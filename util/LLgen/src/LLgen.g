@@ -127,16 +127,23 @@ def			{	register string p; }
 				start = ff;
 			}
 	| C_LEXICAL C_IDENT
+	  /*
+	   * Declaration of a name for the lexical analyser.
+	   * May appear only once
+	   */
 			{	if (!lexical) {
 					lexical = store(lextoken.t_string);
 				}
 				else	error(linecount,"Duplicate %%lexical");
 			}
 	  ';'
-	  /*
-	   * Declaration of a name for the lexical analyser.
-	   * May appear only once
-	   */
+	| C_ONERROR C_IDENT
+			{	if (! onerror) {
+					onerror = store(lextoken.t_string);
+				}
+				else	error(linecount,"Duplicate %%onerror");
+			}
+	  ';'
 	| action(0)	{	acount++; }
 	  /*
 	   * A global C-declaration

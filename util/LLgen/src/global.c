@@ -58,6 +58,7 @@ string	f_input;
 string	e_noopen = "Cannot open %s";
 int	verbose;
 string	lexical;
+string	onerror;
 int	ntneeded;
 int	ntprint;
 # ifndef NDEBUG

@@ -168,12 +168,13 @@ genrecovery() {
 		}
 	}
 	i = maxptr - setptr;
-	fprintf(fpars,
+	fprintf(f,
 "#define LL_LEXI %s\n#define LL_SSIZE %d\n#define LL_NSETS %d\n#define LL_NTERMINALS %d\n",
 		  lexical,
 		  nbytes,
 		  i > 0 ? i : 1,
 		  ntokens);
+	if (onerror) fprintf(f,"#define LL_USERHOOK %s\n", onerror);
 	/* Now generate the routines that call the startsymbols */
 	for (st = start; st; st = st->ff_next) {
 		fputs(st->ff_name, f);
@@ -471,8 +472,11 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 				genpop(findindex(n->n_contains));
 			}
 			if (g_gettype(n->n_rule) == EORULE &&
-			    safety == getntout(n) &&
-			    ! g_getnpar(p)) break;
+			    safety <= getntout(n) &&
+			    ! g_getnpar(p)) {
+				safety = getntout(n);
+				break;
+			}
 			fprintf(f,"L%d_%s(\n",g_getnont(p), n->n_name);
 			if (g_getnpar(p)) {
 				controlline();

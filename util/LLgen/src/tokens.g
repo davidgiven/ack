@@ -67,6 +67,7 @@ STATIC string	vallookup();
 %token	C_PERSISTENT ;
 %token	C_FIRST ;
 %token	C_LEXICAL ;
+%token	C_ONERROR ;
 %token	C_AVOID ;
 %token	C_PREFER ;
 %token	C_DEFAULT ;
@@ -100,6 +101,7 @@ static t_keyw resword[] = {
 	{ "first",	C_FIRST	},
 	{ "start",	C_START	},
 	{ "lexical",	C_LEXICAL	},
+	{ "onerror",	C_ONERROR	},
 	{ 0,		0	}
 };
 
