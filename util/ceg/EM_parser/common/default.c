@@ -196,7 +196,7 @@ handle_defaults()
 				 * ponding C_con_xxx C_rom_xxx instruction
 				 * so set correct info.
 				 */
-				set_C_instr_info( def_info[i-2].name);
+				set_C_instr_info( def_info[(i>>2)<<2].name);
 				def_row();
 				out( "}\n\n");
 			}
@@ -244,8 +244,7 @@ extnd_header()
  */
 {
 	out( "if ( %s == 0 ) {\n", C_instr_info->arg_id[3]);
-	set_segment( SEGBSS);
-	out( "bss( %s);\n", C_instr_info->arg_id[0]);
+	out( "common( %s);\n", C_instr_info->arg_id[0]);
 	out( "}\nelse {\n");
 	set_segment( SEGCON);
 	out( "for ( %s = 0; %s < %s/EM_WSIZE; %s++)\n",

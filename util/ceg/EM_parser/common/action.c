@@ -1,6 +1,5 @@
 #include "decl.h"
 #include <alloc.h>
-extern char *malloc(), *realloc(), *Salloc();
 
 /* This file contains some routines needed in "pars.g" to handle the  action-
  * grammarrule. The assembler-instructions are handeld in blocks rather than
@@ -24,7 +23,7 @@ init_as_block()
 
 	if ( quantum == 0) {
 		quantum = 16;
-		as_instructions = (char **)malloc( quantum*sizeof( char *));
+		as_instructions = (char **)Malloc( quantum*sizeof( char *));
 	}
 }
 
@@ -37,7 +36,7 @@ char *instr;
 {
 	if ( nr_instr == quantum) {
 		quantum *= 2;
-		as_instructions = (char **) realloc( as_instructions,
+		as_instructions = (char **) Realloc( as_instructions,
 					   quantum*sizeof( char *));
 	}
 

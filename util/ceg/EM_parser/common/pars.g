@@ -169,7 +169,7 @@ c_row	: %if ( to_change && strcmp( yytext, to_change) == 0)
 	| C_INSTR
 	  [ c_special | c_simple]
 
-	| %if ( strcmp( yytext, to_change) == 0)
+	| %if ( to_change && strcmp( yytext, to_change) == 0)
 	  DEF_C_INSTR		{ init_defaults( yytext);}
 	  [ Dspecial | Dsimple] { handle_defaults();}
 
