@@ -1,6 +1,9 @@
 name "Vax 4-4 backend"
 dir cg
 end
+name "Vax target optimizer"
+dir top
+end
 name "Vax 4-4 C libraries"
 system vax*
 dir libcc
@@ -20,7 +23,4 @@ end
 name "Vax 4-4 systemcall interface"
 system vax*
 dir libsys
-end
-name "Vax target optimizer"
-dir top
 end
