@@ -6,10 +6,11 @@
 
 EMHOME = ../..
 LIBDIR= $(EMHOME)/lib
+MODLIBDIR = $(EMHOME)/modules/lib
 PREFLAGS=  -I$(EMHOME)/h -DNDEBUG -DNASSERT
 CFLAGS	= $(PREFLAGS) -O
 LDFLAGS	= -i
-LDLIBS = $(EMHOME)/modules/lib/libstring.a $(EMHOME)/modules/lib/libobject.a
+LDLIBS = $(MODLIBDIR)/libstring.a $(MODLIBDIR)/libobject.a
 LINTFLAGS=-phbxa $(PREFLAGS)
 PR	= pr
 PRFLAGS	=

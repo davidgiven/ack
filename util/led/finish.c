@@ -61,13 +61,13 @@ adjust_names(name, head, chars)
 	register char		*chars;
 {
 	register int		cnt;
-	register ind_t		charoff;
+	register long		charoff;
 
 	cnt = head->oh_nname;
 	charoff = OFF_CHAR(*head);
 	while (cnt--) {
 		if (name->on_foff != (long)0)
-			name->on_mptr = chars + name->on_foff - charoff;
+			name->on_mptr = chars + (ind_t)(name->on_foff - charoff);
 		name++;
 	}
 }
