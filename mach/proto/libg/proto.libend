@@ -8,12 +8,14 @@ SRC_DIR =	$(SRC_HOME)/mach/$(MACH)/libend
 
 all:		end_o.a
 
-end_o.a:	$(SRC_DIR)/end_s.a
+end_o.a:
 		ASAR="$(ASAR)" ; export ASAR ; \
 		RANLIB="$(RANLIB)" ; export RANLIB ; \
 		MACH="$(MACH)" ; export MACH ; \
+		SUF="$(SUF)" ; export SUF ; \
 		MACHFL="$(MACHFL)" ; export MACHFL ; \
-		if [ $(SUF) = o ] march $(SRC_DIR) end_o.a $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/end_s.a end_o.a ; fi
+		LIB=`head -1 $(SRC_DIR)/LIST` ; export LIB ; \
+		if [ $(SUF) = o -o $(SUF) = m ] ; then march $(SRC_DIR) end_o.a $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/$$LIB end_o.a ; fi
 
 install:	all
 		cp end_o.a $(TARGET_HOME)/lib/$(MACH)/end_em
@@ -29,4 +31,5 @@ opr:
 		make pr | opr
 
 pr:
-		arch pv $(SRC_DIR)/end_s.a | pr -h $(SRC_DIR)/end_s.a
+		LIB=`head -1 $(SRC_DIR)/LIST` ; export LIB ; \
+		arch pv $(SRC_DIR)/$$LIB | pr -h $(SRC_DIR)/$$LIB

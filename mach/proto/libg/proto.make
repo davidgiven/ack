@@ -25,21 +25,21 @@ headcp: head
 	rm -f head_$(PREF)
 
 tailcp: tail
-	cp tail_$(PREF) $(TARGET_HOME)/lib/$(MACH)/tail_$(PREF)
-	$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_$(PREF)
+	cp tail_$(PREF)$(SUB) $(TARGET_HOME)/lib/$(MACH)/tail_$(PREF)$(SUB)
+	$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_$(PREF)$(SUB)
 	rm -f tail_$(PREF)$(SUB)
 
 cp:     headcp tailcp
 
 head_$(PREF):  $(HEADSRC)
 	cp $(HEADSRC) head_$(PREF).e
-	$(MACH) $(MACHFL) -I$(TARGET_HOME)/h head_$(PREF).e
+	$(MACH) $(MACHFL) -c -I$(TARGET_HOME)/h head_$(PREF).e
 	mv head_$(PREF).$(SUF) head_$(PREF)
 	-rm -f head_$(PREF).[ekm$(SUF)]
 
 tail_$(PREF)$(SUB):
 	@echo translation test
-	@$(MACH) $(MACHFL) $(SRC_HOME)/mach/proto/libg/barrier.c
+	@$(MACH) $(MACHFL) -c $(SRC_HOME)/mach/proto/libg/barrier.c
 	@-rm -f barrier.[oeskm] barrier.so
 	@echo OK
 	-rm -f tail_$(PREF)$(SUB)

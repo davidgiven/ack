@@ -6,6 +6,7 @@
 
 MACHDEF= \
 	"MACH=$(MACH)" \
+	"MACHFL=$(MACHFL) -I$(TARGET_HOME)/h" \
 	"SUF=$(SUF)" \
 	"ASAR=$(ASAR)" \
 	"RANLIB=$(RANLIB)" \
@@ -13,7 +14,7 @@ MACHDEF= \
 	"TARGET_HOME=$(TARGET_HOME)" \
 	"COMPILE=$(SRC_HOME)/mach/proto/libg/compmodule"
 
-MAKEFILE=$(SRC_HOME)/mach/proto/libg/Makefile
+MAKEFILE=../../proto/libg/Makefile
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 LIBM="PREF=m" "SRC=lang/cem/libcc/math"
