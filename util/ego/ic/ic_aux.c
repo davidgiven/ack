@@ -43,6 +43,7 @@ offset opr_size(instr)
 			return (offset) 2*ws;
 		case op_lae:
 		case op_fil:
+		case op_gto:
 			return (offset) UNKNOWN_SIZE;
 		default:
 			error("illegal operand of opr_size: %d", instr);
@@ -377,7 +378,7 @@ dblock_p block_of_lab(ident)
 	dbl = symlookup(ident,DEFINING);
 	VD(dbl);
 	if (dbl->d_pseudo != DUNKNOWN) {
-		error("identifier redeclared");
+		error("identifier %s redeclared", ident);
 	}
 	return dbl;
 }
