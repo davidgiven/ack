@@ -31,8 +31,8 @@ struct outhead	outhead;
 struct outsect	outsect[S_MAX];
 char		*stringarea ;
 
-char	*output_file;
-int	output_file_created;
+char	*ofile;
+int	ofile_created;
 
 char *program ;
 
@@ -88,8 +88,8 @@ main(argc, argv)
 	case 1:	break;
 	case 3:	if ((output = fopen(argv[2], "w")) == (FILE *)0)
 			fatal("Can't write %s.\n", argv[2]);
-		output_file = argv[2];
-		output_file_created = 1;
+		ofile = argv[2];
+		ofile_created = 1;
 		/* FALLTHROUGH */
 	case 2:	if ((input = fopen(argv[1], "r")) == (FILE *)0)
 			fatal("Can't read %s.\n", argv[1]);
@@ -170,7 +170,7 @@ main(argc, argv)
 	if ( ferror(output) ) {
 		fatal("output write error\n") ;
 	}
-	if ( output_file_created ) chmod(argv[2],0755);
+	if ( ofile_created ) chmod(argv[2],0755);
 	return 0;
 }
 
@@ -368,7 +368,7 @@ fatal(s, a1, a2)
 {
 	fprintf(stderr,"%s: ",program) ;
 	fprintf(stderr, s, a1, a2);
-	if (output_file_created)
-		unlink(output_file);
+	if (ofile_created)
+		unlink(ofile);
 	exit(-1);
 }
