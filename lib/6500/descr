@@ -1,0 +1,27 @@
+var w=2
+var p=2
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=m6500
+var M=6500
+var LIB=mach/6500/lib/tail_
+var RT=mach/6500/lib/head_
+var INCLUDES=-I{EM}/include
+name be
+	from .m
+	to .s
+	program {EM}/lib/{M}_be
+	args <
+	prop >
+	need .e
+end
+name asld
+	from .s.a
+	to a.out
+	program {EM}/lib/{M}_as
+	mapflag -l* LNAME={EM}/{LIB}*
+	args (.e:{HEAD}={EM}/{RT}em) -o > (.e:{TAIL}={EM}/{LIB}em)
+	prop C
+end

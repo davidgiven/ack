@@ -1,0 +1,79 @@
+/*
+ * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ *
+ *          This product is part of the Amsterdam Compiler Kit.
+ *
+ * Permission to use, sell, duplicate or disclose this software must be
+ * obtained in writing. Requests for such permissions may be sent to
+ *
+ *      Dr. Andrew S. Tanenbaum
+ *      Wiskundig Seminarium
+ *      Vrije Universiteit
+ *      Postbox 7161
+ *      1007 MC Amsterdam
+ *      The Netherlands
+ *
+ */
+
+/**************************************************************************/
+/*                                                                        */
+/*                 Bookkeeping for growing strings                        */
+/*                                                                        */
+/**************************************************************************/
+
+#include "ack.h"
+#include "grows.h"
+
+gr_add(id,c) register growstring *id ; char c ; {
+	if ( id->gr_size==id->gr_max) {
+		if ( id->gr_size==0 ) { /* The first time */
+			id->gr_max= 2*GR_MORE ;
+			id->gr_string= getcore(id->gr_max) ;
+		} else {
+			id->gr_max += GR_MORE ;
+			id->gr_string= changecore(id->gr_string,id->gr_max ) ;
+		}
+	}
+	*(id->gr_string+id->gr_size++)= c ;
+}
+
+gr_cat(id,string) growstring *id ; char *string ; {
+	register char *ptr ;
+
+#ifdef DEBUG
+	if ( id->gr_size && *(id->gr_string+id->gr_size-1) ) {
+		vprint("Non-zero terminated %*s\n",
+			id->gr_size, id->gr_string ) ;
+	}
+#endif
+	if ( id->gr_size ) id->gr_size-- ;
+	ptr=string ;
+	for (;;) {
+		gr_add(id,*ptr) ;
+		if ( *ptr++ ) continue ;
+		break ;
+	}
+}
+
+gr_throw(id) register growstring *id ; {
+	/* Throw the string away */
+	if ( id->gr_max==0 ) return ;
+	freecore(id->gr_string) ;
+	id->gr_max=0 ;
+	id->gr_size=0 ;
+}
+
+gr_init(id) growstring *id ; {
+	id->gr_size=0 ; id->gr_max=0 ;
+}
+
+char *gr_final(id) growstring *id ; {
+	/* Throw away the bookkeeping, adjust the string to its final
+	   length and return a pointer to a string to be get rid of with
+	   throws
+	*/
+	register char *retval ;
+	retval= keeps(gr_start(*id)) ;
+	gr_throw(id) ;
+	return retval ;
+}
