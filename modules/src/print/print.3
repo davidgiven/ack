@@ -5,6 +5,7 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .SH SYNOPSIS
 .nf
 .B #include <system.h>
+.B #include <varargs.h>
 .PP
 .B print(format [, arg] ... )
 .B char *format;
@@ -19,7 +20,7 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .B doprnt(filep, format, args)
 .B File *filep;
 .B char *format;
-.B int args[];
+.B va_list args;
 .fi
 .SH DESCRIPTION
 .I Print

@@ -4,15 +4,20 @@
  */
 /* $Header$ */
 
+#include <varargs.h>
 #include <system.h>
 #include "param.h"
 
 /*VARARGS1*/
-print(fmt, args)
-	char *fmt;
-	int args;
+print(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list args;
 	char buf[SSIZE];
 
-	sys_write(STDOUT, buf, _format(buf, fmt, &args));
+	va_start(args);
+	fmt = va_arg(args, char *);
+	sys_write(STDOUT, buf, _format(buf, fmt, args));
+	va_end(args);
 }

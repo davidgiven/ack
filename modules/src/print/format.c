@@ -4,6 +4,8 @@
  */
 /* $Header$ */
 
+#include <varargs.h>
+
 char *long2str();
 
 static int
@@ -27,9 +29,9 @@ integral(c)
 int
 _format(buf, fmt, argp)
 	char *buf, *fmt;
-	char *argp;
+	register va_list argp;
 {
-	register char *pf = fmt, *pa = argp;
+	register char *pf = fmt;
 	register char *pb = buf;
 
 	while (*pf) {
@@ -52,24 +54,20 @@ _format(buf, fmt, argp)
 			while (*pf >= '0' && *pf <= '9')
 				width = 10 * width + *pf++ - '0';
 			
-			/* get text and move pa */
 			if (*pf == 's') {
-				arg = *(char **)pa;
-				pa += sizeof(char *);
+				arg = va_arg(argp, char *);
 			}
 			else
 			if (*pf == 'c') {
-				cbuf[0] = * (int *) pa;
+				cbuf[0] = va_arg(argp, int);
 				cbuf[1] = '\0';
-				pa += sizeof(int);
 				arg = &cbuf[0];
 			}
 			else
 			if (*pf == 'l') {
 				/* alignment ??? */
 				if (base = integral(*++pf)) {
-					arg = long2str(*(long *)pa, base);
-					pa += sizeof(long);
+					arg = long2str(va_arg(argp,long), base);
 				}
 				else {
 					pf--;
@@ -78,8 +76,7 @@ _format(buf, fmt, argp)
 			}
 			else
 			if (base = integral(*pf)) {
-				arg = long2str((long)*(int *)pa, base);
-				pa += sizeof(int);
+				arg = long2str((long)va_arg(argp,int), base);
 			}
 			else
 			if (*pf == '%')

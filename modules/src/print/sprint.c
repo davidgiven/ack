@@ -4,15 +4,22 @@
  */
 /* $Header$ */
 
+#include <varargs.h>
 #include <system.h>
 #include "param.h"
 
 /*VARARGS1*/
 char *
-sprint(buf, fmt, args)
-	char *buf, *fmt;
-	int args;
+sprint(va_alist)
+	va_dcl
 {
-	buf[_format(buf, fmt, &args)] = '\0';
+	char *buf, *fmt;
+	va_list args;
+
+	va_start(args);
+	buf = va_arg(args, char *);
+	fmt = va_arg(args, char *);
+	buf[_format(buf, fmt, args)] = '\0';
+	va_end(args);
 	return buf;
 }
