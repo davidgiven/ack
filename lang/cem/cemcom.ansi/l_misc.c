@@ -52,14 +52,14 @@ lint_new_oper(expr)
 		right == 0 ? 0 :		/* for ( without parameters */
 		right->ex_type->tp_fund;
 
-	/*	In ch7.c, in ch7asgn(), a combined operator/assignment
+	/*	In ch3.c, in ch3asgn(), a combined operator/assignment
 		is hammered into correctness by repeated application of
-		ch7bin(), which calls new_oper(), which calls lint_new_oper().
+		ch3bin(), which calls new_oper(), which calls lint_new_oper().
 		These spurious calls understandably cause spurious error
 		messages, which we don't like.  So we try to suppress these
 		wierd calls here.  This refers to the code marked
 			this is really $#@&*%$# !
-		in ch7asgn().
+		in ch3asgn().
 	*/
 	switch (oper) {
 	case PLUSAB:
@@ -103,7 +103,7 @@ lint_new_oper(expr)
 		else {
 			/* binary */
 			if (l_fund == ENUM && r_fund == ENUM) {
-				if (!equal_type(left->ex_type, right->ex_type))
+				if (!equal_type(left->ex_type, right->ex_type, 0))
 					warning("subtracting enums of different type");
 				/* update the type, cem does not do it */
 				expr->ex_type = int_type;
@@ -164,7 +164,7 @@ lint_new_oper(expr)
 	case EQUAL:
 	case NOTEQUAL:
 		if (	(l_fund == ENUM || r_fund == ENUM)
-		&&	!equal_type(left->ex_type, right->ex_type)
+		&&	!equal_type(left->ex_type, right->ex_type, 0)
 		) {
 			warning("comparing enum with non-enum");
 		}

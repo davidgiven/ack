@@ -252,22 +252,23 @@ idf2sdef(idf, tp)
 	register struct idf *idf;
 	struct type *tp;
 {
-	/*	The identifier idf is identified as a selector, preferably
-		in the struct tp, but we will settle for any unique
-		identification.
-		If the attempt fails, a selector of type error_type is
+	/*	The identifier idf is identified as a selector
+		in the struct tp.
+		If there is no such member, give a member with the same
+		name.
+		If this fails too, a selector of type error_type is
 		created.
 	*/
 	register struct sdef **sdefp = &idf->id_sdef, *sdef;
 	
 	/* Follow chain from idf, to meet tp. */
 	while ((sdef = *sdefp))	{
-		if (equal_type(sdef->sd_stype, tp))
+		if (equal_type(sdef->sd_stype, tp, 0))
 			return sdef;
 		sdefp = &(*sdefp)->next;
 	}
 	
-	/* Tp not met; any unique identification will do. */
+	/* Tp not met; take an identification. */
 	if (sdef = idf->id_sdef)	{
 		/* There is an identification */
 		error("illegal use of selector %s", idf->id_text);

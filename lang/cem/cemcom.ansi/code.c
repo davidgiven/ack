@@ -337,7 +337,7 @@ do_return_expr(expr)
 	/*	do_return_expr() generates the expression and the jump for
 		a return statement with an expression.
 	*/
-	ch7cast(&expr, RETURN, func_type);
+	ch3cast(&expr, RETURN, func_type);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	C_bra(return_label);
 	return_expr_occurred = 1;
@@ -504,7 +504,7 @@ loc_init(expr, id)
 		}
 	}
 	else	{	/* not embraced	*/
-		ch7cast(&expr, '=', tp);	/* may modify expr */
+		ch3cast(&expr, '=', tp);	/* may modify expr */
 #ifndef	LINT
 		{
 			struct value vl;

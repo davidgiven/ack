@@ -85,13 +85,13 @@ postfix_expression(register struct expr **expp;)
 	primary(expp)
 	[
 		'[' expression(&e1) ']'
-			{ ch7bin(expp, '[', e1); e1 = 0; }
+			{ ch3bin(expp, '[', e1); e1 = 0; }
 	|
 		'(' parameter_list(&e1)? ')'
-			{ ch7bin(expp, '(', e1); call_proto(expp); e1 = 0; }
+			{ ch3bin(expp, '(', e1); call_proto(expp); e1 = 0; }
 	|
 		[ '.' | ARROW ]			{ oper = DOT; }
-		identifier(&idf)		{ ch7sel(expp, oper, idf); }
+		identifier(&idf)		{ ch3sel(expp, oper, idf); }
 	]*
 	[
 		[
@@ -99,7 +99,7 @@ postfix_expression(register struct expr **expp;)
 		|
 			MINMIN		{ oper = POSTDECR; }
 		]
-		    { ch7incr(expp, oper); }
+		    { ch3incr(expp, oper); }
 	]?
 ;
 
@@ -112,7 +112,7 @@ parameter_list(struct expr **expp;)
 		','
 		assignment_expression(&e1)
 		{any2opnd(&e1, PARCOMMA);}
-		{ch7bin(expp, PARCOMMA, e1);}
+		{ch3bin(expp, PARCOMMA, e1);}
 	]*
 ;
 
@@ -124,14 +124,14 @@ unary(register struct expr **expp;)
 :
 %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 	cast(&tp) unary(expp)
-	{	ch7cast(expp, CAST, tp);
+	{	ch3cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
 	}
 |
 	postfix_expression(expp)
 |
 	unop(&oper) unary(expp)
-	{ch7mon(oper, expp);}
+	{ch3mon(oper, expp);}
 |
 	size_of(expp)
 ;
@@ -152,7 +152,7 @@ size_of(register struct expr **expp;)
 		}
 	|
 		unary(expp)
-		{ch7mon(SIZEOF, expp);}
+		{ch3mon(SIZEOF, expp);}
 	]
 	{ InSizeof--; }
 ;
@@ -216,7 +216,7 @@ binary_expression(int maxrank; struct expr **expp;)
 		}
 		binary_expression(rank_of(oper)-1, &e1)
 		{
-			ch7bin(expp, oper, e1);
+			ch3bin(expp, oper, e1);
 			ResultKnown = OldResultKnown;
 		}
 	]*
@@ -249,9 +249,9 @@ conditional_expression(struct expr **expp;)
 		{	
 			check_conditional(e2, '=', "not allowed after :");
 			ResultKnown = OldResultKnown;
-			ch7bin(&e1, ':', e2);
+			ch3bin(&e1, ':', e2);
 			opnd2test(expp, '?');
-			ch7bin(expp, '?', e1);
+			ch3bin(expp, '?', e1);
 		}
 	]?
 ;
@@ -266,7 +266,7 @@ assignment_expression(struct expr **expp;)
 	[%prefer	/* (rank_of(DOT) <= maxrank) for any asgnop */
 		asgnop(&oper)
 		assignment_expression(&e1)
-		{ch7asgn(expp, oper, e1);}
+		{ch3asgn(expp, oper, e1);}
 	|
 		empty		/* LLgen artefact ??? */
 	]
@@ -280,7 +280,7 @@ expression(struct expr **expp;)
 	[	','
 		assignment_expression(&e1)
 		{
-			ch7bin(expp, ',', e1);
+			ch3bin(expp, ',', e1);
 		}
 	]*
 ;

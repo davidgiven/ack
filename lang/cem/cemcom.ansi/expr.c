@@ -395,7 +395,7 @@ new_oper(tp, e1, oper, e2)
 		expr->ex_depth =
 			(e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth) + 1;
 		expr->ex_flags = (e1_flags | e2->ex_flags)
-			& ~(EX_PARENS | EX_READONLY /* ??? | EX_VOLATILE */ );
+			& ~(EX_PARENS | EX_READONLY | EX_VOLATILE );
 	}
 	op = &expr->ex_object.ex_oper;
 	op->op_type = tp;

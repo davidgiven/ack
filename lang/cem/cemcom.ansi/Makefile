@@ -71,20 +71,20 @@ LOBJ =	tokenfile.o declar.o statement.o expression.o program.o Lpars.o ival.o
 
 # Objects of hand-written C files
 CSRC =	main.c idf.c declarator.c decspecs.c struct.c \
-	expr.c ch7.c ch7bin.c cstoper.c fltcstoper.c arith.c \
+	expr.c ch3.c ch3bin.c cstoper.c fltcstoper.c arith.c \
 	code.c dumpidf.c error.c field.c\
 	tokenname.c LLlex.c LLmessage.c \
 	input.c domacro.c replace.c init.c options.c \
-	skip.c stack.c type.c ch7mon.c label.c eval.c \
+	skip.c stack.c type.c ch3mon.c label.c eval.c \
 	switch.c conversion.c util.c proto.c \
 	pragma.c blocks.c dataflow.c Version.c \
 	l_lint.c l_states.c l_misc.c l_ev_ord.c l_outdef.c l_comment.c l_dummy.c
 COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
-	expr.o ch7.o ch7bin.o cstoper.o fltcstoper.o arith.o \
+	expr.o ch3.o ch3bin.o cstoper.o fltcstoper.o arith.o \
 	code.o dumpidf.o error.o field.o\
 	tokenname.o LLlex.o LLmessage.o \
 	input.o domacro.o replace.o init.o options.o \
-	skip.o stack.o type.o ch7mon.o label.o eval.o \
+	skip.o stack.o type.o ch3mon.o label.o eval.o \
 	switch.o conversion.o util.o proto.o \
 	pragma.o blocks.o dataflow.o Version.o \
 	l_lint.o l_states.o l_misc.o l_ev_ord.o l_outdef.o l_comment.o l_dummy.o
@@ -405,34 +405,34 @@ expr.o: sizes.h
 expr.o: spec_arith.h
 expr.o: target_sizes.h
 expr.o: type.h
-ch7.o: Lpars.h
-ch7.o: arith.h
-ch7.o: assert.h
-ch7.o: debug.h
-ch7.o: def.h
-ch7.o: expr.h
-ch7.o: file_info.h
-ch7.o: idf.h
-ch7.o: label.h
-ch7.o: lint.h
-ch7.o: nobitfield.h
-ch7.o: nopp.h
-ch7.o: proto.h
-ch7.o: spec_arith.h
-ch7.o: struct.h
-ch7.o: type.h
-ch7bin.o: Lpars.h
-ch7bin.o: arith.h
-ch7bin.o: botch_free.h
-ch7bin.o: expr.h
-ch7bin.o: idf.h
-ch7bin.o: label.h
-ch7bin.o: lint.h
-ch7bin.o: nobitfield.h
-ch7bin.o: nopp.h
-ch7bin.o: spec_arith.h
-ch7bin.o: struct.h
-ch7bin.o: type.h
+ch3.o: Lpars.h
+ch3.o: arith.h
+ch3.o: assert.h
+ch3.o: debug.h
+ch3.o: def.h
+ch3.o: expr.h
+ch3.o: file_info.h
+ch3.o: idf.h
+ch3.o: label.h
+ch3.o: lint.h
+ch3.o: nobitfield.h
+ch3.o: nopp.h
+ch3.o: proto.h
+ch3.o: spec_arith.h
+ch3.o: struct.h
+ch3.o: type.h
+ch3bin.o: Lpars.h
+ch3bin.o: arith.h
+ch3bin.o: botch_free.h
+ch3bin.o: expr.h
+ch3bin.o: idf.h
+ch3bin.o: label.h
+ch3bin.o: lint.h
+ch3bin.o: nobitfield.h
+ch3bin.o: nopp.h
+ch3bin.o: spec_arith.h
+ch3bin.o: struct.h
+ch3bin.o: type.h
 cstoper.o: Lpars.h
 cstoper.o: arith.h
 cstoper.o: assert.h
@@ -691,18 +691,18 @@ type.o: sizes.h
 type.o: spec_arith.h
 type.o: target_sizes.h
 type.o: type.h
-ch7mon.o: Lpars.h
-ch7mon.o: arith.h
-ch7mon.o: botch_free.h
-ch7mon.o: def.h
-ch7mon.o: expr.h
-ch7mon.o: idf.h
-ch7mon.o: label.h
-ch7mon.o: lint.h
-ch7mon.o: nobitfield.h
-ch7mon.o: nopp.h
-ch7mon.o: spec_arith.h
-ch7mon.o: type.h
+ch3mon.o: Lpars.h
+ch3mon.o: arith.h
+ch3mon.o: botch_free.h
+ch3mon.o: def.h
+ch3mon.o: expr.h
+ch3mon.o: idf.h
+ch3mon.o: label.h
+ch3mon.o: lint.h
+ch3mon.o: nobitfield.h
+ch3mon.o: nopp.h
+ch3mon.o: spec_arith.h
+ch3mon.o: type.h
 label.o: Lpars.h
 label.o: arith.h
 label.o: def.h

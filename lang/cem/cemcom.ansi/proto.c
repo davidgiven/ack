@@ -482,7 +482,7 @@ call_proto(expp)
 				break;
 			}
 			else if (!(pstack[pcnt]->pl_flag & PL_ELLIPSIS)) {
-				ch7cast(estack[ecnt],CASTAB,pstack[pcnt]->pl_type);
+				ch3cast(estack[ecnt],CASTAB,pstack[pcnt]->pl_type);
 				pcnt--;
 			} else
 				any2parameter(estack[ecnt]);

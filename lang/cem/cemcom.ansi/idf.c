@@ -414,7 +414,7 @@ global_redecl(idf, new_sc, tp)
 	register struct def *def = idf->id_def;
 	int retval;
 
-	if (!(retval = equal_type(tp, def->df_type)))
+	if (!(retval = equal_type(tp, def->df_type, 0)))
 		error("redeclaration of %s with different type", idf->id_text);
 	else if (retval == 1)
 		update_proto(tp, def->df_type);
@@ -609,7 +609,7 @@ check_formals(idf, dc)
 		}
 		while(fm && pl) {
 		    if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type)
-					, pl->pl_type)) {
+					, pl->pl_type, 0)) {
 			if (!(pl->pl_flag & PL_ERRGIVEN))
 			    error("incorrect type for parameter %s"
 						, fm->fm_idf->id_text);
@@ -638,6 +638,7 @@ check_formals(idf, dc)
 		}
 		if (pl == 0) {		/* make func(void) */
 			pl = new_proto();
+			pl->pl_type = void_type;
 			pl->pl_flag = PL_VOID;
 		}
 		idf->id_def->df_type->tp_pseudoproto = pl;

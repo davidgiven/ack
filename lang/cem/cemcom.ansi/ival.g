@@ -447,7 +447,7 @@ check_ival(expp, tp)
 	register struct type *tp;
 	struct expr **expp;
 {
-	/*	The philosophy here is that ch7cast puts an explicit
+	/*	The philosophy here is that ch3cast puts an explicit
 		conversion node in front of the expression if the types
 		are not compatible.  In this case, the initialisation
 		expression is no longer a constant.
@@ -461,7 +461,7 @@ check_ival(expp, tp)
 	case LONG:
 	case ENUM:
 	case POINTER:
-		ch7cast(expp, '=', tp);
+		ch3cast(expp, '=', tp);
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
@@ -491,7 +491,7 @@ check_ival(expp, tp)
 	case FLOAT:
 	case DOUBLE:
 	case LNGDBL:
-		ch7cast(expp, '=', tp);
+		ch3cast(expp, '=', tp);
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
@@ -527,7 +527,7 @@ and also to prevent runtime coercions for compile-time constants.
 
 #ifndef NOBITFIELD
 	case FIELD:
-		ch7cast(expp, '=', tp->tp_up);
+		ch3cast(expp, '=', tp->tp_up);
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);

@@ -142,10 +142,10 @@ relbalance(e1p, oper, e2p)
 	if ((*e2p)->ex_type->tp_fund == FUNCTION)
 		function2pointer(*e2p);
 	if ((*e1p)->ex_type->tp_fund == POINTER)
-		ch76pointer(e2p, oper, (*e1p)->ex_type);
+		ch3pointer(e2p, oper, (*e1p)->ex_type);
 	else
 	if ((*e2p)->ex_type->tp_fund == POINTER)
-		ch76pointer(e1p, oper, (*e2p)->ex_type);
+		ch3pointer(e1p, oper, (*e2p)->ex_type);
 	else
 	if (	(*e1p)->ex_type == (*e2p)->ex_type &&
 		(*e1p)->ex_type->tp_fund == ENUM
@@ -155,7 +155,7 @@ relbalance(e1p, oper, e2p)
 		arithbalance(e1p, oper, e2p);
 }
 
-ch76pointer(expp, oper, tp)
+ch3pointer(expp, oper, tp)
 	struct expr **expp;
 	register struct type *tp;
 {
@@ -167,7 +167,7 @@ ch76pointer(expp, oper, tp)
 
 	if (exp->ex_type->tp_fund == POINTER)	{
 		if (exp->ex_type != tp)
-			ch7cast(expp, oper, tp);
+			ch3cast(expp, oper, tp);
 	}
 	else
 	if (is_integral_type(exp->ex_type)) {
@@ -177,14 +177,14 @@ ch76pointer(expp, oper, tp)
 					symbol2str(oper),
 					symbol2str(exp->ex_type->tp_fund));
 		}
-		ch7cast(expp, CAST, tp);
+		ch3cast(expp, CAST, tp);
 	}
 	else	{
 		expr_error(exp, "%s on %s and pointer",
 				symbol2str(oper),
 				symbol2str(exp->ex_type->tp_fund)
 			);
-		ch7cast(expp, oper, tp);
+		ch3cast(expp, oper, tp);
 	}
 }
 
@@ -468,7 +468,7 @@ opnd2test(expp, oper)
 	if ((*expp)->ex_class == Oper && is_test_op((*expp)->OP_OPER))
 		{ /* It is already a test */ }
 	else
-		ch7bin(expp, NOTEQUAL, intexpr((arith)0, INT));
+		ch3bin(expp, NOTEQUAL, intexpr((arith)0, INT));
 }
 
 int
@@ -542,19 +542,19 @@ field2arith(expp)
 	(*expp)->ex_type = atype;
 
 	if (atype->tp_unsigned)	{	/* don't worry about the sign bit */
-		ch7bin(expp, RIGHT, intexpr((arith)fd->fd_shift, INT));
-		ch7bin(expp, '&', intexpr(fd->fd_mask, INT));
+		ch3bin(expp, RIGHT, intexpr((arith)fd->fd_shift, INT));
+		ch3bin(expp, '&', intexpr(fd->fd_mask, INT));
 	}
 	else	{	/* take care of the sign bit: sign extend if needed */
 		arith bits_in_type = atype->tp_size * 8;
 
-		ch7bin(expp, LEFT,
+		ch3bin(expp, LEFT,
 			intexpr(bits_in_type - fd->fd_width - fd->fd_shift,
 						INT)
 		);
-		ch7bin(expp, RIGHT, intexpr(bits_in_type - fd->fd_width, INT));
+		ch3bin(expp, RIGHT, intexpr(bits_in_type - fd->fd_width, INT));
 	}
-	ch7cast(expp, CAST, tp);	/* restore its original type */
+	ch3cast(expp, CAST, tp);	/* restore its original type */
 }
 #endif NOBITFIELD
 
