@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 
 /*	To determine the minimum scope of a local variable, all (braced)
 	scopes are numbered consecutively.  Next we maintain an array which

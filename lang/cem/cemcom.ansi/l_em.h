@@ -2,7 +2,7 @@
  * (c) copyright 1990 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 
 /*
  * This file can be considered the em_code.h file of lint.

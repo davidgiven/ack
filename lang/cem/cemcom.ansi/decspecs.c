@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
 #include	"assert.h"

@@ -2,7 +2,7 @@
  * (c) copyright 1989 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 /*	  F O R   F L O A T I N G   P O I N T   N U M B E R S		*/
 

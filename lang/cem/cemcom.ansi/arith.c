@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*	A R I T H M E T I C   C O N V E R S I O N S	 */
 
 /*	This file contains the routines for the various conversions that

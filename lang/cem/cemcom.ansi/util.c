@@ -5,7 +5,7 @@
 
 /* M I S C E L L A N E O U S   U T I L I T I E S */
 
-/* $Header$ */
+/* $Id$ */
 
 /*	Code for the allocation and de-allocation of temporary variables,
 	allowing re-use.

@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Header$ */
+/* $Id$ */
 /*		U S E   O F   C H A R A C T E R   C L A S S E S		*/
 
 /*	As a starter, chars are divided into classes, according to which
