@@ -30,6 +30,10 @@ FILE *curoutp;
 
 /* putlines */
 
+STATIC putstr();
+STATIC outlab();
+STATIC outobject();
+
 STATIC putargs(ap)
 	register arg_p ap;
 {
