@@ -19,6 +19,7 @@ ArraySort.mod
 catch.c
 Traps.mod
 XXTermcap.c
+dvi.c
 Arguments.c
 LtoUset.e
 StrAss.c

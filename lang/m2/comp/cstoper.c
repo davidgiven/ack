@@ -186,35 +186,28 @@ cstibin(expp)
 			node_error(expp, "division by 0");
 			return;
 		}
-#if (-1)/2==0
-		o1 /= o2;
-#else
-		if (o1 == 0) break;
 		if ((o1 < 0) != (o2 < 0)) {
-			o1 = o1/o2 + 1;
+			if (o1 < 0) o1 = -o1;
+			else o2 = -o2;
+			o1 = -((o1+o2-1)/o2);
 		}
 		else {
 			o1 /= o2;
 		}
-#endif
 		break;
-
 	case MOD:
 		if (o2 == 0)	{
 			node_error(expp, "modulo by 0");
 			return;
 		}
-#if (-1)/2==0
-		o1 %= o2;
-#else
-		if (o1 == 0) break;
 		if ((o1 < 0) != (o2 < 0)) {
-			o1 -= (o1 / o2 + 1) * o2;
+			if (o1 < 0) o1 = -o1;
+			else o2 = -o2;
+			o1 = ((o1+o2-1)/o2) * o2 - o1;
 		}
 		else {
 			o1 %= o2;
 		}
-#endif
 		break;
 
 	case '+':

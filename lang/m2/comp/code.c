@@ -782,7 +782,13 @@ CodeOper(expr, true_label, false_label)
 		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
-			C_dvi(tp->tp_size);
+			if ((int)(tp->tp_size) == word_size) {
+			C_cal((int)(tp->tp_size) == (int)word_size 
+				? "dvi"
+				: "dvil");
+			}
+			C_asp(2*tp->tp_size);
+			C_lfr(tp->tp_size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
@@ -798,7 +804,13 @@ CodeOper(expr, true_label, false_label)
 		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
-			C_rmi(tp->tp_size);
+			if ((int)(tp->tp_size) == word_size) {
+			C_cal((int)(tp->tp_size) == (int)word_size 
+				? "rmi"
+				: "rmil");
+			}
+			C_asp(2*tp->tp_size);
+			C_lfr(tp->tp_size);
 			break;
 		case T_POINTER:
 		case T_EQUAL:
