@@ -1,3 +1,4 @@
+/ $Header$
 .text
 .globl sto2~
 .globl save1~

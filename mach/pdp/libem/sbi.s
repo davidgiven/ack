@@ -1,3 +1,4 @@
+/ $Header$
 .text
 .globl sbi~
 .globl unknown~

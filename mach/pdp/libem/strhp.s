@@ -1,3 +1,4 @@
+/ $Header$
 .text
 .globl strhp~
 .globl fat~,reghp~,_end
