@@ -744,22 +744,26 @@ LLP LLP adp SLP sti $2==$4 && (!notreg($2) || $5!=p):
 LEP LEP adp SEP sti $2==$4 && $5!=p:
 	LEP $1 sti $5 LEP $2 adp $3 SEP $4
 #ifndef INT
-stl lol $1==$2 : dup w stl $1
+stl lol notreg($1) && $1==$2 : dup w stl $1
 ste loe $1==$2 : dup w ste $1
 sil lil $1==$2 : dup w sil $1
-sdl ldl $1==$2 : dup 2*w sdl $1
+sdl ldl notreg($1) && $1==$2 : dup 2*w sdl $1
 sde lde $1==$2 : dup 2*w sde $1
 
-lol lol $1==$2 : lol $1 dup w
+lol lol notreg($1) && $1==$2 : lol $1 dup w
 loe loe $1==$2 : loe $1 dup w
 lil lil $1==$2 : lil $1 dup w
-ldl ldl $1==$2 : ldl $1 dup 2*w
+ldl ldl notreg($1) && $1==$2 : ldl $1 dup 2*w
 lde lde $1==$2 : lde $1 dup 2*w
 LLP lof LLP lof $1==$3 && $2==$4 : LLP $1 lof $2 dup w
 LEP lof LEP lof $1==$3 && $2==$4 : LEP $1 lof $2 dup w
 LEP loi LEP loi $1==$3 && $2==$4 && $2==w : LEP $1 loi $2 dup w
 
 #endif
+LLP dup adp SLP sti ! notreg($1) && $1==$4 && $2==p :
+	LLP $1 sti $5 LLP $1 adp $3 SLP $1
+LLP LLP adp SLP sti ! notreg($1) && $1==$4 && $2==$4 :
+	LLP $1 sti $5 LLP $1 adp $3 SLP $1
 adp SLP LLP adp $1+$4==0 && $2==$3 : dup p adp $1 SLP $2
 adp SEP LEP adp $1+$4==0 && $2==$3 : dup p adp $1 SEP $2
 adp sil lil adp $1+$4==0 && $2==$3 && w==p : dup p adp $1 sil $2
