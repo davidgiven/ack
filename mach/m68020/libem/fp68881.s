@@ -113,6 +113,13 @@
 	move.l	(sp),a1
 	fmove.s	(4,sp),fp0
 	fgetexp	fp0,fp1
+	fmove.l	fpsr,d0
+	and.l	#0x2000,d0	! set if Infinity
+	beq	1f
+	move.l	#129,(a1)
+	move.l	#0x3f000000,(4,a1)
+	jmp	(a0)
+1:
 	fmove.l	fp1,d0
 	add.l	#1,d0
 	fgetman	fp0
@@ -127,6 +134,14 @@
 	move.l	(sp),a1
 	fmove.d	(4,sp),fp0
 	fgetexp	fp0,fp1
+	fmove.l	fpsr,d0
+	and.l	#0x2000,d0	! set if Infinity
+	beq	1f
+	move.l	#1025,(a1)
+	move.l	#0x3fe00000,(4,a1)
+	clr.l	(8,a1)
+	jmp	(a0)
+1:
 	fmove.l	fp1,d0
 	add.l	#1,d0
 	fgetman	fp0
