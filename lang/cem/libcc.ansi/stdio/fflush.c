@@ -3,10 +3,12 @@
  */
 /* $Header$ */
 
+#include	<sys/types.h>
 #include	<stdio.h>
 #include	"loc_incl.h"
 
 int _write(int d, const char *buf, int nbytes);
+off_t _lseek(int fildes, off_t offset, int whence);
 
 int
 fflush(FILE *stream)
@@ -21,8 +23,8 @@ fflush(FILE *stream)
 	}
 
 	if (!stream->_buf
-	    || (!io_testflag(_IOREADING)
-		&& !io_testflag(_IOWRITING)))
+	    || (!io_testflag(stream, _IOREADING)
+		&& !io_testflag(stream, _IOWRITING)))
 		return 0;
 	if (io_testflag(stream, _IOREADING)) {
 		(void) fseek(stream, 0L, SEEK_CUR);
@@ -39,7 +41,7 @@ fflush(FILE *stream)
 		return 0;
 
 	if (io_testflag(stream, _IOAPPEND)) {
-		if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
+		if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
 			stream->_flags |= _IOERR;
 			return EOF;
 		}
