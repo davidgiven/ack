@@ -26,6 +26,7 @@
 #include	"align.h"
 #include	"mes.h"
 #include	"atw.h"
+#include	"specials.h"
 
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 #define	toword(n)	((n) < word_size ? word_size : (n))
@@ -445,7 +446,20 @@ EVAL(expr, val, code, true_label, false_label)
 		{
 			register struct expr *ex;
 			arith ParSize = (arith)0;
+			label setjmp_label = 0;
 
+			if (left->ex_class == Value && left->VL_CLASS == Name) {
+				if (left->VL_IDF->id_special == SP_SETJMP) {
+					label addr_label = data_label();
+
+					setjmp_label = text_label();
+					C_df_dlb(addr_label);
+					C_rom_ilb(setjmp_label);
+					C_lae_dlb(addr_label, (arith) 0);
+					C_loi(pointer_size);
+					ParSize += pointer_size;
+				}
+			}
 			if ((ex = right) != NILEXPR) {
 				/* function call with parameters*/
 				while (	ex->ex_class == Oper &&
@@ -464,6 +478,9 @@ EVAL(expr, val, code, true_label, false_label)
 			if (left->ex_class == Value && left->VL_CLASS == Name) {
 				/* e.g., main() { (*((int (*)())0))(); } */
 				C_cal(left->VL_IDF->id_text);
+				if (setjmp_label) {
+					C_df_ilb(setjmp_label);
+				}
 #ifdef	DATAFLOW
 				{	extern char options[];
 					if (options['d'])

@@ -670,6 +670,7 @@ eval.o: nofloat.h
 eval.o: nopp.h
 eval.o: sizes.h
 eval.o: spec_arith.h
+eval.o: specials.h
 eval.o: stack.h
 eval.o: target_sizes.h
 eval.o: type.h
