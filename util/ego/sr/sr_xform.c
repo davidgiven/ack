@@ -116,16 +116,24 @@ STATIC adjust_jump(newtarg,oldtarg,c)
 	 * start of the new target.
 	 */
 
-	line_p l;
+	line_p l = last_instr(c);
+
+	assert(l != (line_p) 0);
 
 	if (INSTR(oldtarg->b_start) == op_lab) {
 		/* If old target has no label, it cannot be jumped to */
-		l = last_instr(c);
-		assert(l != (line_p) 0);
 		if (TYPE(l) == OPINSTRLAB &&
 		    INSTRLAB(l) == INSTRLAB(oldtarg->b_start)) {
 			INSTRLAB(l) = label(newtarg);
 		}
+	}
+
+	if (c->b_next == oldtarg && INSTR(l) != op_bra) {
+		line_p new = newline(OPINSTRLAB);
+
+		INSTRLAB(new) = label(newtarg);
+		new->l_instr = op_bra;
+		DLINK(l, new);
 	}
 }
 

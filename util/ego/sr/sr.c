@@ -155,6 +155,27 @@ STATIC opt_proc(p)
 
 
 
+STATIC bblock_p header(lp)
+	loop_p lp;
+{
+	/* Try to determine the 'header' block of loop lp.
+	 * If 'e' is the entry block of loop L, then block 'b' is
+	 * called the header block of L, iff:
+	 *	SUCC(b) = {e} & b dominates e.
+	 * If lp has no header block, 0 is returned.
+	 */
+
+	bblock_p x = lp->lp_entry->b_idom;
+
+	if (x != (bblock_p) 0 && Lnrelems(x->b_succ) == 1 &&
+	    (bblock_p) Lelem(Lfirst(x->b_succ)) == lp->lp_entry) {
+		return x;
+	}
+	return (bblock_p) 0;
+}
+
+
+
 STATIC sr_extproc(p)
 	proc_p p;
 {
@@ -167,9 +188,12 @@ STATIC sr_extproc(p)
 	   pi = Lnext(pi,p->p_loops)) {
 		lp = (loop_p) Lelem(pi);
 		lp->lp_extend = newsrlpx();
+		lp->LP_HEADER = header(lp);
+		if (lp->LP_HEADER) {
+			lp->LP_INSTR = last_instr(lp->LP_HEADER);
+		}
 	}
 }
-
 
 
 STATIC sr_cleanproc(p)

@@ -146,6 +146,25 @@ STATIC replcode(code,text)
 	/* Note that the old code is still accessible via code->co_lfirst */
 }
 
+STATIC line_p add_code(pl, l)
+	line_p pl, l;
+{
+	if (! pl) {
+		PREV(l) = 0;
+	}
+	else {
+		line_p n = pl->l_next;
+
+		DLINK(pl, l);
+		if (n) {
+			while (l->l_next) l = l->l_next;
+			DLINK(l, n);
+		}
+		l = pl;
+	}
+	return l;
+}
+
 
 
 STATIC init_code(code,tmp)
@@ -193,20 +212,19 @@ STATIC init_code(code,tmp)
 	PREV(l->l_next) = l;
 	/* Now insert the code at the end of the header block */
 	p = &code->co_loop->LP_INSTR;
-	if (*p == (line_p) 0) {
+	if (*p == (line_p) 0 || (PREV((*p)) == 0 && INSTR((*p)) == op_bra)) {
 		/* LP_INSTR points to last instruction of header block,
 		 * so if it is 0, the header block is empty yet.
 		 */
 		code->co_loop->LP_HEADER->b_start =
-		    code->co_lfirst;
-	} else {
-		(*p)->l_next = code->co_lfirst;
-		PREV(code->co_lfirst) = *p;
+		  add_code(code->co_loop->LP_HEADER->b_start, code->co_lfirst);
+	} else if (INSTR((*p)) == op_bra) {
+		add_code(PREV((*p)), code->co_lfirst);
 	}
-	*p = l->l_next; /* new last instruction */
+	else	add_code(*p, code->co_lfirst);
+	while (l->l_next) l = l->l_next;
+	*p = l; /* new last instruction */
 }
-
-
 
 STATIC incr_code(code,tmp)
 	code_p  code;
