@@ -214,7 +214,7 @@ rule			{	register p_nont p;
 				p->n_lineno = linecount;
 				p->n_off = ftell(fact);
 			}
-	  [ params	{	if (nparams > 0) {
+	  [ params(1)	{	if (nparams > 0) {
 					p->n_flags |= PARAMS;
 					if (nparams > 15) {
 						error(linecount,"Too many parameters");
@@ -479,7 +479,7 @@ elem (register p_gram pres;)
 	  C_IDENT	{	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
 			}
-	  [ params	{	if (nparams > 15) {
+	  [ params(0)	{	if (nparams > 15) {
 					error(linecount,"Too many parameters");
 				} else	g_setnpar(pres,nparams);
 				if (g_gettype(pres) == TERMINAL) {
@@ -497,11 +497,11 @@ elem (register p_gram pres;)
 	  action(1)
 	;
 
-params
+params(int formal)
 {
 	long off = ftell(fact);
 }
-	: '('		{	copyact('(',')',0,0); }
+	: '('		{	copyact('(', ')', formal ? 2 : 0, 0); }
 	  ')'
 			{	if (nparams == 0) {
 					fseek(fact, off, 0);
@@ -565,7 +565,8 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	/*
 	 * Copy an action to file f. Opening bracket is ch1, closing bracket
 	 * is ch2.
-	 * If flag != 0, copy opening and closing parameters too.
+	 * If flag & 1, copy opening and closing parameters too.
+	 * If flag & 2, don't allow ','.
 	 */
 	static int	text_seen = 0;
 	register	FILE *f;
@@ -581,7 +582,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 		putc('\0',f);
 		fprintf(f,"# line %d \"%s\"\n", linecount,f_input);
 	}
-	if (level || flag) putc(ch1,f);
+	if (level || (flag & 1)) putc(ch1,f);
 	for (;;) {
 		ch = input();
 		if (ch == ch2) {
@@ -589,7 +590,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 				unput(ch);
 				if (text_seen) nparams++;
 			}
-			if (level || flag) putc(ch,f);
+			if (level || (flag & 1)) putc(ch,f);
 			return;
 		}
 		switch(ch) {
@@ -626,6 +627,9 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			if (! level && text_seen) {
 				text_seen = 0;
 				nparams++;
+				if (ch == ',' && (flag & 2)) {
+					error(linecount, "Parameters may not be separated with a ','");
+				}
 			}
 			break;
 		  case '\'':
