@@ -498,7 +498,16 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	if (result.e_typ!=EV_REG)
 		break;
 	if ( in_stack(result.e_v.e_reg) ) BROKE() ; /* Check aside-stack */
-	if (dokill) machregs[result.e_v.e_reg].r_contents.t_token = 0;
+	if (dokill) {
+		/* kill register, and kill condition codes if they are set to
+		   this register
+		*/
+		machregs[result.e_v.e_reg].r_contents.t_token = 0;
+		if (machregs[0].r_contents.t_token == -1 &&
+		    machregs[0].r_contents.t_att[0].ar == result.e_v.e_reg) {
+			machregs[0].r_contents.t_token = 0;	
+		}
+	}
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (tp->t_token==-1) {
 			if(tp->t_att[0].ar==result.e_v.e_reg)
