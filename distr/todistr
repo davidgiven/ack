@@ -17,8 +17,10 @@ do
 		esac
 	esac
 done
-set -e
 case x$REV in
-x)	REV=`rlog -h "$FILE"|sed -n -e '/head/s/^head:[ 	]*//'` ;;
+x)	REV=`rlog -h "$FILE"|sed -n -e '/head/s/^head:[ 	]*//p'` ;;
+esac
+case x$REV in
+x)	exit 2 ;;
 esac
 rcs -ndistr2:$REV $FLAGS $FILE
