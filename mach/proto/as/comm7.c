@@ -12,6 +12,8 @@
 #include	"comm1.h"
 #include	"y.tab.h"
 
+extern char	*sprintf();
+
 valu_t
 load(ip)
 register item_t *ip;

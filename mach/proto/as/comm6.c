@@ -76,8 +76,10 @@ register item_t *ip;
 newlabel(ip)
 register item_t *ip;
 {
+#if DEBUG != 0
 #ifdef THREE_PASS
 	register addr_t oldval = ip->i_valu;
+#endif
 #endif
 
 	if (DOTSCT == NULL)
@@ -94,7 +96,7 @@ register item_t *ip;
 newsect(ip)
 register item_t *ip;
 {
-	register ushort typ;
+	register short typ;
 	register sect_t *sp = NULL;
 
 	typ = ip->i_type & S_TYP;
@@ -128,6 +130,7 @@ register item_t *ip;
 		switchsect(typ);
 }
 
+/*ARGSUSED*/
 newbase(base)
 valu_t base;
 {
