@@ -1,11 +1,16 @@
 /* cache.c */
 
 #include <stdio.h>
-#include </usr/include/assert.h>
-#include <malloc.h>
-#include <string.h>
-#include <strings.h>
+#include <assert.h>
 #include "mach.h"
+
+#ifdef __STDC__
+#include <stdlib.h>
+#include <string.h>
+#else
+extern char *malloc();
+extern char *strcpy();
+#endif
 
 #define free_reg_num(i) if (1) { assert(reg[i].inuse > 0); reg[i].inuse--; if (debug) fprintf(stderr,"free_reg(%s)\n", regnam[i]); } else
 
