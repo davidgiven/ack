@@ -12,10 +12,181 @@
 #include <alloc.h>
 #include "insert.h"
 
-#ifdef INCORE
-#define		C_switchtotmp()		(C_ontmpfile = 1)
-#define		C_switchtoout()		(C_ontmpfile = 0)
+#ifndef INCORE
+static int
+getbyte(b)
+	long b;
+{
+	/*	Get the byte at offset "b" from the start of the
+		temporary file, and try to do so in an efficient way.
+	*/
+	static long	start_core, curr_pos;
+
+	if (b < start_core || b >= curr_pos) {
+		/* the block wanted is not in core, so get it */
+		long nb = (b & ~(BUFSIZ - 1));
+		int n;
+
+		C_flush();
+		if (nb != curr_pos) {
+			if (sys_seek(tfr, nb, 0, &curr_pos) == 0) {
+				C_failed();
+			}
+		}
+		if (! ibuf) {
+			ibuf = Malloc(BUFSIZ);
+		}
+		if (sys_read(tfr, ibuf, BUFSIZ, &n) == 0) {
+			C_failed();
+		}
+		curr_pos += n;
+		start_core = nb;
+	}
+
+	return ibuf[(int) (b - start_core)];
+}
 #endif
+
+static C_out_parts();
+static Part *C_findpart();
+
+outpart(id)
+	int id;
+{
+	/*	Output part "id", if present.
+	*/
+	Part *p = C_findpart(id);
+
+	if (p) C_out_parts(p->p_parts);
+}
+
+static
+C_out_parts(pp)
+	register PartOfPart *pp;
+{
+	/*	Output the list of chunks started by "pp".
+		The list is build in reverse order, so this routine is
+		recursive.
+	*/
+	PartOfPart *prev = 0, *next;
+
+	while (pp) {
+		next = pp->pp_next;
+		pp->pp_next = prev;
+		prev = pp;
+		pp = next;
+	}
+	pp = prev;
+
+	while (pp) {
+		if (pp->pp_type == INSERT) {
+			C_outpart(pp->pp_id);
+		}
+		else {
+			/* copy the chunk to output */
+#ifdef INCORE
+			register char *s = C_BASE + pp->pp_begin;
+			char *se = C_BASE + pp->pp_end;
+
+			while (s < se) {
+				put(*s++);
+			}
+#else
+			register long b = pp->pp_begin;
+
+			while (b < pp->pp_end) {
+				put(getbyte(b++));
+			}
+#endif
+		}
+		pp = pp->pp_next;
+	}
+}
+
+static Part *
+C_findpart(part)
+	int part;
+{
+	/*	Look for part "part" in the table.
+		Return 0 if not present,
+	*/
+	register Part *p = C_stable[part % TABSIZ];
+
+	while (p && p->p_id != part) {
+		p = p->p_next;
+	}
+	return p;
+}
+
+static
+switchtotmp()
+{
+#ifndef INCORE
+	if (C_tmpfile == 0) {
+		static char tmpbuf[64];
+		register char *p = tmpbuf;
+
+		strcpy(p, C_tmpdir);
+		strcat(p, "/CodeXXXXXX");
+		tmpfile = mktemp(p);
+		if (! sys_open(p, OP_WRITE, &C_old_ofp)) {
+			C_failed();
+		}
+		if (! sys_open(p, OP_READ, &C_tfr)) {
+			C_failed();
+		}
+	}
+	if (! C_ontmpfile) {
+		File *p = C_ofp;
+
+		C_flush();
+		C_ofp = C_old_ofp;
+		C_old_ofp = p;
+		C_ontmpfile = 1;
+	}
+#else
+	if (! C_ontmpfile) {
+		char *p;
+
+		p = C_opp;
+		C_opp = C_old_opp;
+		C_old_opp = p;
+
+		p = C_top;
+		C_top = C_old_top;
+		C_old_top = p;
+		C_ontmpfile = 1;
+	}
+#endif
+}
+
+static
+switchtoout()
+{
+#ifndef INCORE
+	if (C_ontmpfile) {
+		File *p = C_ofp;
+
+		C_flush();
+		C_ofp = C_old_ofp;
+		C_old_ofp = p;
+		C_ontmpfile = 0;
+	}
+#else
+	if (C_ontmpfile) {
+		char *p;
+
+		p = C_opp;
+		C_opp = C_old_opp;
+		C_old_opp = p;
+
+		p = C_top;
+		C_top = C_old_top;
+		C_old_top = p;
+		C_ontmpfile = 0;
+	}
+#endif
+}
 
 static int
 available(part)
@@ -88,7 +259,7 @@ end_partofpart(p)
 	if (p) {
 		register PartOfPart *pp = p->p_parts;
 
-		pp->pp_end = C_current_out;
+		pp->pp_end = C_current_out - C_BASE;
 		if (pp->pp_begin == pp->pp_end) {
 			/* nothing in this chunk, so give it back */
 			p->p_parts = pp->pp_next;
@@ -106,12 +277,12 @@ resume(p)
 	*/
 	register PartOfPart *pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
 
-	C_switchtotmp();
+	switchtotmp();
 	C_curr_part = p;
 	pp->pp_next = p->p_parts;
 	p->p_parts = pp;
 	pp->pp_type = TEXT;
-	pp->pp_begin = C_current_out;
+	pp->pp_begin = C_current_out - C_BASE;
 }
 
 C_insertpart(part)
@@ -124,6 +295,9 @@ C_insertpart(part)
 	register Part *p;
 	register PartOfPart *pp;
 
+	C_outpart = outpart;
+	C_switchtotmp = switchtotmp;
+	C_switchtoout = switchtoout;
 	if (C_sequential && available(part)) {
 		outpart(part);
 		return;
@@ -158,6 +332,10 @@ C_beginpart(part)
 	*/
 	register Part *p = mkpart(part);
 
+	C_outpart = outpart;
+	C_switchtotmp = switchtotmp;
+	C_switchtoout = switchtoout;
+
 	end_partofpart(C_curr_part);
 
 	p->p_prevpart = C_curr_part;
@@ -181,6 +359,6 @@ C_endpart(part)
 	if (p->p_prevpart) resume(p->p_prevpart);
 	else {
 		C_curr_part = 0;
-		C_switchtoout();
+		switchtoout();
 	}
 }

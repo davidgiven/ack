@@ -5,7 +5,7 @@
 /* $Header$ */
 /* EM CODE OUTPUT ROUTINES */
 
-#include <system.h>
+#include "io.c"
 #include "em_private.h"
 
 #define	put8(x)		C_putbyte(x)

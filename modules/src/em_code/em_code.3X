@@ -64,6 +64,8 @@ emcode \- EM code interface for compilers
 .B int id;
 .PP
 .B int C_getid()
+.PP
+.B char *C_tmpdir;
 .fi
 .SH DESCRIPTION
 This package provides a procedural EM code interface to be used in
@@ -419,11 +421,22 @@ The order in which the parts are defined is not significant.
 However, when
 .I C_close
 is called, all parts that have been inserted, must also be defined.
+Parts may themselves again have sub-parts.
 .PP
 The routine
 .I C_getid
 can be used to obtain a valid and unique part
 .IR id .
+.PP
+On implementations with limited memory, the mechanism is implemented with a
+temporary file.
+The directory in which this file resides is indicated by
+.IR C_tmpdir .
+The default is the #define TMP_DIR from ~em/h/em_path.h.
+The user can change this by just changing
+.I C_tmpdir
+before calling
+.IR C_open.
 .SH FILES
 .nf
 ~em/modules/h/em.h

@@ -5,7 +5,7 @@
  */
 /* EM CODE OUTPUT ROUTINES */
 
-#include <system.h>
+#include "io.c"
 #include "em_private.h"
 
 /*
@@ -26,7 +26,9 @@ static
 wrs(s)
 	register char *s;
 {
-	while (*s) C_putbyte(*s++);
+	while (*s) {
+		C_putbyte(*s++);
+	}
 }
 
 C_pt_dnam(s)
@@ -74,8 +76,9 @@ C_pt_scon(x, y)
 	C_putbyte('\'');
 	p = bts2str(x, (int) y, xbuf);
 	while (*p) {
-		if (*p == '\'')
+		if (*p == '\'') {
 			C_putbyte('\\');
+		}
 		C_putbyte(*p++);
 	}
 	C_putbyte('\'');
@@ -144,11 +147,13 @@ C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 	char *v;
 	arith sz;
 {
+	int ch = sp == sp_icon ? 'I' : sp == sp_ucon ? 'U' : 'F';
+
 	wrs(v);
-	C_putbyte(sp == sp_icon ? 'I' : sp == sp_ucon ? 'U' : 'F');
+	C_putbyte(ch);
 	C_pt_cst(sz);
 }
 
 C_pt_nl() { C_putbyte('\n'); }
 C_pt_comma() { C_putbyte(','); }
-C_pt_ccend() { wrs(" ?"); }
+C_pt_ccend() { C_putbyte('?'); }

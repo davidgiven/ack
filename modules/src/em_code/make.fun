@@ -41,9 +41,9 @@ rm -f C_*.o
 .
 $a
 rm -f libem$1.a
-cc -c -O -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
+cc -c -O -I. -I$1 -I$EMHOME/modules/h -I$EMHOME/h $1/em.c
 mv em.o em$1.o
-ar rc libem$1.a C_*.o em$1.o insert.o io.o failed.o internerr.o getid.o
+ar rc libem$1.a C_*.o em$1.o insert.o failed.o internerr.o getid.o
 rm -f C_*.o
 --EOF--
 .

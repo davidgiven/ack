@@ -24,38 +24,38 @@ C_ina_dlb	| label:l	| PS(ps_ina); DLB(l); NL()
 C_inp		| char *:s	| PS(ps_inp); PNAM(s); NL()
 
 C_bss_cst	| arith:n arith:w int:i	|
-	PS(ps_bss); DCST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
 C_bss_icon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); DCST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
 C_bss_ucon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); DCST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
 C_bss_fcon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_bss); DCST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
 C_bss_dnam	| arith:n char *:s arith:offs int:i	|
-	PS(ps_bss); DCST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
 C_bss_dlb	| arith:n label:l arith:offs int:i	|
-	PS(ps_bss); DCST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
 C_bss_ilb	| arith:n label:l int:i			|
-	PS(ps_bss); DCST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
 C_bss_pnam	| arith:n char *:s int:i		|
-	PS(ps_bss); DCST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
+	PS(ps_bss); CST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
 
 C_hol_cst	| arith:n arith:w int:i	|
-	PS(ps_hol); DCST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); CST(w); COMMA(); CST((arith) i); NL()
 C_hol_icon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); DCST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); WCON(sp_icon, s, sz); COMMA(); CST((arith) i); NL()
 C_hol_ucon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); DCST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); WCON(sp_ucon, s, sz); COMMA(); CST((arith) i); NL()
 C_hol_fcon	| arith:n char *:s arith:sz int:i	|
-	PS(ps_hol); DCST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); WCON(sp_fcon, s, sz); COMMA(); CST((arith) i); NL()
 C_hol_dnam	| arith:n char *:s arith:offs int:i	|
-	PS(ps_hol); DCST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); NOFF(s, offs); COMMA(); CST((arith) i); NL()
 C_hol_dlb	| arith:n label:l arith:offs int:i	|
-	PS(ps_hol); DCST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); DOFF(l, offs); COMMA(); CST((arith) i); NL()
 C_hol_ilb	| arith:n label:l int:i			|
-	PS(ps_hol); DCST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); ILB(l); COMMA(); CST((arith) i); NL()
 C_hol_pnam	| arith:n char *:s int:i		|
-	PS(ps_hol); DCST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
+	PS(ps_hol); CST(n); COMMA(); PNAM(s); COMMA(); CST((arith) i); NL()
 
 C_con_cst	| arith:l		| PS(ps_con); CST(l); CEND(); NL()
 C_con_icon	| char *:val arith:siz	|
