@@ -44,3 +44,11 @@ The files ....sed (e.g. test.sed) are used
 to produce legal C programs from the OPS file, in which
 the result of all expressions is printed.
 The programs are run in the way described above.
+
+If one has a implementation without floating point one can
+use the -DNOFLOAT flag.
+Most programs use compile time #ifdef's to hide the use of
+floating point they make.
+For an example, look at makefile.i86.
+Differences are to be expected in the output of such a run.
+Look at the file Out2.nf.std to see what can be expected.
