@@ -141,6 +141,14 @@ ldc adu $1==0 && $2==2*w:
 loc ads $1==0 && $2==w:
 ldc ads $1==0 && $2==2*w:
 zer adi $1==$2:
+loc sri $1==0 && $2==w:
+loc sli $1==0 && $2==w:
+loc sru $1==0 && $2==w:
+loc slu $1==0 && $2==w:
+loc sri $1==0 && $2==2*w:
+loc sli $1==0 && $2==2*w:
+loc sru $1==0 && $2==2*w:
+loc slu $1==0 && $2==2*w:
 loc and $1==0 && $2==w:		asp w loc 0
 ldc and $1==0 && $2==2*w:	asp 2*w ldc 0
 zer and $1==$2:			asp $1 zer $1
