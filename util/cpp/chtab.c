@@ -42,6 +42,7 @@ main(argc, argv)
 		}
 	}
 	MkCharIndex();
+	exit(0);
 }
 
 MkCharIndex()
