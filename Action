@@ -69,8 +69,21 @@ end
 name "Occam frontend"
 dir lang/occam/comp
 end
+name "Modula-2 frontend"
+dir lang/m2/comp
+end
+name "Modula-2 definition modules"
+dir lang/m2/libm2
+end
+name "Modula-2 makefile generator"
+dir lang/m2/m2mm
+end
 name "Intel 8086 support"
 dir mach/i86
+indir
+end
+name "Intel 80286 support for Xenix"
+dir mach/xenix3
 indir
 end
 name "MSC6500 support"

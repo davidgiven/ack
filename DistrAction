@@ -1,1 +1,2 @@
-exec sh TakeAction distr distr/Action
+sh TakeAction distr distr/Action
+sh TakeAction distr distr/Action1
