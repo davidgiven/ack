@@ -4989,15 +4989,16 @@ pat set $1==2
 with conreg2
     uses DD_REG = {zero_const, 0}
     gen bset %1, %a	yields	%a
-#endif
+#else
 
 pat set $1==4
 with conreg2
     uses DD_REG4 = {zero_const4, 0}
     gen bset %1, %a	yields	%a
+#endif
 
 #if WORD_SIZE==2
-pat set $1>4
+pat set $1>2
 with STACK
     kills ALL
     gen move {const, $1}, d0
