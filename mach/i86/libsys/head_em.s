@@ -1,6 +1,6 @@
 .define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
-.define ERANGE,ESET,EHEAP,ECASE,EILLINS
+.define ERANGE,ESET,EHEAP,ECASE,EILLINS,EODDZ
 
 ERANGE          = 1
 ESET            = 2
