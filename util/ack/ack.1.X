@@ -377,6 +377,16 @@ input:name:output:description
 \&.o:cv:a.out:Conversion from Ack object to machine object
 .TE
 .in -2
+.SH "ENVIRONMENT VARIABLES"
+.IP ACKDIR
+If set, this environment variable overrides ack's idea of its home
+directory.
+.IP ACKM
+If set, this environment variable overrides ack's idea of the default
+machine it compiles for.
+.IP ACKFE
+If set, this environment variable tells ack where to get the front-end
+description file.
 .SH "SEE ALSO"
 .PD 0
 em_opt(6), em_ass(6), em_cg(6), ack.out(5)

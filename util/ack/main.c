@@ -123,7 +123,7 @@ varinit() {
 	register char *envstr ;
 	extern char em_dir[];
 
-	if ( envstr=getenv("EM_DIR") ) {
+	if ( envstr=getenv("ACKDIR") ) {
 		setsvar(keeps(HOME),keeps(envstr)) ;
 	} else {
 		setsvar(keeps(HOME),keeps(em_dir)) ;
