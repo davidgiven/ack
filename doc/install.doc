@@ -1,0 +1,622 @@
+.nr LL 7.5i
+.nr PD 1v
+.TL
+Amsterdam Compiler Kit installation guide
+.AU
+Ed Keizer
+.AI
+Wiskundig Seminarium
+Vrije Universiteit
+Amsterdam
+.NH
+Introduction
+.PP
+This document
+describes the process of installing Amsterdam Compiler Kit.
+It depends on your combination of hard- and software how
+hard it will be to install the kit.
+This description is intended for a PDP 11/44 running
+.UX
+Version 7.
+Installation on other PDP 11's should be easy, as long
+as they have separate instruction and data space.
+Installation on machine's without this feature, like PDP 11/34,
+PDP 11/60 requires extensive surgery on some programs and is
+thought of as impossible.
+See chapter 6 for installation on other systems.
+.NH
+Restoring tree
+.PP
+The process of installing Amsterdam Compiler Kit is quite simple.
+It is important that the original Amsterdam Compiler Kit
+distribution tree structure is restored.
+Proceed as follows
+.IP "  -" 10
+Create a directory, for example /usr/em, on a device
+with at least 20000 blocks left.
+.IP "  -"
+Change to that directory (cd ...); it will be the working directory.
+.IP "  -"
+Extract all files from the distribution medium, for instance
+magtape:
+\fBtar x\fP.
+.IP "  -"
+Keep a copy of the original distribution to be able to repeat the process
+of installation in case of disasters.
+This copy is also useful as a reference point for diff-listings.
+.LP
+The directories in the tree contain the following information:
+.nr PD 1v
+.IP "lib" 14
+.br
+almost all binaries and shell files used by commands and
+library em_data.a from misc/data
+.IP "lib/ack"
+.br
+The command descriptor files used by the program ack.
+.nr PD 0
+.IP "bin"
+.br
+the few utilities that knot things together
+.IP "etc"
+.br
+The MAIN description of EM sits here.
+contains files (e.g. em_table) describing
+the opcodes and pseudos in use,
+the operands allowed, effect in stack etc. etc.
+Make in this directory creates most of the files in h
+.IP "include"
+.br
+More or less system independent include files needed by modules
+in the C library from lang/cem/libcc.
+Especially needed for "stdio".
+.IP "h"
+.br
+The #include files for:
+.nf
+as_spec.h    Used by EM assembler and interpreters.
+em_abs.h     Contains trap numbers and address for lin and fil
+em_flag.h    Definition of bits in array em_flag in lib/em_data.a
+             Describes parameters effect on flow of instructions
+em_mes.h     Definition of names for mes pseudo numbers
+em_mnem.h    instruction => compact mapping.
+em_pseu.h    pseudo instruction => compact mapping
+em_ptyp.h    Useful for compact code reading/writing,
+             defines classes of parameters
+em_spec.h    Definition of constants used in compact code
+local.h      Various definitions for local versions
+pc_err.h     Definitions of error numbers in Pascal
+pc_file.h    Macro's used in file handling in Pascal
+em_path.h    Pathnames used by \fIack\fP, intended
+             for all utilities
+pc_size.h    Sizes of objects used by Pascal compiler and
+             run-time system.
+em_reg.h     Definition of names for register types.
+.IP "doc"
+.br
+Documentation
+.nf
+cg.doc          Use and internal specification of the backend.
+.br
+regadd.doc      Update for cg.doc concerning register variables
+.br
+regadd.doc      Description of steps to add register variables.
+.br
+ack.doc         Layout of description files needed for each machine.
+.br
+cref.doc        C reference manual, addendum
+.br
+install.doc     Ack Installation Guide
+.br
+pcref.doc       Pascal reference manual, addendum
+.br
+peep.doc        Description of the peephole optimizer
+.br
+em.doc          EM reference manual
+.br
+toolkit.doc     A general overview of the toolkit
+.br
+v7bugs.doc      Bugs in the standard V7 system
+.br
+val.doc         Pascal validation suite version 3 report
+.nf
+.IP "doc/em.doc"
+.br
+The EM-manual IR-81
+.IP "doc/em.doc/int"
+.br
+The EM interpreter written in pascal
+.IP "mkun"
+.br
+The PUBMAC macro package for nroff/troff from the Katholieke Universiteit at
+Nijmegen.
+It is used for the EM reference manual,
+the Makefile installs the macro package in
+/usr/lib/tmac/tmac.mkun*.
+This package is in the public domain.
+.IP "mach"
+.br
+just there to group the directories for all machines
+these directories have sub-directories named:
+.nf
+  as      the assembler ( *.s + libraries => a.out )
+  cg      the new backend   ( *.m => *.s )
+  lib     the libraries for all run-time systems
+          these libraries are used by the assembler.
+  libpc   Used to create Pascal run-time system in 'lib'
+  libcc   Used to create C run-time system in 'lib'
+  libem   Sources for EM runtime system, result sits in 'lib'
+  test    Various tests
+  dl      Down-load programs
+  int     Source for an interpreter
+available are:
+    PMDS II 68000, wordsize 2, ptrsize 4
+        mach/m68k2
+        mach/m68k2/as
+        mach/m68k2/cg
+        mach/m68k2/libem
+        mach/m68k2/lib
+        mach/m68k2/dl
+        mach/m68k2/libpc
+        mach/m68k2/libcc
+        mach/m68k2/libsys
+    bare 6809
+        mach/6809
+        mach/6809/as
+    8080, wordsize 2, ptrsize 2
+        mach/8080
+        mach/8080/as
+        mach/8080/test
+        mach/8080/libcc
+        mach/8080/lib
+   bare 8086, wordsize 2, ptrsize 2
+        mach/i86
+        mach/i86/as
+        mach/i86/lib
+        mach/i86/libcc
+        mach/i86/dl
+        mach/i86/libem
+        mach/i86/libpc
+        mach/i86/saio  (library for stand-alone EM on 86/12A )
+    pdp 11, UNIX/V7, wordsize 2, ptrsize 2
+        mach/pdp
+        mach/pdp/test
+        mach/pdp/libem
+        mach/pdp/lib
+        mach/pdp/libcc
+        mach/pdp/libpc
+        mach/pdp/cg
+        mach/pdp/int         -PDP 11/44 EM interpreter
+    vax 780, UNIX V7, wordsize 4, ptrsize 4
+        mach/vax4
+        mach/vax4/cg
+        mach/vax4/lib
+        mach/vax4/libcc
+        mach/vax4/libem
+        mach/vax4/libpc
+    z80, CP/M, wordsize 2, ptrsize 2
+        mach/z80
+        mach/z80/as
+        mach/z80/libem
+        mach/z80/lib
+        mach/z80/libcc
+        mach/z80/libpc
+        mach/z80/int         -Z80 EM interpreter
+    z80, nascom
+        mach/z80a
+        mach/z80a/dl
+    vax 11/780, Berkeley UNIX, wordsize 2, ptrsize 4
+        mach/vax2
+        mach/vax2/cg
+        mach/vax2/lib
+        mach/vax2/libpc
+        mach/vax2/libem
+    bare 6500, wordsize 2, ptrsize 2
+        mach/6500
+        mach/6500/as
+        mach/6500/dl
+        mach/6500/libem
+        mach/6500/lib
+    bare 6800, wordsize 2, ptrsize 2
+        mach/6800
+        mach/6800/as
+    EM virtual machine code, wordsize 2, ptrsize 2
+        mach/int
+        mach/int/libcc
+        mach/int/libpc
+        mach/int/lib
+        mach/int/test
+    The directory proto contains files used by most machines.
+    e.g. makefiles for libraries for C and Pascal
+        mach/proto
+        mach/proto/libg
+.fi
+.IP "emtest"
+.br
+Contains prototype of em test set.
+.IP "man"
+.br
+Man files for various utilities
+.IP "lang"
+.br
+just there to group the directories for all front-ends
+.IP "lang/pc"
+.br
+Pascal front-end
+.IP "lang/pc/libpc"
+.br
+Source of Pascal run-time system ( in EM or C )
+.IP "lang/pc/test"
+.br
+Some test programs written in Pascal
+.IP "lang/pc/pem"
+.br
+The compiler proper
+.IP "lang/cem"
+.br
+C front-end
+.IP "lang/cem/libcc"
+.br
+Directories with sources of C runtime system, libraries (in EM or C)
+.IP "lang/cem/libcc/gen"
+.br
+Sources for routines in chapter III of UNIX programmers manual,
+excluding STDIO
+.IP "lang/cem/libcc/stdio"
+.br
+STDIO sources
+.IP "lang/cem/libcc/mon"
+.br
+Sources for routines in chapter II, written in EM
+.IP "lang/cem/comp"
+.br
+The compiler proper
+.IP "lang/cem/ctest"
+.br
+C test set
+.IP "lang/cem/ctest/cterr"
+.br
+Programs developed for pinpointing previous errors
+.IP "lang/cem/ctest/ct*"
+.br
+The test programs.
+.IP "util"
+.br
+Contains directories with various utilities
+.IP "util/opt"
+.br
+EM peephole optimizer (*.k => *.m)
+.IP "util/misc"
+.br
+Decode (*.[km] => *.e) + encode (*.e => *.k)
+.IP "util/data"
+.br
+The C-code for `lib/em_data.a`
+These sources are created by the Makefile in `etc`
+.IP "util/ass"
+.br
+The EM assembler ( *.[km] + libraries => e.out )
+.IP "util/arch"
+.br
+The archiver to be used for ALL EM utilities
+.IP "util/cgg"
+.br
+A program needed for compiling backends.
+.IP "util/cpp"
+.br
+The V7 C preprocessor.
+.LP
+All pathnames mentioned in the text of this document are relative to the
+working directory, unless they start with '/'.
+.PP
+The person doing the installation needs permission to write in the
+directories of the Amsterdam Compiler Kit distribution tree.
+Preferably you should log in as sys (uid=3,gid=0).
+.NH
+Pathnames
+.PP
+Absolute pathnames are concentrated in "h/em_path.h".
+Only the pascal runtime system and the utility \fIack\fP use
+absolute pathnames to access files in the kit.
+The tree is distributed with /usr/em as the working
+directory.
+The definition of EM_HOME in em_path.h should be altered to
+specify the root
+directory for the Compiler Kit distribution on your system.
+The trailing " in the definition of EM_HOME is intentionally
+missing!
+Em_path.h also specifies which directory should be used for
+temporary files.
+Most programs from the kit do indeed use that directory
+although some remain stubborn and use /tmp or /usr/tmp.
+.LP
+The shape of the tree should not be altered lightly because
+most Makefiles and the
+utility \fIack\fP know the shape of the ACK tree.
+All pathnames in all Makefiles are relative, that is do not
+have "/" as the first character.
+The knowledge of the utility \fIack\fP about the shape of the tree is
+concentrated in the files in the directory lib/ack.
+.NH
+Commands
+.PP
+The kit is distributed with all available commands in the bin
+directory.
+The commands distributed are:
+.IP "\fIack\fP, \fIacc\fP, \fIapc\fP and their links"
+.br
+They are used to compile the Pascal, C, etc... programs.
+.IP \fIarch\fP
+.br
+The archiver used for the EM- and universal assembler.
+.IP "\fIem\fP and \fIeminform\fP"
+.br
+The EM interpretator for the PDP-11 and the program to unravel
+its post-mortem information.
+.LP
+We currently make the kit available to our users by telling
+them that they should include the bin directory of the kit in
+their PATH shell variable.
+The programs will still work when moved to a different
+directory.
+The copying should preferably be done with tar, since links are
+heavily used.
+Renaming of the programs linked to \fIack\fP will not always
+produce the desired result.
+This program uses its call name as an argument.
+Any call name not being \fIcc\fP, \fIacc\fP, \fIpc\fP or \fIapc\fP will be
+interpreted as the name of a 'machine description' and the
+program will try to find a description file with that name.
+All recompilations will only touch the utilities in the bin
+directory, not your own copies.
+.NH
+Options
+.PP
+There is one important option in h/local.h.
+The utility \fIack\fP uses a default machine name when called
+as \fIacc\fP, \fIcc\fP, \fIapc\fP, \fIpc\fP or \fIack\fP.
+The machine name used for default is determined by the
+definition of ACKM in h/local.h.
+The current definition is \fIpdp\fP.
+.PP
+The distribution is tailored to one specific opreating system per CPU type.
+For some of these  CPU's it is possible to tailor the distribution to another
+operating system.
+The steps to be taken are described in READ_ME (or README) files in the
+subdirectories of the directory in EM_HOME/mach for that particular machine.
+For example: The vax2 distribution is tailoerd to BSD4.1, but has #define's
+for BSD4.1c and BSD4.2.
+For the names and places of these define's look in EM_HOME/mach/vax2/cg and
+EM_HOME/mach/vax2/libem.
+.NH
+Recompilation
+.PP
+The kit comes with binaries in the directories \fBbin\fP and
+\fBlib\fP.
+Some directories among mach/*/lib contain archives with object files,
+notably mach/pdp/lib.
+The binaries and object files are for a PDP 11/44 with floating
+point running UNIX V7.
+.PP
+Almost all directories contain a "Makefile" or a shell command file called
+"make".
+Apart from commands applying to that specific directory these
+files all recognize a few special commands.
+When called with one of these they will apply the command to
+their own directory and all subdirectories.
+The special commands are:
+.IP "install" 20
+recompile and install all binaries and libraries.
+.br
+Some Makefiles allow errors to occur in the programs they call.
+They ignore such errors and notify the user with the message
+"~....... error code n: ignored".
+Whenever such a message appears in the output you can ignore it
+too.
+.br
+The installation of the PUBMAC macro package is not done
+automatically from the higher level directory.
+.IP "cmp"
+recompile all binaries and libraries and compare them to the
+ones already installed.
+.IP pr
+print the sources and documentation on the standard output.
+.IP opr
+make pr | opr
+.br
+Opr should be an off-line printer daemon.
+On some systems it exists under another name e.g. lpr.
+The easiest way to call such a spooler is using a shell script
+with the name opr that calls lpr.
+This script should be placed in /usr/bin or EM_HOME/bin or
+one of the directories in your PATH.
+.IP clean
+remove all files not needed for day-to-day use,
+that is binaries not in bin or lib, object files etc.
+.LP
+Example:
+.nf
+.sp 1
+        make install
+.sp 1
+.fi
+given as command in the home directory will cause
+recompilation of all programs in the kit.
+.LP
+Recompilation of the complete kit lasts about 9 hours an a PDP
+11/44.
+.NH 2
+Recompilation on a different machine.
+.PP
+Installation on other systems will often require recompilation
+of all programs.
+The presence of a C compiler is essential for recompilation.
+Except the Pascal compiler proper all programs are written in C.
+Some modules are derived from \fIyacc\fP sources.
+Retranslating these programs from that yacc source is not
+necessary, although it might improve performance.
+Some versions of \fIyacc\fP 'know' that the resulting C programs will
+run on a 32-bit int machine.
+C modules produced by such a \fIyacc\fP are not portable and
+should not be used to (cross)compile programs for 16-bit machines.
+We assume a version UNIX which, apart from the C-compiler,
+contains most normal utilities, like ed, sed, grep, make, the
+Bourne shell etc.
+All Makefiles use the system C-compiler.
+The existence of a backend for your system is of course essential
+if you wish to produce executable files for that system.
+When the backend exists it is also possible to boot the Pascal
+Compiler,
+that is written in Pascal itself.
+The kit contains the compact code files for the 2/2 and 2/4
+versions of the Pascal compiler.
+The current version of this compiler can only be used on machines
+with a 16-bit word size and 16- or 32-bit pointers.
+The Makefile automatically tries to boot the Pascal compiler
+from one of these compact code files, if the compiler proves
+unable to compile itself.
+.PP
+The native assemblers and loaders are used on PDP-11 and VAX.
+The description files in lib/ack for other systems use our
+universal assembler.
+The load file produced by this assembler is not directly
+usable in any system known to us,
+but has to be converted before it can be put to use.
+The \fIdl\fP programs present for some machines unravel
+these load files and transmit commands to load memory
+to a microprocessor over a serial line.
+The PDP-11 version of our universal assembler is supplied
+with a conversion program.
+The file man/a.out.5 contains a description of the format of
+the universal assembler load file,
+it might be useful to those who wish or need to write their
+own conversion programs.
+.br
+Berkeley UNIX for the VAX'en has (at least) three different
+versions, BSD4.1a, BSD4.1c and BSD4.2. The READ_ME files in the
+directories mach/vax2/cg, mach/vax2/libem, mach/vax4/cg and
+mach/vax4/libem tell you how to adapt the vax2 and vax4 backend
+to these versions.
+.NH 2
+Recompiling libraries
+.PP
+The kit contains sources for part II and III of the C-library, except
+the math functions, they are grabbed from our V7 system and sometimes
+altered in a EM dependent way or replaced altogether when the original
+was in assembly.
+These files can be used to make libraries for the Ack C-compiler.
+The recompilation process uses a few include files.
+The include directory in the EM home directory contains a few more
+or less system independent include files.
+The system dependent include files are fetched from /usr/include
+on the system you use to recompile.
+This may lead to several problems.
+Sometimes the system differs so much from V7 that certain manifest constants
+do not exist any more.
+At other times these include files were written for a compiler without
+a restriction on name length.
+In that case - I've seen it happen - people tend to use differing
+identifiers that are identical in the first eight characters.
+All these problems you have to solve yourself,
+the libraries are only included as an extra and too much system
+dependent to give any guarantees.
+.NH
+Fixes to the UNIX V7 system
+.PP
+UNIX System V7 has a few bugs that prevent a part of or the whole kit
+from working properly.
+To be honest, we do not know which of the following changes are
+essential to the functioning of our kit.
+.PP
+The file "doc/v7bugs.doc" gives for each of the following bugs
+a small test program and a diff listing of the source files that have to be
+modified.
+.IP 1
+Bug in the C optimizer for unsigned comparison
+.nr PD 0
+.IP 2
+The loader 'ld' fails for large data and text portions
+.IP 3
+Floating point registers are not saved if more memory is needed.
+.IP 4
+Floating point registers are not copied to child in fork().
+.nr PD 1v
+.LP
+Use the test programs to see if the errors are present in your system
+and to check if the modifications are effective.
+.NH
+Testing
+.PP
+Test sets are available in Pascal, C and EM assembly.
+.IP em 8
+.br
+The directory emtest contains a few EM test programs.
+The EM assembly files in these tests must be transformed into
+load files, thereby avoiding use of the EM optimizer.
+These tests use the LIN and NOP instructions to mark the passing of each
+test.
+The NOP instruction prints the current line number during the
+test phase.
+Each test notifies its correctness by calling LIN with a unique
+number followed by a NOP which prints this line number.
+The test finishes normally with 0 as the last number printed
+In all other cases a bug showed its
+existence.
+.IP Pascal
+.br
+The directory lang/pc/test contains a few pascal test programs.
+All these programs print the number of errors found and a
+identification of these errors.
+.IP C
+.br
+The sub-directories in lang/cem/ctest contain C test programs.
+The idea behind these tests is:
+when you have a program called xx.c, compile it into xx.cem.
+Run it with standard output to xx.cem.r, compare this file to
+xx.cem.g, a file containing the 'ideal' output.
+Any differences will point to implementation differences or
+bugs.
+Giving the command "run gen" or plain "run" starts this
+process.
+The differences will be presented on standard output.
+The contents of the result files depend on the wordsize,
+the xx.cem.g files on the distribution are intended for a
+16-bit machine.
+.NH
+Documentation
+.PP
+Manual pages for Amsterdam Compiler Kit can be copied
+to "/usr/man/man?" by the
+following commands:
+.DS
+cd man
+make install
+.DE
+.LP
+Several documents are provided:
+.DS
+doc/toolkit.doc: a general overview
+doc/pcref.doc: the Pascal-frontend reference manual
+doc/val.doc: the results of running the Pascal Validation Suite
+doc/cref.doc: the C-frontend manual
+doc/em.doc: a description of the EM machine architecture
+doc/peep.doc: internal documentation for the peephole optimizer
+doc/cg.doc: documentation for backend writers and maintainers
+doc/regadd.doc: addendum to previous document describing register variables
+doc/install.doc: this document
+.DE
+.LP
+The Validation Suite is a collection of more than 200 Pascal programs,
+designed by Brian Wichmann and Arthur Sale to test Pascal compilers.
+We are not allowed to distribute it, but you may
+request a copy from
+.DS
+Richard J. Cichelli
+A.N.P.A.
+1350 Sullivan Trail
+P.O. Box 598
+Easton, Pennsylvania 18042
+USA
+.DE
+.LP
+Good luck.
