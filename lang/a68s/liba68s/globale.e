@@ -12,19 +12,19 @@
  pro $ESTART0,0
  lor 0			; my LB
  dup SZADDR
- dch			; m_a_i_n's LB
+ dch			; _m_a_i_n's LB
  dup SZADDR
- str 0			; pretend I am in m_a_i_n
+ str 0			; pretend I am in _m_a_i_n
  lae .HTOP-FIRSTIBOFFSET; destination address (holtop-firstiboffset)
  ; now calc how much to move
  lal 0
  lor 0
  sbs SZWORD		; subtract address of param from lb to get link space
  loc SZWORD+SZADDR+SZADDR
- ads SZWORD		; allow for one parameter of m_a_i_n
+ ads SZWORD		; allow for one parameter of _m_a_i_n
  bls SZWORD		; block move
 			; now the global area contains an exact copy of
-			; m_a_i_n's stack frame, and main will subsequently
+			; _m_a_i_n's stack frame, and main will subsequently
 			; adjust its LB to point to this global copy, thus
 			; making it a part of the official stack.
  str 0			; get my LB back
@@ -54,7 +54,7 @@
  lxa 2
  cal $_ini
  asp SZADDR+SZADDR+SZADDR+SZADDR
- loc A68STAMP		; m_a_i_n's frame stamp, for isa68, any positive number
+ loc A68STAMP		; _m_a_i_n's frame stamp, for isa68, any positive number
  ste .HTOP-FSTAMPOFFSET ; it is in a SZWORD integer, 1st local var
  inp $_usigs
  cal $_usigs		; catch UNIX interrupts as EM trap 15

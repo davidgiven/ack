@@ -24,11 +24,11 @@
 
 #if SZWORD==2
 #define PUTTVARSPACE 150 /* space, or greater used for locals in PUTT */
-#define GETTVARSPACE 350 /* space, or greater used for locals in GETT */
+#define GETTVARSPACE 350 /* exactly (!) space used for locals in GETT */
 #define LLC ldc 	 /* for loading bit patterns */
 #else
-#define PUTTVARSPACE 300
-#define GETTVARSPACE 700
+#define PUTTVARSPACE 212
+#define GETTVARSPACE 432
 #define LLC loc
 #endif
 #define HTOP 500   /* this must agree with what the compiler produces */

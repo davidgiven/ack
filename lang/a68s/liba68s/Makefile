@@ -1,7 +1,7 @@
 EMROOT=../../..
 ACK=$(EMROOT)/bin/$(MACH)
-PC=$(ACK) -.p -PR$(EMROOT)/lang/a68s/cpem/cpem
-PCFLAGS=-v -L -e -LIB -Oego -SR -CJ -BO -SP
+PC=/proj/em/bin/sun3 -.p -PR$(EMROOT)/lang/a68s/cpem/cpem -Ras=/proj/em/Work/lib/m68020/as -I/proj/em/h -Rbe=/proj/em/Work/lib/m68020/cg
+PCFLAGS=-v -L -e -LIB # -Oego -SR -CJ -BO -SP
 EPCFLAGS=-v -L -e -LIB $(BSD4) $(VAX4)
 UTIL=$(EMROOT)/lang/a68s/util
 TAILOR=$(UTIL)/tailor
@@ -65,7 +65,7 @@ run68g.o:	rundecsg.h run68g.p
 		 cat run68g.p ) \
 		    >temp.p
 		$(PC) $(PCFLAGS) -c.s temp.p
-		sed -e '/^.define _m_a_i_n/d' -e '/^.extern _m_a_i_n/,$$d' -e '/^.globl	_m_a_i_n/,$$d' temp.s > run68g.s
+		sed -e '/^.define __m_a_i_n/d' -e '/^.extern __m_a_i_n/,$$d' -e '/^.globl	__m_a_i_n/,$$d' temp.s > run68g.s
 		$(PC) $(PCFLAGS) -c.o run68g.s
 		rm temp.p run68g.s
 
