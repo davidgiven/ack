@@ -571,6 +571,9 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 						| %[1] %[2]	| adi 2 |
 ...		| NC source2-REG CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
 			allocate(%[1],REG=%[1])	| %[2] %[a] | adi 2 |
+...		| NC source1 CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
+			allocate(%[1],REG={CONST2, 0})
+			"bisb %[1],%[a]"	| %[2] %[a] | adi 2 |
 ...		| NC regconst2 CONST2 | |
 					   {regconst2,%[1.reg],
 					      tostring(%[2.num])+"+"+%[1.ind]} | |
@@ -1050,6 +1053,8 @@ lil ngi sil $1==$3 && $2==2 && inreg($1)==2 | |
 			"neg *%(regvar($1)%)" 		|	| |
 lil inc sil $1==$3 && inreg($1)==2 | | INDSTORE
 			"inc *%(regvar($1)%)"		|	| |
+lil dec sil $1==$3 && inreg($1)==2 | | INDSTORE
+			"dec *%(regvar($1)%)"		|	| |
 lol adi stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))
 			"add %[1],%(regvar($1)%)"
@@ -1080,6 +1085,12 @@ lol inl $1==$2 && inreg($1)==2 | |
 lol inl $1==$2 | |
 			allocate(REG={LOCAL2, $1, 2})	| %[a] 
 							| inl $2 |
+lol del $1==$2 && inreg($1)==2 | |
+			allocate(REG=regvar($1))	| %[a] 
+							| del $2 |
+lol del $1==$2 | |
+			allocate(REG={LOCAL2, $1, 2})	| %[a] 
+							| del $2 |
 lol adp dup stl $1==$4 && $3==2 && inreg($1)==2	| | |
 					| lol $1 adp $2 stl $1 lol $1 |
 lol adp stl $1==$3 && $2==1 && inreg($1)==2 | |
@@ -1109,6 +1120,8 @@ lil ngi sil $1==$3 && $2==2 | | INDSTORE
 			"neg *$1(r5)"			|	| |
 lil inc sil $1==$3 | | INDSTORE
 			"inc *$1(r5)"			|	| |
+lil dec sil $1==$3 | | INDSTORE
+			"dec *$1(r5)"			|	| |
 lol adi stl $2==2 && $1==$3 | source2 |
 			remove(indordef)
 			remove(locals, %[ind] <= $1 && %[ind]+%[size] > $1)
@@ -2312,11 +2325,27 @@ cmf zge $1==8	| DBL_REG double8 |
 			"cmpf %[1],%[2]\ncfcc"
 			"jle $2"				| | |
 
-and zeq $1==2	| source2 source2 |
+and zeq $1==2	| source1 source1or2 |
+			remove(all)
+			"bitb %[1],%[2]"
+			"jeq $2"				| | |
+...		| source1or2 source1 |
+			remove(all)
+			"bitb %[1],%[2]"
+			"jeq $2"				| | |
+...		| source2 source2 |
 			remove(all)
 			"bit %[1],%[2]"
 			"jeq $2"				| | |
-and zne $1==2	| source2 source2 |
+and zne $1==2	| source1 source1or2 |
+			remove(all)
+			"bitb %[1],%[2]"
+			"jne $2"				| | |
+...		| source1or2 source1 |
+			remove(all)
+			"bitb %[1],%[2]"
+			"jne $2"				| | |
+...		| source2 source2 |
 			remove(all)
 			"bit %[1],%[2]"
 			"jne $2"				| | |
@@ -2414,19 +2443,18 @@ blm             | SCR_REG SCR_REG |
 			allocate(REG={CONST2,$1/2})
 			"1:mov (%[2])+,(%[1])+\nsob %[a],1b"
 			erase(%[1]) erase (%[2]) erase(%[a])    |       | |
-bls $1==2       | source2 |
-			remove(all)
-			move(%[1],r0)
-			"jsr pc,blm~"
-			erase(r01)                              |       | |
+bls $1==2       | SCR_REG SCR_REG SCR_REG |
+			"asr %[1]\nbeq 2f"
+			"1:mov (%[3])+,(%[2])+\nsob %[1],1b\n2:"
+			erase(%[1]) erase (%[2]) erase(%[3])    |       | |
 #ifdef UNTESTED
-bls !defined($1)| source2 source2 |
+bls !defined($1)| source2 SCR_REG SCR_REG SCR_REG |
 			remove(all)
 			"cmp %[1],$$2"
 			"beq 1f;jmp unknown~;1:"
-			move(%[2],r0)
-			"jsr pc,blm~"
-			erase(r01)                              |       | |
+			"asr %[2]\nbeq 2f"
+			"1:mov (%[4])+,(%[3])+\nsob %[2],1b\n2:"
+			erase(%[2]) erase (%[3]) erase(%[4])    |       | |
 #endif
 lae csa $2==2 | source2 |
 			remove(all)
