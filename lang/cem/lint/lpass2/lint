@@ -1,0 +1,166 @@
+#!/bin/sh
+# (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+# See the copyright notice in the ACK home directory, in the file "Copyright".
+#
+# $Header$
+
+#	L I N T   D R I V E R
+
+PATH=/bin:/usr/bin
+
+EMLINT=/usr/dick/lint
+
+LPASS1="$EMLINT/lpass1/lnt -Dmc68000"
+LPASS2="$EMLINT/lpass2/lpass2"
+LINTLIB=${LINTLIB-$EMLINT/llib}
+
+TMP=/usr/tmp/lint1.$$
+NEW=/usr/tmp/lint2.$$
+
+trap "rm -f $TMP $NEW; exit 1" 1 2 15
+trap "rm -f $TMP $NEW; exit 0" 0
+
+set dummy $LINTFLAGS $@			# dummy as a shield for $LINTFLAGS
+shift					# remove dummy
+
+LIBRARY=no
+
+# get the non-library options
+while	test -n "$1"
+do
+	case "$1" in
+	-l*)	# library parameter; start pass 1
+		break
+		;;
+	-KR)	# strictly Kernighan & Ritchie, pass 1
+		PARAMS1="$PARAMS1 -R"
+		shift
+		;;
+	-[DUI]*)# Define, Undef and Include; for pass 1 only
+		PARAMS1="$PARAMS1 $1"
+		shift
+		;;
+	-L*)	# make a lint library
+		LIBRARY=`expr "$1" : '-L\(llib-l.*\)'`
+		shift
+		;;
+	-*)	# for pass 1 or pass 2
+		PARAMS1="$PARAMS1 $1"
+		PARAMS2="$PARAMS2 $1"
+		shift
+		;;
+	*)	# input file; start pass 1
+		break
+		;;
+	esac
+done
+
+case "$LIBRARY" in
+no)	# normal lint; we want its messages on stdout; this takes some doing
+	(	# intermediate file has to go to stdout for pipe connection
+		(	# pass 1: messages to stderr
+			LIBC=true	# true if llib-lc to be included
+			STATNR=0	# static scope number
+
+			for F in $*
+			do
+				case $F in
+				-l)	# do NOT include llib-lc
+					LIBC=
+					;;
+				-lc)	# do include llib-lc
+					LIBC=true
+					;;
+				-l*)	# include special lint library
+					cat $LINTLIB/llib$F
+					;;
+				*.c)	# a real C-file
+					STATNR=` expr $STATNR + 1 `
+					$LPASS1 -S$STATNR -Dlint $PARAMS1 $F
+					;;
+				*)	# a lint library?
+					case `basename $F` in
+					llib-l*)	# yes, it is
+						cat $F
+						;;
+					*)
+						echo $0: unknown input $F >&2
+						;;
+					esac
+					;;
+				esac
+			done
+
+			case "$LIBC" in
+			true)	# append llib-lc
+				cat $LINTLIB/llib-lc
+				;;
+			esac
+		) |
+		sort -u |
+		tee /tmp/\#lint.debug |
+		(	# pass 2: divert messages to avoid interleaving
+			$LPASS2 $PARAMS2 2>$TMP
+		)
+	) 2>&1				# messages pass 1 to stdout
+
+	# append messages pass 2
+	cat $TMP
+	;;
+
+*)	# making a lint library
+	set -e				# stop at first sign of trouble
+
+	case $LIBRARY in
+	llib-l*)	# OK
+		;;
+	*)
+		echo "Lint library name does not start with 'llib-l'" >&2
+		exit 1
+		;;
+	esac
+
+	if	/bin/test ! -r $LIBRARY
+	then	cp /dev/null $LIBRARY
+	fi
+
+	# collect pass 1 intermediate output for all input files
+	for F in $@
+	do
+		case $F in
+		*.c)	# a C file
+			(	echo "/* LINTLIBRARY */"
+				echo "#line 1 \"$F\""
+				cat $F
+			) >$TMP
+			$LPASS1 $PARAMS1 -Dlint -v $TMP
+			;;
+		*)	# a library?
+			case `basename $F` in
+			llib-l*)	# yes, it is
+				cat $F
+				;;
+			*)
+				echo $0: unknown input $F >&2
+				;;
+			esac
+			;;
+		esac
+	done >$NEW
+
+	# get the last line for each name and sort them
+	cat $LIBRARY $NEW |
+	awk -F: '
+		{	entry[$1] = $0;
+		}
+	END	{	for (e in entry) {print entry[e];}
+		}
+	' |
+	sort >$TMP
+
+	cp $TMP $LIBRARY
+
+esac
+
+rm -f $TMP $NEW
+

@@ -1,0 +1,154 @@
+.TH LINT 1 88/2/22
+.SH NAME
+lint \- a C program checker
+.SH SYNOPSIS
+.B lint
+[
+.B \-abhuvx \-KR
+]
+[file | libname
+.BR \-l xxx
+] ...
+.br
+.B lint
+.BR \-L libname
+[file | libname2 ] ...
+.br
+.SH DESCRIPTION
+.I Lint
+does an extensive consistency and plausibility check on a set of C
+program files.
+When it detects a doubtful construction
+(which need not be an error) it gives a warning.
+.I Lint
+does a full flow-of-control check, except that
+.BR goto s
+are not followed and non-termination of functions is not propagated.
+If, however, no
+.BR goto s
+are used, each call to a non-terminating function is followed by
+/*NOTREACHED*/ and each switch has a default clause (possibly consisting
+of /*NOTREACHED*/), the initialization state of all local variables will
+be checked correctly.
+.PP
+The second command is used to maintain lint libraries; these are ASCII files
+that contain the output of the first pass.
+A library name must start with
+.B llib\-l
+and cannot end in
+.BR .c .
+A lint user library can be created and updated by using the
+.B \-L
+option.  The
+.I libname
+must be a local file and can be passed to
+.I lint
+again as a normal argument.
+.PP
+Standard libraries are searched using the
+.B \-l
+option; their format is identical to that of the user library files.
+Possibilities are
+.BR \-lm ,
+.B \-ltermcap
+and 
+.BR \-lcurses .
+.B \-lc
+is default; a single
+.B \-l
+tells
+.I lint
+not to use the standard C library.
+.PP
+The
+.BR \-D ,
+.B \-U
+and
+.B \-I
+options are recognized as separate arguments.  The
+.B \-KR
+option tells
+.I lint
+to check strictly according to Kernighan & Ritchie; since
+.I lint
+is trying to be helpful rather than obnoxious, this is not the default.
+.PP
+.I Lint
+understands the following additional options:
+.TP
+.B a
+Warn about conversions that may cause a loss of precision.
+.TP
+.B b
+Do not report not-reachable 
+.I break
+statements.
+This flag may be useful when
+.I lint
+is run on a generated source file.
+.TP
+.B h
+Signal "null effects", possible pointer alignment problems and unexpected
+constructs.  Report definitions of variables that have a scope wider than
+necessary: extern variables that are used in one file only, automatic
+variables that could be more local.
+.TP
+.B u
+Do not complain about unused and undefined functions and global variables.
+.TP
+.B v
+Do not warn about unused arguments of functions.
+.TP
+.B x
+Complain about unused external variables.
+.PP
+In some cases where the programmer knows that a construction is questionable
+but nevertheless correct, a pseudo-comment can be used to silence
+.IR lint ;
+the comments recognized are:
+.TP
+/* VARARGS\fIn\fR */
+The next function can be called with a variable number of
+arguments.
+Only check the types of the first \fIn\fR arguments.
+The \fIn\fR must follow the word VARARGS immediately.
+.TP
+/* VARARGS */
+Same as /* VARARGS0 */
+.TP
+/* ARGSUSED */
+Do not warn about arguments not used in the next function
+(see also the \-\fBv\fR option).
+.TP
+/* NOTREACHED */
+This tells
+.I lint
+that the flow of control "cannot reach" this comment.
+This is a way to tell
+.I lint
+that a statement never "returns".
+.TP
+/* LINTLIBRARY */
+The following definitions are assumed to be part of a library.
+It suppresses complaints about unused functions and variables
+and is used in the creation of lint libraries.
+.SH FILES
+.IP ???/lnt 35
+first pass
+.IP ???/lpass2/lpass2
+second pass
+.IP ???/llib/llib\-l*
+lint libraries
+.SH SEE ALSO
+cem(1)
+.br
+Frans Kunst,
+.I Lint, a C Program Checker
+.SH BUGS
+Conflicting options in the command line are not detected.
+.br
+After a label, all automatic variables are assumed initialized.
+.br
+Initializations hidden inside for statements are sometimes overlooked.
+.SH AUTHOR
+Frans Kunst, Vrije Universiteit, Amsterdam.
