@@ -14,7 +14,7 @@ _i_compute(unsigned long val, int base, char *s, int nrdigits)
 
 	c= val % base ;
 	val /= base ;
-	if (val || nrdigits > 0)
+	if (val || nrdigits > 1)
 		s = _i_compute(val, base, s, nrdigits - 1);
 	*s++ = (c>9 ? c-10+'a' : c+'0');
 	return s;
