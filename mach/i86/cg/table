@@ -214,6 +214,9 @@ bpreg_off	= Xbpreg_off + Rbpreg_off
 halfindir	= reg_off + bpreg_off + ADDR_LOCAL
 a_word		= rmorconst + rm1 + halfindir
 no_reg_off	= rmorconst + rm1 + ADDR_LOCAL
+#ifdef REGVARS
+uses_bx		= ADDREG + Xreg_off + Xbpreg_off
+#endif
 
 CODE:
 
@@ -458,6 +461,9 @@ sti $1==1	| addreg regorconst12 |
 ...		| reg_off regorconst12 |
 			remove(referals)
 			move(%[2],{ind_regoff1,%[1.reg],%[1.off]})  |	| |
+...		| reg_off regorconst12 |
+			remove(referals)
+			move(%[2],{ind_regoff1,%[1.reg],%[1.off]})  |	| |
 ...		| bpreg_off regorconst12 |
 			remove(all_locals)
 			remove(indexed)
@@ -469,7 +475,7 @@ sti $1==1	| addreg regorconst12 |
 			remove(indexed)
 			remove(locals,
 				%[ind]<=%[1.ind] && %[ind]+%[size]>%[1.ind] )
-			move(%[2],{ind_regoff1, bp, tostring(%[1.ind])})
+			move(%[2],{LOCAL1, %[1.ind], 1})
 								|	| |
 sti $1==4	| addreg regorconst regorconst |
 			remove(referals)
@@ -1490,26 +1496,39 @@ cfu		| CXREG DXREG |
 cff		| CXREG DXREG |
 			remove(ALL)
 			"call .cff"			  | | |
-loc loc cii $1==1 && $2==2	| ACC |
+loc loc cii $1==1 && $2==2	| X_ACC |
 			 "cbw"
 			 samecc 		    | ax  | |(1,2)
-...				| ACC1 |
+...				| rmorconst1 |
+			allocate(%[1], ACC1 = %[1])
 			 "cbw"
 			 samecc			    | ax  | |(1,2)
-loc loc cii $1==1 && $2==4	| ACC |
+...				| nocoercions: rmorconst1 ACC+ACC1 |
+			allocate(%[2],ACC1,REG)
+			move(%[2],%[b])
+			move(%[1],%[a])
+			 "cbw"
+			 samecc			    | ax %[b]  | |(1,2)
+...				| nocoercions: rmorconst ACC+ACC1 |
+			allocate(%[2],ACC,REG)
+			move(%[2],%[b])
+			move(%[1],%[a])
+			 "cbw"
+			 samecc			    | ax %[b]  | |(1,2)
+loc loc cii $1==1 && $2==4	| X_ACC |
 			allocate(DXREG)
 			"cbw"
 			"cwd"
-			samecc			    | dx ax | |(2,7)
-...				| ACC1 |
-			allocate(DXREG)
+			samecc			    | %[a] ax | |(2,7)
+...				| rmorconst1 |
+			allocate(%[1], ACC1 = %[1], DXREG)
 			"cbw"
 			"cwd"
 			samecc			    | dx ax | |(2,7)
 loc loc cii $1==2 && $2==4	| ACC |
 			allocate(DXREG)
 			"cwd"
-			samecc			    | dx ax | |(1,5)
+			samecc			    | %[a] ax | |(1,5)
 loc loc cii $1==4 && $2==2	| a_word a_word |    | %[1] | |
 loc loc ciu	| |		|			| loc $1 loc $2 cuu |
 loc loc cui	| |		|			| loc $1 loc $2 cuu |
@@ -1730,12 +1749,10 @@ inn !defined($1)| CXREG X_ACC |
 			remove(ALL)
 			"call .inn"
 			erase(%[2])		       | ax | |
-loc inn zeq $2==2 | rm |
-			remove(ALL)
+loc inn zeq $2==2 | rm STACK |
 			"test %[1],%(1<<$1%)"
 			"je $3" 		       |    | |
-loc inn zne $2==2 | rm |
-			remove(ALL)
+loc inn zne $2==2 | rm STACK |
 			"test %[1],%(1<<$1%)"
 			"jne $3"		       |    | |
 set $1==2	| SHIFT_CREG |
@@ -1783,10 +1800,33 @@ lae aar $2==2 && defined(rom(1,1))	    | X_ACC |
 loc sli ads $1==1 && $2==2 && $3==2 | X_ADDREG |
 			"sal %[1],1"
 			erase(%[1])     | %[1] | ads 2 |
+#ifdef REGVARS
+...	| nocoercions: rmorconst uses_bx |
+			allocate(%[2],REG=%[2],ADDREG=%[1])
+			"sal %[b],1"
+			erase(%[b])     | %[b] %[a] | ads 2 |
+#endif
 loc sli ads $1==2 && $2==2 && $3==2 | X_ADDREG |
 			"sal %[1],1"
 			"sal %[1],1"
 			erase(%[1])     | %[1] | ads 2 |
+#ifdef REGVARS
+...	| nocoercions: rmorconst uses_bx |
+			allocate(%[2],REG=%[2],ADDREG=%[1])
+			"sal %[b],1"
+			"sal %[b],1"
+			erase(%[b])     | %[b] %[a] | ads 2 |
+#endif
+loc sli ads $2==2 && $3==2 | X_ADDREG |
+			allocate(CXREG={ANYCON, $1})
+			"sal %[1],cl"
+			erase(%[1])     | %[1] | ads 2 |
+#ifdef REGVARS
+...	| nocoercions: rmorconst uses_bx |
+			allocate(%[2],REG=%[2],ADDREG=%[1],CXREG={ANYCON,$1})
+			"sal %[b],cl"
+			erase(%[b])     | %[b] %[a] | ads 2 |
+#endif
 aar $1==2	 | halfindir X_ACC X_ADDREG |
 			allocate(DXREG)
 			"sub %[2],%[1]"
@@ -2030,7 +2070,7 @@ cmi tlt $1==2	| regorconst rm |
 			"jge 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jle 1f"
@@ -2042,7 +2082,7 @@ cmi tle $1==2	| regorconst rm |
 			"jg 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jl 1f"
@@ -2054,7 +2094,7 @@ cmi teq $1==2	| regorconst rm |
 			"jne 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jne 1f"
@@ -2066,7 +2106,7 @@ cmi tne $1==2	| regorconst rm |
 			"je 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"je 1f"
@@ -2078,7 +2118,7 @@ cmi tge $1==2	| regorconst rm |
 			"jl 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jg 1f"
@@ -2090,7 +2130,7 @@ cmi tgt $1==2	| regorconst rm |
 			"jle 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jge 1f"
@@ -2102,7 +2142,7 @@ cmp tlt 	| regorconst rm |
 			"jae 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jbe 1f"
@@ -2114,7 +2154,7 @@ cmp tle 	| regorconst rm |
 			"ja 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jb 1f"
@@ -2126,7 +2166,7 @@ cmp teq 	| regorconst rm |
 			"jne 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jne 1f"
@@ -2138,7 +2178,7 @@ cmp tne 	| regorconst rm |
 			"je 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"je 1f"
@@ -2150,7 +2190,7 @@ cmp tge 	| regorconst rm |
 			"jb 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"ja 1f"
@@ -2162,7 +2202,7 @@ cmp tgt 	| regorconst rm |
 			"jbe 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jae 1f"
@@ -2174,7 +2214,7 @@ cms teq $1==2	| regorconst rm |
 			"jne 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"jne 1f"
@@ -2186,122 +2226,97 @@ cms tne $1==2	| regorconst rm |
 			"je 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-...		| NO rm regorconst |
+...		| rm regorconst |
 			allocate(REG={ANYCON,0})
 			"cmp %[1],%[2]"
 			"je 1f"
 			"inc %[a]\n1:"
 			erase(%[a])		     | %[a] | |
-cmp zlt 	| regorconst rm |
-			remove(ALL)
+cmp zlt 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jb $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"ja $2" 			  | | |
-cmp zle 	| regorconst rm |
-			remove(ALL)
+cmp zle 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jbe $2"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jae $2"			  | | |
-cmp zeq 	| regorconst rm |
-			remove(ALL)
+cmp zeq 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"je $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"je $2" 			  | | |
-cmp zne 	| regorconst rm |
-			remove(ALL)
+cmp zne 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jne $2"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jne $2"			  | | |
-cmp zge 	| regorconst rm |
-			remove(ALL)
+cmp zge 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jae $2"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jbe $2"			  | | |
-cmp zgt 	| regorconst rm |
-			remove(ALL)
+cmp zgt 	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"ja $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jb $2" 			  | | |
-cms zeq $1==2	| regorconst rm |
-			remove(ALL)
+cms zeq $1==2	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"je $2"			  	  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"je $2"			  	  | | |
-cms zne $1==2	| regorconst rm |
-			remove(ALL)
+cms zne $1==2	| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jne $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jne $2" 			  | | |
-cms zne $1==4	| regorconst regorconst rm rm |
-			remove(ALL)
+cms zne $1==4	| regorconst regorconst rm rm STACK |
 			"cmp %[3],%[1]"
 			"jne $2"
 			"cmp %[4],%[2]"
 			"jne $2"			  | | |
-...		| NO rm rm regorconst regorconst |
-			remove(ALL)
+...		| rm rm regorconst regorconst STACK |
 			"cmp %[1],%[3]"
 			"jne $2"
 			"cmp %[2],%[4]"
 			"jne $2"			  | | |
-cms zeq $1==4	| regorconst regorconst rm rm |
-			remove(ALL)
+cms zeq $1==4	| regorconst regorconst rm rm STACK |
 			"cmp %[3],%[1]"
 			"jne 1f"
 			"cmp %[4],%[2]"
 			"je $2\n1:"			  | | |
-...		| NO rm rm regorconst regorconst |
-			remove(ALL)
+...		| rm rm regorconst regorconst STACK |
 			"cmp %[1],%[3]"
 			"jne 1f"
 			"cmp %[2],%[4]"
 			"je $2\n1:"			  | | |
-and zeq $1==2	| regorconst rm |
-			remove(ALL)
+and zeq $1==2	| regorconst rm STACK |
 			"test %[2],%[1]"
 			"je $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"test %[1],%[2]"
 			"je $2"				  | | |
-and zne $1==2	| regorconst rm |
-			remove(ALL)
+and zne $1==2	| regorconst rm STACK |
 			"test %[2],%[1]"
 			"jne $2" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"test %[1],%[2]"
 			"jne $2"			  | | |
-loc and zeq $1<256 && $1>=0 && $2==2		| nocoercions : rm1 + memory2 |
+loc and zeq $1<256 && $1>=0 && $2==2	| nocoercions : rm1 + memory2 |
 			remove(ALL)
 			"testb %[1],$1"
 			"je $3" 			  | | | (1,3) + %[1]
-...						| GENREG |
-			remove(ALL)
+...						| GENREG STACK |
 			"testb %[1.1],$1"
 			"je $3" 			  | | | (1,3) + %[1]
 ...						| nocoercions : IREG |
@@ -2312,8 +2327,7 @@ loc and zne $1<256 && $1>=0 && $2==2		| nocoercions : rm1 + memory2 |
 			remove(ALL)
 			"testb %[1],$1"
 			"jne $3" 			  | | | (1,3) + %[1]
-...						| GENREG |
-			remove(ALL)
+...						| GENREG STACK |
 			"testb %[1.1],$1"
 			"jne $3" 			  | | | (1,3) + %[1]
 ...						| nocoercions : IREG |
@@ -2324,16 +2338,14 @@ loc beq $1<256 && $1>=0		 		| nocoercions : rm1 |
 			remove(ALL)
 			"cmpb %[1],$1"
 			"je $2" 			  | | | (1,3) + %[1]
-...						| rm |
-			remove(ALL)
+...						| rm STACK |
 			"cmp %[1],$1"
 			"je $2" 			  | | | (2,3) + %[1]
 loc bne $1<256 && $1>=0		 		| nocoercions : rm1 |
 			remove(ALL)
 			"cmpb %[1],$1"
 			"jne $2" 			  | | | (1,3) + %[1]
-...						| rm |
-			remove(ALL)
+...						| rm STACK |
 			"cmp %[1],$1"
 			"jne $2" 			  | | | (2,3) + %[1]
 /* Note: test for <,<=,>,>= can be done in this way,
@@ -2342,16 +2354,14 @@ loc cmu zeq $1<256 && $1>=0 && $2==2		| nocoercions : rm1 |
 			remove(ALL)
 			"cmpb %[1],$1"
 			"je $3" 			  | | | (1,3) + %[1]
-...						| rm |
-			remove(ALL)
+...						| rm STACK |
 			"cmp %[1],$1"
 			"je $3" 			  | | | (2,3) + %[1]
 loc cmu zne $1<256 && $1>=0 && $2==2		| nocoercions : rm1 |
 			remove(ALL)
 			"cmpb %[1],$1"
 			"jne $3" 			  | | | (1,3) + %[1]
-...						| rm |
-			remove(ALL)
+...						| rm STACK |
 			"cmp %[1],$1"
 			"jne $3" 			  | | | (2,3) + %[1]
 
@@ -2362,76 +2372,58 @@ loc cmu zne $1<256 && $1>=0 && $2==2		| nocoercions : rm1 |
 bra		| |	remove(ALL)
 			"jmp $1"
 			samecc				  | | |
-blt		| regorconst rm |
-			remove(ALL)
+blt		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jl $1" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jg $1" 			  | | |
-ble		| regorconst rm |
-			remove(ALL)
+ble		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jle $1"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jge $1"			  | | |
-beq		| regorconst rm |
-			remove(ALL)
+beq		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"je $1" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"je $1" 			  | | |
-bne		| regorconst rm |
-			remove(ALL)
+bne		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jne $1"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jne $1"			  | | |
-bge		| regorconst rm |
-			remove(ALL)
+bge		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jge $1"			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jle $1"			  | | |
-bgt		| regorconst rm |
-			remove(ALL)
+bgt		| regorconst rm STACK |
 			"cmp %[2],%[1]"
 			"jg $1" 			  | | |
-...		| NO rm regorconst |
-			remove(ALL)
+...		| rm regorconst STACK |
 			"cmp %[1],%[2]"
 			"jl $1" 			  | | |
-zlt		| rm |
-			remove(ALL)
+zlt		| rm STACK |
 			test(%[1])
 			"jl $1" 			  | | |
-zle		| rm |
-			remove(ALL)
+zle		| rm STACK |
 			test(%[1])
 			"jle $1"			  | | |
-zeq		| rm+rm1 |
-			remove(ALL)
+zeq		| rm+rm1 STACK |
 			test(%[1])
 			"je $1" 			  | | |
-zne		| rm+rm1 |
-			remove(ALL)
+zne		| rm+rm1 STACK |
 			test(%[1])
 			"jne $1"			  | | |
-zge		| rm |
-			remove(ALL)
+zge		| rm STACK |
 			test(%[1])
 			"jge $1"			  | | |
-zgt		| rm |
-			remove(ALL)
+zgt		| rm STACK |
 			test(%[1])
 			"jg $1" 			  | | |
 
@@ -2513,13 +2505,11 @@ asp $1==4	| nocoercions : a_word a_word | 	  | | |
 			"pop %[a]" "pop %[a]"
 			erase(%[a]) samecc		  | | | (2,16)
 asp $1==0-2	| |	/* Anything will do */	       | bp | |
-asp		| |	remove(ALL)
+asp		| STACK |
 			"add sp,$1"			  | | | (4,4)
-ass $1==2	| rmorconst |
-			remove(ALL)
+ass $1==2	| rmorconst STACK |
 			"add sp,%[1]"			  | | |
-ass !defined($1)| rm rmorconst |
-			remove(ALL)
+ass !defined($1)| rm rmorconst STACK |
 			"cmp %[1],2"
 			"jne .unknown"
 			"add sp,%[2]"			  | | |
@@ -2602,7 +2592,7 @@ lim		| |	allocate(REG)
 lin		| |	"mov (hol0),$1" 		  | | |
 lni		| |	"inc (hol0)"			  | | |
 lor $1==0	| |				       | bp | |
-lor $1==1	| |	remove(ALL)
+lor $1==1	| STACK |
 			allocate(REG)
 			"mov %[a],sp"		     | %[a] | |
 lor $1==2	| |	allocate(REG)
@@ -2626,8 +2616,7 @@ sim		| regorconst |
 			"mov (.ignmask),%[1]"		  | | |
 str $1==0	| rmorconst |
 			"mov bp,%[1]"			  | | |
-str $1==1	| rmorconst |
-			remove(ALL)
+str $1==1	| rmorconst STACK |
 			"mov sp,%[1]"			  | | |
 str $1==2	| |
 			remove(ALL)
