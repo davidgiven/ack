@@ -52,7 +52,7 @@ branch(opc,exp) register opc; expr_t exp; {
 	emit1(opc);
 	if (sm == 0) {
 #ifdef RELOCATION
-		newrelo(exp.typ, RELPC | RELO2);
+		newrelo(exp.typ, RELO2);
 #endif
 		emit2(exp.val);
 	} else {
