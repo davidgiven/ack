@@ -23,7 +23,7 @@ con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
 		part_size++;
-	if (part_size == EM_WSIZE)
+	if (part_size == TEM_WSIZE)
 		part_flush();
 	if (sz == 1) {
 		w &= 0xFF;
