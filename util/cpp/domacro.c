@@ -269,7 +269,7 @@ do_include()
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
-			fatal("cannot find include file \"%s\"", filenm);
+			error("cannot find include file \"%s\"", filenm);
 		}
 		else {
 			WorkingDir = getwdir(result);
