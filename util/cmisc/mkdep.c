@@ -104,7 +104,7 @@ main(argc, argv)
 			++err;
 		print_namelist(*argv++, nl);
 	}
-	return err ? 1 : 0;
+	exit(err ? 1 : 0);
 }
 
 int

@@ -50,6 +50,7 @@ main(argc, argv)
 		DoFile(stdin);
 	}
 	EndOfProgram();
+	exit(0);
 }
 
 DoFile(fp)
