@@ -120,6 +120,7 @@ main(argc, argv)
 	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
 		flag=argv[1][1] ;
+		if (flag == 'u') unresolved++;
 		argc-- ; argv++ ;
 	}
 	switch (argc) {
