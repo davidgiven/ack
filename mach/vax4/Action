@@ -13,3 +13,10 @@ name "Vax 4-4 Basic library"
 system vax*
 dir libbc
 end
+name "Vax 4-4 systemcall interface"
+system vax*
+dir libsys
+end
+name "Vax target optimizer"
+dir top
+end
