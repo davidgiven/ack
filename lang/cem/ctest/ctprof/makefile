@@ -7,7 +7,7 @@ egen:   tp.e
 	echo comparing tp.e
 	-if test -f tp.e.g ; then diff tp.cem.r tp.e.g ; else echo creating tp.e.g ; cp tp.cem.r tp.e.g ; fi
 	rm -f tp.e
-tp.e:   tp.c $(CEM)
+tp.e:   tp.c
 	$(CEM) -p -c.e tp.c
 tp.cem.r: tp.cem
 	echo running tp
