@@ -3,215 +3,149 @@
  * This file is copied into Lpars.c.
  */
 
-# ifndef NORCSID
+# ifndef lint
 static char *rcsid = "$Header$";
 # endif
 
-#define LLSTSIZ	1024
-static short	LLstack[LLSTSIZ];		/* Recovery stack */
-short *		LLptr;				/* ptr in it */
-#define		LLmax (&LLstack[LLSTSIZ-1])	/* if beyond this, overflow */
-int		LLscd;				/* lookahead done or not? */
-int		LLb,LLi;
-int		LLsymb;
-int		LLcsymb;
-static int	LLlevel;
-static short *	LLbase;
+# ifdef LL_DEBUG
+# include <stdio.h>
+# endif
 
-static struct LLsaved {
-	int LLs_i, LLs_b, LLs_s, LLs_c, LLs_t;
-	short *LLs_p, *LLs_x;
-} LLsaved[LL_MAX];
+int		LLsymb;
+unsigned int	LLtcnt[LL_NTERMINALS];
+unsigned int	LLscnt[LL_NSETS];
+int		LLcsymb, LLsymb;
+static int	LLlevel;
 
 /* In this file are defined: */
-extern		LLcheck();
+extern		LLread();
+extern int	LLskip();
+extern int	LLnext();
 extern		LLscan();
-extern		LLpush();
-extern		LLlpush();
-extern int	LLpop();
-extern int	LLsskip();
-static		LLerror();
+extern		LLerror();
+# ifndef LLNOFIRSTS
+extern int	LLfirst();
+# endif
 extern		LLnewlevel();
 extern		LLoldlevel();
-
-LLcheck() {
-	register c;
-	/* 
-	 * The symbol to be checked is on the stack.
-	 */
-	if (!LLscd) {
-		if ((c = LL_LEXI()) <= 0) c = EOFILE;
-		LLsymb = c;
-	}
-	else LLscd = 0;
-	if (LLsymb == *--LLptr) return;
-	/* 
-	 * If we come here, an error has been detected.
-	 * LLpop will try and recover
-	 */
-	LLptr++;
-	while (LLindex[LLsymb] < 0) {
-		LLerror(0);
-		if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
-	}
-	LLcsymb = LLindex[LLsymb];
-	LLb = LLbyte[LLcsymb];
-	LLi = LLcsymb>>3;
-	LLscd = 1;
-	if (!LLpop()) LLerror(*LLptr);
-	LLscd = 0;
-}
 
 LLscan(t) {
 	/*
 	 * Check if the next symbol is equal to the parameter
 	 */
-	if (!LLscd) {
-		if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
+	if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
+	if (LLsymb == t) {
+		return;
 	}
-	else LLscd = 0;
-	if (LLsymb == t) return;
 	/*
 	 * If we come here, an error has been detected
 	 */
-	LLpush(t);
-	LLscd = 1;
-	while (LLindex[LLsymb] < 0) {
-		LLerror(0);
-		if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
-	}
-	LLcsymb = LLindex[LLsymb];
-	LLb = LLbyte[LLcsymb];
-	LLi = LLcsymb>>3;
-	if (!LLpop()) LLerror(t);
-	LLscd = 0;
+	LLerror(t);
 }
 
-LLpush(t) {
-	if (LLptr == LLmax) {
-		LLerror(-1);
-	} 	
-	*LLptr++ = t;
-}
-
-LLlpush(d) {
-	register i;
-	register short *p;
-	
-	p = &LLlists[d];
-	i = *p++;
-	while(i--) {
-		if (LLptr == LLmax) {
-			LLerror(-1);
-		}
-		*LLptr++ = *p++;
-	}
-}
-
-LLsskip() {
-	/*
-	 * Error recovery, and not only that!
-	 * Skip symbols until one is found that is on the stack.
-	 * Return 1 if it is on top of the stack
-	 */
-	register short *t;
-	register i;
-
+LLread() {
 	for (;;) {
-		if (!LLscd) {
-lab:
-			if ((i = LL_LEXI()) <= 0) i = EOFILE;
-			LLsymb = i;
-			if ((i = LLindex[i]) < 0) {
-				LLerror(0);
-				goto lab;
-				/*
-				 * Ugly, but we want speed
-			 	 * on possibly correct symbols !!
-			 	 * So, no breaks out of "for (;;)"
-			 	 */
+		if ((LLsymb = LL_LEXI()) <= 0) LLsymb = EOFILE;
+		if ((LLcsymb = LLindex[LLsymb]) >= 0) return;
+		LLmessage(0);
+	}
+	/* NOTREACHED */
+}
+
+LLerror(t) {
+	register int i;
+
+	if ((LLcsymb = LLindex[LLsymb]) < 0) {
+		LLmessage(0);
+		LLread();
+	}
+	i = LLindex[t];
+	LLtcnt[i]++;
+	if (LLskip()) /* nothing */;
+	LLtcnt[i]--;
+	if (LLsymb != t) LLmessage(t);
+}
+
+# ifndef LLNOFIRSTS
+LLfirst(x, d) {
+	register int i;
+
+	return (i = LLindex[x]) >= 0 &&
+		(LLsets[d + (i >> 3)] & (1 << (i & 07)));
+}
+# endif
+
+LLnext(n) {
+
+	if (LLskip()) /* nothing */;
+	if (n <= 0) return (LLsets[(LLcsymb >> 3) - n] & (1 << (LLcsymb & 07)));
+	return LLsymb == n;
+}
+
+LLskip() {
+	register int i;
+	int retval;
+	int LLi, LLb;
+
+	retval = 0;
+	for (;;) {
+		if (LLtcnt[LLcsymb] != 0) return retval;
+		LLi = LLcsymb >> 3;
+		LLb = 1 << (LLcsymb & 07);
+		for (i = LL_NSETS - 1; i >= 0; i--) {
+			if (LLscnt[i] != 0) {
+				if (LLsets[LL_SSIZE*i+LLi] & LLb) return retval;
 			}
-			LLcsymb = i;
-			LLb = LLbyte[i];
-			LLi = (i>>3);
-			LLscd = 1;
 		}
-		t = LLptr-1;
-		i = *t;
-		if (!((i<=0 && LLsets[LLi-i]&LLb)||i==LLsymb)) {
-			while (--t >= LLbase) {
-				/*
-			 	 * If the element on the stack is negative,
-			 	 * its opposite is an index in the setarray,
-			 	 * otherwise it is a terminal symbol
-			 	 */
-				i = *t;
-				if ((i<=0&&LLsets[LLi-i]&LLb)||i==LLsymb){
-					break;
-				}
-			}
-			if (t >= LLbase) break;
-			LLerror(0);
-			LLscd = 0;
+		retval = 1;
+		LLmessage(0);
+		LLread();
+	}
+	/* NOTREACHED */
+}
+
+LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
+	register int i;
+
+	if (LLlevel++) {
+		LLsinfo[LL_NSETS+LL_NTERMINALS] = (unsigned) LLsymb;
+		LLsinfo[LL_NSETS+LL_NTERMINALS+1] = (unsigned) LLcsymb;
+		for (i = LL_NTERMINALS - 1; i >= 0; i--) {
+			LLsinfo[i] = LLtcnt[i];
+			LLtcnt[i] = 0;
 		}
-		else {
-			return 1;
+		for (i = LL_NSETS - 1; i >= 0; i--) {
+			LLsinfo[LL_NTERMINALS+i] = LLscnt[i];
+			LLscnt[i] = 0;
 		}
 	}
-	return t == LLptr - 1;
+	LLtincr(0);
 }
 
-LLpop() {
-	register i;
+LLoldlevel(LLsinfo) unsigned int *LLsinfo; {
+	register int i;
 
-	i = LLsskip();
-	LLptr--;
-	return i;
-}
-
-static
-LLerror(d) {
-
-	LLmessage(d);
-	if (d < 0) exit(1);
-}
-
-LLnewlevel() {
-	register struct LLsaved *p;
-
-	if (!LLlevel++) {
-		LLptr = LLstack;
-		LLbase = LLstack;
-		LLpush(EOFILE);
-	}
-	else {
-		if (LLlevel > LL_MAX) LLerror(-1);
-		p = &LLsaved[LLlevel - 2];
-		p->LLs_p = LLptr;
-		p->LLs_i = LLi;
-		p->LLs_b = LLb;
-		p->LLs_s = LLsymb;
-		p->LLs_t = LLcsymb;
-		p->LLs_c = LLscd;
-		p->LLs_x = LLbase;
-		LLbase = LLptr;
-		LLpush(EOFILE);
-	}
-}
-
-LLoldlevel() {
-	register struct LLsaved *p;
-
-	LLcheck();
+	LLtdecr(0);
+# ifdef LL_DEBUG
+	for (i = 0; i < LL_NTERMINALS; i++) LL_assert(LLtcnt[i] == 0);
+	for (i = 0; i < LL_NSETS; i++) LL_assert(LLscnt[i] == 0);
+# endif
 	if (--LLlevel) {
-		p = &LLsaved[LLlevel-1]; 
-		LLptr = p->LLs_p;
-		LLi = p->LLs_i;
-		LLb = p->LLs_b;
-		LLsymb = p->LLs_s;
-		LLcsymb = p->LLs_t;
-		LLbase = p->LLs_x;
-		LLscd = p->LLs_c;
+		for (i = LL_NSETS - 1; i >= 0; i--) {
+			LLscnt[i] = LLsinfo[LL_NTERMINALS+i];
+		}
+		for (i = LL_NTERMINALS - 1; i >= 0; i--) {
+			LLtcnt[i] = LLsinfo[i];
+		}
+		LLsymb = (int) LLsinfo[LL_NSETS+LL_NTERMINALS];
+		LLcsymb = (int) LLsinfo[LL_NSETS+LL_NTERMINALS+1];
 	}
 }
 
+# ifdef LL_DEBUG
+LL_badassertion(asstr,file,line) char *asstr, *file; {
+
+	fprintf(stderr,"Assertion \"%s\" failed %s(%d)\n",asstr,file,line);
+	abort();
+}
+# endif
