@@ -9,13 +9,8 @@
 
 #define m_type		m_buf[0]
 
-#ifdef DEBUGGEE
-#define PS		sizeof(char *)
-#define LS		sizeof(long)
-#else
-#define PS		pointer_size
-#define LS		long_size
-#endif
+#define PS		4
+#define LS		4
 
 struct message_hdr {
   char	m_buf[BUFLEN];

@@ -7,7 +7,6 @@
 
 #include "idf.h"
 #include "type.h"
-#include "sizes.h"
 #include "symbol.h"
 #include "scope.h"
 #include "langdep.h"
@@ -19,14 +18,14 @@ p_type	void_type;
 p_type	float_type, double_type;
 p_type	string_type, address_type;
 
-long	int_size = SZ_INT,
+long	int_size = sizeof(int),
 	char_size = 1,
-	short_size = SZ_SHORT,
-	long_size = SZ_LONG,
-	pointer_size = SZ_POINTER;
+	short_size = sizeof(short),
+	long_size = sizeof(long),
+	pointer_size = sizeof(char *);
 
-long	float_size = SZ_FLOAT,
-	double_size = SZ_DOUBLE;
+long	float_size = sizeof(float),
+	double_size = sizeof(double);
 
 struct bounds {
 	long low, high;

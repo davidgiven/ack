@@ -13,7 +13,6 @@
 #include "expr.h"
 
 extern FILE *db_out;
-extern long float_size, pointer_size, int_size;
 extern char *strindex();
 
 static

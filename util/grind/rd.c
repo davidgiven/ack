@@ -4,7 +4,10 @@
 
 #include "rd.h"
 
+#if (defined(sun) && defined(mc68020)) || defined(vax)
 #if defined(sun) && defined(mc68020)
+#define relocation_info	reloc_info_68k
+#endif
 
 #include <a.out.h>
 #include <stdio.h>
@@ -34,18 +37,24 @@ rd_ohead(h)
   h->oh_stamp = 0;
   h->oh_nsect = 4;
   h->oh_nname = 3 + bh.a_syms / sizeof(struct nlist);
-  h->oh_nrelo = (bh.a_trsize + bh.a_drsize) / sizeof(struct reloc_info_68k);
+  h->oh_nrelo = (bh.a_trsize + bh.a_drsize) / sizeof(struct relocation_info);
   h->oh_flags = h->oh_nrelo ? HF_LINK : 0;
+#if defined(sun)
   if (bh.a_magic == ZMAGIC) bh.a_text -= sizeof(struct exec);
+#endif
   h->oh_nemit = bh.a_text + bh.a_data;
+#if defined(sun)
   if (bh.a_magic == ZMAGIC) bh.a_text += sizeof(struct exec);
+#endif
   fseek(inf, N_STROFF(bh), 0);
   h->oh_nchar = getw(inf) + 6 + 6 + 5 - 4; /* ".text", ".data", ".bss",
 					      minus the size word */
   seg_strings = h->oh_nchar - 17;
-  if (bh.a_magic == ZMAGIC) bh.a_text -= sizeof(struct exec);
-  fseek(inf, sizeof(struct exec) + bh.a_text + bh.a_data, 0);
+  fseek(inf, N_TXTOFF(bh)+bh.a_text+bh.a_data, 0);
   hh = *h;
+#if defined(sun)
+  if (bh.a_magic == ZMAGIC) bh.a_text -= sizeof(struct exec);
+#endif
 }
 
 /*ARGSUSED1*/
@@ -117,7 +126,9 @@ rd_string(strings, count)
   register char	*strings;
   long	count;
 {
+#if defined(sun)
   if (bh.a_magic == ZMAGIC) bh.a_text += sizeof(struct exec);
+#endif
   fseek(inf, N_STROFF(bh)+4, 0);
   if (! readf(strings, (int)count-17, 1)) rd_fatal();
   strings += count-17;

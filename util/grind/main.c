@@ -10,6 +10,7 @@
 #include "symbol.h"
 #include "scope.h"
 #include "Lpars.h"
+#include "type.h"
 
 static char	*usage = "Usage: %s [<ack.out>] [<a.out>]";
 char		*progname;
@@ -52,10 +53,28 @@ main(argc, argv)
   while (p = strindex(progname, '/')) {
 	progname = p + 1;
   }
-  if (argv[1] && argv[1][0] == '-') {
+  while (argv[1] && argv[1][0] == '-') {
 	switch(argv[1][1]) {
-	case 'd':
+	case 'v':
 		debug++;
+		break;
+	case 'i':
+		int_size = atoi(&argv[1][2]);
+		break;
+	case 's':
+		short_size = atoi(&argv[1][2]);
+		break;
+	case 'l':
+		long_size = atoi(&argv[1][2]);
+		break;
+	case 'f':
+		float_size = atoi(&argv[1][2]);
+		break;
+	case 'd':
+		double_size = atoi(&argv[1][2]);
+		break;
+	case 'p':
+		pointer_size = atoi(&argv[1][2]);
 		break;
 	default:
 		fatal(usage, progname);
