@@ -574,7 +574,7 @@ macro2buffer(repl, idf, args)
 		    }
 
 		    if (repl->r_ptr >= repl->r_text
-			    && *repl->r_ptr == TOKSEP);
+			    && *repl->r_ptr == TOKSEP)
 			--repl->r_ptr;
 
 		    ++repl->r_ptr;
