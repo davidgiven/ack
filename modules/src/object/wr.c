@@ -19,63 +19,118 @@ extern long		lseek();
 /*
  * Parts of the output file.
  */
-#define	PARTEMIT	0
-#define	PARTRELO	1
-#define	PARTNAME	2
-#define	PARTCHAR	3
-#ifdef SYMDBUG
-#define PARTDBUG	4
-#else
-#define PARTDBUG	3
-#endif
-#define	NPARTS		(PARTDBUG + 1)
-
 static long		offset[MAXSECT];
+struct fil		__parts[NPARTS];
 
 #ifdef OUTSEEK
 static int		outfile;
-static long		outseek[NPARTS];
 static long		currpos;
-#define OUTSECT(i) \
-	(outseek[PARTEMIT] = offset[i])
-static
-OUTWRITE(p, b, n) {
-	char *b;
-	long n;
-{
-	register long l = outseek[p];
+#endif
+static int		sectionnr;
+static int		offcnt;
 
-	if (currpos != l) {
-		lseek(outfile, l, 0);
+__wr_flush(ptr)
+	register struct fil *ptr;
+{
+	if (ptr->pnow > ptr->pbegin) {
+#ifdef OUTSEEK
+		if (currpos != ptr->currpos) {
+			lseek(ptr->fd, ptr->currpos, 0);
+		}
+#endif
+		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
+		ptr->currpos += ptr->pnow - ptr->pbegin;
+		if (ptr == &__parts[PARTEMIT]) {
+			offset[sectionnr] = ptr->currpos;
+		}
 	}
-	wr_bytes(outfile, b, n);
-	currpos = l + n;
-	outseek[p] = currpos;
+	ptr->cnt = WBUFSIZ;
+	ptr->pnow = ptr->pbuf;
+	ptr->pbegin = ptr->pbuf;
+#ifdef OUTSEEK
+	currpos = ptr->currpos;
+#endif
 }
 
-#define BEGINSEEK(p, o) \
-	(outseek[(p)] = (o))
+static OUTWRITE(p, b, n)
+	int		p;	/* part number */
+	register char	*b;	/* buffer pointer */
+	long		n;	/* write count */
+{
+	register struct fil *ptr = &__parts[p];
+	register char *pn = ptr->pnow;
+	register int i;
+	long m;
 
-#else OUTSEEK
+	i = ptr->cnt;
+	if (i < WBUFSIZ) {
+		if (n > i) {
+			__wr_flush(ptr);
+			wr_bytes(ptr->fd, b, (long) i);
+			n -= i;
+			b += i;
+			ptr->currpos += i;
+			if (ptr == &__parts[PARTEMIT]) {
+				offset[sectionnr] = ptr->currpos;
+			}
+		}
+		else {
+			i = n;
+			ptr->cnt -= i;
+			n = 0;
+			while (i > 0) {
+				*pn++ = *b++;
+				i--;
+			}
+			ptr->pnow = pn;
+		}
+	}
+	if (ptr->cnt == 0 || ptr->cnt == WBUFSIZ) {
+		__wr_flush(ptr);
+		m = n & ~(WBUFSIZ - 1);
+		if (m != 0) {
+			wr_bytes(ptr->fd, b, m);
+			b += m;
+			n &= WBUFSIZ - 1;
+			ptr->currpos += m;
+			if (ptr == &__parts[PARTEMIT]) {
+				offset[sectionnr] = ptr->currpos;
+			}
+		}
+		i = n;
+		if (i != 0) {
+			n = 0;
+			pn = ptr->pnow;
+			ptr->cnt -= i;
+			while (i > 0) {
+				*pn++ = *b++;
+				i--;
+			}
+			ptr->pnow = pn;
+		}
+#ifdef OUTSEEK
+		currpos = ptr->currpos;
+#endif
+	}
+}
 
-static int	outfile[NPARTS];
-static long	currpos[NPARTS];
-#define OUTSECT(i) \
-	(currpos[PARTEMIT] == offset[(i)] ?\
-		0 :\
-		(currpos[PARTEMIT] = offset[(i)],\
-		 lseek(outfile[PARTEMIT], currpos[PARTEMIT], 0)))
-#define OUTWRITE(p, b, n) \
-	(wr_bytes(outfile[(p)], (b), (n)), currpos[(p)] += (n))
-#define BEGINSEEK(p, o) \
-	(currpos[(p)] = lseek(outfile[(p)], (o), 0))
+static BEGINSEEK(p, o)
+	int		p;	/* part number */
+	long		o;	/* offset in file */
+{
+	register struct fil *ptr = &__parts[p];
 
-#endif OUTSEEK
+#ifdef OUTSEEK
+	ptr->fd = outfile;
+	ptr->currpos = o;
+#else
+	ptr->currpos = lseek(ptr->fd, o, 0);
+#endif
+	ptr->cnt = WBUFSIZ - ((int)o & (WBUFSIZ-1));
+	ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
+	ptr->pnow = ptr->pbegin;
+}
 
-int _ocnt;
-char *_pbuf;
-static int sectionnr;
-static int offcnt;
 
 /*
  * Open the output file according to the chosen strategy.
@@ -84,42 +139,40 @@ int
 wr_open(f)
 	char *f;
 {
-#ifndef OUTSEEK
-	register int	*fdp;
-#endif OUTSEEK
+	register struct fil	*fdp;
 
 	close(creat(f, 0666));
 #ifdef OUTSEEK
 	if ((outfile = open(f, 1)) < 0)
 		return 0;
 	currpos = 0;
-#else OUTSEEK
-	for (fdp = &outfile[PARTEMIT]; fdp < &outfile[NPARTS]; fdp++)
-		if ((*fdp = open(f, 1)) < 0)
+#else /* not OUTSEEK */
+	for (fdp = &__parts[PARTEMIT]; fdp < &__parts[NPARTS]; fdp++)
+		if ((fdp->fd = open(f, 1)) < 0)
 			return 0;
-#endif OUTSEEK
+#endif /* not OUTSEEK */
 	offcnt = 0;
 	return 1;
 }
 
 wr_close()
 {
+	register struct fil *ptr;
 #ifndef OUTSEEK
 	register int *fdp;
-#endif not OUTSEEK
+#endif /* not OUTSEEK */
 
-	if (_ocnt) {
-		wr_flush();
+	for (ptr = &__parts[PARTEMIT]; ptr < &__parts[NPARTS]; ptr++) {
+		__wr_flush(ptr);
+#ifndef OUTSEEK
+		close(ptr->fd);
+#endif /* not OUTSEEK */
+		ptr->fd = -1;
 	}
 #ifdef OUTSEEK
 	close(outfile);
 	outfile = -1;
-#else not OUTSEEK
-	for (fdp = &outfile[PARTEMIT]; fdp < &outfile[NPARTS]; fdp++) {
-		close(*fdp);
-		*fdp = -1;
-	}
-#endif not OUTSEEK
+#endif /* OUTSEEK */
 }
 
 wr_fd()
@@ -127,25 +180,27 @@ wr_fd()
 #ifdef OUTSEEK
 	return outfile;
 #else
-	return outfile[PARTEMIT];
+	return __parts[PARTEMIT].fd;
 #endif
 }
 
 wr_ohead(head)
 	register struct outhead	*head;
 {
-	register long off = OFF_RELO(*head);
+	{
+		register long off = OFF_RELO(*head);
 
-	BEGINSEEK(PARTEMIT, 0L);
-	BEGINSEEK(PARTRELO, off);
-	off += (long) head->oh_nrelo * SZ_RELO;
-	BEGINSEEK(PARTNAME, off);
-	off += (long) head->oh_nname * SZ_NAME;
-	BEGINSEEK(PARTCHAR, off);
+		BEGINSEEK(PARTEMIT, 0L);
+		BEGINSEEK(PARTRELO, off);
+		off += (long) head->oh_nrelo * SZ_RELO;
+		BEGINSEEK(PARTNAME, off);
+		off += (long) head->oh_nname * SZ_NAME;
+		BEGINSEEK(PARTCHAR, off);
 #ifdef SYMDBUG
-	off += head->oh_nchar;
-	BEGINSEEK(PARTDBUG, off);
+		off += head->oh_nchar;
+		BEGINSEEK(PARTDBUG, off);
 #endif
+	}
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	if (sizeof(struct outhead) != SZ_HEAD)
 #endif
@@ -164,7 +219,9 @@ wr_ohead(head)
 		OUTWRITE(PARTEMIT, buf, (long) SZ_HEAD);
 	}
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
-	else	OUTWRITE(PARTEMIT, (char *) head, (long) SZ_HEAD);
+	else {
+		OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
+	}
 #endif
 }
 
@@ -172,26 +229,26 @@ wr_sect(sect, cnt1)
 	register struct outsect	*sect;
 	unsigned int	cnt1;
 {
+	register unsigned int cnt = cnt1;
 	char buf[MAXSECT * SZ_SECT];
 	register char *c = buf;
-	register unsigned int cnt = cnt1;
 
 	while (cnt--) {
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 		if (sizeof(struct outsect) != SZ_SECT)
 #endif
 		{
-			put4(sect->os_base, c); c += 4;
-			put4(sect->os_size, c); c += 4;
-			put4(sect->os_foff, c); c += 4;
+			put4(sect->os_base, c);	c += 4;
+			put4(sect->os_size, c);	c += 4;
+			put4(sect->os_foff, c);	c += 4;
 		}
 		offset[offcnt++] = sect->os_foff;
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 		if (sizeof(struct outsect) != SZ_SECT)
 #endif
 		{
-			put4(sect->os_flen, c); c += 4;
-			put4(sect->os_lign, c); c += 4;
+			put4(sect->os_flen, c);	c += 4;
+			put4(sect->os_lign, c);	c += 4;
 		}
 		sect++;
 	}
@@ -205,22 +262,29 @@ wr_sect(sect, cnt1)
 #endif
 }
 
-wr_flush()
-{
-	OUTWRITE(PARTEMIT, _pbuf, (long) _ocnt);
-	offset[sectionnr] += _ocnt;
-	_ocnt = 0;
-}
-
 wr_outsect(s)
+	int		s;	/* section number */
 {
-	if (s != sectionnr) {
-		if (_ocnt) {
-			wr_flush();
-		}
-		sectionnr = s;
-		OUTSECT(s);
+	register struct fil *ptr = &__parts[PARTEMIT];
+
+	if (s != sectionnr &&
+	    offset[s] != ptr->currpos + (ptr->pnow - ptr->pbegin)) {
+#ifdef OUTSEEK
+		if (currpos != ptr->currpos) 
+			currpos = lseek(ptr->fd, ptr->currpos, 0);
+#endif
+		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
+#ifdef OUTSEEK
+		currpos += ptr->pnow - ptr->pbegin;
+#endif
+		ptr->currpos += ptr->pnow - ptr->pbegin;
+		offset[sectionnr] = ptr->currpos;
+		ptr->currpos = lseek(ptr->fd, offset[s], 0);
+		ptr->cnt = WBUFSIZ - ((int)offset[s] & (WBUFSIZ-1));
+		ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
+		ptr->pnow = ptr->pbegin;
 	}
+	sectionnr = s;
 }
 
 /*
@@ -230,81 +294,78 @@ wr_emit(emit, cnt)
 	char		*emit;
 	long		cnt;
 {
-	if (_ocnt) wr_flush();
 	OUTWRITE(PARTEMIT, emit, cnt);
-	offset[sectionnr] += cnt;
 }
 
 wr_relo(relo, cnt)
 	register struct outrelo	*relo;
-	register unsigned int cnt;
+	unsigned int cnt;
 {
-	long l;
 
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	if (sizeof(struct outrelo) != SZ_RELO)
 #endif
+	while (cnt)
 	{
-		char buf[100 * SZ_RELO];
-		register char *c = buf;
-		register int i = 0;
+		register char *c;
+		register unsigned int i;
 
-		while (cnt--) {
+		i = __parts[PARTRELO].cnt/SZ_RELO;
+		c = __parts[PARTRELO].pnow;
+		if (i > cnt) i = cnt;
+		cnt -= i;
+		__parts[PARTRELO].cnt -= (i*SZ_RELO);
+		while (i--) {
 			*c++ = relo->or_type;
 			*c++ = relo->or_sect;
 			put2(relo->or_nami, c); c += 2;
 			put4(relo->or_addr, c); c += 4;
 			relo++;
-			i++;
-			if (i == 100 || cnt == 0) {
-				c = buf;
-				l = (long) (i * SZ_RELO);
-				OUTWRITE(PARTRELO, c, l);
-				i = 0;
-			}
+		}
+		__parts[PARTRELO].pnow = c;
+		if (cnt) {
+			__wr_flush(&__parts[PARTRELO]);
 		}
 	}
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	else {
-		l = (long) cnt * SZ_RELO;
-		OUTWRITE(PARTRELO, (char *) relo, l);
+		OUTWRITE(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
 	}
 #endif
 }
 
 wr_name(name, cnt)
 	register struct outname	*name;
-	register unsigned int cnt;
+	unsigned int cnt;
 {
-	long l;
+	register unsigned int i = cnt;
 
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	if (sizeof(struct outname) != SZ_NAME)
 #endif
+	while (cnt)
 	{
-		char buf[100 * SZ_NAME];
-		register char *c = buf;
-		register int i = 0;
+		register char *c;
+		register unsigned int i;
 
-		while (cnt--) {
-			put4(name->on_foff,c); c += 4;
-			put2(name->on_type,c); c += 2;
-			put2(name->on_desc,c); c += 2;
-			put4(name->on_valu,c); c += 4;
+		i = __parts[PARTNAME].cnt/SZ_NAME;
+		c = __parts[PARTNAME].pnow;
+		if (i > cnt) i = cnt;
+		cnt -= i;
+		__parts[PARTNAME].cnt -= (i*SZ_NAME);
+		while (i--) {
+			put4(name->on_foff, c);	c += 4;
+			put2(name->on_type, c);	c += 2;
+			put2(name->on_desc, c);	c += 2;
+			put4(name->on_valu, c); c += 4;
 			name++;
-			i++;
-			if (i == 100 || !cnt) {
-				c = buf;
-				l = (long) (i * SZ_NAME);
-				OUTWRITE(PARTNAME, c, l);
-				i = 0;
-			}
 		}
+		__parts[PARTNAME].pnow = c;
+		if (cnt) __wr_flush(&__parts[PARTNAME]);
 	}
 #if ! (BYTES_REVERSED || WORDS_REVERSED)
 	else {
-		l = (long)cnt * SZ_NAME;
-		OUTWRITE(PARTNAME, (char *) name, l);
+		OUTWRITE(PARTNAME, (char *) name, (long)cnt * SZ_NAME);
 	}
 #endif
 

@@ -4,6 +4,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include "byte_order.h"
+#include <local.h>
+#include <stdio.h>
 
 #if CHAR_UNSIGNED
 #define Xchar(ch)	(ch)
@@ -33,3 +35,37 @@
 #define get4(c)		(* ((long *) (c)))
 #define put4(l, c)	(* ((long *) (c)) = (l))
 #endif
+
+#if BIGMACHINE
+#define WBUFSIZ	(8*BUFSIZ)
+#else
+#define WBUFSIZ	BUFSIZ
+#endif
+
+struct fil {
+	int	cnt;
+	char	*pnow;
+	char	*pbegin;
+	long	currpos;
+#ifndef OUTSEEK
+	int	fd;
+#endif
+	char	pbuf[WBUFSIZ];
+};
+
+extern struct fil __parts[];
+
+#define OUTBYTE(p, b)	{if (__parts[p].cnt == 0) __wr_flush(&__parts[p]);\
+			 __parts[p].cnt--; *__parts[p].pnow++ = (b);}
+
+#define	PARTEMIT	0
+#define	PARTRELO	1
+#define	PARTNAME	2
+#define	PARTCHAR	3
+#ifdef SYMDBUG
+#define PARTDBUG	4
+#else
+#define PARTDBUG	3
+#endif
+#define	NPARTS		(PARTDBUG + 1)
+
