@@ -319,7 +319,7 @@ int myatoi(s) register char *s; {
 		case 'e':
 		case 'f':
 			if (base!=16) error("Hexletter in number not expected");
-			sum = sum*base + *s++ - 'a';
+			sum = sum*base + 10 + *s++ - 'a';
 			break;
 		case 'A':
 		case 'B':
@@ -328,7 +328,7 @@ int myatoi(s) register char *s; {
 		case 'E':
 		case 'F':
 			if (base!=16) error("Hexletter in number not expected");
-			sum = sum*base + *s++ - 'A';
+			sum = sum*base + 10 + *s++ - 'A';
 			break;
 		}
 	}
