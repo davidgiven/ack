@@ -1,6 +1,11 @@
-EMH=../../../h
-EMLIB=../../../lib
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
 SHR=../share
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
 
 CFILES=\
 ic.c ic_aux.c ic_lib.c ic_lookup.c ic_io.c
@@ -22,6 +27,8 @@ SHARE_MFILES=\
 $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/debug.m \
 $(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/aux.m
 
+all:	ic
+
 ic:	$(OFILES)
 	$(CC) -o ic $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
 
@@ -29,12 +36,24 @@ ic_ack:	$(CFILES) $(SHARE_MFILES)
 	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
 	$(CC) -o ic -.c $(LDFLAGS) ic.o $(EMLIB)/em_data.a
 
+install:	all
+	../install ic
+
+cmp:	all
+	-../compare ic
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
-pr:	$(PRFILES)
+print:	$(PRFILES)
 	@pr $?
-	@touch pr
+	@touch print
+
+pr:
+	@pr $(PRFILES)
+
+opr:
+	make pr | opr
 
 depend:
 	$(SHR)/makedepend
