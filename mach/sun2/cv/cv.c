@@ -392,7 +392,7 @@ put(l,sz)
 	long l;
 {
 	char buf[10];
-	register char *p;
+	register char *p = buf;
 
 	*p++ = l >> 24;
 	*p++ = l >> 16;
