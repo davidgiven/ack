@@ -67,6 +67,13 @@ char **argv;
 				fatal("-o needs filename");
 			aoutpath = argv[i];
 			break;
+		case 'T':
+			if (*p != NULL) {
+				extern char *tmp_dir;
+
+				tmp_dir = p;
+			}
+			break;
 		case 'd':
 #ifdef LISTING
 			dflag = 0;

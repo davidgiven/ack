@@ -159,8 +159,10 @@ listline(textline)
 			putchar(c);
 		} while ((c = getc(listfile)) != '\n');
 	}
-	if (listflag & 7)
+	if (listflag & 7) {
 		putchar('\n');
+		fflush(stdout);
+	}
 	listeoln = 1;
 	listcolm = 0;
 	listflag = listtemp;
@@ -314,6 +316,11 @@ char *s;
 	return(f);
 }
 
+#ifndef TMPDIR
+#define TMPDIR "/tmp"
+#endif
+char *tmp_dir = TMPDIR;
+
 FILE *
 fftemp(path, tail)
 char *path, *tail;
@@ -321,11 +328,7 @@ char *path, *tail;
 	register char *dir;
 
 	if ((dir = getenv("TMPDIR")) == NULL)
-#ifdef TMPDIR
-		dir = TMPDIR;
-#else
-		dir = "/tmp";
-#endif
+		dir = tmp_dir;
 	sprintf(path, "%s/%s", dir, tail);
 	return(ffcreat(mktemp(path)));
 }
