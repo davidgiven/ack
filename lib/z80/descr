@@ -34,7 +34,7 @@ name led
 	program {EM}/lib.bin/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -ansi C_LIB={EM}/{LIB}ac
-	args -b0:0x1000 ( .e:{HEAD}={EM}/{RT}em) \
+	args -b0:0x1000 (.e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.ocm.b={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
