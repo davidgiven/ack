@@ -9,7 +9,7 @@ var NAME=i86
 var M=i86
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix
+var CPP_F=-Dunix -D__USG
 var INCLUDES=-I{EM}/include/_tail_cc
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be

@@ -9,7 +9,7 @@ var NAME=m68020
 var M=m68020
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix=unix
+var CPP_F=-Dunix=unix -D__USG
 var INCLUDES=-I{EM}/include/_tail_cc
 # 410 align is the default
 var ALIGN=-a0:2 -a1:2 -a2:0x10000 -a3:2
