@@ -20,9 +20,189 @@
 #include "cf_idom.h"
 #include "cf_loop.h"
 
+#define nexcfbx()	(bext_p) newstruct(bext_cf)
+#define oldcfbx(x)	oldstruct(bext_cf,x)
 
 STATIC cset	lpi_set;	/* set of procedures used in LPI instruction */
 STATIC cset	cai_set;	/* set of all procedures doing a CAI */
+
+
+/* The procedure getbblocks reads the EM textfile and 
+ * partitions every procedure into a number of basic blocks.
+ */
+
+#define LABEL0		0
+#define LABEL		1
+#define NORMAL		2
+#define JUMP		3
+#define END		4
+#define AFTERPRO	5
+#define INIT		6
+
+
+/* These global variables are used by getbblocks and nextblock. */
+
+STATIC bblock_p b, *bp;  /* b is the current basic block, bp is
+			  * the address where the next block has
+			  * to be linked.
+			  */
+STATIC line_p   lnp, *lp; /* lnp is the current line, lp is
+			   * the address where the next line
+			   * has to be linked.
+			   */
+STATIC short state;	/* We use a finite state machine with the
+			 * following states:
+			 *  LABEL0: after the first (successive)
+			 *	    instruction label.
+			 *  LABEL1:  after at least two successive
+			 *	    instruction labels.
+			 *  NORMAL: after a normal instruction.
+			 *  JUMP:   after a branch (conditional,
+			 *	    unconditional or CSA/CSB).
+			 *  END:    after an END pseudo
+			 *  AFTERPRO: after we've read a PRO pseudo
+			 *  INIT:   initial state
+			 */
+
+
+STATIC nextblock()
+{
+	/* allocate a new basic block structure and
+	 * set b, bp and lp.
+	 */
+
+	b = *bp = freshblock();
+	bp = &b->b_next;
+	b->b_start = lnp;
+	b->b_succ = Lempty_set();
+	b->b_pred = Lempty_set();
+	b->b_extend = newcfbx(); /* basic block extension for CF */
+	b->b_extend->bx_cf.bx_bucket = Lempty_set();
+	b->b_extend->bx_cf.bx_semi = 0;
+	lp = &lnp->l_next;
+#ifdef TRACE
+	fprintf(stderr,"new basic block, id = %d\n",lastbid);
+#endif
+}
+
+
+STATIC short kind(lnp)
+	line_p lnp;
+{
+	/* determine if lnp is a label, branch, end or otherwise */
+
+	short instr;
+	byte  flow;
+
+	if ((instr = INSTR(lnp)) == op_lab) return (short) LABEL;
+	if (instr == ps_end) return (short) END;
+	if (instr > sp_lmnem) return (short) NORMAL; /* pseudo */
+	if ((flow = (em_flag[instr-sp_fmnem] & EM_FLO)) == FLO_C ||
+	     flow == FLO_T) return (short) JUMP; /* conditional/uncond. jump */
+	return (short) NORMAL;
+}
+
+
+
+STATIC bool getbblocks(fp,kind_out,n_out,g_out,l_out)
+	FILE *fp;
+	short *kind_out;
+	short *n_out;
+	bblock_p *g_out;
+	line_p *l_out;
+{
+	bblock_p head = (bblock_p) 0;
+	line_p headl = (line_p) 0;
+
+	curproc = (proc_p) 0;
+	/* curproc will get a value when we encounter a PRO pseudo.
+	 * If there is no such pseudo, we're reading only data
+	 * declarations or messages (outside any proc.).
+	 */
+	curinp = fp;
+	lastbid = (block_id) 0;  /* block identier */
+	state = INIT;	/* initial state */
+	bp = &head;
+
+	for (;;) {
+#ifdef TRACE
+		fprintf(stderr,"state = %d\n",state);
+#endif
+		switch(state) {
+			case LABEL0:
+				nextblock();
+				/* Fall through !! */
+			case LABEL:
+				lbmap[INSTRLAB(lnp)] = b;
+				/* The lbmap table contains for each
+				 * label_id the basic block of that label.
+				 */
+				lnp = read_line(&curproc);
+				state = kind(lnp);
+				if (state != END) {
+					*lp = lnp;
+					lp = &lnp->l_next;
+				}
+				break;
+			case NORMAL:
+				lnp = read_line(&curproc);
+				if ( (state = kind(lnp)) == LABEL) {
+					/* If we come accross a label
+					 * here, it must be the beginning
+					 * of a new basic block.
+					 */
+					state = LABEL0;
+				} else {
+					if (state != END) {
+						*lp = lnp;
+						lp = &lnp->l_next;
+					}
+				}
+				break;
+			case JUMP:
+				lnp = read_line(&curproc);
+				/* fall through ... */
+			case AFTERPRO:
+				switch(state = kind(lnp)) {
+					case LABEL:
+						state = LABEL0;
+						break;
+					case JUMP:
+					case NORMAL:
+						nextblock();
+						break;
+				}
+				break;
+			case END:
+				*lp = lnp;
+#ifdef TRACE
+				fprintf(stderr,"at end of proc, %d blocks\n",lastbid);
+#endif
+				if (head == (bblock_p) 0) {
+					*kind_out = LDATA;
+					*l_out = headl;
+				} else {
+					*kind_out = LTEXT;
+					*g_out = head;
+					*n_out = (short) lastbid;
+					/* number of basic blocks */
+				}
+				return TRUE;
+			case INIT:
+				lnp = read_line(&curproc);
+				if (feof(curinp)) return FALSE;
+				if (INSTR(lnp) == ps_pro) {
+					state = AFTERPRO;
+				} else {
+					state = NORMAL;
+					headl = lnp;
+					lp = &lnp->l_next;
+				}
+				break;
+		}
+	}
+}
+
 
 STATIC interproc_analysis(p)
 	proc_p p;
