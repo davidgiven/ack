@@ -1,7 +1,8 @@
 EM = ../../../..
 CEG = $(EM)/lib/ceg
 
-Em   = $(CEG)/EM_parser
+Em   = $(CEG)/EM_parser/obj_EM_pars
+ASMAIN = $(CEG)/assemble/obj_assemble
 AS   = $(CEG)/as_parser
 EVAL = $(CEG)/as_parser/eval
 DEF = $(CEG)/defaults
@@ -11,7 +12,7 @@ CFLAGS = -O
 AR = ar
 LEXLIB = -ll
 
-IFILES  = -I. -I.. -I$(AS) -I$(Em) -I$(EM)/h -I$(EM)/modules/h
+IFILES  = -I. -I.. -I$(AS) -I$(Em) -I$(EM)/h -I$(EM)/modules/h -I../back
 
 CEG_LIBS = $(EM)/modules/lib/liballoc.a\
 	   $(EM)/modules/lib/libprint.a\
@@ -43,7 +44,9 @@ ce : ceg/ceg EM_table mach.h
 
 ceg : 
 	-mkdir ceg
-
+	(cd ceg; cp $(ASMAIN)/* .) 
+	(cd ceg;$(CC) -c $(IFILES) *.c; $(AR) r as_lib.a *.o )
+	-(cd ceg; ranlib as_lib.a)
 
 
 ce.a : ce/*.o
@@ -54,7 +57,7 @@ ce/*.o : mach.h
 	(cd ce;$(CC) -c $(CFLAGS) $(IFILES) ../$*.c)
 
 EM_instr : ceg/ceg EM_table mach.h
-	( cd ce; $(EM)/lib/cpp/p -P ../EM_table| ../ceg/ceg -l)
+	( cd ce; $(EM)/lib/cpp -P ../EM_table| ../ceg/ceg -l)
 	( cd ce; $(CEG)/util/create_ofiles)
 	@make -f ce_makefile ce.a
 
@@ -62,7 +65,7 @@ EM_instr : ceg/ceg EM_table mach.h
 
 
 ceg/ceg	: ceg/assemble.o ceg/as_instr.o ceg/eval_as.o # $(Em)/em_parser 
-	(cd ceg ; $(CC) -o ceg $(Em)/*.o assemble.o as_instr.o eval_as.o\
+	(cd ceg ; $(CC) -o ceg $(Em)/*.o assemble.o as_instr.o eval_as.o as_lib.a\
 			 $(CEG_LIBS) $(LEXLIB) )
 
 ceg/assemble.o : as.h ceg/assemble.c ceg/*h
