@@ -38,6 +38,7 @@ then
     if test $errors = no
     then
       ${ASAR-arch} cr $2 $OFILES
+      ${RANLIB-:} $2
       rm $OFILES
     else
       echo $2 not made, due to compilation errors
