@@ -133,6 +133,8 @@ properties of the Ack-C frontend.
 .IT "2.2 Identifiers"
 External identifiers are unique up to 7 characters and allow
 both upper and lower case.
+.IT "2.3 Keywords"
+The word \fBvoid\fP is also reserved as a keyword.
 .IT "2.4.3 Character constants"
 The ASCII-mapping is used when a character is converted to an
 integer.
@@ -140,11 +142,12 @@ integer.
 To prevent loss of precision the compiler does not perform
 floating point constant folding.
 .IT "2.6 Hardware characteristics"
-The size of objects of the several arithmetic types and the two
-pointer types depend on the EM-implementation used.
+The size of objects of the several arithmetic types and 
+pointers depend on the EM-implementation used.
 The ranges of the arithmetic types depend on the size used,
 the C-frontend assumes two's complement representation for the
-integral types. All sizes are multiples of bytes.
+integral types.
+All sizes are multiples of bytes.
 The calling program \fIack\fP[4] passes information about the
 size of the types to the compiler proper.
 .br
@@ -152,32 +155,27 @@ However, a few general remarks must be made:
 .sp 1
 .IS
 .PT (a)
-Two different pointer types exist: pointers to data and
-pointers to functions.
-The latter type is twice as large as the former.
-Pointers to functions use the same format as Pascal procedure
-parameters, thereby allowing C to use Pascal procedure
-parameters and vice-versa.
-The extra information passed indicates the scope level of the
-procedure.
-.PT (b)
-The size of pointers to data is a multiple of
+The size of pointers is a multiple of
 (or equal to) the size of an \fIint\fP.
-.PT (c)
+.PT (b)
 The following relations exist for the sizes of the types
 mentioned:
 .br
 .ti +5
 \fIchar<=short<=int<=long\fP
-.PT (d)
+.PT (c)
 Objects of type \fIchar\fP use one 8-bit byte of storage,
 although several bytes are allocated sometimes.
-.PT (e)
+.PT (d)
 All sizes are in multiples of bytes.
-.PT (f)
+.PT (e)
 Most EM implementations use 4 bytes for floats and 8 bytes
 for doubles, but exceptions to this rule occur.
 .IE
+.IT "4 What's in a name"
+The type \fIvoid\fP is added.
+Objects of type void do not exist.
+Functions declared as returning void, do not return a value at all.
 .IT "6.1 Characters and integers"
 Objects of type \fIchar\fP are unsigned and do not cause
 sign-extension when converted to \fIint\fP.
@@ -187,8 +185,16 @@ Floating point numbers are truncated towards zero when
 converted to the integral types.
 .IT "6.4 Pointers and integers"
 When a \fIlong\fP is added to or subtracted from a pointer and
-longs are larger then data pointers the \fIlong\fP is converted to an
+longs are larger then pointers the \fIlong\fP is converted to an
 \fIint\fP before the operation is performed.
+.IT "7.2 Unary operators"
+It is allowed to cast any expression to the type \fIvoid\fP.
+.IT "8.2 Type specifiers"
+One type is added to the type-specifiers:
+.br
+.IS
+void
+.IE
 .IT "8.5 Structure and union declarations"
 The only type allowed for fields is \fIint\fP.
 Fields with exactly the size of \fIint\fP are signed,
@@ -200,8 +206,15 @@ Initialization of structures containing bit fields is not
 allowed.
 There is one restriction when using an 'address expression' to initialize
 an integral variable.
-The integral variable must have the size of a data pointer.
+The integral variable must have the same size as a pointer.
 Conversions altering the size of the address expression are not allowed.
+.IT "9.10 Return statement"
+Return statements of the form:
+.IS
+	return ;
+.IE
+are the only form of return statement allowed in a function of type
+function returning void.
 .IT "10.1 External function definitions"
 The total amount for storage used for parameters
 in any function must be less then 4096 bytes.
@@ -227,15 +240,8 @@ int and back will not always result in the same pointer.
 The process mentioned above works with integrals
 of the same size or larger as pointers in all EM implementations
 having such integrals.
-Note that pointers to functions have
-twice the size of pointers to data.
-When converting data pointers to an integral type or vice-versa,
-the pointers is seen as an unsigned with the same size a data-pointer.
-When converting function pointers to anything else the static link part
-of the pointer is discarded,
-the resulting value is treated as if it were a data pointer.
-When converting a data pointer or object of integral type to a function pointer
-a static link with the value 0 is added to complete the function pointer.
+When converting pointers to an integral type or vice-versa,
+the pointers is seen as an unsigned int.
 .br
 EM guarantees that any object can be placed at a word boundary,
 this allows the C-programs to use \fIint\fP pointers
