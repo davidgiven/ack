@@ -13,7 +13,6 @@ CID = $(EMHOME)/bin/cid
 # Libraries and EM interface definitions
 SYSLIB = $(EMHOME)/modules/lib/libsystem.a
 EMKLIB = $(EMHOME)/modules/lib/libemk.a $(EMHOME)/lib/em_data.a
-EMOLIB = $(EMHOME)/modules/lib/libemopt.a
 EMELIB = $(EMHOME)/modules/lib/libeme.a $(EMHOME)/lib/em_data.a
 STRLIB = $(EMHOME)/modules/lib/libstring.a
 PRTLIB = $(EMHOME)/modules/lib/libprint.a
@@ -24,6 +23,11 @@ EMMESCELIB = $(EMHOME)/modules/lib/libem_mesCE.a
 MACH = sun3
 EMCELIB = $(EMHOME)/lib/$(MACH)/ce.a \
 		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/modules/lib/libflt.a \
+		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a
+EMOCELIB = $(EMHOME)/modules/lib/libCEopt.a $(EMHOME)/lib/$(MACH)/ce.a \
+		$(EMHOME)/lib/$(MACH)/back.a \
+		$(EMHOME)/modules/lib/libflt.a \
 		$(EMHOME)/modules/lib/libobject.a $(EMHOME)/lib/em_data.a
 INPLIB = $(EMHOME)/modules/lib/libinput.a
 ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
@@ -32,10 +36,10 @@ LIBS = $(INPLIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(FLTLIB)
 ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(FLTLIB)
-OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
-	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(FLTLIB)
+OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOCELIB) $(PRTLIB) $(STRLIB) \
+	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 CELIBS = $(INPLIB) $(EMMESCELIB) $(EMCELIB) $(PRTLIB) $(STRLIB) \
-	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(FLTLIB)
+	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 LLIBS = $(INPLIB) $(EMMESLIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB) $(FLTLIB)
 LIB_INCLUDES = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
@@ -96,6 +100,10 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 GCSRC =	char.c symbol2str.c next.c
 GOBJ =	char.o symbol2str.o next.o
 
+# Extra object for generating peephole-optimizer-code-expander version.
+# The Sun-3 version is faster when the text-size exceeds 180K! ARRGH
+EXTRA_O =
+
 STRSRC = code.str declar.str decspecs.str def.str expr.str field.str \
 	estack.str util.str proto.str replace.str \
 	idf.str macro.str stack.str stmt.str struct.str switch.str type.str \
@@ -126,7 +134,7 @@ GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
 	print hfiles Cfiles $(GHSRC) $(GSRC) longnames $(LCSRC)
 
 # include files containing ALLOCDEF specifications
-OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
+OBJ =	$(COBJ) $(LOBJ) $(GOBJ) $(EXTRA_O)
 SRC =	$(CSRC) $(LCSRC) $(GCSRC)
 
 LINT = /usr/bin/lint
@@ -151,15 +159,13 @@ Emain:	Cfiles
 
 Omain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EXTRA_O="$(EXTRA_O) "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)omain ; else EMHOME=$(EMHOME); export EMHOME; mach=$(MACH); export mach; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o PEEPHOLE
 
 CEmain:	Cfiles
 	rm -f *.o
-	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "MACH="$(MACH) "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)cemain ; else EMHOME=$(EMHOME); export EMHOME; mach=$(MACH); export mach; ./Resolve cemain ; fi'
 	@rm -f nmclash.o a.out
-	mv *.o CODE_EXPANDER
 
 Lnt:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) $(CURRDIR)lnt ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve lnt ; fi'

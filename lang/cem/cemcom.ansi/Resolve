@@ -64,4 +64,4 @@ ed - $PW/Makefile <<'EOF'
 w Makefile
 q
 EOF
-make EMHOME=$EMHOME COPTIONS=$options CURRDIR=$PW/ $target
+make EMHOME=$EMHOME COPTIONS=$options MACH=$mach CURRDIR=$PW/ $target
