@@ -204,7 +204,11 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		if (*format != '%') {
 			ic = getc(stream);
 			nrchars++;
-			if (ic != *format++) break;	/* error */
+			if (ic != *format++) {
+				if (ic != EOF) ungetc(ic,stream);
+				nrchars--;
+				break;	/* error */
+			}
 			continue;
 		}
 		format++;
