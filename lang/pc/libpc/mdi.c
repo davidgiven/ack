@@ -41,3 +41,31 @@ long _mdil(j,i) long j,i; {
 		i += j;
 	return(i);
 }
+
+int _dvi(j, i) unsigned int j,i; {
+	int neg = 0;
+
+	if ((int)j < 0) {
+		j = -(int)j; neg = 1;
+	}
+	if ((int)i < 0) {
+		i = -(int)i; neg = !neg;
+	}
+	i = i / j;
+	if (neg) return -(int)i;
+	return i;
+}
+
+long _dvil(j, i) unsigned long j,i; {
+	int neg = 0;
+
+	if ((long)j < 0) {
+		j = -(long)j; neg = 1;
+	}
+	if ((long)i < 0) {
+		i = -(long)i; neg = !neg;
+	}
+	i = i / j;
+	if (neg) return -(long)i;
+	return i;
+}
