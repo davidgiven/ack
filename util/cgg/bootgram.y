@@ -69,6 +69,8 @@ static char rcsid[]="$Header$";
 typedef char byte;
 typedef char * string;
 
+char *malloc(),*myalloc();
+
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
