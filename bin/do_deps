@@ -1,0 +1,18 @@
+: '$Header$'
+
+: Produce dependencies for all argument files
+
+for i in $*
+do
+	n=`basename $i .c`
+	if [ -f $n.dep ]
+	then
+		:
+	else
+		echo $n.'$(SUF):	'$i > $n.dep
+		echo "	head -5 $n.dep > $n.dp1" >> $n.dep
+		echo '	CC="$(CC)" UTIL_HOME="$(UTIL_HOME)" $(CC_AND_MKDEP) '$n.dp2 '$(CFLAGS)' -c $i >> $n.dep
+		echo "	cat $n.dp1 $n.dp2 > $n.dep" >> $n.dep
+		echo "	rm -f $n.dp1 $n.dp2" >> $n.dep
+	fi
+done

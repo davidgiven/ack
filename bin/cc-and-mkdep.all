@@ -1,0 +1,20 @@
+: '$Header$'
+
+: Compile and make dependencies. First argument is the file on which the
+: dependencies must be produced. This version is a generic one that should
+: work for all Unix systems.
+n=$1
+shift
+cpp_args=
+for i in $*
+do
+	case $i in
+	-I*|-D*|-U*)	cpp_args="$cpp_args $i"
+			;;
+	-*)		;;
+	*)		cpp_args="$cpp_args $i"
+			;;
+	esac
+done
+$UTIL_HOME/lib.bin/cpp -d $cpp_args > $n
+exec $CC $*

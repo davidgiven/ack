@@ -1,0 +1,47 @@
+: '$Header$'
+
+: Resolve name clashes in the files on the argument list. If these
+: files reside in another directory, a copy is made in the current
+: directory. If not, it is overwritten. Never do this in a source
+: directory! A list of the new files is produced on standard output.
+
+UTIL_BIN=$UTIL_HOME/bin
+
+trap "rm -f tmp$$ a.out nmclash.* longnames clashes" 0 1 2 3 15
+
+: first find out if we have to resolve problems with identifier significance.
+
+cat > nmclash.c <<'EOF'
+/* Accepted if many characters of long names are significant */
+abcdefghijklmnopr() { }
+abcdefghijklmnopq() { }
+main() { }
+EOF
+if $CC nmclash.c
+then	: no identifier significance problem
+	for i in $*
+	do
+		echo $i
+	done
+else
+	$UTIL_BIN/prid -l7 $* > longnames
+
+	: remove code generating routines from the clashes list.
+	: code generating routine names start with C_.
+	: also remove names starting with flt_.
+
+	sed '/^C_/d' < longnames | sed '/^flt_/d' > tmp$$
+	$UTIL_BIN/cclash -c -l7 tmp$$ > clashes
+	for i in $*
+	do
+		$UTIL_BIN/cid -Fclashes < $i > tmp$$
+		n=`basename $i .xxx`
+		if cmp -s $n tmp$$
+		then
+			rm -f tmp$$
+		else
+			mv tmp$$ $n
+		fi
+		echo $n
+	done
+fi
