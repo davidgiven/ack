@@ -80,9 +80,9 @@ va_list ap;
 				width = width * 10 + *format++ - '0';
 		} else
 			widflag = 0;	/* no width spec */
-		if (longflag = (tolower (*format) == 'l'))
+		if (longflag = (*format == 'L' || *format == 'l'))
 			++format;
-		else if (shortflag = (tolower(*format) == 'h'))
+		else if (shortflag = (*format == 'H' || *format == 'h'))
 			++format;
 		if (isupper(*format)) {
 			kind = tolower(*format);
