@@ -6,12 +6,12 @@
 
 SRC_DIR = $(SRC_HOME)/lang/cem/libcc.ansi
 
-.SUFFIXES: .o .e .c .m .s
+.SUFFIXES: .o .e .c .m .s .so
 
-.c.o .c.m .c.s:
+.c.o .c.m .c.s .c.so:
 		$(MACH) $(MACHFL) -ansi -c $<
 
-.e.o .e.m .e.s:
+.e.o .e.m .e.s .e.so:
 		$(MACH) $(MACHFL) -c $<
 
 fake:
