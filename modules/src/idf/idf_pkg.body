@@ -24,6 +24,8 @@ IDF_new(tg, size, cpy)
 {
 	static int nidf;
 	static struct idf *pidf;
+	static struct idf null_idf;
+	register struct idf *id;
 #define NIDS 50
 #define IBUFSIZ	2048
 	static unsigned int icnt;
@@ -34,8 +36,11 @@ IDF_new(tg, size, cpy)
 	if (! nidf--) {
 		nidf += NIDS;
 		pidf = (struct idf *) Malloc(NIDS * sizeof (struct idf));
-		clear((char *) pidf, NIDS * sizeof(struct idf));
 	}
+
+	id = *pidf;
+	pidf++;
+	*id = null_idf;
 
 	if (cpy) {
 		if (size > icnt) {
@@ -44,14 +49,14 @@ IDF_new(tg, size, cpy)
 		}
 		else p = ip;
 		icnt -= size;
-		pidf->id_text = p;
+		id->id_text = p;
 		while (size--) {
 			*p++ = *tg++;
 		}
 		ip = p;
 	}
-	else	pidf->id_text = tg;
-	return pidf++;
+	else	id->id_text = tg;
+	return id;
 }
 
 #ifdef	IDF_DEBUG
@@ -85,14 +90,15 @@ str2idf(tg, cpy)
 	struct idf **hook;
 	register struct idf *notch;
 	register unsigned int hash;
+	register int c;
 	int size;
 
 	IDF_STARTHASH(hash);
-	while (*cp) {
-		IDF_ENHASH(hash, *cp++);
+	while (c = *cp++) {
+		IDF_ENHASH(hash, c);
 	}
 	IDF_STOPHASH(hash);
-	size = cp - tg + 1;
+	size = cp - tg;
 
 	/*	The tag tg with length size and known hash value hash is
 		looked up in the identifier table; if not found, it is
@@ -103,18 +109,17 @@ str2idf(tg, cpy)
 
 	while ((notch = *hook))	{
 		register char *s1 = tg;
-		int cmp;
 
 		cp = notch->id_text;
 
-		while (!(cmp = (*s1 - *cp++))) {
+		while (!(c = (*s1 - *cp++))) {
 			if (*s1++ == '\0') {
 				break;
 			}
 		}
 
-		if (cmp == 0) return notch;
-		if (cmp < 0) break;
+		if (c == 0) return notch;
+		if (c < 0) break;
 		hook = &notch->id_next;
 	}
 	/* a new struct idf must be inserted at the hook */
@@ -123,7 +128,4 @@ str2idf(tg, cpy)
 	notch->id_next = *hook;
 	*hook = notch;		/* hooked in */
 	return notch;
-}
-
-init_idf()	{
 }

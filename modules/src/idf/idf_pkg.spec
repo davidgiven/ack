@@ -23,9 +23,9 @@ struct idf	{
 
 /*	init_idf()
 
-	Initializes the namelist
+	Initializes the namelist. Empty for now.
 */
-extern			init_idf();
+#define			init_idf()
 
 /*	struct idf * str2idf(tg, cp)
 		char *tg;
