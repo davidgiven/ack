@@ -173,7 +173,8 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 	int		conv = 0;	/* # of conversions */
 	int		base;		/* conversion base */
 	unsigned long	val;		/* an integer value */
-	char		*str, *tmp_string;	/* temporary pointers */
+	register char	*str;		/* temporary pointer */
+	char		*tmp_string;	/* ditto */
 	unsigned	width;		/* width of field */
 	int		flags;		/* some flags */
 	int		reverse;	/* reverse the checking in [...] */
@@ -188,7 +189,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 	while (1) {
 		if (isspace(*format)) {
 			while (isspace(*format))
-				++format;	/* skip whitespace */
+				format++;	/* skip whitespace */
 			ic = getc(stream);
 			nrchars++;
 			while (isspace (ic)) {
@@ -200,19 +201,16 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}
 		if (!*format) break;	/* end of format */
 
-		ic = getc(stream);
-		nrchars++;
-
-		if (ic == EOF)
-			return conv ? done : EOF;
 		if (*format != '%') {
-			if (ic != *format)
-				break;		/* matching error */
-			++format;
+			ic = getc(stream);
+			nrchars++;
+			if (ic != *format++) break;	/* error */
 			continue;
 		}
-		++format;
+		format++;
 		if (*format == '%') {
+			ic = getc(stream);
+			nrchars++;
 			if (ic == '%') {
 				format++;
 				continue;
@@ -221,7 +219,7 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}
 		flags = 0;
 		if (*format == '*') {
-			++format;
+			format++;
 			flags |= FL_NOASSIGN;
 		}
 		if (isdigit (*format)) {
@@ -237,21 +235,23 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}
 		kind = *format;
 		if ((kind != 'c') && (kind != '[') && (kind != 'n')) {
-			while (ic != EOF && isspace(ic)) {
+			do {
 				ic = getc(stream);
 				nrchars++;
-			}
-			if (ic == EOF) return conv ? done : EOF;
+			} while (isspace(ic));
+			if (ic == EOF) break;		/* outer while */
+		} else if (kind != 'n') {		/* %c or %[ */
+			ic = getc(stream);
+			if (ic == EOF) break;		/* outer while */
+			nrchars++;
 		}
-		conv++;
 		switch (kind) {
 		default:
-			if (kind == ic) continue;
+			/* not recognized, like %q */
+			return conv || (ic != EOF) ? done : EOF;
 			break;
 		case 'n':
-			if (ic != EOF) ungetc(ic, stream);
-			nrchars--;
-			if (!(flags & FL_NOASSIGN)) {
+			if (!(flags & FL_NOASSIGN)) {	/* silly, though */
 				if (flags & FL_SHORT)
 					*va_arg(ap, short *) = (short) nrchars;
 				else if (flags & FL_LONG)
@@ -270,16 +270,22 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		case 'u':		/* unsigned */
 		case 'x':		/* hexadecimal */
 		case 'X':		/* ditto */
-			if (!(flags & FL_WIDTHSPEC))
+			if (!(flags & FL_WIDTHSPEC) || width > NUMLEN)
 				width = NUMLEN;
-			if (!width) {
-				if (ic != EOF) ungetc(ic, stream);
-				return done;
-			}
+			if (!width) return done;
+
 			str = o_collect(ic, stream, kind, width, &base);
 			if (str < inp_buf
-			    || (str == inp_buf && *str == '-')) return done;
-			nrchars += str - inp_buf + 1;
+			    || (str == inp_buf
+				    && (*str == '-'
+					|| *str == '+'))) return done;
+
+			/*
+			 * Although the length of the number is str-inp_buf+1
+			 * we don't add the 1 since we counted it already
+			 */
+			nrchars += str - inp_buf;
+
 			if (!(flags & FL_NOASSIGN)) {
 				if (kind == 'd' || kind == 'i')
 				    val = strtol(inp_buf, &tmp_string, base);
@@ -291,23 +297,18 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					*va_arg(ap, unsigned short *) = (unsigned short) val;
 				else
 					*va_arg(ap, unsigned *) = (unsigned) val;
-				done++;
 			}
 			break;
 		case 'c':
 			if (!(flags & FL_WIDTHSPEC))
 				width = 1;
 			if (!(flags & FL_NOASSIGN))
-				tmp_string = va_arg(ap, char *);
-			if (!width) {
-				if (ic != EOF) ungetc(ic, stream);
-				return done;
-			}
-			if (!(flags & FL_NOASSIGN) && (ic != EOF))
-				++done;
+				str = va_arg(ap, char *);
+			if (!width) return done;
+
 			while (width && ic != EOF) {
 				if (!(flags & FL_NOASSIGN))
-					*tmp_string++ = (char) ic;
+					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
@@ -319,21 +320,16 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				nrchars--;
 			}
 			break;
-
 		case 's':
 			if (!(flags & FL_WIDTHSPEC))
 				width = 0xffff;
 			if (!(flags & FL_NOASSIGN))
-				tmp_string = va_arg(ap, char *);
-			if (!width) {
-				if (ic != EOF) ungetc(ic,stream);
-				return done;
-			}
-			if (!(flags & FL_NOASSIGN))
-				++done;
+				str = va_arg(ap, char *);
+			if (!width) return done;
+
 			while (width && ic != EOF && !isspace(ic)) {
 				if (!(flags & FL_NOASSIGN))
-					*tmp_string++ = (char) ic;
+					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
@@ -341,33 +337,29 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 			}
 			/* terminate the string */
 			if (!(flags & FL_NOASSIGN))
-				*tmp_string = '\0';	
+				*str = '\0';	
 			if (width) {
 				if (ic != EOF) ungetc(ic,stream);
 				nrchars--;
 			}
 			break;
-
 		case '[':
-		{	int old_nrchars;
 			if (!(flags & FL_WIDTHSPEC))
 				width = 0xffff;
+			if (!width) return done;
 
-			if (!width) {
-				if (ic != EOF) ungetc(ic, stream);
-				return done;
-			}
-			if ( *(++format) == '^' ) {
+			if ( *++format == '^' ) {
 				reverse = 1;
 				format++;
 			} else
 				reverse = 0;
 
-			for (tmp_string = Xtable; tmp_string < &Xtable[NR_CHARS]
-							; tmp_string++)
-				*tmp_string = 0;
+			for (str = Xtable; str < &Xtable[NR_CHARS]
+							; str++)
+				*str = 0;
 
 			if (*format == ']') Xtable[*format++] = 1;
+
 			while (*format && *format != ']') {
 				Xtable[*format++] = 1;
 				if (*format == '-') {
@@ -385,51 +377,53 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					else Xtable['-'] = 1;
 				}
 			}
-			if (!*format) {
-				if (ic != EOF) ungetc(ic,stream);
-				return done;
-			}
+			if (!*format) return done;
 			
-			old_nrchars = nrchars;
-			if (!(flags & FL_NOASSIGN))
-				tmp_string = va_arg(ap, char *);
-			if (ic == EOF || !(Xtable[ic] ^ reverse)) {
-				if (ic != EOF) ungetc(ic, stream);
-				return done;
-			}
+			if (!(Xtable[ic] ^ reverse)) return done;
 
-			 while (width && ic != EOF && (Xtable[ic] ^ reverse)) {
+			if (!(flags & FL_NOASSIGN))
+				str = va_arg(ap, char *);
+
+			do {
 				if (!(flags & FL_NOASSIGN))
-					*tmp_string++ = (char) ic;
+					*str++ = (char) ic;
 				if (--width) {
 					ic = getc(stream);
 					nrchars++;
 				}
-			}
+			} while (width && ic != EOF && (Xtable[ic] ^ reverse));
+
 			if (width) {
 				if (ic != EOF) ungetc(ic, stream);
 				nrchars--;
 			}
 			if (!(flags & FL_NOASSIGN)) {	/* terminate string */
-				*tmp_string = '\0';	
-				++done;
+				*str = '\0';	
 			}
 			break;
-		}
 #ifndef	NOFLOAT:
 		case 'e':
 		case 'E':
 		case 'f':
 		case 'g':
 		case 'G':
-			if (!(flags & FL_WIDTHSPEC)) width = NUMLEN;
-			if (width > NUMLEN) width = NUMLEN;
+			if (!(flags & FL_WIDTHSPEC) || width > NUMLEN)
+				width = NUMLEN;
 
 			if (!width) return done;
 			str = f_collect(ic, stream, width);
+
 			if (str < inp_buf
-			    || (str == inp_buf && *str == '-')) return done;
-			nrchars += str - inp_buf + 1;
+			    || (str == inp_buf
+				&& (*str == '-'
+				    || *str == '+'))) return done;
+
+			/*
+			 * Although the length of the number is str-inp_buf+1
+			 * we don't add the 1 since we counted it already
+			 */
+			nrchars += str - inp_buf;
+
 			if (!(flags & FL_NOASSIGN)) {
 				ld_val = strtod(inp_buf, &tmp_string);
 				if (flags & FL_LONGDOUBLE)
@@ -439,12 +433,13 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 					*va_arg(ap, double *) = (double) ld_val;
 				else
 					*va_arg(ap, float *) = (float) ld_val;
-				done++;
 			}
 			break;
 #endif
 		}		/* end switch */
-		++format;
+		conv++;
+		if (!(flags & FL_NOASSIGN) && kind != 'n') done++;
+		format++;
 	}
 	return conv || (ic != EOF) ? done : EOF;
 }
