@@ -162,7 +162,7 @@ loc blt $1==1:  zle $2
 loc dvi $1==1 && $2==w:
 ldc dvi $1==1 && $2==2*w:
 loc dvu $1==1 && $2==w:
-loc dvu $1==1 && $2==2*w:
+ldc dvu $1==1 && $2==2*w:
 loc loe adi $1==1 && $3==w:     loe $2  inc
 loc lol adi $1==1 && $3==w:     lol $2  inc
 loc mli $1==0 && $2==w:	asp w loc 0
@@ -180,7 +180,7 @@ loc loe adi inc $3==w:	loe $2 	loc $1 	adi w inc
 loc loe adi dec $3==w:	loe $2 	loc $1 	adi w dec
 loc lol mli $3==w:      lol $2  loc $1  mli w
 loc lol adi loc $3==w:	lol $2	loc $1	adi w loc $4
-loc lol adi inc $3==w:	lol $2	loc $1	adi w dec
+loc lol adi inc $3==w:	lol $2	loc $1	adi w inc
 loc lol adi dec $3==w:	lol $2	loc $1	adi w dec
 ldc lde mli $3==2*w:    lde $2  ldc $1  mli 2*w
 ldc lde adi $3==2*w:    lde $2  ldc $1  adi 2*w
