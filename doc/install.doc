@@ -1011,14 +1011,17 @@ in the bin directory.
 .NH
 Compilation on a different machine.
 .PP
-The Kit be installed and used as a cross-compiler
-for the languages it supports on
+The installation mechanism of the Kit is supposed to be portable across
+.UX
+machines, so
+the Kit can be installed and used as a cross-compiler
+for the languages it supports on any
 .UX
 machine.
 The presence of most 
 .UX
 utilities is essential for compilation.
-A few of the programs certainly needed are: C-compiler, sed,
+A few of the programs certainly needed are: sh, C-compiler, sed, ed,
 make, and awk.
 .NH 2
 Backend
@@ -1058,7 +1061,7 @@ There is one important option in $TARGET_HOME/config/local.h.
 The utility \fIack\fP uses a default machine name when called
 as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP, \fIocm\fP,
 \fIm2\fP, \fIf2c\fP, or \fIack\fP.
-The machine name used for default is determined by the
+The machine name used by default is determined by the
 definition of ACKM in $TARGET_HOME/config/local.h.
 The Kit is distributed with "sun3" as the default machine,
 but the shell script "first" in the directory "first" alters this
@@ -1194,7 +1197,7 @@ An example of the output of a make is present in the file Out.std.
 .NH
 Documentation
 .PP
-After installationm manual pages for Amsterdam Compiler Kit can be found
+After installation, the manual pages for Amsterdam Compiler Kit can be found
 in the $TARGET_HOME/man directory. Also, the following documents are provided
 in the $TARGET_HOME/doc directory:
 .TS
