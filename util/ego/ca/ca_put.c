@@ -88,7 +88,7 @@ STATIC outsym(s,t)
 STATIC outdsym(dbl)
 	dblock_p dbl;
 {
-	outsym(dnames[dbl->d_id],sp_dnam);
+	if (dnames[dbl->d_id]) outsym(dnames[dbl->d_id],sp_dnam);
 }
 
 
@@ -126,7 +126,8 @@ STATIC outdocc(obj) obj_p obj; {
 	dbl = obj->o_dblock;
 	if ((dbl->d_flags2 & DF_SYMOUT) == 0) {
 		dbl->d_flags2 |= DF_SYMOUT;
-		if ((dbl->d_flags1 & DF_EXTERNAL) == 0) {
+		if (dnames[dbl->d_id] != 0 && 
+		    (dbl->d_flags1 & DF_EXTERNAL) == 0) {
 			outinst(ps_ina);
 			outdsym(dbl);
 		}
@@ -154,7 +155,7 @@ STATIC coutobject(obj)
 	 * hol block; the offset is omitted if it is 0 and the label
 	 * was not omitted.
 	 */
-	if (dnames[obj->o_dblock->d_id][0] == '\0') {
+	if (dnames[obj->o_dblock->d_id] == 0) {
 		coutoff(obj->o_off);
 	} else {
 		if (obj->o_off == 0) {

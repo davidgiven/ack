@@ -172,11 +172,13 @@ STATIC bool name_exists(name,endp,endd)
 	proc_p p;
 	dblock_p d;
 
+	if (! name) return FALSE;	/* HOL blocks don't have names */
 	for (p = fproc; p != endp; p = p->p_next) {
 		if (strcmp(name,pnames[p->p_id]) == 0) return TRUE;
 	}
 	for (d = fdblock; d != endd; d = d->d_next) {
-		if (strcmp(name,dnames[d->d_id]) == 0) return TRUE;
+		if (dnames[d->d_id] != 0 &&	/* HOL blocks excluded */
+		    strcmp(name,dnames[d->d_id]) == 0) return TRUE;
 	}
 	return FALSE;
 }
