@@ -67,14 +67,14 @@ instruction
 			{		/* 64 bit dividend or product */
 				checksize($2, 4);
 				T_EMIT2((046000 | ($1 & ~1)) | mrg_2, 0, 0, 0);
-				T_EMIT2(($1&1)<<11 | $7<<12 | $5 ,0,0,0);
+				T_EMIT2(($1&1)<<11 | $7<<12 | $5 | 02000 ,0,0,0);
 				ea_2(SIZE_L, DTA);
 			}
 	|	DIVL sizedef ea ',' DREG ':' DREG
 			{	    /* 32 bit long division with remainder */
 				checksize($2, 4);
 				T_EMIT2(($1 & ~1) | mrg_2, 0, 0, 0);
-				T_EMIT2(($1 & 1)<<11 | $7<<12 | $5 | 02000, 0, 0, 0);
+				T_EMIT2(($1 & 1)<<11 | $7<<12 | $5 , 0, 0, 0);
 				ea_2(SIZE_L, DTA);
 			}
 	|	LEA ea ',' AREG
