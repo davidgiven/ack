@@ -52,5 +52,5 @@ main(argc,argv) char **argv; {
 	} else {
 		errorexit();
 	}
-	return(nerrors==0 ? 0 : -1);
+	exit(nerrors==0 ? 0 : -1);
 }
