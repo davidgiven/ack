@@ -5,7 +5,7 @@ _gtty:
 	push	bp
 	mov	bp,sp
 push 6(bp)
-mov ax,29704
+mov ax,0x5401
 push ax
 push 4(bp)
 call _ioctl
