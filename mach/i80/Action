@@ -10,6 +10,9 @@ end
 name "Intel 8080 Basic library"
 dir libbc
 end
+name "Intel 8080 Occam library"
+dir liboc
+end
 name "Intel 8080 C libraries"
 dir libcc
 end

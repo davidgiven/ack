@@ -10,9 +10,12 @@ end
 name "M68000 4-4 C libraries"
 dir libcc
 end
-name "M68000 4-4 Basic libraries"
+name "M68000 4-4 Basic library"
 dir libbc
 end
-name "M68000 4-4 Pascal libraries"
+name "M68000 4-4 Pascal library"
 dir libpc
+end
+name "M68000 4-4 Occam library"
+dir liboc
 end

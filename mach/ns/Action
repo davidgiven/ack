@@ -16,6 +16,9 @@ end
 name "NS16032 PC library"
 dir libpc
 end
-name "NS16032 Basic libraries"
+name "NS16032 Basic library"
 dir libbc
+end
+name "NS16032 Occam library"
+dir liboc
 end

@@ -7,6 +7,9 @@ end
 name "Z80 Basic library"
 dir libbc
 end
+name "Z80 Occam library"
+dir liboc
+end
 name "Z80 C libraries"
 dir libcc
 end
