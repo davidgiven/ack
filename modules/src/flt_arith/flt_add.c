@@ -7,6 +7,9 @@
 
 #include "flt_misc.h"
 
+#if __STDC__ > 0
+void
+#endif
 flt_add(e1,e2,e3)
 	register flt_arith *e1,*e2,*e3;
 {
@@ -74,6 +77,9 @@ flt_add(e1,e2,e3)
 	flt_chk(e3);
 }
 
+#if __STDC__ > 0
+void
+#endif
 flt_sub(e1,e2,e3)
 	flt_arith *e1,*e2,*e3;
 {

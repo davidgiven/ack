@@ -1,7 +1,9 @@
 /* $Header$ */
 
 #include "flt_misc.h"
-
+#if __STDC__ > 0
+void
+#endif
 flt_split(e, p)
 	register flt_arith *e;
 	register unsigned short *p;

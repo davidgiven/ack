@@ -6,7 +6,9 @@
 /* $Header$ */
 
 #include "flt_misc.h"
-
+#if __STDC__ > 0
+void
+#endif
 flt_nrm(e)
 	register flt_arith *e;
 {

@@ -8,7 +8,9 @@
 #include "flt_misc.h"
 
 int	flt_status = 0;
-
+#if __STDC__ > 0
+void
+#endif
 flt_chk(e)
 	register flt_arith *e;
 {

@@ -20,3 +20,11 @@
 #define flt_chk		_flt_chk
 #define flt_b64_add	_flt_64add
 #define flt_split	_flt_split
+
+#if __STDC__ > 0
+int ucmp(long, long);
+void flt_nrm(flt_arith *);
+void flt_chk(flt_arith *);
+int flt_b64_add(struct flt_mantissa *, struct flt_mantissa *);
+void flt_split(flt_arith *, unsigned short *);
+#endif

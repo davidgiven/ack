@@ -217,7 +217,9 @@ add_exponent(e, exp)
 	if (!status) status = flt_status;
 	flt_status = status;
 }
-
+#if __STDC__ > 0
+void
+#endif
 flt_str2flt(s, e)
 	register char		*s;
 	register flt_arith	*e;
@@ -418,7 +420,9 @@ flt_ecvt(e, decpt, sign)
 	}
 	return buf;
 }
-
+#if __STDC__ > 0
+void
+#endif
 flt_flt2str(e, buf, bufsize)
 	flt_arith *e;
 	char *buf;

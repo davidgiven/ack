@@ -7,6 +7,9 @@
 
 #include "flt_misc.h"
 
+#if __STDC__ > 0
+void
+#endif
 flt_b64_sft(e,n)
 	register struct flt_mantissa *e;
 	register int n;
