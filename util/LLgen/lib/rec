@@ -28,7 +28,7 @@ extern		LLoldlevel();
 
 #ifdef LL_USERHOOK
 static		LLdoskip();
-static int	LLuserhook():
+static int	LLuserhook();
 #endif
 
 #ifndef LL_FASTER
