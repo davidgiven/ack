@@ -53,10 +53,8 @@
 #define SZ_WORD		(arith)4
 #define	SZ_INT		(arith)4
 #define	SZ_LONG		(arith)4
-#ifndef NOFLOAT
 #define	SZ_FLOAT	(arith)4
 #define	SZ_DOUBLE	(arith)8
-#endif NOFLOAT
 #define	SZ_POINTER	(arith)4
 
 /* target machine alignment requirements	*/
@@ -65,10 +63,8 @@
 #define AL_WORD		2
 #define	AL_INT		2
 #define	AL_LONG		2
-#ifndef NOFLOAT
 #define	AL_FLOAT	2
 #define	AL_DOUBLE	2
-#endif NOFLOAT
 #define	AL_POINTER	2
 #define AL_STRUCT	2
 #define AL_UNION	2

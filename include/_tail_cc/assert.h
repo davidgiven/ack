@@ -15,5 +15,5 @@
 #else
 #define	assert(exp)	(1)
 #define _assert(exp)	(1)
-#endif	NDEBUG
+#endif	/* NDEBUG */
 #endif /* _ASSERT_H */
