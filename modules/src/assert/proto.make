@@ -34,7 +34,7 @@ clean:
 		rm -f *.$(LIBSUF) *.$(SUF)
 
 lintlib:
-		$(MK_LINT_LIB) assert $(MOD_DIR)/lib $(INCLUDES) BadAssert.c
+		$(MK_LINT_LIB) assert $(MOD_DIR)/lib $(INCLUDES) $(SRC_DIR)/BadAssert.c
 
 BadAssert.$(SUF):	$(SRC_DIR)/BadAssert.c
 		$(CC) -c $(CFLAGS) $(SRC_DIR)/BadAssert.c
