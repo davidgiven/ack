@@ -199,9 +199,9 @@ oper	:	NOOP_1
 	/* 486 instructions */
 	|	BSWAP R32
 			{	emit1(0xF); emit1($1|$2); }
-	|	EXTOPBW reg ',' ea_2
+	|	EXTOPBW ea_2 ',' reg
 			{	regsize($1);
-				emit1(0xF); emit1($1); ea_2($2<<3);
+				emit1(0xF); emit1($1); ea_2($4<<3);
 			}
 	;
 

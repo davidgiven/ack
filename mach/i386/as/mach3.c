@@ -411,8 +411,8 @@
 /* Intel 486 instructions */
 0,	EXTOPBW,	0xC0,		"xaddb",
 0,	EXTOPBW,	0xC1,		"xadd",
-0,	EXTOPBW,	0xA6,		"cmpxchgb",
-0,	EXTOPBW,	0xA7,		"cmpxchg",
+0,	EXTOPBW,	0xB0,		"cmpxchgb",
+0,	EXTOPBW,	0xB1,		"cmpxchg",
 0,	BSWAP,		0xC8,		"bswap",
 0,	NOOP_2,		017+(010<<8),	"invd",
 0,	EXTOP1,		071,		"invlpg",
