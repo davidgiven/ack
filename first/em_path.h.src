@@ -1,12 +1,9 @@
-/* The trailing " is intentionally missing ! */
-#define TMP_HOME        "/usr/tmp
-#define TMP_DIR		TMP_HOME"
 /* Intended as a common directory for ALL temporary files */
+#define TMP_DIR		"/usr/tmp"
 
-/* The trailing " is intentionally missing ! */
-#define EM_HOME		"/usr/em
-#define EM_DIR          EM_HOME"	/* The root directory for EM stuff */
-#define PEM_PATH        EM_HOME/lib/pc_pem"
-#define ERR_PATH        EM_HOME/etc/pc_errors"
-#define RTERR_PATH	EM_HOME/etc/pc_rt_errors"
-#define ACK_DIR         EM_HOME/lib/ack"
+/* Access to the ACK tree and parts thereof */
+#define EM_DIR		"/usr/em"	/* The root directory for EM stuff */
+#define PEM_PATH	"lib/pc_pem"
+#define ERR_PATH	"etc/pc_errors"
+#define RTERR_PATH	"etc/pc_rt_errors"
+#define ACK_PATH	"lib/ack"
