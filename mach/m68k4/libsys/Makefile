@@ -1,17 +1,21 @@
 # $Header$
-install:
-	../../install head_em.s head_em
-	../../install tail_mon.a tail_mon
+MACH=m68k4
+all:		tail_mon
+install: 	all
+		../../install tail_mon
 
-compare:
-	-../../compare head_em.s head_em
-	-../../compare tail_mon.a tail_mon
+cmp:		all
+		-../../compare tail_mon
 
-clean :
+tail_mon:
+		ASAR=aal ; export ASAR ;\
+		march . tail_mon
+
+clean:
+		rm -f *.o
 
 opr :
-	make pr | opr
+		make pr | opr
 
 pr:
-	@pr -h `pwd`/head_em.s head_em.s
-	@ar pv tail_mon.a | pr -h `pwd`/tail_mon.a
+		@ar pv tail_mon.a

@@ -1,5 +1,9 @@
 .define _errno
 .extern _errno
-.bss
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .bss
 _errno:		.space 4
-.text
+.sect .text

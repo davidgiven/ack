@@ -1,5 +1,10 @@
 .define _execl
 .extern _execl
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _execl:		link a6,#0
 		tst.b -132(sp)
 		move.l _environ,-(sp)

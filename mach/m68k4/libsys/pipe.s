@@ -1,5 +1,10 @@
 .define _pipe
 .extern _pipe
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _pipe:		
 		move.w #0x2A,d0
 		trap #0

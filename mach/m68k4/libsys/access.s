@@ -1,6 +1,10 @@
 .define _access
 .extern _access
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _access:	move.w #0x21,d0
 		move.l 4(sp),a0
 		move.l 8(sp),d1

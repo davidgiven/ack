@@ -1,6 +1,10 @@
 .define _time
 .extern _time
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _time:		move.w #0xD,d0
 		trap #0
 		tst.l 4(sp)

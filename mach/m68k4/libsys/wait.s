@@ -1,5 +1,10 @@
 .define _wait
 .extern _wait
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _wait:		move.w	#0x7,d0
 		move.l	4(sp),a0
 		trap #0

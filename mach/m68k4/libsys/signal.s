@@ -1,5 +1,10 @@
 .define _signal
 .extern _signal
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 NSIG=32
 _signal:
 	move.l	4(sp), d0
@@ -82,5 +87,5 @@ enter:
 	movem.l	(sp)+,d0/d1/a0/a1
 	add.l	#4,sp
 	rtr
-.bss
+.sect .bss
 dvect: .space 4*NSIG

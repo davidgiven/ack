@@ -1,7 +1,11 @@
 .define _ptrace
 .extern _ptrace
 .extern _errno
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _ptrace:	move.w #0x1A,d0
 		move.l 16(sp),a0
 		move.l 12(sp),d1

@@ -7,7 +7,11 @@
 .extern calle
 .extern cerror
 .extern _errno
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 call:		trap #0
 		bcs cerror
 		rts

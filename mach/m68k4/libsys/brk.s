@@ -2,7 +2,11 @@
 .define _sbrk
 .extern _brk
 .extern _sbrk
-.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _sbrk:		move.l .reghp,a0
 		add.l  4(sp),a0
 		move.w #0x11,d0
