@@ -1,11 +1,11 @@
-.define .csa
+.define .csa4
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
 	.sect .text
-.csa:
+.csa4:
 	! case descriptor in a0
 	! index in d0
 	move.l	(a0)+,a1	! default address
