@@ -272,6 +272,10 @@ and for the struct where all information for one procedure is kept.
 This is in one struct so it can be saved easily when recursive
 procedures have to be resolved.
 .NH 3
+tes.h
+.PP
+Contains the data structure used by the top element size computation.
+.NH 3
 types.h
 .PP
 Collection of typedefs to be used by almost all modules.
@@ -477,6 +481,17 @@ This routine might decide not to do an optimization and return false.
 .PP
 The last routine that is called from process() is putline()
 to write the optimized code, bringing us to
+.NH 3
+tes.c
+.PP
+Contains the routines used by the top element size computation phase,
+which is run after the peephole-optimisation.
+The main routine of tes.c is tes_instr().  This looks at an instruction and
+decides the size of the element on top of the stack after the instruction
+is executed.  When a label is defined or used, the size of the top element
+is remembered for later use.  When the information in consistent throuhout
+the procedure, it is passed to the code generator by means of an ms_tes
+message.
 .NH 3
 putline.c
 .PP
