@@ -11,7 +11,9 @@ fef8:
 	jsr	(_frexp)
 	lea	(12,sp),sp
 	move.l	(sp),a0
-	move.l	d1,(4,sp)
+	move.l	d0,(4,sp)
+	move.l	(8,sp),d0
+	move.l	d1,(8,sp)
 	move.l	d0,(sp)
 	jmp	(a0)
 

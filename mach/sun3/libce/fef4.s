@@ -12,6 +12,8 @@ fef4:
 	lea	(12,sp),sp
 	jsr	(Fdtos)		! convert result to single
 	move.l	(sp),a0
-	move.l	d0,(sp)
+	move.l	(4,sp),d1
+	move.l	d0,(4,sp)
+	move.l	d1,(sp)
 	jmp	(a0)
 

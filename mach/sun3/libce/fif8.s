@@ -2,8 +2,8 @@
 .sect .text
 .define fif8
 fif8:
-	move.l	(4,sp),d1
-	move.l	(8,sp),d0
+	move.l	(4,sp),d0
+	move.l	(8,sp),d1
 	lea	(12,sp),a0
 	jsr	(Fmuld)		! result in d0/d1
 	lea	(4,sp),a0	! build stack for modf
