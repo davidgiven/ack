@@ -117,5 +117,9 @@ _unlink.c
 _utime.c
 _wait.c
 _write.c
+stbrksz.s
+stcatch.s
+stsndrec.s
+_stsndrec.s
 vectab.c
 errno.c

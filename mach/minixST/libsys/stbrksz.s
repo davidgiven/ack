@@ -1,13 +1,10 @@
-#
-	.define	_brksize
-	.extern	_end
-#ifdef ACK
-	.sect	.text
-	.sect	.rom
-	.sect	.data
-	.sect	.bss
-#endif ACK
+.define	__brksize
+.extern	endbss, __brksize
+.sect	.text
+.sect	.rom
+.sect	.data
+.sect	.bss
 
-	.sect	.data
-_brksize:
-	.data4	_end
+.sect	.data
+__brksize:
+.data4	endbss
