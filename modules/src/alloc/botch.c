@@ -7,9 +7,6 @@
 		to check if freed memory is used inappopriately.
 */
 
-#include "in_all.h"
-
-EXPORT
 botch(ptr, n)
 	register char *ptr;
 	register unsigned int n;

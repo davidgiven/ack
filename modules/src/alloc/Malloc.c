@@ -10,10 +10,9 @@
 	char *Malloc(n)		: allocate n bytes
 */
 
-#include	"in_all.h"
 #include	"alloc.h"
 
-EXPORT char *
+char *
 Malloc(sz)
 	unsigned int sz;
 {

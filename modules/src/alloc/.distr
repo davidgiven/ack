@@ -7,7 +7,6 @@ alloc.3
 alloc.h
 botch.c
 clear.c
-in_all.h
 st_alloc.c
 std_alloc.c
 No_Mem.c

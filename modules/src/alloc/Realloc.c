@@ -10,10 +10,9 @@
 	char *Realloc(ptr, n)	: reallocate buffer to n bytes
 */
 
-#include	"in_all.h"
 #include	"alloc.h"
 
-EXPORT char *
+char *
 Realloc(ptr, sz)
 	char ptr[];
 	unsigned int sz;

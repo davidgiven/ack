@@ -10,10 +10,9 @@
 	char *Srealloc(ptr, n)	: reallocate buffer to n bytes
 */
 
-#include	"in_all.h"
 #include	"alloc.h"
 
-EXPORT char *
+char *
 Srealloc(str, sz)
 	char str[];
 	unsigned int sz;

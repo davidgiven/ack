@@ -6,10 +6,7 @@
 /*	clear - clear a block of memory, and try to do it fast.
 */
 
-#include "in_all.h"
-
 /* instead of Calloc: */
-EXPORT
 clear(ptr, n)
 	register char *ptr;
 	register unsigned int n;

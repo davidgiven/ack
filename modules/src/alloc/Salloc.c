@@ -11,10 +11,9 @@
 					str
 */
 
-#include	"in_all.h"
 #include	"alloc.h"
 
-EXPORT char *
+char *
 Salloc(str, sz)
 	register char *str;
 	register unsigned int sz;
