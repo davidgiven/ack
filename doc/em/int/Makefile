@@ -24,7 +24,7 @@ nem:            nem.p
 		apc -O -i nem.p >emerrs ; mv a.out nem
 
 emdmp:          emdmp.c
-		$(CC) -I$(HOME)/h -o emdmp -O emdmp.c
+		$(CC) -I$(HOME)/h -I$(HOME)/config -o emdmp -O emdmp.c
 
 cmp:
 
