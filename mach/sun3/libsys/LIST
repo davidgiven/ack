@@ -34,7 +34,9 @@ flock.s
 fork.s
 _fork.s
 Xstat.c
+_Xstat.c
 fstat.s
+_fstat.s
 fstatfs.s
 fsync.s
 ftime.c
@@ -107,6 +109,7 @@ recvmsg.s
 rename.s
 rmdir.s
 sbrk.s
+_sbrk.s
 select.s
 semsys.s
 send.s
@@ -147,6 +150,7 @@ sync.s
 syscall.s
 time.c
 times.c
+_times.c
 truncate.s
 umask.s
 unlink.s
