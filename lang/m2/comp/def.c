@@ -96,16 +96,22 @@ define(id, scope, kind)
 	*/
 	register t_def *df;
 
-	df = lookup(id, scope, 1, 0);
+	df = lookup(id, scope, 2, 0);
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
 		( 
 		  scopeclosed(scope)
 		&&
-		  (df = lookup(id, PervasiveScope, 1, 0)))
+		  (df = lookup(id, PervasiveScope, 2, 0)))
 	   ) {
 		switch(df->df_kind) {
+		case D_INUSE:
+			if (kind != D_INUSE) {
+				error("identifier \"%s\" already used; may not be redefined in this scope", df->df_idf->id_text);
+			}
+			return df;
+
 		case D_HIDDEN:
 			/* An opaque type. We may now have found the
 			   definition of this type.

@@ -188,7 +188,7 @@ Reverse(pdf)
 		from this list.
 	*/
 	register t_def *df, *df1;
-#define INTERESTING D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE
+#define INTERESTING (D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE|D_IMPORTED)
 
 	df = 0;
 	df1 = *pdf;

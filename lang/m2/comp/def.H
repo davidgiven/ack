@@ -98,9 +98,11 @@ struct def	{		/* list of definitions for a name */
 #define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
+#define D_INUSE		0x8000	/* identification in this scope (like D_IMPORT)
+				*/
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
-#define D_IMPORTED	(D_IMPORT)
+#define D_IMPORTED	(D_IMPORT|D_INUSE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	unsigned short  df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */

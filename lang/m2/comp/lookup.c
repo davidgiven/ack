@@ -23,6 +23,8 @@
 #include	"type.h"
 #include	"misc.h"
 
+extern int	pass_1;
+
 t_def *
 lookup(id, scope, import, flags)
 	register t_idf *id;
@@ -55,6 +57,7 @@ lookup(id, scope, import, flags)
 		df->df_flags |= flags;
 		if (import) {
 			while (df->df_kind & D_IMPORTED) {
+				if (df->df_kind == D_INUSE && import != 1) break;
 				assert(df->imp_def != 0);
 				df = df->imp_def;
 			}
@@ -66,23 +69,31 @@ lookup(id, scope, import, flags)
 t_def *
 lookfor(id, vis, message, flags)
 	register t_node *id;
-	t_scopelist *vis;
+	register t_scopelist *vis;
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
 		if message is set, give an error message
 	*/
-	register t_def *df;
 	register t_scopelist *sc = vis;
+	t_def *df;
 
 	while (sc) {
 		df = lookup(id->nd_IDF, sc->sc_scope, 1, flags);
-		if (df) return df;
+		if (df) {
+			if (pass_1 &&
+			    message && 
+			    sc->sc_scope->sc_level < vis->sc_scope->sc_level &&
+			    ! scopeclosed(vis->sc_scope)) {
+				define(id->nd_IDF, vis->sc_scope, D_INUSE)->
+					imp_def = df;
+			}
+			return df;
+		}
 		sc = nextvisible(sc);
 	}
 
 	if (message) id_not_declared(id);
 
-	df = MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
-	return df;
+	return MkDef(id->nd_IDF, vis->sc_scope, D_ERROR);
 }
