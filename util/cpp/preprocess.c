@@ -138,8 +138,11 @@ preprocess(fn)
 			case STSTR:
 			case STCHAR: {
 				register int stopc = c;
+				int escaped;
 	
 				do {
+
+					escaped = 0;
 					echo(c);
 					LoadChar(c);
 					if (c == '\n') {
@@ -156,10 +159,10 @@ preprocess(fn)
 							++LineNumber;
 							lineno++;
 						}
-						else if (c == '\'') continue;
+						else if (c == '\'') escaped = 1;
 					}
 				}
-				while (c != stopc);
+				while (escaped || c != stopc);
 				echo(c);
 				if (c == '\n')
 					break;	/* Don't eat # */
