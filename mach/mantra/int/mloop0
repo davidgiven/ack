@@ -7,7 +7,7 @@
 		bsr	_break
 		add.l	wrd,sp
 #if	last
-		move.l	#30,d0			!initialise lasttable
+		move.l	#126,d0			!initialise lasttable
 		lea	lasttable,a5
 0:		clr.l	(a5)+
 		dbra	d0,0b
@@ -409,7 +409,7 @@ skipdisp:
 #if flow
 		move.l	d1,lflow
 		move.l	maxcount,d0
-		asr.l	#3,d0		!divide by 8 ; byte is 8 bits ,you know
+		asr.l	#3,d0		!divide by 8
 		add.l	#2,d0
 		bclr	#0,d0		!make integer number of words (2 byte!)
 		add.l	d0,d1
@@ -495,6 +495,8 @@ hp:	.space	4
 	.define	retarea
 	.define	retsize
 	.define hp
+	.define maxcount
+	.define firstp
 	.define globmax
 	.define tblmax
 	.define ml
