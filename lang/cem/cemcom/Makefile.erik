@@ -77,7 +77,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	idepth.h idfsize.h ifdepth.h inputtype.h inumlength.h lapbuf.h \
 	maxincl.h myalloc.h nobitfield.h nopp.h \
 	nparams.h numsize.h parbufsize.h pathlength.h predefine.h \
-	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h
+	strsize.h target_sizes.h textsize.h use_tmp.h spec_arith.h static.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
@@ -217,15 +217,15 @@ cstoper.o: Lpars.h arith.h assert.h debug.h expr.h idf.h label.h nobitfield.h no
 arith.o: Lpars.h alloc.h arith.h botch_free.h expr.h field.h idf.h label.h mes.h nobitfield.h nopp.h spec_arith.h storage.h type.h
 alloc.o: alloc.h assert.h debug.h myalloc.h
 code.o: LLlex.h Lpars.h alloc.h arith.h assert.h atw.h botch_free.h code.h dataflow.h debug.h declar.h decspecs.h def.h expr.h idf.h label.h level.h mes.h nobitfield.h nopp.h sizes.h spec_arith.h specials.h stack.h stmt.h storage.h type.h use_tmp.h
-dumpidf.o: Lpars.h arith.h debug.h def.h expr.h field.h idf.h label.h nobitfield.h nopp.h spec_arith.h stack.h struct.h type.h
+dumpidf.o: Lpars.h arith.h debug.h def.h expr.h field.h idf.h label.h nobitfield.h nopp.h spec_arith.h stack.h static.h struct.h type.h
 error.o: LLlex.h arith.h debug.h errout.h expr.h label.h nopp.h spec_arith.h tokenname.h use_tmp.h
 field.o: Lpars.h arith.h assert.h code.h debug.h expr.h field.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h type.h
 tokenname.o: LLlex.h Lpars.h arith.h idf.h nopp.h spec_arith.h tokenname.h
 LLlex.o: LLlex.h Lpars.h alloc.h arith.h assert.h class.h debug.h def.h idf.h idfsize.h input.h nopp.h numsize.h sizes.h spec_arith.h strsize.h
 LLmessage.o: LLlex.h Lpars.h alloc.h arith.h idf.h nopp.h spec_arith.h
-input.o: LLlex.h alloc.h arith.h assert.h debug.h idepth.h input.h inputtype.h interface.h nopp.h pathlength.h spec_arith.h
+input.o: LLlex.h alloc.h arith.h assert.h debug.h idepth.h input.h inputtype.h interface.h nopp.h pathlength.h spec_arith.h static.h
 domacro.o: LLlex.h Lpars.h alloc.h arith.h assert.h botch_free.h class.h debug.h idf.h idfsize.h ifdepth.h input.h interface.h macro.h nopp.h nparams.h parbufsize.h spec_arith.h storage.h textsize.h
-replace.o: LLlex.h alloc.h arith.h assert.h class.h debug.h idf.h input.h interface.h macro.h nopp.h pathlength.h spec_arith.h strsize.h
+replace.o: LLlex.h alloc.h arith.h assert.h class.h debug.h idf.h input.h interface.h macro.h nopp.h pathlength.h spec_arith.h static.h strsize.h
 init.o: alloc.h class.h idf.h interface.h macro.h nopp.h predefine.h
 options.o: align.h arith.h class.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h use_tmp.h
 scan.o: class.h idf.h input.h interface.h lapbuf.h macro.h nopp.h nparams.h

@@ -16,6 +16,7 @@
 #include	"Lpars.h"
 #include	"label.h"
 #include	"expr.h"
+#include	"static.h"
 
 /*	Some routines (symbol2str, token2str, type2str) which should have
  *	yielded strings are written to yield a pointer to a transient piece
@@ -284,15 +285,16 @@ type2str(tp)
 	return buf;
 }
 
+STATIC char trans_buf[MAXTRANS][300];
+
 char *		/* the ultimate transient buffer supplier */
 next_transient()
 {
 	static int bnum;
-	static char buf[MAXTRANS][300];
 
 	if (++bnum == MAXTRANS)
 		bnum = 0;
-	return buf[bnum];
+	return trans_buf[bnum];
 }
 
 print_expr(msg, expr)

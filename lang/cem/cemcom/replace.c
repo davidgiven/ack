@@ -17,6 +17,7 @@
 #include	"class.h"
 #include	"assert.h"
 #include	"interface.h"
+#include	"static.h"
 
 char *strcpy(), *strcat();
 char *long2str();
@@ -62,6 +63,8 @@ replace(idef)
 	return 1;
 }
 
+STATIC char FilNamBuf[PATHLENGTH];
+
 PRIVATE
 macro_func(idef)
 	struct idf *idef;
@@ -71,8 +74,6 @@ macro_func(idef)
 		replacement texts must be evaluated at the time they are
 		used.
 	*/
-	static char FilNamBuf[PATHLENGTH];
-
 	/* This switch is very blunt...	*/
 	switch (idef->id_text[2]) {
 	case 'F' :			/* __FILE__	*/

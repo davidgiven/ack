@@ -130,3 +130,6 @@
 /* describes internal compiler arithmetics */
 #undef	SPECIAL_ARITHMETICS	/* something different from native long */
 
+
+!File: static.h
+#define STATIC			/* decl. spec. for large "static" arrays */

@@ -32,7 +32,7 @@
 
 #include	<system.h>
 #include	"nopp.h"
-#include	"inputtype.h"	/* UF */
+#include	"inputtype.h"
 #include	"interface.h"
 #include	"arith.h"
 #include	"LLlex.h"
@@ -40,10 +40,11 @@
 #include	"alloc.h"
 
 #ifndef NOPP
-#include	"idepth.h"	/* UF */
-#include	"debug.h"	/* UF */
-#include	"pathlength.h"	/* UF */
+#include	"idepth.h"
+#include	"debug.h"
+#include	"pathlength.h"
 #include	"assert.h"
+#include	"static.h"
 #endif NOPP
 
 EXPORT char *ipp = 0;		/* input pointer	*/
@@ -445,18 +446,19 @@ setwdir(wdir, fn)
 #ifndef NOPP
 /*	mk_filename() concatenates a dir and filename.
 */
+STATIC char path[PATHLENGTH];
+
 PRIVATE char *
 mk_filename(dir, file)
 	register char *dir, *file;
 {
-	static char newfn[PATHLENGTH];
-	register char *dst = &newfn[0];
+	register char *dst = &path[0];
 
 	if (!(dir[0] == '.' && dir[1] == '\0')) {
 		while (*dst++ = *dir++);
 		*(dst - 1) = '/';
 	}
 	while (*dst++ = *file++);
-	return &newfn[0];
+	return &path[0];
 }
 #endif NOPP
