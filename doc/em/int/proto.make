@@ -10,10 +10,10 @@ all:            em emdmp tables
 tables:         mktables $(SRC_HOME)/etc/ip_spec.t
 		mktables $(SRC_HOME)/etc/ip_spec.t tables
 
-mktables:       mktables.c $(TARGET_HOME)/h/em_spec.h \
+mktables:       $(SRC_DIR)/mktables.c $(TARGET_HOME)/h/em_spec.h \
 		$(TARGET_HOME)/h/em_flag.h \
 		$(TARGET_HOME)/lib.bin/em_data.$(LIBSUF) $(TARGET_HOME)/h/ip_spec.h
-		$(CC) -I$(TARGET_HOME)/h -O -o mktables mktables.c $(TARGET_HOME)/lib.bin/em_data.$(LIBSUF)
+		$(CC) -I$(TARGET_HOME)/h -O -o mktables $(SRC_DIR)/mktables.c $(TARGET_HOME)/lib.bin/em_data.$(LIBSUF)
 
 em:             $(SRC_DIR)/em.p
 		apc -O $(SRC_DIR)/em.p >emerrs ; mv a.out em
