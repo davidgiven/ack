@@ -2468,6 +2468,10 @@ with REG rmorconst
       add %1,%2			yields %1
 
 pat loc sli ads sti $2==2 && $3==2
+with exact rmorconst ADDR_EXTERN
+uses reusing %1,ADDREG=%1,CXREG={ANYCON,$1}
+  gen sal %a,cl			yields {Xreg_off,%a,%2.off}
+						leaving sti $4
 with ADDREG rmorconst
 uses CXREG={ANYCON,$1}
   gen sal %1,cl
@@ -2478,6 +2482,9 @@ uses CXREG={ANYCON,$1}
       add %2,%1			yields %2	leaving sti $4
 
 pat loc sli ads $2==2 && $3==2
+with exact rmorconst ADDR_EXTERN
+uses reusing %1,ADDREG=%1,CXREG={ANYCON,$1}
+  gen sal %a,cl			yields {Xreg_off,%a,%2.off}
 with ADDREG rmorconst
 uses CXREG={ANYCON,$1}
   gen sal %1,cl
