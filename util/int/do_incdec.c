@@ -280,7 +280,7 @@ DoZRLn2(arg)
 
 	LOG(("@Z6 DoZRLn2(%ld)", l));
 	spoilFRA();
-	l = arg_l(arg);
+	l = arg_l(l);
 	st_stw(loc_addr(l), 0L);
 }
 
