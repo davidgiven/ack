@@ -423,8 +423,14 @@ char *s;
 	switchsect(S_UND);
 	modulename = s;
 	lineno = 1;
-	if ((sflag & (SYM_EXT|SYM_LOC|SYM_LAB)) && PASS_SYMB)
-		newsymb(s, S_MOD, (short)0, (valu_t)0);
+#ifdef NEEDED
+        /*
+         * problem: it shows the name of the tempfile, not any name
+         * the user is familiar with. Moreover, it is not reproducable.
+         */
+        if ((sflag & (SYM_EXT|SYM_LOC|SYM_LAB)) && PASS_SYMB)
+                newsymb(s, S_MOD, (short)0, (valu_t)0);
+#endif
 #ifdef LISTING
 	listtemp = 0;
 	if (dflag & 01000)
