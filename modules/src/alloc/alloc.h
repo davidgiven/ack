@@ -24,12 +24,13 @@ char *Srealloc(char *, unsigned int);
 char *Realloc(char *, unsigned int);
 char *st_alloc(char **, unsigned int, int);
 char *std_alloc(char **, unsigned int, int, int *);
-int No_Mem(void);
+void No_Mem(void);
 void clear(char *, unsigned int);
 void botch(char *, unsigned int);
 #else
 extern char	*Salloc(), *Malloc(), *Srealloc(), *Realloc();
 extern char	*st_alloc(), *std_alloc();
+void		clear(), botch(), No_Mem();
 #endif
 
 /*	S T R U C T U R E - S T O R A G E  D E F I N I T I O N S	*/

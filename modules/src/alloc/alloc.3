@@ -38,12 +38,13 @@ Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory alloc
 .br
 .B unsigned int size;
 .PP
-.br
-.B clear(ptr, size)
+.B void clear(ptr, size)
 .br
 .B char *ptr;
 .br
 .B unsigned int size;
+.PP
+.void No_Mem()
 .PP
 .SH DESCRIPTION
 This set of routines provides a checking memory allocation mechanism.

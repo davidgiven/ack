@@ -9,9 +9,7 @@
 
 #include "alloc.h"
 
-#if __STDC__
 void
-#endif
 botch(ptr, n)
 	register char *ptr;
 	register unsigned int n;
