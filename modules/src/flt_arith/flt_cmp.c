@@ -11,8 +11,6 @@ int
 flt_cmp(e1, e2)
 	register flt_arith *e1, *e2;
 {
-	int sign;
-	int tmp;
 	flt_arith x;
 
 	flt_sub(e1, e2, &x);
