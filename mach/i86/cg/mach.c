@@ -89,8 +89,8 @@ regscore(off, size, typ, score, totyp)
 {
 	if (size != 2) return -1;
 	score -= 1;
-	if (typ == reg_pointer || typ == reg_loop) score *= 3;
-	else score *= 2;
+	score += score;
+	if (typ == reg_pointer || typ == reg_loop) score += (score >> 2);
 	score -= 2;	/* cost of saving */
 	if (off >= 0) score -= 3;
 	return score;

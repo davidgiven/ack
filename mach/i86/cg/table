@@ -1849,16 +1849,48 @@ lar !defined($1) | |	remove(ALL)
  * group 12 : Compare instructions	*
  ****************************************/
 
-cmi $1==2	| |	|				    | sbi 2  |
-cmi $1==4	| rmorconst rmorconst X_REG X_REG |
-			"sub %[3],%[1]"
-			"sbb %[4],%[2]"
-			"jne 1f"
-			"and %[3],%[3]"
-			"je 1f"
-			"inc %[4]\n1: "
-			setcc(%[4]) erase(%[3]) erase(%[4])
-						     | %[4] | |
+cmi $1==2	| NO register rmorconst |
+			allocate(REG = {ANYCON,0})
+			"cmp %[1],%[2]"
+			"je 2f"
+			"jl 1f"
+			"inc %[a]"
+			"jmp 2f"
+			"1:\tdec %[a]\n2:"
+			setcc(%[a])
+			erase(%[a])		     | %[a] | |(4,4)
+...	       | rmorconst register |
+			allocate(REG = {ANYCON,0})
+			"cmp %[1],%[2]"
+			"je 2f"
+			"jl 1f"
+			"inc %[a]"
+			"jmp 2f"
+			"1:\tdec %[a]\n2:"
+			setcc(%[a])
+			erase(%[a])		     | %[a] | |(4,4)
+...	       | ACC const |
+			allocate(REG = {ANYCON,0})
+			"cmp %[1],%[2]"
+			"je 2f"
+			"jl 1f"
+			"inc %[a]"
+			"jmp 2f"
+			"1:\tdec %[a]\n2:"
+			setcc(%[a])
+			erase(%[a])		     | %[a] | |(3,4)
+...	       | const ACC |
+			allocate(REG = {ANYCON,0})
+			"cmp %[1],%[2]"
+			"je 2f"
+			"jl 1f"
+			"inc %[a]"
+			"jmp 2f"
+			"1:\tdec %[a]\n2:"
+			setcc(%[a])
+			erase(%[a])		     | %[a] | |(3,4)
+cmi $1==4	| |	remove(ALL)
+			"call .cmi4"			| ax | |
 cmu $1==2	| |	|				    | cmp |
 cmu $1==4	| |	remove(ALL)
 			"call .cmu4"		       | ax | |
@@ -2273,6 +2305,39 @@ cms zne $1==2	| regorconst rm STACK |
 			remove(ALL)
 			"cmp %[1],%[2]"
 			"jne $2" 			  | | |
+ldc cmi zlt highw(1)==0 && loww(1)==0 && $2==4 | rmorconst rmorconst |
+                                        | %[2] | zlt $3 |
+ldc cmi zge highw(1)==0 && loww(1)==0 && $2==4 | rmorconst rmorconst |
+                                        | %[2] | zge $3 |
+ldc cms zeq $2==4 && loww(1)==0 && highw(1)==0 | rmorconst X_REG |
+                        remove(ALL)
+                        "or %[2],%[1]"
+                        "je $3"                        |               | |
+...						| X_REG rmorconst |
+			remove(ALL)
+			"or %[1],%[2]"
+			"je $3"			|		| |
+ldc cms zne $2==4 && loww(1)==0 && highw(1)==0 | rmorconst X_REG |
+                        remove(ALL)
+                        "or %[2],%[1]"
+                        "jne $3"                        |               | |
+...						| X_REG rmorconst |
+			remove(ALL)
+			"or %[1],%[2]"
+			"jne $3"			|		| |
+ldc cms zeq $2==4       | rmorconst rmorconst |
+                        remove(ALL)
+                        "cmp %[2],%(loww(1)%)"
+                        "jne 1f"
+                        "cmp %[1],%(highw(1)%)"
+                        "je $3"
+                        "1:"                            |               | |
+ldc cms zne $2==4       | rmorconst rmorconst |
+                        remove(ALL)
+                        "cmp %[2],%(loww(1)%)"
+                        "jne $3"
+                        "cmp %[1],%(highw(1)%)"
+                        "jne $3"                        |               | |
 cms zne $1==4	| regorconst regorconst rm rm STACK |
 			"cmp %[3],%[1]"
 			"jne $2"
