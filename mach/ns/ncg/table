@@ -29,7 +29,6 @@ EM_BSIZE=8
 
 PROPERTIES
 
-USELESS			/* Bug circumvention */
 REG			/* Normal registers */
 FREG			/* Floating point registers */
 DFREG(8)		/* double floating reg for double precision */
@@ -537,7 +536,6 @@ with exact addr_external		yields {absolute8, %1.disp}
 with exact LOCAL			yields {memrel8, fp, %1.ind, 0}
 
 pat loi defined($1)
-with USELESS
 with REG STACK
     uses REG = {const4, $1}
     gen addd %a, %1
@@ -751,7 +749,6 @@ with regcon4 consrc4 consrc4
 	move %2, {regrel4, %1.reg, %1.disp+4}
 
 pat sti defined($1)
-with USELESS
 with REG STACK
     uses REG={const4, $1}
     gen 1:
@@ -938,12 +935,10 @@ kills absolute + rel + memregrelcon4
     gen ashd {const4, $2}, {absolute4, $1}
 
 pat loc sri $2 == 4
-with USELESS
 with REG
     gen ashd {const4,0-$1}, %1		yields %1
 
 pat sri $1 == 4
-with USELESS
 with REG REG
 gen negd %1, %1
     ashd %1, %2				yields %2
@@ -1021,12 +1016,10 @@ with STACK
 pat slu						leaving sli $1
 
 pat loc sru $2 == 4
-with USELESS
 with REG
     gen lshd {const4, 0-$1}, %1		yields %1
 
 pat sru $1 == 4
-with USELESS
 with REG REG
     gen negd %1, %1
         lshd %1, %2			yields %2
@@ -1201,7 +1194,6 @@ pat sbs $1==4					leaving sbi 4
  *****************************************************************/
 
 pat inc
-with USELESS
 with REG
     gen addd {const4,1}, %1		yields %1
 with exact STACK
@@ -1234,7 +1226,6 @@ kills absolute, rel, memregrelcon4
     gen addd {const4,1},{absolute4, $1}
 
 pat dec
-with USELESS
 with  REG
     gen addd {const4,0-1}, %1		yields %1
 with exact STACK
@@ -1424,6 +1415,16 @@ with STACK
 	addr {regrel4, r1, 4}, r1
 	acbd {const4, 0-4}, r0, {label, "1b"}
 
+pat and !defined($1)
+with REG STACK
+uses REG
+    gen addr {memregrel4, sp, 0}, %a
+	addd %1, %a
+	1:
+	andd {TOS}, {regrel4, %a, 0}
+	addr {regrel4, %a, 4}, %a
+	acbd {const4, 0-4}, %1, {label, "1b"}
+
 pat lol ior stl $1==$3 && $2==4
 with src4
 kills rel, LOCAL %ind-4 < $1 && %ind+4 > $1
@@ -1485,6 +1486,16 @@ with STACK
 	addr {regrel4, r1, 4}, r1
 	acbd {const4, 0-4}, r0, {label, "1b"}
 
+pat ior !defined($1)
+with REG STACK
+uses REG
+    gen addr {memregrel4, sp, 0}, %a
+	addd %1, %a
+	1:
+	ord {TOS}, {regrel4, %a, 0}
+	addr {regrel4, %a, 4}, %a
+	acbd {const4, 0-4}, %1, {label, "1b"}
+
 pat xor $1==4
 with src4 REG
     gen xord %1, %2				yields %2
@@ -1500,8 +1511,17 @@ with STACK
 	addr {regrel4, r1, 4}, r1
 	acbd {const4, 0-4}, r0, {label, "1b"}
 
+pat xor !defined($1)
+with REG STACK
+uses REG
+    gen addr {memregrel4, sp, 0}, %a
+	addd %1, %a
+	1:
+	xord {TOS}, {regrel4, %a, 0}
+	addr {regrel4, %a, 4}, %a
+	acbd {const4, 0-4}, %1, {label, "1b"}
+
 pat com $1==4
-with USELESS
 with REG
     gen comd %1, %1				yields %1
 
@@ -1514,17 +1534,24 @@ with STACK
 	addr {regrel4, r1, 4}, r1
 	acbd {const4, 0-4}, r0, {label, "1b"}
 
+pat com !defined($1)
+with REG STACK
+uses REG
+    gen addr {memregrel4, sp, 0}, %a
+	1:
+	comd {regrel4, %a, 0}, {regrel4, %a, 0}
+	addr {regrel4, %a, 4}, %a
+	acbd {const4, 0-4}, %1, {label, "1b"}
+
 pat rol $1 == 4
 with src124 REG
     gen rotd %1, %2			yields %2
 
 pat loc ror $2 == 4
-with USELESS
 with REG
     gen rotd {const4, 0-$1}, %1		yields %1
 
 pat ror $1 == 4
-with USELESS
 with REG REG
     gen negd %1, %1
 	rotd %1, %2			yields %2
@@ -1614,19 +1641,16 @@ pat lae aar $2==2 && rom($1,3)==1 && rom($1,1)!=0
 						adp 0-rom($1,1)
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)==0 
-with USELESS
 with REG
     gen ashd {const4, 1}, %1		yields %1
 					leaving adi 2
 
 pat lae aar $2==2 && rom($1,3)==2 && rom($1,1)!=0 
-with USELESS
 with REG
     gen ashd {const4, 1}, %1		yields {regcon4, %1,(0-2)*rom($1,1)}
 					leaving adi 2
 
 pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)==0
-with USELESS
 with REG addr_local
 uses REG
     gen addr {memregrelsid, %2.ind, fp, %1}, %a	
@@ -1638,7 +1662,6 @@ uses REG
 with					leaving lae $1 aar $2
 
 pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)!=0
-with USELESS
 with REG addr_local
 uses REG
     gen subd {const4, rom($1,1)}, %1
@@ -1652,13 +1675,11 @@ uses REG
 with 					leaving lae $1 aar $2
 
 pat lae lar $2==4 && rom($1,3)==4 && rom($1,1)==0
-with USELESS
 with REG addr_local		yields {memregrelsid, %2.ind, fp, %1}
 with REG addr_external		yields {abssid, %2.disp, %1}
 with 					leaving lae $1 lar $2
 
 pat lae lar $2==4 && rom($1,3)==4 && rom($1,1)!=0
-with USELESS
 with REG addr_local
     gen subd {const4, rom($1,1)}, %1
 				yields {memregrelsid, %2.ind, fp, %1}
@@ -1692,7 +1713,6 @@ with src4 REG
     gen indexd %2, {const4, rom($1,3)-1}, %1	yields %2
 
 pat lae aar $2==4 && rom($1,1)!=0
-with USELESS
 with REG REG
     gen subd {const4,rom($1,1)}, %1
 	indexd %2, {const4, rom($1,3)-1}, %1	yields %2
@@ -1985,7 +2005,6 @@ with STACK
     gen jsr {absolute4, $1}
 
 pat cai
-with USELESS
 with REG STACK
     gen jsr %1
 
@@ -2020,7 +2039,6 @@ with STACK
     gen adjspd {const4,0-$1}
 
 pat ass $1==4
-with USELESS
 with REG STACK
     gen negd %1, %1
 	adjspd %1
@@ -2030,13 +2048,11 @@ with const4 STACK
 pat blm $1==0
 
 pat blm $1==4
-with USELESS
 with REG REG
 kills allmincon
     gen move {regrel4, %2, 0}, {regrel4, %1, 0}
 
 pat blm $1>4 && $1<=16
-with USELESS
 with REG REG
 kills allmincon
     gen movmd %2, %1, {const4, $1}
@@ -2054,7 +2070,6 @@ kills allmincon
     gen movmd {LOCAL, %2.ind}, {LOCAL, %1.ind}, {const4, $1}
 
 pat blm $1>16
-with USELESS
 with REG REG
 kills allmincon
     uses REG={const4,$1}
@@ -2065,7 +2080,6 @@ kills allmincon
 	acbd {const4, 0-4}, %a, {label, "1b"}
 
 pat bls $1==4
-with USELESS
 with REG
 kills ALL
     gen 1:
