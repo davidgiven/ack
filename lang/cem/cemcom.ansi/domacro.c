@@ -720,19 +720,15 @@ domacro()
 
 	EoiForNewline = 1;
 	if ((tok = GetToken(&tk)) == IDENTIFIER) {
-		if (! strcmp(tk.tk_idf->id_text, "line")) {
-			tok = GetToken(&tk);
-			if (tok == INTEGER) {
-				do_line((unsigned int) tk.tk_ival);
-				EoiForNewline = 0;
-				return;
-			}
-		}
-		else if (! strcmp(tk.tk_idf->id_text, "pragma")) {
+		if (! strcmp(tk.tk_idf->id_text, "pragma")) {
 			do_pragma();
 			EoiForNewline = 0;
 			return;
 		}
+	} else if (tok == INTEGER) {
+		do_line((unsigned int) tk.tk_ival);
+		EoiForNewline = 0;
+		return;
 	}
 	error("illegal # line");
 	EoiForNewline = 0;

@@ -56,7 +56,7 @@ COPTIONS =
 
 # What parser generator to use and how
 GEN = $(EMHOME)/bin/LLgen
-GENOPTIONS = -vvvx
+GENOPTIONS = #-vvvx
 
 # tabgen
 TABGEN = $(EMHOME)/bin/tabgen
