@@ -9,9 +9,8 @@
 
 #define	MIN_SIZE	(1<<LOG_MIN_SIZE)
 #define	MAX_FLIST	(LOG_MAX_SIZE - LOG_MIN_SIZE)
-#if ALIGNMENT != 1 && ALIGNMENT != 2 && ALIGNMENT != 4 && ALIGNMENT != 8 &&\
-    ALIGNMENT != 16
-ALIGNMENT must be a (small) power of two !!!
+#if ALIGNMENT != 4 && ALIGNMENT != 8 && ALIGNMENT != 16
+ALIGNMENT must be 4, 8, or 16
 #endif
 #define align(n)	(((n) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 

@@ -96,6 +96,7 @@ malloc(n)
 		}
 
 		p = SBRK((int)req);
+		assert((size_type)p == align((size_type)p));
 		if (p == ILL_BREAK) {
 			req = n + mallink_size();
 			p = SBRK((int)req);

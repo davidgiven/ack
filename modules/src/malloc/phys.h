@@ -8,8 +8,17 @@
 */
 publicdata mallink *ml_last;
 
-#define	__free_of(ml)		((size_type)_phys_prev_of(ml) & 01)
-#define __phys_prev_of(ml)	(mallink *)((size_type)_phys_prev_of(ml) & ~01)
+#define FREE_BIT		01
+#ifdef STORE
+#define STORE_BIT		02
+#define BITS			(FREE_BIT|STORE_BIT)
+#else
+#define BITS			(FREE_BIT)
+#endif
+
+#define __bits(ml)		((size_type)_phys_prev_of(ml) & BITS)
+#define	__free_of(ml)		((size_type)_phys_prev_of(ml) & FREE_BIT)
+#define __phys_prev_of(ml)	(mallink *)((size_type)_phys_prev_of(ml) & ~FREE_BIT)
 #define prev_size_of(ml)	((char *)(ml) - \
 				 (char *)__phys_prev_of(ml) - \
 				 mallink_size() \
@@ -45,8 +54,8 @@ public Error();
 
 #define	set_free(ml,e) \
 	(_phys_prev_of(ml) = (mallink *) \
-		((e) ? (size_type) _phys_prev_of(ml) | 01 : \
-		       (size_type) _phys_prev_of(ml) & ~01))
+		((e) ? (size_type) _phys_prev_of(ml) | FREE_BIT : \
+		       (size_type) _phys_prev_of(ml) & ~FREE_BIT))
 #define	free_of(ml)		(__free_of(ml))
 
 #define coalesce_forw(ml,nxt)	( unlink_free_chunk(nxt), \
