@@ -1,3 +1,4 @@
+#! /bin/sh
 case $0 in
 */first)
 	FDIR=`expr $0 : '\(.*\)/first'`
@@ -75,11 +76,11 @@ while :
 do
 	for i in $MACH_LIST
 	do
-		if [ $i = $ACM ]
+		if [ $i = "$ACM" ]
 		then break
 		fi
 	done
-	if [ $i = $ACM ]
+	if [ $i = "$ACM" ]
 	then break
 	fi
 	echo "This installation script has no knowledge about $SYSNAME.

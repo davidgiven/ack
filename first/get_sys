@@ -146,7 +146,7 @@ case X$ANS in
 Xj*|Xy*|X)	break
 	;;
 Xn*)	echo Ok, I will give you another chance....
-	. get_sys
+	. $0
 	break
 	;;
 *)	echo "I do not understand your answer ($ANS). Try again."
