@@ -10,7 +10,9 @@ int n;
   if (n <= 0) return(s1);
 
   /* Find the end of s1. */
-  while (*s1 != 0) s1++;
+  while (*s1++ != 0) ;
+
+  s1--;
 
   /* Now copy s2 to the end of s1. */
   while (*s1++ = *s2++) {

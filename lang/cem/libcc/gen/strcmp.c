@@ -1,16 +1,10 @@
 /* $Header$ */
-int strcmp(s1, s2)
-register char *s1, *s2;
+int
+strcmp(s, t)
+	register char *s, *t;
 {
-/* Compare 2 strings. */
-
-  for(;;) {
-	if (*s1 != *s2) {
-		if (!*s1) return -1;
-		if (!*s2) return 1;
-		return(*s1 - *s2);
-	}
-	if (*s1++ == 0) return(0);
-	s2++;
-  }
+	while (*s == *t++)
+		if (*s++ == '\0')
+			return 0;
+	return *s - *--t;
 }
