@@ -2,7 +2,7 @@
 .ad
 .SH NAME
 sys_open, sys_close, sys_read, sys_write, sys_reset, sys_access,
-sys_modtime, sys_remove, sys_filesize, sys_chmode,
+sys_modtime, sys_remove, sys_rename, sys_filesize, sys_chmode,
 sys_lock, sys_unlock,
 sys_break, sys_stop, sys_time \- system call interface
 .SH SYNOPSIS
@@ -44,6 +44,9 @@ sys_break, sys_stop, sys_time \- system call interface
 .PP
 .B int sys_remove(path)
 .B char *path;
+.PP
+.B int sys_rename(path1, path2)
+.B char *path1, *path2;
 .PP
 .B long sys_filesize(path)
 .B char *path;
@@ -218,6 +221,15 @@ is performed on it.
 A non-zero return value indicates successful action whereas 0
 indicates that the given file does not exist or cannot be removed.
 .PP
+.I Sys_rename
+renames file
+.I path1
+to
+.IR path2 .
+A non-zero return value indicates successful action. If
+.I path2
+exists, it is removed first.
+.PP
 The function 
 .I sys_filesize
 returns the size in bytes of the
@@ -292,7 +304,8 @@ The routines
 .IR sys_read ,
 .IR sys_write ,
 .IR sys_reset ,
-.I sys_chmode
+.IR sys_chmode ,
+.IR sys_rename ,
 and
 .I sys_remove
 return a value of zero upon any failure and a non-zero

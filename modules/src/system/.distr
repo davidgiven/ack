@@ -10,6 +10,7 @@ modtime.c
 open.c
 read.c
 remove.c
+rename.c
 stop.c
 system.3
 system.c
