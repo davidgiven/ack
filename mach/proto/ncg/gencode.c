@@ -84,6 +84,8 @@ string ad2str(ad) addr_t ad; {
 
 	if (ad.ea_str==0)
 		ad.ea_str="";
+	if (ad.ea_off==0)
+		return(mystrcpy(ad.ea_str));
 	sprintf(buf,"%s%c%ld",ad.ea_str,ad.ea_off>=0 ? '+' : ' ',(long)ad.ea_off);
 	return(mystrcpy(buf));
 }
