@@ -3,7 +3,7 @@
 .di zz
 .so /usr/lib/tmac/tmac.an
 .TH "\\$1" "\\$2" "\\$3" "\\$4"
-.ds ]W 4th ACK distribution
+.ds ]W 5th ACK distribution
 .ds ]D Amsterdam Compiler Kit
 .di
 .rm yy
