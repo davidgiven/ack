@@ -144,6 +144,13 @@ struct  lines {
 /* Used to indicate a invalid contents of opoff */
 #define NO_OFF          ((char *)-1)
 
+struct  loc_label {
+	locl_t  *l_chain;       /* The next label with same low order bits */
+	char    l_hinum;        /* high bits of number of label */
+	char    l_defined;      /* see below */
+	int     l_min,l_max;    /* boundaries of value */
+};
+
 /* The structure containing procedure pertinent data */
 /* Used for environment stacking for nested PRO's */
 
@@ -154,13 +161,6 @@ struct  procstat  {
 	relc_t  *s_fdata;       /* last datareloc before procedure */
 	stat_t  *s_prevstat;    /* backward chain of nested procedures */
 } ;
-
-struct  loc_label {
-	locl_t  *l_chain;       /* The next label with same low order bits */
-	char    l_hinum;        /* high bits of number of label */
-	char    l_defined;      /* see below */
-	int     l_min,l_max;    /* boundaries of value */
-};
 
 /* contents of l_defined */
 #define EMPTY           0       /* Empty slot */
