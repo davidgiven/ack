@@ -1308,7 +1308,7 @@ pat  lxa $1==2
 
 pat lxa $1>2
     uses AA_REG = {LOCAL, SL},
-	 DD_REG = {const, $1-1}
+	 DD_REG = {const, $1-2}
     gen 1: 
         move_l {offsetted4, %a, SL} ,%a
 	dbf %b, {slabel, 1b}
