@@ -16,7 +16,7 @@ static char rcsid[] = "$Header$";
 	linked.
 */
 
-#include	<stdio.h>
+#include	<system.h>
 #include        <em_pseu.h>
 #include	<em_mnem.h>
 #include        <em_spec.h>
@@ -58,7 +58,7 @@ main(argc,argv)
 		if (p->em_type == EM_ERROR) {
 			error("%s", EM_error);
 		}
-		else if (!EM_mkcalls(p)) {
+		if (!EM_mkcalls(p)) {
 			error("%s", EM_error);
 		}
 		p = EM_getinstr();
@@ -72,12 +72,12 @@ main(argc,argv)
 error(s,a1,a2,a3,a4)
 	char *s;
 {
-	fprintf(stderr,
+	fprint(STDERR,
 		"%s, line %d: ",
 		filename ? filename : "standard input",
 		EM_lineno);
-	fprintf(stderr,s,a1,a2,a3,a4);
-	putc('\n', stderr);
+	fprint(STDERR,s,a1,a2,a3,a4);
+	fprint(STDERR, "\n");
 	errors++;
 }
 
