@@ -1,10 +1,10 @@
 .\" $Header$
-.TH EM_CG VI
+.TH EM_NCG 6ACK
 .ad
 .SH NAME
-em_cg \- EM to assembly code translator
+em_ncg \- EM to assembly code translator
 .SH SYNOPSIS
-em_cg [-d\fIn\fP] [-p\fIn\fP] [-w\fIn\fP] [-u\fIfile\fP] [ infile [ outfile ] ]
+~em/lib/\fBmach\fP/cg [-d\fIn\fP] [-p\fIn\fP] [-w\fIn\fP] [-u\fIfile\fP] [ infile [ outfile ] ]
 .SH DESCRIPTION
 Em_cg reads a compact EM-program, argument or standard input,
 and produces an assembly program on argument or standard output
@@ -27,13 +27,12 @@ and write the \fIfile\fP at end of code generation,
 substituting zero bits for rules used.
 Give a list of untested rules on standard error, unless the -u
 was given as -U.
-Only possible if the -d flag was given to cgg(VI).
+Only possible if the -d flag was given to ncgg(6).
 .SH FILES
-code	If the -c flag was given to cgg(VI)
+code	If the -c flag was given to ncgg(6)
 .SH "SEE ALSO"
-ack(I)
-.br
-cgg(VI)
+ack(1),
+ncgg(6)
 .PD 0
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan

@@ -1,10 +1,10 @@
 .\" $Header$
-.TH EM_CG VI
+.TH EM_CG 6ACK
 .ad
 .SH NAME
 em_cg \- EM to assembly code translator
 .SH SYNOPSIS
-/usr/em/lib/mach_cg [-d] [-p\fIn\fP] [-w\fIn\fP] [ infile [ outfile ] ]
+~em/lib/\fBmach\fP/cg [-d] [-p\fIn\fP] [-w\fIn\fP] [ infile [ outfile ] ]
 .SH DESCRIPTION
 Em_cg reads a compact EM-program, argument or standard input,
 and produces an assembly program on argument or standard output
@@ -22,7 +22,7 @@ Set the weight percentage for size to \fIn\fP %, default is 50.
 This sets the size/time tradeoff in the codegenerator.
 Effects are again machine dependent.
 .SH "SEE ALSO"
-ack(I)
+ack(1)
 .PD 0
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
