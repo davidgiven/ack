@@ -55,7 +55,7 @@ df_error(nd, mess, edf)
 
 STATIC int
 ex_error(nd, mess)
-	t_node	*nd;
+	register t_node	*nd;
 	char	*mess;
 {
 	node_error(nd, "\"%s\": %s", symbol2str(nd->nd_symb), mess);
@@ -67,37 +67,37 @@ MkCoercion(pnd, tp)
 	register t_type	*tp;
 {
 	/*	Make a coercion from the node indicated by *pnd to the
-		type indicated by tp.
+		type indicated by tp. If the node indicated by *pnd
+		is constant, try to do the coercion compile-time.
+		Coercions are inserted in the tree when
+		- the expression is not constant or
+		- we are in the second pass and the coercion might cause
+		  an error
 	*/
 	register t_node	*nd = *pnd;
 	register t_type	*nd_tp = nd->nd_type;
 	extern int	pass_1;
-	int		w = 0;
+	char		*wmess = 0;
 
 	if (nd_tp == tp || nd_tp->tp_fund == T_STRING /* Why ??? */) return;
 	nd_tp = BaseType(nd_tp);
 	if (nd->nd_class == Value &&
 	    nd_tp->tp_fund != T_REAL &&
 	    tp->tp_fund != T_REAL) {
+		/* Constant expression mot involving REALs */
 		switch(tp->tp_fund) {
 		case T_SUBRANGE:
 			if (! chk_bounds(tp->sub_lb, nd->nd_INT, 
 				BaseType(tp)->tp_fund) ||
 			    ! chk_bounds(nd->nd_INT, tp->sub_ub,
 				BaseType(tp)->tp_fund)) {
-				node_warning(nd,
-					     W_ORDINARY,
-					     "might cause range bound error");
-				w = 1;
+				wmess = "range bound";
 			}
 			break;
 		case T_ENUMERATION:
 		case T_CHAR:
 			if (nd->nd_INT < 0 || nd->nd_INT >= tp->enm_ncst) {
-				node_warning(nd,
-					     W_ORDINARY,
-					     "might cause range bound error");
-				w = 1;
+				wmess = "range bound";
 			}
 			break;
 		case T_INTORCARD:
@@ -105,10 +105,7 @@ MkCoercion(pnd, tp)
 		case T_POINTER:
 			if ((nd_tp->tp_fund == T_INTEGER && nd->nd_INT < 0) ||
 			    (nd->nd_INT & ~full_mask[(int)(tp->tp_size)])) {
-				node_warning(nd,
-					     W_ORDINARY,
-					     "might cause conversion error");
-				w = 1;
+				wmess = "conversion";
 			}
 			break;
 		case T_INTEGER:  {
@@ -118,15 +115,15 @@ MkCoercion(pnd, tp)
 			if ((nd_tp->tp_fund == T_INTEGER &&
 			     j != i && j != 0) ||
 			    (nd_tp->tp_fund != T_INTEGER && j)) {
-				node_warning(nd,
-					     W_ORDINARY,
-					     "might cause conversion error");
-				w = 1;
+				wmess = "conversion";
 			}
 			}
 			break;
 		}
-		if (!w || pass_1) {
+		if (wmess) {
+		   node_warning(nd, W_ORDINARY, "might cause %s error", wmess);
+		}
+		if (!wmess || pass_1) {
 			nd->nd_type = tp;
 			return;
 		}

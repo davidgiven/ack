@@ -49,55 +49,53 @@
 
 ModuleDeclaration
 {
-	register t_def *df;
-	t_node *exportlist = 0;
-	int qualified;
+	register t_def	*df;
+	t_node		*exportlist;
+	int		qualified;
 } :
 	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
-	priority(df)
+	priority(&(df->mod_priority))
 	';'
 	import(1)*
-	export(&qualified, &exportlist)?
+	export(&qualified, &exportlist)
 	block(&(df->mod_body))
-	IDENT		{ if (exportlist) {
-				EnterExportList(exportlist, qualified);
-			  }
+	IDENT		{ EnterExportList(exportlist, qualified);
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(df->df_idf, dot.TOK_IDF);
 			}
 ;
 
-priority(register t_def *df;):
+priority(register t_node **prio;):
 	[
-		'[' ConstExpression(&(df->mod_priority)) ']'
-			{ if (!(df->mod_priority->nd_type->tp_fund &
-				T_CARDINAL)) {
-				node_error(df->mod_priority,
-					   "illegal priority");
+		'[' ConstExpression(prio) ']'
+			{ if (! ((*prio)->nd_type->tp_fund & T_CARDINAL)) {
+				node_error(*prio, "illegal priority");
 			  }
 			}
 	|
-			{ df->mod_priority = 0; }
 	]
 ;
 
 export(int *QUALflag; t_node **ExportList;):
-	EXPORT
+				{ *ExportList = 0; *QUALflag = D_EXPORTED; }
 	[
-		QUALIFIED
-			{ *QUALflag = D_QEXPORTED; }
+		EXPORT
+		[
+			QUALIFIED
+				{ *QUALflag = D_QEXPORTED; }
+		|
+		]
+		IdentList(ExportList) ';'
 	|
-			{ *QUALflag = D_EXPORTED; }
 	]
-	IdentList(ExportList) ';'
 ;
 
 import(int local;)
 {
-	t_node *ImportList;
-	register t_node *FromId = 0;
-	register t_def *df;
-	extern t_def *GetDefinitionModule();
+	t_node		*ImportList;
+	register t_node	*FromId = 0;
+	register t_def	*df;
+	extern t_def	*GetDefinitionModule();
 } :
 	[ FROM
 	  IDENT		{ FromId = dot2leaf(Name);
@@ -106,7 +104,8 @@ import(int local;)
 			  }
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
-	]?
+	|
+	]
 	IMPORT IdentList(&ImportList) ';'
 	/*
 	   When parsing a global module, this is the place where we must
@@ -117,57 +116,54 @@ import(int local;)
 			{ if (FromId) {
 				EnterFromImportList(ImportList, df, FromId);
 			  }
-			  else if (local) EnterImportList(ImportList);
-			  else EnterGlobalImportList(ImportList);
+			  else EnterImportList(ImportList, local);
 			  FreeNode(ImportList);
 			}
 ;
 
 DefinitionModule
 {
-	register t_def *df;
-	t_node *exportlist;
-	int dummy;
-	extern t_idf *DefId;
-	extern int ForeignFlag;
+	register t_def	*df;
+	t_node		*exportlist;
+	int		dummy;
+	extern t_idf	*DefId;
+	extern int	ForeignFlag;
+	register t_scope *currscope = CurrentScope;
 } :
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
-			  df->df_flags |= D_BUSY;
-			  df->df_flags |= ForeignFlag;
+			  df->df_flags |= D_BUSY | ForeignFlag;
 			  if (!Defined) Defined = df;
-		  	  CurrentScope->sc_definedby = df;
+		  	  currscope->sc_definedby = df;
 			  if (DefId && df->df_idf != DefId) {
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
 					df->df_idf->id_text, DefId->id_text);
 			  }
-			  CurrentScope->sc_name = df->df_idf->id_text;
+			  currscope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);
-			  df->df_type->rec_scope = df->mod_vis->sc_scope;
+			  df->df_type->rec_scope = currscope;
 			  DefinitionModule++;
 			}
 	';'
 	import(0)* 
-	[
-		export(&dummy, &exportlist)
+	export(&dummy, &exportlist)
 		/*	New Modula-2 does not have export lists in definition
 			modules. Issue a warning.
 		*/
 			{ 
+			  if (exportlist) {
 #ifndef STRICT_3RD_ED
-			  if (! options['3'])
+			    if (! options['3'])
 node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignored");
-			  else
+			    else
 #endif
 				error("export list not allowed in definition module");
-			  FreeNode(exportlist);
+			    FreeNode(exportlist);
+			  }
 			}
-	|
-		/* empty */
-	]
 	definition* END IDENT
-			{ end_definition_list(&(CurrentScope->sc_def));
+			{ end_definition_list(&(currscope->sc_def));
 			  DefinitionModule--;
 			  match_id(df->df_idf, dot.TOK_IDF);
 			  df->df_flags &= ~D_BUSY;
@@ -177,8 +173,8 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 
 definition
 {
-	register t_def *df;
-	t_def *dummy;
+	register t_def	*df;
+	t_def		*dummy;
 } :
 	CONST [ %persistent ConstantDeclaration ';' ]*
 |
@@ -201,14 +197,13 @@ definition
 |
 	VAR [ %persistent VariableDeclaration ';' ]*
 |
-	ProcedureHeading(&dummy, D_PROCHEAD)
-	';'
+	ProcedureHeading(&dummy, D_PROCHEAD) ';'
 ;
 
 ProgramModule
 {
-	extern t_def *GetDefinitionModule();
-	register t_def *df;
+	extern t_def	*GetDefinitionModule();
+	register t_def	*df;
 } :
 	MODULE
 	IDENT	{ if (state == IMPLEMENTATION) {
@@ -223,7 +218,7 @@ ProgramModule
 		  	CurrentScope->sc_definedby = df;
 		  }
 		}
-	priority(df)
+	priority(&(df->mod_priority))
 	';' import(0)*
 	block(&(df->mod_body)) IDENT
 		{ close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
@@ -232,22 +227,20 @@ ProgramModule
 	'.'
 ;
 
-Module:
-				{ error("Compiling a definition module");
-				  open_scope(CLOSEDSCOPE);
-				  state = DEFINITION;
-				}
+CompilationUnit:
+			{ error("Compiling a definition module");
+			  open_scope(CLOSEDSCOPE);
+			  state = DEFINITION;
+			}
 	DefinitionModule
-				{ close_scope(SC_CHKFORW); }
+			{ close_scope(SC_CHKFORW); }
 |	%default
 	[
-		IMPLEMENTATION	{ state = IMPLEMENTATION; }
+		IMPLEMENTATION
+			{ state = IMPLEMENTATION; }
 	|
-		/* empty */	{ state = PROGRAM; }
+		/* empty */
+			{ state = PROGRAM; }
 	]
 	ProgramModule
-;
-
-CompilationUnit:
-	Module
 ;

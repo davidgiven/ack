@@ -166,7 +166,8 @@ IfStatement(t_node **pnd;)
 	[
 		ELSE
 		StatementSequence(&(nd->nd_right))
-	]?
+	|
+	]
 	END
 ;
 
@@ -186,7 +187,8 @@ CaseStatement(t_node **pnd;)
 			{ nd = nd->nd_right; }
 	]*
 	[ ELSE StatementSequence(&(nd->nd_right))
-	]?
+	|
+	]
 	END
 ;
 
@@ -194,7 +196,8 @@ case(t_node **pnd; t_type **ptp;) :
 	[ CaseLabelList(ptp, pnd)
 	  ':'		{ *pnd = dot2node(Link, *pnd, NULLNODE); }
 	  StatementSequence(&((*pnd)->nd_right))
-	]?
+	|
+	]
 			{ *pnd = dot2node(Link, *pnd, NULLNODE);
 			  (*pnd)->nd_symb = '|';
 			}

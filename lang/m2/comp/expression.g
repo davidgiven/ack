@@ -103,7 +103,8 @@ expression(t_node **pnd;)
 		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
 			{ *pnd = dot2node(Oper, *pnd, NULLNODE); }
 		SimpleExpression(&((*pnd)->nd_right))
-	]?
+	|
+	]
 ;
 
 /* Inline in expression
@@ -121,7 +122,8 @@ SimpleExpression(t_node **pnd;)
 			{ nd = dot2leaf(Uoper);
 			  /* priority of unary operator ??? */
 			}
-	]?
+	|
+	]
 	term(pnd)
 			{ if (nd) {
 				nd->nd_right = *pnd;
@@ -170,11 +172,12 @@ factor(register t_node **p;)
 } :
 	qualident(p)
 	[
-		designator_tail(p)?
+		designator_tail(p)
 		[
 			{ *p = dot2node(Call, *p, NULLNODE); }
 			ActualParameters(&((*p)->nd_right))
-		]?
+		|
+		]
 	|
 		bare_set(&nd)
 			{ nd->nd_left = *p; *p = nd; }
@@ -229,7 +232,8 @@ bare_set(t_node **pnd;)
 		[	{ nd = nd->nd_right; }
 			',' element(nd)
 		]*
-	]?
+	|
+	]
 	'}'
 ;
 
@@ -246,7 +250,8 @@ element(register t_node *nd;)
 		UPTO
 			{ nd1 = dot2node(Link, nd1, NULLNODE);}
 		expression(&(nd1->nd_right))
-	]?
+	|
+	]
 			{ nd->nd_right = dot2node(Link, nd1, NULLNODE);
 			  nd->nd_right->nd_symb = ',';
 			}
@@ -255,7 +260,7 @@ element(register t_node *nd;)
 designator(t_node **pnd;)
 :
 	qualident(pnd)
-	designator_tail(pnd)?
+	designator_tail(pnd)
 ;
 
 designator_tail(t_node **pnd;):
@@ -266,6 +271,7 @@ designator_tail(t_node **pnd;):
 	|
 		visible_designator_tail(pnd)
 	]*
+|
 ;
 
 visible_designator_tail(t_node **pnd;)

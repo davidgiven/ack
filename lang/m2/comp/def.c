@@ -194,9 +194,9 @@ end_definition_list(pdf)
 		them again.
 		Also, mark all other definitions "QUALIFIED EXPORT".
 	*/
-	register t_def *df = *pdf;
+	register t_def *df;
 
-	while (df) {
+	while (df = *pdf) {
 		if (df->df_kind & D_IMPORTED) {
 			if (! (df->df_flags & D_USED)) {
 				warning(W_ORDINARY, "identifier \"%s\" imported but not used", df->df_idf->id_text);
@@ -209,7 +209,6 @@ end_definition_list(pdf)
 			df->df_flags |= D_QEXPORTED;
 			pdf = &(df->df_nextinscope);
 		}
-		df = *pdf;
 	}
 }
 

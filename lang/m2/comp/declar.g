@@ -68,11 +68,14 @@ ProcedureHeading(t_def **pdf; int type;)
 			[
 				';' FPSection(&pr, &parmaddr)
 			]*
-		]?
+		|
+		]
 		')'
 		[	':' qualtype(&tp)
-		]?
-	]?
+		|
+		]
+	|
+	]
 			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
 #ifndef NOSTRICT
 			  if (tp && IsConstructed(tp)) {
@@ -128,10 +131,12 @@ declaration
  * 		[
  * 			';' FPSection(ppr, parmaddr)
  * 		]*
- * 	]?
+ *	|
+ * 	]
  * 	')'
  * 	[	':' qualtype(ptp)
- * 	]?
+ *	|
+ * 	]
  * ;
 */
 
@@ -362,10 +367,12 @@ FieldList(t_scope *scope; arith *cnt; int *palign;)
 	]*
 	[ ELSE FieldListSequence(scope, &tcnt, palign)
 			{ if (tcnt > max) max = tcnt; }
-	]?
+	|
+	]
 	END
 			{ *cnt = max; }
-]?
+|
+]
 ;
 
 variant(t_scope *scope; arith *cnt; t_type *tp; int *palign;)
@@ -381,7 +388,8 @@ variant(t_scope *scope; arith *cnt; t_type *tp; int *palign;)
 			  FreeNode(nd);
 			}
 		':' FieldListSequence(scope, cnt, palign)
-	]?
+	|
+	]
 			/* Changed rule in new modula-2 */
 ;
 
@@ -426,7 +434,8 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			  }
 
 			}
-	]?
+	|
+	]
 			{
 			  *ptp = nd->nd_type;
 			}
@@ -482,7 +491,8 @@ FormalTypeList(t_type **ptp;)
 		[
 			',' VarFormalType(&pr, &parmaddr)
 		]*
-	]?
+	|
+	]
 	')'
 	[ ':' qualtype(ptp)
 	|		{ *ptp = 0; }
@@ -547,6 +557,7 @@ IdentAddr(t_node **pnd;)
 	[	'['
 		ConstExpression(&(nd->nd_left))
 		']'
-	]?
+	|
+	]
 			{ *pnd = nd; }
 ;

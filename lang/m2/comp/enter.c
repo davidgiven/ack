@@ -479,31 +479,24 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 	if (!forwflag) FreeNode(FromId);
 }
 
-EnterGlobalImportList(idlist)
+EnterImportList(idlist, local)
 	register t_node *idlist;
 {
 	/*	Import "idlist" from the enclosing scope.
-		Definition modules must be read for "idlist".
+		If the import is not local, definition modules must be read
+		for "idlist".
 	*/
+	t_scope *sc = enclosing(CurrVis)->sc_scope;
 	extern t_def *GetDefinitionModule();
 	struct f_info f;
 	
 	f = file_info;
 
 	for (; idlist; idlist = idlist->nd_left) {
-		DoImport(GetDefinitionModule(idlist->nd_IDF, 1), CurrentScope);
+		DoImport(local ?
+			   ForwDef(idlist, sc) :
+			   GetDefinitionModule(idlist->nd_IDF, 1), 
+			 CurrentScope);
 		file_info = f;
-	}
-}
-
-EnterImportList(idlist)
-	register t_node *idlist;
-{
-	/*	Import "idlist" from the enclosing scope.
-	*/
-	t_scope *sc = enclosing(CurrVis)->sc_scope;
-
-	for (; idlist; idlist = idlist->nd_left) {
-		DoImport(ForwDef(idlist, sc), CurrentScope);
 	}
 }
