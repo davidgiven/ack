@@ -28,7 +28,7 @@ IMPLEMENTATION MODULE Traps;
   (* Write message "str" on standard error, preceeded by filename and
      linenumber if possible
   *)
-  VAR 	p, q: POINTER TO CHAR;
+  VAR 	p: POINTER TO CHAR;
 	l: CARDINAL;
 	lino: INTEGER;
 	buf, buf2: ARRAY [0..255] OF CHAR;
@@ -36,11 +36,16 @@ IMPLEMENTATION MODULE Traps;
   BEGIN
 	p := EM.FILN();
 	IF p # NIL THEN
-		q := p;
+		i := 1;
+		buf[0] := '"';
 		WHILE p^ # 0C DO
+			buf[i] := p^;
+			INC(i);
 			p := ADDRESS(p) + 1;
 		END;
-		IF Unix.write(2, q, ADDRESS(p) - ADDRESS(q)) < 0 THEN END;
+		buf[i] := '"';
+		INC(i);
+		IF Unix.write(2, ADR(buf), i) < 0 THEN END;
 	ELSE
 		l := Argv(0, buf);
 		IF Unix.write(2, ADR(buf), l-1) < 0 THEN END;
@@ -48,12 +53,13 @@ IMPLEMENTATION MODULE Traps;
 	lino := EM.LINO();
 	i := 0;
 	IF lino # 0 THEN
-		i := 2;
-		buf[0] := ',';
-		buf[1] := ' ';
+		i := 7;
+		buf[0] := ','; buf[1] := ' ';
+		buf[2] := 'l'; buf[3] := 'i'; buf[4] := 'n'; buf[5] := 'e';
+		buf[6] := ' ';
 		IF lino < 0 THEN
-			buf[2] := '-';
-			i := 3;
+			buf[7] := '-';
+			i := 8;
 			lino := - lino;
 		END;
 		j := 0;

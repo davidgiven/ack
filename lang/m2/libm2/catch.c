@@ -45,7 +45,7 @@ static struct errm {
 	{ M2_TOOMANY,	"too many nested traps + handlers"},
 	{ M2_NORESULT,	"no RETURN from procedure function"},
 	{ M2_UOVFL,	"cardinal overflow"},
-	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
+	{ M2_FORCH,	"(warning) FOR-loop control variable was changed in the body"},
 	{ M2_UUVFL,	"cardinal underflow"},
 	{ M2_INTERNAL,	"internal error; ask an expert for help"},
 	{ M2_UNIXSIG,	"got a unix signal"},
