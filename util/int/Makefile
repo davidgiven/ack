@@ -43,9 +43,11 @@ all:	test
 
 install:	$(INT)
 	cp $(INT) $(EM)/bin/int
+	cp int.1 $(EM)/man/int.1
 
 cmp:	$(INT)
-	cmp $(INT) $(EM)/bin/int
+	-cmp $(INT) $(EM)/bin/int
+	-cmp int.1 $(EM)/man/int.1
 
 test:	$(INT) test/awa.em22 test/awa.em24 test/awa.em44
 	@rm -f int.mess
@@ -99,7 +101,7 @@ tags:	$(HDR) $(SRC)
 MFILES =	M.trap_msg M.warn_h M.warn_msg
 
 ALL =	READ_ME Makefile $(MFILES) $(HDR) $(SRC)
-DISTR =	$(ALL) switch test
+DISTR =	$(ALL) int.1 switch test
 
 print:
 	@pr $(ALL)
