@@ -11,14 +11,17 @@
 
 main()
 {
+	puts("#ifndef size_type");
 	if (sizeof(unsigned int) == sizeof(char *)) {
-		puts("typedef unsigned int size_type;");
-		exit(0);
+		puts("#define size_type unsigned int");
 	}
-	if (sizeof(long) == sizeof(char *)) {
-		puts("typedef long size_type;");
-		exit(0);
+	else if (sizeof(long) == sizeof(char *)) {
+		puts("#define size_type long");
 	}
-	fputs("funny pointer size\n", stderr);
-	exit(1);
+	else {
+		fputs("funny pointer size\n", stderr);
+		exit(1);
+	}
+	puts("#endif");
+	exit(0);
 }

@@ -5,7 +5,7 @@ CFLAGS = -O -I$(EMHOME)/modules/h $(COPT)
 SUF = o
 RCC = cc	#$ must produce a runnable object
 
-MALLOCSRC =	READ_ME size_type.h param.h impl.h check.h log.h phys.h \
+MALLOCSRC =	READ_ME size_type.h gensize_type.h param.h impl.h check.h log.h phys.h \
 		mal.c log.c phys.c check.c
 
 .SUFFIXES: .$(SUF)
@@ -35,10 +35,10 @@ opr:
 		make pr | opr
 
 clean:
-		rm -f *.$(SUF) clashes malloc1.c size_type.h getsize malloc.c
+		rm -f *.$(SUF) clashes malloc1.c gensize_type.h getsize malloc.c
 
-size_type.h:	getsize
-		getsize > size_type.h
+gensize_type.h:	getsize
+		getsize > gensize_type.h
 
 getsize:	getsize.c
 		$(RCC) -o getsize getsize.c
