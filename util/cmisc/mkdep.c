@@ -4,11 +4,17 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* make dependencies; Date: jan 07, 1986; Author: Erik Baalbergen */
+/* Log:
+	[Thu Oct  6 09:56:30 MET 1988; erikb]
+	Added option '-d' which suppresses "file.c :" be printed
+ */
 
 #include <stdio.h>
 
 #define BSIZ 1024
-char *progname;
+char *prog;
+
+int dflag = 0;	/* suppress "file.c :" */
 
 struct namelist {
 	struct namelist *next;
@@ -57,9 +63,7 @@ free_namelist(nlp)
 add_name(nm)
 	char *nm;
 {
-	struct namelist *nlp = nl;
-	struct namelist *lnlp = 0;
-	struct namelist *nnlp;
+	struct namelist *nlp = nl, *lnlp = 0, *nnlp;
 	char *strcpy();
 
 	while (nlp) {
@@ -88,11 +92,11 @@ print_namelist(nm, nlp)
 	char *nm;
 	struct namelist *nlp;
 {
-	if (nlp) {
-			while (nlp) {
-				printf("%s: %s\n", nm, nlp->name);
-				nlp = nlp->next;
-			}
+	while (nlp) {
+		if (!dflag)
+			printf("%s: ", nm);
+		printf("%s\n", nlp->name);
+		nlp = nlp->next;
 	}
 }
 
@@ -101,8 +105,18 @@ main(argc, argv)
 {
 	int err = 0;
 
-	progname = *argv++;
-	while (--argc > 0) {
+	prog = *argv++;
+	if (**argv == '-') {
+		char *opt = &(*argv++)[1];
+
+		if (*opt++ != 'd' || *opt) {
+			fprintf(stderr, "use: %s [-d] [file ...]\n", prog);
+			exit(1);
+		}
+		dflag = 1;
+	}
+
+	while (*argv) {
 		free_namelist(nl);
 		nl = 0;
 		if (dofile(*argv) == 0)
@@ -116,9 +130,8 @@ int
 contains_slash(s)
 	register char *s;
 {
-	while (*s) {
+	while (*s)
 		if (*s++ == '/') return 1;
-	}
 	return 0;
 }
 
@@ -130,12 +143,12 @@ dofile(fn)
 	char *nm, *include_line();
 
 	if ((fp = fopen(fn, "r")) == 0) {
-		fprintf(stderr, "%s: cannot read %s\n", progname, fn);
+		fprintf(stderr, "%s: cannot read %s\n", prog, fn);
 		return 0;
 	}
 
 	if (contains_slash(fn)) {
-		fprintf(stderr, "%s: (warning) %s not in current directory; not checked\n", progname, fn);
+		fprintf(stderr, "%s: (warning) %s not in current directory; not checked\n", prog, fn);
 		fclose(fp);
 		return 1;
 	}
@@ -172,7 +185,8 @@ include_line(s)
 			while ((*s == '\t') || (*s == ' '))
 				s++;
 			if (*s++ == '"') {
-				register char *nm = s;
+				char *nm = s;
+
 				while (*s != 0 && *s != '"')
 					s++;
 				*s = '\0';

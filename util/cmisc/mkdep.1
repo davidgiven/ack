@@ -3,7 +3,7 @@
 .SH NAME
 mkdep \- dependency generator for C-programs
 .SH SYNOPSYS
-.B mkdep
+.B mkdep [ -d ]
 file ...
 .SH DESCRIPTION
 .I Mkdep
@@ -19,6 +19,8 @@ and produces for each file \fIarg\fR in the argument list lines of the form
 .fi
 where \fIfile1\fR, \fIfile2\fR, etc. are filenames included by \fIarg\fR, or
 by a file included by \fIarg\fR, etc.
+.PP
+The \fB-d\fP suppresses the \fIarg\fR: part.
 .PP
 Only files in the current directory are scanned.
 .SH "SEE ALSO"
