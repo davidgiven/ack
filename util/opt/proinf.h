@@ -1,3 +1,5 @@
+/* $Header$ */
+
 struct num {
 	num_p	n_next;
 	unsigned n_number;
@@ -27,6 +29,7 @@ typedef struct proinf {
 	line_p	lastline;
 	sym_p	symbol;
 	reg_p	freg;
+	bool	gtoproc;
 	num_p	numhash[NNUMHASH];
 } proinf;
 
