@@ -26,8 +26,8 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 	int ndigit, *decpt, *sign;
 {
 	double intpart, fractpart;
-	static char buf[NDIGITS];
-	char buf1[NDIGITS];
+	static char buf[NDIGITS+1];
+	char buf1[NDIGITS+1];
 	register char *pe = buf1;
 	register  char *pb;
 	int pointpos = 0;
@@ -47,7 +47,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		do {	/* get digits of integer part, low order digit
 			   first
 			*/
-			value = modf(intpart/10, &intpart);
+			value = modf(intpart/10.0, &intpart);
 			/* compensate for rounding errors, because
 			   the conversion to "int" truncates
 			*/
@@ -56,7 +56,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 				pe = &buf1[0];
 				while (pb < &buf1[NDIGITS]) *pe++ = *pb++;
 			}
-			*pe++ = (int)((value+.05) * 10) + '0';
+			*pe++ = (int)((value+.05) * 10.0) + '0';
 			pointpos++;
 		} while (intpart != 0);
 		pb = buf;
@@ -66,7 +66,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		pb = &buf[0];
 		if (value > 0) {
 			fractpart = value;
-			while ((value = value*10) < 1) {
+			while ((value = value*10.0) < 1) {
 				fractpart = value;
 				pointpos--;
 			}
@@ -85,7 +85,7 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		if (pe > &buf[NDIGITS]) pe = &buf[NDIGITS];
 	}
 	while (pb <= pe) {
-		fractpart = modf(fractpart * 10, &value);
+		fractpart = modf(fractpart * 10.0, &value);
 		*pb++ = (int)value + '0';
 	}
 	pb = pe;
