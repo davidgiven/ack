@@ -456,11 +456,6 @@ CodeStd(nd)
 		RangeCheck(char_type, tp);
 		break;
 
-	case S_FLOAT:
-		CodePExpr(left);
-		CodeCoercion(tp, real_type);
-		break;
-
 	case S_HIGH:
 		assert(IsConformantArray(tp));
 		DoHIGH(left->nd_def);
@@ -493,9 +488,14 @@ CodeStd(nd)
 		CodePExpr(left);
 		break;
 
+	case S_TRUNCD:
 	case S_TRUNC:
+	case S_FLOAT:
+	case S_FLOATD:
+	case S_LONG:
+	case S_SHORT:
 		CodePExpr(left);
-		CodeCoercion(tp, card_type);
+		CodeCoercion(tp, nd->nd_type);
 		break;
 
 	case S_VAL:

@@ -28,6 +28,10 @@
 #define S_VAL	17
 #define S_NEW	18
 #define S_DISPOSE 19
+#define S_LONG	20
+#define S_SHORT	21
+#define S_TRUNCD 22
+#define S_FLOATD 23
 
 /* Standard procedures and functions defined in the SYSTEM module ... */
 

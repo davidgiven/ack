@@ -40,6 +40,9 @@ struct desig {
 	char	*dsg_name;	/* name of global variable, used for
 				   FIXED and PFIXED
 				*/
+	struct def *dsg_def;	/* def structure associated with this
+				   designator, or 0
+				*/
 };
 
 /* The next structure describes the designator in a with-statement.

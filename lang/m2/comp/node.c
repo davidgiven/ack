@@ -84,7 +84,13 @@ printnode(nd, lvl)
 	register struct node *nd;
 {
 	indnt(lvl);
-	print("C: %d; T: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
+	print("Class: %d; Symbol: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
+	if (nd->nd_type) {
+		indnt(lvl);
+		print("Type: ");
+		DumpType(nd->nd_type);
+		print("\n");
+	}
 }
 
 PrNode(nd, lvl)

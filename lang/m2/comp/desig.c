@@ -31,7 +31,7 @@
 #include	"node.h"
 
 extern int	proclevel;
-struct desig	InitDesig = {DSG_INIT, 0, 0};
+struct desig	InitDesig = {DSG_INIT, 0, 0, 0};
 
 int	C_ste_dnam(), C_sde_dnam(), C_loe_dnam(), C_lde_dnam();
 int	C_stl(), C_sdl(), C_lol(), C_ldl();
@@ -54,6 +54,7 @@ static int (*ext_ld_and_str[2][2])() = {
 int
 DoLoadOrStore(ds, size, LoadOrStoreFlag)
 	register struct desig *ds;
+	arith size;
 {
 	int sz;
 
@@ -223,8 +224,8 @@ CodeMove(rhs, left, rtp)
 	switch(rhs->dsg_kind) {
 	case DSG_LOADED:
 		CodeDesig(left, lhs);
-		CodeAddress(lhs);
 		if (rtp->tp_fund == T_STRING) {
+			CodeAddress(lhs);
 			C_loc(rtp->tp_size);
 			C_loc(tp->tp_size);
 			C_cal("_StringAssign");
@@ -315,6 +316,7 @@ CodeMove(rhs, left, rtp)
 				lhs->dsg_offset = tmp;
 				lhs->dsg_name = 0;
 				lhs->dsg_kind = DSG_PFIXED;
+				lhs->dsg_def = 0;
 				C_stl(tmp);		/* address of lhs */
 			}
 			CodeValue(rhs, tp->tp_size, tp->tp_align);
@@ -347,6 +349,7 @@ CodeAddress(ds)
 			break;
 		}
 		C_lal(ds->dsg_offset);
+		if (ds->dsg_def) ds->dsg_def->df_flags |= D_NOREG;
 		break;
 		
 	case DSG_PFIXED:
@@ -489,7 +492,8 @@ CodeVarDesig(df, ds)
 		ds->dsg_kind = DSG_PFIXED;
 	}
 	else	ds->dsg_kind = DSG_FIXED;
-	ds->dsg_offset =df->var_off;
+	ds->dsg_offset = df->var_off;
+	ds->dsg_def = df;
 }
 
 CodeDesig(nd, ds)

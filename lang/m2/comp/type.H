@@ -150,6 +150,7 @@ struct type
 #define bounded(tpx)		((tpx)->tp_fund & T_INDEX)
 #define complex(tpx)		((tpx)->tp_fund & (T_RECORD|T_ARRAY))
 #define WA(sz)			(align(sz, (int) word_size))
+#ifdef DEBUG
 #define ResultType(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
 					(tpx)->next)
 #define ParamList(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
@@ -160,6 +161,13 @@ struct type
 					(tpx)->next)
 #define PointedtoType(tpx)	(assert((tpx)->tp_fund == T_POINTER),\
 					(tpx)->next)
+#else DEBUG
+#define ResultType(tpx)		((tpx)->next)
+#define ParamList(tpx)		((tpx)->prc_params)
+#define IndexType(tpx)		((tpx)->next)
+#define ElementType(tpx)	((tpx)->next)
+#define PointedtoType(tpx)	((tpx)->next)
+#endif DEBUG
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)

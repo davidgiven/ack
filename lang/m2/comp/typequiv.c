@@ -63,7 +63,7 @@ TstParEquiv(tp1, tp2)
 
 int
 TstProcEquiv(tp1, tp2)
-	register struct type *tp1, *tp2;
+	struct type *tp1, *tp2;
 {
 	/*	Test if two procedure types are equivalent. This routine
 		may also be used for the testing of assignment compatibility
@@ -105,31 +105,24 @@ TstCompat(tp1, tp2)
 
 	tp1 = BaseType(tp1);
 	tp2 = BaseType(tp2);
+	if (tp2 != intorcard_type &&
+	    (tp1 == intorcard_type || tp1 == address_type)) {
+		struct type *tmp = tp2;
+		
+		tp2 = tp1;
+		tp1 = tmp;
+	}
 
 	return	tp1 == tp2
-	    ||
-		(  tp1 == intorcard_type
-		&&
-		   (tp2 == int_type || tp2 == card_type || tp2 == address_type)
-		)
 	    ||
 		(  tp2 == intorcard_type
 		&&
 		   (tp1 == int_type || tp1 == card_type || tp1 == address_type)
 		)
 	    ||
-		(  tp1 == address_type
-		&& 
-	          (  tp2 == card_type
-		  || tp2->tp_fund == T_POINTER
-		  )
-		)
-	    ||
 		(  tp2 == address_type
 		&& 
-	          (  tp1 == card_type
-		  || tp1->tp_fund == T_POINTER
-		  )
+	          ( tp1 == card_type || tp1->tp_fund == T_POINTER)
 		)
 	;
 }
@@ -150,6 +143,9 @@ TstAssCompat(tp1, tp2)
 
 	if ((tp1->tp_fund & T_INTORCARD) &&
 	    (tp2->tp_fund & T_INTORCARD)) return 1;
+
+	if ((tp1->tp_fund == T_REAL) &&
+	    (tp2->tp_fund == T_REAL)) return 1;
 
 	if (tp1->tp_fund == T_PROCEDURE &&
 	    tp2->tp_fund == T_PROCEDURE) {

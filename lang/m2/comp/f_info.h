@@ -18,3 +18,4 @@ struct f_info {
 extern struct f_info file_info;
 #define LineNumber file_info.f_lineno
 #define FileName file_info.f_filename
+#define WorkingDir file_info.f_workingdir

@@ -59,7 +59,8 @@ SkipComment()
 			/* Foreign; This definition module has an
 			   implementation in another language.
 			   In this case, don't generate prefixes in front
-			   of the names
+			   of the names. Also, don't generate call to
+			   initialization routine.
 			*/
 			ForeignFlag = 1;
 			break;
@@ -359,7 +360,7 @@ again:
 			have to read the number with the help of a rather
 			complex finite automaton.
 		*/
-		enum statetp {Oct,Hex,Dec,OctEndOrHex,End,OptReal,Real};
+		enum statetp {Oct,OptHex,Hex,Dec,OctEndOrHex,End,OptReal,Real};
 		register enum statetp state;
 		register int base;
 		register char *np = &buf[1];
@@ -390,7 +391,8 @@ again:
 					}
 					LoadChar(ch);
 				}
-				if (is_hex(ch)) state = Hex;
+				if (ch == 'D') state = OptHex;
+				else if (is_hex(ch)) state = Hex;
 				else if (ch == '.') state = OptReal;
 				else {
 					state = End;
@@ -398,6 +400,15 @@ again:
 					else if (ch == EOI) eofseen = 1;
 					else PushBack();
 				}
+				break;
+
+			case OptHex:
+				LoadChar(ch);
+				if (is_hex(ch)) {
+					if (np < &buf[NUMSIZE]) *np++ = 'D';
+					state = Hex;
+				}
+				else	state = End;
 				break;
 
 			case Hex:
@@ -454,6 +465,9 @@ lexwarning(W_ORDINARY, "overflow in constant");
 lexwarning(W_ORDINARY, "character constant out of range");
 					}
 				}
+				else if (ch == 'D' && base == 10) {
+					toktype = longint_type;
+				}
 				else if (tk->TOK_INT>=0 &&
 					 tk->TOK_INT<=max_int) {
 					toktype = intorcard_type;
@@ -485,6 +499,8 @@ lexwarning(W_ORDINARY, "character constant out of range");
 		/* a real real constant */
 		if (np < &buf[NUMSIZE]) *np++ = '.';
 
+		toktype = real_type;
+
 		while (is_dig(ch)) {
 			/* 	Fractional part
 			*/
@@ -492,9 +508,15 @@ lexwarning(W_ORDINARY, "character constant out of range");
 			LoadChar(ch);
 		}
 
-		if (ch == 'E') {
+		if (ch == 'E' || ch == 'D') {
 			/*	Scale factor
 			*/
+			if (ch == 'D') {
+				toktype = longreal_type;
+				LoadChar(ch);
+				if (!(ch == '+' || ch == '-' || is_dig(ch)))
+					goto noscale;
+			}
 			if (np < &buf[NUMSIZE]) *np++ = 'E';
 			LoadChar(ch);
 			if (ch == '+' || ch == '-') {
@@ -514,6 +536,7 @@ lexwarning(W_ORDINARY, "character constant out of range");
 			}
 		}
 
+noscale:
 		*np++ = '\0';
 		if (ch == EOI) eofseen = 1;
 		else PushBack();
@@ -523,7 +546,6 @@ lexwarning(W_ORDINARY, "character constant out of range");
 			lexerror("floating constant too long");
 		}
 		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;
-		toktype = real_type;
 		return tk->tk_symb = REAL;
 
 		/*NOTREACHED*/

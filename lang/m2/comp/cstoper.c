@@ -386,14 +386,19 @@ cstcall(expp, call)
 		CutSize(expp);
 		break;
 
+	case S_LONG:
+	case S_SHORT: {
+		struct type *tp = expp->nd_type;
+
+		*expp = *expr;
+		expp->nd_type = tp;
+		break;
+		}
 	case S_CAP:
 		if (expr->nd_INT >= 'a' && expr->nd_INT <= 'z') {
-			expp->nd_INT = expr->nd_INT + ('A' - 'a');
+			expr->nd_INT = expr->nd_INT + ('A' - 'a');
 		}
-		else	expp->nd_INT = expr->nd_INT;
-		CutSize(expp);
-		break;
-
+		/* fall through */
 	case S_CHR:
 		expp->nd_INT = expr->nd_INT;
 		CutSize(expp);

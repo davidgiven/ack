@@ -840,7 +840,7 @@ ChkUnOper(expp)
 
 	case '-':
 		if (tpr->tp_fund & T_INTORCARD) {
-			if (tpr == intorcard_type) {
+			if (tpr == intorcard_type || tpr == card_type) {
 				expp->nd_type = int_type;
 			}
 			if (right->nd_class == Value) {
@@ -849,7 +849,6 @@ ChkUnOper(expp)
 			return 1;
 		}
 		else if (tpr->tp_fund == T_REAL) {
-			expp->nd_type = tpr;
 			if (right->nd_class == Value) {
 				if (*(right->nd_REL) == '-') (right->nd_REL)++;
 				else (right->nd_REL)--;
@@ -939,10 +938,46 @@ ChkStandard(expp, left)
 		if (left->nd_class == Value) cstcall(expp, S_CHR);
 		break;
 
+	case S_FLOATD:
 	case S_FLOAT:
 		expp->nd_type = real_type;
+		if (std == S_FLOATD) expp->nd_type = longreal_type;
 		if (!(left = getarg(&arg, T_INTORCARD, 0, edf))) return 0;
 		break;
+
+	case S_LONG: {
+		struct type *tp;
+
+		if (!(left = getarg(&arg, 0, 0, edf))) {
+			return 0;
+		}
+		tp = BaseType(left->nd_type);
+		if (tp == int_type) expp->nd_type = longint_type;
+		else if (tp == real_type) expp->nd_type = longreal_type;
+		else {
+			expp->nd_type = error_type;
+			Xerror(left, "unexpected parameter type", edf);
+		}
+		if (left->nd_class == Value) cstcall(expp, S_LONG);
+		break;
+		}
+
+	case S_SHORT: {
+		struct type *tp;
+
+		if (!(left = getarg(&arg, 0, 0, edf))) {
+			return 0;
+		}
+		tp = BaseType(left->nd_type);
+		if (tp == longint_type) expp->nd_type = int_type;
+		else if (tp == longreal_type) expp->nd_type = real_type;
+		else {
+			expp->nd_type = error_type;
+			Xerror(left, "unexpected parameter type", edf);
+		}
+		if (left->nd_class == Value) cstcall(expp, S_SHORT);
+		break;
+		}
 
 	case S_HIGH:
 		if (!(left = getarg(&arg, T_ARRAY|T_STRING|T_CHAR, 0, edf))) {
@@ -1053,8 +1088,10 @@ ChkStandard(expp, left)
 				  expp->nd_left->nd_def->df_idf->id_text);
 		break;
 
+	case S_TRUNCD:
 	case S_TRUNC:
 		expp->nd_type = card_type;
+		if (std == S_TRUNCD) expp->nd_type = longint_type;
 		if (!(left = getarg(&arg, T_REAL, 0, edf))) return 0;
 		break;
 

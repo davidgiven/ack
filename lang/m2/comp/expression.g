@@ -79,16 +79,16 @@ ConstExpression(struct node **pnd;)
 	 * Check that the expression is a constant expression and evaluate!
 	 */
 		{ nd = *pnd;
-		  DO_DEBUG(options['X'], print("CONSTANT EXPRESSION\n"));
-		  DO_DEBUG(options['X'], PrNode(nd, 0));
+		  DO_DEBUG(options['C'], print("CONSTANT EXPRESSION\n"));
+		  DO_DEBUG(options['C'], PrNode(nd, 0));
 
 		  if (ChkExpression(nd) &&
 		      ((nd)->nd_class != Set && (nd)->nd_class != Value)) {
 			error("constant expression expected");
 		  }
 
-		  DO_DEBUG(options['X'], print("RESULTS IN\n"));
-		  DO_DEBUG(options['X'], PrNode(nd, 0));
+		  DO_DEBUG(options['C'], print("RESULTS IN\n"));
+		  DO_DEBUG(options['C'], PrNode(nd, 0));
 		}
 ;
 

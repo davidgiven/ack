@@ -34,7 +34,7 @@ long	sys_filesize();
 
 struct idf *DefId;
 
-STATIC char *
+char *
 getwdir(fn)
 	register char *fn;
 {
@@ -65,7 +65,6 @@ GetFile(name)
 	*/
 	char buf[15];
 	char *strncpy(), *strcat();
-	static char *WorkingDir = ".";
 
 	strncpy(buf, name, 10);
 	buf[10] = '\0';			/* maximum length */

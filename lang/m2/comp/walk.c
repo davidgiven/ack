@@ -141,8 +141,8 @@ WalkModule(module)
 	}
 	MkCalls(sc->sc_def);
 	proclevel++;
-	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	WalkNode(module->mod_body, NO_EXIT_LABEL);
+	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	C_df_ilb(RETURN_LABEL);
 	EndPriority();
 	C_ret((arith) 0);
@@ -293,8 +293,8 @@ WalkProcedure(procedure)
 
 	text_label = 1;		/* label at end of procedure */
 
-	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	WalkNode(procedure->prc_body, NO_EXIT_LABEL);
+	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	C_df_ilb(RETURN_LABEL);	/* label at end */
 	tp = func_type;
 	if (func_res_label) {

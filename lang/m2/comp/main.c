@@ -74,6 +74,7 @@ Compile(src, dst)
 	char *src, *dst;
 {
 	extern struct tokenname tkidf[];
+	extern char *getwdir();
 
 	if (! InsertFile(src, (char **) 0, &src)) {
 		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
@@ -81,6 +82,7 @@ Compile(src, dst)
 	}
 	LineNumber = 1;
 	FileName = src;
+	WorkingDir = getwdir(src);
 	init_idf();
 	InitCst();
 	reserve(tkidf);
@@ -171,6 +173,10 @@ static struct stdproc {
 	{ "MAX",	S_MAX },
 	{ "MIN",	S_MIN },
 	{ "INCL",	S_INCL },
+	{ "LONG",	S_LONG },
+	{ "SHORT",	S_SHORT },
+	{ "TRUNCD",	S_TRUNCD },
+	{ "FLOATD",	S_FLOATD },
 	{ 0,		0 }
 };
 
@@ -246,3 +252,13 @@ cnt_scope, cnt_scopelist, cnt_tmpvar);
 print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif
+
+No_Mem()
+{
+	fatal("out of memory");
+}
+
+C_failed()
+{
+	fatal("write failed");
+}

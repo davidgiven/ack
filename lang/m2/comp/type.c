@@ -652,8 +652,7 @@ DumpType(tp)
 	print(" fund:");
 	switch(tp->tp_fund) {
 	case T_RECORD:
-		print("RECORD\n");
-		DumpScope(tp->rec_scope->sc_def);
+		print("RECORD");
 		break;
 	case T_ENUMERATION:
 		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;
