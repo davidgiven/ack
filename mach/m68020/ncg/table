@@ -4368,7 +4368,7 @@ pat cmi tlt $1==4			call cmxtxx("slt","sgt")
 pat cmi tle $1==4			call cmxtxx("sle","sge")
 pat cmi teq $1==4			call cmxtxx("seq","seq")
 pat cmi tne $1==4			call cmxtxx("sne","sne")
-pat cmi tge $1==4			call cmxtxx("sge","slt")
+pat cmi tge $1==4			call cmxtxx("sge","sle")
 pat cmi tgt $1==4			call cmxtxx("sgt","slt")
 
 pat cmu tlt $1==4			call cmxtxx("scs","shi")
