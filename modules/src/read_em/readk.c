@@ -353,7 +353,7 @@ gethead()
 
 		p->em_type = EM_DEFDNAM;
 		if (!(s = getstring(1))) {
-			p->em_type = EM_ERROR;
+			p->em_defdnam = "";
 		}
 		else	p->em_defdnam = s->str;
 		break;
