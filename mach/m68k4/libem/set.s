@@ -1,33 +1,30 @@
-.define .set
+.define	.set
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 
-	! d0 : setsize in bytes
-	! d1 : bitnumber
-	.sect .text
-.set:
+.sect .text
+.set:	! d0 bitnumber
+	! d1 setsize in bytes
+
 	move.l	(sp)+,a0
-	move.l	(sp)+,d1
-	move.l	d0,d2
-	asr.l	#2,d2
+	move.l	d1, d2
+	asr.l	#2, d2
+	sub.l	#1, d2
 1:
-	clr.l	-(sp)		!create empty set
-	sub.l	#1,d2
-	bgt	1b
-	move.l	sp,a1		! set base
-	move.l	d1,d2
-	asr.l	#3,d2
-	cmp.l	d0,d2
-	bcs	1f
-	move.w	#ESET,-(sp)
-	jsr	.trp
-1:
-	bclr	#0,d2
-	bclr	#1,d2
-	add.l	d2,a1
-	clr.l	d2
-	bset	d1,d2
-	move.l	d2,(a1)
+	clr.l	-(sp)
+	dbf	d2, 1b
+
+	move.l	d0, d2
+	asr.l	#3, d2		! offset .sect from sp in bytes
+	eor.l	#3, d2		! longs are stored in high-to-low order
+	cmp.l	d1, d2
+	blt	2f
+	move.l	a0, -(sp)
+	move.l	#ESET, -(sp)	! bitnumber too large
+	jmp	.trp
+2:
+	bset	d0, 0(sp, d2.l)
 	jmp	(a0)
+.align 2
