@@ -227,9 +227,9 @@ Lsigtrp:
 	movl	4(sp),r1	# Sig in r1
 	movl	(sp)+,(sp)	# Trapno on top of stack
 	cmpl	r1,$16
-	bgtru	badsig
+	jgtru	badsig
 	tstl	r1
-	beql	badsig
+	jeql	badsig
 #ifdef BSD42
 	movl	$3,(ap)+	# sigvec(sig, vec, ovec)
 #else BSD42
