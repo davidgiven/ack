@@ -737,6 +737,8 @@ extconst(n) cons_t n ; {
 
 extbss(n) cons_t n ; {
 	cons_t objsize,amount ;
+	cons_t sv_argval;
+	int sv_tabval;
 
 	if ( n<=0 ) {
 		if ( n<0 ) werror("negative bss/hol size") ;
@@ -752,15 +754,31 @@ extbss(n) cons_t n ; {
 		return;
 	}
 	if ( n%objsize != 0 ) error("BSS/HOL incompatible sizes");
-	putval();
-	amount= n/objsize ;
-	if ( amount>1 ) {
-		setmode(DATA_REP);
-		extadr(amount-1) ;
-	}
-	databytes +=n ;
+	sv_tabval = tabval;
+	sv_argval = argval;
 	getarg(sp_cst2);
 	if ( argval<0 || argval>1 ) error("illegal last argument") ;
+	databytes +=n ;
+	if (argval == 1) {
+		tabval = sv_tabval;
+		argval = sv_argval;
+		putval();
+		amount= n/objsize ;
+		if ( amount>1 ) {
+			setmode(DATA_REP);
+			extadr(amount-1) ;
+		}
+	}
+	else {
+		n = (n + wordsize - 1) / wordsize;
+		while (n > MAXBYTE) {
+			setmode(DATA_BSS);
+			ext8(MAXBYTE);
+			n -= MAXBYTE;
+		}
+		setmode(DATA_BSS);
+		ext8((int) n);
+	}
 }
 
 extloc(lbp) register locl_t *lbp; {

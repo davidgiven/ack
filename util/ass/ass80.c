@@ -260,8 +260,6 @@ cons_t xgeta(f) FILE *f ; {
 	return val ;
 }
 
-#define MAXBYTE 255
-
 int icount(size) {
 	int amount ;
 	amount=(dataoff-lastoff)/size ;
@@ -286,6 +284,7 @@ setmode(mode) {
 		case DATA_ICON:
 		case DATA_FCON:
 		case DATA_UCON:
+		case DATA_BSS:
 			break ;
 		default:
 			return ;
@@ -360,6 +359,9 @@ setmode(mode) {
 	case DATA_REP:
 		ext8(HEADREP) ;
 		break ;
+	case DATA_BSS:
+		ext8(HEADBSS) ;
+		break;
 	default:
 		fatal("Unknown mode in setmode") ;
 	}

@@ -112,6 +112,8 @@ typedef union {
 #define TRUE            1
 #define FALSE           0
 
+#define MAXBYTE 255
+
 #define MAXSTRING       200     /* Maximum string length accepted */
 #define LOCLABSIZE      128     /* size of local label hash table */
 				/* may not be smaller */
