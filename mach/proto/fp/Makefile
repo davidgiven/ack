@@ -92,7 +92,7 @@ FP_$(MACH).a:	$(LIST)
 	$(ASAR) rv $@ $?
 
 fptrp.$(SUF): $(CDIR)/fptrp.e
-	ack -m$(MACH) -L -LIB -c $(CDIR)/fptrp.e
+	ack -m$(MACH) $(EMFLAGS) -c $(CDIR)/fptrp.e
 
 extend.$(SUF) compact.$(SUF): byte_order.h $(CDIR)/get_put.h
 
