@@ -2527,6 +2527,28 @@ uses REG = {ANYCON, 0}
       inc %a
       1:			yields %a
 
+pat ldc cmu zgt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jl {label,$3}
+      jg {label,1f}
+      cmp %a,%1
+      jne {label,$3}
+      1:
+
+pat ldc cmu tgt highw($1)==0 && loww($1)==0 && $2==4
+with rmorconst rmorconst
+uses REG = {ANYCON, 0}
+  gen cmp %a,%2
+      jl {label,2f}
+      jg {label,1f}
+      cmp %a,%1
+      je {label,1f}
+      2:
+      inc %a
+      1:			yields %a
+
 pat ldc cms zeq $2==4 && loww($1)==0 && highw($1)==0
 with rmorconst REG STACK
   gen or %2,%1
