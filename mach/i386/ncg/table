@@ -205,9 +205,7 @@ and LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
 and rm:rw:cc, regorconst:ro.
 and anyreg:rw:cc, rmorconst:ro.
-cbw "o16 cbw" kills ah cost(2,3).
 cdq kills edx cost(1,3).
-cwde cost(1,3).
 cmp rm:ro, regorconst:ro kills :cc.
 cmp anyreg:ro, rmorconst:ro kills :cc.
 cmpb rm1:rw, const:ro kills :cc.
@@ -236,10 +234,11 @@ jmp label cost(1,4).
 proccall "call" label+rm cost(1,8).
 jxx "syntax error" label cost(1,4).
 lea anyreg:rw, halfindir:ro.
+lea LOCAL:rw, halfindir:ro.	/* only for register variables, UNSAFE!!! */
 leave cost(1,4).
 loop label kills ecx.
 #ifdef REGVARS
-mov LOCAL:wo, memory:ro.	/* only for register variables, UNSAFE!!! */
+mov LOCAL:wo, rmorconst:ro.	/* only for register variables, UNSAFE!!! */
 #endif
 mov a_word:wo, regorconst:ro.
 mov anyreg:wo, rmorconst:ro.
@@ -247,9 +246,13 @@ movb rm1:wo, regorconst124:ro.
 movb REG1:wo, rm1:ro.
 movw "o16 mov" rm2:wo, regorconst124:ro cost(3,2).
 movw "o16 mov" REG2:wo, rmorconst2:ro cost(3,2).
+movsxb anyreg:wo, REG+rmorconst1:ro.
+movsx anyreg:wo, REG+rmorconst2:ro.
+movzxb anyreg:wo, REG+rmorconst1:ro.
+movzx anyreg:wo, REG+rmorconst2:ro.
 mul rmorconst:ro kills :cc eax edx cost(2,41).
 neg rmorconst:rw:cc.
-not rmorconst:rw:cc.
+not rmorconst:rw.
 ORB "orb" REG1:ro, REG1:ro:cc.		/* use ORB for tests */
 ORW "o16 or" REG2:ro, REG2:ro:cc.	/* use ORW for tests */
 OR "or" anyreg:ro, anyreg:ro:cc.	/* Use OR for tests */
@@ -304,7 +307,7 @@ MOVES
 /*****************************************************************/
 
 #ifdef REGVARS
-from memory to LOCAL		/* unsafe !!! */
+from rmorconst to LOCAL		/* unsafe !!! */
 gen mov %2,%1
 #endif
 
@@ -315,6 +318,9 @@ from anyreg to dest
 gen mov %2,%1
 
 from halfindir to register+AREG
+gen lea %2,%1
+
+from halfindir to LOCAL		/* unsafe !!! */
 gen lea %2,%1
 
 from rm1 to REG1
@@ -384,21 +390,23 @@ from const to STACK
   gen push %1
 
 from rm1 to STACK
-  uses GENREG
-  gen move {ANYCON,0},%a
-      move %1,%a.1
+  uses REG
+  gen movzxb %a,%1
       push %a
 
 from rm1 to STACK
   gen push eax
-      xor eax,eax
-      movb al,%1
+      movzxb eax,%1
       xchg {indir_r,esp},eax
 
 from rm2 to STACK
+  uses REG
+  gen movzx %a,%1
+      push %a
+
+from rm2 to STACK
   gen push eax
-      xor eax,eax
-      movw ax,%1
+      movzx eax,%1
       xchg {indir_r,esp},eax
 
 from Xreg_off to STACK
@@ -406,8 +414,7 @@ from Xreg_off to STACK
       push %1.reg
 
 from ADDR_LOCAL %ind==0 to STACK
-  gen
-	push ebp
+  gen push ebp
 
 from halfindir to STACK
   uses REG
@@ -462,9 +469,21 @@ from rm1
   uses reusing %1,REG1=%1		yields %a
 
 from rm1
-  uses GENREG={ANYCON,0}
+  uses GENREG
   gen
-      move %1,%a.1			yields %a
+      movzxb %a,%1			yields %a
+
+/****************
+ * From source2 *
+ ****************/
+
+from rm2
+  uses reusing %1,REG2=%1		yields %a
+
+from rm2
+  uses GENREG
+  gen
+      movzx %a,%1			yields %a
 
 /************************
  * From STACK coercions *
@@ -495,7 +514,7 @@ pat stl lol $1==$2
 #endif
 						leaving dup 4 stl $1
 
-pat sdl ldl $1==$2				leaving dup 4 sdl $1
+pat sdl ldl $1==$2				leaving dup 8 sdl $1
 
 pat lol lol $1==$2
 #ifdef REGVARS
@@ -564,7 +583,7 @@ pat lxl $1>2
   uses ADDREG={indir_r_off,ebp,SSL},
        CXREG={ANYCON,$1-1}
   gen 1:
-      mov %a,{indir_r_off,%a,4}
+      mov %a,{indir_r_off,%a,SSL}
       loop {label,1b}			yields %a
 
 pat lxa $1==0				yields {ADDR_LOCAL,SL}
@@ -580,7 +599,7 @@ pat lxa $1>2
   uses ADDREG={indir_r_off,ebp,SSL},
        CXREG={ANYCON,$1-1}
   gen 1:
-      mov %a,{indir_r_off,%a,4}
+      mov %a,{indir_r_off,%a,SSL}
       loop {label,1b}			yields {Xreg_off,%a,SSL}
 
 pat dch						leaving loi 4
@@ -685,6 +704,9 @@ pat stl inreg($1)==reg_any
   with rmorconst
   kills regvar($1)
   gen move %1, {LOCAL,$1,4}
+  with exact halfindir
+  kills regvar($1)
+  gen move %1, {LOCAL,$1,4}
   with exact STACK
   kills regvar($1)
   gen pop {LOCAL, $1, 4}
@@ -753,7 +775,7 @@ pat stf
   with ADDR_LOCAL regorconst
   kills indir,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
   gen move %2,{LOCAL,%1.ind+$1,4}
-  with exact ADDR_LOCAL
+  with exact ADDR_LOCAL STACK
   kills indir,locals %ind+%size > %1.ind+$1 && %ind < %1.ind+$1+4
   gen pop {LOCAL,%1.ind+$1,4}
   with ADDR_EXTERN regorconst
@@ -791,7 +813,7 @@ pat sti $1==4
   with ADDR_LOCAL regorconst
   kills indir,locals %ind+%size > %1.ind && %ind < %1.ind+4
   gen move %2,{LOCAL,%1.ind,4}
-  with exact ADDR_LOCAL
+  with exact ADDR_LOCAL STACK
   kills indir,locals %ind+%size > %1.ind && %ind < %1.ind+4
   gen pop {LOCAL,%1.ind,4}
   with ADDR_EXTERN regorconst
@@ -1135,15 +1157,10 @@ pat dvf $1==4		leaving cal ".dvf4" asp 4
 pat dvf $1==8		leaving cal ".dvf8" asp 8
 pat ngf $1==4		leaving cal ".ngf4"
 pat ngf $1==8		leaving cal ".ngf8"
-pat fif $1==4		leaving cal ".fif4"
-pat fif $1==8		leaving cal ".fif8"
-pat fef $1==4		leaving dup 4 cal ".fef4"
-pat fef $1==8
-with REG REG
-  kills ALL
-  gen push %1
-      push %2
-      push %1		leaving cal ".fef8"
+pat fif $1==4		leaving lor 1 cal ".fif4" asp 4
+pat fif $1==8		leaving lor 1 cal ".fif8" asp 4
+pat fef $1==4		leaving lor 1 adp 0-4 cal ".fef4"
+pat fef $1==8		leaving lor 1 adp 0-4 cal ".fef8"
 
 /******************************************************************
  *  Group 6: Pointer Arithmetic					  *
@@ -1387,6 +1404,12 @@ with regorconst
 kills all_mems
 gen axx* {indir_r, regvar($1)}, %1
 
+proc xxxrstl example adi stl
+with rmorconst rmorconst-RREG
+  kills regvar($2)
+  gen move %1, {LOCAL, $2, 4}
+      axx* {LOCAL, $2, 4}, %2
+
 pat lol adi stl $1==$3 && $2==4 && inreg($1)==reg_any	call lolrxxxstl("add")
 pat lol adu stl $1==$3 && $2==4 && inreg($1)==reg_any	call lolrxxxstl("add")
 pat lol ads stl $1==$3 && $2==4 && inreg($1)==reg_any	call lolrxxxstl("add")
@@ -1400,6 +1423,13 @@ pat lil ads sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilrxxxsil("add")
 pat lil and sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilrxxxsil("and")
 pat lil ior sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilrxxxsil("or")
 pat lil xor sil $1==$3 && $2==4 && inreg($1)==reg_any	call lilrxxxsil("xor")
+
+pat adi stl $1==4 && inreg($2)==reg_any	call xxxrstl("add")
+pat adu stl $1==4 && inreg($2)==reg_any	call xxxrstl("add")
+pat ads stl $1==4 && inreg($2)==reg_any	call xxxrstl("add")
+pat and stl $1==4 && inreg($2)==reg_any	call xxxrstl("and")
+pat ior stl $1==4 && inreg($2)==reg_any	call xxxrstl("or")
+pat xor stl $1==4 && inreg($2)==reg_any	call xxxrstl("xor")
 #endif
 
 proc lolxxxstl example lol adi stl
@@ -1502,6 +1532,12 @@ pat lol lof ngi lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call lofruxxsof("neg")
 pat lol lof com lol stf $1==$4 && $2==$5 && $3==4 && inreg($1)==reg_any
 					call lofruxxsof("not")
+
+pat lol lof dup adp lol stf $1==$5 && $2==$6 && $3==4 && inreg($1)==reg_any
+kills all_mems
+uses ADDREG={indir_r_off, regvar($1), $2}
+gen add {indir_r_off, regvar($1), $2}, {ANYCON, $4} 	yields %a
+
 #endif
 
 proc lofuxxsof example lol lof inc lol stf
@@ -1531,6 +1567,13 @@ pat lol lof and lol stf $1==$4 && $2==$5 && $3==4	call lofxxxsof("and")
 pat lol lof ior lol stf $1==$4 && $2==$5 && $3==4	call lofxxxsof("or")
 pat lol lof xor lol stf $1==$4 && $2==$5 && $3==4	call lofxxxsof("xor")
 
+pat lol lof dup adp lol stf $1==$5 && $2==$6 && $3==4
+kills all_mems
+uses ADDREG={LOCAL,$1,4},ADDREG
+gen mov %b, {indir_r_off, %a, $2}
+    add {indir_r_off, %a, $2}, {ANYCON, $4}
+    killreg %a				yields %b
+
 proc lefuxxsef example loe lof inc loe stf
 kills all_mems
 uses ADDREG={EXTERN,$1}
@@ -1557,6 +1600,13 @@ pat loe lof ads loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("add")
 pat loe lof and loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("and")
 pat loe lof ior loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("or")
 pat loe lof xor loe stf $1==$4 && $2==$5 && $3==4	call lefxxxsef("xor")
+
+pat loe lof dup adp loe stf $1==$5 && $2==$6 && $3==4
+kills all_mems
+uses ADDREG={EXTERN,$1},ADDREG
+gen mov %b, {indir_r_off, %a, $2}
+    add {indir_r_off, %a, $2}, {ANYCON, $4}
+    killreg %a				yields %b
 
 proc leiuxxsei example loe loi inc loe sti
 kills all_mems
@@ -1700,8 +1750,8 @@ proc lolcxxstl example lol loc sbi stl
 
 pat lol loc sbi stl $1==$4 && $3==4		call lolcxxstl("sub")
 pat lol loc sbu stl $1==$4 && $3==4		call lolcxxstl("sub")
-pat lol loc adi stl $1==$4 && $3==4		call lolcxxstl("sub")
-pat lol loc adi stl $1==$4 && $3==4		call lolcxxstl("sub")
+pat lol loc adi stl $1==$4 && $3==4		call lolcxxstl("add")
+pat lol loc adi stl $1==$4 && $3==4		call lolcxxstl("add")
 pat lol loc sli stl $1==$4 && $3==4		call lolcxxstl("sal")
 pat lol loc slu stl $1==$4 && $3==4		call lolcxxstl("sal")
 pat lol loc sri stl $1==$4 && $3==4		call lolcxxstl("sar")
@@ -1747,8 +1797,20 @@ pat lol lol adp stl loi stl $1==$2 && $2==$4 && $5<=4
 					leaving lol $1 loi $5 stl $6 lol $2 adp $3 stl $4
 
 #ifdef REGVARS
+pat lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && $5==1 && inreg($1) > 0 && $6==1 && $7==4
+uses REG
+gen movsxb %a,{indir_r1, regvar($1)}
+				yields %a
+					leaving lol $2 adp $3 stl $4
+
 pat lol lol adp stl loi $1==$2 && $2==$4 && $5==1 && inreg($1) > 0
 uses REG1 = {indir_r1, regvar($1)}
+				yields %a
+					leaving lol $2 adp $3 stl $4
+
+pat lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && $5==2 && inreg($1) > 0 && $6==2 && $7==4
+uses REG
+gen movsx %a,{indir_r2, regvar($1)}
 				yields %a
 					leaving lol $2 adp $3 stl $4
 
@@ -1756,6 +1818,7 @@ pat lol lol adp stl loi $1==$2 && $2==$4 && $5==2 && inreg($1) > 0
 uses REG2 = {indir_r2, regvar($1)}
 				yields %a
 					leaving lol $2 adp $3 stl $4
+
 pat lol lol adp stl loi $1==$2 && $2==$4 && $5==4 && inreg($1) > 0
 uses REG = {indir_r, regvar($1)}
 				yields %a
@@ -1887,20 +1950,17 @@ pat loc loc cii loc and zne $4<65536 && $4>=0 && $5==4 && $1==2 && $2==4
 
 pat loc loc cii $1==1 && $2==4
 with ACC
-gen cbw.
-    cwde.			yields eax
+gen movsxb %1,%1		yields eax
 with exact rmorconst1
-uses reusing %1, ACC1=%1
-gen cbw.
-    cwde.			yields eax
+uses reusing %1, GENREG
+gen movsxb %a,%1		yields %a
 
 pat loc loc cii $1==2 && $2==4
 with ACC
-gen  cwde.			yields eax
+gen  movsx %1,%1		yields eax
 with exact rmorconst2
-uses ACC
-gen movw ax,%1
-    cwde.			yields eax
+uses reusing %1,GENREG
+gen movsx %a,%1			yields %a
 
 pat loc loc ciu				leaving loc $1 loc $2 cuu
 pat loc loc cui				leaving loc $1 loc $2 cuu
@@ -1929,6 +1989,9 @@ with REG rmorconst
   gen and %1,%2				yields %1
 with rmorconst REG
   gen and %2,%1				yields %2
+
+pat loc and $1==255 && $2==4
+with GENREG				yields %1.1
 
 pat and $1==8
 with EXACT REG REG rmorconst rmorconst
@@ -2229,9 +2292,10 @@ with REG REG rmorconst rmorconst
 pat cms defined($1)
 kills ALL
   gen mov ecx,{ANYCON,$1}
-      proccall {label,".cms"}	  yields ecx
+      proccall {label,".cms"}	yields ecx
 
 pat cms !defined($1)
+with CXREG
 kills ALL
   gen proccall {label,".cms"}	yields ecx
 
@@ -2535,13 +2599,13 @@ pat ret $1==8
 pat asp $1==4
 with exact a_word
 with STACK
-  uses BXREG /* GENREG may contain lfr area */
+  uses CXREG /* GENREG may contain lfr area */
   gen pop %a
 
 pat asp $1==8
 with exact a_word a_word
 with STACK
-  uses BXREG /* GENREG may contain lfr area */
+  uses CXREG /* GENREG may contain lfr area */
   gen pop %a
       pop %a
 
@@ -2589,7 +2653,7 @@ kills ALL
   gen jmp {label, ".csa4"}
 
 pat csa !defined($1)
-with rm-BXREG-ACC ACC
+with rm-BXREG-ACC BXREG ACC
 kills ALL
   gen cmp %1,{ANYCON,4}
       jne {label, ".unknown"}
