@@ -79,6 +79,8 @@ char opdesc[] = {
 	0,			/* EX_HIGHW */
 	LLDEF,			/* EX_INREG */
 	LLDEF,			/* EX_REGVAR */
+	LLDEF|RLDEF,		/* EX_OR */
+	LLDEF|RLDEF,		/* EX_AND */
 };
 
 string salloc(),strcpy(),strcat();
@@ -289,6 +291,14 @@ result_t compute(node) register node_p node; {
 	case EX_MINUS:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
 		result.e_v.e_con = leaf1.e_v.e_con - leaf2.e_v.e_con;
+		return(result);
+	case EX_OR:
+	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
+		result.e_v.e_con = leaf1.e_v.e_con | leaf2.e_v.e_con;
+		return(result);
+	case EX_AND:
+	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
+		result.e_v.e_con = leaf1.e_v.e_con & leaf2.e_v.e_con;
 		return(result);
 	case EX_TIMES:
 	assert(leaf1.e_typ == EV_INT && leaf2.e_typ == EV_INT);
