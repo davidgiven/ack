@@ -131,7 +131,7 @@ opr:
 	make pr | opr
 
 clean:
-	rm -f $(OBJ) $(GENERATED)
+	rm -f $(OBJ) $(GENERATED) main
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
