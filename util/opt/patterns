@@ -174,6 +174,10 @@ ldc mli $1==1 && $2==2*w:
 loc mlu $1==1 && $2==w:
 ldc mlu $1==1 && $2==2*w:
 loc sbi $1==1 && $2==w: dec
+loc loe mlu $3==w:      loe $2  loc $1  mlu w
+loc lol mlu $3==w:      lol $2  loc $1  mlu w
+ldc lde mlu $3==2*w:    lde $2  ldc $1  mlu 2*w
+ldc ldl mlu $3==2*w:    ldl $2  ldc $1  mlu 2*w
 loc loe mli $3==w:      loe $2  loc $1  mli w
 loc loe adi loc $3==w:	loe $2 	loc $1 	adi w loc $4
 loc loe adi inc $3==w:	loe $2 	loc $1 	adi w inc
