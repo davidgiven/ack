@@ -177,7 +177,6 @@ int argc;
 char *argv[];
 {
   register char *ptr;
-  int pow, pid;
 
   progname = argv[0];
 
@@ -250,10 +249,9 @@ MEMBER *
 get_member()
 {
   static MEMBER member;
-  register int ret;
 
 again:
-  if ((ret = rd_arhdr(ar_fd, &member)) == 0)
+  if (rd_arhdr(ar_fd, &member) == 0)
 	return NIL_MEM;
 #ifdef AAL
   if (equal(SYMDEF, member.ar_name)) {
@@ -573,7 +571,6 @@ char *s, *name;
 write_symdef()
 {
 	register struct ranlib	*ran;
-	register char	*str;
 	register int	i;
 	register long	delta;
 	MEMBER	arbuf;
