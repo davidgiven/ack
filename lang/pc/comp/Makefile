@@ -215,6 +215,7 @@ LLlex.o: LLlex.h
 LLlex.o: Lpars.h
 LLlex.o: class.h
 LLlex.o: const.h
+LLlex.o: dbsymtab.h
 LLlex.o: debug.h
 LLlex.o: debugcst.h
 LLlex.o: f_info.h
@@ -230,12 +231,14 @@ LLlex.o: target_sizes.h
 LLlex.o: type.h
 LLmessage.o: LLlex.h
 LLmessage.o: Lpars.h
+LLmessage.o: dbsymtab.h
 LLmessage.o: idf.h
 LLmessage.o: nocross.h
 LLmessage.o: target_sizes.h
 LLmessage.o: type.h
 body.o: LLlex.h
 body.o: chk_expr.h
+body.o: dbsymtab.h
 body.o: debug.h
 body.o: debugcst.h
 body.o: def.h
@@ -252,6 +255,7 @@ chk_expr.o: LLlex.h
 chk_expr.o: Lpars.h
 chk_expr.o: chk_expr.h
 chk_expr.o: const.h
+chk_expr.o: dbsymtab.h
 chk_expr.o: debug.h
 chk_expr.o: debugcst.h
 chk_expr.o: def.h
@@ -266,6 +270,7 @@ chk_expr.o: target_sizes.h
 chk_expr.o: type.h
 code.o: LLlex.h
 code.o: Lpars.h
+code.o: dbsymtab.h
 code.o: debug.h
 code.o: debugcst.h
 code.o: def.h
@@ -283,6 +288,7 @@ code.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
 cstoper.o: const.h
+cstoper.o: dbsymtab.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
 cstoper.o: nocross.h
@@ -291,6 +297,7 @@ cstoper.o: required.h
 cstoper.o: target_sizes.h
 cstoper.o: type.h
 def.o: LLlex.h
+def.o: dbsymtab.h
 def.o: debug.h
 def.o: debugcst.h
 def.o: def.h
@@ -303,6 +310,7 @@ def.o: scope.h
 def.o: target_sizes.h
 def.o: type.h
 desig.o: LLlex.h
+desig.o: dbsymtab.h
 desig.o: debug.h
 desig.o: debugcst.h
 desig.o: def.h
@@ -315,6 +323,7 @@ desig.o: scope.h
 desig.o: target_sizes.h
 desig.o: type.h
 enter.o: LLlex.h
+enter.o: dbsymtab.h
 enter.o: def.h
 enter.o: idf.h
 enter.o: main.h
@@ -338,6 +347,7 @@ input.o: idf.h
 input.o: input.h
 input.o: inputtype.h
 label.o: LLlex.h
+label.o: dbsymtab.h
 label.o: def.h
 label.o: idf.h
 label.o: main.h
@@ -347,6 +357,7 @@ label.o: scope.h
 label.o: target_sizes.h
 label.o: type.h
 lookup.o: LLlex.h
+lookup.o: dbsymtab.h
 lookup.o: def.h
 lookup.o: idf.h
 lookup.o: misc.h
@@ -359,6 +370,7 @@ main.o: LLlex.h
 main.o: Lpars.h
 main.o: class.h
 main.o: const.h
+main.o: dbsymtab.h
 main.o: debug.h
 main.o: debugcst.h
 main.o: def.h
@@ -381,6 +393,7 @@ misc.o: main.h
 misc.o: misc.h
 misc.o: node.h
 node.o: LLlex.h
+node.o: dbsymtab.h
 node.o: debug.h
 node.o: debugcst.h
 node.o: nocross.h
@@ -389,12 +402,14 @@ node.o: target_sizes.h
 node.o: type.h
 options.o: class.h
 options.o: const.h
+options.o: dbsymtab.h
 options.o: idfsize.h
 options.o: main.h
 options.o: nocross.h
 options.o: target_sizes.h
 options.o: type.h
 readwrite.o: LLlex.h
+readwrite.o: dbsymtab.h
 readwrite.o: debug.h
 readwrite.o: debugcst.h
 readwrite.o: def.h
@@ -407,6 +422,7 @@ readwrite.o: scope.h
 readwrite.o: target_sizes.h
 readwrite.o: type.h
 scope.o: LLlex.h
+scope.o: dbsymtab.h
 scope.o: debug.h
 scope.o: debugcst.h
 scope.o: def.h
@@ -423,6 +439,7 @@ tokenname.o: idf.h
 tokenname.o: tokenname.h
 type.o: LLlex.h
 type.o: const.h
+type.o: dbsymtab.h
 type.o: debug.h
 type.o: debugcst.h
 type.o: def.h
@@ -434,6 +451,7 @@ type.o: scope.h
 type.o: target_sizes.h
 type.o: type.h
 typequiv.o: LLlex.h
+typequiv.o: dbsymtab.h
 typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
@@ -442,6 +460,7 @@ typequiv.o: node.h
 typequiv.o: target_sizes.h
 typequiv.o: type.h
 progs.o: LLlex.h
+progs.o: dbsymtab.h
 progs.o: debug.h
 progs.o: debugcst.h
 progs.o: def.h
@@ -452,6 +471,7 @@ progs.o: target_sizes.h
 progs.o: type.h
 stab.o: LLlex.h
 stab.o: const.h
+stab.o: dbsymtab.h
 stab.o: def.h
 stab.o: idf.h
 stab.o: main.h
@@ -463,6 +483,7 @@ stab.o: type.h
 declar.o: LLlex.h
 declar.o: Lpars.h
 declar.o: chk_expr.h
+declar.o: dbsymtab.h
 declar.o: debug.h
 declar.o: debugcst.h
 declar.o: def.h
@@ -477,6 +498,7 @@ declar.o: type.h
 expression.o: LLlex.h
 expression.o: Lpars.h
 expression.o: chk_expr.h
+expression.o: dbsymtab.h
 expression.o: debug.h
 expression.o: debugcst.h
 expression.o: def.h
@@ -490,6 +512,7 @@ expression.o: target_sizes.h
 expression.o: type.h
 program.o: LLlex.h
 program.o: Lpars.h
+program.o: dbsymtab.h
 program.o: def.h
 program.o: f_info.h
 program.o: idf.h
@@ -499,6 +522,7 @@ program.o: scope.h
 statement.o: LLlex.h
 statement.o: Lpars.h
 statement.o: chk_expr.h
+statement.o: dbsymtab.h
 statement.o: def.h
 statement.o: desig.h
 statement.o: f_info.h
@@ -516,6 +540,7 @@ symbol2str.o: Lpars.h
 casestat.o: LLlex.h
 casestat.o: Lpars.h
 casestat.o: chk_expr.h
+casestat.o: dbsymtab.h
 casestat.o: debug.h
 casestat.o: debugcst.h
 casestat.o: density.h
@@ -524,6 +549,7 @@ casestat.o: nocross.h
 casestat.o: node.h
 casestat.o: target_sizes.h
 casestat.o: type.h
+tmpvar.o: dbsymtab.h
 tmpvar.o: debug.h
 tmpvar.o: debugcst.h
 tmpvar.o: def.h

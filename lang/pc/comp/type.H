@@ -1,5 +1,7 @@
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
 
+#include "dbsymtab.h"
+
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
 	struct def *par_def;	/* "df" of parameter */
@@ -97,7 +99,9 @@ struct type	{
 #define T_HASFILE	0x1	/* set if type has a filecomponent */
 #define T_PACKED	0x2	/* set if type is packed */
 #define T_CHECKED	0x4	/* set if array has been checked */
+#ifdef DBSYMTAB
 	short tp_dbindex;	/* index in debugger symbol table */
+#endif
 	int tp_align;		/* alignment requirement of this type */
 	int tp_palign;		/* in packed structures */
 	arith tp_size;		/* size of this type */

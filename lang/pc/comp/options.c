@@ -9,6 +9,7 @@
 #include	"main.h"
 #include	"type.h"
 #include	"nocross.h"
+#include	"dbsymtab.h"
 
 #define	MINIDFSIZE	9
 
@@ -31,13 +32,18 @@ DoOption(text)
 					-i: largest value of set of integer
 					-u, -U: allow underscore in identifier
 					-w: no warnings
-					-g: generate symbol table for debugger
 					-R: no range checks
 					-A: range checks for array references
 				   and many more if DEBUG
 				*/
 
 
+#ifdef DBSYMTAB
+	case 'g':
+		options['g'] = 1;
+		options['n'] = 1;
+		break;
+#endif
 	case 'i':	{		/* largest value of set of integer */
 		char *t = text;
 
