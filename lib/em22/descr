@@ -9,7 +9,7 @@ var M=em22
 var NAME=em22
 var LIB=lib/em22/tail_
 var RT=lib/em22/head_
-var SIZE_FLAG=-sm
+var SIZE_FLAG=
 var CPP_F=-Dunix
 var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name asld
