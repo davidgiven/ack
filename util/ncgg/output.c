@@ -891,7 +891,7 @@ used(resource,use,max) char *resource; {
 }
 
 statistics() {
-	extern char *end,*sbrk();
+	extern char *beg_sbrk,*sbrk();
 	extern int nnodes, maxempatlen,maxrule;
 
 	used("Registers",nregs,MAXREGS);
@@ -915,5 +915,5 @@ statistics() {
 	used("Pat bytes",npatbytes+1,MAXPATBYTES);
 	if (tabledebug)
 		used("Source lines",maxline,MAXSOURCELINES);
-	fprintf(stderr,"%ldK heap used\n",((long) (sbrk(0)-(char *) &end+1023))/1024);
+	fprintf(stderr,"%ldK heap used\n",((long) (sbrk(0)-beg_sbrk+1023))/1024);
 }
