@@ -18,6 +18,8 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+#define op_CBO	(op_plast+1)
+
 #define MAXNODES 1000
 expr_t	nodes[MAXNODES];
 expr_p	lastnode = nodes+1;
@@ -32,6 +34,18 @@ bool	nonumlab[N_EX_OPS];
 bool	onlyconst[N_EX_OPS];
 int	nerrors=0;
 char	patid[128];
+
+int CBO_instrs[] = {
+	op_adi,
+	op_adu,
+	op_and,
+	op_ior,
+	op_xor
+	/* don't add op_mli and op_mlu! */
+};
+
+int	patCBO;
+int	rplCBO;
 %}
 
 %union {
@@ -67,22 +81,21 @@ patternlist
 	;
 pattern	:
 		mnemlist optexpr ':' replacement '\n'
-			{ register i;
-			  outbyte(0); outshort(prevind); prevind=curind-3;
-			  out(patlen);
-			  for (i=0;i<patlen;i++) outbyte(patmnem[i]);
-			  out($2);
-			  out(rpllen);
-			  for (i=0;i<rpllen;i++) {
-				outbyte(rplmnem[i]);
-				out(rplexpr[i]);
+			{
+			  if (patCBO) {
+				register int i;
+
+			  	if (! rplCBO) {
+					yyerror("No CBO in replacement");
+				}
+				for (i=0; i<sizeof(CBO_instrs)/sizeof(int); i++) {
+					outpat($2, CBO_instrs[i]);
+				}
 			  }
-#ifdef DIAGOPT
-			  outshort(patno);
-#endif
-			  patno++;
-			  printf("\n");
-			  if (patlen>maxpatlen) maxpatlen=patlen;
+			  else {
+				outpat($2, 0);
+			  }
+			  patCBO = rplCBO = 0;
 			}
 	|	error '\n'
 			{ yyerrok; }
@@ -103,12 +116,36 @@ repllist:	/* empty */
 	|	repllist repl
 	;
 repl	:	MNEM	optexpr
-			{ rplmnem[rpllen] = $1; rplexpr[rpllen++] = $2; }
+			{ rplmnem[rpllen] = $1; rplexpr[rpllen++] = $2;
+			  if ($1 == op_CBO) {
+				if (!patCBO) {
+					yyerror("No CBO in pattern");
+				}
+				if (rplCBO) {
+					yyerror("Only one CBO allowed in replacement");
+				}
+				rplCBO = 1;
+			  }
+			}
 	;
 mnemlist:	MNEM
-			{ patlen=0; patmnem[patlen++] = $1; }
+			{ patlen=0; patmnem[patlen++] = $1;
+			  if ($1 == op_CBO) {
+				if (patCBO) {
+					yyerror("Only one CBO allowed in pattern");
+				}
+				patCBO = 1;
+			  }
+			}
 	|	mnemlist MNEM
-			{ patmnem[patlen++] = $2; }
+			{ patmnem[patlen++] = $2;
+			  if ($2 == op_CBO) {
+				if (patCBO) {
+					yyerror("Only one CBO allowed in pattern");
+				}
+				patCBO = 1;
+			  }
+			}
 	;
 optexpr	:	/* empty */
 			{ $$ = 0; }
@@ -211,6 +248,7 @@ inithash() {
 	enter("LEP",op_LEP);
 	enter("SLP",op_SLP);
 	enter("SEP",op_SEP);
+	enter("CBO",op_CBO);
 	for(i=0;i<=sp_lmnem-sp_fmnem;i++)
 		enter(em_mnem[i],i+sp_fmnem);
 }
@@ -332,6 +370,31 @@ initio() {
 	for (i=0;i<N_EX_OPS;i++) printf("%d,",onlyconst[i]);
 	printf("};\n\nbyte pattern[] = { 0\n");
 	curind = 1;
+}
+
+outpat(exprno, instrno)
+{
+	register int i;
+
+  	outbyte(0); outshort(prevind); prevind=curind-3;
+  	out(patlen);
+  	for (i=0;i<patlen;i++) {
+		if (patmnem[i] == op_CBO) outbyte(instrno);
+		else outbyte(patmnem[i]);
+	}
+  	out(exprno);
+  	out(rpllen);
+  	for (i=0;i<rpllen;i++) {
+		if (rplmnem[i] == op_CBO) outbyte(instrno);
+		else outbyte(rplmnem[i]);
+		out(rplexpr[i]);
+  	}
+#ifdef DIAGOPT
+  	outshort(patno);
+#endif
+  	patno++;
+  	printf("\n");
+  	if (patlen>maxpatlen) maxpatlen=patlen;
 }
 
 outbyte(b) {

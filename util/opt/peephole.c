@@ -603,6 +603,7 @@ basicblock(alpp) line_p *alpp; {
 	int i;
 	short index;
 	bool madeopt;
+	int count = 0;
 
 	lpp = alpp; madeopt = FALSE;
 	while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
@@ -639,6 +640,15 @@ basicblock(alpp) line_p *alpp; {
 			index=(bp[PO_NEXT]&BMASK)|(bp[PO_NEXT+1]<<8);
 		    }
 		}
+		if (lpp == next) {
+			count++;
+			if (count > 100) {
+				/* probably loop in table */
+				fprintf(stderr, "Warning: possible loop in patterns; call an expert\n");
+				next = &((*lpp)->l_next);
+			}
+		}
+		else	count = 0;
 		lpp = next;
 	}
 	return madeopt;
