@@ -207,8 +207,10 @@ char *mnem;
 
 		if ( rel == 0 )
 			break;
-		else if ( high == low)
+		else if ( high == low) {
 			error( "can't find %s", mnem);
+			return;
+		}
 		else if ( rel < 0)
 			high = mid;
 		else
