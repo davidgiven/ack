@@ -148,49 +148,58 @@ LexScan()
 }
 #endif
 
+static struct stdproc {
+	char *st_nam;
+	int  st_con;
+} stdproc[] = {
+	{ "ABS",	S_ABS },
+	{ "CAP",	S_CAP },
+	{ "CHR",	S_CHR },
+	{ "FLOAT",	S_FLOAT },
+	{ "HIGH",	S_HIGH },
+	{ "HALT",	S_HALT },
+	{ "EXCL",	S_EXCL },
+	{ "DEC",	S_DEC },
+	{ "INC",	S_INC },
+	{ "VAL",	S_VAL },
+	{ "NEW",	S_NEW },
+	{ "DISPOSE",	S_DISPOSE },
+	{ "TRUNC",	S_TRUNC },
+	{ "SIZE",	S_SIZE },
+	{ "ORD",	S_ORD },
+	{ "ODD",	S_ODD },
+	{ "MAX",	S_MAX },
+	{ "MIN",	S_MIN },
+	{ "INCL",	S_INCL },
+	{ 0,		0 }
+};
+
+extern struct def *Enter();
+
 AddStandards()
 {
 	register struct def *df;
-	extern struct def *Enter();
+	register struct stdproc *p;
 	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0}};
 
-	Enter("ABS", D_PROCEDURE, std_type, S_ABS);
-	Enter("CAP", D_PROCEDURE, std_type, S_CAP);
-	Enter("CHR", D_PROCEDURE, std_type, S_CHR);
-	Enter("FLOAT", D_PROCEDURE, std_type, S_FLOAT);
-	Enter("HIGH", D_PROCEDURE, std_type, S_HIGH);
-	Enter("HALT", D_PROCEDURE, std_type, S_HALT);
-	Enter("EXCL", D_PROCEDURE, std_type, S_EXCL);
-	Enter("DEC", D_PROCEDURE, std_type, S_DEC);
-	Enter("INC", D_PROCEDURE, std_type, S_INC);
-	Enter("VAL", D_PROCEDURE, std_type, S_VAL);
-	Enter("NEW", D_PROCEDURE, std_type, S_NEW);
-	Enter("DISPOSE", D_PROCEDURE, std_type, S_DISPOSE);
-	Enter("TRUNC", D_PROCEDURE, std_type, S_TRUNC);
-	Enter("SIZE", D_PROCEDURE, std_type, S_SIZE);
-	Enter("ORD", D_PROCEDURE, std_type, S_ORD);
-	Enter("ODD", D_PROCEDURE, std_type, S_ODD);
-	Enter("MAX", D_PROCEDURE, std_type, S_MAX);
-	Enter("MIN", D_PROCEDURE, std_type, S_MIN);
-	Enter("INCL", D_PROCEDURE, std_type, S_INCL);
+	for (p = stdproc; p->st_nam != 0; p++) {
+		Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con);
+	}
 
-	Enter("CHAR", D_TYPE, char_type, 0);
-	Enter("INTEGER", D_TYPE, int_type, 0);
-	Enter("LONGINT", D_TYPE, longint_type, 0);
-	Enter("REAL", D_TYPE, real_type, 0);
-	Enter("LONGREAL", D_TYPE, longreal_type, 0);
-	Enter("BOOLEAN", D_TYPE, bool_type, 0);
-	Enter("CARDINAL", D_TYPE, card_type, 0);
+	EnterType("CHAR", char_type);
+	EnterType("INTEGER", int_type);
+	EnterType("LONGINT", longint_type);
+	EnterType("REAL", real_type);
+	EnterType("LONGREAL", longreal_type);
+	EnterType("BOOLEAN", bool_type);
+	EnterType("CARDINAL", card_type);
 	df = Enter("NIL", D_CONST, address_type, 0);
 	df->con_const = &nilnode;
 	nilnode.nd_INT = 0;
 	nilnode.nd_type = address_type;
 
-	Enter("PROC",
-		     D_TYPE,
-		     construct_type(T_PROCEDURE, NULLTYPE),
-		     0);
-	df = Enter("BITSET", D_TYPE, bitset_type, 0);
+	EnterType("PROC", construct_type(T_PROCEDURE, NULLTYPE));
+	EnterType("BITSET", bitset_type);
 	df = Enter("TRUE", D_ENUM, bool_type, 0);
 	df->enm_val = 1;
 	df->enm_next = Enter("FALSE", D_ENUM, bool_type, 0);
@@ -206,9 +215,9 @@ do_SYSTEM()
 	static char systemtext[] = SYSTEMTEXT;
 
 	open_scope(CLOSEDSCOPE);
-	Enter("WORD", D_TYPE, word_type, 0);
-	Enter("BYTE", D_TYPE, byte_type, 0);
-	Enter("ADDRESS", D_TYPE, address_type, 0);
+	EnterType("WORD", word_type);
+	EnterType("BYTE", byte_type);
+	EnterType("ADDRESS",address_type);
 	Enter("ADR", D_PROCEDURE, std_type, S_ADR);
 	Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
 	if (!InsertText(systemtext, sizeof(systemtext) - 1)) {

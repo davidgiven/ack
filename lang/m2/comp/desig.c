@@ -33,6 +33,45 @@
 extern int	proclevel;
 struct desig	InitDesig = {DSG_INIT, 0, 0};
 
+int	C_ste_dnam(), C_sde_dnam(), C_loe_dnam(), C_lde_dnam();
+int	C_stl(), C_sdl(), C_lol(), C_ldl();
+
+#define WRD	0
+#define DWRD	1
+#define LD	0
+#define STR	1
+
+static int (*lcl_ld_and_str[2][2])() = {
+{ C_lol, C_stl },
+{ C_ldl, C_sdl }
+};
+
+static int (*ext_ld_and_str[2][2])() = {
+{ C_loe_dnam, C_ste_dnam },
+{ C_lde_dnam, C_sde_dnam }
+};
+
+int
+DoLoadOrStore(ds, size, LoadOrStoreFlag)
+	register struct desig *ds;
+{
+	int sz;
+
+	if (ds->dsg_offset % word_size != 0) return 0;
+
+	if (size == word_size) sz = WRD;
+	else if (size == dword_size) sz = DWRD;
+	else return 0;
+
+	if (ds->dsg_name) {
+		(*(ext_ld_and_str[sz][LoadOrStoreFlag]))(ds->dsg_name, ds->dsg_offset);
+	}
+	else {
+		(*(lcl_ld_and_str[sz][LoadOrStoreFlag]))(ds->dsg_offset);
+	}
+	return 1;
+}
+
 STATIC int
 properly(ds, size, al)
 	register struct desig *ds;
@@ -73,23 +112,7 @@ CodeValue(ds, size, al)
 		break;
 
 	case DSG_FIXED:
-		if (ds->dsg_offset % word_size == 0) {	
-			if (size == word_size) {
-				if (ds->dsg_name) {
-					C_loe_dnam(ds->dsg_name,ds->dsg_offset);
-				}
-				else	C_lol(ds->dsg_offset);
-				break;
-			}
-	
-			if (size == dword_size) {
-				if (ds->dsg_name) {
-					C_lde_dnam(ds->dsg_name,ds->dsg_offset);
-				}
-				else	C_ldl(ds->dsg_offset);
-				break;
-			}
-		}
+		if (DoLoadOrStore(ds, size, LD)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
@@ -138,23 +161,7 @@ CodeStore(ds, size, al)
 	save = *ds;
 	switch(ds->dsg_kind) {
 	case DSG_FIXED:
-		if (ds->dsg_offset % word_size == 0) {
-			if (size == word_size) {
-				if (ds->dsg_name) {
-					C_ste_dnam(ds->dsg_name,ds->dsg_offset);
-				}
-				else	C_stl(ds->dsg_offset);
-				break;
-			}
-
-			if (size == dword_size) {
-				if (ds->dsg_name) {
-					C_sde_dnam(ds->dsg_name,ds->dsg_offset);
-				}
-				else	C_sdl(ds->dsg_offset);
-				break;
-			}
-		}
+		if (DoLoadOrStore(ds, size, STR)) break;
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
@@ -343,11 +350,7 @@ CodeAddress(ds)
 		break;
 		
 	case DSG_PFIXED:
-		if (ds->dsg_name) {
-			C_loe_dnam(ds->dsg_name,ds->dsg_offset);
-			break;
-		}
-		C_lol(ds->dsg_offset);
+		DoLoadOrStore(ds, word_size, LD);
 		break;
 
 	case DSG_INDEXED:

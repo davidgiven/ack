@@ -332,27 +332,29 @@ cstset(expp)
 			}
 			expp->nd_class = Value;
 			expp->nd_symb = INTEGER;
-			if (expp->nd_left->nd_set) {
-				free((char *) expp->nd_left->nd_set);
-			}
-			if (expp->nd_right->nd_set) {
-				free((char *) expp->nd_right->nd_set);
-			}
-			FreeNode(expp->nd_left);
-			FreeNode(expp->nd_right);
-			expp->nd_left = expp->nd_right = 0;
+			freesets(expp);
 			return;
 		default:
 			crash("(cstset)");
 		}
-		if (expp->nd_right->nd_set) {
-			free((char *) expp->nd_right->nd_set);
-		}
-		if (expp->nd_left->nd_set) {
-			free((char *) expp->nd_left->nd_set);
-		}
+		freesets(expp);
 		expp->nd_class = Set;
 		expp->nd_set = resultset;
+		return;
+	}
+	FreeNode(expp->nd_left);
+	FreeNode(expp->nd_right);
+	expp->nd_left = expp->nd_right = 0;
+}
+
+freesets(expp)
+	register struct node *expp;
+{
+	if (expp->nd_right->nd_set) {
+		free((char *) expp->nd_right->nd_set);
+	}
+	if (expp->nd_left->nd_set) {
+		free((char *) expp->nd_left->nd_set);
 	}
 	FreeNode(expp->nd_left);
 	FreeNode(expp->nd_right);

@@ -43,6 +43,17 @@ Enter(name, kind, type, pnam)
 	return df;
 }
 
+EnterType(name, type)
+	char *name;
+	struct type *type;
+{
+	/*	Enter a type definition for "name"  and type
+		"type" in the Current Scope.
+	*/
+
+	Enter(name, D_TYPE, type, 0);
+}
+
 EnterEnumList(Idlist, type)
 	struct node *Idlist;
 	register struct type *type;

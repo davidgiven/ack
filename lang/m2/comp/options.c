@@ -141,12 +141,14 @@ DoOption(text)
 
 	case 'V' :	/* set object sizes and alignment requirements	*/
 	{
-		arith size;
-		int align;
+		register arith size;
+		register int align;
 		char c;
 		char *t;
 
 		while (c = *text++)	{
+			char *strindex();
+
 			t = text;
 			size = txt2int(&t);
 			align = 0;
@@ -155,44 +157,60 @@ DoOption(text)
 				align = txt2int(&t);
 				text = t;
 			}
-			switch (c)	{
+			if (! strindex("wislfdpS", c)) {
+				error("-V: bad type indicator %c\n", c);
+			}
+			if (size != 0) switch (c)	{
 
 			case 'w':	/* word		*/
-				if (size != (arith)0) {
-					word_size = size;
-					dword_size = 2 * size;
-				}
-				if (align != 0) word_align = align;
+				word_size = size;
+				dword_size = 2 * size;
 				break;
 			case 'i':	/* int		*/
-				if (size != (arith)0) int_size = size;
-				if (align != 0) int_align = align;
+				int_size = size;
 				break;
 			case 's':	/* short (subranges) */
-				if (size != 0) short_size = size;
-				if (align != 0) short_align = align;
+				short_size = size;
 				break;
 			case 'l':	/* longint	*/
-				if (size != (arith)0) long_size = size;
-				if (align != 0) long_align = align;
+				long_size = size;
 				break;
 			case 'f':	/* real		*/
-				if (size != (arith)0) float_size = size;
-				if (align != 0) float_align = align;
+				float_size = size;
 				break;
 			case 'd':	/* longreal	*/
-				if (size != (arith)0) double_size = size;
-				if (align != 0) double_align = align;
+				double_size = size;
 				break;
 			case 'p':	/* pointer	*/
-				if (size != (arith)0) pointer_size = size;
-				if (align != 0) pointer_align = align;
+				pointer_size = size;
+				break;
+			}
+			if (align != 0) switch (c)	{
+
+			case 'w':	/* word		*/
+				word_align = align;
+				break;
+			case 'i':	/* int		*/
+				int_align = align;
+				break;
+			case 's':	/* short (subranges) */
+				short_align = align;
+				break;
+			case 'l':	/* longint	*/
+				long_align = align;
+				break;
+			case 'f':	/* real		*/
+				float_align = align;
+				break;
+			case 'd':	/* longreal	*/
+				double_align = align;
+				break;
+			case 'p':	/* pointer	*/
+				pointer_align = align;
 				break;
 			case 'S':	/* initial record alignment	*/
-				if (align != (arith)0) struct_align = align;
+				struct_align = align;
 				break;
-			default:
-				error("-V: bad type indicator %c\n", c);
 			}
 		}
 		break;

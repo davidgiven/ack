@@ -59,64 +59,61 @@ TmpSpace(sz, al)
 	return sc->sc_off;
 }
 
-arith
-NewInt()
+STATIC arith
+NewTmp(plist, sz, al, regtype)
+	struct tmpvar **plist;
+	arith sz;
 {
 	register arith offset;
 	register struct tmpvar *tmp;
 
-	if (!TmpInts) {
-		offset = TmpSpace(int_size, int_align);
-		if (! options['n']) C_ms_reg(offset, int_size, reg_any, 0);
+	if (!*plist) {
+		offset = TmpSpace(sz, al);
+		if (! options['n']) C_ms_reg(offset, sz, regtype, 0);
 	}
 	else {
-		tmp = TmpInts;
+		tmp = *plist;
 		offset = tmp->t_offset;
-		TmpInts = tmp->next;
+		*plist = tmp->next;
 		free_tmpvar(tmp);
 	}
 	return offset;
+}
+
+arith
+NewInt()
+{
+	return NewTmp(&TmpInts, int_size, int_align, reg_any);
 }
 
 arith
 NewPtr()
 {
-	register arith offset;
-	register struct tmpvar *tmp;
+	return NewTmp(&TmpPtrs, pointer_size, pointer_align, reg_pointer);
+}
 
-	if (!TmpPtrs) {
-		offset = TmpSpace(pointer_size, pointer_align);
-		if (! options['n']) C_ms_reg(offset, pointer_size, reg_pointer, 0);
-	}
-	else {
-		tmp = TmpPtrs;
-		offset = tmp->t_offset;
-		TmpPtrs = tmp->next;
-		free_tmpvar(tmp);
-	}
-	return offset;
+STATIC
+FreeTmp(plist, off)
+	struct tmpvar **plist;
+	arith off;
+{
+	register struct tmpvar *tmp = new_tmpvar();
+
+	tmp->next = *plist;
+	tmp->t_offset = off;
+	*plist = tmp;
 }
 
 FreeInt(off)
 	arith off;
 {
-	register struct tmpvar *tmp;
-
-	tmp = new_tmpvar();
-	tmp->next = TmpInts;
-	tmp->t_offset = off;
-	TmpInts = tmp;
+	FreeTmp(&TmpInts, off);
 }
 
 FreePtr(off)
 	arith off;
 {
-	register struct tmpvar *tmp;
-
-	tmp = new_tmpvar();
-	tmp->next = TmpPtrs;
-	tmp->t_offset = off;
-	TmpPtrs = tmp;
+	FreeTmp(&TmpPtrs, off);
 }
 
 TmpClose()
