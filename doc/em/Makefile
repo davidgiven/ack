@@ -10,7 +10,7 @@ FILES = macr.nr title.nr intro.nr mem.nr ispace.nr dspace.nr mapping.nr \
 	types.nr descr.nr env.nr traps.nr mach.nr assem.nr \
 	app.int.nr app.codes.nr app.exam.nr cont.nr
 
-IOP=$(HOME)/util/ass/ip_spec.t#			# to construct itables from
+IOP=$(HOME)/etc/ip_spec.t#			# to construct itables from
 
 ../em.$(SUF):	$(FILES) itables dispatdummy em.i Makefile
 		$(TBL) $(FILES) | $(NROFF) > ../em.$(SUF)

@@ -179,6 +179,8 @@ int decflag(str) char *str ; {
 		check(type) ; type=OP32 ; break ;
 	case '8' :
 		check(type) ; type=OP64 ; break ;
+	case 'u' :
+		check(type) ; type=OP16U ; break ;
 	case 'e' :
 		check(escape) ; escape=0 ; break ;
 	case 'N' :
@@ -199,6 +201,7 @@ int decflag(str) char *str ; {
 		if ( escape!=ILLGL ) error("Conflicting escapes") ;
 		escape=ILLGL ;
 	case OP16 :
+	case OP16U :
 	case OP8 :
 	case OPSHORT :
 	case OPNO :
@@ -452,6 +455,7 @@ prx(flg,low,opc)
 		putchar('z');
 		break;
 	case OP16:
+	case OP16U:
 		if (flg&OP_POS) putchar('p');
 		else if (flg&OP_NEG) putchar('n');
 		else putchar('l');
