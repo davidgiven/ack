@@ -15,6 +15,7 @@ rscid = "$Header$"
 #include "whichone.h"
 
 #define small(x) ((x)>=1 && (x)<=8)
+#define abs_small(x)	((x)>=0-8 && (x)<=8)
 #define nicesize(x) ((x)==1||(x)==2||(x)==4||(x)==8)
 #define lowb(x) ((x) & 0377)
 #define loww(x) ((x) & 0177777)
@@ -1434,6 +1435,18 @@ pat and dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("and.l")
 pat ior dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("or.l")
 pat xor dup stl $1==4 && $2==4 && inreg($3)==reg_any	call xxxdupstl("eor.l")
 
+pat dup stl $1==4 && inreg($2)==reg_any
+with any4
+    kills regvar($2, reg_any), use_index %xreg==regvar($2, reg_any)
+    gen move %1,{dreg4, regvar($2,reg_any)}
+					yields {LOCAL, $2}
+
+pat dup stl $1==4 && inreg($2)==reg_pointer
+with any4
+    kills regvar($2, reg_pointer), all_regind %reg==regvar($2, reg_pointer)
+    gen move_l %1,{LOCAL, $2}
+					yields {LOCAL, $2}
+
 pat lil adp sil $1==$3 && inreg($1)==reg_pointer
     kills allexceptcon
     gen add_l {const, $2}, {indirect4, regvar($1, reg_pointer)}
@@ -1451,13 +1464,6 @@ pat lol ads stl $1==$3 && $2==4 && inreg($1)==reg_pointer
     with data4-sconsts
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen add_l %1, {LOCAL, $1}
-
-pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
-    kills allexceptcon
-    uses AA_REG = {indirect4, regvar($1, reg_pointer)}
-    gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
-    killreg %a
-			yields	%a
 
 pat lil lil inc sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
@@ -1570,10 +1576,24 @@ with any4-sconsts
     kills allexceptcon, regvar($1, reg_pointer)
     gen move_l %1, {pre_dec4, regvar($1, reg_pointer)}
 
-pat lol lol adp stl $1==$2 && $1==$4 && inreg($1)==reg_pointer
+pat lol lol adp stl $1==$2 && $1==$4 && inreg($1)==reg_pointer && abs_small($3)
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     uses AA_REG = {LOCAL, $1}
     gen add_l {const, $3}, {LOCAL, $1}
+    killreg %a
+			yields	%a
+
+pat lol lol adp stl $1==$2 && $1==$4 && inreg($1)==reg_pointer
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
+    uses AA_REG = {LOCAL, $1}, DD_REG = {const, $3}
+    gen add_l %b, {LOCAL, $1}
+    killreg %a
+			yields	%a
+
+pat lol lol adp stl $1==$2 && $1==$4 && abs_small($3)
+    kills all_indir, LOCAL %bd==$1
+    uses AA_REG = {LOCAL, $1}, DD_REG = {const, $3}
+    gen add_l %b, {LOCAL, $1}
     killreg %a
 			yields	%a
 
@@ -1584,13 +1604,30 @@ pat lol lol adp stl $1==$2 && $1==$4
     killreg %a
 			yields	%a
 
-pat lol adp stl $1==$3 && inreg($1)==reg_pointer
+pat lol adp stl $1==$3 && inreg($1)==reg_pointer && abs_small($2)
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen add_l {const, $2}, {LOCAL, $1}
+
+pat lol adp stl $1==$3 && inreg($1)==reg_pointer
+    kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
+    uses DD_REG = {const, $2}
+    gen add_l %a, {LOCAL, $1}
 
 pat lol adp stl $1==$3
     kills all_indir, LOCAL %bd==$1
     gen add_l {const, $2}, {LOCAL, $1}
+
+pat lol adp stl $1==$3 && abs_small($2)
+    kills all_indir, LOCAL %bd==$1
+    uses DD_REG = {const, $2}
+    gen add_l %a, {LOCAL, $1}
+
+pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
+    kills allexceptcon
+    uses AA_REG = {indirect4, regvar($1, reg_pointer)}
+    gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
+    killreg %a
+			yields	%a
 
 pat lil lil adp sil $1==$2 && $1==$4
     kills allexceptcon
@@ -1649,6 +1686,8 @@ pat lol			yields	{LOCAL, $1}
 pat ldl				leaving lol $1+4 lol $1
 
 pat loe			yields	{absolute4, $1}
+
+pat loe loe $1==$2		leaving loe $1 dup 4
 
 pat lil inreg($1)==reg_pointer
     kills pre_post %reg==regvar($1, reg_pointer)
