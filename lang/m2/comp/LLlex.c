@@ -348,6 +348,9 @@ again:
 		register t_idf *id;
 
 		do	{
+			if (ch == '_' && *tag == '_') {
+				lexerror("an identifier may not contain two consecutive underscores");
+			}
 			if (tag - buf < idfsize) *tag++ = ch;
 			LoadChar(ch);
 		} while(in_idf(ch));
@@ -356,7 +359,7 @@ again:
 		else PushBack();
 		*tag = '\0';
 		if (*(tag - 1) == '_') {
-			lexerror("last character of an identifier may not be a '_'");
+			lexerror("last character of an identifier may not be an underscore");
 		}
 
 		tk->TOK_IDF = id = str2idf(buf, 1);
