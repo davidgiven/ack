@@ -209,7 +209,11 @@ ret_1W:		move.l	#0,d0
 		lea	retarea,a5 ;	bra	4f
 ret_0:		move.w	#-1,retsize
 4:		unlk	a2	;	cmp.l	a2,d6
-		beq	hlt_z ;	move.l	(sp)+,a3
+		bne	9f
+		cl	-(sp)
+		jsr	hlt_z 
+9:
+		move.l	(sp)+,a3
 		move.l	(sp)+,a0		!FILE OR PROC DES BASE IN a0
 #if	count+flow+prof
 		move.l	a0,curproc		!SAVE PROC DES BASE CUR PROC
