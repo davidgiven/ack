@@ -17,7 +17,7 @@ extern char *sprintf();
 char * myalloc(n) {
 	register char *p;
 
-	p= (char*) malloc((unsigned)n);
+	p= malloc((unsigned)n);
 	if (p==0) {
 		yyerror("Out of core");
 		exit(1);

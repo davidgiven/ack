@@ -13,7 +13,6 @@
 
 #ifdef	LOGGING
 
-extern char *sprintf();
 extern int strlen();
 extern char *strcpy();
 
@@ -256,10 +255,10 @@ do_log(va_alist)
 		if (fmt[0] == '@') {
 			/* include position */
 			fprintf(log_fp, "%.4s%s, ", fmt, position());
-			_doprnt(&fmt[4], ap, log_fp);
+			vfprintf(log_fp, &fmt[4], ap);
 		}
 		else {
-			_doprnt(&fmt[0], ap, log_fp);
+			vfprintf(log_fp, &fmt[0], ap);
 		}
 	}
 	va_end(ap);

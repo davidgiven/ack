@@ -18,8 +18,6 @@
 #include	"rsb.h"
 #include	"fra.h"
 
-extern char *sprintf();
-
 extern jmp_buf trapbuf;			/* from main.c */
 
 int must_test;				/* TEST-bit on in EM header word 2 */

@@ -31,8 +31,6 @@ extern long inr;			/* from log.c */
 	although it is not directly evident how.
 */
 
-extern char *sprintf();
-
 PRIVATE char *displ_undefs(), *displ_fil(), *displ_sh(), *displ_code();
 PRIVATE ptr std_raw(), std_rsb();
 PRIVATE int std_bytes(), dtd_bytes(), FRAd_bytes();

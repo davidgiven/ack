@@ -53,7 +53,13 @@ extern char *iname;			/* stdin */
 typedef char byte;
 typedef char * string;
 
-extern char *malloc(),*myalloc();
+extern char *myalloc();
+
+#if __STDC__
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
 
 #include <cg_pattern.h>
 

@@ -12,6 +12,9 @@
 
 #include	<sys/types.h>
 #include	<sys/stat.h>
+#if __STDC__
+#include	<time.h>
+#endif
 #include	<sys/times.h>
 #include	<sgtty.h>
 

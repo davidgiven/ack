@@ -12,9 +12,6 @@
 #include	"mem.h"
 #include	"linfil.h"
 
-extern char *sprintf();
-extern _doprnt();
-
 extern int running;			/* from main.c */
 extern char *prog_name;			/* from main.c */
 extern char *load_name;			/* from init.c */
@@ -162,7 +159,7 @@ PRIVATE do_fatal(fp, fmt, ap)
 	fprintf(fp, "(Fatal error) ");
 	if (load_name)
 		fprintf(fp, "%s: ", load_name);
-	_doprnt(fmt, ap, fp);
+	vfprintf(fp, fmt, ap);
 	fputc('\n', fp);
 }
 
@@ -177,7 +174,7 @@ message(va_alist)
 	va_start(ap);
 	{
 		register char *fmt = va_arg(ap, char *);
-		_doprnt(fmt, ap, mess_fp);
+		vfprintf(mess_fp, fmt, ap);
 	}
 	va_end(ap);
 

@@ -11,6 +11,9 @@
 
 #include	<sys/types.h>
 #include	<sys/stat.h>
+#if __STDC__
+#include	<time.h>
+#endif
 #include	<sys/times.h>
 
 extern int errno;			/* UNIX error number */
@@ -54,7 +57,6 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 
 #define	DUPMASK		0x40
 
-extern long times();
 extern long lseek();
 #ifdef	SYS_V
 extern unsigned int alarm();

@@ -13,7 +13,6 @@
 
 #include <stdio.h>
 
-extern char *sprintf();
 extern FILE *popen();
 
 char *progname;
