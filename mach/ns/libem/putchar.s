@@ -15,6 +15,6 @@
 	addr	8(fp),tos
 	movqd	1,tos
 	bsr	_write
-	asjspb	-12
+	adjspb	-12
 	exit	[]
 	ret	0

@@ -22,7 +22,7 @@
 	movqd 0, @.trpreg
 	jsr r1
 3:
-	adjspd $-4
+	adjspd -4
 	restore [r0, r1]
 	ret 4
 2:	

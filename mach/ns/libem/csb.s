@@ -12,6 +12,8 @@
 .csb:
 	save[r2,r3]
 	movd 4(r1), r2		!number of entries
+	cmpqd 0, r2
+	beq 3f
 	movd r1, r3
 1:
 	addd 8, r3		!find addres of next index
