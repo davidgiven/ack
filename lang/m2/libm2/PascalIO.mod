@@ -32,12 +32,17 @@ IMPLEMENTATION MODULE PascalIO;
 	head: Text;
 
   PROCEDURE Reset(VAR InputText: Text; Filename: ARRAY OF CHAR);
+  VAR	i: CARDINAL;
   BEGIN
 	doclose(InputText);
 	getstruct(InputText);
 	WITH InputText^ DO
 		eof := FALSE;
-		fildes := Unix.open(ADR(Filename), 0);
+		FOR i := 0 TO HIGH(Filename) DO
+			buf[i+1] := Filename[i];
+		END;
+		buf[HIGH(Filename)+2] := 0C;
+		fildes := Unix.open(ADR(buf), 0);
 		IF fildes < 0 THEN
 			Traps.Message("could not open input file");
 			HALT;
@@ -50,12 +55,17 @@ IMPLEMENTATION MODULE PascalIO;
   END Reset;
 
   PROCEDURE Rewrite(VAR OutputText: Text; Filename: ARRAY OF CHAR);
+  VAR	i: CARDINAL;
   BEGIN
 	doclose(OutputText);
 	getstruct(OutputText);
 	WITH OutputText^ DO
 		eof := FALSE;
-		fildes := Unix.creat(ADR(Filename), 666B);
+		FOR i := 0 TO HIGH(Filename) DO
+			buf[i+1] := Filename[i];
+		END;
+		buf[HIGH(Filename)+2] := 0C;
+		fildes := Unix.creat(ADR(buf), 666B);
 		IF fildes < 0 THEN
 			Traps.Message("could not open output file");
 			HALT;
