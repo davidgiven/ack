@@ -61,7 +61,7 @@ GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
 	print Xref lxref hfiles cfiles
 
 # include files containing ALLOCDEF specifications
-NEXTFILES = code.str declarator.str decspecs.str def.str expr.str field.str \
+NEXTFILES = code.str declar.str decspecs.str def.str expr.str field.str \
 	idf.str macro.str stack.str struct.str switch.str type.str
 
 .SUFFIXES: .str .h
