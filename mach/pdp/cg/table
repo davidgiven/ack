@@ -572,7 +572,7 @@ adi $1==2       | NC SCR_REG CONST2 | | {regconst2,%[1],tostring(%[2.num])} | |
 ...		| NC source2-REG CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
 			allocate(%[1],REG=%[1])	| %[2] %[a] | adi 2 |
 ...		| NC source1 CONST2+ADDR_EXTERNAL+ADDR_LOCAL |
-			allocate(%[1],REG={CONST2, 0})
+			allocate(REG={CONST2, 0})
 			"bisb %[1],%[a]"	| %[2] %[a] | adi 2 |
 ...		| NC regconst2 CONST2 | |
 					   {regconst2,%[1.reg],
