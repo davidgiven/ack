@@ -100,12 +100,20 @@ to be defined as follows:
 .br
 .RS
 .nf
-/*VARARGS1*/
-print(fmt, argv)
-	char *fmt;
-	int argv;
+#include <varargs.h>
+#include <system.h>
+
+/*VARARGS*/
+print(va_alist)
+	va_dcl
 {
-	doprnt(STDOUT, fmt, &argv);
+	char *fmt;
+	va_list args;
+
+	va_start(args);
+	fmt = va_arg(args, char *);
+	doprnt(STDOUT, fmt, args);
+	va_end(args);
 }
 .fi
 .RE
@@ -123,4 +131,4 @@ The maximum length of the string to be printed is 1024 characters.
 .SH SEE ALSO
 printf(3)
 .SH AUTHOR
-Erik Baalbergen <erikb@vu44.UUCP>
+Erik Baalbergen <erikb@cs.vu.nl>

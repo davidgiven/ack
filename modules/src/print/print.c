@@ -8,7 +8,7 @@
 #include <system.h>
 #include "param.h"
 
-/*VARARGS1*/
+/*VARARGS*/
 print(va_alist)
 	va_dcl
 {
