@@ -1078,7 +1078,7 @@ zer !defined($1)| X_CXREG |
 lol adi stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
 			remove(regvar($1))
 			"add %(regvar($1)%),%[1]"
-			setcc(regvar($1))		  | | |
+			erase(regvar($1)) setcc(regvar($1))		  | | |
 #endif
 lol adi stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
@@ -1094,7 +1094,7 @@ ldl adi sdl $1==$3 && $2==4 | regorconst regorconst |
 lol loc sbi stl $1==$4 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"sub %(regvar($1)%),$2"
-			setcc(regvar($1))		   | | |
+			erase(regvar($1)) setcc(regvar($1))		   | | |
 #endif
 lol loc sbi stl $1==$4 && $3==2 | |
 			remove(indexed)
@@ -1105,37 +1105,37 @@ lol loc sbi stl $1==$4 && $3==2 | |
 lol loc sli stl $1==$4 && $2==1 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"sal %(regvar($1)%),1"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 lol loc sli stl $1==$4 && $2==2 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"sal %(regvar($1)%),1"
 			"sal %(regvar($1)%),1"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 lol loc sli stl $1==$4 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			allocate(CXREG = {ANYCON, $2})
 			"sal %(regvar($1)%),cl"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 lol loc sri stl $1==$4 && $2==1 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"sar %(regvar($1)%),1"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 lol loc sri stl $1==$4 && $2==2 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"sar %(regvar($1)%),1"
 			"sar %(regvar($1)%),1"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 lol loc sri stl $1==$4 && $3==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			allocate(CXREG = {ANYCON, $2})
 			"sar %(regvar($1)%),cl"
-			setcc(regvar($1))		| | |
+			erase(regvar($1)) setcc(regvar($1))		| | |
 #endif
 #ifdef REGVARS
 lol ngi stl $1==$3 && $2==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"neg %(regvar($1)%)"
-			setcc(regvar($1))		  | | |
+			erase(regvar($1)) setcc(regvar($1))		  | | |
 #endif
 lol ngi stl $1==$3 && $2==2 | |
 			remove(indexed)
@@ -1167,7 +1167,7 @@ lol adp stl $1==$3 && $2==0-1 | | | | del $1 |
 lol adp stl $1==$3 && inreg($1)==2    | |
 			remove(regvar($1))
 			"add %(regvar($1)%),$2"
-			setcc(regvar($1))		  | | |
+			erase(regvar($1)) setcc(regvar($1))		  | | |
 #endif
 lol adp stl $1==$3	    | |
 			remove(indexed)
@@ -1178,7 +1178,7 @@ lol adp stl $1==$3	    | |
 lol and stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
 			remove(regvar($1))
 			"and %(regvar($1)%),%[1]"
-			setcc(regvar($1))		  | | |
+			erase(regvar($1)) setcc(regvar($1))		  | | |
 #endif
 lol and stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
@@ -1189,7 +1189,7 @@ lol and stl $1==$3 && $2==2 | regorconst |
 lol ior stl $1==$3 && $2==2 && inreg($1)==2 | rmorconst |
 			remove(regvar($1))
 			"or %(regvar($1)%),%[1]"
-			setcc(regvar($1))		  | | |
+			erase(regvar($1)) setcc(regvar($1))		  | | |
 #endif
 lol ior stl $1==$3 && $2==2 | regorconst |
 			remove(indexed)
@@ -1200,7 +1200,7 @@ lol ior stl $1==$3 && $2==2 | regorconst |
 lol com stl $1==$3 && $2==2 && inreg($1)==2 | |
 			remove(regvar($1))
 			"not %(regvar($1)%)"
-			samecc				  | | |
+			erase(regvar($1)) samecc				  | | |
 #endif
 lol com stl $1==$3 && $2==2 | |
 			remove(indexed)
