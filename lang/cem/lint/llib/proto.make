@@ -7,7 +7,7 @@
 
 SRC_DIR =	$(SRC_HOME)/lang/cem/lint/llib
 
-LINT =		$(TARGET_HOME)/bin/lint
+LINT =		$(UTIL_HOME)/bin/lint
 
 CURSESDIR =	/usr/src/lib/libcurses#		# for a local -lcurses
 MATHDIR =	/usr/src/lib/libm#		# for a local -lm
