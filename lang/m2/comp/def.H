@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
+
+/* $Header$ */
 
 struct module {
 	struct node *mo_priority;/* priority of a module */
@@ -106,6 +115,7 @@ struct def	{		/* list of definitions for a name */
 #define D_EXPORTED	0x20	/* set if exported */
 #define D_QEXPORTED	0x40	/* set if qualified exported */
 #define D_BUSY		0x80	/* set if busy reading this definition module */
+#define D_FOREIGN	0x100	/* set for foreign language modules */
 	struct type *df_type;
 	union {
 		struct module df_module;

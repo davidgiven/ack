@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* T E M P O R A R Y   V A R I A B L E S */
+
+/* $Header$ */
 
 /*	Code for the allocation and de-allocation of temporary variables,
 	allowing re-use.

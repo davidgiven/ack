@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* T Y P E   E Q U I V A L E N C E */
+
+/* $Header$ */
 
 /*	Routines for testing type equivalence, type compatibility, and
 	assignment compatibility

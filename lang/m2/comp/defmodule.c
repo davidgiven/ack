@@ -1,10 +1,20 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* D E F I N I T I O N   M O D U L E S */
+
+/* $Header$ */
 
 #include	"debug.h"
 
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<alloc.h>
 
 #include	"idf.h"
 #include	"input.h"
@@ -24,6 +34,28 @@ long	sys_filesize();
 
 struct idf *DefId;
 
+STATIC char *
+getwdir(fn)
+	char *fn;
+{
+	register char *p;
+	char *strrindex();
+
+	p = strrindex(fn, '/');
+	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
+		*p = '\0';
+		p = strrindex(fn, '/');
+	}
+
+	if (p) {
+		*p = '\0';
+		fn = Salloc(fn, p - &fn[0] + 1);
+		*p = '/';
+		return fn;
+	}
+	else return ".";
+}
+
 STATIC
 GetFile(name)
 	char *name;
@@ -33,14 +65,17 @@ GetFile(name)
 	*/
 	char buf[15];
 	char *strcpy(), *strcat();
+	static char *WorkingDir = ".";
 
 	strncpy(buf, name, 10);
 	buf[10] = '\0';			/* maximum length */
 	strcat(buf, ".def");
+	DEFPATH[0] = WorkingDir;
 	if (! InsertFile(buf, DEFPATH, &(FileName))) {
 		error("could not find a DEFINITION MODULE for \"%s\"", name);
 		return 0;
 	}
+	WorkingDir = getwdir(FileName);
 	LineNumber = 1;
 	DO_DEBUG(options['F'], debug("File %s : %ld characters", FileName, sys_filesize(FileName)));
 	return 1;
@@ -64,20 +99,26 @@ GetDefinitionModule(id, incr)
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
 		*/
+		DefId = id;
 		if (!strcmp(id->id_text, "SYSTEM")) {
 			do_SYSTEM();
+			df = lookup(id, GlobalScope, 1);
 		}
 		else {
+			extern int ForeignFlag;
+
+			ForeignFlag = 0;
 			open_scope(CLOSEDSCOPE);
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
-				DefId = id;
 				DefModule();
-				if (level == 1) {
+				df = lookup(id, GlobalScope, 1);
+				if (level == 1 &&
+				    (!df || !(df->df_flags & D_FOREIGN))) {
 					/* The module is directly imported by
-					   the currently defined module, so we
-					   have to remember its name because
-					   we have to call its initialization
-					   routine
+					   the currently defined module, and
+					   is not foreign, so we have to
+					   remember its name because we have 
+					   to call its initialization routine
 					*/
 					static struct node *nd_end;
 					register struct node *n;
@@ -91,10 +132,13 @@ GetDefinitionModule(id, incr)
 					nd_end = n;
 				}
 			}
+			else {
+				df = lookup(id, GlobalScope, 1);
+				CurrentScope->sc_name = id->id_text;
+			}
 			vis = CurrVis;
 			close_scope(SC_CHKFORW);
 		}
-		df = lookup(id, GlobalScope, 1);
 		if (! df) {
 			df = MkDef(id, GlobalScope, D_ERROR);
 			df->df_type = error_type;

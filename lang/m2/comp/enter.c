@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* H I G H   L E V E L   S Y M B O L   E N T R Y */
+
+/* $Header$ */
 
 #include	"debug.h"
 
@@ -94,11 +103,9 @@ EnterVarList(Idlist, type, local)
 	*/
 	register struct def *df;
 	register struct node *idlist = Idlist;
-	register struct scopelist *sc;
+	register struct scopelist *sc = CurrVis;
 	char buf[256];
 	extern char *sprint();
-
-	sc = CurrVis;
 
 	if (local) {
 		/* Find the closest enclosing open scope. This
@@ -136,9 +143,15 @@ EnterVarList(Idlist, type, local)
 		else {
 			/* Global name, possibly external
 			*/
-			sprint(buf,"%s_%s", sc->sc_scope->sc_name,
+			if (sc->sc_scope->sc_definedby->df_flags & D_FOREIGN) {
+				df->var_name = df->df_idf->id_text;
+			}
+			else {
+				sprint(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
-			df->var_name = Salloc(buf, (unsigned)(strlen(buf)+1));
+				df->var_name = Salloc(buf,
+						(unsigned)(strlen(buf)+1));
+			}
 			df->df_flags |= D_NOREG;
 
  			if (DefinitionModule) {

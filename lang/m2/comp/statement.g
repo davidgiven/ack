@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* S T A T E M E N T S */
+
+/* $Header$ */
 
 {
 #include	<assert.h>
@@ -147,7 +156,13 @@ CaseStatement(struct node **pnd;)
 		case(&(nd->nd_right), &tp)
 			{ nd = nd->nd_right; }
 	]*
-	[ ELSE StatementSequence(&(nd->nd_right)) ]?
+	[ ELSE StatementSequence(&(nd->nd_right))
+			{ if (! nd->nd_right) {
+				nd->nd_right = MkLeaf(Stat, &dot);
+				nd->nd_right->nd_symb = ';';
+			  }
+			}
+	]?
 	END
 ;
 

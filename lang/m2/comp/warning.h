@@ -1,3 +1,14 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
+/* W A R N I N G   C L A S S E S */
+
+/* $Header$ */
+
 /* Warning classes, at the moment three of them:
    Strict (R)
    Ordinary (W)

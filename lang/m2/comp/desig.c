@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* D E S I G N A T O R   E V A L U A T I O N */
+
+/* $Header$ */
 
 /*	Code generation for designators.
    	This file contains some routines that generate code common to address
@@ -43,11 +52,11 @@ properly(ds, size, al)
 	arith wordmodsz = word_size % size;	/* 0 if dividor of wordsize */
 
 	if (szmodword && wordmodsz) return 0;
-	if (al >= word_size) return 1;
+	if (al >= word_align) return 1;
 	if (szmodword && al >= szmodword) return 1;
 
 	return ds->dsg_kind == DSG_FIXED &&
-	       ((! szmodword && ds->dsg_offset % word_size == 0) ||
+	       ((! szmodword && ds->dsg_offset % word_align == 0) ||
 		(! wordmodsz && ds->dsg_offset % size == 0));
 }
 

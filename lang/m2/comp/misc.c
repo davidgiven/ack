@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* M I S C E L L A N E O U S    R O U T I N E S */
+
+/* $Header$ */
 
 #include	<alloc.h>
 #include	<em_arith.h>

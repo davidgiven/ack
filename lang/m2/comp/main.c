@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* M A I N   P R O G R A M */
+
+/* $Header$ */
 
 #include	"debug.h"
 #include	"ndir.h"
@@ -19,6 +28,7 @@
 #include	"tokenname.h"
 #include	"node.h"
 #include	"warning.h"
+#include	"SYSTEM.h"
 
 int		state;			/* either IMPLEMENTATION or PROGRAM */
 char		options[128];
@@ -67,8 +77,6 @@ Compile(src, dst)
 	}
 	LineNumber = 1;
 	FileName = src;
-	DEFPATH[0] = ".";
-	DEFPATH[NDIRS] = 0;
 	init_idf();
 	InitCst();
 	reserve(tkidf);
@@ -88,6 +96,7 @@ Compile(src, dst)
 	if (! C_open(dst)) fatal("could not open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+	CheckForLineDirective();
 	CompUnit();
 	C_ms_src((arith) (LineNumber - 1), FileName);
 	if (!err_occurred) {
@@ -186,26 +195,19 @@ AddStandards()
 	df->enm_next = 0;
 }
 
-/* How do you like that! Modula-2 in a C-program.
-*/
-char SYSTEM[] = "\
-DEFINITION MODULE SYSTEM;\n\
-TYPE	PROCESS = ADDRESS;\n\
-PROCEDURE NEWPROCESS(P:PROC; A:ADDRESS; n:CARDINAL; VAR p1:ADDRESS);\n\
-PROCEDURE TRANSFER(VAR p1,p2:ADDRESS);\n\
-END SYSTEM.\n";
-
 do_SYSTEM()
 {
 	/*	Simulate the reading of the SYSTEM definition module
 	*/
+	static char systemtext[] = SYSTEMTEXT;
+
 	open_scope(CLOSEDSCOPE);
 	Enter("WORD", D_TYPE, word_type, 0);
 	Enter("BYTE", D_TYPE, byte_type, 0);
 	Enter("ADDRESS", D_TYPE, address_type, 0);
 	Enter("ADR", D_PROCEDURE, std_type, S_ADR);
 	Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
-	if (!InsertText(SYSTEM, sizeof(SYSTEM) - 1)) {
+	if (!InsertText(systemtext, sizeof(systemtext) - 1)) {
 		fatal("could not insert text");
 	}
 	DefModule();

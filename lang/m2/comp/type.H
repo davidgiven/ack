@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
+
+/* $Header$ */
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
@@ -131,6 +140,8 @@ struct type
 	*set_type(),
 	*subr_type(),
 	*proc_type(),
+	*enum_type(),
+	*qualified_type(),
 	*RemoveEqual();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)

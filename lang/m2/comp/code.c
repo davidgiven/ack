@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* C O D E   G E N E R A T I O N   R O U T I N E S */
+
+/* $Header$ */
 
 /*	Code generation for expressions and coercions
 */

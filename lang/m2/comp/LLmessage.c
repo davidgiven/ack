@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* S Y N T A X   E R R O R   R E P O R T I N G */
+
+/* $Header$ */
 
 /*	Defines the LLmessage routine. LLgen-generated parsers require the
 	existence of a routine of that name.

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* P A R S E   T R E E   W A L K E R */
+
+/* $Header$ */
 
 /*	Routines to walk through parts of the parse tree, and generate
 	code for these parts.
@@ -42,6 +51,9 @@ static struct node	*priority;
 STATIC
 DoPriority()
 {
+	/*	For the time being (???), handle priorities by calls to
+		the runtime system
+	*/
 	if (priority) {
 		C_loc(priority->nd_INT);
 		C_cal("_stackprio");
@@ -111,10 +123,11 @@ WalkModule(module)
 		register struct node *nd = Modules;
 
 		if (state == IMPLEMENTATION) {
-			label l1 = ++data_label;
-			/* we don't actually prevent recursive calls,
+			/* We don't actually prevent recursive calls,
 			   but do nothing if called recursively
 			*/
+			label l1 = ++data_label;
+
 			C_df_dlb(l1);
 			C_bss_cst(word_size, (arith) 0, 1);
 			/* if this one is set to non-zero, the initialization
@@ -422,6 +435,9 @@ WalkStat(nd, exit_label)
 
 	if (! options['L']) C_lin((arith) nd->nd_lineno);
 	switch(nd->nd_symb) {
+	case ';':
+		break;
+
 	case BECOMES:
 		DoAssign(nd, left, right);
 		break;

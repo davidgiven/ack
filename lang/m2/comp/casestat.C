@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* C A S E   S T A T E M E N T   C O D E   G E N E R A T I O N */
+
+/* $Header$ */
 
 /*	Generation of case statements is done by first creating a
 	description structure for the statement, build a list of the

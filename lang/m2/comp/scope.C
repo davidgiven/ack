@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* S C O P E   M E C H A N I S M */
+
+/* $Header$ */
 
 #include	"debug.h"
 
@@ -44,6 +53,17 @@ open_scope(scopetype)
 	CurrVis = ls;
 }
 
+struct scope *
+open_and_close_scope(scopetype)
+{
+	struct scope *sc;
+
+	open_scope(scopetype);
+	sc = CurrentScope;
+	close_scope();
+	return sc;
+}
+
 InitScope()
 {
 	register struct scope *sc = new_scope();
@@ -58,25 +78,6 @@ InitScope()
 	ls->sc_scope = PervasiveScope;
 	PervVis = ls;
 	CurrVis = ls;
-}
-
-Forward(tk, ptp)
-	struct node *tk;
-	struct type *ptp;
-{
-	/*	Enter a forward reference into a list belonging to the
-		current scope. This is used for POINTER declarations, which
-		may have forward references that must howewer be declared in the
-		same scope.
-	*/
-	register struct def *df = define(tk->nd_IDF, CurrentScope, D_FORWTYPE);
-
-	if (df->df_kind == D_TYPE) {
-		ptp->next = df->df_type;
-		return;
-	}
-	df->df_forw_type = ptp;
-	df->df_forw_node = tk;
 }
 
 STATIC

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* E R R O R   A N D   D I A G N O S T I C   R O U T I N E S */
+
+/* $Header$ */
 
 /*	This file contains the (non-portable) error-message and diagnostic
 	giving functions.  Be aware that they are called with a variable

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* U S E R   O P T I O N - H A N D L I N G */
+
+/* $Header$ */
 
 #include	"idfsize.h"
 #include	"ndir.h"
@@ -18,7 +27,7 @@ recognize some keywords!
 #endif
 
 extern int	idfsize;
-static int	ndirs;
+static int	ndirs = 1;
 int		warning_classes;
 
 DoOption(text)
@@ -26,17 +35,16 @@ DoOption(text)
 {
 	switch(*text++)	{
 
-	default:
-		options[text[-1]]++;	/* flags, debug options etc.	*/
+	case '-':
+		options[*text]++;	/* debug options etc.	*/
 		break;
-					/* recognized flags:
-						-L: don't generate fil/lin
-						-p: generate procentry/procexit
-						-w: no warnings
-						-n: no register messages
-					   and many more if DEBUG
-					*/
 
+	case 'L':	/* no fil/lin */
+	case 'p':	/* call procentry/procexit */
+	case 'n':	/* no register messages */
+	case 'x':	/* every name global */
+		options[text[-1]]++;
+		break;
 
 	case 'w':
 		if (*text) {

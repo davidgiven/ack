@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
+
+/* $Header$ */
 
 #include	"debug.h"
 

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* D E F I N I T I O N   M E C H A N I S M */
+
+/* $Header$ */
 
 #include	"debug.h"
 
@@ -234,8 +243,13 @@ DeclProc(type, id)
 		*/
 		df = define(id, CurrentScope, type);
 		df->for_node = MkLeaf(Name, &dot);
-		sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
-		df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
+		if (CurrentScope->sc_definedby->df_flags & D_FOREIGN) {
+			df->for_name = id->id_text;
+		}
+		else {
+			sprint(buf,"%s_%s",CurrentScope->sc_name,id->id_text);
+			df->for_name = Salloc(buf, (unsigned) (strlen(buf)+1));
+		}
 		if (CurrVis == Defined->mod_vis) {
 			/* The current module will define this routine.
 			   make sure the name is exported.

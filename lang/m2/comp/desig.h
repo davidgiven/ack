@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* D E S I G N A T O R   D E S C R I P T I O N S */
+
+/* $Header$ */
 
 /* Generating code for designators is not particularly easy, especially if
    you don't know wether you want the address or the value.

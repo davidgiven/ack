@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* E X P R E S S I O N   C H E C K I N G */
+
+/* $Header$ */
 
 /*	Check expressions, and try to evaluate them as far as possible.
 */
@@ -1203,11 +1212,7 @@ int (*ExprChkTable[])() = {
 };
 
 int (*DesigChkTable[])() = {
-#ifdef DEBUG
-	ChkValue,
-#else
-	done_before,
-#endif
+	no_desig,
 	ChkArr,
 	no_desig,
 	no_desig,

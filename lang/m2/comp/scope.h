@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* S C O P E   M E C H A N I S M */
+
+/* $Header$ */
 
 #define OPENSCOPE	0	/* Indicating an open scope */
 #define CLOSEDSCOPE	1	/* Indicating a closed scope (module) */
@@ -40,3 +49,5 @@ extern struct scopelist
 #define enclosing(x)	((x)->sc_encl)
 #define scopeclosed(x)	((x)->sc_scopeclosed)
 #define nextvisible(x)	((x)->next)		/* use with scopelists */
+
+struct scope *open_and_close_scope();

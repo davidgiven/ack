@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* D E C L A R A T I O N S */
+
+/* $Header$ */
 
 {
 #include	"debug.h"
@@ -21,25 +30,27 @@
 
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
+
+#define needs_static_link()	(proclevel > 1)
+
 }
 
 ProcedureDeclaration
 {
 	struct def *df;
 } :
-			{ ++proclevel; }
+			{	++proclevel; }
 	ProcedureHeading(&df, D_PROCEDURE)
 	';' block(&(df->prc_body))
 	IDENT
-			{ EndProc(df, dot.TOK_IDF);
-			  --proclevel;
+			{	EndProc(df, dot.TOK_IDF);
+				--proclevel;
 			}
 ;
 
 ProcedureHeading(struct def **pdf; int type;)
 {
 	struct type *tp = 0;
-#define needs_static_link()	(proclevel > 1)
 	arith parmaddr = needs_static_link() ? pointer_size : 0;
 	struct paramlist *pr = 0;
 } :
@@ -67,11 +78,11 @@ block(struct node **pnd;) :
 ;
 
 declaration:
-	CONST [ %persistent ConstantDeclaration ';' ]*
+	CONST [ ConstantDeclaration ';' ]*
 |
-	TYPE [ %persistent TypeDeclaration ';' ]*
+	TYPE [ TypeDeclaration ';' ]*
 |
-	VAR [ %persistent VariableDeclaration ';' ]*
+	VAR [ VariableDeclaration ';' ]*
 |
 	ProcedureDeclaration ';'
 |
@@ -171,20 +182,7 @@ enumeration(struct type **ptp;)
 	struct node *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
-		{ register struct type *tp =
-		  	standard_type(T_ENUMERATION, int_align, int_size);
-
-		  *ptp = tp;
-		  EnterEnumList(EnumList, tp);
-		  if (ufit(tp->enm_ncst-1, 1)) {
-			tp->tp_size = 1;
-			tp->tp_align = 1;
-		  }
-		  else if (ufit(tp->enm_ncst-1, short_size)) {
-			tp->tp_size = short_size;
-			tp->tp_align = short_align;
-		  }
-		}
+		{ *ptp = enum_type(EnumList); }
 ;
 
 IdentList(struct node **p;)
@@ -244,10 +242,7 @@ RecordType(struct type **ptp;)
 }
 :
 	RECORD
-		{ open_scope(OPENSCOPE);	/* scope for fields of record */
-		  scope = CurrentScope;
-		  close_scope(0);
-		}
+		{ scope = open_and_close_scope(OPENSCOPE); }
 	FieldListSequence(scope, &size, &xalign)
 		{ if (size == 0) {
 			warning(W_ORDINARY, "empty record declaration");
@@ -271,13 +266,13 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	struct node *FldList;
 	register struct idf *id = 0;
 	struct type *tp;
-	struct node *nd1;
-	register struct node *nd;
+	struct node *nd;
 	arith tcnt, max;
 } :
 [
 	IdentList(&FldList) ':' type(&tp)
-			{ *palign = lcm(*palign, tp->tp_align);
+			{
+			  *palign = lcm(*palign, tp->tp_align);
 			  EnterFieldList(FldList, tp, scope, cnt);
 			}
 |
@@ -285,8 +280,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	/* Also accept old fashioned Modula-2 syntax, but give a warning.
 	   Sorry for the complicated code.
 	*/
-	[ qualident(&nd1)
-			{ nd = nd1; }
+	[ qualident(&nd)
 	  [ ':' qualtype(&tp)
 			/* This is correct, in both kinds of Modula-2, if
 		   	   the first qualident is a single identifier.
@@ -300,25 +294,20 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 	  |		/* Old fashioned! the first qualident now represents
 			   the type
 			*/
-			{ warning(W_OLDFASHIONED, "old fashioned Modula-2 syntax; ':' missing");
-			  if (ChkDesignator(nd) &&
-			      (nd->nd_class != Def ||
-			       !(nd->nd_def->df_kind&(D_ERROR|D_ISTYPE)) ||
-			       !nd->nd_def->df_type)) {
-				node_error(nd, "type expected");
-				tp = error_type;
-			  }
-			  else tp = nd->nd_def->df_type;
-			  FreeNode(nd);
+			{ warning(W_OLDFASHIONED,
+			      "old fashioned Modula-2 syntax; ':' missing");
+			  tp = qualified_type(nd);
 			}
 	  ]
 	| ':' qualtype(&tp)
 	  /* Aha, third edition. Well done! */
 	]
-			{ if (id) {
-			  	register struct def *df = define(id,
-								 scope,
-								 D_FIELD);
+			{
+			  *palign = lcm(*palign, tp->tp_align);
+			  if (id) {
+			  	register struct def *df = 
+					define(id, scope, D_FIELD);
+
 			  	if (!(tp->tp_fund & T_DISCRETE)) {
 					error("illegal type in variant");
 			  	}
@@ -351,7 +340,7 @@ variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
 		CaseLabelList(&tp, &nd)
 			{ /* Ignore the cases for the time being.
 			     Maybe a checking version will be supplied
-			     later ??? (Improbable)
+			     later ???
 			  */
 			  FreeNode(nd);
 			}
@@ -403,73 +392,21 @@ SetType(struct type **ptp;) :
 	have to be declared yet, so be careful about identifying
 	type-identifiers
 */
-PointerType(struct type **ptp;)
-{
-	register struct node *nd = 0;
-} :
+PointerType(struct type **ptp;) :
 	POINTER TO
-			{ *ptp = construct_type(T_POINTER, NULLTYPE); }
-	[ %if	( lookup(dot.TOK_IDF, CurrentScope, 1)
-			/* Either a Module or a Type, but in both cases defined
-		   	   in this scope, so this is the correct identification
-			*/
-		||
-		  ( nd = new_node(),
-		    nd->nd_token = dot,
-		    lookfor(nd, CurrVis, 0)->df_kind == D_MODULE
-		  )
-			/* A Modulename in one of the enclosing scopes.
-			   It is not clear from the language definition that
-			   it is correct to handle these like this, but
-			   existing compilers do it like this, and the
-			   alternative is difficult with a lookahead of only
-			   one token.
-			   ???
-			*/
-		)
+	[ %if	(type_or_forward(ptp))
 	  type(&((*ptp)->next)) 
-			{ if (nd) free_node(nd); }
 	|
-	  IDENT		{ if (nd) {
-				/* nd could be a null pointer, if we had a
-				   syntax error exactly at this alternation.
-				   MORAL: Be careful with %if resolvers with
-				   side effects!
-				*/
-				Forward(nd, (*ptp));
-			  }
-			}
+	  IDENT
 	]
 ;
 
 qualtype(struct type **ptp;)
 {
-	register struct node *nd;
-	struct node *nd1;		/* because &nd is illegal */
+	struct node *nd;
 } :
-	qualident(&nd1)
-		{ nd = nd1;
-		  *ptp = error_type;
-		  if (ChkDesignator(nd)) {
-			if (nd->nd_class != Def) {
-				node_error(nd, "type expected");
-			}
-			else {
-				register struct def *df = nd->nd_def;
-
-				if (df->df_kind&(D_ISTYPE|D_FORWARD|D_ERROR)) {
-				    if (! df->df_type) {
-node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
-				    }
-				    else *ptp = df->df_type;
-				}
-				else {
-node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
-				}
-			}
-		  }
-		  FreeNode(nd);
-		}
+	qualident(&nd)
+		{ *ptp = qualified_type(nd); }
 ;
 
 ProcedureType(struct type **ptp;)

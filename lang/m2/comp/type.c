@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
+
+/* $Header$ */
 
 #include	"target_sizes.h"
 #include	"debug.h"
@@ -18,6 +27,7 @@
 #include	"const.h"
 #include	"scope.h"
 #include	"walk.h"
+#include	"chk_expr.h"
 
 int
 	word_align = AL_WORD,
@@ -100,9 +110,10 @@ align(pos, al)
 	arith pos;
 	int al;
 {
-	arith i;
+	arith i = pos % al;
 
-	return pos + ((i = pos % al) ? al - i : 0);
+	if (i) return pos + al - i;
+	return pos;
 }
 
 struct type *
@@ -113,8 +124,10 @@ standard_type(fund, align, size)
 {
 	register struct type *tp = new_type();
 
+	if (align == 0) align = 1;
+
 	tp->tp_fund = fund;
-	tp->tp_align = align ? align : 1;
+	tp->tp_align = align;
 	tp->tp_size = size;
 
 	return tp;
@@ -190,6 +203,59 @@ InitTypes()
 	/* a unique type indicating an error
 	*/
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
+}
+
+STATIC
+u_small(tp, n)
+	register struct type *tp;
+	arith n;
+{
+	if (ufit(n, 1)) {
+		tp->tp_size = 1;
+		tp->tp_align = 1;
+	}
+	else if (ufit(n, short_size)) {
+		tp->tp_size = short_size;
+		tp->tp_align = short_align;
+	}
+}
+
+struct type *
+enum_type(EnumList)
+	struct node *EnumList;
+{
+	register struct type *tp =
+		standard_type(T_ENUMERATION, int_align, int_size);
+
+	EnterEnumList(EnumList, tp);
+	u_small(tp, (arith) (tp->enm_ncst-1));
+	return tp;
+}
+
+struct type *
+qualified_type(nd)
+	struct node *nd;
+{
+	struct type *tp = error_type;
+
+	if (ChkDesignator(nd)) {
+		if (nd->nd_class != Def) node_error(nd, "type expected");
+		else {
+			register struct def *df = nd->nd_def;
+
+			if (df->df_kind&(D_ISTYPE|D_FORWARD|D_ERROR)) {
+			    if (! df->df_type) {
+node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
+			    }
+			    else tp = df->df_type;
+			}
+			else {
+node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
+			}
+		}
+	}
+	FreeNode(nd);
+	return tp;
 }
 
 chk_basesubrange(tp, base)
@@ -275,14 +341,7 @@ subr_type(lb, ub)
 	res->tp_size = tp->tp_size;
 	res->tp_align = tp->tp_align;
 	if (tp == card_type) {
-		if (ufit(res->sub_ub, 1)) {
-			res->tp_size = 1;
-			res->tp_align = 1;
-		}
-		else if (ufit(res->sub_ub, 2)) {
-			res->tp_size = short_size;
-			res->tp_align = short_align;
-		}
+		u_small(res, res->sub_ub);
 	}
 	else if (tp == int_type) {
 		if (fit(res->sub_lb, 1) && fit(res->sub_ub, 1)) {
@@ -503,6 +562,54 @@ RemoveEqual(tpx)
 
 	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->next;
 	return tpx;
+}
+
+int
+type_or_forward(ptp)
+	struct type **ptp;
+{
+	struct node *nd = 0;
+
+	*ptp = construct_type(T_POINTER, NULLTYPE);
+	if (lookup(dot.TOK_IDF, CurrentScope, 1)
+		/* Either a Module or a Type, but in both cases defined
+		   in this scope, so this is the correct identification
+		*/
+	    ||
+	    ( nd = new_node(),
+	      nd->nd_token = dot,
+	      lookfor(nd, CurrVis, 0)->df_kind == D_MODULE
+	    )
+		/* A Modulename in one of the enclosing scopes.
+		   It is not clear from the language definition that
+		   it is correct to handle these like this, but
+		   existing compilers do it like this, and the
+		   alternative is difficult with a lookahead of only
+		   one token.
+		   ???
+		*/
+	   ) {
+		if (nd) free_node(nd);
+		return 1;
+	}
+	/*	Enter a forward reference into a list belonging to the
+		current scope. This is used for POINTER declarations, which
+		may have forward references that must howewer be declared in the
+		same scope.
+	*/
+	{
+		register struct def *df =
+			define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
+
+		if (df->df_kind == D_TYPE) {
+			(*ptp)->next = df->df_type;
+		}
+		else {
+			df->df_forw_type = *ptp;
+			df->df_forw_node = nd;
+		}
+	}
+	return 0;
 }
 
 int

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* T O K E N   D E S C R I P T O R   D E F I N I T I O N */
+
+/* $Header$ */
 
 /* Structure to store a string constant
 */

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* L E X I C A L   A N A L Y S E R   F O R   M O D U L A - 2 */
+
+/* $Header$ */
 
 #include	"debug.h"
 #include	"idfsize.h"
@@ -25,7 +34,8 @@ long str2long();
 struct token	dot,
 		aside;
 struct type	*toktype;
-int		 idfsize = IDFSIZE;
+int		idfsize = IDFSIZE;
+int		ForeignFlag;
 #ifdef DEBUG
 extern int	cntlines;
 #endif
@@ -42,6 +52,19 @@ SkipComment()
 	register int CommentLevel = 0;
 
 	LoadChar(ch);
+	if (ch == '$') {
+		LoadChar(ch);
+		switch(ch) {
+		case 'F':
+			/* Foreign; This definition module has an
+			   implementation in another language.
+			   In this case, don't generate prefixes in front
+			   of the names
+			*/
+			ForeignFlag = 1;
+			break;
+		}
+	}
 	for (;;) {
 		if (class(ch) == STNL) {
 			LineNumber++;
@@ -138,10 +161,20 @@ linedirective() {
 	/*	Read a line directive
 	*/
 	register int	ch;
+}
+
+CheckForLineDirective()
+{
+	register int ch = getch();
 	register int	i = 0;
 	char		buf[IDFSIZE + 2];
 	register char	*c = buf;
 
+
+	if (ch != '#') {
+		PushBack();
+		return;
+	}
 	do {	/*
 		 * Skip to next digit
 		 * Do not skip newlines
@@ -153,10 +186,10 @@ linedirective() {
 			return;
 		}
 	} while (class(ch) != STNUM);
-	do  {
+	while (class(ch) == STNUM)  {
 		i = i*10 + (ch - '0');
 		ch = getch();
-	} while (class(ch) == STNUM);
+	}
 	while (ch != '"' && class(ch) != STNL) ch = getch();
 	if (ch == '"') {
 		c = buf;
@@ -206,7 +239,7 @@ LLlex()
 
 	tk->tk_lineno = LineNumber;
 
-again2:
+again1:
 	if (eofseen) {
 		eofseen = 0;
 		ch = EOI;
@@ -214,7 +247,6 @@ again2:
 	else {
 again:
 		LoadChar(ch);
-again1:
 		if ((ch & 0200) && ch != EOI) {
 			error("non-ascii '\\%03o' read", ch & 0377);
 			goto again;
@@ -229,10 +261,8 @@ again1:
 		cntlines++;
 #endif
 		tk->tk_lineno++;
-		LoadChar(ch);
-		if (ch != '#') goto again1;
-		linedirective();
-		goto again2;
+		CheckForLineDirective();
+		goto again1;
 
 	case STSKIP:
 		goto again;

@@ -1,4 +1,13 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Ceriel J.H. Jacobs
+ */
+
 /* O V E R A L L   S T R U C T U R E */
+
+/* $Header$ */
 
 {
 #include	"debug.h"
@@ -118,14 +127,17 @@ DefinitionModule
 	struct node *exportlist;
 	int dummy;
 	extern struct idf *DefId;
+	extern int ForeignFlag;
 } :
 	DEFINITION
 	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  df->df_flags |= D_BUSY;
+			  if (ForeignFlag) df->df_flags |= D_FOREIGN;
 			  if (!Defined) Defined = df;
+		  	  CurrentScope->sc_definedby = df;
 			  if (df->df_idf != DefId) {
-				error("DEFINITION MODULE name is not \"%s\"",
-					DefId->id_text);
+				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
+					df->df_idf->id_text, DefId->id_text);
 			  }
 			  CurrentScope->sc_name = df->df_idf->id_text;
 			  df->mod_vis = CurrVis;
@@ -207,8 +219,8 @@ ProgramModule
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
 			CurrentScope->sc_name = "_M2M";
+		  	CurrentScope->sc_definedby = df;
 		  }
-		  CurrentScope->sc_definedby = df;
 		}
 	priority(df)
 	';' import(0)*
