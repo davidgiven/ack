@@ -255,8 +255,18 @@ ImportEffects(idef, scope, flag)
 		/* Also import all enumeration literals
 		*/
 		for (df = tp->enm_enums; df; df = df->enm_next) {
+			/* But be careful; we could have a situation where f.i.
+			   different subrange types of the enumeration type
+			   are imported. If the literal is already imported
+			   in some way, don't do it again; we don't want
+			   a multiple defined error message here.
+			*/
+			t_def *df1;
+
 			df->df_flags |= D_QEXPORTED;
-			if (! DoImport(df, scope, flag|D_USED)) assert(0);
+			if ((!(df1 = lookup(df->df_idf, scope, D_IMPORT, 0)) ||
+			     df1 != df) &&
+			    ! DoImport(df, scope, flag|D_USED)) assert(0);
 				/* don't complain when not used ... */
 		}
 		idef->df_flags |= D_USED;	/* don't complain ... */
