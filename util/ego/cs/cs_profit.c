@@ -142,11 +142,13 @@ STATIC bool gains(avp)
 	if (avp->av_instr == (byte) op_lxa || avp->av_instr == (byte) op_lxl)
 		return off_set(avp->av_found) >= LX_threshold;
 
-	if (avp->av_instr == (byte) op_sli)
+	if (avp->av_instr == (byte) op_sli || avp->av_instr == (byte) op_slu)
 		return ! sli_no_eliminate(avp->av_found);
 
 	if (avp->av_instr == (byte) op_ads &&
-	    avp->av_found->l_prev && INSTR(avp->av_found->l_prev) == op_sli)
+	    avp->av_found->l_prev && 
+	    ( INSTR(avp->av_found->l_prev) == op_sli ||
+	      INSTR(avp->av_found->l_prev) == op_slu))
 		return ! sli_no_eliminate(avp->av_found->l_prev);
 
 	if (Cis_elem(avp->av_instr & BMASK, addr_modes))
