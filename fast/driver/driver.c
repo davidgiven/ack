@@ -34,11 +34,6 @@ Something wrong here! Only one of FM2, FPC, or FCC must be defined
 #include <varargs.h>
 #include <stdio.h>
 #include <em_path.h>
-#define M2DEF	"/lib/m2"
-#define FASTDIR EM_DIR
-
-#define CCINCL	"/include/tail_ac"
-char *ROOT_DIR = FASTDIR;
 
 /*
 	Version producing ACK .o files in one pass.
@@ -56,10 +51,11 @@ struct arglist {
 #define CPP_NAME	"$H/lib.bin/cpp"
 #define LD_NAME		"$H/lib.bin/em_led"
 #define CV_NAME		"$H/lib.bin/$S/cv"
-#define SHELL	"/bin/sh"
+#define SHELL		"/bin/sh"
 
 char	*CPP;
 char	*COMP;
+char	*cc = "cc";
 
 int kids =  -1;
 int ecount = 0;
@@ -451,7 +447,7 @@ main(argc, argv)
 	INCLUDE = expand_string("-I$H/lib/m2");
 #endif FM2
 #ifdef FCC
-	INCLUDE = expand_string("-I$H/include/tail_ac");
+	INCLUDE = expand_string(ansi_c ? "-I$H/include/tail_ac" : "-I$H/include/_tail_cc");
 	append(&COMP_FLAGS, "-L");
 #endif FCC
 	count = SRCFILES.al_argc;
@@ -531,6 +527,7 @@ main(argc, argv)
 	if (RET_CODE == 0 && LDFILES.al_argc > 0) {
 		init(call);
 		expand(&LD_HEAD);
+		cc = "cc.2g";
 		expand(&LD_TAIL);
 		append(call, expand_string(LD_NAME));
 		concat(call, &align);
@@ -602,10 +599,10 @@ expand_string(s)
 			switch(*p++) {
 			case 'A':
 				if (ansi_c) strcpy(q, "ac");
-				else strcpy(q, "cc.2g");
+				else strcpy(q, cc);
 				break;
 			case 'H':
-				strcpy(q, ROOT_DIR);
+				strcpy(q, EM_DIR);
 				break;
 			case 'M':
 				strcpy(q, MACHNAME);
