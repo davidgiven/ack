@@ -46,6 +46,7 @@ LLgen.o:	types.h
 Lpars.o:	Lpars.h
 alloc.o:	extern.h
 alloc.o:	types.h
+cclass.o:	cclass.h
 check.o:	assert.h
 check.o:	extern.h
 check.o:	io.h
