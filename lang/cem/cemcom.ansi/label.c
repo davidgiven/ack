@@ -30,6 +30,7 @@ enter_label(idf, defining)
 			error("redeclaration of label %s", idf->id_text);
 	}
 	else	{
+		stack_idf(idf, stack_level_of(L_LOCAL));
 		def = new_def();
 		def->df_sc = LABEL;
 		idf->id_label = def;

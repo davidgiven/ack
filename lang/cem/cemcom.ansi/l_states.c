@@ -1140,8 +1140,8 @@ lint_jump_stmt(idf)
 	dbg_lint_stack("lint_jump_stmt");
 	top_ls->ls_current->st_notreached = 1;
 	top_ls->ls_current->st_warned = 0;
-	if (idf->id_def)
-		idf->id_def->df_used = 1;
+	if (idf->id_label)
+		idf->id_label->df_used = 1;
 }
 
 lint_label()
