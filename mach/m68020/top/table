@@ -84,31 +84,31 @@ cmp.b A,A				->	tst.b A ;
 
 cmp.w #0,D : beq LAB			->	tst.w D : beq LAB ;
 cmp.w #0,D : bne LAB			->	tst.w D : bne LAB ;
-cmp.w #0,D : blt LAB			->	tst.w D : bgt LAB ;
-cmp.w #0,D : ble LAB			->	tst.w D : bge LAB ;
-cmp.w #0,D : bge LAB			->	tst.w D : ble LAB ;
-cmp.w #0,D : bgt LAB			->	tst.w D : blt LAB ;
+cmp.w #0,D : blt LAB			->	tst.w D : blt LAB ;
+cmp.w #0,D : ble LAB			->	tst.w D : ble LAB ;
+cmp.w #0,D : bge LAB			->	tst.w D : bge LAB ;
+cmp.w #0,D : bgt LAB			->	tst.w D : bgt LAB ;
 
 cmp.l #0,D : beq LAB			->	tst.l D : beq LAB ;
 cmp.l #0,D : bne LAB			->	tst.l D : bne LAB ;
-cmp.l #0,D : blt LAB			->	tst.l D : bgt LAB ;
-cmp.l #0,D : ble LAB			->	tst.l D : bge LAB ;
-cmp.l #0,D : bge LAB			->	tst.l D : ble LAB ;
-cmp.l #0,D : bgt LAB			->	tst.l D : blt LAB ;
+cmp.l #0,D : blt LAB			->	tst.l D : blt LAB ;
+cmp.l #0,D : ble LAB			->	tst.l D : ble LAB ;
+cmp.l #0,D : bge LAB			->	tst.l D : bge LAB ;
+cmp.l #0,D : bgt LAB			->	tst.l D : bgt LAB ;
 
 cmp.w D,#0 : beq LAB			->	tst.w D : beq LAB ;
 cmp.w D,#0 : bne LAB			->	tst.w D : bne LAB ;
-cmp.w D,#0 : blt LAB			->	tst.w D : blt LAB ;
-cmp.w D,#0 : ble LAB			->	tst.w D : ble LAB ;
-cmp.w D,#0 : bge LAB			->	tst.w D : bge LAB ;
-cmp.w D,#0 : bgt LAB			->	tst.w D : bgt LAB ;
+cmp.w D,#0 : blt LAB			->	tst.w D : bgt LAB ;
+cmp.w D,#0 : ble LAB			->	tst.w D : bge LAB ;
+cmp.w D,#0 : bge LAB			->	tst.w D : ble LAB ;
+cmp.w D,#0 : bgt LAB			->	tst.w D : blt LAB ;
 
 cmp.l D,#0 : beq LAB			->	tst.l D : beq LAB ;
 cmp.l D,#0 : bne LAB			->	tst.l D : bne LAB ;
-cmp.l D,#0 : blt LAB			->	tst.l D : blt LAB ;
-cmp.l D,#0 : ble LAB			->	tst.l D : ble LAB ;
-cmp.l D,#0 : bge LAB			->	tst.l D : bge LAB ;
-cmp.l D,#0 : bgt LAB			->	tst.l D : bgt LAB ;
+cmp.l D,#0 : blt LAB			->	tst.l D : bgt LAB ;
+cmp.l D,#0 : ble LAB			->	tst.l D : bge LAB ;
+cmp.l D,#0 : bge LAB			->	tst.l D : ble LAB ;
+cmp.l D,#0 : bgt LAB			->	tst.l D : blt LAB ;
 
 /* change "cmp" into "add" or "sub" (possibly "addq" or "subq") */
 cmp.w #-NUM,DSREG : beq LAB		->	add.w #NUM,DSREG : beq LAB ;

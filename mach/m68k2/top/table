@@ -68,31 +68,31 @@ move.l DREG,A : ANY A,X
 /* change some compares to tests */
 cmp.w #0,X : beq LAB			->	tst.w X : beq LAB ;
 cmp.w #0,X : bne LAB			->	tst.w X : bne LAB ;
-cmp.w #0,X : blt LAB			->	tst.w X : bgt LAB ;
-cmp.w #0,X : ble LAB			->	tst.w X : bge LAB ;
-cmp.w #0,X : bge LAB			->	tst.w X : ble LAB ;
-cmp.w #0,X : bgt LAB			->	tst.w X : blt LAB ;
+cmp.w #0,X : blt LAB			->	tst.w X : blt LAB ;
+cmp.w #0,X : ble LAB			->	tst.w X : ble LAB ;
+cmp.w #0,X : bge LAB			->	tst.w X : bge LAB ;
+cmp.w #0,X : bgt LAB			->	tst.w X : bgt LAB ;
 
 cmp.l #0,X : beq LAB			->	tst.l X : beq LAB ;
 cmp.l #0,X : bne LAB			->	tst.l X : bne LAB ;
-cmp.l #0,X : blt LAB			->	tst.l X : bgt LAB ;
-cmp.l #0,X : ble LAB			->	tst.l X : bge LAB ;
-cmp.l #0,X : bge LAB			->	tst.l X : ble LAB ;
-cmp.l #0,X : bgt LAB			->	tst.l X : blt LAB ;
+cmp.l #0,X : blt LAB			->	tst.l X : blt LAB ;
+cmp.l #0,X : ble LAB			->	tst.l X : ble LAB ;
+cmp.l #0,X : bge LAB			->	tst.l X : bge LAB ;
+cmp.l #0,X : bgt LAB			->	tst.l X : bgt LAB ;
 
 cmp.w X,#0 : beq LAB			->	tst.w X : beq LAB ;
 cmp.w X,#0 : bne LAB			->	tst.w X : bne LAB ;
-cmp.w X,#0 : blt LAB			->	tst.w X : blt LAB ;
-cmp.w X,#0 : ble LAB			->	tst.w X : ble LAB ;
-cmp.w X,#0 : bge LAB			->	tst.w X : bge LAB ;
-cmp.w X,#0 : bgt LAB			->	tst.w X : bgt LAB ;
+cmp.w X,#0 : blt LAB			->	tst.w X : bgt LAB ;
+cmp.w X,#0 : ble LAB			->	tst.w X : bge LAB ;
+cmp.w X,#0 : bge LAB			->	tst.w X : ble LAB ;
+cmp.w X,#0 : bgt LAB			->	tst.w X : blt LAB ;
 
 cmp.l X,#0 : beq LAB			->	tst.l X : beq LAB ;
 cmp.l X,#0 : bne LAB			->	tst.l X : bne LAB ;
-cmp.l X,#0 : blt LAB			->	tst.l X : blt LAB ;
-cmp.l X,#0 : ble LAB			->	tst.l X : ble LAB ;
-cmp.l X,#0 : bge LAB			->	tst.l X : bge LAB ;
-cmp.l X,#0 : bgt LAB			->	tst.l X : bgt LAB ;
+cmp.l X,#0 : blt LAB			->	tst.l X : bgt LAB ;
+cmp.l X,#0 : ble LAB			->	tst.l X : bge LAB ;
+cmp.l X,#0 : bge LAB			->	tst.l X : ble LAB ;
+cmp.l X,#0 : bgt LAB			->	tst.l X : blt LAB ;
 
 /* change "cmp" into "add" or "sub" (possibly "addq" or "subq") */
 cmp.w #-NUM,DSREG : beq LAB		->	add.w #NUM,DSREG : beq LAB ;
