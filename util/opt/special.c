@@ -12,6 +12,7 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+#ifdef ALLOWSPECIAL
 bool special(lpp,bp,patlen)
 line_p *lpp;
 byte *bp;
@@ -20,3 +21,4 @@ int patlen;
 
 	return(FALSE);
 }
+#endif

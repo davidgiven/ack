@@ -40,6 +40,8 @@ short	curfrag = 3;	/* see also peephole.c */
 offset rombuf[MAXROM];
 int	rc;
 
+extern offset aoff();
+
 backward() {
 	register line_p lnp;
 	line_p	next;

@@ -16,6 +16,8 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
+extern char *strncpy();
+
 unsigned hash(string) char *string; {
 	register char *p;
 	register unsigned i,sum;
