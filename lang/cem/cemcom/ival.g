@@ -38,6 +38,7 @@ char *long2str();
 char *strncpy();
 extern char options[];
 static int gen_error;
+static int pack_level;
 struct type **gen_tphead(), **gen_tpmiddle();
 struct sdef *gen_align_to_next();
 struct e_stack *p_stack;
@@ -69,7 +70,6 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 ;
 
 initial_value_pack(struct type **tpp; struct expr **expp;)
-	{ static int pack_level; }
 :
 	'{'
 			{ if (pack_level == 0) gen_error = 0; pack_level++; }
@@ -83,6 +83,7 @@ initial_value_pack(struct type **tpp; struct expr **expp;)
 					p_stack = p;
 				}
 			  }
+			  if (pack_level < gen_error) gen_error = 0;
 			}
 	'}'
 ;
@@ -115,20 +116,20 @@ gen_tpcheck(tpp, union_allowed)
 	switch((tp = *tpp)->tp_fund) {
 	case ARRAY:
 		if (! valid_type(tp->tp_up, "array element"))
-			gen_error = 1;
+			gen_error = pack_level;
 		break;
 	case STRUCT:
 		if (! valid_type(tp, "struct"))
-			gen_error = 1;
+			gen_error = pack_level;
 		break;
 	case UNION:
 		if (! union_allowed) {
 			error("union initialisation not allowed");
-			gen_error = 1;
+			gen_error = pack_level;
 			break;
 		}
 		if (! valid_type(tp, "union"))
-			gen_error = 1;
+			gen_error = pack_level;
 		break;
 	}
 }
@@ -152,7 +153,7 @@ gen_simple_exp(tpp, expp)
 		check_and_pad(expp, tpp);
 		break;
 	case ERRONEOUS:
-		gen_error = 1;
+		gen_error = pack_level;
 		break;
 	default:
 		check_ival(expp, tp);
@@ -200,7 +201,7 @@ gen_tphead(tpp, nest)
 	register struct sdef *sd;
 
 	if (tpp && *tpp == error_type) {
-		gen_error = 1;
+		gen_error = pack_level;
 		return 0;
 	}
 	if (gen_error) return tpp;
@@ -229,7 +230,7 @@ gen_tphead(tpp, nest)
 #endif
 		if (! sd) {
 			/* something wrong with this struct */
-			gen_error = 1;
+			gen_error = pack_level;
 			p_stack = p->next;
 			free_e_stack(p);
 			return 0;
@@ -358,7 +359,6 @@ gen_tpend()
 	    free_e_stack(p_stack);
 	    p_stack = p;
 	}
-	gen_error = 0;
 }
 
 /*	check_and_pad() is given a simple initialisation expression
@@ -687,12 +687,12 @@ illegal_init_cst(ex)
 	struct expr *ex;
 {
 	expr_error(ex, "illegal initialisation constant");
-	gen_error = 1;
+	gen_error = pack_level;
 }
 
 too_many_initialisers()
 {
 	error("too many initialisers");
-	gen_error = 1;
+	gen_error = pack_level;
 }
 }
