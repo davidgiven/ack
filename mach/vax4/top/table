@@ -1,0 +1,287 @@
+/* VAX descriptor table for ACK target optimizer,
+ * Prolog prototype
+ */
+
+/* tunable constants-> */
+
+MAXOP			4;
+MAXLINELEN		50;
+LABEL_STARTER		'L';
+OPC_TERMINATOR		'	';
+
+%%;
+
+ZERO		{strcmp(VAL,"$0") == 0};
+ONE		{strcmp(VAL,"$1") == 0};
+M_ONE		{strcmp(VAL,"$-1") == 0};
+CONST		{VAL[0] == '$'};
+NUM,NUM1	{is_number(VAL)};
+REG		{is_register(VAL)};
+SREG		{is_scratchreg(VAL)};
+LAB,LAB2	{VAL[0] == 'L'};
+A,B		{no_side_effects(VAL) };
+X,Y,LOG		{TRUE};
+
+%%;
+
+movab 1(X),X			->	incl X;
+movab -1(X),X			->	decl X;
+
+movzbw ZERO,X			->	clrw X;
+movzbl ZERO,X			->	clrl X;
+movb ZERO,X			->	clrb X;
+movw ZERO,X			->	clrw X;
+movl ZERO,X			->	clrl X;
+cvtbw ZERO,X			->	clrw X;
+cvtww ZERO,X			->	clrw X;
+cvtbl ZERO,X			->	clrl X;
+cvtwl ZERO,X			->	clrl X;
+
+/* change 3-operand instructions to 2-operand instructions */
+
+addw3 X,Y,Y			->	addw2 X,Y;
+addl3 X,Y,Y			->	addl2 X,Y;
+addf3 X,Y,Y			->	addf2 X,Y;
+addd3 X,Y,Y			->	addd2 X,Y;
+
+addw3 X,Y,X			->	addw2 Y,X;
+addl3 X,Y,X			->	addl2 Y,X;
+addf3 X,Y,X			->	addf2 Y,X;
+addd3 X,Y,X			->	addd2 Y,X;
+
+subw3 X,Y,Y			->	subw2 X,Y;
+subl3 X,Y,Y			->	subl2 X,Y;
+subf3 X,Y,Y			->	subf2 X,Y;
+subd3 X,Y,Y			->	subd2 X,Y;
+
+mulw3 X,Y,Y			->	mulw2 X,Y;
+mull3 X,Y,Y			->	mull2 X,Y;
+mulf3 X,Y,Y			->	mulf2 X,Y;
+muld3 X,Y,Y			->	muld2 X,Y;
+
+mulw3 X,Y,X			->	mulw2 Y,X;
+mull3 X,Y,X			->	mull2 Y,X;
+mulf3 X,Y,X			->	mulf2 Y,X;
+muld3 X,Y,X			->	muld2 Y,X;
+
+divw3 X,Y,Y			->	divw2 X,Y;
+divl3 X,Y,Y			->	divl2 X,Y;
+divf3 X,Y,Y			->	divf2 X,Y;
+divd3 X,Y,Y			->	divd2 X,Y;
+
+xorw3 X,Y,Y			->	xorw2 X,Y;
+xorl3 X,Y,Y			->	xorl2 X,Y;
+
+bisw3 X,Y,Y			->	bisw2 X,Y;
+bisl3 X,Y,Y			->	bisl2 X,Y;
+bisw3 X,Y,X			->	bisw2 Y,X;
+bisl3 X,Y,X			->	bisl2 Y,X;
+
+bicw3 X,Y,Y			->	bicw2 X,Y;
+bicl3 X,Y,Y			->	bicl2 X,Y;
+
+/* eliminate negative constants */
+
+addw2 $-NUM,X			->	subw2 $NUM,X;
+addl2 $-NUM,X			->	subl2 $NUM,X;
+addw3 $-NUM,X,Y			->	subw3 $NUM,X,Y;
+addl3 $-NUM,X,Y			->	subl3 $NUM,X,Y;
+addw3 X,$-NUM,Y			->	subw3 $NUM,X,Y;
+addl3 X,$-NUM,Y			->	subl3 $NUM,X,Y;
+
+subw2 $-NUM,X			->	addw2 $NUM,X;
+subl2 $-NUM,X			->	addl2 $NUM,X;
+subw3 $-NUM,X,Y			->	addw3 $NUM,X,Y;
+subl3 $-NUM,X,Y			->	addl3 $NUM,X,Y;
+subw3 X,$-NUM,Y			->	addw3 $NUM,X,Y;
+subl3 X,$-NUM,Y			->	addl3 $NUM,X,Y;
+
+/* use special instructions */
+
+addw2 ONE,X			->	incw X;
+addl2 ONE,X			->	incl X;
+subw2 ONE,X			->	decw X;
+subl2 ONE,X			->	decl X;
+
+addw2 M_ONE,X			->	decw X;
+addl2 M_ONE,X			->	decl X;
+subw2 M_ONE,X			->	incw X;
+subl2 M_ONE,X			->	incl X;
+
+bitw $NUM,A : jneq LAB
+	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,A,LAB;
+bitl $NUM,A : jneq LAB
+	{is_poweroftwo(NUM,LOG)}->	jbs $LOG,A,LAB;
+bitw $NUM,A : jeql LAB
+	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,A,LAB;
+bitl $NUM,A : jeql LAB
+	{is_poweroftwo(NUM,LOG)}->	jbc $LOG,A,LAB;
+bitw ONE,A : jneq LAB		->	jlbs A,LAB;
+bitl ONE,A : jneq LAB		->	jlbs A,LAB;
+bitw ONE,A : jneq LAB		->	jlbc A,LAB;
+bitl ONE,A : jneq LAB		->	jlbc A,LAB;
+ashl $-NUM,A,REG : bicw2 $~NUM1,REG
+	{is_p2m1(NUM1,LOG)}	->	extzv $NUM,$LOG,A,REG;
+ashl $-NUM,A,REG : bicl2 $~NUM1,REG
+	{is_p2m1(NUM1,LOG)}	->	extzv $NUM,$LOG,A,REG;
+
+/* stack optimizations */
+
+movl (sp)+,X : pushl X		->	movl (sp),X;
+tstw (sp)+ : movw X,-(sp)	->	movw X,(sp);
+tstl (sp)+ : movl X,-(sp)	->	movl X,(sp);
+tstw (sp)+ : clrw -(sp)		->	clrw (sp);
+tstl (sp)+ : clrl -(sp)		->	clrl (sp);
+tstw (sp)+ : movzbw X,-(sp)	->	movzbw X,(sp);
+tstl (sp)+ : movzbl X,-(sp)	->	movzbl X,(sp);
+tstw (sp)+ : cvtbw X,-(sp)	->	cvtbw X,(sp);
+tstl (sp)+ : cvtbl X,-(sp)	->	cvtbl X,(sp);
+tstw (sp)+ : tstw X		->	movw X,(sp)+;
+tstl (sp)+ : tstl X		->	movl X,(sp)+;
+tstl (sp)+ : pushl X		->	movl X,(sp);
+tstl (sp)+ : pushab X		->	movab X,(sp);
+tstl (sp)+ : pushaw X		->	movaw X,(sp);
+tstl (sp)+ : pushal X		->	moval X,(sp);
+tstl (sp)+ : pushaq X		->	movaq X,(sp);
+
+/* push constants */
+
+clrw -(sp) : movw $NUM,-(sp)	->	pushl $NUM;
+clrw -(sp) : mnegw $NUM, -(sp)	->	movzwl $-NUM,-(sp);
+clrw -(sp) : movw X,-(sp)	->	movzwl X,-(sp);
+clrw -(sp) : cvtbw $NUM,-(sp)	->	pushl $NUM;
+clrw -(sp) : cvtbw CONST,-(sp)	->	movzwl CONST,-(sp);
+
+/* compare with zero */
+
+cmpb X,ZERO 			->	tstb X;
+cmpw X,ZERO 			->	tstw X;
+cmpl X,ZERO 			->	tstl X;
+cmpb ZERO,X : jneq LAB		->	tstb X: jneq LAB;
+cmpw ZERO,X : jneq LAB		->	tstw X: jneq LAB;
+cmpl ZERO,X : jneq LAB		->	tstl X: jneq LAB;
+
+cmpb ZERO,X : jeql LAB		->	tstb X: jeql LAB;
+cmpw ZERO,X : jeql LAB		->	tstw X: jeql LAB;
+cmpl ZERO,X : jeql LAB		->	tstl X: jeql LAB;
+
+cmpb ZERO,X : jgtr LAB		->	tstb X: jlss LAB;
+cmpw ZERO,X : jgtr LAB		->	tstw X: jlss LAB;
+cmpl ZERO,X : jgtr LAB		->	tstl X: jlss LAB;
+
+cmpb ZERO,X : jlss LAB		->	tstb X: jgtr LAB;
+cmpw ZERO,X : jlss LAB		->	tstw X: jgtr LAB;
+cmpl ZERO,X : jlss LAB		->	tstl X: jgtr LAB;
+
+cmpb ZERO,X : jgeq LAB		->	tstb X: jleq LAB;
+cmpw ZERO,X : jgeq LAB		->	tstw X: jleq LAB;
+cmpl ZERO,X : jgeq LAB		->	tstl X: jleq LAB;
+
+cmpb ZERO,X : jleq LAB		->	tstb X: jgeq LAB;
+cmpw ZERO,X : jleq LAB		->	tstw X: jgeq LAB;
+cmpl ZERO,X : jleq LAB		->	tstl X: jgeq LAB;
+
+/* compare with -1 */
+
+cmpw M_ONE,SREG : jeql LAB	->	incw SREG : jeql LAB;
+cmpl M_ONE,SREG : jeql LAB	->	incl SREG : jeql LAB;
+cmpw M_ONE,SREG : jneq LAB	->	incw SREG : jneq LAB;
+cmpl M_ONE,SREG : jneq LAB	->	incl SREG : jneq LAB;
+
+/* eliminate redundant tests */
+
+movw X,A : tstw A		->	movw X,A;
+movl X,A : tstl A		->	movl X,A;
+movw A,X : tstw A		->	movw A,X;
+movl A,X : tstl A		->	movl A,X;
+
+/* skip over jumps */
+
+jeql LAB : jbr LAB2 : labdef LAB ->	jneq LAB2 : labdef LAB;
+jgeq LAB : jbr LAB2 : labdef LAB ->	jlss LAB2 : labdef LAB;
+jgtr LAB : jbr LAB2 : labdef LAB ->	jleq LAB2 : labdef LAB;
+jlss LAB : jbr LAB2 : labdef LAB ->	jgeq LAB2 : labdef LAB;
+jleq LAB : jbr LAB2 : labdef LAB ->	jgtr LAB2 : labdef LAB;
+jneq LAB : jbr LAB2 : labdef LAB ->	jeql LAB2 : labdef LAB;
+
+/* Register propagation */
+
+movl REG,A : ANY *A		->	movl REG,A : ANY *REG;
+movl REG,A : ANY *A,X		->	movl REG,A : ANY *REG,X;
+movl REG,A : ANY X,*A		->	movl REG,A : ANY X,*REG;
+movl REG,A : ANY *A,X,Y		->	movl REG,A : ANY *REG,X,Y;
+movl REG,A : ANY X,*A,Y		->	movl REG,A : ANY X,*REG,Y;
+movl REG,A : ANY X,Y,*A		->	movl REG,A : ANY X,Y,*REG;
+
+
+%%;
+
+/* Auxiliary routines: */
+
+int is_number(s)
+	register char *s;
+{
+	while (*s >= '0' && *s <= '9') s++;
+	return *s == '\0';
+}
+
+int is_poweroftwo(s,t)
+	char *s,*t;
+{
+	long	arg, pow;
+	register int i;
+
+	arg = atol(s);
+	pow = 1;
+	i = 0;
+	while (pow > 0) {
+		if (pow == arg) {
+			sprintf(t,"%d",i);
+			return 1;
+		}
+		pow <<= 1;
+		i++;
+	}
+	return 0;
+}
+
+int is_p2m1(s,t)
+	char *s,*t;
+{
+	long arg;
+	char buf[MAXLINELEN];
+
+	arg = atol(s)+1;
+	sprintf(buf,"%ld",arg);
+	return is_poweroftwo(buf,t);
+}
+
+int no_side_effects(s)
+	register char *s;
+{
+
+	for(;;) {
+		switch(*s++) {
+			case '\0': return TRUE;
+			case '-':  if (*s == '(') return FALSE; break;
+			case ')':  if (*s == '+') return FALSE; break;
+		}
+	}
+	/* NOTREACHED */
+}
+
+int is_register(s)
+	register char *s;
+{
+	if (*s++ == 'r' && *s >= '0' && *s <= '9') {
+		if (*s++ == '1' && (*s == '0' || *s == '1')) s++;
+		return *s == '\0';
+	}
+	return FALSE;
+}
+
+int is_scratchreg(s)
+	register char *s;
+{
+	return *s++ == 'r' && *s >= '0' && *s++ <= '3' && *s == '\0';
+}
