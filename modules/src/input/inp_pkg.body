@@ -234,10 +234,10 @@ INP_mk_filename(dir, file, newname)
 	if (!dst) return 0;
 	*newname = dst;
 	if (*dir) {
-		while (*dst++ = *dir++);
-		*--dst = '/';
+		while (*dst++ = *dir++) ;
+		*(dst-1) = '/';
 	}
-	while (*++dst = *file++);
+	while (*dst++ = *file++);
 	return 1;
 }
 
