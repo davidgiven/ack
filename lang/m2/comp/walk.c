@@ -22,8 +22,10 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"Lpars.h"
 #include	"desig.h"
+#include	"f_info.h"
 
 extern arith	align();
+extern arith	NewPtr();
 extern int	proclevel;
 static label	instructionlabel;
 static char	return_expr_occurred;
@@ -42,6 +44,22 @@ data_label()
 	static label	datalabel = 0;
 
 	return ++datalabel;
+}
+
+static
+DoProfil()
+{
+	static label	filename_label = 0;
+
+	if (options['p']) {
+		if (!filename_label) {
+			filename_label = data_label();
+			C_df_dlb(filename_label);
+			C_rom_scon(FileName, (arith) strlen(FileName));
+		}
+
+		C_fil_dlb(filename_label, (arith) 0);
+	}
 }
 
 WalkModule(module)
@@ -96,11 +114,13 @@ WalkModule(module)
 	instructionlabel = 2;
 	func_type = 0;
 	C_pro_narg(CurrentScope->sc_name);
+	DoProfil();
 	MkCalls(CurrentScope->sc_def);
 	WalkNode(module->mod_body, (label) 0);
 	C_df_ilb((label) 1);
 	C_ret(0);
-	C_end(align(-CurrentScope->sc_off, word_align));
+	C_end(-CurrentScope->sc_off);
+	TmpClose();
 
 	CurrVis = vis;
 }
@@ -121,6 +141,7 @@ WalkProcedure(procedure)
 	/* Generate code for this procedure
 	*/
 	C_pro_narg(CurrentScope->sc_name);
+	DoProfil();
 	/* generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
@@ -137,7 +158,8 @@ node_error(procedure->prc_body,"function procedure does not return a value");
 		C_ret((int) align(func_type->tp_size, word_align));
 	}
 	else	C_ret(0);
-	C_end(align(-CurrentScope->sc_off, word_align));
+	C_end(-CurrentScope->sc_off);
+	TmpClose();
 	CurrVis = vis;
 	proclevel--;
 }
@@ -202,6 +224,8 @@ WalkStat(nd, lab)
 	*/
 	register struct node *left = nd->nd_left;
 	register struct node *right = nd->nd_right;
+
+	if (options['p']) C_lin((arith) nd->nd_lineno);
 
 	if (!nd) {
 		/* Empty statement
@@ -306,6 +330,7 @@ WalkStat(nd, lab)
 		{
 			struct scopelist link;
 			struct withdesig wds;
+			arith tmp = 0;
 
 			WalkDesignator(left);
 			if (left->nd_type->tp_fund != T_RECORD) {
@@ -316,12 +341,18 @@ WalkStat(nd, lab)
 			wds.w_next = WithDesigs;
 			WithDesigs = &wds;
 			wds.w_scope = left->nd_type->rec_scope;
-			/* 
-			   Decide here wether to use a temporary variable or
-			   not, depending on the value of Desig.
-			   Suggestion: temporary if Desig != DSG_FIXED
-			   ???
-			*/
+			if (Desig.dsg_kind != DSG_PFIXED) {
+				/* In this case, we use a temporary variable
+				*/
+				CodeAddress(&Desig);
+				Desig.dsg_kind = DSG_FIXED;
+				/* Only for the store ... */
+				Desig.dsg_offset = tmp = NewPtr();
+				Desig.dsg_name = 0;
+				CodeStore(&Desig, pointer_size);
+				Desig.dsg_kind = DSG_PFIXED;
+				/* the record is indirectly available */
+			}
 			wds.w_desig = Desig;
 			link.sc_scope = wds.w_scope;
 			link.next = CurrVis;
@@ -329,6 +360,7 @@ WalkStat(nd, lab)
 			WalkNode(right, lab);
 			CurrVis = link.next;
 			WithDesigs = wds.w_next;
+			if (tmp) FreePtr(tmp);
 			break;
 		}
 

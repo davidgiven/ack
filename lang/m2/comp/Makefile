@@ -5,7 +5,7 @@ HDIR =	../../em/h
 PKGDIR =	../../em/pkg
 LIBDIR =	../../em/lib
 
-INCLUDES = -I$(HDIR) -I$(PKGDIR) -I/user1/erikb/em/h
+INCLUDES = -I$(HDIR) -I/usr/em/h -I$(PKGDIR) -I/user1/erikb/em/h
 
 LSRC =	tokenfile.g program.g declar.g expression.g statement.g
 CC =	cc
@@ -18,7 +18,8 @@ LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
-	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o code.o
+	cstoper.o chk_expr.o options.o walk.o casestat.o desig.o \
+	code.o tmpvar.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -58,6 +59,7 @@ def.h:		def.H make.allocd
 type.h:		type.H make.allocd
 node.h:		node.H make.allocd
 scope.c:	scope.C make.allocd
+tmpvar.c:	tmpvar.C make.allocd
 casestat.c:	casestat.C make.allocd
 
 char.c: char.tab tab
@@ -100,7 +102,9 @@ cstoper.o: LLlex.h Lpars.h debug.h idf.h node.h standards.h target_sizes.h type.
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 options.o: idfsize.h main.h ndir.h type.h
 walk.o: LLlex.h Lpars.h debug.h def.h desig.h main.h node.h scope.h type.h
-casestat.o: LLlex.h Lpars.h debug.h density.h node.h type.h
+casestat.o: LLlex.h Lpars.h debug.h density.h desig.h node.h type.h
+desig.o: LLlex.h debug.h def.h desig.h node.h scope.h type.h
+code.o: LLlex.h Lpars.h debug.h def.h desig.h node.h scope.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h node.h scope.h type.h

@@ -49,7 +49,7 @@ extern char *symbol2str();
 */
 
 #ifdef DEBUG
-/*VARARGS2*/
+/*VARARGS1*/
 debug(fmt, args)
 	char *fmt;
 {

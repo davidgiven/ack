@@ -244,7 +244,7 @@ rem_set(set)
 }
 
 struct node *
-getarg(argp, bases)
+getarg(argp, bases, designator)
 	struct node *argp;
 {
 	struct type *tp;
@@ -254,7 +254,10 @@ getarg(argp, bases)
 		return 0;
 	}
 	argp = argp->nd_right;
-	if (!chk_expr(argp->nd_left)) return 0;
+	if ((!designator && !chk_expr(argp->nd_left)) ||
+	    (designator && !chk_designator(argp->nd_left, DESIGNATOR))) {
+		return 0;
+	}
 	tp = argp->nd_left->nd_type;
 	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 	if (bases && !(tp->tp_fund & bases)) {
@@ -305,7 +308,6 @@ chk_call(expp)
 	if (left->nd_class == Def &&
 	    (left->nd_def->df_kind & (D_HTYPE|D_TYPE|D_HIDDEN))) {
 		/* It was a type cast. This is of course not portable.
-		   No runtime action. Remove it.
 		*/
 		arg = expp->nd_right;
 		if ((! arg) || arg->nd_right) {
@@ -317,14 +319,18 @@ node_error(expp, "only one parameter expected in type cast");
 		if (arg->nd_type->tp_size != left->nd_type->tp_size) {
 node_error(expp, "unequal sizes in type cast");
 		}
-		arg->nd_type = left->nd_type;
-		FreeNode(expp->nd_left);
-		expp->nd_right->nd_left = 0;
-		FreeNode(expp->nd_right);
-		*expp = *arg;
-		arg->nd_left = 0;
-		arg->nd_right = 0;
-		FreeNode(arg);
+		if (arg->nd_class == Value) {
+			struct type *tp = left->nd_type;
+
+			FreeNode(expp->nd_left);
+			expp->nd_right->nd_left = 0;
+			FreeNode(expp->nd_right);
+			expp->nd_left = expp->nd_right = 0;
+			*expp = *arg;
+			expp->nd_type = tp;
+		}
+		else expp->nd_type = left->nd_type;
+
 		return 1;
 	}
 
@@ -362,18 +368,12 @@ chk_proccall(expp)
 	param = left->nd_type->prc_params;
 
 	while (param) {
-		if (!(arg = getarg(arg, 0))) return 0;
+		if (!(arg = getarg(arg, 0, param->par_var))) return 0;
 
 		if (! TstParCompat(param->par_type,
 				   arg->nd_left->nd_type,
 				   param->par_var)) {
 node_error(arg->nd_left, "type incompatibility in parameter");
-			return 0;
-		}
-
-		if (param->par_var &&
-		    !chk_designator(arg->nd_left, VARIABLE|DESIGNATOR)) {
-			node_error(arg->nd_left,"VAR parameter expected");
 			return 0;
 		}
 
@@ -451,20 +451,14 @@ chk_designator(expp, flag)
 
 	if (expp->nd_class == Link) {
 		assert(expp->nd_symb == '.');
+		assert(expp->nd_right->nd_class == Name);
 
 		if (! chk_designator(expp->nd_left,
 				     (flag|HASSELECTORS))) return 0;
 
 		tp = expp->nd_left->nd_type;
 
-		if (expp->nd_right->nd_class == Def) {
-			/* We were here already!
-			*/
-			return 1;
-		}
-
 		assert(tp->tp_fund == T_RECORD);
-		assert(expp->nd_right->nd_class == Name);
 
 		df = lookup(expp->nd_right->nd_IDF, tp->rec_scope);
 
@@ -892,7 +886,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	switch(left->nd_def->df_value.df_stdname) {
 	case S_ABS:
-		if (!(arg = getarg(arg, T_NUMERIC))) return 0;
+		if (!(arg = getarg(arg, T_NUMERIC, 0))) return 0;
 		left = arg->nd_left;
 		expp->nd_type = left->nd_type;
 		if (left->nd_class == Value) cstcall(expp, S_ABS);
@@ -900,25 +894,25 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	case S_CAP:
 		expp->nd_type = char_type;
-		if (!(arg = getarg(arg, T_CHAR))) return 0;
+		if (!(arg = getarg(arg, T_CHAR, 0))) return 0;
 		left = arg->nd_left;
 		if (left->nd_class == Value) cstcall(expp, S_CAP);
 		break;
 
 	case S_CHR:
 		expp->nd_type = char_type;
-		if (!(arg = getarg(arg, T_INTORCARD))) return 0;
+		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
 		left = arg->nd_left;
 		if (left->nd_class == Value) cstcall(expp, S_CHR);
 		break;
 
 	case S_FLOAT:
 		expp->nd_type = real_type;
-		if (!(arg = getarg(arg, T_INTORCARD))) return 0;
+		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
 		break;
 
 	case S_HIGH:
-		if (!(arg = getarg(arg, T_ARRAY))) return 0;
+		if (!(arg = getarg(arg, T_ARRAY, 0))) return 0;
 		expp->nd_type = arg->nd_left->nd_type->next;
 		if (!expp->nd_type) {
 			/* A dynamic array has no explicit index type
@@ -930,19 +924,19 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	case S_MAX:
 	case S_MIN:
-		if (!(arg = getarg(arg, T_DISCRETE))) return 0;
+		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
 		expp->nd_type = arg->nd_left->nd_type;
 		cstcall(expp,left->nd_def->df_value.df_stdname);
 		break;
 
 	case S_ODD:
-		if (!(arg = getarg(arg, T_INTORCARD))) return 0;
+		if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
 		expp->nd_type = bool_type;
 		if (arg->nd_left->nd_class == Value) cstcall(expp, S_ODD);
 		break;
 
 	case S_ORD:
-		if (!(arg = getarg(arg, T_DISCRETE))) return 0;
+		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
 		expp->nd_type = card_type;
 		if (arg->nd_left->nd_class == Value) cstcall(expp, S_ORD);
 		break;
@@ -957,7 +951,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	case S_TRUNC:
 		expp->nd_type = card_type;
-		if (!(arg = getarg(arg, T_REAL))) return 0;
+		if (!(arg = getarg(arg, T_REAL, 0))) return 0;
 		break;
 
 	case S_VAL:
@@ -975,7 +969,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 		expp->nd_right = arg->nd_right;
 		arg->nd_right = 0;
 		FreeNode(arg);
-		arg = getarg(expp, T_INTORCARD);
+		arg = getarg(expp, T_INTORCARD, 0);
 		if (!arg) return 0;
 		if (arg->nd_left->nd_class == Value) cstcall(expp, S_VAL);
 		break;
@@ -983,7 +977,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 
 	case S_ADR:
 		expp->nd_type = address_type;
-		if (!(arg = getarg(arg, D_VARIABLE|D_FIELD))) return 0;
+		if (!(arg = getarg(arg, 0, 1))) return 0;
 		break;
 
 	case S_DEC:
@@ -991,7 +985,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 		expp->nd_type = 0;
 		if (!(arg = getvariable(arg))) return 0;
 		if (arg->nd_right) {
-			if (!(arg = getarg(arg, T_INTORCARD))) return 0;
+			if (!(arg = getarg(arg, T_INTORCARD, 0))) return 0;
 		}
 		break;
 
@@ -1011,7 +1005,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 node_error(arg, "EXCL and INCL expect a SET parameter");
 			return 0;
 		}
-		if (!(arg = getarg(arg, T_DISCRETE))) return 0;
+		if (!(arg = getarg(arg, T_DISCRETE, 0))) return 0;
 		if (!TstAssCompat(tp->next, arg->nd_left->nd_type)) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???

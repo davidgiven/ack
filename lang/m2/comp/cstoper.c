@@ -289,9 +289,13 @@ cstset(expp)
 			}
 			if (j == setsize) expp->nd_INT = expp->nd_symb == '=';
 			expp->nd_class = Value;
+			expp->nd_symb = INTEGER;
 			free((char *) expp->nd_left->nd_set);
 			free((char *) expp->nd_right->nd_set);
-			break;
+			FreeNode(expp->nd_left);
+			FreeNode(expp->nd_right);
+			expp->nd_left = expp->nd_right = 0;
+			return;
 		default:
 			assert(0);
 		}
@@ -319,6 +323,7 @@ cstcall(expp, call)
 		FreeNode(expp->nd_right);
 	}
 	expp->nd_class = Value;
+	expp->nd_symb = INTEGER;
 	switch(call) {
 	case S_ABS:
 		if (expr->nd_type->tp_fund == T_REAL) {

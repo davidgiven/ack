@@ -200,8 +200,8 @@ factor(struct node **p;)
 
 			tp = charc_type;
 			i = *(dot.TOK_STR) & 0377;
-			free(dot.TOK_STR);
 			free((char *) dot.tk_data.tk_str);
+			free(dot.TOK_STR);
 			dot.TOK_INT = i;
 		  }
 		  else	tp = standard_type(T_STRING, 1, dot.TOK_SLE);

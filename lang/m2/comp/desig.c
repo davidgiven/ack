@@ -30,6 +30,7 @@ struct desig	InitDesig = {DSG_INIT, 0, 0};
 
 CodeValue(ds, size)
 	register struct desig *ds;
+	arith size;
 {
 	/*	Generate code to load the value of the designator described
 		in "ds"
@@ -71,6 +72,49 @@ CodeValue(ds, size)
 	}
 
 	ds->dsg_kind = DSG_LOADED;
+}
+
+CodeStore(ds, size)
+	register struct desig *ds;
+	arith size;
+{
+	/*	Generate code to store the value on the stack in the designator
+		described in "ds"
+	*/
+
+	switch(ds->dsg_kind) {
+	case DSG_FIXED:
+		if (size == word_size) {
+			if (ds->dsg_name) {
+				C_ste_dnam(ds->dsg_name, ds->dsg_offset);
+			}
+			else	C_stl(ds->dsg_offset);
+			break;
+		}
+
+		if (size == dword_size) {
+			if (ds->dsg_name) {
+				C_sde_dnam(ds->dsg_name, ds->dsg_offset);
+			}
+			else	C_sdl(ds->dsg_offset);
+			break;
+		}
+		/* Fall through */
+	case DSG_PLOADED:
+	case DSG_PFIXED:
+		CodeAddress(ds);
+		C_sti(size);
+		break;
+
+	case DSG_INDEXED:
+		C_sar(word_size);
+		break;
+
+	default:
+		crash("(CodeStore)");
+	}
+
+	ds->dsg_kind = DSG_INIT;
 }
 
 CodeAddress(ds)
@@ -144,6 +188,7 @@ CodeFieldDesig(df, ds)
 		/* Found it. Now, act like it was a selection.
 		*/
 		*ds = wds->w_desig;
+		assert(ds->dsg_kind == DSG_PFIXED);
 	}
 
 	switch(ds->dsg_kind) {
@@ -277,6 +322,7 @@ CodeDesig(nd, ds)
 	case Link:
 		assert(nd->nd_symb == '.');
 		assert(nd->nd_right->nd_class == Def);
+
 		CodeDesig(nd->nd_left, ds);
 		CodeFieldDesig(nd->nd_right->nd_def, ds);
 		break;
@@ -297,6 +343,7 @@ CodeDesig(nd, ds)
 			*/
 			/* ??? */
 		}
+		ds->dsg_kind = DSG_INDEXED;
 		break;
 
 	case Uoper:

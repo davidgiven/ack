@@ -22,6 +22,7 @@ static char *RcsId = "$Header$";
 #include	"Lpars.h"
 
 extern label	data_label();
+extern label	text_label();
 extern char	*long2str();
 extern char	*symbol2str();
 extern int	proclevel;
@@ -42,7 +43,7 @@ CodeConst(cst, size)
 	else {
 		C_df_dlb(dlab = data_label());
 		C_rom_icon(long2str((long) cst), 10);
-		C_lae_dlb(dlab);
+		C_lae_dlb(dlab, (arith) 0);
 		C_loi(size);
 	}
 }
@@ -53,6 +54,10 @@ CodeString(nd)
 	
 	label lab;
 	
+	if (nd->nd_type == charc_type) {
+		C_loc(nd->nd_INT);
+		return;
+	}
 	C_df_dlb(lab = data_label());
 	C_rom_scon(nd->nd_STR, nd->nd_SLE);
 	C_lae_dlb(lab);
@@ -74,7 +79,6 @@ CodeExpr(nd, ds, true_label, false_label)
 	struct desig *ds;
 	label true_label, false_label;
 {
-	struct desig ds1, ds2;
 
 	switch(nd->nd_class) {
 	case Def:
@@ -174,6 +178,18 @@ CodeCall(nd)
 	}	
 	tp = left->nd_type;
 
+	if (left->nd_class == Def &&
+	    (left->nd_def->df_kind & (D_TYPE|D_HTYPE|D_HIDDEN))) {
+		/* it was just a cast. Simply ignore it
+		*/
+		Des = InitDesig;
+		CodeExpr(nd->nd_right->nd_left, &Des, NO_LABEL, NO_LABEL);
+		CodeValue(&Des);
+		*nd = *(nd->nd_right->nd_left);
+		nd->nd_type = left->nd_def->df_type;
+		return;
+	}
+
 	assert(tp->tp_fund == T_PROCEDURE);
 
 	for (param = left->nd_type->prc_params; param; param = param->next) {
@@ -223,7 +239,7 @@ CodeStd(nd)
 
 CodeAssign(nd, dst, dss)
 	struct node *nd;
-	struct desig *dst, dss;
+	struct desig *dst, *dss;
 {
 	/*	Generate code for an assignment. Testing of type
 		compatibility and the like is already done.
@@ -262,8 +278,6 @@ CodeOper(expr, true_label, false_label)
 	register struct node *leftop = expr->nd_left;
 	register struct node *rightop = expr->nd_right;
 	register struct type *tp = expr->nd_type;
-	struct desig Des;
-	register struct desig *ds = &Des;
 
 	switch (oper)	{
 	case '+':
