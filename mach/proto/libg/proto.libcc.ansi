@@ -21,8 +21,7 @@ head:
 		$(MACH) $(MACHFL) -c -I$(TARGET_HOME)/h head_ac.e
 
 copy:
-		( cd $(SRC_DIR) ; tar cf - LIST `cat LIST` head_ac.e ) | \
-			tar xf -
+		cp_dir $(SRC_DIR) .
 		for i in `cat LIST` ; \
 		do cd $$i ; \
 		   make `cat LIST` ; \
