@@ -24,6 +24,12 @@ DEFINITION MODULE RealInOut;
      If fewer than n characters are needed, leading blanks are inserted.
   *)
 
+  PROCEDURE WriteFixPt(x: REAL; n, k: CARDINAL);
+  (* Write x in fixed-point notation usign n characters with k digits
+     after the decimal point. If fewer than n characters are needed,
+     leading blanks are inserted.
+  *)
+
   PROCEDURE WriteRealOct(x: REAL);
   (* Write x in octal words.
   *)

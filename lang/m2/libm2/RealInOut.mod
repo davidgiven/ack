@@ -31,6 +31,16 @@ IMPLEMENTATION MODULE RealInOut;
 	InOut.WriteString(buf);
   END WriteReal;
 
+  PROCEDURE WriteFixPt(arg: REAL; n, k: CARDINAL);
+  VAR buf: RBUF;
+      ok : BOOLEAN;
+
+  BEGIN
+	IF n > MAXWIDTH THEN n := MAXWIDTH END;
+	RealConversions.RealToString(arg, n, k, buf, ok);
+	InOut.WriteString(buf);
+  END WriteFixPt;
+
   PROCEDURE ReadReal(VAR x: REAL);
     VAR	Buf: ARRAY[0..512] OF CHAR;
 	ok: BOOLEAN;

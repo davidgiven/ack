@@ -21,7 +21,7 @@ DEFINITION MODULE RealConversions;
 			     VAR ok: BOOLEAN);
 
   PROCEDURE RealToString(r: REAL;
-			 digits, width: INTEGER;
+			 width, digits: INTEGER;
 			 VAR str: ARRAY OF CHAR;
 			 VAR ok: BOOLEAN);
   (* Convert real number "r" to string "str", either in fixed-point or
@@ -34,7 +34,7 @@ DEFINITION MODULE RealConversions;
   *)
 
   PROCEDURE LongRealToString(r: LONGREAL;
-			 digits, width: INTEGER;
+			 width, digits: INTEGER;
 			 VAR str: ARRAY OF CHAR;
 			 VAR ok: BOOLEAN);
 
