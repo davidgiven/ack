@@ -17,4 +17,5 @@ then
 	exit 0
 else
 	echo Sorry, can not create "lib/${MACH}/$DEST".
+	exit 1
 fi
