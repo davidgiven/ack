@@ -1,6 +1,6 @@
 .define	CERASE,CKILL,CSTOP,CSTART
 .define .lino,.filn
-.define F_DUM,EXIT
+.define F_DUM,EXIT,WRITE,BRK
 .define	begtext,begdata,begbss
 .define	EARRAY,ERANGE,ESET,EIDIVZ,EHEAP,EILLINS,ECASE
 .define	hol0,.reghp,.limhp,.trpim,.trppc
@@ -43,6 +43,9 @@ EXIT:
 	! As a temporary measure
 	jsr .trp
 	
+WRITE:	jmp	__write
+
+BRK:	jmp	__brk
 
 	.sect .data
 begdata:
