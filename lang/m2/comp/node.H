@@ -13,7 +13,12 @@ struct node {
 #define Call	4		/* cast or procedure - or function call */
 #define Link	5
 	struct type *nd_type;	/* type of this node */
-	struct token nd_token;
+	union {
+		struct token ndu_token;
+		char *ndu_set;	/* Pointer to a set constant */
+	} nd_val;
+#define nd_token	nd_val.ndu_token
+#define nd_set		nd_val.ndu_set
 #define nd_symb		nd_token.tk_symb
 #define nd_lineno	nd_token.tk_lineno
 #define nd_filename	nd_token.tk_filename

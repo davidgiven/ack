@@ -1,4 +1,4 @@
-/*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
+/* C O N S T A N T   E X P R E S S I O N   H A N D L I N G */
 
 static char *RcsId = "$Header$";
 
@@ -14,33 +14,66 @@ static char *RcsId = "$Header$";
 
 long mach_long_sign;	/* sign bit of the machine long */
 int mach_long_size;	/* size of long on this machine == sizeof(long) */
-long full_mask[MAXSIZE];/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
+long full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 arith max_longint;	/* maximum longint on target machine	*/
 
-#if 0
+cstunary(expp, oper)
+	register struct node *expp;
+{
+	/*	The unary operation oper is performed on the constant
+		expression expp, and the result restored in expp.
+	*/
+	arith o1 = expp->nd_INT;
+
+	switch(oper) {
+	case '+':
+		return;
+	case '-':
+		o1 = -o1;
+		break;
+	case NOT:
+		o1 = !o1;
+		break;
+	default:
+		assert(0);
+	}
+	expp->nd_INT = o1;
+	cut_size(expp);
+}
 
 cstbin(expp, oper, expr)
-	struct expr **expp, *expr;
+	register struct node *expp, *expr;
 {
-	/*	The operation oper is performed on the constant
-		expressions *expp(ld) and expr(ct), and the result restored in
-		*expp.
+	/*	The binary operation oper is performed on the constant
+		expressions expp and expr, and the result restored in
+		expp.
 	*/
-	arith o1 = (*expp)->VL_VALUE;
-	arith o2 = expr->VL_VALUE;
-	int uns = (*expp)->ex_type->tp_unsigned;
+	arith o1 = expp->nd_INT;
+	arith o2 = expr->nd_INT;
+	int uns = expp->nd_type != int_type;
 
-	ASSERT(is_ld_cst(*expp) && is_cp_cst(expr));
+	assert(expp->nd_class == Value && expr->nd_class == Value);
 	switch (oper)	{
+	case IN:
+		/* ??? */
+		return;
 	case '*':
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		o1 *= o2;
 		break;
 	case '/':
+		assert(expp->nd_type->tp_fund == SET);
+		/* ??? */
+		return;
+	case DIV:
 		if (o2 == 0)	{
-			expr_error(expr, "division by 0");
-			break;
+			node_error(expr, "division by 0");
+			return;
 		}
 		if (uns)	{
 			/*	this is more of a problem than you might
@@ -74,10 +107,10 @@ cstbin(expp, oper, expr)
 		else
 			o1 /= o2;
 		break;
-	case '%':
+	case MOD:
 		if (o2 == 0)	{
-			expr_error(expr, "modulo by 0");
-			break;
+			node_error(expr, "modulo by 0");
+			return;
 		}
 		if (uns)	{
 			if (o2 & mach_long_sign)	{/* o2 > max_long */
@@ -104,24 +137,18 @@ cstbin(expp, oper, expr)
 			o1 %= o2;
 		break;
 	case '+':
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		o1 += o2;
 		break;
 	case '-':
-		o1 -= o2;
-		break;
-	case LEFT:
-		o1 <<= o2;
-		break;
-	case RIGHT:
-		if (o2 == 0)
-			break;
-		if (uns)	{
-			o1 >>= 1;
-			o1 & = ~mach_long_sign;
-			o1 >>= (o2-1);
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
 		}
-		else
-			o1 >>= o2;
+		o1 -= o2;
 		break;
 	case '<':
 		if (uns)	{
@@ -143,7 +170,11 @@ cstbin(expp, oper, expr)
 		else
 			o1 = o1 > o2;
 		break;
-	case LESSEQ:
+	case LESSEQUAL:
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
 				(o2 & mach_long_sign ? o1 <= o2 : 0) :
@@ -153,7 +184,11 @@ cstbin(expp, oper, expr)
 		else
 			o1 = o1 <= o2;
 		break;
-	case GREATEREQ:
+	case GREATEREQUAL:
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		if (uns)	{
 			o1 = (o1 & mach_long_sign ?
 				(o2 & mach_long_sign ? o1 >= o2 : 1) :
@@ -163,58 +198,63 @@ cstbin(expp, oper, expr)
 		else
 			o1 = o1 >= o2;
 		break;
-	case EQUAL:
+	case '=':
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		o1 = o1 == o2;
 		break;
-	case NOTEQUAL:
+	case '#':
+		if (expp->nd_type->tp_fund == SET) {
+			/* ??? */
+			return;
+		}
 		o1 = o1 != o2;
 		break;
-	case '&':
-		o1 &= o2;
+	case AND:
+		o1 = o1 && o2;
 		break;
-	case '|':
-		o1 |= o2;
+	case OR:
+		o1 = o1 || o2;
 		break;
-	case '^':
-		o1 ^= o2;
-		break;
+	default:
+		assert(0);
 	}
-	(*expp)->VL_VALUE = o1;
-	cut_size(*expp);
-	(*expp)->ex_flags |= expr->ex_flags;
-	(*expp)->ex_flags &= ~EX_PARENS;
+	expp->nd_INT = o1;
+	cut_size(expp);
 }
 
 cut_size(expr)
-	struct expr *expr;
+	register struct node *expr;
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	arith o1 = expr->VL_VALUE;
-	int uns = expr->ex_type->tp_unsigned;
-	int size = (int) expr->ex_type->tp_size;
+	arith o1 = expr->nd_INT;
+	int uns = expr->nd_type == card_type || expr->nd_type == intorcard_type;
+	int size = expr->nd_type->tp_size;
 
-	ASSERT(expr->ex_class == Value);
+	assert(expr->nd_class == Value);
 	if (uns) {
-		if (o1 & ~full_mask[size])
-			expr_warning(expr,
-				"overflow in unsigned constant expression");
+		if (o1 & ~full_mask[size]) {
+			node_warning(expr,
+				"overflow in constant expression");
+		}
 		o1 &= full_mask[size];
 	}
 	else {
 		int nbits = (int) (mach_long_size - size) * 8;
 		long remainder = o1 & ~full_mask[size];
 
-		if (remainder != 0 && remainder != ~full_mask[size])
-			expr_warning(expr, "overflow in constant expression");
-		o1 <<= nbits;		/* ??? */
+		if (remainder != 0 && remainder != ~full_mask[size]) {
+			node_warning(expr, "overflow in constant expression");
+		}
+		o1 <<= nbits;
 		o1 >>= nbits;
 	}
-	expr->VL_VALUE = o1;
+	expr->nd_INT = o1;
 }
-
-# endif
 
 init_cst()
 {
