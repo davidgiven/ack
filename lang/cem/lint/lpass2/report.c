@@ -4,7 +4,12 @@
  */
 /* $Id$ */
 
+#if __STDC__
+#include	<stdarg.h>
+extern panic(char *, ...);
+#else
 #include	<varargs.h>
+#endif
 
 #include	<system.h>
 #include	"private.h"
@@ -19,6 +24,15 @@ extern int LineNr;
 
 PRIVATE rep_loc();
 
+#if __STDC__
+/* VARARGS */
+report(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+#else
 /* VARARGS */
 report(va_alist)
 	va_dcl
@@ -28,6 +42,7 @@ report(va_alist)
 	va_start(ap);
 	{
 		char *fmt = va_arg(ap, char*);
+#endif
 		register char *f = fmt;
 		register char fc;
 
@@ -108,6 +123,23 @@ rep_loc(id)
 	}
 }
 
+#if __STDC__
+/* VARARGS */
+panic(char *fmt, ...)				/* fmt, args */
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+		fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
+		doprnt(ERROUT, fmt, ap);
+		fprint(ERROUT, "\n");
+	}
+	va_end(ap);
+
+	exit(1);
+}
+#else
 /* VARARGS */
 panic(va_alist)				/* fmt, args */
 	va_dcl
@@ -126,4 +158,4 @@ panic(va_alist)				/* fmt, args */
 
 	exit(1);
 }
-
+#endif
