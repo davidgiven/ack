@@ -222,6 +222,7 @@ jmp label cost(1,7).
 joehoe "call" label+rm cost(1,8).
 jxx "syntax error" label.
 lea anyreg:wo, halfindir:ro cost(1,2).
+lea LOCAL:wo, halfindir:ro cost(1,2).	/* only for register variables, UNSAFE!!! */
 loop label kills cx cost(1,5).
 #ifdef REGVARS
 mov LOCAL:wo, memory2:ro cost(1,2).	/* only for register variables, UNSAFE!!! */
@@ -286,6 +287,9 @@ MOVES
 #ifdef REGVARS
 from memory2 to LOCAL		/* unsafe !!! */
 gen mov %2,%1
+
+from halfindir to LOCAL		/* unsafe !!! */
+gen lea %2,%1
 #endif
 
 from rm to register
@@ -621,6 +625,9 @@ pat lol lal sti $1==$2 && $3<=2
 #ifdef REGVARS
 pat stl inreg($1)==reg_any
   with rmorconst
+  kills regvar($1)
+  gen move %1, {LOCAL,$1,2}
+  with halfindir
   kills regvar($1)
   gen move %1, {LOCAL,$1,2}
   with exact STACK
@@ -1792,6 +1799,11 @@ pat loc loc cii loc and zne $4<256 && $4>=0 && $5==2 && $1==1 && $2==2
 pat loc loc cii $1==1 && $2==2
 with ACC
 gen cbw.			yields ax
+with exact rmorconst1 ACC
+uses REG
+gen move %2,%a
+    move %1,%2.1
+    cbw.			yields %a ax
 with exact rmorconst1
 uses reusing %1, ACC1=%1
 gen cbw.			yields ax
@@ -2369,6 +2381,26 @@ with rmorconst REG STACK
       jne {label,$3}
 with REG rmorconst STACK
   gen or %1,%2
+      jne {label,$3}
+
+pat ldc cms zeq $2==4 && loww($1)==65535 && highw($1)==(0-1)
+with rmorconst REG STACK
+  gen and %2,%1
+      cmp %2,{ANYCON,0-1}
+      je {label,$3}
+with REG rmorconst STACK
+  gen and %1,%2
+      cmp %1,{ANYCON,0-1}
+      je {label,$3}
+
+pat ldc cms zne $2==4 && loww($1)==65535 && highw($1)==(0-1)
+with rmorconst REG STACK
+  gen and %2,%1
+      cmp %2,{ANYCON,0-1}
+      jne {label,$3}
+with REG rmorconst STACK
+  gen and %1,%2
+      cmp %1,{ANYCON,0-1}
       jne {label,$3}
 
 pat ldc cms zeq $2==4
