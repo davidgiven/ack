@@ -3,16 +3,25 @@ case $1 in
 *)	mkdir $DESTDIR/$1
 	;;
 esac
-p=`pwd`
-cd $DESTDIR/$1
+p=$REPDIR/$1
+dir=$1
+if [ $# = 2 ]
+then
+	if [ -f $2 ]
+	then	
+		set `fgrep "$dir " $2`
+	fi
+fi
+cd $DESTDIR/$dir
 if [ $# = 2 ]
 then
 	RV $p $2 > /dev/null 2>&1
+	echo "$dir $2"
 else
 	if `CV $p > /dev/null 2>&1`
 	then
-		echo "$1 `RC -i`"
+		echo "$dir `RC -i`"
 	else
-		echo "-- $1 CV failed for some reason" 1>&2
+		echo "-- $dir CV failed for some reason" 1>&2
 	fi
 fi

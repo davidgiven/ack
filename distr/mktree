@@ -1,14 +1,24 @@
 case $# in
-1|2)	;;
-*)	echo $0 directory [ SVrecord ] 1>&2 ; exit 1 ;;
+2|3)	;;
+*)	echo Usage: $0 directory repdir [ SVrecord ] 1>&2 ; exit 1 ;;
 esac
-DDIR=/usr/proj/em/Work/distr
+case $0 in
+/*)	DDIR=`dirname $0`
+	;;
+*)	DDIR=`pwd`/`dirname $0`
+	;;
+esac
 case $1 in
 /*)	DESTDIR=$1 ;;
 *)	DESTDIR=`pwd`/$1 ;;
 esac
+case $2 in
+/*)	REPDIR=$2 ;;
+*)	REPDIR=`pwd`/$2 ;;
+esac
+cd $REPDIR
 DD=$DDIR/mkd
 DF=$DDIR/mkf
 DA=$DDIR/mka
-export DDIR DESTDIR DD DF DA
-$DDIR/dwalk $2
+export DDIR DESTDIR DD DF DA REPDIR
+$DDIR/dwalk $3
