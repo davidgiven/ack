@@ -417,7 +417,7 @@ to use the Kit.
 Read the next section and the manuals provided
 with the Kit (in the man directory) on how to use it.
 .NH 2
-Possible problems you may meet
+Problems you may meet
 .NH 3
 on Unisoft m68000 systems.
 .PP
@@ -563,7 +563,7 @@ of the kit:
 The names mentioned here can be used to compile Pascal, C, etc... programs.
 Most of the links can be used to generate code for a particular
 machine.
-See also the section about "Machines"
+See also the section about "Machines".
 .IP \fIarch\fP
 .br
 The archiver used for the EM- and universal assembler.
