@@ -569,6 +569,8 @@ CodeStd(nd)
 	case S_EXCL:
 		CodePExpr(left);
 		CodePExpr(arg->nd_left);
+		C_loc(tp->set_low);
+		C_sbi(word_size);
 		C_set(tp->tp_size);
 		if (std == S_INCL) {
 			C_ior(tp->tp_size);
@@ -822,6 +824,8 @@ CodeOper(expr, true_label, false_label)
 		*/
 		CodePExpr(rightop);
 		CodePExpr(leftop);
+		C_loc(rightop->nd_type->set_low);
+		C_sbi(word_size);
 		C_inn(rightop->nd_type->tp_size);
 		if (true_label != NO_LABEL) {
 			C_zne(true_label);
@@ -975,6 +979,7 @@ CodeEl(nd, tp)
 	register t_type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
+		C_loc(tp->set_low);
 		C_loc(tp->tp_size);	/* push size */
 		if (eltype->tp_fund == T_SUBRANGE) {
 			C_loc(eltype->sub_ub);
@@ -982,10 +987,12 @@ CodeEl(nd, tp)
 		else	C_loc((arith) (eltype->enm_ncst - 1));
 		Operands(nd->nd_left, nd->nd_right);
 		C_cal("_LtoUset");	/* library routine to fill set */
-		C_asp(4 * word_size);
+		C_asp(5 * word_size);
 	}
 	else {
 		CodePExpr(nd);
+		C_loc(tp->set_low);
+		C_sbi(word_size);
 		C_set(tp->tp_size);
 		C_ior(tp->tp_size);
 	}

@@ -369,6 +369,7 @@ ChkElement(expp, tp, set)
 		Also try to compute the set!
 	*/
 	register t_node *expr = *expp;
+	t_type *el_type = ElementType(tp);
 	register unsigned int i;
 	arith lo, hi, low, high;
 
@@ -376,8 +377,8 @@ ChkElement(expp, tp, set)
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (! (ChkEl(&(expr->nd_left), tp) & 
-		       ChkEl(&(expr->nd_right), tp))) {
+		if (! (ChkEl(&(expr->nd_left), el_type) & 
+		       ChkEl(&(expr->nd_right), el_type))) {
 			return 0;
 		}
 
@@ -393,7 +394,7 @@ ChkElement(expp, tp, set)
 		high = expr->nd_right->nd_INT;
 	}
 	else {
-		if (! ChkEl(expp, tp)) return 0;
+		if (! ChkEl(expp, el_type)) return 0;
 		expr = *expp;
 		if (expr->nd_class != Value) {
 			return 1;
@@ -405,12 +406,14 @@ ChkElement(expp, tp, set)
 		return 0;
 	}
 
-	getbounds(tp, &lo, &hi);
+	getbounds(el_type, &lo, &hi);
 	if (low < lo || high > hi) {
 		node_error(expr, "set element out of range");
 		return 0;
 	}
 
+	low -= tp->set_low;
+	high -= tp->set_low;
 	for (i=(unsigned)low; i<= (unsigned)high; i++) {
 		set[i/wrd_bits] |= (1<<(i%wrd_bits));
 	}
@@ -494,8 +497,7 @@ ChkSet(expp)
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (!ChkElement(&(nd->nd_left), ElementType(tp),
-						expp->nd_set)) {
+		if (!ChkElement(&(nd->nd_left), tp, expp->nd_set)) {
 			retval = 0;
 		}
 		if (nd->nd_left) SetIsConstant = 0;

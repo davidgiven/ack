@@ -65,6 +65,11 @@ struct proc {
 #define prc_nbpar	tp_value.tp_proc.pr_nbpar
 };
 
+struct set {
+	arith st_low;
+#define set_low		tp_value.tp_set.st_low
+};
+
 struct type	{
 	struct type *tp_next;	/* used with ARRAY, PROCEDURE, POINTER, SET,
 				   SUBRANGE, EQUAL
@@ -98,6 +103,7 @@ struct type	{
 	    struct array *tp_arr;
 	    struct record tp_record;
 	    struct proc tp_proc;
+	    struct set tp_set;
 	} tp_value;
 };
 

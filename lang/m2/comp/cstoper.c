@@ -258,6 +258,7 @@ cstset(expp)
 
 		assert(expp->nd_left->nd_class == Value);
 
+		expp->nd_left->nd_INT -= expp->nd_right->nd_type->set_low;
 		i = expp->nd_left->nd_INT;
 		expp->nd_class = Value;
 		expp->nd_INT = (expp->nd_left->nd_INT >= 0 &&

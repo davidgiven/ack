@@ -52,11 +52,6 @@
 #define INP_READ_IN_ONE	1	/* read input file in one	*/
 
 
-!File: maxset.h
-#define MAXSET	1024		/* maximum number of elements in a set,
-				   but what is a reasonable choice ???
-				*/
-
 !File: density.h
 #define DENSITY	3		/* see casestat.C for an explanation */
 

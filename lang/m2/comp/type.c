@@ -11,7 +11,6 @@
 
 #include	"target_sizes.h"
 #include	"debug.h"
-#include	"maxset.h"
 
 #include	<assert.h>
 #include	<alloc.h>
@@ -29,6 +28,7 @@
 #include	"scope.h"
 #include	"walk.h"
 #include	"chk_expr.h"
+#include	"warning.h"
 
 int
 	word_align = AL_WORD,
@@ -39,9 +39,6 @@ int
 	double_align = AL_DOUBLE,
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT;
-
-int
-	maxset = MAXSET;
 
 arith
 	word_size = SZ_WORD,
@@ -467,7 +464,7 @@ set_type(tp)
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
 	*/
-	arith lb, ub;
+	arith lb, ub, diff;
 
 	if (! bounded(tp)) {
 		error("illegal base type for set");
@@ -476,13 +473,19 @@ set_type(tp)
 
 	getbounds(tp, &lb, &ub);
 
-	if (lb < 0 || ub > maxset-1 || (sizeof(int)==2 && ub > 65535)) {
+	if (lb < 0) {
+		warning(W_STRICT, "base type of set has negative lower bound");
+	}
+
+	diff = ub - lb + 1;
+	if (diff < 0 || (sizeof(int) == 2 && diff > 65535)) {
 		error("set type limits exceeded");
 		return error_type;
 	}
 
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = WA((ub + 8) >> 3);
+	tp->tp_size = WA((diff + 7) >> 3);
+	tp->set_low = lb;
 	return tp;
 }
 

@@ -51,19 +51,6 @@ DoOption(text)
 		options[text[-1]]++;
 		break;
 
-	case 'i':	/* # of bits in set */
-	{
-		char *t = text;
-		int val;
-		extern int maxset;
-
-		val = txt2int(&t);
-		if (val <= 0 || *t) {
-			error("bad -i flag; use -i<num>");
-		}
-		else	maxset = val;
-		break;
-	}
 	case 'w':
 		if (*text) {
 			while (*text) {
