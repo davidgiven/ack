@@ -159,7 +159,7 @@ Label(struct node **pnd;)
 		*pnd = NULLNODE;
 	  }
 	  else	{
-		sprint(lab, "%d", dot.TOK_INT);
+		sprint(lab, "%d", (int) dot.TOK_INT);
 		*pnd = MkLeaf(Name, &dot);
 		(*pnd)->nd_IDF = str2idf(lab, 1);
 	  }

@@ -145,14 +145,14 @@ stb_type(tp, assign_num)
 	case T_SET:
 		addc_db_str('S');
 		stb_type(tp->next, 0);
-		adds_db_str(sprint(buf, ";%ld;%ld;", tp->tp_size, 0L));
+		adds_db_str(sprint(buf, ";%ld;%ld;", (long) tp->tp_size, 0L));
 		break;
 	case T_ARRAY:
 		addc_db_str('a');
 		if (IsConformantArray(tp)) {
 			addc_db_str('r');
 			stb_type(tp->next, 0);
-			adds_db_str(sprint(buf, ";A%ld;Z%ld", tp->arr_cfdescr, tp->arr_cfdescr));
+			adds_db_str(sprint(buf, ";A%ld;Z%ld", (long) tp->arr_cfdescr, (long) tp->arr_cfdescr));
 		}
 		else {
 			stb_type(tp->next, 0);
@@ -168,14 +168,14 @@ stb_type(tp, assign_num)
 			while (edef) {
 				adds_db_str(sprint(buf, "%s:%ld,",
 					edef->df_idf->id_text,
-					edef->enm_val));
+					(long) edef->enm_val));
 				edef = edef->enm_next;
 			}
 		}
 		addc_db_str(';');
 		break;
 	case T_RECORD:
-		adds_db_str(sprint(buf, "s%ld", tp->tp_size));
+		adds_db_str(sprint(buf, "s%ld", (long) tp->tp_size));
 		{
 			register struct def	*sdef = tp->rec_scope->sc_def;
 
@@ -185,8 +185,8 @@ stb_type(tp, assign_num)
 				stb_type(sdef->df_type, 0);
 				adds_db_str(sprint(buf,
 					",%ld,%ld;",
-					sdef->fld_off*8,
-					sdef->df_type->tp_size*8));
+					sdef->fld_off*8L,
+					sdef->df_type->tp_size*8L));
 				sdef = sdef->df_nextinscope;
 			}
 		}
@@ -326,10 +326,10 @@ stb_string(df, kind)
 		case T_LONG:
 		case T_POINTER:
 		case T_PROCEDURE:
-			adds_db_str(sprint(buf, "i%ld;", df->con_const->nd_INT));
+			adds_db_str(sprint(buf, "i%ld;", (long) df->con_const->nd_INT));
 			break;
 		case T_CHAR:
-			adds_db_str(sprint(buf, "c%ld;", df->con_const->nd_INT));
+			adds_db_str(sprint(buf, "c%ld;", (long) df->con_const->nd_INT));
 			break;
 		case T_REAL:
 			addc_db_str('r');
@@ -352,7 +352,7 @@ stb_string(df, kind)
 		case T_ENUMERATION:
 			addc_db_str('e');
 			stb_type(tp, 0);
-			adds_db_str(sprint(buf, ",%ld;", df->enm_val));
+			adds_db_str(sprint(buf, ",%ld;", (long) df->enm_val));
 			break;
 		case T_SET: {
 			register int i;
@@ -361,7 +361,7 @@ stb_string(df, kind)
 			stb_type(tp, 0);
 			for (i = 0; i < tp->tp_size; i++) {
 				adds_db_str(sprint(buf, ",%ld",
-					(df->con_const->nd_set[i/(int) word_size] >> (8*(i%(int)word_size)))&0377));
+					(long) (df->con_const->nd_set[i/(int) word_size] >> (8*(i%(int)word_size)))&0377));
 			}
 			addc_db_str(';');
 			}
