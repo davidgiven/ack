@@ -1,8 +1,9 @@
 #ifdef BSD4_2
-#include "/usr/include/sys/dir.h"
+#define MAXNAMLEN 255
 #else
-#define DIRBLKSIZ 512
 #define MAXNAMLEN 14
+#endif
+#define DIRBLKSIZ 512
 #undef DIRSIZ
 #define DIRSIZ(dp) \
 	((sizeof(struct direct) - (MAXNAMLEN+1)) + (((dp)->d_namlen+1+3)&~3))
@@ -17,7 +18,8 @@ struct _dirdesc {
 	int	dd_fd;
 	long	dd_loc;
 	long	dd_size;
-	char	dd_buf[DIRBLKSIZ];
+	char	*dd_buf;
+	int	dd_bsize;
 };
 
 typedef struct _dirdesc DIR;
@@ -25,10 +27,9 @@ typedef struct _dirdesc DIR;
 #ifndef NULL
 #define NULL 0
 #endif
-extern DIR	*opendir();
+extern DIR *opendir();
 extern struct direct *readdir();
-extern long	telldir();
-extern		seekdir();
+extern long telldir();
+extern seekdir();
 #define rewinddir(dirp) seekdir((dirp), 0L)
-extern		closedir();
-#endif
+extern closedir();

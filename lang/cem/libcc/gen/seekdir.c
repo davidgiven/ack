@@ -16,22 +16,18 @@ long loc;
 	curloc = telldir(dirp);
 	if (loc == curloc)
 		return;
-	base = loc & ~(DIRBLKSIZ - 1);
-	offset = loc & (DIRBLKSIZ - 1);
+	offset = loc % dirp->dd_bsize;
+	base = loc - offset;
 	if (dirp->dd_loc != 0 && offset != 0 &&
-	    (curloc & ~(DIRBLKSIZ-1)) ==  base) {
+	    (curloc - (curloc % dirp->dd_bsize)) ==  base) {
 		dirp->dd_loc = offset;
 		return;
 	}
 	(void) lseek(dirp->dd_fd, base, 0);
 	dirp->dd_loc = 0;
 	dirp->dd_size = 0;
-	if (offset == 0)
-		(void) readdir(dirp);
-	else {
-		while (dirp->dd_loc < offset) {
-			if (readdir(dirp) == (struct direct *) 0)
-				return;
-		}
+	while (dirp->dd_loc < offset) {
+		if (readdir(dirp) == (struct direct *) 0)
+			return;
 	}
 }

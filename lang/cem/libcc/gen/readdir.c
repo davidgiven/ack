@@ -27,7 +27,7 @@ register DIR *dirp;
 	for (;;) {
 		if (dirp->dd_loc == 0) {
 			dirp->dd_size = read(dirp->dd_fd, dirp->dd_buf, 
-					     DIRBLKSIZ);
+					     dirp->dd_bsize);
 			if (dirp->dd_size <= 0) {
 				dirp->dd_size = 0;
 				return NULL;

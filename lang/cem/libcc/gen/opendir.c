@@ -21,6 +21,21 @@ char *name;
 		close (fd);
 		return NULL;
 	}
+	if ((int) stbuf.st_size == stbuf.st_size &&
+	    (dirp->dd_buf = malloc((unsigned) stbuf.st_size))) {
+		dirp->dd_bsize = stbuf.st_size;
+	}
+	else if (dirp->dd_buf = malloc(8*DIRBLKSIZ)) {
+		dirp->dd_bsize = 8 * DIRBLKSIZ;
+	}
+	else if (dirp->dd_buf = malloc(DIRBLKSIZ)) {
+		dirp->dd_bsize =  DIRBLKSIZ;
+	}
+	else {
+		close(fd);
+		free((char *) dirp);
+		return NULL;
+	}
 	dirp->dd_fd = fd;
 	dirp->dd_loc = 0;
 	return dirp;
