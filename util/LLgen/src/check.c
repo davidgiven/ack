@@ -228,9 +228,8 @@ check(p) register p_gram p; {
 			else {
 				if (q->t_flags & RESOLVER) {
 					q->t_flags |= NOCONF;
-					error(p->g_lineno,
-						"%%while, no conflict");
-					retval = 1;
+					warning(p->g_lineno,
+						"%%while without conflict");
 				}
 			}
 			free((p_mem) temp);
@@ -255,9 +254,8 @@ check(p) register p_gram p; {
 			} else {
 				if (l->l_flag & (COND|PREFERING|AVOIDING)) {
 					l->l_flag |= NOCONF;
-					error(p->g_lineno,
+					warning(p->g_lineno,
 "Conflict resolver without conflict");
-					retval = 1;
 				}
 			}
 			free( (p_mem) temp);

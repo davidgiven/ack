@@ -195,6 +195,13 @@ genrecovery() {
 	}
 	fputs(c_arrend, f);
 	free((p_mem) index);
+	if (onerror) {
+		fputs("short LLtok[] = {\n", f);
+		for (t = tokens; t < maxt; t++) {
+			fprintf(f, t->t_tokno<0400 ? "'%s',\n" : "%s,\n",t->t_string);
+		}
+		fputs(c_arrend, f);
+	}
 	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
 	if (ferror(f) != 0) {
@@ -526,6 +533,9 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 			lb, hulp2);
 		}
 		if (l->l_flag & COND) {
+			if (l->l_flag & NOCONF) {
+				fputs("#ifdef ___NOCONFLICT___\n", f);
+			}
 			set = setalloc();
 			setunion(set, l->l_others);
 			setintersect(set, l->l_symbs);
@@ -536,6 +546,10 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 			fputs("if (!",f);
 			getaction(0);
 			fprintf(f,") goto L_%d;\n", hulp);
+			if (l->l_flag & NOCONF) {
+				fputs("#endif\n", f);
+				free((p_mem) set);
+			}
 		}
 		if (!haddefault && (l->l_flag & DEF)) {
 			haddefault = 1;
@@ -551,7 +565,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 		}
 		rulecode(l->l_rule, nsafe, mustscan, mustpop);
 		fputs(c_break,f);
-		if (l->l_flag & COND) {
+		if ((l->l_flag & COND) && !(l->l_flag & NOCONF)) {
 			p++;
 			fprintf(f,"L_%d : ;\n",hulp);
 			if (g_gettype(p+1) == EORULE) {
@@ -813,6 +827,9 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 	fprintf(f, "L_%d : ", hulp2);
 	fputs("switch(LLcsymb) {\n", f);
 	if (q->t_flags & RESOLVER) {
+		if (q->t_flags & NOCONF) {
+			fputs("#ifdef ___NOCONFLICT___\n", f);
+		}
 		hulp1 = nlabel++;
 		p1 = setalloc();
 		setunion(p1,q->t_first);
@@ -830,6 +847,9 @@ genswhead(q, rep, cnt, safety, ispushed) register p_term q; {
 		fputs("if (", f);
 		getaction(0);
 		fprintf(f, ") goto L_%d;\n", hulp1);
+		if (q->t_flags & NOCONF) {
+			fputs("#endif ___NOCONFLICT___\n", f);
+		}
 	}
 	if (safeterm == 0 || (!onerror && safeterm <= SAFESCANDONE)) {
 		fputs("default:\n", f);

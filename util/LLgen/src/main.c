@@ -207,6 +207,18 @@ error(lineno,s,t,u) string	s,t,u; {
 }
 
 /* VARARGS1 */
+warning(lineno,s,t,u) string	s,t,u; {	
+	/*
+	 * Just a warning
+	 */
+
+	if (!lineno) lineno = 1;
+	fprintf(stderr,"\"%s\", line %d : (Warning) ",f_input, lineno);
+	fprintf(stderr,s,t,u);
+	fputs("\n",stderr);
+}
+
+/* VARARGS1 */
 fatal(lineno,s,t,u) string	s,t,u; {
 	/*
 	 * Fatal error
