@@ -50,7 +50,7 @@ struct withdesig	*WithDesigs;
 t_node			*Modules;
 
 static t_type		*func_type;
-static arith		priority;
+static t_node		*priority;
 static int		oldlineno;
 
 static int		RegisterMessage();
@@ -80,9 +80,10 @@ DoPriority()
 	/*	For the time being (???), handle priorities by calls to
 		the runtime system
 	*/
+	register t_node *pri = priority;
 
-	if (priority) {
-		C_loc(priority);
+	if (pri) {
+		C_loc(pri->nd_INT);
 		C_cal("_stackprio");
 		C_asp(word_size);
 	}
@@ -112,10 +113,12 @@ DoLineno(nd)
 	}
 }
 
-DoFilename()
+DoFilename(nd)
+	t_node *nd;
 {
 	static label	filename_label = 0;
 
+	oldlineno = 0;
 	if (! options['L']) {
 
 		if (! filename_label) {
@@ -125,6 +128,8 @@ DoFilename()
 		}
 
 		C_fil_dlb((label) 1, (arith) 0);
+
+		if (nd) DoLineno(nd);
 	}
 }
 
@@ -139,7 +144,7 @@ WalkModule(module)
 	t_scopelist *savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
-	priority = module->mod_priority ? module->mod_priority->nd_INT : 0;
+	priority = module->mod_priority;
 	sc = CurrentScope;
 
 	/* Walk through it's local definitions
@@ -155,7 +160,7 @@ WalkModule(module)
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
 	DoPriority();
-	DoFilename();
+	DoFilename(module->mod_body);
 	if (module == Defined) {
 		/* Body of implementation or program module.
 		   Call initialization routines of imported modules.
@@ -203,7 +208,7 @@ WalkProcedure(procedure)
 		local definitions, checking and generating code.
 	*/
 	t_scopelist *savevis = CurrVis;
-	register t_scope *sc = procedure->prc_vis->sc_scope;
+	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	register t_type *tp;
 	register t_param *param;
 	label func_res_label = 0;
@@ -216,16 +221,16 @@ WalkProcedure(procedure)
 
 	/* Generate code for all local modules and procedures
 	*/
-	WalkDefList(sc->sc_def, WalkDef);
+	WalkDefList(procscope->sc_def, WalkDef);
 
 	/* Generate code for this procedure
 	*/
-	C_pro_narg(sc->sc_name);
+	C_pro_narg(procscope->sc_name);
 	DoPriority();
-	DoFilename();
-	TmpOpen(sc);
+	DoFilename(procedure->prc_body);
+	TmpOpen(procscope);
 
-	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
+	func_type = tp = RemoveEqual(RresultType(procedure->df_type));
 
 	if (tp) {
 		func_res_size = WA(tp->tp_size);
@@ -247,7 +252,7 @@ WalkProcedure(procedure)
 	/* Generate calls to initialization routines of modules defined within
 	   this procedure
 	*/
-	WalkDefList(sc->sc_def, MkCalls);
+	WalkDefList(procscope->sc_def, MkCalls);
 
 	/* Make sure that arguments of size < word_size are on a
 	   fixed place.
@@ -286,8 +291,9 @@ WalkProcedure(procedure)
 						   needed if the value itself
 						   is returned
 						*/
-						sc->sc_off -= func_res_size;
-						retsav = sc->sc_off;
+						procscope->sc_off -=
+							func_res_size;
+						retsav = procscope->sc_off;
 					}
 					StackAdjustment = NewPtr();
 					C_lor((arith) 1);
@@ -353,15 +359,15 @@ WalkProcedure(procedure)
 	}
 	EndPriority();
 	C_ret(func_res_size);
-	if (! options['n']) WalkDefList(sc->sc_def, RegisterMessage);
-	C_end(-sc->sc_off);
-	if (! fit(sc->sc_off, (int) word_size)) {
+	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
+	C_end(-procscope->sc_off);
+	if (! fit(procscope->sc_off, (int) word_size)) {
 		node_error(procedure->prc_body, "maximum local byte count exceeded");
 	}
 	TmpClose();
 	CurrVis = savevis;
 	proclevel--;
-	WalkDefList(sc->sc_def, UseWarnings);
+	WalkDefList(procscope->sc_def, UseWarnings);
 }
 
 static int

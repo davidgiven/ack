@@ -369,7 +369,7 @@ CodeCall(nd)
 		}
 		else	C_lfr(sz);
 	}
-	DoFilename();
+	DoFilename(nd);
 }
 
 CodeParameters(param, arg)
