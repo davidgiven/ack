@@ -272,7 +272,7 @@ eliminate(pp)
 				mes = find_mesreg(tmp);
 				OUTVERBOSE("re-using %D(LB)", tmp);
 			} else {
-				tmp = tmplocal(pp, (int) ravp->av_size);
+				tmp = tmplocal(pp,  ravp->av_size);
 				mes = gen_mesreg(tmp, ravp, pp);
 				append(ravp, tmp);
 			}
