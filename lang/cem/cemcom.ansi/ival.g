@@ -200,11 +200,9 @@ next_field(sd, p)
 {
 	if (sd->sd_sdef)
 		p->bytes_upto_here += zero_bytes(sd);
-	if (p->last_offset != sd->sd_offset) {
-		p->bytes_upto_here +=
-			size_of_type(sd->sd_type, "selector");
-		p->last_offset = sd->sd_offset;
-	}
+	p->bytes_upto_here +=
+		size_of_type(sd->sd_type, "selector");
+	p->last_offset = sd->sd_offset;
 	return sd->sd_sdef;
 }
 
