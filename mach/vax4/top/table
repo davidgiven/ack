@@ -38,46 +38,46 @@ cvtwl ZERO,X			->	clrl X;
 
 /* change 3-operand instructions to 2-operand instructions */
 
-addw3 X,Y,Y			->	addw2 X,Y;
-addl3 X,Y,Y			->	addl2 X,Y;
-addf3 X,Y,Y			->	addf2 X,Y;
-addd3 X,Y,Y			->	addd2 X,Y;
+addw3 X,A,A			->	addw2 X,A;
+addl3 X,A,A			->	addl2 X,A;
+addf3 X,A,A			->	addf2 X,A;
+addd3 X,A,A			->	addd2 X,A;
 
-addw3 X,Y,X			->	addw2 Y,X;
-addl3 X,Y,X			->	addl2 Y,X;
-addf3 X,Y,X			->	addf2 Y,X;
-addd3 X,Y,X			->	addd2 Y,X;
+addw3 A,Y,A			->	addw2 Y,A;
+addl3 A,Y,A			->	addl2 Y,A;
+addf3 A,Y,A			->	addf2 Y,A;
+addd3 A,Y,A			->	addd2 Y,A;
 
-subw3 X,Y,Y			->	subw2 X,Y;
-subl3 X,Y,Y			->	subl2 X,Y;
-subf3 X,Y,Y			->	subf2 X,Y;
-subd3 X,Y,Y			->	subd2 X,Y;
+subw3 X,A,A			->	subw2 X,A;
+subl3 X,A,A			->	subl2 X,A;
+subf3 X,A,A			->	subf2 X,A;
+subd3 X,A,A			->	subd2 X,A;
 
-mulw3 X,Y,Y			->	mulw2 X,Y;
-mull3 X,Y,Y			->	mull2 X,Y;
-mulf3 X,Y,Y			->	mulf2 X,Y;
-muld3 X,Y,Y			->	muld2 X,Y;
+mulw3 X,A,A			->	mulw2 X,A;
+mull3 X,A,A			->	mull2 X,A;
+mulf3 X,A,A			->	mulf2 X,A;
+muld3 X,A,A			->	muld2 X,A;
 
-mulw3 X,Y,X			->	mulw2 Y,X;
-mull3 X,Y,X			->	mull2 Y,X;
-mulf3 X,Y,X			->	mulf2 Y,X;
-muld3 X,Y,X			->	muld2 Y,X;
+mulw3 A,Y,A			->	mulw2 Y,A;
+mull3 A,Y,A			->	mull2 Y,A;
+mulf3 A,Y,A			->	mulf2 Y,A;
+muld3 A,Y,A			->	muld2 Y,A;
 
-divw3 X,Y,Y			->	divw2 X,Y;
-divl3 X,Y,Y			->	divl2 X,Y;
-divf3 X,Y,Y			->	divf2 X,Y;
-divd3 X,Y,Y			->	divd2 X,Y;
+divw3 X,A,A			->	divw2 X,A;
+divl3 X,A,A			->	divl2 X,A;
+divf3 X,A,A			->	divf2 X,A;
+divd3 X,A,A			->	divd2 X,A;
 
-xorw3 X,Y,Y			->	xorw2 X,Y;
-xorl3 X,Y,Y			->	xorl2 X,Y;
+xorw3 X,A,A			->	xorw2 X,A;
+xorl3 X,A,A			->	xorl2 X,A;
 
-bisw3 X,Y,Y			->	bisw2 X,Y;
-bisl3 X,Y,Y			->	bisl2 X,Y;
-bisw3 X,Y,X			->	bisw2 Y,X;
-bisl3 X,Y,X			->	bisl2 Y,X;
+bisw3 X,A,A			->	bisw2 X,A;
+bisl3 X,A,A			->	bisl2 X,A;
+bisw3 A,Y,A			->	bisw2 Y,A;
+bisl3 A,Y,A			->	bisl2 Y,A;
 
-bicw3 X,Y,Y			->	bicw2 X,Y;
-bicl3 X,Y,Y			->	bicl2 X,Y;
+bicw3 X,A,A			->	bicw2 X,A;
+bicl3 X,A,A			->	bicl2 X,A;
 
 /* eliminate negative constants */
 
