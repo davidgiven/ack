@@ -30,6 +30,7 @@
 static field_busy = 0;
 
 extern char options[];
+char *symbol2str();
 int lcm();
 
 /*	The semantics of the identification of structure/union tags is
@@ -175,7 +176,6 @@ declare_struct(fund, idf, tpp)
 		The idf may be missing (i.e. idf == 0), in which case an
 		anonymous struct etc. is defined.
 	*/
-	extern char *symbol2str();
 	register struct tag **tgp;
 	register struct tag *tg;
 
