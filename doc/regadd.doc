@@ -119,6 +119,7 @@ stl inreg($1)==2| xsource2 |
 inl inreg($1)==2| |     remove(regvar($1))
 			"inc %(regvar($1)%)"
 			setcc(regvar($1))          |       | |
+.DE
 .NH 1
 Afterthoughts.
 .PP
