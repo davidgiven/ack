@@ -43,10 +43,10 @@ convert(mnemfile,itemfile)
 			/* there is no line for this mnemonic, so
 			 * it has no type.
 			 */
-			printf("{NO_ITEM,0},\n");
+			printf("{NO_ITEM,0}, /* %s */\n", mnem1);
 			newcl = FALSE;
 		} else {
-			printf("{%s,%d},\n",itemtype,index);
+			printf("{%s,%d}, /* %s */\n",itemtype,index, mnem1);
 			newcl = TRUE;
 		}
 	}
