@@ -40,8 +40,17 @@ program pem(input,em,errors);
 	"Description of a machine architecture for use with
 	 block structured languages" Informatika rapport 81.
   NOTE: this version is modified to produce the modified EM code of
-	januari 1981. it is not possible, using this compiler, to generate
-	code for machines with 1 or 4 byte wordsize.
+	januari 1981. it is not possible, using this compiler, to
+	generate code for machines with 1 byte wordsize.
+  NOTE: this version is modified by Kees Visser in such a way that
+	the compiler can now run on 2 and 4 byte machines. It is also
+	able to generate em-code for a 2 bytes machine while running
+	on a 4-bytes machine. Cross-compilation from a 2 bytes to a
+	four bytes machine is also possible with the following
+	exception: large integers that don't fit in an integer of 
+	the compiler are treated like longs and are thus not allowed
+	in types.
+
   A description of Pascal is given in
    - K.Jensen & N.Wirth, "PASCAL user manual and report", Springer-Verlag.
   Several options may be given in the normal pascal way. Moreover,
@@ -49,7 +58,8 @@ program pem(input,em,errors);
 	a:      interpret assertions (+)
 	c:      C-type strings allowed (-)
 	d:      type long may be used (-)
-	i:      controls the number of bits in integer sets (16)
+	i:      controls the number of elements in integer sets
+			default: (wordsize in bits)
 	l:      insert code to keep track of source lines (+)
 	o:      optimize (+)
 	r:      check subranges (+)
@@ -64,14 +74,35 @@ label 9999;
 
 const
 {fundamental constants}
-  MB1 = 7;               MB2 = 15;              {MB4 = 31}
-  NB1 = 8;               NB2 = 16;              {NB4 = 32}
+  MB1 = 7;
+  NB1 = 8;
+  MI2 = 32767;
+  MU1 = 255;
+  NU1 = 256;
 
-  MI1 = 127;             MI2 = 32767;           {MI4 = 2147483647}
-  NI1 = 128;            {NI2 = 32768}           {NI4 = 2147483648}
+{string constants}
+  imax = 10;
+  max2bytes   = '0000032767';
+  max4bytes   = '2147483647';
 
-  MU1 = 255;            {MU2 = 65535}           {MU4 = 4294967295}
-  NU1 = 256;            {NU2 = 65536}           {NU4 = 4294967296}
+#ifdef vax4
+  MU2 = 65535;
+  NU2 = 65536;
+
+  {characteristics of the machine on which the compiler will run}
+  {wordsize and integer size are 4}
+  szcompint = 4;
+  MI = 2147483647;
+  maxcompintstring = max4bytes;
+#endif
+#ifdef vax2
+  MU2 = 0;	{not used}
+  NU2 = 0;	{not used}
+
+  szcompint = 2;
+  MI = MI2;
+  maxcompintstring = max2bytes;
+#endif
 
 {maximal indices}
   idmax         = 8;
@@ -342,6 +373,7 @@ var  {the most frequent used externals are declared first}
   fa:attr;              {attr for current file name}
 {arrays}
   sizes:array[0 .. sz_last] of integer;
+  maxintstring,maxlongstring:packed array[1..imax] of char;
   strbuf:array[1..smax] of char;
   rw:array[rwrange] of idarr;
 			{reserved words}
@@ -456,15 +488,27 @@ begin
   put1(i1); put1(i2)
 end;
 
+procedure put4(i:integer);
+var i1,i2:integer;
+begin
+  if i<0 then
+    begin i:=-(i+1); i1:=MU2 - i mod NU2; i2:=MU2 - i div NU2 end
+  else
+    begin i1:=i mod NU2; i2:=i div NU2 end;
+  put1(i1 mod NU1); put1(i1 div NU1);
+  put1(i2 mod NU1); put1(i2 div NU1)
+end;
+
 procedure argend;
 begin put1(sp_cend) end;
 
 procedure argcst(i:integer);
 begin
   if (i >= -sp_zcst0) and (i < sp_ncst0-sp_zcst0) then
-    put1(i + sp_zcst0 + sp_fcst0)
-  else
-    begin put1(sp_cst2); put2(i) end
+    	 put1(i + sp_zcst0 + sp_fcst0)
+  else if (i >= -MI2-1) and (i <= MI2) then
+    	 begin put1(sp_cst2); put2(i) end
+  else   begin put1(sp_cst4); put4(i) end
 end;
 
 procedure argnil;
@@ -731,7 +775,8 @@ begin if formof(a.asp,[arrays..records]) then loadaddr else load end;
 
 procedure nextch;
 begin
-  eol:=eoln(input); read(input,ch); srcchno:=srcchno+1; chsy:=cs[ch];
+  eol:=eoln(input); read(input,ch); chsy:=cs[ch];
+  if chsy <> tabch then srcchno:=srcchno+1
 end;
 
 procedure nextln;
@@ -815,9 +860,6 @@ end;
 
 procedure innumber;
 label   1;
-const   imax = 10;
-	maxintstring    = '0000032767';
-	maxlongstring   = '2147483647';
 var     i,j:integer;
 	is:packed array[1..imax] of char;
 begin ix:=0; sy:=intcst; val:=0;
@@ -845,7 +887,7 @@ begin ix:=0; sy:=intcst; val:=0;
     if ix>imax then error(+08) else
       begin is:='0000000000'; i:=ix; j:=imax;
 	repeat is[j]:=strbuf[i]; j:=j-1; i:=i-1 until i=0;
-	if is<=maxintstring then
+	if (is<=maxintstring) and (is<=maxcompintstring) then
 	  repeat j:=j+1; val:=val*10 - ord('0') + ord(is[j]) until j=imax
 	else if (is<=maxlongstring) and (dopt<>off) then
 	  begin sy:=longcst; val:=romstr(sp_icon,sz_long) end
@@ -1188,7 +1230,8 @@ end;
 function posaddr(var lb:integer; fsp:sp; partword:boolean):integer;
 var sz:integer;
 begin sz:=sizeof(fsp,partword);
-  if lb >= MI2-sz then begin error(+016); lb:=0 end;
+  if sz_int = 2 then
+    if lb >= MI2-sz-sz_word then begin error(+016); lb:=0 end;
   if not partword or (sz>=sz_word) then
     while lb mod sz_word <> 0 do lb:=lb+1;
   posaddr:=lb;
@@ -1199,7 +1242,8 @@ function negaddr(fsp:sp):integer;
 var sz:integer;
 begin with b do begin
   sz:=sizeof(fsp,wordmult);
-  if reglb <= -MI2+sz then begin error(+017); reglb:=0 end;
+  if sz_int = 2 then
+    if reglb <= -MI2+sz+sz_word then begin error(+017); reglb:=0 end;
   reglb:=reglb-sz;
   while reglb mod sz_word <> 0 do reglb:=reglb-1;
   if reglb < minlb then minlb:=reglb;
@@ -1213,7 +1257,10 @@ end;
 
 procedure genhol;
 begin gencst(ps_hol,posaddr(holeb,nil,false));
-  argcst(-MI2-1); argcst(0); level:=1
+  if sz_word = 4 then begin put1(sp_cst4); put1(0); put1(0); end
+  else put1(sp_cst2);
+  put1(0); put1(128);	 	{ 1000000000000000 pattern}
+  argcst(0); level:=1
 end;
 
 function arraysize(fsp:sp; pack:boolean):integer;
@@ -1596,8 +1643,9 @@ begin fwptr:=nil; intypedec:=true;
 	nextif(semicolon,+093); enterid(lip);
       end;
   until not find2([ident],fsys,+094);
+  assert sy<>ident;
   while fwptr<>nil do
-    begin assert sy<>ident;
+    begin
       id:=fwptr^.name; lip:=searchid([types]);
       fwptr^.idtype^.eltype:=lip^.idtype; fwptr:=fwptr^.next
     end;
@@ -1606,7 +1654,7 @@ end;
 
 procedure vardeclaration(fsys:sos);
 var lip,hip,vip:ip; lsp:sp;
-begin with b do begin
+begin
   repeat hip:=nil; lip:=nil;
     repeat vip:=newident(vars,nil,nil,+095);
       if vip<>nil then
@@ -1626,7 +1674,7 @@ begin with b do begin
       end;
     nextif(semicolon,+099);
   until not find2([ident],fsys,+0100);
-end end;
+end;
 
 procedure pfhead(fsys:sos;var fip:ip;var again:boolean;param:boolean);
   forward;
@@ -2235,21 +2283,41 @@ procedure buildset(fsys:sos);
   - expr..expr very difficult to implement on most machines
   - this construct makes it hard to implement sets of different size
 }
-const   ncsw    = 16;   {tunable}
-type    wordset = set of 0..MB2;
+const   ncsb    = 32;   {tunable}
+type    byteset = set of 0..MB1;
 var     i,j,val1,val2,ncst,l1,l2,sz:integer;
 	cst1,cst2,cst12,varpart:boolean;
-	cstpart:array[1..ncsw] of wordset;
+	cstpart:array[1..ncsb] of byteset;
 
-procedure genwordset(s:wordset);
+procedure genconstset(sz:integer);
 	{level 2: <<  buildset}
-var b,i,w:integer;
-begin i:=0; w:=0; b:=-1;
+var i,j:integer;
+
+function setcode(s:byteset):byte;
+	{level 3: <<  buildset}
+var b,i,w:byte;
+begin i:=0; w:=0; b:=1;
+  for i:=0 to MB1 do
+    begin if i in s then w:=w+b; b:=b+b end;
+  setcode := w;
+end;
+
+begin
+  i:=sz;
   repeat
-    if i in s then w:=w-b; b:=b+b; i:=i+1
-  until i=MB2;
-  if i in s then w:=w+b;
-  gencst(op_loc,w)
+    genop(op_loc); j:=i; i:=i-sz_word;
+
+    {the bytes of the next word to be loaded on the stack}
+    {are in cstpart[i+1] .. cstpart[j]}
+    while (cstpart[j] = []) and (j > i+1) do j:=j-1;
+    if j = i+1 then argcst(setcode(cstpart[j]))
+    else
+      begin
+        if j = i+2 then put1(sp_cst2)
+        else begin j:=i+4; put1(sp_cst4) end;
+        for j:=i+1 to j do put1(setcode(cstpart[j]))
+      end;
+  until i = 0;
 end;
 
 procedure setexpr(fsys:sos; var c:boolean; var v:integer);
@@ -2270,14 +2338,14 @@ begin with a do begin c:=false; v:=0; lsp:=asp;
   if asp<>nil then if ak=cst then
     if (pos.ad<0) or (pos.ad div NB1>=sizeof(lsp,wordmult)) then
       error(+0188)
-    else if sz<=ncsw*sz_word then
+    else if sz<=ncsb*sz_byte then
       begin c:=true; v:=pos.ad end;
   if not c then load; asp:=lsp
 end end;
 
 begin with a do begin  {buildset}
   varpart:=false; ncst:=0; asp:=nullset;
-  for i:=1 to ncsw do cstpart[i]:=[];
+  for i:=1 to ncsb do cstpart[i]:=[];
   if find2([notsy..lparent],fsys,+0189) then
     repeat l1:=lino;
       setexpr(fsys+[colon2,comma],cst1,val1); cst12:=cst1;
@@ -2297,8 +2365,8 @@ begin with a do begin  {buildset}
 	if cst12 then val2:=val1 else genasp(op_set);
       if cst12 then
 	for i:=val1 to val2 do
-	  begin j:=i div NB2 + 1; ncst:=ncst+1;
-	    cstpart[j]:=cstpart[j] + [i mod NB2]
+	  begin j:=i div NB1 + 1; ncst:=ncst+1;
+	    cstpart[j]:=cstpart[j] + [i mod NB1]
 	  end
       else
 	if varpart then genasp(op_ior) else varpart:=true;
@@ -2306,8 +2374,7 @@ begin with a do begin  {buildset}
   ak:=loaded;
   if ncst>0 then
     begin
-      for i:=sizeof(asp,wordmult) div sz_word downto 1 do
-	genwordset(cstpart[i]);
+      genconstset(sizeof(asp,wordmult));
       if varpart then genasp(op_ior);
     end
   else
@@ -2520,7 +2587,7 @@ begin
   if not formof(la.asp,[arrays..records]) then store else
     begin loadaddr;
       if la.asp^.form<>carray then genasp(op_blm) else
-	begin descraddr(la.asp^.arpos); gensp(ASZ,2*sz_addr);
+	begin descraddr(la.asp^.arpos); gensp(ASZ,sz_addr);
 	  gencst(op_lfr,sz_word); gencst(op_bls,sz_word)
 	end;
     end;
@@ -2589,7 +2656,7 @@ begin with b do begin
   expression(fsys+[ofsy,semicolon,ident..plussy]); lsp:=a.asp; load;
   if not nicescalar(desub(lsp)) then begin error(+0223); lsp:=nil end;
   l0:=lino; ilbno:=ilbno+1; ilb1:=ilbno;
-  nextif(ofsy,+0224); head:=nil; max:=-MI2; min:=MI2; n:=0;
+  nextif(ofsy,+0224); head:=nil; max:=-MI; min:=MI; n:=0;
   repeat ilbno:=ilbno+1; ilb2:=ilbno;   {label of current case}
     repeat i:=cstinteger(fsys+[comma,colon1,semicolon],lsp,+0225);
       if i>max then max:=i; if i<min then min:=i; n:=n+1;
@@ -3059,8 +3126,13 @@ end;
 
 procedure init3;
 var n:np; p,q:ip; i:integer; c:char;
+    is:packed array[1..imax] of char;
 begin
   for i:=0 to sz_last do readln(errors,sizes[i]);
+  if sz_int  = 2 then maxintstring  := max2bytes
+  else		      maxintstring  := max4bytes;
+  if sz_long = 2 then maxlongstring := max2bytes
+  else		      maxlongstring := max4bytes;
   gencst(ps_mes,ms_emx); argcst(sz_word); argcst(sz_addr); argend;
   ix:=1;
   while not eoln(errors) do
@@ -3092,7 +3164,16 @@ begin
   q:=nil; p:=newip(konst,'false   ',boolptr,q); enterid(p);
   q:=p; p:=newip(konst,'true    ',boolptr,q); p^.value:=1; enterid(p);
   boolptr^.fconst:=p;
-  p:=newip(konst,'maxint  ',intptr,nil); p^.value:=MI2; enterid(p);
+{maxint of the target machine}
+  p:=newip(konst,'maxint  ',intptr,nil);
+  if sz_int = 2 then p^.value:=MI2
+  else if szcompint = 4 then p^.value := MI
+  else {szcompint = 2, sz_int = 4}
+    begin p^.idtype:=longptr; ix:=imax; is:=max4bytes;
+      for i:=1 to ix do strbuf[i]:=is[i];
+      p^.value:=romstr(sp_icon,sz_int);
+    end;
+  enterid(p);
   p:=newip(konst,spaces,charptr,nil); p^.value:=maxcharord;
   charptr^.fconst:=p;
 {new name space for user externals}
@@ -3110,7 +3191,7 @@ end;
 procedure init4;
 begin
   copt:=opt['c'];
-  dopt:=opt['d'];
+  dopt:=opt['d']; if szcompint < sz_int then dopt:=on;
   iopt:=opt['i'];
   sopt:=opt['s'];
   if sopt<>off then begin copt:=off; dopt:=off end
