@@ -640,9 +640,12 @@ GetChar()
 	*/
 	register int ch;
 
+#ifndef NOPP
 again:
+#endif
 	LoadChar(ch);
 
+#ifndef NOPP
 	/* possible trigraph sequence */
 	if (ch == '?')
 		ch = trigraph();
@@ -657,10 +660,11 @@ again:
 		PushBack();
 		ch = '\\';
 	}
+#endif
 	return(LexSave = ch);
 }
 
-
+#ifndef NOPP
 int
 trigraph()
 {
@@ -703,6 +707,7 @@ trigraph()
 	PushBack();
 	return('?');
 }
+#endif
 
 /* strflt2tok only checks the syntax of the floating-point number and
  * selects the right type for the number.
