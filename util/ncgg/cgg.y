@@ -542,11 +542,11 @@ coercdeflist
 coercdeflist_el
 	: FROM
 		{startline = lineno; tokpatlen=0; inithall();}
-	  STACK allocates GEN genlist YIELDS tokeninstance
+	  STACK allocates generates YIELDS tokeninstance
 		{ checkhall();
-		  n_coerc(0,0,$4,$6,(struct varinfo *) 0,$8);
+		  n_coerc(0,0,$4,$5,(struct varinfo *) 0,$7);
 		  freevi($4);
-		  freevi($6);
+		  freevi($5);
 		}
 	| FROM
 		{startline = lineno;}
