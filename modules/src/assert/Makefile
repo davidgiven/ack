@@ -5,11 +5,12 @@ INCLUDES = -I$(HDIR)
 CFLAGS = $(INCLUDES) -O
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
+AR = ar
 
 all:		libassert.a
 
 libassert.a:	BadAssert.o
-		ar r libassert.a BadAssert.o
+		$(AR) r libassert.a BadAssert.o
 		-sh -c 'ranlib libassert.a'
 
 install:	all
