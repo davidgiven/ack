@@ -10,6 +10,8 @@ OPC_TERMINATOR '\t';
 NUM,NUM1,NUM2	{is_number(VAL)			};
 REG		{VAL[0] == '%'			};
 A,B,X,Y,Z	{TRUE				};
+REG_NO_O7	{VAL[0] == '%' && (VAL[1] != 'o' || VAL[2] != '7')};
+NO_O7		{no_o7(VAL)			};
 
 %%;
 
@@ -18,18 +20,18 @@ A,B,X,Y,Z	{TRUE				};
 
 /* usage of delay slot: */
 
-ANY X,Y,Z : st REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X,Y,Z : call A : st REG,B ;
-ANY X,Y : st REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X,Y : call A : st REG,B ;
-ANY X : st REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X : call A : st REG,B ;
-ANY X,Y,Z : mov REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X,Y,Z : call A : mov REG,B ;
-ANY X,Y : mov REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X,Y : call A : mov REG,B ;
-ANY X : mov REG,B : call A : nop {no_delay(ANY)}
-					->	ANY X : call A : mov REG,B ;
+ANY X,Y,Z : st REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X,Y,Z : call A : st REG_NO_O7,NO_O7 ;
+ANY X,Y : st REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X,Y : call A : st REG_NO_O7,NO_O7 ;
+ANY X : st REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X : call A : st REG_NO_O7,NO_O7 ;
+ANY X,Y,Z : mov REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X,Y,Z : call A : mov REG_NO_O7,NO_O7 ;
+ANY X,Y : mov REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X,Y : call A : mov REG_NO_O7,NO_O7 ;
+ANY X : mov REG_NO_O7,NO_O7 : call A : nop {no_delay(ANY)}
+					->	ANY X : call A : mov REG_NO_O7,NO_O7 ;
 ANY X,Y,Z : st REG,B : b A : nop {no_delay(ANY)}
 					->	ANY X,Y,Z : b A : st REG,B ;
 ANY X,Y : st REG,B : b A : nop {no_delay(ANY)}
@@ -116,6 +118,21 @@ int smaller(s,s1,s2)
 int no_delay(s)
 	char	*s;
 {
-	s[0] != 'b' && s[0] != 'j' && s[0] != 'r' &&
-	s[1] != 'b' && strcmp(s,"call");
+	return s[0] != 'b' && s[0] != 'j' && s[0] != 'r' &&
+	s[1] != 'b' && s[0] != 'c';
+}
+
+int no_o7(s)
+	char	*s;
+{
+	for (;;) {
+		while (*s && *s != '%') s++;
+		if (*s) {
+			if (*++s == 'o') {
+				if (*++s == '7') return FALSE;
+			}
+		}
+		else break;
+	}
+	return TRUE;
 }
