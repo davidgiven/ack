@@ -19,3 +19,4 @@ seekdir.c
 telldir.c
 isatty.c
 mktemp.c
+hypot.c

@@ -21,3 +21,4 @@ sleep.c
 telldir.c
 termcap.c
 mktemp.c
+hypot.c
