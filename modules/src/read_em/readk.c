@@ -132,16 +132,17 @@ getarg(typset)
 
 	case sp_doff:	/* A data label + offset */
 	{
-		register struct e_args *ap1, *ap2;
+		register struct e_args *ap1;
 
 		ap1 = getarg(lab_ptyp);
-		ap2 = getarg(cst_ptyp);
 		*ap = *ap1;
-		if (ap->em_argtype == sof_ptyp) {	/* non-numeric label */
-			ap->em_soff = ap2->em_cst;
+		i_emargs--;
+		ap1 = getarg(cst_ptyp);
+		if (argtyp == sof_ptyp) {	/* non-numeric label */
+			ap->em_soff = ap1->em_cst;
 		}
-		else	ap->em_noff = ap2->em_cst;
-		i_emargs -= 2;
+		else	ap->em_noff = ap1->em_cst;
+		i_emargs--;
 		break;
 	}
 
@@ -149,10 +150,10 @@ getarg(typset)
 	case sp_ucon:	/* An unsigned constant */
 	case sp_fcon:	/* A floating constant */
 	{
-		register struct e_args *ap1;
 		register struct string *p;
 
-		ap1 = getarg(cst_ptyp);
+		ap->em_size = getarg(cst_ptyp)->em_cst;
+		i_emargs--;
 		p = getstring(0);
 #ifdef CHECKING
 		if (state & INSTRING) {
@@ -161,8 +162,6 @@ getarg(typset)
 #endif CHECKING
 		ap->em_argtype = ptyp(i);
 		ap->em_str = p->str;
-		ap->em_size = ap1->em_cst;
-		i_emargs--;
 		break;
 	}
 

@@ -54,7 +54,10 @@ _fill()
 #define STRSIZ	256		/* Maximum length of strings */
 
 static struct e_instr emhead;	/* Where we put the head */
-static struct e_args emargs[NARGS];	/* Where we put the arguments */
+static struct e_args emargs[NARGS+2];	/* Where we put the arguments.
+					   We need some more because some
+					   arguments are constructed
+					*/
 static struct e_args *i_emargs;
 #define argentry()	(i_emargs++)
 static struct string {
