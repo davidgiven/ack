@@ -91,7 +91,7 @@ var s:record b:boolean; case t:boolean of false:(c:char);true:(d:cmat) end;
     w: packed record
           case z:boolean of
             false: (x:array[0..20] of integer);
-            true: (a,b,c,d,e,f,g,h,i,j,k,l:char)
+            true: (x1,x2,x3,a,b,c,d,e,f,g,h,i,j,k,l:char)
        end;
 
     y: record
