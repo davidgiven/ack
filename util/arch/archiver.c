@@ -175,6 +175,7 @@ int argc;
 char *argv[];
 {
   register char *ptr;
+  int needs_arg = 0;
 
   progname = argv[0];
 
@@ -193,6 +194,7 @@ char *argv[];
 			ex_fl = TRUE;
 			break;
 		case 'a' :
+			needs_arg = 1;
 			app_fl = TRUE;
 			break;
 		case 'c' :
@@ -200,13 +202,16 @@ char *argv[];
 			break;
 #ifndef AAL
 		case 'p' :
+			needs_arg = 1;
 			pr_fl = TRUE;
 			break;
 #endif
 		case 'd' :
+			needs_arg = 1;
 			del_fl = TRUE;
 			break;
 		case 'r' :
+			needs_arg = 1;
 			rep_fl = TRUE;
 			break;
 		case 'l' :
@@ -216,6 +221,9 @@ char *argv[];
 			usage();
 	}
   }
+
+  if (needs_arg)
+	usage();
   if (local_fl) strcpy(temp_arch, "ar.XXXXXX");
   else	strcpy(temp_arch, "/tmp/ar.XXXXXX");
 
