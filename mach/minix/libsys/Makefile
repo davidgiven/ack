@@ -25,7 +25,7 @@ libsys.a:	libsys_s.a
 		march . libsys.a
 
 libsys_o.a:	libsys.a ../../../lib/i86/tail_em
-		mkdir X; cd X; aal x ../libsys.a; aal x ../../../../lib/i86/tail_em; aal rv ../libsys_o.a *.o
+		mkdir X; cd X; aal x ../libsys.a; aal x ../../../../lib/i86/tail_em; aal rv ../libsys_o.a *.o ; cd ..
 		rm -rf X
 
 clean:
