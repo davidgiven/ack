@@ -10,7 +10,7 @@ ed - em_table <<'A' > X
 1,/^$/g/	/s// /gp
 A
 
-ed - em_table <<'A' | awk '{print $1,$2+'$p'}' > Y
+ed - em_table <<'A' | awk '{$2=$2+'$p'; print}' > Y
 1,/^$/d
 1,/^$/g/	/s// /gp
 A
@@ -31,6 +31,7 @@ g/^/s//#define sp_/p
 A
 
 ed - Y <<'A' > $h/em_pseu.h
+g/ \(.*\) .*/s// \1/
 g/\(.*\) \(.*\)/s//#define ps_\1 \2/p
 A
 
