@@ -8,7 +8,7 @@
 #include "cs.h"
 #include "cs_aux.h"
 
-#define STACK_DEPTH	50
+#define STACK_DEPTH	250
 
 STATIC struct token	Stack[STACK_DEPTH];
 STATIC token_p		free_token;
