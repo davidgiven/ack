@@ -4,7 +4,8 @@ MODDIR=$(EMHOME)/modules
 INSTALL = $(MODDIR)/install
 COMPARE = $(MODDIR)/compare
 INCLUDES = -I$(MODDIR)/h
-CFLAGS = -c -O $(INCLUDES)
+CFLAGS = -O $(INCLUDES)
+AR = ar
 SRC = doprnt.c fprint.c print.c sprint.c format.c
 OBJ = doprnt.o fprint.o print.o sprint.o format.o
 
@@ -12,7 +13,7 @@ all:		$(LIBPRINT)
 
 $(LIBPRINT):	$(OBJ)
 		rm -f $(LIBPRINT)
-		ar r $(LIBPRINT) $(OBJ)
+		$(AR) r $(LIBPRINT) $(OBJ)
 		-sh -c 'ranlib $(LIBPRINT)'
 
 install:	all
