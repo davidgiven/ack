@@ -183,11 +183,11 @@ std_rsb(addr)
 	}
 	else
 	if (pi < NProc) {
-		sprintf(pr_descr, "(%lu,%lu)",
+		sprintf(pr_descr, "(%ld,%ld)",
 				pi, (long)proctab[pi].pr_nloc);
 	}
 	else {
-		sprintf(pr_descr, "%lu >>>> ILLEGAL <<<<", pi);
+		sprintf(pr_descr, "%ld >>>> ILLEGAL <<<<", pi);
 	}
 	LOG((" d1 >> RSB: code = %s, PI = %s, PC = %lu, LB = %lu, LIN = %lu, FIL = %s",
 		displ_code(code), pr_descr, pc, lb, lin, displ_fil(fil)));

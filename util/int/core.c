@@ -48,7 +48,7 @@ core_dump()
 
 	fprintf(core_file, "OnTrap=%d\n", OnTrap);
 	fprintf(core_file, "IgnMask=%ld\n", IgnMask);
-	fprintf(core_file, "TrapPI=%d\n", TrapPI);
+	fprintf(core_file, "TrapPI=%ld\n", TrapPI);
 
 	fprintf(core_file, "FRASize=%ld\n", FRASize);
 	fprintf(core_file, "FRA_def=%d\n", FRA_def);

@@ -1766,7 +1766,7 @@ PRIVATE do_pr_instr(opcode)
 			do_pr_instr(TERT_BASE + nextTCbyte());
 			break;
 		default:
-			printf(">>>> bad opcode %d at PC = %lu <<<<\n",
+			printf(">>>> bad opcode %u at PC = %lu <<<<\n",
 					opcode, TC);
 			break;
 	}
