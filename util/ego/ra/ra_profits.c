@@ -222,10 +222,13 @@ compute_profits(alloclist,time_opt)
 			nr_inits = Lnrelems(alloc->al_inits);
 			s = alloc->al_susecount * space - 
 				nr_inits*ospace;
+#ifdef __STRANGE__
 			if (!alloc->al_isloop && nr_inits > 0) {
 				/* might lead to increase of execution time */
 				cnt = 0;
-			} else {
+			} else
+#endif
+			{
 				cnt = alloc->al_dusecount;
 			}
 			t = cnt * time - dyn_inits(alloc->al_inits) * otime;
