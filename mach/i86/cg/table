@@ -2798,7 +2798,7 @@ str $1==2	| |
 			"call .strhp"			  | | |
 trp		| X_ACC |
 			remove(ALL)
-			"call .trp"			  | | |
+			"call .Xtrp"			  | | |
 
 /********************************
  * From source to register	*
