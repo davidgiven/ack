@@ -22,10 +22,12 @@ extern char *filename;
 				if (c=='\n') lineno++;
                           } while (c!='/');
                         }
-^\#[ \t]+[0-9]+[ \t]+\".*\"$	{
+^\#(line)?[ \t]*[0-9]+[ \t]+\".*\".*$	{
 			  int ind,ind2;
-			  lineno=atoi(yytext+1)-1;
-			  for(ind=0;yytext[ind]!='"';ind++)
+			  for (ind=0; yytext[ind] < '0' || yytext[ind]>'9'; ind++)
+				;
+			  lineno=atoi(&yytext[ind])-1;
+			  for(;yytext[ind]!='"';ind++)
 				;
 			  for(ind2=ind+1;yytext[ind2]!='"';ind2++)
 				;
