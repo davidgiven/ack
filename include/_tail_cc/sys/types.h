@@ -26,3 +26,11 @@ typedef	long	time_t;
 typedef	long	label_t[14];
 typedef	short	dev_t;
 typedef	long	off_t;
+
+/* system V compatibility: */
+typedef unsigned int	uint;
+typedef unsigned short	ushort;
+typedef unsigned char	uchar_t;
+typedef short		cnt_t;
+typedef long		paddr_t;
+typedef long		key_t;
