@@ -42,6 +42,11 @@ putbyte(b)
 
 #define putbyte(c) Xputbyte(c)
 
+C_init(w, p)
+	arith w, p;
+{
+}
+
 C_open(nm)	/* open file for compact code output	*/
 	char *nm;
 {
