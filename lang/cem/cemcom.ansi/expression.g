@@ -148,8 +148,7 @@ size_of(register struct expr **expp;)
 	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
 		cast(&tp)
 		{
-			*expp = intexpr(size_of_type(tp, "type"),
-				(int_size == pointer_size ? UNSIGNED : ULONG));
+			*expp = intexpr(size_of_type(tp, "type"), UNSIGNED);
 			(*expp)->ex_flags |= EX_SIZEOF;
 		}
 	|

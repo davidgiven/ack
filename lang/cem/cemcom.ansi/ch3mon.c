@@ -153,7 +153,7 @@ ch3mon(oper, expp)
 				   (arith)((*expp)->SG_LEN) :
 				   size_of_type((*expp)->ex_type,
 				       symbol2str((*expp)->ex_type->tp_fund))
-			       , (int_size == pointer_size ? UNSIGNED : ULONG));
+			       , UNSIGNED);
 		expr->ex_flags |= EX_SIZEOF;
 		free_expression(*expp);
 		*expp = expr;
