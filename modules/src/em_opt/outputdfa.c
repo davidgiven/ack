@@ -271,13 +271,13 @@ sametest(s1,s2,e1,e2)
 		case ROTATE:
 		case SAMEEXT:
 		case SAMENAM:
-			return (sametest(e1->exp_left,e2->exp_left) &&
-				sametest(e1->exp_right,e2->exp_right));
+			return (sametest(s1,s2,e1->exp_left,e2->exp_left) &&
+				sametest(s1,s2,e1->exp_right,e2->exp_right));
 		case NOT:
 		case COMP:
 		case UPLUS:
 		case UMINUS:
-			return sametest(e1->exp_left,e2->exp_left);
+			return sametest(s1,s2,e1->exp_left,e2->exp_left);
 		case DEFINED:
 		case UNDEFINED:
 		case INT:
