@@ -7,9 +7,9 @@
 #include	<string.h>
 
 char *
-strcat(register char *s1, register const char *s2)
+strcat(char *ret, register const char *s2)
 {
-	char *ret = s1;
+	register char *s1 = ret;
 
 	while (*s1++ != '\0')
 		/* EMPTY */ ;

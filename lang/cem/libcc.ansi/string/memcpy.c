@@ -7,7 +7,7 @@
 #include	<string.h>
 
 void *
-memcpy(register void *s1, register const void *s2, register size_t n)
+memcpy(void *s1, const void *s2, register size_t n)
 {
 	register char *p1 = s1;
 	register const char *p2 = s2;

@@ -7,9 +7,9 @@
 #include	<string.h>
 
 size_t
-strlen(register const char *s)
+strlen(const char *org)
 {
-	const char *org = s;
+	register const char *s = org;
 
 	while (*s++)
 		/* EMPTY */ ;
