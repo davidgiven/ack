@@ -18,7 +18,7 @@ extern bcopy();
 #define BUGFIX	0
 #endif
 
-extern char *sbrk();
+extern char *sbrk(), *brk();
 static char *bottom, *top;
 
 static grow(len)

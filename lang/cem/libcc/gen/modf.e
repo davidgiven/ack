@@ -17,6 +17,7 @@
  */
 
  mes 2,EM_WSIZE,EM_PSIZE
+#ifndef NOFLOAT
  exp $modf
  pro $modf,0
  lal 0
@@ -31,3 +32,4 @@
  sti EM_DSIZE
  ret EM_DSIZE
  end
+#endif

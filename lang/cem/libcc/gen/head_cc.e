@@ -30,11 +30,11 @@ _penvp
  exp $m_a_i_n
  pro $m_a_i_n,0
 #if EM_WSIZE==1
- ldc 256
+ ldc 1288	; EIOVFL | EIUND | ECONV
 #else
- loc 256
+ loc 1288
 #endif
- sim            ; EIUND is ignored
+ sim            ; ignored
  lal EM_WSIZE+EM_PSIZE
  loi EM_PSIZE
  lae environ
