@@ -8,14 +8,25 @@
 
 #define	LFDF	'a'	/* Library Function Definition */
 #define	LVDF	'b'	/* Library Variable Definition */
-#define	EFDF	'c'	/* External Function Definition */
-#define	EVDF	'd'	/* External Variable Definition */
-#define	EFDC	'e'	/* External Function Declaration */
-#define	EVDC	'f'	/* External Variable Declaration */
-#define	IFDC	'g'	/* Implicit Function Declaration */
-#define	SFDF	'h'	/* Static Function Definition */
-#define	SVDF	'i'	/* Static Variable Definition */
-#define	FC	'j'	/* Function Call */
-#define	VU	'k'	/* Variable Usage */
-#define	XXDF	'l'	/* Ignore Class */
+
+#define	PFDF	'd'	/* Prototype Function Definition */
+
+#define	EFDF	'f'	/* External Function Definition */
+#define	EVDF	'g'	/* External Variable Definition */
+#define	EFDC	'h'	/* External Function Declaration */
+#define	EVDC	'i'	/* External Variable Declaration */
+
+#define	IFDC	'm'	/* Implicit Function Declaration */
+
+#define	SFDF	'q'	/* Static Function Definition */
+#define	SVDF	'r'	/* Static Variable Definition */
+
+#define	FC	'u'	/* Function Call */
+#define	VU	'v'	/* Variable Usage */
+
+#define	XXDF	'z'	/* Ignore Class */
+
+/* Two meta-definitions */
+#define	MIN_CLASS_CONST	LFDF
+#define	MAX_CLASS_CONST	XXDF
 

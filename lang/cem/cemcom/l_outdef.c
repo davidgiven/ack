@@ -50,7 +50,7 @@ PRIVATE outargs();
 PRIVATE outarg();
 PRIVATE outargstring();
 PRIVATE outargtype();
-PRIVATE fill_arg();
+PRIVATE add_expr_arg();
 
 lint_declare_idf(idf, sc)
 	struct idf *idf;
@@ -159,7 +159,7 @@ local_EFDC(idf)
 
 lint_formals()
 {
-/* Make a list of tp_entries containing the types of the formal
+/* Make a list of 'struct argument's containing the types of the formal
  * parameters of the function definition just parsed.
  */
 	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
@@ -286,7 +286,7 @@ PRIVATE
 output_def(od)
 	struct outdef *od;
 {
-/* As the types are output the tp_entries are removed, because they
+/* As the types are output the 'struct argument's are removed, because they
  * are then not needed anymore.
  */
 	if (od->od_class == XXDF || !od->od_name || od->od_name[0] == '#')
@@ -301,7 +301,7 @@ output_def(od)
 			od->od_class = LVDF;
 			break;
 		case SFDF:
-			/* remove tp_entries */
+			/* remove 'struct argument's */
 			while (od->od_arg) {
 				register struct argument *tmp = od->od_arg;
 				od->od_arg = od->od_arg->next;
@@ -526,19 +526,20 @@ fill_outcall(ex, used)
 	OutCall.od_arg = (struct argument *)0;
 	OutCall.od_nrargs = 0;
 
-	if ((ex = ex->OP_RIGHT) != 0) {	/* function call with arguments */
-		/* store types of argument expressions in tp_entries */
+	if ((ex = ex->OP_RIGHT) != 0) {
+		/* function call with arguments */
+		/* store types of argument expressions in 'struct argument's */
 		while (ex->ex_class == Oper && ex->OP_OPER == PARCOMMA) {
-			fill_arg(ex->OP_RIGHT);
+			add_expr_arg(ex->OP_RIGHT);
 			ex = ex->OP_LEFT;
 		}
-		fill_arg(ex);
+		add_expr_arg(ex);
 	}
 	OutCall.od_valused = used;	/* USED, IGNORED or VOIDED */
 }
 
 PRIVATE
-fill_arg(e)
+add_expr_arg(e)
 	struct expr *e;
 {
 	register struct argument *arg;

@@ -364,6 +364,10 @@ lint_ptr_conv(from, to)
 		break;
 	}
 
+	if (from == VOID) {
+		/* OK any which way */
+	}
+	else
 	if (from == CHAR) {
 		hwarning("pointer to char may not align correctly for a %s",
 			symbol2str(to));

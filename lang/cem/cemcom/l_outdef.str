@@ -10,6 +10,7 @@
 #define	ArgExpr		1		/* actual */
 #define	ArgConst	2		/* integer constant */
 #define	ArgString	3		/* string */
+#define	ArgEllipsis	4		/* ellipsis */
 
 struct argument {
 	struct argument *next;

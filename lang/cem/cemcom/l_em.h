@@ -28,6 +28,7 @@
 #define	C_lin(c)
 #define	C_loi(c)
 #define	C_lol(c)
+#define	C_ret(c)
 #define	C_sdl(c)
 #define	C_sti(c)
 #define	C_stl(c)
