@@ -429,6 +429,7 @@ ChkSet(expp)
 	assert(expp->nd_symb == SET);
 
 	expp->nd_class = Set;
+	expp->nd_type = error_type;
 
 	/* First determine the type of the set
 	*/
@@ -471,7 +472,6 @@ ChkSet(expp)
 						expp->nd_set)) {
 			retval = 0;
 		}
-		if (nd->nd_left) expp->nd_class = Xset;
 		nd = nd->nd_right;
 	}
 
@@ -577,7 +577,6 @@ ChkProcCall(expp)
 	if (left->nd_type == error_type) {
 		/* Just check parameters as if they were value parameters
 		*/
-		expp->nd_type = error_type;
 		while (expp->nd_right) {
 			getarg(&expp, 0, 0, edf);
 		}
@@ -622,15 +621,15 @@ ChkFunCall(expp)
 {
 	/*	Check a call that must have a result
 	*/
-	int retval = 1;
 
-	if (!ChkCall(expp)) retval = 0;
+	if (! ChkCall(expp)) return 0;
+
 	if (expp->nd_type == 0) {
 		node_error(expp, "function call expected");
 		expp->nd_type = error_type;
-		retval = 0;
+		return 0;
 	}
-	return retval;
+	return 1;
 }
 
 int
@@ -647,7 +646,6 @@ ChkCall(expp)
 
 	/* First, get the name of the function or procedure
 	*/
-	expp->nd_type = error_type;
 	if (ChkDesignator(left)) {
 		if (IsCast(left)) {
 			/* It was a type cast.
@@ -696,11 +694,7 @@ ResultOfOperation(operator, tp)
 	return tp;
 }
 
-STATIC int
-Boolean(operator)
-{
-	return operator == OR || operator == AND;
-}
+#define Boolean(operator) (operator == OR || operator == AND)
 
 STATIC int
 AllowedTypes(operator)
@@ -764,7 +758,7 @@ ChkBinOper(expp)
 	/*	Check a binary operation.
 	*/
 	register struct node *left, *right;
-	struct type *tpl, *tpr;
+	register struct type *tpl, *tpr;
 	int allowed;
 	int retval;
 
@@ -960,6 +954,7 @@ ChkStandard(expp)
 
 	assert(left->nd_class == Def);
 
+	expp->nd_type = error_type;
 	switch(edf->df_value.df_stdname) {
 	case S_ABS:
 		if (!(left = getarg(&arg, T_NUMERIC, 0, edf))) return 0;
@@ -1027,7 +1022,6 @@ ChkStandard(expp)
 			MkCoercion(&(arg->nd_left), d2);
 		}
 		else {
-			expp->nd_type = error_type;
 			Xerror(left, "unexpected parameter type", edf);
 			break;
 		}
@@ -1093,6 +1087,7 @@ ChkStandard(expp)
 	node_warning(expp, W_OLDFASHIONED, "NEW and DISPOSE are obsolete");
 			}
 		}
+		expp->nd_type = 0;
 		if (! (left = getvariable(&arg, edf))) return 0;
 		if (! (left->nd_type->tp_fund == T_POINTER)) {
 			return Xerror(left, "pointer variable expected", edf);

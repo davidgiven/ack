@@ -202,12 +202,9 @@ tokenname.o: Lpars.h
 tokenname.o: idf.h
 tokenname.o: tokenname.h
 idf.o: idf.h
-input.o: def.h
 input.o: f_info.h
-input.o: idf.h
 input.o: input.h
 input.o: inputtype.h
-input.o: scope.h
 type.o: LLlex.h
 type.o: chk_expr.h
 type.o: const.h
@@ -265,6 +262,7 @@ typequiv.o: LLlex.h
 typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
+typequiv.o: idf.h
 typequiv.o: node.h
 typequiv.o: type.h
 typequiv.o: warning.h
@@ -394,6 +392,7 @@ char.o: class.h
 Lpars.o: Lpars.h
 casestat.o: LLlex.h
 casestat.o: Lpars.h
+casestat.o: chk_expr.h
 casestat.o: debug.h
 casestat.o: debugcst.h
 casestat.o: density.h
@@ -401,6 +400,7 @@ casestat.o: desig.h
 casestat.o: node.h
 casestat.o: type.h
 casestat.o: walk.h
+tmpvar.o: LLlex.h
 tmpvar.o: debug.h
 tmpvar.o: debugcst.h
 tmpvar.o: def.h

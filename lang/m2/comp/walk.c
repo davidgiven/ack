@@ -704,7 +704,8 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 }
 
 DoAssign(left, right)
-	register struct node *left, *right;
+	register struct node *left;
+	struct node *right;
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
@@ -712,30 +713,29 @@ DoAssign(left, right)
 	   DAMN THE BOOK!
 	*/
 	register struct desig *dsr;
-	register struct type *rtp, *ltp;
-	struct node *rht = right;
+	register struct type *tp;
 
 	if (! (ChkExpression(right) & ChkVariable(left))) return;
-	rtp = right->nd_type;
-	ltp = left->nd_type;
+	tp = left->nd_type;
 
-	if (right->nd_symb == STRING) TryToString(right, ltp);
+	if (right->nd_symb == STRING) TryToString(right, tp);
 
-	if (! ChkAssCompat(&rht, ltp, "assignment")) {
+	if (! ChkAssCompat(&right, tp, "assignment")) {
 		return;
 	}
 	dsr = new_desig();
 
 #define StackNeededFor(ds)	((ds)->dsg_kind == DSG_PLOADED \
 				  || (ds)->dsg_kind == DSG_INDEXED)
-	CodeExpr(rht, dsr, NO_LABEL, NO_LABEL);
-	if (complex(rtp)) {
+	CodeExpr(right, dsr, NO_LABEL, NO_LABEL);
+	tp = right->nd_type;
+	if (complex(tp)) {
 		if (StackNeededFor(dsr)) CodeAddress(dsr);
 	}
 	else {
-		CodeValue(dsr, rtp);
+		CodeValue(dsr, tp);
 	}
-	CodeMove(dsr, left, rtp);
+	CodeMove(dsr, left, tp);
 	free_desig(dsr);
 }
 

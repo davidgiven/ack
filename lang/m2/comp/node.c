@@ -34,7 +34,6 @@ MkNode(class, left, right, token)
 	nd->nd_right = right;
 	nd->nd_token = *token;
 	nd->nd_class = class;
-	nd->nd_type = error_type;
 	return nd;
 }
 
@@ -46,7 +45,6 @@ MkLeaf(class, token)
 
 	nd->nd_left = nd->nd_right = 0;
 	nd->nd_token = *token;
-	nd->nd_type = error_type;
 	nd->nd_class = class;
 	return nd;
 }

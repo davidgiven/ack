@@ -460,7 +460,8 @@ FormalTypeList(struct type **ptp;)
 	]?
 	')'
 	[ ':' qualtype(ptp)
-	]?
+	|		{ *ptp = 0; }
+	]
 			{ *ptp = proc_type(*ptp, pr, parmaddr); }
 ;
 

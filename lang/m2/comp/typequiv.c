@@ -25,6 +25,8 @@
 #include	"node.h"
 #include	"warning.h"
 
+extern char *sprint();
+
 int
 TstTypeEquiv(tp1, tp2)
 	struct type *tp1, *tp2;
@@ -193,7 +195,7 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 	char ebuf1[256];
 
 	if (edf) {
-		sprintf(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
+		sprint(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
 	}
 	else sprint(ebuf, "parameter %d: %%s", parno);
 
