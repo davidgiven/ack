@@ -13,7 +13,6 @@ static char rcsid[]="$Header$";
 
 #include <stdio.h>
 #include <assert.h>
-#include <ctype.h>
 #include <em_spec.h>
 #include <em_flag.h>
 #include <em_reg.h>

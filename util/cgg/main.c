@@ -8,6 +8,7 @@
 #include "booth.h"
 
 extern char *strncpy(), *strcpy();
+extern char *malloc();
 #ifndef __STDC__
 extern char *sprintf();
 #else

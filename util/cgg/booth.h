@@ -55,12 +55,6 @@ typedef char * string;
 
 extern char *myalloc();
 
-#if __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc();
-#endif
-
 #include <cg_pattern.h>
 
 typedef struct list1str {
