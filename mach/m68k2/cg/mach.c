@@ -23,7 +23,7 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the Motorola 68000
  */
 
-#define IEEEFLOAT
+/* #define IEEEFLOAT */
 
 #ifdef IEEEFLOAT
 #include "FP.h"
@@ -58,7 +58,7 @@ con_mult(sz) word sz; {
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
-	fprintf(codefile,".long %s\n",str);
+	fprintf(codefile,".data4 %s\n",str);
 }
 
 #ifdef IEEEFLOAT
@@ -86,7 +86,7 @@ con_float()
 
 	sz = argval;
 	if (sz!= 4 && sz!= 8) {
-		sprintf(mesg,"con_float(): bad fcon size %d %D\nstr: %s\n\0",
+		sprintf(mesg,"con_float(): bad fcon size %d %ld\nstr: %s\n\0",
 				sz,sz,str);
 		fatal(mesg);
 	}
@@ -104,7 +104,7 @@ con_float()
 #endif IEEEFLOAT
 
 	while ( sz ) {
-		fprintf(codefile,"\t.word 0x%x,0x%x !float test %s\n",
+		fprintf(codefile,"\t.data2 0x%x,0x%x !float test %s\n",
 			(int)(*l)&0xFFFF,(int)(*l>>16)&0xFFFF,str);
 		sz -=4 ;
 		l++;
@@ -235,7 +235,7 @@ regreturn()
 
 prolog(nlocals) full nlocals; {
 
-	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
+	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
 }
 
 
@@ -264,8 +264,8 @@ mes(type) word type ; {
 
 
 char    *segname[] = {
-	".text",        /* SEGTXT */
-	".data",        /* SEGCON */
-	".data",        /* SEGROM */
-	".bss"          /* SEGBSS */
+	".sect .text",        /* SEGTXT */
+	".sect .data",        /* SEGCON */
+	".sect .rom",         /* SEGROM */
+	".sect .bss"          /* SEGBSS */
 };
