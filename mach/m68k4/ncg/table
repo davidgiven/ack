@@ -1,0 +1,3288 @@
+			/********************************
+			 *				*
+			 *    68000, 68010 and 68020    *
+			 *	      back end table	*
+			 *				*
+			 ********************************/
+
+
+#ifndef m68k4
+#define m68020
+#endif
+			/* m68020 to be defined if this is the 68020 table.
+			 * The 68000 and 68010 tables are identical.
+			 */
+
+
+#define small(x) ((x)>=1 && (x)<=8)
+#define nicesize(x) ((x)==1||(x)==2||(x)==4||(x)==8)
+#define lowb(x) (((x)<<24)>>24)
+#define loww(x) (((x)<<16)>>16)
+#define in_1(x) ((x)>=0-128 && (x)<128)
+#define in_2(x) ((x)>=0-32768 && (x)<32768)
+
+
+EM_WSIZE = 4
+EM_PSIZE = 4
+EM_BSIZE = 8
+
+SL = 8
+
+TIMEFACTOR = 1/2
+
+
+PROPERTIES
+
+D_REG		/* data registers */
+A_REG		/* address registers */
+DD_REG		/* allocatable D_REG, may not be a register variable */
+AA_REG		/* allocatable A_REG, may not be a register variable */
+
+
+
+REGISTERS
+
+d0, d1, d2			:D_REG, DD_REG.
+d3, d4, d5, d6, d7		:D_REG  regvar.
+a0, a1				:A_REG, AA_REG.
+a2, a3, a4, a5			:A_REG  regvar(reg_pointer).
+lb ("a6"), sp			:A_REG.	/* localbase and stack pointer */
+
+
+
+
+TOKENS
+
+	/* Not all addressing modes available on the MC68020 are used in this
+	 * table. E.g (Dn), data register indirect is not used. Compared to
+	 * (An), address register indirect, (Dn) requires two more bytes and
+	 * several more clock cycles. Using (Dn) is even more expensive in
+	 * time than first moving Dn to an address register An, and then using
+	 * (An). For this kind of reasons several addressing modes are
+	 * not used in this table.
+	 *
+	 * Cost in bytes may sometimes be incorrect. Several effective addresses
+	 * use displacements that can occupy either 2 or 4 bytes. These are not
+	 * considered different TOKENS in this table.
+	 *
+	 * Data registers are the only registers used as index registers in this
+	 * table; address registers are only used to hold addresses.
+	 *
+	 * For the m68k4 table: the MC68000 and MC68010 have two modes that use
+	 * displacements (offsets) of limited size:
+	 * 	- offset(A_REG, Index_reg), where offset is only 8 bits, and
+	 *	- offset(A_REG), where offset can only be 16 bits.
+	 * To make sure that no output is given with offsets too large, two
+	 * extra tokens are declared: t_regAregXcon and t_regAcon. These are
+	 * used as addresses to these modes. Whenever the displacements become
+	 * too large, they are transformed into different tokens.
+	 *
+	 * Sometimes some TOKENS are used with displacements (offsets) of 0.
+	 * It would have been possible to provide separate TOKENS for these, in
+	 * case the assembler doesn't handle zero offsets optimally. This
+	 * however would mean a very large amount of extra TOKENS and SETS for
+	 * a very small profit in code bytes, so we won't do that.
+	 *
+	 * To prevent the TOKENS list from getting too unreadable, #ifdefs are
+	 * used to form three parts: 
+	 *	(i)   the common part;
+	 *	(ii)  the m68k4 part;
+	 *	(iii) the m68020 part;
+	 */
+
+	/* Part (i) */
+const		= {INT num;} 4 cost(4,4) "#" num .
+indirect4	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
+post_inc4	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
+pre_dec4	= {A_REG reg;} 4 cost(0,5) "-(" reg ")" .
+indirect2	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
+post_inc2	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
+pre_dec2	= {A_REG reg;} 4 cost(0,5) "-(" reg ")" .
+indirect1	= {A_REG reg;} 4 cost(0,4) "(" reg ")" .
+post_inc1	= {A_REG reg;} 4 cost(0,4) "(" reg ")+" .
+pre_dec1	= {A_REG reg;} 4 cost(0,5) "-(" reg ")" .
+
+ext_addr	= {ADDR bd;} 4 cost(4,5) "#" bd .
+llabel		= {ADDR bd;} 4 cost(2,0) bd .
+slabel		= {ADDR bd;} 4 cost(0,0) bd .
+shconst		= {INT num;} 4 cost(0,0) "#" num .
+
+#ifndef m68020
+	/* Part (ii) */
+absolute4	= {ADDR bd;} 4 cost(4,8) bd .
+offsetted4	= {A_REG reg; INT bd;} 4 cost(2,6) bd "(" reg ")" .
+index_off4	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,7)
+			    bd "(" reg "," xreg ".l)" .
+absolute2	= {ADDR bd;} 4 cost(4,6) bd .
+offsetted2	= {A_REG reg; INT bd;} 4 cost(2,4) bd "(" reg ")" .
+index_off2	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,5)
+			    bd "(" reg "," xreg ".l)" .
+absolute1	= {ADDR bd;} 4 cost(4,6) bd .
+offsetted1	= {A_REG reg; INT bd;} 4 cost(2,4) bd "(" reg ")" .
+index_off1	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,5)
+			    bd "(" reg "," xreg ".l)" .
+
+LOCAL		= {INT bd;} 4 cost(2,6) bd "(a6)" .
+
+local_addr	= {INT bd;} 4 cost(2,6) bd "(a6)" .
+regAcon		= {A_REG reg; INT bd;} 4 cost(2,6) bd "(" reg ")" .
+regAregXcon	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,8)
+				bd "(" reg "," xreg ".l)" .
+			/* note: in the m68k4 version %sc always equals 1 */
+
+t_regAregXcon	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,8) .
+t_regAcon	= {A_REG reg; INT bd;} 4 cost(2,6) .
+
+#else m68020
+	/* Part (iii) */
+absolute4	= {ADDR bd;} 4 cost(4,7) "(" bd ")" .
+offsetted4	= {A_REG reg; INT bd;} 4 cost(2,6) "(" bd "," reg ")" .
+index_off4	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(4,9)
+			    "(" bd "," reg "," xreg ".l*" sc ")" .
+abs_index4	= {INT sc; D_REG xreg; ADDR bd;} 4 cost(6,9)
+			    "(" bd "," xreg ".l*" sc ")" .
+OFF_off4	= {A_REG reg; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," od ")" .
+OFF_indoff4	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," xreg ".l*" sc "," od ")" .
+INDOFF_off4	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "," xreg ".l*" sc "]," od ")" .
+ABS_off4	= {ADDR bd; ADDR od;} 4 cost(8,22) "([" bd "]," od ")" .
+ABS_indoff4	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "]," xreg ".l*" sc "," od ")" .
+ABSIND_off4	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "," xreg ".l*" sc "]," od ")" .
+
+absolute2	= {ADDR bd;} 4 cost(4,7) "(" bd ")" .
+offsetted2	= {A_REG reg; INT bd;} 4 cost(2,6) "(" bd "," reg ")" .
+index_off2	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(4,9)
+			    "(" bd "," reg "," xreg ".l*" sc ")" .
+abs_index2	= {INT sc; D_REG xreg; ADDR bd;} 4 cost(6,9)
+			    "(" bd "," xreg ".l*" sc ")" .
+OFF_off2	= {A_REG reg; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," od ")" .
+OFF_indoff2	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," xreg ".l*" sc "," od ")" .
+INDOFF_off2	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "," xreg ".l*" sc "]," od ")" .
+ABS_off2	= {ADDR bd; ADDR od;} 4 cost(8,22) "([" bd "]," od ")" .
+ABS_indoff2	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "]," xreg ".l*" sc "," od ")" .
+ABSIND_off2	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "," xreg ".l*" sc "]," od ")" .
+
+absolute1	= {ADDR bd;} 4 cost(4,7) "(" bd ")" .
+offsetted1	= {A_REG reg; INT bd;} 4 cost(2,6) "(" bd "," reg ")" .
+index_off1	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(4,9)
+			    "(" bd "," reg "," xreg ".l*" sc ")" .
+abs_index1	= {INT sc; D_REG xreg; ADDR bd;} 4 cost(6,9)
+			    "(" bd "," xreg ".l*" sc ")" .
+OFF_off1	= {A_REG reg; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," od ")" .
+OFF_indoff1	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "]," xreg ".l*" sc "," od ")" .
+INDOFF_off1	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,19)
+			    "([" bd "," reg "," xreg ".l*" sc "]," od ")" .
+ABS_off1	= {ADDR bd; ADDR od;} 4 cost(8,22) "([" bd "]," od ")" .
+ABS_indoff1	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "]," xreg ".l*" sc "," od ")" .
+ABSIND_off1	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,22)
+			    "([" bd "," xreg ".l*" sc "]," od ")" .
+
+LOCAL		= {INT bd;} 4 cost(2,6) "(" bd ",a6)" .
+ILOCAL		= {INT bd;} 4 cost(4,16) "([" bd ",a6])" .
+
+local_addr	= {INT bd;} 4 cost(2,3) "(" bd ",a6)" .
+regAcon		= {A_REG reg; INT bd;} 4 cost(2,3) "(" bd "," reg ")" .
+regAregXcon	= {A_REG reg; D_REG xreg; INT sc; INT bd;} 4 cost(2,7)
+				"(" bd "," reg "," xreg ".l*" sc ")" .
+off_con		= {A_REG reg; INT bd; ADDR od;} 4 cost(6,18)
+				"([" bd "," reg "]," od ")".
+off_regXcon	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,18)
+				"([" bd "," reg "]," xreg ".l*" sc "," od ")" .
+indoff_con	= {A_REG reg; D_REG xreg; INT sc; INT bd; ADDR od;} 4 cost(6,18)
+				"([" bd "," reg "," xreg ".l*" sc "]," od ")" .
+abs_con		= {ADDR bd; ADDR od;} 4 cost(8,21) "([" bd "]," od ")" .
+abs_regXcon	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,21)
+				"([" bd "]," xreg ".l*" sc "," od ")" .
+absind_con	= {INT sc; D_REG xreg; ADDR bd; ADDR od;} 4 cost(8,21)
+				"([" bd "," xreg ".l*" sc "]," od ")" .
+ext_regX	= {INT sc; D_REG xreg; ADDR bd;} 4 cost(6,15)
+				"(" bd "," xreg ".l*" sc ")" .
+
+regX		= {INT sc; D_REG xreg;} 4 cost(2,7) "(" xreg ".l*" sc ")" .
+DREG_pair	= {D_REG reg1; D_REG reg2;} 8 cost(2,0) reg1 ":" reg2 .
+
+#define	t_regAregXcon	regAregXcon
+#define t_regAcon	regAcon
+
+#endif m68020
+
+SETS
+
+		/* The SETS list cannot be kept as 'readable' as the TOKENS list
+		 * because cgg is one pass.
+		 */
+
+#ifndef m68020
+	/* A m68k4 part */
+data4		= D_REG + LOCAL + const + post_inc4 + pre_dec4 +
+		  indirect4 + offsetted4 + index_off4 + absolute4 +
+		  ext_addr .
+memory4		= data4 - D_REG .
+control4	= indirect4 + offsetted4 + index_off4 + absolute4 +
+		  LOCAL .
+alterable4	= data4 + A_REG - const - ext_addr .
+any4		= data4 + A_REG . /* all four above together */
+
+data2		= D_REG + post_inc2 + pre_dec2 + indirect2 +
+		  offsetted2 + index_off2 + absolute2 + const .
+memory2		= data2 - D_REG .
+control2	= indirect2 + offsetted2 + index_off2 + absolute2 .
+alterable2	= data2 + A_REG - const .
+any2		= data2 + A_REG .
+
+data1		= D_REG + post_inc1 + pre_dec1 + indirect1 +
+		  offsetted1 + index_off1 + absolute1 + const .
+memory1		= data1 - D_REG .
+control1	= indirect1 + offsetted1 + index_off1 + absolute1 .
+alterable1	= data1 - const .
+any1		= data1 .
+
+#else m68020
+
+data4		= D_REG + indirect4 + post_inc4 + pre_dec4 + index_off4 +
+		      offsetted4 + OFF_off4 + OFF_indoff4 +
+		  INDOFF_off4 +
+		  ABS_off4 + ABS_indoff4 + ABSIND_off4 +
+		  absolute4 + abs_index4 + const + ext_addr +
+		  LOCAL + ILOCAL .
+memory4		= data4 - D_REG .
+control4	= memory4 - (post_inc4 + pre_dec4 + const + ext_addr) .
+alterable4	= data4 + A_REG - const - ext_addr .
+any4		= data4 + A_REG . /* all four above together */
+
+data2		= D_REG + indirect2 + post_inc2 + pre_dec2 + index_off2 +
+		      offsetted2 + OFF_off2 + OFF_indoff2 +
+		  INDOFF_off2 +
+		  ABS_off2 + ABS_indoff2 + ABSIND_off2 +
+		  absolute2 + abs_index2 + const .
+memory2		= data2 - D_REG .
+control2	= memory2 - (post_inc2 + pre_dec2 + const) .
+alterable2	= data2 + A_REG - const .
+any2		= data2 + A_REG . /* all four above together */
+
+data1		= D_REG + indirect1 + post_inc1 + pre_dec1 + index_off1 +
+		      offsetted1 + OFF_off1 + OFF_indoff1 +
+		  INDOFF_off1 +
+		  ABS_off1 + ABS_indoff1 + ABSIND_off1 +
+		  absolute1 + abs_index1 + const .
+memory1		= data1 - D_REG .
+control1	= memory1 - (post_inc1 + pre_dec1 + const) .
+alterable1	= data1 - const .
+any1		= data1 . /* all four above together */
+
+#endif m68020
+	/* This is a common part */
+any		= any4 + any2 + any1 .
+absolute	= absolute4 + absolute2 + absolute1 .
+control		= control4 + control2 + control1 .
+indirect	= indirect4 + indirect2 + indirect1 .
+pre_post	= pre_dec4 + pre_dec2 + pre_dec1 +
+		  post_inc4 + post_inc2 + post_inc1 .
+offsetted	= offsetted4 + offsetted2 + offsetted1 .
+index_off	= index_off4 + index_off2 + index_off1 .
+
+#ifndef m68020
+	/* A m68k4 part */
+regind_addr	= regAcon + regAregXcon + t_regAcon + t_regAregXcon .
+address		= ext_addr + local_addr + regAcon + regAregXcon .
+all_regind	= indirect + offsetted + pre_post + index_off +
+		      regind_addr .
+all_indir	= all_regind .
+allexceptcon	= ALL - ( D_REG + A_REG + const +
+		    local_addr + ext_addr + regAcon + regAregXcon +
+		    t_regAcon + t_regAregXcon ) .
+use_index	= index_off4 + index_off2 + index_off1 .
+
+#else m68020
+
+reg_memind4	= OFF_off4 + OFF_indoff4 + INDOFF_off4 .
+memind4		= reg_memind4 +
+		  ABS_off4 + ABS_indoff4 .
+reg_memind2	= OFF_off2 + OFF_indoff2 + INDOFF_off2 .
+memind2		= reg_memind2 +
+		  ABS_off2 + ABS_indoff2 .
+reg_memind1	= OFF_off1 + OFF_indoff1 + INDOFF_off1 .
+memind1		= reg_memind1 +
+		  ABS_off1 + ABS_indoff1 .
+reg_memind	= reg_memind4 + reg_memind2 + reg_memind1 .
+memind		= memind4 + memind2 + memind1 .
+regind_addr	= regAcon + regAregXcon +
+		  off_con + off_regXcon +
+		  indoff_con .
+address		= regind_addr +
+		  ext_addr + local_addr +
+		  abs_con + abs_regXcon +
+		  absind_con +
+		  ext_regX .
+all_regind	= indirect + offsetted + index_off + pre_post +
+		      reg_memind + regind_addr .
+all_indir	= all_regind + memind + ILOCAL .
+allexceptcon	= ALL - ( D_REG + A_REG + const +
+		    local_addr + ext_addr + regAcon + regAregXcon + ext_regX ) .
+use_index4	= index_off4 + abs_index4 +
+		  OFF_indoff4 + INDOFF_off4 +
+		  ABS_indoff4 + ABSIND_off4 .
+use_index2	= index_off2 + abs_index2 +
+		  OFF_indoff2 + INDOFF_off2 +
+		  ABS_indoff2 + ABSIND_off2 .
+use_index1	= index_off1 + abs_index1 +
+		  OFF_indoff1 + INDOFF_off1 +
+		  ABS_indoff1 + ABSIND_off1 .
+use_indaddr	= regAregXcon + 
+		  off_regXcon + indoff_con +
+		  abs_regXcon + absind_con +
+		  ext_regX .
+
+use_index	= use_index4 + use_index2 + use_index1 + use_indaddr + regX .
+
+#endif m68020
+	/* A common part */
+posextern	= absolute + all_indir .
+
+genreg		= D_REG + A_REG.
+label		= llabel + slabel .
+immediate4	= const + ext_addr .
+conreg4		= D_REG + immediate4 .
+conreg2		= D_REG + const .
+conreg1		= D_REG + const .
+shconreg	= D_REG + shconst .
+datalt4		= data4 * alterable4 .
+datalt2		= data2 * alterable2 .
+datalt1		= data1 * alterable1 .
+datalt		= datalt4 + datalt2 + datalt1 .
+memalt4		= memory4 * alterable4 .
+memalt2		= memory2 * alterable2 .
+memalt1		= memory1 * alterable1 .
+
+#ifndef m68020
+	/* A m68k4 part */
+imm_cmp4	= alterable4 .
+imm_cmp2	= alterable2 .
+imm_cmp1	= datalt1 .
+
+test_set4	= datalt4 .
+test_set2	= datalt2 .
+test_set1	= datalt1 .
+
+#else m68020
+
+imm_cmp4	= any4 - immediate4 .
+imm_cmp2	= any2 - const .
+imm_cmp1	= data1 - const .
+
+test_set4	= data4 - immediate4 .
+test_set2	= data2 - const .
+test_set1	= data1 - const .
+
+#endif m68020
+
+test_set	= test_set4 + test_set2 + test_set1 .
+
+#ifndef m68020
+t_address	= address + t_regAregXcon + t_regAcon .
+#else m68020
+#define	t_address	address
+#endif m68020
+
+
+INSTRUCTIONS
+
+	/* Since the 68000 , the 68010 and the 68020 instruction sets are rather
+	 * extensive, especially because e.g. 'add.l' and 'add.w' are
+	 * considered different instructions, only those instructions are
+	 * listed here that are used in the rest of this table.
+	 *
+	 * Instruction timing cost cannot be accurately given, nor the timing
+	 * cost for getting operands. Detailed information about this can be
+	 * found in the "MC68020 User's Manual", section 9, about instruction
+	 * timing. The cost used in this table are 'worst case' cost, as
+	 * mentioned in section 9 of the user's manual.
+	 *
+	 * The first few instructions had to be added because register
+	 * variables are used. The LOCALs below are register variables.
+	 * One may not conclude that these operations are also allowed
+	 * on LOCALs that are not register variables.
+	 * The cost have been adapted, but are not accurate; when 'real'
+	 * LOCALs are used the cost are very inaccurate.
+	 */
+
+add_l  "add.l"	any4:ro,	LOCAL:rw:cc		cost(0,0).
+lea		address:ro,	LOCAL:wo		cost(0,0).
+sub_l  "sub.l"	any4:ro,	LOCAL:rw:cc		cost(0,0).
+sh   "illegal"	shconreg:ro,	LOCAL:rw:cc		cost(0,0).
+sh   "illegal"	LOCAL:ro,	LOCAL:rw:cc		cost(0,0).
+xxx  "illegal"	data4:ro,	LOCAL:rw:cc		cost(0,0).
+xxx  "illegal"	LOCAL:ro,	alterable4:rw:cc	cost(0,0).
+#ifdef m68020
+divs_l "divs.l" data4:ro,	LOCAL:rw:cc		cost(0,90).
+divu_l "divu.l" data4:ro,	LOCAL:rw:cc		cost(0,78).
+muls_l "muls.l" data4:ro,	LOCAL:rw:cc		cost(0,44).
+mulu_l "mulu.l" data4:ro,	LOCAL:rw:cc		cost(0,44).
+#endif m68020
+
+add_l  "add.l"	any4:ro,	D_REG:rw:cc		cost(2,3).
+add_l  "add.l"	any4:ro,	A_REG:rw 		cost(2,3).
+add_l  "add.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
+and_l  "and.l"	data4:ro,	D_REG:rw:cc		cost(2,3).
+and_l  "and.l"	D_REG:ro,	memalt4:rw:cc		cost(2,6).
+and_l  "and.l"	const:ro,	datalt4:rw:cc		cost(2,6).
+asl_l  "asl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,5).
+asl   "asl #1,"	memalt2:rw:cc				cost(2,4).
+asr_l  "asr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+asr   "asr #1,"	memalt2:rw:cc				cost(2,4).
+bra		label					cost(2,5).
+bcc		label					cost(2,5).
+bcs		label					cost(2,5).
+beq		label					cost(2,5).
+bge		label					cost(2,5).
+bgt		label					cost(2,5).
+bhi		label					cost(2,5).
+ble		label					cost(2,5).
+bls		label					cost(2,5).
+blt		label					cost(2,5).
+bmi		label					cost(2,5).
+bne		label					cost(2,5).
+bpl		label					cost(2,5).
+bvc		label					cost(2,5).
+bvs		label					cost(2,5).
+bset		conreg2:ro,	D_REG:rw kills :cc	cost(2,4).
+btst		conreg2:ro,	data1:rw kills :cc	cost(2,3).
+clr_l  "clr.l"	D_REG:wo:cc				cost(2,3).
+clr_l  "clr.l"	memalt4:wo:cc				cost(2,6).
+clr_w  "clr.w"	D_REG:wo:cc				cost(2,2).
+clr_w  "clr.w"	memalt2:wo:cc				cost(2,4).
+clr_b  "clr.b"	D_REG:wo:cc				cost(2,2).
+clr_b  "clr.b"	memalt1:wo:cc				cost(2,4).
+cmp_l  "cmp.l"	any4:ro,	genreg:ro kills :cc	cost(2,3).
+cmp_l  "cmp.l"	post_inc4:ro,	post_inc4:ro kills :cc 	cost(2,2).
+cmp_l  "cmp.l"	immediate4:ro,	imm_cmp4:ro kills :cc	cost(2,2).
+cmp_w  "cmp.w"	any2:ro,	genreg:ro kills :cc	cost(2,3).
+cmp_w  "cmp.w"	post_inc2:ro,	post_inc2:ro kills :cc 	cost(2,2).
+cmp_w  "cmp.w"	const:ro,	imm_cmp2:ro kills :cc	cost(2,2).
+cmp_b  "cmp.b"	data1:ro,	D_REG:ro kills :cc	cost(2,3).
+cmp_b  "cmp.b"	post_inc1:ro,	post_inc1:ro kills :cc 	cost(2,2).
+cmp_b  "cmp.b"	const:ro,	imm_cmp1:ro kills :cc	cost(2,2).
+dbf		D_REG:rw,	label			cost(2,5).
+eor_l  "eor.l"	conreg4:ro,	datalt4:rw:cc		cost(2,6).
+ext_l  "ext.l"	D_REG:rw:cc				cost(2,2).
+ext_w  "ext.w"	D_REG:rw:cc				cost(2,2).
+jmp		address+control4			cost(2,0).
+jsr		address+control4 kills :cc		cost(2,3).
+lea		address+control4:ro, A_REG:wo		cost(2,0).
+lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
+lsr_l  "lsr.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+lsr   "lsr #1,"	memalt2:rw:cc				cost(2,4).
+move_l "move.l" any4:ro,	alterable4:wo:cc	cost(2,2).
+move_w "move.w" any2:ro,	alterable2:wo:cc	cost(2,2).
+move_b "move.b" data1:ro,	alterable1:wo:cc	cost(2,2).
+neg_l  "neg.l"	D_REG:rw:cc				cost(2,3).
+neg_l  "neg.l"	memory4:rw:cc				cost(2,6).
+not_l  "not.l"	D_REG:rw:cc				cost(2,3).
+not_l  "not.l"	memory4:rw:cc				cost(2,6).
+or_l   "or.l"	data4:ro,	D_REG:rw:cc		cost(2,3).
+or_l   "or.l"	D_REG:ro,	memalt4:rw:cc		cost(2,6).
+or_l   "or.l"	const:ro,	datalt4:rw:cc		cost(2,6).
+rol_l  "rol.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+rol   "rol #1,"	memalt2:rw:cc				cost(2,4).
+ror_l  "ror.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+ror   "ror #1,"	memalt2:rw:cc				cost(2,4).
+roxl "roxl #1,"	memalt2:rw:cc				cost(2,4).
+roxr "roxr #1,"	memalt2:rw:cc				cost(2,4).
+sne		datalt1:rw				cost(2,3).
+sub_l  "sub.l"	any4:ro,	D_REG:rw:cc		cost(2,3).
+sub_l  "sub.l"	any4:ro,	A_REG:rw		cost(2,3).
+sub_l  "sub.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
+tst_l  "tst.l"	test_set4:ro:cc				cost(2,3).
+tst_w  "tst.w"	test_set2:ro:cc				cost(2,3).
+tst_b  "tst.b"	test_set1:ro:cc				cost(2,3).
+unlk		A_REG					cost(2,6).
+
+bxx  "illegal"	label					cost(2,5).
+xxx  "illegal"	data4:ro,	D_REG:rw:cc		cost(2,3).
+xxx  "illegal"	conreg4:ro,	memalt4:rw:cc		cost(2,6).
+bit  "illegal"	control4:rw:cc				cost(2,6).
+sh   "illegal"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
+shw  "illegal"	control2:rw:cc				cost(2,4).
+
+#ifdef m68020
+cmp2_l "cmp2.l" address+control4:ro, genreg:ro kills :cc cost(2,18).
+divs_l "divs.l" data4:ro,	D_REG:rw:cc		cost(2,90).
+divsl_l "divsl.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,90).
+divu_l "divu.l" data4:ro,	D_REG:rw:cc		cost(2,78).
+divul_l "divul.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,78).
+extb_l "extb.l" D_REG:rw:cc				cost(2,4).
+muls_l "muls.l" data4:ro,	D_REG:rw:cc		cost(2,44).
+mulu_l "mulu.l" data4:ro,	D_REG:rw:cc		cost(2,44).
+pea		address+control4+regX			cost(2,4).
+#else m68020
+pea		address+control4			cost(2,4).
+#endif m68020
+
+	/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	 * Extra pseudo instruction; it just kills a D_REG;
+	 * it is necessary with long divides where remainders are important;
+	 * see also: 'pat rmi' and 'pat rmu'
+	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+killreg "! kill" D_REG:wo				cost(0,0).
+
+
+MOVES
+
+from const %num==0 to D_REG
+    gen clr_l %2
+
+from const %num==0 to memalt4
+    gen clr_l %2
+
+from const %num==0 to memalt2
+    gen clr_w %2
+
+from const %num==0 to memalt1
+    gen clr_b %2
+
+from const to memalt1
+    gen move_b {const, lowb(%1.num)}, %2
+
+from const to memalt2
+    gen move_w {const, loww(%1.num)}, %2
+
+from regAcon %bd==0 to A_REG
+    gen move_l %1.reg, %2
+
+#ifndef m68020
+from t_regAregXcon sfit(%bd, 8) to A_REG
+    gen lea {regAregXcon, %1.reg, %1.xreg, 1, %1.bd}, %2
+
+from t_regAregXcon to A_REG
+    gen lea {regAregXcon, %1.reg, %1.xreg, 1, 0}, %2
+	add_l {const, %1.bd}, %2
+
+from t_regAcon sfit(%bd, 16) to A_REG
+    gen lea {regAcon, %1.reg, %1.bd}, %2
+
+from t_regAcon to A_REG
+    gen move_l %1.reg, %2
+	add_l {const, %1.bd}, %2
+#endif m68020
+
+from address - ext_addr to A_REG
+    gen lea %1, %2
+
+from any4 to alterable4
+    gen move_l %1, %2
+
+from any2 to datalt2
+    gen move_w %1, %2
+
+from data1 to datalt1
+    gen move_b %1, %2
+
+
+
+
+TESTS
+
+
+to test test_set4
+    gen tst_l %1
+
+to test test_set2
+    gen tst_w %1
+
+to test test_set1
+    gen tst_b %1
+
+
+STACKINGRULES
+
+
+from const %num==0 to STACK
+    gen clr_l {pre_dec4, sp}
+
+#ifndef m68020
+from t_regAregXcon sfit(%bd, 8) to STACK
+    gen pea {regAregXcon, %1.reg, %1.xreg, 1, %1.bd}
+
+from t_regAregXcon to STACK
+    gen pea {regAregXcon, %1.reg, %1.xreg, 1, 0}
+	add_l {const, %1.bd}, {indirect4, sp}
+
+from t_regAcon sfit(%bd, 16) to STACK
+    gen pea {regAcon, %1.reg, %1.bd}
+
+from t_regAcon to STACK
+    gen move_l %1.reg, {pre_dec4, sp}
+	add_l {const, %1.bd}, {indirect4, sp}
+#endif m68020
+
+from address - ext_addr to STACK
+    gen pea %1
+
+from ext_addr to STACK
+    gen pea {absolute4, %1.bd}
+
+from const to STACK
+    gen pea {absolute4, %1.num}
+
+from any4 to STACK
+    gen move_l %1, {pre_dec4, sp}
+
+from any2 to STACK
+    gen clr_l {pre_dec4, sp}
+	move_w %1, {offsetted2, sp, 2}
+
+from data1 to STACK
+    gen clr_l {pre_dec4, sp}
+	move_b %1, {offsetted1, sp, 3}
+
+#ifdef m68020
+from regX to STACK
+    gen pea %1
+#endif m68020
+	/* This last stackingrule is never used: whenever regX is put on
+	 * the fakestack, some em-instuctions are left that remove it
+	 * immediately. However cgg complained about not having a
+	 * stackingrule for regX, so here it is
+	 */
+
+
+COERCIONS
+
+
+from STACK
+    uses DD_REG
+    gen move_l {post_inc4, sp}, %a
+			yields	%a
+
+from STACK
+    uses AA_REG
+    gen move_l {post_inc4, sp}, %a
+			yields	%a
+
+#ifndef m68020
+from t_regAregXcon sfit(%bd, 8)
+			yields	{regAregXcon, %1.reg, %1.xreg, 1, %1.bd}
+
+from t_regAregXcon
+    uses AA_REG=%1.reg
+    gen add_l {const, %1.bd}, %a
+			yields	{regAregXcon, %a, %1.xreg, 1, 0}
+
+from t_regAcon sfit(%bd, 16)
+			yields	{regAcon, %1.reg, %1.bd}
+
+from t_regAcon
+    uses reusing %1, AA_REG=%1.reg
+    gen add_l {const, %1.bd}, %a
+			yields	%a
+#endif m68020
+
+from t_address
+    uses reusing %1, AA_REG = %1
+			yields	%a
+
+from any4
+    uses reusing %1, DD_REG = %1
+			yields	%a
+
+from any4
+    uses reusing %1, AA_REG = %1
+			yields	%a
+
+from memory2
+    uses DD_REG = {const, 0}
+    gen move_w %1, %a	yields	%a
+
+from memory1
+    uses DD_REG = {const, 0}
+    gen move_b %1, %a	yields	%a
+
+
+
+
+PATTERNS
+
+/************************************************
+ * Group 0: rules for register variables	*
+ * LOCALs mentioned here refer to registers	*
+ ************************************************/
+
+pat lol inreg($1)==reg_pointer
+    kills pre_post %reg==regvar($1, reg_pointer)
+			yields	{LOCAL, $1}
+
+pat lil inreg($1)==reg_pointer
+    kills pre_post %reg==regvar($1, reg_pointer)
+			yields	{indirect4, regvar($1, reg_pointer)}
+
+pat stl inreg($1)==reg_any
+with any4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen move %1, {LOCAL, $1}
+
+pat stl inreg($1)==reg_pointer
+with any4
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    gen move %1, {LOCAL, $1}
+with exact ext_addr
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    gen move %1, {LOCAL, $1}
+with exact address-ext_addr
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    gen lea %1, {LOCAL, $1}
+
+pat sil inreg($1)==reg_pointer
+with any4
+    kills allexceptcon
+    gen move %1, {indirect4, regvar($1, reg_pointer)}
+
+
+pat lol sbi stl $1==$3 && $2==4 && inreg($1)==reg_any
+with any4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen sub_l %1, {LOCAL, $1}
+	neg_l {LOCAL, $1}
+
+pat lol sbu stl $1==$3 && $2==4 && inreg($1)==reg_any
+with any4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen sub_l %1, {LOCAL, $1}
+	neg_l {LOCAL, $1}
+
+pat lil sbi sil $1==$3 && $2==4 && inreg($1)==reg_pointer
+with conreg4
+    kills allexceptcon
+    gen sub_l %1, {indirect4, regvar($1, reg_pointer)}
+	neg_l {indirect4, regvar($1, reg_pointer)}
+
+pat lil sbu sil $1==$3 && $2==4 && inreg($1)==reg_pointer
+with conreg4
+    kills allexceptcon
+    gen sub_l %1, {indirect4, regvar($1, reg_pointer)}
+	neg_l {indirect4, regvar($1, reg_pointer)}
+
+
+pat lil ngi sil $1==$3 && $2==4 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen neg_l {indirect4, regvar($1, reg_pointer)}
+
+pat lil com sil $1==$3 && $2==4 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen not_l {indirect4, regvar($1, reg_pointer)}
+
+
+proc lolcshstl example lol loc sli stl
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen sh* {shconst, $2}, {LOCAL, $1}
+
+proc lolrshstl example lol lol sli stl
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen sh* {LOCAL, $2}, {LOCAL, $1}
+
+proc lil1shlsil example lil loc sli sil		/* only left */
+    kills allexceptcon
+    gen shw* {offsetted2, regvar($1, reg_pointer), 2}
+	roxl {indirect2, regvar($1, reg_pointer)}
+
+proc lil1shrsil example lil loc sli sil		/* only right */
+    kills allexceptcon
+    gen shw* {indirect2, regvar($1, reg_pointer)}
+	roxr {offsetted2, regvar($1, reg_pointer), 2}
+
+pat lol loc sli stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("asl.l")
+pat lol loc slu stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("asl.l")
+pat lol lol sli stl $1==$4 && inreg($1)==reg_any && $3==4 && inreg($2)==reg_any
+					call lolrshstl("asl.l")
+pat lol lol slu stl $1==$4 && inreg($1)==reg_any && $3==4 && inreg($2)==reg_any
+					call lolrshstl("asl.l")
+pat lil loc sli sil $1==$4 && $2==1 && $3==4 && inreg($1)==reg_pointer
+					call lil1shlsil("asl #1,")
+pat lil loc slu sil $1==$4 && $2==1 && $3==4 && inreg($1)==reg_pointer
+					call lil1shlsil("asl #1,")
+pat lol loc sri stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("asr.l")
+pat lol loc sru stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("lsr.l")
+pat lol lol sri stl $1==$4 && inreg($1)==reg_any && $3==4 && inreg($2)==reg_any
+					call lolrshstl("asr.l")
+pat lol lol sru stl $1==$4 && inreg($1)==reg_any && $3==4 && inreg($2)==reg_any
+					call lolrshstl("lsr.l")
+pat lil loc sri sil $1==$4 && $2==1 && $3==4 && inreg($1)==reg_pointer
+					call lil1shrsil("asr #1,")
+pat lil loc sru sil $1==$4 && $2==1 && $3==4 && inreg($1)==reg_pointer
+					call lil1shrsil("lsr #1,")
+pat lol loc rol stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("rol.l")
+pat lol lol rol stl $1==$4 && inreg($2)==reg_any && $3==4 && inreg($1)==reg_any
+					call lolrshstl("rol.l")
+pat lol loc ror stl $1==$4 && small($2) && $3==4 && inreg($1)==reg_any
+					call lolcshstl("ror.l")
+pat lol lol ror stl $1==$4 && inreg($2)==reg_any && $3==4 && inreg($1)==reg_any
+					call lolrshstl("ror.l")
+
+#ifdef m68020
+pat lol loc dvi stl $1==$4 && $3==4 && inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen divs_l {const, $2}, {LOCAL, $1}
+
+pat lol loc dvu stl $1==$4 && $3==4 && inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen divu_l {const, $2}, {LOCAL, $1}
+
+pat lol loc mli stl $1==$4 && $3==4 && inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen muls_l {const, $2}, {LOCAL, $1}
+
+pat lol loc mlu stl $1==$4 && $3==4 && inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen mulu_l {const, $2}, {LOCAL, $1}
+
+pat lol mli stl $1==$3 && $2==4 && inreg($1)==reg_any
+    with data4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen muls_l %1, {LOCAL, $1}
+
+pat lol mlu stl $1==$3 && $2==4 && inreg($1)==reg_any
+    with data4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen mulu_l %1, {LOCAL, $1}
+#endif m68020
+
+
+pat lil inc sil $1==$3 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen add_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
+
+pat lil dec sil $1==$3 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen sub_l {const, 1}, {indirect4, regvar($1, reg_pointer)}
+
+pat inl inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen add_l {const, 1}, {LOCAL, $1}
+
+pat del inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen sub_l {const, 1}, {LOCAL, $1}
+
+pat zrl inreg($1)==reg_any
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen clr_l {LOCAL, $1}
+
+pat zrl inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+    gen move_l {const, 0}, {LOCAL, $1}
+
+
+proc lolxxstl example lol and stl
+with data4
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen xxx* %1, {LOCAL, $1}
+
+proc lilxxsil example lil and sil
+with conreg4
+    kills allexceptcon
+    gen xxx* %1, {indirect4, regvar($1, reg_pointer)}
+
+proc lolcxxstl example lol loc and stl
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen xxx* {const, $2}, {LOCAL, $1}
+
+proc lilcxxsil example lil loc and sil
+    kills allexceptcon
+    gen xxx* {const, $2}, {indirect4, regvar($1, reg_pointer)}
+
+proc lolrxxstl example lol lol and stl
+    kills LOCAL %bd==$1, use_index %xreg==regvar($1, reg_any)
+    gen xxx* {LOCAL, $2}, {LOCAL, $1}
+
+proc lilrxxsil example lil lol and sil
+    kills allexceptcon
+    gen xxx* {LOCAL, $2}, {indirect4, regvar($1, reg_pointer)}
+
+pat lol adi stl $1==$3 && $2==4 && inreg($1)==reg_any
+					call lolxxstl("add.l")
+pat lol loc adi stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("add.l")
+pat lil adi sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
+					call lilxxsil("add.l")
+pat lil loc adi sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("add.l")
+pat lol lol adi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+					call lolrxxstl("add.l")
+pat lil lol adi sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("add.l")
+pat lol adu stl $1==$3 && $2==4 && inreg($1)==reg_any
+					call lolxxstl("add.l")
+pat lol loc adu stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("add.l")
+pat lil adu sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
+					call lilxxsil("add.l")
+pat lil loc adu sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("add.l")
+pat lol lol adu stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+					call lolrxxstl("add.l")
+pat lil lol adu sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("add.l")
+pat lol loc sbi stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("sub.l")
+pat lil loc sbi sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("sub.l")
+pat lol lol sbi stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+					call lolrxxstl("sub.l")
+pat lil lol sbi sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("sub.l")
+pat lol loc sbu stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("sub.l")
+pat lil loc sbu sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("sub.l")
+pat lol lol sbu stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+					call lolrxxstl("sub.l")
+pat lil lol sbu sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("sub.l")
+pat lol and stl $1==$3 && $2==4 && inreg($1)==reg_any
+					call lolxxstl("and.l")
+pat lol loc and stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("and.l")
+pat lil and sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
+					call lilxxsil("and.l")
+pat lil loc and sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("and.l")
+pat lol lol and stl $1==$4 && $3==4 && inreg($1)==reg_any && inreg($2)==reg_any
+					call lolrxxstl("and.l")
+pat lil lol and sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("and.l")
+pat lol ior stl $1==$3 && $2==4 && inreg($1)==reg_any
+					call lolxxstl("or.l")
+pat lol loc ior stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("or.l")
+pat lil ior sil $1==$3 && $2==4 && inreg($1)==reg_pointer
+					call lilxxsil("or.l")
+pat lil loc ior sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("or.l")
+pat lol lol ior stl $1==$4 && $3==4 && inreg($1)==reg_any &&
+						inreg($2)==reg_any
+					call lolrxxstl("or.l")
+pat lil lol ior sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("or.l")
+pat lol xor stl $1==$3 && $2==4 && inreg($1)==reg_any
+					call lolxxstl("eor.l")
+pat lol loc xor stl $1==$4 && $3==4 && inreg($1)==reg_any
+					call lolcxxstl("eor.l")
+pat lil xor sil $1==$3 && $2==4 &&inreg($1)==reg_pointer
+					call lilxxsil("eor.l")
+pat lil loc xor sil $1==$4 && $3==4 && inreg($1)==reg_pointer
+					call lilcxxsil("eor.l")
+pat lol lol xor stl $1==$4 && $3==4 && inreg($1)==reg_any &&
+						inreg($2)==reg_any
+					call lolrxxstl("eor.l")
+pat lil lol xor sil $1==$4 && $3==4 && inreg($1)==reg_pointer &&
+						inreg($2)==reg_any
+					call lilrxxsil("eor.l")
+
+pat lil adp sil $1==$3 && inreg($1)==reg_pointer
+    kills allexceptcon
+    gen add_l {const, $2}, {indirect4, regvar($1, reg_pointer)}
+
+pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
+    kills allexceptcon
+    uses AA_REG = {indirect4, regvar($1, reg_pointer)}
+    gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
+			yields	%a
+
+pat lol lol adp stl loi $1==$2 && $1==$4 && $3==1 && $5==1 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc1, regvar($1, reg_pointer)}
+
+pat lol loi lol adp stl $1==$3 && $1==$5 && $2==1 && $4==1 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc1, regvar($1, reg_pointer)}
+
+pat lol lol adp stl loi $1==$2 && $1==$4 && $3==2 && $5==2 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc2, regvar($1, reg_pointer)}
+
+pat lol loi lol adp stl $1==$3 && $1==$5 && $2==2 && $4==2 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc2, regvar($1, reg_pointer)}
+
+pat lol lol adp stl loi $1==$2 && $1==$4 && $3==4 && $5==4 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc4, regvar($1, reg_pointer)}
+
+pat lil lol adp stl $1==$2 && $1==$4 && $3==4 && inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{post_inc4, regvar($1, reg_pointer)}
+
+pat lol lol adp stl sti $1==$2 && $1==$4 && $3==1 && $5==1 &&
+						inreg($1)==reg_pointer
+with data1
+    kills allexceptcon
+    gen move %1, {post_inc1, regvar($1, reg_pointer)}
+
+pat lol sti lol adp stl $1==$3 && $1==$5 && $2==1 && $4==1 &&
+						inreg($1)==reg_pointer
+with data1
+    kills allexceptcon
+    gen move %1, {post_inc1, regvar($1, reg_pointer)}
+
+pat lol lol adp stl sti $1==$2 && $1==$4 && $3==2 && $5==2 &&
+						inreg($1)==reg_pointer
+with any2
+    kills allexceptcon
+    gen move %1, {post_inc2, regvar($1, reg_pointer)}
+
+pat lol sti lol adp stl $1==$3 && $1==$5 && $2==2 && $4==2 &&
+						inreg($1)==reg_pointer
+with any2
+    kills allexceptcon
+    gen move %1, {post_inc2, regvar($1, reg_pointer)}
+
+pat lol lol adp stl sti $1==$2 && $1==$4 && $3==4 && $5==4 &&
+						inreg($1)==reg_pointer
+with any4
+    kills allexceptcon
+    gen move_l %1, {post_inc4, regvar($1, reg_pointer)}
+
+pat sil lol adp stl $1==$2 && $1==$4 && $3==4 && inreg($1)==reg_pointer
+with any4
+    kills allexceptcon
+    gen move_l %1, {post_inc4, regvar($1, reg_pointer)}
+
+pat lol adp stl lol loi $1==$3 && $1==$4 && $2==0-1 && $5==1 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{pre_dec1, regvar($1, reg_pointer)}
+
+pat lol adp stl lol loi $1==$3 && $1==$4 && $2==0-2 && $5==2 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{pre_dec2, regvar($1, reg_pointer)}
+
+pat lol adp stl lil $1==$3 && $1==$4 && $2==0-4 &&
+						inreg($1)==reg_pointer
+    kills LOCAL %bd==$1, all_regind %reg==regvar($1, reg_pointer)
+			yields	{pre_dec4, regvar($1, reg_pointer)}
+
+pat lol adp stl lol sti $1==$3 && $1==$4 && $2==0-1 && $5==1 &&
+						inreg($1)==reg_pointer
+with data1
+    kills allexceptcon
+    gen move %1, {pre_dec1, regvar($1, reg_pointer)}
+
+pat lol adp stl lol sti $1==$3 && $1==$4 && $2==0-2 && $5==2 &&
+						inreg($1)==reg_pointer
+with any2
+    kills allexceptcon
+    gen move %1, {pre_dec2, regvar($1, reg_pointer)}
+
+pat lol adp stl sil $1==$3 && $1==$4 && $2==0-4 &&
+						inreg($1)==reg_pointer
+with any4
+    kills allexceptcon
+    gen move_l %1, {pre_dec4, regvar($1, reg_pointer)}
+
+
+
+
+/************************************************
+ * Group 1: load instructions			*
+ ************************************************/
+
+pat loc			yields	{const, $1}
+
+pat ldc				leaving loc 18 trp
+
+pat lol			yields	{LOCAL, $1}
+
+pat ldl				leaving lol $1+4 lol $1
+
+pat loe			yields	{absolute4, $1}
+
+pat lil
+#ifdef m68020
+			yields	{ILOCAL, $1}
+#else m68020
+    uses AA_REG = {LOCAL, $1}
+			yields	{indirect4, %a}
+#endif m68020
+
+	/* When using the 'offsetted' intructions regAregXcon cannot be used
+	 * for the m68k4; there is no way of knowing about the size of
+	 * %1.bd+$1, because expressions are not allowed in stack patterns, and
+	 * this may lead to outputting too large displacements. With regAcon
+	 * the chance that this will happen is very slim, because it can 
+	 * have displacements of 16 bits. Besides, leaving out regAcon here
+	 * would make it very hard to handle this instruction efficiently.
+	 */
+pat lof
+with A_REG		yields	{offsetted4, %1, $1}
+with exact local_addr	yields	{LOCAL, %1.bd+$1}
+with exact ext_addr	yields	{absolute4, %1.bd+$1}
+#ifndef m68020
+with regAcon		yields	{offsetted4, %1.reg, %1.bd+$1}
+#else m68020
+with exact regAcon	yields	{offsetted4, %1.reg, %1.bd+$1}
+with exact regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
+with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, $1}
+with exact indirect	yields	{OFF_off4, %1.reg, 0, $1}
+with exact LOCAL	yields	{OFF_off4, lb, %1.bd, $1}
+with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od+$1}
+with exact off_regXcon	yields	{OFF_indoff4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
+with exact indoff_con	yields	{INDOFF_off4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact absolute4	yields	{ABS_off4, %1.bd, $1}
+with exact abs_con	yields	{ABS_off4, %1.bd, %1.od+$1}
+with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
+with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+#endif m68020
+
+pat lal			yields	{local_addr, $1}
+
+pat lae			yields	{ext_addr, $1}
+
+pat lxl $1==0		yields	lb
+
+pat lxl $1==1		yields	{LOCAL, SL}
+
+pat lxl $1==2
+#ifdef m68020
+			yields	{OFF_off4, lb, SL, SL}
+#else m68020
+    uses AA_REG = {LOCAL, SL}
+			yields	{offsetted4, %a, SL}
+#endif m68020
+
+pat lxl $1==3
+#ifdef m68020
+    uses AA_REG = {OFF_off4, lb, SL, SL}
+#else m68020
+    uses AA_REG = {LOCAL, SL}
+    gen move {offsetted4, %a, SL}, %a
+#endif m68020
+			yields	{offsetted4, %a, SL}
+
+pat lxl $1>3
+    uses AA_REG = {LOCAL, SL},
+	 DD_REG = {const, $1-2}
+    gen 1: 
+        move_l {offsetted4, %a, SL} ,%a
+	dbf %b, {slabel, 1b}
+			yields	%a
+
+pat lxa $1==0		yields	{local_addr, SL}
+
+pat lxa $1==1
+#ifdef m68020
+			yields	{off_con, lb, SL, SL}
+#else m68020
+    uses AA_REG = {LOCAL, SL}
+			yields	{regAcon, %a, SL}
+#endif m68020
+
+pat  lxa $1==2
+#ifdef m68020
+    uses AA_REG = {OFF_off4, lb, SL, SL}
+#else m68020
+    uses AA_REG = {LOCAL, SL}
+    gen move {offsetted4, %a, SL}, %a
+#endif m68020
+			yields	{regAcon, %a, SL}
+
+pat lxa $1>2
+    uses AA_REG = {LOCAL, SL},
+	 DD_REG = {const, $1-1}
+    gen 1: 
+        move_l {offsetted4, %a, SL} ,%a
+	dbf %b, {slabel, 1b}
+			yields	{regAcon, %a, SL}
+
+pat loi $1==1
+with A_REG		yields	{indirect1, %1}
+with exact local_addr	yields	{offsetted1, lb, %1.bd}
+with exact ext_addr	yields	{absolute1, %1.bd}
+#ifndef m68020
+with regAcon		yields	{offsetted1, %1.reg, %1.bd}
+with regAregXcon	yields	{index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon	yields	{offsetted1, %1.reg, %1.bd}
+with exact regAregXcon	yields	{index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact indirect4	yields	{OFF_off1, %1.reg, 0, 0}
+with exact offsetted4	yields	{OFF_off1, %1.reg, %1.bd, 0}
+with exact LOCAL	yields	{OFF_off1, lb, %1.bd, 0}
+with exact off_con	yields	{OFF_off1, %1.reg, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff1,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact index_off4	yields	{INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact indoff_con	yields	{INDOFF_off1,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4	yields	{ABS_off1, %1.bd, 0}
+with exact abs_con	yields	{ABS_off1, %1.bd, %1.od}
+with exact abs_regXcon	yields	{ABS_indoff1, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4	yields	{ABSIND_off1, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con	yields	{ABSIND_off1, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX	yields	{abs_index1, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat loi $1==2
+with A_REG		yields	{indirect2, %1}
+with exact local_addr	yields	{offsetted2, lb, %1.bd}
+with exact ext_addr	yields	{absolute2, %1.bd}
+#ifndef m68020
+with regAcon		yields	{offsetted2, %1.reg, %1.bd}
+with regAregXcon	yields	{index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon	yields	{offsetted2, %1.reg, %1.bd}
+with exact regAregXcon	yields	{index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact indirect4	yields	{OFF_off2, %1.reg, 0, 0}
+with exact offsetted4	yields	{OFF_off2, %1.reg, %1.bd, 0}
+with exact LOCAL	yields	{OFF_off2, lb, %1.bd, 0}
+with exact off_con	yields	{OFF_off2, %1.reg, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff2,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact index_off4	yields	{INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact indoff_con	yields	{INDOFF_off2,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4	yields	{ABS_off2, %1.bd, 0}
+with exact abs_con	yields	{ABS_off2, %1.bd, %1.od}
+with exact abs_regXcon	yields	{ABS_indoff2, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4	yields	{ABSIND_off2, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con	yields	{ABSIND_off2, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX	yields	{abs_index2, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat loi $1==4
+with A_REG		yields	{indirect4, %1}
+with exact local_addr	yields	{LOCAL, %1.bd}
+with exact ext_addr	yields	{absolute4, %1.bd}
+#ifndef m68020
+with regAcon		yields	{offsetted4, %1.reg, %1.bd}
+with regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon	yields	{offsetted4, %1.reg, %1.bd}
+with exact regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact LOCAL	yields	{ILOCAL, %1.bd}
+with exact indirect4	yields	{OFF_off4, %1.reg, 0, 0}
+with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, 0}
+with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od}
+with exact off_regXcon	yields	{OFF_indoff4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact indoff_con	yields	{INDOFF_off4,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4	yields	{ABS_off4, %1.bd, 0}
+with exact abs_con	yields	{ABS_off4, %1.bd, %1.od}
+with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat loi $1==8
+with A_REG		yields	{offsetted4, %1, 4}
+				{indirect4, %1}
+pat loi $1>8
+with AA_REG STACK
+    uses DD_REG = {const, $1/4 -1}
+    gen add_l {const, $1}, %1
+	1:
+	move_l {pre_dec4, %1}, {pre_dec4, sp}
+	dbf %a, {slabel, 1b}
+
+pat los $1==4
+with STACK
+    gen jsr {absolute4, ".los"}
+
+pat lde			yields	{absolute4, $1+4}
+				{absolute4, $1}
+
+pat ldf
+with A_REG		yields	{offsetted4, %1, $1+4}
+				{offsetted4, %1, $1}
+with exact local_addr	yields	{LOCAL, %1.bd+$1+4}
+				{LOCAL, %1.bd+$1}
+with exact ext_addr	yields	{absolute4, %1.bd+$1+4}
+				{absolute4, %1.bd+$1}
+#ifndef m68020
+with regAcon		yields	{offsetted4, %1.reg, %1.bd+$1+4}
+				{offsetted4, %1.reg, %1.bd+$1}
+#else m68020
+with exact regAcon	yields	{offsetted4, %1.reg, %1.bd+$1+4}
+				{offsetted4, %1.reg, %1.bd+$1}
+with exact regAregXcon	yields	{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1+4}
+				{index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
+with exact indirect4	yields	{OFF_off4, %1.reg, 0, $1+4}
+				{OFF_off4, %1.reg, 0, $1}
+with exact offsetted4	yields	{OFF_off4, %1.reg, %1.bd, $1+4}
+				{OFF_off4, %1.reg, %1.bd, $1}
+with exact LOCAL	yields	{OFF_off4, lb, %1.bd, $1+4}
+				{OFF_off4, lb, %1.bd, $1}
+with exact off_con	yields	{OFF_off4, %1.reg, %1.bd, %1.od+$1+4}
+				{OFF_off4, %1.reg, %1.bd, %1.od+$1}
+with exact off_regXcon	yields	{OFF_indoff4,
+				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
+				{OFF_indoff4,
+				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact index_off4	yields	{INDOFF_off4, %1.reg, %1.xreg, %1.sc,%1.bd,$1+4}
+				{INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
+with exact indoff_con	yields	{INDOFF_off4,
+				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
+				{INDOFF_off4,
+				    %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact absolute4	yields	{ABS_off4, %1.bd, $1+4}
+				{ABS_off4, %1.bd, $1}
+with exact abs_con	yields	{ABS_off4, %1.bd, %1.od+$1+4}
+				{ABS_off4, %1.bd, %1.od+$1}
+with exact abs_regXcon	yields	{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
+				{ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact abs_index4	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1+4}
+				{ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
+with exact absind_con	yields	{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
+				{ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact ext_regX	yields	{abs_index4, %1.sc, %1.xreg, %1.bd+$1+4}
+				{abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+#endif m68020
+
+pat lpi			yields	{ext_addr, $1}
+
+
+
+/************************************************
+ * Group 2: store instructions			*
+ ************************************************/
+
+pat stl
+with any4
+    kills all_indir, LOCAL %bd==$1
+    gen move %1, {LOCAL, $1}
+with exact STACK
+    gen move {post_inc4,sp}, {LOCAL, $1}
+
+pat ste
+with any4
+    kills posextern
+    gen move %1, {absolute4, $1}
+with exact STACK
+    gen move {post_inc4, sp}, {absolute4, $1}
+
+pat sil
+#ifdef m68020
+with any4
+    kills allexceptcon
+    gen move %1, {ILOCAL, $1}
+with exact STACK
+    gen move {post_inc4, sp}, {ILOCAL, $1}
+#else m68020
+with any4
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen move %1, {indirect4, %a}
+with exact STACK
+    uses AA_REG = {LOCAL, $1}
+    gen move {post_inc4, sp}, {indirect4, %a}
+#endif m68020
+
+pat stf
+with A_REG any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1, $1}
+with A_REG STACK
+    gen move {post_inc4, sp}, {offsetted4, %1, $1}
+with exact local_addr any4
+    kills allexceptcon
+    gen move %2, {LOCAL, %1.bd+$1}
+with exact ext_addr any4
+    kills allexceptcon
+    gen move %2, {absolute4, %1.bd+$1}
+#ifndef m68020
+with regAcon any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd+$1}
+#else m68020
+with exact regAcon any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd+$1}
+with exact regAregXcon any4
+    kills allexceptcon
+    gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
+with exact indirect4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, 0, $1}
+with exact offsetted4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, $1}
+with exact LOCAL any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, lb, %1.bd, $1}
+with exact off_con any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od+$1}
+with exact off_regXcon any4
+    kills allexceptcon
+    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact index_off4 any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
+with exact indoff_con any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact absolute4 any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, $1}
+with exact abs_con any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, %1.od+$1}
+with exact abs_regXcon any4
+    kills allexceptcon
+    gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact abs_index4 any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
+with exact absind_con any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact ext_regX any4
+    kills allexceptcon
+    gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+#endif m68020
+
+pat sti $1==1
+with A_REG data1
+    kills allexceptcon
+    gen move %2, {indirect1, %1}
+with exact local_addr data1
+    kills allexceptcon
+    gen move %2, {offsetted1, lb, %1.bd}
+with exact ext_addr data1
+    kills allexceptcon
+    gen move %2, {absolute1, %1.bd}
+#ifndef m68020
+with regAcon data1
+    kills allexceptcon
+    gen move %2, {offsetted1, %1.reg, %1.bd}
+with regAregXcon data1
+    kills allexceptcon
+    gen move %2, {index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon data1
+    kills allexceptcon
+    gen move %2, {offsetted1, %1.reg, %1.bd}
+with exact regAregXcon data1
+    kills allexceptcon
+    gen move %2, {index_off1, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact indirect4 data1
+    kills allexceptcon
+    gen move %2, {OFF_off1, %1.reg, 0, 0}
+with exact offsetted4 data1
+    kills allexceptcon
+    gen move %2, {OFF_off1, %1.reg, %1.bd, 0}
+with exact LOCAL data1
+    kills allexceptcon
+    gen move %2, {OFF_off1, lb, %1.bd, 0}
+with exact off_con data1
+    kills allexceptcon
+    gen move %2, {OFF_off1, %1.reg, %1.bd, %1.od}
+with exact off_regXcon data1
+    kills allexceptcon
+    gen move %2, {OFF_indoff1, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact index_off4 data1
+    kills allexceptcon
+    gen move %2, {INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact indoff_con data1
+    kills allexceptcon
+    gen move %2, {INDOFF_off1, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4 data1
+    kills allexceptcon
+    gen move %2, {ABS_off1, %1.bd, 0}
+with exact abs_con data1
+    kills allexceptcon
+    gen move %2, {ABS_off1, %1.bd, %1.od}
+with exact abs_regXcon data1
+    kills allexceptcon
+    gen move %2, {ABS_indoff1, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4 data1
+    kills allexceptcon
+    gen move %2, {ABSIND_off1, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con data1
+    kills allexceptcon
+    gen move %2, {ABSIND_off1, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX data1
+    kills allexceptcon
+    gen move %2, {abs_index1, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat sti $1==2
+with A_REG any2
+    kills allexceptcon
+    gen move %2, {indirect2, %1}
+with exact local_addr any2
+    kills allexceptcon
+    gen move %2, {offsetted2, lb, %1.bd}
+with exact ext_addr any2
+    kills allexceptcon
+    gen move %2, {absolute2, %1.bd}
+#ifndef m68020
+with regAcon any2
+    kills allexceptcon
+    gen move %2, {offsetted2, %1.reg, %1.bd}
+with regAregXcon any2
+    kills allexceptcon
+    gen move %2, {index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon any2
+    kills allexceptcon
+    gen move %2, {offsetted2, %1.reg, %1.bd}
+with exact regAregXcon any2
+    kills allexceptcon
+    gen move %2, {index_off2, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact indirect4 any2
+    kills allexceptcon
+    gen move %2, {OFF_off2, %1.reg, 0, 0}
+with exact offsetted4 any2
+    kills allexceptcon
+    gen move %2, {OFF_off2, %1.reg, %1.bd, 0}
+with exact LOCAL any2
+    kills allexceptcon
+    gen move %2, {OFF_off2, lb, %1.bd, 0}
+with exact off_con any2
+    kills allexceptcon
+    gen move %2, {OFF_off2, %1.reg, %1.bd, %1.od}
+with exact index_off4 any2
+    kills allexceptcon
+    gen move %2, {INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact off_regXcon any2
+    kills allexceptcon
+    gen move %2, {OFF_indoff2, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact indoff_con any2
+    kills allexceptcon
+    gen move %2, {INDOFF_off2, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4 any2
+    kills allexceptcon
+    gen move %2, {ABS_off2, %1.bd, 0}
+with exact abs_con any2
+    kills allexceptcon
+    gen move %2, {ABS_off2, %1.bd, %1.od}
+with exact abs_regXcon any2
+    kills allexceptcon
+    gen move %2, {ABS_indoff2, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4 any2
+    kills allexceptcon
+    gen move %2, {ABSIND_off2, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con any2
+    kills allexceptcon
+    gen move %2, {ABSIND_off2, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX any2
+    kills allexceptcon
+    gen move %2, {abs_index2, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat sti $1==4
+with A_REG any4
+    kills allexceptcon
+    gen move %2, {indirect4, %1}
+with A_REG STACK
+    gen move {post_inc4, sp}, {indirect4, %1}
+with exact local_addr any4
+    kills allexceptcon
+    gen move %2, {LOCAL, %1.bd}
+with exact ext_addr any4
+    kills allexceptcon
+    gen move %2, {absolute4, %1.bd}
+#ifndef m68020
+with regAcon any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd}
+with regAregXcon any4
+    kills allexceptcon
+    gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
+#else m68020
+with exact regAcon any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd}
+with exact regAregXcon any4
+    kills allexceptcon
+    gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd}
+with exact LOCAL any4
+    kills allexceptcon
+    gen move %2, {ILOCAL, %1.bd}
+with exact indirect4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, 0, 0}
+with exact offsetted4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, 0}
+with exact off_con any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od}
+with exact off_regXcon any4
+    kills allexceptcon
+    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact index_off4 any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, 0}
+with exact indoff_con any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od}
+with exact absolute4 any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, 0}
+with exact abs_con any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, %1.od}
+with exact abs_regXcon any4
+    kills allexceptcon
+    gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact abs_index4 any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, 0}
+with exact absind_con any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od}
+with exact ext_regX any4
+    kills allexceptcon
+    gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd}
+#endif m68020
+
+pat sti $1>4
+with AA_REG STACK
+    uses DD_REG = {const, $1/4 -1}
+    gen 1:
+	move_l {post_inc4, sp}, {post_inc4, %1}
+	dbf %a, {slabel, 1b}
+
+pat sts $1==4
+with STACK
+    gen jsr {absolute4, ".sts"}
+
+pat sdl
+with any4 any4
+    kills all_indir, LOCAL %bd==$1
+    gen move %1, {LOCAL, $1}
+	move %2, {LOCAL, $1+4}
+
+pat sde
+with any4 any4
+    kills posextern
+    gen move %1, {absolute4, $1}
+	move %2, {absolute4, $1+4}
+
+pat sdf
+with A_REG any4 any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1, $1}
+	move %3, {offsetted4, %1, $1+4}
+with exact local_addr any4 any4
+    kills allexceptcon
+    gen move %2, {LOCAL, %1.bd+$1}
+	move %3, {LOCAL, %1.bd+$1+4}
+with exact ext_addr any4 any4
+    kills allexceptcon
+    gen move %2, {absolute4, %1.bd+$1}
+	move %3, {absolute4, %1.bd+$1+4}
+#ifndef m68020
+with regAcon any4 any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd+$1}
+	move %3, {offsetted4, %1.reg, %1.bd+$1+4}
+#else m68020
+with exact regAcon any4 any4
+    kills allexceptcon
+    gen move %2, {offsetted4, %1.reg, %1.bd+$1}
+	move %3, {offsetted4, %1.reg, %1.bd+$1+4}
+with exact regAregXcon any4 any4
+    kills allexceptcon
+    gen move %2, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1}
+	move %3, {index_off4, %1.reg, %1.xreg, %1.sc, %1.bd+$1+4}
+with exact indirect4 any4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, 0, $1}
+	move %3, {OFF_off4, %1.reg, 0, $1+4}
+with exact offsetted4 any4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, $1}
+	move %3, {OFF_off4, %1.reg, %1.bd, $1+4}
+with exact LOCAL any4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, lb, %1.bd, $1}
+	move %3, {OFF_off4, lb, %1.bd, $1+4}
+with exact off_con any4 any4
+    kills allexceptcon
+    gen move %2, {OFF_off4, %1.reg, %1.bd, %1.od+$1}
+	move %3, {OFF_off4, %1.reg, %1.bd, %1.od+$1+4}
+with exact off_regXcon any4 any4
+    kills allexceptcon
+    gen move %2, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+	move %3, {OFF_indoff4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
+with exact index_off4 any4 any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
+	move %3, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, $1+4}
+with exact indoff_con any4 any4
+    kills allexceptcon
+    gen move %2, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+	move %3, {INDOFF_off4, %1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1+4}
+with exact absolute4 any4 any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, $1}
+	move %3, {ABS_off4, %1.bd, $1+4}
+with exact abs_con any4 any4
+    kills allexceptcon
+    gen move %2, {ABS_off4, %1.bd, %1.od+$1}
+	move %3, {ABS_off4, %1.bd, %1.od+$1+4}
+with exact abs_regXcon any4 any4
+    kills allexceptcon
+    gen move %2, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+	move %3, {ABS_indoff4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
+with exact abs_index4 any4 any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1}
+	move %3, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, $1+4}
+with exact absind_con any4 any4
+    kills allexceptcon
+    gen move %2, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+	move %3, {ABSIND_off4, %1.sc, %1.xreg, %1.bd, %1.od+$1+4}
+with exact ext_regX any4 any4
+    kills allexceptcon
+    gen move %2, {abs_index4, %1.sc, %1.xreg, %1.bd+$1}
+	move %3, {abs_index4, %1.sc, %1.xreg, %1.bd+$1+4}
+#endif m68020
+
+
+
+/************************************************
+ * Group 3: integer arithmetic.			*
+ ************************************************/
+
+
+pat adi $1==4
+with any4 DD_REG
+    gen add_l %1, %2	yields	%2
+with DD_REG any4-DD_REG
+    gen add_l %2, %1	yields	%1
+with DD_REG STACK
+    gen add_l {post_inc4, sp}, %1
+			yields	%1
+
+pat sbi $1==4
+with any4 DD_REG
+    gen sub_l %1, %2	yields	%2
+with DD_REG any4-DD_REG
+    gen sub_l %2, %1
+	neg_l %1	yields	%1
+with DD_REG STACK
+    gen sub_l {post_inc4, sp}, %1
+	neg_l %1	yields	%1
+with any4 AA_REG
+    gen sub_l %1, %2	yields	%2
+
+pat mli $1==4
+#ifdef m68020
+with data4 DD_REG
+    gen muls_l %1, %2	yields	%2
+#else m68020
+with STACK
+    gen jsr {absolute4, ".mli"}
+			yields	d1
+#endif m68020
+
+pat dvi $1==4
+#ifdef m68020
+with data4 DD_REG
+    gen divs_l %1, %2	yields	%2
+#else m68020
+with STACK
+    gen jsr {absolute4, ".dvi"}
+			yields	d1
+#endif m68020
+
+pat rmi $1==4
+#ifdef m68020
+with data4 DD_REG
+    uses DD_REG
+    gen divsl_l %1, {DREG_pair, %a, %2}
+	killreg %2
+		/* !!!! contents of %2 have changed: make this known to cg */
+			yields	%a
+#else m68020
+with STACK
+    gen jsr {absolute4, ".dvi"}
+			yields	d0
+#endif m68020
+
+pat ngi $1==4
+with DD_REG
+    gen neg_l %1	yields	%1
+
+pat sli $1==4
+with D_REG DD_REG
+    gen asl_l %1, %2	yields	%2
+
+pat sri $1==4
+with D_REG DD_REG
+    gen asr_l %1, %2	yields	%2
+
+
+
+/************************************************
+ * Group 4: unsigned arithmetic.		*
+ ************************************************/
+
+
+pat adu				leaving adi $1
+
+pat sbu				leaving sbi $1
+
+pat mlu $1==4
+#ifdef m68020
+with data4 DD_REG
+    gen mulu_l %1, %2	yields	%2
+#else m68020
+with STACK
+    gen jsr {absolute4, ".mlu"}
+			yields	d1
+#endif m68020
+
+pat dvu $1==4
+#ifdef m68020
+with data4 DD_REG
+    gen divu_l %1, %2	yields	%2
+#else m68020
+with STACK
+    gen jsr {absolute4, ".dvu"}
+			yields	d1
+#endif m68020
+
+pat rmu $1==4
+#ifdef m68020
+with data4 DD_REG
+    uses DD_REG
+    gen divul_l %1, {DREG_pair, %a, %2}
+	killreg %2
+		/* !!!! contents of %2 have changed: make this known to cg */
+			yields	%a
+#else m68020
+with STACK
+    gen jsr {absolute4, ".dvu"}
+			yields	d0
+#endif m68020
+
+pat slu				leaving sli $1
+
+pat sru $1==4
+with D_REG DD_REG
+    gen lsr_l %1, %2	yields	%2
+
+
+
+/************************************************
+ * Group 5: floating point arithmetic		*
+ * 						*
+ * is not available on 68000, 68010 or 68020	*
+ * so traps will be generated			*
+ ************************************************/
+
+pat adf				leaving loc 18 trp
+pat sbf				leaving loc 18 trp
+pat mlf				leaving loc 18 trp
+pat dvf				leaving loc 18 trp
+pat ngf				leaving loc 18 trp
+pat fif				leaving loc 18 trp
+pat fef				leaving loc 18 trp
+
+
+
+/************************************************
+ * Group 6: pointer arithmetic			*
+ ************************************************/
+
+pat adp $1==0		/* skip; array instructions might 'leave' this */
+
+pat adp
+with A_REG		yields	{t_regAcon, %1, $1}
+with exact local_addr	yields	{local_addr, %1.bd+$1}
+with exact ext_addr	yields	{ext_addr, %1.bd+$1}
+with exact regAcon + t_regAcon
+			yields	{t_regAcon, %1.reg, %1.bd+$1}
+with exact regAregXcon + t_regAregXcon
+			yields	{t_regAregXcon,%1.reg, %1.xreg, %1.sc, %1.bd+$1}
+#ifdef m68020
+with exact indirect4	yields	{off_con, %1.reg, 0, $1}
+with exact LOCAL	yields	{off_con, lb, %1.bd, $1}
+with exact offsetted4	yields	{off_con, %1.reg, %1.bd, $1}
+with exact off_con	yields	{off_con, %1.reg, %1.bd, %1.od+$1}
+with exact off_regXcon	yields	{off_regXcon,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact index_off4	yields	{indoff_con, %1.reg, %1.xreg, %1.sc, %1.bd, $1}
+with exact indoff_con	yields	{indoff_con,
+					%1.reg, %1.xreg, %1.sc, %1.bd, %1.od+$1}
+with exact absolute4	yields	{abs_con, %1.bd, $1}
+with exact abs_con	yields	{abs_con, %1.bd, %1.od+$1}
+with exact abs_regXcon	yields	{abs_regXcon, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact abs_index4	yields	{absind_con, %1.sc, %1.xreg, %1.bd, $1}
+with exact absind_con	yields	{absind_con, %1.sc, %1.xreg, %1.bd, %1.od+$1}
+with exact ext_regX	yields	{ext_regX, %1.sc, %1.xreg, %1.bd+$1}
+#endif m68020
+
+pat ads $1==4
+with D_REG A_REG	yields	{regAregXcon, %2, %1, 1, 0}
+with D_REG regAcon + t_regAcon
+			yields	{t_regAregXcon, %2.reg, %1, 1, %2.bd}
+with D_REG local_addr	yields	{t_regAregXcon, lb, %1, 1, %2.bd}
+with any4-D_REG AA_REG
+    gen add_l %1, %2	yields	%2
+
+#ifdef m68020
+
+with D_REG		yields	{regX, 1, %1}
+				leaving ads 4
+with regX A_REG		yields	{regAregXcon, %2, %1.xreg, %1.sc, 0}
+with exact regX regAcon	yields	{regAregXcon, %2.reg, %1.xreg, %1.sc, %2.bd}
+with exact regX local_addr
+			yields	{regAregXcon, lb, %1.xreg, %1.sc, %2.bd}
+with exact regX ext_addr
+			yields	{ext_regX, %1.sc, %1.xreg, %2.bd}
+with exact regX indirect4
+			yields	{off_regXcon, %2.reg, %1.xreg,%1.sc,0,0}
+with exact regX offsetted4
+			yields	{off_regXcon, %2.reg, %1.xreg, %1.sc, %2.bd, 0}
+with exact regX LOCAL	yields	{off_regXcon, lb, %1.xreg, %1.sc, %2.bd, 0}
+with exact regX off_con	yields	{off_regXcon, %2.reg, %1.xreg,%1.sc,%2.bd,%2.od}
+with exact regX absolute4
+			yields	{abs_regXcon, %1.sc, %1.xreg, %2.bd, 0}
+with exact regX abs_con	yields	{abs_regXcon, %1.sc, %1.xreg, %2.bd, %2.od}
+with exact indirect4 ext_addr
+			yields	{off_con, %1.reg, 0, %2.bd}
+with exact offsetted4 ext_addr
+			yields	{off_con, %1.reg, %1.bd, %2.bd}
+with exact LOCAL ext_addr
+			yields	{off_con, lb, %1.bd, %2.bd}
+with exact index_off4 ext_addr
+			yields	{indoff_con, %1.reg, %1.xreg, %1.sc,%1.bd,%2.bd}
+with exact absolute4 ext_addr
+			yields	{abs_con, %1.bd, %2.bd}
+with exact abs_index4 ext_addr
+			yields	{absind_con, %1.sc, %1.xreg, %1.bd, %2.bd}
+with exact indirect4 ext_regX
+			yields	{off_regXcon, %1.reg, %2.xreg, %2.sc, 0, %2.bd}
+with exact offsetted4 ext_regX
+			yields	{off_regXcon, %1.reg, %2.xreg,%2.sc,%1.bd,%2.bd}
+with exact LOCAL ext_regX
+			yields	{off_regXcon, lb, %2.xreg, %2.sc, %1.bd, %2.bd}
+with exact absolute4 ext_regX
+			yields	{abs_regXcon, %2.sc, %2.xreg, %1.bd, %2.bd}
+#endif m68020
+
+	/* I WOULD ALSO LIKE THIS:
+	 * 	pat ads
+	 * 	with const			leaving adp %1.num
+	 * BUT THAT DOESN'T WORK.
+	 */
+
+pat sbs $1==4			leaving sbi 4
+
+#ifdef m68020
+pat loc sli ads $1==1 && $2==4 && $3==4
+with D_REG		yields	{regX, 2, %1}
+				leaving ads 4
+
+pat loc sli ads $1==2 && $2==4 && $3==4
+with D_REG		yields	{regX, 4, %1}
+				leaving ads 4
+
+pat loc sli ads $1==3 && $2==4 && $3==4
+with D_REG		yields	{regX, 8, %1}
+				leaving ads 4
+#endif m68020
+
+
+/************************************************
+ * Group 7: increment / decrement / zero	*
+ ************************************************/
+
+pat inc
+with exact STACK
+    gen add_l {const, 1}, {indirect4, sp}
+with DD_REG+AA_REG
+    gen add_l {const, 1}, %1
+			yields	%1
+
+pat inl
+    kills all_indir, LOCAL %bd==$1
+    gen add_l {const, 1}, {LOCAL, $1}
+
+pat ine
+    kills posextern
+    gen add_l {const, 1}, {absolute4, $1}
+
+pat dec
+with exact STACK
+    gen sub_l {const, 1}, {indirect4, sp}
+with DD_REG+AA_REG
+    gen sub_l {const, 1}, %1
+			yields	%1
+
+pat del
+    kills all_indir, LOCAL %bd==$1
+    gen sub_l {const, 1}, {LOCAL, $1}
+
+pat dee
+    kills posextern
+    gen sub_l {const, 1}, {absolute4, $1}
+
+pat zrl
+    kills all_indir, LOCAL %bd==$1
+    gen clr_l {LOCAL, $1}
+
+pat zre
+    kills posextern
+    gen clr_l {absolute4, $1}
+
+pat zer $1==4		yields	{const, 0}
+pat zer $1==8		yields	{const, 0} {const, 0}
+pat zer $1==12		yields	{const, 0} {const, 0} {const, 0}
+
+pat zer
+with STACK
+    uses DD_REG = {const, $1/4 -1}
+    gen 1:
+	clr_l {pre_dec4, sp}
+	dbf %a, {slabel, 1b}
+
+
+pat zrf				leaving loc 18 trp
+
+
+
+/************************************************
+ * Group 8: convert instructions		*
+ * for float conversions traps are generated	*
+ ************************************************/
+
+
+
+pat cii
+with STACK
+    gen jsr {absolute4, ".cii"}
+
+pat cuu
+with STACK
+    gen jsr {absolute4, ".cuu"}
+
+pat ciu				leaving cuu
+
+pat cui				leaving cuu
+
+pat cfi				leaving loc 18 trp
+pat cif				leaving loc 18 trp
+pat cfu				leaving loc 18 trp
+pat cuf				leaving loc 18 trp
+pat cff				leaving loc 18 trp
+
+
+/************************************************
+ * Group 9: logical instructions		*
+ ************************************************/
+
+
+proc log4
+with datalt4+const DD_REG
+    gen xxx* %1, %2	yields	%2
+with DD_REG datalt4+const
+    gen xxx* %2, %1	yields	%1
+
+proc logdef example and
+with STACK
+    uses DD_REG = {const, $1/4 -1},
+	 AA_REG = {regAcon, sp, $1},
+	 DD_REG
+    gen 1:
+	move_l {post_inc4, sp}, %c
+	xxx* %c, {post_inc4, %b}
+	dbf %a, {slabel, 1b}
+
+proc logndef
+with DD_REG STACK
+    uses AA_REG = {regAregXcon, sp, %1, 1, 0},
+	 DD_REG
+    gen asr_l {shconst, 2}, %1
+	sub_l {const, 1}, %1
+	1:
+	move_l {post_inc4, sp}, %b
+	xxx* %b, {post_inc4, %a}
+	dbf %1, {slabel, 1b}
+
+pat and $1==4				call log4("and.l")
+pat and $1>4				call logdef("and.l")
+pat and !defined($1)			call logndef("and.l")
+pat ior $1==4				call log4("or.l")
+pat ior $1>4				call logdef("or.l")
+pat ior !defined($1)			call logndef("or.l")
+
+pat xor $1==4
+with conreg4 DD_REG
+    gen eor_l %1, %2	yields	%2
+with DD_REG conreg4 
+    gen eor_l %2, %1	yields	%1
+
+pat xor $1>4				call logdef("eor.l")
+pat xor !defined($1)			call logndef("eor.l")
+
+pat com $1==4
+with DD_REG
+    gen not_l %1	yields	%1
+
+pat com $1==8
+with DD_REG DD_REG
+    gen not_l %1
+	not_l %2	yields	%2 %1
+
+pat com $1>4
+with STACK
+    uses AA_REG,
+	 DD_REG = {const, $1/4 -1}
+    gen move_l sp, %a
+	1:
+	not_l {post_inc4, %a}
+	dbf %b, {slabel, 1b}
+
+pat com !defined($1)
+with DD_REG STACK
+    uses AA_REG
+    gen move_l sp, %a
+	asr_l {shconst, 2}, %1
+	sub_l {const, 1}, %1
+	1:
+	not_l {post_inc4, %a}
+	dbf %1, {slabel, 1b}
+
+pat rol $1==4
+with D_REG DD_REG
+    gen rol_l %1, %2	yields	%2
+
+pat ror $1==4
+with D_REG DD_REG
+    gen ror_l %1, %2	yields	%2
+
+	
+
+
+/************************************************
+ * Group 10: sets				*
+ ************************************************/
+
+
+pat inn $1==4
+with conreg2 DD_REG
+    gen btst %1, %2
+	sne %2
+	and_l {const, 1}, %2
+			yields	%2
+
+pat inn defined($1)
+with any4 STACK
+    gen move %1, d0
+	move {const, $1}, d1
+	jsr {absolute4, ".inn"}
+			yields	d0
+
+pat inn !defined($1)
+with any4 any4 STACK
+    gen move %2, d0
+	move %1, d1
+	jsr {absolute4, ".inn"}
+			yields	d0
+
+pat loc inn $2==4 && small($1)
+with DD_REG
+    gen asr_l {shconst, $1}, %1
+	and_l {const, 1}, %1
+			yields	%1
+
+pat set $1==4
+with conreg2
+    uses DD_REG = {const, 0}
+    gen bset %1, %a	yields	%a
+
+pat set $1>4
+with any4 STACK
+    gen move %1, d0
+	move {const, $1}, d1
+	jsr {absolute4, ".set"}
+
+pat set !defined($1)
+with any4 any4 STACK
+    gen move %2, d0
+	move %1, d1
+	jsr {absolute4, ".set"}
+
+
+
+
+/************************************************
+ * Group 11: arrays				*
+ ************************************************/
+
+
+pat lar defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".lar"}
+
+pat lar !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".lar"}
+
+pat sar defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".sar"}
+
+pat sar !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".sar"}
+
+pat aar defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".aar"}
+			yields	a0
+
+pat aar !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".aar"}
+			yields	a0
+
+pat lae lar $2==4 && nicesize(rom($1,3))
+				leaving lae $1 aar 4 loi rom($1, 3)
+pat lae sar $2==4 && nicesize(rom($1,3))
+				leaving lae $1 aar 4 sti rom($1, 3)
+
+pat lae aar $2==4 && rom($1,3)==1
+				leaving ads 4 adp 0-rom($1,1)
+
+#ifdef m68020
+pat lae aar $2==4 && nicesize(rom($1,3))
+with D_REG		yields	{regX, rom($1,3), %1}
+				leaving ads 4 adp rom($1,3)*(0-rom($1,1))
+#else m68020
+pat lae aar $2==4 && rom($1,3)==2
+with DD_REG
+    gen asl_l {shconst, 1}, %1
+			yields	%1
+				leaving ads 4 adp (0 - rom($1,1))<<1
+
+pat lae aar $2==4 && rom($1,3)==4
+with DD_REG
+    gen asl_l {shconst, 2}, %1
+			yields	%1
+				leaving ads 4 adp (0 - rom($1,1))<<2
+
+pat lae aar $2==4 && rom($1,3)==8
+with DD_REG
+    gen asl_l {shconst, 3}, %1
+			yields	%1
+				leaving ads 4 adp (0 - rom($1,1))<<3
+#endif m68020
+
+	/* I WOULD ALSO LIKE THESE:
+	 * pat lae aar $2==4 && defined(rom($1,3))
+	 * with const 		leaving adp rom($1,3)*(%1.num-rom($1,1))
+	 * pat lae lar $2==4 && defined(rom($1,3))
+	 * with const		leaving adp rom($1,3)*(%1.num-rom($1,1))
+	 *				loi rom($1,3)
+	 * pat lae sar $2==4 && defined(rom($1,3))
+	 * with const		leaving adp rom($1,3)*(%1.num-rom($1,1))
+	 *				sti rom($1,3)
+	 * BUT THEY DON'T WORK.
+	 */
+
+
+
+/************************************************
+ * Group 12: compare instructions		*
+ ************************************************/
+
+
+pat cmi $1==4			leaving sbi 4
+
+pat cmi defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".cmi"}
+			yields	d0
+
+pat cmi !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".cmi"}
+			yields	d0
+
+pat cmu $1==4			leaving sbi 4
+
+pat cmu defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".cmu"}
+			yields	d0
+
+pat cmu !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".cmu"}
+			yields	d0
+
+pat cms $1==4			leaving sbi 4
+
+pat cms defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".cms"}
+			yields	d0
+
+pat cms !defined($1)
+with any4 STACK
+    gen move %1, d0
+	jsr {absolute4, ".cms"}
+			yields	d0
+
+pat cmp				leaving cmu 4
+
+proc txx
+with test_set
+    uses DD_REG = {const, 1}
+    gen test %1
+	bxx* {slabel, 1f}
+	clr_l %a
+	1:
+			yields	%a
+
+pat tlt					call txx("blt")
+pat tle					call txx("ble")
+pat teq					call txx("beq")
+pat tne					call txx("bne")
+pat tge					call txx("bge")
+pat tgt					call txx("bgt")
+
+pat cmf				leaving loc 18 trp
+
+
+
+/************************************************
+ * Group 13: branch instructions		*
+ ************************************************/
+
+pat bra
+with STACK
+    gen bra {llabel, $1}
+
+proc brxx example beq
+with any4 genreg STACK
+    gen cmp_l %1, %2
+	bxx[1] {llabel, $1}
+with genreg any4 STACK
+    gen cmp_l %2, %1
+	bxx[2] {llabel, $1}
+with exact immediate4 imm_cmp4
+    kills ALL
+    gen cmp_l %1, %2
+	bxx[1] {llabel, $1}
+with exact imm_cmp4 immediate4
+    kills ALL
+    gen cmp_l %2, %1
+	bxx[2] {llabel, $1}
+with genreg STACK
+    gen cmp_l {post_inc4, sp}, %1
+	bxx[2] {llabel, $1}
+with exact immediate4 STACK
+    gen cmp_l %1, {post_inc4, sp}
+	bxx[1] {llabel, $1}
+with any2-conreg2 genreg STACK
+    gen cmp_w %1, %2
+	bxx[1] {llabel, $1}
+with genreg any2-conreg2 STACK
+    gen cmp_w %2, %1
+	bxx[2] {llabel, $1}
+with exact const imm_cmp2
+    kills ALL
+    gen cmp_w {const, loww(%1.num)}, %2
+	bxx[1] {llabel, $1}
+with exact imm_cmp2 const
+    kills ALL
+    gen cmp_w {const, loww(%2.num)}, %1
+	bxx[2] {llabel, $1}
+with data1-conreg1 D_REG STACK
+    gen cmp_b %1, %2
+	bxx[1] {llabel, $1}
+with D_REG data1-conreg1 STACK
+    gen cmp_b %2, %1
+	bxx[2] {llabel, $1}
+with exact const imm_cmp1
+    kills ALL
+    gen cmp_b {const, lowb(%1.num)}, %2
+	bxx[1] {llabel, $1}
+with exact imm_cmp1 const
+    kills ALL
+    gen cmp_b {const, lowb(%2.num)}, %1
+	bxx[2] {llabel, $1}
+
+pat blt					call brxx("blt","bgt")
+pat ble					call brxx("ble","bge")
+pat beq					call brxx("beq","beq")
+pat bne					call brxx("bne","bne")
+pat bge					call brxx("bge","ble")
+pat bgt					call brxx("bgt","blt")
+
+proc zxx example zeq
+with test_set STACK
+    gen test %1
+	bxx* {llabel, $1}
+with exact STACK
+    gen test {post_inc4, sp}
+	bxx* {llabel, $1}
+
+pat zlt					call zxx("blt")
+pat zle					call zxx("ble")
+pat zeq					call zxx("beq")
+pat zne					call zxx("bne")
+pat zge					call zxx("bge")
+pat zgt					call zxx("bgt")
+
+/************************************************
+ * Group 14: procedure calls instructions	*
+ ************************************************/
+
+
+pat cai
+with exact ext_addr
+    kills ALL
+    gen jsr {absolute4, %1.bd}
+with A_REG STACK
+    gen jsr {indirect4, %1}
+with STACK
+    uses AA_REG = {post_inc4, sp}
+    gen jsr {indirect4, %a}
+#ifdef m68020
+with exact address
+    kills ALL
+    gen jsr %1
+#else m68020
+with address STACK
+    gen jsr %1
+#endif m68020
+
+pat cal
+with STACK
+    gen jsr {absolute4, $1}
+
+pat lfr $1==4		yields	d0
+pat lfr $1==8		yields	d1 d0
+
+pat ret $1==0
+with STACK
+    gen return
+
+pat ret $1==4
+with any4 STACK
+    gen move %1, d0
+	return
+with STACK
+    gen move {post_inc4, sp}, d0
+	return
+
+pat ret $1==8
+with any4 any4 STACK
+    gen move %1, d0
+	move %2, d1
+	return
+with any4 STACK
+    gen move %1, d0
+	move {post_inc4, sp}, d1
+	return
+with STACK
+    gen move {post_inc4, sp}, d0
+	move {post_inc4, sp}, d1
+	return
+
+
+/************************************************
+ * Group 15: miscellaneous instructions		*
+ ************************************************/
+
+pat asp small($1)
+with STACK
+    gen add_l {const, $1}, sp
+pat asp
+with STACK
+    gen move {regAcon, sp, $1}, sp
+
+pat ass $1==4
+with any4 STACK
+    gen add_l %1, sp
+
+pat blm $1==4
+with A_REG A_REG
+    kills allexceptcon
+    gen move_l {indirect4, %2}, {indirect4, %1}
+
+pat blm $1==8
+with A_REG A_REG
+    kills allexceptcon
+    gen	move_l {indirect4, %2}, {indirect4, %1}
+	move_l {offsetted4, %2, 4}, {offsetted4, %1, 4}
+
+pat blm $1>8
+with AA_REG AA_REG
+    kills allexceptcon
+    uses DD_REG={const, $1/4 -1}
+    gen 1:
+	move_l {post_inc4, %2}, {post_inc4, %1}
+	dbf %a, {slabel, 1b}
+
+pat bls $1==4
+with DD_REG AA_REG AA_REG
+    kills allexceptcon
+    gen asr_l {shconst, 2}, %1
+	beq {slabel, 2f}
+	sub_l {const, 1}, %1
+	1:
+	move_l {post_inc4, %3}, {post_inc4, %2}
+	dbf %1, {slabel, 1b}
+	2:
+
+pat csa $1==4
+with STACK
+    gen jmp {absolute4, ".csa"}
+
+pat csb $1==4
+with STACK
+    gen jmp {absolute4, ".csb"}
+
+pat dch				leaving loi 4
+
+pat dup $1==4
+with exact STACK
+    gen move_l {indirect4, sp}, {pre_dec4, sp}
+with any4		yields	%1 %1
+
+pat dup $1==8
+with exact STACK
+    gen move_l {offsetted4, sp, 4}, {pre_dec4, sp}
+	move_l {offsetted4, sp, 4}, {pre_dec4, sp}
+with any4 any4		yields	%2 %1 %2 %1
+
+pat dup $1>8
+with STACK
+    uses DD_REG = {const, $1/4 -1}
+    gen 1:
+	move_l {offsetted4, sp, $1 -4}, {pre_dec4, sp}
+	dbf %a, {slabel, 1b}
+
+pat dus $1==4
+with DD_REG STACK
+    uses AA_REG = {regAregXcon, sp, %1, 1, 0}
+    gen asr_l {shconst, 2}, %1
+	beq {slabel, 2f}
+	sub_l {const, 1}, %1
+	1:
+	move_l {pre_dec4, %a}, {pre_dec4, sp}
+	dbf %1, {slabel, 1b}
+	2:
+
+pat exg $1==4
+with any4 any4		yields	%1 %2
+
+pat exg defined($1)
+with STACK
+    gen move {const, $1}, d0
+	jsr {absolute4, ".exg"}
+
+pat exg !defined($1)
+with any4 STACK
+    gen move_l %1, d0
+	jsr {absolute4, ".exg"}
+
+pat fil
+    gen move_l {ext_addr, $1}, {absolute4, ".filn"}
+
+pat gto
+with STACK
+    uses AA_REG = {ext_addr, $1}
+    gen move_l {offsetted4, %a, 8}, lb
+	move_l {offsetted4, %a, 4}, sp
+#ifdef m68020
+	jmp {OFF_off4, %a, 0, 0}
+#else m68020
+	move_l {indirect4, %a}, %a
+	jmp {indirect4, %a}
+#endif m68020
+
+pat lim			yields	{absolute4, ".trpim"}
+
+pat lin
+    gen move {const, $1}, {absolute4, ".lino"}
+    
+pat lni
+    gen add_l {const, 1}, {absolute4, ".lino"}
+
+pat lor $1==0		yields	lb
+
+pat lor $1==1
+with STACK
+    uses AA_REG = sp	yields	%a
+
+pat lor $1==2		yields	{absolute4, ".reghp"}
+
+pat lpb				leaving adp 8
+
+pat mon
+with STACK
+    gen jsr {absolute4, ".mon"}
+
+pat nop
+with STACK
+    gen jsr {absolute4, ".nop"}
+
+pat rck
+#ifdef m68020
+with ext_addr D_REG
+    gen cmp2_l {absolute4, %1.bd}, %2
+	bcc {slabel, 1f}
+	pea {absolute4, 1}			/* push constant 1 == ERANGE */
+	jsr {absolute4, ".trp"}
+	1:			yields	%2
+with address-ext_addr D_REG
+    gen cmp2_l %1, %2
+	bcc {slabel, 1f}
+	pea {absolute4, 1}			/* push constant 1 == ERANGE */
+	jsr {absolute4, ".trp"}
+	1:			yields	%2
+with A_REG D_REG
+    gen cmp2_l {indirect4, %1}, %2
+	bcc {slabel, 1f}
+	pea {absolute4, 1}			/* push constant 1 == ERANGE */
+	jsr {absolute4, ".trp"}
+	1:			yields	%2
+#else m68020
+with STACK
+    gen jsr {absolute4, ".rck"}
+#endif m68020
+
+pat rtt				leaving ret 0
+
+pat sig
+with any4
+    uses AA_REG
+    gen move {absolute4, ".trppc"}, %a
+	move %1, {absolute4, ".trppc"}
+			yields	%a
+
+pat sim
+with any4
+    gen move_l %1, {absolute4, ".trpim"}
+
+pat str $1==0
+with any4
+#ifdef m68020
+    kills LOCAL, ILOCAL, all_regind %reg==lb, local_addr
+#else m68020
+    kills LOCAL, all_regind %reg==lb, local_addr
+#endif m68020
+    gen move %1, lb
+
+pat str $1==1
+with any4 STACK
+    gen move %1, sp
+
+pat str $1==2
+with STACK
+    gen jsr {absolute4, ".strhp"}
+
+pat trp
+with STACK
+    gen jsr {absolute4, ".trp"}
+ 
+
+
+/************************************************
+ * rules for long EM-patterns			*
+ ************************************************/
+
+proc lolxxxstl example lol adi stl
+with conreg4
+    kills all_indir, LOCAL %bd==$1
+    gen xxx* %1, {LOCAL, $1}
+
+proc loexxxste example loe adi ste
+with conreg4
+    kills posextern
+    gen xxx* %1, {absolute4, $1}
+
+proc lilxxxsil example lil adi sil
+with conreg4
+#ifdef m68020
+    kills allexceptcon
+    gen xxx* %1, {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen xxx* %1, {indirect4, %a}
+#endif m68020
+
+proc lolcxxxstl example lol loc adi stl
+    kills all_indir, LOCAL %bd==$1
+    gen xxx* {const, $2}, {LOCAL, $1}
+
+proc loecxxxste example loe loc adi ste
+    kills posextern
+    gen xxx* {const, $2}, {absolute4, $1}
+
+proc lilcxxxsil example lil loc adi sil
+#ifdef m68020
+    kills allexceptcon
+    gen xxx* {const, $2}, {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen xxx* {const, $2}, {indirect4, %a}
+#endif m68020
+
+proc lolrxxxstl example lol lol adi stl
+    kills all_indir, LOCAL %bd==$1
+    gen xxx* {LOCAL, $2}, {LOCAL, $1}
+
+proc loerxxxste example loe lol adi ste
+    kills posextern
+    gen xxx* {LOCAL, $2}, {absolute4, $1}
+
+proc lilrxxxsil example lil lol adi sil
+#ifdef m68020
+    kills allexceptcon
+    gen xxx* {LOCAL, $2}, {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen xxx* {LOCAL, $2}, {indirect4, %a}
+#endif m68020
+
+pat lol adi stl $1==$3 && $2==4		call lolxxxstl("add.l")
+pat loe adi ste $1==$3 && $2==4		call loexxxste("add.l")
+pat lil adi sil $1==$3 && $2==4		call lilxxxsil("add.l")
+pat lol loc adi stl $1==$4 && $3==4	call lolcxxxstl("add.l")
+pat loe loc adi ste $1==$4 && $3==4	call loecxxxste("add.l")
+pat lil loc adi sil $1==$4 && $3==4	call lilcxxxsil("add.l")
+pat lol lol adi stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("add.l")
+pat loe lol adi ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("add.l")
+pat lil lol adi sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("add.l")
+
+pat lol adu stl $1==$3 && $2==4		call lolxxxstl("add.l")
+pat loe adu ste $1==$3 && $2==4		call loexxxste("add.l")
+pat lil adu sil $1==$3 && $2==4		call lilxxxsil("add.l")
+pat lol loc adu stl $1==$4 && $3==4	call lolcxxxstl("add.l")
+pat loe loc adu ste $1==$4 && $3==4	call loecxxxste("add.l")
+pat lil loc adu sil $1==$4 && $3==4	call lilcxxxsil("add.l")
+pat lol lol adu stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("add.l")
+pat loe lol adu ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("add.l")
+pat lil lol adu sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("add.l")
+
+
+pat lol adp stl $1==$3
+    kills all_indir, LOCAL %bd==$1
+    gen add_l {const, $2}, {LOCAL, $1}
+
+pat lil adp sil $1==$3
+    kills allexceptcon
+#ifdef m68020
+    gen add_l {const, $2}, {ILOCAL, $1}
+#else m68020
+    uses AA_REG = {LOCAL, $1}
+    gen add_l {const, $2}, {indirect4, %a}
+#endif m68020
+
+pat loe adp ste $1==$3
+    kills posextern
+    gen add_l {const, $2}, {absolute4, $1}
+
+pat lol lol adp stl $1==$2 && $1==$4
+    kills all_indir, LOCAL %bd==$1
+    uses AA_REG = {LOCAL, $1}
+    gen add_l {const, $3}, {LOCAL, $1}
+			yields	%a
+
+pat lil lil adp sti $1==$2 && $1==$4
+    kills allexceptcon
+#ifdef m68020
+    uses AA_REG = {ILOCAL, $1}
+    gen add_l {const, $3}, {ILOCAL, $1}
+#else m68020
+    uses AA_REG, AA_REG = {LOCAL, $1}
+    gen move {indirect4, %b}, %a
+	add_l {const, $3}, {indirect4, %b}
+#endif m68020
+			yields	%a
+
+pat loe loe adp ste $1==$2 && $1==$4
+    kills posextern
+    uses AA_REG = {absolute4, $1}
+    gen add_l {const, $3}, {absolute4, $1}
+			yields	%a
+
+
+pat lol loc sbi stl $1==$4 && $3==4	call lolcxxxstl("sub.l")
+pat loe loc sbi ste $1==$4 && $3==4	call loecxxxste("sub.l")
+pat lil loc sbi sil $1==$4 && $3==4	call lilcxxxsil("sub.l")
+pat lol lol sbi stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("sub.l")
+pat loe lol sbi ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("sub.l")
+pat lil lol sbi sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("sub.l")
+
+pat lol loc sbu stl $1==$4 && $3==4	call lolcxxxstl("sub.l")
+pat loe loc sbu ste $1==$4 && $3==4	call loecxxxste("sub.l")
+pat lil loc sbu sil $1==$4 && $3==4	call lilcxxxsil("sub.l")
+pat lol lol sbu stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("sub.l")
+pat loe lol sbu ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("sub.l")
+pat lil lol sbu sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("sub.l")
+
+pat lol and stl $1==$3 && $2==4		call lolxxxstl("and.l")
+pat loe and ste $1==$3 && $2==4		call loexxxste("and.l")
+pat lil and sil $1==$3 && $2==4		call lilxxxsil("and.l")
+pat lol loc and stl $1==$4 && $3==4	call lolcxxxstl("and.l")
+pat loe loc and ste $1==$4 && $3==4	call loecxxxste("and.l")
+pat lil loc and sil $1==$4 && $3==4	call lilcxxxsil("and.l")
+pat lol lol and stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("and.l")
+pat loe lol and ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("and.l")
+pat lil lol and sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("and.l")
+
+pat lol ior stl $1==$3 && $2==4		call lolxxxstl("or.l")
+pat loe ior ste $1==$3 && $2==4		call loexxxste("or.l")
+pat lil ior sil $1==$3 && $2==4		call lilxxxsil("or.l")
+pat lol loc ior stl $1==$4 && $3==4	call lolcxxxstl("or.l")
+pat loe loc ior ste $1==$4 && $3==4	call loecxxxste("or.l")
+pat lil loc ior sil $1==$4 && $3==4	call lilcxxxsil("or.l")
+pat lol lol ior stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("or.l")
+pat loe lol ior ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("or.l")
+pat lil lol ior sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("or.l")
+
+pat lol xor stl $1==$3 && $2==4		call lolxxxstl("eor.l")
+pat loe xor ste $1==$3 && $2==4		call loexxxste("eor.l")
+pat lil xor sil $1==$3 && $2==4		call lilxxxsil("eor.l")
+pat lol loc xor stl $1==$4 && $3==4	call lolcxxxstl("eor.l")
+pat loe loc xor ste $1==$4 && $3==4	call loecxxxste("eor.l")
+pat lil loc xor sil $1==$4 && $3==4	call lilcxxxsil("eor.l")
+pat lol lol xor stl $1==$4 && $3==4 && inreg($2)==reg_any
+					call lolrxxxstl("eor.l")
+pat loe lol xor ste $1==$4 && $3==4 && inreg($2)==reg_any
+					call loerxxxste("eor.l")
+pat lil lol xor sil $1==$4 && $3==4 && inreg($2)==reg_any
+					call lilrxxxsil("eor.l")
+
+proc llol1shstl example lol loc sli stl		/* only left */
+    kills all_indir, LOCAL %bd==$1
+    gen shw* {offsetted2, lb, $1+2}
+	roxl {offsetted2, lb, $1}
+
+proc lloe1shste example loe loc sli ste		/* only left */
+    kills posextern
+    gen shw* {absolute2, $1+2}
+	roxl {absolute2, $1}
+
+proc llil1shsil example lil loc sli sil		/* only left */
+#ifdef m68020
+    kills allexceptcon
+    gen shw* {OFF_off2, lb, $1, 2}
+	roxl {OFF_off2, lb, $1, 0}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen shw* {offsetted2, %a, 2}
+	roxl {indirect2, %a}
+#endif m68020
+
+proc rlol1shstl example lol loc sri stl		/* only right */
+    kills all_indir, LOCAL %bd==$1
+    gen shw* {offsetted2, lb, $1}
+	roxr {offsetted2, lb, $1+2}
+
+proc rloe1shste example loe loc sri ste		/* only right */
+    kills posextern
+    gen shw* {absolute2, $1}
+	roxr {absolute2, $1+2}
+
+proc rlil1shsil example lil loc sri sil		/* only right */
+#ifdef m68020
+    kills allexceptcon
+    gen shw* {OFF_off2, lb, $1, 0}
+	roxr {OFF_off2, lb, $1, 2}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen shw* {indirect2, %a}
+	roxr {offsetted2, %a, 2}
+#endif m68020
+
+pat lol loc sli stl $1==$4 && $2==1 && $3==4	call llol1shstl("asl #1,")
+pat loe loc sli ste $1==$4 && $2==1 && $3==4	call lloe1shste("asl #1,")
+pat lil loc sli sil $1==$4 && $2==1 && $3==4	call llil1shsil("asl #1,")
+pat lol loc sri stl $1==$4 && $2==1 && $3==4	call rlol1shstl("asr #1,")
+pat loe loc sri ste $1==$4 && $2==1 && $3==4	call rloe1shste("asr #1,")
+pat lil loc sri sil $1==$4 && $2==1 && $3==4	call rlil1shsil("asr #1,")
+pat lol loc slu stl $1==$4 && $2==1 && $3==4	call llol1shstl("asl #1,")
+pat loe loc slu ste $1==$4 && $2==1 && $3==4	call lloe1shste("asl #1,")
+pat lil loc slu sil $1==$4 && $2==1 && $3==4	call llil1shsil("asl #1,")
+pat lol loc sru stl $1==$4 && $2==1 && $3==4	call rlol1shstl("lsr #1,")
+pat loe loc sru ste $1==$4 && $2==1 && $3==4	call rloe1shste("lsr #1,")
+pat lil loc sru sil $1==$4 && $2==1 && $3==4	call rlil1shsil("lsr #1,")
+
+proc locsh example loc sli
+with DD_REG
+    gen sh* {shconst, $1}, %1
+			yields	%1
+
+pat loc sli small($1) && $2==4		call locsh("asl.l")
+pat loc sri small($1) && $2==4		call locsh("asr.l")
+pat loc slu small($1) && $2==4		call locsh("asl.l")
+pat loc sru small($1) && $2==4		call locsh("lsr.l")
+pat loc rol small($1) && $2==4		call locsh("rol.l")
+pat loc ror small($1) && $2==4		call locsh("ror.l")
+
+proc lolbitstl example lol ngi stl
+    kills all_indir, LOCAL %bd==$1
+    gen bit* {LOCAL, $1}
+
+proc loebitste example loe ngi ste
+    kills posextern
+    gen bit* {absolute4, $1}
+
+proc lilbitsil example lil ngi sil
+#ifdef m68020
+    kills allexceptcon
+    gen bit* {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen bit* {indirect4, %a}
+#endif m68020
+
+pat lol ngi stl $1==$3 && $2==4		call lolbitstl("neg.l")
+pat loe ngi ste $1==$3 && $2==4		call loebitste("neg.l")
+pat lil ngi sil $1==$3 && $2==4		call lilbitsil("neg.l")
+pat lol com stl $1==$3 && $2==4		call lolbitstl("not.l")
+pat loe com ste $1==$3 && $2==4		call loebitste("not.l")
+pat lil com sil $1==$3 && $2==4		call lilbitsil("not.l")
+
+pat lil inc sil $1==$3
+#ifdef m68020
+    kills allexceptcon
+    gen add_l {const, 1}, {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen add_l {const, 1}, {indirect4, %a}
+#endif m68020
+
+pat lil dec sil $1==$3
+#ifdef m68020
+    kills allexceptcon
+    gen sub_l {const, 1}, {ILOCAL, $1}
+#else m68020
+    kills allexceptcon
+    uses AA_REG = {LOCAL, $1}
+    gen sub_l {const, 1}, {indirect4, %a}
+#endif m68020
+
+
+proc txxand
+with test_set DD_REG
+    gen test %1
+	bxx* {slabel, 1f}
+	clr_l %2
+	1:		yields	%2
+
+proc txxior
+with test_set DD_REG
+    gen test %1
+	bxx* {slabel, 1f}
+	bset {const, 0}, %2
+	1:		yields	%2
+
+pat tlt and $2==4			call txxand("blt")
+pat tle and $2==4			call txxand("ble")
+pat teq and $2==4			call txxand("beq")
+pat tne and $2==4			call txxand("bne")
+pat tge and $2==4			call txxand("bge")
+pat tgt and $2==4			call txxand("bgt")
+
+pat tlt ior $2==4			call txxior("bge")
+pat tle ior $2==4			call txxior("bgt")
+pat teq ior $2==4			call txxior("bne")
+pat tne ior $2==4			call txxior("beq")
+pat tge ior $2==4			call txxior("blt")
+pat tgt ior $2==4			call txxior("ble")
+
+proc cmxtxxand
+with any4 genreg DD_REG
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	clr_l %3
+	1:		yields	%3
+with genreg any4-genreg DD_REG
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	clr_l %3
+	1:		yields	%3
+with exact immediate4 imm_cmp4 DD_REG
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	clr_l %3
+	1:		yields	%3
+with exact imm_cmp4 immediate4 DD_REG
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	clr_l %3
+	1:		yields	%3
+
+proc cmxtxxior
+with any4 genreg DD_REG
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	move {const, 1},  %3
+	1:		yields	%3
+with genreg any4-genreg DD_REG
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	move {const, 1},  %3
+	1:		yields	%3
+with exact immediate4 imm_cmp4 DD_REG
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	move {const, 1},  %3
+	1:		yields	%3
+with exact imm_cmp4 immediate4 DD_REG
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	move {const, 1},  %3
+	1:		yields	%3
+
+proc cmxtxx
+with any4 genreg
+    uses DD_REG = {const, 1}
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+with genreg any4-genreg
+    uses DD_REG = {const, 1}
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+with exact immediate4 imm_cmp4
+    uses DD_REG = {const, 1}
+    gen cmp_l %1, %2
+	bxx[1] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+with exact imm_cmp4 immediate4 
+    uses DD_REG = {const, 1}
+    gen cmp_l %2, %1
+	bxx[2] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+with genreg STACK
+    uses DD_REG = {const, 1}
+    gen cmp_l {post_inc4, sp}, %1
+	bxx[2] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+with exact immediate4 STACK
+    uses DD_REG = {const, 1}
+    gen cmp_l %1, {post_inc4, sp}
+	bxx[1] {slabel, 1f}
+	clr_l %a
+	1:		yields	%a
+
+pat cmi tlt and $1==4 && $3==4		call cmxtxxand("blt","bgt")
+pat cmi tle and $1==4 && $3==4		call cmxtxxand("ble","bge")
+pat cmi teq and $1==4 && $3==4		call cmxtxxand("beq","beq")
+pat cmi tne and $1==4 && $3==4		call cmxtxxand("bne","bne")
+pat cmi tge and $1==4 && $3==4		call cmxtxxand("bge","ble")
+pat cmi tgt and $1==4 && $3==4		call cmxtxxand("bgt","blt")
+
+pat cmu tlt and $1==4 && $3==4		call cmxtxxand("bcs","bhi")
+pat cmu tle and $1==4 && $3==4		call cmxtxxand("bls","bcc")
+pat cmu teq and $1==4 && $3==4		call cmxtxxand("beq","beq")
+pat cmu tne and $1==4 && $3==4		call cmxtxxand("bne","bne")
+pat cmu tge and $1==4 && $3==4		call cmxtxxand("bcc","bls")
+pat cmu tgt and $1==4 && $3==4		call cmxtxxand("bhi","bcs")
+
+pat cmi tlt ior $1==4 && $3==4		call cmxtxxior("bge","ble")
+pat cmi tle ior $1==4 && $3==4		call cmxtxxior("bgt","blt")
+pat cmi teq ior $1==4 && $3==4		call cmxtxxior("bne","bne")
+pat cmi tne ior $1==4 && $3==4		call cmxtxxior("beq","beq")
+pat cmi tge ior $1==4 && $3==4		call cmxtxxior("blt","bgt")
+pat cmi tgt ior $1==4 && $3==4		call cmxtxxior("ble","bge")
+
+pat cmu tlt ior $1==4 && $3==4		call cmxtxxior("bcc","bls")
+pat cmu tle ior $1==4 && $3==4		call cmxtxxior("bhi","bcs")
+pat cmu teq ior $1==4 && $3==4		call cmxtxxior("bne","bne")
+pat cmu tne ior $1==4 && $3==4		call cmxtxxior("beq","beq")
+pat cmu tge ior $1==4 && $3==4		call cmxtxxior("bcs","bhi")
+pat cmu tgt ior $1==4 && $3==4		call cmxtxxior("bls","bcc")
+
+pat cmi tlt $1==4			call cmxtxx("blt","bgt")
+pat cmi tle $1==4			call cmxtxx("ble","bge")
+pat cmi teq $1==4			call cmxtxx("beq","beq")
+pat cmi tne $1==4			call cmxtxx("bne","bne")
+pat cmi tge $1==4			call cmxtxx("bge","blt")
+pat cmi tgt $1==4			call cmxtxx("bgt","blt")
+
+pat cmu tlt $1==4			call cmxtxx("bcs","bhi")
+pat cmu tle $1==4			call cmxtxx("bls","bcc")
+pat cmu teq $1==4			call cmxtxx("beq","beq")
+pat cmu tne $1==4			call cmxtxx("bne","bne")
+pat cmu tge $1==4			call cmxtxx("bcc","bls")
+pat cmu tgt $1==4			call cmxtxx("bhi","bcs")
+
+proc cmxzxx example cmu zlt
+with any4 genreg STACK
+    gen cmp_l %1, %2
+	bxx[1] {llabel, $2}
+with genreg any4-genreg STACK
+    gen cmp_l %2, %1
+	bxx[2] {llabel, $2}
+with exact immediate4 imm_cmp4
+    kills ALL
+    gen cmp_l %1, %2
+	bxx[1] {llabel, $2}
+with exact imm_cmp4 immediate4
+    kills ALL
+    gen cmp_l %2, %1
+	bxx[2] {llabel, $2}
+with genreg STACK
+    gen cmp_l {post_inc4, sp}, %1
+	bxx[2] {llabel, $2}
+with exact immediate4 STACK
+    gen cmp_l %1, {post_inc4, sp}
+	bxx[1] {llabel, $2}
+
+pat cmu zlt $1==4			call cmxzxx("bcs","bhi")
+pat cmu zle $1==4			call cmxzxx("bls","bcc")
+pat cmu zeq $1==4			call cmxzxx("beq","beq")
+pat cmu zne $1==4			call cmxzxx("bne","bne")
+pat cmu zge $1==4			call cmxzxx("bcc","bls")
+pat cmu zgt $1==4			call cmxzxx("bhi","bcs")
+
+
+proc bxx1_in example loc loc cii loc bne
+with imm_cmp1 STACK
+    gen cmp_b {const, lowb($4)}, %1
+	bxx* {llabel, $5}
+
+proc bxx2_in example loc loc cii loc bne
+with imm_cmp2 STACK
+    gen cmp_w {const, loww($4)}, %1
+	bxx* {llabel, $5}
+
+pat loc loc cii loc blt $1==1 && $2==4 && in_1($4)	call bxx1_in("blt")
+pat loc loc cii loc ble $1==1 && $2==4 && in_1($4)	call bxx1_in("ble")
+pat loc loc cii loc beq $1==1 && $2==4 && in_1($4)	call bxx1_in("beq")
+pat loc loc cii loc bne $1==1 && $2==4 && in_1($4)	call bxx1_in("bne")
+pat loc loc cii loc bge $1==1 && $2==4 && in_1($4)	call bxx1_in("bge")
+pat loc loc cii loc bgt $1==1 && $2==4 && in_1($4)	call bxx1_in("bgt")
+
+pat loc loc cii loc blt $1==2 && $2==4 && in_2($4)	call bxx2_in("blt")
+pat loc loc cii loc ble $1==2 && $2==4 && in_2($4)	call bxx2_in("ble")
+pat loc loc cii loc beq $1==2 && $2==4 && in_2($4)	call bxx2_in("beq")
+pat loc loc cii loc bne $1==2 && $2==4 && in_2($4)	call bxx2_in("bne")
+pat loc loc cii loc bge $1==2 && $2==4 && in_2($4)	call bxx2_in("bge")
+pat loc loc cii loc bgt $1==2 && $2==4 && in_2($4)	call bxx2_in("bgt")
+
+pat loc loc cii $1==1 && $2==2
+with DD_REG
+    gen ext_w %1	yields	%1
+
+pat loc loc cii $1==2 && $2==4
+with DD_REG
+    gen ext_l %1	yields	%1
+
+pat loc loc cii $1==1 && $2==4
+with DD_REG
+#ifdef m68020
+    gen extb_l %1	yields %1
+#else m68020
+    gen ext_w %1
+	ext_l %1	yields	%1
+#endif m68020
+
+pat loc loc ciu $1==$2	/* skip this */
+pat loc loc cui $1==$2	/* skip this */
+
+
+/* The following rules should be handled by the peephole optimizer, I think */
+
+pat loc dvi $1==2 && $2==4	leaving loc 1 sri 4
+pat loc dvi $1==4 && $2==4	leaving loc 2 sri 4
+pat loc dvi $1==8 && $2==4	leaving loc 3 sri 4
+pat loc dvi $1==16 && $2==4	leaving loc 4 sri 4
+pat loc dvi $1==32 && $2==4	leaving loc 5 sri 4
+pat loc dvi $1==64 && $2==4	leaving loc 6 sri 4
+pat loc dvi $1==128 && $2==4	leaving loc 7 sri 4
+pat loc dvi $1==256 && $2==4	leaving loc 8 sri 4
+
+pat loc dvu $1==2 && $2==4	leaving loc 1 sru 4
+pat loc dvu $1==4 && $2==4	leaving loc 2 sru 4
+pat loc dvu $1==8 && $2==4	leaving loc 3 sru 4
+pat loc dvu $1==16 && $2==4	leaving loc 4 sru 4
+pat loc dvu $1==32 && $2==4	leaving loc 5 sru 4
+pat loc dvu $1==64 && $2==4	leaving loc 6 sru 4
+pat loc dvu $1==128 && $2==4	leaving loc 7 sru 4
+pat loc dvu $1==256 && $2==4	leaving loc 8 sru 4
