@@ -590,7 +590,7 @@ adi $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"adc %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
 						| %[2] %[1] | |(4,6)+%[4]+%[3]
-...		| X_ACC X_REG const rmorconst |
+...		| nocoercions: X_ACC X_REG const rmorconst |
 			"add %[1],%[3]"
 			"adc %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
@@ -600,7 +600,7 @@ adi $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"adc %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
 						| %[4] %[3] | |(4,6)+%[1]+%[2]
-...		| const rmorconst X_ACC X_REG |
+...		| nocoercions: const rmorconst X_ACC X_REG |
 			"add %[3],%[1]"
 			"adc %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
@@ -628,7 +628,7 @@ sbi $1==4	| rmorconst rmorconst X_REG X_REG |
 			"sbb %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
 						| %[4] %[3] | |(4,6)+%[1]+%[2]
-...		| const rmorconst-ACC X_ACC X_REG |
+...		| nocoercions: const rmorconst-ACC X_ACC X_REG |
 			"sub %[3],%[1]"
 			"sbb %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
@@ -1515,8 +1515,7 @@ loc loc cii $1==4 && $2==2	| a_word a_word |    | %[1] | |
 loc loc ciu	| |		|			| loc $1 loc $2 cuu |
 loc loc cui	| |		|			| loc $1 loc $2 cuu |
 loc loc cuu $1==$2		| |		|	|	|
-loc loc cuu $1==2 && $2==4	| a_word |
-			allocate(REG={ANYCON,0})| %[a] %[1] | |
+loc loc cuu $1==2 && $2==4	| a_word |	| {ANYCON,0} %[1] | |
 loc loc cuu $1==4 && $2==2	| a_word a_word |    | %[1] | |
 
 /*
@@ -1647,7 +1646,7 @@ and $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"and %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
 						| %[2] %[1] | |(4,6)+%[4]+%[3]
-...		| X_ACC X_REG const rmorconst |
+...		| nocoercions: X_ACC X_REG const rmorconst |
 			"and %[1],%[3]"
 			"and %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
@@ -1657,7 +1656,7 @@ and $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"and %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
 						| %[4] %[3] | |(4,6)+%[1]+%[2]
-...		| const rmorconst-ACC X_ACC X_REG |
+...		| nocoercions: const rmorconst-ACC X_ACC X_REG |
 			"and %[3],%[1]"
 			"and %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
@@ -1686,7 +1685,7 @@ ior $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"or %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
 						| %[2] %[1] | |(4,6)+%[4]+%[3]
-...		| X_ACC X_REG const rmorconst |
+...		| nocoercions: X_ACC X_REG const rmorconst |
 			"or %[1],%[3]"
 			"or %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
@@ -1696,7 +1695,7 @@ ior $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"or %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
 						| %[4] %[3] | |(4,6)+%[1]+%[2]
-...		| const rmorconst-ACC X_ACC X_REG |
+...		| nocoercions: const rmorconst-ACC X_ACC X_REG |
 			"or %[3],%[1]"
 			"or %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
@@ -1725,7 +1724,7 @@ xor $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"xor %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
 						| %[2] %[1] | |(4,6)+%[4]+%[3]
-...		| X_ACC X_REG const rmorconst |
+...		| nocoercions: X_ACC X_REG const rmorconst |
 			"xor %[1],%[3]"
 			"xor %[2],%[4]"
 			setcc(%[2]) erase(%[1]) erase(%[2])
@@ -1735,7 +1734,7 @@ xor $1==4	| NO X_REG X_REG rmorconst rmorconst |
 			"xor %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
 						| %[4] %[3] | |(4,6)+%[1]+%[2]
-...		| const rmorconst-ACC X_ACC X_REG |
+...		| nocoercions: const rmorconst-ACC X_ACC X_REG |
 			"xor %[3],%[1]"
 			"xor %[4],%[2]"
 			setcc(%[4]) erase(%[3]) erase(%[4])
