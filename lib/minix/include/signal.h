@@ -29,6 +29,7 @@ typedef unsigned short sigset_t;
 #define SIGUSR1           10	/* user defined signal # 1 */
 #define SIGSEGV           11	/* segmentation violation */
 #define SIGUSR2           12	/* user defined signal # 2 */
+#define SIGSYS            12	/* the usual UNIX name for this signal num */
 #define SIGPIPE           13	/* write on a pipe with no one to read it */
 #define SIGALRM           14	/* alarm clock */
 #define SIGTERM           15	/* software termination signal from kill */
