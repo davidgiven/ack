@@ -92,13 +92,29 @@ LLfirst(x, d) {
 # endif
 
 LLnext(n) {
+	/*	returns: 0 if the current symbol is'nt skipped, and it
+			 is'nt a member of "n",
+			 1 if we have a new symbol, but it is'nt a member,
+			 2 if the current symbol is a member,
+			 and 3 if we have a new symbol and it is a member.
+		So, the low order bit indicates wether we have a new symbol,
+		and the next bit indicates wether it is a member of "n".
+	*/
 
-	if (LLskip()) /* nothing */;
-	if (n <= 0) return (LLsets[(LLcsymb >> 3) - n] & (1 << (LLcsymb & 07)));
-	return LLsymb == n;
+	int retval = 0;
+
+	if (LLskip()) retval = 1;
+	if (n <= 0 && LLsets[(LLcsymb >> 3) - n] & (1 << (LLcsymb & 07))) {
+		retval |= 2;
+	}
+	else if (LLsymb == n) retval |= 2;
+	return retval;
 }
 
 LLskip() {
+	/*	returns 0 if the current symbol is'nt skipped, and
+		1 if it is, t.i., we have a new symbol
+	*/
 #ifdef LL_USERHOOK
 	return LLdoskip(0);
 }
@@ -112,16 +128,18 @@ LLuserhook(exp)
 }
 
 LLdoskip(exp) {
+	int LLx;
 #endif LL_USERHOOK
 	register int i;
 	int retval;
 	int LLi, LLb;
 
 	retval = 0;
-	for (;;) {
 #ifdef LL_USERHOOK
-		if (LLuserhook(exp)) continue;
+	LLx = LLuserhook(exp);
+	if (LLx) retval = 1;
 #endif LL_USERHOOK
+	for (;;) {
 		if (LLtcnt[LLcsymb] != 0) return retval;
 		LLi = LLcsymb >> 3;
 		LLb = 1 << (LLcsymb & 07);
@@ -132,6 +150,10 @@ LLdoskip(exp) {
 				}
 			}
 		}
+#ifdef LL_USERHOOK
+		if (LLx) LLx = LLuserhook(exp);
+		if (LLx) continue;
+#endif LL_USERHOOK
 		LLmessage(0);
 		retval = 1;
 		LLread();
