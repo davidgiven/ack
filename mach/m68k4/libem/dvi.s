@@ -3,7 +3,7 @@
  ! signed long divide
 	.text
 .dvi:
-	movem.l	d0/d4,.savdvi
+	movem.l	d0/d2,.savdvi
 	move.l	(sp)+,.retdvi
 	move.l	(sp)+,d0
 	move.l	(sp)+,d1
@@ -30,13 +30,13 @@
 5:
 	tst.l	d4
 	bpl	6f
-	neg.l	d2	! remainder
+	neg.l	d3	! remainder
 6:
-	movem.l .savdvi,d0/d4
+	movem.l .savdvi,d0/d2
 	move.l	.retdvi,-(sp)
 	rts
 .data
-.savdvi:	.space 12
+.savdvi:	.space 8
 .retdvi:	.long 0
 .text
 .align 2
