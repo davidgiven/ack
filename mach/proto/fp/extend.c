@@ -37,24 +37,22 @@ _double	*from;
 EXTEND	*to;
 int	size;
 {
-	DOUBLE	*f;
-	register char *cpt1,*cpt2;
+	register char *cpt1;
 	unsigned long	tmp;
 	int	leadbit = 0;
 
-	f = (DOUBLE *) from;	/* local cast conversion */
-	if (f->_s.p1.fract == 0L) 	{
+	cpt1 = (char *) from;
+	if (((DOUBLE *) cpt1)->_s.p1.fract == 0L) 	{
 		if (size == sizeof(SINGLE))	{
 zero:			zrf_ext(to);
 			return;
 		}
-		else if (f->_s.p2 == 0L)
+		else if (((DOUBLE *) cpt1)->_s.p2 == 0L)
 			goto zero;
 	}
 /*	there is a number to convert so lets get started	*/
 /*	first extract the exponent; its always in the first two bytes */
 
-	cpt1 = (char *) from;
 	to->exp = uget2(cpt1);
 	to->sign = (to->exp & 0x8000);	/* set sign bit */
 	to->exp ^= to->sign;

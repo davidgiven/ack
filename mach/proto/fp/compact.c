@@ -20,15 +20,14 @@ EXTEND	*f;
 _double	*to;
 int	size;
 {
-	DOUBLE	*DBL;
 	int	error = 0;
-	SINGLE	*SGL;
-	int	exact;
 
 	if (size == sizeof(_double)) {
 	/*
 	 * COMPACT EXTENDED INTO DOUBLE
 	 */
+		DOUBLE *DBL;
+
 		if ((f->m1|(f->m2 & DBL_ZERO)) == 0L)	{
 			zrf8(to);
 			return;
@@ -51,10 +50,6 @@ dbl_over:			trap(EFOVFL);
 			
 		/* local CAST conversion		*/
 		DBL = (DOUBLE *) to;
-		/* check if answer is exact		*/
-		/* (the last 11 bits are zero (0)	*/
-
-		exact = ((f->m2 & DBL_EXACT) == 0) ? 1 : 0;
 
 		/* because of special format shift only 10 bits */
 		/* bit shift mantissa 10 bits		*/
@@ -67,8 +62,10 @@ dbl_over:			trap(EFOVFL);
 
 		/* if not exact then round to nearest	*/
 
-		if (!exact)	{
-		    /* INEXACT(); */
+#ifdef EXCEPTION_INEXACT
+		if ((f->m2 & DBL_EXACT) != 0) {
+		    INEXACT();
+#endif
 		    if (f->m2 & DBL_ROUNDUP)	{
 			DBL->_s.p2++;	/* rounding up	*/
 			if (DBL->_s.p2 == 0L) { /* carry out	*/
@@ -80,27 +77,40 @@ dbl_over:			trap(EFOVFL);
 				f->exp++;
 			    }
 			}
+			/*	check for overflow			*/
+			if (f->exp > DBL_MAX)
+		    		goto dbl_over;
 		    }
+#ifdef EXCEPTION_INEXACT
 		}
-		/*	check for overflow			*/
-		if (f->exp > DBL_MAX)
-		    goto dbl_over;
+#endif
 
 		/*
-		 * STORE EXPONENT:
+		 * STORE EXPONENT AND SIGN:
 		 *
 		 * 1) clear leading bits (B4-B15)
 		 * 2) shift and store exponent
 		 */
 
 		DBL->_s.p1.fract &= DBL_MASK;
-		f->exp <<= DBL_EXPSHIFT;
-		DBL->_s.p1.fract |= ((long) f->exp << EXP_STORE);
+		DBL->_s.p1.fract |= 
+			((long) (f->exp << DBL_EXPSHIFT) << EXP_STORE);
+		if (f->sign)
+			DBL->_s.p1.fract |= CARRYBIT;
+
+		/*
+		 * STORE MANTISSA
+		 */
+
+		put4(DBL->_s.p1.fract, (char *) &DBL->_s.p1.fract);
+		put4(DBL->_s.p2, (char *) &DBL->_s.p2);
 	}
 	else {
 		/*
 		 * COMPACT EXTENDED INTO FLOAT
 		 */
+		SINGLE	*SGL;
+
 		/* local CAST conversion		*/
 		SGL = (SINGLE *) to;
 		if ((f->m1 & SGL_ZERO) == 0L)	{
@@ -122,21 +132,16 @@ sgl_over:			trap(EFOVFL);
 			if (error++)
 				return;
 		}
-		/* check if the answer is exact */
-		/* the last 40 bits are zero	*/
-		/* check first last bits of mantissa 1 */
-		exact = ((f->m1 & SGL_EXACT) == 0) ? 1 : 0;
-
-		/* check last 32 bits in mantissa 2	*/
-		if (exact) /* first part masks to zero	*/
-			exact = (f->m2 == 0L) ? 1 : 0;
 
 		/* shift mantissa and store	*/
 		SGL->fract = (f->m1 >> SGL_RUNPACK);
 
 		/* check for rounding to nearest	*/
-		if (!exact)	{
-			/* INEXACT(); */
+#ifdef EXCEPTION_INEXACT
+		if (f->m2 != 0 ||
+		    (f->m1 & SGL_EXACT) != 0L) {
+			INEXACT();
+#endif
 			if (f->m1 & SGL_ROUNDUP) {
 				SGL->fract++;
 			/* check normal */
@@ -144,39 +149,30 @@ sgl_over:			trap(EFOVFL);
 					SGL->fract >>= 1;
 					f->exp++;
 				}
+				if (f->exp > SGL_MAX)
+					goto sgl_over;
 			}
+#ifdef EXCEPTION_INEXACT
 		}
-		if (f->exp > SGL_MAX)
-			goto sgl_over;
+#endif
 
 		/*
-		 * STORE EXPONENT:
+		 * STORE EXPONENT AND SIGN:
 		 *
 		 * 1) clear leading bit of fraction
 		 * 2) shift and store exponent
 		 */
 
 		SGL->fract &= SGL_MASK; /* B23-B31 are 0 */
-		f->exp <<= SGL_EXPSHIFT;
-		SGL->fract |= ((long) f->exp << EXP_STORE);
-	}
+		SGL->fract |= 
+			((long) (f->exp << SGL_EXPSHIFT) << EXP_STORE);
+		if (f->sign)
+			SGL->fract |= CARRYBIT;
 
-	/*
-	 * STORE SIGN BIT
-	 */
-	if (f->sign)	{
-		SGL = (SINGLE *) to;	/* make sure	*/
-		SGL->fract |= CARRYBIT;
-	}
-		
-	/*
-	 * STORE MANTISSA
-	 */
+		/*
+		 * STORE MANTISSA
+		 */
 
-	if (size == sizeof(_double)) {
-		put4(DBL->_s.p1.fract, (char *) &DBL->_s.p1.fract);
-		put4(DBL->_s.p2, (char *) &DBL->_s.p2);
-	}
-	else
 		put4(SGL->fract, (char *) &SGL->fract);
+	}
 }
