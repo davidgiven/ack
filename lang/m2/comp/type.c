@@ -795,6 +795,23 @@ lcm(m, n)
 	return m * (n / gcd(m, n));
 }
 
+t_type *
+intorcard(left, right)
+	register t_type *left, *right;
+{
+	if (left == intorcard_type) {
+		if (right == int_type || right == card_type) {
+			return right;
+		}
+	}
+	else if (right == intorcard_type) {
+		if (left == int_type || left == card_type) {
+			return left;
+		}
+	}
+	return 0;
+}
+
 #ifdef DEBUG
 DumpType(tp)
 	register t_type *tp;

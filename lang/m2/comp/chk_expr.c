@@ -832,13 +832,11 @@ ChkBinOper(expp)
 	tpl = BaseType(expp->nd_left->nd_type);
 	tpr = BaseType(expp->nd_right->nd_type);
 
-	if (tpl == intorcard_type) {
-		if (tpr == int_type || tpr == card_type) {
+	if (intorcard(tpl, tpr) != 0) {
+		if (tpl == intorcard_type) {
 			 expp->nd_left->nd_type = tpl = tpr;
 		}
-	}
-	if (tpr == intorcard_type) {
-		if (tpl == int_type || tpl == card_type) {
+		if (tpr == intorcard_type) {
 			expp->nd_right->nd_type = tpr = tpl;
 		}
 	}

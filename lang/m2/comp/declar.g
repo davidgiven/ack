@@ -400,7 +400,11 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 }:
 	ConstExpression(pnd)
 			{ 
-			  if (*ptp != 0 && ChkCompat(pnd, *ptp, "case label")) {
+			  if (*ptp != 0) {
+				t_type *tp = intorcard(*ptp,
+					BaseType((*pnd)->nd_type), 0);
+				if (tp) *ptp = tp;
+				ChkCompat(pnd, *ptp, "case label");
 			  }
 			  nd = *pnd;
 			  nd->nd_type = BaseType(nd->nd_type);	/* ??? */

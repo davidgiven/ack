@@ -187,6 +187,7 @@ extern t_type
 	*proc_type(),
 	*enum_type(),
 	*qualified_type(),
+	*intorcard(),
 	*RemoveEqual();	/* All from type.c */
 
 #define NULLTYPE ((t_type *) 0)
