@@ -67,8 +67,8 @@ main(argc,argv) char **argv; {
 		freopen(s,"w",stdout);
 	}
 	first = 1; osg = 0;
-	uid = getuid();
-	lock(1);
+	/* uid = getuid(); */
+	/* lock(1); */
 	for (;;) {
 		pc = get2c(stdin);
 		if (feof(stdin))
