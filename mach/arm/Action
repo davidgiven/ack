@@ -13,6 +13,9 @@ end
 name "ARM EM library"
 dir libem
 end
+name "ARM etext,edata,end library"
+dir libend
+end
 name "ARM RiscOs library"
 dir libmon
 end
