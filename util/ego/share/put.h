@@ -1,6 +1,15 @@
  /*  O U T P U T   R O U T I N E S */
 
 
+extern FILE *curoutp;	/* current output file */
+
+#define outbyte(b) putc(b,curoutp)
+extern	outshort();		/* (short i)
+				 * Write a short to curoutp
+				 */
+extern outoff();		/* (offset off)
+				 * Write an offset to curoutp
+				 */
 
 extern	putdtable();		/* (dblock_p head, FILE *df)
 				 * Write the data block table to file df,
@@ -28,15 +37,4 @@ extern short putlines();	/* (line_p l; FILE *lf)
 				 * Output the list of em instructions
 				 * headed by l. Return the number of
 				 * instructions written.
-				 */
-extern putcall();		/* (call_p call; FILE *cfile; short level)
-				 * Write the call 
-				 * with the given id to the given file.
-				 * The level is the nesting level, used by
-				 * putcall when it calls itself recurively.
-				 * It should be 0 on outer levels.
-				 */
-extern long putcc();		/* (calcnt_p head; FILE *ccf)
-				 * Write call-count information to
-				 * file ccf.
 				 */
