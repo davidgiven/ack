@@ -19,7 +19,7 @@ tmpnam(char *s) {
 		name = name_buffer + strlen(name_buffer);
 		name = _i_compute(_getpid(), 10, name, 5);
 		*name++ = '.';
-		*name++ = '\0';
+		*name = '\0';
 	}
 	if (++count > TMP_MAX) count = 1;	/* wrap-around */
 	*_i_compute(count, 10, name, 3) = '\0';
