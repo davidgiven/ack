@@ -1,4 +1,4 @@
-Makefile
+proto.make
 arg_type.h
 dist.c
 em_decl.h
