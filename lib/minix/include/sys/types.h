@@ -22,6 +22,19 @@ typedef unsigned int size_t;	/* type returned by sizeof */
 typedef long time_t;		/* time in sec since 1 Jan 1970 0000 GMT */
 #endif
 
+typedef	unsigned char	u_char;
+typedef	unsigned short	u_short;
+typedef	unsigned int	u_int;
+typedef	unsigned long	u_long;
+
+/* system V compatibility: */
+typedef unsigned int	uint;
+typedef unsigned short	ushort;
+typedef unsigned char	uchar_t;
+typedef short		cnt_t;
+typedef long		paddr_t;
+typedef long		key_t;
+
 /* Types used in disk, inode, etc. data structures. */
 typedef short	       dev_t;	/* holds (major|minor) device pair */
 typedef char	       gid_t;	/* group id */
