@@ -1,6 +1,6 @@
 set -e
 
-PATH=:$CONFIG/bin:$UTIL_HOME/bin:$PATH
+PATH=::$CONFIG/bin:$UTIL_HOME/bin:/usr/ccs/bin:/usr/ucb:$PATH
 export PATH
 
 $SRC_HOME/first/create_dir $CONFIG
