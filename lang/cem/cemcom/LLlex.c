@@ -25,14 +25,16 @@
 /* Data about the token yielded */
 struct token dot, ahead, aside;
 
+#ifndef NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
-int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int PreProcKeys = 0;		/* return preprocessor key		*/
-int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
-int SkipEscNewline = 0;		/* how to interpret backslash-newline	*/
 int Unstacked = 0;		/* an unstack is done 			*/
+#endif
+int SkipEscNewline = 0;		/* how to interpret backslash-newline	*/
+int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
+int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int File_Inserted = 0;		/* a file has just been inserted	*/
 
 #define MAX_LL_DEPTH	2

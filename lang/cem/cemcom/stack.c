@@ -21,6 +21,7 @@
 #include	"struct.h"
 #include	"level.h"
 #include	"mes.h"
+#include	"noRoption.h"
 
 /* #include	<em_reg.h> */
 
@@ -75,16 +76,15 @@ stack_level_of(lvl)
 		The stack should probably be an array, to be extended with
 		realloc where needed.
 	*/
+	register struct stack_level *stl;
+
 	if (lvl == level)
 		return local_level;
-	else	{
-		register struct stack_level *stl = &UniversalLevel;
+	stl = &UniversalLevel;
 		
-		while (stl->sl_level != lvl)
-			stl = stl->sl_next;
-		return stl;
-	}
-	/*NOTREACHED*/
+	while (stl->sl_level != lvl)
+		stl = stl->sl_next;
+	return stl;
 }
 
 unstack_level()
@@ -238,11 +238,13 @@ unstack_world()
 			&& !def->df_initialized
 		)	{
 			/* orphaned static function */
+#ifndef NOROPTION
 			if (options['R'])
 				warning("static function %s never defined, %s",
 					idf->id_text,
 					"changed to extern"
 				);
+#endif
 			def->df_sc = EXTERN;
 		}
 		

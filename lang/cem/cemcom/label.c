@@ -12,28 +12,9 @@
 #include	"arith.h"
 #include	"def.h"
 #include	"type.h"
+#include	"noRoption.h"
 
 extern char options[];
-
-define_label(idf)
-	struct idf *idf;
-{
-	/*	The identifier idf is defined as a label. If it is new,
-		it is entered into the idf list with the largest possible
-		scope, i.e., on the lowest possible level.
-	*/
-	enter_label(idf, 1);
-}
-
-apply_label(idf)
-	struct idf *idf;
-{
-	/*	The identifier idf is applied as a label. It may or may
-		not be there, and if it is there, it may be from a
-		declaration or another application.
-	*/
-	enter_label(idf, 0);
-}
 
 enter_label(idf, defining)
 	register struct idf *idf;
@@ -52,21 +33,22 @@ enter_label(idf, defining)
 								idf->id_text);
 		}
 		else	{		/* there may still be room for it */
-			int deflevel = def->df_level;
-			
+#ifndef NOROPTION
 			if (options['R'] && def->df_sc == TYPEDEF)
 				warning("label %s is also a typedef",
 					idf->id_text);
+#endif
 			
-			if (deflevel == level)	/* but alas, no */
+			if (def->df_level == level)	/* but alas, no */
 				error("%s is not a label", idf->id_text);
 			else	{
-				int lvl;
+				register int lvl = def->df_level + 1;
 				
-				if (options['R'] && deflevel > L_LOCAL)
+#ifndef NOROPTION
+				if (options['R'] && def->df_level > L_LOCAL)
 					warning("label %s is not function-wide",
 								idf->id_text);
-				lvl = deflevel + 1;
+#endif
 				if (lvl < L_LOCAL)
 					lvl = L_LOCAL;
 				add_def(idf, LABEL, label_type, lvl);

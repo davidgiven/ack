@@ -22,6 +22,7 @@
 #include	"level.h"
 #include	"assert.h"
 #include	"sizes.h"
+#include	"noRoption.h"
 
 /*	Type of previous selector declared with a field width specified,
 	if any.  If a selector is declared with no field with it is set to 0.
@@ -76,11 +77,13 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	register struct sdef *newsdef;
 	int lvl = tg->tg_level;
 	
+#ifndef NOROPTION
 	if (options['R'] && !is_anon_idf(idf))	{
 		/* a K & R test */
 		if (idf->id_struct && idf->id_struct->tg_level == level)
 			warning("%s is also a struct/union tag", idf->id_text);
 	}
+#endif
 
 	if (stp->tp_fund == STRUCT)	{
 #ifndef NOBITFIELD
@@ -110,12 +113,14 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	}
 	
 	check_selector(idf, stp);
+#ifndef NOROPTION
 	if (options['R'])	{
 		if (	sdef && sdef->sd_level == lvl &&
-			sdef->sd_offset != offset
-		)				/* RM 8.7 */
+			( sdef->sd_offset != offset || sdef->sd_type != tp )
+		)				/* RM 8.5 */
 			warning("selector %s redeclared", idf->id_text);
 	}
+#endif
 
 	newsdef = new_sdef();
 	newsdef->sd_sdef = (struct sdef *) 0;
@@ -195,6 +200,7 @@ declare_struct(fund, idf, tpp)
 		idf = gen_idf();
 	tgp = (fund == ENUM ? &idf->id_enum : &idf->id_struct);
 	
+#ifndef NOROPTION
 	if (options['R'] && !is_anon_idf(idf))	{
 		/* a K & R test */
 		if (	fund != ENUM &&
@@ -208,6 +214,7 @@ declare_struct(fund, idf, tpp)
 			warning("%s is also a variable", idf->id_text);
 		}
 	}
+#endif
 	
 	tg = *tgp;
 	if (tg && tg->tg_type->tp_size < 0 && tg->tg_type->tp_fund == fund) {
@@ -220,9 +227,11 @@ declare_struct(fund, idf, tpp)
 			declare_struct(fund, gen_idf(), tpp);
 		}
 		else {
+#ifndef NOROPTION
 			if (options['R'] && tg->tg_level != level)
 				warning("%s declares %s in different range",
 					idf->id_text, symbol2str(fund));
+#endif
 			*tpp = tg->tg_type;
 		}
 	}

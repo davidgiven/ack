@@ -2,10 +2,6 @@
 #define PATHLENGTH	1024	/* max. length of path to file		*/
 
 
-!File: idepth.h
-#define	IDEPTH		100	/* maximum nr of stacked input buffers	*/
-
-
 !File: errout.h
 #define	ERROUT		STDERR	/* file pointer for writing messages	*/
 #define	MAXERR_LINE	5	/* maximum number of error messages given
@@ -78,7 +74,7 @@
 
 
 !File: botch_free.h
-#undef BOTCH_FREE	1	/* botch freed memory, as a check	*/
+#undef BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
 
 
 !File: dataflow.h
@@ -109,11 +105,11 @@
 
 
 !File: nopp.h
-#undef NOPP		1	/* use built-int preprocessor	*/
+#undef NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h
-#undef NOBITFIELD	1	/* implement bitfields	*/
+#undef NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
 
 
 !File: spec_arith.h
@@ -126,5 +122,14 @@
 
 
 !File: nofloat.h
-#undef NOFLOAT			/* floats implemented by default */
+#undef NOFLOAT		1	/* if NOT defined, floats are implemented */
+
+
+!File: noRoption.h
+#undef NOROPTION	1	/* if NOT defined, R option is implemented */
+
+
+!File: nocross.h
+#undef NOCROSS		1	/* if NOT defined, cross compiler */
+
 

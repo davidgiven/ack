@@ -14,3 +14,15 @@ extern label lab_count;
 
 extern label datlab_count;
 #define	data_label()	(datlab_count++)	/* returns a new data label */
+
+#define define_label(idf) enter_label(idf, 1);
+	/*	The identifier idf is defined as a label. If it is new,
+		it is entered into the idf list with the largest possible
+		scope, i.e., on the lowest possible level.
+	*/
+
+#define apply_label(idf) enter_label(idf, 0);
+	/*	The identifier idf is applied as a label. It may or may
+		not be there, and if it is there, it may be from a
+		declaration or another application.
+	*/

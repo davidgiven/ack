@@ -27,6 +27,7 @@
 #include	"Lpars.h"
 #include	"assert.h"
 #include	"specials.h"	/* registration of special identifiers	*/
+#include	"noRoption.h"
 
 int idfsize = IDFSIZE;
 extern char options[];
@@ -252,6 +253,7 @@ declare_idf(ds, dc, lvl)
 			sc =	lvl == L_GLOBAL ? GLOBAL
 				: lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL
 				: AUTO;
+#ifndef NOROPTION
 	if (options['R']) { /* some special K & R tests */
 		/* is it also an enum? */
 		if (idf->id_enum && idf->id_enum->tg_level == level)
@@ -260,6 +262,7 @@ declare_idf(ds, dc, lvl)
 		if (def && def->df_level == L_UNIVERSAL)
 			warning("redeclaring reserved word %s", idf->id_text);
 	}
+#endif
 	if (def && def->df_level >= lvl)	{
 		/*	There is already a declaration for idf on this
 			level, or even more inside.
@@ -294,12 +297,14 @@ declare_idf(ds, dc, lvl)
 		/*	extern declaration inside function is treated the
 			same way as global extern declaration
 		*/
+#ifndef NOROPTION
 		if (	options['R'] &&
 			(sc == STATIC && type->tp_fund == FUNCTION)
 		)
 			if (!is_anon_idf(idf))
 				warning("non-global static function %s",
 					idf->id_text);
+#endif
 		declare_idf(ds, dc, L_GLOBAL);
 	}
 	else	{ /* fill in the def block */
@@ -447,9 +452,11 @@ global_redecl(idf, new_sc, tp)
 				error("cannot redeclare %s to static",
 					idf->id_text);
 			else	{
+#ifndef NOROPTION
 				if (options['R'])
 					warning("%s redeclared to static",
 						idf->id_text);
+#endif
 				def->df_sc = STATIC;
 			}
 			break;
@@ -488,9 +495,11 @@ global_redecl(idf, new_sc, tp)
 			def->df_sc = new_sc;
 			break;
 		case STATIC:
+#ifndef NOROPTION
 			if (options['R'])
 				warning("%s was implicitly declared as extern",
 					idf->id_text);
+#endif
 			def->df_sc = new_sc;
 			break;
 		default:

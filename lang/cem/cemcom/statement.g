@@ -53,9 +53,13 @@ statement
 |
 	default_statement
 |
-	break_statement
+	BREAK
+	{code_break();}
+	';'
 |
-	continue_statement
+	CONTINUE
+	{code_continue();}
+	';'
 |
 	return_statement
 |
@@ -314,20 +318,6 @@ default_statement
 		}
 	':'
 	statement
-;
-
-break_statement
-:
-	BREAK
-	{code_break();}
-	';'
-;
-
-continue_statement
-:
-	CONTINUE
-	{code_continue();}
-	';'
 ;
 
 return_statement

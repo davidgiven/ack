@@ -20,6 +20,7 @@
 #include	"align.h"
 #include	"use_tmp.h"
 #include	"dataflow.h"
+#include	"noRoption.h"
 
 #ifndef NOPP
 extern char *inctable[MAXINCL];
@@ -53,9 +54,16 @@ do_option(text)
 	case 'L' :			/* no fil/lin */
 	case 'n':			/* use no registers */
 	case 'w':			/* no warnings will be given */
+#ifndef NOROPTION
 	case 'R':			/* strict version */
+#endif
 		options[*(text-1)] = 1;
 		break;
+#ifdef NOROPTION
+	case 'R':
+		warning("-R option not implemented");
+		break;
+#endif
 
 #ifdef ___XXX___
 deleted, is now a debug-flag
@@ -118,11 +126,11 @@ deleted, is now a debug-flag
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 #ifndef NOPP
 		if (*text)	{
-			register int i = inc_pos++;
+			int i = inc_pos++;
 			register char *new = text;
 			
 			while (new)	{
-				register char *tmp = inctable[i];
+				char *tmp = inctable[i];
 				
 				inctable[i++] = new;
 				if (i == MAXINCL)
@@ -176,7 +184,7 @@ deleted, is now a debug-flag
 		
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
-		struct idf *idef;
+		register struct idf *idef;
 
 		if (*text)	{
 			if ((idef = str2idf(text))->id_macro) {
@@ -191,8 +199,12 @@ deleted, is now a debug-flag
 	}
 
 	case 'V' :	/* set object sizes and alignment requirements	*/
+#ifdef NOCROSS
+		warning("-V option ignored");
+		break;
+#else NOCROSS
 	{
-		arith size, align;
+		register arith size, align;
 		char c;
 
 		while (c = *text++)	{
@@ -270,12 +282,13 @@ deleted, is now a debug-flag
 		}
 		break;
 	}
+#endif NOCROSS
 	}
 }
 
 int
 txt2int(tp)
-	char **tp;
+	register char **tp;
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.

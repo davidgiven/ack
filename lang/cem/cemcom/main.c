@@ -24,6 +24,10 @@
 #include	"LLlex.h"
 #include	<alloc.h>
 #include	"specials.h"
+#include	"noRoption.h"
+#include	"nocross.h"
+#include	"sizes.h"
+#include	"align.h"
 
 extern struct tokenname tkidf[], tkother[];
 extern char *symbol2str();
@@ -45,6 +49,7 @@ struct sp_id special_ids[] =	{
 	{0, 0}
 };
 
+#ifndef NOCROSS
 arith
 	short_size = SZ_SHORT,
 	word_size = SZ_WORD,
@@ -69,6 +74,7 @@ int
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT,
 	union_align = AL_UNION;
+#endif NOCROSS
 
 #ifndef NOPP
 arith ifval;	/* ifval will contain the result of the #if expression	*/
@@ -232,8 +238,10 @@ init()
 	reserve(tkidf);		/* mark the C reserved words as such	*/
 	init_specials(special_ids);	/* mark special ids as such	*/
 
+#ifndef NOROPTION
 	if (options['R'])
 		reserve(tkother);
+#endif
 
 	char_type = standard_type(CHAR, 0, 1, (arith)1);
 	uchar_type = standard_type(CHAR, UNSIGNED, 1, (arith)1);

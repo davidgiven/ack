@@ -27,13 +27,14 @@ extern char *symbol2str();
 */
 
 ch7sel(expp, oper, idf)
-	register struct expr **expp;
+	struct expr **expp;
 	struct idf *idf;
 {
 	/*	The selector idf is applied to *expp; oper may be '.' or
 		ARROW.
 	*/
-	register struct type *tp = (*expp)->ex_type;
+	register struct expr *exp = *expp;
+	register struct type *tp = exp->ex_type;
 	register struct sdef *sd;
 
 	if (oper == ARROW)	{
@@ -54,21 +55,22 @@ ch7sel(expp, oper, idf)
 				tp = sd->sd_stype;
 				break;
 			default:
-				expr_error(*expp, "-> applied to %s",
+				expr_error(exp, "-> applied to %s",
 					symbol2str(tp->tp_fund));
 			case ERRONEOUS:
-				(*expp)->ex_type = error_type;
+				exp->ex_type = error_type;
 				return;
 			}
 		} /* tp->tp_fund != POINTER */
 	} /* oper == ARROW */
 	else { /* oper == '.' */
 		/* filter out illegal expressions "non_lvalue.sel" */
-		if (!(*expp)->ex_lvalue) {
-			expr_error(*expp, "dot requires lvalue");
+		if (!exp->ex_lvalue) {
+			expr_error(exp, "dot requires lvalue");
 			return;
 		}
 	}
+	exp = *expp;
 	switch (tp->tp_fund)	{
 	case POINTER:	/* for int *p;	p->next = ...	*/
 	case STRUCT:
@@ -83,10 +85,10 @@ ch7sel(expp, oper, idf)
 		break;
 	default:
 		if (!is_anon_idf(idf))
-			expr_error(*expp, "selector %s applied to %s",
+			expr_error(exp, "selector %s applied to %s",
 				idf->id_text, symbol2str(tp->tp_fund));
 	case ERRONEOUS:
-		(*expp)->ex_type = error_type;
+		exp->ex_type = error_type;
 		return;
 	}
 	sd = idf2sdef(idf, tp);
@@ -99,36 +101,37 @@ ch7sel(expp, oper, idf)
 				The code performing these conversions is
 				extremely obscure.
 		*/
-		if ((*expp)->ex_class == Value)	{
+		if (exp->ex_class == Value)	{
 			/*	It is an object we know the address of; so
 				we can calculate the address of the
 				selected member 
 			*/
-			(*expp)->VL_VALUE += sd->sd_offset;
-			(*expp)->ex_type = sd->sd_type;
-			if ((*expp)->ex_type == error_type)
-				(*expp)->ex_flags |= EX_ERROR;
+			exp->VL_VALUE += sd->sd_offset;
+			exp->ex_type = sd->sd_type;
+			if (exp->ex_type == error_type)
+				exp->ex_flags |= EX_ERROR;
 		}
 		else
-		if ((*expp)->ex_class == Oper)	{
-			struct oper *op = &((*expp)->ex_object.ex_oper);
+		if (exp->ex_class == Oper)	{
+			struct oper *op = &(exp->ex_object.ex_oper);
 			
 			if (op->op_oper == '.' || op->op_oper == ARROW)	{
 				ASSERT(is_cp_cst(op->op_right));
 				op->op_right->VL_VALUE += sd->sd_offset;
-				(*expp)->ex_type = sd->sd_type;
-				if ((*expp)->ex_type == error_type)
-					(*expp)->ex_flags |= EX_ERROR;
+				exp->ex_type = sd->sd_type;
+				if (exp->ex_type == error_type)
+					exp->ex_flags |= EX_ERROR;
 			}
 			else
-				*expp = new_oper(sd->sd_type, *expp, '.',
+				exp = new_oper(sd->sd_type, exp, '.',
 						intexpr(sd->sd_offset, INT));
 		}
 	}
 	else /* oper == ARROW */
-		*expp = new_oper(sd->sd_type,
-			*expp, oper, intexpr(sd->sd_offset, INT));
-	(*expp)->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
+		exp = new_oper(sd->sd_type,
+			exp, oper, intexpr(sd->sd_offset, INT));
+	exp->ex_lvalue = (sd->sd_type->tp_fund != ARRAY);
+	*expp = exp;
 }
 
 ch7incr(expp, oper)
@@ -152,11 +155,11 @@ ch7cast(expp, oper, tp)
 	register struct type *oldtp;
 
 	if ((*expp)->ex_type->tp_fund == FUNCTION)
-		function2pointer(expp);
+		function2pointer(*expp);
 	if ((*expp)->ex_type->tp_fund == ARRAY)
-		array2pointer(expp);
+		array2pointer(*expp);
 	if ((*expp)->ex_class == String)
-		string2pointer(expp);
+		string2pointer(*expp);
 	oldtp = (*expp)->ex_type;
 #ifndef NOBITFIELD
 	if (oldtp->tp_fund == FIELD)	{
@@ -276,7 +279,7 @@ ch7cast(expp, oper, tp)
 }
 
 ch7asgn(expp, oper, expr)
-	register struct expr **expp;
+	struct expr **expp;
 	struct expr *expr;
 {
 	/*	The assignment operators.
@@ -292,17 +295,18 @@ ch7asgn(expp, oper, expr)
 			      f     (typeof (f op e))e
 		EVAL should however take care of evaluating (typeof (f op e))f
 	*/
-	int fund = (*expp)->ex_type->tp_fund;
+	register struct expr *exp = *expp;
+	int fund = exp->ex_type->tp_fund;
 	struct type *tp;
 
 	/* We expect an lvalue */
-	if (!(*expp)->ex_lvalue)	{
-		expr_error(*expp, "no lvalue in lhs of %s", symbol2str(oper));
-		(*expp)->ex_depth = 99;	/* no direct store/load at EVAL() */
+	if (!exp->ex_lvalue)	{
+		expr_error(exp, "no lvalue in lhs of %s", symbol2str(oper));
+		exp->ex_depth = 99;	/* no direct store/load at EVAL() */
 			/* what is 99 ??? DG */
 	}
 	if (oper == '=') {
-		ch7cast(&expr, oper, (*expp)->ex_type);
+		ch7cast(&expr, oper, exp->ex_type);
 		tp = expr->ex_type;
 	}
 	else {	/* turn e into e' where typeof(e') = typeof (f op e) */
@@ -310,7 +314,7 @@ ch7asgn(expp, oper, expr)
 
 		/* this is really $#@&*%$# ! */
 		extmp->ex_lvalue = 1;
-		extmp->ex_type = (*expp)->ex_type;
+		extmp->ex_type = exp->ex_type;
 		ch7bin(&extmp, oper, expr);
 		/* Note that ch7bin creates a tree of the expression
 			((typeof (f op e))f op (typeof (f op e))e),
@@ -330,14 +334,15 @@ ch7asgn(expp, oper, expr)
 	}
 #ifndef NOBITFIELD
 	if (fund == FIELD)
-		*expp = new_oper((*expp)->ex_type->tp_up, *expp, oper, expr);
+		exp = new_oper(exp->ex_type->tp_up, exp, oper, expr);
 	else
-		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
+		exp = new_oper(exp->ex_type, exp, oper, expr);
 #else NOBITFIELD
-	*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
+	exp = new_oper(exp->ex_type, exp, oper, expr);
 #endif NOBITFIELD
-	(*expp)->OP_TYPE = tp;	/* for EVAL() */
-	(*expp)->ex_flags |= EX_SIDEEFFECTS;
+	exp->OP_TYPE = tp;	/* for EVAL() */
+	exp->ex_flags |= EX_SIDEEFFECTS;
+	*expp = exp;
 }
 
 /*	Some interesting (?) questions answered.

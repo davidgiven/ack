@@ -12,42 +12,11 @@
 #include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
+#include	"noRoption.h"
 
 extern char options[];
 extern struct expr *intexpr();
 }
-
-/* 7 */
-initial_value(struct expr **expp;) :
-	assignment_expression(expp)
-		{
-			if ((*expp)->ex_type->tp_fund == ARRAY)
-				array2pointer(expp);
-		}
-|
-	initial_value_pack(expp)
-;
-
-initial_value_pack(struct expr **expp;) :
-	'{'
-	initial_value_list(expp)
-	'}'
-;
-
-initial_value_list(struct expr **expp;)
-	{struct expr *e1;}
-:
-	{*expp = NILEXPR;}
-	initial_value(&e1)
-	{init_expression(&expp, e1);}
-	[%while (AHEAD != '}')		/* >>> conflict on ',' */
-		','
-		initial_value(&e1)
-		{init_expression(&expp, e1);}
-	]*
-	','?				/* optional trailing comma */
-;
-
 
 /* 7.1 */
 primary(register struct expr **expp;) :
@@ -224,11 +193,17 @@ conditional_expression(struct expr **expp;)
 	binary_expression(rank_of('?') - 1, expp)
 	[	'?'
 		expression(&e1)
-		{check_conditional(e1, '?', "between ? and :");}
+		{
+#ifndef NOROPTION
+			check_conditional(e1, '?', "between ? and :");
+#endif
+		}
 		':'
 		assignment_expression(&e2)
-		{check_conditional(e2, '=', "after :");}
-		{
+		{	
+#ifndef NOROPTION
+			check_conditional(e2, '=', "after :");
+#endif
 			ch7bin(&e1, ':', e2);
 			opnd2test(expp, '?');
 			ch7bin(expp, '?', e1);

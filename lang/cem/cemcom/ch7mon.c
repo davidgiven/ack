@@ -32,7 +32,7 @@ ch7mon(oper, expp)
 	case '*':			/* RM 7.2 */
 		/* no FIELD type allowed	*/
 		if ((*expp)->ex_type->tp_fund == ARRAY)
-			array2pointer(expp);
+			array2pointer(*expp);
 		if ((*expp)->ex_type->tp_fund != POINTER)	{
 			expr_error(*expp,
 				"* applied to non-pointer (%s)",
@@ -54,12 +54,12 @@ ch7mon(oper, expp)
 	case '&':
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
 			warning("& before array: ignored");
-			array2pointer(expp);
+			array2pointer(*expp);
 		}
 		else
 		if ((*expp)->ex_type->tp_fund == FUNCTION) {
 			warning("& before function: ignored");
-			function2pointer(expp);
+			function2pointer(*expp);
 		}
 		else
 #ifndef NOBITFIELD
@@ -131,7 +131,7 @@ ch7mon(oper, expp)
 		break;
 	case '!':
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
-			function2pointer(expp);
+			function2pointer(*expp);
 		if ((*expp)->ex_type->tp_fund != POINTER)
 			any2arith(expp, oper);
 		opnd2test(expp, '!');

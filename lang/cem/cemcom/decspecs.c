@@ -12,6 +12,7 @@
 #include	"type.h"
 #include	"level.h"
 #include	"def.h"
+#include	"noRoption.h"
 
 extern char options[];
 extern int level;
@@ -75,21 +76,27 @@ do_decspecs(ds)
 	if (ds->ds_unsigned)	{
 		switch (tp->tp_fund)	{
 		case CHAR:
+#ifndef NOROPTION
 			if (options['R'])
 				warning("unsigned char not allowed");
+#endif
 			tp = uchar_type;
 			break;
 		case SHORT:
+#ifndef NOROPTION
 			if (options['R'])
 				warning("unsigned short not allowed");
+#endif
 			tp = ushort_type;
 			break;
 		case INT:
 			tp = uint_type;
 			break;
 		case LONG:
+#ifndef NOROPTION
 			if (options['R'])
 				warning("unsigned long not allowed");
+#endif
 			tp = ulong_type;
 			break;
 		default:

@@ -73,9 +73,7 @@ EVAL(expr, val, code, true_label, false_label)
 		break;
 	case String:	/* a string constant	*/
 		if (gencode) {
-			struct expr *ex = expr;
-			string2pointer(&ex);
-			expr = ex;
+			string2pointer(expr);
 			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
@@ -522,72 +520,37 @@ EVAL(expr, val, code, true_label, false_label)
 			C_df_ilb(l_end);
 			break;
 		}
-		case AND:
-			if (true_label == 0) {
-				label l_true = text_label();
-				label l_false = text_label();
-				label l_maybe = text_label();
-				label l_end = text_label();
-
-				EVAL(left, RVAL, TRUE, l_maybe, l_false);
-				C_df_ilb(l_maybe);
-				if (gencode) {
-					EVAL(right, RVAL, TRUE, l_true,
-						l_false);
-					C_df_ilb(l_true);
-					C_loc((arith)1);
-					C_bra(l_end);
-					C_df_ilb(l_false);
-					C_loc((arith)0);
-					C_df_ilb(l_end);
-				}
-				else {
-					EVAL(right, RVAL, FALSE, l_false,
-						l_false);
-					C_df_ilb(l_false);
-				}
-			}
-			else {
-				label l_maybe = text_label();
-
-				EVAL(left, RVAL, TRUE, l_maybe, false_label);
-				C_df_ilb(l_maybe);
-				EVAL(right, RVAL, gencode, true_label,
-					false_label);
-			}
-			break;
 		case OR:
-			if (true_label == 0) {
-				label l_true = text_label();
-				label l_false = text_label();
-				label l_maybe = text_label();
-				label l_end = text_label();
+		case AND: {
+			label l_false, l_true, l_maybe;
 
-				EVAL(left, RVAL, TRUE, l_true, l_maybe);
-				C_df_ilb(l_maybe);
-				if (gencode) {
-					EVAL(right, RVAL, TRUE, l_true,
-						l_false);
-					C_df_ilb(l_true);
-					C_loc((arith)1);
-					C_bra(l_end);
-					C_df_ilb(l_false);
-					C_loc((arith)0);
-					C_df_ilb(l_end);
-				}
-				else {
-					EVAL(right, RVAL, FALSE, l_true,
-						l_true);
-					C_df_ilb(l_true);
-				}
+			l_maybe = text_label();
+			if (true_label) {
+				l_false = false_label;
+				l_true = true_label;
 			}
 			else {
-				label l_maybe = text_label();
+				l_false = text_label();
+				l_true = gencode ? text_label(): l_false;
+			}
 
-				EVAL(left, RVAL, TRUE, true_label, l_maybe);
-				C_df_ilb(l_maybe);
-				EVAL(right, RVAL, gencode, true_label,
-					false_label);
+			EVAL(left, RVAL, TRUE, oper == AND ? l_maybe : l_true,
+					       oper == AND ? l_false : l_maybe);
+			C_df_ilb(l_maybe);
+			EVAL(right, RVAL, gencode, l_true, l_false);
+			if (gencode && !true_label) {
+				label l_end = text_label();
+
+				C_df_ilb(l_true);
+				C_loc((arith)1);
+				C_bra(l_end);
+				C_df_ilb(l_false);
+				C_loc((arith)0);
+				C_df_ilb(l_end);
+			}
+			else {
+				if (! true_label) C_df_ilb(l_false);
+			}
 			}
 			break;
 		case '!':

@@ -20,6 +20,7 @@
 #include	"assert.h"
 #include	"expr.h"
 #include	"type.h"
+#include	"noRoption.h"
 
 extern char options[];
 
@@ -47,8 +48,10 @@ code_startswitch(expp)
 	
 	switch (fund) {
 	case LONG:
+#ifndef NOROPTION
 		if (options['R'])
 			warning("long in switch (cast to int)");
+#endif
 		int2int(expp, int_type);
 		break;
 #ifndef NOFLOAT

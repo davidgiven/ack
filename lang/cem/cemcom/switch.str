@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* $Header$ */
 /*		S W I T C H - T A B L E - S T R U C T U R E		*/
 
@@ -21,4 +25,4 @@ struct case_entry	{
 	arith ce_value;
 };
 
-/* ALLOCDEF "case_entry" 40 */
+/* ALLOCDEF "case_entry" 20 */

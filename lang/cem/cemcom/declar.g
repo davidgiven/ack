@@ -21,6 +21,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
+#include	"level.h"
 
 extern char options[];
 }
@@ -83,22 +84,20 @@ other_specifier(register struct decspecs *ds;):
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
 			error("repeated storage class specifier");
-		else	{
-			ds->ds_sc_given = 1;
-			ds->ds_sc = DOT;
-		}
+		ds->ds_sc_given = 1;
+		ds->ds_sc = DOT;
 	}
 |
 	[ SHORT | LONG ]
 	{	if (ds->ds_size)
 			error("repeated size specifier");
-		else	ds->ds_size = DOT;
+		ds->ds_size = DOT;
 	}
 |
 	UNSIGNED
 	{	if (ds->ds_unsigned)
 			error("unsigned specified twice");
-		else	ds->ds_unsigned = 1;
+		ds->ds_unsigned = 1;
 	}
 ;
 
@@ -137,7 +136,6 @@ init_declarator_list(struct decspecs *ds;):
 init_declarator(register struct decspecs *ds;)
 	{
 		struct declarator Dc;
-		struct expr *expr = (struct expr *) 0;
 	}
 :
 	{
@@ -149,12 +147,55 @@ init_declarator(register struct decspecs *ds;)
 		reject_params(&Dc);
 		declare_idf(ds, &Dc, level);
 	}
-	initializer(Dc.dc_idf, &expr)?
-	{
-		code_declaration(Dc.dc_idf, expr, level, ds->ds_sc);
-	}
+	[
+		initializer(Dc.dc_idf, ds->ds_sc)
+	|
+		{ code_declaration(Dc.dc_idf, (struct expr *) 0, level, ds->ds_sc); }
+	]
 ]
 	{remove_declarator(&Dc);}
+;
+
+/* 8.6: initializer */
+initializer(struct idf *idf; int sc;)
+	{
+		struct expr *expr = (struct expr *) 0;
+		int globalflag = level == L_GLOBAL ||
+				 (level == L_LOCAL && sc == STATIC);
+	}
+:
+	{	if (idf->id_def->df_type->tp_fund == FUNCTION)	{
+			error("illegal initialization of function");
+		}
+	}
+	[
+		'='
+	|
+		empty
+		{warning("old-fashioned initialization, insert =");}
+		/*	This causes trouble at declarator and at
+			external_definition, q.v.
+		*/
+	]
+	{	if (globalflag) {
+			struct expr ex;
+			code_declaration(idf, &ex, level, sc);
+	  	}
+	}
+	initial_value(globalflag ? &(idf->id_def->df_type) : (struct type **)0,
+			&expr)
+	{	if (! globalflag) {
+			if (idf->id_def->df_type->tp_fund == FUNCTION)	{
+				free_expression(expr);
+				expr = 0;
+			}
+			code_declaration(idf, expr, level, sc);
+#ifdef	DEBUG
+			print_expr("initializer-expression", expr);
+#endif	DEBUG
+	  	}
+	  	init_idf(idf);
+	}
 ;
 
 /*
@@ -395,31 +436,6 @@ bit_expression(struct field **fd;)
 #ifdef NOBITFIELD
 		error("bitfields are not implemented");
 #endif NOBITFIELD
-	}
-;
-
-/* 8.6 */
-initializer(register struct idf *idf; register struct expr **expp;) :
-	[
-		'='
-	|
-		empty
-		{warning("old-fashioned initialization, insert =");}
-		/*	This causes trouble at declarator and at
-			external_definition, q.v.
-		*/
-	]
-	initial_value(expp)
-	{
-		if (idf->id_def->df_type->tp_fund == FUNCTION)	{
-			error("illegal initialization of function");
-			free_expression(*expp);
-			*expp = 0;
-		}
-		init_idf(idf);
-#ifdef	DEBUG
-		print_expr("initializer-expression", *expp);
-#endif	DEBUG
 	}
 ;
 

@@ -15,6 +15,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
+#include	"noRoption.h"
 
 extern char options[];
 extern char *symbol2str();
@@ -68,8 +69,10 @@ ch7bin(expp, oper, expr)
 		if (	(*expp)->ex_type->tp_fund == POINTER &&
 			(*expp)->ex_type->tp_up->tp_fund == FUNCTION
 		)	{
+#ifndef NOROPTION
 			if (options['R'])
 				warning("function pointer called");
+#endif NOROPTION
 			ch7mon('*', expp);
 		}
 		if ((*expp)->ex_type->tp_fund != FUNCTION)	{
@@ -85,7 +88,7 @@ ch7bin(expp, oper, expr)
 		break;
 	case PARCOMMA:				/* RM 7.1 */
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
-			function2pointer(expp);
+			function2pointer(*expp);
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
 		break;
 	case '%':
@@ -271,7 +274,8 @@ pntminuspnt(expp, oper, expr)
 }
 
 mk_binop(expp, oper, expr, commutative)
-	register struct expr **expp, *expr;
+	struct expr **expp;
+	register struct expr *expr;
 {
 	/*	Constructs in *expp the operation indicated by the operands.
 		"commutative" indicates wether "oper" is a commutative

@@ -23,6 +23,7 @@
 #include	"Lpars.h"
 #include	"field.h"
 #include	"mes.h"
+#include	"noRoption.h"
 
 extern char *symbol2str();
 extern char options[];
@@ -80,9 +81,9 @@ relbalance(e1p, oper, e2p)
 		of the relational operator oper.
 	*/
 	if ((*e1p)->ex_type->tp_fund == FUNCTION)
-		function2pointer(e1p);
+		function2pointer(*e1p);
 	if ((*e2p)->ex_type->tp_fund == FUNCTION)
-		function2pointer(e2p);
+		function2pointer(*e2p);
 	if ((*e1p)->ex_type->tp_fund == POINTER)
 		ch76pointer(e2p, oper, (*e1p)->ex_type);
 	else
@@ -98,28 +99,33 @@ relbalance(e1p, oper, e2p)
 }
 
 ch76pointer(expp, oper, tp)
-	register struct expr **expp;
+	struct expr **expp;
 	register struct type *tp;
 {
 	/*	Checks whether *expp may be compared to tp using oper,
 		as described in chapter 7.6 and 7.7.
 		tp is known to be a pointer.
 	*/
-	if ((*expp)->ex_type->tp_fund == POINTER)	{
-		if ((*expp)->ex_type != tp)
+	register struct expr *exp = *expp;
+
+	if (exp->ex_type->tp_fund == POINTER)	{
+		if (exp->ex_type != tp)
 			ch7cast(expp, oper, tp);
 	}
 	else
-	if (	is_integral_type((*expp)->ex_type) &&
+	if (	is_integral_type(exp->ex_type)
+#ifndef NOROPTION
+		&&
 		(	!options['R'] /* we don't care */ ||
 			(oper == EQUAL || oper == NOTEQUAL || oper == ':')
 		)
+#endif NOROPTION
 	)		/* ch 7.7 */
 		ch7cast(expp, CAST, tp);
 	else	{
-		expr_error(*expp, "%s on %s and pointer",
+		expr_error(exp, "%s on %s and pointer",
 				symbol2str(oper),
-				symbol2str((*expp)->ex_type->tp_fund)
+				symbol2str(exp->ex_type->tp_fund)
 			);
 		ch7cast(expp, oper, tp);
 	}
@@ -152,11 +158,13 @@ any2arith(expp, oper)
 			/* allowed by K & R */
 		}
 		else
+#ifndef NOROPTION
 		if (!options['R'])	{
 			/* allowed by us */
 		}
 		else
 			expr_warning(*expp, "%s on enum", symbol2str(oper));
+#endif NOROPTION
 		int2int(expp, int_type);
 		break;
 #ifndef	NOFLOAT
@@ -183,16 +191,18 @@ any2arith(expp, oper)
 }
 
 erroneous2int(expp)
-	register struct expr **expp;
+	struct expr **expp;
 {
 	/*	the (erroneous) expression *expp is replaced by an
 		int expression
 	*/
-	int flags = (*expp)->ex_flags;
+	register struct expr *exp = *expp;
+	int flags = exp->ex_flags;
 	
-	free_expression(*expp);
-	*expp = intexpr((arith)0, INT);
-	(*expp)->ex_flags = (flags | EX_ERROR);
+	free_expression(exp);
+	exp = intexpr((arith)0, INT);
+	exp->ex_flags = (flags | EX_ERROR);
+	*expp = exp;
 }
 
 struct expr *
@@ -215,17 +225,18 @@ arith2arith(tp, oper, expr)
 
 int
 int2int(expp, tp)
-	register struct expr **expp;
+	struct expr **expp;
 	register struct type *tp;
 {
 	/*	The expression *expp, which is of some integral type, is
 		converted to the integral type tp.
 	*/
+	register struct expr *exp = *expp;
 	
-	if (is_cp_cst(*expp))	{
-		register struct type *tp1 = (*expp)->ex_type;
+	if (is_cp_cst(exp))	{
+		register struct type *tp1 = exp->ex_type;
 
-		(*expp)->ex_type = tp;
+		exp->ex_type = tp;
 		if (! tp1->tp_unsigned && tp->tp_unsigned) {
 			/*	Avoid "unreal" overflow warnings, such as
 				caused by f.i.:
@@ -233,20 +244,21 @@ int2int(expp, tp)
 					unsigned int y = -1;
 			*/
 			extern long full_mask[];
-			long remainder = (*expp)->VL_VALUE &
+			long remainder = exp->VL_VALUE &
 						~full_mask[tp->tp_size];
 
 			if (remainder == 0 ||
 			    remainder == ~full_mask[tp->tp_size]) {
-				(*expp)->VL_VALUE &= ~remainder;
+				exp->VL_VALUE &= ~remainder;
 			}
 		}
-		cut_size(*expp);
+		cut_size(exp);
 	}
 	else	{
-		*expp = arith2arith(tp, INT2INT, *expp);
+		exp = arith2arith(tp, INT2INT, exp);
 	}
-	return (*expp)->ex_type->tp_fund;
+	*expp = exp;
+	return exp->ex_type->tp_fund;
 }
 
 #ifndef NOFLOAT
@@ -294,33 +306,30 @@ float2float(expp, tp)
 }
 #endif NOFLOAT
 
-array2pointer(expp)
-	register struct expr **expp;
+array2pointer(exp)
+	register struct expr *exp;
 {
 	/*	The expression, which must be an array, is converted
 		to a pointer.
 	*/
-	(*expp)->ex_type =
-		construct_type(POINTER, (*expp)->ex_type->tp_up, (arith)0);
+	exp->ex_type = construct_type(POINTER, exp->ex_type->tp_up, (arith)0);
 }
 
-function2pointer(expp)
-	register struct expr **expp;
+function2pointer(exp)
+	register struct expr *exp;
 {
 	/*	The expression, which must be a function, is converted
 		to a pointer to the function.
 	*/
-	(*expp)->ex_type =
-		construct_type(POINTER, (*expp)->ex_type, (arith)0);
+	exp->ex_type = construct_type(POINTER, exp->ex_type, (arith)0);
 }
 
-string2pointer(expp)
-	struct expr **expp;
+string2pointer(ex)
+	register struct expr *ex;
 {
 	/*	The expression, which must be a string constant, is converted
 		to a pointer to the string-containing area.
 	*/
-	register struct expr *ex = *expp;
 	label lbl = data_label();
 
 	code_string(ex->SG_VALUE, ex->SG_LEN, lbl);
@@ -351,7 +360,7 @@ opnd2logical(expp, oper)
 	int fund;
 
 	if ((*expp)->ex_type->tp_fund == FUNCTION)
-		function2pointer(expp);
+		function2pointer(*expp);
 #ifndef NOBITFIELD
 	else
 	if ((*expp)->ex_type->tp_fund == FIELD)
@@ -408,6 +417,7 @@ is_test_op(oper)
 	/*NOTREACHED*/
 }
 
+#ifdef ____
 int
 is_arith_op(oper)
 {
@@ -452,6 +462,7 @@ is_asgn_op(oper)
 		return 0;
 	}
 }
+#endif
 
 any2opnd(expp, oper)
 	register struct expr **expp;
@@ -468,11 +479,11 @@ any2opnd(expp, oper)
 		any2arith(expp, oper);
 		break;
 	case ARRAY:
-		array2pointer(expp);
+		array2pointer(*expp);
 		break;
 	case POINTER:
 		if ((*expp)->ex_class == String)
-			string2pointer(expp);
+			string2pointer(*expp);
 		break;
 #ifndef NOBITFIELD
 	case FIELD:

@@ -5,6 +5,6 @@
 /* $Header$ */
 /* Align To Word boundary Definition	*/
 
-extern arith word_size;
+#include "sizes.h"
 
 #define	ATW(arg)	((((arg) + word_size - 1) / word_size) * word_size)

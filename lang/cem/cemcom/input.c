@@ -29,14 +29,13 @@ getwdir(fn)
 
 	if (fn[0] == '\0' || (fn[0] == '/' && p == &fn[0])) /* absolute path */
 		return "";
-	else
 	if (p) {
 		*p = '\0';
 		fn = Salloc(fn, p - &fn[0] + 1);
 		*p = '/';
 		return fn;
 	}
-	else return ".";
+	return ".";
 }
 #endif NOPP
 

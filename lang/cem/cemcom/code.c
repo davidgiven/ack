@@ -31,6 +31,7 @@
 #include	"atw.h"
 #include	"assert.h"
 #include	"align.h"
+#include	"noRoption.h"
 
 label lab_count = 1;
 label datlab_count = 1;
@@ -301,7 +302,8 @@ code_declaration(idf, expr, lvl, sc)
 	/*	code_declaration() does the actual declaration of the
 		variable indicated by "idf" on declaration level "lvl".
 		If the variable is initialised, the expression is given
-		in "expr".
+		in "expr", but for global and static initialisations it
+		is just non-zero, as the expression is not parsed yet.
 		There are some cases to be considered:
 		-	filter out typedefs, they don't correspond to code;
 		-	global variables, coded only if initialized;
@@ -343,8 +345,6 @@ code_declaration(idf, expr, lvl, sc)
 			code_scope(text, def);
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(text);
-			do_ival(&(def->df_type), expr);
-			free_expression(expr);
 		}
 	}
 	else
@@ -361,8 +361,6 @@ code_declaration(idf, expr, lvl, sc)
 			*/
 			C_df_dlb((label)def->df_address);
 			if (expr) { /* there is an initialisation */
-				do_ival(&(def->df_type), expr);
-				free_expression(expr);
 			}
 			else {	/* produce blank space */
 				if (size <= 0) {
@@ -414,6 +412,7 @@ loc_init(expr, id)
 		return;
 	}
 	if (ISCOMMA(e))	{	/* embraced: int i = {12};	*/
+#ifndef NOROPTION
 		if (options['R'])	{
 			if (ISCOMMA(e->OP_LEFT)) /* int i = {{1}} */
 				expr_error(e, "extra braces not allowed");
@@ -421,6 +420,7 @@ loc_init(expr, id)
 			if (e->OP_RIGHT != 0) /* int i = {1 , 2} */
 				expr_error(e, "too many initializers");
 		}
+#endif NOROPTION
 		while (e)	{
 			loc_init(e->OP_LEFT, id);
 			e = e->OP_RIGHT;

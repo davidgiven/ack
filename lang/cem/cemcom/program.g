@@ -148,15 +148,13 @@ ext_decl_specifiers(struct decspecs *ds;) :
 ;
 
 non_function(register struct decspecs *ds; register struct declarator *dc;)
-	{
-		struct expr *expr = (struct expr *) 0;
-	}
 :
 	{reject_params(dc);}
-	initializer(dc->dc_idf, &expr)?
-	{
-		code_declaration(dc->dc_idf, expr, level, ds->ds_sc);
-	}
+	[
+		initializer(dc->dc_idf, ds->ds_sc)
+	|
+		{ code_declaration(dc->dc_idf, (struct excpr *) 0, level, ds->ds_sc); }
+	]
 	[
 		','
 		init_declarator(ds)

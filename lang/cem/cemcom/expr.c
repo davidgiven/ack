@@ -20,6 +20,7 @@
 #include	"declar.h"
 #include	"sizes.h"
 #include	"level.h"
+#include	"noRoption.h"
 
 extern char *symbol2str();
 extern char options[];
@@ -94,6 +95,7 @@ rank_of(oper)
 	/*NOTREACHED*/
 }
 
+#ifndef NOROPTION
 int
 rank_of_expression(ex)
 	register struct expr *ex;
@@ -117,6 +119,7 @@ check_conditional(expr, oper, pos_descr)
 		expr_warning(expr, "%s %s is ungrammatical",
 			symbol2str(expr->OP_OPER), pos_descr);
 }
+#endif
 
 dot2expr(expp)
 	struct expr **expp;
@@ -396,6 +399,7 @@ chk_cst_expr(expp)
 	else
 	if (!is_ld_cst(expr))
 		expr_error(expr, "expression is not constant"), err++;
+#ifndef NOROPTION
 	if (options['R'])	{
 		if (flags & EX_CAST)
 			expr_warning(expr, "cast in constant expression");
@@ -406,6 +410,7 @@ chk_cst_expr(expp)
 			expr_warning(expr,
 				"expression comma in constant expression");
 	}
+#endif NOROPTION
 	if (err)
 		erroneous2int(expp);
 }
