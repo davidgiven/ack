@@ -283,7 +283,7 @@ lblbuf:
 
 datloop:
 	cmp	r4,saver1	/ descriptor over middle?
-	ble	9f		/ no? go ahead
+	blt	9f		/ no? go ahead
 	jsr	pc,blshift	/ yes? shift block down, read next
 
 9:	dec	ndatad		/ still	data to	initialize?
