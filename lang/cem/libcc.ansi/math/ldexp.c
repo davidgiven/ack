@@ -6,7 +6,6 @@
 
 #include	<math.h>
 #include	<float.h>
-#include	<errno.h>
 
 double
 ldexp(double fl, int exp)
@@ -23,7 +22,6 @@ ldexp(double fl, int exp)
 	exp += currexp;
 	if (exp > 0) {
 		if (exp > DBL_MAX_EXP) {
-			errno = ERANGE;
 			return sign * HUGE_VAL;
 		}
 		while (exp>30) {
