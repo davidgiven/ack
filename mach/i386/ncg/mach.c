@@ -9,6 +9,8 @@ static char rcs_m[]= "$Header$" ;
 static char rcs_mh[]= ID_MH ;
 #endif
 
+#include <stb.h>
+
 /*
  * machine dependent back end routines for the Intel 80386
  */
@@ -136,7 +138,7 @@ regreturn()
 #endif REGVARS
 
 mes(type) word type ; {
-	int argt ;
+	int argt, a1, a2 ;
 
 	switch ( (int)type ) {
 	case ms_ext :
@@ -151,6 +153,38 @@ mes(type) word type ; {
 				break ;
 			}
 		}
+	case ms_stb:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			fputs(".symb \"\", ", codefile);
+		else {
+			fprintf(codefile, ".symb \"%s\", ", str);
+			argt = getarg(cst_ptyp);
+		}
+		a1 = argval;
+		argt = getarg(cst_ptyp);
+		a2 = argval;
+		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
+		argt = getarg(end_ptyp);
+		break;
+	case ms_std:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			str[0] = '\0';
+		else {
+			argt = getarg(cst_ptyp);
+		}
+		swtxt();
+		if (argval == N_SLINE) {
+			fputs("call ___u_LiB\n", codefile);
+			cleanregs();	/* debugger might change variables */
+		}
+		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
+		argt = getarg(cst_ptyp);
+		fprintf(codefile, "%d\n", (int) argval);
+		argt = getarg(end_ptyp);
+		break;
 	default :
 		while ( getarg(any_ptyp) != sp_cend ) ;
 		break ;
