@@ -25,6 +25,11 @@ There are a small number of compile-time flags, each in a separate file:
 	nofloat.h	- define if the C compiler used has no floating point
 
 
+There are two subdirectories:
+	switch		- generates opcode-analysing switches
+	test		- contains testprograms
+
+
 Installation note:
 The file do_fpar.c (do floating point arithmetic) contains a macro  MAXDOUBLE
 which defines the largest possible double on the present machine. It is set to

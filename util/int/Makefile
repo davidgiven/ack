@@ -39,15 +39,15 @@ HDR =	alloc.h fra.h global.h linfil.h log.h mem.h memdirect.h monstruct.h \
 
 
 # Main entries
-test:	$(INT)
+test:	$(INT) test/awa.em22 test/awa.em24 test/awa.em44
 	@rm -f int.mess
-	- time $(INT) test22/awa.em <test22/awa.inp
+	-echo 3 5 7 2 -1 | time $(INT) test/awa.em22
 	cat int.mess
 	@rm -f int.mess
-	-echo 3 5 7 2 -1 | time $(INT) test24/awa.em
+	-echo 3 5 7 2 -1 | time $(INT) test/awa.em24
 	cat int.mess
 	@rm -f int.mess
-	-echo 3 5 7 2 -1 | time $(INT) test44/awa.em
+	-echo 3 5 7 2 -1 | time $(INT) test/awa.em44
 	cat int.mess
 
 $(INT):	$(OBJ) Makefile
@@ -71,6 +71,15 @@ switch/DoCases:	$(IP_SPEC)
 switch/PrCases:	$(IP_SPEC)
 	(cd switch; make IP_SPEC=$(IP_SPEC) PrCases)
 
+test/awa.em22:
+	(cd test; make awa.em22)
+
+test/awa.em24:
+	(cd test; make awa.em24)
+
+test/awa.em44:
+	(cd test; make awa.em44)
+
 
 # Auxiliary entries
 lint:
@@ -93,6 +102,7 @@ clean:
 	rm -f core mon.out int.mess int.log int.core int.tally \
 		trap_msg warn_msg warn.h tags print \
 		$(OBJ)
+	(cd switch; make clean)
 	(cd switch; make clean)
 
 bare:	clean
@@ -120,7 +130,7 @@ do_ptrar.o: fra.h global.h log.h logging.h mem.h segcheck.h text.h trap.h warn.h
 do_sets.o: fra.h global.h log.h logging.h mem.h text.h trap.h
 do_store.o: fra.h global.h log.h logging.h mem.h text.h trap.h warn.h
 do_unsar.o: fra.h global.h log.h logging.h mem.h text.h trap.h warn.h
-dump.o: global.h linfil.h log.h logging.h mem.h memdirect.h proctab.h rsb.h shadow.h text.h
+dump.o: fra.h global.h linfil.h log.h logging.h mem.h memdirect.h proctab.h rsb.h shadow.h text.h
 fra.o: alloc.h fra.h global.h logging.h mem.h shadow.h
 global.o: global.h
 init.o: alloc.h global.h log.h logging.h mem.h read.h shadow.h trap.h warn.h
