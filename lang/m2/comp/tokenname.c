@@ -80,6 +80,7 @@ struct tokenname tkinternal[] = {	/* internal keywords	*/
 	{ENUMERATION, ""},
 	{ERRONEOUS, ""},
 	{PROCVAR, ""},
+	{INTORCARD, ""},
 	{0, "0"}
 };
 

@@ -44,6 +44,9 @@ struct type
 	*longreal_type,
 	*word_type,
 	*address_type,
+	*intorcard_type,
+	*string_type,
+	*bitset_type,
 	*error_type;
 
 struct paramlist *h_paramlist;
@@ -123,6 +126,8 @@ standard_type(fund, align, size)
 
 init_types()
 {
+	register struct type *tp;
+
 	char_type = standard_type(CHAR, 1, (arith) 1);
 	bool_type = standard_type(BOOLEAN, 1, (arith) 1);
 	int_type = standard_type(INTEGER, int_align, int_size);
@@ -131,9 +136,15 @@ init_types()
 	real_type = standard_type(REAL, real_align, real_size);
 	longreal_type = standard_type(LONGREAL, lreal_align, lreal_size);
 	word_type = standard_type(WORD, wrd_align, wrd_size);
+	intorcard_type = standard_type(INTORCARD, int_align, int_size);
+	string_type = standard_type(STRING, 1, (arith) -1);
 	address_type = construct_type(POINTER, word_type);
+	tp = construct_type(SUBRANGE, int_type);
+	tp->sub_lb = 0;
+	tp->sub_ub = wrd_size * 8 - 1;
+	bitset_type = construct_type(SET, tp);
+	bitset_type->tp_size = wrd_size;
 	error_type = standard_type(ERRONEOUS, 1, (arith) 1);
-
 }
 
 int

@@ -47,7 +47,7 @@ main(argc, argv)
 #ifdef DEBUG
 	print("Mod2 compiler -- Debug version\n");
 #endif DEBUG
-	DO_DEBUG(debug(1,"Debugging level: %d", options['D']));
+	DO_DEBUG(1, debug("Debugging level: %d", options['D']));
 	return !Compile(Nargv[1]);
 }
 
@@ -56,7 +56,7 @@ Compile(src)
 {
 	extern struct tokenname tkidf[];
 
-	DO_DEBUG(debug(1,"Filename : %s", src));
+	DO_DEBUG(1, debug("Filename : %s", src));
 	if (! InsertFile(src, (char **) 0, &src)) {
 		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
@@ -65,15 +65,13 @@ Compile(src)
 	FileName = src;
 	init_DEFPATH();
 	init_idf();
+	init_cst();
 	reserve(tkidf);
 	init_scope();
 	init_types();
 	add_standards();
 #ifdef DEBUG
-	if (options['L'])
-		LexScan();
-	else if (options['T'])
-		TimeScan();
+	if (options['L']) LexScan();
 	else {
 #endif DEBUG
 		(void) open_scope(CLOSEDSCOPE, 0);
@@ -92,7 +90,7 @@ LexScan()
 {
 	register int symb;
 
-	while ((symb = LLlex()) != EOI) {
+	while ((symb = LLlex()) > 0) {
 		print(">>> %s ", symbol2str(symb));
 		switch(symb) {
 
@@ -113,13 +111,9 @@ LexScan()
 			break;
 
 		default:
-			putchar('\n');
+			print("\n");
 		}
 	}
-}
-
-TimeScan() {
-	while (LLlex() != -1) /* nothing */;
 }
 #endif
 
@@ -165,11 +159,7 @@ add_standards()
 		     D_TYPE,
 		     construct_type(PROCEDURE, NULLTYPE),
 		     0);
-	tp = construct_type(SUBRANGE, int_type);
-	tp->sub_lb = 0;
-	tp->sub_ub = wrd_size * 8 - 1;
-	df = Enter("BITSET", D_TYPE, construct_type(SET, tp), 0);
-	df->df_type->tp_size = wrd_size;
+	df = Enter("BITSET", D_TYPE, bitset_type, 0);
 	df = Enter("FALSE", D_ENUM, bool_type, 0);
 	df->df_value.df_enum.en_val = 0;
 	df->df_value.df_enum.en_next = Enter("TRUE", D_ENUM, bool_type, 0);

@@ -5,6 +5,7 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<assert.h>
 #include	"idf.h"
 #include	"def.h"
 #include	"type.h"
@@ -17,6 +18,10 @@ Enter(name, kind, type, pnam)
 	char *name;
 	struct type *type;
 {
+	/*	Enter a definition for "name" with kind "kind" and type
+		"type" in the Current Scope. If it is a standard name, also
+		put its number in the definition structure.
+	*/
 	struct idf *id;
 	struct def *df;
 
@@ -35,6 +40,13 @@ EnterIdList(idlist, kind, flags, type, scope)
 	struct type *type;
 	struct scope *scope;
 {
+	/*	Put a list of identifiers in the symbol table.
+		They all have kind "kind", and type "type", and are put
+		in scope "scope". "flags" initializes the "df_flags" field
+		of the definition structure.
+		Also assign numbers to enumeration literals, and link
+		them together.
+	*/
 	register struct def *df;
 	struct def *first = 0, *last = 0;
 	int assval = 0;
@@ -45,15 +57,16 @@ EnterIdList(idlist, kind, flags, type, scope)
 		df->df_flags = flags;
 		if (kind == D_ENUM) {
 			if (!first) first = df;
-			df->df_value.df_enum.en_val = assval++;
-			if (last) last->df_value.df_enum.en_next = df;
+			df->enm_val = assval++;
+			if (last) last->enm_next = df;
 			last = df;
 		}
 		idlist = idlist->next;
 	}
 	if (last) {
-		/* Also meaning : enumeration */
-		last->df_value.df_enum.en_next = 0;
+		/* Also meaning : kind == D_ENUM */
+		assert(kind == D_ENUM);
+		last->enm_next = 0;
 		type->enm_enums = first;
 		type->enm_ncst = assval;
 	}

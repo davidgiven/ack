@@ -52,3 +52,32 @@ TstProcEquiv(tp1, tp2)
 	if (p1 != p2) return 0;
 	return 1;
 }
+
+int
+TstCompat(tp1, tp2)
+	register struct type *tp1, *tp2;
+{
+	/*	test if two types are compatible. See section 6.3 of the
+		Modula-2 Report for a definition of "compatible".
+	*/
+	if (TstTypeEquiv(tp1, tp2)) return 1;
+	if (tp2->tp_fund == SUBRANGE) tp1 = tp1->next;
+	if (tp2->tp_fund == SUBRANGE) tp1 = tp1->next;
+	return	tp1 == tp2
+	    ||
+		(  tp1 == address_type
+		&& 
+	          (  tp2 == card_type
+		  || tp2 == intorcard_type
+		  || tp2->tp_fund == POINTER
+		  )
+		)
+	    ||
+		(  tp2 == address_type
+		&& 
+	          (  tp1 == card_type
+		  || tp1 == intorcard_type
+		  || tp1->tp_fund == POINTER
+		  )
+		);
+}

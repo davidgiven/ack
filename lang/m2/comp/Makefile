@@ -17,7 +17,8 @@ LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
-	scope.o misc.o enter.o defmodule.o typequiv.o node.o
+	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
+	cstoper.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -80,15 +81,16 @@ idf.o: idf.h
 input.o: f_info.h input.h
 type.o: LLlex.h Lpars.h def.h def_sizes.h idf.h node.h type.h
 def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
-scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
+scope.o: LLlex.h debug.h def.h idf.h main.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
 enter.o: LLlex.h def.h idf.h node.h scope.h type.h
 defmodule.o: LLlex.h def.h f_info.h idf.h input.h scope.h
 typequiv.o: Lpars.h def.h type.h
-node.o: LLlex.h def.h node.h type.h
+node.o: LLlex.h debug.h def.h main.h node.h type.h
+cstoper.o: Lpars.h def_sizes.h idf.h node.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h
-expression.o: LLlex.h Lpars.h def.h idf.h node.h scope.h
-statement.o: Lpars.h
+expression.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h
+statement.o: LLlex.h Lpars.h node.h
 Lpars.o: Lpars.h

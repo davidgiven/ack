@@ -34,7 +34,7 @@ define(id, scope, kind)
 	register struct def *df;
 	register struct scope *sc;
 
-	DO_DEBUG(debug(4,"Defining identifier %s in scope %d", id->id_text, scope->sc_scope));
+	DO_DEBUG(5, debug("Defining identifier \"%s\" in scope %d", id->id_text, scope->sc_scope));
 	df = lookup(id, scope->sc_scope);
 	if (	/* Already in this scope */
 		df
@@ -94,7 +94,7 @@ lookup(id, scope)
 
 	df1 = 0;
 	df = id->id_def;
-	DO_DEBUG(debug(4,"Looking for identifier %s in scope %d", id->id_text, scope));
+	DO_DEBUG(5, debug("Looking for identifier \"%s\" in scope %d", id->id_text, scope));
 	while (df) {
 		if (df->df_scope == scope) {
 			if (df->df_kind == D_IMPORT) {

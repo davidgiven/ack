@@ -11,6 +11,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"type.h"
 #include	"def.h"
+#include	"main.h"
 #include	"debug.h"
 
 static int maxscope;		/* maximum assigned scope number */
@@ -35,7 +36,7 @@ open_scope(scopetype, scope)
 	sc->sc_scope = scope == 0 ? ++maxscope : scope;
 	sc->sc_forw = 0; sc->sc_def = 0;
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
-	DO_DEBUG(debug(1, "Opening a %s scope",
+	DO_DEBUG(1, debug("Opening a %s scope",
 			scopetype == OPENSCOPE ? "open" : "closed"));
 	sc1 = CurrentScope;
 	if (scopetype == CLOSEDSCOPE) {
@@ -55,7 +56,7 @@ close_scope()
 	register struct scope *sc = CurrentScope;
 
 	assert(sc != 0);
-	DO_DEBUG(debug(1, "Closing a scope"));
+	DO_DEBUG(1, debug("Closing a scope"));
 	if (sc->sc_forw) rem_forwards(sc->sc_forw);
 	if (sc->next && (sc->next->sc_scope == 0)) {
 		struct scope *sc1 = sc;

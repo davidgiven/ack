@@ -6,19 +6,30 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	"main.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"node.h"
+#include	"const.h"
+#include	"type.h"
+#include	"debug.h"
 }
 
-number(struct node **p;):
+number(struct node **p;)
+{
+	struct type *tp;
+} :
 [
-	INTEGER
+	INTEGER		{ tp = dot.TOK_INT <= max_int ?
+				intorcard_type : card_type;
+			}
 |
-	REAL
-]			{ *p = MkNode(Value, NULLNODE, NULLNODE, dot); }
+	REAL		{ tp = real_type; }
+]			{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
+			  (*p)->nd_type = tp;
+			}
 ;
 
 qualident(int types; struct def **pdf; char *str; struct node **p;)
@@ -27,15 +38,16 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 	int  module;
 	register struct def *df;
 	struct def *lookfor();
+	register struct node **pnd;
+	struct node *nd;
 } :
 	IDENT		{ if (types) {
 				df = lookfor(dot.TOK_IDF, CurrentScope, 1);
 				*pdf = df;
 				if (df->df_kind == D_ERROR) types = 0;
 			  }
-			  if (p) {
-			  	*p = MkNode(Value, NULLNODE, NULLNODE,&dot);
-			  }
+			  nd = MkNode(Value, NULLNODE, NULLNODE, &dot);
+			  pnd = &nd;
 			}
 	[
 			{ if (types &&!(scope = has_selectors(df))) {
@@ -44,12 +56,11 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 			  }
 			}
 		/* selector */
-		'.'	{ if (p) *p = MkNode(Link, *p, NULLNODE, &dot); }
+		'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot);
+			  pnd = &(*pnd)->nd_right;
+			}
 		IDENT
-			{ if (p) {
-				p = &((*p)->nd_right);
-				*p = MkNode(Value, NULLNODE, NULLNODE,&dot);
-			  }
+			{ *pnd = MkNode(Value,NULLNODE,NULLNODE,&dot);
 			  if (types) {
 				module = (df->df_kind == D_MODULE);
 				df = lookup(dot.TOK_IDF, scope);
@@ -70,6 +81,8 @@ qualident(int types; struct def **pdf; char *str; struct node **p;)
 				error("identifier \"%s\" is not a %s",
 					df->df_idf->id_text, str);
 			  }
+			  if (!p) FreeNode(nd);
+			  else *p = nd;
 			}
 ;
 
@@ -98,22 +111,24 @@ ConstExpression(struct node **pnd;):
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
+		{ DO_DEBUG(3,
+		     ( debug("Constant expression:"),
+		       PrNode(*pnd)));
+		}
 ;
 
 expression(struct node **pnd;)
 {
-	struct node *nd;
 } :
-	SimpleExpression(&nd)
+	SimpleExpression(pnd)
 	[
 		/* relation */
 		[ '=' | '#' | UNEQUAL | '<' | LESSEQUAL | '>' |
 		  GREATEREQUAL | IN
 		]
-			{ nd = MkNode(Oper, nd, NULLNODE, &dot); }
-		SimpleExpression(&(nd->nd_right))
+			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+		SimpleExpression(&((*pnd)->nd_right))
 	]?
-			{ *pnd = nd; }
 ;
 
 /* Inline in expression
@@ -124,15 +139,19 @@ relation:
 
 SimpleExpression(struct node **pnd;)
 {
-	register struct node *nd;
 } :
-	[ '+' | '-' ]?
-	term(pnd)	{ nd = *pnd; }
+	[
+		[ '+' | '-' ]
+			{ *pnd = MkNode(Uoper, NULLNODE, NULLNODE, &dot);
+			  pnd = &((*pnd)->nd_right);
+			}
+	]?
+	term(pnd)
 	[
 		/* AddOperator */
 		[ '+' | '-' | OR ]
-			{ *pnd = nd = MkNode(Oper, nd, NULLNODE, &dot); }
-		term(&(nd->nd_right))
+			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+		term(&((*pnd)->nd_right))
 	]*
 ;
 
@@ -144,14 +163,13 @@ AddOperator:
 
 term(struct node **pnd;)
 {
-	register struct node *nd;
 }:
-	factor(pnd)	{ nd = *pnd; }
+	factor(pnd)
 	[
 		/* MulOperator */
 		[ '*' | '/' | DIV | MOD | AND | '&' ]
-			{ *pnd = nd = MkNode(Oper, nd, NULLNODE, &dot); }
-		factor(&(nd->nd_right))
+			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+		factor(&((*pnd)->nd_right))
 	]*
 ;
 
@@ -164,23 +182,29 @@ MulOperator:
 factor(struct node **p;)
 {
 	struct def *df;
+	struct node *nd;
 } :
 	qualident(0, &df, (char *) 0, p)
 	[
 		designator_tail(p)?
 		[
-				{ *p = MkNode(Call, p, NULLNODE, &dot); } 
+			{ *p = MkNode(Call, *p, NULLNODE, &dot); }
 			ActualParameters(&((*p)->nd_right))
 		]?
-	|			{ *p = MkNode(Call, p, NULLNODE, &dot); }
-		bare_set(&((*p)->nd_right))
+	|
+		bare_set(&nd)
+			{ nd->nd_left = *p;
+			  *p = nd;
+			}
 	]
 |
 	bare_set(p)
 | %default
 	number(p)
 |
-	STRING		{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot); }
+	STRING		{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);
+			  (*p)->nd_type = string_type;
+			}
 |
 	'(' expression(p) ')'
 |
@@ -190,20 +214,17 @@ factor(struct node **p;)
 
 bare_set(struct node **pnd;)
 {
-	struct node **nd;
+	register struct node *nd;
 } :
 	'{'		{
 			  dot.tk_symb = SET;
-			  *pnd = MkNode(Link, NULLNODE, NULLNODE, &dot);
-			  nd = &((*pnd)->nd_left);
+			  *pnd = nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
+			  nd->nd_type = bitset_type;
 			}
 	[
 		element(nd)
-		[
-			','	{ *nd = MkNode(Link, *nd, NULLNODE, &dot);
-				  nd = &((*nd)->nd_right);
-				}
-			element(nd)
+		[	{ nd = nd->nd_right; }
+			',' element(nd)
 		]*
 	]?
 	'}'
@@ -213,12 +234,19 @@ ActualParameters(struct node **pnd;):
 	'(' ExpList(pnd)? ')'
 ;
 
-element(struct node **pnd;):
-	expression(pnd)
+element(struct node *nd;)
+{
+	struct node *nd1;
+} :
+	expression(&nd1)
 	[
-		UPTO		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);}
-		expression(&((*pnd)->nd_right))
+		UPTO
+			{ nd1 = MkNode(Link, nd1, NULLNODE, &dot);}
+		expression(&(nd1->nd_right))
 	]?
+			{ nd->nd_right = MkNode(Link, nd1, NULLNODE, &dot);
+			  nd->nd_right->nd_symb = ',';
+			}
 ;
 
 designator(struct node **pnd;)

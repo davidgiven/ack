@@ -114,7 +114,7 @@ DefinitionModule
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE, 0);
 			  df->mod_scope = CurrentScope->sc_scope;
 			  DefinitionModule = 1;
-			  DO_DEBUG(debug(1, "Definition module \"%s\"", id->id_text));
+			  DO_DEBUG(1, debug("Definition module \"%s\"", id->id_text));
 			}
 	';'
 	import(0)* 

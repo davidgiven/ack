@@ -46,10 +46,10 @@ extern char *symbol2str();
 
 #ifdef DEBUG
 /*VARARGS2*/
-debug(level, fmt, args)
+debug(fmt, args)
 	char *fmt;
 {
-	if (level <= options['D']) _error(VDEBUG, NULLNODE, fmt, &args);
+	_error(VDEBUG, NULLNODE, fmt, &args);
 }
 #endif DEBUG
 

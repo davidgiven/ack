@@ -77,7 +77,10 @@ extern struct type
 	*longreal_type,
 	*word_type,
 	*address_type,
-	*error_type;
+	*intorcard_type,
+	*string_type,
+	*bitset_type,
+	*error_type;		/* All from type.c */
 
 extern int
 	wrd_align,
@@ -86,7 +89,7 @@ extern int
 	real_align,
 	lreal_align,
 	ptr_align,
-	record_align;
+	record_align;		/* All from type.c */
 
 extern arith
 	wrd_size,
@@ -94,14 +97,14 @@ extern arith
 	lint_size,
 	real_size,
 	lreal_size,
-	ptr_size;
+	ptr_size;		/* All from type.c */
 
 extern arith
-	align();
+	align();		/* type.c */
 
 struct type
 	*create_type(),
 	*construct_type(),
-	*standard_type();
+	*standard_type();	/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)

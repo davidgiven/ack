@@ -5,10 +5,13 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<em_arith.h>
 #include	<alloc.h>
+#include	<system.h>
+#include	"main.h"
 #include	"def.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"node.h"
+#include	"debug.h"
 
 struct node *h_node;		/* header of free list */
 
@@ -26,6 +29,7 @@ MkNode(class, left, right, token)
 	nd->nd_token = *token;
 	nd->nd_class = class;
 	nd->nd_type = NULLTYPE;
+	DO_DEBUG(4,(debug("Create node:"), PrNode(nd)));
 	return nd;
 }
 
@@ -39,3 +43,28 @@ FreeNode(nd)
 	if (nd->nd_right) FreeNode(nd->nd_right);
 	free_node(nd);
 }
+
+#ifdef DEBUG
+
+extern char *symbol2str();
+
+static
+printnode(nd)
+	register struct node *nd;
+{
+	fprint(STDERR, "(");
+	if (nd) {
+		printnode(nd->nd_left);
+		fprint(STDERR, " %s ", symbol2str(nd->nd_symb));
+		printnode(nd->nd_right);
+	}
+	fprint(STDERR, ")");
+}
+
+PrNode(nd)
+	struct node *nd;
+{
+	printnode(nd);
+	fprint(STDERR, "\n");
+}
+#endif DEBUG
