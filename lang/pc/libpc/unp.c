@@ -34,7 +34,7 @@ struct descr {
 	int	size;
 };
 
-_unp(ad,zd,i,ap,zp) int i; struct descr *ad,*zd; char *ap,*zp; {
+_unp(ad,zd,i,ap,zp,noext) int i; struct descr *ad,*zd; char *ap,*zp; int noext; {
 
 	if (zd->diff > ad->diff ||
 			(i -= ad->low) < 0 ||
@@ -46,7 +46,17 @@ _unp(ad,zd,i,ap,zp) int i; struct descr *ad,*zd; char *ap,*zp; {
 		int *aptmp = (int *) ap;
 		assert(ad->size == EM_WSIZE);
 		while (--i >= 0)
-			*aptmp++ = *zp++;
+			if (noext) *aptmp++ = *zp++ & 0377;
+			else *aptmp++ = *zp++;
+#if EM_WSIZE > 2
+	} else if (zd->size == 2) {
+		int *aptmp = (int *) ap;
+		short *zptmp = (short *) zp;
+		assert(ad->size == EM_WSIZE);
+		while (--i >= 0)
+			if (noext) *aptmp++ = *zptmp++ & 0177777;
+			else *aptmp++ = *zptmp++;
+#endif
 	} else {
 		assert(ad->size == zd->size);
 		while (--i >= 0)

@@ -47,6 +47,14 @@ _pac(ad,zd,zp,i,ap) int i; struct descr *ad,*zd; char *zp,*ap; {
 		assert(ad->size == EM_WSIZE);
 		while (--i >= 0)
 			*zp++ = *aptmp++;
+#if EM_WSIZE > 2
+	} else if (zd->size == 2) {
+		int *aptmp = (int *)ap;
+		short *zptmp = (short *) zp;
+		assert(ad->size == EM_WSIZE);
+		while (--i >= 0)
+			*zptmp++ = *aptmp++;
+#endif
 	} else {
 		assert(ad->size == zd->size);
 		while (--i >= 0)
