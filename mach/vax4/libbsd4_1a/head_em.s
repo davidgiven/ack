@@ -25,8 +25,8 @@ a2:
 	pushl	r0
 	pushl	r2
 	pushl	r1
-	movl	$m1,ap
-	chmk	(ap)+		# catch floating point exception
+#	movl	$m1,ap
+#	chmk	(ap)+		# catch floating point exception
 	calls	$3,_m_a_i_n
 	movl	$m2,ap
 	movl	r0,6(ap)
