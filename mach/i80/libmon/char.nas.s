@@ -1,4 +1,9 @@
 .define getchar, putchar
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! These getchar and putchar routines can be used for NASCOM computer.
 

@@ -1,4 +1,9 @@
 .define .inn2
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Bit test on 16 bits set
 ! Expects on stack:	bit number

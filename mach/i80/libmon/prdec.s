@@ -1,4 +1,9 @@
 .define prdec
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! print hl-reg as a decimal number.
 
@@ -50,8 +55,8 @@ convert:
 	ret
 
 table:
-	.short	10000
-	.short	1000
-	.short  100
-	.short	10
+	.data2	10000
+	.data2	1000
+	.data2  100
+	.data2	10
 

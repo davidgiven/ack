@@ -3,6 +3,11 @@
 .define efdivz, eiund, efund, econv, estack, eheap, eillins, eoddz
 .define ecase, ememflt, ebadptr, ebadpc, ebadlae, ebadmon, ebadlin, ebadgto
 .define eunimpl
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Trap routine
 ! Expects trap number on stack.
