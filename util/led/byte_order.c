@@ -26,7 +26,7 @@ determine_ordering()
 		bytes_reversed = TRUE;
 	sp = (short *)&l;
 	sp[0] = 0x0001; sp[1] = 0x0002;
-	if (l != 0x0001 + (0x0002 << 16))
+	if (l != 0x0001 + (0x0002L << 16))
 		words_reversed = TRUE;
 }
 

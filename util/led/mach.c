@@ -6,7 +6,7 @@
  * Now for Vax 11/750.
  */
 
-#define K 1024
+#define K 1024L
 
 	mems[ALLOEMIT + 0].mem_left = 64 * K;
 	mems[ALLOEMIT + 1].mem_left = 64 * K;
