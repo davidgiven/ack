@@ -1190,11 +1190,11 @@ zle | GEN_REG | remove(ALL) 	allocate(AREG)
 				"1:"				| | |
 zeq | GEN_REG | 		remove(ALL) 	allocate(AREG)
 				"ld a,%[1.1]"
-				"xor %[1.2]"
+				"or %[1.2]"
 				"jr z,$1"			| | |
 zne | GEN_REG | 		remove(ALL) 	allocate(AREG)
 				"ld a,%[1.1]"
-				"xor %[1.2]"
+				"or %[1.2]"
 				"jr nz,$1"			| | |
 zge | GEN_REG | 		remove(ALL) 	"bit 7,%[1.1]"
 				"jr z,$1"			| | |
@@ -1231,6 +1231,7 @@ lfr $1 == 2 |  |		remove(ALL)
 lfr $1 == 4 | STACK |		"push de"
 				"push bc"			| | |
 lfr 	| |			remove(ALL)
+				move({IMMEDIATE,$1},DE)
 				"call .lfr"
 								| | |
 ret $1 == 0 | STACK |
@@ -1260,7 +1261,7 @@ ret $1 == 4 | STACK |
 				"pop iy"
 				"ret"				| | |
 ret  		| |		remove(ALL)
-				move({IMMEDIATE,$1},BC)
+				move({IMMEDIATE,$1},DE)
 				"call .ret"
 				erase(BC)			| | |
 
