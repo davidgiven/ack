@@ -187,7 +187,7 @@ int lex_analyzer()
 	}
 	else {
 		tok = yylex();
-		yytext[yyleng] = '\0'; /* strings moeten op een '\0' eindigen */
+		yytext[yyleng] = '\0'; /* strings must end with '\0' */
 		return( tok);
 	}
 }
