@@ -11,14 +11,14 @@
 !POINTERS , AND USES THE C-CALLING CONVENTION. THE 2 BYTE WORDS 4 BYTE
 !POINTERS VERSION HAS TO DO SOME CONVERSION FIRST .
 
-_exit:		move.l	(sp),(a1)
+_Xexit:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
 		trap	#0
 	.data2	1
 
-_fork:		move.l	(sp),(a1)
+_Xfork:		move.l	(sp),(a1)
 		trap	#0
 	.data2	2
 		lea	4(sp),sp
@@ -38,9 +38,9 @@ _fork:		move.l	(sp),(a1)
 		mov	d0,-(sp)
 3:		move.l	(a1),a0
 		jmp	(a0)
-!_fork is special
+!_Xfork is special
 
-_read:		move.l	(sp),(a1)
+_Xread:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
@@ -56,7 +56,7 @@ sys0:		lea	16(sp),sp
 2:		move.l	(a1),a0
 		jmp	(a0)
 
-_write:		move.l	(sp),(a1)
+_Xwrite:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
@@ -64,7 +64,7 @@ _write:		move.l	(sp),(a1)
 	.data2	4
 		bra	sys0
 
-_open:		move.l	(sp),(a1)
+_Xopen:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st243
 #endif
@@ -80,7 +80,7 @@ sys5:		bcc	1f
 2:		move.l	(a1),a0
 		jmp	(a0)
 
-_close:		move.l	(sp),(a1)
+_Xclose:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
@@ -95,7 +95,7 @@ sys4:		bcc	1f
 2:		move.l	(a1),a0
 		jmp	(a0)
 
-_wait:		move.l	(sp),(a1)
+_Xwait:		move.l	(sp),(a1)
 		trap	#0
 	.data2	7
 sys6:		lea	4(sp),sp
@@ -109,7 +109,7 @@ sys6:		lea	4(sp),sp
 2:		move.l	(a1),a0
 		jmp	(a0)
 
-_creat:		move.l	(sp),(a1)
+_Xcreat:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st243
 #endif
@@ -117,23 +117,23 @@ _creat:		move.l	(sp),(a1)
 	.data2	8
 		bra	sys1
 
-_link:		move.l	(sp),(a1)
+_Xlink:		move.l	(sp),(a1)
 		trap	#0
 	.data2	9
 		lea	12(sp),sp
 		bra	sys4
 
-_unlink:	move.l	(sp),(a1)
+_Xunlink:	move.l	(sp),(a1)
 		trap	#0
 	.data2	10
 		bra	sys3
 
-_chdir:		move.l	(sp),(a1)
+_Xchdir:		move.l	(sp),(a1)
 		trap	#0
 	.data2	12
 		bra	sys3
 
-_mknod:		move.l	(sp),(a1)
+_Xmknod:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st244
 #endif
@@ -142,7 +142,7 @@ _mknod:		move.l	(sp),(a1)
 		lea	16(sp),sp
 		bra	sys4
 
-_chmod:		move.l	(sp),(a1)
+_Xchmod:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st243
 #endif
@@ -151,7 +151,7 @@ _chmod:		move.l	(sp),(a1)
 		lea	12(sp),sp
 		bra	sys4
 
-_chown:		move.l	(sp),(a1)
+_Xchown:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st244
 #endif
@@ -160,7 +160,7 @@ _chown:		move.l	(sp),(a1)
 		lea	16(sp),sp
 		bra	sys4
 
-_break:		move.l	(sp),(a1)
+_Xbreak:		move.l	(sp),(a1)
 		trap	#0
 	.data2	17
 		lea	8(sp),sp
@@ -177,13 +177,13 @@ _break:		move.l	(sp),(a1)
 nd:	.data4	endbss
 	.sect .text
 
-_stat:		move.l	(sp),(a1)
+_Xstat:		move.l	(sp),(a1)
 		trap	#0
 	.data2	18
 		lea	12(sp),sp
 		bra	sys4
 
-_lseek:		move.l	(sp),(a1)
+_Xlseek:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st245
 #endif
@@ -200,7 +200,7 @@ _lseek:		move.l	(sp),(a1)
 		jmp	(a0)
 
 
-_getpid:	move.l	(sp),(a1)
+_Xgetpid:	move.l	(sp),(a1)
 		trap	#0
 	.data2	20
 		add.l	#4,sp
@@ -208,7 +208,7 @@ _getpid:	move.l	(sp),(a1)
 		move.l	(a1),a0
 		jmp	(a0)
 
-_mount:		move.l	(sp),(a1)
+_Xmount:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st246
 #endif
@@ -217,12 +217,12 @@ _mount:		move.l	(sp),(a1)
 		lea	16(sp),sp
 		bra	sys4
 
-_umount:	move.l	(sp),(a1)
+_Xumount:	move.l	(sp),(a1)
 		trap	#0
 	.data2	22
 		bra	sys3
 
-_setuid:	move.l	(sp),(a1)
+_Xsetuid:	move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
@@ -230,7 +230,7 @@ _setuid:	move.l	(sp),(a1)
 	.data2	23
 		bra	sys3
 
-_getuid:	move.l	(sp),(a1)
+_Xgetuid:	move.l	(sp),(a1)
 		trap	#0
 	.data2	24
 sys7:		add.l	#4,sp
@@ -239,12 +239,12 @@ sys7:		add.l	#4,sp
 		move.l	(a1),a0
 		jmp	(a0)
 
-_stime:		move.l	(sp),(a1)
+_Xstime:		move.l	(sp),(a1)
 		trap	#0
 	.data2	25
 		bra	sys3
 
-_ptrace:	move.l	(sp),(a1)
+_Xptrace:	move.l	(sp),(a1)
 #ifndef lword
 		bsr	st247
 #endif
@@ -253,7 +253,7 @@ _ptrace:	move.l	(sp),(a1)
 		lea	20(sp),sp
 		bra	sys5
 
-_alarm:		move.l	(sp),(a1)
+_Xalarm:		move.l	(sp),(a1)
 #ifndef lword
 		sub.l	#2,sp
 		clr.w	4(sp)
@@ -265,7 +265,7 @@ _alarm:		move.l	(sp),(a1)
 		move.l	(a1),a0
 		jmp	(a0)
 
-_fstat:		move.l	(sp),(a1)
+_Xfstat:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st241
 #endif
@@ -274,17 +274,17 @@ _fstat:		move.l	(sp),(a1)
 		lea	12(sp),sp
 		bra	sys4
 
-_pause:		trap	#0
+_Xpause:		trap	#0
 	.data2	29
 		rts
 
-_utime:		move.l	(sp),(a1)
+_Xutime:		move.l	(sp),(a1)
 		trap	#0
 	.data2	30
 		lea	12(sp),sp
 		bra	sys4
 
-_access:	move.l	(sp),(a1)
+_Xaccess:	move.l	(sp),(a1)
 #ifndef lword
 		bsr	st248
 #endif
@@ -293,7 +293,7 @@ _access:	move.l	(sp),(a1)
 		lea	12(sp),sp
 		bra	sys4
 
-_nice:
+_Xnice:
 #ifndef lword
 		bsr	241
 #endif
@@ -302,16 +302,16 @@ _nice:
 		move.l	(sp)+,(sp)
 		rts
 
-_ftime:		move.l	(sp),(a1)
+_Xftime:		move.l	(sp),(a1)
 		trap	#0
 	.data2	35
 		bra	sys3
 
-_sync:		trap	#0
+_Xsync:		trap	#0
 	.data2	36
 		rts
 
-_kill:		move.l	(sp),(a1)
+_Xkill:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st248
 #endif
@@ -320,7 +320,7 @@ _kill:		move.l	(sp),(a1)
 		lea	12(sp),sp
 		bra	sys4
 
-_dup:		move.l	(sp),(a1)
+_Xdup:		move.l	(sp),(a1)
 #ifndef lword
 		bsr	st248
 #endif
@@ -328,24 +328,24 @@ _dup:		move.l	(sp),(a1)
 	.data2	38
 		bra	sys1
 
-_pipe:		move.l	(sp),(a1)
+_Xpipe:		move.l	(sp),(a1)
 		trap	#0
 	.data2	42
 		bra	sys6
 
-_times:		trap	#0
+_Xtimes:		trap	#0
 	.data2	43
 		move.l	(sp),a0
 		add.l	#8,sp
 		jmp	(a0)
 
-_profil:	trap	#0
+_Xprofil:	trap	#0
 	.data2	44
 		move.l	(sp),a0
 		lea	20(sp),sp
 		jmp	(a0)
 
-_setgid:	move.l	(sp),(a1)
+_Xsetgid:	move.l	(sp),(a1)
 #ifndef	lword
 		bsr	st241 
 #endif
@@ -353,13 +353,13 @@ _setgid:	move.l	(sp),(a1)
 	.data2	46
 		bra	sys3
 
-_getgid:	move.l	(sp),(a1)
+_Xgetgid:	move.l	(sp),(a1)
 		trap	#0
 	.data2	47
 		bra	sys7
 
 
-_signal:	move.l	(sp)+,retaddr
+_Xsignal:	move.l	(sp)+,retaddr
 		mov	(sp)+,d4
 		extend	d4
 		move.l	d4,-(sp)
@@ -379,11 +379,11 @@ _signal:	move.l	(sp)+,retaddr
 retaddr:  .data4	0
 	.sect .text
 
-_acct:		move.l	(sp),(a1)
+_Xacct:		move.l	(sp),(a1)
 		trap	#0
 	.data2	51
 		bra	sys3
-_lock:		move.l	(sp),(a1)
+_Xlock:		move.l	(sp),(a1)
 #ifndef	lword
 		bsr	st241
 #endif
@@ -391,7 +391,7 @@ _lock:		move.l	(sp),(a1)
 	.data2	53
 		bra	sys3
 
-_ioctl:		move.l	(sp),(a1)
+_Xioctl:		move.l	(sp),(a1)
 #ifndef	lword
 		bsr	st248
 #endif
@@ -400,22 +400,22 @@ _ioctl:		move.l	(sp),(a1)
 		lea	16(sp),sp
 		bra	sys4
 
-_mpxcall:	move.l	(sp),(a1)
-#ifndef	lword
-		bsr	st241
-#endif
-		trap	#0
-	.data2	56
-		lea	12(sp),sp
-		bra	sys4
+!_Xmpxcall:	move.l	(sp),(a1)
+!#ifndef	lword
+!		bsr	st241
+!#endif
+!		trap	#0
+!	.data2	56
+!		lea	12(sp),sp
+!		bra	sys4
 
-_exece:		move.l	(sp),(a1)
+_Xexece:		move.l	(sp),(a1)
 		trap	#0
 	.data2	59
 		lea	16(sp),sp
 		bra	sys4
 
-_umask:		move.l	(sp),(a1)
+_Xumask:		move.l	(sp),(a1)
 #ifndef	lword
 		bsr	st241
 #endif
@@ -426,7 +426,7 @@ _umask:		move.l	(sp),(a1)
 		move.l	(a1),a0
 		jmp	(a0)
 
-_chroot:	move.l	(sp),(a1)
+_Xchroot:	move.l	(sp),(a1)
 		trap	#0
 	.data2	61
 		bra	sys3

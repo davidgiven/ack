@@ -180,7 +180,7 @@ str_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
 		cmp.l	tblmax,d1 ;	bcs	4f
 5:		move.l	d1,hp	;	jmp	(a4)
 3:		move.l	d1,-(sp) ;	add.l	#1280,(sp)
-		bsr	_break ;	testen	(sp)+
+		bsr	_Xbreak ;	testen	(sp)+
 4:		bne	e_heap	;	bra	5b
 
 !----------------------------------------------------------------------------
@@ -206,7 +206,7 @@ lblnop:		lea	nopln+16,a0 ;	move.l	(a6),d1
 		bsr	itoa
 		move.l	#45,-(sp)
 		pea	nopln 	;	mov	#1,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 		jmp	(a4)
 
@@ -298,21 +298,21 @@ mon_z:		mov	(sp)+,d0 ;	bmi	e_badmon
 
 	.sect .data
 syscal:
-.data4	e_badmon ; .data4 hlt_z ; .data4	_fork ; .data4	_read
-.data4	_write ; .data4	_open ; .data4	_close ; .data4	_wait
-.data4	_creat ; .data4	_link ; .data4	_unlink ; .data4 e_badmon
-.data4	_chdir ; .data4	e_badmon ; .data4 _mknod ; .data4	_chmod
-.data4	_chown ; .data4	_break ; .data4 _stat ; .data4	_lseek
-.data4	_getpid ; .data4 _mount ; .data4	_umount ; .data4	_setuid
-.data4	_getuid ; .data4	_stime ; .data4	_ptrace ; .data4	_alarm
-.data4	_fstat ; .data4	_pause ; .data4	_utime ; .data4	e_badmon
-.data4	e_badmon ; .data4 _access ; .data4 _nice ; .data4	_ftime
-.data4	_sync ; .data4	_kill ; .data4	e_badmon ; .data4 e_badmon
-.data4	e_badmon ; .data4 _dup ; .data4	_pipe ; .data4	_times
-.data4	_profil ; .data4 e_badmon ; .data4 _setgid ; .data4 _getgid
-.data4	_sigtrp ; .data4 e_badmon ; .data4 e_badmon ; .data4 _acct
-.data4	e_badmon ; .data4 _lock ; .data4	_ioctl ; .data4	e_badmon
-.data4	_mpxcall ; .data4 e_badmon ; .data4 e_badmon ; .data4 _exece
-.data4	_umask ; .data4	_chroot ; .data4	e_badmon ; .data4 e_badmon
+.data4 e_badmon,	hlt_z,		_Xfork,		_Xread
+.data4 _Xwrite,		_Xopen,		_Xclose,	_Xwait
+.data4 _Xcreat,		_Xlink,		_Xunlink,	e_badmon
+.data4 _Xchdir,		e_badmon,	_Xmknod,	_Xchmod
+.data4 _Xchown,		_Xbreak,	_Xstat,		_Xlseek
+.data4 _Xgetpid,	_Xmount, 	_Xumount, 	_Xsetuid
+.data4 _Xgetuid,	_Xstime, 	_Xptrace, 	_Xalarm
+.data4 _Xfstat,		_Xpause, 	_Xutime, 	e_badmon
+.data4 e_badmon,	_Xaccess,	_Xnice, 	_Xftime
+.data4 _Xsync,		_Xkill, 	e_badmon,	e_badmon
+.data4 e_badmon, 	_Xdup,		_Xpipe, 	_Xtimes
+.data4 _Xprofil, 	e_badmon,	_Xsetgid,	_Xgetgid
+.data4 _sigtrp, 	e_badmon,	e_badmon,	_Xacct
+.data4 e_badmon, 	_Xlock, 	_Xioctl, 	e_badmon
+.data4 e_badmon, 	e_badmon,	e_badmon,	_Xexece
+.data4 _Xumask, 	_Xchroot, 	e_badmon,	e_badmon
 
 	.sect .text

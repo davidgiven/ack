@@ -21,7 +21,7 @@ _sigtrp:	move.l	(sp)+,d2	!save return address
 		bcc	1f
 		move.l	sig_adr-4(a0),d3	!Get the pointer to the trap- 
 		bne	2f		!procedure to give as argument to
-sig_bad:	mov	22,-(sp)	!_signal. If pointer 0 trapping is
+sig_bad:	mov	22,-(sp)	!_Xsignal. If pointer 0 trapping is
 		mov	22,-(sp)	!not legal
 		jmp	(a4)
 1:		comp	#-3,d1		!-2:reset default , -3: ignore
@@ -31,7 +31,7 @@ sig_bad:	mov	22,-(sp)	!_signal. If pointer 0 trapping is
 2:		move.l	d1,(a5)		!set new trapno
 		move.l	d3,-(sp)		!set arguments to signal:
 		mov	d4,-(sp)		!pointer ,signo to be trapped
-		bsr	_signal
+		bsr	_Xsignal
 		jmp	(a4)
 	.sect .data
 sig_adr:	.data4	sig1 ;	.data4	sig2 ;	.data4 sig3 ;	.data4	0
@@ -82,7 +82,7 @@ retutrap:	add.l	#4,sp		!remove signumber
 
 sig12:		pea	sig12
 		mov	#12,-(sp)
-		bsr	_signal
+		bsr	_Xsignal
 		bsr	e_badmon
 		rtr
 sig11:		move.l	4(a1),d0

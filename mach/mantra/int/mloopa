@@ -111,7 +111,7 @@ notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
 		move.l	#20,-(sp)
 		pea	0(a0,d0)
 		mov	#2,-(sp)		!STANDARD ERROR
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 !NEXT INFORMATION ABOUT THE LINE NUMBER
 		move.l	(a6),d1
@@ -120,7 +120,7 @@ notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
 		move.l	#30,-(sp)
 		pea	emess
 		mov	#2,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 !NOW INFORMATION ABOUT THE FILES
 2:		move.l	4(a6),a0
@@ -135,13 +135,13 @@ notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
 		bne	1b
 		move.l	d0,4(sp)
 		mov	#2,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 5:		move.w	#0x0A,-(sp)
 		move.l	#2,-(sp)
 		pea	4(sp)
 		mov	#2,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+6,sp
 		comp	#0xB,(sp)
 		beq	1f
@@ -170,7 +170,7 @@ profsiz: .space	4
 		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emprof
-		bsr	_creat
+		bsr	_Xcreat
 		testen	(sp)+
 		mov	(sp)+,d0
 		move.l	ltime,a4	!a4 points at bottem of prof table
@@ -181,13 +181,13 @@ profsiz: .space	4
 		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emflow
-		bsr	_creat
+		bsr	_Xcreat
 		testen	(sp)+
 		mov	(sp)+,d0
 		move.l	flowsiz,-(sp)
 		move.l	lflow,-(sp)
 		mov	d0,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 	.sect .data
 emflow:	.asciz	"em_flow\0"
@@ -202,7 +202,7 @@ flowsiz: .space 4
 		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emcount
-		bsr	_creat
+		bsr	_Xcreat
 		testen	(sp)+
 		mov	(sp)+,d0
 		move.l	lcount,a4
@@ -223,13 +223,13 @@ counttab:  .space	1884
 	.sect .text
 		mov	#0x1B6,-(sp)
 		pea	emopf
-		bsr	_creat
+		bsr	_Xcreat
 		testen	(sp)+
 		mov	(sp)+,d0
 		move.l	#1884,-(sp)
 		pea	counttab
 		mov	d0,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 #endif
 #if count+flow+prof
@@ -242,7 +242,7 @@ lhalt:
 	.sect .text
 		mov	#0x1B6,-(sp)
 		pea	emlast
-		bsr	_creat
+		bsr	_Xcreat
 		testen	(sp)+
 		mov	(sp)+,d6	!d6 contains file descriptor
 		cmp.l	#-1,linused-4	!test if buffer is fully used
@@ -255,13 +255,13 @@ lhalt:
 		move.l	#22,-(sp)	!here case no lines processed
 		pea	mess1
 		mov	d6,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 		bra	9f
 2:		move.l	#7,-(sp)	!announce new file name
 		pea	mess2
 		mov	d6,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 		move.l	(a5),d7
 		move.l	d7,a0		!keep file pointer in d7
@@ -273,7 +273,7 @@ lhalt:
 		move.l	d1,-(sp)
 		move.l	d7,-(sp)
 		mov	d6,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 4:		move.l	(a5),d1		!next print line numbers
 		lea	mess3,a0
@@ -281,7 +281,7 @@ lhalt:
 		move.l	#12,-(sp)
 		pea	mess3
 		mov	d6,-(sp)
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp
 		bsr	nexttab
 		tst.l	(a5)		!in case 0 no more lines
@@ -302,7 +302,7 @@ lasttable:  .space  512
 linused:    .space  4
 #endif
 	.sect .text
-halt:		bsr	_exit
+halt:		bsr	_Xexit
 
 	.sect .data
 emerr:
@@ -388,7 +388,7 @@ tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
 		move.l	d1,-(sp)
 		move.l	a2,-(sp)
 		mov	8(sp),-(sp)	!WRITE FILE NAME.
-		bsr	_write
+		bsr	_Xwrite
 		add.l	wrd+4,sp	!CLEAN STACK.
 6:		sub.l	d6,d7		!IN d7 NUMBER OF LINES OF CURRENT PROC.
 		asl.l	#2,d6
@@ -401,7 +401,7 @@ tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
 		move.l	#23,-(sp)
 		pea	buffer
 		mov	8(sp),-(sp)
-		bsr	_write		!PRINT LINE NUMBER AND INTEGER .
+		bsr	_Xwrite		!PRINT LINE NUMBER AND INTEGER .
 		add.l	wrd+4,sp	!CLEAN STACK.
 		add.l	#1,d5		!NEXT LINE NUMBER .
 		add.l	#4,d6		!NEXT COUNT.

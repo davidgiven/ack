@@ -22,7 +22,7 @@
 
 		lea	retarea,a1		!a1 POINTS AT RETURN AREA
 		move.l	nd,-(sp)		!nd contains endbss
-		bsr	_break
+		bsr	_Xbreak
 		add.l	wrd,sp
 #if	last
 		move.l	#126,d0			!initialise lasttable
@@ -51,7 +51,7 @@ emfile:	.asciz	"e.out"
 		cl	-(sp)
 		move.l	(a2),-(sp)
 		lea	eb,a6
-		bsr	_open
+		bsr	_Xopen
 		testen	(sp)+
 		bne	nofile
 		mov	(sp)+,savefd
@@ -59,12 +59,12 @@ emfile:	.asciz	"e.out"
 					!information about file for error mess.
 		move.l	#16,-(sp) ;	pea	header
 		mov	savefd,-(sp)			!skip first header
-		bsr	_read	;	testen	(sp)+
+		bsr	_Xread	;	testen	(sp)+
 		bne	badarg1
 		move.l	#32,(sp)
 		pea	header
 		mov	savefd,-(sp)
-		bsr	_read	
+		bsr	_Xread	
 		testen	(sp)+
 		bne	badarg1
 		cmp.l	#32,(sp)+
@@ -85,13 +85,13 @@ emfile:	.asciz	"e.out"
 		add.l	szdata,a0 ;	move.l	a0,tblmax
 		move.l	a0,globmax ;	move.l	a0,hp
 		add.l	#2000,a0 ;	move.l	a0,-(sp)
-		bsr	_break				!ask for core
+		bsr	_Xbreak				!ask for core
 		testen	(sp)+	;	bne	toolarge
 		move.l	eb,a6	;	move.l	filb,4(a6)
 		move.l	ntext,-(sp) 
 		move.l	pb,-(sp)
 		mov	savefd,-(sp)
-		bsr	_read
+		bsr	_Xread
 		testen	(sp)+	;	bne	badarg
 		add.l	#4,sp
 #if	float
@@ -103,7 +103,7 @@ lblbuf:		sub.l	#2048,sp
 		move.l	sp,a4				!transport  ptr a4
 		move.l	sp,a5
 		move.l	#2048,-(sp) ;	move.l	a4,-(sp)
-		mov	savefd,-(sp) ;	bsr	_read
+		mov	savefd,-(sp) ;	bsr	_Xread
 		testen	(sp)+	;	bne	badarg
 		move.l	(sp)+,d0
 		cmp.l	#2048,d0 ;	bcs	0f
@@ -174,7 +174,7 @@ blshift:	move.l	a5,a0	;	move.l	#1024,d0
 0:		move.l	(a5)+,(a0)+ ;	sub.w	#1,d0
 		bgt	0b	;	move.l	a0,a5
 		move.l	a5,-(sp) ;	mov	savefd,-(sp)
-		bsr	_read
+		bsr	_Xread
 		testen	(sp)+	;	bne	badarg
 		move.l	(sp)+,d0
 		cmp.l	#1024,d0 ;	beq	1f
@@ -213,7 +213,7 @@ finito:		cmp.l	hp,a3	;	bne	badarg	!load file error
 		ble	3f	;	bsr	blshift		!more or ready
 		bra	4b
 3:		cmp.l	eb,a3	;	bne	badarg
-		move.l	savefd,-(sp) ;	bsr	_close
+		move.l	savefd,-(sp) ;	bsr	_Xclose
 		move.l	ml,sp				!refresh stack
 
 #if	count+prof+flow
@@ -446,7 +446,7 @@ skipdisp:
 		cmp.l	nd,d1
 		bcs	2f
 		move.l	d1,-(sp)
-		bsr	_break
+		bsr	_Xbreak
 		testen	(sp)+
 		bne	toolarge
 2:		sub.l	a3,d1
