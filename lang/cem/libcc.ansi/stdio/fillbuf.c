@@ -13,6 +13,7 @@ int
 __fillbuf(register FILE *stream)
 {
 	static unsigned char ch[FOPEN_MAX];
+	register int i;
 
 	stream->_count = 0;
 	if (fileno(stream) < 0) return EOF;
@@ -33,13 +34,12 @@ __fillbuf(register FILE *stream)
 			stream->_bufsiz = BUFSIZ;
 		}
 	}
-	if (io_testflag(stream, _IONBF | _IOLBF)) {
-		register int i;
-		for (i = 0; i < FOPEN_MAX; i++) {
-			if (__iotab[i] && io_testflag(__iotab[i], _IOLBF))
-				if (io_testflag(__iotab[i], _IOWRITING))
-					(void) fflush(__iotab[i]);
-		}
+
+	/* flush line-buffered output when filling an input buffer */
+	for (i = 0; i < FOPEN_MAX; i++) {
+		if (__iotab[i] && io_testflag(__iotab[i], _IOLBF))
+			if (io_testflag(__iotab[i], _IOWRITING))
+				(void) fflush(__iotab[i]);
 	}
 
 	if (!stream->_buf) {
