@@ -125,7 +125,7 @@ getaddr(p_addr) long *p_addr ; {
 	return 1 ;
 }
 
-getcnt(p_cnt) unsigned *p_cnt ; {
+getcnt(p_cnt) short *p_cnt ; {
 	char in[2] ;
 	short out[2] ;
 	int i ;
