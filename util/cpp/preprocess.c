@@ -122,17 +122,22 @@ preprocess(fn)
 				do {
 					echo(c);
 					LoadChar(c);
-					if (c == '\\') {
-						echo(c);
-						LoadChar(c);
-					}
 					if (c == '\n') {
 						++LineNumber;
 						lineno++;
+						break;
 					}
 					else if (c == EOI) {
 						flush(op-_obuf);
 						return;
+					}
+					if (c == '\\') {
+						echo(c);
+						LoadChar(c);
+						if (c == '\n') {
+							++LineNumber;
+							lineno++;
+						}
 					}
 				}
 				while (c != stopc);
