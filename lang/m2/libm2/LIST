@@ -33,6 +33,7 @@ blockmove.c
 stackprio.c
 ChkCards.e
 EM.e
+rcka.e
 rcku.e
 rcki.e
 rckul.e
