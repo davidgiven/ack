@@ -10,4 +10,5 @@ grp.h
 sgtty.h
 signal.h
 fcntl.h
+errno.h
 sys
