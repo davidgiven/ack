@@ -1,0 +1,32 @@
+var w=2
+var p=4
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=m68k2
+var M=m68k2
+var LIB=mach/m68k2/lib/tail_
+var RT=mach/m68k2/lib/head_
+var INCLUDES=-I{EM}/include -I/usr/include
+name be
+	from .m
+	to .o
+	program {EM}/lib/{M}_cg
+	args <
+	prop >
+	need .e
+end
+name asld
+	from .o.s.a
+	to a.out
+	program {EM}/lib/{M}_as
+	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -i
+	mapflag -n
+	args (.e:{HEAD}={EM}/{RT}em.pmds) \
+({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{LIB}mon.pmds {EM}/{LIB}em.vend)
+	prop Cm
+end
