@@ -3,23 +3,25 @@
 _randomi()
 {
 	int i;
-	double f;
 	_setchan(-1);
 	printf("Random number seed (-32768 to 32767) ? ");
 	_readint(&i);
-	f=i;
-	_setrand(f);
+	_setrand(i);
 }
 
-_setrand(f)
-double f;
-{
+_setrand(i)
 	int i;
-	i=f;
+{
 	srand(i);
 }
 double _rnd(d) double d;
 {
 	double f; f= (int) rand();
-	return(f/32767.0);
+	return(f/
+#if EM_WSIZE == 4
+		2147483647.0
+#else
+		32767.0
+#endif
+	);
 }

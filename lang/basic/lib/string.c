@@ -64,8 +64,9 @@ String *s1,*s2;
 	int length;
 	okr(s1); okr(s2);
 	s= (String *) salloc(sizeof(String));
-	length= _len(s1)+_len(s2)+1;
-	s->strval= salloc(length);
+	s->strlength= _len(s1)+_len(s2);
+	s->strval= salloc(s->strlength+1);
+	s->strcount = 1;
 	strcpy(s->strval,s2->strval);
 	strcat(s->strval,s1->strval);
 	return(s);
@@ -116,7 +117,7 @@ int d;
 String *_strascii()
 {
 }
-String *_string(d,f)
+String *_string(f, d)
 double	d,f;
 {
 	int i,j;
@@ -139,9 +140,10 @@ String *s, *s2;
 {
 	int l;
 
-/*	printf("mid called %d %d %s %s\n",i1,i2,s->strval, s2->strval);*/
+	/*printf("mid called %d %d %s %s\n",i1,i2,s->strval, s2->strval);*/
+	if (i2 < 0 || i1 < -1) error(3);
+	if( s->strlength<i2 || s->strlength < i1+i2) error(3);	/* source string too short */
 	if( i1== -1) i1= s2->strlength;
-	if( s->strlength<i2) error(3);	/* source string too short */
 	l= s->strlength - i2+1;
 	if( i1>l ) i1=l;
 	strncpy(s->strval+i2-1,s2->strval,i1);
@@ -154,6 +156,7 @@ String *s;
 	String *s2;
 
 /*	printf("mid fcn called %d %d %s\n",i1,i2,s->strval);*/
+	if (i2 < 0 || i1 < -1) return(s2);	/* or error? */
 	if( i1 == -1) i1= s->strlength;
 	s2= _newstr(s->strval);
 	s2->strval[0]=0;
