@@ -18,11 +18,14 @@ param.h
 pattern.h
 patterns
 peephole.c
+pop_push.awk
 process.c
 proinf.h
 putline.c
 reg.c
 scan.l
+shc.c
+shc.h
 special.c
 testopt
 types.h

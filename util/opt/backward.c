@@ -13,6 +13,7 @@ static char rcsid[] = "$Header$";
 #include <em_spec.h>
 #include <em_pseu.h>
 #include <em_mnem.h>
+#include <em_mes.h>
 #include "ext.h"
 
 /*
@@ -160,6 +161,11 @@ backward() {
 			goodrom = (rc >= 2);
 			break;
 		case ps_mes:
+			if ((int) aoff(lnp->l_a.la_arg, 0) == ms_std) {
+				lnp->l_next = i;
+				i = lnp;
+				continue;
+			}
 			break;
 		case ps_inp:
 		case ps_ina:
