@@ -1,0 +1,73 @@
+.TH ALLOC 3ACK "March 25, 1986"
+.SH NAME
+Malloc, Salloc, Srealloc, st_alloc, st_free\ \-\ low level memory allocation routines
+.SH SYNOPSIS
+.B #include <alloc.h>
+.PP
+.B char *Malloc(size)
+.br
+.B unsigned int size;
+.PP
+.B char *Salloc(str, size)
+.br
+.B char *str;
+.B unsigned int size;
+.PP
+.B char *Srealloc(str, size)
+.br
+.B char *str;
+.br
+.B unsigned int size;
+.PP
+.B char *st_alloc(phead, size, count)
+.br
+.B char **phead;
+.br
+.B unsigned int size;
+.PP
+.B st_free(ptr, phead, size)
+.br
+.B char *ptr;
+.br
+.B char **phead;
+.br
+.B unsigned int size;
+.PP
+.SH DESCRIPTION
+This set of routines provides a checking memory allocation mechanism.
+.PP
+\fIMalloc\fR returns a pointer to a block of at least \fIsize\fR
+bytes, beginning on a boundary suitable for any data type.
+.PP
+\fISalloc\fR returns a pointer to a block of at least \fIsize\fR
+bytes, initialized with the null-terminated string \fIstr\fR.
+.PP
+\fISrealloc\fR reallocates
+the string at \fIstr\fR to \fIsize\fR bytes.
+.PP
+All these routines use \fImalloc\fR and \fIrealloc\fR.
+\fIFree\fR can be used on pointers returned by these routines.
+.PP
+\fISt_alloc\fR and \fIst_free\fR provide a mechanism for maintaining free lists
+of structures, whose first field is a pointer called \fBnext\fR.
+This field is used to chain free structures together.
+\fISt_alloc\fR takes three parameters: \fIphead\fR is a pointer to a field
+containing the head of the free list, \fIsize\fR contains the size of the
+structures, and \fIcount\fR indicates how many new structures must be allocated
+in case the free list is exhausted.
+It returns a pointer to a zero-initialized structure.
+\fISt_free\fR also takes three parameters: \fIptr\fR is a pointer to
+the structure to be freed, \fIphead\fR is again a pointer to a field
+containing the head of the free list, and \fIsize\fR again contains the size
+of the structures.
+These last two routines are best used in a macro.
+.SH FILES
+.nf
+~em/modules/h/alloc.h
+~em/modules/lib/liballoc.a
+.fi
+.SH "SEE ALSO"
+malloc(3)
+.SH DIAGNOSTICS
+\fIMalloc\fR, \fISalloc\fR, \fISrealloc\fR, and \fIst_alloc\fR
+give an error message and stop execution if there is no memory available.
