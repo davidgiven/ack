@@ -1,0 +1,24 @@
+.TH MKDEP 1ACK
+.SH NAME
+mkdep \- dependency generator for C-programs
+.SH SYNOPSYS
+.B mkdep
+file ...
+.SH DESCRIPTION
+.I Mkdep
+scans the files in the argument list for C-preprocessor lines of the form
+.DS
+#include "\fIfile1\fp"
+.DE
+and produces for each file \fIarg\fR in the argument list a line of the form
+.DS
+\fIarg\fR: \fIfile1\fR \fIfile2\fR ...
+.DE
+where \fIfile1\fR, \fIfile2\fR, etc. are filenames included by \fIarg\fR, or
+by a file included by \fIarg\fR, etc.
+.PP
+Only files in the current directory are scanned.
+.SH "SEE ALSO"
+make(1)
+.SH BUGS
+Should be able to handle files from other directories
