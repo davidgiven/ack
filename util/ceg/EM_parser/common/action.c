@@ -36,7 +36,7 @@ char *instr;
 {
 	if ( nr_instr == quantum) {
 		quantum *= 2;
-		as_instructions = (char **) Realloc( as_instructions,
+		as_instructions = (char **) Realloc( (char *) as_instructions,
 					   quantum*sizeof( char *));
 	}
 

@@ -44,10 +44,12 @@ int CALL_pos = FALSE;	/* Needed to distinguish between
 			 */
 
 
+static char skip_space();
+static read_string();
 
 int mylex()
 {
-	char c, skip_space();
+	char c;
 
 	static int special = FALSE;	/* rule with conditions + default ? */
 
@@ -188,7 +190,7 @@ int arrow() /* '==>' */
 
 int _default() /* 'default' */
 {
-	char c, skip_space();
+	char c;
 
 	if ( ( *next++ = scanc()) == 'e')
 	    if ( ( *next++ = scanc()) == 'f')
