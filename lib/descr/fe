@@ -11,7 +11,7 @@ callname ack
 name cpp
 	# no from, this is a preprocessor
 	to .i
-	program {EM}/lib/cpp{ANSI_C?}
+	program {EM}/lib.bin/cpp{ANSI_C?}
 	mapflag -I* CPP_F={CPP_F?} -I*
 	mapflag -U* CPP_F={CPP_F?} -U*
 	mapflag -D* CPP_F={CPP_F?} -D*
@@ -20,6 +20,7 @@ name cpp
 	mapflag -wo CPP_F={CPP_F?} -o
 	mapflag -ansi ANSI_C=.ansi
 	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
+		-D__{NAME} \
 		({ANSI_C?}:.ansi={SYSINCLUDES?} {ANSI_C_INCLUDES} {INCLUDES?}) \
 		({ANSI_C?.c}:{SUFFIX}={SYSINCLUDES?} {C_INCLUDES} {INCLUDES?}) \
 		({ANSI_C?.xx}:.xx=-D{NAME} \
@@ -34,7 +35,7 @@ end
 name cem
 	from .c
 	to .k
-	program {EM}/lib/em_cemcom{ANSI_C?}
+	program {EM}/lib.bin/em_cemcom{ANSI_C?}
 	mapflag -ansi ANSI=ansi
 #	mapflag -I* CPP_F={CPP_F?} -I*
 #	mapflag -U* CPP_F={CPP_F?} -U*
@@ -59,6 +60,7 @@ name cem
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		({ANSI_C?.c}:.c={C_INCLUDES}) \
 		{INCLUDES?} \
+		({ANSI_C?}:.ansi=-D__{NAME}) \
 		({ANSI_C?.xx}:.xx=-D{NAME}) \
 		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
 		-D_EM_SSIZE={s} -D_EM_LSIZE={l} -D_EM_FSIZE={f} -D_EM_DSIZE={d} \
@@ -71,7 +73,7 @@ end
 name pc
 	from .p
 	to .k
-	program {EM}/lib/em_pc
+	program {EM}/lib.bin/em_pc
 	mapflag -L PC_F={PC_F?} -L
 #	mapflag -s PC_F={PC_F?} -s
 	mapflag -_ PC_F={PC_F?} -U
@@ -95,7 +97,7 @@ end
 name m2
 	from .mod.def
 	to .k
-	program {EM}/lib/em_m2
+	program {EM}/lib.bin/em_m2
 	mapflag -I* M2_INCL={M2_INCL?} -I*
 	mapflag -L M2_F={M2_F?} -L
 	mapflag -g M2_F={M2_F?} -g
@@ -119,7 +121,7 @@ end
 name ocm
 	from .ocm
 	to .k
-	program {EM}/lib/em_occam
+	program {EM}/lib.bin/em_occam
 	mapflag -L OCM_F={OCM_F?} -L
 	mapflag -V* OCM_F={OCM_F?} -V*
 	args -Vw{w}p{p}l{l} {OCM_F?}
@@ -133,7 +135,7 @@ end
 name abc
 	from .b
 	to .k
-	program {EM}/lib/em_bem
+	program {EM}/lib.bin/em_bem
 	mapflag -h ABC_F={ABC_F?} -h
 	mapflag -w ABC_F={ABC_F?} -w
 	mapflag -L ABC_F={ABC_F?} -L
@@ -149,7 +151,7 @@ var A68INIT={EM}/lib/em_a68s_init
 name a68s
         from .8.a68
         to .k
-        program {EM}/lib/em_a68s{w}{p}
+        program {EM}/lib.bin/em_a68s{w}{p}
         mapflag -PA* A68INIT=*
         args < > {SOURCE}.lst {A68INIT}{w}{p} /dev/null
         prep cond
@@ -160,7 +162,7 @@ end
 name encode
 	from .e
 	to .k
-	program {EM}/lib/em_encode
+	program {EM}/lib.bin/em_encode
 	args <
 	prep cond
 	stdout
@@ -168,7 +170,7 @@ end
 name opt
 	from .k
 	to .m
-	program {EM}/lib/em_opt
+	program {EM}/lib.bin/em_opt
 	mapflag -LIB OPT_F={OPT_F?} -L
 	args {OPT_F?} <
 	stdout
@@ -177,7 +179,7 @@ end
 name ego
 	from .m.ma
 	to .gk
-	program {EM}/lib/em_ego
+	program {EM}/lib.bin/em_ego
 	mapflag -EGO-* EGO_F={EGO_F?} -*
 # The following lines are obsolete, but here for backwards compatibility.
 # They should be removed some day.
@@ -199,7 +201,7 @@ name ego
 	mapflag -a EGO_F={EGO_F?} -a
 	mapflag -O* EGO_F={EGO_F?} -O*
 	args \
-		{EGO_F?} -P {EM}/lib/ego \
+		{EGO_F?} -P {EM}/lib.bin/ego \
 		-M{EM}/lib/ego/{M}descr <
 	optimizer 2
 	stdout
@@ -210,7 +212,7 @@ name opt2
 	# of the em peephole optimizer
 	from .gk
 	to .g
-	program {EM}/lib/em_opt2
+	program {EM}/lib.bin/em_opt2
 #	mapflag -LIB OPT_F={OPT_F?} -L
 	args {OPT_F?} <
 	optimizer
@@ -219,7 +221,7 @@ end
 name decode
 	from .k.m.g.gk
 	to .e
-	program {EM}/lib/em_decode
+	program {EM}/lib.bin/em_decode
 	args <
 	stdout
 end
