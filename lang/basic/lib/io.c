@@ -59,6 +59,7 @@ _zone()
 _in(buf)
 char *buf;
 {
+	register int holder ;
 	char *c;
 	int pos;
 	if( _chann == -1)
@@ -69,8 +70,9 @@ char *buf;
 		stty(0,_ttydef);
 	}else pos= _fdtable[_chann].pos;
 	c= buf;
-	while( (*c = fgetc(_chanrd)) != EOF && *c != '\n'){
-		if( _chann == -1) putchar(*c);
+	while( (holder = fgetc(_chanrd)) != EOF && holder != '\n'){
+		*c= holder ;
+		if( _chann == -1) putchar(holder);
 		c++; pos++;
 	}
 	*c= 0;
