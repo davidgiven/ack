@@ -10,7 +10,8 @@ typedef struct transform trf;
 
 struct transform {
 	char    *t_in ;         /* Suffices in '.o.k' */
-	char    *t_out ;        /* Result '.suffix' or 'name' */
+	char    *t_out ;        /* Result '.suffix' */
+	char	*t_outfile ;	/* Resulting output file */
 	char    *t_name ;       /* The name of this transformation */
 	list_head t_mapf ;      /* Mapflags argument, uses varrep */
 	char    *t_argd ;       /* Argument descriptor, uses varrep */
@@ -24,11 +25,17 @@ struct transform {
 	int     t_optim:1 ;     /* Is optimizer */
 	int     t_isprep:1 ;    /* Is preprocessor */
 	int     t_keep:1 ;      /* Keep the output file */
+	int     t_scan:1 ;      /* Used while finding path's */
+	int	t_bscan:1 ;	/* Best scan so far, while finding path's */
+	int	t_linker:1 ;	/* The linker usurps all unrecognized flags */
+	int	t_do:1 ;	/* Is in a path to execute */
+	int	t_blocked:1 ;	/* An input file could not be produced */
+	list_head t_inputs ;	/* The input 'path's of a combiner */
+	char	*t_origname ;	/* The basename of the output file */
+	trf	*t_next ;	/* The transformation to be executed next */
 	char    *t_prog ;       /* Pathname for load file */
 	list_head t_flags ;     /* List of flags */
 	list_head t_args ;      /* List of arguments */
-	int     t_scan:1 ;      /* Used while finding path's */
-	int     t_do:1 ;        /* Is in path to execute */
 } ;
 
 #define t_cont(elem) ((trf *)l_content(elem))
