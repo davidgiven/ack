@@ -343,7 +343,7 @@ putdbugindex(dbugoff, ndbugbytes)
 	ind_t		dbugindex;
 	extern ind_t	alloc();
 
-	if ((dbugindex = alloc(ALLORELO, ndbugbytes)) != BADOFF) {
+	if ((dbugindex = alloc(ALLODBUG, ndbugbytes)) != BADOFF) {
 		*(ind_t *)modulptr(dbugoff) = dbugindex;
 		return TRUE;
 	}
@@ -501,6 +501,7 @@ modulsize(head)
 static struct outrelo	*walkrelo;
 static unsigned short cnt_relos;
 static unsigned short index;
+#define _RELSIZ	64
 
 startrelo(head)
 	register struct outhead	*head;
@@ -512,7 +513,7 @@ startrelo(head)
 		walkrelo = (struct outrelo *)address(ALLORELO, reloindex);
 	}
 	else {
-		index = 20;
+		index = _RELSIZ;
 		rd_rew_relos(head);
 		cnt_relos = head->oh_nrelo;
 	}
@@ -521,13 +522,13 @@ startrelo(head)
 struct outrelo *
 nextrelo()
 {
-	static struct outrelo	relobuf[20];
+	static struct outrelo	relobuf[_RELSIZ];
 
 	if (incore)
 		return walkrelo++;
 
-	if (index == 20) {
-		int i = cnt_relos >= 20 ? 20 : cnt_relos;
+	if (index == _RELSIZ) {
+		int i = cnt_relos >= _RELSIZ ? _RELSIZ : cnt_relos;
 
 		cnt_relos -= i;
 		rd_relo(relobuf, i);

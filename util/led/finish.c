@@ -105,21 +105,21 @@ handle_relos(head, sects, names)
 		}
 	} else {
 		for (sectindex = 0; sectindex < head->oh_nsect; sectindex++) {
-			emit = getemit(head, sects, sectindex);
-			nrelo = head->oh_nrelo; startrelo(head);
-			while (nrelo--) {
-				relo = nextrelo();
-				if (relo->or_sect - S_MIN == sectindex) {
-					relocate(head,emit,names,relo);
-					/*
-					 * Write out the (probably changed)
-					 * relocation information.
-					 */
-					if (flagword & RFLAG)
-						wr_relo(relo, 1);
-				}
-			}
 			if (sects[sectindex].os_flen) {
+				emit = getemit(head, sects, sectindex);
+				nrelo = head->oh_nrelo; startrelo(head);
+				while (nrelo--) {
+					relo = nextrelo();
+					if (relo->or_sect - S_MIN == sectindex) {
+						relocate(head,emit,names,relo);
+						/*
+						 * Write out the (probably changed)
+						 * relocation information.
+						 */
+						if (flagword & RFLAG)
+							wr_relo(relo, 1);
+					}
+				}
 				wrt_nulls(sectindex, zeros[sectindex]);
 				zeros[sectindex] = 0;
 				wrt_emit(emit, sectindex, sects[sectindex].os_flen);
@@ -138,17 +138,22 @@ handle_relos(head, sects, names)
  */
 static
 put_locals(name, nnames)
-	register struct outname	*name;
+	struct outname		*name;
 	register ushort		nnames;
 {
+	register struct outname *oname = name;
+	register struct outname *iname = oname;
+
 	while (nnames--) {
-		if ((name->on_type & S_EXT) == 0 && mustsavelocal(name)) {
-			namerelocate(name);
-			addbase(name);
-			wrt_name(name);
+		if ((iname->on_type & S_EXT) == 0 && mustsavelocal(iname)) {
+			namerelocate(iname);
+			addbase(iname);
+			wrt_name(iname, 0);
+			*oname++ = *iname;
 		}
-		name++;
+		iname++;
 	}
+	wr_name(name, oname - name);
 }
 
 /*

@@ -65,23 +65,19 @@ end_write()
 	register struct outname	*name;
 	register int		sectindex;
 	extern ushort		NGlobals;
+	extern long		NGChars;
 
 	assert(!incore);
 	assert(!(flagword & SFLAG));
 	cnt = NGlobals;
 	name = (struct outname *)address(ALLOGLOB, (ind_t)0);
-	while (cnt--) {
-		if (name->on_foff != (long)0) {
-			name->on_mptr = address(ALLOGCHR, (ind_t)name->on_foff);
-		} else {
-			name->on_mptr = (char *)0;
-		}
-		wrt_name(name);
-		name++;
-	}
+	namecpy(name, NGlobals, off_char);
+	wr_name(name, NGlobals);
+	wr_string(mems[ALLOGCHR].mem_base+1, NGChars);
+	off_char += NGChars;
 
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++)
-		wrt_name(sectname(sectindex));
+		wrt_name(sectname(sectindex), 1);
 }
 	
 wrt_emit(emit, sectindex, cnt)
@@ -107,7 +103,7 @@ wrt_nulls(sectindex, cnt)
 	}
 }
 
-wrt_name(name)
+wrt_name(name, writename)
 	register struct outname	*name;
 {
 	assert(!incore);
@@ -121,5 +117,5 @@ wrt_name(name)
 	} else {
 		name->on_foff = (long)0;
 	}
-	wr_name(name, 1);
+	if (writename) wr_name(name, 1);
 }

@@ -31,14 +31,12 @@ static		copy_down();
 static		copy_up();
 static		free_saved_moduls();
 static		writelong();
-static		namecpy();
 
 struct memory	mems[NMEMS];
 
 bool	incore = TRUE;	/* TRUE while everything can be kept in core. */
 ind_t	core_position = (ind_t)0;	/* Index of current module. */
 
-#define AT_LEAST	(ind_t)2	/* See comment about string areas. */
 #define GRANULE		64	/* power of 2 */
 
 static char *BASE;
@@ -78,28 +76,39 @@ init_core()
 	extern char		*sbrk();
 
 #include "mach.c"
+#define ALIGN 8			/* minimum alignment for pieces */
+#define AT_LEAST	(ind_t)2*ALIGN	/* See comment about string areas. */
 
 	total_size = (ind_t)0;	/* Will accumulate the sizes. */
 	BASE = base = sbrk(0);		/* First free. */
-	for (mem = mems; mem < &mems[NMEMS]; mem++) {
-		mem->mem_base = base;
-		mem->mem_full = (ind_t)0;
-		base += mem->mem_left;	/* Each piece will start after prev. */
-		total_size += mem->mem_left;
+	if ((int)base % ALIGN) {
+		base  = sbrk(ALIGN - (int)base % ALIGN);
+		BASE = base = sbrk(0);
 	}
 	/*
 	 * String areas are special-cased. The first byte is unused as a way to
 	 * distinguish a name without string from a name which has the first
 	 * string in the string area.
 	 */
-	if (mems[ALLOLCHR].mem_left == 0)
-		total_size += 1;
-	else
-		mems[ALLOLCHR].mem_left -= 1;
-	if (mems[ALLOGCHR].mem_left ==  0)
-		total_size += 1;
-	else
-		mems[ALLOGCHR].mem_left -= 1;
+	for (mem = mems; mem < &mems[NMEMS]; mem++) {
+		mem->mem_base = base;
+		mem->mem_full = (ind_t)0;
+		if (mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR]) {
+			if (mem->mem_left == 0) {
+				mem->mem_left = ALIGN;
+				total_size += ALIGN;
+				base += ALIGN;
+			}
+			base += mem->mem_left;
+			total_size += mem->mem_left;
+			mem->mem_left--;
+			mem->mem_full++;
+		}
+		else {
+			base += mem->mem_left;	/* Each piece will start after prev. */
+			total_size += mem->mem_left;
+		}
+	}
 
 	if (sbreak(total_size) == -1) {
 		incore = FALSE;	/* In core strategy failed. */
@@ -109,13 +118,17 @@ init_core()
 		base = BASE;
 		for (mem = mems; mem < &mems[NMEMS]; mem++) {
 			mem->mem_base = base;
-			mem->mem_full = (ind_t)0;
-			mem->mem_left = 0;
+			if (mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR]) {
+				base += ALIGN;
+				mem->mem_left = ALIGN - 1;
+				mem->mem_full = 1;
+			}
+			else {
+				mem->mem_full = (ind_t)0;
+				mem->mem_left = 0;
+			}
 		}
 	}
-
-	mems[ALLOLCHR].mem_full = 1;
-	mems[ALLOGCHR].mem_full = 1;
 }
 
 /*
@@ -160,7 +173,7 @@ compact(piece, incr, flag)
 {
 	register ind_t		gain, size;
 	register struct memory	*mem;
-#define ALIGN 8			/* minimum alignment for pieces */
+	int min = piece, max = piece;
 #define SHIFT_COUNT 2		/* let pieces only contribute if their free
 				   memory is more than 1/2**SHIFT_COUNT * 100 %
 				   of its occupied memory
@@ -170,35 +183,79 @@ compact(piece, incr, flag)
 	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++) {
 		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
 	}
+
+	mem = &mems[piece];
+	if (flag == NORMAL) {
+		/* try and gain a bit more than needed */
+		gain = (mem->mem_full + incr) >> SHIFT_COUNT;
+		if (incr < gain) incr = gain;
+	}
+	
 	/*
 	 * First, check that moving will result in enough space
 	 */
 	if (flag != FREEZE) {
-		gain = mems[piece].mem_left & ~(ALIGN - 1);
-		for (mem = &mems[0]; mem <= &mems[NMEMS-1]; mem++) {
+		gain = mem->mem_left;
+		for (mem = &mems[piece-1]; mem >= &mems[0]; mem--) {
 			/* 
 			 * Don't give it all away! 
 			 * If this does not give us enough, bad luck
 			 */
-			if (mem == &mems[piece]) continue;
 			if (flag == FORCED)
 				size = 0;
-			else	size = mem->mem_full >> SHIFT_COUNT;
-			if (mem->mem_left > size)
+			else {
+				size = mem->mem_full >> SHIFT_COUNT;
+				if (size == 0) size = mem->mem_left >> 1;
+			}
+			if (mem->mem_left >= size)
 				gain += (mem->mem_left - size) & ~(ALIGN - 1);
+			if (gain >= incr) {
+				min = mem - &mems[0];
+				break;
+			}
+		}
+		if (min == piece)
+		    for (mem = &mems[piece+1]; mem <= &mems[NMEMS - 1]; mem++) {
+			/* 
+			 * Don't give it all away! 
+			 * If this does not give us enough, bad luck
+			 */
+			if (flag == FORCED)
+				size = 0;
+			else {
+				size = mem->mem_full >> SHIFT_COUNT;
+				if (size == 0) size = mem->mem_left >> 1;
+			}
+			if (mem->mem_left >= size)
+				gain += (mem->mem_left - size) & ~(ALIGN - 1);
+			if (gain >= incr) {
+				max = mem - &mems[0];
+				break;
+			}
+		}
+		if (min == piece) {
+			min = 0;
+			if (max == piece) max = 0;
 		}
 		if (gain < incr) return 0;
 	}
+	else {
+		min = 0;
+		max = NMEMS - 1;
+	}
 
 	gain = 0;
-	for (mem = &mems[0]; mem != &mems[piece]; mem++) {
+	for (mem = &mems[min]; mem != &mems[piece]; mem++) {
 		/* Here memory is inserted before a piece. */
 		assert(passnumber == FIRST || gain == (ind_t)0);
-		copy_down(mem, gain);
+		if (gain) copy_down(mem, gain);
 		if (flag == FREEZE || gain < incr) {
 			if (flag != NORMAL) size = 0;
-			else size = mem->mem_full >> SHIFT_COUNT;
-			if (mem->mem_left > size) {
+			else {
+				size = mem->mem_full >> SHIFT_COUNT;
+				if (size == 0) size = mem->mem_left >> 1;
+			}
+			if (mem->mem_left >= size) {
 				size = (mem->mem_left - size) & ~(ALIGN - 1);
 				gain += size;
 				mem->mem_left -= size;
@@ -208,25 +265,28 @@ compact(piece, incr, flag)
 	/*
 	 * Now mems[piece]:
 	 */
-	copy_down(mem, gain);
-	gain += mem->mem_left & ~(ALIGN - 1);
-	mem->mem_left &= (ALIGN - 1);
+	if (gain) copy_down(mem, gain);
+	gain += mem->mem_left;
+	mem->mem_left = 0;
 
 	if (gain < incr) {
 		register ind_t	up = (ind_t)0;
 
-		for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--) {
+		for (mem = &mems[max]; mem > &mems[piece]; mem--) {
 			/* Here memory is appended after a piece. */
 			if (flag == FREEZE || gain + up < incr) {
-				if (flag == FREEZE) size = 0;
-				else size = mem->mem_full >> SHIFT_COUNT;
-				if (mem->mem_left > size) {
+				if (flag != NORMAL) size = 0;
+				else {
+					size = mem->mem_full >> SHIFT_COUNT;
+					if (size == 0) size = mem->mem_left >> 1;
+				}
+				if (mem->mem_left >= size) {
 					size = (mem->mem_left - size) & ~(ALIGN - 1);
 					up += size;
 					mem->mem_left -= size;
 				}
 			}
-			copy_up(mem, up);
+			if (up) copy_up(mem, up);
 		}
 		gain += up;
 	}
@@ -253,7 +313,6 @@ copy_down(mem, dist)
 	register char		*new;
 	register ind_t		size;
 
-	if (!dist) return;
 	size = mem->mem_full;
 	old = mem->mem_base;
 	new = old - dist;
@@ -277,7 +336,6 @@ copy_up(mem, dist)
 	register char		*new;
 	register ind_t		size;
 
-	if (!dist) return;
 	size = mem->mem_full;
 	old = mem->mem_base + size;
 	new = old + dist;
@@ -312,7 +370,7 @@ alloc(piece, size)
 
 	while (left + incr < size)
 		incr += INCRSIZE;
-
+	
 	if (incr == 0 ||
 	    (incr < left + full && move_up(piece, left + full)) ||
 	    move_up(piece, incr) ||
@@ -340,9 +398,7 @@ hard_alloc(piece, size)
 
 	if (size != (ind_t)size)
 		return BADOFF;
-	alloctype = FORCED;
 	if ((ret = alloc(piece, size)) != BADOFF) {
-		alloctype = NORMAL;
 		return ret;
 	}
 
@@ -364,6 +420,11 @@ hard_alloc(piece, size)
 	}
 	free_saved_moduls();
 
+	if ((ret = alloc(piece, size)) != BADOFF) {
+		return ret;
+	}
+
+	alloctype = FORCED;
 	ret = alloc(piece, size);
 	alloctype = NORMAL;
 	return ret;
@@ -516,7 +577,6 @@ write_bytes()
 	wr_close();
 }
 
-static
 namecpy(name, nname, offchar)
 	register struct outname	*name;
 	register ushort		nname;
