@@ -17,7 +17,7 @@ RESFILES= \
 	m68020.$(SUF) occam.$(SUF) m2ref.$(SUF) ceg.$(SUF) nopt.$(SUF) \
 	sparc.$(SUF) int.$(SUF) lint.$(SUF)
 
-.SUFFIXES: .doc .$(SUF) .lpr
+.SUFFIXES: .doc .$(SUF) .lpr .out
 
 .doc.$(SUF):
 		$(NROFF) $(MS) $< > $@
@@ -25,6 +25,10 @@ RESFILES= \
 # directly to the printer:
 .doc.lpr:
 		$(NROFF) $(MS) $< | $(OPR)
+
+# to standard output
+.doc.out:
+		@$(NROFF) $(MS) $<
 
 # Exceptions, to be run without -ms
 
@@ -34,17 +38,26 @@ v7bugs.$(SUF):	v7bugs.doc
 v7bugs.lpr:	v7bugs.doc
 		$(NROFF) v7bugs.doc | $(OPR)
 
+v7bugs.out:	v7bugs.doc
+		@$(NROFF) v7bugs.doc
+
 pcref.$(SUF):	pcref.doc
 		$(NROFF) pcref.doc >$@
 
 pcref.lpr:	pcref.doc
 		$(NROFF) pcref.doc | $(OPR)
 
+pcref.out:	pcref.doc
+		@$(NROFF) pcref.doc
+
 val.$(SUF):	val.doc
 		$(NROFF) val.doc >$@
 
 val.lpr:	val.doc
 		$(NROFF) val.doc | $(OPR)
+
+val.out:	val.doc
+		@$(NROFF) val.doc
 
 pr:
 		@make "SUF="$(SUF) "NROFF="$(NROFF) "MS="$(MS) \
