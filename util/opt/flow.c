@@ -82,6 +82,7 @@ reach(lnp) register line_p lnp; {
 			else
 				np->n_jumps++;
 		}
+		if ((lnp->l_instr & BMASK) > sp_lmnem) continue;
 		if ((em_flag[(lnp->l_instr&BMASK)-sp_fmnem]&EM_FLO)==FLO_T)
 			return;
 	}
