@@ -1,10 +1,14 @@
 /* $Id$ */
 
 #include	<stdio.h>
-#include	<varargs.h>
 #include	<assert.h>
 #include	<alloc.h>
 #include	<out.h>
+#if __STDC__
+#include	<stdarg.h>
+#else
+#include	<varargs.h>
+#endif
 
 #include	"operator.h"
 #include	"position.h"
@@ -24,6 +28,20 @@ t_lineno	listline;
 extern char	*strrindex();
 extern int	interrupted;
 
+#if __STDC__
+/*VARARGS1*/
+p_tree
+mknode(int op, ...)
+{
+  va_list ap;
+  register p_tree p = new_tree();
+
+  va_start(ap, op);
+  {
+	register int i, na;
+
+	p->t_oper = op;
+#else
 /*VARARGS1*/
 p_tree
 mknode(va_alist)
@@ -37,6 +55,7 @@ mknode(va_alist)
 	register int i, na;
 
 	p->t_oper = va_arg(ap, int);
+#endif
 	switch(p->t_oper) {
 	case OP_NAME:
 	case OP_HELP:

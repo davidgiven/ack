@@ -5,7 +5,11 @@
 /* $Id$ */
 
 #include	<stdio.h>
+#if __STDC__
+#include	<stdarg.h>
+#else
 #include	<varargs.h>
+#endif
 
 #include	"logging.h"
 #include	"global.h"
@@ -239,6 +243,16 @@ int check_log(mark)
 	return ((mark[2] - '0') <= log_level[mark[1]]);
 }
 
+#if __STDC__
+/*VARARGS*/
+do_log(char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	{
+
+#else
 /*VARARGS*/
 do_log(va_alist)
 	va_dcl
@@ -249,6 +263,7 @@ do_log(va_alist)
 	{
 		char *fmt = va_arg(ap, char *);
 
+#endif
 		if (!check_log(fmt))
 			return;
 

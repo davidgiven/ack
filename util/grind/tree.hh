@@ -30,4 +30,8 @@ typedef struct tree {
 
 /* ALLOCDEF "tree" 100 */
 
+#if __STDC__
+extern p_tree	mknode(int, ...);
+#else
 extern p_tree	mknode();
+#endif

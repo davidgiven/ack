@@ -5,7 +5,12 @@
 /* $Id$ */
 
 #include	<stdio.h>
+#if __STDC__
+#include	<stdarg.h>
+extern fatal(char *, ...);
+#else
 #include	<varargs.h>
+#endif
 
 #include	"logging.h"
 #include	"global.h"
@@ -105,6 +110,34 @@ init_ofiles(firsttime)
 #endif	/* LOGGING */
 }
 
+#if __STDC__
+/*VARARGS0*/
+fatal(char *fmt, ...)
+{
+	va_list ap;
+
+	fprintf(stderr, "%s: ", prog_name);
+
+	va_start(ap, fmt);
+	{
+		do_fatal(stderr, fmt, ap);
+	}
+	va_end(ap);
+
+	if (mess_fp) {
+		va_start(ap, fmt);
+		{
+			do_fatal(mess_fp, fmt, ap);
+		}
+		va_end(ap);
+	}
+
+	if (running)
+		core_dump();
+	
+	close_down(1);
+}
+#else
 /*VARARGS0*/
 fatal(va_alist)
 	va_dcl
@@ -134,6 +167,7 @@ fatal(va_alist)
 	
 	close_down(1);
 }
+#endif
 
 close_down(rc)
 	int rc;
@@ -163,6 +197,23 @@ PRIVATE do_fatal(fp, fmt, ap)
 	fputc('\n', fp);
 }
 
+#if __STDC__
+/*VARARGS0*/
+message(char *fmt, ...)
+{
+	va_list ap;
+
+	fprintf(mess_fp, "(Message): ");
+
+	va_start(ap, fmt);
+	{
+		vfprintf(mess_fp, fmt, ap);
+	}
+	va_end(ap);
+
+	fprintf(mess_fp, " at %s\n", position());
+}
+#else
 /*VARARGS0*/
 message(va_alist)
 	va_dcl
@@ -180,6 +231,7 @@ message(va_alist)
 
 	fprintf(mess_fp, " at %s\n", position());
 }
+#endif
 
 char *position()			/* transient */
 {
