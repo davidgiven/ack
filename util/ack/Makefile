@@ -6,7 +6,7 @@ DSRC=list.c data.c main.c scan.c svars.c trans.c util.c rmach.c run.c grows.c\
 ISRC=dmach.c intable.c
 OBJ=list.o data.o main.o scan.o svars.o trans.o util.o rmach.o run.o \
     dmach.o intable.o grows.o files.o
-ACKDIR=$(EMHOME)/lib/descr
+ACKDIR=$(EMHOME)/lib
 FE=fe
 INTABLES=pdp int
 LNTABLES=acc apc abc ocm vax4 i86 m68k2 m68k4 pmds pmds4 mantra \

@@ -53,6 +53,7 @@ gr_throw(id) register growstring *id ; {
 	/* Throw the string away */
 	if ( id->gr_max==0 ) return ;
 	freecore(id->gr_string) ;
+	id->gr_string = 0 ;
 	id->gr_max=0 ;
 	id->gr_size=0 ;
 }
