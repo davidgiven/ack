@@ -19,7 +19,7 @@ LIBS = $(PRTLIB) $(STRLIB) $(ALLOCLIB) $(MALLOC) $(ASSERTLIB) $(SYSLIB)
 LIB_INCLUDES = -I$(MODULES)/h -I$(MODULES)/pkg
 
 # Where to install the preprocessor
-CEMPP = $(BIN)/ncpp
+CEMPP = $(BIN)/cpp.ansi
 
 TABGEN	= $(EMHOME)/bin/tabgen
 
@@ -120,12 +120,12 @@ cfiles: hfiles LLfiles $(GSRC) $(GSTRSRC)
 install: all
 	rm -f $(CEMPP)
 	cp ncpp $(CEMPP)
-	rm -f $(MANDIR)/ncpp.6
-	cp ncpp.6 $(MANDIR)/ncpp.6
+	rm -f $(MANDIR)/cpp.ansi.6
+	cp ncpp.6 $(MANDIR)/cpp.ansi.6
 
 cmp:	all
 	-cmp ncpp $(CEMPP)
-	-cmp ncpp.6 $(MANDIR)/ncpp.6
+	-cmp ncpp.6 $(MANDIR)/cpp.ansi.6
 
 pr: 
 	@pr $(PRFILES)
