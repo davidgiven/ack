@@ -15,7 +15,7 @@
 /*  #define MEMUSE          1       /* print memory usage statistics */
 
 #ifndef DUMP
-#define dump(x)                  /* nothing */
+#define dump()                  /* nothing */
 #endif
 
 #ifndef TIMING
