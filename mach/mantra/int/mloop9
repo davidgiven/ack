@@ -261,7 +261,7 @@ lin_l:		adroff		;	clr.l	d0
 		move.w	(a5),d0 ;	bra 1f
 lin_q:		move.l	(sp)+,d0 ;	bra	1f
 lin_s0:		move.l	#0,d0	;	move.b	(a3)+,d0
-1:		cmp	(a6),d0 ;	beq	9f
+1:		comp	(a6),d0 ;	beq	9f
 		mov	d0,(a6)
 #if	count+flow+prof
 		move.l	countfld,d1
