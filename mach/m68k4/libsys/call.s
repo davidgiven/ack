@@ -20,7 +20,7 @@ callc:
 calle:
 		trap #0
 cerror:
-		move.w d0,_errno
+		move.l d0,_errno
 		move.l #-1,d0
 		rts
 .bss

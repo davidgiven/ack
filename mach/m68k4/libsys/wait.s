@@ -7,6 +7,6 @@ _wait:		move.w	#0x7,d0
 		tst.l 4(sp)
 		beq 1f
 		move.l 4(sp),a0
-		move.w d1,(a0)
+		move.l d1,(a0)
 1:
 		rts

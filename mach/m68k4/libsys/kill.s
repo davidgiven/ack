@@ -2,7 +2,6 @@
 .extern _kill
 .text
 _kill:		move.w #0x25,d0
-		move.w 4(sp),a0
-		move.w 6(sp),d1
-		ext.l  d1
+		move.l 4(sp),a0
+		move.l 6(sp),d1
 		jmp callc

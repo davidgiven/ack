@@ -5,8 +5,8 @@ _exit:
 tst.b -40(sp)
 link	a6,#-0
 jsr __cleanup
-move.w 8(a6),-(sp)
+move.l 8(a6),-(sp)
 jsr __exit
-add.l #2,sp
+add.l #4,sp
 unlk a6
 rts
