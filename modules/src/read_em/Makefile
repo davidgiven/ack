@@ -39,8 +39,8 @@ install:	all
 		$(INSTALL) lib/libread_emkV.a
 		$(INSTALL) lib/libread_emeV.a
 		$(INSTALL) man/read_em.3
-		# $(INSTALL) lib/makecallsO.o
-		# $(INSTALL) lib/makecallsCE.o
+#		$(INSTALL) lib/makecallsO.o
+#		$(INSTALL) lib/makecallsCE.o
 
 cmp:		all
 		$(COMPARE) h/em_comp.h
@@ -48,8 +48,8 @@ cmp:		all
 		$(COMPARE) lib/libread_emkV.a
 		$(COMPARE) lib/libread_emeV.a
 		$(COMPARE) man/read_em.3
-		# $(COMPARE) lib/makecallsO.o
-		# $(COMPARE) lib/makecallsCE.o
+#		$(COMPARE) lib/makecallsO.o
+#		$(COMPARE) lib/makecallsCE.o
 
 pr:
 		@pr Makefile m_C_mnem m_C_mnem_na argtype $(SRCFILES)
