@@ -307,6 +307,7 @@ IMPLEMENTATION MODULE InOut ;
 	LOOP
 		IF (i <= HIGH(s)) AND (s[i] # 0C) THEN
 			Streams.Write(Streams.OutputStream, s[i], result);
+			INC(i);
 		ELSE
 			EXIT;
 		END;
