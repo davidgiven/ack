@@ -290,7 +290,6 @@ update_proto(tp, otp)
 
 	pl = tp->tp_proto;
 	opl = otp->tp_proto;
-	if (pl == opl) return;
 	if (pl && opl) {
 		/* both have prototypes */
 		while (pl && opl) {
@@ -298,7 +297,9 @@ update_proto(tp, otp)
 			pl = pl->next;
 			opl = opl->next;
 		}
-		free_proto_list(otp->tp_proto);
+		/* Do not free the old prototype list. It might be part of
+		 * a typedef.
+		 */
 		otp->tp_proto = tp->tp_proto;
 	} else if (opl) {
 		/* old decl has type */
@@ -307,16 +308,6 @@ update_proto(tp, otp)
 	}
 
 	update_proto(tp->tp_up, otp->tp_up);
-}
-
-free_proto_list(pl)
-	register struct proto *pl;
-{
-	while (pl) {
-		register struct proto *tmp = pl->next;
-		free_proto(pl);
-		pl = tmp;
-	}
 }
 
 /* struct/union and enum tags can be declared inside prototypes
