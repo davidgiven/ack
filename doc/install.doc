@@ -728,6 +728,10 @@ A dependency generator for makefiles.
 Some utilities for handling name clashes in C programs. Some
 systems have C-compilers with only 7 or 8 characters significant in
 identifiers.
+.IP \fIint\fP
+.br
+An EM interpreter. This one is written in C, and is very useful for checking
+out programs.
 .sp 1
 .LP
 We currently make the Kit available to our users by telling
@@ -909,11 +913,12 @@ s2650	Signetics 2650				s2650	Assembler only
 .PP
 The commands \fBem22\fP, \fBem24\fP and \fBem44\fP
 produce e.out files with EM machine code which must be interpreted.
-The Kit contains two interpreters: one running under PDP 11/V7 UNIX,
-and one for the M68000, running under the PMDS system, SUN systems, 
-the Mantra system, etc.
+The Kit contains three interpreters: one running under PDP 11/V7 UNIX,
+one for the M68000, running under the PMDS system, SUN systems, 
+the Mantra system, etc, and one, written in C and running on large machines.
 The first one can only interpret 2/2 e.out files,
-the other takes 2/4 and 4/4 files.
+the second takes 2/4 and 4/4 files,
+and the last one takes 2/2, 2/4 and 4/4.
 The PDP 11 interpreter executes floating point instructions.
 The interpreter for the M68000 traps if you try to use floating point.
 .LP
@@ -921,6 +926,8 @@ The program \fBem\fP in the bin directory calls the appropriate
 interpreter.
 The interpreters are sought in the em22, em24 and em44
 subdirectories of lib.
+The third interpreter is available on large machines as the program \fIint\fP
+in the bin directory.
 .NH
 Compilation on a different machine.
 .PP
