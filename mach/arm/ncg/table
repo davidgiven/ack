@@ -692,9 +692,9 @@ with GENREG GENREG			yields {regS, %2, "ASR", %1}
  *									*
  ************************************************************************/
 
-pat adu					leaving adi
+pat adu					leaving adi $1
 
-pat sbu					leaving sbi
+pat sbu					leaving sbi $1
 
 pat loc mlu $1<11 && $1>0 && $2==4	leaving loc $1
 						mli 4
@@ -764,9 +764,9 @@ with exact addr_local			yields {addr_local, %1.ind+$1}
 with exact addr_external		yields {addr_external, %1.add+$1}
 with exact regconst			yields {regconst, %1.reg, %1.ind+$1}
 
-pat ads					leaving adi 4
+pat ads $1==4				leaving adi 4
 
-pat sbs					leaving sbi 4
+pat sbs	$1==4				leaving sbi 4
 
 /************************************************************************
  *									*
@@ -1078,8 +1078,9 @@ uses reusing %2, REG
 gen SUB_S %a, %2, %1				yields %a
 
 pat cmu						leaving cmi $1
+						/* !!! cannot be correct !!! */
 
-pat cmp						leaving cmi $1
+pat cmp						leaving cmu 4
 
 pat cmf						leaving loc 18 trp
 
