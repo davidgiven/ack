@@ -2,29 +2,11 @@
 
 #include	<alloc.h>
 
-/*	Each character of the identifier is xored with an 8-bit mask which
-	depends on the position of the character; the sum of these results
-	is the hash value.  The random masks are obtained from a
-	congruence generator.
-*/
+#define	IDF_HASHSIZE	307	/* size of hashtable, must be odd */
 
-#define	IDF_HASHSIZE	256	/* size of hashtable, must be a power of 2 */
-#ifndef IDF_HSIZE
-#define IDF_HSIZE	16	/* # of significant characters for hashing.
-				   This is NOT the number of significant
-				   characters!
-				*/
-#endif
-#define	IDF_HASH_X		0253	/* Knuth's X */
-#define	IDF_HASH_A		77	/* Knuth's a */
-#define	IDF_HASH_C		153	/* Knuth's c */
-
-#define	IDF_HASHMASK		(IDF_HASHSIZE-1)	/* since it is a power of 2 */
 #define	IDF_STARTHASH(hs)	(hs = 0)
-#define	IDF_ENHASH(hs,ch,hm)	(hs += (ch ^ hm))
-#define	IDF_STOPHASH(hs)	(hs &= IDF_HASHMASK)
-
-static char IDF_hmask[IDF_HSIZE];
+#define	IDF_ENHASH(hs,ch)	(hs = (hs << 2) + ch)
+#define	IDF_STOPHASH(hs)	(hs = hs % IDF_HASHSIZE)
 
 static struct idf *IDF_hashtable[IDF_HASHSIZE];
 	/*	All identifiers can in principle be reached through
@@ -100,19 +82,17 @@ str2idf(tg, cpy)
 		identifier tg.  If necessary, an entry is created.
 	*/
 	register char *cp = tg;
-	register char *phm = &IDF_hmask[0];
 	struct idf **hook;
 	register struct idf *notch;
-	register int hash;
+	register unsigned int hash;
 	int size;
 
 	IDF_STARTHASH(hash);
-	while (*cp && phm < &IDF_hmask[IDF_HSIZE]) {
-		IDF_ENHASH(hash, *cp++, *phm++);
+	while (*cp) {
+		IDF_ENHASH(hash, *cp++);
 	}
 	IDF_STOPHASH(hash);
-	while (*cp++) /* nothing. Find end of string */ ;
-	size = cp - tg;
+	size = cp - tg + 1;
 
 	/*	The tag tg with length size and known hash value hash is
 		looked up in the identifier table; if not found, it is
@@ -146,14 +126,4 @@ str2idf(tg, cpy)
 }
 
 init_idf()	{
-	/*	A simple congruence random number generator, as
-		described in Knuth, vol 2.
-	*/
-	register int rnd = IDF_HASH_X;
-	register char *phm;
-	
-	for (phm = &IDF_hmask[0]; phm < &IDF_hmask[IDF_HSIZE];)	{
-		*phm++ = rnd;
-		rnd = (IDF_HASH_A * rnd + IDF_HASH_C) & IDF_HASHMASK;
-	}
 }
