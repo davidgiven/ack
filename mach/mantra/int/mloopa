@@ -93,10 +93,16 @@ uerrorp:	.long	0x-1
 !FIRST INFORMATION ABOUT THE KIND OF THE ERROR
 notrap:		add.l	#38,sp
 		movem.l	(sp)+,d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6
-notrap1:	comp	#28,d0			!ERROR NUMBER STILL IN d0
-!still to make a routine that prints the number of a user set error
+notrap1:	comp	#29,d0			!ERROR NUMBER STILL IN d0
+		blt	1f			!START PRINTING ERROR
+		extend	d0			!NUMBER.
+		move.l	d0,d1
+		lea	erno+5,a0
+		bsr	itoa
+		move.l	#609,d0
+		bra	2f
 1:		mulu	#21,d0
-		lea	emerr,a0
+2:		lea	emerr,a0
 		move.l	#20,-(sp)
 		pea	0(a0,d0)
 		mov	#2,-(sp)		!STANDARD ERROR
@@ -155,18 +161,19 @@ profile: .space 4
 ltime:	.space 4
 profsiz: .space	4
 	.text
+		tst.l	firstp
+		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emprof
 		bsr	_creat
 		testen	(sp)+
 		mov	(sp)+,d0
-		move.l	profsiz,-(sp)
-		move.l	ltime,-(sp)		!LTIME IS POINTER AT TABLE
-		mov	d0,-(sp)
-		bsr	_write
-		add.l	wrd+4,sp
+		move.l	ltime,a4	!a4 points at bottem of prof table
+		bsr	tabprint
 #endif
 #if flow
+		tst.l	firstp
+		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emflow
 		bsr	_creat
@@ -186,16 +193,15 @@ flowsiz: .space 4
 	.text
 #endif
 #if	count
+		tst.l	firstp
+		beq	lhalt
 		mov	#0x1B6,-(sp)
 		pea	emcount
 		bsr	_creat
 		testen	(sp)+
 		mov	(sp)+,d0
-		move.l	countsiz,-(sp)
-		move.l	lcount,-(sp)
-		mov	d0,-(sp)
-		bsr	_write
-		add.l	wrd+4,sp
+		move.l	lcount,a4
+		bsr	tabprint
 	.data
 emcount: .asciz	"em_count\0"
 	.align 2
@@ -226,6 +232,7 @@ counttab:  .space	1884
 countfld: .space 4			!COUNT NUMBER - NUMBER OF LINE 1 OF PROC
 countptr: .space 4			!COUNT NUMBER OF CURRENT LINE
 #endif
+lhalt:
 #if	last
 	.text
 		mov	#0x1B6,-(sp)
@@ -286,7 +293,7 @@ mess2:	.asciz	"\nfile :"
 mess3:	.asciz	"           \n"
 	.align 2
 	.bss
-lasttable:  .space  128
+lasttable:  .space  512
 linused:    .space  4
 #endif
 	.text
@@ -323,6 +330,8 @@ emerr:
 .asciz	"ARG OF LIN TOO HIGH\n"
 .asciz	"GTO DESCR. ERROR   \n"
 .asciz	"BAD RETURN SIZE    \n"
+erno:
+.asciz	"ERRNO              \n"
 emess:
 .asciz	"ON SOURCE LINE             OF\n"
 .align 2
@@ -335,7 +344,74 @@ nexttab:	move.l  linused,a5
 		add.l	#8,a5
 		cmp.l	#linused,a5	!top of buffer reached?
 		bne	1f		!if so back to bottom
-		sub.l	#128,a5
+		sub.l	#512,a5
 1:		move.l	a5,linused
 		rts
+#endif
+#if count+prof
+!SUBROUTINE FOR PRINTING TABLES . EXPECTS BOTTOM OF TABLE IN a4 AND FILE
+!DESCRIPTOR IN d0 .IN maxcount NUMBER OF 4 BYTE WORDS IN THE TABLE.
+	.text
+tabprint:	mov	d0,-(sp)	!KEEP FILE DESCRIPTOR FOR WRITING
+		lea	buffer,a3
+		move.l	firstp,a5	!IN a5 POINTER TO CURRENT PROC.
+		move.l	#0,a2		!IN a2 POINTER TO FILENAME .
+2:		move.l	16(a5),d0
+		beq	9f		!LAST PROCEDURE , EXCEPTION .
+		move.l	d0,a6		!IN a6 POINTER TO NEXT PROCEDURE .
+7:		move.l	8(a6),d7	!COUNTPTR OF NEXT IN d7
+		bne	8f
+		move.l	16(a6),d0
+		beq	9f
+		move.l	d0,a6
+		bra	7b
+8:		move.l	8(a5),d6	!COUNTPTR OF CURRENT IN d6.
+		move.l	12(a5),d5	!FIRST LINE NUMBER IN d5.
+		beq	1f		!NO LINES : GO ON.
+		cmp.l	20(a5),a2	!START PRINTING FILE NAME .
+		beq	6f		!NO NEW NAME.
+		move.l	20(a5),a2	!NEW FILE NAME.
+		cmp.l	#0,a2		!NO FILE NAME .
+		beq	6f
+		move.l	#0,d1		!START SCANNING FILE NAME
+5:		move.b	(a2),d0		!d1 WILL CONTAIN NUMBER OF SYMBOLS.
+		beq	4f
+		add.l	#1,d1
+		add.l	#1,a2
+		bra	5b
+4:		sub.l	d1,a2
+		move.l	d1,-(sp)
+		move.l	a2,-(sp)
+		mov	8(sp),-(sp)	!WRITE FILE NAME.
+		bsr	_write
+		add.l	wrd+4,sp	!CLEAN STACK.
+6:		sub.l	d6,d7		!IN d7 NUMBER OF LINES OF CURRENT PROC.
+		asl.l	#2,d6
+0:		move.l	a3,a0
+		move.l	d5,d1		!SET UP FOR CALLING itoa.
+		bsr	itoa
+		lea	11(a3),a0
+		move.l	0(a4,d6),d1
+		bsr	itoa
+		move.l	#23,-(sp)
+		pea	buffer
+		mov	8(sp),-(sp)
+		bsr	_write		!PRINT LINE NUMBER AND INTEGER .
+		add.l	wrd+4,sp	!CLEAN STACK.
+		add.l	#1,d5		!NEXT LINE NUMBER .
+		add.l	#4,d6		!NEXT COUNT.
+		sub.l	#1,d7		!ONE LINE LESS TO GO.
+		bhi	0b
+1:		move.l	a6,a5
+		cmp.l	#0,a5
+		bne	2b
+		add.l	wrd,sp		!REMOVE FILE DESCR.
+		rts			!READY.
+9:		move.l	maxcount,d7
+		move.l	#0,a6		!NO NEXT PROCEDURE.
+		bra	8b
+
+	.data
+buffer: .asciz "                      \n"
+	.text
 #endif
