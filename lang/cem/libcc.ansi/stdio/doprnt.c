@@ -131,7 +131,8 @@ f_print(va_list *ap, int flags, char *s, char c, int precision)
 		break;
 	case 'g':
 	case 'G':
-		s = _gcvt(ld_val, precision, s, flags) + strlen(s);
+		s = _gcvt(ld_val, precision, s, flags);
+		s += strlen(s);
 		break;
 	}
 	if ( c == 'E' || c == 'G') {
