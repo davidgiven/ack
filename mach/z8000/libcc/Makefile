@@ -1,4 +1,4 @@
-MAKEFILE=Makef.pr.l
+MAKEFILE=../../proto/libg/Makefile
 MACHDEF="MACH=z8000" "SUF=s"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
