@@ -17,8 +17,8 @@
 %token <y_word> RSYSTR
 %token <y_word> PREFIX
 %token <y_word> ADDOP
+%token <y_word> ARPLOP
 %token <y_word> BITTEST
-%token <y_word> BOUND
 %token <y_word> CALFOP
 %token <y_word> CALLOP
 %token <y_word> ENTER

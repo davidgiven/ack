@@ -279,6 +279,7 @@
 0,	TEST,		1,		"test",
 0,	XCHG,		0,		"xchgb",
 0,	XCHG,		1,		"xchg",
+0,	ARPLOP,		0143,		"arpl",
 
 /* Intel 80[23]87 coprocessor keywords */
 
