@@ -168,7 +168,7 @@ Xlint:
 $(CURRDIR)main: $(OBJ) $(CURRDIR)Makefile
 	-mv $(CURRDIR)main $(CURRDIR)main.old
 	$(CC) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)main
-	size $(CURRDIR)main.old
+	-size $(CURRDIR)main.old
 	size $(CURRDIR)main
 
 $(CURRDIR)omain:	$(OBJ) #$(CURRDIR)Makefile
