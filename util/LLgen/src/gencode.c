@@ -71,7 +71,7 @@ STATIC		genincrdecr();
 
 # define NOPOP		-20000
 
-p_mem alloc();
+p_mem alloc(), ralloc();
 
 doclose(f)
 	FILE *f;
@@ -393,16 +393,15 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 	register int	toplevel = 1;
 	register FILE	*f;
 	register int	*ppu;
-	int		pushlist[100];
+	int		*pushlist;
 	int		*ppushlist;
 
 	/*
 	 * First generate code to push the contains sets of this rule
 	 * on a stack
 	 */
-	ppu = pushlist;
-	ppushlist = dopush(p,safety,1,ppu);
-	if (mustpop != NOPOP) for (; ppu < ppushlist; ppu++) {
+	ppushlist = dopush(p,safety,1, &pushlist);
+	if (mustpop != NOPOP) for (ppu = pushlist; ppu < ppushlist; ppu++) {
 		if (*ppu == mustpop) {
 			*ppu = mustpop = NOPOP;
 			break;
@@ -413,6 +412,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 		mustpop = NOPOP;
 	}
 	for (ppu = pushlist; ppu < ppushlist; ppu++) genpush(*ppu);
+	free((p_mem) pushlist);
 	f = fpars;
 	for (;;) {
 		switch (g_gettype(p)) {
@@ -595,16 +595,26 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 }
 
 STATIC int *
-dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
+dopush(p,safety,toplevel,pp) register p_gram p; int **pp; {
 	/*
 	 * The safety only matters if toplevel != 0
 	 */
+	unsigned int i = 100;
+	register int *ip = (int *) alloc(100 * sizeof(int));
+
+	*pp = ip;
 
 	for (;;) {
+		if (ip - *pp >= i) {
+			*pp = (int *)
+				ralloc((p_mem) (*pp), (i + 100) * sizeof(int));
+			ip = *pp + i;
+			i += 100;
+		}
 		switch(g_gettype(p)) {
 		  case EORULE :
 		  case ALTERNATION :
-			return pp;
+			return ip;
 		  case TERM : {
 			register p_term q;
 			int rep, cnt;
@@ -614,7 +624,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
 			cnt = r_getnum(q);
 			if (!(toplevel > 0 && safety <= SAFESCANDONE &&
 			    (rep == OPT || (rep == FIXED && cnt == 0)))) {
-				*pp++ = findindex(q->t_contains);
+				*ip++ = findindex(q->t_contains);
 			}
 			break; }
 		  case LITERAL :
@@ -625,7 +635,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
 				safety = NOSCANDONE;
 				continue;
 			}
-			if (toplevel == 0) *pp++ = -(g_getcont(p)+1);
+			if (toplevel == 0) *ip++ = -(g_getcont(p)+1);
 			break;
 		  case NONTERM : {
 			register p_nont n;
@@ -634,7 +644,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
 			if (toplevel == 0 ||
 			    (g_gettype(n->n_rule) == ALTERNATION &&
 			     getntsafe(n) > SAFESCANDONE)) {
-				*pp++ = findindex(n->n_contains);
+				*ip++ = findindex(n->n_contains);
 			}
 			break; }
 		  case ACTION :

@@ -295,11 +295,11 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    | C_AVOID	{	*conflres |= AVOIDING; }
 	  ]?
 	  [ %persistent elem(&elem)
-	 		{	if (p_rule - rule >= n_rule - 1) {
+	 		{	if (p_rule - rule >= n_rule - 2) {
 					rule = (p_gram) ralloc(
 						  (p_mem) rule,
 						  (n_rule+100)*sizeof(t_gram));
-					p_rule = rule + n_rule - 1;
+					p_rule = rule + n_rule - 2;
 					n_rule += 100;
 				}
 				kind = FIXED;
@@ -323,11 +323,11 @@ simpleproduction(p_gram *p; register int *conflres;)
 				    g_gettype(q->t_rule) != EORULE) {
 				    while (g_gettype(q->t_rule) != EORULE) {
 					*p_rule++ = *q->t_rule++;
-	 				if (p_rule - rule >= n_rule - 1) {
+	 				if (p_rule - rule >= n_rule - 2) {
 					    rule = (p_gram) ralloc(
 						  (p_mem) rule,
 						  (n_rule+100)*sizeof(t_gram));
-					    p_rule = rule + n_rule - 1;
+					    p_rule = rule + n_rule - 2;
 					    n_rule += 100;
 					}
 				    }
