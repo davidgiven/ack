@@ -21,7 +21,22 @@
  ; This implementation assumes a continuous stack growing downwards
 
  exp $topsize
+#ifdef __sparc
+ inp $topsize2
+ pro $topsize, 0
+ mes 11
+ zer EM_PSIZE
+ lal 0
+ loi EM_PSIZE
+ cal $topsize2
+ asp 2*EM_PSIZE
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+ pro $topsize2, 3*EM_WSIZE+3*EM_PSIZE
+#else
  pro $topsize, 3*EM_WSIZE+3*EM_PSIZE
+#endif
  ; local space for line-number, ignoremask, filename, stack-break, size,
  ; and stack-pointer (see the topsave routine)
  mes 11
@@ -33,6 +48,9 @@
  zne *1
  lxl 0
  dch			; local base of caller
+#ifdef __sparc
+ dch			; because of the extra layer
+#endif
  lal 0
  loi EM_PSIZE
  sti EM_PSIZE
@@ -51,7 +69,21 @@
  end 3*EM_WSIZE+3*EM_PSIZE
 
  exp $topsave
+#ifdef __sparc
+ inp $topsave2
+ pro $topsave,0
+ mes 11
+ lal 0
+ loi 2*EM_PSIZE
+ cal $topsave2
+ asp 2*EM_PSIZE
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+ pro $topsave2,0
+#else
  pro $topsave, 0
+#endif
  mes 11
  loe 0
  lae 4			; load line number and file name
@@ -82,7 +114,20 @@ sv
  bss EM_PSIZE,0,0
 
  exp $topload
+#ifdef __sparc
+ inp $topload1
+ pro $topload,0
+ lal 0
+ loi EM_PSIZE
+ cal $topload1
+ asp EM_PSIZE
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+ pro $topload1, 0
+#else
  pro $topload, 0
+#endif
  mes 11
 
  lal 0
@@ -98,7 +143,7 @@ sv
  loi EM_PSIZE
  cmp			; find another LB first
  zgt *1
- dch			; just follow dinamic chain to make sure we find
+ dch			; just follow dynamic chain to make sure we find
 			; a legal one
  bra *2
 1
@@ -112,13 +157,12 @@ sv
  lae sv
  loi EM_PSIZE		; source address
  lor 1
- adp EM_PSIZE		; destimation address
+ adp EM_PSIZE		; destination address
  lae sv
  loi EM_PSIZE
  adp EM_PSIZE
  loi EM_WSIZE		; size of block
- bls EM_WSIZE		; move block back (SP becomes the SP AFTER again, 
-			; because of the asp -EM_PSIZE!)
+ bls EM_WSIZE
  asp EM_PSIZE+EM_WSIZE	; drop size + SP
  str 0			; restore local base
  sim			; ignore mask
@@ -126,5 +170,5 @@ sv
  sti EM_PSIZE
  ste 0			; line and file
  loc 0
- ret EM_WSIZE		; return 0
+ ret EM_WSIZE
  end 0

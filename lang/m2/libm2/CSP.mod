@@ -16,7 +16,7 @@ IMPLEMENTATION MODULE CSP;
   FROM Storage	IMPORT	Allocate, Deallocate;
   FROM Traps	IMPORT	Message;
 
-  CONST	WorkSpaceSize = 1000;
+  CONST	WorkSpaceSize = 2000;
 
   TYPE	ByteAddress =	POINTER TO BYTE;
 	Channel =	POINTER TO ChannelDescriptor;
