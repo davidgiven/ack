@@ -962,6 +962,7 @@ begin
       begin
 	iflag:=f; instr:=insr;
 	if '2' in cset      then ilength:=2
+	else if 'u' in cset then ilength:=2
 	else if '4' in cset then ilength:=4
 	else if '8' in cset then ilength:=8
 	else if (mini in f) or (short in f) then

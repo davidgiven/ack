@@ -4,12 +4,12 @@ HOME=../../..
 install \
 all:            em emdmp tables
 
-tables:         mktables $(HOME)/util/ass/ip_spec.t
-		mktables $(HOME)/util/ass/ip_spec.t tables
+tables:         mktables $(HOME)/etc/ip_spec.t
+		mktables $(HOME)/etc/ip_spec.t tables
 
 mktables:       mktables.c $(HOME)/h/em_spec.h $(HOME)/h/em_flag.h \
-		$(HOME)/util/data/em_data.a $(HOME)/util/ass/ip_spec.h
-		cc -I$(HOME) -O -o mktables mktables.c $(HOME)/util/data/em_data.a
+		$(HOME)/lib/em_data.a $(HOME)/util/ass/ip_spec.h
+		cc -I$(HOME) -O -o mktables mktables.c $(HOME)/lib/em_data.a
 
 em.out:         em.p
 		apc -mint -O em.p >emerrs ; mv e.out em.out

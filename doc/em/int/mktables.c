@@ -166,6 +166,8 @@ int decflag(str,opc) char *str ; {
 			check(type) ; type=OP32 ; break ;
 		case '8' :
 			check(type) ; type=OP64 ; break ;
+		case 'u' :
+			check(type) ; type=OP16U ; break ;
 		case 'e' :
 			check(escape) ; escape=0 ; break ;
 		case 'N' :
@@ -188,6 +190,7 @@ int decflag(str,opc) char *str ; {
 		if ( escape!=ILLGL ) error("Conflicting escapes") ;
 		escape=ILLGL ;
 	case OP16 :
+	case OP16U :
 	case OP8 :
 	case OPSHORT :
 	case OPNO :
