@@ -7,7 +7,7 @@ system "sparc"
 dir ce_cg
 end
 name "Sparc target optimizer"
-system "sparc"
+system "sparc|sparc_solaris"
 dir top
 end
 name "Sparc EM library"
