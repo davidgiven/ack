@@ -1,12 +1,13 @@
-/* $Header; mach0.c, v1.1 20-Oct-88 AJM */
+/* $Header; mach0.c, v1.2 06-Mar-89 AJM */
 
 #define LISTING
 #define ASLD
 #define THREE_PASS
-
+#define DEBUG 0
+/*
 #define WORDS_REVERSED
 #define BYTES_REVERSED
-
+*/
 #undef valu_t
 #define valu_t 	long
 
@@ -44,4 +45,6 @@
 #define	CMP	0x01500000
 #define	TEQ	0x01300000
 #define	TST	0x01100000
+#define LDR	0x04100000
+#define STR	0x04000000
 

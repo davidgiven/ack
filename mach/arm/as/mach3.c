@@ -1,4 +1,4 @@
-/* $Header: mach3.c, v1.5 2-Nov-88 AJM */
+/* $Header: mach3.c, v2.0 23-Feb-89 AJM */
 
 0,		COND,		0x00000000,	".EQ",
 0,		COND,		0x10000000,	".NE",
@@ -77,6 +77,7 @@
 0,		REG,		13,		"R13",
 0,		REG,		14,		"R14",
 0,		REG,		15,		"R15",
+0,		REG,		15,		"PC",
 
 0,		SHIFT,		0x00000000,	"LSL",
 0,		SHIFT,		0x00000000,	"ASL",
@@ -97,10 +98,10 @@
 0,		BDT,		0x08100000,	"LDMDA",
 0,		BDT,		0x09900000,	"LDMIB",
 0,		BDT,		0x08900000,	"LDMIA",
-0,		BDT,		0x08100000,	"LDMFD",
-0,		BDT,		0x08900000,	"LDMFA",
-0,		BDT,		0x09100000,	"LDMED",
-0,		BDT,		0x09900000,	"LDMEA",
+0,		BDT,		0x08900000,	"LDMFD",
+0,		BDT,		0x08100000,	"LDMFA",
+0,		BDT,		0x09900000,	"LDMED",
+0,		BDT,		0x09100000,	"LDMEA",
 0,		BDT,		0x09000000,	"STMDB",
 0,		BDT,		0x08000000,	"STMDA",
 0,		BDT,		0x09800000,	"STMIB",
@@ -112,7 +113,7 @@
 
 0,		SWI,		0x0F000000,	"SWI",
 
-0,		ADR,		0,		"ADR",
+0,		ADR,		0x00000000,	"ADR",
 
 0,		MUL,		0x00000090,	"MUL",
 0,		MLA,		0x00200090,	"MLA",

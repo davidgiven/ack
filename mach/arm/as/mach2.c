@@ -1,4 +1,4 @@
-/* $Header: mach2.c, V1.3 2-Nov-88 AJM */
+/* $Header: mach2.c, V1.4 15-Mar-89 AJM */
 %token <y_word> COND
 %token <y_word> LINK
 %token <y_word> BRANCH
@@ -20,5 +20,5 @@
 %token <y_word> MLA
 
 %type <y_word> optlink optcond opts optt optp optb optexc reglist rlist
-%type <y_word> optsign optpsr optshift shftcnt address offset
+%type <y_word> optsign optpsr optshift shftcnt address offset aoptshift
 %type <y_expr> operand

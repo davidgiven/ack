@@ -1,4 +1,4 @@
-/* $Header: mach4.c, v1.5 2-Nov-88 AJM */
+/* $Header: mach4.c, v1.9 15-Mar-89 AJM */
 
 operation	: BRANCH optlink expr
 			{branch($1, $2, $3.val);}
@@ -9,13 +9,13 @@ operation	: BRANCH optlink expr
 		| DATA3 optcond opts optp REG ',' operand
 			{data($1,$2|$3|$4|$5<<16,$7.val,$7.typ);}
 		| SDT optcond optb optt REG ',' address
-			{emit4($1|$2|$3|$4|$5<<12|$7);}
+			{strldr($1,$2|$3|$4|$5<<12,$7);}
 		| BDT optcond REG optexc ',' reglist optpsr
 			{emit4($1|$2|$3<<16|$4|$6|$7);}
 		| SWI optcond expr
 			{emit4($1|$2|$3.val);}
 		| ADR optcond REG ',' expr
-			{calcadr($2, $3, $5.val, $5.typ);}
+			{calcadr($2,$3,$5.val,$5.typ);}
 		| MUL optcond REG ',' REG ',' REG
 			{emit4($1|$2|$3<<16|$5|$7<<8);}
 		| MLA optcond REG ',' REG ',' REG ',' REG
@@ -76,6 +76,14 @@ optshift	: ',' SHIFT shftcnt
 			{$$ = 0;}
 		;
 
+aoptshift	: ',' SHIFT '#' expr
+			{$$ = $2|calcshft($4.val, $4.typ, $<y_word>0);}
+		| ',' RRX
+			{$$ = $2;}
+		|
+			{$$ = 0;}
+		;
+
 shftcnt		: '#' expr
 			{$$ = calcshft($2.val, $2.typ, $<y_word>0);}
 		| REG
@@ -83,18 +91,18 @@ shftcnt		: '#' expr
 		;
 
 address		: expr
-			{$$ = 0x01000000|calcaddress($1.val,$1.typ,$<y_word>-1);}
+			{success = 0; $$ = $1.val;}
 		| '[' REG ']'
-			{$$ = 0x01000000|$2<<16;}
+			{success = 1; $$ = 0x01000000|$2<<16;}
 		| '[' REG ',' offset ']' optexc
-			{$$ = $2<<16|$4|$6|0x01000000;}
+			{success = 1; $$ = $2<<16|$4|$6|0x01000000;}
 		| '[' REG ']' ',' offset
-			{$$ = $2<<16|$5;}
+			{success = 1; $$ = $2<<16|$5;}
 		;
 
 offset		: '#' expr
 			{$$ = calcoffset($2.val);}
-		| optsign REG optshift
+		| optsign REG aoptshift
 			{$$ = 0x02000000|$1|$2|$3;}
 		;
 	
@@ -113,4 +121,9 @@ rlist		: REG
 			{$$ = 1<<$1;}
 		| rlist ',' REG
 			{$$ = $1|1<<$3;}
+		| REG '-' REG
+			{
+			       for ($$ = 0; $1 <= $3; $1++)
+                                       $$ |= (1<<$1);
+                        }
 		;
