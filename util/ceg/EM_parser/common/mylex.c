@@ -40,6 +40,9 @@ int CD_pos = FALSE;	/* 'CD_pos' is used as a flag to signal if it is
 			 * This flag is needed because CALL is a subset of
 			 * CONDITION.
 			 */
+int CALL_pos = FALSE;	/* Needed to distinguish between 
+			 *	C_INSTR CONDITION	and	CALL
+			 */
 
 
 
@@ -65,6 +68,7 @@ int mylex()
 					 */
 			if ( special)
 				CD_pos = TRUE;
+			CALL_pos = FALSE;
 		     	return( '.');
 		     }
 		     break;
@@ -73,12 +77,14 @@ int mylex()
 
 	  case '=' : if ( arrow()) {
 			CD_pos = FALSE;
+			CALL_pos = TRUE;
 			return( ARROW);
 		     }
 		     break;
 
 	  case ':' : if ( equiv()) {
 			CD_pos = FALSE;
+			CALL_pos = TRUE;
 			return( EQUIV);
 		     }
 		     break;
@@ -102,14 +108,19 @@ int mylex()
 	}
 	if ( isalpha( c)) {
 		read_ident();
-		c = skip_space();
-		if ( c == '(') {
-			*next++ = c;
-			read_call();
-			return( CALL);
+		if ( CALL_pos) {
+			c = skip_space();
+			if ( c == '(') {
+				*next++ = c;
+				read_call();
+				return( CALL);
+			}
+			else {
+				backc( c);
+				return( ERROR);
+			}
 		}
 		else {
-			backc( c);
 			if ( is_DEF_C_INSTR( yytext)) {
 				CD_pos = TRUE;
 				return( DEF_C_INSTR);
