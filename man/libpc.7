@@ -5,71 +5,71 @@
 libpc \- library of external routines for Pascal programs
 .SH SYNOPSIS
 .ta 11n
-const   bufsize = ?;
+const	bufsize = ?;
 .br
-type    br1 =  1..bufsize;
+type	br1 =  1..bufsize;
 .br
-        br2 =  0..bufsize;
+	br2 =  0..bufsize;
 .br
-        br3 = -1..bufsize;
+	br3 = -1..bufsize;
 .br
-        ok = -1..0;
+	ok = -1..0;
 .br
-        buf = packed array[br1] of char;
+	buf = packed array[br1] of char;
 .br
-        alfa = packed array[1..8] of char;
+	alfa = packed array[1..8] of char;
 .br
-        string = ^packed array[1..?] of char;
+	string = ^packed array[1..?] of char;
 .br
-        filetype = file of ?;
+	filetype = file of ?;
 .br
-        long = record high,low:integer end;
+	long = record high,low:integer end;
 
 {all routines must be declared extern}
 
-function        argc:integer;
+function	argc:integer;
 .br
-function        argv(i:integer):string;
+function	argv(i:integer):string;
 .br
-function        environ(i:integer):string;
+function	environ(i:integer):string;
 .br
-procedure       argshift;
+procedure	argshift;
 
-procedure       buff(var f:filetype);
+procedure	buff(var f:filetype);
 .br
-procedure       nobuff(var f:filetype);
+procedure	nobuff(var f:filetype);
 .br
-procedure       notext(var f:text);
+procedure	notext(var f:text);
 .br
-procedure       diag(var f:text);
+procedure	diag(var f:text);
 .br
-procedure       pcreat(var f:text; s:string);
+procedure	pcreat(var f:text; s:string);
 .br
-procedure       popen(var f:text; s:string);
+procedure	popen(var f:text; s:string);
 .br
-procedure       pclose(var f:filetype);
+procedure	pclose(var f:filetype);
 
-procedure       trap(err:integer);
+procedure	trap(err:integer);
 .br
-procedure       encaps(procedure p; procedure q(n:integer));
+procedure	encaps(procedure p; procedure q(n:integer));
 
-function        perrno:integer;
+function	perrno:integer;
 .br
-function        uread(fd:integer; var b:buf; len:br1):br3;
+function	uread(fd:integer; var b:buf; len:br1):br3;
 .br
-function        uwrite(fd:integer; var b:buf; len:br1):br3;
+function	uwrite(fd:integer; var b:buf; len:br1):br3;
 
-function        strbuf(var b:buf):string;
+function	strbuf(var b:buf):string;
 .br
-function        strtobuf(s:string; var b:buf; len:br1):br2;
+function	strtobuf(s:string; var b:buf; len:br1):br2;
 .br
-function        strlen(s:string):integer;
+function	strlen(s:string):integer;
 .br
-function        strfetch(s:string; i:integer):char;
+function	strfetch(s:string; i:integer):char;
 .br
-procedure       strstore(s:string; i:integer; c:char);
+procedure	strstore(s:string; i:integer; c:char);
 
-function        clock:integer;
+function	clock:integer;
 .SH DESCRIPTION
 This library contains some often used external routines for Pascal programs.
 Two versions exist: one for the EM interpreter and another one
@@ -214,71 +214,70 @@ Return the number of ticks of user and system time consumed by the program.
 The following program presents an example of how these routines can be used.
 This program is equivalent to the UNIX command cat(1).
 .nf
-     {$c+}
-     program cat(input,inp,output);
-     var inp:text;
-         s:string;
+{$c+}
+program cat(input,inp,output);
+var	inp:text;
+	s:string;
 
-     function argc:integer; extern;
-     function argv(i:integer):string; extern;
-     procedure argshift; extern;
-     function strlen(s:string):integer; extern;
-     function strfetch(s:string; i:integer):char; extern;
+function argc:integer; extern;
+function argv(i:integer):string; extern;
+procedure argshift; extern;
+function strlen(s:string):integer; extern;
+function strfetch(s:string; i:integer):char; extern;
 
-     procedure copy(var fi:text);
-     var c:char;
-     begin reset(fi);
-       while not eof(fi) do
-         begin
-           while not eoln(fi) do
-             begin
-               read(fi,c);
-               write(c)
-             end;
-           readln(fi);
-           writeln
-         end
-     end;
+procedure copy(var fi:text);
+var c:char;
+begin reset(fi);
+  while not eof(fi) do
+  begin
+    while not eoln(fi) do
+    begin
+      read(fi,c);
+      write(c)
+    end;
+    readln(fi);
+    writeln
+  end
+end;
 
-     begin  {main}
-       if argc = 1 then
-         copy(input)
-       else
-         repeat
-           s := argv(1);
-           if (strlen(s) = 1) and (strfetch(s,1) = '-')
-             then copy(input)
-             else copy(inp);
-           argshift;
-         until argc <= 1;
-     end.
+begin  {main}
+  if argc = 1 then
+    	copy(input)
+  else
+    repeat
+      s := argv(1);
+      if (strlen(s) = 1) and (strfetch(s,1) = '-')
+      then copy(input)
+      else copy(inp);
+      argshift;
+    until argc <= 1;
+end.
 .fi
 .PP
 Another example gives some idea of the way to manage trap handling:
 .nf
 
-    program bigreal(output);
-    const EFOVFL=4;
-    var trapped:boolean;
+program bigreal(output);
+const EFOVFL=4;
+var trapped:boolean;
 
-    procedure encaps(procedure p;
-                     procedure q(n:integer)); extern;
-    procedure trap(n:integer); extern;
+procedure encaps(procedure p; procedure q(n:integer)); extern;
+procedure trap(n:integer); extern;
 
-    procedure traphandler(n:integer);
-    begin if n=EFOVFL then trapped:=true else trap(n) end;
+procedure traphandler(n:integer);
+begin if n=EFOVFL then trapped:=true else trap(n) end;
 
-    procedure work;
-    var i,j:real;
-    begin trapped:=false; i:=1;
-      while not trapped do
-        begin j:=i; i:=i*2 end;
-      writeln('bigreal = ',j);
-    end;
+procedure work;
+var i,j:real;
+begin trapped:=false; i:=1;
+  while not trapped do
+    begin j:=i; i:=i*2 end;
+  writeln('bigreal = ',j);
+end;
 
-    begin
-      encaps(work,traphandler);
-    end.
+begin
+  encaps(work,traphandler);
+end.
 .fi
 .SH FILES
 .IP ~em/lib/*/tail_pc 20

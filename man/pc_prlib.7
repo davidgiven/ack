@@ -4,196 +4,117 @@
 .SH NAME
 pc_prlib \- library of Pascal runtime routines
 .SH SYNOPSIS
-.ta 11n
-type    alpha=packed array[1..8] of char;
-.br
-        pstring= ^packed array[] of char;
+.ta 11n 22n 33n 44n 55n
+.nf
+type	alpha=packed array[1..8] of char;
+	pstring= ^packed array[] of char;
 
-function        _abi(i:integer):integer;
-.br
-function        _abl(i:long):long;
-.br
-function        _mdi(j,i:integer):integer;
-.br
-function        _mdl(j,i:long):long;
-.br
-function        _abr(r:real):real;
-.br
-function        _sin(r:real):real;
-.br
-function        _cos(r:real):real;
-.br
-function        _atn(r:real):real;
-.br
-function        _exp(r:real):real;
-.br
-function        _log(r:real):real;
-.br
-function        _sqt(r:real):real;
-.br
-function        _rnd(r:real):real;
+function	_abi(i:integer):integer;
+function	_abl(i:long):long;
+function	_mdi(j,i:integer):integer;
+function	_mdl(j,i:long):long;
+function	_abr(r:real):real;
+function	_sin(r:real):real;
+function	_cos(r:real):real;
+function	_atn(r:real):real;
+function	_exp(r:real):real;
+function	_log(r:real):real;
+function	_sqt(r:real):real;
+function	_rnd(r:real):real;
 
-type    compared=-1..1;
-.br
-        gotoinfo=record
-.br
-            pcoffset:^procedure; { procedure id. without static link }
-.br
-            nlocals: integer;
-.br
-        end;
+type	compared=-1..1;
+	gotoinfo=record
+	    pcoffset:^procedure; { procedure id. without static link }
+	    nlocals: integer;
+	end;
 
-function        _bcp(sz:integer; s2,s1:pstring):compared;
-.br
-function        _bts(size,high,low:integer; base:^set 0..(8*size-1))
-                        :set of 0..(8*size-1);
-.br
-procedure       _gto(lb:^integer; p:^gotoinfo);
+function	_bcp(sz:integer; s2,s1:pstring):compared;
+function	_bts(size,high,low:integer; base:^set 0..(8*size-1))
+			:set of 0..(8*size-1);
+procedure	_gto(lb:^integer; p:^gotoinfo);
 
-procedure       _new(size:integer; var p:^integer);
-.br
-procedure       _dis(size:integer; var p:^integer);
-.br
-procedure       _sav(var p:^integer);
-.br
-procedure       _rst(var p:^integer);
+procedure	_new(size:integer; var p:^integer);
+procedure	_dis(size:integer; var p:^integer);
+procedure	_sav(var p:^integer);
+procedure	_rst(var p:^integer);
 
-type    arrdescr=record
-.br
-            lowbnd:  integer;
-.br
-            diffbnds:integer;
-.br
-            elsize:  integer;
-.br
-        end;
-.br
-        arr1=array[] of ?;
-.br
-        arr2=packed array[] of ?;
+type	arrdescr=record
+	    lowbnd:  integer;
+	    diffbnds:integer;
+	    elsize:  integer;
+	end;
+	arr1=array[] of ?;
+	arr2=packed array[] of ?;
 
-procedure       _pac(var ad,zd:arrdescr; var zp:arr2; i:integer;
-.br
-                      var ap:arr1);
-.br
-procedure       _unp(var ad,zd:arrdescr; i:integer; var ap:arr1;
-.br
-                      var zp:arr2;);
-.br
-function        _asz(var dp:arrdescr):integer;
+procedure	_pac(var ad,zd:arrdescr; var zp:arr2; i:integer;
+		      var ap:arr1);
+procedure	_unp(var ad,zd:arrdescr; i:integer; var ap:arr1;
+		      var zp:arr2;);
+function	_asz(var dp:arrdescr):integer;
 
-procedure       _ass(line:integer; b:boolean);
-.br
-procedure       procentry(var name:alpha);
-.br
-procedure       procexit(var name:alpha);
+procedure	_ass(line:integer; b:boolean);
+procedure	procentry(var name:alpha);
+procedure	procexit(var name:alpha);
 
-const   lowbyte=[0..7];
-.br
-        MAGIC  =[1,3,5,7];
-.br
-        WINDOW =[11];
-.br
-        ELNBIT =[12];
-.br
-        EOFBIT =[13];
-.br
-        TXTBIT =[14];
-.br
-        WRBIT  =[15];
-.br
-type    file=record
-.br
-            ptr:     ^char;
-.br
-            flags:   set of [0..15];
-.br
-            fname:   string;
-.br
-            ufd:     0..15;
-.br
-            size:    integer;
-.br
-            count:   0..buflen;
-.br
-            buflen:  max(512,size) div size * size;
-.br
-            bufadr:  packed array[1..max(512,size)]
-.br
-                             of char;
-.br
-        end;
-.br
-        filep=^file;
-.br
-const   NFILES=15;
-.br
-        _extfl:^array[] of filep;
+const	lowbyte=[0..7];
+	MAGIC  =[1,3,5,7];
+	WINDOW =[11];
+	ELNBIT =[12];
+	EOFBIT =[13];
+	TXTBIT =[14];
+	WRBIT  =[15];
+type	file=record
+	    ptr:	^char;
+	    flags:	set of [0..15];
+	    fname:	string;
+	    ufd:	0..15;
+	    size:	integer;
+	    count:	0..buflen;
+	    buflen:	max(512,size) div size * size;
+	    bufadr:	packed array[1..max(512,size)]
+			     of char;
+	end;
+	filep=^file;
+const	NFILES=15;
+	_extfl:^array[] of filep;
 
-procedure       _ini(var args:integer; var hb:integer;
-                            var p:array[] of filep; var mainlb:integer);
-.br
-procedure       _hlt(status:0..255);
+procedure	_ini(var args:integer; var hb:integer;
+			    var p:array[] of filep; var mainlb:integer);
+procedure	_hlt(status:0..255);
 
-procedure       _opn(size:integer; f:filep);
-.br
-procedure       _cre(size:integer; f:filep);
-.br
-procedure       _cls(f:filep);
+procedure	_opn(size:integer; f:filep);
+procedure	_cre(size:integer; f:filep);
+procedure	_cls(f:filep);
 
-procedure       _get(f:filep);
-.br
-procedure       _put(f:filep);
-.br
-function        _wdw(f:filep):^char;
-.br
-function        _efl(f:filep):boolean;
+procedure	_get(f:filep);
+procedure	_put(f:filep);
+function	_wdw(f:filep):^char;
+function	_efl(f:filep):boolean;
 
-function        _eln(f:filep):boolean;
-.br
-function        _rdc(f:filep):char;
-.br
-function        _rdi(f:filep):integer;
-.br
-function        _rdl(f:filep):long;
-.br
-function        _rdr(f:filep):real;
-.br
-procedure       _rln(f:filep);
-.br
-procedure       _wrc(c:char; f:filep);
-.br
-procedure       _wsc(w:integer; c:char; f:filep);
-.br
-procedure       _wri(i:integer; f:filep);
-.br
-procedure       _wsi(w:integer; i:integer; f:filep);
-.br
-procedure       _wrl(l:long; f:filep);
-.br
-procedure       _wsl(w:integer; l:long; f:filep);
-.br
-procedure       _wrr(r:real; f:filep);
-.br
-procedure       _wsr(w:integer; r:real; f:filep);
-.br
-procedure       _wrf(ndigit:integer; w:integer; r:real; f:filep);
-.br
-procedure       _wrs(l:integer; s:pstring; f:filep);
-.br
-procedure       _wss(w:integer; l:integer; s:pstring; f:filep);
-.br
-procedure       _wrb(b:boolean; f:filep);
-.br
-procedure       _wsb(w:integer; b:boolean; f:filep);
-.br
-procedure       _wrz(s:string; f:filep);
-.br
-procedure       _wsz(w:integer; s:string; f:filep);
-.br
-procedure       _wln(f:filep);
-.br
-procedure       _pag(f:filep);
+function	_eln(f:filep):boolean;
+function	_rdc(f:filep):char;
+function	_rdi(f:filep):integer;
+function	_rdl(f:filep):long;
+function	_rdr(f:filep):real;
+procedure	_rln(f:filep);
+procedure	_wrc(c:char; f:filep);
+procedure	_wsc(w:integer; c:char; f:filep);
+procedure	_wri(i:integer; f:filep);
+procedure	_wsi(w:integer; i:integer; f:filep);
+procedure	_wrl(l:long; f:filep);
+procedure	_wsl(w:integer; l:long; f:filep);
+procedure	_wrr(r:real; f:filep);
+procedure	_wsr(w:integer; r:real; f:filep);
+procedure	_wrf(ndigit:integer; w:integer; r:real; f:filep);
+procedure	_wrs(l:integer; s:pstring; f:filep);
+procedure	_wss(w:integer; l:integer; s:pstring; f:filep);
+procedure	_wrb(b:boolean; f:filep);
+procedure	_wsb(w:integer; b:boolean; f:filep);
+procedure	_wrz(s:string; f:filep);
+procedure	_wsz(w:integer; s:string; f:filep);
+procedure	_wln(f:filep);
+procedure	_pag(f:filep);
+.fi
 .SH DESCRIPTION
 This library is used by the Pascal to EM compiler and
 contains all the runtime routines for standard Pascal programs.
@@ -428,7 +349,7 @@ the argument list to global memory, mainlb to _m_lb and hb to _hbase.
 The first contains the local base of the program body, the second
 contains the address of the hol containing the global variables
 of the program.
-A last task of _ini is to set the global variables _argc, _argv  and _environ
+A last task of _ini is to set the global variables _argc, _argv and _environ
 from args for
 possible reference later on.
 Args points to the argument count placed on the stack by the EM runtime system,
