@@ -1,0 +1,47 @@
+/* $Header$ */
+
+#include "langdep.h"
+
+struct langlist {
+  struct langlist	*l_next;
+  struct langdep	*l_lang;
+  char			*l_suff;
+};
+
+/* STATICALLOCDEF "langlist" 5 */
+
+static struct langlist *list;
+
+struct langdep	*currlang;
+
+static int
+add_language(suff, lang)
+  char	*suff;
+  struct langdep *lang;
+{
+  struct langlist *p = new_langlist();
+
+  p->l_next = list;
+  p->l_suff = suff;
+  p->l_lang = lang;
+  list = p;
+}
+
+int
+init_languages()
+{
+  add_language(".mod", m2_dep);
+}
+
+int
+find_language(suff)
+  char	*suff;
+{
+  register struct langlist *p = list;
+
+  while (p) {
+	currlang = p->l_lang;
+	if (! strcmp(p->l_suff, suff)) break;
+	p = p->l_next;
+  }
+}

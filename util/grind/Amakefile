@@ -1,0 +1,141 @@
+AMAKELIB = { . , /usr/local/lib/amake } ;
+
+%include ack-defs.amk ;
+%include common.amk ;
+%include cc_hh_tools.amk ;
+%include tok_tools.amk ;
+%include op_tools.amk ;
+%include char_tools.amk ;
+%include LLgen.amk ;
+%include cc-c.amk ;
+%include loader.amk ;
+%include lint.amk ;
+
+%default grind ;
+
+TOKENNAMES = tokenname.c [
+	gen_tokens,
+	cc-dest = symbol2str.c,
+	LL-dest = tokenfile.g
+];
+
+DBS_LLTARGETS = {
+	dbx_string.c[type=C-src],
+	DBSpars.c[type=C-src],
+	DBSpars.h[type=C-incl]
+} ;
+
+DBS_LLSRC = {
+	dbx_string.g
+} ;
+
+CMD_LLTARGETS = {
+	tokenfile.c[type=C-src],
+	commands.c[type=C-src],
+	Lpars.c[type=C-src],
+	Lpars.h[type=C-incl]
+} ;
+
+CMD_LLSRC = {
+	tokenname.c,
+	commands.g
+} ;
+
+GENNEXTSRC = {
+	file.h[type=C-incl],
+	next.c[type=C-src]
+} ;
+
+CSRC = {
+	dbxread.c,
+	main.c,
+	list.c,
+	tree.c,
+	expr.c,
+	position.c,
+	idf.c,
+	run.c,
+	dump.c,
+	symbol.c,
+	print.c,
+	value.c,
+	type.c,
+	rd.c,
+	modula-2.c
+} ;
+
+HSRC = {
+	tokenname.h,
+	operator.h,
+	class.h,
+	position.h,
+	idf.h,
+	message.h,
+	avl.h,
+	scope.h,
+	langdep.h,
+	sizes.h,
+	rd.h
+} ;
+
+HHSRC = {
+	file.hh,
+	type.hh,
+	symbol.hh,
+	tree.hh,
+	avl.cc,
+	scope.cc,
+	itemlist.cc,
+	langdep.cc
+} ;
+
+LIBRARIES = {
+	$EMHOME/modules/lib/libassert.a,
+	$EMHOME/modules/lib/liballoc.a,
+	$EMHOME/modules/lib/malloc.o,
+	$EMHOME/modules/lib/libstring.a,
+	$EMHOME/modules/lib/libobject.a,
+	$EMHOME/modules/lib/libsystem.a
+} ;
+
+DBFLAGS = { -g, -DDEBUG } ;
+PROFFLAGS = { } ;
+
+LDFLAGS = {
+	-Bstatic,
+	$PROFFLAGS,
+	$DBFLAGS
+} ;
+
+INCLUDES = {
+	-I$EMHOME/modules/h,
+	-I$EMHOME/modules/pkg,
+	-I$EMHOME/h
+} ;
+
+CFLAGS = {
+	$INCLUDES,
+	$PROFFLAGS,
+	$DBFLAGS
+} ;
+
+LINTFLAGS = {
+	$INCLUDES
+} ;
+
+%cluster {
+	%targets $DBS_LLTARGETS ;
+	%sources $DBS_LLSRC ;
+	%use LLgen(prefix => DBS) ;
+} ;
+
+%cluster {
+	%targets lint.out[type = lint-output];
+	%sources $CMD_LLSRC + $CSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
+	%use lint(realdest => lint.out) ;
+} ;
+
+%cluster {
+	%targets grind[type = program];
+	%sources $CMD_LLSRC + $CSRC + $DBS_LLTARGETS + $HHSRC + char.ct + operators.ot ;
+} ;
