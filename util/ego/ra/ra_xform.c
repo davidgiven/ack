@@ -268,7 +268,14 @@ STATIC apply_alloc(b,l,alloc)
 	line_p newcode;
 
 	if (alloc->al_item->it_type == LOCALVAR) {
-		SHORT(l) = alloc->al_dummy;
+		if ((short) (alloc->al_dummy) == alloc->al_dummy) {
+			TYPE(l) = OPSHORT;
+			SHORT(l) = alloc->al_dummy;
+		}
+		else {
+			TYPE(l) = OPOFFSET;
+			OFFSET(l) = alloc->al_dummy;
+		}
 	} else {
 		newcode = repl_code(l,alloc->al_dummy);
 		replace_line(l,b,newcode);
@@ -491,7 +498,7 @@ xform_proc(p,alloclist,nrinstrs,instrmap)
 
 
 
-STATIC bool always_in_reg(off,allocs,size_out)
+bool always_in_reg(off,allocs,size_out)
 	offset off;
 	alloc_p allocs;
 	short *size_out;

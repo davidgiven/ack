@@ -251,6 +251,21 @@ STATIC bool useful_item(item)
 }
 
 
+STATIC cleantimeset(s)
+	lset s;
+{
+	register Lindex i;
+	register time_p t;
+
+	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i,s)) {
+		t = (time_p) Lelem(i);
+		oldtime(t);
+	}
+	Ldeleteset(s);
+}
+
+
+
 STATIC item_p cat_items(items)
 	item_p items[];
 {
@@ -292,21 +307,6 @@ STATIC clean_interval(list)
 		next = x->i_next;
 		oldinterval(x);
 	}
-}
-
-
-
-STATIC cleantimeset(s)
-	lset s;
-{
-	register Lindex i;
-	register time_p t;
-
-	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i,s)) {
-		t = (time_p) Lelem(i);
-		oldtime(t);
-	}
-	Ldeleteset(s);
 }
 
 
