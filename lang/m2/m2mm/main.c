@@ -31,6 +31,19 @@ extern char	*strrindex();
 extern char	*strcpy(), *strcat();
 
 char *
+basename(s)
+	char *s;
+{
+	static char buf[256];
+	char *p = strrindex(s, '.');
+
+	if (p != 0) *p = 0;
+	strcpy(buf, s);
+	if (p != 0) *p = '.';
+	return buf;
+}
+
+char *
 getwdir(fn)
         register char *fn;
 {
@@ -410,8 +423,8 @@ pr_prog_dep(id, a)
 	}
 	print("\n\n");
 	print("o_files:\t$(OBS_%s)\n\n", id->id_text);
-	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", id->id_text, id->id_text, id->id_text);
-	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s)\n", id->id_text, id->id_text, id->id_text);
+	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
+	print("\t$(MOD) -.mod -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
 }
 
 programs()
