@@ -608,7 +608,8 @@ addargs(string) char *string ; {
 				l_add(curargs,keeps(in.p_path)) ;
 			} else {
 				scanlist( l_first(*comb_args), elem ) {
-					l_add(curargs,p_cont(*elem)->p_path) ;
+					l_add(curargs,
+					      keeps(p_cont(*elem)->p_path)) ;
 				}
 			}
 			return ;
