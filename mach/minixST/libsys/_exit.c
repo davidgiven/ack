@@ -1,7 +1,7 @@
-#include "lib.h"
+#include <lib.h>
 
-PUBLIC int _exit(status)
+PUBLIC void _exit(status)
 int status;
 {
-  return callm1(MM, EXIT, status, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);
+  _callm1(MM, EXIT, status, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);
 }

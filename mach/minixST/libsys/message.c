@@ -1,5 +1,4 @@
-#include <minix/const.h>
-#include <minix/type.h>
+#include <lib.h>
 
-/* some compilers require an initializer to force storage allocation */
-message M = {0};
+/* Some compilers require an initializer to force storage allocation */
+message _M = {0};
