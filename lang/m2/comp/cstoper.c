@@ -31,11 +31,11 @@ extern char	*symbol2str();
 #define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
 
 #ifndef NOCROSS
-arith full_mask[MAXSIZE];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
-arith max_int[MAXSIZE];	/* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
-arith min_int[MAXSIZE];	/* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
-			   ...
-			*/
+arith full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
+arith max_int[MAXSIZE+1]; /* max_int[1] == 0x7F, max_int[2] == 0x7FFF, .. */
+arith min_int[MAXSIZE+1]; /* min_int[1] == 0xFFFFFF80, min_int[2] = 0xFFFF8000,
+			     ...
+			  */
 unsigned int wrd_bits;	/* number of bits in a word */
 #else
 arith full_mask[] = { 0L, 0xFFL, 0xFFFFL, 0L, 0xFFFFFFFFL };
@@ -676,7 +676,7 @@ InitCst()
 	while (!(bt < 0))	{
 		i++;
 		bt = (bt << 8) + 0377;
-		if (i == MAXSIZE)
+		if (i == MAXSIZE+1)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 		max_int[i] = bt & ~(1L << ((8 * i) - 1));

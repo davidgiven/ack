@@ -493,7 +493,6 @@ MkSet(size)
 	register arith	*s, *t;
 
 	s = t = (arith *) Malloc(size);
-	clear((char *) s , size);
 	s++;
 	size /= sizeof(arith);
 	while (size--) *t++ = 0;
