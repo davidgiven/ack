@@ -10,8 +10,8 @@ TBL=tbl
 PIC=pic
 GRAP=grap
 
-SRC =	$(SRC_DIR)/init \
-	$(SRC_DIR)/refs \
+SRC =	$(SRC_DIR)/refs \
+	$(SRC_DIR)/init \
 	$(SRC_DIR)/title \
 	$(SRC_DIR)/intro \
 	$(SRC_DIR)/1 \
@@ -22,7 +22,7 @@ SRC =	$(SRC_DIR)/init \
 	A \
 	$(SRC_DIR)/B
 
-$(TARGET)/sparc.doc:	$(SRC)
+$(TARGET):	$(SRC)
 		$(REFER) -sA+T '-l\", ' -p $(SRC) | $(GRAP) | $(PIC) | $(TBL) > $@
 
 4:	$(SRC_DIR)/4
