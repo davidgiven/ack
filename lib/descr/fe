@@ -190,7 +190,7 @@ name opt
 	to .m
 	program {EM}/lib.bin/em_opt
 	mapflag -LIB OPT_F={OPT_F?} -L
-	args {OPT_F?} <
+	args {OPT_F?} {MACHOPT_F?} <
 	stdout
 	optimizer
 end
@@ -232,7 +232,7 @@ name opt2
 	to .g
 	program {EM}/lib.bin/em_opt2
 #	mapflag -LIB OPT_F={OPT_F?} -L
-	args {OPT_F?} <
+	args {OPT_F?} {MACHOPT_F?} <
 	optimizer
 	stdout
 end
