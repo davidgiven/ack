@@ -586,6 +586,7 @@ pea		address+control4			cost(2,4).
 	 * see also: 'pat rmi' and 'pat rmu'
 	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 killreg "! kill" D_REG+A_REG:wo				cost(0,0).
+killcc "! killcc" 	kills :cc			cost(0,0).
 #if TBL68881
 /* These descriptions are not very accurate, because we have no
    other 8-byte objects in the table.
@@ -2215,7 +2216,7 @@ pat loe loe $1==$2		leaving loe $1 dup 4
 proc steloezxx example ste loe zne
 with any4-sconsts
     kills posextern
-    gen move %1, {absolute4, $1}
+    gen move_l %1, {absolute4, $1}
 	bxx* {llabel, $3}
 with exact STACK
     kills posextern
@@ -4016,12 +4017,39 @@ with test_set1 + test_set2
 	2:
 			yields	%a
 
-pat tlt					call txx("blt", "bcs")
-pat tle					call txx("ble", "bls")
+/* for some branches, we need to get rid of the overflow bit first.
+   The easiest way to do this is to just test ....
+*/
+proc txx_ouch
+with test_set4
+    uses reusing %1,DD_REG
+    gen	killcc.
+	test %1
+	bxx[1] {slabel,1f}
+	clr_l %a
+	bra {slabel,2f}
+	1:
+	move_l {const,1},%a
+	2:
+			yields	%a
+
+with test_set1 + test_set2
+    uses reusing %1,DD_REG
+    gen test %1
+	bxx[2] {slabel,1f}
+	clr_l %a
+	bra {slabel,2f}
+	1:
+	move_l {const,1},%a
+	2:
+			yields	%a
+
+pat tlt					call txx("bmi", "bcs")
+pat tle					call txx_ouch("ble", "bls")
 pat teq					call txx("beq", "beq")
 pat tne					call txx("bne", "bne")
-pat tge					call txx("bge", "bcc")
-pat tgt					call txx("bgt", "bhi")
+pat tge					call txx("bpl", "bcc")
+pat tgt					call txx_ouch("bgt", "bhi")
 #else
 proc txx
 with test_set4
@@ -4038,11 +4066,11 @@ with test_set1 + test_set2
 	neg_b %a
 			yields {extend1, %a}
 
-pat tlt					call txx("slt", "scs")
+pat tlt					call txx("smi", "scs")
 pat tle					call txx("sle", "sls")
 pat teq					call txx("seq", "seq")
 pat tne					call txx("sne", "sne")
-pat tge					call txx("sge", "scc")
+pat tge					call txx("spl", "scc")
 pat tgt					call txx("sgt", "shi")
 #endif
 
@@ -4152,15 +4180,30 @@ with test_set1 + test_set2 STACK
     gen test %1
 	bxx[2] {llabel, $1}
 with exact STACK
-    gen test {post_inc4, sp}
+    gen tst_l {post_inc4, sp}
 	bxx[1] {llabel, $1}
 
-pat zlt					call zxx("blt", "bcs")
-pat zle					call zxx("ble", "bls")
+/* for some branches, we need to get rid of the overflow bit first.
+   The easiest way to do this is to just test ....
+*/
+proc zxx_ouch example zeq
+with test_set4 STACK
+    gen killcc.
+	test %1
+	bxx[1] {llabel, $1}
+with test_set1 + test_set2 STACK
+    gen test %1
+	bxx[2] {llabel, $1}
+with exact STACK
+    gen tst_l {post_inc4, sp}
+	bxx[1] {llabel, $1}
+
+pat zlt					call zxx("bmi", "bcs")
+pat zle					call zxx_ouch("ble", "bls")
 pat zeq					call zxx("beq", "beq")
 pat zne					call zxx("bne", "bne")
-pat zge					call zxx("bge", "bcc")
-pat zgt					call zxx("bgt", "bhi")
+pat zge					call zxx("bpl", "bcc")
+pat zgt					call zxx_ouch("bgt", "bhi")
 
 /************************************************
  * Group 14: procedure calls instructions	*
@@ -4555,19 +4598,45 @@ with test_set1 + test_set2 DD_REG
 	bset {const, 0}, %2
 	1:		yields	%2
 
-pat tlt and $2==4			call txxand("blt", "bcs")
-pat tle and $2==4			call txxand("ble", "bls")
+proc txxand_ouch
+with test_set4 DD_REG
+    gen	killcc.
+	test %1
+	bxx[1] {slabel, 1f}
+	bclr {const,0}, %2
+	1:		yields	%2
+with test_set1 + test_set2 DD_REG
+    gen test %1
+	bxx[2] {slabel, 1f}
+	bclr {const,0}, %2
+	1:		yields	%2
+
+proc txxior_ouch
+with test_set4 DD_REG
+    gen	killcc.
+	test %1
+	bxx[1] {slabel, 1f}
+	bset {const, 0}, %2
+	1:		yields	%2
+with test_set1 + test_set2 DD_REG
+    gen test %1
+	bxx[2] {slabel, 1f}
+	bset {const, 0}, %2
+	1:		yields	%2
+
+pat tlt and $2==4			call txxand("bmi", "bcs")
+pat tle and $2==4			call txxand_ouch("ble", "bls")
 pat teq and $2==4			call txxand("beq", "beq")
 pat tne and $2==4			call txxand("bne", "bne")
-pat tge and $2==4			call txxand("bge", "bcc")
-pat tgt and $2==4			call txxand("bgt", "bhi")
+pat tge and $2==4			call txxand("bpl", "bcc")
+pat tgt and $2==4			call txxand_ouch("bgt", "bhi")
 
-pat tlt ior $2==4			call txxior("bge", "bcc")
-pat tle ior $2==4			call txxior("bgt", "bhi")
+pat tlt ior $2==4			call txxior("bpl", "bcc")
+pat tle ior $2==4			call txxior_ouch("bgt", "bhi")
 pat teq ior $2==4			call txxior("bne", "bne")
 pat tne ior $2==4			call txxior("beq", "beq")
-pat tge ior $2==4			call txxior("blt", "bcs")
-pat tgt ior $2==4			call txxior("ble", "bls")
+pat tge ior $2==4			call txxior("bmi", "bcs")
+pat tgt ior $2==4			call txxior_ouch("ble", "bls")
 
 proc cmxtxxand
 with exact extend1 extend1 DD_REG
@@ -4995,55 +5064,55 @@ pat loc dvu $1==256 && $2==4	leaving loc 8 sru 4
 pat loc dvi $1==2 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 1 sri 4
 
 pat loc dvi $1==4 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 2 sri 4
 
 pat loc dvi $1==8 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 3 sri 4
 
 pat loc dvi $1==16 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 4 sri 4
 
 pat loc dvi $1==32 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 5 sri 4
 
 pat loc dvi $1==64 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 6 sri 4
 
 pat loc dvi $1==128 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 7 sri 4
 
 pat loc dvi $1==256 && $2==4
     with DD_REG
     gen	test %1
-	bge {slabel,1f}
+	bpl {slabel,1f}
 	add_l {const,$1-1},%1
 	1: 			yields %1		leaving loc 8 sri 4
