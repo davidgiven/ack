@@ -14,6 +14,9 @@ libmon_o.a:	libmon_s.a
 		ASAR=aal ; export ASAR ;\
 		march . libmon_o.a
 
+head_em.o:	head_em.s
+		$(MACH) -c -I../../../h head_em.s
+
 clean:
 		rm -f *.o libmon_o.a
 

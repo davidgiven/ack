@@ -18,7 +18,7 @@ libem_o.a:	libem_s.a
 		march . libem_o.a
 
 clean:
-		rm -f *.o libmon_o.a
+		rm -f *.o libem_o.a
 
 opr :
 		make pr | opr
