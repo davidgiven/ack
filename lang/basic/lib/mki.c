@@ -19,7 +19,7 @@ double d;
 	String *s;
 
 	s= _newstr(buffer);
-	* ( (double *)s->strval ) = i ;
+	* ( (double *)s->strval ) = d ;
 	return(s);
 }
 long _cvi(s)
