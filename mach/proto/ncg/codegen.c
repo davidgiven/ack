@@ -76,6 +76,7 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #ifndef NDEBUG
 	level++;
 	DEBUG("Entering codegen");
+	if (Debug > 1) fprintf(stderr, "toplevel = %d\n", toplevel);
 #endif
 	for (;;) {
 	switch( (*codep++)&037 ) {
