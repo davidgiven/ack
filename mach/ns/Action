@@ -1,3 +1,18 @@
 name "NS16032 assembler"
 dir as
 end
+name "NS16032 backend"
+dir cg
+end
+name "NS16032 EM library"
+dir libem
+end
+name "NS16032 system call library"
+dir libsys
+end
+name "NS16032 C libraries"
+dir libcc
+end
+name "NS16032 Basic libraries"
+dir libbc
+end
