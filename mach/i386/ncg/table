@@ -2746,7 +2746,9 @@ kills ALL
 
 pat nop
 kills ALL
-  /* gen proccall {label, ".nop"} */
+#ifdef DEBUG
+  gen proccall {label, ".nop"}
+#endif
 
 pat rck $1==4
 with BXREG ACC

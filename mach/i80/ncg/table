@@ -2035,7 +2035,9 @@ gen Call {label,".mon"}
 
 pat nop
 kills ALL
+#ifdef DEBUG
 gen Call {label,".nop"}
+#endif
 
 pat rck
 with hl_or_de STACK

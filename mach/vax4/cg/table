@@ -4454,7 +4454,7 @@ lpb		| bigsource4 |
 mon		| STACK |
 			"jsb\t.mon"		|	| |
 nop		| STACK |
-#ifdef TESTING
+#ifdef DEBUG
 			"jsb\t.nop"
 #endif
 						|	| |

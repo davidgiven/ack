@@ -3288,7 +3288,7 @@ kills ALL
 
 pat nop
 kills ALL
-#if 0
+#if DEBUG
   gen joehoe {label, ".nop"}
 #endif
 

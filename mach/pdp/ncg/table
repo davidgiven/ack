@@ -2190,7 +2190,9 @@ gen jsr pc,{label, "mon~"}
 
 pat nop
 kills ALL
+#ifdef DEBUG
 gen jsr pc,{label, "nop~"}
+#endif
 
 pat rck $1==2
 with src2

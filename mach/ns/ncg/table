@@ -2227,9 +2227,11 @@ gen jsr {absolute4, ".mon"}
 
 pat nop
 kills ALL
+#ifdef DEBUG
     gen move {absolute4, "hol0"}, {TOS}
 	jsr {absolute4, ".print"}
 	jsr {absolute4, ".prnl"}
+#endif
 
 pat rck $1==4
 kills ALL

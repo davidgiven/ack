@@ -5872,11 +5872,12 @@ with STACK
     kills ALL
     gen jsr {absolute4, ".mon"}
 
-/* used by the ANSI-compiler to indicate volatile */
 pat nop
 with STACK
     kills ALL
-/*     gen jsr {absolute4, ".nop"} */
+#ifdef DEBUG
+    gen jsr {absolute4, ".nop"}
+#endif
 
 #if WORD_SIZE==2
 pat rck $1==2

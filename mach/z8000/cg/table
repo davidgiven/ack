@@ -1711,7 +1711,7 @@ mon	| STACK	| "calr mon"	| | |
 nop	| STACK	|
 #ifdef DEBUG
 	"calr noop"
-#ENDIF
+#endif
 					| | |
 rtt	| | | | ret 0	|
 sig	| REG	| allocate(REG)

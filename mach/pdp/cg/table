@@ -2675,7 +2675,10 @@ lor $1==2       | |     			| {relative2,"reghp~"}  | |
 mon             | |     remove(all)
 			"jsr pc,mon~"                   |       | |
 nop             | |     remove(all)
-			"jsr pc,nop~"                   |       | |
+#ifdef DEBUG
+			"jsr pc,nop~"
+#endif
+							|       | |
 #ifdef DORCK
 rck $1==2       | source2 |
 			remove(all)

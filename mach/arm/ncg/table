@@ -2172,6 +2172,7 @@ pat lor $1==2				yields {absolute, "_RegHp"}
 pat lpb					leaving adp 8
 
 pat nop
+kills ALL
 gen MOV_NV R0,R0
 
 pat rck
