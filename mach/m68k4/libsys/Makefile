@@ -7,7 +7,7 @@ install: 	all
 cmp:		all
 		-../../compare tail_mon
 
-tail_mon:
+tail_mon:	tail_mon.a
 		ASAR=aal ; export ASAR ;\
 		march . tail_mon
 
