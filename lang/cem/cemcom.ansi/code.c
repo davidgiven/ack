@@ -46,6 +46,7 @@
 
 label lab_count = 1;
 label datlab_count = 1;
+arith fbytes;
 
 int fp_used;
 extern arith NewLocal();	/* util.c	*/
@@ -212,7 +213,7 @@ code_scope(text, def)
 static label return_label, return2_label;
 static char return_expr_occurred;
 static arith func_size;
-static label func_res_label;
+static int struct_return;
 static char *last_fn_given = (char *)0;
 static label file_name_label;
 
@@ -281,12 +282,11 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 		if (func_size <= 0) {
 			error("unknown return type for function %s", name);
 		} else {
-			C_df_dlb(func_res_label = data_label());
-			C_bss_cst(func_size, (arith)0, 1);
+			struct_return = 1;
 		}
 	}
 	else
-		func_res_label = 0;
+		struct_return = 0;
 	/*	Special arrangements if the function result doesn't fit in
 		the function return area of the EM machine.  The size of
 		the function return area is implementation dependent.
@@ -318,8 +318,7 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 #endif
 }
 
-end_proc(fbytes)
-	arith fbytes;
+end_proc()
 {
 	/*	end_proc() deals with the code to be generated at the end of
 		a function, as there is:
@@ -341,14 +340,14 @@ end_proc(fbytes)
 		DfaEndFunction();
 #endif	/* DATAFLOW */
 	C_df_ilb(return2_label);
-	if (return_expr_occurred && func_res_label == 0) {
+	if (return_expr_occurred && struct_return == 0) {
 			C_asp(-func_size);
 	}
 	C_df_ilb(return_label);
 	prc_exit();
 	if (return_expr_occurred) {
-		if (func_res_label != 0)	{
-			C_lae_dlb(func_res_label, (arith)0);
+		if (struct_return != 0)	{
+			LoadLocal(fbytes, pointer_size);
 			C_ret(pointer_size);
 		}
 		else
@@ -357,8 +356,8 @@ end_proc(fbytes)
 	else	C_ret((arith) 0);
 
 	/* getting the number of "local" bytes is posponed until here,
-	   because copying the function result in "func_res_label" may
-	   need temporaries! However, local_level is now L_FORMAL2, because
+	   because copying the function result may need temporaries!
+	   However, local_level is now L_FORMAL2, because
 	   L_LOCAL is already unstacked. Therefore, "unstack_level" must
 	   also pass "sl_max_block" to the level above L_LOCAL.
 	*/
@@ -367,6 +366,7 @@ end_proc(fbytes)
 	C_beginpart(pro_id);
 	C_pro(func_name, nbytes);
 #endif
+	if (struct_return) fbytes += pointer_size;
 	if (fbytes > max_int) {
 		error("%s has more than %ld parameter bytes",
 			func_name, (long) max_int);
@@ -410,8 +410,8 @@ do_return_expr(expr)
 	*/
 	ch3cast(&expr, RETURN, func_type);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
-	if (func_res_label != 0) {
-		C_lae_dlb(func_res_label, (arith)0);
+	if (struct_return != 0) {
+		LoadLocal(fbytes, pointer_size);
 		store_block(func_size, func_type->tp_align);
 	}
 	C_bra(return_label);

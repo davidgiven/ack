@@ -475,6 +475,7 @@ EVAL(expr, val, code, true_label, false_label)
 			register struct expr *ex;
 			arith ParSize = (arith)0;
 			label setjmp_label = 0;
+			arith retspace = 0;
 
 			if (ISNAME(left)) {
 				if (left->VL_IDF->id_special == SP_SETJMP) {
@@ -487,6 +488,12 @@ EVAL(expr, val, code, true_label, false_label)
 					C_loi(pointer_size);
 					ParSize += pointer_size;
 				}
+			}
+			if (is_struct_or_union(tp->tp_fund)) {
+				retspace = NewLocal(tp->tp_size, tp->tp_align,
+						    -1, 0);
+				C_lal(retspace);
+				ParSize += pointer_size;
 			}
 			if ((ex = right) != NILEXPR) {
 				/* function call with parameters*/
@@ -525,8 +532,10 @@ EVAL(expr, val, code, true_label, false_label)
 			if (gencode) {
 				if (is_struct_or_union(tp->tp_fund)) {
 					C_lfr(pointer_size);
-					if (val == RVAL)
+					if (val == RVAL) {
 					  load_block(tp->tp_size, (int) word_size);
+					  FreeLocal(retspace);
+					}
 				}
 				else
 					C_lfr(ATW(tp->tp_size));
@@ -551,7 +560,7 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case ',':
 			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
-			EVAL(right, RVAL, gencode, true_label, false_label);
+			EVAL(right, val, gencode, true_label, false_label);
 			break;
 		case '~':
 			EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
