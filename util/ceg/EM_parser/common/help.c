@@ -160,4 +160,5 @@ file_header()
 	out( "#include <em.h>\n");
 	out( "#include \"mach.h\"\n");
 	out( "#include \"back.h\"\n\n");
+	out( "extern int holno, procno;\n\n");
 }
