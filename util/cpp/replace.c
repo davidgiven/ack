@@ -173,18 +173,18 @@ macro2buffer(idef, actpars, siztext)
 			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
-					text = Srealloc(text, size <<= 1);
+					text = Realloc(text, size <<= 1);
 			}
 		}
 		else {
 			text[pos++] = *ptr++;
 			if (pos == size)
-				text = Srealloc(text, size <<= 1);
+				text = Realloc(text, size <<= 1);
 		}
 	}
 	text[pos] = '\0';
 	*siztext = pos;
-	return Srealloc(text, pos+1);
+	return Realloc(text, pos+1);
 }
 
 EXPORT

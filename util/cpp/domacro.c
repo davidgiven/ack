@@ -611,7 +611,7 @@ get_text(formals, length)
 			else
 				text[pos++] = '\\';
 			if (pos == text_size)
-				text = Srealloc(text, text_size <<= 1);
+				text = Realloc(text, text_size <<= 1);
 		}
 		else
 		if ( c == '/') {
@@ -624,7 +624,7 @@ get_text(formals, length)
 			else
 				text[pos++] = '/';
 			if (pos == text_size)
-				text = Srealloc(text, text_size <<= 1);
+				text = Realloc(text, text_size <<= 1);
 		}
 		else
 		if (formals && class(c) == STIDF) {
@@ -644,7 +644,7 @@ get_text(formals, length)
 				/* construct the formal parameter mark	*/
 				text[pos++] = FORMALP | (char) n;
 				if (pos == text_size)
-					text = Srealloc(text,
+					text = Realloc(text,
 						text_size <<= 1);
 			}
 			else {
@@ -653,7 +653,7 @@ get_text(formals, length)
 				idp = id_buf;
 
 				while (pos + sz >= text_size) text_size <<= 1;
-				text = Srealloc(text, text_size);
+				text = Realloc(text, text_size);
 				while (text[pos++] = *idp++) ;
 				pos--;
 			}
@@ -661,12 +661,12 @@ get_text(formals, length)
 		else {
 			text[pos++] = c;
 			if (pos == text_size)
-				text = Srealloc(text, text_size <<= 1);
+				text = Realloc(text, text_size <<= 1);
 			LoadChar(c);
 		}
 	}
 	text[pos++] = '\0';
-	text = Srealloc(text, pos);
+	text = Realloc(text, pos);
 	*length = pos - 1;
 	return text;
 }

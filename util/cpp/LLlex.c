@@ -317,11 +317,11 @@ string_token(nm, stop_char)
 		}
 		str[pos++] = c;
 		if (pos == str_size)
-			str = Srealloc(str, str_size <<= 1);
+			str = Realloc(str, str_size <<= 1);
 		LoadChar(c);
 	}
 	str[pos++] = '\0'; /* for filenames etc. */
-	str = Srealloc(str, pos);
+	str = Realloc(str, pos);
 	return str;
 }
 
