@@ -158,13 +158,15 @@ One of the most fundamental operations in EM is ``loc c'', load the value of c
 on the stack. To expand this instruction the 
 tables contain the following information:
 .DS
-EM_table   : \fCW
+EM_table   :
+.ft CW
    C_loc   ==>   "pushl $$$1".
      /* $1 refers to the first argument of C_loc. 
       * $$ is a quoted $. */
 
 
-\fRas_table   :\fCW
+\fRas_table   :
+.ft CW
    pushl  src : CONST   ==> 
                          @text1( 0xd0);
                          @text1( 0xef);
@@ -174,7 +176,7 @@ EM_table   : \fCW
 .LP
 The as_table is transformed in the following routine:
 .DS
-\fCW
+.ft CW
 pushl_instr(src)
 t_operand *src;    
 /* ``t_operand'' is a struct defined by the 
@@ -189,7 +191,7 @@ t_operand *src;
 .DE
 Using ``pushl_instr()'', the following routine is generated from the EM_table:
 .DS
-\fCW
+.ft CW
 C_loc( c)
 arith c;
 /* text1() and text4() are library routines that fill the
@@ -335,7 +337,7 @@ the speed of the actual code expander. Finally, actions can be grouped into
 a list of actions; actions are separated by a semicolon and terminated 
 by a ``.''.
 .DS
-\fCW
+.ft CW
 C_nop   ==> .            
        /* Empty action list : no operation. */
 
@@ -362,7 +364,7 @@ action list.
 .LP
 The following example illustrates the usage of labels.
 .DS
-\fCW
+.ft CW
    /* Compare the two top elements on the stack. */
 C_cmp      ==>     "pop bx";           
                    "pop cx";          
@@ -397,7 +399,7 @@ The value of the $\fIi\fR argument referring to a parameter ($\fIi\fR >= 0)
 is increased by ``EM_BSIZE''. ``EM_BSIZE'' is the size of the return status block
 and must be defined in the file ``mach.h'' (see section 3.3). For example :
 .DS
-\fCW
+.ft CW
 C_lol   ==>     "push $1(bp)". 
        /* automatic conversion of $1 */
 \fR
@@ -409,7 +411,7 @@ transformed into a unique assembly name. To prevent name clashes with library
 names the table writer has to provide the
 conversions in the file ``mach.h''. For example :
 .DS
-\fCW
+.ft CW
 C_bra   ==>     "jmp $1". 
         /* automatic conversion of $1 */
         /* type arith is converted to string */
@@ -435,7 +437,7 @@ The boolean expressions in a COND_SEQUENCE must be C expressions. Besides the
 ordinary C operators and constants, $\fIi\fR references can be used 
 in an expression. 
 .DS
-\fCW
+.ft CW
     /* Load address of LB $1 levels back. */
 C_lxl                                 
     $1 == 0    ==>    "pushl fp".
@@ -454,7 +456,7 @@ these variants together. For this purpose the ``..'' notation is introduced.
 For the code expander there is no difference between the 
 following instructions. 
 .DS
-\fCW
+.ft CW
 C_loe_dlb    ==>    "pushl $1 + $2".
 C_loe_dnam   ==>    "pushl $1 + $2".
 C_loe        ==>    "pushl $1 + $2".
@@ -462,7 +464,7 @@ C_loe        ==>    "pushl $1 + $2".
 .DE
 So it can be written in the following way.
 .DS
-\fCW
+.ft CW
 C_loe..      ==>    "pushl $1 + $2".
 \fR
 .DE
@@ -481,7 +483,7 @@ Most pseudo instructions are machine independent and are provided
 by \fBceg\fR. The table writer has only to supply the following functions,
 which are used to build a stackframe:
 .DS
-\fCW
+.ft CW
 C_prolog()
 /* Performs the prolog, for example save 
  * return address */
@@ -512,7 +514,7 @@ C_rom_icon, C_con_icon, C_bss_icon, C_hol_icon can be abbreviated by ..icon.
 This also holds for ..ucon and ..fcon.
 For example :
 .DS
-\fCW
+.ft CW
 \\.\\.icon
     $2 == 1   ==>  gen1( (ONE_BYTE) atoi( $1)).
     $2 == 2   ==>  gen2( (TWO_BYTES) atoi( $1)).
@@ -630,7 +632,7 @@ There are three primitives that have to be defined by the table writer, either
 as functions in the file ``mach.c'' or as rules in the EM_table.
 For example, for the 8086 they look like this:
 .DS
-\fCW
+.ft CW
 C_jump       ==>       "jmp $1".
 
 C_prolog     ==>       "push bp";
@@ -781,7 +783,7 @@ right hand side gives the corresponding actions as \fBback\fR-primitives or as
 functions defined by the table writer, which call \fBback-primitives\fR.
 Two simple examples from the VAX as_table and the 8086 as_table, resp.:
 .DS
-\fCW
+.ft CW
 movl src, dst  ==> @text1( 0xd0);
                    gen_operand( src); 
                    gen_operand( dst). 
@@ -822,7 +824,7 @@ that each mnemonic is mentioned only once in the as_table, otherwise
 .PP
 The following example shows the usage of type fields.
 .DS 
-\fCW
+.ft CW
  mov dst:REG, src:EADDR  ==>  
           @text1( 0x8b);                /* opcode */
           mod_RM( %d(dst->reg), src). /* operands */
@@ -832,8 +834,11 @@ The following example shows the usage of type fields.
           mod_RM( %d(src->reg), dst). /* operands */
 \fR
 .DE
-The table-writer must supply the restriction functions, \fCWREG\fR and
-\fCWEADDR\fR in the previous example, in ``as.c'' or ''as.h''.
+The table-writer must supply the restriction functions, 
+.ft CW
+REG\fR and
+.ft CW
+EADDR\fR in the previous example, in ``as.c'' or ''as.h''.
 .NH 3 
 The function of the @-sign and the if-statement.
 .PP
@@ -842,7 +847,9 @@ Since the as_table is
 interpreted on two levels, during code expander generation and during code
 expander execution, two levels of calls are present in it. A function-call
 without an ``@''-sign
-is called during code expander generation (e.g., the \fCWgen_operand()\fR in the
+is called during code expander generation (e.g., the
+.ft CW
+gen_operand()\fR in the
 first example). 
 A function call with an ``@''-sign is called during code 
 expander execution (e.g.,
@@ -854,7 +861,7 @@ can be replaced by ``move x, y'').
 In this case flags need to be set, unset, and tested during the execution of
 the compiler:
 .DS L
-\fCW
+.ft CW
 PUSH src  ==>   /* save in ax */
                 mov_instr( AX_oper, src);  
                 /* set flag */
@@ -862,7 +869,7 @@ PUSH src  ==>   /* save in ax */
 \fR
 .DE
 .DS
-\fCW
+.ft CW
 POP dst   ==>   @if ( push_waiting)
                        /* ``mov_instr'' is asg-generated */
                        mov_instr( dst, AX_oper);      
@@ -889,7 +896,7 @@ run time of the \fBce\fR. In such a condition one may of course refer
 to the ''$\fIi\fR'' arguments. For example, constants can be 
 packed into one or two byte arguments as follows:
 .DS 
-\fCW
+.ft CW
 mov dst:ACCU, src:DATA ==> 
                        @if ( fits_byte( %$(dst->expr)))
                             @text1( 0xc0);
@@ -948,7 +955,7 @@ The following example illustrates the usage of ``%$''. (For an
 example that illustrates the usage of ordinary fields see
 the section on ``User supplied definitions and functions'').
 .DS
-\fCW
+.ft CW
 jmp dst ==> 
     @text1( 0xe9);
     @reloc2( %$(dst->lab), %$(dst->off), PC_REL).
@@ -969,7 +976,7 @@ and reloc4()
 calls, saving space and time (no relocation at compiler run time). 
 The following example illustrates the usage of ``%dist''.
 .DS 
-\fCW
+.ft CW
  jmp dst:ILB    ==> /* label in an instruction list */
      @text1( 0xeb);          
      @text1( %dist( dst->lab)).
@@ -1012,7 +1019,7 @@ below).
 If the default assemble() does not work the way the table writer wants, he
 can supply his own version of it. Assemble() has the following arguments:
 .DS
-\fCW
+.ft CW
 assemble( instruction )
     char *instruction;
 \fR
@@ -1027,7 +1034,7 @@ required on a block of assembly instructions, the table writer only has to
 rewrite this function to get a new \fBceg\fR that obliges to his wishes.
 The function block_assemble has the following arguments:
 .DS
-\fCW
+.ft CW
 block_assemble( instructions, nr, first, last)
       char   **instruction;
       int      nr, first, last;
@@ -1053,7 +1060,7 @@ The following example shows the representative and essential parts of the
 .nr VS 12
 .LP
 .DS L
-\fCW
+.ft CW
 /* Constants and type definitions in as.h */
 
 #define        UNKNOWN                0
@@ -1101,7 +1108,7 @@ extern struct t_operand saved_op, *AX_oper;
 .nr PS 10
 .nr VS 12
 .DS L
-\fCW
+.ft CW
 
 /* Some functions in as.c. */
 
@@ -1261,7 +1268,7 @@ for ``as_table'', ``as.h'', and ``as.c'' at this moment.
 .IP \0\03:
 type
 .br
-\fCW
+.ft CW
 install_ceg -as
 \fR
 .br
@@ -1272,7 +1279,9 @@ one for each
 EM-instruction. All these files will be compiled and put in a library called
 \fBce.a\fR.
 .br
-The option \fCW-as\fR means that a \fBback\fR-library will be 
+The option 
+.ft CW
+-as\fR means that a \fBback\fR-library will be 
 generated (in the directory ``back'') that
 supports the generation of assembly language. The library is named ``back.a''.
 .IP \0\04:
@@ -1284,7 +1293,7 @@ tested (e.g., by running the compiler on the EM test set). If an error occurs,
 change the EM_table and type
 .IP
 .br
-\fCW
+.ft CW
 update_ceg\fR \fBC_instr
 \fR
 .br
@@ -1305,13 +1314,18 @@ Write the ``as_table'', ``as.h'', and ``as.c'' files.
 .IP \0\03:
 type
 .sp
-\fCW install_ceg -obj \fR
+.ft CW
+install_ceg -obj \fR
 .sp
-The option \fCW-obj\fR means that ``back.a'' will contain a library 
+The option 
+.ft CW
+-obj\fR means that ``back.a'' will contain a library 
 for generating
 ACK.OUT(5ACK) object files, see appendix B. 
 If the writer does not want to use the default ``back.a'',
-the \fCW-obj\fR flag must omitted and a ``back.a'' should be supplied that
+the 
+.ft CW
+-obj\fR flag must omitted and a ``back.a'' should be supplied that
 generates the generates object code in the desired format.
 .IP \0\04:
 Link a front end, ``ce.a'', and ``back.a'' together resulting in a compiler
@@ -1322,12 +1336,14 @@ Then there are two ways to proceed:
 .IP \0\01:
 recompile the whole EM_table,
 .sp
-\fCW update_ceg ALL \fR
+.ft CW
+update_ceg ALL \fR
 .sp
 .IP \0\02:
 recompile just the few EM-instructions that contained the error,
 .sp
-\fCW  update_ceg \fBC_instr\fR
+.ft CW
+update_ceg \fBC_instr\fR
 .sp
 where \fBC_instr\fR is an erroneous EM-instruction.
 This has to be done for every EM-instruction that contained the erroneous
