@@ -4,7 +4,7 @@
  */
 /* $Header$ */
 
-/* #define DIAGOPT /* if defined diagnostics are produced */
+#undef DIAGOPT /* if defined diagnostics are produced */
 #ifdef DIAGOPT
 #define OPTIM(x) optim(x)
 #define O_UNREACH 1001

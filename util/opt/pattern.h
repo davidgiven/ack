@@ -21,7 +21,7 @@
  *   by the line number in the tables.
  */
 
-/* #define ALLOWSPECIAL /* Special optimizations allowed */
+#undef ALLOWSPECIAL /* Special optimizations allowed */
 
 #define PO_HASH		0
 #define PO_NEXT		1

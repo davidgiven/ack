@@ -22,7 +22,7 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
-/* #define CHK_HASH	/* print numbers patterns are hashed to */
+#undef CHK_HASH	/* print numbers patterns are hashed to */
 #ifdef CHK_HASH
 #include <stdio.h>
 #endif

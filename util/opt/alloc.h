@@ -16,9 +16,9 @@ extern		oldline();
 extern		oldloc();
 extern		oldreg();
 
-/* #define USEMALLOC	/* if defined malloc() and free() are used */
+#undef USEMALLOC	/* if defined malloc() and free() are used */
 
-/* #define COREDEBUG	/* keep records and print statistics */
+#undef COREDEBUG	/* keep records and print statistics */
 
 /*
  * The next define gives if defined the number of pseudo's outside

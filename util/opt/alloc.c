@@ -27,7 +27,7 @@ short * myalloc();
 
 #else
 
-/* #define CORECHECK	/* if defined tests are made to insure
+#undef CORECHECK	/* if defined tests are made to insure
 			   each block occurs at most once */
 
 #define CCHUNK	1024	/* number of shorts asked from system */
