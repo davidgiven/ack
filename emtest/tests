@@ -1179,8 +1179,8 @@ b051
 MAIN 20
  loc 40
  loc 41
- sdl -12+(2*WS)
- lal -12
+ sdl -16+(2*WS)
+ lal -16
  loc 6
  lae a051
  lar WS
@@ -1190,13 +1190,13 @@ MAIN 20
  bne *1
 OK
  loc 42
- lal -9
+ lal -13
  sti 1
- lal -11
+ lal -15
  loc 7
  lae b051
  lar WS
- lal -9
+ lal -13
  loi 1
  bne *1
 OK
@@ -1208,8 +1208,8 @@ b052
 MAIN 20
  loc 40
  loc 41
- sdl -12+(2*WS)
- lal -12
+ sdl -16+(2*WS)
+ lal -16
  loc 6
  lae a052
  loc WS
@@ -1220,14 +1220,14 @@ MAIN 20
  bne *1
 OK
  loc 42
- lal -9
+ lal -13
  sti 1
- lal -11
+ lal -15
  loc 7
  lae b052
  loc WS
  lar ?
- lal -9
+ lal -13
  loi 1
  bne *1
 OK
@@ -1471,11 +1471,12 @@ OK
  loc 1
  bne *1
 OK
+#ifdef W2S
  loc 17
  loc 6
  loc 27
  loc 6
- cmu 2*WS
+ cmu W2S
  tlt
  loc 1
  bne *1
@@ -1484,11 +1485,12 @@ OK
  loc 27
  loc 6
  loc 17
- cmu 2*WS
+ cmu W2S
  tgt
  loc 1
  bne *1
 OK
+#endif
 TEST 063: test cms
 MAIN 0
  loc 6
@@ -1825,19 +1827,19 @@ OK
  lor SP
  lal -8
  sti PS
- loc -18
+ loc -24
  ass WS
  lor SP
  lal -4
  sti PS
- loc 18
+ loc 24
  ass WS
  lal -8
  loi PS
  lal -4
  loi PS
  sbs WS
- loc 18
+ loc 24
  bne *1
 OK
 TEST 083: test blm
