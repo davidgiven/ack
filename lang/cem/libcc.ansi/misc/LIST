@@ -4,6 +4,7 @@ getpass.c
 getpw.c
 getw.c
 putw.c
+putenv.c
 popen.c
 sleep.c
 termcap.c
