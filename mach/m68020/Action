@@ -7,6 +7,10 @@ end
 name "M68020 target optimizer"
 dir top
 end
+name "M68020 code expander library"
+system "m68020|sun3"
+dir ce
+end
 name "M68020 EM library"
 dir libem
 end
