@@ -60,10 +60,10 @@ pass_3()
 		default:
 		if ( lnp->type1==CONST && (em_flag[insno]&EM_PAR)==PAR_G ) {
 			if (holbase != 0) {
-				lnp->ad.ad_i += holbase;
 				if (lnp->ad.ad_i >= holsize) {
 						hol_err_line= line_num ;
 				}
+				lnp->ad.ad_i += holbase;
 			}
 		} else
 		if ( lnp->type1>=VALLOW && (em_flag[insno]&EM_PAR)==PAR_G ) {
