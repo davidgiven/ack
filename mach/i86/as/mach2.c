@@ -24,6 +24,7 @@
 %token <y_word> CALLOP
 %token <y_word> CALFOP
 %token <y_word> LEAOP
+%token <y_word> ARPLOP
 %token <y_word> ESC
 %token <y_word> INT
 %token <y_word> RET
