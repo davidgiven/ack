@@ -11,7 +11,6 @@ static char *rcsid = "$Header$";
 # include <stdio.h>
 # endif
 
-int		LLsymb;
 unsigned int	LLtcnt[LL_NTERMINALS];
 unsigned int	LLscnt[LL_NSETS];
 int		LLcsymb, LLsymb;
