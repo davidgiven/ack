@@ -66,10 +66,6 @@ move.l AREG,DREG : move.l DREG,AREG	->	move.l AREG,DREG ;
 move.w DREG,DREG2 : move.w DREG2,DREG	->	move.w DREG,DREG2 ;
 move.l AREG,AREG			->	;
 
-move.l A,B : move.l A,B			->	move.l A,B ;
-move.w A,B : move.w A,B			->	move.w A,B ;
-move.b A,B : move.b A,B			->	move.b A,B ;
-
 /* register subsumption */
 move.w DREG,A : ANY A,X
 	{reg_subs_allowed(ANY) &&
