@@ -1018,7 +1018,7 @@ inc		| X_REG |
 inl inreg($1)==2| |
 			remove(regvar($1))
 			"inc %(regvar($1)%)"
-			setcc(regvar($1))	     |	    | |(1,2)
+			erase(regvar($1)) setcc(regvar($1))	     |	    | |(1,2)
 #endif
 inl		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -1034,7 +1034,7 @@ dec		| X_REG |
 del inreg($1)==2| |
 			remove(regvar($1))
 			"dec %(regvar($1)%)"
-			setcc(regvar($1))	     |	    | |(1,2)
+			erase(regvar($1)) setcc(regvar($1))	     |	    | |(1,2)
 #endif
 del		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
@@ -1046,7 +1046,8 @@ dee		| |	remove(indirects)
 #ifdef REGVARS
 zrl inreg($1)==2| |
 			remove(regvar($1))
-			move({ANYCON,0},regvar($1))	|	| |
+			move({ANYCON,0},regvar($1))
+			erase(regvar($1)) 	|	| |
 #endif
 zrl		| |	remove(indexed)
 			remove(locals, %[ind]>=$1 && %[ind]<$1+2 )
