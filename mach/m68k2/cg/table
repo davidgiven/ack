@@ -818,8 +818,12 @@ mli $1 == 2 | DATASCR ANY |	"muls %[2],%[1]"
 mli $1 == 2 | ANY DATASCR |	"muls %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])		| %[2] | |
-ldc mli loww(1) == 1 && highw(1) == 0 && $2 == 4 | | | | |
-ldc mli loww(1) == 2 && highw(1) == 0 && $2 == 4 | | | | loc 1 sli 4 |
+loc loc cii ldc mli $1==2 && $2==4 && highw(4)==0 && loww(4)>0 && $5==4
+	    | DATASCR |		allocate(%[1],DATAREG4)
+				move(%[1],%[a.1])
+				"muls #$4,%[a]"
+				erase(%[a])
+				setcc(%[a])		| %[a] | |
 mli $1 == 4 | |			remove(ALL)
 				"jsr .mli"
 							| DD1 | |
@@ -2724,8 +2728,14 @@ bls $1 == 4 |	DATASCR4 ADDSCR ADDSCR |
 csa $1 == 2 | |			remove(ALL)
 				"jmp .csa"
 					 		| | |
+csa $1 == 4 | |			remove(ALL)
+				"jmp .csa4"
+					 		| | |
 csb $1 == 2 | |			remove(ALL)
 				"jmp .csb"
+							| | |
+csb $1 == 4 | |			remove(ALL)
+				"jmp .csb4"
 							| | |
 dch | | | | loi 4 |
 dup $1 == 2 |	ANY-REGCH2 |		|	%[1] %[1] | |
