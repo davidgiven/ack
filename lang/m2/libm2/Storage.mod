@@ -59,8 +59,12 @@ IMPLEMENTATION MODULE Storage;
     VAR	nu : CARDINAL;
 	b : CARDINAL;
 	p, q: BucketPtr;
+	pc: POINTER TO CHAR;
 	brk : ADDRESS;
   BEGIN
+	IF size > CARDINAL(MAX(INTEGER)) THEN
+		RETURN NIL;
+	END;
 	nu := (size + (UNIT-1)) DIV UNIT;
 	IF nu = 0 THEN
 		RETURN NIL;
@@ -72,6 +76,10 @@ IMPLEMENTATION MODULE Storage;
 			p := FreeLists[b];
 			FreeLists[b] := p^.BNEXT;
 			p^.BNEXT := USED;
+			IF p^.BSIZE * UNIT # size THEN
+				pc := ADR(p^.BSTORE) + size;
+				pc^ := MAGICC;
+			END;
 			RETURN ADR(p^.BSTORE);
 		END;
 
@@ -91,6 +99,10 @@ IMPLEMENTATION MODULE Storage;
 				FreeLists[p^.BSIZE] := p;
 				q^.BSIZE := nu;
 				q^.BNEXT := USED;
+				IF q^.BSIZE * UNIT # size THEN
+					pc := ADR(q^.BSTORE) + size;
+					pc^ := MAGICC;
+				END;
 				RETURN ADR(q^.BSTORE);
 			END;
 		END;
@@ -122,6 +134,10 @@ IMPLEMENTATION MODULE Storage;
 					FreeLists[q^.BSIZE] := q;
 					p^.BSIZE := nu;
 				END;
+				IF p^.BSIZE * UNIT # size THEN
+					pc := ADR(p^.BSTORE) + size;
+					pc^ := MAGICC;
+				END;
 				RETURN ADR(p^.BSTORE);
 			END;
 			(* Give part of tail of original block.
@@ -131,6 +147,10 @@ IMPLEMENTATION MODULE Storage;
 			q^.BSIZE := nu;
 			p^.BSIZE := p^.BSIZE - nu - 1;
 			q^.BNEXT := USED;
+			IF q^.BSIZE * UNIT # size THEN
+				pc := ADR(q^.BSTORE) + size;
+				pc^ := MAGICC;
+			END;
 			RETURN ADR(q^.BSTORE);
 		END;
 	END;
@@ -152,6 +172,10 @@ IMPLEMENTATION MODULE Storage;
 	p := brk;
 	p^.BSIZE := nu;
 	p^.BNEXT := USED;
+	IF p^.BSIZE * UNIT # size THEN
+		pc := ADR(p^.BSTORE) + size;
+		pc^ := MAGICC;
+	END;
 	RETURN ADR(p^.BSTORE);
   END MyAllocate;
 
@@ -161,18 +185,11 @@ IMPLEMENTATION MODULE Storage;
   END Allocate;
 
   PROCEDURE ALLOCATE(VAR a: ADDRESS; size: CARDINAL);
-  VAR p: BucketPtr;
-      pc: POINTER TO CHAR;
   BEGIN
 	a := MyAllocate(size);
 	IF a = NIL THEN
 		Message("out of core");
 		HALT;
-	END;
-	p := a - UNIT;
-	IF p^.BSIZE * UNIT # size THEN
-		pc := a + size;
-		pc^ := MAGICC;
 	END;
   END ALLOCATE;
 
@@ -212,7 +229,7 @@ IMPLEMENTATION MODULE Storage;
 		ELSIF (BSIZE*UNIT # size) THEN
 			pc := a + size;
 			IF pc^ # MAGICC THEN
-				Message("(Warning) area corrupted");
+				Message("(Warning) heap corrupted or wrong size in deallocate");
 			END;
 		END;	
 		IF BSIZE <= NLISTS THEN
