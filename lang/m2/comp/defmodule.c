@@ -128,7 +128,7 @@ GetDefinitionModule(id, incr)
 					register struct node *n;
 					extern struct node *Modules;
 
-					n = MkLeaf(Name, &dot);
+					n = dot2leaf(Name);
 					n->nd_IDF = id;
 					n->nd_symb = IDENT;
 					if (nd_end) nd_end->nd_left = n;

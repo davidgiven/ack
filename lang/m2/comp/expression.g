@@ -36,7 +36,7 @@ number(struct node **p;) :
 	INTEGER
 |
 	REAL
-]			{ *p = MkLeaf(Value, &dot);
+]			{ *p = dot2leaf(Value);
 			  (*p)->nd_type = toktype;
 			}
 ;
@@ -45,14 +45,14 @@ number(struct node **p;) :
 qualident(struct node **p;)
 {
 } :
-	IDENT	{ *p = MkLeaf(Name, &dot); }
+	IDENT	{ *p = dot2leaf(Name); }
 	[
 		selector(p)
 	]*
 ;
 
 selector(struct node **pnd;):
-	'.'	{ *pnd = MkNode(Link,*pnd,NULLNODE,&dot); }
+	'.'	{ *pnd = dot2node(Link,*pnd,NULLNODE); }
 	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
 ;
 
@@ -60,11 +60,11 @@ ExpList(struct node **pnd;)
 {
 	register struct node *nd;
 } :
-	expression(pnd)		{ *pnd = nd = MkNode(Link,*pnd,NULLNODE,&dot);
+	expression(pnd)		{ *pnd = nd = dot2node(Link,*pnd,NULLNODE);
 				  nd->nd_symb = ',';
 				}
 	[
-		','		{ nd->nd_right = MkLeaf(Link, &dot);
+		','		{ nd->nd_right = dot2leaf(Link);
 				  nd = nd->nd_right;
 				}
 		expression(&(nd->nd_left))
@@ -101,7 +101,7 @@ expression(struct node **pnd;)
 	[
 		/* relation */
 		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
-			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+			{ *pnd = dot2node(Oper, *pnd, NULLNODE); }
 		SimpleExpression(&((*pnd)->nd_right))
 	]?
 ;
@@ -118,7 +118,7 @@ SimpleExpression(struct node **pnd;)
 } :
 	[
 		[ '+' | '-' ]
-			{ nd = MkLeaf(Uoper, &dot);
+			{ nd = dot2leaf(Uoper);
 			  /* priority of unary operator ??? */
 			}
 	]?
@@ -132,7 +132,7 @@ SimpleExpression(struct node **pnd;)
 	[
 		/* AddOperator */
 		[ '+' | '-' | OR ]
-			{ nd = MkNode(Oper, nd, NULLNODE, &dot); }
+			{ nd = dot2node(Oper, nd, NULLNODE); }
 		term(&(nd->nd_right))
 	]*
 			{ *pnd = nd; }
@@ -152,7 +152,7 @@ term(struct node **pnd;)
 	[
 		/* MulOperator */
 		[ '*' | '/' | DIV | MOD | AND ]
-			{ nd = MkNode(Oper, nd, NULLNODE, &dot); }
+			{ nd = dot2node(Oper, nd, NULLNODE); }
 		factor(&(nd->nd_right))
 	]*
 			{ *pnd = nd; }
@@ -172,7 +172,7 @@ factor(register struct node **p;)
 	[
 		designator_tail(p)?
 		[
-			{ *p = MkNode(Call, *p, NULLNODE, &dot); }
+			{ *p = dot2node(Call, *p, NULLNODE); }
 			ActualParameters(&((*p)->nd_right))
 		]?
 	|
@@ -189,11 +189,11 @@ factor(register struct node **p;)
 		REAL
 	|
 		STRING
-	]		{ *p = MkLeaf(Value, &dot);
+	]		{ *p = dot2leaf(Value);
 			  (*p)->nd_type = toktype;
 			}
 |
-	'(' 	{ nd = MkLeaf(Uoper, &dot); }
+	'(' 	{ nd = dot2leaf(Uoper); }
 	expression(p)
 		{ /*	In some cases we must leave the '(' as an unary
 			operator, because otherwise we cannot see that the
@@ -212,7 +212,7 @@ factor(register struct node **p;)
 		}
 	')'
 |
-	NOT		{ *p = MkLeaf(Uoper, &dot); }
+	NOT		{ *p = dot2leaf(Uoper); }
 	factor(&((*p)->nd_right))
 ;
 
@@ -221,7 +221,7 @@ bare_set(struct node **pnd;)
 	register struct node *nd;
 } :
 	'{'		{ dot.tk_symb = SET;
-			  *pnd = nd = MkLeaf(Xset, &dot);
+			  *pnd = nd = dot2leaf(Xset);
 			  nd->nd_type = bitset_type;
 			}
 	[
@@ -244,10 +244,10 @@ element(register struct node *nd;)
 	expression(&nd1)
 	[
 		UPTO
-			{ nd1 = MkNode(Link, nd1, NULLNODE, &dot);}
+			{ nd1 = dot2node(Link, nd1, NULLNODE);}
 		expression(&(nd1->nd_right))
 	]?
-			{ nd->nd_right = MkNode(Link, nd1, NULLNODE, &dot);
+			{ nd->nd_right = dot2node(Link, nd1, NULLNODE);
 			  nd->nd_right->nd_symb = ',';
 			}
 ;
@@ -273,18 +273,18 @@ visible_designator_tail(struct node **pnd;)
 	register struct node *nd = *pnd;
 }:
 [
-	'['		{ nd = MkNode(Arrsel, nd, NULLNODE, &dot); }
+	'['		{ nd = dot2node(Arrsel, nd, NULLNODE); }
 		expression(&(nd->nd_right))
 		[
 			','
-			{ nd = MkNode(Arrsel, nd, NULLNODE, &dot);
+			{ nd = dot2node(Arrsel, nd, NULLNODE);
 			  nd->nd_symb = '[';
 			}
 			expression(&(nd->nd_right))
 		]*
 	']'
 |
-	'^'		{ nd = MkNode(Arrow, NULLNODE, nd, &dot); }
+	'^'		{ nd = dot2node(Arrow, NULLNODE, nd); }
 ]
 			{ *pnd = nd; }
 ;

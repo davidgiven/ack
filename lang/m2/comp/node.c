@@ -38,15 +38,27 @@ MkNode(class, left, right, token)
 }
 
 struct node *
+dot2node(class, left, right)
+	struct node *left, *right;
+{
+	return MkNode(class, left, right, &dot);
+}
+
+struct node *
 MkLeaf(class, token)
 	struct token *token;
 {
 	register struct node *nd = new_node();
 
-	nd->nd_left = nd->nd_right = 0;
 	nd->nd_token = *token;
 	nd->nd_class = class;
 	return nd;
+}
+
+struct node *
+dot2leaf(class)
+{
+	return MkLeaf(class, &dot);
 }
 
 FreeNode(nd)

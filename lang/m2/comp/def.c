@@ -239,7 +239,7 @@ DeclProc(type, id)
 		/* In a definition module
 		*/
 		df = define(id, CurrentScope, type);
-		df->for_node = MkLeaf(Name, &dot);
+		df->for_node = dot2leaf(Name);
 		if (CurrentScope->sc_definedby->df_flags & D_FOREIGN) {
 			df->for_name = id->id_text;
 		}

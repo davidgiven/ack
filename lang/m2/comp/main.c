@@ -40,6 +40,7 @@ int		pass_1;
 struct def 	*Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
+struct node	*EmptyStatement;
 
 main(argc, argv)
 	register char **argv;
@@ -86,6 +87,8 @@ Compile(src, dst)
 	InitScope();
 	InitTypes();
 	AddStandards();
+	EmptyStatement = dot2leaf(Stat);
+	EmptyStatement->nd_symb = ';';
 #ifdef DEBUG
 	if (options['l']) {
 		LexScan();

@@ -99,7 +99,7 @@ import(int local;)
 	extern struct def *GetDefinitionModule();
 } :
 	[ FROM
-	  IDENT		{ FromId = MkLeaf(Name, &dot);
+	  IDENT		{ FromId = dot2leaf(Name);
 			  if (local) df = lookfor(FromId,enclosing(CurrVis),0);
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}

@@ -22,6 +22,7 @@
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
+extern struct node *EmptyStatement;
 }
 
 statement(register struct node **pnd;)
@@ -35,7 +36,7 @@ statement(register struct node **pnd;)
 	 * but this gives LL(1) conflicts
 	 */
 	designator(pnd)
-	[			{ nd = MkNode(Call, *pnd, NULLNODE, &dot);
+	[			{ nd = dot2node(Call, *pnd, NULLNODE);
 				  nd->nd_symb = '(';
 				}
 		ActualParameters(&(nd->nd_right))?
@@ -45,7 +46,7 @@ statement(register struct node **pnd;)
 				  DOT = BECOMES;
 				}
 		]
-				{ nd = MkNode(Stat, *pnd, NULLNODE, &dot); }
+				{ nd = dot2node(Stat, *pnd, NULLNODE); }
 		expression(&(nd->nd_right))
 	]
 				{ *pnd = nd; }
@@ -57,19 +58,19 @@ statement(register struct node **pnd;)
 |
 	CaseStatement(pnd)
 |
-	WHILE		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	WHILE		{ *pnd = nd = dot2leaf(Stat); }
 	expression(&(nd->nd_left))
 	DO
 	StatementSequence(&(nd->nd_right))
 	END
 |
-	REPEAT		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
 	StatementSequence(&(nd->nd_left))
 	UNTIL
 	expression(&(nd->nd_right))
 |
 			{ loopcount++; }
-	LOOP		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	LOOP		{ *pnd = nd = dot2leaf(Stat); }
 	StatementSequence(&((*pnd)->nd_right))
 	END
 			{ loopcount--; }
@@ -80,13 +81,13 @@ statement(register struct node **pnd;)
 |
 	EXIT
 			{ if (!loopcount) error("EXIT not in a LOOP");
-			  *pnd = MkLeaf(Stat, &dot);
+			  *pnd = dot2leaf(Stat);
 			}
 |
 	ReturnStatement(pnd)
 			{ return_occurred = 1; }
 |
-	/* empty */	{ *pnd = 0; }
+	/* empty */	{ *pnd = EmptyStatement; }
 ;
 
 /*
@@ -108,14 +109,11 @@ StatementSequence(register struct node **pnd;)
 	statement(pnd)
 	[ %persistent
 		';' statement(&nd)
-			{ if (nd) {
-				register struct node *nd1 = 
-						MkNode(Link, *pnd, nd, &dot);
+			{ register struct node *nd1 = dot2node(Link, *pnd, nd);
 
-				*pnd = nd1;
-				nd1->nd_symb = ';';
-			  	pnd = &(nd1->nd_right);
-			  }
+			  *pnd = nd1;
+			  nd1->nd_symb = ';';
+			  pnd = &(nd1->nd_right);
 			}
 	]*
 ;
@@ -124,21 +122,21 @@ IfStatement(struct node **pnd;)
 {
 	register struct node *nd;
 } :
-	IF		{ nd = MkLeaf(Stat, &dot);
+	IF		{ nd = dot2leaf(Stat);
 			  *pnd = nd;
 			}
 	expression(&(nd->nd_left))
-	THEN		{ nd->nd_right = MkLeaf(Link, &dot);
+	THEN		{ nd->nd_right = dot2leaf(Link);
 			  nd = nd->nd_right;
 			}
 	StatementSequence(&(nd->nd_left))
 	[
-		ELSIF	{ nd->nd_right = MkLeaf(Stat, &dot);
+		ELSIF	{ nd->nd_right = dot2leaf(Stat);
 			  nd = nd->nd_right;
 			  nd->nd_symb = IF;
 			}
 		expression(&(nd->nd_left))
-		THEN	{ nd->nd_right = MkLeaf(Link, &dot);
+		THEN	{ nd->nd_right = dot2leaf(Link);
 			  nd = nd->nd_right;
 			}
 		StatementSequence(&(nd->nd_left))
@@ -155,7 +153,7 @@ CaseStatement(struct node **pnd;)
 	register struct node *nd;
 	struct type *tp = 0;
 } :
-	CASE		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	CASE		{ *pnd = nd = dot2leaf(Stat); }
 	expression(&(nd->nd_left))
 	OF
 	case(&(nd->nd_right), &tp)
@@ -166,21 +164,16 @@ CaseStatement(struct node **pnd;)
 			{ nd = nd->nd_right; }
 	]*
 	[ ELSE StatementSequence(&(nd->nd_right))
-			{ if (! nd->nd_right) {
-				nd->nd_right = MkLeaf(Stat, &dot);
-				nd->nd_right->nd_symb = ';';
-			  }
-			}
 	]?
 	END
 ;
 
 case(struct node **pnd; struct type **ptp;) :
 	[ CaseLabelList(ptp, pnd)
-	  ':'		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
+	  ':'		{ *pnd = dot2node(Link, *pnd, NULLNODE); }
 	  StatementSequence(&((*pnd)->nd_right))
 	]?
-			{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+			{ *pnd = dot2node(Link, *pnd, NULLNODE);
 			  (*pnd)->nd_symb = '|';
 			}
 ;
@@ -190,7 +183,7 @@ WhileStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	WHILE		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	WHILE		{ *pnd = nd = dot2leaf(Stat); }
 	expression(&(nd->nd_left))
 	DO
 	StatementSequence(&(nd->nd_right))
@@ -201,7 +194,7 @@ RepeatStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	REPEAT		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
 	StatementSequence(&(nd->nd_left))
 	UNTIL
 	expression(&(nd->nd_right))
@@ -213,9 +206,9 @@ ForStatement(struct node **pnd;)
 	register struct node *nd, *nd1;
 	struct node *dummy;
 }:
-	FOR		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	FOR		{ *pnd = nd = dot2leaf(Stat); }
 	IDENT		{ nd->nd_IDF = dot.TOK_IDF; }
-	BECOMES		{ nd->nd_left = nd1 = MkLeaf(Stat, &dot); }
+	BECOMES		{ nd->nd_left = nd1 = dot2leaf(Stat); }
 	expression(&(nd1->nd_left))
 	TO
 	expression(&(nd1->nd_right))
@@ -238,7 +231,7 @@ ForStatement(struct node **pnd;)
 
 /* inline in Statement; lack of space
 LoopStatement(struct node **pnd;):
-	LOOP		{ *pnd = MkLeaf(Stat, &dot); }
+	LOOP		{ *pnd = dot2leaf(Stat); }
 	StatementSequence(&((*pnd)->nd_right))
 	END
 ;
@@ -248,7 +241,7 @@ WithStatement(struct node **pnd;)
 {
 	register struct node *nd;
 }:
-	WITH		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	WITH		{ *pnd = nd = dot2leaf(Stat); }
 	designator(&(nd->nd_left))
 	DO
 	StatementSequence(&(nd->nd_right))
@@ -261,7 +254,7 @@ ReturnStatement(struct node **pnd;)
 	register struct node *nd;
 } :
 
-	RETURN		{ *pnd = nd = MkLeaf(Stat, &dot); }
+	RETURN		{ *pnd = nd = dot2leaf(Stat); }
 	[
 		expression(&(nd->nd_right))
 			{ if (scopeclosed(CurrentScope)) {

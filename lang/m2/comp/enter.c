@@ -197,7 +197,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 
 	if (! idlist) {
 		/* Can only happen when a procedure type is defined */
-		dummy = Idlist = idlist = MkLeaf(Name, &dot);
+		dummy = Idlist = idlist = dot2leaf(Name);
 	}
 	for ( ; idlist; idlist = idlist->nd_left) {
 		pr = new_paramlist();

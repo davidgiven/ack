@@ -32,7 +32,7 @@ int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
 
 #define needs_static_link()	(proclevel > 1)
-
+extern struct node *EmptyStatement;
 }
 
 /* inline in declaration: need space
@@ -82,11 +82,13 @@ block(struct node **pnd;) :
 	[	%persistent
 		declaration
 	]*
-			{ return_occurred = 0; *pnd = 0; }
-	[	%persistent
+			{ return_occurred = 0; }
+	[	%default
 		BEGIN
 		StatementSequence(pnd)
-	]?
+	|
+			{ *pnd = EmptyStatement; }
+	]
 	END
 ;
 
@@ -164,7 +166,7 @@ TypeDeclaration
 	register struct node *nd;
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
-			  nd = MkLeaf(Name, &dot);
+			  nd = dot2leaf(Name);
 			}
 	'=' type(&tp)
 			{ DeclareType(nd, df, tp);
@@ -218,10 +220,10 @@ IdentList(struct node **p;)
 {
 	register struct node *q;
 } :
-	IDENT		{ *p = q = MkLeaf(Value, &dot); }
+	IDENT		{ *p = q = dot2leaf(Value); }
 	[ %persistent
 		',' IDENT
-			{ q->nd_left = MkLeaf(Value, &dot);
+			{ q->nd_left = dot2leaf(Value);
 			  q = q->nd_left;
 			}
 	]*
@@ -376,7 +378,7 @@ variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
 CaseLabelList(struct type **ptp; struct node **pnd;):
 	CaseLabels(ptp, pnd)
 	[	
-			{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
+			{ *pnd = dot2node(Link, *pnd, NULLNODE); }
 		',' CaseLabels(ptp, &((*pnd)->nd_right))
 			{ pnd = &((*pnd)->nd_right); }
 	]*
@@ -394,7 +396,7 @@ CaseLabels(struct type **ptp; register struct node **pnd;)
 			  nd = *pnd;
 			}
 	[
-		UPTO	{ *pnd = MkNode(Link,nd,NULLNODE,&dot); }
+		UPTO	{ *pnd = dot2node(Link,nd,NULLNODE); }
 		ConstExpression(&(*pnd)->nd_right)
 			{ if (!ChkCompat(&((*pnd)->nd_right), nd->nd_type,
 					 "case label")) {
@@ -518,7 +520,7 @@ IdentAddr(struct node **pnd;)
 {
 	register struct node *nd;
 } :
-	IDENT		{ nd = MkLeaf(Name, &dot); }
+	IDENT		{ nd = dot2leaf(Name); }
 	[	'['
 		ConstExpression(&(nd->nd_left))
 		']'
