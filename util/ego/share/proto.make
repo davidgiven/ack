@@ -58,7 +58,7 @@ all:		classdefs.h pop_push.h $(OBS)
 		$(AR) r share.$(LIBSUF) $(OBS)
 		$(RANLIB) share.$(LIBSUF)
 
-install:	all lintlib
+install:	all
 		-mkdir $(TARGET_HOME)/lib.bin/ego
 		cp share.$(LIBSUF) $(TARGET_HOME)/lib.bin/ego/share.$(LIBSUF)
 		$(RANLIB) $(TARGET_HOME)/lib.bin/ego/share.$(LIBSUF)
