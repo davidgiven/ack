@@ -1920,12 +1920,12 @@ with CXREG DXREG ACC
 kills ALL
 gen joehoe {label,".cuu"}		yields %3
 
-pat loc loc cii zeq $1==1 $$ $2==2
+pat loc loc cii zeq $1==1 && $2==2
 with GENREG
 gen test %1.1
     je {label, $4}
 
-pat loc loc cii zne $1==1 $$ $2==2
+pat loc loc cii zne $1==1 && $2==2
 with GENREG
 gen test %1.1
     jne {label, $4}
