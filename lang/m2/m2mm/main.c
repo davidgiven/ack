@@ -108,7 +108,7 @@ main(argc, argv)
 	reserve(tkidf);
 	print("IFLAGS =");
 	for (i = 1; i < nDEF; i++) {
-		print(" -I%s", DEFPATH[i]);
+		if (DEFPATH[i]) print(" -I%s", DEFPATH[i]);
 	}
 	print("\nM2FLAGS = %s\nMOD = %s\nSUFFIX = %s\nLIBS = %s\n", mflags, compiler, suff, llibs ? llibs : "");
 	init_lib();
@@ -126,7 +126,7 @@ new_file_list()
 	register struct file_list *f;
 	static int cnt;
 
-	if (cnt-- < 0) {
+	if (--cnt < 0) {
 		p = (struct file_list *)Malloc(50*sizeof(struct file_list));
 		cnt = 49;
 	}
@@ -136,6 +136,7 @@ new_file_list()
 	f->a_next = 0;
 	f->a_idf = 0;
 	f->a_notfound = 0;
+	return f;
 }
 
 Add(parglist, f, d, copy)
