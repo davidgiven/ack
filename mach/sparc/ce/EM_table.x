@@ -10,10 +10,6 @@ define(`RETH_ST',`reg_i1')
 define(`RETL_ST',`reg_i0')
 define(`LIN_NO',`%g6')
 define(`FIL_NAM',`%g7')
-define(O0, reg_o0)
-define(O1, reg_o1)
-define(O2, reg_o2)
-define(O3, reg_o3)
 
 define(`BP_OFFSET',`'WINDOWSIZE)
 define(`'`EM_BSIZE',EM_BSIZE)
@@ -415,7 +411,7 @@ C_sti
 			C_sts(EM_WSIZE).
 
 	default		==>
-				arg_error( "loi", $1).
+				arg_error( "sti", $1).
 
 
 C_sts
@@ -449,8 +445,15 @@ C_sts
 					a= pop_reg_reg(&c);
 				else
 					a = pop_reg_c13(n);
-				if (type_of_tos() == T_float)
+				if (type_of_tos() == T_float) {
 					b= pop_float();
+					if (size < 4) {
+						"st	$b,[%fp+64]";
+						free_reg(b);
+						b= alloc_reg();
+						"ld	[%fp+64],$b";
+					}
+				}
 				else
 					b = pop_reg();
 				if (c)
@@ -715,8 +718,8 @@ C_mli
 			"call	mli4";
 			"nop"			/* delay */
 			free_output();
-			forced_alloc_reg(O0);
-			push_reg(O0);
+			forced_alloc_reg(reg_o0);
+			push_reg(reg_o0);
 		}
 	}.
 	default	==>
@@ -741,32 +744,27 @@ C_dvi
 			sprint (n_exp_str, "%d", n_exp);
 			n= pop_const(NULL);
 			a= pop_reg();
-			if (n <0)
-			{
-				b= alloc_reg();
-				"neg	$a, $b";
-				free_reg(a);
-				a= b;
-			}
 			b= alloc_reg();
 			"sra	$a, $n_exp_str, $b";
 			free_reg(a);
 			push_reg(b);
 		}
 		else
+#endif
 		{
 			force_alloc_output();
 			pop_reg_as(reg_o1);	/* denominator */
 			pop_reg_as(reg_o0);	/* numerator */
+#if MATH_DIVIDE
+			"call	mathdvi4";
+#else
 			"call	dvi4";
+#endif
 			"nop"
 			free_output();
 			forced_alloc_reg(reg_o0);
 			push_reg(reg_o0);
 		}
-#else
-		not_implemented("dvi");
-#endif /* MATH_DIVIDE */
 	}.
 	default	==>
 			arg_error( "dvi", $1).
@@ -780,11 +778,15 @@ C_rmi
 				force_alloc_output();
 				pop_reg_as(reg_o1);	/* denominator */
 				pop_reg_as(reg_o0);	/* numerator */
+#if MATH_DIVIDE
+				"call	mathdvi4";
+#else
 				"call	dvi4";
+#endif
 				"nop"
 				free_output();
-				forced_alloc_reg(O1);
-				push_reg(O1);
+				forced_alloc_reg(reg_o1);
+				push_reg(reg_o1);
 			}.
 	default	==>
 			arg_error( "rmi", $1).
@@ -899,8 +901,8 @@ C_mlu
 			"call	mlu4";
 			"nop"
 			free_output();
-			forced_alloc_reg(O0);
-			push_reg(O0);
+			forced_alloc_reg(reg_o0);
+			push_reg(reg_o0);
 		}.
 */
 	default	==>
@@ -956,8 +958,8 @@ C_rmu
 			"call	dvu4";
 			"nop"
 			free_output();
-			forced_alloc_reg(O1);
-			push_reg(O1);
+			forced_alloc_reg(reg_o1);
+			push_reg(reg_o1);
 		}.
 	default	==>
 			arg_error( "rmu", $1).
@@ -1785,8 +1787,89 @@ C_cfi		==>
 	}.
 
 C_cfu		==>
-			Comment0( cfu );
-			C_cfi().
+	{
+		reg_t a;	/* target (int) size */
+		reg_t b;	/* src (float) size */
+		int n1;		/* target (int) size */
+		int n2;		/* src (float) size */
+		const_str_t n1_str;
+
+		Comment0( cfu );
+		a= NULL;
+		b= NULL;
+		if (type_of_tos() != T_cst)
+		{
+			a= pop_reg();
+			b= pop_reg();
+		}
+		else
+		{
+			n1= pop_const (n1_str);
+			if (type_of_tos() != T_cst)
+			{
+				a= alloc_reg();
+				"set	$n1_str, $a";
+				b= pop_reg();
+			}
+			else
+				n2= pop_const(NULL);
+		}
+
+		if (!a)
+		{
+			if (n1 != EM_WSIZE)
+				arg_error ("unimp cfu", n1);
+			force_alloc_output();
+			flush_cache();
+			if (n2 == EM_WSIZE)
+			{
+				"call cfu4";
+				"nop";
+			}
+			else if (n2 == EM_DSIZE)
+			{
+				"call cfu8";
+				"nop";
+			}
+			else
+				arg_error ("unimp cfu", n2);
+			soft_alloc_reg(reg_o0);
+			free_output();
+			push_reg(reg_o0);
+		}
+		else
+		{
+			flush_cache();
+			force_alloc_output();
+			"cmp	$a, 4";
+			"bne	0f";
+			"nop";
+			"cmp	$b, 4";
+			"be	4f";
+			"nop";
+			"cmp	$b, 8";
+			"bne	0f";
+			"nop";
+		"8:";
+			"call	cfu8";
+			"nop";
+			"b	1f";
+		"4:";
+			"call	cfu4";
+			"nop";
+			"b	1f";
+		"0:";
+			"set	E_EM_CFU, %o0";
+			"call	trp";
+			"nop";
+		"1:";
+			free_reg(a);
+			free_reg(b);
+			soft_alloc_reg(reg_o0);
+			free_output();
+			push_reg(reg_o0);
+		}
+	}.
 
 C_cff		==>
 	{
@@ -4611,7 +4694,7 @@ C_locals		==>
 	{
 		Comment( locals , $1 );
 
-		soft_alloc_reg(reg_sp);
+		soft_alloc_reg(reg_lb);
 		push_reg(reg_lb);
 		inc_tos(-($1));
 		pop_reg_as(reg_sp);

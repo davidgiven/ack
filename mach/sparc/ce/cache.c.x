@@ -680,6 +680,10 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_c13()=...\n"); }
 				free_reg(S3);
 				S1 = S2;
 			}
+			else {
+				free_reg(S1);
+				S1 = S3;
+			}
 			tos->cst &= 0x3FF;
 		}
 		sprint(n, "%d", tos->cst);

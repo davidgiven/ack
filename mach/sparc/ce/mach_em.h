@@ -52,7 +52,7 @@
 #define FLTSAV_OFFSET	(WINDOWSIZE + FLOATTRANS)
 #define REGSAV		(WINDOWSIZE + FLOATTRANS + ALIGN_GAP + FLTSAV)
 
-#define MATH_DIVIDE	1
+#undef MATH_DIVIDE	1
 
 #ifndef DEBUG
 #undef arg_error
