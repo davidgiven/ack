@@ -7,9 +7,6 @@ end
 name	"EM definition"
 dir etc
 end
-name "LL(1) Parser generator"
-dir util/LLgen
-end
 name "EM definition library"
 dir util/data
 end
@@ -19,6 +16,9 @@ end
 name "Modules"
 dir modules/src
 indir
+end
+name "LL(1) Parser generator"
+dir util/LLgen
 end
 name "C preprocessor"
 dir util/cpp
