@@ -1880,9 +1880,9 @@ end;
 procedure callnonstandard(fsys:sos; moreargs:boolean; fip:ip);
 var nxt,lip:ip; l0,l1,l2,l3,sz:integer; lsp,savasp:sp;
 begin with a do begin
-  l0:=lino; sz:=0; nxt:=fip^.parhead;
+  l0:=lino; l1:=l0; sz:=0; nxt:=fip^.parhead;
   while moreargs do
-    begin l1:=lino;
+    begin
       if nxt=nil then
 	begin if fip^.pfkind<>varargs then error(+0137);
 	  expression(fsys); load; sz:=sz+sizeof(asp,wordmult)
@@ -1927,7 +1927,7 @@ begin with a do begin
 	    end;
 	  nxt:=nxt^.next
 	end;
-      exchange(l0,l1); moreargs:=find3(comma,fsys,+0145)
+      exchange(l0,l1); l1:=lino; moreargs:=find3(comma,fsys,+0145)
     end;
   if nxt<>nil then error(+0146);
   inita(procptr,0); pos:=fip^.pfpos;
