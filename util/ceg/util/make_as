@@ -1,5 +1,5 @@
 EM = /proj/em/Work
-CEG = /usr/star/kaashoek/em/ceg.1
+CEG = /usr/star/kaashoek/em/ceg
 
 Em   = $(CEG)/EM_parser/as_EM_pars
 ASMAIN = $(CEG)/assemble/as_assemble
