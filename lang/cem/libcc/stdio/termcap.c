@@ -112,12 +112,17 @@ check_for_tc()
 			return(0);	/* no : in termcap entry */
 	if (p[1] != 't' || p[2] != 'c')
 		return(1);
-	if (++count > 16) return(0);	/* recursion in tc= definitions */
+	if (count > 16) return(0);	/* recursion in tc= definitions */
+	count++;
 	strcpy(terminalname, &p[4]);
 	q = terminalname;
 	while (*q && *q != ':') q++;
 	*q = 0;
-	if (tgetent(buf, terminalname) != 1) return(0);
+	if (tgetent(buf, terminalname) != 1) {
+		---count;
+		return(0);
+	}
+	--count;
 	for (q = buf; *q && *q != ':'; q++) { }
 	strcpy(p, q);
 	capab = savcapab;
