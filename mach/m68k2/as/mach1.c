@@ -11,10 +11,10 @@
 #define	low3(z)		((short)(z) & 07)
 #define	low4(z)		((short)(z) & 017)
 
-#define	fit3(z)		((((z)-1) & ~(int)07) == 0)
-#define	fit4(z)		(((z) & ~(int)017) == 0)
-#define	fit8(z)		(((z) & ~(int)0xFF) == 0)
-#define	fit16(z)	(((z) & ~(valu_t)0xFFFF) == 0)
+#define	fit3(z)		((((z)-1) & ~((int)07)) == 0)
+#define	fit4(z)		(((z) & ~((int)017)) == 0)
+#define	fit8(z)		(((z) & ~((int)0xFF)) == 0)
+#define	fit16(z)	(((z) & ~(0xFFFFL)) == 0)
 
 #define	SIZE_B		0000
 #define	SIZE_W		0100
