@@ -205,31 +205,31 @@ outputrepl(state,patt,repl)
 		char *mnem = ri->op_code->id_text;
 		switch(ri->op_code->id_argfmt) {
 		case NOARG:
-			fprint(ofile,"\t\tOO_outop(op_%s);\n",mnem);
+			fprint(ofile,"\t\t\tOO_outop(op_%s);\n",mnem);
 			break;
 		case CST:
 		case CSTOPT:
-			fprint(ofile,"\t\tOO_outcst(op_%s,",mnem);
+			fprint(ofile,"\t\t\tOO_outcst(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case LAB:
-			fprint(ofile,"\t\tOO_outlab(op_%s,",mnem);
+			fprint(ofile,"\t\t\tOO_outlab(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case DEFILB:
-			fprint(ofile,"\t\tOO_outdefilb(op_%s,",mnem);
+			fprint(ofile,"\t\t\tOO_outdefilb(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case PNAM:
-			fprint(ofile,"\t\tOO_outpnam(op_%s,",mnem);
+			fprint(ofile,"\t\t\tOO_outpnam(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
 		case EXT:
-			fprint(ofile,"\t\tOO_outext(op_%s,",mnem);
+			fprint(ofile,"\t\t\tOO_outext(op_%s,",mnem);
 			outputexp(ri->arg,state);
 			fprint(ofile,");\n");
 			break;
