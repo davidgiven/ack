@@ -27,15 +27,15 @@ crefman.$(SUF):	crefman.doc
 v7bugs.$(SUF):	v7bugs.doc
 		$(NROFF) $(TARGET) v7bugs.doc >$@
 install.$(SUF):	install.doc
-		$(TBL) $(TARGET) install.doc | $(NROFF) $(MS) $(TARGET) >$@
+		$(TBL) install.doc | $(NROFF) $(MS) $(TARGET) >$@
 pcref.$(SUF):	pcref.doc
-		$(TBL) $(TARGET) pcref.doc | $(NROFF) $(TARGET) >$@
+		$(TBL) pcref.doc | $(NROFF) $(TARGET) >$@
 val.$(SUF):	val.doc
 		$(NROFF) $(TARGET) val.doc >$@
 6500.$(SUF):	6500.doc
-		$(TBL) $(TARGET) 6500.doc | $(NROFF) $(MS) $(TARGET) >$@
+		$(TBL) 6500.doc | $(NROFF) $(MS) $(TARGET) >$@
 ncg.$(SUF):	ncg.doc
-		$(TBL) $(TARGET) ncg.doc | $(NROFF) $(MS) $(TARGET) >$@
+		$(TBL) ncg.doc | $(NROFF) $(MS) $(TARGET) >$@
 LLgen.doc:	LLgen.X
 LLgen.X:
 		cd LLgen; make "EQN="$(EQN) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
