@@ -806,22 +806,12 @@ with EXACT REG rmorconst
   gen add %1,%2			yields %1
 with rmorconst REG
   gen add %2,%1			yields %2
-with ACC const
-  gen add %1,%2			yields %1
-with const ACC
-  gen add %2,%1			yields %2
 
 pat adi $1==4
 with EXACT REG REG rmorconst rmorconst
   gen add %1,%3
       adc %2,%4			yields %2 %1
-with exact ACC REG const rmorconst
-  gen add %1,%3
-      adc %2,%4			yields %2 %1
 with rmorconst rmorconst REG REG
-  gen add %3,%1
-      adc %4,%2			yields %4 %3
-with exact const rmorconst ACC REG
   gen add %3,%1
       adc %4,%2			yields %4 %3
 
@@ -834,20 +824,12 @@ pat sbi $1==2
 
 with rmorconst REG
   gen sub %2,%1			yields %2
-with const ACC
-  gen sub %2,%1			yields %2
 with EXACT REG rmorconst
-  gen sub %1,%2
-      neg %1			yields %1
-with EXACT ACC const
   gen sub %1,%2
       neg %1			yields %1
 
 pat sbi $1==4
 with rmorconst rmorconst REG REG
-  gen sub %3,%1
-      sbb %4,%2			yields %4 %3
-with exact const rmorconst-ACC ACC REG
   gen sub %3,%1
       sbb %4,%2			yields %4 %3
 
@@ -1862,22 +1844,12 @@ with EXACT REG rmorconst
   gen and %1,%2				yields %1
 with rmorconst REG
   gen and %2,%1				yields %2
-with ACC const
-  gen and %1,%2				yields %1
-with const ACC
-  gen and %2,%1				yields %2
 
 pat and $1==4
 with EXACT REG REG rmorconst rmorconst
   gen and %1,%3
       and %2,%4				yields %2 %1
-with exact ACC REG const rmorconst
-  gen and %1,%3
-      and %2,%4				yields %2 %1
 with rmorconst rmorconst REG REG
-  gen and %3,%1
-      and %4,%2				yields %4 %3
-with exact const rmorconst-ACC ACC REG
   gen and %3,%1
       and %4,%2				yields %4 %3
 
@@ -1892,26 +1864,16 @@ kills ALL
   gen joehoe {label, ".and"}
 
 pat ior $1==2
-with REG rmorconst
+with EXACT REG rmorconst
   gen or %1,%2				yields %1
-with EXACT rmorconst REG
-  gen or %2,%1				yields %2
-with ACC const
-  gen or %1,%2				yields %1
-with const ACC
+with rmorconst REG
   gen or %2,%1				yields %2
 
 pat ior $1==4
 with EXACT REG REG rmorconst rmorconst
   gen or %1,%3
       or %2,%4				yields %2 %1
-with exact ACC REG const rmorconst
-  gen or %1,%3
-      or %2,%4				yields %2 %1
 with rmorconst rmorconst REG REG
-  gen or %3,%1
-      or %4,%2				yields %4 %3
-with exact const rmorconst-ACC ACC REG
   gen or %3,%1
       or %4,%2				yields %4 %3
 
@@ -1930,22 +1892,12 @@ with EXACT REG rmorconst
   gen xor %1,%2				yields %1
 with rmorconst REG
   gen xor %2,%1				yields %2
-with ACC const
-  gen xor %1,%2				yields %1
-with const ACC
-  gen xor %2,%1				yields %2
 
 pat xor $1==4
 with EXACT REG REG rmorconst rmorconst
   gen xor %1,%3
       xor %2,%4				yields %2 %1
-with exact ACC REG const rmorconst
-  gen xor %1,%3
-      xor %2,%4				yields %2 %1
 with rmorconst rmorconst REG REG
-  gen xor %3,%1
-      xor %4,%2				yields %4 %3
-with exact const rmorconst-ACC ACC REG
   gen xor %3,%1
       xor %4,%2				yields %4 %3
 
@@ -2205,26 +2157,6 @@ with rmorconst register
       1:
       dec %a
       2:			yields %a
-with ACC const
-  uses REG={ANYCON,0}
-  gen cmp %1,%2
-      je {label,2f}
-      jl {label,1f}
-      inc %a
-      jmp {label,2f}
-      1:
-      dec %a
-      2:			yields %a
-with const ACC
-  uses REG={ANYCON,0}
-  gen cmp %1,%2
-      je {label,2f}
-      jl {label,1f}
-      inc %a
-      jmp {label,2f}
-      1:
-      dec %a
-      2:			yields %a
 
 pat cmi $1==4
 kills ALL
@@ -2240,10 +2172,6 @@ pat cms $1==2
 with EXACT REG rmorconst
   gen sub %1,%2                	yields %1
 with rmorconst REG
-  gen sub %2,%1                	yields %2
-with ACC const
-  gen sub %1,%2                	yields %1
-with const ACC
   gen sub %2,%1                	yields %2
 
 pat cms $1==4
@@ -2283,24 +2211,6 @@ uses REG = {ANYCON,0}
       1: dec %a
       2:                            yields %a
 with rmorconst register
-uses REG = {ANYCON,0}
-  gen cmp %1,%2
-      je  {label,2f}
-      jb  {label,1f}
-      inc %a
-      jmp {label,2f}
-      1: dec %a
-      2:                            yields %a
-with ACC const
-uses REG = {ANYCON,0}
-  gen cmp %1,%2
-      je  {label,2f}
-      jb  {label,1f}
-      inc %a
-      jmp {label,2f}
-      1: dec %a
-      2:                            yields %a
-with const ACC
 uses REG = {ANYCON,0}
   gen cmp %1,%2
       je  {label,2f}
