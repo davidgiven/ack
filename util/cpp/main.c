@@ -43,6 +43,7 @@ main(argc, argv)
 	inc_total = 3;
 	inctable[0] = "";
 	inctable[1] = "/usr/include";
+	inctable[2] = 0;
 	init_pp();	/* initialise the preprocessor macros	*/
 
 	/*	Note: source file "-" indicates that the source is supplied
