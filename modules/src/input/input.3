@@ -106,15 +106,20 @@ The next input characters will be obtained from the specified file
 \fIfilename\fR.
 This file will be looked for in the directories, mentioned in the
 null-terminated list \fItable\fR.
+When \fItable\fR is 0, only the current directory is searched. When it is not,
+perhaps it is wise to include "." in the table ...
+When \fIfilename\fR starts with a "/", \fItable\fR is not used.
 If \fIfilename\fR is a null pointer, standard input is used. In this case,
 the package may not have been instantiated with INP_READ_IN_ONE defined.
 \fIInsertFile\fR returns 1 if it succeeds, 0 if it fails.
-When it succeeds, it stores the file name in the \fIresult\fR parameter.
+When it succeeds, and \fIresult\fR is not 0, it stores the file name in the \fIresult\fR parameter.
 .PP
 The routine \fIInsertText\fR also suspends input from the current input stream.
 The next input characters will be obtained from the string \fItext\fR,
 which is \fIlength\fR characters long.
 \fIInsertText\fR returns 1 if it succeeds, 0 if it fails.
+The \fItext\fR string is not copied, so it should not be changed until the
+corresponding \fIAtEoIT\fR isd called.
 .PP
 The routine \fIAtEoIF\fR is called at the end of the input stream
 inserted by \fIInsertFile\fR.

@@ -306,7 +306,7 @@ InsertFile(filnam, table, result)
 		}
 #endif INP_READ_IN_ONE
 		bh->bh_fd = fd;	/* this is a file */
-		*result = filnam;
+		if (result) *result = filnam;
 		return 1;
 	}
 	return 0;
