@@ -15,6 +15,7 @@ em_ptyp.h
 em_reg.h
 em_spec.h
 out.h
+stb.h
 pc_err.h
 pc_file.h
 ranlib.h

@@ -131,7 +131,7 @@ typedef struct exprnode *node_p;
 #define EX_XOR		42
 #define EX_AND		43
 #define EX_ISROM	44
-#define EX_STACKHEIGHT	45
+#define EX_TOPELTSIZE	45
 #define EX_FALLTHROUGH	46
 
 
