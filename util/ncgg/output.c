@@ -271,7 +271,7 @@ outregs() {
 			l_regs[i].ri_size);
 		if (maxmembers!=0) {
 			fprintf(ctable,",{");
-			for(j=0;j<2;j++)
+			for(j=0;j<maxmembers;j++)
 				fprintf(ctable,"%d,",l_regs[i].ri_memb[j]);
 			/* now compute and print set of registers
 			 * that clashes with this register.
