@@ -6,9 +6,9 @@
 
 	.sect .text
 .trp:
-	cmp.l	#16,4(sp)
-	bcc	1f
 	move.l	d0,-(sp)
+	cmp.l	#16,8(sp)
+	bcc	1f
 	move.l	8(sp),d0
 	btst	d0,.trpim
 	bne	3f
@@ -37,5 +37,5 @@
 	jmp	EXIT
 
 	.sect .data
-fmt:	.asciz "trap %d called\n"
+fmt:	.asciz "EM trap %d called\n"
 .align 2
