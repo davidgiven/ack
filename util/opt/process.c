@@ -104,7 +104,6 @@ symknown() {
 cleanlocals() {
 	register num_p *npp,np,tp;
 
-	delete_labels();
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++) {
 		np = *npp;
 		while (np != (num_p) 0) {

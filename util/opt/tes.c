@@ -28,8 +28,6 @@ extern char flow_tab[];
 #define ISABRANCH(i)		(flow_tab[i]&HASLABEL)
 #define ISCONDBRANCH(i)		(flow_tab[i]&CONDBRA)
 
-lblst_p est_list = NULL;
-
 #define INSTR(lnp)      (lnp->l_instr & BMASK)
 #define TYPE(lnp)       lnp->l_optyp
 #define PREV(lnp)       lnp->l_prev
@@ -46,7 +44,6 @@ init_state()
 {
 	stacktop = 0;
 	state = KNOWN;
-	est_list = NULL;
 }
 
 tes_pseudos()
@@ -161,37 +158,17 @@ line_p lnp;
 	}
 }
 
-delete_labels()
-{
-	register lblst_p tmp;
-
-	while ((tmp = est_list) != NULL) {
-	    est_list = est_list->ll_next;
-	    oldlblst(tmp);
-	}
-}
-
 assign_label(label)
-num_p label;
+register num_p label;
 {
-	register lblst_p lst_elt;
-
 	if (label->n_flags & NUMSET) {
-		lst_elt = label->n_lst_elt;
-		if (state == NOTREACHED || stacktop > lst_elt->ll_size) {
-			stacktop = lst_elt->ll_size;
-		} else if ( stacktop < lst_elt->ll_size) {
-			lst_elt->ll_size = stacktop;
+		if (state == NOTREACHED || stacktop > label->n_size) {
+			stacktop = label->n_size;
+		} else if ( stacktop < label->n_size) {
+			label->n_size = stacktop;
 		}
 	} else {
-		lst_elt = newlblst();
-		lst_elt->ll_next = est_list;
-		lst_elt->ll_num = label;
-		lst_elt->ll_size = stacktop;
-
-		est_list = lst_elt;
-
-		label->n_lst_elt = lst_elt;
+		label->n_size = stacktop;
 		label->n_flags |= NUMSET;
 	}
 }
@@ -206,9 +183,8 @@ line_p lnp;
 
 	if (instr == op_lab) {
 		if (state == NOTREACHED)  {
-			label->n_lst_elt->ll_fallthrough = FALSE;
 		} else {
-			label->n_lst_elt->ll_fallthrough = TRUE;
+			label->n_flags |= NUMFALLTHROUGH;
 		}
 	} else if (ISCONDBRANCH(instr)) {	/* conditional branch */
 		label->n_flags |= NUMCOND;

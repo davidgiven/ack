@@ -10,7 +10,7 @@ struct num {
 	unsigned n_jumps;
 	num_p	n_repl;
 	short	n_flags;
-	lblst_p	n_lst_elt;
+	short	n_size;		/* size of element on top at this label */
 	line_p	n_line;
 };
 
@@ -22,6 +22,7 @@ struct num {
 #define NUMSCAN		000020
 #define NUMSET		000040
 #define NUMCOND		000100
+#define NUMFALLTHROUGH	000200
 
 #define NNUMHASH	37
 extern num_p	numlookup();

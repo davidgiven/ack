@@ -8,7 +8,6 @@ extern line_p 	newline();
 extern offset	*newrom();
 extern sym_p	newsym();
 extern num_p	newnum();
-extern lblst_p	newlblst();
 extern arg_p	newarg();
 extern argb_p	newargb();
 extern reg_p	newreg();

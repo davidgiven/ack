@@ -80,18 +80,19 @@ outregs() {
 
 /* outtes() handles the output of the top elt. messages */
 outtes() {
-	register lblst_p lp = est_list;
+	register num_p *npp, np;
 
-	while(lp != NULL) {
-		if ((lp->ll_size != 0) && !(lp->ll_num->n_flags & NUMCOND)) {
+	for (npp=curpro.numhash;npp< &curpro.numhash[NNUMHASH]; npp++) {
+		for (np = *npp; np != (num_p) 0; np=np->n_next) {
+			if (! (np->n_flags & NUMSET) || np->n_size == 0 ||
+			    (np->n_flags & NUMCOND)) continue;
 			outinst(ps_mes);
 			outoff((offset)ms_tes);
-			outoff((offset)lp->ll_num->n_number);
-			outoff((offset)lp->ll_size);
-			outoff((offset)lp->ll_fallthrough);
+			outoff((offset)np->n_number);
+			outoff((offset)np->n_size);
+			outoff((offset)((np->n_flags & NUMFALLTHROUGH) ? 1 : 0));
 			outinst(sp_cend);
 		}
-		lp = lp->ll_next;
 	}
 }
 

@@ -172,16 +172,6 @@ oldnum(lp) num_p lp; {
 	oldcore((short *) lp,sizeof(num_t));
 }
 
-lblst_p newlblst() {
-
-	return((lblst_p) newcore(sizeof(lblst_t)));
-}
-
-oldlblst(lbp) lblst_p lbp; {
-
-	oldcore((short *) lbp, sizeof(lblst_t));
-}
-
 offset *newrom() {
 
 	return((offset *) newcore(MAXROM*sizeof(offset)));
