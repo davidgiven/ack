@@ -1,0 +1,17 @@
+getgrent.c
+getopt.c
+getpass.c
+getpw.c
+getw.c
+putw.c
+popen.c
+sleep.c
+termcap.c
+fdopen.c
+closedir.c
+getdents.c
+opendir.c
+readdir.c
+rewinddir.c
+seekdir.c
+telldir.c
