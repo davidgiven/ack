@@ -502,7 +502,7 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		case EXTERN:
 			if (expr && !is_anon_idf(idf) && level != L_GLOBAL)
-				error("cannot initialize extern in block"
+				error("cannot initialize extern %s in block"
 						, idf->id_text);
 		case GLOBAL:
 			/* we are sure there is no expression */
