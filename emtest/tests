@@ -263,6 +263,13 @@ MAIN 20
  loi 1
  loc 7
  bne *1
+ loc 129
+ lal -10
+ sti 1
+ lal -10
+ loi 1
+ loc 9
+ ble *1
 OK
 #endif
 TEST 013: test loi 2*WS
