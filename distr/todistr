@@ -23,4 +23,4 @@ esac
 case x$REV in
 x)	exit 2 ;;
 esac
-rcs -ndistr3:$REV $FLAGS $FILE
+rcs -ndistr4:$REV $FLAGS $FILE

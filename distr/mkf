@@ -1,10 +1,10 @@
-if co -q -rdistr3 $DESTDIR/$1/$2 >/dev/null 2>&1
+if co -q -rdistr4 $DESTDIR/$1/$2 >/dev/null 2>&1
 then
 	chmod +w $DESTDIR/$1/$2
 elif co -q $DESTDIR/$1/$2 >/dev/null 2>&1
 then
 	chmod +w $DESTDIR/$1/$2
-	echo -- $1/$2 no distr3 yet
+	echo -- $1/$2 no distr4 yet
 elif grep LIST .distr >/dev/null 2>&1 &&
      (test "$2" = "`head -1 $DESTDIR/$1/LIST`") >/dev/null 2>&1 &&
      ${DA-false} "$1" "$2"

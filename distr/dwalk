@@ -1,11 +1,11 @@
 : ${CDIR=.}
-if test ! -r .distr
+${DF-:} $CDIR .distr
+if test ! -r $DESTDIR/$CDIR/.distr
 then
 	echo ++ no .distr in $CDIR
         exit 0
 fi
-${DS-:} $CDIR
-for i in `cat .distr`
+for i in `cat $DESTDIR/$CDIR/.distr`
 do
         if test -d $i
         then

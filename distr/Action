@@ -1,3 +1,6 @@
+name "EM tables"
+dir etc
+end
 name "Installation manual"
 dir doc
 end
