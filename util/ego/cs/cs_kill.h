@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern	kill_call();	/* (proc_p pp)
 			 * Kill all entities that might have an other value
 			 * after execution of the procedure in pp.

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*** Generic C Identifier Processing Module	***/
 /* IMPORT CheckId(char *, int), DoOption(char *), BeginOfProgram(), and
    EndOfProgram().

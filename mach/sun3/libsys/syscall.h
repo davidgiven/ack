@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define SYSTEM(sys) pea (sys); trap #0; bcs 1f; rts; 1: jmp (cerror)
 #define SYS_exit 1
 #define SYS_fork 2

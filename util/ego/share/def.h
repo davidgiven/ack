@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*  G L O B A L   M A C R O   D E F I N I T I O N S
  *
  *  F O R   A L L   O P T I M I Z E R   P A S S E S

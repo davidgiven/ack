@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 #define DEFINE(sysn)	.globl sysn; .align 1; sysn: .word 0
 #define SYSTEM(sys)	chmk $sys; bcs err; ret; err: jmp cerror
 #define SYSNORET(sys)	chmk $sys; bcc ok; jmp cerror; ok:

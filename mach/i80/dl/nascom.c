@@ -1,4 +1,8 @@
 /*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/*
  * Download Z80 load module into the NASCOM
  *
  * Johan Stevenson, Vrije Universiteit, Amsterdam

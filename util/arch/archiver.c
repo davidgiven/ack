@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* ar - archiver		Author: Michiel Huisjes */
 /* Made into arch/aal by Ceriel Jacobs
  */

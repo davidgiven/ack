@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern avail_p	avails;		/* The set of available expressions. */
 
 extern avail_p	av_enter();	/* (avail_p avp, occur_p ocp, byte kind)

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern offset	array_elemsize();	/* (valnum vm)
 					 * Returns the size of array-elements,
 					 * if vn is the valuenumber of the

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*  I N T E R M E D I A T E   C O D E
  *
  *  C O R E   A L L O C A T I O N   A N D   D E A L L O C A T I O N

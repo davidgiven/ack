@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* F U N C T I O N S   F O R   A C C E S S I N G   T H E   S E T
  *
  * O F   E N T I T I E S

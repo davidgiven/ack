@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern bool anal_params();	/* (call_p c)
 				 * See which parameters of the call
 				 * may be expanded in line.

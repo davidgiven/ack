@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 typedef short		valnum;
 typedef struct entity 	*entity_p;
 typedef struct avail 	*avail_p;

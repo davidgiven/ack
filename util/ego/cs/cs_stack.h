@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern	Push();		/* (token_p tkp)
 			 * Push the token in tkp on the fake-stack.
 			 */

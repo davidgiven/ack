@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* I N T E R N A L   D A T A S T R U C T U R E S   O F
  *
  *       S T R E N G T H   R E D U C T I O N

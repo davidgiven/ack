@@ -1,4 +1,8 @@
 /*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/*
  * dit programma leest een a.out file
  * voor een kleine uP (adres space = 64K)
  * en levert aan de standaard output een

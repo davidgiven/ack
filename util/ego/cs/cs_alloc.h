@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 extern occur_p	newoccur();	/* (line_p l1, l2; bblock_p b)
 				 * Returns a pointer to a new struct occur
 				 * and initializes it.

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* M O D U L E   F O R   A C C E S S S I N G   T H E   L I S T
  *
  * O F   A V A I L A B L E   E X P R E S S I O N S

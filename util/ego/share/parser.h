@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 bool parse();	/* (line_p l, *l_out; offset nbytes;
 			 * int    level; int    (*action0) ())
 			 * This is a recursive descent parser for
