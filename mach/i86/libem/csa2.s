@@ -3,14 +3,15 @@
 
 .sect .text
 .csa2:
-				! si, descriptor address
-				! bx, index
-	mov     dx,(si)         ! default
-	sub     bx,2(si)
-	cmp     bx,4(si)
+				! bx, descriptor address
+				! ax, index
+	mov     dx,(bx)         ! default
+	sub     ax,2(bx)
+	cmp     ax,4(bx)
 	ja      1f
-	sal     bx,1
-	mov     bx,6(bx)(si)
+	sal     ax,1
+	add	bx,ax
+	mov     bx,6(bx)
 	test    bx,bx
 	jnz     2f
 1:

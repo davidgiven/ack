@@ -7,27 +7,27 @@
 .ciu:
 .cui:
 .cuu:
-	pop     di              ! return address
+	pop     bx              ! return address
 				! pop     cx, dest. size
-				! pop     bx, source size
+				! pop     dx, source size
 				! ax is low word of source
-	cmp     bx,cx
+	cmp     dx,cx
 	je      8f
-	cmp     bx,2
+	cmp     dx,2
 	je      1f
-	cmp     bx,4
+	cmp     dx,4
 	jne     9f
 	cmp     cx,2
 	jne     9f
 	pop     dx
 8:
-	jmp     di
+	jmp     bx
 1:
 	cmp     cx,4
 	jne     9f
 	xor     dx,dx
 	push    dx
-	jmp     di
+	jmp     bx
 9:
 	push    ax              ! to help debugging ?
 .extern EILLINS

@@ -4,23 +4,25 @@
 .sect .text
 .cmu4:
 	pop     bx              ! return address
-	xor     ax,ax
 	pop     cx
 	pop     dx
-	pop     si
-	pop     di
-	cmp     di,dx
+	pop     ax
+	push	si
+	mov	si,sp
+	xchg	bx,2(si)
+	pop	si
+	cmp     bx,dx
 	ja      1f
 	jb      2f
-	cmp     si,cx
+	cmp     ax,cx
 	ja      1f
 	je      3f
 2:
-	dec     ax
+	mov	ax,-1
+	ret
 3:
-	jmp     bx
+	xor	ax,ax
+	ret
 1:
-	inc     ax
-	jmp     bx
-
+	mov	ax,1
 	ret

@@ -28,7 +28,7 @@
 .extern .dvu4
 	call   .dvu4
 	pop     bx
-	push    cx
+	push    dx
 	push    ax
 	jmp     bx
 9:

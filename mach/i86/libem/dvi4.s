@@ -1,13 +1,15 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .define .dvi4
 
-yl=2
-yh=4
-xl=6
-xh=8
+yl=6
+yh=8
+xl=10
+xh=12
 
 .sect .text
 .dvi4:
+	push	si
+	push	di
 	mov     si,sp           ! copy of sp
 	mov     bx,yl(si)
 	mov     ax,yh(si)
@@ -42,7 +44,10 @@ xh=8
 1:
 			! cx is high order result
 			! ax is low order result
-	ret     8
+	mov	dx,cx
+	pop	di
+	pop	si
+	ret     8	! result in ax/dx
 
 7:
 	push    dx              ! sign of y

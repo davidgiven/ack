@@ -6,6 +6,8 @@
 .cms:
 	pop     bx              ! return address
 	mov     dx,sp
+	push	si
+	push	di
 	mov     si,dx
 	add     dx,cx
 	mov     di,dx
@@ -15,5 +17,7 @@
 	je      1f
 	inc     cx
 1:
+	pop	di
+	pop	si
 	mov     sp,dx
 	jmp     bx

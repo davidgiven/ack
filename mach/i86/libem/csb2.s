@@ -3,20 +3,17 @@
 
 .sect .text
 .csb2:
-				!si, descriptor address
-				!dx,  index
-	lods
-	xchg    ax,bx           ! default
-	lods
-	xchg    ax,cx           ! number of cases
+				!bx, descriptor address
+				!ax,  index
+	mov	dx,(bx)
+	mov	cx,2(bx)
 1:
+	add	bx,4
 	dec     cx
 	jl      2f
-	lods
-	cmp     ax,dx
-	lods
+	cmp     ax,(bx)
 	jne     1b
-	xchg    ax,bx
+	mov	bx,2(bx)
 2:
 	test    bx,bx
 	jnz     3f

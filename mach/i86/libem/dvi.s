@@ -28,7 +28,7 @@
 .extern .dvi4
         call   .dvi4
         pop     bx
-        push    cx
+        push    dx
         push    ax
         jmp     bx
 9:

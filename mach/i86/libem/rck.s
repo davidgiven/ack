@@ -2,12 +2,12 @@
 .sect .text
 .define .rck
 
-	! descriptor address in si
+	! descriptor address in bx
 	! value in ax, must be left there
 .rck:
-	cmp     ax,(si)
+	cmp     ax,(bx)
 	jl      2f
-	cmp     ax,2(si)
+	cmp     ax,2(bx)
 	jg      2f
 	ret
 2:

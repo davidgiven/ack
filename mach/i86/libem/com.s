@@ -4,12 +4,12 @@
 	! #bytes in cx
 	.sect .text
 .com:
-	pop	bx		! return address
-	mov	di,sp
+	mov	bx,sp
+	add	bx,2
 	sar	cx,1
 1:
-	not	(di)
-	inc	di
-	inc	di
+	not	(bx)
+	inc	bx
+	inc	bx
 	loop	1b
-	jmp	bx
+	ret

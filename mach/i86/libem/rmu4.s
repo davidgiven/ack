@@ -2,12 +2,14 @@
 .sect .text
 .define .rmu4
 
-yl=2
-yh=4
-xl=6
-xh=8
+yl=6
+yh=8
+xl=10
+xh=12
 
 .rmu4:
+	push	si
+	push	di
 	mov     si,sp           ! copy of sp
 	mov     bx,yl(si)
 	mov     ax,yh(si)
@@ -25,7 +27,11 @@ xh=8
 9:
 			! bx is high order result
 			! dx is low order result
-	ret     8
+	mov	ax,dx
+	mov	dx,bx
+	pop	di
+	pop	si
+	ret     8	! result in ax/dx
 
 7:
 	mov     di,ax

@@ -8,27 +8,32 @@
 	pop     bx              ! return address
 	xor     dx,dx
 !ifdef create set
-	mov     di,sp
-	sub     di,cx
+	sub	sp,cx
+	push	bx
+	push	di
+	mov     bx,sp
+	xor	di,di
+	sar	cx,1
 1:
-	push    dx
-	cmp     sp,di
-	ja      1b
+	mov     dx,4(di)(bx)
+	add	di,2
+	loop	1b
 !endif
-	mov     di,8
-	div     di
-	cmp     ax,cx
+	mov     bx,8
+	div     bx
+	cmp     ax,di
 	jae     2f
+	mov	di,dx
+	movb	dl,bits(di)
 	mov     di,sp
 	add     di,ax
-	mov     si,dx
-	movb    dl,bits(si)
-	orb     (di),dl
-	jmp     bx
+	orb     4(di),dl
+	pop	di
+	ret
 2:
 .extern ESET
 .extern .trp
-	push    bx
+	pop	di
 	mov     ax,ESET
 	push    ax
 	jmp     .trp

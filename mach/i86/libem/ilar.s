@@ -3,14 +3,13 @@
 .define .ilar
 
 .ilar:
-	pop     bx
+	pop     cx
 	pop     dx
 .extern .unknown
 	cmp     dx,2
 	jne     .unknown
-	pop     di      ! descriptor address
+	pop     bx      ! descriptor address
 	pop     ax      ! index
-	pop     si      ! array base
-	push    bx
+	push    cx
 .extern .lar2
 	jmp    .lar2

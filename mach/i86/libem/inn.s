@@ -5,22 +5,24 @@
 	! #bytes in cx
 	! bit # in ax
 .inn:
-	pop     bx              ! return address
 	xor     dx,dx
-	xor     si,si
-	mov     di,8
-	div     di
-	mov     di,sp
-	add     di,ax
+	mov     bx,8
+	div     bx
+	mov     bx,sp
+	add	bx,2
+	add     bx,ax
 	cmp     ax,cx
-	xchg    ax,dx
-	xchg    ax,si           ! ax:=si,si:=dx,does not change carry
 	jae     1f
-	movb    dl,bits(si)
-	testb   (di),dl
+	movb	al,(bx)
+	mov	bx,dx
+	testb   al,bits(bx)
 	jz      1f
-	inc     ax
+	mov	ax,1
+	jmp	2f
 1:
+	xor	ax,ax
+2:
+	pop	bx
 	add     sp,cx
 	! ax is result
 	jmp     bx

@@ -27,10 +27,10 @@
 	push    ax
 .extern .rmi4
 	call   .rmi4
-	pop     ax
-	push    bx
+	pop     bx
 	push    dx
-	jmp     ax
+	push    ax
+	jmp     bx
 9:
 .extern EODDZ
 .extern .trp

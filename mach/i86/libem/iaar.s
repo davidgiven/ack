@@ -3,15 +3,17 @@
 .define .iaar
 
 .iaar:
-	pop     bx
+	pop     cx
 	pop     dx
 	cmp     dx,2
 .extern .unknown
 	jne     .unknown
-	pop     si      ! descriptor address
+	pop     bx      ! descriptor address
 	pop     ax      ! index
-	pop     di      ! array base
-	sub     ax,(si)
-	mul     4(si)
-	add     di,ax
-	jmp     bx
+	pop     dx      ! array base
+	sub     ax,(bx)
+	mul     4(bx)
+	mov	bx,dx
+	add     bx,ax
+	push	cx
+	ret

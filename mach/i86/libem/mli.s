@@ -13,15 +13,27 @@
 	push    ax
 	jmp     bx
 1:
-	mov     dx,bx
 	cmp     ax,4
 	jne     9f
-	pop     si
-	pop     di
-	pop     bx
-	pop     ax
-	push    dx
-	jmp    .mli4
+	push	bx
+	mov	cx,bx
+	mov	bx,sp
+	mov	ax,2(bx)
+	mov	(bx),ax
+	mov	ax,4(bx)
+	mov	2(bx),ax
+	mov	ax,6(bx)
+	mov	4(bx),ax
+	mov	ax,8(bx)
+	mov	6(bx),ax
+	mov	8(bx),cx
+	pop	ax
+	pop	dx
+	jsr    .mli4
+	pop	bx
+	push	dx
+	push	ax
+	jmp	bx
 9:
 .extern EODDZ
 .extern .trp

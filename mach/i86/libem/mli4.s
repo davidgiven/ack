@@ -2,17 +2,24 @@
 .sect .text
 .define .mli4
 
-	! x * y with
-	! x.low = si x.high = di
-	! y.low = bx y.high = ax
+yl=2
+yh=4
+	! x * y
+	! xl in ax
+	! xh in dx
 
 .mli4:
-	mul     si              ! xl*yh
-	mov     cx,ax
-	mov     ax,di
-	mul     bx              ! xh*yl
-	add     cx,ax           ! xh*yl+xl*yh
-	mov     ax,si
-	mul     bx              ! xl*yl
+	mov	bx,sp
+	push	dx
+	mov	cx,ax
+	mul	yh(bx)           ! xl*yh
+	pop	dx
+	push	ax
+	mov	ax,dx
+	mul	yl(bx)		! xh * yl
+	pop	dx
+	add     dx,ax           ! xh*yl+xl*yh
+	mov     ax,cx
+	mul     yl(bx)           ! xl*yl
 	add     dx,cx
-	ret
+	ret	4
