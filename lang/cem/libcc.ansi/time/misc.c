@@ -40,21 +40,23 @@ void _ftime(struct timeb *bp);
 #define	TZ_LEN		10
 
 /* Make sure that the strings do not end up in ROM.
+ * These strings probably contain the wrong value, and we cannot obtain the
+ * right value from the system. TZ is the only help.
  */
-static char ntstr[TZ_LEN + 1] = "MET";	/* string for normal time */
-static char dststr[TZ_LEN + 1] = "MDT";	/* string for daylight saving */
+static char ntstr[TZ_LEN + 1] = "GMT";	/* string for normal time */
+static char dststr[TZ_LEN + 1] = "GMT";	/* string for daylight saving */
 
-long	_timezone = -1 * 60 * 60;
+long	_timezone = 0;
 long	_dst_off = 60 * 60;
-int	_daylight = -1;
+int	_daylight = 0;
 char	*_tzname[2] = {ntstr, dststr};
 
 #if	defined(__USG) || defined(_POSIX_SOURCE)
 char	*tzname[2] = {ntstr, dststr};
 
 #if	defined(__USG)
-long	timezone = -1 * 60 * 60;
-int	daylight = 1;
+long	timezone = 0;
+int	daylight = 0;
 #endif
 #endif
 
