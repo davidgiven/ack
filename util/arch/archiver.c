@@ -141,7 +141,7 @@ register int mode;
   int fd;
 
   if (mode == CREATE) {
-	if ((fd = creat(name, 0644)) < 0)
+	if ((fd = creat(name, 0666)) < 0)
 		error(TRUE, "cannot creat %s\n", name);
 	magic = MAGIC_NUMBER;
 	wr_int2(fd, magic);
@@ -463,7 +463,7 @@ register MEMBER *member;
 
   strncpy(buf, member->ar_name, sizeof(member->ar_name));
   buf[sizeof(member->ar_name)] = 0;
-  if (pr_fl == FALSE && (fd = creat(buf, 0644)) < 0) {
+  if (pr_fl == FALSE && (fd = creat(buf, 0666)) < 0) {
 	error(FALSE, "cannot create %s\n", buf);
 	fd = -1;
   }
