@@ -134,7 +134,7 @@ opening_cost(itemtyp,localtyp,off,time_out,space_out)
 
 
 
-short regsave_cost(regs,time_out,space_out)
+regsave_cost(regs,time_out,space_out)
 	short regs[], *time_out, *space_out;
 {
 	/* Estimate the costs of saving and restoring the registers
