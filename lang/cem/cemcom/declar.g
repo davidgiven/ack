@@ -134,6 +134,7 @@ single_type_specifier(register struct decspecs *ds;):
 	%default TYPE_IDENTIFIER	/* this includes INT, CHAR, etc. */
 	{idf2type(dot.tk_idf, &ds->ds_type);}
 |
+	%erroneous
 	IDENTIFIER
 	{
 		error("%s is not a type identifier", dot.tk_idf->id_text);
@@ -143,6 +144,9 @@ single_type_specifier(register struct decspecs *ds;):
 			dot.tk_idf->id_def->df_sc = TYPEDEF;
 		}
 	}
+|
+	%illegal
+	IDENTIFIER
 |
 	struct_or_union_specifier(&ds->ds_type)
 |

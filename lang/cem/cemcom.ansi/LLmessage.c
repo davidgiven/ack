@@ -19,11 +19,17 @@ LLmessage(tk)	{
 		error("end of file expected");
 	}
 	else if (tk)	{
+#ifndef LLNONCORR
 		error("%s missing before %s", symbol2str(tk), symbol2str(DOT));
+#endif
 		insert_token(tk);
 	}
 	else	{
+#ifndef LLNONCORR
 		error("%s deleted", symbol2str(DOT));
+#else
+		error("%s not expected", symbol2str(DOT));
+#endif
 	}
 	tk_nmb_at_last_syn_err = token_nmb;
 }

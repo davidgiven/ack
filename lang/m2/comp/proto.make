@@ -12,7 +12,7 @@ SRC_DIR = \
 TABGEN=	$(UTIL_BIN)/tabgen
 LLGEN =	$(UTIL_BIN)/LLgen
 LLGENOPTIONS = \
-	-v
+	-n
 
 SRC_G =	$(SRC_DIR)/program.g $(SRC_DIR)/declar.g \
 	$(SRC_DIR)/expression.g $(SRC_DIR)/statement.g
@@ -28,7 +28,7 @@ SRC_C =	$(SRC_DIR)/LLlex.c $(SRC_DIR)/LLmessage.c $(SRC_DIR)/error.c \
 	$(SRC_DIR)/desig.c $(SRC_DIR)/code.c $(SRC_DIR)/lookup.c \
 	$(SRC_DIR)/stab.c
 GEN_C =	tokenfile.c program.c declar.c expression.c statement.c \
-	symbol2str.c char.c Lpars.c casestat.c tmpvar.c scope.c next.c
+	symbol2str.c char.c Lpars.c Lncor.c casestat.c tmpvar.c scope.c next.c
 CFILES=	$(SRC_C) $(GEN_C)
 
 SRC_H =	$(SRC_DIR)/LLlex.h $(SRC_DIR)/chk_expr.h $(SRC_DIR)/class.h \
@@ -118,6 +118,7 @@ clean:
 LLfiles:	$(GFILES)
 		$(LLGEN) $(LLGENOPTIONS) $(GFILES)
 		@touch LLfiles
+		@if [ -f Lncor.c ] ; then : ; else touch Lncor.c ; fi
 
 hfiles:		Parameters $(SRC_DIR)/make.hfiles
 		$(SRC_DIR)/make.hfiles Parameters

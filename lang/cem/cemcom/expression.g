@@ -24,6 +24,8 @@ primary(register struct expr **expp;) :
 	IDENTIFIER
 	{dot2expr(expp);}
 |
+	%illegal TYPE_IDENTIFIER
+|
 	constant(expp)
 |
 	STRING

@@ -109,7 +109,9 @@ import(int local;)
 	   name, otherwise the names in the import list are module names.
 	*/
 	[ FROM
-	  IDENT		{ FromId = dot2leaf(Name);
+	  IDENT
+	  %substart DefinitionModule;
+			{ FromId = dot2leaf(Name);
 			  if (local) {
 				df = lookfor(FromId,enclosing(CurrVis),0,D_USED);
 			  }
@@ -117,6 +119,7 @@ import(int local;)
 			}
 	]?
 	IMPORT IdentList(&ImportList) ';'
+	  %substart DefinitionModule;
 			{ if (FromId) {
 				EnterFromImportList(ImportList, df, FromId);
 			  }
@@ -226,7 +229,9 @@ ProgramModule
 	register t_def	*df;
 } :
 	MODULE
-	IDENT	{ 
+	IDENT
+	%substart DefinitionModule;
+		{ 
 		  if (state == IMPLEMENTATION) {
 		  	int len = strlen(dot.TOK_IDF->id_text);
 

@@ -145,6 +145,7 @@ single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
 		ds->ds_typedef = 1;
 	}
 |
+	%erroneous
 	IDENTIFIER
 	{
 		error("%s is not a type identifier", dot.tk_idf->id_text);
@@ -154,6 +155,9 @@ single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
 			dot.tk_idf->id_def->df_sc = TYPEDEF;
 		}
 	}
+|
+	%illegal
+	IDENTIFIER
 |
 	struct_or_union_specifier(&ds->ds_type)
 |

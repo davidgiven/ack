@@ -43,7 +43,8 @@ statement(register t_node **pnd;)
 		ActualParameters(&(nd->nd_RIGHT))?
 	|
 		[ BECOMES	
-		| '='		{ error("':=' expected instead of '='");
+		| %erroneous '='
+				{ error("':=' expected instead of '='");
 				  DOT = BECOMES;
 				}
 		]

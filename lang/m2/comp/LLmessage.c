@@ -34,7 +34,9 @@ LLmessage(tk)
 		*/
 		register t_token *dotp = &dot;
 
+#ifndef LLNONCORR
 		error("%s missing before %s", symbol2str(tk), symbol2str(dotp->tk_symb));
+#endif
 
 		aside = *dotp;
 
@@ -62,9 +64,15 @@ LLmessage(tk)
 		}
 	}
 	else if (tk  < 0) {
-		error("garbage at end of program");
+		error("end of file expected");
 	}
-	else	error("%s deleted", symbol2str(dot.tk_symb));
+	else	{
+#ifndef LLNONCORR
+		error("%s deleted", symbol2str(dot.tk_symb));
+#else
+		error("%s not expected", symbol2str(dot.tk_symb));
+#endif
+	}
 	tk_nmb_at_last_syn_err = token_nmb;
 }
 
