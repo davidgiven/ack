@@ -5,4 +5,5 @@ assert.h
 termio.h
 varargs.h
 math.h
+time.h
 sys
