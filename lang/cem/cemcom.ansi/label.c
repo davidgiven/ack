@@ -41,8 +41,8 @@ enter_label(idf, defining)
 	}
 	else	{
 		add_def(idf, LABEL, label_type, L_LOCAL);
-		def = idf->id_def;
 	}
+	def = idf->id_def;	/* might be changed by 1 of the 2 add_defs */
 	if (def->df_address == 0)
 		def->df_address = (arith) text_label();
 	if (defining)

@@ -67,43 +67,38 @@ declaration
 		short typedef yepp;
 	makes all hope of writing a specific grammar for typedefs illusory.
 */
-/*	We do not accept the whole of the grammar, since when we see
-	something like 'unsigned plain' (where plain is a typedef) is
-	illegal if 'plain' is a typedef.  Therefore, we assume that
-	'plain' is the identifier of a declarator.  Unfortunately, this
-	causes declarations like 'unsigned plain x;' to be rejected on the
-	grounds of syntax, even though it is syntactically right.  This may
-	cause a lot of extra messages.
-	To do this, decl_specifiers is divided into:
-	1: normal specifiers == storage class specifiers + type_qualifiers
-	2: special specifiers == short + long + signed + unsigned
-	3: basic types == void + char + int + float + double
-	4: single type specifiers == struct or union specifiers
-				    + enum specifiers + typedef names
+/*	Accept a single declaration specifier.  Then accept zero or more
+	type-specifiers.  There can be a conflict on both TYPE_IDENTIFIER
+	and IDENTIFIER.
+	The following rule is used:
+	When we see a TYPE_IDENTIFIER, we accept it if no type-specifier
+	was given, and it is not directly followed by an identifier.
+	If no type-dpecifier was given, it is taken as the identifier being
+	declared.  If it is followed by an identifier, we assume that an
+	error has been  made, (e.g. unsigned typedeffed_int x;) and that
+	this will be detected later on.
+	When we see an IDENTIFIER, directly followed by another IDENTIFIER,
+	we assume that a typing mistake has been made, and we accept it as
+	an erroneous type-identifier.
+*/
 
- */
 decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 	/*	Reads a non-empty decl_specifiers and fills the struct
 		decspecs *ds.
 	*/
 :
-[ %if (AHEAD == IDENTIFIER)			/* like: register i; */
-	normal_specifier(ds)
-|
-	normal_specifier(ds)*
-	[	special_specifier(ds)
-	|	basic_type(ds)
-	|	single_type_specifier(ds)
-	]
-	[	normal_specifier(ds)
-	|	special_specifier(ds)
-	|	basic_type(ds)
+	single_decl_specifier(ds)
+	[ %while(  (DOT==TYPE_IDENTIFIER
+			&& ds->ds_size == 0
+			&& ds->ds_unsigned == 0
+			&& ds->ds_type == (struct type *)0)
+		    || AHEAD == IDENTIFIER)	/* always an error */
+		single_decl_specifier(ds)
 	]*
-]
 	{do_decspecs(ds);}
 ;
 
-normal_specifier(register struct decspecs *ds;)
+single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
 :
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
@@ -112,28 +107,18 @@ normal_specifier(register struct decspecs *ds;)
 		ds->ds_sc = DOT;
 	}
 |
-	/*	This qualifier applies to the top type.
-		E.g. volatile float * is a pointer to volatile float.
-	*/
 	VOLATILE
 	{	if (ds->ds_typequal & TQ_VOLATILE)
 			error("repeated type qualifier");
 		ds->ds_typequal |= TQ_VOLATILE;
 	}
 |
-	/*	This qualifier applies to the top type.
-		E.g. volatile float * is a pointer to volatile float.
-	*/
 	CONST
-	{
-		if (ds->ds_typequal & TQ_CONST)
+	{	if (ds->ds_typequal & TQ_CONST)
 			error("repeated type qualifier");
 		ds->ds_typequal |= TQ_CONST;
 	}
-;
-
-special_specifier(register struct decspecs *ds;)
-:
+|
 	[ SHORT | LONG ]
 	{	if (ds->ds_size)
 			error("repeated size specifier");
@@ -145,35 +130,14 @@ special_specifier(register struct decspecs *ds;)
 			error("repeated sign specifier");
 		ds->ds_unsigned = DOT;
 	}
-;
-
-/* 3.5.2 */
-type_specifier(struct type **tpp;)
-	/*	Used in struct/union declarations and in casts; only the
-		type is relevant.
-	*/
-	{struct decspecs Ds; Ds = null_decspecs;}
-:
-	decl_specifiers(&Ds)
-	{
-		if (Ds.ds_sc_given)
-			error("storage class ignored");
-		if (Ds.ds_sc == REGISTER)
-			error("register ignored");
-	}
-	{*tpp = Ds.ds_type;}
-;
-
-basic_type(register struct decspecs *ds;):
+|
 	[ VOID | CHAR | INT | FLOAT | DOUBLE ]
 	{
 		idf2type(dot.tk_idf, &ds->ds_type);
 		ds->ds_typedef = 0;
 	}
-;
-
-single_type_specifier(register struct decspecs *ds;):
-	%default TYPE_IDENTIFIER	/* this includes INT, CHAR, etc. */
+|
+	%default TYPE_IDENTIFIER
 	{
 		idf2type(dot.tk_idf, &ds->ds_type);
 		ds->ds_typedef = 1;
@@ -192,6 +156,23 @@ single_type_specifier(register struct decspecs *ds;):
 	struct_or_union_specifier(&ds->ds_type)
 |
 	enum_specifier(&ds->ds_type)
+;
+
+/* 3.5.2 */
+type_specifier(struct type **tpp;)
+	/*	Used in struct/union declarations and in casts; only the
+		type is relevant.
+	*/
+	{struct decspecs Ds; Ds = null_decspecs;}
+:
+	decl_specifiers(&Ds)
+	{
+		if (Ds.ds_sc_given)
+			error("storage class ignored");
+		if (Ds.ds_sc == REGISTER)
+			error("register ignored");
+	}
+	{*tpp = Ds.ds_type;}
 ;
 
 /* 3.5 */

@@ -195,6 +195,17 @@ int to_endif;
 		*/
 		switch(tk.tk_idf->id_resmac) {
 		default:
+		case K_UNKNOWN:
+			/* invalid word seen after the '#'      */
+			lexerror("%s: unknown control", tk.tk_idf->id_text);
+			/* fallthrough */
+		case K_DEFINE:
+		case K_ERROR:
+		case K_INCLUDE:
+		case K_LINE:
+		case K_PRAGMA:
+		case K_UNDEF:
+		case K_FILE:
 			SkipToNewLine();
 			break;
 		case K_IF:
