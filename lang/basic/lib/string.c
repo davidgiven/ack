@@ -7,7 +7,7 @@
 
 extern char *salloc() ;
 
-_len(str)
+_length(str)
 String *str;
 {
 	okr(str);
@@ -64,7 +64,7 @@ String *s1,*s2;
 	int length;
 	okr(s1); okr(s2);
 	s= (String *) salloc(sizeof(String));
-	s->strlength= _len(s1)+_len(s2);
+	s->strlength= _length(s1)+_length(s2);
 	s->strval= salloc(s->strlength+1);
 	s->strcount = 1;
 	strcpy(s->strval,s2->strval);
@@ -175,7 +175,7 @@ int length;
 	String *s;
 	int i;
 
-	i= _len(str)-length;
+	i= _length(str)-length;
 	if(i<0) i=0;
 	s= _newstr(str->strval+i);
 	return(s);

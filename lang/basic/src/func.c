@@ -138,7 +138,7 @@ int *typetable;
                            	C_lfr((arith) BEMPTRSIZE);
 				return(STRINGTYPE);
 		case LENSYM:	cv(STRINGTYPE);
-				C_cal("_len"); 
+				C_cal("_length"); 
 				res=INTTYPE;
 				parm(1);
 				break;
