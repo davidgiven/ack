@@ -225,9 +225,9 @@
 0,	ATOGGLE,	0147,		"a16",	/* address size toggle */
 0,	ATOGGLE,	0347,		"a32",	/* address size toggle */
 0,	PREFIX,		0360,		"lock",
-0,	PREFIX,		0362,		"rep",
 0,	PREFIX,		0362,		"repne",
 0,	PREFIX,		0362,		"repnz",
+0,	PREFIX,		0363,		"rep",
 0,	PREFIX,		0363,		"repe",
 0,	PREFIX,		0363,		"repz",
 0,	PREFIX,		046,		"eseg",
