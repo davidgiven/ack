@@ -38,6 +38,15 @@ static p_order	order,
 		maxorder;
 static p_term t_list;
 static int t_cnt;
+static p_gram   alt_table;
+static int      n_alts;
+static int      max_alts;
+#define ALTINCR 32
+
+static p_gram   rule_table;
+static int      n_rules;
+static int      max_rules;
+#define RULEINCR        32
 
 /* Here are defined : */
 STATIC p_order	neworder();
@@ -64,17 +73,30 @@ neworder(index) {
 	else	sorder = po;
 	return po;
 }
+ 
+p_init()
+{
+        alt_table = (p_gram )alloc(ALTINCR*sizeof(t_gram));
+        n_alts = 0;
+        max_alts = ALTINCR;
+        rule_table = (p_gram )alloc(RULEINCR*sizeof(t_gram));
+        n_rules = 0;
+        max_rules = RULEINCR;
+}
+
 }
 
 %start	LLparse, spec;
 
-spec	:		{	acount = 0; }
+spec	:		{	acount = 0; p_init(); }
 	  [ %persistent def ]*
 			{	/*
 				 * Put an endmarker in temporary file
 				 */
 				putc('\0', fact);
 				putc('\0', fact);
+				free((p_mem) rule_table);
+				free((p_mem) alt_table);
 			}
 	;
 
@@ -196,9 +218,7 @@ productions(p_gram *p;)
 		int		conflres = 0;
 		int		t = 0;
 		int		haddefault = 0;
-		p_gram		alts = (p_gram) alloc(200 * sizeof(t_gram));
-		register p_gram	p_alts = alts;
-		unsigned	n_alts = 200;
+		int             altcnt = 0;
 		int		o_lc, n_lc;
 	} :
 			{	o_lc = linecount; }
@@ -207,13 +227,11 @@ productions(p_gram *p;)
 	  [ 
 	    [ '|'	{	n_lc = linecount; }
 	      simpleproduction(&prod,&t)
-			{	if (p_alts - alts == n_alts) {
-					alts = (p_gram) ralloc(
-						  (p_mem) alts,
-						  (n_alts+100)*sizeof(t_gram));
-					p_alts = alts + n_alts;
-					n_alts += 100;
-				}
+			{       if (n_alts >= max_alts-2) {
+                                        alt_table = (p_gram ) ralloc(
+                                                (p_mem) alt_table,
+                                                (max_alts+=ALTINCR)*sizeof(t_gram));
+                                }
 				if (t & DEF) {
 					if (haddefault) {
 						error(n_lc,
@@ -221,7 +239,8 @@ productions(p_gram *p;)
 					}
 					haddefault = 1;
 				}
-				mkalt(*p,conflres,o_lc,p_alts++);
+				mkalt(*p,conflres,o_lc,&alt_table[n_alts++]);
+                                altcnt++;
 				o_lc = n_lc;
 				conflres = t;
 				t = 0;
@@ -231,9 +250,10 @@ productions(p_gram *p;)
 					error(n_lc,
 		"Resolver on last alternative not allowed");
 				}
-	  			mkalt(*p,conflres,n_lc,p_alts++);
-				g_settype(p_alts,EORULE);
-				*p = copyrule(alts,p_alts+1-alts);
+	  			mkalt(*p,conflres,n_lc,&alt_table[n_alts++]);
+                                altcnt++;
+                                g_settype((&alt_table[n_alts]),EORULE);
+                                *p = copyrule(&alt_table[n_alts-altcnt],altcnt+1);
 	  		}
 	  |
 			{	if (conflres & ~DEF) {
@@ -248,7 +268,7 @@ productions(p_gram *p;)
 				*/
 			}
 	  ]
-			{	free((p_mem) alts); }
+			{	n_alts -= altcnt; }
 	;
 {
 
@@ -277,10 +297,8 @@ mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
 }
 
 simpleproduction(p_gram *p; register int *conflres;)
-	{	p_gram		rule = (p_gram) alloc(200 * sizeof(t_gram));
-		unsigned	n_rule = 200;
-		t_gram		elem;
-		register p_gram	p_rule = rule;
+	{	t_gram		elem;
+		int		elmcnt = 0;
 		int		cnt, kind;
 		int		termdeleted = 0;
 	} :
@@ -295,23 +313,21 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    | C_AVOID	{	*conflres |= AVOIDING; }
 	  ]?
 	  [ %persistent elem(&elem)
-	 		{	if (p_rule - rule >= n_rule - 2) {
-					rule = (p_gram) ralloc(
-						  (p_mem) rule,
-						  (n_rule+100)*sizeof(t_gram));
-					p_rule = rule + n_rule - 2;
-					n_rule += 100;
+	 		{	if (n_rules >= max_rules-2) {
+                                        rule_table = (p_gram) ralloc(
+                                                  (p_mem) rule_table,
+                                                  (max_rules+=RULEINCR)*sizeof(t_gram));
 				}
 				kind = FIXED;
 				cnt = 0;
 			}
 	    [ repeats(&kind, &cnt)
 			{	if (g_gettype(&elem) != TERM) {
-					*p_rule = elem;
-					g_settype(p_rule+1,EORULE);
-					mkterm(copyrule(p_rule,2),
+					rule_table[n_rules] = elem;
+                                        g_settype((&rule_table[n_rules+1]),EORULE);
+                                        mkterm(copyrule(&rule_table[n_rules],2),
 					       0,
-					       p_rule->g_lineno,
+					       elem.g_lineno,
 					       &elem);
 				}
 			}
@@ -323,17 +339,17 @@ simpleproduction(p_gram *p; register int *conflres;)
 				    g_gettype(q->t_rule) != ALTERNATION &&
 				    g_gettype(q->t_rule) != EORULE) {
 				    while (g_gettype(q->t_rule) != EORULE) {
-					*p_rule++ = *q->t_rule++;
-	 				if (p_rule - rule >= n_rule - 2) {
-					    rule = (p_gram) ralloc(
-						  (p_mem) rule,
-						  (n_rule+100)*sizeof(t_gram));
-					    p_rule = rule + n_rule - 2;
-					    n_rule += 100;
-					}
+					rule_table[n_rules++] = *q->t_rule++;
+                                        elmcnt++;
+                                        if (n_rules >= max_rules-2) {
+                                            rule_table = (p_gram) ralloc(
+                                                  (p_mem) rule_table,
+                                                  (max_rules+=RULEINCR)*sizeof(t_gram));
+                                        }
 				    }
 				    elem = *--(q->t_rule);
-				    p_rule--;
+				    n_rules--;
+				    elmcnt--;
 				    if (q == t_list - 1) {
 				    	t_list--;
 				    	nterms--;
@@ -366,22 +382,24 @@ simpleproduction(p_gram *p; register int *conflres;)
 					*/
 				}
 				termdeleted = 0;
-				*p_rule++ = elem;
+				elmcnt++;
+                                rule_table[n_rules++] = elem;
 			}
 	  ]*		{	register p_term q;
 	  
-				g_settype(p_rule,EORULE);
-				*p = 0;
-				if (g_gettype(&rule[0]) == TERM &&
-				    p_rule-rule == 1) {
-				    	q = g_getterm(&rule[0]);
-					if (r_getkind(q) == FIXED &&
-					    r_getnum(q) == 0) {
-					    	*p = q->t_rule;
-					}
-				}
-				if (!*p) *p = copyrule(rule,p_rule-rule+1);
-				free((p_mem) rule);
+				g_settype((&rule_table[n_rules]),EORULE);
+                                *p = 0;
+                                n_rules -= elmcnt;
+                                if (g_gettype(&rule_table[n_rules]) == TERM &&
+                                    elmcnt == 1) {
+                                        q = g_getterm(&rule_table[n_rules]);
+                                        if (r_getkind(q) == FIXED &&
+                                            r_getnum(q) == 0) {
+                                                *p = q->t_rule;
+                                        }
+                                }
+                                if (!*p) *p = copyrule(&rule_table[n_rules],
+                                                elmcnt+1);
 	  		}
 	;
 {
