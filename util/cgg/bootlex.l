@@ -122,7 +122,8 @@ return			return(RETURN);
                                         *p++=c; *p++=input(); break;
                                 case '\n':
                                         yyerror("Unterminated string");
-                                        break;
+					unput(c);
+                          		/* fall through */
                                 case '"':
                                         tipe=STRING; goto endstr;
                                 case '%':
