@@ -294,39 +294,17 @@ fill_int_expr(ex, ivalue, fund)
 	case INT:
 		ex->ex_type = int_type;
 		break;
-	case INTEGER:
-		if (ivalue >= 0 && ivalue <= max_int) {
-			ex->ex_type = int_type;
-			break;
-		}
-		/*FALL THROUGH*/
+	case UNSIGNED:
+		ex->ex_type = uint_type;
+		break;
 	case LONG:
-		ex->ex_type = 
-			(ivalue & (1L << (8*long_size - 1))) ? ulong_type
-				: long_type;
+		ex->ex_type =  long_type;
 		break;
 	case ULONG:
 		ex->ex_type = ulong_type;
 		break;
-	case UNSIGNED:
-		/*	We cannot make a test like
-				ivalue <= max_unsigned
-			because, if
-				sizeof(arith) == int_size
-			holds, max_unsigned may be a negative arith in
-			which case the comparison results in an unexpected
-			answer.
-		*/
-		ex->ex_type = 
-			(ivalue & ~max_int) ?
-			  ( (ivalue & ~max_unsigned) ? 
-			      ( ivalue & (1L<<(8*long_size-1)) ?
-					ulong_type : long_type
-			      ) : uint_type
-			  ) : int_type;
-		break;
 	default:
-		crash("(intexpr) bad fund %s\n", symbol2str(fund));
+		crash("(fill_int_expr) bad fund %s\n", symbol2str(fund));
 		/*NOTREACHED*/
 	}
 	ex->ex_class = Value;

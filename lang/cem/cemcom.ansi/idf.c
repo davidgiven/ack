@@ -250,7 +250,7 @@ declare_idf(ds, dc, lvl)
 		if (lvl != L_GLOBAL)  {		/* 3.5.1 */
 			if (sc == 0)
 				sc = GLOBAL;
-			else if (sc != EXTERN) {
+			else if (sc != EXTERN && sc != TYPEDEF) {
 				error("illegal storage class %s for function with block-scope"
 					, symbol2str(sc));
 				ds->ds_sc = sc = EXTERN;
