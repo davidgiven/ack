@@ -6,11 +6,11 @@ var l=4
 var f=4
 var d=8
 var NAME=xenix3
-var M=xenix3
-var IM=i86
-var LIB=lib/{M}/tail_
+var M=i86
+var IM=xenix3
+var LIB=lib/{IM}/tail_
 var ILIB=lib/i86/tail_
-var RT=lib/{M}/head_
+var RT=lib/{IM}/head_
 var IRT=lib/i86/head_
 var CPP_F=-Dunix -D__USG
 var INCLUDES=-I{EM}/include/_tail_cc
@@ -18,7 +18,7 @@ var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{IM}/cg
+	program {EM}/lib/{M}/cg
 	args <
 	stdout
 	need .e
@@ -26,7 +26,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/{IM}/as
+	program {EM}/lib/{M}/as
 	args - -o > <
 	prep cond
 end
@@ -54,7 +54,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{M}/cv
+	program {EM}/lib/{IM}/cv
 	mapflag -F* CVFLAG=-F*
 	args {CVFLAG?} < >
 	outfile a.out
