@@ -95,7 +95,7 @@ _doprnt(fmt,args,stream)
 	unsigned int    uint ;
 	register int    j ;
 	int             i,c,rjust,width,ndigit,ndfnd,zfill;
-	char            *oldfmt,*s1,buf[40];
+	char            *oldfmt,*s1,buf[129];
 
 	nextarg = args;
 	while (c = *fmt++) {
@@ -216,10 +216,12 @@ _doprnt(fmt,args,stream)
 			break;
 #ifndef NOFLOAT
 		case 'e':
+			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
 			geta(&dbl,wsize(dbl)) ;
 			s = _pscien(dbl,s,ndigit,ndfnd);
 			break;
 		case 'f':
+			if (ndigit >= sizeof(buf)) ndigit = sizeof(buf) - 1;
 			geta(&dbl,wsize(dbl)) ;
 			s = _pfloat(dbl,s,ndigit,ndfnd);
 			break;
