@@ -6,14 +6,14 @@
 
 _readln()
 {
-	char c;
+	register int c;
 	while( (c=fgetc(_chanrd)) != EOF && c!= '\n')
 		;
 }
 
 readskip()
 {
-	char c;
+	register int c;
 #ifdef DEBUG
 	printf("readskip\n");
 #endif
@@ -73,6 +73,7 @@ _readstr(s)
 String **s;
 {
 	char buffer[1024];
+	register int kar ;
 	char *c;
 
 #ifdef DEBUG
@@ -80,17 +81,18 @@ String **s;
 #endif
 	_asschn();
 	c= buffer;
-	*c= fgetc(_chanrd); 
-	while(isspace(*c) && *c!= EOF) 
-		*c= fgetc(_chanrd);
-	if( *c== '"')
+	kar= fgetc(_chanrd); 
+	while(isspace(kar) && kar!= EOF) 
+		kar= fgetc(_chanrd);
+	*c=kar ;
+	if( kar== '"')
 	{
 		/* read quoted string */
 #ifdef DEBUG
 		printf("qouted string\n");
 #endif
-		while( (*c= fgetc(_chanrd)) != '"' && *c!= EOF ) c++;
-		ungetc(*c,_chanrd);
+		while ( (kar= fgetc(_chanrd)) != EOF && kar!='"' ) *c++ = kar ;
+		ungetc(kar,_chanrd);
 		*c=0;
 	}else
 	if( isalpha(*c))
@@ -100,10 +102,10 @@ String **s;
 #ifdef DEBUG
 		printf("non-qouted string\n");
 #endif
-		while( (*c= fgetc(_chanrd)) != ',' && *c!= EOF &&
-		       !isspace(*c) && *c!='\n') 
-		       c++;
-		ungetc(*c,_chanrd);
+		while( (kar= fgetc(_chanrd)) != ',' && kar!= EOF &&
+		       !isspace(kar) && kar!='\n') 
+		       *c++= kar ;
+		ungetc(kar,_chanrd);
 		*c=0;
 	}else{
 		if( ferror(_chanrd)) error(29);
