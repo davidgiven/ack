@@ -40,7 +40,10 @@ char *headvar(),*tailvar() ;
 int transform(phase) register trf *phase ; {
 	int ok ;
 
-	if ( !setfiles(phase) ) return 0 ;
+	if ( !setfiles(phase) ) {
+		disc_files(phase) ;
+		return 0 ;
+	}
 	if ( !phase->t_visited ) {
 		/* The flags are set up once.
 		   At the first time the phase is used.
@@ -56,23 +59,17 @@ int transform(phase) register trf *phase ; {
 	}
 	getcallargs(phase) ;
 	ok= runphase(phase) ;
-	if ( !ok ) rmtemps() ;
+	if ( !ok ) rmfile(&out) ;
 	/* Free the space occupied by the arguments,
-	   except for the combiner, since we are bound to exit soon
+	   except for the linker, since we are bound to exit soon
 	   and do not foresee further need of memory space */
-	if ( !phase->t_combine ) discardargs(phase) ;
-	disc_files() ;
+	if ( !phase->t_linker ) discardargs(phase) ;
+	disc_files(phase) ;
 	return ok ;
 }
 
-int do_combine() {
-	setsvar(keeps(RTS), keeps(rts? rts : "") ) ;
-	if ( !outfile ) outfile= combiner->t_out ;
-	getmapflags(combiner);
-	return transform(combiner) ;
-}
-
 getmapflags(phase) register trf *phase ; {
+	register path *l_in ;
 	register list_elem *elem ;
 	int scanned ;
 	register char *ptr ;
@@ -92,13 +89,15 @@ getmapflags(phase) register trf *phase ; {
 		}
 		*(l_content(*elem)) |= scanned ;
 	}
-	if ( phase->t_combine ) {
-		scanlist(l_first(c_arguments),elem) {
-			if ( mapflag(&(phase->t_mapf),l_content(*elem)) ) {
-				throws(l_content(*elem)) ;
+	if ( phase->t_linker ) {
+		scanlist(l_first(phase->t_inputs),elem) {
+			l_in = p_cont(*elem) ;
+			if ( mapflag(&(phase->t_mapf),l_in->p_path) ) {
+				if ( l_in->p_keeps) throws(l_in->p_path) ;
 				ptr= keeps(getvar(LIBVAR)) ;
 				clr_noscan(ptr) ;
-				l_content(*elem)= ptr ;
+				l_in->p_path= ptr ;
+				l_in->p_keeps=YES ;
 			}
 		}
 		scanlist(l_first(flags),elem) {
@@ -170,11 +169,12 @@ transini() {
 	l_clear(&R_list) ;
 	scanlist(l_first(tr_list), elem) {
 		phase = t_cont(*elem) ;
-		if ( !phase->t_combine ) getmapflags(phase);
+		if ( !phase->t_linker ) getmapflags(phase);
 	}
 	setpvar(keeps(NEEDS),needvar) ;
 	setpvar(keeps(HEAD),headvar) ;
 	setpvar(keeps(TAIL),tailvar) ;
+	if ( linker ) getmapflags(linker) ;
 }
 
 set_Rflag(argp) register char *argp ; {
@@ -608,6 +608,7 @@ char *c_rep(string,place,rep) char *string, *place, *rep ; {
 }
 
 static list_head *curargs ;
+static list_head *comb_args ;
 
 addargs(string) char *string ; {
 	register char *temp, *repc ;
@@ -620,19 +621,19 @@ addargs(string) char *string ; {
 			if ( in.p_path ) { /* All but combiner */
 				l_add(curargs,keeps(in.p_path)) ;
 			} else {
-				scanlist( l_first(c_arguments), elem ) {
-					l_add(curargs,l_content(*elem)) ;
+				scanlist( l_first(*comb_args), elem ) {
+					l_add(curargs,p_cont(*elem)->p_path) ;
 				}
 			}
 			return ;
 		}
-		if ( in.p_path ) { /* Not for the combiner */
+		if ( in.p_path ) { /* Not for the combiners */
 			temp=c_rep(string,repc,in.p_path) ;
 			addargs(temp) ;
 			throws(temp) ;
-		} else {           /* For the combiner */
-			scanlist( l_first(c_arguments), elem ) {
-				temp=c_rep(string,repc,l_content(*elem)) ;
+		} else {           /* For the combiners */
+			scanlist( l_first(*comb_args), elem ) {
+				temp=c_rep(string,repc,p_cont(*elem)->p_path);
 				addargs(temp) ;
 				throws(temp) ;
 			}
@@ -668,6 +669,7 @@ getcallargs(phase) register trf *phase ; {
 #endif
 	gr_throw(&arg1) ;
 	curargs= &phase->t_args ;
+	if (phase->t_combine) comb_args = &phase->t_inputs ;
 	unravel( gr_start(arg2), addargs ) ;
 	gr_throw(&arg2) ;
 }
