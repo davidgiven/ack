@@ -24,6 +24,7 @@ SRC_C = \
 	$(SRC_DIR)/LLlex.c \
 	$(SRC_DIR)/LLmessage.c \
 	$(SRC_DIR)/arith.c \
+	$(SRC_DIR)/asm.c \
 	$(SRC_DIR)/blocks.c \
 	$(SRC_DIR)/ch7.c \
 	$(SRC_DIR)/ch7bin.c \
