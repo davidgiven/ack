@@ -49,9 +49,9 @@ OBJ=\
 ACKDIR=$(TARGET_HOME)/lib
 FE=fe
 INTABLES=sun3
-LNTABLES=acc apc abc ocm m2 vax4 i86 i386 m68k2 m68k4 pmds pmds4 mantra \
+LNTABLES=acc apc abc ocm m2 f2c vax4 i86 i386 m68k2 m68k4 pmds pmds4 mantra \
 	m68020 z8000 pdp em22 em24 em44 6500 6800 6805 6809 i80 ns s2650 z80 \
-	sun2 xenix3 minix minixST
+	sun2 xenix3 minix minixST sparc arm
 INCLUDES=-I$(TARGET_HOME)/h -I$(TARGET_HOME)/config -I$(SRC_DIR)
 CFLAGS= $(INCLUDES) $(COPTIONS)
 UCFLAGS= $(INCLUDES) $(UCOPTIONS)
@@ -66,12 +66,12 @@ MODDIR=$(TARGET_HOME)/modules/lib
 all:		ack ack.1
 
 install:	ack ack.1
-		rm -f $(BINDIR)/ack
 		cp ack $(BINDIR)/ack
 		-cd $(BINDIR) ; \
 		for i in $(INTABLES) $(LNTABLES) ; do rm -f $$i ; ln ack $$i ; done
-		rm -f $(MANDIR)/ack.1
-		cp ack.1 $(MANDIR)/ack.1
+		if [ $(DO_MACHINE_INDEP) = y ] ; \
+		then cp ack.1 $(MANDIR)/ack.1 ; \
+		fi
 
 cmp:		ack ack.1
 		-cmp ack $(BINDIR)/ack

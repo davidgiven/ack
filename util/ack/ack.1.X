@@ -26,6 +26,8 @@ ack \- Amsterdam Compiler Kit
 .br
 \fBocm\fP arguments
 .br
+\fBf2c\fP arguments
+.br
 \fImachine\fP arguments
 .SH DESCRIPTION
 This program transforms sources in several
@@ -66,6 +68,8 @@ Basic program.
 Occam program.
 .IP .mod
 Modula-2 module.
+.IP .f
+Fortran module.
 .IP .e
 EM assembly module in human readable form.
 .IP .k
@@ -115,17 +119,13 @@ If two \fB\-t\fP are used,
 .SB messages
 .IP \-w
 Suppress all warning messages.
-.IP \-E
-Produce a complete listing of each Pascal source program.
-Normally for each error, one message,
-including the source line number, is given.
-.IP \-e
-List only the erroneous lines of each Pascal source program.
 .IP \-v
 Verbose.
 Print information while juggling with files.
 .IP \-KR
 Tell the C-compiler to conform to "Kernighan & Ritchie" C.
+.IP \-ansi
+Tell \fIack\fP to use the ANSI C compiler instead of the old one.
 .IP \-fp
 Use floating point package, if not for VAX or PDP.
 .SB preprocessing
@@ -242,6 +242,7 @@ for higher levels: as for \-O4.
 .IP \-L
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
+(This is the default for C and Fortran).
 .SB libraries
 .IP \-l\fIname\fP
 Tells \fIack\fP to insert a library module at this point.
@@ -251,7 +252,7 @@ routines for systems calls needed by both C and Pascal.
 When linking multiple \fI.o\fP or \fI.m\fP files created by
 separate calls of \fIack\fP together, \fIack\fP cannot deduce
 the run-time system needed,
-unless called as \fIapc\fP, \fIabc\fP, \fIocm\fP, \fIm2\fP, or \fIacc\fP.
+unless called as \fIapc\fP, \fIabc\fP, \fIocm\fP, \fIm2\fP, \fIf2c\fP, or \fIacc\fP.
 This flag serves to tell \fIack\fP which runtime system is
 needed in such a case.
 For example: "ack \-c x.c ; ack \-.c x.o".
@@ -310,6 +311,11 @@ it very likely that the phase will be used.
 .IP \-k
 Do not stop when an error occurs, but try to transform all
 other arguments as far as possible.
+.IP \-g
+Instruct the front-end and back-end to produce symbolic debugger information
+for \fIgrind\fP(1). This is currently supported by the following front-ends:
+ANSI-C, Pascal, Modula-2, and the following back-ends: Motorola M68020,
+Sparc, Vax.
 .PP
 All arguments without a suffix or with an unrecognized suffix
 are passed to the loaders, as for flags.
@@ -336,6 +342,8 @@ EM_FSIZE:size of floats (C):EM_DSIZE:size of doubles (C+Pascal)
 .sp 1
 The name of the \fImachine\fP or something like it when
 the machine name is numeric is also defined (as 1).
+As the ANSI C rules forbid this, in ANSI C, underscores are prepended to
+these names.
 .PP
 The default directories searched for include files differ for each machine.
 .SH PROGRAMS
@@ -353,6 +361,7 @@ program as input and the file type produced as output.
 tab(:);
 l l l l.
 input:name:output:description
+\&.f:f77:.c:Fortran-to-C front end
 \&.c:cem:.k:C front end [4,5,6]
 \&.p:pc:.k:Pascal front end [2,3,6]
 \&.b:abc:.k:Basic front end [6,8]
@@ -388,10 +397,10 @@ description file.
 em_opt(6), em_ass(6), em_cg(6), ack.out(5)
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
-Stevenson \fIDescription of a machine architecture for use with
+Stevenson, \fIDescription of a machine architecture for use with
 block structured languages\fP, Informatica rapport IR-81.
 .IP [2]
-K. Jensen and N. Wirth
+K. Jensen and N. Wirth,
 \fIPASCAL, User manual and report\fP Springer Verlag.
 .IP [3]
 The ISO Pascal standard proposal ISO/TC97/SC5-N462.
@@ -405,7 +414,7 @@ Amsterdam Compiler Kit, reference manuals and UNIX manual pages.
 .IP [7]
 E.G. Keizer, Ack description file reference manual.
 .IP [8]
-M.L. Kersten, \fIThe ABC compiler\fP.
+M.L. Kersten a.o., \fIThe ABC compiler\fP.
 .IP [9]
 Kees Bot and Edwin Scheffer, \fIAn Occam Compiler\fP, IM-6.
 .IP [10]
