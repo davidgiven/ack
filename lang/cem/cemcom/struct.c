@@ -456,7 +456,8 @@ add_field(szp, fd, fdtpp, idf, stp)
 		Sign extension could occur on some machines when shifting
 		the mask to the left.
 	*/
-	fd->fd_mask = (1 << fd->fd_width) - 1;
+	if (fd->fd_width >= 8*sizeof(arith)) fd->fd_mask = -1;
+	else fd->fd_mask = (1L << fd->fd_width) - 1;
 
 	if (options['r'])	/* adjust the field at the right	*/
 		fd->fd_shift = bits_declared - fd->fd_width;
