@@ -50,24 +50,15 @@ all:	Cfiles
 	@rm -f nmclash.o a.out
 
 clean:
-	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab cclash.o cid.o cclash cid clashes
+	rm -f $(OBJ) $(GENFILES) LLfiles hfiles Cfiles tab clashes
 	(cd .. ; rm -rf Xsrc)
 
 lint:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make Xlint ; else sh Resolve Xlint ; fi'
 	@rm -f nmclash.o a.out
 
-mkdep:	mkdep.o
-	$(CC) $(LFLAGS) -o mkdep mkdep.o
-
-cclash:	cclash.o
-	$(CC) $(LFLAGS) -o cclash cclash.o
-
 clashes:	$(SRC) $(HFILES)
-	sh -c 'if test -f clashes ; then ./cclash -l7 clashes $? > Xclashes ; mv Xclashes clashes ; else ./cclash -l7 $? > clashes ; fi'
-
-cid:	cid.o
-	$(CC) $(LFLAGS) -o cid cid.o
+	sh -c 'if test -f clashes ; then cclash -l7 clashes $? > Xclashes ; mv Xclashes clashes ; else cclash -l7 $? > clashes ; fi'
 
 # entry points not to be used directly
 
@@ -119,10 +110,10 @@ char.c: ../src/char.tab ../src/tab
 ../src/tab: 
 	$(CC) ../src/tab.c -o ../src/tab
 
-depend:	mkdep
+depend:
 	sed '/^#AUTOAUTO/,$$d' Makefile > Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
-	./mkdep $(SRC) |\
+	mkdep $(SRC) |\
 		sed 's/\.c:/\.o:/' >> Makefile.new
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile

@@ -6,9 +6,7 @@ case $# in
 	;;
 esac
 case $1 in
-main)
-	;;
-Xlint)
+main|Xlint)
 	;;
 *)	echo "$0: $1: Illegal argument" 1>&2
 	exit 1
@@ -19,10 +17,11 @@ then
 	:
 else	mkdir ../Xsrc
 fi
-make cclash clashes cid
+make clashes
 sed '/^C_/d' < clashes > tmp$$
 ./cclash -c -l7 tmp$$ > ../Xsrc/Xclashes
 rm -f tmp$$
+PW=`pwd`
 cd ../Xsrc
 if cmp -s Xclashes clashes
 then
@@ -31,13 +30,13 @@ else
 	mv Xclashes clashes
 fi
 rm -f Makefile
-for i in `cat ../src/Cfiles`
+for i in `cat $PW/Cfiles`
 do
 	cat >> Makefile <<EOF
-$i:	clashes ../src/$i
-	../src/cid -Fclashes < ../src/$i > $i
+$i:	clashes $PW/$i
+	cid -Fclashes < $PW/$i > $i
 
 EOF
 done
-make `cat ../src/Cfiles`
-make -f ../src/Makefile $1
+make `cat $PW/Cfiles`
+make -f $PW/Makefile $1
