@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE InOut ;
 
   IMPORT Unix;

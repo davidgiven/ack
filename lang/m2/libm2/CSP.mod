@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE CSP;
 (* From 
 	"A Modula-2 Implementation of CSP",

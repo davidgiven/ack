@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE Conversions;
 
   PROCEDURE ConvertNum(num, len, base: CARDINAL;

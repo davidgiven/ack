@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE random;
 
 FROM Unix IMPORT getpid, time;

@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE MathLib0;
 
   IMPORT Mathlib;

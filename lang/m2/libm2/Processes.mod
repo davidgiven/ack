@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE Processes [1];
 (* This implementation module comes from
 	"Programming in Modula-2", by Niklaus Wirth,

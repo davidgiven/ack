@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE RealInOut;
 
   IMPORT InOut;

@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE Storage;
 (* This storage manager maintains an array of lists of objects with the
    same size. Commonly used sizes have their own bucket. The larger ones

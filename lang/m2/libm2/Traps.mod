@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE Traps;
   IMPORT EM;
   IMPORT Unix;

@@ -1,4 +1,5 @@
 #
+(*$R-*)
 IMPLEMENTATION MODULE Terminal;
 (* This implementation is Unix-dependant
 *)

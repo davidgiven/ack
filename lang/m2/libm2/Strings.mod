@@ -1,3 +1,4 @@
+(*$R-*)
 IMPLEMENTATION MODULE Strings;
 
 PROCEDURE Assign(source: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);
