@@ -23,6 +23,7 @@ static char rcsid[] = "$Header$";
  */
 
 char buf[512];
+char *index();
 
 main() {
 	register n,sa;
