@@ -3,7 +3,7 @@
 SUF=pr
 PRINT=cat
 RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\
-ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF)
+ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF) LLgen.$(SUF)
 NROFF=nroff
 MS=-ms
 
@@ -27,6 +27,8 @@ val.$(SUF):         val.doc
 		$(NROFF) $? >$@
 toolkit.$(SUF):	toolkit.doc
 		$(NROFF) $(MS) $? >$@
+LLgen.$(SUF):	LLgen.doc
+		eqn $? | $(NROFF) $(MS) >$@
 
 install cmp:
 
