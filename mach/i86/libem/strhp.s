@@ -1,7 +1,7 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define	.strhp
-.extern .reghp, .limhp, EHEAP, .fat
+.extern .reghp, .limhp, EHEAP, .trp
 
 .strhp:
 	pop	bx
@@ -18,4 +18,6 @@
 	jmp	bx
 2:
 	mov	ax,EHEAP
-	jmp	.fat
+	push	ax
+	call	.trp
+	jmp	bx

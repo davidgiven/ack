@@ -22,5 +22,6 @@
 	jmp	(a0)		! return
 2:
 	move.l	#EHEAP, -(sp)
-	jmp	(.fatal)
+	jsr	(.trp)
+	jmp	(a0)
 .align 2

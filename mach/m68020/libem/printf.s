@@ -8,11 +8,11 @@ _getal:
 	.space	12
 _char:
 	.space	1
-	.align  2
+	.align  4
 .sect .data
 hexs:
 	.ascii	"0123456789abcdef"
-	.align	2
+	.align	4
 .sect .text
 _printf:
 	movem.l	d0/d1/d2/a0/a1/a2/a3/a4/a5/a6, -(sp)
