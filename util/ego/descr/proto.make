@@ -26,10 +26,10 @@ PRFILES = $(SRC_DIR)/proto.make $(SRC_DIR)/descr.sed $(SOURCES)
 all:	$(TARGETS)
 
 install:	all
-	for i in $(TARGETS) ; do cp $$i $(TARGET_HOME)/lib/ego/$$i ; done
+	for i in $(TARGETS) ; do cp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
 
 cmp:	all
-	-for i in $(TARGETS) ; do cmp $$i $(TARGET_HOME)/lib/ego/$$i ; done
+	-for i in $(TARGETS) ; do cmp $$i $(TARGET_HOME)/lib.bin/ego/$$i ; done
 
 pr:
 	@pr $(PRFILES)

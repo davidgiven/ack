@@ -1,6 +1,8 @@
 # $Header$
 
 #PARAMS		do not remove this line
+
+SRC_DIR = $(SRC_HOME)/util/ego/em_ego
 EMH=$(TARGET_HOME)/h
 EMCONFIG=$(TARGET_HOME)/config
 EMLIB=$(TARGET_HOME)/lib.bin

@@ -70,7 +70,7 @@ depend:	asstb.c
 ass00.$(SUF):	$(SRC_DIR)/ass00.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass00.c
 ass00.$(SUF):	$(SRC_DIR)/assex.h
-ass00.$(SUF):	$(TARGET_HOME)/h/local.h
+ass00.$(SUF):	$(TARGET_HOME)/config/local.h
 ass00.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass00.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass00.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -80,7 +80,7 @@ ass30.$(SUF):	$(SRC_DIR)/ass30.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass30.c
 ass30.$(SUF):	$(SRC_DIR)/ip_spec.h
 ass30.$(SUF):	$(SRC_DIR)/assex.h
-ass30.$(SUF):	$(TARGET_HOME)/h/local.h
+ass30.$(SUF):	$(TARGET_HOME)/config/local.h
 ass30.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass30.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass30.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -89,7 +89,7 @@ ass30.$(SUF):	$(SRC_DIR)/ass00.h
 ass40.$(SUF):	$(SRC_DIR)/ass40.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass40.c
 ass40.$(SUF):	$(SRC_DIR)/assex.h
-ass40.$(SUF):	$(TARGET_HOME)/h/local.h
+ass40.$(SUF):	$(TARGET_HOME)/config/local.h
 ass40.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass40.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass40.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -99,7 +99,7 @@ ass50.$(SUF):	$(SRC_DIR)/ass50.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass50.c
 ass50.$(SUF):	$(SRC_DIR)/ip_spec.h
 ass50.$(SUF):	$(SRC_DIR)/assex.h
-ass50.$(SUF):	$(TARGET_HOME)/h/local.h
+ass50.$(SUF):	$(TARGET_HOME)/config/local.h
 ass50.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass50.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass50.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -109,7 +109,7 @@ ass60.$(SUF):	$(SRC_DIR)/ass60.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass60.c
 ass60.$(SUF):	$(SRC_DIR)/ip_spec.h
 ass60.$(SUF):	$(SRC_DIR)/assex.h
-ass60.$(SUF):	$(TARGET_HOME)/h/local.h
+ass60.$(SUF):	$(TARGET_HOME)/config/local.h
 ass60.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass60.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass60.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -118,7 +118,7 @@ ass60.$(SUF):	$(SRC_DIR)/ass00.h
 ass70.$(SUF):	$(SRC_DIR)/ass70.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass70.c
 ass70.$(SUF):	$(SRC_DIR)/assex.h
-ass70.$(SUF):	$(TARGET_HOME)/h/local.h
+ass70.$(SUF):	$(TARGET_HOME)/config/local.h
 ass70.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass70.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass70.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -126,9 +126,9 @@ ass70.$(SUF):	$(TARGET_HOME)/h/em_spec.h
 ass70.$(SUF):	$(SRC_DIR)/ass00.h
 ass80.$(SUF):	$(SRC_DIR)/ass80.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/ass80.c
-ass80.$(SUF):	$(TARGET_HOME)/h/em_path.h
+ass80.$(SUF):	$(TARGET_HOME)/config/em_path.h
 ass80.$(SUF):	$(SRC_DIR)/assex.h
-ass80.$(SUF):	$(TARGET_HOME)/h/local.h
+ass80.$(SUF):	$(TARGET_HOME)/config/local.h
 ass80.$(SUF):	$(TARGET_HOME)/h/arch.h
 ass80.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 ass80.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -140,7 +140,7 @@ assci.$(SUF):	$(TARGET_HOME)/h/em_ptyp.h
 assci.$(SUF):	$(TARGET_HOME)/h/em_pseu.h
 assci.$(SUF):	$(TARGET_HOME)/h/em_mes.h
 assci.$(SUF):	$(SRC_DIR)/assex.h
-assci.$(SUF):	$(TARGET_HOME)/h/local.h
+assci.$(SUF):	$(TARGET_HOME)/config/local.h
 assci.$(SUF):	$(TARGET_HOME)/h/arch.h
 assci.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 assci.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -149,7 +149,7 @@ assci.$(SUF):	$(SRC_DIR)/ass00.h
 assda.$(SUF):	$(SRC_DIR)/assda.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/assda.c
 assda.$(SUF):	$(SRC_DIR)/assex.h
-assda.$(SUF):	$(TARGET_HOME)/h/local.h
+assda.$(SUF):	$(TARGET_HOME)/config/local.h
 assda.$(SUF):	$(TARGET_HOME)/h/arch.h
 assda.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 assda.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -158,7 +158,7 @@ assda.$(SUF):	$(SRC_DIR)/ass00.h
 assrl.$(SUF):	$(SRC_DIR)/assrl.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/assrl.c
 assrl.$(SUF):	$(SRC_DIR)/assex.h
-assrl.$(SUF):	$(TARGET_HOME)/h/local.h
+assrl.$(SUF):	$(TARGET_HOME)/config/local.h
 assrl.$(SUF):	$(TARGET_HOME)/h/arch.h
 assrl.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 assrl.$(SUF):	$(TARGET_HOME)/h/as_spec.h
@@ -168,7 +168,7 @@ asstb.$(SUF):	asstb.c
 	$(CC) -c $(CFLAGS) asstb.c
 asscm.$(SUF):	$(SRC_DIR)/asscm.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/asscm.c
-asscm.$(SUF):	$(TARGET_HOME)/h/local.h
+asscm.$(SUF):	$(TARGET_HOME)/config/local.h
 asscm.$(SUF):	$(TARGET_HOME)/h/arch.h
 asscm.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 asscm.$(SUF):	$(TARGET_HOME)/h/as_spec.h
