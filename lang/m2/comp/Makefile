@@ -43,7 +43,7 @@ SRC =	$(CSRC) $(GENC)
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 
 GENH=	errout.h\
-	idfsize.h numsize.h strsize.h target_sizes.h \
+	idfsize.h numsize.h strsize.h target_sizes.h bigparam.h bigresult.h \
 	inputtype.h density.h squeeze.h nocross.h nostrict.h \
 	def.h debugcst.h type.h Lpars.h node.h desig.h strict3rd.h
 HFILES=		LLlex.h\
@@ -178,6 +178,7 @@ $(CURRDIR)cemain:      $(OBJ) $(CURRDIR)Makefile
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
 LLlex.o: LLlex.h
 LLlex.o: Lpars.h
+LLlex.o: bigparam.h
 LLlex.o: class.h
 LLlex.o: const.h
 LLlex.o: debug.h
@@ -212,6 +213,7 @@ error.o: warning.h
 main.o: LLlex.h
 main.o: Lpars.h
 main.o: SYSTEM.h
+main.o: bigparam.h
 main.o: debug.h
 main.o: debugcst.h
 main.o: def.h
@@ -236,6 +238,7 @@ input.o: f_info.h
 input.o: input.h
 input.o: inputtype.h
 type.o: LLlex.h
+type.o: bigparam.h
 type.o: chk_expr.h
 type.o: const.h
 type.o: debug.h
@@ -253,6 +256,7 @@ type.o: walk.h
 type.o: warning.h
 def.o: LLlex.h
 def.o: Lpars.h
+def.o: bigparam.h
 def.o: debug.h
 def.o: debugcst.h
 def.o: def.h
@@ -270,6 +274,7 @@ misc.o: idf.h
 misc.o: misc.h
 misc.o: node.h
 enter.o: LLlex.h
+enter.o: bigparam.h
 enter.o: debug.h
 enter.o: debugcst.h
 enter.o: def.h
@@ -284,6 +289,7 @@ enter.o: target_sizes.h
 enter.o: type.h
 defmodule.o: LLlex.h
 defmodule.o: Lpars.h
+defmodule.o: bigparam.h
 defmodule.o: debug.h
 defmodule.o: debugcst.h
 defmodule.o: def.h
@@ -299,6 +305,7 @@ defmodule.o: scope.h
 defmodule.o: target_sizes.h
 defmodule.o: type.h
 typequiv.o: LLlex.h
+typequiv.o: bigparam.h
 typequiv.o: debug.h
 typequiv.o: debugcst.h
 typequiv.o: def.h
@@ -311,6 +318,7 @@ typequiv.o: target_sizes.h
 typequiv.o: type.h
 typequiv.o: warning.h
 node.o: LLlex.h
+node.o: bigparam.h
 node.o: debug.h
 node.o: debugcst.h
 node.o: def.h
@@ -321,6 +329,7 @@ node.o: target_sizes.h
 node.o: type.h
 cstoper.o: LLlex.h
 cstoper.o: Lpars.h
+cstoper.o: bigparam.h
 cstoper.o: debug.h
 cstoper.o: debugcst.h
 cstoper.o: idf.h
@@ -332,6 +341,7 @@ cstoper.o: type.h
 cstoper.o: warning.h
 chk_expr.o: LLlex.h
 chk_expr.o: Lpars.h
+chk_expr.o: bigparam.h
 chk_expr.o: chk_expr.h
 chk_expr.o: const.h
 chk_expr.o: debug.h
@@ -349,6 +359,7 @@ chk_expr.o: strict3rd.h
 chk_expr.o: target_sizes.h
 chk_expr.o: type.h
 chk_expr.o: warning.h
+options.o: bigparam.h
 options.o: class.h
 options.o: idfsize.h
 options.o: main.h
@@ -361,6 +372,8 @@ options.o: type.h
 options.o: warning.h
 walk.o: LLlex.h
 walk.o: Lpars.h
+walk.o: bigparam.h
+walk.o: bigresult.h
 walk.o: chk_expr.h
 walk.o: debug.h
 walk.o: debugcst.h
@@ -380,6 +393,7 @@ walk.o: type.h
 walk.o: walk.h
 walk.o: warning.h
 desig.o: LLlex.h
+desig.o: bigparam.h
 desig.o: debug.h
 desig.o: debugcst.h
 desig.o: def.h
@@ -394,6 +408,8 @@ desig.o: walk.h
 desig.o: warning.h
 code.o: LLlex.h
 code.o: Lpars.h
+code.o: bigparam.h
+code.o: bigresult.h
 code.o: debug.h
 code.o: debugcst.h
 code.o: def.h
@@ -407,6 +423,7 @@ code.o: target_sizes.h
 code.o: type.h
 code.o: walk.h
 lookup.o: LLlex.h
+lookup.o: bigparam.h
 lookup.o: debug.h
 lookup.o: debugcst.h
 lookup.o: def.h
@@ -420,6 +437,7 @@ lookup.o: type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h
 program.o: Lpars.h
+program.o: bigparam.h
 program.o: debug.h
 program.o: debugcst.h
 program.o: def.h
@@ -435,6 +453,7 @@ program.o: type.h
 program.o: warning.h
 declar.o: LLlex.h
 declar.o: Lpars.h
+declar.o: bigparam.h
 declar.o: chk_expr.h
 declar.o: debug.h
 declar.o: debugcst.h
@@ -452,6 +471,7 @@ declar.o: type.h
 declar.o: warning.h
 expression.o: LLlex.h
 expression.o: Lpars.h
+expression.o: bigparam.h
 expression.o: chk_expr.h
 expression.o: const.h
 expression.o: debug.h
@@ -465,6 +485,7 @@ expression.o: type.h
 expression.o: warning.h
 statement.o: LLlex.h
 statement.o: Lpars.h
+statement.o: bigparam.h
 statement.o: def.h
 statement.o: idf.h
 statement.o: nocross.h
@@ -477,6 +498,7 @@ char.o: class.h
 Lpars.o: Lpars.h
 casestat.o: LLlex.h
 casestat.o: Lpars.h
+casestat.o: bigparam.h
 casestat.o: chk_expr.h
 casestat.o: debug.h
 casestat.o: debugcst.h
@@ -490,6 +512,7 @@ casestat.o: target_sizes.h
 casestat.o: type.h
 casestat.o: walk.h
 tmpvar.o: LLlex.h
+tmpvar.o: bigparam.h
 tmpvar.o: debug.h
 tmpvar.o: debugcst.h
 tmpvar.o: def.h
@@ -499,6 +522,7 @@ tmpvar.o: scope.h
 tmpvar.o: target_sizes.h
 tmpvar.o: type.h
 scope.o: LLlex.h
+scope.o: bigparam.h
 scope.o: debug.h
 scope.o: debugcst.h
 scope.o: def.h

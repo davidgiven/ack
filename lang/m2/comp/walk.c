@@ -38,6 +38,7 @@
 #include	"walk.h"
 #include	"misc.h"
 #include	"warning.h"
+#include	"bigresult.h"
 
 extern arith		NewPtr();
 extern arith		NewInt();
@@ -234,7 +235,7 @@ WalkProcedure(procedure)
 	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	register t_type *tp;
 	register t_param *param;
-	int too_big = 0;		/* returnsize larger than returnarea */
+	label too_big = 0;		/* returnsize larger than returnarea */
 	arith StackAdjustment = 0;	/* space for conformant arrays */
 	arith retsav = 0;		/* temporary space for return value */
 	arith func_res_size = 0;
@@ -254,11 +255,25 @@ WalkProcedure(procedure)
 	if (tp) {
 		func_res_size = WA(tp->tp_size);
 		if (TooBigForReturnArea(tp)) {
-			/* The result type of this procedure is constructed.
+#ifdef BIG_RESULT_ON_STACK
+			/* The result type of this procedure is too big.
 			   The caller will have reserved space on its stack,
 			   above the parameters, to store the result.
 			*/
 			too_big = 1;
+#else
+			/* The result type of this procedure is too big.
+			   The actual procedure will return a pointer to a
+			   global data area in which the function result is
+			   stored.
+			   Notice that this makes the code non-reentrant.
+			   Here, we create the data area for the function
+			   result.
+			*/
+			too_big = ++data_label;
+			C_df_dlb(too_big);
+			C_bss_cst(func_res_size, (arith)0, 0);
+#endif BIG_RESULT_ON_STACK
 		}
 	}
 
@@ -378,7 +393,11 @@ WalkProcedure(procedure)
 		/* Fill the data area reserved for the function result
 		   with the result
 		*/
+#ifdef BIG_RESULT_ON_STACK
 		C_lal(procedure->df_type->prc_nbpar);
+#else
+		c_lae_dlb(too_big);
+#endif BIG_RESULT_ON_STACK
 		C_sti(func_res_size);
 		if (StackAdjustment) {
 			/* Remove copies of conformant arrays
@@ -386,7 +405,12 @@ WalkProcedure(procedure)
 			LOL(StackAdjustment, pointer_size);
 			C_str((arith) 1);
 		}
+#ifdef BIG_RESULT_ON_STACK
 		func_res_size = 0;
+#else
+		c_lae_dlb(too_big);
+		func_res_size = pointer_size;
+#endif BIG_RESULT_ON_STACK
 	}
 	else if (StackAdjustment) {
 		/* First save the function result in a safe place.
@@ -406,8 +430,11 @@ WalkProcedure(procedure)
 	C_ret(func_res_size);
 	C_beginpart(partno2);
 	C_pro(procscope->sc_name, -procscope->sc_off);
-	C_ms_par(procedure->df_type->prc_nbpar +
-		 (too_big ? func_res_size : 0));
+	C_ms_par(procedure->df_type->prc_nbpar
+#ifdef BIG_RESULT_ON_STACK
+		+ (too_big ? func_res_size : 0)
+#endif
+		);
 	if (! options['n']) WalkDefList(procscope->sc_def, RegisterMessage);
 	C_endpart(partno2);
 	C_end(-procscope->sc_off);
@@ -974,9 +1001,11 @@ UseWarnings(df)
 		warning = "never used/assigned";
 		break;
 	case D_USED|D_VARPAR:
+#ifdef PASS_BIG_VAL_AS_VAR
 		if (df->df_type->tp_fund != T_EQUAL) {
 			warning = "never assigned, could be value parameter";
 		}
+#endif
 		break;
 	case D_USED:
 		warning = "never assigned";

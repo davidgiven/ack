@@ -30,6 +30,7 @@
 #include	"Lpars.h"
 #include	"standards.h"
 #include	"walk.h"
+#include	"bigresult.h"
 
 extern char	*long2str();
 extern char	*symbol2str();
@@ -321,11 +322,12 @@ CodeCall(nd)
 
 	assert(IsProc(left));
 
-	if (result_tp = ResultType(left->nd_type)) {
-		if (TooBigForReturnArea(result_tp)) {
-			C_asp(-WA(result_tp->tp_size));
-		}
+	result_tp = ResultType(left->nd_type);
+#ifdef BIG_RESULT_ON_STACK
+	if (result_tp && TooBigForReturnArea(result_tp)) {
+		C_asp(-WA(result_tp->tp_size));
 	}
+#endif
 
 	if (nd->nd_right) {
 		CodeParameters(ParamList(left->nd_type), nd->nd_right);
@@ -356,9 +358,14 @@ CodeCall(nd)
 	}
 	C_asp(left->nd_type->prc_nbpar);
 	if (result_tp) {
+		arith sz = WA(result_tp->tp_size);
 		if (TooBigForReturnArea(result_tp)) {
+#ifndef BIG_RESULT_ON_STACK
+			C_lfr(pointer_size);
+			C_loi(sz);
+#endif
 		}
-		else	C_lfr(WA(result_tp->tp_size));
+		else	C_lfr(sz);
 	}
 	DoFilename(needs_fn);
 	DoLineno(nd);

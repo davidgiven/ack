@@ -76,3 +76,18 @@
 				*/
 
 
+!File: bigparam.h
+#define PASS_BIG_VAL_AS_VAR 1	/* define when big value parameters must be
+				   passed as addresses
+				*/
+
+
+!File: bigresult.h
+#define BIG_RESULT_ON_STACK 1	/* define when function results must be
+				   put on the stack; in this case, caller
+				   reserves space for it. When not defined,
+				   callee puts result in global data area and
+				   returns a pointer to it
+				*/
+
+
