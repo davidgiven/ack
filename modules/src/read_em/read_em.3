@@ -283,6 +283,11 @@ by \fIinstr\fR
 into calls of the procedural interface defined in \fIem_code\fR(3L).
 It returns 1 if it succeeds, 0 if it fails for some reason. The
 reason can then be found in \fIEM_error\fR.
+The \fIEM_mkcalls\fP routine is obsolete. It is being replaced by the
+.I C_out
+routine of the
+.I em_code
+module.
 .PP
 \fIEM_lineno\fR contains the line number of the last line read by 
 \fIEM_getinstr\fR.
