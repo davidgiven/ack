@@ -6,15 +6,14 @@
 
 FILE *freopen(name,mode,fp)
 char *name , *mode;
-FILE *fp;
+register FILE *fp;
 {
 	char *malloc();
 	int fd,
-	flags = 0;
+	flags = fp->_flags & ~(IO_WRITEMODE|IO_READMODE|IO_ERR|IO_EOF|IO_PERPRINTF);
 
 	fflush(fp);
 	close(fileno(fp));
-	if (io_testflag(fp, IO_MYBUF) && fp->_buf) free(fp->_buf);
 
 	switch(*mode){
 
@@ -51,10 +50,9 @@ FILE *fp;
 		if (fp != &_stdin && fp != &_stdout && fp != &_stderr) free(fp);
 		return NULL;
 	}
-
 	fp->_count = 0;
+	if (fp->_buf) fp->_count = BUFSIZ;
 	fp->_fd = fd;
 	fp->_flags = flags;
-	fp->_buf = 0;
 	return(fp);
 }
