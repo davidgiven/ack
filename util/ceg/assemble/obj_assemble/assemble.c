@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <system.h>
+#include <stdio.h>
 #include "as.h"
 #include "const.h"
 
@@ -127,7 +128,7 @@ char *parse_operand( ptr, n_ops, instr)
 			*(last+1) = '\0';
 		}
 		else {
-			fprintf(stderr, "strange operand format: %s\n", ptr);
+			error("strange operand format: %s\n", ptr);
 			/* 
 			*ptr++ = '\0';
 			ptr = skip_space( ptr);
