@@ -39,7 +39,7 @@ struct t_operand *arg;
 
 char lab_buf[4][256],
      ind_buf[4][256],
-     *match(), *lab(), *ind(), *end_arg();
+     *match(), *lab(), *ind(), *end_arg(), *strindex();
 
 static int n_index = -1;
 
