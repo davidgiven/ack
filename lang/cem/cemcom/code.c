@@ -566,7 +566,7 @@ prc_entry(name)
 	if (options['p']) {
 		C_df_dlb(l1 = data_label());
 		C_rom_scon(name, (arith) (strlen(name) + 1));
-		C_lae_dlb(l1);
+		C_lae_dlb(l1, (arith) 0);
 		C_cal("procentry");
 		C_asp(pointer_size);
 	}
@@ -575,7 +575,7 @@ prc_entry(name)
 prc_exit()
 {
 	if (options['p']) {
-		C_lae_dlb(l1);
+		C_lae_dlb(l1, (arith) 0);
 		C_cal("procexit");
 		C_asp(pointer_size);
 	}
