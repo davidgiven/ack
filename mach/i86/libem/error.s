@@ -1,5 +1,6 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .define .error
+.define .Xtrp
 
 	! ax is trap number
 	! all registers must be saved
@@ -31,3 +32,11 @@
 	pop  si
 	pop  bp
 	ret
+
+.Xtrp:
+	cmp	ax,16
+	jge	1f
+	call	.error
+	ret
+1:
+	jmp	.trp

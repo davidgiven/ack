@@ -35,5 +35,4 @@
 .cmf4:
 .cmf8:
 	mov	ax,18	! illegal instruction EILLINS
-	call	.trp
-	ret
+	jmp	.trp

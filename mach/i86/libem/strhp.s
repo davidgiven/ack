@@ -12,14 +12,16 @@
 	add	ax,02000
 	and	ax,~0777
 	mov	(.limhp),ax
+	push	bx
 	push	ax
 	call	_brk
-	or	ax,ax
-	jne	2f
+	pop	cx
+	pop	bx
+	cmp	ax,-1
+	je	2f
 1:
 	jmp	bx
 2:
 	mov	ax,EHEAP
-	push	ax
-	call	.trp
-	jmp	bx
+	push	bx
+	jmp	.trp

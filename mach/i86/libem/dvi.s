@@ -35,5 +35,5 @@
 .extern EODDZ
 .extern .trp
         mov     ax,EODDZ
-        push    ax
+        push    bx
         jmp     .trp

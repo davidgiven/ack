@@ -35,7 +35,6 @@
 .extern .trp
 	pop	di
 	mov     ax,ESET
-	push    ax
 	jmp     .trp
 
 	.sect .data
