@@ -515,9 +515,9 @@ legal_mixture(tp, otp, diag)
 	struct type *tp, *otp;
 	int diag;
 {
-	register struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
+	struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
 	int retval = 1;
-	struct proto *prot;
+	register struct proto *prot;
 	int fund;
 
 	ASSERT( (pl != 0) ^ (opl != 0));
