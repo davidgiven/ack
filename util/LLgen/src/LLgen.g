@@ -117,7 +117,7 @@ def			{	register string p; }
 	   */
 	| C_START C_IDENT
 			{	p = store(lextoken.t_string); }
-	  ',' C_IDENT ';'
+	  ',' C_IDENT
 	  /*
 	   * A start symbol declaration
 	   */
@@ -141,6 +141,7 @@ def			{	register string p; }
 					}
 				}
 			}
+	  ';'
 	| C_LEXICAL C_IDENT
 	  /*
 	   * Declaration of a name for the lexical analyser.
