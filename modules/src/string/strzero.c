@@ -11,4 +11,5 @@ strzero(s)
 	char *s;
 {
 	*s = '\0';
+	return s;
 }

@@ -8,9 +8,13 @@
 
 char *
 btszero(b, n)
-	register char *b;
+	char *b;
 	register int n;
 {
+	register char *s = b;
+
 	while (n-- > 0)
-		*b++ = '\0';
+		*s++ = '\0';
+	
+	return b;
 }
