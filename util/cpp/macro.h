@@ -75,3 +75,4 @@ extern char *std_alloc();
 #define	K_LINE		9
 #define	K_UNDEF		10
 #define K_PRAGMA	11
+#define K_FILE		100	/* for dependency generator */

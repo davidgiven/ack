@@ -78,7 +78,6 @@ replace(idef)
 			struct idf *param;
 			char *nam;
 			extern char *GetIdentifier();
-			extern struct idf *str2idf();
 
 			UnknownIdIsZero = 0;
 			nam = GetIdentifier();

@@ -7,13 +7,20 @@
 
 #include <alloc.h>
 #include <em_arith.h>
+#include <assert.h>
 #include "file_info.h"
 #include "idfsize.h"
+#include "mkdep.h"
+#ifdef MKDEP
+#include "idf.h"
+#include "macro.h"
+#endif
 
 extern char *symbol2str();
 extern char *getwdir();
 extern int err_occurred;
 int idfsize = IDFSIZE;
+extern char options[];
 
 arith ifval;
 
@@ -49,6 +56,9 @@ main(argc, argv)
 		do_option(par);
 		argc--, argv++;
 	}
+#ifdef MKDEP
+	options['P'] = 1;
+#endif
 	compile(argc - 1, &argv[1]);
 	exit(err_occurred);
 }
@@ -79,4 +89,34 @@ compile(argc, argv)
 			source ? source : "stdin");
 	if (source) WorkingDir = getwdir(dummy);
 	preprocess(source);
+#ifdef MKDEP
+	list_files();
+#endif
 }
+
+#ifdef MKDEP
+struct idf	*file_head;
+
+list_files()
+{
+	register struct idf *p = file_head;
+
+	while (p) {
+		assert(p->id_resmac == K_FILE);
+		print("%s\n", p->id_text);
+		p = p->id_file;
+	}
+}
+
+add_file(s)
+	char *s;
+{
+	register struct idf *p = str2idf(s, 0);
+
+	if (! p->id_resmac) {
+		p->id_resmac = K_FILE;
+		p->id_file = file_head;
+		file_head = p;
+	}
+}
+#endif

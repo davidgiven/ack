@@ -23,6 +23,7 @@
 #include	"class.h"
 #include	"macro.h"
 #include	"bits.h"
+#include	"mkdep.h"
 
 IMPORT char **inctable;		/* list of include directories		*/
 IMPORT char *getwdir();
@@ -273,9 +274,17 @@ do_include()
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
+#ifndef MKDEP
 			error("cannot find include file \"%s\"", filenm);
+#else
+			warning("cannot find include file \"%s\"", filenm);
+			add_file(filenm);
+#endif
 		}
 		else {
+#ifdef MKDEP
+			add_file(result);
+#endif
 			WorkingDir = getwdir(result);
 			svnestlevel[++nestcount] = nestlevel;
 			FileName = result;

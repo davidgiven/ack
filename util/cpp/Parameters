@@ -66,3 +66,12 @@
 #define LINE_PREFIX	"#"	/* prefix for generated line directives,
 				   either "#" or "#line"
 				*/
+
+
+!File: mkdep.h
+#undef MKDEP		1	/* if defined, preprocessor only outputs
+				   names of files included (not finished yet)
+				*/
+
+
+
