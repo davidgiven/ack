@@ -37,8 +37,8 @@ int special, n_haakjes;
 {identifier}		return( IDENTIFIER);
 
 
-"("			{ BEGIN CON; n_haakjes = 1; yymore();}
 <CON>[^()]*"("  	{ n_haakjes++; yymore();}
+"("			{ BEGIN CON; n_haakjes = 1; yymore();}
 <CON>[^()]*")"  	{ if ( n_haakjes == 1) {
 				BEGIN 0;
 				return( CONDITION);
