@@ -7,16 +7,21 @@ The major additions are:
 	- a LINT C program checker, both non-ansi and ansi
 	- an Intel 80386 back-end
 	- a SPARC code expander
-	- a source level debugger for Pascal, Modula-2, and ANSI C
+	- a source level debugger for Pascal, Modula-2, C, and ANSI C
 	- an Acorn Archimedes back-end
 	- code-expanders for VAX, Intel 80386 and Motorola M68020 processors,
-	  allowing the creation of very fast compilers.
+	  and very fast Pascal, Modula-2, ANSI C, and C compilers constructed
+	  using these code expanders
+	- a cc-compatible very fast C compiler for SUN-3 and VAX.
 
-				Ceriel J.H. Jacobs
-				Dept. of Math. and Computer Science
-				Vrije Universiteit
-				De Boelelaan 1081a
-				1081 HV  Amsterdam
-				The Netherlands
+Also added, but not part of the Kit proper are
+	- flex: a lexical analyzer generator
+	- byacc: yacc-clone by UCB
+	- f2c: a Fortran to C compiler by AT&T.
 
-				(Email: ceriel@cs.vu.nl)
+See the ACK installation manual for their copyright notices.
+
+--
+Ceriel Jacobs, Dept. of Mathematics and Computer Science, Vrije Universiteit,
+De Boelelaan 1081a, 1081 HV Amsterdam, The Netherlands
+Email:	ceriel@cs.vu.nl		Fax: +31 20 6427705

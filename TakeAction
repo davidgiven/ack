@@ -15,7 +15,12 @@ fi
 case $0 in
 /*)	THISFILE=$0
 	;;
-*)	THISFILE=`pwd`/$0
+*)	if [ -f $0 ]
+	then
+		THISFILE=`pwd`/$0
+	else
+		THISFILE=$0
+	fi
 	;;
 esac
 SYS=
@@ -68,37 +73,45 @@ do
 			x)	echo Missing name line; RETC=65 ;;
 			*)	if test -d $DIR
 				then (
-				     cd $DIR
-				     X=
-				     case $ATYPE in
-				     indir)	
-					     if sh $THISFILE "$PAR" $ACTION
-					     then eval echo $SUCC
-						  touch NoAction
-					     else RETC=2 ; eval echo $FAIL
-					     fi ;;
-				     *)
-					     case "$ACTION" in
-					     '$PAR')	ACTION="$PAR"
-							;;
-					     *)		;;
-					     esac
-					     if [ -f NoAction ]
-					     then
-						ACTION='echo "No actions performed, NoAction file present"'
-					     fi
-					     if eval "{ $ACTION ; } >Out 2>&1 </dev/null"
-					     then eval echo $SUCC
-						  touch NoAction
-					     else RETC=1 ; X=: ; eval echo $FAIL
-					     fi
-					     ;;
-				     esac
-				     (echo ------- `pwd`
-				      cat Out
-				      $X rm -f Out
-				     ) 2>/dev/null 1>&- 1>&3
-				     exit $RETC
+				    cd $DIR
+				    X=
+				    case $ATYPE in
+				    indir)	
+					if $THISFILE "$PAR" $ACTION
+					then eval echo $SUCC
+					else RETC=2 ; eval echo $FAIL
+					fi ;;
+				    *)
+					case "$ACTION" in
+					'$PAR')
+					    	ACTION="$PAR"
+					    ;;
+					*)  ;;
+					esac
+					if [ -f No$CMD ]
+					then
+					    x=`cat No$CMD`
+					    if [ "$ACTION" = "$x" ]
+					    then
+						ACTION='echo "No actions performed, No$CMD file present"'
+						SUCC='$SYS -- skipped'
+					    fi
+					fi
+					if eval "{ $ACTION ; } >Out 2>&1 </dev/null"
+					then	eval echo $SUCC
+						if [ "$SUCC" = '$SYS -- skipped' ]
+						then :
+						else echo "$ACTION" > No$CMD 2>/dev/null
+						fi
+					else RETC=1 ; X=: ; eval echo $FAIL
+					fi
+					;;
+				    esac
+				    (echo ------- `pwd`
+				     cat Out
+				     $X rm -f Out
+				    ) 2>/dev/null 1>&- 1>&3
+				    exit $RETC
 				)
 				case $? in
 				0) ;;

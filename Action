@@ -1,8 +1,11 @@
 name	"System definition"
 dir first
 action ack_sys
-failure "You have to run the shell script first in the directory first"
+failure "You have to run the shell script first/first"
 fatal
+end
+name "Manual pages"
+dir man
 end
 ! name	"EM definition"
 ! dir etc
@@ -15,6 +18,7 @@ dir util/cmisc
 end
 name "Flex lexical analyzer generator"
 dir util/flex
+action "make firstinstall && make clean"
 end
 name "Yacc parser generator"
 dir util/byacc
@@ -25,7 +29,7 @@ indir
 end
 name "LL(1) Parser generator"
 dir util/LLgen
-action "make firstinstall"
+action "make firstinstall && make clean"
 end
 name "C preprocessor"
 dir util/cpp
@@ -248,4 +252,14 @@ end
 name "Motorola 68000 interpreters"
 system "m68*|sun*"
 dir mach/mantra/int
+end
+name "Fast compilers"
+system "m68020|sun3|i386|vax*"
+dir fast
+indir
+end
+name "Fast cc-compatible C compiler"
+system "sun3|vax*"
+dir fcc
+indir
 end

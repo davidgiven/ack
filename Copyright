@@ -1,7 +1,8 @@
 /*
  *     A M S T E R D A M   C O M P I L E R   K I T
  *
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * Copyright (c) 1987, 1991 by the Vrije Universiteit, Amsterdam,
+ * The Netherlands.
  *
  * Permission to use, sell, duplicate or disclose this software must be
  * obtained in writing. Requests for such permissions may be sent to
@@ -9,7 +10,7 @@
  *      Dr. Andrew S. Tanenbaum
  *      Wiskundig Seminarium
  *      Vrije Universiteit
- *      De Boelelaan 1081
+ *      De Boelelaan 1081a
  *      1081 HV  Amsterdam
  *      The Netherlands
  *
