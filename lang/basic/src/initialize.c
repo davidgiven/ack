@@ -12,7 +12,6 @@ static char rcs_id[] = "$Header$";
 
 /* generate temporary files etc */
 
-File	*tmp_file;
 File	*datfile;
 
 
@@ -43,8 +42,7 @@ initialize()
 	C_init((arith)BEMINTSIZE, (arith)BEMPTRSIZE);
 	result1 = sys_open(inpfile, OP_READ, &yyin);
 	result2 = C_open(outfile);
-	result3 = sys_open(tmpfname,OP_WRITE, &tmp_file);
-	if ( result1==0 || result2== 0 || result3== 0 )
+	if ( result1==0 || result2== 0 )
 		fatal("Improper file permissions");
 	C_magic();
 	fillkex();	/* initialize symbol table */

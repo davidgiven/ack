@@ -48,7 +48,6 @@ extern char	tmpfname[MAXFILENAME];	/* temporary statements file */
 
 extern File	*emfile;		/* EM output file */
 extern File	*datfile;		/* data file */
-extern File	*tmp_file;		/* compiler temporary */
 extern File	*yyin;			/* Compiler input */
 
 extern int	endofinput;
