@@ -177,6 +177,9 @@ extern arith
 #endif NOCROSS
 
 extern arith
+	ret_area_size;
+
+extern arith
 	align();		/* type.c */
 
 extern t_type
@@ -220,7 +223,7 @@ extern t_type
 #define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->tp_next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
-#define	TooBigForReturnArea(tpx) ((tpx)->tp_size > dword_size)
+#define	TooBigForReturnArea(tpx) ((tpx)->tp_size > ret_area_size)
 
 extern long full_mask[];
 extern long max_int[];

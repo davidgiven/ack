@@ -553,13 +553,14 @@ WalkStat(nd, exit_label)
 				C_lol(tmp2);
 				RangeCheck(nd->nd_type, left->nd_left->nd_type);
 				CodeDStore(nd);
-				C_lol(tmp);
-				ForLoopVarExpr(nd);
 				if (left->nd_INT >= 0) {
+					C_lol(tmp);
+					ForLoopVarExpr(nd);
 				}
 				else {
 					stepsize = -stepsize;
-					C_exg(int_size);
+					ForLoopVarExpr(nd);
+					C_lol(tmp);
 				}
 				C_sbu(int_size);
 				if (stepsize) {

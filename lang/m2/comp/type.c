@@ -52,6 +52,8 @@ arith
 	pointer_size = SZ_POINTER;
 #endif
 
+arith	ret_area_size;
+
 t_type
 	*bool_type,
 	*char_type,
@@ -159,6 +161,9 @@ InitTypes()
 	if ((int) double_size < (int) float_size) {
 		fatal("long real size smaller than real size");
 	}
+
+	ret_area_size = (int) double_size > ((int) pointer_size << 1) ?
+				double_size : (pointer_size << 1);
 
 	/* character type
 	*/
