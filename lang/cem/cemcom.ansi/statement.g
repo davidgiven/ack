@@ -467,7 +467,7 @@ compound_statement
 	{
 #ifdef DBSYMTAB
 	static int	brc_level = 1;
-	int		ndecl = 0;
+	int		decl_seen = brc_level == 1;
 #endif /* DBSYMTAB */
 	}
 :
@@ -481,14 +481,14 @@ compound_statement
 		declaration
 		{
 #ifdef DBSYMTAB
-			ndecl++;
+			decl_seen++;
 #endif /* DBSYMTAB */
 		}
 	]*
 		{
 #ifdef DBSYMTAB
 			++brc_level;
-			if (options['g'] && ndecl) {
+			if (options['g'] && decl_seen) {
 				C_ms_std((char *) 0, N_LBRAC, brc_level);
 			}
 #endif /* DBSYMTAB */
@@ -500,7 +500,7 @@ compound_statement
 		{
 			unstack_level();
 #ifdef DBSYMTAB
-			if (options['g'] && ndecl) {
+			if (options['g'] && decl_seen) {
 				C_ms_std((char *) 0, N_RBRAC, brc_level);
 			}
 			brc_level--;
