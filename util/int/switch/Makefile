@@ -1,6 +1,6 @@
 # $Header$
 
-IP_SPEC =	/usr/em/etc/ip_spec.t
+IP_SPEC =	../../../etc/ip_spec.t
 
 SRC =	 	mkswitch.c
 OBJ =		mkswitch.o
@@ -19,6 +19,8 @@ PrCases:	mkswitch $(IP_SPEC)
 lint:
 	lint $(SRC)
 
+distr:		.distr
+
 .distr:		Makefile
 	echo READ_ME Makefile $(SRC) | tr ' ' '\012' >.distr
 
@@ -32,3 +34,16 @@ clean:						# NOT the cases files !
 bare:		clean
 	/bin/rm -f DoCases PrCases
 
+all:	mkswitch
+
+install:
+	echo "Nothing to install"
+
+cmp:
+	echo "Nothing to compare"
+
+pr:
+	@pr READ_ME Makefile $(SRC)
+
+opr:
+	make pr | opr
