@@ -3,8 +3,8 @@
 
 # Machine and environ dependent definitions
 EMHOME = ../../..
-CC = cc
 CC = $(EMHOME)/bin/fcc
+CC = cc
 CFLOW = cflow
 MKDEP = $(EMHOME)/bin/mkdep
 PRID = $(EMHOME)/bin/prid
@@ -61,7 +61,7 @@ GENOPTIONS = -vvvx
 # Special #defines during compilation
 PROF = #-pg
 CDEFS =	$(EM_INCLUDES) $(LIB_INCLUDES)
-CFLAGS = $(CDEFS) $(COPTIONS) $(PROF) #-O
+CFLAGS = $(CDEFS) $(COPTIONS) $(PROF) -O
 LDFLAGS = -i $(PROF)
 
 # Grammar files and their objects

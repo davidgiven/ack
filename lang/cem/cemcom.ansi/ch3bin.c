@@ -256,6 +256,7 @@ ch3bin(expp, oper, expr)
 #endif	LINT
 			*expp = (*expp)->VL_VALUE ?
 				expr->OP_LEFT : expr->OP_RIGHT;
+			(*expp)->ex_flags |= EX_ILVALUE;
 		}
 		else {
 			*expp = new_oper(expr->ex_type, *expp, oper, expr);

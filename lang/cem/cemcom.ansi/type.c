@@ -58,7 +58,7 @@ promoted_type(tp)
 struct type *tp;
 {
 	if (tp->tp_fund == CHAR || tp->tp_fund == SHORT) {
-		if (tp->tp_unsigned == UNSIGNED && tp->tp_size == int_size)
+		if (tp->tp_unsigned && tp->tp_size == int_size)
 			return uint_type;
 		else return int_type;
 	} else if (tp->tp_fund == FLOAT)

@@ -29,6 +29,7 @@
 
 arith NewLocal();		/* util.c	*/
 char *symbol2str();		/* symbol2str.c	*/
+extern arith full_mask[];	/* cstoper.c	*/
 
 /*	Eval_field() evaluates expressions involving bit fields.
 	The various instructions are not yet optimised in the expression
@@ -73,7 +74,7 @@ eval_field(expr, code)
 			C_slu(asize);
 		else
 			C_sli(asize);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | (~0 << (8 * asize))));
+		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[asize]));
 		if (leftop->ex_depth == 0)	{	/* simple case	*/
 			load_val(leftop, RVAL);
 			C_and(asize);
@@ -143,7 +144,7 @@ eval_field(expr, code)
 			C_slu(asize);
 		else
 			C_sli(asize);
-		C_loc(~((fd->fd_mask << fd->fd_shift) | (~0 << (8 * asize))));
+		C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[asize]));
 		if (leftop->ex_depth == 0)	{
 			load_val(leftop, RVAL);
 			C_and(asize);

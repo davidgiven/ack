@@ -18,9 +18,9 @@ blocks.c
 cem.1
 cem.c
 cemcom.1
-ch7.c
-ch7bin.c
-ch7mon.c
+ch3.c
+ch3bin.c
+ch3mon.c
 char.tab
 class.h
 code.c
@@ -45,6 +45,7 @@ expression.g
 field.c
 field.str
 file_info.h
+fltcstoper.c
 idf.c
 idf.str
 init.c

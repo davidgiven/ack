@@ -242,12 +242,8 @@ conditional_expression(struct expr **expp;)
 			else ResultKnown = OldResultKnown;
 		  }
 		}
-		/* should be: conditional_expression(&e2)
-		 * but that wouldn't work  with 0 ? 0 : i = 0
-		 */
-		assignment_expression(&e2)
+		conditional_expression(&e2)
 		{	
-			check_conditional(e2, '=', "not allowed after :");
 			ResultKnown = OldResultKnown;
 			ch3bin(&e1, ':', e2);
 			opnd2test(expp, '?');
@@ -263,7 +259,7 @@ assignment_expression(struct expr **expp;)
 	}
 :
 	conditional_expression(expp)
-	[%prefer	/* (rank_of(DOT) <= maxrank) for any asgnop */
+	[
 		asgnop(&oper)
 		assignment_expression(&e1)
 		{ch3asgn(expp, oper, e1);}
@@ -339,7 +335,6 @@ constant(struct expr **expp;) :
 /* 3.4 */
 constant_expression (struct expr **expp;) :
 	conditional_expression(expp)
-			    /* was: assignment_expression(expp) */
 	{ chk_cst_expr(expp); }
 ;
 

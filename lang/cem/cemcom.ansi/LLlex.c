@@ -158,7 +158,9 @@ firstline:
 	case STSKIP:		/* just skip the skip characters	*/
 		goto again;
 	case STGARB:		/* garbage character			*/
+#ifndef NOPP
 garbage:
+#endif
 		if (040 < ch && ch < 0177)
 			lexerror("garbage char %c", ch);
 		else

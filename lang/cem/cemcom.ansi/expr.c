@@ -97,30 +97,6 @@ rank_of(oper)
 	/*NOTREACHED*/
 }
 
-int
-rank_of_expression(ex)
-	register struct expr *ex;
-{
-	/*	Returns the rank of the top node in the expression.
-	*/
-	if (!ex || (ex->ex_flags & EX_PARENS) || ex->ex_class != Oper)
-		return 0;
-	return rank_of(ex->OP_OPER);
-}
-
-check_conditional(expr, oper, pos_descr)
-	register struct expr *expr;
-	char *pos_descr;
-{
-	/*	Since the grammar is LR and the parser is LL, this kludge
-		here checks if there was a syntax error caused by
-		the priorities in an expression.
-	*/
-	if (rank_of_expression(expr) >= rank_of(oper))
-		expr_error(expr, "%s %s",
-			symbol2str(expr->OP_OPER), pos_descr);
-}
-
 dot2expr(expp)
 	struct expr **expp;
 {
