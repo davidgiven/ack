@@ -797,9 +797,14 @@ struct token *ptok;
 	if (ovfl) {
 		lexwarning("overflow in constant");
 		fund = ULONG;
-	} else if ((val & full_mask[(int)int_size]) == val) {
-		if (val >= 0 && val <= max_int) fund = INT;
-		else fund = (((base == 10) && !uns_flg) ? LONG : UNSIGNED);
+	} else if (!lng_flg && (val & full_mask[(int)int_size]) == val) {
+		if (val >= 0 && val <= max_int) {
+			fund = INT;
+		} else if (int_size == long_size) {
+			fund = UNSIGNED;
+		} else if (base == 10 && !uns_flg)
+			fund = LONG;
+		else	fund = UNSIGNED;
 	} else if((val & full_mask[(int)long_size]) == val) {
 		if (val > 0) fund = LONG;
 		else fund = ULONG;
@@ -811,8 +816,8 @@ struct token *ptok;
 		fund = ULONG;
 	}
 	if (lng_flg) {
-	    if (fund == INT) fund = LONG;
-	    else if (fund == UNSIGNED) fund = ULONG;
+		/* fund can't be INT */
+		if (fund == UNSIGNED) fund = ULONG;
 	}
 	if (uns_flg) {
 	    if (fund == INT) fund = UNSIGNED;
