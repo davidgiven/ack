@@ -338,6 +338,10 @@ code_declaration(idf, expr, lvl, sc)
 		/* STATIC, EXTERN, GLOBAL, IMPLICIT, AUTO or REGISTER */
 		switch (def_sc)	{
 		case STATIC:
+			if (def->df_type->tp_fund == FUNCTION) {
+				/* should produce "inp $function" ??? */
+				break;
+			}
 			/*	they are handled on the spot and get an
 				integer label in EM.
 			*/
