@@ -49,3 +49,8 @@ fat.s
 trp.s
 stop.s
 print.s
+ret6.s
+ret8.s
+lfr6.s
+lfr8.s
+retarea.s
