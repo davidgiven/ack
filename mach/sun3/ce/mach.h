@@ -36,6 +36,7 @@
 #define	RELOC2_FMT		".data2 %s + %ld\n"
 #define	RELOC4_FMT		".data4 %s + %ld\n"
 
+#define GENLAB	'I'		/* compiler-generated labels start with ... */
 
 
 

@@ -18,8 +18,8 @@ C_loe..		==> 	"move.l ($1+$2), -(sp)".
 
 C_lil		==> 	"move.l ([$1,a6]), -(sp)".
 
-C_lof		==> 	"move.l (sp)+, a0";
-			"move.l ($1,a0), -(sp)".
+C_lof		==> 	"move.l (sp), a0";
+			"move.l ($1,a0), (sp)".
 
 C_lal		==> 	"pea ($1,a6)".
 	
@@ -44,16 +44,16 @@ C_lxa
 				"pea (8,a0)".
 
 C_loi		
-  	$1 == 1		==>	"move.l (sp)+, a0";
-				"clr.l -(sp)";
+  	$1 == 1		==>	"move.l (sp), a0";
+				"clr.l (sp)";
 				"move.b (a0), (3,sp)".
-  	$1 == 2		==>	"move.l (sp)+, a0";
-				"clr.l -(sp)";
+  	$1 == 2		==>	"move.l (sp), a0";
+				"clr.l (sp)";
 				"move.w (a0), (2,sp)".
-  	$1 == 4		==>	"move.l (sp)+, a0";
-				"move.l (a0), -(sp)".
-	$1 == 8         ==>     "move.l (sp)+, a0";
-				"move.l (4,a0), -(sp)";
+  	$1 == 4		==>	"move.l (sp), a0";
+				"move.l (a0), (sp)".
+	$1 == 8         ==>     "move.l (sp), a0";
+				"move.l (4,a0), (sp)";
 				"move.l (a0), -(sp)".
   	$1 % 4 == 0	==>	"move.l (sp)+, a0";
 				"move.l #$1/4-1, d0";
@@ -74,8 +74,8 @@ C_ldl		==> 	"move.l ($1+4, a6), -(sp)";
 C_lde..		==> 	"move.l ($1+$2+4), -(sp)";
 			"move.l ($1+$2), -(sp)".
 
-C_ldf		==> 	"move.l (sp)+, a0";
-			"move.l ($1+4,a0), -(sp)";
+C_ldf		==> 	"move.l (sp), a0";
+			"move.l ($1+4,a0), (sp)";
 			"move.l ($1,a0), -(sp)".
 
 C_lpi		==> 	"pea ($1)".
@@ -142,22 +142,23 @@ C_sbi
 
 C_mli
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"muls.l (sp)+, d0";
-				"move.l d0, -(sp)".
+				"muls.l (sp), d0";
+				"move.l d0, (sp)".
 	default		==>	arg_error( "mli", $1).
 
 C_dvi		
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"divs.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
 	default		==> 	arg_error( "dvi", $1).
 
 C_rmi	
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
-				"divsl.l d0, d2:d1";
-				"move.l d2, -(sp)".
+				"move.l (sp), d1";
+				"move.l d0, (sp)";
+				"divsl.l (sp), d0:d1";
+				"move.l d0, (sp)".
 	default		==>	arg_error( "rmi", $1).
 
 C_ngi		
@@ -167,16 +168,16 @@ C_ngi
 
 C_sli		
 	$1 == 4		==> 	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"asl.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
 	default		==> 	arg_error( "sli", $1).
 
 C_sri		
 	$1 == 4		==> 	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"asr.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
 	default		==>	arg_error( "sri", $1).
 
 
@@ -193,31 +194,32 @@ C_sbu		==> 	C_sbi( w).
 
 C_mlu
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"mulu.l (sp)+, d0";
-				"move.l d0, -(sp)".
+				"mulu.l (sp), d0";
+				"move.l d0, (sp)".
 	default		==>	arg_error( "mlu", $1).
 
 C_dvu		
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"divu.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
 	default		==> 	arg_error( "dvu", $1).
 
 C_rmu		
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
-				"divul.l d0, d2:d1";
-				"move.l d2, -(sp)".
+				"move.l (sp), d1";
+				"move.l d0, (sp)";
+				"divul.l (sp), d0:d1";
+				"move.l d0, (sp)".
 	default		==> 	arg_error( "rmu", $1).
 
 C_slu		==> 	C_sli( w).
 
 C_sru
 	$1 == 4		==> 	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"lsr.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
 	default		==>	arg_error( "sru", $1).
 
 
@@ -319,25 +321,19 @@ C_zer
 /*									      */
 /******************************************************************************/
 
-C_cii		==> 	"   move.l (sp), d0";
-			"   move.l (4, sp), d1";
+/* cii, ciu, cuu, cui are assumed to be called with legal arguments only */
+
+C_cii		==> 	"   move.l (sp)+, d0";
+			"   move.l (sp)+, d1";
 			"   cmp.l d1, d0";
 			"   ble 4f";
-			"   cmp.l #4, d1";
-			"   bge 4f";
-			"   move.l (8, sp), d2";
+			"   move.l (sp), d0";
 			"   cmp.l #1, d1";
 			"   bne 2f";
-			"   cmp.l #2, d0";
-			"   bne 1f";
-			"   ext.w d2";
-			"   bra 3f";
-			"1: extl.l d2";
-			"   bra 3f";
-			"2: ext.l d2";
-			"3: move.l d2, (8, sp)";
-			"   move.l #4, (4, sp)";
-			"4: jsr (.cii)".
+			"   ext.w d0";
+			"2: ext.l d0";
+			"   move.l d0,(sp)";
+			"4:".
 
 C_cuu		==> 	"lea	(8,sp),sp".
 
@@ -403,16 +399,16 @@ C_com
 
 C_rol
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"rol.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
   	default		==>	arg_error( "rol", $1).
 
 C_ror
 	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"ror.l d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
   	default		==>	arg_error( "ror", $1).
 
 
@@ -424,11 +420,11 @@ C_ror
 
 C_inn
   	$1 == 4		==>	"move.l (sp)+, d0";
-				"move.l (sp)+, d1";
+				"move.l (sp), d1";
 				"btst d0, d1";
 				"sne d1";
 				"and.l #1, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
   	default		==>	"move.l (sp)+, d0";
 				"move.l #$1, d1";
 				"jsr (.inn)";
@@ -440,10 +436,10 @@ C_inn_narg	==> 	"move.l (sp)+, d1";
 			"move.l d0, -(sp)".
   
 C_set
-  	$1 == 4		==>	"move.l (sp)+, d0";
+  	$1 == 4		==>	"move.l (sp), d0";
 				"clr.l d1";
 				"bset d0, d1";
-				"move.l d1, -(sp)".
+				"move.l d1, (sp)".
   	default		==>	"move.l (sp)+, d0";
 				"move.l #$1, d1";
 				"jsr (.set)".
@@ -526,43 +522,43 @@ C_cms_narg	==> 	"move.l (sp)+, d0";
 
 C_cmp		==>	C_cmu( (arith)4).
 
-C_tlt		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_tlt		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"blt 1f";
 			"clr.l (sp)";
 			"1:".
 
-C_tle		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_tle		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"ble 1f";
 			"clr.l (sp)";
 			"1:".
 
-C_teq		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_teq		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"beq 1f";
 			"clr.l (sp)";
 			"1:".
 
-C_tne		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_tne		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"bne 1f";
 			"clr.l (sp)";
 			"1:".
 
-C_tge		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_tge		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"bge 1f";
 			"clr.l (sp)";
 			"1:".
 
-C_tgt		==> 	"move.l (sp)+, d0";
-			"move.l #1, -(sp)";
+C_tgt		==> 	"move.l (sp), d0";
+			"move.l #1, (sp)";
 			"tst.l d0";
 			"bgt 1f";
 			"clr.l (sp)";
@@ -800,6 +796,6 @@ C_trp		==> 	"jsr (.trp)".
 
 prolog		==>	.
 
-jump 		==>	"jmp $1".
+jump 		==>	"bra $1".
 
 locals		==>	"link a6, #-$1".

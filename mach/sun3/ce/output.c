@@ -39,18 +39,21 @@ output()
 			Malloc((unsigned)nrelo*sizeof(struct relocation_info));
 
 	for (i = 0; i < nrelo; i++) {
-		if (  ( reloc_info[i].or_sect-S_MIN) == SEGTXT) {
-			convert_reloc( &reloc_info[i], u_reloc++);
+		if (  ( reloc_info[i].or_sect-S_MIN) == SEGTXT &&
+			convert_reloc( &reloc_info[i], u_reloc)) {
 			trsize++;
+			u_reloc++;
 		}
 	}
 	for (i = 0; i < nrelo; i++) {
-		if (  ( reloc_info[i].or_sect-S_MIN) != SEGTXT) {
-			convert_reloc( &reloc_info[i], u_reloc++);
+		if (  ( reloc_info[i].or_sect-S_MIN) != SEGTXT &&
+			convert_reloc( &reloc_info[i], u_reloc)) {
+			u_reloc++;
 			drsize++;
 		}
 	}
 
+	nrelo = trsize + drsize;
 	u_reloc -= nrelo;
 
 	init_unixheader();
@@ -104,6 +107,8 @@ convert_reloc( a_relo, u_relo)
 struct outrelo *a_relo;
 struct relocation_info *u_relo;
 {
+	int retval = 1;
+
 	u_relo->r_address = a_relo->or_addr;
 	u_relo->r_symbolnum = a_relo->or_nami;
 	u_relo->r_pcrel = (a_relo->or_type & RELPC) >> 3;
@@ -116,6 +121,9 @@ struct relocation_info *u_relo;
 	if ( u_relo->r_extern == 0) {
 		switch ( (symbol_table[ a_relo->or_nami].on_type & S_TYP) - S_MIN) {
 			case SEGTXT : u_relo->r_symbolnum = N_TEXT;
+				      if (u_relo->r_pcrel &&
+					  (a_relo->or_sect-S_MIN == SEGTXT))
+						retval = 0;
 				      break;
 			case SEGCON : u_relo->r_symbolnum = N_DATA;
 				      break;
@@ -126,6 +134,7 @@ struct relocation_info *u_relo;
 			    (symbol_table[ a_relo->or_nami].on_type & S_TYP) - S_MIN);
 		}
 	}
+	return retval;
 }
 
 
@@ -176,8 +185,7 @@ long valu;
 {
 	int sect;
 
-	*u_type = '\0';
-	*u_type |= ( *a_type & S_EXT) ? N_EXT : N_UNDF;
+	*u_type = ((*a_type&S_TYP) == S_UND || (*a_type & S_EXT)) ? N_EXT : 0;
 
 	if ( valu != -1 && (! (*a_type & S_COM))) {
 		sect = ( *a_type & S_TYP ) - S_MIN;
