@@ -168,7 +168,7 @@ Lnt:	Cfiles
 	@rm -f nmclash.o a.out
 
 install:	Main
-	rm -f $(EMHOME)/lib/em_cemcom # $(EMHOME)/man/em_cemcom.6
+	rm -f $(EMHOME)/lib/em_cemcom.ansi # $(EMHOME)/man/em_cemcom.6
 	cp $(CURRDIR)main $(EMHOME)/lib/em_cemcom.ansi
 	# cp $(CURRDIR)cemcom.1 $(EMHOME)/man/em_cemcom.6
 
