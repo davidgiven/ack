@@ -17,7 +17,7 @@
 char *strcpy(), *strcat();
 char *long2str();
 
-PRIVATE struct macro	*ReplaceList;	/* list of currently active macros */
+PRIVATE struct mlist *ReplaceList;	/* list of currently active macros */
 
 EXPORT int
 replace(idef)
@@ -36,6 +36,7 @@ replace(idef)
 	register char c;
 	char **actpars, **getactuals();
 	char *reptext, *macro2buffer();
+	register struct mlist *repl;
 	int size;
 
 	if (mac->mc_flag & NOREPLACE) {
@@ -70,27 +71,36 @@ replace(idef)
 		if (mac->mc_flag & FUNC) {
 			struct idf *param = findidf(*actpars);
 
+			repl = new_mlist();
 			if (param && param->id_macro) 
 				reptext = "1";
 			else
 				reptext = "0";
 			InsertText(reptext, 1);
-			mac->next = ReplaceList;
-			ReplaceList = mac;
+
+			repl->next = ReplaceList;
+			ReplaceList = repl;
+			repl->m_mac = mac;
 			return 1;
 		}
 	}
+
+	repl = new_mlist();
+	repl->m_mac = mac;
 	if (mac->mc_flag & FUNC) /* this macro leads to special action	*/
 		macro_func(idef);
 	if (mac->mc_nps <= 0) {
-		mac->mc_flag |= NOREPLACE;
 		reptext = mac->mc_text;
 		size = mac->mc_length;
+		mac->mc_flag |= NOREPLACE;	/* a file called __FILE__ ??? */
 	}
-	else reptext = macro2buffer(idef, actpars, &size); /* create input buffer */
+	else {
+		reptext = macro2buffer(idef, actpars, &size); /* create input buffer */
+		repl->m_repl = reptext;
+	}
 	InsertText(reptext, size);
-	mac->next = ReplaceList;
-	ReplaceList = mac;
+	repl->next = ReplaceList;
+	ReplaceList = repl;
 	return 1;
 }
 
@@ -182,14 +192,18 @@ DoUnstack()
 EXPORT
 EnableMacros()
 {
-	register struct macro *p = ReplaceList;
+	register struct mlist *p = ReplaceList;
 
 	assert(Unstacked > 0);
 	while (Unstacked > 0) {
+		struct mlist *nxt = p->next;
+
 		assert(p != 0);
-		p->mc_flag &= ~NOREPLACE;
-		p->mc_count = 0;
-		p = p->next;
+		p->m_mac->mc_flag &= ~NOREPLACE;
+		if (p->m_mac->mc_count) p->m_mac->mc_count--;
+		if (p->m_repl) free(p->m_repl);
+		free_mlist(p);
+		p = nxt;
 		Unstacked--;
 	}
 	ReplaceList = p;

@@ -36,6 +36,24 @@ extern char *std_alloc();
 #endif
 #define	free_macro(p) st_free(p, &h_macro, sizeof(struct macro))
 
+struct mlist {
+	struct mlist *next;
+	struct macro *m_mac;
+	char *m_repl;
+};
+
+/* allocation definitions of struct mlist */
+extern char *st_alloc();
+extern struct mlist *h_mlist;
+#ifdef DEBUG
+extern int cnt_mlist;
+extern char *std_alloc();
+#define	new_mlist() ((struct mlist *) std_alloc((char **)&h_mlist, sizeof(struct mlist), 20, &cnt_mlist))
+#else
+#define	new_mlist() ((struct mlist *) st_alloc((char **)&h_mlist, sizeof(struct mlist), 20))
+#endif
+#define	free_mlist(p) st_free(p, &h_mlist, sizeof(struct mlist))
+
 
 /* `token' numbers of keywords of command-line processor
 */
