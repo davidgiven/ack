@@ -52,6 +52,7 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define OPT	"optimizer"
 #define LINKER	"linker"
 #define COMBINER "combiner"
+#define PRIO	"priority"
 #define RUNT    "rts"
 #define NEEDT	"need"
 #define CALL	"callname"
@@ -181,6 +182,9 @@ intrf() {
 		if ( strcmp(ty_name,COMBINER)==0 ) {
 			if ( new->t_combine ) twice=YES ;
 			new->t_combine= YES ;
+		} else
+		if ( strcmp(ty_name,PRIO)==0 ) {
+			new->t_priority= atoi(bol) ;
 		} else
 		if ( strcmp(ty_name,PROP)==0 ) {
 			/* Obsolete by now, to be removed */

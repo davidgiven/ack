@@ -43,6 +43,9 @@ enum f_path getpath(first) register trf **first ; {
 
 /******************** data used only while scanning *******************/
 
+static	int	last_pcount;	/* The added priority of
+				   the best path so far */
+
 static  int     last_ncount;    /* The # of non-optimizing transformations
 				   in the best path sofar */
 
@@ -138,20 +141,21 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 
 scan_found() {
 	register list_elem *scan;
-	int ncount, ocount ;
+	int ncount, ocount, pcount ;
 
 	suf_found= 1;
 #ifdef DEBUG
 	if ( debug>=3 ) vprint("Scan found\n") ;
 #endif
 	/* Gather data used in comparison */
-	ncount=0; ocount=0;
+	ncount=0; ocount=0; pcount=0;
 	scanlist(l_first(tr_list),scan) {
 		if (t_cont(*scan)->t_scan) {
 #ifdef DEBUG
 			if ( debug>=4 ) vprint("%s-",t_cont(*scan)->t_name) ;
 #endif
 			if( t_cont(*scan)->t_optim ) ocount++ ;else ncount++ ;
+			pcount += t_cont(*scan)->t_priority ;
 		}
 	}
 #ifdef DEBUG
@@ -160,14 +164,17 @@ scan_found() {
 	/* Is this transformation better then any found yet ? */
 #ifdef DEBUG
 	if ( debug>=3 ) {
-		vprint("old n:%d, o:%d - new n:%d, o:%d\n",
-			last_ncount,last_ocount,ncount,ocount) ;
+		vprint("old n:%d, o:%d, p:%d - new n:%d, o:%d, p:%d\n",
+			last_ncount,last_ocount,last_pcount,
+			ncount,ocount,pcount) ;
 	}
 #endif
 	if ( last_ncount== -1 ||                /* None found yet */
-	     last_ncount>ncount ||              /* Shorter nec. path */
-	     (last_ncount==ncount &&            /* Same nec. path, optimize?*/
-		(Optflag? last_ocount<ocount : last_ocount>ocount ) ) ) {
+	     last_pcount<pcount ||		/* Better priority */
+	     ( last_pcount==pcount &&		/* Same prio, and */
+	        ( last_ncount>ncount ||              /* Shorter nec. path */
+	          (last_ncount==ncount &&            /* Same nec. path, optimize?*/
+		    (Optflag? last_ocount<ocount : last_ocount>ocount ))))) {
 		/* Yes it is */
 #ifdef DEBUG
 		if ( debug>=3 ) vprint("Better\n");
@@ -175,7 +182,7 @@ scan_found() {
 		scanlist(l_first(tr_list),scan) {
 			t_cont(*scan)->t_bscan=t_cont(*scan)->t_scan;
 		}
-		last_ncount=ncount; last_ocount=ocount;
+		last_ncount=ncount; last_ocount=ocount; last_pcount=pcount;
 	}
 }
 

@@ -30,6 +30,7 @@ struct transform {
 	int	t_linker:1 ;	/* The linker usurps all unrecognized flags */
 	int	t_do:1 ;	/* Is in a path to execute */
 	int	t_blocked:1 ;	/* An input file could not be produced */
+	short	t_priority ;	/* Importance of including phase in scan */
 	list_head t_inputs ;	/* The input 'path's of a combiner */
 	char	*t_origname ;	/* The basename of the output file */
 	trf	*t_next ;	/* The transformation to be executed next */
