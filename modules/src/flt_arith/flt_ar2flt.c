@@ -21,22 +21,20 @@ flt_arith2flt(n, e, uns)
 		n = -n;
 	}
 	else	e->flt_sign = 0;
-	e->m1 = e->m2 = 0;
+	switch(sizeof(arith)) {
+	case 4:
+		e->m1 = n; e->m2 = 0; break;
+	default:
+		e->m1 = (n >> (sizeof(arith)*8 - 32)) & 0xFFFFFFFF;
+		e->m2 = n << 32;
+		break;
+	}
 	if (n == 0) {
 		e->flt_exp = 0;
 		return;
 	}
 	e->flt_exp = 63;
 		
-	for (i = 64; i > 0 && n != 0; i--) {
-		flt_b64_sft(&(e->flt_mantissa),1);
-		e->m1 |= (n & 1) << 31;
-		n = (n >> 1) & ~(0x80L << 8*(sizeof(arith)-1));
-	}
-
-	if (i > 0) {
-		flt_b64_sft(&(e->flt_mantissa), i);
-	}
 	flt_status = 0;
 	flt_nrm(e);
 }

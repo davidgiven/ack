@@ -288,23 +288,21 @@ flt_str2flt(s, e)
 	flt_chk(e);
 }
 
-#define NDIGITS 128
+#define NDIG 18
 
 static char *
-flt_ecvt(e, ndigit, decpt, sign)
+flt_ecvt(e, decpt, sign)
 	register flt_arith *e;
-	int ndigit, *decpt, *sign;
+	int *decpt, *sign;
 {
 	/*	Like ecvt(), but for extended precision */
 
-	static char buf[NDIGITS+1];
+	static char buf[NDIG+1];
 	register char *p = buf;
 	register char *pe;
 	register int findex = 0;
 
-	if (ndigit < 0) ndigit = 0;
-	if (ndigit > NDIGITS) ndigit = NDIGITS;
-	pe = &buf[ndigit];
+	pe = &buf[NDIG];
 	buf[0] = '\0';
 
 	*sign = 0;
@@ -416,6 +414,7 @@ flt_ecvt(e, ndigit, decpt, sign)
 			}
 		}
 		*pe = '\0';
+		while (--pe > buf && *pe == '0') *pe = '\0';
 	}
 	return buf;
 }
@@ -425,7 +424,6 @@ flt_flt2str(e, buf, bufsize)
 	char *buf;
 {
 
-#define NDIG	19
 	int sign, dp;
 	register int i;
 	register char *s1;
@@ -435,14 +433,17 @@ flt_flt2str(e, buf, bufsize)
 
 	e1 = *e;
 	flt_status = 0;
-	s1 = flt_ecvt(&e1,NDIG,&dp,&sign);
+	s1 = flt_ecvt(&e1,&dp,&sign);
         if (sign)
                 *s++ = '-';
         *s++ = *s1++;
         *s++ = '.';
         for (i = NDIG-1; i > 0; i--) {
                 if (*s1) *s++ = *s1++;
-                else *s++ = '0';
+                else {
+			if (i == NDIG-1) *s++ = '0';
+			break;
+		}
 	}
         if (e->m1 | e->m2) {
 		--dp ;
