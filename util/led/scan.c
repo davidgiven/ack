@@ -302,9 +302,10 @@ putemitindex(sectindex, emitoff, allopiece)
 			while (zero--) *p++ = 0;
 		}
 		else	 return FALSE;
+		zero = 0;
 	}
 	zeros[allopiece - ALLOEMIT] =
-		((struct outsect *) modulptr(sectindex))->os_size - flen;
+	 zero + ((struct outsect *) modulptr(sectindex))->os_size - flen;
 	if ((emitindex = alloc(allopiece, flen)) != BADOFF) {
 		*(ind_t *)modulptr(emitoff) = emitindex;
 		return TRUE;

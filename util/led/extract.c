@@ -114,6 +114,7 @@ process(head)
 	while (nsect--) {
 		if (sects->os_flen) {
 			/* contains non-zero stuff */
+			outhead.oh_nemit += outsp->os_size - outsp->os_flen;
 			outsp->os_flen = outsp->os_size + sects->os_flen;
 		}
 		else {
