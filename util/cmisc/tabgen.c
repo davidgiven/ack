@@ -12,7 +12,7 @@
 #include <stdio.h> 
 
 #ifndef NORCSID
-static char *RcsId = "$Header$";
+static char *RcsId = "$Id$";
 #endif
 
 #define MAXBUF	256
