@@ -282,6 +282,7 @@ struct { char *name; int class, segment;}
 				{ "C_inp", P_ARG, NOSEG},
 				{ "C_ior", W_ARG, SEGTXT},
 				{ "C_ior_narg", NO_ARGS, SEGTXT},
+				{ "C_jump", _STRING, SEGTXT},
 				{ "C_lae", EXTERNAL, SEGTXT},
 				{ "C_lae_dlb", EXTERNAL_DLB, SEGTXT},
 				{ "C_lae_dnam", EXTERNAL_DNAM, SEGTXT},
@@ -300,6 +301,7 @@ struct { char *name; int class, segment;}
 				{ "C_lin", N_ARG, SEGTXT},
 				{ "C_lni", NO_ARGS, SEGTXT},
 				{ "C_loc", C_ARG, SEGTXT},
+				{ "C_locals", N_ARG, SEGTXT},
 				{ "C_loe", EXTERNAL, SEGTXT},
 				{ "C_loe_dlb", EXTERNAL_DLB, SEGTXT},
 				{ "C_loe_dnam", EXTERNAL_DNAM, SEGTXT},
@@ -332,6 +334,7 @@ struct { char *name; int class, segment;}
 				{ "C_pnam", P_ARG, NOSEG},
 				{ "C_pro", P_ARG, SEGTXT},
 				{ "C_pro_narg", NO_ARGS, SEGTXT},
+				{ "C_prolog", NO_ARGS, SEGTXT},
 				{ "C_rck", W_ARG, SEGTXT},
 				{ "C_rck_narg", NO_ARGS, SEGTXT},
 				{ "C_ret", Z_ARG, SEGTXT},
@@ -414,10 +417,7 @@ struct { char *name; int class, segment;}
 				{ "C_zre_dnam", EXTERNAL_DNAM, SEGTXT},
 				{ "C_zrf", W_ARG, SEGTXT},
 				{ "C_zrf_narg", NO_ARGS, SEGTXT},
-				{ "C_zrl", L_ARG, SEGTXT},
-				{ "C_jump", _STRING, SEGTXT},
-				{ "C_locals", N_ARG, SEGTXT},
-				{ "C_prolog", NO_ARGS, SEGTXT}
+				{ "C_zrl", L_ARG, SEGTXT}
 			};
 
 set_C_instr_info( instr)
