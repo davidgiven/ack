@@ -99,6 +99,7 @@ flex : $(FLEXOBJS)
 
 first_flex:
 	cp $(SRC_DIR)/initscan.c scan.c
+	chmod +w scan.c
 	make $(MFLAGS) flex
 
 parse.h parse.c : $(SRC_DIR)/parse.y
