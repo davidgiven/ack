@@ -39,6 +39,7 @@ name asld
 		(.f:{TAIL}={EM}/{LIB}f77 {EM}/{LIB}ac) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.p.b.ocm.mod.c.f.e:{TAIL}={EM}/{LIB}mon)
+		(.p.b.ocm.mod.c.f.e:{TAIL}={EM}/{LIB}mon) \
+		({RTS}{ANSI?}:.cansi={EM}/lib/em44/end_em)
 	linker
 end
