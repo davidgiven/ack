@@ -182,7 +182,7 @@ static params_to_regs()		/* copy required parameters to registers */
 			reg_dat[i].offset, reg_dat[i].reg);
 
   for (i = 0; i < nr_flt_vars; i++)
-	if (reg_dat[i].offset >= 4092) {
+	if (flt_dat[i].offset >= 4092) {
 		fprint(codefile, "set	%d, %s\n",
 			reg_dat[i].offset, reg_dat[i].reg);
 		fprint(codefile, "ld	[%%l1+%s], %s\n",
