@@ -629,7 +629,7 @@ pat stl inreg($1)==reg_any
 #endif
 pat stl
   with regorconst
-  kills indexed,locals %ind>=$1 && %ind<$1+2
+  kills indexed,locals %ind+%size > $1 && %ind < $1+2
   gen move %1,{LOCAL,$1,2}
   with exact STACK
   kills ALL
@@ -724,7 +724,7 @@ pat sti $1==1
   kills indirects
   gen move %2,{EXTERN1,%1.off}
   with ADDR_LOCAL regorconst12
-  kills indexed,locals %ind<=%1.ind && %ind+%size>%1.ind
+  kills indexed,locals %ind+%size > $1 && %ind <= $1
   gen move %2,{ind_regoff1,bp,%1.ind}
 
 pat sti $1==4
@@ -1268,7 +1268,7 @@ pat inl inreg($1)==reg_any
 #endif
 
 pat inl 
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen inc {LOCAL, $1, 2}
 
 pat ine
@@ -1286,7 +1286,7 @@ pat del inreg($1)==reg_any
 #endif
 
 pat del 
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen dec {LOCAL, $1, 2}
 
 pat dee
@@ -1300,7 +1300,7 @@ pat zrl inreg($1)==reg_any
 #endif
 
 pat zrl 
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen move {ANYCON, 0}, {LOCAL,$1,2}
 
 pat zre
@@ -1360,7 +1360,7 @@ pat lil xor sil $1==$3 && $2==2 && inreg($1)==reg_any	call lilrxxxsil("xor")
 
 proc lolxxxstl example lol adi stl
 with regorconst
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen axx* {LOCAL, $1, 2}, %1
 
 pat lol adi stl $1==$3 && $2==2		call lolxxxstl("add")
@@ -1420,7 +1420,7 @@ pat loe xor ste $1==$3 && $2==2		call loexxxste("xor")
 
 proc ldlxxxsdl example ldl adi sdl
 with regorconst regorconst
-  kills indexed, locals %ind>=$1 && %ind<$1+4
+  kills indexed,locals %ind+%size > $1 && %ind < $1+4
   gen axx[1] {LOCAL,$1,2},%1
       axx[2] {LOCAL,$1+2,2},%2
 
@@ -1431,7 +1431,7 @@ pat ldl ior sdl $1==$3 && $2==4		call ldlxxxsdl("or", "or")
 pat ldl xor sdl $1==$3 && $2==4		call ldlxxxsdl("xor", "xor")
 
 proc ldlcxxsdl example ldl ldc sbi sdl
-  kills indexed, locals %ind>=$1 && %ind<$1+2
+  kills indexed,locals %ind+%size > $1 && %ind < $1+4
   gen axx[1] {LOCAL,$1,2},{ANYCON,loww($2)}
       axx[2] {LOCAL,$1+2,2},{ANYCON,highw($2)}
 
@@ -1582,7 +1582,7 @@ pat lol loc sru stl $1==$4 && $3==2 && inreg($1)==reg_any
 #endif
 
 proc lolcxxstl example lol loc sbi stl
-  kills indexed, locals %ind>=$1 && %ind<$1+2
+  kills indexed,locals %ind+%size > $1 && %ind < $1+2
   gen axx* {LOCAL,$1,2},{ANYCON,$2}
 
 pat lol loc sbi stl $1==$4 && $3==2		call lolcxxstl("sub")
@@ -1593,7 +1593,7 @@ pat lol loc sri stl $1==$4 && $3==2 && $2==1	call lolcxxstl("sar")
 pat lol loc sru stl $1==$4 && $3==2 && $2==1	call lolcxxstl("shr")
 
 proc lolcshstl example lol loc sli stl
-  kills indexed, locals %ind>=$1 && %ind<$1+2
+  kills indexed,locals %ind+%size > $1 && %ind < $1+2
   uses CXREG = {ANYCON,$2}
   gen sxx* {LOCAL,$1,2},cl
 
@@ -1633,11 +1633,11 @@ gen neg {LOCAL, $1, 2}
 #endif
 
 pat lol ngi stl $1==$3 && $2==2
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen neg {LOCAL, $1, 2}
 
 pat ldl ngi sdl $1==$3 && $2==4
-kills indexed, locals %ind>=$1 && %ind<$1+4
+kills indexed,locals %ind+%size > $1 && %ind < $1+4
 gen neg {LOCAL, $1, 2}
     neg {LOCAL, $1+2, 2}
     sbb {LOCAL, $1+2, 2}, {ANYCON, 0}
@@ -1681,7 +1681,7 @@ gen not {LOCAL,$1,2}
 #endif
 
 pat lol com stl $1==$3 && $2==2
-kills indexed, locals %ind>=$1 && %ind<$1+2
+kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen not {LOCAL, $1, 2}
 
 #ifdef REGVARS
