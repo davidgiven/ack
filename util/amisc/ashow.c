@@ -181,6 +181,11 @@ showname(namep)
 		printf("\tass src file item\n"); break;
 	case S_COM:
 		printf("\tcommon\n"); break;
+	case 0:
+		break;
+	default:
+		printf("\tstab 0x%x\n", namep->on_type >> 8);
+		printf("\tdesc 0x%x\n", namep->on_desc);
 	}
 	printf("\tvalue %ld\n", namep->on_valu);
 }
