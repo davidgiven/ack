@@ -7,8 +7,9 @@
 #include <em.h>
 #include <em_reg.h>
 #include <em_mes.h>
-#include "push_pop.h"
+#include <stb.h>
 #include "mach.h"
+#include "push_pop.h"
 #include <stdio.h>
 
 #define MAX_NR_REGS 12
@@ -26,15 +27,18 @@ typedef struct reg_info {
 	reg_t reg, reg2;	/* reg2 used for doubles only */
 } reg_info;
 
-reg_info reg_dat[MAX_NR_REGS], flt_dat[MAX_NR_FLTS];
+static reg_info reg_dat[MAX_NR_REGS], flt_dat[MAX_NR_FLTS];
 
-int current_reg_mes[RM_COUNT+4];
+static int current_reg_mes[RM_COUNT+4];
 
-int in_reg_mes = 0;	/* boolean */
-int reg_mes_nr;
+static int in_reg_mes = 0;	/* boolean */
+static int reg_mes_nr;
+static int db_mes = 0;
+static int db_str = 0;
+static int db_nul = 0;		/* boolean */
 
-int worst_reg_pri, worst_flt_pri; /* reset by C_prolog (to some large number) */
-int nr_reg_vars, nr_flt_vars;		/* dito  (both to 0) */
+static int worst_reg_pri, worst_flt_pri; /* reset by C_prolog (to some large number) */
+static int nr_reg_vars, nr_flt_vars;		/* dito  (both to 0) */
 
 init_reg_man()
 {
@@ -42,7 +46,7 @@ init_reg_man()
   nr_reg_vars = nr_flt_vars = 0;
 }
 
-reg_t my_alloc_reg(pri,loc)
+static reg_t my_alloc_reg(pri,loc)
 int pri, *loc;
 {
 	reg_t S1;
@@ -68,7 +72,7 @@ int pri, *loc;
 	return S1;
 }
 
-reg_t my_alloc_double(pri,loc,r2)
+static reg_t my_alloc_double(pri,loc,r2)
 int pri, *loc;
 reg_t *r2;
 /* implementation note: my_alloc_double only reclaims other doubles
@@ -101,7 +105,7 @@ reg_t *r2;
 	return S1;
 }
 
-reg_t my_alloc_float(pri,loc)
+static reg_t my_alloc_float(pri,loc)
 int pri, *loc;
 /* just as for my_alloc_double, my_alloc_float never reclaims a double,
  * even though this me be useful and easy. Sorry.
@@ -162,7 +166,7 @@ alloc_all_reg_vars()
   check_cache();
 }
 
-params_to_regs()		/* copy required parameters to registers */
+static params_to_regs()		/* copy required parameters to registers */
 {
   int i, j;
 
@@ -182,13 +186,13 @@ params_to_regs()		/* copy required parameters to registers */
 	}
 }
 
-cmp_flt_dat(e1, e2)
+static cmp_flt_dat(e1, e2)
 reg_info *e1, *e2;
 {
   return (e1->offset - e2->offset);
 }
 
-save_float_regs()
+static save_float_regs()
 {
   int i;
   int offset;
@@ -237,13 +241,23 @@ int ms;
 	in_reg_mes = (ms == ms_reg);
 	if (ms == ms_gto)
 		fprint(codefile, "ta	3\n");
+	db_mes = (ms == ms_stb || ms == ms_std) ? ms : 0;
 }
+
+static dump_reg_tabs();
 
 C_mes_end()
 {
 	int pos;
 	reg_t S1, S2;
 
+	if (db_mes) {
+		db_nul = 0;
+		if (db_mes == ms_std && db_str == 2) fprint(codefile,",1f\n1:\n");
+		else fprint(codefile, "\n");
+		db_str = 0;
+		db_mes = 0;
+	}
 	if (!in_reg_mes)	/* end of some other mes */
 		return;
 	if (reg_mes_nr == 0) {	/* end of reg_mes's */
@@ -295,10 +309,92 @@ C_mes_end()
 C_cst( l)
 arith l;
 {
+	if (db_mes) {
+		if (! db_str) {
+			switchseg( SEGTXT);
+			if (l == N_SLINE) {
+				flush_cache();
+				fprintf(codefile, "call ___uX_LiB\nnop\n");
+			}
+			if (db_mes == ms_std) {
+				fprint(codefile, ".stabd 0x%lx,0", (long) l);
+			}
+			else	fprint(codefile, ".stabn 0x%lx,0", (long) l);
+			db_str = 1;
+			db_nul = 1;
+		}
+		else	fprint(codefile, ",0x%lx", (long) l);
+		if (! db_nul) {
+			fprint(codefile, ",0");
+			db_nul = 1;
+		}
+	}
 	if (in_reg_mes)
 		current_reg_mes[reg_mes_nr++] = l;
 }
 
+C_scon(s, l)
+register char *s;
+register arith l;
+{
+	if (db_mes) {
+		fprint(codefile, ".stabs \"");
+		while (--l) {
+			register int c = *s++;
+
+			if (isprint(c) && c != '"' && c != '\\')
+				fprint(codefile, "%c", c);
+			else
+				fprint(codefile, "\\%03o", c);
+		}
+		fprint(codefile, "\"");
+		db_str = 2;
+	}
+}
+
+C_dlb(l, off)
+label l;
+arith off;
+{
+	if (db_mes) {
+		fprint(codefile,",");
+		fprint(codefile, DLB_FMT, (long) l);
+		if (off) fprint(codefile,"+%ld", (long) off);
+	}
+}
+
+C_dnam(l, off)
+char *l;
+arith off;
+{
+	if (db_mes) {
+		fprint(codefile,",");
+		fprint(codefile, DNAM_FMT, l);
+		if (off) fprint(codefile,"+%ld", (long) off);
+	}
+}
+
+extern int B_procno;
+
+C_ilb(l)
+label l;
+{
+	if (db_mes) {
+		fprint(codefile,",");
+		fprint(codefile, ILB_FMT, B_procno, (long)l);
+	}
+}
+
+C_pnam(s)
+char *s;
+{
+	if (db_mes) {
+		fprint(codefile,",");
+		fprint(codefile, NAME_FMT, s);
+	}
+}
+
+static
 dump_reg_tabs(stream)
 FILE *stream;
 {
