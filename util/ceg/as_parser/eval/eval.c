@@ -192,13 +192,18 @@ char *str;
 pr_call( call)
 char *call;
 {
+	char c;
+
+	printf( "{");
 	if ( strncmp( "text", call, 4) == 0 && isdigit( *(call+4))) 
 		printf( "cur_pos += %d;", *(call+4) - '0');
 	else if ( strncmp( "reloc", call, 5) == 0 && isdigit( *(call+5)))
 		printf( "cur_pos += %d;", *(call+5) - '0');
 
 	pr_text_with_conversions( call);
-	printf( "fprint( outfile, \";\")");
+	printf( "fprint( outfile, \";\");");
+	printf( "}");
+	for (; ( c = getchar()) != ';' ; putchar( c));	/* skip ';' */
 }
 
 pr_elsif( quest)
@@ -220,16 +225,32 @@ char *quest;
 pr_text_with_conversions( str)
 char *str;
 {
-	char *ptr, *next_conversion(), *pr_conversion();
+	char *s, *ptr, *next_conversion(), *pr_conversion();
 
         while (  ptr = next_conversion( str)) {
 		/* ptr points to '%'-sign */
 	 	*ptr = '\0';
-		printf( "fprint( outfile, \"%s\");", str);
+		printf( "fprint( outfile, \"");
+
+		for ( s = str; *s != '\0'; s++)
+			if ( *s == '\n')
+				printf( "\\n");
+			else
+				putchar( *s);
+
+		printf( "\");");
 	 	*ptr = '%';
 	        str = pr_conversion( ptr);
 	}
-	printf( "fprint( outfile, \"%s\");", str);
+	printf( "fprint( outfile, \"");
+
+	for ( s = str; *s != '\0'; s++)
+		if ( *s == '\n')
+			printf( "\\n");
+		else
+			putchar( *s);
+
+	printf( "\");");
 }
 
 char *next_conversion( str)
