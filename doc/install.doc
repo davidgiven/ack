@@ -21,7 +21,7 @@ This description is intended for a VAX running BSD 4.1
 .UX
 \.
 Installation on VAX BSD4.2/4.3 systems,
-Sun-3 systems, and some System V systems
+Sun-2 or Sun-3 systems running Release 3.0 or newer, and some System V systems
 should be easy.
 Installation on PDP 11's running
 .UX
@@ -389,7 +389,7 @@ For some of these, the installation procedure has not been tested, as
 we don't have them. However,
 the pdp_v7, vax_bsd4_1a, pc_ix, sun3 and m68 systems are known to behave
 reasonably.
-The Sun systems should run Release 3.0 or later.
+The Sun systems should run Release 3.0 or newer.
 For ANY you can use any name you fancy,
 but the Kit will not be able to compile programs for your system.
 If you want to do that you have to read the section about "compilation
@@ -772,12 +772,12 @@ m68020	M68020/V/68	4/4	C		m68020
 			Basic
 			Occam
 
-sun3	SUN 3 R3.2	4/4	C		sun3
+sun3	SUN 3 R3.0	4/4	C		sun3
 			Pascal		m68020
 			Basic
 			Occam
 
-sun2	SUN 2 ???	4/4	C		sun2
+sun2	SUN 2 R3.0	4/4	C		sun2
 			Pascal		m68k4
 			Basic		m68k2
 			Occam
@@ -839,8 +839,9 @@ s2650	Signetics 2650				s2650	Assembler only
 .PP
 The commands \fBint\fP, \fBint22\fP, \fBint24\fP and \fBint44\fP
 produce e.out files with EM machine code which must be interpreted.
-The Kit contains two interpreters one running under PDP 11/V7 UNIX
-and the PMDS system.
+The Kit contains two interpreters: one running under PDP 11/V7 UNIX,
+and one for the M68000, running under the PMDS system, SUN systems, 
+the Mantra system, etc.
 The first one can only interpret 2/2 e.out files,
 the other takes 2/4 and 4/4 files.
 The PDP 11 interpreter executes floating point instructions.
