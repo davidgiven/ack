@@ -1415,6 +1415,13 @@ ChkCast(expp)
 	if (arg->nd_class == Value) {
 		*expp = *arg;
 		free_node(arg);
+		if (lefttype->tp_fund == T_SET) {
+			/* User deserves what he gets here ... */
+			arith val = expp->nd_INT;
+
+			expp->nd_set = MkSet((unsigned)(lefttype->tp_size));
+			expp->nd_set[0] = val;
+		}
 	}
 	else {
 		expp->nd_symb = CAST;
