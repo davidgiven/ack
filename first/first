@@ -292,7 +292,7 @@ ABC
 	do
 		if grep "name asopt" $i > /dev/null 2>&1
 		then
-			if [ -f $i.top ]
+			if test -f $i.top
 			then
 				:
 			else
@@ -354,7 +354,7 @@ ABC
 	)
 	done
 	( cd ../modules/src/malloc
-	  if [ -f param.h.orig ]
+	  if test -f param.h.orig
 	  then
 		:
 	  else
@@ -380,7 +380,7 @@ ABC
 	  : machines with word or pointer size not 2
 	  for i in em24 em44 m68020 m68k2 m68k4 mantra ns sun2 sun3 vax4
 	  do
-	  if [ -f $i/Action.orig ]
+	  if test -f $i/Action.orig
 	  then
 		:
 	  else
@@ -395,7 +395,7 @@ ABC
 	  done
 	)
 	( cd ..
-	  if [ -f Action.orig ]
+	  if test -f Action.orig
 	  then
 		:
 	  else
@@ -421,7 +421,7 @@ esac
 : find varargs include file
 : if not present use our own
 
-if [ -f /usr/include/varargs.h ]
+if test -f /usr/include/varargs.h
 then
 	:
 else
@@ -479,7 +479,7 @@ do
 done
 DISABLE_SUP=
 set i86 xenix3 minix 6500 6800 6805 6809 i80 em22 em24 em44 m68k2 pmds minixST m68k4 pmds4 sun2 mantra m68020 sun3 ns pdp s2650 vax4 z80 z8000
-while [ $# != 0 ]
+while test $# != 0
 do
     while :
     do
@@ -552,7 +552,7 @@ done
 for i in $DISABLE_LANG
 do
 	echo "disabling installation of $i"
-	if [ -f ../Action.orig ]
+	if test -f ../Action.orig
 	then
 		:
 	else
@@ -592,7 +592,7 @@ EOF
 	  for j in */$lib
 	  do
 	    ( cd $j/..
-	      if [ -f Action.orig ]
+	      if test -f Action.orig
 	      then
 		:
 	      else
@@ -612,7 +612,7 @@ DISABLE_INT=0
 for i in $DISABLE_SUP
 do
 	echo "disabling installation of $i"
-	if [ -f ../Action.orig ]
+	if test -f ../Action.orig
 	then
 		:
 	else
@@ -629,7 +629,7 @@ EOF
 		DISABLE_INT=1
 		;;
 	mantra)
-		if [ $SYSNAME = m68_sysV_0 ]
+		if test $SYSNAME = m68_sysV_0
 		then
 			DISABLE_INT=1
 		fi
@@ -650,7 +650,7 @@ EOF
 		;;
 	esac
 done
-if [ $DISABLE_INT = 1 ]
+if test $DISABLE_INT = 1
 then
 	ed - ../Action <<EOF
 /68000 interpreters/;/^end/s/^/!/
