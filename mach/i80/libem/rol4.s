@@ -16,7 +16,7 @@
 	mov l,c
 	shld .bcreg
 
-.rol4:	pop h		! low-order bytes of operand
+	pop h		! low-order bytes of operand
 	pop b		! high order bytes of operand
 
 	mov a,e
