@@ -3,7 +3,6 @@ MACHDEF="MACH=int44" "SUF=m"
 BCDEF="PREF=bc" "SUB=" "SRC=lang/basic/lib"
 
 install:
-	RANLIB=ranlib ; export RANLIB ;\
 	make -f $(MAKEFILE) $(BCDEF) $(MACHDEF) tailcp
 
 cmp:
