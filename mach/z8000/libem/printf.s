@@ -62,10 +62,8 @@ ready:	    !now really print the string we built in the buffer
 	push	*RR14, R3	!count
 	push	*RR14, R1	!buffer
 	push	*RR14, $2	!file descriptor
-	push	*RR14, $4	! write
-	calr	mon
-	pop	R1, *RR14
-	pop	R1, *RR14	! ignore result
+	calr	__write
+	inc	R15, $6
 
 	ldm	R4, savereg, $10
 	pushl	*RR14, saveret
