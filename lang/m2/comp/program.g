@@ -235,15 +235,16 @@ definition
 ProgramModule
 {
 	register t_def	*df;
-	int len;
 } :
 	MODULE
-	IDENT	{ len = strlen(dot.TOK_IDF->id_text);
-		  if (len > 10) len = 10;
-		  if (strncmp(FileName, dot.TOK_IDF->id_text, len)) {
-			warning(W_ORDINARY, "modulename %s does not match filename %s", dot.TOK_IDF->id_text, FileName);
-		  }
+	IDENT	{ 
 		  if (state == IMPLEMENTATION) {
+		  	int len = strlen(dot.TOK_IDF->id_text);
+
+		  	if (len > 10) len = 10;
+		  	if (strncmp(FileName, dot.TOK_IDF->id_text, len)) {
+				warning(W_ORDINARY, "modulename %s does not match filename %s", dot.TOK_IDF->id_text, FileName);
+		  	}
 			df = GetDefinitionModule(dot.TOK_IDF, 0);
 			CurrVis = df->mod_vis;
 		  }
