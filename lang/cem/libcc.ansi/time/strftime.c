@@ -4,7 +4,7 @@
 /* $Header$ */
 
 #include	<time.h>
-#include	"loc_incl.h"
+#include	"loc_time.h"
 
 /* The width can be -1 in both s_prnt() as in u_prnt(). This
  * indicates that as many characters as needed should be printed.

@@ -34,7 +34,7 @@ void _ftime(struct timeb *bp);
 #endif
 #endif
 
-#include	"loc_incl.h"
+#include	"loc_time.h"
 
 #define	RULE_LEN	120
 #define	TZ_LEN		10

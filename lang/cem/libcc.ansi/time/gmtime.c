@@ -5,7 +5,7 @@
 
 #include	<time.h>
 #include	<limits.h>
-#include	"loc_incl.h"
+#include	"loc_time.h"
 
 struct tm *
 gmtime(register const time_t *timer)

@@ -6,7 +6,7 @@
 /* This function is present for System V && POSIX */
 
 #include	<time.h>
-#include	"loc_incl.h"
+#include	"loc_time.h"
 
 void
 tzset(void)

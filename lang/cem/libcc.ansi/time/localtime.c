@@ -4,7 +4,7 @@
 /* $Header$ */
 
 #include	<time.h>
-#include	"loc_incl.h"
+#include	"loc_time.h"
 
 /* We must be careful, since an int can't represent all the seconds in a day.
  * Hence the adjustment of minutes when adding timezone and dst information.

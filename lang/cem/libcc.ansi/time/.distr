@@ -5,7 +5,7 @@ clock.c
 ctime.c
 difftime.c
 gmtime.c
-loc_incl.h
+loc_time.h
 localtime.c
 misc.c
 mktime.c
