@@ -25,6 +25,8 @@ extern int	flt_status;
 #define FLT_DIV0	004
 #define FLT_NOFLT	010
 #define FLT_BTSM	020
+
+#define FLT_STRLEN	32
 .PP
 .B flt_add(e1, e2, e3)
 .B flt_arith *e1, *e2, *e3;
@@ -181,6 +183,7 @@ stored in
 At most
 .I bufsize
 characters are stored.
+The maximum length needed is available in the constant FLT_STRLEN.
 .PP
 .B flt_arith2flt
 converts the number

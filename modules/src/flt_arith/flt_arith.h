@@ -25,4 +25,5 @@ extern int	flt_status;
 #define	FLT_NOFLT	010
 #define FLT_BTSM	020
 
+#define FLT_STRLEN	32	/* max length of result of flt_flt2str() */
 #endif __FLT_INCLUDED__
