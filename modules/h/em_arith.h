@@ -1,0 +1,3 @@
+/* $Header$ */
+
+#define arith	long
