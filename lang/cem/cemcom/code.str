@@ -12,6 +12,8 @@ struct string_cst	{	/* storing string constants */
 	label sc_dlb;
 };
 
+extern struct string_cst *str_list;
+
 /* ALLOCDEF "string_cst" 10 */
 
 #define	LVAL	0

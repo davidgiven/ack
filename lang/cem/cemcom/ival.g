@@ -489,12 +489,10 @@ check_ival(expp, tp)
 			else	/* e.g., int a; int *p = &a; */
 				C_con_dnam(idf->id_text, expr->VL_VALUE);
 		}
-#ifndef	LINT
 		else {
 			ASSERT(expr->VL_CLASS == Label);
 			C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
-#endif	LINT
 		break;
 #ifndef NOFLOAT
 	case FLOAT:

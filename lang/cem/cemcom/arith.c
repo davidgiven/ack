@@ -339,7 +339,6 @@ function2pointer(exp)
 string2pointer(ex)
 	register struct expr *ex;
 {
-#ifndef	LINT
 	/*	The expression, which must be a string constant, is converted
 		to a pointer to the string-containing area.
 	*/
@@ -350,7 +349,6 @@ string2pointer(ex)
 	ex->VL_CLASS = Label;
 	ex->VL_LBL = lbl;
 	ex->VL_VALUE = (arith)0;
-#endif	LINT
 }
 
 opnd2integral(expp, oper)
