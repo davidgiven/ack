@@ -115,6 +115,7 @@ GetDefinitionModule(id, incr)
 		else {
 			if (!is_anon_idf(id) && GetFile(id->id_text)) {
 
+				char *f = FileName;
 				DefModule();
 				df = lookup(id, GlobalScope, D_IMPORTED, 0);
 				if (level == 1 &&
@@ -135,6 +136,7 @@ GetDefinitionModule(id, incr)
 					else Modules = n;
 					nd_end = n;
 				}
+				free(f);
 			}
 			else {
 				df = lookup(id, GlobalScope, D_IMPORTED, 0);
