@@ -66,6 +66,7 @@ unsigned length;
 	char *s,*c;
 	extern char *malloc() ;
 	s=c= malloc(length);
+	if ( !s ) fatal("Out of memory") ;
 	while(length--)*c++ =0;
 	return(s);
 }
