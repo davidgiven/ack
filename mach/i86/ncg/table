@@ -803,6 +803,9 @@ with EXACT REG rmorconst
   gen add %1,%2			yields %1
 with rmorconst REG
   gen add %2,%1			yields %2
+with EXACT rmorconst const
+  uses reusing %1,REG=%1
+  gen add %a,%2			yields %a
 
 pat adi $1==4
 with EXACT REG REG rmorconst rmorconst
