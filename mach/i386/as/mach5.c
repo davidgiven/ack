@@ -507,23 +507,30 @@ imul(reg)
 		if (exp_2.typ == S_ABS && fitb(exp_2.val)) {
 			/* case 1: 1 byte encoding of immediate */
 			emit1(0153);
-			ea_1(reg << 3);
+			ea_1((reg & 07) << 3);
 			emit1((int)(exp_2.val));
 		}
 		else {
 			/* case 2: WORD or DWORD encoding of immediate */
 			emit1(0151);
-			ea_1(reg << 3);
+			ea_1((reg & 07) << 3);
 			RELOMOVE(relonami, rel_2);
 			opsize_exp(exp_2, 1);
 		}
 	}
-	else if (is_reg(reg_1) && ((reg_1&7) == reg)) {
+	else if (is_reg(reg_1) && ((reg_1&7) == (reg & 07))) {
 		/* the "reg" field and the "reg_or_mem" field are the same,
 		   and the 3rd operand is not an immediate ...
 		*/
 		if (reg == 0) {
 			/* how lucky we are, the target is the ax register */
+			/* However, we cannot make an optimization for f.i.
+				imul eax, blablabla
+			   because the latter does not affect edx, whereas
+				imul blablabla
+			   does! Therefore, "reg" is or-ed with 0x10 in the
+			   former case, so that the test above fails.
+			*/
 			emit1(0367);
 			ea_2(050);
 		}
@@ -531,7 +538,7 @@ imul(reg)
 			/* another register ... */
 			emit1(0xF);
 			emit1(0257);
-			ea_2(reg << 3);
+			ea_2((reg & 07) << 3);
 		}
 	}
 	else badsyntax();

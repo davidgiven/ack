@@ -88,9 +88,9 @@ oper	:	NOOP_1
 	|	IMUL	ea_2
 			{	reg_1 = IS_R32; imul(0); }
 	|	IMUL	R32 ',' ea_2
-			{	reg_1 = $2 | IS_R32; imul($2); }
+			{	reg_1 = $2 | IS_R32; imul($2|0x10); }
 	|	IMUL	R32 ',' ea_ea
-			{	imul($2);}
+			{	imul($2|0x10);}
 	|	INT absexp
 			{	if ($2==3)
 					emit1(0314);
