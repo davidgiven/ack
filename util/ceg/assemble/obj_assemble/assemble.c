@@ -214,7 +214,7 @@ char *mnem;
 		else if ( rel < 0)
 			high = mid;
 		else
-			/* pas op, mid is naar beneden afgerond !! */
+			/* watch it, mid is truncated */
 			low = ( mid == low ? low + 1: mid);
 	}
 	( *( instruction[ mid]))( &operand[0], &operand[1], &operand[2], 
