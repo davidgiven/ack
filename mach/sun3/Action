@@ -1,0 +1,6 @@
+name "Ack.out --> SUN 68020 a.out format conversion program"
+dir cv
+end
+name "SUN 68020 systemcall library"
+dir libsys
+end
