@@ -7,8 +7,9 @@
 #include	<limits.h>
 #include	"loc_incl.h"
 
-/* The code assumes that time_t is an unsigned long. When it is not, some
- * things may have to change.
+/* The code assumes that unsigned long can be converted to time_t.
+ * A time_t should not be wider than unsigned long, since this would mean
+ * that the check for overflow at the end could fail.
  */
 time_t
 mktime(register struct tm *timep)
@@ -16,7 +17,7 @@ mktime(register struct tm *timep)
 	register long day, year;
 	register int tm_year;
 	int yday, month;
-	register time_t seconds;
+	register unsigned long seconds;
 	int overflow;
 	unsigned dst;
 
@@ -63,7 +64,7 @@ mktime(register struct tm *timep)
 	timep->tm_mday = day + 1;
 	_tzset();			/* set timezone and dst info  */
 	year = EPOCH_YR;
-	if (timep->tm_year < year - YEAR0) return -1;
+	if (timep->tm_year < year - YEAR0) return (time_t)-1;
 	seconds = 0;
 	day = 0;			/* means days since day 0 now */
 	overflow = 0;
@@ -124,5 +125,6 @@ mktime(register struct tm *timep)
 
 	if (overflow) return (time_t)-1;
 
-	return seconds;
+	if ((time_t)seconds != seconds) return (time_t)-1;
+	return (time_t)seconds;
 }
