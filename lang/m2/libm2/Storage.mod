@@ -170,11 +170,9 @@ IMPLEMENTATION MODULE Storage;
 		HALT;
 	END;
 	p := a - UNIT;
-	WITH p^ DO
-		IF BSIZE # ((size + (UNIT - 1)) DIV UNIT) THEN
-			pc := a + size;
-			pc^ := MAGICC;
-		END;
+	IF p^.BSIZE * UNIT # size THEN
+		pc := a + size;
+		pc^ := MAGICC;
 	END;
   END ALLOCATE;
 
