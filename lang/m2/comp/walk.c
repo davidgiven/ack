@@ -272,7 +272,7 @@ ExpectBool(nd)
 
 	chk_expr(nd);
 
-	if (nd->nd_type != bool_type) {
+	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
 		node_error(nd, "boolean expression expected");
 	}
 

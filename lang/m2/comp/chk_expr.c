@@ -369,7 +369,7 @@ left->nd_def->df_idf->id_text, left->nd_def->df_value.df_stdname));
 					/* A dynamic array has no explicit
 					   index type
 					*/
-					expp->nd_type = int_type;
+					expp->nd_type = intorcard_type;
 				}
 				else	cstcall(expp, S_MAX);
 				break;
@@ -667,16 +667,19 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 	}
 
 	if (expp->nd_symb == '[') {
-		/* Handle ARRAY selection specially too! */
+		/* Handle ARRAY selection specially too!
+		*/
 		if (tpl->tp_fund != T_ARRAY) {
 			node_error(expp,
 				   "array index not belonging to an ARRAY");
 			return 0;
 		}
-		if (!TstCompat(tpl->next, tpr)) {
+
+		if ((tpl->next && !TstCompat(tpl->next, tpr)) ||
+		    (!tpl->next && !TstCompat(intorcard_type, tpr)) {
 			node_error(expp, "incompatible index type");
-			return 0;
 		}
+
 		expp->nd_type = tpl->arr_elem;
 		return 1;
 	}

@@ -61,7 +61,7 @@ ProcedureHeading(struct def **pdf; int type;)
 			/* We already saw a definition of this type
 			   in the definition module.
 			*/
-		  	if (!TstTypeEquiv(tp, df->df_type)) {
+		  	if (!TstProcEquiv(tp, df->df_type)) {
 error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
 			}
 			FreeType(df->df_type);
