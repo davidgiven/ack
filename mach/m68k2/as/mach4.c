@@ -23,7 +23,7 @@ operation
 			{	branch($1, $2);}
 	|	DBR DREG ',' expr
 			{	$4.val -= (DOTVAL+2);
-				fit(fitw($4.val));
+				Xfit(fitw($4.val));
 				emit2($1 | $2);
 #ifdef RELOCATION
 				newrelo($4.typ, RELPC|RELO2|RELBR|RELWR);
@@ -102,7 +102,7 @@ operation
 	|	UNLK AREG
 			{	emit2(047130 | $2);}
 	|	TRAP '#' absexp
-			{	fit(fit4($3)); emit2(047100|low4($3));}
+			{	Xfit(fit4($3)); emit2(047100|low4($3));}
 	|	RTD imm
 			{	test68010();
 				emit2(047164);

@@ -23,19 +23,17 @@ ea_1(sz, bits)
 	if (bits)
 		serror("bad addressing categorie");
 	if (flag & FITW)
-		if (
+		Xfit (
 			! fitw(exp_1.val)
 			&&
 			(mrg_1 != 074 || ! fit16(exp_1.val))
-		)
-			nofit();
+		) ;
 	if (flag & FITB) {
-		if (
+		Xfit (
 			! fitb(exp_1.val)
 			&&
 			(mrg_1 != 074 || ! fit8(exp_1.val))
-		)
-			nofit();
+		);
 		if (mrg_1 == 074)
 			exp_1.val &= 0xFF;
 	}
@@ -60,7 +58,7 @@ ea_2(sz, bits)
 
 index(hibyte)
 {
-	fit(fitb(exp_2.val));
+	Xfit(fitb(exp_2.val));
 	exp_2.val = hibyte | lowb(exp_2.val);
 }
 
@@ -92,12 +90,12 @@ shift_op(opc, sz)
 		return;
 	}
 	if (mrg_2 < 010) {
-		fit(fit3(exp_1.val));
+		Xfit(fit3(exp_1.val));
 		emit2((opc&0170430) | sz | low3(exp_1.val)<<9 | mrg_2);
 		return;
 	}
 	checksize(sz, 2);
-	fit(exp_1.val == 1);
+	Xfit(exp_1.val == 1);
 	emit2((opc&0177700) | mrg_2);
 	ea_2(SIZE_W, MEM|ALT);
 }
@@ -359,7 +357,7 @@ expr_t exp;
 		else
 			emit2(opc | lowb(exp.val));
 	} else {
-		fit(fitw(exp.val));
+		Xfit(fitw(exp.val));
 		emit2(opc);
 #ifdef RELOCATION
 		newrelo(exp.typ, RELPC|RELO2|RELBR|RELWR);
@@ -454,4 +452,9 @@ ea73(ri, sz)
 	exp_2.val -= (DOTVAL + 2);
 	checksize(sz, 2|4);
 	index(ri<<12 | (sz&0200)<<4);
+}
+
+Xnofit()
+{
+	if (pass == PASS_3) serror("too big");
 }
