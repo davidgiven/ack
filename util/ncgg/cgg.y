@@ -757,8 +757,6 @@ kills
 		{ $$ = 0; }
 	| KILLS kill_list
 		{ $$ = $2;
-		  if (optstack)
-			error("No sense in giving kills in this pattern");
 		}
 	;
 kill_list

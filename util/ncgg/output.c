@@ -96,6 +96,7 @@ finishcode() {
 
 	if (code_in_c)
 		fprintf(ctable,"\n};\n\n");
+	fprintf(ctable, "int allsetno = %d;\n", allsetno);
 	if (tabledebug) {
 		int fd;
 		int sz;
@@ -683,7 +684,7 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 	} else if (stackcoerc)
 		code8nl(DO_COERC);
 	if (optstack) {
-		code53(DO_REMOVE,0);
+		code53(DO_TOSTACK,0);
 		codeint(allsetno);
 		codenl();
 	}
