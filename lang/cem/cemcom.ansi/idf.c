@@ -235,11 +235,13 @@ declare_idf(ds, dc, lvl)
 						idf->id_text);
 				/** type = idf->id_def->df_type = int_type; **/
 				}
-				newdef->df_address =
+				if (type->tp_size != (arith) -1) {
+				    newdef->df_address =
 					NewLocal(type->tp_size,
 						 type->tp_align,
 						 regtype(type),
 						 sc);
+				}
 				break;
 			case STATIC:
 				newdef->df_address = (arith) data_label();

@@ -37,6 +37,7 @@
 #include	"atw.h"
 #include	"assert.h"
 #include	"LLlex.h"
+#include	"align.h"
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	/* LINT */
@@ -559,7 +560,7 @@ loc_init(expr, id)
 			C_df_dlb((label)df->df_address);
 		} else {
 			C_lae_dlb((label)df->df_address, (arith)0);
-			load_block(tp->tp_size, 1);
+			load_block(tp->tp_size, word_align);
 			if (unknownsize) {
 				/* tmpoffset += tp->tp_size; */
 				unknownsize = 0;
@@ -570,7 +571,7 @@ loc_init(expr, id)
 						    , df->df_sc);
 			}
 			C_lal(tmpoffset);
-			store_block(tp->tp_size, 1);
+			store_block(tp->tp_size, tmpoffset % word_align ? 1 : word_align);
 			df->df_address = tmpoffset;
 			tmpoffset = 0;
 		}
