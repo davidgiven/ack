@@ -191,16 +191,19 @@ startmes(p)
 	state = MES;
 
 	if (p->em_cst == ms_emx) {
-		if (wsize || psize) {
-			if (!EM_error) EM_error = "Duplicate ms_emx";
-		}
 		p = &aheads[ahead++];
 		getarg(cst_ptyp, &(p->em_arg));
+		if (wsize && p->em_cst != wsize && !EM_error) {
+			EM_error = "Different wordsize in duplicate ms_emx";
+		}
 		wsize = p->em_cst;
 		EM_wordsize = p->em_cst;
 		p->em_type = EM_MESARG;
 		p = &aheads[ahead++];
 		getarg(cst_ptyp, &(p->em_arg));
+		if (psize && p->em_cst != psize && !EM_error) {
+			EM_error = "Different pointersize in duplicate ms_emx";
+		}
 		psize = p->em_cst;
 		EM_pointersize = p->em_cst;
 		p->em_type = EM_MESARG;
