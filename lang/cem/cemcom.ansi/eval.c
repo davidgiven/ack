@@ -348,6 +348,12 @@ EVAL(expr, val, code, true_label, false_label)
 				break;
 			}
 #endif NOBITFIELD
+			if (is_struct_or_union(tp->tp_fund) && ! gencode) {
+				EVAL(right, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				copy_block(tp->tp_size, tp->tp_align);
+				break;
+			}
 			EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			if (gencode && val == RVAL)
 				C_dup(ATW(tp->tp_size));

@@ -20,6 +20,7 @@
 #include "Lpars.h"
 extern arith NewLocal();
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
+#define LocalIntVar()	NewLocal(int_size, int_align, reg_any, REGISTER)
 #endif STB
 
 /*	Because EM does not support the loading and storing of
@@ -137,18 +138,48 @@ load_block(sz, al)
 	}
 }
 
+copy_block(sz, al)
+	arith sz;
+	int al;
+{
+
+	if (suitable_sz(sz, al))
+		C_blm(sz);
+	else {
+#ifndef STB
+		arith src, dst;
+
+		/* allocate two pointer temporaries */
+		src = LocalPtrVar();
+		dst = LocalPtrVar();
+
+		StoreLocal(src, pointer_size);
+		StoreLocal(dst, pointer_size);
+		copy_loop(sz, src, dst);
+		FreeLocal(dst);
+		FreeLocal(src);
+#else STB
+		C_loc(sz);			/* # bytes to copy	*/
+		C_cal("__stb");			/* library copy routine	*/
+		C_asp(int_size + pointer_size + pointer_size);
+#endif STB
+	}
+}
+
 #ifndef STB
 copy_loop(sz, src, dst)
 	arith sz, src, dst;
 {
 	/* generate inline byte-copy loop */
 	label l_cont = text_label(), l_stop = text_label();
+	arith tmp_sz = LocalIntVar();
 
 	C_loc(sz);		/* amount of bytes */
+	StoreLocal(tmp_sz, int_size);
 	C_df_ilb(l_cont);
-	C_dup(word_size);
+	LoadLocal(tmp_sz, int_size);
 	C_zle(l_stop);
-	C_dec();
+	C_del(tmp_sz);
 	LoadLocal(src, pointer_size);
 	C_dup(pointer_size);
 	C_adp((arith)1);
@@ -161,7 +192,7 @@ copy_loop(sz, src, dst)
 	C_sti((arith)1);
 	C_bra(l_cont);
 	C_df_ilb(l_stop);
-	C_asp(word_size);
+	FreeLocal(tmp_sz);
 }
 #endif STB
 
