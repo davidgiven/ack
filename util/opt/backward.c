@@ -162,7 +162,8 @@ backward() {
 			break;
 		case ps_mes:
 			if (prodepth != 0 &&
-			    (int) aoff(lnp->l_a.la_arg, 0) == ms_std) {
+			    ((int) aoff(lnp->l_a.la_arg, 0) == ms_std ||
+			     (int) aoff(lnp->l_a.la_arg, 0) == ms_ego)) {
 				lnp->l_next = i;
 				i = lnp;
 				continue;
