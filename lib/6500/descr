@@ -9,7 +9,7 @@ var NAME=m6500
 var M=6500
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var INCLUDES=-I{EM}/include -I/usr/include
+var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name be
 	from .m.g
 	to .s
@@ -31,6 +31,6 @@ name asld
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.b.c.p:{TAIL}={EM}/{LIB}mon) \
-		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}em.vend)
+		(.e:{TAIL}={EM}/{LIB}em {EM}/lib/{M}/end_em)
 	linker
 end

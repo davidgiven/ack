@@ -11,7 +11,7 @@ var LIB=lib/int44/tail_
 var RT=lib/int44/head_
 var SIZE_FLAG=-sm
 var CPP_F=-Dunix
-var INCLUDES=-I{EM}/include -I/usr/include
+var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
 name asld
 	from .k.m.a.g
 	to .out
