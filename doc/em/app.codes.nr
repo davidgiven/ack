@@ -120,18 +120,30 @@ The following suffices exist:
 no arguments
 .PT .l
 16-bit argument
+.PT .L
+32-bit argument
 .PT .u
 16-bit unsigned argument
 .PT .lw
 16-bit argument divided by the wordsize
+.PT .Lw
+32-bit argument divided by the wordsize
 .PT .p
 positive 16-bit argument
+.PT .P
+positive 32-bit argument
 .PT .pw
 positive 16-bit argument divided by the wordsize
+.PT .Pw
+positive 32-bit argument divided by the wordsize
 .PT .n
 negative 16-bit argument
+.PT .N
+negative 32-bit argument
 .PT .nw
 negative 16-bit argument divided by the wordsize
+.PT .Nw
+negative 32-bit argument divided by the wordsize
 .PT .s<num>
 shortie with <num> as high order argument byte
 .PT .w<num>

@@ -462,7 +462,7 @@ Common Table for Neutral State and Arguments
 .TS
 tab(:);
 c c s c
-l8 l l8 l.
+l4 l l4 l.
 class:bytes:description
 
 <ilb>:240:b1:Instruction label b1  (Not used for branches)
@@ -515,7 +515,7 @@ an <end> byte if the trailing argument is not present.
 tab(|);
 l s l
 l s s
-l 2 lw(46) l.
+l 2 lw(30) l.
 Example  ASCII|Example compact
 (LOC = 69, BRA = 18 here):
 

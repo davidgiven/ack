@@ -227,15 +227,15 @@ int decflag(str) char *str ; {
 /* ----------- checking --------------*/
 
 int ecodes[256],codes[256],lcodes[256] ;
-char eflags[256], flags[256];
-int elows[256], lows[256];
+char eflags[256], flags[256], lflags[256] ;
+int elows[256], lows[256], llows[256];
 
 #define NMNEM   (sp_lmnem-sp_fmnem+1)
 #define MUST    1
 #define MAY     2
 #define FORB    3
 
-char negc[NMNEM], zc[NMNEM], posc[NMNEM] ;
+char negc[NMNEM], zc[NMNEM], posc[NMNEM], lnegc[NMNEM], lposc[NMNEM] ;
 
 checkall() {
 	register i,flag ;
@@ -274,9 +274,13 @@ checkall() {
 			else if ( flag&OP_POS )
 				posc[opc]++ ;
 			break ;
-		case OP16U :
 		case OP32 :
-		case OP64 :
+			if ( flag&OP_NEG )
+				lnegc[opc]++ ;
+			else if ( flag&OP_POS )
+				lposc[opc]++ ;
+			break ;
+		case OP16U :
 			break ;
 		default :
 			error("Illegal type") ;
@@ -345,9 +349,11 @@ chkc(flag,icode,emc,low) {
 	case OP64:
 		if ( lcodes[icode]!=-1 ) {
 			mess("Long opcode %d used by %s and %s",
-				icode,ename(emc),ename(codes[icode])) ;
+				icode,ename(emc),ename(lcodes[icode])) ;
 		}
 		lcodes[icode]=emc;
+		lflags[icode]=flag;
+		llows[icode]=low;
 		break ;
 	}
 }
@@ -356,6 +362,8 @@ ckop(emc,zf,pf,nf) {
 	if ( zc[emc]>1 ) mess("More then one OPNO for %s",ename(emc)) ;
 	if ( posc[emc]>1 ) mess("More then one OP16(pos) for %s",ename(emc)) ;
 	if ( negc[emc]>1 ) mess("More then one OP16(neg) for %s",ename(emc)) ;
+	if ( lposc[emc]>1 ) mess("More then one OP32(pos) for %s",ename(emc)) ;
+	if ( lnegc[emc]>1 ) mess("More then one OP32(neg) for %s",ename(emc)) ;
 	switch(zf) {
 	case MUST:
 		if ( zc[emc]==0 ) mess("No OPNO for %s",ename(emc)) ;
@@ -439,6 +447,7 @@ writeout() {
 	while (lcodes[i] != -1) {
 		if (!(i % 8)) printf("\n%d", i);
 		printf("\t%s", ename(lcodes[i]));
+			prx(lflags[i],llows[i],i);
 		i++;
 	}
 	while (i++ % 8) putchar('\t');
@@ -462,6 +471,12 @@ prx(flg,low,opc)
 		if (flg&OP_POS) putchar('p');
 		else if (flg&OP_NEG) putchar('n');
 		else putchar('l');
+		if (flg&OPWORD) putchar('w');
+		break;
+	case OP32:
+		if (flg&OP_POS) putchar('P');
+		else if (flg&OP_NEG) putchar('N');
+		else putchar('L');
 		if (flg&OPWORD) putchar('w');
 		break;
 	case OPSHORT:
