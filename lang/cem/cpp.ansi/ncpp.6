@@ -42,6 +42,28 @@ do not generate line directives
 .IP -\fBM\fIn\fR
 set maximum identifier length to
 .IR n .
+.IP -\fBd\fR[\fIfile\fR]
+.br
+if \fIfile\fR is not given, do not preprocess, but instead generate a list
+of makefile dependencies and write them to the standard output.
+If \fIfile\fP is given, generate preprocessor output on standard output,
+and generate the list of makefile dependencies on file \fIfile\fP.
+.IP -\fBA\fR[\fIfile\fR]
+identical to the -d option.
+.IP -\fBi\fR
+when generating makefile dependencies, do not include files from
+/usr/include.
+.IP -\fBm\fR
+when generating makefile dependencies, generate them in the following format:
+.RS
+.IP "file.o: file1.h"
+.RE
+.IP ""
+where "file.o" is derived from the source file name. Normally, only a list
+of files included is generated.
+.IP -\fBundef\fR
+.br
+this flag is silently ignored, for compatibility with other preprocessors.
 .PP
 The following names are always available. They cannot be the subject of a
 -U command line option or a #undef directive.

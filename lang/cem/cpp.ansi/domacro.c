@@ -35,6 +35,7 @@ char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 int	nestlevel = -1;
 int	svnestlevel[30] = {-1};
 int	nestcount;
+extern int do_preprocess;
 
 char *
 GetIdentifier(skiponerr)
@@ -301,10 +302,12 @@ do_include()
 	inctable[0] = WorkingDir;
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
-			error("cannot open include file \"%s\"", filenm);
+			if (do_preprocess) error("cannot open include file \"%s\"", filenm);
+			else warning("cannot open include file \"%s\"", filenm);
+			add_dependency(filenm);
 		}
 		else {
-			if (filenm != result) free(filenm);
+			add_dependency(result);
 			WorkingDir = getwdir(result);
 			svnestlevel[++nestcount] = nestlevel;
 			FileName = result;

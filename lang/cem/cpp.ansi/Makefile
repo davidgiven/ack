@@ -208,7 +208,9 @@ input.o: input.h
 input.o: inputtype.h
 main.o: arith.h
 main.o: file_info.h
+main.o: idf.h
 main.o: idfsize.h
+main.o: macro.h
 options.o: class.h
 options.o: idf.h
 options.o: idfsize.h

@@ -15,8 +15,10 @@ char	options[128];			/* one for every char	*/
 int	inc_pos = 1;			/* place where next -I goes */
 int	inc_max;
 int	inc_total;
-int	debug;
+int	do_preprocess = 1;
+int	do_dependencies = 0;
 char	**inctable;
+char	*dep_file = 0;
 
 extern int idfsize;
 int	txt2int();
@@ -28,14 +30,30 @@ do_option(text)
 	case '-':
 		options[*text] = 1;
 		break;
+	case 'u':
+		if (! strcmp(text, "ndef")) {
+			/* ignore -undef */
+			break;
+		}
+		/* fall through */
 	default:
 		error("illegal option: %c", text[-1]);
 		break;
-	case 'o':	/* ignore garbage after #else or #endif */
-		options['o'] = 1;
+	case 'A' :	/* for Amake */
+	case 'd' :	/* dependency generation */
+		do_dependencies = 1;
+		if (*text) {
+			dep_file = text;
+		}
+		else {
+			do_preprocess = 0;
+		}
 		break;
+	case 'i':
+	case 'm':
+	case 'o':	/* ignore garbage after #else or #endif */
 	case 'C' :	/* comment output		*/
-		options['C'] = 1;
+		options[*(text-1)] = 1;
 		break;
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
