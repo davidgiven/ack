@@ -399,6 +399,9 @@ proc_type(result_type, parameters, n_bytes_params)
 
 	tp->prc_params = parameters;
 	tp->prc_nbpar = n_bytes_params;
+	if (! fit(n_bytes_params, (int) word_size)) {
+		error("maximum parameter byte count exceeded");
+	}
 	return tp;
 }
 

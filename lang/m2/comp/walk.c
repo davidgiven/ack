@@ -339,6 +339,9 @@ WalkProcedure(procedure)
 	C_ret(func_res_size);
 	if (! options['n']) WalkDefList(sc->sc_def, RegisterMessage);
 	C_end(-sc->sc_off);
+	if (! fit(sc->sc_off, (int) word_size)) {
+		node_error(procedure->prc_body, "maximum local byte count exceeded");
+	}
 	TmpClose();
 	CurrVis = savevis;
 	proclevel--;
