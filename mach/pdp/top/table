@@ -28,10 +28,13 @@ add ZERO,A  {carry_dead(REST)}	->	;
 add ONE, X  {carry_dead(REST)}	->	inc X;
 sub ONE, X  {carry_dead(REST)}	->	dec X;
 
+mov A,A				->	tst A;
+
 /* tst-elimination */
 tst (sp)+ : tst X		->	mov X,(sp)+;
 tst (sp)+ : mov X,-(sp) 	->	mov X,(sp);
 mov A,X : tst A			->	mov A,X;
+mov X,A : tst A			->	mov X,A;
 
 /* register subsumption */
 mov REG,A : ANY A,X 		->	mov REG,A : ANY REG,X;
