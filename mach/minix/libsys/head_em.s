@@ -3,6 +3,7 @@
 .define begtext,begdata,begbss
 .define hol0,.reghp,.limhp,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
+.define EXIT, BRK
 
 ERANGE          = 1
 ESET            = 2
@@ -27,7 +28,13 @@ begtext:
 	xor bp,bp
 	call    __m_a_i_n
 	add sp,6
+EXIT:
+	push	ax
 	call	__exit
+
+BRK:
+	jmp	__brk
+
 .sect	.data
 begdata:
 hol0:
