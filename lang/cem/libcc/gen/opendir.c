@@ -12,31 +12,43 @@ char *name;
 	register DIR *dirp;
 	register int fd;
 	struct stat stbuf;
+	long siz;
 	extern char *malloc();
 
 	if ((fd = open(name, 0)) == -1)
 		return NULL;
 	fstat(fd, &stbuf);
+	siz = stbuf.st_blksize;
 	if (((stbuf.st_mode & S_IFDIR) == 0) ||
 	    ((dirp = (DIR *)malloc(sizeof (DIR))) == NULL)) {
 		close (fd);
 		return NULL;
 	}
-	if ((unsigned) stbuf.st_size == stbuf.st_size &&
-	    (dirp->dd_buf = malloc((unsigned) stbuf.st_size))) {
-		dirp->dd_bsize = stbuf.st_size;
+	if (stbuf.st_size > siz) siz = stbuf.st_size;
+	if ((unsigned) siz == siz &&
+	    (dirp->dd_buf = malloc((unsigned) siz))) {
+		dirp->dd_bsize = siz;
+#ifdef sun
+		dirp->dd_size = getdirentries(fd,
+					      (char *) dirp->dd_buf,
+					      (int) siz,
+					      &siz);
+#else
 		dirp->dd_size = read(fd, dirp->dd_buf, dirp->dd_bsize);
+#endif
 		close(fd);
 		dirp->dd_fd = -2;
 		dirp->dd_loc = 0;
 		return dirp;
 	}
+#ifndef sun
 	else if (dirp->dd_buf = malloc(8*DIRBLKSIZ)) {
 		dirp->dd_bsize = 8 * DIRBLKSIZ;
 	}
 	else if (dirp->dd_buf = malloc(DIRBLKSIZ)) {
 		dirp->dd_bsize =  DIRBLKSIZ;
 	}
+#endif
 	else {
 		close(fd);
 		free((char *) dirp);
