@@ -231,7 +231,7 @@ conditional_expression(struct expr **expp;)
 		{check_conditional(e2, '=', "after :");}
 		{
 			ch7bin(&e1, ':', e2);
-			opnd2test(expp, NOTEQUAL);
+			opnd2test(expp, '?');
 			ch7bin(expp, '?', e1);
 		}
 	]?

@@ -34,7 +34,7 @@ cstbin(expp, oper, expr)
 		break;
 	case '/':
 		if (o2 == 0)	{
-			error("division by 0");
+			expr_error(expr, "division by 0");
 			break;
 		}
 		if (uns)	{
@@ -71,7 +71,7 @@ cstbin(expp, oper, expr)
 		break;
 	case '%':
 		if (o2 == 0)	{
-			error("modulo by 0");
+			expr_error(expr, "modulo by 0");
 			break;
 		}
 		if (uns)	{

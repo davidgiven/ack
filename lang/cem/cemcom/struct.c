@@ -396,7 +396,7 @@ add_field(szp, fd, pfd_type, idf, stp)
 	case LONG:
 		/* right type; size OK? */
 		if ((*pfd_type)->tp_size > word_size) {
-			error("bit field type %s doesn't fit in word",
+			error("bit field type %s does not fit in a word",
 				symbol2str((*pfd_type)->tp_fund));
 			*pfd_type = error_type;
 			return field_offset;

@@ -180,7 +180,7 @@ EVAL(expr, val, code, true_label, false_label)
 					C_sbi(tp->tp_size);
 				break;
 			case POINTER:
-				if (EXPRTYPE(rightop) == POINTER)
+				if (rightop->ex_type->tp_fund == POINTER)
 					C_sbs(pointer_size);
 				else	{
 					C_ngi(rightop->ex_type->tp_size);
@@ -645,7 +645,7 @@ EVAL(expr, val, code, true_label, false_label)
 				conversion(rightop->ex_type, leftop->ex_type);
 			break;
 		default:
-			crash("(EVAL) Bad operator %s\n", symbol2str(oper));
+			crash("(EVAL) bad operator %s\n", symbol2str(oper));
 		}
 
 		/*	If the rvalue of the expression is required but

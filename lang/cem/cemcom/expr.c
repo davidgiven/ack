@@ -12,7 +12,7 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"decspecs.h"
-#include	"declar.h"
+#include	"declarator.h"
 #include	"storage.h"
 #include	"sizes.h"
 
@@ -212,21 +212,18 @@ intexpr(ivalue, fund)
 		the size indicated by fund.
 	*/
 	struct expr *expr = new_expr();
-
+	
 	clear((char *)expr, sizeof(struct expr));
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
-
+	
 	switch (fund) {
-
 	case INT:
 		expr->ex_type = int_type;
 		break;
-
 	case LONG:
 		expr->ex_type = long_type;
 		break;
-
 	case UNSIGNED:
 		/*	We cannot make a test like "ivalue <= max_unsigned"
 			because, if sizeof(long) == int_size holds, max_unsigned
@@ -237,17 +234,15 @@ intexpr(ivalue, fund)
 		expr->ex_type = 
 			(ivalue & ~max_unsigned) ? long_type : uint_type;
 		break;
-
 	case INTEGER:
 		expr->ex_type = (ivalue <= max_int) ? int_type : long_type;
 		break;
-
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
 	}
 	expr->ex_class = Value;
 	expr->VL_VALUE = ivalue;
-
+	
 	cut_size(expr);
 	return expr;
 }
@@ -279,13 +274,26 @@ new_oper(tp, e1, oper, e2)
 	struct oper *op;
 
 	clear((char *)expr, sizeof(struct expr));
-	if (!e1 || !e2)	{
-		expr->ex_file = dot.tk_file;
-		expr->ex_line = dot.tk_line;
+	if (e2)	{
+		struct expr *e = e2;
+		
+		while (e->ex_class == Oper && e->OP_LEFT)
+			e = e->OP_LEFT;
+		expr->ex_file = e->ex_file;
+		expr->ex_line = e->ex_line;
+	}
+	else
+	if (e1)	{
+		struct expr *e = e1;
+		
+		while (e->ex_class == Oper && e->OP_RIGHT)
+			e = e->OP_RIGHT;
+		expr->ex_file = e->ex_file;
+		expr->ex_line = e->ex_line;
 	}
 	else	{
-		expr->ex_file = e2->ex_file;
-		expr->ex_line = e2->ex_line;
+		expr->ex_file = dot.tk_file;
+		expr->ex_line = dot.tk_line;
 	}
 	expr->ex_type = tp;
 	expr->ex_class = Oper;
@@ -333,7 +341,7 @@ chk_cst_expr(expp)
 		are cast, logical operators and the expression comma.
 		Special problems (of which there is only one, sizeof in
 		Preprocessor #if) have to be dealt with locally
-
+		
 		Note that according to K&R the negation ! is illegal in
 		constant expressions and is indeed rejected by the
 		Ritchie compiler.
@@ -369,7 +377,7 @@ chk_cst_expr(expp)
 	
 	if (err) {
 		free_expression(expr);
-		*expp = intexpr((arith)1, INT);
+		erroneous2int(expp);
 		(*expp)->ex_type = error_type;
 	}
 }
@@ -391,6 +399,36 @@ init_expression(eppp, expr)
 	*/
 	**eppp = new_oper(void_type, expr, INITCOMMA, NILEXPR);
 	*eppp = &(**eppp)->OP_RIGHT;
+}
+
+int
+is_ld_cst(expr)
+	register struct expr *expr;
+{
+	/*	An expression is a `load-time constant' if it is of the form
+		<idf> +/- <integral> or <integral>.
+	*/
+	return expr->ex_lvalue == 0 && expr->ex_class == Value;
+}
+
+int
+is_cp_cst(expr)
+	register struct expr *expr;
+{
+	/*	An expression is a `compile-time constant' if it is a
+		load-time constant, and the idf is not there.
+	*/
+	return is_ld_cst(expr) && expr->VL_IDF == 0;
+}
+
+int
+is_fp_cst(expr)
+	register struct expr *expr;
+{
+	/*	An expression is a `floating-point constant' if it consists
+		of the float only.
+	*/
+	return expr->ex_class == Float;
 }
 
 free_expression(expr)

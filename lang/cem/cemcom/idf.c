@@ -16,7 +16,7 @@
 #include	"def.h"
 #include	"type.h"
 #include	"struct.h"
-#include	"declar.h"
+#include	"declarator.h"
 #include	"decspecs.h"
 #include	"sizes.h"
 #include	"Lpars.h"
@@ -333,7 +333,7 @@ declare_idf(ds, dc, lvl)
 			case REGISTER:
 			case AUTO:
 				if (type->tp_size == (arith)-1) {
-					error("size of local \"%s\" unknown",
+					error("size of local %s unknown",
 						idf->id_text);
 					type = idf->id_def->df_type = int_type;
 				}

@@ -18,7 +18,7 @@
 #include	"em.h"
 #include	"level.h"
 #include	"decspecs.h"
-#include	"declar.h"
+#include	"declarator.h"
 #include	"Lpars.h"
 #include	"mes.h"
 #include	"LLlex.h"
@@ -227,6 +227,13 @@ end_proc(fbytes, nbytes)
 	C_end(ATW(nbytes));
 }
 
+do_return()
+{
+	/*	do_return generates a direct return */
+	/*	isn't a jump to the return label smarter ??? */
+	C_ret((arith)0);
+}
+
 do_return_expr(expr)
 	struct expr *expr;
 {
@@ -303,10 +310,11 @@ code_declaration(idf, expr, lvl, sc)
 				do_ival(&(def->df_type), expr);
 			else {	/* produce blank space */
 				if (size <= 0) {
-					error("size of \"%s\" unknown", text);
+					error("size of %s unknown", text);
 					size = (arith)0;
 				}
-				C_bss_cst(align(size, word_align), (arith)0, 1);
+				C_bss_cst(align(size, word_align),
+							(arith)0, 1);
 			}
 			break;
 		case EXTERN:

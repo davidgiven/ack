@@ -164,12 +164,21 @@ any2arith(expp, oper)
 		error("operator %s on non-numerical operand (%s)",
 			symbol2str(oper), symbol2str(fund));
 	case ERRONEOUS:
-		free_expression(*expp);
-		*expp = intexpr((arith)1, INT);
+		erroneous2int(expp);
 		break;
 	}
 
 	return (*expp)->ex_type->tp_fund;
+}
+
+erroneous2int(expp)
+	struct expr **expp;
+{
+	/*	the (erroneous) expression *expp is replaced by an
+		int expression
+	*/
+	free_expression(*expp);
+	*expp = intexpr((arith)0, INT);
 }
 
 struct expr *
@@ -247,7 +256,7 @@ float2float(expp, tp)
 	*/
 	
 	fp_used = 1;
-	if ((*expp)->ex_class == Float)	{
+	if (is_fp_cst(*expp))	{
 		(*expp)->ex_type = tp;
 	}
 	else	{
@@ -285,7 +294,7 @@ opnd2integral(expp, oper)
 		if (fund != ERRONEOUS)
 			error("%s operand to %s",
 				symbol2str(fund), symbol2str(oper));
-		*expp = intexpr((arith)1, INT);
+		erroneous2int(expp);
 		/* fund = INT; */
 	}
 }
@@ -321,7 +330,7 @@ opnd2logical(expp, oper)
 		error("%s operand to %s",
 			symbol2str(fund), symbol2str(oper));
 	case ERRONEOUS:
-		*expp = intexpr((arith)1, INT);
+		erroneous2int(expp);
 		break;
 	}
 }

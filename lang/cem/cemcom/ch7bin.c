@@ -82,7 +82,7 @@ ch7bin(expp, oper, expr)
 		fund = arithbalance(expp, oper, &expr);
 		if (fund == DOUBLE)	{
 			error("floating operand to %%");
-			*expp = intexpr((arith)1, INT);
+			erroneous2int(expp);
 		}
 		else
 			non_commutative_binop(expp, oper, expr);
@@ -235,8 +235,7 @@ pntminuspnt(expp, oper, expr)
 	if (up_type != expr->ex_type->tp_up)	{
 		error("subtracting incompatible pointers");
 		free_expression(expr);
-		free_expression(*expp);
-		*expp = intexpr((arith)0, INT);
+		erroneous2int(expp);
 		return;
 	}
 	/*	we hope the optimizer will eliminate the load-time
@@ -285,8 +284,7 @@ pointer_arithmetic(expp1, oper, expp2)
 	if (any2arith(expp2, oper) == DOUBLE)	{
 		expr_error(*expp2,
 			"illegal combination of float and pointer");
-		free_expression(*expp2);
-		*expp2 = intexpr((arith)0, INT);
+		erroneous2int(expp2);
 	}
 	ch7bin( expp2, '*',
 		intexpr(size_of_type((*expp1)->ex_type->tp_up, "object"),

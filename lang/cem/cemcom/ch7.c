@@ -13,10 +13,6 @@
 #include	"Lpars.h"
 #include	"assert.h"
 
-#define	is_zero(ex)	\
-	((ex)->ex_class == Value && (ex)->VL_VALUE == (arith)0 && \
-			(ex)->VL_IDF == 0)
-
 extern char options[];
 extern char *symbol2str();
 
@@ -262,7 +258,7 @@ ch7cast(expp, oper, tp)
 		case NOTEQUAL:
 		case '=':
 		case RETURN:
-			if (is_zero(*expp))
+			if (is_cp_cst(*expp) && (*expp)->VL_VALUE == (arith)0)
 				break;
 		default:
 			warning("illegal conversion of %s to pointer",

@@ -5,6 +5,7 @@
 #include	"botch_free.h"
 #include	"density.h"
 
+#include	"Lpars.h"
 #include	"idf.h"
 #include	"label.h"
 #include	"arith.h"
@@ -16,6 +17,8 @@
 #include	"type.h"
 #include	"em.h"
 
+extern char options[];
+
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= (DENSITY - 1))
 
 static struct switch_hdr *switch_stack = 0;
@@ -23,19 +26,32 @@ static struct switch_hdr *switch_stack = 0;
 code_startswitch(expr)
 	struct expr *expr;
 {
-	/*	stack a new case header and fill in the necessary fields.
+	/*	Check the expression, stack a new case header and
+		fill in the necessary fields.
 	*/
 	register label l_table = text_label();
 	register label l_break = text_label();
 	register struct switch_hdr *sh = new_switch_hdr();
-
+	int fund = any2arith(&expr, SWITCH);	/* INT, LONG or DOUBLE */
+	
+	switch (fund)	{
+	case LONG:
+		if (options['R'])
+			warning("long in switch");
+		break;
+	case DOUBLE:
+		error("float/double in switch");
+		erroneous2int(&expr);
+		break;
+	}
+	
 	stat_stack(l_break, NO_LABEL);
 	sh->sh_break = l_break;
 	sh->sh_default = 0;
 	sh->sh_table = l_table;
 	sh->sh_nrofentries = 0;
 	sh->sh_type = expr->ex_type;	/* the expression switched	*/
-	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* ??? */
+	sh->sh_lowerbd = sh->sh_upperbd = (arith)0;	/* immaterial ??? */
 	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
@@ -48,7 +64,7 @@ code_endswitch()
 {
 	register struct switch_hdr *sh = switch_stack;
 	register label tablabel;
-	register struct case_entry *ce, *tmp;
+	register struct case_entry *ce;
 
 	if (sh->sh_default == 0)	/* no default occurred yet */
 		sh->sh_default = sh->sh_break;
@@ -88,33 +104,42 @@ code_endswitch()
 	}
 	C_df_ilb(sh->sh_break);
 	switch_stack = sh->next;	/* unstack the switch descriptor */
+	
 	/* free the allocated switch structure	*/
-	for (ce = sh->sh_entries; ce; ce = tmp)	{
-		tmp = ce->next;
+	ce = sh->sh_entries;
+	while (ce)	{
+		register struct case_entry *tmp = ce->next;
 		free_case_entry(ce);
+		ce = tmp;
 	}
 	free_switch_hdr(sh);
 	stat_unstack();
 }
 
-code_case(val)
-	arith val;
+code_case(expr)
+	struct expr *expr;
 {
+	register arith val;
 	register struct case_entry *ce;
 	register struct switch_hdr *sh = switch_stack;
-
+	
 	if (sh == 0)	{
 		error("case statement not in switch");
 		return;
 	}
+	
+	expr->ex_type = sh->sh_type;
+	cut_size(expr);
+	
 	ce = new_case_entry();
 	C_df_ilb(ce->ce_label = text_label());
-	ce->ce_value = val;
+	ce->ce_value = val = expr->VL_VALUE;
+	
 	if (sh->sh_entries == 0)	{
 		/* first case entry	*/
 		ce->next = (struct case_entry *) 0;
 		sh->sh_entries = ce;
-		sh->sh_lowerbd = sh->sh_upperbd = ce->ce_value;
+		sh->sh_lowerbd = sh->sh_upperbd = val;
 		sh->sh_nrofentries = 1;
 	}
 	else	{
@@ -138,7 +163,8 @@ code_case(val)
 				insert ce right after the head
 			3: c1 == 0 && c2 != 0:
 				append ce to last element
-			The case c1 == 0 && c2 == 0 cannot occur!
+			The case c1 == 0 && c2 == 0 cannot occur, since
+			the list is guaranteed not to be empty.
 		*/
 		if (c1)	{
 			if (c1->ce_value == ce->ce_value)	{

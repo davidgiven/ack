@@ -76,7 +76,7 @@ ch7mon(oper, expp)
 					be used as register anymore
 				*/
 				if (def->df_sc == REGISTER) {
-					error("'&' on register variable not allowed");
+					error("& on register variable not allowed");
 					(*expp)->ex_type = error_type;
 					break;	/* break case '&' */
 				}
@@ -91,8 +91,9 @@ ch7mon(oper, expp)
 		int fund = (*expp)->ex_type->tp_fund;
 
 		if (fund == FLOAT || fund == DOUBLE)	{
-			error("~ not allowed on %s operands", symbol2str(fund));
-			*expp = intexpr((arith)1, INT);
+			error("~ not allowed on %s operands",
+						symbol2str(fund));
+			erroneous2int(expp);
 			break;
 		}
 	}

@@ -84,7 +84,8 @@ IVAL(tpp, expr)
 	register struct type *tp = *tpp;
 	
 	switch (tp->tp_fund) {
-	case ARRAY:	/* array initialisation	*/
+	case ARRAY:
+		/* array initialisation	*/
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return 0;
 		if (ISCOMMA(expr))	{
@@ -96,10 +97,13 @@ IVAL(tpp, expr)
 		*/
 		if (tp->tp_up->tp_fund == CHAR && expr->ex_class == String)
 			init_string(tpp, expr);
-		else		/* " int i[24] = 12;"	*/
+		else	{
+			/* " int i[24] = 12;"	*/
 			check_and_pad(expr, tpp);
+		}
 		return 0;	/* nothing left	*/
-	case STRUCT:	/* struct initialisation */
+	case STRUCT:
+		/* struct initialisation */
 		if (valid_type(tp, "struct") == 0)
 			return 0;
 		if (ISCOMMA(expr))	{
@@ -109,13 +113,16 @@ IVAL(tpp, expr)
 		/* "struct foo f = 12;"	*/
 		check_and_pad(expr, tpp);
 		return 0;
-	case UNION:	/* sorry, but ....	*/
+	case UNION:
+		/* sorry, but ....	*/
 		error("union initialisation not allowed");
 		return 0;
 	case ERRONEOUS:
 		return 0;
-	default:	/* fundamental type	*/
-		if (ISCOMMA(expr)) {	/* " int i = {12};"	*/
+	default:
+		/* fundamental type	*/
+		if (ISCOMMA(expr))	{
+			/* " int i = {12};"	*/
 			if (IVAL(tpp, expr->OP_LEFT) != 0)
 				too_many_initialisers(expr);
 			/*	return remainings of the list for the
@@ -124,10 +131,9 @@ IVAL(tpp, expr)
 			*/
 			return expr->OP_RIGHT;
 		}
-		else {			/* "int i = 12;"	*/
-			check_ival(expr, tp);
-			return 0;
-		}
+		/* "int i = 12;"	*/
+		check_ival(expr, tp);
+		return 0;
 	}
 	/* NOTREACHED */
 }
@@ -149,15 +155,14 @@ do_array(expr, tpp)
 	struct expr *expr;
 	struct type **tpp;
 {
-	/* it is certain that ISCOMMA(expr) and tp->tp_fund == ARRAY	*/
 	register struct type *tp = *tpp;
 	register arith elem_count;
 	
-	ASSERT(tp->tp_fund == ARRAY);
+	ASSERT(tp->tp_fund == ARRAY && ISCOMMA(expr));
 	/*	the following test catches initialisations like
 		char c[] = {"just a string"};
 		or
-		char d[] = {{"just another string"}}
+		char d[] = {{"just another string"}};
 		The use of the brackets causes this problem.
 		Note: although the implementation of such initialisations
 		is completely foolish, we did it!! (no applause, thank you)
@@ -249,12 +254,11 @@ do_struct(expr, tp)
 	struct expr *expr;
 	struct type *tp;
 {
-	/* tp is a STRUCT and expr->OP_OPER == INITCOMMA	*/
-
 	struct sdef *sd = tp->tp_sdef;
 	arith bytes_upto_here = (arith)0;
 	arith last_offset = (arith)-1;
-
+	
+	ASSERT(tp->tp_fund == STRUCT && ISCOMMA(expr));
 	/* as long as there are selectors and there is an initialiser..	*/
 	while (sd && expr) {
 		if (ISCOMMA(expr->OP_LEFT)) {	/* embraced expression	*/
@@ -292,7 +296,8 @@ do_struct(expr, tp)
 			bytes_upto_here += zero_bytes(sd);
 		if (last_offset != sd->sd_offset) {
 			/* don't take the field-width more than once	*/
-			bytes_upto_here += size_of_type(sd->sd_type, "selector");
+			bytes_upto_here +=
+				size_of_type(sd->sd_type, "selector");
 			last_offset = sd->sd_offset;
 		}
 		sd = sd->sd_sdef;
@@ -308,7 +313,8 @@ do_struct(expr, tp)
 			if (sd->sd_sdef)
 				bytes_upto_here += zero_bytes(sd);
 			/* no field thrown-outs here	*/
-			bytes_upto_here += size_of_type(sd->sd_type, "selector");
+			bytes_upto_here +=
+				size_of_type(sd->sd_type, "selector");
 		} while (sd = sd->sd_sdef);
 	}
 	/* keep on aligning...	*/
@@ -440,8 +446,8 @@ check_ival(expr, type)
 {
 	/*	The philosophy here is that ch7cast puts an explicit
 		conversion node in front of the expression if the types
-		are not compatible.  In this case, the initialisation is
-		not legal. ???
+		are not compatible.  In this case, the initialisation
+		expression is no longer a constant.
 	*/
 	
 	switch (type->tp_fund) {
@@ -449,31 +455,24 @@ check_ival(expr, type)
 	case SHORT:
 	case INT:
 	case LONG:
-		if (expr->ex_class == Oper || expr->VL_IDF != 0)	{
+	case ENUM:
+		ch7cast(&expr, '=', type);
+		if (expr->ex_class != Value || expr->VL_IDF != 0)	{
 			illegal_init_cst(expr);
 			break;
 		}
-		ch7cast(&expr, '=', type);
 		con_int(expr);
 		break;
 #ifndef NOBITFIELD
 	case FIELD:
-		if (expr->ex_class == Oper || expr->VL_IDF != 0)	{
+		ch7cast(&expr, '=', type->tp_up);
+		if (expr->ex_class != Value || expr->VL_IDF != 0)	{
 			illegal_init_cst(expr);
 			break;
 		}
-		ch7cast(&expr, '=', type->tp_up);
 		put_bf(type, expr->VL_VALUE);
 		break;
 #endif NOBITFIELD
-	case ENUM:
-		if (expr->ex_class == Oper)	{
-			illegal_init_cst(expr);
-			break;
-		}
-		ch7cast(&expr, '=', type);
-		con_int(expr);
-		break;
 	case FLOAT:
 	case DOUBLE:
 		ch7cast(&expr, '=', type);
@@ -482,10 +481,11 @@ check_ival(expr, type)
 		else
 		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
 			expr = expr->OP_RIGHT;
-			if (expr->ex_class == Value && expr->VL_IDF == 0)
-				C_con_fcon(itos(expr->VL_VALUE), type->tp_size);
-			else 
+			if (expr->ex_class != Value || expr->VL_IDF != 0)	{
 				illegal_init_cst(expr);
+				break;
+			}
+			C_con_fcon(itos(expr->VL_VALUE), type->tp_size);
 		}
 		else
 			illegal_init_cst(expr);

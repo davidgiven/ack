@@ -108,20 +108,19 @@ if_statement
 	'('
 	expression(&expr)
 		{
-			opnd2test(&expr, NOTEQUAL);
-			if (expr->ex_class != Value)	{
-				/*	What's happening here? If the
-					expression consisted of a constant
-					expression, the comparison has
-					been optimized to a 0 or 1.
+			opnd2test(&expr, IF);
+			if (is_cp_cst(expr))	{
+				/*	The comparison has been optimized
+					to a 0 or 1.
 				*/
-				code_expr(expr, RVAL, TRUE, l_true, l_false);
-				C_df_ilb(l_true);
-			}
-			else	{
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_false);
 				}
+				/* else fall through */
+			}
+			else	{
+				code_expr(expr, RVAL, TRUE, l_true, l_false);
+				C_df_ilb(l_true);
 			}
 			free_expression(expr);
 		}
@@ -159,15 +158,15 @@ while_statement
 	'('
 	expression(&expr)
 		{
-			opnd2test(&expr, NOTEQUAL);
-			if (expr->ex_class != Value)	{
-				code_expr(expr, RVAL, TRUE, l_body, l_break);
-				C_df_ilb(l_body);
-			}
-			else	{
+			opnd2test(&expr, WHILE);
+			if (is_cp_cst(expr))	{
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
+			}
+			else	{
+				code_expr(expr, RVAL, TRUE, l_body, l_break);
+				C_df_ilb(l_body);
 			}
 		}
 	')'
@@ -198,14 +197,14 @@ do_statement
 		}
 	expression(&expr)
 		{
-			opnd2test(&expr, NOTEQUAL);
-			if (expr->ex_class != Value)	{
-				code_expr(expr, RVAL, TRUE, l_body, l_break);
-			}
-			else	{
+			opnd2test(&expr, WHILE);
+			if (is_cp_cst(expr))	{
 				if (expr->VL_VALUE == (arith)1)	{
 					C_bra(l_body);
 				}
+			}
+			else	{
+				code_expr(expr, RVAL, TRUE, l_body, l_break);
 			}
 			C_df_ilb(l_break);
 		}
@@ -240,15 +239,15 @@ for_statement
 	[
 		expression(&e_test)
 		{
-			opnd2test(&e_test, NOTEQUAL);
-			if (e_test->ex_class != Value)	{
-				code_expr(e_test, RVAL, TRUE, l_body, l_break);
-				C_df_ilb(l_body);
-			}
-			else	{
+			opnd2test(&e_test, FOR);
+			if (is_cp_cst(e_test))	{
 				if (e_test->VL_VALUE == (arith)0)	{
 					C_bra(l_break);
 				}
+			}
+			else	{
+				code_expr(e_test, RVAL, TRUE, l_body, l_break);
+				C_df_ilb(l_body);
 			}
 		}
 	]?
@@ -276,9 +275,8 @@ switch_statement
 :
 	SWITCH
 	'('
-	expression(&expr)	/* this must be an integer expression!	*/
+	expression(&expr)
 		{
-			ch7cast(&expr, CAST, int_type);
 			code_startswitch(expr);
 		}
 	')'
@@ -297,7 +295,7 @@ case_statement
 	CASE
 	constant_expression(&expr)
 		{
-			code_case(expr->VL_VALUE);
+			code_case(expr);
 			free_expression(expr);
 		}
 	':'
@@ -348,7 +346,7 @@ return_statement
 	|
 		empty
 		{
-			C_ret((arith)0);
+			do_return();
 		}
 	]
 	';'
