@@ -266,7 +266,9 @@ node_error(expp, "Size of type in type cast does not match size of operand");
 		}
 		arg->nd_type = left->nd_type;
 		FreeNode(expp->nd_left);
-		*expp = *(arg->nd_left);
+		expp->nd_right->nd_left = 0;
+		FreeNode(expp->nd_right);
+		*expp = *arg;
 		arg->nd_left = 0;
 		arg->nd_right = 0;
 		FreeNode(arg);
@@ -451,8 +453,6 @@ findname(expp)
 	register struct def *df;
 	struct def *lookfor();
 	register struct type *tp;
-	int scope;
-	int module;
 
 	expp->nd_type = error_type;
 	if (expp->nd_class == Name) {
@@ -596,7 +596,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	if (!TstCompat(tpl, tpr)) {
 		node_error(expp,
-			   "Incompatible types for operator \"%s\"",
+			   "incompatible types for operator \"%s\"",
 			   symbol2str(expp->nd_symb));
 		return 0;
 	}

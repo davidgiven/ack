@@ -74,7 +74,7 @@ Compile(src)
 	if (options['L']) LexScan();
 	else {
 #endif DEBUG
-		(void) open_scope(CLOSEDSCOPE, 0);
+		(void) open_scope(CLOSEDSCOPE);
 		GlobalScope = CurrentScope;
 		CompUnit();
 #ifdef DEBUG
@@ -192,7 +192,7 @@ PROCEDURE NEWPROCESS(P:PROC; A:ADDRESS; n:CARDINAL; VAR p1:ADDRESS);\n\
 PROCEDURE TRANSFER(VAR p1,p2:ADDRESS);\n\
 END SYSTEM.\n";
 
-	open_scope(CLOSEDSCOPE, 0);
+	open_scope(CLOSEDSCOPE);
 	(void) Enter("WORD", D_TYPE, word_type, 0);
 	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
 	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
@@ -202,7 +202,7 @@ END SYSTEM.\n";
 	}
 	SYSTEMModule = 1;
 	DefModule();
-	close_scope();
+	close_scope(0);
 	SYSTEMModule = 0;
 }
 

@@ -22,9 +22,7 @@ number(struct node **p;)
 	struct type *tp;
 } :
 [
-	INTEGER		{ tp = dot.TOK_INT <= max_int ?
-				intorcard_type : card_type;
-			}
+	INTEGER		{ tp = numtype; }
 |
 	REAL		{ tp = real_type; }
 ]			{ *p = MkNode(Value, NULLNODE, NULLNODE, &dot);

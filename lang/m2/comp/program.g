@@ -20,7 +20,6 @@ static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   implementation module currently being
 				   compiled
 				*/
-static struct def *impl_df;
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -50,10 +49,10 @@ ModuleDeclaration
 				  id = dot.TOK_IDF;
 				  df = define(id, CurrentScope, D_MODULE);
 				  if (!df->mod_scope) {	
-				  	open_scope(CLOSEDSCOPE, 0);
-				  	df->mod_scope = CurrentScope->sc_scope;
+				  	open_scope(CLOSEDSCOPE);
+				  	df->mod_scope = CurrentScope;
 				  }
-				  else	open_scope(CLOSEDSCOPE, df->mod_scope);
+				  else	CurrentScope = df->mod_scope;
 				  df->df_type = 
 					standard_type(T_RECORD, 0, (arith) 0);
 				  df->df_type->rec_scope = df->mod_scope;
@@ -123,8 +122,8 @@ DefinitionModule
 	DEFINITION
 	MODULE IDENT	{ id = dot.TOK_IDF;
 			  df = define(id, GlobalScope, D_MODULE);
-			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE, 0);
-			  df->mod_scope = CurrentScope->sc_scope;
+			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
+			  df->mod_scope = CurrentScope;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_scope;
 			  DefinitionModule = 1;
@@ -144,7 +143,6 @@ DefinitionModule
 				   implementation module being compiled
 				*/
 				RemImports(&(CurrentScope->sc_def));
-				impl_df = CurrentScope->sc_def;
 			  }
 			  df = CurrentScope->sc_def;
 			  while (df) {
@@ -174,7 +172,8 @@ definition
 	       The export is said to be opaque.
 	       It is restricted to pointer types.
 	    */
-	    		{ df->df_kind = D_HIDDEN; }
+	    		{ df->df_kind = D_HIDDEN;
+			}
 	  ]
 	  ';'
 	]*
@@ -188,20 +187,19 @@ ProgramModule(int state;)
 {
 	struct idf *id;
 	struct def *df, *GetDefinitionModule();
-	int scope = 0;
+	struct scope *scope = 0;
 } :
 	MODULE
 	IDENT		{ 
 			  id = dot.TOK_IDF;
 			  if (state == IMPLEMENTATION) {
-				   DEFofIMPL = 1;
-				   df = GetDefinitionModule(id);
-				   scope = df->mod_scope;
-				   DEFofIMPL = 0;
+				DEFofIMPL = 1;
+				df = GetDefinitionModule(id);
+				CurrentScope = df->mod_scope;
+				DEFofIMPL = 0;
+			  	DefinitionModule = 0;
 			  }
-			  DefinitionModule = 0;
-			  open_scope(CLOSEDSCOPE, scope);
-			  CurrentScope->sc_def = impl_df;
+			  else	open_scope(CLOSEDSCOPE);
 			}
 	priority?
 	';' import(0)*

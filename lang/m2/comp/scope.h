@@ -16,16 +16,15 @@ struct scope {
 	struct scope *next;
 	struct forwards *sc_forw;
 	struct def *sc_def;	/* list of definitions in this scope */
-	int sc_scope;		/* The scope number. Scope number 0 indicates
-				   both the pervasive scope and the end of a
-				   visibility range
-				*/
+	arith sc_off;		/* offsets of variables in this scope */
+	char sc_scopeclosed;	/* flag indicating closed or open scope */
 };
 
 extern struct scope
 	*CurrentScope,
+	*PervasiveScope,
 	*GlobalScope;
 
-#define nextvisible(x)	((x)->sc_scope ? (x)->next : (struct scope *) 0)
-#define scopeclosed(x)	((x)->next->sc_scope == 0)
-#define enclosing(x)	(scopeclosed(x) ? (x)->next->next : (x)->next)
+#define enclosing(x)	((x)->next)
+#define scopeclosed(x)	((x)->sc_scopeclosed)
+#define nextvisible(x)	(scopeclosed(x) ? PervasiveScope : enclosing(x))

@@ -151,24 +151,6 @@ init_types()
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
 }
 
-int
-has_selectors(df)
-	register struct def *df;
-{
-
-	switch(df->df_kind) {
-	case D_MODULE:
-		return df->df_value.df_module.mo_scope;
-	case D_VARIABLE:
-		if (df->df_type->tp_fund == T_RECORD) {
-			return df->df_type->rec_scope;
-		}
-		break;
-	}
-	error("no selectors for \"%s\"", df->df_idf->id_text);
-	return 0;
-}
-
 /*	Create a parameterlist of a procedure and return a pointer to it.
 	"ids" indicates the list of identifiers, "tp" their type, and
 	"VARp" is set when the parameters are VAR-parameters.
@@ -226,6 +208,8 @@ chk_basesubrange(tp, base)
 		error("Specified base does not conform");
 	}
 	tp->next = base;
+	tp->tp_size = base->tp_size;
+	tp->tp_align = base->tp_align;
 }
 
 struct type *
@@ -236,7 +220,7 @@ subr_type(lb, ub)
 		indicated by "lb" and "ub", but first perform some
 		checks
 	*/
-	register struct type *tp = lb->nd_type;
+	register struct type *tp = lb->nd_type, *res;
 
 	if (!TstCompat(lb->nd_type, ub->nd_type)) {
 		node_error(ub, "Types of subrange bounds not compatible");
@@ -264,11 +248,13 @@ subr_type(lb, ub)
 
 	/* Now construct resulting type
 	*/
-	tp = construct_type(T_SUBRANGE, tp);
-	tp->sub_lb = lb->nd_INT;
-	tp->sub_ub = ub->nd_INT;
+	res = construct_type(T_SUBRANGE, tp);
+	res->sub_lb = lb->nd_INT;
+	res->sub_ub = ub->nd_INT;
+	res->tp_size = tp->tp_size;
+	res->tp_align = tp->tp_align;
 	DO_DEBUG(2,debug("Creating subrange type %ld-%ld", (long)lb->nd_INT,(long)ub->nd_INT));
-	return tp;
+	return res;
 }
 #define MAX_SET	1024	/* ??? Maximum number of elements in a set */
 
@@ -301,4 +287,72 @@ set_type(tp)
 	tp = construct_type(T_SET, tp);
 	tp->tp_size = align(((ub - lb) + 7)/8, wrd_align);
 	return tp;
+}
+
+ArraySizes(tp)
+	register struct type *tp;
+{
+	/*	Assign sizes to an array type
+	*/
+	arith elem_size;
+	register struct type *itype = tp->next;	/* the index type */
+
+	if (tp->arr_elem->tp_fund == T_ARRAY) {
+		ArraySizes(tp->arr_elem);
+	}
+
+	elem_size = align(tp->arr_elem->tp_size, tp->arr_elem->tp_align);
+	tp->tp_align = tp->arr_elem->tp_align;
+
+	if (! (itype->tp_fund & T_INDEX)) {
+		error("Illegal index type");
+		tp->tp_size = 0;
+		return;
+	}
+
+	switch(itype->tp_fund) {
+	case T_SUBRANGE:
+		tp->arr_lb = itype->sub_lb;
+		tp->arr_ub = itype->sub_ub;
+		tp->tp_size = elem_size * (itype->sub_ub - itype->sub_lb + 1);
+		break;
+	case T_CHAR:
+	case T_ENUMERATION:
+		tp->arr_lb = 0;
+		tp->arr_ub = itype->enm_ncst - 1;
+		tp->tp_size = elem_size * itype->enm_ncst;
+		break;
+	default:
+		assert(0);
+	}
+	/* ??? overflow checking ??? */
+}
+
+int
+gcd(m, n)
+	register int m, n;
+{
+	/*	Greatest Common Divisor
+ 	*/
+	register int r;
+
+	while (n)	{
+		r = m % n;
+		m = n;
+		n = r;
+	}
+	return m;
+}
+
+int
+lcm(m, n)
+	register int m, n;
+{
+	/*	Least Common Multiple
+ 	*/
+	while (m != n) {
+		if (m < n) m = m + m;
+		else n = n + n;
+	}
+	return n;		/* or m */
 }

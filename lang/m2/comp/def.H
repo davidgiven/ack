@@ -4,14 +4,16 @@
 
 struct module {
 	int mo_priority;	/* priority of a module */
-	int mo_scope;		/* scope of this module */
+	struct scope *mo_scope;	/* scope of this module */
 #define mod_priority	df_value.df_module.mo_priority
 #define mod_scope	df_value.df_module.mo_scope
 };
 
 struct variable {
 	arith va_off;		/* address or offset of variable */
+	char va_addrgiven;	/* an address was given in the program */
 #define var_off		df_value.df_variable.va_off
+#define var_addrgiven	df_value.df_variable.va_addrgiven
 };
 
 struct constant {
@@ -38,8 +40,12 @@ struct field {
 };
 
 struct dfproc {
-	int pr_scope;		/* scope number of procedure */
+	struct scope *pr_scope;	/* scope of procedure */
+	int pr_level;		/* depth level of this procedure */
+	arith pr_nbpar;		/* Number of bytes parameters */
 #define prc_scope	df_value.df_proc.pr_scope
+#define prc_level	df_value.df_proc.pr_level
+#define prc_nbpar	df_value.df_proc.pr_nbpar
 };
 
 struct import {
@@ -48,7 +54,7 @@ struct import {
 };
 
 struct dforward {
-	int fo_scope;
+	struct scope *fo_scope;
 	struct node *fo_node;
 #define for_node	df_value.df_forward.fo_node
 #define for_scope	df_value.df_forward.fo_scope
@@ -59,7 +65,7 @@ struct def	{		/* list of definitions for a name */
 	struct def *df_nextinscope;
 				/* link all definitions in a scope */
 	struct idf *df_idf;	/* link back to the name */
-	int df_scope;		/* scope in which this definition resides */
+	struct scope *df_scope;	/* scope in which this definition resides */
 	short df_kind;		/* the kind of this definition: */
 #define D_MODULE	0x0001	/* a module */
 #define D_PROCEDURE	0x0002	/* procedure of function */

@@ -4,13 +4,16 @@ static char *RcsId = "$Header$";
 
 #include	<alloc.h>
 #include	<em_arith.h>
+#include	<em_label.h>
 #include	<assert.h>
 #include	"input.h"
 #include	"f_info.h"
 #include	"Lpars.h"
 #include	"class.h"
 #include	"idf.h"
+#include	"type.h"
 #include	"LLlex.h"
+#include	"const.h"
 
 #define IDFSIZE	256	/* Number of significant characters in an identifier */
 #define NUMSIZE	256	/* maximum number of characters in a number */
@@ -18,6 +21,7 @@ static char *RcsId = "$Header$";
 long str2long();
 
 struct token dot, aside;
+struct type *numtype;
 struct string string;
 
 static
@@ -102,6 +106,7 @@ LLlex()
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
 
+	numtype = error_type;
 	if (ASIDE)	{	/* a token is put aside		*/
 		*tk = aside;
 		ASIDE = 0;
@@ -236,7 +241,7 @@ again:
 		switch (ch) {
 		case 'H':
 Shex:			*np++ = '\0';
-			/* Type is integer */
+			numtype = card_type;
 			tk->TOK_INT = str2long(&buf[1], 16);
 			return tk->tk_symb = INTEGER;
 
@@ -271,10 +276,10 @@ Shex:			*np++ = '\0';
 			PushBack(ch);
 			ch = *--np;
 			*np++ = '\0';
-			/*
-			 * If (ch == 'C') type is a CHAR
-			 * else type is an INTEGER
-			 */
+			if (ch == 'C') {
+				numtype = char_type;
+			}
+			else	numtype = card_type;
 			tk->TOK_INT = str2long(&buf[1], 8);
 			return tk->tk_symb = INTEGER;
 
@@ -369,8 +374,11 @@ Sreal:
 			PushBack(ch);
 Sdec:
 			*np++ = '\0';
-			/* Type is an integer */
 			tk->TOK_INT = str2long(&buf[1], 10);
+			if (tk->TOK_INT < 0 || tk->TOK_INT > max_int) {
+				numtype = card_type;
+			}
+			else	numtype = intorcard_type;
 			return tk->tk_symb = INTEGER;
 		}
 		/*NOTREACHED*/

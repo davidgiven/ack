@@ -2,6 +2,9 @@
 
 static char *RcsId = "$Header$";
 
+/*	Routines for testing type equivalence, type compatibility, and
+	assignment compatibility
+*/
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	"type.h"
@@ -15,8 +18,8 @@ TstTypeEquiv(tp1, tp2)
 		from the fact that for some procedures two declarations may
 		be given: one in the specification module and one in the
 		definition module.
-		A related problem is that two dynamic arrays with the
-		same base type are also equivalent.
+		A related problem is that two dynamic arrays with
+		equivalent base types are also equivalent.
 	*/
 
 	return     tp1 == tp2
@@ -66,8 +69,7 @@ TstProcEquiv(tp1, tp2)
 		p1 = p1->next;
 		p2 = p2->next;
 	}
-	if (p1 != p2) return 0;
-	return 1;
+	return p1 == p2;
 }
 
 int

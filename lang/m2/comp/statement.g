@@ -6,12 +6,15 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	"LLlex.h"
 #include	"node.h"
+
+static int	loopcount = 0;	/* Count nested loops */
 }
 
-statement
+statement(struct node **pnd;)
 {
-	struct node *nd1, *nd2 = 0;
+	struct node *nd1;
 } :
+				{ *pnd = 0; }
 [
 	/*
 	 * This part is not in the reference grammar. The reference grammar
@@ -19,38 +22,45 @@ statement
 	 * but this gives LL(1) conflicts
 	 */
 	designator(&nd1)
-	[
-		ActualParameters(&nd2)?
-				{ nd1 = MkNode(Call, nd1, nd2, &dot);
+	[			{ nd1 = MkNode(Call, nd1, NULLNODE, &dot);
 				  nd1->nd_symb = '(';
 				}
+		ActualParameters(&(nd1->nd_right))?
 	|
 		BECOMES		{ nd1 = MkNode(Stat, nd1, NULLNODE, &dot); }
 		expression(&(nd1->nd_right))
 	]
+				{ *pnd = nd1; }
 	/*
 	 * end of changed part
 	 */
 |
-	IfStatement
+	IfStatement(pnd)
 |
-	CaseStatement
+	CaseStatement(pnd)
 |
-	WhileStatement
+	WhileStatement(pnd)
 |
-	RepeatStatement
+	RepeatStatement(pnd)
 |
-	LoopStatement
+			{ loopcount++; }
+	LoopStatement(pnd)
+			{ loopcount--; }
 |
-	ForStatement
+	ForStatement(pnd)
 |
-	WithStatement
+	WithStatement(pnd)
 |
 	EXIT
+			{ if (!loopcount) {
+				error("EXIT not in a LOOP");
+			  }
+			  *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
+			}
 |
-	RETURN
+	RETURN		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
 	[
-		expression(&nd1)
+		expression(&((*pnd)->nd_right))
 	]?
 ]?
 ;
@@ -67,66 +77,132 @@ ProcedureCall:
 ;
 */
 
-StatementSequence:
-	statement [ ';' statement ]*
+StatementSequence(struct node **pnd;):
+	statement(pnd)
+	[
+		';'	{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+			  pnd = &((*pnd)->nd_right);
+			}
+		statement(pnd)
+	]*
 ;
 
-IfStatement
+IfStatement(struct node **pnd;)
 {
-	struct node *nd1;
+	register struct node *nd;
 } :
-	IF expression(&nd1) THEN StatementSequence
-	[ ELSIF expression(&nd1) THEN StatementSequence ]*
-	[ ELSE StatementSequence ]?
+	IF		{ nd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
+			  *pnd = nd;
+			}
+	expression(&(nd->nd_left))
+	THEN		{ nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
+			  (*pnd)->nd_right = nd;
+			}
+	StatementSequence(&(nd->nd_left))
+	[
+		ELSIF	{ nd->nd_right = MkNode(Stat,NULLNODE,NULLNODE,&dot);
+			  nd = nd->nd_right;
+			  nd->nd_symb = IF;
+			}
+		expression(&(nd->nd_left))
+		THEN	{ nd->nd_right = MkNode(Link,NULLNODE,NULLNODE,&dot);
+			  nd = nd->nd_right;
+			}
+		StatementSequence(&(nd->nd_left))
+	]*
+	[
+		ELSE
+		StatementSequence(&(nd->nd_right))
+	]?
 	END
 ;
 
-CaseStatement
+CaseStatement(struct node **pnd;)
 {
-	struct node *nd;
+	register struct node *nd;
+	struct type *tp = 0;
 } :
-	CASE expression(&nd) OF case [ '|' case ]*
-	[ ELSE StatementSequence ]?
+	CASE		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	expression(&(nd->nd_left))
+	OF
+	case(&(nd->nd_right), &tp)
+			{ nd = nd->nd_right; }
+	[
+		'|'
+		case(&(nd->nd_right), &tp)
+			{ nd = nd->nd_right; }
+	]*
+	[ ELSE StatementSequence(&(nd->nd_right)) ]?
 	END
 ;
 
-case:
-	[ CaseLabelList ':' StatementSequence ]?
+case(struct node **pnd; struct type **ptp;) :
+			{ *pnd = 0; }
+	[ CaseLabelList(ptp/*,pnd*/)
+	  ':'		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
+	  StatementSequence(&((*pnd)->nd_right))
+	]?
 				/* This rule is changed in new modula-2 */
+			{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+			  (*pnd)->nd_symb = '|';
+			}
 ;
 
-WhileStatement
+WhileStatement(struct node **pnd;)
 {
-	struct node *nd;
+	register struct node *nd;
 }:
-	WHILE expression(&nd) DO StatementSequence END
+	WHILE		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	expression(&(nd->nd_left))
+	DO
+	StatementSequence(&(nd->nd_right))
+	END
 ;
 
-RepeatStatement
+RepeatStatement(struct node **pnd;)
 {
-	struct node *nd;
+	register struct node *nd;
 }:
-	REPEAT StatementSequence UNTIL expression(&nd)
+	REPEAT		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	StatementSequence(&(nd->nd_left))
+	UNTIL
+	expression(&(nd->nd_right))
 ;
 
-ForStatement
+ForStatement(struct node **pnd;)
 {
-	struct node *nd1, *nd2, *nd3;
+	register struct node *nd;
 }:
-	FOR IDENT
-	BECOMES expression(&nd1)
-	TO expression(&nd2)
-	[ BY ConstExpression(&nd3) ]?
-	DO StatementSequence END
+	FOR		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	IDENT		{ nd = MkNode(Name, NULLNODE, NULLNODE, &dot); }
+	BECOMES		{ nd = MkNode(BECOMES, nd, NULLNODE, &dot); }
+	expression(&(nd->nd_right))
+	TO		{ (*pnd)->nd_left=nd=MkNode(Link,nd,NULLNODE,&dot); }
+	expression(&(nd->nd_right))
+	[
+		BY	{ nd->nd_right=MkNode(Link,NULLNODE,nd->nd_right,&dot);
+			}
+		ConstExpression(&(nd->nd_right->nd_left))
+	|
+	]
+	DO
+	StatementSequence(&((*pnd)->nd_right))
+	END
 ;
 
-LoopStatement:
-	LOOP StatementSequence END
+LoopStatement(struct node **pnd;):
+	LOOP		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	StatementSequence(&((*pnd)->nd_right))
+	END
 ;
 
-WithStatement
+WithStatement(struct node **pnd;)
 {
-	struct node *nd;
+	register struct node *nd;
 }:
-	WITH designator(&nd) DO StatementSequence END
+	WITH		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	designator(&(nd->nd_left))
+	DO
+	StatementSequence(&(nd->nd_right))
+	END
 ;

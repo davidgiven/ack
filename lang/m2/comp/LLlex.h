@@ -28,6 +28,7 @@ struct token	{
 #define TOK_REL	tk_data.tk_real
 
 extern struct token dot, aside;
+extern struct type *numtype;
 
 #define DOT	dot.tk_symb
 #define ASIDE	aside.tk_symb

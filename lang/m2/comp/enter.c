@@ -35,10 +35,11 @@ Enter(name, kind, type, pnam)
 	return df;
 }
 
-EnterIdList(idlist, kind, flags, type, scope)
+EnterIdList(idlist, kind, flags, type, scope, addr)
 	register struct node *idlist;
 	struct type *type;
 	struct scope *scope;
+	arith *addr;
 {
 	/*	Put a list of identifiers in the symbol table.
 		They all have kind "kind", and type "type", and are put
@@ -50,11 +51,29 @@ EnterIdList(idlist, kind, flags, type, scope)
 	register struct def *df;
 	struct def *first = 0, *last = 0;
 	int assval = 0;
+	arith off;
 
 	while (idlist) {
 		df = define(idlist->nd_IDF, scope, kind);
 		df->df_type = type;
 		df->df_flags |= flags;
+		if (addr) {
+			if (*addr >= 0) {
+				off = align(*addr, type->tp_align);
+				*addr = off + type->tp_size;
+			}
+			else {
+				off = -align(-*addr, type->tp_align);
+				*addr = off - type->tp_size;
+			}
+			if (kind == D_VARIABLE) {
+				df->var_off = off;
+			}
+			else {
+				assert(kind == D_FIELD);
+				df->fld_off = off;
+			}
+		}
 		if (kind == D_ENUM) {
 			if (!first) first = df;
 			df->enm_val = assval++;
@@ -72,6 +91,45 @@ EnterIdList(idlist, kind, flags, type, scope)
 	}
 }
 
+EnterVarList(IdList, type, local)
+	register struct node *IdList;
+	struct type *type;
+{
+	register struct def *df;
+	struct scope *scope;
+
+	if (local) {
+		/* Find the closest enclosing open scope. This
+		   is the procedure that we are dealing with
+		*/
+		scope = CurrentScope;
+		while (scope->sc_scopeclosed) scope = scope->next;
+	}
+
+	while (IdList) {
+		df = define(IdList->nd_IDF, CurrentScope, D_VARIABLE);
+		df->df_type = type;
+		if (IdList->nd_left) {
+			df->var_addrgiven = 1;
+			if (IdList->nd_left->nd_type != card_type) {
+node_error(IdList->nd_left,"Illegal type for address");
+			}
+			df->var_off = IdList->nd_left->nd_INT;
+		}
+		else if (local) {
+			arith off;
+
+			/* add aligned size of variable to the offset
+			*/
+			off = scope->sc_off - type->tp_size;
+			off = -align(-off, type->tp_align);
+			df->var_off = off;
+			scope->sc_off = off;
+		}
+		IdList = IdList->nd_right;
+	}
+}
+
 struct def *
 lookfor(id, scope, give_error)
 	struct node *id;
@@ -86,7 +144,7 @@ lookfor(id, scope, give_error)
 	register struct scope *sc = scope;
 
 	while (sc) {
-		df = lookup(id->nd_IDF, sc->sc_scope);
+		df = lookup(id->nd_IDF, sc);
 		if (df) return df;
 		sc = nextvisible(sc);
 	}

@@ -38,8 +38,8 @@ struct array {
 };
 
 struct record {
-	int rc_scope;		/* Scope number of this record */
-				/* Members are in the symbol table */
+	struct scope *rc_scope;	/* scope of this record */
+				/* members are in the symbol table */
 #define rec_scope	tp_value.tp_record.rc_scope
 };
 
@@ -71,6 +71,7 @@ struct type	{
 #define T_INTORCARD	(T_INTEGER|T_CARDINAL)
 #define T_DISCRETE	(T_ENUMERATION|T_INTORCARD|T_CHAR)
 #define T_NUMERIC	(T_INTORCARD|T_REAL)
+#define T_INDEX		(T_ENUMERATION|T_CHAR|T_SUBRANGE)
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
 	union {

@@ -49,7 +49,7 @@ GetDefinitionModule(id)
 	*/
 	struct def *df;
 
-	df = lookup(id, GlobalScope->sc_scope);
+	df = lookup(id, GlobalScope);
 	if (!df) {
 		/* Read definition module. Make an exception for SYSTEM.
 		*/
@@ -60,7 +60,7 @@ GetDefinitionModule(id)
 			GetFile(id->id_text);
 			DefModule();
 		}
-		df = lookup(id, GlobalScope->sc_scope);
+		df = lookup(id, GlobalScope);
 	}
 	assert(df != 0 && df->df_kind == D_MODULE);
 	return df;
