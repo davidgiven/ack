@@ -3,7 +3,7 @@
  exp $_dup
  pro $_dup,0
  lol 0
- _dup EM_WSIZE
+ dup EM_WSIZE
  loc 41
  mon
  zeq *1
