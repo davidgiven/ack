@@ -5,6 +5,8 @@
 #define ok(X)	if( X ==0) return;
 #define okr(X)	if( X ==0) return(0);
 
+extern char *salloc() ;
+
 _len(str)
 String *str;
 {
@@ -19,7 +21,7 @@ char *str;
 	s= (String *) salloc(sizeof(String));
 	s->strcount=1;
 	s->strlength= strlen(str);
-	s->strval= (char *) salloc(s->strlength+1);
+	s->strval= salloc(s->strlength+1);
 	strcpy(s->strval,str);
 	return(s);
 }
@@ -51,7 +53,7 @@ String *src;
 {
 	ok(src);
 	sfree(src->strval);
-	sfree(src);
+	sfree((char *)src);
 }
 String *_concat(s1,s2)
 String *s1,*s2;
@@ -61,7 +63,7 @@ String *s1,*s2;
 	okr(s1); okr(s2);
 	s= (String *) salloc(sizeof(String));
 	length= _len(s1)+_len(s2)+1;
-	s->strval= (char *) salloc(length);
+	s->strval= salloc(length);
 	strcpy(s->strval,s2->strval);
 	strcat(s->strval,s1->strval);
 	return(s);
@@ -83,7 +85,7 @@ int	size;
 	okr(s);
 	if( size <0 || size >s->strlength) error(3);
 	ns= (String *) salloc(sizeof(String));
-	ns->strval= (char *) salloc(size+1);
+	ns->strval= salloc(size+1);
 	ns->strcount=1;
 	for(i=0; i<size && s->strval[i];i++)
 		ns->strval[i]= s->strval[i];
@@ -102,7 +104,7 @@ int d;
 	s= (String *) salloc(sizeof(String));
 	s->strlength= len;
 	s->strcount=1;
-	s->strval= (char *) salloc(len+1);
+	s->strval= salloc(len+1);
 	for(i=0;i<len;i++)
 		s->strval[i]= ' ';
 	s->strval[i]=0;
@@ -123,7 +125,7 @@ double	d,f;
 	s= (String *) salloc(sizeof(String));
 	s->strlength= i;
 	s->strcount=1;
-	s->strval= (char *) salloc(i+1);
+	s->strval= salloc(i+1);
 	s->strval[i]=0;
 	for(; i>=0;i--)
 		s->strval[i]= j;
