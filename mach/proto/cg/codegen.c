@@ -402,13 +402,13 @@ if (Debug)
 	assert(result.e_typ==EV_REG);
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (tp->t_token==-1) {
-			if(tp->t_att[0].ar==result.e_v.e_con)
+			if(tp->t_att[0].ar==result.e_v.e_reg)
 				goto gotone;
 		} else {
 			tdp = &tokens[tp->t_token];
 			for(i=0;i<TOKENSIZE;i++)
 				if (tdp->t_type[i]==EV_REG &&
-				    tp->t_att[i].ar==result.e_v.e_con)
+				    tp->t_att[i].ar==result.e_v.e_reg)
 					goto gotone;
 		}
 	break;
