@@ -1,5 +1,5 @@
 # $Header$
-EMHOME =	/proj/em/Work
+EMHOME =	../../..
 INSTALL =	$(EMHOME)/modules/install
 COMPARE =	$(EMHOME)/modules/compare
 LINT	=	lint

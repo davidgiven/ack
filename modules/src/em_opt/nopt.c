@@ -4,12 +4,17 @@ static char rcsid2[] = "$Header$";
 
 #include "nopt.h"
 
-extern int (*OO_fstate[])();	/* Initialized from patterns in dfa.c */
-extern int OO_maxpattern;	/* Initialized from patterns in dfa.c */
-extern int OO_maxreplacement;	/* Initialized from patterns in dfa.c */
+extern struct dfa OO_checknext[];	/* Initialized in dfa.c */
+extern struct dfa *OO_base[];		/* Initialized in dfa.c */
+extern struct dodefault OO_default[];	/* Initialized in dfa.c */
+extern int OO_maxpattern;		/* Initialized in dfa.c */
+extern int OO_maxreplacement;		/* Initialized in dfa.c */
+extern int (*OO_ftrans[])();		/* Initialized in trans.c */
 
 extern char	em_mnem[][4];
 extern char	em_pseu[][4];
+
+int OO_state = 0;
 
 p_instr	OO_buffer;
 p_instr	OO_patternqueue;
@@ -69,9 +74,23 @@ O_close()
 OO_dfa(last)
 	register int last;
 {
+	register struct dfa *b;
+	register struct dodefault *d;
+	register int (*f)();
 	for(;;) {
 		printstate("OO_dfa");
-		(*OO_fstate[OO_state])(last);
+		if((b=OO_base[OO_state]) && ((b += last)->check==OO_state)) {
+			if(f=OO_ftrans[OO_state = b->next]) f();
+		}
+		else if (OO_state) {
+			/* consult default entry */
+			d = &OO_default[OO_state];
+			if(!OO_endbackup) OO_endbackup = OO_nxtpatt;
+			OO_nxtpatt--;
+			OO_patternqueue += d->numout;
+			if(f=OO_ftrans[OO_state = d->next]) f();
+		}
+		else OO_flush();
 		if (!OO_endbackup) return;
 		last = (OO_nxtpatt++)->em_opcode;
 		if (OO_nxtpatt >= OO_endbackup)
@@ -197,18 +216,17 @@ OO_mkext(p,opcode,arg,off)
 	}
 }
 
-OO_backup(n)
-	int n;
+OO_mkrepl(lrepl,diff,numbkup)
+	int lrepl,diff,numbkup;
 {
 	/* copy the replacement queue into the buffer queue */
 	/* then move the pattern queue back n places */
 	register p_instr p,q;
-	register int i,lrepl, diff;
+	register int i;
 	printstate("Before backup");
-	lrepl = OO_nxtrepl-OO_replqueue;
 	if(OO_endbackup) {
 		/* move the region between OO_nxtpatt and OO_endbackup */
-		if ((diff = (OO_nxtpatt-OO_patternqueue) - lrepl) > 0) {
+		if (diff > 0) {
 			/* move left by diff */
 			BTSCPY(p,q,i,OO_nxtpatt-diff,OO_nxtpatt,OO_endbackup-OO_nxtpatt);
 			OO_nxtpatt -= diff;
@@ -233,26 +251,14 @@ OO_backup(n)
 		OO_nxtrepl = OO_replqueue;
 		OO_patternqueue += lrepl;
 	}
-	/* now move the position of interest back n instructions */
-	if ((OO_patternqueue-OO_buffer) < n) 
-		n = (OO_patternqueue-OO_buffer);
-	OO_nxtpatt = OO_patternqueue -= n;
-	if(!OO_endbackup && n)
-		OO_endbackup = OO_patternqueue+n;
+	/* now move the position of interest back nunbkup instructions */
+	if ((OO_patternqueue-OO_buffer) < numbkup) 
+		numbkup = (OO_patternqueue-OO_buffer);
+	OO_nxtpatt = OO_patternqueue -= numbkup;
+	if(!OO_endbackup && numbkup)
+		OO_endbackup = OO_patternqueue+numbkup;
 	OO_state = 0;
 	printstate("After backup");
-}
-
-OO_dodefault(numout, newstate)
-	int numout;
-	int newstate;
-{
-	printstate("Before dodefault");
-	if(!OO_endbackup) OO_endbackup = OO_nxtpatt;
-	OO_nxtpatt--;
-	OO_patternqueue += numout;
-	OO_state = newstate;
-	printstate("After dodefault");
 }
 
 #ifdef DEBUG

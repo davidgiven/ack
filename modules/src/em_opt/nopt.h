@@ -20,6 +20,16 @@
 
 typedef struct e_instr *p_instr;
 
+struct dfa {
+	short	check;
+	short	next;
+};
+
+struct dodefault {
+	short	numout;
+	short	next;
+};
+
 extern p_instr	OO_buffer;
 extern p_instr	OO_patternqueue;
 extern p_instr	OO_nxtpatt;

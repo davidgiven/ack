@@ -6,8 +6,8 @@ static char rcsidp3[] = "$Header$";
 
 #define UPDATEWORST(backups) if(backups>mostbackups) mostbackups = backups;
 
-findworst(repl)
-	struct mnems repl;
+findworst(patt,repl)
+	struct mnems patt,repl;
 {
 	/*
 	/* Find the pattern that requires the most backup of output queue.
@@ -26,11 +26,12 @@ findworst(repl)
 	/*	requires a backup of n-i+1 instructions and a goto to state 0.
 	*/
 	int n = repl.m_len;
+	int diff = patt.m_len - repl.m_len;
 	int first,i;
 	int s;
 	int mostbackups = 0;
 	if(n==0) {
-		fprintf(ofile,"\t\tOO_backup(%d);\n", maxpattern-1);
+		fprintf(ofile,"\t\tOO_mkrepl(0,%d,%d);\n",diff,maxpattern-1);
 		return;
 	}
 	for(s=1;s<=higheststate;s++) {
@@ -56,7 +57,7 @@ findworst(repl)
 			}
 		}
 	}
-	fprintf(ofile,"\t\tOO_backup(%d);\n",mostbackups);
+	fprintf(ofile,"\t\tOO_mkrepl(%d,%d,%d);\n",n,diff,mostbackups);
 }
 
 findfail(state,resout,rescpy,resgto)

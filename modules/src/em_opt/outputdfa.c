@@ -90,66 +90,136 @@ RENAME(x,y)
 	unlink(x);
 }
 
+# define MAXOPCODE 255
+# define EMPTY     -1
+
+int *next, *check, *base;
+unsigned currsize;		/* current size of next and check arrays */
+int maxpos = 0;		/* highest used position in these arrayes */
+
+PRIVATE
+increase_next(size)
+	int size;
+{
+	/* realloc arrays next and check so they are at least
+	 * of size 'size'
+	 */
+	char *Realloc();
+	unsigned newsize = currsize;
+	register int i;
+	do {
+		newsize *= 2;
+	} while (newsize<size);
+	printf("Extending next/check arrays from %d to %d\n",currsize,newsize);
+	next = (int *)Realloc(next,newsize);
+	check = (int *)Realloc(check,newsize);
+	/* clear ends of new arrays */
+	for(i=currsize;i<newsize;i++)
+		next[i] = check[i] = EMPTY;
+	currsize = newsize;
+}
+
+PRIVATE
+store_row(state,row)
+	int state;
+	register int *row;
+{
+	/* find a place to store row in arrays */
+	register b,i,o;
+	register int *n = next;
+	b=0;
+	for(;;) {
+		/* look for first possible place to store it */
+		for(i=0;i<MAXOPCODE;i++) {
+			if(row[i]) {
+				if((o = b+i)>currsize) increase_next(o);
+				if(n[o]!=EMPTY) goto nextpos;
+			}
+		}
+		/* found a place */
+		base[state]=b;
+		for(i=0;i<MAXOPCODE;i++)
+			if(row[i]) {
+				if((o=b+i) >maxpos) maxpos = o;
+				next[o] = row[i];
+				check[o] = state;
+			}
+		return;
+	nextpos:
+		++b;
+	}
+}
+
 PRIVATE
 outdfa()
 {
-	int s;
-	struct state *p;
+	register int s,i;
+	register struct state *p;
 	int nout, ncpy, ngto;
-	int seenswitch;
+	int row[MAXOPCODE];
+	int numinrow;
+	int numentries = 0;
+			
 	fprintf(ofile,"#include \"nopt.h\"\n");
 	fprintf(ofile,"\n");
 	fprintf(ofile,"int OO_maxreplacement = %d;\n", maxreplacement);
-	fprintf(ofile,"int OO_state = 0;\n");
 	fprintf(ofile,"\n");
+
+	/* find how many entries in dfa */
+	for(s=0;s<=higheststate;s++)
+		for(p=states[s];p!=(struct state *)NULL;p=p->next)
+			numentries++;
+	/* start with next and check arrays twice this size */
+	currsize = 2 * numentries;
+	next  = (int *)Malloc(currsize*sizeof(int));
+	check = (int *)Malloc(currsize*sizeof(int));
+	base  = (int *)Malloc(((unsigned)(higheststate+1))*sizeof(int));
+	/* fill next array with EMPTY */
+	for(i=0;i<currsize;i++) check[i]=next[i]=EMPTY;
 	for(s=0;s<=higheststate;s++) {
-		fprintf(ofile,"static dfa%d();\n",s);
+		/* empty row */
+		for(i=0;i<MAXOPCODE;i++) row[i]=0;
+		numinrow = 0;
+		/* fill in non zero entries */
+		for(p=states[s];p!=(struct state *)NULL;p=p->next) {
+			numinrow++;
+			row[p->op->id_opcode] = p->goto_state;
+		}
+		/* look for a place to store row */
+		if(numinrow)
+			store_row(s,row);
+		else
+			base[s] = EMPTY;
 	}
-	fprintf(ofile,"\nint (*OO_fstate[])()=\n{\n");
-	for(s=0;s<=higheststate;s++) {
-		fprintf(ofile,"\tdfa%d,\n",s);
+
+	/* output the arrays */
+	printf("Compacted %d entries into %d positions\n",numentries,maxpos);
+	fprintf(ofile,"struct dfa OO_checknext[] = {\n");
+	for(i=0;i<=maxpos;i++) {
+		fprintf(ofile,"\t/* %4d */\t",i);
+		fprintf(ofile,"{%4d,%4d},\n", check[i], next[i]);
 	}
 	fprintf(ofile,"};\n\n");
+	fprintf(ofile,"struct dfa *OO_base[] = {\n");
 	for(s=0;s<=higheststate;s++) {
-		fprintf(ofile,"static dfa%d(opcode)\n",s);
-		fprintf(ofile,"\tint opcode;\n");
-		fprintf(ofile,"{\n");
-		fprintf(ofile,"\t/* ");
+		fprintf(ofile,"\t/* %4d: ",s);
 		outmnems(patterns[s]);
-		fprintf(ofile," */\n");
-		seenswitch = 0;
-		for(p=states[s];p!=(struct state *)NULL;p=p->next) {
-			if(!seenswitch) {
-				seenswitch++;
-				fprintf(ofile,"\tswitch(opcode) {\n");
-			}
-			fprintf(ofile,"\tcase op_%s: ",p->op->id_text);
-			if(actions[p->goto_state]==(struct action *)NULL)
-				fprintf(ofile,"OO_state = %d; ",p->goto_state);
-			else fprintf(ofile,"OO_%ddotrans(); ",p->goto_state);
-			fprintf(ofile,"break;\n");
-		}
-		if(s==0) {
-			if(!seenswitch) {
-				seenswitch++;
-				fprintf(ofile,"\tswitch(opcode) {\n");
-			}
-			fprintf(ofile,"\tdefault:\n");
-			fprintf(ofile,"\t\tOO_flush();\n");
-			fprintf(ofile,"\t\tbreak;\n");
-		}
-		else {
-			if(seenswitch) fprintf(ofile,"\tdefault:\n");
-			findfail(s,&nout,&ncpy,&ngto);
-			fprintf(ofile,"\t\tOO_dodefault(%d,%d);\n",nout,ngto);
-			if(actions[ngto]!=NULL)
-				fprintf(ofile,"\t\tOO_%ddotrans();\n",ngto);
-			if(seenswitch) fprintf(ofile,"\t\tbreak;\n");
-		}
-		if(seenswitch) fprintf(ofile,"\t}\n");
-		fprintf(ofile,"}\n");
-		fprintf(ofile,"\n");
+		fprintf(ofile,"*/\t");
+		if(base[s]==EMPTY)
+			fprintf(ofile,"0,\n");
+		else
+			fprintf(ofile,"&OO_checknext[%4d],\n", base[s]);
 	}
+	fprintf(ofile,"};\n\n");
+	fprintf(ofile,"struct dodefault OO_default[] = {\n");
+	for(s=0;s<=higheststate;s++) {
+		fprintf(ofile,"\t/* %4d: ",s);
+		outmnems(patterns[s]);
+		fprintf(ofile,"*/\t");
+		findfail(s,&nout,&ncpy,&ngto);
+		fprintf(ofile,"{%4d,%4d},\n", nout,ngto);
+	}
+	fprintf(ofile,"};\n\n");
 }
 
 PRIVATE
@@ -168,9 +238,24 @@ outdotrans()
 	struct action *a;
 	int seennontested;
 	fprintf(ofile,"#include \"nopt.h\"\n\n");
+	/* declare all the trans functions */
+	for(s=0;s<=higheststate;s++) {
+		if(actions[s]!=(struct action *)NULL)
+			fprintf(ofile,"static do%dtrans();\n",s);
+	}
+	/* output the array itself */
+	fprintf(ofile,"\nint (*OO_ftrans[])()=\n{\n");
+	for(s=0;s<=higheststate;s++) {
+		if(actions[s]!=(struct action *)NULL)
+			fprintf(ofile,"\tdo%dtrans,\n",s);
+		else
+			fprintf(ofile,"\t0,\n");
+	}
+	fprintf(ofile,"};\n\n");
+	/* now output the functions */
 	for(s=0;s<=higheststate;s++) {
 		if(actions[s]!=(struct action *)NULL) {
-			fprintf(ofile,"\nOO_%ddotrans() {\n",s);
+			fprintf(ofile,"\nstatic do%dtrans() {\n",s);
 			fprintf(ofile,"\tregister p_instr patt = OO_patternqueue;\n");
 			fprintf(ofile,"\t/* ");
 			outmnems(patterns[s]);
@@ -194,13 +279,8 @@ outdotrans()
 					outoneaction(s,a);
 				}
 			}
-			if(!seennontested)
-				fprintf(ofile,"\tOO_state=%d;\n",s);
 			fprintf(ofile,"}\n");
 		}
-		/*
-		 * else fprintf(ofile,"\nOO_%ddotrans() {\n\tOO_state=%d;\n}\n",s,s);
-		 */
 	}
 }
 
@@ -216,7 +296,7 @@ outoneaction(s,a)
 	fprintf(ofile,"\t\tif(OO_wrstats) fprintf(stderr,\"%d\\n\");\n",a->linenum);
 	fprintf(ofile,"#endif\n");
 	outrepl(s,a->replacement);
-	findworst(a->replacement);
+	findworst(patterns[s],a->replacement);
 }
 
 PRIVATE

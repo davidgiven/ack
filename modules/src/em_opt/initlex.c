@@ -6,7 +6,7 @@ static char rcsidp2[] = "$Header$";
 #include <em_flag.h>
 #include <em_spec.h>
 #include "parser.h"
-#define op_lab 255
+#define op_lab sp_fpseu	/* if you change this change nopt.h also */
 
 #include <idf_pkg.body>
 
