@@ -128,7 +128,7 @@ external_definition
 				is a function, not an old-fashioned
 				initialization.
 			*/
-			function(&Dc)
+			function(&Ds, &Dc)
 		|
 			non_function(&Ds, &Dc)
 		]
@@ -166,7 +166,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 ;
 
 /* 10.1 */
-function(struct declarator *dc;)
+function(struct decspecs *ds; struct declarator *dc;)
 	{
 		arith fbytes;
 	}
@@ -175,7 +175,7 @@ function(struct declarator *dc;)
 		init_idf(idf);
 		stack_level();		/* L_FORMAL1 declarations */
 		declare_params(dc);
-		begin_proc(idf->id_text, idf->id_def);
+		begin_proc(ds, idf);	/* sets global function info */
 		stack_level();		/* L_FORMAL2 declarations */
 	}
 	declaration*

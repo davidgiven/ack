@@ -28,7 +28,7 @@ extern int inc_max;
 extern int inc_total;
 #endif NOPP
 
-extern char options[];
+char options[128];			/* one for every char	*/
 extern int idfsize;
 
 int txt2int();
@@ -36,10 +36,12 @@ int txt2int();
 do_option(text)
 	char *text;
 {
-	switch(*text++)	{
+	register char opt;
+
+	switch (opt = *text++)	{
 
 	default:
-		fatal("illegal option: %c", *--text);
+		fatal("illegal option: %c", opt);
 		break;
 	case '-':
 		options[*text] = 1;	/* flags, debug options etc.	*/
@@ -55,8 +57,9 @@ do_option(text)
 #ifndef	NOROPTION
 	case 'R':			/* strict version */
 #endif
-		options[*(text-1)] = 1;
+		options[opt] = 1;
 		break;
+
 #ifdef	NOROPTION
 	case 'R':
 		warning("-R option not implemented");
@@ -208,62 +211,62 @@ deleted, is now a debug-flag
 		break;
 #else NOCROSS
 	{
-		register arith size, align;
+		register arith sz, algn;
 		char c;
 
 		while (c = *text++)	{
-			size = txt2int(&text);
-			align = 0;
+			sz = txt2int(&text);
+			algn = 0;
 			if (*text == '.')	{
 				text++;
-				align = txt2int(&text);
+				algn = txt2int(&text);
 			}
 			switch (c)	{
 			case 's':	/* short	*/
-				if (size != (arith)0)
-					short_size = size;
-				if (align != 0)
-					short_align = align;
+				if (sz != (arith)0)
+					short_size = sz;
+				if (algn != 0)
+					short_align = algn;
 				break;
 			case 'w':	/* word		*/
-				if (size != (arith)0)
-					dword_size = (word_size = size) << 1;
-				if (align != 0)
-					word_align = align;
+				if (sz != (arith)0)
+					dword_size = (word_size = sz) << 1;
+				if (algn != 0)
+					word_align = algn;
 				break;
 			case 'i':	/* int		*/
-				if (size != (arith)0)
-					int_size = size;
-				if (align != 0)
-					int_align = align;
+				if (sz != (arith)0)
+					int_size = sz;
+				if (algn != 0)
+					int_align = algn;
 				break;
 			case 'l':	/* long		*/
-				if (size != (arith)0)
-					long_size = size;
-				if (align != 0)
-					long_align = align;
+				if (sz != (arith)0)
+					long_size = sz;
+				if (algn != 0)
+					long_align = algn;
 				break;
 			case 'f':	/* float	*/
 #ifndef NOFLOAT
-				if (size != (arith)0)
-					float_size = size;
-				if (align != 0)
-					float_align = align;
+				if (sz != (arith)0)
+					float_size = sz;
+				if (algn != 0)
+					float_align = algn;
 #endif NOFLOAT
 				break;
 			case 'd':	/* double	*/
 #ifndef NOFLOAT
-				if (size != (arith)0)
-					double_size = size;
-				if (align != 0)
-					double_align = align;
+				if (sz != (arith)0)
+					double_size = sz;
+				if (algn != 0)
+					double_align = algn;
 #endif NOFLOAT
 				break;
 			case 'p':	/* pointer	*/
-				if (size != (arith)0)
-					pointer_size = size;
-				if (align != 0)
-					pointer_align = align;
+				if (sz != (arith)0)
+					pointer_size = sz;
+				if (algn != 0)
+					pointer_align = algn;
 				break;
 			case 'r':	/* adjust bitfields right	*/
 #ifndef NOBITFIELD
@@ -273,12 +276,12 @@ deleted, is now a debug-flag
 #endif NOBITFIELD
 				break;
 			case 'S':	/* initial struct alignment	*/
-				if (size != (arith)0)
-					struct_align = size;
+				if (sz != (arith)0)
+					struct_align = sz;
 				break;
 			case 'U':	/* initial union alignment	*/
-				if (size != (arith)0)
-					union_align = size;
+				if (sz != (arith)0)
+					union_align = sz;
 				break;
 			default:
 				error("-V: bad type indicator %c\n", c);

@@ -126,7 +126,7 @@ conversion(from_type, to_type)
 	signed, unsigned or floating
 */
 static int
-convtype(tp)/* bad name ???*/
+convtype(tp)
 	register struct type *tp;
 {
 	switch (tp->tp_fund)	{

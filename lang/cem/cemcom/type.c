@@ -97,6 +97,9 @@ construct_type(fund, tp, count)
 			count *= tp->tp_size;
 		dtp = array_of(tp, count);
 		break;
+	default:
+		crash("bad constructor in construct_type");
+		/*NOTREACHED*/
 	}
 	return dtp;
 }
@@ -212,14 +215,14 @@ align(pos, al)
 }
 
 struct type *
-standard_type(fund, sign, algn, size)
-	int algn; arith size;
+standard_type(fund, sgn, algn, sz)
+	int algn; arith sz;
 {
 	register struct type *tp = create_type(fund);
 
-	tp->tp_unsigned = sign;
+	tp->tp_unsigned = sgn;
 	tp->tp_align = algn;
-	tp->tp_size = size;
+	tp->tp_size = sz;
 
 	return tp;
 }

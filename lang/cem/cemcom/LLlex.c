@@ -285,6 +285,8 @@ firstline:
 			PushBack();
 		*tg++ = '\0';	/* mark the end of the identifier	*/
 		idef = ptok->tk_idf = idf_hashed(buf, tg - buf, hash);
+		idef->id_file = ptok->tk_file;
+		idef->id_line = ptok->tk_line;
 #ifndef NOPP
 		if (idef->id_macro && ReplaceMacros && replace(idef))
 			/* macro replacement should be performed	*/

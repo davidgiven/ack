@@ -8,6 +8,7 @@
 struct decspecs	{
 	struct decspecs *next;
 	struct type *ds_type;	/* single type */
+	int ds_notypegiven;	/* set if type not given explicitly */
 	int ds_sc_given;	/* 1 if the st. class is explicitly given */
 	int ds_sc;		/* storage class, given or implied */
 	int ds_size;		/* LONG, SHORT or 0 */

@@ -173,6 +173,8 @@ dumpdefs(def, opt)
 			def->df_sc == ENUM ? ", =" : " at",
 			def->df_address
 		);
+		print("%s, line %u",
+			def->df_file ? def->df_file : "NO_FILE", def->df_line);
 		def = def->next;
 	}
 	dumplevel--;

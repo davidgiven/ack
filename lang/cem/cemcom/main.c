@@ -30,7 +30,7 @@
 
 extern struct tokenname tkidf[], tkother[];
 extern char *symbol2str();
-char options[128];			/* one for every char	*/
+extern char options[128];
 
 #ifndef NOPP
 int inc_pos = 1;			/* place where next -I goes */

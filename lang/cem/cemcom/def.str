@@ -19,6 +19,8 @@ struct def	{		/* for ordinary tags */
 	char df_initialized;	/* an initialization has been generated */
 	char df_alloc;		/* 0, ALLOC_SEEN or ALLOC_DONE */
 	char df_used;		/* set if idf is used */
+	char *df_file;		/* file containing the definition */
+	long df_line;		/* line number of the definition */
 	char df_formal_array;	/* to warn if sizeof is taken */
 	arith df_address;
 };

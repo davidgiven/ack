@@ -37,11 +37,15 @@ label datlab_count = 1;
 int fp_used;
 #endif NOFLOAT
 
+/* global function info */
+char *func_name;
+struct type *func_type;
+int func_notypegiven;
+
 #ifdef USE_TMP
 static int	tmp_id;
 static int	pro_id;
 #endif USE_TMP
-static char	*pro_name;
 
 extern char options[];
 char *symbol2str();
@@ -160,15 +164,14 @@ code_scope(text, def)
 
 static label return_label, return2_label;
 static char return_expr_occurred;
-static struct type *func_tp;
 static arith func_size;
 static label func_res_label;
 static char *last_fn_given = "";
 static label file_name_label;
 
-begin_proc(name, def)	/* to be called when entering a procedure	*/
-	char *name;
-	register struct def *def;
+begin_proc(ds, idf)		/* to be called when entering a procedure */
+	struct decspecs *ds;
+	struct idf *idf;
 {
 	/*	begin_proc() is called at the entrance of a new function
 		and performs the necessary code generation:
@@ -178,7 +181,8 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 			does not fit in the return area
 		-	a fil pseudo instruction
 	*/
-	register struct type *tp = def->df_type;
+	register char *name = idf->id_text;
+	register struct def *def = idf->id_def;
 
 #ifndef USE_TMP
 	code_scope(name, def);
@@ -188,21 +192,24 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 		DfaStartFunction(name);
 #endif	DATAFLOW
 
-	if (tp->tp_fund != FUNCTION) {
+	/* set global function info */
+	func_name = name;
+	if (def->df_type->tp_fund != FUNCTION) {
 		error("making function body for non-function");
-		tp = error_type;
+		func_type = error_type;
 	}
-	else
-		tp = tp->tp_up;
-	func_tp = tp;
-	func_size = ATW(tp->tp_size);
-	pro_name = name;
+	else {
+		func_type = def->df_type->tp_up;
+	}
+	func_notypegiven = ds->ds_notypegiven;
+	func_size = ATW(func_type->tp_size);
+
 #ifndef USE_TMP
 	C_pro_narg(name);
 #else
 	C_insertpart(pro_id = C_getid());
 #endif
-	if (is_struct_or_union(tp->tp_fund))	{
+	if (is_struct_or_union(func_type->tp_fund))	{
 		C_df_dlb(func_res_label = data_label());
 		C_bss_cst(func_size, (arith)0, 1);
 	}
@@ -260,7 +267,7 @@ end_proc(fbytes)
 	if (return_expr_occurred) {
 		if (func_res_label != 0)	{
 			C_lae_dlb(func_res_label, (arith)0);
-			store_block(func_size, func_tp->tp_align);
+			store_block(func_size, func_type->tp_align);
 			C_lae_dlb(func_res_label, (arith)0);
 			C_ret(pointer_size);
 		}
@@ -268,7 +275,6 @@ end_proc(fbytes)
 			C_ret(func_size);
 	}
 	else	C_ret((arith) 0);
-
 	/* getting the number of "local" bytes is posponed until here,
 	   because copying the function result in "func_res_label" may
 	   need temporaries! However, local_level is now L_FORMAL2, because
@@ -278,11 +284,11 @@ end_proc(fbytes)
 	nbytes = ATW(- local_level->sl_max_block);
 #ifdef USE_TMP
 	C_beginpart(pro_id);
-	C_pro(pro_name, nbytes);
+	C_pro(func_name, nbytes);
 #endif
 	if (fbytes > max_int) {
 		error("%s has more than %ld parameter bytes",
-			pro_name, (long) max_int);
+			func_name, (long) max_int);
 	}
 	C_ms_par(fbytes);		/* # bytes for formals		*/
 	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
@@ -297,7 +303,7 @@ end_proc(fbytes)
 	C_end(nbytes);
 	if (nbytes > max_int) {
 		error("%s has more than %ld bytes of local variables",
-			pro_name, (long) max_int);
+			func_name, (long) max_int);
 	}
 	options['n'] = optionsn;
 }
@@ -318,7 +324,7 @@ do_return_expr(expr)
 	/*	do_return_expr() generates the expression and the jump for
 		a return statement with an expression.
 	*/
-	ch7cast(&expr, RETURN, func_tp);
+	ch7cast(&expr, RETURN, func_type);
 	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 	C_bra(return_label);
 	return_expr_occurred = 1;

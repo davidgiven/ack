@@ -278,6 +278,8 @@ declare_idf(ds, dc, lvl)
 		switch (lvl)	{
 		case L_GLOBAL:
 			global_redecl(idf, sc, type);
+			def->df_file = idf->id_file;
+			def->df_line = idf->id_line;
 			break;
 		case L_FORMAL1:	/* formal declaration */
 			error("formal %s redeclared", idf->id_text);
@@ -295,6 +297,8 @@ declare_idf(ds, dc, lvl)
 		def->df_formal_array = formal_array;
 		def->df_sc = sc;
 		def->df_level = L_FORMAL2;	/* CJ */
+		def->df_file = idf->id_file;
+		def->df_line = idf->id_line;
 	}
 	else
 	if (	lvl >= L_LOCAL &&
@@ -320,6 +324,8 @@ declare_idf(ds, dc, lvl)
 		newdef->df_level = lvl;
 		newdef->df_type = type;
 		newdef->df_sc = sc;
+		newdef->df_file = idf->id_file;
+		newdef->df_line = idf->id_line;
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);

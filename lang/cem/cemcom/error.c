@@ -37,7 +37,6 @@ int err_occurred = 0;
 
 extern char *symbol2str();
 extern char options[];
-extern char loptions[];
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
