@@ -16,6 +16,10 @@ DEFINITION MODULE RealConversions;
      Input terminates with a blank or any control character.
   *)
 
+  PROCEDURE StringToLongReal(str: ARRAY OF CHAR;
+			     VAR r: LONGREAL;
+			     VAR ok: BOOLEAN);
+
   PROCEDURE RealToString(r: REAL;
 			 digits, width: INTEGER;
 			 VAR str: ARRAY OF CHAR;
@@ -28,5 +32,10 @@ DEFINITION MODULE RealConversions;
      If fewer than "width" characters are needed, leading blanks are inserted.
      If the representation does not fit in "width", then ok is set to FALSE.
   *)
+
+  PROCEDURE LongRealToString(r: LONGREAL;
+			 digits, width: INTEGER;
+			 VAR str: ARRAY OF CHAR;
+			 VAR ok: BOOLEAN);
 
 END RealConversions.

@@ -26,46 +26,84 @@ DEFINITION MODULE Mathlib;
 
   PROCEDURE pow(x: REAL; i: INTEGER): REAL;
 
+  PROCEDURE longpow(x: LONGREAL; i: INTEGER): LONGREAL;
+
   PROCEDURE sqrt(x: REAL): REAL;
+
+  PROCEDURE longsqrt(x: LONGREAL): LONGREAL;
 
   PROCEDURE exp(x: REAL): REAL;
 
+  PROCEDURE longexp(x: LONGREAL): LONGREAL;
+
   PROCEDURE ln(x: REAL): REAL;	(* natural log *)
 
+  PROCEDURE longln(x: LONGREAL): LONGREAL;	(* natural log *)
+
   PROCEDURE log(x: REAL): REAL;	(* log with base 10 *)
+
+  PROCEDURE longlog(x: LONGREAL): LONGREAL;	(* log with base 10 *)
 
   (* trigonometric functions; arguments in radians *)
 
   PROCEDURE sin(x: REAL): REAL;
 
+  PROCEDURE longsin(x: LONGREAL): LONGREAL;
+
   PROCEDURE cos(x: REAL): REAL;
+
+  PROCEDURE longcos(x: LONGREAL): LONGREAL;
 
   PROCEDURE tan(x: REAL): REAL;
 
+  PROCEDURE longtan(x: LONGREAL): LONGREAL;
+
   PROCEDURE arcsin(x: REAL): REAL;
+
+  PROCEDURE longarcsin(x: LONGREAL): LONGREAL;
 
   PROCEDURE arccos(x: REAL): REAL;
 
+  PROCEDURE longarccos(x: LONGREAL): LONGREAL;
+
   PROCEDURE arctan(x: REAL): REAL;
+
+  PROCEDURE longarctan(x: LONGREAL): LONGREAL;
 
   (* hyperbolic functions *)
 
   PROCEDURE sinh(x: REAL): REAL;
 
+  PROCEDURE longsinh(x: LONGREAL): LONGREAL;
+
   PROCEDURE cosh(x: REAL): REAL;
+
+  PROCEDURE longcosh(x: LONGREAL): LONGREAL;
 
   PROCEDURE tanh(x: REAL): REAL;
 
+  PROCEDURE longtanh(x: LONGREAL): LONGREAL;
+
   PROCEDURE arcsinh(x: REAL): REAL;
+
+  PROCEDURE longarcsinh(x: LONGREAL): LONGREAL;
 
   PROCEDURE arccosh(x: REAL): REAL;
 
+  PROCEDURE longarccosh(x: LONGREAL): LONGREAL;
+
   PROCEDURE arctanh(x: REAL): REAL;
+
+  PROCEDURE longarctanh(x: LONGREAL): LONGREAL;
 
   (* conversions *)
 
   PROCEDURE RadianToDegree(x: REAL): REAL;
 
+  PROCEDURE longRadianToDegree(x: LONGREAL): LONGREAL;
+
   PROCEDURE DegreeToRadian(x: REAL): REAL;
+
+  PROCEDURE longDegreeToRadian(x: LONGREAL): LONGREAL;
 
 END Mathlib.
