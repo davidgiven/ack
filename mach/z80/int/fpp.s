@@ -1,3 +1,10 @@
+.define fpac, fpadd, fpcdf, fpcfd, fpcfi, fpcif, fpcmf, fpcomp
+.define fpdiv, fpfef, fpfif, fpmult, fpop, fpsub, fpnorm
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! floating point pakket voor Z80
 ! geimplementeerd zoals beschreven in 
 ! Electronica top internationaal.
@@ -16,7 +23,6 @@ fol:	.space 1
 fon:	.space 1
 fom:	.space 1
 fox:	.space 1
-	.errnz xa/256-fox/256
 
 fpsub:
 	call fpcomp		! inverteer fpacc
@@ -99,11 +105,15 @@ addmor:
 	djnz addmor		! herhaal dit 4 keer
 	jr fpnorm
 
+yyy:
+	.data2 fom
+
 fpmult:
 	call setsgn
 	add a,(hl)		! bereken exponent produkt
 	ld (hl),a		! fax exponent produkt
-	ld l,fom%256
+	ld a,(yyy)
+	ld l,a
 	ex de,hl		! gebruik de als wijzer
 	xor a
 	ld h,a
@@ -244,9 +254,12 @@ tstacc:
 init:
 	ld hl,xa		! initialiseer nog een paar registers
 	ld (hl),c
+	ld a,(xxx)
+	ld l,a
 	ld a,(fox)
-	ld l,fax%256
 	ret
+xxx:
+	.data2 fax
 
 fpcif:
 	ld de,(fpac)		! integer to convert
