@@ -18,7 +18,7 @@ floor(x)
 	extern double _fif();
 	double val;
 
-	return _fif(x, 1,0, &val) < 0 ? val - 1.0 : val ;
+	return _fif(x, 1.0, &val) < 0 ? val - 1.0 : val ;
 	/*	this also works if _fif always returns a positive
 		fractional part
 	*/

@@ -42,7 +42,7 @@ exp(x)
 		return M_MIN_D;
 	}
 	if (x >= M_LN_MAX_D) {
-		if (x < M_LN_MAX_D) errno = ERANGE;
+		if (x > M_LN_MAX_D) errno = ERANGE;
 		return M_MAX_D;
 	}
 
