@@ -1,11 +1,10 @@
-l=../lib
 
 install:	cp
 
 cp:
-		cp head_em.s $l/head_em
-		cp tail_em.s.a $l/tail_em
+		ln tail_em.s.a head_em ; ../../install head_em ; rm head_em
+		ln tail_em.s.a tail_em ; ../../install tail_em ; rm tail_em
 
 cmp:
-		cmp head_em.s $l/head_em
-		cmp tail_em.s.a $l/tail_em
+		-ln tail_em.s.a head_em ; ../../compare head_em ; rm head_em
+		-ln tail_em.s.a tail_em ; ../../compare tail_em ; rm tail_em
