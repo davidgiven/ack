@@ -368,7 +368,7 @@ instsize(tinstno,tp) token_p tp; {
 	default:
 		assert(FALSE);
 	case IN_COPY:
-		assert(inp->in_info[0]==1);
+		assert(inp->in_info[0]<=1);
 #if MAXMEMBERS!=0
 		if (inp->in_info[1]==0)
 #endif
