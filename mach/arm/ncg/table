@@ -1,0 +1,1467 @@
+#define fitins(a) (a&~0xFF)==0||(a&~0x3FC)==0||(a&~0xFF0)==0||(a&~0x3FC0)==0||(a&~0xFF00)==0||(a&~0x3FC00)==0||(a&~0xFF000)==0||(a&~0x3FC000)==0||(a&~0xFF0000)==0||(a&~0x3FC0000)==0||(a&~0xFF00000)==0||(a&~0x3FC00000)==0||(a&~0xFF000000)==0||(a&~0xFC000003)==0||(a&~0xF000000F)==0||(a&~0xC000003F)==0||(~a&~0xFF)==0
+EM_WSIZE=4
+EM_PSIZE=4
+EM_BSIZE=8
+
+PROPERTIES
+
+GENREG			/* All 16 user registers */
+REG			/* Allocatable registers */
+PCPSR			/* PSW and PC */
+SREG
+STACKPOINTER
+LOCALBASE
+LINKREGISTER
+
+REGISTERS
+
+R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10	:GENREG, REG .
+R11	               			:GENREG, SREG  .
+SP("R12")				:GENREG, STACKPOINTER .
+LB("R13")				:GENREG, LOCALBASE .
+R14					:GENREG, LINKREGISTER .
+PC("R15")				:GENREG, PCPSR .
+
+TOKENS
+
+const4		= { INT num; } 4 "#" num .
+fitcon		= { INT num; } 4 "#" num .
+LOCAL		= { INT ind; } 4 "[R13,#" ind "]" .
+addr_local	= { INT ind; } 4 .
+addr_external	= { ADDR add; } 4 add .
+
+imS		= { GENREG reg; ADDR S; INT shift;} 4 reg "," S " #" shift  .
+regS		= { GENREG reg; ADDR S; GENREG sreg;} 4 reg "," S " "sreg  .
+
+absolute	= { ADDR add; } 4 add .
+regind		= { GENREG reg; } 4 "[" reg "]" .
+regrel		= { GENREG reg; ADDR ind; } 4 "[" reg ",#" ind "]"  .
+regrelwb	= { GENREG reg; ADDR ind; } 4 "[" reg ",#" ind "]<"  .
+regregrel	= { GENREG reg1; GENREG reg2; } 4 "[" reg1 "," reg2 "]" .
+regminregrel	= { GENREG reg1; GENREG reg2; } 4 "[" reg1 ",-" reg2 "]" .
+regiSregrel	= { GENREG reg1; ADDR S; INT shift; GENREG reg2; } 4 
+			"[" reg1 "," reg2 ","  S "#" shift "]" .
+regminiSregrel	= { GENREG reg1; ADDR S; INT shift; GENREG reg2; } 4 
+			"[" reg1 ",-" reg2 ","  S "#" shift "]" .
+regrSregrel	= { GENREG reg1; ADDR S; GENREG sreg; GENREG reg2; } 4 
+			"[" reg1 "," reg2 ","  S sreg "]" .
+regminrSregrel	= { GENREG reg1; ADDR S; GENREG sreg; GENREG reg2; } 4 
+			"[" reg1 ",-" reg2 ","  S sreg "]" .
+regregrelwb	= { GENREG reg1; GENREG reg2; } 4 "[" reg1 "," reg2 "]<" .
+regiSregrelwb	= { GENREG reg1; ADDR S; INT shift; GENREG reg2; } 4 
+			"[" reg1 "," reg2 ","  S "#" shift "]<" .
+regrSregrelwb	= { GENREG reg1; ADDR S; GENREG sreg; GENREG reg2; } 4 
+			"[" reg1 "," reg2 ","  S sreg "]<" .
+regrelpi	= { GENREG reg; ADDR ind; } 4 "[" reg "],#" ind .
+regregrelpi	= { GENREG reg1; GENREG reg2; } 4 "[" reg1 "]," reg2 .
+
+label		= {ADDR add; } 4 add .
+
+autoid		= {GENREG reg; } 4 reg "<" .
+reglist1	= {GENREG reg1; } 4 "{" reg1 "}" .
+reglist2	= {GENREG reg1; GENREG reg2; } 8 "{" reg1 "," reg2 "}" .
+reglist3	= {GENREG reg1; GENREG reg2; GENREG reg3; } 12 
+			"{" reg1 "," reg2 "," reg3 "}" .
+reglist4	= {GENREG reg1; GENREG reg2; GENREG reg3; GENREG reg4; } 16 
+			"{" reg1 "," reg2 "," reg3 "," reg4 "}" .
+regexp		= {INT exp;} 4 exp  .
+
+regconst	= {GENREG reg; ADDR ind; } 4 reg ",#" ind  .
+regplusreg	= {GENREG reg1; GENREG reg2;} 4  .
+regplusiSreg	= {GENREG reg1; ADDR S; INT shift; GENREG reg2;} 4  .
+regplusrSreg	= {GENREG reg1; ADDR S; GENREG sreg; GENREG reg2;} 4  .
+regminreg	= {GENREG reg1; GENREG reg2;} 4  .
+regminiSreg	= {GENREG reg1; ADDR S; INT shift; GENREG reg2;} 4  .
+regminrSreg	= {GENREG reg1; ADDR S; GENREG sreg; GENREG reg2;} 4  .
+
+SETS
+
+address		= absolute + regind + regrel + regrelwb + regregrel +
+                  regiSregrel + regrSregrel + regiSregrelwb + regrSregrelwb +
+		  regminregrel + regminiSregrel + regminrSregrel +
+		  regregrelwb + regrelpi + regregrelpi + LOCAL .
+REGcon		= GENREG + imS + regS + fitcon  .
+reglist		= reglist1 + reglist2 + reglist3 + reglist4 + regexp  .
+
+INSTRUCTIONS
+
+BAL  label  .
+BAL_L "BAL.L" label  .
+BNV  label  .
+BNE  label  .
+BEQ  label  .
+BMI  label  .
+BGT  label  .
+BLT  label  .
+BLE  label  .
+BGE  label  .
+
+LDR  GENREG:wo,	address:rw  .
+STR  GENREG:ro, address:rw  .
+LDR_B "LDR.B" GENREG:wo, address:rw  .
+STR_B "STR.B" GENREG:ro, address:rw  .
+
+LDMFD autoid:rw, reglist:wo  .
+STMFD autoid:rw, reglist:ro  .
+LDMIA GENREG:rw, reglist:wo  .
+
+ADC  GENREG:wo, GENREG:ro, REGcon:ro  .
+ADD  GENREG:wo, GENREG:ro, REGcon+const4:ro  .
+ADD  GENREG:wo, regconst:ro  .
+AND  GENREG:wo, GENREG:ro, REGcon:ro  .
+BIC  GENREG:wo, GENREG:ro, REGcon:ro  .
+CMN  GENREG:ro, REGcon:ro kills :cc  .
+CMP  GENREG:ro, REGcon:ro kills :cc  .
+EOR  GENREG:wo, GENREG:ro, REGcon:ro  .
+EOR_S "EOR.S"  GENREG:wo:cc, GENREG:ro, REGcon:ro  .
+MOV  GENREG:wo, REGcon+const4:ro  .
+MOV_MI "MOV.MI"  GENREG:wo, REGcon+const4:ro  .
+MOV_LT "MOV.LT"  GENREG:wo, REGcon+const4:ro  .
+MOV_LE "MOV.LE"  GENREG:wo, REGcon+const4:ro  .
+MOV_EQ "MOV.EQ"  GENREG:wo, REGcon+const4:ro  .
+MOV_NE "MOV.NE"  GENREG:wo, REGcon+const4:ro  .
+MOV_GE "MOV.GE"  GENREG:wo, REGcon+const4:ro  .
+MOV_GT "MOV.GT"  GENREG:wo, REGcon+const4:ro  .
+MVN  GENREG:wo, REGcon:ro  .
+ORR  GENREG:wo, GENREG:ro, REGcon:ro  .
+RSB  GENREG:wo, GENREG:ro, REGcon:ro  .
+RSB_S "RSB.S"  GENREG:wo:cc, GENREG:ro, REGcon:ro  .
+RSC  GENREG:wo, GENREG:ro, REGcon:ro  .
+SBC  GENREG:wo, GENREG:ro, REGcon:ro  .
+SUB  GENREG:wo, GENREG:ro, REGcon:ro  .
+SUB_S "SUB.S"  GENREG:wo:cc, GENREG:ro, REGcon:ro  .
+TEQ  GENREG:ro, REGcon:ro kills :cc  .
+TST  GENREG:ro, REGcon:ro kills :cc  .
+ADR  GENREG:wo, addr_external+label:ro  .
+LABEL "" label kills :cc .
+
+MOVES
+
+from GENREG to address
+	gen STR %1, %2
+
+from address to GENREG
+	gen LDR %2, %1
+
+from GENREG to autoid
+	gen STMFD %2, {reglist1, %1}
+
+from autoid to GENREG
+	gen LDMFD %1, {reglist1, %2}
+
+from REGcon to GENREG
+	gen MOV %2, %1
+
+from const4 to GENREG
+	gen MOV %2, %1
+
+from addr_external to GENREG
+	gen ADR %2, %1
+
+TESTS
+
+to test GENREG
+gen CMP %1, {fitcon, 0}
+
+STACKINGRULES
+
+from address to STACK
+	gen move %1, R11
+	    move R11, {autoid, SP}
+
+from GENREG to STACK
+	gen move %1, {autoid, SP}
+
+from REGcon to STACK
+	gen move %1, R11
+	    move R11, {autoid, SP}
+
+from const4 to STACK
+	gen move %1, R11
+	    move R11, {autoid, SP}
+
+from addr_local to STACK
+	gen ADD R11, LB, {const4, %1.ind}
+	    move R11, {autoid, SP}
+	
+from addr_external to STACK
+	gen ADR R11, %1
+	    move R11, {autoid, SP}
+
+from regconst to STACK
+	gen ADD R11, %1
+	    move R11, {autoid, SP}
+
+from regplusreg to STACK
+	gen ADD R11, %1.reg1, %1.reg2
+	    move R11, {autoid, SP}
+
+from regminreg to STACK
+	gen SUB R11, %1.reg1, %1.reg2
+	    move R11, {autoid, SP}
+
+from regplusiSreg to STACK
+	gen ADD R11, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+	    move R11, {autoid, SP}
+
+from regminiSreg to STACK
+	gen SUB R11, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+	    move R11, {autoid, SP}
+
+from regplusrSreg to STACK
+	gen ADD R11, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+	    move R11, {autoid, SP}
+
+from regminrSreg to STACK
+	gen SUB R11, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+	    move R11, {autoid, SP}
+
+COERCIONS
+
+from const4
+uses REG
+	gen move %1, %a				yields %a
+
+from const4 fitins(%1.num)			 yields {fitcon, %num}
+
+from STACK
+uses REG
+	gen move {autoid, SP}, %a		yields %a
+
+from address 
+uses REG
+	gen move %1, %a				yields %a
+
+from REGcon 
+uses REG
+	gen move %1, %a				yields %a
+	
+from addr_external
+uses REG
+	gen move %1, %a
+	    					yields %a
+
+from addr_local
+uses REG
+	gen ADD %a, LB, {const4, %1.ind}	yields %a
+
+from regconst
+uses REG
+	gen ADD %a, %1				yields %a
+
+from regplusreg 
+uses REG
+	gen ADD %a, %1.reg1, %1.reg2
+						yields %a
+
+from regminreg 
+uses REG
+	gen SUB %a, %1.reg1, %1.reg2
+						yields %a
+
+from regplusiSreg 
+uses REG
+	gen ADD %a, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+						yields %a
+
+from regminiSreg 
+uses REG
+	gen SUB %a, %1.reg1, {imS, %1.reg2, %1.S, %1.shift}
+						yields %a
+
+from regplusrSreg 
+uses REG
+	gen ADD %a, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+						yields %a
+
+from regminrSreg 
+uses REG
+	gen SUB %a, %1.reg1, {regS, %1.reg2, %1.S, %1.sreg}
+						yields %a
+
+
+PATTERNS
+
+/************************************************************************
+ *									*
+ * GROUP I :	Load Instructions					*
+ *									*
+ ************************************************************************/
+
+pat loc fitins($1)		yields {fitcon, $1}
+
+pat loc !(fitins($1))		yields {const4, $1}
+
+pat ldc				leaving loc 18
+					trp
+
+pat lol				yields {LOCAL, $1}
+
+pat loe				yields {absolute, $1}
+
+pat lil				leaving lol $1 loi 4
+
+pat lof
+with GENREG			yields {regrel, %1, $1}
+with exact addr_local		yields {LOCAL, %1.ind+$1}
+with exact addr_external	yields {absolute, %1.add+$1}
+with exact regconst		yields {regrel, %1.reg, $1+%1.ind}
+
+pat lal				yields {addr_local, $1}
+
+pat lae				yields {addr_external, $1}
+
+pat lxl $1==0			yields LB
+
+pat lxl $1==1			yields {LOCAL,8}
+
+pat lxl $1>1
+uses REG={const4, $1}, REG=LB
+gen move {regrel, %b, 8}, %b
+    SUB_S %a, %a, {fitcon,1}
+    BNE {label,"1B"}		yields %b
+
+pat lxa $1==0			yields {addr_local,8}
+
+pat lxa $1==1
+uses REG={LOCAL,8}		yields {regconst,%a,8}
+
+
+pat lxa $1>1
+uses REG={const4, $1}, REG=LB
+gen move {regrel, %b, 8}, %b
+    SUB_S %a, %a, {fitcon,1}
+    BNE {label,"1B"}		yields {regconst, %b, 8}
+
+pat loi $1==1
+with GENREG
+uses REG
+gen LDR_B %a, {regind, %1}	yields %a
+with exact addr_local
+uses REG
+gen LDR_B %a, {LOCAL, %1.ind}	yields %a
+with exact addr_external
+uses REG
+gen LDR_B %a, {absolute, %1.add}	yields %a
+with exact regconst
+uses REG
+gen LDR_B %a, {regrel, %1.reg, %1.ind}	yields %a
+with exact regplusreg
+uses REG
+gen LDR_B %a, {regregrel, %1.reg1, %1.reg2}	yields %a
+with exact regminreg
+uses REG
+gen LDR_B %a, {regminregrel, %1.reg1, %1.reg2}	yields %a
+with exact regplusiSreg
+uses REG
+gen LDR_B %a, {regiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	yields %a
+with exact regminiSreg
+uses REG
+gen LDR_B %a, {regminiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	yields %a
+with exact regplusrSreg
+uses REG
+gen LDR_B %a, {regrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	yields %a
+with exact regminrSreg
+uses REG
+gen LDR_B %a, {regminrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	yields %a
+
+pat loi $1==2
+with GENREG
+uses REG, REG
+gen LDR_B %a, {regind, %1}
+    LDR_B %b, {regrel, %1, 1}
+    ADD %a, %a, {imS, %b, "LSL", 8}	yields %a
+
+pat loi $1==4
+with GENREG			yields {regind, %1}
+with exact addr_local		yields {LOCAL, %1.ind}
+with exact addr_external	yields {absolute, %1.add}
+with exact regconst		yields {regrel, %1.reg, %1.ind}
+with exact regplusreg		yields {regregrel, %1.reg1, %1.reg2}	
+with exact regminreg		yields {regminregrel, %1.reg1, %1.reg2}	
+with exact regplusiSreg	 yields {regiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	
+with exact regminiSreg	 yields {regminiSregrel,%1.reg1,%1.S,%1.shift,%1.reg2}	
+with exact regplusrSreg	 yields {regrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	
+with exact regminrSreg	 yields {regminrSregrel,%1.reg1,%1.S,%1.sreg,%1.reg2}	
+
+pat loi $1==8
+with GENREG
+uses REG, REG
+gen LDMIA %1, {reglist2, %a, %b}	yields %b %a
+
+pat loi defined($1)
+with GENREG STACK
+kills ALL
+uses REG = {const4, $1}
+gen LABEL {label, "1:"}
+    SUB_S %a, %a, {fitcon, 4}
+    move {regregrel, %1, %a}, R11
+    move R11, {autoid, SP}
+    BLT {label, "1b"}
+
+pat los $1==4
+with STACK
+kills ALL
+gen BAL_L {label, ".los"}
+
+pat ldl				yields {LOCAL, $1+4}
+				       {LOCAL, $1}
+
+pat lde				yields {absolute, $1+4}
+				       {absolute, $1}
+
+pat ldf
+with GENREG			yields {regrel, %1, $1+4}
+				       {regrel, %1, $1}
+with exact addr_local		yields {LOCAL, %1.ind+$1+4}
+				       {LOCAL, %1.ind+$1}
+with exact addr_external	yields {absolute, %1.add+$1+4}
+				       {absolute, %1.add+$1}
+with exact regconst		yields {regrel, %1.reg, $1+%1.ind+4}
+				       {regrel, %1.reg, $1+%1.ind}
+
+pat lpi				yields {addr_external, $1}
+
+/************************************************************************
+ *									*
+ * GROUP II :	Store Instructions					*
+ *									*
+ ************************************************************************/
+
+pat stl
+with GENREG
+kills address-(absolute+LOCAL), LOCAL %ind-4 < $1 && %ind+4 > $1
+	gen move %1, {LOCAL, $1}
+
+pat ste
+with GENREG
+kills address
+	gen move %1, {absolute, $1}
+
+pat sil					leaving lol $1 sti 4
+
+pat stf
+with GENREG GENREG
+kills address
+	gen move %2, {regrel, %1, $1}
+with addr_local GENREG
+kills address
+	gen move %2, {LOCAL, %1.ind + $1}
+with addr_external GENREG
+kills address
+	gen move %2, {absolute, %1.add + $1}
+with regconst GENREG
+kills address
+	gen move %2, {regrel, %1.reg, $1+%1.ind}
+
+pat sti $1==1
+with GENREG GENREG
+kills address
+	gen STR_B %2, {regind, %1}
+with  addr_local GENREG
+kills address
+	gen STR_B %2, {LOCAL, %1.ind}
+with  addr_external GENREG
+kills address
+	gen STR_B %2, {absolute, %1.add}
+with  regconst GENREG
+kills address
+	gen STR_B %2, {regrel, %1.reg, %1.ind}
+with  regplusreg GENREG
+kills address
+	gen STR_B %2, {regregrel, %1.reg1, %1.reg2}
+with  regminreg GENREG 
+kills address
+	gen STR_B %2, {regminregrel, %1.reg1, %1.reg2}	
+with  regplusiSreg GENREG
+kills address
+	gen STR_B %2, {regiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	
+with  regminiSreg GENREG
+kills address
+	gen STR_B %2, {regminiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	
+with  regplusrSreg GENREG
+kills address
+	gen STR_B %2, {regrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	
+with  regminrSreg GENREG
+kills address
+	gen STR_B %2, {regminrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	
+
+pat sti $1==2
+with GENREG GENREG
+kills address
+uses REG
+gen move {imS, %2, "LSR", 8}, %a
+    SUB %2, %2, {imS, %a, "LSL", 8}
+    STR_B %2, {regind, %1}
+    STR_B %a, {regrel, %1, 1}
+
+pat sti $1==4
+with GENREG GENREG
+kills address
+	gen move %2, {regind, %1}
+with addr_local GENREG
+kills address
+	gen move %2, {LOCAL, %1.ind}
+with addr_external GENREG
+kills address
+	gen move %2, {absolute, %1.add}
+with regconst GENREG
+kills address
+	gen move %2, {regrel, %1.reg, %1.ind}
+with  regplusreg GENREG
+kills address
+	gen move %2, {regregrel, %1.reg1, %1.reg2}
+with  regminreg GENREG 
+kills address
+	gen move %2, {regminregrel, %1.reg1, %1.reg2}	
+with  regplusiSreg GENREG
+kills address
+	gen move %2, {regiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	
+with  regminiSreg GENREG
+kills address
+	gen move %2, {regminiSregrel, %1.reg1, %1.S, %1.shift, %1.reg2}	
+with  regplusrSreg GENREG
+kills address
+	gen move %2, {regrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	
+with  regminrSreg GENREG
+kills address
+	gen move %2, {regminrSregrel, %1.reg1, %1.S, %1.sreg, %1.reg2}	
+
+pat sti defined($1)
+with GENREG STACK
+kills ALL
+uses REG={const4, $1}
+gen	LABEL {label, "1:"}
+	SUB_S %a, %a, {fitcon, 4}
+	move {regregrel, SP, %a}, R11
+	move R11, {regregrel, %1, %a}
+	BLT {label,"1B"}
+	ADD SP, SP, {const4, $1}
+
+pat sts $1==4
+with STACK
+kills ALL
+gen BAL_L {label, ".sts"}
+
+pat sdl
+with GENREG GENREG
+kills address-absolute
+gen 	move %1, {LOCAL,$1}
+	move %2, {LOCAL,$1+4}
+
+pat sde
+with GENREG GENREG
+kills address
+gen	move %1, {absolute, $1}
+	move %2, {absolute, $1+4}
+
+pat sdf
+with GENREG GENREG GENREG
+kills address
+gen	move %2, {regrel, %1, $1}
+	move %3, {regrel, %1, $1+4}
+
+/************************************************************************
+ *									*
+ * GROUP III :	Integer Arithmetic					*
+ *									*
+ ************************************************************************/
+
+pat adi $1==4
+with GENREG const4			yields {regconst, %1, %2.num}
+with const4 GENREG			yields {regconst, %2, %1.num}
+with GENREG GENREG			yields {regplusreg, %1, %2}
+with GENREG imS			yields {regplusiSreg,%1, %2.S, %2.shift, %2.reg}
+with imS GENREG 		yields {regplusiSreg,%2, %1.S, %1.shift, %1.reg}
+with GENREG regS		yields {regplusrSreg,%1, %2.S, %2.sreg, %2.reg}
+with regS GENREG 		yields {regplusrSreg,%2, %1.S, %1.sreg, %1.reg}
+with exact addr_local const4		yields {addr_local, %1.ind+%2.num}
+with exact const4 addr_local 		yields {addr_local, %2.ind+%1.num}
+with exact addr_external const4		yields {addr_external, %1.add+%2.num}
+with exact const4 addr_external		yields {addr_external, %2.add+%1.num}
+
+pat sbi $1==4
+with GENREG GENREG			yields {regminreg, %2, %1}
+with imS GENREG			yields {regminiSreg,%2,%1.S,%1.shift,%1.reg}
+with regS GENREG		yields {regminrSreg,%2,%1.S,%1.sreg,%1.reg}
+with GENREG REGcon
+gen	RSB %1, %1, %2			yields %1
+with const4 GENREG			yields {regconst, %2, 0-%1.num}
+with exact const4 addr_local		yields {addr_local, %2.ind-%1.num}
+
+pat loc mli $1<0 && $2==4		leaving loc 0-$1
+						mli 4
+						ngi 4
+
+pat loc mli $1==2 && $2==4		
+with GENREG				yields {imS, %1, "LSL", 1}
+
+pat loc mli $1==4 && $2==4		
+with GENREG				yields {imS, %1, "LSL", 2}
+
+pat loc mli $1==8 && $2==4		
+with GENREG				yields {imS, %1, "LSL", 3}
+
+pat loc mli $1==16 && $2==4		
+with GENREG				yields {imS, %1, "LSL", 4}
+
+pat loc mli $1==32 && $2==4		
+with GENREG				yields {imS, %1, "LSL", 5}
+
+pat loc mli $1==3 && $2==4
+with GENREG				yields {regplusiSreg,%1,"LSL",1,%1}
+
+pat loc mli $1==5 && $2==4
+with GENREG				yields {regplusiSreg,%1,"LSL",2,%1}
+
+pat loc mli $1==6 && $2==4
+with GENREG
+gen ADD %1, %1, {imS, %1, "LSL", 2}	yields {regplusiSreg,%1,"LSR",2,%1}
+
+pat loc mli $1==7 && $2==4
+with GENREG
+gen RSB %1, %1, {imS, %1, "LSL", 3}	yields %1
+
+pat loc mli $1==9 && $2==4
+with GENREG
+with GENREG				yields {regplusiSreg,%1,"LSL",3,%1}
+
+pat loc mli $1==10 && $2==4
+with GENREG
+uses REG
+gen ADD %1, %1, {imS, %1, "LSL", 3}	
+    ADD %1, %1, {imS, %1, "LSR", 3}	yields %1
+
+pat loc mli $1==12 && $2==4
+with GENREG
+gen move {imS, %1, "LSL", 3}, %1	yields {regplusiSreg,%1,"LSR",1,%1}
+
+pat mli $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".mli"}		yields R0
+
+pat loc dvi $1<0 && $2==4		leaving loc 0-$1
+						dvi 4
+						ngi 4
+
+pat loc dvi $1==2 && $2==4	
+with GENREG				yields {imS, %1, "ASR", 1}
+
+pat loc dvi $1==4 && $2==4	
+with GENREG				yields {imS, %1, "ASR", 2}
+
+pat loc dvi $1==8 && $2==4	
+with GENREG				yields {imS, %1, "ASR", 3}
+
+pat loc dvi $1==16 && $2==4	
+with GENREG				yields {imS, %1, "ASR", 4}
+
+pat loc dvi $1==32 && $2==4	
+with GENREG				yields {imS, %1, "ASR", 5}
+
+pat dvi $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".dvi"}		yields R3
+
+pat rmi $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".dvi"}		yields R2
+
+pat ngi $1==4
+with GENREG
+gen 	RSB %1, %1, {fitcon, 0}		yields %1
+
+pat sli $1==4
+with const4 GENREG			yields {imS, %2, "LSL", %1.num}
+with GENREG GENREG			yields {regS, %2, "LSL", %1}
+
+pat loc sri $1==0 && $2==4		
+with address+REGcon			yields %1
+
+pat sri $1==4
+with const4 GENREG			yields {imS, %2, "ASR", %1.num}
+with GENREG GENREG			yields {regS, %2, "ASR", %1}
+
+
+/************************************************************************
+ *									*
+ * GROUP IV :	Unsigned Arithmetic					*
+ *									*
+ ************************************************************************/
+
+pat adu					leaving adi
+
+pat sbu					leaving sbu
+
+pat loc mlu $1<11 && $1>0 && $2==4	leaving loc $1
+						mli 4
+
+pat mlu $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".mlu"}		yields R0
+
+pat loc dvu $1<33 && $1>0 && $2==4	leaving loc $1
+						dvi 4
+
+pat dvu $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".dvu"}		yields R3
+
+pat rmu $1==4
+with STACK
+kills ALL
+gen	BAL_L {label, ".dvu"}		yields R2
+
+pat slu $1==4
+with GENREG GENREG			yields {regS, %2, "LSL", %1}
+with const4 GENREG			yields {imS, %2, "LSL", $1}
+
+pat sru $1==4
+with GENREG GENREG			yields {regS, %2, "LSR", %1}
+with const4 GENREG			yields {imS, %2, "LSR", $1}
+
+/************************************************************************
+ *									*
+ * GROUP V :	Floating Point Arithmetic 				*
+ *									*
+ ************************************************************************/
+
+ pat adf				leaving loc 18
+						trp
+
+ pat sbf				leaving loc 18
+						trp
+
+ pat mlf				leaving loc 18
+						trp
+
+ pat dvf				leaving loc 18
+						trp
+
+ pat  ngf				leaving loc 18
+						trp
+
+ pat fif				leaving loc 18
+						trp
+
+ pat fef				leaving loc 18
+						trp
+
+/************************************************************************
+ *									*
+ * GROUP VI :	Pointer Arithmetic					*
+ *									*
+ ************************************************************************/
+
+pat adp
+with GENREG				yields {regconst, %1, $1}
+with exact addr_local			yields {addr_local, %1.ind+$1}
+with exact addr_external		yields {addr_external, %1.add+$1}
+with exact regconst			yields {regconst, %1.reg, %1.ind+$1}
+
+pat ads					leaving adi 4
+
+pat sbs					leaving sbi 4
+
+/************************************************************************
+ *									*
+ * GROUP VII :	Increment/Decrement/Zero				*
+ *									*
+ ************************************************************************/
+
+pat inc
+with GENREG				yields {regconst, %1, 1}
+with exact regconst			yields {regconst, %1.reg, %1.ind+1}
+
+pat inl
+kills address-absolute
+uses REG={LOCAL,$1}
+gen ADD %a,%a,{const4,1}
+    move %a,{LOCAL,$1}
+
+pat ine
+kills address			
+uses REG={absolute,$1}
+gen ADD %a,%a,{const4,1}
+    move %a,{absolute,$1}
+
+pat dec
+with GENREG				yields {regconst, %1, 0-1}
+
+pat del
+kills address-absolute
+uses REG={LOCAL,$1}
+gen SUB %a,%a,{fitcon,1}
+    move %a,{LOCAL,$1}
+
+pat dee
+kills address			
+uses REG={absolute,$1}
+gen SUB %a,%a,{fitcon,1}
+    move %a,{absolute,$1}
+
+pat zrl
+kills address-absolute
+uses REG={fitcon,0}
+gen move %a,{LOCAL,$1}
+
+pat zre
+kills address
+uses REG={fitcon,0}
+gen move %a,{absolute,$1}
+
+pat zrf					leaving loc 18
+						trp
+
+pat zer $1==4				yields {fitcon,0}
+
+pat zer $1==8				yields {fitcon,0} {fitcon,0}
+
+pat zer $1==12				yields {fitcon,0} {fitcon,0} {fitcon,0}
+
+pat zer defined($1)
+with STACK
+kills ALL
+uses REG={fitcon,0},REG={const4,$1}
+gen LABEL {label, "1:"}
+    move %a,{autoid,SP}
+    SUB_S %b,%b,{fitcon,4}
+    BNE {label,"1B"}
+    move R14,PC
+
+/************************************************************************
+ *									*
+ * GROUP VIII :	Convert 						*
+ *									*
+ ************************************************************************/
+
+pat cii
+with address + REGcon address + REGcon
+
+pat cui
+with address +REGcon address + REGcon
+
+pat cfi					leaving loc 18 trp
+pat cif					leaving loc 18 trp
+pat cuf					leaving loc 18 trp
+pat cff					leaving loc 18 trp
+pat cfu					leaving loc 18 trp
+
+pat ciu
+with address +REGcon address + REGcon
+
+pat cuu
+with address +REGcon address + REGcon
+
+/************************************************************************
+ *									*
+ * GROUP IX :	Logical 						*
+ *									*
+ ************************************************************************/
+
+pat and $1==4
+with REGcon GENREG
+gen AND %2, %2, %1			yields %2
+with GENREG REGcon
+gen AND %1, %1, %2			yields %1
+
+pat ior $1==4
+with REGcon GENREG
+gen ORR %2, %2, %1			yields %2
+with GENREG REGcon
+gen ORR %1, %1, %2			yields %1
+
+pat xor $1==4
+with REGcon GENREG
+gen EOR %2, %2, %1			yields %2
+with GENREG REGcon
+gen EOR %1, %1, %2			yields %1
+
+pat com $1==4
+with REGcon
+uses REG
+gen MVN %a,%1				yields %a
+
+pat ror $1==4
+with const4 GENREG			yields {imS, %2, "ROR", %1.num}
+with GENREG GENREG			yields {regS, %2, "ROR", %1}
+
+pat rol $1==4
+with const4 GENREG			yields {imS, %2, "ROR", 32-%1.num}
+with GENREG GENREG
+gen RSB %1, %1, {fitcon,32}		yields {regS, %2, "ROR", %1}
+
+pat and $1>4
+with STACK
+gen move {const4,$1}, R1
+    move SP, R0
+    ADD SP, SP, R1
+    LABEL {label, "1:"}
+    SUB_S R1, R1, {fitcon, 4}
+    move {regregrel,SP,R1},R2
+    move {regregrel,R0,R1},R3
+    AND R2, R2, R3
+    move R2, {regregrel,SP,R1}
+    BNE {label, "1B"}
+    move R14,PC
+
+pat ior $1>4
+with STACK
+gen move {const4,$1}, R1
+    move SP, R0
+    ADD SP, SP, R1
+    LABEL {label, "1:"}
+    SUB_S R1, R1, {fitcon, 4}
+    move {regregrel,SP,R1},R2
+    move {regregrel,R0,R1},R3
+    ORR R2, R2, R3
+    move R2, {regregrel,SP,R1}
+    BNE {label, "1B"}
+    move R14,PC
+
+
+pat xor $1>4
+with STACK
+gen move {const4,$1}, R1
+    move SP, R0
+    ADD SP, SP, R1
+    LABEL {label, "1:"}
+    SUB_S R1, R1, {fitcon, 4}
+    move {regregrel,SP,R1},R2
+    move {regregrel,R0,R1},R3
+    EOR R2, R2, R3
+    move R2, {regregrel,SP,R1}
+    BNE {label, "1B"}
+    move R14,PC
+
+pat com $1>4
+with STACK
+gen move {const4,$1}, R1
+    LABEL {label, "1:"}
+    SUB_S R1, R1, {fitcon, 4}
+    move {regregrel,SP,R1},R2
+    MVN R2, R2
+    move R2,{regregrel,SP,R1}
+    BNE {label, "1B"}
+    move R14,PC
+
+/************************************************************************
+ *									*
+ * GROUP X:	Sets  							*
+ *									*
+ ************************************************************************/
+
+pat loc loc inn !defined($3)		leaving loc $1 inn $2
+
+pat loc inn $2==4 && $1>=0 && $1<32
+with GENREG
+uses REG={fitcon,1}
+gen AND %1, %1, {imS,%a,"LSL",$1}	yields %1
+
+pat loc inn $2==4 && $1<0
+with GENREG
+gen move {fitcon,0}, %1			yields %1
+
+pat loc inn $2==4 && $1>31		leaving loc 2 trp
+
+pat loc inn !defined($2)		leaving inn $1
+
+pat inn defined($1)
+with STACK
+kills ALL
+gen move {const4,$1}, R0
+    BAL_L {label, ".inn"}		yields R0
+
+pat inn !defined($1)
+with GENREG
+gen move %1, R0
+    BAL_L {label, ".inn"}		yields R0
+
+pat loc set !defined($2)		leaving set $1
+
+pat set $1==4
+with const4 
+uses REG={fitcon,1} 			yields {imS,%a,"LSL",%1.num}
+with GENREG 
+uses REG={fitcon,1}			yields {regS,%a,"LSL",%1}
+
+pat set $1>4
+with GENREG STACK
+uses REG={fitcon,1}, REG={fitcon,0}, REG={const4,$1}
+gen LABEL {label, "2:"}
+    move %b,{autoid, SP}
+    SUB_S %c, %c, {fitcon,4}
+    BGT {label, "2B"}
+    CMP %1, {fitcon, 0}
+    BMI {label, "1F"}
+    AND %b, %1, {fitcon, 31}
+    move {regS, %a, "LSL", %b}, %b
+    move {imS, %1, "LSR", 5}, %1
+    move %b, {regiSregrel, SP, "LSL", 2, %1}
+    LABEL {label, "1:"}
+
+
+/************************************************************************
+ *									*
+ * GROUP XI :	Array Instructions					*
+ *									*
+ ************************************************************************/
+
+pat lae aar $2==4 && rom($1,3)==1 && rom($1,1)==0	leaving adi 4
+
+pat lae aar $2==4 && rom($1,3)==1 && rom($1,1)!=0
+with GENREG
+gen ADD %1, %1, {const4, 1-rom($1,1)}		yields %1
+						leaving adi 4
+
+pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)==0
+with GENREG					yields {imS, %1,"LSL",  2}
+						leaving adi 4
+
+pat lae aar $2==4 && rom($1,3)==4 && rom($1,1)!=0
+with GENREG
+gen ADD %1, %1, {const4, 1-rom($1,1)}		yields {imS, %1,"LSL", 2}
+						leaving adi 4
+
+pat lae aar $2==4 && rom($1,1)==0
+						leaving loc rom($1,3) 
+							mli 4 adi 4
+
+pat lae aar $2==4 && rom($1,1)!=0
+with GENREG
+gen ADD %1, %1, {const4, 1-rom($1,1)}
+						yields %1
+						leaving loc rom($1,3) 
+							mli 4 adi 4
+
+pat aar $1==4
+with GENREG GENREG
+uses REG
+gen move {regind, %1}, %a
+    SUB %2, %2, %a				yields %2 {regrel, %1, 8}
+						leaving mli 4 adi 4
+
+pat lae sar $2==4 && defined(rom($1,3))		leaving lae $1 aar 4 
+							sti rom($1,3)
+						
+pat lae lar $2==4 && defined(rom($1,3))		leaving lae $1 aar 4 
+							loi rom($1,3)
+
+pat loc aar !defined($2)			leaving aar $1
+						
+pat lae loc sar !defined($3) && $2==4 && defined(rom($1,3))
+						leaving lae $1 aar 4
+							sti rom($1,3)
+						
+pat lae loc lar !defined($3) && $2==4 && defined(rom($1,3))
+						leaving lae $1 aar 4
+							loi rom($1,3)
+						
+
+/************************************************************************
+ *									*
+ * GROUP XII :	Compare Instructions					*
+ *									*
+ ************************************************************************/
+
+pat cmi
+with GENREG REGcon
+uses reusing %1, REG
+gen RSB_S %a, %1, %2				yields %a
+with REGcon GENREG
+uses reusing %2, REG
+gen SUB_S %a, %2, %1				yields %a
+
+pat cmu						leaving cmi $1
+
+pat cmp						leaving cmi $1
+
+pat cmf						leaving loc 18 trp
+
+pat loc cms !defined($2)			leaving cms $1
+
+pat cms $1==4
+with GENREG REGcon
+gen EOR_S %1, %1, %2				yields %1
+with REGcon GENREG
+gen EOR_S %2, %2, %1				yields %2
+
+pat cms $1!=4
+with STACK
+uses REG = {const4, $1}, REG, REG, REG
+gen ADD %b, %a, SP
+    LABEL {label, "1:"}
+    SUB_S %a, %a, {fitcon, 4}
+    BLT {label, "2F"}
+    move {regregrel, SP, %a}, %c
+    move {regregrel, %b, %a}, %d
+    EOR_S %c, %c, %d
+    BEQ {label, "1B"}
+    LABEL {label, "2:"}
+    ADD SP, %b, {const4, $1}			yields %c
+
+pat cms !defined($1)
+with GENREG STACK
+uses REG, REG, REG
+gen ADD %a, %1, SP
+    LABEL {label, "1:"}
+    SUB_S %1, %1, {fitcon, 4}
+    BLT {label, "2F"}
+    move {regregrel, SP, %1}, %b
+    move {regregrel, %a, %1}, %c
+    EOR_S %b, %b, %c
+    BEQ {label, "1B"}
+    LABEL {label, "2:"}
+    ADD SP, %a, {const4, $1}			yields %b
+
+pat tlt
+with GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_LT %a, {fitcon,1}
+    MOV_GE %a, {fitcon,0}			yields %a
+
+pat tle
+with  GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_LE %a, {fitcon,1}
+    MOV_GT %a, {fitcon,0}			yields %a
+
+pat teq
+with GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_EQ %a, {fitcon,1}
+    MOV_NE %a, {fitcon,0}			yields %a
+
+pat tne
+with  GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_NE %a, {fitcon,1}
+    MOV_EQ %a, {fitcon,0}			yields %a
+
+pat tge
+with  GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_GE %a, {fitcon,1}
+    MOV_LT %a, {fitcon,0}			yields %a
+
+pat tgt
+with GENREG
+uses reusing %1, REG
+gen test %1
+    MOV_GT %a, {fitcon,1}
+    MOV_LE %a, {fitcon,0}			yields %a
+
+/************************************************************************
+ *									*
+ * GROUP XIII :	Branch Instructions					*
+ *									*
+ ************************************************************************/
+
+pat bra
+with STACK
+	gen BAL {label, $1}
+
+pat bne
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BNE {label, $1}
+with GENREG REGcon STACK
+	gen CMP %1, %2
+	    BNE {label, $1}
+
+pat beq
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BEQ {label, $1}
+with GENREG REGcon STACK
+	gen CMP %1, %2
+	    BEQ {label, $1}
+
+pat blt
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BLT {label, $1}
+
+pat ble
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BLE {label, $1}
+
+pat bgt
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BGT {label, $1}
+
+pat bge
+with REGcon GENREG STACK
+	gen CMP %2, %1
+	    BGE {label, $1}
+
+pat zlt
+with GENREG STACK
+gen test %1
+    BLT {label, $1}
+
+pat zle
+with GENREG STACK
+gen test %1
+    BLE {label, $1}
+
+pat zeq
+with GENREG STACK
+gen test %1
+    BEQ {label, $1}
+
+pat zne
+with GENREG STACK
+gen test %1
+    BNE {label, $1}
+
+pat zge
+with GENREG STACK
+gen test %1
+    BGE {label, $1}
+
+pat zgt
+with  GENREG STACK
+gen test %1
+    BGT {label, $1}
+
+/************************************************************************
+ *									*
+ * GROUP XIV :	Procedure Call						*
+ *									*
+ ************************************************************************/
+
+pat cal
+with STACK
+kills ALL
+gen BAL_L {label, $1}
+
+pat cai					leaving loc 18 trp
+
+pat lfr $1==4				yields R0
+
+pat lfr $1==8				yields R1 R0
+
+pat lfr $1==12				yields R2 R1 R0
+
+pat ret $1==0				
+with STACK
+kills ALL
+gen move LB, SP 
+    move {autoid, SP}, LB
+    move {autoid, SP}, PC
+
+pat ret $1==4
+with address STACK
+kills ALL
+gen move %1, R0
+    move LB, SP
+    move {autoid, SP}, LB
+    move {autoid, SP}, PC
+with REGcon STACK
+kills ALL
+gen move %1, R0
+    move LB, SP
+    move {autoid, SP}, LB
+    move {autoid, SP}, PC
+
+pat ret $1==8
+with REGcon REGcon STACK
+kills ALL
+gen move %1, R0
+    move %2, R1
+    move LB, SP
+    move {autoid, SP}, LB
+    move {autoid, SP}, PC
+
+pat ret $1==12
+with REGcon REGcon REGcon STACK
+kills ALL
+gen move %1, R0
+    move %2, R1
+    move %3, R2
+    move LB, SP
+    move {autoid, SP}, LB
+    move {autoid, SP}, PC
+
+
+
+/************************************************************************
+ *									*
+ * GROUP XV :	Miscellaneous						*
+ *									*
+ ************************************************************************/
+
+pat asp
+with STACK
+gen ADD SP, SP, {const4, $1}
+
+pat ass $1==4
+with REGcon STACK
+gen ADD SP, SP, %1
+
+pat blm $1==0
+with address+REGcon address+REGcon
+
+pat blm $1==4
+with GENREG GENREG
+kills address
+uses REG
+gen move {regind, %2}, %a
+    move %a, {regind, %1}
+
+pat blm $1>4
+with GENREG GENREG
+kills address
+uses REG, REG={const4, $1-4}
+gen LABEL {label, "1:"}
+    move {regregrel, %2, %b}, %a
+    move %a, {regregrel, %1, %b}
+    SUB_S %b, %b, {fitcon, 4}
+    BGE {label,"1B"}
+
+pat bls $1==4
+with GENREG GENREG GENREG
+kills address
+uses REG
+gen LABEL {label, "1:"}
+    SUB_S %1, %1, {fitcon, 4}
+    move {regregrel, %3, %1}, %a
+    move %a, {regregrel, %2, %1}
+    BGT {label,"1B"}
+
+pat csa
+
+pat csb
+
+pat dch					leaving loi 4
+
+pat dup $1==4
+with address+REGcon			yields %1 %1
+
+pat dup $1==8
+with address+REGcon address+REGcon	yields %2 %1 %2 %1
+
+pat dup $1>8
+with STACK
+uses REG={const4,$1}, REG
+gen LABEL {label, "1:"}
+    move {regrel, SP, $1-4}, %b
+    move %b, {autoid, SP}
+    SUB_S %a, %a, {fitcon, 4}
+    BGT {label, "1B"}
+
+pat dus
+with GENREG STACK
+uses REG, REG
+gen SUB %b, %1, {fitcon, 4}
+    LABEL {label, "1:"}
+    move {regregrel, SP, %b}, %a
+    move %a, {autoid, SP}
+    SUB_S %1, %1, {fitcon, 4}
+    BGT {label, "1B"}
+
+pat exg $1==4
+with address+REGcon address+REGcon		yields %1 %2
+
+pat exg $1==8
+with address+REGcon address+REGcon
+     address+REGcon address+REGcon		yields %2 %1 %4 %3
+
+pat exg $1>8
+with STACK
+kills ALL
+uses REG, REG, REG={const4, $1-4}, REG
+gen ADD %d, SP, {const4, $1}
+    LABEL {label, "1:"}
+    move {regregrel,SP,%c}, %a
+    move {regregrel,%d,%c}, %b
+    move %a, {regregrel,%d,%c}
+    move %b, {regregrel,SP,%c}
+    SUB_S %c, %c, {fitcon, 4}
+    BGE {label, "1B"}
+
+pat fil
+
+pat gto
+
+pat lim
+
+pat lin
+
+pat lni
+
+pat lor $1==0				yields LB
+
+pat lor $1==1
+with STACK				yields SP
+
+pat lor $1==2				yields {absolute, ".reghp"}
+
+pat lpb					leaving adp 8
+
+pat mon
+
+pat nop
+
+pat rck
+with GENREG REGcon STACK
+uses REG
+gen move {regind, %1}, %a
+    CMP %a, %2
+    BGT {label, "rcktrap"}
+    move {regrel, %1, 4}, %a
+    CMP %a, %2
+    BLT {label, "rcktrap"}
+
+pat rtt
+
+pat sig
+
+pat sim
+
+pat str $1==0
+with address
+gen move %1, LB
+with REGcon
+gen move %1, LB
+
+pat str $1==1
+with address
+gen move %1, SP
+with REGcon
+gen move %1, SP
+
+pat str $1==2
+with GENREG
+gen move %1, {absolute, ".reghp"}
+
+pat trp
+
+
+/***********************************************************************/
+
+pat lol lol adp stl loi $1==$2 && $2==$4 && $5==4
+uses REG, REG
+gen move {LOCAL, $1}, %a
+    move {regrelpi, %a, $3}, %b
+    move %a, {LOCAL, $1}		yields %b
+
+pat lol lol adp stl sti $1==$2 && $2==$4 && $5==4
+with GENREG
+uses REG
+gen move {LOCAL,$1}, %a
+    move %1, {regrelpi, %a, $3}
+    move %a, {LOCAL, $1}
