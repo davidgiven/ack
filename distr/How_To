@@ -13,7 +13,7 @@ these files.
 
 When all this is correct, use the shell script mktree the extract
 the distribution from the EM tree.
-	cd ~em/Repositories ; sh ../Work/distr/mktree destination_tree >../Work/distr/f.attf 2>&1
+	cd ~em/Repositories ; sh ../Work/distr/mktree destination_tree Distr4 >../Work/distr/f.attf 2>&1
 Make sure that the destination tree exists and is empty!
 Failing to do that will almost certainly result in a welter of
 error messages.

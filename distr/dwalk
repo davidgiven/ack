@@ -1,6 +1,15 @@
 : ${CDIR=.}
-${DD-:} $CDIR
+if [ $# = 1 ]
+then
+	${DD-:} $CDIR $1
+else
+	${DD-:} $CDIR
+fi
 ${DF-:} $CDIR .distr
+if test ! -r $DESTDIR/$CDIR/.distr
+then
+	( cd $DESTDIR/$CDIR; make .distr ) >/dev/null 2>&1
+fi
 if test ! -r $DESTDIR/$CDIR/.distr
 then
 	echo ++ no .distr in $CDIR
@@ -14,7 +23,7 @@ do
 		  then 
 			CDIR=$CDIR/$i
 			export CDIR
-			exec /proj/em/Work/distr/dwalk
+			exec /proj/em/Work/distr/dwalk $*
 		  else
 			echo ++ Could not access $CDIR/$i
 		  fi

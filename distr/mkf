@@ -9,8 +9,3 @@ then
 else
 	echo ++ $1/$2 not present
 fi
-case $2 in
-LIST)	if (test -r $DESTDIR/$1/`head -1 $DESTDIR/$1/LIST`) >/dev/null 2>&1
-	then echo ++ LIST files must be in .distr before their libraries!!!
-	fi ;;
-esac

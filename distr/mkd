@@ -5,11 +5,14 @@ case $1 in
 esac
 p=`pwd`
 cd $DESTDIR/$1
-if `RV $p $p/Distr4 > /dev/null 2>&1`
+if [ $# = 2 ] && [ -f $p/$2 ]
 then
-	:
+	RV $p $p/$2 > /dev/null 2>&1
 else
-	echo "-- $1 no Distr4 Save Record yet"
+	if [ $# = 2 ]
+	then
+		echo "-- $1 no $2 Save Record yet"
+	fi
 	if `CV $p > /dev/null 2>&1`
 	then
 		:

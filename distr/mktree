@@ -1,6 +1,6 @@
 case $# in
-1)	;;
-*)	echo $0 directory ; exit 1 ;;
+1|2)	;;
+*)	echo $0 directory [ SVrecord ] ; exit 1 ;;
 esac
 DDIR=/proj/em/Work/distr
 case $1 in
@@ -11,4 +11,4 @@ DD=$DDIR/mkd
 DF=$DDIR/mkf
 DA=$DDIR/mka
 export DESTDIR DD DF DA
-$DDIR/dwalk
+$DDIR/dwalk $2

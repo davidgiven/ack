@@ -7,10 +7,6 @@ end
 name "Pascal bootstrap files"
 dir lang/pc/pem
 end
-name "C compiler makefile"
-dir lang/cem/cemcom
-action "cp AckMake makefile"
-end
 name "LLgen bootstrap files"
 dir util/LLgen
 end
@@ -24,10 +20,4 @@ end
 name "h/em_path.h"
 dir first
 action "cp em_path.h.src ../h/em_path.h"
-end
-name "create .distr file for interpreter"
-dir util/int
-end
-name "create .distr file for interpreter docs"
-dir doc/int
 end
