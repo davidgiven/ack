@@ -26,6 +26,7 @@ integral(c)
 	return 0;
 }
 
+/*VARARGS2*/
 /*FORMAT1 $
 	%s = char *
 	%l = long

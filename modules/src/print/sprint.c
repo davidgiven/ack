@@ -8,6 +8,7 @@
 #include <system.h>
 #include "param.h"
 
+/*VARARGS*/
 /*FORMAT1v $
 	%s = char *
 	%l = long
