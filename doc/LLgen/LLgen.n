@@ -896,36 +896,35 @@ stat    {       int     ident, val; } :
         ;
 
 expr(int level, *val;) {       int     expr; } :
-        %if (level <= MAXPRIO)
-                    /* The grammar is ambiguous here. If level > MAXPRIO,
-                     * this invocation will only scan one factor
-                     */
-            expr(MAXPRIO+1,val)
-            [ %while (prio(tok.t_tokno) >= level)
+          factor(val)
+          [ %while (prio(tok.t_tokno) >= level)
                     /* Swallow operators as long as their priority is
                      * larger than or equal to the level of this invocation
                      */
-                '+' expr(prio('+')+1,&expr)
+              '+' expr(prio('+')+1,&expr)
                                 {       *val += expr; }
                     /* This states that '+' groups left to right. If it
                      * should group right to left, the rule should read:
                      * '+' expr(prio('+'),&expr)
                      */
-              | '-' expr(prio('-'),&expr)
+            | '-' expr(prio('-')+1,&expr)
                                 {       *val -= expr; }
-              | '*' expr(prio('*'),&expr)
+            | '*' expr(prio('*')+1,&expr)
                                 {       *val *= expr; }
-              | '/' expr(prio('/'),&expr)
+            | '/' expr(prio('/')+1,&expr)
                                 {       *val /= expr; }
-              | '%' expr(prio('%'),&expr)
+            | '%' expr(prio('%')+1,&expr)
                                 {       *val %= expr; }
-              | '&' expr(prio('&'),&expr)
+            | '&' expr(prio('&')+1,&expr)
                                 {       *val &= expr; }
-              | '|' expr(prio('|'),&expr)
+            | '|' expr(prio('|')+1,&expr)
                                 {       *val |= expr; }
-            ]*
+          ]*
                     /* Notice the "*" here. It is important.
                      */
+	;
+
+factor(int *val;):
           | '(' expr(1,val) ')'
           | '-' expr(MAXPRIO+1,val)
                                 {       *val = -*val; }
