@@ -137,6 +137,12 @@ ldc adu $1==0 && $2==2*w:
 loc ads $1==0 && $2==w:
 ldc ads $1==0 && $2==2*w:
 zer adi $1==$2:
+loc and $1==0 && $2==w:		asp w loc 0
+ldc and $1==0 && $2==2*w:	asp 2*w ldc 0
+zer and $1==$2:			asp $1 zer $1
+loc ior $1==0 && $2==w:
+ldc ior $1==0 && $2==2*w:
+zer ior $1==$2:
 loc beq $1==0:  zeq $2
 loc bge $1==0:  zge $2
 loc bgt $1==0:  zgt $2
@@ -552,6 +558,8 @@ loc loc bgt $1>$2 : bra $3
 loc loc bgt :
 loc loc blt $1<$2 : bra $3
 loc loc blt :
+loc loc cms $3==w :	loc $1!=$2
+ldc ldc cms $3==2*w :	loc $1!=$2
 lae loi lal sti $2==$4 && $2>8 : lae $1 lal $3 blm $2
 lal loi lae sti $2==$4 && $2>8 : lal $1 lae $3 blm $2
 lal loi lal sti $2==$4 && $2>8 && ( $3<=$1-$2 || $3>=$1+$2 ) :
