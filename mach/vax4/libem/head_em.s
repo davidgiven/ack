@@ -1,9 +1,10 @@
-	# $Header$
 #include "system.h"
 #include "em_abs.h"
 #ifdef BSD42
 #include "/usr/include/syscall.h"
 #endif BSD42
+
+	# $Header$
 
 .globl	hol0
 .globl	.reghp
