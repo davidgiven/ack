@@ -1,9 +1,0 @@
-set -e
-for i in `tail +2 $DESTDIR/$1/LIST`
-do
-	${DF-false} $1 $i
-done
-cd $DESTDIR/$1
-arch cDr `cat LIST`
-: I do not remove the files constituating the library, because
-: they might be present in .distr

@@ -1,8 +1,0 @@
-V=`cat Version.c`
-VERSION=`expr "$V" ':' '.*[0-9][0-9]*\.\([0-9][0-9]*\).*'`
-NEWVERSION=`expr $VERSION + 1`
-sed "s/\.$VERSION/.$NEWVERSION/" < Version.c > tmp$$
-mv tmp$$ Version.c
-CM "$*"
-V=`cat Version.c`
-SV > Versions/V`expr "$V" ':' '.*\([0-9][0-9]*\.[0-9][0-9]*\).*'`

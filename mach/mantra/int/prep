@@ -1,3 +1,0 @@
-rm -f temp.c
-cat header deffile $1 >> temp.c
-../../../lib/cpp -P temp.c >$2

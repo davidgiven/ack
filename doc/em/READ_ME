@@ -1,6 +1,0 @@
-This it the text of IR-81,
-DESCRIPTION OF A MACHINE ARCHITECTURE FOR USE WITH BLOCK STRUCTURED LANGUAGES
-
-The file em.i (text of the defining interpreter) was hand-edited from int/em.p
-
-The directory int contains the interpreter.

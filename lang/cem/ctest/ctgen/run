@@ -1,4 +1,0 @@
-for A in *.sed
-do
-        run1 `basename $A .sed` ${1-gen}
-done

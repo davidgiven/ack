@@ -1,6 +1,0 @@
-- front-end cannot generate DBX symbol table information for bit-fields,
-  because it does not know about byte-order.
-- single stepping on a line by line basis is difficult if you use breakpoints.
-  The problem is where to set the next breakpoint. One solution is to use
-  single-stepping until we are at a different line, but this is probably
-  extremely slow. Another solution is to adapt edb's method.

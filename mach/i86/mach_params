@@ -1,5 +1,0 @@
-MACH=i86
-SUF=o
-ASAR=aal
-RANLIB=:
-MACHFL=-O -DUFS
