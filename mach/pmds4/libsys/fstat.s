@@ -1,7 +1,12 @@
 .define _fstat
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _fstat
 _fstat:			trap #0
-.short	0x1C
+.data2	0x1C
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,7 +1,12 @@
 .define _fork
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _fork
 _fork:		trap #0
-.short 0x2
+.data2 0x2
 		bra 1f
 		bcs 2f
 		rts

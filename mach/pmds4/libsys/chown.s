@@ -1,8 +1,13 @@
 .define _chown
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chown
-.text
+.sect .text
 _chown:		trap #0
-.short	0x10
+.data2	0x10
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,5 +1,10 @@
 .define _sync
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _sync
 _sync:			trap #0
-.short	0x24
+.data2	0x24
 			rts

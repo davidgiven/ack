@@ -1,5 +1,10 @@
-
 .define _tell
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+
 .extern _tell
 _tell:		
 			pea	1

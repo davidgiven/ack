@@ -1,7 +1,12 @@
 .define _chdir
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _chdir
 _chdir:			trap #0
-.short	0xC
+.data2	0xC
 			bcc	1f
 			jmp	cerror
 1:

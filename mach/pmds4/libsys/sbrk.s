@@ -1,5 +1,10 @@
 .define _sbrk
 .define _brk
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _sbrk
 .extern _brk
 _sbrk:		tst.b	-8(sp)
@@ -9,7 +14,7 @@ _sbrk:		tst.b	-8(sp)
 			move.l	d0,-(sp)
 			clr.l	-(sp)
 			trap #0
-.short	0x11
+.data2	0x11
 			add.l	#8,sp
 			bcc	1f
 			jmp	cerror
@@ -19,7 +24,7 @@ _sbrk:		tst.b	-8(sp)
 			add.l	d1,.reghp
 			rts
 _brk:			trap #0
-.short	0x11
+.data2	0x11
 			bcc	1f
 			jmp	cerror
 1:

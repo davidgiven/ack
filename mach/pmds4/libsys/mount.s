@@ -1,8 +1,13 @@
 .define _mount
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _mount
-.text
+.sect .text
 _mount:		trap #0
-.short	0x15
+.data2	0x15
 			bcc	1f
 			jmp	cerror
 1:

@@ -1,6 +1,11 @@
 .define _alarm
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _alarm
-.text
+.sect .text
 _alarm:		trap #0
-.short	0x1B
+.data2	0x1B
 			rts

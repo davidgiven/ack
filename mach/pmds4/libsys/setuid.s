@@ -1,8 +1,13 @@
 .define _setuid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _setuid
-.text
+.sect .text
 _setuid:		trap #0
-.short	0x17
+.data2	0x17
 			bcc	1f
 			jmp	cerror
 1:

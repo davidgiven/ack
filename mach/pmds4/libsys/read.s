@@ -1,7 +1,12 @@
 .define _read
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _read
 _read:		trap #0
-.short	0x3
+.data2	0x3
 			bcc	1f
 			jmp	cerror
 1:

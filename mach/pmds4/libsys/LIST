@@ -1,4 +1,4 @@
-tail_mon
+libmon_s.a
 access.s
 acct.s
 alarm.s

@@ -1,6 +1,11 @@
 .define _times
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _times
 _times:
 	trap #0
-.short	0x2B
+.data2	0x2B
 	rts

@@ -1,8 +1,13 @@
 .define _setgid
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _setgid
-.text
+.sect .text
 _setgid:		trap #0
-.short	0x2E
+.data2	0x2E
 			bcc	1f
 			jmp	cerror
 1:

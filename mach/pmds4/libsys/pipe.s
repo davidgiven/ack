@@ -1,7 +1,12 @@
 .define _pipe
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _pipe
 _pipe:		trap #0
-.short 0x2A
+.data2 0x2A
 		bcc 1f
 		jmp cerror
 1:

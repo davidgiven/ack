@@ -1,6 +1,11 @@
 .define _umask
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _umask
-.text
+.sect .text
 _umask:		trap #0
-.short	0x3C
+.data2	0x3C
 			rts

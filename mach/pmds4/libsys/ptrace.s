@@ -1,7 +1,12 @@
 .define _ptrace
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 .extern _ptrace
 _ptrace:		trap #0
-.short	0x1A
+.data2	0x1A
 			bcc	1f
 			jmp	cerror
 1:

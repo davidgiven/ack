@@ -1,17 +1,29 @@
 # $Header$
-install:
-	../../install head_em.s head_em
-	../../install tail_mon tail_mon
+MACH=pmds4
+all:		libmon_o.a head_em
 
-cmp:
-	-../../compare head_em.s head_em
-	-../../compare tail_mon tail_mon
+install: 	all
+		../../install head_em.o head_em
+		../../install libmon_o.a tail_mon
 
-clean :
+
+cmp:		all
+		-../../compare head_em.o head_em
+		-../../compare libmon_o.a tail_mon
+
+libmon_o.a:	libmon_s.a
+		ASAR=aal ; export ASAR ;\
+		march . libmon_o.a
+
+head_em.o:	head_em.s
+		$(MACH) -I../../../h -c head_em.s
+
+clean:
+		rm -f *.o
 
 opr :
-	make pr | opr
+		make pr | opr
 
 pr:
-	pr -h `pwd`/head_em.s head_em.s
-	@arch pv tail_mon | pr -h `pwd`/tail_mon
+		@pr `pwd`/head_em.s
+		@arch pv libmon_s.a | pr -h `pwd`/libmon_s.a
