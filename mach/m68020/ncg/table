@@ -5116,10 +5116,10 @@ with any_int STACK
 #endif /* WORD_SIZE==2 */
 
 #if WORD_SIZE==2
-pat cms $1==2			leaving sbi 2
+pat cms $1==2			leaving cmi 2
 pat cms $1==4			leaving cmi 4
 #else
-pat cms $1==4			leaving sbi 4
+pat cms $1==4			leaving cmi 4
 #endif
 
 pat cms defined($1)
@@ -5272,21 +5272,26 @@ pat zrf		leaving zer $1
 
 #if WORD_SIZE==2
 pat lab topeltsize($1)==4 && !fallthrough($1)
+kills ALL
 gen labeldef $1			yields dl0
 
 pat lab topeltsize($1)==4 && fallthrough($1)
 with any4 STACK
+kills ALL
 gen move %1, dl0
+    killreg dl0
     labeldef $1			yields dl0
 #endif
 
 pat lab topeltsize($1)==WORD_SIZE && !fallthrough($1)
+kills ALL
 gen labeldef $1			yields d0
 
 pat lab topeltsize($1)==WORD_SIZE && fallthrough($1)
 with any_int STACK
 kills ALL
 gen move %1,d0
+    killreg d0
     labeldef $1			yields d0
 
 pat lab
