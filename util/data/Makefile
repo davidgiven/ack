@@ -4,7 +4,7 @@ h=$d/h
 l=$d/lib
 AR=ar
 SUF=o
-LIBSUF=ma
+LIBSUF=a
 
 OBJ=em_mnem.$(SUF) em_pseu.$(SUF) em_flag.$(SUF) em_ptyp.$(SUF)
 
