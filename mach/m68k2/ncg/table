@@ -4957,7 +4957,7 @@ with conreg2
 
 #if WORD_SIZE==2
 pat set $1>4
-with any_int STACK
+with STACK
     kills ALL
     gen move {const, $1}, d0
 	jsr {absolute4, ".set"}
