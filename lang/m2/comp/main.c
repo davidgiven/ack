@@ -158,8 +158,8 @@ add_standards()
 		     construct_type(PROCEDURE, NULLTYPE),
 		     0);
 	tp = construct_type(SUBRANGE, int_type);
-	tp->tp_value.tp_subrange.su_lb = 0;
-	tp->tp_value.tp_subrange.su_ub = wrd_size * 8 - 1;
+	tp->sub_lb = 0;
+	tp->sub_ub = wrd_size * 8 - 1;
 	df = Enter("BITSET", D_TYPE, construct_type(SET, tp), 0);
 	df->df_type->tp_size = wrd_size;
 	df = Enter("FALSE", D_ENUM, bool_type, 0);

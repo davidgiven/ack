@@ -31,13 +31,17 @@ ProcedureHeading(struct def **pdf; int type;)
 	struct paramlist *params = 0;
 } :
 	PROCEDURE IDENT
-			{ assert(type == D_PROCEDURE || type == D_PROCHEAD);
+			{ assert(type & (D_PROCEDURE | D_PROCHEAD));
 			  *pdf = define(dot.TOK_IDF, CurrentScope, type);
 			  if (type == D_PROCEDURE) {
 				open_scope(OPENSCOPE, 0);
 			  }
 			}
 	FormalParameters(type, &params, &tp)?
+			{
+			  (*pdf)->df_type = tp = construct_type(PROCEDURE, tp);
+			  tp->prc_params = params;
+			}
 ;
 
 block:
@@ -63,54 +67,47 @@ FormalParameters(int doparams; struct paramlist **pr; struct type **tp;)
 } :
 	'('
 	[
-		FPSection(doparams, pr)
+		FPSection(doparams, pr)	
+			{ pr1 = *pr; }
 		[
-			{ for (pr1 = *pr; pr1->next; pr1 = pr1->next) ; }
+			{ for (; pr1->next; pr1 = pr1->next) ; }
 			';' FPSection(doparams, &(pr1->next))
 		]*
 	]?
 	')'
 			{ *tp = 0; }
-	[ ':' qualident(D_TYPE | D_HTYPE, &df, "type")
-			{ /* ???? *tp = df->df_type; */ }
+	[	':' qualident(D_TYPE | D_HTYPE, &df, "type")
+			{ *tp = df->df_type; }
 	]?
 ;
 
+/*	In the next nonterminal, "doparams" is a flag indicating whether
+	the identifiers representing the parameters must be added to the
+	symbol table. We must not do so when reading a Definition Module,
+	because in this case we only read the header. The Implementation
+	might contain different identifiers representing the same paramters.
+*/
 FPSection(int doparams; struct paramlist **ppr;)
 {
 	struct id_list *FPList;
-	register struct id_list *pid;
-	register struct paramlist *pr = 0;
-	int VARflag = 0;
+	struct paramlist *ParamList();
+	struct type *tp;
+	int VARp = 0;
 } :
 	[
-		VAR	{ VARflag = 1; }
+		VAR	{ VARp = 1; }
 	]?
-	IdentList(&FPList) ':' FormalType
-			{
-			  if (doparams) {
-				EnterIdList(FPList,
-					    D_VARIABLE,
-					    VARflag,
-					    (struct type *) 0	/* ???? */,
-					    CurrentScope
-				);
-			  }
-			  *ppr = pr = new_paramlist();
-			  pr->par_type = 0;	/* ??? */
-			  pr->par_var = VARflag;
-			  for (pid = FPList->next; pid; pid = pid->next) {
-				pr->next = new_paramlist();
-				pr = pr->next;
-				pr->par_type = 0;	/* ??? */
-				pr->par_var = VARflag;
-			  }
-			  pr->next = 0;
-			  FreeIdList(FPList);
-			}
+	IdentList(&FPList) ':' FormalType(&tp)
+		{
+		  if (doparams) {
+			EnterIdList(FPList, D_VARIABLE, VARp, tp, CurrentScope);
+		  }
+		  *ppr = ParamList(FPList, tp);
+		  FreeIdList(FPList);
+		}
 ;
 
-FormalType
+FormalType(struct type **tp;)
 {
 	struct def *df;
 	int ARRAYflag = 0;
@@ -118,6 +115,12 @@ FormalType
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
 	qualident(D_TYPE | D_HTYPE, &df, "type")
+			{ if (ARRAYflag) {
+				*tp = construct_type(ARRAY, NULLTYPE);
+				(*tp)->arr_elem = df->df_type;
+			  }
+			  else	*tp = df->df_type;
+			}
 ;
 
 TypeDeclaration
@@ -127,8 +130,7 @@ TypeDeclaration
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	'=' type(&tp)
-			{ df->df_type = tp;
-			}
+			{ df->df_type = tp; }
 ;
 
 type(struct type **ptp;):
@@ -148,17 +150,19 @@ type(struct type **ptp;):
 SimpleType(struct type **ptp;)
 {
 	struct def *df;
+	struct type *tp;
 } :
 	qualident(D_TYPE | D_HTYPE, &df, "type")
 	[
-
+		/* nothing */
 	|
 		SubrangeType(ptp)
-		/*
-		 * The subrange type is given a base type by the
-		 * qualident (this is new modula-2).
-		 */
-			{ /* ???? (*ptp)->next = df->df_type; */ }
+		/* The subrange type is given a base type by the
+		   qualident (this is new modula-2).
+		*/
+			{
+			  chk_basesubrange(*ptp, tp);
+			}
 	]
 |
 	enumeration(ptp)
@@ -228,11 +232,11 @@ ArrayType(struct type **ptp;)
 			}
 	[
 		',' SimpleType(&tp)
-			{ tp2 = tp2->tp_value.tp_arr.ar_elem = 
+			{ tp2 = tp2->arr_elem = 
 				construct_type(ARRAY, tp);
 			}
 	]* OF type(&tp)
-			{ tp2->tp_value.tp_arr.ar_elem = tp; }
+			{ tp2->arr_elem = tp; }
 ;
 
 RecordType(struct type **ptp;)
@@ -245,7 +249,7 @@ RecordType(struct type **ptp;)
 	FieldListSequence(scopenr)
 			{
 			  *ptp = standard_type(RECORD, record_align, (arith) 0 /* ???? */);
-			  (*ptp)->tp_value.tp_record.rc_scopenr = scopenr;
+			  (*ptp)->rec_scopenr = scopenr;
 			}
 	END
 ;
@@ -310,48 +314,87 @@ SetType(struct type **ptp;)
 			}
 ;
 
+/*	In a pointer type definition, the type pointed at does not
+	have to be declared yet, so be careful about identifying
+	type-identifiers
+*/
 PointerType(struct type **ptp;)
 {
 	struct type *tp;
-	register struct def *df;
+	struct def *df;
 	struct def *lookfor();
 } :
 	POINTER TO
 	[ %if ( (df = lookup(dot.TOK_IDF, CurrentScope)))
-		IDENT
+		/* Either a Module or a Type, but in both cases defined
+		   in this scope, so this is the correct identification
+		*/
+		qualident(D_TYPE|D_HTYPE, &df, "type")
 				{
-				  if (!(df->df_kind & (D_TYPE | D_HTYPE))) {
-					error("\"%s\" is not a type identifier",
-						df->df_idf->id_text);
-				  }
 				  if (!df->df_type) {
 					error("type \"%s\" not declared",
 						df->df_idf->id_text);
+					tp = error_type;
 				  }
-				  *ptp = df->df_type;
+				  else	tp = df->df_type;
 				}
 	| %if (df = lookfor(dot.TOK_IDF, 0), df->df_kind == D_MODULE)
 		type(&tp)
-				{ *ptp = construct_type(POINTER, tp); }
 	|
 		IDENT
-				{ *ptp = construct_type(POINTER, NULLTYPE);
-				  Forward(&dot, &((*ptp)->next));
-				}
+				{ tp = NULLTYPE; }
 	]
+				{
+				  *ptp = construct_type(POINTER, tp);
+				  if (!tp) Forward(&dot, &((*ptp)->next));
+				}
 ;
 
-ProcedureType(struct type **ptp;):
-	PROCEDURE FormalTypeList?
-			{ *ptp = 0; }
+ProcedureType(struct type **ptp;)
+{
+	struct paramlist *pr = 0;
+	struct type *tp = 0;
+} :
+	PROCEDURE FormalTypeList(&pr, &tp)?
+			{ *ptp = construct_type(PROCEDURE, tp);
+			  (*ptp)->prc_params = pr;
+			}
 ;
 
-FormalTypeList
+FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 {
 	struct def *df;
+	struct type *tp;
+	struct paramlist *p;
+	int VARp;
 } :
-	'(' [ VAR? FormalType [ ',' VAR? FormalType ]* ]? ')'
-	[ ':' qualident(1, &df, "type")
+	'('		{ *ppr = 0; }
+	[
+		[ VAR	{ VARp = 1; }
+		|	{ VARp = 0; }
+		]
+		FormalType(&tp)
+			{ *ppr = p = new_paramlist();
+			  p->par_type = tp;
+			  p->par_var = VARp;
+			}
+		[
+			','
+			[ VAR	{VARp = 1; }
+			|	{VARp = 0; }
+			] 
+			FormalType(&tp)
+				{ p->next = new_paramlist();
+				  p = p->next;
+				  p->par_type = tp;
+				  p->par_var = VARp;
+				}
+		]*
+				{ p->next = 0; }
+	]?
+	')'
+	[ ':' qualident(D_TYPE|D_HTYPE, &df, "type")
+				{ *ptp = df->df_type; }
 	]?
 ;
 

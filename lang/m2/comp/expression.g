@@ -25,11 +25,8 @@ qualident(int types; struct def **pdf; char *str;)
 	struct def *lookfor();
 } :
 	IDENT		{ if (types) {
-				df = lookfor(dot.TOK_IDF, 1);
-				if (df->df_kind == D_ERROR) {
-					*pdf = df;
-					types = 0;
-				}
+				*pdf = df = lookfor(dot.TOK_IDF, 1);
+				if (df->df_kind == D_ERROR) types = 0;
 			  }
 			}
 	[
@@ -53,7 +50,7 @@ qualident(int types; struct def **pdf; char *str;)
 	]*
 			{ if (types && !(types & df->df_kind)) {
 				error("identifier \"%s\" is not a %s",
-					dot.TOK_IDF, str);
+					df->df_idf->id_text, str);
 			  }
 			}
 ;

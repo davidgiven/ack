@@ -74,8 +74,8 @@ symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
-type.o: Lpars.h def.h def_sizes.h idf.h type.h
-def.o: Lpars.h debug.h def.h idf.h main.h scope.h
+type.o: Lpars.h def.h def_sizes.h idf.h misc.h type.h
+def.o: Lpars.h debug.h def.h idf.h main.h misc.h scope.h
 scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
 enter.o: def.h idf.h misc.h scope.h type.h

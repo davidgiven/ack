@@ -14,26 +14,38 @@ struct enume {
 	struct def *en_enums;	/* Definitions of enumeration literals */
 	unsigned int en_ncst;	/* Number of constants */
 	label en_rck;		/* Label of range check descriptor */
+#define enm_enums	tp_value.tp_enum.en_enums
+#define enm_ncst	tp_value.tp_enum.en_ncst
+#define enm_rck		tp_value.tp_enum.enm_rck
 };
 
 struct subrange {
 	arith su_lb, su_ub;	/* Lower bound and upper bound */
 	label su_rck;		/* Label of range check descriptor */
+#define sub_lb	tp_value.tp_subrange.su_lb
+#define sub_ub	tp_value.tp_subrange.su_ub
+#define sub_rck	tp_value.tp_subrange.su_rck
 };
 
 struct array {
 	struct type *ar_elem;	/* Type of elements */
 	arith ar_lb, ar_ub;	/* Lower bound and upper bound */
 	label ar_descr;		/* Label of array descriptor */
+#define arr_elem	tp_value.tp_arr.ar_elem
+#define arr_lb		tp_value.tp_arr.ar_lb
+#define arr_ub		tp_value.tp_arr.ar_ub
+#define arr_descr	tp_value.tp_arr.ar_descr
 };
 
 struct record {
 	int rc_scopenr;		/* Scope number of this record */
 				/* Members are in the symbol table */
+#define rec_scopenr	tp_value.tp_record.rc_scopenr
 };
 
 struct proc {
 	struct paramlist *pr_params;
+#define prc_params	tp_value.tp_proc.pr_params
 };
 
 struct type	{

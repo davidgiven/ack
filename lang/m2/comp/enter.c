@@ -55,8 +55,8 @@ EnterIdList(idlist, kind, flags, type, scope)
 	if (last) {
 		/* Also meaning : enumeration */
 		last->df_value.df_enum.en_next = 0;
-		type->tp_value.tp_enum.en_enums = first;
-		type->tp_value.tp_enum.en_ncst = assval;
+		type->enm_enums = first;
+		type->enm_ncst = assval;
 	}
 }
 

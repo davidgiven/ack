@@ -11,6 +11,7 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
+#include	"misc.h"
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
@@ -143,11 +144,66 @@ has_selectors(df)
 		register struct type *tp = df->df_type;
 
 		if (tp->tp_fund == RECORD) {
-			return tp->tp_value.tp_record.rc_scopenr;
+			return tp->rec_scopenr;
 		}
 		break;
 		}
 	}
 	error("no selectors for \"%s\"", df->df_idf->id_text);
 	return 0;
+}
+
+/*	Create a parameterlist of a procedure and return a pointer to it.
+	"ids" indicates the list of identifiers, "tp" their type, and
+	"VARp" is set when the parameters are VAR-parameters.
+	Actually, "ids" is only used because it tells us how many parameters
+	there were with this type.
+*/
+struct paramlist *
+ParamList(ids, tp, VARp)
+	register struct id_list *ids;
+	struct type *tp;
+{
+	register struct paramlist *pr;
+	struct paramlist *pstart;
+
+	pstart = pr = new_paramlist();
+	pr->par_type = tp;
+	pr->par_var = VARp;
+	for (ids = ids->next; ids; ids = ids->next) {
+		pr->next = new_paramlist();
+		pr = pr->next;
+		pr->par_type = tp;
+		pr->par_var = VARp;
+	}
+	pr->next = 0;
+	return pstart;
+}
+
+/*	A subrange had a specified base. Check that the bases conform ...
+*/
+chk_basesubrange(tp, base)
+	register struct type *tp, *base;
+{
+	if (base->tp_fund == SUBRANGE) {
+		/* Check that the bounds of "tp" fall within the range
+		   of "base"
+		*/
+		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
+			error("Base type has insufficient range");
+		}
+		base = base->next;
+	}
+	if (base->tp_fund == ENUMERATION || base->tp_fund == CHAR) {
+		if (tp->next != base) {
+			error("Specified base does not conform");
+		}
+	}
+	else if (base != card_type && base != int_type) {
+		error("Illegal base for a subrange");
+	}
+	else if (base != tp->next && base != int_type) {
+		error("Specified base does not conform");
+	}
+	tp->next = base;
 }

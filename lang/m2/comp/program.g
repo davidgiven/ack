@@ -32,8 +32,20 @@ static  char *RcsId = "$Header$";
 
 %start	CompUnit, CompilationUnit;
 
-ModuleDeclaration:
-	MODULE IDENT priority? ';' import(1)* export? block IDENT
+ModuleDeclaration
+{
+	struct idf *id;
+} :
+	MODULE IDENT		{ open_scope(CLOSEDSCOPE, 0);
+				  id = dot.TOK_IDF;
+				}
+	priority? ';'
+	import(1)*
+	export?
+	block
+	IDENT			{ close_scope();
+				  match_id(id, dot.TOK_IDF);
+				}
 ;
 
 priority:
@@ -51,6 +63,7 @@ export
 	]?
 	IdentList(&ExportList) ';'
 			{
+			  Export(ExportList, QUALflag);
 			  FreeIdList(ExportList);
 			}
 ;
@@ -71,6 +84,7 @@ import(int local;)
 	   name, otherwise the names in the import list are module names.
 	*/
 			{
+			  Import(ImportList, id, local);
 			  FreeIdList(ImportList);
 			}
 ;
@@ -78,12 +92,13 @@ import(int local;)
 DefinitionModule
 {
 	struct def *df;
+	struct idf *id;
 } :
 	DEFINITION	{ state = DEFINITION; }
-	MODULE IDENT	{ 
-			  df = define(dot.TOK_IDF, CurrentScope, D_MODULE);
+	MODULE IDENT	{ id = dot.TOK_IDF;
+			  df = define(id, CurrentScope, D_MODULE);
 			  open_scope(CLOSEDSCOPE, 0);
-			  df->df_value.df_module.mo_scope = CurrentScope;
+			  df->mod_scope = CurrentScope;
 			}
 	';'
 	import(0)* 
@@ -92,7 +107,9 @@ DefinitionModule
 	   	New Modula-2 does not have export lists in definition modules.
 	*/
 	definition* END IDENT '.'
-			{ close_scope(); }
+			{ close_scope();
+			  match_id(id, dot.TOK_IDF);
+			}
 ;
 
 definition
@@ -120,7 +137,9 @@ definition
 	ProcedureHeading(&df, D_PROCHEAD) ';'
 ;
 
-ProgramModule:
+ProgramModule {
+	struct idf *id;
+} :
 	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
 	IDENT		{ if (state == IMPLEMENTATION) {
 				/* ????
@@ -128,12 +147,16 @@ ProgramModule:
 				   Look for current identifier,
 				   and find out its scope number
 				*/
-				open_scope(CLOSEDSCOPE, 0);
 			  }
-			  else	open_scope(CLOSEDSCOPE, 0);
+			  id = dot.TOK_IDF;
+			  open_scope(CLOSEDSCOPE, 0);
 			}
-	priority? ';' import(0)* block IDENT
-			{ close_scope(); }
+	priority?
+	';' import(0)*
+	block IDENT
+			{ close_scope();
+			  match_id(id, dot.TOK_IDF);
+			}
 	'.'
 ;
 
