@@ -155,9 +155,9 @@ fill_window(w,len)
 write_first(w)
 	queue w;
 {
-	instr_p ip;
+	register instr_p ip = qhead(w);
 
-	write_instr(ip = qhead(w));
+	fputs(ip->line, stdout);
 	remove_head(w);
 	oldinstr(ip);
 }
@@ -524,14 +524,15 @@ static bool junk_state = FALSE;  /* TRUE while processing a very long line */
 
 instr_p read_instr()
 {
-	register instr_p ip;
+	instr_p ip;
 	register int c;
 	register char *p;
+	register FILE *inp = stdin;
 	char *plim;
 
 	ip = newinstr();
 	plim = &ip->line[MAXLINELEN];
-	if (( c = getchar()) == EOF) return NIL;
+	if (( c = getc(inp)) == EOF) return NIL;
 	for (p = ip->line; p < plim;) {
 		*p++ = c;
 		if (c == '\n') {
@@ -540,23 +541,12 @@ instr_p read_instr()
 			junk_state = FALSE;
 			return ip;
 		}
-		c = getchar();
+		c = getc(inp);
 	}
-	ungetc(c,stdin);
+	ungetc(c,inp);
 	*p = '\0';
 	junk_state = ip->state = JUNK;
 	return ip;
-}
-
-
-write_instr(ip)
-	instr_p ip;
-{
-	register char *p;
-
-	for (p = ip->line; *p != '\0'; p++) {
-		putchar(*p);
-	}
 }
 
 
