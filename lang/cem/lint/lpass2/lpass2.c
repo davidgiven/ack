@@ -96,7 +96,7 @@ PRIVATE init(argc, argv)
 			switch (ch) {
 			case 'u':
 				/*	don't report situations like
-					"defined/declared but not used"
+					"not used anywhere"
 				*/
 			case 'X':	/* ??? prints incoming inpdefs */
 			default:	/* and any other */
@@ -145,7 +145,7 @@ PRIVATE ext_def()
 {
 	if (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
 		if (lib) {
-			report("%L: %s %s also defined in library %L",
+			report("%L: %s %s also defined in %L",
 				dot, funvar(dot), dot->id_name, lib);
 		}
 		ext = dot;
@@ -335,7 +335,7 @@ PRIVATE stat_def(stnr)
 {
 	if (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
 		if (lib) {
-			report("%L: %s %s also defined in library %L",
+			report("%L: %s %s also defined in %L",
 				dot, funvar(dot), dot->id_name, lib);
 		}
 		if (ext) {
@@ -372,9 +372,8 @@ PRIVATE chk_def(def)
 		}
 		else {
 			if (!loptions['u']) {
-				report("%L: %s %s %s but not used",
-					def, funvar(def), def->id_name,
-					defdec(def));
+				report("%L: %s %s not used anywhere",
+					def, funvar(def), def->id_name);
 			}
 		}
 	}

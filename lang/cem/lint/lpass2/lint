@@ -8,7 +8,7 @@
 
 PATH=/bin:/usr/bin
 
-EMLINT=/usr/dick/lint
+EMLINT=/home/top/dick/lint
 
 LPASS1="$EMLINT/lpass1/lnt -Dmc68000"	# pass 1 program
 LPASS2="$EMLINT/lpass2/lpass2"		# pass 2 program

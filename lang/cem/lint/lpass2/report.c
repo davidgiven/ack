@@ -98,7 +98,7 @@ rep_loc(id)
 	}
 	else
 	if (is_class(id, CL_LIB)) {
-		fprint(MSGOUT, "library file %s", id->id_file);
+		fprint(MSGOUT, "library");
 	}
 	else {
 		fprint(MSGOUT, "\"%s\", line %d",

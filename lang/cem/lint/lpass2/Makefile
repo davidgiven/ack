@@ -6,7 +6,7 @@
 #	M A K E F I L E   F O R   L P A S S 2
 
 # Machine and environ dependent definitions
-EMHOME =	/usr/em
+EMHOME =	/usr/proj/em/Work
 LPASS1 =	$(EMHOME)/lang/cem/cemcom
 
 # Libraries and EM interface definitions
@@ -28,8 +28,8 @@ SRC =	lpass2.c checkargs.c read.c report.c class.c l_print3ack.c
 OBJ =	lpass2.o checkargs.o read.o report.o class.o l_print3ack.o
 
 test:	lpass2
-	lpass2 -xh <.i
-#	make lint.test
+	make lint.test
+#	lpass2 -xh <.i
 
 
 lpass2:	$(OBJ) Makefile next.o

@@ -20,6 +20,7 @@ PRIVATE char formatargs[1000];		/* the definitions */
 PRIVATE chk_argtps();
 PRIVATE char *next_atype();
 PRIVATE int type_match();
+PRIVATE form_type();
 
 int
 type_equal(act, form)
@@ -78,8 +79,14 @@ PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
 
 		(*nrargs)++;
 		if (!type_match(id, act_start, form_start)) {
-			report("%L: arg %d of %s differs from that in %L",
-				id, *nrargs, id->id_name, def);
+			char act_form[100];
+			char form_form[100];
+
+			form_type(act_form, act_start);
+			form_type(form_form, form_start);
+			report("%L: arg %d of %s (%s) differs from that in %L (%s)",
+				id, *nrargs, id->id_name,
+				act_form, def, form_form);
 		}
 		act_tp[-1] = ':';
 		form_tp[-1] = ':';
@@ -244,5 +251,21 @@ PRIVATE conv_format(id, act, form)
 		}
 	}
 	*fmt++ = '\0';
+}
+
+PRIVATE form_type(buff, tp)
+	char buff[];
+	char *tp;
+{	/*	store a formatted version of tp in buff
+	*/
+	if (tp[0] == '"') {
+		strcpy(buff, "char*");
+	}
+	else if (tp[0] == '+') {
+		sprintf(buff, "[unsigned] %s", &tp[1]);
+	}
+	else {
+		strcpy(buff, tp);
+	}
 }
 
