@@ -96,9 +96,7 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 	fakestack[stackheight] = *tp2;
 	fakestack[stackheight+1] = *tp1;
 	stackheight += 2;
-	tokpatlen += 2;
 	t = codegen(&coderules[mp->m_cindex],ply,toplevel,maxcost,0);
-	tokpatlen -= 2;
 	stackheight -= 2;
 	return(t);
 }
@@ -145,9 +143,7 @@ test(tp,ply,toplevel,maxcost) token_p tp; unsigned maxcost; {
 
 	fakestack[stackheight] = *tp;
 	stackheight++;
-	tokpatlen++;
 	t = codegen(&coderules[mp->t_cindex],ply,toplevel,maxcost,0);
-	tokpatlen--;
 	stackheight--;
 	return(t);
 }

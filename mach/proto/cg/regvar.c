@@ -116,6 +116,10 @@ fixregvars(saveall) {
 		}
 	}
 	f_regsave();
+#ifndef TEM_BSIZE
+	for(rv=rvlist;rv!=0;rv=rv->rv_next)
+		if (rv->rv_off >= 0) rv->rv_off += TEM_BSIZE;
+#endif
 }
 
 isregvar(off) long off; {

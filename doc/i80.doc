@@ -1,3 +1,4 @@
+." $Header$
 .RP
 .TL
 Back end table for the Intel 8080 micro-processor
@@ -96,11 +97,15 @@ The 8080 microprocessor provides five flip-flops used as condition flags
 .br
 The sign bit S is set (cleared) by certain instructions when the most significant
 bit of the result of an operation equals one (zero).
+.br
 The zero bit Z is set (cleared) by certain operations when the
 8-bit result of an operation equals (does not equal) zero.
+.br
 The parity bit P is set (cleared) if the 8-bit result of an
 operation includes an even (odd) number of ones.
+.br
 C is the normal carry bit.
+.br
 AC is an auxiliary carry that indicates whether there has been a carry
 out of bit 3 of the accumulator.
 This auxiliary carry is used only by the DAA instruction, which
@@ -125,12 +130,14 @@ of register-pair HL.
 .NH 3
 Register addressing
 .PP
-With each instruction using register addressing,
+
+With each intruction using register addressing,
 only one register is specified (except for the MOV instruction),
 although in many of them the accumulator is implied as
 second operand.
 Examples are CMP E, which compares register E with the accumulator,
 and DCR B, which decrements register B.
+.br
 A few instructions deal with 16 bit register-pairs:
 examples are DCX B, which decrements register-pair BC and the 
 PUSH and POP instructions.
@@ -166,7 +173,7 @@ The high order byte is stored at the highest address.
 THE 8080 BACK END TABLE
 .PP
 The back end table is designed as described in [5].
-For an overall design of a back end table I refer to this document.
+So for an overall design of a back end table I refer to this document.
 .br
 This section deals with problems encountered in writing the
 8080 back-end table.
@@ -178,30 +185,30 @@ Constant definitions
 Word size (EM_WSIZE) and pointer size (EM_PSIZE) are both 
 defined as two bytes.
 The hole between AB and LB (EM_BSIZE) is four bytes: only the
-return address and the local base are saved.
+return address and the localbase are saved.
 .NH 2
 Registers and their properties
 .PP
 All properties have the default size of two bytes, because one-byte
 registers also cover two bytes when put on the real stack.
 .sp 1
-The next considerations led to the choice of register-pair BC 
-as local base.
-Though saving the local base in memory would leave one more register-pair
+The next considerations led to the choise of register-pair BC 
+as localbase.
+Though saving the localbase in memory would leave one more register-pair
 available as scratch register, it would slow down instructions
 as 'lol' and 'stl' too much.
-So a register-pair should be sacrificed as local base.
+So a register-pair should be sacrificed as localbase.
 Because a back-end without a free register-pair HL is completely
-broken-winged, the only reasonable choices are BC and DE.
-Though the choice between them might seem arbitrary at first sight,
+broken-winged, the only reasonable choises are BC and DE.
+Though the choise between them might seem arbitrary at first sight,
 there is a difference between register-pairs BC and DE:
 the instruction XCHG exchanges the contents of register-pairs DE and
 HL.
 When DE and HL are both heavily used on the fake-stack, this instruction
-is very useful.
-Since it won't be useful too often to exchange HL with the local base
+is very usefull.
+Since it won't be usefull too often to exchange HL with the localbase
 and since an instruction exchanging BC and HL does not exist, BC is
-chosen as local base.
+chosen as localbase.
 .sp 1
 Many of the register properties are never mentioned in the
 PATTERNS part of the table.
@@ -212,7 +219,7 @@ The properties really used in the PATTERNS part are:
 the accumulator only
 .IP reg:
 any of the registers A, D, E, H or L. Of course the registers B and C which are
-used as local base don't possess this property.
+used as localbase don't possess this property.
 When there is a single register on the fake-stack, its value
 is always considered non-negative.
 .IP dereg:
@@ -221,12 +228,12 @@ register-pair DE only
 register-pair HL only
 .IP hl_or_de:
 register-pairs HL and DE both have this property
-.IP local base:
+.IP localbase:
 used only once (i.e. in the EM-instruction 'str 0')
 .PP
 .sp 1
 The stackpointer SP and the processor status word PSW have to be
-defined explicitly because they are needed in some instructions
+defined explicitely because they are needed in some instructions
 (i.e. SP in LXI, DCX and INX and PSW in PUSH and POP).
 .br
 It doesn't matter that the processor status word is not just register A
@@ -245,6 +252,7 @@ Compared with many other back-end tables, there are only a small number of
 different tokens (four).
 Reasons are the limited addressing modes of the 8080 microprocessor,
 no index registers etc.
+.br
 For example to translate the EM-instruction
 .DS
 lol 10
@@ -252,15 +260,16 @@ lol 10
 the next 8080 instructions are generated:
 .DS L
 LXI H,10        /* load registers pair HL with value 10 */
-DAD B           /* add local base (BC) to HL            */
+DAD B           /* add localbase (BC) to HL             */
 MOV E,M         /* load E with byte pointed to by HL    */
 INX H           /* increment HL                         */
 MOV D,M         /* load D with next byte                */
 .DE
-Of course, instead of emitting code immediately, it could be postponed
+Of course, instead of emitting code immmediately, it could be postponed
 by placing something like a {LOCAL,10} on the fake-stack, but some day the above
 mentioned code will have to be generated, so a LOCAL-token is
-hardly useful.
+hardly usefull.
+.br
 See also the comment on the load instructions.
 .NH 2
 Sets
@@ -286,13 +295,13 @@ In fact it usually takes 3 extra time periods when this register indirect mode
 is used instead of register mode, but since the costs are not completely
 orthogonal this results in small deficiencies for the DCR, INR and MOV
 instructions.
-Although it is not particularly useful these deficiencies are
+Although it is not particularly usefull these deficiencies are
 corrected in the INSTRUCTIONS part, by treating the register indirect
-mode separately.
+mode seperately.
 .sp 1
 The costs of the conditional call and return instructions really
 depend on whether or not the call resp. return is actually made.
-However, this is not important to the behaviour of the back end.
+Unimportant.
 .sp 1
 Instructions not used in this table have been commented out.
 Of course many of them are used in the library routines.
@@ -307,7 +316,7 @@ The TESTS section is only included to refrain
 .B cgg
 from complaining.
 .NH 2
-Stacking rules
+Stackingrules
 .PP
 When, for example, the token {const2,10} has to be stacked while
 no free register-pair is available, the next code is generated:
@@ -332,11 +341,12 @@ this instruction in fact exchanges the contents of these
 register-pairs.
 Before the coercion is carried out other appearances of DE and HL
 on the fake-stack will be moved to the real stack, because in
-the INSTRUCTION-part is told that XCHG destroys the contents
+the INSTRUCTION-part is told that XCHG destroyes the contents
 of both DE and HL.
+.br
 The coercion transposing one register-pair to another one by
 emitting two MOV-instructions, will be used only if
-one of the register-pairs is the local base.
+one of the register-pairs is the localbase.
 .NH 2
 Patterns
 .PP
@@ -351,7 +361,7 @@ gen lhld {label,$1}                   yields hl
 .DE
 the 'uses'-clause could have been omitted because 
 .B cgg
-knows that LHLD destroys register-pair HL.
+knows that LHLD destroyes register-pair HL.
 .sp 1
 Since there is only one register with property 'hlreg',
 there is no difference between 'uses hlreg' (allocate a
@@ -359,7 +369,7 @@ register with property 'hlreg') and 'kills hlreg' (remove
 all registers with property 'hlreg' from the fake-stack).
 The same applies for the property 'dereg'.
 .br
-Consequently 'kills' is rarely used in this back-end table.
+As a consequence 'kills' is rarely used in this back-end table.
 .NH 3
 Group 1: Load instructions
 .PP
@@ -375,6 +385,7 @@ To refrain
 .B cgg
 from emitting the code for 'lol 10' again, an extra
 pattern is included in the table for cases like this.
+.br
 The same applies for two consecutive 'loe'-s or 'lil'-s.
 .sp 1
 A bit tricky is 'lof'.
@@ -390,7 +401,7 @@ knows that HL is destroyed).
 .sp 1
 By lookahead,
 .B cgg
-can make a clever choice between the first and
+can make a clever choise between the first and
 second code rule of 'loi 4'.
 The same applies for several other instructions.
 .NH 3
@@ -404,12 +415,13 @@ Groups 3 and 4: Signed and unsigned integer arithmetic
 Since the 8080 instruction set doesn't provide multiply and
 divide instructions, special routines are made to accomplish these tasks.
 .sp 1
-Instead of providing four slightly differing routines for 16 bit signed or
+Instead of providing four slighty differing routines for 16 bit signed or
 unsigned division, yielding the quotient or the remainder,
 the routines are merged.
 This saves space and assembly time
 when several variants are used in a particular program,
 at the cost of a little speed.
+.br
 When the routine is called, bit 7 of register A indicates whether
 the operands should be considered as signed or as unsigned integers,
 and bit 0 of register A indicates whether the quotient or the
@@ -424,15 +436,14 @@ provided, because this one will usually be much faster.
 .NH 3
 Group 5: Floating point arithmetic
 .PP
-Floating point is not implemented.
+Floating points are not implemented.
+.br
 Whenever an EM-instruction involving floating points is offered
-to the code-generator, it calls the corresponding
-library routine with the proper parameters.
-Each floating point library routine calls 'eunimpl',
-trapping with trap number 63.
+to the code-generator, it generates the code 'call eunimpl',
+which traps with trap number 63.
 Some of the Pascal and C library routines output floating point
 EM-instructions, so code has to be generated for them.
-Of course this does not imply the code will ever be executed.
+Of course this doesn't imply the code will ever be executed.
 .NH 3
 Group 12: Compare instructions
 .PP
@@ -457,6 +468,7 @@ gen mov a,%1.2
 but the current version of
 .B cgg
 doesn't approve this.
+.br
 In any case
 .B cgg
 chooses either DE or HL to store the result, using lookahead.
@@ -469,7 +481,7 @@ If only 2 bytes have to be returned, register-pair DE is used.
 LIBRARY ROUTINES
 .PP
 Most of the library routines start with saving the return address
-and the local base, so that the parameters are on the top of the stack
+and the localbase, so that the parameters are on the top of the stack
 and the registers B and C are available as scratch registers.
 Since register-pair HL is needed to accomplish these tasks,
 and also to restore everything just before the routine returns,
@@ -481,6 +493,7 @@ When a routine returns 2 bytes, they are usually returned in
 registers-pair DE.
 When it returns more than 2 bytes they are pushed onto the stack.
 .br
+
 It would have been possible to let the 32 bit arithmetic routines
 return 2 bytes in DE and the remaining 2 bytes on the stack
 (this often would have saved some space and execution time),
@@ -491,6 +504,7 @@ TRAPS
 Whenever a trap, for example trying to divide by zero,
 occurs in a program that originally was written in C or Pascal,
 a special trap handler is called.
+.br
 This trap handler wants to write an appropriate error message on the
 monitor.
 It tries to read the message from a file (e.g. etc/pc_rt_errors in the
@@ -535,11 +549,11 @@ for example by downloading or
 by storing it in ROM (Read Only Memory).
 .sp 1
 Depending on the characteristics of the particular 8080 based system, some
-adaptations have to be made:
+adaptions have to be made:
 .IP 1) 10 
 In 'head_em': the base address, which is the address where the first
 8080 instruction will be stored, and the initial value of the
-stackpointer are set to 0x1000 and 0x8000 respectively.
+stackpointer are set to 0x1000 and 0x8000 respectivally.
 .br
 Other systems require other values.
 .IP 2)
@@ -560,12 +574,12 @@ If this is not the right way on your system, change it.
 .IP 5)
 In 'tail_em': the current version of the 8080 back-end has very limited I/O
 capabilities, because it was tested on a system that
-had no knowledge of files.
+had no knowlegde of files.
 So the implementation of the EM-instruction 'mon' is very simple;
 it can only do the following things:
 .RS
 .IP Monitor\ call\ 1: 40
-exit
+Exit
 .IP Monitor\ call\ 3:
 read, always reads from the monitor.
 .br
@@ -593,7 +607,7 @@ INTEL 8080 VERSUS ZILOG Z80 AND INTEL 8086
 .NH 2
 Introduction
 .PP
-At about the same time I developed the back end
+At about the same time I develloped the back end
 for the Intel 8080 and Intel 8085,
 Frans van Haarlem did the same job for the Zilog z80 microprocessor.
 Since the z80 processor is an extension of the 8080,
@@ -601,8 +615,8 @@ any machine code offered to a 8080 processor can be offered
 to a z80 too.
 The assembly languages are quite different however.
 .br
-During the developments of the back ends we have used
-two micro-computers, both equipped with a z80 microprocessor.
+During the devellopments of the back ends we have used
+two micro-computers, both equiped with a z80 microprocessor.
 Of course the output of the 8080 back end is assembled by an
 8080 assembler. This should assure I have never used any of
 the features that are potentially available in the z80 processor,
@@ -618,7 +632,7 @@ I have also involved the 8086 micro-processor in this measurements.
 Differences between the 8080 and z80 processors
 .PP
 Except for some features that are less important concerning back ends,
-there are two points where the z80 improves upon the 8080:
+there are two points where the z80 improves the 8080:
 .IP First, 18
 the z80 has two additional index registers, IX and IY.
 They are used as in
@@ -648,10 +662,11 @@ Special routines are included to jump to near locations, saving 1 byte.
 Consequences for the 8080 and z80 back end
 .PP
 The most striking difference between the 8080 and z80 back ends
-is the choice of the local base.
-The writer of the z80 back end chose index register IY as local base,
+is the choise of the localbase.
+The writer of the z80 back end chose index register IY as localbase,
 because this results in the cheapest coding of EM-instructions
 like 'lol' and 'stl'.
+.br
 The z80 instructions that load local 10, for example
 .DS
 LD E,(IY+10)
@@ -664,7 +679,7 @@ Although the profit of the z80 might be not world-shocking,
 it should be noted that as a side effect it may save some
 pushing and popping since register pair HL is not used.
 .sp 1
-The choice of IY as local base has its drawbacks too.
+The choise of IY as localbase has its drawbacks too.
 The root of the problem is that it is not possible to add
 IY to HL.
 For the EM-instruction
@@ -684,7 +699,7 @@ This annoying push and pop instructions are also needed in some
 other instructions, for instance in 'lol' when the offset
 doesn't fit in one byte.
 .sp 1
-Beside the choice of the local base, I think there is no
+Beside the choise of the localbase, I think there is no
 fundamental difference between the 8080 and z80 back ends,
 except of course that the z80 back end has register pair BC
 and, less important, index register IX available as scratch registers.
@@ -700,6 +715,7 @@ some C programs and some Pascal programs.
 Then I produced 8080, z80 and 8086 code for them.
 Investigating the assembler listing I found the
 lengths of the different parts of the generated code.
+.br
 I have checked two areas:
 .IP 1) 8
 the entire text part
@@ -726,7 +742,7 @@ The table below should be read as follows.
 For all programs I have computed the ratio of the code-lengths
 of the 8080, z80 and 8086.
 The averages of all Pascal/C programs are listed in the table,
-standardized to '100' for the 8080.
+standarized to '100' for the 8080.
 So the listed '107' indicates that the lengths
 of the text parts of the z80 programs that originally were Pascal programs,
 averaged 7 percent larger than in the corresponding 8080 programs.
@@ -744,7 +760,7 @@ averaged 7 percent larger than in the corresponding 8080 programs.
 The most striking thing in this table is that the z80 back end appears
 to produce larger code than the 8080 back end.
 The reason is that the current z80 back end table is
-not very sophisticated yet.
+not very elaborate yet.
 For instance it doesn't look for any EM-pattern longer than one.
 So the table shows that the preparations in the 8080 back end table
 to produce faster code (like recognizing special EM-patterns
@@ -752,7 +768,7 @@ and permitting one byte registers on the fake-stack)
 was not just for fun, but really improved the generated code
 significantly.
 .sp 1
-The table shows that the 8080 table is relatively better
+The table shows that the 8080 table is relativelly better
 when only the plain user program is considered instead  of the entire text part.
 This is not very surprising since the 8080 back end sometimes
 uses library routines where the z80 and especially the 8086 don't.
@@ -781,7 +797,7 @@ An overview on the Amsterdam Compiler Kit.
 .IP [3]
 Tanenbaum, A.S., Stevenson, J.W., Keizer, E.G., and van Staveren, H.
 .br
-Description of an experimental machine architecture for use with block
+Desciption of an experimental machine architecture for use with block
 structured languages,
 .br
 Informatica report 81, Vrije Universiteit, Amsterdam, 1983.

@@ -392,14 +392,14 @@ if(Debug>1) fprintf(stderr,"Next tuple %d,%d,%d,%d\n",
 		ntup = tup->p_next;
 		for (i=0,t=0;i<nregneeded && t<mincost; i++)
 			t += docoerc(regtp[i],regcp[i],ply,FALSE,tup->p_rar[i]);
-		if ( t<mincost && tokpatlen<=stackheight ) {
+		if (t<mincost) {
 #ifndef NDEBUG
 			if (Debug>2)
 				fprintf(stderr,"Continuing match after coercions\n");
 #endif
 			t += codegen(codep,ply,FALSE,mincost-t,0);
 		}
-		if ( t<mincost && tokpatlen<=stackheight ) {
+		if (t<mincost) {
 			mincost = t;
 			besttup = tup;
 		} else
@@ -480,7 +480,6 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	result=compute(&enodes[nodeno]);
 	if (result.e_typ!=EV_REG)
 		break;
-	if ( in_stack(result.e_v.e_reg) ) BROKE() ; /* Check aside-stack */
 	for (tp= &fakestack[stackheight-tokpatlen-1];tp>=&fakestack[0];tp--)
 		if (tp->t_token==-1) {
 			if(tp->t_att[0].ar==result.e_v.e_reg)

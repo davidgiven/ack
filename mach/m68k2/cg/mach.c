@@ -23,19 +23,6 @@ static char rcsid[] = "$Header$";
  * machine dependent back end routines for the Motorola 68000
  */
 
-#define IEEEFLOAT
-
-#ifdef IEEEFLOAT
-#include "FP.h"
-#include "trp.c"
-#include "fcompact.c"
-#include "dbl_extract.c"
-#ifdef	PRT_EXP_DEBUG
-#include "prt_extend.c"
-#endif
-#endif IEEEFLOAT
-
-
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -61,57 +48,23 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".long %s\n",str);
 }
 
-#ifdef IEEEFLOAT
-dbl_adjust(fl)
-my_dbl	*fl;
-{
-	EXTEND	buf;
+con_float() {
 
-		/* special routine to strip SGL_BIAS */
-	dbl_extract(fl,&buf);
-		/* standard routine to add DBL_BIAS */
-	fcompact(&buf,fl,sizeof(double));
-}
-#endif IEEEFLOAT
-
-con_float()
-{
-	register word	sz;
-	register long	*l;
-#ifdef IEEEFLOAT
-	register my_dbl	*md;
-#endif IEEEFLOAT
-		 double	d;
-	char	mesg[128];
-
-	sz = argval;
-	if (sz!= 4 && sz!= 8) {
-		sprintf(mesg,"con_float(): bad fcon size %d %D\nstr: %s\n\0",
-				sz,sz,str);
-		fatal(mesg);
-	}
-
-	d = atof(str);
-	l = (long *) &d;
-
-#ifdef IEEEFLOAT
-	if (sz == 8)	{
-		/* ATOF() RETURNS THE PROPER FORMAT FOR A FLOAT */
-		/* BUT NOT FOR A DOUBLE. CORRECT THE FORMAT.	*/
-		md = (my_dbl *) &d;
-		dbl_adjust(md);
-	}
-#endif IEEEFLOAT
-
-	while ( sz ) {
-		fprintf(codefile,"\t.word 0x%x,0x%x !float test %s\n",
-			(int)(*l)&0xFFFF,(int)(*l>>16)&0xFFFF,str);
-		sz -=4 ;
-		l++;
+static int been_here;
+	if (argval != 4 && argval != 8)
+		fatal("bad fcon size");
+	fprintf(codefile,".long\t");
+	if (argval == 8)
+		fprintf(codefile,"F_DUM,");
+	fprintf(codefile,"F_DUM\n");
+	if ( !been_here++)
+	{
+	fprintf(stderr,"Warning : dummy float-constant(s)\n");
 	}
 }
 
 #ifdef REGVARS
+
 
 regscore(off,size,typ,score,totyp)
 	long off;
@@ -140,6 +93,8 @@ regscore(off,size,typ,score,totyp)
 	score -= 1; /* take save/restore into account */
 	return score;
 }
+
+
 struct regsav_t {
 	char	*rs_reg;	/* e.g. "a3" or "d5" */
 	long	rs_off;		/* offset of variable */
@@ -148,10 +103,20 @@ struct regsav_t {
 
 
 int regnr;
+int nr_a_regs,nr_d_regs;
+int TEM_BSIZE;
+static long nlocals;
+
+prolog(n)
+{	nlocals = n; }
+
 
 i_regsave()
 {
 	regnr = 0;
+	nr_a_regs = 0;
+	nr_d_regs = 0;
+	TEM_BSIZE = 0;
 }
 
 #define MOVEM_LIMIT	2
@@ -160,9 +125,11 @@ i_regsave()
 * we simply use several move.l's.
 */
 
+
 save()
 {
 	register struct regsav_t *p;
+	int i;
 
 	if (regnr > MOVEM_LIMIT) {
 		fprintf(codefile,"movem.l ");
@@ -173,16 +140,37 @@ save()
 		}
 		fprintf(codefile,",-(sp)\n");
 	} else {
-		for (p = regsav; p < &regsav[regnr]; p++) {
-			fprintf(codefile,"move.l %s,-(sp)\n",p->rs_reg);
+		/* Note that the order in which the registers are saved
+		 * is important; it is used by gto.s.
+		 */
+		for (i = 0; i < nr_a_regs; i++) {
+			fprintf(codefile,"move.l a%d,-(sp)\n",5-i);
+		}
+		for (i = 0; i < nr_d_regs; i++) {
+			fprintf(codefile,"move.l d%d,-(sp)\n",7-i);
 		}
 	}
+	/* Push a mask that indicates which registers were saved */
+	assert(nr_d_regs < 8 && nr_a_regs < 8);
+	if (nr_d_regs == 0 && nr_a_regs == 0) {
+		fprintf(codefile,"clr.w -(sp)\n");
+	} else {
+		fprintf(codefile,"move.w #%d,-(sp)\n",
+			nr_d_regs + (nr_a_regs<<3));
+	}
+
+	/* Compute AB - LB */
+	TEM_BSIZE = 4 * (nr_d_regs + nr_a_regs) + 10;
+
+	/* allocate space for local variables */
+	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
+
 	/* initialise register-parameters */
 	for (p = regsav; p < &regsav[regnr]; p++) {
 		if (p->rs_off >= 0) {
 			fprintf(codefile,"move.%c %ld(a6),%s\n",
 				(p->rs_size == 4 ? 'l' : 'w'),
-				p->rs_off,
+				p->rs_off + TEM_BSIZE,
 				p->rs_reg);
 		}
 	}
@@ -191,7 +179,10 @@ save()
 restr()
 {
 	register struct regsav_t *p;
+	int i;
 
+	fprintf(codefile,"unlk a6\n");
+	fprintf(codefile,"add.l #2,sp\n"); /* pop mask */
 	if (regnr > MOVEM_LIMIT)  {
 		fprintf(codefile,"movem.l (sp)+,");
 		for (p = regsav; ;) {
@@ -201,11 +192,13 @@ restr()
 		}
 		putc('\n',codefile);
 	} else {
-		for (p = &regsav[regnr-1]; p >= regsav; p--) {
-			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
+		for (i = nr_d_regs - 1; i >= 0; i--) {
+			fprintf(codefile,"move.l (sp)+,d%d\n",7-i);
+		}
+		for (i = nr_a_regs - 1; i >= 0; i--) {
+			fprintf(codefile,"move.l (sp)+,a%d\n",5-i);
 		}
 	}
-	fprintf(codefile,"unlk a6\n");
 	fprintf(codefile,"rts\n");
 }
 
@@ -221,6 +214,12 @@ regsave(str,off,size)
 {
 	assert (regnr < 9);
 	regsav[regnr].rs_reg = str;
+	if (str[0] == 'a') {
+		nr_a_regs++;
+	} else {
+		assert(str[0] == 'd');
+		nr_d_regs++;
+	}
 	regsav[regnr].rs_off = off;
 	regsav[regnr++].rs_size = size;
 	fprintf(codefile, "!Local %ld into %s\n",off,str);
@@ -233,10 +232,14 @@ regreturn()
 
 #endif
 
+#ifndef REGVARS
+
 prolog(nlocals) full nlocals; {
 
 	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
 }
+
+#endif
 
 
 

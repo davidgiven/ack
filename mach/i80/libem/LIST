@@ -12,7 +12,6 @@ csb.s
 dup.s
 dvi2.s
 exg.s
-flp.s
 inn.s
 ior.s
 lar2.s
