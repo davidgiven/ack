@@ -5,17 +5,19 @@ static char *RcsId = "$Header$";
 #include	<system.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+
 #include	"input.h"
 #include	"f_info.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
-#include	"debug.h"
 #include	"type.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"standards.h"
 #include	"tokenname.h"
+
+#include	"debug.h"
 
 char	options[128];
 int	DefinitionModule; 
@@ -24,6 +26,7 @@ char	*ProgName;
 extern int err_occurred;
 char	*DEFPATH[128];
 char	*getenv();
+struct def *Defined;
 
 main(argc, argv)
 	char *argv[];
@@ -45,7 +48,6 @@ main(argc, argv)
 		return 1;
 	}
 #ifdef DEBUG
-	print("MODULA-2 compiler -- Debug version\n");
 	DO_DEBUG(1, debug("Debugging level: %d", options['D']));
 #endif DEBUG
 	return !Compile(Nargv[1], Nargv[2]);
@@ -72,20 +74,25 @@ Compile(src, dst)
 	init_types();
 	add_standards();
 #ifdef DEBUG
-	if (options['l']) LexScan();
-	else
-#endif DEBUG
-	{
-		(void) open_scope(CLOSEDSCOPE);
-		GlobalScope = CurrentScope;
-		C_init(word_size, pointer_size);
-		if (! C_open(dst)) {
-			fatal("Could not open output file");
-		}
-		C_magic();
-		C_ms_emx(word_size, pointer_size);
-		CompUnit();
+	if (options['l']) {
+		LexScan();
+		return 1;
 	}
+#endif DEBUG
+	(void) open_scope(CLOSEDSCOPE);
+	GlobalScope = CurrentScope;
+	C_init(word_size, pointer_size);
+	if (! C_open(dst)) {
+		fatal("Could not open output file");
+	}
+	C_magic();
+	C_ms_emx(word_size, pointer_size);
+	CompUnit();
+	if (err_occurred) {
+		C_close();
+		return 0;
+	}
+	WalkModule(Defined);
 	C_close();
 	if (err_occurred) return 0;
 	return 1;

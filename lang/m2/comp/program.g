@@ -6,6 +6,7 @@ static  char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+
 #include	"main.h"
 #include	"idf.h"
 #include	"LLlex.h"
@@ -13,15 +14,13 @@ static  char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"node.h"
+
 #include	"debug.h"
 
 static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 				   parsing the definition module of the
 				   implementation module currently being
 				   compiled
-				*/
-short nmcount = 0;		/* count names in definition modules in order
-				   to create suitable names in the object code
 				*/
 }
 /*
@@ -47,27 +46,37 @@ ModuleDeclaration
 {
 	struct idf *id;
 	register struct def *df;
+	extern int proclevel;
+	static int modulecount = 0;
+	char buf[256];
+	extern char *sprint(), *Malloc(), *strcpy();
 } :
-	MODULE IDENT		{
-				  id = dot.TOK_IDF;
-				  df = define(id, CurrentScope, D_MODULE);
-				  if (!df->mod_scope) {	
-				  	open_scope(CLOSEDSCOPE);
-				  	df->mod_scope = CurrentScope;
-				  }
-				  else	CurrentScope = df->mod_scope;
-				  df->df_type = 
-					standard_type(T_RECORD, 0, (arith) 0);
-				  df->df_type->rec_scope = df->mod_scope;
-				}
+	MODULE IDENT	{
+			  id = dot.TOK_IDF;
+			  df = define(id, CurrentScope, D_MODULE);
+			  if (!df->mod_scope) {	
+			  	open_scope(CLOSEDSCOPE);
+			  	df->mod_scope = CurrentScope;
+			  }
+			  else	CurrentScope = df->mod_scope;
+			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
+			  df->df_type->rec_scope = df->mod_scope;
+			  df->mod_number = ++modulecount;
+			  sprint(buf, "__%d%s", df->mod_number, id->id_text);
+			  CurrentScope->sc_name =
+				Malloc((unsigned) (strlen(buf) + 1));
+			  strcpy(CurrentScope->sc_name, buf);
+			  C_ina_dnam(&buf[1]);
+			  C_inp(buf);
+			}
 	priority(&(df->mod_priority))?
 	';'
 	import(1)*
 	export(0)?
 	block(&(df->mod_body))
-	IDENT			{ close_scope(SC_CHKFORW|SC_CHKPROC);
-				  match_id(id, dot.TOK_IDF);
-				}
+	IDENT		{ close_scope(SC_CHKFORW|SC_CHKPROC);
+			  match_id(id, dot.TOK_IDF);
+			}
 ;
 
 priority(arith *pprio;)
@@ -75,12 +84,12 @@ priority(arith *pprio;)
 	struct node *nd;
 } :
 	'[' ConstExpression(&nd) ']'
-				{ if (!(nd->nd_type->tp_fund & T_INTORCARD)) {
-					node_error(nd, "Illegal priority");
-				  }
-				  *pprio = nd->nd_INT;
-				  FreeNode(nd);
-				}
+			{ if (!(nd->nd_type->tp_fund & T_INTORCARD)) {
+				node_error(nd, "Illegal priority");
+			  }
+			  *pprio = nd->nd_INT;
+			  FreeNode(nd);
+			}
 ;
 
 export(int def;)
@@ -90,7 +99,8 @@ export(int def;)
 } :
 	EXPORT
 	[
-		QUALIFIED	{ QUALflag = 1; }
+		QUALIFIED
+			{ QUALflag = 1; }
 	]?
 	IdentList(&ExportList) ';'
 			{
@@ -128,18 +138,19 @@ DefinitionModule
 {
 	register struct def *df;
 	struct idf *id;
-	int savnmcount = nmcount;
 } :
 	DEFINITION
-	MODULE IDENT	{ id = dot.TOK_IDF;
+	MODULE IDENT	{ 
+			  id = dot.TOK_IDF;
 			  df = define(id, GlobalScope, D_MODULE);
 			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE);
+			  if (!Defined) Defined = df;
 			  df->mod_scope = CurrentScope;
+			  df->mod_number = 0;
 			  CurrentScope->sc_name = id->id_text;
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_scope;
 			  DefinitionModule++;
-			  nmcount = 0;
 			  DO_DEBUG(1, debug("Definition module \"%s\" %d",
 					id->id_text, DefinitionModule));
 			}
@@ -167,7 +178,6 @@ DefinitionModule
 			  if (!SYSTEMModule) close_scope(SC_CHKFORW);
 			  DefinitionModule--;
 			  match_id(id, dot.TOK_IDF);
-			  nmcount = savnmcount;
 			}
 	'.'
 ;
@@ -221,8 +231,10 @@ ProgramModule(int state;)
 		  }
 		  else {
 			df = define(id, CurrentScope, D_MODULE);
+		  	Defined = df;
 			open_scope(CLOSEDSCOPE);
 			df->mod_scope = CurrentScope;
+			df->mod_number = 0;
 		  }
 		}
 	priority(&(df->mod_priority))?

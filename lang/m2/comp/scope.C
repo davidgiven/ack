@@ -168,16 +168,31 @@ Reverse(pdf)
 {
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
+		Also, while we're at it, remove uninteresting definitions
+		from this list. The only interesting definitions are:
+		D_MODULE, D_PROCEDURE, and D_PROCHEAD.
 	*/
 	register struct def *df, *df1;
+#define INTERESTING D_MODULE|D_PROCEDURE|D_PROCHEAD
 
 	df = 0;
 	df1 = *pdf;
 	while (df1) {
+		if (df1->df_kind & INTERESTING) break;
 		df1 = df1->df_nextinscope;
+	}
+
+	if (!(*pdf = df1)) return;
+
+	while (df1) {
+		*pdf = df1;
+		df1 = df1->df_nextinscope;
+		while (df1) {
+			if (df1->df_kind & INTERESTING) break;
+			df1 = df1->df_nextinscope;
+		}
 		(*pdf)->df_nextinscope = df;
 		df = *pdf;
-		*pdf = df1;
 	}
 }
 

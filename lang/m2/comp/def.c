@@ -6,6 +6,7 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+
 #include	"main.h"
 #include	"def.h"
 #include	"type.h"
@@ -13,6 +14,7 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"LLlex.h"
 #include	"node.h"
+
 #include	"debug.h"
 
 struct def *h_def;		/* Pointer to free list of def structures */
@@ -77,6 +79,7 @@ define(id, scope, kind)
 				   already seen in a definition module
 				*/
 				df->df_kind = kind;
+				df->prc_name = df->for_name;
 				return df;
 			}
 			break;	
@@ -389,6 +392,56 @@ RemFromId(df)
 		}
 		df1->next = df->next;
 	}
+}
+
+struct def *
+DeclProc(type)
+{
+	/*	A procedure is declared, either in a definition or a program
+		module. Create a def structure for it (if neccessary)
+	*/
+	register struct def *df;
+	extern char *sprint(), *Malloc(), *strcpy();
+	static int nmcount = 0;
+	char buf[256];
+
+	assert(type & (D_PROCEDURE | D_PROCHEAD));
+
+	if (type == D_PROCHEAD) {
+		/* In a definition module
+		*/
+		df = define(dot.TOK_IDF, CurrentScope, type);
+		df->for_node = MkNode(Name, NULLNODE, NULLNODE, &dot);
+		sprint(buf,"%s_%s",CurrentScope->sc_name,df->df_idf->id_text);
+		df->for_name = Malloc((unsigned) (strlen(buf)+1));
+		strcpy(df->for_name, buf);
+		C_exp(df->for_name);
+	}
+	else {
+		df = lookup(dot.TOK_IDF, CurrentScope);
+		if (df && df->df_kind == D_PROCHEAD) {
+			/* C_exp already generated when we saw the definition
+			   in the definition module
+			*/
+			df->df_kind = type;
+		}
+		else {
+			df = define(dot.TOK_IDF, CurrentScope, type);
+			if (CurrentScope != Defined->mod_scope) {
+				sprint(buf, "_%d_%s", ++nmcount,
+					df->df_idf->id_text);
+			}
+			else	(sprint(buf, "%s_%s",df->df_scope->sc_name,
+						df->df_idf->id_text));
+			df->prc_name = Malloc((unsigned)(strlen(buf)+1));
+			strcpy(df->prc_name, buf);
+			C_inp(buf);
+		}
+		df->prc_nbpar = 0;
+		open_scope(OPENSCOPE);
+	}
+
+	return df;
 }
 
 #ifdef DEBUG

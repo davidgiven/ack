@@ -12,3 +12,7 @@ extern int DefinitionModule;
 extern int SYSTEMModule;/* Flag indicating that we are handling the SYSTEM
 			   module
 			*/
+extern struct def *Defined;
+			/* Definition structure of module defined in this
+			   compilation
+			*/

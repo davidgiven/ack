@@ -16,25 +16,22 @@ static char *RcsId = "$Header$";
 #include	"misc.h"
 #include	"main.h"
 
-static int	proclevel = 0;	/* nesting level of procedures */
-char *		sprint();
+int		proclevel = 0;	/* nesting level of procedures */
+extern char	*sprint();
 }
 
 ProcedureDeclaration
 {
 	struct def *df;
-	char buf[256];
 } :
 	ProcedureHeading(&df, D_PROCEDURE)
-			{ df->prc_level = proclevel++;
-			  if (DefinitionModule) {
-				C_exp(sprint(buf, "%s_%s",
-						df->df_scope->sc_name,
-						df->df_idf->id_text));
-			  }
+			{
+			  df->prc_level = proclevel++;
+
 			}
 	';' block(&(df->prc_body)) IDENT
-			{ match_id(dot.TOK_IDF, df->df_idf);
+			{
+			  match_id(dot.TOK_IDF, df->df_idf);
 			  df->prc_scope = CurrentScope;
 			  close_scope(SC_CHKFORW);
 			  proclevel--;
@@ -44,34 +41,22 @@ ProcedureDeclaration
 ProcedureHeading(struct def **pdf; int type;)
 {
 	struct type *tp = 0;
-	struct type *tp1 = 0;
 	struct paramlist *params = 0;
 	register struct def *df;
+	struct def *DeclProc();
 } :
 	PROCEDURE IDENT
-		{ assert(type & (D_PROCEDURE | D_PROCHEAD));
-		  if (type == D_PROCHEAD) {
-			df = define(dot.TOK_IDF, CurrentScope, type);
-			df->for_node = MkNode(Name, NULLNODE, NULLNODE, &dot);
-		  }
-		  else {
-			df = lookup(dot.TOK_IDF, CurrentScope);
-			if (df && df->df_kind == D_PROCHEAD) {
-				df->df_kind = type;
-				tp1 = df->df_type;
-			}
-			else	df = define(dot.TOK_IDF, CurrentScope, type);
-			df->prc_nbpar = 0;
-			open_scope(OPENSCOPE);
-		  }
+		{
+		  df = DeclProc(type);
 		}
 	FormalParameters(type == D_PROCEDURE, &params, &tp, &(df->prc_nbpar))?
 		{
-		  df->df_type = tp = construct_type(T_PROCEDURE, tp);
+		  tp = construct_type(T_PROCEDURE, tp);
 		  tp->prc_params = params;
-		  if (tp1 && !TstTypeEquiv(tp, tp1)) {
+		  if (df->df_type && !TstTypeEquiv(tp, df->df_type)) {
 error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
 		  }
+		  df->df_type = tp;
 		  *pdf = df;
 		}
 ;
@@ -120,7 +105,8 @@ FormalParameters(int doparams;
 	]?
 	')'
 			{ *tp = 0; }
-	[	':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
+	[	':' qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type",
+							(struct node **) 0)
 			{ *tp = df->df_type; }
 	]?
 ;
@@ -160,15 +146,15 @@ FormalType(struct type **tp;)
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
 	qualident(D_TYPE|D_HTYPE|D_HIDDEN, &df, "type", (struct node **) 0)
-			{ if (ARRAYflag) {
-				*tp = construct_type(T_ARRAY, NULLTYPE);
-				(*tp)->arr_elem = df->df_type;
-				(*tp)->tp_align = lcm(word_align, pointer_align);
-				(*tp)->tp_size = align(pointer_size + 3*word_size,
-							(*tp)->tp_align);
-			  }
-			  else	*tp = df->df_type;
-			}
+		{ if (ARRAYflag) {
+			*tp = construct_type(T_ARRAY, NULLTYPE);
+			(*tp)->arr_elem = df->df_type;
+			(*tp)->tp_align = lcm(word_align, pointer_align);
+			(*tp)->tp_size = align(pointer_size + word_size,
+						(*tp)->tp_align);
+		  }
+		  else	*tp = df->df_type;
+		}
 ;
 
 TypeDeclaration
@@ -188,7 +174,6 @@ TypeDeclaration
 			      tp->tp_fund != T_POINTER) {
 error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 			  }
-
 			}
 ;
 
@@ -244,6 +229,7 @@ enumeration(struct type **ptp;)
 				error("Too many enumeration literals");
 			}
 			else {
+				/* ??? This is crummy */
 				(*ptp)->tp_size = word_size;
 				(*ptp)->tp_align = word_align;
 			}
@@ -392,7 +378,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				{ max = tcnt; tcnt = *cnt; }
 	[
 		'|' variant(scope, &tcnt, tp, palign)
-				{ if (tcnt > max) max = tcnt; }
+				{ if (tcnt > max) max = tcnt; tcnt = *cnt; }
 	]*
 	[ ELSE FieldListSequence(scope, &tcnt, palign)
 				{ if (tcnt > max) max = tcnt; }

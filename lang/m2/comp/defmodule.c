@@ -5,12 +5,15 @@ static char *RcsId = "$Header$";
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+
 #include	"idf.h"
 #include	"input.h"
 #include	"scope.h"
 #include	"def.h"
 #include	"LLlex.h"
 #include	"f_info.h"
+#include	"main.h"
+
 #include	"debug.h"
 
 #ifdef DEBUG

@@ -96,14 +96,21 @@ EnterVarList(IdList, type, local)
 	register struct node *IdList;
 	struct type *type;
 {
+	/*	Enter a list of identifiers representing variables into the
+		name list. "type" represents the type of the variables.
+		"local" is set if the variables are declared local to a
+		procedure
+	*/
 	register struct def *df;
-	struct scope *scope;
+	register struct scope *scope;
+	char buf[256];
+	extern char *sprint(), *Malloc(), *strcpy();
 
+	scope = CurrentScope;
 	if (local) {
 		/* Find the closest enclosing open scope. This
 		   is the procedure that we are dealing with
 		*/
-		scope = CurrentScope;
 		while (scope->sc_scopeclosed) scope = scope->next;
 	}
 
@@ -111,6 +118,8 @@ EnterVarList(IdList, type, local)
 		df = define(IdList->nd_IDF, CurrentScope, D_VARIABLE);
 		df->df_type = type;
 		if (IdList->nd_left) {
+			/* An address was supplied
+			*/
 			df->var_addrgiven = 1;
 			if (IdList->nd_left->nd_type != card_type) {
 node_error(IdList->nd_left,"Illegal type for address");
@@ -127,12 +136,23 @@ node_error(IdList->nd_left,"Illegal type for address");
 			df->var_off = off;
 			scope->sc_off = off;
 		}
-		else if (DefinitionModule) {
-			char buf[256];
-			char *sprint();
-
-			C_exa_dnam(sprint(buf,"%s_%s",df->df_scope->sc_name,
-						df->df_idf->id_text));
+		else if (!DefinitionModule &&
+			 CurrentScope != Defined->mod_scope) {	
+			scope->sc_off = align(scope->sc_off, type->tp_align);
+			df->var_off = scope->sc_off;
+			scope->sc_off += type->tp_size;
+		}
+		else {
+			sprint(buf,"%s_%s", df->df_scope->sc_name,
+					    df->df_idf->id_text);
+			df->var_name = Malloc((unsigned)(strlen(buf)+1));
+			strcpy(df->var_name, buf);
+ 			if (DefinitionModule) {
+				C_exa_dnam(df->var_name);
+			}
+			else {
+				C_ina_dnam(df->var_name);
+			}
 		}
 		IdList = IdList->nd_right;
 	}

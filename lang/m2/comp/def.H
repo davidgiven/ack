@@ -6,18 +6,22 @@ struct module {
 	arith mo_priority;	/* priority of a module */
 	struct scope *mo_scope;	/* scope of this module */
 	struct node *mo_body;	/* body of this module */
+	int mo_number;		/* number of this module */
 #define mod_priority	df_value.df_module.mo_priority
 #define mod_scope	df_value.df_module.mo_scope
 #define mod_body	df_value.df_module.mo_body
+#define mod_number	df_value.df_module.mo_number
 };
 
 struct variable {
 	arith va_off;		/* address or offset of variable */
+	char *va_name;		/* name of variable if given */
 	char va_addrgiven;	/* an address was given in the program */
 	char va_noreg;		/* may not be in a register */
 	short va_number;	/* number of this variable in definition module
 				*/
 #define var_off		df_value.df_variable.va_off
+#define var_name	df_value.df_variable.va_name
 #define var_addrgiven	df_value.df_variable.va_addrgiven
 #define var_noreg	df_value.df_variable.va_noreg
 #define var_number	df_value.df_variable.va_number
@@ -49,15 +53,14 @@ struct field {
 struct dfproc {
 	struct scope *pr_scope;	/* scope of procedure */
 	short pr_level;		/* depth level of this procedure */
-	short pr_number;	/* number of this procedure in definition module
-				*/
+	char *pr_name;		/* name of this procedure */
 	arith pr_nbpar;		/* number of bytes parameters */
 	struct node *pr_body;	/* body of this procedure */
 #define prc_scope	df_value.df_proc.pr_scope
 #define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
 #define prc_body	df_value.df_proc.pr_body
-#define prc_number	df_value.df_proc.pr_number
+#define prc_name	df_value.df_proc.pr_name
 };
 
 struct import {
@@ -68,8 +71,10 @@ struct import {
 struct dforward {
 	struct scope *fo_scope;
 	struct node *fo_node;
+	char *fo_name;
 #define for_node	df_value.df_forward.fo_node
 #define for_scope	df_value.df_forward.fo_scope
+#define for_name	df_value.df_forward.fo_name
 };
 
 struct def	{		/* list of definitions for a name */
