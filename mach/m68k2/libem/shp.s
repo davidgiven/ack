@@ -15,6 +15,7 @@
 	and.l	#~0x3ff,d0
 	move.l	a0,-(sp)
 	move.l	d0,-(sp)
+	move.l	d0,.limhp
 	jsr	_brk
 	tst.l	(sp)+
 	move.l	(sp)+,a0
