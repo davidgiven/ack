@@ -7,7 +7,7 @@ SHR=../share
 LDFLAGS=-i
 CPPFLAGS=-DVERBOSE -DNOTCOMPACT
 CFLAGS=$(CPPFLAGS) -O
-LINTFLAGS=-hbac
+LINTFLAGS=-hbu
 
 CFILES=\
 cf.c cf_succ.c cf_idom.c cf_loop.c

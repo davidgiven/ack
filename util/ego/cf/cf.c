@@ -362,10 +362,9 @@ STATIC cf_cleanproc(p)
 
 
 
-#define CHANGE_INDIR(ch)	((ch->c_flags & CF_INDIR) != 0)
+#define CH_CHANGE_INDIR(ch)	((ch->c_flags & CF_INDIR) != 0)
 #define USE_INDIR(us)		((us->u_flags & UF_INDIR) != 0)
 #define CALLS_UNKNOWN(p)	(p->p_flags1 & (byte) PF_CALUNKNOWN)
-#define BODY_KNOWN(p)		(p->p_flags1 & (byte) PF_BODYSEEN)
 #define ENVIRON(p)		(p->p_flags1 & (byte) PF_ENVIRON)
 
 
@@ -422,7 +421,7 @@ STATIC bool add_info(q,p)
 		Cjoin(chq->c_ext, &chp->c_ext);
 		diff = TRUE;
 	}
-	if (CHANGE_INDIR(chq) && !CHANGE_INDIR(chp)) {
+	if (CH_CHANGE_INDIR(chq) && !CH_CHANGE_INDIR(chp)) {
 		/* q does a change-indirect (sil etc.)
 		 * and p did not (yet).
 		 */
