@@ -1,0 +1,184 @@
+.TH 
+.I cpp
+.SH NAME
+cpp \- C Pre-Processor
+.SH SYNOPSIS
+cpp [\-options] files
+.SH DESCRIPTION
+.I Cpp
+reads one or more files, expands macros and include
+files, and writes an input file for the C compiler.
+All output is to cpp.tmp (cpp.tmp.c on Unix).
+.br
+The following options are supported.  On non-Unix systems,
+options may be given in either case.
+.IP -Ofile
+Output to this file, instead of the default.
+.IP -S
+Output to stdout, instead of the default.
+.IP -Idirectory
+Add this directory to the list of
+directories searched for #include "..." and #include <...>
+commands.  Note that there is no space between the
+"-I" and the directory string.  More than one -I command
+is permitted.
+.IP -L		
+.I Cpp
+transmits line number information to
+the C compiler by outputting "#line <number>" records.
+If the -L option is given, this record will be transmitted
+as "#", allowing the output of 
+.I cpp
+to be input to a compiler
+without an intervening preprocessor without error.
+.IP -Dname=value
+Define the name as if the programmer wrote
+.br
+.nf
+    #define name value
+.fi
+.br
+at the start of the first file.  If "=value" is not
+given, a value of "1" will be used.
+.br
+On non-unix systems, all alphabetic text will be forced
+to upper-case.
+.br
+.IP -Uname
+Undefine the name as if
+.br
+.nf
+	#undef name
+.fi
+.br
+were given.  On non-Unix systems, "name" will be forced to
+upper-case.
+The following names are always available unless undefined:
+.RS
+.IP __FILE__
+The input (or #include) file being compiled
+(as a quoted string).
+.IP __LINE__
+The line number being compiled.
+.IP __DATE__
+The date and time of compilation as
+a Unix ctime quoted string (the trailing newline is removed).
+.RE
+Thus,
+.br
+.nf
+    printf("Bug at line %s,", __LINE__);
+    printf(" source file %s", __FILE__);
+    printf(" compiled on %s", __DATE__);
+.fi
+.IP
+-Xnumber
+Enable debugging code.  If no value is
+given, a value of 1 will be used.  (For maintenence of
+.I cpp
+only.)
+.SH "COMMENTS IN MACRO TEXT AND ARGUMENT CONCATENATION"
+.br
+Comments are removed from the input text.  The comment
+characters serve as an invisible token delimiter.  Thus,
+the macro
+.nf
+    #define CAT(a, b) b/**/a
+    int value = CAT(1, 2);
+.fi
+Will generate "int value = 21;".
+.br
+A better way of concatenating arguments is as follows:
+.nf
+    #define I(x)x
+    #define CAT(x,y)I(x)y
+    int value = CAT(1, 2);
+.fi
+If the above macros are defined without extraneous
+spaces, they will be transportable to other implementations.
+.br
+.SH DIFFERENCES
+.br
+The following is a list of differences between this
+pre-processor and the Unix V7 preprocessor which was
+written by John Reiser.  It is probably not complete.
+.IP o
+Macro formal parameters are recognized within
+quoted strings and character constants in macro definitions.
+For example,
+.nf
+    #define foo(a) "Today is a"
+    printf(foo(tuesday));
+.fi
+Would print "Today is tuesday".
+.br
+Recognition of formal parameters in macro replacement
+strings is not permitted by the Draft ANSI C Standard.
+It is permitted in this implementation if cpp was
+compiled with the STRING_FORMAL parameter set appropriately.
+.br
+Unlike Reiser's implementation, the '\e' "quote next character"
+does just that.  I.e.
+.nf
+    #define foo(a) "Today is \ea a"
+    printf(foo(tuesday));
+.fi
+Would print "Today is a tuesday".  Note that this may
+not be portable.
+.IP o
+Reiser's implementation removes "escaped" linefeeds
+(The two character sequence \e<LF>) within macros.  This
+implementation preserves them.  For example, a macro which
+generates control commands might be written
+.nf
+    #define foo(a, b) \e
+    #define	a	b \e
+.fi
+.nf
+    foo(fubar, foobar)
+    int		fubar;
+.fi
+The above would generate "int foobar;" and a warning message.
+Reiser's scan is slightly different.
+.SH "ANSI C STANDARD"
+.I Cpp
+implements most of the ANSI draft standard.
+You should be aware of the following:
+.IP o
+In the draft standard, the \en (backslash-newline)
+character is "invisible" to all processing.  In this implementation,
+it is invisible to strings, but acts a "whitespace" (token-delimiter)
+outside of strings.  This considerably simplifies error
+message handling.
+.IP o
+The following extensions to C are processed by cpp:
+.nf
+.sp 1
+.ta 4 27
+	#elif expression	(#else #if)
+	'\exNNN'	(Hexadecimal constants)
+	'\ea'	(Ascii BELL)
+	'\ev'	(Ascii VT)
+	#if defined NAME	(1 if defined, 0 if not)
+	#if defined (NAME)	(1 if defined, 0 if not)
+	unary +	(gag me with a spoon)
+.fi
+.IP o
+The draft standard has extended C, adding a string
+concatenation operator, where
+.br
+.nf
+    "foo" "bar"
+.fi
+.br
+is regarded as the single string "foobar".  It is not clear
+from the draft standard whether this applies to pre-processing
+if macro formals are recognized in strings.
+.SH "ERROR MESSAGES"
+.br
+Many.
+.br
+.SH AUTHOR
+.br
+Martin Minow
+.br
