@@ -304,12 +304,12 @@
 /* 80286 keywords */
 0,	NOOP_1,		0140,			"pusha",
 0,	NOOP_1,		0141,			"popa",
+0,	NOOP_1,		0154,			"insb",
+0,	NOOP_1,		0155,			"ins",
+0,	NOOP_1,		0155,			"insw",
 0,	NOOP_1,		0156,			"outsb",
 0,	NOOP_1,		0157,			"outs",
 0,	NOOP_1,		0157,			"outsw",
-0,	NOOP_1,		0246,			"insb",
-0,	NOOP_1,		0247,			"ins",
-0,	NOOP_1,		0247,			"insw",
 
 0,	ENTER,		0310,			"enter",
 0,	NOOP_1,		0311,			"leave",
