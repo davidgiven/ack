@@ -1,4 +1,4 @@
-.TH CEM 1 local
+.TH CEM 1L 86/03/10
 .SH NAME
 cem \- ACK C compiler
 .SH SYNOPSIS
@@ -6,8 +6,10 @@ cem \- ACK C compiler
 [ option ] ... file ...
 .SH DESCRIPTION
 .I Cem
-is a \fIcc\fP(1)-like
-C compiler that uses the C front-end compiler \fIcemcom\fP(1)
+is a
+.I cc (1)-like
+C compiler that uses the C front-end compiler
+.I cemcom (1)
 of the Amsterdam Compiler Kit.
 .I Cem
 interprets its arguments not starting with a '\-' as
@@ -33,20 +35,30 @@ The actions to be taken by
 are directed by the type of file argument and the various options that are
 presented to it.
 .PP
-The following options, which is a mixture of options interpreted by \fIcc\fP(1)
-and \fIack\fP(?),
+The following set of options, which is a mixture of options interpreted by
+.I cc (1)
+and 
+.I ack (?)
 are interpreted by
 .I cem .
 (The options not specified here are passed to the front-end
-compiler \fIcemcom\fP(1).)
+compiler 
+.I cemcom (1L).)
 .IP \fB\-B\fP\fIname\fP
-Use \fIname\fP as front-end compiler instead of the default \fIcemcom\fP(1).
+Use 
+.I name
+as front-end compiler instead of the default 
+.I cemcom (1).
 .br
 Same as "\fB\-Rcem=\fP\fIname\fP".
 .IP \fB\-C\fP
-Run C preprocessor \fI/lib/cpp\fP only and prevent it from eliding comments.
+Run C preprocessor 
+.I /lib/cpp
+only and prevent it from eliding comments.
 .IP \fB\-D\fP\fIname\fP\fB=\fP\fIdef\fP
-Define the \fIname\fP to the preprocessor, as if by "#define".
+Define the 
+.I name
+to the preprocessor, as if by "#define".
 .IP \fB\-D\fP\fIname\fP
 .br
 Same as "\fB\-D\fP\fIname\fP\fB=1\fP".
@@ -233,6 +245,6 @@ causes files with the same name as the intermediate files to be overwritten.
 .IP \(bu
 .B Cem
 only accepts a limited number of arguments to be passed to the various phases.
-(e.g. 256).
+(e.g., 256).
 .IP \(bu
 Please report suggestions and other bugs to erikb@tjalk.UUCP
