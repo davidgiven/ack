@@ -431,8 +431,8 @@ static struct EXTEND r_big_ten_powers[] = { /* representation of 10 ** -(28*i) *
 	{ 0,	-1768,	0xD4EEC394,	0xD6258BF8 }
 };
 
-#define	TP	(sizeof(ten_powers)/sizeof(ten_powers[0]))
-#define BTP	(sizeof(big_ten_powers)/sizeof(big_ten_powers[0]))
+#define	TP	(int)(sizeof(ten_powers)/sizeof(ten_powers[0]))
+#define BTP	(int)(sizeof(big_ten_powers)/sizeof(big_ten_powers[0]))
 #define MAX_EXP	(TP * BTP - 1)
 
 static
@@ -685,7 +685,6 @@ _dbl_ext_cvt(double value, struct EXTEND *e)
 }
 
 static struct EXTEND max_d;
-static struct EXTEND min_d;
 
 double
 _ext_dbl_cvt(struct EXTEND *e)
@@ -701,17 +700,15 @@ _ext_dbl_cvt(struct EXTEND *e)
 	}
 	if (max_d.exp == 0) {
 		_dbl_ext_cvt(DBL_MAX, &max_d);
-		_dbl_ext_cvt(DBL_MIN, &min_d);
 	}
-	if (cmp_ext(e, &min_d) < 0) {
-		f = 0.0;
-		errno = ERANGE;
-	}
-	else if (cmp_ext(&max_d, e) < 0) {
+	if (cmp_ext(&max_d, e) < 0) {
 		f = HUGE_VAL;
 		errno = ERANGE;
 	}
 	else	f = ldexp(ldexp((double)e->m1, 32) + (double)e->m2, e->exp-63);
 	if (sign) f = -f;
+	if (f == 0.0 && (e->m1 != 0 || e->m2 != 0)) {
+		errno = ERANGE;
+	}
 	return f;
 }
