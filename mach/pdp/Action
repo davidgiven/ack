@@ -32,3 +32,6 @@ end
 name "PDP 11 Occam library"
 dir liboc
 end
+name "PDP 11 Modula-2 library"
+dir libm2
+end

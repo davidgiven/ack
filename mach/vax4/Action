@@ -20,6 +20,10 @@ name "Vax 4-4 Occam library"
 system vax*
 dir liboc
 end
+name "Vax 4-4 Modula-2 library"
+system vax*
+dir libm2
+end
 name "Vax 4-4 Basic library"
 system vax*
 dir libbc

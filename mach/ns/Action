@@ -22,3 +22,6 @@ end
 name "NS16032 Occam library"
 dir liboc
 end
+name "NS16032 Modula-2 library"
+dir libm2
+end

@@ -10,3 +10,6 @@ end
 name "Sun 2 M68000 Occam library"
 dir liboc
 end
+name "Sun 2 M68000 Modula-2 library"
+dir libm2
+end

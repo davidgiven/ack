@@ -19,3 +19,6 @@ end
 name "Zilog Z8000 Occam library"
 dir liboc
 end
+name "Zilog Z8000 Modula-2 library"
+dir libm2
+end

@@ -10,3 +10,6 @@ end
 name "4-4 Interpreter Occam library"
 dir liboc
 end
+name "4-4 Interpreter Modula-2 library"
+dir libm2
+end

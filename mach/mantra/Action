@@ -7,6 +7,9 @@ end
 name "Mantra M68000 4-4 Occam library"
 dir liboc
 end
+name "Mantra M68000 4-4 Modula-2 library"
+dir libm2
+end
 name "Mantra M68000 4-4 conversion program"
 dir cv
 end

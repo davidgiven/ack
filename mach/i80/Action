@@ -25,3 +25,6 @@ end
 name "Intel 8080 System library"
 dir libsys
 end
+name "Intel 8080 Modula-2 library"
+dir libm2
+end
