@@ -249,6 +249,9 @@ name "Acorn Archimedes support"
 dir mach/arm
 indir
 end
+name "Documentation"
+dir doc
+end
 name "Motorola 68000 interpreters"
 system "m68*|sun*"
 dir mach/mantra/int
