@@ -12,6 +12,7 @@
 #include	"idf.h"
 #include	"input.h"
 #include	"nopp.h"
+#include	"lint.h"
 
 #ifndef NOPP
 #include	"ifdepth.h"
@@ -148,6 +149,10 @@ domacro()
 	EoiForNewline = 0;
 }
 
+#ifdef LINT
+int lint_skip_comment;
+#endif
+
 skip_block(to_endif)
 int to_endif;
 {
@@ -164,6 +169,9 @@ int to_endif;
 	struct token tk;
 	int toknum;
 
+#ifdef LINT
+	lint_skip_comment++;
+#endif
 	NoUnstack++;
 	for (;;) {
 		ch = GetChar();	/* read first character after newline	*/
@@ -172,6 +180,9 @@ int to_endif;
 		if (ch != '#') {
 			if (ch == EOI) {
 				NoUnstack--;
+#ifdef LINT
+				lint_skip_comment--;
+#endif
 				return;
 			}
 			/* A possible '/' is not pushed back */
@@ -230,6 +241,9 @@ int to_endif;
 				push_if();
 				if (ifexpr()) {
 					NoUnstack--;
+#ifdef LINT
+					lint_skip_comment--;
+#endif
 					return;
 				}
 			}
@@ -245,6 +259,9 @@ int to_endif;
 						lexstrict("garbage following #else");
 				}
 				NoUnstack--;
+#ifdef LINT
+				lint_skip_comment--;
+#endif
 				return;
 			}
 			else SkipToNewLine();
@@ -258,6 +275,9 @@ int to_endif;
 				}
 				nestlevel--;
 				NoUnstack--;
+#ifdef LINT
+				lint_skip_comment--;
+#endif
 				return;
 			}
 			else SkipToNewLine();

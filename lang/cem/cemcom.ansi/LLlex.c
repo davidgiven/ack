@@ -49,6 +49,10 @@ int LexSave = 0;		/* last character read by GetChar	*/
 #define	FLG_DOTSEEN	0x02	/* certainly a floating point number */
 extern arith full_mask[];
 
+#ifdef LINT
+extern int lint_skip_comment;
+#endif
+
 #ifndef	NOPP
 static struct token LexStack[MAX_LL_DEPTH];
 static LexSP = 0;
@@ -460,8 +464,10 @@ skipcomment()
 	NoUnstack++;
 	c = GetChar();
 #ifdef	LINT
-	lint_start_comment();
-	lint_comment_char(c);
+	if (! lint_skip_comment) {
+		lint_start_comment();
+		lint_comment_char(c);
+	}
 #endif	/* LINT */
 	do {
 		while (c != '*') {
@@ -470,14 +476,14 @@ skipcomment()
 			} else if (c == EOI) {
 				NoUnstack--;
 #ifdef	LINT
-				lint_end_comment();
+				if (! lint_skip_comment) lint_end_comment();
 #endif	/* LINT */
 				return;
 			}
 			oldc = c;
 			c = GetChar();
 #ifdef	LINT
-			lint_comment_char(c);
+			if (! lint_skip_comment) lint_comment_char(c);
 #endif	/* LINT */
 		} /* last Character seen was '*' */
 		c = GetChar();
@@ -485,11 +491,11 @@ skipcomment()
 			lexwarning("comment inside comment ?");
 		oldc = '*';
 #ifdef	LINT
-		lint_comment_char(c);
+		if (! lint_skip_comment) lint_comment_char(c);
 #endif	/* LINT */
 	} while (c != '/');
 #ifdef	LINT
-	lint_end_comment();
+	if (! lint_skip_comment) lint_end_comment();
 #endif	/* LINT */
 	NoUnstack--;
 }
