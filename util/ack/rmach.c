@@ -367,11 +367,17 @@ char *readline() {
 }
 
 int getinchar() {
+	register int token ;
+
 	if ( incore ) {
 		if ( *inptr==0 ) return EOF ;
 		return *inptr++ ;
 	}
-	return getc(infile) ;
+	token= getc(infile) ;
+	if ( (token>=0177 || token <=0 ) && token !=EOF ) {
+		fuerror("Non-ascii character in description file %s",inname);
+	}
+	return token ;
 }
 
 int getline() {
