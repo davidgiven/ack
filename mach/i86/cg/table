@@ -1126,12 +1126,11 @@ cfu		| CXREG DXREG |
 cff		| CXREG DXREG |
 			remove(ALL)
 			"call .cff"			  | | |
-loc loc cii $1==1 && $2==2	| ACC1 |
-			 allocate(%[1],ACC)
+loc loc cii $1==1 && $2==2	| ACC |
 			 "cbw"
-			 samecc 		    | %[a]  | |(1,2)
-loc loc cii $1==1 && $2==4	| ACC1 |
-			allocate(%[1],ACC,DXREG)
+			 samecc 		    | ax  | |(1,2)
+loc loc cii $1==1 && $2==4	| ACC |
+			allocate(DXREG)
 			"cbw"
 			"cwd"
 			samecc			    | dx ax | |(2,7)
