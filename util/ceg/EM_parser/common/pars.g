@@ -164,14 +164,14 @@ c_table	: c_row*
 
 c_row	: %if ( strcmp( yytext, to_change) == 0)
 	  C_INSTR 		{ set_outfile( yytext); header( yytext);}
-	  [ special | simple]	{ out( "}\n\n"); exit(0);}
+	  [ special | simple]	{ out( "}\n\n"); }
 
 	| C_INSTR
 	  [ c_special | c_simple]
 
 	| %if ( strcmp( yytext, to_change) == 0)
 	  DEF_C_INSTR		{ init_defaults( yytext);}
-	  [ Dspecial | Dsimple] { handle_defaults();exit(0);}
+	  [ Dspecial | Dsimple] { handle_defaults();}
 
 	| DEF_C_INSTR
 	  [ c_special | c_simple]
@@ -210,11 +210,13 @@ c_action: CALL
 {
 
 int saved = 0, token;
+int nerrors = 0;
 
 
 LLmessage( inserted_token)
 int inserted_token;
 {
+	nerrors++;
 	if ( inserted_token == 0) {
 		fprint( STDERR, "EM_table : syntax error in line %d, >>",
 			yylineno);
@@ -222,9 +224,8 @@ int inserted_token;
 		fprint( STDERR, "<<  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint(STDERR,"EM_table : stack overflow in line %d (fatal)!\n",
+		fprint(STDERR,"EM_table : syntax error in line %d, garbage at end of table\n",
 			 yylineno);
-		exit( 1);
 	}
 	else {
 		fprint( STDERR, "EM_table : syntax error in line %d, >>",
@@ -319,7 +320,7 @@ char **argv;
 			to_change = argv[2];
 			c_table();
 			fprint( STDERR, "No rule for %s\n", to_change);
-			return( 1);
+			exit( 1);
 		}
 	}
 	else {
@@ -327,7 +328,8 @@ char **argv;
 		file_header();
 	}
 	
-	return( table());
+	table();
+	exit(nerrors);
 }
 
 }
