@@ -250,7 +250,7 @@ IMPLEMENTATION MODULE RealConversions;
 	ch := str[iB]; INC(iB);
 	IF NOT (ch IN SETOFCHAR{'0'..'9'}) THEN ok := FALSE; RETURN END;
 	REPEAT
-		dig(ORD(ch));
+		IF r>BIG THEN INC(pow10) ELSE r:= 10.0D*r+FLOATD(ORD(ch)-ORD('0')) END;
 		IF iB <= HIGH(str) THEN
 			ch := str[iB]; INC(iB);
 		END;
@@ -259,8 +259,10 @@ IMPLEMENTATION MODULE RealConversions;
 		ch := str[iB]; INC(iB);
 		IF NOT (ch IN SETOFCHAR{'0'..'9'}) THEN ok := FALSE; RETURN END;
 		REPEAT
-			dig(ORD(ch));
-			DEC(pow10);
+			IF r < BIG THEN
+				r := 10.0D * r + FLOATD(ORD(ch)-ORD('0'));
+				DEC(pow10);
+			END;
 			IF iB <= HIGH(str) THEN
 				ch := str[iB]; INC(iB);
 			END;
@@ -297,6 +299,10 @@ IMPLEMENTATION MODULE RealConversions;
 	IF pow10 < 0 THEN i := -pow10; ELSE i := pow10; END;
 	e := 1.0D;
 	DEC(i);
+	WHILE i >= 10 DO
+		e := e * 10000000000.0D;
+		DEC(i,10);
+	END;
 	WHILE i >= 0 DO
 		e := e * 10.0D;
 		DEC(i)

@@ -313,14 +313,17 @@ IMPLEMENTATION MODULE InOut ;
 		Read(ch);
 	UNTIL (ch # ' ') AND (ch # TAB);
 	UnRead(ch);
-    	LOOP
+    	REPEAT
 		Read(ch);
 		termCH := ch;
-		IF (NOT Done) OR (ch <= " ") THEN s[i] := 0C; RETURN END;
-		s[i] := ch;
+		IF i <= HIGH(s) THEN
+			s[i] := ch;
+			IF (NOT Done) OR (ch <= " ") THEN
+				s[i] := 0C;
+			END;
+		END;
 		INC(i);
-		IF i > HIGH(s) THEN DEC(i); END;
-    	END;
+    	UNTIL (NOT Done) OR (ch <= " ");
   END ReadString;
 
   PROCEDURE XReadString(VAR s : ARRAY OF CHAR);
