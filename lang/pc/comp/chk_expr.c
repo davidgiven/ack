@@ -403,7 +403,8 @@ ChkBinOper(expp)
 	left = expp->nd_left;
 	right = expp->nd_right;
 
-	retval = ChkExpression(left) & ChkExpression(right);
+	retval = ChkExpression(left);
+	retval &= ChkExpression(right);
 
 	MarkUsed(left);
 	MarkUsed(right);

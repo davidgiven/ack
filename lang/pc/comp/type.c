@@ -514,7 +514,7 @@ chk_forw_types()
 		    if( df->df_kind == D_FORWTYPE )	{
 			/* forward type not in this scope declared */
 			register struct scopelist *scl = nextvisible(CurrVis);
-			struct def *df1;
+			struct def *df1 = 0;
 
 			while( scl )	{
 				/* look in enclosing scopes */

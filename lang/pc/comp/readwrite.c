@@ -16,6 +16,8 @@
 /* DEBUG */
 #include	"idf.h"
 
+extern char	*sprint();
+
 ChkRead(arg)
 	register struct node *arg;
 {

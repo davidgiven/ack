@@ -157,7 +157,7 @@ CodeValue(ds, tp)
 		in "ds"
 	*/
 	arith size = ds->dsg_packed ? tp->tp_psize : tp->tp_size;
-	int align = ds->dsg_packed ? tp->tp_palign : tp->tp_align;
+	int algn = ds->dsg_packed ? tp->tp_palign : tp->tp_align;
 
 	switch( ds->dsg_kind )	{
 	case DSG_LOADED:
@@ -182,7 +182,7 @@ CodeValue(ds, tp)
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
-		if( properly(ds, size, align) )	{
+		if( properly(ds, size, algn) )	{
 			CodeAddress(ds);
 			C_loi(size);
 			break;
@@ -217,7 +217,7 @@ CodeStore(ds, tp)
 	*/
 	struct desig save;
 	arith size = ds->dsg_packed ? tp->tp_psize : tp->tp_size;
-	int align = ds->dsg_packed ? tp->tp_palign : tp->tp_align;
+	int algn = ds->dsg_packed ? tp->tp_palign : tp->tp_align;
 
 	save = *ds;
 	
@@ -242,7 +242,7 @@ CodeStore(ds, tp)
 	case DSG_PLOADED:
 	case DSG_PFIXED:
 		CodeAddress(&save);
-		if( properly(ds, size, align) )	{
+		if( properly(ds, size, algn) )	{
 			C_sti(size);
 			break;
 		}

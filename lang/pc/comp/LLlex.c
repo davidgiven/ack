@@ -36,7 +36,6 @@ struct type	*toktype,
 		*asidetype;
 
 static int	eofseen;
-extern int	in_compound;
 
 int tokenseen = 0;	/* Some comment-options must precede any program text */
 
