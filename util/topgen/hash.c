@@ -82,7 +82,7 @@ printhashtable() {
     fputs("int hashany[] = { ", genc);
     prhlist(hashtable[128]);
     fputs("-1 };\n",genc);
-    fputs("int *hashtab[] = {",genc);
-    for (i = 1; i <= 128; i++) fprintf(genc,"hash%d,",i);
-    fputs("hashany};\n",genc);
+    fputs("int *hashtab[] = {\n",genc);
+    for (i = 1; i <= 128; i++) fprintf(genc,"\thash%d,\n",i);
+    fputs("\thashany\n};\n",genc);
 }
