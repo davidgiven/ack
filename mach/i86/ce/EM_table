@@ -74,7 +74,7 @@ C_loi
 C_los
   $1 == 2	==> 	"pop cx";
 			"pop bx";
-			"call .loi".
+			"call .los".
 
   default	==> 	arg_error( "C_los", $1).
 
@@ -133,7 +133,7 @@ C_sti
 C_sts
   $1 == 2	==> 	"pop cx";
 			"pop bx";
-			"call .sti".
+			"call .sts".
 
   default	==>	arg_error( "C_sts", $1).
 
