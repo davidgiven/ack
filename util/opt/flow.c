@@ -97,6 +97,7 @@ cleaninstrs() {
 					OPTIM(O_BRALAB);
 					lpp = lastbra;
 					*lpp = lp;
+					lastbra = (line_p *) 0;
 					lp->l_a.la_np->n_jumps--;
 				}
 			}
