@@ -392,7 +392,7 @@ line_p read_line(p_out)
 			break;
 		case OPINSTRLAB:
 			INSTRLAB(lnp) = getshort();
-			if (instr == op_lab) {
+			if ((instr & BMASK) == op_lab) {
 				/* defining occurrence of an
 				 * instruction label.
 				 */
