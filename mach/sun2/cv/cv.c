@@ -168,7 +168,7 @@ main(argc, argv)
 		magic= NMAGIC ;
 		textsize= (outsect[ROMSG].os_base - outsect[TEXTSG].os_base) +
 				outsect[ROMSG].os_size ;
-		if (! follows(&outsect[ROMSG],&outsect[TEXTSG].os_base))
+		if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
 			fatal("rom segment must follow text\n") ;
 		outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
 		outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
@@ -177,17 +177,20 @@ main(argc, argv)
 		/* Plain 407 file */
 		rom_in_data = 0;
 		magic= OMAGIC ;
-		textsize= (outsect[DATASG].os_base - outsect[TEXTSG].os_base);
 		if (!unresolved) {
+			textsize= (outsect[DATASG].os_base - outsect[TEXTSG].os_base);
 			if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
 				fatal("rom segment must follow text\n") ;
 			if (! follows(&outsect[DATASG],&outsect[ROMSG]))
 				fatal("data segment must follow rom\n") ;
+			outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
+			outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
+			outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
 		}
-		outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
-		outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
-		outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
-		datasize= outsect[DATASG].os_size ;
+		else {
+			textsize = outsect[TEXTSG].os_size+outsect[ROMSG].os_size;
+		}
+		datasize = outsect[DATASG].os_size;
 	}
 	if (outsect[TEXTSG].os_base == TOT_HDRSIZE+ENTRY) {
 		if (magic != NMAGIC) {
@@ -231,6 +234,8 @@ main(argc, argv)
 	if (rom_in_data && magic == ZMAGIC) {
 		lseek(output,textsize,0);
 	}
+	else if (! unresolved)
+		lseek(output, (long) TOT_HDRSIZE + (outsect[ROMSG].os_base-outsect[TEXTSG].os_base), 0);
 	emits(&outsect[ROMSG]) ;
 	if (!rom_in_data && magic == ZMAGIC) {
 		lseek(output,textsize,0);
@@ -379,6 +384,7 @@ get(sz)
 	while (sz--) {
 		l = (l << 8) | (*p++ & 0377);
 	}
+	return l;
 }
 
 put(l,sz)
@@ -421,8 +427,13 @@ patch(ap, an, mp)
 		setsymbolnum(mp->relodata,N_DATA);
 		break;
 	case ROMSG:
-		correction += outsect[TEXTSG].os_size;
+		correction = outsect[TEXTSG].os_size;
 		setsymbolnum(mp->relodata,N_TEXT);
+		break;
+	case BSSSG:
+		correction = outsect[ROMSG].os_size + outsect[TEXTSG].os_size+
+				outsect[DATASG].os_size;
+		setsymbolnum(mp->relodata,N_BSS);
 		break;
 	default:
 		assert(0);
@@ -493,7 +504,10 @@ emit_symtab()
 	ACKnames = A;
 	for (; i; i--, A++, M++) {
 		M->value = A->on_valu;
-		switch(A->on_type & S_TYP) {
+		if (A->on_type & S_COM) {
+			M->type = N_UNDF | N_EXT;
+		}
+		else switch(A->on_type & S_TYP) {
 			case S_UND:
 				switch(A->on_type & S_ETC) {
 				default:
@@ -512,34 +526,19 @@ emit_symtab()
 				M->type = N_ABS;
 				break;
 			case S_MIN + TEXTSG:
-				if (! A->on_type & S_COM) {
-					M->value += outsect[TEXTSG].os_base;
-				}
 				M->type = N_TEXT; 
 				break;
 			case S_MIN + ROMSG:
 				M->type = (rom_in_data ? N_DATA : N_TEXT);
-				if (! A->on_type & S_COM) {
-					M->value += outsect[ROMSG].os_base;
-				}
 				break;
 			case S_MIN + DATASG:
 				M->type = N_DATA;
-				if (! A->on_type & S_COM) {
-					M->value += outsect[DATASG].os_base;
-				}
 				break;
 			case S_MIN + BSSSG:
 				M->type = N_BSS;
-				if (! A->on_type & S_COM) {
-					M->value += outsect[BSSSG].os_base;
-				}
 				break;
 			case S_MIN + LSECT:
 				M->type = N_BSS;
-				if (! A->on_type & S_COM) {
-					M->value += outsect[LSECT].os_base;
-				}
 				break;
 			default:
 				fprintf(stderr,"warning: unknown s_type: %d\n",
