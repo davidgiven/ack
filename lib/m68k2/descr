@@ -9,8 +9,8 @@ var NAME=m68k2
 var M=m68k2
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var CPP_F=-Dunix
-var INCLUDES=-I{EM}/include -I/usr/include
+var CPP_F=-Dunix=unix -Dm68000=m68000
+var INCLUDES=-I{EM}/include/_tail_cc
 # 407 align is the default
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
@@ -28,6 +28,15 @@ name as
 	args - -o > <
 	prep cond
 end
+name asopt
+	from .s
+	to .so
+	program {EM}/lib/{M}/top
+	args
+	optimizer
+	stdin
+	stdout
+end
 name led
 	from .o.a
 	to .out
@@ -41,7 +50,7 @@ name led
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-		(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
 name cv
