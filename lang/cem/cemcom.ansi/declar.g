@@ -299,7 +299,7 @@ declarator(register struct declarator *dc;)
 	primary_declarator(dc)
 	[/*%while(1)*/
 		'('
-		[ %if (DOT != IDENTIFIER && DOT != ')')
+		[ %if (DOT != IDENTIFIER)
 			parameter_type_list(&pl)
 		|
 			formal_list(&fm)
@@ -678,7 +678,9 @@ parameter_declarator(register struct declarator *dc;)
 			parameter_type_list(&pl)
 		|
 			formal_list(&fm)
-		]?
+		|
+			/* empty */
+		]
 		')'
 		{   add_decl_unary(dc, FUNCTION, 0, (arith)0, fm, pl);
 		    reject_params(dc);
