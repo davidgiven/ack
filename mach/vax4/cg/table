@@ -1648,6 +1648,7 @@ adp		| NC ADDR_EXTERNAL |
 			| {aextdefind1,%[a],%[1.ind]}	| |
 ...		| NC adispl | | {adispl,%[1.reg],%[1.ind]+"+"+tostring($1)} | |
 ...		| reg4 | 	| {adispl,%[1],tostring($1)}		  | |
+adp sil		| | | {CONST4,$1}		| adi 4 sil $2 |
 adp stl		| | | {CONST4,$1}		| adi 4 stl $2 |
 adp ste		| | | {CONST4,$1}		| adi 4 ste $2 |
 adp dup $2==4	| | | {CONST4,$1}		| adi 4 dup 4 |
