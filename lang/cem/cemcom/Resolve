@@ -19,6 +19,10 @@ omain)
 	target=$PW/$1
 	options=-DPEEPHOLE
 	;;
+cemain)
+	target=$PW/$1
+	options=-DCODE_EXPANDER
+	;;
 Xlint)
 	target=$1
 	;;

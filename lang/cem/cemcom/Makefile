@@ -16,6 +16,7 @@ STRLIB = $(EMHOME)/modules/lib/libstring.a
 PRTLIB = $(EMHOME)/modules/lib/libprint.a
 EMMESLIB = $(EMHOME)/modules/lib/libem_mes.a
 EMMESOLIB = $(EMHOME)/modules/lib/libem_mesO.a
+EMMESCELIB = $(EMHOME)/modules/lib/libem_mesCE.a
 INPLIB = $(EMHOME)/modules/lib/libinput.a
 ALLOCLIB = $(EMHOME)/modules/lib/liballoc.a
 MALLOC = $(EMHOME)/modules/lib/malloc.o
@@ -24,6 +25,8 @@ LIBS = $(INPLIB) $(EMMESLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
 ELIBS = $(INPLIB) $(EMMESLIB) $(EMELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 OLIBS = $(INPLIB) $(EMMESOLIB) $(EMOLIB) $(EMKLIB) $(PRTLIB) $(STRLIB) \
+	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
+CELIBS = $(INPLIB) $(EMMESCELIB) $(EMCELIB) $(PRTLIB) $(STRLIB) \
 	$(ALLOCLIB) $(MALLOC) $(SYSLIB)
 LIB_INCLUDES = -I$(EMHOME)/modules/h -I$(EMHOME)/modules/pkg
 EM_INCLUDES = -I$(EMHOME)/h
@@ -127,6 +130,11 @@ Omain:	Cfiles
 	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DPEEPHOLE $(CURRDIR)/omain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve omain ; fi'
 	@rm -f nmclash.o a.out *.o
 
+CEmain:	Cfiles
+	rm -f *.o
+	sh -c 'if $(CC) nmclash.c > /dev/null 2>&1 ; then make "EMHOME="$(EMHOME) "COPTIONS="-DCODE_EXPANDER $(CURRDIR)/cemain ; else EMHOME=$(EMHOME); export EMHOME; ./Resolve cemain ; fi'
+	@rm -f nmclash.o a.out *.o
+
 install:	Main
 	rm -f $(EMHOME)/lib/em_cemcom $(EMHOME)/man/em_cemcom.6
 	cp $(CURRDIR)/main $(EMHOME)/lib/em_cemcom
@@ -220,6 +228,10 @@ $(CURRDIR)/emain:	$(OBJ) $(CURRDIR)/makefile
 $(CURRDIR)/omain:	$(OBJ) $(CURRDIR)/makefile
 	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(OLIBS) -o $(CURRDIR)/omain 
 	size $(CURRDIR)/omain
+
+$(CURRDIR)/cemain:	$(OBJ) $(CURRDIR)/makefile
+	$(CC) $(COPTIONS) $(LDFLAGS) $(OBJ) $(CELIBS) -o $(CURRDIR)/cemain 
+	size $(CURRDIR)/cemain
 
 Xlint:
 	lint $(CDEFS) $(LINTFLAGS) $(SRC)
