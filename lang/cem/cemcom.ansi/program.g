@@ -155,14 +155,16 @@ external_definition
 		[
 			function(&Ds, &Dc)
 		|
-			{	if (! Ds.ds_sc_given && Ds.ds_notypegiven) {
+			{	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
+				    Ds.ds_notypegiven) {
 					strict("declaration specifiers missing");
 				}
 			}
 			non_function(&Ds, &Dc)
 		]
 	|
-		{	if (! Ds.ds_sc_given && Ds.ds_notypegiven) {
+		{	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
+			    Ds.ds_notypegiven) {
 				strict("declaration missing");
 			}
 		}

@@ -79,6 +79,7 @@ do_decspecs(ds)
 	SIZE_ERROR:
 			error("%s with illegal type",symbol2str(ds->ds_size));
 		}
+		ds->ds_notypegiven = 0;
 	}
 	if (ds->ds_unsigned) {
 		register int ds_isunsigned = (ds->ds_unsigned == UNSIGNED);
@@ -101,6 +102,7 @@ do_decspecs(ds)
 			error("%s with illegal type"
 				, symbol2str(ds->ds_unsigned));
 		}
+		ds->ds_notypegiven = 0;
 	}
 	ds->ds_type = qualifier_type(tp, ds->ds_typequal);
 }
