@@ -16,7 +16,7 @@ struct range_descr {
   unsigned	low, high;
 };
 
-rcki(descr, val)
+rcku(descr, val)
   struct range_descr *descr;
   unsigned val;
 {

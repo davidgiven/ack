@@ -25,14 +25,14 @@
 adduchk(a,b)
   unsigned	a,b;
 {
-  if (MAXCARD - a > b) TRP(M2_UOVFL);
+  if (MAXCARD - a < b) TRP(M2_UOVFL);
 }
 
 #if EM_WSIZE < EM_LSIZE
 addulchk(a,b)
   unsigned long	a,b;
 {
-  if (MAXLONGCARD - a > b) TRP(M2_UOVFL);
+  if (MAXLONGCARD - a < b) TRP(M2_UOVFL);
 }
 #endif
 
