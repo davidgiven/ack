@@ -25,6 +25,9 @@ extern char **inctable;
 extern int inc_pos;
 extern int inc_max;
 extern int inc_total;
+int do_dependencies = 0;
+char *dep_file = 0;
+
 #endif NOPP
 
 char options[128];			/* one for every char	*/
@@ -58,6 +61,21 @@ next_option:			/* to allow combined one-char options */
 	case '-':
 		options[*text++] = 1;	/* flags, debug options etc.	*/
 		goto next_option;
+
+#ifndef LINT
+#ifndef NOPP
+        case 'A' :      /* Amake dependency generation */
+                do_dependencies = 1;
+                if (*text) {
+                        dep_file = text;
+                }
+                break;
+        case 'i':
+        case 'm':
+             	options[opt] = 1;
+            	break;
+#endif NOPP
+#endif LINT
 
 #ifndef	LINT
 #ifdef	DATAFLOW

@@ -155,7 +155,12 @@ qualifier_type(tp, typequal)
 		dtp->tp_size = tp->tp_size;
 		dtp->tp_pointer = tp->tp_pointer;
 		dtp->tp_array = tp->tp_array;
+#if 0
+/* The tp_function field does not exist now. See the comment in the
+   function_of() routine.
+*/
 		dtp->tp_function = tp->tp_function;
+#endif
 		switch (fund) {
 		case ARRAY:
 			if (typequal) {

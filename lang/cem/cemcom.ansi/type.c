@@ -126,7 +126,12 @@ function_of(tp, pl, qual)
 	struct proto *pl;
 	int qual;
 {
+#if 0
+/* See comment below */
 	register struct type *dtp = tp->tp_function;
+#else
+	register struct type *dtp;
+#endif
 
 	/* look for a type with the right qualifier */
 #if 0
@@ -136,6 +141,8 @@ function_of(tp, pl, qual)
    because updating the type works inside the data-structures for that type
    thus, a new type is created for very function. This may change in the
    future, when declarations with empty parameter lists become obsolete.
+   When it does, change type.str, decspecs.c, and this routine. Search for
+   the function_of pattern to find the places.
 */
 	while (dtp && (dtp->tp_typequal != qual || dtp->tp_proto != pl))
 		dtp = dtp->next;
@@ -151,8 +158,11 @@ function_of(tp, pl, qual)
 		dtp->tp_align = pointer_align;
 		dtp->tp_typequal = qual;
 		dtp->tp_proto = pl;
+#if 0
+/* See comment above */
 		dtp->next = tp->tp_function;
 		tp->tp_function = dtp;
+#endif
 	}
 	return dtp;
 }

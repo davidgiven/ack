@@ -289,6 +289,7 @@ main.o: input.h
 main.o: inputtype.h
 main.o: level.h
 main.o: lint.h
+main.o: macro.h
 main.o: nobitfield.h
 main.o: nocross.h
 main.o: nopp.h
@@ -429,9 +430,12 @@ ch3bin.o: idf.h
 ch3bin.o: label.h
 ch3bin.o: lint.h
 ch3bin.o: nobitfield.h
+ch3bin.o: nocross.h
 ch3bin.o: nopp.h
+ch3bin.o: sizes.h
 ch3bin.o: spec_arith.h
 ch3bin.o: struct.h
+ch3bin.o: trgt_sizes.h
 ch3bin.o: type.h
 cstoper.o: Lpars.h
 cstoper.o: arith.h

@@ -10,13 +10,16 @@
 struct type	{
 	struct type *next;	/* used for ARRAY and for qualifiers */
 	short tp_fund;		/* fundamental type */
-	short tp_unsigned;
+	char tp_unsigned;
+	char tp_typequal;	/* type qualifier */
 	int tp_align;
-	int tp_typequal;	/* type qualifier */
 	arith tp_size;		/* -1 if declared but not defined */
 	struct type *tp_pointer;	/* to POINTER */
 	struct type *tp_array;		/* to ARRAY */
+#if 0
+/* This field is not needed now; see comment in function_of() routine. */
 	struct type *tp_function;	/* to FUNCTION */
+#endif
 	union {
 	    struct {
 		struct idf *tp__idf;	/* name of STRUCT, UNION or ENUM */

@@ -293,8 +293,10 @@ do_include()
 	if (filenm) {
 		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
 			error("cannot open include file \"%s\"", filenm);
+			add_dependency(filenm);
 		}
 		else {
+			add_dependency(result);
 			WorkingDir = getwdir(result);
 			File_Inserted = 1;
 			FileName = result;
