@@ -34,6 +34,7 @@ Enter(name, kind, type, pnam)
 		df->df_value.df_reqname = pnam;
 		df->df_flags |= D_SET;
 	}
+	else if (options['g']) stb_string(df, kind);
 	return df;
 }
 
@@ -64,6 +65,7 @@ EnterProgList(Idlist)
 					df->var_name = output;
 					set_outp();
 				}
+				if (options['g']) stb_string(df, D_VARIABLE);
 			}
 		}
 		else	{
@@ -85,7 +87,7 @@ EnterEnumList(Idlist, type)
 	/*	Put a list of enumeration literals in the symbol table.
 		They all have type "type". Also assign numbers to them.
 	*/
-	register struct def *df;
+	register struct def *df, *df1 = 0;
 	register struct node *idlist = Idlist;
 
 	type->enm_ncst = 0;
@@ -94,6 +96,11 @@ EnterEnumList(Idlist, type)
 			df->df_type = type;
 			df->enm_val = (type->enm_ncst)++;
 			df->df_flags |= D_SET;
+			if (! df1) {
+				type->enm_enums = df;
+			}
+			else	df1->enm_next = df;
+			df1 = df;
 		}
 	FreeNode(Idlist);
 }
@@ -156,6 +163,7 @@ EnterVarList(Idlist, type, local)
 			df->var_name = df->df_idf->id_text;
 			df->df_flags |= D_NOREG;
 		}
+		if (options['g']) stb_string(df, D_VARIABLE);
 	}
 	FreeNode(Idlist);
 }

@@ -2,6 +2,7 @@
 {
 #include	<alloc.h>
 #include	<em.h>
+#include	<stb.h>
 
 #include	"LLlex.h"
 #include	"chk_expr.h"
@@ -46,6 +47,14 @@ Statement
 	]?
 					{ if( !options['L'] )
 						C_lin((arith) dot.tk_lineno);
+					  if (options['g']) {
+					    static int ms_lineno;
+
+					    if (ms_lineno != dot.tk_lineno) {
+						C_ms_std((char *) 0, N_SLINE, dot.tk_lineno);
+						ms_lineno = dot.tk_lineno;
+					    }
+					  }
 					}
 	[
 		SimpleStatement

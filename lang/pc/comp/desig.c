@@ -435,20 +435,19 @@ CodeBoundDesig(df, ds)
 
 	if( df->df_scope->sc_level < proclevel )	{
 		C_lxa((arith) (proclevel - df->df_scope->sc_level));
+		C_lof(df->bnd_type->arr_cfdescr);
 		if( df->df_kind == D_UBOUND )	{
-			C_ldf(df->bnd_type->arr_cfdescr);
+			C_lxa((arith) (proclevel - df->df_scope->sc_level));
+			C_lof(df->bnd_type->arr_cfdescr+word_size);
 			C_adi(word_size);
 		}
-		else
-			C_lof(df->bnd_type->arr_cfdescr);
 	}
 	else	{
+		C_lol(df->bnd_type->arr_cfdescr);
 		if( df->df_kind == D_UBOUND )	{
-			C_ldl(df->bnd_type->arr_cfdescr);
+			C_lol(df->bnd_type->arr_cfdescr+word_size);
 			C_adi(word_size);
 		}
-		else
-			C_lol(df->bnd_type->arr_cfdescr);
 	}
 
 	ds->dsg_kind = DSG_LOADED;

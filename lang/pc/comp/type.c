@@ -48,6 +48,7 @@ struct type
 	*text_type,
 	*nil_type,
 	*emptyset_type,
+	*void_type,
 	*error_type;
 
 CheckTypeSizes()
@@ -128,6 +129,7 @@ InitTypes()
 	/* an unique type indicating an error
 	*/
 	error_type = standard_type(T_ERROR, 1, (arith) 1);
+	void_type = error_type;
 
 	/* the nilvalue has an unique type
 	*/

@@ -5,6 +5,7 @@
 #include	<em.h>
 #include	<em_mes.h>
 #include	<system.h>
+#include	<stb.h>
 
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -19,6 +20,7 @@
 #include	"required.h"
 #include	"tokenname.h"
 #include	"type.h"
+#include	"scope.h"
 
 char		options[128];
 char		*ProgName;
@@ -82,7 +84,6 @@ Compile(src, dst)
 
 	InitScope();
 	InitTypes();
-	AddRequired();
 
 	if( options['c'] ) tkclass['"'] = STSTR;
 	if( options['u'] || options['U'] ) {
@@ -105,6 +106,10 @@ Compile(src, dst)
 		fatal("couldn't open output file");
 	C_magic();
 	C_ms_emx(word_size, pointer_size);
+	if (options['g']) {
+		C_ms_std(FileName, N_SO, 0);
+	}
+	AddRequired();
 	C_df_dlb(++data_label);
 	C_rom_scon(FileName,(arith) strlen(FileName) + 1);
 	LLparse();
@@ -161,6 +166,15 @@ AddRequired()
 	 * in the grammar
 	 */
 
+	df = Enter("false", D_ENUM, bool_type, 0);
+	df->enm_val = 0;
+	df->df_flags |= D_SET;
+	bool_type->enm_enums = df;
+	df->enm_next = Enter("true", D_ENUM, bool_type, 0);
+	df->enm_next->enm_val = 1;
+	df->df_flags |= D_SET;
+	df->enm_next->enm_next = NULLDEF;
+
 	(void) Enter("rewrite", D_PROCEDURE, std_type, R_REWRITE);
 	(void) Enter("put", D_PROCEDURE, std_type, R_PUT);
 	(void) Enter("reset", D_PROCEDURE, std_type, R_RESET);
@@ -216,6 +230,7 @@ AddRequired()
 	(void) Enter("real", D_TYPE, real_type, 0);
 	(void) Enter("boolean", D_TYPE, bool_type, 0);
 	(void) Enter("text", D_TYPE, text_type, 0);
+	(void) Enter("(void)", D_TYPE, void_type, 0);
 
 	if( options['d'] )
 		(void) Enter("long", D_TYPE, long_type, 0);
@@ -229,19 +244,13 @@ AddRequired()
 	/* CONSTANTS */
 	/* nil is TOKEN and thus part of the grammar */
 
-	df = Enter("maxint", D_CONST, int_type, 0);
-	df->con_const = &maxintnode;
-	df->df_flags |= D_SET;
 	maxintnode.nd_type = int_type;
 	maxintnode.nd_INT = max_int;		/* defined in cstoper.c */
-	df = Enter("true", D_ENUM, bool_type, 0);
-	df->enm_val = 1;
+	df = define(str2idf("maxint", 0), CurrentScope, D_CONST);
+	df->df_type = int_type;
+	df->con_const = &maxintnode;
 	df->df_flags |= D_SET;
-	df->enm_next = Enter("false", D_ENUM, bool_type, 0);
-	df = df->enm_next;
-	df->enm_val = 0;
-	df->df_flags |= D_SET;
-	df->enm_next = NULLDEF;
+	if (options['g']) stb_string(df, D_CONST);
 }
 
 #ifdef DEBUG

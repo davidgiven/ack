@@ -15,6 +15,7 @@ struct scope {
 struct scopelist {
 	struct scopelist *next;
 	struct scope *sc_scope;
+	int sc_count;
 };
 
 /* ALLOCDEF "scopelist" 10 */

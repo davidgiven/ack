@@ -4,6 +4,8 @@
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<em_code.h>
+#include	<stb.h>
 
 #include	"LLlex.h"
 #include	"def.h"
@@ -24,7 +26,13 @@ Program
 	struct def *df;
 	arith dummy;
 }:
-	ProgramHeading(&df) ';' Block(df) '.'
+	ProgramHeading(&df)
+	';' Block(df) '.'
+	  { if (options['g']) {
+		C_ms_stb_cst(df->df_idf->id_text, N_MAIN, 0, (arith) 0);
+		stb_string(df, D_END);
+	    }
+	  }
 	| { df = new_def();
 	    df->df_idf = str2idf(FileName, 1);
 	    df->df_kind = D_MODULE;
@@ -44,6 +52,7 @@ ProgramHeading(register struct def **df;):
 			  open_scope();
 			  GlobalScope = CurrentScope;
 			  (*df)->prc_vis = CurrVis;
+	  		  if (options['g']) stb_string(*df, D_MODULE);
 			}
 	[
 		'('

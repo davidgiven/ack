@@ -10,8 +10,10 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 /* ALLOCDEF "paramlist" 50 */
 
 struct enume	{
+	struct def *en_enums;
 	unsigned int en_ncst;	/* number of constants */
 	label en_rck;		/* label of range check descriptor */
+#define enm_enums	tp_value.tp_enum.en_enums
 #define enm_ncst	tp_value.tp_enum.en_ncst
 #define enm_rck		tp_value.tp_enum.en_rck
 };
@@ -95,6 +97,7 @@ struct type	{
 #define T_HASFILE	0x1	/* set if type has a filecomponent */
 #define T_PACKED	0x2	/* set if type is packed */
 #define T_CHECKED	0x4	/* set if array has been checked */
+	short tp_dbindex;	/* index in debugger symbol table */
 	int tp_align;		/* alignment requirement of this type */
 	int tp_palign;		/* in packed structures */
 	arith tp_size;		/* size of this type */
@@ -121,6 +124,7 @@ extern struct type
 	*text_type,
 	*nil_type,
 	*emptyset_type,
+	*void_type,
 	*error_type;		/* All from type.c */
 
 #include "nocross.h"

@@ -18,6 +18,7 @@
 struct scope *GlobalScope, *PervasiveScope, *BlockScope;
 struct scopelist *CurrVis;
 extern int proclevel;			/* declared in declar.g */
+static int sccount;
 
 InitScope()
 {
@@ -29,6 +30,7 @@ InitScope()
 	PervasiveScope = sc;
 	ls->next = 0;
 	ls->sc_scope = PervasiveScope;
+	ls->sc_count = ++sccount;
 	CurrVis = ls;
 }
 
@@ -40,6 +42,7 @@ open_scope()
 	sc->sc_level = proclevel;
 	ls->sc_scope = sc;
 	ls->next = CurrVis;
+	ls->sc_count = ++sccount;
 	CurrVis = ls;
 }
 

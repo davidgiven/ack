@@ -51,6 +51,7 @@ readwrite.c
 required.h
 scope.H
 scope.c
+stab.c
 statement.g
 tmpvar.C
 tokenname.c

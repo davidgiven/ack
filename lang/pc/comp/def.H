@@ -103,6 +103,10 @@ struct def	{		/* list of definitions for a name */
 #define D_MODULE	0x080000	/* the module */
 #define D_INUSE		0x100000	/* variable is in use */
 
+/* special values for stab.c */
+#define D_END		(D_MODULE|D_PROCEDURE)
+#define D_PEND		(D_MODULE|D_PROCEDURE|D_VARIABLE)
+
 #define D_VALUE		(D_FUNCTION | D_CONST | D_ENUM | D_FIELD | D_VARIABLE\
 			 | D_FWFUNCTION | D_LBOUND | D_UBOUND)
 #define D_ROUTINE      (D_FUNCTION | D_FWFUNCTION | D_PROCEDURE | D_FWPROCEDURE)

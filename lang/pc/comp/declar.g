@@ -180,6 +180,7 @@ ConstantDefinition
 			  	df->con_const = nd;
 				df->df_type = nd->nd_type;
 				df->df_flags |= D_SET;
+				if (options['g']) stb_string(df, D_CONST);
 			  }
 			}
 ;
@@ -196,6 +197,7 @@ TypeDefinition
 			{ if( df = define(id, CurrentScope, D_TYPE) ) {
 			  	df->df_type = tp;
 				df->df_flags |= D_SET;
+				if (options['g']) stb_string(df, D_TYPE);
 			  }
 			}
 ;
@@ -286,9 +288,12 @@ ProcedureDeclaration
 		Directive
 				{ DoDirective(dot.TOK_IDF, nd, tp, scl, 0); }
 	|
-				{ df = DeclProc(nd, tp, scl); }
+				{ df = DeclProc(nd, tp, scl);
+				  if (options['g']) stb_string(df, D_PROCEDURE);
+				}
 		Block(df)
 				{ /* open_scope() is simulated in DeclProc() */
+				  if (options['g']) stb_string(df, D_PEND);
 				  close_scope();
 				}
 	]
@@ -363,10 +368,12 @@ FunctionDeclaration
 					df->prc_bool =
 						CurrentScope->sc_off =
 							df->prc_res - int_size;
+					if (options['g']) stb_string(df, D_FUNCTION);
 				    }
 				}
 			Block(df)
 				{ if( df ) {
+					if (options['g']) stb_string(df, D_PEND);
 					EndFunc(df);
 				  }
 

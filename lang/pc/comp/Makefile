@@ -61,11 +61,11 @@ LOBJ =	declar.o expression.o program.o statement.o tokenfile.o
 CSRC =	LLlex.c LLmessage.c body.c chk_expr.c code.c\
 	cstoper.c def.c desig.c enter.c error.c idf.c input.c label.c\
 	lookup.c main.c misc.c node.c options.c readwrite.c\
-	scope.c symbol2str.c tokenname.c type.c typequiv.c progs.c
+	scope.c symbol2str.c tokenname.c type.c typequiv.c progs.c stab.c
 COBJ =	LLlex.o LLmessage.o body.o casestat.o char.o chk_expr.o code.o\
 	cstoper.o def.o desig.o enter.o error.o idf.o input.o label.o\
-	lookup.o main.o misc.o next.o node.o options.o readwrite.o\
-	scope.o symbol2str.o tmpvar.o tokenname.o type.o typequiv.o progs.o
+	lookup.o main.o misc.o next.o node.o options.o readwrite.o scope.o\
+	symbol2str.o tmpvar.o tokenname.o type.o typequiv.o progs.o stab.o
 
 # Extra object for generating peephole-optimizer-code-expander version.
 # The Sun-3 version is faster when the text-size exceeds 180K! ARRGH
