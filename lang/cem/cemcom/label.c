@@ -32,7 +32,7 @@ apply_label(idf)
 }
 
 enter_label(idf, defining)
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	The identifier idf is entered as a label. If it is new,
 		it is entered into the idf list with the largest possible
@@ -40,7 +40,7 @@ enter_label(idf, defining)
 		If defining, the label comes from a label statement.
 	*/
 	if (idf->id_def)	{
-		struct def *def = idf->id_def;
+		register struct def *def = idf->id_def;
 		
 		if (def->df_sc == LABEL)	{
 			if (defining && def->df_initialized)
@@ -79,7 +79,7 @@ enter_label(idf, defining)
 }
 
 unstack_label(idf)
-	struct idf *idf;
+	register struct idf *idf;
 {
 	/*	The scope in which the label idf occurred is left.
 	*/

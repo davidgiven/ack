@@ -13,7 +13,7 @@
 
 
 !File: idfsize.h
-#define	IDFSIZE	30	/* maximum significant length of an identifier	*/
+#define	IDFSIZE	64	/* maximum significant length of an identifier	*/
 
 
 !File: numsize.h
@@ -86,7 +86,7 @@
 
 
 !File: debug.h
-#define DEBUG		1	/* perform various self-tests		*/
+#undef DEBUG		1	/* perform various self-tests		*/
 
 
 !File: use_tmp.h

@@ -102,7 +102,7 @@ rank_of_expression(ex)
 }
 
 check_conditional(expr, oper, pos_descr)
-	struct expr *expr;
+	register struct expr *expr;
 	char *pos_descr;
 {
 	/*	Warn if restricted C is in effect and the expression expr,
@@ -115,27 +115,29 @@ check_conditional(expr, oper, pos_descr)
 }
 
 dot2expr(expp)
-	register struct expr **expp;
+	struct expr **expp;
 {
 	/*	The token in dot is converted into an expression, a
 		pointer to which is stored in *expp.
 	*/
-	*expp = new_expr();
-	(*expp)->ex_file = dot.tk_file;
-	(*expp)->ex_line = dot.tk_line;
+	register struct expr *ex = new_expr();
+
+	*expp = ex;
+	ex->ex_file = dot.tk_file;
+	ex->ex_line = dot.tk_line;
 	switch (DOT)	{
 	case IDENTIFIER:
-		idf2expr(*expp);
+		idf2expr(ex);
 		break;
 	case STRING:
-		string2expr(*expp);
+		string2expr(ex);
 		break;
 	case INTEGER:
-		int2expr(*expp);
+		int2expr(ex);
 		break;
 #ifndef NOFLOAT
 	case FLOATING:
-		float2expr(*expp);
+		float2expr(ex);
 		break;
 #endif NOFLOAT
 	default:
@@ -294,7 +296,7 @@ fill_int_expr(ex, ivalue, fund)
 struct expr *
 new_oper(tp, e1, oper, e2)
 	struct type *tp;
-	struct expr *e1, *e2;
+	register struct expr *e1, *e2;
 {
 	/*	A new expression is constructed which consists of the
 		operator oper which has e1 and e2 as operands; for a

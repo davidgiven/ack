@@ -28,7 +28,7 @@ extern int level;
 /* 9 */
 statement
 :
-[%if (AHEAD != ':')
+%if (AHEAD != ':')
 	expression_statement
 |
 	label ':' statement
@@ -60,7 +60,6 @@ statement
 	';'
 |
 	asm_statement
-]
 ;
 
 expression_statement

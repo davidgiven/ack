@@ -236,10 +236,10 @@ input.o: file_info.h input.h inputtype.h nopp.h
 domacro.o: LLlex.h Lpars.h arith.h assert.h botch_free.h class.h debug.h file_info.h idf.h idfsize.h ifdepth.h input.h interface.h macro.h nofloat.h nopp.h nparams.h parbufsize.h spec_arith.h textsize.h
 replace.o: LLlex.h arith.h assert.h class.h debug.h file_info.h idf.h input.h interface.h macro.h nofloat.h nopp.h pathlength.h spec_arith.h static.h strsize.h
 init.o: class.h idf.h interface.h macro.h nopp.h
-options.o: align.h arith.h botch_free.h class.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nofloat.h nopp.h sizes.h spec_arith.h use_tmp.h
+options.o: align.h arith.h botch_free.h class.h dataflow.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nofloat.h nopp.h sizes.h spec_arith.h use_tmp.h
 scan.o: class.h idf.h input.h interface.h lapbuf.h macro.h nopp.h nparams.h
 skip.o: LLlex.h arith.h class.h file_info.h input.h interface.h nofloat.h nopp.h spec_arith.h
-stack.o: Lpars.h arith.h botch_free.h debug.h def.h idf.h level.h mes.h nobitfield.h nofloat.h nopp.h spec_arith.h stack.h struct.h type.h use_tmp.h
+stack.o: Lpars.h arith.h botch_free.h debug.h def.h idf.h level.h mes.h nobitfield.h nofloat.h nopp.h spec_arith.h stack.h struct.h type.h
 type.o: Lpars.h align.h arith.h botch_free.h def.h idf.h nobitfield.h nofloat.h nopp.h sizes.h spec_arith.h type.h
 ch7mon.o: Lpars.h arith.h botch_free.h def.h expr.h idf.h label.h nobitfield.h nofloat.h nopp.h spec_arith.h type.h
 label.o: Lpars.h arith.h def.h idf.h label.h level.h nobitfield.h nofloat.h nopp.h spec_arith.h type.h

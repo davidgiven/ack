@@ -25,15 +25,13 @@
 */
 
 conversion(from_type, to_type)
-	struct type *from_type, *to_type;
+	register struct type *from_type, *to_type;
 {
-	arith from_size;
-	arith to_size;
+	register arith from_size = from_type->tp_size;
+	register arith to_size = to_type->tp_size;
 
 	if (from_type == to_type)	/* a little optimisation */
 		return;
-	from_size = from_type->tp_size;
-	to_size = to_type->tp_size;
 	switch (fundamental(from_type))	{
 	case T_SIGNED:
 		switch (fundamental(to_type))	{
@@ -50,7 +48,7 @@ conversion(from_type, to_type)
 #ifndef NOFLOAT
 		case T_FLOATING:
 			C_loc(from_size < word_size ? word_size : from_size);
-			C_loc(to_size < word_size ? word_size : to_size);
+			C_loc(to_size);
 			C_cif();
 			break;
 #endif NOFLOAT
@@ -75,7 +73,7 @@ conversion(from_type, to_type)
 		break;
 #ifndef NOFLOAT
 	case T_FLOATING:
-		C_loc(from_size < word_size ? word_size : from_size);
+		C_loc(from_size);
 		C_loc(to_size < word_size ? word_size : to_size);
 		switch (fundamental(to_type))	{
 		case T_SIGNED:

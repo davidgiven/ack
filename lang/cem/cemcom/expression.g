@@ -15,7 +15,6 @@ extern struct expr *intexpr();
 
 /* 7 */
 initial_value(struct expr **expp;) :
-[
 	assignment_expression(expp)
 		{
 			if ((*expp)->ex_type->tp_fund == ARRAY)
@@ -23,7 +22,6 @@ initial_value(struct expr **expp;) :
 		}
 |
 	initial_value_pack(expp)
-]
 ;
 
 initial_value_pack(struct expr **expp;) :
@@ -48,8 +46,7 @@ initial_value_list(struct expr **expp;)
 
 
 /* 7.1 */
-primary(struct expr **expp;) :
-[
+primary(register struct expr **expp;) :
 	IDENTIFIER
 	{dot2expr(expp);}
 |
@@ -60,10 +57,9 @@ primary(struct expr **expp;) :
 |
 	'(' expression(expp) ')'
 	{(*expp)->ex_flags |= EX_PARENS;}
-]
 ;
 
-secundary(struct expr **expp;) :
+secundary(register struct expr **expp;) :
 	primary(expp)
 	[
 		index_pack(expp)
@@ -124,10 +120,10 @@ postfixed(struct expr **expp;)
 
 %first	first_of_type_specifier, type_specifier;
 
-unary(struct expr **expp;)
+unary(register struct expr **expp;)
 	{struct type *tp; int oper;}
 :
-[%if (first_of_type_specifier(AHEAD))
+%if (first_of_type_specifier(AHEAD))
 	cast(&tp) unary(expp)
 	{	ch7cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
@@ -139,10 +135,9 @@ unary(struct expr **expp;)
 	{ch7mon(oper, expp);}
 |
 	size_of(expp)
-]
 ;
 
-size_of(struct expr **expp;)
+size_of(register struct expr **expp;)
 	{struct type *tp;}
 :
 	SIZEOF
@@ -273,11 +268,9 @@ unop(int *oper;) :
 ;
 
 postop(int *oper;):
-[
 	PLUSPLUS {*oper = POSTINCR;}
 |
 	MINMIN {*oper = POSTDECR;}
-]
 ;
 
 multop:
@@ -311,8 +304,7 @@ binop(int *oper;) :
 	{*oper = DOT;}
 ;
 
-asgnop(int *oper;):
-[
+asgnop(register int *oper;):
 	'=' {*oper = DOT;}
 |
 	'+' '=' {*oper = PLUSAB;}
@@ -344,7 +336,6 @@ asgnop(int *oper;):
 				symbol2str(DOT));
 			*oper = DOT;
 		}
-]
 ;
 
 constant(struct expr **expp;) :

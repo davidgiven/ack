@@ -63,12 +63,13 @@ extern error();
 
 control_if_expression
 	{
-		struct expr *expr;
+		struct expr *exprX;
 	}
 :
-	constant_expression(&expr)
+	constant_expression(&exprX)
 		{
 #ifndef NOPP
+			register struct expr *expr = exprX;
 			if (expr->ex_flags & EX_SIZEOF)
 				expr_error(expr,
 					"sizeof not allowed in preprocessor");
@@ -113,7 +114,6 @@ external_definition
 		Ds = null_decspecs;
 		Dc = null_declarator;
 	}
-[
 	ext_decl_specifiers(&Ds)
 	[
 		declarator(&Dc)
@@ -133,19 +133,17 @@ external_definition
 	{remove_declarator(&Dc);}
 |
 	asm_statement			/* top level, would you believe */
-]
 ;
 
 ext_decl_specifiers(struct decspecs *ds;) :
-[%prefer /* the thin ice in  R.M. 11.1 */
+%prefer /* the thin ice in  R.M. 11.1 */
 	decl_specifiers(ds)
 |
 	empty
 	{do_decspecs(ds);}
-]
 ;
 
-non_function(struct decspecs *ds; struct declarator *dc;)
+non_function(register struct decspecs *ds; register struct declarator *dc;)
 	{
 		struct expr *expr = (struct expr *) 0;
 	}
@@ -168,7 +166,7 @@ function(struct declarator *dc;)
 		arith fbytes, nbytes;
 	}
 :
-	{	struct idf *idf = dc->dc_idf;
+	{	register struct idf *idf = dc->dc_idf;
 		
 		init_idf(idf);
 		stack_level();		/* L_FORMAL1 declarations */

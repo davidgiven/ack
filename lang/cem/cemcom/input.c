@@ -12,7 +12,7 @@ struct file_info	finfo;
 #ifndef NOPP
 char *
 getwdir(fn)
-	char *fn;
+	register char *fn;
 {
 	register char *p;
 	char *strrindex();

@@ -56,7 +56,7 @@ declaration
 	makes all hope of writing a specific grammar for typedefs illusory.
 */
 
-decl_specifiers	/* non-empty */ (struct decspecs *ds;)
+decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 	/*	Reads a non-empty decl_specifiers and fills the struct
 		decspecs *ds.
 	*/
@@ -75,8 +75,7 @@ decl_specifiers	/* non-empty */ (struct decspecs *ds;)
 ;
 
 /* 8.1 */
-other_specifier(struct decspecs *ds;):
-[
+other_specifier(register struct decspecs *ds;):
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
 			error("repeated storage class specifier");
@@ -97,7 +96,6 @@ other_specifier(struct decspecs *ds;):
 			error("unsigned specified twice");
 		else	ds->ds_unsigned = 1;
 	}
-]
 ;
 
 /* 8.2 */
@@ -117,15 +115,13 @@ type_specifier(struct type **tpp;)
 	{*tpp = Ds.ds_type;}
 ;
 
-single_type_specifier(struct decspecs *ds;):
-[
+single_type_specifier(register struct decspecs *ds;):
 	TYPE_IDENTIFIER		/* this includes INT, CHAR, etc. */
 	{idf2type(dot.tk_idf, &ds->ds_type);}
 |
 	struct_or_union_specifier(&ds->ds_type)
 |
 	enum_specifier(&ds->ds_type)
-]
 ;
 
 /* 8.3 */
@@ -134,7 +130,7 @@ init_declarator_list(struct decspecs *ds;):
 	[ ',' init_declarator(ds) ]*
 ;
 
-init_declarator(struct decspecs *ds;)
+init_declarator(register struct decspecs *ds;)
 	{
 		struct declarator Dc;
 		struct expr *expr = (struct expr *) 0;
@@ -164,13 +160,12 @@ init_declarator(struct decspecs *ds;)
 	we just include the (formal) parameter list in the declarator
 	description list dc.
 */
-declarator(struct declarator *dc;)
+declarator(register struct declarator *dc;)
 	{
 		arith count;
 		struct formal *fm = 0;
 	}
 :
-[
 	primary_declarator(dc)
 	[%while(1)			/*	int i (M + 2) / 4;
 						is a function, not an
@@ -190,15 +185,12 @@ declarator(struct declarator *dc;)
 |
 	'*' declarator(dc)
 	{add_decl_unary(dc, POINTER, (arith)0, NO_PARAMS);}
-]
 ;
 
-primary_declarator(struct declarator *dc;) :
-[
+primary_declarator(register struct declarator *dc;) :
 	identifier(&dc->dc_idf)
 |
 	'(' declarator(dc) ')'
-]
 ;
 
 arrayer(arith *sizep;)
@@ -229,7 +221,7 @@ formal(struct formal **fmp;)
 :
 	identifier(&idf)
 	{
-		struct formal *new = new_formal();
+		register struct formal *new = new_formal();
 		
 		new->fm_idf = idf;
 		new->next = *fmp;
@@ -238,7 +230,7 @@ formal(struct formal **fmp;)
 ;
 
 /* Change 2 */
-enum_specifier(struct type **tpp;)
+enum_specifier(register struct type **tpp;)
 	{
 		struct idf *idf;
 		arith l = (arith)0;
@@ -260,7 +252,7 @@ enum_specifier(struct type **tpp;)
 	]
 ;
 
-enumerator_pack(struct type *tp; arith *lp;) :
+enumerator_pack(register struct type *tp; arith *lp;) :
 	'{'
 	enumerator(tp, lp)
 	[%while(AHEAD != '}')		/* >>> conflict on ',' */
@@ -294,10 +286,11 @@ enumerator(struct type *tp; arith *lp;)
 ;
 
 /* 8.5 */
-struct_or_union_specifier(struct type **tpp;)
+struct_or_union_specifier(register struct type **tpp;)
 	{
 		int fund;
-		struct idf *idf;
+		struct idf *idfX;
+		register struct idf *idf;
 	}
 :
 	[ STRUCT | UNION ]
@@ -308,7 +301,7 @@ struct_or_union_specifier(struct type **tpp;)
 		}
 		struct_declaration_pack(*tpp)
 	|
-		identifier(&idf)
+		identifier(&idfX)	{ idf = idfX; }
 		[
 			{
 				declare_struct(fund, idf, tpp);
@@ -325,7 +318,7 @@ struct_or_union_specifier(struct type **tpp;)
 	]
 ;
 
-struct_declaration_pack(struct type *stp;)
+struct_declaration_pack(register struct type *stp;)
 	{
 		struct sdef **sdefp = &stp->tp_sdef;
 		arith size = (arith)0;
@@ -402,7 +395,7 @@ bit_expression(struct field **fd;)
 ;
 
 /* 8.6 */
-initializer(struct idf *idf; struct expr **expp;) :
+initializer(register struct idf *idf; register struct expr **expp;) :
 	[
 		'='
 	|
@@ -440,10 +433,9 @@ cast(struct type **tpp;)	{struct declarator Dc;} :
 /*	This code is an abject copy of that of 'declarator', for lack of
 	a two-level grammar.
 */
-abstract_declarator(struct declarator *dc;)
+abstract_declarator(register struct declarator *dc;)
 	{arith count;}
 :
-[
 	primary_abstract_declarator(dc)
 	[
 		'(' ')'
@@ -455,7 +447,6 @@ abstract_declarator(struct declarator *dc;)
 |
 	'*' abstract_declarator(dc)
 	{add_decl_unary(dc, POINTER, (arith)0, NO_PARAMS);}
-]
 ;
 
 primary_abstract_declarator(struct declarator *dc;) :

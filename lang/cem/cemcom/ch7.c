@@ -340,7 +340,7 @@ ch7asgn(expp, oper, expr)
 */
 int
 is_integral_type(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
 	case CHAR:
@@ -360,7 +360,7 @@ is_integral_type(tp)
 
 int
 is_arith_type(tp)
-	struct type *tp;
+	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
 	case CHAR:

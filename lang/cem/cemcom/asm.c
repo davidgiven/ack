@@ -1,12 +1,12 @@
 /* $Header$ */
 /*		A S M			*/
 
+/*ARGSUSED*/
 code_asm(s, l)
 	char *s;
 	int l;
 {
 	/*	'asm' '(' string ')' ';'
 	*/
-	s = s; l = l;
-	error("\"asm instruction not implemented", s);
+	error("\"asm\" instruction not implemented");
 }

@@ -166,6 +166,7 @@ main(argc, argv)
 
 	set_traps(trap);
 	ProgCall = *argv++;
+	append(&CEM_FLAGS, "-L");
 	while (--argc > 0) {
 		if (*(str = *argv++) != '-') {
 			append(&SRCFILES, str);
@@ -268,9 +269,6 @@ main(argc, argv)
 			break;
 		case 'O':
 			append(&O_FLAGS, "-O");
-			break;
-		case 'p':
-			append(&CEM_FLAGS, "-p");
 			break;
 		case 'R':
 			if (str[2] == '\0')

@@ -40,12 +40,13 @@ stack_level()	{
 	/*	A new level is added on top of the identifier stack.
 	*/
 	register struct stack_level *stl = new_stack_level();
+	register struct stack_level *loclev = local_level;
 	
-	local_level->sl_next = stl;
-	stl->sl_previous = local_level;
+	loclev->sl_next = stl;
+	stl->sl_previous = loclev;
 	stl->sl_level = ++level;
 	stl->sl_local_offset =
-	stl->sl_max_block = local_level->sl_local_offset;
+	stl->sl_max_block = loclev->sl_local_offset;
 	local_level = stl;
 }
 

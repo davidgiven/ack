@@ -184,7 +184,7 @@ cut_size(expr)
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	arith o1 = expr->VL_VALUE;
+	register arith o1 = expr->VL_VALUE;
 	int uns = expr->ex_type->tp_unsigned;
 	int size = (int) expr->ex_type->tp_size;
 

@@ -554,11 +554,11 @@ EVAL(expr, val, code, true_label, false_label)
 				if (gencode) {
 					EVAL(right, RVAL, TRUE, l_true,
 						l_false);
-					C_df_ilb(l_false);
-					C_loc((arith)0);
-					C_bra(l_end);
 					C_df_ilb(l_true);
 					C_loc((arith)1);
+					C_bra(l_end);
+					C_df_ilb(l_false);
+					C_loc((arith)0);
 					C_df_ilb(l_end);
 				}
 				else {
@@ -578,23 +578,10 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case '!':
 			if (true_label == 0) {
+				EVAL(right, RVAL, gencode, NO_LABEL, NO_LABEL);
 				if (gencode) {
-					label l_true = text_label();
-					label l_false = text_label();
-					label l_end = text_label();
-
-					EVAL(right, RVAL, TRUE, l_false,
-						l_true);
-					C_df_ilb(l_false);
-					C_loc((arith)0);
-					C_bra(l_end);
-					C_df_ilb(l_true);
-					C_loc((arith)1);
-					C_df_ilb(l_end);
+					C_teq();
 				}
-				else
-					EVAL(right, RVAL, FALSE, NO_LABEL,
-						NO_LABEL);
 			}
 			else
 				EVAL(right, RVAL, gencode, false_label,

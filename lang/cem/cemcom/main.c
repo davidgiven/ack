@@ -109,7 +109,6 @@ main(argc, argv)
 }
 
 char *source = 0;
-char *destination = 0;
 
 char *nmlist = 0;
 
@@ -127,16 +126,21 @@ compile(argc, argv)
 	char tmpf[256];
 #endif
 	char *result;
+	register char *destination = 0;
 
+#ifdef DEBUG
 #ifndef NOPP
-	int pp_only = options['E'] || options['P'];
+	int pp_only = options['E'] || options['P'] || options['C'];
 #endif NOPP
+#endif
 
 	switch (argc) {
 	case 1:
+#ifdef DEBUG
 #ifndef NOPP
 		if (!pp_only)
 #endif NOPP
+#endif
 			fatal("%s: destination file not specified", prog_name);
 		break;
 	case 2:
@@ -173,21 +177,22 @@ compile(argc, argv)
 #endif NOPP
 	PushLex();
 
+#ifdef DEBUG
 #ifndef NOPP
 	if (pp_only) /* run the preprocessor as if it is stand-alone	*/
 		preprocess();
-	else	{
+	else
 #endif NOPP
+#endif DEBUG
+	{
 
 #ifdef	USE_TMP
 		if (!options['N']) {
 			init_code(tmpfile);
 		}
 		else
-			init_code(destination);
-#else	USE_TMP
-		init_code(destination);
 #endif	USE_TMP
+		init_code(destination);
 
 		/* compile the source text			*/
 		C_program();
@@ -208,9 +213,7 @@ compile(argc, argv)
 		if (options['f'] || options['t'])
 			dumpidftab("end of main", options['f'] ? 0 : 0);
 #endif	DEBUG
-#ifndef NOPP
 	}
-#endif	NOPP
 	PopLex();
 }
 
@@ -302,6 +305,7 @@ init_specials(si)
 	}
 }
 
+#ifdef DEBUG
 #ifndef NOPP
 preprocess()
 {
@@ -373,6 +377,7 @@ preprocess()
 	}
 }
 #endif NOPP
+#endif DEBUG
 
 #ifdef USE_TMP
 AppendFile(src, dst)

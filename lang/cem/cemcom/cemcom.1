@@ -16,23 +16,12 @@ When the preprocessor is invoked to run stand-alone, \fIdestination\fP
 needs not be specified.
 .br
 \fIOptions\fP is a, possibly empty, sequence of the following combinations:
-.IP \fB\-C\fR
-list the sequence of input tokens while maintaining the comments.
 .IP \fB\-D\fIname\fR=\fItext\fR
 .br
 define \fIname\fR as a macro with \fItext\fR as its replacement text.
 .IP \fB\-D\fIname\fR
 .br
 the same as \fB\-D\fIname\fR=1.
-.IP \fB\-E\fR
-list the sequence of input tokens and delete any comments.
-Control lines of the form
-.RS
-.RS
-#\fBline\fR <\fIinteger\fR> "\fIfilename\fR"
-.RE
-are generated whenever needed.
-.RE
 .IP \fB\-I\fIdirname\fR
 .br
 insert \fIdirname\fR in the list of include directories.
@@ -46,8 +35,13 @@ machine.
 don't generate the EM \fBfil\fR and \fBlin\fR instructions 
 that usually are generated to enable
 an interpreter to keep track of the current location in the source code.
-.IP \fB\-P\fR
-like \fB\-E\fR but without #\fBline\fR control lines.
+.IP \fB\-p\fR
+generate code at each procedure entry to call the routine
+.BR procentry ,
+and at each return to call the routine
+.BE procexit .
+These routines are supplied with one parameter, a pointer to a
+string containing the name of the procedure.
 .IP \fB\-R\fR
 interpret the input as restricted C (according to the language as 
 described in \fIThe C programming language\fR by Kernighan and Ritchie.)
@@ -75,12 +69,10 @@ This feature can be used in various shell scripts and surrounding programs
 to force a certain option to be handed over to \fBcemcom\fR.
 .LP
 .SH FILES
-.IR /usr/em/lib/em_cemcom :
+.IR ~em/lib/em_cemcom :
 the compiler
 .SH DIAGNOSTICS
 All warning and error messages are written on standard error output.
-.SH BUGS
-Feel free to report them to erikb@vu44.uucp
 .SH REFERENCE
 Baalbergen, E.H., D. Grune, M. Waage ;"\fIThe CEM compiler\fR", 
 Informatica Manual IM-4

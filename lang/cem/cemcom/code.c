@@ -203,6 +203,7 @@ begin_proc(name, def)	/* to be called when entering a procedure	*/
 	lab_count = (label) 1;
 	return_label = text_label();
 	return_expr_occurred = 0;
+	prc_entry(name);
 	if (! options['L'])	{	/* profiling */
 		if (strcmp(last_fn_given, FileName) != 0)	{
 			/* previous function came from other file */
@@ -237,9 +238,11 @@ end_proc(fbytes, nbytes)
 	if (options['d'])
 		DfaEndFunction();
 #endif	DATAFLOW
+	prc_exit();
 	C_ret((arith)0);
 	if (return_expr_occurred != 0)	{
 		C_df_ilb(return_label);
+		prc_exit();
 		if (func_res_label != 0)	{
 			C_lae_dlb(func_res_label, (arith)0);
 			store_block(func_tp->tp_size, func_tp->tp_align);
@@ -268,6 +271,7 @@ do_return()
 {
 	/*	do_return generates a direct return */
 	/*	isn't a jump to the return label smarter ??? */
+	prc_exit();
 	C_ret((arith)0);
 }
 
@@ -386,7 +390,7 @@ code_declaration(idf, expr, lvl, sc)
 
 loc_init(expr, id)
 	struct expr *expr;
-	struct idf *id;
+	register struct idf *id;
 {
 	/*	loc_init() generates code for the assignment of
 		expression expr to the local variable described by id.
@@ -550,6 +554,29 @@ unstack_stmt()
 		which may contain break or continue
 	*/
 	register struct stmt_block *sbp = stmt_stack;
-	stmt_stack = stmt_stack->next;
+	stmt_stack = sbp->next;
 	free_stmt_block(sbp);
+}
+
+static label l1;
+
+prc_entry(name)
+	char *name;
+{
+	if (options['p']) {
+		C_df_dlb(l1 = data_label());
+		C_rom_scon(name, (arith) (strlen(name) + 1));
+		C_lae_dlb(l1);
+		C_cal("procentry");
+		C_asp(pointer_size);
+	}
+}
+
+prc_exit()
+{
+	if (options['p']) {
+		C_lae_dlb(l1);
+		C_cal("procexit");
+		C_asp(pointer_size);
+	}
 }

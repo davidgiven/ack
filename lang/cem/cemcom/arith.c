@@ -124,6 +124,7 @@ ch76pointer(expp, oper, tp)
 int
 any2arith(expp, oper)
 	register struct expr **expp;
+	register int oper;
 {
 	/*	Turns any expression into int_type, long_type or
 		double_type.
@@ -211,14 +212,31 @@ arith2arith(tp, oper, expr)
 int
 int2int(expp, tp)
 	register struct expr **expp;
-	struct type *tp;
+	register struct type *tp;
 {
 	/*	The expression *expp, which is of some integral type, is
 		converted to the integral type tp.
 	*/
 	
 	if (is_cp_cst(*expp))	{
+		register struct type *tp1 = (*expp)->ex_type;
+
 		(*expp)->ex_type = tp;
+		if (! tp1->tp_unsigned && tp->tp_unsigned) {
+			/*	Avoid "unreal" overflow warnings, such as
+				caused by f.i.:
+					unsigned int x = ~0;
+					unsigned int y = -1;
+			*/
+			extern long full_mask[];
+			long remainder = (*expp)->VL_VALUE &
+						~full_mask[tp->tp_size];
+
+			if (remainder == 0 ||
+			    remainder == ~full_mask[tp->tp_size]) {
+				(*expp)->VL_VALUE &= ~remainder;
+			}
+		}
 		cut_size(*expp);
 	}
 	else	{
@@ -230,7 +248,7 @@ int2int(expp, tp)
 #ifndef NOFLOAT
 int
 int2float(expp, tp)
-	struct expr **expp;
+	register struct expr **expp;
 	struct type *tp;
 {
 	/*	The expression *expp, which is of some integral type, is
@@ -255,7 +273,7 @@ float2int(expp, tp)
 }
 
 float2float(expp, tp)
-	struct expr **expp;
+	register struct expr **expp;
 	struct type *tp;
 {
 	/*	The expression *expp, which is of some floating type, is
@@ -273,7 +291,7 @@ float2float(expp, tp)
 #endif NOFLOAT
 
 array2pointer(expp)
-	struct expr **expp;
+	register struct expr **expp;
 {
 	/*	The expression, which must be an array, is converted
 		to a pointer.
@@ -326,7 +344,7 @@ opnd2logical(expp, oper)
 	register struct expr **expp;
 	int oper;
 {
-	register int fund;
+	int fund;
 
 	if ((*expp)->ex_type->tp_fund == FUNCTION)
 		function2pointer(expp);
@@ -478,7 +496,7 @@ field2arith(expp)
 		ch7bin(expp, '&', intexpr(fd->fd_mask, INT));
 	}
 	else	{	/* take care of the sign bit: sign extend if needed */
-		register arith bits_in_type = atype->tp_size * 8;
+		arith bits_in_type = atype->tp_size * 8;
 
 		ch7bin(expp, LEFT,
 			intexpr(bits_in_type - fd->fd_width - fd->fd_shift,

@@ -15,6 +15,7 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"use_tmp.h"
+#include	"dataflow.h"
 
 #ifndef NOPP
 extern char *inctable[MAXINCL];
@@ -41,6 +42,19 @@ do_option(text)
 		options[*text] = 1;	/* flags, debug options etc.	*/
 		break;
 
+#ifdef DATAFLOW
+	case 'd':
+#endif DATAFLOW
+	case 'p':			/* procentry/procexit */
+	case 'L' :			/* no fil/lin */
+	case 'n':			/* use no registers */
+	case 'w':			/* no warnings will be given */
+	case 'R':			/* strict version */
+		options[*(text-1)] = 1;
+		break;
+
+#ifdef ___XXX___
+deleted, is now a debug-flag
 	case 'C' :	/* E option + comment output		*/
 #ifndef NOPP
 		options['E'] = 1;
@@ -49,6 +63,7 @@ do_option(text)
 		warning("-C option ignored");
 #endif NOPP
 		break;
+#endif ___XXX___
 
 	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP
@@ -86,6 +101,7 @@ do_option(text)
 		break;
 	}
 
+#ifdef ___XXX___
 	case 'E' :	/* run preprocessor only, with #<int>	*/
 #ifndef NOPP
 		options['E'] = 1;
@@ -93,6 +109,7 @@ do_option(text)
 		warning("-E option ignored");
 #endif NOPP
 		break;
+#endif ___XXX___
 
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 #ifndef NOPP
@@ -115,10 +132,6 @@ do_option(text)
 #endif NOPP
 		break;
 
-	case 'L' :
-		options['L'] = 1;	/* no fil/lin */
-		break;
-
 	case 'M':	/* maximum identifier length */
 		idfsize = txt2int(&text);
 		if (*text || idfsize <= 0)
@@ -135,6 +148,7 @@ do_option(text)
 #endif USE_TMP
 		break;
 
+#ifdef ___XXX___
 	case 'P' :	/* run preprocessor stand-alone, without #'s	*/
 #ifndef NOPP
 		options['E'] = 1;
@@ -143,10 +157,7 @@ do_option(text)
 		warning("-P option ignored");
 #endif NOPP
 		break;
-
-	case 'R':
-		options['R'] = 1;
-		break;
+#endif ___XXX___
 
 #ifdef USE_TMP
 	case 'T' :
@@ -255,12 +266,6 @@ do_option(text)
 		}
 		break;
 	}
-	case 'n':
-		options['n'] = 1;	/* use no registers	*/
-		break;
-	case 'w':
-		options['w'] = 1;	/* no warnings will be given	*/
-		break;
 	}
 }
 

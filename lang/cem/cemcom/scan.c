@@ -31,7 +31,7 @@ PRIVATE int nr_of_params;	/* number of actuals read until now	*/
 
 PRIVATE char **
 getactuals(idef)
-	struct idf *idef;
+	register struct idf *idef;
 {
 	/*	getactuals() collects the actual parameters and turns them
 		into a list of strings, a pointer to which is returned.
