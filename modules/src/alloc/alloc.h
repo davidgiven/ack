@@ -30,6 +30,8 @@ typedef struct _ALLOC_ {
 	struct _ALLOC_ *_A_next;
 } *_PALLOC_;
 
+extern char	*st_alloc();
+
 #define	_A_st_free(ptr, phead, size)	(((_PALLOC_)ptr)->_A_next = \
 						(_PALLOC_)(*phead), \
 					 *((_PALLOC_ *)phead) = \
