@@ -186,7 +186,7 @@ deleted, is now a debug-flag
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
-				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
+				  Realloc((char *) inctable,(inc_max+=10)*sizeof(char *));
 			}
 
 			for (i = inc_pos++; i < inc_total; i++) {
