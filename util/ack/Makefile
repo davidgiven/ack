@@ -8,7 +8,7 @@ OBJ=list.o data.o main.o scan.o svars.o trans.o util.o rmach.o run.o \
     dmach.o intable.o grows.o files.o
 ACKDIR=$(EMHOME)/lib
 FE=fe
-INTABLES=pdp int
+INTABLES=pdp
 LNTABLES=acc apc abc ocm m2 vax4 i86 m68k2 m68k4 pmds pmds4 mantra \
 	m68020 z8000 int22 int24 int44 6500 6800 6805 6809 i80 ns s2650 z80 \
 	sun3 sun2 xenix3 minix minixST

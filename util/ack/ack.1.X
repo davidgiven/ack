@@ -22,7 +22,7 @@ ack \- Amsterdam Compiler Kit
 .br
 \fBabc\fP arguments
 .br
-\fBint\fP arguments
+\fBm2\fP arguments
 .br
 \fBocm\fP arguments
 .br
@@ -43,7 +43,7 @@ Two types of load files can be distinguished,
 \fIa.out\fP files containing machine code and \fIe.out\fP
 files containing virtual EM machine code.
 The last type is designed for interpretation; it is obtained by calling
-the compiler as \fIint\fP.
+the compiler as \fIint22\fP, \fIint24\fP, or \fIint44\fP.
 Compilation time for interpretation is fast and gives many
 runtime checks,
 but execution is about seven times slower.
@@ -289,7 +289,7 @@ are passed to the loaders, as for flags.
 All C source programs are run through the preprocessor
 before they are fed to the compiler proper.
 On larger machines, the compiler has a built in preprocessor.
-Other human readable sources (Pascal or Basic programs and
+Other human readable sources (Modula-2, Pascal, or Basic programs and
 machine assembly) are only preprocessed when they start with a \`#\'.
 .PP
 \fIAck\fP adds a few macro definitions when it calls the
@@ -329,6 +329,7 @@ input:name:output:description
 \&.p:pc:.k:Pascal front end [2,3,6]
 \&.b:abc:.k:Basic front end [6,8]
 \&.ocm:ocm:.k:Occam front end [9]
+\&.mod:m2:.k:Modula-2 front end [11]
 \&.e:encode:.k:Compactify EM assembly language [1]
 \&.k:opt:.m:EM peephole optimizer
 \&.k .m:decode:.e:Produce human readable EM assembly
@@ -372,6 +373,8 @@ Kees Bot and Edwin Scheffer, \fIAn Occam Compiler\fP, IM-6.
 .IP [10]
 H.E. Bal, \fIThe design and implementation of the EM Global Optimizer\fP,
 Informatica rapport IR-99.
+.IP [11]
+C.J.H. Jacobs, \fIThe ACK Modula-2 Compiler\fP.
 .PD
 .SH DIAGNOSTICS
 .PD
@@ -382,6 +385,6 @@ The -g flag is inoperative.
 Not all warning messages are superseded by \fB\-w\fP.
 .br
 Argument assembly files are not preprocessed when fed into the
-universal assembler.
+universal assembler/loader.
 .SH AUTHOR
 Ed Keizer, Vrije Universiteit, Amsterdam
