@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
  *
@@ -65,6 +69,7 @@ static int been_here;
 regscore(off,size,typ,score,totyp)
 	long off;
 {
+	if (score == 0) return -1;
 	switch(typ) {
 		case reg_float:
 			return -1;
@@ -147,7 +152,12 @@ save()
 	}
 	/* Push a mask that indicates which registers were saved */
 	assert(nr_d_regs < 8 && nr_a_regs < 8);
-	fprintf(codefile,"move.w #%d,-(sp)\n",nr_d_regs + (nr_a_regs<<3));
+	if (nr_d_regs == 0 && nr_a_regs == 0) {
+		fprintf(codefile,"clr.w -(sp)\n");
+	} else {
+		fprintf(codefile,"move.w #%d,-(sp)\n",
+			nr_d_regs + (nr_a_regs<<3));
+	}
 
 	/* Compute AB - LB */
 	EM_BSIZE = 4 * (nr_d_regs + nr_a_regs) + 10;
