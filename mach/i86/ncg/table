@@ -37,7 +37,6 @@ EM_BSIZE = 4
 SIZEFACTOR = 5/1
 
 #define EXACT exact
-#define LONGEMPAT
 #define REGVARS
 
 /*****************************************************************/
@@ -879,12 +878,6 @@ with ACC
   gen joehoe {label,".dvi"}
 */
 
-#ifdef LONGEMPAT
-pat loc loc cii dvi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-  with rmnoacc ACC DXREG
-  gen idiv %1			yields ax
-#endif
-
 pat rmi $1==2
 with rmnoacc rmorconst
   uses reusing %2, ACC=%2, DXREG
@@ -901,12 +894,6 @@ with ACC
   kills ALL
   gen joehoe {label,".rmi"}
 */
-
-#ifdef LONGEMPAT
-pat loc loc cii rmi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-with rmnoacc ACC DXREG
-  gen idiv %1			yields dx
-#endif
 
 pat ngi $1==2
 with REG

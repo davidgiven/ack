@@ -669,12 +669,6 @@ dvi !defined($1)| X_ACC |
 			remove(ALL)
 			"call .dvi" erase(%[1])     |	    | |
 */
-#ifdef LONGEMPAT
-loc loc cii dvi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-		| rmnoacc X_ACC X_DXREG |
-			"idiv %[1]"
-			erase(%[2]) erase(%[3])        | ax | |(2,171)+%[1]
-#endif
 rmi $1==2	| rmnoacc rmorconst |
 			allocate(%[2], ACC=%[2], DXREG)
 			"cwd"
@@ -687,12 +681,6 @@ rmi !defined($1)| X_ACC |
 			remove(ALL)
 			"call .rmi" erase(%[1])     |	    | |
 */
-#ifdef LONGEMPAT
-loc loc cii rmi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-		| rmnoacc X_ACC X_DXREG |
-			"idiv %[1]"
-			erase(%[2]) erase(%[3])        | dx | |(2,171)+%[1]
-#endif
 ngi $1==2	| X_REG |
 			"neg %[1]"
 			setcc(%[1]) erase(%[1])     | %[1]  | |(2,3)
