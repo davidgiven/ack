@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include "em_mesX.h"
 #ifdef PEEPHOLE
 #include "em_codeO.h"
 #include "emO_code.h"
