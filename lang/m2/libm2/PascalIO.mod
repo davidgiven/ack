@@ -1,185 +1,149 @@
 (*$R-*)
 IMPLEMENTATION MODULE PascalIO;
+(*
+  Module:	Pascal-like Input/Output
+  Author:	Ceriel J.H. Jacobs
+  Version:	$Header$
+*)
 
-  IMPORT Unix;
   IMPORT Conversions;
   IMPORT Traps;
   IMPORT RealConversions;
-  FROM TTY IMPORT isatty;
+  FROM Streams IMPORT Stream, StreamKind, StreamMode, StreamResult,
+		      InputStream, OutputStream, OpenStream, CloseStream, 
+		      EndOfStream, Read, Write, SetStreamBuffering,
+		      StreamBuffering;
   FROM Storage IMPORT ALLOCATE;
   FROM SYSTEM IMPORT ADR;
 
   TYPE	charset = SET OF CHAR;
 	btype = (reading, writing, free);
 
-  CONST	BUFSIZ = 1024;		(* Tunable *)
-	spaces = charset{11C, 12C, 13C, 14C, 15C, ' '};
+  CONST	spaces = charset{11C, 12C, 13C, 14C, 15C, ' '};
 
-  TYPE	IOBuf = RECORD
+  TYPE	IOstream = RECORD
 			type: btype;
-			eof: BOOLEAN;
+			done, eof : BOOLEAN;
+			ch: CHAR;
 			next: Text;
-			fildes: INTEGER;
-			cnt: INTEGER;
-			maxcnt: INTEGER;
-			bufferedcount: INTEGER;
-			buf: ARRAY [1..BUFSIZ] OF CHAR;
+			stream: Stream;
 		END;
-	Text =	POINTER TO IOBuf;
+	Text =	POINTER TO IOstream;
 	numbuf = ARRAY[0..255] OF CHAR;
 
-  VAR	ibuf, obuf: IOBuf;
+  VAR	ibuf, obuf: IOstream;
 	head: Text;
+	result: StreamResult;
 
   PROCEDURE Reset(VAR InputText: Text; Filename: ARRAY OF CHAR);
-  VAR	i: CARDINAL;
   BEGIN
 	doclose(InputText);
 	getstruct(InputText);
 	WITH InputText^ DO
-		eof := FALSE;
-		FOR i := 0 TO HIGH(Filename) DO
-			buf[i+1] := Filename[i];
-		END;
-		buf[HIGH(Filename)+2] := 0C;
-		fildes := Unix.open(ADR(buf), 0);
-		IF fildes < 0 THEN
+		OpenStream(stream, Filename, text, reading, result);
+		IF result # succeeded THEN
 			Traps.Message("could not open input file");
 			HALT;
 		END;
 		type := reading;
-		cnt := 1;
-		maxcnt := 0;
-		bufferedcount := BUFSIZ;
+		done := FALSE;
+		eof := FALSE;
 	END;
   END Reset;
 
   PROCEDURE Rewrite(VAR OutputText: Text; Filename: ARRAY OF CHAR);
-  VAR	i: CARDINAL;
   BEGIN
 	doclose(OutputText);
 	getstruct(OutputText);
 	WITH OutputText^ DO
-		eof := FALSE;
-		FOR i := 0 TO HIGH(Filename) DO
-			buf[i+1] := Filename[i];
-		END;
-		buf[HIGH(Filename)+2] := 0C;
-		fildes := Unix.creat(ADR(buf), 666B);
-		IF fildes < 0 THEN
+		OpenStream(stream, Filename, text, writing, result);
+		IF result # succeeded THEN
 			Traps.Message("could not open output file");
 			HALT;
 		END;
 		type := writing;
-		cnt := 0;
-		maxcnt := 0;
-		bufferedcount := BUFSIZ;
 	END;
   END Rewrite;
 
   PROCEDURE CloseOutput();
-  VAR text: Text;
+  VAR p: Text;
   BEGIN
-	text := head;
-	WHILE text # NIL DO
-		doclose(text);
-		text := text^.next;
+	p := head;
+	WHILE p # NIL DO
+		doclose(p);
+		p := p^.next;
 	END;
   END CloseOutput;
 
-  PROCEDURE doclose(text: Text);
-  VAR dummy: INTEGER;
+  PROCEDURE doclose(Xtext: Text);
   BEGIN
-	IF text # Notext THEN
-		WITH text^ DO
-			IF type = writing THEN
-				Flush(text);
-			END;
+	IF Xtext # Notext THEN
+		WITH Xtext^ DO
 			IF type # free THEN
+				CloseStream(stream, result);
 				type := free;
-				dummy := Unix.close(fildes);
 			END;
 		END;
 	END;
   END doclose;
 
-  PROCEDURE getstruct(VAR text: Text);
+  PROCEDURE getstruct(VAR Xtext: Text);
   BEGIN
-	text := head;
-	WHILE (text # NIL) AND (text^.type # free) DO
-		text := text^.next;
+	Xtext := head;
+	WHILE (Xtext # NIL) AND (Xtext^.type # free) DO
+		Xtext := Xtext^.next;
 	END;
-	IF text = NIL THEN
-		ALLOCATE(text,SIZE(IOBuf));
-		text^.next := head;
-		head := text;
+	IF Xtext = NIL THEN
+		ALLOCATE(Xtext,SIZE(IOstream));
+		Xtext^.next := head;
+		head := Xtext;
 	END;
   END getstruct;
 
-  PROCEDURE chk(text: Text; tp: btype);
+  PROCEDURE Error(tp: btype);
   BEGIN
-	IF text^.type # tp THEN
-		IF tp = reading THEN
-			Traps.Message("input text expected");
-		ELSE
-			Traps.Message("output text expected");
-		END;
-		HALT;
+	IF tp = reading THEN
+		Traps.Message("input text expected");
+	ELSE
+		Traps.Message("output text expected");
 	END;
-  END chk;
+	HALT;
+  END Error;
 
   PROCEDURE ReadChar(InputText: Text; VAR ch : CHAR);
   BEGIN
 	ch := NextChar(InputText);
-	Get(InputText);
+	InputText^.done := FALSE;
   END ReadChar;
 
   PROCEDURE NextChar(InputText: Text): CHAR;
-  VAR c: CHAR;
   BEGIN
-	chk(InputText, reading);
 	WITH InputText^ DO
-		IF cnt <= maxcnt THEN
-			c := buf[cnt];
-		ELSE
-			c := FillBuf(InputText);
+		IF type # reading THEN Error(reading); END;
+		IF NOT done THEN
+			Get(InputText);
 		END;
+		RETURN ch;
 	END;
-	RETURN c;
   END NextChar;
 
   PROCEDURE Get(InputText: Text);
-  VAR dummy: CHAR;
   BEGIN
-	chk(InputText, reading);
 	WITH InputText^ DO
+		IF type # reading THEN Error(reading); END;
 		IF eof THEN
 			Traps.Message("unexpected EOF");
 			HALT;
 		END;
-		IF cnt > maxcnt THEN
-			dummy := FillBuf(InputText);
+		IF EndOfStream(stream, result) THEN
+			eof := TRUE;
+			ch := 0C;
+		ELSE
+			Read(stream, ch, result);
 		END;
-		INC(cnt);
+		done := TRUE;
 	END;
   END Get;
-
-  PROCEDURE FillBuf(ib: Text) : CHAR;
-  VAR c : CHAR;
-  BEGIN
-	WITH ib^ DO
-		IF eof THEN RETURN 0C; END;
-		maxcnt := Unix.read(fildes, ADR(buf), bufferedcount);
-		cnt := 1;
-		IF maxcnt <= 0 THEN
-			c :=  0C;
-			eof := TRUE;
-		ELSE
-			c :=  buf[1];
-		END;
-	END;
-	RETURN c;
-  END FillBuf;
 
   PROCEDURE Eoln(InputText: Text): BOOLEAN;
   BEGIN
@@ -199,24 +163,11 @@ IMPLEMENTATION MODULE PascalIO;
 	UNTIL ch = 12C;
   END ReadLn;
 
-  PROCEDURE Flush(ob: Text);
-  VAR dummy: INTEGER;
+  PROCEDURE WriteChar(OutputText: Text; char: CHAR);
   BEGIN
-	WITH ob^ DO
-		dummy := Unix.write(fildes, ADR(buf), cnt);
-		cnt := 0;
-	END;
-  END Flush;
-
-  PROCEDURE WriteChar(OutputText: Text; ch: CHAR);
-  BEGIN
-	chk(OutputText, writing);
 	WITH OutputText^ DO
-		INC(cnt);
-		buf[cnt] := ch;
-		IF cnt >= bufferedcount THEN
-			Flush(OutputText);
-		END;
+		IF type # writing THEN Error(writing); END;
+		Write(stream, char, result);
 	END;
   END WriteChar;
 
@@ -451,23 +402,15 @@ IMPLEMENTATION MODULE PascalIO;
 
 BEGIN	(* PascalIO initialization *)
 	WITH ibuf DO
+		stream := InputStream;
 		eof := FALSE;
 		type := reading;
-		fildes := 0;
-		bufferedcount := BUFSIZ;
-		maxcnt := 0;
-		cnt := 1;
+		done := FALSE;
 	END;
 	WITH obuf DO
+		stream := OutputStream;
 		eof := FALSE;
 		type := writing;
-		fildes := 1;
-		IF isatty(1) THEN
-			bufferedcount := 1;
-		ELSE
-			bufferedcount := BUFSIZ;
-		END;
-		cnt := 0;
 	END;
 	Notext := NIL;
 	Input := ADR(ibuf);

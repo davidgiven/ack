@@ -1,8 +1,14 @@
 DEFINITION MODULE PascalIO;
-(* This module provides for I/O that is essentially equivalent to the I/O
+(* 
+   Module:	Pascal-like Input/Output
+   Author:	Ceriel J.H. Jacobs
+   Version:	$Header$
+
+   This module provides for I/O that is essentially equivalent to the I/O
    provided by Pascal with "text", or "file of char".
-   However, the user must call a cleanup routine at the end of his program
-   for the output buffers to be flushed.
+   Output buffers are automaically flushed at program termination.
+   The CloseOutput routine is just there for compatibility with earlier
+   versions of this module.
 *)
 
   CONST	Eos = 0C;		(* End of string character *)
