@@ -589,6 +589,7 @@ copyact(ch1,ch2,flag,level) char ch1,ch2; {
 			ch = input();
 			unput(ch);
 			if (ch == '*') {
+				putc('/', f);
 				skipcomment(1);
 				continue;
 			}

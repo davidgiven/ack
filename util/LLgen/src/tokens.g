@@ -240,20 +240,22 @@ unput(c) {
 skipcomment(flag) {
 	/*
 	 * Skip comment. If flag != 0, the comment is inside a fragment
-	 * of C-code, so the newlines in it must be copied to enable the
-	 * C-compiler to keep a correct line count
+	 * of C-code, so keep it.
 	 */
 	register int	ch;
 	int		saved;	/* line count on which comment starts */
 
 	saved = linecount;
 	if (input() != '*') error(linecount,"Illegal comment");
+	if (flag) putc('*', fact);
 	do {
 		ch = input();
+		if (flag) putc(ch, fact);
 		while (ch == '*') {
-			if ((ch = input()) == '/') return;
+			ch = input();
+			if (flag) putc(ch, fact);
+			if (ch == '/') return;
 		}
-		if (flag && ch == '\n') putc(ch,fact);
 	} while (ch != EOF);
 	error(saved,"Comment does not terminate");
 }
