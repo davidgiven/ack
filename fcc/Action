@@ -1,0 +1,6 @@
+name "Fast cc-compatible C compiler"
+dir cemcom
+end
+name "Driver for fast cc-compatible C compiler"
+dir driver
+end
