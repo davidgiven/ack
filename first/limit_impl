@@ -148,7 +148,7 @@ if [ $DO_MACHINE_INDEP = n ]
 then
 	for i in $CONFIG/mach/*/Action
 	do
-		for j in libem libend libfp libdb libsys libmon libbsd4_2 libbsd4_1a libsysV_2
+		for j in libem libend libfp libdb libsys libmon libbsd4_2 libbsd4_1a libsysV_2 libce
 		do
 			if grep -s $j $i
 			then

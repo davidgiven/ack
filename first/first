@@ -48,24 +48,24 @@ BM=1
 OLDACM=$ACM
 OLDSYS=$SYS
 case $SYSNAME in
-vax_bsd4_1a)    ACM=vax4 ; SYS=BSD4_1 ; BYTE_ORDER=0123 ;;
-vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ; BYTE_ORDER=0123 ;;
-vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ; BYTE_ORDER=0123 ;;
-i386)		ACM=i386 ; SYS=SYS_5 ; BYTE_ORDER=0123 ;;
-sun3)		ACM=sun3 ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
-sun2)		ACM=sun2 ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
-m68_unisoft|m68k2)	ACM=m68k2 ; SYS=V7; BYTE_ORDER=3210 ;;
-m68_sysV_0|mantra)	ACM=mantra ; SYS=SYS_5; BYTE_ORDER=3210 ;;
-m68020)		ACM=m68020 ; SYS=SYS_5; BYTE_ORDER=3210 ;;
-sparc)		ACM=sparc ; SYS=BSD4_2; BYTE_ORDER=3210 ;;
-i86)		ACM=i86 ; SYS=SYS_5; BYTE_ORDER=0123 ;;
-xenix3)		ACM=xenix3 ; SYS=SYS_5; BYTE_ORDER=0123 ;;
-minix)		ACM=minix ; SYS=V7; BYTE_ORDER=0123 ;;
-pmds)		ACM=pmds ; SYS=V7; BYTE_ORDER=3210 ;;
-pmds4)		ACM=pmds4 ; SYS=V7; BYTE_ORDER=3210 ;;
-minixST)	ACM=minixST ; SYS=V7; BYTE_ORDER=3210 ;;
-m68k4)		ACM=m68k4 ; SYS=V7; BYTE_ORDER=3210 ;;
-*)		ACM=XXX ; SYS=XXX ; BYTE_ORDER=XXX ;;
+vax_bsd4_1a)    ACM=vax4 ; SYS=BSD4_1 ; BYTE_ORDER=0123 ; MACH=vax4 ;;
+vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ; BYTE_ORDER=0123 ; MACH=vax4 ;;
+vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ; BYTE_ORDER=0123 ; MACH=vax4 ;;
+i386)		ACM=i386 ; SYS=SYS_5 ; BYTE_ORDER=0123 ; MACH=i386 ;;
+sun3)		ACM=sun3 ; SYS=BSD4_2; BYTE_ORDER=3210 ; MACH=m68020 ;;
+sun2)		ACM=sun2 ; SYS=BSD4_2; BYTE_ORDER=3210 ; MACH=m68k4 ;;
+m68_unisoft|m68k2)	ACM=m68k2 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k2 ;;
+m68_sysV_0|mantra)	ACM=mantra ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68k4 ;;
+m68020)		ACM=m68020 ; SYS=SYS_5; BYTE_ORDER=3210 ; MACH=m68020 ;;
+sparc)		ACM=sparc ; SYS=BSD4_2; BYTE_ORDER=3210 ; MACH=sparc ;;
+i86)		ACM=i86 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
+xenix3)		ACM=xenix3 ; SYS=SYS_5; BYTE_ORDER=0123 ; MACH=i86 ;;
+minix)		ACM=minix ; SYS=V7; BYTE_ORDER=0123 ; MACH=i86 ;;
+pmds)		ACM=pmds ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k2 ;;
+pmds4)		ACM=pmds4 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k4 ;;
+minixST)	ACM=minixST ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k2 ;;
+m68k4)		ACM=m68k4 ; SYS=V7; BYTE_ORDER=3210 ; MACH=m68k4 ;;
+*)		ACM=XXX ; SYS=XXX ; BYTE_ORDER=XXX ; MACH=XXX ;;
 esac
 
 : do not change the order in MACH_LIST. check limit_enquire first.
@@ -186,6 +186,7 @@ echo "DISABLE_SUP=\"$DISABLE_SUP\"; export DISABLE_SUP" >> macros
 echo "DO_MACHINE_INDEP=\"$DO_MACHINE_INDEP\"; export DO_MACHINE_INDEP" >> macros
 echo "MACH_LIST=\"$MACH_LIST\"; export MACH_LIST" >> macros
 echo "SYSVAX=\"$SYSVAX\"; export SYSVAX" >> macros
+echo "MACH=\"$MACH\"; export MACH" >> macros
 echo "WS=\"$WS\"; export WS" >> macros
 echo "PS=\"$PS\"; export PS" >> macros
 

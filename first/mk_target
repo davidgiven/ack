@@ -31,13 +31,11 @@ create_dir $TARGET_HOME/etc
 create_dir $TARGET_HOME/h
 create_dir $TARGET_HOME/include
 create_dir $TARGET_HOME/doc
-create_dir $TARGET_HOME/man
 
 cp $SRC_HOME/etc/ip_spec.t $TARGET_HOME/etc/ip_spec.t
 ( cd $SRC_HOME/lib ; tar cf - . ) | ( cd $TARGET_HOME/lib ; tar xf - )
 ( cd $SRC_HOME/include ; tar cf - . ) | ( cd $TARGET_HOME/include ; tar xf - )
 ( cd $SRC_HOME/h ; tar cf - . ) | ( cd $TARGET_HOME/h ; tar xf - )
-( cd $SRC_HOME/man ; tar cf - . ) | ( cd $TARGET_HOME/man ; tar xf - )
 ( cd $SRC_HOME/doc ; tar cf - . ) | ( cd $TARGET_HOME/doc ; tar xf - )
 
 cd $TARGET_HOME

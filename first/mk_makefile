@@ -1,15 +1,25 @@
 : '$Header$'
 
-: This shell script inserts the file "make_macros" after a line
+: This shell script inserts make macros after a line
 : starting with #PARAMS in "make_proto", and produces the result on
 : standard output.
 
+trap "rm -f /tmp/mk_mak$$" 0 1 2 3 15
 case $# in
-2)	;;
-*)	echo "Usage: $0 <make_macros> <make_proto>" 1>&2
+1)	;;
+*)	echo "Usage: $0 <make_proto>" 1>&2
 	exit 1
 	;;
 esac
 
-sed -e "/^#PARAMS/r $1" $2
+cp $1 /tmp/mk_mak$$
+
+ed - /tmp/mk_mak$$ << 'EOF'
+/^#PARAMS/c
+#PARAMS		do not remove this line!
+.
+w
+q
+EOF
+cat /tmp/mk_mak$$
 exit 0

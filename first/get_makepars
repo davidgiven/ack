@@ -53,6 +53,9 @@ UTIL_HOME = $UTIL_HOME
 
 # Machine independent part created?
 DO_MACHINE_INDEP = $DO_MACHINE_INDEP
+
+# Target machine, only needed for fast compilers
+MACH = $MACH
 " > make_macros
 
 if [ $TARGET_HOME = $UTIL_HOME ]

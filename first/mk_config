@@ -1,13 +1,5 @@
 set -e
 
-MACROS=$1
-
-if [ -f $MACROS ]
-then :
-else echo "$0: $MACROS not found" 1>&2
-     exit 3
-fi
-
 create_dir $CONFIG
 
 cd $SRC_HOME
@@ -22,9 +14,13 @@ done
 for i in `cat dir_list`
 do
 	create_dir $i
-	rm -f $i/NoAction
+	rm -f $i/No*
+	if [ -f $i/Makefile ]
+	then
+		( cd $i ; if make clean ; then exit 0 ; else exit 0 ; fi ) > /dev/null 2>&1 
+	fi
 	if [ -f $SRC_HOME/$i/proto.make ]
-	then mk_makefile $MACROS $SRC_HOME/$i/proto.make > $i/Makefile
+	then mk_makefile $SRC_HOME/$i/proto.make > $i/Makefile
 	fi
 	if [ -f $SRC_HOME/$i/Action ]
 	then
@@ -38,7 +34,7 @@ done
 cd $SRC_HOME/util/ceg/util
 for i in make_*
 do
-	mk_makefile $MACROS $i > $CONFIG/util/ceg/util/$i
+	mk_makefile $i > $CONFIG/util/ceg/util/$i
 done
 
 cd $CONFIG
@@ -62,25 +58,25 @@ do
 	if [ -d $i/as ]
 	then
 		cd $i/as
-		mk_makefile $MACROS $SRC_HOME/mach/proto/as/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/as/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
 		cd ../..
 	fi
 	if [ -d $i/top ]
 	then
 		cd $i/top
-		mk_makefile $MACROS $SRC_HOME/mach/proto/top/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/top/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
 		cd ../..
 	fi
 	if [ -d $i/cg ]
 	then
 		cd $i/cg
-		mk_makefile $MACROS $SRC_HOME/mach/proto/cg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/cg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
 		cd ../..
 	fi
 	if [ -d $i/ncg ]
 	then
 		cd $i/ncg
-		mk_makefile $MACROS $SRC_HOME/mach/proto/ncg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/ncg/proto.make | sed -e "/#MACH_DEFINE/,/^MACH/s/=.*/= $i/" > Makefile
 		if [ -f $SRC_HOME/mach/$i/ncg/table_dir ]
 		then
 			ed - Makefile <<EOF
@@ -91,12 +87,12 @@ EOF
 		fi
 		cd ../..
 	fi
-	for j in libem libend libmon libfp libsys libdb
+	for j in libem libend libmon libfp libsys libdb libce
 	do
 	    if [ -d $i/$j ]
 	    then
 		cd $i/$j
-		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
 		cd ../..
 	    fi
 	done
@@ -105,7 +101,7 @@ EOF
 	    if [ -d $i/$j ]
 	    then
 		cd $i/$j
-		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.libsys | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" -e "s/libsys/$j/g" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/libg/proto.libsys | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" -e "s/libsys/$j/g" > Makefile
 		cd ../..
 	    fi
 	done
@@ -113,7 +109,7 @@ EOF
 	do
 	    create_dir $i/$j
 	    cd $i/$j
-	    mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+	    mk_makefile $SRC_HOME/mach/proto/libg/proto.$j | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
 	    cd ../..
 	done
 	if [ $i = vax4 ]
@@ -123,7 +119,7 @@ EOF
 	else 
 		create_dir $i/libsys
 		cd $i/libsys
-		mk_makefile $MACROS $SRC_HOME/mach/proto/libg/proto.sysmon | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
+		mk_makefile $SRC_HOME/mach/proto/libg/proto.sysmon | sed -e "/#MACH_PARAMS/r $SRC_HOME/mach/$i/mach_params" > Makefile
 		cd ../..
 	fi
     fi

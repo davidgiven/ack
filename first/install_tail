@@ -1,9 +1,20 @@
 set -e
 
-PATH=::$SRC_HOME/first:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb
+PATH=::$CONFIG/bin:$UTIL_HOME/bin:/bin:/usr/bin:/usr/ucb
 export PATH
 
-mk_config `pwd`/make_macros
+$SRC_HOME/first/create_dir $CONFIG
+$SRC_HOME/first/create_dir $CONFIG/bin
+
+cat macros $SRC_HOME/first/mk_config > $CONFIG/bin/mk_config
+cat macros $SRC_HOME/first/mk_target > $CONFIG/bin/mk_target
+cat macros $SRC_HOME/first/limit_impl > $CONFIG/bin/limit_impl
+
+sed '/^#PARAMS/r make_macros' < $SRC_HOME/first/mk_makefile > $CONFIG/bin/mk_makefile
+chmod +x $CONFIG/bin/*
+cp $SRC_HOME/first/create_dir $CONFIG/bin/create_dir
+
+mk_config
 
 mk_target
 
@@ -11,7 +22,7 @@ limit_impl
 
 case $SYSNAME in
 i386)
-	ed - $TARGET_HOME/lib/descr/fe << ABC
+	ed - $TARGET_HOME/lib/descr/fe << 'ABC'
 1,$s/-D{NAME}/-D{NAME} -DNO_PROTOTYPE/
 w
 q
