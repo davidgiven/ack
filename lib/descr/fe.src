@@ -41,22 +41,23 @@ name cem
 	callname acc
 	callname cc
 end
-var PC_PCPATH={EM}/lib/pc_pem
-var PC_ERRPATH={EM}/etc/pc_errors
 name pc
 	from .p
 	to .k
 	program {EM}/lib/em_pc
-	mapflag -p PC_F={PC_F?} -p
+	mapflag -L PC_F={PC_F?} -L
+#	mapflag -s PC_F={PC_F?} -s
+#	mapflag -u PC_F={PC_F?} -u
 	mapflag -w PC_F={PC_F?} -w
-	mapflag -E PC_F={PC_F?} -E
-	mapflag -e PC_F={PC_F?} -e
-	mapflag -{*} PC_F={PC_F?} -\{*}
-	mapflag -L PC_F={PC_F?} -\{l-}
 	mapflag -V* PC_F={PC_F?} -V*
-	mapflag -Pr* PC_ERRPATH=*
-	mapflag -PR* PC_PCPATH=*
-	args -Vw{w}i{w}j{w}p{p}f{d}l{l} -R{PC_PCPATH} -r{PC_ERRPATH} {PC_F?} < > {SOURCE}
+	mapflag -M* PC_F={PC_F?} -M*
+#	mapflag -i* PC_F={PC_F?} -i*
+	mapflag -A  PC_F={PC_F?} -A
+#	mapflag -R  PC_F={PC_F?} -R
+	mapflag --* PC_F={PC_F?} -*
+#default size and alignment for longs are 4
+#range checks can only be disabled through comments
+	args -Vw{w}.{w}i{w}.{w}l{l}.{w}p{p}.{w}f{d}.{w}S{w}.{w} {PC_F?} < > {SOURCE}
 	prep cond
 	rts .p
 	need .p
@@ -141,11 +142,13 @@ name opt
 	stdout
 	optimizer
 end
+var EGO={EM}/lib/em_ego
 name ego
 	from .m.ma
 	to .gk
 	program /bin/sh
-	mapflag -EGO* EGO_F={EGO_F?} *
+	mapflag -EGO-* EGO_F={EGO_F?} -*
+	mapflag -EGO=* EGO=*
 # The following lines are obsolete, but here for backwards compatibility.
 # They should be removed some day.
 	mapflag -IL* EGO_F={EGO_F?} -IL*
@@ -165,7 +168,7 @@ name ego
 	mapflag -s* EGO_F={EGO_F?} -s*
 	mapflag -a* EGO_F={EGO_F?} -a*
 	mapflag -O* EGO_F={EGO_F?} -O*
-	args {EM}/lib/em_ego {EM} {EGO_F?} -P {EM}/lib/ego \
+	args {EGO} {EM} {EGO_F?} -P {EM}/lib/ego \
 -M{EM}/lib/ego/{M}descr <
 	optimizer 2
 	stdout
