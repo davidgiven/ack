@@ -17,9 +17,6 @@ extern int ws;		/* word size	*/
 /* number of bits in a byte */
 #define BYTELENGTH 8
 
-/* number of bits in a word, defined in automatically generated file */
-#include "../share/wordlen.h"
-
 #if BYTELENGTH==8
 #define DIVBL(a)	((a) >> 3)
 #define MODBL(a)	((a) & 07)
@@ -28,19 +25,18 @@ extern int ws;		/* word size	*/
 #define MODBL(a)	(a%BYTELENGTH)
 #endif
 
-#if WORDLENGTH==16
-#define DIVWL(a)	((a) >> 4)
-#define MODWL(a)	((a) & 017)
-#else
-#if WORDLENGTH==32
-#define DIVWL(a)	((a) >> 5)
-#define MODWL(a)	((a) & 037)
-#else
-#define DIVWL(a)	(a/WORDLENGTH)
-#define MODWL(a)	(a%WORDLENGTH)
-#endif
-#endif
+#define WORDLENGTH	(sizeof(int)*BYTELENGTH)
 
+#define DIVWL(a)	(WORDLENGTH==16 ? \
+			  ((a)>>4) : \
+			  (WORDLENGTH==32 ? \
+			    ((a)>>5) : \
+			    ((a)/(8*sizeof(int)))))
+#define MODWL(a)	(WORDLENGTH==16 ? \
+			  ((a)&017) : \
+			  (WORDLENGTH==32 ? \
+			    ((a)&037) : \
+			    ((a)%(8*sizeof(int)))))
 
 #define UNKNOWN_SIZE (-1)
 

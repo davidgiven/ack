@@ -25,7 +25,6 @@ lset.c
 lset.h
 makecldef.c
 makedepend
-makewlen.c
 map.c
 map.h
 parser.c

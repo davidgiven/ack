@@ -143,7 +143,7 @@ showcset()
 	for (;;) {
 		w = getint();
 		mask = 1 ;
-		for (j = 1; j <= WORDLENGTH; j++) {
+		for (j = 1; j <= sizeof(int)*8; j++) {
 			if (w & mask) {
 				printf("%d ",i);
 			}

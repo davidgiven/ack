@@ -22,7 +22,7 @@ PRFILES=$(SRC)
 	$(CC) -c.m $(CFLAGS) $<
 
 all:\
-classdefs.h pop_push.h wordlen.h alloc.o cset.o debug.o files.o go.o\
+classdefs.h pop_push.h alloc.o cset.o debug.o files.o go.o\
 global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o\
 init_glob.o
 
@@ -33,7 +33,7 @@ cmp:		all
 distr:		pop_push.h
 
 em_files:\
-classdefs.h pop_push.h wordlen.h alloc.m cset.m debug.m\
+classdefs.h pop_push.h alloc.m cset.m debug.m\
 files.m go.m global.m lset.m map.m parser.m get.m put.m aux.m stack_chg.m\
 locals.m init_glob.m
 
@@ -49,13 +49,6 @@ makeclassdef: \
 pop_push.h: \
 	$(EMHOME)/etc/em_table pop_push.awk
 	 awk -f pop_push.awk < $(EMHOME)/etc/em_table > pop_push.h
-
-wordlen.h: makewordlen 
-	makewordlen > wordlen.h
-	rm makewordlen 
-
-makewordlen: makewlen.c
-	$(CC) -o makewordlen makewlen.c
 
 show: \
 	show.c
@@ -73,7 +66,7 @@ clean:
 	@echo "cleaned. Type 'make oclean' instead."
 
 oclean:
-	rm -f makeclassdef classdefs.h makewordlen wordlen.h *.o Out out nohup.out *.m
+	rm -f makeclassdef classdefs.h *.o Out out nohup.out *.m
 
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
