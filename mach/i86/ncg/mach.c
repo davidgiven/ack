@@ -63,9 +63,9 @@ con_float() {
 	double f;
 	double atof();
 	int i;
-#ifndef OWNFLOAT
-	double frexp();
 	int j;
+	double frexp();
+#ifndef OWNFLOAT
 	int sign = 0;
 	int fraction[4] ;
 #else OWNFLOAT
@@ -79,9 +79,31 @@ con_float() {
 	}
 	fprintf(codefile,"!float %s sz %d\n", str, argval);
 	f = atof(str);
+	if (f == 0) {
+		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
+		fprintf(codefile, ".data2 0, 0\n");
+		return;
+	}
 #ifdef OWNFLOAT
 	if (argval == 4) {
+		/* careful: avoid overflow */
+		double ldexp();
+		f = frexp(f, &i);
 		fl = f;
+		fl = frexp(fl,&j);
+		if (i+j > 127) {
+			/* overflow situation */
+			fprintf(codefile, ".data1 0%o, 0377, 0377, 0377 ! overflow\n",
+				f < 0 ? 0377 : 0177);
+			return;
+		}
+		if (i+j < -127) {
+			/* underflow situation */
+			fprintf(codefile, ".data1 0%o, 0200, 0, 0 ! underflow\n",
+				f < 0 ? 0200 : 0);
+			return;
+		}
+		fl = ldexp(fl, i+j);
 		p = (char *) &fl;
 	}
 	else {
@@ -92,11 +114,6 @@ con_float() {
 		fprintf(codefile,",0%o", *p++ & 0377);
 	}
 #else OWNFLOAT
-	if (f == 0) {
-		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
-		fprintf(codefile, ".data2 0, 0\n");
-		return;
-	}
 	f = frexp(f, &i);
 	if (f < 0) {
 		f = -f;
