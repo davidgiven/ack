@@ -205,7 +205,8 @@ begin if (a<sp) or (a mod wsize<>0) then trap(ESTACK); lb:=a end;
 
 procedure newhp(a:adr);
 begin if (a>sp) or (a>maxdata+1) or (a mod wsize<>0)
-      then trap(EHEAP); hp:=a
+      then trap(EHEAP)
+      else hp:=a
 end;
 
 function argc(a:double):sword;

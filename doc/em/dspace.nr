@@ -357,9 +357,9 @@ If it is smaller, then the heap shrinks.
 HP may never point below its original value.
 All words between the current HP and the original HP
 are allocated to the heap.
-The heap may not grow into a part of memory that is already allocated
-for the stack.
+The heap may not grow into a part of memory that is already allocated.
 When this is attempted, the STR instruction will cause a trap to occur.
+In this case, HP retains its old value.
 .P
 The only way to address the heap is indirectly.
 Whenever an object is allocated by increasing HP,

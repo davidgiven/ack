@@ -96,7 +96,7 @@ n l l.
 9@EFUND@Undefined float
 10@ECONV@Conversion error
 16*@ESTACK@Stack overflow
-17*@EHEAP@Heap overflow
+17@EHEAP@Heap overflow
 18*@EILLINS@Illegal instruction
 19*@EODDZ@Illegal size argument
 20*@ECASE@Case error
