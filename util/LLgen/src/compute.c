@@ -713,7 +713,7 @@ do_safes(p,safe) register p_gram p; {
 		  	p++;
 			continue;
 		  case TERMINAL:
-			retval = 2;
+			safe = NOSCANDONE;
 			break;
 		  case TERM : {
 			register p_term q;
@@ -727,7 +727,7 @@ do_safes(p,safe) register p_gram p; {
 			if (retval == 2 && (!(q->t_flags & TNOSCAN))) {
 				q->t_flags |= TNOSCAN;
 			}
-			if (rep != FIXED || retval == 0) retval = 1;
+			safe = t_after(rep, i, q->t_flags & TNOSCAN);
 			break; }
 		  case ALTERNATION : {
 		  	register p_link l;
@@ -748,27 +748,30 @@ do_safes(p,safe) register p_gram p; {
 			return retval; }
 		  case NONTERM : {
 			register p_nont n;
-			int nsafe;
+			int nsafe, osafe;;
 
 			n = &nonterms[g_getnont(p)];
 			nsafe = getntsafe(n->n_flags);
-			if (!(n->n_flags & NNOSCAN)) retval = 1;
-			else retval = 2;
-			if (safe == nsafe) break;
+			osafe = safe;
+			if (!(n->n_flags & NNOSCAN)) {
+				safe = SCANDONE;
+			}
+			else safe = NOSCANDONE;
+			if (osafe == nsafe) break;
 			if (nsafe == NOSAFETY) {
 				change = 1;
-				setntsafe(&(n->n_flags), safe);
+				setntsafe(&(n->n_flags), osafe);
 				break;
 			}
-			if (safe == NOSCANDONE || nsafe == NOSCANDONE) {
+			if (osafe == NOSCANDONE || nsafe == NOSCANDONE) {
 				if (nsafe != SCANDONE) {
 					change = 1;
 					setntsafe(&(n->n_flags), SCANDONE);
 				}
 				break;
 			}
-			if (safe > nsafe) {
-				setntsafe(&(n->n_flags), safe);
+			if (osafe > nsafe) {
+				setntsafe(&(n->n_flags), osafe);
 				change = 1;
 			}
 			break; }
@@ -776,8 +779,8 @@ do_safes(p,safe) register p_gram p; {
 			return retval;
 		}
 		p++;
-		if (retval == 1) safe = SCANDONE;
-		else safe = NOSCANDONE;
+		if (safe == NOSCANDONE) retval = 2;
+		else retval = 1;
 	}
 }
 
@@ -809,4 +812,12 @@ t_safety(rep, count, persistent, safety) {
 		return SCANDONE;
 	}
 	/* NOTREACHED */
+}
+
+t_after(rep, count, noscan) {
+	if (count == 0 && (rep == STAR || rep == PLUS)) {
+		return SAFESCANDONE;
+	}
+	if (rep == FIXED && noscan) return NOSCANDONE;
+	return SCANDONE;
 }

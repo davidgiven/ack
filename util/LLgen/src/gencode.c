@@ -761,8 +761,7 @@ codeforterm(q,safety,toplevel) register p_term q; {
 			fputs(c_close, f);/* Close Register ... */
 		}
 	}
-	if (rep != FIXED || !noscan) return SCANDONE;
-	return NOSCANDONE;
+	return t_after(rep, i, noscan);
 }
 
 STATIC
