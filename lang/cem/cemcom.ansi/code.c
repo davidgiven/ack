@@ -154,7 +154,7 @@ end_code()
 		/* floating point used	*/
 		C_ms_flt();
 	}
-	C_ms_src((int)(LineNumber - 2), FileName);
+	C_ms_src((int)(LineNumber - 2), source);
 	C_close();
 }
 #endif	/* LINT */
@@ -554,6 +554,7 @@ loc_init(expr, id)
 			break;		/* switch */
 		} else if (!tmpoffset) {/* first time for this variable */
 			tmpoffset = df->df_address;
+			if (unknownsize) tmpoffset = -1;
 			df->df_address = data_label();
 			C_df_dlb((label)df->df_address);
 		} else {
