@@ -24,7 +24,7 @@
 extern          (*_sig())();
 extern          _catch();
 #ifndef CPM
-extern int      ioctl();
+extern int      gtty();
 #endif
 
 char            *_hbase;
@@ -37,7 +37,7 @@ char            **_penvp;
 
 _ini(args,hb,p,mainlb) char *args,*hb,*mainlb; int *p; {
 	struct file *f;
-	char buf[6];
+	char buf[128];
 
 	_pargc= *(int *)args; args += sizeof (int);
 	_pargv= *(char ***)args; args += sizeof (char **);
@@ -66,7 +66,7 @@ _ini(args,hb,p,mainlb) char *args,*hb,*mainlb; int *p; {
 #ifdef CPM
 		f->count = 1;
 #else
-		f->count = (ioctl(1,(('t'<<8)|8),buf) == 0 ? 1 : 512);
+		f->count = (gtty(1,buf) >= 0 ? 1 : 512);
 #endif
 		f->buflen = f->count;
 	}
