@@ -2,8 +2,8 @@
 #include <em.h>
 #include "back.h"
 
-extern int locals_created;
-extern int procno;
+extern int B_locals_created;
+extern int B_procno;
 
 C_end( l)
 arith l;
@@ -12,12 +12,12 @@ arith l;
 
 	swtxt();
 
-	if ( !locals_created) {
-		p = extnd_pro( procno);
+	if ( !B_locals_created) {
+		p = extnd_pro( B_procno);
 
 		symbol_definition( p);
 		set_local_visible( p);
 		locals( l);
-		jump( extnd_start( procno));
+		jump( extnd_start( B_procno));
 	}
 }

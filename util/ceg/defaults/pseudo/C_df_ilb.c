@@ -2,7 +2,7 @@
 #include <em.h>
 #include "back.h"
 
-extern int procno;
+extern int B_procno;
 
 C_df_ilb( l)
 label l;
@@ -10,6 +10,6 @@ label l;
 	char *s;
 
 	swtxt();
-	symbol_definition(s = extnd_ilb( l, procno));
+	symbol_definition(s = extnd_ilb( l, B_procno));
 	set_local_visible(s);
 }

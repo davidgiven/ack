@@ -2,9 +2,9 @@
 #include <em.h>
 #include <assert.h>
 
-extern int locals_created; 
+extern int B_locals_created; 
 
 C_end_narg()
 {
-	assert( locals_created);
+	assert( B_locals_created);
 }

@@ -2,26 +2,25 @@
 #include <em.h>
 #include "back.h"
 
-extern int locals_created; 
-extern int procno; 
+extern int B_locals_created; 
+extern int B_procno; 
 
 C_pro_narg( s)
 char*s;
 
-/* Het aantal locale variabelen is nog niet bekend, maar het stack-frame moet
- * nu wel gemaakt worden! Oplossing : Pas bij bij C_end() is het aantal locale
- * variabelen bekend dus nu een "jump" genereren en bij C_end() prolog() aan-
- * roepen en daarna terug-jump-en naar het begin van de EM-procedure.
+/* The number of locals is unknown, but the stackframe must be made anyway.
+ * Solution: jump to end of procedure, where C_end() will generate code to
+ * create the stackframe, and also will generate code to jump back.
  */
 {
 	char *ss;
 	swtxt();
 
 	symbol_definition( extnd_name( s));
-	procno++;
+	B_procno++;
 	prolog();
-	locals_created = 0;
-	jump( extnd_pro( procno));
-	symbol_definition( ss = extnd_start( procno));
+	B_locals_created = 0;
+	jump( extnd_pro( B_procno));
+	symbol_definition( ss = extnd_start( B_procno));
 	set_local_visible( ss);
 }

@@ -2,13 +2,13 @@
 #include <em.h>
 #include <assert.h>
 
-extern int busy; 
+extern int B_busy; 
 
 C_close()
 {
-	assert( busy);
+	assert( B_busy);
 
 	end_back();
         close_back();
-	busy = 0;
+	B_busy = 0;
 }

@@ -1,9 +1,9 @@
 #define CODE_EXPANDER
 #include <em.h>
 
-extern int busy; 
+extern int B_busy; 
 
 int C_busy()
 {
-	return( busy);
+	return( B_busy);
 }

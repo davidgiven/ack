@@ -3,12 +3,12 @@
 #include <assert.h>
 #include <system.h>
 
-extern int busy; 
+extern int B_busy; 
 
 int C_open( filename)
 char *filename;
 {
-	assert( !busy);
+	assert( !B_busy);
 
 	if ( !open_back( filename)) {
 		fprint( STDERR, "Couldn't open %s\n", filename);
