@@ -135,6 +135,7 @@ signal.c
 sigpause.s
 _sigpause.s
 sigsetmask.s
+_sigsetmask.s
 sigstack.s
 sigtramp.s
 sigvec.c
