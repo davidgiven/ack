@@ -10,7 +10,7 @@
 /* ??? check these later */
 private acquire_malout(void), check_ml_last(const char *s);
 private dump_all_mallinks(void), dump_free_list(int i);
-private dump_mallink(const char *s), print_loop(mallink *ml);
+private dump_mallink(const char *s, mallink *ml), print_loop(mallink *ml);
 private working_on(mallink *ml);
 private unsigned int checksum(mallink *ml);
 static FILE *malout;
@@ -41,7 +41,7 @@ maldump(int n)	{
 	acquire_malout();
 	fprintf(malout,
 		">>>>>>>>>>>>>>>> DUMP OF ALL MALLINKS <<<<<<<<<<<<<<<<");
-	fprintf(malout, "    ml_last = %ld\n", (long)ml_last);
+	fprintf(malout, "    ml_last = %p\n", ml_last);
 	if (++pr_cnt == 100) pr_cnt = 0;
 	dump_all_mallinks();
 	fprintf(malout,
@@ -62,7 +62,7 @@ acquire_malout(void)	{
 	static char buf[BUFSIZ];
 	
 	if (!malout)	{
-		malout = fopen("mal.out", "w");	
+		malout = freopen("mal.out", "w", stderr);	
 		setbuf(malout, buf);
 	}
 }
@@ -88,7 +88,7 @@ dump_free_list(int i)	{
 	for_free_list(i, ml)	{
 		if (print_loop(ml))
 			return;
-		fprintf(malout, "%ld ", ml);
+		fprintf(malout, "%p ", ml);
 	}
 	fprintf(malout, "<\n");
 }
@@ -108,7 +108,7 @@ dump_mallink(const char *s, mallink *ml)	{
 	acquire_malout();
 	if (s)
 		fprintf(malout, "%s: ", s);
-	fprintf(malout, "@: %ld;", (long)ml);
+	fprintf(malout, "@: %p;", ml);
 	if (ml && checksum_of(ml) != checksum(ml))
 		fprintf(malout, ">>>> CORRUPTED <<<<");
 	if (!ml)	{
@@ -116,12 +116,12 @@ dump_mallink(const char *s, mallink *ml)	{
 		return;
 	}	
 	if (free_of(ml))	{
-		fprintf(malout, " l_p: %ld;", (long)_log_prev_of(ml));
-		fprintf(malout, " l_n: %ld;", (long)_log_next_of(ml));
+		fprintf(malout, " l_p: %p;", _log_prev_of(ml));
+		fprintf(malout, " l_n: %p;", _log_next_of(ml));
 	}
-	fprintf(malout, " p_s: %ld;", (long)prev_size_of(ml));
-	fprintf(malout, " t_s: %ld;", (long)_this_size_of(ml));
-	fprintf(malout, " sz: %ld;", (long)size_of(ml));
+	fprintf(malout, " p_s: %p;", prev_size_of(ml));
+	fprintf(malout, " t_s: %p;", _this_size_of(ml));
+	fprintf(malout, " sz: %p;", size_of(ml));
 	fprintf(malout, " fr: %d;", free_of(ml));
 	fprintf(malout, "\n");
 }
@@ -153,7 +153,7 @@ check_mallinks(const char *s)	{
 	stat = BEZET;
 	for_all_mallinks(ml)	{
 		if (checksum_of(ml) != checksum(ml))
-			Error("mallink info at %ld corrupted", s, ml);
+			Error("mallink info at %p corrupted", s, ml);
 		if (working_on(ml))	{
 			stat = BEZET;
 			continue;
@@ -161,14 +161,14 @@ check_mallinks(const char *s)	{
 		if (	!last_mallink(ml) &&
 			phys_prev_of(phys_next_of(ml)) != ml
 		)
-			Error("upward chain bad at %ld", s, ml);
+			Error("upward chain bad at %p", s, ml);
 		if (	!first_mallink(ml) &&
 			phys_next_of(phys_prev_of(ml)) != ml
 		)
-			Error("downward chain bad at %ld", s, ml);
+			Error("downward chain bad at %p", s, ml);
 		if (free_of(ml))	{
 			if (stat == VRIJ)
-				Error("free mallink at %ld follows free mallink",
+				Error("free mallink at %p follows free mallink",
 								s, ml);
 			stat = VRIJ;
 		}
@@ -182,29 +182,29 @@ check_mallinks(const char *s)	{
 			if (working_on(ml))
 				continue;
 			if (!free_of(ml))
-				Error("occupied mallink %ld occurs in free_list", s, ml);
+				Error("occupied mallink %p occurs in free_list", s, ml);
 			switch (mark_of(ml))	{
 			case IN_ML_LAST:
 				set_mark(ml, IN_FREE_LIST);
 				break;
 			case IN_FREE_LIST:
-				Error("mallink %ld occurs in 2 free_lists",
+				Error("mallink %p occurs in 2 free_lists",
 								s, ml);
 			default:
-				Error("unknown mallink %ld in free_list",
+				Error("unknown mallink %p in free_list",
 								s, ml);
 			}
 			if (size_of(ml) < size)
-				Error("size of mallink %ld too small", s, ml);
+				Error("size of mallink %p too small", s, ml);
 			if (size_of(ml) >= 2*size)
-				Error("size of mallink %ld too large", s, ml);
+				Error("size of mallink %p too large", s, ml);
 		}
 	}
 	for_all_mallinks (ml)	{
 		if (working_on(ml))
 			continue;
 		if (free_of(ml) && mark_of(ml) != IN_FREE_LIST)
-			Error("free mallink %ld is in no free_list", s, ml);
+			Error("free mallink %p is in no free_list", s, ml);
 		set_mark(ml, CLEAR);
 	}
 }
@@ -212,7 +212,7 @@ check_mallinks(const char *s)	{
 private
 check_ml_last(const char *s)	{
 	if (ml_last && _this_size_of(ml_last) == 0)
-		Error("size of ml_last == 0, at %ld", s, ml_last);
+		Error("size of ml_last == 0, at %p", s, ml_last);
 }
 
 private unsigned int
@@ -245,7 +245,7 @@ started_working_on(mallink *ml)	{
 			off_colour[i] = ml;
 			return;
 		}
-	Error("out of off_colour array at %ld", "started_working_on", ml);
+	Error("out of off_colour array at %p", "started_working_on", ml);
 }
 
 private
@@ -257,7 +257,7 @@ stopped_working_on(mallink *ml)	{
 			off_colour[i] = MAL_NULL;
 			return;
 		}
-	Error("stopped working on mallink %ld", "stopped_working_on", ml);
+	Error("stopped working on mallink %p", "stopped_working_on", ml);
 }
 
 private int

@@ -173,6 +173,7 @@ free(void *addr)
 		set_log_next(ml, *stp);
 		*stp = ml;
 		set_store(ml, 1);
+		calc_checksum(ml);
 		check_mallinks("free fast exit");
 	}
 	else	{
@@ -260,6 +261,7 @@ realloc(void *addr, register size_t n)
 		if (! stp1) store[(size_of(ml) >> LOG_MIN_SIZE) - 1] = stp;
 		else set_log_next(stp1, stp);
 		set_store(ml, 0);
+		calc_checksum(ml);
 	}
 #endif
 	if (free_of(ml)) {
