@@ -153,12 +153,14 @@ main(argc, argv)
 	/* A few checks */
 	if ( outsect[BSSSG].os_flen != 0 )
 		fatal("bss space contains initialized data\n") ;
-	if ( !unresolved && ! follows(&outsect[BSSSG], &outsect[DATASG]))
-		fatal("bss segment must follow data segment\n") ;
-	if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
-		fatal("rom segment must follow text\n") ;
-	if (! follows(&outsect[DATASG], &outsect[ROMSG]))
-		fatal("data segment must follow rom\n") ;
+	if ( !unresolved) {
+		if (! follows(&outsect[BSSSG], &outsect[DATASG]))
+			fatal("bss segment must follow data segment\n") ;
+		if (! follows(&outsect[ROMSG],&outsect[TEXTSG]))
+			fatal("rom segment must follow text\n") ;
+		if (! follows(&outsect[DATASG], &outsect[ROMSG]))
+			fatal("data segment must follow rom\n") ;
+	}
 	outsect[TEXTSG].os_size = outsect[ROMSG].os_base - outsect[TEXTSG].os_base;
 	outsect[ROMSG].os_size = outsect[DATASG].os_base - outsect[ROMSG].os_base;
 	outsect[DATASG].os_size = outsect[BSSSG].os_base - outsect[DATASG].os_base;
