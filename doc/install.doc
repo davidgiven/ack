@@ -537,7 +537,8 @@ happily proceed with further installation commands.
 Compilation of the whole Kit might take anything from a few
 hours to more than a day.
 If you do not want to install libraries etc. for a particular
-machine you can edit the file Action and remove the relevant entries.
+machine you can edit the file Action and comment out the relevant entries.
+Lines starting with a '!' are comments.
 .PP
 If this compilation went reasonably successful you should be able
 to use the Kit.
