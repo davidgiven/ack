@@ -12,5 +12,7 @@
 cap(u)
 	unsigned u;
 {
-	if (u >= 'a' && u <= 'z') u += 'A'-'a';
+	register unsigned *p = &u;
+
+	if (*p >= 'a' && *p <= 'z') *p += 'A'-'a';
 }
