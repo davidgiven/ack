@@ -5,7 +5,9 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
-#include	"def_sizes.h"
+
+#include	"target_sizes.h"
+
 #include	"idf.h"
 #include	"type.h"
 #include	"LLlex.h"
@@ -211,7 +213,7 @@ cstset(expp)
 	assert(expp->nd_right->nd_class == Set);
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
 	set2 = expp->nd_right->nd_set;
-	setsize = expp->nd_right->nd_type->tp_size / wrd_size;
+	setsize = expp->nd_right->nd_type->tp_size / word_size;
 
 	if (expp->nd_symb == IN) {
 		arith i;
@@ -359,7 +361,8 @@ cstcall(expp, call)
 		cut_size(expp);
 		break;
 	case S_SIZE:
-		expp->nd_INT = align(expr->nd_type->tp_size, wrd_size)/wrd_size;
+		expp->nd_INT = align(expr->nd_type->tp_size, (int) word_size) /
+				word_size;
 		break;
 	case S_VAL:
 		expp->nd_INT = expr->nd_INT;
@@ -435,12 +438,12 @@ init_cst()
 	}
 	mach_long_size = i;
 	mach_long_sign = 1 << (mach_long_size * 8 - 1);
-	if (lint_size > mach_long_size) {
+	if (long_size > mach_long_size) {
 		fatal("sizeof (long) insufficient on this machine");
 	}
 
 	max_int = full_mask[int_size] & ~(1 << (int_size * 8 - 1));
 	max_unsigned = full_mask[int_size];
-	max_longint = full_mask[lint_size] & ~(1 << (lint_size * 8 - 1));
-	wrd_bits = 8 * wrd_size;
+	max_longint = full_mask[long_size] & ~(1 << (long_size * 8 - 1));
+	wrd_bits = 8 * word_size;
 }

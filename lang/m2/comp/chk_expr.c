@@ -79,7 +79,7 @@ chk_set(expp)
 	if (expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		(void) findname(expp->nd_left);
+		findname(expp->nd_left);
 		assert(expp->nd_left->nd_class == Def);
 		df = expp->nd_left->nd_def;
 		if ((df->df_kind != D_TYPE && df->df_kind != D_ERROR) ||
@@ -93,7 +93,7 @@ chk_set(expp)
 
 	/* Now check the elements given, and try to compute a constant set.
 	*/
-	set = (arith *) Malloc(tp->tp_size * sizeof(arith) / wrd_size);
+	set = (arith *) Malloc(tp->tp_size * sizeof(arith) / word_size);
 	nd = expp->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
@@ -149,7 +149,7 @@ node_error(expp, "Lower bound exceeds upper bound in range");
 			}
 		}
 		else if (*set) {
-			free(*set);
+			free((char *) *set);
 			*set = 0;
 		}
 		return 1;
@@ -223,7 +223,7 @@ getname(argp, kinds)
 		return 0;
 	}
 	argp = argp->nd_right;
-	if (!findname(argp->nd_left)) return 0;
+	findname(argp->nd_left);
 	assert(argp->nd_left->nd_class == Def);
 	if (!(argp->nd_left->nd_def->df_kind & kinds)) {
 		node_error(argp, "Unexpected type");
@@ -244,8 +244,8 @@ chk_call(expp)
 	register struct node *arg;
 
 	expp->nd_type = error_type;
-	(void) findname(expp->nd_left);	/* parser made sure it is a name */
 	left = expp->nd_left;
+	findname(left);
 
 	if (left->nd_type == error_type) return 0;
 	if (left->nd_class == Def &&
@@ -451,8 +451,8 @@ findname(expp)
 		scope.
 	*/
 	register struct def *df;
-	struct def *lookfor();
 	register struct type *tp;
+	struct def *lookfor();
 
 	expp->nd_type = error_type;
 	if (expp->nd_class == Name) {
@@ -498,18 +498,18 @@ df->df_idf->id_text);
 	}
 	if (expp->nd_class == Oper) {
 		assert(expp->nd_symb == '[');
-		(void) findname(expp->nd_left);
-		if (chk_expr(expp->nd_right, 0) &&
+		findname(expp->nd_left);
+		if (chk_expr(expp->nd_right) &&
 		    expp->nd_left->nd_type != error_type &&
 		    chk_oper(expp)) /* ??? */ ;
-		return 1;
+		return;
 	}
 	if (expp->nd_class == Uoper && expp->nd_symb == '^') {
-		(void) findname(expp->nd_right);
+		findname(expp->nd_right);
 		if (expp->nd_right->nd_type != error_type &&
 	    		chk_uoper(expp)) /* ??? */ ;
 	}
-	return 0;
+	return;
 }
 
 int
@@ -518,7 +518,7 @@ chk_name(expp)
 {
 	register struct def *df;
 
-	(void) findname(expp);
+	findname(expp);
 	assert(expp->nd_class == Def);
 	df = expp->nd_def;
 	if (df->df_kind == D_ERROR) return 0;

@@ -25,7 +25,7 @@ ProcedureDeclaration
 	ProcedureHeading(&df, D_PROCEDURE)
 			{ df->prc_level = proclevel++;
 			}
-	';' block IDENT
+	';' block(&(df->prc_body)) IDENT
 			{ match_id(dot.TOK_IDF, df->df_idf);
 			  df->prc_scope = CurrentScope;
 			  close_scope(SC_CHKFORW);
@@ -68,11 +68,17 @@ error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text);
 		}
 ;
 
-block
+block(struct node **pnd;)
 {
-	struct node *nd;
 }:
-	declaration* [ BEGIN StatementSequence(&nd) ]? END
+	declaration*
+	[
+		BEGIN
+		StatementSequence(pnd)
+	|
+			{ *pnd = 0; }
+	]
+	END
 ;
 
 declaration:
@@ -101,7 +107,7 @@ FormalParameters(int doparams;
 			{ pr1 = *pr; }
 		[
 			{ for (; pr1->next; pr1 = pr1->next) ; }
-			';' FPSection(doparams, &(pr1->next), &parmaddr)
+			';' FPSection(doparams, &(pr1->next), parmaddr)
 		]*
 	]?
 	')'
@@ -149,8 +155,8 @@ FormalType(struct type **tp;)
 			{ if (ARRAYflag) {
 				*tp = construct_type(T_ARRAY, NULLTYPE);
 				(*tp)->arr_elem = df->df_type;
-				(*tp)->tp_align = lcm(wrd_align, ptr_align);
-				(*tp)->tp_size = align(ptr_size + 3*wrd_size,
+				(*tp)->tp_align = lcm(word_align, pointer_align);
+				(*tp)->tp_size = align(pointer_size + 3*word_size,
 							(*tp)->tp_align);
 			  }
 			  else	*tp = df->df_type;
@@ -221,17 +227,17 @@ enumeration(struct type **ptp;)
 } :
 	'(' IdentList(&EnumList) ')'
 		{
-		  *ptp = standard_type(T_ENUMERATION,1,1);
+		  *ptp = standard_type(T_ENUMERATION, 1, (arith) 1);
 		  EnterIdList(EnumList, D_ENUM, 0, *ptp,
 				CurrentScope, (arith *) 0);
 		  FreeNode(EnumList);
 		  if ((*ptp)->enm_ncst > 256) {
-			if (wrd_size == 1) {
+			if (word_size == 1) {
 				error("Too many enumeration literals");
 			}
 			else {
-				(*ptp)->tp_size = wrd_size;
-				(*ptp)->tp_align = wrd_align;
+				(*ptp)->tp_size = word_size;
+				(*ptp)->tp_align = word_align;
 			}
 		  }
 		}
@@ -291,7 +297,7 @@ RecordType(struct type **ptp;)
 {
 	struct scope *scope;
 	arith count;
-	int xalign = record_align;
+	int xalign = struct_align;
 }
 :
 	RECORD
@@ -391,28 +397,43 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
 {
 	struct type *tp1 = tp;
+	struct node *nd;
 } :
 	[
-		CaseLabelList(&tp1) ':' FieldListSequence(scope, cnt, palign)
+		CaseLabelList(&tp1, &nd)
+				{ /* Ignore the cases for the time being.
+				     Maybe a checking version will be supplied
+				     later ???
+				  */
+				  FreeNode(nd);
+				}
+		':' FieldListSequence(scope, cnt, palign)
 	]?
 					/* Changed rule in new modula-2 */
 ;
 
-CaseLabelList(struct type **ptp;):
-	CaseLabels(ptp) [ ',' CaseLabels(ptp) ]*
+CaseLabelList(struct type **ptp; struct node **pnd;):
+	CaseLabels(ptp, pnd)
+	[	
+			{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
+		',' CaseLabels(ptp, &((*pnd)->nd_right))
+			{ pnd = &((*pnd)->nd_right); }
+	]*
 ;
 
-CaseLabels(struct type **ptp;)
+CaseLabels(struct type **ptp; struct node **pnd;)
 {
 	struct node *nd1, *nd2 = 0;
 }:
-	ConstExpression(&nd1)
+	ConstExpression(&nd1)	{ *pnd = nd1; }
 	[
-		UPTO ConstExpression(&nd2)
+		UPTO		{ *pnd = MkNode(Link,nd1,NULLNODE,&dot); }
+		ConstExpression(&nd2)
 				{ if (!TstCompat(nd1->nd_type, nd2->nd_type)) {
 node_error(nd2,"type incompatibility in case label");
 				  }
 				  nd1->nd_type = error_type;
+				  (*pnd)->nd_right = nd2;
 				}
 	]?
 				{ if (*ptp != 0 &&

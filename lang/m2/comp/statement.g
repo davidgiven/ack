@@ -4,7 +4,9 @@
 static char *RcsId = "$Header$";
 
 #include	<em_arith.h>
+#include	<em_label.h>
 #include	"LLlex.h"
+#include	"type.h"
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
@@ -12,7 +14,7 @@ static int	loopcount = 0;	/* Count nested loops */
 
 statement(struct node **pnd;)
 {
-	struct node *nd1;
+	register struct node *nd;
 } :
 				{ *pnd = 0; }
 [
@@ -21,16 +23,16 @@ statement(struct node **pnd;)
 	 * states : assignment | ProcedureCall | ...
 	 * but this gives LL(1) conflicts
 	 */
-	designator(&nd1)
-	[			{ nd1 = MkNode(Call, nd1, NULLNODE, &dot);
-				  nd1->nd_symb = '(';
+	designator(pnd)
+	[			{ nd = MkNode(Call, *pnd, NULLNODE, &dot);
+				  nd->nd_symb = '(';
 				}
-		ActualParameters(&(nd1->nd_right))?
+		ActualParameters(&(nd->nd_right))?
 	|
-		BECOMES		{ nd1 = MkNode(Stat, nd1, NULLNODE, &dot); }
-		expression(&(nd1->nd_right))
+		BECOMES		{ nd = MkNode(Stat, *pnd, NULLNODE, &dot); }
+		expression(&(nd->nd_right))
 	]
-				{ *pnd = nd1; }
+				{ *pnd = nd; }
 	/*
 	 * end of changed part
 	 */
@@ -58,9 +60,9 @@ statement(struct node **pnd;)
 			  *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot);
 			}
 |
-	RETURN		{ *pnd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
+	RETURN		{ *pnd = nd = MkNode(Stat, NULLNODE, NULLNODE, &dot); }
 	[
-		expression(&((*pnd)->nd_right))
+		expression(&(nd->nd_right))
 	]?
 ]?
 ;
@@ -138,7 +140,7 @@ CaseStatement(struct node **pnd;)
 
 case(struct node **pnd; struct type **ptp;) :
 			{ *pnd = 0; }
-	[ CaseLabelList(ptp/*,pnd*/)
+	[ CaseLabelList(ptp, pnd)
 	  ':'		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
 	  StatementSequence(&((*pnd)->nd_right))
 	]?

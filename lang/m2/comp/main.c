@@ -28,14 +28,14 @@ char	*getenv();
 main(argc, argv)
 	char *argv[];
 {
-	register Nargc = 1;
+	register int Nargc = 1;
 	register char **Nargv = &argv[0];
 
 	ProgName = *argv++;
 
 	while (--argc > 0) {
 		if (**argv == '-')
-			Option(*argv++);
+			do_option((*argv++) + 1);
 		else
 			Nargv[Nargc++] = *argv++;
 	}
@@ -71,16 +71,14 @@ Compile(src)
 	init_types();
 	add_standards();
 #ifdef DEBUG
-	if (options['L']) LexScan();
-	else {
+	if (options['l']) LexScan();
+	else
 #endif DEBUG
+	{
 		(void) open_scope(CLOSEDSCOPE);
 		GlobalScope = CurrentScope;
 		CompUnit();
-#ifdef DEBUG
 	}
-	if (options['h']) hash_stat();
-#endif DEBUG
 	if (err_occurred) return 0;
 	return 1;
 }
@@ -116,12 +114,6 @@ LexScan()
 	}
 }
 #endif
-
-Option(str)
-	char *str;
-{
-	options[str[1]]++;	/* switch option on	*/
-}
 
 add_standards()
 {

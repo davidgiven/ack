@@ -23,7 +23,6 @@ open_scope(scopetype)
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
 	register struct scope *sc = new_scope();
-	register struct scope *sc1;
 
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 	sc->sc_scopeclosed = scopetype == CLOSEDSCOPE;
@@ -161,6 +160,24 @@ rem_forwards(fo)
 	}
 }
 
+Reverse(pdf)
+	register struct def **pdf;
+{
+	/*	Reverse the order in the list of definitions in a scope.
+		This is neccesary because this list is built in reverse.
+	*/
+	register struct def *df, *df1;
+
+	df = 0;
+	df1 = *pdf;
+	while (df1) {
+		df1 = df1->df_nextinscope;
+		(*pdf)->df_nextinscope = df;
+		df = *pdf;
+		*pdf = df1;
+	}
+}
+
 close_scope(flag)
 {
 	/*	Close a scope. If "flag" is set, check for forward declarations,
@@ -177,6 +194,7 @@ close_scope(flag)
 		DO_DEBUG(2, PrScopeDef(sc->sc_def));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));
+		Reverse(&(sc->sc_def));
 	}
 	CurrentScope = sc->next;
 }

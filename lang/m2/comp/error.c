@@ -9,14 +9,14 @@ static char *RcsId = "$Header$";
 
 #include	<system.h>
 #include	<em_arith.h>
+
+#include	"errout.h"
+
 #include	"input.h"
 #include	"f_info.h"
 #include	"LLlex.h"
 #include	"main.h"
 #include	"node.h"
-
-#define MAXERR_LINE	5	/* Number of error messages on one line ... */
-#define	ERROUT		STDERR
 
 /* error classes */
 #define	ERROR		1

@@ -102,21 +102,21 @@ extern struct type
 	*error_type;		/* All from type.c */
 
 extern int
-	wrd_align,
+	word_align,
 	int_align,
-	lint_align,
-	real_align,
-	lreal_align,
-	ptr_align,
-	record_align;		/* All from type.c */
+	long_align,
+	float_align,
+	double_align,
+	pointer_align,
+	struct_align;		/* All from type.c */
 
 extern arith
-	wrd_size,
+	word_size,
 	int_size,
-	lint_size,
-	real_size,
-	lreal_size,
-	ptr_size;		/* All from type.c */
+	long_size,
+	float_size,
+	double_size,
+	pointer_size;		/* All from type.c */
 
 extern arith
 	align();		/* type.c */

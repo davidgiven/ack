@@ -43,7 +43,7 @@ static int DEFofIMPL = 0;	/* Flag indicating that we are currently
 ModuleDeclaration
 {
 	struct idf *id;
-	struct def *df;
+	register struct def *df;
 } :
 	MODULE IDENT		{
 				  id = dot.TOK_IDF;
@@ -57,20 +57,27 @@ ModuleDeclaration
 					standard_type(T_RECORD, 0, (arith) 0);
 				  df->df_type->rec_scope = df->mod_scope;
 				}
-	priority? ';'
+	priority(&(df->mod_priority))?
+	';'
 	import(1)*
 	export(0)?
-	block
+	block(&(df->mod_body))
 	IDENT			{ close_scope(SC_CHKFORW|SC_CHKPROC);
 				  match_id(id, dot.TOK_IDF);
 				}
 ;
 
-priority
+priority(arith *pprio;)
 {
 	struct node *nd;
-}:
+} :
 	'[' ConstExpression(&nd) ']'
+				{ if (!(nd->nd_type->tp_fund & T_INTORCARD)) {
+					node_error(nd, "Illegal priority");
+				  }
+				  *pprio = nd->nd_INT;
+				  FreeNode(nd);
+				}
 ;
 
 export(int def;)
@@ -161,7 +168,7 @@ definition
 {
 	struct def *df;
 } :
-	CONST [ ConstantDeclaration ';' ]*
+	CONST [ ConstantDeclaration Semicolon ]*
 |
 	TYPE
 	[ IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
@@ -175,38 +182,48 @@ definition
 	    		{ df->df_kind = D_HIDDEN;
 			}
 	  ]
-	  ';'
+	  Semicolon
 	]*
 |
-	VAR [ VariableDeclaration ';' ]*
+	VAR [ VariableDeclaration Semicolon ]*
 |
-	ProcedureHeading(&df, D_PROCHEAD) ';'
+	ProcedureHeading(&df, D_PROCHEAD) Semicolon
+;
+
+Semicolon:
+	';'
+|
+			{ warning("; expected"); }
 ;
 
 ProgramModule(int state;)
 {
 	struct idf *id;
-	struct def *df, *GetDefinitionModule();
-	struct scope *scope = 0;
+	struct def *GetDefinitionModule();
+	register struct def *df;
 } :
 	MODULE
-	IDENT		{ 
-			  id = dot.TOK_IDF;
-			  if (state == IMPLEMENTATION) {
-				DEFofIMPL = 1;
-				df = GetDefinitionModule(id);
-				CurrentScope = df->mod_scope;
-				DEFofIMPL = 0;
-			  	DefinitionModule = 0;
-			  }
-			  else	open_scope(CLOSEDSCOPE);
-			}
-	priority?
+	IDENT	{ 
+		  id = dot.TOK_IDF;
+		  if (state == IMPLEMENTATION) {
+			DEFofIMPL = 1;
+			df = GetDefinitionModule(id);
+			CurrentScope = df->mod_scope;
+			DEFofIMPL = 0;
+		  	DefinitionModule = 0;
+		  }
+		  else {
+			df = define(id, CurrentScope, D_MODULE);
+			open_scope(CLOSEDSCOPE);
+			df->mod_scope = CurrentScope;
+		  }
+		}
+	priority(&(df->mod_priority))?
 	';' import(0)*
-	block IDENT
-			{ close_scope(SC_CHKFORW|SC_CHKPROC);
-			  match_id(id, dot.TOK_IDF);
-			}
+	block(&(df->mod_body)) IDENT
+		{ close_scope(SC_CHKFORW|SC_CHKPROC);
+		  match_id(id, dot.TOK_IDF);
+		}
 	'.'
 ;
 

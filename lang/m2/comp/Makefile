@@ -12,25 +12,30 @@ CC =	cc
 GEN =	LLgen
 GENOPTIONS =
 PROFILE =
-CFLAGS = -DDEBUG $(PROFILE) $(INCLUDES)
+CFLAGS = $(PROFILE) $(INCLUDES)
 LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
 	scope.o misc.o enter.o defmodule.o typequiv.o node.o \
-	cstoper.o chk_expr.o
+	cstoper.o chk_expr.o options.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
 	tokenfile.g symbol2str.c char.c Lpars.c Lpars.h
 
 all:
+	make hfiles
 	make LLfiles
 	make main
 
 LLfiles:	$(LSRC)
 	$(GEN) $(GENOPTIONS) $(LSRC)
 	@touch LLfiles
+
+hfiles:	Parameters make.hfiles
+	make.hfiles Parameters
+	touch hfiles
 
 main:	$(OBJ) Makefile
 	$(CC) $(LFLAGS) $(OBJ) $(LIBDIR)/libcomp.a $(LIBDIR)/malloc.o /user1/erikb/em/lib/libprint.a /user1/erikb/em/lib/libstr.a /user1/erikb/em/lib/libsystem.a -o main
@@ -73,28 +78,28 @@ depend:
 	make.allocd < $< > $@
 
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
-LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h input.h
+LLlex.o: LLlex.h Lpars.h class.h const.h f_info.h idf.h idfsize.h input.h inputtype.h numsize.h strsize.h type.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
-error.o: LLlex.h f_info.h input.h main.h node.h
-main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h scope.h standards.h tokenname.h type.h
+error.o: LLlex.h errout.h f_info.h input.h inputtype.h main.h node.h
+main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h inputtype.h scope.h standards.h tokenname.h type.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
-input.o: f_info.h input.h
-type.o: LLlex.h const.h debug.h def.h def_sizes.h idf.h node.h type.h
+input.o: f_info.h input.h inputtype.h
+type.o: LLlex.h const.h debug.h def.h idf.h node.h target_sizes.h type.h
 def.o: LLlex.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h node.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h node.h
 enter.o: LLlex.h def.h idf.h node.h scope.h type.h
-defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h scope.h
+defmodule.o: LLlex.h debug.h def.h f_info.h idf.h input.h inputtype.h scope.h
 typequiv.o: def.h type.h
 node.o: LLlex.h debug.h def.h node.h type.h
-cstoper.o: LLlex.h Lpars.h def_sizes.h idf.h node.h standards.h type.h
+cstoper.o: LLlex.h Lpars.h idf.h node.h standards.h target_sizes.h type.h
 chk_expr.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h standards.h type.h
 tokenfile.o: Lpars.h
 program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h
 expression.o: LLlex.h Lpars.h const.h debug.h def.h idf.h node.h scope.h type.h
-statement.o: LLlex.h Lpars.h node.h
+statement.o: LLlex.h Lpars.h node.h type.h
 Lpars.o: Lpars.h

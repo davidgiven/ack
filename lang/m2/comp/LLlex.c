@@ -6,6 +6,11 @@ static char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+
+#include	"idfsize.h"
+#include	"numsize.h"
+#include	"strsize.h"
+
 #include	"input.h"
 #include	"f_info.h"
 #include	"Lpars.h"
@@ -15,14 +20,12 @@ static char *RcsId = "$Header$";
 #include	"LLlex.h"
 #include	"const.h"
 
-#define IDFSIZE	256	/* Number of significant characters in an identifier */
-#define NUMSIZE	256	/* maximum number of characters in a number */
-
 long str2long();
 
 struct token dot, aside;
 struct type *numtype;
 struct string string;
+int idfsize = IDFSIZE;
 
 static
 SkipComment()
@@ -73,7 +76,7 @@ GetString(upto)
 	register struct string *str = &string;
 	register char *p;
 	
-	str->s_str = p = Malloc(str->s_length = 32);
+	str->s_str = p = Malloc((unsigned) (str->s_length = ISTRSIZE));
 	LoadChar(ch);
 	while (ch != upto)	{
 		if (class(ch) == STNL)	{
@@ -87,8 +90,10 @@ GetString(upto)
 		}
 		*p++ = ch;
 		if (p - str->s_str == str->s_length)	{
-			str->s_str = Srealloc(str->s_str, str->s_length += 8);
-			p = str->s_str + (str->s_length - 8);
+			str->s_str = Srealloc(str->s_str,
+					      str->s_length + RSTRSIZE);
+			p = str->s_str + str->s_length;
+			str->s_length += RSTRSIZE;
 		}
 		LoadChar(ch);
 	}
@@ -99,7 +104,7 @@ GetString(upto)
 int
 LLlex()
 {
-	/*	LLlex() plays the role of Lexical Analyzer for the parser.
+	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
 	*/
 	register struct token *tk = &dot;
@@ -199,7 +204,7 @@ again:
 		register struct idf *id;
 
 		do	{
-			if (tg - buf < IDFSIZE) *tg++ = ch;
+			if (tg - buf < idfsize) *tg++ = ch;
 			LoadChar(ch);
 		} while(in_idf(ch));
 

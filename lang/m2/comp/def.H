@@ -3,10 +3,12 @@
 /* $Header$ */
 
 struct module {
-	int mo_priority;	/* priority of a module */
+	arith mo_priority;	/* priority of a module */
 	struct scope *mo_scope;	/* scope of this module */
+	struct node *mo_body;	/* body of this module */
 #define mod_priority	df_value.df_module.mo_priority
 #define mod_scope	df_value.df_module.mo_scope
+#define mod_body	df_value.df_module.mo_body
 };
 
 struct variable {
@@ -43,9 +45,11 @@ struct dfproc {
 	struct scope *pr_scope;	/* scope of procedure */
 	int pr_level;		/* depth level of this procedure */
 	arith pr_nbpar;		/* Number of bytes parameters */
+	struct node *pr_body;	/* body of this procedure */
 #define prc_scope	df_value.df_proc.pr_scope
 #define prc_level	df_value.df_proc.pr_level
 #define prc_nbpar	df_value.df_proc.pr_nbpar
+#define prc_body	df_value.df_proc.pr_body
 };
 
 struct import {

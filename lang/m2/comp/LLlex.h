@@ -3,7 +3,7 @@
 /* $Header$ */
 
 struct string {
-	int s_length;		/* length of a string */
+	unsigned int s_length;	/* length of a string */
 	char *s_str;		/* the string itself */
 };
 

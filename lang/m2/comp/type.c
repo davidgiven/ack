@@ -6,34 +6,36 @@ static char *RcsId = "$Header$";
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include	"def_sizes.h"
+
+#include	"target_sizes.h"
+#include	"debug.h"
+
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"node.h"
 #include	"const.h"
-#include	"debug.h"
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
 */
 int
-	wrd_align = AL_WORD,
+	word_align = AL_WORD,
 	int_align = AL_INT,
-	lint_align = AL_LONG,
-	real_align = AL_FLOAT,
-	lreal_align = AL_DOUBLE,
-	ptr_align = AL_POINTER,
-	record_align = AL_STRUCT;
+	long_align = AL_LONG,
+	float_align = AL_FLOAT,
+	double_align = AL_DOUBLE,
+	pointer_align = AL_POINTER,
+	struct_align = AL_STRUCT;
 
 arith
-	wrd_size = SZ_WORD,
+	word_size = SZ_WORD,
 	int_size = SZ_INT,
-	lint_size = SZ_LONG,
-	real_size = SZ_FLOAT,
-	lreal_size = SZ_DOUBLE,
-	ptr_size = SZ_POINTER;
+	long_size = SZ_LONG,
+	float_size = SZ_FLOAT,
+	double_size = SZ_DOUBLE,
+	pointer_size = SZ_POINTER;
 
 struct type
 	*bool_type,
@@ -83,12 +85,12 @@ construct_type(fund, tp)
 	switch (fund)	{
 	case T_PROCEDURE:
 	case T_POINTER:
-		dtp->tp_align = ptr_align;
-		dtp->tp_size = ptr_size;
+		dtp->tp_align = pointer_align;
+		dtp->tp_size = pointer_size;
 		dtp->next = tp;
 		break;
 	case T_SET:
-		dtp->tp_align = wrd_align;
+		dtp->tp_align = word_align;
 		dtp->next = tp;
 		break;
 	case T_ARRAY:
@@ -135,17 +137,17 @@ init_types()
 	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);
 	bool_type->enm_ncst = 2;
 	int_type = standard_type(T_INTEGER, int_align, int_size);
-	longint_type = standard_type(T_INTEGER, lint_align, lint_size);
+	longint_type = standard_type(T_INTEGER, long_align, long_size);
 	card_type = standard_type(T_CARDINAL, int_align, int_size);
-	real_type = standard_type(T_REAL, real_align, real_size);
-	longreal_type = standard_type(T_REAL, lreal_align, lreal_size);
-	word_type = standard_type(T_WORD, wrd_align, wrd_size);
+	real_type = standard_type(T_REAL, float_align, float_size);
+	longreal_type = standard_type(T_REAL, double_align, double_size);
+	word_type = standard_type(T_WORD, word_align, word_size);
 	intorcard_type = standard_type(T_INTORCARD, int_align, int_size);
 	string_type = standard_type(T_STRING, 1, (arith) -1);
 	address_type = construct_type(T_POINTER, word_type);
 	tp = construct_type(T_SUBRANGE, int_type);
 	tp->sub_lb = 0;
-	tp->sub_ub = wrd_size * 8 - 1;
+	tp->sub_ub = word_size * 8 - 1;
 	bitset_type = set_type(tp);
 	std_type = construct_type(T_PROCEDURE, NULLTYPE);
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
@@ -265,7 +267,7 @@ set_type(tp)
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
 	*/
-	int lb, ub;
+	arith lb, ub;
 
 	if (tp->tp_fund == T_SUBRANGE) {
 		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAX_SET - 1) {
@@ -285,7 +287,7 @@ set_type(tp)
 		return error_type;
 	}
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = align(((ub - lb) + 7)/8, wrd_align);
+	tp->tp_size = align(((ub - lb) + 7)/8, word_align);
 	return tp;
 }
 
@@ -346,13 +348,9 @@ gcd(m, n)
 
 int
 lcm(m, n)
-	register int m, n;
+	int m, n;
 {
 	/*	Least Common Multiple
  	*/
-	while (m != n) {
-		if (m < n) m = m + m;
-		else n = n + n;
-	}
-	return n;		/* or m */
+	return m * (n / gcd(m, n));
 }
