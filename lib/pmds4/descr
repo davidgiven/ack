@@ -12,7 +12,7 @@ var RT=lib/{M}/head_
 var INCLUDES=-I{EM}/include/_tail_cc
 var CPP_F=-Dunix=unix -Dm68000=m68000
 # 407 align is default
-var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
+var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
 name be
 	from .m.g
 	to .s
@@ -42,15 +42,17 @@ name led
 	to .out
 	program {EM}/lib/em_led
 	mapflag -l* LNAME={EM}/{LIB}*
-	mapflag -i ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
-	mapflag -n ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
-	mapflag -nr ALIGN=-a0:2 -a1:0x8000 -a2:2 -a3:2
+	mapflag -i ALIGN=-a0:4 -a1:4 -a2:0x8000 -a3:4
+	mapflag -n ALIGN=-a0:4 -a1:4 -a2:0x8000 -a3:4
+	mapflag -nr ALIGN=-a0:4 -a1:0x8000 -a2:4 -a3:4
+	mapflag -fp LIBFP={EM}/{LIB}fp
 	args {ALIGN} (.e:{HEAD}={EM}/lib/pmds4/head_em) \
 ({RTS}:.ocm.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		{LIBFP?} \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/lib/pmds4/tail_mon {EM}/lib/{M}/end_em)
 	linker
 end
