@@ -24,7 +24,7 @@
 #include	<system.h>
 #define SBRK	sys_break
 #else
-#define SBRK	sbrk
+#define SBRK	_sbrk
 #define	ILL_BREAK		(void *)(-1)	/* funny failure value */
 #endif
 extern void *SBRK(int incr);
