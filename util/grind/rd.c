@@ -28,7 +28,63 @@
 #define relocation_info	reloc_info_sparc
 #endif
 
-#include <a.out.h>
+struct exec {
+#ifdef sun
+	short a_x;
+	unsigned short	a_magic;
+#else
+	unsigned long	a_magic;
+#endif
+	unsigned long	a_text;
+	unsigned long	a_data;
+	unsigned long	a_bss;
+	unsigned long	a_syms;
+	unsigned long	a_entry;
+	unsigned long	a_trsize;
+	unsigned long	a_drsize;
+};
+
+#define OMAGIC	0407
+#define NMAGIC	0410
+#define	ZMAGIC	0413
+
+#define N_BADMAG(x) \
+	((x).a_magic!=OMAGIC && (x).a_magic!=NMAGIC && (x).a_magic!=ZMAGIC)
+#ifdef sun
+#define N_TXTOFF(x)	((x).a_magic == ZMAGIC ? 0 : sizeof(struct exec))
+#else
+#define N_TXTOFF(x)	(sizeof(struct exec))
+#endif
+#define N_STROFF(x)	(N_TXTOFF(x)+(x).a_text+(x).a_data+(x).a_trsize+(x).a_drsize+(x).a_syms)
+
+#ifdef sparc
+#define RELOC_SIZE	12
+#else
+#define RELOC_SIZE	8
+#endif
+
+struct nlist {
+	union {
+		char	*n_name;
+		long	n_strx;
+	} n_un;
+	unsigned char n_type;
+	char	n_other;
+	short	n_desc;
+	unsigned long n_value;
+};
+
+#define	N_UNDF	0
+#define	N_ABS	2
+#define	N_TEXT	4
+#define	N_DATA	6
+#define	N_BSS	8
+#define	N_FN	0x1e
+
+#define	N_EXT	01
+
+#define	N_STAB	0xe0
+
 #include <stdio.h>
 
 static FILE *inf;
@@ -56,7 +112,7 @@ rd_ohead(h)
   h->oh_stamp = 0;
   h->oh_nsect = 4;
   h->oh_nname = 3 + bh.a_syms / sizeof(struct nlist);
-  h->oh_nrelo = (bh.a_trsize + bh.a_drsize) / sizeof(struct relocation_info);
+  h->oh_nrelo = (bh.a_trsize + bh.a_drsize) / RELOC_SIZE;
   h->oh_flags = h->oh_nrelo ? HF_LINK : 0;
 #if defined(sun)
   if (bh.a_magic == ZMAGIC) bh.a_text -= sizeof(struct exec);

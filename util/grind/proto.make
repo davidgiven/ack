@@ -132,7 +132,7 @@ clean:
 		-make -f make.main clean
 		rm -f $(GEN_C) $(GEN_G) $(GEN_H) \
 			LL1files LL2files Cfiles LL.output DBS.output
-		rm -f resolved *.dep lists make.main make_macros
+		rm -f resolved *.dep lists make.main make_macros tokenfile.[cg]
 
 LLfiles:	LL1files LL2files
 
