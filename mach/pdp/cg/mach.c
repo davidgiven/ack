@@ -71,7 +71,13 @@ con_float() {
 
 #ifdef REGVARS
 
-char Rstring[10] = "RT";
+char Rstring[10];
+full lbytes;
+struct regadm {
+	char *ra_str;
+	long  ra_off;
+} regadm[2];
+int nregvars;
 
 regscore(off,size,typ,score,totyp) long off; {
 
@@ -91,20 +97,54 @@ regscore(off,size,typ,score,totyp) long off; {
 
 i_regsave() {
 
-	Rstring[2] = 0;
+	Rstring[0] = 0;
+	nregvars=0;
 }
 
-f_regsave() {}
+f_regsave() {
+	register i;
+
+	if (nregvars==0 || lbytes==0) {
+#ifdef REGPATCH
+		fprintf(codefile,"mov r2,-(sp)\nmov r4,-(sp)\n");
+#endif
+		fprintf(codefile,"mov r5,-(sp)\nmov sp,r5\n");
+		if (lbytes == 2)
+			fprintf(codefile,"tst -(sp)\n");
+		else if (lbytes!=0)
+			fprintf(codefile,"sub $0%o,sp\n",lbytes);
+		for (i=0;i<nregvars;i++)
+			fprintf(codefile,"mov %s,-(sp)\n",regadm[i].ra_str);
+	} else {
+		if (lbytes>6) {
+			fprintf(codefile,"mov $0%o,r0\n",lbytes);
+			fprintf(codefile,"jsr r5,PR%s\n",Rstring);
+		} else {
+			fprintf(codefile,"jsr r5,PR%d%s\n",lbytes,Rstring);
+		}
+	}
+	for (i=0;i<nregvars;i++)
+		if (regadm[i].ra_off>=0)
+			fprintf(codefile,"mov 0%lo(r5),%s\n",regadm[i].ra_off,
+						regadm[i].ra_str);
+}
 
 regsave(regstr,off,size) char *regstr; long off; {
 
 	fprintf(codefile,"/ Local %ld into %s\n",off,regstr);
+/* commented away 
 #ifndef REGPATCH
 	fprintf(codefile,"mov %s,-(sp)\n",regstr);
 #endif
 	strcat(Rstring,regstr);
 	if (off>=0)
 		fprintf(codefile,"mov 0%lo(r5),%s\n",off,regstr);
+end of commented away */
+
+	strcat(Rstring,regstr);
+	regadm[nregvars].ra_str = regstr;
+	regadm[nregvars].ra_off = off;
+	nregvars++;
 }
 
 regreturn() {
@@ -112,7 +152,7 @@ regreturn() {
 #ifdef REGPATCH
 	fprintf(codefile,"jmp eret\n");
 #else
-	fprintf(codefile,"jmp %s\n",Rstring);
+	fprintf(codefile,"jmp RT%s\n",Rstring);
 #endif
 }
 
@@ -120,6 +160,7 @@ regreturn() {
 
 prolog(nlocals) full nlocals; {
 
+#ifndef REGVARS
 #ifdef REGPATCH
 	fprintf(codefile,"mov r2,-(sp)\nmov r4,-(sp)\n");
 #endif
@@ -130,6 +171,9 @@ prolog(nlocals) full nlocals; {
 		fprintf(codefile,"tst -(sp)\n");
 	else
 		fprintf(codefile,"sub $0%o,sp\n",nlocals);
+#else
+	lbytes = nlocals;
+#endif
 }
 
 dlbdlb(as,ls) string as,ls; {
