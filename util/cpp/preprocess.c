@@ -51,7 +51,7 @@ preprocess(fn)
 
 			fn = FileName;
 			lineno = LineNumber;
-			sprint(p, "#line %d \"%s\"\n", LineNumber,
+			sprint(p, "# %d \"%s\"\n", LineNumber,
 							FileName);
 			while (*p) {
 				echo(*p++);
