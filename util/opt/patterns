@@ -526,14 +526,22 @@ lol loc adi stl $3==w && $1==$4 : loc $2 lol $1 adi w stl $4
 ldl ldc adi sdl $3==2*w && $1==$4 : ldc $2 ldl $1 adi 2*w sdl $4
 lol loe adi stl $3==w && $1==$4 : loe $2 lol $1 adi w stl $4
 ldl lde adi sdl $3==2*w && $1==$4 : lde $2 ldl $1 adi 2*w sdl $4
+ldl loe loc loc cii adi sdl $6==2*w && $1==$7 && $3==w && $4==2*w :
+	loe $2 loc $3 loc $4 cii ldl $1 adi 2*w sdl $1
 lol lol adi stl $3==w && $1==$4 && $1!=$2 : lol $2 lol $1 adi w stl $4
 ldl ldl adi sdl $3==2*w && $1==$4 &&$1!=$2 : ldl $2 ldl $1 adi 2*w sdl $4
+ldl lol loc loc cii adi sdl $6==2*w && $1==$7 && $3==w && $4==2*w :
+	lol $2 loc $3 loc $4 cii ldl $1 adi 2*w sdl $1
 loe loc adi ste $3==w && $1==$4 : loc $2 loe $1 adi w ste $4
 lde ldc adi sde $3==2*w && $1==$4 : ldc $2 lde $1 adi 2*w sde $4
 loe loe adi ste $3==w && $1==$4 && $1!=$2 : loe $2 loe $1 adi w ste $4
 lde lde adi sde $3==2*w && $1==$4 && $1!=$2 : lde $2 lde $1 adi 2*w sde $4
+lde loe loc loc cii adi sde $6==2*w && $1==$7 && $3==w && $4==2*w :
+	loe $2 loc $3 loc $4 cii lde $1 adi 2*w sde $1
 loe lol adi ste $3==w && $1==$4 : lol $2 loe $1 adi w ste $4
 lde ldl adi sde $3==2*w && $1==$4 : ldl $2 lde $1 adi 2*w sde $4
+lde lol loc loc cii adi sde $6==2*w && $1==$7 && $3==w && $4==2*w :
+	lol $2 loc $3 loc $4 cii lde $1 adi 2*w sde $1
 lol loc ior stl $3==w && $1==$4 : loc $2 lol $1 ior w stl $4
 lol loe ior stl $3==w && $1==$4 : loe $2 lol $1 ior w stl $4
 lol lol ior stl $3==w && $1==$4 && $1!=$2 : lol $2 lol $1 ior w stl $4
