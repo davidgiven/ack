@@ -4677,6 +4677,32 @@ pat cmu zge $1==4			call cmuzxx("bcc","bls")
 pat cmu zgt $1==4			call cmuzxx("bhi","bcs")
 
 
+#if TBL68881
+proc cmf4zxx example cmf zlt
+with FS_REG FS_REG
+    gen	fcmp %1,%2
+	bxx* {llabel, $2}
+
+pat cmf zlt $1==4			call cmf4zxx("fblt")
+pat cmf zle $1==4			call cmf4zxx("fble")
+pat cmf zne $1==4			call cmf4zxx("fbne")
+pat cmf zeq $1==4			call cmf4zxx("fbeq")
+pat cmf zge $1==4			call cmf4zxx("fbge")
+pat cmf zgt $1==4			call cmf4zxx("fbgt")
+
+proc cmf8zxx example cmf zlt
+with FD_REG FD_REG
+    gen	fcmp %1,%2
+	bxx* {llabel, $2}
+
+pat cmf zlt $1==8			call cmf8zxx("fblt")
+pat cmf zle $1==8			call cmf8zxx("fble")
+pat cmf zne $1==8			call cmf8zxx("fbne")
+pat cmf zeq $1==8			call cmf8zxx("fbeq")
+pat cmf zge $1==8			call cmf8zxx("fbge")
+pat cmf zgt $1==8			call cmf8zxx("fbgt")
+#endif
+
 proc bxx1_in example loc loc cii loc bne
 with imm_cmp1 STACK
     gen cmp_b {const, lowb($4)}, %1
