@@ -31,15 +31,17 @@ install :       all
 		rm -f $(EMBIN)/arch $(EMBIN)/aal
 		cp aal $(EMBIN)/aal
 		cp arch $(EMBIN)/arch
-		rm -f $(EMHOME)/man/arch.1 $(EMHOME)/man/aal.1
+		rm -f $(EMHOME)/man/arch.1 $(EMHOME)/man/aal.1 $(EMHOME)/man/arch.5
 		cp aal.1 $(EMHOME)/man/aal.1
 		cp arch.1 $(EMHOME)/man/arch.1
+		cp arch.5 $(EMHOME)/man/arch.5
 
 cmp :           all
 		-cmp aal $(EMBIN)/aal
 		-cmp arch $(EMBIN)/arch
 		-cmp aal.1 $(EMHOME)/man/aal.1
 		-cmp arch.1 $(EMHOME)/man/arch.1
+		-cmp arch.5 $(EMHOME)/man/arch.5
 
 opr:
 		make pr ^ opr
