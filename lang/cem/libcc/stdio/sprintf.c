@@ -12,7 +12,7 @@ int args;
 	_tempfile._ptr   = (unsigned char *) buf;
 	_tempfile._count = 32767;
 
-	_doprintf(format, &args, &_tempfile);
+	_doprnt(format, &args, &_tempfile);
 	putc('\0',&_tempfile);
 
 	return buf;
