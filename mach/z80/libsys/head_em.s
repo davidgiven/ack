@@ -1,6 +1,11 @@
 .define EARRAY,ERANGE,EILLINS,EILLSIZE,ECASE,EMON,EHEAP
 .define hol0,trapproc,trpim,argv,hp,.reghp,envp,begbss,ignmask
 .define savebc,savede,savehl,saveix,saveaf,saveiy,ebadmon
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
    EARRAY = 0
    ERANGE = 1
    EHEAP = 17
@@ -11,10 +16,9 @@
    ebadmon=25
 
 
-	.base 0x1000
-.text
+.sect .text
 
-				! clear .bss
+				! clear .sect .bss
 	ld sp,0x7ffe		!address of fbase
 	ld de,endbss
 	ld h,d
@@ -44,37 +48,37 @@
 
 	jp 0x20
 
-.bss
+.sect .bss
 begbss:
-.data
+.sect .data
 hol0:
-	.word 0,0
-	.word 0,0
+	.data2 0,0
+	.data2 0,0
 saveaf:
-	.word 0
+	.data2 0
 savebc:
-	.word 0
+	.data2 0
 savede:
-	.word 0
+	.data2 0
 savehl:
-	.word 0
+	.data2 0
 saveix:
-	.word 0
+	.data2 0
 saveiy:
-	.word 0
+	.data2 0
 ignmask:
-	.word 0
+	.data2 0
 hp:
-	.word 0
+	.data2 0
 trapproc:
-	.word 0
+	.data2 0
 trpim:
-	.word 0
+	.data2 0
 argv:
-	.word 3f
+	.data2 3f
 envp:
-	.word 0
+	.data2 0
 3:
 	.asciz 'PROGRAM'
 .reghp:
-	.word endbss
+	.data2 endbss

@@ -1,5 +1,10 @@
 .define .mon
 .define uxfinish
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! monitor instruction
 ! a small collection of UNIX system calls implemented under CP/M
@@ -98,21 +103,21 @@
 	zcount=41
 	zsave=42
 
-	.errnz filefcb
+	.assert [ filefcb] <> 0
 
 0:	.space maxfiles*filesize
 	filearea = 0b+128
 sibuf:
-	.word 0
+	.data2 0
 	.space 82
 siptr:	.space 2
 saveargs:
 	.space 128
 argc:	.space 2
-ttymode:.byte 9,9,8,21;.short 06310+RAW*040	! raw = 040
+ttymode:.data1 9,9,8,21;.data2 06310+RAW*040	! raw = 040
 
 return:
-	.word 0,0
+	.data2 0,0
 uxinit:
 	xor a
 	ld c,maxfiles
@@ -155,70 +160,70 @@ uxfinish:
 	jp (hl)
 
 systab:	
-	.word e.mon	! ux_indir
-	.word ux_exit
-	.word e.mon	! ux_fork
-	.word ux_read
-	.word ux_write
-	.word ux_open
-	.word ux_close
-	.word e.mon	! ux_wait
-	.word ux_creat
-	.word e.mon	! ux_link
-	.word ux_unlink
-	.word e.mon	! ux_exec
-	.word e.mon	! ux_chdir
-	.word ux_time
-	.word e.mon	! ux_mknod
-	.word e.mon	! ux_chmod
-	.word e.mon	! ux_chown
-	.word e.mon	! ux_break
-	.word e.mon	! ux_stat
-	.word e.mon	! ux_seek
-	.word ux_getpid
-	.word e.mon	! ux_mount
-	.word e.mon	! ux_umount
-	.word e.mon	! ux_setuid
-	.word e.mon	! ux_getuid
-	.word e.mon	! ux_stime
-	.word e.mon	! ux_ptrace
-	.word e.mon	! ux_alarm
-	.word e.mon	! ux_fstat
-	.word e.mon	! ux_pause
-	.word e.mon	! ux_utime
-	.word e.mon	! ux_stty
-	.word e.mon	! ux_gtty
-	.word e.mon	! ux_access
-	.word e.mon	! ux_nice
-	.word ux_ftime
-	.word e.mon	! ux_sync
-	.word e.mon	! ux_kill
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word e.mon	! ux_dup
-	.word e.mon	! ux_pipe
-	.word e.mon	! ux_times
-	.word e.mon	! ux_prof
-	.word e.mon	! ux_unused
-	.word e.mon	! ux_setgid
-	.word e.mon	! ux_getgid
-	.word e.mon	! ux_sig
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word ux_ioctl
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld
-	.word unimpld	! ux_exece
-	.word e.mon	! ux_umask
-	.word e.mon	! ux_chroot
-	.word unimpld
-	.word unimpld
+	.data2 e.mon	! ux_indir
+	.data2 ux_exit
+	.data2 e.mon	! ux_fork
+	.data2 ux_read
+	.data2 ux_write
+	.data2 ux_open
+	.data2 ux_close
+	.data2 e.mon	! ux_wait
+	.data2 ux_creat
+	.data2 e.mon	! ux_link
+	.data2 ux_unlink
+	.data2 e.mon	! ux_exec
+	.data2 e.mon	! ux_chdir
+	.data2 ux_time
+	.data2 e.mon	! ux_mknod
+	.data2 e.mon	! ux_chmod
+	.data2 e.mon	! ux_chown
+	.data2 e.mon	! ux_break
+	.data2 e.mon	! ux_stat
+	.data2 e.mon	! ux_seek
+	.data2 ux_getpid
+	.data2 e.mon	! ux_mount
+	.data2 e.mon	! ux_umount
+	.data2 e.mon	! ux_setuid
+	.data2 e.mon	! ux_getuid
+	.data2 e.mon	! ux_stime
+	.data2 e.mon	! ux_ptrace
+	.data2 e.mon	! ux_alarm
+	.data2 e.mon	! ux_fstat
+	.data2 e.mon	! ux_pause
+	.data2 e.mon	! ux_utime
+	.data2 e.mon	! ux_stty
+	.data2 e.mon	! ux_gtty
+	.data2 e.mon	! ux_access
+	.data2 e.mon	! ux_nice
+	.data2 ux_ftime
+	.data2 e.mon	! ux_sync
+	.data2 e.mon	! ux_kill
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 e.mon	! ux_dup
+	.data2 e.mon	! ux_pipe
+	.data2 e.mon	! ux_times
+	.data2 e.mon	! ux_prof
+	.data2 e.mon	! ux_unused
+	.data2 e.mon	! ux_setgid
+	.data2 e.mon	! ux_getgid
+	.data2 e.mon	! ux_sig
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 ux_ioctl
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld
+	.data2 unimpld	! ux_exece
+	.data2 e.mon	! ux_umask
+	.data2 e.mon	! ux_chroot
+	.data2 unimpld
+	.data2 unimpld
 
 emptyfile:
 	! searches for a free filestructure
@@ -902,23 +907,23 @@ ux_getpid:
 
 
 
-retarea: .word 0	! base of buffer for result values (max 8 bytes)
-	 .word 0
-	 .word 0
-	 .word 0
+retarea: .data2 0	! base of buffer for result values (max 8 bytes)
+	 .data2 0
+	 .data2 0
+	 .data2 0
 
 trapproc:
-	.word 0
+	.data2 0
 
-nextp:	.byte 0
+nextp:	.data1 0
 
 header:
-ntext:	.word 0
-ndata:	.word 0
-nproc:	.word 0
-entry:	.word 0
-nline:	.word 0
+ntext:	.data2 0
+ndata:	.data2 0
+nproc:	.data2 0
+entry:	.data2 0
+nline:	.data2 0
 
-hp:	.word 0
-pb:	.word 0
-pd:	.word 0
+hp:	.data2 0
+pb:	.data2 0
+pd:	.data2 0

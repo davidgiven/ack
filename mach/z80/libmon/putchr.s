@@ -1,4 +1,9 @@
 .define putchr
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 putchr:
 	push hl

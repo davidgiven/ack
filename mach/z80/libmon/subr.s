@@ -1,4 +1,9 @@
 .define _read,_write,_ioctl,_getpid,_open,_close,_exit,_errno
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _read:
 	ld (savebc),bc
 	push af
@@ -149,14 +154,14 @@ _close:
 	ret
 _exit:
 jp 0x38
-.data
+.sect .data
 _errno:
-	.word	0
+	.data2	0
 ! output routine in monitor
 CRT	= 0x013B
 ! output a charcter
 ! entry: ascii character in a
-.text
+.sect .text
 !putchr:
 !	push	hl
 !	push	bc
@@ -175,11 +180,11 @@ CRT	= 0x013B
 !	ld	a,(hl)
 !	jr	2b
 !! conversion table for nascom characters
-!tab:	.byte	0x0D,0x00
-!	.byte	0x1B,0x1E
-!	.byte	0x08,0x1D
-!	.byte	0x0A,0x1F
-!	.byte	0x7F,0x00
+!tab:	.data1	0x0D,0x00
+!	.data1	0x1B,0x1E
+!	.data1	0x08,0x1D
+!	.data1	0x0A,0x1F
+!	.data1	0x7F,0x00
 
 KBD	= 0x69
 ! get character from keyboard

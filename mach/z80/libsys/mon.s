@@ -1,4 +1,9 @@
 .define .mon
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 
 ! Monitor call
 ! Expects on stack:	monitor call number

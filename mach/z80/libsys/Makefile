@@ -1,25 +1,44 @@
-TAIL=tail.hermac
+TAIL=libhermac_o.a
 # Other possibilities are: tail.nascom and tail.cpm
+MACH=z80
 
-all:		tail.cpm tail.nascom tail.hermac
+all:		head_em.o libhermac_o.a libnascom_o.a libcpm_o.a
 
-install:	$(TAIL)
-		../../install head_em.s head_em
-		../../install $(TAIL) tail_sys
+install:	head_em.o $(TAIL)
+		../../install head_em.o head_em
+		../../install $(TAIL) tail_mon
 
-cmp:		$(TAIL)
-		-../../compare head_em.s head_em
-		-../../compare $(TAIL) tail_sys
+cmp:		head_em.o $(TAIL)
+		-../../compare head_em.o head_em
+		-../../compare $(TAIL) tail_mon
 
-tail.cpm:	mon.cpm.s
+head_em.o:	head_em.s
+		$(MACH) -I../../../h -c head_em.s
+
+libcpm_o.a:	libcpm_s.a
+		ASAR=aal ; export ASAR; march . libcpm_o.a
+
+libnascom_o.a:	libnascom_s.a
+		ASAR=aal ; export ASAR; march . libnascom_o.a
+
+libhermac_o.a:	libhermac_s.a
+		ASAR=aal ; export ASAR; march . libhermac_o.a
+
+libcpm_s.a:
 		@echo Warning: untested, this is an example
-		arch cr tail.cpm mon.cpm.s
+		arch cr libcpm_s.a mon.cpm.s
+		echo libcpm_s.a > LIST
+		arch t libcpm_s.a >> LIST
 
-tail.nascom:	mon.s char.nas.s
-		arch cr tail.nascom mon.s char.nas.s
+libnascom_s.a:
+		arch cr libnascom_s.a mon.s char.nas.s
+		echo libnascom_s.a > LIST
+		arch t libnascom_s.a >> LIST
 
-tail.hermac:	mon.s char.her.s
-		arch cr tail.hermac mon.s char.her.s
+libhermac_s.a:
+		arch cr libhermac_s.a mon.s char.her.s
+		echo libhermac_s.a > LIST
+		arch t libhermac_s.a >> LIST
 
 opr:
 		make pr | opr

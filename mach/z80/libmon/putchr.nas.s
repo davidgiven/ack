@@ -1,4 +1,9 @@
 .define	putchr
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 ! output routine in monitor
 CRT	= 0x013B
 ! output a charcter
@@ -21,8 +26,8 @@ fetch:	inc	hl
 	ld	a,(hl)
 	jr	2b
 ! conversion table for nascom characters
-tab:	.byte	0x0D,0x00
-	.byte	0x1B,0x1E
-	.byte	0x08,0x1D
-	.byte	0x0A,0x1F
-	.byte	0x7F,0x00
+tab:	.data1	0x0D,0x00
+	.data1	0x1B,0x1E
+	.data1	0x08,0x1D
+	.data1	0x0A,0x1F
+	.data1	0x7F,0x00
