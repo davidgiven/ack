@@ -1346,7 +1346,7 @@ gto		| |		remove(ALL)
 				move({EXTENDED_ADDR,$1},HL)
 				"call .gto"
 							| | |
-lim		| | 		| {EXTENDED,"(ignmask)"} | |
+lim		| | 		| {EXTENDED,"ignmask"} | |
 lin        | |			  remove(ALL) allocate(HL_REG)
 				move({IMMEDIATE,$1},HL)
 				"ld (hol0),hl"
