@@ -15,9 +15,6 @@ static char rcsid1[] = "$Header$";
 char *filename;			/* Name of input file */
 int errors;			/* Number of errors */
 
-extern arith	C_bsssize, C_holsize;
-extern int	C_bssinit, C_holinit;
-
 main(argc,argv)
 	char **argv;
 {
@@ -69,15 +66,6 @@ main(argc,argv)
 			case ps_pro:
 			case ps_end:
 				break;
-			case ps_hol:
-				C_holsize = EM_holsize;
-				C_holinit = EM_holinit;
-				C_out(p);
-				OO_nxtpatt--;
-				continue;
-			case ps_bss:
-				C_bsssize = EM_bsssize;
-				C_bssinit = EM_bssinit;
 			default:
 				C_out(p);
 				OO_nxtpatt--;
