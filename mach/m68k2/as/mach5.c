@@ -66,7 +66,7 @@ checksize(sz, bits)
 
 test68010()
 {
-	if (model != 1)
+	if (model != 1 && pass == PASS_3)
 		warning("68010 instruction");
 }
 
