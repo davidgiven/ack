@@ -206,12 +206,12 @@ jneq LAB : jbr LAB2 : labdef LAB ->	jeql LAB2 : labdef LAB;
 
 /* Register propagation */
 
-movl REG,A : ANY *A		->	movl REG,A : ANY *REG;
-movl REG,A : ANY *A,X		->	movl REG,A : ANY *REG,X;
-movl REG,A : ANY X,*A		->	movl REG,A : ANY X,*REG;
-movl REG,A : ANY *A,X,Y		->	movl REG,A : ANY *REG,X,Y;
-movl REG,A : ANY X,*A,Y		->	movl REG,A : ANY X,*REG,Y;
-movl REG,A : ANY X,Y,*A		->	movl REG,A : ANY X,Y,*REG;
+movl REG,A : ANY *A		->	movl REG,A : ANY (REG);
+movl REG,A : ANY *A,X		->	movl REG,A : ANY (REG),X;
+movl REG,A : ANY X,*A		->	movl REG,A : ANY X,(REG);
+movl REG,A : ANY *A,X,Y		->	movl REG,A : ANY (REG),X,Y;
+movl REG,A : ANY X,*A,Y		->	movl REG,A : ANY X,(REG),Y;
+movl REG,A : ANY X,Y,*A		->	movl REG,A : ANY X,Y,(REG);
 
 
 %%;
