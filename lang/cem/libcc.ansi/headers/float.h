@@ -6,7 +6,7 @@
 #if	!defined(_FLOAT_H)
 #define	_FLOAT_H
 
-#if	defined(vax) || defined(pdp)
+#if	defined(__vax) || defined(__pdp)
 #define	FLT_DIG			6
 #define	FLT_EPSILON		5.96046448e-08F
 #define	FLT_MANT_DIG		8

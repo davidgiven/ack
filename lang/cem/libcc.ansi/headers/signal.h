@@ -28,7 +28,7 @@ struct sigaction {
 #endif
 
 #define	SIG_ERR		((void (*)(int))-1)
-#if	defined(em22) || defined(em24) || defined(em44)
+#if	defined(__em22) || defined(__em24) || defined(__em44)
 #define	SIG_DFL		((void (*)(int))-2)
 #define	SIG_IGN		((void (*)(int))-3)
 #else
