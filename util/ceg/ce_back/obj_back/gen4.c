@@ -1,4 +1,5 @@
 #include <system.h>
+#include <em.h>
 #include "mach.h"
 #include "back.h"
 #ifdef BYTES_REVERSED

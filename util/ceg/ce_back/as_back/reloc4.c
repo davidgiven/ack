@@ -1,4 +1,5 @@
 #include "header.h"
+#include <em.h>
 
 reloc4( s, o, r)
 char *s;
