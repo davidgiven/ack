@@ -1,0 +1,4 @@
+MACH=z80
+SUF=o
+ASAR=aal
+RANLIB=:

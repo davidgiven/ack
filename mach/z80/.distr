@@ -2,10 +2,7 @@ Action
 as
 cg
 int
-libbc
-libcc
 libem
-libpc
-libsys
-liboc
-libm2
+libend
+libmon
+mach_params

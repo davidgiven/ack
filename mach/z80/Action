@@ -4,24 +4,12 @@ end
 name "Z80 code generator"
 dir cg
 end
-name "Z80 Basic library"
-dir libbc
-end
-name "Z80 Occam library"
-dir liboc
-end
-name "Z80 Modula-2 library"
-dir libm2
-end
-name "Z80 C libraries"
-dir libcc
-end
 name "Z80 EM library"
 dir libem
 end
-name "Z80 Pascal library"
-dir libpc
+name "Z80 system call library"
+dir libmon
 end
-name "Z80 System library"
-dir libsys
+name "Z80 end,etext,edata library"
+dir libend
 end
