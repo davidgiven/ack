@@ -4,11 +4,8 @@ EML=$(EM)/lib
 CFLAGS=-DVERBOSE -DNOTCOMPACT
 SRC=types.h def.h debug.h debug.c global.h global.c files.h files.c go.h go.c map.h map.c aux.h aux.c get.h get.c put.h put.c alloc.h alloc.c lset.h lset.c cset.h cset.c parser.h parser.c stack_chg.h stack_chg.c locals.h locals.c init_glob.h init_glob.c
 
-.SUFFIXES: .m
-.c.m:
-	ack -O -L -c.m $(CFLAGS) $<
-all:	classdefs.h alloc.o cset.o debug.o files.o go.o global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o init_glob.o
-optim:	classdefs.h alloc.m cset.m debug.m files.m global.m lset.m map.m parser.m get.m put.m stack_chg.m locals.m init_globl.m
+all:	classdefs.h pop_push.h wordlen.h alloc.o cset.o debug.o files.o go.o global.o lset.o map.o parser.o get.o put.o aux.o stack_chg.o locals.o init_glob.o
+
 classdefs.h: \
 	makeclassdef \
 	cldefs.src
@@ -16,9 +13,16 @@ classdefs.h: \
 makeclassdef: \
 	makecldef.c
 	 $(CC) -o makeclassdef makecldef.c
+
 pop_push.h: \
 	$(EM)/etc/em_table pop_push.awk
 	 awk -f pop_push.awk < $(EM)/etc/em_table > pop_push.h
+
+wordlen.h: makewordlen 
+	makewordlen > wordlen.h
+	rm makewordlen makewlen.o
+makewordlen: makewlen.c
+	$(CC) -o makewordlen makewlen.c
 lpr:
 	pr $(SRC) | lpr
 opr:
