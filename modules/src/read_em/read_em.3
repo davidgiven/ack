@@ -1,0 +1,281 @@
+.TH READ_EM 3ACK "March 17, 1986"
+.SH NAME
+EM_open, EM_getinstr, EM_close,
+EM_mkcalls\ \-\ a module to read EM assembly code
+.SH SYNOPSIS
+.B #include <em_spec.h>
+.br
+.B #include <em_mnem.h>
+.br
+.B #include <em_pseu.h>
+.br
+.B #include <em_flag.h>
+.br
+.B #include <em_ptyp.h>
+.br
+.B #include <em.h>
+.br
+.B #include <em_comp.h>
+.PP
+.B int EM_open(filename)
+.br
+.B EM_close()
+.br
+.B char *filename;
+.PP
+.B struct e_instr *EM_getinstr()
+.PP
+.B int EM_mkcalls(instr)
+.br
+.B struct e_instr *instr;
+.PP
+.B char *EM_error;
+.PP
+.B unsigned int EM_lineno;
+.PP
+.B char *EM_filename;
+.SH DESCRIPTION
+This package provides routines to read EM assembly code.
+The object is to simplify the program
+writer's task of reading EM assembly code,
+either in compact or human-readable form.
+.PP
+\fIEM_open\fR must be called as initializer of the package.
+If \fIfilename\fR is a null pointer, reading is done from standard input,
+otherwise it is done from the file \fIfilename\fR.
+\fIEM_open\fR returns 1 on success and 0 on failure
+with an error message in \fIEM_error\fR.
+\fIEM_close\fR must be called after all other calls to this package.
+.PP
+\fIEM_getinstr\fR reads an EM instruction, and
+returns it as a pointer to a structure having the following
+layout:
+.br
+.PP
+.ta \w'struct'u +\w'struct e_instr *\ \ \ \ \ \ \ \ \ 'u +\w'em_argtype\ \ \ \ \ \ 'u
+.nf
+struct e_instr {
+	int	em_type;	/* Type of this instruction */
+	union {
+	      struct {
+	           int	emus_opcode;	/* Opcode of instruction */
+	           struct e_args	*emus_args;	/* Arguments of instruction */
+	      } emu_mp;
+	      label	emu_deflb;	/* Numeric label definition */
+	      char	*emu_defdnam;	/* Non-numeric label definition */
+	      struct e_args	*emu_arg;	/* For a message argument */
+	} em_i; 
+#define em_opcode    \kaem_i.emu_mp.emus_opcode
+#define em_args\h'|\nau'em_i.emu_mp.emus_args
+#define em_deflb\h'|\nau'em_i.emu_deflb
+#define em_defdnam\h'|\nau'em_i.emu_defdnam
+#define em_arg\h'|\nau'em_i.emu_arg
+};
+.fi
+.PP
+Possible arguments to the EM instruction read are supplied in a linked list
+of structures:
+.PP
+.nf
+struct e_args {
+	struct e_args	*em_next;	/* Next argument */
+	short	em_argtype;	/* Type of this argument */
+	union {
+	       arith	emu_cst;	/* A constant */
+	       label	emu_ilb;	/* An instruction label */
+	       char	*emu_pnam;	/* A procedure name (not including '$') */
+	       struct {
+	              label	emus_dlb;
+	              arith	emus_noff;
+	       } emu_ndlb;		/* Numeric data label + offset */
+	       struct {
+	              char	*emus_dnam;
+	              arith	emus_soff;
+	       } emu_sdlb;		/* String data label + offset */
+	       struct {
+	              char	*emus_str;
+	              arith	emus_size;
+	       } emu_con;		/* An scon, icon, ucon or fcon */
+	} em_value;
+#define em_cst\h'|\nau'em_value.emu_cst
+#define em_ilb\h'|\nau'em_value.emu_ilb
+#define em_pnam\h'|\nau'em_value.emu_pnam
+#define em_dlb\h'|\nau'em_value.emu_ndlb.emus_dlb
+#define em_noff\h'|\nau'em_value.emu_ndlb.emus_noff
+#define em_dnam\h'|\nau'em_value.emu_sdlb.emus_dnam
+#define em_soff\h'|\nau'em_value.emu_sdlb.emus_soff
+#define em_str\h'|\nau'em_value.emu_con.emus_str
+#define em_size\h'|\nau'em_value.emu_con.emus_size
+};
+.fi
+.PP
+The named types \fBarith\fR and \fBlabel\fR refer to types on the local machine
+that are suitable for doing arithmetic and storing EM numeric labels
+respectively.
+Common definitions are \fBlong\fR for \fBarith\fR and \fBunsigned int\fR for
+\fBlabel\fR.
+.PP
+The \fIe_instr\fR structure consists of the fields
+\fIem_type\fR, containing the type of this \fIe_instr\fR, and
+\fIem_i\fR, containing its value of this \fIe_instr\fR.
+.PP
+The possible values of
+\fIem_type\fR, defined in <em_code.h>, are summarized below:
+.br
+.ta \w'EM_STARTMES\ \ \ 'u +\w'em_defdnam\ \ \ 'u
+.di xx
+		\ka
+.br
+.di
+.IP "Value	Selector" \nau
+Meaning
+.IP "EM_MNEM	em_opcode" \nau
+an EM machine instruction.
+.br
+.PD 0
+.IP "	em_args" \nau
+The \fIem_opcode\fR field
+contains the opcode of the instruction, and \fIem_args\fR may indicate
+arguments.
+.IP "EM_PSEU	em_opcode" \nau
+an EM pseudo instruction.
+.IP "	em_args" \nau
+The \fIem_opcode\fR field
+contains the opcode, and \fIem_args\fR may indicate arguments.
+As consecutive CON-pseudos are allocated consecutively, a CON delivered by
+\fIEM_getinstr\fR has exactly one argument.
+If the CON-pseudo read has more, they are delivered as separate CON's.
+The same holds for ROM-pseudos.
+Also, if the length of a string constant exceeds 256 characters, it will be
+delivered as several CON's or ROM's.
+.IP "EM_STARTMES	em_arg" \nau
+the start of a MES pseudo.
+.br
+There is one argument: the message number.
+The other arguments, if any, are delivered as separate EM_MESARG's.
+.IP "EM_MESARG	em_arg" \nau
+an argument of a MES pseudo.
+.IP "EM_ENDMES	none" \nau
+the end of a MES pseudo.
+.IP "EM_DEFILB	em_deflb" \nau
+an instruction label definition.
+.br
+The field \fIem_deflb\fR contains the label (instruction labels are always
+numeric).
+.IP "EM_DEFDLB	em_deflb" \nau
+a numeric data label definition.
+.br
+The field \fIem_deflb\fR contains the label.
+.IP "EM_DEFDNAM	em_defdnam" \nau
+a non-numeric data label definition.
+.br
+The field \fIem_defdnam\fR contains the label.
+.IP "EM_ERROR	none" \nau
+an error in the input.
+.br
+\fIEM_error\fR
+contains an error message.
+.IP "EM_FATAL	none" \nau
+a fatal error.
+.br
+\fIEM_error\fR contains an
+error message.
+.PD
+.PP
+The \fIe_args\fR structure consists of the fields
+\fIem_next\fR, containing a pointer to the next argument or null,
+the field \fIem_argtype\fR, containing the type of this argument, and
+the field \fIem_value\fR, containing the value of the argument.
+The possible values of \fIem_argtype\fR, defined in <em_ptyp.h>,
+are summarized below:
+.br
+.ta \w'dlb_ptyp\ \ \ \ 'u +\w'em_opcode\ \ \ 'u
+.di xx
+		\ka
+.br
+.di
+.IP "Value	Selector" \nau
+Meaning
+.IP "ilb_ptyp	em_ilb" \nau
+an instruction label.
+.PD 0
+.IP "nof_ptyp	em_dlb" \nau
+an offset from a numeric data label.
+.IP "	em_noff" \nau
+The
+\fIem_noff\fR field contains the offset and the
+\fIem_dlb\fR field contains the label.
+.IP "sof_ptyp	em_dnam" \nau
+an offset from a non-numeric data label.
+.IP "	em_soff" \nau
+The \fIem_soff\fR field contains the offset and the \fIem_dnam\fR field
+contains the label, represented as a string.
+.IP "cst_ptyp	em_cst" \nau
+a numeric constant.
+.IP "pro_ptyp	em_pnam" \nau
+a procedure name, not including the '$',
+represented as a string.
+.IP "str_ptyp	em_str" \nau
+a string constant.
+.IP "	em_size" \nau
+The string is found in \fIem_str\fR, represented as a row of bytes, of
+length \fIem_size\fR.
+.IP "ico_ptyp	em_str" \nau
+an integer constant.
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_str\fR.
+It has size \fIem_size\fR bytes on the target machine.
+.IP "uco_ptyp	em_str" \nau
+an unsigned constant.
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_str\fR.
+It has size \fIem_size\fR bytes on the target machine.
+.IP "fco_ptyp	em_str" \nau
+a floating constant.
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_str\fR.
+It has size \fIem_size\fR bytes on the target machine.
+.PD
+.PP
+The routine \fIEM_mkcalls\fR "translates" the EM instruction indicated
+by \fIinstr\fR
+into calls of the procedural interface defined in \fIem_code\fR(3L).
+It returns 1 if it succeeds, 0 if it fails for some reason. The
+reason can then be found in \fIEM_error\fR.
+.PP
+\fIEM_lineno\fR contains the line number of the last line read by 
+\fIEM_getinstr\fR.
+.PP
+\fIEM_filename\fR contains a filename. It usually contains the value
+given as parameter to \fIEM_open\fR, but may have a different value, when
+the input was the result of some preprocessing.
+.PP
+.SH FILES
+.nf
+~em/modules/h/em.h
+~em/modules/h/em_ptyp.h
+~em/modules/h/em_comp.h
+~em/modules/lib/libread_emk.a: non-checking library for reading compact EM code
+~em/modules/lib/libread_emkV.a: checking library for reading compact EM code
+~em/modules/lib/libread_emeV.a: checking library for reading human-readable EM code
+.fi
+.SH MODULES
+em_code(3), string(3), system(3), ~em/lib/em_data.a
+.SH "SEE ALSO"
+em_code(3)
+.br
+A.S. Tanenbaum, H. v Staveren, E.G. Keizer, J.W. Stevenson, "\fBDescription
+of a Machine Architecture for use with Block Structured Languages\fR",
+Informatica Rapport IR-81, Vrije Universiteit, Amsterdam, 1983.
+.SH DIAGNOSTICS
+\fIEM_getinstr\fR returns a null pointer on end of file.
+.SH REMARKS
+All information must be considered to be contained in a static area so it
+must be copied to be saved.
+.SH BUGS
+As CON's and ROM's may be delivered in several parts, the count fields in
+a static exchange may be wrong.
+.PP
+Please report bugs to the author.
+.SH AUTHOR
+Ceriel J.H. Jacobs <ceriel@vu44.UUCP>

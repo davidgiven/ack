@@ -1,0 +1,15 @@
+EM_TABLE=../../../etc/em_table
+list=`./argtype w $EM_TABLE`
+echo "switch(opcode) {"
+for i in $list
+do
+	cat << EOF
+	case op_$i:
+		C_${i}_narg();
+		break;
+EOF
+done
+cat << EOF
+	default: EM_error = "Illegal mnemonic";
+}
+EOF
