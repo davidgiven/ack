@@ -98,7 +98,7 @@ main(argc,argv) char **argv; {
 		flags[3] = pflg=='+' ? 'p' : '-';
 	else
 		flags[3]= header.h_flags&PROFILE ? 'p' : '-';
-	sprintf(interpret,"%s/lib/em%d%d/em_%s",
+	sprintf(interpret,"%s/lib.bin/em%d%d/em_%s",
 		em_dir,header.h_wsize,header.h_psize,flags);
 	execv(interpret,argv);
 	fprintf(stderr,"Interpreter %s not available\n",interpret);
