@@ -15,7 +15,7 @@ classdefs.h: \
 	 makeclassdef $(EMH)/em_mnem.h cldefs.src > classdefs.h
 makeclassdef: \
 	makecldef.c
-	 cc -o makeclassdef makecldef.c
+	 $(CC) -o makeclassdef makecldef.c
 pop_push.h: \
 	$(EM)/etc/em_table pop_push.awk
 	 awk -f pop_push.awk < $(EM)/etc/em_table > pop_push.h
@@ -27,7 +27,7 @@ dumpflop:
 	tar -uf ../../../ego/share/share.tarf $(SRC) Makefile show.c
 show: \
 	show.c
-	 cc -o show show.c $(EML)/em_data.a
+	 $(CC) -o show show.c $(EML)/em_data.a
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
 alloc.o:	alloc.h
