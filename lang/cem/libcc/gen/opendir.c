@@ -15,10 +15,14 @@ char *name;
 	long siz;
 	extern char *malloc();
 
+#ifdef __BSD4_2
+	siz = stbuf.st_blksize;
+#else
+	siz = DIRBLKSIZ;
+#endif
 	if ((fd = open(name, 0)) == -1)
 		return NULL;
 	fstat(fd, &stbuf);
-	siz = stbuf.st_blksize;
 	if (((stbuf.st_mode & S_IFDIR) == 0) ||
 	    ((dirp = (DIR *)malloc(sizeof (DIR))) == NULL)) {
 		close (fd);
