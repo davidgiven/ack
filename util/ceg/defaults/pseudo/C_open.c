@@ -12,7 +12,7 @@ char *filename;
 
 	if ( !do_open( filename)) {
 		fprint( STDERR, "Couldn't open %s\n", filename);
-		return( 0)
+		return( 0);
 	}
 	else
 	        return( 1);
