@@ -752,7 +752,7 @@ do_line(l)
 	struct token tk;
 	int t = GetToken(&tk);
 
-	SkipToNewLine();
+	if (t != EOF) SkipToNewLine();
 	LineNumber = l;		/* the number of the next input line */
 	if (t == STRING)	/* is there a filespecifier? */
 		FileName = tk.tk_str;
