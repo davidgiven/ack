@@ -2,7 +2,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#define RCSID5 "$Header$"
+#define RCSID5 "$Id$"
 
 /*
  * INTEL 80386 special routines
@@ -150,18 +150,26 @@ indexed() {
 			reg_2 = 05;
 			return;
 		}
-		if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
-			mod_2 = 02;
-		else if (exp_2.val != 0 || reg_2 == 5)
-			mod_2 = 01;
+		if (small(exp_2.typ == S_ABS && fitb(exp_2.val), 3)) {
+			if (small(exp_2.val == 0 && reg_2 != 5, 1)) {
+			}
+			else mod_2 = 01;
+		}
+		else	if (small(0, 1)) {
+		}
+		else mod_2 = 02;
 	}
 	else {
         	if (reg_2 & ~7)
                 	serror("register error");
-        	if (exp_2.typ != S_ABS || fitb(exp_2.val) == 0)
-                	reg_2 |= 0200;
-        	else if (exp_2.val != 0 || reg_2 == 6)
-                	reg_2 |= 0100;
+        	if (small(exp_2.typ == S_ABS && fitb(exp_2.val), 1)) {
+			if (small(exp_2.val == 0 && reg_2 != 6, 1)) {
+			}
+			else reg_2 |= 0100;
+		}
+		else if (small(0, 1)) {
+		}
+		else reg_2 |= 0200;
 	}
 }
 
@@ -349,10 +357,11 @@ rolop(opc)
 	if (oreg == (IS_R8 | 1 | (address_long ? 0 : 0300))) {
 		/* cl register */
 		emit1(0322 | (opc&1)); ea_1(opc&070);
-	} else if (is_expr(oreg) && exp_2.typ == S_ABS && exp_2.val == 1) {
+	} else if (is_expr(oreg)) {
+	    if (small(exp_2.typ == S_ABS && exp_2.val == 1, 1)) {
 		/* shift by 1 */
 		emit1(0320 | (opc&1)); ea_1(opc&070);
-	} else if (is_expr(oreg)) {
+	    } else {
 		/* shift by byte count */
 		emit1(0300 | (opc & 1)); 
 		ea_1(opc & 070);
@@ -361,6 +370,7 @@ rolop(opc)
 		newrelo(exp_2.typ, RELO1);
 #endif
 		emit1((int)(exp_2.val));
+	    }
 	}
 	else
 		badsyntax();
