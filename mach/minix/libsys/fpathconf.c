@@ -1,6 +1,7 @@
 /* POSIX fpathconf (Sec. 5.7.1) 		Author: Andy Tanenbaum */
 
 #include <lib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #define fstat	_fstat
 #include <sys/stat.h>

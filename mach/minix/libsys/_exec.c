@@ -1,4 +1,5 @@
 #include <lib.h>
+#include <unistd.h>
 #define execl	_execl
 #define execle	_execle
 #define execv	_execv
