@@ -84,10 +84,7 @@ interface. To free the table writer of the burden of building
 an object file, we supply a set of routines that build an object file
 in the ACK_A.OUT(5L)
 .[~[
-%T ACK_A.OUT(5L)
-%J ACK Documentation
-%I Vrije Universiteit
-%C Amsterdam, The Netherlands
+aout
 .]]
 format (see appendix B). This set of routines is called
 the
