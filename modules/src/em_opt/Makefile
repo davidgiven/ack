@@ -49,7 +49,7 @@ NOFILES =	nopt.$(SUF) dfa.$(SUF) trans.$(SUF) aux.$(SUF) mkstrct.$(SUF)
 POFILES =	parser.$(SUF) syntax.$(SUF) outputdfa.$(SUF) outcalls.$(SUF) findworst.$(SUF)\
 		initlex.$(SUF) Lpars.$(SUF)
 
-GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c dfadummy\
+GENFILES =	Lpars.h Lpars.c parserdummy parser.c syntax.c \
 		dfa.c dfa.c.new trans.c trans.c.new\
 		incalls.d incalls.r incalls.r.new pseudo.d
 
@@ -93,7 +93,7 @@ NOPTLIB = 	$(EMHOME)/modules/lib/libread_emk.$(LIBSUF)\
 		$(EMHOME)/modules/lib/libsystem.$(LIBSUF)\
 		$(EMHOME)/lib/em_data.$(LIBSUF)
 
-em_nopt:	dfadummy main.$(SUF) $(NOFILES)
+em_nopt:	incalls.r main.$(SUF) $(NOFILES)
 		$(CC) -o em_nopt main.$(SUF) $(NOFILES) $(NOPTLIB)
 
 OLINT =		main.c mkstrct.c nopt.c aux.c dfa.c trans.c
@@ -105,17 +105,17 @@ OLINTLIB = 	$(EMHOME)/modules/lib/llib-lread_emkV.ln\
 		$(EMHOME)/modules/lib/llib-lprint.ln\
 		$(EMHOME)/modules/lib/llib-lstring.ln
 
-lintnopt:	dfadummy $(OLINT)
+lintnopt:	incalls.r $(OLINT)
 		$(LINT) $(LINTFLAGS) $(OLINT) $(OLINTLIB)
 
 # How to build the library version of the optimizer
 
-$(LIBOPT):	dfadummy $(NOFILES) pseudo.d incalls.d
+$(LIBOPT):	$(NOFILES) pseudo.d incalls.d
 		rm -f $(LIBOPT)
 		ar rc $(LIBOPT) O_*.$(SUF) $(NOFILES)
 		-sh -c 'ranlib $(LIBOPT)'
 
-$(LIBCEOPT):	dfadummy
+$(LIBCEOPT):	incalls.r
 		rm -f O_*.$(SUF) $(NOFILES) pseudo.d incalls.d
 		-mv $(LIBOPT) $(LIBOPT).saved
 		make "EMHOME="$(EMHOME) PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
@@ -123,17 +123,16 @@ $(LIBCEOPT):	dfadummy
 		-mv $(LIBOPT).saved $(LIBOPT)
 		rm -f O_*.$(SUF) $(NOFILES)
 
-dfadummy:	patterns parser
+incalls.r:	patterns parser
 		-$(EMHOME)/lib/cpp patterns | $(HOWMUCH) >/tmp/patts
 		parser </tmp/patts
 		-rm /tmp/patts
-		touch dfadummy
 
 # How to build the lint library for the optimizer
 
 LLINT =		nopt.c mkstrct.c aux.c dfa.c trans.c
 
-lintlib:	dfadummy $(LLINT)
+lintlib:	incalls.r $(LLINT)
 		$(LINT) $(LINTFLAGS) $(LLINT) -Cemopt
 		mv llib-lemopt.ln $(EMHOME)/modules/lib
 
