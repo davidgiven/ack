@@ -7,6 +7,7 @@
 */
 
 #include "nofloat.h"
+#include "file_info.h"
 
 /* the structure of a token:	*/
 struct token	{
@@ -42,8 +43,6 @@ struct token	{
 #endif NOFLOAT
 
 extern struct token dot, ahead, aside;
-extern unsigned int LineNumber;	/* "LLlex.c"	*/
-extern char *FileName;		/* "LLlex.c"	*/
 
 extern int ReplaceMacros;	/* "LLlex.c"	*/
 extern int EoiForNewline;	/* "LLlex.c"	*/
@@ -52,6 +51,7 @@ extern int AccFileSpecifier;	/* "LLlex.c"	*/
 extern int AccDefined;		/* "LLlex.c"	*/
 extern int UnknownIdIsZero;	/* "LLlex.c"	*/
 extern int SkipEscNewline;	/* "LLlex.c"	*/
+extern int Unstacked;		/* "LLlex.c"	*/
 
 extern int NoUnstack;		/* buffer.c	*/
 

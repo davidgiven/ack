@@ -21,9 +21,6 @@
 /* Data about the token yielded */
 struct token dot, ahead, aside;
 
-unsigned int LineNumber = 0;	/* current LineNumber	*/
-char *FileName = 0;		/* current filename	*/
-
 int ReplaceMacros = 1;		/* replacing macros			*/
 int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int PreProcKeys = 0;		/* return preprocessor key		*/
@@ -31,6 +28,7 @@ int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 int SkipEscNewline = 0;		/* how to interpret backslash-newline	*/
+int Unstacked = 0;		/* an unstack is done 			*/
 
 #define MAX_LL_DEPTH	2
 
@@ -102,21 +100,28 @@ GetToken(ptok)
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
 
+	if (! LineNumber) goto firstline;
 again:	/* rescan the input after an error or replacement	*/
+#ifndef NOPP
+	if (Unstacked) EnableMacros();
+#endif
 	LoadChar(ch);
 go_on:	/* rescan, the following character has been read	*/
 	if ((ch & 0200) && ch != EOI) /* stop on non-ascii character */
 		fatal("non-ascii '\\%03o' read", ch & 0377);
 	switch (class(ch)) {	/* detect character class	*/
 	case STNL:		/* newline, vertical space or formfeed	*/
+firstline:
 		LineNumber++;			/* also at vs and ff	*/
 		if (EoiForNewline)	/* called in control line	*/
 			/*	a newline in a control line indicates the
 				end-of-information of the line.
 			*/
 			return ptok->tk_symb = EOI;
-		while (LoadChar(ch), ch == '#') /* a control line follows */
+		while (LoadChar(ch), ch == '#') { /* a control line follows */
 			domacro();
+			if (!LineNumber) goto firstline;
+		}
 			/*	We have to loop here, because in
 				`domacro' the nl, vt or ff is read. The
 				character following it may again be a `#'.
@@ -253,6 +258,9 @@ go_on:	/* rescan, the following character has been read	*/
 		hash = STARTHASH();
 		do	{			/* read the identifier	*/
 			if (++pos < idfsize) {
+#ifndef NOPP
+				if (Unstacked) EnableMacros();
+#endif
 				*tg++ = ch;
 				hash = ENHASH(hash, ch, pos);
 			}
@@ -485,8 +493,10 @@ string_token(nm, stop_char, plen)
 		}
 		if (ch == '\\') {
 			LoadChar(ch);
-			if (ch == '\n')
+			if (ch == '\n') {
 				LineNumber++;
+				continue;
+			}
 			ch = quoted(ch);
 		}
 		str[pos++] = ch;

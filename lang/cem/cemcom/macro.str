@@ -9,7 +9,7 @@
 */
 #define NOFLAG		0		/* no special flags	*/
 #define	FUNC		01		/* function attached    */
-#define	PREDEF		02		/* predefined macro	*/
+#define NOREPLACE	02		/* don't replace	*/
 
 #define	FORMALP 0200	/* mask for creating macro formal parameter	*/
 
@@ -21,8 +21,9 @@
 struct macro	{
 	struct macro *next;
 	char *	mc_text;	/* the replacement text		*/
-	int	mc_nps;	/* number of formal parameters	*/
+	int	mc_nps;		/* number of formal parameters	*/
 	int	mc_length;	/* length of replacement text	*/
+	int	mc_count;	/* # of "concurrent" invocations*/
 	char	mc_flag;	/* marking this macro		*/
 };
 

@@ -34,7 +34,7 @@ char *inctable[MAXINCL] = {		/* list for includes	*/
 	0
 };
 
-char **WorkingDir = &inctable[0];
+extern char *getwdir();
 #endif NOPP
 
 struct sp_id special_ids[] =	{
@@ -90,19 +90,17 @@ main(argc, argv)
 #endif NOPP
 
 	/*	Note: source file "-" indicates that the source is supplied
-		as standard input.  This is only allowed if READ_IN_ONE is
+		as standard input.  This is only allowed if INP_READ_IN_ONE is
 		not defined!
 	*/
-#ifdef READ_IN_ONE
+#ifdef INP_READ_IN_ONE
 	while (argc > 1 && *argv[1] == '-')
-#else READ_IN_ONE
+#else INP_READ_IN_ONE
 	while (argc > 1 && *argv[1] == '-' && argv[1][1] != '\0')
-#endif READ_IN_ONE
+#endif INP_READ_IN_ONE
 	{
 		char *par = &argv[1][1];
 
-		if (*par == '-')
-			par++;
 		do_option(par);
 		argc--, argv++;
 	}
@@ -139,6 +137,7 @@ compile(argc, argv)
 #ifdef USE_TMP
 	char tmpf[256];
 #endif
+	char *result;
 
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'];
@@ -172,11 +171,15 @@ compile(argc, argv)
 
 	if (destination && strcmp(destination, "-") == 0)
 		destination = 0;
-	if (!InsertFile(source, (char **) 0)) /* read the source file	*/
+	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, 
 			source ? source : "stdin");
 	init();
-	/* FileName = source; /* needed ???	*/
+	FileName = source;
+	LineNumber = 0;
+#ifndef NOPP
+	WorkingDir = getwdir(source);
+#endif NOPP
 	PushLex();
 
 #ifndef NOPP

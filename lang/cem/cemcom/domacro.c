@@ -24,6 +24,7 @@
 #include	"storage.h"
 
 IMPORT char *inctable[];	/* list of include directories		*/
+IMPORT char *getwdir();
 PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
@@ -223,6 +224,7 @@ do_include()
 	/*	do_include() performs the inclusion of a file.
 	*/
 	char *filenm;
+	char *result;
 	int tok;
 	struct token tk;
 
@@ -235,8 +237,17 @@ do_include()
 	}
 	AccFileSpecifier = 0;
 	SkipRestOfLine();
-	if (filenm && !InsertFile(filenm, &inctable[tok == FILESPECIFIER]))
-		lexerror("cannot find include file \"%s\"", filenm);
+	inctable[0] = WorkingDir;
+	if (filenm) {
+		if (!InsertFile(filenm, &inctable[tok==FILESPECIFIER],&result)){
+			lexerror("cannot find include file \"%s\"", filenm);
+		}
+		else {
+			WorkingDir = getwdir(result);
+			FileName = result;
+			LineNumber = 0;
+		}
+	}
 }
 
 PRIVATE
@@ -341,35 +352,31 @@ do_if()
 PRIVATE
 do_ifdef(how)
 {
-	struct idf *id;
+	register struct idf *id;
 
 	/*	how == 1 : ifdef; how == 0 : ifndef
 	*/
 	push_if();
-	if (id = GetIdentifier()) {
-		if (
-			(how && !(id && id->id_macro))
-		||
-			(!how && id && id->id_macro)
-		) /* this id is not defined	*/
-			skip_block();
-		else
-			SkipRestOfLine();
-	}
-	else {
+	if (!(id = GetIdentifier()))
 		lexerror("illegal #ifdef construction");
+
+	/* The next test is a shorthand for:
+		(how && !id->id_macro) || (!how && id->id_macro)
+	*/
+	if (how ^ (id && id->id_macro != 0))
+		skip_block();
+	else
 		SkipRestOfLine();
-	}
 }
 
 PRIVATE
 do_undef()
 {
-	struct idf *id;
+	register struct idf *id;
 
 	/* Forget a macro definition.	*/
 	if (id = GetIdentifier()) {
-		if (id && id->id_macro) { /* forget the macro */
+		if (id->id_macro) { /* forget the macro */
 			free_macro(id->id_macro);
 			id->id_macro = (struct macro *) 0;
 		} /* else: don't complain */
@@ -406,14 +413,15 @@ getparams(buf, parbuf)
 		Note that the '(' has already been eaten.
 		The names of the formal parameters are stored into parbuf.
 	*/
-	register count = 0;
-	register c;
+	register char **pbuf = &buf[0];
+	register int c;
 	register char *ptr = &parbuf[0];
+	register char **pbuf2;
 
 	LoadChar(c);
 	c = skipspaces(c);
 	if (c == ')') {		/* no parameters: #define name()	*/
-		buf[0] = (char *) 0;
+		*pbuf = (char *) 0;
 		return 0;
 	}
 	for (;;) {		/* eat the formal parameter list	*/
@@ -421,7 +429,7 @@ getparams(buf, parbuf)
 			lexerror("#define: bad formal parameter");
 			return -1;
 		}
-		buf[count++] = ptr;	/* name of the formal	*/
+		*pbuf = ptr;	/* name of the formal	*/
 		*ptr++ = c;
 		if (ptr >= &parbuf[PARBUFSIZE])
 			fatal("formal parameter buffer overflow");
@@ -432,10 +440,22 @@ getparams(buf, parbuf)
 				fatal("formal parameter buffer overflow");
 		} while (in_idf(c));
 		*(ptr - 1) = '\0';	/* mark end of the name		*/
+
+		/*	Check if this formal parameter is already used.
+			Usually, macros do not have many parameters, so ...
+		*/
+		for (pbuf2 = pbuf - 1; pbuf2 >= &buf[0]; pbuf2--) {
+			if (!strcmp(*pbuf2, *pbuf)) {
+				warning("formal parameter \"%s\" already used",
+					*pbuf);
+			}
+		}
+
+		pbuf++;
 		c = skipspaces(c);
 		if (c == ')') {	/* end of the formal parameter list	*/
-			buf[count] = (char *) 0;
-			return count;
+			*pbuf = (char *) 0;
+			return pbuf - buf;
 		}
 		if (c != ',') {
 			lexerror("#define: bad formal parameter list");
@@ -444,11 +464,12 @@ getparams(buf, parbuf)
 		LoadChar(c);
 		c = skipspaces(c);
 	}
+	/*NOTREACHED*/
 }
 
 EXPORT
 macro_def(id, text, nformals, length, flags)
-	struct idf *id;
+	register struct idf *id;
 	char *text;
 {
 	register struct macro *newdef = id->id_macro;
@@ -456,15 +477,12 @@ macro_def(id, text, nformals, length, flags)
 	/*	macro_def() puts the contents and information of a macro
 		definition into a structure and stores it into the symbol
 		table entry belonging to the name of the macro.
-		A warning is given if the definition overwrites another
-		(unless predefined!)
+		A warning is given if the definition overwrites another.
 	*/
 	if (newdef) {		/* is there a redefinition?	*/
-		if ((newdef->mc_flag & PREDEF) == 0) {
-			if (macroeq(newdef->mc_text, text))
-				return;
-			lexwarning("redefine \"%s\"", id->id_text);
-		} /* else: overwrite pre-definition	*/
+		if (macroeq(newdef->mc_text, text))
+			return;
+		lexwarning("redefine \"%s\"", id->id_text);
 	}
 	else
 		id->id_macro = newdef = new_macro();
@@ -472,6 +490,7 @@ macro_def(id, text, nformals, length, flags)
 	newdef->mc_nps  = nformals;	/* nr of formals	*/
 	newdef->mc_length = length;	/* length of repl. text	*/
 	newdef->mc_flag = flags;	/* special flags	*/
+	newdef->mc_count = 0;
 }
 
 PRIVATE int

@@ -42,10 +42,6 @@
 #define	DENSITY	2	/* see switch.[ch] for an explanation		*/
 
 
-!File: predefine.h
-#define	PREDEFINE	"vax,VAX,BSD4_1,bsd4_1"
-
-
 !File: lapbuf.h
 #define	LAPBUF	4096	/* size of macro actual parameter buffer	*/
 
@@ -115,7 +111,7 @@
 
 
 !File: inputtype.h
-#undef READ_IN_ONE	1	/* read input file in one	*/
+#undef INP_READ_IN_ONE	1	/* read input file in one	*/
 
 
 !File: nopp.h

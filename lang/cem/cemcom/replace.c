@@ -21,9 +21,11 @@
 char *strcpy(), *strcat();
 char *long2str();
 
+PRIVATE struct macro	*ReplaceList;	/* list of currently active macros */
+
 EXPORT int
 replace(idef)
-	struct idf *idef;
+	register struct idf *idef;
 {
 	/*	replace() is called by the lexical analyzer to perform
 		macro replacement.  "idef" is the description of the
@@ -34,14 +36,18 @@ replace(idef)
 		replace() returns 1 if the replacement succeeded and 0 if
 		some error has occurred.
 	*/
+	register struct macro *mac = idef->id_macro;
 	register char c;
-	register char flags = idef->id_macro->mc_flag;
 	char **actpars, **getactuals();
 	char *reptext, *macro2buffer();
 	int size;
 
-	if (idef->id_macro->mc_nps != -1) {	/* with parameter list	*/
-		if (flags & FUNC) {
+	if (mac->mc_flag & NOREPLACE) {
+		lexwarning("macro %s is recursive", idef->id_text);
+		return 0;
+	}
+	if (mac->mc_nps != -1) {	/* with parameter list	*/
+		if (mac->mc_flag & FUNC) {
 					/* must be "defined".
 					   Unfortunately, the next assertion
 					   will not compile ...
@@ -49,6 +55,12 @@ replace(idef)
 					*/
 			if (! AccDefined)
 				return 0;
+		}
+		if (++mac->mc_count > 100) {
+			/* 100 must be some number in Parameters */
+			lexwarning("macro %s is assumed recursive",
+				    idef->id_text);
+			return 0;
 		}
 		LoadChar(c);
 		c = skipspaces(c);
@@ -59,23 +71,27 @@ replace(idef)
 			return 0;
 		}
 		actpars = getactuals(idef);	/* get act.param. list	*/
-		if (flags & FUNC) {
+		if (mac->mc_flag & FUNC) {
 			struct idf *param = str2idf(*actpars);
 
 			if (param->id_macro) 
-				reptext = "\0001";
+				reptext = "1";
 			else
-				reptext = "\0000";
-			InsertText(reptext, 2);
+				reptext = "0";
+			InsertText(reptext, 1);
+			mac->next = ReplaceList;
+			ReplaceList = mac;
 			return 1;
 		}
 	}
-	if ((flags & PREDEF) && (UnknownIdIsZero == 0)) /* don't replace */
-		return 0;
-	if (flags & FUNC) 	/* this macro leads to special action	*/
+	if (mac->mc_flag & FUNC) /* this macro leads to special action	*/
 		macro_func(idef);
+	if (mac->mc_nps <= 0)
+		mac->mc_flag |= NOREPLACE;
 	reptext = macro2buffer(idef, actpars, &size); /* create input buffer */
 	InsertText(reptext, size);
+	mac->next = ReplaceList;
+	ReplaceList = mac;
 	return 1;
 }
 
@@ -83,24 +99,26 @@ GSTATIC char FilNamBuf[PATHLENGTH];
 
 PRIVATE
 macro_func(idef)
-	struct idf *idef;
+	register struct idf *idef;
 {
 	/*	macro_func() performs the special actions needed with some
 		macros.  These macros are __FILE__ and __LINE__ which
 		replacement texts must be evaluated at the time they are
 		used.
 	*/
+	register struct macro *mac = idef->id_macro;
+
 	switch (idef->id_text[2]) { /* This switch is very blunt... */
 	case 'F' :			/* __FILE__	*/
 		FilNamBuf[0] = '"';
 		strcpy(&FilNamBuf[1], FileName);
 		strcat(FilNamBuf, "\"");
-		idef->id_macro->mc_text = FilNamBuf;
-		idef->id_macro->mc_length = strlen(FilNamBuf);
+		mac->mc_text = FilNamBuf;
+		mac->mc_length = strlen(FilNamBuf);
 		break;
 	case 'L' :			/* __LINE__	*/
-		idef->id_macro->mc_text = long2str((long)LineNumber, 10);
-		idef->id_macro->mc_length = 1;
+		mac->mc_text = long2str((long)LineNumber, 10);
+		mac->mc_length = 1;
 		break;
 	default :
 		crash("(macro_func)");
@@ -125,10 +143,9 @@ macro2buffer(idef, actpars, siztext)
 	*/
 	register int size = 8;
 	register char *text = Malloc(size);
-	register pos = 0;
+	register int pos = 0;
 	register char *ptr = idef->id_macro->mc_text;
 
-	text[pos++] = '\0';			/* allow pushback	*/
 	while (*ptr) {
 		if (*ptr & FORMALP) {	/* non-asc formal param. mark	*/
 			register int n = *ptr++ & 0177;
@@ -138,7 +155,7 @@ macro2buffer(idef, actpars, siztext)
 			/*	copy the text of the actual parameter
 				into the replacement text
 			*/
-			for (p = actpars[n - 1]; *p; p++) {
+			for (p = actpars[n - 1]; p && *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
 					text = Srealloc(text, size += RSTRSIZE);
@@ -153,5 +170,27 @@ macro2buffer(idef, actpars, siztext)
 	text[pos] = '\0';
 	*siztext = pos;
 	return text;
+}
+
+EXPORT
+DoUnstack()
+{
+	Unstacked++;
+}
+
+EXPORT
+EnableMacros()
+{
+	register struct macro *p = ReplaceList;
+
+	ASSERT(Unstacked > 0);
+	while (Unstacked > 0) {
+		ASSERT(p != 0);
+		p->mc_flag &= ~NOREPLACE;
+		p->mc_count = 0;
+		p = p->next;
+		Unstacked--;
+	}
+	ReplaceList = p;
 }
 #endif NOPP

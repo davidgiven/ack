@@ -34,7 +34,10 @@ do_option(text)
 	switch(*text++)	{
 
 	default:
-		options[text[-1]] = 1;	/* flags, debug options etc.	*/
+		fatal("illegal option: %c", *--text);
+
+	case '-':
+		options[*text] = 1;	/* flags, debug options etc.	*/
 		break;
 
 	case 'C' :	/* E option + comment output		*/
@@ -105,6 +108,7 @@ do_option(text)
 				new = tmp;
 			}
 		}
+		else inctable[inc_pos] = 0;
 #else NOPP
 		warning("-I option ignored");
 #endif NOPP
@@ -133,6 +137,10 @@ do_option(text)
 #else NOPP
 		warning("-P option ignored");
 #endif NOPP
+		break;
+
+	case 'R':
+		options['R'] = 1;
 		break;
 
 #ifdef USE_TMP
