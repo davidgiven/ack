@@ -16,6 +16,7 @@ MALLOCSRC =	$(SRC_DIR)/READ_ME $(SRC_DIR)/size_type.h \
 all:		malloc.$(SUF)
 
 install:	all
+		-mkdir $(MOD_DIR)/lib
 		cp malloc.$(SUF) $(MOD_DIR)/lib/malloc.$(SUF)
 
 cmp:		all
