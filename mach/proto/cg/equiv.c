@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "assert.h"
 #include "equiv.h"
 #include "param.h"

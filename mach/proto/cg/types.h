@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #ifndef EM_WSIZE
 EM_WSIZE should be defined at this point
 #endif

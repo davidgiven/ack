@@ -1,3 +1,5 @@
+/* $Header$ */
+
 struct regvar {
 	struct regvar  *rv_next;
 	long		rv_off;

@@ -1,3 +1,5 @@
+/* $Header$ */
+
 struct result {
 	int	e_typ;		/* EV_INT,EV_REG,EV_STR */
 	union {

@@ -1,3 +1,5 @@
+/* $Header$ */
+
 typedef struct glosym {
 	struct glosym *gl_next;
 	string	       gl_name;

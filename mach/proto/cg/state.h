@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define STONSTACK	/* if defined state is saved in stackframe */
 
 typedef struct state {

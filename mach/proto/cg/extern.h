@@ -1,3 +1,5 @@
+/* $Header$ */
+
 extern int maxply;                      /* amount of lookahead allowed */
 extern int stackheight;                 /* # of tokens on fakestack */
 extern token_t fakestack[];             /* fakestack itself */

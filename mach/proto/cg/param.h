@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define BMASK 0377
 #define BSHIFT 8
 

@@ -1,3 +1,5 @@
+/* $Header$ */
+
 typedef struct {
 	int     t_token;        /* kind of token, -1 for register */
 	union {

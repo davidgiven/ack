@@ -1,3 +1,5 @@
+/* $Header$ */
+
 #define MAXCREG 4
 
 struct perm {

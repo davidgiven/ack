@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include <em_spec.h>
 #include <em_flag.h>
 #include "assert.h"
