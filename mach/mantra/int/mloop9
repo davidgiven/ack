@@ -1,3 +1,10 @@
+	.define ignmask
+	.define itoa
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 !---------------------------------------------------------------------------
 !		MISCELLANEOUS
 !----------------------------------------------------------------------------
@@ -148,10 +155,9 @@ gto_l:		move.l	d6,a0	;	move.b	(a3)+,-(sp)
 lim_z:		move.w	ignmask,-(sp) ;	jmp	(a4)
 sim_z:		move.w	(sp)+,ignmask ;	jmp	(a4)
 
-	.bss
+	.sect .bss
 ignmask:  .space 2
-	.define ignmask
-	.text
+	.sect .text
 
 !---------------------------------------------------------------------------
 lor_s0:		move.l	d6,d0	;	move.b	(a3)+,d0
@@ -204,15 +210,14 @@ lblnop:		lea	nopln+16,a0 ;	move.l	(a6),d1
 		add.l	wrd+4,sp
 		jmp	(a4)
 
-	.data
+	.sect .data
 nopln:	.asciz	"line number nop              sp             \n"
 	.align 2
-	.text
+	.sect .text
 !unsigned to ascii for integers  , a0 is address of first character
 ! d1 contains integer. Output is 11 characters of which the first is a space.
 
-	.define itoa
-	.text
+	.sect .text
 
 itoa:		move.l	#9,d4	;	add.l	#11,a0
 		move.l	#10,d0
@@ -291,23 +296,23 @@ mon_z:		mov	(sp)+,d0 ;	bmi	e_badmon
 		add.l	#syscal,d0 ;	move.l	d0,a0
 		move.l	(a0),a0	;	jmp	(a0)
 
-	.data
+	.sect .data
 syscal:
-.long	e_badmon ; .long hlt_z ; .long	_fork ; .long	_read
-.long	_write ; .long	_open ; .long	_close ; .long	_wait
-.long	_creat ; .long	_link ; .long	_unlink ; .long e_badmon
-.long	_chdir ; .long	e_badmon ; .long _mknod ; .long	_chmod
-.long	_chown ; .long	_break ; .long _stat ; .long	_lseek
-.long	_getpid ; .long _mount ; .long	_umount ; .long	_setuid
-.long	_getuid ; .long	_stime ; .long	_ptrace ; .long	_alarm
-.long	_fstat ; .long	_pause ; .long	_utime ; .long	e_badmon
-.long	e_badmon ; .long _access ; .long _nice ; .long	_ftime
-.long	_sync ; .long	_kill ; .long	e_badmon ; .long e_badmon
-.long	e_badmon ; .long _dup ; .long	_pipe ; .long	_times
-.long	_profil ; .long e_badmon ; .long _setgid ; .long _getgid
-.long	_sigtrp ; .long e_badmon ; .long e_badmon ; .long _acct
-.long	e_badmon ; .long _lock ; .long	_ioctl ; .long	e_badmon
-.long	_mpxcall ; .long e_badmon ; .long e_badmon ; .long _exece
-.long	_umask ; .long	_chroot ; .long	e_badmon ; .long e_badmon
+.data4	e_badmon ; .data4 hlt_z ; .data4	_fork ; .data4	_read
+.data4	_write ; .data4	_open ; .data4	_close ; .data4	_wait
+.data4	_creat ; .data4	_link ; .data4	_unlink ; .data4 e_badmon
+.data4	_chdir ; .data4	e_badmon ; .data4 _mknod ; .data4	_chmod
+.data4	_chown ; .data4	_break ; .data4 _stat ; .data4	_lseek
+.data4	_getpid ; .data4 _mount ; .data4	_umount ; .data4	_setuid
+.data4	_getuid ; .data4	_stime ; .data4	_ptrace ; .data4	_alarm
+.data4	_fstat ; .data4	_pause ; .data4	_utime ; .data4	e_badmon
+.data4	e_badmon ; .data4 _access ; .data4 _nice ; .data4	_ftime
+.data4	_sync ; .data4	_kill ; .data4	e_badmon ; .data4 e_badmon
+.data4	e_badmon ; .data4 _dup ; .data4	_pipe ; .data4	_times
+.data4	_profil ; .data4 e_badmon ; .data4 _setgid ; .data4 _getgid
+.data4	_sigtrp ; .data4 e_badmon ; .data4 e_badmon ; .data4 _acct
+.data4	e_badmon ; .data4 _lock ; .data4	_ioctl ; .data4	e_badmon
+.data4	_mpxcall ; .data4 e_badmon ; .data4 e_badmon ; .data4 _exece
+.data4	_umask ; .data4	_chroot ; .data4	e_badmon ; .data4 e_badmon
 
-	.text
+	.sect .text

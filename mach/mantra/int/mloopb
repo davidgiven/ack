@@ -1,3 +1,8 @@
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 _sigtrp:	move.l	(sp)+,d2	!save return address
 		mov	(sp)+,d1	!trapno in d1
 		mov	(sp)+,d4	!signo in d4
@@ -28,16 +33,16 @@ sig_bad:	mov	22,-(sp)	!_signal. If pointer 0 trapping is
 		mov	d4,-(sp)		!pointer ,signo to be trapped
 		bsr	_signal
 		jmp	(a4)
-	.data
-sig_adr:	.long	sig1 ;	.long	sig2 ;	.long sig3 ;	.long	0
-		.long	0 ;	.long	0 ;	.long 0 ;	.long	0
-		.long	0 ;	.long	0 ;	.long sig11 ;	.long	sig12
-		.long	sig13 ;	.long	sig14 ;	.long sig15 ;	.long	sig16
-sig_trp:	.long	-2  ;	.long	-2  ;	.long	-2  ;	.long	-2  
-		.long	-2  ;	.long	-2  ;	.long	-2  ;	.long	-2  
-		.long	-2  ;	.long	-2  ;	.long	21  ;	.long	25  
-		.long	-2  ;	.long	-2  ;	.long	-2  ;	.long	-2  
-	.text
+	.sect .data
+sig_adr:	.data4	sig1 ;	.data4	sig2 ;	.data4 sig3 ;	.data4	0
+		.data4	0 ;	.data4	0 ;	.data4 0 ;	.data4	0
+		.data4	0 ;	.data4	0 ;	.data4 sig11 ;	.data4	sig12
+		.data4	sig13 ;	.data4	sig14 ;	.data4 sig15 ;	.data4	sig16
+sig_trp:	.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
+		.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
+		.data4	-2  ;	.data4	-2  ;	.data4	21  ;	.data4	25  
+		.data4	-2  ;	.data4	-2  ;	.data4	-2  ;	.data4	-2  
+	.sect .text
 !the next procedures map the catched signal to em errors. The em error
 !procedure will handle this.
 sig1:		pea	retutrap

@@ -1,3 +1,10 @@
+	.define mlu4
+	.define	dvu4
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 !----------------------------------------------------------------------------
 !		SIGNED INTEGER ARITHMETIC
 !------------------------------------------------------------------------------
@@ -117,8 +124,7 @@ mli_2W:
 ! multiplicant in d1 . Returns 4 byte result in d0 . If d4=0 overflow did 
 ! not occur on the multiplication , else it did .
 
-	.define mlu4
-	.text
+	.sect .text
 
 mlu4:		move.l	d1,d3	;	move.l	d0,d2
 		swap	d2	;	swap	d3
@@ -232,8 +238,7 @@ dvi4:		move.l	(sp)+,d5
 
 !Expects d0 divisor , d1 dividend. Gives d1 quotient ,d3 remainder
 
-	.define	dvu4
-	.text
+	.sect .text
 dvu4:
 #if test
 		tst.l	d0	;	bne	1f

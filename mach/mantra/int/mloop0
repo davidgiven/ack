@@ -1,3 +1,21 @@
+	.define	filb
+	.define curproc
+	.define	pd
+	.define	nproc
+	.define	retarea
+	.define	retsize
+	.define hp
+	.define maxcount
+	.define firstp
+	.define globmax
+	.define tblmax
+	.define ml
+	.define argc
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 !---------------------------------------------------------------------------
 !		START OF THE PROGRAM
 !---------------------------------------------------------------------------
@@ -18,10 +36,10 @@
 		move.l	(a2),filb	!interpreter name in filb
 		sub.l	#1,(sp)
 		bgt	0f
-	.data
+	.sect .data
 emfile:	.asciz	"e.out"
 	.align 2
-	.text
+	.sect .text
 		move.l	4(sp),a0	!4(sp) is argv
 		move.l	#emfile,(a0)	!pointer to e.out in argp1
 		add.l	#1,(sp)		!only 1 argument in this case
@@ -103,10 +121,10 @@ datloop:	cmp.l	a4,a5	;	bhi	9f	!Go on filling data
 		asl.l	#2,d1	;	move.l	-4(a6,d1),a0
 		jmp	(a0)
 
-	.data
-datswi:	.long	dat1;	.long	dat2;	.long	dat3;	.long	dat4
-	.long	dat5;	.long	dat6;	.long	dat6;	.long	dofloat
-	.text
+	.sect .data
+datswi:	.data4	dat1;	.data4	dat2;	.data4	dat3;	.data4	dat4
+	.data4	dat5;	.data4	dat6;	.data4	dat6;	.data4	dofloat
+	.sect .text
 
 dat0:		add.l	#4,a1
 		move.b	(a4)+,-(a1) ;	move.b	(a4)+,-(a1)
@@ -331,7 +349,7 @@ procinf:	move.l	#1,maxcount	!count pointer for first procedure
 1:
 countlabel:
 
-	.data
+	.sect .data
 skipdisp:
 .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
 .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0; .byte 0;
@@ -394,7 +412,7 @@ skipdisp:
 .byte 2; .byte 0; .byte 2; .byte 2; .byte 2; .byte 2; .byte 2; .byte 2;
 .byte 0; .byte 2; .byte 0; .byte 1; .byte 2; .byte 0; .byte 0; .byte 2;
 
-	.text
+	.sect .text
 		move.l	globmax,d1
 		move.l	d1,a3
 #if prof
@@ -458,12 +476,12 @@ nofile:		mov	#0xD,d0 ;	bra	notrap1
 badarg:		move.l	eb,a6
 badarg1:	mov	#0xE,d0 ;	bra	notrap1
 toolarge:	mov	#0xF,d0 ;	bra	notrap1
-	.data
+	.sect .data
 retsize: .space	2
 retarea: .space 32
 
 
-	.bss
+	.sect .bss
 argc:	.space	4
 argv:	.space	4
 envp:	.space	4
@@ -488,18 +506,5 @@ pb:	.space	4
 pd:	.space	4
 hp:	.space	4
 
-	.define	filb
-	.define curproc
-	.define	pd
-	.define	nproc
-	.define	retarea
-	.define	retsize
-	.define hp
-	.define maxcount
-	.define firstp
-	.define globmax
-	.define tblmax
-	.define ml
-	.define argc
 
-	.text
+	.sect .text

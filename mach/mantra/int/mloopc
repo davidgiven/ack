@@ -1,3 +1,8 @@
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
 !THIS FILE CONTAINS THE SYSTEM CALLS FOR PMDS-II AS SUBROUTINES FOR THE
 !EM-INTERPRETER. a1 CONTAINS A POINTER TO THE RETURN AREA . EACH SUBROUTINE
 !EXPECTS ITS DATA IN THE FORM EM PRODUCES AND GIVES ITS RESULTS AS EM 
@@ -11,17 +16,17 @@ _exit:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	1
+	.data2	1
 
 _fork:		move.l	(sp),(a1)
 		trap	#0
-	.short	2
+	.data2	2
 		lea	4(sp),sp
 		bcs	2f
 		tst.l	d0		!PID OF CHILD IN PARENT, 0 IN CHILD
 		bne	1f
 		trap	#0
-	.short	20
+	.data2	20
 		mov	d1,-(sp)	!PID OF PARENT IN d1
 		mov	#1,-(sp)	!(PID OF CHILD IN D0),FLAG 1 IN CHILD
 		bra	0f
@@ -40,7 +45,7 @@ _read:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	3
+	.data2	3
 sys0:		lea	16(sp),sp
 		bcc	1f
 		mov	d0,-(sp)
@@ -56,7 +61,7 @@ _write:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	4
+	.data2	4
 		bra	sys0
 
 _open:		move.l	(sp),(a1)
@@ -64,7 +69,7 @@ _open:		move.l	(sp),(a1)
 		bsr	st243
 #endif
 		trap	#0
-	.short	5
+	.data2	5
 sys1:		lea	12(sp),sp
 sys5:		bcc	1f
 		mov	d0,-(sp)
@@ -80,7 +85,7 @@ _close:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	6
+	.data2	6
 sys3:		lea	8(sp),sp
 sys4:		bcc	1f
 		mov	d0,-(sp)
@@ -92,7 +97,7 @@ sys4:		bcc	1f
 
 _wait:		move.l	(sp),(a1)
 		trap	#0
-	.short	7
+	.data2	7
 sys6:		lea	4(sp),sp
 		bcc	1f
 		mov	d0,-(sp)
@@ -109,23 +114,23 @@ _creat:		move.l	(sp),(a1)
 		bsr	st243
 #endif
 		trap	#0
-	.short	8
+	.data2	8
 		bra	sys1
 
 _link:		move.l	(sp),(a1)
 		trap	#0
-	.short	9
+	.data2	9
 		lea	12(sp),sp
 		bra	sys4
 
 _unlink:	move.l	(sp),(a1)
 		trap	#0
-	.short	10
+	.data2	10
 		bra	sys3
 
 _chdir:		move.l	(sp),(a1)
 		trap	#0
-	.short	12
+	.data2	12
 		bra	sys3
 
 _mknod:		move.l	(sp),(a1)
@@ -133,7 +138,7 @@ _mknod:		move.l	(sp),(a1)
 		bsr	st244
 #endif
 		trap	#0
-	.short	14
+	.data2	14
 		lea	16(sp),sp
 		bra	sys4
 
@@ -142,7 +147,7 @@ _chmod:		move.l	(sp),(a1)
 		bsr	st243
 #endif
 		trap	#0
-	.short	15
+	.data2	15
 		lea	12(sp),sp
 		bra	sys4
 
@@ -151,13 +156,13 @@ _chown:		move.l	(sp),(a1)
 		bsr	st244
 #endif
 		trap	#0
-	.short	16
+	.data2	16
 		lea	16(sp),sp
 		bra	sys4
 
 _break:		move.l	(sp),(a1)
 		trap	#0
-	.short	17
+	.data2	17
 		lea	8(sp),sp
 		bcc	1f
 		mov	d0,-(sp)
@@ -168,13 +173,13 @@ _break:		move.l	(sp),(a1)
 2:		move.l	(a1),a0
 		jmp	(a0)
 
-	.data
-nd:	.long	endbss
-	.text
+	.sect .data
+nd:	.data4	endbss
+	.sect .text
 
 _stat:		move.l	(sp),(a1)
 		trap	#0
-	.short	18
+	.data2	18
 		lea	12(sp),sp
 		bra	sys4
 
@@ -183,7 +188,7 @@ _lseek:		move.l	(sp),(a1)
 		bsr	st245
 #endif
 		trap	#0
-	.short	19
+	.data2	19
 		lea	16(sp),sp
 		bcc	1f
 		mov	d0,-(sp)
@@ -197,7 +202,7 @@ _lseek:		move.l	(sp),(a1)
 
 _getpid:	move.l	(sp),(a1)
 		trap	#0
-	.short	20
+	.data2	20
 		add.l	#4,sp
 		mov	d0,-(sp)
 		move.l	(a1),a0
@@ -208,13 +213,13 @@ _mount:		move.l	(sp),(a1)
 		bsr	st246
 #endif
 		trap	#0
-	.short	21
+	.data2	21
 		lea	16(sp),sp
 		bra	sys4
 
 _umount:	move.l	(sp),(a1)
 		trap	#0
-	.short	22
+	.data2	22
 		bra	sys3
 
 _setuid:	move.l	(sp),(a1)
@@ -222,12 +227,12 @@ _setuid:	move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	23
+	.data2	23
 		bra	sys3
 
 _getuid:	move.l	(sp),(a1)
 		trap	#0
-	.short	24
+	.data2	24
 sys7:		add.l	#4,sp
 		mov	d1,-(sp)
 		mov	d0,-(sp)
@@ -236,7 +241,7 @@ sys7:		add.l	#4,sp
 
 _stime:		move.l	(sp),(a1)
 		trap	#0
-	.short	25
+	.data2	25
 		bra	sys3
 
 _ptrace:	move.l	(sp),(a1)
@@ -244,7 +249,7 @@ _ptrace:	move.l	(sp),(a1)
 		bsr	st247
 #endif
 		trap	#0
-	.short	26
+	.data2	26
 		lea	20(sp),sp
 		bra	sys5
 
@@ -254,7 +259,7 @@ _alarm:		move.l	(sp),(a1)
 		clr.w	4(sp)
 #endif
 		trap	#0
-	.short	27
+	.data2	27
 		lea	8(sp),sp
 		mov	d0,-(sp)
 		move.l	(a1),a0
@@ -265,17 +270,17 @@ _fstat:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	28
+	.data2	28
 		lea	12(sp),sp
 		bra	sys4
 
 _pause:		trap	#0
-	.short	29
+	.data2	29
 		rts
 
 _utime:		move.l	(sp),(a1)
 		trap	#0
-	.short	30
+	.data2	30
 		lea	12(sp),sp
 		bra	sys4
 
@@ -284,7 +289,7 @@ _access:	move.l	(sp),(a1)
 		bsr	st248
 #endif
 		trap	#0
-	.short	33
+	.data2	33
 		lea	12(sp),sp
 		bra	sys4
 
@@ -293,17 +298,17 @@ _nice:
 		bsr	241
 #endif
 		trap	#0
-	.short	34
+	.data2	34
 		move.l	(sp)+,(sp)
 		rts
 
 _ftime:		move.l	(sp),(a1)
 		trap	#0
-	.short	35
+	.data2	35
 		bra	sys3
 
 _sync:		trap	#0
-	.short	36
+	.data2	36
 		rts
 
 _kill:		move.l	(sp),(a1)
@@ -311,7 +316,7 @@ _kill:		move.l	(sp),(a1)
 		bsr	st248
 #endif
 		trap	#0
-	.short	37
+	.data2	37
 		lea	12(sp),sp
 		bra	sys4
 
@@ -320,22 +325,22 @@ _dup:		move.l	(sp),(a1)
 		bsr	st248
 #endif
 		trap	#0
-	.short	38
+	.data2	38
 		bra	sys1
 
 _pipe:		move.l	(sp),(a1)
 		trap	#0
-	.short	42
+	.data2	42
 		bra	sys6
 
 _times:		trap	#0
-	.short	43
+	.data2	43
 		move.l	(sp),a0
 		add.l	#8,sp
 		jmp	(a0)
 
 _profil:	trap	#0
-	.short	44
+	.data2	44
 		move.l	(sp),a0
 		lea	20(sp),sp
 		jmp	(a0)
@@ -345,12 +350,12 @@ _setgid:	move.l	(sp),(a1)
 		bsr	st241 
 #endif
 		trap	#0
-	.short	46
+	.data2	46
 		bra	sys3
 
 _getgid:	move.l	(sp),(a1)
 		trap	#0
-	.short	47
+	.data2	47
 		bra	sys7
 
 
@@ -360,7 +365,7 @@ _signal:	move.l	(sp)+,retaddr
 		move.l	d4,-(sp)
 		move.l	retaddr,-(sp)
 		trap	#0
-	.short	48
+	.data2	48
 		lea	12(sp),sp		!remove arguments
 		bcc	1f
 		mov	d0,-(sp)
@@ -370,20 +375,20 @@ _signal:	move.l	(sp)+,retaddr
 		cl	-(sp)
 2:		move.l	retaddr,a0
 		jmp	(a0)
-	.data
-retaddr:  .long	0
-	.text
+	.sect .data
+retaddr:  .data4	0
+	.sect .text
 
 _acct:		move.l	(sp),(a1)
 		trap	#0
-	.short	51
+	.data2	51
 		bra	sys3
 _lock:		move.l	(sp),(a1)
 #ifndef	lword
 		bsr	st241
 #endif
 		trap	#0
-	.short	53
+	.data2	53
 		bra	sys3
 
 _ioctl:		move.l	(sp),(a1)
@@ -391,7 +396,7 @@ _ioctl:		move.l	(sp),(a1)
 		bsr	st248
 #endif
 		trap	#0
-	.short	54
+	.data2	54
 		lea	16(sp),sp
 		bra	sys4
 
@@ -400,13 +405,13 @@ _mpxcall:	move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	56
+	.data2	56
 		lea	12(sp),sp
 		bra	sys4
 
 _exece:		move.l	(sp),(a1)
 		trap	#0
-	.short	59
+	.data2	59
 		lea	16(sp),sp
 		bra	sys4
 
@@ -415,7 +420,7 @@ _umask:		move.l	(sp),(a1)
 		bsr	st241
 #endif
 		trap	#0
-	.short	60
+	.data2	60
 		add.l	#8,sp
 		mov	d0,-(sp)
 		move.l	(a1),a0
@@ -423,7 +428,7 @@ _umask:		move.l	(sp),(a1)
 
 _chroot:	move.l	(sp),(a1)
 		trap	#0
-	.short	61
+	.data2	61
 		bra	sys3
 
 

@@ -1,6 +1,11 @@
-	.text
+.sect .text
+.sect .rom
+.sect .data
+.sect .bss
+.sect .text
+	.sect .text
 end:
-	.bss
+	.sect .bss
 endbss:
-	.data
+	.sect .data
 enddata:
