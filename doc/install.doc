@@ -734,6 +734,9 @@ A dependency generator for makefiles.
 Some utilities for handling name clashes in C programs. Some
 systems have C-compilers with only 7 or 8 characters significant in
 identifiers.
+.IP "\fItabgen\fP
+.br
+A utility for generating character tables for C-programs.
 .IP \fIint\fP
 .br
 An EM interpreter. This one is written in C, and is very useful for checking
