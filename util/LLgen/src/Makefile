@@ -2,12 +2,12 @@
 PROF=
 LLOPT= # -vvv -x
 INCLUDES =
-DEFINES = -DNDEBUG
+DEFINES = -DNDEBUG -DNON_CORRECTING
 CFLAGS=-O $(DEFINES) $(INCLUDES) $(PROF)
 LDFLAGS=
-OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o name.o sets.o Lpars.o alloc.o machdep.o cclass.o
-CFILES = main.c gencode.c compute.c LLgen.c tokens.c check.c reach.c global.c name.c sets.c Lpars.c alloc.c machdep.c cclass.c
-FILES =types.h extern.h io.h sets.h tokens.g LLgen.g main.c name.c compute.c sets.c gencode.c global.c check.c reach.c alloc.c machdep.c Makefile cclass.c
+OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o name.o sets.o Lpars.o alloc.o machdep.o cclass.o savegram.o
+CFILES = main.c gencode.c compute.c LLgen.c tokens.c check.c reach.c global.c name.c sets.c Lpars.c alloc.c machdep.c cclass.c savegram.c
+FILES =types.h extern.h io.h sets.h tokens.g LLgen.g main.c name.c compute.c sets.c gencode.c global.c check.c reach.c alloc.c machdep.c Makefile cclass.c savegram.c
 GFILES = tokens.g LLgen.g
 LINT = lint -b $(DEFINES) -DNORCSID
 
