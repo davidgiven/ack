@@ -23,6 +23,10 @@ name asld
 	outfile a.out
 	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
-	args (.e:{HEAD}={EM}/{RT}em) -o > (.e:{TAIL}={EM}/{LIB}em)
+	mapflag -i  IFILE={EM}/{RT}i
+	args {IFILE?} (.e:{HEAD}={EM}/{RT}em) \
+({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+(.p.c:{TAIL}={EM}/{LIB}mon) (.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}em.vend)
 	linker
 end
