@@ -96,6 +96,7 @@ vax_bsd4_2)	ACM=vax2 ;;
 pc_ix)		ACM=ix ;;
 m68_unisoft)	ACM=m68k2 ;;
 m68_pmds) 	ACM=pmds ;;
+*)		ACM=m68k2 ;;
 esac
 rm -f local.h
 sed /ACKM/s/'".*"'/'"'$ACM'"'/ <../h/local.h >local.h
