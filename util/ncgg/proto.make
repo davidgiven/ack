@@ -21,7 +21,7 @@ SOURCES=$(SRC_DIR)/*.h $(SRC_DIR)/cgg.y $(SRC_DIR)/scan.l \
 SRC_DIR=$(SRC_HOME)/util/ncgg
 EMH=$(TARGET_HOME)/h
 MANDIR=$(TARGET_HOME)/man
-INCLUDES=-I$(EMH) -I$(SRC_DIR) -I.
+INCLUDES=-I$(EMH) -I$(TARGET_HOME)/config -I$(SRC_DIR) -I.
 CFLAGS=$(INCLUDES) $(COPTIONS)
 YFLAGS=-d
 LDFLAGS=$(LDOPTIONS)
@@ -98,7 +98,7 @@ cgg.$(SUF):	$(SRC_DIR)/set.h
 cgg.$(SUF):	$(SRC_DIR)/lookup.h
 cgg.$(SUF):	$(SRC_DIR)/varinfo.h
 cgg.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-cgg.$(SUF):	$(TARGET_HOME)/h/local.h
+cgg.$(SUF):	$(TARGET_HOME)/config/local.h
 cgg.$(SUF):	$(SRC_DIR)/param.h
 subr.$(SUF):	$(SRC_DIR)/subr.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/subr.c
@@ -115,7 +115,7 @@ subr.$(SUF):	$(SRC_DIR)/property.h
 subr.$(SUF):	$(SRC_DIR)/lookup.h
 subr.$(SUF):	$(SRC_DIR)/reg.h
 subr.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-subr.$(SUF):	$(TARGET_HOME)/h/local.h
+subr.$(SUF):	$(TARGET_HOME)/config/local.h
 subr.$(SUF):	$(SRC_DIR)/param.h
 main.$(SUF):	$(SRC_DIR)/main.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/main.c
@@ -132,7 +132,7 @@ coerc.$(SUF):	$(SRC_DIR)/reg.h
 coerc.$(SUF):	$(SRC_DIR)/property.h
 coerc.$(SUF):	$(SRC_DIR)/set.h
 coerc.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-coerc.$(SUF):	$(TARGET_HOME)/h/local.h
+coerc.$(SUF):	$(TARGET_HOME)/config/local.h
 coerc.$(SUF):	$(SRC_DIR)/param.h
 coerc.$(SUF):	$(SRC_DIR)/assert.h
 enterkeyw.$(SUF):	enterkeyw.c
@@ -145,7 +145,7 @@ emlookup.$(SUF):	$(SRC_DIR)/emlookup.c
 emlookup.$(SUF):	$(TARGET_HOME)/h/em_flag.h
 emlookup.$(SUF):	$(SRC_DIR)/expr.h
 emlookup.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-emlookup.$(SUF):	$(TARGET_HOME)/h/local.h
+emlookup.$(SUF):	$(TARGET_HOME)/config/local.h
 emlookup.$(SUF):	$(SRC_DIR)/param.h
 expr.$(SUF):	$(SRC_DIR)/expr.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/expr.c
@@ -160,7 +160,7 @@ expr.$(SUF):	$(SRC_DIR)/lookup.h
 expr.$(SUF):	$(SRC_DIR)/reg.h
 expr.$(SUF):	$(SRC_DIR)/set.h
 expr.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-expr.$(SUF):	$(TARGET_HOME)/h/local.h
+expr.$(SUF):	$(TARGET_HOME)/config/local.h
 expr.$(SUF):	$(SRC_DIR)/param.h
 expr.$(SUF):	$(SRC_DIR)/assert.h
 instruct.$(SUF):	$(SRC_DIR)/instruct.c
@@ -175,7 +175,7 @@ instruct.$(SUF):	$(SRC_DIR)/pseudo.h
 instruct.$(SUF):	$(SRC_DIR)/cost.h
 instruct.$(SUF):	$(SRC_DIR)/instruct.h
 instruct.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-instruct.$(SUF):	$(TARGET_HOME)/h/local.h
+instruct.$(SUF):	$(TARGET_HOME)/config/local.h
 instruct.$(SUF):	$(SRC_DIR)/param.h
 iocc.$(SUF):	$(SRC_DIR)/iocc.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/iocc.c
@@ -190,14 +190,14 @@ iocc.$(SUF):	$(SRC_DIR)/lookup.h
 iocc.$(SUF):	$(SRC_DIR)/expr.h
 iocc.$(SUF):	$(SRC_DIR)/set.h
 iocc.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-iocc.$(SUF):	$(TARGET_HOME)/h/local.h
+iocc.$(SUF):	$(TARGET_HOME)/config/local.h
 iocc.$(SUF):	$(SRC_DIR)/param.h
 iocc.$(SUF):	$(SRC_DIR)/assert.h
 lookup.$(SUF):	$(SRC_DIR)/lookup.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/lookup.c
 lookup.$(SUF):	$(SRC_DIR)/lookup.h
 lookup.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-lookup.$(SUF):	$(TARGET_HOME)/h/local.h
+lookup.$(SUF):	$(TARGET_HOME)/config/local.h
 lookup.$(SUF):	$(SRC_DIR)/param.h
 lookup.$(SUF):	$(SRC_DIR)/assert.h
 output.$(SUF):	$(SRC_DIR)/output.c
@@ -214,7 +214,7 @@ output.$(SUF):	$(SRC_DIR)/token.h
 output.$(SUF):	$(SRC_DIR)/property.h
 output.$(SUF):	$(SRC_DIR)/reg.h
 output.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-output.$(SUF):	$(TARGET_HOME)/h/local.h
+output.$(SUF):	$(TARGET_HOME)/config/local.h
 output.$(SUF):	$(SRC_DIR)/param.h
 output.$(SUF):	$(SRC_DIR)/varinfo.h
 output.$(SUF):	$(SRC_DIR)/assert.h
@@ -229,12 +229,12 @@ set.$(SUF):	$(SRC_DIR)/token.h
 set.$(SUF):	$(SRC_DIR)/set.h
 set.$(SUF):	$(SRC_DIR)/property.h
 set.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-set.$(SUF):	$(TARGET_HOME)/h/local.h
+set.$(SUF):	$(TARGET_HOME)/config/local.h
 set.$(SUF):	$(SRC_DIR)/param.h
 strlookup.$(SUF):	$(SRC_DIR)/strlookup.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/strlookup.c
 strlookup.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-strlookup.$(SUF):	$(TARGET_HOME)/h/local.h
+strlookup.$(SUF):	$(TARGET_HOME)/config/local.h
 strlookup.$(SUF):	$(SRC_DIR)/param.h
 var.$(SUF):	$(SRC_DIR)/var.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/var.c
@@ -247,12 +247,12 @@ var.$(SUF):	$(SRC_DIR)/token.h
 var.$(SUF):	$(SRC_DIR)/property.h
 var.$(SUF):	$(SRC_DIR)/reg.h
 var.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-var.$(SUF):	$(TARGET_HOME)/h/local.h
+var.$(SUF):	$(TARGET_HOME)/config/local.h
 var.$(SUF):	$(SRC_DIR)/param.h
 hall.$(SUF):	$(SRC_DIR)/hall.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/hall.c
 hall.$(SUF):	$(SRC_DIR)/set.h
 hall.$(SUF):	$(TARGET_HOME)/h/em_spec.h
-hall.$(SUF):	$(TARGET_HOME)/h/local.h
+hall.$(SUF):	$(TARGET_HOME)/config/local.h
 hall.$(SUF):	$(SRC_DIR)/param.h
 hall.$(SUF):	$(SRC_DIR)/assert.h

@@ -125,7 +125,7 @@ main.$(SUF):	$(SRC_DIR)/const.h
 main.$(SUF):	$(TARGET_HOME)/h/out.h
 memory.$(SUF):	$(SRC_DIR)/memory.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/memory.c
-memory.$(SUF):	$(TARGET_HOME)/h/local.h
+memory.$(SUF):	$(TARGET_HOME)/config/local.h
 memory.$(SUF):	$(SRC_DIR)/mach.c
 memory.$(SUF):	$(SRC_DIR)/memory.h
 memory.$(SUF):	$(SRC_DIR)/debug.h

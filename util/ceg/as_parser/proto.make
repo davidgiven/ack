@@ -5,11 +5,11 @@
 SRC_DIR = $(SRC_HOME)/util/ceg/as_parser
 CEGLIB = $(TARGET_HOME)/lib.bin/ceg
 
-IFILES = -I$(EM)/h -I$(EM)/modules/h -I.
+IFILES = -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I.
 CFLAGS = $(COPTIONS) -DFLEX $(IFILES)
 LDFLAGS = $(LDOPTIONS)
 
-GFILES = pars.g
+GFILES = $(SRC_DIR)/pars.g
 OFILES = pars.$(SUF) Lpars.$(SUF) lex.yy.$(SUF) help.$(SUF) conversion.$(SUF)
 LIBS   = $(TARGET_HOME)/modules/lib/liballoc.$(LIBSUF)\
 	 $(TARGET_HOME)/modules/lib/libprint.$(LIBSUF)\
