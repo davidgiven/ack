@@ -166,22 +166,22 @@ esac
 : 'Set the default machine in ../h/local.h'
 BM=1
 case `ack_sys` in
-pdp_v7)		ACM=pdp ; BM=0 ;;
-vax_bsd4_1a)    ACM=vax4 ;;
-vax_bsd4_2)	ACM=vax4 ;;
-vax_sysV_2)	ACM=vax4 ;;
-pc_ix)		ACM=i86 ; BM=0;;
-xenix3)		ACM=xenix3 ; BM=0;;
-sun3)		ACM=sun3 ;;
-sun2)		ACM=sun2 ;;
-m68_unisoft)	ACM=m68k2 ;;
-m68_sysV_0)	ACM=mantra ;;
-m68020)		ACM=m68020 ;;
-SMALL)		ACM=i86 ; BM = 0 ;;
-*)		ACM=m68k2 ;;
+pdp_v7)		ACM=pdp ; BM=0 ; SYS=V7 ;;
+vax_bsd4_1a)    ACM=vax4 ; SYS=BSD4_1 ;;
+vax_bsd4_2)	ACM=vax4 ; SYS=BSD4_2 ;;
+vax_sysV_2)	ACM=vax4 ; SYS=SYS_5 ;;
+pc_ix)		ACM=i86 ; BM=0 ; SYS=SYS_5 ;;
+xenix3)		ACM=xenix3 ; BM=0; SYS=SYS_5 ;;
+sun3)		ACM=sun3 ; SYS=BSD4_2 ;;
+sun2)		ACM=sun2 ; SYS=BSD4_2 ;;
+m68_unisoft)	ACM=m68k2 ; SYS=V7 ;;
+m68_sysV_0)	ACM=mantra ; SYS=SYS_5 ;;
+m68020)		ACM=m68020 ; SYS=SYS_5 ;;
+SMALL)		ACM=i86 ; BM = 0 ; SYS=SYS_5 ;;
+*)		ACM=m68k2 ; SYS=SYS_5 ;;
 esac
 rm -f local.h
-sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ < ../h/local.h >local.h
+sed -e /ACKM/s/'".*"'/'"'$ACM'"'/ -e /BIGMACH/s/'[01]'/$BM/ -e /SYSTEM/s/'^#[ 	]*define[ 	]*[a-zA-Z_][a-zA-Z0-9_]*'/"#	define $SYS"/ < ../h/local.h >local.h
 if cmp -s ../h/local.h local.h
 then :
 else
