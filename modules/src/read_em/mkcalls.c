@@ -44,16 +44,18 @@ checkarg(arg, typset)
 		   an argument expected, but there is none
 		*/
 		EM_error = "Illegal number of parameters";
-		return;
+		return 0;
 	}
 
 	if (!(arg->ema_argtype & typset)) {
 		/* Type error */
 		EM_error = "Illegal parameter type";
+		return 0;
 	}
+	return 1;
 }
 #else not CHECKING
-#define checkarg(arg, x)
+#define checkarg(arg, x) 1
 #endif CHECKING
 
 /*	EM_doinstr: An EM instruction
@@ -77,11 +79,13 @@ EM_doinstr(p)
 		case PAR_NO:
 			break;
 		default:
-			checkarg(&(p->em_arg), em_ptyp[parametertype]);
+			if (! checkarg(&(p->em_arg), em_ptyp[parametertype])) {
+				return;
+			}
 			break;
 		case PAR_W:
 			if (p->em_argtype != 0) {
-				checkarg(&(p->em_arg), cst_ptyp);
+				if (! checkarg(&(p->em_arg), cst_ptyp)) return;
 			}
 			else {
 #include "C_mnem_narg"
@@ -103,7 +107,7 @@ EM_dopseudo(p)
 			break;
 		}
 		case ps_hol: {
-			checkarg(&(p->em_arg), par_ptyp);
+			if (! checkarg(&(p->em_arg), par_ptyp)) break;
 			switch(p->em_argtype) {
 			    case cst_ptyp:
 				C_hol_cst(EM_holsize,
@@ -157,7 +161,7 @@ EM_dopseudo(p)
 			break;
 		}
 		case ps_bss: {
-			checkarg(&(p->em_arg), par_ptyp);
+			if (! checkarg(&(p->em_arg), par_ptyp)) break;
 			switch(p->em_argtype) {
 			    case cst_ptyp:
 				C_bss_cst(EM_bsssize,
@@ -212,7 +216,7 @@ EM_dopseudo(p)
 		}
 		case ps_end:
 			if (p->em_argtype != 0) {
-				checkarg(&(p->em_arg), cst_ptyp);
+				if (! checkarg(&(p->em_arg), cst_ptyp)) break;
 				C_end(p->em_cst);
 				break;
 			}
@@ -220,7 +224,7 @@ EM_dopseudo(p)
 			break;
 		case ps_exa:
 		case ps_ina:
-			checkarg(&(p->em_arg), lab_ptyp);
+			if (! checkarg(&(p->em_arg), lab_ptyp)) break;
 			if (p->em_argtype == nof_ptyp) {
 				if (p->em_opcode == ps_exa) {
 					C_exa_dlb(p->em_dlb);
@@ -234,22 +238,22 @@ EM_dopseudo(p)
 			else	C_ina_dnam(p->em_dnam);
 			break;
 		case ps_exp:
-			checkarg(&(p->em_arg), pro_ptyp);
+			if (! checkarg(&(p->em_arg), pro_ptyp)) break;
 			C_exp(p->em_pnam);
 			break;
 		case ps_inp:
-			checkarg(&(p->em_arg), pro_ptyp);
+			if (! checkarg(&(p->em_arg), pro_ptyp)) break;
 			C_inp(p->em_pnam);
 			break;
 		case ps_pro:
-			checkarg(&(p->em_arg), pro_ptyp);
+			if (! checkarg(&(p->em_arg), pro_ptyp)) break;
 			if (p->em_nlocals >= 0) {
 				C_pro(p->em_pnam, p->em_nlocals);
 			}
 			else	C_pro_narg(p->em_pnam);
 			break;
 		case ps_con:
-			checkarg(&(p->em_arg), val_ptyp);
+			if (! checkarg(&(p->em_arg), val_ptyp)) break;
 			switch(p->em_argtype) {
 				case ilb_ptyp:
 					C_con_ilb(p->em_ilb);
@@ -284,7 +288,7 @@ EM_dopseudo(p)
 			}
 			break;
 		case ps_rom:
-			checkarg(&(p->em_arg), val_ptyp);
+			if (! checkarg(&(p->em_arg), val_ptyp)) break;
 			switch(p->em_argtype) {
 				case ilb_ptyp:
 					C_rom_ilb(p->em_ilb);
@@ -372,7 +376,7 @@ EM_dostartmes(p)
 		EM_error = "Message not ended";
 		return;
 	}
-	checkarg(&(p->em_arg), cst_ptyp);
+	if (! checkarg(&(p->em_arg), cst_ptyp)) return;
 	C_mes_begin((int) (p->em_cst));
 	listtype = ps_mes;
 }

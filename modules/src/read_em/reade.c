@@ -616,7 +616,7 @@ getlabel(c, p)
 
 PRIVATE
 gethead(p)
-	struct e_instr *p;
+	register struct e_instr *p;
 {
 	register int c;
 
@@ -647,6 +647,7 @@ gethead(p)
 			return;
 		}
 		checkeol();
+		if (p->em_type == EM_ERROR || p->em_type == EM_FATAL) return;
 	}
 	/*NOTREACHED*/
 }

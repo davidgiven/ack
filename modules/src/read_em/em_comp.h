@@ -43,9 +43,11 @@ struct e_instr {
 };
 
 extern arith
-	EM_holsize, EM_bsssize;
+	EM_holsize;
+#define EM_bsssize EM_holsize
 extern int
-	EM_holinit, EM_bssinit;
+	EM_holinit;
+#define EM_bssinit EM_holinit
 
 #define em_ilb  	em_arg.ema_ilb
 #define em_dlb  	em_arg.ema_dlb

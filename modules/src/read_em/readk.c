@@ -50,6 +50,7 @@ getarg(typset, ap)
 	int argtyp;
 #endif CHECKING
 
+	ap->ema_argtype = 0;
 	switch(i) {
 	default:
 		if (i < sp_fcst0+sp_ncst0 && i >= sp_fcst0) { /* A cst */

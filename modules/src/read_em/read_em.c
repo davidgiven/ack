@@ -221,6 +221,7 @@ EM_getinstr(p)
 		return 1;
 	}
 	emhead = p;
+	p->em_type = 0;
 #ifdef CHECKING
 	if (!EM_initialized) {
 		EM_error = "Initialization not done";
