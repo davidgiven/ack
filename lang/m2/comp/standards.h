@@ -21,4 +21,8 @@
 #define S_VAL	17
 
 /* Standard procedures and functions defined in the SYSTEM module ... */
-/* PM ??? */
+
+#define S_ADR	20
+#define S_TSIZE	21
+#define S_NEWPROCESS	22
+#define S_TRANSFER	23

@@ -2,7 +2,13 @@
 
 /* $Header$ */
 
-extern int
-	state;		/* Indicates what we are compiling: A DEFINITION,
-			   an IMPLEMENTATION, or a PROGRAM module
+extern char options[];	/* Indicating which options were given */
+
+extern int DefinitionModule;
+			/* Flag indicating that we are reading a definition
+			   module
+			*/
+
+extern int SYSTEMModule;/* Flag indicating that we are handling the SYSTEM
+			   module
 			*/

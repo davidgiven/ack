@@ -48,9 +48,20 @@ gen_anon_idf()
 	*/
 	static int name_cnt;
 	char buff[100];
-	char *sprintf();
+	char *sprint();
 
-	sprintf(buff, "#%d in %s, line %u",
+	sprint(buff, "#%d in %s, line %u",
 			++name_cnt, FileName, LineNumber);
 	return str2idf(buff, 1);
+}
+
+id_not_declared(id)
+	struct idf *id;
+{
+	/*	The identifier "id" is not declared. If it is not generated,
+		give an error message
+	*/
+	if (!is_anon_idf(id)) {
+		error("identifier \"%s\" not declared", id->id_text);
+	}
 }

@@ -52,7 +52,7 @@ define(id, scope, kind)
 			}
 			break;	
 		case D_HIDDEN:
-			if (kind == D_TYPE && state == IMPLEMENTATION) {
+			if (kind == D_TYPE && !DefinitionModule) {
 				df->df_kind = D_HTYPE;
 				return df;
 			}
@@ -145,7 +145,7 @@ Import(ids, id, local)
 	/*	"ids" is a list of imported identifiers.
 		If "id" is a null-pointer, the identifiers are imported from the
 		enclosing scope. Otherwise they are imported from the module
-		indicated by "id", ehich must be visible in the enclosing scope.
+		indicated by "id", which must be visible in the enclosing scope.
 		An exception must be made for imports of the Compilation Unit.
 		This case is indicated by  the value 0 of the flag "local".
 		In this case, if "id" is a null pointer, the "ids" identifiers
@@ -222,5 +222,54 @@ exprt_literals(df, toscope)
 	while (df) {
 		define(df->df_idf, toscope, D_IMPORT)->imp_def = df;
 		df = df->enm_next;
+	}
+}
+
+RemImports(pdf)
+	struct def **pdf;
+{
+	/*	Remove all imports from a definition module. This is
+		neccesary because the implementation module might import
+		them again.
+	*/
+	register struct def *df = *pdf, *df1 = 0;
+
+	while (df) {
+		if (df->df_kind == D_IMPORT) {
+			RemFromId(df);
+			if (df1) {
+				df1->df_nextinscope = df->df_nextinscope;
+				free_def(df);
+				df = df1->df_nextinscope;
+			}
+			else {
+				*pdf = df->df_nextinscope;
+				free_def(df);
+				df = *pdf;
+			}
+		}
+		else {
+			df1 = df;
+			df = df->df_nextinscope;
+		}
+	}
+}
+
+RemFromId(df)
+	struct def *df;
+{
+	/*	Remove definition "df" from the definition list
+	*/
+	register struct idf *id = df->df_idf;
+	register struct def *df1;
+
+	if (id->id_def == df) id->id_def = df->next;
+	else {
+		df1 = id->id_def;
+		while (df1->next != df) {
+			assert(df1->next != 0);
+			df1 = df1->next;
+		}
+		df1->next = df->next;
 	}
 }

@@ -14,6 +14,9 @@ static  char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"debug.h"
+
+static struct idf *impl_name = 0;
+static struct def *impl_df;
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -101,30 +104,41 @@ DefinitionModule
 	register struct def *df;
 	struct idf *id;
 } :
-	DEFINITION	{ state = DEFINITION; }
+	DEFINITION
 	MODULE IDENT	{ id = dot.TOK_IDF;
 			  df = define(id, GlobalScope, D_MODULE);
-			  open_scope(CLOSEDSCOPE, 0);
+			  if (!SYSTEMModule) open_scope(CLOSEDSCOPE, 0);
 			  df->mod_scope = CurrentScope->sc_scope;
+			  DefinitionModule = 1;
 			  DO_DEBUG(debug(1, "Definition module \"%s\"", id->id_text));
 			}
 	';'
 	import(0)* 
 	export(1)?
-
 	/*	New Modula-2 does not have export lists in definition modules.
+		For the time being, we ignore export lists here, and a
+		warning is issued.
 	*/
-	definition* END IDENT '.'
+	definition* END IDENT
 			{
+			  if (id == impl_name) {
+				/* Just read the definition module of the
+				   implementation module being compiled
+				*/
+				RemImports(&(CurrentScope->sc_def));
+				impl_df = CurrentScope->sc_def;
+			  }
 			  df = CurrentScope->sc_def;
 			  while (df) {
 				/* Make all definitions "QUALIFIED EXPORT" */
 				df->df_flags |= D_QEXPORTED;
 				df = df->df_nextinscope;
 			  }
-			  close_scope();
+			  if (!SYSTEMModule) close_scope();
+			  DefinitionModule = 0;
 			  match_id(id, dot.TOK_IDF);
 			}
+	'.'
 ;
 
 definition
@@ -153,20 +167,23 @@ definition
 	ProcedureHeading(&df, D_PROCHEAD) ';'
 ;
 
-ProgramModule
+ProgramModule(int state;)
 {
 	struct idf *id;
 	struct def *df, *GetDefinitionModule();
 	int scope = 0;
 } :
-	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
+	MODULE
 	IDENT		{ 
 			  id = dot.TOK_IDF;
 			  if (state == IMPLEMENTATION) {
+				   impl_name = id;
 				   df = GetDefinitionModule(id);
 				   scope = df->mod_scope;
 			  }
+			  DefinitionModule = 0;
 			  open_scope(CLOSEDSCOPE, scope);
+			  CurrentScope->sc_def = impl_df;
 			}
 	priority?
 	';' import(0)*
@@ -177,13 +194,16 @@ ProgramModule
 	'.'
 ;
 
-Module:
+Module
+{
+	int state = PROGRAM;
+} :
 	DefinitionModule
 |
 	[
 		IMPLEMENTATION	{ state = IMPLEMENTATION; }
 	]?
-	ProgramModule
+	ProgramModule(state)
 ;
 
 CompilationUnit:

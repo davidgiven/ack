@@ -12,6 +12,7 @@ static char *RcsId = "$Header$";
 #include	"input.h"
 #include	"f_info.h"
 #include	"LLlex.h"
+#include	"main.h"
 
 #define MAXERR_LINE	5	/* Number of error messages on one line ... */
 #define	ERROUT		STDERR
@@ -32,7 +33,6 @@ static char *RcsId = "$Header$";
 int err_occurred;
 
 extern char *symbol2str();
-extern char options[];
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -198,10 +198,10 @@ _error(class, expr, fmt, argv)
 	}
 #endif DEBUG
 	
-	if (FileName) fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
+	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
 
-	if (remark) fprintf(ERROUT, "%s ", remark);
+	if (remark) fprint(ERROUT, "%s ", remark);
 
 	doprnt(ERROUT, fmt, argv);		/* contents of error */
-	fprintf(ERROUT, "\n");
+	fprint(ERROUT, "\n");
 }

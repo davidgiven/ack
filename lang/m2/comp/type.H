@@ -75,7 +75,8 @@ extern struct type
 	*longint_type,
 	*real_type,
 	*longreal_type,
-	*nil_type,
+	*word_type,
+	*address_type,
 	*error_type;
 
 extern int

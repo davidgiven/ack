@@ -19,12 +19,12 @@ long str2long();
 
 struct token dot, aside;
 
-/*	Skip Modula-2 like comment (* ... *).
-	Note that comment may be nested.
-*/
 static
 SkipComment()
 {
+	/*	Skip Modula-2 comments (* ... *).
+		Note that comments may be nested (par. 3.5).
+	*/
 	register int ch;
 	register int NestLevel = 0;
 
@@ -62,6 +62,8 @@ SkipComment()
 static char *
 GetString(upto)
 {
+	/*	Read a Modula-2 string, delimited by the character "upto".
+	*/
 	register int ch;
 	int str_size;
 	char *str = Malloc(str_size = 32);
@@ -88,12 +90,12 @@ GetString(upto)
 	return str;
 }
 
-/*	LLlex() plays the role of Lexical Analyzer for the parser.
-	The putting aside of tokens is taken into account.
-*/
 int
 LLlex()
 {
+	/*	LLlex() plays the role of Lexical Analyzer for the parser.
+		The putting aside of tokens is taken into account.
+	*/
 	register struct token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
@@ -378,4 +380,3 @@ Sdec:
 	}
 	/*NOTREACHED*/
 }
-

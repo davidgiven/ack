@@ -88,6 +88,8 @@ struct tokenname tkstandard[] =	{	/* standard identifiers */
 	{SUBRANGE, ""},
 	{ENUMERATION, ""},
 	{ERRONEOUS, ""},
+	{WORD, ""},
+	{ADDRESS, ""},
 	{0, ""}
 };
 

@@ -43,10 +43,9 @@ qualident(int types; struct def **pdf; char *str;)
 				module = (df->df_kind == D_MODULE);
 				df = lookup(dot.TOK_IDF, scope);
 				if (!df) {
-					error("identifier \"%s\" not declared",
-					      dot.TOK_IDF->id_text);
 					types = 0;
 					df = ill_df;
+					id_not_declared(dot.TOK_IDF);
 				}
 				else
 				if (module &&

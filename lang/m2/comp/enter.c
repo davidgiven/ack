@@ -76,6 +76,6 @@ lookfor(id, scope, give_error)
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
-	if (give_error) error("identifier \"%s\" not declared", id->id_text);
+	if (give_error) id_not_declared(id);
 	return define(id, scope, D_ERROR);
 }

@@ -17,12 +17,13 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"standards.h"
 
-char options[128];
-char *ProgName;
-int state;
+char	options[128];
+int	DefinitionModule; 
+int	SYSTEMModule = 0;
+char	*ProgName;
 extern int err_occurred;
-char *DEFPATH[128];
-char *getenv();
+char	*DEFPATH[128];
+char	*getenv();
 
 main(argc, argv)
 	char *argv[];
@@ -40,11 +41,11 @@ main(argc, argv)
 	}
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc != 2) {
-		fprintf(STDERR, "%s: Use one file argument\n", ProgName);
+		fprint(STDERR, "%s: Use one file argument\n", ProgName);
 		return 1;
 	}
 #ifdef DEBUG
-	printf("Mod2 compiler -- Debug version\n");
+	print("Mod2 compiler -- Debug version\n");
 #endif DEBUG
 	DO_DEBUG(debug(1,"Debugging level: %d", options['D']));
 	return !Compile(Nargv[1]);
@@ -57,7 +58,7 @@ Compile(src)
 
 	DO_DEBUG(debug(1,"Filename : %s", src));
 	if (! InsertFile(src, (char **) 0, &src)) {
-		fprintf(STDERR,"%s: cannot open %s\n", ProgName, src);
+		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
 	}
 	LineNumber = 1;
@@ -92,23 +93,23 @@ LexScan()
 	register int symb;
 
 	while ((symb = LLlex()) != EOI) {
-		printf(">>> %s ", symbol2str(symb));
+		print(">>> %s ", symbol2str(symb));
 		switch(symb) {
 
 		case IDENT:
-			printf("%s\n", dot.TOK_IDF->id_text);
+			print("%s\n", dot.TOK_IDF->id_text);
 			break;
 		
 		case INTEGER:
-			printf("%ld\n", dot.TOK_INT);
+			print("%ld\n", dot.TOK_INT);
 			break;
 		
 		case REAL:
-			printf("%s\n", dot.TOK_REL);
+			print("%s\n", dot.TOK_REL);
 			break;
 		
 		case STRING:
-			printf("\"%s\"\n", dot.TOK_STR);
+			print("\"%s\"\n", dot.TOK_STR);
 			break;
 
 		default:
@@ -159,7 +160,7 @@ add_standards()
 	(void) Enter("LONGREAL", D_TYPE, longreal_type, 0);
 	(void) Enter("BOOLEAN", D_TYPE, bool_type, 0);
 	(void) Enter("CARDINAL", D_TYPE, card_type, 0);
-	(void) Enter("NIL", D_CONST, nil_type, 0);
+	(void) Enter("NIL", D_CONST, address_type, 0);
 	(void) Enter("PROC",
 		     D_TYPE,
 		     construct_type(PROCEDURE, NULLTYPE),
@@ -196,13 +197,29 @@ do_SYSTEM()
 {
 	/*	Simulate the reading of the SYSTEM definition module
 	*/
-	struct def *df;
-	struct idf *sys_id;
+	char *SYSTEM = "\
+DEFINITION MODULE SYSTEM;\n\
+PROCEDURE NEWPROCESS(P:PROC; A:ADDRESS; n:CARDINAL; VAR p1:ADDRESS);\n\
+PROCEDURE TRANSFER(VAR p1,p2:ADDRESS);\n\
+END SYSTEM.\n";
 
-	sys_id = str2idf("SYSTEM", 0);
-	df = define(sys_id, GlobalScope, D_MODULE);
 	open_scope(CLOSEDSCOPE, 0);
-	df->mod_scope = CurrentScope->sc_scope;
-	/* ???? */
+	(void) Enter("WORD", D_TYPE, word_type, 0);
+	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
+	(void) Enter("ADR", D_STDFUNC, NULLTYPE, S_ADR);
+	(void) Enter("TSIZE", D_STDFUNC, NULLTYPE, S_TSIZE);
+	if (!InsertText(SYSTEM, strlen(SYSTEM))) {
+		fatal("Could not insert text");
+	}
+	SYSTEMModule = 1;
+	DefModule();
 	close_scope();
+	SYSTEMModule = 0;
+}
+
+AtEoIT()
+{
+	/*	Make the end of the text noticable
+	*/
+	return 1;
 }
