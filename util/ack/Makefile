@@ -1,3 +1,4 @@
+# $Header$
 HFILES=ack.h list.h trans.h data.h dmach.h grows.h
 DSRC=list.c data.c main.c scan.c svars.c trans.c util.c rmach.c run.c grows.c\
      files.c

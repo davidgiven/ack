@@ -29,6 +29,10 @@ char *s;
 #define ASSERT(p)
 #endif
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*      avoid break bug */
 #ifdef pdp11
 #define GRANULE 64

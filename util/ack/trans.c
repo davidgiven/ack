@@ -21,6 +21,11 @@
 #include "grows.h"
 #include "data.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+static char rcs_trans[] = RCS_TRANS ;
+#endif
+
 /****************************************************************************/
 /*      Routines for transforming from one file type to another             */
 /****************************************************************************/

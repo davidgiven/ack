@@ -21,6 +21,10 @@
 #include "data.h"
 #include <signal.h>
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 #define ARG_MORE  40            /* The size of args chunks to allocate */
 
 static char      **arglist ;    /* The first argument */

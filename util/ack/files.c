@@ -22,6 +22,10 @@
 #include "data.h"
 #include "../../h/em_path.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 setfiles(phase) register trf *phase ; {
 	/* Set the out structure according to the in structure,
 	   the transformation and some global data */

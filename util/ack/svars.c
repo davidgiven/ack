@@ -17,6 +17,10 @@
 
 #include "ack.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 /*      The processing of string valued variables,
 	this is an almost self contained module.
 

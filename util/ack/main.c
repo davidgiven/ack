@@ -23,6 +23,11 @@
 #include "data.h"
 #include <signal.h>
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+static char rcs_ack[] = RCS_ACK ;
+#endif
+
 static int sigs[] = { SIGINT, SIGHUP, SIGTERM, 0 } ;
 
 extern  char    *getenv();

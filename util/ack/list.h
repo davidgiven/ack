@@ -1,3 +1,7 @@
+#ifndef NORCSID
+#define RCS_LIST "$Header$"
+#endif
+
 struct ca_elem {
 	struct ca_elem          *ca_next; /* The link */
 	char                    *ca_cont; /* The contents */

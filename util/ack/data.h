@@ -1,3 +1,7 @@
+#ifndef NORCSID
+#define RCS_DATA "$Header$"
+#endif
+
 EXTERN  char            *stopsuffix;    /* Suffix to stop at */
 EXTERN  char            *machine;       /* The machine id */
 EXTERN  char            *rts;           /* The runtime-system id */

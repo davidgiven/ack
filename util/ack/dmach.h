@@ -4,6 +4,10 @@
 /*                                                             */
 /***************************************************************/
 
+#ifndef NORCSID
+#define RCS_DMACH "$Header$"
+#endif
+
 
 typedef struct {
 	char *ma_name ;         /* The name of the machine */

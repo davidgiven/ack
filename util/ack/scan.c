@@ -20,6 +20,10 @@
 #include "trans.h"
 #include "data.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 enum f_path setpath() { /* Try to find a transformation path */
 
 	start_scan();

@@ -1,3 +1,7 @@
+#ifndef NORCSID
+#define RCS_TRANS "$Header$"
+#endif
+
 /* This structure is the center of all actions */
 /* It contains the description of all phases,
    the suffices they consume and produce and various properties */

@@ -26,6 +26,10 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+#endif
+
 extern  char    *progname ;
 extern  int     w_flag ;
 extern  int     n_error;

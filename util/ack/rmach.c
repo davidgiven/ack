@@ -24,6 +24,11 @@
 #include "data.h"
 #include <stdio.h>
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+static char rcs_dmach[] = RCS_DMACH ;
+#endif
+
 /************************************************************************/
 /*                                                                      */
 /*           Read machine definitions and transformations               */

@@ -24,6 +24,11 @@
 #include "ack.h"
 #include "grows.h"
 
+#ifndef NORCSID
+static char rcs_id[] = "$Header$" ;
+static char rcs_grows[] = RCS_GROWS ;
+#endif
+
 gr_add(id,c) register growstring *id ; char c ; {
 	if ( id->gr_size==id->gr_max) {
 		if ( id->gr_size==0 ) { /* The first time */

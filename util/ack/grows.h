@@ -1,3 +1,7 @@
+#ifndef NORCSID
+#define RCS_GROWS "$Header$"
+#endif
+
 /* struct used to identify and do bookkeeping for growing strings */
 
 typedef struct {
