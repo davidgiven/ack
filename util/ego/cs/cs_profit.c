@@ -28,11 +28,11 @@ STATIC get_instrs(f, s_p)
 	 * Such a set must be delimited by a number lower than
 	 * the number of the first EM mnemonic.
 	 */
-	Celem_t instr;
+	int instr;
 
 	fscanf(f, "%d", &instr);
 	while (instr >= sp_fmnem) {
-		Cadd(instr, s_p);
+		Cadd((Celem_t) instr, s_p);
 		fscanf(f, "%d", &instr);
 	}
 }
