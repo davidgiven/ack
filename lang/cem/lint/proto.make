@@ -5,7 +5,7 @@
 DIRS = lpass1 lpass1.ansi lpass2 llib
 
 all:
-	for i in $(DIRS) ; do cd $i ; make ; cd .. ; done
+	for i in $(DIRS) ; do cd $$i ; make ; cd .. ; done
 
 install:
-	for i in $(DIRS) ; do cd $i ; make install ; cd .. ; done
+	for i in $(DIRS) ; do cd $$i ; make install ; cd .. ; done
