@@ -50,9 +50,7 @@ $(PROGRAM):     $(OBJS) $(LIBS)
 		@$(LINKER) $(LDFLAGS) -o $(PROGRAM) $(OBJS) $(LIBS)
 		@echo "done"
 
-clean:;		@rm -f $(OBJS)
-
-clobber:;	@rm -f $(OBJS) $(PROGRAM)
+clean:;		@rm -f $(OBJS) $(PROGRAM)
 
 index:;		@ctags -wx $(HDRS) $(SRCS)
 

@@ -9,7 +9,7 @@
 char *banner[] =
 {
     "#ifndef lint",
-    "static char yysccsid[] = \"@(#)yaccpar	1.7 (Berkeley) 09/09/90\";",
+    "static char yysccsid[] = \"@(#)yaccpar	1.8 (Berkeley) 01/20/90\";",
     "#endif",
     "#define YYBYACC 1",
     0
@@ -47,16 +47,16 @@ char *header[] =
     "#ifdef YYMAXDEPTH",
     "#define YYSTACKSIZE YYMAXDEPTH",
     "#else",
-    "#define YYSTACKSIZE 600",
-    "#define YYMAXDEPTH 600",
+    "#define YYSTACKSIZE 200",		/* ACK mod: Changed from 600 to 200 */
+    "#define YYMAXDEPTH 200",		/* ACK mod: Changed from 600 to 200 */
     "#endif",
     "#endif",
+    "#if YYDEBUG",
     "int yydebug;",
+    "#endif",
     "int yynerrs;",
     "int yyerrflag;",
     "int yychar;",
-    "short *yyssp;",
-    "YYSTYPE *yyvsp;",
     "YYSTYPE yyval;",
     "YYSTYPE yylval;",
     "short yyss[YYSTACKSIZE];",
@@ -75,6 +75,8 @@ char *body[] =
     "yyparse()",
     "{",
     "    register int yym, yyn, yystate;",
+    "    register short *yyssp;",	/* ACK mod: made this a local */
+    "    register YYSTYPE *yyvsp;",	/* ACK mod: made this a local */
     "#if YYDEBUG",
     "    register char *yys;",
     "    extern char *getenv();",
