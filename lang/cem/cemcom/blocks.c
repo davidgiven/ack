@@ -96,11 +96,8 @@ load_block(sz, al)
 {
 	arith esz = ATW(sz);	/* effective size == actual # pushed bytes */
 
-	if ((sz == al) && (word_align % al == 0))
+	if (((sz == al) && (word_align % al == 0)) || (al % word_align == 0))
 		C_loi(sz);
-	else
-	if (al % word_align == 0)
-		C_loi(esz);
 	else {
 #ifndef STB
 		arith src, dst;
