@@ -139,10 +139,7 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 		VAR	{ VARp = D_VARPAR; }
 	]?
 	IdentList(&FPList) ':' FormalType(&tp)
-		{
-		  ParamList(ppr, FPList, tp, VARp, parmaddr);
-		  FreeNode(FPList);
-		}
+			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
 ;
 
 FormalType(struct type **ptp;)
@@ -235,11 +232,8 @@ enumeration(struct type **ptp;)
 	'(' IdentList(&EnumList) ')'
 		{
 		  *ptp = tp = standard_type(T_ENUMERATION, 1, (arith) 1);
-		  EnterIdList(EnumList, D_ENUM, 0, tp,
-				 CurrentScope, (arith *) 0);
-		  FreeNode(EnumList);
-		  if (tp->enm_ncst > 256) {
-			/* ??? is this reasonable ??? */
+		  EnterEnumList(EnumList, tp);
+		  if (tp->enm_ncst > 256) { /* ??? is this reasonable ??? */
 			error("Too many enumeration literals");
 		  }
 		}
@@ -311,7 +305,7 @@ RecordType(struct type **ptp;)
 			}
 	FieldListSequence(scope, &count, &xalign)
 		{
-		  *ptp = standard_type(T_RECORD, xalign, count);
+		  *ptp = standard_type(T_RECORD, xalign, WA(count));
 		  (*ptp)->rec_scope = scope;
 		}
 	END
@@ -336,9 +330,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 [
 	IdentList(&FldList) ':' type(&tp)
 			{ *palign = lcm(*palign, tp->tp_align);
-			  EnterIdList(FldList, D_FIELD, D_QEXPORTED,
-					tp, scope, cnt);
-			  FreeNode(FldList);
+			  EnterFieldList(FldList, tp, scope, cnt);
 			}
 |
 	CASE
@@ -575,9 +567,7 @@ VariableDeclaration
 			{ nd = nd->nd_right; }
 	]*
 	':' type(&tp)
-			{ EnterVarList(VarList, tp, proclevel > 0);
-			  FreeNode(VarList);
-			}
+			{ EnterVarList(VarList, tp, proclevel > 0); }
 ;
 
 IdentAddr(struct node **pnd;) :

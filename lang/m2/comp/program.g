@@ -76,12 +76,11 @@ ModuleDeclaration
 	priority(&(df->mod_priority))?
 	';'
 	import(1)*
-	export(&qualified, &exportlist, 0)?
+	export(&qualified, &exportlist)?
 	block(&nd)
 	IDENT		{ InitProc(nd, df);
 			  if (exportlist) {
-				Export(exportlist, qualified, df);
-			  	FreeNode(exportlist);
+				EnterExportList(exportlist, qualified);
 			  }
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(id, dot.TOK_IDF);
@@ -101,23 +100,17 @@ priority(arith *pprio;)
 			}
 ;
 
-export(int *QUALflag; struct node **ExportList; int def;)
+export(int *QUALflag; struct node **ExportList;)
 {
 } :
 	EXPORT
 	[
 		QUALIFIED
-			{ *QUALflag = 1; }
+			{ *QUALflag = D_QEXPORTED; }
 	|
-			{ *QUALflag = 0; }
+			{ *QUALflag = D_EXPORTED; }
 	]
 	IdentList(ExportList) ';'
-			{
-			  if (def) {
-node_warning(*ExportList, "export list in definition module ignored");
-				FreeNode(*ExportList);
-			  }
-			}
 ;
 
 import(int local;)
@@ -135,8 +128,8 @@ import(int local;)
 	   If the FROM clause is present, the identifier in it is a module
 	   name, otherwise the names in the import list are module names.
 	*/
-			{
-			  Import(ImportList, id, local);
+			{ if (id) EnterFromImportList(ImportList, id, local);
+			  else EnterImportList(ImportList, local);
 			}
 ;
 
@@ -144,7 +137,7 @@ DefinitionModule
 {
 	register struct def *df;
 	struct idf *id;
-	struct node *exportlist;
+	struct node *exportlist = 0;
 	int dummy;
 } :
 	DEFINITION
@@ -163,11 +156,16 @@ DefinitionModule
 			}
 	';'
 	import(0)* 
-	export(&dummy, &exportlist, 1)?
+	export(&dummy, &exportlist)?
 	/*	New Modula-2 does not have export lists in definition modules.
 		For the time being, we ignore export lists here, and a
 		warning is issued.
 	*/
+			{ if (exportlist) {
+node_warning(exportlist, "export list in definition module ignored");
+				FreeNode(exportlist);
+			  }
+			}
 	definition* END IDENT
 			{
 			  df = CurrentScope->sc_def;

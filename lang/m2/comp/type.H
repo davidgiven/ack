@@ -138,3 +138,4 @@ struct type
 #define complex(tpx)	((tpx)->tp_fund & (T_RECORD|T_ARRAY))
 #define returntype(tpx)	(((tpx)->tp_fund & T_PRCRESULT) ||\
 		((tpx)->tp_fund == T_SET && (tpx)->tp_size <= dword_size))
+#define WA(sz)		(align(sz, (int) word_size))

@@ -33,6 +33,7 @@ static char	return_expr_occurred;
 static struct type *func_type;
 struct withdesig *WithDesigs;
 struct node	*Modules;
+struct scope	*ProcScope;
 
 label
 text_label()
@@ -87,7 +88,7 @@ WalkModule(module)
 			if (df->df_kind == D_VARIABLE) {
 				C_df_dnam(df->var_name);
 				C_bss_cst(
-					align(df->df_type->tp_size, word_align),
+					WA(df->df_type->tp_size),
 					(arith) 0, 0);
 			}
 			df = df->df_nextinscope;
@@ -107,6 +108,7 @@ WalkModule(module)
 	sc->sc_off = 0;
 	instructionlabel = 2;
 	func_type = 0;
+	ProcScope = CurrentScope;	
 	C_pro_narg(state == PROGRAM ? "main" : sc->sc_name);
 	DoProfil();
 	if (CurrVis == Defined->mod_vis) {
@@ -161,7 +163,7 @@ WalkProcedure(procedure)
 
 	proclevel++;
 	CurrVis = procedure->prc_vis;
-	sc = CurrentScope;
+	ProcScope = sc = CurrentScope;
 	
 	WalkDef(sc->sc_def);
 
@@ -185,7 +187,7 @@ WalkProcedure(procedure)
 		if (! return_expr_occurred) {
 node_error(procedure->prc_body,"function procedure does not return a value");
 		}
-		C_ret(align(res_type->tp_size, word_align));
+		C_ret(WA(res_type->tp_size));
 	}
 	else	C_ret((arith) 0);
 	C_end(-sc->sc_off);
@@ -341,7 +343,7 @@ WalkStat(nd, lab)
 			l1 = instructionlabel++;
 			l2 = instructionlabel++;
 			C_df_ilb(l1);
-			WalkNode(left, l2);
+			WalkNode(right, l2);
 			C_bra(l1);
 			C_df_ilb(l2);
 			break;
@@ -425,7 +427,7 @@ WalkStat(nd, lab)
 
 	case RETURN:
 		if (right) {
-			WalkExpr(right, NO_LABEL, NO_LABEL);
+			WalkExpr(right);
 			/* Assignment compatibility? Yes, see Rep. 9.11
 			*/
 			if (!TstAssCompat(func_type, right->nd_type)) {
@@ -449,16 +451,18 @@ ExpectBool(nd, true_label, false_label)
 		generate code to evaluate the expression.
 	*/
 
-	WalkExpr(nd, true_label, false_label);
+	if (!chk_expr(nd)) return;
 
 	if (nd->nd_type != bool_type && nd->nd_type != error_type) {
 		node_error(nd, "boolean expression expected");
 	}
+
+	Desig = InitDesig;
+	CodeExpr(nd, &Desig,  true_label, false_label);
 }
 
-WalkExpr(nd, true_label, false_label)
+WalkExpr(nd)
 	struct node *nd;
-	label true_label, false_label;
 {
 	/*	Check an expression and generate code for it
 	*/
@@ -467,8 +471,7 @@ WalkExpr(nd, true_label, false_label)
 
 	if (! chk_expr(nd)) return;
 
-	Desig = InitDesig;
-	CodeExpr(nd, &Desig, true_label, false_label);
+	CodePExpr(nd);
 }
 
 WalkDesignator(nd)
@@ -568,6 +571,8 @@ DumpTree(nd)
 	switch(nd->nd_class) {
 	case Def:	s = "Def"; break;
 	case Oper:	s = "Oper"; break;
+	case Arrsel:	s = "Arrsel"; break;
+	case Arrow:	s = "Arrow"; break;
 	case Uoper:	s = "Uoper"; break;
 	case Name:	s = "Name"; break;
 	case Set:	s = "Set"; break;

@@ -6,6 +6,9 @@ static char *RcsId = "$Header$";
 
 /*	Code for the allocation and de-allocation of temporary variables,
 	allowing re-use.
+	The routines use "ProcScope" instead of "CurrentScope", because
+	"CurrentScope" also reflects WITH statements, and these scopes do not
+	have local variabes.
 */
 
 #include	"debug.h"
@@ -29,8 +32,9 @@ struct tmpvar {
 
 static struct tmpvar	*TmpInts,	/* for integer temporaries */
 			*TmpPtrs;	/* for pointer temporaries */
-
-extern arith align();
+extern struct scope	*ProcScope;	/* scope of procedure in which the
+					   temporaries are allocated
+					*/
 
 arith
 NewInt()
@@ -39,8 +43,8 @@ NewInt()
 	register struct tmpvar *tmp;
 
 	if (!TmpInts) {
-		offset = - align(int_size - CurrentScope->sc_off, int_align);
-		CurrentScope->sc_off = offset;
+		offset = - WA(align(int_size - ProcScope->sc_off, int_align));
+		ProcScope->sc_off = offset;
 		C_ms_reg(offset, int_size, reg_any, 0);
 	}
 	else {
@@ -59,8 +63,8 @@ NewPtr()
 	register struct tmpvar *tmp;
 
 	if (!TmpPtrs) {
-		offset = - align(pointer_size - CurrentScope->sc_off, pointer_align);
-		CurrentScope->sc_off = offset;
+		offset = - WA(align(pointer_size - ProcScope->sc_off, pointer_align));
+		ProcScope->sc_off = offset;
 		C_ms_reg(offset, pointer_size, reg_pointer, 0);
 	}
 	else {

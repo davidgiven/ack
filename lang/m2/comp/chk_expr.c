@@ -36,22 +36,17 @@ chk_expr(expp)
 	*/
 
 	switch(expp->nd_class) {
-	case Oper:
-		if (expp->nd_symb == '[') {
-			return chk_designator(expp, DESIGNATOR|VARIABLE, D_NOREG|D_USED);
-		}
+	case Arrsel:
+		return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
 
-		return	chk_expr(expp->nd_left) &&
-			chk_expr(expp->nd_right) &&
-			chk_oper(expp);
+	case Oper:
+		return	chk_oper(expp);
+
+	case Arrow:
+		return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
 
 	case Uoper:
-		if (expp->nd_symb == '^') {
-			return chk_designator(expp, DESIGNATOR|VARIABLE, D_USED);
-		}
-
-		return	chk_expr(expp->nd_right) &&
-			chk_uoper(expp);
+		return	chk_uoper(expp);
 
 	case Value:
 		switch(expp->nd_symb) {
@@ -547,7 +542,7 @@ df->df_idf->id_text);
 		return 0;
 	}
 
-	if (expp->nd_class == Oper) {
+	if (expp->nd_class == Arrsel) {
 		struct type *tpl, *tpr;
 
 		assert(expp->nd_symb == '[');
@@ -582,7 +577,7 @@ df->df_idf->id_text);
 		return 1;
 	}
 
-	if (expp->nd_class == Uoper) {
+	if (expp->nd_class == Arrow) {
 		assert(expp->nd_symb == '^');
 
 		if (! chk_designator(expp->nd_right, DESIGNATOR|VARIABLE, dflags)) {
@@ -665,11 +660,17 @@ chk_oper(expp)
 {
 	/*	Check a binary operation.
 	*/
-	register struct node *left = expp->nd_left;
-	register struct node *right = expp->nd_right;
-	struct type *tpl = left->nd_type;
-	struct type *tpr = right->nd_type;
+	register struct node *left, *right;
+	struct type *tpl, *tpr;
 	int allowed;
+
+	left = expp->nd_left;
+	right = expp->nd_right;
+
+	if (!chk_expr(left) || !chk_expr(right)) return 0;
+
+	tpl = left->nd_type;
+	tpr = right->nd_type;
 
 	if (tpl->tp_fund == T_SUBRANGE) tpl = tpl->next;
 	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
@@ -763,8 +764,11 @@ chk_uoper(expp)
 	/*	Check an unary operation.
 	*/
 	register struct node *right = expp->nd_right;
-	register struct type *tpr = right->nd_type;
+	register struct type *tpr;
 
+	if (! chk_expr(right)) return 0;
+
+	tpr = right->nd_type;
 	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
 	expp->nd_type = tpr;
 
@@ -839,7 +843,7 @@ getvariable(argp)
 	left = arg->nd_left;
 
 	if (! chk_designator(left, DESIGNATOR, D_REFERRED)) return 0;
-	if (left->nd_class == Oper || left->nd_class == Uoper) {
+	if (left->nd_class == Arrsel || left->nd_class == Arrow) {
 		*argp = arg;
 		return left;
 	}

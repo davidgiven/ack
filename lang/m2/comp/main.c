@@ -146,7 +146,7 @@ LexScan()
 AddStandards()
 {
 	register struct def *df;
-	struct def *Enter();
+	extern struct def *Enter();
 	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0}};
 
 	(void) Enter("ABS", D_PROCEDURE, std_type, S_ABS);
@@ -184,11 +184,11 @@ AddStandards()
 		     construct_type(T_PROCEDURE, NULLTYPE),
 		     0);
 	df = Enter("BITSET", D_TYPE, bitset_type, 0);
-	df = Enter("FALSE", D_ENUM, bool_type, 0);
-	df->enm_val = 0;
-	df->enm_next = Enter("TRUE", D_ENUM, bool_type, 0);
-	df = df->enm_next;
+	df = Enter("TRUE", D_ENUM, bool_type, 0);
 	df->enm_val = 1;
+	df->enm_next = Enter("FALSE", D_ENUM, bool_type, 0);
+	df = df->enm_next;
+	df->enm_val = 0;
 	df->enm_next = 0;
 }
 

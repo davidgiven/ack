@@ -7,15 +7,17 @@ struct node {
 #define nd_left	next
 	struct node *nd_right;
 	int nd_class;		/* kind of node */
-#define Value	1		/* constant */
+#define Value	0		/* constant */
+#define Arrsel  1		/* array selection */
 #define Oper	2		/* binary operator */
 #define Uoper	3		/* unary operator */
-#define Call	4		/* cast or procedure - or function call */
-#define Name	5		/* an identifier */
-#define Set	6		/* a set constant */
-#define Xset	7		/* a set */
-#define Def	8		/* an identified name */
-#define Stat	9		/* a statement */
+#define Arrow	4		/* ^ construction */
+#define Call	5		/* cast or procedure - or function call */
+#define Name	6		/* an identifier */
+#define Set	7		/* a set constant */
+#define Xset	8		/* a set */
+#define Def	9		/* an identified name */
+#define Stat	10		/* a statement */
 #define Link	11
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;

@@ -430,8 +430,7 @@ cstcall(expp, call)
 		CutSize(expp);
 		break;
 	case S_SIZE:
-		expp->nd_INT = align(expr->nd_type->tp_size, (int) word_size) /
-				word_size;
+		expp->nd_INT = WA(expr->nd_type->tp_size) / word_size;
 		break;
 	case S_VAL:
 		expp->nd_INT = expr->nd_INT;

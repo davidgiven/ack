@@ -258,16 +258,16 @@ designator_tail(struct node **pnd;):
 ;
 
 visible_designator_tail(struct node **pnd;):
-	'['		{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot); }
+	'['		{ *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot); }
 		expression(&((*pnd)->nd_right))
 		[
 			','
-			{ *pnd = MkNode(Oper, *pnd, NULLNODE, &dot);
+			{ *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot);
 			  (*pnd)->nd_symb = '[';
 			}
 			expression(&((*pnd)->nd_right))
 		]*
 	']'
 |
-	'^'		{ *pnd = MkNode(Uoper, NULLNODE, *pnd, &dot); }
+	'^'		{ *pnd = MkNode(Arrow, NULLNODE, *pnd, &dot); }
 ;

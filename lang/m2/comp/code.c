@@ -60,7 +60,7 @@ CodeString(nd)
 	}
 	else {
 		C_df_dlb(lab = data_label());
-		C_rom_scon(nd->nd_STR, align(nd->nd_SLE + 1, (int) word_size));
+		C_rom_scon(nd->nd_STR, WA(nd->nd_SLE + 1));
 		C_lae_dlb(lab, (arith) 0);
 	}
 }
@@ -72,7 +72,7 @@ CodePadString(nd, sz)
 	/*	Generate code to push the string indicated by "nd".
 		Make it null-padded to "sz" bytes
 	*/
-	register arith sizearg = align(nd->nd_type->tp_size, word_align);
+	register arith sizearg = WA(nd->nd_type->tp_size);
 
 	assert(nd->nd_type->tp_fund == T_STRING);
 
@@ -114,25 +114,21 @@ CodeExpr(nd, ds, true_label, false_label)
 		/* Fall through */
 
 	case Link:
+	case Arrsel:
+	case Arrow:
 		CodeDesig(nd, ds);
 		break;
 
 	case Oper:
-		if (nd->nd_symb == '[') {
-			CodeDesig(nd, ds);
-			break;
-		}
 		CodeOper(nd, true_label, false_label);
 		if (true_label == 0) ds->dsg_kind = DSG_LOADED;
-		else ds->dsg_kind = DSG_INIT;
-		true_label = 0;
+		else {
+			ds->dsg_kind = DSG_INIT;
+			true_label = 0;
+		}
 		break;
 
 	case Uoper:
-		if (nd->nd_symb == '^') {
-			CodeDesig(nd, ds);
-			break;
-		}
 		CodePExpr(nd->nd_right);
 		CodeUoper(nd);
 		ds->dsg_kind = DSG_LOADED;
@@ -298,7 +294,6 @@ CodeCall(nd)
 	register struct node *arg = nd;
 	register struct paramlist *param;
 	struct type *tp;
-	arith pushed = 0;
 
 	if (left->nd_type == std_type) {
 		CodeStd(nd);
@@ -332,27 +327,28 @@ CodeCall(nd)
 			else if (tp->arr_elem == word_type) {
 				C_loc(left->nd_type->tp_size / word_size - 1);
 			}
-			else	C_loc(left->nd_type->tp_size /
-				      tp->arr_elsize - 1);
+			else {
+				tp = left->nd_type->next;
+				if (tp->tp_fund == T_SUBRANGE) {
+					C_loc(tp->sub_ub - tp->sub_lb);
+				}
+				else	C_loc((arith) (tp->enm_ncst - 1));
+			}
 			C_loc((arith) 0);
 			if (left->nd_symb == STRING) {
 				CodeString(left);
 			}
 			else	CodeDAddress(left);
-			pushed += pointer_size + 3 * word_size;
 		}
 		else if (IsVarParam(param)) {
 			CodeDAddress(left);
-			pushed += pointer_size;
 		}
 		else {
 			if (left->nd_type->tp_fund == T_STRING) {
-				CodePadString(left,
-					      align(tp->tp_size, word_align));
+				CodePadString(left, tp->tp_size);
 			}
 			else CodePExpr(left);
 			CheckAssign(left->nd_type, tp);
-			pushed += align(tp->tp_size, word_align);
 		}
 	}
 
@@ -361,7 +357,6 @@ CodeCall(nd)
 	if (left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) {
 		if (left->nd_def->df_scope->sc_level > 0) {
 			C_lxl((arith) proclevel - left->nd_def->df_scope->sc_level);
-			pushed += pointer_size;
 		}
 		C_cal(NameOfProc(left->nd_def));
 	}
@@ -372,9 +367,9 @@ CodeCall(nd)
 		CodePExpr(left);
 		C_cai();
 	}
-	if (pushed) C_asp(pushed);
+	if (left->nd_type->prc_nbpar) C_asp(left->nd_type->prc_nbpar);
 	if (left->nd_type->next) {
-		C_lfr(align(left->nd_type->next->tp_size, word_align));
+		C_lfr(WA(left->nd_type->next->tp_size));
 	}
 }
 
@@ -526,7 +521,6 @@ CodeAssign(nd, dss, dst)
 		compatibility and the like is already done.
 	*/
 	register struct type *tp = nd->nd_right->nd_type;
-	extern arith align();
 
 	if (dss->dsg_kind == DSG_LOADED) {
 		if (tp->tp_fund == T_STRING) {
@@ -787,6 +781,10 @@ CodeOper(expr, true_label, false_label)
 		Operands(rightop, leftop);
 		CodeCoercion(leftop->nd_type, word_type);
 		C_inn(rightop->nd_type->tp_size);
+		if (true_label != 0) {
+			C_zne(true_label);
+			C_bra(false_label);
+		}
 		break;
 	case AND:
 	case '&':
@@ -1032,7 +1030,7 @@ DoHIGH(nd)
 
 	highoff = df->var_off + pointer_size + word_size;
 	if (df->df_scope->sc_level < proclevel) {
-		C_lxa(proclevel - df->df_scope->sc_level);
+		C_lxa((arith) (proclevel - df->df_scope->sc_level));
 		C_lof(highoff);
 	}
 	else	C_lol(highoff);

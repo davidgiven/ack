@@ -221,43 +221,6 @@ InitTypes()
 	error_type = standard_type(T_CHAR, 1, (arith) 1);
 }
 
-ParamList(ppr, ids, tp, VARp, off)
-	register struct node *ids;
-	struct paramlist **ppr;
-	struct type *tp;
-	int VARp;
-	arith *off;
-{
-	/*	Create (part of) a parameterlist of a procedure.
-		"ids" indicates the list of identifiers, "tp" their type, and
-		"VARp" indicates D_VARPAR or D_VALPAR.
-	*/
-	register struct paramlist *pr;
-	register struct def *df;
-
-	for ( ; ids; ids = ids->next) {
-		pr = new_paramlist();
-		pr->next = *ppr;
-		*ppr = pr;
-		df = define(ids->nd_IDF, CurrentScope, D_VARIABLE);
-		pr->par_def = df;
-		df->df_type = tp;
-		df->var_off = align(*off, word_align);
-		df->df_flags = VARp;
-		if (IsConformantArray(tp)) {
-			/* we need room for the base address and a descriptor
-			*/
-			*off = df->var_off + pointer_size + 3 * word_size;
-		}
-		else if (VARp == D_VARPAR) {
-			*off = df->var_off + pointer_size;
-		}
-		else {
-			*off = df->var_off + tp->tp_size;
-		}
-	}
-}
-
 chk_basesubrange(tp, base)
 	register struct type *tp, *base;
 {
@@ -417,7 +380,7 @@ set_type(tp)
 	}
 
 	tp = construct_type(T_SET, tp);
-	tp->tp_size = align(((ub - lb) + 7)/8, word_align);
+	tp->tp_size = WA(((ub - lb) + 7)/8);
 	return tp;
 }
 
@@ -433,8 +396,11 @@ ArrayElSize(tp)
 
 	if (tp->tp_fund == T_ARRAY) ArraySizes(tp);
 	algn = align(tp->tp_size, tp->tp_align);
-	if (!(algn % word_size == 0 || word_size % algn == 0)) {
-		algn = align(algn, (int) word_size);
+	if (word_size % algn != 0) {
+		/* algn is not a dividor of the word size, so make sure it
+		   is a multiple
+		*/
+		algn = WA(algn);
 	}
 	return algn;
 }
@@ -481,8 +447,9 @@ ArraySizes(tp)
 	default:
 		crash("Funny index type");
 	}
-	
+
 	C_rom_cst(tp->arr_elsize);
+	tp->tp_size = WA(tp->tp_size);
 
 	/* ??? overflow checking ???
 	*/

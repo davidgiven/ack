@@ -66,7 +66,7 @@ CaseCode(nd, exitlabel)
 	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
 
 	clear((char *) sh, sizeof(*sh));
-	WalkExpr(pnode->nd_left, NO_LABEL, NO_LABEL);
+	WalkExpr(pnode->nd_left);
 	sh->sh_type = pnode->nd_left->nd_type;
 	sh->sh_break = text_label();
 
@@ -88,8 +88,9 @@ CaseCode(nd, exitlabel)
 		else {
 			/* Else part
 			*/
-			pnode = 0;
+
 			sh->sh_default = text_label();
+			pnode = 0;
 		}
 	}
 
@@ -98,7 +99,7 @@ CaseCode(nd, exitlabel)
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);
 	if (sh->sh_default) C_rom_ilb(sh->sh_default);
-	else C_rom_ucon("0", pointer_size);
+	else C_rom_ilb(sh->sh_break);
 	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
 
@@ -112,7 +113,7 @@ CaseCode(nd, exitlabel)
 				ce = ce->next;
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
-			else C_rom_ucon("0", pointer_size);
+			else C_rom_ilb(sh->sh_break);
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
 		C_csa(word_size);

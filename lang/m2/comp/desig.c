@@ -319,7 +319,7 @@ CodeDesig(nd, ds)
 		CodeFieldDesig(nd->nd_def, ds);
 		break;
 
-	case Oper:
+	case Arrsel:
 		assert(nd->nd_symb == '[');
 
 		CodeDesig(nd->nd_left, ds);
@@ -347,7 +347,7 @@ CodeDesig(nd, ds)
 		ds->dsg_kind = DSG_INDEXED;
 		break;
 
-	case Uoper:
+	case Arrow:
 		assert(nd->nd_symb == '^');
 
 		CodeDesig(nd->nd_right, ds);

@@ -22,7 +22,7 @@ DoOption(text)
 	switch(*text++)	{
 
 	default:
-		options[text[-1]] = 1;	/* flags, debug options etc.	*/
+		options[text[-1]]++;	/* flags, debug options etc.	*/
 		break;
 
 	case 'L' :	/* don't generate fil/lin */
