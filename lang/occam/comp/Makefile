@@ -9,7 +9,8 @@ LLOPT=
 LIBRARY=	$(MODLIB)/libem_mes.a $(MODLIB)/libemk.a \
 		$(MODLIB)/libprint.a $(MODLIB)/libstring.a \
 		$(MODLIB)/libsystem.a -lln
-CFLAGS =	-O $(INCL)
+CFLAGS =	-Dvoid=int -O $(INCL)
+# void = int, because some compilers don't understand void
 HSRC =		code.h em.h expr.h sizes.h symtab.h token.h
 CSRC =		builtin.c code.c em.c expr.c keytab.c report.c symtab.c
 
