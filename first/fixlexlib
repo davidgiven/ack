@@ -12,13 +12,13 @@ X0)
 %%
 [A-Z]	putchar(yytext[0]+'a'-'A');
 EOF
-	if lex x.l > /dev/null 2>&1
+	if lex x.l > /dev/null 2>&1 && cc -c lex.yy.c > /dev/null 2>&1
 	then :
 	else myecho "Sorry, your lex does not seem to work"
 	     exit 2
 	fi
 	cat > trylib <<'EOF'
-if cc lex.yy.c $1 > /dev/null 2>&1
+if cc lex.yy.o $1 > /dev/null 2>&1
 then
 	rm -f lex.yy.* a.out
 	exit 0
@@ -30,8 +30,7 @@ EOF
 	then
 		LEX=$TRY
 	else
-		FL=fail
-		TRIES=$TRY
+		exec $0 -ll $TRY
 	fi
 	;;
 *)	if sh trylib $1
@@ -69,6 +68,7 @@ EOF
 	done
 	;;
 esac
-rm -f x.l trylib
+rm -f x.l trylib lex.yy.*
 echo echo "$LEX" > .Xlex
 chmod +x .Xlex
+echo "apparently, \"cc ... $LEX\" works"
