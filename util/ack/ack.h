@@ -7,7 +7,7 @@
 /****************************************************************************/
 
 #define FRONTENDS       "fe"    /* The front-end definitions */
-#define TMPNAME         "Ack%04x"     /* Naming of temp. files */
+#define TMPNAME         "Ack_%x"     /* Naming of temp. files */
 
 /****************************************************************************/
 /*         Internal mnemonics, should not be tinkered with                  */
