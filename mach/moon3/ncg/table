@@ -2846,9 +2846,11 @@ with STACK
 pat lim			yields	{absolute4, ".trpim"}
 
 pat lin
+    kills posextern
     gen move {const, $1}, {absolute4, ".lino"}
     
 pat lni
+    kills posextern
     gen add_l {const, 1}, {absolute4, ".lino"}
 
 pat lor $1==0		yields	lb
@@ -2901,6 +2903,7 @@ pat rtt				leaving ret 0
 
 pat sig
 with any4
+    kills posextern
     uses AA_REG
     gen move {absolute4, ".trppc"}, %a
 	move %1, {absolute4, ".trppc"}
@@ -2908,6 +2911,7 @@ with any4
 
 pat sim
 with any4
+    kills posextern
     gen move_l %1, {absolute4, ".trpim"}
 
 pat str $1==0
