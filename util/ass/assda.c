@@ -104,6 +104,7 @@ int     r_flag          =  0;           /* don't dump relocation tables */
 int     jflag;
 #endif
 int     wflag           =  0;           /* don't issue warning messages */
+int	Uflag		=  0;		/* exit status 0 on unresolved refs */
 int     eof_seen;
 int     mod_sizes;                      /* Size info in current module ok? */
 

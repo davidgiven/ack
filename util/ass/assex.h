@@ -99,6 +99,7 @@ extern  int     r_flag;
 extern  int     jflag;
 #endif
 extern  int     wflag;
+extern  int     Uflag;
 extern  int     eof_seen;
 extern  int     mod_sizes;
 /*

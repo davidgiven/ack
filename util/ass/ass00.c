@@ -20,7 +20,7 @@ main(argc, argv)
 	char    **argv;
 {
 	/*
-	 * Usage: ass [-[d][p][m][u]] [-s(s/m/l/x)] [ [file] [flag] ] ...
+	 * Usage: ass [-[d][p][m][u][U]] [-s(s/m/l/x)] [ [file] [flag] ] ...
 	 *   The d flag can be repeated several times, resulting in more
 	 *        debugging information.
 	 */
@@ -159,6 +159,7 @@ flags(arg)
 #ifdef JOHAN
 			case 'j':       ++jflag; break;
 #endif
+			case 'U':	++Uflag; break;
 			case '-':
 			case '+':
 				on = (*argp == '+');
@@ -517,6 +518,7 @@ check_def() {
 		for (g = xglobs; count--; g++)
 			if (g->g_name && (g->g_status&DEF)==0)
 				printf("    %s\n",glostring(g));
+		if (! Uflag) nerrors++;
 	}
 }
 
