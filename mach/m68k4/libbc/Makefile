@@ -1,5 +1,6 @@
+SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=m68k4" "SUF=o" "ASAR=aal"
+MACHDEF="MACH=m68k4" "SUF=$(SUF)" "ASAR=aal"
 BCDEF="PREF=bc" "SUB=" "SRC=lang/basic/lib"
 
 install:
@@ -11,7 +12,7 @@ cmp:
 	-../../compare tail_bc
 
 clean:
-		-rm -f *.old *.[ceo] tail* head*
+		-rm -f *.old *.[ce$(SUF)] tail* head*
 
 opr:
 	make pr | opr

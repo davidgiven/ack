@@ -1,5 +1,6 @@
+SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=m68k4" "SUF=o"
+MACHDEF="MACH=m68k4" "SUF=$(SUF)" "ASAR=aal"
 PCDEF="PREF=pc" "SUB=" "SRC=lang/pc/libpc"
 
 install:

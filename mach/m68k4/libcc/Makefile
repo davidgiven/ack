@@ -1,5 +1,6 @@
+SUF=o
 MAKEFILE=../../proto/libg/Makefile
-MACHDEF="MACH=m68k4" "SUF=o"
+MACHDEF="MACH=m68k4 -DNOFLOAT" "SUF=$(SUF)" "ASAR=aal"
 STDIO="PREF=cc" "SUB=.1s" "SRC=lang/cem/libcc/stdio"
 GEN="PREF=cc" "SUB=.2g" "SRC=lang/cem/libcc/gen"
 MON="PREF=mon" "SRC=lang/cem/libcc/mon"
@@ -13,7 +14,7 @@ cpgen:
 cpmon:
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tailcp
 
-cmp:		cmpstdio cmpgen cmpmon
+cmp:		cmpstdio cmpgen
 
 cmpstdio:
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tail

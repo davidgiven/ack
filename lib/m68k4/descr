@@ -1,4 +1,4 @@
-# $Revision 2.2$
+# $Revision$
 var w=4
 var p=4
 var s=2
@@ -7,31 +7,50 @@ var f=4
 var d=8
 var NAME=m68k4
 var M=m68k4
-var LIB=lib/m68k4/tail_
-var RT=lib/m68k4/head_
-var INCLUDES=-I{EM}/include -I/usr/include
+var LIB=lib/{M}/tail_
+var RT=lib/{M}/head_
+var CPP_F=-Dunix=unix -Dm68000=m68000
+var INCLUDES=-I{EM}/include/_tail_cc
+# 407 align is the default
+var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
-	from .m
-	to .o
+	from .m.g
+	to .s
 	program {EM}/lib/{M}/cg
 	args <
 	stdout
 	need .e
 end
-name asld
-	from .s.a.o
-	to .out
+name asopt
+	from .s
+	to .so
+	program {EM}/lib/m68k2/top
+	args
+	optimizer
+	stdin
+	stdout
+end
+name as
+	from .s.so
+	to .o
 	program {EM}/lib/m68k2/as
-	mapflag -l* LNAME={EM}/{LIB}*
-	mapflag -d* LFLAG={LFLAG?} -d*
-	mapflag -s* LFLAG={LFLAG?} -s*
-	mapflag -n*
-	mapflag -i*
-	args {LFLAG?} (.e:{HEAD}={EM}/{RT}em) \
-({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
-(.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
+	args - -o > <
 	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -i ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
+	mapflag -n ALIGN=-a0:2 -a1:2 -a2:0x8000 -a3:2
+	mapflag -nr ALIGN=-a0:2 -a1:0x8000 -a2:2 -a3:2
+	args (.e:{HEAD}=-b0:0x20000 {ALIGN} {EM}/{RT}em) \
+({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)
 	linker
 end
 name cv

@@ -1,4 +1,4 @@
-tail_mon.a
+libmon_s.a
 exit.s
 _exit.s
 access.s
@@ -12,7 +12,9 @@ close.s
 creat.s
 dup.s
 dup2.s
+execle.s
 execl.s
+execv.s
 execve.s
 fork.s
 ftime.s
