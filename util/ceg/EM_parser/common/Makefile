@@ -11,7 +11,7 @@ IFILES = -I$(EM)/h -I$(EM)/modules/h
 CC = cc
 CFLAGS = $(IFILES)
 
-all :	dummy
+all :	dummy $(OFILES)
 	make $(OFILES)
 
 dummy : $(GFILES)
