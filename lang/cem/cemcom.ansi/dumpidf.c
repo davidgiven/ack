@@ -255,7 +255,8 @@ dump_proto(pl)
 		print("%d: %s", argcnt++,
 			pl->pl_flag & PL_FORMAL ?
 			(pl->pl_flag & PL_VOID ? "void" : "formal")
-			: "ellipsis");
+			: (pl->pl_flag & PL_ELLIPSIS
+				? "ellipsis" : "unknown" ));
 		newline();
 		if (type = pl->pl_type){
 			dump_type(type);

@@ -42,9 +42,8 @@ ch3mon(oper, expp)
 				    symbol2str((*expp)->ex_type->tp_fund));
 		} else {
 			expr = *expp;
-			if ((expr->ex_type->tp_fund == ARRAY
-				&& expr->ex_class != String)
-			    || expr->ex_type->tp_fund == FUNCTION)
+
+			if (is_ld_cst(expr))
 				/* dereference in administration only */
 				expr->ex_type = expr->ex_type->tp_up;
 			else	/* runtime code */

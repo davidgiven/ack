@@ -612,7 +612,7 @@ ch3asgn(expp, oper, expr)
 		expr_error(exp, "operand of %s is read-only", oper_string);
 	} else if (fund == STRUCT || fund == UNION) {
 		if (recurqual(exp->ex_type, TQ_CONST))
-			expr_error(expr,"operand of %s contains a const-qualified member",
+			expr_error(exp,"operand of %s contains a const-qualified member",
 					    oper_string);
 	}
 

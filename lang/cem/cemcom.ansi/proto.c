@@ -79,7 +79,9 @@ add_proto(pl, ds, dc, lvl)
 		else {
 			if (idf != (struct idf *)0)
 				error("illegal use of void in argument list");
-			else pl->pl_flag = PL_VOID;
+			else {
+				pl->pl_flag |= PL_VOID;
+			}
 		}
 	}
 
@@ -280,6 +282,7 @@ update_proto(tp, otp)
 	if (!tp || !otp) return;
 
 	while (tp->tp_fund != FUNCTION) {
+		if (tp->tp_fund != POINTER && tp->tp_fund != ARRAY) return;
 		tp = tp->tp_up;
 		otp = otp->tp_up;
 		if (!tp) return;
@@ -287,6 +290,7 @@ update_proto(tp, otp)
 
 	pl = tp->tp_proto;
 	opl = otp->tp_proto;
+	if (pl == opl) return;
 	if (pl && opl) {
 		/* both have prototypes */
 		while (pl && opl) {

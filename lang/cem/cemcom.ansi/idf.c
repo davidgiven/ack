@@ -597,11 +597,10 @@ check_formals(idf, dc)
 
 	if (du->du_proto) return;
 
-	if (!options['o'])
-		warning("'%s' old-fashioned function definition"
-				, dc->dc_idf->id_text);
-
 	if (pl) {
+		/* Don't give a warning about an old-style definition,
+		 * since the arguments will be checked anyway.
+		 */
 		if (pl->pl_flag & PL_ELLIPSIS) {
 		    if (!(du->du_proto) && !(pl->pl_flag & PL_ERRGIVEN))
 			error("ellipsis terminator in previous declaration");
@@ -627,6 +626,10 @@ check_formals(idf, dc)
 	} else {			/* make a pseudo-prototype */
 		register struct proto *lpl = new_proto();
 
+		if (!options['o'])
+			warning("'%s' old-fashioned function definition"
+					, dc->dc_idf->id_text);
+
 		while (fm) {
 			if (pl == 0) pl = lpl;
 			else {
@@ -642,7 +645,7 @@ check_formals(idf, dc)
 		if (pl == 0) {		/* make func(void) */
 			pl = lpl;
 			pl->pl_type = void_type;
-			pl->pl_flag = PL_VOID;
+			pl->pl_flag = PL_FORMAL | PL_VOID;
 		}
 		idf->id_def->df_type->tp_pseudoproto = pl;
 	}
