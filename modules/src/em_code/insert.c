@@ -50,6 +50,7 @@ getbyte(b)
 static C_out_parts();
 static Part *C_findpart();
 
+static
 outpart(id)
 	int id;
 {
@@ -118,6 +119,8 @@ C_findpart(part)
 	return p;
 }
 
+extern char	*strcpy(), *strcat(), *mktemp();
+
 static
 swttmp()
 {
@@ -125,7 +128,6 @@ swttmp()
 	if (C_tmpfile == 0) {
 		static char tmpbuf[64];
 		register char *p = tmpbuf;
-		extern char *mktemp();
 
 		strcpy(p, C_tmpdir);
 		strcat(p, "/CodeXXXXXX");
