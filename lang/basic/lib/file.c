@@ -101,7 +101,7 @@ int	reclen;
 			printf("file mode %s\n",mode->strval);
 			error(29);
 	}
-	_chanrd= _fdtable[_chann].fd= f;
+	_chanwr= _chanrd= _fdtable[_chann].fd= f;
 	_fdtable[_chann].fname= fname->strval;
 	_fdtable[_chann].reclength= reclen;
 	_fdtable[_chann].mode= m;
