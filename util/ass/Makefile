@@ -41,7 +41,7 @@ ass-i:       ass00.o ass30.o ass40.o ass50.o ass60.o ass70.o \
 			ass80.o assci.o assda.o assrl.o asstb.o asscm.o \
 			$l/em_data.a
 
-ass00.o ass40.o ass60.o ass70.o ass80.o assrl.c: \
+ass00.o ass40.o ass60.o ass70.o ass80.o assrl.o: \
 		$h/local.h $h/em_spec.h $h/as_spec.h \
 		$h/em_flag.h $h/arch.h ass00.h assex.h
 
@@ -68,6 +68,9 @@ asstb.c:        maktab ip_spec.t
 maktab:         maktab.c $h/em_spec.h ip_spec.h $h/em_flag.h \
 		$l/em_data.a
 		cc -O -o maktab maktab.c $l/em_data.a
+
+asprint:	asprint.p
+		apc -w -o asprint asprint.p
 
 opr:
 		make pr ^ opr
