@@ -6,5 +6,4 @@
 .sect .bss
 .sect .text
 _times:		move.l #0x2B,d0
-		trap #0
 		jmp (call)
