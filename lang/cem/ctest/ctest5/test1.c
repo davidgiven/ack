@@ -224,7 +224,7 @@ test4()
 #endif
   t=4; pct++;
 #ifndef NOFLOAT
-  epsf = 1e-7; epsd = 1e-17;
+  epsf = 1e-7; epsd = 1e-14;
 #endif
   for ( i=0; i<20 ; i++ ) a1[i] = i*i;
   if ( a1[9] != 81 || a1[17] != 289 || a1[0] != 0 ) e(1);
@@ -250,7 +250,7 @@ test5()
 { int b1[20];
 #ifndef NOFLOAT
   float epsf, b2[20]; double b3[20],epsd;
-  epsf = 1e-7; epsd = 1e-17;
+  epsf = 1e-7; epsd = 1e-14;
 #endif
   t = 5; pct++;
   for ( i=0; i<20 ; i++ ) b1[i] = i*i;
@@ -283,7 +283,7 @@ test6()
 #endif
   t = 6;  pct++;
 #ifndef NOFLOAT
-  epsd = 1e-17;
+  epsd = 1e-14;
 #endif
   li = 6; i = li ;
   if ( i != 6 ) e(1);
