@@ -144,7 +144,7 @@ has_selectors(df)
 		register struct type *tp = df->df_type;
 
 		if (tp->tp_fund == RECORD) {
-			return tp->rec_scopenr;
+			return tp->rec_scope;
 		}
 		break;
 		}

@@ -37,7 +37,7 @@ ProcedureHeading(struct def **pdf; int type;)
 				open_scope(OPENSCOPE, 0);
 			  }
 			}
-	FormalParameters(type, &params, &tp)?
+	FormalParameters(type == D_PROCEDURE, &params, &tp)?
 			{
 			  (*pdf)->df_type = tp = construct_type(PROCEDURE, tp);
 			  tp->prc_params = params;
@@ -133,8 +133,14 @@ TypeDeclaration
 			{ df->df_type = tp;
 			  if ((df->df_flags&D_EXPORTED) &&
 			      tp->tp_fund == ENUMERATION) {
-				exprt_literals(tp->enm_enums, enclosing(currscope));
+				exprt_literals(tp->enm_enums,
+						enclosing(CurrentScope));
 			  }
+			  if (df->df_kind == D_HTYPE &&
+			      tp->tp_fund != POINTER) {
+error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
+			  }
+				
 			}
 ;
 
@@ -246,27 +252,29 @@ ArrayType(struct type **ptp;)
 
 RecordType(struct type **ptp;)
 {
-	int scopenr;
+	struct scope scope;
 }
 :
 	RECORD
-			{ scopenr = uniq_scope(); }
-	FieldListSequence(scopenr)
+			{ scope.sc_scope = uniq_scope();
+			  scope.next = CurrentScope;
+			}
+	FieldListSequence(&scope)
 			{
 			  *ptp = standard_type(RECORD, record_align, (arith) 0 /* ???? */);
-			  (*ptp)->rec_scopenr = scopenr;
+			  (*ptp)->rec_scope = scope.sc_scope;
 			}
 	END
 ;
 
-FieldListSequence(int scopenr;):
-	FieldList(scopenr)
+FieldListSequence(struct scope *scope;):
+	FieldList(scope)
 	[
-		';' FieldList(scopenr)
+		';' FieldList(scope)
 	]*
 ;
 
-FieldList(int scopenr;)
+FieldList(struct scope *scope;)
 {
 	struct id_list *FldList;
 	struct idf *id;
@@ -283,21 +291,21 @@ FieldList(int scopenr;)
 				{ id = gen_anon_idf(); }
 	]			/* Changed rule in new modula-2 */
 	':' qualident(D_TYPE|D_HTYPE, &df, "type")
-				{ df1 = define(id, scopenr, D_FIELD);
+				{ df1 = define(id, scope, D_FIELD);
 				  df1->df_type = df->df_type;
 				}
-	OF variant(scopenr)
+	OF variant(scope)
 	[
-		'|' variant(scopenr)
+		'|' variant(scope)
 	]*
-	[ ELSE FieldListSequence(scopenr)
+	[ ELSE FieldListSequence(scope)
 	]?
 	END
 ]?
 ;
 
-variant(int scopenr;):
-	[ CaseLabelList ':' FieldListSequence(scopenr) ]?
+variant(struct scope *scope;):
+	[ CaseLabelList ':' FieldListSequence(scope) ]?
 					/* Changed rule in new modula-2 */
 ;
 
@@ -330,7 +338,7 @@ PointerType(struct type **ptp;)
 	struct def *lookfor();
 } :
 	POINTER TO
-	[ %if ( (df = lookup(dot.TOK_IDF, CurrentScope)))
+	[ %if ( (df = lookup(dot.TOK_IDF, CurrentScope->sc_scope)))
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
@@ -343,7 +351,8 @@ PointerType(struct type **ptp;)
 				  }
 				  else	tp = df->df_type;
 				}
-	| %if (df = lookfor(dot.TOK_IDF, currscope, 0), df->df_kind == D_MODULE)
+	| %if (df = lookfor(dot.TOK_IDF, CurrentScope, 0),
+	       df->df_kind == D_MODULE)
 		type(&tp)
 	|
 		IDENT

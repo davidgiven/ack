@@ -14,7 +14,7 @@ LFLAGS =	-p
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
-	scope.o misc.o print.o enter.o
+	scope.o misc.o print.o enter.o defmodule.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -69,18 +69,19 @@ LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h input.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
 error.o: LLlex.h f_info.h input.h
-main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h main.h standards.h type.h
+main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h main.h scope.h standards.h type.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
 type.o: Lpars.h def.h def_sizes.h idf.h misc.h type.h
-def.o: Lpars.h debug.h def.h idf.h main.h misc.h scope.h
+def.o: Lpars.h debug.h def.h idf.h main.h misc.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
 enter.o: def.h idf.h misc.h scope.h type.h
+defmodule.o: LLlex.h def.h f_info.h idf.h input.h scope.h
 tokenfile.o: Lpars.h
-program.o: LLlex.h Lpars.h def.h idf.h main.h misc.h scope.h type.h
+program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h scope.h type.h
 declar.o: LLlex.h Lpars.h def.h idf.h misc.h scope.h type.h
 expression.o: LLlex.h Lpars.h def.h idf.h scope.h
 statement.o: Lpars.h

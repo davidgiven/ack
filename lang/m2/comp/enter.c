@@ -11,9 +11,6 @@ static char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"misc.h"
 
-extern struct idf *str2idf();
-extern struct def *define();
-
 struct def *
 Enter(name, kind, type, pnam)
 	char *name;
@@ -35,6 +32,7 @@ Enter(name, kind, type, pnam)
 EnterIdList(idlist, kind, flags, type, scope)
 	register struct id_list *idlist;
 	struct type *type;
+	struct scope *scope;
 {
 	register struct def *df;
 	struct def *first = 0, *last = 0;
@@ -78,6 +76,6 @@ lookfor(id, scope, give_error)
 		if (df) return df;
 		sc = nextvisible(sc);
 	}
-	if (give_error) error("Identifier \"%s\" not declared", id->id_text);
-	return define(id, scope->sc_scope, D_ERROR);
+	if (give_error) error("identifier \"%s\" not declared", id->id_text);
+	return define(id, scope, D_ERROR);
 }

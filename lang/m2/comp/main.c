@@ -14,12 +14,15 @@ static char *RcsId = "$Header$";
 #include	"debug.h"
 #include	"type.h"
 #include	"def.h"
+#include	"scope.h"
 #include	"standards.h"
 
 char options[128];
 char *ProgName;
 int state;
 extern int err_occurred;
+char *DEFPATH[128];
+char *getenv();
 
 main(argc, argv)
 	char *argv[];
@@ -53,12 +56,13 @@ Compile(src)
 	extern struct tokenname tkidf[];
 
 	DO_DEBUG(debug(1,"Filename : %s", src));
-	if (! InsertFile(src, (char **) 0)) {
+	if (! InsertFile(src, (char **) 0, &src)) {
 		fprintf(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
 	}
 	LineNumber = 1;
 	FileName = src;
+	init_DEFPATH();
 	init_idf();
 	reserve(tkidf);
 	init_scope();
@@ -69,10 +73,13 @@ Compile(src)
 		LexScan();
 	else if (options['T'])
 		TimeScan();
-	else
+	else {
 #endif DEBUG
+		(void) open_scope(CLOSEDSCOPE, 0);
+		GlobalScope = CurrentScope;
 		CompUnit();
 #ifdef DEBUG
+	}
 	if (options['h']) hash_stat();
 #endif DEBUG
 	if (err_occurred) return 0;
@@ -168,4 +175,34 @@ add_standards()
 	df = df->df_value.df_enum.en_next;
 	df->df_value.df_enum.en_val = 1;
 	df->df_value.df_enum.en_next = 0;
+}
+
+init_DEFPATH()
+{
+	register char *p = getenv("M2path");
+	register int i = 0;
+
+	if (p) {
+		while (*p) {
+			DEFPATH[i++] = p;
+			while (*p && *p != ':') p++;
+			if (*p) *p++ = '\0';
+		}
+	}
+	DEFPATH[i] = 0;
+}
+
+do_SYSTEM()
+{
+	/*	Simulate the reading of the SYSTEM definition module
+	*/
+	struct def *df;
+	struct idf *sys_id;
+
+	sys_id = str2idf("SYSTEM", 0);
+	df = define(sys_id, GlobalScope, D_MODULE);
+	open_scope(CLOSEDSCOPE, 0);
+	df->mod_scope = CurrentScope->sc_scope;
+	/* ???? */
+	close_scope();
 }

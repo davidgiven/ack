@@ -26,7 +26,8 @@ qualident(int types; struct def **pdf; char *str;)
 	struct def *lookfor();
 } :
 	IDENT		{ if (types) {
-				*pdf = df = lookfor(dot.TOK_IDF, currscope, 1);
+				df = lookfor(dot.TOK_IDF, CurrentScope, 1);
+				*pdf = df;
 				if (df->df_kind == D_ERROR) types = 0;
 			  }
 			}

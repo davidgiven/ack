@@ -16,9 +16,9 @@ struct scope {
 };
 
 extern struct scope
-	*currscope;
+	*CurrentScope,
+	*GlobalScope;
 
 #define nextvisible(x)	((x)->sc_scope ? (x)->next : (struct scope *) 0)
 #define scopeclosed(x)	((x)->next->sc_scope == 0)
 #define enclosing(x)	(scopeclosed(x) ? (x)->next->next : (x)->next)
-#define CurrentScope	(currscope->sc_scope)

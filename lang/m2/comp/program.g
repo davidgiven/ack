@@ -13,6 +13,7 @@ static  char *RcsId = "$Header$";
 #include	"scope.h"
 #include	"def.h"
 #include	"type.h"
+#include	"debug.h"
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -31,6 +32,7 @@ static  char *RcsId = "$Header$";
 %lexical LLlex;
 
 %start	CompUnit, CompilationUnit;
+%start	DefModule, DefinitionModule;
 
 ModuleDeclaration
 {
@@ -41,11 +43,11 @@ ModuleDeclaration
 				  id = dot.TOK_IDF;
 				  df = define(id, CurrentScope, D_MODULE);
 				  open_scope(CLOSEDSCOPE, 0);
-				  df->mod_scope = CurrentScope;
+				  df->mod_scope = CurrentScope->sc_scope;
 				}
 	priority? ';'
 	import(1)*
-	export?
+	export(0)?
 	block
 	IDENT			{ close_scope();
 				  match_id(id, dot.TOK_IDF);
@@ -56,7 +58,7 @@ priority:
 	'[' ConstExpression ']'
 ;
 
-export
+export(int def;)
 {
 	struct id_list *ExportList;
 	int QUALflag = 0;
@@ -67,7 +69,8 @@ export
 	]?
 	IdentList(&ExportList) ';'
 			{
-			  Export(ExportList, QUALflag);
+			  if (!def) Export(ExportList, QUALflag);
+			  else warning("export list in definition module ignored");
 			  FreeIdList(ExportList);
 			}
 ;
@@ -95,23 +98,31 @@ import(int local;)
 
 DefinitionModule
 {
-	struct def *df;
+	register struct def *df;
 	struct idf *id;
 } :
 	DEFINITION	{ state = DEFINITION; }
 	MODULE IDENT	{ id = dot.TOK_IDF;
-			  df = define(id, CurrentScope, D_MODULE);
+			  df = define(id, GlobalScope, D_MODULE);
 			  open_scope(CLOSEDSCOPE, 0);
-			  df->mod_scope = CurrentScope;
+			  df->mod_scope = CurrentScope->sc_scope;
+			  DO_DEBUG(debug(1, "Definition module \"%s\"", id->id_text));
 			}
 	';'
 	import(0)* 
-	/*	export?
+	export(1)?
 
-	   	New Modula-2 does not have export lists in definition modules.
+	/*	New Modula-2 does not have export lists in definition modules.
 	*/
 	definition* END IDENT '.'
-			{ close_scope();
+			{
+			  df = CurrentScope->sc_def;
+			  while (df) {
+				/* Make all definitions "QUALIFIED EXPORT" */
+				df->df_flags |= D_QEXPORTED;
+				df = df->df_nextinscope;
+			  }
+			  close_scope();
 			  match_id(id, dot.TOK_IDF);
 			}
 ;
@@ -124,7 +135,7 @@ definition
 	CONST [ ConstantDeclaration ';' ]*
 |
 	TYPE
-	[ IDENT 
+	[ IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	  [ '=' type(&tp)
 	  | /* empty */
 	    /*
@@ -132,6 +143,7 @@ definition
 	       The export is said to be opaque.
 	       It is restricted to pointer types.
 	    */
+	    		{ df->df_kind = D_HIDDEN; }
 	  ]
 	  ';'
 	]*
@@ -141,19 +153,20 @@ definition
 	ProcedureHeading(&df, D_PROCHEAD) ';'
 ;
 
-ProgramModule {
+ProgramModule
+{
 	struct idf *id;
+	struct def *df, *GetDefinitionModule();
+	int scope = 0;
 } :
 	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
-	IDENT		{ if (state == IMPLEMENTATION) {
-				/* ????
-				   Read definition module,
-				   Look for current identifier,
-				   and find out its scope number
-				*/
-			  }
+	IDENT		{ 
 			  id = dot.TOK_IDF;
-			  open_scope(CLOSEDSCOPE, 0);
+			  if (state == IMPLEMENTATION) {
+				   df = GetDefinitionModule(id);
+				   scope = df->mod_scope;
+			  }
+			  open_scope(CLOSEDSCOPE, scope);
 			}
 	priority?
 	';' import(0)*

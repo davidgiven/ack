@@ -38,9 +38,9 @@ struct array {
 };
 
 struct record {
-	int rc_scopenr;		/* Scope number of this record */
+	int rc_scope;		/* Scope number of this record */
 				/* Members are in the symbol table */
-#define rec_scopenr	tp_value.tp_record.rc_scopenr
+#define rec_scope	tp_value.tp_record.rc_scope
 };
 
 struct proc {

@@ -25,6 +25,7 @@ struct def *ill_df = &illegal_def;
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
+	struct scope *scope;
 {
 	/*	Declare an identifier in a scope, but first check if it
 		already has been defined. If so, error message.
@@ -32,14 +33,14 @@ define(id, scope, kind)
 	register struct def *df;
 	register struct scope *sc;
 
-	DO_DEBUG(debug(4,"Defining identifier %s in scope %d", id->id_text, scope));
-	df = lookup(id, scope);
+	DO_DEBUG(debug(4,"Defining identifier %s in scope %d", id->id_text, scope->sc_scope));
+	df = lookup(id, scope->sc_scope);
 	if (	/* Already in this scope */
 		df
 	   ||	/* A closed scope, and id defined in the pervasive scope */
 		( CurrentScope == scope 
 		&&
-		  scopeclosed(currscope)
+		  scopeclosed(CurrentScope)
 		&&
 		  (df = lookup(id, 0)))
 	   ) {
@@ -68,19 +69,14 @@ define(id, scope, kind)
 	}
 	df = new_def();
 	df->df_idf = id;
-	df->df_scope = scope;
+	df->df_scope = scope->sc_scope;
 	df->df_kind = kind;
 	df->next = id->id_def;
 	id->id_def = df;
 
 	/* enter the definition in the list of definitions in this scope */
-	sc = currscope;
-	while (sc->sc_scope != scope) {
-		sc = sc->next;
-		assert(sc != 0);
-	}
-	df->df_nextinscope = sc->sc_def;
-	sc->sc_def = df;
+	df->df_nextinscope = scope->sc_def;
+	scope->sc_def = df;
 	return df;
 }
 
@@ -135,7 +131,7 @@ Export(ids, qualified)
 		}
 		else {
 			df->df_flags |= D_EXPORTED;
-			df = define(ids->id_ptr, enclosing(currscope)->sc_scope,
+			df = define(ids->id_ptr, enclosing(CurrentScope),
 					D_IMPORT);
 		}
 		ids = ids->next;
@@ -164,55 +160,56 @@ Import(ids, id, local)
 	int imp_kind;
 #define FROM_MODULE	0
 #define FROM_ENCLOSING	1
-	struct def *lookfor();
+	struct def *lookfor(), *GetDefinitionModule();
 
-	if (local) {
-		kind = D_IMPORT;
-		scope = enclosing(currscope)->sc_scope;
-		if (!id) imp_kind = FROM_ENCLOSING;
-		else {
-			imp_kind = FROM_MODULE;
-			df = lookfor(id, enclosing(currscope), 1);
-			if (df->df_kind != D_MODULE) {
-				/* enter all "ids" with type D_ERROR */
-				kind = D_ERROR;
-				if (df->df_kind != D_ERROR) {
+	kind = D_IMPORT;
+	scope = enclosing(CurrentScope)->sc_scope;
+	if (!id) imp_kind = FROM_ENCLOSING;
+	else {
+		imp_kind = FROM_MODULE;
+		if (local) df = lookfor(id, enclosing(CurrentScope), 1);
+		else df = GetDefinitionModule(id);
+		if (df->df_kind != D_MODULE) {
+			/* enter all "ids" with type D_ERROR */
+			kind = D_ERROR;
+			if (df->df_kind != D_ERROR) {
 error("identifier \"%s\" does not represent a module", id->id_text);
-				}
 			}
-			else	scope = df->mod_scope;
 		}
-		while (ids) {
-			if (imp_kind == FROM_MODULE) {
-				if (!(df = lookup(ids->id_ptr, scope))) {
+		else	scope = df->mod_scope;
+	}
+	while (ids) {
+		if (imp_kind == FROM_MODULE) {
+			if (!(df = lookup(ids->id_ptr, scope))) {
 error("identifier \"%s\" not declared in qualifying module",
 ids->id_ptr->id_text);
-					df = ill_df;
-				}
-				else 
-				if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
+				df = ill_df;
+			}
+			else 
+			if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
 error("identifier \"%s\" not exported from qualifying module",
 ids->id_ptr->id_text);
-				}
 			}
-			else {
-				df = lookfor(ids->id_ptr, enclosing(currscope), 0);
-				if (df->df_kind == D_ERROR) {
+		}
+		else {
+			if (local) {
+				df = lookfor(ids->id_ptr,
+					     enclosing(CurrentScope), 0);
+			} else df = GetDefinitionModule(ids->id_ptr);
+			if (df->df_kind == D_ERROR) {
 error("identifier \"%s\" not visible in enclosing scope",
 ids->id_ptr->id_text);
-				}
 			}
-			define(ids->id_ptr, CurrentScope, kind)->imp_def = df;
-			if (df->df_kind == D_TYPE &&
-			    df->df_type->tp_fund == ENUMERATION) {
-				/* Also import all enumeration literals */
-				exprt_literals(df->df_type->enm_enums, currscope);
-			}
-			ids = ids->next;
 		}
-		return;
+		define(ids->id_ptr, CurrentScope, kind)->imp_def = df;
+		if (df->df_kind == D_TYPE &&
+		    df->df_type->tp_fund == ENUMERATION) {
+			/* Also import all enumeration literals */
+			exprt_literals(df->df_type->enm_enums,
+					CurrentScope);
+		}
+		ids = ids->next;
 	}
-	/* ???? */
 }
 
 exprt_literals(df, toscope)
@@ -223,7 +220,7 @@ exprt_literals(df, toscope)
 		as an import from the scope "toscope".
 	*/
 	while (df) {
-		define(df->df_idf, toscope->sc_scope, D_IMPORT)->imp_def = df;
+		define(df->df_idf, toscope, D_IMPORT)->imp_def = df;
 		df = df->enm_next;
 	}
 }
