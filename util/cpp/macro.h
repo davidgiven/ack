@@ -45,7 +45,7 @@ struct mlist {
 	struct mlist *next;
 	struct macro *m_mac;
 	char *m_repl;
-	char m_unstack;
+	int m_level;
 };
 
 /* allocation definitions of struct mlist */

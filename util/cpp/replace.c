@@ -20,6 +20,7 @@
 
 char *strcpy(), *strcat();
 char *long2str();
+extern int InputLevel;
 
 PRIVATE struct mlist *ReplList;	/* list of currently active macros */
 
@@ -81,6 +82,8 @@ replace(idef)
 			else
 				reptext = "0";
 			InsertText(reptext, 1);
+			InputLevel++;
+			repl->m_level = InputLevel;
 
 			repl->next = ReplList;
 			ReplList = repl;
@@ -103,6 +106,8 @@ replace(idef)
 		repl->m_repl = reptext;
 	}
 	InsertText(reptext, size);
+	InputLevel++;
+	repl->m_level = InputLevel;
 	repl->next = ReplList;
 	ReplList = repl;
 	return 1;
@@ -190,35 +195,28 @@ macro2buffer(idef, actpars, siztext)
 EXPORT
 DoUnstack()
 {
-	register struct mlist *p = ReplList;
-
-	while (p->m_unstack) p = p->next;
-	p->m_unstack = 1;
-	Unstacked++;
+	Unstacked = 1;
 }
 
 EXPORT
 EnableMacros()
 {
 	register struct mlist *p = ReplList, *prev = 0;
-	int cnt = 0;
 
 	assert(Unstacked > 0);
 	while (p) {
 		struct mlist *nxt = p->next;
 
-		if (p->m_unstack) {
+		if (p->m_level > InputLevel) {
 			p->m_mac->mc_flag &= ~NOREPLACE;
 			if (p->m_mac->mc_count) p->m_mac->mc_count--;
 			if (p->m_repl) free(p->m_repl);
 			if (! prev) ReplList = nxt;
 			else prev->next = nxt;
 			free_mlist(p);
-			cnt++;
 		}
 		else prev = p;
 		p = nxt;
 	}
-	assert(cnt == Unstacked);
 	Unstacked = 0;
 }

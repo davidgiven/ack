@@ -37,10 +37,12 @@ getwdir(fn)
 
 int	NoUnstack;
 int	Unstacked;
+int	InputLevel;
 
 AtEoIT()
 {
 	if (NoUnstack) warning("unexpected EOF");
+	InputLevel--;
 	DoUnstack();
 	return 0;
 }

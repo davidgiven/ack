@@ -38,6 +38,8 @@ getwdir(fn)
 	}
 	return "";
 }
+
+int	InputLevel;
 #endif NOPP
 
 int	NoUnstack;
@@ -47,6 +49,7 @@ AtEoIT()
 #ifndef NOPP
 	/* if (NoUnstack) lexwarning("unexpected EOF"); ??? */
 	DoUnstack();
+	InputLevel--;
 #endif NOPP
 	return 0;
 }
