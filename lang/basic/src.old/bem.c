@@ -39,7 +39,10 @@ char **argv;
 	/* compile source programs */
 	compileprogram(program);
 	linewarnings();
-	if( errorcnt) exit(-1);
+	if( errorcnt) {
+		unlink(tmpfname);
+		exit(-1);
+	}
 	/* process em object files */
 	simpleprogram();
 }
