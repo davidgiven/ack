@@ -61,13 +61,15 @@ cvt(value, ndigit, decpt, sign, ecvtflag)
 		pb = buf;
 		while (pe > buf1) *pb++ = *--pe;
 	}
-	else if (value > 0) {
-		fractpart = value;
-		while ((value = value*10) < 1) {
-			fractpart = value;
-			pointpos--;
-		}
+	else {
 		pb = &buf[0];
+		if (value > 0) {
+			fractpart = value;
+			while ((value = value*10) < 1) {
+				fractpart = value;
+				pointpos--;
+			}
+		}
 	}
 	pe = &buf[ndigit];
 	if (! ecvtflag) {
