@@ -3,13 +3,13 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*
-	chtabgen - character table generator 
+	chtabgen - character table generator
 
 	Author: Erik Baalbergen (..tjalk!erikb)
 	Many mods by Ceriel Jacobs
 */
 
-#include <stdio.h> 
+#include <stdio.h>
 
 #ifndef NORCSID
 static char *RcsId = "$Id$";
