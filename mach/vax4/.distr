@@ -3,6 +3,7 @@ as
 cg
 libbc
 libcc
+libcc.ansi
 libem
 libpc
 liboc
