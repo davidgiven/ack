@@ -195,9 +195,7 @@ and rm:rw:cc, regorconst:ro.
 and anyreg:rw:cc, rmorconst:ro.
 cbw kills ah cost(1,2).
 cmp rm:ro, regorconst:ro kills :cc.
-cmp regorconst:ro, rm:ro kills :cc.
 cmp anyreg:ro, rmorconst:ro kills :cc.
-cmp rmorconst:ro, anyreg:ro kills :cc.
 cmpb rm1:rw, const:ro kills :cc.
 cwd kills dx cost(1,5).
 dec rm:rw:cc cost(1,2).
@@ -1089,7 +1087,9 @@ with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
 with REG
   gen inc %1		yields %1
-with ADDREG		yields {Xreg_off, %1, $1}
+with ADDREG
+  gen killreg %1
+			yields {Xreg_off, %1, $1}
 with exact RADDREG	yields {Rreg_off, %1, $1}
 
 pat adp $1==0-1
@@ -1100,7 +1100,9 @@ with exact ADDR_LOCAL   yields {ADDR_LOCAL,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
 with REG
   gen dec %1		yields %1
-with ADDREG		yields {Xreg_off, %1, $1}
+with ADDREG
+  gen killreg %1
+			yields {Xreg_off, %1, $1}
 with exact RADDREG	yields {Rreg_off, %1, $1}
 
 pat adp
@@ -1109,7 +1111,9 @@ with exact Rreg_off	yields {Rreg_off,%1.reg,%1.off+$1}
 with exact ADDR_EXTERN	yields {ADDR_EXTERN,%1.off+$1}
 with exact ADDR_LOCAL	yields {ADDR_LOCAL,%1.ind+$1}
 with exact Rbpreg_off	yields {Rbpreg_off,%1.reg,%1.ind+$1}
-with ADDREG		yields {Xreg_off,%1,$1}
+with ADDREG
+  gen killreg %1
+			yields {Xreg_off,%1,$1}
 with exact RADDREG	yields {Rreg_off, %1, $1}
 with REG
   gen add %1,{ANYCON,$1}	yields %1
@@ -1325,7 +1329,7 @@ pat lol ngi stl $1==$3 && $2==2
 kills indexed, locals %ind>=$1 && %ind<$1+2
 gen neg {LOCAL, $1, 2}
 
-pat ldl ngi stl $1==$3 && $2==4
+pat ldl ngi sdl $1==$3 && $2==4
 kills indexed, locals %ind>=$1 && %ind<$1+4
 gen neg {LOCAL, $1, 2}
     neg {LOCAL, $1+2, 2}
@@ -1492,6 +1496,10 @@ uses ADDREG={LOCAL, $1, 2}
 gen not {ind_reg2, %a}
     killreg %a
 
+pat lol lof inc lol stf $1==$4 && $2==$5 
+	leaving lol $1 lof $2 adp 1 lol $4 stf $5
+pat lol lof dec lol stf $1==$4 && $2==$5 
+	leaving lol $1 lof $2 adp (0-1) lol $4 stf $5
 #ifdef REGVARS
 pat lol lof adi lol stf $1==$4 && $2==$5 && $3==2 && inreg($1)==reg_any
 with regorconst
@@ -1519,7 +1527,7 @@ gen neg {ind_regoff2, %a, $2}
     killreg %a
 
 pat lol lof ads lol stf $1==$4 && $2==$5 && $3==2
-			leaving lol $1 lof $2 ads $3 lol $4 stf $5
+			leaving lol $1 lof $2 adi $3 lol $4 stf $5
 
 #ifdef REGVARS
 pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1 && inreg($1)==reg_any
@@ -2136,9 +2144,9 @@ with EXACT register rmorconst
       2:			yields %a
 with rmorconst register
   uses REG={ANYCON,0}
-  gen cmp %1,%2
+  gen cmp %2,%1
       je {label,2f}
-      jl {label,1f}
+      jg {label,1f}
       inc %a
       jmp {label,2f}
       1:
@@ -2199,9 +2207,9 @@ uses REG = {ANYCON,0}
       2:                            yields %a
 with rmorconst register
 uses REG = {ANYCON,0}
-  gen cmp %1,%2
+  gen cmp %2,%1
       je  {label,2f}
-      jb  {label,1f}
+      ja  {label,1f}
       inc %a
       jmp {label,2f}
       1: dec %a
