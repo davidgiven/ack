@@ -105,10 +105,11 @@ temporarily in 16-bit operand mode.
 Prefixes only affect the next instruction.
 .IP ""
 There are also the .use32 and .use16 assembler directives, which do not
-generate code, but change the default for operand and address sizes.
+generate code, but change the assemblers default for operand and address sizes.
 Obviously, .use16 gives 16-bit modes, .use32 gives 32-bit modes.
 This is useful for assembling real mode 80386 code, or pure 16-bit
 modules (that do not have the D-bit set in the segment descriptor).
+These assembler directives stay in effect until there is another one.
 .SH "SEE ALSO"
 uni_ass(6),
 ack(1),
