@@ -33,6 +33,7 @@ main() {
 	addr_lb() ;
 	compl_ind() ;
 	printf("END\n") ;
+	return 0;
 }
 
 cmp_rev() {
