@@ -58,7 +58,7 @@ ceg/as_lib.a:
 	cd ceg; cp $(ASMAIN)/* . ; touch dummy ; $(CC) -c $(IFILES) *.c; $(AR) r as_lib.a *.o ; cd ..
 	-sh -c 'ranlib ceg/as_lib.a'
 
-ceg/ceg : ceg/assemble.o ceg/as_instr.o ceg/eval_as.o # $(Em)/em_parser
+ceg/ceg : ceg/as_lib.a ceg/assemble.o ceg/as_instr.o ceg/eval_as.o
 	cd ceg ; $(CC) -o ceg $(Em)/*.o assemble.o as_instr.o eval_as.o as_lib.a $(CEG_LIBS) $(LEXLIB) ; cd ..
 
 ceg/assemble.o : as.h ceg/assemble.c ceg/dummy
