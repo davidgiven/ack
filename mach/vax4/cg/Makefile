@@ -56,15 +56,17 @@ var.o: $(CDIR)/var.c
 	cc -c $(CFLAGS) $(CDIR)/var.c
 
 install: all
-	../install cg
+	../../install cg
 
 cmp:	 all
-	-../compare cg
+	-../../compare cg
 
 
 tables.c: table
-	../../../lib/cpp -P table | ../../../lib/cgg -htables.H > debug.out
-	-cmp -s tables.h tables.H || mv tables.H tables.h
+	-mv tables.h tables.h.save
+	/lib/cpp -P table | ../../../lib/cgg > debug.out
+	-if cmp -s tables.h.save tables.h; then mv tables.h.save tables.h; else exit 0; fi
+	-if cmp -s /dev/null tables.h; then mv tables.h.save tables.h; else exit 0; fi
 
 lint: $(CFILES)
 	lint $(LINTOPTS) $(PREFLAGS) $(CFILES)
