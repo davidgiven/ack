@@ -1,6 +1,6 @@
 #include "string.h"
 
-/* $Header $ */
+/* $Header$ */
 
 String *_chr(i)
 int i;

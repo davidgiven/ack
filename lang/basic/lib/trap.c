@@ -1,7 +1,7 @@
 #include <signal.h>
 #include <setjmp.h>
 
-/* $Header $ */
+/* $Header$ */
 
 /* Trap handling */
 int	_trpline;	/* BASIC return label */

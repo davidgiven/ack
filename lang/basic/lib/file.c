@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "io.h"
 
-/* $Header $ */
+/* $Header$ */
 
 Filedesc	_fdtable[16];
 /* BASIC file descriptor table */

@@ -1,6 +1,6 @@
 #include "string.h"
 
-/* $Header $ */
+/* $Header$ */
 
 String *_mki(i)
 int i;

@@ -1,6 +1,6 @@
 #include "string.h"
 
-/* $Header $ */
+/* $Header$ */
 
 int _asc(str)
 String *str;

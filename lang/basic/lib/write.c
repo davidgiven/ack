@@ -1,7 +1,7 @@
 #include "string.h"
 #include "io.h"
 
-/* $Header $ */
+/* $Header$ */
 
 /* assume that the channel has been set */
 

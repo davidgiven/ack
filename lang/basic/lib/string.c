@@ -1,6 +1,6 @@
 #include "string.h"
 
-/* $Header $ */
+/* $Header$ */
 
 #define ok(X)	if( X ==0) return;
 #define okr(X)	if( X ==0) return(0);

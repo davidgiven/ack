@@ -1,4 +1,4 @@
-/* $Header $ */
+/* $Header$ */
 
 /* error takes an error value in the range of 0-255 */
 /* and generates a trap */

@@ -1,6 +1,6 @@
 #include "string.h"
 
-/* $Header $ */
+/* $Header$ */
 
 _intswap(i1,i2)
 int *i1,*i2;

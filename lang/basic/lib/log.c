@@ -15,7 +15,7 @@
  *
  */
 
-/* $Header $ */
+/* $Header$ */
 
 /* Author: J.W. Stevenson */
 

@@ -1,4 +1,4 @@
-/* $Header $ */
+/* $Header$ */
 
 long _abl(i) long i;
 {

@@ -1,4 +1,4 @@
-/* $Header $ */
+/* $Header$ */
 
 _sgn(v)
 double v;

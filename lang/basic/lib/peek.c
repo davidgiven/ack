@@ -1,4 +1,4 @@
-/* $Header $ */
+/* $Header$ */
 
 int peek(addr)
 int addr;

@@ -1,4 +1,4 @@
-/* $Header $ */
+/* $Header$ */
 
 /*
 	computes a^b.

@@ -1,7 +1,7 @@
 #include "string.h"
 #include "io.h"
 
-/* $Header $ */
+/* $Header$ */
 
 /* Here all routine to generate terminal oriented output is located */
 

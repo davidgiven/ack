@@ -2,7 +2,7 @@
 #include "io.h"
 #include <ctype.h>
 
-/* $Header $ */
+/* $Header$ */
 
 _readln()
 {
