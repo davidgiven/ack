@@ -20,6 +20,15 @@ num_p numhash[NNUMHASH];
 
 
 
+#define newsym()	(sym_p) newstruct(sym)
+#define newprc()	(prc_p) newstruct(prc)
+#define newnum()	(num_p) newstruct(num)
+
+#define oldsym(x)	oldstruct(sym,x)
+#define oldprc(x)	oldstruct(prc,x)
+#define oldnum(x)	oldstruct(num,x)
+
+
 /* instr_lab */
 
 
