@@ -36,17 +36,13 @@ operation
 	;
 
 OP1_O
-	:	OP1_b		{ opnd[0].size = 1; $$ = $1; }
-	|	OP1_w		{ opnd[0].size = 2; $$ = $1; }
-	|	OP1_l		{ opnd[0].size = 4; $$ = $1; }
+	:	OP1_X		{ opnd[0].size = $1>>16; $$ = $1 & 0xffff; }
 	|	OP1_A		{ opnd[0].size = -2; $$ = $1; }
 	|	OP1_u		{ opnd[0].size = 0; $$ = $1; }
 	;
 
 OP1_B
-	:	OP1_Bb		{ opnd[0].size = 1; $$ = $1; }
-	|	OP1_Bw		{ opnd[0].size = 2; $$ = $1; }
-	|	OP1_Bl		{ opnd[0].size = 4; $$ = $1; }
+	:	OP1_BX		{ opnd[0].size = $1>>16; $$ = $1 & 0xffff; }
 	;
 
 OP2_O_O
@@ -217,14 +213,10 @@ OP6_O_O_O_O_O_O
 	;
 
 CASE_O_O_O
-	:	CASE_b_b_b	{ opnd[0].size = 1; opnd[1].size = 1;
-				  opnd[2].size = 1; $$ = $1;
-				}
-	|	CASE_w_w_w	{ opnd[0].size = 2; opnd[1].size = 2;
-				  opnd[2].size = 2; $$ = $1;
-				}
-	|	CASE_l_l_l	{ opnd[0].size = 4; opnd[1].size = 4;
-				  opnd[2].size = 4; $$ = $1;
+	:	CASE_X_X_X	{ opnd[0].size = ($1>>16);
+				  opnd[1].size = ($1>>16);
+				  opnd[2].size = ($1>>16);
+				  $$ = $1 & 0xffff;
 				}
 	;
 

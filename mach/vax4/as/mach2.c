@@ -24,13 +24,18 @@
 	Bx -	branch, size of offset determined by instruction
 	Be -	extended conditional branch; the instruction may be replaced
 		by a reverse-conditional branch over a branch or jump
+   To reduce the number of terminals, some instructions that have operands of
+   equal size are coded with an X instead of b, w, or l; these instructions
+   have the size in the high order word of the valu field. This is needed
+   because some yacc versions do not accept grammars with more than 127
+   terminal symbols.
 */
 
 %token <y_word> REG
-%token <y_word>	CASE_b_b_b, CASE_l_l_l, CASE_w_w_w
+%token <y_word>	CASE_X_X_X
 %token <y_word> OP0
-%token <y_word>	OP1_A, OP1_Bb, OP1_Bl, OP1_Bw, OP1_Bx, OP1_b, OP1_l, OP1_u,
-		OP1_w, OP1_Be
+%token <y_word>	OP1_A, OP1_Bx, OP1_u, OP1_Be
+%token <y_word>	OP1_BX, OP1_X
 %token <y_word>	OP2_A_A, OP2_A_l, OP2_b_b, OP2_b_l, OP2_b_u, OP2_b_w, OP2_l_A,
 		OP2_l_Bb, OP2_l_b, OP2_l_l, OP2_l_u, OP2_l_w, OP2_u_b, OP2_u_l,
 		OP2_u_u, OP2_u_w, OP2_w_b, OP2_w_l, OP2_w_u, OP2_w_w, OP2_l_Be

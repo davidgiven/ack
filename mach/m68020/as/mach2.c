@@ -11,7 +11,6 @@
 %token <y_word> DREG
 %token <y_word> AREG
 %token <y_word> PC
-%token <y_word> ZPC
 %token <y_word> CREG
 %token <y_word> SPEC
 %token <y_word> ABCD
@@ -39,17 +38,15 @@
 %token <y_word> DIVL
 %token <y_word> CMP
 %token <y_word> MOVE
-%token <y_word> MOVEP
 %token <y_word> MOVEM
 %token <y_word> MOVEC
-%token <y_word> MOVES
+%token <y_word> MOVESP
 %token <y_word> SWAP
 %token <y_word> LINK
 %token <y_word> UNLK
 %token <y_word> TRAP
-%token <y_word> STOP
 %token <y_word> EXG
-%token <y_word> RTD
+%token <y_word> OP_IMM
 %token <y_word> BKPT
 %token <y_word> CALLM
 %token <y_word> CAS
@@ -58,8 +55,7 @@
 %token <y_word> CPBCC
 %token <y_word> CPDBCC
 %token <y_word> CPGEN
-%token <y_word> CPRESTORE
-%token <y_word> CPSAVE
+%token <y_word> CPSAVREST
 %token <y_word> CPSCC
 %token <y_word> CPTRAPCC
 %token <y_word> FPCR

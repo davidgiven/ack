@@ -6,6 +6,10 @@
 /*
  *  Motorola 68020 syntax rules
  */
+/* Please do not add more terminal symbols. As it is, 127 terminal symbols
+   are used, and this is the limit for some "yacc" implementations,
+   notably the Ultrix one.
+*/
 
 operation
 	:		{	instrp = instr;
@@ -123,14 +127,15 @@ instruction
 			}
 	|	MOVE sizenon ea_ea
 			{	move($2);}
-	|	MOVEP sizedef ea_ea
-			{	movep($2);}
 	|	MOVEM sizedef regs ',' notimmreg
 			{	movem(0, $2, $3);}
 	|	MOVEM sizedef notimmreg ',' regs
 			{	movem(1, $2, $5);}
-	| 	MOVES sizedef ea_ea
-			{	if (mrg_1 <= 017) {
+	| 	MOVESP sizedef ea_ea
+			{	if ($1 == 0) {
+					/* movep */
+					movep($2);
+				} else if (mrg_1 <= 017) {
 					T_EMIT2(007000 | $2 | mrg_2,0,0,0);
 					T_EMIT2(mrg_1 << 12 | 04000,0,0,0);
 					ea_2($2,ALT|MEM);
@@ -165,8 +170,8 @@ instruction
 			}
 	|	SWAP DREG
 			{	T_EMIT2(044100 | $2,0,0,0);}
-	|	STOP imm
-			{	T_EMIT2(047162, 0, 0, 0);
+	|	OP_IMM imm
+			{	T_EMIT2($1, 0, 0, 0);
 				ea_2(SIZE_W, 0);
 			}
 	|	LINK sizenon AREG ',' imm
@@ -176,10 +181,6 @@ instruction
 	|	TRAP '#' absexp
 			{	fit(fit4($3));
 				T_EMIT2(047100|low4($3),0,0,0);
-			}
-	|	RTD imm
-			{	T_EMIT2(047164,0,0,0);
-				ea_2(SIZE_W, 0);
 			}
 	|	BKPT '#' absexp
 			{	fit(($3 & ~07) == 0);
@@ -335,9 +336,9 @@ areg_index
 			}
 	;
 areg	:	AREG
-	|	PC	{	mrg_2 |= PC_MODE;}
-	|	ZPC	{	mrg_2 |= PC_MODE;
-				ffew_2 |= 0200; /* base-reg suppressed */
+	|	PC	{	mrg_2 |= PC_MODE;
+				ffew_2 |= $1; /* base-reg suppressed for zpc */
+				$$ = 0;
 			}
 	;
 index	:	reg sizedef scale
@@ -633,13 +634,13 @@ mm_op1	:   /* Coprocessor instructions; syntax may be changed (please).
 				 * NO EFFECTIVE ADDRESS IS CALCULATED (SYNTAX ?)
 				 */
 			}
-	|	CPRESTORE ea
+	|	CPSAVREST ea
 			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
-				ea_2(SIZE_W, (mrg_2 & 070)==030 ? 0 : CTR);
-			}
-	|	CPSAVE ea
-			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
-				ea_2(SIZE_W,(mrg_2 & 070)==020 ? 0 : CTR|ALT);
+				if ($1 & 0100) {
+					/* restore */
+					ea_2(SIZE_W, (mrg_2 & 070)==030 ? 0 : CTR);
+				}
+				else ea_2(SIZE_W,(mrg_2 & 070)==020 ? 0 : CTR|ALT);
 			}
 	|	CPSCC cp_cond ea
 			{	T_EMIT2($1 | co_id | mrg_2,0,0,0);
@@ -657,7 +658,7 @@ mm_op1	:   /* Coprocessor instructions; syntax may be changed (please).
 				T_EMIT2($2,0,0,0);
 			}
 	;
-cp_cond	:	'.' absexp
+cp_cond	:	DOT absexp
 			{	fit(fit6($2));
 				$$ = low6($2);
 			}

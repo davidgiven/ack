@@ -14,6 +14,8 @@
 
 #undef valu_t
 #define valu_t long
+#undef word_t
+#define word_t long
 #undef addr_t
 #define addr_t long
 

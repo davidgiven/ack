@@ -31,7 +31,7 @@
 0,	AREG,		07,		"sp",
 
 0,	PC,		0,		"pc",
-0,	ZPC,		0,		"zpc",
+0,	PC,		0200,		"zpc",
 
 0,	CREG,		04001,		"vbr",
 0,	CREG,		0,		"sfc",
@@ -190,9 +190,9 @@
 0,	CMP,		0,		"cmp",
 
 0,	MOVE,		0,		"move",
-0,	MOVEP,		0,		"movep",
+0,	MOVESP,		0,		"movep",
 0,	MOVEM,		0,		"movem",
-0,	MOVES,		0,		"moves",
+0,	MOVESP,		1,		"moves",
 0,	MOVEC,		0,		"movec",
 
 0,	SWAP,		0,		"swap",
@@ -203,7 +203,7 @@
 
 0,	TRAP,		0,		"trap",
 
-0,	STOP,		0,		"stop",
+0,	OP_IMM,		047162,		"stop",
 
 0,	CHK,		0,		"chk",
 
@@ -213,7 +213,7 @@
 
 0,	LEA,		0,		"lea",
 
-0,	RTD,		0,		"rtd",
+0,	OP_IMM,		047164,		"rtd",
 
 0,	BKPT,		0,		"bkpt",
 
@@ -238,8 +238,8 @@
 0,	CPTRAPCC,	0170170,	".trap",
 0,	CPBCC,		0170200,	".br", /* 'r' to distinguish from SIZE_B
 					        */
-0,	CPSAVE,		0170400,	".save",
-0,	CPRESTORE,	0170500,	".restore",
+0,	CPSAVREST,	0170400,	".save",
+0,	CPSAVREST,	0170500,	".restore",
 
 /* floating point coprocessor ... */
 
