@@ -822,8 +822,8 @@ DbRead(f)
 			CurrentScope->sc_start = n->on_valu;
 			/* fall through */
 		case N_SOL:
-			if (! line_file) line_file = n;
-			else line_file->on_mptr = n->on_mptr;
+			if (line_file) n->on_valu = line_file->on_valu;
+			line_file = n;
 			break;
 		case N_MAIN:
 			if (! FileScope) fatal("No file scope");

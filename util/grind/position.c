@@ -14,27 +14,7 @@
 
 extern FILE	*db_out;
 
-static p_file	mapping;
-static int	nfiles = 0;
-
-/* static p_file get_map_from_addr(t_addr t);
-   Returns the file entry that contains the code at the address 't',
-   or 0 if there is no information available, or 't' represents an address
-   below the start address of the first file.
-*/
-static p_file
-get_map_from_addr(t)
-  t_addr t;
-{
-  register p_file p = mapping, oldp = 0;
-
-  /* linear search is probably acceptable here */
-  while (p && p->f_start->on_valu <= t) {
-	oldp = p;
-	p = p->f_nextmap;
-  }
-  return oldp ? oldp : p->f_start->on_valu <= t ? p : 0;
-}
+static struct outname *f_start, *f_end;
 
 /* extern p_position get_position_from_addr(t_addr t);
    Returns a pointer to a structure containing the source position of the code
@@ -44,25 +24,27 @@ p_position
 get_position_from_addr(t)
   t_addr t;
 {
-  register p_file map = get_map_from_addr(t);
   static t_position retval;
-  register int i,j,m;
+  register struct outname *p;
+  register int i,j;
 
-  if (! map) return 0;
+  if (! f_start) return 0;
   i = 0;
-  j = map->f_end - map->f_start;
+  j = f_end - f_start;
   do {
-	m = ((i + j) >> 1) + ((i + j) & 1);
-	while ((map->f_start[m].on_type >> 8) != N_SLINE) m++;
-	assert(m <= j);
-	if (map->f_start[m].on_valu > t) {
-		j = m - 1;
-		while (j > i && (map->f_start[j].on_type >> 8) != N_SLINE) j--;
+	p = &f_start[((i + j) >> 1) + ((i + j) & 1)];
+	while ((p->on_type >> 8) != N_SLINE) p++;
+	if (p->on_valu > t) {
+		p--;
+		while (p > &f_start[i] && (p->on_type >> 8) != N_SLINE) p--;
+		j = p-f_start;
 	}
-	else	i = m;
+	else	i = p-f_start;
   } while (i < j);
-  retval.filename = map->f_sym->sy_idf->id_text;
-  retval.lineno = map->f_start[j].on_desc;
+  retval.lineno = f_start[j].on_desc;
+  p = &f_start[j-1];
+  while ((i = p->on_type >> 8) != N_SOL && i != N_SO) p--;
+  retval.filename = p->on_mptr;
   return &retval;
 }
 
@@ -109,7 +91,6 @@ add_position_addr(filename, n)
   if (filename != lastfile) {	/* new file ... */
 	register p_symbol sym;
 
-	nfiles++;
 	lastfile = filename;
 	if (! filename) {	/* last call */
 		return;
@@ -121,14 +102,12 @@ add_position_addr(filename, n)
 		map = sym->sy_file;
 		map->f_scope = FileScope;
 	}
-	if (! mapping) mapping = map;
-	else lastmap->f_nextmap = map;
 	lastmap = map;
-	map->f_start = n;
+	if (! f_start) f_start = n;
   }
   else map = lastmap;
   if (map) {
-  	map->f_end = n;
+  	f_end = n;
   	setnext_outname(n, map->f_line_addr[HASH(n->on_desc)]);
   	map->f_line_addr[HASH(n->on_desc)] = n;
   }

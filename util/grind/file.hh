@@ -23,8 +23,6 @@ typedef struct file {
 	} f_x;
 #define f_linepos	f_x.ff_linepos
 #define f_next		f_x.ff_next
-	struct outname	*f_start;
-	struct outname	*f_end;
 	struct outname	*f_line_addr[HSIZ];
 					/* hash table, mapping line numbers to
 					   outname structures. Collisions are
@@ -32,8 +30,6 @@ typedef struct file {
 					*/
 #define next_outname(n)		((struct outname *) ((n)->on_mptr))
 #define setnext_outname(n,m)	((n)->on_mptr = (char *) (m))
-
-	struct file	*f_nextmap;	/* next file in mapping */
 } t_file, *p_file;
 
 /* ALLOCDEF "file" 10 */
