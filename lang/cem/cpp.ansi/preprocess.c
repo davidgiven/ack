@@ -134,7 +134,7 @@ preprocess(fn)
 			if (! options['P']) {				\
 				register char *p = Xbuf;		\
 									\
-				sprint(p, "%s %d \"%s\"\n",		\
+				sprint(p, "\n%s %d \"%s\"\n",		\
 					LINE_PREFIX,			\
 					LineNumber,			\
 					FileName);			\
