@@ -16,4 +16,4 @@
 #define ps_sym	(sp_lpseu+1)
 #define ps_last	ps_sym
 
-#define BMASK	0377
+#define BMASK	255	/* 0377 is unsigned, which may cause problems */
