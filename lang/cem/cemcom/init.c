@@ -81,8 +81,6 @@ init_pp()
 			containing a number of identifiers to be
 			predefined at the host machine (for example
 			-DPREDEFINE="vax,unix,pmds").
-			Note that PREDEF causes the identifier not
-			to be substituted.
 		*/
 		register char *s = PREDEFINE;
 		register char *id;
@@ -96,7 +94,7 @@ init_pp()
 				while (in_idf(*s++));
 				c = *--s;
 				*s = '\0';
-				macro_def(str2idf(id), "", -1, 0, PREDEF);
+				macro_def(str2idf(id), "1", -1, 1, PREDEF);
 				*s = c;
 			}
 			else

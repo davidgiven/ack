@@ -43,29 +43,22 @@ replace(idef)
 	if (idef->id_macro->mc_nps != -1) {	/* with parameter list	*/
 		LoadChar(c);
 		c = skipspaces(c);
-
 		if (c != '(') {		/* no replacement if no ()	*/
 			lexerror("(warning) macro %s needs arguments",
 				idef->id_text);
 			PushBack();
 			return 0;
 		}
-
 		actpars = getactuals(idef);	/* get act.param. list	*/
 	}
-
-	if (flags & PREDEF) {	/* don't replace this one...	*/
-		return 0;
-	}
-
-	if (flags & FUNC) {	/* this macro leads to special action	*/
+	if ((flags & PREDEF) && (UnknownIdIsZero == 0))
+		/* don't replace this one...	*/
+			return 0;
+	if (flags & FUNC)	/* this macro leads to special action	*/
 		macro_func(idef);
-	}
-
 	/* create and input buffer	*/
 	reptext = macro2buffer(idef, actpars, &size);
 	InsertText(reptext, size);
-
 	return 1;
 }
 
@@ -82,7 +75,6 @@ macro_func(idef)
 
 	/* This switch is very blunt...	*/
 	switch (idef->id_text[2]) {
-
 	case 'F' :			/* __FILE__	*/
 		FilNamBuf[0] = '"';
 		strcpy(&FilNamBuf[1], FileName);
@@ -90,15 +82,12 @@ macro_func(idef)
 		idef->id_macro->mc_text = FilNamBuf;
 		idef->id_macro->mc_length = strlen(FilNamBuf);
 		break;
-
 	case 'L' :			/* __LINE__	*/
 		idef->id_macro->mc_text = long2str((long)LineNumber, 10);
 		idef->id_macro->mc_length = 1;
 		break;
-
 	default :
-		crash("(macro_func) illegal macro %s\n", idef->id_text);
-
+		crash("(macro_func)");
 	}
 }
 
@@ -115,7 +104,6 @@ macro2buffer(idef, actpars, siztext)
 		parameter list actpars.  A pointer to the beginning of the
 		constructed text is returned, while *siztext is filled
 		with its length.
-
 		If there are no parameters, this function behaves
 		the same as strcpy().
 	*/
@@ -125,35 +113,28 @@ macro2buffer(idef, actpars, siztext)
 	register char *ptr = idef->id_macro->mc_text;
 
 	text[pos++] = '\0';			/* allow pushback	*/
-
 	while (*ptr) {
 		if (*ptr & FORMALP) {	/* non-asc formal param. mark	*/
 			register int n = *ptr++ & 0177;
 			register char *p;
 
 			ASSERT(n != 0);
-
 			/*	copy the text of the actual parameter
 				into the replacement text
 			*/
 			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
-
-				if (pos == size) {
+				if (pos == size)
 					text = Srealloc(text,
 							size += RSTRSIZE);
-				}
 			}
 		}
 		else {
 			text[pos++] = *ptr++;
-
-			if (pos == size) {
+			if (pos == size)
 				text = Srealloc(text, size += RSTRSIZE);
-			}
 		}
 	}
-
 	text[pos] = '\0';
 	*siztext = pos;
 	return text;

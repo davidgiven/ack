@@ -274,15 +274,9 @@ go_on:	/* rescan, the following character has been read	*/
 		*tg++ = '\0';	/* mark the end of the identifier	*/
 		idef = ptok->tk_idf = idf_hashed(buf, tg - buf, hash);
 #ifndef NOPP
-		if (idef->id_macro && ReplaceMacros) {
+		if (idef->id_macro && ReplaceMacros && replace(idef))
 			/* macro replacement should be performed	*/
-			if (replace(idef))
-				goto again;
-			/*	arrived here: something went wrong in
-				replace, don't substitute in this case
-			*/
-		}
-		else
+			goto again;
 		if (UnknownIdIsZero) {
 			ptok->tk_ival = (arith)0;
 			ptok->tk_fund = INT;
