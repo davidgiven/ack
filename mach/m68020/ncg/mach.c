@@ -232,7 +232,29 @@ i_regsave()
 	regnr = 0;
 }
 
-save()
+full nlocals;
+
+regreturn()
+{
+	register struct regsav_t *p;
+
+	if (regnr > MOVEM_LIMIT)  {
+		fputs("movem.l (sp)+,", codefile);
+		for (p = regsav; ;) {
+			fputs(p->rs_reg, codefile);
+			if (++p == &regsav[regnr]) break;
+			putc('/',codefile);
+		}
+		putc('\n',codefile);
+	} else {
+		for (p = &regsav[regnr-1]; p >= regsav; p--) {
+			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
+		}
+	}
+	fputs("unlk a6\nrts\n", codefile);
+}
+
+f_regsave()
 {
 	register struct regsav_t *p;
 
@@ -264,32 +286,6 @@ save()
 	}
 }
 
-restr()
-{
-	register struct regsav_t *p;
-
-	if (regnr > MOVEM_LIMIT)  {
-		fputs("movem.l (sp)+,", codefile);
-		for (p = regsav; ;) {
-			fputs(p->rs_reg, codefile);
-			if (++p == &regsav[regnr]) break;
-			putc('/',codefile);
-		}
-		putc('\n',codefile);
-	} else {
-		for (p = &regsav[regnr-1]; p >= regsav; p--) {
-			fprintf(codefile,"move.l (sp)+,%s\n",p->rs_reg);
-		}
-	}
-	fputs("unlk a6\nrts\n", codefile);
-}
-
-
-f_regsave()
-{
-	save();
-}
-
 regsave(s,off,size)
 	char *s;
 	long off;
@@ -301,18 +297,13 @@ regsave(s,off,size)
 	fprintf(codefile, "!Local %ld into %s\n",off,s);
 }
 
-regreturn()
-{
-	restr();
-}
+prolog(n) full n; {
 
-
-prolog(nlocals) full nlocals; {
-
+	nlocals = n;
 #ifdef TBL68020
-	fprintf(codefile,"link\ta6,#-%ld\n",nlocals);
+	fprintf(codefile,"link\ta6,#-%ld\n",n);
 #else
-	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",nlocals+40,nlocals);
+	fprintf(codefile,"tst.b -%ld(sp)\nlink\ta6,#-%ld\n",n+40,n);
 #endif
 }
 
