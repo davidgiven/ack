@@ -11,7 +11,7 @@ static char rcsid[] = "$Header$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
-#ifdef USE_SHC
+#ifdef USE_TES
 #include "mach.h"
 #endif
 
@@ -143,7 +143,7 @@ prtoken(tp,leadingchar) token_p tp; {
 	}
 }
 
-#ifdef	USE_SHC
+#ifdef USE_TES
 printlabel(labnum)
 int labnum;
 {

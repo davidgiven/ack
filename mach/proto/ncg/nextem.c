@@ -64,7 +64,7 @@ byte *trypat(bp,len) register byte *bp; {
 	if (Debug) {
 		fprintf(stderr,"Matched:");
 		for (i=0;i<patlen;i++) {
-#ifdef USE_SHC
+#ifdef USE_TES
 			if (emp[i].em_instr == op_lab)
 				fprintf(stderr," lab");
 			else

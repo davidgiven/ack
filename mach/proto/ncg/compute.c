@@ -11,8 +11,7 @@ static char rcsid[] = "$Header$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
-#ifdef	USE_SHC
-#include <stdio.h>
+#ifdef USE_TES
 #include "label.h"
 #endif
 
@@ -76,8 +75,8 @@ char opdesc[] = {
 	LLDEF|RLDEF,		/* EX_XOR */
 	LLDEF|RLDEF,		/* EX_AND */
 	0,			/* EX_ISROM */
-#ifdef USE_SHC
-	0,			/* EX_STACKHEIGHT */
+#ifdef USE_TES
+	0,			/* EX_TOPELTSIZE */
 	0,			/* EX_FALLTHROUGH */
 #endif
 };
@@ -384,12 +383,12 @@ result_t compute(node) register node_p node; {
 	assert(leaf1.e_typ == EV_INT);
 		result.e_v.e_con = -leaf1.e_v.e_con;
 		return(result);
-#ifdef USE_SHC
-	case EX_STACKHEIGHT:			/* Hans, new */
+#ifdef USE_TES
+	case EX_TOPELTSIZE:			/* Hans, new */
 	    { register label_p lbl;
 
 		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
-		if (lbl != NULL) {
+		if (lbl != (label_p)0) {
 		    result.e_v.e_con = lbl->lb_height;
 		} else {
 		    result.e_v.e_con = 0;
@@ -400,7 +399,7 @@ result_t compute(node) register node_p node; {
 	    { register label_p lbl;
 
 		lbl = get_label(saveemp[node->ex_lnode].em_u.em_ioper);
-		if (lbl != NULL) {
+		if (lbl != (label_p)0) {
 		    result.e_v.e_con = lbl->lb_fallthrough;
 		} else result.e_v.e_con = 0;
 		return(result);

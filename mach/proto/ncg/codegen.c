@@ -858,7 +858,7 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	level--;
 #endif
 	return(totalcost);
-#ifdef USE_SHC
+#ifdef USE_TES
     case DO_LABDEF: {
 	int index;
 

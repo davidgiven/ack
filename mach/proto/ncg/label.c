@@ -1,16 +1,15 @@
 #include "tables.h"
-#ifdef USE_SHC
-#include <stdio.h>
+#ifdef USE_TES
 #include "types.h"
 #include "param.h"
 #include "label.h"
 
-static label_p label_list = NULL;
+static label_p label_list = (label_p)0;
 extern char *myalloc();
 
 add_label(num, height, flth)
 {
-	register label_p lbl = NULL;
+	register label_p lbl = (label_p)0;
 
 	if (height <= 0) return;
 	if (flth != TRUE && flth != FALSE)
@@ -29,18 +28,18 @@ register word num;
 {
 	register label_p tmp = label_list;
 
-	while (tmp != NULL) {
+	while (tmp != (label_p)0) {
 		if (tmp->lb_number == num) return tmp;
 		tmp = tmp->lb_next;
 	}
-	return NULL;
+	return (label_p)0;
 }
 
 kill_labels()
 {
 	label_p tmp;
 
-	while((tmp = label_list) != NULL) {
+	while((tmp = label_list) != (label_p)0) {
 	    label_list = label_list->lb_next;
 	    myfree((char *)tmp);
 	}
