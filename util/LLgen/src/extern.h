@@ -53,6 +53,7 @@ extern struct order *sorder, *porder;
 				 */
 extern string	e_noopen;	/* Error message string used often */
 extern int	verbose;	/* Level of verbosity */
+extern int	wflag;		/* warnings? */
 extern string	lexical;	/* name of lexical analyser */
 extern string	onerror;	/* name of user error handler */
 extern int	ntneeded;	/* ntneeded = 1 if nonterminals are included

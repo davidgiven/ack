@@ -47,6 +47,7 @@ string	f_temp = ACTFILE;
 string	f_input;
 string	e_noopen = "Cannot open %s";
 int	verbose;
+int	wflag;
 string	lexical;
 string	onerror;
 int	ntneeded;

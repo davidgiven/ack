@@ -487,7 +487,7 @@ do_lengthcomp() {
 	 * nonterminal.
 	 * This length consists of two fields: the number of terminals,
 	 * and a number that is composed of 
-	 * - the value of the first terminal
+	 * - the number of this alternative
 	 * - a crude measure of the number of terms and nonterminals in the
 	 *   production of this shortest string.
 	 */
@@ -521,6 +521,7 @@ complength(p,le) register p_gram p; p_length le; {
 	register p_term q;
 	t_length i;
 	t_length X;
+	int cnt = 0;
 
 	X.cnt = 0;
 	X.val = 0;
@@ -528,16 +529,17 @@ complength(p,le) register p_gram p; p_length le; {
 		switch (g_gettype(p)) {
 		  case LITERAL :
 		  case TERMINAL :
-		  	if (!X.cnt) add(&X, 1, g_getcont(p));
-			else add(&X, 1, 0);
+			add(&X, 1, 0);
 			break;
 		  case ALTERNATION :
 
 			X.cnt = INFINITY;
 			X.val = INFINITY;
 			while (g_gettype(p) != EORULE) {
+				cnt++;
 				l = g_getlink(p);
 				complength(l->l_rule,&i);
+				i.val += cnt;
 				if (l->l_flag & DEF) {
 					X = i;
 					break;
@@ -557,21 +559,17 @@ complength(p,le) register p_gram p; p_length le; {
 
 			q = g_getterm(p);
 			rep = r_getkind(q);
+			X.val += 1;
 			if ((q->t_flags&PERSISTENT) || 
 			    rep==FIXED || rep==PLUS) {
 				complength(q->t_rule,&i);
 				add(&X, i.cnt, i.val);
-				if (i.cnt == 0) X.val += ntokens;
 				if (rep == FIXED && r_getnum(q) > 0) {
 					for (rep = r_getnum(q) - 1;
 					     rep > 0; rep--) {
 						add(&X, i.cnt, i.val);
 					}
 				}
-			}
-			else {
-				/* Empty producing term on this path */
-				 X.val += ntokens;
 			}
 			break; }
 		  case NONTERM : {
@@ -586,10 +584,8 @@ complength(p,le) register p_gram p; p_length le; {
 			}
 			else if (x == -1) x = INFINITY;
 			add(&X, x, pl->val);
-			if (x == 0) {
-				/* Empty producing nonterminal */
-				X.val += ntokens;
-			}}
+			X.val += 1;
+			}
 		}
 		p++;
 	}
@@ -602,7 +598,7 @@ add(a, c, v) register p_length a; {
 		a->cnt = INFINITY;
 		return;
 	}
-	if (a->cnt == 0) a->val = v;
+	a->val += v;
 	a->cnt += c;
 }
 
@@ -623,15 +619,17 @@ setdefaults(p) register p_gram p; {
 			break;
 		  case ALTERNATION: {
 			register p_link l, l1;
-			int temp = 0, temp1;
+			int temp = 0, temp1, cnt = 0;
 			t_length count, i;
 
 			count.cnt = INFINITY;
 			count.val = INFINITY;
 			l1 = g_getlink(p);
 			do {
+				cnt++;
 				l = g_getlink(p);
 				complength(l->l_rule,&i);
+				i.val += cnt;
 				if (l->l_flag & DEF) temp = 1;
 				temp1 = compare(&i, &count);
 				if (temp1 < 0 ||

@@ -52,6 +52,10 @@ main(argc,argv) register string	argv[]; {
 	while (argc >= 2 && (arg = argv[1], *arg == '-')) {
 		while (*++arg) {
 			switch(*arg) {
+			  case 'w':
+			  case 'W':
+				wflag = 1;
+				continue;
 			  case 'v':
 			  case 'V':
 				verbose++;
@@ -221,6 +225,7 @@ warning(lineno,s,t,u) string	s,t,u; {
 	 * Just a warning
 	 */
 
+	if (wflag) return;
 	if (!lineno) lineno = 1;
 	fprintf(stderr,"\"%s\", line %d : (Warning) ",f_input, lineno);
 	fprintf(stderr,s,t,u);
