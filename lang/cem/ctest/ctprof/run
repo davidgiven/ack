@@ -1,2 +1,10 @@
 echo test profiling
-make -k "`grep CEM= ../makefile`" ${1-gen}
+case ${1-gen} in
+gen|tp.cem.r)
+	make -k "`grep CEM= ../makefile`" tp.cem
+	make "P=tp" -fsk ../makefile ${1-gen}
+	;;
+*)
+	make -k "`grep CEM= ../makefile`" $1
+	;;
+esac
