@@ -1,5 +1,5 @@
 .\" $Header$
-.TH PC_PRLIB VII
+.TH PC_PRLIB 7ACK
 .ad
 .SH NAME
 pc_prlib \- library of Pascal runtime routines
@@ -653,9 +653,9 @@ error message can access the file name.
 Used to access the arguments of the main program.
 .PD
 .SH FILES
-.IP /usr/em/lib/mach/*/lib/tail_pc 20
+.IP ~em/lib/*/tail_pc 20
 The library used by ack[5] to link programs.
-.IP /usr/em/etc/pc_rterrors
+.IP ~em/etc/pc_rterrors
 The error messages
 .PD
 .SH "SEE ALSO"
@@ -673,9 +673,9 @@ ISO/TC97/SC5-N462, received November 1979.
 .IP [4]
 Ed Keizer, "The Amsterdam Compiler Kit reference manual".
 .br
-(try \fInroff /usr/emi/doc/pcref.doc\fP).
+(try \fInroff ~em/doc/pcref.doc\fP).
 .IP [5]
-ack(I), pc_pem(VI)
+ack(1), pc_pem(6)
 .PD
 .SH DIAGNOSTICS
 All errors discovered by this runtime system cause an EM TRP instruction
@@ -687,7 +687,7 @@ an EM machine trap or a language or user defined trap occurs.
 One of the first actions in _ini is to specify that the routine _fatal,
 available in this library, will handle traps.
 This routine is called with an error code (0..252) as argument.
-The file "/usr/em/etc/pc_rterrors" is opened and searched for a message
+The file "~em/etc/pc_rterrors" is opened and searched for a message
 corresponding with this number.
 If the file can not be opened, or if the error number is not recorded
 in the file, then the same trap is generated again, but without
@@ -758,5 +758,3 @@ file xxx: non-ASCII char read
 .PP
 .SH AUTHORS
 Johan Stevenson and Ard Verhoog, Vrije Universiteit.
-.SH BUGS
-Please report bugs to the authors.

@@ -1,5 +1,5 @@
 .\" $Header$
-.TH LIBPC VII
+.TH LIBPC 7ACK
 .ad
 .SH NAME
 libpc \- library of external routines for Pascal programs
@@ -181,7 +181,7 @@ because the previous trap handler must be restored.
 Therefore, you may only jump out of procedure \fIp\fP from inside \fIq\fP and
 you may only jump out of one level of encapsulation.
 If you want to exit several levels of encapsulation, use traps.
-See pc_emlib(VII) and pc_prlib(VII) for lists of trap numbers
+See pc_prlib(7) for lists of trap numbers
 for EM machine errors and Pascal run time system errors.
 Note that \fIp\fP may not have parameters.
 .PD
@@ -190,13 +190,13 @@ Note that \fIp\fP may not have parameters.
 UNIX system calls:
 .RS
 The routines of this category require global variables or routines
-of the monitor library libmon(VII).
+of the monitor library libmon(7).
 .IP uread 10
 Equal to the read system call.
 Its normal name is blocked by the standard Pascal routine read.
 .PD 0
 .IP uwrite
-As above but for write(II).
+As above but for write(2).
 .IP perrno
 Because external data references are not possible in Pascal,
 this routine returns the global variable errno, indicating the result of
@@ -212,7 +212,7 @@ Return the number of ticks of user and system time consumed by the program.
 .PP
 .RE
 The following program presents an example of how these routines can be used.
-This program is equivalent to the UNIX command cat(I).
+This program is equivalent to the UNIX command cat(1).
 .nf
      {$c+}
      program cat(input,inp,output);
@@ -281,10 +281,10 @@ Another example gives some idea of the way to manage trap handling:
     end.
 .fi
 .SH FILES
-.IP /usr/em/mach/*/lib/tail_pc 20
+.IP ~em/lib/*/tail_pc 20
 .PD
 .SH "SEE ALSO"
-ack(I), pc_pem(VI), pc_prlib(VII), libmon(VII)
+ack(1), pc_pem(6), pc_prlib(7), libmon(7)
 .SH DIAGNOSTICS
 Two routines may cause fatal error messages to be generated.
 These are:

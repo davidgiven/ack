@@ -1,5 +1,5 @@
 .\" $Header$
-.TH LIBMON VII
+.TH LIBMON 7ACK
 .ad
 .SH NAME
 libmon \- library of system call routines with EM calling sequence
@@ -50,7 +50,7 @@ can be declared as:
      creatmode = set of XHIM..SUID;
 .IP -
 There are special system call routines \fIuread\fP and \fIuwrite\fP
-in libpc(VII),
+in libpc(7),
 because the names \fIread\fP and \fIwrite\fP
 are blocked by similar functions in Pascal.
 .PP
@@ -85,10 +85,10 @@ signal number is specified.
 Only the signal numbers 1, 2, 3, 13, 14, 15 and 16 may be used as argument
 for \fIsigtrp\fP.
 .SH FILES
-.IP /usr/em/mach/*/lib/tail_mon
+.IP ~em/lib/*/tail_mon
 .PD
 .SH "SEE ALSO"
-em(I), ack(I), *(II), libpc(VII)
+em(1), ack(1), *(2), libpc(7)
 .SH DIAGNOSTICS
 All routines put the UNIX error code in the global variable \fIerrno\fP.
 Errno is not cleared by successful system calls, so it always gives
