@@ -65,7 +65,7 @@ acquire_malout()	{
 	static char buf[BUFSIZ];
 	
 	if (!malout)	{
-		malout = fopen("mal.out", "w");	
+		malout = freopen("mal.out", "w", stderr);	
 		setbuf(malout, buf);
 	}
 }
@@ -156,7 +156,7 @@ check_mallinks(s) char *s;	{
 	stat = BEZET;
 	for_all_mallinks(ml)	{
 		if (checksum_of(ml) != checksum(ml))
-			Error("mallink info at %ld corrupted", s, ml);
+			Error("mallink info at %lx corrupted", s, (long)ml);
 		if (working_on(ml))	{
 			stat = BEZET;
 			continue;
@@ -164,15 +164,15 @@ check_mallinks(s) char *s;	{
 		if (	!last_mallink(ml) &&
 			phys_prev_of(phys_next_of(ml)) != ml
 		)
-			Error("upward chain bad at %ld", s, ml);
+			Error("upward chain bad at %lx", s, (long)ml);
 		if (	!first_mallink(ml) &&
 			phys_next_of(phys_prev_of(ml)) != ml
 		)
-			Error("downward chain bad at %ld", s, ml);
+			Error("downward chain bad at %lx", s, (long)ml);
 		if (free_of(ml))	{
 			if (stat == VRIJ)
-				Error("free mallink at %ld follows free mallink",
-								s, ml);
+				Error("free mallink at %lx follows free mallink",
+								s, (long)ml);
 			stat = VRIJ;
 		}
 		else
@@ -185,29 +185,29 @@ check_mallinks(s) char *s;	{
 			if (working_on(ml))
 				continue;
 			if (!free_of(ml))
-				Error("occupied mallink %ld occurs in free_list", s, ml);
+				Error("occupied mallink %lx occurs in free_list", s, (long)ml);
 			switch (mark_of(ml))	{
 			case IN_ML_LAST:
 				set_mark(ml, IN_FREE_LIST);
 				break;
 			case IN_FREE_LIST:
-				Error("mallink %ld occurs in 2 free_lists",
-								s, ml);
+				Error("mallink %lx occurs in 2 free_lists",
+								s, (long)ml);
 			default:
-				Error("unknown mallink %ld in free_list",
-								s, ml);
+				Error("unknown mallink %lx in free_list",
+								s, (long)ml);
 			}
 			if (size_of(ml) < size)
-				Error("size of mallink %ld too small", s, ml);
+				Error("size of mallink %lx too small", s, (long)ml);
 			if (size_of(ml) >= 2*size)
-				Error("size of mallink %ld too large", s, ml);
+				Error("size of mallink %lx too large", s, (long)ml);
 		}
 	}
 	for_all_mallinks (ml)	{
 		if (working_on(ml))
 			continue;
 		if (free_of(ml) && mark_of(ml) != IN_FREE_LIST)
-			Error("free mallink %ld is in no free_list", s, ml);
+			Error("free mallink %lx is in no free_list", s, (long)ml);
 		set_mark(ml, CLEAR);
 	}
 }

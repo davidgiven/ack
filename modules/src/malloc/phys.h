@@ -18,19 +18,19 @@ publicdata mallink *ml_last;
 
 #define __bits(ml)		((size_type)_phys_prev_of(ml) & BITS)
 #define	__free_of(ml)		((size_type)_phys_prev_of(ml) & FREE_BIT)
-#define __phys_prev_of(ml)	(mallink *)((size_type)_phys_prev_of(ml) & ~FREE_BIT)
+#define __phys_prev_of(ml)	(mallink *)((size_type)_phys_prev_of(ml) & ~BITS)
 #define prev_size_of(ml)	((char *)(ml) - \
 				 (char *)__phys_prev_of(ml) - \
 				 mallink_size() \
 				)
 #define	set_phys_prev(ml,e) \
-	(_phys_prev_of(ml) = (mallink *) ((char *)e + __free_of(ml)))
+	(_phys_prev_of(ml) = (mallink *) ((char *)e + __bits(ml)))
 
 #ifdef	CHECK
 public Error();
 #define	phys_prev_of(ml)	(mallink *) \
 	(first_mallink(ml) ? \
-		(char *)Error("phys_prev_of first_mallink %ld", "somewhere", ml) : \
+		(char *)Error("phys_prev_of first_mallink %lx", "somewhere", (long)ml) : \
 		(char *)__phys_prev_of(ml) \
 	)
 #else	ndef	CHECK
