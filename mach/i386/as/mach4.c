@@ -102,9 +102,13 @@ oper	:	NOOP_1
 	|	IMULB	ea_1
 			{	regsize(0); emit1(0366); ea_1($1&070);}
 	|	IMUL	ea_2
-			{	reg_1 = IS_R32; imul(0); }
+			{	reg_1 = IS_R32 | (address_long ? 0 : 0310);
+				imul(0);
+			}
 	|	IMUL	R32 ',' ea_2
-			{	reg_1 = $2 | IS_R32; imul($2|0x10); }
+			{	reg_1 = $2 | IS_R32 | (address_long ? 0 : 0310);
+				imul($2|0x10);
+			}
 	|	IMUL	R32 ',' ea_ea
 			{	imul($2|0x10);}
 	|	INT absexp
@@ -196,12 +200,10 @@ st_i	:	ST '(' absexp ')'
 
 	;
 mem	:	'(' expr ')'
-			{	if (address_long) {
-					rm_2 = 05; reg_2 = 05; mod_2 = 0;
-				}
-				else {
-					reg_2 = 06;
-				}
+			{	if (address_long) reg_2 = 05;
+				else reg_2 = 06;
+				mod_2 = 0;
+				rm_2 = 05;
 				exp_2 = $2;
 				RELOMOVE(rel_2, relonami);
 					
@@ -214,20 +216,15 @@ mem	:	'(' expr ')'
 			}
 	;
 bases	:	'(' R32 ')'
-			{	if (address_long) {
-					reg_2 = $2; sib_2 = 0; rm_2 = 0;
-				}
+			{	if (address_long) reg_2 = $2;
 				else 	reg_2 = sr_m[$2];
+				sib_2 = 0; rm_2 = 0;
 			}
 	|	'(' R32 ')' '(' R32 scale ')'
-			{	if (address_long) {
-					rm_2 = 04;
-					 sib_2 |= regindex_ind[$2][$5];
-					reg_2 = $2;
-				}
-				else {
-					reg_2 = dr_m[$2][$5];
-				}
+			{	if (address_long) reg_2 = $2;
+				else reg_2 = dr_m[$2][$5];
+				rm_2 = 04;
+				sib_2 |= regindex_ind[$2][$5];
 			}
 	|	'(' R32 '*' absexp ')'
 			{	if ($4 == 1) {
@@ -247,13 +244,20 @@ scale	:	/* empty */
 	;
 ea_2	:	mem
 	|	R8
-			{	reg_2 = $1 | IS_R8; rm_2 = 0;}
+			{	reg_2 = ($1 | IS_R8) | (address_long ? 0 : 0300);
+				rm_2 = 0;
+			}
 	|	R32
-			{	reg_2 = $1 | IS_R32; rm_2 = 0;}
+			{	reg_2 = ($1 | IS_R32) | (address_long ? 0 : 0310);
+				rm_2 = 0;
+			}
 	|	RSEG
-			{	reg_2 = $1 | IS_RSEG; rm_2 = 0;}
+			{	reg_2 = ($1 | IS_RSEG) | (address_long ? 0 : 020);
+				rm_2 = 0;
+			}
 	|	expr
-			{	reg_2 = IS_EXPR; exp_2 = $1; rm_2 = 0;
+			{	reg_2 = IS_EXPR | (address_long ? 0 : 040);
+				exp_2 = $1; rm_2 = 0;
 				RELOMOVE(rel_2, relonami);
 			}
 	;

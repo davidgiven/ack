@@ -25,7 +25,7 @@
 #define is_expr(reg)	((reg)&IS_EXPR)
 #define is_segreg(reg)	((reg)&IS_RSEG)
 #define is_reg(reg)	(((reg)&(IS_R8|IS_R32)) != 0)
-#define is_acc(reg)	((reg) != 0 && ((reg)&(IS_R8|IS_R32)) == (reg))
+#define is_acc(reg)	(is_reg(reg) && ((reg & 07) == 0))
 
 struct operand {
 	int	mod;

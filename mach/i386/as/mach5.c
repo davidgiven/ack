@@ -10,6 +10,7 @@
 
 ea_1_16(param)
 {
+	reg_1 &= 0377;
         if ((reg_1 & 070) || (param & ~070)) {
                 serror("bad operand");
         }
@@ -127,6 +128,10 @@ regsize(sz)
 	if ((is_reg(reg_1) && (reg_1 & IS_R8) != bit) ||
 	    (is_reg(reg_2) && (reg_2 & IS_R8) != bit)) 
 		serror("register error");
+	if (! address_long) {
+		reg_1 &= ~010;
+		reg_2 &= ~010;
+	}
 }
 
 indexed() {
@@ -292,9 +297,6 @@ adsize_exp(exp, relpc)
 		emit4((long)(exp.val));
 	}
 	else {
-		if (! fitw(exp.val) && pass == PASS_3) {
-			warning("offset does not fit in 2 bytes; remove prefix");
-		}
 #ifdef RELOCATION
 		newrelo(exp.typ, RELO2 | relpc);
 #endif
@@ -344,7 +346,7 @@ rolop(opc)
 	oreg = reg_2;
 	reg_2 = reg_1;
 	regsize(opc);
-	if (oreg == (IS_R8 | 1)) {
+	if (oreg == (IS_R8 | 1 | (address_long ? 0 : 0300))) {
 		/* cl register */
 		emit1(0322 | (opc&1)); ea_1(opc&070);
 	} else if (is_expr(oreg) && exp_2.typ == S_ABS && exp_2.val == 1) {
@@ -446,10 +448,10 @@ mov(opc)
 	regsize(opc);
 	if (is_segreg(reg_1)) {
 		/* to segment register */
-		emit1(0216); ea_2((reg_1&3)<<3);
+		emit1(0216); ea_2((reg_1&07)<<3);
 	} else if (is_segreg(reg_2)) {
 		/* from segment register */
-		emit1(0214); ea_1((reg_2&3)<<3);
+		emit1(0214); ea_1((reg_2&07)<<3);
 	} else if (is_expr(reg_2)) {
 		/* from immediate */
 		if (is_reg(reg_1)) {
@@ -473,10 +475,10 @@ mov(opc)
 		adsize_exp(exp_2, 0);
 	} else if (is_reg(reg_2)) {
 		/* from register to memory or register */
-		emit1(0210 | opc); ea_1((reg_2&7)<<3);
+		emit1(0210 | opc); ea_1((reg_2&07)<<3);
 	} else if (is_reg(reg_1)) {
 		/* from memory or register to register */
-		emit1(0212 | opc); ea_2((reg_1&7)<<3);
+		emit1(0212 | opc); ea_2((reg_1&07)<<3);
 	} else
 		badsyntax();
 }
@@ -490,7 +492,7 @@ extshft(opc, reg)
 	regsize(1);
 
 	emit1(0xF);
-	if (oreg2 == (IS_R8 | 1)) {
+	if (oreg2 == (IS_R8 | 1 | (address_long ? 0 : 0300))) {
 		/* cl register */
 		emit1(opc|1);
 		ea_1(reg << 3);
