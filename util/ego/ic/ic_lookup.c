@@ -24,7 +24,7 @@ prc_p prochash[NPROCHASH];
 num_p numhash[NNUMHASH];
 char *lastname;
 
-
+extern char	*strcpy();
 
 #define newsym()	(sym_p) newstruct(sym)
 #define newprc()	(prc_p) newstruct(prc)
@@ -118,8 +118,9 @@ dblock_p symlookup(name, status)
 			 * list.
 			 */
 			if (strcmp((*spp)->sy_name, name) == 0) {
-				if (status != DEFINING ||
-				    (*spp)->sy_dblock->d_pseudo == DUNKNOWN) {
+				if ((status != DEFINING
+				     && ((*spp)->sy_dblock->d_flags1 & DF_EXTERNAL) == 0)
+				    || (*spp)->sy_dblock->d_pseudo == DUNKNOWN) {
 					/* found */
 					lastname = (*spp)->sy_name;
 					return ((*spp)->sy_dblock);
@@ -216,8 +217,9 @@ proc_p proclookup(name, status)
 		 */
 		if (strcmp((*ppp)->pr_name, name) == 0) {
 			/* found */
-			if (status != DEFINING || 
-			    ! ((*ppp)->pr_proc->p_flags1 & PF_BODYSEEN)) {
+			if ((status != DEFINING
+			     && ((*ppp)->pr_proc->p_flags1 & PF_EXTERNAL) == 0)
+			    || ! ((*ppp)->pr_proc->p_flags1 & PF_BODYSEEN)) {
 				return ((*ppp)->pr_proc);
 			}
 			break;
@@ -298,7 +300,6 @@ dump_procnames(hash,n,f)
 
 	register prc_p *pp, ph;
 	proc_p p;
-	register int i;
 
 #define PF_WRITTEN 01
 
@@ -317,7 +318,34 @@ dump_procnames(hash,n,f)
 	}
 }
 
+static int
+extrefproc_superfluous(ph)
+	prc_p	ph;
+{
+	/* The problem is that when an EXP is found, we don't know yet
+	 * to which definition it applies (although this only is a problem
+	 * for erroneous input). Therefore, we create an entry in the
+	 * procedure table, and at the end of the EM file remove it if it
+	 * is superfluous. This routine checks for this superfluousness.
+	 */
+	prc_p	next = ph->pr_next;
 
+	if (! (ph->pr_proc->p_flags1 & PF_BODYSEEN)) {
+		/* No body seen yet, but maybe there is another definition ...
+		*/
+		register prc_p nn = next;
+
+		while (nn) {
+			if ((nn->pr_proc->p_flags1 & (PF_BODYSEEN|PF_EXTERNAL))
+			    == (PF_BODYSEEN|PF_EXTERNAL)
+			    && ! strcmp(nn->pr_name, ph->pr_name)) {
+				return 1;
+			}
+			nn = nn->pr_next;
+		}
+	}
+	return 0;
+}
 
 /* cleanprocs */
 
@@ -346,7 +374,9 @@ cleanprocs(hash,n,mask)
 			 * the list.
 			 */
 			next = ph->pr_next;
-			if ((ph->pr_proc->p_flags1 & mask) == 0) {
+			if ((ph->pr_proc->p_flags1 & mask) == 0
+			    || (mask == PF_EXTERNAL
+				&& extrefproc_superfluous(ph))) {
 				if (x == (prc_p) 0) {
 					*pp = next;
 				} else {
@@ -376,7 +406,6 @@ dump_dblocknames(hash,n,f)
 
 	register sym_p *sp, sh;
 	dblock_p d;
-	register int i;
 
 #define DF_WRITTEN 01
 
@@ -396,6 +425,35 @@ dump_dblocknames(hash,n,f)
 }
 
 
+static int
+extrefdata_superfluous(ph)
+	sym_p	ph;
+{
+	/* The problem is that when an EXA is found, we don't know yet
+	 * to which definition it applies (although this only is a problem
+	 * for erroneous input). Therefore, we create an entry in the
+	 * data table, and at the end of the EM file remove it if it
+	 * is superfluous. This routine checks for this superfluousness.
+	 */
+	sym_p	next = ph->sy_next;
+
+	if (ph->sy_dblock->d_pseudo == DUNKNOWN) {
+		/* No definition seen yet, but maybe there is another one ...
+		*/
+		register sym_p nn = next;
+
+		while (nn) {
+			if (nn->sy_dblock->d_pseudo != DUNKNOWN
+			    && (nn->sy_dblock->d_flags1 & DF_EXTERNAL)
+			    && ! strcmp(nn->sy_name, ph->sy_name)) {
+				return 1;
+			}
+			nn = nn->sy_next;
+		}
+	}
+	return 0;
+}
+
 
 /* cleandblocks */
 
@@ -413,7 +471,9 @@ cleandblocks(hash,n,mask)
 		x = (sym_p) 0;
 		for (sh = *sp; sh != (sym_p) 0; sh = next) {
 			next = sh->sy_next;
-			if ((sh->sy_dblock->d_flags1 & mask) == 0) {
+			if ((sh->sy_dblock->d_flags1 & mask) == 0
+			    || (mask == DF_EXTERNAL
+				&& extrefdata_superfluous(sh))) {
 				if (x == (sym_p) 0) {
 					*sp = next;
 				} else {

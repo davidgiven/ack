@@ -484,7 +484,7 @@ line_p inpseudo(n)
 			 */
 			dblockdef(db,n,lnp);
 			/* Fill in d_pseudo, d_size and d_values fields of db */
-			if (fragm_type != db->d_pseudo & BMASK) {
+			if (fragm_type != db->d_pseudo) {
 				/* Keep track of fragment numbers,
 				 * enter a new fragment.
 				 */
