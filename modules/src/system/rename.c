@@ -4,6 +4,8 @@
  */
 /* $Header$ */
 
+#include <system.h>
+
 int
 sys_rename(path1, path2)
 	char *path1, *path2;

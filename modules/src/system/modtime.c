@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <system.h>
+
 long
 sys_modtime(path)
 	char *path;

@@ -4,6 +4,8 @@
  */
 /* $Header$ */
 
+#include <system.h>
+
 int
 sys_unlock(path)
 	char *path;

@@ -31,6 +31,45 @@ extern File _sys_ftab[];
 #define S_EXIT	1
 #define S_ABORT	2
 
+#if __STDC__
+int sys_open(char *, int, File **);
+void sys_close(File *);
+int sys_read(File *, char *, int, int *);
+int sys_write(File *, char *, int);
+int sys_seek(File *, long, int, long *);
+int sys_reset(File *);
+int sys_access(char *, int);
+int sys_remove(char *);
+int sys_rename(char *, char *);
+long sys_filesize(char *);
+int sys_chmode(char *, int);
+int sys_lock(char *);
+int sys_unlock(char *);
+char *sys_break(int);
+void sys_stop(int);
+long sys_time(void);
+long sys_modtime(char *);
+#else
+/* No prototypes, avoid 'void'. */
+int sys_open();
+extern sys_close();
+int sys_read();
+int sys_write();
+int sys_seek();
+int sys_reset();
+int sys_access();
+int sys_remove();
+int sys_rename();
+long sys_filesize();
+int sys_chmode();
+int sys_lock();
+int sys_unlock();
+char *sys_break();
+extern sys_stop();
+long sys_time();
+long sys_modtime();
+#endif
+
 /* standard file decsriptors */
 #define STDIN	&_sys_ftab[0]
 #define STDOUT	&_sys_ftab[1]

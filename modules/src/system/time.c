@@ -4,6 +4,8 @@
  */
 /* $Header$ */
 
+#include <system.h>
+
 long time();
 
 long

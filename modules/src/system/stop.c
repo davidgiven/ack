@@ -6,6 +6,9 @@
 
 #include <system.h>
 
+#if __STDC__ > 0
+void
+#endif
 sys_stop(how)
 	int how;
 {
