@@ -821,6 +821,8 @@ CodeOper(expr, true_label, false_label)
 		case T_POINTER:
 		case T_HIDDEN:
 		case T_EQUAL:
+			C_cmp();
+			break;
 		case T_CARDINAL:
 		case T_INTORCARD:
 			C_cmu(tp->tp_size);
