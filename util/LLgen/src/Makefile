@@ -20,7 +20,7 @@ parser:		$(GFILES)
 		@touch parser
 
 LLgen:		$(OBJECTS)
-		$(CC) $(PROF) $(LDFLAGS) $(OBJECTS)  -o LLgen
+		$(CC) $(PROF) $(LDFLAGS) $(OBJECTS) $(EMHOME)/modules/lib/libsystem.a -o LLgen
 		@size LLgen
 
 pr : 

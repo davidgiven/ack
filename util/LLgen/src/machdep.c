@@ -33,15 +33,13 @@ extern string	libpath();
 UNLINK(x) string x; {
 	/* Must remove the file "x" */
 
-	unlink(x);	/* systemcall to remove file */
+	sys_remove(x);	/* systemcall to remove file */
 }
 
 RENAME(x,y) string x,y; {
 	/* Must move the file "x" to the file "y" */
 
-	unlink(y);
-	if(link(x,y)!=0)fatal(1,"Cannot link to %s",y);
-	unlink(x);
+	if(! sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
 }
 
 string
