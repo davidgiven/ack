@@ -121,21 +121,13 @@ char *parse_operand( ptr, n_ops, instr)
 	     *last;
 
 	ptr = skip_operand( ptr, instr);
-	if ( *ptr != '\0')  {
-		if ( *ptr == ',')  {
-			for( last=ptr-1; isspace( *last); last--) 
-				;
-			*(last+1) = '\0';
-		}
-		else {
-			error("strange operand format: %s\n", ptr);
-			/* We don't know what this code does ! */
-			*ptr++ = '\0';
-			ptr = skip_space( ptr);
-			if  ( *ptr != '\0') ptr++;   /* skip ';' */
-		}
-		ptr = skip_space( ptr);
+	for( last=ptr-1; isspace( *last); last--) 
+		;
+	if ( *ptr == ',')  {
+		ptr = skip_space( ptr + 1);
 	}
+	*(last+1) = '\0';
+		
 	process_operand( op, &operand[ n_ops-1]);
 	return( ptr);
 }
