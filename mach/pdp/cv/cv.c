@@ -46,7 +46,7 @@ struct exec exec;
 
 char	*output_file;
 int	outputfile_created;
-int	output;
+FILE	*output;
 int	rom_in_text;
 
 char *program ;
@@ -68,7 +68,7 @@ main(argc, argv)
 {
 	register struct exec *e = &exec;
 
-	output = 1;
+	output = stdout;
 	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
 		flag=argv[1][1] ;
@@ -77,7 +77,7 @@ main(argc, argv)
 	switch (argc) {
 	case 1: rd_fdopen(0);
 		break;
-	case 3:	if ((output = creat(argv[2], 0644)) < 0) {
+	case 3:	if ((output = fopen(argv[2], "w")) == NULL) {
 			fatal("Can't write %s.\n", argv[2]);
 		}
 		output_file = argv[2];
@@ -182,24 +182,18 @@ main(argc, argv)
 
 wr_int2(n)
 {
-	char buf[2];
-
-	buf[0] = n;
-	buf[1] = (n >> 8);
-	write(output, buf, 2);
+	putc(n, output);
+	putc((n>>8), output);
 }
 
 /*
 wr_long(l)
 	long l;
 {
-	char buf[4];
-
-	buf[2] = l;
-	buf[3] = (l >> 8);
-	buf[0] = (l >> 16);
-	buf[1] = (l >> 24);
-	write(output, buf, 4);
+	putc((int)(l >> 16), output);
+	putc((int)(l >> 24), output);
+	putc((int) l, output);
+	putc(((int)l >> 8), output);
 }
 */
 
@@ -216,7 +210,7 @@ emits(section) struct outsect *section ; {
 	while (n > 0) {
 		blk = n > BUFSIZ ? BUFSIZ : n;
 		rd_emit(buffer, (long) blk);
-		write(output, buffer, blk);
+		fwrite(buffer, sizeof(char), blk, output);
 		n -= blk;
 	}
 	if ((n = section->os_size - section->os_flen) > 0) {
@@ -225,7 +219,7 @@ emits(section) struct outsect *section ; {
 		}
 		while (n > 0) {
 			blk = n > BUFSIZ ? BUFSIZ : n;
-			write(output, buffer, blk);
+			fwrite(buffer, sizeof(char), blk, output);
 			n -= blk;
 		}
 	}
@@ -294,7 +288,7 @@ emit_symtab()
 		for (j++; j < 8; j++) {
 			PDP_name.n_name[j] = 0;
 		}
-		write(output, (char *) &PDP_name, 8);
+		fwrite((char *) &PDP_name, sizeof(char), 8, output);
 		wr_int2(PDP_name.n_type);
 		wr_int2(PDP_name.n_value);
 	}
