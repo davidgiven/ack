@@ -10,7 +10,7 @@ FFLAG	=
 INCL	= -I. -I$h $(DEF)
 CFLAGS	= $(FFLAG) -O $(INCL)
 YFLAGS	= -d
-LDFLAGS	= $(FFLAG) -i
+LDFLAGS	= $(FFLAG)
 
 CSRC	= $(CDIR)/comm3.c $(CDIR)/comm4.c $(CDIR)/comm5.c \
 	  $(CDIR)/comm6.c $(CDIR)/comm7.c $(CDIR)/comm8.c
