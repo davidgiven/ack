@@ -2,11 +2,12 @@ ctype.h
 setjmp.h
 stdio.h
 assert.h
-termio.h
 varargs.h
 math.h
 time.h
 pwd.h
 grp.h
 sgtty.h
+signal.h
+fcntl.h
 sys
