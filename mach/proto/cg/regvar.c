@@ -29,7 +29,7 @@
  *
  * Author: Hans van Staveren
  */
-
+extern string myalloc();
 struct regvar *rvlist;
 
 struct regvar *
