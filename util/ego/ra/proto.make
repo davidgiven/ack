@@ -67,7 +67,7 @@ cmp:	all
 	-cmp ra $(EMLIB)/ego/ra
 
 clean:
-	rm -f *.$(SUF) ra Out out nohup.out
+	rm -f *.$(SUF) ra Out out nohup.out makeitems itemtab.h
 
 lint:
 	$(LINT) $(LINTFLAGS) $(CFILES)
