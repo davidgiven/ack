@@ -9,19 +9,28 @@ OBJ =	C_ms_err.o C_ms_opt.o C_ms_emx.o C_ms_reg.o C_ms_src.o\
 INCLUDES=-I$(EMHOME)/h -I$(HDIR)
 CFLAGS = $(INCLUDES) -O
 
-all:		libem_mes.a
+all:		libem_mes.a libem_mesO.a
 
 libem_mes.a:	$(OBJ)
 		rm -f libem_mes.a
 		ar cr libem_mes.a $(OBJ)
 		-sh -c 'ranlib libem_mes.a'
 
+libem_mesO.a:
+		rm -f *.o libem_mesO.a
+		$(CC) -c $(CFLAGS) -DPEEPHOLE $(SRC)
+		ar cr libem_mesO.a $(OBJ)
+		-sh -c 'ranlib libem_mesO.a'
+		rm -f *.o
+
 install:	all
 		$(INSTALL) lib/libem_mes.a
+		$(INSTALL) lib/libem_mesO.a
 		$(INSTALL) man/em_mes.3
 
 cmp:		all
 		$(COMPARE) lib/libem_mes.a
+		$(COMPARE) lib/libem_mesO.a
 		$(COMPARE) man/em_mes.3
 
 pr:
