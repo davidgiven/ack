@@ -20,7 +20,7 @@
 #define BRKSIZE		4096
 #endif
 #define	PTRSIZE		sizeof(char *)
-#define Align(x,a)	(((x) + (a - 1)) & ~(a - 1))
+#define Align(x,a)	(((x) + (a - 1)) & ~(ptrint)(a - 1))
 #define NextSlot(p)	(* (char **) ((p) - PTRSIZE))
 #define NextFree(p)	(* (char **) (p))
 
