@@ -47,40 +47,11 @@ con_mult(sz) word sz; {
 }
 
 #define PDPFLOAT
+#define FL_MSL_AT_LOW_ADDRESS	1
+#define FL_MSW_AT_LOW_ADDRESS	1
+#define FL_MSB_AT_LOW_ADDRESS	0
+#define CODE_GENERATOR
 #include <con_float>
-
-con_float()
-{
-	char buf[8];
-	int rval = float_cst(str, argval, buf);
-	int i;
-
-        if (rval == 1) {
-                fprintf(stderr,"float constant size = %d\n",argval);
-                fatal("bad fcon size");
-        }
-#ifdef ACK_ASS
-        fprintf(codefile,"! float %s sz %d\n", str, argval);
-#else
-        fprintf(codefile,"/ float %s sz %d\n", str, argval);
-#endif
-        if (rval == 2) {
-                fprintf(stderr, "Warning: overflow in floating point constant %s\n", str);
-        }
-#ifdef ACK_ASS
-        fprintf(codefile, ".data1 0%o", buf[1] & 0377);
-        for (i = 1; i < argval; i++) {
-		/* use little trick to get bytes out in swapped order ... */
-                fprintf(codefile, ",0%o", buf[i^1] & 0377);
-        }
-#else
-        for (i = 0; i < argval; i++) {
-		/* use little trick to get bytes out in swapped order ... */
-                fprintf(codefile, "??? %o", buf[i^1] & 0377);
-        }
-#endif
-        putc('\n', codefile);
-}
 
 #ifdef REGVARS
 
