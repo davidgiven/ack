@@ -36,25 +36,27 @@ void _ftime(struct timeb *bp);
 
 #include	"loc_incl.h"
 
-/* The following define of TZ_LEN must match the number of characters
- * of the elements of tzname.
- */
-#define	TZ_LEN		10
 #define	RULE_LEN	120
+#define	TZ_LEN		10
+
+/* Make sure that the strings do not end up in ROM.
+ */
+static char ntstr[TZ_LEN + 1] = "MET";	/* string for normal time */
+static char dststr[TZ_LEN + 1] = "MDT";	/* string for daylight saving */
+
+long	_timezone = -1 * 60 * 60;
+long	_dst_off = 60 * 60;
+int	_daylight = -1;
+char	*_tzname[2] = {ntstr, dststr};
 
 #if	defined(__USG) || defined(_POSIX_SOURCE)
-char	*tzname[2] = {"MET\0\0\0\0\0\0\0", "MDT\0\0\0\0\0\0\0"};
+char	*tzname[2] = {ntstr, dststr};
 
 #if	defined(__USG)
 long	timezone = -1 * 60 * 60;
 int	daylight = 1;
 #endif
 #endif
-
-long	_timezone = -1 * 60 * 60;
-long	_dst_off = 60 * 60;
-int	_daylight = -1;
-char	*_tzname[2] = {"MET\0\0\0\0\0\0\0", "MDT\0\0\0\0\0\0\0"};
 
 static struct dsttype {
 	char ds_type;		/* Unknown, Julian, Zero-based or M */
