@@ -30,6 +30,7 @@
 
 extern char *symbol2str();
 extern char options[];
+extern arith flt_flt2arith();
 
 arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	register struct expr **e1p, **e2p;
