@@ -1,5 +1,5 @@
 INTS=em_t--- em_---- em_tf-- em_t-c- em_t--p
-b=../../../lib/pdp_int
+b=../../../lib/int22
 
 all:	$(INTS) eminform em
 
