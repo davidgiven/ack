@@ -140,7 +140,7 @@ DoOption(text)
 
 			if (++nDEF > mDEF) {
 				DEFPATH = (char **)
-				  Realloc(DEFPATH,(mDEF+=10)*sizeof(char *));
+				  Realloc((char *)DEFPATH,(unsigned)(mDEF+=10)*sizeof(char *));
 			}
 
 			for (i = ndirs++; i < nDEF; i++) {

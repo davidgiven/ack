@@ -69,6 +69,7 @@ main(argc, argv)
 		exit(1);
 	}
 	exit(!Compile(Nargv[1], Nargv[2]));
+	/*NOTREACHED*/
 }
 
 Compile(src, dst)
@@ -195,7 +196,7 @@ static struct stdproc sysprocs[] = {
 	{ 0,		0 }
 };
 
-extern t_def *Enter();
+extern t_def *Enter(), *EnterType();
 
 AddProcs(p)
 	register struct stdproc *p;
