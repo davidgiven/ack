@@ -13,7 +13,6 @@ typedef struct tree {
 	struct {
 		struct idf *tt_idf;
 		char *tt_str;
-		struct scope *tt_scope;	
 	} tt_x;
 	struct tree *tt_args[MAXARGS];
 	t_position tt_pos;
@@ -23,7 +22,6 @@ typedef struct tree {
 #define t_fval	t_xxxx.tt_fval
 #define t_idf	t_xxxx.tt_x.tt_idf
 #define t_str	t_xxxx.tt_x.tt_str
-#define t_sc	t_xxxx.tt_x.tt_scope
 #define t_args	t_xxxx.tt_args
 #define t_lino t_xxxx.tt_pos.lineno
 #define t_filename t_xxxx.tt_pos.filename

@@ -129,3 +129,19 @@ base_scope(sc)
   }
   return sc;
 }
+
+/* extern int	scope_encloses(p_scope scope, from_scope);
+   Returns 1 if scope encloses from from_scope, 0 otherwise.
+*/
+int
+scope_encloses(scope, from_scope)
+  p_scope	scope, from_scope;
+{
+  register p_scope sc = from_scope;
+
+  while (sc) {
+	if (sc == scope) return 1;
+	sc = sc->sc_static_encl;
+  }
+  return 0;
+}

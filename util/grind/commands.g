@@ -49,16 +49,15 @@ commands
     |	%default ';'	{ give_prompt = 0; }
     ]
 			{ if (com) {
-				if (errorgiven) {
-					freenode(com);
-					com = 0;
-				}
 				if (lastcom) {
 					freenode(lastcom);
 					lastcom = 0;
 				}
-
-				if (com) {
+				if (errorgiven) {
+					freenode(com);
+					com = 0;
+				}
+				else {
 					eval(com);
 			  		if (repeatable(com)) {
 						lastcom = com;
@@ -67,6 +66,7 @@ commands
 					        com != run_command &&
 						com != print_command) {
 						freenode(com);
+						com = 0;
 					}
 				}
 			  } else if (lastcom && ! errorgiven) {
@@ -98,7 +98,7 @@ command_line(p_tree *p;)
 | where_command(p)
 | STATUS		{ *p = mknode(OP_STATUS); }
 | DUMP			{ *p = mknode(OP_DUMP); }
-| RESTORE INTEGER	{ *p = mknode(OP_RESTORE, tok.ival); }
+| RESTORE count(p)?	{ *p = mknode(OP_RESTORE, *p); }
 | delete_command(p)
 | print_command(p)
 | display_command(p)
@@ -112,14 +112,14 @@ command_line(p_tree *p;)
 ]
 ;
 
+
 where_command(p_tree *p;)
-  { long l; }
 :
-  WHERE
-  [ INTEGER		{ l = tok.ival; }
-  | '-' INTEGER		{ l = - tok.ival; }
-  |			{ l = 0x7fffffff; }
-  ]			{ *p = mknode(OP_WHERE, l); }
+  WHERE			{ *p = mknode(OP_WHERE, (p_tree) 0); }
+  [ count(&(*p)->t_args[0])?
+  | '-' count(&(*p)->t_args[0])
+			{ (*p)->t_args[0]->t_ival = - (*p)->t_args[0]->t_ival; }
+  ]
 ;
 
 list_command(p_tree *p;)
@@ -153,9 +153,9 @@ file_command(p_tree *p;)
 help_command(p_tree *p;)
 :
   [ HELP | '?' ]
-  [			{ *p = mknode(OP_HELP, (struct idf *) 0, (char *) 0); }
-  | name(p)		{ (*p)->t_oper = OP_HELP; }
-  | '?'			{ *p = mknode(OP_HELP, str2idf("help",0), (char *) 0); }
+  			{ *p = mknode(OP_HELP, (p_tree) 0); }
+  [ name(&(*p)->t_args[0])?
+  | '?'			{ (*p)->t_args[0] = mknode(OP_NAME, str2idf("help",0), (char *) 0); }
   ]
 ;
 
@@ -210,7 +210,9 @@ when_command(p_tree *p;)
 :
   WHEN
   where(&whr)?
-  condition(&cond)?
+  condition(&cond)?	{ *p = mknode(OP_WHEN, whr, cond, (p_tree) 0); 
+			  p = &(*p)->t_args[2];
+			}
   '{' 
   command_line(p)
   [ ';'			{ if (*p) {
@@ -223,46 +225,34 @@ when_command(p_tree *p;)
   '}'
 			{ if (! whr && ! cond) {
 				error("no position or condition");
-				freenode(*p);
-				*p = 0;
 			  }
 			  else if (! *p) {
 				error("no commands given");
 			  }
-			  else *p = mknode(OP_WHEN, whr, cond, *p);
 			}
 ;
 
 step_command(p_tree *p;)
-  { long	l; }
 :
-  STEP
-  [ INTEGER		{ l = tok.ival; }
-  |			{ l = 1; }
-  ]			{ *p = mknode(OP_STEP, l); }
+  STEP			{ *p = mknode(OP_STEP, (p_tree) 0); }
+  count(&(*p)->t_args[0])?
 ;
 
 next_command(p_tree *p;)
-  { long	l; }
 :
-  NEXT
-  [ INTEGER		{ l = tok.ival; }
-  |			{ l = 1; }
-  ]			{ *p = mknode(OP_NEXT, l); }
+  NEXT			{ *p = mknode(OP_NEXT, (p_tree) 0); }
+  count(&(*p)->t_args[0])?
 ;
 
 regs_command(p_tree *p;)
-  { long	l; }
 :
-  REGS
-  [ INTEGER		{ l = tok.ival; }
-  |			{ l = 0; }
-  ]			{ *p = mknode(OP_REGS, l); }
+  REGS			{ *p = mknode(OP_REGS, (p_tree) 0); }
+  count(&(*p)->t_args[0])?
 ;
 
 delete_command(p_tree *p;)
 :
-  DELETE count_list(p)	{ *p = mknode(OP_DELETE, *p); }
+  DELETE count_list(p)?	{ *p = mknode(OP_DELETE, *p); }
 ;
 
 print_command(p_tree *p;)
@@ -323,13 +313,13 @@ able_command(p_tree *p;)
   [ ENABLE 		{ *p = mknode(OP_ENABLE, (p_tree) 0); }
   | DISABLE 		{ *p = mknode(OP_DISABLE, (p_tree) 0); }
   ]
-  count_list(&(*p)->t_args[0])
+  count_list(&(*p)->t_args[0])?
 ;
 
 count_list(p_tree *p;)
 :
   count(p)
-  [ ','			{ *p = mknode(OP_LIST, *p, (p_tree) 0); }
+  [ ','			{ *p = mknode(OP_LINK, *p, (p_tree) 0); }
     count(&(*p)->t_args[1])
   ]*
 ;
@@ -341,7 +331,8 @@ condition(p_tree *p;)
 
 where(p_tree *p;)
 :
-  IN qualified_name(p)	{ *p = mknode(OP_IN, *p); }
+  IN qualified_name(p)	{ *p = mknode(OP_IN, *p, (p_tree) 0); }
+  position(&((*p)->t_args[1]))?
 |
   position(p)
 ;

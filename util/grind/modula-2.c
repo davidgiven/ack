@@ -44,7 +44,7 @@ static struct langdep m2 = {
 	"%lXH",
 	"%lu",
 	"%lXH",
-	"%G",
+	"%.14G",
 
 	"[",
 	"]",

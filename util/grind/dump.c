@@ -16,7 +16,10 @@ extern p_tree	get_from_item_list();
 struct dump {
   char	*globals, *stack;
   struct message_hdr mglobal, mstack;
+  struct dump *next;
 };
+
+static struct dump	*last_dump;
 
 /* dumping and restoring of child process.
 */
@@ -36,6 +39,8 @@ do_dump(p)
   p->t_args[0] = (struct tree *) d;
   p->t_address = (t_addr) get_int(d->mglobal.m_buf+PC_OFF*pointer_size, pointer_size, T_UNSIGNED);
   add_to_item_list(p);
+  d->next = last_dump;
+  last_dump = d;
 }
 
 /* dumping and restoring of child process.
@@ -45,16 +50,22 @@ do_restore(p)
 {
   struct dump *d;
   
-  p = get_from_item_list((int) p->t_ival);
-  if (!p || p->t_oper != OP_DUMP) {
-	error("no such dump");
+  if (p->t_args[0]) { 
+	p = get_from_item_list((int) p->t_args[0]->t_ival);
+  	if (!p || p->t_oper != OP_DUMP) {
+		error("no such dump");
+		return;
+	}
+  	d = (struct dump *) p->t_args[0];
+  }
+  else	d = last_dump;
+
+  if (! d) {
+	error("no dumps");
 	return;
   }
 
-  d = (struct dump *) p->t_args[0];
-
   if (! put_dump(&d->mglobal, d->globals, &d->mstack, d->stack)) {
-	error("no debuggee");
   }
   do_items();
 }
@@ -66,5 +77,12 @@ free_dump(p)
 
   free(d->globals);
   free(d->stack);
+  if (d == last_dump) last_dump = d->next;
+  else {
+	register struct dump *d1 = last_dump;
+
+	while (d1->next != d) d1 = d1->next;
+	d1->next = d->next;
+  }
   free((char *) d);
 }

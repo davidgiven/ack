@@ -188,6 +188,7 @@ DbxRead(f)
   }
   close_scope();
   add_position_addr((char *) 0, (struct outname *) 0);
+  clean_tp_tab();
   rd_close();
   return (h.oh_magic == O_CONVERTED);
 }

@@ -65,8 +65,12 @@ debugger_string
 			}
   | /* tag name (only C?) */
 			{ s = NewSymbol(str, CurrentScope, TAG, currnam); }
-	'T' tag_name(s)
-
+	'T' type_name(&(s->sy_type), s)
+			{ if (! s->sy_type->ty_sym) s->sy_type->ty_sym = s; 
+			  if (s->sy_type->ty_class != T_CROSS) {
+				resolve_cross(s->sy_type);
+			  }
+			}
   | /* end scope */
 	'E' INTEGER
 			{ close_scope(); }
@@ -105,6 +109,7 @@ debugger_string
 			{ s = Lookup(findidf(str), FileScope, VAR);
 			  if (s) {
 				tmp = s->sy_type;
+				s->sy_type = 0;
 			  } else s = NewSymbol(str, FileScope, VAR, currnam);
 			}
 	'G' type(&(s->sy_type), (int *) 0, s)
@@ -224,25 +229,21 @@ string_const
 type_name(p_type *t; p_symbol sy;)
   { int type_index[2]; p_type *p; }
 :
-  type_index(type_index)
+  type_index(type_index)	{ p = tp_lookup(type_index); }
   [
-	'='			
-	type(t, type_index, sy)
-				{ p = tp_lookup(type_index);
-				  if (*p && *p != incomplete_type) {
-					if ((*p)->ty_class != T_CROSS)
-						error("Redefining (%d,%d) %d",
-						  type_index[0],
-						  type_index[1],
-						  (*p)->ty_class);
-					if (*t && *p != *t) free_type(*p);
+				{ if (*p && (*p)->ty_class != 0 &&
+				      (*p)->ty_class != T_CROSS) {
+					error("Redefining (%d,%d) %d",
+					  type_index[0],
+					  type_index[1],
+					  (*p)->ty_class);
 				  }
-				  if (*t) *p = *t; 
 				}
+	'='			
+	type(p, type_index, sy)
   |
-				{ p = tp_lookup(type_index); }
   ]
-				{ if (*p == 0) *p = incomplete_type;
+				{ if (*p == 0) *p = new_type();
 				  *t = *p;
 				}
 ;
@@ -258,33 +259,6 @@ type_index(int *type_index;)
 ]
 				{ last_index[0] = type_index[0];
 				  last_index[1] = type_index[1];
-				}
-;
-
-tag_name(p_symbol t;)
-  { int type_index[2]; p_type *p; }
-:
-  type_index(type_index)
-  '='				
-  type(&(t->sy_type), type_index, t)
-				{ p = tp_lookup(type_index);
-				  if (*p && *p != incomplete_type) {
-					if ((*p)->ty_class != T_CROSS)
-						error("Redefining (%d,%d) %d",
-						  type_index[0],
-						  type_index[1],
-						  (*p)->ty_class);
-					if (t->sy_type && *p != t->sy_type) {
-						free_type(*p);
-					}
-				  }
-				  if (t->sy_type) *p = t->sy_type; 
-				  if (*p == 0) *p = incomplete_type;
-			  	  if (t->sy_type &&
-				      t->sy_type->ty_class == T_ENUM &&
-			              currnam->on_desc != 0) {
-					t->sy_type->ty_size = currnam->on_desc;
-			  	  }
 				}
 ;
 
@@ -335,14 +309,14 @@ routine(p_symbol p;)
 ;
 
 type(p_type *ptp; int *type_index; p_symbol sy;)
-  { register p_type tp = 0;
-    p_type t1, t2;
+  { register p_type tp = *ptp ? *ptp : new_type();
+    p_type t1 = 0, t2 = 0;
     long ic1, ic2;
     int A_used = 0;
     int tclass;
     char *str;
   }
-:			{ *ptp = 0; }
+:
   [
 	/* type cross reference */
 	/* these are used in C for references to a struct, union or
@@ -362,13 +336,14 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 			  if (sy && 
 			      (sy->sy_type->ty_class == tclass ||
 			       sy->sy_type->ty_class == T_CROSS)) {
+				if (tp != *ptp) free_type(tp);
 				tp = sy->sy_type;
 			  }
 			  else {
-				tp = new_type();
 				tp->ty_class = T_CROSS;
-				tp->ty_tag = str;
+				tp->ty_size = tclass;
 				sy = NewSymbol(str, CurrentScope, TAG, (struct outname *) 0);
+				sy->sy_type = tp;
 			  }
 			}
   |
@@ -388,7 +363,8 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 	[ 'A' integer_const(&ic2)	{ A_used |= 2; }
 	| integer_const(&ic2)
 	]
-			{ *ptp = subrange_type(A_used,
+			{ if (tp != *ptp) free_type(tp);
+			  tp = subrange_type(A_used,
 					       last_index,
 					       ic1,
 					       ic2,
@@ -399,28 +375,30 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
    	 * is element type
    	 */
   	'a' type(&t1, (int *) 0, (p_symbol) 0) ';' type(&t2, (int *) 0, (p_symbol) 0)
-			{ *ptp = array_type(t1, t2); }
+			{ if (tp != *ptp) free_type(tp);
+			  tp = array_type(t1, t2); 
+			}
   |
   	/* structure type */
-  	's'		{ tp = new_type(); tp->ty_class = T_STRUCT; }
+  	's'		{ tp->ty_class = T_STRUCT; }
 	structure_type(tp, sy)
   |
   	/* union type */
-  	'u'		{ tp = new_type(); tp->ty_class = T_UNION; }
+  	'u'		{ tp->ty_class = T_UNION; }
 	structure_type(tp, sy)
   |
   	/* enumeration type */
-  	'e'		{ tp = new_type(); tp->ty_class = T_ENUM; }
+  	'e'		{ tp->ty_class = T_ENUM; }
 	enum_type(tp)
   |
   	/* pointer type */
-  	'*'		{ tp = new_type(); tp->ty_class =T_POINTER;
+  	'*'		{ tp->ty_class = T_POINTER;
 			  tp->ty_size = pointer_size;
 			}
   	type(&(tp->ty_ptrto), (int *) 0, (p_symbol) 0)
   |
   	/* function type */
-  	'f'		{ tp = new_type(); tp->ty_class = T_PROCEDURE;
+  	'f'		{ tp->ty_class = T_PROCEDURE;
 			  tp->ty_size = pointer_size;
 			}
   	type(&(tp->ty_retval), (int *) 0, (p_symbol) 0) 
@@ -432,14 +410,14 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 */
   |
   	/* procedure type */
-  	'Q'		{ tp = new_type(); tp->ty_class = T_PROCEDURE;
+  	'Q'		{ tp->ty_class = T_PROCEDURE;
 			  tp->ty_size = pointer_size;
 			}
   	type(&(tp->ty_retval), (int *) 0, (p_symbol) 0) 
 	',' param_list(tp)
   |
   	/* another procedure type */
-  	'p'		{ tp = new_type(); tp->ty_class = T_PROCEDURE;
+  	'p'		{ tp->ty_class = T_PROCEDURE;
 			  tp->ty_size = pointer_size;
 			  tp->ty_retval = void_type;
 			}
@@ -449,7 +427,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
   	/* the first integer_const represents the size in bytes,
    	 * the second one represents the low bound
    	 */
-  	'S'		{ tp = new_type(); tp->ty_class = T_SET; }
+  	'S'		{ tp->ty_class = T_SET; }
 	type(&(tp->ty_setbase), (int *) 0, (p_symbol) 0) ';'
 	[
 		integer_const(&(tp->ty_size)) ';'
@@ -459,19 +437,23 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 	]
   |
 	/* file type of Pascal */
-	'L'		{ tp = new_type(); tp->ty_class = T_FILE; }
+	'L'		{ tp->ty_class = T_FILE; }
 	type(&(tp->ty_fileof), (int *) 0, (p_symbol) 0)
   |
   	type_name(ptp, (p_symbol) 0)
 			{ if (type_index &&
-			      *ptp == incomplete_type &&
+			      (*ptp)->ty_class == 0 &&
 			      type_index[0] == last_index[0] &&
 			      type_index[1] == last_index[1]) {
-				*ptp = void_type;
+				**ptp = *void_type;
+				if (*ptp != tp) free_type(tp);
 			  }
+			  tp = *ptp;
 			}
   ]
-			{ if (! *ptp) *ptp = tp; }
+			{ if (*ptp && *ptp != tp) **ptp = *tp;
+			  else *ptp = tp;
+			}
 ;
 
 structure_type(register p_type tp; p_symbol sy;)
@@ -676,6 +658,7 @@ get_field_space(tp, s)
   }
   p = &tp->ty_fields[tp->ty_nfields++];
   p->fld_name = s;
+  p->fld_type = 0;
   sy = NewSymbol(s, CurrentScope, FIELD, currnam);
   sy->sy_field = p;
   return p;

@@ -19,6 +19,7 @@ int		debug;
 extern struct tokenname tkidf[];
 extern char	*strindex();
 extern int	eof_seen;
+extern int	interrupted;
 
 static struct tokenname shorts[] = {
 	{LIST, "l"},
@@ -113,14 +114,16 @@ error(va_alist)
   va_list ap;
   char *fmt;
 
-  va_start(ap);
-  {
-	fmt = va_arg(ap, char *);
-	fprintf(db_out, "%s: ", progname);
-	vfprintf(db_out, fmt, ap);
-	fprintf(db_out, "\n");
+  if (! interrupted) {
+  	va_start(ap);
+  	{
+		fmt = va_arg(ap, char *);
+		fprintf(db_out, "%s: ", progname);
+		vfprintf(db_out, fmt, ap);
+		fprintf(db_out, "\n");
+  	}
+  	va_end(ap);
   }
-  va_end(ap);
   errorgiven = 1;
 }
 

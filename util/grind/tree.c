@@ -19,11 +19,12 @@
 #include	"expr.h"
 
 extern FILE	*db_out;
-extern t_lineno	currline;
+t_lineno	currline;
 static t_lineno	listline;
 extern long	pointer_size;
 extern char	*strrindex();
 extern int	interrupted;
+extern int	stop_reason;
 
 p_tree		print_command;
 
@@ -59,11 +60,6 @@ mknode(va_alist)
 		p->t_filename = va_arg(ap, char *);
 		break;
 	case OP_INTEGER:
-	case OP_NEXT:
-	case OP_STEP:
-	case OP_REGS:
-	case OP_RESTORE:
-	case OP_WHERE:
 		p->t_ival = va_arg(ap, long);
 		break;
 	default:
@@ -120,6 +116,25 @@ get_addr_from_node(p)
 	
   case OP_IN:
 	a =  get_addr_from_node(p->t_args[0]);
+
+	if (p->t_args[1]) {
+		p_scope sc;
+
+		a = get_addr_from_node(p->t_args[1]);
+		sc = base_scope(get_scope_from_addr(a));
+		sym = identify(p->t_args[0], FUNCTION|PROC|MODULE);
+		if (! sym->sy_name.nm_scope ||
+		    ! sym->sy_name.nm_scope->sc_bp_opp) {
+			error("could not determine address of \"%s\"", p->t_str);
+			a = ILL_ADDR;
+			break;
+		}
+		if (sc->sc_definedby != sym) {
+			error("inconsistent address");
+			a = ILL_ADDR;
+			break;
+		}
+	}
 	p->t_address = a;
 	break;
 
@@ -209,13 +224,16 @@ print_node(p, top_level)
 	print_node(p->t_args[0], 0);
 	break;
   case OP_REGS:
-	fprintf(db_out, "regs %ld", p->t_ival);
+	fputs("regs ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_NEXT:
-	fprintf(db_out, "next %ld", p->t_ival);
+	fputs("next ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_STEP:
-	fprintf(db_out, "step %ld", p->t_ival);
+	fputs("step ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_STATUS:
 	fputs("status", db_out);
@@ -225,15 +243,16 @@ print_node(p, top_level)
 	print_position(p->t_address, 1);
 	break;
   case OP_RESTORE:
-	fprintf(db_out, "restore %ld", p->t_ival);
+	fputs("restore ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_WHERE:
-	fputs("where", db_out);
-	if (p->t_ival != 0x7fffffff) fprintf(db_out, " %ld", p->t_ival);
+	fputs("where ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_HELP:
-	fputs("help", db_out);
-	if (p->t_str != 0) fprintf(db_out, " %s", p->t_str);
+	fputs("help ", db_out);
+	print_node(p->t_args[0], 0);
 	break;
   case OP_CONT:
 	fputs("cont", db_out);
@@ -258,7 +277,7 @@ print_node(p, top_level)
 	}
 	p = p->t_args[2];
 	fputs(" { ", db_out);
-	while (p->t_oper == OP_LINK) {
+	while (p && p->t_oper == OP_LINK) {
 		print_node(p->t_args[0], 0);
 		fputs("; ", db_out);
 		p = p->t_args[1];
@@ -299,6 +318,8 @@ print_node(p, top_level)
   case OP_IN:
 	fputs("in ", db_out);
 	print_node(p->t_args[0], 0);
+	fputs(" ", db_out);
+	print_node(p->t_args[1], 0);
 	break;
   case OP_SELECT:
 	print_node(p->t_args[0], 0);
@@ -326,6 +347,8 @@ print_node(p, top_level)
   case OP_BINOP:
 	(*currlang->printop)(p);
 	break;
+  default:
+	assert(0);
   }
   if (top_level) fputs("\n", db_out);
 }
@@ -342,7 +365,8 @@ repeatable(com)
 	return 1;
   case OP_NEXT:
   case OP_STEP:
-	com->t_ival = 1;
+	freenode(com->t_args[0]);
+	com->t_args[0] = 0;
 	return 1;
   case OP_LIST:
 	freenode(com->t_args[0]);
@@ -428,7 +452,14 @@ do_list(p)
 do_file(p)
   p_tree	p;
 {
+  FILE	*f;
+
   if (p->t_args[0]) {
+	if ((f = fopen(p->t_args[0]->t_str, "r")) == NULL) {
+		error("could not open %s", p->t_args[0]->t_str);
+		return;
+	}
+	fclose(f);
 	newfile(p->t_args[0]->t_idf);
   }
   else if (listfile) fprintf(db_out, "%s\n", listfile->sy_idf->id_text);
@@ -461,7 +492,6 @@ setstop(p, kind)
   p->t_address = a;
   if (a != NO_ADDR) {
 	if (! set_or_clear_breakpoint(a, kind)) {
-		error("could not %s breakpoint", kind == SETBP ? "set" : "clear");
 		return 0;
 	}
   }
@@ -496,11 +526,7 @@ settrace(p, kind)
 	if (sc) e = sc->sc_start - 1;
 	else e = 0xffffffff;
   }
-  if (! set_or_clear_trace(a, e, kind)) {
-	error("could not %s trace", kind == SETTRACE ? "set" : "clear");
-	return 0;
-  }
-  return 1;
+  return set_or_clear_trace(a, e, kind);
 }
 
 do_trace(p)
@@ -518,6 +544,15 @@ able(p, kind)
   p_tree	p;
   int		kind;
 {
+  if (!p) {
+	if (stop_reason) {
+		able_item(stop_reason, kind);
+	}
+	else {
+		error("no current stopping point");
+	}
+	return;
+  }
   switch(p->t_oper) {
   case OP_LINK:
 	able(p->t_args[0], kind);
@@ -526,6 +561,8 @@ able(p, kind)
   case OP_INTEGER:
 	able_item((int)p->t_ival, kind);
 	break;
+  default:
+	assert(0);
   }
 }
 
@@ -545,7 +582,6 @@ do_continue(p)
   p_tree	p;
 {
   int count;
-  int first_time = 1;
 
   if (p) {
 	count = p->t_args[0]->t_ival;
@@ -553,10 +589,12 @@ do_continue(p)
 		t_addr	a = get_addr_from_position(&(p->t_args[1]->t_pos));
 		p_scope sc = get_scope_from_addr(a);
 
-		if (a == ILL_ADDR || base_scope(sc) != base_scope(CurrentScope) ||
-		    ! set_pc(a)) {
+		if (a == ILL_ADDR || base_scope(sc) != base_scope(CurrentScope)) {
 			error("cannot continue at line %d",
 			      p->t_args[1]->t_lino);
+			return;
+		}
+		if (! set_pc(a)) {
 			return;
 		}
 	}
@@ -564,27 +602,28 @@ do_continue(p)
   else count = 1;
   while (count--) {
 	if (! send_cont(count==0)) {
-		if (first_time) error("no process");
 		break;
 	}
-	first_time = 0;
+  }
+  if (count > 0) {
+	fprintf(db_out, "Only %d breakpoints skipped\n",
+		p->t_args[0]->t_ival - count);
   }
 }
 
 do_step(p)
   p_tree	p;
 {
-  if (! do_single_step(SETSS, p->t_ival)) {
-	if (! interrupted) error("no process");
+  p = p->t_args[0];
+  if (! do_single_step(SETSS, p ? p->t_ival : 1L)) {
   }
 }
 
 do_next(p)
   p_tree	p;
 {
-
-  if (! do_single_step(SETSSF, p->t_ival)) {
-	if (! interrupted) error("no process");
+  p = p->t_args[0];
+  if (! do_single_step(SETSSF, p? p->t_ival : 1L)) {
   }
 }
 
@@ -594,10 +633,11 @@ do_regs(p)
   p_tree	p;
 {
   t_addr	*buf;
-  int		n = p->t_ival;
+  int		n = 0;
 
+  p = p->t_args[0];
+  if (p) n = p->t_ival;
   if (! (buf = get_EM_regs(n))) {
-	if (! interrupted) error("no process");
 	return;
   }
   fprintf(db_out, "EM registers %d levels back:\n", n);
@@ -615,12 +655,13 @@ do_where(p)
 {
   int i = 0;
   unsigned int cnt;
-  unsigned int maxcnt = p->t_ival;
+  unsigned int maxcnt = 0xffff;
   p_scope sc;
   t_addr *buf;
   t_addr PC;
 
-  if (p->t_ival < 0) {
+  p = p->t_args[0];
+  if (p && p->t_ival < 0) {
 	for (;;) {
 		buf = get_EM_regs(i++);
 		if (! buf || ! buf[AB_OFF]) break;
@@ -634,6 +675,7 @@ do_where(p)
 	i -= maxcnt;
 	if (i < 0) i = 0;
   }
+  else if (p) maxcnt = p->t_ival;
   for (cnt = maxcnt; cnt != 0; cnt--) {
 	t_addr AB;
 
@@ -659,7 +701,16 @@ do_delete(p)
 {
   switch(p->t_oper) {
   case OP_DELETE:
-	do_delete(p->t_args[0]);
+	if (! p->t_args[0]) {
+		if (stop_reason) {
+			remove_from_item_list(stop_reason);
+			stop_reason = 0;
+		}
+		else {
+			error("no current stopping point");
+		}
+	}
+	else do_delete(p->t_args[0]);
 	break;
   case OP_LINK:
 	do_delete(p->t_args[0]);
@@ -681,6 +732,8 @@ do_delete(p)
   	}
   	freenode(p);
 	break;
+  default:
+	assert(0);
   }
 }
 
@@ -702,7 +755,7 @@ do_print(p)
 		}
 	}
 	else if (p != print_command) {
-		freenode(print_command);
+		/* freenode(print_command); No, could be in when-list */
 		print_command = p;
 	}
 	/* fall through */
@@ -746,9 +799,7 @@ do_set(p)
 	free(buf);
 	return;
   }
-  if (! set_bytes(size, buf, a)) {
-	error("could not handle this SET request");
-  }
+  set_bytes(size, buf, a);
   free(buf);
 }
 
@@ -760,13 +811,13 @@ perform(p, a)
   case OP_WHEN:
 	if (p->t_args[1] && ! eval_cond(p->t_args[1])) break;
 	p = p->t_args[2];
-	while (p->t_oper == OP_LINK) {
+	while (p && p->t_oper == OP_LINK) {
 		if (interrupted) return;
-		eval(p->t_args[0]);
+		if (p->t_args[0]) eval(p->t_args[0]);
 		p = p->t_args[1];
 	}
 	if (interrupted) return;
-	eval(p);
+	if (p) eval(p);
 	break;
   case OP_TRACE:
 	if (p->t_args[0] && p->t_args[0]->t_oper == OP_IN) {

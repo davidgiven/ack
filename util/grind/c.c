@@ -45,7 +45,7 @@ static struct langdep c = {
 	"0x%lX",
 	"%lu",
 	"0x%lX",
-	"%g",
+	"%.14g",
 
 	"{",
 	"}",

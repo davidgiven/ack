@@ -44,8 +44,8 @@ typedef struct type {
   struct symbol	*ty_sym;
   union {
      /* cross references */
-     char	    *typ_tag;
-#define ty_tag		ty_v.typ_tag
+     struct type    *typ_cross;
+#define ty_cross	ty_v.typ_cross
      /* procedures/functions: */
      struct {
 	int	    typ_nparams;
@@ -117,6 +117,6 @@ extern long
 
 extern p_type	char_type, uchar_type, bool_type, int_type,
 		long_type, double_type, string_type, address_type;
-extern p_type	void_type, incomplete_type;
+extern p_type	void_type;
 extern long	int_size, pointer_size, long_size, double_size;
 

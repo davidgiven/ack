@@ -11,6 +11,7 @@
 
 extern FILE	*db_out;
 extern int	db_ss;
+int		stop_reason;
 
 typedef struct item {
   struct item	*i_next;
@@ -51,8 +52,10 @@ pr_item(i)
 }
 
 int
-item_addr_actions(a, mess_type)
+item_addr_actions(a, mess_type, may_stop)
   t_addr	a;
+  int		mess_type;
+  int		may_stop;
 {
   /* Perform actions associated with position 'a', and return 1 if we must stop
      there, and 0 if not.
@@ -60,20 +63,22 @@ item_addr_actions(a, mess_type)
   register p_item i = item_list.il_first;
   int stopping = 0;
 
-  while (i) {
+  stop_reason = 0;
+  for (i = item_list.il_first; i != 0; i = i->i_next) {
 	register p_tree	p = i->i_node;
 
-	if (! i->i_disabled && (p->t_address == a || p->t_address == NO_ADDR)) {
+	if (! i->i_disabled
+	    && (p->t_address == a || p->t_address == NO_ADDR)) {
 		switch(p->t_oper) {
-		case OP_TRACE:
-		case OP_WHEN:
-			perform(p, a);
-			break;
 		case OP_STOP:
 			if (mess_type != DB_SS && mess_type != OK) break;
-			if (! p->t_args[1] ||
-			    eval_cond(p->t_args[1])) stopping = 1;
+			if (! p->t_args[1] || eval_cond(p->t_args[1])) {
+				if (! stop_reason) stop_reason = i->i_itemno;
+				stopping = 1;
+			}
 			break;
+		case OP_TRACE:
+		case OP_WHEN:
 		case OP_DUMP:
 		case OP_DISPLAY:
 			break;
@@ -81,7 +86,30 @@ item_addr_actions(a, mess_type)
 			assert(0);
 		}
 	}
-	i = i->i_next;
+  }
+  for (i = item_list.il_first; i != 0; i = i->i_next) {
+	register p_tree	p = i->i_node;
+
+	if (! i->i_disabled
+	    && (p->t_address == a || p->t_address == NO_ADDR)) {
+		switch(p->t_oper) {
+		case OP_TRACE:
+			if ((! stopping && mess_type != END_SS)
+			    || p->t_args[2] || ! may_stop) {
+				perform(p, a);
+			}
+			break;
+		case OP_WHEN:
+			perform(p, a);
+			break;
+		case OP_STOP:
+		case OP_DUMP:
+		case OP_DISPLAY:
+			break;
+		default:
+			assert(0);
+		}
+	}
   }
   return stopping;
 }
@@ -107,8 +135,8 @@ add_to_item_list(p)
 
   i = new_item();
   i->i_node = p;
-  if (p->t_address == NO_ADDR &&
-      (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss++;
+  if (p->t_address == NO_ADDR
+      && (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss++;
   if (item_list.il_first == 0) {
 	item_list.il_first = i;
   }
@@ -140,8 +168,8 @@ remove_from_item_list(n)
 	else item_list.il_first = i->i_next;
 	if (i == item_list.il_last) item_list.il_last = prev;
 	p = i->i_node;
-	if (p->t_address == NO_ADDR &&
-	    (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss--;
+	if (p->t_address == NO_ADDR
+	    && (p->t_oper != OP_TRACE || ! p->t_args[0])) db_ss--;
 	free_item(i);
   }
   return p;
@@ -179,8 +207,8 @@ able_item(n, kind)
 	warning("item %d already %sabled", n, kind ? "dis" : "en");
 	return;
   }
-  if (p->t_address == NO_ADDR &&
-      (p->t_oper != OP_TRACE || ! p->t_args[0])) {
+  if (p->t_address == NO_ADDR
+      && (p->t_oper != OP_TRACE || ! p->t_args[0])) {
 	db_ss += kind == 1 ? (-1) : 1;
   }
   i->i_disabled = kind;

@@ -65,8 +65,9 @@ long
 get_int(buf, size, class)
   char	*buf;
   long	size;
+  int	class;
 {
-  long l;
+  register long l;
 
   switch((int)size) {
   case sizeof(char):
@@ -140,8 +141,8 @@ int
 convert(pbuf, psize, ptp, tp, size)
   char	**pbuf;
   long	*psize;
-  p_type *ptp;
-  p_type tp;
+  register p_type *ptp;
+  register p_type tp;
   long size;
 {
   /* Convert the value in pbuf, of size psize and type ptp, to type
@@ -318,7 +319,6 @@ do_deref(p, pbuf, psize, ptp)
 	*pbuf = malloc((unsigned) *psize);
 	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, addr, *pbuf)) {
-		error("could not get value");
 		free(*pbuf);
 		*pbuf = 0;
 		return 0;
@@ -918,7 +918,6 @@ array_addr(p, paddr, psize, ptp)
 	}
 	if ((*ptp)->ty_class == T_POINTER) {
 		if (! get_bytes(pointer_size, *paddr, (char *) paddr)) {
-			error("could not get value");
 			free(buf);
 			return 0;
 		}
@@ -1021,7 +1020,6 @@ do_select(p, pbuf, psize, ptp)
 	*pbuf = malloc((unsigned int) *psize);
 	malloc_succeeded(*pbuf);
 	if (! get_bytes(*psize, a, *pbuf)) {
-		error("could not get value");
 		free(*pbuf);
 		*pbuf = 0;
 		return 0;
@@ -1105,8 +1103,6 @@ eval_expr(p, pbuf, psize, ptp)
 	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR|CONST);
 	if (! sym) return 0;
 	if (! get_value(sym, pbuf, psize)) {
-		print_node(p, 0);
-		fputs(" currently not available\n", db_out);
 		break;
 	}
 	*ptp = sym->sy_type;
@@ -1180,8 +1176,6 @@ eval_desig(p, paddr, psize, ptp)
 	sym = identify(p, VAR|REGVAR|LOCVAR|VARPAR);
 	if (! sym) return 0;
 	if (! (a = get_addr(sym, psize))) {
-		print_node(p, 0);
-		fputs(" currently not available\n", db_out);
 		break;
 	}
 	*paddr = a;

@@ -15,7 +15,7 @@
 
 p_type	int_type, char_type, short_type, long_type, bool_type;
 p_type	uint_type, uchar_type, ushort_type, ulong_type;
-p_type	void_type, incomplete_type;
+p_type	void_type;
 p_type	float_type, double_type;
 p_type	string_type, address_type;
 
@@ -257,7 +257,6 @@ init_types()
   string_type = basic_type(T_STRING, 0L);
   address_type = basic_type(T_POINTER, pointer_size);
   void_type = basic_type(T_VOID, 0L);
-  incomplete_type = basic_type(T_INCOMPLETE, 0L);
   float_type = basic_type(T_REAL, float_size);
   double_type = basic_type(T_REAL, double_size);
 
@@ -324,7 +323,7 @@ clean_tp_tab()
 		if (j) {
 			while (--j > 0) {
 				p_type p = list_row[i].row[j];
-				if (p == incomplete_type) {
+				if (p && p->ty_class == 0) {
 					error("incomplete type (%d,%d) 0x%x", i, j, &list_row[i].row[j]);
 				}
 			}

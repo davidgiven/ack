@@ -52,3 +52,8 @@ extern p_scope	get_next_scope_from_addr();
    Returns the closest enclosing scope of 'sc' that has an activation record.
 */
 extern p_scope	base_scope();
+
+/* extern int	scope_encloses(p_scope scope, from_scope);
+   Returns 1 if scope encloses from from_scope, 0 otherwise.
+*/
+extern int	scope_encloses();

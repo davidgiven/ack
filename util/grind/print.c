@@ -187,6 +187,13 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 
   if (indent == 0) indent = 4;
   switch(tp->ty_class) {
+  case T_CROSS:
+	if (! tp->ty_cross) {
+		error("unknown type");
+		break;
+	}
+	print_val(tp->ty_cross, tp_sz, addr, compressed, indent, format);
+	break;
   case T_SUBRANGE:
 	print_val(tp->ty_base, tp_sz, addr, compressed, indent, format);
 	break;

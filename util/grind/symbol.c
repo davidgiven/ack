@@ -221,14 +221,13 @@ identify(p, class_set)
 
   switch(p->t_oper) {
   case OP_NAME:
-	if (! p->t_sc) p->t_sc = CurrentScope;
-	sym = Lookfromscope(p->t_idf, class_set, p->t_sc);
+	sym = Lookfromscope(p->t_idf, class_set, CurrentScope);
 	if (sym) {
 		/* Found it. */
 		break;
 	}
 
-	/* We could not find it using scope p->t_sc; now we try to identify
+	/* We could not find it using the current scope; now we try to identify
 	   it using class_set. If this results in only one definition, we
 	   take this one.
 	*/
@@ -381,4 +380,21 @@ do_which(p)
   p_symbol	sym = identify(p->t_args[0], 0xffff);
 
   if ( sym) pr_sym(sym);
+}
+
+resolve_cross(tp)
+  p_type	tp;
+{
+  register p_symbol	sym = tp->ty_sym->sy_idf->id_def;
+
+  while (sym) {
+	if (sym->sy_class == TAG &&
+	    sym->sy_type->ty_class == T_CROSS &&
+	    sym->sy_type->ty_cross == (p_type) 0 &&
+	    sym->sy_type->ty_size == tp->ty_class &&
+	    scope_encloses(tp->ty_sym->sy_scope, sym->sy_scope)) {
+		sym->sy_type->ty_cross = tp;
+	}
+	sym = sym->sy_next;
+  }
 }

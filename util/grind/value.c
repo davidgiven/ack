@@ -5,6 +5,7 @@
 
 #include "position.h"
 #include "scope.h"
+#include "idf.h"
 #include "symbol.h"
 #include "type.h"
 #include "message.h"
@@ -38,7 +39,6 @@ get_addr(sym, psize)
   case VAR:
 	/* exists if child exists; nm_value contains addres */
 	return (t_addr) sym->sy_name.nm_value;
-	break;
   case VARPAR:
   case LOCVAR:
 	/* first find the stack frame in which it resides */
@@ -51,22 +51,20 @@ get_addr(sym, psize)
 	for (;;) {
 		sc = 0;
 		if (! (EM_regs = get_EM_regs(i++))) {
-			/* no child? */
-			break;
+			return 0;
 		}
 		if (! EM_regs[AB_OFF]) {
-			/* no more frames */
-			break;
+			error("%s not available", sym->sy_idf->id_text);
+			return 0;
 		}
 		sc = base_scope(get_scope_from_addr(EM_regs[PC_OFF]));
 		if (! sc || sc->sc_start > EM_regs[PC_OFF]) {
+			error("%s not available", sym->sy_idf->id_text);
 			sc = 0;
-			break;
+			return 0;
 		}
 		if (sc == symsc) break;		/* found it */
 	}
-
-	if (! sc) break;	/* not found */
 
 	if (sym->sy_class == LOCVAR) {
 		/* Either local variable or value parameter */
@@ -101,6 +99,7 @@ get_addr(sym, psize)
 		return a;
 	}
   default:
+	error("%s is not a variable", sym->sy_idf->id_text);
 	break;
   }
   return 0;
@@ -162,7 +161,7 @@ get_value(sym, buf, psize)
 		size = *psize;
 		*buf = malloc((unsigned) size);
 		if (! *buf) {
-			error("Could not allocate enough memory");
+			error("could not allocate enough memory");
 			break;
 		}
 		if (get_bytes(size, a, *buf)) {
