@@ -17,7 +17,7 @@ A,B		{no_side_effects(VAL)			};
 X,Y		{TRUE					};
 REG		{is_register(VAL)			};	/* register */
 SREG		{is_scratchreg(VAL)			};	/* scratch reg */
-M_ONE		{strcmp(VAL,"$037777777777") == 0	};	/* -1	*/
+M_ONE		{strcmp(VAL,"$-1") == 0			};	/* -1	*/
 LAB,L1,L2	{VAL[0] == 'I'				};	/* label */
 
 %%;
