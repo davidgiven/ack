@@ -27,6 +27,7 @@ name cem
 	mapflag -K CEM_F={CEM_F?} -R
 	mapflag -w CEM_F={CEM_F?} -w
 	mapflag -p CEM_F={DEM_F?} -p
+	mapflag -V CEM_F={DEM_F?} -V*
 	args {CPP_F?} {CEM_F?} {INCLUDES?} -D{NAME} -DEM_WSIZE={w} -DEM_PSIZE={p} \
 -DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
 -Vw{w}.{w}i{w}.{w}p{p}.{w}f{f}.{w}s{s}.{s}l{l}.{w}d{d}.{w} {CC_ALIGN?} < >
@@ -47,6 +48,7 @@ name pc
 	mapflag -e PC_F={PC_F?} -e
 	mapflag -{*} PC_F={PC_F?} -\{*}
 	mapflag -L PC_F={PC_F?} -\{l-}
+	mapflag -V* PC_F={PC_F?} -V*
 	mapflag -Pr* PC_ERRPATH=*
 	mapflag -PR* PC_PCPATH=*
 	args -Vw{w}i{w}j{w}p{p}f{d}l{l} -R{PC_PCPATH} -r{PC_ERRPATH} {PC_F?} < > {SOURCE}
@@ -60,13 +62,14 @@ name m2
 	from .mod
 	to .k
 	program {EM}/lib/em_m2
-	mapflag -I* M2_F={M2_F?} -I*
+	mapflag -I* M2_INCL={M2_INCL?} -I*
 	mapflag -L M2_F={M2_F?} -L
 	mapflag -w* M2_F={M2_F?} -w*
 	mapflag -W* M2_F={M2_F?} -W*
 	mapflag -M* M2_F={M2_F?} -M*
 	mapflag -x M2_F={M2_F?} -x
-	args {M2_F?} -I{EM}/lib/m2 {M2SYSLIB?} -Vi{w}.{w}p{p}.{w}l{l}.{w} < >
+	mapflag -V* M2_F={M2_F?} -V*
+	args -I{M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} -Vi{w}.{w}p{p}.{w}l{l}.{w} {M2_F?} < >
 	rts .mod
 	need .mod
 	callname m2
@@ -76,7 +79,8 @@ name ocm
 	to .k
 	program {EM}/lib/em_occam
 	mapflag -L OCM_F={OCM_F?} -L
-	args {OCM_F?} -Vw{w}p{p}l{l}
+	mapflag -V* OCM_F={OCM_F?} -V*
+	args -Vw{w}p{p}l{l} {OCM_F?}
 	stdin
 	stdout
 	rts .ocm
