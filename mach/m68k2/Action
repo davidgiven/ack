@@ -2,7 +2,7 @@ name "Motorola 68000 assembler"
 dir as
 end
 name "Motorola 68000 2-4 backend"
-dir cg
+dir ncg
 end
 name "Motorola 68000 2-4 conversion program"
 dir cv
