@@ -1,5 +1,5 @@
 .SILENT:
-CEM=acc
+CEM=acc -fp # -Oego -IL -s0 -SP -BO -CJ -CS -SR -UD -LV -SA
 head:
 	echo use run
 
@@ -14,7 +14,7 @@ egen:   $P.e
 	echo comparing $P.e
 	-if test -f $P.e.g ; then diff -h $P.e $P.e.g ; else echo creating $P.e.g ; cp $P.e $P.e.g ; fi
 	rm -f $P.e
-$P.e:   $P.c $(CEM)
+$P.e:   $P.c
 	$(CEM) -c.e $P.c
 $P.pcc.r: $P.pcc
 	echo running $P.pcc
