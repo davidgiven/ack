@@ -1,3 +1,3 @@
 #include "syscall.h"
-DEFINE(_chwon)
-SYSTEM(SYS_chwon)
+DEFINE(_chown)
+SYSTEM(SYS_chown)
