@@ -16,18 +16,9 @@ extern short *myalloc();
 #define oldstruct(t,p)	oldcore((short *) p,sizeof (struct t))
 
 extern line_p	newline();		/* (byte optype) */
-extern dblock_p newdblock();
-extern obj_p	newobject();
-extern proc_p	newproc();
 extern arg_p	newarg();		/* (byte argtype) */
-extern argb_p	newargb();
-extern bblock_p	newbblock();
 extern short    **newmap();		/* (short length)	*/
-extern elem_p	newelem();
 extern cset	newbitvect();		/* (short nrbytes)	*/
-extern loop_p	newloop();
-extern use_p	newuse();
-extern change_p newchange();
 extern cond_p 	newcondtab();
 
 
@@ -35,53 +26,29 @@ extern oldline() ;
 extern oldargs() ;
 extern oldargb() ;
 extern oldobjects() ;
-extern oldproc() ;
 extern olddblock() ;
-extern oldbblock();
 extern oldmap();
-extern oldelem();
 extern oldbitvect();			/* (cset s, short nrbytes)	*/
-extern oldloop();
-extern olduse();
-extern oldchange();
 extern oldcondtab();
 
-extern sym_p	newsym();
-extern prc_p	newprc();
-extern num_p	newnum();
-extern oldnum() ;
-extern oldsym();
-extern oldprc();
-extern iv_p newiv();
-extern oldiv();
-extern code_p newcinfo();
-extern oldcinfo();
-extern call_p newcall();
-extern oldcall();
-extern actual_p newactual();
-extern oldactual();
-extern formal_p newformal();
-extern oldformal();
-extern calcnt_p newcalcnt();
-extern oldcalcnt();
-extern local_p newlocal();
-extern oldlocal();
 extern short *newtable();
 extern oldtable();
-extern char **newnametab();
-extern bext_p newcfbx();
-extern oldcfbx();
-extern lpext_p newcflpx();
-extern oldcflpx();
-extern lpext_p newsrlpx();
-extern oldsrlpx();
-extern pext_p newilpx();
-extern oldilpx();
-extern bext_p newudbx();
-extern oldudbx();
-extern bext_p newlvbx();
-extern oldlvbx();
-extern bext_p newrabx();
-extern oldrabx();
-extern lpext_p newralpx();
-extern oldralpx();
+
+#define newdblock()	(dblock_p) newstruct(dblock)
+#define newobject()	(obj_p) newstruct(obj)
+#define newproc()	(proc_p) newstruct(proc)
+#define newargb()	(argb_p) newstruct(argbytes)
+#define newbblock()	(bblock_p) newstruct(bblock)
+#define newelem()	(elem_p) newstruct(elemholder)
+#define newloop()	(loop_p) newstruct(loop)
+#define newuse()	(use_p) newstruct(use)
+#define newchange()	(change_p) newstruct(change)
+#define newlocal()	(local_p) newstruct(local)
+
+#define oldproc(x)	oldstruct(proc,x)
+#define oldbblock(x)	oldstruct(bblock,x)
+#define oldelem(x)	oldstruct(elemholder,x)
+#define oldloop(x)	oldstruct(loop,x)
+#define olduse(x)	oldstruct(use,x)
+#define oldchange(x)	oldstruct(change,x)
+#define oldlocal(x)	oldstruct(local,x)
