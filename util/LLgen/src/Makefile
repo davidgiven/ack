@@ -1,6 +1,6 @@
 # $Header$
 PROF=
-LLOPT=-vvv -x
+LLOPT= # -vvv -x
 CFLAGS=$(PROF) -O -DNDEBUG # -R
 LDFLAGS=-i
 OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o name.o sets.o Lpars.o alloc.o machdep.o
@@ -14,7 +14,8 @@ all:
 		@make LLgen "LDFLAGS=$(LDFLAGS)" "CC=$(CC)" "PROF=$(PROF)" "CFLAGS=$(CFLAGS)"
 
 parser:		$(GFILES)
-		LLgen $(LLOPT) $(GFILES)
+		-LLgen $(LLOPT) $(GFILES)
+# must continue when installing LLgen
 		@touch parser
 
 LLgen:		$(OBJECTS)
@@ -22,7 +23,7 @@ LLgen:		$(OBJECTS)
 		@size LLgen
 
 pr : 
-		@pr $(FILES) ../lib/rec ../lib/incl
+		@pr $(FILES) ../lib/rec ../lib/incl Makefile
 
 lint: 
 		$(LINT) $(CFILES)
