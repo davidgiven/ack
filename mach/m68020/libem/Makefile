@@ -23,14 +23,14 @@ libem_o.a:	libem_s.a
 		march . libem_o.a
 
 clean:
-		rm -f *.o libem_o.a
+		rm -f *.o libem_o.a end.a
 
 opr :
 		make pr | opr
 
 pr:
 		@arch pv libem_s.a | pr -h `pwd`/libem_s.a
-		@pr `pwd`/end.s
+		@pr `pwd`/em_end.s `pwd`/edata.s `pwd`/etext.s `pwd`/end.s
 
 trpstr.s:	trpstr.c strscript
 		sh strscript
