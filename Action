@@ -23,6 +23,9 @@ name "Flex lexical analyzer generator"
 dir util/flex
 action "make firstinstall && make clean"
 end
+name "Include files for modules"
+dir modules/h
+end
 name "Modules"
 dir modules/src
 indir
