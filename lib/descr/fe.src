@@ -158,7 +158,7 @@ name opt2
 	from .gk
 	to .g
 	program {EM}/lib/em_opt2
-	mapflag -LIB OPT_F={OPT_F?} -L
+#	mapflag -LIB OPT_F={OPT_F?} -L
 	args {OPT_F?} <
 	optimizer
 	stdout
