@@ -14,4 +14,6 @@ opr :
 	make pr | opr
 
 pr:
-	@ar pv libem_s.a
+	@pr head_em.s
+	@arch pv libem_s.a | pr -h `pwd`/libem_s.a
+	@arch pv libem_s.vend.a | pr -h `pwd`/libem_s.vend.a
