@@ -823,6 +823,7 @@ DbRead(f)
 			else line_file->on_mptr = n->on_mptr;
 			break;
 		case N_MAIN:
+			if (! FileScope) fatal("No file scope");
 			newfile(FileScope->sc_definedby->sy_idf);
 			break;
 		case N_SLINE:
