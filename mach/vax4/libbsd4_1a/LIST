@@ -1,5 +1,6 @@
 tail_mon.a
 exit.c
+cleanup.c
 gtty.c
 stty.c
 _exit.s
