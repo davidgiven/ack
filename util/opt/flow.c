@@ -1,3 +1,7 @@
+#ifndef NORCSID
+static char rcsid[] = "$Header$";
+#endif
+
 #include "param.h"
 #include "types.h"
 #include "../../h/em_flag.h"
