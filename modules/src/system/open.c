@@ -38,7 +38,7 @@ sys_open(path, flag, filep)
 		}
 		/* Fall through */
 	case OP_WRITE:
-		if ((fd = creat(path, 0644)) < 0)
+		if ((fd = creat(path, 0666)) < 0)
 			return 0;
 		break;
 	default:
