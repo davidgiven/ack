@@ -15,13 +15,19 @@
 #include "../share/get.h"
 #include "../share/put.h"
 #include "../../../h/em_mnem.h"
+#include "../../../h/em_pseu.h"
+#include "../../../h/em_spec.h"
+#include "../../../h/em_flag.h"
+#include "../share/def.h"
 #include "cf.h"
 #include "cf_succ.h"
 #include "cf_idom.h"
 #include "cf_loop.h"
 
-#define nexcfbx()	(bext_p) newstruct(bext_cf)
+#define newcfbx()	(bext_p) newstruct(bext_cf)
 #define oldcfbx(x)	oldstruct(bext_cf,x)
+
+extern char em_flag[];
 
 STATIC cset	lpi_set;	/* set of procedures used in LPI instruction */
 STATIC cset	cai_set;	/* set of all procedures doing a CAI */
