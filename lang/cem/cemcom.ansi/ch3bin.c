@@ -39,20 +39,21 @@ ch3bin(expp, oper, expr)
 
 	any2opnd(expp, oper);
 	expp_tp = (*expp)->ex_type;
+	/* expp_tp can never be ARRAY, since any2opnd() converts the type
+	 * to pointer (except for SIZEOF and unary &).
+	 */
 	any2opnd(&expr, oper);
 	switch (oper)	{
 	case '[':				/* 3.3.2.1 */
 		/* indexing follows the commutative laws */
 		switch (expp_tp->tp_fund)	{
 		case POINTER:
-		case ARRAY:
 			break;
 		case ERRONEOUS:
 			return;
 		default:		/* unindexable */
 			switch (expr->ex_type->tp_fund)	{
 			case POINTER:
-			case ARRAY:
 				break;
 			case ERRONEOUS:
 				return;
@@ -124,6 +125,7 @@ ch3bin(expp, oper, expr)
 	case '+':
 		if (expr->ex_type->tp_fund == POINTER)	{ /* swap operands */
 			struct expr *etmp = expr;
+			expp_tp = expr->ex_type;	/* both in registers */
 			expr = *expp;
 			*expp = etmp;
 		}
@@ -295,9 +297,10 @@ pntminuspnt(expp, oper, expr)
 	*/
 	*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 	ch3cast(expp, CAST, pa_type);	/* ptr-ptr: result has pa_type	*/
-	ch3bin(expp, '/',
-		intexpr(size_of_type(up_type, "object"), pa_type->tp_fund));
-	ch3cast(expp, CAST, pa_type);	/* result will be an integgral expr */
+	ch3bin(expp, '/'
+		, intexpr(size_of_type(up_type, symbol2str(up_type->tp_fund))
+			    , pa_type->tp_fund));
+	ch3cast(expp, CAST, pa_type);	/* result will be an integral expr */
 					/* cast necessary ??? */
 }
 

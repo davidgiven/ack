@@ -200,7 +200,6 @@ any2arith(expp, oper)
 	switch (fund = (*expp)->ex_type->tp_fund)	{
 	case CHAR:
 	case SHORT:
-	case GENERIC:
 		ASSERT((*expp)->ex_type->tp_size <= int_type->tp_size);
 
 		if ((*expp)->ex_type->tp_unsigned
@@ -322,6 +321,7 @@ int2float(expp, tp)
 		converted to the floating type tp.
 	*/
 	register struct expr *exp = *expp;
+	int uns = (*expp)->ex_type->tp_unsigned;
 	
 	fp_used = 1;
 	if (is_cp_cst(exp)) {
@@ -335,7 +335,7 @@ int2float(expp, tp)
 		exp->ex_type = tp;
 		exp->ex_class = Float;
 		exp->FL_VALUE = 0;
-		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH));
+		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);
 		exp->FL_DATLAB = 0;
 	}
 	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
@@ -348,9 +348,23 @@ float2int(expp, tp)
 	/*	The expression *expp, which is of some floating type, is
 		converted to the integral type tp.
 	*/
+	register struct expr *ex = *expp;
 	
 	fp_used = 1;
-	*expp = arith2arith(tp, FLOAT2INT, *expp);
+	if (is_fp_cst(ex)) {
+		arith ar = flt_flt2arith(&ex->FL_ARITH, tp->tp_unsigned);
+
+		if (flt_status == FLT_OVFL)
+			expr_warning(ex,"overflow in float to int conversion");
+		else if (flt_status == FLT_UNFL)
+			expr_warning(ex,"underflow in float to unsigned conversion");
+		ex->ex_type = tp;
+		/* The following lines are copied from fill_int_expr */
+		ex->ex_class = Value;
+		ex->VL_CLASS = Const;
+		ex->VL_VALUE = ar;
+		cut_size(ex);
+	} else *expp = arith2arith(tp, FLOAT2INT, ex);
 }
 
 float2float(expp, tp)
@@ -426,17 +440,7 @@ opnd2logical(expp, oper)
 {
 	int fund = (*expp)->ex_type->tp_fund;
 
-	if (fund == FUNCTION || fund == ARRAY) {
-		expr_warning(*expp, "%s operand to %s",
-			symbol2str(fund),
-			symbol2str(oper));
-		if (fund == FUNCTION) {
-			function2pointer(*expp);
-		}
-		else	array2pointer(*expp);
-	}
 #ifndef NOBITFIELD
-	else
 	if (fund == FIELD)
 		field2arith(expp);
 #endif NOBITFIELD
@@ -490,6 +494,9 @@ any2opnd(expp, oper)
 {
 	if (!*expp)
 		return;
+
+	if (oper == SIZEOF || oper == '&') return;
+
 	switch ((*expp)->ex_type->tp_fund)	{
 	case CHAR:
 	case SHORT:
@@ -503,6 +510,9 @@ any2opnd(expp, oper)
 	case POINTER:
 		if ((*expp)->ex_class == String)
 			string2pointer(*expp);
+		break;
+	case FUNCTION:
+		function2pointer(*expp);
 		break;
 #ifndef NOBITFIELD
 	case FIELD:

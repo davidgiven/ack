@@ -34,12 +34,9 @@
 #define	DENSITY	2	/* see switch.[ch] for an explanation		*/
 
 
-!File: lapbuf.h
-#define	LAPBUF	4096	/* size of macro replacement buffer		*/
-
-
-!File: argbuf.h
-#define	ARGBUF	2048	/* size of macro actual parameter buffer	*/
+!File: macbuf.h
+#define	LAPBUF	128	/* initial size of macro replacement buffer	*/
+#define ARGBUF	128	/* initial size of macro parameter buffer(s)	*/
 
 
 !File: strsize.h
@@ -107,7 +104,6 @@
 
 !File: textsize.h
 #define ITEXTSIZE	32	/* 1st piece of memory for repl. text	*/
-#define RTEXTSIZE	16	/* stepsize for enlarging repl.text	*/
 
 
 !File: inputtype.h

@@ -103,7 +103,6 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{LNGDBL, "long double"},
 	{ULONG, "unsigned long"},
 	{VOID, "void"},
-	{GENERIC, "generic"},
 
 	{ARRAY, "array"},
 	{FUNCTION, "function"},

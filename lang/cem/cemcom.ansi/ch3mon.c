@@ -28,20 +28,15 @@ ch3mon(oper, expp)
 	*/
 	register struct expr *expr;
 
+	any2opnd(expp, oper);
+
 	switch (oper)	{
 	case '*':			/* 3.3.3.2 */
 		/* no FIELD type allowed	*/
-		if ((*expp)->ex_type->tp_fund == ARRAY)
-			array2pointer(*expp);
 		if ((*expp)->ex_type->tp_fund != POINTER) {
-		    if ((*expp)->ex_type->tp_fund != FUNCTION) {
 			    expr_error(*expp,
 				    "* applied to non-pointer (%s)",
 				    symbol2str((*expp)->ex_type->tp_fund));
-		    } else {
-			    warning("superfluous use of * on function");
-			    /* ignore indirection (yegh) */
-		    }
 		} else {
 			expr = *expp;
 			if (expr->ex_lvalue == 0 && expr->ex_class != String)
@@ -63,13 +58,11 @@ ch3mon(oper, expp)
 		break;
 	case '&':
 		if ((*expp)->ex_type->tp_fund == ARRAY) {
-			expr_warning(*expp, "& before array ignored");
-			array2pointer(*expp);
+			(*expp)->ex_type = pointer_to((*expp)->ex_type, 0);
 		}
 		else
 		if ((*expp)->ex_type->tp_fund == FUNCTION) {
-			expr_warning(*expp, "& before function ignored");
-			function2pointer(*expp);
+			(*expp)->ex_type = pointer_to((*expp)->ex_type, 0);
 		}
 		else
 #ifndef NOBITFIELD
@@ -135,10 +128,6 @@ ch3mon(oper, expp)
 					NILEXPR, oper, *expp);
 		break;
 	case '!':
-		if ((*expp)->ex_type->tp_fund == FUNCTION)
-			function2pointer(*expp);
-		if ((*expp)->ex_type->tp_fund != POINTER)
-			any2arith(expp, oper);
 		opnd2test(expp, '!');
 		if (is_cp_cst(*expp))	{
 			(*expp)->VL_VALUE = !((*expp)->VL_VALUE);
@@ -158,8 +147,9 @@ ch3mon(oper, expp)
 				(*expp)->VL_IDF->id_text);
 		expr = intexpr((*expp)->ex_class == String ?
 				   (arith)((*expp)->SG_LEN) :
-				   size_of_type((*expp)->ex_type, "object"),
-				INT);
+				   size_of_type((*expp)->ex_type,
+				       symbol2str((*expp)->ex_type->tp_fund))
+			       , INT);
 		expr->ex_flags |= EX_SIZEOF;
 		free_expression(*expp);
 		*expp = expr;

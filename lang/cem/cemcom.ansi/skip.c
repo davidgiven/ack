@@ -65,16 +65,16 @@ SkipToNewLine()
 	register int garbage = 0;
 
 	while ((ch = GetChar()) != '\n') {
+#ifndef NOPP
 		if (ch == '/') {
 			if ((ch = GetChar()) == '*'
-#ifndef NOPP
 			    && !InputLevel
-#endif
 			) {
 				skipcomment();
 				continue;
 			}
 		}
+#endif
 		if (!is_wsp(ch))
 			garbage = 1;
 	}

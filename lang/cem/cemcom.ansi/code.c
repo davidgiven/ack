@@ -462,17 +462,15 @@ loc_init(expr, id)
 			unknownsize = 1;
 	case STRUCT:
 	case UNION:
-		if (!tmpoffset) {	/* first time for this variable */
+		if (expr != (struct expr *) 0) {
+			break;		/* switch */
+		} else if (!tmpoffset) {/* first time for this variable */
 			tmpoffset = id->id_def->df_address;
 			id->id_def->df_address = data_label();
 			C_df_dlb((label)id->id_def->df_address);
 		} else {
-			/* generate a 'loi, sti' sequence. The peephole
-			 * optimizer will optimize this into a 'blm'
-			 * whenever possible.
-			 */
 			C_lae_dlb((label)id->id_def->df_address, (arith)0);
-			C_loi(tp->tp_size);
+			load_block(tp->tp_size, 1);
 			if (unknownsize) {
 				/* tmpoffset += tp->tp_size; */
 				unknownsize = 0;
@@ -483,7 +481,7 @@ loc_init(expr, id)
 						    , id->id_def->df_sc);
 			}
 			C_lal(tmpoffset);
-			C_sti(tp->tp_size);
+			store_block(tp->tp_size, 1);
 			id->id_def->df_address = tmpoffset;
 			tmpoffset = 0;
 		}

@@ -239,12 +239,6 @@ init()
 	reserve(tkidf);		/* mark the C reserved words as such	*/
 	init_specials(special_ids);	/* mark special ids as such	*/
 
-	/*	Treat the type generic as int, having the same size and
-		alignment requirements.
-		This type is used as top type for void pointers, and is
-		transparent to the user.
-	*/
-	gen_type = standard_type(GENERIC, 0, 1, (arith)1);
 	schar_type = standard_type(CHAR, 0, 1, (arith)1);
 	uchar_type = standard_type(CHAR, UNSIGNED, 1, (arith)1);
 
@@ -267,7 +261,7 @@ init()
 	float_type = standard_type(FLOAT, 0, float_align, float_size);
 	double_type = standard_type(DOUBLE, 0, double_align, double_size);
 	lngdbl_type = standard_type(LNGDBL, 0, lngdbl_align, lngdbl_size);
-	void_type = standard_type(VOID, 0, 1, (arith)0);
+	void_type = standard_type(VOID, 0, 1, (arith)-1);
 	label_type = standard_type(LABEL, 0, 0, (arith)0);
 	error_type = standard_type(ERRONEOUS, 0, 1, (arith)1);
 

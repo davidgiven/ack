@@ -502,7 +502,7 @@ is_zero_cst(expr)
 	case Value:
 		return expr->VL_VALUE == 0;
 	case Float:
-		flt_arith2flt((arith) 0, &var);
+		flt_arith2flt((arith) 0, &var, 0);
 		return flt_cmp(&var, &(expr->FL_ARITH)) == 0;
 	}
 	/*NOTREACHED*/

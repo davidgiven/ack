@@ -267,12 +267,32 @@ ch3cast(expp, oper, tp)
 	}
 	else
 	if (oldtp->tp_fund == POINTER && tp->tp_fund == POINTER)	{
-		if (oper == CASTAB)
-			expr_warning(*expp, "incompatible pointers");
-		else
-		if (oper != CAST)
-			expr_warning(*expp, "incompatible pointers in %s",
+		switch (oper) {
+		case EQUAL:
+		case NOTEQUAL:
+		case '=':
+		case CASTAB:
+		case RETURN:
+		    if (tp->tp_up && oldtp->tp_up) {
+			    if (tp->tp_up->tp_fund == VOID
+				&& oldtp->tp_up->tp_fund != FUNCTION) {
+				break;	/* switch */
+			    }
+			    if (oldtp->tp_up->tp_fund == VOID
+				&& tp->tp_up->tp_fund != FUNCTION) {
+				break;	/* switch */
+			    }
+		    }
+		    /* falltrough */
+		default:
+		    if (oper == CASTAB)
+			    expr_warning(*expp, "incompatible pointers");
+		    else
+			    expr_warning(*expp, "incompatible pointers in %s",
 							symbol2str(oper));
+		    break;
+		case CAST: break;
+		}
 #ifdef	LINT
 		if (oper != CAST)
 			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
@@ -552,6 +572,7 @@ ch3asgn(expp, oper, expr)
 	char *oper_string = symbol2str(oper);
 
 	/* We expect an lvalue */
+	if (fund == ARRAY || fund == FUNCTION) exp->ex_lvalue = 0;
 	if (!exp->ex_lvalue) {
 		expr_error(exp, "no lvalue in operand of %s", oper_string);
 	} else if (exp->ex_flags & EX_ILVALUE)	{
@@ -616,7 +637,6 @@ is_integral_type(tp)
 	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
-	case GENERIC:
 	case CHAR:
 	case SHORT:
 	case INT:
@@ -637,7 +657,6 @@ is_arith_type(tp)
 	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
-	case GENERIC:
 	case CHAR:
 	case SHORT:
 	case INT:

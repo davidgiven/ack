@@ -123,7 +123,6 @@ convtype(tp)
 	register struct type *tp;
 {
 	switch (tp->tp_fund)	{
-	case GENERIC:
 	case CHAR:
 	case SHORT:
 	case INT:

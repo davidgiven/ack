@@ -29,7 +29,7 @@ int token_nmb = 0;		/* number of the ahead token */
 int tk_nmb_at_last_syn_err = -5/*ERR_SHADOW*/;
 				/* token number at last syntax error */
 
-#ifndef NOPP
+#ifndef	NOPP
 int ReplaceMacros = 1;		/* replacing macros			*/
 int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
@@ -40,7 +40,7 @@ int AccFileSpecifier = 0;	/* return filespecifier <...>		*/
 int EoiForNewline = 0;		/* return EOI upon encountering newline	*/
 int File_Inserted = 0;		/* a file has just been inserted	*/
 int LexSave = 0;		/* last character read by GetChar	*/
-#define MAX_LL_DEPTH	2
+#define	MAX_LL_DEPTH	2
 
 #define	FLG_ESEEN	0x01	/* possibly a floating point number */
 #define	FLG_DOTSEEN	0x02	/* certainly a floating point number */
@@ -115,6 +115,7 @@ GetToken(ptok)
 	*/
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
+	int nlflag = 0;
 
 	token_nmb++;
 
@@ -145,7 +146,9 @@ firstline:
 				end-of-information of the line.
 			*/
 			return ptok->tk_symb = EOI;
-		while ((ch = GetChar()), (ch == '#' || class(ch) == STSKIP)) {
+
+		while ((ch = GetChar()),
+			(ch == '#' || ch == '/' || class(ch) == STSKIP)) {
 			/* blanks are allowed before hashes */
 			if (ch == '#') {
 				/* a control line follows */
@@ -154,6 +157,13 @@ firstline:
 				if (File_Inserted) {
 					File_Inserted = 0;
 					goto firstline;
+				}
+			} else if (ch == '/') {
+				if ((GetChar() == '*') && !InputLevel) {
+					skipcomment();
+				} else {
+					UnGetChar();
+					break;
 				}
 #endif	/* NOPP */
 			}
@@ -166,7 +176,7 @@ firstline:
 	case STSKIP:		/* just skip the skip characters	*/
 		goto again;
 	case STGARB:		/* garbage character			*/
-#ifndef NOPP
+#ifndef	NOPP
 garbage:
 #endif
 		if (040 < ch && ch < 0177)
@@ -252,14 +262,12 @@ garbage:
 				return ptok->tk_symb = XORAB;
 			break;
 		case '/':
-			if (nch == '*'
-#ifndef NOPP
-			    && !InputLevel
-#endif
-			) {
+#ifndef	NOPP
+			if (nch == '*' && !InputLevel) {
 				skipcomment();
 				goto again;
 			}
+#endif
 			if (nch == '=')
 				return ptok->tk_symb = DIVAB;
 			break;
@@ -323,7 +331,7 @@ garbage:
 		idef = ptok->tk_idf = idf_hashed(buf, tg - buf, hash);
 		idef->id_file = ptok->tk_file;
 		idef->id_line = ptok->tk_line;
-#ifndef NOPP
+#ifndef	NOPP
 		if (idef->id_macro && ReplaceMacros && !NoExpandNext) {
 			if (replace(idef))
 					goto again;
@@ -429,6 +437,7 @@ garbage:
 	/*NOTREACHED*/
 }
 
+#ifndef	NOPP
 skipcomment()
 {
 	/*	The last character read has been the '*' of '/_*'.  The
@@ -475,6 +484,7 @@ skipcomment()
 #endif	LINT
 	NoUnstack--;
 }
+#endif	/* NOPP */
 
 arith
 char_constant(nm)
@@ -628,7 +638,7 @@ again:
 	if (ch == '?')
 		ch = trigraph();
 
-	/* \\\n are removed from the input stream */
+	/* \<newline> is removed from the input stream */
 	if (ch == '\\') {
 		LoadChar(ch);
 		if (ch == '\n') {

@@ -33,7 +33,7 @@ struct type
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
 	*float_type, *double_type, *lngdbl_type,
-	*void_type, *gen_type, *label_type,
+	*void_type, *label_type,
 	*string_type, *funint_type, *error_type;
 
 struct type *pa_type;	/* Pointer-Arithmetic type	*/
@@ -98,22 +98,17 @@ construct_type(fund, tp, qual, count, pl)
 		dtp = function_of(tp, pl, qual);
 		break;
 	case POINTER:
-		if (tp->tp_fund == VOID) {
-			/* A void pointer has the same characteristics as a
-			   character pointer. I can't make them equal, because
-			   i would like to have the type information around */
-			tp = qualifier_type(gen_type, tp->tp_typequal);
-		}
 		dtp = pointer_to(tp, qual);
 		break;
 	case ARRAY:
-		if (count >= 0 && tp->tp_size < 0)	{
+		if (tp->tp_fund == VOID) {
+			error("cannot construct array of void");
+			count = (arith) -1;
+		} else if (count >= 0 && tp->tp_size < 0)	{
 			error("cannot construct array of unknown type");
 			count = (arith)-1;
 		}
-		else if (tp->tp_size == 0)	/* CJ */
-			strict("array elements have size 0");
-		if (count >= (arith)0)
+		if (count > (arith)0)
 			count *= tp->tp_size;
 		dtp = array_of(tp, count, qual);
 		break;
@@ -150,7 +145,8 @@ function_of(tp, pl, qual)
 	if (!dtp)	{
 		dtp = create_type(FUNCTION);
 		dtp->tp_up = tp;
-		dtp->tp_size = pointer_size;
+		/* dtp->tp_size = pointer_size; ??? */
+		dtp->tp_size = -1;	/* function size is not known */
 		dtp->tp_align = pointer_align;
 		dtp->tp_typequal = qual;
 		dtp->tp_proto = pl;

@@ -74,11 +74,13 @@ add_proto(pl, ds, dc, lvl)
 	type = declare_type(ds->ds_type, dc);
 	if (type->tp_size < (arith)0 && actual_declaration(sc, type)) {
 		extern char *symbol2str();
-		error("unknown %s-type", symbol2str(type->tp_fund));
-	} else if (type->tp_size == 0) {
-		if (idf != (struct idf *)0)
-			error("illegal use of void in argument list");
-		else pl->pl_flag = PL_VOID;
+		if (type->tp_fund != VOID)
+			error("unknown %s-type", symbol2str(type->tp_fund));
+		else {
+			if (idf != (struct idf *)0)
+				error("illegal use of void in argument list");
+			else pl->pl_flag = PL_VOID;
+		}
 	}
 
 	/*	Perform some special conversions for parameters.

@@ -14,16 +14,18 @@
 #include	"nopp.h"
 
 #ifndef NOPP
-#include	"ifdepth.h"	
-#include	"botch_free.h"	
-#include	"nparams.h"	
-#include	"parbufsize.h"	
-#include	"textsize.h"	
+#include	"ifdepth.h"
+#include	"botch_free.h"
+#include	"nparams.h"
+#include	"parbufsize.h"
+#include	"textsize.h"
 #include	"idfsize.h"	
 #include	"assert.h"
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
+#include	"macbuf.h"
+#include	"replace.h"
 
 extern char options[];
 extern	char **inctable;	/* list of include directories		*/
@@ -167,7 +169,15 @@ int to_endif;
 				NoUnstack--;
 				return;
 			}
-			UnGetChar();
+			/* A possible '/' is not pushed back */
+			if (ch == '/') {
+				ch = GetChar();
+				if (ch != '*') UnGetChar();
+				else {
+					skipcomment();
+					continue;
+				}
+			} else UnGetChar();
 			SkipToNewLine();
 			continue;
 		}
@@ -211,9 +221,10 @@ int to_endif;
 				lexerror("#else after #else");
 			++(ifstack[nestlevel]);
 			if (!to_endif && nestlevel == skiplevel) {
-				if (SkipToNewLine())
+				if (SkipToNewLine()) {
 					if (!options['o'])
 						lexstrict("garbage following #else");
+				}
 				NoUnstack--;
 				return;
 			}
@@ -222,9 +233,10 @@ int to_endif;
 		case K_ENDIF:
 			ASSERT(nestlevel > nestlow);
 			if (nestlevel == skiplevel) {
-				if (SkipToNewLine())
+				if (SkipToNewLine()) {
 					if (!options['o'])
 						lexstrict("garbage following #endif");
+				}
 				nestlevel--;
 				NoUnstack--;
 				return;
@@ -311,7 +323,7 @@ do_define()
 		return;
 	}
 	/*	there is a formal parameter list if the identifier is
-		followed immediately by a '('. 
+		followed immediately by a '('.
 	*/
 	ch = GetChar();
 	if (ch == '(') {
@@ -324,17 +336,8 @@ do_define()
 	/* read the replacement text if there is any			*/
 	ch = skipspaces(ch,0);	/* find first character of the text	*/
 	ASSERT(ch != EOI);
-	if (class(ch) == STNL) {
-		/*	Treat `#define something' as `#define something ""'
-		*/
-		repl_text = Malloc(1);
-		*repl_text = '\0';
-		length = 0;
-	}
-	else {
-		UnGetChar();
-		repl_text = get_text((nformals > 0) ? formals : 0, &length);
-	}
+	UnGetChar();
+	repl_text = get_text((nformals > 0) ? formals : 0, &length);
 	macro_def(id, repl_text, nformals, length, NOFLAG);
 	LineNumber++;
 }
@@ -382,9 +385,10 @@ do_else()
 
 do_endif()
 {
-	if (SkipToNewLine())
+	if (SkipToNewLine()) {
 		if (!options['o'])
 			lexstrict("garbage following #endif");
+	}
 	if (nestlevel <= nestlow)	{
 		lexerror("#endif without corresponding #if");
 	}
@@ -551,7 +555,7 @@ find_name(nm, index)
 	char *nm, *index[];
 {
 	/*	find_name() returns the index of "nm" in the namelist
-		"index" if it can be found there.  0 is returned if it is
+		"index" if it can be found there. 0 is returned if it is
 		not there.
 	*/
 	register char **ip = &index[0];
@@ -563,6 +567,8 @@ find_name(nm, index)
 	return 0;
 }
 
+#define	BLANK(ch)	((ch == ' ') || (ch == '\t'))
+
 char *
 get_text(formals, length)
 	char *formals[];
@@ -573,100 +579,108 @@ get_text(formals, length)
 		substituting each formal parameter by a special character
 		(non-ascii: 0200 & (order-number in the formal parameter
 		list)) in order to substitute this character later by the
-		actual parameter.  The replacement text is copied into
+		actual parameter. The replacement text is copied into
 		itself because the copied text will contain fewer or the
-		same amount of characters.  The length of the replacement
+		same amount of characters. The length of the replacement
 		text is returned.
 
 		Implementation:
-		finite automaton : we are only interested in
-		identifiers, because they might be replaced by some actual
-		parameter.  Other tokens will not be seen as such.
+		finite automaton : we are interested in
+		1-  white space, sequences must be mapped onto 1 single
+		    blank.
+		2-  identifiers, since they might be replaced by some
+		    actual parameter.
+		3-  strings and character constants, since replacing
+		    variables within them is illegal, and white-space is
+		    significant.
+		4-  comment, same as for 1
+		Other tokens will not be seen as such.
 	*/
 	register int c;
-	register int text_size;
-	char *text = Malloc(text_size = ITEXTSIZE);
-	register int pos = 0;
+	struct repl repls;
+	register struct repl *repl = &repls;
+	int blank = 0;
 
 	c = GetChar();
 
+	repl->r_ptr = repl->r_text = Malloc(repl->r_size = ITEXTSIZE);
 	while ((c != EOI) && (class(c) != STNL)) {
+		if (BLANK(c)) {
+			if (!blank++) add2repl(repl, ' ');
+			c = GetChar();
+			continue;
+		}
+
 		if (c == '\'' || c == '"') {
 			register int delim = c;
 
 			do {
-			    /* being careful, as ever */
-			    if (pos+3 >= text_size)
-				text = Realloc(text,
-					(unsigned) (text_size += RTEXTSIZE));
-			    text[pos++] = c;
-			    if (c == '\\')
-				    text[pos++] = GetChar();
+			    add2repl(repl, c);
+			    if (c == '\\') add2repl(repl, GetChar());
 			    c = GetChar();
 			} while (c != delim && c != EOI && class(c) != STNL);
-			text[pos++] = c;
+			add2repl(repl, c);
 			c = GetChar();
-		}
-		else
-		if (c == '/') {
+		} else if (c == '/') {
 			c = GetChar();
-			if (pos+1 >= text_size)
-				text = Realloc(text,
-					(unsigned) (text_size += RTEXTSIZE));
 			if (c == '*') {
 				skipcomment();
-				text[pos++] = ' ';
+				if(blank++) add2repl(repl, ' ');
 				c = GetChar();
+				continue;
 			}
-			else
-				text[pos++] = '/';
-		}
-		else
-		if (formals && (class(c) == STIDF || class(c) == STELL)) {
+			else add2repl(repl, '/');
+		} else if (formals
+			    && (class(c) == STIDF || class(c) == STELL)) {
 			char id_buf[IDFSIZE + 1];
-			register id_size = 0;
-			register n;
+			register char *idp = id_buf;
+			int n;
 
 			/* read identifier: it may be a formal parameter */
-			id_buf[id_size++] = c;
+			*idp++ = c;
 			do {
 				c = GetChar();
-				if (id_size <= IDFSIZE)
-					id_buf[id_size++] = c;
+				if (idp <= &id_buf[IDFSIZE])
+					*idp++ = c;
 			} while (in_idf(c));
-			id_buf[--id_size] = '\0';
-			if (n = find_name(id_buf, formals)) {
-			    /* construct the formal parameter mark	*/
-			    if (pos+1 >= text_size)
-				text = Realloc(text,
-					(unsigned) (text_size += RTEXTSIZE));
-			    text[pos++] = FORMALP | (char) n;
-			}
+			*--idp = '\0';
+			/* construct the formal parameter mark or identifier */
+			if (n = find_name(id_buf, formals))
+			    add2repl(repl, FORMALP | (char) n);
 			else {
-			    register char *ptr = &id_buf[0];
-
-			    while (pos + id_size >= text_size)
-				text = Realloc(text,
-					(unsigned) (text_size += RTEXTSIZE));
-			    while (text[pos++] = *ptr++)
-				/* EMPTY */ ;
-			    pos--;
+			    idp = id_buf;
+			    while (*idp) add2repl(repl, *idp++);
 			}
-		}
-		else {
-			if (pos+1 >= text_size)
-				text = Realloc(text,
-					(unsigned) (text_size += RTEXTSIZE));
-			text[pos++] = c;
+		} else if (class(c) == STNUM) {
+			add2repl(repl, c);
+			if (c == '.') {
+				c = GetChar();
+				if (class(c) != STNUM) {
+					blank = 0; continue;
+				}
+				add2repl(repl, c);
+			}
+			c = GetChar();
+			while(in_idf(c) || c == '.') {
+				add2repl(repl, c);
+				if((c = GetChar()) == 'e' || c == 'E') {
+					add2repl(repl, c);
+					c = GetChar();
+					if (c == '+' || c == '-') {
+						add2repl(repl, c);
+						c = GetChar();
+					}
+				}
+			}
+		} else {
+			add2repl(repl, c);
 			c = GetChar();
 		}
+		blank = 0;
 	}
-	text[pos++] = '\0';
-	*length = pos - 1;
-	return text;
+	*length = repl->r_ptr - repl->r_text;
+	return Realloc(repl->r_text, repl->r_ptr - repl->r_text + 1);
 }
-
-#define	BLANK(ch)	((ch == ' ') || (ch == '\t'))
 
 /*	macroeq() decides whether two macro replacement texts are
 	identical.  This version compares the texts, which occur
@@ -676,7 +690,7 @@ get_text(formals, length)
 macroeq(s, t)
 	register char *s, *t;
 {
-	
+
 	/* skip leading spaces	*/
 	while (BLANK(*s)) s++;
 	while (BLANK(*t)) t++;
@@ -746,9 +760,10 @@ do_line(l)
 	unsigned int l;
 {
 	struct token tk;
+	int t = GetToken(&tk);
 
-	LineNumber = l - 1;	/* the number of the next input line */
-	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
-		FileName = tk.tk_bts;
 	SkipToNewLine();
+	LineNumber = l;		/* the number of the next input line */
+	if (t == STRING)	/* is there a filespecifier? */
+		FileName = tk.tk_bts;
 }

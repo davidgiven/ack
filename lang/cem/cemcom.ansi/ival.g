@@ -61,9 +61,15 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
 			if (tpp) {
-			  	gen_simple_exp(tpp, expp);
-			  	free_expression(*expp);
-				*expp = 0;
+				if (is_ld_cst(*expp) || is_fp_cst(*expp) || level >= L_LOCAL) {
+					gen_simple_exp(tpp, expp);
+					free_expression(*expp);
+					*expp = 0;
+				} else {
+					expr_error(*expp,"illegal initialisation");
+					free_expression(*expp);
+					*expp = 0;
+				}
 			}
 		}
 |
@@ -152,6 +158,7 @@ gen_simple_exp(tpp, expp)
 		check_and_pad(expp, tpp);
 		break;
 	case ERRONEOUS:
+	case VOID:
 		gen_error = pack_level;
 		break;
 	default:
@@ -544,6 +551,7 @@ and also to prevent runtime coercions for compile-time constants.
 #endif NOBITFIELD
 
 	case ERRONEOUS:
+	case VOID:
 		break;
 	default:
 		crash("check_ival");
