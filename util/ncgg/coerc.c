@@ -201,7 +201,7 @@ n_coerc(ti,be,al,ge,rp,in) struct varinfo *al,*ge,*rp; iocc_t in; {
 	c3p = & l_coercs[ncoercs-1];
 	c3p->c3_texpno = ti;
 	c3p->c3_expr = be;
-	c3p->c3_prop = nallreg==0 ? 0 : allreg[0];
+	c3p->c3_prop = nallreg==0 ? -1 : allreg[0];
 	c3p->c3_repl = rp->vi_int[0];
 	c3p->c3_codep = codeindex;
 	dopattern(ti==0,VI_NULL,al,ge,rp,VI_NULL);
