@@ -39,7 +39,7 @@ string ad2str();
 #define DEBUG(string) {if(Debug) fprintf(stderr,"%-*d%s\n",4*level,level,string);}
 #endif
 
-#define BROKE() {assert(origcp!=startupcode);DEBUG("BROKE");totalcost=INFINITY;goto doreturn;}
+#define BROKE() {assert(origcp!=startupcode || !paniced);DEBUG("BROKE");totalcost=INFINITY;goto doreturn;}
 #define CHKCOST() {if (totalcost>=costlimit) BROKE();}
 
 #ifdef TABLEDEBUG
@@ -179,7 +179,7 @@ if (Debug)
 					if (dist<mindistance) {
 						if(dist==0)
 							goto gotit;
-						if (! paniced) npos=0;
+						npos=0;
 						mindistance = dist;
 					}
 #ifdef ALLOW_NEXTEM
@@ -430,11 +430,11 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 			myfree((string)besttup);
 normalfailed:	if (stackpad!=tokpatlen) {
 			if (stackpad) {
-				if (costlimit<MAXINT)
-					BROKE();
 				for (i=0;i<stackheight-stackpad;i++)
 					fakestack[i] = fakestack[i+stackpad];
 				stackheight -= stackpad;
+				if (costlimit<MAXINT)
+					BROKE();
 				totalcost += stackupto(&fakestack[stackheight-1],ply,toplevel);
 			} else
 				totalcost += stackupto(fakestack,ply,toplevel);
@@ -442,6 +442,9 @@ normalfailed:	if (stackpad!=tokpatlen) {
 			goto nextmatch;
 		}
 		totalcost += mincost;
+		for (i=0;i<stackheight-stackpad;i++)
+			fakestack[i] = fakestack[i+stackpad];
+		stackheight -= stackpad;
                 BROKE();
 	}
 	for (i=0;i<nregneeded;i++)
