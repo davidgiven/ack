@@ -85,7 +85,6 @@ proto.c
 proto.str
 replace.c
 replace.str
-scan.c
 sizes.h
 skip.c
 specials.h

@@ -463,7 +463,11 @@ struct_or_union_specifier(register struct type **tpp;)
 			   * this means that we have to declare a new
 			   * structure. (yegh)
 			   */
-			  if (DOT == ';') declare_struct(fund, idf, tpp);
+			  if (DOT == ';' &&
+			      ( !idf->id_tag ||
+				 idf->id_tag->tg_level != level ||
+				 idf->id_tag->tg_type->tp_size < 0
+			     )) declare_struct(fund, idf, tpp);
 			  else apply_struct(fund, idf, tpp);
 			}
 			/* empty */

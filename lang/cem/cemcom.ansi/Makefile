@@ -120,7 +120,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	nobitfield.h nopp.h nocross.h \
 	nparams.h numsize.h parbufsize.h pathlength.h Lpars.h \
 	strsize.h trgt_sizes.h textsize.h use_tmp.h spec_arith.h static.h \
-	regcount.h
+	regcount.h db_symtab.h
 
 HSRC = LLlex.h align.h arith.h assert.h atw.h class.h \
 	 input.h interface.h label.h level.h mes.h sizes.h specials.h \
