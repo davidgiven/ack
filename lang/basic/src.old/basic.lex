@@ -232,7 +232,7 @@ lookup()
 	for(c=cptr; *c && isalnum(*c);c++) 
 	if( isupper(*c) )
 		*c= tolower((*c));
-	for(k= keywords+kex[*cptr-'a']; *(k->name)== *cptr;k++)
+	for(k= keywords+kex[*cptr-'a']; k->name != 0 && *(k->name)== *cptr;k++)
 	if( strncmp(cptr,k->name,k->length)==0)
 	{
 		/* check functions first*/
