@@ -26,11 +26,11 @@
 #define	ILL_BREAK		(char *)(-1)	/* funny failure value */
 #endif
 extern char *SBRK();
+privatedata char *freed;
 #ifdef STORE
 #define	MAX_STORE	32
 private do_free(), Xfree(), sell_out();
 privatedata mallink *store[MAX_STORE];
-privatedata char *freed;
 #endif STORE
 
 char *
@@ -49,6 +49,7 @@ malloc(n)
 		
 		if (ml = *stp)	{
 			*stp = log_next_of(ml);
+			set_store(ml, 0);
 			check_mallinks("malloc fast exit");
 			return block_of_mallink(ml);
 		}
@@ -152,7 +153,7 @@ Xfree()
 #ifdef STORE
 
 	freed = 0;
-	if (free_of(ml))
+	if (free_of(ml) || in_store(ml))
 		return;				/* user frees free block */
 	if (size_of(ml) <= MAX_STORE*MIN_SIZE)	{
 		/* return to store */
@@ -160,6 +161,7 @@ Xfree()
 		
 		set_log_next(ml, *stp);
 		*stp = ml;
+		set_store(ml, 1);
 		check_mallinks("free fast exit");
 	}
 	else	{
@@ -283,6 +285,7 @@ sell_out()	{
 		
 		while (ml)	{
 			*stp = log_next_of(ml);
+			set_store(ml, 0);
 			do_free(ml);
 			ml = *stp;
 		}
