@@ -77,7 +77,6 @@ int procno=0;
 int curseg= -1;
 int part_size=0;
 word part_word=0;
-int endofprog=0;
 #ifdef REGVARS
 int regallowed=0;
 #endif
@@ -140,7 +139,6 @@ fillemlines() {
 			return;
 		case EOF:
 			nextispseu=1; savetab1=t;
-			endofprog=1;
 			nemlines--;
 			lp->em_instr = 0;
 			return;
@@ -552,7 +550,7 @@ char *strarg(t) {
 }
 
 bss(n,t,b) full n; {
-	register long s;
+	register long s = 0;
 
 	if (n % TEM_WSIZE)
 		fatal("bad BSS size");

@@ -21,8 +21,6 @@ int Debug=0;
 char *strtdebug="";
 #endif
 
-extern int endofprog;
-
 main(argc,argv) char **argv; {
 	register unsigned n;
 	extern unsigned cc1,cc2,cc3,cc4;

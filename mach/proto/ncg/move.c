@@ -18,8 +18,6 @@ static char rcsid[] = "$Header$";
  * Author: Hans van Staveren
  */
 
-unsigned costcalc();
-
 move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 	register move_p mp;
 	unsigned t;
