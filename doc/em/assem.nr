@@ -388,6 +388,17 @@ May not be preceded by any other pseudo, except MES's.
 .PT "MES 9,<cst>"
 Guarantees that no more than <cst> bytes of parameters are
 accessed, either directly or indirectly.
+.PT "MES 10,<cst>[,<par>]*
+This message number is reserved for the global optimizer.
+It inserts these messages in its output as hints to backends.
+<cst> indicates the type of hint.
+.PT "MES 11"
+Procedures containing this message are possible destinations of
+non-local goto's with the GTO instruction.
+Some backends keep locals in registers,
+the locals in this procedure should not be kept in registers and
+all registers containing locals of other procedures should be
+saved upon entry to this procedure.
 .PE 1
 .VS 1 1
 Each backend is free to skip irrelevant MES pseudos.
@@ -561,7 +572,7 @@ l l 15 l l.
 \&\*n:cst:>= 0:counter
 \&\*s:cst:>0 , word multiple:object size
 \&\*z:cst:>= 0 , zero or word multiple:object size
-\&\*o:cst:>= 0 , word multiple or fraction:object size
+\&\*o:cst:> 0 , word multiple or fraction:object size
 \&\*w:cst:> 0 , word multiple:object size *
 \&\*p:pro::pro identifier
 \&\*b:ilb:>= 0:label number
