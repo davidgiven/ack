@@ -184,9 +184,10 @@ STATIC bool okay_lines(avp, ocp)
 	 * as an AAR LOI/STI. This depends on the size of the array-elements.
 	 */
 	if (INSTR(ocp->oc_llast) == op_lar || INSTR(ocp->oc_llast) == op_sar) {
+		sz = array_elemsize(avp->av_othird);
+		if (sz == UNKNOWN_SIZE) return FALSE;
 		if (avp->av_instr == (byte) op_aar && time_space_ratio < 50) {
-			return (sz = array_elemsize(avp->av_othird)) <= AR_limit &&
-				sz != UNKNOWN_SIZE;
+			return sz <= AR_limit;
 		}
 	}
 	return TRUE;
