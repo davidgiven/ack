@@ -125,7 +125,7 @@ align(pos, al)
 	int i = pos % al;
 
 	if (i) return pos + (al - i);
-	return pos == 0 ? 1 : pos;
+	return pos;
 }
 
 t_type *
