@@ -120,11 +120,27 @@ main(argc, argv)
 	long			datasize ;
 	long			bsssize;
 	long			symstart;
+	long			stacksize = 0x1000;
 
 	output = 1;
 	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
-		flag=argv[1][1] ;
+		if (argv[1][1] == 'F') {
+			register char *p = &argv[1][2];
+
+			stacksize = 0;
+			while (*p) {
+				stacksize <<= 4;
+				if (*p >= '0' && *p <= '9') 
+					stacksize += *p - '0';
+				else if (*p >= 'a' && *p <= 'f')
+					stacksize += 10 + *p - 'a';
+				else if (*p >= 'A' && *p <= 'F')
+					stacksize += 10 + *p - 'A';
+				else fatal("Illegal -F option\n");
+				p++;
+			}
+		}
 		argc-- ; argv++ ;
 	}
 	switch (argc) {
@@ -200,7 +216,7 @@ main(argc, argv)
 		if ( outsect[LSECT].os_size != 0 )
 			fatal("end segment must be empty\n") ;
 	}
-	ext.xe_stksize = 0x1000;
+	ext.xe_stksize = stacksize;
 	/* Not too big, because "brk" and "sbrk"-allocated memory resides
 	   above the stack!
 	*/

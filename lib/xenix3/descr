@@ -55,6 +55,7 @@ name cv
 	from .out
 	to .cv
 	program {EM}/lib/{M}/cv
-	args < >
+	mapflag -F* CVFLAG=-F*
+	args {CVFLAG?} < >
 	outfile a.out
 end
