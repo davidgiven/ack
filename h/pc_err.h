@@ -13,6 +13,8 @@
 #define	EMOD	71
 #define	EBADF	72
 #define	EFREE	73
+#define EFUNASS	74
+#define EWIDTH	75
 
 #define	EWRITEF	96
 #define	EREADF	97

@@ -10,6 +10,8 @@
 #define	WINDOW	04000
 #define	MAGIC	0252
 
+#define	PC_BUFLEN	1024
+
 struct file {
 	char	*ptr;
 	unsigned flags;
@@ -18,7 +20,5 @@ struct file {
 	int	size;
 	int	count;
 	int	buflen;
-	char	bufadr[512];
+	char	bufadr[PC_BUFLEN];
 };
-
-#define	EXTFL(z)	((struct file *)(_hbase + _extfl[z]))
