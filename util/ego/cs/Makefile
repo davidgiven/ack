@@ -1,11 +1,10 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHR=../share
 
 LDFLAGS=
-CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT -I$(EMH)
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbu
 
@@ -75,6 +74,7 @@ depend:
 # AUTOAUTOAUTOAUTOAUTOAUTO
 cs.o:	../share/debug.h
 cs.o:	../share/go.h
+cs.o:	../share/lset.h
 cs.o:	../share/types.h
 cs.o:	cs.h
 cs.o:	cs_aux.h
@@ -95,7 +95,6 @@ cs_aux.o:	../share/lset.h
 cs_aux.o:	../share/types.h
 cs_aux.o:	cs.h
 cs_aux.o:	cs_entity.h
-cs_avail.o:	../../../h/em_mnem.h
 cs_avail.o:	../share/aux.h
 cs_avail.o:	../share/debug.h
 cs_avail.o:	../share/global.h
@@ -104,8 +103,8 @@ cs_avail.o:	../share/types.h
 cs_avail.o:	cs.h
 cs_avail.o:	cs_alloc.h
 cs_avail.o:	cs_aux.h
+cs_avail.o:	cs_debug.h
 cs_avail.o:	cs_getent.h
-cs_debug.o:	../../../h/em_spec.h
 cs_debug.o:	../share/debug.h
 cs_debug.o:	../share/lset.h
 cs_debug.o:	../share/types.h
@@ -113,8 +112,6 @@ cs_debug.o:	cs.h
 cs_debug.o:	cs_aux.h
 cs_debug.o:	cs_avail.h
 cs_debug.o:	cs_entity.h
-cs_elim.o:	../../../h/em_mnem.h
-cs_elim.o:	../../../h/em_reg.h
 cs_elim.o:	../share/alloc.h
 cs_elim.o:	../share/aux.h
 cs_elim.o:	../share/debug.h
@@ -133,8 +130,8 @@ cs_entity.o:	../share/global.h
 cs_entity.o:	../share/lset.h
 cs_entity.o:	../share/types.h
 cs_entity.o:	cs.h
+cs_entity.o:	cs_alloc.h
 cs_entity.o:	cs_aux.h
-cs_getent.o:	../../../h/em_mnem.h
 cs_getent.o:	../share/aux.h
 cs_getent.o:	../share/debug.h
 cs_getent.o:	../share/global.h
@@ -143,30 +140,24 @@ cs_getent.o:	cs.h
 cs_getent.o:	cs_aux.h
 cs_getent.o:	cs_entity.h
 cs_getent.o:	cs_stack.h
-cs_kill.o:	../../../h/em_mnem.h
 cs_kill.o:	../share/aux.h
 cs_kill.o:	../share/cset.h
 cs_kill.o:	../share/debug.h
 cs_kill.o:	../share/global.h
 cs_kill.o:	../share/lset.h
+cs_kill.o:	../share/map.h
 cs_kill.o:	../share/types.h
 cs_kill.o:	cs.h
 cs_kill.o:	cs_aux.h
 cs_kill.o:	cs_avail.h
 cs_kill.o:	cs_debug.h
 cs_kill.o:	cs_entity.h
-cs_partit.o:	../../../h/em_mnem.h
-cs_partit.o:	../../../h/em_pseu.h
-cs_partit.o:	../../../h/em_reg.h
-cs_partit.o:	../../../h/em_spec.h
 cs_partit.o:	../share/aux.h
 cs_partit.o:	../share/debug.h
 cs_partit.o:	../share/global.h
 cs_partit.o:	../share/types.h
 cs_partit.o:	cs.h
 cs_partit.o:	cs_stack.h
-cs_profit.o:	../../../h/em_mnem.h
-cs_profit.o:	../../../h/em_spec.h
 cs_profit.o:	../share/aux.h
 cs_profit.o:	../share/cset.h
 cs_profit.o:	../share/debug.h
@@ -176,6 +167,7 @@ cs_profit.o:	../share/types.h
 cs_profit.o:	cs.h
 cs_profit.o:	cs_aux.h
 cs_profit.o:	cs_avail.h
+cs_profit.o:	cs_debug.h
 cs_profit.o:	cs_partit.h
 cs_stack.o:	../share/aux.h
 cs_stack.o:	../share/debug.h
@@ -183,10 +175,6 @@ cs_stack.o:	../share/global.h
 cs_stack.o:	../share/types.h
 cs_stack.o:	cs.h
 cs_stack.o:	cs_aux.h
-cs_valno.o:	../share/debug.h
-cs_valno.o:	../share/types.h
-cs_valno.o:	cs.h
-cs_vnm.o:	../../../h/em_mnem.h
 cs_vnm.o:	../share/aux.h
 cs_vnm.o:	../share/debug.h
 cs_vnm.o:	../share/global.h

@@ -9,14 +9,14 @@
  */
 
 #include <stdio.h>
+#include <em_spec.h>
+#include <em_pseu.h>
+#include <em_flag.h>
+#include <em_mes.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/def.h"
 #include "../share/map.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_flag.h"
-#include "../../../h/em_mes.h"
 #include "ic.h"
 #include "ic_lookup.h"
 #include "ic_aux.h"

@@ -10,10 +10,10 @@
 
 
 #include <stdio.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/map.h"
-#include "../../../h/em_spec.h"
 #include "ic.h"
 #include "ic_lookup.h"
 #include "../share/alloc.h"

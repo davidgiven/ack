@@ -5,10 +5,10 @@
  */
 /* Functions to partition the huge set of EM-instructions. */
 
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_reg.h"
-#include "../../../h/em_spec.h"
+#include <em_mnem.h>
+#include <em_pseu.h>
+#include <em_reg.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "../share/aux.h"
 #include "../share/debug.h"

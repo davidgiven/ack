@@ -46,9 +46,11 @@ extern char	*mktemp();
 extern char	*strcpy(), *strcat();
 extern char	*strrindex();
 
-static char	ddump[128];		/* data label dump file */
-static char	pdump[128];		/* procedure name dump file */
-static char	tmpbufs[NTEMPS*2][128];
+static char	ddump[128] = TMP_DIR;	/* data label dump file */
+static char	pdump[128] = TMP_DIR;	/* procedure name dump file */
+static char	tmpbufs[NTEMPS*2][128] = {
+  TMP_DIR
+};
 
 static int O2phases[] = {		/* Passes for -O2 */
   CJ, BO, SP, 0
@@ -77,7 +79,6 @@ static int	nphase_args;
 
 static char	*opt_dir;
 static char	*prog_name;
-static char	*tmp_dir = TMP_DIR;
 
 static void
 cleanup()
@@ -292,8 +293,7 @@ main(argc, argv)
 		case 't':
 			if (argv[0][2] == '\0') {
 				keeptemps = 1;
-				tmp_dir = ".";
-				continue;
+				/* no continue; IL also needs this */
 			}
 			break;
 		case 'O':
@@ -307,6 +307,7 @@ main(argc, argv)
 		case 'I':
 			if (! strcmp(&argv[0][1], "IL")) {
 				add_uphase(IL);
+				add_uphase(CF);
 				continue;
 			}
 			break;
@@ -374,14 +375,16 @@ main(argc, argv)
 	fatal("no correct -P flag given");
   }
 
-  (void) strcpy(ddump, tmp_dir);
+  if (keeptemps) {
+	(void) strcpy(ddump, ".");
+	(void) strcpy(pdump, ".");
+	(void) strcpy(tmpbufs[0], ".");
+  }
   (void) strcat(ddump, "/ego.dd.XXXXXX");
   (void) mktemp(ddump);
-  (void) strcpy(pdump, tmp_dir);
   (void) strcat(pdump, "/ego.pd.XXXXXX");
   (void) mktemp(pdump);
 
-  (void) strcpy(tmpbufs[0], tmp_dir);
   (void) strcat(tmpbufs[0], "/ego.A.BB.XXXXXX");
   (void) mktemp(tmpbufs[0]);
   for (i = 2*NTEMPS-1; i >= 1; i--) {

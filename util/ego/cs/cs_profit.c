@@ -4,8 +4,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <stdio.h>
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
+#include <em_mnem.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/global.h"

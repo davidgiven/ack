@@ -8,7 +8,7 @@
  * O F   A V A I L A B L E   E X P R E S S I O N S
  */
 
-#include "../../../h/em_mnem.h"
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/aux.h"

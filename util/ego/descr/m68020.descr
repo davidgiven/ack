@@ -22,7 +22,7 @@ register score parameters:
 			default ->	(0,0)
 		general,pointer
 			(1 size)
-			default ->	(2,2)
+			default ->	(1,2)
 	constant:
 		(3 sizes)
 		in_0_8 ->	(-1,-1)
@@ -33,10 +33,10 @@ register score parameters:
 		default ->	(-1,-1)
 	address of global variable:
 		(1 size)
-		default ->	(4,4)
+		default ->	(1,4)
 	address of procedure:
 		(1 size)
-		default ->	(4,4)
+		default ->	(1,4)
 
 opening cost parameters:
 	local variable:

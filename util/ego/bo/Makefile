@@ -1,11 +1,10 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHR=../share
 
 LDFLAGS=
-CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT -I$(EMH)
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbu
 
@@ -66,7 +65,6 @@ depend:
 
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
-
 bo.o:	../share/alloc.h
 bo.o:	../share/aux.h
 bo.o:	../share/debug.h
@@ -79,6 +77,3 @@ bo.o:	../share/lset.h
 bo.o:	../share/map.h
 bo.o:	../share/put.h
 bo.o:	../share/types.h
-bo.o:	../../../h/em_mnem.h
-bo.o:	../../../h/em_pseu.h
-bo.o:	../../../h/em_spec.h

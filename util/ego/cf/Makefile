@@ -1,11 +1,10 @@
-
 EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHR=../share
 
 LDFLAGS=
-CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT -I$(EMH)
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbu
 
@@ -67,10 +66,10 @@ depend:
 
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
-cf.o:	../../../h/em_mnem.h
 cf.o:	../share/alloc.h
 cf.o:	../share/cset.h
 cf.o:	../share/debug.h
+cf.o:	../share/def.h
 cf.o:	../share/files.h
 cf.o:	../share/get.h
 cf.o:	../share/global.h
@@ -88,14 +87,11 @@ cf_idom.o:	../share/lset.h
 cf_idom.o:	../share/types.h
 cf_idom.o:	cf.h
 cf_loop.o:	../share/alloc.h
+cf_loop.o:	../share/aux.h
 cf_loop.o:	../share/debug.h
 cf_loop.o:	../share/lset.h
 cf_loop.o:	../share/types.h
 cf_loop.o:	cf.h
-cf_succ.o:	../../../h/em_flag.h
-cf_succ.o:	../../../h/em_mnem.h
-cf_succ.o:	../../../h/em_pseu.h
-cf_succ.o:	../../../h/em_spec.h
 cf_succ.o:	../share/cset.h
 cf_succ.o:	../share/debug.h
 cf_succ.o:	../share/def.h

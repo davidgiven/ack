@@ -11,11 +11,11 @@
 
 
 #include <stdio.h>
+#include <em_pseu.h>
+#include <em_spec.h>
+#include <arch.h>
 #include "../share/types.h"
 #include "../share/debug.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/arch.h"
 #include "ic.h"
 #include "ic_lookup.h"
 #include "../share/alloc.h"

@@ -10,6 +10,8 @@
 
 
 #include <stdio.h>
+#include <em_pseu.h>
+#include <em_mes.h>
 #include "../share/types.h"
 #include "ca.h"
 #include "../share/debug.h"
@@ -19,8 +21,6 @@
 #include "../share/map.h"
 #include "../share/alloc.h"
 #include "../share/get.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_mes.h"
 #include "ca_put.h"
 
 

@@ -6,7 +6,7 @@
 
 /* V A L U E N U M B E R I N G   M E T H O D */
 
-#include "../../../h/em_mnem.h"
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "../share/global.h"
 #include "../share/debug.h"

@@ -2,8 +2,9 @@ EMHOME=../../..
 EMH=$(EMHOME)/h
 EMLIB=$(EMHOME)/lib
 SHR=../share
+
 LDFLAGS=
-CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT -I$(EMH)
 CFLAGS=$(CPPFLAGS) -O
 LINTFLAGS=-hbu
 
@@ -63,10 +64,6 @@ depend:
 
 # the next lines are generated automatically
 # AUTOAUTOAUTOAUTOAUTOAUTO
-ic.o:	../../../h/em_flag.h
-ic.o:	../../../h/em_mes.h
-ic.o:	../../../h/em_pseu.h
-ic.o:	../../../h/em_spec.h
 ic.o:	../share/alloc.h
 ic.o:	../share/aux.h
 ic.o:	../share/debug.h
@@ -81,9 +78,6 @@ ic.o:	ic_aux.h
 ic.o:	ic_io.h
 ic.o:	ic_lib.h
 ic.o:	ic_lookup.h
-ic_aux.o:	../../../h/em_mnem.h
-ic_aux.o:	../../../h/em_pseu.h
-ic_aux.o:	../../../h/em_spec.h
 ic_aux.o:	../share/alloc.h
 ic_aux.o:	../share/aux.h
 ic_aux.o:	../share/debug.h
@@ -94,17 +88,12 @@ ic_aux.o:	ic.h
 ic_aux.o:	ic_aux.h
 ic_aux.o:	ic_io.h
 ic_aux.o:	ic_lookup.h
-ic_io.o:	../../../h/em_pseu.h
-ic_io.o:	../../../h/em_spec.h
 ic_io.o:	../share/alloc.h
 ic_io.o:	../share/debug.h
 ic_io.o:	../share/types.h
 ic_io.o:	ic.h
 ic_io.o:	ic_io.h
 ic_io.o:	ic_lookup.h
-ic_lib.o:	../../../h/em_mes.h
-ic_lib.o:	../../../h/em_pseu.h
-ic_lib.o:	../../../h/em_spec.h
 ic_lib.o:	../share/debug.h
 ic_lib.o:	../share/files.h
 ic_lib.o:	../share/global.h
@@ -113,7 +102,6 @@ ic_lib.o:	ic.h
 ic_lib.o:	ic_io.h
 ic_lib.o:	ic_lib.h
 ic_lib.o:	ic_lookup.h
-ic_lookup.o:	../../../h/em_spec.h
 ic_lookup.o:	../share/alloc.h
 ic_lookup.o:	../share/debug.h
 ic_lookup.o:	../share/map.h

@@ -10,14 +10,14 @@
 
 
 
+#include <em_pseu.h>
+#include <em_spec.h>
+#include <em_mnem.h>
 #include "../share/types.h"
 #include "../share/global.h"
 #include "../share/debug.h"
 #include "../share/def.h"
 #include "../share/aux.h"
-#include "../../../h/em_pseu.h"
-#include "../../../h/em_spec.h"
-#include "../../../h/em_mnem.h"
 #include "ic.h"
 #include "ic_io.h"
 #include "ic_lookup.h"

@@ -10,6 +10,8 @@
  */
 
 #include <stdio.h>
+#include <em_mnem.h>
+#include <em_spec.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/global.h"
@@ -23,8 +25,6 @@
 #include "../share/def.h"
 #include "../share/stack_chg.h"
 #include "../share/go.h"
-#include "../../../h/em_mnem.h"
-#include "../../../h/em_spec.h"
 
 
 /* Cross jumping performs optimzations like:
