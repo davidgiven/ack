@@ -29,35 +29,34 @@ STATIC get_instrs(f, s_p)
 	FILE *f;
 	cset *s_p;
 {
-	/* Read a set of instructions from inputfile f into *s_p.
-	 * Such a set must be delimited by a number lower than
-	 * the number of the first EM mnemonic.
+	/* Read a set of integers from inputfile f into *s_p.
+	 * Such a set must be delimited by a negative number.
 	 */
 	int instr;
 
 	fscanf(f, "%d", &instr);
-	while (instr >= sp_fmnem) {
+	while (instr >= 0) {
 		Cadd((Celem_t) instr, s_p);
 		fscanf(f, "%d", &instr);
 	}
 }
 
-STATIC choose_cset(f, s_p)
+STATIC choose_cset(f, s_p, max)
 	FILE *f;
 	cset *s_p;
 {
-	/* Read two compact sets of EM instructions from inputfile f.
+	/* Read two compact sets of integers from inputfile f.
 	 * Choose the first if we optimize with respect to time,
 	 * the second if we optimize with respect to space, as
 	 * indicated by time_space_ratio.
 	 */
 	cset cs1, cs2; /* Two dummy sets. */
 
-	*s_p = Cempty_set((short) sp_lmnem);
+	*s_p = Cempty_set((short) max);
 
-	cs1 = Cempty_set((short) sp_lmnem);
+	cs1 = Cempty_set((short) max);
 	get_instrs(f, &cs1);
-	cs2 = Cempty_set((short) sp_lmnem);
+	cs2 = Cempty_set((short) max);
 	get_instrs(f, &cs2);
 
 	Ccopy_set(time_space_ratio >= 50 ? cs1 : cs2, s_p);
@@ -80,13 +79,13 @@ cs_machinit(f)
 	/* Choose a set of instructions which must only be eliminated
 	 * if they are at the root of another expression.
 	 */
-	choose_cset(f, &addr_modes);
+	choose_cset(f, &addr_modes, sp_lmnem);
 
 	/* Choose a set of cheap instructions; i.e. instructions that
 	 * are cheaper than a move to save the result of such an
 	 * instruction.
 	 */
-	choose_cset(f, &cheaps);
+	choose_cset(f, &cheaps, sp_lmnem);
 
 	/* Read how many lexical levels back an LXL/LXA instruction
 	 * must at least look before it will be eliminated.
@@ -113,7 +112,7 @@ cs_machinit(f)
 	 * when they stay, and with which is not dealt in the common
 	 * decision routines.
 	 */
-	choose_cset(f, &forbidden);
+	choose_cset(f, &forbidden, sp_lmnem);
 }
 
 STATIC bool is_index(lnp)
