@@ -1,0 +1,4 @@
+if minixST -c -L -LIB -DATARI_ST -DACK $1 1>&2
+then echo `basename $1 $2`.o
+else exit 1
+fi
