@@ -496,9 +496,17 @@ again:
 					tk->TOK_INT = 0;
 					while (*np) {
 						arith old = tk->TOK_INT;
+						int c;
 
+						if (is_dig(*np)) {
+							c = *np++ - '0';
+						}
+						else {
+							assert(is_hex(*np));
+							c = *np++ - 'A' + 10;
+						}
 						tk->TOK_INT = tk->TOK_INT*base
-							+ (*np++ - '0');
+							+ c;
 						sgnswtch += (old < 0) ^
 							    (tk->TOK_INT < 0);
 					}
