@@ -77,7 +77,7 @@ struct tchars {
 #else
 #define HUPCL	     0000001    /* unused ??? */
 #endif
-/*#define COOKED     0000000	/* neither CBREAK nor RAW */
+#undef COOKED     0000000	/* neither CBREAK nor RAW */
 
 #ifdef __BDS4_2
 #define TIOCGETP (('t'<<8) | 8 | (6 << 16) | 0x40000000)
