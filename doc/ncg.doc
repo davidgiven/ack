@@ -234,7 +234,7 @@ to register variables in the rest of this document.
 .PP
 The front ends generate messages to the back ends telling them which
 local variables could go into registers.
-The information given is the offset of the local, it's size and type
+The information given is the offset of the local, its size and type
 and a scoring number, roughly the number of times it occurs.
 .PP
 The decision which variable to put in which register is taken by the
@@ -578,7 +578,7 @@ that can adjust the time/space tradeoff to all positions
 from 100% time to 100% space.
 .LP
 By supplying different code rules in certain situations
-it is possible to get a code generator that can adjust it's
+it is possible to get a code generator that can adjust its
 code to the need of the moment.
 This is probably most useful with small machines,
 experience has shown that on the larger micro's and mini's
@@ -1458,7 +1458,7 @@ with exact REG src2-REG
 This rule for
 .I sbi
 has a normal first part,
-and a hand optimized special case as it's second part.
+and a hand optimized special case as its second part.
 .DS
 .ta 7.5c
 pat mli $1==2
@@ -1604,7 +1604,7 @@ This rule shows the exchanging of two elements on the fake stack.
 Code rules using procedures
 .PP
 To start this section it must be admitted at once that the
-word procedure is chosen here mainly for it's advertising
+word procedure is chosen here mainly for its advertising
 value.
 It more resembles a glorified goto but this of course can
 not be admitted in the glossy brochures.
@@ -2681,7 +2681,7 @@ otherwise the register is marked empty.
 .NH 4
 DO_INSTR
 .PP
-This prints an instruction and it's operands.
+This prints an instruction and its operands.
 Only done on toplevel.
 .NH 4
 DO_MOVE
