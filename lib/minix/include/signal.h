@@ -1,4 +1,3 @@
-#define NR_SIGS           16	/* number of signals used */
 #define NSIG              16	/* number of signals used */
 
 #define	SIGHUP	           1	/* hangup */
@@ -18,6 +17,7 @@
 #define SIGTERM           15	/* software termination signal from kill */
 
 #define STACK_FAULT       16	/* used by kernel to signal stack fault */
+#define	NR_SIGS		NSIG
 
 int	(*signal())();
 #define	SIG_DFL	(int (*)())0

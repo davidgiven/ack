@@ -5,7 +5,71 @@
 #define ANY   (NR_PROCS+100)	/* receive(ANY, buf) accepts from any source */
 
 /* Task numbers, function codes and reply codes. */
-#define HARDWARE          -1	/* used as source on interrupt generated msgs */
+
+#define TTY         -NR_TASKS	/* terminal I/O class */
+#	define TTY_CHAR_INT 1	/* fcn code for tty input interrupt */
+#	define TTY_O_DONE   2	/* fcn code for tty output done */
+#	define TTY_READ	    3	/* fcn code for reading from tty */
+#	define TTY_WRITE    4	/* fcn code for writing to tty */
+#	define TTY_IOCTL    5	/* fcn code for ioctl */
+#	define TTY_SETPGRP  6	/* fcn code for setpgrp */
+#	define SUSPEND	 -998	/* used in interrupts when tty has no data */
+
+#ifdef AM_KERNEL
+#define	AMOEBA
+#endif
+
+#ifdef AMOEBA
+
+/* there are AM_NTASK copies of the amoeba kernel task.
+** If you change AM_NTASKS be sure to adjust kernel/table.c and fs/table.c
+*/
+#define AM_NTASKS	   4	/* number of kernel tasks of this class */
+
+#define	AMINT_CLASS	    (TTY+1)	/* Amoeba event handler */
+#define AMOEBA_CLASS 	    (AMINT_CLASS+AM_NTASKS) /* transaction handlers */
+#	define ETHER_ARRIV   1	/* fcn code for packet arrival */
+#	define AM_TRANS      2	/* amoeba transaction */		
+#	define AM_GETREQ     3	/* amoeba getrequest */
+#	define AM_PUTREP     4	/* amoeba putrep */
+#	define AM_REVIVE     6	/* used by kernel task to revive luser task */
+#	define AM_TIMEOUT    8	/* used to talk to clock task */
+#	define AM_PUTSIG     9	/* when the luser hits the DEL ! */
+#	define AM_TASK_DIED 10  /* sent if task died during a transaction */
+
+#else
+
+#define	AMOEBA_CLASS	TTY
+
+#endif AMOEBA
+
+/*
+** New class definitions should go here and should be defined relative
+** to AMOEBA_CLASS  (ie. as AMOEBA_CLASS+n, for the nth task added).
+*/
+
+#define PRINTER           -7		/* printer  I/O class */
+/* the printer uses the same commands as TTY */
+
+#define WINCHESTER        -6	/* winchester (hard) disk class */
+#define FLOPPY            -5	/* floppy disk class */
+#	define DISKINT     1	/* fcn code for disk interrupt */
+#	define DISK_READ   3	/* fcn code to DISK (must equal TTY_READ) */
+#	define DISK_WRITE  4	/* fcn code to DISK (must equal TTY_WRITE) */
+#	define DISK_IOCTL  5	/* fcn code for setting up RAM disk */
+
+#define MEM               -4	/* /dev/ram, /dev/(k)mem and /dev/null class */
+#	define RAM_DEV     0	/* minor device for /dev/ram */
+#	define MEM_DEV     1	/* minor device for /dev/mem */
+#	define KMEM_DEV    2	/* minor device for /dev/kmem */
+#	define NULL_DEV    3	/* minor device for /dev/null */
+
+#define CLOCK             -3	/* clock class */
+#	define SET_ALARM   1	/* fcn code to CLOCK, set up alarm */
+#	define CLOCK_TICK  2	/* fcn code for clock tick */
+#	define GET_TIME	   3	/* fcn code to CLOCK, get real time */
+#	define SET_TIME	   4	/* fcn code to CLOCK, set real time */
+#	define REAL_TIME   1	/* reply from CLOCK: here is real time */
 
 #define SYSTASK           -2	/* internal functions */
 #	define SYS_XIT     1	/* fcn code for sys_xit(parent, proc) */
@@ -17,38 +81,10 @@
 #	define SYS_EXEC    7	/* fcn code for sys_exec(procno, new_sp) */
 #	define SYS_TIMES   8	/* fcn code for sys_times(procno, bufptr) */
 #	define SYS_ABORT   9	/* fcn code for sys_abort() */
-#ifdef ATARI_ST
-#	define SYS_FRESH  10	/* fcn code for sys_fresh() */
-#endif
+#	define SYS_FRESH  10	/* fcn code for sys_fresh()  (Atari only) */
+#	define SYS_KILL   11	/* fcn code for sys_kill(proc, sig) */
 
-#define CLOCK             -3	/* clock class */
-#	define SET_ALARM   1	/* fcn code to CLOCK, set up alarm */
-#	define CLOCK_TICK  2	/* fcn code for clock tick */
-#	define GET_TIME	   3	/* fcn code to CLOCK, get real time */
-#	define SET_TIME	   4	/* fcn code to CLOCK, set real time */
-#	define REAL_TIME   1	/* reply from CLOCK: here is real time */
-
-#define MEM               -4	/* /dev/ram, /dev/(k)mem and /dev/null class */
-#	define RAM_DEV     0	/* minor device for /dev/ram */
-#	define MEM_DEV     1	/* minor device for /dev/mem */
-#	define KMEM_DEV    2	/* minor device for /dev/kmem */
-#	define NULL_DEV    3	/* minor device for /dev/null */
-
-#define FLOPPY            -5	/* floppy disk class */
-#define WINCHESTER        -6	/* winchester (hard) disk class */
-#	define DISKINT     1	/* fcn code for disk interupt */
-#	define DISK_READ   3	/* fcn code to DISK (must equal TTY_READ) */
-#	define DISK_WRITE  4	/* fcn code to DISK (must equal TTY_WRITE) */
-#	define DISK_IOCTL  5	/* fcn code for setting up RAM disk */
-
-#define TTY               -7	/* terminal I/O class */
-#define PRINTER           -8	/* printer  I/O class */
-#	define TTY_CHAR_INT 1	/* fcn code for tty input interrupt */
-#	define TTY_O_DONE  2	/* fcn code for tty output done */
-#	define TTY_READ	   3	/* fcn code for reading from tty */
-#	define TTY_WRITE   4	/* fcn code for writing to tty */
-#	define TTY_IOCTL   5	/* fcn code for ioctl */
-#	define SUSPEND	-998	/* used in interrupts when tty has no data */
+#define HARDWARE          -1	/* used as source on interrupt generated msgs */
 
 /* Names of message fields for messages to CLOCK task. */
 #define DELTA_TICKS    m6_l1	/* alarm interval in clock ticks */
@@ -66,9 +102,11 @@
 
 /* Names of message fields for messages to TTY task. */
 #define TTY_LINE       m2_i1	/* message parameter: terminal line */
+#define TTY_SPEED      m2_i2	/* low byte = input speed, next byte = output*/
 #define TTY_REQUEST    m2_i3	/* message parameter: ioctl request code */
 #define TTY_SPEK       m2_l1	/* message parameter: ioctl speed, erasing */
 #define TTY_FLAGS      m2_l2	/* message parameter: ioctl tty mode */
+#define TTY_PGRP       m2_i3    /* message parameter: process group */
 
 /* Names of messages fields used in reply messages from tasks. */
 #define REP_PROC_NR    m2_i1	/* # of proc on whose behalf I/O was done */
@@ -87,7 +125,7 @@
 #define USER_TIME      m4_l1	/* user time consumed by process */
 #define SYSTEM_TIME    m4_l2	/* system time consumed by process */
 #define CHILD_UTIME    m4_l3	/* user time consumed by process' children */
-#define CHILD_STIME    m4_l4	/* system time consumed by proces children */
+#define CHILD_STIME    m4_l4	/* sys time consumed by process' children */
 
 #define PROC1          m1_i1	/* indicates a process */
 #define PROC2          m1_i2	/* indicates a process */
@@ -99,3 +137,18 @@
 #define MEM_PTR        m1_p1	/* tells where memory map is for sys_newmap */
 #define CANCEL             0    /* general request to force a task to cancel */
 #define SIG_MAP        m1_i2	/* used by kernel for passing signal bit map */
+
+#ifdef AMOEBA
+
+/* names of message fields for amoeba tasks */
+#define	AM_OP		m2_i1	/* one of the above operators */
+#define	AM_PROC_NR	m2_i2	/* process # of proc doing operation */
+#define	AM_COUNT	m2_i3	/* size of buffer for operation */
+#define	AM_ADDRESS	m2_p1	/* address of buffer for operation */
+/* for communication between MM and AMOEBA_CLASS kernel tasks */
+#define	AM_STATUS	m2_i3	/* same use as REP_STATUS but for amoeba */
+#define	AM_FREE_IT	m2_l1	/* 1=not a getreq, 0=is a getreq */
+/* and a special for passing a physical address from the ethernet driver */
+#define	AM_PADDR	m2_l1	/* to the transaction layer */
+
+#endif AMOEBA

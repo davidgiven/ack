@@ -7,10 +7,16 @@
  * subject to a few conditions.
  */
 
+#ifndef i8088
+#ifndef ATARI_ST
+#error Either i8088 or ATARI ST must be defined
+#endif
+#endif
+
 #define EXTERN        extern	/* used in *.h files */
 #define PRIVATE       static	/* PRIVATE x limits the scope of x */
 #define PUBLIC			/* PUBLIC is the opposite of PRIVATE */
-#define FORWARD       static	/* some compilers require this to be 'static' */
+#define FORWARD       		/* some compilers require this to be 'static' */
 
 #define TRUE               1	/* used for turning integers into Booleans */
 #define FALSE              0	/* used for turning integers into Booleans */
@@ -22,7 +28,11 @@
 #define MAJOR	           8	/* major device = (dev>>MAJOR) & 0377 */
 #define MINOR	           0	/* minor device = (dev>>MINOR) & 0377 */
 
+#ifdef AM_KERNEL
+#define NR_TASKS	  13	/* must be 5 more than without amoeba */
+#else
 #define NR_TASKS           8	/* number of tasks in the transfer vector */
+#endif
 #define NR_PROCS          16	/* number of slots in proc table */
 #define NR_SEGS            3	/* # segments per process */
 #define T                  0	/* proc[i].mem_map[T] is for text */
@@ -64,7 +74,7 @@
 #define NO_NUM           0x8000	/* used as numerical argument to panic() */
 #define MAX_PATH            128	/* max length of path names */
 #define SIG_PUSH_BYTES	      8	/* how many bytes pushed by signal */
-#define MAX_ISTACK_BYTES   1024	/* maximum initial stack size for EXEC */
+#define MAX_ISTACK_BYTES   2048	/* maximum initial stack size for EXEC */
 
 /* Device numbers of root (RAM) and boot (fd0) devices. */
 #define ROOT_DEV (dev_nr)   256	/* major-minor device number of root dev */

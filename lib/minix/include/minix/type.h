@@ -27,7 +27,7 @@ typedef unshort dev_nr;		/* major | minor device number */
 typedef char links;		/* number of links to an inode */
 #define MAX_LINKS 	0177
 
-typedef long real_time;		/* real time in seconds since Jan 1, 1980 */
+typedef long real_time;		/* real time in seconds since Jan 1, 1970 */
 typedef long file_pos;		/* position in, or length of, a file */
 #define MAX_FILE_POS 017777777777L
 typedef short int uid;		/* user id */

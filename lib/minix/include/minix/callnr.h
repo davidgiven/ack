@@ -1,4 +1,4 @@
-#define NCALLS            69  	/* number of system calls allowed */
+#define NCALLS            70  	/* number of system calls allowed */
 
 #define EXIT	           1 
 #define FORK	           2 
@@ -48,3 +48,6 @@
 #define BRK2	          66	/* to MM: used to say how big FS & INIT are */
 #define REVIVE            67	/* to FS: revive a sleeping process */
 #define TASK_REPLY        68	/* to FS: reply code from tty task */
+
+/* The following IS a system call for amoeba transactions */
+#define	AM_SYSCALL	  69
