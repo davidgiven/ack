@@ -8,14 +8,14 @@ var d=8
 var NAME=sun
 var M=m68k4
 var P=sun2
-# I am not sure about the next line. It is the sun3 one.
-var CC_ALIGN=-Vw{w}.{s}i{w}.{s}p{p}.{s}s{s}.{s}l{l}.{s}f{f}.{w}d{d}.{w}S{s}U{s}
+var CC_ALIGN=-Vw{w}.1
 var LIB=lib/{P}/tail_
 var RT=lib/{P}/head_
 var PLIB=lib/{M}/tail_
 var PRT=lib/{M}/head_
 var CPP_F=-Dunix -Dm68k -DM68010 -Dmc68010 -D__BSD4_2
-var INCLUDES=-I{EM}/include/_tail_cc
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+var OLD_C_LIB={C_LIB}
 # 413 align is the default, rom in text
 var ALIGN=-a0:4 -a1:4 -a2:0x20000 -a3:4 -b0:0x2020
 name be
@@ -52,8 +52,11 @@ name led
 	mapflag -N ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b0:0x2000
 	mapflag -r ALIGN=-a0:4 -a1:0x20000 -a2:4 -a3:4 -b0:0x2020
 	mapflag -fp LIBFP={EM}/{PLIB}fp
+	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args  {ALIGN} (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.ocm.b.c={EM}/{RT}cc) \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.p={EM}/{PRT}pc) \
 		({RTS}:.mod={EM}/{PRT}m2) \
 		-o > < \
@@ -61,7 +64,8 @@ name led
 		(.b:{TAIL}={EM}/{PLIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
-		(.ocm.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
 		(.e:{TAIL}={EM}/{PLIB}em {EM}/{LIB}mon {EM}/{PLIB}em {EM}/lib/{M}/end_em)
 	linker

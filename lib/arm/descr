@@ -9,7 +9,9 @@ var NAME=arm
 var M=arm
 var LIB=lib/{M}/tail_
 var RT=lib/{M}/head_
-var INCLUDES=-I{EM}/include/_tail_cc -I{EM}/include/_tail_mon
+var INCLUDES=-I{EM}/include/_tail_mon
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
@@ -33,8 +35,11 @@ name asld
 	outfile a.out
 	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.ocm.b.c={EM}/{RT}cc) \
+		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.p={EM}/{RT}pc) \
 		({RTS}:.mod={EM}/{RT}m2) \
 		-o > < \
@@ -42,7 +47,8 @@ name asld
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
-		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
 		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}mon) \
 		(.mod.ocm.b.c.p:{TAIL}={EM}/{LIB}fp) \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}ros {EM}/lib/{M}/end_em)

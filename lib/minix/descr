@@ -12,9 +12,11 @@ var RT=lib/{M}/head_
 var MRT=lib/minix/head_
 var MLIB=lib/minix/tail_
 var CPP_F=-Dunix -DACK -Di8088
-var INCLUDES=-I{EM}/lib/minix/include -I{EM}/include/_tail_cc
+var INCLUDES=-I{EM}/lib/minix/include
 var ALIGN=-a0:2 -a1:16 -a2:2 -a3:2
 var CC_ALIGN=-VS2U2
+var C_LIB={EM}/{MLIB}cc.1s {EM}/{MLIB}cc.2g
+var OLD_C_LIB={C_LIB}
 name be
 	from .m.g
 	to .s
@@ -37,12 +39,18 @@ name led
 	mapflag -l* LNAME={EM}/{MLIB}*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp LIBFP={EM}/{LIB}fp
-	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{MRT}em) \
-({RTS}:.ocm.b.c={EM}/{MRT}cc) ({RTS}:.p={EM}/{MRT}pc) -o > < \
+	mapflag -ansi C_LIB={EM}/{MLIB}ac
+	args {ALIGN} {SEPID?} \
+		(.e:{HEAD}={EM}/{MRT}em) \
+		({RTS}:.ocm.b={EM}/{MRT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{MRT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{MRT}ac) \
+		({RTS}:.p={EM}/{MRT}pc) -o > < \
 		(.p:{TAIL}={EM}/{MLIB}pc) \
 		(.b:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{MLIB}ocm) \
-		(.ocm.b.c:{TAIL}={EM}/{MLIB}cc.1s {EM}/{MLIB}cc.2g) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
 		{LIBFP?} \
 		(.e:{TAIL}={EM}/{MLIB}mon {EM}/lib/minix/end_em)
 	linker

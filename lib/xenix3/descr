@@ -13,7 +13,8 @@ var ILIB=lib/i86/tail_
 var RT=lib/{IM}/head_
 var IRT=lib/i86/head_
 var CPP_F=-Dunix -D__USG
-var INCLUDES=-I{EM}/include/_tail_cc
+var C_LIB={EM}/{ILIB}cc.1s {EM}/{ILIB}cc.2g
+var OLD_C_LIB={C_LIB}
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 name be
 	from .m.g
@@ -37,8 +38,11 @@ name led
 	mapflag -l* LNAME={EM}/{ILIB}*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
+	mapflag -ansi C_LIB={EM}/{ILIB}ac
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.ocm.b.c={EM}/{IRT}cc) \
+		({RTS}:.ocm.b={EM}/{IRT}cc) \
+		({RTS}{ANSI?}:.c={EM}/{IRT}cc) \
+		({RTS}{ANSI?}:.cansi={EM}/{IRT}ac) \
 		({RTS}:.p={EM}/{IRT}pc) \
 		({RTS}:.mod={EM}/{IRT}m2) \
 		-o > < \
@@ -46,7 +50,8 @@ name led
 		(.b:{TAIL}={EM}/{ILIB}bc) \
 		(.mod:{TAIL}={EM}/{ILIB}m2) \
 		(.ocm:{TAIL}={EM}/{ILIB}ocm) \
-		(.ocm.b.c:{TAIL}={EM}/{ILIB}cc.1s {EM}/{ILIB}cc.2g) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
 		{FLOATS?} \
 		(.e:{TAIL}={EM}/{ILIB}em {EM}/{LIB}mon {EM}/lib/i86/end_em)
 	linker
