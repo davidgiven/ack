@@ -16,6 +16,7 @@ then
       arch x $1/$archname
       for file in `arch t $1/$archname`
       do
+	echo $file: 1>&2
 	suffix=`expr $file : '.*\(\..*\)'`
 	ofile=`$makecmd $file $suffix`
 	if test $? != 0
