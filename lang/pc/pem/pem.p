@@ -1236,7 +1236,8 @@ begin
 	begin if not (used in fip^.iflag) then errid(-(+019),fip^.name);
 	  if not (assigned in fip^.iflag) then errid(-(+020),fip^.name);
 	  lsp:=fip^.idtype;
-	  if level<>1 then if not (noreg in fip^.iflag) then
+	  if level<>1 then 
+	   if (refer in fip^.iflag) or not (noreg in fip^.iflag) then
 	    if (refer in fip^.iflag) or formof(lsp,[pointer]) then
 	      genreg(sz_addr,fip^.vpos.ad,reg_pointer)
 	    else
