@@ -383,6 +383,7 @@ lexwarning("Character constant out of range");
 			}
 		}
 
+		*np++ = '\0';
 		PushBack(ch);
 
 		if (np >= &buf[NUMSIZE]) {
