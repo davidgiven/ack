@@ -11,3 +11,6 @@
 #define LP_BLOCKS	lp_extend->lpx_cf.lpx_blocks
 #define LP_COUNT	lp_extend->lpx_cf.lpx_count
 #define LP_MESSY	lp_extend->lpx_cf.lpx_messy
+
+#define newcflpx()	(lpext_p) newstruct(lpext_cf)
+#define oldcflpx(x)	oldstruct(lpext_cf,x)
