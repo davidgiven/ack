@@ -1,11 +1,11 @@
-.define _sbrk
-.define _brk
+.define __sbrk
+.define __brk
 .sect .text
 .sect .rom
 .sect .data
 .sect .bss
 .sect .text
-_sbrk:		tst.b	-8(sp)
+__sbrk:		tst.b	-8(sp)
 			move.l	4(sp),d0
 			beq	1f
 			add.l	.limhp,d0
@@ -21,7 +21,7 @@ _sbrk:		tst.b	-8(sp)
 			move.l	4(sp),d1
 			add.l	d1,.limhp
 			rts
-_brk:			trap #0
+__brk:			trap #0
 .data2	0x11
 			bcc	1f
 			jmp	cerror
