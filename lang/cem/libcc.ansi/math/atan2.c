@@ -6,8 +6,8 @@
  */
 /* $Header$ */
 
-#include	<errno.h>
 #include	<math.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 double

@@ -5,20 +5,20 @@
  */
 /* $Header$ */
 
- mes 2,EM_WSIZE,EM_PSIZE
+ mes 2,_EM_WSIZE,_EM_PSIZE
 #ifndef NOFLOAT
  exp $modf
  pro $modf,0
  lal 0
- loi EM_DSIZE
+ loi _EM_DSIZE
  loc 1
- loc EM_WSIZE
- loc EM_DSIZE
+ loc _EM_WSIZE
+ loc _EM_DSIZE
  cif
- fif EM_DSIZE
- lal EM_DSIZE
- loi EM_PSIZE
- sti EM_DSIZE
- ret EM_DSIZE
+ fif _EM_DSIZE
+ lal _EM_DSIZE
+ loi _EM_PSIZE
+ sti _EM_DSIZE
+ ret _EM_DSIZE
  end
 #endif

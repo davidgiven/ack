@@ -6,13 +6,21 @@
  */
 /* $Header$ */
 
-#include	<errno.h>
 #include	<math.h>
+#include	<float.h>
+#include	<errno.h>
+#include	"localmath.h"
 
 double
 pow(double x, double y)
 {
+	/*	Simple version for now. The Cody and Waite book has
+		a very complicated, much more precise version, but
+		this version has machine-dependent arrays A1 and A2,
+		and I don't know yet how to solve this ???
+	*/
 	double dummy;
+	int	result_neg = 0;
 
 	if ((x == 0 && y == 0) ||
 	    (x < 0 && modf(y, &dummy) != 0)) {
@@ -23,13 +31,26 @@ pow(double x, double y)
 	if (x == 0) return x;
 
 	if (x < 0) {
-		double val = exp(log(-x) * y);
 		if (modf(y/2.0, &dummy) != 0) {
 			/* y was odd */
-			val = - val;
+			result_neg = 1;
 		}
-		return val;
+		x = -x;
+	}
+	x = log(x);
+	if (x < 0) {
+		x = -x;
+		y = -y;
+	}
+	if (y > M_LN_MAX_D/x) {
+		errno = ERANGE;
+		return 0;
+	}
+	if (y < M_LN_MIN_D/x) {
+		errno = ERANGE;
+		return 0;
 	}
 
-	return exp(log(x) * y);
+	x = exp(x * y);
+	return result_neg ? -x : x;
 }

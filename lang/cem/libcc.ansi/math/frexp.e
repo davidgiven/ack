@@ -5,16 +5,16 @@
  */
 /* $Header$ */
 
- mes 2,EM_WSIZE,EM_PSIZE
+ mes 2,_EM_WSIZE,_EM_PSIZE
 #ifndef NOFLOAT
  exp $frexp
  pro $frexp,0
  lal 0
- loi EM_DSIZE
- fef EM_DSIZE
- lal EM_DSIZE
- loi EM_PSIZE
- sti EM_WSIZE
- ret EM_DSIZE
+ loi _EM_DSIZE
+ fef _EM_DSIZE
+ lal _EM_DSIZE
+ loi _EM_PSIZE
+ sti _EM_WSIZE
+ ret _EM_DSIZE
  end
 #endif

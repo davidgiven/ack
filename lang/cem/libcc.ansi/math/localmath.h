@@ -39,4 +39,4 @@
 #define	POLYNOM13(x, a)	(POLYNOM12((x),(a)+1)*(x)+(a)[0])
 
 #define	M_LN_MAX_D	(M_LN2 * DBL_MAX_EXP)
-#define	M_LN_MIN_D	(M_LN2 * (DBL_MAX_EXP - 1))
+#define	M_LN_MIN_D	(M_LN2 * (DBL_MIN_EXP - 1))

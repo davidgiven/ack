@@ -6,16 +6,20 @@
  */
 /* $Header$ */
 
-#include	<errno.h>
 #include	<math.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 double
 log10(double x)
 {
-	if (x <= 0) {
+	if (x < 0) {
 		errno = EDOM;
-		return 0;
+		return -HUGE_VAL;
+	}
+	else if (x == 0) {
+		errno = ERANGE;
+		return -HUGE_VAL;
 	}
 
 	return log(x) / M_LN10;

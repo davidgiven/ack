@@ -1,10 +1,8 @@
-mlib
 localmath.h
 asin.c
 atan2.c
 atan.c
 ceil.c
-cosh.c
 fabs.c
 pow.c
 log10.c
@@ -12,8 +10,11 @@ log.c
 sin.c
 sinh.c
 sqrt.c
-ldexp.c
 tan.c
 tanh.c
 exp.c
+ldexp.c
+fmod.c
 floor.c
+frexp.e
+modf.e

@@ -6,34 +6,35 @@
  */
 /* $Header$ */
 
-#include	<errno.h>
-#include	<float.h>
 #include	<math.h>
+#include	<float.h>
+#include	<errno.h>
 #include	"localmath.h"
 
 
 double
 exp(double x)
 {
-	/*	2**x = (Q(x*x)+x*P(x*x))/(Q(x*x)-x*P(x*x)) for x in [0,0.5] */
-	/*	Hart & Cheney #1069 */
+	/*	Algorithm and coefficients from:
+			"Software manual for the elementary functions"
+			by W.J. Cody and W. Waite, Prentice-Hall, 1980
+	*/
 
-	static double p[3] = {
-		 0.2080384346694663001443843411e+07,
-		 0.3028697169744036299076048876e+05,
-		 0.6061485330061080841615584556e+02
+	static double p[] = {
+		0.25000000000000000000e+0,
+		0.75753180159422776666e-2,
+		0.31555192765684646356e-4
 	};
 
-	static double q[4] = {
-		 0.6002720360238832528230907598e+07,
-		 0.3277251518082914423057964422e+06,
-		 0.1749287689093076403844945335e+04,
-		 0.1000000000000000000000000000e+01
+	static double q[] = {
+		0.50000000000000000000e+0,
+		0.56817302698551221787e-1,
+		0.63121894374398503557e-3,
+		0.75104028399870046114e-6
 	};
-
-	int negative = x < 0;
-	int ipart, large = 0;
-	double xsqr, xPxx, Qxx;
+	double	xn, g;
+	int	n;
+	int	negative = x < 0;
 
 	if (x <= M_LN_MIN_D) {
 		if (x < M_LN_MIN_D) errno = ERANGE;
@@ -44,22 +45,24 @@ exp(double x)
 		return DBL_MAX;
 	}
 
+	if (negative) x = -x;
+ 
+	/* ??? avoid underflow ??? */
+
+	n = x * M_LOG2E + 0.5;	/* 1/ln(2) = log2(e), 0.5 added for rounding */
+	xn = n;
+	{
+		double	x1 = (long) x;
+		double	x2 = x - x1;
+
+		g = ((x1-xn*0.693359375)+x2) - xn*(-2.1219444005469058277e-4);
+	}
 	if (negative) {
-		x = -x;
+		g = -g;
+		n = -n;
 	}
-	x /= M_LN2;
-	ipart = floor(x);
-	x -= ipart;
-	if (x > 0.5) {
-		large = 1;
-		x -= 0.5;
-	}
-	xsqr = x * x;
-	xPxx = x * POLYNOM2(xsqr, p);
-	Qxx = POLYNOM3(xsqr, q);
-	x = (Qxx + xPxx) / (Qxx - xPxx);
-	if (large) x *= M_SQRT2;
-	x = ldexp(x, ipart);
-	if (negative) return 1.0/x;
-	return x;
+	xn = g * g;
+	x = g * POLYNOM2(xn, p);
+	n += 1;
+	return (ldexp(0.5 + x/(POLYNOM3(xn, q) - x), n));
 }
