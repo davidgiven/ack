@@ -175,6 +175,14 @@ first_pass(argv)
 			DEB = 1;
 			break;
 #endif
+		case 'n':
+			/* In the resulting name list, leave offsets with
+			   respect to the beginning of the section instead
+			   of absolute addresses.
+			*/
+			flagword |= NFLAG;
+			break;
+
 		case 'o':
 			/*
 			 * The `name' argument after -o is used as name
@@ -367,7 +375,7 @@ evaluate()
 {
 	norm_commons();
 	complete_sections();
-	if (!(flagword&RFLAG))
+	if (!(flagword&(RFLAG|NFLAG)))
 		change_names();
 }
 

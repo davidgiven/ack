@@ -102,6 +102,12 @@ be resolved.
 This may be useful for machines that need a last relocation step
 at load time. This flag disables the \fB\-r\fP flag.
 .TP
+.B \-n
+Usually, after linking, a value in the namelist represents an absolute
+address. Sometimes, particularly when using the \fB\-c\fR flag, it may be
+useful to have as value the offset with respect to the beginning of the
+corresponding section. The \fB\-n\fR flag enables this.
+.TP
 .B  \-s
 `Strip' the output, that is, remove the name table
 and relocation information to save space (but impair the

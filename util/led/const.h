@@ -15,6 +15,7 @@ typedef int		bool;
 #define RFLAG		0x01		/* -r flag given.		*/
 #define SFLAG		0x02		/* -s flag given.		*/
 #define CFLAG		0x04		/* -c flag given.		*/
+#define NFLAG		0x08		/* -n flag given.		*/
 
 #define PLAIN		0		/* Input file is a normal file.	*/
 #define ARCHIVE		1		/* Input file is an archive.	*/
