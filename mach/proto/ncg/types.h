@@ -20,8 +20,4 @@ typedef char * string;
 #define full		int
 #endif
 
-#if TEM_WSIZE>2
 #define word long
-#else
-#define word int
-#endif
