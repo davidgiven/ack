@@ -1,4 +1,4 @@
-name "Xenix 3.0 8086 systemcall library"
+name "Xenix 3.0 80286 systemcall library"
 dir libsys
 end
 name "Xenix 3.0 conversion program from ack.out --> Xenix 3.0 a.out"
