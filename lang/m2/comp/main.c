@@ -141,39 +141,39 @@ AddStandards()
 	extern struct def *Enter();
 	static struct node nilnode = { 0, 0, Value, 0, { INTEGER, 0}};
 
-	(void) Enter("ABS", D_PROCEDURE, std_type, S_ABS);
-	(void) Enter("CAP", D_PROCEDURE, std_type, S_CAP);
-	(void) Enter("CHR", D_PROCEDURE, std_type, S_CHR);
-	(void) Enter("FLOAT", D_PROCEDURE, std_type, S_FLOAT);
-	(void) Enter("HIGH", D_PROCEDURE, std_type, S_HIGH);
-	(void) Enter("HALT", D_PROCEDURE, std_type, S_HALT);
-	(void) Enter("EXCL", D_PROCEDURE, std_type, S_EXCL);
-	(void) Enter("DEC", D_PROCEDURE, std_type, S_DEC);
-	(void) Enter("INC", D_PROCEDURE, std_type, S_INC);
-	(void) Enter("VAL", D_PROCEDURE, std_type, S_VAL);
-	(void) Enter("NEW", D_PROCEDURE, std_type, S_NEW);
-	(void) Enter("DISPOSE", D_PROCEDURE, std_type, S_DISPOSE);
-	(void) Enter("TRUNC", D_PROCEDURE, std_type, S_TRUNC);
-	(void) Enter("SIZE", D_PROCEDURE, std_type, S_SIZE);
-	(void) Enter("ORD", D_PROCEDURE, std_type, S_ORD);
-	(void) Enter("ODD", D_PROCEDURE, std_type, S_ODD);
-	(void) Enter("MAX", D_PROCEDURE, std_type, S_MAX);
-	(void) Enter("MIN", D_PROCEDURE, std_type, S_MIN);
-	(void) Enter("INCL", D_PROCEDURE, std_type, S_INCL);
+	Enter("ABS", D_PROCEDURE, std_type, S_ABS);
+	Enter("CAP", D_PROCEDURE, std_type, S_CAP);
+	Enter("CHR", D_PROCEDURE, std_type, S_CHR);
+	Enter("FLOAT", D_PROCEDURE, std_type, S_FLOAT);
+	Enter("HIGH", D_PROCEDURE, std_type, S_HIGH);
+	Enter("HALT", D_PROCEDURE, std_type, S_HALT);
+	Enter("EXCL", D_PROCEDURE, std_type, S_EXCL);
+	Enter("DEC", D_PROCEDURE, std_type, S_DEC);
+	Enter("INC", D_PROCEDURE, std_type, S_INC);
+	Enter("VAL", D_PROCEDURE, std_type, S_VAL);
+	Enter("NEW", D_PROCEDURE, std_type, S_NEW);
+	Enter("DISPOSE", D_PROCEDURE, std_type, S_DISPOSE);
+	Enter("TRUNC", D_PROCEDURE, std_type, S_TRUNC);
+	Enter("SIZE", D_PROCEDURE, std_type, S_SIZE);
+	Enter("ORD", D_PROCEDURE, std_type, S_ORD);
+	Enter("ODD", D_PROCEDURE, std_type, S_ODD);
+	Enter("MAX", D_PROCEDURE, std_type, S_MAX);
+	Enter("MIN", D_PROCEDURE, std_type, S_MIN);
+	Enter("INCL", D_PROCEDURE, std_type, S_INCL);
 
-	(void) Enter("CHAR", D_TYPE, char_type, 0);
-	(void) Enter("INTEGER", D_TYPE, int_type, 0);
-	(void) Enter("LONGINT", D_TYPE, longint_type, 0);
-	(void) Enter("REAL", D_TYPE, real_type, 0);
-	(void) Enter("LONGREAL", D_TYPE, longreal_type, 0);
-	(void) Enter("BOOLEAN", D_TYPE, bool_type, 0);
-	(void) Enter("CARDINAL", D_TYPE, card_type, 0);
+	Enter("CHAR", D_TYPE, char_type, 0);
+	Enter("INTEGER", D_TYPE, int_type, 0);
+	Enter("LONGINT", D_TYPE, longint_type, 0);
+	Enter("REAL", D_TYPE, real_type, 0);
+	Enter("LONGREAL", D_TYPE, longreal_type, 0);
+	Enter("BOOLEAN", D_TYPE, bool_type, 0);
+	Enter("CARDINAL", D_TYPE, card_type, 0);
 	df = Enter("NIL", D_CONST, address_type, 0);
 	df->con_const = &nilnode;
 	nilnode.nd_INT = 0;
 	nilnode.nd_type = address_type;
 
-	(void) Enter("PROC",
+	Enter("PROC",
 		     D_TYPE,
 		     construct_type(T_PROCEDURE, NULLTYPE),
 		     0);
@@ -200,11 +200,11 @@ do_SYSTEM()
 	/*	Simulate the reading of the SYSTEM definition module
 	*/
 	open_scope(CLOSEDSCOPE);
-	(void) Enter("WORD", D_TYPE, word_type, 0);
-	(void) Enter("BYTE", D_TYPE, byte_type, 0);
-	(void) Enter("ADDRESS", D_TYPE, address_type, 0);
-	(void) Enter("ADR", D_PROCEDURE, std_type, S_ADR);
-	(void) Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
+	Enter("WORD", D_TYPE, word_type, 0);
+	Enter("BYTE", D_TYPE, byte_type, 0);
+	Enter("ADDRESS", D_TYPE, address_type, 0);
+	Enter("ADR", D_PROCEDURE, std_type, S_ADR);
+	Enter("TSIZE", D_PROCEDURE, std_type, S_TSIZE);
 	if (!InsertText(SYSTEM, sizeof(SYSTEM) - 1)) {
 		fatal("could not insert text");
 	}

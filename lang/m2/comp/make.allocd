@@ -10,7 +10,7 @@ extern char *std_alloc();\
 #else\
 #define	new_\1() ((struct \1 *) st_alloc((char **)\&h_\1, sizeof(struct \1), \2))\
 #endif\
-#define	free_\1(p) st_free(p, h_\1, sizeof(struct \1))\
+#define	free_\1(p) st_free(p, \&h_\1, sizeof(struct \1))\
 :' -e '
 s:^.*[ 	]STATICALLOCDEF[ 	].*"\(.*\)"[ 	]*\([0-9][0-9]*\).*$:\
 /* allocation definitions of struct \1 */\
@@ -22,5 +22,5 @@ int cnt_\1;\
 #else\
 #define	new_\1() ((struct \1 *) st_alloc((char **)\&h_\1, sizeof(struct \1), \2))\
 #endif\
-#define	free_\1(p) st_free(p, h_\1, sizeof(struct \1))\
+#define	free_\1(p) st_free(p, \&h_\1, sizeof(struct \1))\
 :'
