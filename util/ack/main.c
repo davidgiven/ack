@@ -36,6 +36,7 @@ main(argc,argv) char **argv ; {
 	register list_elem *elem ;
 	register char *frontend ;
 	register int *n_sig ;
+	register trf *phase ;
 
 	progname=argv[0];
 	varinit();
@@ -45,10 +46,24 @@ main(argc,argv) char **argv ; {
 	} else {
 		setlist(FRONTENDS);
 	}
+	if ( callname ) {
+		if ( machine ) {
+			fuerror("can not produce code for both %s and %s",
+				callname,machine) ;
+		}
+		machine= callname ;
+	}
+	if ( !machine && ! (machine=getenv("ACKM")) ) {
+#ifdef ACKM
+		machine= ACKM;          /* The default machine */
+#else
+		fuerror("No machine specified") ;
+#endif
+	}
 	setlist(machine);
 	transini();
 	scanneeds();
-	template= mktemp(ACKNAME) ;
+	sprintf(template,TMPNAME,getpid()) ;
 	if ( n_error && !k_flag ) return n_error ;
 
 	for ( n_sig=sigs ; *n_sig ; n_sig++ ) {
@@ -56,23 +71,47 @@ main(argc,argv) char **argv ; {
 			signal(*n_sig,SIG_IGN) ;
 		}
 	}
-	scanlist ( l_first(arguments), elem ) {
-		if ( !process(l_content(*elem)) && !k_flag ) return 1 ;
-	}
-	orig.p_path= (char *)0 ;
 
-	if ( !combiner && !stopsuffix ) {
-		/* Call combiner directly without any transformation */
+	if ( !stopsuffix ) {
+		/* Find the linker, needed for argument building */
 		scanlist(l_first(tr_list),elem) {
-			if ( t_cont(*elem)->t_combine ) {
-				combiner= t_cont(*elem) ;
+			if ( t_cont(*elem)->t_linker ) {
+				linker= t_cont(*elem) ;
+				linker->t_do= YES ;
 			}
 		}
 	}
 
-	if ( !combiner || n_error ) return n_error ;
+	scanlist ( l_first(arguments), elem ) {
+		if ( !process(l_content(*elem)) && !k_flag ) return 1 ;
+	}
+	orig.p_path= (char *)0 ;
+	if ( !rts ) rts="" ;
+	setsvar(keeps(RTS),rts) ;
 
-	if ( !do_combine() ) return 1 ;
+	scanlist(l_first(tr_list),elem) {
+		phase=t_cont(*elem) ;
+		if ( phase->t_combine && phase->t_do ) {
+			if ( phase->t_blocked ) {
+#ifdef DEBUG
+				if ( debug ) {
+					vprint("phase %s is blocked\n",
+						phase->t_name) ;
+				}
+#endif
+				disc_inputs(phase) ;
+				continue ;
+			}
+			orig.p_keep=YES ;
+			orig.p_keeps=NO ;
+			orig.p_path=phase->t_origname ;
+			if ( p_basename ) throws(p_basename) ;
+			p_basename= keeps(basename(orig.p_path)) ;
+			if ( !startrf(phase) && !k_flag ) return 1 ;
+		}
+	}
+
+	if ( n_error ) return n_error ;
 
 	if ( g_flag ) {
 		return do_run();
@@ -87,7 +126,13 @@ char *srcvar() {
 
 varinit() {
 	/* initialize the string variables */
-	setsvar(keeps(HOME),keeps(EM_DIR)) ;
+	register char *envstr ;
+
+	if ( envstr=getenv("EM_DIR") ) {
+		setsvar(keeps(HOME),keeps(envstr)) ;
+	} else {
+		setsvar(keeps(HOME),keeps(EM_DIR)) ;
+	}
 	setpvar(keeps(SRC),srcvar)  ;
 }
 
@@ -147,9 +192,14 @@ vieuwargs(argc,argv) char **argv ; {
 			}
 			keeptail(&argp[2]); eaten=1 ;
 			break ;
-	   case '.':    if ( rts ) fuerror("Two run-time systems?") ;
-			rts= &argp[1] ; eaten=1;
-			keephead(rts) ; keeptail(rts) ;
+	   case '.':    if ( rts ) {
+	   			if ( strcmp(rts,&argp[1])!=0 )
+					fuerror("Two run-time systems?") ;
+			} else {
+				rts= &argp[1] ;
+				keephead(rts) ; keeptail(rts) ;
+			}
+			eaten=1 ;
 			break ;
 #ifdef DEBUG
 	   case 'd':    debug++ ;
@@ -179,13 +229,6 @@ vieuwargs(argc,argv) char **argv ; {
 			werror("Unexpected characters at end of %s",argp) ;
 		}
 	}
-	if ( !machine && ! (machine=getenv("ACKM")) ) {
-#ifdef ACKM
-		machine= ACKM;          /* The default machine */
-#else
-		fuerror("No machine specified") ;
-#endif
-	}
 	return ;
 }
 
@@ -198,97 +241,124 @@ firstarg(argp) register char *argp ; {
 	} else {
 		name= argp ;
 	}
-	if ( strcmp(name,"ack")==0 ) return ;
-	if ( strcmp(name,"acc")==0 || strcmp(name,"cc")==0 ) {
-		rts= ".c" ; keephead(rts) ; keeptail(rts) ;
-		return ;
-	}
-	if ( strcmp(name,"apc")==0 || strcmp(name,"pc")==0 ) {
-		rts= ".p" ; keephead(rts) ; keeptail(rts) ;
-		return ;
-	}
-	machine= name;
+	callname= name;
 }
 
 /************************* argument processing ***********************/
 
 process(arg) char *arg ; {
 	/* Process files & library arguments */
-	register list_elem *elem ;
-	register trf *phase ;
-	int first=YES ;
+	trf *phase ;
 
 #ifdef DEBUG
 	if ( debug ) vprint("Processing %s\n",arg) ;
 #endif
-	if ( arg[0]=='-' ) { l_add(&c_arguments,keeps(arg)) ; return 1 ; }
 	p_suffix= rindex(arg,SUFCHAR) ;
-	if ( p_basename ) throws(p_basename) ;
 	orig.p_keep= YES ;      /* Don't throw away the original ! */
+	orig.p_keeps= NO;
 	orig.p_path= arg ;
+	if ( arg[0]=='-' || !p_suffix ) {
+		if ( linker ) add_input(&orig,linker) ;
+		return 1 ;
+	}
+	if ( p_basename ) throws(p_basename) ;
 	p_basename= keeps(basename(arg)) ;
-	if ( !p_suffix ) { l_add(&c_arguments,keeps(arg)) ; return 1 ; }
 	/* Try to find a path through the transformations */
-	switch( setpath() ) {
+	switch( getpath(&phase) ) {
 	case F_NOPATH :
 		error("Cannot produce the desired file from %s",arg) ;
-		l_add(&c_arguments,keeps(arg)) ;
+		if ( linker ) add_input(&orig,linker) ;
 		return 1 ;
 	case F_NOMATCH :
 		if ( stopsuffix ) werror("Unknown suffix in %s",arg) ;
-		l_add(&c_arguments,keeps(arg)) ;
+		if ( linker ) add_input(&orig,linker) ;
 		return 1 ;
 	case F_OK :
 		break ;
 	}
-	orig.p_keeps= NO;
+	if ( !phase ) return 1 ;
+	if ( phase->t_combine ) {
+		add_input(&orig,phase) ;
+		return 1 ;
+	}
 	in= orig ;
-	scanlist(l_first(tr_list), elem) {
-		phase= t_cont(*elem) ;
-		if ( phase->t_do ) { /* perform this transformation */
-			if ( first ) {
-			   if ( !nill_flag ) {
-				printf("%s\n",arg) ;
-			   }
-			}
-			switch ( phase->t_prep ) {
-			default :    if ( !mayprep() ) break ;
-			case YES:    if ( !transform(cpp_trafo) ) {
-					   n_error++ ;
+	if ( !nill_flag ) {
+		printf("%s\n",arg) ;
+	}
+	return startrf(phase) ;
+}
+
+int startrf(first) trf *first ; {
+	/* Start the transformations at the indicated phase */
+	register trf *phase ;
+
+	phase=first ;
+	for(;;) {
+		switch ( phase->t_prep ) {
+			/* BEWARE, sign extension */
+		default :    if ( !mayprep() ) break ;
+		case YES:    if ( !transform(cpp_trafo) ) {
+				   n_error++ ;
 #ifdef DEBUG
-					   vprint("Pre-processor failed\n") ;
+				   vprint("Pre-processor failed\n") ;
 #endif
-					   return 0 ;
-				     }
-			case NO :
-				     break ;
-			}
-			if ( cpp_trafo && stopsuffix &&
-			     strcmp(cpp_trafo->t_out,stopsuffix)==0 ) {
-				break ;
-			}
-			if ( !transform(phase) ) {
-				n_error++ ;
+				   return 0 ;
+			     }
+		case NO :
+			     break ;
+		}
+		if ( cpp_trafo && stopsuffix &&
+		     strcmp(cpp_trafo->t_out,stopsuffix)==0 ) {
+			break ;
+		}
+		if ( !transform(phase) ) {
+			n_error++ ;
+			block(phase->t_next) ;
 #ifdef DEBUG
-				if ( debug ) {
+			if ( debug ) {
+				if ( !orig.p_path ) {
+					vprint("phase %s failed\n",
+						phase->t_name ) ;
+				} else {
 					vprint("phase %s for %s failed\n",
-					       phase->t_name,orig.p_path) ;
+					        phase->t_name,orig.p_path) ;
 				}
-#endif
-				return 0 ;
 			}
-			first=NO ;
+#endif
+			return 0 ;
+		}
+		first=NO ;
+		phase=phase->t_next ;
+		if ( !phase ) {
+#ifdef DEBUG
+if ( debug ) vprint("Transformation sequence complete for %s\n",
+				orig.p_path) ;
+#endif
+			/* No more work on this file */
+			if ( !in.p_keep ) {
+				fatal("attempt to discard the result file") ;
+			}
+			if ( in.p_keeps ) throws(in.p_path) ;
+			in.p_keep=NO ; in.p_keeps=NO ; in.p_path= (char *) 0 ;
+			return 1 ;
+		}
+		if ( phase->t_combine ) {
+			add_input(&in,phase) ;
+			break ;
 		}
 	}
-#ifdef DEBUG
-	if ( debug ) vprint("Transformation complete for %s\n",orig.p_path) ;
-#endif
-	if ( !in.p_keep ) fatal("attempt to discard the result file") ;
-	l_add(&c_arguments,keeps(in.p_path));
-	disc_files() ;
 	return 1 ;
 }
 
+block(first) trf *first ; {
+	/* One of the input files of this phase could not be produced,
+	   block all combiners taking their input from this one.
+	*/
+	register trf *phase ;
+	for ( phase=first ; phase ; phase=phase->t_next ) {
+		if ( phase->t_combine ) phase->t_blocked=YES ;
+	}
+}
 mayprep() {
 	int file ;
 	char fc ;
@@ -316,21 +386,17 @@ scanneeds() {
 }
 
 setneeds(suffix,tail) char *suffix ; {
-	register list_elem *elem ;
-	register trf *phase ;
+	trf *phase ;
 
 	p_suffix= suffix ;
-	switch ( setpath() ) {
+	switch ( getpath(&phase) ) {
 	case F_OK :
-		scanlist( l_first(tr_list), elem ) {
-			phase = t_cont(*elem) ;
-			if ( phase->t_do ) {
-				if ( phase->t_needed ) {
-					if ( tail )
-						add_tail(phase->t_needed) ;
-					else
-						add_head(phase->t_needed) ;
-				}
+		for ( ; phase ; phase= phase->t_next ) {
+			if ( phase->t_needed ) {
+				if ( tail )
+					add_tail(phase->t_needed) ;
+				else
+					add_head(phase->t_needed) ;
 			}
 		}
 		break ;
@@ -338,7 +404,7 @@ setneeds(suffix,tail) char *suffix ; {
 		werror("\"%s\": unrecognized suffix",suffix) ;
 		break ;
 	case F_NOPATH :
-		werror("incomplete internal specification for %s files",
+		werror("sorry, cannot produce the desired file(s) from %s files",
 			suffix) ;
 		break ;
 	}
