@@ -163,13 +163,41 @@ main(argc, argv)
 	}
 
 	/* Action at last */
-	write(output, (char *) e, 32);
+	write(output, (char *) e, 6);
+	wr_int2(e->a_version);
+	wr_long(e->a_text);
+	wr_long(e->a_data);
+	wr_long(e->a_bss);
+	wr_long(e->a_entry);
+	wr_long(e->a_misc);
+	wr_long(e->a_syms);
 	emits(&outsect[TEXTSG]) ;
 	emits(&outsect[ROMSG]) ;
 	emits(&outsect[DATASG]) ;
 	emit_symtab();
 	if ( outputfile_created ) chmod(argv[2],0755);
 	return 0;
+}
+
+wr_int2(n)
+{
+	char buf[2];
+
+	buf[0] = n;
+	buf[1] = (n >> 8);
+	write(output, buf, 2);
+}
+
+wr_long(l)
+	long l;
+{
+	char buf[4];
+
+	buf[0] = l;
+	buf[1] = (l >> 8);
+	buf[2] = (l >> 16);
+	buf[3] = (l >> 24);
+	write(output, buf, 4);
 }
 
 /*
@@ -260,7 +288,10 @@ emit_symtab()
 		for (j++; j < 8; j++) {
 			IX_name.n_name[j] = 0;
 		}
-		write(output, (char *) &IX_name, sizeof(struct nlist));
+		write(output, (char *) &IX_name, 8);
+		wr_long(IX_name.n_value);
+		write(output, &(IX_name.n_sclass), 2);
+		wr_int2(IX_name.n_type);
 	}
 }
 
