@@ -28,15 +28,15 @@ monitor(lowpc, highpc, buffer, bufsize, nfunc)
 	buffer += sizeof(char *);
 	*(char **) buffer = (char *) highpc;
 	buffer += sizeof(char *);
-	*(short *) buffer = nfunc;
-	buffer += 2;
+	*(int *) buffer = nfunc;
+	buffer += sizeof(int);
 	buffer += (sizeof (char *) + sizeof(long)) * nfunc;
 	bufsize -= ((sizeof (char *) + sizeof(long)) * nfunc + 2 * sizeof(char *) + sizeof(int)) >> 1;
 	if (bufsize < 0) return;
 	scale = ((char *) highpc - (char *) lowpc) >> 1;
 	if (bufsize < scale)
 		scale = ((long) bufsize << 15) / scale;
-	else	scale = 0x7fff;
+	else	scale = 0x8000;
 	bufp = buffer;
 	sc = scale << 1;
 	bufs = bufsize << 1;
@@ -45,7 +45,7 @@ monitor(lowpc, highpc, buffer, bufsize, nfunc)
 
 moncontrol(mode)
 {
-	profil(bs, bufs, *(char **) bufp, !mode ? 0 : sc);
+	profil(bufp, bufs, *(char **) bp, !mode ? 0 : sc);
 }
 
 #define NCOUNTS 300
@@ -53,7 +53,7 @@ moncontrol(mode)
 monstartup(lowpc, highpc)
 	int (*lowpc)(), (*highpc)();
 {
-	int sz = (((char *) highpc - (char *) lowpc + 7) & ~7) << 1;
+	int sz = (((char *) highpc - (char *) lowpc + 7) & ~7);
 	char *s, *sbrk();
 
 	sz += NCOUNTS * (sizeof(long) + sizeof(char *)) + 2 * sizeof(char *) + sizeof(int);
