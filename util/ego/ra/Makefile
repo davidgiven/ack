@@ -34,6 +34,12 @@ ra_ack:	$(CFILES) $(SHARE_MFILES)
 	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
 	$(CC) -o ra -.c $(LDFLAGS) ra.o $(EMLIB)/em_data.a
 
+itemtab.h: itemtab.src makeitems $(EMH)/em_mnem.h
+	makeitems $(EMH)/em_mnem.h itemtab.src > itemtab.h
+
+makeitems: makeitems.c
+	$(CC) -o makeitems makeitems.c
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
