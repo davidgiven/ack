@@ -1,0 +1,12 @@
+DEFINITION MODULE random;
+
+PROCEDURE Random(): CARDINAL;
+(* Return a random CARDINAL
+*)
+
+PROCEDURE Uniform (lwb, upb: CARDINAL): CARDINAL;
+(* Return CARDINALs, uniformly distributed between "lwb" and "upb".
+   "lwb" must be smaller than "upb", or "lwb" is returned.
+*)
+
+END random.

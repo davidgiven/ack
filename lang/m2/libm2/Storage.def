@@ -1,0 +1,20 @@
+DEFINITION MODULE Storage;
+
+	FROM SYSTEM IMPORT ADDRESS;
+
+	PROCEDURE ALLOCATE(VAR a : ADDRESS; size : CARDINAL);
+	(* Allocate an area of the given size and return the address
+	   in "a". If no space is available, the calling program is
+	   killed.
+	*)
+
+	PROCEDURE DEALLOCATE(VAR a : ADDRESS; size : CARDINAL);
+	(* Free the area at address "a" with the given size. The area
+	   must have been allocated by "ALLOCATE", with the same size.
+	*)
+
+	PROCEDURE Available(size : CARDINAL) : BOOLEAN;
+	(* Return TRUE if an area with the given size could be allocated.
+	*)
+
+END Storage.

@@ -1,0 +1,25 @@
+DEFINITION MODULE RealInOut;
+
+  VAR Done: BOOLEAN;
+
+  PROCEDURE ReadReal(VAR x: REAL);
+  (* Read a real number "x" according to the syntax:
+     
+	['+'|'-'] digit {digit} ['.' digit {digit}]
+	['E' ['+'|'-'] digit [digit]]
+
+     Done := "a number was read".
+     Input terminates with a blank or any control character.
+     When reading from a terminal, backspacing may be done by either
+     DEL or BACKSPACE, depending on the implementation of ReadString.
+  *)
+
+  PROCEDURE WriteReal(x: REAL; n: CARDINAL);
+  (* Write x using n characters.
+     If fewer than n characters are needed, leading blanks are inserted.
+  *)
+
+  PROCEDURE WriteRealOct(x: REAL);
+  (* Write x in octal form with exponent and mantissa.
+  *)
+END RealInOut.

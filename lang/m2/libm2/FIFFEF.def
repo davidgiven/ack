@@ -1,0 +1,12 @@
+DEFINITION MODULE FIFFEF;
+
+	PROCEDURE FIF(arg1, arg2: REAL; VAR intres: REAL) : REAL;
+	(* multiplies arg1 and arg2, and returns the integer part of the
+	   result in "intres" and the fraction part as the function result.
+	*)
+
+	PROCEDURE FEF(arg: REAL; VAR exp: INTEGER) : REAL;
+	(* splits "arg" in mantissa and a base-2 exponent.
+	   The mantissa is returned, and the exponent is left in "exp".
+	*)
+END FIFFEF.

@@ -1,0 +1,27 @@
+DEFINITION MODULE Semaphores;
+
+  TYPE Sema;
+
+  PROCEDURE Level(s: Sema) : CARDINAL;
+  (* Returns current value of semaphore s *)
+
+  PROCEDURE NewSema(n: CARDINAL) : Sema;
+  (* Creates a new semaphore with initial level "n" *)
+
+  PROCEDURE Down(VAR s: Sema);
+  (* If the value of "s" is > 0, then just decrement "s".
+     Else, suspend the current process until the semaphore becomes
+     positive again.
+     May result in a process switch.
+  *)
+
+  PROCEDURE Up(VAR s: Sema);
+  (* Increment the semaphore "s".
+     This call may result in a process switch
+  *)
+
+  PROCEDURE StartProcess(P: PROC; n: CARDINAL);
+  (* Create a new process with procedure P and workspace of size "n".
+     Also transfer control to it.
+  *)
+END Semaphores.
