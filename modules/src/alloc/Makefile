@@ -16,7 +16,7 @@ OBJECTS =	botch.o clear.o st_alloc.o Malloc.o std_alloc.o
 
 all:		liballoc.a
 
-liballoc.a:	all
+liballoc.a:	$(OBJECTS)
 		ar cr liballoc.a $(OBJECTS)
 		-sh -c 'ranlib liballoc.a'
 
@@ -25,7 +25,7 @@ install:	all
 		$(INSTALL) man/alloc.3
 		$(INSTALL) h/alloc.h
 
-cmp:		liballoc.a
+cmp:		all
 		$(COMPARE) lib/liballoc.a
 		$(COMPARE) man/alloc.3
 		$(COMPARE) h/alloc.h
