@@ -6,7 +6,7 @@
 	Author: Erik Baalbergen
 */
 	
-#include "string.h"
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>

@@ -8,7 +8,6 @@
 #include	"use_tmp.h"
 #include	"errout.h"
 #include	"debug.h"
-#include	"string.h"
 
 #include	"tokenname.h"
 #include	"arith.h"

@@ -427,12 +427,12 @@ setwdir(wdir, fn)
 	char *fn, **wdir;
 {
 	register char *p;
-	char *rindex();
+	char *strrindex();
 
-	p = rindex(fn, '/');
+	p = strrindex(fn, '/');
 	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
 		*p = '\0';
-		p = rindex(fn, '/');
+		p = strrindex(fn, '/');
 	}
 
 	if (fn[0] == '\0' || (fn[0] == '/' && p == &fn[0])) /* absolute path */

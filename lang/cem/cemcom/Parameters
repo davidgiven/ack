@@ -122,11 +122,7 @@
 #undef NOBITFIELD	1	/* implement bitfields	*/
 
 
-!File: str_params.h
-/* maximum number of characters in string representation of (unsigned) long
-*/
-#define MAXWIDTH 32		
-
+!File: ssize.h
 #define SSIZE	1024	/* string-buffer size for print routines	*/
 
 

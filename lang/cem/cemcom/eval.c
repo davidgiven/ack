@@ -17,7 +17,6 @@
 #include	"debug.h"
 #include	"nobitfield.h"
 
-#include	"string.h"
 #include	"dataflow.h"
 #include	"arith.h"
 #include	"type.h"
@@ -39,6 +38,7 @@
 #define	roundup(n)	((n) < word_size ? word_size : (n))
 
 char *symbol2str();
+char *long2str();
 arith tmp_pointer_var();
 
 /*	EVAL() serves as the main expression tree evaluator, which turns
@@ -1024,7 +1024,7 @@ load_cst(val, siz)
 		label datlab;
 
 		C_df_dlb(datlab = data_label());
-		C_rom_icon(itos(val), siz);
+		C_rom_icon(long2str((long)val, 10), siz);
 		C_lae_dlb(datlab, (arith)0);
 		C_loi(siz);
 	}

@@ -6,7 +6,6 @@
 #include	"debug.h"
 #include	"nobitfield.h"
 
-#include	"string.h"
 #include	"arith.h"
 #include	"align.h"
 #include	"label.h"
@@ -22,9 +21,10 @@
 #include	"level.h"
 #include	"def.h"
 
-extern char *symbol2str();
+#define con_nullbyte()	C_con_ucon("0", (arith)1)
 
-#define con_byte(c)	C_con_ucon(itos((long)(c) & 0xFF), (arith)1)
+char *symbol2str();
+char *long2str();
 
 struct expr *do_array(), *do_struct(), *IVAL();
 struct expr *strings = 0; /* list of string constants within initialiser */
@@ -313,7 +313,7 @@ do_struct(expr, tp)
 	}
 	/* keep on aligning...	*/
 	while (bytes_upto_here++ < tp->tp_size)
-		con_byte(0);
+		con_nullbyte();
 	return expr;
 }
 
@@ -479,7 +479,10 @@ check_ival(expr, type)
 				illegal_init_cst(expr);
 				break;
 			}
-			C_con_fcon(itos(expr->VL_VALUE), type->tp_size);
+			C_con_fcon(
+				long2str((long)expr->VL_VALUE, 10),
+				type->tp_size
+			);
 		}
 		else
 			illegal_init_cst(expr);
@@ -578,11 +581,11 @@ init_string(tpp, expr)
 	}
 	/* throw out the characters of the already prepared string	*/
 	do
-		con_byte(*s++);
+		C_con_ucon(long2str((long)*s++ & 0xFF, 10), (arith)1);
 	while (--length > 0);
 	/* pad the allocated memory (the alignment has been calculated)	*/
 	while (ntopad-- > 0)
-		con_byte(0);
+		con_nullbyte();
 }
 
 #ifndef NOBITFIELD
@@ -635,7 +638,7 @@ zero_bytes(sd)
 	register count = n;
 
 	while (n-- > 0)
-		con_byte((arith)0);
+		con_nullbyte();
 	return count;
 }
 
@@ -657,9 +660,9 @@ con_int(expr)
 	register struct type *tp = expr->ex_type;
 
 	if (tp->tp_unsigned)
-		C_con_ucon(itos(expr->VL_VALUE), tp->tp_size);
+		C_con_ucon(long2str((long)expr->VL_VALUE, -10), tp->tp_size);
 	else
-		C_con_icon(itos(expr->VL_VALUE), tp->tp_size);
+		C_con_icon(long2str((long)expr->VL_VALUE, 10), tp->tp_size);
 }
 
 illegal_init_cst(expr)

@@ -10,8 +10,9 @@ EM_INCLUDES =$(EM)/h#		# directory containing EM interface definition
 # Libraries
 SYSLIB = /user1/erikb/em/lib/libsystem.a
 EMLIB = /user1/erikb/em/lib/libemk.a
+STRLIB = /user1/erikb/em/lib/libstr.a
 EMMESLIB = /user1/erikb/em/lib/libem_mes.a
-LIBS = $(EMMESLIB) $(EMLIB) $(SYSLIB)
+LIBS = $(EMMESLIB) $(EMLIB) $(STRLIB) $(SYSLIB)
 LIB_INCLUDES = /user1/erikb/em/h
 
 # Where to install the compiler and its driver
@@ -44,7 +45,7 @@ COBJ =	main.o idf.o declarator.o decspecs.o struct.o \
 	input.o domacro.o replace.o init.o options.o \
 	scan.o skip.o stack.o type.o ch7mon.o label.o eval.o \
 	switch.o storage.o ival.o conversion.o \
-	blocks.o dataflow.o string.o
+	blocks.o dataflow.o doprnt.o
 
 # Objects of other generated C files
 GOBJ =	char.o symbol2str.o next.o
@@ -60,7 +61,7 @@ GHSRC =	botch_free.h dataflow.h debug.h density.h errout.h \
 	maxincl.h myalloc.h nobitfield.h nopp.h \
 	nparams.h numsize.h parbufsize.h pathlength.h predefine.h \
 	strsize.h target_sizes.h textsize.h use_tmp.h \
-	str_params.h spec_arith.h
+	ssize.h spec_arith.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tab tokenfile.g Lpars.h LLfiles LL.output lint.out \
@@ -81,10 +82,10 @@ cc:
 	make LLfiles
 	make main
 
-cem:	cem.c string.o
-	$(CC) -O cem.c string.o $(SYSLIB) -o cem
+cem:	cem.c
+	$(CC) -O cem.c $(SYSLIB) -o cem
 
-lint.cem: cem.c string.c
+lint.cem: cem.c
 	lint -abx cem.c
 
 hfiles: Parameters
@@ -197,15 +198,15 @@ arith.o: Lpars.h alloc.h arith.h botch_free.h expr.h field.h idf.h label.h mes.h
 alloc.o: alloc.h assert.h debug.h myalloc.h
 code.o: LLlex.h Lpars.h alloc.h arith.h assert.h atw.h botch_free.h code.h dataflow.h debug.h declar.h decspecs.h def.h expr.h idf.h label.h level.h mes.h nobitfield.h nopp.h sizes.h spec_arith.h specials.h stack.h storage.h type.h use_tmp.h
 dumpidf.o: Lpars.h arith.h debug.h def.h expr.h field.h idf.h label.h nobitfield.h nopp.h spec_arith.h stack.h struct.h type.h
-error.o: LLlex.h arith.h debug.h errout.h expr.h label.h nopp.h spec_arith.h string.h tokenname.h use_tmp.h
+error.o: LLlex.h arith.h debug.h errout.h expr.h label.h nopp.h spec_arith.h tokenname.h use_tmp.h
 field.o: Lpars.h arith.h assert.h code.h debug.h expr.h field.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h type.h
 tokenname.o: LLlex.h Lpars.h arith.h idf.h nopp.h spec_arith.h tokenname.h
 LLlex.o: LLlex.h Lpars.h alloc.h arith.h assert.h class.h debug.h def.h idf.h idfsize.h input.h nopp.h numsize.h sizes.h spec_arith.h strsize.h
 LLmessage.o: LLlex.h Lpars.h alloc.h arith.h idf.h nopp.h spec_arith.h
 input.o: LLlex.h alloc.h arith.h assert.h debug.h idepth.h input.h inputtype.h interface.h nopp.h pathlength.h spec_arith.h
 domacro.o: LLlex.h Lpars.h alloc.h arith.h assert.h botch_free.h class.h debug.h idf.h idfsize.h ifdepth.h input.h interface.h macro.h nopp.h nparams.h parbufsize.h spec_arith.h storage.h textsize.h
-replace.o: LLlex.h alloc.h arith.h assert.h class.h debug.h idf.h input.h interface.h macro.h nopp.h pathlength.h spec_arith.h string.h strsize.h
-init.o: alloc.h class.h idf.h interface.h macro.h nopp.h predefine.h string.h
+replace.o: LLlex.h alloc.h arith.h assert.h class.h debug.h idf.h input.h interface.h macro.h nopp.h pathlength.h spec_arith.h strsize.h
+init.o: alloc.h class.h idf.h interface.h macro.h nopp.h predefine.h
 options.o: align.h arith.h class.h idf.h idfsize.h macro.h maxincl.h nobitfield.h nopp.h sizes.h spec_arith.h storage.h
 scan.o: class.h idf.h input.h interface.h lapbuf.h macro.h nopp.h nparams.h
 skip.o: LLlex.h arith.h class.h input.h interface.h nopp.h spec_arith.h
@@ -213,14 +214,14 @@ stack.o: Lpars.h alloc.h arith.h botch_free.h debug.h def.h idf.h level.h mes.h 
 type.o: Lpars.h align.h alloc.h arith.h def.h idf.h nobitfield.h nopp.h sizes.h spec_arith.h type.h
 ch7mon.o: Lpars.h arith.h botch_free.h def.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h storage.h type.h
 label.o: Lpars.h arith.h def.h idf.h label.h level.h nobitfield.h nopp.h spec_arith.h type.h
-eval.o: Lpars.h align.h arith.h assert.h atw.h code.h dataflow.h debug.h def.h expr.h idf.h label.h level.h mes.h nobitfield.h nopp.h sizes.h spec_arith.h stack.h string.h type.h
+eval.o: Lpars.h align.h arith.h assert.h atw.h code.h dataflow.h debug.h def.h expr.h idf.h label.h level.h mes.h nobitfield.h nopp.h sizes.h spec_arith.h stack.h type.h
 switch.o: Lpars.h arith.h assert.h botch_free.h code.h debug.h density.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h storage.h switch.h type.h
 storage.o: alloc.h assert.h botch_free.h debug.h storage.h
-ival.o: Lpars.h align.h arith.h assert.h class.h debug.h def.h expr.h field.h idf.h label.h level.h nobitfield.h nopp.h sizes.h spec_arith.h string.h struct.h type.h
+ival.o: Lpars.h align.h arith.h assert.h class.h debug.h def.h expr.h field.h idf.h label.h level.h nobitfield.h nopp.h sizes.h spec_arith.h struct.h type.h
 conversion.o: Lpars.h arith.h nobitfield.h sizes.h spec_arith.h type.h
 blocks.o: arith.h atw.h sizes.h spec_arith.h
 dataflow.o: dataflow.h
-string.o: arith.h nopp.h spec_arith.h str_params.h string.h
+doprnt.o: ssize.h
 tokenfile.o: Lpars.h
 declar.o: LLlex.h Lpars.h arith.h debug.h declar.h decspecs.h def.h expr.h field.h idf.h label.h nobitfield.h nopp.h sizes.h spec_arith.h struct.h type.h
 statement.o: LLlex.h Lpars.h arith.h botch_free.h code.h debug.h def.h expr.h idf.h label.h nobitfield.h nopp.h spec_arith.h stack.h storage.h type.h

@@ -8,7 +8,6 @@
 #include	"pathlength.h"	/* UF */
 #include	"strsize.h"	/* UF */
 
-#include	"string.h"
 #include	"alloc.h"
 #include	"idf.h"
 #include	"input.h"
@@ -18,6 +17,9 @@
 #include	"class.h"
 #include	"assert.h"
 #include	"interface.h"
+
+char *strcpy(), *strcat();
+char *long2str();
 
 EXPORT int
 replace(idef)
@@ -90,7 +92,7 @@ macro_func(idef)
 		break;
 
 	case 'L' :			/* __LINE__	*/
-		idef->id_macro->mc_text = itos(LineNumber);
+		idef->id_macro->mc_text = long2str((long)LineNumber, 10);
 		idef->id_macro->mc_length = 1;
 		break;
 

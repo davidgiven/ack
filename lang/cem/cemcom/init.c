@@ -11,7 +11,6 @@
 #include	"macro.h"
 #include	"idf.h"
 #include	"interface.h"
-#include	"string.h"
 
 PRIVATE struct mkey	{
 	char *mk_reserved;
@@ -29,6 +28,8 @@ PRIVATE struct mkey	{
 	{"undef",	K_UNDEF},
 	{0,		K_UNKNOWN}
 };
+
+char *strcpy();
 
 EXPORT
 init_pp()

@@ -33,6 +33,7 @@ decspecs.c
 decspecs.str
 def.str
 domacro.c
+doprnt.c
 dumpidf.c
 error.c
 eval.c
@@ -75,8 +76,6 @@ statement.g
 stb.c
 storage.c
 storage.h
-string.c
-string.h
 struct.c
 struct.str
 switch.c
