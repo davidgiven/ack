@@ -2655,8 +2655,10 @@ gto		| |	remove(all)
 			"jmp gto~"				|       | |
 fil             | |     "mov $$$1,hol0+4"                       |       | |
 lim             | |             | { relative2, "trpim~"}                | |
-lin             | |     "mov $$$1,hol0"                        |       | |
-lni             | |     "inc hol0"                              |       | |
+lin             | |     "mov $$$1,hol0"
+			"jsr pc,_u_LiB"				|       | |
+lni             | |     "inc hol0" 
+			"jsr pc,_u_LiB"				|       | |
 lor $1==0       | |                                             | lb    | |
 lor $1==1       | |     remove(all)
 			allocate(REG)
