@@ -1,3 +1,3 @@
-childno N
-Child N, status 0x800
+childno 16276
+Child 16276, status 0x800
 fork/wait ok
