@@ -1,3 +1,4 @@
+# $Revision$
 # Script for use of ACK as cross C-compiler on VAX for PMDS machine
 # The output has its int's in the pmds order.
 # Conversion from VU-a.out to PMDS-a.out should still be done on the pmds.
