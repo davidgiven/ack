@@ -8,6 +8,8 @@
  * Motorola 68000/68010 keywords
  */
 
+0,      EXTERN,         0,              ".globl",
+
 0,	SIZE,		SIZE_B,		".b",
 0,	SIZE,		SIZE_W,		".w",
 0,	SIZE,		SIZE_L,		".l",

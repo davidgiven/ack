@@ -23,16 +23,12 @@ ea_1(sz, bits)
 	if (bits)
 		serror("bad addressing categorie");
 	if (flag & FITW)
-		Xfit (
-			! fitw(exp_1.val)
-			&&
-			(mrg_1 != 074 || ! fit16(exp_1.val))
+		Xfit (fitw(exp_1.val) ||
+		      (mrg_1 == 074 && fit16(exp_1.val))
 		) ;
 	if (flag & FITB) {
-		Xfit (
-			! fitb(exp_1.val)
-			&&
-			(mrg_1 != 074 || ! fit8(exp_1.val))
+		Xfit (fitb(exp_1.val) ||
+		      (mrg_1 == 074 && fit8(exp_1.val))
 		);
 		if (mrg_1 == 074)
 			exp_1.val &= 0xFF;
