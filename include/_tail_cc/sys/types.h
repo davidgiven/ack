@@ -34,8 +34,9 @@ typedef	u_long ino_t;
 typedef	u_short ino_t;
 #endif
 typedef	long	swblk_t;
-typedef	long	size_t;
-typedef	long	time_t;
+
+#include <sys/stdtypes.h>
+
 typedef	long	label_t[14];
 typedef	short	dev_t;
 typedef	long	off_t;
