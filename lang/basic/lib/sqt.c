@@ -7,6 +7,7 @@
 
 /* $Header$ */
 
+#define __NO_DEFS
 #include <math.h>
 
 #define NITER	5
