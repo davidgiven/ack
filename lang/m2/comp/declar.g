@@ -56,7 +56,7 @@ ProcedureHeading(struct def **pdf; int type;)
 			}
 	FormalParameters(type == D_PROCEDURE, &params, &tp)?
 			{
-			  df->df_type = tp = construct_type(PROCEDURE, tp);
+			  df->df_type = tp = construct_type(T_PROCEDURE, tp);
 			  tp->prc_params = params;
 			  if (tp1 && !TstTypeEquiv(tp, tp1)) {
 error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text); 
@@ -137,7 +137,7 @@ FormalType(struct type **tp;)
 	]?
 	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
 			{ if (ARRAYflag) {
-				*tp = construct_type(ARRAY, NULLTYPE);
+				*tp = construct_type(T_ARRAY, NULLTYPE);
 				(*tp)->arr_elem = df->df_type;
 			  }
 			  else	*tp = df->df_type;
@@ -153,12 +153,12 @@ TypeDeclaration
 	'=' type(&tp)
 			{ df->df_type = tp;
 			  if ((df->df_flags&D_EXPORTED) &&
-			      tp->tp_fund == ENUMERATION) {
+			      tp->tp_fund == T_ENUMERATION) {
 				exprt_literals(tp->enm_enums,
 						enclosing(CurrentScope));
 			  }
 			  if (df->df_kind == D_HTYPE &&
-			      tp->tp_fund != POINTER) {
+			      tp->tp_fund != T_POINTER) {
 error("Opaque type \"%s\" is not a pointer type", df->df_idf->id_text);
 			  }
 
@@ -207,11 +207,11 @@ enumeration(struct type **ptp;)
 	struct node *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
-			{
-			  *ptp = standard_type(ENUMERATION,int_align,int_size);
-			  EnterIdList(EnumList, D_ENUM, 0, *ptp, CurrentScope);
-			  FreeNode(EnumList);
-			}
+		{
+		  *ptp = standard_type(T_ENUMERATION,int_align,int_size);
+		  EnterIdList(EnumList, D_ENUM, 0, *ptp, CurrentScope);
+		  FreeNode(EnumList);
+		}
 
 ;
 
@@ -252,12 +252,12 @@ ArrayType(struct type **ptp;)
 } :
 	ARRAY SimpleType(&tp)
 			{
-			  *ptp = tp2 = construct_type(ARRAY, tp);
+			  *ptp = tp2 = construct_type(T_ARRAY, tp);
 			}
 	[
 		',' SimpleType(&tp)
 			{ tp2 = tp2->arr_elem = 
-				construct_type(ARRAY, tp);
+				construct_type(T_ARRAY, tp);
 			}
 	]* OF type(&tp)
 			{ tp2->arr_elem = tp; }
@@ -273,10 +273,10 @@ RecordType(struct type **ptp;)
 			  scope.next = CurrentScope;
 			}
 	FieldListSequence(&scope)
-			{
-			  *ptp = standard_type(RECORD, record_align, (arith) 0 /* ???? */);
-			  (*ptp)->rec_scope = scope.sc_scope;
-			}
+		{
+		  *ptp = standard_type(T_RECORD, record_align, (arith) 0 /* ???? */);
+		  (*ptp)->rec_scope = scope.sc_scope;
+		}
 	END
 ;
 
@@ -380,7 +380,7 @@ PointerType(struct type **ptp;)
 				{ tp = NULLTYPE; }
 	]
 				{
-				  *ptp = construct_type(POINTER, tp);
+				  *ptp = construct_type(T_POINTER, tp);
 				  if (!tp) Forward(&dot, &((*ptp)->next));
 				}
 ;
@@ -391,7 +391,7 @@ ProcedureType(struct type **ptp;)
 	struct type *tp = 0;
 } :
 	PROCEDURE FormalTypeList(&pr, &tp)?
-			{ *ptp = construct_type(PROCVAR, tp);
+			{ *ptp = construct_type(T_PROCEDURE, tp);
 			  (*ptp)->prc_params = pr;
 			}
 ;

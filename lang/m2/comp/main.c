@@ -156,7 +156,7 @@ add_standards()
 	(void) Enter("NIL", D_CONST, address_type, 0);
 	(void) Enter("PROC",
 		     D_TYPE,
-		     construct_type(PROCEDURE, NULLTYPE),
+		     construct_type(T_PROCEDURE, NULLTYPE),
 		     0);
 	df = Enter("BITSET", D_TYPE, bitset_type, 0);
 	df = Enter("FALSE", D_ENUM, bool_type, 0);

@@ -53,9 +53,23 @@ struct type	{
 				   SUBRANGE
 				*/
 	int tp_fund;		/* fundamental type  or constructor */
+#define T_RECORD	0x0001
+#define	T_ENUMERATION	0x0002
+#define	T_INTEGER	0x0004
+#define T_CARDINAL	0x0008
+/* #define T_LONGINT	0x0010 */
+#define T_REAL		0x0020
+/* #define T_LONGREAL	0x0040 */
+#define T_POINTER	0x0080
+#define T_CHAR		0x0100
+#define T_WORD		0x0200
+#define T_SET		0x0400
+#define T_SUBRANGE	0x0800
+#define T_PROCEDURE	0x1000
+#define T_ARRAY		0x2000
+#define T_STRING	0x4000
 	int tp_align;		/* alignment requirement of this type */
 	arith tp_size;		/* size of this type */
-/*	struct idf *tp_idf;	/* name of this type */
 	union {
 	    struct enume tp_enum;
 	    struct subrange tp_subrange;

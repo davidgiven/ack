@@ -76,22 +76,10 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 
 struct tokenname tkinternal[] = {	/* internal keywords	*/
 	{PROGRAM, ""},
-	{SUBRANGE, ""},
-	{ENUMERATION, ""},
-	{ERRONEOUS, ""},
-	{PROCVAR, ""},
-	{INTORCARD, ""},
 	{0, "0"}
 };
 
 struct tokenname tkstandard[] =	{	/* standard identifiers */
-	{CHAR, ""},
-	{BOOLEAN, ""},
-	{LONGINT, ""},
-	{CARDINAL, ""},
-	{LONGREAL, ""},
-	{WORD, ""},
-	{ADDRESS, ""},
 	{0, ""}
 };
 

@@ -8,18 +8,18 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<assert.h>
 #include	<alloc.h>
+#include	"Lpars.h"
 #include	"idf.h"
 #include	"type.h"
 #include	"def.h"
 #include	"LLlex.h"
 #include	"node.h"
-#include	"Lpars.h"
 #include	"scope.h"
 #include	"const.h"
 #include	"standards.h"
 
 int
-chk_expr(expp, const)
+chk_expr(expp)
 	register struct node *expp;
 {
 	/*	Check the expression indicated by expp for semantic errors,
@@ -29,12 +29,12 @@ chk_expr(expp, const)
 
 	switch(expp->nd_class) {
 	case Oper:
-		return	chk_expr(expp->nd_left, const) &&
-			chk_expr(expp->nd_right, const) &&
-			chk_oper(expp, const);
+		return	chk_expr(expp->nd_left) &&
+			chk_expr(expp->nd_right) &&
+			chk_oper(expp);
 	case Uoper:
-		return	chk_expr(expp->nd_right, const) &&
-			chk_uoper(expp, const);
+		return	chk_expr(expp->nd_right) &&
+			chk_uoper(expp);
 	case Value:
 		switch(expp->nd_symb) {
 		case REAL:
@@ -46,13 +46,13 @@ chk_expr(expp, const)
 		}
 		break;
 	case Xset:
-		return chk_set(expp, const);
+		return chk_set(expp);
 	case Name:
-		return chk_name(expp, const);
+		return chk_name(expp);
 	case Call:
-		return chk_call(expp, const);
+		return chk_call(expp);
 	case Link:
-		return chk_name(expp, const);
+		return chk_name(expp);
 	default:
 		assert(0);
 	}
@@ -60,7 +60,7 @@ chk_expr(expp, const)
 }
 
 int
-chk_set(expp, const)
+chk_set(expp)
 	register struct node *expp;
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
@@ -82,7 +82,7 @@ chk_set(expp, const)
 		assert(expp->nd_left->nd_class == Def);
 		df = expp->nd_left->nd_def;
 		if ((df->df_kind != D_TYPE && df->df_kind != D_ERROR) ||
-		    (df->df_type->tp_fund != SET)) {
+		    (df->df_type->tp_fund != T_SET)) {
 			node_error(expp, "Illegal set type");
 			return 0;
 		}
@@ -96,11 +96,10 @@ chk_set(expp, const)
 	nd = expp->nd_right;
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
-		if (!chk_el(nd->nd_left, const, tp->next, &set)) return 0;
+		if (!chk_el(nd->nd_left, tp->next, &set)) return 0;
 		nd = nd->nd_right;
 	}
 	expp->nd_type = tp;
-	assert(!const || set);
 	if (set) {
 		/* Yes, in was a constant set, and we managed to compute it!
 		*/
@@ -114,7 +113,7 @@ chk_set(expp, const)
 }
 
 int
-chk_el(expp, const, tp, set)
+chk_el(expp, tp, set)
 	register struct node *expp;
 	struct type *tp;
 	arith **set;
@@ -127,8 +126,8 @@ chk_el(expp, const, tp, set)
 		/* { ... , expr1 .. expr2,  ... }
 		   First check expr1 and expr2, and try to compute them.
 		*/
-		if (!chk_el(expp->nd_left, const, tp, set) ||
-		    !chk_el(expp->nd_right, const, tp, set)) {
+		if (!chk_el(expp->nd_left, tp, set) ||
+		    !chk_el(expp->nd_right, tp, set)) {
 			return 0;
 		}
 		if (expp->nd_left->nd_class == Value &&
@@ -157,7 +156,7 @@ node_error(expp, "Lower bound exceeds upper bound in range");
 
 	/* Here, a single element is checked
 	*/
-	if (!chk_expr(expp, const)) {
+	if (!chk_expr(expp)) {
 		return rem_set(set);
 	}
 	if (!TstCompat(tp, expp->nd_type)) {
@@ -165,10 +164,10 @@ node_error(expp, "Lower bound exceeds upper bound in range");
 		return rem_set(set);
 	}
 	if (expp->nd_class == Value) {
-	    	if ((tp->tp_fund != ENUMERATION &&
+	    	if ((tp->tp_fund != T_ENUMERATION &&
 		     (expp->nd_INT < tp->sub_lb || expp->nd_INT > tp->sub_ub))
 		   ||
-		    (tp->tp_fund == ENUMERATION &&
+		    (tp->tp_fund == T_ENUMERATION &&
 		     (expp->nd_INT < 0 || expp->nd_INT > tp->enm_ncst))
 		   ) {
 			node_error(expp, "Set element out of range");
@@ -193,12 +192,52 @@ rem_set(set)
 	return 0;
 }
 
+struct node *
+getarg(argp, bases)
+	struct node *argp;
+{
+	struct type *tp;
+
+	if (!argp->nd_right) {
+		node_error(argp, "Too few arguments supplied");
+		return 0;
+	}
+	argp = argp->nd_right;
+	if (!chk_expr(argp->nd_left)) return 0;
+	tp = argp->nd_left->nd_type;
+	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+	if (!(tp->tp_fund & bases)) {
+		node_error(argp, "Unexpected type");
+		return 0;
+	}
+	return argp;
+}
+
+struct node *
+getname(argp, kinds)
+	struct node *argp;
+{
+	if (!argp->nd_right) {
+		node_error(argp, "Too few arguments supplied");
+		return 0;
+	}
+	argp = argp->nd_right;
+	if (!findname(argp->nd_left)) return 0;
+	assert(argp->nd_left->nd_class == Def);
+	if (!(argp->nd_left->nd_def->df_kind & kinds)) {
+		node_error(argp, "Unexpected type");
+		return 0;
+	}
+	return argp;
+}
+
 int
-chk_call(expp, const)
+chk_call(expp)
 	register struct node *expp;
 {
 	register struct type *tp;
 	register struct node *left;
+	register struct node *arg;
 
 	expp->nd_type = error_type;
 	(void) findname(expp->nd_left);
@@ -211,57 +250,148 @@ chk_call(expp, const)
 		/* A type cast. This is of course not portable.
 		   No runtime action. Remove it.
 		*/
-		if (!expp->nd_right ||
-		    (expp->nd_right->nd_symb == ',')) {
+		arg = expp->nd_right;
+		if (!arg || arg->nd_right) {
 node_error(expp, "Only one parameter expected in type cast");
 			return 0;
 		}
-		if (! chk_expr(expp->nd_right, const)) return 0;
-		if (expp->nd_right->nd_type->tp_size !=
+		if (! chk_expr(arg->nd_left)) return 0;
+		if (arg->nd_left->nd_type->tp_size !=
 		    	left->nd_type->tp_size) {
 node_error(expp, "Size of type in type cast does not match size of operand");
 			return 0;
 		}
-		expp->nd_right->nd_type = left->nd_type;
-		left = expp->nd_right;
+		arg->nd_left->nd_type = left->nd_type;
 		FreeNode(expp->nd_left);
-		*expp = *(expp->nd_right);
-		left->nd_left = left->nd_right = 0;
-		FreeNode(left);
+		*expp = *(arg->nd_left);
+		arg->nd_left->nd_left = 0;
+		arg->nd_left->nd_right = 0;
+		FreeNode(arg);
 		return 1;
 	}
 
 	if ((left->nd_class == Def && left->nd_def->df_kind == D_PROCEDURE) ||
-	    tp->tp_fund == PROCVAR) {
+	    tp->tp_fund == T_PROCEDURE) {
 		/* A procedure call. it may also be a call to a
 		   standard procedure
 		*/
+		arg = expp;
 		if (tp == std_type) {
 			assert(left->nd_class == Def);
 			switch(left->nd_def->df_value.df_stdname) {
 			case S_ABS:
+				arg = getarg(arg, T_INTEGER|T_CARDINAL|T_REAL);
+				if (! arg) return 0;
+				expp->nd_type = arg->nd_left->nd_type;
+				break;
 			case S_CAP:
+				arg = getarg(arg, T_CHAR);
+				expp->nd_type = char_type;
+				if (!arg) return 0;
+				break;
 			case S_CHR:
+				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				expp->nd_type = char_type;
+				if (!arg) return 0;
+				break;
 			case S_FLOAT:
+				arg = getarg(arg, T_CARDINAL|T_INTEGER);
+				expp->nd_type = real_type;
+				if (!arg) return 0;
+				break;
 			case S_HIGH:
+				arg = getarg(arg, T_ARRAY);
+				if (!arg) return 0;
+				expp->nd_type = arg->nd_left->nd_type->next;
+				if (!expp->nd_type) expp->nd_type = int_type;
+				break;
 			case S_MAX:
 			case S_MIN:
+				arg = getarg(arg, T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL);
+				if (!arg) return 0;
+				expp->nd_type = arg->nd_left->nd_type;
+				break;
 			case S_ODD:
+				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				if (!arg) return 0;
+				expp->nd_type = bool_type;
+				break;
 			case S_ORD:
+				arg = getarg(arg, T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL);
+				if (!arg) return 0;
+				expp->nd_type = card_type;
+				break;
+			case S_TSIZE:	/* ??? */
 			case S_SIZE:
+				arg = getname(arg, D_FIELD|D_VARIABLE|D_TYPE|D_HIDDEN|D_HTYPE);
+				expp->nd_type = intorcard_type;
+				if (!arg) return 0;
+				break;
 			case S_TRUNC:
+				arg = getarg(arg, T_REAL);
+				if (!arg) return 0;
+				expp->nd_type = card_type;
+				break;
 			case S_VAL:
+				arg = getname(arg, D_HIDDEN|D_HTYPE|D_TYPE);
+				if (!arg) return 0;
+				tp = arg->nd_left->nd_def->df_type;
+				if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+				if (!(tp->tp_fund & (T_ENUMERATION|T_CHAR|T_INTEGER|T_CARDINAL))) {
+					node_error(arg, "unexpected type");
+					return 0;
+				}
+				expp->nd_type = arg->nd_left->nd_def->df_type;
+				FreeNode(arg->nd_left);
+				arg->nd_left = 0;
+				arg = getarg(arg, T_INTEGER|T_CARDINAL);
+				if (!arg) return 0;
+				break;
+			case S_ADR:
+				arg = getname(arg, D_VARIABLE|D_FIELD|D_PROCEDURE);
+				expp->nd_type = address_type;
+				if (!arg) return 0;
 				break;
 			case S_DEC:
 			case S_INC:
+				expp->nd_type = 0;
+				arg = getname(arg, D_VARIABLE|D_FIELD);
+				if (!arg) return 0;
+				if (arg->nd_right) {
+					arg = getarg(arg, T_INTEGER|T_CARDINAL);
+					if (!arg) return 0;
+				}
+				break;
 			case S_HALT:
+				expp->nd_type = 0;
+				break;
 			case S_EXCL:
 			case S_INCL:
 				expp->nd_type = 0;
+				arg = getname(arg, D_VARIABLE|D_FIELD);
+				if (!arg) return 0;
+				tp = arg->nd_left->nd_type;
+				if (tp->tp_fund != T_SET) {
+node_error(arg, "EXCL and INCL expect a SET parameter");
+					return 0;
+				}
+				arg = getarg(arg, T_INTEGER|T_CARDINAL|T_CHAR|T_ENUMERATION);
+				if (!arg) return 0;
+				if (!TstCompat(tp->next, arg->nd_left->nd_type)) {
+					node_error(arg, "Unexpected type");
+					return 0;
+				}
 				break;
 			default:
 				assert(0);
 			}
+			if (arg->nd_right) {
+				node_error(arg->nd_right,
+					"Too many parameters supplied");
+				return 0;
+			}
+			FreeNode(expp->nd_left);
+			expp->nd_left = 0;
 			return 1;
 		}
 		return 1;
@@ -297,7 +427,7 @@ findname(expp)
 		if (tp == error_type) {
 			df = ill_df;
 		}
-		else if (tp->tp_fund != RECORD) {
+		else if (tp->tp_fund != T_RECORD) {
 			/* This is also true for modules */
 			node_error(expp,"Illegal selection");
 			df = ill_df;
@@ -341,18 +471,15 @@ df->df_idf->id_text);
 }
 
 int
-chk_name(expp, const)
+chk_name(expp)
 	register struct node *expp;
 {
 	register struct def *df;
-	int retval = 1;
 
 	(void) findname(expp);
 	assert(expp->nd_class == Def);
 	df = expp->nd_def;
-	if (df->df_kind == D_ERROR) {
-		retval = 0;
-	}
+	if (df->df_kind == D_ERROR) return 0;
 	if (df->df_kind & (D_ENUM | D_CONST)) {
 		if (df->df_kind == D_ENUM) {
 			expp->nd_class = Value;
@@ -363,20 +490,14 @@ chk_name(expp, const)
 			*expp = *(df->con_const);
 		}
 	}
-	else if (const) {
-		node_error(expp, "constant expected");
-		retval = 0;
-	}
-	return retval;
+	return 1;
 }
 
 int
-chk_oper(expp, const)
+chk_oper(expp)
 	register struct node *expp;
 {
-	/*	Check a binary operation. If "const" is set, also check
-		that it is constant.
-		The code is ugly !
+	/*	Check a binary operation.
 	*/
 	register struct type *tpl = expp->nd_left->nd_type;
 	register struct type *tpr = expp->nd_right->nd_type;
@@ -398,7 +519,7 @@ chk_oper(expp, const)
 	if (expp->nd_symb == IN) {
 		/* Handle this one specially */
 		expp->nd_type = bool_type;
-		if (tpr->tp_fund != SET) {
+		if (tpr->tp_fund != T_SET) {
 node_error(expp, "RHS of IN operator not a SET type");
 			return 0;
 		}
@@ -411,7 +532,7 @@ node_error(expp, "IN operator: type of LHS not compatible with element type of R
 
 	if (expp->nd_symb == '[') {
 		/* Handle ARRAY selection specially too! */
-		if (tpl->tp_fund != ARRAY) {
+		if (tpl->tp_fund != T_ARRAY) {
 node_error(expp, "array index not belonging to an ARRAY");
 			return 0;
 		}
@@ -420,11 +541,10 @@ node_error(expp, "incompatible index type");
 			return 0;
 		}
 		expp->nd_type = tpl->arr_elem;
-		if (const) return 0;
 		return 1;
 	}
 
-	if (tpl->tp_fund == SUBRANGE) tpl = tpl->next;
+	if (tpl->tp_fund == T_SUBRANGE) tpl = tpl->next;
 	expp->nd_type = tpl;
 
 	if (!TstCompat(tpl, tpr)) {
@@ -437,49 +557,35 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 	case '-':
 	case '*':
 		switch(tpl->tp_fund) {
-		case INTEGER:
-		case INTORCARD:
-		case CARDINAL:
-		case LONGINT:
-		case SET:
+		case T_INTEGER:
+		case T_CARDINAL:
+		case T_SET:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
 			}
 			return 1;
-		case REAL:
-		case LONGREAL:
-			if (const) {
-				errval = 2;
-				break;
-			}
+		case T_REAL:
 			return 1;
 		}
 		break;
 	case '/':
 		switch(tpl->tp_fund) {
-		case SET:
+		case T_SET:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
 			}
 			return 1;
-		case REAL:
-		case LONGREAL:
-			if (const) {
-				errval = 2;
-				break;
-			}
+		case T_REAL:
 			return 1;
 		}
 		break;
 	case DIV:
 	case MOD:
 		switch(tpl->tp_fund) {
-		case INTEGER:
-		case INTORCARD:
-		case CARDINAL:
-		case LONGINT:
+		case T_INTEGER:
+		case T_CARDINAL:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
@@ -505,32 +611,30 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 	case '<':
 	case '>':
 		switch(tpl->tp_fund) {
-		case SET:
+		case T_SET:
 			if (expp->nd_symb == '<' || expp->nd_symb == '>') {
 				break;
 			}
-		case INTEGER:
-		case INTORCARD:
-		case LONGINT:
-		case CARDINAL:
-		case ENUMERATION:	/* includes boolean */
-		case CHAR:
+			if (expp->nd_left->nd_class == Set &&
+			    expp->nd_right->nd_class == Set) {
+				cstbin(expp);
+			}
+			return 1;
+		case T_INTEGER:
+		case T_CARDINAL:
+		case T_ENUMERATION:	/* includes boolean */
+		case T_CHAR:
 			if (expp->nd_left->nd_class == Value &&
 			    expp->nd_right->nd_class == Value) {
 				cstbin(expp);
 			}
 			return 1;
-		case POINTER:
+		case T_POINTER:
 			if (!(expp->nd_symb == '=' || expp->nd_symb == '#')) {
 				break;
 			}
 			/* Fall through */
-		case REAL:
-		case LONGREAL:
-			if (const) {
-				errval = 2;
-				break;
-			}
+		case T_REAL:
 			return 1;
 		}
 	default:
@@ -540,37 +644,32 @@ node_error(expp, "Incompatible types for operator \"%s\"", symbol2str(expp->nd_s
 	case 1:
 		node_error(expp,"Operator \"%s\": illegal operand type(s)", symbol2str(expp->nd_symb));
 		break;
-	case 2:
-		node_error(expp, "Expression not constant");
-		break;
 	case 3:
 		node_error(expp, "BOOLEAN type(s) expected");
 		break;
+	default:
+		assert(0);
 	}
 	return 0;
 }
 
 int
-chk_uoper(expp, const)
+chk_uoper(expp)
 	register struct node *expp;
 {
-	/*	Check an unary operation. If "const" is set, also check that
-		it can be evaluated compile-time.
+	/*	Check an unary operation.
 	*/
 	register struct type *tpr = expp->nd_right->nd_type;
 
-	if (tpr->tp_fund == SUBRANGE) tpr = tpr->next;
+	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
 	expp->nd_type = tpr;
 
 	switch(expp->nd_symb) {
 	case '+':
 		switch(tpr->tp_fund) {
-		case INTEGER:
-		case LONGINT:
-		case REAL:
-		case LONGREAL:
-		case CARDINAL:
-		case INTORCARD:
+		case T_INTEGER:
+		case T_REAL:
+		case T_CARDINAL:
 			expp->nd_token = expp->nd_right->nd_token;
 			FreeNode(expp->nd_right);
 			expp->nd_right = 0;
@@ -579,15 +678,12 @@ chk_uoper(expp, const)
 		break;
 	case '-':
 		switch(tpr->tp_fund) {
-		case INTEGER:
-		case LONGINT:
-		case INTORCARD:
+		case T_INTEGER:
 			if (expp->nd_right->nd_class == Value) {
 				cstunary(expp);
 			}
 			return 1;
-		case REAL:
-		case LONGREAL:
+		case T_REAL:
 			if (expp->nd_right->nd_class == Value) {
 				expp->nd_token = expp->nd_right->nd_token;
 				if (*(expp->nd_REL) == '-') {
@@ -609,9 +705,8 @@ chk_uoper(expp, const)
 		}
 		break;
 	case '^':
-		if (tpr->tp_fund != POINTER) break;
+		if (tpr->tp_fund != T_POINTER) break;
 		expp->nd_type = tpr->next;
-		if (const) return 0;
 		return 1;
 	default:
 		assert(0);

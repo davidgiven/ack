@@ -82,21 +82,21 @@ construct_type(fund, tp)
 	struct type *dtp = create_type(fund);
 
 	switch (fund)	{
-	case PROCEDURE:
-	case POINTER:
+	case T_PROCEDURE:
+	case T_POINTER:
 		dtp->tp_align = ptr_align;
 		dtp->tp_size = ptr_size;
 		dtp->next = tp;
 		break;
-	case SET:
+	case T_SET:
 		dtp->tp_align = wrd_align;
 		dtp->next = tp;
 		break;
-	case ARRAY:
+	case T_ARRAY:
 		dtp->tp_align = tp->tp_align;
 		dtp->next = tp;
 		break;
-	case SUBRANGE:
+	case T_SUBRANGE:
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
 		dtp->next = tp;
@@ -131,25 +131,25 @@ init_types()
 {
 	register struct type *tp;
 
-	char_type = standard_type(CHAR, 1, (arith) 1);
+	char_type = standard_type(T_CHAR, 1, (arith) 1);
 	char_type->enm_ncst = 256;
-	bool_type = standard_type(ENUMERATION, 1, (arith) 1);
+	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);
 	bool_type->enm_ncst = 2;
-	int_type = standard_type(INTEGER, int_align, int_size);
-	longint_type = standard_type(LONGINT, lint_align, lint_size);
-	card_type = standard_type(CARDINAL, int_align, int_size);
-	real_type = standard_type(REAL, real_align, real_size);
-	longreal_type = standard_type(LONGREAL, lreal_align, lreal_size);
-	word_type = standard_type(WORD, wrd_align, wrd_size);
-	intorcard_type = standard_type(INTORCARD, int_align, int_size);
-	string_type = standard_type(STRING, 1, (arith) -1);
-	address_type = construct_type(POINTER, word_type);
-	tp = construct_type(SUBRANGE, int_type);
+	int_type = standard_type(T_INTEGER, int_align, int_size);
+	longint_type = standard_type(T_INTEGER, lint_align, lint_size);
+	card_type = standard_type(T_CARDINAL, int_align, int_size);
+	real_type = standard_type(T_REAL, real_align, real_size);
+	longreal_type = standard_type(T_REAL, lreal_align, lreal_size);
+	word_type = standard_type(T_WORD, wrd_align, wrd_size);
+	intorcard_type = standard_type(T_INTEGER, int_align, int_size);
+	string_type = standard_type(T_STRING, 1, (arith) -1);
+	address_type = construct_type(T_POINTER, word_type);
+	tp = construct_type(T_SUBRANGE, int_type);
 	tp->sub_lb = 0;
 	tp->sub_ub = wrd_size * 8 - 1;
 	bitset_type = set_type(tp);
-	std_type = construct_type(PROCEDURE, NULLTYPE);
-	error_type = standard_type(ERRONEOUS, 1, (arith) 1);
+	std_type = construct_type(T_PROCEDURE, NULLTYPE);
+	error_type = standard_type(T_CHAR, 1, (arith) 1);
 }
 
 int
@@ -160,14 +160,11 @@ has_selectors(df)
 	switch(df->df_kind) {
 	case D_MODULE:
 		return df->df_value.df_module.mo_scope;
-	case D_VARIABLE: {	
-		register struct type *tp = df->df_type;
-
-		if (tp->tp_fund == RECORD) {
-			return tp->rec_scope;
+	case D_VARIABLE:
+		if (df->df_type->tp_fund == T_RECORD) {
+			return df->df_type->rec_scope;
 		}
 		break;
-		}
 	}
 	error("no selectors for \"%s\"", df->df_idf->id_text);
 	return 0;
@@ -205,7 +202,7 @@ ParamList(ids, tp, VARp)
 chk_basesubrange(tp, base)
 	register struct type *tp, *base;
 {
-	if (base->tp_fund == SUBRANGE) {
+	if (base->tp_fund == T_SUBRANGE) {
 		/* Check that the bounds of "tp" fall within the range
 		   of "base"
 		*/
@@ -214,7 +211,7 @@ chk_basesubrange(tp, base)
 		}
 		base = base->next;
 	}
-	if (base->tp_fund == ENUMERATION || base->tp_fund == CHAR) {
+	if (base->tp_fund == T_ENUMERATION || base->tp_fund == T_CHAR) {
 		if (tp->next != base) {
 			error("Specified base does not conform");
 		}
@@ -247,13 +244,13 @@ subr_type(lb, ub)
 		return error_type;
 	}
 
-	if (tp->tp_fund == SUBRANGE) tp = tp->next;
+	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 	if (tp == intorcard_type) tp = card_type;	/* lower bound > 0 */
 
 	/* Check base type
 	*/
 	if (tp != int_type && tp != card_type && tp != char_type &&
-	    tp->tp_fund != ENUMERATION) {
+	    tp->tp_fund != T_ENUMERATION) {
 		/* BOOLEAN is also an ENUMERATION type
 		*/
 		node_error(ub, "Illegal base type for subrange");
@@ -268,7 +265,7 @@ subr_type(lb, ub)
 
 	/* Now construct resulting type
 	*/
-	tp = construct_type(SUBRANGE, tp);
+	tp = construct_type(T_SUBRANGE, tp);
 	tp->sub_lb = lb->nd_INT;
 	tp->sub_ub = ub->nd_INT;
 	DO_DEBUG(2,debug("Creating subrange type %ld-%ld", (long)lb->nd_INT,(long)ub->nd_INT));
@@ -285,13 +282,13 @@ set_type(tp)
 	*/
 	int lb, ub;
 
-	if (tp->tp_fund == SUBRANGE) {
+	if (tp->tp_fund == T_SUBRANGE) {
 		if ((lb = tp->sub_lb) < 0 || (ub = tp->sub_ub) > MAX_SET - 1) {
 			error("Set type limits exceeded");
 			return error_type;
 		}
 	}
-	else if (tp->tp_fund == ENUMERATION || tp == char_type) {
+	else if (tp->tp_fund == T_ENUMERATION || tp == char_type) {
 		lb = 0;
 		if ((ub = tp->enm_ncst - 1) > MAX_SET - 1) {
 			error("Set type limits exceeded");
@@ -302,7 +299,7 @@ set_type(tp)
 		error("illegal base type for set");
 		return error_type;
 	}
-	tp = construct_type(SET, tp);
+	tp = construct_type(T_SET, tp);
 	tp->tp_size = align(((ub - lb) + 7)/8, wrd_align);
 	return tp;
 }

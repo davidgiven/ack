@@ -68,12 +68,15 @@ ExpList(struct node **pnd;)
 {
 	struct node **nd;
 } :
-	expression(pnd)		{ nd = pnd; }
-	[
-		','		{ *nd = MkNode(Link, *nd, NULLNODE, &dot);
-				  nd = &(*nd)->nd_right;
+	expression(pnd)		{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+				  (*pnd)->nd_symb = ',';
+				  nd = &((*pnd)->nd_right);
 				}
-		expression(nd)
+	[
+		','		{ *nd = MkNode(Link, NULLNODE, NULLNODE, &dot);
+				}
+		expression(&(*nd)->nd_left)
+				{ nd = &((*pnd)->nd_right); }
 	]*
 ;
 
@@ -86,7 +89,10 @@ ConstExpression(struct node **pnd;):
 		{ DO_DEBUG(3,
 		     ( debug("Constant expression:"),
 		       PrNode(*pnd)));
-		  (void) chk_expr(*pnd, 1);
+		  if (chk_expr(*pnd) &&
+		      ((*pnd)->nd_class != Set && (*pnd)->nd_class != Value)) {
+			error("Constant expression expected");
+		  }
 		  DO_DEBUG(3, PrNode(*pnd));
 		}
 ;

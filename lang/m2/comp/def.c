@@ -204,7 +204,7 @@ ids->nd_IDF->id_text);
 		DO_DEBUG(2, debug("importing \"%s\", kind %d", ids->nd_IDF->id_text, df->df_kind));
 		define(ids->nd_IDF, CurrentScope, kind)->imp_def = df;
 		if (df->df_kind == D_TYPE &&
-		    df->df_type->tp_fund == ENUMERATION) {
+		    df->df_type->tp_fund == T_ENUMERATION) {
 			/* Also import all enumeration literals */
 			exprt_literals(df->df_type->enm_enums,
 					CurrentScope);

@@ -60,7 +60,7 @@ cstbin(expp)
 	int uns = expp->nd_type != int_type;
 
 	assert(expp->nd_class == Oper);
-	if (expp->nd_right->nd_type->tp_fund == SET) {
+	if (expp->nd_right->nd_type->tp_fund == T_SET) {
 		cstset(expp);
 		return;
 	}
