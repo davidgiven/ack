@@ -1,3 +1,4 @@
+# $Header$
 d=../../..
 h=$d/h
 PEM=$d/lib/pc_pem
@@ -14,6 +15,7 @@ pem.out:        pem.m
 pem:            pem.m
 		apc $(LDFLAG) -o pem pem.m
 
+# pem.m is system dependent and may NOT be distributed
 pem.m:          pem.p $(HEAD)
 		-rm -f pem.m
 		-if apc -I$h -O -c.m pem.p ; then :; else \
@@ -27,8 +29,8 @@ install:	pem
 		cp pem $(PEM)
 
 distr:
-		ln pem.p pem22.p ; apc -mvax2 -c.m -I$h pem22.p ; rm pem22.p
-		ln pem.p pem24.p ; apc -mvax4 -c.m -I$h pem24.p ; rm pem24.p
+		ln pem.p pem22.p ; apc -mpdp -c.m -I$h pem22.p ; rm pem22.p
+		ln pem.p pem24.p ; apc -mvax2 -c.m -I$h pem24.p ; rm pem24.p
 clean:
 		-rm -f pem pem.out *.[os] *.old
 
