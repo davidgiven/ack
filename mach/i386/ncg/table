@@ -233,7 +233,7 @@ jne label cost(1,4).
 jmp label cost(1,4).
 proccall "call" label+rm cost(1,8).
 jxx "syntax error" label cost(1,4).
-setxx "syntax error" REG cost(2,4).
+setxx "syntax error" REG:rw cost(2,4).
 lea anyreg:rw, halfindir:ro.
 lea LOCAL:rw, halfindir:ro.	/* only for register variables, UNSAFE!!! */
 leave cost(1,4).
