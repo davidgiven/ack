@@ -35,6 +35,7 @@ sys_open(path, flag, filep)
 				close(fd);
 				return 0;
 			}
+			break;
 		}
 		/* Fall through */
 	case OP_WRITE:
