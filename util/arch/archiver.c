@@ -430,8 +430,10 @@ char *mess;
 		x = even(x);
 	}
 	else	status.st_size -= x;
-  	if (read(src_fd, io_buffer, read_chars) != read_chars)
+  	if (read(src_fd, io_buffer, read_chars) != read_chars) {
 		error(FALSE,"%s seems to shrink\n", name);
+		break;
+	}
 	mwrite(fd, io_buffer, x);
   }
 
