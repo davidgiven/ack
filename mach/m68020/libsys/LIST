@@ -14,7 +14,9 @@ chroot.s
 close.s
 _close.s
 creat.s
+_creat.s
 dup.s
+_dup.s
 dup2.s
 _dup2.s
 execl.s
