@@ -1119,22 +1119,10 @@ pat dvf $1==4		leaving cal ".dvf4" asp 4
 pat dvf $1==8		leaving cal ".dvf8" asp 8
 pat ngf $1==4		leaving cal ".ngf4"
 pat ngf $1==8		leaving cal ".ngf8"
-pat fif $1==4		leaving cal ".fif4"
-pat fif $1==8		leaving cal ".fif8"
-pat fef $1==4
-with REG REG
-  kills ALL
-  gen push %2
-      push %2
-      push %1		leaving cal ".fef4"
-pat fef $1==8
-with REG REG REG REG
-  kills ALL
-  gen push %4
-      push %4
-      push %3
-      push %2
-      push %1		leaving cal ".fef8"
+pat fif $1==4		leaving lor 1 cal ".fif4" asp 2
+pat fif $1==8		leaving lor 1 cal ".fif8" asp 2
+pat fef $1==4		leaving lor 1 adp 0-2 cal ".fef4"
+pat fef $1==8		leaving lor 1 adp 0-2 cal ".fef8"
 
 /******************************************************************
  *  Group 6: Pointer Arithmetic                                   *
