@@ -1,5 +1,10 @@
 #define MININT		(1 << (sizeof(int) * 8 - 1))
-#define MAXCHUNK	(-(MININT + 1))	/* Highest count we write(2).	*/
+#define MAXCHUNK	(~MININT)	/* Highest count we read(2).	*/
+/* Unfortunately, MAXCHUNK is too large with some  compilers. Put it in
+   an int!
+*/
+
+int maxchunk = MAXCHUNK;
 
 /*
  * We don't have to worry about byte order here.
@@ -12,7 +17,7 @@ rd_bytes(fd, string, cnt)
 {
 
 	while (cnt) {
-		register int n = cnt >= MAXCHUNK ? MAXCHUNK : cnt;
+		register int n = cnt >= maxchunk ? maxchunk : cnt;
 
 		if (read(fd, string, n) != n)
 			rd_fatal();
