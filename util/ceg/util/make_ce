@@ -7,7 +7,7 @@ DEF = $(CEG)/defaults
 AR = ar
 CC = cc
 
-IFILES	= -I. -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back
+IFILES	= -I. -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(EM)/mach
 
 CFLAGS = -O $(IFILES)
 
