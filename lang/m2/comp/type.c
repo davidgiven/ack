@@ -11,7 +11,8 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"misc.h"
+#include	"LLlex.h"
+#include	"node.h"
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
@@ -164,7 +165,7 @@ has_selectors(df)
 */
 struct paramlist *
 ParamList(ids, tp, VARp)
-	register struct id_list *ids;
+	register struct node *ids;
 	struct type *tp;
 {
 	register struct paramlist *pr;

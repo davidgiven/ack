@@ -7,12 +7,12 @@ static  char *RcsId = "$Header$";
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	"idf.h"
-#include	"misc.h"
 #include	"main.h"
 #include	"LLlex.h"
 #include	"scope.h"
 #include	"def.h"
 #include	"type.h"
+#include	"node.h"
 #include	"debug.h"
 
 static struct idf *impl_name = 0;
@@ -57,13 +57,16 @@ ModuleDeclaration
 				}
 ;
 
-priority:
-	'[' ConstExpression ']'
+priority
+{
+	struct node *nd;
+}:
+	'[' ConstExpression(&nd) ']'
 ;
 
 export(int def;)
 {
-	struct id_list *ExportList;
+	struct node *ExportList;
 	int QUALflag = 0;
 } :
 	EXPORT
@@ -74,17 +77,17 @@ export(int def;)
 			{
 			  if (!def) Export(ExportList, QUALflag);
 			  else warning("export list in definition module ignored");
-			  FreeIdList(ExportList);
+			  FreeNode(ExportList);
 			}
 ;
 
 import(int local;)
 {
-	struct id_list *ImportList;
-	struct idf *id = 0;
+	struct node *ImportList;
+	struct node *id = 0;
 } :
 	[ FROM
-	  IDENT		{ id = dot.TOK_IDF; }
+	  IDENT		{ id = MkNode(Value, NULLNODE, NULLNODE, &dot); }
 	]?
 	IMPORT IdentList(&ImportList) ';'
 	/*
@@ -95,7 +98,8 @@ import(int local;)
 	*/
 			{
 			  Import(ImportList, id, local);
-			  FreeIdList(ImportList);
+			  FreeNode(ImportList);
+			  if (id) FreeNode(id);
 			}
 ;
 

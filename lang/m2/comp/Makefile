@@ -17,7 +17,7 @@ LFLAGS = $(PROFILE)
 LOBJ =	tokenfile.o program.o declar.o expression.o statement.o
 COBJ =	LLlex.o LLmessage.o char.o error.o main.o \
 	symbol2str.o tokenname.o idf.o input.o type.o def.o \
-	scope.o misc.o enter.o defmodule.o typequiv.o
+	scope.o misc.o enter.o defmodule.o typequiv.o node.o
 OBJ =	$(COBJ) $(LOBJ) Lpars.o
 GENFILES=	tokenfile.c \
 	program.c declar.c expression.c statement.c \
@@ -47,6 +47,7 @@ symbol2str.c:	tokenname.c make.tokcase
 misc.h:		misc.H make.allocd
 def.h:		def.H make.allocd
 type.h:		type.H make.allocd
+node.h:		node.H make.allocd
 scope.c:	scope.C make.allocd
 
 char.c: char.tab tab
@@ -71,22 +72,23 @@ depend:
 LLlex.o: LLlex.h Lpars.h class.h f_info.h idf.h input.h
 LLmessage.o: LLlex.h Lpars.h idf.h
 char.o: class.h
-error.o: LLlex.h f_info.h input.h main.h
+error.o: LLlex.h f_info.h input.h main.h node.h
 main.o: LLlex.h Lpars.h debug.h def.h f_info.h idf.h input.h main.h scope.h standards.h type.h
 symbol2str.o: Lpars.h
 tokenname.o: Lpars.h idf.h tokenname.h
 idf.o: idf.h
 input.o: f_info.h input.h
-type.o: Lpars.h def.h def_sizes.h idf.h misc.h type.h
-def.o: Lpars.h debug.h def.h idf.h main.h misc.h scope.h type.h
+type.o: LLlex.h Lpars.h def.h def_sizes.h idf.h node.h type.h
+def.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
 scope.o: LLlex.h debug.h def.h idf.h scope.h type.h
 misc.o: LLlex.h f_info.h idf.h misc.h
-enter.o: def.h idf.h misc.h scope.h type.h
+enter.o: LLlex.h def.h idf.h node.h scope.h type.h
 defmodule.o: LLlex.h def.h f_info.h idf.h input.h scope.h
 typequiv.o: Lpars.h def.h type.h
+node.o: LLlex.h def.h node.h type.h
 tokenfile.o: Lpars.h
-program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h misc.h scope.h type.h
-declar.o: LLlex.h Lpars.h def.h idf.h misc.h scope.h type.h
-expression.o: LLlex.h Lpars.h def.h idf.h scope.h
+program.o: LLlex.h Lpars.h debug.h def.h idf.h main.h node.h scope.h type.h
+declar.o: LLlex.h Lpars.h def.h idf.h misc.h node.h scope.h type.h
+expression.o: LLlex.h Lpars.h def.h idf.h node.h scope.h
 statement.o: Lpars.h
 Lpars.o: Lpars.h

@@ -13,6 +13,7 @@ static char *RcsId = "$Header$";
 #include	"f_info.h"
 #include	"LLlex.h"
 #include	"main.h"
+#include	"node.h"
 
 #define MAXERR_LINE	5	/* Number of error messages on one line ... */
 #define	ERROUT		STDERR
@@ -28,8 +29,6 @@ static char *RcsId = "$Header$";
 #define VDEBUG		7
 #endif
 
-#define NILEXPR	((struct expr *) 0)
-
 int err_occurred;
 
 extern char *symbol2str();
@@ -37,12 +36,12 @@ extern char *symbol2str();
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
 		error()		syntactic and semantic error messages
-		expr_error()	errors in expressions
+		node_error()	errors in nodes
 	The difference lies in the place where the file name and line
 	number come from.
 	Lexical errors report from the global variables LineNumber and
-	FileName, expression errors get their information from the
-	expression, whereas other errors use the information in the token.
+	FileName, node errors get their information from the
+	node, whereas other errors use the information in the token.
 */
 
 #ifdef DEBUG
@@ -50,7 +49,7 @@ extern char *symbol2str();
 debug(level, fmt, args)
 	char *fmt;
 {
-	if (level <= options['D']) _error(VDEBUG, NILEXPR, fmt, &args);
+	if (level <= options['D']) _error(VDEBUG, NULLNODE, fmt, &args);
 }
 #endif DEBUG
 
@@ -58,44 +57,44 @@ debug(level, fmt, args)
 error(fmt, args)
 	char *fmt;
 {
-	_error(ERROR, NILEXPR, fmt, &args);
+	_error(ERROR, NULLNODE, fmt, &args);
 }
 
 /*VARARGS2*/
-expr_error(expr, fmt, args)
-	struct expr *expr;
+node_error(node, fmt, args)
+	struct node *node;
 	char *fmt;
 {
-	_error(ERROR, expr, fmt, &args);
+	_error(ERROR, node, fmt, &args);
 }
 
 /*VARARGS1*/
 warning(fmt, args)
 	char *fmt;
 {
-	_error(WARNING, NILEXPR, fmt, &args);
+	_error(WARNING, NULLNODE, fmt, &args);
 }
 
 /*VARARGS2*/
-expr_warning(expr, fmt, args)
-	struct expr *expr;
+node_warning(node, fmt, args)
+	struct node *node;
 	char *fmt;
 {
-	_error(WARNING, expr, fmt, &args);
+	_error(WARNING, node, fmt, &args);
 }
 
 /*VARARGS1*/
 lexerror(fmt, args)
 	char *fmt;
 {
-	_error(LEXERROR, NILEXPR, fmt, &args);
+	_error(LEXERROR, NULLNODE, fmt, &args);
 }
 
 /*VARARGS1*/
 lexwarning(fmt, args) 
 	char *fmt;
 {
-	_error(LEXWARNING, NILEXPR, fmt, &args);
+	_error(LEXWARNING, NULLNODE, fmt, &args);
 }
 
 /*VARARGS1*/
@@ -104,13 +103,13 @@ fatal(fmt, args)
 	int args;
 {
 
-	_error(FATAL, NILEXPR, fmt, &args);
+	_error(FATAL, NULLNODE, fmt, &args);
 	sys_stop(S_EXIT);
 }
 
-_error(class, expr, fmt, argv)
+_error(class, node, fmt, argv)
 	int class;
-	struct expr *expr;
+	struct node *node;
 	char *fmt;
 	int argv[];
 {
@@ -118,8 +117,10 @@ _error(class, expr, fmt, argv)
 		for a given line to MAXERR_LINE.
 	*/
 	static unsigned int last_ln = 0;
-	static int e_seen = 0;
 	unsigned int ln = 0;
+	static char * last_fn = 0;
+	char *fn = 0;
+	static int e_seen = 0;
 	char *remark = 0;
 	
 	/*	Since name and number are gathered from different places
@@ -158,13 +159,19 @@ _error(class, expr, fmt, argv)
 	case FATAL:
 		remark = "fatal error --";
 		break;
+#ifdef DEBUG
+	case VDEBUG:
+		remark = "(debug)";
+		break;
+#endif DEBUG
 	}
 	
 	/* the place */
 	switch (class)	{	
 	case WARNING:
 	case ERROR:
-		ln = /* ???? expr ? expr->ex_line : */ dot.tk_lineno;
+		fn = node ? node->nd_filename : dot.tk_filename;
+		ln = node ? node->nd_lineno : dot.tk_lineno;
 		break;
 	case LEXWARNING:
 	case LEXERROR:
@@ -174,13 +181,14 @@ _error(class, expr, fmt, argv)
 	case VDEBUG:
 #endif DEBUG
 		ln = LineNumber;
+		fn = FileName;
 		break;
 	}
 	
 #ifdef DEBUG
 	if (class != VDEBUG) {
 #endif
-	if (ln == last_ln)	{
+	if (fn == last_fn && ln == last_ln)	{
 		/* we've seen this place before */
 		e_seen++;
 		if (e_seen == MAXERR_LINE) fmt = "etc ...";
@@ -192,13 +200,14 @@ _error(class, expr, fmt, argv)
 	else	{
 		/* brand new place */
 		last_ln = ln;
+		last_fn = fn;
 		e_seen = 0;
 	}
 #ifdef DEBUG
 	}
 #endif DEBUG
 	
-	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
+	if (fn) fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
 
 	if (remark) fprint(ERROUT, "%s ", remark);
 

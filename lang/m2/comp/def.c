@@ -10,9 +10,10 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"misc.h"
 #include	"main.h"
 #include	"scope.h"
+#include	"LLlex.h"
+#include	"node.h"
 #include	"debug.h"
 
 struct def *h_def;		/* Pointer to free list of def structures */
@@ -63,7 +64,7 @@ define(id, scope, kind)
 			return df;
 		}
 		if (kind != D_ERROR) {
-			error("identifier \"%s\" already declared", id->id_text);
+error("identifier \"%s\" already declared", id->id_text);
 		}
 		return df;
 	}
@@ -115,7 +116,7 @@ lookup(id, scope)
 }
 
 Export(ids, qualified)
-	register struct id_list *ids;
+	register struct node *ids;
 {
 	/*	From the current scope, the list of identifiers "ids" is
 		exported. Note this fact. If the export is not qualified, make
@@ -125,36 +126,38 @@ Export(ids, qualified)
 	register struct def *df;
 
 	while (ids) {
-		df = define(ids->id_ptr, CurrentScope, D_ISEXPORTED);
+		df = define(ids->nd_IDF, CurrentScope, D_ISEXPORTED);
 		if (qualified) {
 			df->df_flags |= D_QEXPORTED;
 		}
 		else {
 			df->df_flags |= D_EXPORTED;
-			df = define(ids->id_ptr, enclosing(CurrentScope),
+			df = define(ids->nd_IDF, enclosing(CurrentScope),
 					D_IMPORT);
 		}
 		ids = ids->next;
 	}
 }
 
-Import(ids, id, local)
-	register struct id_list *ids;
-	struct idf *id;
+Import(ids, idn, local)
+	register struct node *ids;
+	struct node *idn;
 {
 	/*	"ids" is a list of imported identifiers.
-		If "id" is a null-pointer, the identifiers are imported from the
-		enclosing scope. Otherwise they are imported from the module
-		indicated by "id", which must be visible in the enclosing scope.
-		An exception must be made for imports of the Compilation Unit.
+		If "idn" is a null-pointer, the identifiers are imported from
+		the enclosing scope. Otherwise they are imported from the module
+		indicated by "idn", which must be visible in the enclosing
+		scope.  An exception must be made for imports of the
+		Compilation Unit.
 		This case is indicated by  the value 0 of the flag "local".
-		In this case, if "id" is a null pointer, the "ids" identifiers
+		In this case, if "idn" is a null pointer, the "ids" identifiers
 		are all module identifiers. Their Definition Modules must be
-		read.  Otherwise "id" is a module identifier whose Definition
+		read.  Otherwise "idn" is a module identifier whose Definition
 		Module must be read. "ids" then represents a list of
 		identifiers defined in this module.
 	*/
 	register struct def *df;
+	register struct idf *id = 0;
 	int scope;
 	int kind;
 	int imp_kind;
@@ -162,6 +165,7 @@ Import(ids, id, local)
 #define FROM_ENCLOSING	1
 	struct def *lookfor(), *GetDefinitionModule();
 
+	if (idn) id = idn->nd_IDF;
 	kind = D_IMPORT;
 	scope = enclosing(CurrentScope)->sc_scope;
 	if (!id) imp_kind = FROM_ENCLOSING;
@@ -173,35 +177,35 @@ Import(ids, id, local)
 			/* enter all "ids" with type D_ERROR */
 			kind = D_ERROR;
 			if (df->df_kind != D_ERROR) {
-error("identifier \"%s\" does not represent a module", id->id_text);
+node_error(idn, "identifier \"%s\" does not represent a module", id->id_text);
 			}
 		}
 		else	scope = df->mod_scope;
 	}
 	while (ids) {
 		if (imp_kind == FROM_MODULE) {
-			if (!(df = lookup(ids->id_ptr, scope))) {
-error("identifier \"%s\" not declared in qualifying module",
-ids->id_ptr->id_text);
+			if (!(df = lookup(ids->nd_IDF, scope))) {
+node_error(ids, "identifier \"%s\" not declared in qualifying module",
+ids->nd_IDF->id_text);
 				df = ill_df;
 			}
 			else 
 			if (!(df->df_flags&(D_EXPORTED|D_QEXPORTED))) {
-error("identifier \"%s\" not exported from qualifying module",
-ids->id_ptr->id_text);
+node_error(ids,"identifier \"%s\" not exported from qualifying module",
+ids->nd_IDF->id_text);
 			}
 		}
 		else {
 			if (local) {
-				df = lookfor(ids->id_ptr,
+				df = lookfor(ids->nd_IDF,
 					     enclosing(CurrentScope), 0);
-			} else df = GetDefinitionModule(ids->id_ptr);
+			} else df = GetDefinitionModule(ids->nd_IDF);
 			if (df->df_kind == D_ERROR) {
-error("identifier \"%s\" not visible in enclosing scope",
-ids->id_ptr->id_text);
+node_error(ids, "identifier \"%s\" not visible in enclosing scope",
+ids->nd_IDF->id_text);
 			}
 		}
-		define(ids->id_ptr, CurrentScope, kind)->imp_def = df;
+		define(ids->nd_IDF, CurrentScope, kind)->imp_def = df;
 		if (df->df_kind == D_TYPE &&
 		    df->df_type->tp_fund == ENUMERATION) {
 			/* Also import all enumeration literals */

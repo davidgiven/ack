@@ -7,11 +7,12 @@ static char *RcsId = "$Header$";
 #include	<em_label.h>
 #include	<assert.h>
 #include	"idf.h"
-#include	"misc.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"
+#include	"node.h"
+#include	"misc.h"
 }
 
 ProcedureDeclaration
@@ -95,7 +96,7 @@ FormalParameters(int doparams; struct paramlist **pr; struct type **tp;)
 	]?
 	')'
 			{ *tp = 0; }
-	[	':' qualident(D_TYPE | D_HTYPE, &df, "type")
+	[	':' qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
 			{ *tp = df->df_type; }
 	]?
 ;
@@ -108,7 +109,7 @@ FormalParameters(int doparams; struct paramlist **pr; struct type **tp;)
 */
 FPSection(int doparams; struct paramlist **ppr;)
 {
-	struct id_list *FPList;
+	struct node *FPList;
 	struct paramlist *ParamList();
 	struct type *tp;
 	int VARp = 0;
@@ -122,7 +123,7 @@ FPSection(int doparams; struct paramlist **ppr;)
 			EnterIdList(FPList, D_VARIABLE, VARp, tp, CurrentScope);
 		  }
 		  *ppr = ParamList(FPList, tp);
-		  FreeIdList(FPList);
+		  FreeNode(FPList);
 		}
 ;
 
@@ -133,7 +134,7 @@ FormalType(struct type **tp;)
 } :
 	[ ARRAY OF	{ ARRAYflag = 1; }
 	]?
-	qualident(D_TYPE | D_HTYPE, &df, "type")
+	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
 			{ if (ARRAYflag) {
 				*tp = construct_type(ARRAY, NULLTYPE);
 				(*tp)->arr_elem = df->df_type;
@@ -182,7 +183,7 @@ SimpleType(struct type **ptp;)
 	struct def *df;
 	struct type *tp;
 } :
-	qualident(D_TYPE | D_HTYPE, &df, "type")
+	qualident(D_TYPE | D_HTYPE, &df, "type", (struct node **) 0)
 	[
 		/* nothing */
 	|
@@ -202,41 +203,44 @@ SimpleType(struct type **ptp;)
 
 enumeration(struct type **ptp;)
 {
-	struct id_list *EnumList;
+	struct node *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
 			{
 			  *ptp = standard_type(ENUMERATION,int_align,int_size);
 			  EnterIdList(EnumList, D_ENUM, 0, *ptp, CurrentScope);
-			  FreeIdList(EnumList);
+			  FreeNode(EnumList);
 			}
 
 ;
 
-IdentList(struct id_list **p;)
+IdentList(struct node **p;)
 {
-	register struct id_list *q = new_id_list();
+	register struct node *q;
 } :
-	IDENT			{ q->id_ptr = dot.TOK_IDF;  *p = q;}
+	IDENT		{ q = MkNode(Value, NULLNODE, NULLNODE, &dot);
+			  *p = q;
+			}
 	[
-		',' IDENT	{ q->next = new_id_list();
-				  q = q->next;
-				  q->id_ptr = dot.TOK_IDF;
-				}
+		',' IDENT
+			{ q->next = MkNode(Value,NULLNODE,NULLNODE,&dot);
+			  q = q->next;
+			}
 	]*
-				{ q->next = 0; }
+			{ q->next = 0; }
 ;
 
 SubrangeType(struct type **ptp;)
 {
 	struct type *tp;
+	struct node *nd1 = 0, *nd2 = 0;
 }:
 	/*
 	   This is not exactly the rule in the new report, but see
 	   the rule for "SimpleType".
 	*/
-	'[' ConstExpression
-	UPTO ConstExpression
+	'[' ConstExpression(&nd1)
+	UPTO ConstExpression(&nd2)
 	']'
 	/*
 	   Evaluate the expressions. Check that they are indeed constant.
@@ -295,7 +299,7 @@ FieldListSequence(struct scope *scope;):
 
 FieldList(struct scope *scope;)
 {
-	struct id_list *FldList;
+	struct node *FldList;
 	struct idf *id;
 	struct def *df, *df1;
 	struct type *tp;
@@ -303,7 +307,7 @@ FieldList(struct scope *scope;)
 [
 	IdentList(&FldList) ':' type(&tp)
 			{ EnterIdList(FldList, D_FIELD, 0, tp, scope);
-			  FreeIdList(FldList);
+			  FreeNode(FldList);
 			}
 |
 	CASE
@@ -312,7 +316,7 @@ FieldList(struct scope *scope;)
 	|
 				{ id = gen_anon_idf(); }
 	]			/* Changed rule in new modula-2 */
-	':' qualident(D_TYPE|D_HTYPE, &df, "type")
+	':' qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
 				{ df1 = define(id, scope, D_FIELD);
 				  df1->df_type = df->df_type;
 				}
@@ -335,8 +339,11 @@ CaseLabelList:
 	CaseLabels [ ',' CaseLabels ]*
 ;
 
-CaseLabels:
-	ConstExpression [ UPTO ConstExpression ]?
+CaseLabels
+{
+	struct node *nd1, *nd2 = 0;
+}:
+	ConstExpression(&nd1) [ UPTO ConstExpression(&nd2) ]?
 ;
 
 SetType(struct type **ptp;)
@@ -364,7 +371,7 @@ PointerType(struct type **ptp;)
 		/* Either a Module or a Type, but in both cases defined
 		   in this scope, so this is the correct identification
 		*/
-		qualident(D_TYPE|D_HTYPE, &df, "type")
+		qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
 				{
 				  if (!df->df_type) {
 					error("type \"%s\" not declared",
@@ -429,7 +436,7 @@ FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 				{ p->next = 0; }
 	]?
 	')'
-	[ ':' qualident(D_TYPE|D_HTYPE, &df, "type")
+	[ ':' qualident(D_TYPE|D_HTYPE, &df, "type", (struct node **) 0)
 				{ *ptp = df->df_type; }
 	]?
 ;
@@ -438,24 +445,26 @@ ConstantDeclaration
 {
 	struct def *df;
 	struct idf *id;
+	struct node *nd;
 }:
 	IDENT			{ id = dot.TOK_IDF; }
-	'=' ConstExpression	{ df = define(id, CurrentScope, D_CONST);
+	'=' ConstExpression(&nd){ df = define(id, CurrentScope, D_CONST);
 				  /* ???? */
 				}
 ;
 
 VariableDeclaration
 {
-	struct id_list *VarList;
+	struct node *VarList;
 	struct type *tp;
+	struct node *nd = 0;
 } :
 	IdentList(&VarList)
 	[
-		ConstExpression
+		ConstExpression(&nd)
 	]?
 	':' type(&tp)
 			{ EnterIdList(VarList, D_VARIABLE, 0, tp, CurrentScope);
-			  FreeIdList(VarList);
+			  FreeNode(VarList);
 			}
 ;

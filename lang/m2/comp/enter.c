@@ -9,7 +9,8 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"
-#include	"misc.h"
+#include	"LLlex.h"
+#include	"node.h"
 
 struct def *
 Enter(name, kind, type, pnam)
@@ -30,7 +31,7 @@ Enter(name, kind, type, pnam)
 }
 
 EnterIdList(idlist, kind, flags, type, scope)
-	register struct id_list *idlist;
+	register struct node *idlist;
 	struct type *type;
 	struct scope *scope;
 {
@@ -39,7 +40,7 @@ EnterIdList(idlist, kind, flags, type, scope)
 	int assval = 0;
 
 	while (idlist) {
-		df = define(idlist->id_ptr, scope, kind);
+		df = define(idlist->nd_IDF, scope, kind);
 		df->df_type = type;
 		df->df_flags = flags;
 		if (kind == D_ENUM) {

@@ -2,20 +2,27 @@
 
 {
 static char *RcsId = "$Header$";
+
+#include	<em_arith.h>
+#include	"LLlex.h"
+#include	"node.h"
 }
 
-statement:
+statement
+{
+	struct node *nd1, *nd2;
+} :
 [
 	/*
 	 * This part is not in the reference grammar. The reference grammar
 	 * states : assignment | ProcedureCall | ...
 	 * but this gives LL(1) conflicts
 	 */
-	designator
+	designator(&nd1)
 	[
-		ActualParameters?
+		ActualParameters(&nd2)?
 	|
-		BECOMES expression
+		BECOMES expression(&nd2)
 	]
 	/*
 	 * end of changed part
@@ -37,7 +44,10 @@ statement:
 |
 	EXIT
 |
-	RETURN expression?
+	RETURN
+	[
+		expression(&nd1)
+	]?
 ]?
 ;
 
@@ -57,15 +67,21 @@ StatementSequence:
 	statement [ ';' statement ]*
 ;
 
-IfStatement:
-	IF expression THEN StatementSequence
-	[ ELSIF expression THEN StatementSequence ]*
+IfStatement
+{
+	struct node *nd1;
+} :
+	IF expression(&nd1) THEN StatementSequence
+	[ ELSIF expression(&nd1) THEN StatementSequence ]*
 	[ ELSE StatementSequence ]?
 	END
 ;
 
-CaseStatement:
-	CASE expression OF case [ '|' case ]*
+CaseStatement
+{
+	struct node *nd;
+} :
+	CASE expression(&nd) OF case [ '|' case ]*
 	[ ELSE StatementSequence ]?
 	END
 ;
@@ -75,19 +91,28 @@ case:
 				/* This rule is changed in new modula-2 */
 ;
 
-WhileStatement:
-	WHILE expression DO StatementSequence END
+WhileStatement
+{
+	struct node *nd;
+}:
+	WHILE expression(&nd) DO StatementSequence END
 ;
 
-RepeatStatement:
-	REPEAT StatementSequence UNTIL expression
+RepeatStatement
+{
+	struct node *nd;
+}:
+	REPEAT StatementSequence UNTIL expression(&nd)
 ;
 
-ForStatement:
+ForStatement
+{
+	struct node *nd1, *nd2, *nd3;
+}:
 	FOR IDENT
-	BECOMES expression
-	TO expression
-	[ BY ConstExpression ]?
+	BECOMES expression(&nd1)
+	TO expression(&nd2)
+	[ BY ConstExpression(&nd3) ]?
 	DO StatementSequence END
 ;
 
@@ -95,6 +120,9 @@ LoopStatement:
 	LOOP StatementSequence END
 ;
 
-WithStatement:
-	WITH designator DO StatementSequence END
+WithStatement
+{
+	struct node *nd;
+}:
+	WITH designator(&nd) DO StatementSequence END
 ;
