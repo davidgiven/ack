@@ -259,10 +259,9 @@ cstset(expp)
 
 		i = expp->nd_left->nd_INT;
 		expp->nd_class = Value;
-		expp->nd_INT = (i >= 0 && set2 != 0 &&
-		    i < setsize * wrd_bits &&
+		expp->nd_INT = (i >= 0 && i < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
-		if (set2) free((char *) set2);
+		free((char *) set2);
 	}
 	else {
 		set1 = expp->nd_left->nd_set;
@@ -272,12 +271,7 @@ cstset(expp)
 		case '+':
 			/* Set union
 			*/
-			if (!set1) {
-				resultset = set2;
-				expp->nd_right->nd_set = 0;
-				break;
-			}
-			if (set2) for (j = 0; j < setsize; j++) {
+			for (j = 0; j < setsize; j++) {
 				*set1++ |= *set2++;
 			}
 			break;
@@ -285,14 +279,6 @@ cstset(expp)
 		case '-':
 			/* Set difference
 			*/
-			if (!set1 || !set2) {
-				/* The set from which something is substracted
-				   is already empty, or the set that is
-				   substracted is empty. In either case, the
-				   result set is set1.
-				*/
-				break;
-			}
 			for (j = 0; j < setsize; j++) {
 				*set1++ &= ~*set2++;
 			}
@@ -301,19 +287,6 @@ cstset(expp)
 		case '*':
 			/* Set intersection
 			*/
-			if (!set1) {
-				/* set1 is empty, and so is the result set
-				*/
-				break;
-			}
-			if (!set2) {
-				/* set 2 is empty, so the result set must be
-				   empty too.
-				*/
-				resultset = set2;
-				expp->nd_right->nd_set = 0;
-				break;
-			}
 			for (j = 0; j < setsize; j++) {
 				*set1++ &= *set2++;
 			}
@@ -322,15 +295,8 @@ cstset(expp)
 		case '/':
 			/* Symmetric set difference
 			*/
-			if (!set1) {
-				resultset = set2;
-				expp->nd_right->nd_set = 0;
-				break;
-			}
-			if (set2) {
-				for (j = 0; j < setsize; j++) {
-					*set1++ ^= *set2++;
-				}
+			for (j = 0; j < setsize; j++) {
+				*set1++ ^= *set2++;
 			}
 			break;
 
@@ -344,33 +310,25 @@ cstset(expp)
 			for (j = 0; j < setsize; j++) {
 				switch(expp->nd_symb) {
 				case GREATEREQUAL:
-					if (!set2) {j = setsize; break; }
-					if (!set1) break;
 					if ((*set1 | *set2++) != *set1) break;
 					set1++;
 					continue;
 				case LESSEQUAL:
-					if (!set1) {j = setsize; break; }
-					if (!set2) break;
 					if ((*set2 | *set1++) != *set2) break;
 					set2++;
 					continue;
 				case '=':
 				case '#':
-					if (!set1 && !set2) {
-						j = setsize; break;
-					}
-					if (!set1 || !set2) break;
 					if (*set1++ != *set2++) break;
 					continue;
 				}
-				if (j < setsize) {
-					expp->nd_INT = expp->nd_symb == '#';
-				}
-				else {
-			 		expp->nd_INT = expp->nd_symb != '#';
-				}
 				break;
+			}
+			if (j < setsize) {
+				expp->nd_INT = expp->nd_symb == '#';
+			}
+			else {
+				expp->nd_INT = expp->nd_symb != '#';
 			}
 			expp->nd_class = Value;
 			expp->nd_symb = INTEGER;

@@ -399,14 +399,8 @@ ChkSet(expp)
 	nd = expp->nd_right;
 
 	/* Now check the elements given, and try to compute a constant set.
-	   First allocate room for the set, but only if it is'nt empty.
+	   First allocate room for the set.
 	*/
-	if (! nd) {
-		/* The resulting set IS empty, so we just return
-		*/
-		expp->nd_set = 0;
-		return 1;
-	}
 	size = tp->tp_size * (sizeof(arith) / word_size);
 	expp->nd_set = (arith *) Malloc(size);
 	clear((char *) (expp->nd_set) , size);
