@@ -108,6 +108,9 @@ ch7bin(expp, oper, expr)
 	case TIMESAB:
 		arithbalance(expp, oper, &expr);
 		non_commutative_binop(expp, oper, expr);
+		if (oper != '/' && oper != '%') {
+			(*expp)->ex_flags |= EX_SIDEEFFECTS;
+		}
 		break;
 
 	case '&':
@@ -144,6 +147,9 @@ ch7bin(expp, oper, expr)
 			else
 				non_commutative_binop(expp, oper, expr);
 		}
+		if (oper != '+') {
+			(*expp)->ex_flags |= EX_SIDEEFFECTS;
+		}
 		break;
 
 	case '-':
@@ -162,6 +168,9 @@ ch7bin(expp, oper, expr)
 			arithbalance(expp, oper, &expr);
 			non_commutative_binop(expp, oper, expr);
 		}
+		if (oper != '-') {
+			(*expp)->ex_flags |= EX_SIDEEFFECTS;
+		}
 		break;
 
 	case LEFT:
@@ -173,6 +182,9 @@ ch7bin(expp, oper, expr)
 		arithbalance(expp, oper, &expr); /* ch. 7.5 */
 		ch7cast(&expr, oper, int_type); /* cvt. rightop to int */
 		non_commutative_binop(expp, oper, expr);
+		if (oper != LEFT && oper != RIGHT) {
+			(*expp)->ex_flags |= EX_SIDEEFFECTS;
+		}
 		break;
 
 	case '<':
@@ -182,7 +194,10 @@ ch7bin(expp, oper, expr)
 	case EQUAL:
 	case NOTEQUAL:
 		relbalance(expp, oper, &expr);
-		non_commutative_binop(expp, oper, expr);
+		if (oper == EQUAL || oper == NOTEQUAL) {
+			commutative_binop(expp, oper, expr);
+		}
+		else	non_commutative_binop(expp, oper, expr);
 		(*expp)->ex_type = int_type;
 		break;
 
@@ -311,7 +326,10 @@ mk_binop(expp, oper, expr, commutative)
 	if (is_cp_cst(expr) && is_cp_cst(ex))
 		cstbin(expp, oper, expr);
 	else	{
-		*expp = (commutative && expr->ex_depth >= ex->ex_depth) ?
+		*expp = (commutative &&
+			  ( expr->ex_depth > ex->ex_depth ||
+			    (expr->ex_flags & EX_SIDEEFFECTS) ||
+			    is_cp_cst(ex))) ?
 				new_oper(ex->ex_type, expr, oper, ex) :
 				new_oper(ex->ex_type, ex, oper, expr);
 	}
