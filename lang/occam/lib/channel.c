@@ -4,12 +4,7 @@
 #ifndef __BSD4_2
 #include <signal.h>
 #endif
-#define __CHANNEL__
-#ifdef __USG
-#include <termio.h>
-#else
 #include <sgtty.h>
-#endif
 #include "ocm_chan.h"
 
 static void disaster();
@@ -55,46 +50,22 @@ void chan_out(v, c) long v; register chan *c;
 	switch(c->type) {
 	case C_T_FILE: {
 		register FILE *fp= unix_file[c->f.index];
-#ifdef __USG
-		struct termio tty;
-#else
 		struct sgttyb tty;
-#endif
 
 		if ((v& ~0xff)==0)	/* Plain character */
 			putc( (int) v, fp);
 		else
 		if (v==C_F_TEXT) {
-#ifdef __USG
-			ioctl(fileno(fp), TCGETA, &tty);
-			tty.c_oflag |= (ONLCR);
-			tty.c_iflag |= (ICRNL);
-			tty.c_cc[VMIN] = 1;
-			tty.c_cc[VTIME] = 0;
-			tty.c_lflag |= (ECHO|ICANON);
-			ioctl(fileno(fp), TCSETA, &tty);
-#else
 			gtty(fileno(fp), &tty);
 			tty.sg_flags&= ~CBREAK;
 			tty.sg_flags|= ECHO|CRMOD;
 			stty(fileno(fp), &tty);
-#endif
 		} else
 		if (v==C_F_RAW) {
-#ifdef __USG
-			ioctl(fileno(fp), TCGETA, &tty);
-			tty.c_oflag &= ~(ONLCR);
-			tty.c_iflag &= ~(ICRNL);
-			tty.c_cc[VMIN] = 1;
-			tty.c_cc[VTIME] = 0;
-			tty.c_lflag &= ~(ECHO|ICANON);
-			ioctl(fileno(fp), TCSETA, &tty);
-#else
 			gtty(fileno(fp),&tty);
 			tty.sg_flags|= CBREAK;
 			tty.sg_flags&= ~(ECHO|CRMOD);
 			stty(fileno(fp), &tty);
-#endif
 		}
 	}	break;
 	case C_T_CHAN:
@@ -121,12 +92,7 @@ static int timeout();
 int chan_any(c) register chan *c;
 {
 #ifdef __BSD4_2
-/* Sigh ... since SunOs 4.1, fcntl.h requires sys/types.h. */
-#include <sys/types.h>
 #include <fcntl.h>
-#ifndef O_NDELAY
-#define O_NDELAY FNDELAY
-#endif
 	int flags;
 #endif
 	switch (c->type) {
