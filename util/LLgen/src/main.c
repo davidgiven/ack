@@ -96,7 +96,7 @@ main(argc,argv) register string	argv[]; {
 				continue;
 			  default:
 				fprintf(stderr,"illegal option : %c\n",*arg);
-				return 1;
+				exit(1);
 			}
 # ifndef NDEBUG
 			break;
@@ -126,7 +126,7 @@ main(argc,argv) register string	argv[]; {
 # endif
 	if ((fact = fopen(f_temp,"w")) == NULL) {
 		fputs("Cannot create temporary\n",stderr);
-		return 1;
+		exit(1);
 	}
 	a_init();
 	readgrammar(argc,argv);
@@ -149,7 +149,7 @@ main(argc,argv) register string	argv[]; {
 	else	gencode(argc);
 	UNLINK(f_temp);
 	UNLINK(f_pars);
-	return 0;
+	exit(0);
 }
 
 STATIC
