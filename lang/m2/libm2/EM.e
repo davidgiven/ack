@@ -58,3 +58,31 @@
  trp
  ret 0
  end ?
+
+#define PROC    0
+
+; SIG is called with one parameter:
+;       - procedure instance identifier (PROC)
+; and returns the old traphandler.
+; only the procedure identifier inside the PROC is used.
+
+ exp $SIG
+ pro $SIG, 0
+ lal PROC
+ loi EM_PSIZE
+ sig
+ ret EM_PSIZE
+ end ?
+
+ exp $LINO
+ pro $LINO,0
+ loe 0
+ ret EM_WSIZE
+ end ?
+
+ exp $FILN
+ pro $FILN,0
+ lae 4
+ loi EM_PSIZE
+ ret EM_PSIZE
+ end ?

@@ -31,14 +31,9 @@ static struct errm {
 
 	{ 64,		"stack size of process too large"},
 	{ 65,		"too many nested traps + handlers"},
-	{ 66,		"illegal integer"},
-	{ 67,		"illegal cardinal"},
-	{ 68,		"illegal real"},
 	{ -1,		0}
 };
 
-extern char		*_hol0();
-extern char		*_argv[];
 extern			exit();
 
 _catch(trapno)
@@ -46,56 +41,32 @@ _catch(trapno)
 {
 	register struct errm *ep = &errors[0];
 	char *errmessage;
-	char		*pp[8];
-	register char **qq = &pp[0];
-	register char *p;
+	char buf[20];
+	register char *p, *s;
 	char *q;
-	int i;
 
-	if (p = FILN)
-		*qq++ = p;
-	else
-		*qq++ = _argv[0];
-	p = &("xxxxxxxxxxx: "[11]);
-	if (i = LINO) {
-		if (i < 0) {
-			/* ??? */
-			*qq++ = ", -";
-			i = -i;
-		}
-		else
-			*qq++ = ", ";
-		do
-			*--p = i % 10 + '0';
-		while (i /= 10);
-	}
-	*qq++ = p;
 	while (ep->errno != trapno && ep->errmes != 0) ep++;
-	if (ep->errmes)
-		*qq++ = ep->errmes;
+	if (p = ep->errmes) {
+		while (*p) p++;
+		Traps_Message(ep->errmes, 0, (int) (p - ep->errmes), 1);
+	}
 	else {
-		*qq++ = "error number";
-		p = &("xxxxxxxxxxx: "[11]);
-		i = trapno;
+		int i = trapno;
+
+		q = "error number xxxxxxxxxxxxx";
+		p = &q[13];
+		s = buf;
 		if (i < 0) {
-			/* ??? */
-			*qq++ = "-";
 			i = -i;
+			*p++ = '-';
 		}
 		do
-			*--p = i % 10 + '0';
+			*s++ = i % 10 + '0';
 		while (i /= 10);
-		*qq++ = p;
-	}
-	*qq++ = "\n";
-	*qq = 0;
-	qq = pp;
-	while (q = *qq++) {
-		p = q;
-		while (*p)
-			p++;
-		if (write(2,q,p-q) < 0)
-			;
+		*s = 0;
+		s = buf;
+		while (*p++ = *s++) /* nothing */;
+		Traps_Message(q, 0, (int) (p - q), 1);
 	}
 	exit(trapno);
 }

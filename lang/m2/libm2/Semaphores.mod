@@ -3,6 +3,7 @@ IMPLEMENTATION MODULE Semaphores [1];
   FROM SYSTEM IMPORT ADDRESS, NEWPROCESS, TRANSFER;
   FROM Storage IMPORT ALLOCATE;
   FROM random IMPORT Uniform;
+  FROM Traps IMPORT Message;
 
   TYPE	Sema = POINTER TO Semaphore;
 	Processes = POINTER TO Process;
@@ -76,7 +77,11 @@ IMPLEMENTATION MODULE Semaphores [1];
 			DEC(i);
 			IF i = 0 THEN EXIT END;
 		END;
-		IF (cp = s0) AND (j = i) THEN (* deadlock *) HALT END;
+		IF (cp = s0) AND (j = i) THEN
+			(* deadlock *)
+			Message("deadlock");
+			HALT
+		END;
 	END;
 	IF cp # s0 THEN TRANSFER(s0^.proc, cp^.proc); END;
   END ReSchedule;

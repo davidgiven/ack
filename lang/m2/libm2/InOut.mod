@@ -1,9 +1,8 @@
-#include <em_abs.h>
 IMPLEMENTATION MODULE InOut ;
 
   IMPORT Unix;
   IMPORT Conversions;
-  IMPORT EM;
+  IMPORT Traps;
   FROM TTY IMPORT isatty;
   FROM SYSTEM IMPORT ADR;
 
@@ -244,7 +243,8 @@ IMPLEMENTATION MODULE InOut ;
 	   	IF (int > SAFELIMITDIV10) OR 
 		   ( (int = SAFELIMITDIV10) AND
 		     (chvalue > safedigit)) THEN
-			EM.TRP(EIOVFL);
+			Traps.Message("integer too large");
+			HALT;
 	    	ELSE
 			int := 10*int + VAL(INTEGER, chvalue);
 			INC(index)
@@ -256,7 +256,8 @@ IMPLEMENTATION MODULE InOut ;
 		integ := int
 	END;
 	IF buf[index] > " " THEN
-		EM.TRP(66);
+		Traps.Message("illegal integer");
+		HALT;
 	END;
 	Done := TRUE;
   END ReadInt;
@@ -287,14 +288,16 @@ IMPLEMENTATION MODULE InOut ;
 	    	IF (int > SAFELIMITDIV10) OR 
 		   ( (int = SAFELIMITDIV10) AND
 		     (chvalue > safedigit)) THEN
-			EM.TRP(EIOVFL);
+			Traps.Message("cardinal too large");
+			HALT;
 	    	ELSE
 			int := 10*int + chvalue;
 			INC(index);
 	    	END;
 	END;
 	IF buf[index] > " " THEN
-		EM.TRP(67);
+		Traps.Message("illegal cardinal");
+		HALT;
 	END;
 	card := int;
 	Done := TRUE;
@@ -310,7 +313,9 @@ IMPLEMENTATION MODULE InOut ;
 	REPEAT
 		Read(ch);
 	UNTIL NOT (ch IN charset{' ', TAB, 12C, 15C});
-	UnRead(ch);
+	IF NOT Done THEN
+		RETURN;
+	END;
     	REPEAT
 		Read(ch);
 		termCH := ch;
@@ -322,7 +327,7 @@ IMPLEMENTATION MODULE InOut ;
 		END;
 		INC(i);
     	UNTIL (NOT Done) OR (ch <= " ");
-	UnRead(ch);
+	IF Done THEN UnRead(ch); END;
   END ReadString;
 
   PROCEDURE XReadString(VAR s : ARRAY OF CHAR);

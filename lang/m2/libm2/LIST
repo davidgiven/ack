@@ -1,4 +1,5 @@
 tail_m2.a
+PascalIo.mod
 RealInOut.mod
 InOut.mod
 Terminal.mod
@@ -13,9 +14,9 @@ Conversion.mod
 Semaphores.mod
 random.mod
 Strings.mod
+Traps.mod
 Arguments.c
 catch.c
-hol0.e
 LtoUset.e
 StrAss.c
 absd.c

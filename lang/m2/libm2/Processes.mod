@@ -8,6 +8,8 @@ IMPLEMENTATION MODULE Processes [1];
 
   FROM Storage IMPORT ALLOCATE;
 
+  FROM Traps IMPORT Message;
+
   TYPE	SIGNAL = POINTER TO ProcessDescriptor;
 
 	ProcessDescriptor =
@@ -72,6 +74,7 @@ IMPLEMENTATION MODULE Processes [1];
 	UNTIL cp^.ready;
 	IF cp = s0 THEN
 		(* deadlock *)
+		Message("deadlock");
 		HALT
 	END;
 	s0^.ready := FALSE;

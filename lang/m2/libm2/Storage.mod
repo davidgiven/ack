@@ -3,8 +3,9 @@ IMPLEMENTATION MODULE Storage;
    same size. Commonly used sizes have their own bucket. The larger ones
    are put in a single list.
 *)
-  FROM Unix IMPORT sbrk, write, exit, ILLBREAK;
+  FROM Unix IMPORT sbrk, write, ILLBREAK;
   FROM SYSTEM IMPORT ADDRESS, ADR;
+  FROM Traps IMPORT Message;
 
   CONST
 	NLISTS = 20;
@@ -140,16 +141,11 @@ IMPLEMENTATION MODULE Storage;
   END Allocate;
 
   PROCEDURE ALLOCATE(VAR a: ADDRESS; size: CARDINAL);
-    VAR	err: ARRAY[0..20] OF CHAR;
   BEGIN
 	a := Allocate(size);
 	IF a = NIL THEN
-		err:= "Out of core";
-		err[11] := 12C;
-		IF write(2, ADR(err), 12) < 0 THEN
-			;
-		END;
-		exit(1);
+		Message("out of core");
+		HALT;
 	END;
   END ALLOCATE;
 

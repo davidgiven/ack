@@ -1,6 +1,10 @@
 (*$Foreign *)
 DEFINITION MODULE EM;
-(* An interface to EM instructions *)
+(* An interface to EM instructions and data *)
+
+	FROM SYSTEM IMPORT ADDRESS;
+
+	TYPE TrapHandler = PROCEDURE(INTEGER);
 
 	PROCEDURE FIF(arg1, arg2: LONGREAL; VAR intres: LONGREAL) : LONGREAL;
 	(* multiplies arg1 and arg2, and returns the integer part of the
@@ -14,4 +18,10 @@ DEFINITION MODULE EM;
 
 	PROCEDURE TRP(trapno: INTEGER);
 	(* Generate EM trap number "trapno" *)
+
+	PROCEDURE SIG(t: TrapHandler): TrapHandler;
+
+	PROCEDURE FILN(): ADDRESS;
+
+	PROCEDURE LINO(): INTEGER;
 END EM.

@@ -187,7 +187,6 @@ IMPLEMENTATION MODULE RealConversions;
 	END;
 	IF ind1 > CARDINAL(width) THEN
 		ok := FALSE;
-		str[0] := 0C;
 		RETURN;
 	END;
 	IF ind1 < CARDINAL(width) THEN
@@ -263,7 +262,7 @@ IMPLEMENTATION MODULE RealConversions;
 			END;
 		UNTIL (iB > HIGH(str)) OR NOT (ch IN SETOFCHAR{'0'..'9'});
 	END;
-	IF (ch = 'E') OR (ch = 'e') THEN
+	IF (ch = 'E') THEN
 		IF iB > HIGH(str) THEN
 			ok := FALSE;
 			RETURN;

@@ -1,0 +1,138 @@
+DEFINITION MODULE PascalIo;
+(* This module provides for I/O that is essentially equivalent to the I/O
+   provided by Pascal with "text", or "file of char".
+   However, the user must call a cleanup routine at the end of his program
+   for the output buffers to be flushed.
+*)
+
+  CONST	EOS = 0C;		(* End of string character *)
+
+  TYPE	Text;
+
+  VAR	input, output: Text;	(* standard input and standard output available
+				   immediately.
+				   Standard output is not buffered when
+				   connected to a terminal.
+				*)
+  VAR	notext: Text;		(* Initialize your Text variables with this *)
+
+  PROCEDURE Reset(filename: ARRAY OF CHAR; VAR inputtext: Text);
+  (* When inputtext indicates an open textfile, it is first flushed
+     and closed. Then, the file indicated by "filename" is opened for reading.
+     If this fails, a runtime error results. Otherwise, inputtext is
+     associated with the new input file.
+  *)
+
+  PROCEDURE Rewrite(filename: ARRAY OF CHAR; VAR outputtext: Text);
+  (* When outputtext indicates an open textfile, it is first flushed
+     and closed. Then, the file indicated by "filename" is opened for writing.
+     If this fails, a runtime error results. Otherwise, outputtext is
+     associated with the new output file.
+  *)
+
+  PROCEDURE PascalIoCleanup();
+  (* To be called at the end of the program, to flush all output buffers *)
+
+  (***************************************************************************
+     Input routines;
+     All these routines result in a runtime error when not called with either
+     "input", or a "Text" value obtained by Reset.
+     Also, the routines that actually advance the "read pointer", result in a
+     runtime error when end of file is reached prematurely.
+  ****************************************************************************)
+
+  PROCEDURE NextCHAR(inputtext: Text): CHAR;
+  (* Returns the next character of the inputtext, 0C on end of file.
+     Does not advance the "read pointer", so behaves much like "input^"
+     in Pascal. However, unlike Pascal, if Eoln(inputtext) is true, it
+     returns the newline character, rather than a space.
+  *)
+
+  PROCEDURE Get(inputtext: Text);
+  (* Advances the "read pointer" by one character *)
+
+  PROCEDURE Eoln(inputtext: Text): BOOLEAN;
+  (* Returns TRUE if the next character of the inputtext is a linefeed *)
+
+  PROCEDURE Eof(inputtext: Text): BOOLEAN;
+  (* Returns TRUE if the end of the inputtext is reached *)
+
+  PROCEDURE ReadCHAR(inputtext: Text; VAR ch: CHAR);
+  (* Read a character from the inputtext, and leave result in "ch" *)
+
+  PROCEDURE ReadLn(inputtext: Text);
+  (* Skip the rest of the current line of the inputtext, including the linefeed *)
+
+  PROCEDURE ReadINTEGER(inputtext: Text; VAR int: INTEGER);
+  (* Skip leading blanks, read an optionally signed integer from the
+     inputtext, and leave the result in "int".
+     If no integer is read, or when overflow occurs, a runtime error results.
+     Input stops at the character following the integer.
+  *)
+
+  PROCEDURE ReadCARDINAL(inputtext: Text; VAR card: CARDINAL);
+  (* Skip leading blanks, read a cardinal from the inputtext, and leave the
+     result in "card".
+     If no cardinal is read, or when overflow occurs, a runtime error results.
+     Input stops at the character following the integer.
+  *)
+
+  PROCEDURE ReadREAL(inputtext: Text; VAR real: REAL);
+  (* Skip leading blanks, read a real from the inputtext, and leave the
+     result in "card".
+     Syntax:
+      real -->	[(+|-)] digit {digit} [. digit {digit}]
+		[ (e|E) [(+|-)] digit {digit} ]
+     If no real is read, or when overflow/underflow occurs, a runtime error
+     results.
+     Input stops at the character following the integer.
+  *)
+
+  (***************************************************************************
+     Output routines;
+     All these routines result in a runtime error when not called with either
+     "output", or a "Text" value obtained by Rewrite.
+  ****************************************************************************)
+
+  PROCEDURE WriteCHAR(outputtext: Text; ch: CHAR);
+  (* Writes the character "ch" to the outputtext *)
+
+  PROCEDURE WriteLn(outputtext: Text);
+  (* Writes a linefeed to the outputtext *)
+
+  PROCEDURE Page(outputtext: Text);
+  (* Writes a form-feed to the outputtext *)
+
+  PROCEDURE WriteINTEGER(outputtext: Text; int: INTEGER; width: CARDINAL);
+  (* Write integer "int" to the outputtext, using at least "width" places,
+     blank-padding to the left if needed.
+  *)
+
+  PROCEDURE WriteCARDINAL(outputtext: Text; card: CARDINAL; width: CARDINAL);
+  (* Write cardinal "card" to the outputtext, using at least "width" places,
+     blank-padding to the left if needed.
+  *)
+
+  PROCEDURE WriteBOOLEAN(outputtext: Text; bool: BOOLEAN; width: CARDINAL);
+  (* Write boolean "bool" to the outputtext, using at least "width" places,
+     blank-padding to the left if needed.
+     Equivalent to WriteSTRING(" TRUE", width), or
+		   WriteSTRING("FALSE", width)
+  *)
+
+  PROCEDURE WriteSTRING(outputtext: Text;
+			str: ARRAY OF CHAR; width: CARDINAL);
+  (* Write string "str" to the outputtext, using at least "width" places,
+     blank-padding to the left if needed.
+     The string is terminated either by the character EOS, or the upperbound of
+     the array "str".
+  *)
+
+  PROCEDURE WriteREAL(outputtext: Text; real: REAL; width, nfrac: CARDINAL);
+  (* Write real "real" to the outputtext. If "nfrac" = 0, use scientific
+     notation, otherwise use fixed-point notation with "nfrac" digits behind
+     the dot.
+     Always use at least "width" places, blank-padding to the left if needed.
+  *)
+
+END PascalIo.

@@ -4,6 +4,7 @@ ASCII.def
 Arguments.def
 Conversion.def
 EM.def
+PascalIo.def
 InOut.def
 Makefile
 Mathlib.def
@@ -19,3 +20,4 @@ Terminal.def
 Unix.def
 head_m2.e
 random.def
+Traps.def

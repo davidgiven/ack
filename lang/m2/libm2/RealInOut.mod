@@ -2,7 +2,7 @@ IMPLEMENTATION MODULE RealInOut;
 
   IMPORT InOut;
   IMPORT RealConversions;
-  IMPORT EM;
+  IMPORT Traps;
   FROM SYSTEM IMPORT WORD;
 
   CONST	MAXNDIG = 32;
@@ -28,7 +28,8 @@ IMPLEMENTATION MODULE RealInOut;
 	InOut.ReadString(Buf);
 	RealConversions.StringToReal(Buf, x, ok);
 	IF NOT ok THEN
-		EM.TRP(68);
+		Traps.Message("real expected");
+		HALT;
 	END;
 	Done := TRUE;
   END ReadReal;

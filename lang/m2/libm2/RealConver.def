@@ -4,7 +4,7 @@ DEFINITION MODULE RealConversions;
   (* Convert string "str" to a real number "r" according to the syntax:
      
 	['+'|'-'] digit {digit} ['.' digit {digit}]
-	['E' ['+'|'-'] digit [digit]]
+	['E' ['+'|'-'] digit {digit}]
 
      ok := "conversion succeeded"
      Leading blanks are skipped;
