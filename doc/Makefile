@@ -56,6 +56,10 @@ int.doc:	int.X
 int.X:
 		cd int; make "TBL="$(TBL)
 
+ceg.doc:	ceg.X
+ceg.X:
+		cd ceg; make "PIC="$(PIC) "TBL="$(TBL) "REFER="$(REFER) "TARGET="$(TARGET)
+
 install cmp:
 
 distr:		install.doc
@@ -72,4 +76,4 @@ opr:
 
 clean:
 		-rm -f *.old $(RESFILES) *.t *.out LLgen.doc top.doc \
-			occam.doc ego.doc
+			occam.doc ego.doc int.doc ceg.doc

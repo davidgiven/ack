@@ -203,6 +203,8 @@ libsys	Sources for system-dependent EM library
 test	Various tests
 
 int	Source for an interpreter
+
+ce	code expander (fast back-end producing either .s or .o files)
 .TE
 .in -3n
 The directory proto contains files used by most machines,
@@ -214,7 +216,7 @@ mach/proto/cg	Current backend sources.
 mach/proto/ncg	New backend sources.
 mach/proto/as	Assembler sources.
 mach/proto/top	Target optimizer sources.
-mach/proto/fp	FLoating point package sources.
+mach/proto/fp	Floating point package sources.
 mach/proto/libg	Makefile for compiling libraries.
 .TE
 .IP "emtest"
@@ -364,6 +366,9 @@ ACK a.out format.
 .br
 An EM interpreter, written in C. Very useful for checking out software.
 Unfortunately not available for small machines.
+.IP "util/ceg"
+.br
+Code expander generator.
 .ne 4
 .LP
 All pathnames mentioned in the text of this document are relative to the
@@ -1228,6 +1233,7 @@ doc/occam	Occam-frontend description
 doc/ego	Global Optimizer description
 doc/top	Target Optimizer description
 doc/int	description of the EM interpreter written in C
+doc/ceg	documentation for code-expander writers and maintainers
 doc/m2ref.doc	Modula-2 frontend description
 doc/install.doc	this document
 doc/install.pr	this document (formatted)
