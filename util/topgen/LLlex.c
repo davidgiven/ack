@@ -85,7 +85,7 @@ LLlex() {
 			dot.t_tokno = PATTERN_SEPARATOR;
 			return PATTERN_SEPARATOR;
 		}
-		ungetc(c,stdin);
+		ungetc(c,input);
 		dot.t_tokno = OTHER;
 		return OTHER;
 	  case open_bracket :
