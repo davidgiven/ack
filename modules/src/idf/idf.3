@@ -1,7 +1,7 @@
 .TH IDF 3ACK "March 17, 1986"
 .UC
 .SH NAME
-init_idf, str2idf\ \-\ a namelist module
+init_idf, str2idf, findidf\ \-\ a namelist module
 .SH SYNOPSIS
 .PP
 .B init_idf()
@@ -59,7 +59,7 @@ The function
 creates an entry for it if necessary. A pointer to this entry is
 returned. If \fIcpy\fR is non-zero, a copy of the \fItag\fR is made,
 otherwise the \fItag\fR itself is used.
-The entry has the following structure, defined in \fIinp_pkg.spec\fR:
+The entry has the following structure, defined in \fIidf_pkg.spec\fR:
 .PP
 .nf
 struct idf	{
@@ -77,12 +77,10 @@ The field \fInext\fR is used for internal information and must not
 be changed by the user of this module.
 .PP
 The function \fIfindidf\fP searches for the string \fItag\fP in the
-namelist, but returns 0 when it is'nt present.
+namelist, but returns 0 when it is not present.
 .SH "MODULES USED"
 alloc(3)
 .SH FILES
 ~em/modules/pkg/idf_pkg.spec
 .br
 ~em/modules/pkg/idf_pkg.body
-.SH DIAGNOSTICS
-\fIstr2idf\fP returns a null pointer if there is no memory available.
