@@ -170,6 +170,9 @@ _error(class, expr, fmt, argv)
 	case LEXERROR:
 	case CRASH:
 	case FATAL:
+#ifdef DEBUG
+	case VDEBUG:
+#endif DEBUG
 		ln = LineNumber;
 		break;
 	}
@@ -180,8 +183,7 @@ _error(class, expr, fmt, argv)
 	if (ln == last_ln)	{
 		/* we've seen this place before */
 		e_seen++;
-		if (e_seen == MAXERR_LINE)
-			fmt = "etc ...";
+		if (e_seen == MAXERR_LINE) fmt = "etc ...";
 		else
 		if (e_seen > MAXERR_LINE)
 			/* and too often, I'd say ! */
@@ -192,14 +194,14 @@ _error(class, expr, fmt, argv)
 		last_ln = ln;
 		e_seen = 0;
 	}
-	
-	if (FileName)
-		fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
-	if (remark)
-		fprintf(ERROUT, "%s ", remark);
 #ifdef DEBUG
 	}
-#endif
+#endif DEBUG
+	
+	if (FileName) fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
+
+	if (remark) fprintf(ERROUT, "%s ", remark);
+
 	doprnt(ERROUT, fmt, argv);		/* contents of error */
 	fprintf(ERROUT, "\n");
 }

@@ -80,11 +80,11 @@ struct tokenname tkinternal[] = {	/* internal keywords	*/
 };
 
 struct tokenname tkstandard[] =	{	/* standard identifiers */
-	{CHAR, "CHAR"},
-	{BOOLEAN, "BOOLEAN"},
-	{LONGINT, "LONGINT"},
-	{CARDINAL, "CARDINAL"},
-	{LONGREAL, "LONGREAL"},
+	{CHAR, ""},
+	{BOOLEAN, ""},
+	{LONGINT, ""},
+	{CARDINAL, ""},
+	{LONGREAL, ""},
 	{SUBRANGE, ""},
 	{ERRONEOUS, ""},
 	{0, ""}

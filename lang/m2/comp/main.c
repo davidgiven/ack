@@ -4,6 +4,7 @@ static char *RcsId = "$Header$";
 
 #include	<system.h>
 #include	<em_arith.h>
+#include	<em_label.h>
 #include	"input.h"
 #include	"f_info.h"
 #include	"idf.h"
@@ -11,6 +12,9 @@ static char *RcsId = "$Header$";
 #include	"Lpars.h"
 #include	"main.h"
 #include	"debug.h"
+#include	"type.h"
+#include	"def.h"
+#include	"standards.h"
 
 char options[128];
 char *ProgName;
@@ -48,9 +52,7 @@ Compile(src)
 {
 	extern struct tokenname tkidf[];
 
-#ifdef DEBUG
-	printf("%s\n", src);
-#endif DEBUG
+	DO_DEBUG(debug(1,"Filename : %s", src));
 	if (! InsertFile(src, (char **) 0)) {
 		fprintf(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
@@ -61,6 +63,7 @@ Compile(src)
 	reserve(tkidf);
 	init_scope();
 	init_types();
+	add_standards();
 #ifdef DEBUG
 	if (options['L'])
 		LexScan();
@@ -116,4 +119,57 @@ Option(str)
 	char *str;
 {
 	options[str[1]]++;	/* switch option on	*/
+}
+
+#define NULLTYPE	((struct type *) 0)
+
+add_standards()
+{
+	register struct def *df;
+	register struct type *tp;
+	struct def *Enter();
+
+	(void) Enter("ABS", D_STDFUNC, NULLTYPE, S_ABS);
+	(void) Enter("CAP", D_STDFUNC, NULLTYPE, S_CAP);
+	(void) Enter("CHR", D_STDFUNC, NULLTYPE, S_CHR);
+	(void) Enter("FLOAT", D_STDFUNC, NULLTYPE, S_FLOAT);
+	(void) Enter("HIGH", D_STDFUNC, NULLTYPE, S_HIGH);
+	(void) Enter("HALT", D_STDPROC, NULLTYPE, S_HALT);
+	(void) Enter("EXCL", D_STDPROC, NULLTYPE, S_EXCL);
+	(void) Enter("DEC", D_STDPROC, NULLTYPE, S_DEC);
+	(void) Enter("INC", D_STDPROC, NULLTYPE, S_INC);
+	(void) Enter("VAL", D_STDFUNC, NULLTYPE, S_VAL);
+	(void) Enter("TRUNC", D_STDFUNC, NULLTYPE, S_TRUNC);
+	(void) Enter("SIZE", D_STDFUNC, NULLTYPE, S_SIZE);
+	(void) Enter("ORD", D_STDFUNC, NULLTYPE, S_ORD);
+	(void) Enter("ODD", D_STDFUNC, NULLTYPE, S_ODD);
+	(void) Enter("MAX", D_STDFUNC, NULLTYPE, S_MAX);
+	(void) Enter("MIN", D_STDFUNC, NULLTYPE, S_MIN);
+	(void) Enter("INCL", D_STDPROC, NULLTYPE, S_INCL);
+
+	(void) Enter("CHAR", D_TYPE, char_type, 0);
+	(void) Enter("INTEGER", D_TYPE, int_type, 0);
+	(void) Enter("LONGINT", D_TYPE, longint_type, 0);
+	(void) Enter("REAL", D_TYPE, real_type, 0);
+	(void) Enter("LONGREAL", D_TYPE, longreal_type, 0);
+	(void) Enter("BOOLEAN", D_TYPE, bool_type, 0);
+	(void) Enter("CARDINAL", D_TYPE, card_type, 0);
+	(void) Enter("NIL", D_CONST, nil_type, 0);
+	(void) Enter("PROC",
+		     D_TYPE,
+		     construct_type(PROCEDURE, NULLTYPE, (arith) 0),
+		     0);
+	tp = construct_type(SUBRANGE, int_type, (arith) 0);
+	tp->tp_value.tp_subrange.su_lb = 0;
+	tp->tp_value.tp_subrange.su_ub = wrd_size * 8 - 1;
+	(void) Enter("BITSET",
+		     D_TYPE,
+		     construct_type(SET, tp, wrd_size),
+		     0);
+	df = Enter("FALSE", D_ENUM, bool_type, 0);
+	df->df_value.df_enum.en_val = 0;
+	df->df_value.df_enum.en_next = Enter("TRUE", D_ENUM, bool_type, 0);
+	df = df->df_value.df_enum.en_next;
+	df->df_value.df_enum.en_val = 1;
+	df->df_value.df_enum.en_next = 0;
 }

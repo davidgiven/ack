@@ -49,6 +49,8 @@ struct def	{		/* list of definitions for a name */
 #define D_PROCHEAD	0x08	/* A procedure heading in a definition module */
 #define D_HIDDEN	0x09	/* A hidden type */
 #define D_HTYPE		0x0A	/* Definition of a hidden type seen */
+#define D_STDPROC	0x0B	/* A standard procedure */
+#define D_STDFUNC	0x0C	/* A standard function */
 #define D_ISEXPORTED	0xFF	/* Not yet defined */
 	char df_flags;
 #define D_ADDRESS	0x01	/* Set if address was taken */
@@ -65,6 +67,7 @@ struct def	{		/* list of definitions for a name */
 		struct enumval df_enum;
 		struct field df_field;
 		struct import df_import;
+		int df_stdname;	/* Define for standard name */
 	} df_value;
 };
 

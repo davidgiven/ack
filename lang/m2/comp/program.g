@@ -9,6 +9,7 @@ static  char *RcsId = "$Header$";
 #include	"misc.h"
 #include	"main.h"
 #include	"LLlex.h"
+#include	"scope.h"
 }
 /*
 	The grammar as given by Wirth is already almost LL(1); the
@@ -68,7 +69,7 @@ import(int local;)
 
 DefinitionModule:
 	DEFINITION	{ state = DEFINITION; }
-	MODULE IDENT
+	MODULE IDENT	{ open_scope(CLOSEDSCOPE, 0); }
 	';'
 	import(0)* 
 	/*	export?
@@ -76,6 +77,7 @@ DefinitionModule:
 	   	New Modula-2 does not have export lists in definition modules.
 	*/
 	definition* END IDENT '.'
+			{ close_scope(); }
 ;
 
 definition:
@@ -101,7 +103,15 @@ definition:
 
 ProgramModule:
 	MODULE		{ if (state != IMPLEMENTATION) state = PROGRAM; }
-	IDENT priority? ';' import(0)* block IDENT '.'
+	IDENT		{ if (state == IMPLEMENTATION) {
+				/* Re-open scope ??? */
+				open_scope(CLOSEDSCOPE, 0);
+			  }
+			  else	open_scope(CLOSEDSCOPE, 0);
+			}
+	priority? ';' import(0)* block IDENT
+			{ close_scope(); }
+	'.'
 ;
 
 Module:

@@ -56,12 +56,14 @@ struct type	{
 /* ALLOCDEF "type" */
 
 extern struct type
+	*bool_type,
 	*char_type,
 	*int_type,
 	*card_type,
 	*longint_type,
 	*real_type,
 	*longreal_type,
+	*nil_type,
 	*error_type;
 
 extern int

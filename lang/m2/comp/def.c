@@ -16,14 +16,18 @@ struct def *h_def;		/* Pointer to free list of def structures */
 struct def *
 define(id, scope, kind)
 	register struct idf *id;
-	struct scope *scope;
+	register struct scope *scope;
 {
 	/*	Declare an identifier in a scope, but first check if it
 		already has been defined. If so, error message.
 	*/
-	register struct def *df = lookup(id, scope);
+	register struct def *df = lookup(id, scope->sc_scope);
 
-	if (df) {
+	if (	/* Already in this scope */
+		df
+	   ||	/* A closed scope, and id defined in the pervasive scope */
+		(scopeclosed(scope) && (df = lookup(id, 0)))
+	   ) {
 		switch(df->df_kind) {
 		case D_PROCHEAD:
 			if (kind == D_PROCEDURE) {
@@ -57,7 +61,6 @@ define(id, scope, kind)
 struct def *
 lookup(id, scope)
 	register struct idf *id;
-	struct scope *scope;
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.
@@ -69,7 +72,7 @@ lookup(id, scope)
 	df1 = 0;
 	df = id->id_def;
 	while (df) {
-		if (df->df_scope == scope->sc_scope) {
+		if (df->df_scope == scope) {
 			if (df1) {
 				df1->next = df->next;
 				df->next = id->id_def;

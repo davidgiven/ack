@@ -40,6 +40,7 @@ struct type
 	*longint_type,
 	*real_type,
 	*longreal_type,
+	*nil_type,
 	*error_type;
 
 struct paramlist *h_paramlist;
@@ -130,5 +131,6 @@ init_types()
 	card_type = standard_type(CARDINAL, int_align, int_size);
 	real_type = standard_type(REAL, real_align, real_size);
 	longreal_type = standard_type(LONGREAL, lreal_align, lreal_size);
+	nil_type = standard_type(POINTER, ptr_align, ptr_size);
 	error_type = standard_type(ERRONEOUS, 1, (arith) 1);
 }
