@@ -3,7 +3,6 @@ FP_bias.h
 FP_shift.h
 FP_trap.h
 FP_types.h
-Makefile
 add_ext.c
 adder.c
 adder.h
