@@ -214,11 +214,13 @@ rule			{	register p_nont p;
 				p->n_lineno = linecount;
 				p->n_off = ftell(fact);
 			}
-	  [ params	{	p->n_flags |= PARAMS;
-				if (nparams > 15) {
-					error(linecount,"Too many parameters");
+	  [ params	{	if (nparams > 0) {
+					p->n_flags |= PARAMS;
+					if (nparams > 15) {
+						error(linecount,"Too many parameters");
+					}
+					else	setntparams(p,nparams);
 				}
-				else	setntparams(p,nparams);
 			}
 	  ]?
 	  [ action(0)	{	p->n_flags |= LOCALS; }
@@ -496,8 +498,15 @@ elem (register p_gram pres;)
 	;
 
 params
+{
+	long off = ftell(fact);
+}
 	: '('		{	copyact('(',')',0,0); }
 	  ')'
+			{	if (nparams == 0) {
+					fseek(fact, off, 0);
+				}
+			}
 	;
 
 expr	: '('		{	copyact('(',')',1,0); }
