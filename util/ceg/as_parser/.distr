@@ -1,4 +1,4 @@
-Makefile
+proto.make
 as_parser.h
 const.h
 conversion.c
