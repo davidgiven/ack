@@ -97,6 +97,7 @@ clean:
 	rm -f makeclassdef classdefs.h *.$(SUF) Out out nohup.out
 
 lintlib:
+	-mkdir $(TARGET_HOME)/lib.bin/ego
 	$(MK_LINT_LIB) share $(TARGET_HOME)/lib.bin/ego $(CPPFLAGS) $(CFILES)
 
 depend:	pop_push.h classdefs.h
