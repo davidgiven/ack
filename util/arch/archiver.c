@@ -415,6 +415,10 @@ char *mess;
 	error(FALSE, "cannot find %s\n", name);
 	return;
   }
+  else if (status.st_mode & S_IFDIR) {
+	error(FALSE, "%s is a directory (ignored)\n", name);
+	return;
+  }
   else if ((src_fd = open(name, 0)) < 0) {
 	error(FALSE, "cannot open %s\n", name);
 	return;
