@@ -472,7 +472,6 @@ static int been_here;
 	}
 }
 #else
-#define ACKFLOAT 1
 
 con_float() {
 	int i, j;
