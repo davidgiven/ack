@@ -708,7 +708,7 @@ loe dup adp ste $1==$4 && $2==2 && $3>0 && $3<=16	| |
 			remove( ind_access )
 			"inc $1, $$$3"
 			setcc({da2, $1})		| %[a]	| |
-loe dup adp ste $1==$2 && $2==2 && $3<0 && $3>=0-16	| |
+loe dup adp ste $1==$4 && $2==2 && $3<0 && $3>=0-16	| |
 			allocate( REG = {da2, $1} )
 			remove( da )
 			remove( indexed, %[xreg]!=LB )
