@@ -17,6 +17,8 @@ install:
 	if [ $(DO_MACHINE_INDEP) = y ] ; \
 	then	cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec ; \
 		cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl ; \
+		cp $(SRC_HOME)/util/LLgen/lib/nc_incl $(LIBDIR)/nc_incl ; \
+		cp $(SRC_HOME)/util/LLgen/lib/nc_rec $(LIBDIR)/nc_rec ; \
 		mk_manpage $(SRC_HOME)/util/LLgen/LLgen.1 $(TARGET_HOME) ; \
 	fi
 
@@ -27,6 +29,8 @@ firstinstall:
 	then	if [ -d $(LIBDIR) ] ; then : ; else mkdir $(LIBDIR) ; fi ; \
 		cp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec ; \
 		cp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl ; \
+		cp $(SRC_HOME)/util/LLgen/lib/nc_incl $(LIBDIR)/nc_incl ; \
+		cp $(SRC_HOME)/util/LLgen/lib/nc_rec $(LIBDIR)/nc_rec ; \
 		mk_manpage $(SRC_HOME)/util/LLgen/LLgen.1 $(TARGET_HOME) ; \
 	fi
 
@@ -35,6 +39,8 @@ cmp:
 	-cmp src/LLgen $(INSTALLDIR)/LLgen
 	-cmp $(SRC_HOME)/util/LLgen/lib/rec $(LIBDIR)/rec
 	-cmp $(SRC_HOME)/util/LLgen/lib/incl $(LIBDIR)/incl
+	-cmp $(SRC_HOME)/util/LLgen/lib/nc_rec $(LIBDIR)/nc_rec
+	-cmp $(SRC_HOME)/util/LLgen/lib/nc_incl $(LIBDIR)/nc_incl
 
 distr:
 	cd src; make distr

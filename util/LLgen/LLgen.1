@@ -4,7 +4,7 @@
 .SH NAME
 LLgen, an extended LL(1) parser generator
 .SH SYNOPSIS
-LLgen [ \-vxwa ] [ \-j[\fInum\fP] ] [ \-l\fInum\fP ] [ \-h\fInum\fP ] file ...
+LLgen [ \-vxwans ] [ \-j[\fInum\fP] ] [ \-l\fInum\fP ] [ \-h\fInum\fP ] file ...
 .SH DESCRIPTION
 \fILLgen\fP
 converts a context-free grammar into a set of
@@ -36,7 +36,14 @@ to access the token-codes by
 using the token-names.
 \fILpars.c\fP
 contains the error recovery routines and tables. It must also
-be compiled by the C-compiler.
+be compiled by the C-compiler. When the generated parser uses non-correcting
+error recovery (
+\fB\-n\fP 
+option) 
+\fILLgen\fP
+also generates a file 
+\fILncor.c\fP
+that contains the non-correcting recovery mechanism.
 .PP
 \fILLgen\fP
 will only update those output files that differ from their previous
@@ -78,6 +85,12 @@ file.
 no warnings are given.
 .IP \fB\-a\fP
 Produce ANSI C function headers and prototypes.
+.IP \fB\-n\fP
+Produce a parser with non-correcting error recovery.
+.IP \fB\-s\fP
+Simulate the calling of all defined subparsers in all semantic actions. When 
+using non-correcting error recovery, subparsers that are called in semantic
+actions may cause problems; this flag provides a `brute-force' solution. 
 .IP \fB\-j\fP[\fInum\fP]
 when this flag is given, \fILLgen\fP will generate dense switches,
 so that the compiler can generate a jump table for it. This will only be
@@ -109,6 +122,9 @@ Lpars.h                   defines for token names
 .br
 \fILLgen, an Extended LL(1) Parser Generator\fP
 by C.J.H. Jacobs.
+.br
+\fITop-down Non-Correcting Error Recovery in LLgen\fP
+by A.W van Deudekom and P.J. Kooiman
 .SH DIAGNOSTICS
 Are intended to be self-explanatory. They are reported
 on standard error. A more detailed report is found in the
@@ -116,3 +132,6 @@ on standard error. A more detailed report is found in the
 file.
 .SH AUTHOR
 Ceriel J. H. Jacobs
+.br
+The non-correcting error recovery mechanism is written by
+A.W van Deudekom and P.J. Kooiman.

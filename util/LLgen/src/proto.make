@@ -148,3 +148,10 @@ tokens.$(SUF):	$(SRC_DIR)/cclass.h
 tokens.$(SUF):	$(SRC_DIR)/extern.h
 tokens.$(SUF):	$(SRC_DIR)/io.h
 tokens.$(SUF):	$(SRC_DIR)/types.h
+
+savegram.$(SUF):	$(SRC_DIR)/savegram.c
+		$(CC) -c $(CFLAGS) $(SRC_DIR)/savegram.c
+savegram.$(SUF):	$(SRC_DIR)/types.h
+savegram.$(SUF):	$(SRC_DIR)/extern.h
+savegram.$(SUF):	$(SRC_DIR)/io.h
+savegram.$(SUF):	$(SRC_DIR)/sets.h
