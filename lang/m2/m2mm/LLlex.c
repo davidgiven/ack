@@ -25,7 +25,7 @@ int		ForeignFlag;
 
 extern char	*getwdir();
 
-STATIC
+static
 SkipComment()
 {
 	/*	Skip Modula-2 comments (* ... *).
@@ -76,7 +76,7 @@ SkipComment()
 	}
 }
 
-STATIC
+static
 GetString(upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
@@ -98,7 +98,7 @@ GetString(upto)
 
 static char *s_error = "illegal line directive";
 
-STATIC int
+static int
 getch()
 {
 	register int ch;
