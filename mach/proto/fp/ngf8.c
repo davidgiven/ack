@@ -21,7 +21,7 @@ _double	f;
 {
 	unsigned char	*p;
 
-	if (f[0] != 0 || f[1] != 0) {
+	if (f.__double[0] != 0 || f.__double[1] != 0) {
 		p = (unsigned char *) &f;
 		*p ^= 0x80;
 	}
