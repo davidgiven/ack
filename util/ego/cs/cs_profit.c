@@ -124,7 +124,7 @@ STATIC bool sli_no_eliminate(lnp)
 
 	return	lnp->l_prev != (line_p) 0 && INSTR(lnp->l_prev) == op_loc &&
 		lnp->l_next != (line_p) 0 && INSTR(lnp->l_next) == op_ads &&
-		(cst = off_set(lnp->l_prev)) == (Celem_t) cst &&
+		((cst = off_set(lnp->l_prev)), cst == (Celem_t) cst) &&
 		Cis_elem((Celem_t) cst, sli_counts)
 		;
 }
