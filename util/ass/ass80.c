@@ -66,7 +66,6 @@ fatal(s) char *s; {
 	 */
 	error("Fatal error: %s",s);
 	dump(0);
-	abort();
 	exit(-1);
 }
 
