@@ -26,7 +26,7 @@ shp.s
 sig.s
 cms.s
 fat.s
-fakfp.s
+fp68881.s
 trp.s
 dia.s
 dvu.s
