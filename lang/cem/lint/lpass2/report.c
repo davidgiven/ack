@@ -7,10 +7,14 @@
 #include	<varargs.h>
 
 #include	<system.h>
+#include	"private.h"
+#include	"class.h"
 #include	"inpdef.h"
 
 #define	MSGOUT		STDERR	/* filedes on which to write the messages */
 #define	ERROUT		STDERR	/* filedes on which to write the panics */
+
+PRIVATE rep_loc();
 
 /* VARARGS */
 report(va_alist)
@@ -25,7 +29,8 @@ report(va_alist)
 		register char fc;
 
 		/*	First see if the first arg is an inpdef with
-			a global file name; if so, skip this message.
+			a global file name not ending in .c; if so,
+			skip this message.
 		*/
 		if (f[0] == '%' && f[1] == 'L') {
 			/* it is an inpdef */
@@ -57,8 +62,7 @@ report(va_alist)
 					register int i;
 				case 'L':	/* a location item */
 					id = va_arg(ap, struct inpdef *);
-					fprint(MSGOUT, "\"%s\", line %d",
-						id->id_file, id->id_line);
+					rep_loc(id);
 					break;
 				case 's':	/* a string item */
 					s = va_arg(ap, char *);
@@ -80,6 +84,19 @@ report(va_alist)
 		fprint(MSGOUT, "\n");
 	}
 	va_end(ap);
+}
+
+PRIVATE
+rep_loc(id)
+	struct inpdef *id;
+{
+	if (is_class(id, CL_LIB)) {
+		fprint(MSGOUT, "library file %s", id->id_file);
+	}
+	else {
+		fprint(MSGOUT, "\"%s\", line %d",
+			id->id_file, id->id_line);
+	}
 }
 
 /* VARARGS1 */

@@ -10,7 +10,7 @@
 
 #include	<ctype.h>
 
-#define	INP_NPUSHBACK 2
+#define	INP_NPUSHBACK 1
 
 #include	<inp_pkg.spec>
 #include	<inp_pkg.body>
@@ -79,10 +79,6 @@ get_id(id)
 
 	if (!ReadString(id->id_file, '\n', FNAMESIZE))
 		return 0;
-	{	extern char loptions[];
-		if (loptions['X'])
-			print_id("read", id);/*???*/
-	}
 	return (1);
 }
 
@@ -174,7 +170,6 @@ ReadArgs(nrargs, buf)
 	*/
 	int i;
 	int charcount = 1;
-	int n;
 
 	if (nrargs < 0) {
 		/* variable # of args */
@@ -182,6 +177,8 @@ ReadArgs(nrargs, buf)
 	}
 	*buf = '\0';
 	for (i = 0; i < nrargs; i++) {
+		int n;
+
 		if (!ReadString(buf, ':', ARGTPSSIZE-charcount-1))
 			return 0;
 		n = strlen(buf) + 1;

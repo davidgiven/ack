@@ -342,9 +342,11 @@ PRIVATE stat_def(stnr)
 				dot, funvar(dot), dot->id_name, lib);
 		}
 		if (ext) {
-			report("%L: %s %s also %s at %L",
-				dot, funvar(dot), dot->id_name,
-				defdec(ext), ext);
+			if (!streq(dot->id_file, ext->id_file)) {
+				report("%L: %s %s also %s at %L",
+					dot, funvar(dot), dot->id_name,
+					defdec(ext), ext);
+			}
 		}
 		sta = dot;
 		dot = new_inpdef();
