@@ -8,6 +8,9 @@ LFLAGS =	#		# passed to loader
 
 IDIRS =		-I$(EM)/h#	# passed to C compiler and lint
 
+LINT =		lint#		# lint to be used
+LINTFLAGS =	-h#		# passed to lint
+
 INT =		./int#		# name of resulting interpreter
 
 IP_SPEC =	$(EM)/etc/ip_spec.t
@@ -92,8 +95,8 @@ test/awa.em44:
 
 
 # Auxiliary entries
-lint:
-	lint $(IDIRS) $(SRC) -lc
+lint:	$(SRC) trap_msg warn_msg warn.h switch/DoCases switch/PrCases
+	$(LINT) $(LINTFLAGS) $(IDIRS) $(SRC) -lc
 
 tags:	$(HDR) $(SRC)
 	ctags $(HDR) $(SRC)

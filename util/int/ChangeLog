@@ -1,3 +1,7 @@
+ 3-Oct-88  Dick Grune (dick) at dick
+	Since the definitions of VERSION and MAGIC are now available from
+	standard include files, e.out.h can be simplified.
+
 27-May-88  Dick Grune (dick) at dick
 	Testing with the UNIX system call tester by Leonie van der Voort
 	revealed a few errors: when length was negative in a call of read

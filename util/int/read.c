@@ -5,8 +5,10 @@
 /* $Header$ */
 
 #include	<stdio.h>
+#include	<local.h>		/* for VERSION */
+#include	<em_spec.h>
+#include	<as_spec.h>		/* for as_magic */
 
-#include	"e.out.h"
 #include	"logging.h"
 #include	"nofloat.h"
 #include	"global.h"
@@ -65,7 +67,7 @@ rd_open(fname)
 rd_header()
 {
 	/* Part 1 */
-	if (rd_int(2L) != MAGIC)
+	if (rd_int(2L) != as_magic)
 		fatal("Bad magic number in loadfile");
 
 	FLAGS = rd_int(2L);
