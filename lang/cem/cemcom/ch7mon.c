@@ -46,21 +46,23 @@ ch7mon(oper, expp)
 		}
 		break;
 	case '&':
-		if ((*expp)->ex_type->tp_fund == ARRAY)
+		if ((*expp)->ex_type->tp_fund == ARRAY) {
+			warning("& before array: ignored");
 			array2pointer(expp);
+		}
 		else
-		if ((*expp)->ex_type->tp_fund == FUNCTION)
+		if ((*expp)->ex_type->tp_fund == FUNCTION) {
+			warning("& before function: ignored");
 			function2pointer(expp);
+		}
 		else
 #ifndef NOBITFIELD
-		if ((*expp)->ex_type->tp_fund == FIELD)	{
+		if ((*expp)->ex_type->tp_fund == FIELD)
 			expr_error(*expp, "& applied to field variable");
-		}
 		else
 #endif NOBITFIELD
-		if (!(*expp)->ex_lvalue)	{
+		if (!(*expp)->ex_lvalue)
 			expr_error(*expp, "& applied to non-lvalue");
-		}
 		else {
 			/* assume that enums are already filtered out	*/
 			if (	(*expp)->ex_class == Value
@@ -89,11 +91,15 @@ ch7mon(oper, expp)
 		int fund = (*expp)->ex_type->tp_fund;
 
 		if (fund == FLOAT || fund == DOUBLE)	{
-			expr_error(*expp, "~ not allowed on %s operands",
-						symbol2str(fund));
+			expr_error(
+				*expp,
+				"~ not allowed on %s operands",
+				symbol2str(fund)
+			);
 			erroneous2int(expp);
 			break;
 		}
+		/* FALL THROUGH */
 	}
 	case '-':
 		any2arith(expp, oper);
@@ -106,7 +112,7 @@ ch7mon(oper, expp)
 			switch_sign_fp(*expp);
 		else
 			*expp = new_oper((*expp)->ex_type,
-						NILEXPR, oper, *expp);
+					NILEXPR, oper, *expp);
 		break;
 	case '!':
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
@@ -116,7 +122,7 @@ ch7mon(oper, expp)
 		opnd2test(expp, '!');
 		if (is_cp_cst(*expp))	{
 			(*expp)->VL_VALUE = !((*expp)->VL_VALUE);
-			(*expp)->ex_type = int_type;
+			(*expp)->ex_type = int_type;	/* a cast ???(EB) */
 		}
 		else
 			*expp = new_oper(int_type, NILEXPR, oper, *expp);

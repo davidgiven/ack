@@ -1,5 +1,4 @@
 User options:
-
 C	while running preprocessor, copy comment
 D	see identifier following as a macro
 E	run preprocessor only

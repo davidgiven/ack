@@ -32,12 +32,12 @@ struct expr *do_array(), *do_struct(), *IVAL();
 	of type tp with the initialisation expression expr by calling IVAL().
 	Guided by type tp, the expression is evaluated.
 */
-do_ival(tpp, expr)
+do_ival(tpp, ex)
 	struct type **tpp;
-	struct expr *expr;
+	struct expr *ex;
 {
-	if (IVAL(tpp, expr) != 0)
-		too_many_initialisers(expr);
+	if (IVAL(tpp, ex) != 0)
+		too_many_initialisers(ex);
 }
 
 /*	IVAL() recursively guides the initialisation expression through the
@@ -52,9 +52,9 @@ do_ival(tpp, expr)
 	IVAL() returns a pointer to the remaining expression tree.
 */
 struct expr *
-IVAL(tpp, expr)
+IVAL(tpp, ex)
 	struct type **tpp;		/* type of global variable	*/
-	struct expr *expr;		/* initialiser expression	*/
+	struct expr *ex;		/* initialiser expression	*/
 {
 	register struct type *tp = *tpp;
 	
@@ -63,22 +63,22 @@ IVAL(tpp, expr)
 		/* array initialisation	*/
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return 0;
-		if (ISCOMMA(expr)) /* list of initialisation expressions */
-			return do_array(expr, tpp);
+		if (ISCOMMA(ex)) /* list of initialisation expressions */
+			return do_array(ex, tpp);
 		/* catch initialisations like char s[] = "I am a string" */
-		if (tp->tp_up->tp_fund == CHAR && expr->ex_class == String)
-			init_string(tpp, expr);
+		if (tp->tp_up->tp_fund == CHAR && ex->ex_class == String)
+			init_string(tpp, ex);
 		else /* " int i[24] = 12;"	*/
-			check_and_pad(expr, tpp);
+			check_and_pad(ex, tpp);
 		break;
 	case STRUCT:
 		/* struct initialisation */
 		if (valid_type(tp, "struct") == 0)
 			return 0;
-		if (ISCOMMA(expr)) /* list of initialisation expressions */
-			return do_struct(expr, tp);
+		if (ISCOMMA(ex)) /* list of initialisation expressions */
+			return do_struct(ex, tp);
 		/* "struct foo f = 12;"	*/
-		check_and_pad(expr, tpp);
+		check_and_pad(ex, tpp);
 		break;
 	case UNION:
 		error("union initialisation not allowed");
@@ -86,17 +86,17 @@ IVAL(tpp, expr)
 	case ERRONEOUS:
 		break;
 	default: /* fundamental type	*/
-		if (ISCOMMA(expr))	{ /* " int i = {12};"	*/
-			if (IVAL(tpp, expr->OP_LEFT) != 0)
-				too_many_initialisers(expr);
+		if (ISCOMMA(ex))	{ /* " int i = {12};"	*/
+			if (IVAL(tpp, ex->OP_LEFT) != 0)
+				too_many_initialisers(ex);
 			/*	return remainings of the list for the
 				other members of the aggregate, if this
 				item belongs to an aggregate.
 			*/
-			return expr->OP_RIGHT;
+			return ex->OP_RIGHT;
 		}
 		/* "int i = 12;"	*/
-		check_ival(expr, tp);
+		check_ival(ex, tp);
 		break;
 	}
 	return 0;
@@ -115,14 +115,14 @@ IVAL(tpp, expr)
 	members are padded with zeroes
 */
 struct expr *
-do_array(expr, tpp)
-	struct expr *expr;
+do_array(ex, tpp)
+	struct expr *ex;
 	struct type **tpp;
 {
 	register struct type *tp = *tpp;
 	register arith elem_count;
 	
-	ASSERT(tp->tp_fund == ARRAY && ISCOMMA(expr));
+	ASSERT(tp->tp_fund == ARRAY && ISCOMMA(ex));
 	/*	the following test catches initialisations like
 		char c[] = {"just a string"};
 		or
@@ -132,7 +132,7 @@ do_array(expr, tpp)
 		is completely foolish, we did it!! (no applause, thank you)
 	*/
 	if (tp->tp_up->tp_fund == CHAR) {
-		register struct expr *f = expr->OP_LEFT;
+		register struct expr *f = ex->OP_LEFT;
 		register struct expr *g = 0;
 
 		while (ISCOMMA(f)) {	/* eat the brackets!!!	*/
@@ -141,28 +141,28 @@ do_array(expr, tpp)
 		}
 		if (f->ex_class == String) { /* hallelujah, it's a string! */
 			init_string(tpp, f);
-			return g ? g->OP_RIGHT : expr->OP_RIGHT;
+			return g ? g->OP_RIGHT : ex->OP_RIGHT;
 		}
 		/* else: just go on with the next part of this function */
 		if (g != 0)
-			expr = g;
+			ex = g;
 	}
 	if (tp->tp_size == (arith)-1) {
 		/* declared with unknown size: [] */
-		for (elem_count = 0; expr; elem_count++) {
+		for (elem_count = 0; ex; elem_count++) {
 			/* eat whole initialisation expression	*/
-			if (ISCOMMA(expr->OP_LEFT)) {
+			if (ISCOMMA(ex->OP_LEFT)) {
 				/* the member expression is embraced	*/
-				if (IVAL(&(tp->tp_up), expr->OP_LEFT) != 0)
-					too_many_initialisers(expr);
-				expr = expr->OP_RIGHT;
+				if (IVAL(&(tp->tp_up), ex->OP_LEFT) != 0)
+					too_many_initialisers(ex);
+				ex = ex->OP_RIGHT;
 			}
 			else {
 				if (aggregate_type(tp->tp_up))
-					expr = IVAL(&(tp->tp_up), expr);
+					ex = IVAL(&(tp->tp_up), ex);
 				else {
-					check_ival(expr->OP_LEFT, tp->tp_up);
-					expr = expr->OP_RIGHT;
+					check_ival(ex->OP_LEFT, tp->tp_up);
+					ex = ex->OP_RIGHT;
 				}
 			}
 		}
@@ -172,30 +172,30 @@ do_array(expr, tpp)
 	else {		/* the number of members is already known	*/
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
 
-		for (elem_count = 0; elem_count < dim && expr; elem_count++) {
-			if (ISCOMMA(expr->OP_LEFT)) {
+		for (elem_count = 0; elem_count < dim && ex; elem_count++) {
+			if (ISCOMMA(ex->OP_LEFT)) {
 				/* embraced member initialisation	*/
-				if (IVAL(&(tp->tp_up), expr->OP_LEFT) != 0)
-					too_many_initialisers(expr);
-				expr = expr->OP_RIGHT;
+				if (IVAL(&(tp->tp_up), ex->OP_LEFT) != 0)
+					too_many_initialisers(ex);
+				ex = ex->OP_RIGHT;
 			}
 			else {
 				if (aggregate_type(tp->tp_up))
 					/* the member is an aggregate	*/
-					expr = IVAL(&(tp->tp_up), expr);
+					ex = IVAL(&(tp->tp_up), ex);
 				else {
-					check_ival(expr->OP_LEFT, tp->tp_up);
-					expr = expr->OP_RIGHT;
+					check_ival(ex->OP_LEFT, tp->tp_up);
+					ex = ex->OP_RIGHT;
 				}
 			}
 		}
-		if (expr && elem_count == dim)
+		if (ex && elem_count == dim)
 			/*	all the members are initialised but there
 				remains a part of the expression tree which
 				is returned
 			*/
-			return expr;
-		if ((expr == 0) && elem_count < dim) {
+			return ex;
+		if ((ex == 0) && elem_count < dim) {
 			/*	the expression tree is completely absorbed
 				but there are still members which must be
 				initialised with zeroes
@@ -214,31 +214,31 @@ do_array(expr, tpp)
 	during which alignment is taken care of.
 */
 struct expr *
-do_struct(expr, tp)
-	struct expr *expr;
+do_struct(ex, tp)
+	struct expr *ex;
 	struct type *tp;
 {
 	struct sdef *sd = tp->tp_sdef;
 	arith bytes_upto_here = (arith)0;
 	arith last_offset = (arith)-1;
 	
-	ASSERT(tp->tp_fund == STRUCT && ISCOMMA(expr));
+	ASSERT(tp->tp_fund == STRUCT && ISCOMMA(ex));
 	/* as long as there are selectors and there is an initialiser..	*/
-	while (sd && expr) {
-		if (ISCOMMA(expr->OP_LEFT)) {	/* embraced expression	*/
-			if (IVAL(&(sd->sd_type), expr->OP_LEFT) != 0)
-				too_many_initialisers(expr);
-			expr = expr->OP_RIGHT;
+	while (sd && ex) {
+		if (ISCOMMA(ex->OP_LEFT)) {	/* embraced expression	*/
+			if (IVAL(&(sd->sd_type), ex->OP_LEFT) != 0)
+				too_many_initialisers(ex);
+			ex = ex->OP_RIGHT;
 		}
 		else {
 			if (aggregate_type(sd->sd_type))
 				/* selector is an aggregate itself	*/
-				expr = IVAL(&(sd->sd_type), expr);
+				ex = IVAL(&(sd->sd_type), ex);
 			else {
 #ifdef NOBITFIELD
 				/* fundamental type, not embraced */
-				check_ival(expr->OP_LEFT, sd->sd_type);
-				expr = expr->OP_RIGHT;
+				check_ival(ex->OP_LEFT, sd->sd_type);
+				ex = ex->OP_RIGHT;
 #else
 				if (is_anon_idf(sd->sd_idf))
 					/*	a hole in the struct due to
@@ -248,9 +248,9 @@ do_struct(expr, tp)
 					put_bf(sd->sd_type, (arith)0);
 				else {
 					/* fundamental type, not embraced */
-					check_ival(expr->OP_LEFT,
+					check_ival(ex->OP_LEFT,
 							sd->sd_type);
-					expr = expr->OP_RIGHT;
+					ex = ex->OP_RIGHT;
 				}
 #endif NOBITFIELD
 			}
@@ -266,8 +266,8 @@ do_struct(expr, tp)
 		}
 		sd = sd->sd_sdef;
 	}
-	/* perfect fit if (expr && (sd == 0)) holds	*/
-	if ((expr == 0) && (sd != 0)) {
+	/* perfect fit if (ex && (sd == 0)) holds	*/
+	if ((ex == 0) && (sd != 0)) {
 		/*	there are selectors left which must be padded with
 			zeroes
 		*/
@@ -284,7 +284,7 @@ do_struct(expr, tp)
 	/* keep on aligning...	*/
 	while (bytes_upto_here++ < tp->tp_size)
 		con_nullbyte();
-	return expr;
+	return ex;
 }
 
 /*	check_and_pad() is given a simple initialisation expression
@@ -292,17 +292,17 @@ do_struct(expr, tp)
 	In the latter case, only the first member is initialised and
 	the rest is zeroed.
 */
-check_and_pad(expr, tpp)
-	struct expr *expr;
+check_and_pad(ex, tpp)
+	struct expr *ex;
 	struct type **tpp;
 {
-	/* expr is of a fundamental type	*/
+	/* ex is of a fundamental type	*/
 	struct type *tp = *tpp;
 
 	if (tp->tp_fund == ARRAY) {
 		if (valid_type(tp->tp_up, "array element") == 0)
 			return;
-		check_and_pad(expr, &(tp->tp_up));	/* first member	*/
+		check_and_pad(ex, &(tp->tp_up));	/* first member	*/
 		if (tp->tp_size == (arith)-1)
 			/*	no size specified upto here: just
 				set it to the size of one member.
@@ -321,7 +321,7 @@ check_and_pad(expr, tpp)
 
 		if (valid_type(tp, "struct") == 0)
 			return;
-		check_and_pad(expr, &(sd->sd_type));
+		check_and_pad(ex, &(sd->sd_type));
 		/* Next selector is aligned by adding extra zeroes */
 		if (sd->sd_sdef)
 			zero_bytes(sd);
@@ -332,7 +332,7 @@ check_and_pad(expr, tpp)
 		}
 	}
 	else	/* simple type	*/
-		check_ival(expr, tp);
+		check_ival(ex, tp);
 }
 
 /*	pad() fills an element of type tp with zeroes.
@@ -404,9 +404,9 @@ pad(tp)
 	No further comment is needed to explain the internal structure
 	of this straightforward function.
 */
-check_ival(expr, type)
-	struct expr *expr;
-	struct type *type;
+check_ival(ex, tp)
+	struct expr *ex;
+	struct type *tp;
 {
 	/*	The philosophy here is that ch7cast puts an explicit
 		conversion node in front of the expression if the types
@@ -414,88 +414,81 @@ check_ival(expr, type)
 		expression is no longer a constant.
 	*/
 	
-	switch (type->tp_fund) {
+	switch (tp->tp_fund) {
 	case CHAR:
 	case SHORT:
 	case INT:
 	case LONG:
 	case ENUM:
-		ch7cast(&expr, '=', type);
-		if (is_cp_cst(expr))
-			con_int(expr);
+	case POINTER:
+		ch7cast(&ex, '=', tp);
+#ifdef DEBUG
+		print_expr("init-expr after cast", ex);
+#endif DEBUG
+		if (!is_ld_cst(ex))
+			illegal_init_cst(ex);
 		else
-			illegal_init_cst(expr);
-		break;
-#ifndef NOBITFIELD
-	case FIELD:
-		ch7cast(&expr, '=', type->tp_up);
-		if (is_cp_cst(expr))
-			put_bf(type, expr->VL_VALUE);
+		if (ex->VL_CLASS == Const)
+			con_int(ex);
 		else
-			illegal_init_cst(expr);
+		if (ex->VL_CLASS == Name) {
+			register struct idf *id = ex->VL_IDF;
+			register struct def *df = id->id_def;
+
+			if (df->df_level >= L_LOCAL)
+				illegal_init_cst(ex);
+			else	/* e.g., int f(); int p = f; */
+			if (df->df_type->tp_fund == FUNCTION)
+				C_con_pnam(id->id_text);
+			else	/* e.g., int a; int *p = &a; */
+				C_con_dnam(id->id_text, ex->VL_VALUE);
+		}
+		else {
+			ASSERT(ex->VL_CLASS == Label);
+			C_con_dlb(ex->VL_LBL, ex->VL_VALUE);
+		}
 		break;
-#endif NOBITFIELD
 	case FLOAT:
 	case DOUBLE:
-		ch7cast(&expr, '=', type);
-		if (expr->ex_class == Float)
-			C_con_fcon(expr->FL_VALUE, expr->ex_type->tp_size);
+		ch7cast(&ex, '=', tp);
+#ifdef DEBUG
+		print_expr("init-expr after cast", ex);
+#endif DEBUG
+		if (ex->ex_class == Float)
+			C_con_fcon(ex->FL_VALUE, ex->ex_type->tp_size);
 		else
-		if (expr->ex_class == Oper && expr->OP_OPER == INT2FLOAT) {
-			expr = expr->OP_RIGHT;
-			if (is_cp_cst(expr))
+		if (ex->ex_class == Oper && ex->OP_OPER == INT2FLOAT) {
+			/* float f = 1; */
+			ex = ex->OP_RIGHT;
+			if (is_cp_cst(ex))
 				C_con_fcon(
-					long2str((long)expr->VL_VALUE, 10),
-					type->tp_size
+					long2str((long)ex->VL_VALUE, 10),
+					tp->tp_size
 				);
 			else 
-				illegal_init_cst(expr);
+				illegal_init_cst(ex);
 		}
 		else
-			illegal_init_cst(expr);
+			illegal_init_cst(ex);
 		break;
-	case POINTER:
-		ch7cast(&expr, '=', type);
-		switch (expr->ex_class) {
-		case Oper:
-			illegal_init_cst(expr);
-			break;
-		case Value:
-		{
-			ASSERT(expr->ex_type->tp_fund == POINTER);
-			if (expr->ex_type->tp_up->tp_fund == FUNCTION) {
-				if (expr->VL_CLASS == Name)
-					C_con_pnam(expr->VL_IDF->id_text);
-				else	/* int (*func)() = 0	*/
-					con_int(expr);
-			}
-			else
-			if (expr->VL_CLASS == Name) {
-				register struct idf *id = expr->VL_IDF;
 
-				if (id ->id_def->df_level >= L_LOCAL)
-					expr_error(expr,
-						"illegal initialisation");
-				else
-					C_con_dnam(id->id_text, expr->VL_VALUE);
-			}
-			else
-			if (expr->VL_CLASS == Label)
-				C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
-			else
-				con_int(expr);
-			break;
-		}
-		case String:
-		default:
-			crash("(check_ival) illegal value class");
-		}
+#ifndef NOBITFIELD
+	case FIELD:
+		ch7cast(&ex, '=', tp->tp_up);
+#ifdef DEBUG
+		print_expr("init-expr after cast", ex);
+#endif DEBUG
+		if (is_cp_cst(ex))
+			put_bf(tp, ex->VL_VALUE);
+		else
+			illegal_init_cst(ex);
 		break;
+#endif NOBITFIELD
+
 	case ERRONEOUS:
 		break;
 	default:
-		crash("(check_ival) bad fundamental type %s",
-			symbol2str(type->tp_fund));
+		crash("check_ival");
 	}
 }
 
@@ -503,17 +496,17 @@ check_ival(expr, type)
 	a string constant.
 	Alignment is taken care of.
 */
-init_string(tpp, expr)
+init_string(tpp, ex)
 	struct type **tpp;	/* type tp = array of characters	*/
-	struct expr *expr;
+	struct expr *ex;
 {
 	register struct type *tp = *tpp;
 	register arith length;
-	char *s = expr->SG_VALUE;
+	char *s = ex->SG_VALUE;
 	arith ntopad;
 
-	ASSERT(expr->ex_class == String);
-	length = expr->SG_LEN;
+	ASSERT(ex->ex_class == String);
+	length = ex->SG_LEN;
 	if (tp->tp_size == (arith)-1)	{
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
@@ -524,7 +517,7 @@ init_string(tpp, expr)
 
 		ntopad = align(dim, word_align) - length;
 		if (length > dim)
-			expr_error(expr,
+			expr_error(ex,
 				"too many characters in initialiser string");
 	}
 	/* throw out the characters of the already prepared string	*/

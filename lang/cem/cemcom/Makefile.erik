@@ -9,10 +9,12 @@ EM_INCLUDES =$(EM)/h#		# directory containing EM interface definition
 
 # Libraries
 SYSLIB = /user1/erikb/em/lib/libsystem.a
-EMLIB = /user1/erikb/em/lib/libemk.a
+EMKLIB = /user1/erikb/em/lib/libemk.a
+EMELIB = /user1/erikb/em/lib/libeme.a
 STRLIB = /user1/erikb/em/lib/libstr.a
 EMMESLIB = /user1/erikb/em/lib/libem_mes.a
-LIBS = $(EMMESLIB) $(EMLIB) $(STRLIB) $(SYSLIB)
+LIBS = $(EMMESLIB) $(EMKLIB) $(STRLIB) $(SYSLIB)
+ELIBS = $(EMMESLIB) $(EMELIB) $(STRLIB) $(SYSLIB)
 LIB_INCLUDES = /user1/erikb/em/h
 
 # Where to install the compiler and its driver
@@ -127,6 +129,10 @@ OBJ =	$(COBJ) $(LOBJ) $(GOBJ)
 main:	$(OBJ) Makefile
 	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(LIBS) -o main 
 	size main
+
+emain:	$(OBJ) Makefile
+	$(CC) $(COPTIONS) $(LFLAGS) $(OBJ) $(ELIBS) -o emain 
+	size emain
 
 cfiles: hfiles LLfiles $(GSRC)
 	@touch cfiles
