@@ -531,6 +531,7 @@ pea		address+control4			cost(2,4).
 	 * see also: 'pat rmi' and 'pat rmu'
 	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 killreg "! kill" D_REG:wo				cost(0,0).
+killreg "! kill" A_REG:wo				cost(0,0).
 
 
 MOVES
@@ -899,6 +900,7 @@ pat lol inl $1==$2 && inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     uses DD_REG = {LOCAL, $1}
     gen add_l {const, 1}, {LOCAL, $1}
+	killreg %a
 			yields %a
 
 pat del inreg($1)==reg_any
@@ -909,6 +911,7 @@ pat lol del $1==$2 && inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     uses DD_REG = {LOCAL, $1}
     gen sub_l {const, 1}, {LOCAL, $1}
+	killreg %a
 			yields %a
 
 pat zrl inreg($1)==reg_any
@@ -1055,12 +1058,14 @@ pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
     kills allexceptcon
     uses AA_REG = {indirect4, regvar($1, reg_pointer)}
     gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
+    killreg %a
 			yields	%a
 
 pat lol lof dup adp lol stf $1==$5 && $2==$6 && inreg($1)==reg_pointer
     kills allexceptcon
     uses AA_REG = {offsetted4, regvar($1, reg_pointer), $2}
     gen add_l {const, $4}, {offsetted4, regvar($1, reg_pointer), $2}
+    killreg %a
 			yields	%a
 
 pat lol lol adp stl loi $1==$2 && $1==$4 && $3==1 && $5==1 &&
@@ -2112,6 +2117,7 @@ pat lol inl $1==$2
     kills all_indir, LOCAL %bd==$1
     uses DD_REG = {LOCAL, $1}
     gen add_l {const, 1}, {LOCAL, $1}
+    killreg %a
 			yields %a
 
 pat ine
@@ -2133,6 +2139,7 @@ pat lol del $1==$2
     kills all_indir, LOCAL %bd==$1
     uses DD_REG = {LOCAL, $1}
     gen sub_l {const, 1}, {LOCAL, $1}
+	killreg %a
 			yields %a
 
 pat dee
@@ -2956,6 +2963,7 @@ pat lol lol adp stl $1==$2 && $1==$4
     kills all_indir, LOCAL %bd==$1
     uses AA_REG = {LOCAL, $1}
     gen add_l {const, $3}, {LOCAL, $1}
+    killreg %a
 			yields	%a
 
 pat lil lil adp sti $1==$2 && $1==$4
@@ -2968,12 +2976,14 @@ pat lil lil adp sti $1==$2 && $1==$4
     gen move {indirect4, %b}, %a
 	add_l {const, $3}, {indirect4, %b}
 #endif TBL68020
+killreg %a
 			yields	%a
 
 pat loe loe adp ste $1==$2 && $1==$4
     kills posextern
     uses AA_REG = {absolute4, $1}
     gen add_l {const, $3}, {absolute4, $1}
+    killreg %a
 			yields	%a
 
 
