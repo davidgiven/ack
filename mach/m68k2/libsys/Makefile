@@ -1,21 +1,25 @@
 # $Header$
 MACH=m68k2
-all:		tail_mon
+all:		libmon_o.a head_em.o
+
 install: 	all
-		../../install tail_mon
+		../../install head_em.o head_em
+		../../install libmon_o.a tail_mon
 
 cmp:		all
-		-../../compare tail_mon
+		-../../compare head_em.o head_em
+		-../../compare libmon_o.a tail_mon
 
-tail_mon:
+libmon_o.a:	libmon_s.a
 		ASAR=aal ; export ASAR ;\
-		march . tail_mon
+		march . libmon_o.a
 
 clean:
-		rm -f *.o
+		rm -f *.o libmon_o.a
 
 opr :
 		make pr | opr
 
 pr:
-		@ar pv tail_mon.a
+		@pr `pwd`/head_em.s
+		@arch pv libmon_s.a | pr -h `pwd`/libmon_s.a
