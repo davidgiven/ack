@@ -14,27 +14,15 @@ end
 name "M68020 EM library"
 dir libem
 end
-name "M68020 system call library"
-dir libsys
-end
-name "M68020 C libraries"
-dir libcc
-end
-name "M68020 Pascal library"
-dir libpc
-end
-name "M68020 Basic library"
-dir libbc
-end
-name "M68020 Occam library"
-dir liboc
-end
-name "M68020 Modula-2 library"
-dir libm2
-end
-name "M68020 VME131 System V/68 R2V2.1 conversion"
-dir cv
+name "M68020 etext,edata,end library"
+dir libend
 end
 name "M68020 floating point library"
 dir libfp
+end
+name "M68020 system call library"
+dir libsys
+end
+name "M68020 VME131 System V/68 R2V2.1 conversion"
+dir cv
 end

@@ -1,6 +1,4 @@
 LIST
-Makefile
 README
-compmodule
 head_em.s
 libmon_s.a

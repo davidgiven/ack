@@ -1,0 +1,4 @@
+MACH=m68020
+SUF=o
+ASAR=aal
+RANLIB=:
