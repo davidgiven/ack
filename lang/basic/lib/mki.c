@@ -3,13 +3,13 @@
 /* $Header$ */
 
 String *_mki(i)
-int i;
+long i;
 {
-	char *buffer ="  ";
+	char *buffer ="    ";
 	String *s;
 
 	s= _newstr(buffer);
-	strncpy(s->strval,&i,2);
+	* ( (long *)s->strval ) = i ;
 	return(s);
 }
 String *_mkd(d)
@@ -19,19 +19,16 @@ double d;
 	String *s;
 
 	s= _newstr(buffer);
-	strncpy(s->strval,&d,8);
+	* ( (double *)s->strval ) = i ;
 	return(s);
 }
-_cvi(s)
+long _cvi(s)
 String *s;
 {
-	int i;
-	strncpy(&i,s->strval,2);
-	return(i);
+	return *( (long *) s->strval) ;
 }
 double _cvd(s)
 String *s;
 {
-	double d;
-	strncpy(&d,s->strval,8);
+	return *( (double *) s->strval) ;
 }
