@@ -40,6 +40,7 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4 %s\n",str);
 }
 
+#ifdef NOFLOAT
 con_float() {
 
 static int been_here;
@@ -54,6 +55,91 @@ static int been_here;
 	fputs("Warning : dummy float-constant(s)\n", stderr);
 	}
 }
+#else
+#define IEEEFLOAT
+
+con_float() {
+	double f;
+	double atof();
+	float fl;
+	int i;
+#ifndef OWNFLOAT
+	double f1;
+	double frexp(), modf();
+	int j;
+	int sign = 0;
+	int fraction ;
+#else OWNFLOAT
+	char *p;
+#endif OWNFLOAT
+
+	if (argval!= 4 && argval!= 8)	{
+		fprintf(stderr,"float constant size = %d\n",argval);
+		fatal("bad fcon size");
+	}
+	fprintf(codefile,"!float %s sz %d\n", str, argval);
+	f = atof(str);
+#ifdef OWNFLOAT
+	if (argval == 4) {
+		fl = f;
+		p = (char *) &fl;
+	}
+	else {
+		p = (char *) &f;
+	}
+	fprintf(codefile, ".data1 0%o", *p++ & 0377);
+	for (i = argval-2; i; i--) {
+		fprintf(codefile,",0%o", *p++ & 0377);
+	}
+#else OWNFLOAT
+	f = frexp(f, &i);
+	if (f < 0) {
+		f = -f;
+		sign = 1;
+	}
+	if (f == 0) {
+		if (argval == 8) fprintf(codefile, ".data2 0, 0\n");
+		fprintf(codefile, ".data2 0, 0\n");
+		return;
+	}
+	while (f < 0.5) {
+		f += f;
+		i --;
+	}
+	f = modf(2 * f, &f1); /* hidden bit */
+#ifdef IEEEFLOAT
+	if (argval == 4) {
+#endif IEEEFLOAT
+		i = (i + 128) & 0377;
+		fraction = (sign << 15) | (i << 7);
+		for (j = 6; j>= 0; j--) {
+			if (f >= 0.5) fraction |= (1 << j);
+			f = modf(2*f, &f1);
+		}
+#ifdef IEEEFLOAT
+	}
+	else {
+		i = (i + 1024) & 03777;
+		fraction = (sign << 15) | (i << 4);
+		for (j = 3; j>= 0; j--) {
+			if (f >= 0.5) fraction |= (1 << j);
+			f = modf(2*f, &f1);
+		}
+	}
+#endif IEEEFLOAT
+	fprintf(codefile, ".data1 0%o, 0%o", (fraction>>8)&0377, fraction&0377);
+	for (i = argval / 2 - 1; i; i--) {
+		fraction = 0;
+		for (j = 15; j>= 0; j--) {
+			if (f >= 0.5) fraction |= (1 << j);
+			f = modf(2*f, &f1);
+		}
+		fprintf(codefile, ", 0%o, 0%o", (fraction>>8)&0377, fraction&0377);
+	}
+#endif OWNFLOAT
+	putc('\n', codefile);
+}
+#endif
 
 #define MOVEM_LIMIT	2
 /* If #registers to be saved exceeds MOVEM_LIMIT, we
