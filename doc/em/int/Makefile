@@ -9,7 +9,7 @@ tables:         mktables $(HOME)/util/ass/ip_spec.t
 
 mktables:       mktables.c $(HOME)/h/em_spec.h $(HOME)/h/em_flag.h \
 		$(HOME)/util/data/em_data.a $(HOME)/util/ass/ip_spec.h
-		cc -O -o mktables mktables.c $(HOME)/util/data/em_data.a
+		cc -I$(HOME) -O -o mktables mktables.c $(HOME)/util/data/em_data.a
 
 em.out:         em.p
 		apc -mint -O em.p >emerrs ; mv e.out em.out
@@ -24,7 +24,7 @@ nem:            nem.p
 		apc -O -i nem.p >emerrs ; mv a.out nem
 
 emdmp:          emdmp.c
-		cc -o emdmp -O emdmp.c
+		cc -I$(HOME)/h -o emdmp -O emdmp.c
 
 cmp:
 
