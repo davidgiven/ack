@@ -162,7 +162,7 @@ CaseCode(nd, exitlabel, end_reached)
 				if (val == ce->ce_up) {
 					gen = 0;
 					ce = ce->ce_next;
-					while (! ce->ce_label) ce = ce->ce_next;
+					while (ce && ! ce->ce_label) ce = ce->ce_next;
 				}
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
@@ -331,14 +331,6 @@ AddOneCase(sh, lnode, rnode, lbl)
 		   find the proper place to put ce into the list
 		*/
 		
-		if (ce->ce_label) {
-			if (! chk_bounds(sh->sh_lowerbd, ce->ce_low, fund)) {
-				sh->sh_lowerbd = ce->ce_low;
-			}
-			if (! chk_bounds(ce->ce_up, sh->sh_upperbd, fund)) {
-				sh->sh_upperbd = ce->ce_up;
-			}
-		}
 		while (c1 && chk_bounds(c1->ce_low, ce->ce_low, fund)) {
 			c2 = c1;
 			c1 = c1->ce_next;
@@ -379,6 +371,14 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_up));
 			assert(c2);
 
 			c2->ce_next = ce;
+		}
+		if (ce->ce_label) {
+			if (! chk_bounds(sh->sh_lowerbd, ce->ce_low, fund)) {
+				sh->sh_lowerbd = ce->ce_low;
+			}
+			if (! chk_bounds(ce->ce_up, sh->sh_upperbd, fund)) {
+				sh->sh_upperbd = ce->ce_up;
+			}
 		}
 	}
 	if (ce->ce_label) sh->sh_nrofentries += ce->ce_up - ce->ce_low + 1;
