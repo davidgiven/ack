@@ -1,8 +1,4 @@
 .ND
-.pl 11.7i
-.ll 80m
-.nr LL 80m
-.nr tl 78m
 .tr ~
 .ds >. .
 .TL
@@ -82,6 +78,7 @@ machine-dependent description table (see figure 1.).
 So the major part of the code of a target optimizer is
 shared among all target optimizers.
 .DS
+.ft 5
 
 
                                        |-------------------------|
@@ -95,6 +92,7 @@ table     |                 |          |                         |
           |-----------------|          |-------------------------|
    
                                               target optimizer
+.ft R
    
     Figure 1: Generation of a target optimizer.
 
@@ -163,22 +161,26 @@ ANY matches every instruction mnemonic.
 .nf
 
 Examples of mnemonic descriptions:
+.ft 5
 
         add
         sub.l
         mulw3
         ANY
+.ft R
 .fi
 .PP
 An operand can also be described by a string constant.
 .nf
 
 Examples:
+.ft 5
 
        (sp)+
        r5
        -4(r6)
 
+.ft R
 .fi
 Alternatively, it can be described by means of a \fIvariable name\fR.
 Variables have values which are strings.
@@ -187,22 +189,27 @@ Each such declaration defines the name of a variable and
 a \fIrestriction\fR to which its value is subjected.
 .nf
 Example of variable declarations:
+.ft 5
 
       CONST       { VAL[0] == '$' };
       REG         { VAL[0] == 'r' && VAL[1] >= '0' && VAL[1] <= '3' &&
                     VAL[2] == '\\0' };
       X           { TRUE };
 
+.ft R
 .fi
 The keyword VAL denotes the value of the variable, which is
 a null-terminated string.
 An operand description given via a variable name matches an
 actual operand if the actual operand obeys the associated restriction.
 .nf
+.ft 5
 
      CONST  matches   $1, $-5, $foo etc.
      REG    matches   r0, r1, r2 and r3
      X      matches   anything
+.ft R
+
 .fi
 The restriction (between curly braces) may be any legal "C"
 .[
@@ -214,9 +221,11 @@ These procedures must be added to the table after the patterns.
 .nf
 
 Example:
+.ft 5
 
      FERMAT_NUMBER    { VAL[0] == '$' && is_fermat_number(&VAL[1]) };
 
+.ft R
 .fi
 An operand can also be described by a mixture of a string constant
 and a variable name.
@@ -226,9 +235,11 @@ The most general form allowed is:
        string_constant1 variable_name string_constant2
 
 Example:
+.ft 5
 
        (REG)+  matches  (r0)+, (r1)+, (r2)+ and (r3)+
 
+.ft R
 .fi
 Any of the three components may be omitted,
 so the first two forms are just special cases of the general form.
@@ -254,17 +265,23 @@ the optional constraint C is satisfied, i.e. it evaluates to TRUE.
 .LP
 .nf
 The pattern:
+.ft 5
 
       dec REG : move.b CONST,(REG)
 
+.ft R
 matches:
+.ft 5
 
       dec r0 : move.b $4,(r0)
 
+.ft R
 but not:
+.ft 5
 
       dec r0 : move.b $4,(r1)
 
+.ft R
 (as the variable REG matches two different strings).
 .fi
 If a pattern containing different registers must be described,
@@ -272,10 +289,12 @@ extra names for a register should be declared, all sharing
 the same restriction.
 .nf
 Example:
+.ft 5
 
      REG1,REG2  { VAL[0] == 'r' &&  .....  };
 
      addl3 REG1,REG1,REG2 : subl2 REG2,REG1
+.ft R
 .fi
 .PP
 The optional constraint is an auxiliary "C" expression (just like
@@ -283,14 +302,18 @@ the parameter restrictions).
 The expression may refer to the variables and to ANY.
 .nf
 Example:
+.ft 5
 
     move REG1,REG2    { REG1[1] == REG2[1] + 1 }
 
+.ft R
 matches
+.ft 5
 
     move r1,r0
     move r2,r1
     move r3,r2
+.ft R
 .fi
 .PP
 The replacement part of a (pattern,replacement) table entry
@@ -311,10 +334,13 @@ Vax examples
 .PP
 Suppose the table contains the following declarations:
 .nf
+
+.ft 5
          X, LOG        { TRUE };
          LAB           { VAL[0] == 'L' };   /* e.g. L0017 */
          A             { no_side_effects(VAL) };
          NUM           { is_number(VAL) };
+.ft R
 
 .fi
 The procedure "no_side_effects" checks if its argument
@@ -324,23 +350,29 @@ These procedures must be supplied by the table-writer and must be
 included in the table.
 .PP
 .nf
-\fIentry:\fR  addl3 X,A,A    -> addl2 X,A;
+.ft 5
+\fIentry:\fP  addl3 X,A,A    -> addl2 X,A;
+.ft R
 
 .fi
 This entry changes a 3-operand instruction into a cheaper  2-operand
 instruction.
 An optimization like:
 .nf
+.ft 5
 
         addl3 r0,(r2)+,(r2)+   -> addl2 r0,(r2)+
 
+.ft R
 .fi
 is illegal, as r2 should be incremented twice.
 Hence the second argument is required to
 be side-effect free.
 .PP
 .nf
-\fIentry:\fR  addw2 $-NUM,X  -> subw2 $NUM,X;
+.ft 5
+\fIentry:\fP  addw2 $-NUM,X  -> subw2 $NUM,X;
+.ft R
 
 .fi
 An instruction like "subw2 $5,r0" is cheaper
@@ -349,18 +381,22 @@ because constants in the range 0 to 63 are represented
 very efficiently on the Vax.
 .PP
 .nf
-\fIentry:\fR  bitw $NUM,A : jneq LAB
+.ft 5
+\fIentry:\fP  bitw $NUM,A : jneq LAB
                 { is_poweroftwo(NUM,LOG) }  -> jbs $LOG,A,LAB;
 
+.ft R
 .fi
 A "bitw x,y" sets the condition codes to the bitwise "and" of
 x and y.
 A "jbs n,x,l" branches to l if bit n of x is set.
 So, for example, the following transformation is possible:
 .nf
+.ft 5
 
       bitw $32,r0 : jneq L0017 ->  jbs $5,r0,L0017
 
+.ft R
 .fi
 The user-defined  procedure "is_poweroftwo" checks if its first argument is
 a power of 2 and, if so, sets its second argument to the logarithm
@@ -373,18 +409,23 @@ PDP-11 examples
 .PP
 Suppose we have the following declarations:
 .nf
+
+.ft 5
          X             { TRUE };
          A             { no_side_effects(VAL) };
          L1, L2        { VAL[0] == 'I' };
          REG           { VAL[0] == 'r' && VAL[1] >= '0' && VAL[1] <= '5' &&
                          VAL[2] == '\\0' };
 
+.ft P
 .fi
 The implementation of "no_side_effects" may of course
 differ for the PDP-11 and the Vax.
 .PP
 .nf
-\fIentry:\fR  mov REG,A : ANY A,X  ->  mov REG,A : ANY REG,X ;
+.ft 5
+\fIentry:\fP  mov REG,A : ANY A,X  ->  mov REG,A : ANY REG,X ;
+.ft R
 
 .fi
 This entry implements register subsumption.
@@ -392,7 +433,9 @@ If A and REG hold the same value (which is true after "mov REG,A")
 and A is used as source (first) operand, it is cheaper to use REG instead.
 .PP
 .nf
-\fIentry:\fR  jeq L1 : jbr L2 : labdef L1  ->  jne L2 : labdef L1;
+.ft 5
+\fIentry:\fP  jeq L1 : jbr L2 : labdef L1  ->  jne L2 : labdef L1;
+.ft R
 
 .fi
 The "jeq L1" is a "skip over an unconditional jump". "labdef L1"
@@ -401,7 +444,9 @@ As the target optimizer has to know how such a definition
 looks like, this must be expressed in the table (see Appendix A).
 .PP
 .nf
-\fIentry:\fR  add $01,X { carry_dead(REST) }  -> inc X;
+.ft 5
+\fIentry:\fP  add $01,X { carry_dead(REST) }  -> inc X;
+.ft R
 
 .fi
 On the PDP-11, an add-one is not equivalent to an increment.
@@ -440,24 +485,32 @@ backwards,
 as it is possible that instructions that were rejected earlier now do match.
 For example, consider the following patterns:
 .DS
+.ft 5
 cmp $0, X           -> tst X ;
 mov REG,X : tst X   -> move REG.X ;   /* redundant test */
+.ft R
 .DE
 If the input is:
 .DS
+.ft 5
 mov r0,foo : cmp $0,foo
+.ft R
 .DE
 then the first instruction is initially rejected.
 However, after the transformation
 .DS
+.ft 5
 cmp $0,foo   ->  tst foo
+.ft R
 .DE
 the following optimization is possible:
 .DS
+.ft 5
 mov r0,foo : tst foo  ->  mov r0,foo
+.ft R
 .DE
 .PP
-The window is implemented a a \fIqueue\fR.
+The window is implemented as a \fIqueue\fR.
 Matching takes place at the head of the queue.
 New instructions are added at the tail.
 If the window is moved forwards, the instruction at the head
@@ -619,7 +672,10 @@ These two files are compiled together with some machine-independent
 files to produce a target optimizer.
 .PP
 Topgen is implemented using 
-the LL(1) parser generator system LLgen,
+the LL(1) parser generator system LLgen ,
+.[
+jacobs topics parser generation
+.]
 a powerful tool of the Amsterdam Compiler Kit.
 This system provides a flexible way of describing the syntax of the tables.
 The syntactical description of the table format included
@@ -646,13 +702,14 @@ optimizer description table format.
 This appendix is intended for table-writers.
 We use syntax rules for the description of the table format.
 The following notation is used:
-.nf
-      { a }      zero or more of a
-      [ a ]      zero or one of a
-      a b        a followed by b
-      a | b      a or b
-
-.fi
+.TS
+center;
+l l.
+{ a }	zero or more of a
+[ a ]	zero or one of a
+a b	a followed by b
+a | b	a or b
+.TE
 Terminals are given in quotes, as in ';'.
 .PP
 The table may contain white space and comment at all reasonable places.
@@ -661,35 +718,40 @@ Identifiers are sequences of letters, digits and the underscore ('_'),
 beginning with a letter.
 .PP
 .DS
+.ft 5
 table   ->   {parameter_line} '%%;' {variable_declaration} '%%;'
              {entry} '%%;' user_routines.
-
+.ft R
 .DE
 A table consists of four sections, containing machine-dependent
 constants, variable declarations, pattern rules and
 user-supplied subroutines.
 .PP
 .DS
+.ft 5
 parameter_line ->  identifier value ';' .
-
+.ft R
 .DE
 A parameter line defines some attributes of the target machines
 assembly code.
 For unspecified parameters default values apply.
 The names of the parameters and the corresponding defaults
 are shown in table 1.
-.DS
-       OPC_TERMINATOR       ' '
-       OP_SEPARATOR         ','
-       LABEL_STARTER        'I'
-       LABEL_TERMINATOR     ':'
-       MAXOP                  2
-       MAXOPLEN              25
-       MAX_OPC_LEN           10
-       MAXVARLEN             25
-       MAXLINELEN           100
-
-       table 1: parameter names and defaults
+.TS
+center;
+l l.
+OPC_TERMINATOR	' '
+OP_SEPARATOR	','
+LABEL_STARTER	'I'
+LABEL_TERMINATOR	':'
+MAXOP	2
+MAXOPLEN	25
+MAX_OPC_LEN	10
+MAXVARLEN	25
+MAXLINELEN	100
+.TE
+.ce 1
+table 1: parameter names and defaults
 .DE
 The OPC_TERMINATOR is the character that separates the instruction
 mnemonic from the first operand (if any).
@@ -717,9 +779,11 @@ the line is not optimized.
 Optimization does, however, proceed with the rest of the input.
 .PP
 .DS
+.ft 5
 variable_declaration  -> identifier {',' identifier} restriction ';' .
 
 restriction           ->  '{' anything '}' .
+.ft R
 .DE
 A variable declaration declares one or more string variables
 that may be used in the patterns and in the replacements.
@@ -739,6 +803,7 @@ Inside the expression, the name VAL stands for the part of the actual
 The expression may contain calls to procedures that are defined in the
 user-routines section.
 .DS
+.ft 5
 entry             ->  pattern '->' replacement ';' .
 
 pattern           ->  instruction_descr
@@ -760,6 +825,7 @@ operand_descr     -> [ string_constant ]
 variable_name     -> identifier .
 
 opcode            -> anything .
+.ft R
 .DE
 The symbol 'white' stands for white space (space or tab).
 An opcode can be any string not containing the special
@@ -783,7 +849,9 @@ which contains the mnemonic of the first instruction of the
 rest of the input. (REST is a null-string if this mnemonic can
 not be determined).
 .DS
+.ft 5
 user_routines -> anything .
+.ft R
 .DE
 The remainder of the table consists of user-defined subroutines.
 .bp
