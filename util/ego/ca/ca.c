@@ -90,7 +90,7 @@ STATIC line_p get_ca_lines(lf,p_out)
 		}
 	}
 	*pp = (line_p) 0;
-	if (INSTR(head) == ps_pro) {
+	if (head != (line_p) 0 && INSTR(head) == ps_pro) {
 		/* append register message without arguments to list */
 		l = newline(OPLIST);
 		l->l_instr = ps_mes;
