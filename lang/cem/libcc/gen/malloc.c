@@ -1,6 +1,6 @@
 /* $Header$ */
 
-#define CLICK_SIZE	16
+#define CLICK_SIZE	4096
 #if EM_WSIZE == EM_PSIZE
 typedef unsigned int vir_bytes;
 #else
@@ -13,7 +13,7 @@ extern bcopy();
 #define NEXT(p)		(* (char **) (p))
 
 #ifdef pdp
-#define BUGFIX	64
+#define BUGFIX	64	/* cannot set break in top 64 bytes */
 #else
 #define BUGFIX	0
 #endif
@@ -25,11 +25,15 @@ static grow(len)
 unsigned len;
 {
   register char *p;
+  register int click = CLICK_SIZE;
 
-  p = (char *) ALIGN((vir_bytes) top + sizeof(char *) + len, CLICK_SIZE)
+  while (click >= 4) {
+  	p = (char *) ALIGN((vir_bytes) top + sizeof(char *) + len, click)
 							+ BUGFIX;
-  if (p < top || brk(p - BUGFIX) < 0)
-	return(0);
+	if (p > top && brk(p - BUGFIX) >= 0) break;
+	click >>= 1;
+  }
+  if (click < 4) return(0);
   top = p - (BUGFIX + sizeof(char *));
   for (p = bottom; NEXT(p) != 0; p = (char *) (* (vir_bytes *) p & ~BUSY))
 	;

@@ -60,13 +60,14 @@ ttyslot()
 #else
 	for (;;) {
 		tp = buf;
-		for (;;) {
+		for (;;tp++) {
 			if (read(fd, tp, 1) != 1) {
 				close(fd);
 				return 0;
 			}
 			if (*tp == '\n' || tp >= &buf[31]) {
 				*tp = 0;
+				if (tp < buf+2) buf[2] = '\0';
 				tp = buf+2;
 				break;
 			}
