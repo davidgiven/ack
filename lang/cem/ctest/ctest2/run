@@ -1,0 +1,1 @@
+make "P=t7" -fsk ../makefile ${1-gen}

@@ -1,0 +1,3 @@
+make "TS=$1"
+make "P=$1" -fk ../makefile $2
+rm $1.[ckmos]

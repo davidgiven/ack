@@ -1,0 +1,13 @@
+date
+for A in ct*
+do (
+        echo "***** $A"
+        cd "$A"
+        if test -r run ; then
+                sh run "${1-gen}"
+        else
+                echo "No run file present"
+        fi
+   )
+done
+date

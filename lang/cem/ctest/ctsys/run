@@ -1,0 +1,1 @@
+make "P=tfork" -fsk ../makefile ${1-gen}

@@ -1,0 +1,1 @@
+make "P=bugs" -fsk ../makefile ${1-gen}

@@ -1,0 +1,1 @@
+make "P=test" -fsk ../makefile ${1-gen}

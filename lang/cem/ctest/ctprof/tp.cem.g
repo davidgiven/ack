@@ -1,0 +1,16 @@
+Entering main
+  Entering fac
+    Entering fac
+      Entering fac
+        Entering fac
+          Entering fac
+            Entering fac
+              Entering fac
+              Leaving  fac
+            Leaving  fac
+          Leaving  fac
+        Leaving  fac
+      Leaving  fac
+    Leaving  fac
+  Leaving  fac
+Leaving  main

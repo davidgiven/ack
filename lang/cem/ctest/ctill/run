@@ -1,0 +1,2 @@
+echo ----- A missing argument error should be reported
+make "P=noarg" -fsk ../makefile ${1-gen}

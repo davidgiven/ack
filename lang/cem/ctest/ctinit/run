@@ -1,0 +1,1 @@
+make "P=init" -fsk ../makefile ${1-gen}

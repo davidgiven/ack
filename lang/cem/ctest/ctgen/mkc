@@ -1,0 +1,1 @@
+sed -f $1.sed <OPS >$1.c
