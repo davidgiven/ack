@@ -6,24 +6,25 @@ var f=4
 var d=8
 var NAME=i8086
 var M=i86
-var LIB=mach/i86/lib/tail_
-var LIBIBM=mach/ibm/lib/tail_
-var RT=mach/i86/lib/head_
-var RTIBM=mach/ibm/lib/head_
-var CCP_F=-Dunix
-var INCLUDES=-I{EM}/include -I{EM}/mach/ibm/include
+var LIB=lib/i86/tail_
+var LIBIBM=lib/ibm/tail_
+var RT=lib/i86/head_
+var RTIBM=lib/ibm/head_
+var CPP_F=-Dunix
+var INCLUDES=-I{EM}/include -I{EM}/lib/ibm/include
 name be
-	from .m
+	from .m.g
 	to .s
-	program {EM}/lib/{M}_cg
+	program {EM}/lib/{M}/cg
 	args <
-	prop >
+	stdout
 	need .e
 end
 name asld
 	from .s.a
-	to a.out
-	program {EM}/lib/{M}_as
+	to .out
+	outfile a.out
+	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	mapflag -i  IFILE={EM}/{RT}i
 	args {IFILE?} (.e:{HEAD}={EM}/{RTIBM}em) \
@@ -32,5 +33,5 @@ name asld
 (.e:{TAIL}={EM}/{LIBIBM}em) \
 (.c.p:{TAIL}={EM}/{LIBIBM}mon) \
 (.e:{TAIL}={EM}/{LIBIBM}em.vend)
-	prop C
+	linker
 end
