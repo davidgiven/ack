@@ -5,7 +5,7 @@
  */
 
 #include "ack.h"
-#include "../../h/em_path.h"
+#include <em_path.h>
 #include "list.h"
 #include "trans.h"
 #include "grows.h"

@@ -9,7 +9,7 @@
 #include "trans.h"
 #include "grows.h"
 #include "data.h"
-#include "../../h/em_path.h"
+#include <em_path.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Header$" ;

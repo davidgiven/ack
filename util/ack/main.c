@@ -7,8 +7,8 @@
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
-#include "../../h/em_path.h"
-#include "../../h/local.h"
+#include <em_path.h>
+#include <local.h>
 #include "data.h"
 #include <signal.h>
 
