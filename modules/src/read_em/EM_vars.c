@@ -12,5 +12,5 @@ char	*EM_error;
 char	*EM_filename;
 unsigned int EM_lineno;
 int	EM_wordsize, EM_pointersize;
-arith	em_holorbsssize;
-int	em_holorbssinit;
+arith	EM_holsize, EM_bsssize;
+int	EM_holinit, EM_bssinit;

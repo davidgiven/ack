@@ -106,49 +106,49 @@ EM_dopseudo(p)
 			checkarg(&(p->em_arg), par_ptyp);
 			switch(p->em_argtype) {
 			    case cst_ptyp:
-				C_hol_cst(em_holsize,
+				C_hol_cst(EM_holsize,
 					  p->em_cst,
-					  em_holinit);
+					  EM_holinit);
 				break;
 			    case ico_ptyp:
-				C_hol_icon(em_holsize,
+				C_hol_icon(EM_holsize,
 					   p->em_string,
 					   p->em_size, 
-					   em_holinit);
+					   EM_holinit);
 				break;
 			    case uco_ptyp:
-				C_hol_ucon(em_holsize,
+				C_hol_ucon(EM_holsize,
 					   p->em_string,
 					   p->em_size,
-					   em_holinit);
+					   EM_holinit);
 				break;
 			    case fco_ptyp:
-				C_hol_fcon(em_holsize,
+				C_hol_fcon(EM_holsize,
 					   p->em_string,
 					   p->em_size, 
-					   em_holinit);
+					   EM_holinit);
 				break;
 			    case sof_ptyp:
-				C_hol_dnam(em_holsize,
+				C_hol_dnam(EM_holsize,
 					   p->em_dnam,
 					   p->em_off, 
-					   em_holinit);
+					   EM_holinit);
 				break;
 			    case nof_ptyp:
-				C_hol_dlb(em_holsize,
+				C_hol_dlb(EM_holsize,
 					  p->em_dlb,
 					  p->em_off, 
-					  em_holinit);
+					  EM_holinit);
 				break;
 			    case ilb_ptyp:
-				C_hol_ilb(em_holsize,
+				C_hol_ilb(EM_holsize,
 					  p->em_ilb, 
-					  em_holinit);
+					  EM_holinit);
 				break;
 			    case pro_ptyp:
-				C_hol_pnam(em_holsize,
+				C_hol_pnam(EM_holsize,
 					   p->em_pnam, 
-					   em_holinit);
+					   EM_holinit);
 				break;
 			    default:
 				EM_error = "Illegal parameter type";
@@ -160,49 +160,49 @@ EM_dopseudo(p)
 			checkarg(&(p->em_arg), par_ptyp);
 			switch(p->em_argtype) {
 			    case cst_ptyp:
-				C_bss_cst(em_bsssize,
+				C_bss_cst(EM_bsssize,
 					  p->em_cst,
-					  em_bssinit);
+					  EM_bssinit);
 				break;
 			    case ico_ptyp:
-				C_bss_icon(em_bsssize,
+				C_bss_icon(EM_bsssize,
 					   p->em_string,
 					   p->em_size, 
-					   em_bssinit);
+					   EM_bssinit);
 				break;
 			    case uco_ptyp:
-				C_bss_ucon(em_bsssize,
+				C_bss_ucon(EM_bsssize,
 					   p->em_string,
 					   p->em_size,
-					   em_bssinit);
+					   EM_bssinit);
 				break;
 			    case fco_ptyp:
-				C_bss_fcon(em_bsssize,
+				C_bss_fcon(EM_bsssize,
 					   p->em_string,
 					   p->em_size, 
-					   em_bssinit);
+					   EM_bssinit);
 				break;
 			    case sof_ptyp:
-				C_bss_dnam(em_bsssize,
+				C_bss_dnam(EM_bsssize,
 					   p->em_dnam,
 					   p->em_off, 
-					   em_bssinit);
+					   EM_bssinit);
 				break;
 			    case nof_ptyp:
-				C_bss_dlb(em_bsssize,
+				C_bss_dlb(EM_bsssize,
 					  p->em_dlb,
 					  p->em_off, 
-					  em_bssinit);
+					  EM_bssinit);
 				break;
 			    case ilb_ptyp:
-				C_bss_ilb(em_bsssize,
+				C_bss_ilb(EM_bsssize,
 					  p->em_ilb, 
-					  em_bssinit);
+					  EM_bssinit);
 				break;
 			    case pro_ptyp:
-				C_bss_pnam(em_bsssize, 
+				C_bss_pnam(EM_bsssize, 
 					   p->em_pnam, 
-					   em_bssinit);
+					   EM_bssinit);
 				break;
 			    default:
 				EM_error = "Illegal parameter type";

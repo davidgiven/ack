@@ -42,9 +42,9 @@ struct e_instr {
 };
 
 extern arith
-	em_holorbsssize;
+	EM_holsize, EM_bsssize;
 extern int
-	em_holorbssinit;
+	EM_holinit, EM_bssinit;
 
 #define em_ilb  	em_arg.ema_ilb
 #define em_dlb  	em_arg.ema_dlb
@@ -55,13 +55,10 @@ extern int
 #define em_string	em_arg.ema_string
 #define em_off  	em_arg.ems_szoroff
 #define em_size 	em_arg.ems_szoroff
+
+/* Arguments for EXC pseudo: */
 #define em_exc1 	em_arg.ema_cst
 #define em_exc2 	em_arg.ems_szoroff
-
-#define em_holsize	em_holorbsssize
-#define em_bsssize	em_holorbsssize
-#define em_holinit	em_holorbssinit
-#define em_bssinit	em_holorbssinit
 
 extern char
 	*EM_error, *EM_filename;

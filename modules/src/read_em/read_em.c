@@ -318,14 +318,14 @@ EM_getinstr(p)
 			case ps_bss:
 			case ps_hol:
 				getarg(cst_ptyp, &dummy);
-				em_holsize = dummy.ema_cst;
+				EM_holsize = dummy.ema_cst;
 				getarg(par_ptyp, &(p->em_arg));
 				getarg(cst_ptyp, &dummy);
-				em_holinit = dummy.ema_cst;
+				EM_holinit = dummy.ema_cst;
 #ifdef CHECKING
 				/* Check that the last value is 0 or 1
 				*/
-				if (em_holinit != 1 && em_holinit != 0) {
+				if (EM_holinit != 1 && EM_holinit != 0) {
 				  if (! EM_error)
 				   EM_error="Third argument of hol/bss not 0/1";
 				}
