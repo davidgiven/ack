@@ -269,7 +269,7 @@ ABC
 	( cd ..
 	  cp Action Action.orig
 	  ed - Action <<ABC
-/EM interpreter in C/,/^end/s/^/!/
+/EM interpreter in C/;/^end/s/^/!/
 w
 q
 ABC
