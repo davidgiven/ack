@@ -62,7 +62,7 @@ GSRC =	char.c symbol2str.c
 GHSRC =	errout.h idfsize.h ifdepth.h lapbuf.h \
 	maxincl.h nparams.h numsize.h obufsize.h \
 	parbufsize.h pathlength.h strsize.h textsize.h \
-	botch_free.h debug.h inputtype.h dobits.h
+	botch_free.h debug.h inputtype.h dobits.h line_prefix.h
 
 # Other generated files, for 'make clean' only
 GENERATED = tokenfile.g Lpars.h LLfiles LL.output lint.out \
