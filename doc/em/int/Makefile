@@ -8,8 +8,8 @@ tables:         mktables $(HOME)/etc/ip_spec.t
 		mktables $(HOME)/etc/ip_spec.t tables
 
 mktables:       mktables.c $(HOME)/h/em_spec.h $(HOME)/h/em_flag.h \
-		$(HOME)/lib/em_data.a $(HOME)/util/ass/ip_spec.h
-		$(CC) -I$(HOME) -O -o mktables mktables.c $(HOME)/lib/em_data.a
+		$(HOME)/lib.bin/em_data.a $(HOME)/h/ip_spec.h
+		$(CC) -I$(HOME)/h -O -o mktables mktables.c $(HOME)/lib.bin/em_data.a
 
 em.out:         em.p
 		apc -mint -O em.p >emerrs ; mv e.out em.out

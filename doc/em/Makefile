@@ -28,7 +28,7 @@ dispatdummy:	$(IOP) mkdispatch
 	sed -f dispat3.sed < dispatdummy | $(TBL) > dispat3
 
 mkdispatch:	mkdispatch.c
-	$(CC) -I$(HOME)/util/ass -I$(HOME)/h -o mkdispatch mkdispatch.c $(HOME)/lib/em_data.a
+	$(CC) -I$(HOME)/h -o mkdispatch mkdispatch.c $(HOME)/lib.bin/em_data.a
 
 .SUFFIXES : .pr .nr
 .nr.pr: ; $(TBL) macr.nr $*.nr | $(NROFF) -mkun >$@

@@ -8,9 +8,9 @@
 /* Author: E.G. Keizer */
 
 #include <stdio.h>
-#include <util/ass/ip_spec.h>
-#include <h/em_spec.h>
-#include <h/em_flag.h>
+#include <ip_spec.h>
+#include <em_spec.h>
+#include <em_flag.h>
 
 /* This program reads the human readable interpreter specification
    and produces a efficient machine representation that can be
