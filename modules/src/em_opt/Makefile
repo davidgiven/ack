@@ -116,7 +116,7 @@ $(LIBOPT):	dfadummy $(NOFILES) pseudo.d incalls.d
 		-sh -c 'ranlib $(LIBOPT)'
 
 $(LIBCEOPT):	dfadummy
-		rm -f O_*.$(SUF) $(NOFILES)
+		rm -f O_*.$(SUF) $(NOFILES) pseudo.d incalls.d
 		-mv $(LIBOPT) $(LIBOPT).saved
 		make "EMHOME="$(EMHOME) PREFLAGS='$(INCLDIR) -DPRIVATE=static -DCODE_EXPANDER' $(LIBOPT)
 		mv $(LIBOPT) $(LIBCEOPT)
