@@ -1549,7 +1549,7 @@ zer $1>0 && $1<=256	| |
 loc loc cii $1==1 && $2==2	| R16 |
 		"txa"
 		"bpl 1f"
-		"lda #0FFh"
+		"lda #0xff"
 		"bne 2f"
 		"1:  lda #0\n2:"
 					| %[1] | |
@@ -1633,10 +1633,10 @@ xor ND	| R16 |
 		"jsr Xor"
 					| | |
 com $1==2	| R16 |
-		"eor #0FFh"
+		"eor #0xff"
 		"pha"
 		"txa"
-		"eor #0FFh"
+		"eor #0xff"
 		"tax"
 		"pla"
 					| %[1] | |
