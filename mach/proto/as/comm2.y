@@ -125,7 +125,7 @@ program	:	/* empty */
 			{	lineno++; LISTLINE(1); RELODONE;}
 	|	program '#' NUMBER STRING '\n'
 			{	lineno = $3;
-				if (modulename) strncpy(modulename, &stringbuf[1], 63);
+				if (modulename) strncpy(modulename, &stringbuf[1], STRINGMAX-1);
 				LISTLINE(1); RELODONE;
 			}
 	|	program error '\n'

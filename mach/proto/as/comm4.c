@@ -433,11 +433,11 @@ pass_23(n)
 newmodule(s)
 char *s;
 {
-	static char nmbuf[64];
+	static char nmbuf[STRINGMAX];
 
 	switchsect(S_UND);
 	if (s && s != modulename) {
-		strncpy(nmbuf, s, 63);
+		strncpy(nmbuf, s, STRINGMAX-1);
 		modulename = nmbuf;
 	}
 	else modulename = s;

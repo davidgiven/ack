@@ -270,7 +270,11 @@ short s;
 	s &= ~S_COM;
 	if ((n & RELPC) == 0 && s == S_ABS)
 		return;
-	if ((n & RELPC) != 0 && s == DOTTYP)
+	if ((n & RELPC) != 0 && s == DOTTYP
+#ifndef ASLD
+	    && ! iscomm
+#endif
+	   )
 		return;
 	if (pass != PASS_3) {
 		outhead.oh_nrelo++;
