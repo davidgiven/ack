@@ -1,4 +1,6 @@
 #define	ARMAG	0177545
+#define AALMAG	0177454
+
 struct	ar_hdr {
 	char	ar_name[14];
 	long	ar_date;
