@@ -1,11 +1,13 @@
 /*	$Header$	*/
 /*
-	Driver for the CEMCOM compiler: works like /bin/cc and accepts the
-	options accepted by /bin/cc and /usr/em/bin/ack.
+	Driver for the CEMCOM compiler: works like /bin/cc and accepts
+	most of the options accepted by /bin/cc and /usr/em/bin/ack.
 	Date written: dec 4, 1985
+	Adapted for 68000 (Aug 19, 1986)
+	Merged the vax and mantra versions (Nov 10, 1986)
 	Author: Erik Baalbergen
 */
-	
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -22,29 +24,43 @@ struct arglist {
 
 /* some system-dependent variables	*/
 char *PP = "/lib/cpp";
-char *CEM = "/user1/erikb/bin/cemcom";
-char *AS_FIX = "/user1/erikb/bin/mcomm";
+char *CEM = "/usr/em/lib/em_cemcom";
 char *ENCODE = "/usr/em/lib/em_encode";
 char *DECODE = "/usr/em/lib/em_decode";
 char *OPT = "/usr/em/lib/em_opt";
-char *CG = "/usr/em/lib/vax4/cg";
-char *AS = "/bin/as";
-char *LD = "/bin/ld";
 char *SHELL = "/bin/sh";
 
+#ifndef MANTRA
+char *CG = "/usr/em/lib/vax4/cg";
+char *AS = "/bin/as";
+char *AS_FIX = "/user1/erikb/bin/mcomm";
+char *LD = "/bin/ld";
 char *LIBDIR = "/user1/cem/lib";
-
 char *V_FLAG = "-Vs2.2w4.4i4.4l4.4f4.4d8.4p4.4";
+#else MANTRA
+char *CG = "/usr/em/lib/m68k2/cg";
+char *AS = "/usr/em/lib/m68k2/as";
+char *LD = "/usr/em/lib/em_led";
+char *CV = "/usr/em/lib/m68k2/cv";
+char *LIBDIR = "/usr/em/lib/m68k2";
+char *V_FLAG = "-Vs2.2w2.2i2.2l4.2f4.2d8.2p4.2";
+#endif MANTRA
 
 struct arglist LD_HEAD = {
 	2,
 	{
+#ifndef MANTRA
 		"/usr/em/lib/vax4/head_em",
 		"/usr/em/lib/vax4/head_cc"
+#else MANTRA
+		"/usr/em/lib/m68k2/head_em",
+		"/usr/em/lib/m68k2/head_cc"
+#endif MANTRA
 	}
 };
 
 struct arglist LD_TAIL = {
+#ifndef MANTRA
 	4,
 	{
 		"/user1/cem/lib/libc.a",
@@ -52,11 +68,26 @@ struct arglist LD_TAIL = {
 		"/usr/em/lib/vax4/tail_mon",
 		"/usr/em/lib/vax4/tail_em"
 	}
+#else MANTRA
+	7,
+	{
+		"/usr/em/lib/m68k2/tail_cc.1s",
+		"/usr/em/lib/m68k2/tail_cc.2g",
+		"/usr/em/lib/m68k2/tail_cem",
+		"/usr/em/lib/m68k2/tail_fp.a",
+		"/usr/em/lib/m68k2/tail_em.rt",
+		"/usr/em/lib/m68k2/tail_mon",
+		"/usr/em/lib/m68k2/end_em"
+	}
+#endif MANTRA
 };
 
 char *o_FILE = "a.out";
+#ifdef MANTRA
+char *cv_FILE = "cv.out";
+#endif MANTRA
 
-#define remove(str)	(((t_flag == 0) && unlink(str)), (str)[0] = '\0')
+#define remove(str)	(((FLAG(t) == 0) && unlink(str)), (str)[0] = '\0')
 #define cleanup(str)		(str && remove(str))
 #define mkname(dst, s1, s2)	mkstr(dst, (s1), (s2), 0)
 #define init(al)		(al)->al_argc = 1
@@ -64,42 +95,34 @@ char *o_FILE = "a.out";
 	mkstr(alloc((unsigned int)strlen(nm) + strlen(LIBDIR) + 7), \
 		LIBDIR, "/lib", nm, ".a", 0)
 
-char *ProgCall = 0;
+struct arglist SRCFILES, LDFILES, GEN_LDFILES, PP_FLAGS, CEM_FLAGS,
+	OPT_FLAGS, DECODE_FLAGS, ENCODE_FLAGS, CG_FLAGS, AS_FLAGS,
+	O_FLAGS, DEBUG_FLAGS, CALL_VEC;
 
-struct arglist SRCFILES;
-struct arglist LDFILES;
-struct arglist GEN_LDFILES;
-
-struct arglist PP_FLAGS;
-struct arglist CEM_FLAGS;
-
-int debug = 0;
-int exec = 1;
-
-int RET_CODE = 0;
-
-struct arglist OPT_FLAGS;
-struct arglist DECODE_FLAGS;
-struct arglist ENCODE_FLAGS;
-struct arglist CG_FLAGS;
-struct arglist AS_FLAGS;
+#ifndef MANTRA
 struct arglist LD_FLAGS;
-struct arglist O_FLAGS;
-struct arglist DEBUG_FLAGS;
+#else MANTRA
+struct arglist LD_FLAGS = {
+	5,
+	{
+		"-b0:0x80000",
+		"-a0:2",
+		"-a1:2",
+		"-a2:2",
+		"-a3:2"
+	}
+};
+struct arglist CV_FLAGS;
+int Nc_flag = 0;
+#endif MANTRA
 
-struct arglist CALL_VEC;
+/* option naming */
+#define NAME(chr)	chr
+#define FLAG(chr)	NAME(chr)_flag
+int E_flag, P_flag, S_flag, c_flag, e_flag, k_flag, 
+	m_flag, o_flag, t_flag, v_flag;
 
-int e_flag = 0;
-int E_flag = 0;
-int c_flag = 0;
-int k_flag = 0;
-int m_flag = 0;
-int o_flag = 0;
-int S_flag = 0;
-int t_flag = 0;
-int v_flag = 0;
-int P_flag = 0;
-
+/* various passes */
 struct prog {
 	char *p_name;
 	char **p_task;
@@ -114,87 +137,83 @@ struct prog {
 	{ "cg",		&CG,		&CG_FLAGS	},
 	{ "as",		&AS,		&AS_FLAGS	},
 	{ "ld",		&LD,		&LD_FLAGS	},
+#ifdef MANTRA
+	{ "cv",		&CV,		&CV_FLAGS	},
+#endif MANTRA
 	{ 0,		0,		0		}
 };
 
+/* various forward declarations */
 int trap();
 char *mkstr();
 char *alloc();
 long sizeof_file();
 
+/* various globals */
+char *ProgCall = 0;
+int debug = 0;
+int exec = 1;
+int RET_CODE = 0;
+
 main(argc, argv)
 	char *argv[];
 {
-	char *str;
-	char **argvec;
-	int count;
-	int ext;
-	char Nfile[USTR_SIZE];
-	char kfile[USTR_SIZE];
-	char sfile[USTR_SIZE];
-	char mfile[USTR_SIZE];
-	char ofile[USTR_SIZE];
+	char *str, **argvec, *file, *ldfile = 0;
+	int count, ext;
+	char Nfile[USTR_SIZE], kfile[USTR_SIZE], sfile[USTR_SIZE],
+		mfile[USTR_SIZE], ofile[USTR_SIZE], BASE[USTR_SIZE];
 	register struct arglist *call = &CALL_VEC;
-	char BASE[USTR_SIZE];
-	char *file;
-	char *ldfile = 0;
 
 	set_traps(trap);
-
 	ProgCall = *argv++;
-
 	while (--argc > 0) {
 		if (*(str = *argv++) != '-') {
 			append(&SRCFILES, str);
 			continue;
 		}
-
 		switch (str[1]) {
-
 		case '-':
 			switch (str[2]) {
 			case 'C':
 			case 'E':
 			case 'P':
-				E_flag = 1;
+				FLAG(E) = 1;
 				append(&PP_FLAGS, str);
 				PP = CEM;
-				P_flag = (str[2] == 'P');
+				FLAG(P) = (str[2] == 'P');
 				break;
 			default:
 				append(&DEBUG_FLAGS, str);
 				break;
 			}
 			break;
-
 		case 'B':
 			PP = CEM = &str[2];
 			break;
 		case 'C':
 		case 'E':
 		case 'P':
-			E_flag = 1;
+			FLAG(E) = 1;
 			append(&PP_FLAGS, str);
-			P_flag = (str[1] == 'P');
+			FLAG(P) = (str[1] == 'P');
 			break;
 		case 'c':
 			if (str[2] == '.') {
 				switch (str[3]) {
-
 				case 's':
-					S_flag = 1;
+					FLAG(S) = 1;
 					break;
 				case 'k':
-					k_flag = 1;
+					FLAG(k) = 1;
 					break;
 				case 'o':
-					c_flag = 1;
+					FLAG(c) = 1;
 					break;
 				case 'm':
-					m_flag = 1;
+					FLAG(m) = 1;
 					break;
 				case 'e':
-					e_flag = 1;
+					FLAG(e) = 1;
 					break;
 				default:
 					bad_option(str);
@@ -202,7 +221,7 @@ main(argc, argv)
 			}
 			else
 			if (str[2] == '\0')
-				c_flag = 1;
+				FLAG(c) = 1;
 			else
 				bad_option(str);
 			break;
@@ -212,7 +231,7 @@ main(argc, argv)
 			append(&PP_FLAGS, str);
 			break;
 		case 'k':
-			k_flag = 1;
+			FLAG(k) = 1;
 			break;
 		case 'l':
 			if (str[2] == '\0')	/* no standard libraries */
@@ -224,10 +243,24 @@ main(argc, argv)
 			LIBDIR = &str[2];
 			break;
 		case 'm':
-			m_flag = 1;
+			FLAG(m) = 1;
 			break;
+#ifdef MANTRA
+		case 'N':
+			switch (str[2]) {
+			case 'c': /* no a.out conversion */
+				Nc_flag = 1;
+				break;
+			case 'l': /* no default options to led */
+				LD_FLAGS.al_argc = 0;
+				break;
+			default:
+				bad_option(str);
+			}
+			break;
+#endif MANTRA
 		case 'o':
-			o_flag = 1;
+			FLAG(o) = 1;
 			if (argc-- < 0)
 				bad_option(str);
 			else
@@ -246,58 +279,42 @@ main(argc, argv)
 				Roption(str);
 			break;
 		case 'S':
-			S_flag = 1;
+			FLAG(S) = 1;
 			break;
 		case 't':
-			t_flag = 1;
+			FLAG(t) = 1;
 			break;
 		case 'v':	/* set debug switches */
-			v_flag = 1;
+			FLAG(v) = 1;
 			switch (str[2]) {
-
 			case 'd':
 				debug = 1;
 				break;
 			case 'n':	/* no execute */
 				exec = 0;
 				break;
+			case '\0':
+				break;
+			default:
+				bad_option(str);
 			}
 			break;
 		case 'V':
 			V_FLAG = str;
 			break;
-		case 'e':
-		case 'F':
-		case 'd':
-		case 'n':
-		case 'N':
-		case 'r':
-		case 's':
-		case 'u':
-		case 'x':
-		case 'X':
-		case 'z':
-			append(&LD_FLAGS, str);
-			break;
 		default:
-			append(&CEM_FLAGS, str);
+			append(&LD_FLAGS, str);
 		}
 	}
-
-	if (debug)
-		report("Note: debug output");
+	if (debug) report("Note: debug output");
 	if (exec == 0)
 		report("Note: no execution");
-
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
-
 	Nfile[0] = '\0';
-
 	while (count-- > 0) {
 		basename(file = *argvec++, BASE);
-		
-		if (E_flag) {
+		if (FLAG(E)) {
 			char ifile[USTR_SIZE];
 
 			init(call);
@@ -305,12 +322,10 @@ main(argc, argv)
 			concat(call, &DEBUG_FLAGS);
 			concat(call, &PP_FLAGS);
 			append(call, file);
-			runvec(call, P_flag ? mkname(ifile, BASE, ".i") : 0);
+			runvec(call, FLAG(P) ? mkname(ifile, BASE, ".i") : 0);
 			continue;
 		}
-
 		ext = extension(file);
-
 		/* .c to .k and .N	*/
 		if (ext == 'c' || ext == 'i') {
 			init(call);
@@ -322,7 +337,6 @@ main(argc, argv)
 			append(call, file);
 			append(call, mkname(kfile, BASE, ".k"));
 			append(call, mkname(Nfile, BASE, ".N"));
-
 			if (runvec(call, (char *)0)) {
 				file = kfile;
 				ext = 'k';
@@ -335,7 +349,6 @@ main(argc, argv)
 				continue;
 			}
 		}
-
 		/* .e to .k */
 		if (ext == 'e') {
 			init(call);
@@ -348,14 +361,11 @@ main(argc, argv)
 			file = kfile;
 			ext = 'k';
 		}
-
-		if (k_flag)
+		if (FLAG(k))
 			continue;
-		
 		/* decode .k or .m */
-		if (e_flag && (ext == 'k' || ext == 'm')) {
+		if (FLAG(e) && (ext == 'k' || ext == 'm')) {
 			char efile[USTR_SIZE];
-
 			init(call);
 			append(call, DECODE);
 			concat(call, &DECODE_FLAGS);
@@ -365,7 +375,6 @@ main(argc, argv)
 			cleanup(kfile);
 			continue;
 		}
-		
 		/* .k to .m */
 		if (ext == 'k') {
 			init(call);
@@ -378,10 +387,8 @@ main(argc, argv)
 			ext = 'm';
 			cleanup(kfile);
 		}
-
-		if (m_flag)
+		if (FLAG(m))
 			continue;
-		
 		/* .m to .s */
 		if (ext == 'm') {
 			init(call);
@@ -392,29 +399,32 @@ main(argc, argv)
 			if (runvec(call, (char *)0) == 0)
 				continue;
 			if (Nfile[0] != '\0') {
+#ifndef MANTRA
 				init(call);
 				append(call, AS_FIX);
 				append(call, Nfile);
 				append(call, sfile);
 				runvec(call, (char *)0);
+#endif MANTRA
 				remove(Nfile);
 			}
 			cleanup(mfile);
 			file = sfile;
 			ext = 's';
 		}
-	
-		if (S_flag)
+		if (FLAG(S))
 			continue;
-		
 		/* .s to .o */
 		if (ext == 's') {
-			ldfile = c_flag ?
+			ldfile = FLAG(c) ?
 				ofile :
 				alloc((unsigned)strlen(BASE) + 3);
 			init(call);
 			append(call, AS);
 			concat(call, &AS_FLAGS);
+#ifdef MANTRA
+			append(call, "-");
+#endif MANTRA
 			append(call, "-o");
 			append(call, mkname(ldfile, BASE, ".o"));
 			append(call, file);
@@ -424,24 +434,25 @@ main(argc, argv)
 			ext = 'o';
 			cleanup(sfile);
 		}
-
-		if (c_flag)
+		if (FLAG(c))
 			continue;
-		
 		append(&LDFILES, file);
 		if (ldfile) {
 			append(&GEN_LDFILES, ldfile);
 			ldfile = 0;
 		}
 	}
-
 	/* *.o to a.out */
 	if (RET_CODE == 0 && LDFILES.al_argc > 0) {
 		init(call);
 		append(call, LD);
 		concat(call, &LD_FLAGS);
 		append(call, "-o");
+#ifndef MANTRA
 		append(call, o_FILE);
+#else MANTRA
+		append(call, Nc_flag ? o_FILE : cv_FILE);
+#endif MANTRA
 		concat(call, &LD_HEAD);
 		concat(call, &LDFILES);
 		concat(call, &LD_TAIL);
@@ -450,29 +461,40 @@ main(argc, argv)
 
 			while (i-- > 0)
 				remove(GEN_LDFILES.al_argv[i]);
+#ifdef MANTRA
+			/* convert to local a.out format */
+			if (Nc_flag == 0) {
+				init(call);
+				append(call, CV);
+				concat(call, &CV_FLAGS);
+				append(call, cv_FILE);
+				append(call, o_FILE);
+				if (runvec(call, (char *)0))
+					remove(cv_FILE);
+			}
+#endif MANTRA
 		}
 	}
-
 	exit(RET_CODE);
 }
 
+#define BUFSIZE  (USTR_SIZE * MAXARGC)
+char alloc_buf[BUFSIZE];
 
 char *
 alloc(u)
 	unsigned u;
 {
-#define BUFSIZE  (USTR_SIZE * MAXARGC)
-	static char buf[BUFSIZE];
-	static char *bufptr = &buf[0];
+	static char *bufptr = &alloc_buf[0];
 	register char *p = bufptr;
 
-	if ((bufptr += u) >= &buf[BUFSIZE])
+	if ((bufptr += u) >= &alloc_buf[BUFSIZE])
 		panic("no space");
 	return p;
 }
 
 append(al, arg)
-	struct arglist *al;
+	register struct arglist *al;
 	char *arg;
 {
 	if (al->al_argc >= MAXARGC)
@@ -483,7 +505,7 @@ append(al, arg)
 concat(al1, al2)
 	struct arglist *al1, *al2;
 {
-	register i = al2->al_argc;
+	register int i = al2->al_argc;
 	register char **p = &(al1->al_argv[al1->al_argc]);
 	register char **q = &(al2->al_argv[0]);
 
@@ -520,9 +542,8 @@ Roption(str)
 	char *prog, *arg;
 	char bc;
 	char *cindex();
-	
-	prog = &str[2];
 
+	prog = &str[2];
 	if (eq = cindex(prog, '='))
 		bc = '=';
 	else
@@ -532,17 +553,14 @@ Roption(str)
 		bad_option(str);
 		return;
 	}
-
 	*eq++ = '\0';
 	if (arg = eq) {
 		char *opt = 0;
 		struct prog *pp = &ProgParts[0];
 
-		if (bc == '-')	{
+		if (bc == '-')
 			opt = mkstr(alloc((unsigned)strlen(arg) + 2),
 								"-", arg, 0);
-		}
-		
 		while (pp->p_name) {
 			if (strcmp(prog, pp->p_name) == 0) {
 				if (opt)
@@ -570,7 +588,7 @@ basename(str, dst)
 	p1--;
 	if (*--p1 == '.')
 		*p1 = '\0';
-	while (*dst++ = *p2++);
+	while (*dst++ = *p2++) {}
 	*p1 = '.';
 }
 
@@ -580,7 +598,7 @@ extension(fn)
 {
 	char c;
 
-	while (*fn++) ;
+	while (*fn++) {}
 	fn--;
 	c = *--fn;
 	return (*--fn == '.') ? c : 0;
@@ -625,30 +643,27 @@ runvec(vec, outp)
 	char *task = vec->al_argv[1];
 
 	vec->al_argv[vec->al_argc] = 0;
-	if (v_flag)
+	if (FLAG(v))
 		print_vec(vec);
 	if (exec == 0)
 		return 1;
 	if (fork() == 0) {	/* start up the process */
 		extern int errno;
-
 		if (outp) {	/* redirect standard output	*/
+			close(1);
 			if ((fd = creat(outp, 0666)) < 0)
 				panic("cannot create %s", outp);
-			if (dup2(fd, 1) == -1)
-				panic("dup failure");
-			close(fd);
+			if (fd != 1)
+				panic("illegal redirection");
 		}
 		if (debug) report("exec %s", task);
 		execv(task, &(vec->al_argv[1]));
-
 		/* not an a.out file, let's try it with the SHELL */
 		if (debug) report("try it with %s", SHELL);
 		if (errno == ENOEXEC) {
 			vec->al_argv[0] = SHELL;
 			execv(SHELL, &(vec->al_argv[0]));
 		}
-
 		/* failed, so ... */
 		panic("cannot execute %s", task);
 		exit(1);
