@@ -11,6 +11,11 @@
 
 #include <m2_traps.h>
 
+#ifndef EM_WSIZE
+#define EM_WSIZE _EM_WSIZE
+#define EM_PSIZE _EM_PSIZE
+#endif
+
 #if EM_WSIZE==EM_PSIZE
 typedef unsigned pcnt;
 #else
