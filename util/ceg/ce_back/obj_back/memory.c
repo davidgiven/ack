@@ -1,6 +1,6 @@
 #include <out.h>
 #include <system.h>
-#include "data.h"
+#include "back.h"
 #include "hash.h"
 #include <alloc.h>
 
@@ -16,7 +16,7 @@ mem_text()
 
 	text_area = Realloc( text_area, sizeof( char) * 2 * size_text);
 	text = text_area + diff;
-	_text_cnt += size_text;
+	text_cnt += size_text;
 	size_text = 2 * size_text;
 }
 
@@ -28,7 +28,7 @@ mem_data()
 
 	data_area = Realloc( data_area, sizeof( char) * 2 * size_data);
 	data = data_area + diff;
-	_data_cnt += size_data;
+	data_cnt += size_data;
 	size_data = 2 * size_data;
 }
 

@@ -1,7 +1,8 @@
 #include <system.h>
-#include <em.h>
 #include "mach.h"
 #include "back.h"
+#undef text2
+#undef con2
 #ifdef BYTES_REVERSED
 #define text2(w)	{ *text++ = ((w) >> 8); *text++ = (w);}
 #define con2(w)		{ *data++ = ((w) >> 8); *data++ = (w);}
@@ -15,7 +16,7 @@ FOUR_BYTES l;
 {
 	switch ( cur_seg) {
 		case SEGTXT :
-			if ((_text_cnt -= 4) < 0) mem_text();
+			if ((text_cnt -= 4) < 0) mem_text();
 #ifdef WORDS_REVERSED
 			text2( (int) (l>>16));
 			text2( (int) l);
@@ -26,7 +27,7 @@ FOUR_BYTES l;
 			return;
 		case SEGCON  :
 		case SEGROM  :
-			if ((_data_cnt -= 4) < 0) mem_data();
+			if ((data_cnt -= 4) < 0) mem_data();
 #ifdef WORDS_REVERSED
 			con2( (int)(l>>16));
 			con2( (int) l);

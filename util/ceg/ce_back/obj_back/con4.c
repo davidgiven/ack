@@ -1,6 +1,8 @@
 #include "mach.h"
 #include "back.h"
 
+#undef con2
+
 #ifdef BYTES_REVERSED
 #define con2(w)		{ *data++ = ((w) >> 8); *data++ = (w);}
 #else

@@ -1,5 +1,4 @@
 #include <system.h>
-#include <em.h>
 #include "mach.h"
 #include "back.h"
  
@@ -8,7 +7,7 @@ TWO_BYTES w;
 {
 	switch ( cur_seg) {
 		case SEGTXT :
-				if ((_text_cnt -= 2) < 0) mem_text();
+				if ((text_cnt -= 2) < 0) mem_text();
 #ifdef BYTES_REVERSED
 				*text++ = w>>8;
 				*text++ = w;
@@ -19,7 +18,7 @@ TWO_BYTES w;
 			        return;
 		case SEGCON  :
 		case SEGROM  :
-				if ((_data_cnt -= 2) < 0) mem_data();
+				if ((data_cnt -= 2) < 0) mem_data();
 #ifdef BYTES_REVERSED
 				*data++ = w>>8;
 				*data++ = w;

@@ -24,9 +24,9 @@ init_back()
         relo = reloc_info;
 
 	size_text = MAXTEXT;
-	_text_cnt = MAXTEXT;
+	text_cnt = MAXTEXT;
 	size_data = MAXDATA;
-	_data_cnt = MAXDATA;
+	data_cnt = MAXDATA;
 	size_reloc = MAXRELO;
 	size_symbol = MAXNAME;
 	size_string = MAXSTRING;

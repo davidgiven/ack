@@ -1,6 +1,8 @@
 #include "mach.h"
 #include "back.h"
 
+#undef text2
+
 #ifdef BYTES_REVERSED
 #define text2(w)	{ *text++ = ((w) >> 8); *text++ = (w);}
 #else
@@ -10,7 +12,7 @@
 text4( l)
 FOUR_BYTES l;
 {
-	if ((_text_cnt -= 4) < 0) mem_text();
+	if ((text_cnt -= 4) < 0) mem_text();
 #ifdef WORDS_REVERSED
 	text2( (int) (l>>16));
 	text2( (int) l);

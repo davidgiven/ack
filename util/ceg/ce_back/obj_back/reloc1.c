@@ -1,5 +1,4 @@
 #include <out.h>
-#include <em.h>
 #include "mach.h"
 #include "back.h"
 #include "header.h"

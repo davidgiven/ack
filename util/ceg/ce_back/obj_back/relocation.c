@@ -1,7 +1,6 @@
 #include <system.h>
 #include <out.h>
 #include "back.h"
-#include "data.h"
 
 /* Solve the local references.
  */

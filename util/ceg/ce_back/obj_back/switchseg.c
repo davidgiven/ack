@@ -1,6 +1,6 @@
-#include "data.h"
+#include "back.h"
 
-_swtchsg( seg)
+B_swtchsg( seg)
 int seg;
 
  /* The EM definition demands that pseudo instructions are aligned

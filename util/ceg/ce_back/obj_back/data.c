@@ -1,6 +1,6 @@
 #include <system.h>
 #include <out.h>
-#include "data.h"
+#include "back.h"
 #include "mach.h"
 
 /* Global datastructures : 
@@ -34,7 +34,7 @@ struct outname 	*symbol_table;
 
 int 		cur_seg = -1 , nname = 0;
 long 		nbss = 0, size_text, size_data, size_reloc, size_symbol,
-		size_string, _text_cnt, _data_cnt;
+		size_string, text_cnt, data_cnt;
 
 
 put2(sect,addr,w)
