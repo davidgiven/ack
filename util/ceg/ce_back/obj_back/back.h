@@ -22,7 +22,7 @@ extern holno, procno;
 #define 	SEGCON		2
 #define 	SEGBSS		3
 
-#define swtxt()		sitchseg( SEGTXT)
+#define swtxt()		switchseg( SEGTXT)
 
 #define 	PC_REL  	1
 #define 	ABSOLUTE 	!PC_REL
