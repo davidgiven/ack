@@ -63,19 +63,40 @@ IDF_new(tg, size, cpy)
 hash_stat()
 {
 	register int i;
+	int total_count = 0;
 
 	print("Hash table tally:\n");
 	for (i = 0; i < IDF_HASHSIZE; i++)	{
 		register struct idf *notch = IDF_hashtable[i];
 		register int cnt = 0;
 
+		print ("%d ", i);
 		while (notch)	{
 			cnt++;
+			print("'%s' ", notch->id_text);
 			notch = notch->id_next;
 		}
-		print("%d %d\n", i, cnt);
+		print("%d\n", cnt);
+		total_count += cnt;
 	}
+	print("total = %d\n", total_count);
 	print("End hash table tally\n");
+}
+
+idfappfun(fun, opt)
+	int	(*fun)();
+	int	opt;
+{
+	register int	i;
+
+	for (i = 0; i < IDF_HASHSIZE; i++) {
+		register struct idf *notch = IDF_hashtable[i];
+
+		while (notch) {
+			(*fun)(notch, opt);
+			notch = notch->id_next;
+		}
+	}
 }
 #endif	IDF_DEBUG
 
