@@ -260,6 +260,7 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	}
 	func_notypegiven = ds->ds_notypegiven;
 	func_size = ATW(func_type->tp_size);
+	sp_occurred[SP_SETJMP] = 0;
 
 #ifndef USE_TMP
 	C_pro_narg(name);
