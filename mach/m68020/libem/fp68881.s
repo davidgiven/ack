@@ -128,8 +128,13 @@
 	fmove.l	fp1,d0
 	add.l	#1,d0
 	fgetman	fp0
+	fbne	1f
+	clr.l	d0
+	bra	2f
+1:
 	fmove.l	#2,fp1
 	fdiv	fp1,fp0
+2:
 	fmove.s	fp0,(4,a1)
 	move.l	d0,(a1)
 	jmp	(a0)
@@ -156,8 +161,13 @@
 	fmove.l	fp1,d0
 	add.l	#1,d0
 	fgetman	fp0
+	fbne	1f
+	clr.l	d0
+	bra	2f
+1:
 	fmove.l	#2,fp1
 	fdiv	fp1,fp0
+2:
 	fmove.d	fp0,(4,a1)
 	move.l	d0,(a1)
 	jmp	(a0)
