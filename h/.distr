@@ -24,3 +24,4 @@ ocm_chan.h
 ocm_parco.h
 ocm_proc.h
 m2_traps.h
+ip_spec.h
