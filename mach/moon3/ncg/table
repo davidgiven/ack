@@ -3156,28 +3156,6 @@ pat fif $1==8
 	fsub %1,%2
 	fmove_d %2,{pre_dec4,sp}
 	fmove_d %1,{pre_dec4,sp}
-pat fef $1==4
-    with FS_REG STACK
-    uses D_REG, FS_REG
-    gen	fgetexp %1,%b
-	fmove_l %b,%a
-	add_l {const,1},%a
-	fgetman %1
-	fmove_l {const,2},%b
-	fdiv %b,%1
-	fmove_s %1,{pre_dec4,sp}
-				yields %a
-pat fef $1==8
-    with FD_REG STACK
-    uses D_REG, FD_REG
-    gen	fgetexp %1,%b
-	fmove_l %b,%a
-	add_l {const,1},%a
-	fgetman %1
-	fmove_l {const,2},%b
-	fdiv %b,%1
-	fmove_d %1,{pre_dec4,sp}
-				yields %a
 #else
 pat adf $1==4	leaving  cal ".adf4" asp 4
 pat adf $1==8	leaving  cal ".adf8" asp 8
@@ -3191,9 +3169,9 @@ pat ngf $1==4	leaving  cal ".ngf4"
 pat ngf $1==8	leaving  cal ".ngf8"
 pat fif $1==4	leaving  lor 1 cal ".fif4" asp 4
 pat fif $1==8	leaving  lor 1 cal ".fif8" asp 4
+#endif
 pat fef $1==4	leaving  lor 1 adp 0-4 cal ".fef4"
 pat fef $1==8	leaving	 lor 1 adp 0-4 cal ".fef8"
-#endif
 
 /************************************************
  * Group 6: pointer arithmetic			*
