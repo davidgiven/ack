@@ -55,6 +55,8 @@
 
 STATIC int Scj;  /* number of optimizations found */
 
+STATIC showinstr();
+
 
 
 #define DLINK(l1,l2)	l1->l_next=l2; l2->l_prev=l1
@@ -200,9 +202,12 @@ STATIC jump_cross(l1,l2,b1,b2)
 		DLINK(l,l1);
 	}
 	b->b_start = l;
-	for (l = l2; INSTR(l) != op_bra; l = l->l_next) {
+	for (l = l2; INSTR(l) != op_bra;) {
+		line_p next = l->l_next;
+
 		assert (l != (line_p) 0);
 		rm_line(l,b2);
+		l = next;
 	}
 	INSTRLAB(l) = INSTRLAB(b->b_start);
 }
@@ -355,16 +360,3 @@ STATIC showinstr(lnp) line_p lnp; {
     }
     printf("\n");
 } /* showinstr */
-
-
-STATIC print_list(list,b1,b2,p)
-	line_p list;
-	bblock_p b1,b2;
-	proc_p p;
-{
-	line_p l;
-	printf("block %d and %d of proc %d:\n",b1->b_id,b2->b_id,p->p_id);
-	for (l = list; l != 0; l = l->l_next) {
-		showinstr(l);
-	}
-}
