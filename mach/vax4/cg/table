@@ -77,6 +77,7 @@ CONST1 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST2 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST4 =	{INT num;}		4 cost=(4,3)  "$%[num]"
 CONST8 =	{STRING ind;}		8 cost=(8,6)  "$%[ind]"
+FCONST4 =	{INT num;}		4 cost=(4,3)  "$0f%[num].0"
 FCONST8 =	{INT num;}		8 cost=(8,6)  "$0f%[num].0"
 LOCAL1 =	{REGISTER reg; INT num,size;}	4 cost=(2,6)  "%[num](%[reg])"
 LOCAL2 =	{REGISTER reg; INT num,size;}	4 cost=(2,6)  "%[num](%[reg])"
@@ -182,7 +183,7 @@ source2 =	regdef2 + displ2 + displdef2 +
 		+ reginc2 + regdec2
 #endif REGVARS
 source4 =	REG + regdef4 + displ4 + displdef4 + LocaLBase +
-		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4
+		EXTERNAL4 + reldef4 + CONST + DOUBLE + LOCAL4 + FCONST4
 		+ extind4 + displind4 + extdefind4 + displdefind4
 #ifdef REGVARS
 		+ RREG + reginc4 + regdec4
@@ -191,7 +192,7 @@ dups4 =		CONST + regdef1 + displ1 + LOCAL1 +
 		REG +	regdef2 + displ2 + LOCAL2 +
 		RREG +	regdef4 + displ4 + LOCAL4 + DOUBLE
 source8 =	QREG + regdef8 + displ8 + displdef8 +
-		EXTERNAL8 + reldef8 + CONST8 + LOCAL8
+		EXTERNAL8 + reldef8 + CONST8 + LOCAL8 + FCONST8
 		+ extind8 + displind8 + extdefind8 + displdefind8
 #ifdef REGVARS
 		+ reginc8 + regdec8
@@ -244,7 +245,7 @@ reg8 =		QREG
 sreg4 = 	REG * SCRATCH
 sreg8 = 	QREG * SCRATCH
 bigsource4 =	source1or2or4 + nonexist
-bigsource8 =	source8 + FCONST8
+bigsource8 =	source8
 all =		bigsource4 + bigsource8
 scr =		ALL - (EXTERNALS + LOCALS + ADDR_LOCAL + ADDR_EXTERNAL + CONST
 			+ DOUBLE)
@@ -264,7 +265,6 @@ CODE:
 loc $1>=0 && $1<256	| |	| {CONST1,$1}				| |
 loc $1>=256 && $1<65536	| |	| {CONST2,$1}				| |
 loc		| |		| {CONST4,$1}				| |
-loc loc $1==0 && $2==0	| |	| {FCONST8,0}				| |
 ldc		| |		| {CONST8,$1}				| |
 #ifdef REGVARS
 lol inreg($1)==2 | |		| regvar($1)				| |
@@ -1986,9 +1986,14 @@ zrl zrl $1==$2-4 | |				|	| zrl $2 zrl $1 |
 zre		| |	remove(externals)
 			"clrl\t$1"
 			setcc({EXTERNAL4,$1})	|	| |
-zrf $1==4	| |		| {CONST4,0}		| |
-zrf $1==8	| |		| {FCONST8,0}		| |
-zer $1==4	| |		| {CONST4,0}				| |
+/* Avoid a bug in the VAX assembler, that handles $0f0.0 wrong.
+   So, do NOT create {FCONST[4|8], 0}!
+*/
+zrf $1==4	| |	allocate(REG)
+			"clrl\t%[a]"		| %[a]	| |
+zrf $1==8	| |	allocate(QREG)
+			"clrq\t%[a]"		| %[a]	| |
+zer $1==4	| |		| {CONST4,0}		| |
 zer $1==8	| |	allocate(QREG)
 			"clrq\t%[a]"		| %[a]	| |
 zer $1<=32	| STACK |
@@ -2183,6 +2188,8 @@ loc loc cif stl $1==4 && $2==4 && $4>=0
 loc loc cif ste $1==4 && $2==4	| source4 |
 			remove(externals)
 			"cvtlf\t%[1],$4"	|	| |
+loc loc loc cif $1!=0 && $2==4 && $3==4	| |	| {FCONST4, $1} | |
+/* $1 != 0: kludge to avoid bug in VAX assembler */
 #endif FLOAT4
 loc loc cif $1==4 && $2==4	| source4 |
 			allocate(%[1],REG)
@@ -4520,6 +4527,10 @@ MOVES:
 				setcc(%[2]),		(2,4)+%[2])
 (CONST8 %[ind]=="0",source8,	"clrq\t%[2]"
 				setcc(%[2]),		(2,4)+%[2])
+(FCONST4 %[num]==0,source4,	"clrl\t%[2]"
+				setcc(%[2]),		(2,4)+%[2])
+(FCONST4,source4,		"movl\t%[1],%[2]"
+				setcc(%[2]),		(3,4)+%[1]+%[2])
 (FCONST8 %[num]==0,source8,	"clrq\t%[2]"
 				setcc(%[2]),		(2,4)+%[2])
 (FCONST8,source8,		"movd\t%[1],%[2]"
@@ -4592,6 +4603,7 @@ STACKS:
 (source8,,	"movq\t%[1],-(sp)"
 		setcc(%[1]),		(3,10)+ %[1])
 (nonexist1,,	"pushal\t%[1]",		(2,7) + %[1])
+(FCONST4,,	"pushl\t%[1]",		(2,7) + %[1])
 (FCONST8 %[num]==0,,
 		"clrq\t-(sp)",		(2,10))
 (FCONST8,,	"movd\t%[1],-(sp)",	(3,10) + %[1])
