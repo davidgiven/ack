@@ -202,8 +202,7 @@ ch3bin(expp, oper, expr)
 			else {
 				ex->ex_flags |= expr->ex_flags;
 				free_expression(expr);
-				*expp = intexpr((arith)((oper == AND) ? 0 : 1),
-						INT);
+				*expp = intexpr((arith)(oper != AND), INT);
 			}
 			(*expp)->ex_flags |= ex->ex_flags | EX_ILVALUE;
 			free_expression(ex);
