@@ -72,8 +72,8 @@ EOF
 	fi
 	cat $FDIR/util_comp >> make_macros
 else
-	case $knowtarget in
-	1)	sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "/cc-and-mkdep.ack/s/^..//" -e "s/^CC=cc/CC=acc -m$ACM" -e "s/^# AR=aal/AR=aal/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
+	case $know_target in
+	1)	sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" -e "/cc-and-mkdep.ack/s/^..//" -e "s/^CC=cc/CC=acc -m$ACM/" -e "s/^# AR=aal/AR=aal/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
 		;;
 	*)	sed "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS/" < $FDIR/target_comp >> make_macros
 		;;
@@ -86,7 +86,7 @@ cat $FDIR/lint_params >> make_macros
 echo "A file called 'make_macros' has been created. This file defines some
 'make' variables that parameterize all Makefiles in ACK. You may want
 to check it before attempting to actually install ACK."
-case $knowtarget in
+case $know_target in
 0)	echo "In fact, this installation script does not know much about
 your target machine, so expect some things to be wrong"
 	;;

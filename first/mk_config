@@ -17,7 +17,7 @@ cd $CONFIG
 for i in mach/*/libsys
 do
 	rm -rf $i
-fi
+done
 
 for i in `cat dir_list`
 do

@@ -144,7 +144,7 @@ q
 EOF
 fi
 
-if [ DO_MACHINE_INDEP = n ]
+if [ $DO_MACHINE_INDEP = n ]
 then
 	for i in $CONFIG/mach/*/Action
 	do
