@@ -39,12 +39,13 @@ void meswp()
 
 void maxdes()
 {
+	long max = (1L << (8*wz-1)) - 1;
 	C_df_dnam("maxcdes");
-	rom(wz, 0L); rom(wz, -1L); rom(wz, (long) (wz+vz));
+	rom(wz, 0L); rom(wz, max); rom(wz, (long) (wz+vz));
 	C_df_dnam("maxwdes");
-	rom(wz, 0L); rom(wz, -1L); rom(wz, (long) vz);
+	rom(wz, 0L); rom(wz, max); rom(wz, (long) vz);
 	C_df_dnam("maxbdes");
-	rom(wz, 0L); rom(wz, -1L); rom(wz, 1L);
+	rom(wz, 0L); rom(wz, max); rom(wz, 1L);
 }
 
 int new_label(L) register *L;
