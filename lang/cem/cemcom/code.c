@@ -32,7 +32,9 @@
 static struct stmt_block *stmt_stack;
 
 char *symbol2str();
+#ifndef NOFLOAT
 int fp_used;
+#endif NOFLOAT
 label lab_count = 1;
 label datlab_count = 1;
 
@@ -254,11 +256,13 @@ end_proc(fbytes, nbytes)
 		else
 			C_ret(ATW(func_tp->tp_size));
 	}
+#ifndef NOFLOAT
 	if (fp_used && mes_flt_given == 0)	{
 		/* floating point used	*/
 		C_ms_flt();
 		mes_flt_given++;
 	}
+#endif NOFLOAT
 	C_ms_par(fbytes);		/* # bytes for formals		*/
 	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
 		C_ms_gto();

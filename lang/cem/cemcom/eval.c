@@ -91,6 +91,7 @@ EVAL(expr, val, code, true_label, false_label)
 			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
+#ifndef NOFLOAT
 	case Float:	/* a floating constant	*/
 		if (gencode) {
 			label datlab = data_label();
@@ -101,6 +102,7 @@ EVAL(expr, val, code, true_label, false_label)
 			C_loi(expr->ex_type->tp_size);
 		}
 		break;
+#endif NOFLOAT
 	case Oper:	/* compound expression	*/
 	{
 		register int oper = expr->OP_OPER;
@@ -131,9 +133,11 @@ EVAL(expr, val, code, true_label, false_label)
 				case POINTER:
 					C_ads(rightop->ex_type->tp_size);
 					break;
+#ifndef NOFLOAT
 				case DOUBLE:
 					C_adf(tp->tp_size);
 					break;
+#endif NOFLOAT
 				default:
 					crash("bad type +");
 				}
@@ -144,14 +148,16 @@ EVAL(expr, val, code, true_label, false_label)
 				EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
 				if (gencode) {
 					switch (tp->tp_fund)	{
-					case DOUBLE:
-						C_ngf(tp->tp_size);
-						break;
 					case INT:
 					case LONG:
 					case POINTER:
 						C_ngi(tp->tp_size);
 						break;
+#ifndef NOFLOAT
+					case DOUBLE:
+						C_ngf(tp->tp_size);
+						break;
+#endif NOFLOAT
 					default:
 						CRASH();
 					}
@@ -183,9 +189,11 @@ EVAL(expr, val, code, true_label, false_label)
 					C_ads(rightop->ex_type->tp_size);
 				}
 				break;
+#ifndef NOFLOAT
 			case DOUBLE:
 				C_sbf(tp->tp_size);
 				break;
+#endif NOFLOAT
 			default:
 				crash("bad type -");
 			}
@@ -206,9 +214,11 @@ EVAL(expr, val, code, true_label, false_label)
 						else
 							C_mli(tp->tp_size);
 						break;
+#ifndef NOFLOAT
 					case DOUBLE:
 						C_mlf(double_size);
 						break;
+#endif NOFLOAT
 					default:
 						crash("bad type *");
 					}
@@ -227,9 +237,11 @@ EVAL(expr, val, code, true_label, false_label)
 					else
 						C_dvi(tp->tp_size);
 					break;
+#ifndef NOFLOAT
 				case DOUBLE:
 					C_dvf(double_size);
 					break;
+#endif NOFLOAT
 				default:
 					crash("bad type /");
 				}
@@ -237,17 +249,13 @@ EVAL(expr, val, code, true_label, false_label)
 		case '%':
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
 			EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
-			if (gencode)
-				if (	tp->tp_fund == INT
-				||	tp->tp_fund == LONG
-				)	{
-					if (tp->tp_unsigned)
-						C_rmu(tp->tp_size);
-					else
-						C_rmi(tp->tp_size);
-				}
+			ASSERT(tp->tp_fund==INT || tp->tp_fund==LONG);
+			if (gencode) {
+				if (tp->tp_unsigned)
+					C_rmu(tp->tp_size);
 				else
-					crash("bad type %%");
+					C_rmi(tp->tp_size);
+			}
 			break;
 		case LEFT:
 			EVAL(leftop, RVAL, code, NO_LABEL, NO_LABEL);
@@ -287,10 +295,12 @@ EVAL(expr, val, code, true_label, false_label)
 					else
 						C_cmi(size);
 					break;
-				case FLOAT:
+#ifndef NOFLOAT
+				case FLOAT: /* thought they were converted??? */
 				case DOUBLE:
 					C_cmf(size);
 					break;
+#endif NOFLOAT
 				case POINTER:
 					C_cmp();
 					break;
@@ -553,12 +563,10 @@ EVAL(expr, val, code, true_label, false_label)
 
 			EVAL(leftop, RVAL, TRUE, l_true, l_false);
 			C_df_ilb(l_true);
-			EVAL(rightop->OP_LEFT, RVAL, code,
-						NO_LABEL, NO_LABEL);
+			EVAL(rightop->OP_LEFT, RVAL, code, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
 			C_df_ilb(l_false);
-			EVAL(rightop->OP_RIGHT, RVAL, code,
-						NO_LABEL, NO_LABEL);
+			EVAL(rightop->OP_RIGHT, RVAL, code, NO_LABEL, NO_LABEL);
 			C_df_ilb(l_end);
 			break;
 		}
@@ -655,9 +663,11 @@ EVAL(expr, val, code, true_label, false_label)
 								true_label);
 			break;
 		case INT2INT:
+#ifndef NOFLOAT
 		case INT2FLOAT:
 		case FLOAT2INT:
 		case FLOAT2FLOAT:
+#endif NOFLOAT
 			EVAL(rightop, RVAL, code, NO_LABEL, NO_LABEL);
 			if (gencode)
 				conversion(rightop->ex_type, leftop->ex_type);
@@ -784,6 +794,7 @@ assop(type, oper)
 			break;
 		}
 		break;
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		switch (oper)	{
@@ -805,6 +816,7 @@ assop(type, oper)
 			break;
 		}
 		break;
+#endif NOFLOAT
 	case POINTER:
 		if (oper == MINAB || oper == MINMIN || oper == POSTDECR)
 			C_ngi(size);

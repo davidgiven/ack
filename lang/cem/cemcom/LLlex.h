@@ -21,7 +21,9 @@ struct token	{
 			int tok_fund;	/* INT or LONG */
 			arith tok_ival;
 		} tok_integer;
+#ifndef NOFLOAT
 		char *tok_fval;
+#endif NOFLOAT
 	} tok_data;
 };
 
@@ -33,7 +35,9 @@ struct token	{
 #define tk_len	tok_data.tok_string.tok_len
 #define tk_fund	tok_data.tok_integer.tok_fund
 #define tk_ival	tok_data.tok_integer.tok_ival
+#ifndef NOFLOAT
 #define tk_fval	tok_data.tok_fval
+#endif NOFLOAT
 
 extern struct token dot, ahead, aside;
 extern unsigned int LineNumber;	/* "LLlex.c"	*/

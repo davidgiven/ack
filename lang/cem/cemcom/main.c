@@ -48,8 +48,10 @@ arith
 	dword_size = (2 * SZ_WORD),
 	int_size = SZ_INT,
 	long_size = SZ_LONG,
+#ifndef NOFLOAT
 	float_size = SZ_FLOAT,
 	double_size = SZ_DOUBLE,
+#endif NOFLOAT
 	pointer_size = SZ_POINTER;
 
 int
@@ -57,8 +59,10 @@ int
 	word_align = AL_WORD,
 	int_align = AL_INT,
 	long_align = AL_LONG,
+#ifndef NOFLOAT
 	float_align = AL_FLOAT,
 	double_align = AL_DOUBLE,
+#endif NOFLOAT
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT,
 	union_align = AL_UNION;
@@ -237,8 +241,10 @@ init()
 	long_type = standard_type(LONG, 0, long_align, long_size);
 	ulong_type = standard_type(LONG, UNSIGNED, long_align, long_size);
 
+#ifndef NOFLOAT
 	float_type = standard_type(FLOAT, 0, float_align, float_size);
 	double_type = standard_type(DOUBLE, 0, double_align, double_size);
+#endif NOFLOAT
 	void_type = standard_type(VOID, 0, 0, (arith)0);
 	label_type = standard_type(LABEL, 0, 0, (arith)0);
 	error_type = standard_type(ERRONEOUS, 0, 1, (arith)1);
@@ -274,8 +280,10 @@ init()
 	/* Define the standard type identifiers. */
 	add_def(str2idf("char"), TYPEDEF, char_type, L_UNIVERSAL);
 	add_def(str2idf("int"), TYPEDEF, int_type, L_UNIVERSAL);
+#ifndef NOFLOAT
 	add_def(str2idf("float"), TYPEDEF, float_type, L_UNIVERSAL);
 	add_def(str2idf("double"), TYPEDEF, double_type, L_UNIVERSAL);
+#endif NOFLOAT
 	add_def(str2idf("void"), TYPEDEF, void_type, L_UNIVERSAL);
 	stack_level();
 }
@@ -350,9 +358,11 @@ preprocess()
 		case INTEGER:
 			print("%ld ", dot.tk_ival);
 			break;
+#ifndef NOFLOAT
 		case FLOATING:
 			print("%s ", dot.tk_fval);
 			break;
+#endif NOFLOAT
 		case EOI:
 		case EOF:
 			return;

@@ -128,10 +128,12 @@ unstack_level()
 					case POINTER:
 						reg = reg_pointer;
 						break;
+#ifndef NOFLOAT
 					case FLOAT:
 					case DOUBLE:
 						reg = reg_float;
 						break;
+#endif NOFLOAT
 					default:
 						reg = reg_any;
 						break;

@@ -383,10 +383,12 @@ pad(tp)
 	case POINTER:
 		C_con_ucon("0",  tp->tp_size);
 		break;
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		C_con_fcon("0", tp->tp_size);
 		break;
+#endif NOFLOAT
 	case UNION:
 		error("initialisation of unions not allowed");
 		break;
@@ -448,6 +450,7 @@ check_ival(ex, tp)
 			C_con_dlb(ex->VL_LBL, ex->VL_VALUE);
 		}
 		break;
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		ch7cast(&ex, '=', tp);
@@ -471,6 +474,7 @@ check_ival(ex, tp)
 		else
 			illegal_init_cst(ex);
 		break;
+#endif NOFLOAT
 
 #ifndef NOBITFIELD
 	case FIELD:

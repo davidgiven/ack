@@ -25,10 +25,12 @@ struct string	{
 	label sg_datlab;	/* global data-label			*/
 };
 
+#ifndef NOFLOAT
 struct floating	{
 	char *fl_value;		/* pointer to string repr. the fp const. */
 	label fl_datlab;	/* global data_label	*/
 };
+#endif NOFLOAT
 
 struct oper	{
 	struct type *op_type;	/* resulting type of the operation	*/
@@ -40,7 +42,9 @@ struct oper	{
 /* The following constants indicate the class of the expression: */
 #define	Value	0		/* it is a value known at load time */
 #define	String	1		/* it is a string constant  */
+#ifndef NOFLOAT
 #define	Float	2		/* it is a floating point constant	*/
+#endif NOFLOAT
 #define	Oper	3		/* it is a run-time expression */
 #define	Type	4		/* only its type is relevant */
 
@@ -56,7 +60,9 @@ struct expr	{
 	union	{
 		struct value ex_value;
 		struct string ex_string;
+#ifndef NOFLOAT
 		struct floating ex_float;
+#endif NOFLOAT
 		struct oper ex_oper;
 	} ex_object;
 };
@@ -69,8 +75,10 @@ struct expr	{
 #define	SG_VALUE	ex_object.ex_string.sg_value
 #define SG_LEN		ex_object.ex_string.sg_len
 #define	SG_DATLAB	ex_object.ex_string.sg_datlab
+#ifndef NOFLOAT
 #define	FL_VALUE	ex_object.ex_float.fl_value
 #define	FL_DATLAB	ex_object.ex_float.fl_datlab
+#endif NOFLOAT
 #define	OP_TYPE		ex_object.ex_oper.op_type
 #define	OP_LEFT		ex_object.ex_oper.op_left
 #define	OP_OPER		ex_object.ex_oper.op_oper

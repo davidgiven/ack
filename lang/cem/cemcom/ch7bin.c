@@ -314,11 +314,13 @@ pointer_arithmetic(expp1, oper, expp2)
 	/*	prepares the integral expression expp2 in order to
 		apply it to the pointer expression expp1
 	*/
+#ifndef NOFLOAT
 	if (any2arith(expp2, oper) == DOUBLE)	{
 		expr_error(*expp2,
 			"illegal combination of float and pointer");
 		erroneous2int(expp2);
 	}
+#endif NOFLOAT
 	ch7bin( expp2, '*',
 		intexpr(size_of_type((*expp1)->ex_type->tp_up, "object"),
 			pa_type->tp_fund)

@@ -49,10 +49,12 @@ code_startswitch(expp)
 			warning("long in switch (cast to int)");
 		int2int(expp, int_type);
 		break;
+#ifndef NOFLOAT
 	case DOUBLE:
 		error("float/double in switch");
 		erroneous2int(expp);
 		break;
+#endif NOFLOAT
 	}
 	
 	stack_stmt(l_break, NO_LABEL);

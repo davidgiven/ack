@@ -200,16 +200,20 @@ do_option(text)
 					long_align = align;
 				break;
 			case 'f':	/* float	*/
+#ifndef NOFLOAT
 				if (size != (arith)0)
 					float_size = size;
 				if (align != 0)
 					float_align = align;
+#endif NOFLOAT
 				break;
 			case 'd':	/* double	*/
+#ifndef NOFLOAT
 				if (size != (arith)0)
 					double_size = size;
 				if (align != 0)
 					double_align = align;
+#endif NOFLOAT
 				break;
 			case 'p':	/* pointer	*/
 				if (size != (arith)0)

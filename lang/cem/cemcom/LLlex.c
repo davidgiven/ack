@@ -337,6 +337,7 @@ go_on:	/* rescan, the following character has been read	*/
 		register arith val = 0;
 
 		if (ch == '.') {	/* an embarrassing ambiguity */
+#ifndef NOFLOAT
 			LoadChar(vch);
 			PushBack();
 			if (!is_dig(vch))	/* just a `.'	*/
@@ -345,6 +346,9 @@ go_on:	/* rescan, the following character has been read	*/
 			/*	in the rest of the compiler, all floats
 				have to start with a digit.
 			*/
+#else NOFLOAT
+			return ptok->tk_symb = ch;
+#endif NOFLOAT
 		}
 		if (ch == '0') {
 			*np++ = ch;
@@ -367,7 +371,10 @@ go_on:	/* rescan, the following character has been read	*/
 			ptok->tk_fund = LONG;
 			return ptok->tk_symb = INTEGER;
 		}
-		if (base == 16 || !(ch == '.' || ch == 'e' || ch == 'E')) {
+#ifndef NOFLOAT
+		if (base == 16 || !(ch == '.' || ch == 'e' || ch == 'E'))
+#endif NOFLOAT
+		{
 			PushBack();
 			ptok->tk_ival = val;
 			/*	The semantic analyser must know if the
@@ -383,6 +390,7 @@ go_on:	/* rescan, the following character has been read	*/
 			return ptok->tk_symb = INTEGER;
 		}
 		/* where's the test for the length of the integral ???	*/
+#ifndef NOFLOAT
 		if (ch == '.'){
 			if (np < &buf[NUMSIZE])
 				*np++ = ch;
@@ -423,6 +431,7 @@ go_on:	/* rescan, the following character has been read	*/
 		else
 			ptok->tk_fval = Salloc(buf, np - buf) + 1;
 		return ptok->tk_symb = FLOATING;
+#endif NOFLOAT
 	}
 	case STEOI:			/* end of text on source file	*/
 		return ptok->tk_symb = EOI;

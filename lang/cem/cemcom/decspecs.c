@@ -52,15 +52,19 @@ do_decspecs(ds)
 	case SHORT:
 		if (tp == int_type)
 			tp = short_type;
-		else	error("short with illegal type");
+		else
+			error("short with illegal type");
 		break;
 	case LONG:
 		if (tp == int_type)
 			tp = long_type;
 		else
+#ifndef NOFLOAT
 		if (tp == float_type)
 			tp = double_type;
-		else	error("long with illegal type");
+		else
+#endif NOFLOAT
+			error("long with illegal type");
 		break;
 	}
 	if (ds->ds_unsigned)	{

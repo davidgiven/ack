@@ -210,9 +210,11 @@ declare_idf(ds, dc, lvl)
 			type = construct_type(POINTER, type->tp_up, (arith)0);
 			formal_array = 1;
 			break;
+#ifndef NOFLOAT
 		case FLOAT:	/* RM 10.1	*/
 			type = double_type;
 			break;
+#endif NOFLOAT
 		case CHAR:
 		case SHORT:
 			/*	The RM is not clear about this: we must

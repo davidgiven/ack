@@ -88,6 +88,7 @@ ch7mon(oper, expp)
 		}
 		break;
 	case '~':
+#ifndef NOFLOAT
 	{
 		int fund = (*expp)->ex_type->tp_fund;
 
@@ -102,6 +103,7 @@ ch7mon(oper, expp)
 		}
 		/* FALLTHROUGH */
 	}
+#endif NOFLOAT
 	case '-':
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
@@ -114,9 +116,11 @@ ch7mon(oper, expp)
 			  );
 		}
 		else
+#ifndef NOFLOAT
 		if (is_fp_cst(*expp))
 			switch_sign_fp(*expp);
 		else
+#endif NOFLOAT
 			*expp = new_oper((*expp)->ex_type,
 					NILEXPR, oper, *expp);
 		break;

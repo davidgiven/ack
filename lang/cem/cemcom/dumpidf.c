@@ -327,7 +327,9 @@ p1_expr(lvl, expr)
 		expr->ex_depth,
 		expr->ex_class == Value ? "Value" :
 		expr->ex_class == String ? "String" :
+#ifndef NOFLOAT
 		expr->ex_class == Float ? "Float" :
+#endif NOFLOAT
 		expr->ex_class == Oper ? "Oper" :
 		expr->ex_class == Type ? "Type" : "UNKNOWN CLASS"
 	);
@@ -361,9 +363,11 @@ p1_expr(lvl, expr)
 		);
 		break;
 	}
+#ifndef NOFLOAT
 	case Float:
 		print("%s\n", expr->FL_VALUE);
 		break;
+#endif NOFLOAT
 	case Oper:
 		o = &expr->ex_object.ex_oper;
 		print("\n");

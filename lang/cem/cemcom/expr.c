@@ -134,9 +134,11 @@ dot2expr(expp)
 	case INTEGER:
 		int2expr(*expp);
 		break;
+#ifndef NOFLOAT
 	case FLOATING:
 		float2expr(*expp);
 		break;
+#endif NOFLOAT
 	default:
 		crash("bad conversion to expression");
 		break;
@@ -224,6 +226,7 @@ int2expr(expr)
 	fill_int_expr(expr, dot.tk_ival, dot.tk_fund);
 }
 
+#ifndef NOFLOAT
 float2expr(expr)
 	struct expr *expr;
 {
@@ -235,6 +238,7 @@ float2expr(expr)
 	expr->FL_VALUE = dot.tk_fval;
 	expr->FL_DATLAB = 0;
 }
+#endif NOFLOAT
 
 struct expr*
 intexpr(ivalue, fund)
@@ -408,10 +412,8 @@ chk_cst_expr(expp)
 			expr_warning(expr,
 				"expression comma in constant expression");
 	}
-	
-	if (err) {
+	if (err)
 		erroneous2int(expp);
-	}
 }
 
 init_expression(eppp, expr)
@@ -453,6 +455,7 @@ is_cp_cst(expr)
 	return is_ld_cst(expr) && expr->VL_CLASS == Const;
 }
 
+#ifndef NOFLOAT
 int
 is_fp_cst(expr)
 	register struct expr *expr;
@@ -462,6 +465,7 @@ is_fp_cst(expr)
 	*/
 	return expr->ex_class == Float;
 }
+#endif NOFLOAT
 
 free_expression(expr)
 	struct expr *expr;

@@ -9,7 +9,9 @@
 
 #define	T_SIGNED		1
 #define	T_UNSIGNED		2
+#ifndef NOFLOAT
 #define	T_FLOATING		3
+#endif NOFLOAT
 
 /*	conversion() generates the EM code for a conversion between
 	the types char, short, int, long, float, double and pointer.
@@ -51,11 +53,13 @@ conversion(from_type, to_type)
 			C_ciu();
 			break;
 
+#ifndef NOFLOAT
 		case T_FLOATING:
 			C_loc(from_size < word_size ? word_size : from_size);
 			C_loc(to_size < word_size ? word_size : to_size);
 			C_cif();
 			break;
+#endif NOFLOAT
 		}
 		break;
 
@@ -73,12 +77,15 @@ conversion(from_type, to_type)
 			C_cuu();
 			break;
 
+#ifndef NOFLOAT
 		case T_FLOATING:
 			C_cuf();
 			break;
+#endif NOFLOAT
 		}
 		break;
 
+#ifndef NOFLOAT
 	case T_FLOATING:
 		C_loc(from_size < word_size ? word_size : from_size);
 		C_loc(to_size < word_size ? word_size : to_size);
@@ -98,6 +105,7 @@ conversion(from_type, to_type)
 			break;
 		}
 		break;
+#endif NOFLOAT
 	default:
 		crash("(conversion) illegal type conversion");
 	}
@@ -120,9 +128,11 @@ fundamental(tp)
 	case ENUM:
 		return tp->tp_unsigned ? T_UNSIGNED : T_SIGNED;
 
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
 		return T_FLOATING;
+#endif NOFLOAT
 
 	case POINTER:	/* pointer : signed / unsigned	???	*/
 		return T_SIGNED;

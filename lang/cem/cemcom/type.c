@@ -26,7 +26,9 @@ struct type
 	*word_type, *uword_type,
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
+#ifndef NOFLOAT
 	*float_type, *double_type,
+#endif NOFLOAT
 	*void_type, *label_type,
 	*string_type, *funint_type, *error_type;
 

@@ -36,6 +36,7 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	t2 = any2arith(e2p, oper);
 
 	/* Now t1 and t2 are either INT or LONG or DOUBLE */
+#ifndef NOFLOAT
 	if (t1 == DOUBLE && t2 != DOUBLE)
 		t2 = int2float(e2p, double_type);
 	else
@@ -44,6 +45,7 @@ arithbalance(e1p, oper, e2p)	/* RM 6.6 */
 	else
 	if (t1 == DOUBLE)
 		return DOUBLE;
+#endif NOFLOAT
 
 	/* Now they are INT or LONG */
 	u1 = (*e1p)->ex_type->tp_unsigned;
@@ -148,11 +150,13 @@ any2arith(expp, oper)
 			expr_warning(*expp, "%s on enum", symbol2str(oper));
 		int2int(expp, int_type);
 		break;
+#ifndef NOFLOAT
 	case FLOAT:
 		float2float(expp, double_type);
 		break;
 	case DOUBLE:
 		break;
+#endif NOFLOAT
 #ifndef NOBITFIELD
 	case FIELD:
 		field2arith(expp);
@@ -220,6 +224,7 @@ int2int(expp, tp)
 	return (*expp)->ex_type->tp_fund;
 }
 
+#ifndef NOFLOAT
 int
 int2float(expp, tp)
 	struct expr **expp;
@@ -262,6 +267,7 @@ float2float(expp, tp)
 	else
 		*expp = arith2arith(tp, FLOAT2FLOAT, *expp);
 }
+#endif NOFLOAT
 
 array2pointer(expp)
 	struct expr **expp;
@@ -337,8 +343,10 @@ opnd2logical(expp, oper)
 	case LONG:
 	case ENUM:
 	case POINTER:
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
+#endif NOFLOAT
 		break;
 	default:
 		expr_error(*expp, "%s operand to %s",
@@ -429,7 +437,9 @@ any2opnd(expp, oper)
 	case CHAR:
 	case SHORT:
 	case ENUM:
+#ifndef NOFLOAT
 	case FLOAT:
+#endif NOFLOAT
 		any2arith(expp, oper);
 		break;
 	case ARRAY:
@@ -477,6 +487,7 @@ field2arith(expp)
 }
 #endif NOBITFIELD
 
+#ifndef NOFLOAT
 /*	switch_sign_fp() negates the given floating constant expression
 	The lexical analyser has reserved an extra byte of space in front
 	of the string containing the representation of the floating
@@ -491,3 +502,4 @@ switch_sign_fp(expr)
 	else
 		--(expr->FL_VALUE);
 }
+#endif NOFLOAT

@@ -3,7 +3,10 @@
 
 extern int
 	short_align, word_align, int_align, long_align,
-	float_align, double_align, pointer_align,
+#ifndef NOFLOAT
+	float_align, double_align,
+#endif NOFLOAT
+	pointer_align,
 	struct_align, union_align;
 
 extern arith align();

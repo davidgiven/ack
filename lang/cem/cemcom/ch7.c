@@ -222,6 +222,7 @@ ch7cast(expp, oper, tp)
 					symbol2str(oper));
 			int2int(expp, tp);
 		}
+#ifndef NOFLOAT
 		else
 		if (oldi && !i)	{
 			if (oldtp->tp_fund == ENUM && oper != CAST)
@@ -235,6 +236,10 @@ ch7cast(expp, oper, tp)
 			float2int(expp, tp);
 		else		/* !oldi && !i */
 			float2float(expp, tp);
+#else NOFLOAT
+		else
+			crash("(ch7cast) floats not implemented\n");
+#endif NOFLOAT
 	}
 	else
 	if (oldtp->tp_fund == POINTER && tp->tp_fund == POINTER)	{
@@ -404,8 +409,10 @@ is_arith_type(tp)
 	case INT:
 	case LONG:
 	case ENUM:
+#ifndef NOFLOAT
 	case FLOAT:
 	case DOUBLE:
+#endif NOFLOAT
 		return 1;
 #ifndef NOBITFIELD
 	case FIELD:
