@@ -6,3 +6,4 @@
 #define INSTLAB		(-4)
 #define INSSETCC	(-5)
 #define INSERASE	(-6)
+#define INSREMOVE	(-7)
