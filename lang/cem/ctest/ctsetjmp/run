@@ -1,0 +1,1 @@
+make "P=stjmp" -fsk ../makefile ${1-gen}
