@@ -188,12 +188,9 @@ CodeBeginBlock(df)
 					C_mli(word_size);
 					C_loc(word_size - 1);
 					C_adi(word_size);
-					C_loc(word_size);
-					C_dvi(word_size);
-							/* size in words */
-					C_loc(word_size);
-					C_mli(word_size);
-							/* size in bytes */
+					C_loc(word_size - 1);
+					C_com(word_size);
+					C_and(word_size);
 					C_dup(word_size);
 					C_lol(StackAdjustment);
 					C_adi(word_size);
@@ -531,22 +528,15 @@ CodeBoper(expr, true_label)
 			break;
 
 		case DIV:
-			Operands(leftop, rightop);
-			if( tp->tp_fund == T_INTEGER || tp->tp_fund == T_LONG)
-				C_dvi(tp->tp_size);
-			else
-				crash("(CodeBoper: bad type DIV)");
-			break;
-
 		case MOD:
 			Operands(leftop, rightop);
 			if( tp->tp_fund == T_INTEGER ) {
-				C_cal("_mdi");
+				C_cal(expr->nd_symb == MOD ? "_mdi" : "_dvi");
 				C_asp(2 * tp->tp_size);
 				C_lfr(tp->tp_size);
 			}
 			else if( tp->tp_fund == T_LONG) {
-				C_cal("_mdil");
+				C_cal(expr->nd_symb == MOD ? "_mdil" : "_dvil");
 				C_asp(2 * tp->tp_size);
 				C_lfr(tp->tp_size);
 			}
