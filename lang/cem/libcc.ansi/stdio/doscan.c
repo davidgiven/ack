@@ -266,7 +266,8 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 				return done;
 			}
 			str = o_collect(ic, stream, kind, width, &base);
-			if (str < inp_buf) return done;
+			if (str < inp_buf
+			    || (str == inp_buf && *str == '-')) return done;
 			nrchars += str - inp_buf + 1;
 			if (!(flags & FL_NOASSIGN)) {
 				if (kind == 'd' || kind == 'i')
@@ -415,7 +416,8 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 
 			if (!width) return done;
 			str = f_collect(ic, stream, width);
-			if (str < inp_buf) return done;
+			if (str < inp_buf
+			    || (str == inp_buf && *str == '-')) return done;
 			nrchars += str - inp_buf + 1;
 			if (!(flags & FL_NOASSIGN)) {
 				ld_val = strtod(inp_buf, &tmp_string);
@@ -433,5 +435,5 @@ _doscan(register FILE *stream, const char *format, va_list ap)
 		}		/* end switch */
 		++format;
 	}
-	return conv ? done : EOF;
+	return conv || (ic != EOF) ? done : EOF;
 }

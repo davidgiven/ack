@@ -27,7 +27,15 @@ fflush(FILE *stream)
 		&& !io_testflag(stream, _IOWRITING)))
 		return 0;
 	if (io_testflag(stream, _IOREADING)) {
-		(void) fseek(stream, 0L, SEEK_CUR);
+		/* (void) fseek(stream, 0L, SEEK_CUR); */
+		int adjust = 0;
+		if (stream->_buf && !io_testflag(stream,_IONBF))
+			adjust = stream->_count;
+		stream->_count = 0;
+		_lseek(fileno(stream), (off_t) adjust, SEEK_CUR);
+		if (io_testflag(stream, _IOWRITE))
+			stream->_flags &= ~(_IOREADING | _IOWRITING);
+		stream->_ptr = stream->_buf;
 		return 0;
 	} else if (io_testflag(stream, _IONBF)) return 0;
 
