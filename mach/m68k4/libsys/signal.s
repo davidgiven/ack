@@ -15,7 +15,9 @@ _signal:
 	beq	2f
 	btst	#0,d1
 	bne	2f
-	move.l	#enter,d1
+	move.l	#jmptab,d1
+	add.l	d0,d1
+	add.l	d0,d1
 2:
 	move.l	d0,a0
 	move.w	#0x30,d0
@@ -32,10 +34,45 @@ _signal:
 3:
 	jmp	cerror
 
+jmptab:	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
+	bsr	enter
 enter:
 	movem.l	d0/d1/a0/a1,-(sp)
-	move.l	16(sp),a0
-	move.l	a0,-(sp)
+	move.l	16(sp),d0
+	sub.l	#jmptab+2,d0
+	asr.l	#1,d0
+	move.l	d0,-(sp)
+	move.l	d0,a0
 	add.l	a0,a0
 	add.l	a0,a0
 	add.l	#dvect,a0
