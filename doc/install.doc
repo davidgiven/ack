@@ -16,7 +16,7 @@ Introduction
 .PP
 This document
 describes the process of installing the Amsterdam Compiler Kit (ACK).
-It depends on your combination of hard- and software how
+It depends on the combination of hard- and software how
 hard it will be to install the Kit.
 This description is intended for a Sun-3 or SPARC workstation.
 Installation on VAXen running Berkeley
@@ -31,8 +31,7 @@ See section 8 for installation on other systems.
 .NH
 The ACK installation process
 .PP
-Before starting the installation, you need to know some things about the
-installation process. In this process, three directory trees are used:
+In the ACK installation process, three directory trees are used:
 .IP "-"
 the ACK source tree. This is the tree on the ACK distribution medium.
 For the rest of this document, we will refer to this directory 
@@ -88,14 +87,9 @@ contains the file "ip_spec.t" needed for EM interpreters and EM documentation.
 .IP "config"
 contains two include files:
 .TS
-l lw(4.5i).
-em_path.h	T{
-path names used by \fIack\fP, intended
-for all utilities
-T}
-local.h	T{
-various definitions for local versions
-T}
+l l.
+em_path.h	path names used by \fIack\fP, intended for all utilities
+local.h	various definitions for local versions
 .TE
 These include files are specific for the current machine, so they
 are in a separate directory.
@@ -115,90 +109,37 @@ in the library lang/cem/libcc/mon.
 .IP "h"
 the #include files for:
 .TS
-l lw(4.5i).
-arch.h	T{
-definition of the ACK archive format
-T}
-as_spec.h	T{
-used by EM assembler and interpreters
-T}
-bc_io.h	T{
-used by the Basic run-time system
-T}
-bc_string.h	T{
-used by the Basic run-time system
-T}
-cg_pattern.h	T{
-used by the backend program "cg" and its bootstrap
-T}
-cgg_cg.h	T{
-used by the backend program "ncg" and its bootstrap
-T}
-em_abs.h	T{
-contains trap numbers and address for lin and fil
-T}
-em_ego.h	T{
-definition of names for some global optimizer messages
-T}
-em_flag.h	T{
-definition of bits in array em_flag in $TARGET_HOME/lib.bin/em_data.a.
-Describes parameters effect on flow of instructions
-T}
-em_mes.h	T{
-definition of names for mes pseudo numbers
-T}
-em_mnem.h	T{
-instruction => compact mapping.
-T}
-em_pseu.h	T{
-pseudo instruction => compact mapping
-T}
-em_ptyp.h	T{
-useful for compact code reading/writing,
-defines classes of parameters
-T}
-em_reg.h	T{
-definition of mnemonics indicating register type
-T}
-em_spec.h	T{
-definition of constants used in compact code
-T}
-ip_spec.h	T{
-used by programs that read e.out files
-T}
-m2_traps.h	T{
-used by the Modula-2 run-time system
-T}
-ocm_chan.h	T{
-used by the occam run-time system
-T}
-ocm_parco.h	T{
-used by the occam run-time system
-T}
-ocm_proc.h	T{
-used by the occam run-time system
-T}
-out.h	T{
-defines the ACK a.out format
-T}
-pc_err.h	T{
-definitions of error numbers in Pascal
-T}
-pc_file.h	T{
-macro's used in file handling in Pascal
-T}
-pc_size.h	T{
-sizes of objects used by Pascal compiler and run-time system
-T}
-pc_math.h	T{
-used by the Pascal runtime system
-T}
-ranlib.h	T{
-defines symbol table format for archives
-T}
-stb.h	T{
-defines debugger symbol table types
-T}
+l l.
+arch.h	definition of the ACK archive format
+as_spec.h	used by EM assembler and interpreters
+bc_io.h	used by the Basic run-time system
+bc_string.h	used by the Basic run-time system
+cg_pattern.h	used by the backend program "cg" and its bootstrap
+cgg_cg.h	used by the backend program "ncg" and its bootstrap
+em_abs.h	contains trap numbers and address for lin and fil
+em_ego.h	definition of names for some global optimizer
+	messages
+em_flag.h	definition of bits in array em_flag in
+	$TARGET_HOME/lib.bin/em_data.a. Describes parameters
+	effect on flow of instructions
+em_mes.h	definition of names for mes pseudo numbers
+em_mnem.h	instruction => compact mapping
+em_pseu.h	pseudo instruction => compact mapping
+em_ptyp.h	useful for compact code reading/writing,
+	defines classes of parameters
+em_reg.h	definition of mnemonics indicating register type
+em_spec.h	definition of constants used in compact code
+ip_spec.h	used by programs that read e.out files
+m2_traps.h	used by the Modula-2 run-time system
+ocm_chan.h	used by the occam run-time system
+ocm_parco.h	used by the occam run-time system
+ocm_proc.h	used by the occam run-time system
+out.h	defines the ACK a.out format
+pc_err.h	definitions of error numbers in Pascal
+pc_file.h	macro's used in file handling in Pascal
+pc_math.h	used by the Pascal runtime system
+ranlib.h	defines symbol table format for archives
+stb.h	defines debugger symbol table types
 .TE
 .IP "modules"
 root of a tree containing modules for compiler writers.
@@ -221,22 +162,25 @@ the EM interpreter written in Pascal.
 man files for various utilities.
 .if n .nr PD 1v
 .LP
-If you have a shared file system and want to install ACK on several types
-of machines, it may be useful to know that the "doc", "etc", "h",
+When installing ACK on several types of machines with a shared file system,
+it may be useful to know that the "doc", "etc", "h",
 "include", "lib" and "man" sub-directories do not depend on this
 particular installation. They do not contain binaries or path-dependent
 information. These directories can therefore be shared between the
 ACK installations. This can be accomplished by creating the tree and
 suitable symbolic links before starting the installation process.
 .LP
-For instance, let us say you have a file-system that is accessible from 
-the different machines as "/usr/share/local". You can then create a
-directory "/usr/share/local/ack", and give it subdirectories "doc", "etc", "h",
-"include", "lib" and "man". Also, let us assume that you want the
-ack binary tree in "/usr/local/ack". You can create this directory and
+For instance, let us say there is a file-system that is accessible from 
+the different machines as "/usr/share/local", and the ACK binary tree
+must be installed in "/usr/local/ack". In this case, proceed as follows:
+.IP \-
+create a directory "/usr/share/local/ack", with subdirectories
+"doc", "etc", "h", "include", "lib" and "man".
+.IP \-
+create a directory "/usr/local/ack" and
 then create symbolic links "doc" to "/usr/share/local/ack/doc", etc.
 .LP
-If you do this on all machines on which ACK will be installed, the
+If this is done on all machines on which ACK will be installed, the
 machine-independent part only has to be installed once, preferably
 on the fastest processor (it takes a long time to install all libraries).
 .LP
@@ -267,77 +211,33 @@ are used for which systems.
 These directories have subdirectories named:
 .in +3n
 .TS
-l lw(4i).
-cg	T{
-the backend   (*.m => *.s)
-T}
-ncg	T{
-the new backend   (*.m => *.s)
-T}
-as	T{
-the assembler (*.s => *.o) or
-assembler/linker (*.s + libraries => a.out)
-T}
-cv	T{
-conversion programs for a.out files
-T}
-dl	T{
-down-load programs
-T}
-top	T{
-the target optimizer
-T}
-int	T{
-source for an interpreter
-T}
+l l.
+cg	the backend   (*.m => *.s)
+ncg	the new backend   (*.m => *.s)
+as	the assembler (*.s => *.o) or
+	assembler/linker (*.s + libraries => a.out)
+cv	conversion programs for a.out files
+dl	down-load programs
+top	the target optimizer
+int	source for an interpreter
 
-libbc	T{
-used to create Basic run-time system and libraries
-T}
-libcc	T{
-used to create C run-time system and libraries
-T}
-libcc.ansi	T{
-used to create ANSI C run-time system and libraries
-T}
-libpc	T{
-used to create Pascal run-time system and libraries
-T}
-libf77	T{
-used to create Fortran run-time system and libraries
-T}
-libm2	T{
-used to create Modula-2 run-time system and libraries
-T}
-liboc	T{
-used to create occam run-time system and libraries
-T}
-libem	T{
-sources for EM runtime system, only depending on CPU type
-T}
-libend	T{
-sources of library defining end, edata, etext
-T}
-libfp	T{
-used to create floating point library
-T}
-libdb	T{
-used to create debugger support library
-T}
-libsys	T{
-sources for system-dependent EM library
-T}
-libce	T{
-sources for fast cc-compatible C compiler library support
-T}
+libbc	to create Basic run-time system and libraries
+libcc	to create C run-time system and libraries
+libcc.ansi	to create ANSI C run-time system and libraries
+libpc	to create Pascal run-time system and libraries
+libf77	to create Fortran run-time system and libraries
+libm2	to create Modula-2 run-time system and libraries
+liboc	to create occam run-time system and libraries
+libem	EM runtime system, only depending on CPU type
+libend	library defining end, edata, etext
+libfp	to create floating point library
+libdb	to create debugger support library
+libsys	system-dependent EM library
+libce	fast cc-compatible C compiler library support
 
-ce	T{
-code expander (fast back-end producing either .s or .o files)
-T}
+ce	code expander (fast back-end)
 
-test	T{
-various tests
-T}
+test	various tests
 .TE
 .in -3n
 Actually, some of these directories will only appear in the configuration tree.
@@ -462,7 +362,7 @@ a part of ACK, but is included because it adds another language.
 The Fortran system carries the following copyright notice:
 .IP ""
 .nf
-/****************************************************************
+/**************************************************************
 Copyright 1990, 1991 by AT&T Bell Laboratories and Bellcore.
 
 Permission to use, copy, modify, and distribute this software
@@ -483,7 +383,7 @@ whatsoever resulting from loss of use, data or profits, whether
 in an action of contract, negligence or other tortious action,
 arising out of or in connection with the use or performance of
 this software.
-****************************************************************/
+**************************************************************/
 .fi
 .IP "lang/fortran/comp"
 .br
@@ -602,14 +502,14 @@ Keep a copy of the original distribution to be able to repeat the process
 of installation in case of disasters.
 This copy is also useful as a reference point for diff-listings.
 .NH
-Adapting ACK to your system
+Adapting ACK to the local system
 .PP
 Before compiling the sources in the Kit some installation dependent
 actions have to be taken.
 Most of these are performed by an interactive shell script in the file
 .I $SRC_HOME/first/first.
-If you don't want to write in the $SRC_HOME tree you can call this
-script from another directory, for instance an empty directory which will later
+Calling this script should be done
+from another directory, for instance an empty directory which will later
 become $CONFIG.
 .LP
 The actions of the
@@ -618,11 +518,11 @@ script are:
 .if n .sp 1
 .if n .nr PD 0
 .IP \-
-Asking you for the path names of the ACK source directory ($SRC_HOME), the
+Asking for the path names of the ACK source directory ($SRC_HOME), the
 configuration directory ($CONFIG), and the ACK users directory ($TARGET_HOME).
-You will need about 5M for the configuration tree. The disk space needed
-for the ACK users tree depends on which front-ends and back-ends you want
-to install.
+About 5M are needed for the configuration tree. The disk space needed
+for the ACK users tree depends on which front-ends and back-ends are to be
+installed.
 For instance, on our SPARC systems
 we have installed all languages and 6 back-ends, including the
 system-independent part. This amounts to about 16M.
@@ -633,45 +533,25 @@ We also have the fast ACK compilers
 installed on the SUN-3's.
 The total amount of disk-space used is less than 8M.
 .IP \-
-Asking you for the type of system you have
+Asking for what type of system the binary tree must be produced for
 and creating the shell script "ack_sys" in the Kit's bin directory.
 Several utilities make use of "ack_sys" to determine the type of
-system you have.
+system.
 The current choice is between:
 .TS
-c cw(3i) c
-l lw(3i) l.
+c c c
+l l l.
 answer	system type	default machine
-vax_bsd4_1a	T{
-VAX11 with BSD4.1a
-T}	vax4
-vax_bsd4_2	T{
-VAX11 with BSD4.2
-T}	vax4
-vax_sysV_2	T{
-VAX11 with System V.2
-T}	vax4
-i386	T{
-Intel 80386 system running Xenix System V
-T}	i386
-sun3	T{
-Sun-3 Motorola 68020 workstation
-T}	sun3
-sun2	T{
-Sun-2 Motorola 68010 workstation
-T}	sun2
-m68_sysV_0	T{
-68000 with Uniplus UNIX System V.0
-T}	mantra
-m68020	T{
-Motorola M68020 VME131 running Unix System V/68 R2V2.1
-T}	m68020
-sparc	T{
-Sun-4 or SPARC workstation
-T}	sparc
-ANY	T{
-Neither of the above
-T}	???
+vax_bsd4_1a	VAX11 + BSD4.1a	vax4
+vax_bsd4_2	VAX11 + BSD4.2	vax4
+vax_sysV_2	VAX11 + System V.2	vax4
+i386	Intel 80386 system + Xenix System V	i386
+sun3	Sun-3 Motorola 68020 workstation	sun3
+sun2	Sun-2 Motorola 68010 workstation	sun2
+m68_sysV_0	68000 + Uniplus System V.0	mantra
+m68020	Motorola 68020 VME131 + System V/68 R2V2.1	m68020
+sparc	Sun-4 or SPARC workstation	sparc
+ANY	Neither of the above	???
 .TE
 For some of these, the installation procedure has not been tested, as
 we don't have them.
@@ -679,19 +559,19 @@ For others, the installation procedure has only been tested with earlier
 distributions, as we don't have those systems anymore.
 However, the sun3 and sparc systems are known to behave reasonably.
 The Sun systems should run SunOs Release 3.0 or newer.
-If your system is not on this list, choose one that comes close.
+If the target system is not on this list, choose one that comes close.
 If none of them come close, use the "ANY" choice.
-For ANY you can use any name you fancy,
-but the Kit will not be able to compile programs for your system.
-If you want to do that you have to read the section about "compilation
+For ANY, any name can be used,
+but the Kit will not be able to compile programs for the target system.
+See the section about "compilation
 on a different machine".
 .IP \-
 Setting the default machine for which code is
-produced to your own type of system according to the table above.
+produced to the local type of system according to the table above.
 This in done in the file "$TARGET_HOME/config/local.h".
-See also the section 9.1.
+See also section 9.1.
 .IP \-
-Asking you for things that you may not want to install.
+Asking for things that don't have to be installed.
 .IP \-
 Producing a shell script called "INSTALL" that will take care of the
 ACK installation process.
@@ -703,7 +583,7 @@ Some actions still have to be done by hand:
 .if n .nr PD 0
 .IP \-
 The installation of the PUBMAC macro package is not done
-automatically because you need super-user privileges to do
+automatically because super-user privileges are needed to do
 that on most systems.
 This macro package is used with several of the documents
 provided in the Kit.
@@ -744,14 +624,14 @@ The Makefiles adhere to a standard which is described in the
 section 9.
 .IP \-
 Copy "Action" files to the configuration tree and editing them to
-reflect your choices concerning the parts of ACK that you want
-to install.  "Action" files are described below.
+reflect the choices concerning the parts of ACK that have to be
+installed.  "Action" files are described below.
 .IP \-
 Copy part of the source tree to the ACK users tree (include files, 
 manual pages, documentation, et cetera).
 .IP \-
 Calling the "TakeAction" script.
-You do not have to start all the Makefiles separately.
+All these Makefiles do not have to be called separately.
 We wrote a shell script calling the make's needed to install
 the whole Kit.
 This script consists of the file $SRC_HOME/TakeAction
@@ -762,29 +642,28 @@ The default action is to start "make install && make clean".
 The output of each make is diverted to a file called "Out"
 in the same directory as the make was started in.
 If the make was successful (return code 0) the Out file is removed
-and the script TakeAction produces a small message telling you
+and the script TakeAction produces a small message indicating
 that it succeeded in fulfilling its goal.
 If the make was not successful (any other return code) the Out file
-is left alone for further examination and a small message telling you
-to look at that file is produced by TakeAction.
+is left alone for further examination and the script TakeAction
+produces a small message indicating that it failed.
 .br
 For some programs the scripts already know they can't be
-installed on your type of system.
+installed on the local type of system.
 In that case they produce a message "Sorry, ....." and
 happily proceed with further installation commands.
 .if n .sp 1
 .if n .nr PD 1v
 .LP
-Compilation of the whole Kit might take anything from a few
-hours to more than a day, depending on the speed of your machine and
-your choices.
+Installation of the Kit might take anything from a few
+hours to more than a day, depending on the speed of the local machine and
+what must be installed.
 .LP
-If this compilation went reasonably successful you should be able
-to use the Kit.
+If the installation succeeded, the Kit is ready to be used.
 Read section 6 and the manuals provided
 with the Kit (in the $TARGET_HOME/man directory) on how to use it.
 .NH 2
-Problems you may meet
+Problems
 .NH 3
 on Unisoft m68000 systems.
 .PP
@@ -850,13 +729,13 @@ An example output of TakeAction.
 .sp 1
 .fi
 .LP
-The lines starting with "Sorry, " tell you that certain programs cannot
-be translated on your machine.
-The lines starting with "Failed for" tell
-you that certain programs/libraries were expected to,
+The lines starting with "Sorry, " indicate that certain programs cannot
+be translated on the local machine.
+The lines starting with "Failed for" indicate
+that certain programs/libraries were expected to,
 but did not compile.
 In this example, the installation of LINT failed.
-If you want to repeat a certain part of the installation, look in
+To repeat a certain part of the installation, look in
 the Action file, which resides in the root of the configuration tree,
 for the directory in which that part is to be found.
 If that directory contains an Action file issue the command
@@ -885,9 +764,9 @@ the EM interpretator for the PDP-11.
 .IP \fILLgen\fP
 the LL(1) parser generator.
 .IP \fIack_sys\fP
-a shell script producing an identification of your system.
+a shell script producing an identification of the target system.
 Used by some utilities to determine what is, and what is
-not feasible on your system.
+not feasible on the target system.
 .IP \fImarch\fP
 a shell script used while compiling libraries.
 .IP "\fIasize\fP, \fIanm\fP, \fIastrip\fP"
@@ -931,13 +810,13 @@ Any call name not being \fIcc\fP, \fIacc\fP, \fIabc\fP, \fIpc\fP, \fIf2c\fP,
 interpreted as the name of a 'machine description' and the
 program will try to find a description file with that name.
 The installation process will only touch the utilities in the $TARGET_HOME/bin
-directory, not your own copies.
+directory, not copies of these utilities.
 .NH
 Machines
 .PP
-Underneath you will find a table with entries for all commands in
+Below is a table with entries for all commands in
 the bin directory used to (cross)compile for a particular machine.
-The name in the first column give the name in the bin directory.
+The name in the first column gives the name in the bin directory.
 The column headed dir indicates which subdirectories of
 $TARGET_HOME/lib and/or $TARGET_HOME/lib.bin are needed for compilation.
 The column head i/p contains the integer and pointer size used in units of
@@ -971,47 +850,47 @@ sparc	Sun-4	4/4	C	*	sparc
 			Modula-2
 			Fortran
 
-m68k2	M68000/Unisoft	2/4	C	+	m68k2
-			Pascal
+m68k2	M68000/	2/4	C	+	m68k2
+	Unisoft		Pascal
 			Basic
 			occam
 			Modula-2
 
-m68k4	M68000/Unisoft	4/4	C	+	m68k4
-			Pascal		m68k2
+m68k4	M68000/	4/4	C	+	m68k4
+	Unisoft		Pascal		m68k2
 			Basic
 			occam
 			Modula-2
 			Fortran
 
-pmds	M68000/PMDS	2/4	C	+	pmds	Philips Micro
-			Pascal		m68k2	Devel. System
+pmds	M68000/	2/4	C	+	pmds	Philips Micro
+	PMDS		Pascal		m68k2	Devel. System
 			Basic
 			occam
 			Modula-2
 
-pmds4	M68000/PMDS	4/4	C	+	pmds4	Philips Micro
-			Pascal		m68k2	Devel. System
+pmds4	M68000/	4/4	C	+	pmds4	Philips Micro
+	PMDS		Pascal		m68k2	Devel. System
 			Basic		m68k4
 			occam
 			Modula-2
 			Fortran
 
-mantra	M68000/SysV.0	4/4	C	+	mantra
-			Pascal		m68k2
+mantra	M68000/	4/4	C	+	mantra
+	Sys V.0		Pascal		m68k2
 			Basic		m68k4
 			occam
 			Modula-2
 			Fortran
 
-m68020	M68020/V/68	4/4	C	+	m68020
-	R2V2.1		Pascal
+m68020	M68020/	4/4	C	+	m68020
+	Sys V/68 R2V2.1		Pascal
 			Basic
 			occam
 			Modula-2
 			Fortran
 
-sun3	Sun-3 R3.0	4/4	C	+	sun3
+sun3	Sun-3 R4.1	4/4	C	+	sun3
 			Pascal		m68020
 			Basic
 			occam
@@ -1031,14 +910,14 @@ i86	IBM PC/IX	2/2	C	+	i86	IBM PC with PC/IX
 			occam
 			Modula-2
 
-xenix3	Microsoft Xenix V3	2/2	C	+	xenix3	IBM AT with Xenix
-			Pascal		i86
+xenix3	Microsoft	2/2	C	+	xenix3	IBM AT with Xenix
+	Xenix V3		Pascal		i86
 			Basic
 			occam
 			Modula-2
 
-i386	SCO Xenix System V	4/4	C	+	i386	Intel 80386
-			Pascal			Xenix System V
+i386	SCO Xenix	4/4	C	+	i386	Intel 80386
+	System V		Pascal			Xenix System V
 			Basic
 			occam
 			Modula-2
@@ -1058,7 +937,7 @@ minixST	ST Minix	2/4	C	+	minixST	Atari ST running Minix
 
 z8000	Zilog 8000	2/2	C		z8000	Central Data
 			Pascal			CPU board
-			Basic			Uses assembler/loader
+			Basic			Assembler/loader
 			occam
 			Modula-2
 
@@ -1081,7 +960,7 @@ em44	EM machine	4/4	C	*	em44	Needs interpreter
 			Modula-2
 			Fortran
 
-6500	6502/BBC	2/2	C		6500	Uses assembler/loader
+6500	6502/BBC	2/2	C		6500	Assembler/loader
 			Pascal
 			Basic
 			occam
@@ -1112,10 +991,10 @@ z80	Hermac/z80	2/2	C		z80	\fIi80\fP is faster
 			occam
 			Modula-2
 
-s2650	Signetics 2650				s2650	Assembler only
+s2650	Signetics				s2650	Assembler only
 
-arm	Acorn Archimedes	4/4	C	*	arm	Uses assembler/loader
-			Pascal
+arm	Acorn	4/4	C	*	arm	Assembler/loader
+	Archimedes		Pascal
 			Basic
 			occam
 			Modula-2
@@ -1148,17 +1027,17 @@ machine.
 The presence of most 
 .UX
 utilities is essential for compilation.
-A few of the programs you certainly need are: C-compiler, sed,
+A few of the programs certainly needed are: C-compiler, sed,
 make, and awk.
 .NH 2
 Backend
 .PP
 The existence of a backend with a system call library
-for your system is essential
-if you wish to produce executable files for that system.
+for the target system is essential
+for producing executable files for that system.
 Rewriting the system call library if the one supplied does
-not work on your system is fairly straightforward.
-If no backend exists for your CPU type you have to write one yourself
+not work on the target system is fairly straightforward.
+If no backend exists for the target CPU type, a new backend has to be written
 which is a major undertaking.
 .NH 2
 Universal assembler/loader, link editor
@@ -1192,9 +1071,9 @@ The machine name used for default is determined by the
 definition of ACKM in $TARGET_HOME/config/local.h.
 The Kit is distributed with "sun3" as the default machine,
 but the shell script "first" in the directory "first" alters this
-to suit your own system.
+to suit the target system.
 There is nothing against using the Kit as a cross-compiler
-and by default produce code that can't run on your own system.
+and by default produce code that can't run on the local system.
 .NH 2
 Pathnames
 .PP
@@ -1205,7 +1084,7 @@ The tree is distributed with /usr/em as the working
 directory.
 The definition of EM_DIR in em_path.h should be altered to
 specify the root
-directory for the Compiler Kit distribution on your system ($SRC_HOME).
+directory for the Compiler Kit binaries on the local system ($TARGET_HOME).
 This is done automatically by the shell script "first" in the
 directory "first".
 Em_path.h also specifies which directory should be used for
@@ -1234,8 +1113,7 @@ recompile and install all binaries and libraries.
 Some Makefiles allow errors to occur in the programs they call.
 They ignore such errors and notify the user with the message
 "~....... error code n: ignored".
-Whenever such a message appears in the output you can ignore it
-too.
+Whenever such a message appears in the output it can be ignored.
 .IP "cmp"
 recompile all binaries and libraries and compare them to the
 ones already installed.
@@ -1249,7 +1127,7 @@ On some systems it exists under another name e.g. lpr.
 The easiest way to call such a spooler is using a shell script
 with the name opr that calls lpr.
 This script should be placed in /usr/bin or $TARGET_HOME/bin or
-one of the directories in your PATH.
+one of the directories in the PATH environment variable.
 .IP clean
 remove all files not needed for day-to-day use,
 that is binaries not in $TARGET_HOME/bin or $TARGET_HOME/lib.bin, object files etc.
@@ -1287,8 +1165,8 @@ identification of these errors.
 We also tested Pascal with the Validation Suite.
 The Validation Suite is a collection of more than 200 Pascal programs,
 designed by Brian Wichmann and Arthur Sale to test Pascal compilers.
-We are not allowed to distribute it, but you may
-request a copy from
+We are not allowed to distribute it, but a copy may
+be requested from
 .DS
 Richard J. Cichelli
 A.N.P.A.
@@ -1300,7 +1178,7 @@ USA
 .IP C
 the sub-directories in $SRC_HOME/lang/cem/ctest contain C test programs.
 The idea behind these tests is:
-when you have a program called xx.c, compile it into xx.cem.
+if there is a program called xx.c, compile it into xx.cem.
 Run it with standard output to xx.cem.r, compare this file to
 xx.cem.g, a file containing the 'ideal' output.
 Any differences will point to implementation differences or
