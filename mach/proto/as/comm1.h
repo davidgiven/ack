@@ -101,6 +101,8 @@ extern item_t		keytab[];
 extern struct outhead	outhead;
 #endif
 
+extern int	curr_token;
+
 /* forward function declarations */
 #ifdef ASLD
 extern char	*readident();

@@ -64,6 +64,7 @@ yylex()
 			c = getval(c);
 		}
 	}
+	curr_token = c;
 	return(c);
 }
 

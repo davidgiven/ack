@@ -264,10 +264,11 @@ newrelo(s, n)
 	 *	move	b,d0
 	 *	b=a
 	 *  a:	.data2	0
+	 * but no relocation info if S_VAR is set, but type is S_ABS.
 	 */
 	iscomm = s & S_COM;
 	s &= ~S_COM;
-	if ((n & RELPC) == 0 && s == S_ABS)
+	if ((n & RELPC) == 0 && ((s & ~S_VAR) == S_ABS))
 		return;
 	if ((n & RELPC) != 0 && s == DOTTYP
 #ifndef ASLD
