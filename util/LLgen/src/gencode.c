@@ -238,6 +238,7 @@ generate(f) p_file f; {
 	register p_first ff;
 	int mustpop;
 
+	fprintf(fpars, "#define LL_LEXI %s\n", lexical);
 	listcount = 0;
 	/* Generate first sets */
 	for (ff = f->f_firsts; ff; ff = ff->ff_next) {
