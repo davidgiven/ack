@@ -11,6 +11,7 @@
 #else
 #define _NSIG             16	/* number of signals used */
 #endif
+#define NSIG _NSIG
 
 #define SIGHUP	           1	/* hangup */
 #define SIGINT             2	/* interrupt (DEL) */
