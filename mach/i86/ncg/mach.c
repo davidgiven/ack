@@ -57,9 +57,16 @@ string holstr(n) word n; {
 }
 */
 
+#ifdef REGVARS
+full lbytes;
+#endif
+
 prolog(nlocals) full nlocals; {
 
 	fputs("\tpush\tbp\n\tmov\tbp,sp\n", codefile);
+#ifdef REGVARS
+	lbytes = nlocals;
+#else
 	switch (nlocals) {
 	case 4: fputs("\tpush\tax\n", codefile);
 	case 2: fputs("\tpush\tax\n", codefile);
@@ -67,6 +74,7 @@ prolog(nlocals) full nlocals; {
 	default:
 		fprintf(codefile, "\tsub\tsp,%d\n",nlocals); break;
 	}
+#endif
 }
 
 #ifdef REGVARS
@@ -95,6 +103,28 @@ i_regsave()
 
 f_regsave()
 {
+	if (di_off == -lbytes) lbytes -= 2;
+	if (si_off == -lbytes) lbytes -= 2;
+	if (di_off == -lbytes) lbytes -= 2;
+	switch (lbytes) {
+	case 4: fputs("\tpush\tax\n", codefile);
+	case 2: fputs("\tpush\tax\n", codefile);
+	case 0: break;
+	default:
+		fprintf(codefile, "\tsub\tsp,%d\n",lbytes); break;
+	}
+	if (firstreg == 1) {
+		fputs("push di\n", codefile);
+		if (si_off != -1) fputs("push si\n", codefile);
+	}
+	else if (firstreg == -1) {
+		fputs("push si\n", codefile);
+		if (di_off != -1) fputs("push di\n", codefile);
+	}
+	if (di_off >= 0)
+		fprintf(codefile, "mov di,%ld(bp)\n", di_off);
+	if (si_off >= 0)
+		fprintf(codefile, "mov si,%ld(bp)\n", si_off);
 }
 
 regsave(regstr, off, size)
@@ -104,16 +134,10 @@ regsave(regstr, off, size)
 	if (strcmp(regstr, "si") == 0) {
 		if (! firstreg) firstreg = -1;
 		si_off = off;
-		fputs("push si\n", codefile);
-		if (off >= 0)
-			fprintf(codefile, "mov si,%ld(bp)\n", off);
 	}
 	else {
 		if (! firstreg) firstreg = 1;
 		di_off = off;
-		fputs("push di\n", codefile);
-		if (off >= 0)
-			fprintf(codefile, "mov di,%ld(bp)\n", off);
 	}
 }
 

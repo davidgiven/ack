@@ -403,6 +403,10 @@ from Xreg_off
   gen add %1.reg,{CONSTR,%1.off}	yields %1.reg
 
 from halfindir
+  uses reusing %1,ADDREG
+  gen move %1,%a			yields %a
+
+from halfindir
   uses reusing %1,REG
   gen move %1,%a			yields %a
 
