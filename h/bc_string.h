@@ -12,4 +12,6 @@ typedef struct{
 	int	strlength;
 	} String;
 
+String *_newstr() ;
+
 #define MAXSTRING 1024
