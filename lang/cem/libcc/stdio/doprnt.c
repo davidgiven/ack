@@ -121,7 +121,7 @@ _doprnt(fmt,ap,stream)
 		switch (c = *fmt++) {
 		default:
 #ifdef  CPM
-			if (c == '\n') putc('r',stream);
+			if (c == '\n') putc('\r',stream);
 #endif
 			putc(c,stream);
 			continue;
@@ -165,11 +165,7 @@ _doprnt(fmt,ap,stream)
 				*s++ = '-';
 				l = -l;
 			}
-			goto do_l;
 		    l_unsignd:
-			if (l && ndigit)
-				*s++ = '0';
-		    do_l:
 			s = l_compute(l,j,s);
 			break;
 #endif
@@ -187,11 +183,7 @@ _doprnt(fmt,ap,stream)
 				*s++ = '-';
 				inte= -inte ;
 			}
-			goto do_i ;
 		    i_unsignd:
-			if (inte && ndigit)
-				*s++ = '0';
-		    do_i:
 			s = i_compute(inte,j,s);
 			break;
 		case 'c':
