@@ -660,8 +660,8 @@ _ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int *sign, int ecvtflag)
 			else *p++ = '0';
 			/* Check that remainder is still significant */
 			if (cmp_ext(&m, e) > 0 || cmp_ext(e, &oneminm) > 0) {
+				if (e->m1 && e->exp >= -1) *(p-1) += 1;
 				e->m1 = 0;
-				if (e->exp >= -1) *(p-1) += 1;
 				continue;
 			}
 			ten_mult(&m);
