@@ -15,3 +15,8 @@
 #define valu_t long
 #undef ADDR_T
 #define ADDR_T long
+
+#undef ALIGNWORD
+#define ALIGNWORD	4
+#undef ALIGNSECT
+#define ALIGNSECT	4

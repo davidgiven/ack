@@ -14,3 +14,8 @@
 
 #undef valu_t
 #define valu_t long
+
+#undef ALIGNWORD
+#define ALIGNWORD 2
+#undef ALIGNSECT
+#define ALIGNSECT 2
