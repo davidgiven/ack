@@ -3978,7 +3978,7 @@ with data4-sconsts4 DD_REG4
 with STACK
     kills ALL
     gen jsr {absolute4, ".dvu"}
-			yields	dl0
+			yields	dl2
 #endif TBL68020
 
 pat slu				leaving sli $1
