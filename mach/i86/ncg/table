@@ -238,17 +238,17 @@ or rm:rw:cc, regorconst:ro.
 or anyreg:rw:cc, rmorconst:ro.
 pop rmorconst:wo cost(1,8).
 push rmorconst:ro cost(1,10).
-rcl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-rcr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+rcl rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
+rcr rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
 ret cost(1,8).
-rol rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-ror rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-sal rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-sar rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+rol rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
+ror rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
+sal rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
+sar rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
 sbb rm:rw:cc, regorconst:ro.
 sbb anyreg:rw:cc, rmorconst:ro.
-shl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-shr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+shl rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
+shr rm:rw, ANYCON+SHIFT_CREG:ro kills:cc.
 sxx rm:rw:cc, ANYCON+SHIFT_CREG:ro.
 #ifdef REGVARS
 sub LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
