@@ -1,4 +1,4 @@
-.define	.csb
+.define	.csb4
 .sect .text
 .sect .rom
 .sect .data
@@ -7,7 +7,7 @@ ECASE=20
 
 .sect .text
 
-.csb:
+.csb4:
 		! case descriptor in a0
 		! index in d0
 
