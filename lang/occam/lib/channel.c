@@ -1,7 +1,9 @@
 /* $Header$ */
 /*	channel.c - basic channel handling routines */
 #include <errno.h>
+#ifndef __BSD4_2
 #include <signal.h>
+#endif
 #define __CHANNEL__
 #ifdef __USG
 #include <termio.h>
@@ -112,7 +114,9 @@ void chan_out(v, c) long v; register chan *c;
 	}
 }
 
+#ifndef __BSD4_2
 static int timeout();
+#endif
 
 int chan_any(c) register chan *c;
 {
@@ -189,6 +193,7 @@ int chan_any(c) register chan *c;
 	}
 }
 
+#ifndef __BSD4_2
 /* The ch=getc(fp) in the above function calls read(2) to do its task, but if
  * there's no input on the file (pipe or terminal) then the read will block.
  * To stop this read from blocking, we use the fact that if the read is
@@ -204,6 +209,7 @@ static int timeout(sig)
 	signal(SIGALRM, timeout);
 	alarm(1);
 }
+#endif
 
 static void disaster()
 {
