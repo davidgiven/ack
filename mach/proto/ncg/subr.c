@@ -392,6 +392,66 @@ tref(tp,amount) register token_p tp; {
 }
 
 #define MAXSAVE 10
+/* A few routines to save the top of the current stack,
+   restore it and check whether a certain register is present in the
+   saved stack
+*/
+token_t aside[MAXSAVE] ;
+int	aside_length = -1 ;
+
+save_stack(tp) register token_p tp ; {
+	int i ;
+
+	aside_length = &fakestack[stackheight-1] -tp;
+	assert(aside_length<=MAXSAVE);
+#ifndef NDEBUG
+	if (aside_length!=0 && Debug>1)
+		fprintf(stderr,"Saving %d items from fakestack\n",aside_length);
+#endif
+	for (i=1;i<=aside_length;i++)
+		aside[i-1] = tp[i];
+	stackheight -= aside_length;
+}
+
+in_stack(reg) {
+	register token_p tp ;
+	register i ;
+	register tkdef_p tdp ;
+
+	for ( i=0, tp=aside ; i<aside_length ; i++, tp++ )
+		if (tp->t_token==-1) {
+			if(tp->t_att[0].ar==reg)
+				goto gotone ;
+		} else {
+			tdp = &tokens[tp->t_token];
+			for(i=0;i<TOKENSIZE;i++)
+				if (tdp->t_type[i]==EV_REG &&
+				    tp->t_att[i].ar==reg)
+					goto gotone ;
+		}
+	return 0 ;
+gotone:
+#ifndef NDEBUG
+	if ( Debug>2 )
+		fprintf(stderr,"Register %d present on non-visible stack\n",
+			reg ) ;
+#endif
+	return 1 ;
+}
+
+rest_stack() {
+	register int i ;
+
+	assert(aside_length!= -1); 
+#ifndef NDEBUG
+	if (aside_length!=0 && Debug>1)
+		fprintf(stderr,"Restoring %d items to fakestack(%d)\n",
+			aside_length,stackheight);
+#endif
+	for (i=0;i<aside_length;i++)
+		fakestack[stackheight++] = aside[i];
+	aside_length= -1 ;
+}
 
 #ifdef MAXSPLIT
 split(tp,ip,ply,toplevel) token_p tp; register int *ip; {
@@ -418,49 +478,26 @@ split(tp,ip,ply,toplevel) token_p tp; register int *ip; {
 	return(0);
 found:
 	assert(stackheight+cp->c2_nsplit-1<MAXFSTACK);
-	stp = &fakestack[stackheight-1];
-	diff = stp - tp;
-	assert(diff<=MAXSAVE);
-	for (i=1;i<=diff;i++)
-		savestack[i-1] = tp[i];         /* save top of stack */
-	stackheight -= diff;
+	save_stack(tp);
 	tpl = tokpatlen;
 	tokpatlen = 1;
 	codegen(&coderules[cp->c2_codep],ply,toplevel,MAXINT,0);
 	tokpatlen = tpl;
-	for (i=0;i<diff;i++)            /* restore top of stack */
-		fakestack[stackheight++] = savestack[i];
+	rest_stack();
 	return(cp->c2_nsplit);
 }
 #endif MAXSPLIT
 
 unsigned docoerc(tp,cp,ply,toplevel,forced) token_p tp; register c3_p cp; {
-	token_t savestack[MAXSAVE];
-	token_p stp;
-	register int i,diff;
 	unsigned cost;
 	int tpl;        /* saved tokpatlen */
 
-	stp = &fakestack[stackheight-1];
-	diff = stp -tp;
-	assert(diff<=MAXSAVE);
-#ifndef NDEBUG
-	if (diff!=0 && Debug>1)
-		fprintf(stderr,"Saving %d items from fakestack\n",diff);
-#endif
-	for (i=1;i<=diff;i++)
-		savestack[i-1] = tp[i];
-	stackheight -= diff;
+	save_stack(tp) ;
 	tpl = tokpatlen;
 	tokpatlen = 1;
 	cost = codegen(&coderules[cp->c3_codep],ply,toplevel,MAXINT,forced);
 	tokpatlen = tpl;
-#ifndef NDEBUG
-	if (diff!=0 && Debug>1)
-		fprintf(stderr,"Restoring %d items to fakestack(%d)\n",diff,stackheight);
-#endif
-	for (i=0;i<diff;i++)
-		fakestack[stackheight++] = savestack[i];
+	rest_stack() ;
 	nallreg = 0;
 	return(cost);
 }
