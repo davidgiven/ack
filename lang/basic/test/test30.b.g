@@ -1,0 +1,3 @@
+"CAMERA","93604-1"
+CAMERA
+LINE 150:ERROR 29: Bad file mode
