@@ -20,8 +20,16 @@
 	ld hl,0
 	add hl,sp
 	call octnr
+	ld de,20
+	push de
 	ld de,1f
-	call pstrng
+	push de
+	ld de,1
+	push de
+	call __write
+	pop de
+	pop de
+	pop de
 	pop iy
 	ret
 1:	.asciz 'test xxxxx 0xxxxxx\r\n'

@@ -39,5 +39,4 @@ inn.s
 xor.s
 nop.s
 outdec.s
-pstrng.s
 ret.s

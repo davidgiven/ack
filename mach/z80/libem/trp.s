@@ -37,11 +37,20 @@
 	push de
 	ld iy,1f+6
 	call outdec
-	ld de,1f
-	call pstrng
+	ld iy,13
+	push iy
+	ld iy,1f
+	push iy
+	ld iy,2
+	push iy
+	call __write
+	pop iy
+	pop iy
+	pop iy
 	pop de
 	pop iy
-	jp 0x20
+	push de
+	call __exit
 2:
 	pop hl
 	push bc

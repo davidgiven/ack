@@ -11,7 +11,7 @@ unimpld:		! used in dispatch table to
 	ld hl,EILLINS
 9:	push hl
 	call .trp.z
-	jp 20
+	ret
 
 e.mon:
 	ld hl,EMON
