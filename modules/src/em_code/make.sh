@@ -6,7 +6,7 @@ do
 	echo "+$cc $cflags $i"
 	if $cc $cflags $i
 	then
-		list="$list `basename $i .c`.o"
+		list="$list `basename $i .c`.$suf"
 	else
 		exit 1
 	fi
