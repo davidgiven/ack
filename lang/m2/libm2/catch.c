@@ -35,6 +35,7 @@ static struct errm {
 	{ M2_NORESULT,	"no RETURN from procedure function"},
 	{ M2_UOVFL,	"cardinal overflow"},
 	{ M2_FORCH,	"Warning: FOR-loop control variable was changed in the body"},
+	{ M2_ENDPROCS,	"too many procedures to be called on program termination"},
 	{ -1,		0}
 };
 

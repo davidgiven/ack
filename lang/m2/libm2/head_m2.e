@@ -91,6 +91,7 @@ mainroutine
  sig
  asp EM_PSIZE
  cal $_M2M
- loc 0
+ cal $_halt
+ loc 0			; should not get here
  ret EM_WSIZE
  end
