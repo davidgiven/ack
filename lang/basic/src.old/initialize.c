@@ -1,9 +1,9 @@
 #include "bem.h"
+#include <em_path.h>
 
 #ifndef NORSCID
 static char rcs_id[] = "$Header$" ;
 #endif
-
 
 /* generate temporary files etc */
 
@@ -13,7 +13,7 @@ FILE	*datfile;
 
 initialize()
 {
-	sprintf(tmpfname,"/tmp/abc%d",getpid());
+	sprintf(tmpfname,"%s/abc%d",TMP_DIR,getpid());
 	strcpy(datfname,program);
 	strcat(datfname,".d");
 	yyin= fopen(inpfile,"r");
