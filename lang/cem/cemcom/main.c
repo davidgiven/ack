@@ -1,15 +1,14 @@
 /* $Header$ */
 /* MAIN PROGRAM */
 
+#include	<system.h>
 #include	"nopp.h"
 #include	"target_sizes.h"
 #include	"debug.h"
 #include	"myalloc.h"
 #include	"use_tmp.h"
 #include	"maxincl.h"
-#include	"system.h"
 #include	"inputtype.h"
-#include	"bufsiz.h"
 
 #include	"input.h"
 #include	"level.h"
@@ -134,10 +133,8 @@ compile(argc, argv)
 	int pp_only = options['E'] || options['P'];
 #endif NOPP
 
-	source = argv[0];
-
+	source = strcmp(argv[0], "-") ? argv[0] : 0;
 	switch (argc) {
-
 	case 1:
 #ifndef NOPP
 		if (!pp_only)
@@ -147,7 +144,6 @@ compile(argc, argv)
 	case 2:
 		destination = argv[1];
 		break;
-
 	case 3:
 		nmlist = argv[2];
 		destination = argv[1];
@@ -160,22 +156,18 @@ compile(argc, argv)
 #ifdef USE_TMP
 	tmpfile = mktemp(tmpname);
 #endif USE_TMP
-
-	if (!InsertFile(source, (char **) 0))	{
-		/* read the source file	*/
-		fatal("%s: no source file %s\n", prog_name, source);
-	}
+	if (strcmp(destination, "-") == 0)
+		destination = 0;
+	if (!InsertFile(source, (char **) 0)) /* read the source file	*/
+		fatal("%s: no source file %s\n", prog_name, 
+			source ? source : "stdin");
 	init();
-
-	/* needed ???	*/
-	FileName = source;
+	/* FileName = source; /* needed ???	*/
 	PushLex();
 
 #ifndef NOPP
-	if (pp_only)	{
-		/* run the preprocessor as if it is stand-alone	*/
+	if (pp_only) /* run the preprocessor as if it is stand-alone	*/
 		preprocess();
-	}
 	else	{
 #endif NOPP
 
@@ -365,20 +357,25 @@ preprocess()
 AppendFile(src, dst)
 	char *src, *dst;
 {
-	int fd_src, fd_dst;
+	File *fp_src, *fp_dst;
 	char buf[BUFSIZ];
 	int n;
 
-	if ((fd_src = sys_open(src, OP_RDONLY)) < 0) {
+	if (sys_open(src, OP_READ, &fp_src) == 0)
 		fatal("cannot read %s", src);
+	if (dst) {
+		if (sys_open(dst, OP_APPEND, &fp_dst) == 0)
+			fatal("cannot write to %s", src);
 	}
-	if ((fd_dst = sys_open(dst, OP_APPEND)) < 0) {
-		fatal("cannot write to %s", src);
-	}
-	while ((n = sys_read(fd_src, buf, BUFSIZ)) > 0) {
-		sys_write(fd_dst, buf, n);
-	}
-	sys_close(fd_src);
-	sys_close(fd_dst);
+	else
+		fp_dst = STDOUT;
+	while (sys_read(fp_src, buf, BUFSIZ, &n) != 0 && n > 0)
+		if (sys_write(fp_dst, buf, n) == 0)
+			fatal("(AppendFile) write error");
+	if (n != 0)
+		fatal("(AppendFile) read error");
+	sys_close(fp_src);
+	if (fp_dst != STDOUT)
+		sys_close(fp_dst);
 }
 #endif USE_TMP

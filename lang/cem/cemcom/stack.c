@@ -5,7 +5,7 @@
 #include	"use_tmp.h"
 #include	"botch_free.h"
 
-#include	"system.h"
+#include	<system.h>
 #include	"alloc.h"
 #include	"Lpars.h"
 #include	"arith.h"
@@ -267,22 +267,19 @@ unstack_world()
 	list is generated.
 */
 extern char *nmlist;	/* BAH! -- main.c	*/
-static int nfd;
+static File *nfp = 0;
 
 open_name_list()
 {
-	if (nmlist)	{
-		if ((nfd = sys_creat(nmlist, 0644)) < 0)	{
-			fatal("cannot create namelist %s", nmlist);
-		}
-	}
+	if (nmlist && sys_open(nmlist, OP_WRITE, &nfp) == 0)
+		fatal("cannot create namelist %s", nmlist);
 }
 
 namelist(nm)
 	char *nm;
 {
 	if (nmlist)	{
-		sys_write(nfd, nm, strlen(nm));
-		sys_write(nfd, "\n", 1);
+		sys_write(nfp, nm, strlen(nm));
+		sys_write(nfp, "\n", 1);
 	}
 }

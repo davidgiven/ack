@@ -23,21 +23,19 @@
 	Salloc(str, sz)		: save string in malloc storage
 */
 
+#include	<system.h>
 #include	"myalloc.h"	/* UF */
 #include	"debug.h"	/* UF */
 
 #include	"alloc.h"
 #include	"assert.h"
-#include	"system.h"
 
 #ifdef	OWNALLOC
-
-#define	SBRK_ERROR	((char *) -1)	/* errors during allocation	*/
-
+char *sys_break();
 /* the following variables are used for book-keeping		 */
-static int nfreebytes = 0;	/* # free bytes in sys_sbrk-ed space */
+static int nfreebytes = 0;	/* # free bytes in sys_break space */
 static char *freeb;		/* pointer to first free byte	 */
-static char *lastalloc;	/* pointer to last malloced sp	 */
+static char *lastalloc;		/* pointer to last malloced sp	 */
 static int lastnbytes;		/* nr of bytes in last allocated */
 				/* space			 */
 static char *firstfreeb = 0;
@@ -75,11 +73,11 @@ malloc(n)
 		register nbts = (n <= ALLOCSIZ) ? ALLOCSIZ : n;
 
 		if (!nfreebytes)	{
-			if ((freeb = sys_sbrk(nbts)) == SBRK_ERROR)
+			if ((freeb = sys_break(nbts)) == ILL_BREAK)
 				fatal("out of memory");
 		}
 		else	{
-			if (sys_sbrk(nbts) == SBRK_ERROR)
+			if (sys_break(nbts) == ILL_BREAK)
 				fatal("out of memory");
 		}
 		nfreebytes += nbts;
@@ -118,7 +116,7 @@ realloc(ptr, n)
 		nbytes = ALIGN(nbytes);
 	if (nfreebytes < nbytes)	{
 		register int nbts = (nbytes < ALLOCSIZ) ? ALLOCSIZ : nbytes;
-		if (sys_sbrk(nbts) == SBRK_ERROR)
+		if (sys_break(nbts) == ILL_BREAK)
 			fatal("out of memory");
 		nfreebytes += nbts;
 	}
@@ -136,13 +134,13 @@ free(p)
 
 init_mem()
 {
-	firstfreeb = sys_sbrk(0);
+	firstfreeb = sys_break(0);
 	/* align the first memory unit to ALIGNSIZE ???	*/
 	if ((long) firstfreeb % ALIGNSIZE != 0) {
 		register char *fb = firstfreeb;
 
 		fb = (char *)ALIGN((long)fb);
-		firstfreeb = sys_sbrk(fb - firstfreeb);
+		firstfreeb = sys_break(fb - firstfreeb);
 		firstfreeb = fb;
 		ASSERT((long)firstfreeb % ALIGNSIZE == 0);
 	}
@@ -155,7 +153,7 @@ mem_stat()
 
 	if (options['m'])
 		printf("Total nr of bytes allocated: %d\n",
-			sys_sbrk(0) - firstfreeb);
+			sys_break(0) - firstfreeb);
 }
 #endif	DEBUG
 #endif	OWNALLOC

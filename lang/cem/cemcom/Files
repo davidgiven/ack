@@ -86,8 +86,6 @@ struct.c
 struct.str
 switch.c
 switch.str
-system.c
-system.h
 tab.c
 tokenname.c
 tokenname.h

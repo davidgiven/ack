@@ -1,11 +1,11 @@
 /* $Header$ */
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
+#include	<system.h>
 #include	"nopp.h"
 #include	"use_tmp.h"
 #include	"errout.h"
 #include	"debug.h"
-#include	"system.h"
 #include	"string.h"
 
 #include	"tokenname.h"
@@ -96,9 +96,9 @@ crash(fmt, args)
 	_error(CRASH, NILEXPR, fmt, &args);
 	C_close();
 #ifdef	DEBUG
-	sys_stop(S_ABORT, 0);
+	sys_stop(S_ABORT);
 #else	DEBUG
-	sys_stop(S_EXIT, 1);
+	sys_stop(S_EXIT);
 #endif	DEBUG
 }
 
@@ -115,7 +115,7 @@ fatal(fmt, args)
 #endif	USE_TMP
 
 	_error(FATAL, NILEXPR, fmt, &args);
-	sys_stop(S_EXIT, 1);
+	sys_stop(S_EXIT);
 }
 
 _error(class, expr, fmt, argv)

@@ -5,8 +5,7 @@
 #define MAX_ARG_CNT 32
 
 #include	"em.h"
-#include	"system.h"
-#include	"bufsiz.h"
+#include	<system.h>
 #include	"arith.h"
 #include	"label.h"
 
@@ -21,17 +20,18 @@
 */
 
 /* supply a kind of buffered output */
-#define	flush(x)	sys_write(ofd, &obuf[0], x);
+#define	flush(x)	sys_write(ofp, &obuf[0], x)
 
 static char obuf[BUFSIZ];
 static char *opp = &obuf[0];
-int ofd = -1;
+File *ofp = 0;
 
 putbyte(b)	/* shouldn't putbyte() be a macro ??? (EB)	*/
 	int b;
 {
 	if (opp >= &obuf[BUFSIZ]) { /* flush if buffer overflows */
-		flush(BUFSIZ);
+		if (flush(BUFSIZ) == 0)
+			sys_stop(S_ABORT);
 		opp = &obuf[0];
 	}
 	*opp++ = (char) b;
@@ -45,24 +45,26 @@ C_open(nm)	/* open file for compact code output	*/
 	char *nm;
 {
 	if (nm == 0)
-		ofd = 1;	/* standard output	*/
+		ofp = STDOUT;	/* standard output	*/
 	else
-	if ((ofd = sys_creat(nm, CMODE)) < 0)
+	if (sys_open(nm, OP_WRITE, &ofp) == 0)
 		return 0;
 	return 1;
 }
 
 C_close()
 {
-	flush(opp - &obuf[0]);
+	if (flush(opp - &obuf[0]) == 0)
+		sys_stop(S_ABORT);
 	opp = obuf;	/* reset opp	*/
-	sys_close(ofd);
-	ofd = -1;
+	if (ofp != STDOUT)
+		sys_close(ofp);
+	ofp = 0;
 }
 
 C_busy()
 {
-	return ofd >= 0; /* true if code is being generated */
+	return ofp != 0; /* true if code is being generated */
 }
 
 /***    the compact code generating routines	***/

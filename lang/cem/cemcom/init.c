@@ -4,13 +4,13 @@
 #include	"nopp.h"
 
 #ifndef NOPP
+#include	<system.h>
 #include	"predefine.h"	/* UF */
 #include	"alloc.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
 #include	"interface.h"
-#include	"system.h"
 #include	"string.h"
 
 PRIVATE struct mkey	{
@@ -33,7 +33,7 @@ PRIVATE struct mkey	{
 EXPORT
 init_pp()
 {
-	time_type clock;
+	long clock;
 	static char date[30];
 	char *ctime();
 
@@ -62,7 +62,7 @@ init_pp()
 		"pdp" are predefined macros.
 	*/
 	/* __DATE__	*/
-	clock = sys_time((time_type *) 0);
+	clock = sys_time();
 	strcpy(&date[1], ctime(&clock));
 	date[26] = '\0';		/* zap nl	*/
 	date[0] = date[25] = '"';

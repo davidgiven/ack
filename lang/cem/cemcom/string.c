@@ -1,19 +1,20 @@
 /* $Header$ */
 /* STRING MANIPULATION AND PRINT ROUTINES */
 
+#include	<system.h>
 #include	"string.h"
 #include	"nopp.h"
 #include	"str_params.h"
 #include	"arith.h"
-#include	"system.h"
 
-doprnt(fd, fmt, argp)
+doprnt(fp, fmt, argp)
+	File *fp;
 	char *fmt;
 	int argp[];
 {
 	char buf[SSIZE];
 
-	sys_write(fd, buf, format(buf, fmt, (char *)argp));
+	sys_write(fp, buf, format(buf, fmt, (char *)argp));
 }
 
 /*VARARGS1*/
@@ -23,17 +24,18 @@ printf(fmt, args)
 {
 	char buf[SSIZE];
 
-	sys_write(1, buf, format(buf, fmt, &args));
+	sys_write(STDOUT, buf, format(buf, fmt, &args));
 }
 
 /*VARARGS1*/
-fprintf(fd, fmt, args)
+fprintf(fp, fmt, args)
+	File *fp;
 	char *fmt;
 	char args;
 {
 	char buf[SSIZE];
 
-	sys_write(fd, buf, format(buf, fmt, &args));
+	sys_write(fp, buf, format(buf, fmt, &args));
 }
 
 /*VARARGS1*/

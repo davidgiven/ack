@@ -30,6 +30,7 @@
 		a fixed length input buffer
 */
 
+#include	<system.h>
 #include	"nopp.h"
 #include	"inputtype.h"	/* UF */
 #include	"interface.h"
@@ -37,8 +38,6 @@
 #include	"LLlex.h"
 #include	"input.h"
 #include	"alloc.h"
-#include	"system.h"
-#include	"bufsiz.h"
 
 #ifndef NOPP
 #include	"idepth.h"	/* UF */
@@ -51,7 +50,7 @@ EXPORT char *ipp = 0;		/* input pointer	*/
 EXPORT int NoUnstack = 0;	/* if 1: report EOF	*/
 
 #ifndef READ_IN_ONE
-PRIVATE int FilDes = -1;	/* current input medium	*/
+PRIVATE File *FilDes = 0;	/* current input medium	*/
 #endif READ_IN_ONE
 
 #ifndef NOPP
@@ -63,7 +62,7 @@ struct buffer_header	{
 	char *bh_text;	/* pointer to buffer containing text	*/
 	char *bh_ipp;	/* current read pointer (= stacked ipp)	*/
 	char *bh_wdir;	/* directory of current file		*/
-	int bh_fd;	/* >= 0 (fd if !READ_IN_ONE) in case of file	*/
+	File *bh_fp;	/* needed for files if !READ_IN_ONE	*/
 };
 
 PRIVATE struct buffer_header instack[IDEPTH];	/* stack of input media	*/
@@ -91,27 +90,21 @@ readfile(filename, size)
 	char *filename;
 	long *size;
 {
-	int fd;			/* filedescriptor for `filename'	*/
+	File *fp;		/* filedescriptor for `filename'	*/
 	char *cbuf;		/* pointer to buffer to be returned	*/
-	register tmp;
+	int tmp;
+	long sys_filesize();
 
-	if ((fd = sys_open(filename, OP_RDONLY)) < 0)	{
-		/* can't open this file */
+	if (sys_open(filename, OP_READ, &fp) == 0) /* can't open this file */
 		return (char *) 0;
-	}
-
-	if ((*size = sys_fsize(fd)) < 0)
+	if ((*size = sys_filesize(filename)) == -1L)
 		fatal("(readfile) cannot get size of file");
-
 	/* allocate enough space to store contents of the file		*/
 	cbuf = Malloc(*size + 2);
-
-	tmp = sys_read(fd, cbuf + 1, (int) *size); /* read the file	*/
-	if (tmp != *size)
-		fatal("(readfile) bad read count");
-
+	if (sys_read(fp, cbuf + 1, (int) *size, &tmp) == 0 || tmp != *size)
+		fatal("(readfile) bad read");
 	(*size)++;		/* keep book of the size!	*/
-	sys_close(fd);		/* filedes no longer needed	*/
+	sys_close(fp);		/* filedes no longer needed	*/
 	cbuf[0] = '\0';		/* allow pushback of first char	*/
 	cbuf[*size] = '\0';	/* invoke loadbuf() at end	*/
 	return cbuf;
@@ -173,7 +166,7 @@ push_bh()
 PRIVATE int
 pop_bh()
 {
-	int pfd = head->bh_fd;
+	File *pfp = head->bh_fp;
 
 	if (NoUnstack) {
 		lexerror("unexpected EOF");
@@ -186,9 +179,9 @@ pop_bh()
 
 	ipp = (--head)->bh_ipp; /* restore the previous input pointer	*/
 
-	if (pfd >= 0)	{		/* unstack a file	*/
+	if (pfp != 0)	{		/* unstack a file	*/
 #ifndef READ_IN_ONE
-		closefile(pfd);
+		closefile(pfp);
 		popbuf();		/* free last buffer	*/
 #endif READ_IN_ONE
 		LineNumber = head->bh_lineno;
@@ -197,7 +190,7 @@ pop_bh()
 	}
 
 #ifndef READ_IN_ONE
-	FilDes = head->bh_fd;
+	FilDes = head->bh_fp;
 #endif READ_IN_ONE
 
 	return 1;
@@ -208,32 +201,36 @@ pop_bh()
 /*	low level IO routines: openfile(), readblock() and closefile()
 */
 
-PRIVATE int
+PRIVATE File *
 openfile(filename)
 	char *filename;
 {
-	int fd;			/* filedescriptor for `filename'	*/
+	File *fp;
 
-	if ((fd = sys_open(filename, OP_RDONLY)) < 0 && sys_errno == EMFILE)
-		fatal("too many files open");
-	return fd;
+	if (filename == 0)
+		return STDIN;
+	if (sys_open(filename, OP_READ, &fp) == 0)
+		return (File *)0;
+	return fp;
 }
 
 PRIVATE
-closefile(fd)
+closefile(fp)
+	File *fp;
 {
-	sys_close(fd);
+	if (fp != STDIN)
+		sys_close(fp);
 }
 
 PRIVATE int
-readblock(fd, buf)
+readblock(fp, buf)
+	File *fp;
 	char buf[];
 {
-	register n;
+	int n;
 
-	if ((n = sys_read(fd, &buf[1], BUFSIZ)) < 0) {
-		fatal("(readblock) bad read from file");
-	}
+	if (sys_read(fp, &buf[1], BUFSIZ, &n) == 0)
+		fatal("(readblock) bad read");
 	buf[0] = buf[n + 1] = '\0';
 	return n;
 }
@@ -249,16 +246,19 @@ InsertFile(filnam, table)
 {
 	char *mk_filename(), *newfn;
 	char *strcpy();
+	File *openfile();
 
 #ifdef READ_IN_ONE
 	char *readfile(), *text;
 	long size;
 #else READ_IN_ONE
-	int fd = -1;
+	File *fp = 0;
 #endif READ_IN_ONE
 
+#ifdef READ_IN_ONE
 	if (!filnam)
 		return 0;
+#endif READ_IN_ONE
 
 #ifndef NOPP
 	if (table == 0 || filnam[0] == '/') {	/* don't look in the table! */
@@ -266,17 +266,20 @@ InsertFile(filnam, table)
 #ifdef READ_IN_ONE
 		text = readfile(filnam, &size);
 #else READ_IN_ONE
-		fd = openfile(filnam);
+		fp = openfile(filnam);
+		if (filnam == 0)
+			filnam = "standard input";
 #endif READ_IN_ONE
 #ifndef NOPP
 	}
 	else {
+		ASSERT(filnam != 0);
 		while (*table) {	/* look in the directory table	*/
 			newfn = mk_filename(*table++, filnam);
 #ifdef READ_IN_ONE
 			if (text = readfile(newfn, &size))
 #else READ_IN_ONE
-			if ((fd = openfile(newfn)) >= 0)
+			if ((fp = openfile(newfn)) != 0)
 #endif READ_IN_ONE
 			{
 				/* free filnam ??? */
@@ -290,7 +293,7 @@ InsertFile(filnam, table)
 #ifdef READ_IN_ONE
 	if (text)
 #else READ_IN_ONE
-	if (fd >= 0)
+	if (fp != 0)
 #endif READ_IN_ONE
 #ifndef NOPP
 	{
@@ -303,11 +306,11 @@ InsertFile(filnam, table)
 		bh->bh_wdir = *WorkingDir;
 #ifdef READ_IN_ONE
 		bh->bh_size = size;
-		bh->bh_fd = 0;		/* this is a file */
+		bh->bh_fp = STDIN;		/* this is a file */
 		ipp = bh->bh_text = text;
 #else READ_IN_ONE
-		bh->bh_size = readblock(fd, ipp = bh->bh_text = pushbuf()) + 1;
-		FilDes = bh->bh_fd = fd;
+		bh->bh_size = readblock(fp, ipp = bh->bh_text = pushbuf()) + 1;
+		FilDes = bh->bh_fp = fp;
 #endif READ_IN_ONE
 		bh->bh_text[0] = '\n';	/* wake up pp if '#' comes first */
 		return 1;
@@ -318,7 +321,7 @@ InsertFile(filnam, table)
 		isize = size;
 		ipp = text;
 #else READ_IN_ONE
-		isize = readblock(FilDes = fd, ipp = &ibuf[0]) + 1;
+		isize = readblock(FilDes = fp, ipp = &ibuf[0]) + 1;
 #endif READ_IN_ONE
 		ibuf[0] = '\n';
 		return 1;
@@ -340,10 +343,10 @@ InsertText(text, length)
 	bh->bh_size = (long) length;
 	bh->bh_text = text;
 	bh->bh_wdir = *WorkingDir;
-	bh->bh_fd = -1;			/* this is no file !	*/
+	bh->bh_fp = 0;	/* this is not a file !	*/
 	ipp = text + 1;
 #ifndef READ_IN_ONE
-	FilDes = -1;
+	FilDes = 0;
 #endif READ_IN_ONE
 }
 #endif NOPP
@@ -376,13 +379,13 @@ loadbuf()
 
 #ifndef READ_IN_ONE
 #ifndef NOPP
-	if (	FilDes >= 0
+	if (	FilDes != 0
 	&&	(head->bh_size = readblock(FilDes, head->bh_text)) > 0
 	)	{
 		return ipp = &(head->bh_text[1]), *ipp++;
 	}
 #else NOPP
-	if (FilDes >= 0 && (isize = readblock(FilDes, &ibuf[0])) > 0)
+	if (FilDes != 0 && (isize = readblock(FilDes, &ibuf[0])) > 0)
 		return ipp = &ibuf[1], *ipp++;
 #endif NOPP
 

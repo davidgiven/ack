@@ -78,7 +78,7 @@ prepend_scopes(dst_file)
 	struct stack_entry *se = local_level->sl_entry;
 
 	if (C_open(dst_file) == 0)
-		fatal("cannot create file %s", dst_file);
+		fatal("cannot create %s", dst_file ? dst_file : "stdout");
 	famous_first_words();
 	while (se != 0)	{
 		struct idf *idf = se->se_idf;
