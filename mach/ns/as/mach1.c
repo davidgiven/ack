@@ -11,8 +11,8 @@
 #define low4(val)	((int)(val&0xF))
 
 /* signed value fits in ? bits */
-#define fit32(val)	( (val)>= -2147483648 && (val)<=2147483647 )
-#define fit16(val)	( (val)>= -32768 && (val)<=32767 )
+#define fit32(val)	( (val)>= -2147483647L-1 && (val)<=2147483647L )
+#define fit16(val)	( (val)>= -32767-1 && (val)<=32767 )
 #define fit8(val)	( (val)>= -128 && (val)<=127 )
 #define	fit4(val)	( (val)>= -8 && (val)<=7 )
 
