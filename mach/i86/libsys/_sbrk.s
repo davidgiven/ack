@@ -1,17 +1,16 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define __sbrk
-.extern __sbrk, xbrk, cerror
 __sbrk:
 push	bp
 mov	bp,sp
 mov	ax,4(bp)
-mov	bx,(np)
+mov	bx,(.limhp)
 add	ax,bx
 mov	cx,sp
 sub	cx,128
 sub	cx,ax
 jbe	1f
-mov	(np),ax
+mov	(.limhp),ax
 sub	ax,bx
 jbe	2f
 call	xbrk

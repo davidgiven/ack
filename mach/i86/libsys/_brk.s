@@ -1,18 +1,14 @@
 .sect .text; .sect .rom; .sect .data; .sect .bss; .sect .text
 .define __brk
 .define xbrk
-.define np
-.extern __brk
-.extern xbrk,endbss
-.extern np, cerror
 __brk:	
 	mov bx,sp
 	mov ax,2(bx)
 	mov cx,sp
 	sub cx,128
 	jbe 1f
-	mov bx,(np)
-	mov (np),ax
+	mov bx,(.limhp)
+	mov (.limhp),ax
 	sub ax,bx
 	jbe 2f
 	call xbrk
@@ -34,6 +30,3 @@ xbrk:
 3:
 	pop di
 	ret
-.sect .data
-np: .data2 endbss
-.sect .text
