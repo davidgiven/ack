@@ -394,7 +394,7 @@ size of the elements.
 The descriptor is pushed first.
 If the parameter is a value parameter, the called routine must make sure
 that its value is never changed, for instance by making its own copy
-of the array.
+of the array. The Modula-2 compiler does exactly this.
 .NH 1
 References
 .IP [1]
