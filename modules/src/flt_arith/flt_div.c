@@ -57,7 +57,7 @@ flt_div(e1,e2,e3)
 		if (u_p[0] == 0 && u_p[1] < v[1]) continue;
 		temp = ((long)u_p[0] << 16) + u_p[1];
 		if (u_p[0] >= v[1]) {
-			q_est = 0x0000FFFF;
+			q_est = 0x0000FFFFL;
 		}
 		else if (v[1] == 1) {
 			q_est = temp;
