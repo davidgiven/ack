@@ -25,12 +25,12 @@ st_alloc(phead, size, count)
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
 			p += size;
-			((_PALLOC_) p)->_A_next = p - size;
+			((_PALLOC_) p)->_A_next = (_PALLOC_) (p - size);
 		}
 		*phead = p;
 	}
 	else	p = *phead;
-	*phead = ((_PALLOC_)p)->_A_next;
+	*phead = (char *) (((_PALLOC_)p)->_A_next);
 	retval = p;
 	if (size >= sizeof(long)) {
 		q = (long *) p;

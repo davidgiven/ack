@@ -25,12 +25,12 @@ std_alloc(phead, size, count, pcnt)
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
 			p += size;
-			((_PALLOC_) p)->_A_next = p - size;
+			((_PALLOC_) p)->_A_next = (_PALLOC_) (p - size);
 		}
 		*phead = p;
 	}
 	else p = *phead;
-	*phead = ((_PALLOC_) p)->_A_next;
+	*phead = (char *) (((_PALLOC_) p)->_A_next);
 	p += size;
 	while (size--) *--p = 0;
 	return p;
