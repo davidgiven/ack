@@ -29,11 +29,11 @@ STATIC
 Xerror(nd, mess, edf)
 	struct node *nd;
 	char *mess;
-	struct def *edf;
+	register struct def *edf;
 {
 	if (edf) {
 		if (edf->df_kind != D_ERROR)  {
-			node_error(nd, "\"%s\": %s", edf->df_idf->id_text, mess);
+			node_error(nd,"\"%s\": %s", edf->df_idf->id_text, mess);
 		}
 	}
 	else	node_error(nd, "%s", mess);
@@ -517,6 +517,16 @@ ChkProcCall(expp)
 	if (left->nd_class == Def || left->nd_class == LinkDef) {
 		edf = left->nd_def;
 	}
+	if (left->nd_type == error_type) {
+		/* Just check parameters as if they were value parameters
+		*/
+		expp->nd_type = error_type;
+		while (expp->nd_right) {
+			getarg(&expp, 0, 0, edf);
+		}
+		return 0;
+	}
+
 	expp->nd_type = RemoveEqual(ResultType(left->nd_type));
 
 	/* Check parameter list
@@ -564,31 +574,30 @@ ChkCall(expp)
 	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
-	if (! ChkDesignator(left)) return 0;
-
-	if (IsCast(left)) {
-		/* It was a type cast.
-		*/
-		return ChkCast(expp, left);
-	}
-
-	if (IsProcCall(left)) {
-		/* A procedure call.
-		   It may also be a call to a standard procedure
-		*/
-		if (left->nd_type == std_type) {
-			/* A standard procedure
+	if (ChkDesignator(left)) {
+		if (IsCast(left)) {
+			/* It was a type cast.
 			*/
-			return ChkStandard(expp, left);
+			return ChkCast(expp, left);
 		}
-		/* Here, we have found a real procedure call. The left hand
-		   side may also represent a procedure variable.
-		*/
-		return ChkProcCall(expp);
-	}
 
-	node_error(left, "procedure, type, or function expected");
-	return 0;
+		if (IsProcCall(left)) {
+			/* A procedure call.
+		   	   It may also be a call to a standard procedure
+			*/
+			if (left->nd_type == std_type) {
+				/* A standard procedure
+				*/
+				return ChkStandard(expp, left);
+			}
+			/* Here, we have found a real procedure call. 
+			   The left hand side may also represent a procedure
+			   variable.
+			*/
+		}
+		else node_error(left, "procedure, type, or function expected");
+	}
+	return ChkProcCall(expp);
 }
 
 STATIC struct type *
