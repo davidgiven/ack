@@ -19,14 +19,14 @@ struct timezone {
 	int	tz_dsttime;	/* type of dst correction */
 };
 
-int gettimeofday(struct timeval *tp, struct timezone *tzp);
+int _gettimeofday(struct timeval *tp, struct timezone *tzp);
 
 time_t
 time(time_t *timer)
 {
 	struct timeval tv;
 	struct timezone tz;
-	gettimeofday(&tv, &tz);
+	_gettimeofday(&tv, &tz);
 
 	if (timer) *timer = tv.tv_sec;
 	return tv.tv_sec;

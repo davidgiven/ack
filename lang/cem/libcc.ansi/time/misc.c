@@ -20,7 +20,7 @@ struct timezone {
 	int	tz_dsttime;	/* type of dst correction */
 };
 
-int gettimeofday(struct timeval *tp, struct timezone *tzp);
+int _gettimeofday(struct timeval *tp, struct timezone *tzp);
 
 #elif	!defined(_POSIX_SOURCE) && !defined(__USG)
 #if	!defined(_MINIX)		/* MINIX has no ftime() */
@@ -30,7 +30,7 @@ struct timeb {
 	short	timezone;
 	short	dstflag;
 };
-void ftime(struct timeb *bp);
+void _ftime(struct timeb *bp);
 #endif
 #endif
 
@@ -279,7 +279,7 @@ _tzset(void)
 	struct timeval tv;
 	struct timezone tz;
 
-	gettimeofday(&tv, &tz);
+	_gettimeofday(&tv, &tz);
 	_daylight = tz.tz_dsttime;
 	_timezone = tz.tz_minuteswest * 60;
 
@@ -288,7 +288,7 @@ _tzset(void)
 #if	!defined(_MINIX)		/* MINIX has no ftime() */
 	struct timeb time;
 
-	ftime(&time);
+	_ftime(&time);
 	_timezone = time.timezone * 60L;
 	_daylight = time.dstflag;
 #endif

@@ -34,7 +34,7 @@ struct rusage {
 	long	ru_nivcsw;		/* involuntary context switches */
 };
 
-void getrusage(int who, struct rusage *rusage);
+void _getrusage(int who, struct rusage *rusage);
 
 #elif	defined(_POSIX_SOURCE) || defined(__USG)
 
@@ -45,7 +45,7 @@ struct tms {
 	time_t	tms_cstime;		/* system time, children */
 };
 
-long times(struct tms *buffer);
+long _times(struct tms *buffer);
 
 #else					/* Version 7 UNIX */
 
@@ -56,7 +56,7 @@ struct tbuffer {
 	long child_system_time;
 };
 
-long times(struct tbuffer *buffer);
+long _times(struct tbuffer *buffer);
 
 #endif
 
@@ -66,20 +66,20 @@ clock(void)
 #if	defined(__BSD4_2)
 	struct rusage rusage;
 
-	getrusage(RUSAGE_SELF, &rusage);
+	_getrusage(RUSAGE_SELF, &rusage);
 
 	return (((unsigned long)rusage.ru_utime.tv_sec * CLOCKS_PER_SEC)
 		+ rusage.ru_utime.tv_usec);
 #elif	defined(_POSIX_SOURCE) || defined(__USG)
 	struct tms tms;
 
-	times(&tms);
+	_times(&tms);
 	/* Assume that time_t can be converted to clock_t for Sys5 */
 	return tms.tms_utime;
 #else
 	struct tbuffer tbuffer;
 
-	times(&tbuffer);
+	_times(&tbuffer);
 	return tbuffer.proc_user_time;
 #endif
 }
