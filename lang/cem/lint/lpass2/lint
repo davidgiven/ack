@@ -28,7 +28,7 @@ NEW=/usr/tmp/lint2.$$
 trap "rm -f $TMP $NEW; exit 1" 1 2 15
 trap "rm -f $TMP $NEW; exit 0" 0
 
-set dummy $LINTFLAGS $@			# dummy as a shield for $LINTFLAGS
+set dummy $LINTFLAGS "$@"		# dummy as a shield for $LINTFLAGS
 shift					# remove dummy
 
 LIBRARY=
@@ -49,7 +49,16 @@ do
 		PARAMS1="$PARAMS1 -R"
 		shift
 		;;
-	-[DUI]*)# Define, Undef and Include; for pass 1 only
+	-D*=*)	# Define with equal sign; for pass 1 only
+		# be careful about funny characters in -D
+		# this is still not entirely correct
+		HD=`expr "$1" : '\([^=]*\)=.*'`
+		TL=`expr "$1" : '[^=]*=\(.*\)'`
+		PARAMS1="$PARAMS1 $HD='$TL'"
+		shift
+		;;
+	-[DUI]*)# Define, Undef and Include, otherwise; for pass 1 only
+		# this is the simple case
 		PARAMS1="$PARAMS1 $1"
 		shift
 		;;
@@ -89,7 +98,8 @@ case "$LIBRARY" in
 					;;
 				*.c)	# a real C-file
 					STATNR=` expr $STATNR + 1 `
-					$LPASS1 -S$STATNR -Dlint $PARAMS1 $INCLUDES $F
+					eval "$LPASS1 -S$STATNR -Dlint \
+						$PARAMS1 $INCLUDES $F"
 					;;
 				*)	# a lint library?
 					case `basename $F` in
@@ -140,7 +150,7 @@ case "$LIBRARY" in
 	do
 		case $F in
 		*.c)	# a C file
-			$LPASS1 $PARAMS1 $INCLUDES -Dlint -L $F
+			eval "$LPASS1 $PARAMS1 $INCLUDES -Dlint -L $F"
 			;;
 		*)	# a library?
 			case `basename $F` in
