@@ -17,10 +17,10 @@
 	mov	di,dx
 	jmp     bx
 1:
-	mov	bx,si
+	mov	ax,si
 	mov     si,sp
 	rep movs
 	mov     sp,si
 	mov	di,dx
-	mov	si,bx
+	mov	si,ax
 	jmp     bx
