@@ -9,6 +9,11 @@
  */
 
 operation
+	:	{ curr_instr = curr_token; }
+		_operation
+	;
+
+_operation
 	:	bcdx DREG ',' DREG
 			{	emit2($1 | $2 | $4<<9);}
 	|	bcdx '-' '(' AREG ')' ',' '-' '(' AREG ')'

@@ -8,6 +8,23 @@
  * Motorola 68000/68010 auxiliary functions
  */
 
+static int
+extension_offset()
+{
+	switch(curr_instr) {
+	case MOVEM:
+	case FMOVE:
+	case FMOVEM:
+	case FDYADIC:
+	case FMONADIC:
+	case FSINCOS:
+	case FSCC:
+	case FTST:
+		return 4;
+	}
+	return 2;
+}
+
 ea_1(sz, bits)
 {
 	register flag;
@@ -376,7 +393,7 @@ ea5x73(rg, sz)
 		/* pc relative with index */
 		if (sz == SIZE_NON)
 			sz = SIZE_DEF;
-		exp_2.val -= (DOTVAL + 2);
+		exp_2.val -= (DOTVAL + extension_offset());
 		mrg_2 = 073;
 		checksize(sz, 2|4);
 		index(rg<<12 | (sz&0200)<<4);
@@ -416,10 +433,11 @@ ea707172(sz)
 		return;
 	}
 	if ((exp_2.typ & ~S_DOT) == DOTTYP) {
-		sm = fitw(exp_2.val-(DOTVAL+2));
+		int off = extension_offset();
+		sm = fitw(exp_2.val-(DOTVAL+off));
 		sm = small(sm, 2);
 		if (sm) {	/* pc relative */
-			exp_2.val -= (DOTVAL+2);
+			exp_2.val -= (DOTVAL+off);
 			mrg_2 = 072;
 		}
 	} else {
@@ -447,13 +465,13 @@ ea6x(rg, ir, sz)
 ea72()
 {
 	mrg_2 = 072;
-	exp_2.val -= (DOTVAL + 2);
+	exp_2.val -= (DOTVAL + extension_offset());
 }
 
 ea73(ri, sz)
 {
 	mrg_2 = 073;
-	exp_2.val -= (DOTVAL + 2);
+	exp_2.val -= (DOTVAL + extension_offset());
 	checksize(sz, 2|4);
 	index(ri<<12 | (sz&0200)<<4);
 }

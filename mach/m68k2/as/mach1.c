@@ -42,6 +42,7 @@ extern expr_t	exp_1,exp_2;
 extern valu_t	rel_1,rel_2;
 #endif
 extern int 	model;		/* 68000/68010 */
+extern int	curr_instr;
 
 /* addressing mode bits */
 #define	DTA		0x01
