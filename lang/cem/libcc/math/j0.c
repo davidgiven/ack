@@ -10,6 +10,7 @@
 #include <math.h>
 #include <errno.h>
 
+extern int errno;
 
 static double
 P0(x)

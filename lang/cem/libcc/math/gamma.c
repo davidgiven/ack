@@ -10,6 +10,8 @@
 #include <math.h>
 #include <errno.h>
 
+extern int errno;
+
 static double
 smallpos_gamma(x)
 	double x;

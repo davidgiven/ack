@@ -10,6 +10,8 @@
 #include <math.h>
 #include <errno.h>
 
+extern int errno;
+
 double
 yn(n, x)
 	double x;
