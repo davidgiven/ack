@@ -71,7 +71,7 @@ iocc_t iops[20];
 %token TESTS
 %token STACKINGRULES COERCIONS
 %token INSTRUCTIONS
-%token STACKHEIGHT FALLTHROUGH LABELDEF
+%token TOPELTSIZE FALLTHROUGH LABELDEF
 %token PROC CALL EXAMPLE
 %token FROM TO
 %token TEST MOVE STACK RETURN
@@ -846,7 +846,7 @@ gen_instruction
 	| TEST tokeninstance
 		{ $$ = gen_test($2);}
 	| LABELDEF emarg
-		{ $$ = gen_label($2-1); use_shc++; }
+		{ $$ = gen_label($2-1); use_tes++; }
 	| RETURN
 		{ $$ = gen_preturn(); }
 	;
@@ -1012,8 +1012,8 @@ expr
 		{ $$ = make_expr(TYPBOOL,EX_DEFINED,i_expr($3),0); }
 	| SAMESIGN '(' expr ',' expr ')'
 		{ $$ = make_expr(TYPBOOL,EX_SAMESIGN,i_expr($3),i_expr($5)); }
-	| STACKHEIGHT '(' emarg ')'
-		{ $$ = make_expr(TYPINT,EX_STACKHEIGHT,$3-1,0); }
+	| TOPELTSIZE '(' emarg ')'
+		{ $$ = make_expr(TYPINT,EX_TOPELTSIZE,$3-1,0); }
 	| FALLTHROUGH '(' emarg ')'
 		{ $$ = make_expr(TYPBOOL,EX_FALLTHROUGH,$3-1,0); }
 	| SFIT '(' expr ',' expr ')'

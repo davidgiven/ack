@@ -11,7 +11,7 @@ int	code_in_c=1;	/* put code in "tables.c" */
 int	tabledebug=0;	/* do not generate code for table debugging */
 #endif
 int	verbose=0;	/* print all statistics */
-int	use_shc;	/* use stackheight information */
+int	use_tes;	/* use top element size information */
 char	*c_file=	"tables.c";
 char	*h_file=	"tables.H";
 char	*cd_file=	"code";
@@ -593,8 +593,8 @@ outdefs() {
 	}
 	if (tabledebug)
 		cdef("TABLEDEBUG",1);
-	if (use_shc)
-		cdef("USE_SHC",1);
+	if (use_tes)
+		cdef("USE_TES",1);
 }
 
 outars() {

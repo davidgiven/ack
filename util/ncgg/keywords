@@ -43,7 +43,7 @@ reusing	REUSING
 rom	ROM
 samesign	SAMESIGN
 sfit	SFIT
-stackheight	STACKHEIGHT
+topeltsize	TOPELTSIZE
 test	TEST
 to	TO
 ufit	UFIT
