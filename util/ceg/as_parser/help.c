@@ -221,6 +221,8 @@ va_dcl
 	va_end(pvar);
 }
 
+extern int nerrors;
+
 /*VARARGS*/
 error(va_alist)
 va_dcl
@@ -228,6 +230,7 @@ va_dcl
 	char *fmt;
 	va_list pvar;
 
+	nerrors++;
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
 	fprint( STDERR, "!! ERROR :	");

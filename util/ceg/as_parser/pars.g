@@ -124,21 +124,22 @@ if_statement	: IF
 
 {
 
+int nerrors;
 static int saved = 0, token;
 
 
 LLmessage( inserted_token)
 int inserted_token;
 {
+	nerrors++;
 	if ( inserted_token == 0) {
 		fprint( STDERR, "Sytax error in line %d, ", yylineno);
 		print_token( LLsymb);
 		fprint( STDERR, "  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint( STDERR, "Stack overflow in line %d, fatal error!\n",
+		fprint( STDERR, "Garbage at end, line %d!!\n",
 			 yylineno);
-		exit( 1);
 	}
 	else {
 		fprint( STDERR, "Sytax error in line %d, ", yylineno);
@@ -194,7 +195,7 @@ int lex_analyzer()
 main()
 {
 	table();
-	return( 0);
+	exit(nerrors);
 }
 
 }
