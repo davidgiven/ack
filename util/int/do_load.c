@@ -42,7 +42,7 @@ DoLOCm(arg)
 	long arg;
 {
 	/* LOC c: Load constant (i.e. push one word onto the stack) */
-	register long l = arg_c(arg);
+	long l = arg_c(arg);
 
 	LOG(("@L6 DoLOCm(%ld)", l));
 	spoilFRA();
@@ -102,7 +102,7 @@ DoLOLm(arg)
 
 	LOG(("@L6 DoLOLm(%ld)", l));
 	spoilFRA();
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOLn2(arg)
@@ -114,7 +114,7 @@ DoLOLn2(arg)
 	LOG(("@L6 DoLOLn2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOLn4(arg)
@@ -126,7 +126,7 @@ DoLOLn4(arg)
 	LOG(("@L6 DoLOLn4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOLp2(arg)
@@ -138,7 +138,7 @@ DoLOLp2(arg)
 	LOG(("@L6 DoLOLp2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOLp4(arg)
@@ -150,7 +150,7 @@ DoLOLp4(arg)
 	LOG(("@L6 DoLOLp4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOLs(hob, wfac)
@@ -163,7 +163,7 @@ DoLOLs(hob, wfac)
 	LOG(("@L6 DoLOLs(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_st(loc_addr(l), wsize);
+	pushw_st(loc_addr(l));
 }
 
 DoLOEl2(arg)
@@ -174,7 +174,7 @@ DoLOEl2(arg)
 
 	LOG(("@L6 DoLOEl2(%lu)", p));
 	spoilFRA();
-	push_m(arg_g(p), wsize);
+	pushw_m(arg_g(p));
 }
 
 DoLOEl4(arg)
@@ -185,7 +185,7 @@ DoLOEl4(arg)
 
 	LOG(("@L6 DoLOEl4(%lu)", p));
 	spoilFRA();
-	push_m(arg_g(p), wsize);
+	pushw_m(arg_g(p));
 }
 
 DoLOEs(hob, wfac)
@@ -197,7 +197,7 @@ DoLOEs(hob, wfac)
 
 	LOG(("@L6 DoLOEs(%lu)", p));
 	spoilFRA();
-	push_m(arg_g(p), wsize);
+	pushw_m(arg_g(p));
 }
 
 DoLILm(arg)
@@ -208,7 +208,7 @@ DoLILm(arg)
 
 	LOG(("@L6 DoLILm(%ld)", l));
 	spoilFRA();
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLILn2(arg)
@@ -220,7 +220,7 @@ DoLILn2(arg)
 	LOG(("@L6 DoLILn2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLILn4(arg)
@@ -232,7 +232,7 @@ DoLILn4(arg)
 	LOG(("@L6 DoLILn4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLILp2(arg)
@@ -244,7 +244,7 @@ DoLILp2(arg)
 	LOG(("@L6 DoLILp2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLILp4(arg)
@@ -256,7 +256,7 @@ DoLILp4(arg)
 	LOG(("@L6 DoLILp4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLILs(hob, wfac)
@@ -269,7 +269,7 @@ DoLILs(hob, wfac)
 	LOG(("@L6 DoLILs(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	push_m(st_lddp(loc_addr(l)), wsize);
+	pushw_m(st_lddp(loc_addr(l)));
 }
 
 DoLOFl2(arg)
@@ -281,7 +281,7 @@ DoLOFl2(arg)
 
 	LOG(("@L6 DoLOFl2(%ld)", l));
 	spoilFRA();
-	push_m(p + arg_f(l), wsize);
+	pushw_m(p + arg_f(l));
 }
 
 DoLOFl4(arg)
@@ -293,7 +293,7 @@ DoLOFl4(arg)
 
 	LOG(("@L6 DoLOFl4(%ld)", l));
 	spoilFRA();
-	push_m(p + arg_f(l), wsize);
+	pushw_m(p + arg_f(l));
 }
 
 DoLOFm(arg)
@@ -305,7 +305,7 @@ DoLOFm(arg)
 
 	LOG(("@L6 DoLOFm(%ld)", l));
 	spoilFRA();
-	push_m(p + arg_f(l), wsize);
+	pushw_m(p + arg_f(l));
 }
 
 DoLOFs(hob, wfac)
@@ -318,7 +318,7 @@ DoLOFs(hob, wfac)
 
 	LOG(("@L6 DoLOFs(%ld)", l));
 	spoilFRA();
-	push_m(p + arg_f(l), wsize);
+	pushw_m(p + arg_f(l));
 }
 
 DoLALm(arg)
@@ -548,7 +548,7 @@ DoLOSl2(arg)
 DoLOSz()
 {
 	/* LOS w: Load indirect, w-byte integer on top of stack gives object size */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@L6 DoLOSz(%ld)", l));

@@ -130,7 +130,7 @@ PRIVATE std_item(addr)
 	}
 	else
 	if (	is_wordaligned(addr)
-	&&	is_in_stack(addr, wsize)
+	&&	w_is_in_stack(addr)
 	&&	std_bytes(addr, addr + wsize, SH_INT)
 	) {
 		/* print a word value */

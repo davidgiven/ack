@@ -62,7 +62,7 @@ DoANDz()
 {
 	/* AND w: Boolean and on two groups of w bytes */
 	/* size of objects to be compared (in bytes) on top of stack */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@X6 DoANDz(%ld)", l));
@@ -129,7 +129,7 @@ DoIORs(hob, wfac)
 DoIORz()
 {
 	/* IOR w: Boolean inclusive or on two groups of w bytes */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@X6 DoIORz(%ld)", l));
@@ -162,7 +162,7 @@ DoXORl2(arg)
 DoXORz()
 {
 	/* XOR w: Boolean exclusive or on two groups of w bytes */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@X6 DoXORz(%ld)", l));
@@ -194,7 +194,7 @@ DoCOMl2(arg)
 DoCOMz()
 {
 	/* COM w: Complement (one's complement of top w bytes) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@X6 DoCOMz(%ld)", l));
@@ -211,7 +211,7 @@ DoROLl2(arg)
 {
 	/* ROL w: Rotate left a group of w bytes */
 	register size l = (L_arg_2() * arg);
-	register long s, t = upop(wsize);
+	register long s, t = uwpop();
 	register long signbit;
 
 	LOG(("@X6 DoROLl2(%ld)", l));
@@ -243,8 +243,8 @@ DoROLl2(arg)
 DoROLz()
 {
 	/* ROL w: Rotate left a group of w bytes */
-	register size l = upop(wsize);
-	register long s, t = upop(wsize);
+	register size l = uwpop();
+	register long s, t = uwpop();
 	register long signbit;
 
 	LOG(("@X6 DoROLz(%ld)", l));
@@ -278,7 +278,7 @@ DoRORl2(arg)
 {
 	/* ROR w: Rotate right a group of w bytes */
 	register size l = (L_arg_2() * arg);
-	register long s, t = upop(wsize);
+	register long s, t = uwpop();
 	register long signbit;
 
 	LOG(("@X6 DoRORl2(%ld)", l));
@@ -313,8 +313,8 @@ DoRORl2(arg)
 DoRORz()
 {
 	/* ROR w: Rotate right a group of w bytes */
-	register size l = upop(wsize);
-	register long s, t = upop(wsize);
+	register size l = uwpop();
+	register long s, t = uwpop();
 	register long signbit;
 
 	LOG(("@X6 DoRORz(%ld)", l));

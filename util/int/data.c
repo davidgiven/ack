@@ -94,6 +94,7 @@ newHP(ap)
  *									*
  *	dt_stdp(addr, p)	- STore Data Pointer.			*
  *	dt_stn(addr, l, n)	- STore N byte integer.			*
+ *	dt_stw(addr, l)		- STore wsize byte integer.		*
  *	dt_stf(addr, f, n)	- STore n byte Floating point number.	*
  *									*
  ************************************************************************/
@@ -159,6 +160,30 @@ dt_stn(addr, al, n)
 	}
 }
 
+dt_stw(addr, al)
+	register ptr addr;
+	long al;
+{
+	register int i;
+	register long l = al;
+#ifdef LOGGING
+	/* a psize zero is ambiguous */
+	int sh_flags = (l == 0 && wsize == psize) ? (SH_INT|SH_DATAP) : SH_INT;
+#endif LOGGING
+
+	LOG(("@g6 dt_stw(%lu, %lu)", addr, l));
+	ch_in_data(addr, wsize);
+	ch_wordaligned(addr);
+	for (i = (int) wsize; i > 0; i--, addr++) {
+		ch_dt_prot(addr);
+		data_loc(addr) = (char) l;
+#ifdef LOGGING
+		dt_sh(addr) = sh_flags;
+#endif	LOGGING
+		l = l>>8;
+	}
+}
+
 #ifndef	NOFLOAT
 dt_stf(addr, f, n)
 	register ptr addr;
@@ -191,7 +216,9 @@ dt_stf(addr, f, n)
  *	dt_lddp(addr)      - LoaD Data Pointer from data.		*
  *	dt_ldip(addr)      - LoaD Instruction Pointer from data.	*
  *	dt_ldu(addr, n)    - LoaD n Unsigned bytes from data.		*
+ *	dt_lduw(addr)      - LoaD wsize Unsigned bytes from data.	*
  *	dt_lds(addr, n)    - LoaD n Signed bytes from data.		*
+ *	dt_ldsw(addr)      - LoaD wsize Signed bytes from data.		*
  *									*
  ************************************************************************/
 
@@ -255,10 +282,36 @@ unsigned long dt_ldu(addr, n)
 	}
 #endif	LOGGING
 
-	for (i = (int) n-1; i >= 0; i--) {
-		u = (u<<8) | btou(data_loc(addr + i));
+	addr += n-1;
+	for (i = (int) n-1; i >= 0; i--, addr--) {
+		u = (u<<8) | btou(data_loc(addr));
 	}
 	LOG(("@g6 dt_ldu() returns %lu", u));
+	return (u);
+}
+
+unsigned long dt_lduw(addr)
+	register ptr addr;
+{
+	register int i;
+	register unsigned long u = 0;
+
+	LOG(("@g6 dt_lduw(%lu)", addr));
+
+	ch_in_data(addr, wsize);
+	ch_wordaligned(addr);
+#ifdef	LOGGING
+	if (!is_dt_set(addr, wsize, SH_INT)) {
+		warning(WGIEXP);
+		warn_dtbits(addr, wsize);
+	}
+#endif	LOGGING
+
+	addr += wsize-1;
+	for (i = (int) wsize-1; i >= 0; i--, addr--) {
+		u = (u<<8) | btou(data_loc(addr));
+	}
+	LOG(("@g6 dt_lduw() returns %lu", u));
 	return (u);
 }
 
@@ -280,11 +333,38 @@ long dt_lds(addr, n)
 	}
 #endif	LOGGING
 
-	l = btos(data_loc(addr + n - 1));
-	for (i = n - 2; i >= 0; i--) {
-		l = (l<<8) | btol(data_loc(addr + i));
+	addr += n-2;
+	l = btos(data_loc(addr + 1));
+	for (i = n - 2; i >= 0; i--, addr--) {
+		l = (l<<8) | btol(data_loc(addr));
 	}
 	LOG(("@g6 dt_lds() returns %lu", l));
+	return (l);
+}
+
+long dt_ldsw(addr)
+	register ptr addr;
+{
+	register int i;
+	register long l;
+
+	LOG(("@g6 dt_ldsw(%lu)", addr));
+
+	ch_in_data(addr, wsize);
+	ch_wordaligned(addr);
+#ifdef	LOGGING
+	if (!is_dt_set(addr, wsize, SH_INT)) {
+		warning(WGIEXP);
+		warn_dtbits(addr, wsize);
+	}
+#endif	LOGGING
+
+	addr += wsize-2;
+	l = btos(data_loc(addr + 1));
+	for (i = wsize - 2; i >= 0; i--, addr--) {
+		l = (l<<8) | btol(data_loc(addr));
+	}
+	LOG(("@g6 dt_ldsw() returns %lu", l));
 	return (l);
 }
 

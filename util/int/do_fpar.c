@@ -68,7 +68,7 @@ DoADFz()
 {
 	/* ADF w: Floating add (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoADFz(%ld)", l));
@@ -119,7 +119,7 @@ DoSBFz()
 {
 	/* SBF w: Floating subtract (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoSBFz(%ld)", l));
@@ -170,7 +170,7 @@ DoMLFz()
 {
 	/* MLF w: Floating multiply (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoMLFz(%ld)", l));
@@ -221,7 +221,7 @@ DoDVFz()
 {
 	/* DVF w: Floating divide (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoDVFz(%ld)", l));
@@ -253,7 +253,7 @@ DoNGFz()
 {
 	/* NGF w: Floating negate (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoNGFz(%ld)", l));
@@ -285,7 +285,7 @@ DoFIFz()
 {
 	/* FIF w: Floating multiply and split integer and fraction part (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 
 	LOG(("@F6 DoFIFz(%ld)", l));
@@ -316,7 +316,7 @@ DoFEFz()
 {
 	/* FEF w: Split floating number in exponent and fraction part (*) */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@F6 DoFEFz(%ld)", l));
 	spoilFRA();

@@ -86,7 +86,7 @@ DoASSl2(arg)
 DoASSz()
 {
 	/* ASS w: Adjust the stack pointer by w-byte integer */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@M6 DoASSz(%ld)", l));
 	spoilFRA();
@@ -162,7 +162,7 @@ DoBLSl2(arg)
 DoBLSz()
 {
 	/* BLS w: Block move, size is in w-byte integer on top of stack */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr dp1, dp2;
 
 	LOG(("@M6 DoBLSz(%ld)", l));
@@ -196,7 +196,7 @@ DoCSAm(arg)
 DoCSAz()
 {
 	/* CSA w: Case jump; address of jump table at top of stack */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@M6 DoCSAz(%ld)", l));
 	spoilFRA();
@@ -226,7 +226,7 @@ DoCSBm(arg)
 DoCSBz()
 {
 	/* CSB w: Table lookup jump; address of jump table at top of stack */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@M6 DoCSBz(%ld)", l));
 	spoilFRA();
@@ -290,7 +290,7 @@ DoDUSl2(arg)
 DoDUSz()
 {
 	/* DUS w: Duplicate top w bytes */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr oldSP;
 
 	LOG(("@M6 DoDUSz(%ld)", l));
@@ -337,7 +337,7 @@ DoEXGs(hob, wfac)
 DoEXGz()
 {
 	/* EXG w: Exchange top w bytes */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr oldSP = SP;
 
 	LOG(("@M6 DoEXGz(%ld)", l));
@@ -522,7 +522,7 @@ DoRCKm(arg)
 DoRCKz()
 {
 	/* RCK w: Range check; trap on error */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@M6 DoRCKz(%ld)", l));
 	spoilFRA();
@@ -555,11 +555,11 @@ DoRTTz()
 	}
 
 	/* pop the trap number */
-	upop(wsize);
+	uwpop();
 	
 	/* restore the Function Return Area */
-	FRA_def = upop(wsize);
-	FRASize = upop(wsize);
+	FRA_def = uwpop();
+	FRASize = uwpop();
 	popFRA(FRASize);
 }
 
@@ -587,7 +587,7 @@ DoSIMz()
 	/* SIM -: Store 16 bit ignore mask */
 	LOG(("@M6 DoSIMz()"));
 	spoilFRA();
-	IgnMask = (upop(wsize) | PreIgnMask) & MASK2;
+	IgnMask = (uwpop() | PreIgnMask) & MASK2;
 }
 
 DoSTRs(hob, wfac)
@@ -616,7 +616,7 @@ DoSTRs(hob, wfac)
 DoTRPz()
 {
 	/* TRP -: Cause trap to occur (Error number on stack) */
-	register unsigned int tr = (unsigned int)upop(wsize);
+	register unsigned int tr = (unsigned int)uwpop();
 
 	LOG(("@M6 DoTRPz()"));
 	spoilFRA();
@@ -690,11 +690,11 @@ PRIVATE index_jump(nbytes)
 {
 	register ptr cdp = dppop();	/* Case Descriptor Pointer */
 	register long t_index =		/* Table INDEX */
-			spop(nbytes) - mem_lds(cdp + psize, wsize);
+			spop(nbytes) - mem_lds(cdp + psize, nbytes);
 	register ptr nPC;		/* New Program Counter */
 
-	if (t_index >= 0 && t_index <= mem_lds(cdp + wsize + psize, wsize)) {
-		nPC = mem_ldip(cdp + (2 * wsize) + ((t_index + 1) * psize));
+	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes)) {
+		nPC = mem_ldip(cdp + (2 * nbytes) + ((t_index + 1) * psize));
 	}
 	else if ((nPC = mem_ldip(cdp)) == 0) {
 		trap(ECASE);
@@ -719,12 +719,12 @@ PRIVATE search_jump(nbytes)
 	register ptr cdp = dppop();	/* Case Descriptor Pointer */
 	register long sv = spop(nbytes);/* Search Value */
 	register long nt =		/* Number of Table-entries */
-			mem_lds(cdp + psize, wsize);
+			mem_lds(cdp + psize, nbytes);
 	register ptr nPC;		/* New Program Counter */
 
 	while (--nt >= 0) {
-		if (sv == mem_lds(cdp + (nt+1) * (wsize+psize), wsize)) {
-			nPC = mem_ldip(cdp + wsize + (nt+1)*(wsize+psize));
+		if (sv == mem_lds(cdp + (nt+1) * (nbytes+psize), nbytes)) {
+			nPC = mem_ldip(cdp + nbytes + (nt+1)*(nbytes+psize));
 			if (nPC == 0)
 				trap(ECASE);
 			newPC(nPC);
@@ -754,8 +754,8 @@ PRIVATE range_check(nbytes)
 			st_lds(SP, nbytes);
 
 	if (must_test && !(IgnMask&BIT(ERANGE))) {
-		if (	cv < mem_lds(rdp, wsize)
-		||	cv > mem_lds(rdp + wsize, wsize)
+		if (	cv < mem_lds(rdp, nbytes)
+		||	cv > mem_lds(rdp + nbytes, nbytes)
 		) {
 			trap(ERANGE);
 		}

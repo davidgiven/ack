@@ -21,7 +21,7 @@ DoINCz()
 	/* INC -: Increment word on top of stack by 1 (*) */
 	LOG(("@Z6 DoINCz()"));
 	spoilFRA();
-	wpush(inc(spop(wsize)));
+	wpush(inc(swpop()));
 }
 
 DoINLm(arg)
@@ -34,7 +34,7 @@ DoINLm(arg)
 	LOG(("@Z6 DoINLm(%ld)", l));
 	spoilFRA();
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINLn2(arg)
@@ -48,7 +48,7 @@ DoINLn2(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINLn4(arg)
@@ -62,7 +62,7 @@ DoINLn4(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINLp2(arg)
@@ -76,7 +76,7 @@ DoINLp2(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINLp4(arg)
@@ -90,7 +90,7 @@ DoINLp4(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINLs(hob, wfac)
@@ -105,7 +105,7 @@ DoINLs(hob, wfac)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, inc(st_lds(p, wsize)), wsize);
+	st_stw(p, inc(st_ldsw(p)));
 }
 
 DoINEl2(arg)
@@ -117,7 +117,7 @@ DoINEl2(arg)
 	LOG(("@Z6 DoINEl2(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, inc(dt_lds(p, wsize)), wsize);
+	dt_stw(p, inc(dt_ldsw(p)));
 }
 
 DoINEl4(arg)
@@ -129,7 +129,7 @@ DoINEl4(arg)
 	LOG(("@Z6 DoINEl4(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, inc(dt_lds(p, wsize)), wsize);
+	dt_stw(p, inc(dt_ldsw(p)));
 }
 
 DoINEs(hob, wfac)
@@ -142,7 +142,7 @@ DoINEs(hob, wfac)
 	LOG(("@Z6 DoINEs(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, inc(dt_lds(p, wsize)), wsize);
+	dt_stw(p, inc(dt_ldsw(p)));
 }
 
 DoDECz()
@@ -150,7 +150,7 @@ DoDECz()
 	/* DEC -: Decrement word on top of stack by 1 (*) */
 	LOG(("@Z6 DoDECz()"));
 	spoilFRA();
-	wpush(dec(spop(wsize)));
+	wpush(dec(swpop()));
 }
 
 DoDELn2(arg)
@@ -164,7 +164,7 @@ DoDELn2(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, dec(st_lds(p, wsize)), wsize);
+	st_stw(p, dec(st_ldsw(p)));
 }
 
 DoDELn4(arg)
@@ -178,7 +178,7 @@ DoDELn4(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, dec(st_lds(p, wsize)), wsize);
+	st_stw(p, dec(st_ldsw(p)));
 }
 
 DoDELp2(arg)
@@ -192,7 +192,7 @@ DoDELp2(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, dec(st_lds(p, wsize)), wsize);
+	st_stw(p, dec(st_ldsw(p)));
 }
 
 DoDELp4(arg)
@@ -206,7 +206,7 @@ DoDELp4(arg)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, dec(st_lds(p, wsize)), wsize);
+	st_stw(p, dec(st_ldsw(p)));
 }
 
 DoDELs(hob, wfac)
@@ -221,7 +221,7 @@ DoDELs(hob, wfac)
 	spoilFRA();
 	l = arg_l(l);
 	p = loc_addr(l);
-	st_stn(p, dec(st_lds(p, wsize)), wsize);
+	st_stw(p, dec(st_ldsw(p)));
 }
 
 DoDEEl2(arg)
@@ -233,7 +233,7 @@ DoDEEl2(arg)
 	LOG(("@Z6 DoDEEl2(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, dec(dt_lds(p, wsize)), wsize);
+	dt_stw(p, dec(dt_ldsw(p)));
 }
 
 DoDEEl4(arg)
@@ -245,7 +245,7 @@ DoDEEl4(arg)
 	LOG(("@Z6 DoDEEl4(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, dec(dt_lds(p, wsize)), wsize);
+	dt_stw(p, dec(dt_ldsw(p)));
 }
 
 DoDEEs(hob, wfac)
@@ -258,7 +258,7 @@ DoDEEs(hob, wfac)
 	LOG(("@Z6 DoDEEs(%lu)", p));
 	spoilFRA();
 	p = arg_g(p);
-	dt_stn(p, dec(dt_lds(p, wsize)), wsize);
+	dt_stw(p, dec(dt_ldsw(p)));
 }
 
 DoZRLm(arg)
@@ -269,7 +269,7 @@ DoZRLm(arg)
 
 	LOG(("@Z6 DoZRLm(%ld)", l));
 	spoilFRA();
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZRLn2(arg)
@@ -281,7 +281,7 @@ DoZRLn2(arg)
 	LOG(("@Z6 DoZRLn2(%ld)", l));
 	spoilFRA();
 	l = arg_l(arg);
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZRLn4(arg)
@@ -293,7 +293,7 @@ DoZRLn4(arg)
 	LOG(("@Z6 DoZRLn4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZRLp2(arg)
@@ -305,7 +305,7 @@ DoZRLp2(arg)
 	LOG(("@Z6 DoZRLp2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZRLp4(arg)
@@ -317,7 +317,7 @@ DoZRLp4(arg)
 	LOG(("@Z6 DoZRLp4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZRLs(hob, wfac)
@@ -330,7 +330,7 @@ DoZRLs(hob, wfac)
 	LOG(("@Z6 DoZRLs(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	st_stn(loc_addr(l), 0L, wsize);
+	st_stw(loc_addr(l), 0L);
 }
 
 DoZREl2(arg)
@@ -341,7 +341,7 @@ DoZREl2(arg)
 
 	LOG(("@Z6 DoZREl2(%lu)", p));
 	spoilFRA();
-	dt_stn(arg_g(p), 0L, wsize);
+	dt_stw(arg_g(p), 0L);
 }
 
 DoZREl4(arg)
@@ -352,7 +352,7 @@ DoZREl4(arg)
 
 	LOG(("@Z6 DoZREl4(%lu)", p));
 	spoilFRA();
-	dt_stn(arg_g(p), 0L, wsize);
+	dt_stw(arg_g(p), 0L);
 }
 
 DoZREs(hob, wfac)
@@ -364,7 +364,7 @@ DoZREs(hob, wfac)
 
 	LOG(("@Z6 DoZREs(%lu)", p));
 	spoilFRA();
-	dt_stn(arg_g(p), 0L, wsize);
+	dt_stw(arg_g(p), 0L);
 }
 
 DoZRFl2(arg)
@@ -387,7 +387,7 @@ DoZRFz()
 {
 	/* ZRF w: Load a floating zero of size w */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@Z6 DoZRFz(%ld)", l));
 	spoilFRA();
@@ -425,7 +425,7 @@ DoZERs(hob, wfac)
 DoZERz()
 {
 	/* ZER w: Load w zero bytes */
-	register size i, l = spop(wsize);
+	register size i, l = swpop();
 
 	LOG(("@Z6 DoZERz(%ld)", l));
 	spoilFRA();

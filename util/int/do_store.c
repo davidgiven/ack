@@ -21,7 +21,7 @@ DoSTLm(arg)
 
 	LOG(("@S6 DoSTLm(%ld)", l));
 	spoilFRA();
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTLn2(arg)
@@ -33,7 +33,7 @@ DoSTLn2(arg)
 	LOG(("@S6 DoSTLn2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTLn4(arg)
@@ -45,7 +45,7 @@ DoSTLn4(arg)
 	LOG(("@S6 DoSTLn4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTLp2(arg)
@@ -57,7 +57,7 @@ DoSTLp2(arg)
 	LOG(("@S6 DoSTLp2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTLp4(arg)
@@ -69,7 +69,7 @@ DoSTLp4(arg)
 	LOG(("@S6 DoSTLp4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTLs(hob, wfac)
@@ -82,7 +82,7 @@ DoSTLs(hob, wfac)
 	LOG(("@S6 DoSTLs(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_st(loc_addr(l), wsize);
+	popw_st(loc_addr(l));
 }
 
 DoSTEl2(arg)
@@ -93,7 +93,7 @@ DoSTEl2(arg)
 
 	LOG(("@S6 DoSTEl2(%lu)", p));
 	spoilFRA();
-	pop_m(arg_g(p), wsize);
+	popw_m(arg_g(p));
 }
 
 DoSTEl4(arg)
@@ -104,7 +104,7 @@ DoSTEl4(arg)
 
 	LOG(("@S6 DoSTEl4(%lu)", p));
 	spoilFRA();
-	pop_m(arg_g(p), wsize);
+	popw_m(arg_g(p));
 }
 
 DoSTEs(hob, wfac)
@@ -116,7 +116,7 @@ DoSTEs(hob, wfac)
 
 	LOG(("@S6 DoSTEs(%lu)", p));
 	spoilFRA();
-	pop_m(arg_g(p), wsize);
+	popw_m(arg_g(p));
 }
 
 DoSILn2(arg)
@@ -128,7 +128,7 @@ DoSILn2(arg)
 	LOG(("@S6 DoSILn2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_m(st_lddp(loc_addr(l)), wsize);
+	popw_m(st_lddp(loc_addr(l)));
 }
 
 DoSILn4(arg)
@@ -140,7 +140,7 @@ DoSILn4(arg)
 	LOG(("@S6 DoSILn4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_m(st_lddp(loc_addr(l)), wsize);
+	popw_m(st_lddp(loc_addr(l)));
 }
 
 DoSILp2(arg)
@@ -152,7 +152,7 @@ DoSILp2(arg)
 	LOG(("@S6 DoSILp2(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_m(st_lddp(loc_addr(l)), wsize);
+	popw_m(st_lddp(loc_addr(l)));
 }
 
 DoSILp4(arg)
@@ -164,7 +164,7 @@ DoSILp4(arg)
 	LOG(("@S6 DoSILp4(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_m(st_lddp(loc_addr(l)), wsize);
+	popw_m(st_lddp(loc_addr(l)));
 }
 
 DoSILs(hob, wfac)
@@ -177,7 +177,7 @@ DoSILs(hob, wfac)
 	LOG(("@S6 DoSILs(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
-	pop_m(st_lddp(loc_addr(l)), wsize);
+	popw_m(st_lddp(loc_addr(l)));
 }
 
 DoSTFl2(arg)
@@ -189,7 +189,7 @@ DoSTFl2(arg)
 
 	LOG(("@S6 DoSTFl2(%ld)", l));
 	spoilFRA();
-	pop_m(p + arg_f(l), wsize);
+	popw_m(p + arg_f(l));
 }
 
 DoSTFl4(arg)
@@ -201,7 +201,7 @@ DoSTFl4(arg)
 
 	LOG(("@S6 DoSTFl4(%ld)", l));
 	spoilFRA();
-	pop_m(p + arg_f(l), wsize);
+	popw_m(p + arg_f(l));
 }
 
 DoSTFm(arg)
@@ -213,7 +213,7 @@ DoSTFm(arg)
 
 	LOG(("@S6 DoSTFm(%ld)", l));
 	spoilFRA();
-	pop_m(p + arg_f(l), wsize);
+	popw_m(p + arg_f(l));
 }
 
 DoSTFs(hob, wfac)
@@ -226,7 +226,7 @@ DoSTFs(hob, wfac)
 
 	LOG(("@S6 DoSTFs(%ld)", l));
 	spoilFRA();
-	pop_m(p + arg_f(l), wsize);
+	popw_m(p + arg_f(l));
 }
 
 DoSTIl2(arg)
@@ -294,7 +294,7 @@ DoSTSl2(arg)
 DoSTSz()				/* the arg 'w' is on top of stack */
 {
 	/* STS w: Store indirect, w-byte integer on top of stack gives object size */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr p;
 
 	LOG(("@S6 DoSTSz(%ld)", l));

@@ -40,7 +40,7 @@ DoINNs(hob, wfac)
 DoINNz()
 {
 	/* INN w: Bit test on w byte set (bit number on top of stack) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@Y6 DoINNz(%ld)", l));
 	spoilFRA();
@@ -73,7 +73,7 @@ DoSETs(hob, wfac)
 DoSETz()
 {
 	/* SET w: Create singleton w byte set with bit n on (n is top of stack) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@Y6 DoSETz(%ld)", l));
 	spoilFRA();
@@ -93,7 +93,7 @@ PRIVATE bit_test(w)
 	size w;
 {
 	register int bitno =
-		(int) spop(wsize);	/* bitno on TOS */
+		(int) swpop();	/* bitno on TOS */
 	register char test_byte = (char) 0;/* default value to be tested */
 
 	if (must_test && !(IgnMask&BIT(ESET))) {
@@ -119,7 +119,7 @@ PRIVATE bit_test(w)
 PRIVATE create_set(w)
 	size w;
 {
-	register int bitno = (int) spop(wsize);
+	register int bitno = (int) swpop();
 	register size nbytes = w;
 
 	st_inc(nbytes);

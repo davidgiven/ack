@@ -48,7 +48,7 @@ DoADUl2(arg)
 DoADUz()
 {
 	/* ADU w: Addition */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoADUz(%ld)", l));
@@ -71,7 +71,7 @@ DoSBUl2(arg)
 DoSBUz()
 {
 	/* SBU w: Subtraction */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoSBUz(%ld)", l));
@@ -94,7 +94,7 @@ DoMLUl2(arg)
 DoMLUz()
 {
 	/* MLU w: Multiplication */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoMLUz(%ld)", l));
@@ -117,7 +117,7 @@ DoDVUl2(arg)
 DoDVUz()
 {
 	/* DVU w: Division */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoDVUz(%ld)", l));
@@ -140,7 +140,7 @@ DoRMUl2(arg)
 DoRMUz()
 {
 	/* RMU w: Remainder */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoRMUz(%ld)", l));
@@ -153,7 +153,7 @@ DoSLUl2(arg)
 {
 	/* SLU w: Shift left */
 	register size l = (L_arg_2() * arg);
-	register unsigned long t = upop(wsize);
+	register unsigned long t = uwpop();
 
 	LOG(("@U6 DoSLUl2(%ld)", l));
 	spoilFRA();
@@ -164,8 +164,8 @@ DoSLUl2(arg)
 DoSLUz()
 {
 	/* SLU w: Shift left */
-	register size l = upop(wsize);
-	register unsigned long t = upop(wsize);
+	register size l = uwpop();
+	register unsigned long t = uwpop();
 
 	LOG(("@U6 DoSLUz(%ld)", l));
 	spoilFRA();
@@ -178,7 +178,7 @@ DoSRUl2(arg)
 {
 	/* SRU w: Shift right */
 	register size l = (L_arg_2() * arg);
-	register unsigned long t = upop(wsize);
+	register unsigned long t = uwpop();
 
 	LOG(("@U6 DoSRUl2(%ld)", l));
 	spoilFRA();
@@ -189,8 +189,8 @@ DoSRUl2(arg)
 DoSRUz()
 {
 	/* SRU w: Shift right */
-	register size l = upop(wsize);
-	register unsigned long t = upop(wsize);
+	register size l = uwpop();
+	register unsigned long t = uwpop();
 
 	LOG(("@U6 DoSRUz(%ld)", l));
 	spoilFRA();

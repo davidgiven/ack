@@ -1,3 +1,6 @@
+22-Nov-89  Ceriel Jacobs (ceriel) at ceriel
+	Some more speed-up changes, resulting in another 5%.
+
 13-Nov-89  Ceriel Jacobs (ceriel) at ceriel
 	Many changes for speed-up (resulting speed-up: 20-25%).
 	Also fixed serious problem in floating point handling: the existing

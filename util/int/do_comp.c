@@ -51,7 +51,7 @@ DoCMIm(arg)
 DoCMIz()
 {
 	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 	register long s = spop(l);
 
@@ -102,7 +102,7 @@ DoCMFz()
 {
 	/* CMF w: Compare w byte reals */
 #ifndef	NOFLOAT
-	register size l = upop(wsize);
+	register size l = uwpop();
 	double t = fpop(arg_wf(l));
 	double s = fpop(l);
 
@@ -130,7 +130,7 @@ DoCMUl2(arg)
 DoCMUz()
 {
 	/* CMU w: Compare w byte unsigneds */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register unsigned long t = upop(arg_wi(l));
 	register unsigned long s = upop(l);
 
@@ -165,7 +165,7 @@ DoCMSs(hob, wfac)
 DoCMSz()
 {
 	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@T6 DoCMSz(%ld)", l));
 	spoilFRA();

@@ -43,7 +43,7 @@ DoADIm(arg)
 DoADIz()				/* argument on top of stack */
 {
 	/* ADI w: Addition (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoADIz(%ld)", l));
@@ -78,7 +78,7 @@ DoSBIm(arg)
 DoSBIz()				/* arg on top of stack */
 {
 	/* SBI w: Subtraction (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoSBIz(%ld)", l));
@@ -113,7 +113,7 @@ DoMLIm(arg)
 DoMLIz()				/* arg on top of stack */
 {
 	/* MLI w: Multiplication (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoMLIz(%ld)", l));
@@ -148,7 +148,7 @@ DoDVIm(arg)
 DoDVIz()				/* arg on top of stack */
 {
 	/* DVI w: Division (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoDVIz(%ld)", l));
@@ -183,7 +183,7 @@ DoRMIm(arg)
 DoRMIz()				/* arg on top of stack */
 {
 	/* RMI w: Remainder (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoRMIz(%ld)", l));
@@ -206,7 +206,7 @@ DoNGIl2(arg)
 DoNGIz()
 {
 	/* NGI w: Negate (two's complement) (*) */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@I6 DoNGIz(%ld)", l));
 	spoilFRA();
@@ -219,7 +219,7 @@ DoSLIl2(arg)
 {
 	/* SLI w: Shift left (*) */
 	register size l = (L_arg_2() * arg);
-	register long t = spop(wsize);
+	register long t = swpop();
 
 	LOG(("@I6 DoSLIl2(%ld)", l));
 	spoilFRA();
@@ -232,7 +232,7 @@ DoSLIm(arg)
 {
 	/* SLI w: Shift left (*) */
 	register size l = arg_wi(arg);
-	register long t = spop(wsize);
+	register long t = swpop();
 
 	LOG(("@I6 DoSLIm(%ld)", l));
 	spoilFRA();
@@ -242,8 +242,8 @@ DoSLIm(arg)
 DoSLIz()
 {
 	/* SLI w: Shift left (*) */
-	register size l = upop(wsize);
-	register long t = spop(wsize);
+	register size l = uwpop();
+	register long t = swpop();
 
 	LOG(("@I6 DoSLIz(%ld)", l));
 	spoilFRA();
@@ -256,7 +256,7 @@ DoSRIl2(arg)
 {
 	/* SRI w: Shift right (*) */
 	register size l = (L_arg_2() * arg);
-	register long t = spop(wsize);
+	register long t = swpop();
 
 	LOG(("@I6 DoSRIl2(%ld)", l));
 	spoilFRA();
@@ -267,8 +267,8 @@ DoSRIl2(arg)
 DoSRIz()
 {
 	/* SRI w: Shift right (*) */
-	register size l = upop(wsize);
-	register long t = spop(wsize);
+	register size l = uwpop();
+	register long t = swpop();
 
 	LOG(("@I6 DoSRIz(%ld)", l));
 	spoilFRA();

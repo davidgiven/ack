@@ -37,7 +37,7 @@ pushrsb(rsbcode)
 	int rsbcode;
 {
 	/* fill Return Status Block */
-	st_inc(rsbsize);
+	incSP((size)rsbsize);
 
 	st_stdp(SP + rsb_FIL, getFIL());
 	st_prot(SP + rsb_FIL, psize);
@@ -54,7 +54,7 @@ pushrsb(rsbcode)
 	st_stn(SP + rsb_PI, PI, psize);
 	st_prot(SP + rsb_PI, psize);
 
-	st_stn(SP + rsb_rsbcode, (long)rsbcode, wsize);
+	st_stw(SP + rsb_rsbcode, (long)rsbcode);
 	st_prot(SP + rsb_rsbcode, wsize);
 
 	newLB(SP);
@@ -83,7 +83,7 @@ int poprsb(rtt)
 	newSP(LB);
 
 	/* get RSB code and test it for applicability */
-	rsbcode = st_ldu(SP + rsb_rsbcode, wsize);
+	rsbcode = st_lduw(SP + rsb_rsbcode);
 	if ((rsbcode & RSBMASK) != RSBCODE)	/* no RSB at all */
 		return rsbcode;
 

@@ -70,7 +70,7 @@ extern void sync();
 #define	INT2SIZE	max(wsize, 2L)
 #define	INT4SIZE	max(wsize, 4L)
 
-#define	pop_int()	((int) spop(wsize))
+#define	pop_int()	((int) swpop())
 #define	pop_int2()	((int) spop(INT2SIZE))
 #define	pop_int4()	(spop(INT4SIZE))
 #define	pop_intp()	((int) spop(psize))

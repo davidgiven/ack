@@ -53,6 +53,8 @@ init_stack() {
  ************************************************************************
  *									*
  *	newSP(p)	- check and adjust StackPointer.		*
+ *	incSP(n)	- increment stack pointer. n already checked	*
+ *	decSP(n)	- decrement stack pointer. n already checked	*
  *	newLB(p)	- check and adjust Local Base and Actual Base	*
  *									*
  ************************************************************************/
@@ -102,6 +104,43 @@ newSP(ap)
 	SP = p;
 }
 
+incSP(n)
+#ifdef LOGGING
+	register
+#endif
+	size n;
+{
+	register ptr p = SP - n;
+	
+	if (p < HP || maxstack || p < SL) newSP(p);
+	else {
+		LOG(("@s6 newSP(%lu), ML = %lu, SP = %lu", p, ML, SP));
+#ifdef LOGGING
+		/* inline version of st_clear_area.
+		*/
+		SP = p;
+		{
+			while (n--) {
+				st_undef(p);
+				p++;
+			}
+		}
+#endif
+	}
+}
+
+decSP(n)
+	size n;
+{
+	register ptr p = SP + n;
+	
+	if (LB < p) newSP(p);
+	else {
+		LOG(("@s6 newSP(%lu), ML = %lu, SP = %lu", p, ML, SP));
+		SP = p;
+	}
+}
+
 newLB(p)
 	ptr p;
 {
@@ -126,6 +165,7 @@ newLB(p)
  *	st_stdp(addr, p)	- STore Data Pointer.			*
  *	st_stip(addr, p)	- STore Instruction Pointer.		*
  *	st_stn(addr, l, n)	- STore N byte integer.			*
+ *	st_stw(addr, l)		- STore wordsize integer.		*
  *	st_stf(addr, f, n)	- STore Floating point number.		*
  *									*
  ************************************************************************/
@@ -194,6 +234,32 @@ st_stn(addr, al, n)
 	}
 }
 
+st_stw(addr, al)
+	register ptr addr;
+	long al;
+{
+	register int i;
+	register long l = al;
+#ifdef LOGGING
+	/* a psize zero is ambiguous */
+	int sh_flags = (l == 0 && wsize == psize) ? (SH_INT|SH_DATAP) : SH_INT;
+#endif
+
+	LOG(("@s6 st_stw(%lu, %ld)", addr, l));
+	ch_w_in_stack(addr);
+	ch_wordaligned(addr);
+
+	/* store the bytes */
+	for (i = (int) wsize; i > 0; i--, addr++) {
+		ch_st_prot(addr);
+		stack_loc(addr) = (char) l;
+#ifdef	LOGGING
+		st_sh(addr) = sh_flags;
+#endif	LOGGING
+		l = l>>8;
+	}
+}
+
 #ifndef	NOFLOAT
 st_stf(addr, f, n)
 	register ptr addr;
@@ -226,7 +292,9 @@ st_stf(addr, f, n)
  *	st_lddp(addr)	- LoaD Data Pointer from stack.			*
  *	st_ldip(addr)	- LoaD Instruction Pointer from stack.		*
  *	st_ldu(addr, n)	- LoaD n Unsigned bytes from stack.		*
+ *	st_lduw(addr)	- LoaD wsize Unsigned bytes from stack.		*
  *	st_lds(addr, n)	- LoaD n Signed bytes from stack.		*
+ *	st_ldsw(addr)	- LoaD wsize Signed bytes from stack.		*
  *	st_ldf(addr, n)	- LoaD Floating point number from stack.	*
  *									*
  ************************************************************************/
@@ -291,10 +359,36 @@ unsigned long st_ldu(addr, n)
 	}
 #endif	LOGGING
 
-	for (i = (int) n-1; i >= 0; i--) {
-		u = (u<<8) | (btou(stack_loc(addr + i)));
+	addr += n-1;
+	for (i = (int) n-1; i >= 0; i--, addr--) {
+		u = (u<<8) | (btou(stack_loc(addr)));
 	}
 	LOG(("@s6 st_ldu() returns %ld", u));
+	return (u);
+}
+
+unsigned long st_lduw(addr)
+	register ptr addr;
+{
+	register int i;
+	register unsigned long u = 0;
+
+	LOG(("@s6 st_lduw(%lu)", addr));
+
+	ch_w_in_stack(addr);
+	ch_wordaligned(addr);
+#ifdef	LOGGING
+	if (!is_st_set(addr, wsize, SH_INT)) {
+		warning(WLIEXP);
+		warn_stbits(addr, wsize);
+	}
+#endif	LOGGING
+
+	addr += wsize - 1;
+	for (i = (int) wsize-1; i >= 0; i--, addr--) {
+		u = (u<<8) | (btou(stack_loc(addr)));
+	}
+	LOG(("@s6 st_lduw() returns %ld", u));
 	return (u);
 }
 
@@ -316,11 +410,38 @@ long st_lds(addr, n)
 	}
 #endif	LOGGING
 
-	l = btos(stack_loc(addr + n - 1));
-	for (i = n - 2; i >= 0; i--) {
-		l = (l<<8) | btol(stack_loc(addr + i));
+	addr += n - 2;
+	l = btos(stack_loc(addr + 1));
+	for (i = n - 2; i >= 0; i--, addr--) {
+		l = (l<<8) | btol(stack_loc(addr));
 	}
 	LOG(("@s6 st_lds() returns %ld", l));
+	return (l);
+}
+
+long st_ldsw(addr)
+	register ptr addr;
+{
+	register int i;
+	register long l;
+
+	LOG(("@s6 st_ldsw(%lu)", addr));
+
+	ch_w_in_stack(addr);
+	ch_wordaligned(addr);
+#ifdef	LOGGING
+	if (!is_st_set(addr, wsize, SH_INT)) {
+		warning(WLIEXP);
+		warn_stbits(addr, wsize);
+	}
+#endif	LOGGING
+
+	addr += wsize - 2;
+	l = btos(stack_loc(addr+1));
+	for (i = wsize - 2; i >= 0; i--, addr--) {
+		l = (l<<8) | btol(stack_loc(addr));
+	}
+	LOG(("@s6 st_ldsw() returns %ld", l));
 	return (l);
 }
 
@@ -425,9 +546,13 @@ st_mvd(s, d, n)				/* d -> s */
  *									*
  *	dppop()		- pop a data ptr, return a ptr.			*
  *	upop(n)		- pop n unsigned bytes, return a long.		*
+ *	uwpop()		- pop wsize unsigned bytes, return a long.	*
  *	spop(n)		- pop n signed bytes, return a long.		*
+ *	swpop()		- pop wsize signed bytes, return a long.	*
  *	pop_dt(d, n)	- pop n bytes, store at address d in data.	*
+ *	popw_dt(d)	- pop wsize bytes, store at address d in data.	*
  *	pop_st(s, n)	- pop n bytes, store at address s in stack.	*
+ *	popw_st(s)	- pop wsize bytes, store at address s in stack.	*
  *	fpop()		- pop a floating point number.			*
  *	wpop()		- pop a signed word, don't care about any type.	*
  *									*
@@ -438,7 +563,7 @@ ptr dppop()
 	register ptr p;
 
 	p = st_lddp(SP);
-	st_dec(psize);
+	decSP(psize);
 	LOG(("@s7 dppop(), return: %lu", p));
 	return (p);
 }
@@ -449,8 +574,18 @@ unsigned long upop(n)
 	register unsigned long l;
 
 	l = st_ldu(SP, n);
-	st_dec(max(n, wsize));
+	decSP(max(n, wsize));
 	LOG(("@s7 upop(), return: %lu", l));
+	return (l);
+}
+
+unsigned long uwpop()
+{
+	register unsigned long l;
+
+	l = st_lduw(SP);
+	decSP(wsize);
+	LOG(("@s7 uwpop(), return: %lu", l));
 	return (l);
 }
 
@@ -460,8 +595,18 @@ long spop(n)
 	register long l;
 
 	l = st_lds(SP, n);
-	st_dec(max(n, wsize));
+	decSP(max(n, wsize));
 	LOG(("@s7 spop(), return: %ld", l));
+	return (l);
+}
+
+long swpop()
+{
+	register long l;
+
+	l = st_ldsw(SP);
+	decSP(wsize);
+	LOG(("@s7 swpop(), return: %ld", l));
 	return (l);
 }
 
@@ -473,8 +618,15 @@ pop_dt(d, n)
 		dt_stn(d, (long) upop(n), n);
 	else {
 		dt_mvs(d, SP, n);
-		st_dec(n);
+		decSP(n);
 	}
+}
+
+popw_dt(d)
+	ptr d;
+{
+	dt_mvs(d, SP, wsize);
+	decSP(wsize);
 }
 
 pop_st(s, n)
@@ -485,8 +637,15 @@ pop_st(s, n)
 		st_stn(s, (long) upop(n), n);
 	else {
 		st_mvs(s, SP, n);
-		st_dec(n);
+		decSP(n);
 	}
+}
+
+popw_st(s)
+	ptr s;
+{
+	st_mvs(s, SP, wsize);
+	decSP(wsize);
 }
 
 #ifndef	NOFLOAT
@@ -496,7 +655,7 @@ double fpop(n)
 	double d;
 
 	d = st_ldf(SP, n);
-	st_dec(n);
+	decSP(n);
 	return (d);
 }
 #endif	NOFLOAT
@@ -506,7 +665,7 @@ long wpop()
 	register long l;
 	
 	l = w_in_stack(SP);
-	st_dec(wsize);
+	decSP(wsize);
 	return (l);
 }
 
@@ -518,7 +677,9 @@ long wpop()
  *	wpush(l)	- push a word, load from l.			*
  *	npush(l, n)	- push n bytes, load from l.			*
  *	push_dt(d, n)	- push n bytes, load from address d in data.	*
+ *	pushw_dt(d)	- push wsize bytes, load from address d in data.*
  *	push_st(s, n)	- push n bytes, load from address s in stack.	*
+ *	pushw_st(s)	- push wsize bytes, load from address s in stack.*
  *	fpush(f, n)	- push a floating point number, of size n.	*
  *									*
  ************************************************************************/
@@ -526,31 +687,31 @@ long wpop()
 dppush(p)
 	ptr p;
 {
-	st_inc(psize);
+	incSP(psize);
 	st_stdp(SP, p);
 }
 
 wpush(l)
 	long l;
 {
-	st_inc(wsize);
-	st_stn(SP, l, wsize);
+	incSP(wsize);
+	st_stw(SP, l);
 }
 
 npush(l, n)
 	register long l;
-	size n;
+	register size n;
 {
-	size m = max(n, wsize);
-
-	st_inc(m);
-	if (n == 1)
-		l &= MASK1;
-	else
-	if (n == 2)
-		l &= MASK2;
-	st_stn(SP, l, m);
-
+	if (n <= wsize) {
+		incSP(wsize);
+		if (n == 1) l &= MASK1;
+		else if (n == 2) l &= MASK2;
+		st_stw(SP, l);
+	}
+	else {
+		incSP(n);
+		st_stn(SP, l, n);
+	}
 }
 
 push_dt(d, n)
@@ -561,9 +722,16 @@ push_dt(d, n)
 		npush((long) dt_ldu(d, n), n);
 	}
 	else {
-		st_inc(n);
+		incSP(n);
 		st_mvd(SP, d, n);
 	}
+}
+
+pushw_dt(d)
+	ptr d;
+{
+	incSP(wsize);
+	st_mvd(SP, d, wsize);
 }
 
 push_st(s, n)
@@ -574,9 +742,16 @@ push_st(s, n)
 		npush((long) st_ldu(s, n), n);
 	}
 	else {
-		st_inc(n);
+		incSP(n);
 		st_mvs(SP, s, n);
 	}
+}
+
+pushw_st(s)
+	ptr s;
+{
+	incSP(wsize);
+	st_mvs(SP, s, wsize);
 }
 
 #ifndef	NOFLOAT
@@ -584,7 +759,7 @@ fpush(f, n)
 	double f;
 	size n;
 {
-	st_inc(n);
+	incSP(n);
 	st_stf(SP, f, n);
 }
 #endif	NOFLOAT

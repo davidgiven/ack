@@ -39,7 +39,7 @@ DoLARm(arg)
 DoLARz()
 {
 	/* LAR w: Load array element, descriptor contains integers of size w */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@A6 DoLARz(%ld)", l));
 	arr(LAR, arg_wi(l));
@@ -66,7 +66,7 @@ DoSARm(arg)
 DoSARz()
 {
 	/* SAR w: Store array element */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@A6 DoSARz(%ld)", l));
 	arr(SAR, arg_wi(l));
@@ -93,7 +93,7 @@ DoAARm(arg)
 DoAARz()
 {
 	/* AAR w: Load address of array element */
-	register size l = upop(wsize);
+	register size l = uwpop();
 
 	LOG(("@A6 DoAARz(%ld)", l));
 	arr(AAR, arg_wi(l));

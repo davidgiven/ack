@@ -141,7 +141,7 @@ DoADSm(arg)
 DoADSz()
 {
 	/* ADS w: Add w-byte value and pointer */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register long t = spop(arg_wi(l));
 	register ptr p, s = st_lddp(SP);
 
@@ -182,7 +182,7 @@ DoSBSl2(arg)
 DoSBSz()
 {
 	/* SBS w: Subtract pointers in same fragment and push diff as size w integer */
-	register size l = upop(wsize);
+	register size l = uwpop();
 	register ptr t = st_lddp(SP);
 	register ptr s = st_lddp(SP + psize);
 	register long w;

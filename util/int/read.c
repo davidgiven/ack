@@ -234,7 +234,7 @@ PRIVATE ptr rd_descr(type, count, pos)
 	case 1:			/* m uninitialized words */
 		j = count;
 		while (j--) {
-			dt_stn(pos, 0L, wsize);
+			dt_stw(pos, 0L);
 			pos += wsize;
 		}
 		break;
@@ -246,7 +246,7 @@ PRIVATE ptr rd_descr(type, count, pos)
 		break;
 	case 3:			/* m initialized wordsize integers */
 		for (j = 0; j < count; j++) {
-			dt_stn(pos, rd_int(wsize), wsize);
+			dt_stw(pos, rd_int(wsize));
 			pos += wsize;
 		}
 		break;
@@ -301,7 +301,7 @@ PRIVATE int rd_byte()
 {
 	register int i;
 	
-	if ((i = fgetc(load_fp)) == EOF)
+	if ((i = getc(load_fp)) == EOF)
 		fatal("EOF reached during initialization");
 	return (i);
 }
