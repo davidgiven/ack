@@ -67,7 +67,7 @@ dir mach/6809
 indir
 end
 name "Intel 8080 support"
-dir mach/8080
+dir mach/i80
 indir
 end
 name "2-2 Interpreter support"
@@ -90,6 +90,10 @@ name "Motorola 68000 2-4 support"
 dir mach/m68k2
 indir
 end
+name "Motorola 68000 4-4 support"
+dir mach/m68k4
+indir
+end
 name "NS16032 support"
 dir mach/ns
 indir
@@ -100,6 +104,10 @@ indir
 end
 name "PMDS support"
 dir mach/pmds
+indir
+end
+name "PMDS 4/4 support"
+dir mach/pmds4
 indir
 end
 name "Signetics 2650 support"
@@ -121,7 +129,6 @@ end
 name "Zilog Z8000 support"
 dir mach/z8000
 indir
-end
 end
 name "Pascal frontend"
 dir lang/pc/pem
