@@ -42,7 +42,7 @@
 
 /* Test if a constant is suitable for literal mode */
 
-#define literal(z)	(((z) & ~0x3f) == 0)
+#define literal(z)	(((z) & ~(int)0x3f) == 0)
 
 /* Declarations for operands */
 

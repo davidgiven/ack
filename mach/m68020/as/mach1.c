@@ -13,14 +13,14 @@
 #define	low6(z)		((short)(z) & 077)
 #define	low7(z)		((short)(z) & 0177)
 
-#define	fit3(z)		((((z)-1) & ~07) == 0)
-#define	fit4(z)		(((z) & ~017) == 0)
-#define	fit5(z)		(((z) & ~037) == 0)
-#define	fit6(z)		(((z) & ~077) == 0)
-#define	fit7(z)		(((z) & ~0177) == 0)
+#define	fit3(z)		((((z)-1) & ~(int)07) == 0)
+#define	fit4(z)		(((z) & ~(int)017) == 0)
+#define	fit5(z)		(((z) & ~(int)037) == 0)
+#define	fit6(z)		(((z) & ~(int)077) == 0)
+#define	fit7(z)		(((z) & ~(int)0177) == 0)
 #define	sfit7(z)	(fit7((z)+64))
-#define	fit8(z)		(((z) & ~0xFF) == 0)
-#define	fit16(z)	(((z) & ~0xFFFF) == 0)
+#define	fit8(z)		(((z) & ~(valu_t)0xFF) == 0)
+#define	fit16(z)	(((z) & ~(valu_t)0xFFFF) == 0)
 
 #define	SIZE_B		0000
 #define	SIZE_W		0100
