@@ -4,6 +4,10 @@
 
 eval( str)
 char *str;
+
+/* Output 'str' and replace in it all $i occurances by the corrresponding
+ * parameter-names, converted where necessary.
+ */
 {
 	register char c;
 	int i;
