@@ -326,10 +326,13 @@ object(arg)
 pr_arg(a)
 	register struct file_list *a;
 {
-	if (strcmp(f_dir(a), ".") == 0) {
-		print(f_filename(a));
+	char *f = f_filename(a);
+	char *d = f_dir(a);
+
+	if (strcmp(d, ".") == 0 || *f == '/' || *f == '.') {
+		print(f);
 	}
-	else	print("%s/%s", f_dir(a), f_filename(a));
+	else	print("%s/%s", d, f);
 }
 
 print_dep()
