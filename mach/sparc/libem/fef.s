@@ -1,3 +1,4 @@
+#
 .global fef8, Fd0
 
 fef8:
@@ -14,7 +15,11 @@ fef8:
 	retl
 	nop
 1:	
+#ifdef __solaris
+	fdtoq	%f0,%f0
+#else
 	fdtox	%f0,%f0
+#endif
 	st	%f0,[%l0+4]
 	ld	[%l0+4],%o0
 	srl	%o0,16,%o0
@@ -39,7 +44,11 @@ fef8:
 	or	%o1,%o0,%o0
 	st	%o0,[%l0+4]
 	ld	[%l0+4],%f0
+#ifdef __solaris
+	fqtod	%f0,%f0
+#else
 	fxtod	%f0,%f0
+#endif
 	st	%f0,[%l0+4]
 	st	%f1,[%l0+8]
 	retl
