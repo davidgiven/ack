@@ -33,7 +33,7 @@ struct outname 	*symbol_table;
 
 int 		cur_seg = -1 , nname = 0;
 long 		nbss = 0, size_text, size_data, size_reloc, size_symbol,
-		size_string;
+		size_string, _text_cnt, _data_cnt;
 
 
 put1(sect,addr,b)

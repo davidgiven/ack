@@ -1,6 +1,7 @@
 #include <out.h>
 #include "back.h"
 #include "hash.h"
+#include <alloc.h>
 
 char *calloc();
 
@@ -9,13 +10,13 @@ init_back()
 /* Allocate space for the tables and set the default values.
  */
 {
-	text_area = calloc( MAXTEXT, sizeof( char));
-	data_area = calloc( MAXDATA, sizeof( char));
-	reloc_info = (struct outrelo *)calloc( MAXRELO, SZ_RELO);
-	symbol_table = (struct outname *)calloc( MAXNAME, SZ_NAME);
-	Hashitems = (struct Hashitem *)calloc( MAXNAME + 1, 
+	text_area = Malloc( MAXTEXT);
+	data_area = Malloc( MAXDATA);
+	reloc_info = (struct outrelo *)Malloc( MAXRELO* sizeof(struct outrelo));
+	symbol_table = (struct outname *)Malloc( MAXNAME* sizeof(struct outname));
+	Hashitems = (struct Hashitem *)Malloc( (MAXNAME + 1)*
 						sizeof( struct Hashitem));
- 	string_area = calloc( MAXSTRING, sizeof( char));
+ 	string_area = Malloc( MAXSTRING);
 
 	text = text_area;
 	data = data_area;
@@ -23,7 +24,9 @@ init_back()
         relo = reloc_info;
 
 	size_text = MAXTEXT;
+	_text_cnt = MAXTEXT;
 	size_data = MAXDATA;
+	_data_cnt = MAXDATA;
 	size_reloc = MAXRELO;
 	size_symbol = MAXNAME;
 	size_string = MAXSTRING;

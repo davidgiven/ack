@@ -30,7 +30,8 @@ int		string_lengte = 0,
 		index_symbol_table = -1;
 
 struct Hashitem  *Hashitems ; 
-int		 Hashtab[ MAXHASH];   
+static int	 Hashtab[ MAXHASH];   
+static int Hash();
 
 
 int find_sym( sym, isdef)
@@ -90,14 +91,18 @@ int isdef;
 	else {    /* zie C_fil, C_lin, C_lni */
 		string_lengte = 0;
 		for( p=sym; *p != '\0' ; p++) {
-			if ( (string - string_area) >= size_string) 
-				mem_string();
-			*string++ = *p;
 			string_lengte++;
 		}
+		while ( (string + string_lengte - string_area) >= size_string) {
+			mem_string();
+		}
+		for( p=sym; *p != '\0' ; p++) {
+			*string++ = *p;
+		}
 	}
-	if ( (string - string_area) >= size_string) 
+	if ( (string - string_area) >= size_string) {
 		mem_string();
+	}
 	*string++ = '\0';
 	s->on_foff = string - (string_lengte + 1) - string_area;
 
@@ -105,8 +110,8 @@ int isdef;
 }
 
 
-int Hash(sym)
-char *sym;
+static int Hash(sym)
+register char *sym;
 {
 	register unsigned h;
 	register c;

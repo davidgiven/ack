@@ -1,14 +1,20 @@
+#include <system.h>
 #include "mach.h"
-
-gen4( l)
-FOUR_BYTES l;
+#include "back.h"
+ 
+gen4( c)
+FOUR_BYTES c;
 {
-#ifdef WORDS_REVERSED
-	gen2( (short) ((unsigned long)l>>16));
-	gen2( (short) l);
-#else
-	gen2( (short) l);
-	gen2( (short) ((unsigned long)l>>16));
-#endif
+	switch ( cur_seg) {
+		case SEGTXT :  text4( c);
+			       return;
+		case SEGCON  : con4( c);
+			       return;
+		case SEGROM  : rom4( c);
+			       return;
+		case SEGBSS  : bss( 4);
+			       return;
+		default      : fprint( STDERR, "gen4() : bad seg number\n");
+			       return;
+	}
 }
-

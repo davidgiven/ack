@@ -4,13 +4,12 @@
 rom2( w)
 TWO_BYTES w;
 {
+	if ((_data_cnt -= 2) < 0) mem_data();
 #ifdef BYTES_REVERSED
-	rom1( (char) ( ( unsigned short)w>>8));
-	rom1( (char) w);
+	*data++ = ( unsigned short)w>>8;
+	*data++ = w;
 #else
-	rom1( (char) w);
-	rom1( (char) ( ( unsigned short)w>>8));
+	*data++ = w;
+	*data++ = ( unsigned short)w>>8;
 #endif
 }
-
-

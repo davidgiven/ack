@@ -15,7 +15,8 @@ LIBS=$(EM)/modules/lib/*.a
 all : data.o con2.o con4.o relocation.o end_back.o gen1.o gen2.o\
       gen4.o init_back.o mysprint.o output.o reloc1.o reloc2.o reloc4.o\
       rom2.o rom4.o set_global.o set_local.o switchseg.o symboldef.o text2.o\
-      text4.o do_open.o do_close.o memory.o label.o misc.o extnd.o symtable.o
+      text4.o do_open.o do_close.o memory.o label.o misc.o extnd.o symtable.o\
+      common.o
 
 data.o : data.h back.h header.h $(SOURCE)/data.c
 	$(CC) $(CFLAGS) -c $(IDIRS) $(SOURCE)/data.c
@@ -103,4 +104,7 @@ misc.o : data.h back.h ../mach.h $(SOURCE)/misc.c
 
 label.o : data.h back.h ../mach.h $(SOURCE)/label.c
 	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/label.c
+
+common.o : data.h back.h ../mach.h $(SOURCE)/common.c
+	$(CC) $(CFLAGS) -c $(IDIRS) -I.. $(SOURCE)/common.c
 

@@ -33,3 +33,4 @@ symboldef.c
 symtable.c
 text2.c
 text4.c
+common.c

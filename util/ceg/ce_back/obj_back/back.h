@@ -10,9 +10,9 @@ extern holno, procno;
 
 /* These routines are called very often, thus we turned them into macros. */
 
-#define text1(b) {if (text-text_area>=size_text)  mem_text() ; *text++=b;}
-#define con1(b) {if (data-data_area>=size_data) mem_data(); *data++ = b;}
-#define rom1(b) {if (data-data_area>=size_data) mem_data(); *data++=b;}
+#define text1(b)	{if (--_text_cnt < 0) mem_text(); *text++ = b;}
+#define con1(b)		{if (--_data_cnt < 0) mem_data(); *data++ = b;}
+#define rom1(b)		{if (--_data_cnt < 0) mem_data(); *data++ = b;}
 #define bss( n)		( nbss += n)
 
 
@@ -32,10 +32,10 @@ extern holno, procno;
 
 /* Initialize values. */
 
-#define MAXTEXT		20
-#define MAXDATA		20
-#define	MAXRELO		3
-#define	MAXNAME		5
-#define	MAXSTRING	20
+#define MAXTEXT		4096
+#define MAXDATA		2048
+#define	MAXRELO		100
+#define	MAXNAME		100
+#define	MAXSTRING	2048
 #define MAXHASH		256
 

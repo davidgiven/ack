@@ -18,7 +18,7 @@ int 		procno = 0, holno = 0;
 char *extnd_pro( procno)
 int procno;
 {
-	string_lengte = mysprint( "pro%d", procno);
+	string_lengte = mysprint( "%cprc%d", GENLAB, procno);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
@@ -27,7 +27,7 @@ int procno;
 char *extnd_start( procno)
 int procno;
 {
-	string_lengte = mysprint( "start%d", procno);
+	string_lengte = mysprint( "%cstrt%d", GENLAB, procno);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
@@ -81,7 +81,7 @@ int hol;
 char *extnd_part( d)
 int d;
 {
-	string_lengte = mysprint( "part%x", d);
+	string_lengte = mysprint( "%cprt%x", GENLAB, d);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
@@ -90,7 +90,7 @@ int d;
 char *extnd_cont( d)
 int d;
 {
-	string_lengte = mysprint( "cont%x", d);
+	string_lengte = mysprint( "%ccnt%x", GENLAB, d);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }

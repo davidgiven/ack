@@ -1,6 +1,12 @@
 #include <system.h>
+#include <alloc.h>
 #include <out.h>
+#include "mach.h"
 #include "data.h"
+
+static reduce_name_table();
+
+static int nrelo;
 
 output_back()
 /* Dump the tables.
@@ -12,9 +18,13 @@ output_back()
 	struct outsect sect;
         long 	ntext = text - text_area, 
 		ndata = data - data_area,
-		nchar = string - string_area;
-	int 	nrelo = relo - reloc_info;
+		nchar;
 
+	nrelo = relo - reloc_info;
+
+	reduce_name_table();
+
+	nchar = string - string_area;
 	header.oh_magic = O_MAGIC;
 	header.oh_stamp = 0;
 	header.oh_flags = HF_LINK;
@@ -69,6 +79,70 @@ output_back()
 	wr_name( symbol_table, nname);
 
 	wr_string( string_area, nchar);
+}
+
+static
+reduce_name_table()
+{
+	/*
+	 * Reduce the name table size. This is done by first marking
+	 * the name-table entries that are needed for relocation, then
+	 * removing the entries that are compiler-generated and not
+	 * needed for relocation, while remembering how many entries were
+	 * removed at each point, and then updating the relocation info.
+	 * After that, the string table is reduced.
+	 */
+
+#define S_NEEDED	0x8000
+#define removable(nm)	(!(nm.on_type & S_NEEDED) && *(nm.on_foff+string_area) == GENLAB)
+
+	register int *diff_index =
+		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
+	register struct outrelo *rp = reloc_info;
+	register int i;
+	char *new_str;
+	register char *p, *q;
+
+	*diff_index++ = 0;
+	for (i = 0; i < nrelo; i++) {
+		if (symbol_table[rp->or_nami].on_valu == -1 ||
+		    (symbol_table[rp->or_nami].on_type & S_COM)) {
+			symbol_table[rp->or_nami].on_type |= S_NEEDED;
+		}
+		rp++;
+	}
+
+	for (i = 0; i < nname; i++) {
+		diff_index[i] = diff_index[i-1];
+		if (removable(symbol_table[i])) {
+			diff_index[i]++;
+		}
+	}
+
+	rp = reloc_info;
+	for (i = 0; i < nrelo; i++) {
+		rp->or_nami -= diff_index[rp->or_nami];
+		rp++;
+	}
+	for (i = 0; i < nname; i++) {
+		symbol_table[i].on_type &= ~S_NEEDED;
+		if (diff_index[i] && diff_index[i] == diff_index[i-1]) {
+			symbol_table[i - diff_index[i]] = symbol_table[i];
+		}
+	}
+	nname -= diff_index[nname - 1];
+
+	free((char *)(diff_index-1));
+
+	new_str = q = Malloc((unsigned)(string - string_area));
+	for (i = 0; i < nname; i++) {
+		p = symbol_table[i].on_foff + string_area;
+		symbol_table[i].on_foff = q - new_str;
+		while (*q++ = *p) p++;
+	}
+	free(string_area);
+	string_area = new_str;
+	string = q;
 }
 
 wr_fatal()

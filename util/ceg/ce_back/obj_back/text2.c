@@ -4,12 +4,12 @@
 text2( w)
 TWO_BYTES w;
 {
+	if ((_text_cnt -= 2) < 0) mem_text();
 #ifdef BYTES_REVERSED
-	text1( (char) ( ( unsigned short)w>>8));
-	text1( (char) w);
+	*text++ = ( unsigned short)w>>8;
+	*text++ = w;
 #else
-	text1( (char) w);
-	text1( (char) ( ( unsigned short)w>>8));
+	*text++ = w;
+	*text++ = ( unsigned short)w>>8;
 #endif
 }
-

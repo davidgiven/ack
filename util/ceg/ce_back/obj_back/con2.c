@@ -4,12 +4,13 @@
 con2( w)
 TWO_BYTES w;
 {
+	if ((_data_cnt -= 2) < 0) mem_data();
 #ifdef BYTES_REVERSED
-	con1( (char) ( ( unsigned short)w>>8));
-	con1( (char) w);
+	*data++ = ( unsigned short)w>>8;
+	*data++ = w;
 #else
-	con1( (char) w);
-	con1( (char) ( ( unsigned short)w>>8));
+	*data++ = w;
+	*data++ = ( unsigned short)w>>8;
 #endif
 }
 
