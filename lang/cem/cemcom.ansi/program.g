@@ -47,6 +47,7 @@
 {
 #include	"lint.h"
 #include	"nopp.h"
+#include	"debug.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"

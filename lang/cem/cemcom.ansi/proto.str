@@ -19,4 +19,4 @@ struct proto {
 #define	PL_ELLIPSIS	0x04
 #define	PL_ERRGIVEN	0x08
 
-/* ALLOCDEF "proto" 10 */
+/* ALLOCDEF "proto" 20 */

@@ -5,11 +5,11 @@
 /* $Header$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	"debug.h"
 #include	"lint.h"
 #include	<alloc.h>
 #include	"idfsize.h"
 #include	"numsize.h"
-#include	"debug.h"
 #include	"strsize.h"
 #include	"nopp.h"
 #include	"input.h"

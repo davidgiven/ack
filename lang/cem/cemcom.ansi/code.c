@@ -6,6 +6,7 @@
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
 #include	"lint.h"
+#include	"debug.h"
 #include	<em.h>
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -260,7 +261,7 @@ end_proc(fbytes)
 		-	indication of the use of floating points
 		-	indication of the number of bytes used for
 			formal parameters
-		-	use of special identifiers such as "setjmp"
+		-	use of special identifiers such as "__setjmp"
 		-	"end" + number of bytes used for local variables
 	*/
 	arith nbytes;
@@ -304,7 +305,7 @@ end_proc(fbytes)
 			func_name, (long) max_int);
 	}
 	C_ms_par(fbytes);		/* # bytes for formals		*/
-	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "setjmp"	*/
+	if (sp_occurred[SP_SETJMP]) {	/* indicate use of "__setjmp"	*/
 		options['n'] = 1;
 		C_ms_gto();
 		sp_occurred[SP_SETJMP] = 0;

@@ -6,11 +6,10 @@
 /* FIELD DESCRIPTOR */
 
 struct field	{	/* for field specifiers	*/
-	struct field *next;
 	arith fd_mask;
 	int fd_shift;
 	int fd_width;
 	struct sdef *fd_sdef;	/* upward pointer	*/
 };
 
-/* ALLOCDEF "field" 50 */
+/* ALLOCDEF "field" 10 */

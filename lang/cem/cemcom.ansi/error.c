@@ -9,10 +9,10 @@
 #include	<system.h>
 #include	<em.h>
 
+#include	"debug.h"
 #include	"lint.h"
 #include	"nopp.h"
 #include	"errout.h"
-#include	"debug.h"
 
 #include	"tokenname.h"
 #include	<flt_arith.h>

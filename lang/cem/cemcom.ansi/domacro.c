@@ -5,10 +5,10 @@
 /* $Header$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
+#include	"debug.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
-#include	"debug.h"
 #include	"idf.h"
 #include	"input.h"
 #include	"nopp.h"

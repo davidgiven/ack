@@ -27,7 +27,7 @@ struct stack_entry	{
 	struct idf *se_idf;
 };
 
-/* ALLOCDEF "stack_entry" 5 */
+/* ALLOCDEF "stack_entry" 50 */
 
 extern struct stack_level *local_level;
 extern struct stack_level *stack_level_of();

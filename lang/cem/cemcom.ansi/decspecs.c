@@ -153,25 +153,29 @@ qualifier_type(tp, typequal)
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_typequal = typequal;
 		dtp->tp_size = tp->tp_size;
+		dtp->tp_pointer = tp->tp_pointer;
+		dtp->tp_array = tp->tp_array;
+		dtp->tp_function = tp->tp_function;
 		switch (fund) {
 		case ARRAY:
 			if (typequal) {
 			    tp->tp_up = qualifier_type(tp->tp_up, typequal);
 			    dtp->tp_typequal = typequal = 0;
 			}
+			goto nottagged;
+		case FIELD:
+			dtp->tp_field = tp->tp_field;
 			/* fallthrough */
 		case POINTER:
-		case FUNCTION:
+		case FUNCTION:			/* dont't assign tp_proto */
+		nottagged:
+			dtp->tp_up = tp->tp_up;
+			break;
 		case STRUCT:
 		case UNION:
 		case ENUM:
 			dtp->tp_idf = tp->tp_idf;
 			dtp->tp_sdef = tp->tp_sdef;
-			dtp->tp_up = tp->tp_up;
-			dtp->tp_field = tp->tp_field;
-			dtp->tp_pointer = tp->tp_pointer;
-			dtp->tp_array = tp->tp_array;
-			dtp->tp_function = tp->tp_function;
 			break;
 		default:
 			break;

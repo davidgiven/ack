@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"debug.h"
 #include	"interface.h"
 #include	<flt_arith.h>
 #include	"arith.h"	/* definition arith */

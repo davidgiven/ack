@@ -10,9 +10,9 @@
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
+#include	"debug.h"
 #include	"interface.h"
 #include	"assert.h"
-#include	"debug.h"
 #include	<flt_arith.h>
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */

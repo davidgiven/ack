@@ -8,24 +8,42 @@
 #include	"nobitfield.h"
 
 struct type	{
-	struct type *next;	/* used only with ARRAY */
+	struct type *next;	/* used for ARRAY and for qualifiers */
 	short tp_fund;		/* fundamental type */
 	short tp_unsigned;
 	int tp_align;
 	int tp_typequal;	/* type qualifier */
 	arith tp_size;		/* -1 if declared but not defined */
-	struct idf *tp_idf;	/* name of STRUCT, UNION or ENUM */
-	struct sdef *tp_sdef;	/* to first selector */
-	struct type *tp_up;	/* from FIELD, POINTER, ARRAY
-					or FUNCTION to fund. */
-	struct field *tp_field;	/* field descriptor if fund == FIELD	*/
-	struct type *tp_pointer;/* to POINTER */
-	struct type *tp_array;	/* to ARRAY */
-	struct proto *tp_proto;	/* prototype list */
-	struct proto *tp_pseudoproto;	/* pseudo prototype list */
-	struct type *tp_function;/* to FUNCTION */
+	struct type *tp_pointer;	/* to POINTER */
+	struct type *tp_array;		/* to ARRAY */
+	struct type *tp_function;	/* to FUNCTION */
+	union {
+	    struct {
+		struct idf *tp__idf;	/* name of STRUCT, UNION or ENUM */
+		struct sdef *tp__sdef;	/* to first selector */
+	    } tp_istagged;		/* used with STRUCT, UNION & ENUM */
+	    struct {
+		/* tp__up: from FIELD, POINTER, ARRAY or FUNCTION to fund. */
+		struct type *tp__up;
+		union {
+		    /* tp__field: field descriptor if fund == FIELD */
+		    struct field *tp__field;
+		    struct {
+			/* prototype list (pseudoproto for old_style def) */
+			struct proto *tp__proto;
+			struct proto *tp__pseudoproto;
+		    } tp_isfunc;
+		} tp_f;		/* FIELD or FUNCTION */
+	    } tp_nottagged;	/* used with POINTER, FIELD, ARRAY & FUNCTION */
+	} tp_union;
 };
 
+#define tp_idf		tp_union.tp_istagged.tp__idf
+#define tp_sdef		tp_union.tp_istagged.tp__sdef
+#define tp_up		tp_union.tp_nottagged.tp__up
+#define tp_field	tp_union.tp_nottagged.tp_f.tp__field
+#define tp_proto	tp_union.tp_nottagged.tp_f.tp_isfunc.tp__proto
+#define tp_pseudoproto	tp_union.tp_nottagged.tp_f.tp_isfunc.tp__pseudoproto
 
 /*	Type qualifiers. Note: TQ_VOLATILE and TQ_CONST can be
 	'ored' to specify: extern const volatile int a;
@@ -55,4 +73,4 @@ extern struct type *pa_type;	/* type.c	*/
 
 extern arith size_of_type(), align();
 
-/* ALLOCDEF "type" 20 */
+/* ALLOCDEF "type" 50 */

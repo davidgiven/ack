@@ -6,6 +6,7 @@
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
 #include	"nobitfield.h"
+#include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"Lpars.h"

@@ -278,7 +278,7 @@ update_proto(tp, otp)
 		return;
 	}
 
-	while (tp && tp->tp_fund != FUNCTION) {
+	while (tp->tp_fund != FUNCTION) {
 		tp = tp->tp_up;
 		otp = otp->tp_up;
 		if (!tp) return;
@@ -463,10 +463,10 @@ call_proto(expp)
 				any2parameter(estack[ecnt]);
 		}
 		if (pcnt >= 0 && !(pstack[0]->pl_flag & PL_ELLIPSIS))
-			expr_error(*expp, "less parameters than specified in prototype");
+			expr_error(*expp, "fewer parameters than specified in prototype");
 
 	} else {
 		if (pl && !(pl->pl_flag & PL_VOID))
-			expr_error(*expp, "less parameters than specified in prototype");
+			expr_error(*expp, "fewer parameters than specified in prototype");
 	}
 }

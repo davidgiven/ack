@@ -77,7 +77,7 @@ idf_hashed(tg, size, hc)
 			break;
 		if (cmp == 0)	{
 			/*	suppose that special identifiers, as
-				"setjmp", are already inserted
+				"__setjmp", are already inserted
 			*/
 			sp_occurred[notch->id_special] = 1;
 			return notch;

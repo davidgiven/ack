@@ -5,6 +5,7 @@
 /* $Header$ */
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
+#include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
@@ -18,7 +19,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
-#include	"debug.h"
 #include	"level.h"
 
 extern char options[];

@@ -6,6 +6,7 @@
 /* SEMANTIC ANALYSIS (CHAPTER 3.3)  --  BINARY OPERATORS */
 
 #include	"botch_free.h"
+#include	"debug.h"
 #include	<alloc.h>
 #include	"lint.h"
 #include	"idf.h"

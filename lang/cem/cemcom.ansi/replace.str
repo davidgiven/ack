@@ -1,3 +1,10 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+/*	DEFINITIONS FOR THE MACRO REPLACEMENT ROUTINES		*/
+
 struct repl {
 	struct	repl *next;
 	struct	idf *r_idf;		/* name of the macro */
@@ -22,7 +29,7 @@ struct repl {
 		#define	ABCD	2
 		#define	g(x, y)	x ## y + h(x)
 
-		g(ABC, D);
+		g(ABC, D);		// gives: 2 + h(f()) 
 
 	In this case we need two copies: one raw copy for the pasting
 	operator, and an expanded one as argument for h().

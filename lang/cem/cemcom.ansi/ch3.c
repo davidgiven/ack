@@ -5,8 +5,8 @@
 /* $Header$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  3.3		*/
 
-#include	"lint.h"
 #include	"debug.h"
+#include	"lint.h"
 #include	"nobitfield.h"
 #include	"idf.h"
 #include	<flt_arith.h>

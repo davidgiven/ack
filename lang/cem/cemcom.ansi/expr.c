@@ -6,6 +6,7 @@
 /* EXPRESSION TREE HANDLING */
 
 #include	"lint.h"
+#include	"debug.h"
 #include	"assert.h"
 #include	"botch_free.h"
 #include	<alloc.h>

@@ -8,6 +8,7 @@
 {
 #include	<alloc.h>
 #include	"lint.h"
+#include	"debug.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"

@@ -25,6 +25,6 @@ struct tag	{		/* for struct-, union- and enum tags */
 };
 
 
-/* ALLOCDEF "tag" 50 */
+/* ALLOCDEF "tag" 10 */
 
 struct sdef *idf2sdef();

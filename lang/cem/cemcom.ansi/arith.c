@@ -12,6 +12,7 @@
 */
 
 #include	<alloc.h>
+#include	"debug.h"
 #include	"lint.h"
 #include	"nobitfield.h"
 #include	"idf.h"

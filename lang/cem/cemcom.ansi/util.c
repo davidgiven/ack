@@ -17,6 +17,7 @@
 #include	<em_mes.h>
 
 #include	"lint.h"
+#include	"debug.h"
 #include	"util.h"
 #include	"use_tmp.h"
 #include	"regcount.h"
