@@ -14,6 +14,21 @@ int _write(int d, const char *buf, int nbytes);
 int _isatty(int d);
 extern void (*_clean)(void);
 
+static int
+do_write(int d, char *buf, int nbytes)
+{
+	int c;
+
+	/* POSIX actually allows write() to return a positive value less
+	   than nbytes, so loop ...
+	*/
+	while ((c = _write(d, buf, nbytes)) > 0 && c < nbytes) {
+		nbytes -= c;
+		buf += c;
+	}
+	return c > 0;
+}
+
 int
 __flushbuf(int c, FILE * stream)
 {
@@ -75,8 +90,8 @@ __flushbuf(int c, FILE * stream)
 					return EOF;
 				}
 			}
-			if (_write(fileno(stream), (char *)stream->_buf,
-					-stream->_count) != -stream->_count) {
+			if (! do_write(fileno(stream), (char *)stream->_buf,
+					-stream->_count)) {
 				stream->_flags |= _IOERR;
 				return EOF;
 			} else {
@@ -97,8 +112,7 @@ __flushbuf(int c, FILE * stream)
 					return EOF;
 				}
 			}
-			if (_write(fileno(stream), (char *)stream->_buf, count)
-			    != count) {
+			if (! do_write(fileno(stream), (char *)stream->_buf, count)) {
 				*(stream->_buf) = c;
 				stream->_flags |= _IOERR;
 				return EOF;

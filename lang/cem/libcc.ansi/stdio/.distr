@@ -27,7 +27,6 @@ fseek.c
 fsetpos.c
 ftell.c
 fwrite.c
-gcvt.c
 getc.c
 getchar.c
 gets.c

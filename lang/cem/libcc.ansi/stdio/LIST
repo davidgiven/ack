@@ -44,7 +44,6 @@ ferror.c
 fileno.c
 fltpr.c
 ecvt.c
-gcvt.c
 fillbuf.c
 fclose.c
 flushbuf.c

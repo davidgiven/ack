@@ -12,17 +12,15 @@
 int _doprnt(const char *format, va_list ap, FILE *stream);
 int _doscan(FILE * stream, const char *format, va_list ap);
 char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
+char *_f_print(va_list *ap, int flags, char *s, char c, int precision);
 void __cleanup(void);
 
 FILE *popen(const char *command, const char *type);
 FILE *fdopen(int fd, const char *mode);
 
 #ifndef	NOFLOAT
-char *_pfloat(long double r, register char *s, int n, int flags);
-char *_pscien(long double r, register char *s, int n, int flags);
 char *_ecvt(long double value, int ndigit, int *decpt, int *sign);
 char *_fcvt(long double value, int ndigit, int *decpt, int *sign);
-char *_gcvt(long double value, int ndigit, char *s, int flags);
 #endif	/* NOFLOAT */
 
 #define	FL_LJUST	0x0001		/* left-justify field */

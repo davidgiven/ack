@@ -111,38 +111,6 @@ o_print(va_list *ap, int flags, char *s, char c, int precision, int is_signed)
 	return s;
 }
 
-#ifndef	NOFLOAT
-static char *
-f_print(va_list *ap, int flags, char *s, char c, int precision)
-{
-	register char *old_s = s;
-	long double ld_val;
-
-	if (flags & FL_LONGDOUBLE) ld_val = va_arg(*ap, long double);
-	else ld_val = (long double) va_arg(*ap, double);
-
-	switch(c) {
-	case 'f':
-		s = _pfloat(ld_val, s, precision, flags);
-		break;
-	case 'e':
-	case 'E':
-		s = _pscien(ld_val, s, precision , flags);
-		break;
-	case 'g':
-	case 'G':
-		s = _gcvt(ld_val, precision, s, flags);
-		s += strlen(s);
-		break;
-	}
-	if ( c == 'E' || c == 'G') {
-		while (*old_s && *old_s != 'e') old_s++;
-		if (*old_s == 'e') *old_s = 'E';
-	}
-	return s;
-}
-#endif	/* NOFLOAT */
-
 int
 _doprnt(register const char *fmt, va_list ap, FILE *stream)
 {
@@ -279,7 +247,7 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 				precision = sizeof(buf) - 1;
 
 			flags |= FL_SIGNEDCONV;
-			s = f_print(&ap, flags, s, c, precision);
+			s = _f_print(&ap, flags, s, c, precision);
 			break;
 #endif	/* NOFLOAT */
 		case 'r':
