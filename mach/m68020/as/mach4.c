@@ -195,7 +195,7 @@ instruction
 			{	T_EMIT2(03300 | $2, 0, 0, 0);}
 	|	CAS sizedef DREG ',' DREG ',' ea
 			{	T_EMIT2(04300 | (($2+0100)<<3) | mrg_2,0,0,0);
-				T_EMIT2($5 | ($3<<6),0,0,0);
+				T_EMIT2($3 | ($5<<6),0,0,0);
 				ea_2($2, MEM|ALT);
 			}
 	|	CAS2 sizedef DREG ':' DREG ',' DREG ':' DREG ','

@@ -25,7 +25,7 @@ emit_instr()
 {
 	register instr_t *ip;
 
-	for (ip=instr; ip<instrp; emit2(ip++->i_word)) {
+	for (ip=instr; ip<instrp; emit2((ip++)->i_word)) {
 #ifdef RELOCATION
 		RELOMOVE(relonami, ip->i_relonami);
 		if (ip->i_reloinfo)
