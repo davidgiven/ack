@@ -19,6 +19,7 @@
 
 # include "types.h"
 # include "extern.h"
+# include <local.h>
 
 # ifndef NORCSID
 static string rcsid = "$Header$";
@@ -67,7 +68,13 @@ new_mem(p) register p_info p; {
 
 	if (p->i_max >= p->i_top) {	/* No more free elements */
 		sz = p->i_size;
+#if BIGMACHINE
+		p->i_size += p->i_size;
+		if (! p->i_size)
+			p->i_size += p->i_incr * p->i_esize;
+#else
 		p->i_size += p->i_incr * p->i_esize;
+#endif
 		p->i_ptr = !p->i_ptr ? 
 			alloc(p->i_size) :
 			ralloc(p->i_ptr, p->i_size);

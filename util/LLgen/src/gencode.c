@@ -454,7 +454,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			safety = NOSCANDONE;
 			break; }
 		  case NONTERM : {
-			register p_nont n = &nonterms[g_getnont(p)];
+			register p_nont n = &nonterms[g_getcont(p)];
 
 			if (safety == NOSCANDONE &&
 			    getntsafe(n) < NOSCANDONE) {
@@ -472,7 +472,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 				safety = getntout(n);
 				break;
 			}
-			fprintf(f,"L%d_%s(\n",g_getnont(p), n->n_name);
+			fprintf(f,"L%d_%s(\n",g_getcont(p), n->n_name);
 			if (g_getnpar(p)) {
 				controlline();
 				getaction(0);
@@ -481,7 +481,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 			safety = getntout(n);
 			break; }
 		  case TERM :
-			safety = codeforterm(&terms[g_getcont(p)],
+			safety = codeforterm(g_getterm(p),
 						safety,
 						toplevel);
 			break;
@@ -510,7 +510,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	p_set		setalloc();
 
 	assert(safety < NOSCANDONE);
-	l = &links[g_getcont(p)];
+	l = g_getlink(p);
 	hulp = nlabel++;
 	hulp1 = nlabel++;
 	hulp2 = nlabel++;
@@ -525,7 +525,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 	}
 	fputs("switch(LLcsymb) {\n", f);
 	while (g_gettype(p) != EORULE) {
-		l = &links[g_getcont(p)];
+		l = g_getlink(p);
 		if (unsafe && (l->l_flag & DEF)) {
 			haddefault = 1;
 			fprintf(f,
@@ -569,7 +569,7 @@ alternation(p, safety, mustscan, mustpop, lb) register p_gram p; {
 			p++;
 			fprintf(f,"L_%d : ;\n",hulp);
 			if (g_gettype(p+1) == EORULE) {
-				setminus(links[g_getcont(p)].l_symbs, set);
+				setminus(g_getlink(p)->l_symbs, set);
 				free((p_mem) set);
 				continue;
 			}
@@ -609,7 +609,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
 			register p_term q;
 			int rep, cnt;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			rep = r_getkind(q);
 			cnt = r_getnum(q);
 			if (!(toplevel > 0 && safety <= SAFESCANDONE &&
@@ -630,7 +630,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; register int *pp; {
 		  case NONTERM : {
 			register p_nont n;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			if (toplevel == 0 ||
 			    (g_gettype(n->n_rule) == ALTERNATION &&
 			     getntsafe(n) > SAFESCANDONE)) {

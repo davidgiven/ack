@@ -34,6 +34,8 @@
 extern char	ltext[];	/* input buffer	*/
 extern int	nnonterms;	/* number of nonterminals */
 extern int	ntokens;	/* number of terminals */
+extern int	nterms;		/* number of terms */
+extern int	nalts;		/* number of alternatives */
 extern p_start	start;		/* will	contain	startsymbols */
 extern int	linecount;	/* line number */
 extern int	assval;		/* to create difference	between	literals
@@ -70,5 +72,3 @@ extern string	LLgenid;	/* LLgen identification string */
 extern t_token	lextoken;	/* the current token */
 extern int	nerrors;
 extern string	rec_file, incl_file;
-extern p_term	terms;
-extern p_link	links;

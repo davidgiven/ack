@@ -48,9 +48,9 @@ p_mem new_mem();
 
 name_init() {
 	token_info.i_esize = sizeof (t_token);
-	token_info.i_incr = 100;
+	token_info.i_incr = 50;
 	nont_info.i_esize = sizeof (t_nont);
-	nont_info.i_incr = 100;
+	nont_info.i_incr = 50;
 	search(TERMINAL,"EOFILE",ENTERING);
 }
 
@@ -233,6 +233,7 @@ search(type,str,option) register string str; {
 		q->n_contains = 0;
 		g_settype(&(p->h_type), NONTERM);
 		g_setcont(&(p->h_type), nnonterms);
+		g_setnpar(&(p->h_type), 0);
 		nnonterms++;
 		return &(p->h_type);
 	}

@@ -1,7 +1,9 @@
 # $Header$
+EMHOME=../../..
 PROF=
 LLOPT= # -vvv -x
-CFLAGS=-O -DNDEBUG $(PROF)
+INCLUDES = -I$(EMHOME)/h
+CFLAGS=-O -DNDEBUG $(INCLUDES) $(PROF)
 LDFLAGS=-i
 OBJECTS = main.o gencode.o compute.o LLgen.o tokens.o check.o reach.o global.o name.o sets.o Lpars.o alloc.o machdep.o cclass.o
 CFILES = main.c gencode.c compute.c LLgen.c tokens.c check.c reach.c global.c name.c sets.c Lpars.c alloc.c machdep.c cclass.c
@@ -25,7 +27,7 @@ pr :
 		@pr $(FILES) ../lib/rec ../lib/incl Makefile
 
 lint: 
-		$(LINT) $(CFILES)
+		$(LINT) $(INCLUDES) $(CFILES)
 
 clean:
 		-rm -f *.o LL.temp LL.xxx LL.output LLgen

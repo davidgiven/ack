@@ -186,7 +186,7 @@ check(p) register p_gram p; {
 		  case NONTERM : {
 			register p_nont n;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			if (g_getnpar(p) != getntparams(n)) {
 			    error(p->g_lineno,
 			        "Call of %s : parameter count mismatch",
@@ -196,7 +196,7 @@ check(p) register p_gram p; {
 		  case TERM : {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			retval |= check(q->t_rule);
 			if (r_getkind(q) == FIXED) break;
 			if (setempty(q->t_first)) {
@@ -237,7 +237,7 @@ check(p) register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			temp = setalloc();
 			setunion(temp,l->l_symbs);
 			if(!setintersect(temp,l->l_others)) {
@@ -300,7 +300,7 @@ prrule(p) register p_gram p; {
 			register p_term	q;
 			register int	c;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			if (present) prline("\n");
 			fputs("[   ",f);
 			level += 4;
@@ -347,7 +347,7 @@ prrule(p) register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			if (firstalt) {
 				firstalt = 0;
 			}
@@ -385,7 +385,7 @@ prrule(p) register p_gram p; {
 				  "'%s' " : "%s ", pt->t_string);
 			break; }
 		  case NONTERM :
-			fprintf(f,"%s ",nonterms[g_getnont(p)].n_name);
+			fprintf(f,"%s ",nonterms[g_getcont(p)].n_name);
 			break;
 		}
 		p++;
@@ -428,12 +428,12 @@ resolve(p) register p_gram p; {
 		  case EORULE :
 			return;
 		  case TERM :
-			resolve(terms[g_getcont(p)].t_rule);
+			resolve(g_getterm(p)->t_rule);
 			break;
 		  case ALTERNATION : {
 			register p_link	l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			if (l->l_flag & AVOIDING) {
 				/*
 				 * On conflicting symbols, this rule
@@ -462,7 +462,7 @@ propagate(set,p) p_set set; register p_gram p; {
 	 * p will not be chosen.
 	 */
 	while (g_gettype(p) != EORULE) {
-		setminus(links[g_getcont(p)].l_symbs,set);
+		setminus(g_getlink(p)->l_symbs,set);
 		p++;
 	} 
 }

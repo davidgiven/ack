@@ -40,23 +40,21 @@ typedef struct token {
 typedef struct gram {
 	short	x;		/* for lay-out see comment below */
 	short	g_lineno;	/* element found on this line number */
+	union {
+		int	g_index;
+		struct term *	g_term;
+		struct link *	g_link;
+	} g_i;
 } t_gram,*p_gram;
 
 /*
  * Layout of the field x:
  *
- * 15     13 12         9 8                 0
- * ------------------------------------------
- * | type   | nparams    | index            |
- * ------------------------------------------
- * of
- * 15     13 12                             0
- * ------------------------------------------
- * | type   | index                         |
- * ------------------------------------------
- * dependant on type
+ * 15  ....... 7 6 ........ 3 2 .... 0
+ * -----------------------------------
+ * | unused    | | nparams  | | type |
+ * -----------------------------------
  */
-# define UNDEFINED	000777
 # define EORULE		00	/* End of (sub)rule */
 # define ACTION		01	/* Imbedded action */
 # define NONTERM	02	/* A nonterminal */
@@ -68,14 +66,16 @@ typedef struct gram {
 /*
  * Access macros for the x-field of a grammar element
  */
-# define g_gettype(p)	(((p)->x>>13)&07)
-# define g_getcont(p)	((p)->x&017777)
-# define g_getnont(p)	((p)->x&0777)
-# define g_getnpar(p)	(((p)->x>>9)&017)
-# define g_settype(p,s)	{ assert(((unsigned)(s))<=07);(p)->x=((p)->x&017777)|((s)<<13);}
-# define g_setcont(p,s) { assert(((unsigned)(s))<=017777);(p)->x=((p)->x&0160000)|(s);}
-# define g_setnont(p,s) { assert(((unsigned)(s))<=0777);(p)->x=((p)->x&0177000)|(s);}
-# define g_setnpar(p,s) { assert(((unsigned)(s))<=017);(p)->x=((p)->x&0160777)|((s)<<9);}
+# define g_gettype(p)	((p)->x&07)
+# define g_getcont(p)	((p)->g_i.g_index)
+# define g_getterm(p)	((p)->g_i.g_term)
+# define g_getlink(p)	((p)->g_i.g_link)
+# define g_getnpar(p)	(((p)->x>>3)&017)
+# define g_settype(p,s)	{ assert(((unsigned)(s))<=07);(p)->x=((p)->x&~07)|(s);}
+# define g_setcont(p,s) ((p)->g_i.g_index=(s))
+# define g_setterm(p,s)	((p)->g_i.g_term = (s))
+# define g_setlink(p,s)	((p)->g_i.g_link = (s))
+# define g_setnpar(p,s) { assert(((unsigned)(s))<=017);(p)->x=((p)->x&~0170)|((s)<<3);}
 
 /*
  * Some constants to communicate with the symbol table search routine

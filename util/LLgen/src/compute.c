@@ -155,7 +155,7 @@ walk(p) register p_gram p; {
 		  case TERM : {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			q->t_first = get_set();
 			q->t_follow = get_set();
 			walk(q->t_rule);
@@ -163,7 +163,7 @@ walk(p) register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			l->l_symbs = get_set();
 			l->l_others = get_set();
 			walk(l->l_rule);
@@ -209,19 +209,19 @@ empty(p) register p_gram p; {
 		  case TERM :  {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			if (r_getkind(q) == STAR
 			    || r_getkind(q) == OPT
 			    || empty(q->t_rule) ) break;
 			return 0; }
 		  case ALTERNATION :
-			if (empty(links[g_getcont(p)].l_rule)) {
+			if (empty(g_getlink(p)->l_rule)) {
 				return 1;
 			}
 			if (g_gettype(p+1) == EORULE) return 0;
 			break;
 		  case NONTERM :
-			if (nonterms[g_getnont(p)].n_flags & EMPTY) {
+			if (nonterms[g_getcont(p)].n_flags & EMPTY) {
 				break;
 			}
 			/* Fall through */
@@ -262,7 +262,7 @@ first(setp,p,flag) p_set setp; register p_gram p; {
 		  case TERM : {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			if (flag == 0) {
 				if (first(q->t_first,q->t_rule,0))/*nothing*/;
 			}
@@ -275,7 +275,7 @@ first(setp,p,flag) p_set setp; register p_gram p; {
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			if (flag == 0) {
 				if (first(l->l_symbs,l->l_rule,0))/*nothing*/;
 			}
@@ -299,10 +299,10 @@ first(setp,p,flag) p_set setp; register p_gram p; {
 		  case NONTERM : {
 			register p_nont n;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			if (noenter == 0)  {
 				s |= setunion(setp,n->n_first);
-				if (ntneeded) NTPUTIN(setp,g_getnont(p));
+				if (ntneeded) NTPUTIN(setp,g_getcont(p));
 			}
 			p++;
 			if (n->n_flags & EMPTY) continue;
@@ -338,7 +338,7 @@ follow(setp,p) p_set setp; register p_gram p; {
 		  case TERM : {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			if (empty(p+1)) {
 				/*
 				 * If what follows the term can be empty,
@@ -372,12 +372,12 @@ follow(setp,p) p_set setp; register p_gram p; {
 			/*
 			 * Just propagate setp
 			 */
-			s |= follow(setp,links[g_getcont(p)].l_rule);
+			s |= follow(setp,g_getlink(p)->l_rule);
 			break;
 		  case NONTERM : {
 			register p_nont n;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			s |= first(n->n_follow,p+1,1);
 			if (empty(p+1)) {
 				/*
@@ -407,7 +407,7 @@ co_dirsymb(setp,p) p_set setp; register p_gram p; {
 		  case TERM : {
 			register p_term q;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			co_dirsymb(q->t_follow,q->t_rule);
 			break; }
 		  case ALTERNATION : {
@@ -416,7 +416,7 @@ co_dirsymb(setp,p) p_set setp; register p_gram p; {
 			 * Save first alternative
 			 */
 			if (!s) s = p;
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			co_dirsymb(setp,l->l_rule);
 			if (empty(l->l_rule)) {
 				/*
@@ -449,9 +449,9 @@ co_others(p) register p_gram p; {
 	 */
 	register p_link l1,l2;
 
-	l1 = &links[g_getcont(p)];
+	l1 = g_getlink(p);
 	p++;
-	l2 = &links[g_getcont(p)];
+	l2 = g_getlink(p);
 	setunion(l1->l_others,l2->l_symbs);
 	if (g_gettype(p+1) != EORULE) {
 		/*
@@ -493,8 +493,6 @@ do_lengthcomp() {
 	 */
 	register p_length pl;
 	register p_nont p;
-	register p_start st;
-	int change = 1;
 	p_mem alloc();
 
 	length = (p_length) alloc((unsigned) (nnonterms * sizeof(*length)));
@@ -538,7 +536,7 @@ complength(p,le) register p_gram p; p_length le; {
 			X.cnt = INFINITY;
 			X.val = INFINITY;
 			while (g_gettype(p) != EORULE) {
-				l = &links[g_getcont(p)];
+				l = g_getlink(p);
 				complength(l->l_rule,&i);
 				if (l->l_flag & DEF) {
 					X = i;
@@ -557,7 +555,7 @@ complength(p,le) register p_gram p; p_length le; {
 		  case TERM : {
 			register int rep;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			rep = r_getkind(q);
 			if ((q->t_flags&PERSISTENT) || 
 			    rep==FIXED || rep==PLUS) {
@@ -577,7 +575,7 @@ complength(p,le) register p_gram p; p_length le; {
 			}
 			break; }
 		  case NONTERM : {
-			int nn = g_getnont(p);
+			int nn = g_getcont(p);
 			register p_length pl = &length[nn];
 			int x = pl->cnt;
 
@@ -621,7 +619,7 @@ setdefaults(p) register p_gram p; {
 		  case EORULE:
 			return;
 		  case TERM:
-			setdefaults(terms[g_getcont(p)].t_rule);
+			setdefaults(g_getterm(p)->t_rule);
 			break;
 		  case ALTERNATION: {
 			register p_link l, l1;
@@ -630,9 +628,9 @@ setdefaults(p) register p_gram p; {
 
 			count.cnt = INFINITY;
 			count.val = INFINITY;
-			l1 = &links[g_getcont(p)];
+			l1 = g_getlink(p);
 			do {
-				l = &links[g_getcont(p)];
+				l = g_getlink(p);
 				complength(l->l_rule,&i);
 				if (l->l_flag & DEF) temp = 1;
 				temp1 = compare(&i, &count);
@@ -696,7 +694,7 @@ contains(p,set) register p_gram p; register p_set set; {
 			register p_term q;
 			int rep;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			rep = r_getkind(q);
 			if ((q->t_flags & PERSISTENT) ||
 			    rep == PLUS || rep == FIXED) {
@@ -723,17 +721,17 @@ contains(p,set) register p_gram p; register p_set set; {
 		  case NONTERM : {
 			register p_nont n;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			do_contains(n);
 			if (set) {
 				setunion(set, n->n_contains);
-				if (ntneeded) NTPUTIN(set, g_getnont(p));
+				if (ntneeded) NTPUTIN(set, g_getcont(p));
 			}
 			break; }
 		  case ALTERNATION : {
 			register p_link l;
 
-			l = &links[g_getcont(p)];
+			l = g_getlink(p);
 			contains(l->l_rule,
 				(l->l_flag & DEF) ? set : (p_set) 0);
 			break; }
@@ -792,7 +790,7 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 			register p_term q;
 			int i,rep;
 
-			q = &terms[g_getcont(p)];
+			q = g_getterm(p);
 			i = r_getnum(q);
 			rep = r_getkind(q);
 			retval = do_safes(q->t_rule,
@@ -806,7 +804,7 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 
 			f = 1;
 			while (g_gettype(p) == ALTERNATION) {
-				l = &links[g_getcont(p)];
+				l = g_getlink(p);
 				if (safe > SAFE && (l->l_flag & DEF)) {
 					i = do_safes(l->l_rule,SAFESCANDONE,ch);
 				}
@@ -827,7 +825,7 @@ do_safes(p,safe,ch) register p_gram p; register int *ch; {
 			register p_nont n;
 			register int nsafe, osafe;
 
-			n = &nonterms[g_getnont(p)];
+			n = &nonterms[g_getcont(p)];
 			nsafe = getntsafe(n);
 			osafe = safe;
 			safe = getntout(n);

@@ -97,13 +97,13 @@ reachwalk(p) register p_gram p; {
 	for (;;) {
 		switch(g_gettype(p)) {
 		  case ALTERNATION :
-			reachwalk(links[g_getcont(p)].l_rule);
+			reachwalk(g_getlink(p)->l_rule);
 			break;
 		  case TERM :
-			reachwalk(terms[g_getcont(p)].t_rule);
+			reachwalk(g_getterm(p)->t_rule);
 			break;
 		  case NONTERM :
-			reachable(&nonterms[g_getnont(p)]);
+			reachable(&nonterms[g_getcont(p)]);
 			break;
 		  case EORULE :
 			return;

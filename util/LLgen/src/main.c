@@ -117,7 +117,7 @@ main(argc,argv) register string	argv[]; {
 		fputs("Cannot create temporary\n",stderr);
 		exit(1);
 	}
-	a_init();
+	name_init();
 	readgrammar(argc,argv);
 	setinit(ntneeded);
 	maxnt = &nonterms[nnonterms];
@@ -138,6 +138,15 @@ main(argc,argv) register string	argv[]; {
 	else	gencode(argc);
 	UNLINK(f_temp);
 	UNLINK(f_pars);
+	if (verbose) {
+		extern char *sbrk(), *end;
+
+		fprintf(stderr, "number of nonterminals: %d\n", nnonterms);
+		fprintf(stderr, "number of tokens: %d\n", ntokens);
+		fprintf(stderr, "number of term structures: %d\n", nterms);
+		fprintf(stderr, "number of alternation structures: %d\n", nalts);
+		fprintf(stderr, "total memory used: %d\n", sbrk(0) - (char *) &end);
+	}
 	exit(0);
 }
 

@@ -28,33 +28,24 @@
 # ifndef NORCSID
 static string	rcsid = "$Header$";
 # endif
-p_mem		alloc(), new_mem();
+p_mem		alloc(), ralloc();
 string		store();
 p_gram		search();
 
 static int	nparams;		/* parameter count for nonterminals */
 static int	acount;			/* count #of global actions */
-static t_info	term_info,
-		link_info;
 static p_order	order,
 		maxorder;
+static p_term t_list;
+static int t_cnt;
 
 /* Here are defined : */
-extern		a_init();
 STATIC p_order	neworder();
 STATIC		copyact();
 STATIC		mkalt();
 STATIC		mkterm();
 STATIC p_gram	copyrule();
 /* and of course LLparse() */
-
-a_init() {
-	term_info.i_esize = sizeof (t_term);
-	term_info.i_incr = 100;
-	link_info.i_esize = sizeof (t_link);
-	link_info.i_incr = 100;
-	name_init();
-}
 
 STATIC p_order
 neworder(index) {
@@ -111,7 +102,7 @@ def			{	register string p; }
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_start) alloc(sizeof(t_start));
-				ff->ff_nont = g_getnont(temp);
+				ff->ff_nont = g_getcont(temp);
 				ff->ff_name = p;
 				ff->ff_next = start;
 				start = ff;
@@ -155,7 +146,7 @@ rule			{	register p_nont p;
 	   * grammar for a production rule
 	   */
 	  C_IDENT	{	temp = search(NONTERM,lextoken.t_string,BOTH);
-	 			p = &nonterms[g_getnont(temp)];
+	 			p = &nonterms[g_getcont(temp)];
 				if (p->n_rule) {
 					error(linecount,
 "nonterminal %s already defined", lextoken.t_string);
@@ -185,7 +176,7 @@ rule			{	register p_nont p;
 			 * Do not use p->n_rule now! The nonterms array
 			 * might have been re-allocated.
 			 */
-	  		{	nonterms[g_getnont(temp)].n_rule = rr;}
+	  		{	nonterms[g_getcont(temp)].n_rule = rr;}
 	;
 
 action(int n;)
@@ -205,8 +196,9 @@ productions(p_gram *p;)
 		int		conflres = 0;
 		int		t = 0;
 		int		haddefault = 0;
-		t_gram		alts[100];
+		p_gram		alts = (p_gram) alloc(200 * sizeof(t_gram));
 		register p_gram	p_alts = alts;
+		unsigned	n_alts = 200;
 		int		o_lc, n_lc;
 	} :
 			{	o_lc = linecount; }
@@ -215,9 +207,12 @@ productions(p_gram *p;)
 	  [ 
 	    [ '|'	{	n_lc = linecount; }
 	      simpleproduction(&prod,&t)
-			{	if (p_alts - alts >= 97) {
-					error(n_lc,"Too many alternatives");
-					p_alts = alts;
+			{	if (p_alts - alts == n_alts) {
+					alts = (p_gram) ralloc(
+						  (p_mem) alts,
+						  (n_alts+100)*sizeof(t_gram));
+					p_alts = alts + n_alts;
+					n_alts += 100;
 				}
 				if (t & DEF) {
 					if (haddefault) {
@@ -253,6 +248,7 @@ productions(p_gram *p;)
 				*/
 			}
 	  ]
+			{	free((p_mem) alts); }
 	;
 {
 
@@ -261,25 +257,32 @@ mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
 	/*
 	 * Create an alternation and initialise it.
 	 */
-	register int		hulp;
 	register p_link		l;
+	static p_link list;
+	static int cnt;
 
-	l = (p_link) new_mem(&link_info);
-	links = (p_link) link_info.i_ptr;
-	hulp = l - links;
+	if (! cnt) {
+		cnt = 50;
+		list = (p_link) alloc(50 * sizeof(t_link));
+	}
+	cnt--;
+	l = list++;
 	l->l_rule = prod;
 	l->l_flag = condition;
-	g_setcont(res,hulp);
+	g_setlink(res,l);
 	g_settype(res,ALTERNATION);
 	res->g_lineno = lc;
+	nalts++;
 }
 }
 
 simpleproduction(p_gram *p; register int *conflres;)
-	{	t_gram		rule[100];
+	{	p_gram		rule = (p_gram) alloc(200 * sizeof(t_gram));
+		unsigned	n_rule = 200;
 		t_gram		elem;
 		register p_gram	p_rule = rule;
 		int		cnt, kind;
+		int		termdeleted = 0;
 	} :
 	  [ C_DEFAULT	{	*conflres = DEF; }
 	  ]?
@@ -292,9 +295,12 @@ simpleproduction(p_gram *p; register int *conflres;)
 	    | C_AVOID	{	*conflres |= AVOIDING; }
 	  ]?
 	  [ %persistent elem(&elem)
-	 		{	if (p_rule - rule >= 98) {
-					error(linecount,"Production too long");
-					p_rule = rule;
+	 		{	if (p_rule - rule >= n_rule - 1) {
+					rule = (p_gram) ralloc(
+						  (p_mem) rule,
+						  (n_rule+100)*sizeof(t_gram));
+					p_rule = rule + n_rule - 1;
+					n_rule += 100;
 				}
 				kind = FIXED;
 				cnt = 0;
@@ -309,10 +315,37 @@ simpleproduction(p_gram *p; register int *conflres;)
 					       &elem);
 				}
 			}
-	    ]?		{	if (g_gettype(&elem) == TERM) {
+	    |
+			{ if (g_gettype(&elem) == TERM) {
+				register p_term q = g_getterm(&elem);
+
+				if (g_gettype(q->t_rule) != ALTERNATION &&
+				    g_gettype(q->t_rule) != EORULE) {
+				    while (g_gettype(q->t_rule) != EORULE) {
+					*p_rule++ = *q->t_rule++;
+	 				if (p_rule - rule >= n_rule - 1) {
+					    rule = (p_gram) ralloc(
+						  (p_mem) rule,
+						  (n_rule+100)*sizeof(t_gram));
+					    p_rule = rule + n_rule - 1;
+					    n_rule += 100;
+					}
+				    }
+				    elem = *--(q->t_rule);
+				    p_rule--;
+				    if (q == t_list - 1) {
+				    	t_list--;
+				    	nterms--;
+					t_cnt++;
+				    }
+				    termdeleted = 1;
+				}
+			  }
+			}
+	    ]		{	if (!termdeleted && g_gettype(&elem) == TERM) {
 					register p_term q;
 
-					q = &terms[g_getcont(&elem)];
+					q = g_getterm(&elem);
 					r_setkind(q,kind);
 					r_setnum(q,cnt);
 					if ((q->t_flags & RESOLVER) &&
@@ -339,40 +372,44 @@ simpleproduction(p_gram *p; register int *conflres;)
 				*p = 0;
 				if (g_gettype(&rule[0]) == TERM &&
 				    p_rule-rule == 1) {
-				    	q = &terms[g_getcont(&rule[0])];
+				    	q = g_getterm(&rule[0]);
 					if (r_getkind(q) == FIXED &&
 					    r_getnum(q) == 0) {
 					    	*p = q->t_rule;
 					}
 				}
 				if (!*p) *p = copyrule(rule,p_rule-rule+1);
+				free((p_mem) rule);
 	  		}
 	;
 {
 
 STATIC
-mkterm(prod,flags,lc, result) p_gram prod; register p_gram result; {
+mkterm(prod,flags,lc,result) p_gram prod; register p_gram result; {
 	/*
 	 * Create a term, initialise it and return
 	 * a grammar element containing it
 	 */
 	register p_term		q;
-	unsigned		hulp;
 	
-	q = (p_term) new_mem(&term_info);
-	terms = (p_term) term_info.i_ptr;
-	hulp = q - terms;
+	if (! t_cnt) {
+		t_cnt = 50;
+		t_list = (p_term) alloc(50 * sizeof(t_term));
+	}
+	t_cnt--;
+	q = t_list++;
 	q->t_rule = prod;
 	q->t_contains = 0;
 	q->t_flags = flags;
 	g_settype(result,TERM);
-	g_setcont(result,hulp);
+	g_setterm(result,q);
 	result->g_lineno = lc;
+	nterms++;
 }
 }
 
 elem (register p_gram pres;)
-	{	register short	t = 0;
+	{	register int	t = 0;
 		p_gram		p1;
 		int		ln;
 		p_gram		pe;
@@ -456,7 +493,7 @@ firsts	{	register string p; }
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_first) alloc(sizeof(t_first));
-				ff->ff_nont = g_getnont(temp);
+				ff->ff_nont = g_getcont(temp);
 				ff->ff_name = p;
 				ff->ff_next = pfile->f_firsts;
 				pfile->f_firsts = ff;

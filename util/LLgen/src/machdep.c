@@ -18,7 +18,7 @@
  */
 
 
-# include "../../../h/em_path.h"
+# include <em_path.h>
 # include "types.h"
 
 # ifndef NORCSID
