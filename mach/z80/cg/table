@@ -699,6 +699,8 @@ zrl ($1 < 0-128 || $1 >= 127) | |
 				"inc hl"
 				"ld (hl),a"
 				erase(HL)				| | |
+zrf | |
+				"call .unimpld" | | |
 zre  |  |			remove(EXTENDED,%[off] == $1)
 				remove(ALL)
 				allocate(ANY_REG = {IMMEDIATE,0} )
@@ -1368,7 +1370,7 @@ sig		| HL_REG_SCR |
 sim	| HL_REG | 		remove(MEM_ALL)
 				 "pop hl"
 				 "ld (ignmask),hl"		| | |
-str $1 == 0 | IMMEDIATE STACK |	move({IMMEDIATE,%[1.off]} , LB) | | |
+str $1 == 0 | |			"pop iy" | | |
 str $1 == 1 | STACK |		 allocate(HL_REG)
 				"pop hl"
 				"ld sp,hl"			| | |
@@ -1400,6 +1402,9 @@ mon	| |			remove(MEM_ALL)
 				move(LB,%[a])
 				"add %[a],%[1]"
 							|	%[a]  | |
+| IMMEDIATE |			allocate(ANY_REG)
+				move(%[1],%[a])
+							| %[a] | |
 				
 
 /* between registers */
