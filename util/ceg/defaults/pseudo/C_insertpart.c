@@ -23,7 +23,7 @@ int d;
 	swtxt();
 
 	symbol_definition(s = extnd_part( d));
-	set_local_visible(S);
+	set_local_visible(s);
 }
 
 
