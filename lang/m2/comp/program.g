@@ -123,16 +123,16 @@ import(int local;)
 			  }
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
-	  IMPORT IdentList(&ImportList) ';'
-			{ EnterFromImportList(ImportList, df, FromId); }
-	|
-	  IMPORT IdentList(&ImportList) ';'
-			{ EnterImportList(ImportList,
-					  local,
-					  enclosing(CurrVis)->sc_scope);
-			}
-	]
-			{
+	]?
+	IMPORT IdentList(&ImportList) ';'
+			{ if (FromId) {
+				EnterFromImportList(ImportList, df, FromId);
+			  }
+			  else {
+				EnterImportList(ImportList,
+						local,
+						enclosing(CurrVis)->sc_scope);
+			  }
 			  FreeNode(ImportList);
 			}
 ;

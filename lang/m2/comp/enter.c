@@ -234,7 +234,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 			type->arr_high = *off + pointer_size + word_size;
 			*off += pointer_size + word_size + dword_size;
 		}
-		else if (VARp == D_VARPAR || IsBigParamTp(type)) {
+		else if (VARp == D_VARPAR) {
 			*off += pointer_size;
 		}
 		else {

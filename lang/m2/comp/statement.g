@@ -78,7 +78,11 @@ statement(register t_node **pnd;)
 |
 	ForStatement(pnd)
 |
-	WithStatement(pnd)
+	WITH		{ *pnd = nd = dot2leaf(Stat); }
+	designator(&(nd->nd_LEFT))
+	DO
+	StatementSequence(&(nd->nd_RIGHT))
+	END
 |
 	EXIT
 			{ if (!loopcount) error("EXIT not in a LOOP");
@@ -247,7 +251,6 @@ LoopStatement(t_node **pnd;):
 	StatementSequence(&((*pnd)->nd_RIGHT))
 	END
 ;
-*/
 
 WithStatement(t_node **pnd;)
 {
@@ -259,6 +262,7 @@ WithStatement(t_node **pnd;)
 	StatementSequence(&(nd->nd_RIGHT))
 	END
 ;
+*/
 
 ReturnStatement(t_node **pnd;)
 {

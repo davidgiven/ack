@@ -238,13 +238,6 @@ extern t_type
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
 #define	TooBigForReturnArea(tpx) ((tpx)->tp_size > ret_area_size)
 
-#include "bigparam.h"
-#ifdef PASS_BIG_VAL_AS_VAR
-#define IsBigParamTp(tpx)	((tpx)->tp_size > double_size)
-#else
-#define IsBigParamTp(tpx)	(0)
-#endif PASS_BIG_VAL_AS_VAR
-
 extern arith full_mask[];
 extern arith max_int[];
 extern arith min_int[];

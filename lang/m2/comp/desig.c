@@ -584,7 +584,6 @@ CodeVarDesig(df, ds)
 			*/
 			C_lxa((arith) difflevel);
 			if ((df->df_flags & D_VARPAR) ||
-			    IsBigParamTp(df->df_type) ||
 			    IsConformantArray(df->df_type)) {
 				/* var parameter, big parameter,
 				   or conformant array.
@@ -606,7 +605,6 @@ CodeVarDesig(df, ds)
 	/* Now, finally, we have a local variable or a local parameter
 	*/
 	if ((df->df_flags & D_VARPAR) ||
-	    ((df->df_flags & D_VALPAR) && IsBigParamTp(df->df_type)) ||
 	    IsConformantArray(df->df_type)) {
 		/* a var parameter; address directly accessible.
 		*/

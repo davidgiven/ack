@@ -1245,8 +1245,8 @@ ChkStandard(expp)
 	case S_ORD:
 		if (! (left = getarg(&arg, T_NOSUB, 0, edf))) return 0;
 		exp->nd_type = card_type;
-		if (arg->nd_LEFT->nd_class == Value) {
-			arg->nd_LEFT->nd_type = card_type;
+		if (left->nd_class == Value) {
+			left->nd_type = card_type;
 			free_it = 1;
 		}
 		break;
@@ -1309,11 +1309,11 @@ ChkStandard(expp)
 #endif
 #ifndef STRICT_3RD_ED
 		if (! options['3'] && edf->df_value.df_stdname == S_TSIZE) {
-			if (arg->nd_RIGHT) {
-				node_warning(arg->nd_RIGHT,
+			if (left = arg->nd_RIGHT) {
+				node_warning(left,
 					     W_OLDFASHIONED,
 					     "TSIZE with multiple parameters, only first parameter used");
-				FreeNode(arg->nd_RIGHT);
+				FreeNode(left);
 				arg->nd_RIGHT = 0;
 			}
 		}

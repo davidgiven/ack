@@ -95,22 +95,6 @@ dot2leaf(class)
 	return MkLeaf(class, &dot);
 }
 
-FreeLR(nd)
-	register t_node *nd;
-{
-	switch(nsubnodes[nd->nd_class]) {
-	case 2:
-		FreeNode(nd->nd_LEFT);
-		FreeNode(nd->nd_RIGHT);
-		nd->nd_LEFT = nd->nd_RIGHT = 0;
-		break;
-	case 1:
-		FreeNode(nd->nd_NEXT);
-		nd->nd_NEXT = 0;
-		break;
-	}
-}
-
 FreeNode(nd)
 	register t_node *nd;
 {
@@ -118,7 +102,15 @@ FreeNode(nd)
 		list
 	*/
 	if (!nd) return;
-	FreeLR(nd);
+	switch(nsubnodes[nd->nd_class]) {
+	case 2:
+		FreeNode(nd->nd_LEFT);
+		FreeNode(nd->nd_RIGHT);
+		break;
+	case 1:
+		FreeNode(nd->nd_NEXT);
+		break;
+	}
 	free_node(nd);
 }
 

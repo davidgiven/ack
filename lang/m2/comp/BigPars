@@ -76,12 +76,6 @@
 				*/
 
 
-!File: bigparam.h
-#undef PASS_BIG_VAL_AS_VAR 1	/* define when big value parameters must be
-				   passed as addresses
-				*/
-
-
 !File: bigresult.h
 #define BIG_RESULT_ON_STACK 1	/* define when function results must be
 				   put on the stack; in this case, caller
@@ -97,5 +91,9 @@
 
 !File: use_insert.h
 #define USE_INSERT	1	/* use C_insertpart mechanism */
+
+
+!File: uns_arith.h
+#define UNSIGNED_ARITH	unsigned arith
 
 

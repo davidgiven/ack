@@ -11,6 +11,7 @@
 
 #include	"debug.h"
 #include	"target_sizes.h"
+#include	"uns_arith.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -58,13 +59,14 @@ underflow(expp)
 
 STATIC
 commonbin(expp)
-	register t_node **expp;
+	t_node **expp;
 {
-	register t_type *tp = (*expp)->nd_type;
-	register t_node *right = (*expp)->nd_RIGHT;
+	register t_node *exp = *expp;
+	t_type *tp = exp->nd_type;
+	register t_node *right = exp->nd_RIGHT;
 	
-	(*expp)->nd_RIGHT = 0;
-	FreeNode(*expp);
+	exp->nd_RIGHT = 0;
+	FreeNode(exp);
 	*expp = right;
 	right->nd_type = tp;
 }
@@ -86,7 +88,8 @@ cstunary(expp)
 	*/
 
 	case '-':
-		if (o1 == min_int[(int)(right->nd_type->tp_size)]) {
+		if (! options['s'] &&
+		    o1 == min_int[(int)(right->nd_type->tp_size)]) {
 			overflow(exp);
 		}
 		o1 = -o1;
@@ -116,6 +119,7 @@ divide(pdiv, prem)
 	register arith o1 = *pdiv;
 	register arith o2 = *prem;
 
+#ifndef UNSIGNED_ARITH
 	/*	this is more of a problem than you might
 		think on C compilers which do not have
 		unsigned long.
@@ -154,6 +158,10 @@ divide(pdiv, prem)
 			*prem -= o2;
 		}
 	}
+#else
+	*pdiv = (UNSIGNED_ARITH) o1 / (UNSIGNED_ARITH) o2;
+	*prem = (UNSIGNED_ARITH) o1 % (UNSIGNED_ARITH) o2;
+#endif
 }
 
 cstibin(expp)
@@ -191,31 +199,22 @@ cstibin(expp)
 		break;
 
 	case DIV:
-		if (o2 == 0)	{
-			node_error(exp, "division by 0");
-			return;
-		}
-		if ((o1 < 0) != (o2 < 0)) {
-			if (o1 < 0) o1 = -o1;
-			else o2 = -o2;
-			o1 = -((o1+o2-1)/o2);
-		}
-		else {
-			o1 /= o2;
-		}
-		break;
 	case MOD:
 		if (o2 == 0)	{
-			node_error(exp, "modulo by 0");
+			node_error(exp, exp->nd_symb == DIV ?
+					"division by 0" :
+					"modulo by 0");
 			return;
 		}
 		if ((o1 < 0) != (o2 < 0)) {
 			if (o1 < 0) o1 = -o1;
 			else o2 = -o2;
-			o1 = ((o1+o2-1)/o2) * o2 - o1;
+			if (exp->nd_symb == DIV) o1 = -((o1+o2-1)/o2);
+			else o1 = ((o1+o2-1)/o2) * o2 - o1;
 		}
 		else {
-			o1 %= o2;
+			if (exp->nd_symb == DIV) o1 /= o2;
+			else o1 %= o2;
 		}
 		break;
 
@@ -496,13 +495,14 @@ cstset(expp)
 		assert(exp->nd_LEFT->nd_class == Value);
 
 		exp->nd_LEFT->nd_INT -= exp->nd_RIGHT->nd_type->set_low;
-		i = exp->nd_LEFT->nd_INT;
+		exp = exp->nd_LEFT;
+		i = exp->nd_INT;
 		/*	Careful here; use exp->nd_LEFT->nd_INT to see if
 			it falls in the range of the set. Do not use i
 			for this, as i may be truncated.
 		*/
-		i = (exp->nd_LEFT->nd_INT >= 0 &&
-		     exp->nd_LEFT->nd_INT < setsize * wrd_bits &&
+		i = (exp->nd_INT >= 0 &&
+		     exp->nd_INT < setsize * wrd_bits &&
 		    (set2[i / wrd_bits] & (1 << (i % wrd_bits))));
 		FreeSet(set2);
 		exp = getnode(Value);
@@ -607,7 +607,8 @@ cstcall(expp, call)
 	switch(call) {
 	case S_ABS:
 		if (expr->nd_INT < 0) {
-			if (expr->nd_INT <= min_int[(int)(tp->tp_size)]) {
+			if (! options['s'] &&
+			    expr->nd_INT <= min_int[(int)(tp->tp_size)]) {
 				overflow(expr);
 			}
 			expr->nd_INT = - expr->nd_INT;

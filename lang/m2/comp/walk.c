@@ -124,7 +124,11 @@ DoLineno(nd)
 {
 	/*	Generate line number information, if necessary.
 	*/
-	if ((! options['L'] || options['g']) &&
+	if ((! options['L']
+#ifdef DBSYMTAB
+	     || options['g']
+#endif /* DBSYMTAB */
+	    ) &&
 	    nd->nd_lineno &&
 	    nd->nd_lineno != oldlineno) {
 		oldlineno = nd->nd_lineno;
@@ -255,9 +259,9 @@ WalkProcedure(procedure)
 		local definitions, checking and generating code.
 	*/
 	t_scopelist *savevis = CurrVis;
-	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	register t_type *tp;
 	register t_param *param;
+	register t_scope *procscope = procedure->prc_vis->sc_scope;
 	label too_big = 0;		/* returnsize larger than returnarea */
 	arith StackAdjustment = 0;	/* space for conformant arrays */
 	arith retsav = 0;		/* temporary space for return value */
@@ -310,7 +314,7 @@ WalkProcedure(procedure)
 #ifdef USE_INSERT
 	C_insertpart(partno2);	/* procedure header */
 #else
-	C_pro_narg(procscope->sc_name);
+	C_pro_narg(procedure->prc_name);
 #ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
@@ -383,67 +387,43 @@ WalkProcedure(procedure)
 					C_lol(param->par_def->var_off);
 					STL(param->par_def->var_off,
 					    tp->tp_size);
-					continue;
-				}
-				if (IsBigParamTp(tp) &&
-				    (param->par_def->df_flags & D_DEFINED)){
-					/* Value parameter changed in body.
-					   Make a copy
-					*/
-					arith tmp = TmpSpace(tp->tp_size,
-							     tp->tp_align);
-					LOL(param->par_def->var_off,
-					    pointer_size);
-					C_lal(tmp);
-					CodeConst(WA(tp->tp_size),
-						  (int)pointer_size);
-					C_bls(pointer_size);
-					C_lal(tmp);
-					STL(param->par_def->var_off,
-					    pointer_size);
 				}
 				continue;
 			}
-#ifdef PASS_BIG_VAL_AS_VAR
-			if (param->par_def->df_flags & D_DEFINED)
-#endif
-			{
-				/* Here, we have to make a copy of the
-				   array. We must also remember how much
-				   room is reserved for copies, because
-				   we have to adjust the stack pointer before
-				   a RET is done. This is even more complicated
-				   when the procedure returns a value.
-				   Then, the value must be saved,
-				   the stack adjusted, the return value pushed
-				   again, and then RET
+			/* Here, we have to make a copy of the
+			   array. We must also remember how much
+			   room is reserved for copies, because
+			   we have to adjust the stack pointer before
+			   a RET is done. This is even more complicated
+			   when the procedure returns a value.
+			   Then, the value must be saved,
+			   the stack adjusted, the return value pushed
+			   again, and then RET
+			*/
+			if (! StackAdjustment) {
+				/* First time we get here
 				*/
-				if (! StackAdjustment) {
-					/* First time we get here
+				if (func_type && !too_big) {
+					/* Some local space, only
+					   needed if the value itself
+					   is returned
 					*/
-					if (func_type && !too_big) {
-						/* Some local space, only
-						   needed if the value itself
-						   is returned
-						*/
-						retsav= TmpSpace(func_res_size,
-								1);
-					}
-					StackAdjustment = NewPtr();
-					C_lor((arith) 1);
-					STL(StackAdjustment, pointer_size);
+					retsav= TmpSpace(func_res_size, 1);
 				}
-				/* First compute new stackpointer */
-				C_lal(param->par_def->var_off);
-				CAL("new_stackptr", (int)pointer_size);
-				C_lfr(pointer_size);
-				C_ass(pointer_size);
-						/* adjusted stack pointer */
-				LOL(param->par_def->var_off, pointer_size);
-						/* push source address */
-				CAL("copy_array", (int)pointer_size);
-						/* copy */
+				StackAdjustment = NewPtr();
+				C_lor((arith) 1);
+				STL(StackAdjustment, pointer_size);
 			}
+			/* First compute new stackpointer */
+			C_lal(param->par_def->var_off);
+			CAL("new_stackptr", (int)pointer_size);
+			C_lfr(pointer_size);
+			C_ass(pointer_size);
+					/* adjusted stack pointer */
+			LOL(param->par_def->var_off, pointer_size);
+					/* push source address */
+			CAL("copy_array", (int)pointer_size);
+					/* copy */
 		}
 	}
 #ifdef USE_INSERT
@@ -494,7 +474,7 @@ WalkProcedure(procedure)
 	C_ret(func_res_size);
 #ifdef USE_INSERT
 	C_beginpart(partno2);
-	C_pro(procscope->sc_name, -procscope->sc_off);
+	C_pro(procedure->prc_name, -procscope->sc_off);
 #ifdef DBSYMTAB
 	if (options['g']) {
 		C_ms_std((char *) 0, N_LBRAC, proclevel);
@@ -749,11 +729,12 @@ WalkStat(nd, exit_label, end_reached)
 				loopid->nd_def->df_flags |= D_FORLOOP;
 				def_ilb(l1);
 				if (! options['R']) {
-					label x = ++text_label;
-
 					ForLoopVarExpr(loopid);
 					C_stl(tmp2);
-					end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
+				}
+				end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
+				if (! options['R']) {
+					label x = ++text_label;
 					C_lol(tmp2);
 					ForLoopVarExpr(loopid);
 					C_beq(x);
@@ -761,7 +742,6 @@ WalkStat(nd, exit_label, end_reached)
 					C_trp();
 					def_ilb(x);
 				}
-				else	end_reached |= WalkNode(right->nd_RIGHT, exit_label, end_reached);
 				loopid->nd_def->df_flags &= ~D_FORLOOP;
 				FreeInt(tmp2);
 				if (stepsize) {
@@ -1102,13 +1082,6 @@ UseWarnings(df)
 	case 0:
 	case D_VARPAR:
 		df_warning(nd, df,"never used/assigned");
-		break;
-	case D_USED|D_VARPAR:
-#ifdef PASS_BIG_VAL_AS_VAR
-		if (df->df_type->tp_fund != T_EQUAL) {
-			df_warning(nd, df,"never assigned, could be value parameter");
-		}
-#endif
 		break;
 	case D_USED:
 		df_warning(nd, df,"never assigned");

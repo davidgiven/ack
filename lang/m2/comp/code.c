@@ -417,7 +417,7 @@ CodeParameters(param, arg)
 		}
 		c_loc(0);
 	}
-	if (IsConformantArray(tp) || IsVarParam(param) || IsBigParamTp(tp)) {
+	if (IsConformantArray(tp) || IsVarParam(param)) {
 		if (arg->nd_symb == STRING) {
 			CodeString(arg);
 		}
