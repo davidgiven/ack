@@ -641,11 +641,9 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 /* ISO 6.4.3.3 (p. 100)
  * The standard permits the integertype as tagtype, but demands that the set
  * of values denoted by the case-constants is equal to the set of values
- * specified by the tagtype. So we've decided not to allow integer as tagtype,
- * because it's not practical to enumerate ALL integers as case-constants. 
- * Though it wouldn't make a great difference to allow it as tagtype.
+ * specified by the tagtype.
  */
-	  	  if( !(tp->tp_fund & T_INDEX) )	{
+	  	  if( !(tp->tp_fund & T_INDEX)) {
 			error("illegal type in variant");
 			tp = error_type;
 		  }
@@ -654,16 +652,21 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 
 			getbounds(tp, &lb, &ub);
 			ncst = ub - lb + 1;
-
-			/* initialize selector */
-			(*sel)->sel_ptrs = (struct selector **)
-			   Malloc((unsigned)ncst * sizeof(struct selector *));
-			(*sel)->sel_ncst = ncst;
-			(*sel)->sel_lb = lb;
-
-			/* initialize tagvalue-table */
-			sp = (*sel)->sel_ptrs;
-			while( ncst-- ) *sp++ = *sel;
+			if (ncst < 0 || ncst > (~(1L<<(8*sizeof(arith)-1)))/sizeof(struct selector *)) {
+				error("range of variant tag too wide");
+				tp = error_type;
+			}
+			else {
+				/* initialize selector */
+				(*sel)->sel_ptrs = (struct selector **)
+			   	  Malloc((unsigned)ncst * sizeof(struct selector *));
+				(*sel)->sel_ncst = ncst;
+				(*sel)->sel_lb = lb;
+	
+				/* initialize tagvalue-table */
+				sp = (*sel)->sel_ptrs;
+				while( ncst-- ) *sp++ = *sel;
+			}
 		  }
 		  (*sel)->sel_type = tp;
 		  if( df )	{

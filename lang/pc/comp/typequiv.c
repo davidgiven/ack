@@ -96,7 +96,7 @@ TstCompat(tp1, tp2)
 	/* no clause, just check for longs and ints */
 	/* BaseType is used in case of array indexing */
 	if ((BaseType(tp1) == int_type && tp2 == long_type) ||
-			(tp1 == long_type && tp2 == int_type))
+			(tp1 == long_type && BaseType(tp2) == int_type))
 		return 1;
 
 
