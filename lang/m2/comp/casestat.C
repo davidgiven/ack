@@ -151,6 +151,7 @@ CaseCode(nd, exitlabel, end_reached)
 		int gen = 1;
 
 		ce = sh->sh_entries;
+		while (! ce->ce_label) ce = ce->ce_next;
 		C_rom_cst((arith) 0);
 		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
@@ -161,6 +162,7 @@ CaseCode(nd, exitlabel, end_reached)
 				if (val == ce->ce_up) {
 					gen = 0;
 					ce = ce->ce_next;
+					while (! ce->ce_label) ce = ce->ce_next;
 				}
 			}
 			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
@@ -178,6 +180,7 @@ CaseCode(nd, exitlabel, end_reached)
 		for (ce = sh->sh_entries; ce; ce = ce->ce_next)	{
 			/* generate the entries: value + prog.label
 			*/
+			if (! ce->ce_label) continue;
 			val = ce->ce_low;
 			do {
 				C_rom_cst(val);
@@ -275,6 +278,9 @@ AddOneCase(sh, lnode, rnode, lbl)
 	if (! ChkCompat(&lnode, sh->sh_type, "case") ||
 	    ! ChkCompat(&rnode, sh->sh_type, "case")) {
 	}
+	ce->ce_label = lbl;
+	ce->ce_low = lnode->nd_INT;
+	ce->ce_up = rnode->nd_INT;
 	diff = rnode->nd_INT - lnode->nd_INT;
 #define MAXRANGE	100
 	if (diff < 0 || diff > MAXRANGE) {
@@ -309,31 +315,31 @@ AddOneCase(sh, lnode, rnode, lbl)
 		C_asp(int_size);
 		C_bra(lbl);
 		C_df_ilb(cont);
-		free_case_entry(ce);
-		return;
+		ce->ce_label = 0;
 	}
-	ce->ce_label = lbl;
-	ce->ce_low = lnode->nd_INT;
-	ce->ce_up = rnode->nd_INT;
 	if (sh->sh_entries == 0)	{
 		/* first case entry
 		*/
 		sh->sh_entries = ce;
-		sh->sh_lowerbd = ce->ce_low;
-		sh->sh_upperbd = ce->ce_up;
+		if (ce->ce_label) {
+			sh->sh_lowerbd = ce->ce_low;
+			sh->sh_upperbd = ce->ce_up;
+		}
 	}
 	else	{
 		/* second etc. case entry
 		   find the proper place to put ce into the list
 		*/
 		
-		if (chk_bounds(ce->ce_low, sh->sh_lowerbd, fund)) {
-			sh->sh_lowerbd = ce->ce_low;
+		if (ce->ce_label) {
+			if (! chk_bounds(sh->sh_lowerbd, ce->ce_low, fund)) {
+				sh->sh_lowerbd = ce->ce_low;
+			}
+			if (! chk_bounds(ce->ce_up, sh->sh_upperbd, fund)) {
+				sh->sh_upperbd = ce->ce_up;
+			}
 		}
-		if (! chk_bounds(ce->ce_up, sh->sh_upperbd, fund)) {
-			sh->sh_upperbd = ce->ce_up;
-		}
-		while (c1 &&! chk_bounds(ce->ce_up, c1->ce_low, fund)) {
+		while (c1 && chk_bounds(c1->ce_low, ce->ce_low, fund)) {
 			c2 = c1;
 			c1 = c1->ce_next;
 		}
@@ -355,6 +361,11 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_low));
 			}
 		}
 		if (c1)	{
+			if ( chk_bounds(c1->ce_low, ce->ce_up, fund)) {
+node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_up));
+				free_case_entry(ce);
+				return;
+			}
 			if (c2)	{
 				ce->ce_next = c2->ce_next;
 				c2->ce_next = ce;
@@ -370,5 +381,5 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_low));
 			c2->ce_next = ce;
 		}
 	}
-	sh->sh_nrofentries += ce->ce_up - ce->ce_low + 1;
+	if (ce->ce_label) sh->sh_nrofentries += ce->ce_up - ce->ce_low + 1;
 }
