@@ -1,4 +1,4 @@
-.TH CEM 1L 86/03/10
+.TH CEM 1L 86/11/12
 .SH NAME
 cem \- ACK C compiler
 .SH SYNOPSIS
@@ -24,9 +24,9 @@ C source code
 .IP .e
 EM assembler source file.
 .IP .k
-compact EM file, not yet optimised by the EM peephole optimiser.
+compact EM file, not yet optimized by the EM peephole optimizer.
 .IP .m
-compact EM file, already optimised by the peephole optimiser.
+compact EM file, already optimized by the peephole optimizer.
 .IP .s
 assembler file.
 .LP
@@ -41,9 +41,7 @@ and
 .I ack (?)
 are interpreted by
 .I cem .
-(The options not specified here are passed to the front-end
-compiler 
-.I cemcom (1L).)
+(The options not specified here are passed to the loader.)
 .IP \fB\-B\fP\fIname\fP
 Use 
 .I name
@@ -72,6 +70,21 @@ in \fB\-I\fP options, then in directories on a standard list (which in fact
 consists of "/usr/include").
 .IP \fB\-L\fP\fIdir\fP
 Use \fIdir\fP as library-containing directory instead of the default.
+.IP \fB\-N\fP\fIc\fP
+Only effective if ACK pipeline is used. 
+This option causes some default actions and options to be suppressed, according
+to
+.I c :
+.RS
+.IP \fBc\fP
+do not convert from EM a.out to local a.out format (i.e., skip the 
+.B cv
+pass.)
+.IP \fBl\fP
+do not pass the default loader flags to the
+.B ld
+pass.
+.RE
 .IP \fB\-P\fP
 Same as \fB\-E\fP, but sending the result of input file \fIfile\fP\fB.[ceis]\fP
 to \fIfile\fP\fB.i\fP.
@@ -85,24 +98,25 @@ the default.
 \&\fIProg\fP is one of the following names:
 .RS
 .IP \fBcpp\fP
-macro preprocessor (default: /lib/cpp)
+macro preprocessor
 .IP \fBcem\fP
-front\-end compiler (default: $CEM/bin/cemcom)
+front\-end compiler
 .IP \fBopt\fP
-EM peephole optimiser (default: $EM/lib/em_opt)
+EM peephole optimizer
 .IP \fBdecode\fP
-EM compact to EM assembler translator (default: $EM/lib/em_decode)
+EM compact to EM assembler translator
 .IP \fBencode\fP
-EM assembler to EM compact translator (default: $EM/lib/em_encode)
+EM assembler to EM compact translator
 .IP \fBbe\fP
 EM compact code to target\-machine assembly code compiler
-(default: $EM/lib/vax4/cg)
 .IP \fBcg\fP
 same as \fBbe\fP
 .IP \fBas\fP
-assembler (default: /bin/as)
+assembler
 .IP \fBld\fP
-linker/loader (default: /bin/ld)
+linker/loader
+.IP \fBcv\fP
+a.out format converting program (only if ACK pipeline is used)
 .RE
 .IP \fB\-R\fP\fIprog\fP\fB\-\fP\fIoption\fP
 .br
@@ -130,17 +144,17 @@ This option is passed directly to \fIcemcom\fP(1).
 .IP \fB\-c\fP
 Same as \fB\-c.o\fP.
 .IP \fB\-c.e\fP
-Produce EM assembly code on \fIfile\fP\fB.e\fP for the
+Produce human-readable EM assembly code on \fIfile\fP\fB.e\fP for the
 named files \fIfile\fP\fB.[cikm]\fP 
 .IP \fB\-c.k\fP
 Compile C source \fIfile\fP\fB.[ci]\fP or
-encode EM assembly code from \fIfile\fP\fB.e\fP
-into unoptimised compact EM code and write the result on \fIfile\fP\fB.k\fP
+encode human-readable EM assembly code from \fIfile\fP\fB.e\fP
+into non-optimized compact EM code and write the result on \fIfile\fP\fB.k\fP
 .IP \fB\-c.m\fP
 Compile C source \fIfile\fP\fB.[ci]\fP,
-translate unoptimised EM code from \fIfile\fP\fB.k\fP or
+translate non-optimized EM code from \fIfile\fP\fB.k\fP or
 encode EM assembly code from \fIfile\fP\fB.e\fP
-into optimised compact EM code and write the result on \fIfile\fP\fB.m\fP
+into optimized compact EM code and write the result on \fIfile\fP\fB.m\fP
 .IP \fB\-c.o\fP
 Suppress the loading phase of the compilation, and force an object file to
 be produced even if only one program is compiled
@@ -176,7 +190,7 @@ Print the commands before they are executed.
 Do not really execute (for debugging purposes only).
 .IP \fB\-vd\fP
 Print some additional information (for debugging purposes only).
-.IP \fB\-\-\fP\fIanything\f
+.IP \fB\-\-\fP\fIanything\fP
 .br
 Equivalent to \fB\-Rcem\-\-\fP\fIanything\fP.
 The options 
@@ -194,34 +208,7 @@ built\-in preprocessor of the \fBcem\fP phase.
 Most "\-\-" options are used by
 .I cemcom (1)
 to set some internal debug switches.
-.IP loader\ options
-.br
-The options 
-.B \-d ,
-.B \-e ,
-.B \-F ,
-.B \-n ,
-.B \-N ,
-.B \-r ,
-.B \-s ,
-.B \-u ,
-.B \-x ,
-.B \-X
-and
-.B \-z
-are directly passed to the loader.
-.SH FILES
-$CEM/bin/cem: this program
-.br
-$CEM/src/cem.c: C source of the \fBcem\fP program
-.br
-$CEM/bin/cemcom: C front end compiler
-.br
-$CEM/lib: default library-containing directory
-.br
-$CEM/src/cem.1: this manual page
-.br
-$CEM/src/cemcom.1: manual page for the C front end compiler
+.LP
 .SH SEE ALSO
 cemcom(1), cc(1), ack(?), as(1), ld(1)
 .br
@@ -229,22 +216,15 @@ cemcom(1), cc(1), ack(?), as(1), ld(1)
 B.W. Kernighan and D.M. Ritchie, \fIThe C Programming Language\fP,
 Prentice-Hall, 1978.
 .SH DIAGNOSTICS
-Any failure of one of the phases is reported.
-.SH NOTES
-.IP \(bu
-The names $CEM and $EM refer to the directories containing the CEM compiler
-and the ACK distribution tree respectively.
-.IP \(bu
-This manual page contains references to programs that reside on our site
-which is a VAX 11/750 running UNIX BSD4.1.
-Setting up \fBcem\fP requires some names to be declared in $CEM/src/cem.c
+.I Cem
+reports any failure of its components.
 .SH BUGS
 .IP \(bu
 All intermediate files are placed in the current working directory which
 causes files with the same name as the intermediate files to be overwritten.
 .IP \(bu
 .B Cem
-only accepts a limited number of arguments to be passed to the various phases.
+only accepts a limited number of arguments to be passed to the components.
 (e.g., 256).
 .IP \(bu
-Please report suggestions and other bugs to erikb@tjalk.UUCP
+Please report suggestions and other bugs to erikb@vu44.uucp
