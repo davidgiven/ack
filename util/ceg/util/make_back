@@ -13,6 +13,6 @@ back.$(LIBSUF):	$(SRC_DIR)/mach.h
 	-mkdir back
 	cd back; cp $(BACK)/*h . ; cp $(BACK)/Makefile . ; cd ..
 	if [ -d $(SRC_DIR)/back.src ] ; then cd back; cp $(SRC_DIR)/back.src/* . ; cd .. ; fi
-	cd back; make SRC_DIR=$(SRC_DIR) CC="$(CC)" CFLAGS="$(COPTIONS)" TARGET_HOME=$(TARGET_HOME) ; cd ..
+	cd back; make SRC_DIR=$(SRC_DIR) CC="$(CC)" COPTIONS="$(COPTIONS)" TARGET_HOME=$(TARGET_HOME) ; cd ..
 	$(AR) r back.$(LIBSUF) back/*.$(SUF)
 	$(RANLIB) back.$(LIBSUF)
