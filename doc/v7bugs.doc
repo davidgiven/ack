@@ -12,19 +12,19 @@
 .br
 .ne 20
 .sp 2
-.in 5
-.ti -5
+.in 5n
+.ti -5n
 ERROR \\n+e:
 ..
 .de PS
 .sp
 .nf
-.in +5
+.in +5n
 ..
 .de PE
 .sp
 .fi
-.in -5
+.in -5n
 ..
 .sp 3
 .ce

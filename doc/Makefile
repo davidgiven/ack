@@ -16,7 +16,7 @@ RESFILES= \
 cref.$(SUF):        cref.doc
 		$(TBL) $? | $(NROFF) >$@
 v7bugs.$(SUF):      v7bugs.doc
-		$(NROFF) $(MS) $? >$@
+		$(NROFF) $? >$@
 ack.$(SUF):         ack.doc
 		$(NROFF) $(MS) $? >$@
 cg.$(SUF):		cg.doc
