@@ -13,7 +13,7 @@ OBJLIST = Makefile back.h con2.c con4.c data.c data.h do_close.c do_open.c \
 		init_back.c label.c memory.c misc.c mysprint.c output.c \
 		reloc1.c reloc2.c reloc4.c relocation.c rom2.c rom4.c \
 		set_global.c set_local.c switchseg.c symboldef.c symtable.c \
-		text2.c text4.c
+		text2.c text4.c common.c
 
 all:
 
