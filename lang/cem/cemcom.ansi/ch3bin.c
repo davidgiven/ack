@@ -315,8 +315,11 @@ mk_binop(expp, oper, expr, commutative)
 	else if (is_fp_cst(expr) && is_fp_cst(ex))
 		fltcstbin(expp, oper, expr);
 	else	{
-		*expp = (commutative && (expr->ex_depth >= ex->ex_depth
-					|| is_cp_cst(ex)))
+		*expp = (commutative &&
+			  ! (ex->ex_flags & EX_VOLATILE) &&
+			  ( expr->ex_depth > ex->ex_depth ||
+			    (expr->ex_flags & EX_SIDEEFFECTS) ||
+			    is_cp_cst(ex)))
 			    ? new_oper(ex->ex_type, expr, oper, ex)
 			    : new_oper(ex->ex_type, ex, oper, expr);
 	}

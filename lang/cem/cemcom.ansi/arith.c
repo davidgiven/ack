@@ -109,8 +109,6 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 		t2 = int2int(e2p, (int_size<long_size)? long_type : ulong_type);
 	else if (t2 == LONG && t1 == INT && u1 && !shifting)	/* ??? */
 		t1 = int2int(e1p, (int_size<long_size)? long_type : ulong_type);
-	if (int_size > long_size) /* sanity check */
-		crash("size of int exceeds size of long");
 
 	/*	If either operand has type long int, the other operand is con-
 		verted to long int.
@@ -120,6 +118,9 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	else
 	if (t2 == LONG && t1 != LONG && !shifting)	/* ??? */
 		t1 = int2int(e1p, long_type);
+
+	u1 = (*e1p)->ex_type->tp_unsigned;
+	u2 = (*e2p)->ex_type->tp_unsigned;
 
 	/*	If either operand has type unsigned int, the other operand
 		is converted to unsigned int.
