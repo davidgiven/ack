@@ -12,15 +12,7 @@
 	movl    (sp)+,r0
 	cmpl    r0,$4
 	bneq    Lerr
-	tstl    (sp)
-	bgeq    L1
-	jbr     Liovfl
-L1:
 	jmp     (r1)
 Lerr:
 	pushl	$EILLINS
 	jmp     .fat
-Liovfl:
-	pushl	$EIOVFL
-	pushl	r1
-	jmp     .trp
