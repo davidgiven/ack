@@ -10,6 +10,7 @@
 #define INP_TYPE	struct file_info
 #define INP_VAR		finfo
 struct file_info	finfo;
+extern int		nestlevel;
 #include "nopp.h"
 #include <inp_pkg.body>
 
@@ -44,7 +45,7 @@ int	NoUnstack;
 AtEoIT()
 {
 #ifndef NOPP
-	if (NoUnstack) lexwarning("unexpected EOF");
+	/* if (NoUnstack) lexwarning("unexpected EOF"); ??? */
 	DoUnstack();
 #endif NOPP
 	return 0;
@@ -54,9 +55,10 @@ AtEoIF()
 {
 #ifndef NOPP
 
-	if (nestlevel != -1) lexwarning("missing #endif");
+	if (nestlevel != nestlow) lexwarning("missing #endif");
 	else
 #endif NOPP
 	if (NoUnstack) lexwarning("unexpected EOF");
+	nestlevel = nestlow;
 	return 0;
 }

@@ -7,12 +7,12 @@
 
 struct file_info {
 	unsigned int	fil_lino;
-	int		fil_nestlevel;
+	int		fil_nestlow;
 	char		*fil_name;
 	char		*fil_wdir;
 };
 
-#define nestlevel	finfo.fil_nestlevel
+#define nestlow		finfo.fil_nestlow
 #define LineNumber	finfo.fil_lino
 #define FileName	finfo.fil_name
 #define WorkingDir	finfo.fil_wdir

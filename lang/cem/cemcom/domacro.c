@@ -32,6 +32,8 @@ PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
 
+int	nestlevel = -1;
+
 PRIVATE struct idf *
 GetIdentifier()
 {
@@ -184,7 +186,7 @@ skip_block()
 			}
 			break;
 		case K_ENDIF:
-			ASSERT(nestlevel >= 0);
+			ASSERT(nestlevel > nestlow);
 			if (nestlevel == skiplevel) {
 				SkipRestOfLine();
 				nestlevel--;
@@ -249,7 +251,7 @@ do_include()
 			File_Inserted = 1;
 			FileName = result;
 			LineNumber = 0;
-			nestlevel = -1;
+			nestlow = nestlevel;
 		}
 	}
 }
@@ -314,7 +316,7 @@ push_if()
 PRIVATE
 do_elif()
 {
-	if (nestlevel < 0 || (ifstack[nestlevel])) {
+	if (nestlevel <= nestlow || (ifstack[nestlevel])) {
 		lexerror("#elif without corresponding #if");
 		SkipRestOfLine();
 	}
@@ -329,7 +331,7 @@ PRIVATE
 do_else()
 {
 	SkipRestOfLine();
-	if (nestlevel < 0 || (ifstack[nestlevel]))
+	if (nestlevel <= nestlow || (ifstack[nestlevel]))
 		lexerror("#else without corresponding #if");
 	else {	/* mark this level as else-d		*/
 		++(ifstack[nestlevel]);
@@ -341,7 +343,7 @@ PRIVATE
 do_endif()
 {
 	SkipRestOfLine();
-	if (nestlevel < 0)	{
+	if (nestlevel <= nestlow)	{
 		lexerror("#endif without corresponding #if");
 	}
 	else	nestlevel--;
