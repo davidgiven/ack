@@ -13,9 +13,9 @@
 	push	edi
 	mov     ebx,esp
 	xor	edi,edi
-	sar	ecx,1
+	sar	ecx,2
 1:
-	mov     4(ebx)(edi),edx
+	mov     8(ebx)(edi),edx
 	add	edi,4
 	loop	1b
 !endif

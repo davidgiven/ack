@@ -20,8 +20,10 @@
 	o16 mov	(ebx),ax
 	jmp     edx
 1:
-	mov	ebx,edx
+	push	edx
 	mov	edx,edi
+	mov	edi,ebx
+	pop	ebx
 	jmp	1f
 .sti:
 	! only called with count >> 4

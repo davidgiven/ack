@@ -8,7 +8,7 @@
 	mov	edx,edi
 	mov	edi,esp
 	add	edi,ecx
-	sar	ecx,1
+	sar	ecx,2
 1:
 	pop	eax
 	or	eax,(edi)

@@ -9,9 +9,7 @@
 				! eax is source
 	cmp	edx,1
 	jne	2f
-	o16 cbw			! needs operand size toggle to convert
-				! from one to two bytes.
-	cwde
+	movsxb	eax,al
 	mov	edx,4
 	jmp	1f
 2:

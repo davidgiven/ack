@@ -14,4 +14,5 @@
 	pop     eax
 	ret
 2:
+	push	eax
 	call    .stop

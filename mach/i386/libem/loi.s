@@ -11,20 +11,20 @@
 	mov     eax,ecx
 	sar     ecx,1
 	jnb     1f
-	xor	eax,eax
-	movb	al,(edx)
+	movsxb	eax,(ebx)
 	push    eax
 	jmp     edx
 1:
 	sar     ecx,1
 	jnb     1f
-	xor	eax,eax
-	o16 mov	ax,(edx)
+	movsx	eax,(ebx)
 	push    eax
 	jmp     edx
 1:
-	mov	ebx,edx
+	push	edx
 	mov	edx,esi
+	mov	esi,ebx
+	pop	ebx
 	sub     esp,eax
 	jmp	1f
 
