@@ -1504,7 +1504,7 @@ and $1==2 	| CONST2 SCR_REG |
 			erase(%[1]) erase(%[2]) | %[2]  | | (4,600)
 ldc and $2==4 && highw(1)==0	| source2 SCR_REG |
 			"bic $$%(~loww(1)%),%[2]"
-			erase(%[2])		| {CONST2, 0} %[1] | |
+			erase(%[2])		| %[2] {CONST2, 0} | |
 ldc and $2==4 && highw(1)==0-1	| source2 SCR_REG |
 			"bic $$%(~loww(1)%),%[2]"
 			erase(%[2])		| %[2] %[1] | |
