@@ -122,13 +122,19 @@ struct file_list *
 new_file_list()
 {
 	static struct file_list *p;
+	register struct file_list *f;
 	static int cnt;
-	extern char *calloc();
 
-	if (cnt--) return p++;
-	p = (struct file_list *)calloc(50, sizeof(struct file_list));
-	cnt = 49;
-	return p++;
+	if (cnt-- < 0) {
+		p = (struct file_list *)Malloc(50*sizeof(struct file_list));
+		cnt = 49;
+	}
+	f = p++;
+	f->a_filename = 0;
+	f->a_dir = 0;
+	f->a_next = 0;
+	f->a_idf = 0;
+	f->a_notfound = 0;
 }
 
 Add(parglist, f, d, copy)

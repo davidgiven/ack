@@ -30,17 +30,20 @@
 #include	"idf.h"
 #include	"f_info.h"
 #include	"LLlex.h"
+#include	<alloc.h>
 
 struct lnk *
 new_lnk()
 {
 	static struct lnk *p;
 	static int cnt;
-	extern char *calloc();
 
-	if (cnt--) return p++;
-	p = (struct lnk *)calloc(50, sizeof(struct lnk));
-	cnt = 49;
+	if (cnt-- <= 0) {
+		p = (struct lnk *)Malloc(50*sizeof(struct lnk));
+		cnt = 49;
+	}
+	p->lnk_next = 0;
+	p->lnk_imp = 0;
 	return p++;
 }
 }
