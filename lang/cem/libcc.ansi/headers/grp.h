@@ -6,7 +6,11 @@
 struct	group {				/* see getgrent(3) */
 	char	*gr_name;
 	char	*gr_passwd;
+#if	defined(_POSIX_SOURCE) && defined(_MINIX)
+	char	gr_gid;
+#else
 	int	gr_gid;
+#endif
 	char	**gr_mem;
 };
 

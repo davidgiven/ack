@@ -11,6 +11,22 @@
 
 typedef	int		sig_atomic_t;
 
+#if	defined(_POSIX_SOURCE)
+#if	defined(_MINIX)
+typedef	unsigned short sigset_t;
+
+#define	SIG_BLOCK	0	/* for blocking signals */
+#define	SIG_UNBLOCK	1	/* for unblocking signals */
+#define	SIG_SETMASK	2	/* for setting the signal mask */
+
+struct sigaction {
+	void (*sa_handler)(int);/* SIG_DFL, SIG_IGN or pointer to function */
+	sigset_t sa_mask;	/* signals blocked during handling */
+	int sa_flags;		/* special flags */
+};
+#endif
+#endif
+
 #define	SIG_ERR		((void (*)(int))-1)
 #if	defined(em22) || defined(em24) || defined(em44)
 #define	SIG_DFL		((void (*)(int))-2)
@@ -62,6 +78,15 @@ typedef	int		sig_atomic_t;
 #define SIGUSR1 30	/* user defined signal 1 */
 #define SIGUSR2 31	/* user defined signal 2 */
 #define	_NSIG	32
+#elif	defined(_MINIX)
+/* The following signals are defined but not supported */
+#define SIGCHLD		17	/* child process terminated or stopped */
+#define SIGCONT		18	/* continue if stopped */
+#define SIGSTOP		19	/* stop signal */
+#define SIGTSTP		20	/* interactive stop signal */
+#define SIGTTIN		21	/* background process wants to read */
+#define SIGTTOU		22	/* background process wants to write */
+#define	_NSIG	16
 #else
 #define	_NSIG	16
 #endif	/* __USG or __BSD4_2 */
