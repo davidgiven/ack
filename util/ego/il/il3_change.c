@@ -4,6 +4,7 @@
  */
 
 
+#include <stdio.h>
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
