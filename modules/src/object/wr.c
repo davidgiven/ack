@@ -11,8 +11,7 @@
  *	part. In this case #define OUTSEEK.
  */
 
-#include <out.h>
-#include "object.h"
+#include "obj.h"
 
 extern long		lseek();
 
@@ -30,6 +29,7 @@ int			__sectionnr;
 #define sectionnr	__sectionnr
 static int		offcnt;
 
+void
 __wr_flush(ptr)
 	register struct fil *ptr;
 {
@@ -54,7 +54,8 @@ __wr_flush(ptr)
 	ptr->pbegin = ptr->pbuf;
 }
 
-static OUTWRITE(p, b, n)
+static void
+OUTWRITE(p, b, n)
 	int		p;	/* part number */
 	register char	*b;	/* buffer pointer */
 	long		n;	/* write count */
@@ -119,7 +120,8 @@ static OUTWRITE(p, b, n)
 	}
 }
 
-static BEGINSEEK(p, o)
+static void
+BEGINSEEK(p, o)
 	int		p;	/* part number */
 	long		o;	/* offset in file */
 {
@@ -162,6 +164,7 @@ wr_open(f)
 	return 1;
 }
 
+void
 wr_close()
 {
 	register struct fil *ptr;
@@ -179,6 +182,7 @@ wr_close()
 #endif /* OUTSEEK */
 }
 
+void
 wr_ohead(head)
 	register struct outhead	*head;
 {
@@ -215,6 +219,7 @@ wr_ohead(head)
 	else OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
 }
 
+void
 wr_sect(sect, cnt)
 	register struct outsect	*sect;
 	register unsigned int	cnt;
@@ -263,6 +268,7 @@ wr_sect(sect, cnt)
 #endif
 }
 
+void
 wr_outsect(s)
 	int		s;	/* section number */
 {
@@ -295,6 +301,7 @@ wr_outsect(s)
 /*
  * We don't have to worry about byte order here.
  */
+void
 wr_emit(emit, cnt)
 	char		*emit;
 	long		cnt;
@@ -302,6 +309,7 @@ wr_emit(emit, cnt)
 	OUTWRITE(PARTEMIT + getsect(sectionnr) , emit, cnt);
 }
 
+void
 wr_relo(relo, cnt)
 	register struct outrelo	*relo;
 	unsigned int cnt;
@@ -339,6 +347,7 @@ wr_relo(relo, cnt)
 #endif
 }
 
+void
 wr_name(name, cnt)
 	register struct outname	*name;
 	unsigned int cnt;
@@ -374,6 +383,7 @@ wr_name(name, cnt)
 
 }
 
+void
 wr_string(addr, len)
 	char *addr;
 	long len;
@@ -384,6 +394,7 @@ wr_string(addr, len)
 
 #ifdef SYMDBUG
 
+void
 wr_dbug(buf, size)
 	char		*buf;
 	long		size;
