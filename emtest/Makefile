@@ -16,4 +16,4 @@ last:		tests test.h select
 		echo 0 >last
 
 select:		select.c
-		cc -O -n -o select select.c
+		cc -O -i -o select select.c
