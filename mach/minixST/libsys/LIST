@@ -15,6 +15,7 @@ dup.c
 dup2.c
 exec.c
 exit.c
+_exit.c
 cleanup.c
 fork.c
 fstat.c
