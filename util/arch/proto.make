@@ -49,16 +49,16 @@ install :       all
 		cp aal $(EMBIN)/aal
 		cp arch $(EMBIN)/arch
 		rm -f $(EMMAN)/arch.1 $(EMMAN)/aal.1 $(EMMAN)/arch.5
-		cp aal.1 $(EMMAN)/aal.1
-		cp arch.1 $(EMMAN)/arch.1
-		cp arch.5 $(EMMAN)/arch.5
+		cp $(SRC_DIR)/aal.1 $(EMMAN)/aal.1
+		cp $(SRC_DIR)/arch.1 $(EMMAN)/arch.1
+		cp $(SRC_DIR)/arch.5 $(EMMAN)/arch.5
 
 cmp :           all
 		-cmp aal $(EMBIN)/aal
 		-cmp arch $(EMBIN)/arch
-		-cmp aal.1 $(EMMAN)/aal.1
-		-cmp arch.1 $(EMMAN)/arch.1
-		-cmp arch.5 $(EMMAN)/arch.5
+		-cmp $(SRC_DIR)/aal.1 $(EMMAN)/aal.1
+		-cmp $(SRC_DIR)/arch.1 $(EMMAN)/arch.1
+		-cmp $(SRC_DIR)/arch.5 $(EMMAN)/arch.5
 
 opr:
 		make pr ^ opr

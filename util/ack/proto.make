@@ -132,7 +132,7 @@ data.$(SUF):	$(SRC_DIR)/ack.h
 main.$(SUF):	$(SRC_DIR)/main.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/main.c
 main.$(SUF):	$(SRC_DIR)/data.h
-main.$(SUF):	$(HDIR)/local.h
+main.$(SUF):	$(SRC_DIR)/config/local.h
 main.$(SUF):	$(SRC_DIR)/trans.h
 main.$(SUF):	$(SRC_DIR)/list.h
 main.$(SUF):	$(SRC_DIR)/ack.h
