@@ -8,8 +8,10 @@ dec loc sbi $3==w:	loc $2+1 sbi w
 ldc adi ldc sbi $2==2*w && $4==2*w:     ldc $1-$3 adi 2*w
 loc adi loc adi $2==w && $4==w: loc $1+$3 adi w
 ldc adi ldc adi $2==2*w && $4==2*w:     ldc $1+$3 adi 2*w
+/*
 loc adi loc mli $2==w && $4==w:	loc $3 mli w loc $1*$3 adi w
 loc adi loc sli $2==w && $4==w && $3==1: loc $3 sli w loc 2*$1 adi w
+*/
 adp $1==0:
 adp adp :       adp $1+$2
 adp lof :       lof $1+$2
@@ -219,6 +221,22 @@ loc mlu $1==32 && $2==w:        loc 5   slu w
 loc mlu $1==64 && $2==w:        loc 6   slu w
 loc mlu $1==128 && $2==w:       loc 7   slu w
 loc mlu $1==256 && $2==w:       loc 8   slu w
+ldc mli $1==2 && $2==2*w: 	loc 1   sli 2*w
+ldc mli $1==4 && $2==2*w: 	loc 2   sli 2*w
+ldc mli $1==8 && $2==2*w: 	loc 3   sli 2*w
+ldc mli $1==16 && $2==2*w:        loc 4   sli 2*w
+ldc mli $1==32 && $2==2*w:        loc 5   sli 2*w
+ldc mli $1==64 && $2==2*w:        loc 6   sli 2*w
+ldc mli $1==128 && $2==2*w:       loc 7   sli 2*w
+ldc mli $1==256 && $2==2*w:       loc 8   sli 2*w
+ldc mlu $1==2 && $2==2*w: 	loc 1   slu 2*w
+ldc mlu $1==4 && $2==2*w: 	loc 2   slu 2*w
+ldc mlu $1==8 && $2==2*w: 	loc 3   slu 2*w
+ldc mlu $1==16 && $2==2*w:        loc 4   slu 2*w
+ldc mlu $1==32 && $2==2*w:        loc 5   slu 2*w
+ldc mlu $1==64 && $2==2*w:        loc 6   slu 2*w
+ldc mlu $1==128 && $2==2*w:       loc 7   slu 2*w
+ldc mlu $1==256 && $2==2*w:       loc 8   slu 2*w
 loc adi !defined($2):   adi $1
 loc sbi !defined($2):   sbi $1
 loc mli !defined($2):   mli $1
@@ -367,8 +385,10 @@ loc sbi loc sbi $2==w && $4==w: loc $1+$3 sbi w
 ldc sbi ldc sbi $2==2*w && $4==2*w:     ldc $1+$3 sbi 2*w
 loc sbi loc adi $2==w && $4==w: loc $1-$3 sbi w
 ldc sbi ldc adi $2==2*w && $4==2*w:     ldc $1-$3 sbi 2*w
+/*
 loc sbi loc mli $2==w && $4==w:	loc $3 mli w loc $1*$3 sbi w
 loc sbi loc sli $2==w && $4==w && $3==1: loc $3 sli w loc 2*$1 sbi w
+*/
 teq teq :       tne
 teq tne :       teq
 teq zne :       zeq $2
