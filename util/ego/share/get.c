@@ -229,16 +229,15 @@ dblock_p getdtable(dname)
 	 * is correct.
 	 */
 
-	dblock_p head, d, *dp;
-	obj_p    obj, *op;
-	arg_p    arg, *ap;
+	dblock_p head, d = 0, *dp = &head;
+	obj_p    obj, *op = 0;
+	arg_p    arg, *ap = 0;
 	/* dp, op an ap tell how the next dblock/obj/arg
 	 * has to be linked.
 	 */
 	int n;
 
 	head = (dblock_p) 0;
-	dp = &head;
 	if ((curinp = fopen(dname,"r")) == NULL) {
 		error("cannot open %s", dname);
 	}

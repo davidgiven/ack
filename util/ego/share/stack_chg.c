@@ -25,7 +25,7 @@ int stack_change(l,sign)
 
 	char *s;
 	bool argdef;
-	short arg;
+	short arg = 0;
 	int sum = 0;
 	line_p p = PREV(l);
 	line_p pp = (p == (line_p) 0 ? (line_p) 0 : PREV(p));
@@ -33,19 +33,18 @@ int stack_change(l,sign)
 
 	if (i < sp_fmnem || i > sp_lmnem) {
 		return 0;
-	} else {
-		if (TYPE(l) == OPSHORT) {
-			arg = SHORT(l);
-			if (arg < ws) {
-				/* E.g. a LOI 1 loads word-size bytes,
-				 * not 1 byte!
-				 */
-				arg = ws;
-			}
-			argdef = TRUE;
-		} else {
-			argdef = FALSE;
+	}
+	if (TYPE(l) == OPSHORT) {
+		arg = SHORT(l);
+		if (arg < ws) {
+			/* E.g. a LOI 1 loads word-size bytes,
+			 * not 1 byte!
+			 */
+			arg = ws;
 		}
+		argdef = TRUE;
+	} else {
+		argdef = FALSE;
 	}
 	s = pop_push[i];
 	if (*s == '0') return 0;

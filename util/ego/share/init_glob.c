@@ -31,7 +31,7 @@ init_globals()
 	 */
 
 	dblock_p d;
-	obj_p obj, prev;
+	obj_p obj, prev = 0;
 	short nr = 1;
 	offset ill_zone, x;
 

@@ -137,7 +137,7 @@ make_localtab(p)
 	 * i.e. we don't compute ud-info for them.
 	 */
 
-	local_p prev, next, lc;
+	local_p prev = 0, next, lc;
 	local_p locallist = (local_p) 0;
 	short cnt = 0;
 	offset x, ill_zone = 0;
@@ -220,7 +220,7 @@ var_nr(l,nr_out,found_out)
 	 * by EM instruction l.
 	 */
 
-	offset off;
+	offset off = 0;
 	short nr;
 
 	switch(TYPE(l)) {

@@ -152,49 +152,35 @@ STATIC offset nrbytes(class,arg1,arg2)
 	 * arguments and class.
 	 */
 
-	offset n;
-
 	switch(class) {
 		case CLASS1:
-			n = arg1;
-			break;
+			return arg1;
 		case CLASS2:
-			n = 2 * arg1;
-			break;
+			return 2 * arg1;
 		case CLASS3:
-			n = arg1 + ws;
-			break;
+			return arg1 + ws;
 		case CLASS4:
-			n = arg1 + ps;
-			break;
+			return arg1 + ps;
 		case CLASS5:
-			n = ws;
-			break;
+			return ws;
 		case CLASS6:
-			n = 2 * ws;
-			break;
+			return 2 * ws;
 		case CLASS7:
-			n = ps;
-			break;
+			return ps;
 		case CLASS8:
-			n = 2 * ps;
-			break;
+			return 2 * ps;
 		case CLASS9:
-			n = 0;
-			break;
+			return 0;
 		case CLASS10:
-			n = arg2 + 2*ws;
-			break;
+			return arg2 + 2*ws;
 		case CLASS11:
-			n = arg1 + 2*ps;
-			break;
+			return arg1 + 2*ps;
 		case CLASS12:
-			n = (arg1 < ws ? ws : arg1);
-			break;
+			return (arg1 < ws ? ws : arg1);
 		default:
 			assert(FALSE);
 	}
-	return n;
+	return 0;
 }
 
 
@@ -253,7 +239,7 @@ bool parse(l,nbytes,l_out,level,action0)
 	 */
 
 	offset more, expected, sourcebytes,resultbytes;
-	line_p lnp;
+	line_p lnp = 0;
 
 	more = nbytes; /* #bytes to be recognized */
 	while (more > 0) {
