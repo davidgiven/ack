@@ -29,7 +29,9 @@
 extern char options[128];
 extern char *symbol2str();
 
-struct expr_state *lint_expr();
+static struct expr_state *lint_expr();
+static struct expr_state *lint_value();
+static struct expr_state *lint_oper();
 
 lint_init()
 {
@@ -44,6 +46,8 @@ lint_init()
 
 pre_lint_expr(expr, val, used)
 	struct expr *expr;
+	int val;			/* LVAL or RVAL */
+	int used;
 {
 /* Introduced to dispose the returned expression states */
 
@@ -65,9 +69,11 @@ free_expr_states(esp)
 	}
 }
 
-struct expr_state *
+static struct expr_state *
 lint_expr(expr, val, used)
 	register struct expr *expr;
+	int val;
+	int used;
 {
 /* Main function to process an expression tree.
  * It returns a structure containing information about which variables
@@ -77,217 +83,232 @@ lint_expr(expr, val, used)
  * If the value of an operation without side-effects is not used,
  * a warning is given.
  */
-	struct expr_state *esp1 = 0, *esp2 = 0;
-
 	if (used == IGNORED) {
 		expr_ignored(expr);
 	}
 
 	switch (expr->ex_class) {
 	case Value:
-		switch (expr->VL_CLASS) {
-		case Const:
-		case Label:
-			return(0);
-
-		case Name:
-		{
-			register struct idf *idf = expr->VL_IDF;
-
-			if (!idf || !idf->id_def)
-				return(0);
-
-			if (	val == LVAL
-			||	(	val == RVAL
-				&&	expr->ex_type->tp_fund == POINTER
-				&&	!expr->ex_lvalue
-				)
-			) {
-				change_state(idf, SET);
-				idf->id_def->df_file =
-					Salloc(dot.tk_file,
-						strlen(dot.tk_file) + 1);
-				idf->id_def->df_line = dot.tk_line;
-			}
-			if (val == RVAL) {
-				change_state(idf, USED);
-				add_expr_state(expr->EX_VALUE, USED, &esp1);
-			}
-			return(esp1);
-		}
-
-		default:
-			crash("(lint_expr) bad value class\n");
-			/* NOTREACHED */
-		}
+		return lint_value(expr, val);
 
 	case Oper:
+		return lint_oper(expr, val, used);
+
+	default:			/* String Float Type */
+		return 0;
+	}
+}
+
+static struct expr_state *
+lint_value(expr, val)
+	register struct expr *expr;
+{
+	switch (expr->VL_CLASS) {
+	case Const:
+	case Label:
+		return 0;
+
+	case Name:
 	{
-		register int oper = expr->OP_OPER;
-		register struct expr *left = expr->OP_LEFT;
-		register struct expr *right = expr->OP_RIGHT;
+		register struct idf *idf = expr->VL_IDF;
+		struct expr_state *esp1 = 0;
 
-		switch (oper) {
-		case '=':
-		case PLUSAB:
-		case MINAB:
-		case TIMESAB:
-		case DIVAB:
-		case MODAB:
-		case LEFTAB:
-		case RIGHTAB:
-		case ANDAB:
-		case XORAB:
-		case ORAB:
-			lint_conversion(oper, right->ex_type, left->ex_type);
-			/* for cases like i += l; */
-			esp1 = lint_expr(right, RVAL, USED);
-			if (oper != '=') {
-				/* i += 1; is interpreted as i = i + 1; */
-				esp2 = lint_expr(left, RVAL, USED);
-				check_and_merge(&esp1, esp2, oper);
-			}
-			esp2 = lint_expr(left, LVAL, USED);
-			/* for cases like i = i + 1; and i not set, this
-			** order is essential
-			*/
-			check_and_merge(&esp1, esp2, oper);
-			if (	left->ex_class == Value
-			&&	left->VL_CLASS == Name
-			) {
-				add_expr_state(left->EX_VALUE, SET, &esp1);
-			}
-			return(esp1);
+		if (!idf || !idf->id_def)
+			return 0;
 
-		case POSTINCR:
-		case POSTDECR:
-		case PLUSPLUS:
-		case MINMIN:
-			/* i++; is parsed as i = i + 1;
-			 * This isn't quite correct :
-			 * The first statement doesn't USE i,
-			 * the second does.
-			 */
-			esp1 = lint_expr(left, RVAL, USED);
-			esp2 = lint_expr(left, LVAL, USED);
-			check_and_merge(&esp1, esp2, oper);
-			if (	left->ex_class == Value
-			&&	left->VL_CLASS == Name
-			) {
-				add_expr_state(left->EX_VALUE, SET, &esp1);
-				add_expr_state(left->EX_VALUE, USED, &esp1);
-			}
-			return(esp1);
-
-		case '-':
-		case '*':
-			if (left == 0)	/* unary */
-				return(lint_expr(right, RVAL, USED));
-			esp1 = lint_expr(left, RVAL, USED);
-			esp2 = lint_expr(right, RVAL, USED);
-			check_and_merge(&esp1, esp2, oper);
-			return(esp1);
-
-		case '(':
-			if (right != 0) {
-				/* function call with parameters */
-				register struct expr *ex = right;
-
-				while (	ex->ex_class == Oper
-				&&	ex->OP_OPER == PARCOMMA
-				) {
-					esp2 = lint_expr(ex->OP_RIGHT, RVAL,
-							 USED);
-					check_and_merge(&esp1, esp2, oper);
-					ex = ex->OP_LEFT;
-				}
-				esp2 = lint_expr(ex, RVAL, USED);
-				check_and_merge(&esp1, esp2, oper);
-			}
-			if (	left->ex_class == Value
-			&&	left->VL_CLASS == Name
-			) {
-				fill_outcall(expr,
-					expr->ex_type->tp_fund == VOID ?
-					VOIDED : used
-				);
-				outcall();
-				left->VL_IDF->id_def->df_used = 1;
-			}
-			else {
-				esp2 = lint_expr(left, val, USED);
-				check_and_merge(&esp1, esp2, oper);
-			}
-			return(esp1);
-
-		case '.':
-			return(lint_expr(left, val, USED));
-
-		case ARROW:
-			return(lint_expr(left, RVAL, USED));
-
-		case '~':
-		case '!':
-			return(lint_expr(right, RVAL, USED));
-
-		case '?':
-			esp1 = lint_expr(left, RVAL, USED);
-			esp2 = lint_expr(right->OP_LEFT, RVAL, USED);
-			check_and_merge(&esp1, esp2, 0);
-			esp2 = lint_expr(right->OP_RIGHT, RVAL, USED);
-			check_and_merge(&esp1, esp2, 0);
-			return(esp1);
-
-		case INT2INT:
-		case INT2FLOAT:
-		case FLOAT2INT:
-		case FLOAT2FLOAT:
-			lint_conversion(oper, right->ex_type, left->ex_type);
-			return(lint_expr(right, RVAL, USED));
-
-		case '<':
-		case '>':
-		case LESSEQ:
-		case GREATEREQ:
-		case EQUAL:
-		case NOTEQUAL:
-			lint_relop(left, right, oper);
-			lint_relop(right, left, 
-				oper == '<' ? '>' :
-				oper == '>' ? '<' :
-				oper == LESSEQ ? GREATEREQ :
-				oper == GREATEREQ ? LESSEQ :
-				oper
-			);
-			/*FALLTHROUGH*/
-		case '+':
-		case '/':
-		case '%':
-		case ',':
-		case LEFT:
-		case RIGHT:
-		case '&':
-		case '|':
-		case '^':
-		case OR:
-		case AND:
-			esp1 = lint_expr(left, RVAL,
-						oper == ',' ? IGNORED : USED);
-			esp2 = lint_expr(right, RVAL,
-						oper == ',' ? used : USED);
-			if (oper == OR || oper == AND || oper == ',')
-				check_and_merge(&esp1, esp2, 0);
-			else
-				check_and_merge(&esp1, esp2, oper);
-			return(esp1);
-
-		default:
-			return(0);	/* for initcomma */
+		if (	val == LVAL
+		||	(	val == RVAL
+			&&	expr->ex_type->tp_fund == POINTER
+			&&	!expr->ex_lvalue
+			)
+		) {
+			change_state(idf, SET);
+			idf->id_def->df_file =
+				Salloc(dot.tk_file,
+					strlen(dot.tk_file) + 1);
+			idf->id_def->df_line = dot.tk_line;
 		}
+		if (val == RVAL) {
+			change_state(idf, USED);
+			add_expr_state(expr->EX_VALUE, USED, &esp1);
+		}
+		return esp1;
 	}
 
 	default:
-		return(0);
+		crash("(lint_expr) bad value class\n");
+		/* NOTREACHED */
+	}
+}
+
+static struct expr_state *
+lint_oper(expr, val, used)
+	struct expr *expr;
+	int val;
+	int used;
+{
+	register int oper = expr->OP_OPER;
+	register struct expr *left = expr->OP_LEFT;
+	register struct expr *right = expr->OP_RIGHT;
+	struct expr_state *esp1 = 0;
+	struct expr_state *esp2 = 0;
+
+	switch (oper) {
+	case '=':
+	case PLUSAB:
+	case MINAB:
+	case TIMESAB:
+	case DIVAB:
+	case MODAB:
+	case LEFTAB:
+	case RIGHTAB:
+	case ANDAB:
+	case XORAB:
+	case ORAB:
+		lint_conversion(oper, right->ex_type, left->ex_type);
+		/* for cases like i += l; */
+		esp1 = lint_expr(right, RVAL, USED);
+		if (oper != '=') {
+			/* i += 1; is interpreted as i = i + 1; */
+			esp2 = lint_expr(left, RVAL, USED);
+			check_and_merge(&esp1, esp2, oper);
+		}
+		esp2 = lint_expr(left, LVAL, USED);
+		/* for cases like i = i + 1; and i not set, this
+		** order is essential
+		*/
+		check_and_merge(&esp1, esp2, oper);
+		if (	left->ex_class == Value
+		&&	left->VL_CLASS == Name
+		) {
+			add_expr_state(left->EX_VALUE, SET, &esp1);
+		}
+		return esp1;
+
+	case POSTINCR:
+	case POSTDECR:
+	case PLUSPLUS:
+	case MINMIN:
+		/* i++; is parsed as i = i + 1;
+		 * This isn't quite correct :
+		 * The first statement doesn't USE i,
+		 * the second does.
+		 */
+		esp1 = lint_expr(left, RVAL, USED);
+		esp2 = lint_expr(left, LVAL, USED);
+		check_and_merge(&esp1, esp2, oper);
+		if (	left->ex_class == Value
+		&&	left->VL_CLASS == Name
+		) {
+			add_expr_state(left->EX_VALUE, SET, &esp1);
+			add_expr_state(left->EX_VALUE, USED, &esp1);
+		}
+		return esp1;
+
+	case '-':
+	case '*':
+		if (left == 0)	/* unary */
+			return lint_expr(right, RVAL, USED);
+		esp1 = lint_expr(left, RVAL, USED);
+		esp2 = lint_expr(right, RVAL, USED);
+		check_and_merge(&esp1, esp2, oper);
+		return esp1;
+
+	case '(':
+		if (right != 0) {
+			/* function call with parameters */
+			register struct expr *ex = right;
+
+			while (	ex->ex_class == Oper
+			&&	ex->OP_OPER == PARCOMMA
+			) {
+				esp2 = lint_expr(ex->OP_RIGHT, RVAL,
+						 USED);
+				check_and_merge(&esp1, esp2, oper);
+				ex = ex->OP_LEFT;
+			}
+			esp2 = lint_expr(ex, RVAL, USED);
+			check_and_merge(&esp1, esp2, oper);
+		}
+		if (	left->ex_class == Value
+		&&	left->VL_CLASS == Name
+		) {
+			fill_outcall(expr,
+				expr->ex_type->tp_fund == VOID ?
+				VOIDED : used
+			);
+			outcall();
+			left->VL_IDF->id_def->df_used = 1;
+		}
+		else {
+			esp2 = lint_expr(left, val, USED);
+			check_and_merge(&esp1, esp2, oper);
+		}
+		return esp1;
+
+	case '.':
+		return lint_expr(left, val, USED);
+
+	case ARROW:
+		return lint_expr(left, RVAL, USED);
+
+	case '~':
+	case '!':
+		return lint_expr(right, RVAL, USED);
+
+	case '?':
+		esp1 = lint_expr(left, RVAL, USED);
+		esp2 = lint_expr(right->OP_LEFT, RVAL, USED);
+		check_and_merge(&esp1, esp2, 0);
+		esp2 = lint_expr(right->OP_RIGHT, RVAL, USED);
+		check_and_merge(&esp1, esp2, 0);
+		return esp1;
+
+	case INT2INT:
+	case INT2FLOAT:
+	case FLOAT2INT:
+	case FLOAT2FLOAT:
+		lint_conversion(oper, right->ex_type, left->ex_type);
+		return lint_expr(right, RVAL, USED);
+
+	case '<':
+	case '>':
+	case LESSEQ:
+	case GREATEREQ:
+	case EQUAL:
+	case NOTEQUAL:
+		lint_relop(left, right, oper);
+		lint_relop(right, left, 
+			oper == '<' ? '>' :
+			oper == '>' ? '<' :
+			oper == LESSEQ ? GREATEREQ :
+			oper == GREATEREQ ? LESSEQ :
+			oper
+		);
+		/*FALLTHROUGH*/
+	case '+':
+	case '/':
+	case '%':
+	case ',':
+	case LEFT:
+	case RIGHT:
+	case '&':
+	case '|':
+	case '^':
+	case OR:
+	case AND:
+		esp1 = lint_expr(left, RVAL,
+					oper == ',' ? IGNORED : USED);
+		esp2 = lint_expr(right, RVAL,
+					oper == ',' ? used : USED);
+		if (oper == OR || oper == AND || oper == ',')
+			check_and_merge(&esp1, esp2, 0);
+		else
+			check_and_merge(&esp1, esp2, oper);
+		return esp1;
+
+	default:
+		return 0;	/* for initcomma */
 	}
 }
 
@@ -340,8 +361,7 @@ expr_ignored(expr)
 		hwarning("identifier as statement");
 		break;
 
-	case String:
-	case Float:
+	default:			/* String Float */
 		hwarning("constant as statement");
 		break;
 	}

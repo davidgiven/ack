@@ -365,7 +365,7 @@ copy_st_auto_list(from_al, lvl)
 		from_al = from_al->next;
 	}
 
-	return(start);
+	return start;
 }
 
 free_st_auto_list(au)
@@ -392,7 +392,7 @@ copy_state(from_st, lvl)
 	st->st_auto_list = copy_st_auto_list(from_st->st_auto_list, lvl);
 	st->st_notreached = from_st->st_notreached;
 	st->st_warned = from_st->st_warned;
-	return(st);
+	return st;
 }
 
 static
@@ -497,7 +497,7 @@ merge_autos(a1, a2, lvl, mode)
 		crash("(merge_autos) a2 longer than a1");
 		/*NOTREACHED*/
 	}
-	return(a);
+	return a;
 }
 
 merge_states(st1, st2, lvl, mode)
@@ -547,14 +547,15 @@ find_wdf()
 	register struct lint_stack_entry *lse = top_ls;
 
 	while (lse != &stack_bottom) {
-		switch (lse->ls_class)
+		switch (lse->ls_class) {
 		case WHILE:
 		case DO:
 		case FOR:
-			return(lse);
+			return lse;
+		}
 		lse = lse->ls_previous;
 	}
-	return(0);
+	return 0;
 }
 
 struct lint_stack_entry *
@@ -563,15 +564,16 @@ find_wdfc()
 	register struct lint_stack_entry *lse = top_ls;
 
 	while (lse != &stack_bottom) {
-		switch (lse->ls_class)
+		switch (lse->ls_class) {
 		case WHILE:
 		case DO:
 		case FOR:
 		case CASE:
-			return(lse);
+			return lse;
+		}
 		lse = lse->ls_previous;
 	}
-	return(0);
+	return 0;
 }
 
 struct lint_stack_entry *
@@ -580,23 +582,27 @@ find_cs()
 	register struct lint_stack_entry *lse = top_ls;
 
 	while (lse != &stack_bottom) {
-		switch (lse->ls_class)
+		switch (lse->ls_class) {
 		case CASE:
 		case SWITCH:
-			return(lse);
+			return lse;
+		}
 		lse = lse->ls_previous;
 	}
-	return(0);
+	return 0;
 }
 
 /******** A C T I O N S ********/
 
-start_if_part()
+start_if_part(const)
 {
 /* Push a new stack entry on the lint_stack with class == IF
  * copy the ls_current to the top of this stack
  */
 	register struct lint_stack_entry *lse = new_lint_stack_entry();
+
+	if (const)
+		hwarning("condition in if statement is constant");
 
 	lse->ls_class = IF;
 	lse->ls_current = copy_state(top_ls->ls_current, level);
@@ -685,7 +691,7 @@ end_do_stmt(const, cond)
 {
 	end_loop_stmt();
 	if (const)
-		hwarning("constant do condition");
+		hwarning("condition in do-while statement is constant");
 	if (const && cond && top_ls->ls_current->st_notreached) {
 		/* no break met; this is really an endless loop */
 	}
@@ -718,7 +724,8 @@ lint_continue_stmt()
 	top_ls->ls_current->st_notreached = 1;
 }
 
-start_switch_part()
+start_switch_part(expr)
+	struct expr *expr;
 {
 /* ls_current of a SWITCH entry has different meaning from ls_current of
  * other entries. It keeps track of which variables are used in all
@@ -726,6 +733,13 @@ start_switch_part()
  * switch-block.)
  */
 	register struct lint_stack_entry *lse = new_lint_stack_entry();
+
+	/* the following is a trick to detect a constant
+	 * expression in a switch
+	 */
+	opnd2test(&expr, SWITCH);
+	if (is_cp_cst(expr))
+		hwarning("value in switch statement is constant");
 
 	lse->ls_class = SWITCH;
 	lse->ls_current = copy_state(top_ls->ls_current, level);

@@ -1,10 +1,16 @@
 /*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
+/* $Header$ */
+
+/*
  *The following functions are hacked to null-functions (i.e. they
  * do nothing). This needs another solution in the future.
  */
 #include	"lint.h"
 
-#ifdef LINT
+#ifdef	LINT
 
 #include	"arith.h"
 #include	"label.h"
@@ -65,4 +71,4 @@ CC_psdnam(ps_xxx,s) char *s; {}
 CC_pspnam(ps_xxx,s) char *s; {}
 /* ARGSUSED */
 CC_scon(v,s) char *s; {}
-#endif LINT
+#endif	LINT

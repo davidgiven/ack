@@ -225,7 +225,6 @@ initializer(struct idf *idf; int sc;)
 #endif	DEBUG
 #ifdef	LINT
 			change_state(idf, SET);
-			pre_lint_expr(expr, RVAL, USED);
 #endif	LINT
 			code_declaration(idf, expr, level, sc);
 		}

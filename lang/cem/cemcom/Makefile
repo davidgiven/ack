@@ -418,6 +418,7 @@ ch7bin.o: botch_free.h
 ch7bin.o: expr.h
 ch7bin.o: idf.h
 ch7bin.o: label.h
+ch7bin.o: lint.h
 ch7bin.o: noRoption.h
 ch7bin.o: nobitfield.h
 ch7bin.o: nofloat.h
@@ -891,6 +892,10 @@ l_comment.o: arith.h
 l_comment.o: l_state.h
 l_comment.o: lint.h
 l_comment.o: spec_arith.h
+l_dummy.o: arith.h
+l_dummy.o: label.h
+l_dummy.o: lint.h
+l_dummy.o: spec_arith.h
 tokenfile.o: Lpars.h
 declar.o: LLlex.h
 declar.o: Lpars.h
@@ -946,7 +951,6 @@ expression.o: expr.h
 expression.o: file_info.h
 expression.o: idf.h
 expression.o: label.h
-expression.o: lint.h
 expression.o: noRoption.h
 expression.o: nobitfield.h
 expression.o: nofloat.h

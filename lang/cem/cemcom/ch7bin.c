@@ -8,6 +8,7 @@
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"nofloat.h"
+#include	"lint.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
@@ -65,6 +66,7 @@ ch7bin(expp, oper, expr)
 		ch7bin(expp, '+', expr);
 		ch7mon('*', expp);
 		break;
+
 	case '(':				/* RM 7.1 */
 		if (	(*expp)->ex_type->tp_fund == POINTER &&
 			(*expp)->ex_type->tp_up->tp_fund == FUNCTION
@@ -86,11 +88,13 @@ ch7bin(expp, oper, expr)
 					*expp, '(', expr);
 		(*expp)->ex_flags |= EX_SIDEEFFECTS;
 		break;
+
 	case PARCOMMA:				/* RM 7.1 */
 		if ((*expp)->ex_type->tp_fund == FUNCTION)
 			function2pointer(*expp);
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
 		break;
+
 	case '%':
 	case MODAB:
 	case ANDAB:
@@ -105,6 +109,7 @@ ch7bin(expp, oper, expr)
 		arithbalance(expp, oper, &expr);
 		non_commutative_binop(expp, oper, expr);
 		break;
+
 	case '&':
 	case '^':
 	case '|':
@@ -115,6 +120,7 @@ ch7bin(expp, oper, expr)
 		arithbalance(expp, oper, &expr);
 		commutative_binop(expp, oper, expr);
 		break;
+
 	case '+':
 		if (expr->ex_type->tp_fund == POINTER)	{ /* swap operands */
 			struct expr *etmp = expr;
@@ -139,6 +145,7 @@ ch7bin(expp, oper, expr)
 				non_commutative_binop(expp, oper, expr);
 		}
 		break;
+
 	case '-':
 	case MINAB:
 	case POSTDECR:
@@ -156,6 +163,7 @@ ch7bin(expp, oper, expr)
 			non_commutative_binop(expp, oper, expr);
 		}
 		break;
+
 	case LEFT:
 	case RIGHT:
 	case LEFTAB:
@@ -166,6 +174,7 @@ ch7bin(expp, oper, expr)
 		ch7cast(&expr, oper, int_type); /* cvt. rightop to int */
 		non_commutative_binop(expp, oper, expr);
 		break;
+
 	case '<':
 	case '>':
 	case LESSEQ:
@@ -176,6 +185,7 @@ ch7bin(expp, oper, expr)
 		non_commutative_binop(expp, oper, expr);
 		(*expp)->ex_type = int_type;
 		break;
+
 	case AND:
 	case OR:
 		opnd2test(expp, oper);
@@ -220,6 +230,7 @@ ch7bin(expp, oper, expr)
 			*expp = new_oper(int_type, *expp, oper, expr);
 		(*expp)->ex_flags |= EX_LOGICAL;
 		break;
+
 	case ':':
 		if (	is_struct_or_union((*expp)->ex_type->tp_fund)
 		||	is_struct_or_union(expr->ex_type->tp_fund)
@@ -229,16 +240,30 @@ ch7bin(expp, oper, expr)
 		}
 		else
 			relbalance(expp, oper, &expr);
+#ifdef	LINT
+		if (	(is_cp_cst(*expp) && is_cp_cst(expr))
+		&&	(*expp)->VL_VALUE == expr->VL_VALUE
+		) {
+			hwarning("operands of : are constant and equal");
+		}
+#endif	LINT
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 		break;
+
 	case '?':
 		opnd2logical(expp, oper);
-		if (is_cp_cst(*expp))
+		if (is_cp_cst(*expp)) {
+#ifdef	LINT
+			hwarning("condition in ?: expression is constant");
+#endif	LINT
 			*expp = (*expp)->VL_VALUE ?
 				expr->OP_LEFT : expr->OP_RIGHT;
-		else
+		}
+		else {
 			*expp = new_oper(expr->ex_type, *expp, oper, expr);
+		}
 		break;
+
 	case ',':
 		if (is_cp_cst(*expp))
 			*expp = expr;

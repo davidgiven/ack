@@ -144,22 +144,22 @@ if_statement
 				/*	The comparison has been optimized
 					to a 0 or 1.
 				*/
-#ifdef	LINT
-				hwarning("condition in if is constant");
-#endif	LINT
 				if (expr->VL_VALUE == (arith)0)	{
 					C_bra(l_false);
 				}
 				/* else fall through */
+#ifdef	LINT
+				start_if_part(1);
+#endif	LINT
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_true, l_false);
 				C_df_ilb(l_true);
+#ifdef	LINT
+				start_if_part(0);
+#endif	LINT
 			}
 			free_expression(expr);
-#ifdef	LINT
-			start_if_part();
-#endif	LINT
 		}
 	')'
 	statement
@@ -363,13 +363,7 @@ switch_statement
 		{
 			code_startswitch(&expr);
 #ifdef	LINT
-			start_switch_part();
-			/* the following is a trick to detect a constant
-			 * expression in a switch
-			 */
-			opnd2test(&expr, SWITCH);
-			if (is_cp_cst(expr))
-				hwarning("switch value is constant");
+			start_switch_part(expr);
 #endif	LINT
 		}
 	')'
