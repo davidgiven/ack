@@ -1,7 +1,12 @@
 /*	channel.c - basic channel handling routines */
 #include <errno.h>
 #include <signal.h>
+#define __CHANNEL__
+#ifdef __USG
+#include <termio.h>
+#else
 #include <sgtty.h>
+#endif
 #include "ocm_chan.h"
 
 static void disaster();
@@ -47,22 +52,46 @@ void chan_out(v, c) long v; register chan *c;
 	switch(c->type) {
 	case C_T_FILE: {
 		register FILE *fp= unix_file[c->f.index];
+#ifdef __USG
+		struct termio tty;
+#else
 		struct sgttyb tty;
+#endif
 
 		if ((v& ~0xff)==0)	/* Plain character */
 			putc( (int) v, fp);
 		else
 		if (v==C_F_TEXT) {
-			gtty(fileno(fp), &tty);
+#ifdef __USG
+			ioctl(fileno(fp), TCGETA, &tty);
+			tty.c_oflag |= (ONLCR);
+			tty.c_iflag |= (ICRNL);
+			tty.c_cc[VMIN] = 1;
+			tty.c_cc[VTIME] = 0;
+			tty.c_lflag |= (ECHO|ICANON);
+			ioctl(fileno(fp), TCSETA, &tty);
+#else
+			ioctl(fileno(fp), TIOCGETP, &tty);
 			tty.sg_flags&= ~CBREAK;
 			tty.sg_flags|= ECHO|CRMOD;
-			stty(fileno(fp), &tty);
+			ioctl(fileno(fp), TIOCSETN, &tty);
+#endif
 		} else
 		if (v==C_F_RAW) {
-			gtty(fileno(fp), &tty);
+#ifdef __USG
+			ioctl(fileno(fp), TCGETA, &tty);
+			tty.c_oflag &= ~(ONLCR);
+			tty.c_iflag &= ~(ICRNL);
+			tty.c_cc[VMIN] = 1;
+			tty.c_cc[VTIME] = 0;
+			tty.c_lflag &= ~(ECHO|ICANON);
+			ioctl(fileno(fp), TCSETA, &tty);
+#else
+			ioctl(fileno(fp), TIOCGETP ,&tty);
 			tty.sg_flags|= CBREAK;
 			tty.sg_flags&= ~(ECHO|CRMOD);
-			stty(fileno(fp), &tty);
+			ioctl(fileno(fp), TIOCSETN, &tty);
+#endif
 		}
 	}	break;
 	case C_T_CHAN:
