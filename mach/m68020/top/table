@@ -19,6 +19,8 @@ DSREG		{is_dsreg(VAL)			};	/* data register */
 AREG		{is_areg(VAL)			};	/* addressregister */
 FPREG,FPREG2	{is_fpreg(VAL)			};	/* fp register */
 LAB,L1,L2 	{VAL[0] == 'I'			};	/* label */
+NO32	{no_part("div",VAL) && no_part("mul",VAL) && no_part(".l",VAL)};
+							/* for move.w ... */
 BITNO		{TRUE				};
 
 %%;
@@ -72,8 +74,8 @@ move.l DREG,A : ANY A,X
 	{reg_subs_allowed(ANY) &&
 	 !is_dreg(A)	}		->	move.l DREG,A : ANY DREG,X ;
 
-move.w DREG,DREG2 : ANY A,DREG2 : move.w DREG2,DREG
-		{no_part(DREG2,A)}	->	ANY A,DREG : move.w DREG,DREG2 ;
+move.w DREG,DREG2 : NO32 A,DREG2 : move.w DREG2,DREG
+		{no_part(DREG2,A)}	->	NO32 A,DREG : move.w DREG,DREG2 ;
 move.l DREG,DREG2 : ANY A,DREG2 : move.l DREG2,DREG
 		{no_part(DREG2,A)}	->	ANY A,DREG : move.l DREG,DREG2 ;
 
@@ -198,7 +200,7 @@ int isshift_once(s, c1, c2)
 			val -= pow;
 			if (val == 0) {
 				sprintf(c1, "%d", i <= 8 ? i : 8);
-				strcpy(c2, "%d", i <= 8 ? 0 : i - 8);
+				sprintf(c2, "%d", i <= 8 ? 0 : i - 8);
 				return 1;
 			}
 			return 0;
