@@ -14,8 +14,8 @@ flt_cmp(e1, e2)
 	int sign;
 	int tmp;
 
-	if (e1->flt_exp == 0 && e1->m1 == 0 && e1->m2 == 0 &&
-	    e2->flt_exp == 0 && e2->m1 == 0 && e2->m2 == 0) {
+	if (e1->m1 == 0 && e1->m2 == 0 &&
+	    e2->m1 == 0 && e2->m2 == 0) {
 		return 0;
 	}
 	sign = e1->flt_sign ? -1 : 1;

@@ -51,6 +51,7 @@ flt_div(e1,e2,e3)
 	 */
 	for (j = 0; j <= 3; j++, u_p++) {
 		long q_est, temp;
+		long v1 = v[1];
 
 		if (j == 2) lp++;
 		if (u_p[0] == 0 && u_p[1] < v[1]) continue;
@@ -62,22 +63,22 @@ flt_div(e1,e2,e3)
 			q_est = temp;
 		}
 		else if (temp >= 0) {
-			q_est = temp / (long)v[1];
+			q_est = temp / v1;
 		}
 		else {
 			long rem;
-			q_est = (0x7FFFFFFF/(long)v[1])+((temp&0x7FFFFFFF)/(long)v[1]);
-			rem = (0x7FFFFFFF%(long)v[1])+((temp&0x7FFFFFFF)%(long)v[1])+1;
-			while (rem > (long)v[1]) {
+			q_est = (0x7FFFFFFF/v1)+((temp&0x7FFFFFFF)/v1);
+			rem = (0x7FFFFFFF%v1)+((temp&0x7FFFFFFF)%v1)+1;
+			while (rem > v1) {
 				q_est++;
-				rem -= v[1];
+				rem -= v1;
 			}
 		}
-		temp -= q_est * (long)v[1];
+		temp -= q_est * v1;
 		while (!(temp&0xFFFF0000) &&
 		       ucmp((long)v[2]*q_est,(temp<<16)+(long)u_p[2]) > 0) {
 			q_est--;
-			temp += v[1];
+			temp += v1;
 		}
 		/*	Now, according to Knuth, we have an estimate of the
 			quotient, that is either correct or one too big, but
@@ -97,14 +98,14 @@ flt_div(e1,e2,e3)
 				k = (tmp >> 16) & 0xFFFF;
 			}
 			k += borrow;
-			borrow = u_p[0] < k;
+			borrow = (long)u_p[0] < k;
 			u_p[0] -= k;
 
 			if (borrow) {
 				/* So, this does not happen often; the estimate
 				   was one too big; correct this
 				*/
-				*lp |= (j & 1) ? (q_est - 1) : ((q_est-1)<<16);
+				q_est--;
 				borrow = 0;
 				for (i = maxv; i > 0; i--) {
 					long tmp 
@@ -115,7 +116,7 @@ flt_div(e1,e2,e3)
 				}
 				u_p[0] += borrow;
 			}
-			else *lp |= (j & 1) ? q_est : (q_est<<16);
+			*lp |= (j & 1) ? q_est : (q_est<<16);
 		}
 	}
 	e3->m1 = result[0];

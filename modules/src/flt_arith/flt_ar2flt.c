@@ -16,20 +16,19 @@ flt_arith2flt(n, e)
 	*/
 	register int i;
 
-	if (n == 0) {
-		e->flt_exp = 0;
-		e->flt_sign = 0;
-		e->m1 = e->m2 = 0;
-		return;
-	}
 	if (n < 0) {
 		e->flt_sign = 1;
 		n = -n;
 	}
 	else	e->flt_sign = 0;
-	e->flt_exp = 63;
 	e->m1 = e->m2 = 0;
+	if (n == 0) {
+		e->flt_exp = 0;
+		return;
+	}
+	e->flt_exp = 63;
 	if (n < 0) {
+		/* n = MINARITH */
 		n = 0x40000000;
 		while ((n << 1) > 0) n <<= 1;
 		e->flt_exp++;

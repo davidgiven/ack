@@ -208,8 +208,6 @@ add_exponent(e, exp)
 	while (divsz >= BIGSZ) {
 		flt_mul(&x, neg ? &r_big_10pow[BIGSZ-1] : &big_10pow[BIGSZ-1],&x);
 		divsz -= BIGSZ-1;
-		flt_chk(e);
-		if (flt_status != 0) return;
 	}
 	flt_mul(&x, (neg ? r_big_10pow : big_10pow) + divsz, e);
 }
