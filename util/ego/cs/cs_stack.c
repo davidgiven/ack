@@ -33,7 +33,7 @@ Push(tkp)
 
 		free_token->tk_vn = tkp->tk_vn;
 		free_token->tk_size = tkp->tk_size;
-		free_token++->tk_lfirst = tkp->tk_lfirst;
+		(free_token++)->tk_lfirst = tkp->tk_lfirst;
 	}
 }
 
