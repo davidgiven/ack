@@ -609,7 +609,9 @@ basicblock(alpp) line_p *alpp; {
 	register byte *bp;
 	int i;
 	short index;
+	int npasses;
 
+	npasses = 0;
 	do {	/* make pass over basicblock */
 	    lpp = alpp; madeopt = FALSE;
 	    while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr&BMASK) != op_lab) {
@@ -648,5 +650,6 @@ basicblock(alpp) line_p *alpp; {
 		}
 		lpp = next;
 	    }
-	} while(madeopt);	/* as long as there is progress */
+	} while(madeopt && ++npasses<5000);	/* as long as there is progress */
+	assert(!madeopt);
 }
