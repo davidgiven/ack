@@ -703,6 +703,25 @@ can be "#\ include"d in any file that needs the token-names.
 The lexical analyzer must signal the end
 of input to \fILLparse\fR
 by returning a number less than or equal to zero.
+.NH
+Programs with more than one parser
+.PP
+\fILLgen\fR offers a simple facility for having more than one parser in
+a program: in this case, the user can change the names of global procedures,
+variables, etc, by giving a different prefix, like this:
+.sp 1
+.nf
+.ft CW
+%prefix XX ;
+.ft R
+.fi
+.sp 1
+The effect of this is that all global names start with XX instead of LL, for
+the parser that has this prefix. This holds for the variables \fILLsymb\fP,
+which now is called \fIXXsymb\fP, and also for the routine \fILLmessage\fP,
+which must now be called \fIXXmessage\fP.
+\fILL.output\fP is now \fIXX.output\fP, and \fILpars.c\fP and \fILpars.h\fP
+are now called \fIXXpars.c\fP and \fIXXpars.h\fP.
 .bp
 .SH
 References
@@ -741,6 +760,7 @@ version of \fILLgen\fR is written with \fILLgen\fR.
 %token  PREFER;        /* %prefer */
 %token  DEFAULT;       /* %default */
 %token  LEXICAL;       /* %lexical */
+%token  PREFIX;        /* %prefix */
 %token  ONERROR;       /* %onerror */
 %token  FIRST;         /* %first */
 
@@ -769,6 +789,9 @@ declaration
                 IDENTIFIER ',' IDENTIFIER
           ';'
         | LEXICAL
+                IDENTIFIER
+          ';'
+        | PREFIX
                 IDENTIFIER
           ';'
         | ONERROR
