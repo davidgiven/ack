@@ -23,6 +23,9 @@
 !---------------------------------------------------------------------------
 
 _m_a_i_n:
+#ifdef __BSD4_2
+		jsr	getmask
+#endif
 		move.l	sp,d0
 		add.l	#0x10000,d0		! rough guess. What is the
 						! real top ???
