@@ -13,8 +13,9 @@ void (*__functab[NEXITS])(void);
 int __funccnt = 0;
 
 extern void _exit(int);
-/* only fflush when there is output */
-int (*_fflush)(FILE *stream) = NULL;
+
+/* only flush output buffers when necessary */
+int (*_clean)(void) = NULL;
 
 static void
 _calls(void)
@@ -30,6 +31,6 @@ void
 exit(int status)
 {
 	_calls();
-	if (_fflush) _fflush((FILE *)NULL) ;
+	if (_clean) _clean();
 	_exit(status) ;
 }

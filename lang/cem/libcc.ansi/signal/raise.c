@@ -6,13 +6,13 @@
 
 #include	<signal.h>
 
-int kill(int pid, int sig);
-int getpid(void);
+int _kill(int pid, int sig);
+int _getpid(void);
 
 int
 raise(int sig)
 {
 	if (sig < 0 || sig > _NSIG)
 		return -1;
-	return kill(getpid(), sig);
+	return _kill(_getpid(), sig);
 }

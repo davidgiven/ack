@@ -7,9 +7,12 @@
 #include	<signal.h>
 #include	<stdlib.h>
 
+extern void (*_clean)(void);
+
 void
 abort(void)
 {
+	if (_clean) _clean();		/* flush all output files */
 	raise(SIGABRT);
 }
 

@@ -7,11 +7,11 @@
 #include	<stdlib.h>
 #include	<signal.h>
 
-extern int fork(void);
-extern int wait(int *);
+extern int _fork(void);
+extern int _wait(int *);
 extern void _exit(int);
-extern void execl(char *, ...);
-extern void close(int);
+extern void _execl(char *, ...);
+extern void _close(int);
 
 #define	FAIL	127
 
@@ -21,17 +21,17 @@ system(const char *str)
 	int pid, exitstatus, waitval;
 	int i;
 
-	if ((pid = fork()) < 0) return str ? -1 : 0;
+	if ((pid = _fork()) < 0) return str ? -1 : 0;
 
 	if (pid == 0) {
 		for (i = 3; i <= 20; i++)
-			close(i);
+			_close(i);
 		if (!str) str = "cd .";		/* just testing for a shell */
-		execl("/bin/sh", "sh", "-c", str, (char *) NULL);
+		_execl("/bin/sh", "sh", "-c", str, (char *) NULL);
 		/* get here if execl fails ... */
 		_exit(FAIL);	/* see manual page */
 	}
-	while ((waitval = wait(&exitstatus)) != pid) {
+	while ((waitval = _wait(&exitstatus)) != pid) {
 		if (waitval == -1) break;
 	}
 	if (waitval == -1) {
