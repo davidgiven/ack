@@ -1153,12 +1153,12 @@ pat fef					leaving loc 18 trp
  * Group6 : pointer arithmetic					 *
  *****************************************************************/
 
-pat lol lol adp stl $1==$2 && $2==$4
+pat lol dup adp stl $1==$4 && $2==4
 kills allmincon
 uses REG={LOCAL, $1}
 gen addr {memrel4, fp, $1, $3}, {LOCAL, $1}	yields %a
 
-pat loe loe adp ste $1==$2 && $2==$4
+pat loe dup adp ste $1==$4 && $2==4
 kills allmincon
 uses REG={absolute4, $1}
 gen addd {const4, $3}, {absolute4, $1}

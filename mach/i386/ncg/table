@@ -516,14 +516,8 @@ pat stl lol $1==$2
 
 pat sdl ldl $1==$2				leaving dup 8 sdl $1
 
-pat lol lol $1==$2
 #ifdef REGVARS
-	    && inreg($1) <= 0
-#endif
-						leaving lol $1 dup 4
-
-#ifdef REGVARS
-pat lol lol stl $1==$2 && inreg($1) <= 0 && inreg($3) > 0
+pat lol dup stl $2==4 && inreg($1) <= 0 && inreg($3) > 0
 kills regvar($3)
 gen	move {LOCAL,$1,4}, {LOCAL,$3,4}
 					yields {LOCAL,$3,4}
@@ -535,10 +529,8 @@ pat ste loe $1==$2				leaving dup 4 ste $1
 
 pat sde lde $1==$2				leaving dup 8 sde $1
 
-pat loe loe $1==$2				leaving loe $1 dup 4
-
 #ifdef REGVARS
-pat loe loe stl $1==$2 && inreg($3) > 0
+pat loe dup stl $2==4 && inreg($3) > 0
 kills regvar($3)
 gen	move {EXTERN,$1}, {LOCAL,$3,4}
 					yields {LOCAL,$3,4}
@@ -550,9 +542,7 @@ pat lil inreg($1) > 0			yields {indir_r, regvar($1)}
 pat lil
   uses ADDREG={indir_r_off,ebp,$1}	yields {indir_r,%a}
 
-pat lil lil $1==$2				leaving lil $1 dup 4
-
-pat lil lil stl $1==$2				leaving lil $1 stl $3 lol $3
+pat lil dup stl $2==4				leaving lil $1 stl $3 lol $3
 
 pat sil lil $1==$2				leaving dup 4 sil $1
 
@@ -1806,42 +1796,42 @@ pat lol ngi stl $1==$3 && $2==4
 kills indir, locals %ind+%size>$1 && %ind<$1+4
 gen neg {LOCAL, $1, 4}
 
-pat lol lol adp stl loi stl $1==$2 && $2==$4 && $5<=4
-					leaving lol $1 loi $5 stl $6 lol $2 adp $3 stl $4
+pat lol dup adp stl loi stl $1==$4 && $2==4 && $5<=4
+					leaving lol $1 loi $5 stl $6 lol $1 adp $3 stl $4
 
 #ifdef REGVARS
-pat lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && $5==1 && inreg($1) > 0 && $6==1 && $7==4
+pat lol dup adp stl loi loc loc cii $1==$4 && $2==4 && $5==1 && inreg($1) > 0 && $6==1 && $7==4
 uses REG
 gen movsxb %a,{indir_r1, regvar($1)}
 				yields %a
-					leaving lol $2 adp $3 stl $4
+					leaving lol $1 adp $3 stl $4
 
-pat lol lol adp stl loi $1==$2 && $2==$4 && $5==1 && inreg($1) > 0
+pat lol dup adp stl loi $1==$4 && $2==4 && $5==1 && inreg($1) > 0
 uses REG1 = {indir_r1, regvar($1)}
 				yields %a
-					leaving lol $2 adp $3 stl $4
+					leaving lol $1 adp $3 stl $4
 
-pat lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && $5==2 && inreg($1) > 0 && $6==2 && $7==4
+pat lol dup adp stl loi loc loc cii $1==$4 && $2==4 && $5==2 && inreg($1) > 0 && $6==2 && $7==4
 uses REG
 gen movsx %a,{indir_r2, regvar($1)}
 				yields %a
-					leaving lol $2 adp $3 stl $4
+					leaving lol $1 adp $3 stl $4
 
-pat lol lol adp stl loi $1==$2 && $2==$4 && $5==2 && inreg($1) > 0
+pat lol dup adp stl loi $1==$4 && $2==4 && $5==2 && inreg($1) > 0
 uses REG2 = {indir_r2, regvar($1)}
 				yields %a
-					leaving lol $2 adp $3 stl $4
+					leaving lol $4 adp $3 stl $4
 
-pat lol lol adp stl loi $1==$2 && $2==$4 && $5==4 && inreg($1) > 0
+pat lol dup adp stl loi $1==$4 && $2==4 && $5==4 && inreg($1) > 0
 uses REG = {indir_r, regvar($1)}
 				yields %a
-					leaving lol $2 adp $3 stl $4
+					leaving lol $4 adp $3 stl $4
 pat adp stl inreg($2) > 0		leaving stl $2 lol $2 adp $1 stl $2
 #endif
 
-pat lol lol adp stl $1==$2 && $2==$4
+pat lol dup adp stl $1==$4 && $2==4
 uses ADDREG={LOCAL,$1,4}	yields %a
-					leaving lol $2 adp $3 stl $2
+					leaving lol $4 adp $3 stl $4
 
 pat lol inl $1==$2
 uses REG={LOCAL,$1,4}		yields %a
@@ -1866,20 +1856,20 @@ kills indir, locals %ind+%size>$1 && %ind<$1+4
 gen not {LOCAL, $1, 4}
 
 #ifdef REGVARS
-pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_any
+pat lil dup adp sil $1==$4 && $2==4 && inreg($1)==reg_any
 uses ADDREG={indir_r, regvar($1)}
 				yields %a
-					leaving lil $1 adp $3 sil $4
+					leaving lil $4 adp $3 sil $4
 
-pat lil lil inc sil $1==$2 && $1==$4 && inreg($1)==reg_any
+pat lil dup inc sil $1==$4 && $2==4 && inreg($1)==reg_any
 uses REG={indir_r, regvar($1)}
 				yields %a
-					leaving lil $1 inc sil $4
+					leaving lil $4 inc sil $4
 
-pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_any
+pat lil dup dec sil $1==$4 && $2==4 && inreg($1)==reg_any
 uses REG={indir_r, regvar($1)}
 				yields %a
-					leaving lil $1 dec sil $4
+					leaving lil $4 dec sil $4
 #endif
 
 pat lil adp sil $1==$3 && $2==1         leaving lil $1 inc sil $1
@@ -2007,7 +1997,7 @@ pat loe ngi ste $1==$3 && $2==4
 kills mem_nonlocals
 gen neg {EXTERN, $1}
 
-pat loe loe adp ste $1==$2 && $1==$4
+pat loe dup adp ste $1==$4 && $2==4
 uses REG={EXTERN,$1}	yields %a
 					leaving loe $1 adp $3 ste $1
 

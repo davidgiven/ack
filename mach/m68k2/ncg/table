@@ -1468,14 +1468,14 @@ pat lol loc lol adu stl $1==$3 && $3==$5 && $4==WORD_SIZE
     killreg %a
 			yields %a
 
-pat lol lol loc sbu stl $1==$2 && $2==$5 && $4==WORD_SIZE && inreg($1)==reg_any
+pat lol dup loc sbu stl $1==$5 && $2==WORD_SIZE && $4==WORD_SIZE && inreg($1)==reg_any
     kills regvar($1, reg_any), use_index %xreg==regvar($1, reg_any)
     uses DD_REG = {LOCAL, $1}
     gen sub_i {const, $3}, {LOCAL, $1}
 	killreg %a
 			yields %a
 
-pat lol lol loc sbu stl $1==$2 && $2==$5 && $4==WORD_SIZE
+pat lol dup loc sbu stl $1==$5 && $2==WORD_SIZE && $4==WORD_SIZE
     kills all_indir, LOCAL %bd==$1
     uses DD_REG = {LOCAL, $1}
     gen sub_i {const, $3}, {LOCAL, $1}
@@ -1489,7 +1489,7 @@ pat loe loc loe adu ste $1==$3 && $3==$5 && $4==WORD_SIZE
     killreg %a
 			yields	%a
 
-pat loe loe loc sbu ste $1==$2 && $2==$5 && $4==WORD_SIZE
+pat loe dup loc sbu ste $1==$5 && $2==WORD_SIZE && $4==WORD_SIZE
     kills posextern
     uses DD_REG = {absolute_int, $1}
     gen sub_i {const,$3}, {absolute_int, $1}
@@ -1504,7 +1504,7 @@ pat lil loc lil adu sil $1==$3 && $3==$5 && $4==WORD_SIZE
 	killreg %a
 			yields %a
 
-pat lil lil loc sbu sil $1==$2 && $2==$5 && $4==WORD_SIZE
+pat lil dup loc sbu sil $1==$5 && $2==WORD_SIZE && $4==WORD_SIZE
 				&& inreg($1)==reg_pointer
     kills allexceptcon
     uses DD_REG = {indirect_int, regvar($1, reg_pointer)}
@@ -2500,14 +2500,14 @@ pat LLP ads SLP $1==$3 && $2==4 && inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen add_l %1, {DLOCAL, $1}
 
-pat lil lil inc sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
+pat lil dup inc sil $1==$4 && $2==WORD_SIZE && inreg($1)==reg_pointer
     kills allexceptcon
     uses DD_REG = {indirect_int, regvar($1, reg_pointer)}
     gen add_i {const, 1}, {indirect_int, regvar($1, reg_pointer)}
     killreg %a
 			yields	%a
 
-pat lil lil dec sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
+pat lil dup dec sil $1==$4 && $2==WORD_SIZE && inreg($1)==reg_pointer
     kills allexceptcon
     uses DD_REG = {indirect_int, regvar($1, reg_pointer)}
     gen sub_i {const, 1}, {indirect_int, regvar($1, reg_pointer)}
@@ -2608,25 +2608,25 @@ pat lil loi dup adp lil sti $3==4 && $1==$5 && $2==4 && $6==4
 			yields	%b
 #endif
 
-pat LLP LLP adp SLP lae cmp $1==$2 && $2==$4 && inreg($1)==reg_pointer && $3 < 0
+pat LLP dup adp SLP lae cmp $1==$4 && $2==4 && inreg($1)==reg_pointer && $3 < 0
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen	sub_l {const4,0-$3},{DLOCAL,$1}
 			yields {DLOCAL,$1} {ext_addr, $5+$3}
 					leaving cmu 4
 
-pat LLP LLP adp SLP lae cmp $1==$2 && $2==$4 && inreg($1)==reg_pointer && $3 > 0
+pat LLP dup adp SLP lae cmp $1==$4 && $2==4 && inreg($1)==reg_pointer && $3 > 0
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     gen	add_l {const4,$3},{DLOCAL,$1}
 			yields {DLOCAL,$1} {ext_addr, $5+$3}
 					leaving cmu 4
 
-pat LLP LLP adp SLP loi $1==$2 && $1==$4 && $3==4 && $5==4 &&
+pat LLP dup adp SLP loi $1==$4 && $2==4 && $3==4 && $5==4 &&
 						inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
 			yields	{post_inc4, regvar($1, reg_pointer)}
 
-pat LLP LLP adp SLP loi $1==$2 && $1==$4 && $3==$5 && inreg($1)==reg_pointer
-				leaving LLP $1 loi $5 LLP $2 adp $3 SLP $4
+pat LLP dup adp SLP loi $1==$4 && $2==4 && $3==$5 && inreg($1)==reg_pointer
+				leaving LLP $1 loi $5 LLP $4 adp $3 SLP $4
 
 pat LLP loi LLP adp SLP $1==$3 && $1==$5 && $2==1 && $4==1 &&
 						inreg($1)==reg_pointer
@@ -2648,8 +2648,8 @@ pat lil LLP adp SLP $1==$2 && $1==$4 && $3==WORD_SIZE && inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
 			yields	{post_inc_int, regvar($1, reg_pointer)}
 
-pat LLP LLP adp SLP sti $1==$2 && $1==$4 && $3==$5 && inreg($1)==reg_pointer
-				leaving LLP $1 sti $5 LLP $2 adp $3 SLP $4
+pat LLP dup adp SLP sti $1==$4 && $2==4 && $3==$5 && inreg($1)==reg_pointer
+				leaving LLP $1 sti $5 LLP $4 adp $3 SLP $4
 
 pat LLP sti LLP adp SLP $1==$3 && $1==$5 && $2==1 && $4==1 &&
 						inreg($1)==reg_pointer
@@ -2670,7 +2670,7 @@ with any4
     kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {post_inc4, regvar($1, reg_pointer)}
 
-pat LLP LLP adp SLP sti $1==$2 && $1==$4 && $3==WORD_SIZE && $5==WORD_SIZE &&
+pat LLP dup adp SLP sti $1==$4 && $2==4 && $3==WORD_SIZE && $5==WORD_SIZE &&
 						inreg($1)==reg_pointer
 with any_int-sconsts
     kills allexceptcon, regvar($1, reg_pointer)
@@ -2728,42 +2728,42 @@ with any_int-sconsts
     kills allexceptcon, regvar($1, reg_pointer)
     gen move %1, {pre_dec_int, regvar($1, reg_pointer)}
 
-pat LLP LLP adp SLP $1==$2 && $1==$4 && inreg($1)==reg_pointer && directadd($3)
+pat LLP dup adp SLP $1==$4 && $2==4 && inreg($1)==reg_pointer && directadd($3)
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     uses AA_REG = {DLOCAL, $1}
     gen add_l {const4, $3}, {DLOCAL, $1}
     killreg %a
 			yields	%a
 
-pat LLP LLP adp SLP $1==$2 && $1==$4 && inreg($1)==reg_pointer && directsub($3)
+pat LLP dup adp SLP $1==$4 && $2==4 && inreg($1)==reg_pointer && directsub($3)
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     uses AA_REG = {DLOCAL, $1}
     gen sub_l {const4, 0-$3}, {DLOCAL, $1}
     killreg %a
 			yields	%a
 
-pat LLP LLP adp SLP $1==$2 && $1==$4 && inreg($1)==reg_pointer
+pat LLP dup adp SLP $1==$4 && $2==4 && inreg($1)==reg_pointer
     kills regvar($1, reg_pointer), all_regind %reg==regvar($1, reg_pointer)
     uses AA_REG = {DLOCAL, $1}, DD_REG4 = {const4, $3}
     gen add_l %b, {DLOCAL, $1}
     killreg %a
 			yields	%a
 
-pat LLP LLP adp SLP $1==$2 && $1==$4 && directadd($3)
+pat LLP dup adp SLP $1==$4 && $2==4 && directadd($3)
     kills all_indir, DLOCAL %bd==$1
     uses AA_REG = {DLOCAL, $1}
     gen add_l {const4, $3}, {DLOCAL, $1}
     killreg %a
 			yields	%a
 
-pat LLP LLP adp SLP $1==$2 && $1==$4 && directsub($3)
+pat LLP dup adp SLP $1==$4 && $2==4 && directsub($3)
     kills all_indir, DLOCAL %bd==$1
     uses AA_REG = {DLOCAL, $1}
     gen sub_l {const4, 0-$3}, {DLOCAL, $1}
     killreg %a
 			yields	%a
 
-pat LLP LLP adp SLP $1==$2 && $1==$4
+pat LLP dup adp SLP $1==$4 && $2==4
     kills all_indir, DLOCAL %bd==$1
     uses AA_REG = {DLOCAL, $1}, DD_REG4 = {const4, $3}
     gen add_l %b, {DLOCAL, $1}
@@ -2797,7 +2797,7 @@ pat LLP adp SLP $1==$3
     gen add_l %a, {DLOCAL, $1}
 
 #if WORD_SIZE!=2
-pat lil lil adp sil sti $1==$2 && $1==$4 && inreg($1)==reg_pointer && $5<=4
+pat lil dup adp sil sti $1==$4 && $2==4 && inreg($1)==reg_pointer && $5<=4
     with conreg
     kills allexceptcon
     uses AA_REG = {indirect4, regvar($1, reg_pointer)}
@@ -2805,14 +2805,14 @@ pat lil lil adp sil sti $1==$2 && $1==$4 && inreg($1)==reg_pointer && $5<=4
     killreg %a
 			yields	%1 %a		leaving sti $5
 
-pat lil lil adp sil $1==$2 && $1==$4 && inreg($1)==reg_pointer
+pat lil dup adp sil $1==$4 && $2==4 && inreg($1)==reg_pointer
     kills allexceptcon
     uses AA_REG = {indirect4, regvar($1, reg_pointer)}
     gen add_l {const, $3}, {indirect4, regvar($1, reg_pointer)}
     killreg %a
 			yields	%a
 
-pat lil lil adp sil $1==$2 && $1==$4
+pat lil dup adp sil $1==$4 && $2==4
     kills allexceptcon
     uses AA_REG, AA_REG = {LOCAL, $1}
     gen move {indirect4, %b}, %a
@@ -2834,7 +2834,7 @@ pat lil adp sil $1==$3 && inreg($1)!=reg_any
 #endif
 #endif /* WORD_SIZE==2 */
 
-pat LEP LEP adp SEP $1==$2 && $1==$4
+pat LEP dup adp SEP $1==$4 && $2==4
     kills posextern
     uses AA_REG = {absolute4, $1}
     gen add_l {const4, $3}, {absolute4, $1}
@@ -2894,8 +2894,6 @@ pat ldl			yields	{DLOCAL, $1}
 #endif
 
 pat loe			yields	{absolute_int, $1}
-
-pat loe loe $1==$2		leaving loe $1 dup WORD_SIZE
 
 /* replace ste loe by dup ste, but not if followed by a test ... */
 proc steloezxx example ste loe zne

@@ -1063,17 +1063,17 @@ lol adi stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))
 			"add %[1],%(regvar($1)%)"
 			erase(regvar($1))		|	| |
-lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
+lol dup adp stl loi $1==$4 && $2==2 && inreg($1)==2 && $3==1 && $5==1 | |
 			allocate(REG={CONST2, 0})
 			remove(regvar($1))
 			"bisb (%(regvar($1)%))+,%[a]"
 			erase(%[a])			| %[a]	| |
-lol lol adp stl loi loc loc cii $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 && $6==1 && $7==2 | |
+lol dup adp stl loi loc loc cii $1==$4 && $2==2 && inreg($1)==2 && $3==1 && $5==1 && $6==1 && $7==2 | |
 			allocate(REG)
 			remove(regvar($1))
 			"movb (%(regvar($1)%))+,%[a]"
 			erase(%[a])			| %[a]	| |
-lol lol adp stl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
+lol dup adp stl loi $1==$4 && $2==2 && inreg($1)==2 && $3==2 && $5==2 | |
 			allocate(REG)
 			remove(regvar($1))
 			"mov (%(regvar($1)%))+,%[a]"	| %[a]	| |
@@ -1083,12 +1083,12 @@ lol sti lol adp stl $1==$3 && $3==$5 && inreg($1)==2 && $2==1 && $4==1 | source1
 sil lol adp stl $1==$2 && $2==$4 && inreg($1)==2 && $3==2 | source2 |
 			remove(regvar($1))
 			"mov %[1],(%(regvar($1)%))+"	| 	| |
-lol lol adp stl $1==$2 && $2==$4 && inreg($1)==2 | |
+lol dup adp stl $1==$4 && $2==2 && inreg($1)==2 | |
 			allocate(REG=regvar($1))	| %[a] 
-							| lol $2 adp $3 stl $2 |
-lol lol adp stl $1==$2 && $2==$4 | |
+							| lol $1 adp $3 stl $1 |
+lol dup adp stl $1==$4 && $2==2 | |
 			allocate(REG={LOCAL2, $1, 2})	| %[a] 
-							| lol $2 adp $3 stl $2 |
+							| lol $1 adp $3 stl $1 |
 lol inl $1==$2 && inreg($1)==2 | |
 			allocate(REG=regvar($1))	| %[a] 
 							| inl $2 |
@@ -1286,9 +1286,9 @@ loe ine $1==$2 | |
 loe dee $1==$2 | |
 			allocate(REG={relative2, $1})	| %[a] 
 							| dee $2 |
-loe loe adp ste $1==$2 && $2==$4 | |
+loe dup adp ste $1==$4 && $2==2 | |
 			allocate(REG={relative2, $1})	| %[a] 
-							| loe $2 adp $3 ste $2 |
+							| loe $1 adp $3 ste $1 |
 #ifdef REGVARS
 lol ior stl $2==2 && $1==$3 && inreg($1)==2 | source2 |
 			remove(regvar($1))

@@ -1772,19 +1772,19 @@ dup adp loe sti $1==4 && $4==4
 			| %[a] %[1] {CONST4,$2}
 				| adi 4 loe $3 sti 4 |
 #ifdef REGVARS
-lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==1 && $5==1
+lol dup adp stl loi $1==$4 && $2==4 && inreg($1)==2 && $3==1 && $5==1
 		| |	remove(regvar($1))
 			erase(regvar($1))
 			| {reginc1,regvar($1)}		| |
-lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==2 && $5==2
+lol dup adp stl loi $1==$4 && $2==4 && inreg($1)==2 && $3==2 && $5==2
 		| |	remove(regvar($1))
 			erase(regvar($1))
 			| {reginc2,regvar($1)}		| |
-lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==4 && $5==4
+lol dup adp stl loi $1==$4 && $2==4 && inreg($1)==2 && $3==4 && $5==4
 		| |	remove(regvar($1))
 			erase(regvar($1))
 			| {reginc4,regvar($1)}		| |
-lol lol adp stl loi $1==$4 && $2==$1 && inreg($1)==2 && $3==8 && $5==8
+lol dup adp stl loi $1==$4 && $2==4 && inreg($1)==2 && $3==8 && $5==8
 		| |	remove(regvar($1))
 			erase(regvar($1))
 			| {reginc8,regvar($1)}		| |
@@ -1804,7 +1804,7 @@ lol adp dup stl loi $1==$4 && $2==(0-8) && inreg($1)==2 && $3==4 && $5==8
 		| |	remove(regvar($1))
 			erase(regvar($1))
 			| {regdec8,regvar($1)}		| |
-lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==1 && $5==1
+lol dup adp stl sti $1==$4 && $2==4 && inreg($1)==2 && $3==1 && $5==1
 		| NC source1 |
 			REMEXTANDLOC
 			remove(regvar($1))
@@ -1820,7 +1820,7 @@ lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==1 && $5==1
 			remove(regvar($1))
 			"cvtlb\t%[1],(%(regvar($1)%))+"
 			erase(regvar($1))		|	| | (3,7)+%[1]
-lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==2 && $5==2
+lol dup adp stl sti $1==$4 && $2==4 && inreg($1)==2 && $3==2 && $5==2
 		| NC source2 |
 			REMEXTANDLOC
 			remove(regvar($1))
@@ -1831,13 +1831,13 @@ lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==2 && $5==2
 			remove(regvar($1))
 			"cvtlw\t%[1],(%(regvar($1)%))+"
 			erase(regvar($1))		|	| | (3,7)+%[1]
-lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==4 && $5==4
+lol dup adp stl sti $1==$4 && $2==4 && inreg($1)==2 && $3==4 && $5==4
 		| source4 |
 			REMEXTANDLOC
 			remove(regvar($1))
 			move(%[1],{reginc4,regvar($1)})
 			erase(regvar($1))		|	| |
-lol lol adp stl sti $1==$4 && $2==$1 && inreg($1)==2 && $3==8 && $5==8
+lol dup adp stl sti $1==$4 && $2==4 && inreg($1)==2 && $3==8 && $5==8
 		| source8 |
 			REMEXTANDLOC
 			remove(regvar($1))
@@ -1882,7 +1882,7 @@ lol adp dup stl sti $1==$4 && inreg($1)==2 && $2==(0-8) && $3==4 && $5==8
 			remove(regvar($1))
 			move(%[1],{regdec8,regvar($1)})
 			erase(regvar($1))		|	| |
-lol lol adp stl $1==$4 && $2==$4 && inreg($1)==2
+lol dup adp stl $1==$4 && $2==4 && inreg($1)==2
 		| |	remove(regvar($1))
 			allocate(REG=regvar($1))
 			"addl2\t$$$3,%(regvar($1)%)"
@@ -1902,20 +1902,20 @@ lol adp stl $1==$3 && $1>=0
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			"addl2\t$$$2,$1(ap)" 
 			setcc({LOCAL4,AP,$1,4})	|	| |
-lol lol adp stl $1==$4 && $2==$4 && $2<0
+lol dup adp stl $1==$4 && $2==4 && $1<0
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			allocate(REG={LOCAL4,LB,$1,4})
 			"addl2\t$$$3,$1(fp)"
 			setcc({LOCAL4,LB,$1,4})	| %[a]	| |
-lol lol adp stl $1==$4 && $2==$4
+lol dup adp stl $1==$4 && $2==4
 		| |	remove(displaced)
 			remove(LOCALS,%[num]<=$1+3 && %[num]+%[size]>$1)
 			allocate(REG={LOCAL4,AP,$1,4})
 			"addl2\t$$$3,$1(ap)"
 			setcc({LOCAL4,AP,$1,4})	| %[a]	| |
 #ifdef REGVARS
-lil lil adp sil $1==$2 && $1==$4 && inreg($1)==2
+lil dup adp sil $1==$4 && $2==4 && inreg($1)==2
 		| |	REMEXTANDLOC
 			allocate(REG={regdef4,regvar($1)})
 			"addl2\t$$$3,(%(regvar($1)%))"
@@ -1929,7 +1929,7 @@ lol lof dup adp lol stf $1==$5 && $2==$6 && $3==4 && inreg($1)==2
 loe adp ste $1==$3
 		| |	remove(externals)
 			"addl2\t$$$2,$1"	|		| |
-loe loe adp ste $1==$4 && $2==$1
+loe dup adp ste $1==$4 && $2==4
 		| |	remove(externals)
 			allocate(REG={EXTERNAL4,$1})
 			"addl2\t$$$3,$1"	| %[a]		| |
