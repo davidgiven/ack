@@ -270,8 +270,13 @@ w
 q
 ABC
 	)
+	( cd ../lang/m2/comp
+	  cp SmallPars Parameters
+	)
 	;;
 *)	( cd ../lang/cem/cemcom
+	  cp BigPars Parameters
+	  cd ../../m2/comp
 	  cp BigPars Parameters
 	)
 	;;
