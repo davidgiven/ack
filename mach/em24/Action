@@ -1,3 +1,6 @@
 name "em24 etext,edata,end library"
 dir libend
 end
+name "em24 system call library"
+dir libsys
+end
