@@ -1,0 +1,92 @@
+.sp 1.5i
+.ft B
+Appendix C: An example
+.ft R
+.nh
+.nf
+
+
+\h'+10u' 1	\fBprogram\fR factorials(input, output);
+\h'+10u' 2	{ This program prints factorials }
+\h'+10u' 3
+\h'+10u' 4	\fBconst\fR
+\h'+10u' 5	        FAC1 = 1;
+\h'+10u' 6	\fBvar\fR
+\h'+10u' 7	        i : integer;
+\h'+10u' 8
+\h'+10u' 9	\fBfunction\fR factorial(n : integer) : integer;
+10	\fBbegin\fR
+11	        \fBif\fR n = FAC1 \fBthen\fR
+12	                factorial := FAC1
+13	        \fBelse\fR
+14	                factorial := n * factorial(n-1);
+15	\fBend\fR;
+16
+17	\fBbegin\fR
+18	        write('Give a number : ');
+19	        readln(i);
+20	        \fBif\fR i < 1 \fBthen\fR
+21	                writeln('No factorial')
+22	        \fBelse\fR
+23	                writeln(factorial(i):1);
+24	\fBend\fR.
+.bp
+.po
+.DS
+ mes 2,4,4					     loc 16
+\&.1						     cal $_wrs
+ rom 'factorials.p\(rs000'				     asp 12
+i						     lin 19
+ bss 4,0,0					     lae input
+output						     cal $_rdi
+ bss 540,0,0					     asp 4
+input						     lfr 4
+ bss 540,0,0					     ste i
+ exp $factorial					     lae input
+ pro $factorial, ?					     cal $_rln
+ mes 9,4					     asp 4
+ lin 11						     lin 20
+ lol 0						     loe i
+ loc 1						     loc 1
+ cmi 4						     cmi 4
+ teq						     tlt
+ zeq *1						     zeq *1
+ lin 12						     lin 21
+ loc 1						    .4
+ stl -4						     rom 'No factorial'
+ bra *2						     lae output
+1						     lae .4
+ lin 14						     loc 12
+ lol 0						     cal $_wrs
+ lol 0						     asp 12
+ loc 1						     lae output
+ sbi 4						     cal $_wln
+ cal $factorial					     asp 4
+ asp 4						     bra *2
+ lfr 4						    1
+ mli 4						     lin 23
+ stl -4						     lae output
+2						     loe i
+ lin 15						     cal $factorial
+ mes 3,0,4,0,0					     asp 4
+ lol -4						     lfr 4
+ ret 4						     loc 1
+ end 4						     cal $_wsi
+ exp $m_a_i_n				     asp 12
+ pro $m_a_i_n, ?				     lae output
+ mes 9,0					     cal $_wln
+ fil .1						     asp 4
+\&.2						    2
+ con input, output				     lin 24
+ lxl 0						     loc 0
+ lae .2						     cal $_hlt
+ loc 2						     end 0
+ lxa 0						     mes 4,24,'factorials.p\(rs000'
+ cal $_ini
+ asp 16
+ lin 18
+\&.3
+ rom 'Give a number : '
+ lae output
+ lae .3
+.DE

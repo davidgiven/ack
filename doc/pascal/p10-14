@@ -1,0 +1,1 @@
+troff -ms -n10 conf.doc options.doc extensions.doc deviations.doc > p10-14.dit

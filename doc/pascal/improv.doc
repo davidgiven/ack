@@ -1,0 +1,87 @@
+.sp 2
+.NH
+Improvements to the compiler
+.nh
+.sp
+.LP
+In consideration of portability, a restricted option could be implemented.
+Under this option, the extensions and warnings should be considered as errors.
+
+
+.LP
+The restrictions imposed by the standard on the control variable of a
+for-statment should be implemented (\fBISO 6.8.3.9\fR).
+
+.LP
+To check whether a function returns a valid result, the following algorithm
+could be used. When a function is entered a hidden temporary variable of
+type boolean is created. This variable is initialized with the value false.
+The variable is set to true, when an assignment to the function name occurs.
+On exit of the function a test is performed on the variable. If the value
+of the variable is false, a run-time error occurs.
+.br
+Note: The check has to be done run-time.
+
+
+.LP
+The \fIundefined value\fR should be implemented. A problem arises with
+local variables, for which space on the stack is allocated. A possible
+solution would be to generate code for the initialization of the local
+variables with the undefined value at the beginning of a procedure or
+function.
+.br
+The implementation for the global variables is easy, because \fBbss\fR
+blocks are used.
+
+
+.LP
+Closely related to the last point is the generation of warnings when
+variables are never used or assigned. This is not yet implemented.
+
+
+.LP
+The error messages could specify more details about the errors occurred,
+if some additional testing is done.
+
+.bp
+.LP
+Every time the compiler detects sets with different base-types, a warning
+is given. Sometimes this is superfluous.
+
+.nf
+\fBprogram\fR sets(output);
+\fBtype\fR
+	week = (sunday, monday, tuesday, wednesday, thursday, friday, saturday);
+	workweek = monday..friday;
+\fBvar\fR
+	s : \fBset of\fR workweek;
+	day : week;
+\fBbegin\fR
+	day := monday;
+	s := [day];		(* warning *)
+	day := saturday;
+	s := [day];		(* warning *)
+\fBend\fR.
+.fi
+The new compiler gives two warnings, the first one is redundant.
+
+
+.LP
+A nasty point in the compiler is the way the procedures \fIread, readln,
+write\fR and \fIwriteln\fR are handled (see also section 2.2). They have
+been added to the grammar. This implies that they can not be redefined as
+opposed to the other required procedures and functions. They should be
+removed from the grammar altogether. This could imply that more semantic
+checks have to be performed.
+
+
+.LP
+No effort is made to detect possible run-time errors during compilation.
+.br
+E.g. a : \fBarray\fR[1..10] \fBof\fI something\fR, and the array selection
+a[11] would occur.
+
+
+.LP
+Some assistance to implement the improvements mentioned above, can be
+obtained from [PCV].

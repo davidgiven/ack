@@ -1,0 +1,89 @@
+.sp 2
+.NH
+Comparison with the Pascal-VU compiler
+.nh
+
+.LP
+In this chapter, the differences with the Pascal-VU compiler [IM2] are listed.
+The points enumerated below can be used as improvements to the compiler (see
+also Chapter 11).
+.sp
+.NH 2
+Deviations
+.LP
+.sp
+- large labels
+.in +3m
+only labels in the closed interval 0..9999 are allowed, as opposed to the
+Pascal-VU compiler. The Pascal-VU compiler allows every unsigned integer
+as label.
+.in -3m
+
+- goto
+.in +3m
+the new compiler conforms to the standard as opposed to the old one. The
+following program, which contains an illegal jump to label 1, is accepted
+by the Pascal-VU compiler.
+
+.nf
+\fBprogram\fR illegal_goto(output);
+\fBlabel\fR 1;
+\fBvar\fR i : integer;
+\fBbegin\fR
+	\fBgoto\fR 1;
+	\fBfor\fR i := 1 \fBto\fR 10 \fBdo\fR
+	\fBbegin\fR
+		1 : writeln(i);
+	\fBend\fR;
+\fBend\fR.
+.fi
+
+This program is rejected by the new compiler.
+.in -3m
+
+.NH 2
+Extensions
+.LP
+.sp
+The extensions implemented by the Pascal-VU compiler are listed in
+Chapter 5 of [IM2].
+.sp
+- separate compilation
+.ti +3m
+the new compiler only accepts programs, not modules.
+
+- assertions
+.ti +3m
+not implemented.
+
+- additional procedures
+.ti +3m
+the procedures \fIhalt, mark\fR and \fIrelease\fR are not available.
+.bp
+- UNIX\(tm interfacing
+.ti +3m
+the \-c option is not implemented.
+.FS
+\(tm UNIX is a Trademark of Bell Laboratories.
+.FE
+
+- double length integers
+.ti +3m
+integer size can be set with the \-V option, so the additional type \fIlong\fR
+is not implemented.
+
+
+.NH 2
+Compiler options
+.LP
+.sp
+The options implemented by the Pascal-VU compiler are listed in
+Chapter 7 of [IM2].
+.sp
+The construction "{$....}" is not recognized.
+
+The options: \fIa, c, d, s\fR and \fIt\fR are not available.
+
+The \-l option has been changed into the \-L option.
+
+The size of reals can be set with the \-V option.

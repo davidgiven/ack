@@ -1,0 +1,118 @@
+.sp 2
+.NH
+Deviations from the standard
+.nh
+
+.PP
+The compiler deviates from the ISO 7185 standard with respect to the
+following clauses:
+
+.IP "\fBISO 6.1.3:\fR" 14
+\h'-5u'Identifiers may be of any length and all characters of an identifier
+shall be significant in distinguishing between them.
+.sp
+.in +3m
+The constant IDFSIZE, defined in the file \fIidfsize.h\fR, determines
+the (maximum) significant length of an identifier. It can be set at run
+time with the \-M option (see also section on compiler options).
+.in -3m
+.sp
+.IP "\fBISO 6.1.8:\fR"
+\h'-5u'There shall be at least one separator between any pair of consecutive tokens
+made up of identifiers, word-symbols, labels or unsigned-numbers.
+.sp
+.in +3m
+A token separator is not needed when a number is followed by an identifier
+or a word-symbol. For example the input sequence, 2\fBthen\fR, is recognized
+as the integer 2 followed by the keyword \fBthen\fR.
+.in -3m
+.sp
+.IP "\fBISO 6.2.1:\fR"
+\h'-29u'The label-declaration-part shall specify all labels that prefix a statement
+in the corresponding statement-part.
+.sp
+.ti +3m
+The compiler generates a warning if a label is declared but never defined.
+.bp
+.IP "\fBISO 6.2.2:\fR"
+\h'-9u'The scope of identifiers and labels should start at the beginning of the
+block in which these identifiers or labels are declared.
+.sp
+.in +3m
+The compiler, as most other one pass compilers deviates in this respect,
+because the scope of variables and labels start at their defining-point.
+.nf
+.in +4m
+\fBprogram\fR deviates\fB;
+const\fR
+        x \fB=\fR 3\fB;
+procedure\fR p\fB;
+const\fR
+	y \fB=\fR x\fB;\fR
+	x \fB=\fR true\fB;
+begin end;
+begin
+end.\fR
+.in -4m
+.fi
+
+In procedure p, the constant y has the integer value 3. This program does not
+conform to the standard. In [SAL] a simple algorithm is described for
+enforcing the scope rules, it involves numbering all scopes encoutered in the
+program in order of their opening, and recording in each identifier table
+entry the number of the latest scope in which it is used.
+
+Note: The compiler does not deviate from the standard in the following program:
+.nf
+.in +4m
+\fBprogram\fR conforms\fB;
+type\fR
+	x \fB=\fR real\fB;
+procedure\fR p\fB;
+type\fR
+	y \fB= ^\fRx\fB;\fR
+	x \fB=\fR boolean\fB;
+var\fR
+	p \fB:\fR y\fB;
+begin end;
+begin
+end.\fR
+.in -4m
+.fi
+
+In procedure p, the variable p is a pointer to boolean.
+.fi
+.in -3m
+.sp
+.IP "\fBISO 6.4.3.2:\fR"
+The standard specifies that any ordinal type is allowed as index-type.
+.sp
+.in +3m
+The required type \fIinteger\fR is not allowed as index-type, i.e.
+.ti +2m
+\fBARRAY [ \fIinteger\fB ] OF\fR <component-type>
+is not permitted.
+.br
+This could be implemented, but this might cause problems on machines with
+a small memory.
+.in -3m
+.sp
+.IP "\fBISO 6.4.3.3:\fR"
+\h'-1u'The type possessed by the variant-selector, called the tag-type, must
+be an ordinal type, so the integer type is permitted. The values denoted by
+all case-constants shall be distinct and the set thereof shall be equal
+to the set of values specified by the tag-type.
+.sp
+.in +3m
+Because it is impracticable to enumerate all integers as case-constants,
+the integer type is not permitted as tag-type. It would not make a great
+difference to allow it as tagtype.
+.in -3m
+.sp
+.IP "\fBISO 6.8.3.9:\fR"
+The standard specifies that the control-variable of a for-statement is not
+allowed to be modified while executing the loop.
+.sp
+.in +3m
+Violation of this rule is not detected. An algorithm to implement this rule
+can be found in [PCV].

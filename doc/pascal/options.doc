@@ -1,0 +1,166 @@
+.sp 1.5i
+.NH
+Compiler options
+.nh
+.PP
+There are some options available to control the behaviour of the compiler.
+Two types of options can be distinguished: compile-time options and
+run-time options.
+.sp
+.NH 2
+Compile time options
+.LP
+.sp
+There are some options that can be set when the compiler is installed.
+Those options can be found in the file \fIParameters\fR. To set a parameter
+just modify its definition in the file \fIParameters\fR. The shell script
+in the file \fImake.hfiles\fR creates for each parameter a separate .h file.
+This mechanism is derived from the C compiler in ACK.
+.sp
+\fBIDFSIZE\fR
+.in +3m
+The maximum number of characters that are significant in an identifier. This
+value has to be at least the value of \fBMINIDFSIZE\fR, defined in the file
+\fIoptions.c\fR. A compile-time check is included to see if the value of
+\fBMINIDFSIZE\fR is legal. The compiler will not recognize some keywords
+if \fBIDFSIZE\fR is too small.
+.in -3m
+.sp
+\fBISTRSIZE\fR, \fBRSTRSIZE\fR
+.in +3m
+The lexical analyzer uses these two values for the allocation of memory needed
+to store a string. \fBISTRSIZE\fR is the initial number of bytes allocated.
+\fBRSTRSIZE\fR is the step size used for enlarging the memory needed.
+.in -3m
+.sp
+\fBNUMSIZE\fR
+.in +3m
+The maximum length of a numeric constant recognized by the lexical analyzer.
+It is an error if this length is exceeded.
+.in -3m
+.sp
+\fBERROUT\fR, \fBMAXERR_LINE\fR
+.in +3m
+Used for error messages. \fBERROUT\fR defines the file on which the
+messages are written. \fBMAXERR_LINE\fR is the maximum number of error
+messages given per line.
+.in -3m
+.sp
+\fBSZ_CHAR\fR, \fBAL_CHAR\fR, etc
+.in +3m
+The default values of the target machine sizes and alignments. The values
+can be overruled with the \-V option.
+.in -3m
+.sp
+\fBMAXSIZE\fR
+.in +3m
+This value must be set to the maximum of the values of the target machine
+sizes. This parameter is used in overflow detection (see also section 3.2).
+.in -3m
+.sp
+\fBDENSITY\fR
+.in +3m
+This parameter is used to decide what EM instruction has to be generated
+for a case-statement. If the range of the index value is sparse, i.e.
+.br
+.ti +5m
+(upperbound - lowerbound) / number_of_cases
+.br
+is more than some threshold (\fBDENSITY\fR) the \fBcsb\fR instruction is
+chosen. If the range is dense a jump table is generated (\fBcsa\fR). This
+uses more space. Reasonable values are 2, 3 or 4.
+.br
+Higher values might also be reasonable on machines, which have lots of
+address space and memory (see also section 3.3.3).
+.in -3m
+.sp
+\fBINP_READ_IN_ONE\fR
+.in +3m
+Used by the generic input module. It can either be defined or not defined.
+Defining it has the effect that files will be read completely into memory
+using only one read-system call. This should be used only on machines with
+lots of memory.
+.in -3m
+.sp
+.bp
+\fBDEBUG\fR
+.in +3m
+.nf
+If this parameter is defined some built-in compiler-debugging tools can be used:
+.in +2m
+\(bu only lexical analyzing is done, if the \-l option is given.
+\(bu if the \-I option is turned on, the allocated number of structures is printed.
+\(bu the routine debug can be used to print miscellaneous information.
+\(bu the routine PrNode prints a tree of nodes.
+\(bu the routine DumpType prints information about a type structure.
+\(bu the macro DO_DEBUG(x,y) defined as ((x) && (y)) can be used to perform
+  several actions.
+.in -2m
+.in -3m
+.sp
+.NH 2
+Run time options
+.LP
+.sp
+The run time options can be given in the command line when the compiler is
+called.
+.br
+They all have the form: \-<character>
+.br
+Depending on the option, a character string has to be specified. The following
+options are currently available:
+.sp
+.IP \-\fBC\fR 18
+The lower case and upper case letters are treated different (\fBISO 6.1.1\fR).
+.sp
+.IP \-\fBu\fR
+The character '_' is treated like a letter, so it is allowed to use the
+underscore in identifiers.
+.br
+Note: identifiers starting with an underscore may cause problems, because
+.br
+\h'\w'Note: 'u'most identifiers in library routines start with an underscore.
+.sp
+.IP \-\fBn\fR
+This option suppresses the generation of register messages.
+.sp
+.IP \-\fBr\fR
+With this option rangechecks are generated where necessary.
+.sp
+.IP \-\fBL\fR
+Do not generate EM \fBlin\fR and \fBfil\fR instructions. These instructions
+are used only for profiling.
+.sp
+.IP \-\fBM\fR<number>
+Set the number of characters that are significant in an identifier to <number>.
+The maximum significant identifier length depends on the constant IDFSIZE,
+defined in \fIidfsize.h\fR.
+.sp
+.IP \-\fBi\fR<number>
+With this flag the setsize for a set of integers can be changed. The number must
+be the number of bits per set. Default value : (#bits in a word) \- 1
+.sp
+.IP \-\fBw\fR
+Suppress warning messages (see also section 2.5).
+.sp
+.IP \-\fBV\fR[[\fBw\fR|\fBi\fR|\fBf\fR|\fBp\fR|\fBS\fR][\fIsize\fR]?[\fI.alignment\fR]?]*
+.br
+Option to set the object sizes and alignments on the target machine
+dynamically. The objects that can be manipulated are:
+.br
+\fBw\fR\h'\w'ifpS'u'   word
+.br
+\fBi\fR\h'\w'wfpS'u'   integer
+.br
+\fBf\fR\h'\w'wipS'u'   float
+.br
+\fBp\fR\h'\w'wifS'u'   pointer
+.br
+\fBS\fR\h'\w'wifp'u'   structure
+.br
+In case of a structure, \fIsize\fR is discarded and the \fIalignment\fR is
+the initial alignment of the structure. The effective alignment is the least
+common multiple of \fIalignment\fR and the alignment of its members. This
+option has been implemented so that the compiler can be used as cross
+compiler.
+.bp

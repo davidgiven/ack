@@ -1,0 +1,50 @@
+.TL
+The ACK Pascal Compiler
+.AU
+Aad Geudeke
+Frans Hofmeester
+.AI
+Dept. of Mathematics and Computer Science
+Vrije Universiteit
+Amsterdam, The Netherlands
+.AB
+This document describes the implementation of a Pascal to EM compiler. The
+compiler is written in C. The lexical analysis is done using a hand-written
+lexical analyzer. Semantic analysis makes use of the extended LL(1) parser
+generator LLgen. Several EM utility modules are used in the compiler.
+.AE
+.sp 2
+.NH
+Introduction
+
+.PP
+.nh
+The Pascal front end of the Amsterdam Compiler Kit (ACK) complies with the
+requirements of the international standard published by the International
+Organization for Standardization (ISO) [ISO]. An informal description, which
+unfortunately is not conforming to the standard, of the programming language
+Pascal is given in [JEN].
+
+.PP
+The main reason for rewriting the Pascal compiler was that the old Pascal
+compiler was written in Pascal itself, and a disadvantage of it was its
+lack of flexibility. The compiler did not meet the needs of the current
+ACK-framework, which makes use of modern parsing techniques and utility
+modules. In this framework it is, for example, possible to use a fast back
+end. Such a back end translates directly to object code [ACK]. Our compiler is
+written in C and it is designed similar to the current C and Modula-2 compiler
+of ACK.
+
+.PP
+Chapter 2 describes the basic structure of the compiler. Chapter 3 discusses
+the code generation of the main Pascal constructs. Chapter 4 covers one of
+the major components of Pascal, viz. the conformant array. In Chapter 5 the
+various compiler options that can be used are enumerated. The extensions
+to the standard and the deviations from the standard are listed in Chapter
+6 and 7. Chapter 8 presents some ideas to improve the standard. Chapter 9
+gives a short overview of testing the compiler. The major differences
+between the old and new compiler can be found in Chapter 10. Suggestions
+to improve the compiler are described in Chapter 11. The appendices
+contain the grammar of Pascal and the changes made to the ACK Pascal run time
+library. A translation of a Pascal program to EM code as example is presented.
+.bp
