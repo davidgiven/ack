@@ -24,7 +24,11 @@ typedef	unsigned long	u_long;
 typedef	struct	_physadr { int r[1]; } *physadr;
 typedef	long	daddr_t;
 typedef	char *	caddr_t;
+#ifdef __BSD4_2
+typedef	u_long ino_t;
+#else
 typedef	u_short ino_t;
+#endif
 typedef	long	swblk_t;
 typedef	long	size_t;
 typedef	long	time_t;
