@@ -317,8 +317,15 @@ code_instr( opcode, field1, field2, eaddr)
 int opcode, field1, field2;
 struct t_operand *eaddr;
 {
-	code_opcode( opcode, field1, field2, eaddr);
-	code_extension( eaddr);
+	if (eaddr->type == IS_IND_REG_DISPL) {
+		@__instr_code(%d(((opcode & 0xf) << 12) | ((field1 & 0x7) << 9) |
+			        ((field2 & 0x7) << 6)),
+			      %d(eaddr->reg), %$(eaddr->expr));
+	}
+	else {
+		code_opcode( opcode, field1, field2, eaddr);
+		code_extension( eaddr);
+	}
 }
 
 
@@ -326,10 +333,27 @@ code_move( size, src, dst)
 int size;
 struct t_operand *src, *dst;
 {
-	@text2( %d( ((size & 0x3) << 12) | ((reg_mode( dst) & 0x3f) << 6) |
+	if (src->type == IS_IND_REG_DISPL) {
+		if (dst->type == IS_IND_REG_DISPL) {
+			@__moveXX(%d( ((size & 0x3) << 12)),
+				 %d(dst->reg), %$(dst->expr),
+				 %d(src->reg), %$(src->expr));
+		}
+		else {
+			@__instr_code(%d( ((size & 0x3) << 12)|((reg_mode( dst) & 0x3f) << 6)),
+				 %d(src->reg), %$(src->expr));
+		}
+	}
+	else if (dst->type == IS_IND_REG_DISPL) {
+		@__move_X(%d( ((size & 0x3) << 12) | (mode_reg( src) & 0x3f)),
+			 %d(dst->reg), %$(dst->expr));
+	}
+	else {
+		@text2( %d( ((size & 0x3) << 12) | ((reg_mode( dst) & 0x3f) << 6) |
 		    	     		   (mode_reg( src) & 0x3f)));
-	code_extension( src);
-	code_extension( dst);
+		code_extension( src);
+		code_extension( dst);
+	}
 }
 
 
