@@ -7,20 +7,14 @@ OFILES=main.o getline.o lookup.o var.o process.o backward.o util.o\
 	alloc.o putline.o cleanup.o peephole.o flow.o
 ONOGLOB=regnoglob.o
 OGLOB=regglob.o
-KFILES=main.k getline.k lookup.k var.k process.k backward.k util.k\
-	alloc.k putline.k cleanup.k peephole.k flow.k regnoglob.k regglob.k
 LIBS=$(EMHOME)/lib/em_data.a
 CFLAGS=-O -DNDEBUG -I$(EMHOME)/h
 LDFLAGS=-i
 LINT=lint
-OPR=wide|opr
-XREF=xref -c -w80
+OPR=opr
 PROPTS=
 # LEXLIB is implementation dependent, try -ll or -lln first
 LEXLIB=-ll
-
-.DEFAULT:
-	co -q $<
 
 all:	opt opt2
 
@@ -56,10 +50,13 @@ mktab:  mktab.o $(LIBS)
 
 mktab.o:	scan.c optim.h param.h pattern.h types.h
 
-depend: regglob.c regnoglob.c pattern.c
+depend: pattern.c
 	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
 	echo '#AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO' >> Makefile.new
+	cp reg.c regglob.c
+	cp reg.c regnoglob.c
 	mkdep $(CFILES) pattern.c regglob.c regnoglob.c | sed 's/\.c:/.o:/' >> Makefile.new
+	rm -f regglob.c regnoglob.c
 	mv Makefile Makefile.old
 	mv Makefile.new Makefile
 
@@ -72,37 +69,22 @@ printall:
 
 print:  Makefile *.h $(CFILES) mktab.y scan.l patterns
 	-pr $(PROPTS) -n $? | $(OPR)
+	touch print
 
 opr:
-	make pr ^ $(OPR)
+	make pr | $(OPR)
 
 pr:
 	@pr $(PROPTS) -n Makefile *.h $(CFILES) mktab.y scan.l patterns
 
-xref:
-	$(XREF) *.h $(CFILES) | pr $(PROPTS) -h "XREF EMOPT"|$(OPR)&
-
-sizes:  opt
-	-nm opt | sort -n| /usr/plain/bin/map
-
 clean:
 	rm -f *.o opt mktab mktab.c scan.c pattern.c opt2 Out
 
-regnoglob.c:	reg.c
-		-rm -f regnoglob.c
-		cp reg.c regnoglob.c
+regnoglob.o:	reg.c
+		$(CC) $(CFLAGS) -c -o regnoglob.o reg.c
 
-regglob.c:	reg.c
-		-rm -f regglob.c
-		cp reg.c regglob.c
-
-regglob.o:	regglob.c
-		$(CC) $(CFLAGS) -c -DGLOBAL_OPT regglob.c
-
-kfiles: $(KFILES)
-
-.SUFFIXES: .k
-.c.k: ; acc -c.k $*.c
+regglob.o:	reg.c
+		$(CC) $(CFLAGS) -c -DGLOBAL_OPT -o regglob.o reg.c
 
 # the next lines are generated automatically
 #AUTOAUTOAUTOAUTOAUTOAUTOAUTOAUTO
