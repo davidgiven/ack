@@ -80,6 +80,8 @@ static int	nphase_args;
 static char	*opt_dir;
 static char	*prog_name;
 
+static int	v_flag;
+
 static void
 cleanup()
 {
@@ -251,6 +253,15 @@ run_phase(phase)
 	fatal("Could not fork");
   }
   else if (pid == 0) {
+	if (v_flag) {
+		register int i = 0;
+
+		while (phargs[i]) {
+			fprint(STDERR, "%s ", phargs[i]);
+			i++;
+		}
+		fprint(STDERR, "\n");
+	}
 	(void) execv(phargs[0], phargs);
 	fatal("Could not exec %s", phargs[0]);
 	sys_stop(S_EXIT);
@@ -295,6 +306,9 @@ main(argc, argv)
 				keeptemps = 1;
 				/* no continue; IL also needs this */
 			}
+			break;
+		case 'v':
+			v_flag = 1;
 			break;
 		case 'O':
 			if (argv[0][2] == '2' || argv[0][2] == '\0') continue;
