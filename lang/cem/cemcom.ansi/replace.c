@@ -303,10 +303,12 @@ actual(repl)
 		It keeps in account the opening and closing brackets,
 		preprocessor numbers, strings and character constants.
 	*/
-	register int ch;
+	register int ch = 0;
 	register int level = 0, nostashraw = 0;
+	int lastch;
 
 	while (1) {
+		lastch = ch;
 		ch = GetChar();
 
 		if (Unstacked) {
@@ -483,8 +485,10 @@ a_new_line:		ch = GetChar();
 				return ')';
 			}
 			stash(repl, ch, !nostashraw);
-		} else
+		} else {
+			if (lastch == TOKSEP && ch == TOKSEP) continue;
 			stash(repl, ch, !nostashraw);
+		}
 	}
 }
 
