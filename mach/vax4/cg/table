@@ -4399,6 +4399,7 @@ dup $1==8	| bigsource8-regch8 |	| %[1] %[1]	| |
 #else REGVARS
 dup $1==8	| bigsource8 |		| %[1] %[1]	| |
 #endif REGVARS
+...		| dups4 dups4 |		| %[2] %[1] %[2] %[1] | |
 dup		| STACK |
 			allocate(REG,REG={CONST1,$1/4})
 			"addl3\tsp,$$$1,%[a]"
