@@ -28,7 +28,6 @@ ffp.s
 fat.s
 trp.s
 dia.s
-printf.s
 lxl.s
 lxa.s
 lpb.s
