@@ -110,7 +110,7 @@ if ( (n==0 && d_flag) || (n==4 && d_flag>=2) || (n<100 && d_flag>=3) ) {
 			printf("p   ");
 			break;
 		}
-		printf(" %9.9s%14D",
+		printf(" %9.9s%14ld",
 			typestr[ln->type1<VALLOW ? ln->type1 : CONST],
 			nicepr(ln->type1,&ln->ad)) ;
 		if ( ln->opoff != NO_OFF )
@@ -182,11 +182,11 @@ if ( ( (n==0 || n>=100) && d_flag) || (n<=1 && d_flag>=2) ) {
 		printf("\nData relocation\n") ;
 		printf("\n\t%10s %10s %10s\n","offset","type","value");
 		for ( rl=f_data ; rl ; rl= rl->r_next ) {
-			printf("\t%10D %10s ",rl->r_off,r_data[rl->r_typ]);
+			printf("\t%10ld %10s ",rl->r_off,r_data[rl->r_typ]);
 			switch(rl->r_typ) {
 			case RELADR:
 			case RELHEAD:
-				printf("%10D\n",rl->r_val.rel_i) ;
+				printf("%10ld\n",rl->r_val.rel_i) ;
 				break ;
 			case RELGLO:
 				printf("%8.8s\n",rl->r_val.rel_gp->g_name) ;
@@ -201,10 +201,10 @@ if ( ( (n==0 || n>=100) && d_flag) || (n<=1 && d_flag>=2) ) {
 		printf("\n\nText relocation\n") ;
 		printf("\n\t%10s %10s %10s\n","offset","flags","value");
 		for ( rl=f_text; rl ; rl= rl->r_next ) {
-			printf("\t%10D %10s ",
+			printf("\t%10ld %10s ",
 			 rl->r_off,pflags(opchoice[rl->r_typ&~RELMNS])) ;
 			if ( rl->r_typ&RELMNS )
-				printf("%10D\n",rl->r_val.rel_i) ;
+				printf("%10ld\n",rl->r_val.rel_i) ;
 			else    printf("\n") ;
 		}
 	}
