@@ -37,7 +37,7 @@
 
 
 !File: strsize.h
-#define ISTRSIZE	16	/* minimum number of bytes allocated for
+#define ISTRSIZE	32	/* minimum number of bytes allocated for
 					storing a string		*/
 #define RSTRSIZE	8	/* step size in enlarging the memory for
 					the storage of a string		*/
@@ -74,7 +74,7 @@
 
 
 !File: botch_free.h
-#undef BOTCH_FREE	1	/* botch freed memory, as a check	*/
+#undef BOTCH_FREE	1	/* when defined, botch freed memory, as a check	*/
 
 
 !File: dataflow.h
@@ -86,7 +86,7 @@
 
 
 !File: use_tmp.h
-#define USE_TMP		1	/* collect exa, exp, ina and inp commands
+#undef USE_TMP		1	/* collect exa, exp, ina and inp commands
 					and let them precede the rest of
 					the generated compact code	*/
 
@@ -105,11 +105,11 @@
 
 
 !File: nopp.h
-#define NOPP		1	/* use built-int preprocessor	*/
+#define NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h
-#define NOBITFIELD	1	/* implement bitfields	*/
+#undef NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
 
 
 !File: spec_arith.h
@@ -122,5 +122,14 @@
 
 
 !File: nofloat.h
-#undef NOFLOAT			/* floats implemented by default */
+#undef NOFLOAT		1	/* if NOT defined, floats are implemented */
+
+
+!File: noRoption.h
+#define NOROPTION	1	/* if NOT defined, R option is implemented */
+
+
+!File: nocross.h
+#undef NOCROSS		1	/* if NOT defined, cross compiler */
+
 
