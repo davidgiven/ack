@@ -90,11 +90,6 @@ freopen(const char *name, const char *mode, FILE *stream)
 	}
 
 	stream->_count = 0;
-	if (stream->_buf && !(flags & _IONBF) && (flags & _IOWRITE)) 
-		if (flags & _IOLBF)
-			stream->_count  = 0;
-		else	stream->_count = stream->_bufsiz;
-
 	stream->_fd = fd;
 	stream->_flags = flags;
 	return stream;
