@@ -12,7 +12,6 @@
 #include	<alloc.h>
 #include	"nobitfield.h"
 #include	"arith.h"
-#include	"align.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"type.h"
@@ -20,7 +19,6 @@
 #include	"field.h"
 #include	"assert.h"
 #include	"Lpars.h"
-#include	"class.h"
 #include	"sizes.h"
 #include	"idf.h"
 #include	"level.h"
