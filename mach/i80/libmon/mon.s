@@ -7,9 +7,6 @@
 ! number  1:	exit
 ! number  3:	read
 ! number  4:	write
-! number  5:	open
-! number  6:	close
-! number 54:	ioctl
 ! If called with a number of a call that is not implemented,
 ! a trap is generated.
 
@@ -27,12 +24,6 @@
 	jz monread	! is it a read?
 	cpi 4
 	jz monwrite	! is it a write?
-	cpi 5
-	jz monopen	! is it an open?
-	cpi 6
-	jz monclose	! is it a close?
-	cpi 54
-	jz monioctl	! is it an ioctl?
 	jmp ebadmon	! trap
 
 monexit:
@@ -78,25 +69,6 @@ monwrite:
 2:	push d		! no error
 	jmp monret
 
-monopen:
-	pop h		! pointer to string
-	lxi h,0
-	xthl		! pop  flag and push file descriptor
-	push h		! error code
-	jmp monret
-
-monclose:
-	lxi h,0
-	xthl		! pop file descriptor and push error code
-	jmp monret
-
-monioctl:
-	pop h		! file descriptor
-	pop h		! request
-	lxi h,0
-	xthl		! remove argp and push error code
-	jmp monret
-	
 monret:
 	lhld .bcreg
 	mov b,h
