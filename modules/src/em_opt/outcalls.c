@@ -34,7 +34,7 @@ outputincalls()
 			}
 			/* fall thru */
 		case CST:
-			fprintf(ofile,"%s\t| int:n\t|\n",s);
+			fprintf(ofile,"%s\t| arith:n\t|\n",s);
 			if(op->id_used) {
 				fprintf(ofile,"\tEM_mkcst(GETNXTPATT(),op_%s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
@@ -78,7 +78,7 @@ outputincalls()
 			}
 			break;
 		case EXT:
-			fprintf(ofile,"%s\t| int:n\t|\n",s);
+			fprintf(ofile,"%s\t| arith:n\t|\n",s);
 			if(op->id_used) {
 				fprintf(ofile,"\tEM_mkcst(GETNXTPATT(),op_%s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
@@ -87,7 +87,7 @@ outputincalls()
 				fprintf(ofile,"\tFLUSHDFA();\n");
 				fprintf(ofile,"\tC_%s(n);\n",s);
 			}
-			fprintf(ofile,"%s_dnam\t| char *:s int:n\t|\n",s);
+			fprintf(ofile,"%s_dnam\t| char *:s arith:n\t|\n",s);
 			if(op->id_used) {
 				fprintf(ofile,"\tEM_mksof(GETNXTPATT(),op_%s,s,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);
@@ -96,7 +96,7 @@ outputincalls()
 				fprintf(ofile,"\tFLUSHDFA();\n");
 				fprintf(ofile,"\tC_%s_dnam(s,n);\n",s);
 			}
-			fprintf(ofile,"%s_dlb\t| label:l int:n\t|\n",s);
+			fprintf(ofile,"%s_dlb\t| label:l arith:n\t|\n",s);
 			if(op->id_used) {
 				fprintf(ofile,"\tEM_mknof(GETNXTPATT(),op_%s,l,n);\n",s);
 				fprintf(ofile,"\tOO_dfa(op_%s);\n",s);

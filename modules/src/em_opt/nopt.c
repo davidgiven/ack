@@ -159,9 +159,9 @@ OO_flush()
 	register int i,n;
 	printstate("Flush");
 	for(p=OO_buffer;p<OO_patternqueue;p++)
-		EM_mkcalls(p);
+		C_out(p);
 	if(p->em_opcode!=OTHER)
-		EM_mkcalls(p);
+		C_out(p);
 	if(OO_endbackup) {
 		n = OO_endbackup-OO_nxtpatt;
 		BTSCPY(p,q,i,OO_buffer,OO_nxtpatt,n);
@@ -186,7 +186,7 @@ OO_halfflush()
 	printstate("Half flush");
 	n = MAXBUFFER / 2;
 	for(p=OO_buffer,i=n;i--;)
-		EM_mkcalls(p++);
+		C_out(p++);
 	/* now copy the rest of buffer and pattern back */
 	BTSCPY(p,q,i,OO_buffer,OO_buffer+n,n+(OO_nxtpatt-OO_buffer));
 	OO_patternqueue -= n;
