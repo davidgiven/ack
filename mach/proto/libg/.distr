@@ -8,5 +8,6 @@ proto.libsys
 proto.libcc.ansi
 proto.libmon
 proto.libem
+proto.libend
 proto.liboc
 proto.make

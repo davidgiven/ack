@@ -6,24 +6,24 @@
 
 SRC_DIR =	$(SRC_HOME)/mach/$(MACH)/libem
 
-all:		libem
+all:		libem_o.a
 
-libem:		$(SRC_DIR)/libem_s.a
+libem_o.a:	$(SRC_DIR)/libem_s.a
 		ASAR="$(ASAR)" ; export ASAR ; \
 		RANLIB="$(RANLIB)" ; export RANLIB ; \
 		MACH="$(MACH)" ; export MACH ; \
 		MACHFL="$(MACHFL)" ; export MACHFL ; \
-		if [ $(SUF) = o ] march $(SRC_DIR) libem $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/libem_s.a libem ; fi
+		if [ $(SUF) = o ] ; then march $(SRC_DIR) libem_o.a $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/libem_s.a libem_o.a ; fi
 
 install:	all
-		cp libem $(TARGET_HOME)/lib/$(MACH)/tail_em
+		cp libem_o.a $(TARGET_HOME)/lib/$(MACH)/tail_em
 		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_em
 
 cmp:		all
-		-cmp libem $(TARGET_HOME)/lib/$(MACH)/tail_em
+		-cmp libem_o.a $(TARGET_HOME)/lib/$(MACH)/tail_em
 
 clean:
-		-rm -f *.old *.[ce$(SUF)] libem
+		-rm -f *.old *.[ce$(SUF)] libem_o.a
 
 opr:
 		make pr | opr

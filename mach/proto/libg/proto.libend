@@ -1,0 +1,32 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+SRC_DIR =	$(SRC_HOME)/mach/$(MACH)/libend
+
+all:		end_o.a
+
+end_o.a:	$(SRC_DIR)/end_s.a
+		ASAR="$(ASAR)" ; export ASAR ; \
+		RANLIB="$(RANLIB)" ; export RANLIB ; \
+		MACH="$(MACH)" ; export MACH ; \
+		MACHFL="$(MACHFL)" ; export MACHFL ; \
+		if [ $(SUF) = o ] march $(SRC_DIR) end_o.a $(SRC_HOME)/mach/proto/libg/compmodule ; else cp $(SRC_DIR)/end_s.a end_o.a ; fi
+
+install:	all
+		cp end_o.a $(TARGET_HOME)/lib/$(MACH)/end_em
+		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/end_em
+
+cmp:		all
+		-cmp end_o.a $(TARGET_HOME)/lib/$(MACH)/end_em
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] end_o.a
+
+opr:
+		make pr | opr
+
+pr:
+		arch pv $(SRC_DIR)/end_s.a | pr -h $(SRC_DIR)/end_s.a
