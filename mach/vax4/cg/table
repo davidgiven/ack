@@ -4,6 +4,16 @@
 /*#define DORCK		/* define if you want RCK */
 #define FLOAT4		/* define if you want better 4-byte FP arithmetic */
 #define FLOAT8		/* define if you want better 8-byte FP arithmetic */
+#define ASBUG_AVOID	/* define if you want to avoid a bug in the BSD 4.1 VAX
+			   assembler, that sometimes generates "*1" for
+			   (r1). This is avoided by generating 0(r1), which is
+			   optimized by the assembler to (r1).
+			*/
+#ifdef ASBUG_AVOID
+#define REGDEFFORMAT "0(%[reg])"
+#else
+#define REGDEFFORMAT "(%[reg])"
+#endif
 
 #define NC nocoercions :
 #define BSIZE 4
@@ -91,10 +101,10 @@ EXTERNAL4 =	{STRING ind;}		4 cost=(4,6)  "%[ind]"
 EXTERNAL8 =	{STRING ind;}		8 cost=(4,9)  "%[ind]"
 DOUBLE =	{STRING ind;}		4 cost=(4,6)  "$%[ind]"
 /* Now tokens for the target machine */
-regdef1 =	{REGISTER reg;}		4 cost=(0,3)  "(%[reg])"
-regdef2 =	{REGISTER reg;} 	4 cost=(0,3)  "(%[reg])"
-regdef4 =	{REGISTER reg;} 	4 cost=(0,3)  "(%[reg])"
-regdef8 =	{REGISTER reg;} 	8 cost=(0,6)  "(%[reg])"
+regdef1 =	{REGISTER reg;}		4 cost=(0,3)  REGDEFFORMAT
+regdef2 =	{REGISTER reg;} 	4 cost=(0,3)  REGDEFFORMAT
+regdef4 =	{REGISTER reg;} 	4 cost=(0,3)  REGDEFFORMAT
+regdef8 =	{REGISTER reg;} 	8 cost=(0,6)  REGDEFFORMAT
 #ifdef REGVARS
 reginc1 =	{REGISTER reg;}		4 cost=(0,3)  "(%[reg])+"
 reginc2 =	{REGISTER reg;}		4 cost=(0,3)  "(%[reg])+"
@@ -271,7 +281,7 @@ loc $1>=256 && $1<65536	| |	| {CONST2,$1}				| |
 loc		| |		| {CONST4,$1}				| |
 ldc		| |		| {CONST8,$1}				| |
 #ifdef REGVARS
-lol inreg($1)==2 | |		| regvar($1)				| |
+lol inreg($1)==2 | | REMREG($1)	| regvar($1)				| |
 #endif REGVARS
 lol $1 < 0	| |		| {LOCAL4,LB,$1,4}			| |
 lol $1 >= 0	| |		| {LOCAL4,AP,$1,4}			| |
@@ -676,6 +686,11 @@ adi sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"addl3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+adi lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			"addl3\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 adi sil $1==4 && $2<0
 		| source4 source4 |
@@ -729,6 +744,11 @@ sbi sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"subl3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+sbi lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			"subl3\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 sbi sil $1==4 && $2<0
 		| source4 source4 |
@@ -786,6 +806,11 @@ mli sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"mull3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+mli lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			"mull3\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 mli sil $1==4 && $2<0
 		| source4 source4 |
@@ -839,6 +864,11 @@ dvi sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"divl3\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+dvi lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			"divl3\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 dvi sil $1==4 && $2<0
 		| source4 source4 |
@@ -902,6 +932,14 @@ rmi sil $1==4 && inreg($2)==2
 			"mull2\t%[1],%[a]"
 			"subl3\t%[a],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+rmi lol stf $1==4 && inreg($2)==2
+		| Xsource4 Xsource4 |
+			REMEXTANDLOC
+			allocate(REG)
+			"divl3\t%[1],%[2],%[a]"
+			"mull2\t%[1],%[a]"
+			"subl3\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 rmi sil $1==4 && $2<0
 		| Xsource4 Xsource4 |
@@ -961,6 +999,11 @@ ngi sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"mnegl\t%[1],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+ngi lol stf $1==4 && inreg($2)==2
+		| source4 |
+			REMEXTANDLOC
+			"mnegl\t%[1],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 ngi sil $1==4 && $2<0
 		| source4 |
@@ -1010,6 +1053,11 @@ sli sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"ashl\t%[1],%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)})	|	| |
+sli lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			"ashl\t%[1],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| |
 #endif REGVARS
 sli sil $1==4 && $2<0
 		| source4 source4 |
@@ -1092,6 +1140,17 @@ sri sil $1==4 && inreg($2)==2
 			REMEXTANDLOC
 			"ashl\t$$%(0-%[1.num]%),%[2],(%(regvar($2)%))"
 			setcc({regdef4,regvar($2)}) |	| | (6,10)+%[1]+%[2]
+sri lol stf $1==4 && inreg($2)==2
+		| source4 source4 |
+			REMEXTANDLOC
+			allocate(%[1], REG)
+			"mnegl\t%[1],%[a]"
+			"ashl\t%[a],%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)})	|	| | (9,14)+%[1]+%[2]
+...		| NC CONST source4 |
+			REMEXTANDLOC
+			"ashl\t$$%(0-%[1.num]%),%[2],$3(%(regvar($2)%))"
+			setcc({displ4,regvar($2),tostring($3)}) |	| | (6,10)+%[1]+%[2]
 #endif REGVARS
 sri sil $1==4 && $2<0
 		| source4 source4 |
