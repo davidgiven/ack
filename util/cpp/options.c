@@ -31,6 +31,12 @@ do_option(text)
 	case 'x':
 		options[*text] = 1;
 		break;
+	case 'u':
+		if (! strcmp(text,"ndef")) {
+			/* ignore -undef */
+			break;
+		}
+		/* fall through */
 	default:
 		error("illegal option: %c", text[-1]);
 		break;
