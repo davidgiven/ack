@@ -381,6 +381,62 @@ C_sru
 /*									      */
 /******************************************************************************/
 
+C_adf
+  $1 == 4	==>	"call .adf4";
+			"pop bx";
+			"pop bx".
+  $1 == 8	==>	"call .adf8";
+			"add sp,8".
+  default	==>	arg_error("C_adf", $1).
+
+C_sbf
+  $1 == 4	==>	"call .sbf4";
+			"pop bx";
+			"pop bx".
+  $1 == 8	==>	"call .sbf8";
+			"add sp,8".
+  default	==>	arg_error("C_sbf", $1).
+
+C_mlf
+  $1 == 4	==>	"call .mlf4";
+			"pop bx";
+			"pop bx".
+  $1 == 8	==>	"call .mlf8";
+			"add sp,8".
+  default	==>	arg_error("C_mlf", $1).
+
+C_dvf
+  $1 == 4	==>	"call .dvf4";
+			"pop bx";
+			"pop bx".
+  $1 == 8	==>	"call .dvf8";
+			"add sp,8".
+  default	==>	arg_error("C_dvf", $1).
+
+C_fif
+  $1 == 4	==>	"call .fif4".
+  $1 == 8	==>	"call .fif8".
+  default	==>	arg_error("C_fif", $1).
+
+C_fef
+  $1 == 4	==>	"pop ax";
+			"pop bx";
+			"push bx";
+			"push bx";
+			"push ax";
+			"call .fef4".
+  $1 == 8	==>	"pop ax";
+			"pop bx";
+			"pop cx";
+			"pop dx";
+			"push dx";
+			"push dx";
+			"push cx";
+			"push bx";
+			"push ax";
+			"call .fef8".
+  default	==>	arg_error("C_fef", $1).
+
 /******************************************************************************/
 /*									      */
 /*		Group 6 : Pointer arithmetic 				      */
@@ -489,6 +545,8 @@ C_zer
 
   default	==>	arg_error( "C_zer", $1).
 
+C_zrf		==>	C_zer($1).
+
 C_zer_narg	==> 	"pop cx";
 			"sar cx, 1";
 			"xor ax, ax";
@@ -516,6 +574,54 @@ C_cuu		==> 	"pop cx";
 			"pop ax";
 			"call .cuu";
 			"push ax".
+
+C_cif		==>	"call .cif".
+
+C_cuf		==>	"call .cuf".
+
+C_cfi		==>	"call .cfi";
+			"pop bx";
+			"pop cx";
+			"cmp bx,4";
+			"je 1f";
+			"add sp,cx";
+			"push ax";
+			"jmp 2f";
+			"1:add cx,4";
+			"add sp,cx";
+			"2:".
+
+C_cfu		==>	"call .cfu";
+			"pop bx";
+			"pop cx";
+			"cmp bx,4";
+			"je 1f";
+			"add sp,cx";
+			"push ax";
+			"jmp 2f";
+			"1:add cx,4";
+			"add sp,cx";
+			"2:".
+
+C_cff		==>	"pop ax";
+			"pop bx";
+			"cmp ax,bx";
+			"je 1f";
+			"cmp ax,4";
+			"je 2f";
+			"pop cx";
+			"pop bx";
+			"xor ax,ax";
+			"push ax";
+			"push ax";
+			"push bx";
+			"push cx";
+			"call .cff8";
+			"jmp 1f";
+			"2: call .cff4";
+			"pop bx";
+			"pop bx";
+			"1:".
 
 /******************************************************************************/
 /*									      */
@@ -766,6 +872,15 @@ C_cmp		==> 	"pop bx";
 			"jmp 2f";
 			"1: dec ax";
 			"2: push ax".
+
+C_cmf
+  $1 == 4	==>	"call .cmf4";
+			"add sp,8";
+			"push ax".
+  $1 == 8	==>	"call .cmf8";
+			"add sp,16";
+			"push ax".
+  default	==>	arg_error("C_cmf", $1).
 
 C_tlt		==> 	"pop ax";
 			"xor bx, bx";
@@ -1054,7 +1169,9 @@ C_lor
 
   default	==> 	arg_error( "C_lor", $1).
 
-C_lpb		==> 	"add bp, 4".
+C_lpb		==> 	"pop ax";
+			"add ax,4";
+			"push ax".
 
 C_mon		==> 	"pop ax";
 			"call .mon".
@@ -1116,6 +1233,8 @@ C_trp		==> 	"pop ax";
   $2 == 2	==>	gen2( (TWO_BYTES) atoi( $1)).
   $2 == 4	==>	gen4( (FOUR_BYTES) atol( $1)).
   default	==> 	arg_error( "..ucon", $1).
+
+..fcon		==>	con_float($1, $2).
 
 /******************************************************************************/
 /*									      */
