@@ -14,7 +14,7 @@ Linerecord	*firstline,
 List *newlist()
 {
 	List *l;
-	l= (List *) salloc(sizeof(List));
+	/*NOSTRICT*/ l= (List *) salloc(sizeof(List));
 	return(l);
 }
 
@@ -75,7 +75,7 @@ int	nr;
 	}
 
 	/* make new EM block structure */
-	l= (Linerecord *) salloc(sizeof(*l));
+	/*NOSTRICT*/ l= (Linerecord *) salloc(sizeof(*l));
 	l->emlabel= frwrd? frwrd->emlabel: genlabel();
 	l->linenr= nr;
 	/* save offset into tmpfile too */
