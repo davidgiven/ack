@@ -88,20 +88,20 @@ int	abort() {/*NOTREACHED*/ }
 	%c = int		%s = char *
 $ */
 #ifdef __STDC__
-int     printf(const char *_format, ...);
+int     printf(const char *_format, ...) { return(0); }
 #else
 printf(fmt) char *fmt; { ; }
 #endif
 
 /* FORMAT1 */
 #ifdef __STDC__
-int     fprintf(FILE *_stream, const char *_format, ...);
+int     fprintf(FILE *_stream, const char *_format, ...) { return(0); }
 #else
 fprintf(fp, fmt) FILE *fp; char *fmt; { ; }
 #endif
 /* FORMAT1 */
 #ifdef __STDC__
-int     sprintf(char *_s, const char *_format, ...);
+int     sprintf(char *_s, const char *_format, ...) { return(0); }
 #else
 sprintf(s, fmt) char *s; char *fmt; { ; }
 #endif
@@ -114,19 +114,19 @@ sprintf(s, fmt) char *s; char *fmt; { ; }
 	%c = char *		%s = char *		%[[] = char *
 $ */
 #ifdef __STDC__
-int     scanf(const char *_format, ...);
+int     scanf(const char *_format, ...) { return(0); }
 #else
 int scanf(fmt) char *fmt; { return(0); }
 #endif
 /* FORMAT1 */
 #ifdef __STDC__
-int     fscanf(FILE *_stream, const char *_format, ...);
+int     fscanf(FILE *_stream, const char *_format, ...) { return(0); }
 #else
 int fscanf(fp, fmt) FILE *fp; char *fmt; { return(0); }
 #endif
 /* FORMAT1 */
 #ifdef __STDC__
-int     sscanf(const char *_s, const char *_format, ...);
+int     sscanf(const char *_s, const char *_format, ...) { return(0); }
 #else
 int sscanf(s, fmt) char *s; char *fmt; { return(0); }
 #endif
