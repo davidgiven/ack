@@ -4,9 +4,28 @@
 
 #include "rd.h"
 
-#if (defined(sun) && defined(mc68020)) || defined(vax)
+#if defined(__sun)
+#define sun
+#endif
+
+#if defined(__mc68020)
+#define mc68020
+#endif
+
+#if defined(__sparc)
+#define sparc
+#endif
+
+#if defined(__vax)
+#define vax
+#endif
+
+#if defined(sun) || defined(vax)
 #if defined(sun) && defined(mc68020)
 #define relocation_info	reloc_info_68k
+#endif
+#if defined(sun) && defined(sparc)
+#define relocation_info	reloc_info_sparc
 #endif
 
 #include <a.out.h>

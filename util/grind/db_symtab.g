@@ -816,6 +816,7 @@ DbRead(f)
 			open_scope(sym, 0);
 			sym->sy_file->f_scope = CurrentScope;
 			FileScope = CurrentScope;
+			CurrentScope->sc_start = n->on_valu;
 			/* fall through */
 		case N_SOL:
 			if (! line_file) line_file = n;
@@ -826,6 +827,12 @@ DbRead(f)
 			break;
 		case N_SLINE:
 			assert(line_file);
+			if (CurrentScope->sc_start) {
+				register p_scope sc =
+					get_scope_from_addr(n->on_valu);
+
+				if (sc) CurrentScope = sc;
+			}
 			if (! saw_code && !CurrentScope->sc_bp_opp) {
 			    CurrentScope->sc_bp_opp = n->on_valu;
 			    if (! CurrentScope->sc_start) {
@@ -842,12 +849,16 @@ DbRead(f)
 				saw_code = 0;
 			}
 			else {
+				/* Sun-4 ld does not relocate LBRAC
+				   values, so we cannot use it
+				
 				register p_scope sc = 
 					get_scope_from_addr(n->on_valu);
 
 				if (!sc || sc->sc_bp_opp) {
 				}
 				else CurrentScope = sc;
+				*/
 			}
 			lbrac_level++;
 			needs_newscope = 1;
