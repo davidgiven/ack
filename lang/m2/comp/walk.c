@@ -51,6 +51,7 @@ t_node			*Modules;
 
 static t_type		*func_type;
 static arith		priority;
+static int		oldlineno;
 
 static int		RegisterMessage();
 static int		WalkDef();
@@ -69,7 +70,7 @@ LblWalkNode(lbl, nd, exit)
 		enclosing LOOP.
 	*/
 
-	C_df_ilb(lbl);
+	def_ilb(lbl);
 	WalkNode(nd, exit);
 }
 
@@ -95,8 +96,23 @@ EndPriority()
 	}
 }
 
-STATIC
-DoProfil()
+def_ilb(l)
+	label l;
+{
+	C_df_ilb(l);
+	oldlineno = 0;
+}
+
+DoLineno(nd)
+	register t_node *nd;
+{
+	if (! options['L'] && nd->nd_lineno && nd->nd_lineno != oldlineno) {
+		oldlineno = nd->nd_lineno;
+		C_lin((arith) nd->nd_lineno);
+	}
+}
+
+DoFilename()
 {
 	static label	filename_label = 0;
 
@@ -139,7 +155,7 @@ WalkModule(module)
 	TmpOpen(sc);		/* Initialize for temporaries */
 	C_pro_narg(sc->sc_name);
 	DoPriority();
-	DoProfil();
+	DoFilename();
 	if (module == Defined) {
 		/* Body of implementation or program module.
 		   Call initialization routines of imported modules.
@@ -169,7 +185,7 @@ WalkModule(module)
 	proclevel++;
 	WalkNode(module->mod_body, NO_EXIT_LABEL);
 	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
-	C_df_ilb(RETURN_LABEL);
+	def_ilb(RETURN_LABEL);
 	EndPriority();
 	C_ret((arith) 0);
 	C_end(-sc->sc_off);
@@ -206,7 +222,7 @@ WalkProcedure(procedure)
 	*/
 	C_pro_narg(sc->sc_name);
 	DoPriority();
-	DoProfil();
+	DoFilename();
 	TmpOpen(sc);
 
 	func_type = tp = RemoveEqual(ResultType(procedure->df_type));
@@ -302,7 +318,7 @@ WalkProcedure(procedure)
 		C_trp();
 		C_asp(-func_res_size);
 	}
-	C_df_ilb(RETURN_LABEL);	/* label at end */
+	def_ilb(RETURN_LABEL);	/* label at end */
 	if (func_res_label) {
 		/* Fill the data area reserved for the function result
 		   with the result
@@ -426,7 +442,7 @@ WalkStat(nd, exit_label)
 
 	assert(nd->nd_class == Stat);
 
-	if (! options['L'] && nd->nd_lineno) C_lin((arith) nd->nd_lineno);
+	DoLineno(nd);
 	switch(nd->nd_symb) {
 	case '(':
 		if (ChkCall(nd)) {
@@ -459,7 +475,7 @@ WalkStat(nd, exit_label)
 				LblWalkNode(l1, right->nd_right, exit_label);
 				l1 = l2;
 			}
-			C_df_ilb(l1);
+			def_ilb(l1);
 			break;
 		}
 
@@ -472,11 +488,11 @@ WalkStat(nd, exit_label)
 				exit = ++text_label,
 				dummy = ++text_label;
 
-			C_df_ilb(loop);
+			def_ilb(loop);
 			ExpectBool(left, dummy, exit);
 			LblWalkNode(dummy, right, exit_label);
 			C_bra(loop);
-			C_df_ilb(exit);
+			def_ilb(exit);
 			break;
 		}
 
@@ -485,7 +501,7 @@ WalkStat(nd, exit_label)
 
 			LblWalkNode(loop, left, exit_label);
 			ExpectBool(right, exit, loop);
-			C_df_ilb(exit);
+			def_ilb(exit);
 			break;
 		}
 
@@ -494,7 +510,7 @@ WalkStat(nd, exit_label)
 
 			LblWalkNode(loop, right, exit);
 			C_bra(loop);
-			C_df_ilb(exit);
+			def_ilb(exit);
 			break;
 		}
 
@@ -545,7 +561,7 @@ WalkStat(nd, exit_label)
 				}
 				C_stl(tmp);
 				nd->nd_def->df_flags |= D_FORLOOP;
-				C_df_ilb(l1);
+				def_ilb(l1);
 				if (! options['R']) {
 					tmp2 = NewInt();
 					ForLoopVarExpr(nd);
@@ -562,7 +578,7 @@ WalkStat(nd, exit_label)
 					C_beq(x);
 					c_loc(M2_FORCH);
 					C_trp();
-					C_df_ilb(x);
+					def_ilb(x);
 					FreeInt(tmp2);
 				}
 				if (stepsize) {
@@ -580,7 +596,7 @@ WalkStat(nd, exit_label)
 				}
 			}
 			C_bra(l1);
-			C_df_ilb(l2);
+			def_ilb(l2);
 			FreeInt(tmp);
 #ifdef DEBUG
 			nd->nd_left = left;

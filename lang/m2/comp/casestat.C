@@ -201,7 +201,7 @@ CaseCode(nd, exitlabel)
 		}
 	}
 
-	C_df_ilb(sh->sh_break);
+	def_ilb(sh->sh_break);
 	FreeSh(sh);
 }
 

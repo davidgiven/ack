@@ -94,6 +94,7 @@ CodeExpr(nd, ds, true_label, false_label)
 {
 	register t_type *tp = nd->nd_type;
 
+	DoLineno(nd);
 	if (tp->tp_fund == T_REAL) fp_used = 1;
 	switch(nd->nd_class) {
 	case Def:
@@ -300,7 +301,7 @@ CodeCoercion(t1, t2)
 				C_zge(lb);
 				c_loc(ECONV);
 				C_trp();
-				C_df_ilb(lb);
+				def_ilb(lb);
 			}
 			c_loc((int)(t1->tp_size));
 			c_loc((int)(t2->tp_size));
@@ -368,6 +369,7 @@ CodeCall(nd)
 		}
 		else	C_lfr(sz);
 	}
+	DoFilename();
 }
 
 CodeParameters(param, arg)
@@ -660,16 +662,17 @@ RangeCheck(tpl, tpr)
 		C_zge(lb);
 		c_loc(ECONV);
 		C_trp();
-		C_df_ilb(lb);
+		def_ilb(lb);
 	}
 }
 
-Operands(leftop, rightop)
-	register t_node *leftop, *rightop;
+Operands(nd)
+	register t_node *nd;
 {
 
-	CodePExpr(leftop);
-	CodePExpr(rightop);
+	CodePExpr(nd->nd_left);
+	CodePExpr(nd->nd_right);
+	DoLineno(nd);
 }
 
 CodeOper(expr, true_label, false_label)
@@ -683,7 +686,7 @@ CodeOper(expr, true_label, false_label)
 
 	switch (expr->nd_symb)	{
 	case '+':
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_adi(tp->tp_size);
@@ -705,7 +708,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '-':
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_sbi(tp->tp_size);
@@ -728,7 +731,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '*':
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_mli(tp->tp_size);
@@ -758,7 +761,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case '/':
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch (tp->tp_fund)	{
 		case T_REAL:
 			C_dvf(tp->tp_size);
@@ -771,7 +774,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case DIV:
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_dvi(tp->tp_size);
@@ -787,7 +790,7 @@ CodeOper(expr, true_label, false_label)
 		}
 		break;
 	case MOD:
-		Operands(leftop, rightop);
+		Operands(expr);
 		switch(tp->tp_fund)	{
 		case T_INTEGER:
 			C_rmi(tp->tp_size);
@@ -808,7 +811,7 @@ CodeOper(expr, true_label, false_label)
 	case GREATEREQUAL:
 	case '=':
 	case '#':
-		Operands(leftop, rightop);
+		Operands(expr);
 		tp = BaseType(leftop->nd_type);
 		if (tp == intorcard_type) tp = BaseType(rightop->nd_type);
 		switch (tp->tp_fund)	{
@@ -891,17 +894,17 @@ CodeOper(expr, true_label, false_label)
 			CodeExpr(leftop, Des, true_label, l_maybe);
 		}
 		else	CodeExpr(leftop, Des, l_maybe, false_label);
-		C_df_ilb(l_maybe);
+		def_ilb(l_maybe);
 		free_desig(Des);
 		Des = new_desig();
 		CodeExpr(rightop, Des, true_label, false_label);
 		if (genlabels) {
-			C_df_ilb(true_label);
+			def_ilb(true_label);
 			c_loc(1);
 			C_bra(l_end);
-			C_df_ilb(false_label);
+			def_ilb(false_label);
 			c_loc(0);
-			C_df_ilb(l_end);
+			def_ilb(l_end);
 		}
 		free_desig(Des);
 		break;
@@ -1027,7 +1030,7 @@ CodeEl(nd, tp)
 			C_loc(eltype->sub_ub);
 		}
 		else	C_loc((arith) (eltype->enm_ncst - 1));
-		Operands(nd->nd_left, nd->nd_right);
+		Operands(nd);
 		C_cal("_LtoUset");	/* library routine to fill set */
 		C_asp(5 * word_size);
 	}
