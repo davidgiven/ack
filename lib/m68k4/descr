@@ -30,14 +30,14 @@ name asld
 	args {LFLAG?} (.e:{HEAD}={EM}/{RT}em) \
 ({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 (.p:{TAIL}={EM}/{LIB}pc) (.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
-(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon.pmds {EM}/end_em)
+(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/end_em)
 	prep cond
 	linker
 end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib/{PMDS}/cv
+	program {EM}/lib/m68k2/cv
 	args < >
 	outfile a.out
 end
