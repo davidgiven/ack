@@ -200,7 +200,7 @@ handle_defaults()
 				segment = UNKNOWN;
 				/* to prevent another dump_label+switchseg */
 				def_row();
-				out( "}\n\n");
+				out( "}}\n\n");
 			}
 			else
 				def_row();
@@ -249,7 +249,7 @@ extnd_header()
 	out( "common( %s);\n", C_instr_info->arg_id[0]);
 	out( "}\nelse {\n");
 	set_segment( SEGCON);
-	out( "for ( %s = 0; %s < %s/EM_WSIZE; %s++)\n",
+	out( "for ( %s = 0; %s < %s/EM_WSIZE; %s++) {\n",
 	     C_instr_info->arg_id[3], C_instr_info->arg_id[3],
 	     C_instr_info->arg_id[0], C_instr_info->arg_id[3]);
 }
