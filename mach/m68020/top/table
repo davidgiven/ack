@@ -132,6 +132,19 @@ blt L1 : bra L2: labdef L1		->	bge L2 : labdef L1 ;
 ble L1 : bra L2: labdef L1		->	bgt L2 : labdef L1 ;
 bne L1 : bra L2: labdef L1		->	beq L2 : labdef L1 ;
 
+move.l A, B : bra LAB : labdef L1 : move.l A, B : labdef LAB
+					->	labdef L1 : move.l A, B :
+						labdef LAB ;
+/* some strength reduction */
+mulu.l #NUM,DREG			->	muls.l #NUM,DREG ;
+muls.l #NUM,DREG
+	{is_shift_twice(NUM,X,Y)}	->	asl.l #X,DREG :
+						move.l DREG,-(sp) :
+						asl.l #Y,DREG :
+						add.l (sp)+,DREG ;
+asl.l #0,DREG				->	;
+asl.l #1,DREG				->	add.l DREG,DREG ;
+
 %%;
 
 /* auxiliary routines: */
@@ -148,6 +161,39 @@ int no_side_effects(s)
 		}
 	}
 	/* NOTREACHED */
+}
+
+
+int is_shift_twice(s, c1, c2)
+	char *s, *c1, *c2;
+{
+	long atol();
+	register int i = 0;
+	long val = atol(s), pow = 1;
+
+	while (i <= 8) {
+		if (pow & val) {
+			val -= pow;
+			sprintf(c1, "%d", i);
+			break;
+		}
+		pow <<= 1;
+		i++;
+	}
+	if (pow > 0 && val) {
+		i = 0;
+		while (i <= 8) {
+			if (pow & val) {
+				val -= pow;
+				sprintf(c2, "%d", i);
+				if (val == 0) return 1;
+				break;
+			}
+			pow <<= 1;
+			i++;
+		}
+	}
+	return 0;
 }
 
 
