@@ -28,6 +28,7 @@
 #include	"def.h"
 #include	"type.h"
 #include	"warning.h"
+#include	"errout.h"
 
 extern char *getwdir();
 
@@ -39,6 +40,9 @@ int		ForeignFlag;
 #ifdef DEBUG
 extern int	cntlines;
 #endif
+
+int	token_nmb = 0;
+int	tk_nmb_at_last_syn_err = -ERR_SHADOW;
 
 extern char	options[];
 extern int	flt_status;
@@ -266,6 +270,7 @@ LLlex()
 		return tk->tk_symb;
 	}
 
+	token_nmb++;
 again:
 	ch = getch();
 	tk->tk_lineno = LineNumber;

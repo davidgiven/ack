@@ -1,7 +1,8 @@
 !File: errout.h
 #define	ERROUT		STDERR	/* file pointer for writing messages	*/
-#define	MAXERR_LINE	100	/* maximum number of error messages given
-					on the same input line.		*/
+#define ERR_SHADOW      5       /* a syntax error overshadows error messages
+                                        until ERR_SHADOW symbols have been
+                                        accepted without syntax error */
 
 
 !File: idfsize.h

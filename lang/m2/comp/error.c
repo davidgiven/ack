@@ -195,14 +195,17 @@ _error(class, node, ap)
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
 	*/
-	static unsigned int last_ln = 0;
 	unsigned int ln = 0;
-	static char * last_fn = 0;
-	static int e_seen = 0;
 	register char *remark = 0;
 	int warn_class;
 	char *fmt;
 	
+	/* check visibility of message */
+	if (class == ERROR || class == WARNING) {
+		if (token_nmb < tk_nmb_at_last_syn_err + ERR_SHADOW)
+			/* warning or error message overshadowed */
+			return;
+	}
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant
 		values and then decide what to print.
@@ -271,27 +274,6 @@ _error(class, node, ap)
 	}
 
 	fmt  = va_arg(ap, char *);	
-#ifdef DEBUG
-	if (class != VDEBUG) {
-#endif
-	if (FileName == last_fn && ln == last_ln)	{
-		/* we've seen this place before */
-		e_seen++;
-		if (e_seen == MAXERR_LINE) fmt = "etc ...";
-		else
-		if (e_seen > MAXERR_LINE)
-			/* and too often, I'd say ! */
-			return;
-	}
-	else	{
-		/* brand new place */
-		last_ln = ln;
-		last_fn = FileName;
-		e_seen = 0;
-	}
-#ifdef DEBUG
-	}
-#endif DEBUG
 	
 	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
 

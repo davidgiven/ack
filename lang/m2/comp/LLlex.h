@@ -65,3 +65,6 @@ extern struct type *toktype;
 
 #define DOT	dot.tk_symb
 #define ASIDE	aside.tk_symb
+
+extern int	token_nmb;
+extern int	tk_nmb_at_last_syn_err;

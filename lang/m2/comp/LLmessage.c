@@ -65,5 +65,6 @@ LLmessage(tk)
 		error("garbage at end of program");
 	}
 	else	error("%s deleted", symbol2str(dot.tk_symb));
+	tk_nmb_at_last_syn_err = token_nmb;
 }
 
