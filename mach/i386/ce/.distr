@@ -1,5 +1,5 @@
 EM_table
-Makefile
+proto.make
 as.c
 as.h
 as_table

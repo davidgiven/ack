@@ -1,28 +1,43 @@
-MAKE=../../../lib/ceg/util/make_ce
+CEG=$TARGET_HOME/lib.bin/ceg
+MAKE=$CEG/util/make_ce
 
-make -f ceg/Makefile
+case $# in
+  2) case $1 in
+	-as)    OBJ=as;;
+	-obj)   OBJ=obj;;
+	*) echo wrong option $1, use -as or -obj;
+	   exit 1;;
+     esac
+     SRC_DIR=$2
+     ;;
+  1) SRC_DIR=$1;OBJ=obj ;;
+  *) echo Usage: $0 [-as|-obj] <source directory>
+     ;;
+esac
+
+make -f ceg/Makefile SRC_DIR=$SRC_DIR OBJ=$OBJ
 
 for i
 do
 	case $i in
-	  ALL) make -f $MAKE ce.a
+	  ALL) make -f $MAKE SRC_DIR=$SRC_DIR ce.$LIBSUF
 	       exit 0
 	       ;;
 
-	  *.o) make -f $MAKE ce/$i
+	  *.$SUF) make -f $MAKE SRC_DIR=$SRC_DIR ce/$i
 	       ;;
 
-	  *..) ( cd ce; ../../../../lib/cpp -P ../EM_table |  ../ceg/ceg -c $i)
+	  *..) ( cd ce; $TARGET_HOME/lib.bin/cpp -P $SRC_DIR/EM_table |  ../ceg/ceg -c $i)
 	       F=`basename $i ..`
 	       U="_dnam"
 	       V="_dlb"
-	       make -f $MAKE ce/$F.o ce/$F$U.o ce/"$F$V.o"
+	       make -f $MAKE SRC_DIR=$SRC_DIR ce/$F.$SUF ce/$F$U.$SUF ce/$F$V.$SUF
 	       ;;
 
-	    *) ( cd ce; ../../../../lib/cpp -P ../EM_table | ../ceg/ceg -c $i)
-	       make -f $MAKE ce/$i.o
+	    *) ( cd ce; $TARGET_HOME/lib.bin/cpp -P $SRC_DIR/EM_table | ../ceg/ceg -c $i)
+	       make -f $MAKE SRC_DIR=$SRC_DIR ce/$i.$SUF
 	       ;;
 	esac
 done
 touch ce/dummy
-make -f $MAKE ce.a
+make -f $MAKE SRC_DIR=$SRC_DIR ce.$LIBSUF

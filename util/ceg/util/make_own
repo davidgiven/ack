@@ -1,28 +1,37 @@
-EM	= ../../..
-CEG	= $(EM)/lib/ceg
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#requires definition of MACH; possible redefinition of SRC_DIR
+
+EM	= $(TARGET_HOME)
+CEG	= $(EM)/lib.bin/ceg
 CE_MAKE	= $(CEG)/util/make_ce
 BACK_MAKE = $(CEG)/util/make_back
-CEG_MAKE = $(CEG)/util/make_ceg_obj
+CEG_MAKE = $(CEG)/util/make_ceg
 
+SRC_DIR = $(SRC_HOME)/mach/$(MACH)/ce
 
-all:	ceg/ceg ce.a
+all:	ceg/ceg ce.$(LIBSUF)
 
 install:	all
-	../../install ce.a
-	../../install back.a
+	cp ce.$(LIBSUF) $(EM)/lib.bin/$(MACH)/ce.$(LIBSUF)
+	$(RANLIB) $(EM)/lib.bin/$(MACH)/ce.$(LIBSUF)
+	cp back.$(LIBSUF) $(EM)/lib.bin/$(MACH)/back.$(LIBSUF)
+	$(RANLIB) $(EM)/lib.bin/$(MACH)/back.$(LIBSUF)
 
 cmp:	all
-	-../../compare ce.a
-	-../../compare back.a
+	-cmp ce.$(LIBSUF) $(EM)/lib.bin/$(MACH)/ce.$(LIBSUF)
+	-cmp back.$(LIBSUF) $(EM)/lib.bin/$(MACH)/back.$(LIBSUF)
 
 clean:
-	rm -rf ce ceg ce.a Out
+	rm -rf ce ceg ce.$(LIBSUF) Out
 
 dclean:
 	rm -rf ce ceg Out
 
-ce.a:
-	make -f $(CE_MAKE)
+ce.$(LIBSUF):
+	make -f $(CE_MAKE) "SRC_DIR="$(SRC_DIR)
 
 ceg/ceg:
-	make -f $(CEG_MAKE)
+	make -f $(CEG_MAKE) "OBJ="obj "SRC_DIR="$(SRC_DIR)

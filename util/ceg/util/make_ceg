@@ -1,0 +1,54 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#requires definitions for OBJ and SRC_DIR; not to be called directly
+
+CEG = $(TARGET_HOME)/lib.bin/ceg
+
+Em   = $(CEG)/EM_parser/$(OBJ)_EM_pars
+ASMAIN = $(CEG)/assemble/$(OBJ)_assemble
+AS   = $(CEG)/as_parser
+EVAL = $(CEG)/as_parser/eval
+DEF = $(CEG)/defaults
+
+IFILES	= -I. -I$(SRC_DIR) -I$(AS) -I$(Em) -I$(TARGET_HOME)/h -I$(TARGET_HOME)/modules/h -I../back
+
+CFLAGS = $(COPTIONS) $(IFILES)
+LDFLAGS = $(LDOPTIONS)
+
+CEG_LIBS = $(TARGET_HOME)/modules/lib/liballoc.$(LIBSUF)\
+	   $(TARGET_HOME)/modules/lib/libprint.$(LIBSUF)\
+	   $(TARGET_HOME)/modules/lib/libstring.$(LIBSUF)\
+	   $(TARGET_HOME)/modules/lib/libsystem.$(LIBSUF)
+
+all:	ceg/ceg
+
+obj_list:	ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)
+		echo 'ceg/as_lib.$(LIBSUF) ceg/as_instr.$(SUF) ceg/eval_as.$(SUF)' > list
+
+as_list:	ceg/as_lib.$(LIBSUF)
+		echo 'ceg/as_lib.$(LIBSUF)' > list
+
+list:		$(OBJ)_list
+
+ceg/ceg:	list
+		$(CC) $(LDFLAGS) -o ceg/ceg $(Em)/*.$(SUF) `cat list` $(CEG_LIBS)
+
+ceg/as_lib.$(LIBSUF):
+	-mkdir ceg
+	cd ceg ; cp $(CEG)/util/make_ceg_$(OBJ) Makefile ; cd ..
+	cd ceg ; cp $(ASMAIN)/* . ; $(CC) -c $(CFLAGS) *.c; $(AR) r as_lib.$(LIBSUF) *.$(SUF) ; cd ..
+	$(RANLIB) ceg/as_lib.$(LIBSUF)
+
+ceg/eval_as.$(SUF) : ceg/eval_as.c $(SRC_DIR)/as.h # $(AS)/as_parser.h $(Em)/arg_type.h
+	cd ceg ; $(CC) -c $(CFLAGS) eval_as.c ; cd ..
+
+ceg/eval_as.c : $(SRC_DIR)/as.c # $(EVAL)/eval
+	cd ceg ; $(EVAL)/eval < $(SRC_DIR)/as.c > eval_as.c ; cd ..
+
+ceg/as_instr.$(SUF) : $(SRC_DIR)/as.h ceg/as_lib.$(LIBSUF) ceg/as_instr.c
+	cd ceg ; $(CC) -c $(CFLAGS) as_instr.c ; cd ..
+
+ceg/as_instr.c : $(SRC_DIR)/as_table # $(AS)/as_parser
+	cd ceg ; $(TARGET_HOME)/lib.bin/cpp -P $(SRC_DIR)/as_table | $(AS)/as_parser > as_instr.c ; cd ..

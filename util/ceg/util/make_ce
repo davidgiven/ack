@@ -1,30 +1,33 @@
-EM = ../../../..
-CEG = $(EM)/lib/ceg
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#requires a definition for SRC_DIR; not to be called directly.
+
+EM = $(TARGET_HOME)
+CEG = $(EM)/lib.bin/ceg
 
 AS   = $(CEG)/as_parser
 DEF = $(CEG)/defaults
 
-AR = ar
-CC = cc
+IFILES	= -I. -I$(SRC_DIR) -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(SRC_HOME)/mach
 
-IFILES	= -I. -I.. -I$(AS) -I$(EM)/h -I$(EM)/modules/h -I../back -I$(EM)/mach
+CFLAGS = $(COPTIONS) $(IFILES)
 
-CFLAGS = -O $(IFILES)
-
-.c.o:
+.c.$(SUF):
 	cd ce ; $(CC) -c $(CFLAGS) ../$*.c ; cd ..
 
-all:	ce.a
+all:	ce.$(LIBSUF)
 
-ce.a:	ce/dummy
-	$(AR) r ce.a ce/*.o
-	-sh -c 'ranlib ce.a'
+ce.$(LIBSUF):	ce/dummy
+	$(AR) r ce.$(LIBSUF) ce/*.$(SUF)
+	$(RANLIB) ce.$(LIBSUF)
 
-ce/dummy:	ce/dummy1 mach.h back.a
+ce/dummy:	ce/dummy1 back.$(LIBSUF)
 	cd ce ; $(CC) -c $(CFLAGS) *.c ; touch dummy ; cd ..
 
-ce/dummy1:	ceg/ceg EM_table
+ce/dummy1:	ceg/ceg $(SRC_DIR)/EM_table $(SRC_DIR)/mach.c
 	-mkdir ce
-	-ln mach.c ce/mach.c
+	-cp $(SRC_DIR)/mach.c ce/mach.c
 	cd ce ; ../ceg/ceg -l < $(DEF)/not_impl/not_impl_table ; cp $(DEF)/*.c . ; cp $(DEF)/*/*.c . ; cd ..
-	cd ce ; $(EM)/lib/cpp -P ../EM_table | ../ceg/ceg -l ; touch dummy1 ; cd ..
+	cd ce ; $(EM)/lib.bin/cpp -P $(SRC_DIR)/EM_table | ../ceg/ceg -l ; touch dummy1 ; cd ..

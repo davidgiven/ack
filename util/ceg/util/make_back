@@ -1,13 +1,19 @@
-EM	= ../../../..
-CEG	= $(EM)/lib/ceg
+# $Header$
+
+#PARAMS		do not remove this line!
+
+# requires definitions for OBJ and SRC_DIR; not to be called directly
+
+CEG	= $(TARGET_HOME)/lib.bin/ceg
 BACK	= $(CEG)/ce_back/$(OBJ)_back
 
-AR	= ar
+all:	back.$(LIBSUF)
 
-all:	back.a
-
-back.a:	mach.h
+back.$(LIBSUF):	mach.h
 	-mkdir back
 	cd back;cp $(BACK)/*h . ; cp $(BACK)/Makefile . ; make ; cd ..
-	$(AR) r back.a back/*o
-	-sh -c 'ranlib back.a'
+	$(AR) r back.$(LIBSUF) back/*.$(SUF)
+	$(RANLIB) back.$(LIBSUF)
+
+mach.h:	$(SRC_DIR)/mach.h
+	cp $(SRC_DIR)/mach.h .
