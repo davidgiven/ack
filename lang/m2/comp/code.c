@@ -461,8 +461,7 @@ subu(sz)
 {
 	if (options['R']) C_sbu(sz);
 	else {
-		C_cal(sz == word_size ? "subu" : "subul");
-		c_asp((int)sz);
+		CAL((int) sz == (int) word_size ? "subu" : "subul", (int) sz);
 	}
 }
 
@@ -472,8 +471,7 @@ addu(sz)
 {
 	if (options['R']) C_adu(sz);
 	else {
-		C_cal(sz == word_size ? "addu" : "addul");
-		c_asp((int)sz);
+		CAL((int) sz == (int) word_size ? "addu" : "addul", (int) sz);
 	}
 }
 
@@ -500,14 +498,11 @@ CodeStd(nd)
 	case S_ABS:
 		CodePExpr(left);
 		if (tp->tp_fund == T_INTEGER) {
-			if (tp->tp_size == int_size) C_cal("absi");
-			else	C_cal("absl");
+			CAL((int)(tp->tp_size) == (int)int_size ? "absi" : "absl", (int)(tp->tp_size));
 		}
 		else if (tp->tp_fund == T_REAL) {
-			if (tp->tp_size == float_size) C_cal("absf");
-			else	C_cal("absd");
+			CAL((int)(tp->tp_size) == (int)float_size ? "absf" : "absd", (int)(tp->tp_size));
 		}
-		c_asp((int)(tp->tp_size));
 		C_lfr(tp->tp_size);
 		break;
 
@@ -733,10 +728,8 @@ CodeOper(expr, true_label, false_label)
 				C_mlu(tp->tp_size);
 			}
 			else {
-				C_cal(tp->tp_size <= word_size ?
-					"mulu" :
-					"mulul");
-				c_asp((int)(tp->tp_size));
+				CAL((int)(tp->tp_size) <= (int)word_size ? "mulu" : "mulul",
+				    (int)(tp->tp_size));
 			}
 			break;
 		case T_REAL:
@@ -1023,8 +1016,8 @@ CodeEl(nd, tp)
 		}
 		else	C_loc((arith) (eltype->enm_ncst - 1));
 		Operands(nd);
-		C_cal("LtoUset");	/* library routine to fill set */
-		c_asp(5 * (int)word_size);
+		CAL("LtoUset", 5 * (int) word_size);
+		/* library routine to fill set */
 	}
 	else {
 		CodePExpr(nd);
@@ -1070,7 +1063,7 @@ CodeDAddress(nd, chk_controlvar)
 	if (chkptr && ! options['R']) {
 		C_dup(pointer_size);
 		C_loi((arith) 1);
-		c_asp((int)word_size);
+		C_asp(word_size);
 	}
 	free_desig(designator);
 }
@@ -1126,8 +1119,11 @@ c_lae_dlb(l)
 	C_lae_dlb(l, (arith) 0);
 }
 
-c_asp(n)
+CAL(name, ssp)
+	char *name;
+	int ssp;
 {
-	C_asp((arith) n);
+	C_cal(name);
+	C_asp((arith) ssp);
 }
 #endif

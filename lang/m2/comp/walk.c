@@ -85,8 +85,7 @@ DoPriority()
 	if (priority) {
 		tmpprio = NewInt();
 		C_loc(priority->nd_INT);
-		C_cal("stackprio");
-		c_asp((int)word_size);
+		CAL("stackprio", (int) word_size);
 		C_lfr(word_size);
 		C_stl(tmpprio);
 	}
@@ -97,8 +96,7 @@ EndPriority()
 {
 	if (priority) {
 		C_lol(tmpprio);
-		C_cal("unstackprio");
-		c_asp((int)word_size);
+		CAL("unstackprio", (int) word_size);
 		FreeInt(tmpprio);
 	}
 }
@@ -304,16 +302,14 @@ WalkProcedure(procedure)
 				}
 				/* First compute new stackpointer */
 				C_lal(param->par_def->var_off);
-				C_cal("new_stackptr");
-				c_asp((int)pointer_size);
+				CAL("new_stackptr", (int)pointer_size);
 				C_lfr(pointer_size);
-				C_str((arith) 1);
+				C_ass(pointer_size);
 						/* adjusted stack pointer */
 				LOL(param->par_def->var_off, pointer_size);
 						/* push source address */
-				C_cal("copy_array");
+				CAL("copy_array", (int)pointer_size);
 						/* copy */
-				c_asp((int)pointer_size);
 			}
 		}
 	}
@@ -407,8 +403,7 @@ MkCalls(df)
 
 	if (df->df_kind == D_MODULE) {
 		C_lxl((arith) 0);
-		C_cal(df->mod_vis->sc_scope->sc_name);
-		c_asp((int)pointer_size);
+		CAL(df->mod_vis->sc_scope->sc_name, (int)pointer_size);
 	}
 }
 

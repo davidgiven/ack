@@ -22,7 +22,7 @@ extern label	data_label;
 #include "squeeze.h"
 
 #ifndef SQUEEZE
-#define c_asp(x)	C_asp((arith) (x))
 #define c_loc(x)	C_loc((arith) (x))
 #define c_lae_dlb(x)	C_lae_dlb(x,(arith) 0)
+#define CAL(nm, sz)	(C_cal(nm), C_asp((arith)(sz)))
 #endif

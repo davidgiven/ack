@@ -458,12 +458,11 @@ genrck(tp)
 	}
 	c_lae_dlb(ol);
 	if (size <= word_size) {
-		C_cal(btp->tp_fund == T_INTEGER ? "rcki" : "rcku");
+		CAL(btp->tp_fund == T_INTEGER ? "rcki" : "rcku", (int) pointer_size);
 	}
 	else {
-		C_cal(btp->tp_fund == T_INTEGER ? "rckil" : "rckul");
+		CAL(btp->tp_fund == T_INTEGER ? "rckil" : "rckul", (int) pointer_size);
 	}
-	c_asp((int)pointer_size);
 }
 
 getbounds(tp, plo, phi)
