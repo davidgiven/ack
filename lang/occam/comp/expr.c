@@ -27,7 +27,7 @@ struct expr *new_node(op, left, right, byte)
 		register long lc, rc;
 
 		lc=left->u.const;
-		rc=right->u.const;
+		if (right) rc=right->u.const; else rc = 0;
 
 		switch (op) {
 		case '+':	lc+=rc; break;

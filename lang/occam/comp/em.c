@@ -195,17 +195,7 @@ void Loe(name, offset) char *name; int offset;
 		C_loe_dnam(name, (arith) offset);
 }
 
-typedef int (*pfi)();
-
 static int operators[]=	{ '<', '>', '=',  GE,  LE,  NE };
-
-extern C_blt(), C_bgt(), C_beq(), C_bge(), C_ble(), C_bne();
-extern C_tlt(), C_tgt(), C_teq(), C_tge(), C_tle(), C_tne();
-extern C_zlt(), C_zgt(), C_zeq(), C_zge(), C_zle(), C_zne();
-
-static pfi C_bxx[]= { C_blt, C_bgt, C_beq, C_bge, C_ble, C_bne };
-static pfi C_txx[]= { C_tlt, C_tgt, C_teq, C_tge, C_tle, C_tne };
-static pfi C_zxx[]= { C_zlt, C_zgt, C_zeq, C_zge, C_zle, C_zne };
 
 void bxx(pos, op, L) register pos, op, L;
 {
@@ -223,35 +213,96 @@ void bxx(pos, op, L) register pos, op, L;
 		if (pos && (i+=3)>=6) i-=6;
 		if (vz>wz) {
 			C_cmi((arith) vz);
-			(*C_zxx[i])((label) L);
+			switch(i) {
+			case 0:
+				C_zlt((label) L);
+				break;
+			case 1:
+				C_zgt((label) L);
+				break;
+			case 2:
+				C_zeq((label) L);
+				break;
+			case 3:
+				C_zge((label) L);
+				break;
+			case 4:
+				C_zle((label) L);
+				break;
+			case 5:
+				C_zne((label) L);
+				break;
+			}
 		} else {
-			(*C_bxx[i])((label) L);
+			switch(i) {
+			case 0:
+				C_blt((label) L);
+				break;
+			case 1:
+				C_bgt((label) L);
+				break;
+			case 2:
+				C_beq((label) L);
+				break;
+			case 3:
+				C_bge((label) L);
+				break;
+			case 4:
+				C_ble((label) L);
+				break;
+			case 5:
+				C_bne((label) L);
+				break;
+			}
 		}
 	}
 }
 
 void Txx(op) register int op;
 {
-	register i;
-
-	for (i=0; operators[i]!=op; i++) ;
-
-	(*C_txx[i])();
+	switch(op) {
+	case '<':
+		C_tlt();
+		break;
+	case '>':
+		C_tgt();
+		break;
+	case '=':
+		C_teq();
+		break;
+	case GE:
+		C_tge();
+		break;
+	case LE:
+		C_tle();
+		break;
+	case NE:
+		C_tne();
+		break;
+	}
 	cwv();
 	C_ngi((arith) vz);
 }
 
-extern C_adi(), C_sbi(), C_mli(), C_dvi(), C_rmi();
-
 void xxi(op) register op;
 {
-	static int operators[]=	{ '+',   '-',   '*',   '/',   BS };
-	static pfi C_xxi[]=	{ C_adi, C_sbi, C_mli, C_dvi, C_rmi };
-	register i;
-
-	for (i=0; operators[i]!=op; i++) ;
-
-	(*C_xxi[i])((arith) vz);
+	switch(op) {
+	case '+':
+		C_adi((arith) vz);
+		break;
+	case '-':
+		C_sbi((arith) vz);
+		break;
+	case '*':
+		C_mli((arith) vz);
+		break;
+	case '/':
+		C_dvi((arith) vz);
+		break;
+	case BS:
+		C_rmi((arith) vz);
+		break;
+	}
 }
 
 void aar()			{	C_aar((arith) wz); }
@@ -337,7 +388,7 @@ static void do_fil(f) struct ftree *f;
 		dot_label(new_dot_label(&f->lab));
 		C_rom_scon(f->file, (arith) (strlen(f->file)+1));
 	}
-	C_fil_dlb((label) f->lab);
+	C_fil_dlb((label) f->lab, (arith) 0);
 }
 
 void fil()
@@ -377,21 +428,24 @@ int set_file(f) char *f;
 
 void par_begin()
 {
+	C_zer((arith) pz);
 	C_lal((arith) curr_offset);
 	C_cal("pc_begin");
-	C_asp((arith) pz);
+	C_asp((arith) (2*pz));
 }
 
 void par_fork(NONZERO) int *NONZERO;
 {
+	C_zer((arith) pz);
 	C_cal("pc_fork");
+	C_asp(pz);
 	C_lfr((arith) wz);
 	C_zne((label) new_label(NONZERO));
 }
 
 void resumenext()
 {
-	C_cal("resumene");
+	C_cal("resumenext");
 }
 
 void no_deadlock()

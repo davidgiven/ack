@@ -1,6 +1,6 @@
 EMHOME =	../../..
 MODLIB =	$(EMHOME)/modules/lib
-INCL =		-I$(EMHOME)/modules/h
+INCL =		-I$(EMHOME)/modules/h -I$(EMHOME)/h
 GFILES=		occam.g
 PRIMARY=	occam.o Lpars.o keytab.o lex.yy.o code.o em.o
 SECUNDARY=	symtab.o expr.o builtin.o
@@ -8,7 +8,8 @@ TERTIARY=	report.o
 LLOPT=
 LEXLIB=-ll
 LIBRARY=	$(MODLIB)/libem_mes.a $(MODLIB)/libemk.a \
-		$(MODLIB)/libprint.a $(MODLIB)/libstring.a \
+		$(MODLIB)/liballoc.a $(MODLIB)/libprint.a \
+		$(MODLIB)/libstring.a \
 		$(MODLIB)/libsystem.a $(LEXLIB)
 CFLAGS =	-Dvoid=int -O $(INCL)
 LDFLAGS =	-i
