@@ -270,7 +270,6 @@ DeclProc(type, id)
 			/* C_exp already generated when we saw the definition
 			   in the definition module
 			*/
-			df->df_kind = D_PROCEDURE;
 			name = df->for_name;
 			DefInFront(df);
 		}
@@ -380,6 +379,7 @@ CheckWithDef(df, tp)
 			      df->df_idf->id_text); 
 		}
 		FreeType(df->df_type);
+		df->df_kind = D_PROCEDURE;
 	}
 	df->df_type = tp;
 }

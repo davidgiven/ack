@@ -217,6 +217,8 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 		      (  !VARflag
 		      &&
 			 actualtype->tp_size <= word_size
+		      &&
+			 ! IsConformantArray(actualtype)
 		      )
 		   )
 		)

@@ -560,7 +560,7 @@ noscale:
 
 		if (np >= &buf[NUMSIZE]) {
 			tk->TOK_REL = Salloc("0.0", 5);
-			lexerror("floating constant too long");
+			lexerror("real constant too long");
 		}
 		else	tk->TOK_REL = Salloc(buf, (unsigned) (np - buf)) + 1;
 		return tk->tk_symb = REAL;
