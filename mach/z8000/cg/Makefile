@@ -1,12 +1,12 @@
 # $Header$
 
 EMHOME=../../..
-PREFLAGS=-I$(EMHOME)/h -I. -DNDEBUG
+PREFLAGS=-I$(EMHOME)/h -I. -I$(EMHOME)/mach -I$(EMHOME)/modules/h -DNDEBUG
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) -O
 LDFLAGS=-i $(PFLAGS)
 LINTOPTS=-hbxac
-LIBS=$(EMHOME)/lib/em_data.a
+LIBS=$(EMHOME)/lib/em_data.a $(EMHOME)/modules/lib/libflt.a
 CDIR=$(EMHOME)/mach/proto/cg
 CFILES=$(CDIR)/codegen.c $(CDIR)/compute.c $(CDIR)/equiv.c $(CDIR)/fillem.c \
        $(CDIR)/gencode.c $(CDIR)/glosym.c $(CDIR)/main.c $(CDIR)/move.c \
