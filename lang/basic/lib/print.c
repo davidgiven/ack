@@ -31,25 +31,31 @@ _str(f,buffer)
 double f;
 char *buffer;
 {
-	char *c;
-	c= buffer;
+	register char *c = buffer;
+	int eformat = 0;
 	if( f>=0){
-		if( f> 1.0e8)
+		if( f> 1.0e8) {
+			eformat = 1;
 			sprintf(buffer," %e",f);
+		}
 		else sprintf(buffer," %f",f);
 		c++;
 	}else {
-		if(-f> 1.0e8)
+		if(-f> 1.0e8) {
+			eformat = 1;
 			sprintf(buffer,"-%e",-f);
+		}
 		else sprintf(buffer,"-%f",-f);
 	}
-	for( ; *c && *c!= ' ';c++) ;
-	c--;
-	while( c>buffer && *c== '0')
-	{
-		*c= 0;c--;
+	if (! eformat) {
+		for( ; *c && *c!= ' ';c++) ;
+		c--;
+		while( c>buffer && *c== '0')
+		{
+			*c= 0;c--;
+		}
+		if( *c=='.') *c=0;
 	}
-	if( *c=='.') *c=0;
 	strcat(buffer," ");
 }
 _prfnum(f)
