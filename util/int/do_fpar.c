@@ -28,50 +28,14 @@ PRIVATE fef(), fif();
 
 #endif	NOFLOAT
 
-DoADFl2(arg)
-	size arg;
+DoADF(l)
+	register size l;
 {
 	/* ADF w: Floating add (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoADFl2(%ld)", l));
-	spoilFRA();
-	fpush(adf(fpop(l), t), l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoADFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* ADF w: Floating add (*) */
-#ifndef	NOFLOAT
-	register size l = (S_arg(hob) * wfac);
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoADFs(%ld)", l));
-	spoilFRA();
-	fpush(adf(fpop(l), t), l);
-#else	NOFLOAT
-	hob = hob;
-	wfac = wfac;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoADFz()
-{
-	/* ADF w: Floating add (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoADFz(%ld)", l));
+	LOG(("@F6 DoADF(%ld)", l));
 	spoilFRA();
 	fpush(adf(fpop(l), t), l);
 #else	NOFLOAT
@@ -79,50 +43,14 @@ DoADFz()
 #endif	NOFLOAT
 }
 
-DoSBFl2(arg)
-	size arg;
+DoSBF(l)
+	register size l;
 {
 	/* SBF w: Floating subtract (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoSBFl2(%ld)", l));
-	spoilFRA();
-	fpush(sbf(fpop(l), t), l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoSBFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* SBF w: Floating subtract (*) */
-#ifndef	NOFLOAT
-	register size l = (S_arg(hob) * wfac);
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoSBFs(%ld)", l));
-	spoilFRA();
-	fpush(sbf(fpop(l), t), l);
-#else	NOFLOAT
-	hob = hob;
-	wfac = wfac;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoSBFz()
-{
-	/* SBF w: Floating subtract (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoSBFz(%ld)", l));
+	LOG(("@F6 DoSBF(%ld)", l));
 	spoilFRA();
 	fpush(sbf(fpop(l), t), l);
 #else	NOFLOAT
@@ -130,50 +58,14 @@ DoSBFz()
 #endif	NOFLOAT
 }
 
-DoMLFl2(arg)
-	size arg;
+DoMLF(l)
+	register size l;
 {
 	/* MLF w: Floating multiply (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoMLFl2(%ld)", l));
-	spoilFRA();
-	fpush(mlf(fpop(l), t), l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoMLFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* MLF w: Floating multiply (*) */
-#ifndef	NOFLOAT
-	register size l = (S_arg(hob) * wfac);
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoMLFs(%ld)", l));
-	spoilFRA();
-	fpush(mlf(fpop(l), t), l);
-#else	NOFLOAT
-	hob = hob;
-	wfac = wfac;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoMLFz()
-{
-	/* MLF w: Floating multiply (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoMLFz(%ld)", l));
+	LOG(("@F6 DoMLF(%ld)", l));
 	spoilFRA();
 	fpush(mlf(fpop(l), t), l);
 #else	NOFLOAT
@@ -181,50 +73,14 @@ DoMLFz()
 #endif	NOFLOAT
 }
 
-DoDVFl2(arg)
-	size arg;
+DoDVF(l)
+	register size l;
 {
 	/* DVF w: Floating divide (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoDVFl2(%ld)", l));
-	spoilFRA();
-	fpush(dvf(fpop(l), t), l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoDVFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* DVF w: Floating divide (*) */
-#ifndef	NOFLOAT
-	register size l = (S_arg(hob) * wfac);
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoDVFs(%ld)", l));
-	spoilFRA();
-	fpush(dvf(fpop(l), t), l);
-#else	NOFLOAT
-	hob = hob;
-	wfac = wfac;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoDVFz()
-{
-	/* DVF w: Floating divide (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoDVFz(%ld)", l));
+	LOG(("@F6 DoDVF(%ld)", l));
 	spoilFRA();
 	fpush(dvf(fpop(l), t), l);
 #else	NOFLOAT
@@ -232,31 +88,14 @@ DoDVFz()
 #endif	NOFLOAT
 }
 
-DoNGFl2(arg)
-	size arg;
+DoNGF(l)
+	register size l;
 {
 	/* NGF w: Floating negate (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoNGFl2(%ld)", l));
-	spoilFRA();
-	fpush(-t, l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoNGFz()
-{
-	/* NGF w: Floating negate (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoNGFz(%ld)", l));
+	LOG(("@F6 DoNGF(%ld)", l));
 	spoilFRA();
 	fpush(-t, l);
 #else	NOFLOAT
@@ -264,31 +103,14 @@ DoNGFz()
 #endif	NOFLOAT
 }
 
-DoFIFl2(arg)
-	size arg;
+DoFIF(l)
+	register size l;
 {
 	/* FIF w: Floating multiply and split integer and fraction part (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 
-	LOG(("@F6 DoFIFl2(%ld)", l));
-	spoilFRA();
-	fif(fpop(l), t, l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoFIFz()
-{
-	/* FIF w: Floating multiply and split integer and fraction part (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-
-	LOG(("@F6 DoFIFz(%ld)", l));
+	LOG(("@F6 DoFIF(%ld)", l));
 	spoilFRA();
 	fif(fpop(l), t, l);
 #else	NOFLOAT
@@ -296,29 +118,12 @@ DoFIFz()
 #endif	NOFLOAT
 }
 
-DoFEFl2(arg)
-	size arg;
+DoFEF(l)
+	register size l;
 {
 	/* FEF w: Split floating number in exponent and fraction part (*) */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
-
-	LOG(("@F6 DoFEFl2(%ld)", l));
-	spoilFRA();
-	fef(fpop(arg_wf(l)), l);
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoFEFz()
-{
-	/* FEF w: Split floating number in exponent and fraction part (*) */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-
-	LOG(("@F6 DoFEFz(%ld)", l));
+	LOG(("@F6 DoFEF(%ld)", l));
 	spoilFRA();
 	fef(fpop(arg_wf(l)), l);
 #else	NOFLOAT
@@ -453,6 +258,12 @@ PRIVATE fef(f, n)
 	size n;
 {
 	register long exponent, sign = (long) (f < 0.0);
+
+	if (f == 0.0) {
+		fpush(f, n);
+		wpush(0L);
+		return;
+	}
 
 	for (f = fabs(f), exponent = 0; f >= 1.0; exponent++)
 		f /= 2.0;

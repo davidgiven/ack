@@ -23,111 +23,39 @@ extern int running;			/* from main.c */
 
 PRIVATE lfr(), ret();
 
-DoCAIz()				/* proc identifier on top of stack */
+DoCAI()				/* proc identifier on top of stack */
 {
 	/* CAI -: Call procedure (procedure identifier on stack) */
 	register long pi = spop(psize);
 
-	LOG(("@P6 DoCAIz(%lu)", pi));
+	LOG(("@P6 DoCAI(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
-DoCALl2(arg)
-	long arg;
+DoCAL(pi)
+	register long pi;
 {
 	/* CAL p: Call procedure (with identifier p) */
-	register long pi = (L_arg_2() * arg);
 
-	LOG(("@P6 DoCALl2(%lu)", pi));
+	LOG(("@P6 DoCAL(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
-DoCALl4(arg)
-	long arg;
-{
-	/* CAL p: Call procedure (with identifier p) */
-	register long pi = (L_arg_4() * arg);
-
-	LOG(("@P6 DoCALl4(%lu)", pi));
-	call(arg_p(pi), RSB_CAL);
-}
-
-DoCALm(arg)
-	long arg;
-{
-	/* CAL p: Call procedure (with identifier p) */
-	register long pi = arg_p(arg);
-
-	LOG(("@P6 DoCALm(%lu)", pi));
-	call(pi, RSB_CAL);
-}
-
-DoCALs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* CAL p: Call procedure (with identifier p) */
-	register long pi = (S_arg(hob) * wfac);
-
-	LOG(("@P6 DoCALs(%lu)", pi));
-	call(arg_p(pi), RSB_CAL);
-}
-
-DoLFRl2(arg)
-	size arg;
+DoLFR(l)
+	register size l;
 {
 	/* LFR s: Load function result */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@P6 DoLFRl2(%ld)", l));
+	LOG(("@P6 DoLFR(%ld)", l));
 	lfr(arg_s(l));
 }
 
-DoLFRm(arg)
-	size arg;
-{
-	/* LFR s: Load function result */
-	LOG(("@P6 DoLFRm(%ld)", arg));
-	lfr(arg_s(arg));
-}
-
-DoLFRs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* LFR s: Load function result */
-	register size l = (S_arg(hob) * wfac);
-
-	LOG(("@P6 DoLFRs(%ld)", l));
-	lfr(arg_s(l));
-}
-
-DoRETl2(arg)
-	size arg;
+DoRET(l)
+	register size l;
 {
 	/* RET z: Return (function result consists of top z bytes) */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@P6 DoRETl2(%ld)", l));
-	ret(arg_z(l));
-}
-
-DoRETm(arg)
-	size arg;
-{
-	/* RET z: Return (function result consists of top z bytes) */
-	LOG(("@P6 DoRETm(%ld)", arg));
-	ret(arg_z(arg));
-}
-
-DoRETs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* RET z: Return (function result consists of top z bytes) */
-	register size l = (S_arg(hob) * wfac);
-
-	LOG(("@P6 DoRETs(%ld)", l));
+	LOG(("@P6 DoRET(%ld)", l));
 	ret(arg_z(l));
 }
 

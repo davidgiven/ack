@@ -16,261 +16,91 @@
 
 PRIVATE long adi(), sbi(), dvi(), mli(), rmi(), ngi(), sli(), sri();
 
-DoADIl2(arg)
-	size arg;
+DoADI(l)
+	register size l;
 {
 	/* ADI w: Addition (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 
-	LOG(("@I6 DoADIl2(%ld)", l));
+	LOG(("@I6 DoADI(%ld)", l));
 	spoilFRA();
 	npush(adi(spop(l), t, l), l);
 }
 
-DoADIm(arg)
-	size arg;
-{
-	/* ADI w: Addition (*) */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-
-	LOG(("@I6 DoADIm(%ld)", l));
-	spoilFRA();
-	npush(adi(spop(l), t, l), l);
-}
-
-DoADIz()				/* argument on top of stack */
-{
-	/* ADI w: Addition (*) */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-
-	LOG(("@I6 DoADIz(%ld)", l));
-	spoilFRA();
-	npush(adi(spop(l), t, l), l);
-}
-
-DoSBIl2(arg)
-	size arg;
+DoSBI(l)
+	register size l;
 {
 	/* SBI w: Subtraction (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 
-	LOG(("@I6 DoSBIl2(%ld)", l));
+	LOG(("@I6 DoSBI(%ld)", l));
 	spoilFRA();
 	npush(sbi(spop(l), t, l), l);
 }
 
-DoSBIm(arg)
-	size arg;
-{
-	/* SBI w: Subtraction (*) */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-
-	LOG(("@I6 DoSBIm(%ld)", l));
-	spoilFRA();
-	npush(sbi(spop(l), t, l), l);
-}
-
-DoSBIz()				/* arg on top of stack */
-{
-	/* SBI w: Subtraction (*) */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-
-	LOG(("@I6 DoSBIz(%ld)", l));
-	spoilFRA();
-	npush(sbi(spop(l), t, l), l);
-}
-
-DoMLIl2(arg)
-	size arg;
+DoMLI(l)
+	register size l;
 {
 	/* MLI w: Multiplication (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 
-	LOG(("@I6 DoMLIl2(%ld)", l));
+	LOG(("@I6 DoMLI(%ld)", l));
 	spoilFRA();
 	npush(mli(spop(l), t, l), l);
 }
 
-DoMLIm(arg)
-	size arg;
-{
-	/* MLI w: Multiplication (*) */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-
-	LOG(("@I6 DoMLIm(%ld)", l));
-	spoilFRA();
-	npush(mli(spop(l), t, l), l);
-}
-
-DoMLIz()				/* arg on top of stack */
-{
-	/* MLI w: Multiplication (*) */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-
-	LOG(("@I6 DoMLIz(%ld)", l));
-	spoilFRA();
-	npush(mli(spop(l), t, l), l);
-}
-
-DoDVIl2(arg)
-	size arg;
+DoDVI(l)
+	register size l;
 {
 	/* DVI w: Division (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 
-	LOG(("@I6 DoDVIl2(%ld)", l));
+	LOG(("@I6 DoDVI(%ld)", l));
 	spoilFRA();
 	npush(dvi(spop(l), t), l);
 }
 
-DoDVIm(arg)
-	size arg;
-{
-	/* DVI w: Division (*) */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-
-	LOG(("@I6 DoDVIm(%ld)", l));
-	spoilFRA();
-	npush(dvi(spop(l), t), l);
-}
-
-DoDVIz()				/* arg on top of stack */
-{
-	/* DVI w: Division (*) */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-
-	LOG(("@I6 DoDVIz(%ld)", l));
-	spoilFRA();
-	npush(dvi(spop(l), t), l);
-}
-
-DoRMIl2(arg)
-	size arg;
+DoRMI(l)
+	register size l;
 {
 	/* RMI w: Remainder (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 
-	LOG(("@I6 DoRMIl2(%ld)", l));
+	LOG(("@I6 DoRMI(%ld)", l));
 	spoilFRA();
 	npush(rmi(spop(l), t), l);
 }
 
-DoRMIm(arg)
-	size arg;
-{
-	/* RMI w: Remainder (*) */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-
-	LOG(("@I6 DoRMIm(%ld)", l));
-	spoilFRA();
-	npush(rmi(spop(l), t), l);
-}
-
-DoRMIz()				/* arg on top of stack */
-{
-	/* RMI w: Remainder (*) */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-
-	LOG(("@I6 DoRMIz(%ld)", l));
-	spoilFRA();
-	npush(rmi(spop(l), t), l);
-}
-
-DoNGIl2(arg)
-	size arg;
+DoNGI(l)
+	register size l;
 {
 	/* NGI w: Negate (two's complement) (*) */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@I6 DoNGIl2(%ld)", l));
+	LOG(("@I6 DoNGI(%ld)", l));
 	spoilFRA();
 	l = arg_wi(l);
 	npush(ngi(spop(l), l), l);
 }
 
-DoNGIz()
-{
-	/* NGI w: Negate (two's complement) (*) */
-	register size l = uwpop();
-
-	LOG(("@I6 DoNGIz(%ld)", l));
-	spoilFRA();
-	l = arg_wi(l);
-	npush(ngi(spop(l), l), l);
-}
-
-DoSLIl2(arg)
-	size arg;
+DoSLI(l)
+	register size l;
 {
 	/* SLI w: Shift left (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = swpop();
 
-	LOG(("@I6 DoSLIl2(%ld)", l));
+	LOG(("@I6 DoSLI(%ld)", l));
 	spoilFRA();
 	l = arg_wi(l);
 	npush(sli(spop(l), t, l), l);
 }
 
-DoSLIm(arg)
-	size arg;
-{
-	/* SLI w: Shift left (*) */
-	register size l = arg_wi(arg);
-	register long t = swpop();
-
-	LOG(("@I6 DoSLIm(%ld)", l));
-	spoilFRA();
-	npush(sli(spop(l), t, l), l);
-}
-
-DoSLIz()
-{
-	/* SLI w: Shift left (*) */
-	register size l = uwpop();
-	register long t = swpop();
-
-	LOG(("@I6 DoSLIz(%ld)", l));
-	spoilFRA();
-	l = arg_wi(l);
-	npush(sli(spop(l), t, l), l);
-}
-
-DoSRIl2(arg)
-	size arg;
+DoSRI(l)
+	register size l;
 {
 	/* SRI w: Shift right (*) */
-	register size l = (L_arg_2() * arg);
 	register long t = swpop();
 
-	LOG(("@I6 DoSRIl2(%ld)", l));
-	spoilFRA();
-	l = arg_wi(l);
-	npush(sri(spop(l), t, l), l);
-}
-
-DoSRIz()
-{
-	/* SRI w: Shift right (*) */
-	register size l = uwpop();
-	register long t = swpop();
-
-	LOG(("@I6 DoSRIz(%ld)", l));
+	LOG(("@I6 DoSRI(%ld)", l));
 	spoilFRA();
 	l = arg_wi(l);
 	npush(sri(spop(l), t, l), l);

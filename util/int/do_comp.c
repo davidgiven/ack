@@ -22,91 +22,27 @@ extern double fpop();
 
 PRIVATE compare_obj();
 
-DoCMIl2(arg)
-	size arg;
+DoCMI(l)
+	register size l;
 {
 	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
-	register size l = (L_arg_2() * arg);
 	register long t = spop(arg_wi(l));
 	register long s = spop(l);
 
-	LOG(("@T6 DoCMIl2(%ld)", l));
+	LOG(("@T6 DoCMI(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoCMIm(arg)
-	size arg;
-{
-	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
-	register size l = arg_wi(arg);
-	register long t = spop(l);
-	register long s = spop(l);
-
-	LOG(("@T6 DoCMIm(%ld)", l));
-	spoilFRA();
-	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-}
-
-DoCMIz()
-{
-	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
-	register size l = uwpop();
-	register long t = spop(arg_wi(l));
-	register long s = spop(l);
-
-	LOG(("@T6 DoCMIz(%ld)", l));
-	spoilFRA();
-	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-}
-
-DoCMFl2(arg)
-	size arg;
+DoCMF(l)
+	register size l;
 {
 	/* CMF w: Compare w byte reals */
 #ifndef	NOFLOAT
-	register size l = (L_arg_2() * arg);
 	double t = fpop(arg_wf(l));
 	double s = fpop(l);
 
-	LOG(("@T6 DoCMFl2(%ld)", l));
-	spoilFRA();
-	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-#else	NOFLOAT
-	arg = arg;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoCMFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* CMF w: Compare w byte reals */
-#ifndef	NOFLOAT
-	register size l = (S_arg(hob) * wfac);
-	double t = fpop(arg_wf(l));
-	double s = fpop(l);
-
-	LOG(("@T6 DoCMFs(%ld)", l));
-	spoilFRA();
-	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-#else	NOFLOAT
-	hob = hob;
-	wfac = wfac;
-	nofloat();
-#endif	NOFLOAT
-}
-
-DoCMFz()
-{
-	/* CMF w: Compare w byte reals */
-#ifndef	NOFLOAT
-	register size l = uwpop();
-	double t = fpop(arg_wf(l));
-	double s = fpop(l);
-
-	LOG(("@T6 DoCMFz(%ld)", l));
+	LOG(("@T6 DoCMF(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 #else	NOFLOAT
@@ -114,120 +50,84 @@ DoCMFz()
 #endif	NOFLOAT
 }
 
-DoCMUl2(arg)
-	size arg;
+DoCMU(l)
+	register size l;
 {
 	/* CMU w: Compare w byte unsigneds */
-	register size l = (L_arg_2() * arg);
 	register unsigned long t = upop(arg_wi(l));
 	register unsigned long s = upop(l);
 
-	LOG(("@T6 DoCMUl2(%ld)", l));
+	LOG(("@T6 DoCMU(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoCMUz()
-{
-	/* CMU w: Compare w byte unsigneds */
-	register size l = uwpop();
-	register unsigned long t = upop(arg_wi(l));
-	register unsigned long s = upop(l);
-
-	LOG(("@T6 DoCMUz(%ld)", l));
-	spoilFRA();
-	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-}
-
-DoCMSl2(arg)
-	size arg;
+DoCMS(l)
+	register size l;
 {
 	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@T6 DoCMSl2(%ld)", l));
+	LOG(("@T6 DoCMS(%ld)", l));
 	spoilFRA();
 	compare_obj(arg_w(l));
 }
 
-DoCMSs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
-	register size l = (S_arg(hob) * wfac);
-
-	LOG(("@T6 DoCMSs(%ld)", l));
-	spoilFRA();
-	compare_obj(arg_w(l));
-}
-
-DoCMSz()
-{
-	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
-	register size l = uwpop();
-
-	LOG(("@T6 DoCMSz(%ld)", l));
-	spoilFRA();
-	compare_obj(arg_w(l));
-}
-
-DoCMPz()
+DoCMP()
 {
 	/* CMP -: Compare pointers */
 	register ptr t, s;
 
-	LOG(("@T6 DoCMPz()"));
+	LOG(("@T6 DoCMP()"));
 	spoilFRA();
 	t = dppop();
 	s = dppop();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoTLTz()
+DoTLT()
 {
 	/* TLT -: True if less, i.e. iff top of stack < 0 */
-	LOG(("@T6 DoTLTz()"));
+	LOG(("@T6 DoTLT()"));
 	spoilFRA();
 	wpush((long)(wpop() < 0 ? 1 : 0));
 }
 
-DoTLEz()
+DoTLE()
 {
 	/* TLE -: True if less or equal, i.e. iff top of stack <= 0 */
-	LOG(("@T6 DoTLEz()"));
+	LOG(("@T6 DoTLE()"));
 	spoilFRA();
 	wpush((long)(wpop() <= 0 ? 1 : 0));
 }
 
-DoTEQz()
+DoTEQ()
 {
 	/* TEQ -: True if equal, i.e. iff top of stack = 0 */
-	LOG(("@T6 DoTEQz()"));
+	LOG(("@T6 DoTEQ()"));
 	spoilFRA();
 	wpush((long)(wpop() == 0 ? 1 : 0));
 }
 
-DoTNEz()
+DoTNE()
 {
 	/* TNE -: True if not equal, i.e. iff top of stack non zero */
-	LOG(("@T6 DoTNEz()"));
+	LOG(("@T6 DoTNE()"));
 	spoilFRA();
 	wpush((long)(wpop() != 0 ? 1 : 0));
 }
 
-DoTGEz()
+DoTGE()
 {
 	/* TGE -: True if greater or equal, i.e. iff top of stack >= 0 */
-	LOG(("@T6 DoTGEz()"));
+	LOG(("@T6 DoTGE()"));
 	spoilFRA();
 	wpush((long)(wpop() >= 0 ? 1 : 0));
 }
 
-DoTGTz()
+DoTGT()
 {
 	/* TGT -: True if greater, i.e. iff top of stack > 0 */
-	LOG(("@T6 DoTGTz()"));
+	LOG(("@T6 DoTGT()"));
 	spoilFRA();
 	wpush((long)(wpop() > 0 ? 1 : 0));
 }

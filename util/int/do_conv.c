@@ -18,13 +18,13 @@
 extern double fpop();
 #endif	NOFLOAT
 
-DoCIIz()
+DoCII()
 {
 	/* CII -: Convert integer to integer (*) */
 	register int newsize = swpop();
 	register long s;
 
-	LOG(("@C6 DoCIIz()"));
+	LOG(("@C6 DoCII()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 12:
@@ -62,13 +62,13 @@ DoCIIz()
 	}
 }
 
-DoCUIz()
+DoCUI()
 {
 	/* CUI -: Convert unsigned to integer (*) */
 	register int newsize = swpop();
 	register unsigned long u;
 
-	LOG(("@C6 DoCUIz()"));
+	LOG(("@C6 DoCUI()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 22:
@@ -112,14 +112,14 @@ DoCUIz()
 	}
 }
 
-DoCFIz()
+DoCFI()
 {
 	/* CFI -: Convert floating to integer (*) */
 #ifndef	NOFLOAT
 	register int newsize = swpop();
 	double f;
 
-	LOG(("@C6 DoCFIz()"));
+	LOG(("@C6 DoCFI()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 42:
@@ -168,13 +168,13 @@ DoCFIz()
 #endif	NOFLOAT
 }
 
-DoCIFz()
+DoCIF()
 {
 	/* CIF -: Convert integer to floating (*) */
 #ifndef	NOFLOAT
 	register int newsize = swpop();
 
-	LOG(("@C6 DoCIFz()"));
+	LOG(("@C6 DoCIF()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 24:
@@ -203,14 +203,14 @@ DoCIFz()
 #endif	NOFLOAT
 }
 
-DoCUFz()
+DoCUF()
 {
 	/* CUF -: Convert unsigned to floating (*) */
 #ifndef	NOFLOAT
 	register int newsize = swpop();
 	register unsigned long u;
 
-	LOG(("@C6 DoCUFz()"));
+	LOG(("@C6 DoCUF()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 24:
@@ -249,13 +249,13 @@ DoCUFz()
 #endif	NOFLOAT
 }
 
-DoCFFz()
+DoCFF()
 {
 	/* CFF -: Convert floating to floating (*) */
 #ifndef	NOFLOAT
 	register int newsize = swpop();
 
-	LOG(("@C6 DoCFFz()"));
+	LOG(("@C6 DoCFF()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 44:
@@ -276,13 +276,13 @@ DoCFFz()
 #endif	NOFLOAT
 }
 
-DoCIUz()
+DoCIU()
 {
 	/* CIU -: Convert integer to unsigned */
 	register int newsize = swpop();
 	register long u;
 
-	LOG(("@C6 DoCIUz()"));
+	LOG(("@C6 DoCIU()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 22:
@@ -310,12 +310,12 @@ DoCIUz()
 	}
 }
 
-DoCUUz()
+DoCUU()
 {
 	/* CUU -: Convert unsigned to unsigned */
 	register int newsize = swpop();
 
-	LOG(("@C6 DoCUUz()"));
+	LOG(("@C6 DoCUU()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 22:
@@ -342,14 +342,14 @@ DoCUUz()
 	}
 }
 
-DoCFUz()
+DoCFU()
 {
 	/* CFU -: Convert floating to unsigned */
 #ifndef	NOFLOAT
 	register int newsize = swpop();
 	double f;
 
-	LOG(("@C6 DoCFUz()"));
+	LOG(("@C6 DoCFU()"));
 	spoilFRA();
 	switch ((int)(10 * swpop() + newsize)) {
 	case 42:

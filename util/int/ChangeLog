@@ -1,3 +1,10 @@
+21-Jun-90  Ceriel Jacobs (ceriel) at ceriel
+	fixed bug in FEF: did not work on 0.0
+
+20-Jun-90  Remco Feenstra & Peter Boersma
+	Implemented model 3 (intelligent calls)
+	Fixed bug in INN and SET
+
 31-Jan-90  Ceriel Jacobs (ceriel) at ceriel
 	Fixed getpid() version of MON.
 

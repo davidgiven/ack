@@ -1,11 +1,3 @@
--	Reduction of repetetivity in the code
-Before making any major changes to the interpreter, it would be good to
-implement Model 3 (Intelligent Calls), as described in the interpreter
-documentation.  This will reduce the bulk of the code considerably, since then
-there will be only one routine for each instruction.  Now identical changes
-have to be made in n places.
-
-
 -	Shadow bytes with internal values
 The biggest problem with the interpreter is that undefinedness is not
 transitive.  A warning is given if an undefined value is used, but then the

@@ -13,400 +13,103 @@
 #include	"fra.h"
 #include	"warn.h"
 
-DoSTLm(arg)
-	long arg;
+DoSTL(l)
+	register long l;
 {
 	/* STL l: Store local or parameter */
-	register long l = arg_l(arg);
 
-	LOG(("@S6 DoSTLm(%ld)", l));
-	spoilFRA();
-	popw_st(loc_addr(l));
-}
-
-DoSTLn2(arg)
-	long arg;
-{
-	/* STL l: Store local or parameter */
-	register long l = (N_arg_2() * arg);
-
-	LOG(("@S6 DoSTLn2(%ld)", l));
+	LOG(("@S6 DoSTL(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
 	popw_st(loc_addr(l));
 }
 
-DoSTLn4(arg)
-	long arg;
-{
-	/* STL l: Store local or parameter */
-	register long l = (N_arg_4() * arg);
-
-	LOG(("@S6 DoSTLn4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_st(loc_addr(l));
-}
-
-DoSTLp2(arg)
-	long arg;
-{
-	/* STL l: Store local or parameter */
-	register long l = (P_arg_2() * arg);
-
-	LOG(("@S6 DoSTLp2(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_st(loc_addr(l));
-}
-
-DoSTLp4(arg)
-	long arg;
-{
-	/* STL l: Store local or parameter */
-	register long l = (P_arg_4() * arg);
-
-	LOG(("@S6 DoSTLp4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_st(loc_addr(l));
-}
-
-DoSTLs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* STL l: Store local or parameter */
-	register long l = (S_arg(hob) * wfac);
-
-	LOG(("@S6 DoSTLs(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_st(loc_addr(l));
-}
-
-DoSTEl2(arg)
-	long arg;
+DoSTE(arg)
+	register unsigned long arg;
 {
 	/* STE g: Store external */
-	register ptr p = i2p(L_arg_2() * arg);
+	register ptr p = i2p(arg);
 
-	LOG(("@S6 DoSTEl2(%lu)", p));
+	LOG(("@S6 DoSTE(%lu)", p));
 	spoilFRA();
 	popw_m(arg_g(p));
 }
 
-DoSTEl4(arg)
-	long arg;
-{
-	/* STE g: Store external */
-	register ptr p = i2p(L_arg_4() * arg);
-
-	LOG(("@S6 DoSTEl4(%lu)", p));
-	spoilFRA();
-	popw_m(arg_g(p));
-}
-
-DoSTEs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* STE g: Store external */
-	register ptr p = i2p(S_arg(hob) * wfac);
-
-	LOG(("@S6 DoSTEs(%lu)", p));
-	spoilFRA();
-	popw_m(arg_g(p));
-}
-
-DoSILn2(arg)
-	long arg;
+DoSIL(l)
+	register long l;
 {
 	/* SIL l: Store into word pointed to by l-th local or parameter */
-	register long l = (N_arg_2() * arg);
 
-	LOG(("@S6 DoSILn2(%ld)", l));
+	LOG(("@S6 DoSIL(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
 	popw_m(st_lddp(loc_addr(l)));
 }
 
-DoSILn4(arg)
-	long arg;
-{
-	/* SIL l: Store into word pointed to by l-th local or parameter */
-	register long l = (N_arg_4() * arg);
-
-	LOG(("@S6 DoSILn4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_m(st_lddp(loc_addr(l)));
-}
-
-DoSILp2(arg)
-	long arg;
-{
-	/* SIL l: Store into word pointed to by l-th local or parameter */
-	register long l = (P_arg_2() * arg);
-
-	LOG(("@S6 DoSILp2(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_m(st_lddp(loc_addr(l)));
-}
-
-DoSILp4(arg)
-	long arg;
-{
-	/* SIL l: Store into word pointed to by l-th local or parameter */
-	register long l = (P_arg_4() * arg);
-
-	LOG(("@S6 DoSILp4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_m(st_lddp(loc_addr(l)));
-}
-
-DoSILs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* SIL l: Store into word pointed to by l-th local or parameter */
-	register long l = (S_arg(hob) * wfac);
-
-	LOG(("@S6 DoSILs(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	popw_m(st_lddp(loc_addr(l)));
-}
-
-DoSTFl2(arg)
-	long arg;
+DoSTF(l)
+	register long l;
 {
 	/* STF f: Store offsetted */
-	register long l = (L_arg_2() * arg);
 	register ptr p = dppop();
 
-	LOG(("@S6 DoSTFl2(%ld)", l));
+	LOG(("@S6 DoSTF(%ld)", l));
 	spoilFRA();
 	popw_m(p + arg_f(l));
 }
 
-DoSTFl4(arg)
-	long arg;
-{
-	/* STF f: Store offsetted */
-	register long l = (L_arg_4() * arg);
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTFl4(%ld)", l));
-	spoilFRA();
-	popw_m(p + arg_f(l));
-}
-
-DoSTFm(arg)
-	long arg;
-{
-	/* STF f: Store offsetted */
-	register long l = arg;
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTFm(%ld)", l));
-	spoilFRA();
-	popw_m(p + arg_f(l));
-}
-
-DoSTFs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* STF f: Store offsetted */
-	register long l = (S_arg(hob) * wfac);
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTFs(%ld)", l));
-	spoilFRA();
-	popw_m(p + arg_f(l));
-}
-
-DoSTIl2(arg)
-	size arg;
+DoSTI(l)
+	register size l;
 {
 	/* STI o: Store indirect o bytes (pop address, then data) */
-	register size l = (L_arg_2() * arg);
 	register ptr p = dppop();
 
-	LOG(("@S6 DoSTIl2(%ld)", l));
+	LOG(("@S6 DoSTI(%ld)", l));
 	spoilFRA();
 	pop_m(p, arg_o(l));
 }
 
-DoSTIl4(arg)
-	size arg;
-{
-	/* STI o: Store indirect o bytes (pop address, then data) */
-	register size l = (L_arg_4() * arg);
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTIl4(%ld)", l));
-	spoilFRA();
-	pop_m(p, arg_o(l));
-}
-
-DoSTIm(arg)
-	size arg;
-{
-	/* STI o: Store indirect o bytes (pop address, then data) */
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTIm(%ld)", arg));
-	spoilFRA();
-	pop_m(p, arg_o(arg));
-}
-
-DoSTIs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* STI o: Store indirect o bytes (pop address, then data) */
-	register size l = (S_arg(hob) * wfac);
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSTIs(%ld)", l));
-	spoilFRA();
-	pop_m(p, arg_o(l));
-}
-
-DoSTSl2(arg)
-	size arg;
+DoSTS(l)
+	register size l;
 {
 	/* STS w: Store indirect, w-byte integer on top of stack gives object size */
-	register size l = (P_arg_2() * arg);
 	register ptr p;
 
-	LOG(("@S6 DoSTSl2(%ld)", l));
+	LOG(("@S6 DoSTS(%ld)", l));
 	spoilFRA();
 	l = upop(arg_wi(l));
 	p = dppop();
 	pop_m(p, arg_o(l));
 }
 
-DoSTSz()				/* the arg 'w' is on top of stack */
-{
-	/* STS w: Store indirect, w-byte integer on top of stack gives object size */
-	register size l = uwpop();
-	register ptr p;
-
-	LOG(("@S6 DoSTSz(%ld)", l));
-	spoilFRA();
-	l = upop(arg_wi(l));
-	p = dppop();
-	pop_m(p, arg_o(l));
-}
-
-DoSDLn2(arg)
-	long arg;
+DoSDL(l)
+	register long l;
 {
 	/* SDL l: Store double local or parameter */
-	register long l = (N_arg_2() * arg);
 
-	LOG(("@S6 DoSDLn2(%ld)", l));
+	LOG(("@S6 DoSDL(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
 	pop_st(loc_addr(l), dwsize);
 }
 
-DoSDLn4(arg)
-	long arg;
-{
-	/* SDL l: Store double local or parameter */
-	register long l = (N_arg_4() * arg);
-
-	LOG(("@S6 DoSDLn4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	pop_st(loc_addr(l), dwsize);
-}
-
-DoSDLp2(arg)
-	long arg;
-{
-	/* SDL l: Store double local or parameter */
-	register long l = (P_arg_2() * arg);
-
-	LOG(("@S6 DoSDLp2(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	pop_st(loc_addr(l), dwsize);
-}
-
-DoSDLp4(arg)
-	long arg;
-{
-	/* SDL l: Store double local or parameter */
-	register long l = (P_arg_4() * arg);
-
-	LOG(("@S6 DoSDLp4(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	pop_st(loc_addr(l), dwsize);
-}
-
-DoSDLs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* SDL l: Store double local or parameter */
-	register long l = (S_arg(hob) * wfac);
-
-	LOG(("@S6 DoSDLs(%ld)", l));
-	spoilFRA();
-	l = arg_l(l);
-	pop_st(loc_addr(l), dwsize);
-}
-
-DoSDEu(arg)
-	long arg;
+DoSDE(arg)
+	register unsigned long arg;
 {
 	/* SDE g: Store double external */
-	register ptr p = i2p(U_arg() * arg);
+	register ptr p = i2p(arg);
 
-	LOG(("@S6 DoSDEu(%lu)", p));
+	LOG(("@S6 DoSDE(%lu)", p));
 	spoilFRA();
 	pop_m(arg_g(p), dwsize);
 }
 
-DoSDEl4(arg)
-	long arg;
-{
-	/* SDE g: Store double external */
-	register ptr p = i2p(L_arg_4() * arg);
-
-	LOG(("@S6 DoSDEl4(%lu)", p));
-	spoilFRA();
-	pop_m(arg_g(p), dwsize);
-}
-
-DoSDFl2(arg)
-	long arg;
+DoSDF(l)
+	register long l;
 {
 	/* SDF f: Store double offsetted */
-	register long l = (L_arg_2() * arg);
 	register ptr p = dppop();
 
-	LOG(("@S6 DoSDFl2(%ld)", l));
-	spoilFRA();
-	pop_m(p + arg_f(l), dwsize);
-}
-
-DoSDFl4(arg)
-	long arg;
-{
-	/* SDF f: Store double offsetted */
-	register long l = (L_arg_4() * arg);
-	register ptr p = dppop();
-
-	LOG(("@S6 DoSDFl4(%ld)", l));
+	LOG(("@S6 DoSDF(%ld)", l));
 	spoilFRA();
 	pop_m(p + arg_f(l), dwsize);
 }

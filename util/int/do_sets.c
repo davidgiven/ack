@@ -14,68 +14,22 @@
 
 PRIVATE bit_test(), create_set();
 
-DoINNl2(arg)
-	size arg;
+DoINN(l)
+	register size l;
 {
 	/* INN w: Bit test on w byte set (bit number on top of stack) */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@Y6 DoINNl2(%ld)", l));
+	LOG(("@Y6 DoINN(%ld)", l));
 	spoilFRA();
 	bit_test(arg_w(l));
 }
 
-DoINNs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* INN w: Bit test on w byte set (bit number on top of stack) */
-	register size l = (S_arg(hob) * wfac);
-
-	LOG(("@Y6 DoINNs(%ld)", l));
-	spoilFRA();
-	bit_test(arg_w(l));
-}
-
-DoINNz()
-{
-	/* INN w: Bit test on w byte set (bit number on top of stack) */
-	register size l = uwpop();
-
-	LOG(("@Y6 DoINNz(%ld)", l));
-	spoilFRA();
-	bit_test(arg_w(l));
-}
-
-DoSETl2(arg)
-	size arg;
+DoSET(l)
+	register size l;
 {
 	/* SET w: Create singleton w byte set with bit n on (n is top of stack) */
-	register size l = (L_arg_2() * arg);
 
-	LOG(("@Y6 DoSETl2(%ld)", l));
-	spoilFRA();
-	create_set(arg_w(l));
-}
-
-DoSETs(hob, wfac)
-	long hob;
-	size wfac;
-{
-	/* SET w: Create singleton w byte set with bit n on (n is top of stack) */
-	register size l = (S_arg(hob) * wfac);
-
-	LOG(("@Y6 DoSETs(%ld)", l));
-	spoilFRA();
-	create_set(arg_w(l));
-}
-
-DoSETz()
-{
-	/* SET w: Create singleton w byte set with bit n on (n is top of stack) */
-	register size l = uwpop();
-
-	LOG(("@Y6 DoSETz(%ld)", l));
+	LOG(("@Y6 DoSET(%ld)", l));
 	spoilFRA();
 	create_set(arg_w(l));
 }
@@ -95,16 +49,20 @@ PRIVATE bit_test(w)
 	register int bitno =
 		(int) swpop();	/* bitno on TOS */
 	register char test_byte = (char) 0;/* default value to be tested */
+	register int wordoff = bitno / 8;
+	register int bitoff = bitno % 8; 
+
+	if (bitoff < 0) bitoff += 8;
 
 	if (must_test && !(IgnMask&BIT(ESET))) {
-		/* Only w<<3 bytes CAN be tested */
-		if (bitno > (int) ((w << 3) - 1)) {
+		/* Only w*8 bits CAN be tested */
+		if (wordoff >= w) {
 			trap(ESET);
 		}
 	}
-	test_byte = stack_loc(SP + (bitno >> 3));
+	test_byte = stack_loc(SP + wordoff);
 	st_dec(w);
-	wpush((long)((test_byte & BIT(bitno & 7)) ? 1 : 0));
+	wpush((long)((test_byte & BIT(bitoff)) ? 1 : 0));
 }
 
 /********************************************************
@@ -121,6 +79,10 @@ PRIVATE create_set(w)
 {
 	register int bitno = (int) swpop();
 	register size nbytes = w;
+	register int wordoff = bitno / 8;
+	register int bitoff = bitno % 8;
+
+	if (bitoff < 0) bitoff += 8;
 
 	st_inc(nbytes);
 	while (--nbytes >= 0) {
@@ -128,10 +90,10 @@ PRIVATE create_set(w)
 	}
 
 	if (must_test && !(IgnMask&BIT(ESET))) {
-		if (bitno > (int) ((w << 3) - 1)) {
+		if (wordoff >= w) {
 			trap(ESET);
 		}
 	}
-	st_stn(SP + (bitno >> 3), (long)BIT(bitno & 7), 1L);
+	st_stn(SP + wordoff, (long)BIT(bitoff), 1L);
 }
 

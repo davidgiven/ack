@@ -18,86 +18,30 @@
 
 PRIVATE arr();
 
-DoLARl2(arg)
+DoLAR(arg)
 	size arg;
 {
 	/* LAR w: Load array element, descriptor contains integers of size w */
-	register size l = (L_arg_2() * arg);
-
-	LOG(("@A6 DoLARl2(%ld)", l));
-	arr(LAR, arg_wi(l));
-}
-
-DoLARm(arg)
-	size arg;
-{
-	/* LAR w: Load array element, descriptor contains integers of size w */
-	LOG(("@A6 DoLARm(%ld)", arg));
+	LOG(("@A6 DoLAR(%ld)", arg));
 	arr(LAR, arg_wi(arg));
 }
 
-DoLARz()
-{
-	/* LAR w: Load array element, descriptor contains integers of size w */
-	register size l = uwpop();
-
-	LOG(("@A6 DoLARz(%ld)", l));
-	arr(LAR, arg_wi(l));
-}
-
-DoSARl2(arg)
+DoSAR(arg)
 	size arg;
 {
 	/* SAR w: Store array element */
-	register size l = (L_arg_2() * arg);
-
-	LOG(("@A6 DoSARl2(%ld)", l));
-	arr(SAR, arg_wi(l));
-}
-
-DoSARm(arg)
-	size arg;
-{
-	/* SAR w: Store array element */
-	LOG(("@A6 DoSARm(%ld)", arg));
+	LOG(("@A6 DoSAR(%ld)", arg));
 	arr(SAR, arg_wi(arg));
 }
 
-DoSARz()
-{
-	/* SAR w: Store array element */
-	register size l = uwpop();
-
-	LOG(("@A6 DoSARz(%ld)", l));
-	arr(SAR, arg_wi(l));
-}
-
-DoAARl2(arg)
+DoAAR(arg)
 	size arg;
 {
 	/* AAR w: Load address of array element */
-	register size l = (L_arg_2() * arg);
-
-	LOG(("@A6 DoAARl2(%ld)", l));
-	arr(AAR, arg_wi(l));
-}
-
-DoAARm(arg)
-	size arg;
-{
-	/* AAR w: Load address of array element */
-	LOG(("@A6 DoAARm(%ld)", arg));
+	LOG(("@A6 DoAAR(%ld)", arg));
 	arr(AAR, arg_wi(arg));
 }
 
-DoAARz()
-{
-	/* AAR w: Load address of array element */
-	register size l = uwpop();
-
-	LOG(("@A6 DoAARz(%ld)", l));
-	arr(AAR, arg_wi(l));
-}
 
 /********************************************************
 *		Array arithmetic			*
