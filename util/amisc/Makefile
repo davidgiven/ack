@@ -1,19 +1,33 @@
 # @(#)Makefile	1.1
 EM	= ../..
+BINDIR  = $(EM)/bin
 h	= $(EM)/h
 CFLAGS	= -n -O -I$h
-ALL	= anm asize astrip
-OFILES	= anm.o asize.o astrip.o
-CFILES	= anm.c asize.c astrip.c
+ALL	= anm asize astrip aal
+OFILES	= anm.o asize.o astrip.o aal.o
+CFILES	= anm.c asize.c astrip.c aal.c
 
 all:	$(ALL)
 
-cp cmp:	all
-	for i in $(ALL); do $@ $$i $$ROOT/usr/bin/$$i; done
+anm:	anm.c
+	$(CC) $(CFLAGS) -o anm anm.c
+asize:	asize.c
+	$(CC) $(CFLAGS) -o asize asize.c
+astrip: astrip.c
+	$(CC) $(CFLAGS) -o astrip astrip.c
+aal:	aal.c
+	$(CC) $(CFLAGS) -DAUTORAN -o aal aal.c
+
+install:	all
+	for i in $(ALL); do cp $$i $(BINDIR)/$$i; done
+
+cmp:	all
+	for i in $(ALL); do cmp $$i $(BINDIR)/$$i; done
 
 clean:	; rm -f $(ALL) $(OFILES)
-get:	; getall
-unget:	; ungetall
 
-print:	$(CFILES)
-	pr -n Makefile $(CFILES) | lpr
+pr:	$(CFILES)
+	@pr -n Makefile $(CFILES)
+
+opr:
+	make pr | opr
