@@ -1,11 +1,20 @@
 #include "decl.h"
+
+/* All the functions in this file will be called by the parser.
+ */
+
 extern char	*strindex();
 
 static struct Op_info { char *name, *type}
 			op_info[ MAX_OPERANDS] = { { 0, 0}};
-static int	n_ops = 0;
-static char	*assem_instr = 0;
-static Bool	restriction = FALSE;
+
+static int	n_ops = 0;		/* Number of opertands of current
+					 * assembly instruction.
+					 */
+static char	*assem_instr = 0;	/* Name of the current assembly instr */
+static Bool	restriction = FALSE;	/* Is there a restriction on the
+					 * current operand?
+					 */
 File *outfile;
 
 save_instr( instr, len)
@@ -92,6 +101,10 @@ clear_restriction()
 
 char *skip_string( str)
 char *str;
+
+/* returns position after the first '"'-charcter, look out for '\' escape
+ * sequence
+ */
 {
 	for ( str++; *str != '"' || *(str-1) == '\\'; str++);
 	return( str + 1);
@@ -108,6 +121,10 @@ char *str;
 
 pr_call( str)
 char *str;
+
+/* Ouput 'str', but keep track of the number of bytes and take care of
+ * conversions like %$.
+ */
 {
 	if ( strncmp( "text", str, 4) == 0 && isdigit( *(str+4))) 
 		out( "cur_pos += %d;\n", *(str+4) - '0');
@@ -150,6 +167,9 @@ init_table()
 }
 
 clean()
+
+/* Free space, allocated during the parsing of an entry in 'as_table'.
+ */
 {
 	int i;
 
@@ -171,7 +191,7 @@ clean()
 
 operand_clean()
 
-/* Naam van de assembler-instr bewaren! */
+/* Free space for the operands */
 
 {
 	int i;
@@ -224,10 +244,11 @@ char *mnem;
 		mnemonic[ n_mnems++] = Salloc( mnem, strlen( mnem) + 1);
 }
 
+
 end_table()
 
-/* array's wegschrijven !! */
-
+/* Flush information in the array 'mnemonic'
+ */
 {
 	int i;
 
@@ -248,8 +269,7 @@ end_table()
 quicksort( lower, upper)
 int lower, upper;
 
-/* Deze routine sorteert het array 'mnemonic' mbv. het algorithme quick_sort.
- * ( zie diktaat "inleiding programmeren" voor een PASCAL versie.)
+/* Sort the array 'mnemonic'.
  */
 {
 	char *key, *tmp;
