@@ -7,7 +7,6 @@
 #define _NFILES  20
 #define NULL       0
 #define EOF     (-1)
-#define CMASK   0377
 
 #define IO_READMODE     1
 #define IO_WRITEMODE    2
