@@ -321,6 +321,7 @@ short *grabcore(size) int size; {
 short *newcore(size) int size; {
 	register short *p,*q;
 
+	size = (size + sizeof(int) - 1) & ~(sizeof(int) - 1);
 	if( size < 2*MAXSHORT ) {
 		if ((p=freelist[size/sizeof(short)]) != (short *) 0)
 			freelist[size/sizeof(short)] = *(short **) p;

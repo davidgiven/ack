@@ -21,7 +21,7 @@ static char rcsid[] = "$Header$";
  */
 
 main(argc,argv) int argc; char *argv[]; {
-	short somespace[STACKROOM];
+	int somespace[STACKROOM];
 
 	progname = argv[0];
 	while (argc-->1 && **++argv == '-')
@@ -34,7 +34,7 @@ main(argc,argv) int argc; char *argv[]; {
 		if (freopen(*argv,"r",stdin) == NULL)
 			error("Cannot open %s",*argv);
 	fileinit();
-	coreinit(somespace,somespace+STACKROOM);
+	coreinit((short *)somespace,(short *)(somespace+STACKROOM));
 	getlines();
 	cleanup();
 	return(0);
