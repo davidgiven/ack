@@ -127,8 +127,6 @@ DefinitionModule
 			  df->df_type = standard_type(T_RECORD, 0, (arith) 0);
 			  df->df_type->rec_scope = df->mod_vis->sc_scope;
 			  DefinitionModule++;
-			  DO_DEBUG(1, debug("Definition module \"%s\" %d",
-					id->id_text, DefinitionModule));
 			}
 	';'
 	import(0)* 
@@ -209,7 +207,7 @@ ProgramModule
 			df = define(id, CurrentScope, D_MODULE);
 			open_scope(CLOSEDSCOPE);
 			df->mod_vis = CurrVis;
-			CurrentScope->sc_name = id->id_text;
+			CurrentScope->sc_name = "_M2M";
 		  }
 		  Defined = df;
 		  CurrentScope->sc_definedby = df;

@@ -466,12 +466,11 @@ CutSize(expr)
 		conform to the size of the type of the expression.
 	*/
 	arith o1 = expr->nd_INT;
-	struct type *tp = expr->nd_type;
+	struct type *tp = BaseType(expr->nd_type);
 	int uns;
 	int size = tp->tp_size;
 
 	assert(expr->nd_class == Value);
-	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 	uns = (tp->tp_fund & (T_CARDINAL|T_CHAR));
 	if (uns) {
 		if (o1 & ~full_mask[size]) {

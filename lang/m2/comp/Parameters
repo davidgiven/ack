@@ -49,9 +49,9 @@
 #define DEBUG		1	/* perform various self-tests		*/
 extern char options[];
 #ifdef DEBUG
-#define DO_DEBUG(n, x)	((n) <= options['D'] && (x))
+#define DO_DEBUG(y, x)	((y) && (x))
 #else
-#define DO_DEBUG(n, x)
+#define DO_DEBUG(y, x)
 #endif DEBUG
 
 !File: inputtype.h

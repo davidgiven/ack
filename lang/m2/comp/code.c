@@ -193,8 +193,8 @@ CodeCoercion(t1, t2)
 {
 	register int fund1, fund2;
 
-	if (t1->tp_fund == T_SUBRANGE) t1 = t1->next;
-	if (t2->tp_fund == T_SUBRANGE) t2 = t2->next;
+	t1 = BaseType(t1);
+	t2 = BaseType(t2);
 	if (t1 == t2) return;
 	if ((fund1 = t1->tp_fund) == T_WORD) fund1 = T_INTEGER;
 	if ((fund2 = t2->tp_fund) == T_WORD) fund2 = T_INTEGER;
@@ -368,7 +368,7 @@ CodeParameters(param, arg)
 			C_loc(left->nd_type->tp_size / word_size - 1);
 		}
 		else {
-			tp = left->nd_type->next;
+			tp = IndexType(left->nd_type);
 			if (tp->tp_fund == T_SUBRANGE) {
 				C_loc(tp->sub_ub - tp->sub_lb);
 			}
@@ -402,8 +402,7 @@ CodeStd(nd)
 
 	if (arg) {
 		left = arg->nd_left;
-		tp = left->nd_type;
-		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+		tp = BaseType(left->nd_type);
 		arg = arg->nd_right;
 	}
 
@@ -736,8 +735,7 @@ CodeOper(expr, true_label, false_label)
 	case '#':
 		Operands(leftop, rightop);
 		CodeCoercion(rightop->nd_type, leftop->nd_type);
-		tp = leftop->nd_type;	/* Not the result type! */
-		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+		tp = BaseType(leftop->nd_type);	/* Not the result type! */
 		switch (tp->tp_fund)	{
 		case T_INTEGER:
 			C_cmi(tp->tp_size);
@@ -970,13 +968,14 @@ CodeEl(nd, tp)
 	register struct node *nd;
 	register struct type *tp;
 {
+	register struct type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
 		C_loc(tp->tp_size);	/* push size */
-		if (tp->next->tp_fund == T_SUBRANGE) {
-			C_loc(tp->next->sub_ub);
+		if (eltype->tp_fund == T_SUBRANGE) {
+			C_loc(eltype->sub_ub);
 		}
-		else	C_loc((arith) (tp->next->enm_ncst - 1));
+		else	C_loc((arith) (eltype->enm_ncst - 1));
 		Operands(nd->nd_left, nd->nd_right);
 		C_cal("_LtoUset");	/* library routine to fill set */
 		C_asp(4 * word_size);

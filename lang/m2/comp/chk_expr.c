@@ -27,11 +27,87 @@ static char *RcsId = "$Header$";
 
 extern char *symbol2str();
 
+int
+chk_variable(expp)
+	register struct node *expp;
+{
+
+	if (! chk_designator(expp)) return 0;
+
+	if (expp->nd_class == Def &&
+	    !(expp->nd_def->df_kind & (D_FIELD|D_VARIABLE))) {
+		node_error(expp, "variable expected");
+		return 0;
+	}
+
+	return 1;
+}
+
+STATIC int
+chk_arrow(expp)
+	register struct node *expp;
+{
+	register struct type *tp;
+
+	assert(expp->nd_class == Arrow);
+	assert(expp->nd_symb == '^');
+
+	expp->nd_type = error_type;
+
+	if (! chk_variable(expp->nd_right)) return 0;
+
+	tp = expp->nd_right->nd_type;
+
+	if (tp->tp_fund != T_POINTER) {
+		node_error(expp, "illegal operand for unary operator \"%s\"",
+			symbol2str(expp->nd_symb));
+		return 0;
+	}
+
+	expp->nd_type = PointedtoType(tp);
+	return 1;
+}
+
 STATIC int
 chk_arr(expp)
-	struct node *expp;
+	register struct node *expp;
 {
-	return chk_designator(expp, VARIABLE, D_USED);
+	register struct type *tpl, *tpr;
+
+	assert(expp->nd_class == Arrsel);
+	assert(expp->nd_symb == '[');
+
+	expp->nd_type = error_type;
+
+	if ( 
+	     !chk_variable(expp->nd_left)
+	   ||
+	     !chk_expr(expp->nd_right)
+	   ||
+	     expp->nd_left->nd_type == error_type
+	   )	return 0;
+
+	tpl = expp->nd_left->nd_type;
+	tpr = expp->nd_right->nd_type;
+
+	if (tpl->tp_fund != T_ARRAY) {
+		node_error(expp, "array index not belonging to an ARRAY");
+		return 0;
+	}
+
+	/* Type of the index must be assignment compatible with
+	   the index type of the array (Def 8.1).
+	   However, the index type of a conformant array is not specified.
+	   Either INTEGER or CARDINAL seems reasonable.
+	*/
+	if (IsConformantArray(tpl) ? !TstAssCompat(card_type, tpr)
+				   : !TstAssCompat(IndexType(tpl), tpr)) {
+		node_error(expp, "incompatible index type");
+		return 0;
+	}
+
+	expp->nd_type = tpl->arr_elem;
+	return 1;
 }
 
 STATIC int
@@ -54,24 +130,107 @@ STATIC int
 chk_linkorname(expp)
 	register struct node *expp;
 {
-	if (chk_designator(expp, VALUE, D_USED)) {
-		if (expp->nd_class == Def &&
-		    expp->nd_def->df_kind == D_PROCEDURE) {
-			/* Check that this procedure is one that we
-			   may take the address from.
-			*/
-			if (expp->nd_def->df_type == std_type ||
-			    expp->nd_def->df_scope->sc_level > 0) {
-				/* Address of standard or nested procedure
-				   taken.
+	register struct def *df;
+
+	if (expp->nd_class == Name) {
+		expp->nd_def = lookfor(expp, CurrVis, 1);
+		expp->nd_class = Def;
+		expp->nd_type = expp->nd_def->df_type;
+	}
+	else if (expp->nd_class == Link) {
+		register struct node *left = expp->nd_left;
+
+		assert(expp->nd_symb == '.');
+
+		if (! chk_designator(left)) return 0;
+
+		if (left->nd_type->tp_fund != T_RECORD ||
+		    (left->nd_class == Def &&
+		     !(left->nd_def->df_kind & (D_MODULE|D_VARIABLE|D_FIELD))
+		    )
+		   ) {
+			node_error(left, "illegal selection");
+			return 0;
+		}
+
+		if (!(df = lookup(expp->nd_IDF, left->nd_type->rec_scope))) {
+			id_not_declared(expp);
+			return 0;
+		}
+		else {
+			expp->nd_def = df;
+			expp->nd_type = df->df_type;
+			expp->nd_class = LinkDef;
+			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
+				/* Fields of a record are always D_QEXPORTED,
+				   so ...
 				*/
-node_error(expp, "it is illegal to take the address of a standard or local procedure");
+node_error(expp, "identifier \"%s\" not exported from qualifying module",
+df->df_idf->id_text);
 				return 0;
 			}
 		}
-		return 1;
+
+		if (left->nd_class == Def &&
+		    left->nd_def->df_kind == D_MODULE) {
+			expp->nd_class = Def;
+			FreeNode(left);
+			expp->nd_left = 0;
+		}
+		else	return 1;
 	}
-	return 0;
+
+	assert(expp->nd_class == Def);
+
+	df = expp->nd_def;
+
+	if (df->df_kind & (D_ENUM | D_CONST)) {
+		if (df->df_kind == D_ENUM) {
+			expp->nd_class = Value;
+			expp->nd_INT = df->enm_val;
+			expp->nd_symb = INTEGER;
+		}
+		else  {
+			unsigned int ln;
+
+			assert(df->df_kind == D_CONST);
+			ln = expp->nd_lineno;
+			*expp = *(df->con_const);
+			expp->nd_lineno = ln;
+		}
+	}
+
+	return 1;
+}
+
+STATIC int
+chk_ex_linkorname(expp)
+	register struct node *expp;
+{
+	register struct def *df;
+
+	if (! chk_linkorname(expp)) return 0;
+	if (expp->nd_class != Def) return 1;
+	df = expp->nd_def;
+
+	if (!(df->df_kind & (D_ENUM|D_CONST|D_PROCEDURE|D_FIELD|D_VARIABLE|D_PROCHEAD))) {
+		node_error(expp, "value expected");
+	}
+
+	if (df->df_kind == D_PROCEDURE) {
+		/* Check that this procedure is one that we
+		   may take the address from.
+		*/
+		if (df->df_type == std_type || df->df_scope->sc_level > 0) {
+			/* Address of standard or nested procedure
+			   taken.
+			*/
+node_error(expp, "it is illegal to take the address of a standard or local procedure");
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 STATIC int
@@ -186,7 +345,7 @@ chk_set(expp)
 	if (nd = expp->nd_left) {
 		/* A type was given. Check it out
 		*/
-		if (! chk_designator(nd, 0, D_USED)) return 0;
+		if (! chk_designator(nd)) return 0;
 
 		assert(nd->nd_class == Def);
 		df = nd->nd_def;
@@ -224,7 +383,7 @@ node_error(expp, "specifier does not represent a set type");
 	while (nd) {
 		assert(nd->nd_class == Link && nd->nd_symb == ',');
 
-		if (!chk_el(nd->nd_left, tp->next, &set)) return 0;
+		if (!chk_el(nd->nd_left, ElementType(tp), &set)) return 0;
 		nd = nd->nd_right;
 	}
 
@@ -268,13 +427,11 @@ getarg(argp, bases, designator)
 	left = arg->nd_left;
 
 	if ((!designator && !chk_expr(left)) ||
-	    (designator &&
-	     !chk_designator(left, VARIABLE, D_USED|D_NOREG))) {
+	    (designator && !chk_variable(left))) {
 		return 0;
 	}
 
-	tp = left->nd_type;
-	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
+	tp = BaseType(left->nd_type);
 
 	if (bases && !(tp->tp_fund & bases)) {
 		node_error(arg, "unexpected type");
@@ -297,7 +454,7 @@ getname(argp, kinds)
 	}
 
 	arg = arg->nd_right;
-	if (! chk_designator(arg->nd_left, 0, D_REFERRED)) return 0;
+	if (! chk_designator(arg->nd_left)) return 0;
 
 	if (arg->nd_left->nd_class != Def && arg->nd_left->nd_class != LinkDef) {
 		node_error(arg, "identifier expected");
@@ -325,7 +482,7 @@ chk_proccall(expp)
 
 	left = expp->nd_left;
 	arg = expp;
-	expp->nd_type = left->nd_type->next;
+	expp->nd_type = ResultType(left->nd_type);
 
 	for (param = ParamList(left->nd_type); param; param = param->next) {
 		if (!(left = getarg(&arg, 0, IsVarParam(param)))) return 0;
@@ -358,12 +515,14 @@ chk_call(expp)
 		it may also be a cast or a standard procedure call.
 	*/
 	register struct node *left;
+	STATIC int chk_std();
+	STATIC int chk_cast();
 
 	/* First, get the name of the function or procedure
 	*/
 	expp->nd_type = error_type;
 	left = expp->nd_left;
-	if (! chk_designator(left, 0, D_USED)) return 0;
+	if (! chk_designator(left)) return 0;
 
 	if (IsCast(left)) {
 		/* It was a type cast. This is of course not portable.
@@ -387,192 +546,6 @@ chk_call(expp)
 	}
 
 	node_error(left, "procedure, type, or function expected");
-	return 0;
-}
-
-STATIC int
-FlagCheck(expp, df, flag)
-	struct node *expp;
-	struct def *df;
-{
-	/*	See the routine "chk_designator" for an explanation of
-		"flag". Here, a definition "df" is checked against it.
-	*/
-
-	if (df->df_kind == D_ERROR) return 0;
-
-	if ((flag & VARIABLE) &&
-	    !(df->df_kind & (D_FIELD|D_VARIABLE))) {
-		node_error(expp, "variable expected");
-		return 0;
-	}
-
-	if ((flag & HASSELECTORS) &&
-	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_MODULE)) ||
-	      df->df_type->tp_fund != T_RECORD)) {
-		node_error(expp, "illegal selection");
-		return 0;
-	}
-
-	if ((flag & VALUE) &&
-	    ( !(df->df_kind & (D_VARIABLE|D_FIELD|D_CONST|D_ENUM|D_PROCEDURE)))) {
-		node_error(expp, "value expected");
-		return 0;
-	}
-
-	return 1;
-}
-
-int
-chk_designator(expp, flag, dflags)
-	register struct node *expp;
-{
-	/*	Find the name indicated by "expp", starting from the current
-		scope.  "flag" indicates the kind of designator we expect:
-		It contains the flags VARIABLE, indicating that the result must
-		be something that can be assigned to.
-		It may also contain the flag VALUE, indicating that a
-		value is expected. In this case, VARIABLE may not be set.
-		Also contained may be the flag HASSELECTORS, indicating that
-		the result must have selectors.
-		"dflags" contains some flags that must be set at the definition
-		found.
-	*/
-	register struct def *df;
-	register struct type *tp;
-
-	if (expp->nd_class == Def || expp->nd_class == LinkDef) {
-		expp->nd_def->df_flags |= dflags;
-		return 1;
-	}
-
-	expp->nd_type = error_type;
-
-	if (expp->nd_class == Name) {
-		expp->nd_def = lookfor(expp, CurrVis, 1);
-		expp->nd_class = Def;
-		expp->nd_type = expp->nd_def->df_type;
-	}
-	else if (expp->nd_class == Link) {
-		register struct node *left = expp->nd_left;
-
-		assert(expp->nd_symb == '.');
-
-		if (! chk_designator(left,
-				     HASSELECTORS,
-				     dflags)) return 0;
-
-		tp = left->nd_type;
-		assert(tp->tp_fund == T_RECORD);
-
-		if (!(df = lookup(expp->nd_IDF, tp->rec_scope))) {
-			id_not_declared(expp);
-			return 0;
-		}
-		else {
-			expp->nd_def = df;
-			expp->nd_type = df->df_type;
-			expp->nd_class = LinkDef;
-			if (!(df->df_flags & (D_EXPORTED|D_QEXPORTED))) {
-				/* Fields of a record are always D_QEXPORTED,
-				   so ...
-				*/
-node_error(expp, "identifier \"%s\" not exported from qualifying module",
-df->df_idf->id_text);
-				return 0;
-			}
-		}
-
-		if (left->nd_class == Def &&
-		    left->nd_def->df_kind == D_MODULE) {
-			expp->nd_class = Def;
-			FreeNode(left);
-			expp->nd_left = 0;
-		}
-		else {
-			return FlagCheck(expp, df, flag);
-		}
-	}
-
-	if (expp->nd_class == Def) {
-		df = expp->nd_def;
-
-		if (! FlagCheck(expp, df, flag)) return 0;
-
-		if (df->df_kind & (D_ENUM | D_CONST)) {
-			if (df->df_kind == D_ENUM) {
-				expp->nd_class = Value;
-				expp->nd_INT = df->enm_val;
-				expp->nd_symb = INTEGER;
-			}
-			else  {
-				unsigned int ln;
-
-				assert(df->df_kind == D_CONST);
-				ln = expp->nd_lineno;
-				*expp = *(df->con_const);
-				expp->nd_lineno = ln;
-			}
-		}
-
-		df->df_flags |= dflags;
-
-		return 1;
-	}
-
-	if (expp->nd_class == Arrsel) {
-		struct type *tpl, *tpr;
-
-		assert(expp->nd_symb == '[');
-
-		if ( 
-		     !chk_designator(expp->nd_left, VARIABLE, dflags)
-		   ||
-		     !chk_expr(expp->nd_right)
-		   ||
-		     expp->nd_left->nd_type == error_type
-		   )	return 0;
-
-		tpr = expp->nd_right->nd_type;
-		tpl = expp->nd_left->nd_type;
-
-		if (tpl->tp_fund != T_ARRAY) {
-			node_error(expp,
-				   "array index not belonging to an ARRAY");
-			return 0;
-		}
-
-		/* Type of the index must be assignment compatible with
-		   the index type of the array (Def 8.1)
-		*/
-		if ((tpl->next && !TstAssCompat(tpl->next, tpr)) ||
-		    (!tpl->next && !TstAssCompat(intorcard_type, tpr))) {
-			node_error(expp, "incompatible index type");
-			return 0;
-		}
-
-		expp->nd_type = tpl->arr_elem;
-		return 1;
-	}
-
-	if (expp->nd_class == Arrow) {
-		assert(expp->nd_symb == '^');
-
-		if (! chk_designator(expp->nd_right, VARIABLE, dflags)) {
-			return 0;
-		}
-
-		if (expp->nd_right->nd_type->tp_fund != T_POINTER) {
-node_error(expp, "illegal operand for unary operator \"%s\"",
-symbol2str(expp->nd_symb));
-			return 0;
-		}
-
-		expp->nd_type = expp->nd_right->nd_type->next;
-		return 1;
-	}
-
-	node_error(expp, "designator expected");
 	return 0;
 }
 
@@ -663,11 +636,8 @@ chk_oper(expp)
 
 	if (!chk_expr(left) || !chk_expr(right)) return 0;
 
-	tpl = left->nd_type;
-	tpr = right->nd_type;
-
-	if (tpl->tp_fund == T_SUBRANGE) tpl = tpl->next;
-	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
+	tpl = BaseType(left->nd_type);
+	tpr = BaseType(right->nd_type);
 
 	if (tpl == intorcard_type) {
 		if (tpr == int_type || tpr == card_type) {
@@ -688,7 +658,7 @@ chk_oper(expp)
 node_error(expp, "RHS of IN operator not a SET type");
 			return 0;
 		}
-		if (!TstAssCompat(tpl, tpr->next)) {
+		if (!TstAssCompat(tpl, ElementType(tpr))) {
 			/* Assignment compatible ???
 			   I don't know! Should we be allowed to check
 			   if a CARDINAL is a member of a BITSET???
@@ -746,8 +716,7 @@ chk_uoper(expp)
 
 	if (! chk_expr(right)) return 0;
 
-	tpr = right->nd_type;
-	if (tpr->tp_fund == T_SUBRANGE) tpr = tpr->next;
+	tpr = BaseType(right->nd_type);
 	expp->nd_type = tpr;
 
 	switch(expp->nd_symb) {
@@ -809,8 +778,6 @@ getvariable(argp)
 	struct node **argp;
 {
 	register struct node *arg = *argp;
-	register struct def *df;
-	register struct node *left;
 
 	arg = arg->nd_right;
 	if (!arg) {
@@ -818,29 +785,13 @@ getvariable(argp)
 		return 0;
 	}
 
-	left = arg->nd_left;
-
-	if (! chk_designator(left, 0, D_REFERRED)) return 0;
-	if (left->nd_class == Arrsel || left->nd_class == Arrow) {
-		*argp = arg;
-		return left;
-	}
-
-	df = 0;
-	if (left->nd_class == LinkDef || left->nd_class == Def) {
-		df = left->nd_def;
-	}
-
-	if (!df || !(df->df_kind & (D_VARIABLE|D_FIELD))) {
-		node_error(arg, "variable expected");
-		return 0;
-	}
+	if (! chk_variable(arg->nd_left)) return 0;
 
 	*argp = arg;
-	return left;
+	return arg->nd_left;
 }
 
-int
+STATIC int
 chk_std(expp, left)
 	register struct node *expp, *left;
 {
@@ -851,8 +802,6 @@ chk_std(expp, left)
 
 	assert(left->nd_class == Def);
 	std = left->nd_def->df_value.df_stdname;
-
-DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 
 	switch(std) {
 	case S_ABS:
@@ -883,13 +832,15 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 
 	case S_HIGH:
 		if (!(left = getarg(&arg, T_ARRAY, 0))) return 0;
-		expp->nd_type = left->nd_type->next;
-		if (!expp->nd_type) {
-			/* A dynamic array has no explicit index type
+		if (IsConformantArray(left->nd_type)) {
+			/* A conformant array has no explicit index type
 			*/
-			expp->nd_type = intorcard_type;
+			expp->nd_type = card_type;
 		}
-		else	cstcall(expp, S_MAX);
+		else {
+			expp->nd_type = IndexType(left->nd_type);
+			cstcall(expp, S_MAX);
+		}
 		break;
 
 	case S_MAX:
@@ -942,7 +893,7 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 			struct token dt;
 			struct node *nd;
 
-			dt.TOK_INT = left->nd_type->next->tp_size;
+			dt.TOK_INT = PointedtoType(left->nd_type)->tp_size;
 			dt.tk_symb = INTEGER;
 			dt.tk_lineno = left->nd_lineno;
 			nd = MkLeaf(Value, &dt);
@@ -978,7 +929,6 @@ DO_DEBUG(3,debug("standard name \"%s\", %d",left->nd_def->df_idf->id_text,std));
 
 		if (!(left = getname(&arg, D_ISTYPE))) return 0;
 		tp = left->nd_def->df_type;
-		if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 		if (!(tp->tp_fund & T_DISCRETE)) {
 			node_error(arg, "unexpected type");
 			return 0;
@@ -1028,7 +978,7 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 			return 0;
 		}
 		if (!(left = getarg(&arg, T_DISCRETE, 0))) return 0;
-		if (!TstAssCompat(tp->next, left->nd_type)) {
+		if (!TstAssCompat(ElementType(tp), left->nd_type)) {
 			/* What type of compatibility do we want here?
 			   apparently assignment compatibility! ??? ???
 			*/
@@ -1050,6 +1000,7 @@ node_error(arg, "EXCL and INCL expect a SET parameter");
 	return 1;
 }
 
+STATIC int
 chk_cast(expp, left)
 	register struct node *expp, *left;
 {
@@ -1109,20 +1060,51 @@ TryToString(nd, tp)
 	}
 }
 
+STATIC int
+no_desig(expp)
+	struct node *expp;
+{
+	node_error(expp, "designator expected");
+	return 0;
+}
+
+STATIC int
+done_before(expp)
+	struct node *expp;
+{
+	return 1;
+}
+
 extern int	NodeCrash();
 
-int (*ChkTable[])() = {
+int (*ExprChkTable[])() = {
 	chk_value,
 	chk_arr,
 	chk_oper,
 	chk_uoper,
-	chk_arr,
+	chk_arrow,
 	chk_call,
-	chk_linkorname,
+	chk_ex_linkorname,
 	NodeCrash,
 	chk_set,
 	NodeCrash,
 	NodeCrash,
-	chk_linkorname,
+	chk_ex_linkorname,
 	NodeCrash
+};
+
+int (*DesigChkTable[])() = {
+	chk_value,
+	chk_arr,
+	no_desig,
+	no_desig,
+	chk_arrow,
+	no_desig,
+	chk_linkorname,
+	NodeCrash,
+	no_desig,
+	done_before,
+	NodeCrash,
+	chk_linkorname,
+	done_before
 };

@@ -35,7 +35,6 @@ MkNode(class, left, right, token)
 	nd->nd_token = *token;
 	nd->nd_class = class;
 	nd->nd_type = error_type;
-	DO_DEBUG(4,(debug("Create node:"), PrNode(nd)));
 	return nd;
 }
 
@@ -74,23 +73,29 @@ NodeCrash(expp)
 
 extern char *symbol2str();
 
-STATIC
-printnode(nd)
-	register struct node *nd;
+indnt(lvl)
 {
-	fprint(STDERR, "(");
-	if (nd) {
-		printnode(nd->nd_left);
-		fprint(STDERR, " %s ", symbol2str(nd->nd_symb));
-		printnode(nd->nd_right);
+	while (lvl--) {
+		print("  ");
 	}
-	fprint(STDERR, ")");
 }
 
-PrNode(nd)
-	struct node *nd;
+printnode(nd, lvl)
+	register struct node *nd;
 {
-	printnode(nd);
-	fprint(STDERR, "\n");
+	indnt(lvl);
+	print("C: %d; T: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
+}
+
+PrNode(nd, lvl)
+	register struct node *nd;
+{
+	if (! nd) {
+		indnt(lvl); print("<nilnode>\n");
+		return;
+	}
+	PrNode(nd->nd_left, lvl + 1);
+	printnode(nd, lvl);
+	PrNode(nd->nd_right, lvl + 1);
 }
 #endif DEBUG

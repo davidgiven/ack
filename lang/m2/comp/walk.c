@@ -61,21 +61,12 @@ WalkModule(module)
 		Also generate code for its body.
 	*/
 	register struct scope *sc;
-	struct scopelist *vis;
+	struct scopelist *savevis = CurrVis;
 
-	vis = CurrVis;
 	CurrVis = module->mod_vis;
 	sc = CurrentScope;
 
-	if (!proclevel && module == Defined) {
-		/* This module is a global module. Export the name of its
-		   initialization routine
-		*/
-		if (state == PROGRAM) C_exp("main");
-		else C_exp(sc->sc_name);
-	}
-
-	/* Now, walk through it's local definitions
+	/* Walk through it's local definitions
 	*/
 	WalkDef(sc->sc_def);
 
@@ -85,15 +76,15 @@ WalkModule(module)
 	*/
 	sc->sc_off = 0;
 	text_label = 1;
-	ProcScope = CurrentScope;	
-	C_pro_narg(state==PROGRAM && module==Defined ? "main" : sc->sc_name);
+	ProcScope = sc;	
+	C_pro_narg(sc->sc_name);
 	DoProfil();
 	if (module == Defined) {
 		/* Body of implementation or program module.
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		struct node *nd;
+		register struct node *nd;
 
 		if (state == IMPLEMENTATION) {
 			label l1 = ++data_label;
@@ -108,14 +99,13 @@ WalkModule(module)
 			C_ste_dlb(l1, (arith) 0);
 		}
 
-		nd = Modules;
-		while (nd) {
+		for (nd = Modules; nd; nd = nd->next) {
 			C_cal(nd->nd_IDF->id_text);
-			nd = nd->next;
 		}
 	}
 	MkCalls(sc->sc_def);
 	proclevel++;
+	DO_DEBUG(options['X'], PrNode(module->mod_body, 0));
 	WalkNode(module->mod_body, (label) 0);
 	C_df_ilb((label) 1);
 	C_ret((arith) 0);
@@ -123,14 +113,14 @@ WalkModule(module)
 	proclevel--;
 	TmpClose();
 
-	CurrVis = vis;
+	CurrVis = savevis;
 }
 
 WalkProcedure(procedure)
 	register struct def *procedure;
 {
 	/*	Walk through the definition of a procedure and all its
-		local definitions
+		local definitions, checking and generating code.
 	*/
 	struct scopelist *savevis = CurrVis;
 	register struct scope *sc;
@@ -141,7 +131,7 @@ WalkProcedure(procedure)
 	proclevel++;
 	CurrVis = procedure->prc_vis;
 	ProcScope = sc = CurrentScope;
-	
+
 	/* Generate code for all local modules and procedures
 	*/
 	WalkDef(sc->sc_def);
@@ -182,6 +172,7 @@ WalkProcedure(procedure)
 		C_bss_cst(tp->tp_size, (arith) 0, 0);
 	}
 
+	DO_DEBUG(options['X'], PrNode(procedure->prc_body, 0));
 	WalkNode(procedure->prc_body, (label) 0);
 	C_ret((arith) 0);
 	if (tp) {
@@ -195,7 +186,7 @@ WalkProcedure(procedure)
 		else	C_ret(WA(tp->tp_size));
 	}
 
-	RegisterMessages(sc->sc_def);
+	if (! options['n']) RegisterMessages(sc->sc_def);
 	C_end(-sc->sc_off);
 	TmpClose();
 	CurrVis = savevis;
@@ -372,18 +363,20 @@ WalkStat(nd, lab)
 			}
 			C_bra(l1);
 			C_df_ilb(l2);
-			WalkNode(right, lab);
-			C_loc(left->nd_INT);
-			CodePExpr(nd);
-			C_adi(int_size);
+			CheckAssign(nd->nd_type, int_type);
 			CodeDStore(nd);
-			C_df_ilb(l1);
+			WalkNode(right, lab);
 			CodePExpr(nd);
+			C_loc(left->nd_INT);
+			C_adi(int_size);
+			C_df_ilb(l1);
+			C_dup(int_size);
 			if (tmp) C_lol(tmp); else C_loc(fnd->nd_INT);
 			if (left->nd_INT > 0) {
 				C_ble(l2);
 			}
 			else	C_bge(l2);
+			C_asp(int_size);
 			if (tmp) FreeInt(tmp);
 		}
 		break;
@@ -498,8 +491,6 @@ WalkExpr(nd)
 	/*	Check an expression and generate code for it
 	*/
 
-	DO_DEBUG(1, (DumpTree(nd), print("\n")));
-
 	if (! chk_expr(nd)) return;
 
 	CodePExpr(nd);
@@ -512,9 +503,7 @@ WalkDesignator(nd, ds)
 	/*	Check designator and generate code for it
 	*/
 
-	DO_DEBUG(1, (DumpTree(nd), print("\n")));
-
-	if (! chk_designator(nd, VARIABLE, D_DEFINED)) return;
+	if (! chk_variable(nd)) return;
 
 	*ds = InitDesig;
 	CodeDesig(nd, ds);
@@ -529,7 +518,7 @@ DoForInit(nd, left)
 	nd->nd_class = Name;
 	nd->nd_symb = IDENT;
 
-	if (! chk_designator(nd, VARIABLE, D_DEFINED) ||
+	if (! chk_variable(nd) ||
 	    ! chk_expr(left->nd_left) ||
 	    ! chk_expr(left->nd_right)) return 0;
 
@@ -574,7 +563,6 @@ node_warning(nd, "old-fashioned! compatibility required in FOR statement");
 	}
 
 	CodePExpr(left->nd_left);
-	CodeDStore(nd);
 
 	return 1;
 }
@@ -587,7 +575,7 @@ DoAssign(nd, left, right)
 	struct desig dsl, dsr;
 
 	if (!chk_expr(right)) return;
-	if (! chk_designator(left, VARIABLE, D_DEFINED)) return;
+	if (! chk_variable(left)) return;
 	TryToString(right, left->nd_type);
 	dsr = InitDesig;
 	CodeExpr(right, &dsr, NO_LABEL, NO_LABEL);
@@ -613,15 +601,19 @@ DoAssign(nd, left, right)
 RegisterMessages(df)
 	register struct def *df;
 {
-	struct type *tp;
+	register struct type *tp;
 
 	for (; df; df = df->df_nextinscope) {
 		if (df->df_kind == D_VARIABLE && !(df->df_flags & D_NOREG)) {
 			/* Examine type and size
 			*/
-			tp = df->df_type;
-			if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
-			if ((tp->tp_fund & T_NUMERIC) &&
+			tp = BaseType(df->df_type);
+			if ((df->df_flags & D_VARPAR) ||
+				 tp->tp_fund == T_POINTER) {
+				C_ms_reg(df->var_off, pointer_size,
+					 reg_pointer, 0);
+			}
+			else if ((tp->tp_fund & T_NUMERIC) &&
 			     tp->tp_size <= dword_size) {
 				C_ms_reg(df->var_off,
 					 tp->tp_size,
@@ -629,46 +621,6 @@ RegisterMessages(df)
 					    reg_float : reg_any,
 					 0);
 			}
-			else if ((df->df_flags & D_VARPAR) ||
-				 tp->tp_fund == T_POINTER) {
-				C_ms_reg(df->var_off, pointer_size,
-					 reg_pointer, 0);
-			}
 		}
 	}
 }
-
-#ifdef DEBUG
-DumpTree(nd)
-	struct node *nd;
-{
-	char *s;
-	extern char *symbol2str();
-	
-	if (!nd) {
-		print("()");
-		return;
-	}
-
-	print("(");
-	DumpTree(nd->nd_left);
-	switch(nd->nd_class) {
-	case Def:	s = "Def"; break;
-	case Oper:	s = "Oper"; break;
-	case Arrsel:	s = "Arrsel"; break;
-	case Arrow:	s = "Arrow"; break;
-	case Uoper:	s = "Uoper"; break;
-	case Name:	s = "Name"; break;
-	case Set:	s = "Set"; break;
-	case Value:	s = "Value"; break;
-	case Call:	s = "Call"; break;
-	case Xset:	s = "Xset"; break;
-	case Stat:	s = "Stat"; break;
-	case Link:	s = "Link"; break;
-	default:	s = "ERROR"; break;
-	}
-	print("%s %s", s, symbol2str(nd->nd_symb));
-	DumpTree(nd->nd_right);
-	print(")");
-}
-#endif

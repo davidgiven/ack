@@ -20,6 +20,7 @@ static char *RcsId = "$Header$";
 #include	"node.h"
 #include	"misc.h"
 #include	"main.h"
+#include	"chk_expr.h"
 
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurred in a
@@ -52,25 +53,27 @@ error("function procedure does not return a value", df->df_idf->id_text);
 
 ProcedureHeading(struct def **pdf; int type;)
 {
-	struct type *tp = 0;
 	struct paramlist *params = 0;
+	struct type *tp = 0;
 	register struct def *df;
 	struct def *DeclProc();
+	arith NBytesParams;
 } :
 	PROCEDURE IDENT
 		{
 		  df = DeclProc(type);
-		  tp = construct_type(T_PROCEDURE, tp);
 		  if (proclevel > 1) {
 			/* Room for static link
 			*/
-			tp->prc_nbpar = pointer_size;
+			NBytesParams = pointer_size;
 		  }
-		  else	tp->prc_nbpar = 0;
+		  else	NBytesParams = 0;
 		}
-	FormalParameters(&params, &(tp->next), &(tp->prc_nbpar))?
+	FormalParameters(&params, &tp, &NBytesParams)?
 		{
+		  tp = construct_type(T_PROCEDURE, tp);
 		  tp->prc_params = params;
+		  tp->prc_nbpar = NBytesParams;
 		  if (df->df_type) {
 			/* We already saw a definition of this type
 			   in the definition module.
@@ -85,15 +88,10 @@ error("inconsistent procedure declaration for \"%s\"", df->df_idf->id_text);
 
 		  if (type == D_PROCHEAD) close_scope(0);
 
-		  DO_DEBUG(1, type == D_PROCEDURE && 
-				(print("proc %s:", df->df_idf->id_text),
-				 DumpType(tp), print("\n")));
 		}
 ;
 
-block(struct node **pnd;)
-{
-}:
+block(struct node **pnd;) :
 	declaration*
 	[
 		BEGIN
@@ -130,7 +128,6 @@ FormalParameters(struct paramlist **pr;
 		]*
 	]?
 	')'
-			{ *tp = 0; }
 	[	':' qualident(D_ISTYPE, &df, "type", (struct node **) 0)
 			{ *tp = df->df_type;
 			}
@@ -142,31 +139,45 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
 	struct node *FPList;
 	struct type *tp;
 	int VARp = D_VALPAR;
+	struct paramlist *p = 0;
 } :
 	[
 		VAR	{ VARp = D_VARPAR; }
 	]?
-	IdentList(&FPList) ':' FormalType(&tp)
-			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
+	IdentList(&FPList) ':' FormalType(&p, 0)
+			{ EnterParamList(ppr, FPList, p->par_def->df_type,
+					 VARp, parmaddr);
+			  free_def(p->par_def);
+			  free_paramlist(p);
+			}
 ;
 
-FormalType(struct type **ptp;)
+FormalType(struct paramlist **ppr; int VARp;)
 {
-	struct def *df;
-	int ARRAYflag = 0;
+	struct def *df1;
+	register struct def *df;
+	int ARRAYflag;
 	register struct type *tp;
+	register struct paramlist *p = new_paramlist();
 	extern arith ArrayElSize();
 } :
 	[ ARRAY OF	{ ARRAYflag = 1; }
-	]?
-	qualident(D_ISTYPE, &df, "type", (struct node **) 0)
-		{ if (ARRAYflag) {
-			*ptp = tp = construct_type(T_ARRAY, NULLTYPE);
+	|		{ ARRAYflag = 0; }
+	]
+	qualident(D_ISTYPE, &df1, "type", (struct node **) 0)
+		{ df = df1;
+		  if (ARRAYflag) {
+			tp = construct_type(T_ARRAY, NULLTYPE);
 			tp->arr_elem = df->df_type;
 			tp->arr_elsize = ArrayElSize(df->df_type);
 			tp->tp_align = lcm(word_align, pointer_align);
 		  }
-		  else	*ptp = df->df_type;
+		  else	tp = df->df_type;
+		  p->next = *ppr;
+		  *ppr = p;
+		  p->par_def = df = new_def();
+		  df->df_type = tp;
+		  df->df_flags = VARp;
 		}
 ;
 
@@ -362,7 +373,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 				{ warning("Old fashioned Modula-2 syntax!");
 				  id = gen_anon_idf();
 				  df = ill_df;
-				  if (chk_designator(nd, 0, D_REFERRED) &&
+				  if (chk_designator(nd) &&
 				      (nd->nd_class != Def ||
 				       !(nd->nd_def->df_kind &
 					 (D_ERROR|D_ISTYPE)))) {
@@ -513,8 +524,6 @@ ProcedureType(struct type **ptp;)
 FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 {
 	struct def *df;
-	struct type *tp;
-	struct paramlist *p;
 	int VARp;
 } :
 	'('		{ *ppr = 0; }
@@ -522,25 +531,13 @@ FormalTypeList(struct paramlist **ppr; struct type **ptp;)
 		[ VAR	{ VARp = D_VARPAR; }
 		|	{ VARp = D_VALPAR; }
 		]
-		FormalType(&tp)
-			{ *ppr = p = new_paramlist();
-			  p->next = 0;
-			  p->par_def = df = new_def();
-			  df->df_type = tp;
-			  df->df_flags = VARp;
-			}
+		FormalType(ppr, VARp)
 		[
 			','
 			[ VAR	{VARp = D_VARPAR; }
 			|	{VARp = D_VALPAR; }
 			] 
-			FormalType(&tp)
-				{ p = new_paramlist();
-				  p->next = *ppr; *ppr = p;
-			  	  p->par_def = df = new_def();
-			  	  df->df_type = tp;
-			  	  df->df_flags = VARp;
-				}
+			FormalType(ppr, VARp)
 		]*
 	]?
 	')'

@@ -22,6 +22,7 @@ static char *RcsId = "$Header$";
 #include	"def.h"
 #include	"type.h"
 #include	"scope.h"
+#include	"main.h"
 
 struct tmpvar {
 	struct tmpvar	*next;
@@ -45,7 +46,7 @@ NewInt()
 	if (!TmpInts) {
 		offset = - WA(align(int_size - ProcScope->sc_off, int_align));
 		ProcScope->sc_off = offset;
-		C_ms_reg(offset, int_size, reg_any, 0);
+		if (! options['n']) C_ms_reg(offset, int_size, reg_any, 0);
 	}
 	else {
 		tmp = TmpInts;
@@ -65,7 +66,7 @@ NewPtr()
 	if (!TmpPtrs) {
 		offset = - WA(align(pointer_size - ProcScope->sc_off, pointer_align));
 		ProcScope->sc_off = offset;
-		C_ms_reg(offset, pointer_size, reg_pointer, 0);
+		if (! options['n']) C_ms_reg(offset, pointer_size, reg_pointer, 0);
 	}
 	else {
 		tmp = TmpPtrs;

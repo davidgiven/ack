@@ -5,6 +5,7 @@
 static char *RcsId = "$Header$";
 #endif
 
+#include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 
@@ -240,12 +241,12 @@ ReturnStatement(struct node **pnd;)
 			{ if (scopeclosed(CurrentScope)) {
 error("a module body has no result value");
 			  }
-			  else if (! df->df_type->next) {
+			  else if (! ResultType(df->df_type)) {
 error("procedure \"%s\" has no result value", df->df_idf->id_text);
 			  }
 			}
 	|
-			{ if (df->df_type->next) {
+			{ if (ResultType(df->df_type)) {
 error("procedure \"%s\" must return a value", df->df_idf->id_text);
 			  }
 			}

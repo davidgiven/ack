@@ -2,8 +2,12 @@
 
 /* $Header$ */
 
-extern int	(*ChkTable[])();	/* table of expression checking
+extern int	(*ExprChkTable[])();	/* table of expression checking
+					   functions, indexed by node class
+					*/
+extern int	(*DesigChkTable[])();	/* table of designator checking
 					   functions, indexed by node class
 					*/
 
-#define	chk_expr(expp)	((*ChkTable[(expp)->nd_class])(expp))
+#define	chk_expr(expp)	((*ExprChkTable[(expp)->nd_class])(expp))
+#define chk_designator(expp)	((*DesigChkTable[(expp)->nd_class])(expp))

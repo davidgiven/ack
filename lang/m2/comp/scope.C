@@ -218,7 +218,7 @@ close_scope(flag)
 
 	if (flag) {
 		if (sc->sc_forw) rem_forwards(sc->sc_forw);
-		DO_DEBUG(2, PrScopeDef(sc->sc_def));
+		DO_DEBUG(options['S'], PrScopeDef(sc->sc_def));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));
 		if (flag & SC_REVERSE) Reverse(&(sc->sc_def));

@@ -48,7 +48,7 @@ qualident(int types;
 		{ if (types) {
 			df = ill_df;
 
-			if (chk_designator(nd, 0, D_REFERRED)) {
+			if (chk_designator(nd)) {
 			    if (nd->nd_class != Def) {
 				node_error(nd, "%s expected", str);
 			    }
@@ -98,14 +98,14 @@ ConstExpression(struct node **pnd;):
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
-		{ DO_DEBUG(3,
-		     ( debug("Constant expression:"),
-		       PrNode(*pnd)));
+		{ DO_DEBUG(options['X'], print("CONSTANT EXPRESSION\n"));
+		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
 		  if (chk_expr(*pnd) &&
 		      ((*pnd)->nd_class != Set && (*pnd)->nd_class != Value)) {
 			error("Constant expression expected");
 		  }
-		  DO_DEBUG(3, PrNode(*pnd));
+		  DO_DEBUG(options['X'], print("RESULTS IN\n"));
+		  DO_DEBUG(options['X'], PrNode(*pnd, 0));
 		}
 ;
 

@@ -52,9 +52,6 @@ main(argc, argv)
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
 		return 1;
 	}
-#ifdef DEBUG
-	DO_DEBUG(1, debug("Debugging level: %d", options['D']));
-#endif DEBUG
 	return !Compile(Nargv[1], Nargv[2]);
 }
 
@@ -63,8 +60,6 @@ Compile(src, dst)
 {
 	extern struct tokenname tkidf[];
 
-	DO_DEBUG(1, debug("Filename : %s", src));
-	DO_DEBUG(1, (!dst || debug("Targetfile: %s", dst)));
 	if (! InsertFile(src, (char **) 0, &src)) {
 		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
 		return 0;
@@ -98,6 +93,7 @@ Compile(src, dst)
 	C_ms_src((arith) (LineNumber - 1), FileName);
 	close_scope(SC_REVERSE);
 	if (!err_occurred) {
+		C_exp(Defined->mod_vis->sc_scope->sc_name);
 		WalkModule(Defined);
 		if (fp_used) {
 			C_ms_flt();

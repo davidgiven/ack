@@ -134,10 +134,19 @@ struct type
 #define NULLTYPE ((struct type *) 0)
 
 #define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->next==0)
-#define bounded(tpx)	((tpx)->tp_fund & T_INDEX)
-#define complex(tpx)	((tpx)->tp_fund & (T_RECORD|T_ARRAY))
-#define WA(sz)		(align(sz, (int) word_size))
-#define ResultType(tpx)	(assert((tpx)->tp_fund == T_PROCEDURE), (tpx)->next)
-#define ParamList(tpx)	(assert((tpx)->tp_fund == T_PROCEDURE),\
+#define bounded(tpx)		((tpx)->tp_fund & T_INDEX)
+#define complex(tpx)		((tpx)->tp_fund & (T_RECORD|T_ARRAY))
+#define WA(sz)			(align(sz, (int) word_size))
+#define ResultType(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
+					(tpx)->next)
+#define ParamList(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
 					(tpx)->prc_params)
+#define IndexType(tpx)		(assert((tpx)->tp_fund == T_ARRAY),\
+					(tpx)->next)
+#define ElementType(tpx)	(assert((tpx)->tp_fund == T_SET),\
+					(tpx)->next)
+#define PointedtoType(tpx)	(assert((tpx)->tp_fund == T_POINTER),\
+					(tpx)->next)
+#define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next\
+							      : (tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)

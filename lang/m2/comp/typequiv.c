@@ -67,7 +67,7 @@ TstProcEquiv(tp1, tp2)
 
 	/* First check if the result types are equivalent
 	*/
-	if (! TstTypeEquiv(tp1->next, tp2->next)) return 0;
+	if (! TstTypeEquiv(ResultType(tp1), ResultType(tp2))) return 0;
 
 	p1 = ParamList(tp1);
 	p2 = ParamList(tp2);
@@ -94,8 +94,8 @@ TstCompat(tp1, tp2)
 
 	if (TstTypeEquiv(tp1, tp2)) return 1;
 
-	if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
-	if (tp2->tp_fund == T_SUBRANGE) tp2 = tp2->next;
+	tp1 = BaseType(tp1);
+	tp2 = BaseType(tp2);
 
 	return	tp1 == tp2
 	    ||
@@ -138,8 +138,8 @@ TstAssCompat(tp1, tp2)
 
 	if (TstCompat(tp1, tp2)) return 1;
 
-	if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
-	if (tp2->tp_fund == T_SUBRANGE) tp2 = tp2->next;
+	tp1 = BaseType(tp1);
+	tp2 = BaseType(tp2);
 
 	if ((tp1->tp_fund & T_INTORCARD) &&
 	    (tp2->tp_fund & T_INTORCARD)) return 1;
@@ -149,14 +149,14 @@ TstAssCompat(tp1, tp2)
 		*/
 		arith size;
 
-		if (!(tp = tp1->next)) return 0;
+		if (IsConformantArray(tp1)) return 0;
 
+		tp = IndexType(tp1);
 		if (tp->tp_fund == T_SUBRANGE) {
 			size = tp->sub_ub - tp->sub_lb + 1;
 		}
 		else	size = tp->enm_ncst;
-	    	tp1 = tp1->arr_elem;
-		if (tp1->tp_fund == T_SUBRANGE) tp1 = tp1->next;
+	    	tp1 = BaseType(tp1->arr_elem);
 	    	return
 			tp1 == char_type
 		    &&	(tp2->tp_fund  == T_STRING && size >= tp2->tp_size)

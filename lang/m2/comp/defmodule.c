@@ -38,7 +38,7 @@ GetFile(name)
 		fatal("Could'nt find a DEFINITION MODULE for \"%s\"", name);
 	}
 	LineNumber = 1;
-	DO_DEBUG(1, debug("File %s : %ld characters", FileName, sys_filesize(FileName)));
+	DO_DEBUG(options['F'], debug("File %s : %ld characters", FileName, sys_filesize(FileName)));
 }
 
 struct def *

@@ -225,22 +225,22 @@ chk_basesubrange(tp, base)
 		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
 			error("Base type has insufficient range");
 		}
-		base = base->next;
+		base = BaseType(base);
 	}
 
 	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
-		if (tp->next != base) {
+		if (BaseType(tp) != base) {
 			error("Specified base does not conform");
 		}
 	}
 	else if (base != card_type && base != int_type) {
 		error("Illegal base for a subrange");
 	}
-	else if (base == int_type && tp->next == card_type &&
+	else if (base == int_type && BaseType(tp) == card_type &&
 		 (tp->sub_ub > max_int || tp->sub_ub < 0)) {
 		error("Upperbound to large for type INTEGER");
 	}
-	else if (base != tp->next && base != int_type) {
+	else if (base != BaseType(tp) && base != int_type) {
 		error("Specified base does not conform");
 	}
 
@@ -257,14 +257,12 @@ subr_type(lb, ub)
 		indicated by "lb" and "ub", but first perform some
 		checks
 	*/
-	register struct type *tp = lb->nd_type, *res;
+	register struct type *tp = BaseType(lb->nd_type), *res;
 
 	if (!TstCompat(lb->nd_type, ub->nd_type)) {
 		node_error(ub, "Types of subrange bounds not equal");
 		return error_type;
 	}
-
-	if (tp->tp_fund == T_SUBRANGE) tp = tp->next;
 
 	if (tp == intorcard_type) {
 		/* Lower bound >= 0; in this case, the base type is CARDINAL,
@@ -397,7 +395,7 @@ ArraySizes(tp)
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
-	register struct type *index_type = tp->next;
+	register struct type *index_type = IndexType(tp);
 	register struct type *elem_type = tp->arr_elem;
 	arith lo, hi;
 
