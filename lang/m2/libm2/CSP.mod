@@ -13,7 +13,7 @@ IMPLEMENTATION MODULE CSP;
 
   FROM random	IMPORT	Uniform;
   FROM SYSTEM	IMPORT	BYTE, ADDRESS, NEWPROCESS, TRANSFER;
-  FROM Storage	IMPORT	ALLOCATE, DEALLOCATE;
+  FROM Storage	IMPORT	Allocate, Deallocate;
   IMPORT	Traps;
 
   CONST	WorkSpaceSize = 1000;
@@ -163,8 +163,8 @@ IMPLEMENTATION MODULE CSP;
   BEGIN
 	Pop(free, newprocess);
 	IF newprocess = NIL THEN
-		ALLOCATE(newprocess,SIZE(ProcessDescriptor));
-		ALLOCATE(newprocess^.wsp, WorkSpaceSize)
+		Allocate(newprocess,SIZE(ProcessDescriptor));
+		Allocate(newprocess^.wsp, WorkSpaceSize)
 	END;
 	WITH newprocess^ DO
 		father := cp;
@@ -198,7 +198,7 @@ IMPLEMENTATION MODULE CSP;
   PROCEDURE InitChannel(VAR ch: Channel);
   (* Initialize the channel ch *)
   BEGIN
-	ALLOCATE(ch, SIZE(ChannelDescriptor));
+	Allocate(ch, SIZE(ChannelDescriptor));
 	WITH ch^ DO
 		InitQueue(senders);
 		owner := NIL;
@@ -227,7 +227,7 @@ IMPLEMENTATION MODULE CSP;
   BEGIN
 	WITH ch^ DO
 		Push(cp, senders);
-		ALLOCATE(cp^.msgadr, SIZE(data));
+		Allocate(cp^.msgadr, SIZE(data));
 		m := cp^.msgadr;
 		cp^.msglen := HIGH(data);
 		FOR i := 0 TO HIGH(data) DO
@@ -276,7 +276,7 @@ IMPLEMENTATION MODULE CSP;
 			Push(cp, ready);
 			Push(aux, ready)
 		END;
-		DEALLOCATE(aux^.msgadr, aux^.msglen+1);
+		Deallocate(aux^.msgadr, aux^.msglen+1);
 		DoTransfer
 	END
   END Receive;
@@ -338,7 +338,7 @@ IMPLEMENTATION MODULE CSP;
 BEGIN
 	InitQueue(free);
 	InitQueue(ready);
-	ALLOCATE(cp,SIZE(ProcessDescriptor));
+	Allocate(cp,SIZE(ProcessDescriptor));
 	WITH cp^ DO
 		sons := 0;
 		father := NIL

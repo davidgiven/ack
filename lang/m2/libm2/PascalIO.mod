@@ -17,7 +17,7 @@ IMPLEMENTATION MODULE PascalIO;
   FROM Streams IMPORT Stream, StreamKind, StreamMode, StreamResult,
 		      InputStream, OutputStream, OpenStream, CloseStream, 
 		      EndOfStream, Read, Write, StreamBuffering;
-  FROM Storage IMPORT ALLOCATE;
+  FROM Storage IMPORT Allocate;
   FROM SYSTEM IMPORT ADR;
 
   TYPE	charset = SET OF CHAR;
@@ -98,7 +98,7 @@ IMPLEMENTATION MODULE PascalIO;
 		Xtext := Xtext^.next;
 	END;
 	IF Xtext = NIL THEN
-		ALLOCATE(Xtext,SIZE(IOstream));
+		Allocate(Xtext,SIZE(IOstream));
 		Xtext^.next := head;
 		head := Xtext;
 	END;
@@ -125,14 +125,20 @@ IMPLEMENTATION MODULE PascalIO;
 	WITH InputText^ DO
 		IF type # Preading THEN Error(Preading); END;
 		IF NOT done THEN
-			Get(InputText);
-			done := TRUE;
+			IF EndOfStream(stream, result) THEN
+				eof := TRUE;
+				ch := 0C;
+			ELSE
+				Read(stream, ch, result);
+				done := TRUE;
+			END;
 		END;
 		RETURN ch;
 	END;
   END NextChar;
 
   PROCEDURE Get(InputText: Text);
+  VAR dummy: CHAR;
   BEGIN
 	WITH InputText^ DO
 		IF type # Preading THEN Error(Preading); END;
@@ -140,11 +146,8 @@ IMPLEMENTATION MODULE PascalIO;
 			Traps.Message("unexpected EOF");
 			HALT;
 		END;
-		IF EndOfStream(stream, result) THEN
-			eof := TRUE;
-			ch := 0C;
-		ELSE
-			Read(stream, ch, result);
+		IF done THEN done := FALSE;
+		ELSE dummy := NextChar(InputText);
 		END;
 	END;
   END Get;

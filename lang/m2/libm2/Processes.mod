@@ -8,7 +8,7 @@ IMPLEMENTATION MODULE Processes [1];
 
   FROM SYSTEM IMPORT ADDRESS, TSIZE, NEWPROCESS, TRANSFER;
 
-  FROM Storage IMPORT ALLOCATE;
+  FROM Storage IMPORT Allocate;
 
   FROM Traps IMPORT Message;
 
@@ -28,8 +28,8 @@ IMPLEMENTATION MODULE Processes [1];
 	wsp: ADDRESS;
   BEGIN
 	s0 := cp;
-	ALLOCATE(wsp, n);
-	ALLOCATE(cp, TSIZE(ProcessDescriptor));
+	Allocate(wsp, n);
+	Allocate(cp, TSIZE(ProcessDescriptor));
 	WITH cp^ DO
 		next := s0^.next;
 		s0^.next := cp;
@@ -94,7 +94,7 @@ IMPLEMENTATION MODULE Processes [1];
   END Init;
 
 BEGIN
-	ALLOCATE(cp, TSIZE(ProcessDescriptor));
+	Allocate(cp, TSIZE(ProcessDescriptor));
 	WITH cp^ DO
 		next := cp;
 		ready := TRUE;

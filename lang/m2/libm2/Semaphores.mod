@@ -14,7 +14,7 @@ IMPLEMENTATION MODULE Semaphores [1];
 *)
 
   FROM SYSTEM IMPORT ADDRESS, NEWPROCESS, TRANSFER;
-  FROM Storage IMPORT ALLOCATE;
+  FROM Storage IMPORT Allocate;
   FROM random IMPORT Uniform;
   FROM Traps IMPORT Message;
 
@@ -37,8 +37,8 @@ IMPLEMENTATION MODULE Semaphores [1];
 	wsp: ADDRESS;
   BEGIN
 	s0 := cp;
-	ALLOCATE(wsp, n);
-	ALLOCATE(cp, SIZE(Process));
+	Allocate(wsp, n);
+	Allocate(cp, SIZE(Process));
 	WITH cp^ DO
 		next := s0^.next;
 		s0^.next := cp;
@@ -67,7 +67,7 @@ IMPLEMENTATION MODULE Semaphores [1];
   PROCEDURE NewSema(n: CARDINAL): Sema;
   VAR	s: Sema;
   BEGIN
-	ALLOCATE(s, SIZE(Semaphore));
+	Allocate(s, SIZE(Semaphore));
 	s^.level := n;
 	RETURN s;
   END NewSema;
@@ -110,7 +110,7 @@ IMPLEMENTATION MODULE Semaphores [1];
 	RETURN FALSE;
   END Runnable;
 BEGIN
-	ALLOCATE(cp, SIZE(Process));
+	Allocate(cp, SIZE(Process));
 	WITH cp^ DO
 		next := cp;
 		waiting := NIL;

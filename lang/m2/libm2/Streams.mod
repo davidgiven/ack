@@ -44,7 +44,7 @@ IMPLEMENTATION MODULE Streams;
 		IF NOT Storage.Available(SIZE(IOB)) THEN
 			RETURN;
 		END;
-                Storage.ALLOCATE(stream,SIZE(IOB));
+                Storage.Allocate(stream,SIZE(IOB));
                 stream^.next := head;
                 head := stream;
         END;
