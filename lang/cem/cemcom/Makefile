@@ -801,10 +801,8 @@ program.o: type.h
 Lpars.o: Lpars.h
 ival.o: LLlex.h
 ival.o: Lpars.h
-ival.o: align.h
 ival.o: arith.h
 ival.o: assert.h
-ival.o: class.h
 ival.o: debug.h
 ival.o: def.h
 ival.o: estack.h
