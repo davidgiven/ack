@@ -251,8 +251,7 @@ ImportEffects(idef, scope, flag)
 	}
 
 	tp = BaseType(df->df_type);
-	if ((df->df_kind & (D_TYPE|D_FTYPE)) &&
-	    tp->tp_fund == T_ENUMERATION) {
+	if (df->df_kind == D_TYPE && tp->tp_fund == T_ENUMERATION) {
 		/* Also import all enumeration literals
 		*/
 		for (df = tp->enm_enums; df; df = df->enm_next) {
@@ -416,7 +415,7 @@ EnterExportList(Idlist, qualified)
 					continue;
 				}
 				if (df1->df_kind == D_HIDDEN &&
-				    (df2->df_kind & (D_TYPE|D_FTYPE))) {
+				    df2->df_kind == D_TYPE) {
 					DeclareType(idlist, df1, df2->df_type);
 					df1->df_kind = D_TYPE;
 					continue;

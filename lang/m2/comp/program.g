@@ -189,6 +189,7 @@ definition
 	[ %persistent
 	  IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
 	  [ '=' type(&(df->df_type))
+			{ SolveForwardTypeRefs(df); }
 	  | /* empty */
 	    /*
 	       Here, the exported type has a hidden implementation.

@@ -552,8 +552,10 @@ WalkStat(nd, exit_label)
 				C_lol(tmp);
 				if (uns) C_cmu(int_size);
 				else C_cmi(int_size);
-				C_zgt(l2);
+				if (left->nd_INT >= 0) C_zgt(l2);
+				else C_zlt(l2);
 				C_lol(tmp2);
+				RangeCheck(nd->nd_type, left->nd_left->nd_type);
 				CodeDStore(nd);
 				C_lol(tmp);
 				ForLoopVarExpr(nd);
@@ -736,6 +738,7 @@ DoForInit(nd)
 {
 	register t_node *left = nd->nd_left;
 	register t_def *df;
+	register t_type *base_tp;
 	t_type *tpl, *tpr;
 
 	nd->nd_left = nd->nd_right = 0;
@@ -778,12 +781,13 @@ DoForInit(nd)
 		return 1;
 	}
 
+	base_tp = BaseType(df->df_type);
 	tpl = left->nd_left->nd_type;
 	tpr = left->nd_right->nd_type;
 #ifndef STRICT_3RD_ED
 	if (! options['3']) {
-	  if (!ChkAssCompat(&(left->nd_left), df->df_type, "FOR statement") ||
-	      !ChkAssCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
+	  if (!ChkAssCompat(&(left->nd_left), base_tp, "FOR statement") ||
+	      !ChkAssCompat(&(left->nd_right), base_tp, "FOR statement")) {
 		return 1;
 	  }
 	  if (!TstCompat(df->df_type, tpl) ||
@@ -792,8 +796,8 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	  }
 	} else
 #endif
-	if (!ChkCompat(&(left->nd_left), df->df_type, "FOR statement") ||
-	    !ChkCompat(&(left->nd_right), BaseType(df->df_type), "FOR statement")) {
+	if (!ChkCompat(&(left->nd_left), base_tp, "FOR statement") ||
+	    !ChkCompat(&(left->nd_right), base_tp, "FOR statement")) {
 		return 1;
 	}
 

@@ -71,7 +71,9 @@ struct dforward {
 
 struct forwtype {
 	struct node *f_node;
+	struct def *f_def;
 #define df_forw_node	df_value.df_fortype.f_node
+#define df_forw_def	df_value.df_fortype.f_def
 };
 
 struct def	{		/* list of definitions for a name */
@@ -94,14 +96,13 @@ struct def	{		/* list of definitions for a name */
 #define D_FORWARD	0x0400	/* not yet defined */
 #define D_FORWMODULE	0x0800	/* module must be declared later */
 #define D_FORWTYPE	0x1000	/* forward type */
-#define D_FTYPE		0x2000	/* resolved forward type */
 #define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
 #define D_INUSE		0x8000	/* identification in this scope (like D_IMPORT)
 				*/
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
-#define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
+#define D_ISTYPE	(D_HIDDEN|D_TYPE)
 #define D_IMPORTED	(D_IMPORT|D_INUSE)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	unsigned short  df_flags;

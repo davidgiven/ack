@@ -109,34 +109,10 @@ chk_forw(pdf)
 
 	while (df = *pdf) {
 		if (df->df_kind == D_FORWTYPE) {
-			register t_def *df1 = df;
-			register t_node *nd = df->df_forw_node;
-
-			*pdf = df->df_nextinscope;
-			RemoveFromIdList(df);
-			df = lookfor(nd, CurrVis, 1, 0);
-			if (! df->df_kind & (D_ERROR|D_FTYPE|D_TYPE)) {
-node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
-			}
-			while (nd) {
-				nd->nd_type->tp_next = df->df_type;
-				nd = nd->nd_right;
-			}
-			FreeNode(df1->df_forw_node);
-			free_def(df1);
+			ForceForwardTypeDef(df);	/* removes df */
 			continue;
 		}
-		else if (df->df_kind == D_FTYPE) {
-			register t_node *nd = df->df_forw_node;
-
-			df->df_kind = D_TYPE;
-			while (nd) {
-				nd->nd_type->tp_next = df->df_type;
-				nd = nd->nd_right;
-			}
-			FreeNode(df->df_forw_node);
-		}
-		else if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
+		if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
 			/* These definitions must be found in
 			   the enclosing closed scope, which of course
 			   may be the scope that is now closed!

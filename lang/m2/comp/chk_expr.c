@@ -161,7 +161,8 @@ ChkArrow(expp)
 		return ex_error(expp, "illegal operand type");
 	}
 
-	expp->nd_type = RemoveEqual(PointedtoType(tp));
+	if ((tp = RemoveEqual(PointedtoType(tp))) == 0) tp = error_type;
+	expp->nd_type = tp;
 	return 1;
 }
 

@@ -157,10 +157,7 @@ define(id, scope, kind)
 			if (kind == D_FORWTYPE) return df;
 			break;
 		case D_FORWTYPE:
-			if (kind == D_FORWTYPE) return df;
-			if (kind == D_TYPE) {
-				df->df_kind = D_FTYPE;
-			}
+			if (kind & (D_FORWTYPE|D_TYPE)) return df;
 			else {
 				error("identifier \"%s\" must be a type",
 					id->id_text);

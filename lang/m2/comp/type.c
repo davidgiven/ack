@@ -269,7 +269,11 @@ node_error(nd,"type \"%s\" not (yet) declared", df->df_idf->id_text);
 		    	}
 			FreeNode(nd);
 			if (df->df_kind == D_FORWTYPE) {
-				df->df_kind = D_FTYPE;
+				/*	Here, df->df_type was already set,
+					so there is an actual definition in the
+					surrounding scope, which is now used.
+				*/
+				ForceForwardTypeDef(df);
 			}
 		   	return df->df_type;
 		}
@@ -646,6 +650,58 @@ DeclareType(nd, df, tp)
 			CheckForImports(df);
 		}
 	}
+
+	SolveForwardTypeRefs(df);
+}
+
+SolveForwardTypeRefs(df)
+	register t_def *df;
+{
+	register t_node *nd;
+
+	if (df->df_kind == D_FORWTYPE) {
+		nd = df->df_forw_node;
+
+		df->df_kind = D_TYPE;
+		while (nd) {
+			nd->nd_type->tp_next = df->df_type;
+			nd = nd->nd_right;
+		}
+		FreeNode(df->df_forw_node);
+	}
+}
+
+
+ForceForwardTypeDef(df)
+	register t_def *df;
+{
+	register t_def *df1 = df, *df2;
+	register t_node *nd = df->df_forw_node;
+
+	while (df && df->df_kind == D_FORWTYPE) {
+		RemoveFromIdList(df);
+		if ((df2 = df->df_scope->sc_def) == df) {
+			df->df_scope->sc_def = df->df_nextinscope;
+		}
+		else {
+			while (df2->df_nextinscope != df) {
+				df2 = df2->df_nextinscope;
+			}
+			df2->df_nextinscope = df->df_nextinscope;
+		}
+		df = df->df_forw_def;
+	}
+	df = lookfor(nd, CurrVis, 1, 0);
+	if (! df->df_kind & (D_ERROR|D_TYPE)) {
+		node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
+	}
+	while (df1 && df1->df_kind == D_FORWTYPE) {
+		t_def *df2 = df1->df_forw_def;
+		df1->df_type = df->df_type;
+		SolveForwardTypeRefs(df1);
+		free_def(df1);
+		df1 = df2;
+	}
 }
 
 t_type *
@@ -686,6 +742,8 @@ type_or_forward(ptp)
 		   existing compilers do it like this, and the
 		   alternative is difficult with a lookahead of only
 		   one token.
+		   This path should actually only be taken if the next token
+		   is a '.'.
 		   ???
 		*/
 		FreeNode(nd);
@@ -697,17 +755,17 @@ type_or_forward(ptp)
 		same scope.
 	*/
 	df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
+	assert(df->df_kind == D_FORWTYPE);
 	df->df_flags |= D_USED | D_DEFINED;
-
-	if (df->df_kind == D_TYPE) {
-		(*ptp)->tp_next = df->df_type;
-		FreeNode(nd);
-		return 0;
-	}
 	nd->nd_type = *ptp;
 	df->df_forw_node = nd;
-	if (df1->df_kind == D_TYPE) {
+	if (df != df1 && (df1->df_kind & (D_TYPE | D_FORWTYPE))) {
+		/*	"df1" refers to a possible identification, but
+			we cannot be sure at this point. For the time
+			being, however, we use this one.
+		*/
 		df->df_type = df1->df_type;
+		df->df_forw_def = df1;
 	}
 	return 0;
 }
