@@ -1,14 +1,14 @@
 /* $Header$ */
 
-#define IDL	8
+#define IDL	100
 
 struct sym {
 	sym_p	s_next;
-	char	s_name[IDL];
 	offset	*s_rom;
 	short	s_flags;
 	short	s_frag;
 	offset	s_value;
+	char	s_name[2];	/* to be extended up to IDL */
 };
 
 /* contents of .s_flags */

@@ -187,9 +187,12 @@ offset *newrom() {
 	return((offset *) newcore(MAXROM*sizeof(offset)));
 }
 
-sym_p newsym() {
-
-	return((sym_p) newcore(sizeof(sym_t)));
+sym_p newsym(len) int len; {
+	/*
+	 * sym_t includes a 2 character s_name at the end
+	 * extend this structure with len-2 characters
+	 */
+	return((sym_p) newcore(sizeof(sym_t) - 2 + len));
 }
 
 argb_p newargb() {

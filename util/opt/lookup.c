@@ -37,6 +37,7 @@ unsigned hash(string) char *string; {
 
 sym_p symlookup(name,status,flags) char *name; int status,flags; {
 	register sym_p *spp,sp;
+ 	register i;
 	static short genfrag = 32767;
 
 	spp = &symhash[hash(name)%NSYMHASH];
@@ -58,8 +59,13 @@ sym_p symlookup(name,status,flags) char *name; int status,flags; {
 	 * symbol not found, enter in table
 	 */
 
-	*spp = sp = newsym();
-	strncpy(sp->s_name,name,IDL);
+ 	i = strlen(name) + 1;
+ 	if (i & 1)
+ 		i++;
+ 	if (i > IDL)
+ 		i = IDL;
+ 	*spp = sp = newsym(i);
+ 	strncpy(sp->s_name,name,i);
 	sp->s_flags = flags;
 	if (status == DEFINING)
 		sp->s_flags |= SYMDEF;
