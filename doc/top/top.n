@@ -1,6 +1,9 @@
 .ND
 .tr ~
+.ds <.
+.ds <,
 .ds >. .
+.ds >, ,
 .ds [. [
 .ds .] ]
 .TL
@@ -27,7 +30,6 @@ write such a table for a new machine.
 It also discusses the implementation of the
 Target Optimizer and its generator.
 .AE
-.bp
 .NH 1
 Introduction
 .PP
@@ -106,7 +108,6 @@ algorithm and to the definition of the table format.
 Chapters 3 and 4 discuss the implementation of the target optimizer
 and the target optimizer generator.
 Appendix A gives full information for writing a description table.
-.bp
 .NH 1
 Global structure of the target optimizer
 .PP
@@ -463,7 +464,6 @@ The keyword REST contains the mnemonic of the first instruction of
 the rest of the input.
 If this instruction uses the carry-bit (e.g. an adc, subc, bhis)
 the transformation is not allowed.
-.bp
 .NH 1
 Implementation of the target optimizer
 .PP
@@ -650,7 +650,6 @@ its current value (a string).
 The restrictions on variables and the constraints are stored
 in a switch-statement,
 indexed by variable number and entry number respectively.
-.bp
 .NH 1
 Implementation of the target optimizer generator
 .PP
@@ -695,6 +694,12 @@ opcode description from the description of the first operand).
 Topgen maintains two symbol tables, one for variable names and one
 for tunable parameters.
 The symbol tables are organized as binary trees.
+.bp
+.NH 1
+References
+.[
+$LIST$
+.]
 .bp
 .SH
 Appendix A
@@ -751,6 +756,8 @@ MAXOPLEN	25
 MAX_OPC_LEN	10
 MAXVARLEN	25
 MAXLINELEN	100
+PAREN_OPEN	not defined
+PAREN_CLOSE	not defined
 .TE
 .ce 1
 table 1: parameter names and defaults
@@ -774,6 +781,10 @@ As variables may be set by user routines (see "bitw" example for
 the Vax) the table-writer must have access to this length and
 must be able to change it.
 MAXLINELEN denotes the maximum length of a line of assembly code.
+PAREN_OPEN and PAREN_CLOSE must be used when the operand separator can also
+occur within operands, between parentheses of some kind. In this case,
+PAREN_OPEN must be set to a string containing the opening parentheses, and
+PAREN_CLOSE must be set to a string containing the closing parentheses.
 .PP
 If a line of assembly code violates any of the assumptions or
 exceeds some limit,
@@ -856,7 +867,3 @@ user_routines -> anything .
 .ft R
 .DE
 The remainder of the table consists of user-defined subroutines.
-.bp
-.[
-$LIST$
-.]
