@@ -549,6 +549,8 @@ we don't have them.
 For others, the installation procedure has only been tested with earlier
 distributions, as we don't have those systems anymore.
 However, the sun3 and sparc systems are known to behave reasonably.
+The sparc_solaris system has only been tested with the GNU C compiler,
+because we don't have the SUN C compiler (it is unbundled in Solaris 2).
 The Sun systems should run SunOs Release 3.0 or newer.
 The i386 choice may also be used for Intel 80386 or 80486 systems
 running 
