@@ -7,7 +7,7 @@ echo "echo $SYSNAME" > $CONFIG/bin/ack_sys
 chmod +x $CONFIG/bin/ack_sys
 
 cd $SRC_HOME
-find . -type d -print > $CONFIG/dir_list
+find . -type d -perm -555 -print > $CONFIG/dir_list
 
 cd $CONFIG
 for i in mach/*/libsys
