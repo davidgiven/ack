@@ -1,4 +1,4 @@
-#ifdef BSD4_2
+#ifdef __BSD4_2
 struct timeval {
 	long tv_sec, tv_usec;
 };
@@ -6,7 +6,7 @@ struct timezone {
 	int tz_minuteswest, tz_dsttime;
 };
 #else
-#ifndef USG
+#ifndef __USG
 #include <sys/types.h>
 struct timeb
 {
@@ -18,7 +18,7 @@ struct timeb
 #endif
 #endif
 
-#ifdef USG
+#ifdef __USG
 long	timezone = -1 * 60;
 int	daylight = 1;
 char	*tzname[] = {"MET", "MDT",};
@@ -30,7 +30,7 @@ char *__tzname[] = {"MET", "MDT", };
 
 tzset()
 {
-#ifdef BSD4_2
+#ifdef __BSD4_2
 	struct timeval tval;
 	struct timezone tzon;
 
@@ -38,7 +38,7 @@ tzset()
 	__timezone = tzon.tz_minuteswest * 60L;
 	__daylight = tzon.tz_dsttime;
 #else
-#ifndef USG
+#ifndef __USG
 	struct timeb time;
 
 	ftime(&time);
@@ -70,7 +70,7 @@ tzset()
 		strncpy(__tzname[1], p, 3);
 	}
 	}
-#ifdef USG
+#ifdef __USG
 	timezone = __timezone;
 	daylight = __daylight;
 	tzname[0] = __tzname[0];

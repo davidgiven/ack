@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/dir.h>
 
-#ifndef BSD4_2
+#ifndef __BSD4_2
 /*
  * read an old stlye directory entry and present it as a new one
  */
@@ -32,7 +32,7 @@ register DIR *dirp;
 				dirp->dd_size = 0;
 				return NULL;
 			}
-#ifdef BSD4_2
+#ifdef __BSD4_2
 			if (! ((struct direct *) dirp->dd_buf)->d_ino) {
 				dirp->dd_loc += ((struct direct *)dirp->dd_buf)->d_reclen;
 			}
@@ -43,7 +43,7 @@ register DIR *dirp;
 			continue;
 		}
 		dp = (struct olddirect *) (dirp->dd_buf + dirp->dd_loc);
-#ifndef BSD4_2
+#ifndef __BSD4_2
 		dirp->dd_loc += sizeof (struct olddirect);
 		if (dp->od_ino == 0)
 			continue;

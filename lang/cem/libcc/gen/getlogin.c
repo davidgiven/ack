@@ -1,6 +1,6 @@
 #define UTMPFILE "/etc/utmp"
 
-#ifdef USG
+#ifdef __USG
 struct utmp {
 	char ut_name[8];
 	char ut_id[4];
@@ -17,7 +17,7 @@ struct utmp {
 struct utmp {
 	char	ut_line[8];
 	char	ut_name[8];
-#ifdef BSD4_2
+#ifdef __BSD4_2
 	char	ut_host[16];
 #endif
 	long	ut_time;

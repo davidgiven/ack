@@ -1,4 +1,4 @@
-#ifdef USG
+#ifdef __USG
 /*	system V, so no /etc/ttys file. In this case, scan the
 	/etc/utmp file
 */
@@ -27,7 +27,7 @@ ttyslot()
 	register char *tp, *p;
 	int fd;
 	int retval = 1;
-#ifdef USG
+#ifdef __USG
 	struct utmp buf;
 #else
 	char buf[32];
@@ -40,7 +40,7 @@ ttyslot()
 	else
 		p++;
 	if ((fd = open(FILENAME, 0)) < 0) return 0;
-#ifdef USG
+#ifdef __USG
 	while (read(fd, (char *) &buf, sizeof(buf)) == sizeof(buf)) {
 		/* processes associated with a terminal ...
 		   unfortunately we cannot use the include file because

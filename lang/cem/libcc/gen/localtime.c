@@ -16,6 +16,12 @@ last_sunday(d, t)
 	return d - (d - first) % 7;
 }
 
+dysize(y)
+{
+	/* compatibility */
+	return YEARSIZE(y);
+}
+
 extern struct tm *gmtime();
 
 struct tm *
