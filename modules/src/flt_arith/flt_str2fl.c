@@ -300,6 +300,7 @@ flt_ecvt(e, ndigit, decpt, sign)
 	static char buf[NDIGITS+1];
 	register char *p = buf;
 	register char *pe;
+	register int findex = 0;
 
 	if (ndigit < 0) ndigit = 0;
 	if (ndigit > NDIGITS) ndigit = NDIGITS;
@@ -316,21 +317,26 @@ flt_ecvt(e, ndigit, decpt, sign)
 	if (e->m1 != 0) {
 		register flt_arith *pp = &big_10pow[1];
 
+		findex = 1;
 		while (flt_cmp(e, &big_10pow[BIGSZ-1]) >= 0) {
 			flt_mul(e,&r_big_10pow[BIGSZ-1],e);
 			*decpt += (BIGSZ-1)*SMALLSZ;
 		}
 		while (flt_cmp(e,pp) >= 0) {
 			pp++;
+			findex++;
 		}
-		pp--;
-		flt_mul(e,&r_big_10pow[pp-big_10pow],e);
-		*decpt += (pp - big_10pow)*SMALLSZ;
+		findex--;
+		flt_mul(e,&r_big_10pow[findex],e);
+		*decpt += findex*SMALLSZ;
 		pp = &s10pow[1];
-		while (pp < &s10pow[SMALLSZ] && flt_cmp(e, pp) >= 0) pp++;
-		pp--;
-		flt_mul(e, &r_10pow[pp-s10pow], e);
-		*decpt += pp - s10pow;
+		findex = 1;
+		while (pp < &s10pow[SMALLSZ] && flt_cmp(e, pp) >= 0) {
+			pp++;
+			findex++;
+		}
+		findex--;
+		*decpt += findex;
 
 		if (flt_cmp(e, &s10pow[0]) < 0) {
                 	while (flt_cmp(e, &r_big_10pow[BIGSZ-1]) < 0) { 
@@ -338,21 +344,50 @@ flt_ecvt(e, ndigit, decpt, sign)
                         	*decpt -= (BIGSZ-1)*SMALLSZ;
                 	}
 			pp = &r_big_10pow[1];
-			while(flt_cmp(e,pp) < 0) pp++;
-			pp--;
-			flt_mul(e,&big_10pow[pp-r_big_10pow],e);
-			*decpt -= (pp - r_big_10pow)*SMALLSZ;
+			findex = 1;
+			while(flt_cmp(e,pp) < 0) {
+				pp++;
+				findex++;
+			}
+			findex--;
+			flt_mul(e,&big_10pow[findex],e);
+			*decpt -= findex*SMALLSZ;
 			/* here, value >= 10 ** -28 */
 			flt_mul(e, &s10pow[1], e);
 			(*decpt)--;
 			pp = &r_10pow[0];
-			while(flt_cmp(e, pp) < 0) pp++;
-			flt_mul(e, &s10pow[pp-r_10pow], e);
-			*decpt -= pp - r_10pow;
+			findex = 0;
+			while(flt_cmp(e, pp) < 0) {
+				pp++;
+				findex++;
+			}
+			flt_mul(e, &s10pow[findex], e);
+			*decpt -= findex;
+			findex = 0;
 		}
 		(*decpt)++;	/* because now value in [1.0, 10.0) */
 	}
 	while (p <= pe) {
+		if (findex) {
+			flt_arith tc, oldtc;
+			int count = 0;
+
+			oldtc.flt_exp = 0;
+			oldtc.flt_sign = 0;
+			oldtc.m1 = 0;
+			oldtc.m2 = 0;
+			tc = s10pow[findex];
+			while (flt_cmp(e, &tc) >= 0) {
+				oldtc = tc;
+				flt_add(&tc, &s10pow[findex], &tc);
+				count++;
+			}
+			*p++ = count + '0';
+			oldtc.flt_sign = 1;
+			flt_add(e, &oldtc, e);
+			findex--;
+			continue;
+		}
 		if (e->flt_exp >= 0 && e->m1 != 0) {
 			flt_arith x;
 
@@ -367,7 +402,7 @@ flt_ecvt(e, ndigit, decpt, sign)
 			}
 		}
 		else *p++ = '0';
-		flt_mul(e, &s10pow[1], e);
+		if (e->m1) flt_mul(e, &s10pow[1], e);
 	}
 	if (pe >= buf) {
 		p = pe;

@@ -17,3 +17,4 @@ misc.h
 ucmp.c
 split.c
 flt_arith.3
+test.c
