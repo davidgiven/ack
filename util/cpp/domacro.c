@@ -70,7 +70,6 @@ domacro()
 		id = findidf(tk.tk_str);
 		if (!id) {
 			error("%s: unknown control", tk.tk_str);
-			PushBack();
 			skipline();
 			free(tk.tk_str);
 			break;
@@ -119,13 +118,11 @@ domacro()
 		case K_PRAGMA:				/* "pragma"	*/
 			/*	ignore for now
 			*/
-			PushBack();
 			skipline();
 			break;
 		default:
 			/* invalid word seen after the '#'	*/
 			error("%s: unknown control", id->id_text);
-			PushBack();
 			skipline();
 		}
 		break;
@@ -182,27 +179,35 @@ skip_block(to_endif)
 		id = findidf(tk.tk_str);
 		free(tk.tk_str);
 		if (id) switch(id->id_resmac) {
+		default:
+			skipline();
+			break;
 		case K_IF:
 		case K_IFDEF:
 		case K_IFNDEF:
 			push_if();
+			skipline();
 			continue;
 		case K_ELIF:
+			if (ifstack[nestlevel])
+				warning("#elif after #else/#elif");
 			if (! to_endif && nestlevel == skiplevel) {
 				nestlevel--;
 				push_if();
-				if (ifexpr()) {
+				if (ifexpr()) {	/* implicit skipline() */
 					NoUnstack--;
 					return;
 				}
 			}
+			else skipline();
 			break;
 		case K_ELSE:
+			if (ifstack[nestlevel])
+				warning("#else after #else/#elif");
+			skipline();
 			if (! to_endif) {
 				++(ifstack[nestlevel]);
 				if (nestlevel == skiplevel) {
-					PushBack();
-					skipline();
 					NoUnstack--;
 					return;
 				}
@@ -210,9 +215,8 @@ skip_block(to_endif)
 			break;
 		case K_ENDIF:
 			assert(nestlevel >= 0);
+			skipline();
 			if (nestlevel == skiplevel) {
-				PushBack();
-				skipline();
 				nestlevel--;
 				NoUnstack--;
 				return;
@@ -345,7 +349,6 @@ do_elif()
 {
 	if (nestlevel <= svnestlevel[nestcount] || (ifstack[nestlevel])) {
 		error("#elif without corresponding #if");
-		PushBack();
 		skipline();
 	}
 	else { /* restart at this level as if a #if is detected.  */
@@ -358,7 +361,6 @@ do_elif()
 PRIVATE
 do_else()
 {
-	PushBack();
 	skipline();
 	if (nestlevel <= svnestlevel[nestcount] || (ifstack[nestlevel]))
 		error("#else without corresponding #if");
@@ -371,7 +373,6 @@ do_else()
 PRIVATE
 do_endif()
 {
-	PushBack();
 	skipline();
 	if (nestlevel <= svnestlevel[nestcount])
 		error("#endif without corresponding #if");

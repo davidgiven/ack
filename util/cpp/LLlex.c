@@ -203,7 +203,7 @@ go_on:
 		while (c != '\'') {
 			if (c == '\n') {
 				error("newline in character constant");
-				LineNumber++;
+				PushBack();
 				break;
 			}
 			if (c == '\\') {
@@ -299,7 +299,7 @@ string_token(nm, stop_char)
 	while (c != stop_char) {
 		if (c == '\n') {
 			error("newline in %s", nm);
-			LineNumber++;
+			PushBack();
 			break;
 		}
 		if (c == EOI) {
