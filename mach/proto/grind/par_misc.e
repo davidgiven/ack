@@ -18,7 +18,24 @@
 ; ___topsave: save the stack by sending it to the debugger
 ;
  exp $___topsave
+
  pro $___topsave, 0
+#ifdef __sparc
+ inp $___topsave1
+ inp $___topsave2
+ cal $___topsave1
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+
+ pro $___topsave1,0
+ cal $___topsave2
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+
+ pro $___topsave2,0
+#endif
  mes 11
  loe 0
  lae 4			; load line number and file name
@@ -58,6 +75,27 @@
 
  exp $___topload
  pro $___topload, 0
+#ifdef __sparc
+ inp $___topload1
+ inp $___topload2
+ cal $___topload1
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+
+ pro $___topload1,0
+ lxl 0
+ dch
+ lpb
+ loi EM_PSIZE
+ cal $___topload2
+ asp EM_PSIZE
+ lfr EM_WSIZE
+ ret EM_WSIZE
+ end 0
+
+ pro $___topload2,0
+#endif
  mes 11
 
  lal 0
@@ -66,9 +104,9 @@
  lxl 0
 2
  dup EM_PSIZE
+ adp -3*EM_PSIZE
  lal 0
  loi EM_PSIZE		; compare target SP with current LB to see if we must
- loi EM_PSIZE
  cmp			; find another LB first
  zgt *1
  dch			; just follow dynamic chain to make sure we find
@@ -80,7 +118,12 @@
  str 1			; restore SP
  lor 1
  adp -EM_PSIZE
+#ifdef __sparc
+ inp $restore
+ cal $restore
+#else
  cal $___restoretop	; ___restoretop(char *SP)
+#endif
  asp EM_PSIZE+EM_WSIZE
  str 0			; restore local base
  sim			; ignore mask
@@ -90,3 +133,14 @@
  loc 0
  ret EM_WSIZE		; return 0
  end 0
+
+#ifdef __sparc
+ pro $restore
+ mes 11
+ lal 0
+ loi EM_PSIZE
+ cal $___restoretop
+ asp EM_PSIZE
+ ret 0
+ end 0
+#endif
