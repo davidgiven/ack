@@ -121,7 +121,6 @@ char **argv;
 	pass_23(PASS_2);
 #endif
 	pass_23(PASS_3);
-	oflush();
 	wr_close();
 	stop();
 }

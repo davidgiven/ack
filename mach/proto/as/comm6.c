@@ -197,9 +197,6 @@ short newtyp;
 	}
 	assert(newtyp >= S_MIN);
 	sp = &sect[newtyp - S_MIN];
-	if (pass == PASS_3) {
-		wr_outsect(newtyp - S_MIN);
-	}
 	DOTVAL = sp->s_size + sp->s_base;
 	DOTSCT = sp;
 	DOTTYP = newtyp;
@@ -245,24 +242,11 @@ valu_t bytes;
 }
 
 #ifdef RELOCATION
-static int nrelo;
-static struct outrelo relobuf[100];
-
-struct outrelo *
-neworelo()
-{
-	if (nrelo == 100) {
-		wr_relo(relobuf, 100);
-		nrelo = 0;
-	}
-	return &relobuf[nrelo++];
-}
-
 newrelo(s, n)
 short s;
 {
-	register struct outrelo *outrelo;
 	int	iscomm;
+	struct outrelo	outrelo;
 
 	if (rflag == 0)
 		return;
@@ -293,13 +277,12 @@ short s;
 		return;
 	}
 	s &= ~S_VAR;
-	outrelo = neworelo();
-	outrelo->or_type = (char)n;
-	outrelo->or_sect = (char)DOTTYP;
+	outrelo.or_type = (char)n;
+	outrelo.or_sect = (char)DOTTYP;
 #ifndef ASLD
 	if (s == S_UND || iscomm) {
 		assert(relonami != 0);
-		outrelo->or_nami = relonami-1;
+		outrelo.or_nami = relonami-1;
 		relonami = 0;
 	} else
 #endif
@@ -308,50 +291,20 @@ short s;
 		/*
 		 * use first non existing entry (argh)
 		 */
-		outrelo->or_nami = outhead.oh_nname;
+		outrelo.or_nami = outhead.oh_nname;
 	} else {
 		/*
 		 * section symbols are at the end
 		 */
-		outrelo->or_nami = outhead.oh_nname
+		outrelo.or_nami = outhead.oh_nname
 				- outhead.oh_nsect
 				+ (s - S_MIN)
 				;
 	}
-	outrelo->or_addr = (long)DOTVAL;
+	outrelo.or_addr = (long)DOTVAL;
+	wr_relo(&outrelo, 1);
 }
 #endif
-
-static char sbuf[1024];
-static char *psbuf = sbuf;
-
-mwr_string(nm,len)
-	register char *nm;
-{
-	register char *q = psbuf;
-
-	while (len--) {
-		*q++ = *nm++;
-		if (q == &sbuf[1024]) {
-			wr_string(sbuf,1024L);
-			q = sbuf;
-		}
-	}
-	psbuf = q;
-}
-
-static struct outname obuf[100];
-static int nnames;
-
-static struct outname *
-newoname()
-{
-	if (nnames == 100) {
-		wr_name(obuf,100);
-		nnames = 0;
-	}
-	return &obuf[nnames++];
-}
 
 newsymb(name, type, desc, valu)
 register char *name;
@@ -359,7 +312,7 @@ short type;
 short desc;
 valu_t valu;
 {
-	register struct outname *outname;
+	struct outname outname;
 
 	if (name && *name == 0)
 		name = 0;
@@ -371,27 +324,18 @@ valu_t valu;
 		return;
 	}
 	nname++;
-	outname = newoname();
 	if (name) {
-		int len = strlen(name) + 1;
+		long len = strlen(name) + 1;
 
-		mwr_string(name, len);
-		outname->on_foff = outhead.oh_nchar;
+		wr_string(name, len);
+		outname.on_foff = outhead.oh_nchar;
 		outhead.oh_nchar += len;
 	} else
-		outname->on_foff = 0;
-	outname->on_type = type;
-	outname->on_desc = desc;
-	outname->on_valu = valu & ~(((0xFFFFFFFF)<<(4*sizeof(valu_t)))<<(4*sizeof(valu_t)));
-}
-
-oflush()
-{
-#ifdef RELOCATION
-	if (nrelo)	wr_relo(relobuf,nrelo);
-#endif
-	if (nnames)	wr_name(obuf,nnames);
-	if (psbuf > sbuf) wr_string(sbuf, (long) (psbuf - sbuf));
+		outname.on_foff = 0;
+	outname.on_type = type;
+	outname.on_desc = desc;
+	outname.on_valu = valu & ~(((0xFFFFFFFF)<<(4*sizeof(valu_t)))<<(4*sizeof(valu_t)));
+	wr_name(&outname, 1);
 }
 
 new_common(ip)
