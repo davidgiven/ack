@@ -11,6 +11,7 @@ getw.c
 opendir.c
 popen.c
 putenv.c
+environ.c
 putw.c
 readdir.c
 rewinddir.c
