@@ -32,6 +32,7 @@ fstat.s
 fsync.s
 ftime.c
 ftruncate.s
+getdirent.s
 getdtabsz.s
 getegid.s
 geteuid.s

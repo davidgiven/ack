@@ -121,3 +121,4 @@
 #define SYS_setquota 148
 #define SYS_quota 149
 #define SYS_getsockname 150
+#define SYS_getdirentries 156
