@@ -89,6 +89,7 @@ static long wordmask[] = {	/* allowed bits in a word */
 };
 
 static int wsize, psize;	/* word size and pointer size */
+int EM_wordsize, EM_pointersize;
 
 #ifdef CHECKING
 static char *argrange = "Argument range error";
@@ -128,7 +129,6 @@ EXPORT int
 EM_open(filename)
 	char *filename;
 {
-	
 	if (EM_initialized) {
 		EM_error = "EM_open already called";
 		return 0;
@@ -195,9 +195,11 @@ startmes(p)
 		}
 		argp = ap = getarg(cst_ptyp);
 		wsize = ap->em_cst;
+		EM_wordsize = ap->em_cst;
 		ap->em_next = getarg(cst_ptyp);
 		ap = ap->em_next;
 		psize = ap->em_cst;
+		EM_pointersize = ap->em_cst;
 	}
 }
 
