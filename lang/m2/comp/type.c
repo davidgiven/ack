@@ -659,6 +659,7 @@ type_or_forward(ptp)
 		same scope.
 	*/
 	df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
+	df->df_flags |= D_USED | D_DEFINED;
 
 	if (df->df_kind == D_TYPE) {
 		(*ptp)->tp_next = df->df_type;

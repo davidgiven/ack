@@ -129,7 +129,6 @@ EnterVarList(Idlist, type, local)
 	for (; idlist; idlist = idlist->nd_right) {
 		df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
 		df->df_type = type;
-		/* df->df_flags &= ~(D_USED | D_DEFINED); */
 		if (idlist->nd_left) {
 			/* An address was supplied
 			*/

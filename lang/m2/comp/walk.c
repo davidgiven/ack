@@ -858,7 +858,7 @@ UseWarnings(df)
 	register t_def *df;
 {
 	if (is_anon_idf(df->df_idf)) return;
-	if (df->df_kind & (D_IMPORTED | D_VARIABLE | D_PROCEDURE)) {
+	if (df->df_kind & (D_IMPORTED | D_VARIABLE | D_PROCEDURE | D_CONST | D_TYPE)) {
 		struct node *nd;
 
 		if (df->df_flags & (D_EXPORTED | D_QEXPORTED)) return;
@@ -879,7 +879,7 @@ UseWarnings(df)
 			}
 			df = df1;
 		}
-		if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE))) return;
+		if (! (df->df_kind & (D_VARIABLE|D_PROCEDURE|D_TYPE|D_CONST))) return;
 		nd = df->df_scope->sc_end;
 		if (! (df->df_flags & D_DEFINED)) {
 			node_warning(nd,

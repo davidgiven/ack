@@ -493,7 +493,8 @@ lexwarning(W_ORDINARY, "character constant out of range");
 					}
 				}
 				else if (ch == 'D' && base == 10) {
-					if (sgnswtch != 0) {
+					if (sgnswtch != 0 ||
+					    tk->TOK_INT > max_int[(int)long_size]) {
 lexwarning(W_ORDINARY, "overflow in constant");
 					}
 					toktype = longint_type;
@@ -501,6 +502,11 @@ lexwarning(W_ORDINARY, "overflow in constant");
 				else if (sgnswtch == 0 &&
 					 tk->TOK_INT<=max_int[(int)word_size]) {
 					toktype = intorcard_type;
+				}
+				else if (! chk_bounds(tk->TOK_INT,
+						      full_mask[(int)word_size],
+						      T_CARDINAL)) {
+lexwarning(W_ORDINARY, "overflow in constant");
 				}
 				return tk->tk_symb = INTEGER;
 				}
