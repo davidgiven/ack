@@ -522,49 +522,62 @@ declare_formals(idf, fp)
 	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
 	arith f_offset = (arith)0;
 	register int nparams = 0;
-	int hasproto = idf->id_def->df_type->tp_proto != 0;
+	int hasproto;
+	struct def *df = idf->id_def;
+
+	/* When one of the formals has the same name as the function, 
+	   it hides the function def. Get it.
+	*/
+	while (se) {
+		if (se->se_idf == idf) {
+			df = df->next;
+			break;
+		}
+	}
+	
+	hasproto = df->df_type->tp_proto != 0;
 
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("start declare_formals", 0);
 #endif	/* DEBUG */
-	if (is_struct_or_union(idf->id_def->df_type->tp_up->tp_fund)) {
+	if (is_struct_or_union(df->df_type->tp_up->tp_fund)) {
 		/* create space for address of return value */
 		f_offset = pointer_size;
 	}
 	while (se)	{
-		register struct def *def = se->se_idf->id_def;
+		df = se->se_idf->id_def;
 		
 		/* this stacklevel may also contain tags. ignore them */
-		if (!def || def->df_level < L_FORMAL1 ) {
+		if (!df || df->df_level < L_FORMAL1 ) {
 			se = se->next;
 			continue;
 		}
 
-		def->df_address = f_offset;
+		df->df_address = f_offset;
 		/*	the alignment convention for parameters is: align on
 			word boundaries, i.e. take care that the following
 			parameter starts on a new word boundary.
 		*/
 		if (! hasproto 
-		    && def->df_type->tp_fund == FLOAT
-		    && def->df_type->tp_size != double_size) {
+		    && df->df_type->tp_fund == FLOAT
+		    && df->df_type->tp_size != double_size) {
 			f_offset = align(f_offset + double_size, (int) word_size);
 		}
-		else f_offset = align(f_offset + def->df_type->tp_size, (int) word_size);
-		RegisterAccount(def->df_address, def->df_type->tp_size,
-				regtype(def->df_type),
-				def->df_sc);
+		else f_offset = align(f_offset + df->df_type->tp_size, (int) word_size);
+		RegisterAccount(df->df_address, df->df_type->tp_size,
+				regtype(df->df_type),
+				df->df_sc);
 		/* cvt int to char or short and double to float, if necessary
 		 */
-		formal_cvt(hasproto, def);
+		formal_cvt(hasproto, df);
 
-		def->df_level = L_FORMAL2;	/* CJ */
+		df->df_level = L_FORMAL2;	/* CJ */
 		if (nparams++ >= STDC_NPARAMS)
 			strict("number of formal parameters exceeds ANSI limit");
 #ifdef DBSYMTAB
 		if (options['g']) {
-			stb_string(def, FORMAL, se->se_idf->id_text);
+			stb_string(df, FORMAL, se->se_idf->id_text);
 		}
 #endif /* DBSYMTAB */
 		se = se->next;
