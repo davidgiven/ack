@@ -27,6 +27,7 @@ static char rcsid[] = "$Header$";
 
 char *filename;			/* Name of input file */
 int errors;			/* Number of errors */
+extern char *C_error;
 
 main(argc,argv)
 	char **argv;
@@ -57,8 +58,8 @@ main(argc,argv)
 		if (EM_error) {
 			error("%s", EM_error);
 		}
-		if (p->em_type != EM_ERROR && !EM_mkcalls(p)) {
-			error("%s", EM_error);
+		if (p->em_type != EM_ERROR && !C_out(p)) {
+			error("%s", C_error);
 		}
 		EM_getinstr(p);
 	}
