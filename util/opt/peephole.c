@@ -777,7 +777,12 @@ repl_mul(lp, b, e)
 		} else {
 			if (virgin) {
 				newinstr(b, op_dup, sz); b = &((*b)->l_next);
-				newinstr(b, op_loc, 0); b = &((*b)->l_next);
+				if (sz == wordsize) {
+				    newinstr(b, op_loc, 0); b = &((*b)->l_next);
+				}
+				else {
+				    newinstr(b, op_ldc, 0); b = &((*b)->l_next);
+				}
 				newinstr(b, op_exg, sz); b = &((*b)->l_next);
 				virgin = 0;
 			}
