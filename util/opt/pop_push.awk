@@ -1,7 +1,4 @@
-BEGIN	{ print "#define CONDBRA        '\001'" > "pop_push.h"
-	  print "#define JUMP           '\002'" >> "pop_push.h"
-	  print "#define HASLABEL       '\004'" >> "pop_push.h"
-	  print "#include \"pop_push.h\""
+BEGIN	{ print "#include \"pop_push.h\""
 	  print
 	  print "char *pop_push[] = {"
 	  print "\"\","

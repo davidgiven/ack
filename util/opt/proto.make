@@ -60,7 +60,7 @@ mktab.$(USUF):	scan.c $(SRC_DIR)/optim.h $(SRC_DIR)/param.h $(SRC_DIR)/pattern.h
 mktab.c:	$(SRC_DIR)/mktab.y
 	yacc $(SRC_DIR)/mktab.y && mv y.tab.c mktab.c
 
-pop_push.c pop_push.h: $(SRC_HOME)/etc/em_table $(SRC_DIR)/pop_push.awk
+pop_push.c: $(SRC_HOME)/etc/em_table $(SRC_DIR)/pop_push.awk
 	awk -f $(SRC_DIR)/pop_push.awk < $(SRC_HOME)/etc/em_table > pop_push.c
 
 regglob.c:	$(SRC_DIR)/reg.c
@@ -92,7 +92,7 @@ pr:
 
 clean:
 	rm -f *.$(SUF) opt mktab mktab.c scan.c pattern.c opt2 Out \
-		pop_push.c pop_push.h regglob.c regnoglob.c *.old
+		pop_push.c regglob.c regnoglob.c *.old
 
 scan.c:	$(SRC_DIR)/scan.l
 	flex -st $(SRC_DIR)/scan.l > scan.c
@@ -253,7 +253,7 @@ reg.$(SUF):	$(SRC_DIR)/param.h
 reg.$(SUF):	$(SRC_DIR)/assert.h
 tes.$(SUF):	$(SRC_DIR)/tes.c
 	$(CC) -c $(CFLAGS) $(SRC_DIR)/tes.c
-tes.$(SUF):	./pop_push.h
+tes.$(SUF):	$(SRC_DIR)/pop_push.h
 tes.$(SUF):	$(SRC_DIR)/ext.h
 tes.$(SUF):	$(SRC_DIR)/line.h
 tes.$(SUF):	$(SRC_DIR)/proinf.h
@@ -267,7 +267,7 @@ tes.$(SUF):	$(TARGET_HOME)/h/em_mnem.h
 tes.$(SUF):	$(TARGET_HOME)/h/em_spec.h
 pop_push.$(SUF):	pop_push.c
 	$(CC) -c $(CFLAGS) pop_push.c
-pop_push.$(SUF):	pop_push.h
+pop_push.$(SUF):	$(SRC_DIR)/pop_push.h
 pattern.$(SUF):	pattern.c
 	$(CC) -c $(CFLAGS) pattern.c
 pattern.$(SUF):	$(SRC_DIR)/pattern.h

@@ -18,6 +18,7 @@ pattern.h
 patterns
 peephole.c
 pop_push.awk
+pop_push.h
 process.c
 proinf.h
 putline.c
