@@ -8,26 +8,19 @@ _flushbuf(c, iop)
 	if (fileno(iop) < 0) return EOF;
 	if (! io_testflag(iop, IO_UNBUFF)) {
 		if (iop->_buf == 0) {
-			if (iop == stdout) {
-				if (isatty(fileno(stdout))) {
-					iop->_flags |= IO_UNBUFF;
-				}
-				else {
-					extern unsigned char _sobuf[];
-
-					iop->_buf = _sobuf;
-					iop->_count = BUFSIZ-1;
-				}
+			if (iop == stdout && isatty(fileno(stdout))) {
+				iop->_flags |= IO_UNBUFF;
 			}
 			else {
 				extern char *malloc();
-
-				if (!(iop->_buf = (unsigned char *) malloc(BUFSIZ))) {
+	
+				if (!(iop->_buf = (unsigned char *) malloc(_BUFSIZ))) {
 					iop->_flags |= IO_UNBUFF;
 				}
 				else {
 					iop->_flags |= IO_MYBUF;
-					iop->_count = BUFSIZ-1;
+					iop->_bufsiz = _BUFSIZ;
+					iop->_count = _BUFSIZ-1;
 				}
 			}
 			iop->_ptr = iop->_buf;
@@ -47,7 +40,7 @@ _flushbuf(c, iop)
 	else {
 		int count = iop->_ptr - iop->_buf;
 
-		iop->_count = BUFSIZ - 1;
+		iop->_count = iop->_bufsiz - 1;
 		iop->_ptr = iop->_buf + 1;
 
 		if (count > 0) {

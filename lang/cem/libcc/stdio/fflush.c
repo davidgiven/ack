@@ -12,14 +12,14 @@ FILE *iop;
 	    !io_testflag(iop,IO_WRITEMODE) ) 
 		return(0);
 
-	count = BUFSIZ - iop->_count;
+	count = iop->_bufsiz - iop->_count;
 	if ( count <= 0 )
 		return(0);
 
 	c1 = write(iop->_fd,iop->_buf,count);
 
 	if ( count == c1 ) {
-		iop->_count = BUFSIZ;
+		iop->_count = iop->_bufsiz;
 		iop->_ptr   = iop->_buf;
 		return(count);
 	}

@@ -4,6 +4,16 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #define BUFSIZ  1024
+#ifdef vax
+#define _NBF	8
+#endif
+#ifdef mc68020
+#define _NBF	8
+#endif
+#ifndef _NBF
+#define _NBF	1
+#endif
+#define _BUFSIZ	(_NBF * BUFSIZ)
 #define _NFILES  20
 #define NULL       0
 #define EOF     (-1)
@@ -24,6 +34,7 @@ extern struct _io_buf {
     int     _flags;
     unsigned char   *_buf;
     unsigned char   *_ptr;
+    int	    _bufsiz;
 }  *_io_table[_NFILES], _stdin, _stdout, _stderr;
 
 

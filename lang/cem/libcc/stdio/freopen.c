@@ -8,7 +8,6 @@ FILE *freopen(name,mode,fp)
 char *name , *mode;
 register FILE *fp;
 {
-	char *malloc();
 	int fd,
 	flags = fp->_flags & ~(IO_WRITEMODE|IO_READMODE|IO_ERR|IO_EOF|IO_PERPRINTF);
 
@@ -52,7 +51,7 @@ register FILE *fp;
 	}
 	fp->_count = 0;
 	if (fp->_buf && !(flags & IO_UNBUFF) && (flags & IO_WRITEMODE)) 
-		fp->_count = BUFSIZ;
+		fp->_count = fp->_bufsiz;
 	fp->_fd = fd;
 	fp->_flags = flags;
 	return(fp);

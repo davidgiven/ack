@@ -13,10 +13,12 @@ char *buffer;
 	iop->_buf = (unsigned char *) buffer;
 
 	iop->_count = 0;
-	if ( iop->_buf == NULL )
+	if ( iop->_buf == NULL ) {
 		iop->_flags |= IO_UNBUFF;
-	else
-		iop->_count = BUFSIZ;
-
+		iop->_bufsiz = 1;
+	} else {
+		if (io_testflag(iop, IO_WRITEMODE)) iop->_count = BUFSIZ;
+		iop->_bufsiz = BUFSIZ;
+	}
 	iop->_ptr = iop->_buf;
 }

@@ -17,13 +17,21 @@ register FILE *iop;
 		return (EOF);
 
 	if (! io_testflag(iop, IO_UNBUFF) && ! iop->_buf) {
-		iop->_buf = (unsigned char *) malloc(BUFSIZ);
-		if (! iop->_buf) iop->_flags |= IO_UNBUFF;
-		else iop->_flags |= IO_MYBUF;
+		iop->_buf = (unsigned char *) malloc(_BUFSIZ);
+		if (! iop->_buf) {
+			iop->_flags |= IO_UNBUFF;
+		}
+		else {
+			iop->_flags |= IO_MYBUF;
+			iop->_bufsiz = _BUFSIZ;
+		}
 	}
-	if (! iop->_buf) iop->_buf = &ch[fileno(iop)];
+	if (! iop->_buf) {
+		iop->_buf = &ch[fileno(iop)];
+		iop->_bufsiz = 1;
+	}
 	iop->_ptr = iop->_buf;
-	iop->_count = read(iop->_fd, iop->_buf, io_testflag(iop, IO_UNBUFF)? 1 : BUFSIZ);
+	iop->_count = read(iop->_fd, iop->_buf, iop->_bufsiz);
 
 	if (iop->_count <= 0){
 		if (iop->_count == 0) {

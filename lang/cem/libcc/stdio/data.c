@@ -1,19 +1,16 @@
 /* $Header$ */
 #include <stdio.h>
 
-unsigned char  _sobuf[BUFSIZ];
-unsigned char  _sibuf[BUFSIZ];
-
 struct _io_buf _stdin = {
-	0, 0, IO_READMODE , _sibuf, _sibuf
+	0, 0, IO_READMODE , 0, 0, 0
 };
 
 struct _io_buf _stdout = {
-	1, 0, IO_WRITEMODE, 0, 0
+	1, 0, IO_WRITEMODE, 0, 0, 0
 };
 
 struct _io_buf _stderr = {
-	2, 0, IO_WRITEMODE + IO_UNBUFF, NULL, NULL
+	2, 0, IO_WRITEMODE + IO_UNBUFF, 0, 0, 0
 };
 
 struct  _io_buf  *_io_table[_NFILES] = {
