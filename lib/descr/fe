@@ -67,7 +67,7 @@ name cem
 	mapflag -wa CEM_F={CEM_F?} -a
 	mapflag -wo CEM_F={CEM_F?} -o
 	mapflag -ws CEM_F={CEM_F?} -s
-	mapflag -g CEM_F={CEM_F?} -g
+	mapflag -g* CEM_F={CEM_F?} -g
 	mapflag -p CEM_F={CEM_F?} -p
 	mapflag -V* CEM_F={CEM_F?} -V*
 	rts .c
@@ -98,6 +98,7 @@ name pc
 	mapflag -w PC_F={PC_F?} -w
 	mapflag -V* PC_F={PC_F?} -V*
 	mapflag -M* PC_F={PC_F?} -M*
+	mapflag -g* PC_F={PC_F?} -g
 #	mapflag -i* PC_F={PC_F?} -i*
 	mapflag -A  PC_F={PC_F?} -A
 #	mapflag -R  PC_F={PC_F?} -R
@@ -118,7 +119,7 @@ name m2
 	program {EM}/lib.bin/em_m2
 	mapflag -I* M2_INCL={M2_INCL?} -I*
 	mapflag -L M2_F={M2_F?} -L
-	mapflag -g M2_F={M2_F?} -g
+	mapflag -g* M2_F={M2_F?} -g
 	mapflag -w* M2_F={M2_F?} -w*
 	mapflag -W* M2_F={M2_F?} -W*
 	mapflag -_ M2_F={M2_F?} -U
