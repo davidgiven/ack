@@ -1,51 +1,82 @@
+INTS=em2_t--- em2_---- em2_t-cp em2_t-c- em2_t--p \
+em4_t--- em4_---- em4_t-cp em4_t-c- em4_t--p
 P = mloop
-em2tl:	a.out
-	cv a.out em2tl
-	rm a.out
-a.out:	$P02tl.s $P12tl.s $P22tl.s $P32tl.s $P42tl.s $P52tl.s $P62tl.s $P72tl.s $P82tl.s $P92tl.s $Pa2tl.s $Pb2tl.s $Pc2tl.s $Pe2tl.s
-	m68k2 -s $P?2tl.s >symem2tl
-$P02tl.s:	$P0
-	prep $P0 $P02tl.s
-$P12tl.s:	$P1
-	prep $P1 $P12tl.s
-$P22tl.s:	$P2
-	prep $P2 $P22tl.s
-$P32tl.s:	$P3
-	prep $P3 $P32tl.s
-$P42tl.s:	$P4
-	prep $P4 $P42tl.s
-$P52tl.s:	$P5
-	prep $P5 $P52tl.s
-$P62tl.s:	$P6
-	prep $P6 $P62tl.s
-$P72tl.s:	$P7
-	prep $P7 $P72tl.s
-$P82tl.s:	$P8
-	prep $P8 $P82tl.s
-$P92tl.s:	$P9
-	prep $P9 $P92tl.s
-$Pa2tl.s:	$Pa
-	prep $Pa $Pa2tl.s
-$Pb2tl.s:	$Pb
-	prep $Pb $Pb2tl.s
-$Pc2tl.s:	$Pc
-	prep $Pc $Pc2tl.s
-$Pe2tl.s:	$Pe
-	prep $Pe $Pe2tl.s
+FILES=deffile $P0 $P1 $P2 $P3 $P4 $P5 $P6 $P7 $P8 $P9 $Pa $Pb $Pc $Pe
+CPP=../../../lib/cpp
+b=../../../lib/int
 
-install:	em2tl
-	rm -f ../../../bin/em
-	cp em2tl ../../../bin/em
+all:	$(INTS) em
 
-cmp:		em2tl
-	cmp em2tl ../../../bin/em
+em:	em.c
+	cc -o em -I../../../h em.c
+
+em2_t---:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em2_t--- tmp.s
+	rm -f tmp.s
+
+em2_----:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dopfreq=0 -Dlast=0 -Dcount=0 -Dtest=0 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em2_---- tmp.s
+	rm -f tmp.s
+
+em2_t-cp:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dopfreq=0 -Dlast=1 -Dcount=1 -Dtest=1 -Dflow=0 -Dprof=1 >tmp.s
+	m68k2 -o em2_t-cp tmp.s
+	rm -f tmp.s
+
+em2_t-c-:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dopfreq=0 -Dlast=1 -Dcount=1 -Dtest=1 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em2_t-c- tmp.s
+	rm -f tmp.s
+
+em2_t--p:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=1 >tmp.s
+	m68k2 -o em2_t--p tmp.s
+	rm -f tmp.s
+
+em4_t---:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dlword -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em4_t--- tmp.s
+	rm -f tmp.s
+
+em4_----:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dlword -Dopfreq=0 -Dlast=0 -Dcount=0 -Dtest=0 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em4_---- tmp.s
+	rm -f tmp.s
+
+em4_t-cp:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dlword -Dopfreq=0 -Dlast=1 -Dcount=1 -Dtest=1 -Dflow=0 -Dprof=1 >tmp.s
+	m68k2 -o em4_t-cp tmp.s
+	rm -f tmp.s
+
+em4_t-c-:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dlword -Dopfreq=0 -Dlast=1 -Dcount=1 -Dtest=1 -Dflow=0 -Dprof=0 >tmp.s
+	m68k2 -o em4_t-c- tmp.s
+	rm -f tmp.s
+
+em4_t--p:	$(FILES)
+	cat $(FILES) | $(CPP) -P -Dlword -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=1 >tmp.s
+	m68k2 -o em4_t--p tmp.s
+	rm -f tmp.s
+
+install:	all
+		-mkdir $b24 $b44
+		ls em2_???? | sed 's:em2_\(.*\):cp & $b24/em_\1:' | sh
+		ls em4_???? | sed 's:em4_\(.*\):cp & $b44/em_\1:' | sh
+		cp em ../../../bin/em
+
+cmp: 		all
+		ls em2_???? | sed 's:em2_\(.*\):cmp & $b24/em_\1:' | sh
+		ls em4_???? | sed 's:em4_\(.*\):cmp & $b44/em_\1:' | sh
+		cmp em ../../../bin/em
 
 clean:
-	rm -f em2tl *.s temp.c
+		-rm -f *.o *.old a.out em tmp.s $(INTS)
 
 opr:
 	make pr | opr
 
 pr:
-	@pr `pwd`/makefile `pwd`/prep
-	@pr `pwd`/header `pwd/deffile `pwd`/$P?
+	@pr `pwd`/makefile
+	@pr `pwd`/deffile `pwd`/$P?
