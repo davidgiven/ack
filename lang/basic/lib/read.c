@@ -126,7 +126,7 @@ String **s;
 	*s= (String *) _newstr(buffer);
 }
 
-extern int _seektable[];
+extern int _seektab[];
 
 _restore(line)
 int line;
@@ -141,9 +141,9 @@ int line;
 	if( line)
 	{
 		/* search number of lines to skip */
-		for(nr=0; _seektable[nr] && _seektable[nr]< line; nr+=2) 
+		for(nr=0; _seektab[nr] && _seektab[nr]< line; nr+=2) 
 #ifdef DEBUG
-		printf("test %d %d\n",_seektable[nr], _seektable[nr+1]);
+		printf("test %d %d\n",_seektab[nr], _seektab[nr+1]);
 #endif
 		;
 		nr /= 2;

@@ -1,17 +1,17 @@
 /* $Header $ */
 
-_randomize()
+_randomi()
 {
 	int i;
 	double f;
-	_setchannel(-1);
+	_setchan(-1);
 	printf("Random number seed (-32768 to 32767) ? ");
 	_readint(&i);
 	f=i;
-	_setrandom(f);
+	_setrand(f);
 }
 
-_setrandom(f)
+_setrand(f)
 double f;
 {
 	int i;

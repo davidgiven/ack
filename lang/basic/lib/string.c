@@ -66,7 +66,7 @@ String *s1,*s2;
 	strcat(s->strval,s1->strval);
 	return(s);
 }
-_strcompare(s1,s2)
+_strcomp(s1,s2)
 String *s1,*s2;
 {
 	okr(s1);okr(s2);

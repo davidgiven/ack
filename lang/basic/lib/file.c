@@ -18,7 +18,7 @@ int	_chann		= -1;
 FILE	*_chanrd	= stdin;
 FILE	*_chanwr	= stdout;
 
-_setchannel(index)
+_setchan(index)
 int index;
 {
 #ifdef DEBUG
