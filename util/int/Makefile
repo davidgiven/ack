@@ -1,6 +1,6 @@
 # $Header$
 
-EM =		/usr/em#	# EM tree
+EM =		../..#		# EM tree
 
 CC =		cc#		# C comp used for compiling the interpreter
 CFLAGS =	-O#		# passed to C compiler
@@ -12,7 +12,7 @@ INT =		./int#		# name of resulting interpreter
 
 IP_SPEC =	$(EM)/etc/ip_spec.t
 TRAPS =		$(EM)/etc/traps
-APP_A =		../doc/appA	# to be moved later
+APP_A =		$(EM)/doc/int/appA	# to be moved later
 
 SRC =	alloc.c core.c data.c do_array.c do_branch.c do_comp.c do_conv.c \
 	do_fpar.c do_incdec.c do_intar.c do_load.c do_logic.c do_misc.c \
@@ -39,6 +39,14 @@ HDR =	alloc.h fra.h global.h linfil.h log.h mem.h memdirect.h monstruct.h \
 
 
 # Main entries
+all:	test
+
+install:	$(INT)
+	cp $(INT) $(EM)/bin/int
+
+cmp:	$(INT)
+	cmp $(INT) $(EM)/bin/int
+
 test:	$(INT) test/awa.em22 test/awa.em24 test/awa.em44
 	@rm -f int.mess
 	-echo 3 5 7 2 -1 | time $(INT) test/awa.em22
@@ -91,12 +99,20 @@ tags:	$(HDR) $(SRC)
 MFILES =	M.trap_msg M.warn_h M.warn_msg
 
 ALL =	READ_ME Makefile $(MFILES) $(HDR) $(SRC)
+DISTR =	$(ALL) switch test
 
 print:
 	@pr $(ALL)
 
+pr:	print
+
+opr:
+	make pr | opr
+
+distr:	.distr
+
 .distr:		Makefile
-	echo $(ALL) | tr ' ' '\012' >.distr
+	echo $(DISTR) | tr ' ' '\012' >.distr
 
 clean:
 	rm -f core mon.out int.mess int.log int.core int.tally \
