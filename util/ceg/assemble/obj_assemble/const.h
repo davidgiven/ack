@@ -1,4 +1,3 @@
-
 #define Bool	int
 
 #define TRUE		1

@@ -3,13 +3,38 @@
 #include "as.h"
 #include "const.h"
 
+
+/* This file contains the routine assemble(). Assemble() cuts an
+ * assembly instruction in a label, a mnemonic and several operands.
+ * For a label and operands it calls table writer defined routines, 
+ * process_label() and process_operand(), to give the table writer 
+ * the oppurtunity to do something special. At the end assemble() calls
+ * the routine belonging to the mnemonic with the supplied operands.
+ *     If the table writer has other expectations of assemble() he should
+ * write his own version.
+ * 	Assemble parser the following instructions :
+ * INSTR ::= [ STRING ':']? [ STRING [ OPERAND ( ',' OPERAND)*]? ]?
+ * OPERAND ::= STRING [ '{' char* '}' |
+ * 			'(' char* ')' | 
+ * 			'[' char* ']'     ]?
+ * note : nested brackets are not recognized.
+ */
+
+
+/* The following global varaibles are defined in the EM_parser.
+ */
+
 extern char *mnemonic[];
 extern int (*instruction[])(), n_mnems;
+
+/* The struct t_operand must be defined by the table writer in "as.h".
+ * The constant MAX_OPERANDS is defined in "const.h"
+ * To change MAX_OPERANDS effectively, the last statement in 
+ * execute_mnem() must be changed.
+ */
+
 struct t_operand operand[ MAX_OPERANDS];
 
-/* To change MAX_OPERANDS, the last statement in execute_mnem() must
- * be changed.
- */
 
 
 char *skip_space(), *parse_label(), *parse_mnemonic(), *parse_operand(),
@@ -19,12 +44,7 @@ int  label();
 
 assemble( instr)
 	char *instr;
-
-/* INSTR ::= [ STRING ':']? [ STRING [ OPERAND ( ',' OPERAND)*]? ]?
- * OPERAND ::= STRING [ '{' char* '}' |
- * 			'(' char* ')' | 
- * 			'[' char* ']'     ]?
- * Break an assembly instruction down in a LABEL, MNEMONIC and OPERANDS.
+/* Break an assembly instruction down in a LABEL, MNEMONIC and OPERANDS.
  */
 {
 	char *ptr, *copy, *mnem;
@@ -33,19 +53,19 @@ assemble( instr)
 	copy = ptr = Salloc( instr, strlen( instr)+1);
 
 	ptr = skip_space( ptr);
-	if  ( label( ptr))  {
+	if  ( label( ptr))  {     /* Look for a label */
 		ptr = parse_label( ptr);
 		if  ( *ptr == '\0')  return;
 	}
 
 	ptr = parse_mnemonic( ptr, &mnem);
-	while  ( *ptr != '\0')  {
+	while  ( *ptr != '\0')  {  /* parse operans */
 		if ( n_ops++ == MAX_OPERANDS) 
 			error( "to many operands\n");
 		ptr = parse_operand( ptr, n_ops, instr);
 	}
 
-	execute_mnemonic( mnem);
+	execute_mnemonic( mnem);   /* Execute the assembler instruction */
 	free( copy);
 }
 
@@ -164,7 +184,7 @@ char *ptr;
 }
 
 
-/****************************************************************************/
+/*** Execution **************************************************************/
 
 
 execute_mnemonic( mnem)
@@ -198,13 +218,15 @@ char *mnem;
 }
 
 
+/*** Error ****************************************************************/
+
 error( fmt, argv)
 char *fmt;
 int argv;
 {
 	extern int yylineno;
 
-	fprint( STDERR, "!! ERROR in line %d :	", yylineno);
+	fprint( STDERR, "ERROR in line %d :	", yylineno);
 	doprnt( STDERR, fmt, &argv);
-	fprint( STDERR, "	!!\n");
+	fprint( STDERR, "\n");
 }
