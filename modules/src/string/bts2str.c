@@ -19,7 +19,7 @@ bts2str(b, n, s)
 
 	while (n-- > 0) {
 		if (is_print(*f)) {
-			if (*f == '\\') *t++ = *f;
+			if (*f == '\\' || *f == '"') *t++ = '\\';
 			*t++ = *f++;
 		} else {
 			*t++ = '\\';

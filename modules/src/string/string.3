@@ -156,6 +156,7 @@ into a null-terminated string, starting at
 .IR s .
 Printable characters are copied and non-printable characters are transformed
 into sequences of printable characters, representing those characters.
+Also, back-slashes and double quotes are escaped with a back-slash.
 The transformation agrees with the representation of non-printable
 characters in C strings.
 .br
