@@ -35,6 +35,8 @@ opcode with 2-byte signed argument
 opcode with 4-byte signed argument
 .PT 8
 opcode with 8-byte signed argument
+.PT u
+opcode with 2-byte unsigned argument
 .PE
 Secondary (escaped) opcodes.
 .PS - 5 "  "
