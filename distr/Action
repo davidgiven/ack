@@ -1,23 +1,3 @@
 name "EM tables"
 dir etc
 end
-name "Installation manual"
-dir doc
-end
-name "Pascal bootstrap files"
-dir lang/pc/pem
-end
-name "LLgen bootstrap files"
-dir util/LLgen
-end
-name "ego share pop_push file"
-dir util/ego/share
-end
-name "h/local.h"
-dir first
-action "cp local.h.src ../h/local.h"
-end
-name "h/em_path.h"
-dir first
-action "cp em_path.h.src ../h/em_path.h"
-end

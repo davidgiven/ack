@@ -2,7 +2,7 @@ case $# in
 1|2)	;;
 *)	echo $0 directory [ SVrecord ] ; exit 1 ;;
 esac
-DDIR=/proj/em/Work/distr
+DDIR=/usr/proj/em/Work/distr
 case $1 in
 /*)	DESTDIR=$1 ;;
 *)	DESTDIR=`pwd`/$1 ;;
@@ -10,5 +10,5 @@ esac
 DD=$DDIR/mkd
 DF=$DDIR/mkf
 DA=$DDIR/mka
-export DESTDIR DD DF DA
+export DDIR DESTDIR DD DF DA
 $DDIR/dwalk $2

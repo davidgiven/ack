@@ -8,10 +8,6 @@ fi
 ${DF-:} $CDIR .distr
 if test ! -r $DESTDIR/$CDIR/.distr
 then
-	( cd $DESTDIR/$CDIR; make .distr ) >/dev/null 2>&1
-fi
-if test ! -r $DESTDIR/$CDIR/.distr
-then
 	echo ++ no .distr in $CDIR
         exit 0
 fi
@@ -23,7 +19,7 @@ do
 		  then 
 			CDIR=$CDIR/$i
 			export CDIR
-			exec /proj/em/Work/distr/dwalk $*
+			exec $DDIR/dwalk $*
 		  else
 			echo ++ Could not access $CDIR/$i
 		  fi
