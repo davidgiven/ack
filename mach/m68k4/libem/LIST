@@ -25,13 +25,9 @@ mlu.s
 shp.s
 sig.s
 cms.s
-aciaio.s
 fat.s
 trp.s
 dia.s
 printf.s
 dvu.s
-trp.s
 sav.s
-dia.s
-printf.s
