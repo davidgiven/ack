@@ -8,3 +8,5 @@ SRC=	bull.b buzzword.b checker.b creator.b grafiek.b gunner.b learn.b\
 
 head:	
 	for i in $(SRC) ; do runcmp $$i ; done
+clean:
+	rm -f *.b.r *.[oskm]
