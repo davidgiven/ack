@@ -109,12 +109,14 @@ conversion(from_type, to_type)
 	    ) {
 		extern long full_mask[];
 
-		C_loc((arith) full_mask[(int)(to_type->tp_size)]);
-		C_and(word_size);
 		if (to_fund == T_SIGNED) {
 			C_loc(to_type->tp_size);
 			C_loc(word_size);
 			C_cii();
+		}
+		else {
+			C_loc((arith) full_mask[(int)(to_type->tp_size)]);
+			C_and(word_size);
 		}
 	}
 }

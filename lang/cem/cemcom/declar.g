@@ -177,6 +177,7 @@ initializer(struct idf *idf; int sc;)
 :
 	{	if (idf->id_def->df_type->tp_fund == FUNCTION)	{
 			error("illegal initialization of function");
+			idf->id_def->df_type->tp_fund = ERRONEOUS;
 		}
 	}
 	[
