@@ -15,8 +15,8 @@ FLTRAP=
 
 all:	$(INTS) em
 
-em:	em.c
-	$(CC) $(CFLAGS) -o em em.c
+em:	$(SRC_DIR)/em.c
+	$(CC) $(CFLAGS) -o em $(SRC_DIR)/em.c
 
 tmp.s:	$(FILES)
 	cat $(FILES) > tmp.s
@@ -51,10 +51,10 @@ em4_t-c-:tmp.s compile con_float.o
 em4_t--p:	tmp.s compile con_float.o
 	./compile -o em4_t--p -P $(FLTRAP) -Dlword -Dopfreq=0 -Dlast=1 -Dcount=0 -Dtest=1 -Dflow=0 -Dprof=1 tmp.s con_float.o
 
-con_float.o:	con_float.c
+con_float.o:	$(SRC_DIR)/con_float.c
 	case `ack_sys` in m68k2|pmds) \
-		acc -I$(SRC_HOME)/mach -mm68k4 -c -L -O con_float.c;; \
-		*) acc -c -I$(SRC_HOME)/mach -L -O con_float.c;; \
+		acc -I$(SRC_HOME)/mach -mm68k4 -c -L -O $(SRC_DIR)/con_float.c;; \
+		*) acc -c -I$(SRC_HOME)/mach -L -O $(SRC_DIR)/con_float.c;; \
 	esac
 
 compile:	Makefile
