@@ -3,27 +3,28 @@ PRINT=cat
 RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\
 ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF)
 NROFF=nroff
+MS=-ms
 
 cref.$(SUF):        cref.doc
 		tbl $? | $(NROFF) >$@
 v7bugs.$(SUF):      v7bugs.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 ack.$(SUF):         ack.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 cg.$(SUF):		cg.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 regadd.$(SUF):		regadd.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 install.$(SUF):     install.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 pcref.$(SUF):       pcref.doc
 		$(NROFF) $? >$@
 peep.$(SUF):	peep.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 val.$(SUF):         val.doc
 		$(NROFF) $? >$@
 toolkit.$(SUF):	toolkit.doc
-		$(NROFF) -ms $? >$@
+		$(NROFF) $(MS) $? >$@
 
 install cmp:
 
