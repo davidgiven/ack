@@ -32,7 +32,7 @@ static  int     oksizes;        /* MES EMX,.,. seen */
 
 static  enum    m_type { CON, ROM, HOLBSS }     memtype ;
 static  int     valtype;        /* Transfer of type information between
-				   valsize ans putval
+				   valsize, inpseudo and putval
 				*/
 
 int table3(i) {
@@ -243,7 +243,7 @@ int needed() {
 }
 
 cons_t valsize() {
-	switch(valtype=table2()) { /* valtype is used by putval */
+	switch(valtype=table2()) { /* valtype is used by putval and inpseudo */
 	case sp_cst2:
 		return wordsize ;
 	case sp_ilb1:
@@ -252,13 +252,6 @@ cons_t valsize() {
 	case sp_pnam:
 		return ptrsize ;
 	case sp_scon:
-		/* Pad the string with zeros up to the wordsize */
-		while ( strlngth%wordsize ) {
-			if ( strlngth>=MAXSTRING )
-				fatal("string too long") ;
-			string[strlngth]=0 ;
-			strlngth++ ;
-		}
 		return strlngth ;
 	case sp_fcon:
 	case sp_icon:
@@ -433,7 +426,7 @@ inpseudo(instr_no) {
 		chkstart() ;
 		typealign( ctrunc(instr_no)==ps_rom ? ROM : CON ) ;
 		while( (objsize=valsize())!=0 ) {
-			sizealign(objsize) ;
+			if ( valtype!=sp_scon) sizealign(objsize) ;
 			putval() ;
 			databytes+=objsize ;
 		}
