@@ -448,6 +448,8 @@ WalkStat(nd, exit_label)
 
 	assert(nd->nd_class == Stat);
 
+	if (nd->nd_symb == ';') return;
+
 	DoLineno(nd);
 	options['R'] = (nd->nd_flags & ROPTION);
 	options['A'] = (nd->nd_flags & AOPTION);
@@ -460,9 +462,6 @@ WalkStat(nd, exit_label)
 			}
 			CodeCall(nd);
 		}
-		break;
-
-	case ';':
 		break;
 
 	case BECOMES:
@@ -574,13 +573,11 @@ WalkStat(nd, exit_label)
 				nd->nd_def->df_flags |= D_FORLOOP;
 				def_ilb(l1);
 				if (! options['R']) {
+					label x = ++text_label;
+
 					ForLoopVarExpr(nd);
 					C_stl(tmp2);
-				}
-				WalkNode(right, exit_label);
-				nd->nd_def->df_flags &= ~D_FORLOOP;
-				if (! options['R']) {
-					label x = ++text_label;
+					WalkNode(right, exit_label);
 					C_lol(tmp2);
 					ForLoopVarExpr(nd);
 					C_beq(x);
@@ -588,6 +585,8 @@ WalkStat(nd, exit_label)
 					C_trp();
 					def_ilb(x);
 				}
+				else	WalkNode(right, exit_label);
+				nd->nd_def->df_flags &= ~D_FORLOOP;
 				FreeInt(tmp2);
 				if (stepsize) {
 					C_lol(tmp);

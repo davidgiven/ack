@@ -100,7 +100,7 @@ printnode(nd, lvl)
 	register t_node *nd;
 {
 	indnt(lvl);
-	print("Class: %d; Symbol: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
+	print("Class: %d; Symbol: %s; Flags: %d\n", nd->nd_class, symbol2str(nd->nd_symb), nd->nd_flags);
 	if (nd->nd_type) {
 		indnt(lvl);
 		print("Type: ");
