@@ -84,6 +84,30 @@ oper	:	NOOP_1
 			{	test($1);}
 	|	MOV ea_ea
 			{	mov($1);}
+/* Intel 8087 coprocessor instructions */
+	|	FNOOP
+			{	emit1($1); emit1($1>>8);}
+	|	FMEM mem
+			{	emit1($1); ea_2(($1>>8)&070);}
+	|	FST_I st_i
+			{	emit1($1); emit1(($1>>8)|$2); }
+	|	FST_I ST
+			{	emit1($1); emit1($1>>8); }
+	|	FST_ST ST ',' st_i
+			{	emit1($1); emit1(($1>>8)|$4); }
+	|	FST_ST st_i ',' ST
+			{	emit1($1|4); emit1((($1>>8)|$2)); }
+	|	FST_ST2 st_i ',' ST
+			{	emit1($1|4); emit1((($1>>8)|$2)^010); }
+	;
+
+st_i	:	ST '(' absexp ')'
+			{	if (!fit3($3)) {
+					serror("illegal index in FP stack");
+				}
+				$$ = $3;
+			}
+	;
 mem	:	'(' expr ')'
 			{	mrg_2 = 6; exp_2 = $2;
 				RELOMOVE(rel_2, relonami);

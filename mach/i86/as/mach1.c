@@ -10,7 +10,10 @@
 
 #define	low6(z)		(z & 077)
 #define	fit6(z)		(low6(z) == z)
+#define	low3(z)		(z & 07)
+#define	fit3(z)		(low3(z) == z)
 
+#define FESC	0xD8		/* escape for 8087 processor */
 extern int	mrg_1,mrg_2;
 extern expr_t	exp_1,exp_2;
 #ifndef ASLD

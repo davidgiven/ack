@@ -30,3 +30,13 @@
 %token <y_word> XCHG
 %token <y_word> TEST
 %token <y_word> MOV
+
+/* Intel 8087 coprocessor tokens */
+%token <y_word> FNOOP
+%token <y_word> FMEM
+%token <y_word> FST_I
+%token <y_word> FST_ST
+%token <y_word> FST_ST2
+%token <y_word> ST
+
+%type <y_valu> st_i
