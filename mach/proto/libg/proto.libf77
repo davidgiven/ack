@@ -1,0 +1,51 @@
+# $Header$
+
+#PARAMS		do not remove this line!
+
+#MACH_PARAMS	do not remove this line!
+
+SRC_DIR = $(SRC_HOME)/lang/fortran/lib
+
+.SUFFIXES: .o .e .c .m .s
+
+.c.o .c.m .c.s .e.o .e.m .e.s:
+		$(MACH) $(MACHFL) -DSkip_f2c_Undefs -ansi -DNON_UNIX_STDIO -wo -c $<
+
+fake:
+all:		copy tail
+
+copy:
+		( cd $(SRC_DIR) ; tar cf - LIST `cat LIST` ) | \
+			tar xf -
+
+tail:
+		for i in `cat LIST` ; \
+		do cd $$i ; \
+		   rm -f OLIST ; \
+		   sed 's/\.[ce]/.$(SUF)/' < LIST | sed '/\.h/D' > OLIST ; \
+		   make -f ../Makefile `cat OLIST` ; \
+		   cd .. ; \
+		   for j in `cat $$i/OLIST` ; \
+		   do echo $$i/$$j >> OLIST ; \
+		   done ; \
+		done
+		$(AR) r tail_f77 `cat OLIST`
+		$(RANLIB) tail_f77
+
+install:	all
+		cp tail_f77 $(TARGET_HOME)/lib/$(MACH)/tail_f77
+		$(RANLIB) $(TARGET_HOME)/lib/$(MACH)/tail_f77
+
+cmp:		all
+		-cmp tail_f77 $(TARGET_HOME)/lib/$(MACH)/tail_f77
+
+clean:
+		-rm -f *.old *.[ce$(SUF)] tail* head* OLIST
+		-rm -rf `cat LIST`
+		-rm -f LIST
+
+opr:
+		@echo "nothing to be printed"
+
+pr:
+		@echo "nothing to be printed"
