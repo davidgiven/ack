@@ -147,40 +147,85 @@ extern int	passnumber;
  * enough bytes, the first or the second time.
  */
 static bool
-compact(piece, incr)
+compact(piece, incr, freeze)
 	register int		piece;
 	register ind_t		incr;
 {
-	register ind_t		gain;
+	register ind_t		gain, size;
 	register struct memory	*mem;
-#define ALIGN 8
+#define ALIGN 8			/* minimum alignment for pieces */
+#define SHIFT_COUNT 2		/* let pieces only contribute if their free
+				   memory is more than 1/2**SHIFT_COUNT * 100 %
+				   of its occupied memory
+				*/
 
 	debug("compact(%d, %d)\n", piece, (int)incr, 0, 0);
-	gain = mems[0].mem_left & ~(ALIGN - 1);
-	mems[0].mem_left &= (ALIGN - 1);
-	for (mem = &mems[1]; mem <= &mems[piece]; mem++) {
+	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++) {
+		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
+	}
+	/*
+	 * First, check that moving will result in enough space
+	 */
+	if (! freeze) {
+		gain = mems[piece].mem_left & ~(ALIGN - 1);
+		for (mem = &mems[0]; mem <= &mems[NMEMS-1]; mem++) {
+			/* 
+			 * Don't give it all away! 
+			 * If this does not give us enough, bad luck
+			 */
+			if (mem == &mems[piece]) continue;
+			size = mem->mem_full >> SHIFT_COUNT;
+			if (mem->mem_left > size)
+				gain += (mem->mem_left - size) & ~(ALIGN - 1);
+		}
+		if (gain < incr) return 0;
+	}
+
+	gain = 0;
+	for (mem = &mems[0]; mem != &mems[piece]; mem++) {
 		/* Here memory is inserted before a piece. */
 		assert(passnumber == FIRST || gain == (ind_t)0);
 		copy_down(mem, gain);
-		gain += mem->mem_left & ~(ALIGN - 1);
-		mem->mem_left &= (ALIGN - 1);
+		if (freeze || gain < incr) {
+			if (freeze) size = 0;
+			else size = mem->mem_full >> SHIFT_COUNT;
+			if (mem->mem_left > size) {
+				size = (mem->mem_left - size) & ~(ALIGN - 1);
+				gain += size;
+				mem->mem_left -= size;
+			}
+		}
 	}
 	/*
-	 * Note that we already added the left bytes of the piece we want to
-	 * enlarge to `gain'.
+	 * Now mems[piece]:
 	 */
+	copy_down(mem, gain);
+	gain += mem->mem_left & ~(ALIGN - 1);
+	mem->mem_left &= (ALIGN - 1);
+
 	if (gain < incr) {
 		register ind_t	up = (ind_t)0;
 
 		for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--) {
 			/* Here memory is appended after a piece. */
-			up += mem->mem_left & ~(ALIGN - 1);
+			if (freeze || gain + up < incr) {
+				if (freeze) size = 0;
+				else size = mem->mem_full >> SHIFT_COUNT;
+				if (mem->mem_left > size) {
+					size = (mem->mem_left - size) & ~(ALIGN - 1);
+					up += size;
+					mem->mem_left -= size;
+				}
+			}
 			copy_up(mem, up);
-			mem->mem_left &= (ALIGN - 1);
 		}
 		gain += up;
 	}
 	mems[piece].mem_left += gain;
+	assert(freeze || gain >= incr);
+	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++) {
+		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
+	}
 	return gain >= incr;
 }
 
@@ -257,7 +302,7 @@ alloc(piece, size)
 	while (left + incr < size)
 		incr += INCRSIZE;
 
-	if (incr == 0 || move_up(piece, incr) || compact(piece, size)) {
+	if (incr == 0 || move_up(piece, incr) || compact(piece, size, 0)) {
 		mems[piece].mem_full += size;
 		mems[piece].mem_left -= size;
 		return full;
@@ -382,7 +427,7 @@ freeze_core()
 			break;
 		}
 	}
-	compact(NMEMS - 1, (ind_t)0);
+	compact(NMEMS - 1, (ind_t)0, 1);
 }
 
 /* ------------------------------------------------------------------------- */
