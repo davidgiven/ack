@@ -63,10 +63,24 @@ SkipToNewLine()
 {
 	register int ch;
 	register int garbage = 0;
+#ifndef	NOPP
+	register int delim = 0;
+#endif
 
 	while ((ch = GetChar()) != '\n') {
 #ifndef NOPP
-		if (ch == '/') {
+		if (delim) {
+			if (ch == '\\') {
+				if (GetChar() == '\n') break;
+			} else if (ch == delim) {
+				delim = 0;
+			}
+			continue;
+		}
+		else if (ch == '\'' || ch == '\"') {
+			delim = ch;
+			garbage = 1;
+		} else if (ch == '/') {
 			if ((ch = GetChar()) == '*'
 			    && !InputLevel
 			) {
@@ -78,6 +92,9 @@ SkipToNewLine()
 		if (!is_wsp(ch))
 			garbage = 1;
 	}
+#ifndef	NOPP
+	if (delim) strict("unclosed opening %c", delim);
+#endif
 	++LineNumber;
 	return garbage;
 }

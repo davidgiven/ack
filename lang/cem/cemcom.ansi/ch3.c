@@ -177,8 +177,9 @@ ch3cast(expp, oper, tp)
 		(*expp)->ex_type = void_type;
 		return;
 	}
-	if ((*expp)->ex_type->tp_fund == FUNCTION)
+	if ((*expp)->ex_type->tp_fund == FUNCTION) {
 		function2pointer(*expp);
+	}
 	if ((*expp)->ex_type->tp_fund == ARRAY)
 		array2pointer(*expp);
 	if ((*expp)->ex_class == String)
@@ -287,6 +288,7 @@ ch3cast(expp, oper, tp)
 		case '=':
 		case CASTAB:
 		case RETURN:
+		case ':':
 		    if (tp->tp_up && oldtp->tp_up) {
 			    if (tp->tp_up->tp_fund == VOID
 				&& oldtp->tp_up->tp_fund != FUNCTION) {
@@ -296,13 +298,17 @@ ch3cast(expp, oper, tp)
 				&& tp->tp_up->tp_fund != FUNCTION) {
 				break;	/* switch */
 			    }
+			    if (oldtp->tp_up->tp_fund == VOID
+				&& is_cp_cst(*expp)
+				&& (*expp)->VL_VALUE == (arith)0)
+				break;	/* switch */
 		    }
 		    /* falltrough */
 		default:
 		    if (oper == CASTAB)
-			    expr_warning(*expp, "incompatible pointers");
+			    expr_strict(*expp, "incompatible pointers in call");
 		    else
-			    expr_warning(*expp, "incompatible pointers in %s",
+			    expr_strict(*expp, "incompatible pointers in %s",
 							symbol2str(oper));
 		    break;
 		case CAST: break;

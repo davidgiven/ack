@@ -115,7 +115,6 @@ GetToken(ptok)
 	*/
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
-	int nlflag = 0;
 
 	token_nmb++;
 
@@ -590,7 +589,7 @@ quoted(ch)
 
 			for (;;) {
 				ch = GetChar();
-				if (vch = hex_val(ch), vch == -1)
+				if ((vch = hex_val(ch)) == -1)
 					break;
 				hex = hex * 16 + vch;
 			}

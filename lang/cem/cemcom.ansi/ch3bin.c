@@ -70,25 +70,11 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case '(':				/* 3.3.2.2 */
-#if 1
-		if (	expp_tp->tp_fund == POINTER &&
-			expp_tp->tp_up->tp_fund == FUNCTION
-		)	{
+		if (expp_tp->tp_fund == POINTER
+		    && expp_tp->tp_up->tp_fund == FUNCTION)	{
 			ch3mon('*', expp);
 			expp_tp = (*expp)->ex_type;
 		}
-#else
-		if (expp_tp->tp_fund != POINTER
-		    || expp->tp_up->tp_fund != FUNCTION) {
-			expr_error(*expp, "call of non-function (%s)",
-				symbol2str(expp_tp->tp_fund));
-			/* leave the expression; it may still serve */
-			free_expression(expr);	/* there go the parameters */
-			*expp = new_oper(error_type,
-					*expp, '(', (struct expr *)0);
-		}
-#endif
-#if 1
 		if (expp_tp->tp_fund != FUNCTION)	{
 			expr_error(*expp, "call of non-function (%s)",
 				symbol2str(expp_tp->tp_fund));
@@ -97,7 +83,6 @@ ch3bin(expp, oper, expr)
 			*expp = new_oper(error_type,
 					*expp, '(', (struct expr *)0);
 		}
-#endif
 		else
 			*expp = new_oper(expp_tp->tp_up,
 					*expp, '(', expr);
@@ -105,8 +90,6 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case PARCOMMA:				/* 3.3.2.2 */
-		if (expp_tp->tp_fund == FUNCTION)
-			function2pointer(*expp);
 		*expp = new_oper(expr->ex_type, *expp, PARCOMMA, expr);
 		break;
 
@@ -249,13 +232,12 @@ ch3bin(expp, oper, expr)
 		break;
 
 	case ':':
-		if (	is_struct_or_union(expp_tp->tp_fund)
-		||	is_struct_or_union(expr->ex_type->tp_fund)
-		)	{
+		if (is_struct_or_union(expp_tp->tp_fund)
+		    || is_struct_or_union(expr->ex_type->tp_fund))	{
 			if (!equal_type(expp_tp, expr->ex_type, -1))
 				expr_error(*expp, "illegal balance");
 		}
-		else
+		else 
 			relbalance(expp, oper, &expr);
 #ifdef	LINT
 		if (	(is_cp_cst(*expp) && is_cp_cst(expr))
@@ -333,9 +315,10 @@ mk_binop(expp, oper, expr, commutative)
 	else if (is_fp_cst(expr) && is_fp_cst(ex))
 		fltcstbin(expp, oper, expr);
 	else	{
-		*expp = (commutative && expr->ex_depth >= ex->ex_depth) ?
-				new_oper(ex->ex_type, expr, oper, ex) :
-				new_oper(ex->ex_type, ex, oper, expr);
+		*expp = (commutative && (expr->ex_depth >= ex->ex_depth
+					|| is_cp_cst(ex)))
+			    ? new_oper(ex->ex_type, expr, oper, ex)
+			    : new_oper(ex->ex_type, ex, oper, expr);
 	}
 }
 

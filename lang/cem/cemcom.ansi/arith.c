@@ -135,21 +135,31 @@ relbalance(e1p, oper, e2p)
 	register struct expr **e1p, **e2p;
 {
 	/*	The expressions *e1p and *e2p are balanced to be operands
-		of the relational operator oper.
+		of the relational operator oper, or the ':'.
+		Care is taken to switch the operands in case of a
+		null-pointer constant. This is done so that ch3cast()
+		allows assignments of a null-pointer to a function
+		pointer.
 	*/
-	if ((*e1p)->ex_type->tp_fund == FUNCTION)
-		function2pointer(*e1p);
-	if ((*e2p)->ex_type->tp_fund == FUNCTION)
-		function2pointer(*e2p);
-	if ((*e1p)->ex_type->tp_fund == POINTER)
-		ch3pointer(e2p, oper, (*e1p)->ex_type);
-	else if ((*e2p)->ex_type->tp_fund == POINTER)
-		ch3pointer(e1p, oper, (*e2p)->ex_type);
-	else if ((*e1p)->ex_type == (*e2p)->ex_type
-		&& (*e1p)->ex_type->tp_fund == ENUM) {}
+	register struct expr *e1 = *e1p, *e2 = *e2p;
+	struct expr *tmpexpr;
+
+	if (e1->ex_type->tp_fund == POINTER
+	    && is_cp_cst(e1)
+	    && e1->VL_VALUE == 0) {
+		tmpexpr = e1;
+		e1 = e2;
+		e2 = tmpexpr;
+	}
+	if (e1->ex_type->tp_fund == POINTER)
+		ch3pointer(e2p, oper, e1->ex_type);
+	else if (e2->ex_type->tp_fund == POINTER)
+		ch3pointer(e1p, oper, e2->ex_type);
+	else if (e1->ex_type == e2->ex_type
+		&& e1->ex_type->tp_fund == ENUM) {}
 	else if (oper == ':'
-		    && (*e1p)->ex_type->tp_fund == VOID
-		    && (*e2p)->ex_type->tp_fund == VOID) {}
+		    && e1->ex_type->tp_fund == VOID
+		    && e2->ex_type->tp_fund == VOID) {}
 	else
 		arithbalance(e1p, oper, e2p);
 }
