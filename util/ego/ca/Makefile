@@ -1,6 +1,13 @@
-EMH=../../../h
-EMLIB=../../../lib
-SHR=../share
+
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
+SHARE=../share
+
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
 
 CFILES=\
 ca.c ca_put.c
@@ -22,6 +29,8 @@ SHARE_MFILES=\
 $(SHR)/get.m $(SHR)/alloc.m $(SHR)/global.m $(SHR)/aux.m $(SHR)/debug.m \
 $(SHR)/lset.m $(SHR)/cset.m $(SHR)/files.m $(SHR)/map.m
 
+all:	ca
+
 ca:	$(OFILES)
 	$(CC) -o ca $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
 
@@ -29,12 +38,27 @@ ca_ack:	$(CFILES) $(SHARE_MFILES)
 	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
 	$(CC) -o ca -.c $(LDFLAGS) ca.o $(EMLIB)/em_data.a
 
+install:	all
+	../install ca
+
+cmp:	all
+	-../compare ca
+
+pr:
+	@pr $(PRFILES)
+
+opr:
+	make pr | opr
+
+clean:
+	rm -f ca *.o Out out nohup.out
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
-pr:	$(PRFILES)
+print:	$(PRFILES)
 	@pr $?
-	@touch pr
+	@touch print
 
 depend:
 	$(SHR)/makedepend

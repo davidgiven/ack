@@ -1,6 +1,13 @@
-EMH=../../../h
-EMLIB=../../../lib
-SHR=../share
+
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
+SHARE=../share
+
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
 
 CFILES=\
 ra.c ra_items.c ra_lifet.c ra_allocl.c ra_profits.c \
@@ -27,6 +34,8 @@ $(SHR)/aux.m $(SHR)/get.m $(SHR)/put.m $(SHR)/alloc.m $(SHR)/global.m \
 $(SHR)/debug.m $(SHR)/files.m $(SHR)/map.m $(SHR)/lset.m $(SHR)/cset.m \
 $(SHR)/go.m
 
+all:	ra
+
 ra:	$(OFILES)
 	$(CC) -o ra $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
 
@@ -40,12 +49,27 @@ itemtab.h: itemtab.src makeitems $(EMH)/em_mnem.h
 makeitems: makeitems.c
 	$(CC) -o makeitems makeitems.c
 
+install:	all
+	../install ra
+
+cmp:	all
+	-../compare ra
+
+pr:
+	@pr $(PRFILES)
+
+opr:
+	make pr | opr
+
+clean:
+	rm -f ra makeitems itemtab.h *.o Out out nohup.out
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
-pr:	$(PRFILES)
+print:	$(PRFILES)
 	@pr $?
-	@touch pr
+	@touch print
 
 depend:
 	$(SHR)/makedepend

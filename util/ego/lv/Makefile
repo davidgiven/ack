@@ -1,6 +1,13 @@
-EMH=../../../h
-EMLIB=../../../lib
-SHR=../share
+
+EMHOME=../../..
+EMH=$(EMHOME)/h
+EMLIB=$(EMHOME)/lib
+SHARE=../share
+
+LDFLAGS=-i
+CPPFLAGS=-DVERBOSE -DNOTCOMPACT
+CFLAGS=$(CPPFLAGS) -O
+LINTFLAGS=-phbac
 
 CFILES=\
 lv.c
@@ -24,6 +31,8 @@ $(SHR)/get.m $(SHR)/aux.m $(SHR)/put.m $(SHR)/map.m $(SHR)/alloc.m \
 $(SHR)/global.m $(SHR)/debug.m $(SHR)/lset.m $(SHR)/cset.m $(SHR)/parser.m \
 $(SHR)/files.m $(SHR)/locals.m $(SHR)/init_glob.m $(SHR)/go.m
 
+all:	lv
+
 lv:	$(OFILES)
 	$(CC) -o lv $(LDFLAGS) $(OFILES) $(SHARE_OFILES) $(EMLIB)/em_data.a
 
@@ -31,12 +40,27 @@ lv_ack:	$(CFILES) $(SHARE_MFILES)
 	$(CC) -c.o $(CFLAGS) $(CFILES) $(SHARE_MFILES)
 	$(CC) -o lv -.c $(LDFLAGS) lv.o $(EMLIB)/em_data.a
 
+install:	all
+	../install lv
+
+cmp:	all
+	-../compare lv
+
+pr:
+	@pr $(PRFILES)
+
+opr:
+	make pr | opr
+
+clean:
+	rm -f lv *.o Out out nohup.out
+
 lint:
 	lint $(LINTFLAGS) $(CPPFLAGS) $(CFILES)
 
-pr:	$(PRFILES)
+print:	$(PRFILES)
 	@pr $?
-	@touch pr
+	@touch print
 
 depend:
 	$(SHR)/makedepend
