@@ -244,6 +244,24 @@ find_dependencies()
 		}
 	}
 	print("\n\n");
+	print("objects:\t");
+	f_walk(arglist, arg) {
+		char *fn = f_filename(arg);
+		char *dotspot = strrindex(fn, '.');
+
+		if (dotspot && strcmp(dotspot, ".mod") == 0) {
+			register struct idf *id = f_idf(arg);
+
+			if (! f_notfound(arg) && id) {
+				if (id->id_type == PROGRAM) {
+					*dotspot = 0;
+					print("%s_o_files ", fn);
+					*dotspot = '.';
+				}
+			}
+		}
+	}
+	print("\n\n\n");
 }
 
 file_dep(id)
@@ -415,7 +433,7 @@ pr_prog_dep(id, a)
 		}
 	}
 	print("\n\n");
-	print("o_files:\t$(OBS_%s)\n\n", id->id_text);
+	print("%s_o_files:\t$(OBS_%s)\n\n", basename(f_filename(a)), id->id_text);
 	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
 	print("\t$(MOD) -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
 }
