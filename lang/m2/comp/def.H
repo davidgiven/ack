@@ -98,10 +98,9 @@ struct def	{		/* list of definitions for a name */
 #define D_ERROR		0x4000	/* a compiler generated definition for an
 				   undefined variable
 				*/
-#define D_IMP_BY_EXP	0x8000	/* imported definition by export */
 #define D_VALUE	(D_PROCEDURE|D_VARIABLE|D_FIELD|D_ENUM|D_CONST|D_PROCHEAD)
 #define D_ISTYPE	(D_HIDDEN|D_TYPE|D_FTYPE)
-#define D_IMPORTED	(D_IMPORT|D_IMP_BY_EXP)
+#define D_IMPORTED	(D_IMPORT)
 #define is_type(dfx)	((dfx)->df_kind & D_ISTYPE)
 	unsigned short  df_flags;
 #define D_NOREG		0x01	/* set if it may not reside in a register */
@@ -115,6 +114,7 @@ struct def	{		/* list of definitions for a name */
 #define D_FOREIGN	0x100	/* set for foreign language modules */
 #define D_ADDRGIVEN	0x200	/* set if address given for variable */
 #define D_FORLOOP	0x400	/* set if busy in for-loop */
+#define D_IMP_BY_EXP	0x800	/* imported definition by export */
 	struct type *df_type;
 	union {
 		struct module df_module;

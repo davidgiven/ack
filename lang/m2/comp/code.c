@@ -536,6 +536,7 @@ CodeStd(nd)
 		size = left->nd_type->tp_size;
 		if (size < word_size) size = word_size;
 		CodePExpr(left);
+		CodeCoercion(left->nd_type, tp);
 		if (arg) {
 			CodePExpr(arg->nd_left);
 			CodeCoercion(arg->nd_left->nd_type, tp);

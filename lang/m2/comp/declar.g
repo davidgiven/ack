@@ -403,12 +403,21 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			  nd = *pnd;
 			}
 	[
-		UPTO	{ *pnd = dot2node(Link,nd,NULLNODE); }
+		UPTO	{ *pnd = nd = dot2node(Link,nd,NULLNODE);
+			  nd->nd_type = nd->nd_left->nd_type;
+			}
 		ConstExpression(&(*pnd)->nd_right)
 			{ if (!ChkCompat(&((*pnd)->nd_right), nd->nd_type,
 					 "case label")) {
 			  	nd->nd_type = error_type;
 			  }
+			  else if (! chk_bounds(nd->nd_left->nd_INT,
+						nd->nd_right->nd_INT,
+						BaseType(nd->nd_type)->tp_fund)) {
+			    node_error(nd,
+			   "lower bound exceeds upper bound in case label range");
+			  }
+
 			}
 	]?
 			{

@@ -860,7 +860,8 @@ UseWarnings(df)
 			register t_def *df1 = df->imp_def;
 
 			df1->df_flags |= df->df_flags & (D_USED|D_DEFINED);
-			if (df->df_kind == D_IMPORT) {
+			if (df->df_kind == D_IMPORT &&
+			    !(df->df_flags & D_IMP_BY_EXP)) {
 				if (! (df->df_flags & (D_USED | D_DEFINED))) {
 					node_warning(
 						df->df_scope->sc_end,

@@ -411,7 +411,11 @@ genrck(tp)
 	*/
 	arith lb, ub;
 	register label ol;
+	arith size = tp->tp_size;
+	extern char *long2str();
+	register t_type *btp = BaseType(tp);
 
+	if (size < word_size) size = word_size;
 	getbounds(tp, &lb, &ub);
 
 	if (tp->tp_fund == T_SUBRANGE) {
@@ -424,11 +428,17 @@ genrck(tp)
 	}
 	if (!ol) {
 		C_df_dlb(ol = data_label);
-		C_rom_cst(lb);
-		C_rom_cst(ub);
+		C_rom_icon(long2str((long)lb,10), size);
+		C_rom_icon(long2str((long)ub,10), size);
 	}
 	c_lae_dlb(ol);
-	C_rck(word_size);
+	if (size <= word_size) {
+		C_cal(btp->tp_fund == T_INTEGER ? "rcki" : "rcku");
+	}
+	else {
+		C_cal(btp->tp_fund == T_INTEGER ? "rckil" : "rckul");
+	}
+	C_asp(pointer_size);
 }
 
 getbounds(tp, plo, phi)

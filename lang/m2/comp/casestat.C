@@ -232,17 +232,16 @@ AddCases(sh, node, lbl)
 {
 	/*	Add case labels to the case label list
 	*/
-	register arith v1, v2;
 
 	if (node->nd_class == Link) {
 		if (node->nd_symb == UPTO) {
 			assert(node->nd_left->nd_class == Value);
 			assert(node->nd_right->nd_class == Value);
 
-			v2 = node->nd_right->nd_INT;
 			node->nd_type = node->nd_left->nd_type;
-			for (v1 = node->nd_left->nd_INT; v1 <= v2; v1++) {
-				node->nd_INT = v1;
+			for (node->nd_INT = node->nd_left->nd_INT;
+			     node->nd_INT != node->nd_right->nd_INT;
+			     node->nd_INT++) {
 				if (! AddOneCase(sh, node, lbl)) return 0;
 			}
 			return 1;
