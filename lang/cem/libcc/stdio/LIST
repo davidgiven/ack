@@ -1,4 +1,7 @@
 tail_cc.1s.a
+vsprintf.c
+vfprintf.c
+vprintf.c
 termcap.c
 getopt.c
 clearerr.c
