@@ -2,6 +2,7 @@ EMHOME = ../../..
 MODULES = $(EMHOME)/modules
 INSTALL = $(MODULES)/install
 COMPARE = $(MODULES)/compare
+AR	= ar
 
 CFLAGS = -O
 
@@ -15,7 +16,7 @@ OBJ =	bts2str.o btscat.o btscmp.o btscpy.o btszero.o long2str.o \
 all:		libstring.a
 
 libstring.a:	$(OBJ) Makefile
-		ar r libstring.a $(OBJ)
+		$(AR) r libstring.a $(OBJ)
 		-sh -c 'ranlib libstring.a'
 
 install:	all
@@ -34,3 +35,7 @@ opr:
 
 clean:
 		rm -f *.[oa]
+
+lintlib:
+		lint -Cstring $(SRC)
+		mv llib-lstring.ln $(MODULES)/lib
