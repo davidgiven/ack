@@ -183,9 +183,9 @@ loc lol adi loc $3==w:	lol $2	loc $1	adi w loc $4
 loc lol adi inc $3==w:	lol $2	loc $1	adi w inc
 loc lol adi dec $3==w:	lol $2	loc $1	adi w dec
 ldc lde mli $3==2*w:    lde $2  ldc $1  mli 2*w
-ldc lde adi $3==2*w:    lde $2  ldc $1  adi 2*w
+ldc lde adi ldc $3==2*w:    lde $2  ldc $1  adi 2*w ldc $4
 ldc ldl mli $3==2*w:    ldl $2  ldc $1  mli 2*w
-ldc ldl adi $3==2*w:    ldl $2  ldc $1  adi 2*w
+ldc ldl adi ldc $3==2*w:    ldl $2  ldc $1  adi 2*w ldc $4
 loc mli $1==2 && $2==w: 	loc 1   sli w
 loc mli $1==4 && $2==w: 	loc 2   sli w
 loc mli $1==8 && $2==w: 	loc 3   sli w
@@ -381,7 +381,7 @@ loc loc loc $1==0 && $2==0 && $3==0 :    zer 3*w
 zer loc defined($1) && $2==0:   zer $1+w
 #endif
 loi loc and $1==1 && $3==w && ($2&255)==255:    loi 1
-loi loc loc cii $1<w && $2==w: loi $1 loc $2 loc $3 cui
+loi loc and loc loc cii $1==1 && $4==w && $3==w && $2==255: loi $1 loc $4 loc $5 cii
 loi loc loc cii loc and $1==1 && $2==1 && $3==w && $5==255 && $6==w:	loi 1
 loi loc loc cii loc cmi zeq $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:	loi 1 loc $5 cmi w zeq $7
 loi loc loc cii loc cmi zne $1==1 && $2==1 && $3==w && $5>=0 && $5<128 && $6==w:	loi 1 loc $5 cmi w zne $7
@@ -497,11 +497,17 @@ ldf loc inn $3==2*w && $2>=0 && $2<16*w :
 	lof $1+($2/(8*w))*w loc $2&(8*w-1) inn w
 loc inn $1<0 || $1>=8*$2 : asp $2 loc 0
 lol loc adi stl $3==w && $1==$4 : loc $2 lol $1 adi w stl $4
+ldl ldc adi sdl $3==2*w && $1==$4 : ldc $2 ldl $1 adi 2*w sdl $4
 lol loe adi stl $3==w && $1==$4 : loe $2 lol $1 adi w stl $4
+ldl lde adi sdl $3==2*w && $1==$4 : lde $2 ldl $1 adi 2*w sdl $4
 lol lol adi stl $3==w && $1==$4 && $1!=$2 : lol $2 lol $1 adi w stl $4
+ldl ldl adi sdl $3==2*w && $1==$4 &&$1!=$2 : ldl $2 ldl $1 adi 2*w sdl $4
 loe loc adi ste $3==w && $1==$4 : loc $2 loe $1 adi w ste $4
+lde ldc adi sde $3==2*w && $1==$4 : ldc $2 lde $1 adi 2*w sde $4
 loe loe adi ste $3==w && $1==$4 && $1!=$2 : loe $2 loe $1 adi w ste $4
+lde lde adi sde $3==2*w && $1==$4 && $1!=$2 : lde $2 lde $1 adi 2*w sde $4
 loe lol adi ste $3==w && $1==$4 : lol $2 loe $1 adi w ste $4
+lde ldl adi sde $3==2*w && $1==$4 : ldl $2 lde $1 adi 2*w sde $4
 lol loc ior stl $3==w && $1==$4 : loc $2 lol $1 ior w stl $4
 lol loe ior stl $3==w && $1==$4 : loe $2 lol $1 ior w stl $4
 lol lol ior stl $3==w && $1==$4 && $1!=$2 : lol $2 lol $1 ior w stl $4
