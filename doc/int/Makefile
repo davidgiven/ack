@@ -1,12 +1,15 @@
 # $Header$
 
-TBL=/usr/ditroff/tbl
+TBL=tbl
 
 DOC =		draw.mac cover txt1 txt2 txt3 appA appB bib
 int.doc:	$(DOC)
 		$(TBL) $(DOC) > $@
 
-FLS =		README .distr Makefile int.1 $(DOC)
+../int.doc:	int.doc
+		mv int.doc ..
+
+FLS =		README Makefile $(DOC)
 
 .distr:		Makefile
 		echo $(FLS) | tr ' ' '\012' >.distr
