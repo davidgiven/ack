@@ -258,7 +258,7 @@ any2arith(expp, oper)
 			want to keep enums and ints separate
 		*/
 		int2int(expp, int_type);
-#endif	LINT
+#endif	/* LINT */
 		break;
 	case FLOAT:
 /*	only when it is a parameter and the default promotion should
@@ -273,7 +273,7 @@ any2arith(expp, oper)
 	case FIELD:
 		field2arith(expp);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		expr_error(*expp, "operator %s on non-numerical operand (%s)",
 			symbol2str(oper), symbol2str(fund));
@@ -500,7 +500,7 @@ opnd2logical(expp, oper)
 	else 
 	if (fund == FIELD)
 		field2arith(expp);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	switch (fund = (*expp)->ex_type->tp_fund) {
 	case CHAR:
 	case SHORT:
@@ -575,7 +575,7 @@ any2opnd(expp, oper)
 	case FIELD:
 		field2arith(expp);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	}
 }
 
@@ -620,7 +620,7 @@ field2arith(expp)
 		ch3bin(expp, RIGHT, intexpr(other_bits, INT));
 	}
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 /*	switch_sign_fp() negates the given floating constant expression,
  *	and frees the string representing the old value.

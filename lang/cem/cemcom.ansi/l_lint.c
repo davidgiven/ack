@@ -15,7 +15,7 @@
 #include	"assert.h"
 #ifdef ANSI
 #include	<flt_arith.h>
-#endif ANSI
+#endif /* ANSI */
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -450,6 +450,6 @@ print_esp(msg, esp)
 	}
 	print(">\n");
 }
-#endif	DEBUG
+#endif	/* DEBUG */
 
-#endif	LINT
+#endif	/* LINT */

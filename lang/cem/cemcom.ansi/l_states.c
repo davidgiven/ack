@@ -15,7 +15,7 @@
 #include	"debug.h"
 #ifdef ANSI
 #include	<flt_arith.h>
-#endif ANSI
+#endif /* ANSI */
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
@@ -37,7 +37,7 @@
 #define	dbg_lint_stack(m)	/*print_lint_stack(m)	/* or not */
 #else
 #define	dbg_lint_stack(m)
-#endif	DEBUG
+#endif	/* DEBUG */
 
 extern char *symbol2str();
 extern char *func_name;
@@ -208,7 +208,7 @@ lint_1_global(idf, def)
 	case GLOBAL:
 #ifdef	IMPLICIT
 	case IMPLICIT:
-#endif	IMPLICIT
+#endif	/* IMPLICIT */
 		if (fund == ERRONEOUS)
 			break;
 
@@ -1310,6 +1310,6 @@ print_lint_stack(msg)
 	print("  |--------------\n\n");
 }
 
-#endif	DEBUG
+#endif	/* DEBUG */
 
-#endif	LINT
+#endif	/* LINT */

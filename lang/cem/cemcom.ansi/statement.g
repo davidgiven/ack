@@ -12,7 +12,7 @@
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 
 #include	"debug.h"
 #include	"botch_free.h"
@@ -46,7 +46,7 @@ statement
 	{
 #ifdef	LINT
 		lint_statement();
-#endif	LINT
+#endif	/* LINT */
 	}
 :
 %if (AHEAD != ':')
@@ -75,7 +75,7 @@ statement
 		code_break();
 #ifdef	LINT
 		lint_break_stmt();
-#endif	LINT
+#endif	/* LINT */
 	}
 	';'
 |
@@ -84,7 +84,7 @@ statement
 		code_continue();
 #ifdef	LINT
 		lint_continue_stmt();
-#endif	LINT
+#endif	/* LINT */
 	}
 	';'
 |
@@ -105,7 +105,7 @@ expression_statement
 		{
 #ifdef	DEBUG
 			print_expr("expression_statement", expr);
-#endif	DEBUG
+#endif	/* DEBUG */
 			code_expr(expr, RVAL, FALSE, NO_LABEL, NO_LABEL);
 			free_expression(expr);
 		}
@@ -126,7 +126,7 @@ label
 		*/
 #ifdef	LINT
 		lint_label();
-#endif	LINT
+#endif	/* LINT */
 		define_label(idf);
 		C_df_ilb((label)idf->id_label->df_address);
 	}
@@ -156,14 +156,14 @@ if_statement
 				/* else fall through */
 #ifdef	LINT
 				start_if_part(1);
-#endif	LINT
+#endif	/* LINT */
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_true, l_false);
 				C_df_ilb(l_true);
 #ifdef	LINT
 				start_if_part(0);
-#endif	LINT
+#endif	/* LINT */
 			}
 			free_expression(expr);
 		}
@@ -174,7 +174,7 @@ if_statement
 			{
 #ifdef	LINT
 				start_else_part();
-#endif	LINT
+#endif	/* LINT */
 				C_bra(l_end);
 				C_df_ilb(l_false);
 			}
@@ -182,14 +182,14 @@ if_statement
 			{	C_df_ilb(l_end);
 #ifdef	LINT
 				end_if_else_stmt();
-#endif	LINT
+#endif	/* LINT */
 			}
 	|
 		empty
 			{	C_df_ilb(l_false);
 #ifdef	LINT
 				end_if_stmt();
-#endif	LINT
+#endif	/* LINT */
 			}
 	]
 ;
@@ -223,7 +223,7 @@ while_statement
 			}
 #ifdef	LINT
 			start_while_stmt(expr);
-#endif	LINT
+#endif	/* LINT */
 		}
 	')'
 	statement
@@ -235,7 +235,7 @@ while_statement
 #ifdef	LINT
 			end_loop_body();
 			end_loop_stmt();
-#endif	LINT
+#endif	/* LINT */
 		}
 ;
 
@@ -252,7 +252,7 @@ do_statement
 			stack_stmt(l_break, l_continue);
 #ifdef	LINT
 			start_do_stmt();
-#endif	LINT
+#endif	/* LINT */
 		}
 	statement
 	WHILE
@@ -260,7 +260,7 @@ do_statement
 		{
 #ifdef	LINT
 			end_loop_body();
-#endif	LINT
+#endif	/* LINT */
 			C_df_ilb(l_continue);
 		}
 	expression(&expr)
@@ -272,13 +272,13 @@ do_statement
 				}
 #ifdef	LINT
 				end_do_stmt(1, expr->VL_VALUE != (arith)0);
-#endif	LINT
+#endif	/* LINT */
 			}
 			else	{
 				code_expr(expr, RVAL, TRUE, l_body, l_break);
 #ifdef	LINT
 				end_do_stmt(0, 0);
-#endif	LINT
+#endif	/* LINT */
 			}
 			C_df_ilb(l_break);
 		}
@@ -332,13 +332,13 @@ for_statement
 		{
 #ifdef	LINT
 			start_for_stmt(e_test);
-#endif	LINT
+#endif	/* LINT */
 		}
 	statement
 		{
 #ifdef	LINT
 			end_loop_body();
-#endif	LINT
+#endif	/* LINT */
 			C_df_ilb(l_continue);
 			if (e_incr)
 				code_expr(e_incr, RVAL, FALSE,
@@ -351,7 +351,7 @@ for_statement
 			free_expression(e_incr);
 #ifdef	LINT
 			end_loop_stmt();
-#endif	LINT
+#endif	/* LINT */
 		}
 ;
 
@@ -368,14 +368,14 @@ switch_statement
 			code_startswitch(&expr);
 #ifdef	LINT
 			start_switch_part(is_cp_cst(expr));
-#endif	LINT
+#endif	/* LINT */
 		}
 	')'
 	statement
 		{
 #ifdef	LINT
 			end_switch_stmt();
-#endif	LINT
+#endif	/* LINT */
 			code_endswitch();
 			free_expression(expr);
 		}
@@ -392,7 +392,7 @@ case_statement
 		{
 #ifdef	LINT
 			lint_case_stmt(0);
-#endif	LINT
+#endif	/* LINT */
 			code_case(expr);
 			free_expression(expr);
 		}
@@ -407,7 +407,7 @@ default_statement
 		{
 #ifdef	LINT
 			lint_case_stmt(1);
-#endif	LINT
+#endif	/* LINT */
 			code_default();
 		}
 	':'
@@ -425,13 +425,13 @@ return_statement
 		{
 #ifdef	LINT
 			lint_ret_conv(expr);
-#endif	LINT
+#endif	/* LINT */
 
 			do_return_expr(expr);
 			free_expression(expr);
 #ifdef	LINT
 			lint_return_stmt(VALRETURNED);
-#endif	LINT
+#endif	/* LINT */
 		}
 	|
 		empty
@@ -439,7 +439,7 @@ return_statement
 			do_return();
 #ifdef	LINT
 			lint_return_stmt(NOVALRETURNED);
-#endif	LINT
+#endif	/* LINT */
 		}
 	]
 	';'
@@ -458,7 +458,7 @@ jump
 			C_bra((label)idf->id_label->df_address);
 #ifdef	LINT
 			lint_jump_stmt(idf);
-#endif	LINT
+#endif	/* LINT */
 		}
 ;
 

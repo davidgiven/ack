@@ -15,7 +15,7 @@ extern arith
 	pointer_size;
 
 extern arith max_int, max_unsigned;	/* cstoper.c	*/
-#else NOCROSS
+#else /* NOCROSS */
 #define short_size	((arith)SZ_SHORT)
 #define word_size	((arith)SZ_WORD)
 #define dword_size	((arith)2*SZ_WORD)
@@ -33,5 +33,5 @@ extern arith max_int, max_unsigned;	/* cstoper.c	*/
 #define max_int		((arith)2147483647)
 #define max_unsigned	((arith)4294967295)
 #endif
-#endif NOCROSS
+#endif /* NOCROSS */
 

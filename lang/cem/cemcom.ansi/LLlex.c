@@ -87,7 +87,7 @@ LLlex()
 	else {		/* read ahead and return the old one	*/
 #ifdef	LINT
 		lint_comment_ahead();
-#endif	LINT
+#endif	/* LINT */
 		dot = ahead;
 		/*	the following test is performed due to the dual
 			task of LLlex(): it is also called for parsing the
@@ -345,7 +345,7 @@ garbage:
 			ptok->tk_fund = INT;
 			return ptok->tk_symb = INTEGER;
 		}
-#endif NOPP
+#endif /* NOPP */
 		ptok->tk_symb = (
 			idef->id_reserved
 			    ? idef->id_reserved
@@ -462,7 +462,7 @@ skipcomment()
 #ifdef	LINT
 	lint_start_comment();
 	lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 	do {
 		while (c != '*') {
 			if (class(c) == STNL) {
@@ -471,14 +471,14 @@ skipcomment()
 				NoUnstack--;
 #ifdef	LINT
 				lint_end_comment();
-#endif	LINT
+#endif	/* LINT */
 				return;
 			}
 			oldc = c;
 			c = GetChar();
 #ifdef	LINT
 			lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 		} /* last Character seen was '*' */
 		c = GetChar();
 		if ( c != '/' && oldc == '/')
@@ -486,11 +486,11 @@ skipcomment()
 		oldc = '*';
 #ifdef	LINT
 		lint_comment_char(c);
-#endif	LINT
+#endif	/* LINT */
 	} while (c != '/');
 #ifdef	LINT
 	lint_end_comment();
-#endif	LINT
+#endif	/* LINT */
 	NoUnstack--;
 }
 #endif	/* NOPP */

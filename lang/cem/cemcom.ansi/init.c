@@ -93,4 +93,4 @@ init_pp()
 	/* defined(??) */
 	macro_def(str2idf("defined", 0), "", 1, 1, NOUNDEF | FUNC);
 }
-#endif NOPP
+#endif /* NOPP */

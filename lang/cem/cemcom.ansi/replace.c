@@ -790,4 +790,4 @@ stash(repl, ch, stashraw)
 		*args->a_rawptr++ = ch;
 	}
 }
-#endif NOPP
+#endif /* NOPP */

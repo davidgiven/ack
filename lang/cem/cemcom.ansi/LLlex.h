@@ -49,7 +49,7 @@ extern int ReplaceMacros;	/* "LLlex.c"	*/
 extern int AccDefined;		/* "LLlex.c"	*/
 extern int Unstacked;		/* "LLlex.c"	*/
 extern int UnknownIdIsZero;	/* "LLlex.c"	*/
-#endif NOPP
+#endif /* NOPP */
 extern int EoiForNewline;	/* "LLlex.c"	*/
 extern int AccFileSpecifier;	/* "LLlex.c"	*/
 extern int File_Inserted;	/* "LLlex.c"	*/

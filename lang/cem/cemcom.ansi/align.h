@@ -14,7 +14,7 @@ extern int
 	float_align, double_align, lngdbl_align,
 	pointer_align,
 	struct_align, union_align;
-#else NOCROSS
+#else /* NOCROSS */
 #define short_align	((int)AL_SHORT)
 #define word_align	((int)AL_WORD)
 #define int_align	((int)AL_INT)
@@ -25,6 +25,6 @@ extern int
 #define pointer_align	((int)AL_POINTER)
 #define struct_align	((int)AL_STRUCT)
 #define union_align	((int)AL_UNION)
-#endif NOCROSS
+#endif /* NOCROSS */
 
 extern arith align();

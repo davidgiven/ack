@@ -163,7 +163,7 @@ idf2expr(expr)
 			def->df_used = 1;
 		}
 	}
-#endif	LINT
+#endif	/* LINT */
 	expr->ex_type = def->df_type;
 	if (expr->ex_type == error_type) {
 		expr->ex_flags |= EX_ERROR;
@@ -189,7 +189,7 @@ idf2expr(expr)
 		expr->VL_LBL = def->df_address;
 		expr->VL_VALUE = (arith)0;
 	}
-#endif	LINT
+#endif	/* LINT */
 	else {
 		expr->VL_CLASS = Name;
 		expr->VL_IDF = idf;
@@ -367,7 +367,7 @@ new_oper(tp, e1, oper, e2)
 	op->op_right = e2;
 #ifdef	LINT
 	lint_new_oper(expr);
-#endif	LINT
+#endif	/* LINT */
 	return expr;
 }
 
@@ -398,7 +398,7 @@ chk_cst_expr(expp)
 	
 #ifdef	DEBUG
 	print_expr("constant_expression", expr);
-#endif	DEBUG
+#endif	/* DEBUG */
 	switch(expr->ex_type->tp_fund) {
 	case CHAR:
 	case SHORT:
@@ -447,7 +447,7 @@ is_ld_cst(expr)
 #ifdef	LINT
 	if (expr->ex_class == String)
 		return 1;
-#endif	LINT
+#endif	/* LINT */
 	return expr->ex_lvalue == 0 && expr->ex_class == Value;
 }
 

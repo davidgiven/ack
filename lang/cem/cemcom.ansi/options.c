@@ -29,12 +29,12 @@ extern int inc_total;
 int do_dependencies = 0;
 char *dep_file = 0;
 
-#endif NOPP
+#endif /* NOPP */
 
 char options[128];			/* one for every char	*/
 #ifdef	LINT
 char loptions[128];			/* one for every char	*/
-#endif	LINT
+#endif	/* LINT */
 
 extern int idfsize;
 extern int density;
@@ -55,9 +55,9 @@ next_option:			/* to allow combined one-char options */
 	default:
 #ifndef	LINT
 		fatal("illegal option: %c", opt);
-#else	LINT
+#else	/* LINT */
 		warning("illegal option: %c", opt);
-#endif	LINT
+#endif	/* LINT */
 		break;
 
 	case '-':
@@ -76,8 +76,8 @@ next_option:			/* to allow combined one-char options */
         case 'm':
              	options[opt] = 1;
             	break;
-#endif NOPP
-#endif LINT
+#endif /* NOPP */
+#endif /* LINT */
 #ifdef DBSYMTAB
 	case 'g':	/* symbol table for debugger */
 		options['g'] = 1;
@@ -88,7 +88,7 @@ next_option:			/* to allow combined one-char options */
 #ifndef	LINT
 #ifdef	DATAFLOW
 	case 'd':
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 	case 'p':			/* procentry/procexit */
 	case 'L' :			/* no fil/lin */
 	case 'n':			/* use no registers */
@@ -101,7 +101,7 @@ next_option:			/* to allow combined one-char options */
 		options['w'] = 1;	/* implies -a */
 		options['s'] = 1;
 		goto next_option;
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	LINT
 	case 'h':	/* heuristic tests */
@@ -113,7 +113,7 @@ next_option:			/* to allow combined one-char options */
 	case 'L':	/* lintlibrary */
 		loptions[opt] = 1;
 		goto next_option;
-#endif	LINT
+#endif	/* LINT */
 
 #ifndef NOPP
 	case 'D' :	{	/* -Dname :	predefine name		*/
@@ -170,7 +170,7 @@ next_option:			/* to allow combined one-char options */
 		}
 		else inctable[inc_pos] = 0;
 		break;
-#endif NOPP
+#endif /* NOPP */
 
 	case 'M':	/* maximum identifier length */
 		idfsize = txt2int(&text);
@@ -186,7 +186,7 @@ next_option:			/* to allow combined one-char options */
 		stat_number = txt2int(&text);
 		break;
 	}
-#endif	LINT
+#endif	/* LINT */
 
 	case 'T' : {
 #ifdef USE_TMP
@@ -195,9 +195,9 @@ next_option:			/* to allow combined one-char options */
 			C_tmpdir = text;
 		else
 			C_tmpdir = ".";
-#else USE_TMP
+#else /* USE_TMP */
 		warning("-T option ignored");
-#endif USE_TMP
+#endif /* USE_TMP */
 		break;
 	}
 		
@@ -205,7 +205,7 @@ next_option:			/* to allow combined one-char options */
 	case 'U' :		/* -Uname :	undefine predefined	*/
 		if (*text) do_undef(str2idf(text, 0));
 		break;
-#endif NOPP
+#endif /* NOPP */
 
 #ifndef	LINT
 #ifndef NOCROSS
@@ -273,9 +273,9 @@ next_option:			/* to allow combined one-char options */
 			case 'r':	/* adjust bitfields right	*/
 #ifndef NOBITFIELD
 				options['r'] = 1;
-#else NOBITFIELD
+#else /* NOBITFIELD */
 				warning("bitfields are not implemented");
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 				break;
 			case 'S':	/* initial struct alignment	*/
 				if (sz != (arith)0)
@@ -294,8 +294,8 @@ next_option:			/* to allow combined one-char options */
 	case 'S':
 		density = txt2int(&text);
 		break;
-#endif NOCROSS
-#endif	LINT
+#endif /* NOCROSS */
+#endif	/* LINT */
 	}
 }
 

@@ -19,13 +19,13 @@
 
 #include <em_arith.h>		/* obtain definition of "arith"	*/
 
-#else	SPECIAL_ARITHMETICS
+#else	/* SPECIAL_ARITHMETICS */
 
 /*	All preprocessor arithmetic should be done in longs.
 */
 #define	arith	long				/* dummy */
 
-#endif	SPECIAL_ARITHMETICS
+#endif	/* SPECIAL_ARITHMETICS */
 
 #define	arith_size	(sizeof(arith))
 #define	arith_sign	((arith) 1 << (arith_size * 8 - 1))

@@ -12,7 +12,7 @@
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	<alloc.h>
 #include	<assert.h>
@@ -60,7 +60,7 @@ initial_value(register struct type **tpp; register struct expr **expp;) :
 		{
 #ifdef	LINT
 			lint_expr(*expp, USED);
-#endif	LINT
+#endif	/* LINT */
 			if ((*expp)->ex_type->tp_fund == ARRAY)
 				array2pointer(*expp);
 			if (tpp) {
@@ -449,7 +449,7 @@ pad(tpx)
 		put_bf(tp, (arith)0);
 		return;
 	}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	if (tp->tp_align >= word_align) while (sz >= word_size) {
 		C_con_cst((arith) 0);
@@ -489,7 +489,7 @@ check_ival(expp, tp)
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (!is_ld_cst(expr))
 			illegal_init_cst(expr);
 		else
@@ -522,7 +522,7 @@ check_ival(expp, tp)
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (expr->ex_class == Float) {
 			char buf[FLT_STRLEN];
 
@@ -546,7 +546,7 @@ and also to prevent runtime coercions for compile-time constants.
 			else 
 				illegal_init_cst(expr);
 		}
-#endif NOTDEF
+#endif /* NOTDEF */
 		else
 			illegal_init_cst(expr);
 		break;
@@ -557,13 +557,13 @@ and also to prevent runtime coercions for compile-time constants.
 		expr = *expp;
 #ifdef DEBUG
 		print_expr("init-expr after cast", expr);
-#endif DEBUG
+#endif /* DEBUG */
 		if (is_cp_cst(expr))
 			put_bf(tp, expr->VL_VALUE);
 		else
 			illegal_init_cst(expr);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	case ERRONEOUS:
 		if (! gen_error) gen_error = pack_level;
@@ -677,7 +677,7 @@ put_bf(tp, val)
 		offset = (arith)-1;
 	}
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 int
 zero_bytes(sd)

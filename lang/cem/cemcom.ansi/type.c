@@ -22,7 +22,7 @@
 extern struct type *function_of(), *array_of();
 #ifndef NOBITFIELD
 extern struct type *field_of();
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 /*	To be created dynamically in main() from defaults or from command
 	line parameters.
@@ -84,7 +84,7 @@ construct_type(fund, tp, qual, count, pl)
 	case FIELD:
 		dtp = field_of(tp, qual);
 		break;
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 	case FUNCTION:
 		if (tp->tp_fund == FUNCTION)	{
@@ -228,7 +228,7 @@ field_of(tp, qual)
 	dtp->tp_typequal = qual;
 	return dtp;
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 arith
 size_of_type(tp, nm)

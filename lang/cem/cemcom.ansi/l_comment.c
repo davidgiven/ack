@@ -208,4 +208,4 @@ make_format(argn, oldf)
 	*newf++ = '\0';
 }
 
-#endif	LINT
+#endif	/* LINT */

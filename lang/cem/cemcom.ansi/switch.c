@@ -10,7 +10,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>

@@ -11,7 +11,7 @@
 #include	<em.h>
 #else
 #include	"l_em.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"debug.h"
 #include	"botch_free.h"
 #include	<alloc.h>
@@ -56,7 +56,7 @@ stack_level()	{
 	local_level = stl;
 #ifdef	LINT
 	lint_start_local();
-#endif	LINT
+#endif	/* LINT */
 }
 
 stack_idf(idf, stl)
@@ -110,11 +110,11 @@ unstack_level()
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("before unstackidfs", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 
 #ifdef	LINT
 	lint_end_local(local_level);
-#endif	LINT
+#endif	/* LINT */
 
 	/*	The implementation below is more careful than strictly
 		necessary. Optimists may optimize it afterwards.
@@ -172,7 +172,7 @@ unstack_level()
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("after unstackidfs", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 }
 
 unstack_world()
@@ -188,11 +188,11 @@ unstack_world()
 
 #ifdef	LINT
 	lint_end_global(local_level);
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef GEN_NM_LIST
 	open_name_list();
-#endif GEN_NM_LIST
+#endif /* GEN_NM_LIST */
 
 	while (se)	{
 		register struct idf *idf = se->se_idf;
@@ -218,7 +218,7 @@ unstack_world()
 				def->df_initialized ? "init" : "no init",
 				def->df_used ? "used" : "not used");
 		}
-#endif DEBUG
+#endif /* DEBUG */
 		if (def->df_sc == STATIC
 		    && def->df_type->tp_fund == FUNCTION
 		    && !def->df_initialized) {
@@ -236,7 +236,7 @@ unstack_world()
 #ifdef GEN_NM_LIST
 			if (def->df_sc != STATIC)
 				namelist(idf->id_text);	/* may be common */
-#endif GEN_NM_LIST
+#endif /* GEN_NM_LIST */
 			def->df_alloc = ALLOC_DONE;	/* see Note below */
 		}
 		se = se->next;
@@ -278,4 +278,4 @@ namelist(nm)
 		sys_write(nfp, "\n", 1);
 	}
 }
-#endif GEN_NM_LIST
+#endif /* GEN_NM_LIST */

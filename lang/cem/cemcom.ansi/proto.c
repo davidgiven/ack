@@ -204,7 +204,7 @@ declare_protos(dc)
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("start declare_protos", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 	du = dc->dc_decl_unary;
 	while (du) {
 		if (du->du_fund == FUNCTION) {
@@ -261,7 +261,7 @@ declare_protos(dc)
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("end declare_protos", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 }
 
 

@@ -33,7 +33,7 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 	{FLOATING, "floating"},
 	{0, ""}
 };
-#endif	____
+#endif	/* ____ */
 
 #ifdef	____
 struct tokenname tkcomp[] =	{	/* names of the composite tokens */
@@ -61,7 +61,7 @@ struct tokenname tkcomp[] =	{	/* names of the composite tokens */
 	{ELLIPSIS, "..."},
 	{0, ""}
 };
-#endif	____
+#endif	/* ____ */
 
 struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{AUTO, "auto"},
@@ -129,7 +129,7 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 	{FLOAT2FLOAT, "float2float"},
 	{0, ""}
 };
-#endif	____
+#endif	/* ____ */
 
 reserve(resv)
 	register struct tokenname resv[];

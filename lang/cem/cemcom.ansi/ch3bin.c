@@ -250,7 +250,7 @@ ch3bin(expp, oper, expr)
 		) {
 			hwarning("operands of : are constant and equal");
 		}
-#endif	LINT
+#endif	/* LINT */
 		*expp = new_oper((*expp)->ex_type, *expp, oper, expr);
 		break;
 
@@ -259,7 +259,7 @@ ch3bin(expp, oper, expr)
 		if (is_cp_cst(*expp)) {
 #ifdef	LINT
 			hwarning("condition in ?: expression is constant");
-#endif	LINT
+#endif	/* LINT */
 			*expp = (*expp)->VL_VALUE ?
 				expr->OP_LEFT : expr->OP_RIGHT;
 			(*expp)->ex_flags |= EX_ILVALUE;
@@ -273,7 +273,7 @@ ch3bin(expp, oper, expr)
 		if (is_cp_cst(*expp)) {
 #ifdef	LINT
 			hwarning("constant expression ignored");
-#endif	LINT
+#endif	/* LINT */
 			*expp = expr;
 		}
 		else {

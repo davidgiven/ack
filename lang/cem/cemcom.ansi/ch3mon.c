@@ -75,7 +75,7 @@ ch3mon(oper, expp)
 		if ((*expp)->ex_type->tp_fund == FIELD)
 			expr_error(*expp, "& applied to field variable");
 		else
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 		if (!(*expp)->ex_lvalue)
 			expr_error(*expp, "& applied to non-lvalue");
 		else if ((*expp)->ex_flags & EX_ILVALUE)

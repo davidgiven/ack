@@ -116,7 +116,7 @@ dumpidf(idf, opt)
 		}
 		print(" macro");
 	}
-#endif NOPP
+#endif /* NOPP */
 	if ((opt&2) && idf->id_reserved)	{
 		if (!started++)	{
 			newline();
@@ -214,7 +214,7 @@ dumpsdefs(sdef, sdk)
 		print("L%d: ", sdef->sd_level);
 #ifndef NOBITFIELD
 		if (sdk == selector)
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			print("selector %s at offset %lu in %s;",
 				type2str(sdef->sd_type),
 				sdef->sd_offset, type2str(sdef->sd_stype)
@@ -223,7 +223,7 @@ dumpsdefs(sdef, sdk)
 		else	print("field %s at offset %lu;",
 				type2str(sdef->sd_type), sdef->sd_offset
 			);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 		sdef = (sdk == selector ? sdef->next : sdef->sd_sdef);
 	}
 	dumplevel--;
@@ -310,7 +310,7 @@ dumptype(tp)
 					fd->fd_shift, fd->fd_width);
 			}
 			else
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			ops = 0;
 			break;
 		}
@@ -364,7 +364,7 @@ type2str(tp)
 					fd->fd_shift, fd->fd_width);
 			}
 			else
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			ops = 0;
 			break;
 		}
@@ -500,4 +500,4 @@ p1_indent(lvl)
 	while (lvl--)
 		print("  ");
 }
-#endif	DEBUG
+#endif	/* DEBUG */

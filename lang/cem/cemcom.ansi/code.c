@@ -13,7 +13,7 @@
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 #include	"botch_free.h"
 #include	<alloc.h>
 #include	"dataflow.h"
@@ -39,7 +39,7 @@
 #include	"LLlex.h"
 #ifdef	LINT
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 #ifdef DBSYMTAB
 #include	<stb.h>
 #endif /* DBSYMTAB */
@@ -60,7 +60,7 @@ int func_notypegiven;
 #ifdef USE_TMP
 static int	tmp_id;
 static int	pro_id;
-#endif USE_TMP
+#endif /* USE_TMP */
 
 extern char options[];
 extern char *symbol2str();
@@ -98,10 +98,10 @@ init_code(dst_file)
 #ifdef USE_TMP
 #ifdef PREPEND_SCOPES
 	C_insertpart(tmp_id = C_getid());
-#endif	PREPEND_SCOPES
-#endif	USE_TMP
+#endif	/* PREPEND_SCOPES */
+#endif	/* USE_TMP */
 }
-#endif	LINT
+#endif	/* LINT */
 
 struct string_cst *str_list = 0;
 
@@ -155,7 +155,7 @@ end_code()
 	C_ms_src((int)(LineNumber - 2), FileName);
 	C_close();
 }
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	PREPEND_SCOPES
 prepend_scopes()
@@ -168,7 +168,7 @@ prepend_scopes()
 
 #ifdef USE_TMP
 	C_beginpart(tmp_id);
-#endif USE_TMP
+#endif /* USE_TMP */
 	while (se != 0)	{
 		register struct def *df = se->se_idf->id_def;
 		
@@ -179,9 +179,9 @@ prepend_scopes()
 	}
 #ifdef USE_TMP
 	C_endpart(tmp_id);
-#endif USE_TMP
+#endif /* USE_TMP */
 }
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 
 code_scope(text, def)
 	char *text;
@@ -250,11 +250,11 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 	}
 #ifndef PREPEND_SCOPES
 	code_scope(name, def);
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaStartFunction(name);
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 
 
 	/* set global function info */
@@ -339,7 +339,7 @@ end_proc(fbytes)
 #ifdef	DATAFLOW
 	if (options['d'])
 		DfaEndFunction();
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 	C_df_ilb(return2_label);
 	if (return_expr_occurred && func_res_label == 0) {
 			C_asp(-func_size);
@@ -468,7 +468,7 @@ code_declaration(idf, expr, lvl, sc)
 		if (expr) {	/* code only if initialized */
 #ifndef PREPEND_SCOPES
 			code_scope(idf->id_text, def);
-#endif PREPEND_SCOPES
+#endif /* PREPEND_SCOPES */
 			def->df_alloc = ALLOC_DONE;
 			C_df_dnam(idf->id_text);
 		}
@@ -600,9 +600,9 @@ loc_init(expr, id)
 			vl.vl_value = (arith)0;
 			store_val(&vl, tp);
 		}
-#else	LINT
+#else	/* LINT */
 		id->id_def->df_set = 1;
-#endif	LINT
+#endif	/* LINT */
 		free_expression(expr);
 	}
 }
@@ -616,7 +616,7 @@ bss(idf)
 	
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, df);
-#endif	PREPEND_SCOPES
+#endif	/* PREPEND_SCOPES */
 #ifdef DBSYMTAB
 	if (options['g']) {
 		stb_string(df, df->df_sc, idf->id_text);
@@ -660,14 +660,14 @@ formal_cvt(hasproto,df)
 		LoadLocal(df->df_address, double_size);
 #ifndef	LINT
 		conversion(double_type, float_type);
-#endif	LINT
+#endif	/* LINT */
 		StoreLocal(df->df_address, tp->tp_size);
 	}
 }
 
 #ifdef	LINT
 /*ARGSUSED*/
-#endif	LINT
+#endif	/* LINT */
 code_expr(expr, val, code, tlbl, flbl)
 	struct expr *expr;
 	label tlbl, flbl;
@@ -683,9 +683,9 @@ code_expr(expr, val, code, tlbl, flbl)
 	if (options['g']) db_line(expr->ex_file, (unsigned int)expr->ex_line);
 #endif
 	EVAL(expr, val, code, tlbl, flbl);
-#else	LINT
+#else	/* LINT */
 	lint_expr(expr, code ? USED : IGNORED);
-#endif	LINT
+#endif	/* LINT */
 }
 
 /*	The FOR/WHILE/DO/SWITCH stacking mechanism:

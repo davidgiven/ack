@@ -168,7 +168,7 @@ store_field(fd, uns, code, leftop, tmpvar)
 		FreeLocal(tmpvar);
 	}
 }
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
-#endif	LINT
+#endif	/* LINT */
 

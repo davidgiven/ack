@@ -30,7 +30,7 @@
 #include	"level.h"
 #ifdef	LINT
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 
 extern char	options[];
 }
@@ -198,7 +198,7 @@ init_declarator(register struct decspecs *ds;)
 		declare_idf(ds, &Dc, level);
 #ifdef	LINT
 		lint_declare_idf(Dc.dc_idf, ds->ds_sc);
-#endif	LINT
+#endif	/* LINT */
 	}
 	[
 		initializer(Dc.dc_idf, ds->ds_sc)
@@ -209,7 +209,7 @@ init_declarator(register struct decspecs *ds;)
 	{
 #ifdef	LINT
 		add_auto(Dc.dc_idf);
-#endif	LINT
+#endif	/* LINT */
 		remove_declarator(&Dc);
 	}
 ;
@@ -240,7 +240,7 @@ initializer(struct idf *idf; int sc;)
 		if (AHEAD != '{' && AHEAD != STRING ) autoagg = 0;
 #ifdef	LINT
 		lint_statement();
-#endif	LINT
+#endif	/* LINT */
 		if (globalflag) {
 			struct expr ex;
 			code_declaration(idf, &ex, level, sc);
@@ -259,10 +259,10 @@ initializer(struct idf *idf; int sc;)
 			}
 #ifdef	DEBUG
 			print_expr("initializer-expression", expr);
-#endif	DEBUG
+#endif	/* DEBUG */
 #ifdef	LINT
 			change_state(idf, SET);
-#endif	LINT
+#endif	/* LINT */
 #ifdef	DBSYMTAB
 			if (options['g'] && level >= L_LOCAL && expr) {
 				db_line(expr->ex_file, (unsigned) expr->ex_line);
@@ -541,7 +541,7 @@ bit_expression(struct field **fd;)
 		free_expression(expr);
 #ifdef NOBITFIELD
 		error("bitfields are not implemented");
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	}
 ;
 

@@ -14,7 +14,7 @@
 #include	"assert.h"
 #ifdef ANSI
 #include	<flt_arith.h>
-#endif ANSI
+#endif /* ANSI */
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
@@ -106,4 +106,4 @@ check_ev_order(esp1, esp2, expr)
 	}
 }
 
-#endif	LINT
+#endif	/* LINT */

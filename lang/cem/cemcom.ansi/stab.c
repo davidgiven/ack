@@ -304,4 +304,4 @@ stb_string(df, kind, str)
 	}
 }
 
-#endif DBSYMTAB
+#endif /* DBSYMTAB */

@@ -49,4 +49,4 @@ struct macro	{
 #define	K_PRAGMA	11
 #define	K_UNDEF		12
 #define K_FILE          100     /* for dependency generator */
-#endif NOPP
+#endif /* NOPP */

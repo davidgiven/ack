@@ -61,11 +61,11 @@
 #include	"def.h"
 #ifdef	LINT
 #include	"l_lint.h"
-#endif	LINT
+#endif	/* LINT */
 
 #ifndef NOPP
 extern arith ifval;
-#endif NOPP
+#endif /* NOPP */
 
 extern error();
 }
@@ -84,7 +84,7 @@ control_if_expression
 					"sizeof not allowed in preprocessor");
 			ifval = expr->VL_VALUE;
 			free_expression(expr);
-#endif NOPP
+#endif /* NOPP */
 		}
 ;
 
@@ -150,7 +150,7 @@ external_definition
 			declare_idf(&Ds, &Dc, level);
 #ifdef	LINT
 			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
-#endif	LINT
+#endif	/* LINT */
 		}
 		[
 			function(&Ds, &Dc)
@@ -185,7 +185,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 	{
 #ifdef	LINT
 		lint_non_function_decl(ds, dc);
-#endif	LINT
+#endif	/* LINT */
 	}
 	[
 		','
@@ -204,7 +204,7 @@ function(struct decspecs *ds; struct declarator *dc;)
 	{
 #ifdef	LINT
 		lint_start_function();
-#endif	LINT
+#endif	/* LINT */
 		idf_initialized(idf);
 		stack_level();		/* L_FORMAL1 declarations */
 		declare_params(dc);
@@ -218,21 +218,21 @@ function(struct decspecs *ds; struct declarator *dc;)
 		declare_formals(idf, &fbytes);
 #ifdef	LINT
 		lint_formals();
-#endif	LINT
+#endif	/* LINT */
 	}
 	compound_statement
 	{
 		end_proc(fbytes);
 #ifdef	LINT
 		lint_implicit_return();
-#endif	LINT
+#endif	/* LINT */
 		unstack_level();	/* L_FORMAL2 declarations */
 #ifdef	LINT
 		lint_end_formals();
-#endif	LINT
+#endif	/* LINT */
 		unstack_level();	/* L_FORMAL1 declarations */
 #ifdef	LINT
 		lint_end_function();
-#endif	LINT
+#endif	/* LINT */
 	}
 ;

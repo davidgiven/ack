@@ -11,7 +11,7 @@ struct id_u {
 #ifndef NOPP
 	struct macro *idd_macro;
 	int idd_resmac;		/* if nonzero: keyword of macroproc. 	*/
-#endif NOPP
+#endif /* NOPP */
 	int idd_reserved;	/* non-zero for reserved words		*/
 	char *idd_file;		/* file containing the occurrence	*/
 	unsigned int idd_line;	/* line number of the occurrence	*/

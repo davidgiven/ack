@@ -148,5 +148,5 @@ convtype(tp)
 	return 0;
 }
 
-#endif	LINT
+#endif	/* LINT */
 

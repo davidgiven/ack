@@ -159,7 +159,7 @@ declare_idf(ds, dc, lvl)
 
 #ifdef	LINT
 	check_hiding(idf, lvl, sc);	/* of some idf by this idf */
-#endif	LINT
+#endif	/* LINT */
 	if (def && lvl == L_LOCAL && def->df_level == L_FORMAL2) {
 		error("%s redeclared", idf->id_text);
 	}
@@ -212,7 +212,7 @@ declare_idf(ds, dc, lvl)
 #ifdef	LINT
 		newdef->df_set = 0;
 		newdef->df_firstbrace = 0;
-#endif	LINT
+#endif	/* LINT */
 		/* link it into the name list in the proper place */
 		idf->id_def = newdef;
 		update_ahead(idf);
@@ -520,7 +520,7 @@ declare_formals(idf, fp)
 #ifdef	DEBUG
 	if (options['t'])
 		dumpidftab("start declare_formals", 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 	while (se)	{
 		register struct def *def = se->se_idf->id_def;
 		

@@ -347,7 +347,7 @@ EVAL(expr, val, code, true_label, false_label)
 				eval_field(expr, gencode);
 				break;
 			}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			if (is_struct_or_union(tp->tp_fund) && ! gencode) {
 				EVAL(right, LVAL, TRUE, NO_LABEL, NO_LABEL);
 				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
@@ -400,7 +400,7 @@ EVAL(expr, val, code, true_label, false_label)
 				eval_field(expr, gencode);
 				break;
 			}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 			if (left->ex_class == Value) {
 				compl = 0; /* Value */
 			}
@@ -513,7 +513,7 @@ EVAL(expr, val, code, true_label, false_label)
 						DfaCallFunction(
 							left->VL_IDF->id_text);
 				}
-#endif	DATAFLOW
+#endif	/* DATAFLOW */
 			}
 			else {
 				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
@@ -1024,5 +1024,5 @@ operands(expr, gencode)
 	EVAL(expr->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
 	EVAL(expr->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);
 }
-#endif	LINT
+#endif	/* LINT */
 

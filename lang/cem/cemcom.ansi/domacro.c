@@ -747,7 +747,7 @@ macroeq(s, t)
 		return (*s == '\0') && (*t == '\0');
 	}
 }
-#else NOPP
+#else /* NOPP */
 
 struct idf *
 GetIdentifier(skiponerr)
@@ -791,7 +791,7 @@ domacro()
 	EoiForNewline = 0;
 	SkipToNewLine();
 }
-#endif NOPP
+#endif /* NOPP */
 
 
 do_line(l)

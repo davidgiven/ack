@@ -212,7 +212,7 @@ ch3cast(expp, oper, tp)
 		ch3cast(expp, oper, tp->tp_up);
 		return;
 	}
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	switch (oper) {
 	default:	qual_lev = -1; break;
 	case CAST:	qual_lev = -999; break;		/* ??? hack */
@@ -259,9 +259,9 @@ ch3cast(expp, oper, tp)
 			else {
 				int2int(expp, tp);
 			}
-#else	LINT
+#else	/* LINT */
 			int2int(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 		else
 		if (oldi && !i)	{
@@ -271,9 +271,9 @@ ch3cast(expp, oper, tp)
 			else {
 				int2float(expp, tp);
 			}
-#else	LINT
+#else	/* LINT */
 			int2float(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 		else
 		if (!oldi && i) {
@@ -283,9 +283,9 @@ ch3cast(expp, oper, tp)
 			else {
 				float2int(expp, tp);
 			}
-#else	LINT
+#else	/* LINT */
 			float2int(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 		else {
 			/* !oldi && !i */
@@ -295,9 +295,9 @@ ch3cast(expp, oper, tp)
 			else {
 				float2float(expp, tp);
 			}
-#else	LINT
+#else	/* LINT */
 			float2float(expp, tp);
-#endif	LINT
+#endif	/* LINT */
 		}
 	}
 	else
@@ -336,7 +336,7 @@ ch3cast(expp, oper, tp)
 #ifdef	LINT
 		if (oper != CAST)
 			lint_ptr_conv(oldtp->tp_up->tp_fund, tp->tp_up->tp_fund);
-#endif	LINT
+#endif	/* LINT */
 		exp->ex_type = tp;	/* free conversion */
 	}
 	else
@@ -671,9 +671,9 @@ ch3asgn(expp, oper, expr)
 #ifndef NOBITFIELD
 	exp = new_oper(fund == FIELD ? exp->ex_type->tp_up : exp->ex_type,
 		exp, oper, expr);
-#else NOBITFIELD
+#else /* NOBITFIELD */
 	exp = new_oper(exp->ex_type, exp, oper, expr);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	exp->OP_TYPE = tp;	/* for EVAL() */
 	exp->ex_flags |= EX_SIDEEFFECTS;
 	*expp = exp;
@@ -695,7 +695,7 @@ is_integral_type(tp)
 #ifndef NOBITFIELD
 	case FIELD:
 		return is_integral_type(tp->tp_up);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		return 0;
 	}
@@ -718,7 +718,7 @@ is_arith_type(tp)
 #ifndef NOBITFIELD
 	case FIELD:
 		return is_arith_type(tp->tp_up);
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 	default:
 		return 0;
 	}

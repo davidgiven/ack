@@ -64,7 +64,7 @@ extern struct type
 
 #ifndef NOBITFIELD
 extern struct type *field_of();
-#endif NOBITFIELD
+#endif /* NOBITFIELD */
 
 extern struct type
 	*schar_type, *uchar_type,

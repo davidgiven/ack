@@ -45,7 +45,7 @@ extern char *dep_file;
 static File *dep_fd = STDOUT;
 
 extern char *getwdir();
-#endif NOPP
+#endif /* NOPP */
 
 struct sp_id special_ids[] =	{
 	{"__setjmp", SP_SETJMP},	/* non-local goto's are registered */
@@ -75,11 +75,11 @@ int
 	pointer_align = AL_POINTER,
 	struct_align = AL_STRUCT,
 	union_align = AL_UNION;
-#endif NOCROSS
+#endif /* NOCROSS */
 
 #ifndef NOPP
 arith ifval;	/* ifval will contain the result of the #if expression	*/
-#endif NOPP
+#endif /* NOPP */
 
 char *prog_name;
 
@@ -98,7 +98,7 @@ main(argc, argv)
 	inc_max = 10;
 
 	init_pp();	/* initialise the preprocessor macros	*/
-#endif NOPP
+#endif /* NOPP */
 
 	/*	Note: source file "-" indicates that the source is supplied
 		as standard input.  This is only allowed if INP_READ_IN_ONE is
@@ -106,9 +106,9 @@ main(argc, argv)
 	*/
 #ifdef INP_READ_IN_ONE
 	while (argc > 1 && *argv[1] == '-')
-#else INP_READ_IN_ONE
+#else /* INP_READ_IN_ONE */
 	while (argc > 1 && *argv[1] == '-' && argv[1][1] != '\0')
-#endif INP_READ_IN_ONE
+#endif /* INP_READ_IN_ONE */
 	{
 		char *par = &argv[1][1];
 
@@ -117,13 +117,13 @@ main(argc, argv)
 	}
 #ifdef	LINT
 	lint_init();
-#endif	LINT
+#endif	/* LINT */
 	compile(argc - 1, &argv[1]);
 
 #ifdef	DEBUG
 	if (options['h']) hash_stat();
 	if (options['m']) Info();
-#endif	DEBUG
+#endif	/* DEBUG */
 
 #ifndef NOPP
 	if (do_dependencies) {
@@ -199,13 +199,13 @@ char *s, *source;
     else    fprint(dep_fd, "%s\n", s);
 }
 
-#endif NOPP
+#endif /* NOPP */
 
 char *source = 0;
 
 #ifdef GEN_NM_LIST
 char *nmlist = 0;
-#endif GEN_NM_LIST
+#endif /* GEN_NM_LIST */
 
 compile(argc, argv)
 	char *argv[];
@@ -213,12 +213,12 @@ compile(argc, argv)
 	char *result;
 #ifndef	LINT
 	register char *destination = 0;
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef DEBUG
 #ifndef NOPP
 	int pp_only = options['E'] || options['P'] || options['C'];
-#endif NOPP
+#endif /* NOPP */
 #endif
 
 	switch (argc) {
@@ -227,10 +227,10 @@ compile(argc, argv)
 #ifdef DEBUG
 #ifndef NOPP
 		if (!pp_only)
-#endif NOPP
+#endif /* NOPP */
 #endif
 			fatal("%s: destination file not specified", prog_name);
-#endif	LINT
+#endif	/* LINT */
 		break;
 
 #ifndef	LINT
@@ -242,19 +242,19 @@ compile(argc, argv)
 		nmlist = argv[2];
 		destination = argv[1];
 		break;
-#endif GEN_NM_LIST
-#endif	LINT
+#endif /* GEN_NM_LIST */
+#endif	/* LINT */
 
 	default:
 #ifndef	LINT
 #ifdef GEN_NM_LIST
 		fatal("use: %s source destination [namelist]", prog_name);
-#else GEN_NM_LIST
+#else /* GEN_NM_LIST */
 		fatal("use: %s source destination", prog_name);
-#endif GEN_NM_LIST
-#else	LINT
+#endif /* GEN_NM_LIST */
+#else	/* LINT */
 		fatal("use: %s source", prog_name);
-#endif	LINT
+#endif	/* LINT */
 		break;
 	}
 
@@ -277,33 +277,33 @@ compile(argc, argv)
 		  && strcmp(destination, "-") != 0
 			? destination
 			: 0);
-#endif	LINT
+#endif	/* LINT */
 
 #ifndef NOPP
 	WorkingDir = getwdir(source);
 	PushLex();			/* initialize lex machine */
-#else NOPP
+#else /* NOPP */
 	GetToken(&ahead);
-#endif NOPP
+#endif /* NOPP */
 
 #ifdef DEBUG
 #ifndef NOPP
 	if (pp_only) /* run the preprocessor as if it is stand-alone	*/
 		preprocess();
 	else
-#endif NOPP
-#endif DEBUG
+#endif /* NOPP */
+#endif /* DEBUG */
 	{
 		/* compile the source text			*/
 		C_program();
 
 #ifdef PREPEND_SCOPES
 		prepend_scopes();
-#endif PREPEND_SCOPES
+#endif /* PREPEND_SCOPES */
 
 #ifndef	LINT
 		end_code();
-#endif	LINT
+#endif	/* LINT */
 
 #ifdef	DEBUG
 		if (options['u'])	{
@@ -311,7 +311,7 @@ compile(argc, argv)
 		}
 		if (options['f'] || options['t'])
 			dumpidftab("end of main", options['f'] ? 7 : 0);
-#endif	DEBUG
+#endif	/* DEBUG */
 	}
 #ifndef	NOPP
 	PopLex();
@@ -465,7 +465,7 @@ preprocess()
 		}
 	}
 }
-#endif NOPP
+#endif /* NOPP */
 
 Info()
 {
@@ -497,7 +497,7 @@ Info()
 
 
 }
-#endif DEBUG
+#endif /* DEBUG */
 
 No_Mem()				/* called by alloc package */
 {

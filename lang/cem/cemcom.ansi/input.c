@@ -49,7 +49,7 @@ getwdir(fn)
 
 int	InputLevel;
 extern int		nestlevel;
-#endif NOPP
+#endif /* NOPP */
 
 int	NoUnstack;
 
@@ -58,7 +58,7 @@ AtEoIT()
 #ifndef NOPP
 	InputLevel--;
 	unstackrepl();
-#endif NOPP
+#endif /* NOPP */
 	return 0;
 }
 
@@ -68,7 +68,7 @@ AtEoIF()
 #ifndef NOPP
 	if (nestlevel != nestlow) lexwarning("missing #endif");
 	else
-#endif NOPP
+#endif /* NOPP */
 	if (NoUnstack) lexerror("unexpected EOF");
 #ifndef NOPP
 	nestlevel = nestlow;

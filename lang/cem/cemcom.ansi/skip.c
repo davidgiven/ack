@@ -57,7 +57,7 @@ skipspaces(ch, skipnl)
 			return ch;
 	}
 }
-#endif NOPP
+#endif /* NOPP */
 
 SkipToNewLine()
 {
