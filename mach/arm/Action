@@ -1,0 +1,12 @@
+name "ARM assembler"
+dir as
+end
+name "ARM backend"
+dir ncg
+end
+name "ARM C libraries"
+dir libcc
+end
+name "ARM EM library"
+dir libem
+end
