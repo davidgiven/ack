@@ -282,6 +282,7 @@ distance(cindex) {
 	int tokexp,tpl;
 	int expsize,toksize,exact;
 	int xsekt=0;
+	int fromstackneeded=0;
 
 	bp = &coderules[cindex];
 #ifndef NDEBUG
@@ -305,6 +306,7 @@ distance(cindex) {
 	if (stackheight < tpl) {
 		if (xsekt)
 			return(MAXINT);
+		fromstackneeded = tpl - stackheight;
 		tpl = stackheight;
 	} else
 		if (stackheight != tpl && xsekt==2)
@@ -325,12 +327,12 @@ distance(cindex) {
 		} else
 			exact++;
 	}
-	if (exact==tpl) {
+	if (exact==tpl && ! fromstackneeded) {
 		if (xsekt)
 			return(0);
 		return(10-exact);
 	}
-	return(20-exact);
+	return(20-exact+fromstackneeded);
 }
 
 unsigned costcalc(cost) cost_t cost; {
