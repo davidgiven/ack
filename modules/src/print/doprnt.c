@@ -8,7 +8,6 @@
 #include <varargs.h>
 #include "param.h"
 
-/*VARARGS2*/
 /*FORMAT1 $
 	%s = char *
 	%l = long
@@ -16,6 +15,7 @@
 	%[uxbo] = unsigned int
 	%d = int
 $ */
+/*VARARGS2*/
 doprnt(fp, fmt, argp)
 	File *fp;
 	char *fmt;

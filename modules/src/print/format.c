@@ -26,7 +26,6 @@ integral(c)
 	return 0;
 }
 
-/*VARARGS2*/
 /*FORMAT1 $
 	%s = char *
 	%l = long
@@ -34,6 +33,7 @@ integral(c)
 	%[uxbo] = unsigned int
 	%d = int
 $ */
+/*VARARGS2*/
 int
 _format(buf, fmt, argp)
 	char *buf, *fmt;
