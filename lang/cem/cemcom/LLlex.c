@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* $Header$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
@@ -29,6 +33,7 @@ int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 int SkipEscNewline = 0;		/* how to interpret backslash-newline	*/
 int Unstacked = 0;		/* an unstack is done 			*/
+int File_Inserted = 0;		/* a file has just been inserted	*/
 
 #define MAX_LL_DEPTH	2
 
@@ -100,7 +105,10 @@ GetToken(ptok)
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
 	register int ch, nch;
 
-	if (! LineNumber) goto firstline;
+	if (File_Inserted) {
+		File_Inserted = 0;
+		goto firstline;
+	}
 again:	/* rescan the input after an error or replacement	*/
 #ifndef NOPP
 	if (Unstacked) EnableMacros();
@@ -120,7 +128,10 @@ firstline:
 			return ptok->tk_symb = EOI;
 		while (LoadChar(ch), ch == '#') { /* a control line follows */
 			domacro();
-			if (!LineNumber) goto firstline;
+			if (File_Inserted) {
+				File_Inserted = 0;
+				goto firstline;
+			}
 		}
 			/*	We have to loop here, because in
 				`domacro' the nl, vt or ff is read. The

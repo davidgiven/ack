@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* $Header$ */
 /* MAIN PROGRAM */
 
@@ -169,6 +173,7 @@ compile(argc, argv)
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
 		fatal("%s: no source file %s\n", prog_name, 
 			source ? source : "stdin");
+	File_Inserted = 1;
 	init();
 	FileName = source;
 	LineNumber = 0;

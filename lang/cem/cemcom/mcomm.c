@@ -1,3 +1,8 @@
+/* $Header$ */
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /*	mcomm.c -- change ".lcomm name" into ".comm name" where "name"
 	is specified in a list.
 */

@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* $Header$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
@@ -243,6 +247,7 @@ do_include()
 		}
 		else {
 			WorkingDir = getwdir(result);
+			File_Inserted = 1;
 			FileName = result;
 			LineNumber = 0;
 		}
@@ -384,18 +389,6 @@ do_undef()
 	}
 	else
 		lexerror("illegal #undef construction");
-	SkipRestOfLine();
-}
-
-PRIVATE
-do_line(l)
-	unsigned int l;
-{
-	struct token tk;
-
-	LineNumber = l - 1;	/* the number of the next input line */
-	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
-		FileName = tk.tk_bts;
 	SkipRestOfLine();
 }
 
@@ -663,14 +656,7 @@ domacro()
 		SkipRestOfLine();
 		return;
 	}
-	LineNumber = tk.tk_ival - 1; /* number of the next line */
-	if ((tok = GetToken(&tk)) == STRING)
-		FileName = tk.tk_bts;
-	else
-	if (tok != EOI) {
-		error("illegal # line");
-		SkipRestOfLine();
-	}
+	do_line(tk.tk_ival);
 	EoiForNewline = 0;
 	SkipEscNewline = 0;
 }
@@ -684,4 +670,16 @@ SkipRestOfLine()
 	*/
 	PushBack();
 	skipline();
+}
+
+PRIVATE
+do_line(l)
+	unsigned int l;
+{
+	struct token tk;
+
+	LineNumber = l - 1;	/* the number of the next input line */
+	if (GetToken(&tk) == STRING)	/* is there a filespecifier? */
+		FileName = tk.tk_bts;
+	SkipRestOfLine();
 }

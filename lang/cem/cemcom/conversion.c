@@ -1,3 +1,7 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ */
 /* $Header$ */
 /*	C O N V E R S I O N - C O D E  G E N E R A T O R	*/
 
