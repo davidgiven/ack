@@ -386,7 +386,7 @@ cmp(sz)
 	badoperand();
 }
 
-link(sz, areg)
+link_instr(sz, areg)
 {
 	if (sz == SIZE_NON) {
 		if (bd_2.typ == S_ABS && fitw(bd_2.val))

@@ -356,6 +356,7 @@ char *path, *tail;
 
 /* ---------- Error handling ---------- */
 
+/*VARARGS*/
 yyerror(){}		/* we will do our own error printing */
 
 nosect()

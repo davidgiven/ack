@@ -170,7 +170,7 @@ instruction
 				ea_2(SIZE_W, 0);
 			}
 	|	LINK sizenon AREG ',' imm
-			{	link($2, $3);}
+			{	link_instr($2, $3);}
 	|	UNLK AREG
 			{	T_EMIT2(047130 | $2,0,0,0);}
 	|	TRAP '#' absexp
@@ -188,7 +188,7 @@ instruction
 	|	CALLM '#' absexp ',' ea
 			{	fit(fitb($3));
 				T_EMIT2(03300 | mrg_2,0,0,0);
-				T_EMIT2($3,0,0,0);
+				T_EMIT2((short) $3,0,0,0);
 				ea_2(SIZE_L, CTR);
 			}
 	|	RTM reg
