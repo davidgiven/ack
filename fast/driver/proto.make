@@ -33,6 +33,9 @@ opr:
 clean:
 	rm -f *,$(SUF) afcc afm2 afpc Out
 
+lint:
+	$(LINT) $(LINTFLAGS) -DFCC $(SRC_DIR)/driver.c
+
 afcc.$(SUF):	$(SRC_DIR)/driver.c $(TARGET_HOME)/config/em_path.h
 	$(CC) $(CFLAGS) -c -DFCC -D$(MACH) -D`ack_sys` $(SRC_DIR)/driver.c
 	mv driver.$(SUF) afcc.$(SUF)

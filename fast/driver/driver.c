@@ -134,12 +134,8 @@ lang_opt(str)
 	case '-':	/* debug options */
 	case 'w':	/* disable warnings */
 		if (str[2]) {
-			char buf[3];
-
-			buf[2] = '\0';
-			buf[0] = '-';
-			buf[1] = str[2];
-			append(&COMP_FLAGS, buf);
+			str[1] = '-';
+			append(&COMP_FLAGS, &str[1]);
 		}
 		else append(&COMP_FLAGS, "-a");
 		return 1;
@@ -246,14 +242,14 @@ main(argc, argv)
 	strcpy(COMP,comp_name());
 
 #ifdef vax4
-	append(CPP_FLAGS, "-D__vax");
+	append(&CPP_FLAGS, "-D__vax");
 #endif
 #ifdef sun3
-	append(CPP_FLAGS, "-D__sun");
+	append(&CPP_FLAGS, "-D__sun");
 #endif
 #ifdef m68020
-	append(CPP_FLAGS, "-D__mc68020");
-	append(CPP_FLAGS, "-D__mc68000");
+	append(&CPP_FLAGS, "-D__mc68020");
+	append(&CPP_FLAGS, "-D__mc68000");
 #endif
 
 	if (signal(SIGHUP, SIG_IGN) != SIG_IGN)
