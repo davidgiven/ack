@@ -226,7 +226,7 @@ initializer(struct idf *idf; int sc;)
 	}
 	'='
 	{
-		if (AHEAD != '{') autoagg = 0;
+		if (AHEAD != '{' && AHEAD != STRING ) autoagg = 0;
 #ifdef	LINT
 		lint_statement();
 #endif	LINT
