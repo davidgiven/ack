@@ -24,3 +24,4 @@ print.s
 prstr.s
 prnl.s
 putchar.s
+strhp.s
