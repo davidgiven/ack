@@ -9,17 +9,18 @@ BACK=$(TARGET_HOME)/lib.bin/ceg/ce_back
 
 CEG = $(TARGET_HOME)/lib.bin/ceg/util
 
-all:	back_vax.$(LIBSUF)
+all:
 	make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH)
 
-install:	back_vax.$(LIBSUF)
+install:
 	make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH) install
+
+cmp:
+	-make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH) cmp
+
+install_vax:	back_vax.$(LIBSUF)
 	cp back_vax.$(LIBSUF) $(TARGET_HOME)/lib.bin/vax4/back_vax.$(LIBSUF)
 	$(RANLIB) $(TARGET_HOME)/lib.bin/vax4/back_vax.$(LIBSUF)
-
-cmp:	back_vax.$(LIBSUF)
-	-make -f $(CEG)/make_asobj "OBJ="$(OBJ) "MACH="$(MACH) cmp
-	-cmp back_vax.$(LIBSUF) $(TARGET_HOME)/lib.bin/vax4/back_vax.$(LIBSUF)
 
 pr:
 	@pr $(SRC_DIR)/proto.make $(SRC_DIR)/EM_table $(SRC_DIR)/mach.h \
