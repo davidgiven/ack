@@ -168,7 +168,8 @@ vieuwargs(argc,argv) char **argv ; {
 			outfile= argv[nextarg++] ;
 			hide=YES ;
 			break ;
-	   case 'O':    Optflag++ ;
+	   case 'O':    Optlevel = atoi(&argp[2]);
+			if (! Optlevel) Optlevel = 1;
 			Optlist= &argp[2] ;
 			eaten=1 ;
 			break ;

@@ -145,6 +145,7 @@ scan_found() {
 			if ( debug>=4 ) vprint("%s-",t_cont(*scan)->t_name) ;
 #endif
 			if( t_cont(*scan)->t_optim ) ocount++ ;else ncount++ ;
+			if( t_cont(*scan)->t_optim>Optlevel ) pcount-- ;
 			pcount += t_cont(*scan)->t_priority ;
 		}
 	}
@@ -164,7 +165,7 @@ scan_found() {
 	     ( last_pcount==pcount &&		/* Same prio, and */
 	        ( last_ncount>ncount ||              /* Shorter nec. path */
 	          (last_ncount==ncount &&            /* Same nec. path, optimize?*/
-		    (Optflag? last_ocount<ocount : last_ocount>ocount ))))) {
+		    (Optlevel? last_ocount<ocount : last_ocount>ocount ))))) {
 		/* Yes it is */
 #ifdef DEBUG
 		if ( debug>=3 ) vprint("Better\n");

@@ -9,7 +9,7 @@
 .ft \\n(Sf
 .sp 1
 ..
-.TH ACK I
+.TH ACK 1ACK
 .ad
 .SH NAME
 ack \- Amsterdam Compiler Kit
@@ -156,37 +156,46 @@ These routines are supplied with one parameter, a pointer
 to a string containing the name of the routine.
 .SB optimizing
 .IP \-O
-.IP \-Oopt1,opt2,...
+.IP \-O\fInum\fP
+.IP \-O\fIopt1,opt2,...\fP
 Try to use the named optimizers, or, if no optimizers are given,
-try using the peephole optimizer and a target optimizer.
+try to use the optimizers with optimization level <= \fInum\fP (default 1).
 For optimizer names, see the table at the end of this manual page.
-For the global optimizer, the following flags indicate which
-phases must be executed:
+Currently, only the global optimizer has a level > 1.
+Higher levels will invoke more passes of the global optimizer.
+For the global optimizer, it is also possible to indicate explicitly which
+phases must be executed, using the following flags:
 .RS
-.IP \-IL
+.IP \-EGO-IL
 Inline substitution.
-.IP \-CS
+.IP \-EGO-CS
 Commom subexpression elimination.
-.IP \-SR
+.IP \-EGO-SR
 Strength reduction.
-.IP \-UD
+.IP \-EGO-UD
 Use definition analysis.
-.IP \-LV
+.IP \-EGO-LV
 Live variable analysis.
-.IP \-SA
+.IP \-EGO-RA
 Register allocation.
-.IP \-SP
+.IP \-EGO-SP
 Stack pollution.
-.IP \-BO
+.IP \-EGO-BO
 Branch optimization.
-.IP \-CJ
+.IP \-EGO-CJ
 Cross jumping.
+.RE
+.IP ""
+Also, the following flags may be used:
+.RS
 .IP \-s<num>
-Give an indication to the IL phase, how much bigger the program may get.
-The IL phase will not make the program bigger when given \-s0.
+Give an indication to the inline substitution phase,
+how much bigger the program may get,
+in percentage. This is only used as a rough indication.
+The inline substitution phase will not make the program bigger when given \-s0.
 .IP \-a
-Indicate to the IL phase that it is offered the whole program. This allows
-IL to throw away routines that it has substituted inline.
+Indicate to the inline substitution phase that it is offered the whole program.
+This allows it to throw away routines that it has substituted inline.
 .IP \-Q
 Give some statistics.
 .IP \-T
@@ -195,8 +204,6 @@ Optimize for time.
 Optimize for size.
 .RE
 .IP ""
-The default options are: -CJ -BO -SP.
-.br
 In principle, the optimization phases can be run in any order; a phase
 may even be run more than once. However, the following rules must be obeyed:
 .RS
@@ -219,7 +226,19 @@ Strength Reduction (SR) may creaye opportunities for UD.
 .RE
 .IP ""
 The global optimizer is a combiner, so, when using it, offer it all the source
-files of your program. It may throw away definitions of unused routines.
+files of your program. This is not strictly necessary, but it makes the
+global optimizer more effective.
+The current default optimization phases are:
+.RS
+.IP -
+for \-O2: CJ, BO, SP;
+.IP -
+for \-O3: CS, SR, CJ, BO, SP, UD, LV, RA;
+.IP -
+for \-O4: IL, CS, SR, CJ, BO, SP, UD, LV, RA;
+.IP -
+for higher levels: as for \-O4.
+.RE
 .IP \-L
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
@@ -286,7 +305,7 @@ The flag argument \fI\-xxx\fP is given to \fIprogram\fP.
 .IP \-R\fIprogram:n\fP
 Set the priority of the indicated transformation to \fIn\fP.
 The default priority is 0, setting it to -1 makes it highly
-inlikely the the phase will be used, setting it to 1 makes
+unlikely the the phase will be used, setting it to 1 makes
 it very likely that the phase will be used.
 .IP \-k
 Do not stop when an error occurs, but try to transform all

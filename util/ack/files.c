@@ -126,7 +126,7 @@ disc_inputs(phase) trf *phase ; {
 	scanlist( l_first(phase->t_inputs), elem) {
 		l_in= p_cont(*elem) ;
 		file_final(l_in) ;
-		freecore(l_in) ;
+		freecore((char *)l_in) ;
 	}
 	l_clear(&phase->t_inputs) ;
 }

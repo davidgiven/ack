@@ -34,7 +34,6 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define PROG    "program"
 #define MAPF    "mapflag"
 #define ARGS    "args"
-#define PROP    "prop"
 #define STD_IN	"stdin"
 #define STD_OUT	"stdout"
 #define PREP	"prep"
@@ -108,8 +107,7 @@ static int inoptlist(nm)
 
 intrf() {
 	register trf *new ;
-	register char *ptr ;
-	growstring bline, vline ;
+	growstring bline ;
 	int twice ;
 	int name_seen=0 ;
 
@@ -173,7 +171,8 @@ intrf() {
 		} else
 		if ( strcmp(ty_name,OPT)==0 ) {
 			if ( new->t_optim ) twice=YES ;
-			new->t_optim= YES ;
+			new->t_optim= atoi(bol) ;
+			if (new->t_optim <= 0) new->t_optim = 1;
 		} else
 		if ( strcmp(ty_name,LINKER)==0 ) {
 			if ( new->t_linker ) twice=YES ;
@@ -186,25 +185,6 @@ intrf() {
 		} else
 		if ( strcmp(ty_name,PRIO)==0 ) {
 			new->t_priority= atoi(bol) ;
-		} else
-		if ( strcmp(ty_name,PROP)==0 ) {
-			/* Obsolete by now, to be removed */
-			for ( ptr=bol ; *ptr ; ptr++ ) {
-				switch( *ptr ) {
-				case C_IN: new->t_stdin= YES ; break ;
-				case C_OUT: new->t_stdout= YES ; break ;
-				case 'P': new->t_isprep= YES ; break ;
-				case 'p': new->t_prep= YES ; break ;
-				case 'm': new->t_prep= MAYBE ; break ;
-				case 'O': new->t_optim= YES ; break ;
-				case 'L': new->t_linker=YES ;
-				case 'C': new->t_combine= YES ; break ;
-				default :
-				  error("Unkown option %c in %s for %s",
-					*ptr,new->t_name,inname) ;
-				  break ;
-				}
-			}
 		} else
 		if ( strcmp(ty_name,RUNT)==0 ) {
 			if ( new->t_rts ) twice=YES ;
@@ -267,9 +247,9 @@ intrf() {
 		if ( new->t_needed ) vprint("\tneeded: %s\n",new->t_needed) ;
 	}
 #endif
-	if ( new->t_optim && inoptlist(new->t_name) ) {
-		new->t_priority++ ;
-		if ( new->t_priority < 0 ) new->t_priority=0 ;
+	if ( new->t_optim && 
+	     ( new->t_optim <= Optlevel || inoptlist(new->t_name) ) ) {
+		new->t_optim = Optlevel;
 	}
 	l_add(&tr_list,(char *)new) ;
 }

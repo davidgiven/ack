@@ -28,7 +28,7 @@ EXTERN  int             t_flag;         /* Preserve intermediate files */
 EXTERN  int             v_flag;         /* Verbose */
 EXTERN  int             w_flag;         /* Don't print warnings */
 EXTERN  int             nill_flag;      /* Don't print file names */
-EXTERN  int             Optflag;        /* Optimizing */
+EXTERN  int             Optlevel;       /* Optimizing */
 
 #ifdef DEBUG
 EXTERN  int             debug;          /* Debugging control */

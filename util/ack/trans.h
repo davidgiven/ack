@@ -26,7 +26,6 @@ struct transform {
 	int     t_combine:1 ;   /* Transform several files to one result */
 	int     t_visited:1 ;   /* NO before setup, YES after */
 	int     t_prep:2 ;      /* Needs preprocessor YES/NO/MAYBE */
-	int     t_optim:1 ;     /* Is optimizer */
 	int     t_isprep:1 ;    /* Is preprocessor */
 	int     t_keep:1 ;      /* Keep the output file */
 	int     t_scan:1 ;      /* Used while finding path's */
@@ -34,6 +33,7 @@ struct transform {
 	int	t_linker:1 ;	/* The linker usurps all unrecognized flags */
 	int	t_do:1 ;	/* Is in a path to execute */
 	int	t_blocked:1 ;	/* An input file could not be produced */
+	short   t_optim ;       /* Is optimizer, + optimizer level */
 	short	t_priority ;	/* Importance of including phase in scan */
 	list_head t_inputs ;	/* The input 'path's of a combiner */
 	char	*t_origname ;	/* The basename of the output file */

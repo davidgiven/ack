@@ -76,4 +76,4 @@ opr:
 	make pr | opr
 
 lint:   $(ISRC)
-	lint -hbx $(DSRC) $(ISRC)
+	lint -hbx $(INCLUDES) $(DSRC) $(ISRC)
