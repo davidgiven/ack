@@ -37,6 +37,6 @@ name asld
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.p.b.ocm.mod.c:{TAIL}={EM}/{LIB}mon)
+		(.p.b.ocm.mod.c.e:{TAIL}={EM}/{LIB}mon)
 	linker
 end

@@ -37,7 +37,7 @@ name asld
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
-		(.p.b.mod.ocm.c:{TAIL}={EM}/{LIB}mon) \
+		(.p.b.mod.ocm.c.e:{TAIL}={EM}/{LIB}mon) \
 		({RTS}{ANSI?}:.cansi={EM}/lib/em24/end_em)
 	linker
 end
