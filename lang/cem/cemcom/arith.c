@@ -112,15 +112,17 @@ ch76pointer(expp, oper, tp)
 			ch7cast(expp, oper, tp);
 	}
 	else
-	if (	is_integral_type(exp->ex_type)
-#ifndef NOROPTION
-		&&
-		(	!options['R'] /* we don't care */ ||
-			(oper == EQUAL || oper == NOTEQUAL || oper == ':')
-		)
-#endif NOROPTION
-	)		/* ch 7.7 */
+	if (is_integral_type(exp->ex_type)) {
+		if (	(oper != EQUAL && oper != NOTEQUAL && oper != ':') ||
+			(!is_cp_cst(exp) || exp->VL_VALUE != 0)
+		) {	/* ch 7.6, ch 7.7 */
+			expr_warning(exp, "%s on %s and pointer",
+					  symbol2str(oper),
+					  symbol2str(exp->ex_type->tp_fund)
+				);
+		}
 		ch7cast(expp, CAST, tp);
+	}
 	else	{
 		expr_error(exp, "%s on %s and pointer",
 				symbol2str(oper),
