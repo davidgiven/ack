@@ -466,9 +466,10 @@ and
 .DE
 will match for example
 .DS
-\fBlol\fP 6
-\fBinc\fP
-\fBstl\fP 6
+.ta 10m 20m 30m 40m 50m 60m
+\fBlol\fP 6	\fBlol\fP -2		\fBlol\fP 4
+\fBinc\fP	\fBinc\fP	but \fInot\fP	\fBinc\fP
+\fBstl\fP 6	\fBstl\fP -2		\fBstl\fP -4
 .DE
 A missing boolean expression evaluates to TRUE.
 .PP
@@ -1013,6 +1014,9 @@ This is the translation of the EM \fBexa\fP and \fBexp\fP instructions.
 .IP in_ap(s)
 Same to import the symbol.
 Translation of \fBina\fP and \fBinp\fP.
+.IP newplb(s)
+Must print the definition of procedure label \fIs\fR.
+If left undefined the newilb() macro is used instead.
 .IP newilb(s)
 Must print the definition of instruction label \fIs\fR.
 .IP newdlb(s)
@@ -1083,6 +1087,7 @@ Example mach.h for the PDP-11
 #define ex_ap(y)	fprintf(codefile,"\et.globl %s\en",y)
 #define in_ap(y)	/* nothing */
 
+#define newplb(x)	fprintf(codefile,"%s:\en",x)
 #define newilb(x)	fprintf(codefile,"%s:\en",x)
 #define newdlb(x)	fprintf(codefile,"%s:\en",x)
 #define	dlbdlb(x,y)	fprintf(codefile,"%s=%s\en",x,y)
