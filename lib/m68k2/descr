@@ -22,7 +22,6 @@ end
 name asld
 	from .s.a
 	to .out
-	outfile a.out
 	program {EM}/lib/{M}/as
 	mapflag -l* LNAME={EM}/{LIB}*
 	args (.e:{HEAD}={EM}/{RT}em) \
@@ -33,4 +32,11 @@ name asld
 		(.e:{TAIL}={EM}/{LIB}em.rt {EM}/{LIB}mon {EM}/lib/{M}/end_em.s)
 	prep cond
 	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{M}/cv
+	args < >
+	outfile a.out
 end
