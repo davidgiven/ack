@@ -267,18 +267,17 @@ pop rm:wo.
 push anyreg:ro cost(1,2).
 push const:ro cost(1,2).
 push rm:ro cost(2,5).
-rcl rm:rw:cc, ANYCON+SHIFT_CREG:ro cost(2,10).
-rcr rm:rw:cc, ANYCON+SHIFT_CREG:ro cost(2,10).
+rcl rm:rw, ANYCON+SHIFT_CREG:ro kills :cc cost(2,10).
+rcr rm:rw, ANYCON+SHIFT_CREG:ro kills :cc cost(2,10).
 ret cost(1,10).
-rol rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-ror rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-sal rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-sar rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+rol rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+ror rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+sal rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+sar rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
 sbb rm:rw:cc, regorconst:ro.
 sbb anyreg:rw:cc, rmorconst:ro.
-shl rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-shr rm:rw:cc, ANYCON+SHIFT_CREG:ro.
-sxx rm:rw:cc, ANYCON+SHIFT_CREG:ro.
+shl rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+shr rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
 #ifdef REGVARS
 sub LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
@@ -936,9 +935,6 @@ pat sdf
   kills mem_nonlocals
   gen	pop {EXTERN,%1.off+$1}
 	pop {EXTERN,%1.off+$1+4}
-  with halfindir regorconst
-  kills all_mems
-  gen mov %1,%2			yields %1	leaving stf $1+4
 
 
 /****************************************************************
