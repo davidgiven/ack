@@ -153,8 +153,8 @@ copy_block(sz, al)
 		src = LocalPtrVar();
 		dst = LocalPtrVar();
 
-		StoreLocal(src, pointer_size);
 		StoreLocal(dst, pointer_size);
+		StoreLocal(src, pointer_size);
 		copy_loop(sz, src, dst);
 		FreeLocal(dst);
 		FreeLocal(src);
