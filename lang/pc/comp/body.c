@@ -219,7 +219,7 @@ arith
 CodeInitFor(nd, priority)
 	register struct node *nd;
 {
-	/* Push init-value or final-value, the value may only be evaluated
+	/* Push final-value, the value may only be evaluated
 	   once, so generate a temporary for it, when not a constant.
 	*/
 
@@ -237,22 +237,15 @@ CodeInitFor(nd, priority)
 	return (arith) 0;
 }
 
-CodeFor(nd, stepsize, l1, l2, tmp1)
+CodeFor(nd, stepsize, l1, l2)
 	struct node *nd;
 	label l1, l2;
-	arith tmp1;
 {
 	/* Test if loop has to be done */
 	if( stepsize == 1 )	/* TO */
 		C_bgt(l2);
 	else			/* DOWNTO */
 		C_blt(l2);
-
-	/* Store init-value in control-variable */
-	if( tmp1 )
-		C_lol(tmp1);
-	else
-		CodePExpr(nd->nd_left);
 
 	/* Label at begin of the body */
 	C_df_ilb(l1);

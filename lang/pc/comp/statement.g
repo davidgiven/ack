@@ -341,7 +341,6 @@ ForStatement
 	int stepsize;
 	label l1 = ++text_label;
 	label l2 = ++text_label;
-	arith tmp1 = (arith) 0;
 	arith tmp2 = (arith) 0;
 } :
 	FOR
@@ -357,9 +356,10 @@ ForStatement
 	Expression(&(nd->nd_right))
 				{ ChkForStat(nd);
 				  if( !err_occurred )	{
-					tmp1 = CodeInitFor(nd->nd_left, 0);
+					CodePExpr(nd->nd_left);
+					C_dup(int_size);
 					tmp2 = CodeInitFor(nd->nd_right, 2);
-				  	CodeFor(nd, stepsize, l1, l2, tmp1);
+				  	CodeFor(nd, stepsize, l1, l2);
 				  }
 				}
 	DO
@@ -369,7 +369,6 @@ ForStatement
 				  EndForStat(nd);
 				  chk_labels(slevel + 1);
 				  FreeNode(nd);
-				  if( tmp1 ) FreeInt(tmp1);
 				  if( tmp2 ) FreeInt(tmp2);
 				}
 ;
