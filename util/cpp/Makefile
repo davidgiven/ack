@@ -107,7 +107,7 @@ cfiles: hfiles LLfiles $(GSRC)
 install: all
 	rm -f $(CEMPP)
 	cp cpp $(CEMPP)
-	mr -f $(MANDIR)/cpp.6
+	rm -f $(MANDIR)/cpp.6
 	cp cpp.6 $(MANDIR)/cpp.6
 
 cmp:	all
