@@ -236,8 +236,8 @@ data2		= dreg2 + post_inc2 + pre_dec2 + indirect2 +
 		  offsetted2 + index_off2 + absolute2 + const + small_const .
 memory2		= data2 - dreg2 .
 control2	= indirect2 + offsetted2 + index_off2 + absolute2 .
-alterable2	= data2 + A_REG + D_REG - const - small_const .
-any2		= data2 + A_REG + D_REG.
+alterable2	= data2 + D_REG - const - small_const .
+any2		= data2 + D_REG.
 
 data1		= dreg1 + post_inc1 + pre_dec1 + indirect1 +
 		  offsetted1 + index_off1 + absolute1 + const + small_const .
@@ -266,8 +266,8 @@ data2		= dreg2 + indirect2 + post_inc2 + pre_dec2 + index_off2 +
 		  absolute2 + abs_index2 + const + small_const .
 memory2		= data2 - dreg2 .
 control2	= memory2 - (post_inc2 + pre_dec2 + const + small_const) .
-alterable2	= data2 + A_REG + D_REG - const - small_const .
-any2		= data2 + A_REG + D_REG. /* all four above together */
+alterable2	= data2 + D_REG - const - small_const .
+any2		= data2 + D_REG. /* all four above together */
 
 data1		= dreg1 + indirect1 + post_inc1 + pre_dec1 + index_off1 +
 		      offsetted1 + OFF_off1 + OFF_indoff1 +
@@ -365,7 +365,7 @@ memalt1		= memory1 * alterable1 .
 
 #ifndef TBL68020
 	/* A m68k4 part */
-imm_cmp4	= alterable4 - genreg .
+imm_cmp4	= alterable4 - A_REG .
 imm_cmp2	= alterable2 + D_REG .
 imm_cmp1	= datalt1 + D_REG .
 
@@ -375,7 +375,7 @@ test_set1	= datalt1 .
 
 #else TBL68020
 
-imm_cmp4	= any4 - immediate4 - genreg .
+imm_cmp4	= any4 - immediate4 - A_REG .
 imm_cmp2	= any2 - const - small_const .
 imm_cmp1	= any1 - const - small_const .
 
@@ -3523,16 +3523,16 @@ with imm_cmp1-D_REG STACK
 with imm_cmp2-D_REG STACK
     gen	cmp_w {const, $1}, %1
 	bxx[1] {llabel, $2}
-with D_REG STACK
+with data4 STACK
 uses DD_REG = {const, $1}
-    gen cmp_l %a, %1
+    gen cmp_l %1,%a
 	bxx[2] {llabel, $2}
 
 proc bxx2_small example loc bne
 with imm_cmp2-D_REG STACK
     gen cmp_w {const, $1}, %1
 	bxx[1] {llabel, $2}
-with D_REG STACK
+with imm_cmp4 STACK
     gen cmp_l {const, $1}, %1
 	bxx[2] {llabel, $2}
 
@@ -3580,12 +3580,13 @@ pat loc loc cii loc bne $1==2 && $2==4 && in_2($4)	call bxx2_in("bne")
 pat loc loc cii loc bge $1==2 && $2==4 && in_2($4)	call bxx2_in("bge")
 pat loc loc cii loc bgt $1==2 && $2==4 && in_2($4)	call bxx2_in("bgt")
 
-pat loc blt $1>=0 && $1<128		call bxx1_small("bcs", "blt")
-pat loc ble $1>=0 && $1<128		call bxx1_small("bls", "ble")
+/* the second instruction for bxx1_small is the other way around! */
+pat loc blt $1>=0 && $1<128		call bxx1_small("bcs", "bgt")
+pat loc ble $1>=0 && $1<128		call bxx1_small("bls", "bge")
 pat loc beq $1>=0 && $1<128		call bxx1_small("beq", "beq")
 pat loc bne $1>=0 && $1<128		call bxx1_small("bne", "bne")
-pat loc bge $1>=0 && $1<128		call bxx1_small("bcc", "bge")
-pat loc bgt $1>=0 && $1<128		call bxx1_small("bhi", "bgt")
+pat loc bge $1>=0 && $1<128		call bxx1_small("bcc", "ble")
+pat loc bgt $1>=0 && $1<128		call bxx1_small("bhi", "blt")
 
 pat loc blt $1>=128 && $1<32768		call bxx2_small("bcs", "blt")
 pat loc ble $1>=128 && $1<32768		call bxx2_small("bls", "ble")
