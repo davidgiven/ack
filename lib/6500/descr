@@ -12,7 +12,7 @@ var INCLUDES=-I{EM}/include -I/usr/include
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/{M}/be
+	program {EM}/lib/{M}/cg
 	args <
 	stdout
 	need .e
