@@ -82,8 +82,8 @@ AtEoIF()
 	}
 	IncludeLevel--;
 #endif
-#endif /* NOPP */
 	if (WorkingDir[0] != '\0') free(WorkingDir);
+#endif /* NOPP */
 #ifndef LINT
 	if (FileName != source) free(FileName);
 #endif
