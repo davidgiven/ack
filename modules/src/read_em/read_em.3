@@ -177,7 +177,7 @@ They use EM_holsize, EM_holinit, EM_bsssize, and EM_bssinit, because those
 arguments do not fit in the \fIe_arg\fR structure, and we want to keep the
 \fIe_arg\fR structure as small as possible.
 The EXC pseudo has its arguments encoded as indicated in the #defines.
-The PRO pseudo has its second argument in \fIema_nlocals\fR. If it is
+The PRO pseudo has its second argument in \fIem_nlocals\fR. If it is
 -1, it was omitted.
 .IP "EM_STARTMES	em_arg" \nau
 the start of a MES pseudo.
@@ -233,45 +233,45 @@ are summarized below:
 Meaning
 .IP "0	none" \nau
 no argument.
-.IP "ilb_ptyp	ema_ilb" \nau
+.IP "ilb_ptyp	em_ilb" \nau
 an instruction label.
 .PD 0
-.IP "nof_ptyp	ema_dlb" \nau
+.IP "nof_ptyp	em_dlb" \nau
 an offset from a numeric data label.
-.IP "	ema_szoroff" \nau
+.IP "	em_off" \nau
 The
-\fIema_szoroff\fR field contains the offset and the
-\fIema_dlb\fR field contains the label.
-.IP "sof_ptyp	ema_dnam" \nau
+\fIem_off\fR field contains the offset and the
+\fIem_dlb\fR field contains the label.
+.IP "sof_ptyp	em_dnam" \nau
 an offset from a non-numeric data label.
-.IP "	ema_szoroff" \nau
-The \fIema_szoroff\fR field contains the offset and the \fIema_dnam\fR field
+.IP "	em_off" \nau
+The \fIem_off\fR field contains the offset and the \fIem_dnam\fR field
 contains the label, represented as a string.
-.IP "cst_ptyp	ema_cst" \nau
+.IP "cst_ptyp	em_cst" \nau
 a numeric constant.
-.IP "pro_ptyp	ema_pnam" \nau
+.IP "pro_ptyp	em_pnam" \nau
 a procedure name, not including the '$',
 represented as a string.
-.IP "str_ptyp	ema_string" \nau
+.IP "str_ptyp	em_string" \nau
 a string constant.
-.IP "	ema_szoroff" \nau
-The string is found in \fIema_string\fR, represented as a row of bytes, of
-length \fIema_szoroff\fR.
-.IP "ico_ptyp	ema_string" \nau
+.IP "	em_size" \nau
+The string is found in \fIem_string\fR, represented as a row of bytes, of
+length \fIem_size\fR.
+.IP "ico_ptyp	em_string" \nau
 an integer constant.
-.IP "	ema_szoroff" \nau
-A string representation of the constant is found in \fIema_string\fR.
-It has size \fIema_szoroff\fR bytes on the target machine.
-.IP "uco_ptyp	ema_string" \nau
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_string\fR.
+It has size \fIem_size\fR bytes on the target machine.
+.IP "uco_ptyp	em_string" \nau
 an unsigned constant.
-.IP "	ema_szoroff" \nau
-A string representation of the constant is found in \fIema_string\fR.
-It has size \fIema_szoroff\fR bytes on the target machine.
-.IP "fco_ptyp	ema_string" \nau
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_string\fR.
+It has size \fIem_size\fR bytes on the target machine.
+.IP "fco_ptyp	em_string" \nau
 a floating constant.
-.IP "	ema_szoroff" \nau
-A string representation of the constant is found in \fIema_string\fR.
-It has size \fIema_szoroff\fR bytes on the target machine.
+.IP "	em_size" \nau
+A string representation of the constant is found in \fIem_string\fR.
+It has size \fIem_size\fR bytes on the target machine.
 .PD
 .PP
 When an error occurs, \fIEM_error\fR is set to indicate the reason.
