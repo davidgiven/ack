@@ -1,5 +1,0 @@
-
-case $# in
-1)      make "$1".t ; ntlp "$1".t^lpr ;;
-*)      echo $0 heeft een argument nodig ;;
-esac

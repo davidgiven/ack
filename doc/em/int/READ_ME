@@ -1,5 +1,0 @@
-This interpreter is meant for inclusion in the EM manual.
-Although slow, it showed decent behaviour on several tests.
-The only monitor calls implemented are exit, read(untested),
-write and ioctl - just reurns the correct code for telling it's
-a terminal -
