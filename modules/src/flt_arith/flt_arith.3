@@ -61,12 +61,14 @@ extern int	flt_status;
 .B int flt_status;
 .PP
 .B #include <em_arith.h>
-.B flt_arith2flt(n, e)
+.B flt_arith2flt(n, e, uns)
 .B arith n;
 .B flt_arith *e;
+.B int uns;
 .PP
-.B arith flt_flt2arith(e)
+.B arith flt_flt2arith(e, uns)
 .B flt_arith *e;
+.B int uns;
 .PP
 .B flt_b64_sft(m, n)
 .B struct flt_mantissa *m;
@@ -184,14 +186,20 @@ converts the number
 .I n
 to the floating point format used in this package and returns the result
 in
-.IR e .
+.IR e . If the
+.I uns
+flag is set, the number
+.I n
+is regarded as an unsigned.
 .PP
 .B flt_flt2arith
 truncates the number indicated by
 .I e
 to the largest integer value smaller than or equal to the number indicated by
 .IR e .
-It returns this value.
+It returns this value. If the
+.I uns
+flag is set, the result is to be regarded as unsigned.
 .PP
 Before each operation, the
 .I flt_status

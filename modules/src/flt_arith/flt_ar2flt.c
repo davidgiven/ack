@@ -8,7 +8,7 @@
 #include "misc.h"
 #include <em_arith.h>
 
-flt_arith2flt(n, e)
+flt_arith2flt(n, e, uns)
 	register arith n;
 	register flt_arith *e;
 {
@@ -16,7 +16,7 @@ flt_arith2flt(n, e)
 	*/
 	register int i;
 
-	if (n < 0) {
+	if (!uns && n < 0) {
 		e->flt_sign = 1;
 		n = -n;
 	}
@@ -27,16 +27,11 @@ flt_arith2flt(n, e)
 		return;
 	}
 	e->flt_exp = 63;
-	if (n < 0) {
-		/* n = MINARITH */
-		n = 0x40000000;
-		while ((n << 1) > 0) n <<= 1;
-		e->flt_exp++;
-	}
+		
 	for (i = 64; i > 0 && n != 0; i--) {
 		flt_b64_sft(&(e->flt_mantissa),1);
 		e->m1 |= (n & 1) << 31;
-		n >>= 1;
+		n = (n >> 1) & ~(0x80 << 8*(sizeof(arith)-1));
 	}
 
 	if (i > 0) {

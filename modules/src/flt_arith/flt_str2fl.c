@@ -347,7 +347,7 @@ flt_ecvt(e, ndigit, decpt, sign)
 		(*decpt)++;	/* because now value in [1.0, 10.0) */
 	}
 	while (p <= pe) {
-		if (e->flt_exp >= 0) {
+		if (e->flt_exp >= 0 && e->m1 != 0) {
 			flt_arith x;
 
 			x.m2 = 0; x.flt_exp = e->flt_exp;
@@ -355,8 +355,10 @@ flt_ecvt(e, ndigit, decpt, sign)
 			x.m1 = (e->m1 >> 1) & 0x7FFFFFFF;
 			x.m1 = x.m1>>(30-e->flt_exp);
 			*p++ = (x.m1) + '0';
-			x.m1 = x.m1 << (31-e->flt_exp);
-			flt_add(e, &x, e);
+			if (x.m1) {
+				x.m1 = x.m1 << (31-e->flt_exp);
+				flt_add(e, &x, e);
+			}
 		}
 		else *p++ = '0';
 		flt_mul(e, &s10pow[1], e);
