@@ -528,11 +528,8 @@ declare_formals(idf, fp)
 	/* When one of the formals has the same name as the function, 
 	   it hides the function def. Get it.
 	*/
-	while (se) {
-		if (se->se_idf == idf) {
-			df = df->next;
-			break;
-		}
+	if (se && se->se_idf == idf) {
+		df = df->next;
 	}
 	
 	hasproto = df->df_type->tp_proto != 0;
