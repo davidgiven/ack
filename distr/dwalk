@@ -1,4 +1,5 @@
 : ${CDIR=.}
+${DD-:} $CDIR
 ${DF-:} $CDIR .distr
 if test ! -r $DESTDIR/$CDIR/.distr
 then
@@ -11,10 +12,9 @@ do
         then
                 ( if cd $i
 		  then 
-			${DD-:} $CDIR $i
 			CDIR=$CDIR/$i
 			export CDIR
-			exec /proj/em/distr/dwalk
+			exec /proj/em/Work/distr/dwalk
 		  else
 			echo ++ Could not access $CDIR/$i
 		  fi

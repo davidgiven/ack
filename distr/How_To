@@ -20,19 +20,12 @@ error messages.
 The file f.attf contains mktree error messages and should be compared
 to Exceptions.
 The actions of mktree are quite complicated. It starts in the current
-directory checking out the .distr file, and copying it to the destination
-directory
+directory creating a version in the destination directory.
+Then it reads the .distr file.
 For each file mentioned there it performes certain actions:
 1- Directory	Change to that directory and call yourself recursively.
 2- File
-   a-           Try to do "co -rdistr4 destination_tree/path/destination_file"
-                on succes "chmod +w destination_file" 
-              else
-   b-           Try to do "co destination_tree/destination_file"
-                on succes "chmod +w destination_file" and
-                give message that says "Missing distr4 entry" (or some such). 
-              else
-   c-           I   Does a file LIST exist in this directory AND
+   a-               Does a file LIST exist in this directory AND
                     is the first line of LIST equal to the name of the
                     destination file? If so, try to extract all the files
                     named in the rest of the LIST file and call the program
@@ -40,11 +33,7 @@ For each file mentioned there it performes certain actions:
                     In this manner libraries can be distributed whose members
                     have their own RCS file! 
               else
-                II  try to do "cp file destination_tree/path/destination_file"
-                    on succes give message that says "Missing RCS entry"
-                    (or some such). 
-              else
-   d-
+   b-
               give message that says "Missing entry" (or some such). 
 
 Now you have the tree but not everything is kosher yet.

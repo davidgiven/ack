@@ -1,10 +1,10 @@
 case $# in
-0)	DIR=. ;;
-1)	DIR=$1 ;;
+0)	DESTDIR=. ;;
+1)	DESTDIR=$1 ;;
 *)	echo $0 [directory] ; exit 1 ;;
 esac
 DD=`pwd`/listall.d
 DW=`pwd`/dwalk
-export DD
-cd $DIR
+export DD DESTDIR
+cd $DESTDIR
 $DW
