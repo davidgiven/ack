@@ -6,6 +6,10 @@ name "Sparc code expander"
 system "sparc"
 dir ce_cg
 end
+name "Sparc target optimizer"
+system "sparc"
+dir top
+end
 name "Sparc EM library"
 system "sparc"
 dir libem
