@@ -233,11 +233,12 @@ preprocess(fn)
 				}
 				continue;
 			case STELL:
+				c = GetChar();
+				UnGetChar();
 				if (c == '"' || c == '\'') {
-					echo(c);
+					echo('L');
 					continue;
 				}
-				UnGetChar();
 				c = 'L';
 			case STIDF: {
 				extern int idfsize;		/* ??? */
