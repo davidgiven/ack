@@ -57,6 +57,10 @@ char *_pscien(r,s,n,b) float r; register char *s; {
 	} else {
 		*s++ = '+' ;
 	}
+	if (dp >= 100) {
+		*s++ = '0' + (dp / 100);
+		dp %= 100;
+	}
 	*s++ = '0' + (dp/10);
 	*s++ = '0' + (dp%10);
 	return(s);
