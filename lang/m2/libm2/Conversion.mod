@@ -49,10 +49,10 @@ IMPLEMENTATION MODULE Conversions;
 			   len: CARDINAL;   
                            VAR str: ARRAY OF CHAR); 
   BEGIN 
-	IF num < 0 THEN
+	IF (num < 0) AND (num >= -MAX(INTEGER)) THEN
 		ConvertNum(-num, len, 10, TRUE, str);
 	ELSE
-		ConvertNum(num, len, 10, FALSE, str);
+		ConvertNum(CARDINAL(num), len, 10, FALSE, str);
 	END;
   END ConvertInteger; 
 
