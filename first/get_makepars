@@ -67,18 +67,15 @@ then
 	else
 		sed -e "s/^COPTIONS.*\$/COPTIONS=-O -D_EM_WSIZE=$WS -D_EM_PSIZE=$PS -D__${MACH}__/" -e "s/^# RANLIB=:/RANLIB=:/" < $FDIR/target_comp >> make_macros
 	fi
-	if [ -f /bin/arch ]
-	then
-		case `/bin/arch` in
-		sun3|sun4)
-			ed - make_macros <<'EOF'
+	case $ACM in
+	sun3|sparc)
+		ed - make_macros <<'EOF'
 /cc-and-mkdep.sun/s/^..//
 w
 q
 EOF
-			;;
-		esac
-	fi
+		;;
+	esac
 	cat $FDIR/util_comp >> make_macros
 else
 	case $know_target in
