@@ -64,8 +64,7 @@ con_float() {
 	double atof();
 	int i;
 #ifndef OWNFLOAT
-	double f1;
-	double frexp(), modf();
+	double frexp();
 	int j;
 	int sign = 0;
 	int fraction[4] ;
@@ -107,15 +106,18 @@ con_float() {
 		f += f;
 		i --;
 	}
-	f = modf(2 * f, &f1); /* hidden bit */
+	f = 2*f - 1.0;		/* hidden bit */
 #ifdef IEEEFLOAT
 	if (argval == 4) {
 #endif IEEEFLOAT
 		i = (i + 128) & 0377;
 		fraction[0] = (sign << 15) | (i << 7);
 		for (j = 6; j>= 0; j--) {
-			if (f >= 0.5) fraction[0] |= (1 << j);
-			f = modf(2*f, &f1);
+			f *= 2;
+			if (f >= 1.0) {
+				f -= 1.0;
+				fraction[0] |= (1 << j);
+			}
 		}
 #ifdef IEEEFLOAT
 	}
@@ -123,16 +125,22 @@ con_float() {
 		i = (i + 1024) & 03777;
 		fraction[0] = (sign << 15) | (i << 4);
 		for (j = 3; j>= 0; j--) {
-			if (f >= 0.5) fraction[0] |= (1 << j);
-			f = modf(2*f, &f1);
+			f *= 2;
+			if (f >= 1.0) {
+				fraction[0] |= (1 << j);
+				f -= 1.0;
+			}
 		}
 	}
 #endif IEEEFLOAT
 	for (i = 1; i < argval / 2; i++) {
 		fraction[i] = 0;
 		for (j = 15; j>= 0; j--) {
-			if (f >= 0.5) fraction[i] |= (1 << j);
-			f = modf(2*f, &f1);
+			f *= 2;
+			if (f >= 1.0) {
+				fraction[i] |= (1 << j);
+				f -= 1.0;
+			}
 		}
 	}
 	if (f >= 0.5) {
