@@ -25,6 +25,9 @@ _double	s1,s2;
 #ifdef	PRT_EXT
 	fprintf(stderr,"SBF8 ():\n");
 #endif
+	if (s2.__double[0] == 0 && s2.__double[1] == 0) {
+		return s1;
+	}
 	p = (char unsigned *) &s2;
 	*p ^= 0x80;	/* change sign of s2 */
 	s1 = adf8(s2,s1);	/* add and return result */

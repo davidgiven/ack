@@ -18,6 +18,13 @@ _float	s1,s2;
 	EXTEND	e1,e2;
 	int	swap = 0;
 
+	if (s1 == (_float) 0) {
+		s1 = s2;
+		return s1;
+	}
+	if (s2 == (_float) 0) {
+		return s1;
+	}
 	extend((_double *)&s1,&e1,sizeof(SINGLE));
 	extend((_double *)&s2,&e2,sizeof(SINGLE));
 			/* if signs differ do subtraction	*/

@@ -17,6 +17,15 @@ _double	s1,s2;
 {
 	EXTEND	e1,e2;
 	short	swap;
+
+	if (s1.__double[0] == 0 && s1.__double[1] == 0) {
+		s1 = s2;
+		return s1;
+	}
+	if (s2.__double[0] == 0 && s2.__double[1] == 0) {
+		return s1;
+	}
+
 	extend(&s1,&e1,sizeof(_double));
 	extend(&s2,&e2,sizeof(_double));
 #ifdef	PRT_EXT

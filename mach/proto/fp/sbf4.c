@@ -22,6 +22,9 @@ _float	s1,s2;
 				/*		s2 = -s2	*/
 	char unsigned *p;
 
+	if (s2 == (_float) 0) {
+		return s1;
+	}
 	p = (char unsigned *) &s2;
 	*p ^= 0x80;	/* change sign of s2 */
 	s1 = adf4(s2,s1);
