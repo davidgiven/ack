@@ -15,6 +15,10 @@
  *
  */
 
+#ifndef NORCSID
+static char rcsid[]=	"$Header$" ;
+#endif
+
 /*
  * machine dependent back end routines for the Intel 8080.
  */
