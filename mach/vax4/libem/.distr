@@ -2,4 +2,7 @@ LIST
 Makefile
 compmodule
 libem_s.a
+em_end.s
+etext.s
+edata.s
 end.s
