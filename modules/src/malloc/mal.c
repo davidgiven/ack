@@ -39,6 +39,9 @@ malloc(n)
 	register mallink *ml;
 	register int min_class;
 
+	if (n == 0) {
+		return 0;
+	}
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
 #ifdef STORE
 	if (n <= MAX_STORE*MIN_SIZE)	{
@@ -233,6 +236,10 @@ realloc(addr, n)
 			null-pointer
 		*/
 		return malloc(n);
+	}
+	if (n == 0) {
+		free(addr);
+		return 0;
 	}
 	ml = mallink_of_block(addr);
 	if (n < MIN_SIZE) n = align(MIN_SIZE); else n = align(n);
