@@ -639,7 +639,7 @@ EVAL(expr, val, code, true_label, false_label)
 	default:
 		crash("(EVAL) bad expression class");
 	}
-	if (expr->ex_flags & EX_VOLATILE || vol) C_nop();
+	if (val == RVAL && ((expr->ex_flags & EX_VOLATILE) || vol)) C_nop();
 }
 
 /*	compare() serves as an auxiliary function of EVAL	*/
