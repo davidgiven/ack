@@ -46,7 +46,7 @@ MODULE StoreFetch;
 	Init(NonEmpty);
   END SharedBuffer;
 
-  CONST	Max = 80;
+  CONST	Max = 256;
 	eos = 0C;
 
   TYPE	StringType = ARRAY[0..Max-1] OF CHAR;
@@ -85,7 +85,7 @@ MODULE StoreFetch;
 
 BEGIN
 	Init(EndOfTransfer);
-	StartProcess(Store, 500);
-	StartProcess(Fetch, 500);
+	StartProcess(Store, 2000);
+	StartProcess(Fetch, 2000);
 	WAIT(EndOfTransfer);
 END StoreFetch.
