@@ -514,16 +514,23 @@ init_string(tpp, ex)
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
+		extern char options[];
 
+		if (length > dim) {
+			if (options['R'])
+				too_many_initialisers(ex);
+			else { /* don't take the null byte into account */
+				if (length > dim + 1)
+					expr_warning(ex,
+						"too many initialisers");
+				length = dim;
+			}
+		}
 		ntopad = align(dim, word_align) - length;
-		if (length > dim)
-			expr_error(ex,
-				"too many characters in initialiser string");
 	}
 	/* throw out the characters of the already prepared string	*/
-	do
+	while (length-- > 0)
 		C_con_ucon(long2str((long)*s++ & 0xFF, 10), (arith)1);
-	while (--length > 0);
 	/* pad the allocated memory (the alignment has been calculated)	*/
 	while (ntopad-- > 0)
 		con_nullbyte();
