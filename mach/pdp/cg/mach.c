@@ -81,7 +81,6 @@ con_float()
 #endif
         putc('\n', codefile);
 }
-#endif /* ACK_ASS */
 
 #ifdef REGVARS
 
