@@ -176,8 +176,9 @@ addreg		= ADDREG
 		  + RADDREG
 #endif
 rm		= anyreg + memory2
-rmnoacc		= RREG + BREG + CXREG + DXREG + memory2
+rmnoacc		= RREG + BREG + CXREG + memory2
 rmorconst	= const + rm
+noregvar	= const + REG + BREG + memory2
 regorconst	= const + anyreg
 #ifdef REGVARS
 /* Needed because there is a shortage of ADDREG-registers.
@@ -304,11 +305,12 @@ loi $1==4	| addreg     |	| {ind_regoff2,%[1],"2"} {ind_reg2,%[1]}| |
 			      {LOCAL2,%[1.ind]+2,2} {LOCAL2,%[1.ind],2} | |
 ...		| nocoercions : ADDR_EXTERN|	| {EXTERN2, %[1.off]+"+2"}
 				  {EXTERN2, %[1.off]}			| |
-loi $1>4	| |
+loi $1>4	| noregvar |
 			remove(ALL)
 			allocate(CXREG={ANYCON,$1/2})
 			"mov ax,si"
 			"mov bx,di"
+			"mov si,%[1]"
 			"sub sp,%($1%)"
 			"mov di,sp"
 			"rep movs"
@@ -382,7 +384,7 @@ ste		| regorconst |
 #ifdef REGVARS
 sil inreg($1)==2| regorconst |
 			remove(referals)
-			move(%[1],regvar($1))			|	| |
+			move(%[1],{ind_reg2, regvar($1)})			|	| |
 ...		| nocoercions : STACK |
 			"pop (%(regvar($1)%)"	samecc		|  | |(2,26)
 #endif
@@ -487,13 +489,13 @@ sti $1==4	| addreg regorconst regorconst |
 			move(%[2],{ind_regoff2, bp, tostring(%[1.ind])})
 			move(%[3],{ind_regoff2, bp,
 						tostring(%[1.ind]+2)})| | |
-sti $1>4	| |
+sti $1>4	| noregvar |
 			remove(ALL)
 			allocate(CXREG={ANYCON,$1/2})
 			"mov ax,si"
 			"mov bx,di"
 			"mov si,sp"
-			"pop di"
+			"mov di,%[1]"
 			"rep movs"
 			"mov sp,si"
 			"mov si,ax"
@@ -629,7 +631,7 @@ mli $1==2	| X_ACC rm |
 			*/
 			nocc erase(%[1])	    | %[1]  | |(2,118)+%[2]
 ...		| rmnoacc rmorconst |
-			allocate(%[1],%[2],ACC=%[2],DXREG)
+			allocate(%[2],ACC=%[2],DXREG)
 			"mul %[1]"
 			nocc erase(%[a])	    | ax  | |(2,118)+%[1]
 mli $1==4	| X_ACC X_DXREG |
@@ -642,7 +644,7 @@ mli !defined($1)| X_ACC |
 			"call .mli"		    |	    | |
 */
 dvi $1==2	| rmnoacc rmorconst |
-			allocate(%[1], %[2], ACC=%[2], DXREG)
+			allocate(%[2], ACC=%[2], DXREG)
 			"cwd"
 			"idiv %[1]"
 			erase(%[a])		       | ax | |(3,176)+%[1]
@@ -655,12 +657,12 @@ dvi !defined($1)| X_ACC |
 */
 #ifdef LONGEMPAT
 loc loc cii dvi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-		| rm-ACC-DXREG X_ACC X_DXREG |
+		| rmnoacc X_ACC X_DXREG |
 			"idiv %[1]"
 			erase(%[2]) erase(%[3])        | ax | |(2,171)+%[1]
 #endif
 rmi $1==2	| rmnoacc rmorconst |
-			allocate(%[1], %[2], ACC=%[2], DXREG)
+			allocate(%[2], ACC=%[2], DXREG)
 			"cwd"
 			"idiv %[1]"
 			erase(%[a])		       | dx | |(3,176)+%[1]
@@ -673,7 +675,7 @@ rmi !defined($1)| X_ACC |
 */
 #ifdef LONGEMPAT
 loc loc cii rmi loc loc cii $1==2 && $2==4 && $4==4 && $5==4 && $6==2
-		| rm-ACC-DXREG X_ACC X_DXREG |
+		| rmnoacc X_ACC X_DXREG |
 			"idiv %[1]"
 			erase(%[2]) erase(%[3])        | dx | |(2,171)+%[1]
 #endif
@@ -2441,17 +2443,14 @@ trp		| X_ACC |
 | reg_off |	"add %[1.reg],%[1.off]"
 		erase(%[1.reg]) setcc(%[1.reg]) 
 					    | %[1.reg]  | |(2,3) + %[1]
-#ifdef DEEPER
 | halfindir |
 		allocate(%[1],REG)
 		move(%[1],%[a])
 		samecc				| %[a]	| |(0,0)
-#else
 | halfindir |
 		allocate(%[1],ADDREG)
 		move(%[1],%[a])
 		samecc				| %[a]	| |(0,0)
-#endif
 
 /********************************
  * From source to token 	*

@@ -118,7 +118,6 @@ regsave(regstr, off, size)
 			fprintf(codefile, "mov si,%ld(bp)\n", off);
 	}
 	else {
-		assert( ! strcmp(regstr, "di"));
 		if (! firstreg) firstreg = 1;
 		di_off = off;
 		fputs("push di\n", codefile);
