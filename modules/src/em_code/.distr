@@ -26,6 +26,7 @@ dlb.c
 dnam.c
 em.c
 em.nogen
+em_private.h
 end.c
 endarg.c
 exc.c
