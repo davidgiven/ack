@@ -5,6 +5,9 @@
 #MACH_DEFINE	do not remove this or the next line!
 MACH = 
 
+#TABLE_DEFINE	do not remove this or the next line!
+TABLE_DIR = $(SRC_HOME)/mach/$(MACH)/ncg
+
 SRC_DIR = $(SRC_HOME)/mach/$(MACH)/ncg
 CDIR = $(SRC_HOME)/mach/proto/ncg
 LIBEM = $(TARGET_HOME)/lib.bin/em_data.$(LIBSUF)
@@ -17,7 +20,7 @@ TABLEFLAGS=
 #cgg options
 CGGFLAGS=
 
-PREFLAGS=-I$(TARGET_HOME)/h -I$(SRC_HOME)/mach -I$(TARGET_HOME)/modules/h -I$(SRC_DIR) -I. -I$(CDIR) -DNDEBUG
+PREFLAGS=-I$(TARGET_HOME)/h -I$(SRC_HOME)/mach -I$(TARGET_HOME)/modules/h -I$(SRC_DIR) -I$(TABLE_DIR) -I. -I$(CDIR) -DNDEBUG
 PFLAGS=
 CFLAGS=$(PREFLAGS) $(PFLAGS) $(COPTIONS)
 LDFLAGS=$(PFLAGS) $(LDOPTIONS)
@@ -75,13 +78,13 @@ var.$(SUF): $(CDIR)/var.c
 	$(CC) -c $(CFLAGS) $(CDIR)/var.c
 
 install: all
-	cp cg $(TARGET_MOME)/lib.bin/$(MACH)/cg
+	cp cg $(TARGET_HOME)/lib.bin/$(MACH)/cg
 
 cmp:	 all
-	-cmp cg $(TARGET_MOME)/lib.bin/$(MACH)/cg
+	-cmp cg $(TARGET_HOME)/lib.bin/$(MACH)/cg
 
-tables.c: $(SRC_HOME)/$(TABLE) $(CGG)
-	$(CPP) -I$(SRC_DIR) $(TABLEFLAGS) $(SRC_HOME)/$(TABLE) | $(CGG) $(CGGFLAGS)
+tables.c: $(TABLE_DIR)/table $(CGG)
+	$(CPP) -I$(SRC_DIR) -I$(TABLE_DIR) $(TABLEFLAGS) $(TABLE_DIR)/table | $(CGG) $(CGGFLAGS)
 	-cmp tables.h tables.H || cp tables.H tables.h
 
 lint:	tables.c
@@ -118,8 +121,8 @@ equiv.$(SUF):	$(CDIR)/types.h
 fillem.$(SUF):	$(CDIR)/assert.h $(TARGET_HOME)/h/cgg_cg.h
 fillem.$(SUF):	$(CDIR)/data.h
 fillem.$(SUF):	$(CDIR)/extern.h
-fillem.$(SUF):	$(SRC_DIR)/mach.c
-fillem.$(SUF):	$(SRC_DIR)/mach.h
+fillem.$(SUF):	$(TABLE_DIR)/mach.c
+fillem.$(SUF):	$(TABLE_DIR)/mach.h
 fillem.$(SUF):	$(CDIR)/param.h
 fillem.$(SUF):	$(CDIR)/regvar.h
 fillem.$(SUF):	$(CDIR)/result.h

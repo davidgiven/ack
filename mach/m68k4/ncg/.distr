@@ -1,9 +1,2 @@
-Makefile
-README
-mach.c
-mach.h
-table
+table_dir
 whichone.h
-instrmacs.h
-tables1.c
-tables1.h
