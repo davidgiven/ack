@@ -46,6 +46,12 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define MAPF    "mapflag"
 #define ARGS    "args"
 #define PROP    "prop"
+#define STD_IN	"stdin"
+#define STD_OUT	"stdout"
+#define PREP	"prep"
+#define OPT	"optimizer"
+#define LINKER	"linker"
+#define COMBINER "combiner"
 #define RUNT    "rts"
 #define NEEDT	"need"
 #define CALL	"callname"
@@ -137,7 +143,47 @@ intrf() {
 			new->t_argd= keeps(gr_start(bline)) ;
 			gr_throw(&bline) ;
 		} else
+		if ( strcmp(ty_name,STD_IN)==0 ) {
+			if ( new->t_stdin ) twice=YES ;
+			new->t_stdin= YES ;
+		} else
+		if ( strcmp(ty_name,STD_OUT)==0 ) {
+			if ( new->t_stdout ) twice=YES ;
+			new->t_stdout= YES ;
+		} else
+		if ( strcmp(ty_name,PREP)==0 ) {
+			if ( strcmp(bol,"always")==0 ) {
+				if ( new->t_prep ) twice=YES ;
+				new->t_prep=YES ;
+			} else
+			if ( strcmp(bol,"cond")==0 ) {
+				if ( new->t_prep ) twice=YES ;
+				new->t_prep=MAYBE ;
+			} else
+			if ( strcmp(bol,"is")==0 ) {
+				if ( new->t_isprep ) twice=YES ;
+				new->t_isprep= YES ;
+			} else
+			{
+				fuerror("illegal preprocessor spec in %s: %s",
+					inname,bol) ;
+			}
+		} else
+		if ( strcmp(ty_name,OPT)==0 ) {
+			if ( new->t_optim ) twice=YES ;
+			new->t_optim= YES ;
+		} else
+		if ( strcmp(ty_name,LINKER)==0 ) {
+			if ( new->t_linker ) twice=YES ;
+			new->t_linker= YES ;
+			new->t_combine= YES ;
+		} else
+		if ( strcmp(ty_name,COMBINER)==0 ) {
+			if ( new->t_combine ) twice=YES ;
+			new->t_combine= YES ;
+		} else
 		if ( strcmp(ty_name,PROP)==0 ) {
+			/* Obsolete by now, to be removed */
 			for ( ptr=bol ; *ptr ; ptr++ ) {
 				switch( *ptr ) {
 				case C_IN: new->t_stdin= YES ; break ;
@@ -239,16 +285,16 @@ open_in(name) register char *name ; {
 	}
 	/* Not in core */
 	incore= NO ;
-	gr_cat(&rline,EM_DIR) ; gr_cat(&rline,"/") ;
-	gr_cat(&rline,ACK_PATH); gr_cat(&rline,"/") ;
-	gr_cat(&rline,name) ;
+	/* Try to read EM_DIR/lib/MACH/descr */
+	gr_cat(&rline,EM_DIR) ;
+	gr_cat(&rline,"/lib/") ; gr_cat(&rline,name) ;
+	gr_cat(&rline,"/descr") ;
 	infile= fopen(gr_start(rline),"r") ;
 	if ( !infile ) {
-		/* Try to read EM_DIR/lib/MACH/plan */
 		gr_throw(&rline) ;
-		gr_cat(&rline,EM_DIR) ;
-		gr_cat(&rline,"/lib/") ; gr_cat(&rline,name) ;
-		gr_cat(&rline,"/plan") ;
+		gr_cat(&rline,EM_DIR) ; gr_cat(&rline,"/") ;
+		gr_cat(&rline,"lib/n_ack"); gr_cat(&rline,"/") ;
+		gr_cat(&rline,name) ;
 		infile= fopen(gr_start(rline),"r") ;
 	}
 	if ( !infile ) {
