@@ -326,15 +326,17 @@ STATIC block_entry(b,prev)
 
 	for (v = 1; v <= nrlocals; v++) {
 		loc = locals[v];
-		vn = LOC_TO_VARNR(v);
-		if (prev == (bblock_p) 0) {
-			was_live = loc->lc_off >= 0;
-		} else {
-			was_live = Cis_elem(vn,L_OUT(prev));
-		}
-		is_live = Cis_elem(vn,L_IN(b));
-		if (was_live != is_live) {
-			app_block(make_mesg((is_live?ms_liv:ms_ded),loc),b);
+		if (IS_REGVAR(loc)) {
+			vn = LOC_TO_VARNR(v);
+			if (prev == (bblock_p) 0) {
+				was_live = loc->lc_off >= 0;
+			} else {
+				was_live = Cis_elem(vn,L_OUT(prev));
+			}
+			is_live = Cis_elem(vn,L_IN(b));
+			if (was_live != is_live) {
+				app_block(make_mesg((is_live?ms_liv:ms_ded),loc),b);
+			}
 		}
 	}
 }
@@ -386,12 +388,27 @@ STATIC definition(l,useless_out,v_out,mesgflag)
 		*v_out = v;
 		loc = locals[TO_LOCAL(v)];
 		if (IS_REGVAR(loc)) {
+			/*	Tricky stuff here. Make sure that a variable
+				that is assigned to is alive, at least for
+				a very very short time. Otherwize, the
+				register allocation pass might think that it
+				is never alive, and (incorrectly) use the
+				same register for this variable as for 
+				another variable, that is alive at this point.
+				If this variable is dead after the assignment,
+				the two messages (ms_liv, ms_ded) are right
+				after each other. Luckily, this IS an interval.
+			*/
+			if (!mesgflag) {
+				appnd_line(make_mesg(ms_liv,loc), l);
+				l = l->l_next;
+			}
 			if (IS_LIVE(loc)) {
-				if (!mesgflag) {
-					appnd_line(make_mesg(ms_liv,loc), l);
-				}
 				DEAD(loc);
 			} else {
+				if (!mesgflag) {
+					appnd_line(make_mesg(ms_ded, loc), l);
+				}
 				*useless_out = TRUE;
 			}
 		}
@@ -518,6 +535,8 @@ lv_mesg(p,mesgflag)
 OUTVERBOSE("useless assignment ,proc %d,local %d", curproc->p_id,
   (int) locals[TO_LOCAL(v)]->lc_off);
 					Slv++;
+				}
+				else {
 				}
 			} else {
 				if (is_dir_use(l))  {
