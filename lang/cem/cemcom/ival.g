@@ -544,29 +544,26 @@ ch_array(tpp, ex)
 	register struct type *tp = *tpp;
 	register arith length = ex->SG_LEN;
 	char *s;
-	arith ntopad;
 
 	ASSERT(ex->ex_class == String);
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, length);
-		ntopad = align(tp->tp_size, (int) word_size) - tp->tp_size;
 	}
 	else {
 		arith dim = tp->tp_size / tp->tp_up->tp_size;
 
 		if (length > dim) {
 			expr_warning(ex, "too many initialisers");
-			length = dim;
 		}
-		ntopad = align(dim,(int)  word_size) - length;
+		length = dim;
 	}
 	/* throw out the characters of the already prepared string	*/
-	s = Malloc((unsigned) (length + ntopad));
-	clear(s, (int) (length + ntopad));
+	s = Malloc((unsigned) (length));
+	clear(s, (int) (length));
 	strncpy(s, ex->SG_VALUE, (int) length);
 	free(ex->SG_VALUE);
-	str_cst(s, (int) (length + ntopad));
+	str_cst(s, (int) (length));
 	free(s);
 }
 
