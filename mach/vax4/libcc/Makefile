@@ -9,14 +9,19 @@ LIBLN="PREF=ln" "SRC=lang/cem/libcc/libln"
 install:	cpstdio cpgen cpmon cplibm cplibln
 
 cpstdio:
+		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(STDIO) $(MACHDEF) tailcp
 cpgen:
+		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(GEN) $(MACHDEF) cp
 cpmon:
+		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(MON) $(MACHDEF) tailcp
 cplibm:
+		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(LIBM) $(MACHDEF) tailcp
 cplibln:
+		RANLIB=ranlib ; export RANLIB ;\
 		make -f $(MAKEFILE) $(LIBLN) $(MACHDEF) tailcp
 
 cmp:		cmpstdio cmpgen cmpmon cmplib cmplibln
