@@ -1832,6 +1832,9 @@ pat lol com stl $1==$3 && $2==2
 kills indexed,locals %ind+%size > $1 && %ind < $1+2
 gen not {LOCAL, $1, 2}
 
+pat lil adp dup sil lof $1==$4 && $3==2 && $5==(0-$2)
+					leaving lil $4 dup 2 adp $2 sil $4 loi 2
+
 #ifdef REGVARS
 pat lil dup adp sil $1==$4 && $2==2 && inreg($1)==reg_any
 uses ADDREG={ind_reg2, regvar($1)}
@@ -1857,9 +1860,6 @@ pat lil adp sil $1==$3 && $2==1		leaving lil $1 inc sil $1
 pat lil adp sil $1==$3 && $2==0-1	leaving lil $1 dec sil $1
 
 pat lil adp sil $1==$3	 		leaving loc $2 lil $1 adi 2 sil $3
-
-pat lil adp dup sil lof $1==$4 && $3==2 && $5==(0-$2)
-					leaving lil $4 dup 2 adp $2 sil $4 loi 2
 
 pat lol lof adp lol stf $1==$4 && $2==$5 && $3==1
 	leaving lol $1 lof $2 inc lol $4 stf $5
