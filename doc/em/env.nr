@@ -165,7 +165,8 @@ number	name	parameters	results	function
 	29	Pause	Stop until signal
 	30	Utime	string,timep:ptr
 				e:int	Set file times
-	33	Access	string,mode:int	e:int	Determine file accessibility
+	33	Access	string:ptr;mode:int
+				e:int	Determine file accessibility
 	34	Nice	incr:int		Set program priority
 	35	Ftime	bufp:ptr	e:int	Get date and time
 	36	Sync			Update filesystem
