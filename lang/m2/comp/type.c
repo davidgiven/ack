@@ -279,39 +279,6 @@ node_error(nd,"identifier \"%s\" is not a type", df->df_idf->id_text);
 	return error_type;
 }
 
-chk_basesubrange(tp, base)
-	register t_type *tp, *base;
-{
-	/*	A subrange had a specified base. Check that the bases conform.
-	*/
-
-	assert(tp->tp_fund == T_SUBRANGE);
-
-	if (base->tp_fund == T_SUBRANGE) {
-		/* Check that the bounds of "tp" fall within the range
-		   of "base".
-		*/
-		if (! in_range(tp->sub_lb, base) || 
-		    ! in_range(tp->sub_ub, base)) {
-			error("base type has insufficient range");
-		}
-		base = base->tp_next;
-	}
-
-	if ((base->tp_fund & (T_ENUMERATION|T_CHAR)) || base == card_type) {
-		if (tp->tp_next != base) {
-			error("specified base does not conform");
-		}
-	}
-	else if (base == int_type) {
-		if (tp->tp_next == card_type &&
-		    ! chk_bounds(tp->sub_ub,max_int[(int)int_size],T_CARDINAL)){
-			error("upperbound too large for type INTEGER");
-		}
-	}
-	else	error("illegal base for a subrange");
-	tp->tp_next = base;
-}
 
 int
 chk_bounds(l1, l2, fund)
@@ -351,23 +318,29 @@ in_range(i, tp)
 }
 
 t_type *
-subr_type(lb, ub)
+subr_type(lb, ub, base)
 	register t_node *lb;
 	t_node *ub;
+	t_type *base;
 {
 	/*	Construct a subrange type from the constant expressions
 		indicated by "lb" and "ub", but first perform some
-		checks
+		checks. "base" is either a user-specified base-type, or NULL.
 	*/
 	register t_type *tp = BaseType(lb->nd_type);
 	register t_type *res;
 
 	if (tp == intorcard_type) {
 		/* Lower bound >= 0; in this case, the base type is CARDINAL,
-		   according to the language definition, par. 6.3
+		   according to the language definition, par. 6.3.
+		   But what if the upper-bound is of type INTEGER (f.i.
+		   MAX(INTEGER)? The Report does not answer this. Fix this
+		   for the time being, by making it an INTEGER subrange.
+		   ???
 		*/
 		assert(lb->nd_INT >= 0);
-		tp = card_type;
+		if (BaseType(ub->nd_type) == int_type) tp = int_type;
+		else tp = card_type;
 	}
 
 	if (!ChkCompat(&ub, tp, "subrange bounds")) {
@@ -381,17 +354,18 @@ subr_type(lb, ub)
 		return error_type;
 	}
 
+	/* Now construct resulting type
+	*/
+	res = construct_type(T_SUBRANGE, tp);
+	res->sub_lb = lb->nd_INT;
+	res->sub_ub = ub->nd_INT;
+
 	/* Check bounds
 	*/
 	if (! chk_bounds(lb->nd_INT, ub->nd_INT, tp->tp_fund)) {
 		node_error(lb, "lower bound exceeds upper bound");
 	}
 
-	/* Now construct resulting type
-	*/
-	res = construct_type(T_SUBRANGE, tp);
-	res->sub_lb = lb->nd_INT;
-	res->sub_ub = ub->nd_INT;
 	if (tp == card_type) {
 		u_small(res, res->sub_ub);
 	}
@@ -405,6 +379,35 @@ subr_type(lb, ub)
 			res->tp_size = short_size;
 			res->tp_align = short_align;
 		}
+	}
+
+	if (base) {
+		if (base->tp_fund == T_SUBRANGE) {
+			/* Check that the bounds of "res" fall within the range
+			   of "base".
+			*/
+			if (! in_range(res->sub_lb, base) || 
+			    ! in_range(res->sub_ub, base)) {
+				error("base type has insufficient range");
+			}
+			base = base->tp_next;
+		}
+		if ((base->tp_fund & (T_ENUMERATION|T_CHAR)) ||
+		    base == card_type) {
+			if (res->tp_next != base) {
+				error("specified basetype for subrange not compatible with bounds");
+			}
+		}
+		else if (base == int_type) {
+			if (res->tp_next == card_type &&
+			    ! chk_bounds(res->sub_ub,
+					 max_int[(int)int_size],
+					 T_CARDINAL)){
+				error("upperbound too large for type INTEGER");
+			}
+		}
+		else	error("illegal base for a subrange");
+		res->tp_next = base;
 	}
 	return res;
 }

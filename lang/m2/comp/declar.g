@@ -194,23 +194,19 @@ type(register t_type **ptp;):
 	ProcedureType(ptp)
 ;
 
-SimpleType(register t_type **ptp;)
-{
-	t_type *tp;
-} :
+SimpleType(register t_type **ptp;) :
 	qualtype(ptp)
 	[
 		/* nothing */
 	|
-		SubrangeType(&tp)
+		SubrangeType(ptp)
 		/* The subrange type is given a base type by the
 		   qualident (this is new modula-2).
 		*/
-			{ chk_basesubrange(tp, *ptp); *ptp = tp; }
 	]
 |
 	enumeration(ptp)
-|
+|			{ *ptp = 0; }
 	SubrangeType(ptp)
 ;
 
@@ -247,7 +243,7 @@ SubrangeType(t_type **ptp;)
 	'[' ConstExpression(&nd1)
 	UPTO ConstExpression(&nd2)
 	']'
-			{ *ptp = subr_type(nd1, nd2);
+			{ *ptp = subr_type(nd1, nd2, *ptp);
 			  FreeNode(nd1);
 			  FreeNode(nd2);
 			}
