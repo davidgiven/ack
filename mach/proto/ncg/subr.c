@@ -575,7 +575,7 @@ c3_p findcoerc(tp,tep) token_p tp; set_p tep; {
 			if (cp->c3_texpno!=0)
 				continue;
 		}
-		if (cp->c3_prop==0) {   /* no reg needed */
+		if (cp->c3_prop<0) {   /* no reg needed */
 			cinstance(cp->c3_repl,&rtoken,tp,0);
 			if (match(&rtoken,tep,0))
 				return(cp);
