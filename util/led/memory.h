@@ -35,7 +35,7 @@ extern struct memory	mems[];
 #define address(piece,offset)	(mems[(piece)].mem_base+(offset))
 #define modulptr(offset)	(mems[ALLOMODL].mem_base+core_position+(offset))
 
-#define int_align(sz)		(((sz)+(sizeof(int)-1))&~(sizeof(int)-1))
+#define int_align(sz)		(((sz)+(sizeof(int)-1))&~(int)(sizeof(int)-1))
 
 extern ind_t		core_position;
 extern ind_t		hard_alloc();

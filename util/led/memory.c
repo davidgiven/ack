@@ -45,7 +45,6 @@ static ind_t refused;
 sbreak(incr)
 	ind_t incr;
 {
-	extern char	*brk();
 	unsigned int	inc;
 
 	incr = (incr + (GRANULE - 1)) & ~(GRANULE - 1);
@@ -54,7 +53,7 @@ sbreak(incr)
 	if ((refused && refused < incr) ||
 	    (sizeof(char *) < sizeof(long) &&
 	     (inc != incr || BASE + inc < BASE)) ||
-	    (int) brk(BASE + incr) == -1) {
+	    brk(BASE + incr) == -1) {
 		if (!refused || refused > incr)
 			refused = incr;
 		return -1;

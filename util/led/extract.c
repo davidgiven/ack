@@ -20,6 +20,7 @@ static		getexternal();
 static		redefine();
 static		transfer();
 
+extern ind_t savechar();
 /*
  * Get section sizes and symboltable information from present module.
  */

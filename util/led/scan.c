@@ -547,7 +547,7 @@ nextrelo()
 		return walkrelo++;
 
 	if (relind == _RELSIZ) {
-		int i = cnt_relos >= _RELSIZ ? _RELSIZ : cnt_relos;
+		unsigned int i = cnt_relos >= _RELSIZ ? _RELSIZ : cnt_relos;
 
 		cnt_relos -= i;
 		rd_relo(relobuf, i);
