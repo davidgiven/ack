@@ -59,7 +59,6 @@ catch(trapno)
 	char *errmessage;
 	char buf[20];
 	register char *p, *s;
-	char *q;
 
 	while (ep->errno != trapno && ep->errmes != 0) ep++;
 	if (p = ep->errmes) {
@@ -68,8 +67,8 @@ catch(trapno)
 	}
 	else {
 		int i = trapno;
+		static char q[] = "error number xxxxxxxxxxxxx";
 
-		q = "error number xxxxxxxxxxxxx";
 		p = &q[13];
 		s = buf;
 		if (i < 0) {

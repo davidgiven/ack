@@ -20,9 +20,6 @@
 #include	<pc_err.h>
 #include	<pc_file.h>
 
-#define	MESLEN		30
-#define PATHLEN		100
-
 /* to make it easier to patch ... */
 extern struct file	*_curfil;
 
@@ -97,8 +94,8 @@ _catch(erno) unsigned erno; {
 	char buf[20];
 	unsigned i;
 	int j = erno;
-	char *pp[10];
-	char mes[MESLEN];
+	char *pp[11];
+	char xbuf[100];
 
 	qq = pp;
 	if (p = FILN)
@@ -107,14 +104,19 @@ _catch(erno) unsigned erno; {
 		*qq++ = _pargv[0];
 
 	while (ep->errno != erno && ep->errmes != 0) ep++;
-	p = &("xxxxx: "[5]);
+	p = buf;
+	s = xbuf;
 	if (i = LINO) {
 		*qq++ = ", ";
 		do
-			*--p = i % 10 + '0';
+			*p++ = i % 10 + '0';
 		while (i /= 10);
+		while (p > buf) *s++ = *--p;
 	}
-	*qq++ = p;
+	*s++ = ':';
+	*s++ = ' ';
+	*s++ = '\0';
+	*qq++ = xbuf;
 	if ((erno & ~037) == 0140 && (_curfil->flags&0377)==MAGIC) { 
 		/* file error */
 		*qq++ = "file ";
@@ -123,19 +125,18 @@ _catch(erno) unsigned erno; {
 	}
 	if (ep->errmes) *qq++ = ep->errmes;
 	else {
-		q = "error number xxxxxxxxxxxxx";
-		p = &q[13];
-		s = buf;
+		*qq++ = "error number ";
+		*qq++ = s;
+		p = buf;
 		if (j < 0) {
 			j = -j;
-			*p++ = '-';
+			*s++ = '-';
 		}
 		do
-			*s++ = j % 10 + '0';
+			*p++ = j % 10 + '0';
 		while (j /= 10);
-		while (s > buf) *p++ = *--s;
-		*p = 0;
-		*qq++ = q;
+		while (p > buf) *s++ = *--p;
+		*s = 0;
 	}
 	*qq++ = "\n";
 	*qq = 0;
