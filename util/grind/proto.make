@@ -116,6 +116,8 @@ make_macros:	Makefile
 		echo 'COPTIONS=$(COPTIONS)' >> make_macros
 		echo 'LDOPTIONS=$(LDOPTIONS)' >> make_macros
 		echo 'LINT=$(LINT)' >> make_macros
+		echo 'LINTSUF=$(LINTSUF)' >> make_macros
+		echo 'LINTPREF=$(LINTPREF)' >> make_macros
 		echo 'LINTOPTIONS=$(LINTOPTIONS)' >> make_macros
 		echo 'SUF=$(SUF)' >> make_macros
 		echo 'LIBSUF=$(LIBSUF)' >> make_macros
