@@ -92,7 +92,6 @@ float_cst(str, sz, buf)
 	char *str, *buf;
 	int sz;
 {
-	int i;
 	int overflow = 0;
 	flt_arith e;
 
@@ -209,19 +208,19 @@ float_cst(str, sz, buf)
 con_float()
 {
 	char buf[8];
-	int rval = float_cst(str, argval, buf);
+	int rval = float_cst(str, (int)argval, buf);
 	int i;
 
 	if (rval == 1) {
-		fprintf(stderr,"float constant size = %d\n",argval);
+		fprintf(stderr,"float constant size = %d\n",(int)argval);
 		fatal("bad fcon size");
 	}
-	fprintf(codefile,"!float %s sz %d\n", str, argval);
+	fprintf(codefile,"!float %s sz %d\n", str, (int)argval);
 	if (rval == 2) {
 		fprintf(stderr, "Warning: overflow in floating point constant %s\n", str);
 	}
 	fprintf(codefile, ".data1 0%o", buf[0] & 0377);
-	for (i = 1; i < argval; i++) {
+	for (i = 1; i < (int)argval; i++) {
 		fprintf(codefile, ",0%o", buf[i] & 0377);
 	}
 	putc('\n', codefile);
@@ -231,16 +230,17 @@ con_float()
 #ifdef CODE_EXPANDER
 con_float(str, argval)
 	char *str;
+	arith argval;
 {
 	char buf[8];
-	int rval = float_cst(str, argval, buf);
+	int rval = float_cst(str, (int)argval, buf);
 	int i;
 
 	if (rval == 1) {
 		argval = 8;
-		rval = float_cst(str, argval, buf);
+		rval = float_cst(str, 8, buf);
 	}
-	for (i = 0; i < argval; i++) {
+	for (i = 0; i < (int)argval; i++) {
 		gen1(buf[i]);
 	}
 }
