@@ -105,7 +105,7 @@ main(argc, argv)
 	hash_stat();
 #endif	DEBUG
 
-	return err_occurred;
+	exit(err_occurred);
 }
 
 char *source = 0;
