@@ -509,7 +509,7 @@ startrelo(head)
 	else {
 		index = 20;
 		rd_rew_relos(head);
-		cnt_relos = head->oh_nrelos;
+		cnt_relos = head->oh_nrelo;
 	}
 }
 
