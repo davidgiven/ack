@@ -211,6 +211,14 @@ reg_info *e1, *e2;
   return (e1->offset - e2->offset);
 }
 
+static int even(s)
+char *s;
+{
+  int l = strlen(s);
+  /* Assume ASCII, where even-numbered characters (0,2,4,6,8) are even. */
+  return ! (s[l-1] & 1);
+}
+
 static save_float_regs()
 {
   int i;
@@ -220,6 +228,7 @@ static save_float_regs()
   for (i = 0, offset= 0; i < nr_flt_vars; i++, offset += 8)
 	if ((i+1 < nr_flt_vars &&
 		flt_dat[i].offset == flt_dat[i+1].offset-4 &&
+		even(flt_dat[i].reg) &&
 		flt_dat[i].size == EM_FSIZE &&
 		flt_dat[i+1].size == EM_FSIZE)
 		|| (flt_dat[i].size == EM_DSIZE)) {
@@ -240,6 +249,7 @@ load_float_regs()
   for (i = 0, offset= 0; i < nr_flt_vars; i++, offset += 8)
 	if ((i+1 < nr_flt_vars &&
 		flt_dat[i].offset == flt_dat[i+1].offset-4 &&
+		even(flt_dat[i].reg) &&
 		flt_dat[i].size == EM_FSIZE &&
 		flt_dat[i+1].size == EM_FSIZE)
 		|| (flt_dat[i].size == EM_DSIZE)) {
