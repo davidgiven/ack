@@ -233,7 +233,6 @@ small(fitsmall, gain)
 /* ---------- output ---------- */
 
 emit1(arg)
-char arg;
 {
 #ifdef LISTING
 	if (listeoln) {
@@ -268,12 +267,12 @@ char arg;
 }
 
 emit2(arg)
-short arg;
+int arg;
 {
 #ifdef BYTES_REVERSED
-	emit1((char)(arg>>8)); emit1((char)arg);
+	emit1((arg>>8)); emit1(arg);
 #else
-	emit1((char)arg); emit1((char)(arg>>8));
+	emit1(arg); emit1((arg>>8));
 #endif
 }
 
@@ -281,9 +280,9 @@ emit4(arg)
 long arg;
 {
 #ifdef WORDS_REVERSED
-	emit2((short)(arg>>16)); emit2((short)(arg));
+	emit2((arg>>16)); emit2((arg));
 #else
-	emit2((short)(arg)); emit2((short)(arg>>16));
+	emit2((arg)); emit2((arg>>16));
 #endif
 }
 
@@ -293,9 +292,9 @@ int n;
 {
 	switch (n) {
 	case 1:
-		emit1((char)val); break;
+		emit1((int)val); break;
 	case 2:
-		emit2((short)val); break;
+		emit2((int)val); break;
 	case 4:
 		emit4((long)val); break;
 	default:

@@ -115,16 +115,19 @@ program	:	/* empty */
 				newlabel(fb_shift((int)$2));
 			}
 	|	program CODE1
-			{	emit1((char)$2); LISTLINE(0);}
+			{	emit1((int)$2); LISTLINE(0);}
 	|	program CODE2
-			{	emit2((short)$2); LISTLINE(0);}
+			{	emit2((int)$2); LISTLINE(0);}
 	|	program CODE4
 			{	emit4((long)$2); LISTLINE(0);}
 	|	program operation ';'
 	|	program operation '\n'
 			{	lineno++; LISTLINE(1); RELODONE;}
 	|	program '#' NUMBER STRING '\n'
-			{	lineno++; LISTLINE(1); RELODONE;}
+			{	lineno = $3;
+				if (modulename) strncpy(modulename, &stringbuf[1], 63);
+				LISTLINE(1); RELODONE;
+			}
 	|	program error '\n'
 			{	serror("syntax error"); yyerrok;
 				lineno++; LISTLINE(1); RELODONE;
