@@ -17,7 +17,8 @@ all:	data.$(SUF) con2.$(SUF) con4.$(SUF) relocation.$(SUF) end_back.$(SUF) \
 	reloc1.$(SUF) reloc2.$(SUF) reloc4.$(SUF) rom2.$(SUF) rom4.$(SUF) \
 	set_global.$(SUF) set_local.$(SUF) switchseg.$(SUF) symboldef.$(SUF) \
 	text2.$(SUF) text4.$(SUF) do_open.$(SUF) do_close.$(SUF) memory.$(SUF) \
-	label.$(SUF) misc.$(SUF) extnd.$(SUF) symtable.$(SUF) common.$(SUF)
+	label.$(SUF) misc.$(SUF) extnd.$(SUF) symtable.$(SUF) common.$(SUF) \
+	dbsym.$(SUF)
 
 data.$(SUF) : data.h back.h header.h $(SOURCE)/data.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/data.c
@@ -106,3 +107,5 @@ label.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/label.c
 common.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/common.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/common.c
 
+dbsym.$(SUF) : data.h back.h $(SRC_DIR)/mach.h $(SOURCE)/dbsym.c
+	$(CC) $(CFLAGS) -c $(SOURCE)/dbsym.c

@@ -777,3 +777,5 @@ C_locals
   $1 == 4       ==>             "clrq -(sp)".
   $1 == 8       ==>             "clrq -(sp)".
   default	==>		"subl2 ~$1, sp".
+
+C_db_sline	==>		"calls ~0, ___u_LiB".

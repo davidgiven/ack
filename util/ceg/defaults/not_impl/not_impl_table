@@ -268,3 +268,4 @@ C_bss_fcon	==>	not_implemented( "C_bss_fcon").
 C_hol_fcon	==>	not_implemented( "C_hol_fcon").
 C_con_fcon	==>	not_implemented( "C_con_fcon").
 C_exc	==>	not_implemented( "C_exc").
+C_db_sline	==>	.

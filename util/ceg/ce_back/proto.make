@@ -11,14 +11,14 @@ ASLIST = back.h bottom.c bss.c con1.c con2.c con4.c \
 		do_close.c do_open.c end_back.c gen1.c gen2.c gen4.c header.h \
 		init_back.c reloc1.c reloc2.c reloc4.c rom1.c rom2.c rom4.c \
 		set_global.c set_local.c switchseg.c symboldef.c text1.c \
-		text2.c text4.c
+		text2.c text4.c dbsym.c
 
 OBJLIST = back.h con2.c con4.c data.c data.h do_close.c do_open.c \
 		end_back.c extnd.c gen1.c gen2.c gen4.c hash.h header.h \
 		init_back.c label.c memory.c misc.c output.c \
 		reloc1.c reloc2.c reloc4.c relocation.c rom2.c rom4.c \
 		set_global.c set_local.c switchseg.c symboldef.c symtable.c \
-		text2.c text4.c common.c
+		text2.c text4.c common.c dbsym.c
 
 all:
 

@@ -881,3 +881,5 @@ C_prolog		==>	.
 C_jump	 		==>	"bra $1".
 
 C_locals		==>	"link a6, #-$1".
+
+C_db_sline		==>	"jsr (___u_LiB)".

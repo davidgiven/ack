@@ -17,7 +17,7 @@ output_back()
 {
 	struct outhead header;
 	struct outsect sect;
-        long 	ntext = text - text_area, 
+        long	ntext = text - text_area, 
 		ndata = data - data_area,
 		nchar;
 
@@ -94,12 +94,13 @@ reduce_name_table()
 	 * After that, the string table is reduced.
 	 */
 
-#define S_NEEDED	0x8000
-#define removable(nm)	(!(nm.on_type & S_NEEDED) && *(nm.on_foff+string_area) == GENLAB)
+#define S_NEEDED S_MOD
+#define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
 	register int *diff_index =
 		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
 	register struct outrelo *rp = reloc_info;
+	register struct outname *np;
 	register int i;
 	char *new_str;
 	register char *p, *q;
@@ -113,22 +114,31 @@ reduce_name_table()
 		rp++;
 	}
 
-	for (i = 0; i < nname; i++) {
+	for (i = 0, np = symbol_table; i < nname; i++, np++) {
 		diff_index[i] = diff_index[i-1];
-		if (removable(symbol_table[i])) {
+		if (removable(np)) {
 			diff_index[i]++;
+		}
+		if ((np->on_type & S_TYP) == S_CRS) {
+			struct outname *n = &symbol_table[(int) np->on_valu];
+			if (! (n->on_type & S_COM)) {
+				np->on_type &= ~S_TYP;
+				np->on_type |= (n->on_type & S_TYP);
+				np->on_valu = n->on_valu;
+			}
 		}
 	}
 
 	rp = reloc_info;
 	for (i = 0; i < nrelo; i++) {
+		symbol_table[rp->or_nami].on_type &= ~S_NEEDED;
 		rp->or_nami -= diff_index[rp->or_nami];
 		rp++;
 	}
-	for (i = 0; i < nname; i++) {
-		register struct outname *np = &symbol_table[i];
-
-		np->on_type &= ~S_NEEDED;
+	for (i = 0, np = symbol_table; i < nname; i++, np++) {
+		if ((np->on_type & S_TYP) == S_CRS) {
+			np->on_valu -= diff_index[(int) np->on_valu];
+		}
 		if (diff_index[i] && diff_index[i] == diff_index[i-1]) {
 			symbol_table[i - diff_index[i]] = *np;
 		}
@@ -138,14 +148,20 @@ reduce_name_table()
 	free((char *)(diff_index-1));
 
 	new_str = q = Malloc((unsigned)(string - string_area));
-	for (i = 0; i < nname; i++) {
-		p = symbol_table[i].on_foff + string_area;
-		symbol_table[i].on_foff = q - new_str;
+	for (i = 0, np = symbol_table; i < nname; i++, np++) {
+		p = np->on_foff + string_area;
+		np->on_foff = q - new_str;
 		while (*q++ = *p) p++;
 	}
 	free(string_area);
 	string_area = new_str;
 	string = q;
+	for (i = 0, np = symbol_table; i < nname; i++, np++) {
+		if ((np->on_type & S_TYP) == S_CRS) {
+			/* replace by reference to string */
+			np->on_valu = symbol_table[(int) np->on_valu].on_foff;
+		}
+	}
 }
 
 wr_fatal()
@@ -159,11 +175,14 @@ static
 convert_outname( header)
 struct outhead *header;
 {
-    int i;
+	int i;
+	register struct outname *np;
+	register long l = OFF_CHAR(*header);
 
-	for ( i=0; i < nname; i++) {
-		symbol_table[ i].on_foff += OFF_CHAR( *header);
-    }
+	for (i = 0, np = symbol_table; i < nname; i++, np++) {
+		np->on_foff += l;
+		if ((np->on_type & S_TYP) == S_CRS) {
+			np->on_valu += l;
+		}
+	}
 }
-
-

@@ -77,9 +77,9 @@ char *s;
 
 
 char *extnd_dlb( g)
-arith g;
+label g;
 {
-	string_lengte = mysprint( DLB_FMT, (arith)g);
+	string_lengte = mysprint( DLB_FMT, (long)g);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }
@@ -88,7 +88,7 @@ arith g;
 char *extnd_ilb( l, prcno)
 arith l;
 {
-	string_lengte = mysprint( ILB_FMT, prcno, (arith) l);
+	string_lengte = mysprint( ILB_FMT, prcno, (long) l);
         index_symbol_table = find_sym( string, STORE_STRING);
 	return( symbol_table[ index_symbol_table].on_foff + string_area);
 }

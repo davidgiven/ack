@@ -27,3 +27,4 @@ symboldef.c
 text1.c
 text2.c
 text4.c
+dbsym.c

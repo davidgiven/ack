@@ -45,7 +45,8 @@ int isdef;
 	register struct Hashitem *ip;
 	register int h;
 
-	if ( index_symbol_table != -1 )	{
+	if (isdef != FORCE_DEF) {
+	    if ( index_symbol_table != -1 )	{
 		s = symbol_table + index_symbol_table;
 		if ( sym == s->on_foff + string_area)  {
 			if ( (s->on_valu == -2) && ( isdef == REFERENCE)) {
@@ -54,10 +55,10 @@ int isdef;
 			}
 	        	return( index_symbol_table);
 		}
-	}
+	    }
 
-	h = Hash(sym);
-	for ( ip = Hashtab[h] + Hashitems ; ip != Hashitems; 
+	    h = Hash(sym);
+	    for ( ip = Hashtab[h] + Hashitems ; ip != Hashitems; 
 					  ip = (ip->hs_next) + Hashitems) {
 		register char *p = sym, *q;
 
@@ -70,26 +71,30 @@ int isdef;
 		        }
 		       	return ip->hs_nami;
 		}
+	    }
 	}
 	
 	if ( nname >= size_symbol)  
 		mem_symbol_hash();
 
 	s = symbol_table + nname;
-	ip = Hashitems + nname + 1;  /* skip the first entry */
 
-	if (isdef == REFERENCE)  {
+	if (isdef != FORCE_DEF) {
+	    ip = Hashitems + nname + 1;  /* skip the first entry */
+
+	    if (isdef == REFERENCE)  {
 		s->on_type = S_EXT; 
 		s->on_valu = -1;
-	}
-	if (isdef == STORE_STRING) {
+	    }
+	    if (isdef == STORE_STRING) {
 		s->on_type = S_UND;
 		s->on_valu = -2; 
-	}
+	    }
 
-	ip->hs_nami = nname;
-	ip->hs_next = Hashtab[h];
-	Hashtab[h] = ip - Hashitems;
+	    ip->hs_nami = nname;
+	    ip->hs_next = Hashtab[h];
+	    Hashtab[h] = ip - Hashitems;
+	}
 
 	if ( sym == string) 
 	        string += string_lengte;

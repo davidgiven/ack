@@ -17,7 +17,7 @@ all:	bottom.$(SUF) con1.$(SUF) con2.$(SUF) con4.$(SUF) end_back.$(SUF) \
 	reloc2.$(SUF) reloc4.$(SUF) bss.$(SUF) rom1.$(SUF) rom2.$(SUF) \
 	rom4.$(SUF) set_global.$(SUF) set_local.$(SUF) switchseg.$(SUF) \
 	symboldef.$(SUF) do_open.$(SUF) do_close.$(SUF) text1.$(SUF) \
-	text2.$(SUF) text4.$(SUF)
+	text2.$(SUF) text4.$(SUF) dbsym.$(SUF)
 
 bottom.$(SUF) : $(SRC_DIR)/mach.h back.h header.h $(SOURCE)/bottom.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/bottom.c
@@ -93,3 +93,6 @@ switchseg.$(SUF) : header.h back.h $(SRC_DIR)/mach.h $(SOURCE)/switchseg.c
 
 symboldef.$(SUF) : header.h back.h $(SRC_DIR)/mach.h $(SOURCE)/symboldef.c
 	$(CC) $(CFLAGS) -c $(SOURCE)/symboldef.c
+
+dbsym.$(SUF) : header.h back.h $(SRC_DIR)/mach.h $(SOURCE)/dbsym.c
+	$(CC) $(CFLAGS) -c $(SOURCE)/dbsym.c

@@ -145,7 +145,7 @@ t_C_info C_info[] = {
 			       { "str", 0, 0, 0}}
 		     }, *C_instr_info;
 
-#define N_INSTR	269
+#define N_INSTR	270
 
 struct { char *name; int class, segment;}
 		EM_instr[ N_INSTR ] = {
@@ -220,6 +220,7 @@ struct { char *name; int class, segment;}
 				{ "C_cuf", NO_ARGS, SEGTXT},
 				{ "C_cui", NO_ARGS, SEGTXT},
 				{ "C_cuu", NO_ARGS, SEGTXT},
+				{ "C_db_sline", NO_ARGS, SEGTXT},
 				{ "C_dch", NO_ARGS, SEGTXT},
 				{ "C_dec", NO_ARGS, SEGTXT},
 				{ "C_dee", EXTERNAL, SEGTXT},
