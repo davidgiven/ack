@@ -14,4 +14,4 @@
 #endif
 #else
 #define	assert(exp)	(1)
-#endif	DEBUG
+#endif	/* DEBUG */

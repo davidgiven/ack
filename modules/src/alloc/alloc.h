@@ -36,11 +36,11 @@ typedef struct _ALLOC_ {
 						(_PALLOC_) ptr)
 #ifndef	BOTCH_FREE
 #define st_free(ptr, phead, size)	_A_st_free(ptr, phead, size)
-#else	def BOTCH_FREE
+#else	/* def BOTCH_FREE */
 #define	st_free(ptr, phead, size)	(botch((char *)(ptr), size), \
 						_A_st_free(ptr, phead, size))
-#endif	BOTCH_FREE
+#endif	/* BOTCH_FREE */
 
 #define Free(p)	free(p)
 
-#endif __ALLOC_INCLUDED__
+#endif /* __ALLOC_INCLUDED__ */
