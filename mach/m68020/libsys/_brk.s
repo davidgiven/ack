@@ -11,7 +11,7 @@ __sbrk:		move.l (.limhp),d0
 		add.l  d0,(4,sp)
 		move.l #0x11,d0
 		trap #0
-		bcs Icerror
+		bcs lcerror
 		move.l (.limhp),d0
 		move.l d0,a0
 		move.l (4,sp),(.limhp)
