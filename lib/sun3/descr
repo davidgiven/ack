@@ -1,0 +1,55 @@
+# $Revision$
+var w=4
+var p=4
+var s=2
+var l=4
+var f=4
+var d=8
+var NAME=m68020
+var P=m68020
+var M=sun
+var LIB=lib/{P}/tail_
+var RT=lib/{P}/head_
+var CPP_F=-Dunix=unix
+var INCLUDES=-I{EM}/include/_tail_cc
+# 413 align is the default, rom in text
+var ALIGN=-a0:2 -a1:2 -a2:0x20000 -a3:2 -b0:0x2020
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/{P}/cg
+	args <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/{P}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
+	mapflag -n ALIGN=-a0:2 -a1:2 -a2:0x20000 -a3:2 -b0:0x2000
+	mapflag -nr ALIGN=-a0:2 -a1:0x20000 -a2:2 -a3:2 -b0:0x2000
+	mapflag -N ALIGN=-a0:2 -a1:2 -a2:2 -a3:2 -b0:0x2000
+	mapflag -r ALIGN=-a0:2 -a1:0x20000 -a2:2 -a3:2 -b0:0x2020
+	args (.e:{HEAD}= {ALIGN} {EM}/lib/{M}/head_em) \
+({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
+		(.p:{TAIL}={EM}/{LIB}pc) \
+		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
+		(.e:{TAIL}={EM}/{LIB}em {EM}/lib/{M}/tail_mon {EM}/lib/{P}/end_em)
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/{M}/cv
+	args < >
+	outfile a.out
+end
