@@ -4,7 +4,7 @@ SUF=pr
 PRINT=cat
 RESFILES=cref.$(SUF) pcref.$(SUF) val.$(SUF) v7bugs.$(SUF) install.$(SUF)\
 ack.$(SUF) cg.$(SUF) regadd.$(SUF) peep.$(SUF) toolkit.$(SUF) LLgen.$(SUF)\
-basic.$(SUF)
+basic.$(SUF) 6500.$(SUF)
 NROFF=nroff
 MS=-ms
 
@@ -32,6 +32,8 @@ toolkit.$(SUF):	toolkit.doc
 		$(NROFF) $(MS) $? >$@
 LLgen.$(SUF):	LLgen.doc
 		eqn $? | $(NROFF) $(MS) >$@
+6500.$(SUF):	6500.doc
+		$(NROFF) $(MS) $? >$@
 
 install cmp:
 
