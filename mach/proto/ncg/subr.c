@@ -332,7 +332,7 @@ distance(cindex) {
 			return(0);
 		return(10-exact);
 	}
-	return(20-exact+fromstackneeded);
+	return(20-2*exact+fromstackneeded);
 }
 
 unsigned costcalc(cost) cost_t cost; {
