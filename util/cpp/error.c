@@ -6,6 +6,7 @@
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
 #include	<system.h>
+#include	<varargs.h>
 
 #include	"errout.h"
 #include	"LLlex.h"
@@ -27,41 +28,63 @@ err_hdr(s)
 }
 
 /*VARARGS1*/
-error(fmt, args)
-	char *fmt;
+error(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list ap;
+
 	err_hdr("");
-	doprnt(ERROUT, fmt, &args);
+	va_start(ap);
+	fmt = va_arg(ap, char *);
+	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
+	va_end(ap);
 }
 
 /*VARARGS1*/
-warning(fmt, args)
-	char *fmt;
+warning(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list ap;
+
 	err_hdr("(warning) ");
-	doprnt(ERROUT, fmt, &args);
+	va_start(ap);
+	fmt = va_arg(ap, char *);
+	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
+	va_end(ap);
 }
 
 /*VARARGS1*/
-crash(fmt, args)
-	char *fmt;
-	int args;
+crash(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list ap;
+
 	err_hdr("CRASH\007 ");
-	doprnt(ERROUT, fmt, &args);
+	va_start(ap);
+	fmt = va_arg(ap, char *);
+	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
+	va_end(ap);
 	sys_stop(S_ABORT);
 }
 
 /*VARARGS1*/
-fatal(fmt, args)
-	char *fmt;
-	int args;
+fatal(va_alist)
+	va_dcl
 {
+	char *fmt;
+	va_list ap;
+
 	err_hdr("fatal error -- ");
-	doprnt(ERROUT, fmt, &args);
+	va_start(ap);
+	fmt = va_arg(ap, char *);
+	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
+	va_end(ap);
 	sys_stop(S_EXIT);
 }
