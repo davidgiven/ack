@@ -27,7 +27,7 @@ con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
 		part_size++;
-	if (part_size == EM_WSIZE)
+	if (part_size == TEM_WSIZE)
 		part_flush();
 	if (sz == 1) {
 		w &= 0xFF;
@@ -104,7 +104,7 @@ struct regsav_t {
 
 int regnr;
 int nr_a_regs,nr_d_regs;
-int EM_BSIZE;
+int TEM_BSIZE;
 static long nlocals;
 
 prolog(n)
@@ -116,7 +116,7 @@ i_regsave()
 	regnr = 0;
 	nr_a_regs = 0;
 	nr_d_regs = 0;
-	EM_BSIZE = 0;
+	TEM_BSIZE = 0;
 }
 
 #define MOVEM_LIMIT	2
@@ -160,7 +160,7 @@ save()
 	}
 
 	/* Compute AB - LB */
-	EM_BSIZE = 4 * (nr_d_regs + nr_a_regs) + 10;
+	TEM_BSIZE = 4 * (nr_d_regs + nr_a_regs) + 10;
 
 	/* allocate space for local variables */
 	fprintf(codefile,"tst.b -%D(sp)\nlink\ta6,#-%D\n",nlocals+40,nlocals);
@@ -170,7 +170,7 @@ save()
 		if (p->rs_off >= 0) {
 			fprintf(codefile,"move.%c %ld(a6),%s\n",
 				(p->rs_size == 4 ? 'l' : 'w'),
-				p->rs_off + EM_BSIZE,
+				p->rs_off + TEM_BSIZE,
 				p->rs_reg);
 		}
 	}
