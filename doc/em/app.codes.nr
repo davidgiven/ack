@@ -97,9 +97,7 @@ Escaped opcode 145 is used for ZER.
 The interpreter opcode table:
 .N 1
 .IS 3
-.DS B
 .so itables
-.DE 0
 .IE
 .P
 The table above results in the following dispatch tables.
@@ -138,7 +136,7 @@ shortie with argument divided by the wordsize
 mini with <num> as argument
 .PT .<num>W
 mini with <num>*wordsize as argument
-.PE 3
+.PE 1
 <num> is a possibly negative integer.
 .VS 1 1
 .IE
