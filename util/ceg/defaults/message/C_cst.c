@@ -6,6 +6,7 @@
 extern int __db_mes, __db_cst, __db_len, __db_type, __db_add;
 extern char *__db_str;
 
+void
 C_cst( l)
 arith l;
 {

@@ -5,6 +5,7 @@ extern int __db_mes;
 extern char *__db_str;
 extern int __db_len;
 
+void
 C_scon( str, siz)
 char *str;
 arith siz;

@@ -5,6 +5,7 @@ extern int __db_mes;
 extern int __db_cst;
 extern char *__db_str;
 
+void
 C_mes_end()
 {
 	if (__db_mes) {

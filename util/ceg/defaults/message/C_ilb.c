@@ -7,6 +7,7 @@ extern char *__db_str;
 
 extern int B_procno;
 
+void
 C_ilb( l)
 label l;
 {

@@ -9,6 +9,7 @@ int __db_cst = 0;
 int __db_type;
 int __db_add;
 
+void
 C_mes_begin( ms)
 int ms;
 {
