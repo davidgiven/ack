@@ -49,12 +49,12 @@ install:all
 	cp em_opt.6 $(EMHOME)/man/em_opt.6
 
 pattern.c:      patterns mktab
-	/lib/cpp patterns | mktab > pattern.c
+	$(EMHOME)/lib/cpp patterns | mktab > pattern.c
 
 mktab:  mktab.o $(LIBS)
 	$(CC) $(CFLAGS) mktab.o $(LIBS) $(LEXLIB) -o mktab
 
-mktab.o:	scan.c
+mktab.o:	scan.c optim.h param.h pattern.h types.h
 
 depend: regglob.c regnoglob.c pattern.c
 	sed '/^#AUTOAUTO/,$$d' Makefile >Makefile.new
