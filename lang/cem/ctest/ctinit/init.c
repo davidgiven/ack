@@ -237,7 +237,7 @@ pstruct() {
 		st1.s_ca[1],sta[0].s_ca[1],sta[1].s_ca[1],sta[2].s_ca[1]) ;
 	printf("s_ca[2]\t%15d%15d%15d%15d\n",
 		st1.s_ca[2],sta[0].s_ca[2],sta[1].s_ca[2],sta[2].s_ca[2]) ;
-	printf("s_l\t%15D%15D%15D%15D\n",
+	printf("s_l\t%15ld%15ld%15ld%15ld\n",
 		st1.s_l,sta[0].s_l,sta[1].s_l,sta[2].s_l) ;
 #ifndef NOFLOAT
 	printf("s_f\t  %13e  %13e  %13e  %13e\n\n",
