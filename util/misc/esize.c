@@ -13,7 +13,7 @@ int eof;
 /*	Much of the code has been borrowed from the EM interpreter
 */
 
-typedef	unsigned long ptr;	/* pointer to EM adress */
+typedef	/* unsigned */ long ptr;	/* pointer to EM adress */
 
 long magic;
 long flags;
