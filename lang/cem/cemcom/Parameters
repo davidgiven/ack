@@ -132,4 +132,4 @@
 
 
 !File: static.h
-#define STATIC			/* decl. spec. for large "static" arrays */
+#define GSTATIC			/* for large global "static" arrays */

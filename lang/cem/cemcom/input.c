@@ -446,7 +446,7 @@ setwdir(wdir, fn)
 #ifndef NOPP
 /*	mk_filename() concatenates a dir and filename.
 */
-STATIC char path[PATHLENGTH];
+GSTATIC char path[PATHLENGTH];
 
 PRIVATE char *
 mk_filename(dir, file)

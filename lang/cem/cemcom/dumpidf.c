@@ -285,7 +285,7 @@ type2str(tp)
 	return buf;
 }
 
-STATIC char trans_buf[MAXTRANS][300];
+GSTATIC char trans_buf[MAXTRANS][300];
 
 char *		/* the ultimate transient buffer supplier */
 next_transient()

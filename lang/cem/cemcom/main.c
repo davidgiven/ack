@@ -143,7 +143,6 @@ compile(argc, argv)
 	int pp_only = options['E'] || options['P'];
 #endif NOPP
 
-	source = strcmp(argv[0], "-") ? argv[0] : 0;
 	switch (argc) {
 	case 1:
 #ifndef NOPP
@@ -162,6 +161,7 @@ compile(argc, argv)
 		fatal("use: %s source destination [namelist]", prog_name);
 		break;
 	}
+	source = strcmp(argv[0], "-") ? argv[0] : 0;
 
 #ifdef USE_TMP
 	strcpy(tmpf, tmpfdir);

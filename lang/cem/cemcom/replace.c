@@ -63,7 +63,7 @@ replace(idef)
 	return 1;
 }
 
-STATIC char FilNamBuf[PATHLENGTH];
+GSTATIC char FilNamBuf[PATHLENGTH];
 
 PRIVATE
 macro_func(idef)
