@@ -37,6 +37,11 @@ struct idf	{
 	is used.
 	If cp < 0, the string is not entered, but only looked for.
 */
+
+#if __STDC__ > 0
+struct idf *str2idf(char *, int);
+#else
 extern struct idf *	str2idf();
+#endif
 
 #define	findidf(tg)	str2idf(tg, -1)

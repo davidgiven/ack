@@ -17,6 +17,10 @@ static struct idf *IDF_hashtable[IDF_HASHSIZE];
 		(variable, selector, structure tag, etc.).
 	*/
 
+#if __STDC__
+static struct idf *IDF_new(char *, int, int);
+#endif
+
 static struct idf *
 IDF_new(tg, size, cpy)
 	register char *tg;
