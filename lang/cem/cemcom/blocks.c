@@ -14,8 +14,9 @@
 #ifndef STB
 #include "label.h"
 #include "stack.h"
+#include "Lpars.h"
 extern arith NewLocal();
-#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, 0)
+#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 #endif STB
 
 /*	Because EM does not support the loading and storing of

@@ -34,7 +34,7 @@
 char *symbol2str();
 char *long2str();
 arith NewLocal();	/* util.c */
-#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, 0)
+#define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 
 /*	EVAL() is the main expression-tree evaluator, which turns
 	any legal expression tree into EM code. Parameters:

@@ -5,6 +5,7 @@ struct localvar {
 	int		t_align;
 	int		t_regtype;
 	int		t_count;
+	int		t_sc;		/* storage class */
 };
 
 /* ALLOCDEF "localvar" 10 */

@@ -343,9 +343,7 @@ declare_idf(ds, dc, lvl)
 					NewLocal(type->tp_size,
 						 type->tp_align,
 						 regtype(type),
-						 (sc == REGISTER) ? REG_BONUS
-						 : REG_DEFAULT
-						 );
+						 sc);
 				break;
 			case STATIC:
 				newdef->df_address = (arith) data_label();
@@ -615,9 +613,7 @@ declare_formals(fp)
 		def->df_level = L_FORMAL2;	/* CJ */
 		RegisterAccount(def->df_address, def->df_type->tp_size,
 				regtype(def->df_type),
-				(def->df_sc == REGISTER ? REG_BONUS
-				: REG_DEFAULT)
-				);
+				def->df_sc);
 	}
 	*fp = f_offset;
 }
@@ -628,6 +624,7 @@ regtype(tp)
 {
 	switch(tp->tp_fund) {
 	case INT:
+	case LONG:
 		return reg_any;
 #ifndef NOFLOAT
 	case FLOAT:

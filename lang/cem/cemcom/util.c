@@ -22,6 +22,8 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"stack.h"
+#include	"Lpars.h"
+#include	"def.h"
 
 static struct localvar	*FreeTmps;
 #ifdef USE_TMP
@@ -56,7 +58,7 @@ LocalSpace(sz, al)
 static struct localvar *regs[TABSIZ];
 
 arith
-NewLocal(sz, al, regtype, init)
+NewLocal(sz, al, regtype, sc)
 	arith sz;
 {
 	register struct localvar *tmp = FreeTmps;
@@ -66,6 +68,7 @@ NewLocal(sz, al, regtype, init)
 	while (tmp) {
 		if (tmp->t_align >= al &&
 		    tmp->t_size >= sz &&
+		    tmp->t_sc == sc &&
 		    tmp->t_regtype == regtype) {
 			if (prev) {
 				prev->next = tmp->next;
@@ -81,8 +84,9 @@ NewLocal(sz, al, regtype, init)
 		tmp->t_offset = LocalSpace(sz, al);
 		tmp->t_align = al;
 		tmp->t_size = sz;
+		tmp->t_sc = sc;
 		tmp->t_regtype = regtype;
-		tmp->t_count = init;
+		tmp->t_count = REG_DEFAULT;
 	}
 	index = (int) (tmp->t_offset >> 2) & (TABSIZ - 1);
 	tmp->next = regs[index];
@@ -120,6 +124,7 @@ LocalFinish()
 	tmp = FreeTmps;
 	while (tmp) {
 		tmp1 = tmp;
+		if (tmp->t_sc == REGISTER) tmp->t_count += REG_BONUS;
 		if (! options['n'] && tmp->t_regtype >= 0) {
 			C_ms_reg(tmp->t_offset, tmp->t_size, tmp->t_regtype, tmp->t_count);
 		}
@@ -130,6 +135,7 @@ LocalFinish()
 	for (i = 0; i < TABSIZ; i++) {
 		tmp = regs[i];
 		while (tmp) {
+			if (tmp->t_sc == REGISTER) tmp->t_count += REG_BONUS;
 			tmp1 = tmp;
 			if (! options['n'] && tmp->t_regtype >= 0) {
 				C_ms_reg(tmp->t_offset,
@@ -151,7 +157,7 @@ LocalFinish()
 #endif
 }
 
-RegisterAccount(offset, size, regtype, init)
+RegisterAccount(offset, size, regtype, sc)
 	arith offset, size;
 {
 	register struct localvar *p;
@@ -163,7 +169,8 @@ RegisterAccount(offset, size, regtype, init)
 	index = (int) (offset >> 2) & (TABSIZ - 1);
 	p->t_offset = offset;
 	p->t_regtype = regtype;
-	p->t_count = init;
+	p->t_count = REG_DEFAULT;
+	p->t_sc = sc;
 	p->t_size = size;
 	p->next = regs[index];
 	regs[index] = p;
