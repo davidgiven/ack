@@ -254,7 +254,7 @@ w
 q
 ABC
 	)
-	for i in ../mach/vax4/cg ../mach/m68k2/cg
+	for i in ../mach/vax4/cg ../mach/m68k2/cg ../mach/m68020/ncg
 	do
 	( cd $i
 	  cp tables1.c tables.c
