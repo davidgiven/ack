@@ -31,6 +31,12 @@
 %token <y_word> TEST
 %token <y_word> MOV
 
+/* Intel 80268 tokens */
+%token <y_word> IMUL
+%token <y_word> ENTER
+%token <y_word> EXTOP
+%token <y_word> EXTOP1
+
 /* Intel 8087 coprocessor tokens */
 %token <y_word> FNOOP
 %token <y_word> FMEM

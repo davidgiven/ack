@@ -52,14 +52,19 @@
 0,	NOOP_1,		0237,		"lahf",
 0,	NOOP_1,		0244,		"movsb",
 0,	NOOP_1,		0245,		"movs",
+0,	NOOP_1,		0245,		"movsw",
 0,	NOOP_1,		0246,		"cmpsb",
 0,	NOOP_1,		0247,		"cmps",
+0,	NOOP_1,		0247,		"cmpsw",
 0,	NOOP_1,		0252,		"stosb",
 0,	NOOP_1,		0253,		"stos",
+0,	NOOP_1,		0253,		"stosw",
 0,	NOOP_1,		0254,		"lodsb",
 0,	NOOP_1,		0255,		"lods",
+0,	NOOP_1,		0255,		"lodsw",
 0,	NOOP_1,		0256,		"scasb",
 0,	NOOP_1,		0257,		"scas",
+0,	NOOP_1,		0257,		"scasw",
 0,	NOOP_1,		0316,		"into",
 0,	NOOP_1,		0317,		"iret",
 0,	NOOP_1,		0327,		"xlat",
@@ -111,8 +116,10 @@
 0,	PUSHOP,		1,		"pop",
 0,	IOOP,		0344,		"inb",
 0,	IOOP,		0345,		"in",
+0,	IOOP,		0345,		"inw",
 0,	IOOP,		0346,		"outb",
 0,	IOOP,		0347,		"out",
+0,	IOOP,		0347,		"outw",
 0,	ADDOP,		000,		"addb",
 0,	ADDOP,		001,		"add",
 0,	ADDOP,		010,		"orb",
@@ -156,7 +163,7 @@
 0,	NOTOP,		040,		"mulb",
 0,	NOTOP,		041,		"mul",
 0,	NOTOP,		050,		"imulb",
-0,	NOTOP,		051,		"imul",
+0,	IMUL,		051,		"imul",		/* for 80286 */
 0,	NOTOP,		060,		"divb",
 0,	NOTOP,		061,		"div",
 0,	NOTOP,		070,		"idivb",
@@ -178,6 +185,7 @@
 0,	TEST,		1,		"test",
 0,	MOV,		0,		"movb",
 0,	MOV,		1,		"mov",
+0,	MOV,		1,		"movw",
 
 /* Intel 8087 coprocessor keywords */
 
@@ -207,7 +215,7 @@
 0,	FNOOP,		FESC+1+(0xFC<<8),	"frndint",
 0,	FNOOP,		FESC+1+(0xFD<<8),	"fscale",
 0,	FNOOP,		FESC+1+(0xFA<<8),	"fsqrt",
-/* 0,	FNOOP,		FESC+7+(0xE0<<8),	"fstswax", /* 80287 */
+0,	FNOOP,		FESC+7+(0xE0<<8),	"fstswax", /* 80287 */
 0,	FNOOP,		FESC+1+(0xE4<<8),	"ftst",
 0,	FNOOP,		FESC+1+(0xE5<<8),	"fxam",
 0,	FNOOP,		FESC+1+(0xF4<<8),	"fxtract",
@@ -292,3 +300,35 @@
 0,	FST_ST2,	FESC+2+(0xE0<<8),	"fsubp",
 0,	FST_ST2,	FESC+0+(0xE8<<8),	"fsubr",
 0,	FST_ST2,	FESC+2+(0xE8<<8),	"fsubrp",
+
+/* 80286 keywords */
+0,	NOOP_1,		0140,			"pusha",
+0,	NOOP_1,		0141,			"popa",
+0,	NOOP_1,		0156,			"outsb",
+0,	NOOP_1,		0157,			"outs",
+0,	NOOP_1,		0157,			"outsw",
+0,	NOOP_1,		0246,			"insb",
+0,	NOOP_1,		0247,			"ins",
+0,	NOOP_1,		0247,			"insw",
+
+0,	ENTER,		0310,			"enter",
+0,	NOOP_1,		0311,			"leave",
+0,	LEAOP,		0142,			"bound",
+
+0,	NOOP_2,		017+06<<8,		"clts",
+
+0,	EXTOP,		0002,			"lar",
+0,	EXTOP,		0003,			"lsl",
+
+0,	EXTOP1,		0021,			"lgdt",
+0,	EXTOP1,		0001,			"sgdt",
+0,	EXTOP1,		0031,			"lidt",
+0,	EXTOP1,		0011,			"sidt",
+0,	EXTOP1,		0020,			"lldt",
+0,	EXTOP1,		0000,			"sldt",
+0,	EXTOP1,		0030,			"ltr",
+0,	EXTOP1,		0010,			"str",
+0,	EXTOP1,		0061,			"lmsw",
+0,	EXTOP1,		0041,			"smsw",
+0,	EXTOP1,		0050,			"verw",
+0,	EXTOP1,		0040,			"verr",

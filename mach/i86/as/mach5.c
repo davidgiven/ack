@@ -10,8 +10,9 @@
 
 ea_1(param) {
 
-	if ((mrg_1 & 070) || (param & ~070))
+	if ((mrg_1 & 070) || (param & ~070)) {
 		serror("bad operand");
+	}
 	emit1(mrg_1 | param);
 	switch(mrg_1 >> 6) {
 	case 0:
@@ -129,7 +130,21 @@ pushop(opc) register opc; {
 	} else if (mrg_1 >= 0300) {
 		emit1(0120 | opc<<3 | (mrg_1&7));
 	} else if (opc == 0) {
-		emit1(0377); ea_1(6<<3);
+		if (mrg_1 & 040) {	/* 070 ??? */
+			if (small(exp_1.typ == S_ABS && fitb(exp_1.val),1)) {
+				emit1(0152);
+				emit1((int) exp_1.val);
+			} else {
+				emit1(0150);
+				RELOMOVE(relonami, rel_1);
+#ifdef RELOCATION
+				newrelo(exp_1.typ, RELO2);
+				emit2((int) exp_1.val);
+#endif
+			}
+		} else {
+			emit1(0377); ea_1(6<<3);
+		}
 	} else {
 		emit1(0217); ea_1(0<<3);
 	}
@@ -177,8 +192,14 @@ rolop(opc) register opc; {
 	regsize(opc);
 	if (cmrg == 0301) {
 		emit1(0322 | (opc&1)); ea_1(opc&070);
-	} else if ((cmrg & 040) && exp_2.val == 1) {
-		emit1(0320 | (opc&1)); ea_1(opc&070);
+	} else if (cmrg & 040) {
+		if (exp_2.val == 1) {
+			emit1(0320 | (opc&1)); ea_1(opc&070);
+		} else {
+			fit(fitb(exp_2.val));
+			emit1(0300|(opc&1)); ea_1(opc&070);
+			emit1((int)exp_2.val);
+		}
 	} else
 		badsyntax();
 }
@@ -295,6 +316,30 @@ mov(opc) register opc; {
 		emit1(0210 | opc); ea_1((mrg_2&7)<<3);
 	} else if (mrg_1 >= 0300) {
 		emit1(0212 | opc); ea_2((mrg_1&7)<<3);
-	} else
+	} else {
 		badsyntax();
+	}
+}
+
+imul(opc)
+	int opc;
+{
+	regsize(opc);
+	if (exp_2.typ != S_ABS || ((mrg_2 & 040) == 0)) {
+		serror("bad operand");
+	} else {
+		if (small(exp_2.typ == S_ABS && fitb(exp_2.val),1)) {
+			emit1(0153);
+			ea_1((mrg_2&7)<<3);
+			emit1((int)exp_2.val);
+		} else {
+			emit1(0151);
+			ea_1((mrg_2&7)<<3);
+			RELOMOVE(relonami, rel_2);
+#ifdef RELOCATION
+			newrelo(exp_2.typ, RELO2);
+			emit2((int) exp_2.val);
+#endif
+		}
+	}
 }

@@ -38,6 +38,10 @@ oper	:	NOOP_1
 			{	rolop($1);}
 	|	INCOP ea_1
 			{	incop($1);}
+	|	IMUL ea_ea
+			{	imul($1);}
+	|	IMUL ea_1
+			{	regsize($1); emit1(0366|($1&1)); ea_1($1&070);}
 	|	NOTOP ea_1
 			{	regsize($1); emit1(0366|($1&1)); ea_1($1&070);}
 	|	CALLOP ea_1
@@ -55,8 +59,20 @@ oper	:	NOOP_1
 			}
 	|	CALFOP mem
 			{	emit1(0377); ea_2($1&0xFF);}
+	|	ENTER absexp ',' absexp
+			{	fit(fitw($2)); fit(fitb($4));
+				emit1($1); emit2((int)$2); emit1((int)$4);
+			}
 	|	LEAOP R16 ',' mem
 			{	emit1($1); ea_2($2<<3);}
+	|	EXTOP	R16 ',' ea_2
+			{	emit1(0xF); emit1($1);
+				ea_2($2<<3);
+			}
+	|	EXTOP1	ea_1
+			{	regsize(1); emit1(0xF); emit1($1&07); 
+				ea_1($1&070);
+			}
 	|	ESC absexp ',' mem
 			{	fit(fit6($2));
 				emit1(0330 | $2>>3);
