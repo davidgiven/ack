@@ -8,7 +8,9 @@
 
 PATH=/bin:/usr/bin
 
-EMLINT=/home/top/dick/lint
+EMDIR=/usr/em
+EMLINT=$EMDIR/lib.bin/lint
+INCLUDES=-I$EMDIR/include/_tail_cc
 
 #LDEFMACH=-Dmc68000
 
@@ -36,6 +38,7 @@ while	test -n "$1"
 do
 	case "$1" in
 	-ansi)	LPASS1=${LPASS1}.ansi
+		INCLUDES=-I$EMDIR/include/tail_ac
 		CLIB=ansi_c.llb
 		shift
 		;;
@@ -86,7 +89,7 @@ case "$LIBRARY" in
 					;;
 				*.c)	# a real C-file
 					STATNR=` expr $STATNR + 1 `
-					$LPASS1 -S$STATNR -Dlint $PARAMS1 $F
+					$LPASS1 -S$STATNR -Dlint $PARAMS1 $INCLUDES $F
 					;;
 				*)	# a lint library?
 					case `basename $F` in
@@ -137,7 +140,7 @@ case "$LIBRARY" in
 	do
 		case $F in
 		*.c)	# a C file
-			$LPASS1 $PARAMS1 -Dlint -L $F
+			$LPASS1 $PARAMS1 $INCLUDES -Dlint -L $F
 			;;
 		*)	# a library?
 			case `basename $F` in
