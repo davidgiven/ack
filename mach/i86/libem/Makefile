@@ -3,8 +3,8 @@ install:
 	../../install tail_em.a tail_em
 
 cmp:
-	../../compare head_em.s head_em
-	../../compare tail_em.a tail_em
+	-../../compare head_em.s head_em
+	-../../compare tail_em.a tail_em
 
 clean :
 

@@ -4,9 +4,9 @@ install:
 	../../install libem_s.vend.a tail_em.vend
 
 cmp:
-	../../compare head.s head_em
-	../../compare e.a tail_em
-	../../compare libem_s.vend.a tail_em.vend
+	-../../compare head.s head_em
+	-../../compare e.a tail_em
+	-../../compare libem_s.vend.a tail_em.vend
 
 clean :
 
