@@ -135,6 +135,14 @@ ABS4		= {STRING addr;}	4 cost=(3,7) "%[addr]"
 IMMEDIATE4	= {INT cc;}		4 cost=(4,4) "#%[cc]"
 DOUBLE		= {STRING cc;}		4 cost=(4,4) "#%[cc]"
 DOUBLEZERO	= { }			4
+EXTENDED4	= {REGISTER reg;}	4 cost=(0,0) "%[reg]"
+
+REGINC1		= {REGISTER reg;}	2 cost=(0,3) "(%[reg])+"
+REGINC2		= {REGISTER reg;}	2 cost=(0,3) "(%[reg])+"
+REGINC4		= {REGISTER reg;}	4 cost=(0,3) "(%[reg])+"
+REGDEC1		= {REGISTER reg;}	2 cost=(0,3) "-(%[reg])"
+REGDEC2		= {REGISTER reg;}	2 cost=(0,3) "-(%[reg])"
+REGDEC4		= {REGISTER reg;}	4 cost=(0,3) "-(%[reg])"
 
 
 
@@ -144,12 +152,16 @@ DOUBLEZERO	= { }			4
  *************************************/
 
 TOKENEXPRESSIONS:
+REGCH1		=  REGINC1 + REGDEC1
+REGCH2		=  REGINC2 + REGDEC2
+REGCH4		=  REGINC4 + REGDEC4
+REGCH		=  REGCH1 + REGCH2 + REGCH4
 DATA		=  DATAREG + IADDREG + DISPL + INDEXED +
-		   ABS      + IMMEDIATE
+		   ABS      + IMMEDIATE + REGCH2
 MEMORY		=  DATA - DATAREG
 CONTROL		=  MEMORY - IMMEDIATE
 ALTERABLE	=  DATAREG  + IADDREG + DISPL +
-		   INDEXED + ABS
+		   INDEXED + ABS + REGCH2
 ANY		=  DATA + MEMORY + CONTROL + ALTERABLE
 DATA_ALT	=  DATA * ALTERABLE
 ALT_MEM		=  ALTERABLE * MEMORY
@@ -158,27 +170,27 @@ DATASCR		=  DATAREG * SCRATCH
 ADDSCR		=  ADDREG  * SCRATCH
 MEM_ALL		=  ALL - DATAREG - DATAREG4 - ADDREG - IMMEDIATE - IMMEDIATE4
 		   - LOCAL_ADDR -REGOFF_ADDR - EXTERNAL_ADDR - DOUBLE - DOUBLEZERO
-ALL_ACCESSIBLE	=  IADDREG + IADDREG4 + IADDREG1 + INDEXED + INDEXED4
+ALL_ACCESSIBLE	=  IADDREG + IADDREG4 + IADDREG1 + INDEXED + INDEXED4 + REGCH
 
-ANY1		=  DISPL1 + ABS1 + IADDREG1
+ANY1		=  DISPL1 + ABS1 + IADDREG1 + REGCH1 + IMMEDIATE
 DATA_ALT1	=  ANY1
 DATA_ALT_1OR2	=  DATA_ALT + DATA_ALT1
 
 
-REG4		=  DATAREG4 + ADDREG
+REG4		=  DATAREG4 + ADDREG + EXTENDED4
 DATA4		=  DATAREG4 + IADDREG4 + DISPL4 + INDEXED4 +
-		   ABS4     +  IMMEDIATE4 + DOUBLE
+		   ABS4     +  IMMEDIATE4 + DOUBLE + REGCH4 + EXTENDED4
 MEMORY4		=  DATA4 - DATAREG4
 CONTROL4		=  MEMORY4 - IMMEDIATE4 - DOUBLE
 ALTERABLE4	=  DATAREG4  + ADDREG + IADDREG4 + DISPL4 +
-		   INDEXED4 + ABS4
+		   INDEXED4 + ABS4 + REGCH4 + EXTENDED4
 ANY4		=  DATA4 + MEMORY4 + CONTROL4 + ALTERABLE4 + LOCALBASE  +
 		   EXTERNAL_ADDR
 DATA_ALT4	=  DATA4 * ALTERABLE4
 ALT_MEM4		=  ALTERABLE4 * MEMORY4
 
 DATASCR4		=  DATAREG4 * SCRATCH
-
+NO_ADDREG	=  EXTERNAL_ADDR + ABS4 + IMMEDIATE4 + EXTENDED4 + DATAREG4
 
 
 
@@ -199,7 +211,8 @@ lol inreg($1)==2 | | | regvar($1) | |
 #endif
 lol | | | {DISPL,LB,$1}  | |
 #ifdef REGVARS
-ldl inreg($1)==2 | | | regvar($1) | |
+ldl inreg($1)==2 | | remove(REGCH, %[reg] == regvar($1))
+				| regvar($1) | |
 #endif
 ldl | | | {DISPL4,LB,$1} | |
 loe | | | {ABS,$1}       | |
@@ -390,7 +403,7 @@ sti $1 == 1
 		remove(MEM_ALL)
 		move({IMMEDIATE,(%[2.cc]-((%[2.cc]>>8)<<8)+128)%256-128},
 		     {IADDREG1,%[1]}) | | |
-...	| ADDREG ANY1 |
+...	| ADDREG ANY1+DATAREG |
 		remove(MEM_ALL)
 		move(%[2],{IADDREG1,%[1]}) | | |
 ...	| nocoercions: LOCAL_ADDR DATAREG |
@@ -413,7 +426,7 @@ sti $1 == 1
 		remove(MEM_ALL)
 		move({IMMEDIATE,(%[2.cc]-((%[2.cc]>>8)<<8)+128)%256-128},
 		     {DISPL1,LB,%[1.off]}) | | |
-...	| nocoercions: LOCAL_ADDR ANY1 |
+...	| nocoercions: LOCAL_ADDR ANY1+DATAREG |
 		remove(MEM_ALL)
 		move(%[2],{DISPL1,LB,%[1.off]}) | | |
 ...	| nocoercions: REGOFF_ADDR DATAREG |
@@ -436,7 +449,7 @@ sti $1 == 1
 		remove(MEM_ALL)
 		move({IMMEDIATE,(%[2.cc]-((%[2.cc]>>8)<<8)+128)%256-128},
 		     {DISPL1,%[1.reg],%[1.off]}) | | |
-...	| nocoercions: REGOFF_ADDR ANY1 |
+...	| nocoercions: REGOFF_ADDR ANY1+DATAREG |
 		remove(MEM_ALL)
 		move(%[2],{DISPL1,%[1.reg],%[1.off]}) | | |
 ...	| nocoercions: EXTERNAL_ADDR DATAREG |
@@ -459,7 +472,7 @@ sti $1 == 1
 		remove(MEM_ALL)
 		move({IMMEDIATE,(%[2.cc]-((%[2.cc]>>8)<<8)+128)%256-128},
 		     {ABS1,%[1.off]}) | | |
-...	| nocoercions: EXTERNAL_ADDR ANY1 |
+...	| nocoercions: EXTERNAL_ADDR ANY1+DATAREG |
 		remove(MEM_ALL)
 		move(%[2],{ABS1,%[1.off]}) | | |
 sti $1 == 2 | ADDREG ANY |	remove(MEM_ALL)
@@ -516,19 +529,51 @@ sdf | ADDREG ANY4 |	remove(MEM_ALL)
  */
 
 ldl ldl adp sdl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | |
-		allocate(DATAREG={IMMEDIATE,0})
 		remove(regvar($1))
-		"move.b (%(regvar($1)%))+,%[a]"		| %[a] | |
+			| { REGINC1, regvar($1)} | |
 ldl ldl adp sdl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | |
-		allocate(DATAREG)
 		remove(regvar($1))
-		"move.w (%(regvar($1)%))+,%[a]"		| %[a] | |
-ldl ldl adp sdl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==1 && $5==1 | DATAREG |
+			| { REGINC2, regvar($1)} | |
+ldl ldl adp sdl loi $1==$2 && $2==$4 && inreg($1)==2 && $3==4 && $5==4 | |
 		remove(regvar($1))
+			| { REGINC4, regvar($1)} | |
+ldl adp sdl ldl loi $1==$3 && $1==$4 && $2==(0-1) && inreg($1)==2 && $5==1
+                | |     remove(regvar($1))
+                        | {REGDEC1,regvar($1)}          | |
+ldl adp sdl ldl loi $1==$4 && $2==(0-2) && inreg($1)==2 && $3==$4 && $5==2
+                | |     remove(regvar($1))
+                        | {REGDEC2,regvar($1)}          | |
+ldl adp sdl ldl loi $1==$4 && $2==(0-4) && inreg($1)==2 && $3==$4 && $5==4
+                | |     remove(regvar($1))
+                        | {REGDEC4,regvar($1)}          | |
+ldl sti ldl adp sdl $1==$3 && $3==$5 && inreg($1)==2 && $2==1 && $4==1 | ANY1+DATAREG |
+		remove(regvar($1))
+		remove(MEM_ALL)
 		"move.b %[1],(%(regvar($1)%))+"	|	| |
-ldl ldl adp sdl sti $1==$2 && $2==$4 && inreg($1)==2 && $3==2 && $5==2 | ANY |
+ldl sti ldl adp sdl $1==$3 && $3==$5 && inreg($1)==2 && $2==2 && $4==2 | ANY |
 		remove(regvar($1))
+		remove(MEM_ALL)
 		"move.w %[1],(%(regvar($1)%))+"	|	| |
+ldl sti ldl adp sdl $1==$3 && $3==$5 && inreg($1)==2 && $2==4 && $4==4 | ANY4 |
+		remove(regvar($1))
+		remove(MEM_ALL)
+		"move.l %[1],(%(regvar($1)%))+"	|	| |
+ldl adp sdl ldl sti $1==$4 && inreg($1)==2 && $2==(0-1) && $5==1 && $3==$4 
+	| ANY1+DATAREG |
+		remove(regvar($1))
+		remove(MEM_ALL)
+		"move.b %[1],-(%(regvar($1)%))"	|	| |
+ldl adp sdl ldl sti $1==$4 && inreg($1)==2 && $2==(0-2) && $5==2 && $3==$4
+	| ANY |
+		remove(regvar($1))
+		remove(MEM_ALL)
+		"move.w %[1],-(%(regvar($1)%))"	|	| |
+ldl adp sdl ldl sti $1==$4 && inreg($1)==2 && $2==(0-4) && $5==4 && $3==$4
+	| ANY4 |
+		remove(regvar($1))
+		remove(MEM_ALL)
+		"move.l %[1],-(%(regvar($1)%))"	|	| |
+
 ldl ldl adp sdl $1==$2 && $2==$4 && inreg($1)==2 | |
 		allocate(ADDREG=regvar($1))		| %[a]
 							| ldl $2 adp $3 sdl $2 |
@@ -555,21 +600,14 @@ lol adi stl $1 == $3 && $2 == 2  && inreg($1)==2 | ANY |
 				remove(regvar($1))
 				"add.w %[1],%(regvar($1)%)"
 				erase(regvar($1))	| | |	
-loc lil adi sil $2 == $4 && $3 == 2  && inreg($2)==2 | |
+lil adi sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
-				"add.w #$1,(%(regvar($2)%))"	| | |
-lil adi sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
-				remove(ALL)
 				"add.w %[1],(%(regvar($1)%))"	| | |
 ldl ldc adi sdl $1 == $4 && $3 == 4  && inreg($1)==2 | |
 				remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | |  
-ldc ldl adi sdl $2 == $4 && $3 == 4  && inreg($2)==2 | |
-				remove(regvar($2))
-				"add.l #$1,%(regvar($2)%)"	
-				erase(regvar($2))	| | |	
-ldl adi sdl $1 == $3 && $2 == 4  && inreg($1)==2 | DATAREG4 |
+ldl adi sdl $1 == $3 && $2 == 4  && inreg($1)==2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(regvar($1))
 				"add.l %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |
@@ -615,21 +653,14 @@ lol adu stl $1 == $3 && $2 == 2  && inreg($1)==2 | ANY |
 				remove(regvar($1))
 				"add.w %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |	
-loc lil adu sil $2 == $4 && $3 == 2  && inreg($2)==2 | |
-				remove(MEM_ALL)
-				"add.w #$1,(%(regvar($2)%))"	| | |
-lil adu sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
+lil adu sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"add.w %[1],(%(regvar($1)%))"	| | |
 ldl ldc adu sdl $1 == $4 && $3 == 4  && inreg($1)==2 | |
 				remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | |  
-ldc ldl adu sdl $2 == $4 && $3 == 4  && inreg($2)==2 | |
-				remove(regvar($2))
-				"add.l #$1,%(regvar($2)%)"	
-				erase(regvar($2))	| | |	
-ldl adu sdl $1 == $3 && $2 == 4  && inreg($1)==2 | DATAREG4 |
+ldl adu sdl $1 == $3 && $2 == 4  && inreg($1)==2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(regvar($1))
 				"add.l %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |
@@ -651,8 +682,6 @@ lol loc slu stl $1 == $4 && $2 == 1 && $3 == 2  && inreg($1)==2 | |
 ldl adp sdl $1 == $3  && inreg($1)==2 | |	remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | | 
-ldl adp dup sdl loi inreg($1) == 2 && $1 == $4 && $3 == 4 && $5 == 4 | | | |
-			ldl $1 adp $2 sdl $1 ldl $1 loi 4 |
 ldl loi ldl loi adp ldl sti $2==4&&$4==4&&$7==4&&$1==$3&&$1==$6&&inreg($1)==2
 			| |	remove(MEM_ALL)
 				allocate(ADDREG = {IADDREG4,regvar($1)})
@@ -665,10 +694,6 @@ ldl ldc ads sdl $1 == $4 && $3 == 4  && inreg($1)==2 | |
 				remove(regvar($1))
 				"add.l #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | |  
-ldc ldl ads sdl $2 == $4 && $3 == 4  && inreg($2)==2 | |
-				remove(regvar($2))
-				"add.l #$1,%(regvar($2)%)"	
-				erase(regvar($2))	| | |	
 lil inc sil $1==$3  && inreg($1)==2 | |	
 			remove(MEM_ALL)
 			"add.w #1,(%(regvar($1)%))"
@@ -681,40 +706,49 @@ lol and stl $1 == $3 && $2 == 2  && inreg($1)==2 | ANY |
 				remove(regvar($1))
 				"and.w %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |
-loc lil and sil $2 == $4 && $3 == 2  && inreg($2)==2 | |
-				remove(MEM_ALL)
-				"and.w #$1,(%(regvar($2)%))"	| | |
-lil and sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
+lil and sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"and.w %[1],(%(regvar($1)%))"	| | |
 lol ior stl $1 == $3 && $2 == 2  && inreg($1)==2 | ANY |
 				remove(regvar($1))
 				"or.w %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |	
-lil ior sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
+lil ior sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"or.w %[1],(%(regvar($1)%))"	| | |
-loc lil ior sil $2 == $4 && $3 == 2  && inreg($2)==2 | |
-				remove(MEM_ALL)
-				"or.w #$1,(%(regvar($2)%))"	| | |
 lol loc xor stl $1 == $4 && $3 == 2  && inreg($1)==2 | |
 				remove(regvar($1))
 				"eor.w #$2,%(regvar($1)%)"	
 				erase(regvar($1))	| | |  
-loc lol xor stl $2 == $4 && $3 == 2  && inreg($2)==2 | |
-				remove(regvar($2))
-				"eor.w #$1,%(regvar($2)%)"	
-				erase(regvar($2))	| | |	
-loc lil xor sil $2 == $4 && $3 == 2  && inreg($2)==2 | |
-				remove(MEM_ALL)
-				"eor.w #$1,(%(regvar($2)%))"	| | |
-lol xor stl $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
+lol xor stl $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(regvar($1))
 				"eor.w %[1],%(regvar($1)%)"	
 				erase(regvar($1))	| | |
-lil xor sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG |
+lil xor sil $1 == $3 && $2 == 2  && inreg($1)==2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"eor.w %[1],(%(regvar($1)%))"	| | |
+ldl ldf adp ldl sdf inreg($1)==2 && $1==$4 && $2==$5 | |
+				remove(MEM_ALL)
+				"add.l #$3,$2(%(regvar($1)%))"	| | |
+ldl ldf dup adp ldl sdf inreg($1)==2 && $1==$5 && $2==$6 && $3==4 | |
+				remove(MEM_ALL)
+				allocate(ADDREG={DISPL4,regvar($1), $2})
+				"add.l #$4,$2(%(regvar($1)%))"
+				erase(%[a])			| %[a] | |
+ldl lof inc ldl stf inreg($1)==2 && $1==$4 && $2==$5 | |
+				remove(MEM_ALL)
+				"add.w #1,$2(%(regvar($1)%))"	| | |
+ldl lof dec ldl stf inreg($1)==2 && $1==$4 && $2==$5 | |
+				remove(MEM_ALL)
+				"sub.w #1,$2(%(regvar($1)%))"	| | |
+ldl lof adi ldl stf inreg($1)==2 && $1==$4 && $2==$5 && $3==2
+		| IMMEDIATE+DATAREG |
+				remove(MEM_ALL)
+				"add.w %[1],$2(%(regvar($1)%))"	| | |
+ldl lof sbi ldl stf inreg($1)==2 && $1==$4 && $2==$5 && $3==2
+		| IMMEDIATE+DATAREG |
+				remove(MEM_ALL)
+				"sub.w %[1],$2(%(regvar($1)%))"	| | |
 #endif
 /* G R O U P  III AND IV :  I N T E G E R   A R I T H M E T I C */
 
@@ -724,29 +758,19 @@ adi $1 == 2 | ANY DATASCR |	"add.w %[1],%[2]"
 ...	    | DATASCR ANY |	"add.w %[2],%[1]"
 				erase(%[1])
 				setcc(%[1])		| %[1] | | (2,2)+%[2]
-loc lol adi stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"add.w #$1,$2(a6)"	| | |	(6,10)
-loc lil adi sil $2 == $4 && $3 == 2 | |
-				allocate(ADDREG = {DISPL4,LB,$2})
-				remove(MEM_ALL)
-				"add.w #$1,(%[a])"	| | |
-lol adi stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG |
+lol adi stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"add.w %[1],$1(a6)"	| | |
-loe adi ste $1 == $3 && $2 == 2 | DATAREG |
+loe adi ste $1 == $3 && $2 == 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"add.w %[1],$1"	| | |
-lil adi sil $1 == $3 && $2 == 2 | DATAREG |
+lil adi sil $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				allocate(ADDREG={DISPL4,LB,$1})
 				remove(ALL)
 				"add.w %[1],(%[a])"	| | |
 loe loc adi ste $3 == 2 && $1 == $4 | |
 				remove(MEM_ALL)
 				"add.w #$2,$1"		| | |	(7,11)
-loc loe adi ste $3 == 2 && $2 == $4 | |
-				remove(MEM_ALL)
-				"add.w #$1,$2"		| | |	(7,11)
 adi $1 == 4 | ANY4 DATASCR4 |	"add.l %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])		| %[2] | | (2,3)+%[1]
@@ -756,19 +780,13 @@ adi $1 == 4 | ANY4 DATASCR4 |	"add.l %[1],%[2]"
 ldl ldc adi sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl adi sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"add.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc adi sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1"		| | |	(9,17)
-ldc lde adi sde $3 == 4 && $2 == $4 | |
-				remove(MEM_ALL)
-				"add.l #$1,$2"		| | |	(9,17)
-ldl adi sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4 |
+ldl adi sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"add.l %[1],$1(a6)"	| | |
-lde adi sde $1 == $3 && $2 == 4 | DATAREG4 |
+lde adi sde $1 == $3 && $2 == 4 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"add.l %[1],$1"	| | |
 sbi $1 == 2 | ANY DATASCR |	"sub.w %[1],%[2]"
@@ -936,45 +954,29 @@ sru $1 == 4 | DATAREG DATASCR4 |	"lsr.l %[1],%[2]"
 lol loc adu stl $1 == $4 && $3 == 2  && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"add.w #$2,$1(a6)"	| | |  
-loc lol adu stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"add.w #$1,$2(a6)"	| | |	
-loc lil adu sil $2 == $4 && $3 == 2 | |
-				allocate(ADDREG = {DISPL4,LB,$2})
-				remove(MEM_ALL)
-				"add.w #$1,(%[a])"	| | |
-lol adu stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG |
+lol adu stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"add.w %[1],$1(a6)"	| | |
-loe adu ste $1 == $3 && $2 == 2 | DATAREG |
+loe adu ste $1 == $3 && $2 == 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"add.w %[1],$1"	| | |
-lil adu sil $1 == $3 && $2 == 2 | DATAREG |
+lil adu sil $1 == $3 && $2 == 2 | DATAREG+IMMEDIATE |
 				allocate(ADDREG={DISPL4,LB,$1})
 				remove(MEM_ALL)
 				"add.w %[1],(%[a])"	| | |
 loe loc adu ste $3 == 2 && $1 == $4 | |
 				remove(MEM_ALL)
 				"add.w #$2,$1"		| | |	(7,11)
-loc loe adu ste $3 == 2 && $2 == $4 | |
-				remove(MEM_ALL)
-				"add.w #$1,$2"		| | |	(7,11)
 ldl ldc adu sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl adu sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"add.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc adu sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1"		| | |	(9,17)
-ldc lde adu sde $3 == 4 && $2 == $4 | |
-				remove(MEM_ALL)
-				"add.l #$1,$2"		| | |	(9,17)
-ldl adu sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4 |
+ldl adu sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"add.l %[1],$1(a6)"	| | |
-lde adu sde $1 == $3 && $2 == 4 | DATAREG4 |
+lde adu sde $1 == $3 && $2 == 4 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"add.l %[1],$1"	| | |
 lol loc sbu stl $1 == $4 && $3 == 2 && inreg($1) < 2 | |
@@ -1117,7 +1119,9 @@ ldl adp sdl $1 == $3 && inreg($1) < 2 | |	remove(MEM_ALL)
 lde adp sde $1 == $3 | |	remove(MEM_ALL)
 				"add.l #$2,$1"		| | | (9,17)
 ldc ads loww(1) == 0 && highw(1) == 0 && $2 == 4 | | | | |
-ldc ads highw(1) == 0 && $2 == 4 | ADDREG | 
+ldc ads highw(1) == 0 && loww(1) > 0 && loww(1) <= 32767 && $2 == 4 | ADDREG | 
+					| {REGOFF_ADDR,%[1],loww(1)} | |
+ldc ads highw(1) == (0-1) && (loww(1) < 0 || loww(1) > 32767) && $2 == 4 | ADDREG |
 					| {REGOFF_ADDR,%[1],loww(1)} | |
 ads $1 == 2 |	ANY ADDSCR |	"add.w %[1],%[2]"
 				erase(%[2])
@@ -1125,6 +1129,25 @@ ads $1 == 2 |	ANY ADDSCR |	"add.w %[1],%[2]"
 ads $1 == 4 |	ANY4 ADDSCR |	"add.l %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])	| %[2] | |
+#ifdef REGVARS
+ldl ads sdl $1==$3 && inreg($1)==2 && $2==4 | ANY4 |
+				remove(regvar($1))
+				"add.l %[1],%(regvar($1)%)"	| | |
+ads sdl inreg($2)==2 && $1==4 | ANY4 NO_ADDREG |
+				remove(regvar($2))
+				move(%[1],regvar($2))
+				"add.l %[2],%(regvar($2)%)"
+				erase(regvar($2))		| | | (2,8)+%[2]
+...			      | NO_ADDREG ANY4 |
+				remove(regvar($2))
+				move(%[2],regvar($2))
+				"add.l %[1],%(regvar($2)%)"
+				erase(regvar($2))		| | | (2,8)+%[1]
+...			      | nocoercions : ANY4 STACK |
+				remove(regvar($2))
+				"move.l (sp)+,%(regvar($2)%)"
+				"add.l %[1],%(regvar($2)%)"	| | | (4,8)+%[1]
+#endif
 loc ldl ads sdl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
 				remove(MEM_ALL)
 				"add.l #$1,$2(a6)"	| | |	(8,16)
@@ -1134,15 +1157,15 @@ lde loc ads sde $3 == 2 && $1 == $4 | |
 ldl ldc ads sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl ads sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"add.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc ads sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"add.l #$2,$1"		| | |	(9,17)
-ldc lde ads sde $3 == 4 && $2 == $4 | |
+ldl ads sdl $1==$3 && inreg($1)<2 && $2==4 | DOUBLE+DATAREG4+EXTENDED4 |
 				remove(MEM_ALL)
-				"add.l #$1,$2"		| | |	(9,17)
+				"add.l %[1],$1(a6)"	| | |
+lde ads sde $1==$3 && $2==4 | DOUBLE+DATAREG4+EXTENDED4 |
+				remove(MEM_ALL)
+				"add.l %[1],$1"		| | |
 sbs $1 == 2 | ANY4 DATASCR4 |	"sub.l %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])		| %[2.1] | |
@@ -1285,6 +1308,7 @@ zrf		| |			| |	  zer $1 |
 /* G R O U P  VIII :   C O N V E R T   */
 
 
+loc loc cii loc loc cii $1==$5 && $2==$4 && $1 <= $2 | | | | | /* should be peephole optim */
 loc loc cii $1==$2 | | | | |
 loc loc cuu $1==$2 | | | | |
 loc loc ciu $1==$2 | | | | |
@@ -1302,7 +1326,12 @@ ciu | | | | cuu |
 loc loc cii $1==1 && $2==2 | DATASCR |
 				"ext.w %[1]"
 				erase(%[1])
-				setcc(%[1])	| %[1] | |
+				setcc(%[1])	| %[1] | | (2,3)
+...	| nocoercions: ANY1 |
+				allocate(DATAREG)
+				"move.b %[1],%[a]"
+				"ext.w %[a]"
+				setcc(%[a])	| %[a] | | (4,6)+%[1]
 loc loc cii $1==1 && $2==4 | ANY |
 				allocate(%[1],DATAREG4)
 				move(%[1],%[a.1])
@@ -1310,28 +1339,17 @@ loc loc cii $1==1 && $2==4 | ANY |
 				"ext.l %[a]"
 				erase(%[a])
 				setcc(%[a])	| %[a] | |
-loc loc cuu $1==1 && $2==4 | nocoercions: DATASCR |
-				"and.l #255,%[1]"
-				erase(%[1])
-				setcc(%[1])	| %[1] | |
-...			   | ANY |
-				allocate(DATAREG4)
-				"clr.l %[a]"
-				move(%[1],%[a.1])
-				erase(%[a])
-						| %[a] | |
-...			   | ANY1 |
-				allocate(DATAREG4)
-				"clr.l %[a]"
-				"move.b %[1],%[a.1]"
-				erase(%[a])
-						| %[a] | |
 loc loc cii $1==2 && $2==4 | ANY |
 				allocate(%[1],DATAREG4)
 				move(%[1],%[a.1])
 				"ext.l %[a]"
 				erase(%[a])
 				setcc(%[a])	| %[a] | |
+#ifdef REGVARS
+lol loc loc cii inreg($1)==2 && $2==2 && $3==4 | |
+				"ext.l %(regvar($1)%)"
+						| { EXTENDED4, regvar($1) } | |
+#endif
 loc loc cuu $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
 loc loc ciu $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
 loc loc cui $1==2 && $2==4 |	|	| {IMMEDIATE,0} | |
@@ -1344,13 +1362,13 @@ loc loc loc ciu $1 == 0 && $2 == 2 && $3 == 4 | | | {DOUBLE,"0"} | |
 loc loc loc cui $1 == 0 && $2 == 2 && $3 == 4 | | | {DOUBLE,"0"} | |
 
 loc loc cii $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
-...			   | ANY ANY	| |  %[2]   | |
+...			   | ANY-REGCH2 ANY	| |  %[2]   | |
 loc loc cuu $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
-...			   | ANY	| |  | |
+...			   | ANY-REGCH2	| |  | |
 loc loc ciu $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
-...			   | ANY	| |  | |
+...			   | ANY-REGCH2	| |  | |
 loc loc cui $1==4 && $2==2 | DATAREG4	| |  %[1.1] | |
-...			   | ANY	| |  | |
+...			   | ANY-REGCH2	| |  | |
 loc loc loc cuu $2 == 1 && $3 == 4 && $1 > 0 && $1 < 128 | | | | ldc $1 |
 
 /* Floating point stuff */
@@ -1455,29 +1473,19 @@ and defined($1) && $1 == 2 | ANY DATASCR |
 				erase(%[1])		| %[1]  | | (2,2)+%[2]
 lol loc and $2 == 255 && inreg($1) < 2 && $3 == 2 | | | {DISPL1,LB,$1+1} | |
 lal loi and lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
-			   | DATAREG |
+			   | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"and.b %[1],$1(a6)" | | |
-loc lol and stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"and.w #$1,$2(a6)"	| | |	(6,10)
 loe loc and ste $3 == 2 && $1 == $4 | |
 				remove(MEM_ALL)
 				"and.w #$2,$1"		| | |	(7,11)
-loc loe and ste $3 == 2 && $2 == $4 | |
-				remove(MEM_ALL)
-				"and.w #$1,$2"		| | |	(7,11)
-loc lil and sil $2 == $4 && $3 == 2 | |
-				allocate(ADDREG = {DISPL4,LB,$2})
-				remove(MEM_ALL)
-				"and.w #$1,(%[a])"	| | |
-lol and stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG |
+lol and stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG + IMMEDIATE |
 				remove(MEM_ALL)
 				"and.w %[1],$1(a6)"	| | |
-loe and ste $1 == $3 && $2 == 2 | DATAREG |
+loe and ste $1 == $3 && $2 == 2 | DATAREG + IMMEDIATE |
 				remove(MEM_ALL)
 				"and.w %[1],$1"	| | |
-lil and sil $1 == $3 && $2 == 2 | DATAREG |
+lil and sil $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG + IMMEDIATE |
 				allocate(ADDREG={DISPL4,LB,$1})
 				remove(MEM_ALL)
 				"and.w %[1],(%[a])"	| | |
@@ -1495,19 +1503,13 @@ and defined($1) && $1 == 4   | ANY4-ADDREG DATASCR4 |
 ldl ldc and sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"and.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl and sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"and.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc and sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"and.l #$2,$1"		| | |	(9,17)
-ldc lde and sde $3 == 4 && $2 == $4 | |
-				remove(MEM_ALL)
-				"and.l #$1,$2"		| | |	(9,17)
-ldl and sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4 |
+ldl and sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"and.l %[1],$1(a6)"	| | |
-lde and sde $1 == $3 && $2 == 4 | DATAREG4 |
+lde and sde $1 == $3 && $2 == 4 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"and.l %[1],$1"	| | |
 and defined($1) && $1 > 4    | STACK |
@@ -1538,32 +1540,22 @@ ior defined($1) && $1 == 2 | ANY DATASCR |
 				erase(%[1])
 				setcc(%[1])	| %[1]  | | (2,2)+%[2]
 lal loi ior lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
-			   | DATAREG |
+			   | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"or.b %[1],$1(a6)" | | |
-loc lol ior stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"or.w #$1,$2(a6)"	| | |	(6,10)
-lol ior stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG |
+lol ior stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"or.w %[1],$1(a6)"	| | |
-loe ior ste $1 == $3 && $2 == 2 | DATAREG |
+loe ior ste $1 == $3 && $2 == 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"or.w %[1],$1"	| | |
-lil ior sil $1 == $3 && $2 == 2 | DATAREG |
+lil ior sil $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				allocate(ADDREG={DISPL4,LB,$1})
 				remove(MEM_ALL)
 				"or.w %[1],(%[a])"	| | |
 loe loc ior ste $3 == 2 && $1 == $4 | |
 				remove(MEM_ALL)
 				"or.w #$2,$1"		| | |	(7,11)
-loc loe ior ste $3 == 2 && $2 == $4 | |
-				remove(MEM_ALL)
-				"or.w #$1,$2"		| | |	(7,11)
-loc lil ior sil $2 == $4 && $3 == 2 | |
-				allocate(ADDREG = {DISPL4,LB,$2})
-				remove(MEM_ALL)
-				"or.w #$1,(%[a])"	| | |
 ior defined($1) && $1 == 4   | ANY4-ADDREG DATASCR4 |
 				"or.l %[1],%[2]"
 				erase(%[2])
@@ -1575,19 +1567,13 @@ ior defined($1) && $1 == 4   | ANY4-ADDREG DATASCR4 |
 ldl ldc ior sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"or.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl ior sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"or.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc ior sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"or.l #$2,$1"		| | |	(9,17)
-ldc lde ior sde $3 == 4 && $2 == $4 | |
-				remove(MEM_ALL)
-				"or.l #$1,$2"		| | |	(9,17)
-ldl ior sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4 |
+ldl ior sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"or.l %[1],$1(a6)"	| | |
-lde ior sde $1 == $3 && $2 == 4 | DATAREG4 |
+lde ior sde $1 == $3 && $2 == 4 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"or.l %[1],$1"	| | |
 ior defined($1) && $1 > 4    | STACK |
@@ -1618,59 +1604,43 @@ xor defined($1) && $1 == 2 | DATAREG DATASCR |
 				erase(%[1])
 				setcc(%[1])	| %[1]  | | (2,2)+%[2]
 lal loi xor lal sti $1 == $4 && $2 == 1 && $3 == 2 && $5 == 1 && inreg($1) < 2
-			   | DATAREG |
+			   | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"eor.b %[1],$1(a6)" | | |
 lol loc xor stl $1 == $4 && $3 == 2 && inreg($1) < 2  | |
 				remove(MEM_ALL)
 				"eor.w #$2,$1(a6)"	| | |  (6,10)
-loc lol xor stl $2 == $4 && $3 == 2 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"eor.w #$1,$2(a6)"	| | |	(6,10)
 loe loc xor ste $3 == 2 && $1 == $4 | |
 				remove(MEM_ALL)
 				"eor.w #$2,$1"		| | |	(7,11)
-loc loe xor ste $3 == 2 && $2 == $4 | |
-				remove(MEM_ALL)
-				"eor.w #$1,$2"		| | |	(7,11)
-loc lil xor sil $2 == $4 && $3 == 2 | |
-				allocate(ADDREG = {DISPL4,LB,$2})
-				remove(MEM_ALL)
-				"eor.w #$1,(%[a])"	| | |
-lol xor stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG |
+lol xor stl $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"eor.w %[1],$1(a6)"	| | |
-loe xor ste $1 == $3 && $2 == 2 | DATAREG |
+loe xor ste $1 == $3 && $2 == 2 | DATAREG+IMMEDIATE |
 				remove(MEM_ALL)
 				"eor.w %[1],$1"	| | |
-lil xor sil $1 == $3 && $2 == 2 | DATAREG |
+lil xor sil $1 == $3 && $2 == 2 && inreg($1) < 2 | DATAREG+IMMEDIATE |
 				allocate(ADDREG={DISPL4,LB,$1})
 				remove(MEM_ALL)
 				"eor.w %[1],(%[a])"	| | |
-xor defined($1) && $1 == 4   | DATAREG4 DATASCR4 |
+xor defined($1) && $1 == 4   | DATAREG4+EXTENDED4 DATASCR4 |
 				"eor.l %[1],%[2]"
 				erase(%[2])
 				setcc(%[2])		| %[2] | | (2,3)+%[1]
-...			     | DATASCR4 DATAREG4 |
+...			     | DATASCR4 DATAREG4+EXTENDED4 |
 				"eor.l %[2],%[1]"
 				erase(%[1])
 				setcc(%[1])		| %[1] | | (2,3)+%[2]
 ldl ldc xor sdl $1 == $4 && $3 == 4 && inreg($1) < 2 | |
 				remove(MEM_ALL)
 				"eor.l #$2,$1(a6)"	| | |  (8,16)
-ldc ldl xor sdl $2 == $4 && $3 == 4 && inreg($2) < 2 | |
-				remove(MEM_ALL)
-				"eor.l #$1,$2(a6)"	| | |	(8,16)
 lde ldc xor sde $3 == 4 && $1 == $4 | |
 				remove(MEM_ALL)
 				"eor.l #$2,$1"		| | |	(9,17)
-ldc lde xor sde $3 == 4 && $2 == $4 | |
-				remove(MEM_ALL)
-				"eor.l #$1,$2"		| | |	(9,17)
-ldl xor sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4 |
+ldl xor sdl $1 == $3 && $2 == 4 && inreg($1) < 2 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"eor.l %[1],$1(a6)"	| | |
-lde xor sde $1 == $3 && $2 == 4 | DATAREG4 |
+lde xor sde $1 == $3 && $2 == 4 | DATAREG4+EXTENDED4+DOUBLE |
 				remove(MEM_ALL)
 				"eor.l %[1],$1"	| | |
 xor defined($1) && $1 > 4    | STACK |
@@ -1719,11 +1689,11 @@ rol defined($1) && $1 == 4 | DATAREG DATASCR4 |
 					"rol.l %[1],%[2]"
 					erase(%[2])
 					setcc(%[2])	| %[2] | |
-ror defined($1) && $1 == 2 | DATAREG DATAREG |
+ror defined($1) && $1 == 2 | DATAREG DATASCR |
 					"ror %[1],%[2]"
 					erase(%[2])
 					setcc(%[2])	| %[2] | |
-ror defined($1) && $1 == 4 | DATAREG DATAREG4 |
+ror defined($1) && $1 == 4 | DATAREG DATASCR4 |
 					"ror.l %[1],%[2]"
 					erase(%[2])
 					setcc(%[2])	| %[2] | |
@@ -2049,109 +2019,109 @@ cmu zgt $1==2 | ANY DATAREG STACK |
 				"cmp.w %[1],%[2]"
 				"bhi $2" | | |
 
-cmi tlt and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tlt and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"blt 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tlt ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tlt ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bge 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tle and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tle and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"ble 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tle ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tle ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bgt 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi teq and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi teq and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"beq 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi teq ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi teq ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bne 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tne and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tne and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bne 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tne ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tne ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"beq 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tge and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tge and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bge 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tge ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tge ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"blt 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tgt and $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tgt and $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"bgt 1f"
 				"clr %[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tgt ior $1==4 && $3==2 | ANY4 DATAREG4 DATASCR |
+cmi tgt ior $1==4 && $3==2 | ANY4 DATAREG4+EXTENDED4 DATASCR |
 				"cmp.l %[1],%[2]"
 				"ble 1f"
 				"bset #0,%[3]"
 				"1:"
 				erase(%[3])	| %[3] | |
-cmi tlt $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi tlt $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"blt 1f"
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi tle $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi tle $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"ble 1f"
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi teq $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi teq $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"beq 1f"
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi tne $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi tne $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bne 1f"
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi tge $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi tge $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bge 1f"
 				"clr %[a]"
 				"1:"
 				erase(%[a])	| %[a] | |
-cmi tgt $1==4 | ANY4 DATAREG4 |	allocate(DATAREG={IMMEDIATE,1})
+cmi tgt $1==4 | ANY4 DATAREG4+EXTENDED4 |	allocate(DATAREG={IMMEDIATE,1})
 				"cmp.l %[1],%[2]"
 				"bgt 1f"
 				"clr %[a]"
@@ -2782,9 +2752,9 @@ csb $1 == 2 | |			remove(ALL)
 				"jmp .csb"
 							| | |
 dch | | | | loi 4 |
-dup $1 == 2 |	ANY |		|	%[1] %[1] | |
-dup $1 == 4 |	ANY4 |		|	%[1] %[1] | |
-   ...	    | ANY ANY |		|       %[2] %[1] %[2] %[1] | |
+dup $1 == 2 |	ANY-REGCH2 |		|	%[1] %[1] | |
+dup $1 == 4 |	DATAREG4+ADDREG |		|	%[1] %[1] | |
+   ...	    | ANY-REGCH2 ANY-REGCH2 |		|       %[2] %[1] %[2] %[1] | |
 dup $1 > 4 |	STACK |		allocate(ADDREG,DATAREG4)
 				"move.l sp,%[a]"
 				"add.l #$1,%[a]"
@@ -2892,7 +2862,7 @@ MOVES:
 		"move.l %[1],%[2]" setcc(%[2]),(2,2))
 (ANY, DATA_ALT, "move.w %[1], %[2]"setcc(%[2]),(2,2)+%[1]+%[2])
 (IMMEDIATE %[cc] == 0, ANY1, "clr.b %[2]" setcc(%[2]),(2,3)+%[2] )
-(ANY+ANY1, ANY1, "move.b %[1], %[2]"setcc(%[2]),(2,2)+%[1]+%[2])
+(ANY+ANY1-REGCH2, ANY1, "move.b %[1], %[2]"setcc(%[2]),(2,2)+%[1]+%[2])
 (IMMEDIATE4 %[cc] == 0, DATA_ALT4, "clr.l %[2]"setcc(%[2]),(2,5)+%[2])
 (DOUBLEZERO, DATA_ALT4, "clr.l %[2]"setcc(%[2]),(2,5)+%[2])
 (DOUBLE %[cc] == "0", DATA_ALT4, "clr.l %[2]"setcc(%[2]),(2,5)+%[2])
