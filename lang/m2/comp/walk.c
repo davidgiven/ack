@@ -136,7 +136,7 @@ WalkModule(module)
 			C_ine_dlb(data_label, (arith) 0);
 		}
 
-		for (; nd; nd = nd->next) {
+		for (; nd; nd = nd->nd_left) {
 			C_cal(nd->nd_IDF->id_text);
 		}
 	}
@@ -213,7 +213,7 @@ WalkProcedure(procedure)
 	*/
 	for (param = ParamList(procedure->df_type);
 	     param;
-	     param = param->next) {
+	     param = param->par_next) {
 		if (! IsVarParam(param)) {
 			register struct type *TpParam = TypeOfParam(param);
 
@@ -544,10 +544,10 @@ WalkStat(nd, exit_label)
 			/* the record is indirectly available */
 			wds.w_desig = ds;
 			link.sc_scope = wds.w_scope;
-			link.next = CurrVis;
+			link.sc_next = CurrVis;
 			CurrVis = &link;
 			WalkNode(right, exit_label);
-			CurrVis = link.next;
+			CurrVis = link.sc_next;
 			WithDesigs = wds.w_next;
 			FreePtr(ds.dsg_offset);
 			break;

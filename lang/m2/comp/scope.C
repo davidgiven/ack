@@ -47,9 +47,9 @@ open_scope(scopetype)
 	ls->sc_scope = sc;
 	ls->sc_encl = CurrVis;
 	if (scopetype == OPENSCOPE) {
-		ls->next = ls->sc_encl;
+		ls->sc_next = ls->sc_encl;
 	}
-	else	ls->next = PervVis;
+	else	ls->sc_next = PervVis;
 	CurrVis = ls;
 }
 
@@ -73,7 +73,7 @@ InitScope()
 	sc->sc_def = 0;
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
-	ls->next = 0;
+	ls->sc_next = 0;
 	ls->sc_encl = 0;
 	ls->sc_scope = PervasiveScope;
 	PervVis = ls;
@@ -126,7 +126,7 @@ chk_forw(pdf)
 node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 			}
 			while (nd) {
-				nd->nd_type->next = df->df_type;
+				nd->nd_type->tp_next = df->df_type;
 				nd = nd->nd_right;
 			}
 			FreeNode(df1->df_forw_node);
@@ -138,7 +138,7 @@ node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 
 			df->df_kind = D_TYPE;
 			while (nd) {
-				nd->nd_type->next = df->df_type;
+				nd->nd_type->tp_next = df->df_type;
 				nd = nd->nd_right;
 			}
 			FreeNode(df->df_forw_node);
@@ -166,7 +166,7 @@ df->df_idf->id_text);
 				struct def *df1 = df->df_nextinscope;
 	
 				if (df->df_kind == D_FORWMODULE) {
-					df->for_vis->next = ls;
+					df->for_vis->sc_next = ls;
 				}
 				df->df_nextinscope = ls->sc_scope->sc_def;
 				ls->sc_scope->sc_def = df;

@@ -537,7 +537,7 @@ ChkProcCall(expp)
 
 	/* Check parameter list
 	*/
-	for (param = ParamList(left->nd_type); param; param = param->next) {
+	for (param = ParamList(left->nd_type); param; param = param->par_next) {
 		if (!(left = getarg(&expp, 0, IsVarParam(param), edf))) {
 			return 0;
 		}

@@ -91,15 +91,13 @@ construct_type(fund, tp)
 		break;
 
 	case T_ARRAY:
-		dtp->tp_value.tp_arr = 
-			(struct array *) Malloc(sizeof(struct array));
+		dtp->tp_value.tp_arr = new_array();
 		if (tp) dtp->tp_align = tp->tp_align;
 		break;
 
 	case T_SUBRANGE:
 		assert(tp != 0);
-		dtp->tp_value.tp_subrange = 
-			(struct subrange *) Malloc(sizeof(struct subrange));
+		dtp->tp_value.tp_subrange = new_subrange();
 		dtp->tp_align = tp->tp_align;
 		dtp->tp_size = tp->tp_size;
 		break;
@@ -108,7 +106,7 @@ construct_type(fund, tp)
 		crash("funny type constructor");
 	}
 
-	dtp->next = tp;
+	dtp->tp_next = tp;
 	return dtp;
 }
 
@@ -135,8 +133,7 @@ standard_type(fund, align, size)
 	tp->tp_align = align;
 	tp->tp_size = size;
 	if (fund == T_ENUMERATION || fund == T_CHAR) {
-		tp->tp_value.tp_enum =
-			(struct enume *) Malloc(sizeof(struct enume));
+		tp->tp_value.tp_enum = new_enume();
 	}
 
 	return tp;
@@ -293,26 +290,26 @@ chk_basesubrange(tp, base)
 		if (base->sub_lb > tp->sub_lb || base->sub_ub < tp->sub_ub) {
 			error("base type has insufficient range");
 		}
-		base = base->next;
+		base = base->tp_next;
 	}
 
 	if (base->tp_fund & (T_ENUMERATION|T_CHAR)) {
-		if (tp->next != base) {
+		if (tp->tp_next != base) {
 			error("specified base does not conform");
 		}
 	}
 	else if (base != card_type && base != int_type) {
 		error("illegal base for a subrange");
 	}
-	else if (base == int_type && tp->next == card_type &&
+	else if (base == int_type && tp->tp_next == card_type &&
 		 (tp->sub_ub > max_int || tp->sub_ub < 0)) {
 		error("upperbound to large for type INTEGER");
 	}
-	else if (base != tp->next && base != int_type) {
+	else if (base != tp->tp_next && base != int_type) {
 		error("specified base does not conform");
 	}
 
-	tp->next = base;
+	tp->tp_next = base;
 	tp->tp_size = base->tp_size;
 	tp->tp_align = base->tp_align;
 }
@@ -533,7 +530,7 @@ FreeType(tp)
 	pr = ParamList(tp);
 	while (pr) {
 		pr1 = pr;
-		pr = pr->next;
+		pr = pr->par_next;
 		free_def(pr1->par_def);
 		free_paramlist(pr1);
 	}
@@ -559,10 +556,10 @@ DeclareType(nd, df, tp)
 				   "opaque type \"%s\" is not a pointer type",
 				   df->df_idf->id_text);
 		}
-		df->df_type->next = tp;
+		df->df_type->tp_next = tp;
 		df->df_type->tp_fund = T_EQUAL;
 		while (tp != df->df_type && tp->tp_fund == T_EQUAL) {
-			tp = tp->next;
+			tp = tp->tp_next;
 		}
 		if (tp == df->df_type) {
 			/* Circular definition! */
@@ -579,7 +576,7 @@ RemoveEqual(tpx)
 	register struct type *tpx;
 {
 
-	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->next;
+	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->tp_next;
 	return tpx;
 }
 
@@ -631,7 +628,7 @@ type_or_forward(ptp)
 			define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
 
 		if (df->df_kind == D_TYPE) {
-			(*ptp)->next = df->df_type;
+			(*ptp)->tp_next = df->df_type;
 			free_node(nd);
 		}
 		else {
@@ -716,7 +713,7 @@ DumpType(tp)
 			while(par) {
 				if (IsVarParam(par)) print("VAR ");
 				DumpType(TypeOfParam(par));
-				par = par->next;
+				par = par->par_next;
 			}
 		}
 		break;
@@ -726,7 +723,7 @@ DumpType(tp)
 		print("; element:");
 		DumpType(tp->arr_elem);
 		print("; index:");
-		DumpType(tp->next);
+		DumpType(tp->tp_next);
 		print(";");
 		return;
 	case T_STRING:
@@ -736,11 +733,11 @@ DumpType(tp)
 	default:
 		crash("DumpType");
 	}
-	if (tp->next && tp->tp_fund != T_POINTER) {
+	if (tp->tp_next && tp->tp_fund != T_POINTER) {
 		/* Avoid printing recursive types!
 		*/
 		print(" next:(");
-		DumpType(tp->next);
+		DumpType(tp->tp_next);
 		print(")");
 	}
 	print(";");

@@ -10,7 +10,7 @@
 /* $Header$ */
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
-	struct paramlist *next;
+	struct paramlist *par_next;
 	struct def *par_def;	/* "df" of parameter */
 #define	IsVarParam(xpar)	((int) ((xpar)->par_def->df_flags & D_VARPAR))
 #define TypeOfParam(xpar)	((xpar)->par_def->df_type)
@@ -27,6 +27,8 @@ struct enume {
 #define enm_rck		tp_value.tp_enum->en_rck
 };
 
+/* ALLOCDEF "enume" 5 */
+
 struct subrange {
 	arith su_lb, su_ub;	/* lower bound and upper bound */
 	label su_rck;		/* label of range check descriptor */
@@ -34,6 +36,8 @@ struct subrange {
 #define sub_ub	tp_value.tp_subrange->su_ub
 #define sub_rck	tp_value.tp_subrange->su_rck
 };
+
+/* ALLOCDEF "subrange" 5 */
 
 struct array {
 	struct type *ar_elem;	/* type of elements */
@@ -43,6 +47,8 @@ struct array {
 #define arr_descr	tp_value.tp_arr->ar_descr
 #define arr_elsize	tp_value.tp_arr->ar_elsize
 };
+
+/* ALLOCDEF "array" 5 */
 
 struct record {
 	struct scope *rc_scope;	/* scope of this record */
@@ -58,7 +64,7 @@ struct proc {
 };
 
 struct type	{
-	struct type *next;	/* used with ARRAY, PROCEDURE, POINTER, SET,
+	struct type *tp_next;	/* used with ARRAY, PROCEDURE, POINTER, SET,
 				   SUBRANGE, EQUAL
 				*/
 	int tp_fund;		/* fundamental type  or constructor */
@@ -146,29 +152,29 @@ struct type
 
 #define NULLTYPE ((struct type *) 0)
 
-#define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->next==0)
+#define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->tp_next==0)
 #define bounded(tpx)		((tpx)->tp_fund & T_INDEX)
 #define complex(tpx)		((tpx)->tp_fund & (T_RECORD|T_ARRAY))
 #define WA(sz)			(align(sz, (int) word_size))
 #ifdef DEBUG
 #define ResultType(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
-					(tpx)->next)
+					(tpx)->tp_next)
 #define ParamList(tpx)		(assert((tpx)->tp_fund == T_PROCEDURE),\
 					(tpx)->prc_params)
 #define IndexType(tpx)		(assert((tpx)->tp_fund == T_ARRAY),\
-					(tpx)->next)
+					(tpx)->tp_next)
 #define ElementType(tpx)	(assert((tpx)->tp_fund == T_SET),\
-					(tpx)->next)
+					(tpx)->tp_next)
 #define PointedtoType(tpx)	(assert((tpx)->tp_fund == T_POINTER),\
-					(tpx)->next)
+					(tpx)->tp_next)
 #else DEBUG
-#define ResultType(tpx)		((tpx)->next)
+#define ResultType(tpx)		((tpx)->tp_next)
 #define ParamList(tpx)		((tpx)->prc_params)
-#define IndexType(tpx)		((tpx)->next)
-#define ElementType(tpx)	((tpx)->next)
-#define PointedtoType(tpx)	((tpx)->next)
+#define IndexType(tpx)		((tpx)->tp_next)
+#define ElementType(tpx)	((tpx)->tp_next)
+#define PointedtoType(tpx)	((tpx)->tp_next)
 #endif DEBUG
-#define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->next : \
+#define BaseType(tpx)		((tpx)->tp_fund == T_SUBRANGE ? (tpx)->tp_next : \
 					(tpx))
 #define	IsConstructed(tpx)	((tpx)->tp_fund & T_CONSTRUCTED)
 

@@ -69,7 +69,7 @@ EnterEnumList(Idlist, type)
 	register struct node *idlist = Idlist;
 
 	type->enm_ncst = 0;
-	for (; idlist; idlist = idlist->next) {
+	for (; idlist; idlist = idlist->nd_left) {
 		df = define(idlist->nd_IDF, CurrentScope, D_ENUM);
 		df->df_type = type;
 		df->enm_val = (type->enm_ncst)++;
@@ -93,7 +93,7 @@ EnterFieldList(Idlist, type, scope, addr)
 	register struct def *df;
 	register struct node *idlist = Idlist;
 
-	for (; idlist; idlist = idlist->next) {
+	for (; idlist; idlist = idlist->nd_left) {
 		df = define(idlist->nd_IDF, scope, D_FIELD);
 		df->df_type = type;
 		df->df_flags |= D_QEXPORTED;
@@ -198,11 +198,11 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 		/* Can only happen when a procedure type is defined */
 		dummy = Idlist = idlist = MkLeaf(Name, &dot);
 	}
-	for ( ; idlist; idlist = idlist->next) {
+	for ( ; idlist; idlist = idlist->nd_left) {
 		pr = new_paramlist();
-		pr->next = 0;
+		pr->par_next = 0;
 		if (!*ppr) *ppr = pr;
-		else	last->next = pr;
+		else	last->par_next = pr;
 		last = pr;
 		if (!DefinitionModule && idlist != dummy) {
 			df = define(idlist->nd_IDF, CurrentScope, D_VARIABLE);
@@ -322,7 +322,7 @@ EnterExportList(Idlist, qualified)
 	register struct node *idlist = Idlist;
 	register struct def *df, *df1;
 
-	for (;idlist; idlist = idlist->next) {
+	for (;idlist; idlist = idlist->nd_left) {
 		df = lookup(idlist->nd_IDF, CurrentScope, 0);
 
 		if (!df) {
@@ -354,7 +354,7 @@ EnterExportList(Idlist, qualified)
 				    df1->imp_def == CurrentScope->sc_definedby) {
 					DoImport(df, df1->df_scope);
 				}
-				df1 = df1->next;
+				df1 = df1->df_next;
 			}
 
 			/* Also handle the definition as if the enclosing
@@ -427,7 +427,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 		return;
 	}
 
-	for (; idlist; idlist = idlist->next) {
+	for (; idlist; idlist = idlist->nd_left) {
 		if (forwflag) df = ForwDef(idlist, vis->sc_scope);
 		else if (! (df = lookup(idlist->nd_IDF, vis->sc_scope, 1))) {
 			if (! is_anon_idf(idlist->nd_IDF)) {
@@ -464,7 +464,7 @@ EnterImportList(Idlist, local)
 	struct scope *sc = enclosing(CurrVis)->sc_scope;
 	extern struct def *GetDefinitionModule();
 
-	for (; idlist; idlist = idlist->next) {
+	for (; idlist; idlist = idlist->nd_left) {
 		DoImport(local ?
 				ForwDef(idlist, sc) :
 				GetDefinitionModule(idlist->nd_IDF, 1) ,

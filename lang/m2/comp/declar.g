@@ -218,11 +218,11 @@ IdentList(struct node **p;)
 	IDENT		{ *p = q = MkLeaf(Value, &dot); }
 	[ %persistent
 		',' IDENT
-			{ q->next = MkLeaf(Value, &dot);
-			  q = q->next;
+			{ q->nd_left = MkLeaf(Value, &dot);
+			  q = q->nd_left;
 			}
 	]*
-			{ q->next = 0; }
+			{ q->nd_left = 0; }
 ;
 
 SubrangeType(struct type **ptp;)
@@ -416,7 +416,7 @@ SetType(struct type **ptp;) :
 PointerType(register struct type **ptp;) :
 	POINTER TO
 	[ %if	(type_or_forward(ptp))
-	  type(&((*ptp)->next)) 
+	  type(&((*ptp)->tp_next)) 
 	|
 	  IDENT
 	]

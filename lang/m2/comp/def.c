@@ -74,7 +74,7 @@ MkDef(id, scope, kind)
 	df->df_idf = id;
 	df->df_scope = scope;
 	df->df_kind = kind;
-	df->next = id->id_def;
+	df->df_next = id->id_def;
 	id->id_def = df;
 
 	/* enter the definition in the list of definitions in this scope
@@ -211,13 +211,13 @@ RemoveFromIdList(df)
 	register struct idf *id = df->df_idf;
 	register struct def *df1;
 
-	if ((df1 = id->id_def) == df) id->id_def = df->next;
+	if ((df1 = id->id_def) == df) id->id_def = df->df_next;
 	else {
-		while (df1->next != df) {
-			assert(df1->next != 0);
-			df1 = df1->next;
+		while (df1->df_next != df) {
+			assert(df1->df_next != 0);
+			df1 = df1->df_next;
 		}
-		df1->next = df->next;
+		df1->df_next = df->df_next;
 	}
 }
 

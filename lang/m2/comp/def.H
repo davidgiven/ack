@@ -76,7 +76,7 @@ struct forwtype {
 };
 
 struct def	{		/* list of definitions for a name */
-	struct def *next;	/* next definition in definitions chain */
+	struct def *df_next;	/* next definition in definitions chain */
 	struct def *df_nextinscope;
 				/* link all definitions in a scope */
 	struct idf *df_idf;	/* link back to the name */

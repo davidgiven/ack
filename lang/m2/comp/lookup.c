@@ -40,7 +40,7 @@ lookup(id, scope, import)
 	*/
 	for (df = id->id_def, df1 = 0;
 	     df && df->df_scope != scope;
-	     df1 = df, df = df->next) { /* nothing */ }
+	     df1 = df, df = df->df_next) { /* nothing */ }
 
 	if (df) {
 		/* Found it
@@ -48,8 +48,8 @@ lookup(id, scope, import)
 		if (df1) {
 			/* Put the definition in front
 			*/
-			df1->next = df->next;
-			df->next = id->id_def;
+			df1->df_next = df->df_next;
+			df->df_next = id->id_def;
 			id->id_def = df;
 		}
 		if (import && df->df_kind == D_IMPORT) {

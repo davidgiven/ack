@@ -131,7 +131,7 @@ GetDefinitionModule(id, incr)
 					n = MkLeaf(Name, &dot);
 					n->nd_IDF = id;
 					n->nd_symb = IDENT;
-					if (nd_end) nd_end->next = n;
+					if (nd_end) nd_end->nd_left = n;
 					else Modules = n;
 					nd_end = n;
 				}

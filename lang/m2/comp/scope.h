@@ -23,7 +23,7 @@
 				*/
 
 struct scope {
-	struct scope *next;
+	/* struct scope *next; */
 	char *sc_name;		/* name of this scope */
 	struct def *sc_def;	/* list of definitions in this scope */
 	arith sc_off;		/* offsets of variables in this scope */
@@ -33,7 +33,7 @@ struct scope {
 };
 
 struct scopelist {
-	struct scopelist *next;
+	struct scopelist *sc_next;
 	struct scope *sc_scope;
 	struct scopelist *sc_encl;
 };
@@ -48,6 +48,6 @@ extern struct scopelist
 #define GlobalScope	(GlobalVis->sc_scope)
 #define enclosing(x)	((x)->sc_encl)
 #define scopeclosed(x)	((x)->sc_scopeclosed)
-#define nextvisible(x)	((x)->next)		/* use with scopelists */
+#define nextvisible(x)	((x)->sc_next)		/* use with scopelists */
 
 struct scope *open_and_close_scope();

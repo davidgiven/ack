@@ -83,8 +83,8 @@ TstProcEquiv(tp1, tp2)
 	while (p1 && p2) {
 		if (IsVarParam(p1) != IsVarParam(p2) ||
 		    !TstParEquiv(TypeOfParam(p1), TypeOfParam(p2))) return 0;
-		p1 = p1->next;
-		p2 = p2->next;
+		p1 = p1->par_next;
+		p2 = p2->par_next;
 	}
 
 	/* Here, at least one of the parameterlists is exhausted.

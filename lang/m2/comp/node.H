@@ -10,8 +10,7 @@
 /* $Header$ */
 
 struct node {
-	struct node *next;
-#define nd_left	next
+	struct node *nd_left;
 	struct node *nd_right;
 	int nd_class;		/* kind of node */
 #define Value	0		/* constant */

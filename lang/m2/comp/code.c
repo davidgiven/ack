@@ -348,8 +348,8 @@ CodeParameters(param, arg)
 
 	assert(param != 0 && arg != 0);
 
-	if (param->next) {
-		CodeParameters(param->next, arg->nd_right);
+	if (param->par_next) {
+		CodeParameters(param->par_next, arg->nd_right);
 	}
 
 	tp = TypeOfParam(param);

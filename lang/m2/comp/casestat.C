@@ -34,7 +34,6 @@
 #include	"density.h"
 
 struct switch_hdr	{
-	struct switch_hdr *next;	/* in the free list */
 	label sh_break;			/* label of statement after this one */
 	label sh_default;		/* label of ELSE part, or 0 */
 	int sh_nrofentries;		/* number of cases */
@@ -245,7 +244,7 @@ AddCases(sh, node, lbl)
 
 AddOneCase(sh, node, lbl)
 	register struct switch_hdr *sh;
-	register struct node *node;
+	struct node *node;
 	label lbl;
 {
 	register struct case_entry *ce = new_case_entry();

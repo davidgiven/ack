@@ -107,6 +107,7 @@ CodeValue(ds, tp)
 	/*	Generate code to load the value of the designator described
 		in "ds"
 	*/
+	arith sz;
 
 	switch(ds->dsg_kind) {
 	case DSG_LOADED:
@@ -117,13 +118,14 @@ CodeValue(ds, tp)
 		/* Fall through */
 	case DSG_PLOADED:
 	case DSG_PFIXED:
+		sz = WA(tp->tp_size);
 		if (properly(ds, tp->tp_size, tp->tp_align)) {
 			CodeAddress(ds);
 			C_loi(tp->tp_size);
 			break;
 		}
 		if (ds->dsg_kind == DSG_PLOADED) {
-			arith sz = WA(tp->tp_size) - pointer_size;
+			sz -= pointer_size;
 
 			C_asp(-sz);
 			C_lor((arith) 1);
@@ -131,9 +133,9 @@ CodeValue(ds, tp)
 			C_loi(pointer_size);
 		}
 		else  {
-			C_asp(-WA(tp->tp_size));
-			CodeAddress(ds);
+			C_asp(-sz);
 		}
+		CodeAddress(ds);
 		C_loc(tp->tp_size);
 		C_cal("_load");
 		C_asp(2 * word_size);
