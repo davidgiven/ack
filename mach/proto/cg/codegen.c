@@ -139,6 +139,10 @@ unsigned codegen(codep,ply,toplevel,costlimit,forced) byte *codep; unsigned cost
 #ifndef NDEBUG
 		chkregs();
 #endif
+		if (! toplevel) {
+			ply -= emp-saveemp+1;
+			if (ply <= 0) ply = 1;
+		}
 		n = *bp++;
 		assert(n>0 && n<=MAXRULE);
 		if (n>1) {
@@ -657,8 +661,7 @@ if (Debug > 1) fprintf(stderr, "cost after coercions: %u\n", t);
 		}
 	}
 	if (!toplevel) {
-		if (ply >= j) ply += emrepllen - j;
-		else ply = emrepllen;
+		ply += emrepllen;
 	}
 	break;
     case DO_COST:
