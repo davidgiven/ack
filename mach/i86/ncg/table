@@ -156,7 +156,7 @@ rm1		= REG1 + memory1 .
 rmorconst1	= const + rm1 .
 regorconst12	= REG1 + GENREG + const .
 dest1		= REG1 + memory1 .
-rm12		= rm1 + rm .
+rm12		= rm1 + memory2 + REG .
 
 /* Modes used to indicate tokens to be removed from the fakestack */
 reg_indexed	= ind_reg2 + ind_regoff2 + ind_reg1 + ind_regoff1 .
@@ -2383,7 +2383,7 @@ pat and zeq $1==2 call andzxx("je")
 pat and zne $1==2 call andzxx("jne")
 
 proc locandzxx example loc and zeq
-with exact rm1+memory2
+with exact rm12
   kills ALL
   gen testb %1,{ANYCON,$1}
       jxx* {label,$3}
@@ -2392,7 +2392,7 @@ with GENREG STACK
       jxx* {label,$3}
 with exact IREG
   kills ALL
-  gen testb %1,{ANYCON,$1}
+  gen check %1,{ANYCON,$1}
       jxx* {label,$3}
 
 pat loc and zeq $1<256 && $1>=0 && $2==2 call locandzxx("je")
