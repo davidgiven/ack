@@ -49,7 +49,6 @@
 0,		OP_SO,		005600,		"sbc",
 0,		OP_SO,		0105600,	"sbcb",
 0,		OP_SO,		006700,		"sxt",
-0,		OP_SO,		0100,		"jmp",
 0,		OP_DO,		010000,		"mov",
 0,		OP_DO,		0110000,	"movb",
 0,		OP_DO,		020000,		"cmp",

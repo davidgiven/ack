@@ -91,11 +91,12 @@ sob(reg, exp) expr_t exp; {
 }
 
 jump(opc,opr)	{
-	register sm;
 	register val;
 
-	if (opr==067) {
 # ifdef THREE_PASS
+	if (opr==067) {
+		register sm = 0;
+
 		val = adjust(exp_1) >> 1;
 		if ( fitb(val) && (exp_1.typ & ~S_DOT) == DOTTYP) {
 			sm = 1;
@@ -105,8 +106,8 @@ jump(opc,opr)	{
 			im1flag = 0;
 			return(0);
 		}
-# endif
 	}
+# endif
 	emit2(opc | opr);
 	op1(opr);
 }
