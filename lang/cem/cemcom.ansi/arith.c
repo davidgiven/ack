@@ -326,6 +326,9 @@ int2int(expp, tp)
 	return exp->ex_type->tp_fund;
 }
 
+/* With compile-time constants, we don't set fp_used, since this is done
+ * only when necessary in eval.c.
+ */
 int2float(expp, tp)
 	register struct expr **expp;
 	struct type *tp;
@@ -336,7 +339,6 @@ int2float(expp, tp)
 	register struct expr *exp = *expp;
 	int uns = (*expp)->ex_type->tp_unsigned;
 	
-	fp_used = 1;
 	if (is_cp_cst(exp)) {
 		*expp = new_expr();
 		**expp = *exp;
@@ -351,7 +353,10 @@ int2float(expp, tp)
 		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);
 		exp->FL_DATLAB = 0;
 	}
-	else	*expp = arith2arith(tp, INT2FLOAT, *expp);
+	else	{
+		fp_used = 1;
+		*expp = arith2arith(tp, INT2FLOAT, *expp);
+	}
 }
 
 float2int(expp, tp)
@@ -363,7 +368,6 @@ float2int(expp, tp)
 	*/
 	register struct expr *ex = *expp;
 	
-	fp_used = 1;
 	if (is_fp_cst(ex)) {
 		arith ar = flt_flt2arith(&ex->FL_ARITH, tp->tp_unsigned);
 
@@ -377,7 +381,10 @@ float2int(expp, tp)
 		ex->VL_CLASS = Const;
 		ex->VL_VALUE = ar;
 		cut_size(ex);
-	} else *expp = arith2arith(tp, FLOAT2INT, ex);
+	} else {
+		fp_used = 1;
+		*expp = arith2arith(tp, FLOAT2INT, ex);
+	}
 }
 
 float2float(expp, tp)
@@ -390,11 +397,12 @@ float2float(expp, tp)
 		if the expression is a constant.
 	*/
 	
-	fp_used = 1;
 	if (is_fp_cst(*expp))
 		(*expp)->ex_type = tp;
-	else
+	else {
+		fp_used = 1;
 		*expp = arith2arith(tp, FLOAT2FLOAT, *expp);
+	}
 }
 
 array2pointer(exp)

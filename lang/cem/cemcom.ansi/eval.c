@@ -89,6 +89,7 @@ EVAL(expr, val, code, true_label, false_label)
 		if (gencode) {
 			label datlab = data_label();
 			
+			fp_used = 1;
 			if (!expr->FL_VALUE) {
 				expr->FL_VALUE = Malloc(FLT_STRLEN);
 				flt_flt2str(&(expr->FL_ARITH), expr->FL_VALUE, FLT_STRLEN);
@@ -938,9 +939,12 @@ load_val(expr, rlval)
 	else {
 		register struct idf *id = expr->VL_IDF;
 		register struct def *df = id->id_def;
+		int fund = df->df_type->tp_fund;
 
 		ASSERT(ISNAME(expr));
-		if (df->df_type->tp_fund == FUNCTION) {
+		if (fund == FLOAT || fund == DOUBLE || fund == LNGDBL)
+			fp_used = 1;
+		if (fund == FUNCTION) {
 			/*	the previous statement tried to catch a function
 				identifier, which may be cast to a pointer to a
 				function.
