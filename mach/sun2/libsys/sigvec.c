@@ -29,7 +29,7 @@ sigvec(sig,vec,ovec)
 		_sigfunc[sig] = old;
 		return -1;
 	}
-	if (ovec->handler == _sigtramp) {
+	if (ovec && ovec->handler == _sigtramp) {
 		ovec->handler = old;
 	}
 	return 0;
