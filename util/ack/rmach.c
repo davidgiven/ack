@@ -297,7 +297,7 @@ open_in(name) register char *name ; {
 	if ( !infile ) {
 		gr_throw(&rline) ;
 		gr_cat(&rline,EM_DIR) ; gr_cat(&rline,"/") ;
-		gr_cat(&rline,"lib/n_ack"); gr_cat(&rline,"/") ;
+		gr_cat(&rline,ACK_PATH); gr_cat(&rline,"/") ;
 		gr_cat(&rline,name) ;
 		infile= fopen(gr_start(rline),"r") ;
 	}
