@@ -264,10 +264,14 @@ CodeEndBlock(df, StackAdjustment)
 					C_cal("_nfa");
 					C_asp(word_size);
 				}
+				if( tp->tp_size == word_size )
+					C_lol(-tp->tp_size);
 				if( tp->tp_size == 2 * word_size )
 					C_ldl(-tp->tp_size);
-				else
-					C_lol(-tp->tp_size);
+				else {
+					C_lal(-tp->tp_size);
+					C_loi(tp->tp_size);
+				}
 
 				C_ret(tp->tp_size);
 			}

@@ -164,12 +164,20 @@ CodeValue(ds, tp)
 		break;
 
 	case DSG_FIXED:
-		if( ds->dsg_offset % word_size == 0 && size == word_size ) {
-			if( ds->dsg_name )
-				C_loe_dnam(ds->dsg_name, ds->dsg_offset);
-			else
-				C_lol(ds->dsg_offset);
-			break;
+		if( ds->dsg_offset % word_size == 0 ) {
+			if ( size == word_size ) {
+				if( ds->dsg_name )
+					C_loe_dnam(ds->dsg_name, ds->dsg_offset);
+				else
+					C_lol(ds->dsg_offset);
+				break;
+			} else if ( size == word_size * 2) {
+				if( ds->dsg_name )
+					C_lde_dnam(ds->dsg_name, ds->dsg_offset);
+				else
+					C_ldl(ds->dsg_offset);
+				break;
+			}
 		}
 		/* Fall through */
 	case DSG_PLOADED:
@@ -209,12 +217,20 @@ CodeStore(ds, tp)
 	
 	switch( ds->dsg_kind )	{
 	case DSG_FIXED:
-		if( ds->dsg_offset % word_size == 0 && size == word_size ) {
-			if( ds->dsg_name )
-				C_ste_dnam(ds->dsg_name, ds->dsg_offset);
-			else
-				C_stl(ds->dsg_offset);
-			break;
+		if( ds->dsg_offset % word_size == 0 ) {
+			if ( size == word_size ) {
+				if( ds->dsg_name )
+					C_ste_dnam(ds->dsg_name, ds->dsg_offset);
+				else
+					C_stl(ds->dsg_offset);
+				break;
+			} else if ( size == word_size * 2) {
+				if( ds->dsg_name )
+					C_sde_dnam(ds->dsg_name, ds->dsg_offset);
+				else
+					C_sdl(ds->dsg_offset);
+				break;
+			}
 		}
 		/* Fall through */
 	case DSG_PLOADED:
@@ -263,11 +279,19 @@ CodeAddress(ds)
 		break;
 		
 	case DSG_PFIXED:
-		if( ds->dsg_name )
-			C_loe_dnam(ds->dsg_name, ds->dsg_offset);
-		else
-			C_lol(ds->dsg_offset);
-		break;
+		if ( word_size == pointer_size ) {
+			if( ds->dsg_name )
+				C_loe_dnam(ds->dsg_name, ds->dsg_offset);
+			else
+				C_lol(ds->dsg_offset);
+			break;
+		} else {
+			if( ds->dsg_name )
+				C_lde_dnam(ds->dsg_name, ds->dsg_offset);
+			else
+				C_ldl(ds->dsg_offset);
+			break;
+		}
 
 	case DSG_INDEXED:
 		C_aar(word_size);
