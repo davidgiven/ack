@@ -125,7 +125,7 @@ OK
  bne *1
 OK
 #endif
-TEST 004: test lol, stl
+TEST 004: test lol, stl, del, inl, zrl
 MAIN 8
  loc 95
  stl -4
@@ -145,7 +145,34 @@ OK
  lol -4
  bne *1
 OK
-TEST 005: test loe, ste
+ zrl -4
+ lol -4
+ loc 0
+ bne *1
+OK
+ inl -4
+ lol -4
+ loc 1
+ bne *1
+ loc -1
+ stl -4
+ inl -4
+ lol -4
+ loc 0
+ bne *1
+OK
+ del -4
+ lol -4
+ loc -1
+ bne *1
+ loc 1
+ stl -4
+ del -4
+ lol -4
+ loc 0
+ bne *1
+OK
+TEST 005: test loe, ste, zre, ine, dee
 HOL 8
 MAIN 0
  loc 95
@@ -164,6 +191,33 @@ OK
  ste 0
  loe WS
  loe 0
+ bne *1
+OK
+ zre WS
+ loe WS
+ loc 0
+ bne *1
+OK
+ ine WS
+ loe WS
+ loc 1
+ bne *1
+ loc -1
+ ste WS
+ ine WS
+ loe WS
+ loc 0
+ bne *1
+OK
+ dee WS
+ loe WS
+ loc -1
+ bne *1
+ loc 1
+ ste WS
+ dee WS
+ loe WS
+ loc 0
  bne *1
 OK
 TEST 006: test named global data: con, rom, bss
@@ -1491,8 +1545,35 @@ OK
  bne *1
 OK
 #endif
-TEST 063: test cms
+TEST 063: test cms, zer
 MAIN 0
+ loc 6
+ loc -10
+ loc -125
+ loc 30
+ loc 6
+ loc -10
+ loc -125
+ loc 30
+ loc 4*WS
+ cms
+ teq
+ loc 1
+ bne *1
+OK
+ loc 6
+ loc -10
+ loc -125
+ loc 30
+ loc 6
+ loc -10
+ loc -125
+ loc 30
+ cms 4*WS
+ teq
+ loc 1
+ bne *1
+OK
  loc 6
  loc -10
  loc -125
@@ -1504,6 +1585,29 @@ MAIN 0
  loc 4*WS
  cms
  tne
+ loc 1
+ bne *1
+OK
+ loc 6
+ loc -10
+ loc -125
+ loc 30
+ loc 6
+ loc -10
+ loc -126
+ loc 30
+ cms 4*WS
+ tne
+ loc 1
+ bne *1
+OK
+ loc 0
+ loc 0
+ loc 0
+ loc 0
+ zer 4*WS
+ cms 4*WS
+ teq
  loc 1
  bne *1
 OK
@@ -2159,16 +2263,16 @@ OK
  zne *1
 OK
 #if WS == 1
- ldc -128
- loc -128
+ ldc -127
+ loc -127
 #endif
 #if WS == 2
- ldc -32768
- loc -32768
+ ldc -32767
+ loc -32767
 #endif
 #if WS == 4
- ldc -2147483648
- loc -2147483648
+ ldc -2147483647
+ loc -2147483647
 #endif
  loc WS
  loc W2S
@@ -3610,3 +3714,866 @@ PROC
  lpi $retp2
  ret 2*PS
  end
+TEST 128: test adu WS
+MAIN 0
+ loc 1
+ loc 1
+ adu WS
+ loc 2
+ bne *1
+OK
+#if WS >= 2
+ loc 32767
+ loc +999
+ adu WS
+ loc 33766
+ bne *1
+OK
+#endif
+#if WS >= 4
+ loc 2147483640
+ loc 1111111111
+ adu WS
+ loc 3258594751
+ bne *1
+OK
+#endif
+TEST 129: test sbu WS
+MAIN 0
+ loc 1
+ loc 1
+ sbu WS
+ loc 0
+ bne *1
+OK
+#if WS >= 2
+ loc 32767
+ loc -100
+ sbu WS
+ loc 32867
+ bne *1
+OK
+#endif
+#if WS >= 4
+ loc 2147483647
+ loc -100
+ sbu WS
+ loc 2147483747
+ bne *1
+OK
+#endif
+TEST 130: test mlu WS
+MAIN 0
+ loc 5
+ loc 9
+ mlu WS
+ loc 45
+ bne *1
+OK
+ loc 0
+ loc 10
+ mlu WS
+ loc 0
+ bne *1
+OK
+#if WS > 1
+ loc 1024
+ loc 63
+ mlu WS
+ loc 64512
+ bne *1
+OK
+#endif
+#if WS > 2
+ loc 65536
+ loc 32768
+ mlu WS
+ loc 2147483648
+ bne *1
+OK
+#endif
+TEST 131: test dvu WS
+MAIN 0
+ loc 15
+ loc 5
+ dvu WS
+ loc 3
+ bne *1
+OK
+#if WS >= 2
+ loc 65530
+ loc 100
+ dvu WS
+ loc 655
+ bne *1
+OK
+#endif
+#if WS >= 4
+ loc 2447684712
+ loc 100
+ dvu WS
+ loc 24476847
+ bne *1
+OK
+#endif
+TEST 132: test rmu WS
+MAIN 0
+ loc 15
+ loc 5
+ rmu WS
+ loc 0
+ bne *1
+OK
+#if WS >= 2
+ loc 65530
+ loc 100
+ rmu WS
+ loc 30
+ bne *1
+OK
+#endif
+#if WS >= 4
+ loc 2447684712
+ loc 100
+ rmu WS
+ loc 12
+ bne *1
+OK
+#endif
+#ifdef W2S
+TEST 133: test adu W2S
+MAIN 0
+ ldc 1
+ ldc 1
+ adu W2S
+ ldc 2
+ cmu W2S
+ zne *1
+OK
+ ldc 32767
+ ldc +999
+ adu W2S
+ ldc 33766
+ cmu W2S
+ zne *1
+OK
+#if WS >= 2
+ ldc 2147483640
+ ldc 1111111111
+ adu W2S
+ ldc 3258594751
+ cmu W2S
+ zne *1
+OK
+#endif
+TEST 134: test sbu W2S
+MAIN 0
+ ldc 1
+ ldc 1
+ sbu W2S
+ ldc 0
+ cmu W2S
+ zne *1
+OK
+ ldc 32767
+ ldc -100
+ sbu W2S
+ ldc 32867
+ cmu W2S
+ zne *1
+OK
+#if WS >= 2
+ ldc 2147483647
+ ldc -100
+ sbu W2S
+ ldc 2147483747
+ cmu W2S
+ zne *1
+OK
+#endif
+TEST 135: test mlu W2S
+MAIN 0
+ ldc 5
+ ldc 9
+ mlu W2S
+ ldc 45
+ cmu W2S
+ zne *1
+OK
+ ldc 0
+ ldc 10
+ mlu W2S
+ ldc 0
+ cmu W2S
+ zne *1
+OK
+#if WS > 1
+ ldc 1024
+ ldc 63
+ mlu W2S
+ ldc 64512
+ cmu W2S
+ zne *1
+OK
+#endif
+#if WS >= 2
+ ldc 65536
+ ldc 32768
+ mlu W2S
+ ldc 2147483648
+ cmu W2S
+ zne *1
+OK
+#endif
+TEST 136: test dvu W2S
+MAIN 0
+ ldc 15
+ ldc 5
+ dvu W2S
+ ldc 3
+ cmu W2S
+ zne *1
+OK
+ ldc 65530
+ ldc 100
+ dvu W2S
+ ldc 655
+ cmu W2S
+ zne *1
+OK
+#if WS >= 2
+ ldc 2447684712
+ ldc 100
+ dvu W2S
+ ldc 24476847
+ cmu W2S
+ zne *1
+OK
+#endif
+TEST 137: test rmu W2S
+MAIN 0
+ ldc 15
+ ldc 5
+ rmu W2S
+ ldc 0
+ cmu W2S
+ zne *1
+OK
+#if WS >= 2
+ ldc 65530
+ ldc 100
+ rmu W2S
+ ldc 30
+ cmu W2S
+ zne *1
+OK
+#endif
+#if WS >= 4
+ ldc 2447684712
+ ldc 100
+ rmu W2S
+ ldc 12
+ cmu W2S
+ zne *1
+OK
+#endif
+#endif
+TEST 138: test cuu
+MAIN 0
+#ifdef W2S
+ loc 100
+ loc WS
+ loc W2S
+ cuu
+ ldc 100
+ cmu W2S
+ zne *1
+OK
+ ldc 100
+ loc W2S
+ loc WS
+ cuu
+ loc 100
+ bne *1
+OK
+#if WS >= 2
+ loc 32768
+ loc WS
+ loc W2S
+ cuu
+ ldc 32768
+ cmu W2S
+ zne *1
+OK
+ ldc 32768
+ loc W2S
+ loc WS
+ cuu
+ loc 32768
+ bne *1
+OK
+#endif
+#endif
+TEST 139: test gto, dch, lpb
+MAIN 0
+.1139
+ rom *1139
+ lae .1139
+ loi PS
+ lxa 0
+ lxl 0
+ cal $p139_1
+1139
+ asp 3*PS
+OK
+PROC
+ pro $p139_1,0
+ lal 0
+ loi PS
+ lxl 0
+ dch
+ cmp
+ zne *1
+ lal PS
+ loi PS
+ lal 0
+ loi PS
+ lpb
+ cmp
+ zne *1
+ lal 2*PS
+ loi PS
+ lal PS
+ loi PS
+ lal 0
+ loi PS
+ cal $p139_2
+ asp 3*PS
+ ret 0
+ERRLAB
+ end 0
+
+ pro $p139_2,0
+ lal 0
+ loi PS
+ lxl 0
+ dch
+ dch
+ cmp
+ zne *1
+ lal PS
+ loi PS
+ lal 0
+ loi PS
+ lpb
+ cmp
+ zne *1
+; now create GTO descriptor
+ lal 0
+ loi PS	; LB
+ lxl 0
+ dch
+ lpb	; SP
+ lal 2*PS
+ loi PS	; PC
+.2139
+ bss 3*PS,0,0
+ lae .2139
+ sti 3*PS
+ gto .2139
+ERRLAB
+ end 0
+TEST 140: test exg
+MAIN 0
+ loc 0
+ loc 1
+ exg WS
+ loc 0
+ bne *1
+ loc 1
+ bne *1
+OK
+ loc 0
+ loc 1
+ loc 2
+ loc 3
+ exg 2*WS
+ loc 1
+ bne *1
+ loc 0
+ bne *1
+ loc 3
+ bne *1
+ loc 2
+ bne *1
+OK
+ zer 4*WS
+ loc 1
+ loc 1
+ dup 2*WS
+ exg 4*WS
+ zer 4*WS
+ cms 4*WS
+ zne *1
+ loc 1
+ loc 1
+ dup 2*WS
+ cms 4*WS
+ zne *1
+OK
+TEST 141: test lim,sim,sig,trp,rtt
+MAIN 0
+a140
+ con 0
+ lim
+ dup WS
+ loc 9
+ set WS
+ ior WS
+ dup WS
+ sim
+ lim
+ bne *1
+OK
+ lpi $p1_141
+ sig
+ loc 9
+ trp
+ sig
+ asp PS
+OK
+ sim
+ lpi $p2_141
+ sig
+ loc 9
+ trp
+ sig
+ asp PS
+ loe a140
+ zeq *1
+OK
+PROC
+ pro $p1_141,0
+ bra *1
+ERRLAB
+ end
+
+ pro $p2_141,0
+ loc 1
+ ste a140
+ rtt
+ end
+TEST 142: test ciu, cui
+MAIN 0
+ loc 100
+ loc WS
+ loc WS
+ ciu
+ loc 100
+ bne *1
+ loc -1
+ loc WS
+ loc WS
+ ciu
+ ; should not cause a trap
+ asp WS
+OK
+#ifdef W2S
+ loc 100
+ loc WS 
+ loc W2S
+ ciu
+ ldc 100
+ cmu W2S
+ zne *1
+ ldc 100
+ loc W2S
+ loc WS
+ ciu
+ loc 100
+ bne *1
+ ldc 100
+ loc W2S
+ loc W2S
+ ciu
+ ldc 100
+ cmu W2S
+ zne *1
+OK
+#endif
+ loc 100
+ loc WS
+ loc WS
+ cui
+ loc 100
+ bne *1
+OK
+#ifdef W2S
+ loc 100
+ loc WS 
+ loc W2S
+ cui
+ ldc 100
+ cmi W2S
+ zne *1
+ ldc 100
+ loc W2S
+ loc WS
+ cui
+ loc 100
+ bne *1
+ ldc 100
+ loc W2S
+ loc W2S
+ cui
+ ldc 100
+ cmi W2S
+ zne *1
+OK
+#if WS >= 2
+ loc 32768
+ loc WS
+ loc W2S
+ cui
+ ldc 32768
+ cmi W2S
+ zne *1
+OK
+#endif
+#endif
+TEST 143: test zrf
+MAIN 0
+#ifdef FS
+ loc 0
+ loc WS
+ loc FS
+ cif
+ zrf FS
+ cmf FS
+ zne *1
+OK
+#endif
+#ifdef F2S
+ loc 0
+ loc WS
+ loc F2S
+ cif
+ zrf F2S
+ cmf F2S
+ zne *1
+OK
+#endif
+TEST 144: test ngf
+MAIN 0
+#ifdef FS
+ zrf FS
+ loc 100
+ loc WS
+ loc FS
+ cif
+ sbf FS
+ loc 100
+ loc WS
+ loc FS
+ cif
+ ngf FS
+ cmf FS
+ zne *1
+OK
+#endif
+#ifdef F2S
+ zrf F2S
+ loc 100
+ loc WS
+ loc F2S
+ cif
+ sbf F2S
+ loc 100
+ loc WS
+ loc F2S
+ cif
+ ngf F2S
+ cmf F2S
+ zne *1
+OK
+#endif
+TEST 145: test cuf, cfu WS,FS
+MAIN 0
+#ifdef FS
+ loc 100
+ loc WS
+ loc FS
+ cuf
+ loc FS
+ loc WS
+ cfu
+ loc 100
+ bne *1
+OK
+ loc 0
+ loc WS
+ loc FS
+ cuf
+ loc FS
+ loc WS
+ cfu
+ loc 0
+ bne *1
+OK
+#endif
+TEST 146: test cuf, cfu W2S,FS
+MAIN 0
+#ifdef FS
+#ifdef W2S
+ loc 55
+ loc WS
+ loc W2S
+ cuu
+ loc W2S
+ loc FS
+ cuf
+ loc 55
+ loc WS
+ loc FS
+ cuf
+ cmf FS
+ zne *1
+OK
+ loc 24
+ loc WS
+ loc FS
+ cuf
+ loc FS
+ loc W2S
+ cfu
+ loc W2S
+ loc WS
+ cuu
+ loc 24
+ bne *1
+OK
+ loc 57
+ loc WS
+ loc FS
+ cuf
+ loc FS
+ loc W2S
+ cfu
+ loc W2S
+ loc WS
+ cuu
+ loc 57
+ bne *1
+OK
+ loc 40
+ loc WS
+ loc W2S
+ cuu
+ loc W2S
+ loc FS
+ cuf
+ loc FS
+ loc WS
+ cfu
+ loc 40
+ bne *1
+OK
+#endif
+#endif
+TEST 147: test cuf, cfu WS,F2S
+MAIN 0
+#ifdef F2S
+ loc 10
+ loc WS
+ loc F2S
+ cuf
+ loc F2S
+ loc WS
+ cfu
+ loc 10
+ bne *1
+OK
+ loc 0
+ loc WS
+ loc F2S
+ cuf
+ loc F2S
+ loc WS
+ cfu
+ loc 0
+ bne *1
+OK
+#endif
+TEST 148: test cuf, cfu W2S F2S
+MAIN 0
+#ifdef F2S
+#ifdef W2S
+ ldc 55
+ loc W2S
+ loc F2S
+ cuf
+ loc 55
+ loc WS
+ loc F2S
+ cuf
+ cmf F2S
+ zne *1
+OK
+ loc 24
+ loc WS
+ loc F2S
+ cuf
+ loc F2S
+ loc W2S
+ cfu
+ loc W2S
+ loc WS
+ cuu
+ loc 24
+ bne *1
+OK
+ loc 57
+ loc WS
+ loc F2S
+ cuf
+ loc F2S
+ loc W2S
+ cfu
+ loc W2S
+ loc WS
+ cuu
+ loc 57
+ bne *1
+OK
+ ldc 41
+ loc W2S
+ loc F2S
+ cuf
+ loc F2S
+ loc WS
+ cfu
+ loc 41
+ bne *1
+OK
+#endif
+#endif
+TEST 149: test cff
+MAIN 0
+#ifdef FS
+#ifdef F2S
+ loc 0
+ loc WS
+ loc FS
+ cif
+ loc FS
+ loc F2S
+ cff
+ dup F2S
+ zrf F2S
+ cmf F2S
+ zne *1
+ loc F2S
+ loc FS
+ cff
+ zrf FS
+ cmf FS
+ zne *1
+OK
+ loc 100
+ loc WS
+ loc FS
+ cif
+ loc FS
+ loc F2S
+ cff
+ loc 100
+ loc WS
+ loc F2S
+ cif
+ cmf F2S
+ zne *1
+OK
+ loc 100
+ loc WS
+ loc F2S
+ cif
+ loc F2S
+ loc FS
+ cff
+ loc 100
+ loc WS
+ loc FS
+ cif
+ cmf FS
+ zne *1
+OK
+#endif
+#endif
+TEST 150: test fif
+MAIN 0
+#ifdef FS
+ loc 50
+ loc WS
+ loc FS
+ cif
+ loc 2
+ loc WS
+ loc FS
+ cif
+ fif FS
+ loc 100
+ loc WS
+ loc FS
+ cif
+ cmf FS
+ zne *1
+ zrf FS
+ cmf FS
+ zne *1
+OK
+#endif
+#ifdef F2S
+ loc 50
+ loc WS
+ loc F2S
+ cif
+ loc 2
+ loc WS
+ loc F2S
+ cif
+ fif F2S
+ loc 100
+ loc WS
+ loc F2S
+ cif
+ cmf F2S
+ zne *1
+ zrf F2S
+ cmf F2S
+ zne *1
+OK
+#endif
+TEST 151; test fef (needs more work)
+MAIN 0
+#ifdef FS
+ loc 10
+ loc WS
+ loc FS
+ cif
+ fef FS
+ loc 4
+ bne *1
+ asp FS
+OK
+#endif
+#ifdef F2S
+ loc 10
+ loc WS
+ loc F2S
+ cif
+ fef F2S
+ loc 4
+ bne *1
+ asp F2S
+OK
+#endif
