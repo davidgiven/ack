@@ -33,7 +33,7 @@ extern  char    *realloc();
 #endif
 
 char *basename(string) char *string ; {
-	static char retval[20] ;
+	static char retval[256] ;
 	char *last_dot, *last_start ;
 	register char *store;
 	register char *fetch ;
