@@ -42,8 +42,8 @@ gensize_type.h:	getsize
 		getsize > gensize_type.h
 
 getsize:	$(SRC_DIR)/getsize.c
-		cc -o getsize $(SRC_DIR)/getsize.c
-# use cc, not $(CC) as this must produce runnable binary.
+		$(UCC) -o getsize $(SRC_DIR)/getsize.c
+# use $(UCC), not $(CC) as this must produce runnable binary.
 
 malloc.$(SUF):	malloc.c
 		$(CC) -c $(CFLAGS) malloc.c
