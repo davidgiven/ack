@@ -646,7 +646,7 @@ catch_del()
 {
   signal(SIGINT, catch_del);
   if (! disable_intr) {
-  	signal_child(SIGEMT);
+  	signal_child(7);
   	child_interrupted = 1;
   }
   interrupted = 1;
