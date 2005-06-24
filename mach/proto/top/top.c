@@ -626,7 +626,6 @@ error(s,a)
 {
 	fprintf(stderr,s,a);
 	fprintf(stderr,"\n");
-	_cleanup();
 	abort();
 	exit(-1);
 }
