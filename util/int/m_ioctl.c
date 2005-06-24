@@ -10,7 +10,9 @@
 #include	"mem.h"
 #include	"warn.h"
 
+#ifdef WANT_SGTTY
 #include	<sgtty.h>
+#endif
 
 #ifdef	V7IOCTL				/* define the proper V7 requests */
 
@@ -45,7 +47,9 @@ int do_ioctl(fd, req, addr)
 	ptr addr;
 {
 	register long e;
+#ifdef WANT_SGTTY
 	struct sgttyb sg_buf;
+#endif
 
 #ifdef	BSD_X				/* from system.h */
 #ifndef	V7IOCTL
@@ -66,6 +70,8 @@ int do_ioctl(fd, req, addr)
 #ifdef	V7IOCTL
 	switch (req) {			/* translate the V7 requests */
 					/* and reject the non-V7 ones */
+					
+#ifdef	WANT_SGTTY
 	case V7IOGETP:
 		req = TIOCGETP;
 		break;
@@ -81,6 +87,8 @@ int do_ioctl(fd, req, addr)
 	case V7IOHPCL:
 		req = TIOCHPCL;
 		break;
+#endif
+
 #ifdef	BSD_X				/* from system.h */
 	case V7IOSETN:
 		req = TIOCSETN;
@@ -108,11 +116,7 @@ int do_ioctl(fd, req, addr)
 		/****** Struct sgttyb ioctl's ********/
 		/*************************************/
 
-#if 0
-	/* FIXME: I'm not entirely certain what these do; I think they have
-	 * to do with serial port manipulation. If so, they need to be rewritten
-	 * to use the Posix standards. ---dtrg */
-	 
+#ifdef WANT_SGTTY
 	case TIOCGETP:
 		/* Get fd's current param's and store at dsp2 */
 		if (	(e = ioctl(fd, req, (char *) &sg_buf)) == -1

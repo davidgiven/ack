@@ -19,3 +19,9 @@
 #define	SYS_V
 #endif	/* SYS_5 */
 
+/* FIXME: A lot of modern systems, including Linux, don't have struct sgtty
+ * and associated ioctls. If you *do* have it, uncomment this. All this
+ * code should probably be rewritten one day to use termios instead, which
+ * seems to be the standard that won. --- dtrg */
+ 
+//#define WANT_SGTTY

@@ -16,7 +16,10 @@
 #include	<time.h>
 #endif
 #include	<sys/times.h>
+
+#ifdef WANT_SGTTY
 #include	<sgtty.h>
+#endif
 
 #ifdef	BSD_X				/* from system.h */
 #include	<sys/timeb.h>
@@ -85,8 +88,9 @@ int tms2mem(addr, tmsb)
 	return 1;
 }
 
-#if 0
-/* FIXME: see the related fixme in m_ioctlc. ---dtrg */
+#ifdef WANT_SGTTY
+/* FIXME: see the related fixme in sysidf.h. --- dtrg */
+
 int sgttyb2mem(addr, sgttybb)
 	ptr addr;
 	struct sgttyb *sgttybb;
@@ -146,8 +150,9 @@ PRIVATE unsigned long mem_ldfld(addr, offset, length)
 	return mem_ldu(addr + offset, length);
 }
 
-#if 0
-/* FIXME: see the related fixme in m_ioctlc. ---dtrg */
+#ifdef WANT_SGTTY
+/* FIXME: see the related fixme in sysidf.h. --- dtrg */
+
 int mem2sgtty(addr, sgttybb)
 	ptr addr;
 	struct sgttyb *sgttybb;
