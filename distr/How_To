@@ -1,3 +1,27 @@
+How to make a distribution
+--------------------------
+
+I have written a new tool to generate the distributions that does not rely on
+having a local CVS server --- distr/mkdist.
+
+To use it, you need to specify your CVS work tree, the destination directory
+that the distribution will be written to, plus flags. It should be self-
+documenting; use:
+
+	mkdist --help
+	
+...to get documentation.
+
+It uses .distr files in exactly the same way as the previous mechanism.
+
+The documentation for the old distribution tools follows.
+
+David Given
+dg@cowlark.com
+2005-06-25
+
+-----------------------------------------------------------------------------
+
 How to make a fresh distribution:
 For a distribution you need ".distr" files and RCS files.
 The EM home directory contains a file called ".distr". It contains

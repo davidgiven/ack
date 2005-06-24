@@ -158,6 +158,8 @@ echo "Done."
 
 # Revision history
 # $Log$
-# Revision 1.1  2005-06-24 22:13:57  dtrg
-# Created new tool to generate distributions.
+# Revision 1.2  2005-06-24 23:19:23  dtrg
+# Added new mkdist tool.
 #
+# Revision 1.1  2005/06/24 22:13:57  dtrg
+# Created new tool to generate distributions.
