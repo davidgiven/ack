@@ -108,6 +108,11 @@ int do_ioctl(fd, req, addr)
 		/****** Struct sgttyb ioctl's ********/
 		/*************************************/
 
+#if 0
+	/* FIXME: I'm not entirely certain what these do; I think they have
+	 * to do with serial port manipulation. If so, they need to be rewritten
+	 * to use the Posix standards. ---dtrg */
+	 
 	case TIOCGETP:
 		/* Get fd's current param's and store at dsp2 */
 		if (	(e = ioctl(fd, req, (char *) &sg_buf)) == -1
@@ -136,6 +141,7 @@ int do_ioctl(fd, req, addr)
 		/* These have no third argument. */
 		e = ioctl(fd, req, (char *) 0);
 		break;
+#endif
 
 #ifdef	BSD_X				/* from system.h */
 		/*************************************/

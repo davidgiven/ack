@@ -85,6 +85,8 @@ int tms2mem(addr, tmsb)
 	return 1;
 }
 
+#if 0
+/* FIXME: see the related fixme in m_ioctlc. ---dtrg */
 int sgttyb2mem(addr, sgttybb)
 	ptr addr;
 	struct sgttyb *sgttybb;
@@ -98,6 +100,7 @@ int sgttyb2mem(addr, sgttybb)
 	mem_stfld(addr, V7sg_flags, (long) sgttybb->sg_flags);
 	return 1;
 }
+#endif
 
 #ifdef	BSD_X				/* from system.h */
 int tchars2mem(addr, tcharsb)
@@ -143,6 +146,8 @@ PRIVATE unsigned long mem_ldfld(addr, offset, length)
 	return mem_ldu(addr + offset, length);
 }
 
+#if 0
+/* FIXME: see the related fixme in m_ioctlc. ---dtrg */
 int mem2sgtty(addr, sgttybb)
 	ptr addr;
 	struct sgttyb *sgttybb;
@@ -156,6 +161,7 @@ int mem2sgtty(addr, sgttybb)
 	sgttybb->sg_flags = (short) mem_ldfld(addr, V7sg_flags);
 	return 1;
 }
+#endif
 
 #ifdef	BSD_X				/* from system.h */
 int mem2tchars(addr, tcharsb)
