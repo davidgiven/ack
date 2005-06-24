@@ -1,2 +1,174 @@
-Before starting installation you should read
-the file doc/install.pr
+# $Source$
+# $State$
+
+Installing the ACK on a modern platform
+=======================================
+
+This document provides some very quick and dirty instructions for installing
+the ACK on a modern platform. It is not intended as a substitute for the
+real instructions, which can be found in doc/install.pr.
+
+Let me repeat myself:
+
+THE FULL INSTALLATION INSTRUCTIONS ARE IN doc/install.pr.
+
+The ACK is a very large and complex package and has received minimal
+maintenance for the best part of a decade. During that time, the Unix
+world has moved on, and many APIs have changed. It compiles cleanly on
+my, dtrg's, test machine, which is a Debian Ubuntu Linux system. Your
+mileage may vary.
+
+All disclaimers now done, now on to the good stuff:
+
+Building the ACK
+----------------
+
+I'm assuming you're using Linux here, because that's what I use. If you
+don't use Linux, please let me know if you have any trouble and I'll update
+the instructions.
+
+1. Configure the build.
+
+   To do this, run the first/first script. You will be asked several
+   questions.
+   
+   * What is the root of the ACK source tree?
+   
+     This is the directory that you have unpacked the distribution into.
+     For example, /home/dg/src/Ack-5.6.
+     
+   * What is the root of the configuration tree?
+   
+     This is the directory that the build process will use for temporary
+     files. You'll only need this during the compilation process; it can
+     be removed afterwards.
+     For example, /tmp/ack-conf
+     
+   * What is the root of the ACK binaries?
+   
+     This is the ACK's installation path; where the binaries will live.
+     This needs to be writable during the build process --- if you want
+     to install in /usr/local, you either have to make /usr/local
+     writable or compile as root. Sorry!
+     
+   * What is your system type?
+   
+     Linux isn't on the list. Choose ANY.
+     
+   * Is this the system you are running on?
+   
+     Yes.
+     
+   * Are you satisfied?
+   
+     Yes.
+     
+   * What default machine do you wish to compile for?
+   
+     The ACK wants to know what architecture to target if you don't manually
+     specify an architecture. Unfortunately, it can't generate runnable
+     binaries for Linux or any other modern system (except possible Solaris
+     on Sparc). I'd recommend you choose em44. This will produce portable
+     binaries using the ACK's intermediate format, which you can run using
+     the int interpreter.
+     
+   * What kind of Unix are you running?
+   
+     Linux is a mixture, but I pick SYS_5 and it works.
+     
+   * Do you wish to limit the installation?
+   
+     No. If you pick Yes, the script will ask detailed questions about
+     exactly what you want to build. Modern systems are fast enough that
+     we may as well build everything.
+     
+   * Which system call library do you wish to use on the VAX?
+   
+     I don't have a VAX; the only person I know who has one uses it to vacuum
+     his carpets. I pick libsysV_2 with no ill effects.
+     
+   If the configuration script is happy, it will generate a script called
+   INSTALL.
+   
+2. Do the compilation.
+
+   The configuration script will recommend a command line. Execute this. On
+   modern systems, the compilation doesn't take long.
+   
+   Check the output of the configuration script for "Failed" lines. On my
+   system there are two:
+   
+     $ grep Failed INSTALL.out
+     Failed for Intel 8080 download programs, see dl/Out
+     Failed for Intel 8080 support
+   
+   You can ignore these. They aren't important.
+   
+3. Use the ACK.
+
+   Ensure that the ACK's binary directory is on your path; this is /bin in
+   the directory you specified during the configuration process. In my
+   example, this is /usr/local/bin. The /man subdirectory should go on your
+   manpath.
+
+   To test your path, do: ack
+   
+   This should return silently.
+   
+   To test your manpath, do: man ack
+      
+   This will produce the documentation for the main compiler driver.
+   
+   If this works, you can remove the conf tree (/tmp/ack-conf in my example).
+   
+Gotchas
+-------
+
+There are some things you should be aware of.
+
+* The ACK's archiver tool is called 'arch'. This conflicts on Linux platforms
+  with a utility that displays the current architecture. If your compilation
+  occasionally fails obscurely and displays something like 'i686', you are
+  running afoul of this. As a workaround, rearrange your path so the ACK's
+  bin directory comes first --- but do be aware that some Linux system
+  tools may stop working.
+  
+* By default, the ack tool will compile K&R C. Practically all C source these
+  days is ANSI C --- use the -ansi switch to enable ANSI mode. No, the ACK is
+  not C99 compatible.
+  
+* Not all combinations of optimisation and architectures work. This is
+  perfectly normal, but the combinations are not well documented. Everything
+  supports -O.
+  
+Disclaimer
+----------
+
+The ACK is mature, well-tested software, but the environment in which it was
+developed for and tested under is rather different from that available on
+today's machines. There will probably be little in the way of logical bugs,
+but there may be many compilation and API bugs.
+
+If you wish to use the ACK, *please* join the mailing list. We are interested
+in any reports of success and particularly, failure. If it does fail for you,
+we would love to know why, in as much detail as possible. Bug fixes are even
+more welcome.
+
+The ACK is licensed under a BSD-like license. Please see the 'Copyright' file
+for the full text.
+
+You can find the mailing list on the project's web site:
+
+	http://tack.sourceforge.net/
+	
+Please enjoy.
+
+David Given (dtrg on Sourceforge)
+dg@cowlark.com
+2005-06-24, 23:53
+
+# Revision history
+# $Log$
+# Revision 2.2  2005-06-24 23:20:41  dtrg
+# Added some new readmes at the top level.
+#

@@ -1,0 +1,20 @@
+# $Source$
+# $State$
+
+This file contains things that I have noticed need fixing, but have not
+yet been fixed. Everything here should be reasonably low priority. Some
+bugs have been bodged around to make things work; these are all marked in
+the source with FIXME tags.
+
+
+* util/int needs to be rewritten to emulate sgtty with termios; look for
+  FIXMEs.
+
+* mach/i80/dl/nascom.c needs to be rewritten to use termios, not sgtty.
+
+
+# Revision history
+# $Log$
+# Revision 2.1  2005-06-24 23:20:41  dtrg
+# Added some new readmes at the top level.
+#

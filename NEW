@@ -1,4 +1,15 @@
-This is ACK distribution 5.2.
+This is ACK distribution 5.6.
+
+This is a minor update of 5.5, the last public release from Vrije University.
+Only minor changes have been made to make the system build on modern
+platforms.
+
+The NEW document from the previous release follows.
+
+David Given
+dg@cowlark.com 2005-06-24
+
+-----------------------------------------------------------------------------
 
 The only addition with respect to the 5th ACK distribution is the support
 for Solaris 2 on SPARCs. It also contains many bug fixes.
