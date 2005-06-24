@@ -1,0 +1,163 @@
+#!/bin/sh
+# $Source$
+# $State$
+
+# Set up default variables.
+
+destdir=
+srcdir=`pwd`
+arch=/usr/local/bin/arch
+delete=no
+copy=ln
+
+# --- Options parsing -------------------------------------------------------
+
+while [ "$1" != "" ]; do
+	case "$1" in
+		-s|--srcdir)
+			srcdir="$2"
+			shift
+			;;
+			
+		-d|--destdir)
+			destdir="$2"
+			shift
+			;;
+			
+		-x|--delete)
+			delete=yes
+			;;
+			
+		-c|--copy)
+			copy="cp -dp"
+			;;
+			
+		-a|--arch)
+			arch="$2"
+			shift
+			;;
+			
+		-h|--help)
+			echo "mkdist [options]"
+			echo "Options are:"
+			echo "  -s --srcdir <path>   The CVS tree to read from. (default: CWD)"
+			echo "  -d --destdir <path>  The directory to create the distribution in."
+			echo "  -x --delete          Erase the destination directory first."
+			echo "  -c --copy            Make physical copies of the files. (default: hardlink)"
+			echo "  -a --arch <path>     Where the ACK 'arch' tool is."
+			echo "  -h --help            Display this message."
+			exit 0
+			;;
+			
+		*)
+			echo "Unrecognised option. Try --help for help."
+			exit 1
+	esac
+	shift
+done
+
+if [ "$destdir" == "" ]; then
+	echo "You must specify a destination directory. (Try --help for help.)"
+	exit 1
+fi
+
+# --- Main routines ---------------------------------------------------------
+
+# These two routines do the work of traversing the source tree and building
+# the distribution tree.
+
+addfile() {
+	local f
+	f="${1##$srcdir/}"
+	mkdir -p $destdir/`dirname $f`
+	$copy "$1" "$destdir/$f"
+}
+
+process_dir() {
+	local path
+	local archivename
+	
+	path=$1
+	cd $path
+	
+	# Look for a LIST file and cache the first line.
+	
+	archivename=
+	if [ -f LIST ]; then
+		archivename=`head -1 LIST`
+	fi
+
+	for i in `cat $path/.distr`; do
+		if [ -d $i ]; then
+			# This is a directory. Recurse into it.
+			
+			( process_dir $path/$i )
+		elif [ -f $i ]; then
+			# This is a file.
+			
+			addfile $path/$i
+		elif [ "$i" = "$archivename" ]; then
+			# Build the named archive.
+
+			$arch cDr `cat LIST`
+			addfile $path/$archivename
+		else
+		(
+			PATH=$PATH:.
+			export PATH
+			make distr || make $i || (
+				echo "Don't know what to do with $i, listed in $1/.distr."
+				exit 1
+			)
+			
+			if [ ! -f "$path/$i" ]; then
+				echo "Make failed for $i, listed in $path/.distr"
+				exit 1
+			fi
+			addfile $path/$i
+		)
+		fi
+	done
+}
+
+# --- Main program ----------------------------------------------------------
+
+# Test to make sure that $arch points to the right thing.
+
+if !(strings $arch | grep archiver > /dev/null); then
+	echo "$arch does not seem to point at the ACK archiver tool."
+	echo "(Don't confuse this with the Linux tool for displaying your"
+	echo "architecture.)"
+	echo ""
+	echo "Press RETURN to go ahead anyway, or CTRL+C to abort."
+	read
+fi
+
+# Actually do the work.
+
+echo "Creating distribution from CVS tree: $srcdir"
+echo "              into destination tree: $destdir"
+echo ""
+
+if [ -e $destdir ]; then
+	if [ "$delete" == "yes" ]; then
+		echo "Press RETURN to erase $destdir and its contents, or CTRL+C to abort."
+		read
+		echo "Erasing..."
+		rm -rf "$destdir"
+	else
+		echo "$destdir exists. Aborting."
+		exit 1
+	fi
+fi
+
+echo "Working..."
+mkdir -p $destdir
+process_dir $srcdir
+echo "Done."
+
+# Revision history
+# $Log$
+# Revision 1.1  2005-06-24 22:13:57  dtrg
+# Created new tool to generate distributions.
+#
