@@ -29,17 +29,19 @@ int yylineno = 1;
 static char buf[BUF_SIZE],	/* Bufer to save backc()-characters */
             *bufptr = buf;	/* Pointer to space for backc()-character */
 
-static FILE *infile = stdin;
+static FILE *infile = NULL;
 
 
 
 
 static char nextc()
 {
+	FILE* fp = infile ? infile : stdin;
+	
 	if ( bufptr > buf)
 		return( *--bufptr);
 	else
-		return( getc( infile));
+		return( getc( fp));
 }
 
 
@@ -93,11 +95,12 @@ FILE *new;
  */
 
 {
+	FILE* fp = infile ? infile : stdin;
 	char *ptr; FILE *old;
 
 	/* Clean buf[] */
 	for ( ptr = buf; ptr < bufptr; ptr++)
-		if ( ungetc( *ptr, infile) == EOF && *ptr != EOF)
+		if ( ungetc( *ptr, fp) == EOF && *ptr != EOF)
 			return( NULL);
 
 	bufptr = buf;
