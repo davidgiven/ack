@@ -18,14 +18,7 @@ else
 fi
 export E_FLAG E_SFX
 
-echo check write-ability of /tmp and /usr/tmp ...
-if ( >/usr/tmp/aaax.$$ )
-then
-	rm /usr/tmp/aaax.$$
-else
-	echo /usr/tmp must exist and be writable.
-	exit 2
-fi
+echo check write-ability of /tmp ...
 if ( >/tmp/aaax.$$ )
 then
 	rm /tmp/aaax.$$
@@ -33,7 +26,7 @@ else
 	echo /tmp must exist and be writable.
 	exit 2
 fi
-echo "/tmp and /usr/tmp ok"
+echo "/tmp ok"
 
 if [ -f macros ]
 then

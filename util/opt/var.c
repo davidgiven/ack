@@ -25,7 +25,7 @@ bool	repl_longmuls = 0;	/* replacing longmuls as well? */
 line_p	instrs,pseudos;		/* pointers to chains */
 sym_p	symhash[NSYMHASH];	/* array of pointers to chains */
 FILE	*outfile;
-char	template[] = "/usr/tmp/emoptXXXXXX";
+char	template[] = "/tmp/emoptXXXXXX";
 offset	wordsize = 0;
 offset	pointersize = 0;
 char	*progname;

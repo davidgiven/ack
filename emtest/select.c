@@ -32,9 +32,9 @@ int	high	= 999;
 FILE	*file1;
 FILE	*file2;
 FILE	*file3;
-char	name1[] = "/usr/tmp/f1XXXXXX";
-char	name2[] = "/usr/tmp/f2XXXXXX";
-char	name3[] = "/usr/tmp/f3XXXXXX";
+char	name1[] = "/tmp/f1XXXXXX";
+char	name2[] = "/tmp/f2XXXXXX";
+char	name3[] = "/tmp/f3XXXXXX";
 
 char *to3dig();
 

@@ -39,7 +39,7 @@ extern int		_unlink();
 extern long		_lseek();
 
 static int tmpfil() {
-	static char namebuf[] = "/usr/tmp/plf.xxxxx";
+	static char namebuf[] = "/tmp/plf.xxxxx";
 	int i; char *p,*q;
 
 	i = _getpid();

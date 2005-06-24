@@ -1,9 +1,9 @@
 The following modifications to the file-system are required when
 installing ACK under UniSoft Unix:
 
-1) Create a writable directory /usr/tmp (if not present already)
-     mkdir /usr/tmp
-     chmod 777 /usr/tmp
+1) Create a writable directory /tmp (if not present already)
+     mkdir /tmp
+     chmod 777 /tmp
 2) Install the file "assert.h" in /usr/include (this file is not
    included in the Unisoft distribution, although it is standard V7 Unix).
    The file can be copied from the ACK-tree:

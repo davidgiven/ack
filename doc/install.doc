@@ -1084,7 +1084,7 @@ directory "first".
 Em_path.h also specifies which directory should be used for
 temporary files.
 Most programs from the Kit do indeed use that directory
-although some remain stubborn and use /tmp or /usr/tmp.
+although some remain stubborn and use /tmp.
 .LP
 The shape of the tree should not be altered lightly because
 most Makefiles and the

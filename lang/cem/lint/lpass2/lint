@@ -22,8 +22,8 @@ LLIB=${LLIB-"$EMLINT/llib"}			# lint libraries directory
 LINTLIB=${LINTLIB-$LLIB}
 CLIB=c.llb
 
-TMP=/usr/tmp/lint1.$$
-NEW=/usr/tmp/lint2.$$
+TMP=/tmp/lint1.$$
+NEW=/tmp/lint2.$$
 
 trap "rm -f $TMP $NEW; exit 1" 1 2 15
 trap "rm -f $TMP $NEW; exit 0" 0
