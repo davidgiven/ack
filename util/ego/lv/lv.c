@@ -6,6 +6,7 @@
 
 /* L I V E   V A R I A B L E S   A N A L Y S I S */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
@@ -40,6 +41,7 @@ short nrvars;
 STATIC int Slv;
 STATIC bool mesgflag = FALSE;  /* Suppress generation of live/dead info */
 
+STATIC app_block();
 
 STATIC clean_up()
 {
