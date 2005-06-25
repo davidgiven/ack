@@ -9,6 +9,7 @@
  * Convert ACK a.out file to ST-Minix object format.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <out.h>
 #include <assert.h>

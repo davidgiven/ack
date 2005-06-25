@@ -4,6 +4,7 @@
  */
 /* $Id$ */
 
+#include <stdlib.h>
 #include <system.h>
 
 void
