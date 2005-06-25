@@ -73,7 +73,6 @@ extern Linerecord *currline;
 extern char *itoa();
 extern char *salloc();
 
-extern char *sprint();
 extern char *strcpy();
 extern char *strcat();
 #if __STDC__
