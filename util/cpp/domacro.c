@@ -608,6 +608,7 @@ get_text(formals, length)
 	register unsigned int text_size;
 	char *text = Malloc(text_size = ITEXTSIZE);
 	register unsigned int pos = 0;
+	int match = 0;
 
 	LoadChar(c);
 
@@ -621,15 +622,19 @@ get_text(formals, length)
 				*/
 				text[pos++] = ' ';
 				++LineNumber;
-				LoadChar(c);
 			}
-			else
+			else {
 				text[pos++] = '\\';
-			if (pos == text_size)
-				text = Realloc(text, text_size <<= 1);
+				if (pos == text_size)
+					text = Realloc(text, text_size <<= 1);
+				text[pos++] = c;
+				if (pos == text_size)
+					text = Realloc(text, text_size <<= 1);
+			}
+			LoadChar(c);
 		}
 		else
-		if ( c == '/') {
+		if (match == 0 && c == '/') {
 			LoadChar(c);
 			if (c == '*') {
 				skipcomment();
@@ -642,7 +647,19 @@ get_text(formals, length)
 				text = Realloc(text, text_size <<= 1);
 		}
 		else
-		if (formals && class(c) == STIDF) {
+		if (c == '\'' || c == '"') {
+			text[pos++] = c;
+			if (pos == text_size)
+				text = Realloc(text, text_size <<= 1);
+			if (match == c) {
+				match = 0;
+			} else if (match == 0) {
+				match = c;
+			}
+			LoadChar(c);
+		}
+		else
+		if (match == 0 && formals && class(c) == STIDF) {
 			char id_buf[IDFSIZE + 1];
 			register char *idp = id_buf;
 			int n;
