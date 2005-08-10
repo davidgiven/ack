@@ -12,7 +12,9 @@
  */
 #include	<stdio.h>
 #include	<assert.h>
-#include	<sgtty.h>
+/*#include	<sgtty.h>*/
+#include	<termios.h>
+#include 	<unistd.h>
 #include	<signal.h>
 #include	<out.h>
 
@@ -26,8 +28,10 @@ char	hex[] = "0123456789ABCDEF";
 
 char *progname;
 
-struct sgttyb	ttynormal;
-struct sgttyb	ttyraw;
+/*struct sgttyb	ttynormal;
+struct sgttyb	ttyraw;*/
+struct termios	ttynormal;
+struct termios	ttyraw;
 int		rawmode = 0;
 
 struct outhead ohead;
@@ -35,7 +39,8 @@ struct outsect sect[MAXSECT];
 
 stop(code) {
 	if (rawmode)
-		stty(1, &ttynormal);
+		/*stty(1, &ttynormal);*/
+		tcsetattr(1, TCSAFLUSH, &ttynormal);
 	exit(code);
 }
 
@@ -81,16 +86,22 @@ main(argc,argv) char **argv; {
 		signal(SIGINT, SIG_IGN);
 		signal(SIGQUIT, stop);
 		signal(SIGTERM, stop);
-		if (gtty(1, &ttynormal) < 0) {
+		/*if (gtty(1, &ttynormal) < 0) {*/
+		if (tcgetattr(1, &ttynormal) < 0) {
 			fprintf(stderr, "no tty\n");
 			stop(-1);
 		}
 		rawmode++;
 		ttyraw = ttynormal;
+		/*
 		ttyraw.sg_flags |= RAW;
 		ttyraw.sg_ispeed = B1200;
 		ttyraw.sg_ospeed = B1200;
 		stty(1, &ttyraw);
+		*/
+		cfmakeraw(&ttyraw);
+		cfsetispeed(&ttyraw, B1200);
+		cfsetospeed(&ttyraw, B1200);
 		sleep(5);
 	}
 	rd_ohead(&ohead);
