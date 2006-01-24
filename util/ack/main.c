@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "ack.h"
 #include "list.h"
 #include "trans.h"

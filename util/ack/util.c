@@ -11,9 +11,11 @@
 /*                                                                    */
 /**********************************************************************/
 
-#include "ack.h"
-#include <ctype.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include "ack.h"
 
 #ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
@@ -22,9 +24,6 @@ static char rcs_id[] = "$Id$" ;
 extern  char    *progname ;
 extern  int     w_flag ;
 extern  int     n_error;
-
-extern  char    *calloc();
-extern  char    *realloc();
 
 #ifdef DEBUG
 # define STDOUT stdout

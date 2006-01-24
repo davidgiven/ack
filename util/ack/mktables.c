@@ -4,7 +4,9 @@
  *
  */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #ifndef NORCSID
@@ -18,7 +20,7 @@ char *tail ;
 FILE *intab ;
 FILE *dmach ;
 
-int index ;
+int offset ;
 
 main(argc,argv) char **argv ; {
 	register i ;
@@ -38,7 +40,7 @@ start(dir) char *dir ; {
 		*tail++ = *dir ++ ;
 	}
 	if ( tail!=dname ) *tail++= '/' ;
-	index=0 ;
+	offset=0 ;
 	intab= fopen("intable.c","w");
 	dmach= fopen("dmach.c","w");
 	if ( intab==NULL || dmach==NULL ) {
@@ -79,11 +81,11 @@ readm() {
 		return ;
 	}
 	i=0 ;
-	fprintf(dmach,"\t{\"%s\",\t%d\t},\n",fname,index) ;
+	fprintf(dmach,"\t{\"%s\",\t%d\t},\n",fname,offset) ;
 	fprintf(intab,"\n/* %s */\n\t",fname) ;
 	for (;;) {
 		token=getc(in) ;
-		index++ ;
+		offset++ ;
 		if ( ++i == 10 ) {
 			fprintf(intab,"\n\t") ;
 			i=0 ;
