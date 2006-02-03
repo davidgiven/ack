@@ -16,6 +16,8 @@
  * Contains main program, and some error message routines
  */
 
+#include <stdlib.h>
+#include <string.h>
 # include "types.h"
 # include "io.h"
 # include "extern.h"

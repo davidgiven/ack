@@ -16,6 +16,8 @@
  * Several routines to perform checks and printouts
  */
 
+#include <stdlib.h>
+#include <string.h>
 # include "types.h"
 # include "extern.h"
 # include "io.h"

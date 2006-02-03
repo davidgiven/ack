@@ -16,6 +16,7 @@
  * Interface to malloc() and realloc()
  */
 
+#include <stdlib.h>
 # include "types.h"
 # include "extern.h"
 
@@ -31,7 +32,6 @@ alloc(size) unsigned size; {
 	   Allocate "size" bytes. Panic if it fails
 	 */
 	p_mem	p;
-	p_mem	malloc();
 
 	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem);
 	return p;
@@ -43,8 +43,6 @@ ralloc(p,size) p_mem p; unsigned size; {
 	   Re-allocate the chunk of memory indicated by "p", to
 	   occupy "size" bytes
 	 */
-	p_mem	realloc();
-
 	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem);
 	return p;
 }
