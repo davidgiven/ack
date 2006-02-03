@@ -16,6 +16,8 @@
  * Machine dependant things
  */
 
+#include <stdlib.h>
+#include <string.h>
 # include "types.h"
 
 # ifndef NORCSID
@@ -49,9 +51,6 @@ RENAME(x,y) string x,y; {
 #endif
 }
 
-/* to make it easier to patch ... */
-char libdir[256] = LIBDIR;
-
 string
 libpath(s) string s; {
 	/* Must deliver a full pathname to the library file "s" */
@@ -61,6 +60,9 @@ libpath(s) string s; {
 	p_mem alloc();
 	string strcpy(), strcat();
 
+	char* libdir = getenv("LLGEN_LIB_DIR");
+	if (!libdir)
+		libdir = LIBDIR;
 	length = strlen(libdir) + strlen(s) + 2;
 	p = (string) alloc((unsigned) length);
 	strcpy(p,libdir);
