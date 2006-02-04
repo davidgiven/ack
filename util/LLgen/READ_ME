@@ -1,19 +1,84 @@
-$Id$
+                                 LLGEN V1.0
+                                 ==========
 
-To install LLgen, proceed as follows:
+  Copyright © 1991-2005 by the Vrije Universiteit, Amsterdam, the Netherlands.
+                                 2006-02-03
 
-- create a directory to put the libraryfiles in, f.i.
-	/usr/local/lib/LLgen
-- cd to the src directory
-- adapt the file machdep.c, should be easy
-- adapt the Makefile, changing the options to the C-compiler if
-  necessary.
-- change back to this directory
-- edit the Makefile. LIBDIR should be set to the directory for the
-  library files, INSTALLDIR should be set to the directory where LLgen
-  is to be put.
-- now type 
-	make firstinstall
-- This should do all the work.
+INTRODUCTION
+============
 
-LLgen.1 contains a man-page.
+LLgen is a LL(1) parser in the style of yacc. It will generate an efficient
+recursive descent parser for Extended Context-Free grammars, with an optional
+non-correcting error recovery mechanism.
+
+For more information, see the white papers in the doc directory. (You may need
+to build LLgen first to be able to read them.)
+
+INSTALLATION
+============
+
+LLgen depends on the following software:
+
+    gcc: currently, LLgen only builds on gcc, due largely to the lack of any
+        non-gcc test systems. Please contact the support mailing list (see
+        below) if this is a problem.
+        
+    groff: used to build the documentation.
+
+LLgen uses Prime Mover as its build tool. To build, do:
+
+    ./pm install
+
+This will compile LLgen and install it into /usr/local (which you must be able
+to write to). If you want it installed elsewhere, use -D to change the PREFIX
+variable:
+
+    ./pm -DPREFIX="/home/dg/" install
+    
+(If you do change the prefix, you must supply it whenever you invoke pm. And
+there must be a trailing / in the path you give it.)
+
+Invoking ./pm by itself will compile it but not install it; look in the bin
+directory for an image of 
+
+USING LLGEN
+===========
+
+Please see the white papers in PREFIX/share/doc/LLgen, or the man page (called
+LLgen).
+
+LLgen itself uses a parser compiled in LLgen, so you can study the files in
+the src directory for examples. If you wish to modify LLgen's own parser, the
+bootstrap.sh script will update LLgen's source from the parser *.g files.
+LLgen itself may then be recompiled with pm in the usual way. (Although you
+may want to keep a copy of a known good LLgen around in case you break
+something!)
+
+SUPPORT
+=======
+
+LLgen is part of the Amsterdam Compiler Kit (although standalone and
+distributed seperately). For more details, please see:
+
+    http://tack.sourceforge.net
+
+There is a mailing list available at:
+
+	http://sourceforge.net/mail/?group_id=130811
+
+LICENSE
+=======
+
+LLgen is © 1991-2005 by the Vrije Universiteit and is distributed under a
+license equivalent to the three-clause BSD license. See the COPYING file
+for details.
+
+Prime Mover is © 2006 David Given and is distributed under the MIT license.
+Do './pm --license' for details.
+
+-----------------------------------------------------------------------------
+David Given
+dg@cowlark.com
+2006-02-04
+
+/* $Id$ */
