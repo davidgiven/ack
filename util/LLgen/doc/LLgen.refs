@@ -1,0 +1,54 @@
+%T An ALL(1) Compiler Generator
+%A D. R. Milton
+%A L. W. Kirchhoff
+%A B. R. Rowland
+%B Proc. of the SIGPLAN '79 Symposium on Compiler Construction
+%D August 1979 
+%J SIGPLAN Notices
+%N 8
+%P 152-157
+%V 14
+
+%T Lex - A Lexical Analyser Generator
+%A M. E. Lesk
+%I Bell Laboratories
+%D October 1975
+%C Murray Hill, New Jersey
+%R Comp. Sci. Tech. Rep. No. 39
+
+%T Yacc: Yet Another Compiler Compiler
+%A S. C. Johnson
+%I Bell Laboratories
+%D 1975
+%C Murray Hill, New Jersey
+%R Comp. Sci. Tech. Rep. No. 32
+
+%T The C Programming Language
+%A B. W. Kernighan
+%A D. M. Ritchie
+%I Prentice-Hall, Inc.
+%C Englewood Cliffs, New Jersey
+%D 1978
+
+%A M. Griffiths
+%T LL(1) Grammars and Analysers
+%E F. L. Bauer and J. Eickel
+%B Compiler Construction, An Advanced Course
+%I Springer-Verlag
+%C New York, N.Y.
+%D 1974
+
+%T Make - A Program for Maintaining Computer Programs
+%A S. I. Feldman
+%J Software - Practice and Experience
+%V 10
+%N 8
+%P 255-265
+%D August 1979
+
+%T Methods for the Automatic Construction of Error Correcting Parsers
+%A J. R\*:ohrich
+%J Acta Informatica
+%V 13
+%P 115-139
+%D 1980
