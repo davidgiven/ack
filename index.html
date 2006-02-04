@@ -37,6 +37,21 @@ alt="Valid HTML 4.01!" height="31" width="88"></a>
 
 <div class="page" id="home"><h2><a name="home">Home</a></h2>
 
+<h3>2006-02-04</h3>
+<p>LLgen has just been released as a seperate package!</p>
+<p>LLgen is a LL(1) parser generator, quite similar to yacc or bison, that can generate
+recursive descent parsers from Extended Context-Free grammars (which makes it quite a
+bit more useful than yacc or bison). The ACK uses it extensively, but as it's a
+standalone component, I've decided that it would be useful to distribute this
+seperately. LLgen's input files are almost identical to yacc's, so if you can use yacc
+and have been getting frustrated with its limitations, LLgen is for you.</p>
+<p>I've rewritten the build system and overhauled the source so it compiles
+cleanly with gcc; it should work fine on modern systems (and extremely quickly). The
+package contains full documentation, and LLgen is, like the ACK, licensed under the
+new-style BSD license.</p>
+<p>You can <a href="http://sourceforge.net/project/showfiles.php?group_id=130811">get it
+from the Sourceforge download page</a> right next to the ACK.</p>
+
 <h3>2005-06-25</h3>
 <p>We make our first release!</p>
 <p>Version 5.6 of the ACK has now hit Sourceforge and is
@@ -426,6 +441,8 @@ generator</td>
 </div>
 
 <div class="page" id="installation"><h2><a name="installation">Installation</a></h2>
+
+<h3>The ACK</h3>
 <p>To install the ACK, you need to <a href="http://sourceforge.net/project/showfiles.php?group_id=130811">download
 the source package</a> and compile it.
 </p>
@@ -439,6 +456,14 @@ please remember to <a href="http://sourceforge.net/mail/?group_id=130811">join
 the mailing list</a>.
 </p>
 <p>Enjoy.</p>
+
+<h3>LLgen</h3>
+<p>LLgen is <a href="http://sourceforge.net/project/showfiles.php?group_id=130811">available
+on its own</a> (<b>note:</b> you do <i>not</i> need to download this if you want to
+install version 5.6 of the ACK). It is a very simple package; do install, decompress and
+follow the instructions in the README.</p>
+<p>LLgen should work on any modern system with gcc and groff.</p>
+
 <p>&nbsp;</p> <!-- style bug workaround -->
 <p>&nbsp;</p> <!-- style bug workaround -->
 <p>&nbsp;</p> <!-- style bug workaround -->
