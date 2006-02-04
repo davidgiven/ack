@@ -18,6 +18,8 @@
  */
 
 {
+# include <stdlib.h>
+# include <string.h>
 # include "types.h"
 # include "io.h"
 # include "extern.h"
