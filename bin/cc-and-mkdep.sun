@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : Compile and make dependencies. First argument is the file on which the

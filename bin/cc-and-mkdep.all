@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : Compile and make dependencies. First argument is the file on which the
@@ -16,5 +17,5 @@ do
 			;;
 	esac
 done
-$UTIL_HOME/lib.bin/cpp -d -m $cpp_args > $n
+$UTIL_HOME/lib.bin/cpp -d -m $cpp_args > $n 2>/dev/null
 exec $CC $*

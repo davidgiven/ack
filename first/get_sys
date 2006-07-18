@@ -1,3 +1,5 @@
+#!/bin/sh
+
 rm -f em_path.h
 echo "You will now be asked for the root directory of the ACK sources.
 This directory will not be changed by the installation process.

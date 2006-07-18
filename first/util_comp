@@ -1,4 +1,4 @@
-
+#!/bin/sh
 # compiler set for producing runnable binaries (possibly using $(UTIL_HOME)).
 # This must describe the compiler with which $(UTIL_HOME) has been compiled.
 # If $(TARGET_HOME) is identical to $(UTIL_HOME), which usually will be

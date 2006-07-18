@@ -1,3 +1,4 @@
+#!/bin/sh
 # compiler set for target machine
 
 CC=cc#				# compiler to be used for compiling ACK

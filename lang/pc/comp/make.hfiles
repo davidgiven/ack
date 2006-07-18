@@ -1,3 +1,4 @@
+#!/bin/sh
 : Update Files from database
 
 PATH=/bin:/usr/bin

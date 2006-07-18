@@ -1,9 +1,12 @@
+#!/bin/sh
+
 set -e
 
 create_dir $CONFIG
 
 create_dir $CONFIG/bin
-echo "echo $SYSNAME" > $CONFIG/bin/ack_sys
+echo "#!/bin/sh" > $CONFIG/bin/ack_sys
+echo "echo $SYSNAME" >> $CONFIG/bin/ack_sys
 chmod +x $CONFIG/bin/ack_sys
 
 cd $SRC_HOME

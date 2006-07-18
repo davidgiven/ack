@@ -1,3 +1,5 @@
+#!/bin/sh
+
 num=`expr $1 : '.*\.\([1-8]\)'`
 
 if [ -d $2/man ] ; then : ; else mkdir $2/man ; fi

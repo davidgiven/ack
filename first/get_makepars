@@ -1,3 +1,5 @@
+#!/bin/sh
+
 know_target=0
 case $SYSNAME in
 vax*|i386|sun*|sparc*|m68_sysV_0|m68020|mantra|pmds4|m68k4)

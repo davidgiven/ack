@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set -e
 
 PATH=::$CONFIG/bin:$UTIL_HOME/bin:/usr/ccs/bin:/usr/ucb:$PATH
@@ -6,8 +8,15 @@ export PATH
 $SRC_HOME/first/create_dir $CONFIG
 $SRC_HOME/first/create_dir $CONFIG/bin
 
-echo "PATH=:$CONFIG/bin:$UTIL_HOME/bin:$PATH; export PATH" > $CONFIG/bin/TakeAction
-cat $SRC_HOME/TakeAction >> $CONFIG/bin/TakeAction
+(
+	# Slight complication here to ensure that the #! magic at the
+	# beginning of TakeAction is preserved correctly.
+
+	head -1 $SRC_HOME/TakeAction
+	echo "PATH=:$CONFIG/bin:$UTIL_HOME/bin:$PATH; export PATH"
+	tail +2 $SRC_HOME/TakeAction
+) > $CONFIG/bin/TakeAction
+
 sed '/^#PARAMS/r make_macros' < $SRC_HOME/first/mk_makefile > $CONFIG/bin/mk_makefile
 cp $SRC_HOME/first/create_dir $CONFIG/bin/create_dir
 cp $SRC_HOME/first/cp_dir $CONFIG/bin/cp_dir

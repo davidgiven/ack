@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : This shell script inserts make macros after a line

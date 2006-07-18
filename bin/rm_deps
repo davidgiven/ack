@@ -1,3 +1,4 @@
+#!/bin/sh
 : $Id$
 
 : remove dependencies from a makefile, write result on standard output.

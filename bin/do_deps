@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : Produce dependencies for all argument files

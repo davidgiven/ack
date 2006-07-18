@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : Create a lint library file. The name of the library file is constructed

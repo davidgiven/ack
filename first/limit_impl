@@ -1,3 +1,5 @@
+#!/bin/sh
+
 for i in $DISABLE_LANG
 do
 	ed -s $CONFIG/Action <<EOF

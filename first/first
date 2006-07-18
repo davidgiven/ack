@@ -1,4 +1,5 @@
 #! /bin/sh
+
 case $0 in
 */first)
 	FDIR=`expr $0 : '\(.*\)/first'`

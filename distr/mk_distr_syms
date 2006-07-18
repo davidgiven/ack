@@ -1,3 +1,4 @@
+#!/bin/sh
 : Utility to make a tree of symbolic links to source tree.
 : Mount the source tree read-only, use this script, and then try installation.
 case $# in

@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 : Resolve name clashes in the files on the argument list. If these

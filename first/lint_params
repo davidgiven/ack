@@ -1,3 +1,4 @@
+#!/usr/bin/make
 
 # There are two choices for lint here: ACK lint and Unix lint.
 # The current setup is for ACK lint. If you want to use the Unix lint,

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 : ${CDIR=.}
 ${DF-:} $CDIR .distr
 if test ! -r $DESTDIR/$CDIR/.distr
