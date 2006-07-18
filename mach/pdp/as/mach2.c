@@ -36,5 +36,5 @@
 %token <y_word> CLEARCC
 %token <y_word> SETCC
 
-%type <y_word> opr1, opr2, op2, fopr2, fopr1, ari, ainc, adec
-%type <y_word> fop2, clcc, secc, fregister
+%type <y_word> opr1 opr2 op2 fopr2 fopr1 ari ainc adec
+%type <y_word> fop2 clcc secc fregister

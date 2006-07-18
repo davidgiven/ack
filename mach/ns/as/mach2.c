@@ -60,4 +60,4 @@
 %token <y_word> ACB
 %token <y_word> WAIT
 
-%type  <y_word> cpu_opts, cpu_list, string_opts, reg_list, reg_items
+%type  <y_word> cpu_opts cpu_list string_opts reg_list reg_items
