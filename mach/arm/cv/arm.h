@@ -1,5 +1,8 @@
 #define MAXCHUNK        5
-#define NSECT		4
+
+/* Undefined by dtrg --- seems to be redefined by cv.c?
+ * #define NSECT		4
+ */
 
 
 struct entry{
