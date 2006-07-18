@@ -69,7 +69,7 @@ ea_2(sz, bits)
 	ea_1(sz, bits);
 }
 
-index(hibyte)
+indexmode(hibyte)
 {
 	Xfit(fitb(exp_2.val));
 	exp_2.val = hibyte | lowb(exp_2.val);
@@ -415,7 +415,7 @@ ea5x73(rg, sz)
 		exp_2.val -= (DOTVAL + extension_offset());
 		mrg_2 = 073;
 		checksize(sz, 2|4);
-		index(rg<<12 | (sz&0200)<<4);
+		indexmode(rg<<12 | (sz&0200)<<4);
 		return;
 	}
 	/* displacement */
@@ -478,7 +478,7 @@ ea6x(rg, ir, sz)
 {
 	mrg_2 = 060 | rg;
 	checksize(sz, 2|4);
-	index(ir<<12 | (sz&0200)<<4);
+	indexmode(ir<<12 | (sz&0200)<<4);
 }
 
 ea72()
@@ -492,7 +492,7 @@ ea73(ri, sz)
 	mrg_2 = 073;
 	exp_2.val -= (DOTVAL + extension_offset());
 	checksize(sz, 2|4);
-	index(ri<<12 | (sz&0200)<<4);
+	indexmode(ri<<12 | (sz&0200)<<4);
 }
 
 Xnofit()
