@@ -6,6 +6,8 @@
 static char rcsid[]= "$Id$";
 #endif
 
+#include <stdlib.h>
+#include <string.h>
 #include "param.h"
 #include "reg.h"
 #include "lookup.h"
@@ -352,7 +354,6 @@ char *mystrcpy(s) char *s; {
 
 char *myalloc(n) register n; {
 	register char *p,*result;
-	char *malloc();
 
 	result=p=malloc(n);
 	if (p== (char *) 0)

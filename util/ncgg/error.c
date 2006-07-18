@@ -6,6 +6,7 @@
 static char rcsid[]= "$Id$";
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 
 int nerrors=0;
