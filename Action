@@ -30,10 +30,10 @@ name "Modules"
 dir modules/src
 indir
 end
-name "LL(1) Parser generator"
-dir util/LLgen
-action "make firstinstall && make clean"
-end
+! name "LL(1) Parser generator"
+! dir util/LLgen
+! action "make firstinstall && make clean"
+! end
 name "C preprocessor"
 dir util/cpp
 end
