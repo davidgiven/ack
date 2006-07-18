@@ -63,7 +63,7 @@ struct address
 };
 
 extern expr_t	displ;	/* never more than 16 bits */
-extern short	index;	/* never more than 16 bits */
+extern short	offset;	/* never more than 16 bits */
 extern short	mode;
 #ifndef extern
 extern short	modetbl[ 5 ];

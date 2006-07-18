@@ -131,7 +131,7 @@ f2	: F2_1  reg  ','  src
 #endif
 				emit2( (int) displ.val );  break;
 		      case BX:  emit2( 0x7400 | $4<<4 | $2 );
-				emit2( index<<8 );  break;
+				emit2( offset<<8 );  break;
 		      default:  argerr();
 		  }
 		}
@@ -193,7 +193,7 @@ f2	: F2_1  reg  ','  src
 				   emit2( (int) displ.val );
 				   break;
 			  case BX: emit2( 0x7000 | $1 | $4<<4 | $2 );
-				   emit2( index<<8 );
+				   emit2( offset<<8 );
 				   break;
 			  default: argerr();
 		      }
@@ -213,7 +213,7 @@ f2	: F2_1  reg  ','  src
 				   emit2( (int) displ.val );
 				   break;
 			  case BX: emit2( 0x7200 | $1 | $2<<4 | $4 );
-				   emit2( index<<8 );
+				   emit2( offset<<8 );
 				   break;
 			  default: argerr();
 		      }
@@ -263,7 +263,7 @@ f2	: F2_1  reg  ','  src
 				   emit2((int) displ.val );
 				   break;
 			  case BX: emit2( 0x7500 | $4<<4 | $2 );
-				   emit2( index<<8 );
+				   emit2( offset<<8 );
 				   break;
 			  default: argerr();
 		      }
@@ -283,7 +283,7 @@ f2	: F2_1  reg  ','  src
 				   emit2( (int) displ.val );
 				   break;
 			  case BX: emit2( 0x7700 | $2<<4 | $4 );
-				   emit2( index<<8 );
+				   emit2( offset<<8 );
 				   break;
 			  default: argerr();
 		      }
@@ -568,6 +568,6 @@ ba	: R32  '('  '$'  expr  ')'
 bx	: R32  '('  R16  ')'
 		{ if ( $1 == 0 || $3 == 0 ) regerr();
 		  $$ = $1;
-		  index = $3;
+		  offset = $3;
 		}
 	;
