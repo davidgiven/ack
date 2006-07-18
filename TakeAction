@@ -1,3 +1,5 @@
+#!/bin/sh
+
 case $# in
 0)	PAR='make install && make clean' ; CMD=Action ;;
 1)	PAR="$1" ; CMD=Action ;;

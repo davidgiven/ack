@@ -1,4 +1,6 @@
+#!/bin/sh
 : '$Id$'
+
 grep '^#' y.tab.h >tokendefs
 ed -s $1 <<'!Funky!Stuff!'
 g/^#/d
