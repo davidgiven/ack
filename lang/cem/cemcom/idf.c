@@ -5,6 +5,9 @@
 /* $Id$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include	"lint.h"
 #include	<em_reg.h>
 #include	"nofloat.h"

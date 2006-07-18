@@ -4,6 +4,9 @@
  */
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "inputtype.h"
 #include "file_info.h"
 #include "input.h"
