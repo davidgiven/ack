@@ -4,7 +4,7 @@
  */
 /* $Id$ */
 
-#include <system.h>
+#include "system.h"
 
 int
 sys_read(fp, bufptr, bufsiz, pnbytes)

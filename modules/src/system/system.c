@@ -4,7 +4,7 @@
  */
 /* RCS: $Id$ */
 
-#include <system.h>
+#include "system.h"
 
 File _sys_ftab[SYS_NOPEN] = {
 	{ 0, OP_READ},

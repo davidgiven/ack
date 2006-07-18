@@ -8,6 +8,9 @@
 /*	I/O part of em_code module.
 	Also contains C_open, C_close
 */
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <alloc.h>
 #include <em_arith.h>
 #include "insert.h"

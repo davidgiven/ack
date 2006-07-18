@@ -4,15 +4,13 @@
  */
 /* $Id$ */
 
-#include <system.h>
-
-char *sbrk();
+#include "system.h"
+#include <unistd.h>
 
 char *
 sys_break(incr)
 	int incr;
 {
-	char *sbrk();
 	register char *brk = sbrk(incr);
 
 	if (brk == (char *) 0 || brk == (char *)-1)

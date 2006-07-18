@@ -4,7 +4,7 @@
  */
 /* $Id$ */
 
-#include <system.h>
+#include "system.h"
 
 extern File *_get_entry();
 

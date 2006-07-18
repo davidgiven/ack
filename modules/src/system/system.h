@@ -62,6 +62,4 @@ _PROTOTYPE(long sys_modtime, (char *));
 /* return value for sys_break */
 #define ILL_BREAK	((char *)0)
 
-/* system's idea of block */
-#define BUFSIZ	1024
 #endif /* __SYSTEM_INCLUDED__ */

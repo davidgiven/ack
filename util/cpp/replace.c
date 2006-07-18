@@ -5,6 +5,8 @@
  */
 /* PREPROCESSOR: MACRO-TEXT REPLACEMENT ROUTINES */
 
+#include <stdlib.h>
+#include <string.h>
 #include	"debug.h"	/* UF */
 #include	"pathlength.h"	/* UF */
 #include	"textsize.h"	/* UF */

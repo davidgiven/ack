@@ -78,11 +78,15 @@ separate linker only possible if relocation info produced
 /* ========== Machine independent type declarations ========== */
 
 #ifdef _include
+_include    <stdlib.h>
 _include	<stdio.h>
+_include    <string.h>
 _include	<ctype.h>
 _include	<signal.h>
 #else
+#include    <stdlib.h>
 #include	<stdio.h>
+#include    <string.h>
 #include	<ctype.h>
 #include	<signal.h>
 #endif

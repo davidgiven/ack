@@ -7,6 +7,7 @@
  *  V1.0, 08-Mar-89 AJM
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "out.h"
 #include "arm.h"

@@ -86,12 +86,12 @@ EM_doinstr(p)
 				if (! checkarg(&(p->em_arg), cst_ptyp)) return;
 			}
 			else {
-#include "C_mnem_narg"
+#include "C_mnem_narg.h"
 				return;
 			}
 			break;
 	}
-#include "C_mnem"
+#include "C_mnem.h"
 }
 
 PRIVATE void

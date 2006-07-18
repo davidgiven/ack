@@ -2,6 +2,8 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
+#include <string.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -15,7 +17,6 @@ static char rcsid[] = "$Id$";
  */
 
 extern string myalloc();
-extern char *strcpy();
 
 glosym_p glolist= (glosym_p) 0;
 

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <out.h>
 #include <assert.h>
+#include <stdlib.h>
 
 long	lseek();
 
@@ -270,7 +271,6 @@ writef(addr,sz,cnt)
  */
 emits(section) struct outsect *section ; {
 	char		*p;
-	char		*calloc(), *malloc();
 	long sz = section->os_flen;
 
 	rd_outsect(section - outsect);
@@ -484,7 +484,6 @@ emit_symtab()
 	register struct outname *A;
 	struct sym *MACHnames;
 	register struct sym *M;
-	extern char *malloc(), *calloc();
 	char *chars;
 	long offX = OFF_CHAR(outhead) - 4;
 

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <out.h>
 #include <assert.h>
+#include <stdlib.h>
 
 struct outhead	outhead;
 struct outsect	outsect[S_MAX];
@@ -163,7 +164,6 @@ main(argc, argv)
  */
 emits(section) struct outsect *section ; {
 	char		*p;
-	char		*calloc(), *malloc();
 	long sz = section->os_flen;
 
 	rd_outsect(section - outsect);

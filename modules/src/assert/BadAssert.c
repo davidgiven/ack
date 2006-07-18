@@ -7,6 +7,7 @@
 	indicated by the parameters, and then give a core dump
 */
 
+#include <string.h>
 #include <system.h>
 
 static

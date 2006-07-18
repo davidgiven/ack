@@ -4,7 +4,7 @@
  */
 /* $Id$ */
 
-#include <system.h>
+#include "system.h"
 
 void
 sys_close(fp)

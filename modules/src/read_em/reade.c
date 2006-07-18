@@ -9,6 +9,7 @@
 */
 
 #include <ctype.h>
+#include <string.h>
 
 /* #define XXX_YYY	/* only for early debugging */
 

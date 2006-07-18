@@ -9,7 +9,9 @@
 	Many mods by Ceriel Jacobs
 */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef NORCSID
 static char *RcsId = "$Id$";
@@ -27,8 +29,6 @@ char *Table[MAXTAB];
 char *ProgCall;		/* callname of this program */
 int TabSize = 128;	/* default size of generated table */
 char *InitialValue;	/* initial value of all table entries */
-
-extern char *malloc(), *strcpy();
 
 main(argc, argv)
 	char *argv[];

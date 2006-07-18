@@ -11,7 +11,9 @@ static char rcsid[]="$Id$";
  * Author: Hans van Staveren
  */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include <em_spec.h>
 #include <em_flag.h>
@@ -37,8 +39,8 @@ static char rcsid[]="$Id$";
 	inst_t yy_instance;
 }
 
-%type <yy_list1> list1,structlistel
-%type <yy_list2> structlist,structdecl
+%type <yy_list1> list1 structlistel
+%type <yy_list2> structlist structdecl
 %type <yy_expr> expr optexpr
 %type <yy_cost> optcost cost optcommacost
 %type <yy_int> optboolexpr optnocoerc mnem emargno tokargno optprop
@@ -48,8 +50,8 @@ static char rcsid[]="$Id$";
 %type <yy_instance> tokeninstance
 %type <yy_string> optformat
 %token <yy_string> IDENT TYPENAME
-%token <yy_ident> RIDENT,PIDENT,TIDENT,EIDENT
-%token <yy_string> LSTRING,STRING
+%token <yy_ident> RIDENT PIDENT TIDENT EIDENT
+%token <yy_string> LSTRING STRING
 %token <yy_int> NUMBER
 %token <yy_intp> CIDENT
 %token REGISTERHEAD TOKENHEAD EXPRESSIONHEAD CODEHEAD MOVEHEAD TESTHEAD STACKHEAD
@@ -63,12 +65,12 @@ static char rcsid[]="$Id$";
 
 %left OR2
 %left AND2
-%left CMPEQ,CMPNE
-%left CMPLT,CMPLE,CMPGT,CMPGE
-%left RSHIFT,LSHIFT
-%left '+','-'
-%left '*','/','%'
-%nonassoc NOT,COMP,UMINUS
+%left CMPEQ CMPNE
+%left CMPLT CMPLE CMPGT CMPGE
+%left RSHIFT LSHIFT
+%left '+' '-'
+%left '*' '/' '%'
+%nonassoc NOT COMP UMINUS
 %nonassoc '$'
 %%
 machinespec

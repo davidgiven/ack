@@ -116,14 +116,6 @@ extern valu_t	load();
 extern FILE	*ffcreat();
 extern FILE	*fftemp();
 
-/* some library functions used */
-extern char	*mktemp();
-extern char	*malloc();
-extern char	*realloc();
-extern char	*calloc();
-extern char	*getenv();
-extern char	*strncpy();
-
 /* ========== Machine dependent C declarations ========== */
 
 #include	"mach1.c"

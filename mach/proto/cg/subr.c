@@ -2,6 +2,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
 #include "assert.h"
 #include <stdio.h>
 #include "param.h"

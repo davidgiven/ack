@@ -2,6 +2,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -29,7 +30,6 @@ static char rcsid[] = "$Id$";
 
 char *stab[MAXSTAB];
 int nstab=0;
-string malloc();
 
 string myalloc(size) {
 	register string p;

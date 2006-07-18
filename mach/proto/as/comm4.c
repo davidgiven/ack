@@ -20,7 +20,7 @@ extern YYSTYPE	yylval;
 
 /* ========== Machine independent C routines ========== */
 
-stop() {
+void stop() {
 #if DEBUG < 2
 	unlink(temppath);
 #ifdef LISTING

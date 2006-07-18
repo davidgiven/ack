@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #if __STDC__
 #include <stdarg.h>
 extern out(char *, ...);

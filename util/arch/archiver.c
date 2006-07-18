@@ -25,6 +25,9 @@ static char RcsId[] = "$Id$";
 #endif
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
@@ -38,7 +41,6 @@ struct ranlib *tab;
 unsigned int	tnum = 0;
 char	*tstrtab;
 unsigned int	tssiz = 0;
-char	*malloc(), *realloc(), *strcpy(), *strncpy();
 long	time();
 unsigned int tabsz, strtabsz;
 #else

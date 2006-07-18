@@ -1,19 +1,13 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
+#include <string.h>
 #include <em_spec.h>
 #include <em_flag.h>
 #include <em_reg.h>
 
 #include "booth.h"
-
-extern char *strncpy(), *strcpy();
-extern char *malloc();
-#ifndef __STDC__
-extern char *sprintf();
-#else
-/* sprintf should be declared in stdio.h, as returning an int */
-#endif
 
 char * myalloc(n) {
 	register char *p;

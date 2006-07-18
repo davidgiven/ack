@@ -4,6 +4,7 @@
  */
 /* $Id$ */
 
+#include <string.h>
 #include <system.h>
 #include "print.h"
 

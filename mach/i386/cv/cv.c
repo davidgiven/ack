@@ -9,6 +9,7 @@
  * It uses ~em/modules/lib/libobject.a.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 
 struct xexec {
@@ -351,7 +352,6 @@ emit_symtab()
 	char *chars, *xname;
 	struct outname *names;
 	register char *xptr;
-	extern char *malloc();
 	long off = OFF_CHAR(outhead);
 	register char *p;
 	register struct outname *np;

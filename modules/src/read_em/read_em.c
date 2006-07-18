@@ -17,6 +17,8 @@
 	some routines from the system module. and the em_code module
 */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <alloc.h>
 #include <system.h>
@@ -34,8 +36,6 @@
 #define getbyte()	(*_ich ? (*_ich++ & 0377) : _fill())
 #define ungetbyte(uch)	((uch) >= 0 && (*--_ich = (uch)))
 #define init_input()	(_fill(), _ich--)
-
-#define EOF	-1
 
 static File *fd;
 static char *_ich;

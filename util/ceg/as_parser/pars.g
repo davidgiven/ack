@@ -38,6 +38,8 @@
  */
 
 {
+#include <stdlib.h>
+#include <string.h>
 
 #include "decl.h"
 extern int lineno, yyleng;
