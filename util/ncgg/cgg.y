@@ -111,12 +111,12 @@ iocc_t iops[20];
 %left '|'
 %left '^'
 %left '&'
-%left CMPEQ,CMPNE
-%left CMPLT,CMPLE,CMPGT,CMPGE
-%left RSHIFT,LSHIFT
-%left '+','-'
-%left '*','/','%'
-%nonassoc NOT,COMP,UMINUS
+%left CMPEQ CMPNE
+%left CMPLT CMPLE CMPGT CMPGE
+%left RSHIFT LSHIFT
+%left '+' '-'
+%left '*' '/' '%'
+%nonassoc NOT COMP UMINUS
 
 %start machtable
 
