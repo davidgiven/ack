@@ -2,7 +2,9 @@
 static char rcsid2[] = "$Id$";
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "assert.h"
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -85,7 +87,7 @@ extern double atof();
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
 */
-long atol(s)
+long our_atol(s)
 register char *s;
 {
   register long total = 0;
@@ -657,7 +659,7 @@ long con(t) {
 			part_flush();
 			con_mult((word)argval);
 		} else {
-			con_part((int)argval,(word)atol(str));
+			con_part((int)argval,(word)our_atol(str));
 		}
 		return(argval);
 	case sp_fcon:
