@@ -27,7 +27,21 @@ I'm assuming you're using Linux here, because that's what I use. If you
 don't use Linux, please let me know if you have any trouble and I'll update
 the instructions.
 
-1. Configure the build.
+1. Prerequisites
+   
+   The ACK wants to be built with a C compiler called cc. From what I've seen
+   so far of the build system, this can be changed, but not easily.
+   
+   Most platforms have their compiler set up so that 'cc' invokes it, whatever
+   it is; however, some don't. So far the only one I've met that doesn't do
+   this is Solaris with gcc installed, but without the Sun native compiler.
+   
+   If this is the case, the simplest thing to do is to place a symlink to gcc
+   (or your favourite C compiler) in your path somewhere. For example:
+   
+      ln -s /usr/bin/gcc ~/bin/cc
+   
+2. Configure the build.
 
    To do this, run the first/first script. You will be asked several
    questions.
@@ -90,7 +104,7 @@ the instructions.
    If the configuration script is happy, it will generate a script called
    INSTALL.
    
-2. Do the compilation.
+3. Do the compilation.
 
    The configuration script will recommend a command line. Execute this. On
    modern systems, the compilation doesn't take long.
@@ -104,7 +118,7 @@ the instructions.
    
    You can ignore these. They aren't important.
    
-3. Use the ACK.
+4. Use the ACK.
 
    Ensure that the ACK's binary directory is on your path; this is /bin in
    the directory you specified during the configuration process. In my
@@ -169,6 +183,8 @@ dg@cowlark.com
 
 # Revision history
 # $Log$
-# Revision 2.2  2005-06-24 23:20:41  dtrg
-# Added some new readmes at the top level.
+# Revision 2.3  2006-07-18 17:21:34  dtrg
+# Added comment about the use of 'cc' rather than 'gcc'.
 #
+# Revision 2.2  2005/06/24 23:20:41  dtrg
+# Added some new readmes at the top level.
