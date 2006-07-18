@@ -1,3 +1,5 @@
+#!/bin/sh
+
 EM_TABLE=$1
 argtype=$2
 echo "switch(p->em_opcode) {"

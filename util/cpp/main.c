@@ -5,6 +5,7 @@
  */
 /* MAIN PROGRAM */
 
+#include <stdlib.h>
 #include <alloc.h>
 #include <em_arith.h>
 #include <assert.h>

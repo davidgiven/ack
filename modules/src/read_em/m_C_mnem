@@ -1,3 +1,5 @@
+#!/bin/sh
+
 EM_TABLE=$1
 echo "switch(p->em_opcode) {"
 for i in - cdflnorswz p b

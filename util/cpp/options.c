@@ -5,6 +5,8 @@
  */
 /* USER-OPTION HANDLING */
 
+#include <stdlib.h>
+#include <string.h>
 #include	<alloc.h>
 #include	"idfsize.h"
 #include	"class.h"
@@ -90,7 +92,7 @@ do_option(text)
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
-				  Realloc(inctable,(inc_max+=10)*sizeof(char *));
+				  Realloc((void*) inctable,(inc_max+=10)*sizeof(char *));
 			}
 
 			for(i = inc_pos++; i < inc_total; i++) {

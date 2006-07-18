@@ -1,3 +1,4 @@
+#!/bin/sh
 : argtype lists all em mnemonics that have an argument type equal to
 : one of the letters specified in the argument
 case x$# in
