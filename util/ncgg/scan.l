@@ -94,6 +94,11 @@ yywrap() {
 	return(1);
 }
 
+/* unput isn't technically legal in this section, so we need the
+ * following definition to make it work. */
+ 
+#define yytext_ptr yytext
+
 skipupto(tok,str) char *str; {
 	register i; 
 
