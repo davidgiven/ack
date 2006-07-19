@@ -1,3 +1,4 @@
+#!/bin/sh
 : '$Id$'
 
 case $# in
