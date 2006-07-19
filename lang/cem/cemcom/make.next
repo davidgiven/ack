@@ -1,3 +1,5 @@
+#!/bin/sh
+
 sed -n '
 s:^.*ALLOCDEF.*"\(.*\)".*$:struct \1 *h_\1 = 0;:p
 ' $*
