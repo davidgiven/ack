@@ -5,6 +5,8 @@
 /* $Id$ */
 /* PREPROCESSOR: INITIALIZATION ROUTINES */
 
+#include	<stdlib.h>
+#include	<string.h>
 #include	"nopp.h"
 
 #ifndef NOPP

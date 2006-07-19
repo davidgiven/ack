@@ -11,6 +11,9 @@
 	semantics of C is a mess.
 */
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	<alloc.h>
 #include	"lint.h"
 #include	"nofloat.h"

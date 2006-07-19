@@ -5,6 +5,9 @@
 /* $Id$ */
 /*	C O D E - G E N E R A T I N G	R O U T I N E S		*/
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	"lint.h"
 #include	"dbsymtab.h"
 #ifndef	LINT

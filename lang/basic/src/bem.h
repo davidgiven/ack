@@ -4,6 +4,7 @@
  */
 
 #include <ctype.h>
+#include <string.h>
 #include <signal.h>
 #include <system.h>
 #include <print.h>

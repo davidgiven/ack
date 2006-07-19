@@ -4,6 +4,9 @@
  */
 /* $Id$ */
 /*  M A C R O   R E P L A C E M E N T */
+
+#include	<stdlib.h>
+#include	<string.h>
 #include	"nopp.h"
 
 #ifndef NOPP

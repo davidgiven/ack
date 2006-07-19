@@ -5,6 +5,9 @@
 /* $Id$ */
 /*	U S E R	  O P T I O N - H A N D L I N G		*/
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	"lint.h"
 #include	"botch_free.h"
 #include	<alloc.h>

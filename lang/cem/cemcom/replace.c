@@ -5,6 +5,9 @@
 /* $Id$ */
 /* PREPROCESSOR: MACRO-TEXT REPLACEMENT ROUTINES */
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	"nopp.h"
 
 #ifndef NOPP

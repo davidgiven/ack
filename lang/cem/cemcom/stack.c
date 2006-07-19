@@ -5,6 +5,9 @@
 /* $Id$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	"lint.h"
 #include	"nofloat.h"
 #include	<system.h>
