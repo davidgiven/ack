@@ -16,14 +16,15 @@ static char rcsid[] = "$Id$";
 	linked.
 */
 
-#include	<system.h>
-#include        <em_pseu.h>
-#include	<em_mnem.h>
-#include        <em_spec.h>
-#include        <em_flag.h>
-#include        <em_ptyp.h>
-#include	<em.h>
-#include	<em_comp.h>
+#include <stdlib.h>
+#include "system.h"
+#include "em_pseu.h"
+#include "em_mnem.h"
+#include "em_spec.h"
+#include "em_flag.h"
+#include "em_ptyp.h"
+#include "em.h"
+#include "em_comp.h"
 
 char *filename;			/* Name of input file */
 int errors;			/* Number of errors */

@@ -4,7 +4,7 @@
  */
 /* $Id$ */
 
-#include <flt_arith.h>
+#include "flt_arith.h"
 
 /* some short-hands ... */
 #define m1 flt_mantissa.flt_h_32

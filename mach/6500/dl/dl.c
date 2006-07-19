@@ -5,9 +5,10 @@
  *
  */
 
-#include	<stdio.h>
-#include	<assert.h>
-#include	<out.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include "out.h"
 
 #define	DATTYPE		0
 #define	EOFTYPE		1
@@ -57,7 +58,6 @@ main(argc,argv) char **argv; {
 		pc = sect[i].os_base;
 		while (sect[i].os_size) {
 			unsigned int sz = 8096, fl;
-			extern char *calloc();
 			register char *buf;
 			char *pbuf;
 
@@ -165,7 +165,10 @@ reply() {
 	write(1,&c,1);
 }
 
-fatal(s,a) {
+fatal(s,a)
+	const char* s;
+	const char* a;
+{
 
 	fprintf(stderr,"%s: ",progname);
 	fprintf(stderr,s,a);
