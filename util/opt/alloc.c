@@ -2,6 +2,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "param.h"
 #include "types.h"
@@ -427,7 +428,6 @@ coreinit() {
 
 short *myalloc(size) register size; {
 	register short *p,*q;
-	extern char *malloc();
 
 	p = (short *)malloc(size);
 	if (p == 0)

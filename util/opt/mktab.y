@@ -3,7 +3,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "param.h"
 #include "types.h"
 #include "pattern.h"
@@ -57,18 +59,18 @@ int	rplCBO;
 %left OR1
 %left XOR1
 %left AND1
-%left CMPEQ,CMPNE
-%left CMPLT,CMPLE,CMPGT,CMPGE
-%left RSHIFT,LSHIFT
-%left ARPLUS,ARMINUS
-%left ARTIMES,ARDIVIDE,ARMOD
-%nonassoc NOT,COMP,UMINUS
+%left CMPEQ CMPNE
+%left CMPLT CMPLE CMPGT CMPGE
+%left RSHIFT LSHIFT
+%left ARPLUS ARMINUS
+%left ARTIMES ARDIVIDE ARMOD
+%nonassoc NOT COMP UMINUS
 %nonassoc '$'
 
-%token SFIT,UFIT,NOTREG,PSIZE,WSIZE,DEFINED,SAMESIGN,ROM,ROTATE,STRING
+%token SFIT UFIT NOTREG PSIZE WSIZE DEFINED SAMESIGN ROM ROTATE STRING
 %token <y_int> MNEM
 %token <y_int> NUMBER
-%type <y_int> expr,argno,optexpr
+%type <y_int> expr argno optexpr
 
 %start patternlist
 
