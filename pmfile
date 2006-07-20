@@ -1,0 +1,153 @@
+-- $Source$
+-- $State$
+
+include "first/c.pm"
+include "first/yacc.pm"
+include "first/llgen.pm"
+include "config.pm"
+
+CINCLUDES = {
+	"-I"..ROOTDIR.."h",
+	"-I"..ROOTDIR.."modules/h",
+	"-I"..HEADERDIR,
+}
+
+-- Load the pmfiles for the various modules.
+
+include "util/data/pmfile"
+
+include "modules/src/alloc/pmfile"
+include "modules/src/assert/pmfile"
+include "modules/src/system/pmfile"
+include "modules/src/string/pmfile"
+include "modules/src/read_em/pmfile"
+include "modules/src/em_code/pmfile"
+include "modules/src/em_mes/pmfile"
+include "modules/src/print/pmfile"
+include "modules/src/string/pmfile"
+include "modules/src/object/pmfile"
+include "modules/src/idf/pmfile"
+include "modules/src/print/pmfile"
+include "modules/src/input/pmfile"
+include "modules/src/flt_arith/pmfile"
+
+include "util/amisc/pmfile"
+include "util/cmisc/pmfile"
+include "util/ack/pmfile"
+include "util/arch/pmfile"
+include "util/cpp/pmfile"
+include "util/cgg/pmfile"
+include "util/ncgg/pmfile"
+include "util/ceg/pmfile"
+include "util/misc/pmfile"
+include "util/opt/pmfile"
+
+include "lang/cem/cemcom/pmfile"
+include "lang/cem/cemcom.ansi/pmfile"
+
+include "mach/proto/pmfile"
+include "mach/6500/pmfile"
+include "mach/6800/pmfile"
+include "mach/6805/pmfile"
+include "mach/6809/pmfile"
+include "mach/arm/pmfile"
+include "mach/i386/pmfile"
+include "mach/i80/pmfile"
+include "mach/i86/pmfile"
+include "mach/m68020/pmfile"
+include "mach/m68k2/pmfile"
+include "mach/m68k4/pmfile"
+include "mach/ns/pmfile"
+include "mach/pdp/pmfile"
+include "mach/s2650/pmfile"
+include "mach/vax4/pmfile"
+include "mach/z80/pmfile"
+include "mach/z8000/pmfile"
+
+default = group {
+	-- Some of the dependency management across modules isn't entirely
+	-- complete, for simplicity; as a result, the order here is important.
+	-- In particular, referencing a library does not cause the library to
+	-- be built, hence the reason why the modules must be built first. Also,
+	-- some of these generate header files...
+	
+	module_em_data,
+	module_system,
+	module_alloc,
+	module_assert,
+	module_string,
+	module_em_code,
+	module_read_em,	
+	module_em_mes,
+	module_print,
+	module_object,
+	module_idf,
+	module_print,
+	module_input,
+	module_flt_arith,
+
+	tool_tabgen,
+	tool_aal,
+	tool_ack,
+	tool_cpp,
+	tool_cgg,
+	tool_ncgg,
+	tool_ceg,
+	tool_em_decode,
+	tool_em_encode,
+	tool_opt,
+
+	lang_cem_cemcom,
+	lang_cem_cemcom_ansi,
+
+	mach_6500,
+	mach_6800,
+	mach_6805,
+	mach_6809,
+	mach_arm,
+	mach_i386,
+	mach_i80,
+	mach_i86,
+	mach_m68020,
+	mach_m68k2,
+	mach_m68k4,
+	mach_ns,
+	mach_pdp,
+	mach_s2650,
+	mach_vax4,
+	mach_z80,
+	mach_z8000,
+}
+
+-- Ensure that the work directories exist.
+
+posix.mkdir(TEMPDIR)
+posix.mkdir(HEADERDIR)
+
+-- Build the configuration headers, rather crudely. FIXME.
+
+configure = simple {
+	outputs = {HEADERDIR.."local.h", HEADERDIR.."em_path.h"},
+	command = "",
+	__dobuild = function(self, inputs, outputs)
+		-- Build 'local.h', rather crudely
+		
+		local f = io.open(HEADERDIR.."local.h", "w")
+		f:write("#define VERSION 3\n") -- EM byte-code version
+		f:write("#define ACKM \"", DEFAULT_ARCHITECTURE, "\"\n")
+		f:write("#define BIGMACHINE 1\n") -- No, we don't have a 16-bit architecture
+		f:write("#define SYS_5\n")
+		f:close()
+		
+		-- Build 'em_path.h', rather crudely
+		
+		local f = io.open(HEADERDIR.."em_path.h", "w")
+		f:write("#define TMP_DIR \"", ACK_TEMP_DIR, "\"\n")
+		f:write("#define EM_DIR \"", PREFIX, "\"\n")
+		f:write("#define ACK_PATH \"", PLATIND, "/descr\"\n")
+		f:close()
+	end
+}
+
+-- Revision history
+-- $Log: genmakefile,v
