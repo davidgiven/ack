@@ -1,10 +1,10 @@
-#include <em_arith.h>
-#include <em_label.h>
-#include <em_comp.h>
-#include <em_pseu.h>
-#include <em_flag.h>
-#include <em_ptyp.h>
-#include <em_private.h>
+#include "em_arith.h"
+#include "em_label.h"
+#include "../read_em/em_comp.h"
+#include "em_pseu.h"
+#include "em_flag.h"
+#include "em_ptyp.h"
+#include "em_private.h"
 
 /* $Id$ */
 
