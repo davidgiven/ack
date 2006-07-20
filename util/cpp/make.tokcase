@@ -1,3 +1,5 @@
+#!/bin/sh
+
 cat <<'--EOT--'
 #include "Lpars.h"
 
