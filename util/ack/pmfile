@@ -1,0 +1,54 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/ack/"
+
+local mktable = cprogram {
+	cfile (d.."mktables.c")
+}
+
+local makeheaders = simple {
+	outputs= {"%U%/dmach.c", "%U%/intable.c"},
+	command = {
+		"cd %{return posix.dirname(self.out[1])}% && %{return self['in'][1]}% %BINDIR%lib"
+	},
+	
+	mktable
+}
+
+tool_ack = cprogram {
+	cfile (d.."list.c"),
+	cfile (d.."data.c"),
+	cfile (d.."main.c"),
+	cfile (d.."scan.c"),
+	cfile (d.."svars.c"),
+	cfile (d.."trans.c"),
+	cfile (d.."util.c"),
+	cfile (d.."rmach.c"),
+	cfile (d.."run.c"),
+	cfile (d.."grows.c"),
+	cfile (d.."files.c"),
+
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		ith { makeheaders, i = 1 }
+	},
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		ith { makeheaders, i = 2 }
+	},
+		
+	lib_string,
+	
+	outputs = {"%U%/ack"},
+	install = {
+		pm.install("%BINDIR%bin/ack"),
+		pm.install("%ROOTDIR%/lib/descr/fe", "%BINDIR%%PLATIND%/descr/fe"),
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

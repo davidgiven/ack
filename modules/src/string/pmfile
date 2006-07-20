@@ -1,0 +1,37 @@
+-- $Source$
+-- $State$
+
+local d = "modules/src/string/"
+lib_string = file (LIBDIR.."libstring.a")
+
+module_string = clibrary {
+	cfile (d.."bts2str.c"),
+	cfile (d.."btscat.c"),
+	cfile (d.."btscmp.c"),
+	cfile (d.."btscpy.c"),
+	cfile (d.."btszero.c"),
+	cfile (d.."long2str.c"),
+	cfile (d.."str2bts.c"),
+	cfile (d.."str2long.c"),
+	cfile (d.."strcat.c"),
+	cfile (d.."strcmp.c"),
+	cfile (d.."strcpy.c"),
+	cfile (d.."strindex.c"),
+	cfile (d.."strlen.c"),
+	cfile (d.."strncat.c"),
+	cfile (d.."strncmp.c"),
+	cfile (d.."strncpy.c"),
+	cfile (d.."strrindex.c"),
+	cfile (d.."strzero.c"),
+	
+	outputs = {"%U%/lib_string.a"},
+	install = {
+		pm.install(LIBDIR.."libstring.a")
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

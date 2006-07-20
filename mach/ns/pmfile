@@ -1,0 +1,19 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/ns/"
+
+mach_ns = group {
+	ARCH = "ns",
+	
+	proto_as,
+	proto_ncg { ARCHDIR = "ns" },
+	
+	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

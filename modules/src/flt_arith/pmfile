@@ -1,0 +1,35 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."modules/src/flt_arith/"
+lib_flt_arith = file (LIBDIR.."libflt_arith.a")
+
+module_flt_arith = clibrary {
+	cfile (d.."flt_ar2flt.c"),
+	cfile (d.."flt_div.c"),
+	cfile (d.."flt_flt2ar.c"),
+	cfile (d.."flt_modf.c"),
+	cfile (d.."flt_str2fl.c"),
+	cfile (d.."flt_cmp.c"),
+	cfile (d.."flt_add.c"),
+	cfile (d.."b64_add.c"),
+	cfile (d.."flt_mul.c"),
+	cfile (d.."flt_nrm.c"),
+	cfile (d.."b64_sft.c"),
+	cfile (d.."flt_umin.c"),
+	cfile (d.."flt_chk.c"),
+	cfile (d.."split.c"),
+	cfile (d.."ucmp.c"),
+	
+	outputs = {"%U%/libflt_arith.a"},
+	install = {
+		pm.install(LIBDIR.."libflt_arith.a"),
+		pm.install(d.."flt_arith.h",             HEADERDIR.."flt_arith.h")
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

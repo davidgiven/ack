@@ -1,0 +1,16 @@
+-- $Source$
+-- $State$
+
+mach_6800 = group {
+	ARCH = "6800",
+	
+	proto_as,
+	
+	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--

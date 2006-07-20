@@ -1,0 +1,97 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/proto/cg/"
+
+local make_tables = cgg {
+	CGGINCLUDEDIR = (ROOTDIR.."mach/%ARCH%/cg/"),
+	file (ROOTDIR.."mach/%ARCH%/cg/table")
+}
+
+local cfile_with_tables = cfile {
+	class = "cfile_with_tables",
+	dynamicheaders = {
+		make_tables,
+		file (ROOTDIR.."mach/%ARCH%/cg/"),
+		file (ROOTDIR.."mach/")
+	}
+}
+
+proto_cg = cprogram {
+	class = "proto_cg",
+	
+	cfile_with_tables (d.."codegen.c"),
+	cfile_with_tables (d.."compute.c"),
+	cfile_with_tables (d.."equiv.c"),
+	cfile_with_tables (d.."gencode.c"),
+	cfile_with_tables (d.."glosym.c"),
+	cfile_with_tables (d.."move.c"),
+	cfile_with_tables (d.."nextem.c"),
+	cfile_with_tables (d.."reg.c"),
+	cfile_with_tables (d.."regvar.c"),
+	cfile_with_tables (d.."salloc.c"),
+	cfile_with_tables (d.."state.c"),
+	cfile_with_tables (d.."subr.c"),
+	cfile_with_tables (d.."var.c"),
+	cfile_with_tables (d.."fillem.c"),
+	cfile_with_tables (d.."main.c"),
+	
+	cfile {
+		ith { make_tables, i = 1 },
+		dynamicheaders = {
+			file (ROOTDIR.."mach/%ARCH%/cg/"),
+			file (d)
+		}
+	},
+	
+	lib_em_data,
+	lib_flt_arith,
+	
+	outputs = {"%U%/%ARCH%-cg"},
+	install = pm.install("%BINDIR%%PLATDEP%/%ARCH%/cg")
+}
+
+--[[
+# genmakefile
+# This genmakefile doesn't have a real comment yet.
+#
+# $Source$
+# $State$
+
+codegenerator() {
+	push
+		addinclude $SRCDIR/src/arch/$1/cg
+		addinclude $OBJDIR/src/arch/$1/cg
+		addincludeq src/arch/proto/cg
+
+		hostcdyn src/arch/$1/cg/tables.c
+		
+		hostprogram $DESTDIR/lib/$1/cg $OBJS \
+			$DESTDIR/lib/libem_data.a \
+			$DESTDIR/lib/libflt_arith.a
+
+cat <<EOF
+$OBJDIR/src/arch/$1/cg/tables.c: \
+		$SRCDIR/src/arch/$1/cg/table \
+		$DESTDIR/bin/cpp \
+		$DESTDIR/bin/cgg
+	@echo HOSTCGG $SRCDIR/src/arch/$1/cg/table
+	@mkdir -p \$(dir \$@)
+	@(cd $OBJDIR/src/arch/$1/cg && $DESTDIR/bin/cpp -P -I$SRCDIR/src/arch/$1/cg $SRCDIR/src/arch/$1/cg/table | \
+		$DESTDIR/bin/cgg) > /dev/null
+EOF
+	pop
+}
+
+# Revision history
+# $Log$
+# Revision 1.1  2006-07-20 23:18:19  dtrg
+# First version in CVS.
+#
+--]]
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--

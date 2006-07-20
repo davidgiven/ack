@@ -1,0 +1,48 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/cgg/"
+
+local yacc_bootgram = yacc {
+			file (d.."bootgram.y")
+		}
+
+tool_cgg = cprogram {
+	cfile (d.."main.c"),
+	
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		yacc_bootgram,
+	},
+	
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		flex {
+			file (d.."bootlex.l")
+		},
+		
+		dynamicheaders = yacc_bootgram
+	},
+	
+	CLIBRARIES = {"-lfl"},
+	lib_em_data,
+	lib_assert,
+	lib_system,
+	
+	install = pm.install(TOOLDIR.."cgg")
+}
+
+cgg = simple {
+	class = "cgg",
+	
+	outputs = {"%U%/tables.c", "%U%/tables.h"},
+	command = {
+		"cd %out[1]:dirname% && (%BINDIR%bin/cpp -P -I%CGGINCLUDEDIR% %in% | %TOOLDIR%cgg)",
+	},
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:21:17  dtrg
+-- First version in CVS.
+--

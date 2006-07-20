@@ -1,0 +1,81 @@
+-- $Source$
+-- $State$
+
+local d = "util/ncgg/"
+
+local ncgg_yacc = yacc {
+	file (d.."cgg.y")
+}
+
+tool_ncgg = cprogram {
+	cfile (d.."subr.c"),
+	cfile (d.."main.c"),
+	cfile (d.."coerc.c"),
+	cfile (d.."error.c"),
+	cfile (d.."emlookup.c"),
+	cfile (d.."expr.c"),
+	cfile (d.."instruct.c"),
+	cfile (d.."iocc.c"),
+	cfile (d.."lookup.c"),
+	cfile (d.."output.c"),
+	cfile (d.."set.c"),
+	cfile (d.."strlookup.c"),
+	cfile (d.."var.c"),
+	cfile (d.."hall.c"),
+	
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		
+		ncgg_yacc,
+		dynamicheaders = flex {
+			file (d.."scan.l")
+		}
+	},
+	
+	cfile {
+		CEXTRAFLAGS = "-I"..d,
+		simple {
+			outputs = {"%U%/enterkeyw.c"},
+			
+			command = {
+				"cp %{return posix.dirname(self['in'][3])}%/y.tab.h %{return posix.dirname(self.out[1])}%",
+				"cd %{return posix.dirname(self.out[1])}% && "..ROOTDIR..d.."cvtkeywords "..ROOTDIR..d.."keywords",
+			},
+	
+			file (d.."cvtkeywords"),
+			file (d.."keywords"),
+			ncgg_yacc
+		},
+		
+		dynamicheaders = ncgg_yacc
+	},
+	
+	lib_em_data,
+	
+	outputs = {"%U%-ncgg"},
+	install = pm.install(TOOLDIR.."ncgg")
+}
+
+ncgg = simple {
+	class = "ncgg",
+	
+	outputs = {"%U%/tables.c", "%U%/tables.h"},
+	command = {
+		"cd %out[1]:dirname% && (%BINDIR%bin/cpp -P -I%NCGGINCLUDEDIR% %in% | %TOOLDIR%ncgg)",
+		"mv %out[1]:dirname%/tables.H %out[2]%"
+	},
+}
+
+--[[
+	@echo HOSTNCG $SRCDIR/src/arch/$table/ncg/table
+	@mkdir -p \$(dir \$@)
+	@(cd $OBJDIR/src/arch/$1/ncg && $DESTDIR/bin/cpp -P -I$SRCDIR/src/arch/$1/ncg $SRCDIR/src/arch/$table/ncg/table | \
+		$DESTDIR/bin/ncgg) > /dev/null
+	@(cd $OBJDIR/src/arch/$1/ncg && mv tables.H tables.h)
+--]]
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:24:28  dtrg
+-- First version in CVS.
+--

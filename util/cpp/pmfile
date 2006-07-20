@@ -1,0 +1,184 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/cpp/"
+
+local extract_parameters = simple {
+	outputs = {
+		"%U%/pathlength.h",
+		"%U%/errout.h",
+		"%U%/idfsize.h",
+		"%U%/numsize.h",
+		"%U%/nparams.h",
+		"%U%/ifdepth.h",
+		"%U%/lapbuf.h",
+		"%U%/strsize.h",
+		"%U%/botch_free.h",
+		"%U%/debug.h",
+		"%U%/parbufsize.h",
+		"%U%/textsize.h",
+		"%U%/inputtype.h",
+		"%U%/obufsize.h",
+		"%U%/dobits.h",
+		"%U%/line_prefix.h",
+	},
+	
+	command = {
+		"cd %out[1]:dirname% && %in[1]% %in[2]%"
+	},
+	
+	file (d.."make.hfiles"),
+	file (d.."Parameters")
+}
+
+local lpars = LLgen {
+	simple {
+		outputs = {"%U%/tokenfile.g"},
+		command = {
+			"%in[1]% < %in[2]% > %out[1]%"
+		},
+		file (d.."make.tokfile"),
+		file (d.."tokenname.c")
+	},
+	file (d.."expression.g")
+}
+
+
+local cfile_with_headers = cfile {
+	class = "cfile_with_headers",
+	dynamicheaders = {
+		file (d),
+		extract_parameters,
+		lpars
+	}
+}
+	
+tool_cpp = cprogram {
+	cfile_with_headers (d.."LLlex.c"),
+	cfile_with_headers (d.."LLmessage.c"),
+	cfile_with_headers (d.."ch7bin.c"),
+	cfile_with_headers (d.."ch7mon.c"),
+	cfile_with_headers (d.."domacro.c"),
+	cfile_with_headers (d.."error.c"),
+	cfile_with_headers (d.."idf.c"),
+	cfile_with_headers (d.."init.c"),
+	cfile_with_headers (d.."input.c"),
+	cfile_with_headers (d.."main.c"),
+	cfile_with_headers (d.."options.c"),
+	cfile_with_headers (d.."preprocess.c"), 
+	cfile_with_headers (d.."replace.c"),
+	cfile_with_headers (d.."scan.c"),
+	cfile_with_headers (d.."skip.c"),
+	cfile_with_headers (d.."tokenname.c"),
+	cfile_with_headers (d.."next.c"),
+	cfile_with_headers (d.."expr.c"),
+
+	foreach {
+		rule = cfile_with_headers,
+		ith { lpars, from=2 }
+	},
+
+	cfile_with_headers {
+		simple {
+			outputs = {"%U%-symbol2str.c"},
+			command = {
+				"%in[1]% < %in[2]% > %out[1]%"
+			},
+			
+			file (d.."make.tokcase"),
+			file (d.."tokenname.c")
+		}
+	},
+	
+	cfile_with_headers {
+		CEXTRAFLAGS = "-I"..d,
+		tabgen (d.."char.tab")
+	},
+	
+	lib_assert,
+	lib_print,
+	lib_alloc,
+	lib_system,
+	lib_string,
+	
+	outputs = {"%U%/cpp"},
+	install = pm.install(BINDIR.."bin/cpp")
+}
+
+--[[
+# genmakefile
+# This genmakefile doesn't have a real comment yet.
+#
+# $Source$
+# $State$
+
+# --- cpp -------------------------------------------------------------------
+
+push
+	dir=src/tools/cpp
+	
+	addinclude $SRCDIR/$dir
+	addinclude $OBJDIR/$dir
+
+
+	x="$SRCS"
+	hostcdyn $dir/char.c
+	SRCS="$x"
+	tabgen $SRCDIR/$dir/char.tab $OBJDIR/$dir/char.c
+
+	llgen "" $OBJDIR/$dir \
+			$OBJDIR/$dir/tokenfile.g \
+			$SRCDIR/$dir/expression.g
+	tokenfile $dir
+	tokcase $dir
+
+	hostprogram $DESTDIR/bin/cpp $OBJS \
+		$DESTDIR/lib/libassert.a \
+		$DESTDIR/lib/libprint.a \
+		$DESTDIR/lib/liballoc.a \
+		$DESTDIR/lib/libsystem.a \
+		$DESTDIR/lib/libastring.a
+
+	addcleanable $OBJDIR/$dir/errout.h
+	addcleanable $OBJDIR/$dir/idfsize.h
+	addcleanable $OBJDIR/$dir/ifdepth.h
+	addcleanable $OBJDIR/$dir/lapbuf.h
+	addcleanable $OBJDIR/$dir/nparams.h
+	addcleanable $OBJDIR/$dir/numsize.h
+	addcleanable $OBJDIR/$dir/obufsize.h
+	addcleanable $OBJDIR/$dir/parbufsize.h
+	addcleanable $OBJDIR/$dir/pathlength.h
+	addcleanable $OBJDIR/$dir/strsize.h
+	addcleanable $OBJDIR/$dir/textsize.h
+	addcleanable $OBJDIR/$dir/botch_free.h
+	addcleanable $OBJDIR/$dir/debug.h
+	addcleanable $OBJDIR/$dir/inputtype.h
+	addcleanable $OBJDIR/$dir/dobits.h
+	addcleanable $OBJDIR/$dir/line_prefix.h
+cat <<EOF
+$SRCS: $OBJDIR/$dir/.hfiles
+$SRCDIR/$dir/LLlex.c: $OBJDIR/$dir/Lpars.c
+
+$OBJDIR/$dir/.hfiles: \
+		$SRCDIR/$dir/Parameters \
+		$OBJDIR/$dir/char.c
+	@echo MAKE.HFILES \$<
+	@mkdir -p \$(dir \$@)
+	@(cd \$(dir \$@) && $SRCDIR/$dir/make.hfiles \$<) > /dev/null
+	@touch \$@
+
+EOF
+pop
+
+# Revision history
+# $Log$
+# Revision 1.1  2006-07-20 23:24:28  dtrg
+# First version in CVS.
+#
+--]]
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:24:28  dtrg
+-- First version in CVS.
+--

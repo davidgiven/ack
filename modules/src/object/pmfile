@@ -1,0 +1,55 @@
+-- $Source$
+-- $State$
+
+local d = "modules/src/object/"
+lib_object = file (LIBDIR.."libobject.a")
+
+module_object = clibrary {
+	cfile (d.."rd_arhdr.c"),
+	cfile (d.."rd_bytes.c"),
+	cfile (d.."rd_int2.c"),
+	cfile (d.."rd_long.c"),
+	cfile (d.."rd_ranlib.c"),
+	cfile (d.."rd_unsig2.c"),
+	cfile (d.."rd.c"),
+	cfile (d.."wr_arhdr.c"),
+	cfile (d.."wr_bytes.c"),
+	cfile (d.."wr_int2.c"),
+	cfile (d.."wr_long.c"),
+	cfile (d.."wr_putc.c"),
+	cfile (d.."wr_ranlib.c"),
+	cfile (d.."wr.c"),
+
+	outputs = {"%U%/lib_object.a"},
+	install = {
+		pm.install(LIBDIR.."libobject.a")
+	}
+}
+--[[
+
+
+# genmakefile
+# This genmakefile doesn't have a real comment yet.
+#
+# $Source$
+# $State$
+
+push
+	addincludeq src/lib/object
+
+	
+	hostlibrary $LIBDIR/libobject.a $OBJS
+pop
+
+# Revision history
+# $Log$
+# Revision 1.1  2006-07-20 23:18:18  dtrg
+# First version in CVS.
+#
+--]]
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

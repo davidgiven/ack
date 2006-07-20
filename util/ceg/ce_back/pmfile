@@ -1,0 +1,89 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/ceg/ce_back/"
+
+local function installmany(srcroot, destroot, list)
+	local o = {}
+	
+	for _, i in ipairs(list) do
+		table.insert(o, pm.install(srcroot..i, destroot..i))
+	end
+	
+	return o
+end
+
+tool_ceg_assemble = group {
+	install = installmany(d, BINDIR.."%PLATDEP%/ceg/ce_back/",
+	{	
+		"as_back/back.h",
+		"as_back/bottom.c",
+		"as_back/bss.c",
+		"as_back/con1.c",
+		"as_back/con2.c",
+		"as_back/con4.c",
+		"as_back/do_close.c",
+		"as_back/do_open.c",
+		"as_back/end_back.c",
+		"as_back/gen1.c",
+		"as_back/gen2.c",
+		"as_back/gen4.c",
+		"as_back/header.h",
+		"as_back/init_back.c",
+		"as_back/reloc1.c",
+		"as_back/reloc2.c",
+		"as_back/reloc4.c",
+		"as_back/rom1.c",
+		"as_back/rom2.c",
+		"as_back/rom4.c",
+		"as_back/set_global.c",
+		"as_back/set_local.c",
+		"as_back/switchseg.c",
+		"as_back/symboldef.c",
+		"as_back/text1.c",
+		"as_back/text2.c",
+		"as_back/text4.c",
+		"as_back/dbsym.c",
+
+		"obj_back/back.h",
+		"obj_back/con2.c",
+		"obj_back/con4.c",
+		"obj_back/data.c",
+		"obj_back/data.h",
+		"obj_back/do_close.c",
+		"obj_back/do_open.c",
+		"obj_back/end_back.c",
+		"obj_back/extnd.c",
+		"obj_back/gen1.c",
+		"obj_back/gen2.c",
+		"obj_back/gen4.c",
+		"obj_back/hash.h",
+		"obj_back/header.h",
+		"obj_back/init_back.c",
+		"obj_back/label.c",
+		"obj_back/memory.c",
+		"obj_back/misc.c",
+		"obj_back/output.c",
+		"obj_back/reloc1.c",
+		"obj_back/reloc2.c",
+		"obj_back/reloc4.c",
+		"obj_back/relocation.c",
+		"obj_back/rom2.c",
+		"obj_back/rom4.c",
+		"obj_back/set_global.c",
+		"obj_back/set_local.c",
+		"obj_back/switchseg.c",
+		"obj_back/symboldef.c",
+		"obj_back/symtable.c",
+		"obj_back/text2.c",
+		"obj_back/text4.c",
+		"obj_back/common.c",
+		"obj_back/dbsym.c",
+	})
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--

@@ -1,0 +1,51 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/proto/as/"
+
+local parser = yacc {
+	simple {
+		outputs = {"%U%-%I%.y"},
+		command = {
+			"cd %out[1]:dirname% && "..
+			  "%in[2]% -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES% %in[1]% > %out[1]%"
+		},
+		
+		file (d.."comm2.y"),
+		tool_cpp
+	}
+}
+
+local cfile_with_tables = cfile {
+	class = "cfile_with_tables",
+	dynamicheaders = {
+		parser,
+		file (ROOTDIR.."mach/%ARCH%/as/")
+	}
+}
+
+proto_as = cprogram {
+	class = "proto_as",
+	
+	cfile_with_tables (d.."comm3.c"),
+	cfile_with_tables (d.."comm4.c"),
+	cfile_with_tables (d.."comm5.c"),
+	cfile_with_tables (d.."comm6.c"),
+	cfile_with_tables (d.."comm7.c"),
+	cfile_with_tables (d.."comm8.c"),
+	
+	cfile {
+		parser,
+	},
+	
+	lib_object,
+	
+	outputs = {"%U%/%ARCH%-as"},
+	install = pm.install(BINDIR.."%PLATDEP%/%ARCH%/as")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--

@@ -1,0 +1,20 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/ceg/assemble/"
+
+tool_ceg_assemble = group {
+	install = {
+		pm.install(d.."as_assemble/assemble.c",  BINDIR..PLATDEP.."/ceg/assemble/as_assemble/assemble.c"),
+		pm.install(d.."as_assemble/block_as.c",  BINDIR..PLATDEP.."/ceg/assemble/as_assemble/block_as.c"),
+		pm.install(d.."obj_assemble/assemble.c", BINDIR..PLATDEP.."/ceg/assemble/obj_assemble/assemble.c"),
+		pm.install(d.."obj_assemble/block_as.c", BINDIR..PLATDEP.."/ceg/assemble/obj_assemble/block_as.c"),
+		pm.install(d.."obj_assemble/const.h",    BINDIR..PLATDEP.."/ceg/assemble/obj_assemble/const.h"),
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--

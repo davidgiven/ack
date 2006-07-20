@@ -1,0 +1,17 @@
+-- $Source$
+-- $State$
+
+local d = "util/amisc/"
+
+tool_tabgen = cprogram {
+	cfile (d.."tabgen.c"),
+	
+	outputs = {"%U%/tabgen"},
+	install = pm.install(TOOLDIR.."tabgen")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

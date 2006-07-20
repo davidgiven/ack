@@ -1,0 +1,19 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/arm/cv/"
+
+tool_arm_cv = cprogram {
+	cfile (d.."cv.c"),
+	
+	lib_object,
+	
+	outputs = {"%U%/cv"},
+	install = pm.install(BINDIR.."%PLATDEP%/arm/dl")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

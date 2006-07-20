@@ -1,0 +1,90 @@
+-- $Source$
+-- $State$
+
+local d = "modules/src/read_em/"
+lib_read_emk = file (LIBDIR.."libread_emk.a")
+lib_read_emkV = file (LIBDIR.."libread_emkV.a")
+lib_read_emeV = file (LIBDIR.."libread_emeV.a")
+
+local C_mnem_h = simple {
+	command = {"(cd "..d.." && sh %in%) > %out%"},
+	outputs = {"%U%-%I%.h"},
+	install = pm.install(HEADERDIR.."C_mnem.h"),
+	
+	file (ROOTDIR..d.."m_C_mnem"),
+	file (ROOTDIR.."etc/em_table")
+}
+
+local C_mnem_narg_h = simple {
+	command = {"(cd "..d.." && %in%) > %out%"},
+	outputs = {"%U%-%I%.h"},
+	install = pm.install(HEADERDIR.."C_mnem_narg.h"),
+	
+	file (ROOTDIR..d.."m_C_mnem_na"),
+	file (ROOTDIR.."etc/em_table")
+}
+
+local withdynamic = cfile {
+	dynamicheaders = {C_mnem_h, C_mnem_narg_h}
+}
+
+module_read_emk = clibrary {
+	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	cfile (d.."EM_vars.c"),
+	cfile {
+		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCOMPACT",
+		(d.."read_em.c")
+	},
+	withdynamic (d.."mkcalls.c"),
+	
+	outputs = {"%U%/libread_emk.a"},
+	install = pm.install(LIBDIR.."libread_emk.a")
+}
+
+module_read_emkV = clibrary {
+	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	cfile (d.."EM_vars.c"),
+	cfile {
+		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCOMPACT -DCHECKING",
+		(d.."read_em.c")
+	},
+	withdynamic {
+		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		(d.."mkcalls.c"),
+	},
+	
+	outputs = {"%U%/libread_emkV.a"},
+	install = pm.install(LIBDIR.."libread_emkV.a")
+}
+
+module_read_emeV = clibrary {
+	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	cfile (d.."EM_vars.c"),
+	cfile {
+		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		(d.."read_em.c")
+	},
+	withdynamic {
+		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		(d.."mkcalls.c"),
+	},
+	
+	outputs = {"%U%/lib_read_emeV.a"},
+	install = pm.install(LIBDIR.."libread_emeV.a")
+}
+
+module_read_em = group {
+	module_read_emk,
+	module_read_emkV,
+	module_read_emeV,
+	
+	install = {
+		pm.install(d.."em_comp.h",     HEADERDIR.."em_comp.h"),
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

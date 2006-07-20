@@ -1,0 +1,19 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/i86/"
+
+mach_i86 = group {
+	ARCH = "i86",
+	
+	proto_as,
+	proto_ncg { ARCHDIR = "i86" },
+	
+	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

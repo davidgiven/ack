@@ -1,0 +1,22 @@
+-- $Source$
+-- $State$
+
+local d = "util/arch/"
+
+tool_aal = cprogram {
+	CEXTRAFLAGS = "-DAAL",
+	cfile (d.."archiver.c"),
+	
+	lib_print,
+	lib_string,
+	lib_system,
+	lib_object,
+	
+	install = pm.install(BINDIR.."bin/aal")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

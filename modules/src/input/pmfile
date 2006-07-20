@@ -1,0 +1,23 @@
+-- $Source$
+-- $State$
+
+local d = "modules/src/input/"
+lib_input = file (LIBDIR.."libinput.a")
+
+module_input = clibrary {
+	cfile (d.."AtEoIF.c"),
+	cfile (d.."AtEoIT.c"),
+
+	outputs = {"%U%/libinput.a"},
+	install = {
+		pm.install(LIBDIR.."libinput.a"),
+		pm.install(d.."inp_pkg.spec",            HEADERDIR.."inp_pkg.spec"),
+		pm.install(d.."inp_pkg.body",            HEADERDIR.."inp_pkg.body")
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

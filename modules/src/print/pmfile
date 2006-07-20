@@ -1,0 +1,24 @@
+-- $Source$
+-- $State$
+
+local d = "modules/src/print/"
+lib_print = file (LIBDIR.."libprint.a")
+
+module_print = clibrary {
+	cfile (d.."doprnt.c"),
+	cfile (d.."fprint.c"),
+	cfile (d.."print.c"),
+	cfile (d.."sprint.c"),
+	cfile (d.."format.c"),
+
+	outputs = {"%U%/libprint.a"},
+	install = {
+		pm.install(LIBDIR.."libprint.a"),
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

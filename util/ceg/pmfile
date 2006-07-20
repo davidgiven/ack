@@ -1,0 +1,21 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/ceg/"
+
+include (d.."as_parser/pmfile")
+include (d.."assemble/pmfile")
+include (d.."ce_back/pmfile")
+
+tool_ceg = group {
+	tool_ceg_as_parser,
+	tool_ceg_as_parser_eval,
+	tool_ceg_assemble,
+	tool_ceg_ce_back,
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

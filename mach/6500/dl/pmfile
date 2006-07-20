@@ -1,0 +1,19 @@
+-- $Source$
+-- $State$
+
+local d = "mach/6500/dl/"
+
+tool_6500_dl = cprogram {
+	cfile (d.."dl.c"),
+	
+	lib_object,
+	
+	outputs = {"%U%/dl"},
+	install = pm.install(BINDIR..PLATDEP.."/6500/dl")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- First version in CVS.
+--

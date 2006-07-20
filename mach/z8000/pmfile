@@ -1,0 +1,19 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/z8000/"
+
+mach_z8000 = group {
+	ARCH = "z8000",
+	
+	proto_as,
+	proto_cg,
+	
+	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- First version in CVS.
+--
