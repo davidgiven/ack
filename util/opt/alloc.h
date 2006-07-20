@@ -16,7 +16,7 @@ extern		oldline();
 extern		oldloc();
 extern		oldreg();
 
-#undef USEMALLOC	/* if defined malloc() and free() are used */
+#define USEMALLOC	/* if defined malloc() and free() are used */
 
 #undef COREDEBUG	/* keep records and print statistics */
 
