@@ -150,4 +150,7 @@ configure = simple {
 }
 
 -- Revision history
--- $Log: genmakefile,v
+-- $Log$
+-- Revision 1.2  2006-07-20 23:24:42  dtrg
+-- Fixed revision history.
+--
