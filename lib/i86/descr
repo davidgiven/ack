@@ -17,7 +17,7 @@ var MACHOPT_F=-m8
 name be
 	from .m.g
 	to .s
-	program {EM}/lib.bin/{M}/cg
+	program {EM}/lib.bin/{M}/ncg
 	args <
 	stdout
 	need .e
