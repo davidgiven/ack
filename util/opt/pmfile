@@ -94,4 +94,7 @@ tool_opt = group {
 }
 
 -- Revision history
--- $Log: genmakefile,v 
+-- $Log$
+-- Revision 1.2  2006-07-20 23:10:07  dtrg
+-- Fixed revision history.
+--
