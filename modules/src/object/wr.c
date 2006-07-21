@@ -13,8 +13,6 @@
 
 #include "obj.h"
 
-extern long		lseek();
-
 /*
  * Parts of the output file.
  */

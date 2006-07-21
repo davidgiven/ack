@@ -41,12 +41,10 @@ struct ranlib *tab;
 unsigned int	tnum = 0;
 char	*tstrtab;
 unsigned int	tssiz = 0;
-long	time();
 unsigned int tabsz, strtabsz;
 #else
 #define MAGIC_NUMBER	ARMAG
 #endif
-long	lseek();
 
 #define odd(nr)		(nr & 01)
 #define even(nr)	(odd(nr) ? nr + 1 : nr)

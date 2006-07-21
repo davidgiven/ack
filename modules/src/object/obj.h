@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <local.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <out.h>
 #include <ranlib.h>

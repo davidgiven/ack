@@ -100,7 +100,6 @@ int	output;
 
 char *program ;
 
-extern long lseek();
 #define TEXTSG	0
 #define ROMSG	1
 #define DATASG	2
