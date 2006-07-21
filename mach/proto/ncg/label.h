@@ -7,11 +7,11 @@
 
 typedef struct label *label_p;
 
-typedef struct label {
+struct label {
 	label_p	lb_next;
 	word	lb_number;
 	int	lb_height;
 	short	lb_fallthrough;
-    } label_t;
+};
 
 extern label_p get_label();

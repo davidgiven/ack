@@ -15,7 +15,7 @@ add_label(num, height, flth)
 	if (flth != TRUE && flth != FALSE)
 	    fatal("incorrect value for fallthrough");
 
-	lbl = (label_p) myalloc(sizeof(label_t));
+	lbl = (label_p) myalloc(sizeof(struct label));
 	lbl->lb_next = label_list;
 	lbl->lb_number = num;
 	lbl->lb_height = height;
