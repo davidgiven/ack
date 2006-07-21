@@ -1,8 +1,8 @@
-                                 LLGEN V1.0
-                                 ==========
+                                LLGEN V1.0.1
+                                ============
 
   Copyright © 1991-2005 by the Vrije Universiteit, Amsterdam, the Netherlands.
-                                 2006-02-03
+                                 2006-07-21
 
 INTRODUCTION
 ============
@@ -35,11 +35,12 @@ variable:
 
     ./pm -DPREFIX="/home/dg/" install
     
-(If you do change the prefix, you must supply it whenever you invoke pm. And
-there must be a trailing / in the path you give it.)
+(If you do change the prefix, you must supply it whenever you invoke pm,
+whether you're installing or just building. And there must be a trailing / in
+the path you give it.)
 
 Invoking ./pm by itself will compile it but not install it; look in the bin
-directory for an image of 
+directory for an image of the installation directory.
 
 USING LLGEN
 ===========
@@ -64,7 +65,7 @@ distributed seperately). For more details, please see:
 
 There is a mailing list available at:
 
-	http://sourceforge.net/mail/?group_id=130811
+    http://sourceforge.net/mail/?group_id=130811
 
 LICENSE
 =======
@@ -79,6 +80,6 @@ Do './pm --license' for details.
 -----------------------------------------------------------------------------
 David Given
 dg@cowlark.com
-2006-02-04
+2006-07-21
 
 /* $Id$ */
