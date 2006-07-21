@@ -16,7 +16,7 @@ if [ -d ../LLgen-$1 ]; then
 fi
 
 mkdir ../LLgen-$1
-cp -a --parents \
+cp -a --dereference --parents \
 	pm \
 	c.pm \
 	pmfile \
