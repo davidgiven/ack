@@ -1,3 +1,6 @@
+-- $Source$
+-- $State$
+--
 -- $Id$
 --
 -- This is the build file used to compile LLgen. It should be run through
@@ -101,3 +104,9 @@ install = group {
 		"(cd bin && tar cf - .) | (cd %PREFIX% && tar xvf -)"
 	}
 }
+
+-- Revision history
+-- $Log$
+-- Revision 1.2  2006-07-21 11:15:14  dtrg
+-- Updated to the latest version of pm.
+--

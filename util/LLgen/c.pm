@@ -1,6 +1,3 @@
--- This file is part of Prime Mover v0.1pre1.
--- (C) 2006 David Given
---
 -- pm includefile to compile *host* C programs.
 
 -- Standard Lua boilerplate.
@@ -14,13 +11,15 @@ local filetime = pm.filetime
 
 -- Define some variables.
 
-CC = "gcc %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CEXTRAFLAGS% -c -o %out% %in%"
-CPROGRAM = "gcc %CBUILDFLAGS% %CLINKFLAGS% %CEXTRAFLAGS% -o %out% %in% %CLIBRARIES%"
-CDEPENDS = "gcc %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CEXTRAFLAGS% -MM -MG -MF %out% %in%"
+CCOMPILER = "gcc"
+CC = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -c -o %out% %in%"
+CPROGRAM = "%CCOMPILER% %CBUILDFLAGS% %CLINKFLAGS% %CEXTRAFLAGS% -o %out% %in% %CLIBRARIES%"
+CDEPENDS = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -MM -MG %in% > %out%"
 AR = "%RM% %out% && ar cr %out% %in%"
 
 CBUILDFLAGS = "-g -Os"
 CINCLUDES = {}
+CDEFINES = {}
 CEXTRAFLAGS = ""
 CLINKFLAGS = ""
 CDYNINCLUDES = ""
