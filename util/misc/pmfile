@@ -35,13 +35,25 @@ tool_em_encode = cprogram {
 	
 	outputs = {"%U%/em_encode"},
 	install = {
-		-- FIXME lib.bin in next line needs removing --- pm bug?
-		pm.install("%BINDIR%lib.bin/em_encode"),
+		pm.install("%BINDIR%%PLATDEP%/em_encode"),
+		pm.install(d.."em_decode.6", "%BINDIR%man/man6/em_decode.6")
+	}
+}
+	
+tool_esize = cprogram {
+	cfile (d.."esize.c"),
+
+	outputs = {"%U%/esize"},
+	install = {
+		pm.install("%BINDIR%/bin/esize"),
+		pm.install(d.."esize.1", "%BINDIR%man/man1/esize.1")
 	}
 }
 	
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:24:28  dtrg
--- First version in CVS.
+-- Revision 1.2  2006-07-22 20:10:41  dtrg
+-- Added support for the esize object inspection tool.
 --
+-- Revision 1.1  2006/07/20 23:24:28  dtrg
+-- First version in CVS.
