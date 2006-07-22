@@ -24,8 +24,7 @@
 #include "locals.h"
 
 
-extern short nrglobals;
-
+short nrglobals;
 short nrlocals;
 local_p *locals;  /* dynamic array */
 
