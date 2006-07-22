@@ -108,6 +108,7 @@ default = group {
 
 	lang_cem_cemcom,
 	lang_cem_cemcom_ansi,
+	lang_pc,
 
 	mach_6500,
 	mach_6800,
@@ -160,7 +161,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.7  2006-07-22 21:03:07  dtrg
+-- Revision 1.8  2006-07-22 21:24:41  dtrg
+-- Really added support for the Pascal compiler.
+--
+-- Revision 1.7  2006/07/22 21:03:07  dtrg
 -- Added support for the Pascal compiler.
 --
 -- Revision 1.6  2006/07/22 20:10:41  dtrg
