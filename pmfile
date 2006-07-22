@@ -44,6 +44,7 @@ include "util/misc/pmfile"
 include "util/opt/pmfile"
 include "util/ego/pmfile"
 include "util/topgen/pmfile"
+include "util/led/pmfile"
 
 include "lang/cem/cemcom/pmfile"
 include "lang/cem/cemcom.ansi/pmfile"
@@ -101,6 +102,7 @@ default = group {
 	tool_opt,
 	tool_ego,
 	tool_topgen,
+	tool_led,
 
 	lang_cem_cemcom,
 	lang_cem_cemcom_ansi,
@@ -156,7 +158,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.4  2006-07-22 12:31:19  dtrg
+-- Revision 1.5  2006-07-22 20:04:41  dtrg
+-- Added support for the led link editor.
+--
+-- Revision 1.4  2006/07/22 12:31:19  dtrg
 -- Added support for the top target peephole optimiser.
 --
 -- Revision 1.3  2006/07/22 00:52:01  dtrg

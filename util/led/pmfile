@@ -1,0 +1,37 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/led/"
+
+tool_led = cprogram {
+	cfile (d.."archive.c"),
+	cfile (d.."error.c"),
+	cfile (d.."extract.c"),
+	cfile (d.."finish.c"),
+	cfile (d.."main.c"),
+	cfile (d.."memory.c"),
+	cfile (d.."output.c"),
+	cfile (d.."read.c"),
+	cfile (d.."relocate.c"),
+	cfile (d.."save.c"),
+	cfile (d.."scan.c"),
+	cfile (d.."sym.c"),
+	cfile (d.."write.c"),
+
+	lib_string,
+	lib_object,
+	
+	outputs = {"%U%/led"},
+	install = {
+		-- FIXME lib.bin in next line needs removing --- pm bug?
+		pm.install("%BINDIR%bin/led"),
+		pm.install(d.."ack.out.5", "%BINDIR%man/man5/ack.out.5"),
+		pm.install(d.."led.6", "%BINDIR%man/man6/led.6"),
+	}
+}
+	
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-22 20:04:41  dtrg
+-- Added support for the led link editor.
+--
