@@ -24,14 +24,16 @@ tool_led = cprogram {
 	outputs = {"%U%/led"},
 	install = {
 		-- FIXME lib.bin in next line needs removing --- pm bug?
-		pm.install("%BINDIR%bin/led"),
+		pm.install("%BINDIR%%PLATDEP%/em_led"),
 		pm.install(d.."ack.out.5", "%BINDIR%man/man5/ack.out.5"),
-		pm.install(d.."led.6", "%BINDIR%man/man6/led.6"),
+		pm.install(d.."led.6", "%BINDIR%man/man6/em_led.6"),
 	}
 }
 	
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-22 20:04:41  dtrg
--- Added support for the led link editor.
+-- Revision 1.2  2006-07-22 20:52:44  dtrg
+-- led now gets installed into the right place.
 --
+-- Revision 1.1  2006/07/22 20:04:41  dtrg
+-- Added support for the led link editor.
