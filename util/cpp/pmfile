@@ -102,12 +102,18 @@ tool_cpp = cprogram {
 	lib_string,
 	
 	outputs = {"%U%/cpp"},
-	install = pm.install(BINDIR.."bin/cpp")
+	install = {
+		pm.install("%BINDIR%%PLATDEP%/cpp"),
+		pm.install(d.."cpp.6", "%BINDIR%man/man6/cpp.6")
+	}
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-22 12:27:31  dtrg
+-- Revision 1.3  2006-07-22 20:58:27  dtrg
+-- cpp now gets installed in the right place.
+--
+-- Revision 1.2  2006/07/22 12:27:31  dtrg
 -- Removed a huge, ancient comment dating from the genmake days.
 --
 -- Revision 1.1  2006/07/20 23:24:28  dtrg

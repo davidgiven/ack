@@ -37,12 +37,15 @@ cgg = simple {
 	
 	outputs = {"%U%/tables.c", "%U%/tables.h"},
 	command = {
-		"cd %out[1]:dirname% && (%BINDIR%bin/cpp -P -I%CGGINCLUDEDIR% %in% | %TOOLDIR%cgg)",
+		"cd %out[1]:dirname% && (%BINDIR%%PLATDEP%/cpp -P -I%CGGINCLUDEDIR% %in% | %TOOLDIR%cgg)",
 	},
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:21:17  dtrg
+-- Revision 1.2  2006-07-22 20:58:27  dtrg
+-- cpp now gets installed in the right place.
+--
+-- Revision 1.1  2006/07/20 23:21:17  dtrg
 -- First version in CVS.
 --
