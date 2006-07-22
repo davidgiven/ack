@@ -6,9 +6,11 @@
 static char rcsid[] = "$Id$";
 #endif
 
-#include <arch.h>
-#include <out.h>
-#include <ranlib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "arch.h"
+#include "out.h"
+#include "ranlib.h"
 #include "const.h"
 #include "debug.h"
 #include "defs.h"

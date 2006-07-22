@@ -10,7 +10,9 @@ static char rcsid[] = "$Id$";
  * Symbol table management.
  */
 
-#include <out.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "out.h"
 #include "const.h"
 #include "memory.h"
 #include "debug.h"
