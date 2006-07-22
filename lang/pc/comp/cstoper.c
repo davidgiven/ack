@@ -1,5 +1,7 @@
 /* C O N S T A N T   E X P R E S S I O N   H A N D L I N G */
 
+#include    <stdlib.h>
+#include    <string.h>
 #include	"debug.h"
 #include	"target_sizes.h"
 

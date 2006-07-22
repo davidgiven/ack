@@ -1,5 +1,7 @@
 /* C O D E   G E N E R A T I O N   R O U T I N E S */
 
+#include    <stdlib.h>
+#include    <string.h>
 #include	"debug.h"
 #include	<assert.h>
 #include	<em.h>

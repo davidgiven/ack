@@ -1,5 +1,7 @@
 /* M A I N   P R O G R A M */
 
+#include    <stdlib.h>
+#include    <string.h>
 #include	"debug.h"
 
 #include	<em.h>

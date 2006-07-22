@@ -1,5 +1,8 @@
 /* L E X I C A L   A N A L Y S E R   F O R   I S O - P A S C A L */
 
+#include    <stdlib.h>
+#include    <stdio.h>
+#include    <string.h>
 #include	"debug.h"
 #include	"idfsize.h"
 #include	"numsize.h"
