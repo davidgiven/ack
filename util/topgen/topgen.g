@@ -15,16 +15,16 @@
 %start	LLparse, optim_description;
 
 {
-# include <stdio.h>
-# include "token.h"
-# include "symtab.h"
-# include "misc.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "token.h"
+#include "symtab.h"
+#include "misc.h"
 
 char	idbuf[BUFSIZ], buf[BUFSIZ];
 int	countid;		/* # of variables */
 int	countpat;		/* # of patterns */
-char *	malloc();
-char *	strcpy();
 static int patlen;		/* Maximum number of instructions in pattern */
 static int maxoperand;		/* Maximum number of operands of instruction */
 extern FILE *input;		/* file descriptor of inputfile */

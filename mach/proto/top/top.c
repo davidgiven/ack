@@ -3,10 +3,17 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+ 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "gen.h"
 #include "top.h"
 #include "queue.h"
+
+/* Defined in the string module, which has no header file. FIXME. */
+
+extern char* strindex(char *s, int c);
 
 /* STANDARD MACHINE-INDEPENT C CODE *************/
 
@@ -14,10 +21,6 @@ extern char *lstrip();
 extern instr_p newinstr();
 extern instr_p read_instr();
 extern instr_p gen_instr();
-extern char * malloc();
-extern char *strcat();
-extern char *strcpy();
-extern char *strncpy();
 
 struct variable var[NRVARS+1];
 struct variable ANY;  /* ANY symbol matching any instruction */

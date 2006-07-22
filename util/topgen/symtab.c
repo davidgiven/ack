@@ -8,7 +8,10 @@
  * Contains the routine findident, which builds the symbol table and
  * searches identifiers
  */
-# include "symtab.h"
+ 
+#include <stdlib.h>
+#include <string.h>
+#include "symtab.h"
 
 struct symtab *idtable, *deftable;
 
@@ -20,8 +23,6 @@ findident(s, mode, table) char *s; struct symtab **table; {
      * If mode = ENTERING, a new entry will be made if s is not in the
      * table yet, otherwise an error results
      */
-    char *malloc();
-    char *strcpy();
     register struct symtab *p;
     register n;
 

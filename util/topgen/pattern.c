@@ -9,10 +9,12 @@
  * it maintains a table of information about the patterns
  * Functions : addpattern() and printpatterns()
  */
-# include <stdio.h>
-# include <ctype.h>
-# include "misc.h"
-# include "symtab.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include "misc.h"
+#include "symtab.h"
 
 struct pattern {
     char *p_constraint;			/* constraint of this pattern */
@@ -37,7 +39,6 @@ addpattern(str,l,np,nr) char *str; {
      * "nr" is the number of instructions in the replacement
      * Space is allocated in chunks of 50
      */
-    char *malloc(), *realloc();
     register struct pattern *p;
 
     if (!pattable) {		/* No space allocated yet */

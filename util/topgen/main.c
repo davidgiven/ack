@@ -8,7 +8,9 @@
  * Contains the main program, the error reporting routine, and a routine
  * to check wether a constraint consists only of space
  */
-# include <stdio.h>
+ 
+#include <stdlib.h>
+#include <stdio.h>
 
 extern int lineno, newline;
 

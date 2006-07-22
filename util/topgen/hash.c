@@ -8,8 +8,10 @@
  * maintains the the lists of hashed patterns
  * Functions : addtohashtable() and printhashtable()
  */
-# include <stdio.h>
-# include "misc.h"
+ 
+#include <stdlib.h>
+#include <stdio.h>
+#include "misc.h"
 
 struct hlist {			/* linear list of pattern numbers */
     int	h_patno;
@@ -40,7 +42,6 @@ addtohashtable(s,n) char *s; {
      */
     unsigned hval;
     register struct hlist *p;
-    char *malloc();
 
     hval = hash(s);
     p = (struct hlist *) malloc(sizeof *p);
