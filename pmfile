@@ -4,6 +4,7 @@
 include "first/c.pm"
 include "first/yacc.pm"
 include "first/llgen.pm"
+include "first/ack-custom.pm"
 include "config.pm"
 
 CINCLUDES = {
@@ -41,6 +42,7 @@ include "util/ncgg/pmfile"
 include "util/ceg/pmfile"
 include "util/misc/pmfile"
 include "util/opt/pmfile"
+include "util/ego/pmfile"
 
 include "lang/cem/cemcom/pmfile"
 include "lang/cem/cemcom.ansi/pmfile"
@@ -92,10 +94,11 @@ default = group {
 	tool_cpp,
 	tool_cgg,
 	tool_ncgg,
-	tool_ceg,
+--	tool_ceg,
 	tool_em_decode,
 	tool_em_encode,
 	tool_opt,
+	tool_ego,
 
 	lang_cem_cemcom,
 	lang_cem_cemcom_ansi,
@@ -151,6 +154,9 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-20 23:24:42  dtrg
+-- Revision 1.3  2006-07-22 00:52:01  dtrg
+-- Added support for the ego global optimisation suite.
+--
+-- Revision 1.2  2006/07/20 23:24:42  dtrg
 -- Fixed revision history.
 --

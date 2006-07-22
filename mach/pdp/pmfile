@@ -9,12 +9,18 @@ mach_pdp = group {
 	proto_as,
 	proto_cg,
 	proto_ncg { ARCHDIR = "pdp" },
+	ego_descr,
 	
-	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
+	install = {
+		pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr"),
+	}
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- Revision 1.2  2006-07-22 00:52:01  dtrg
+-- Added support for the ego global optimisation suite.
+--
+-- Revision 1.1  2006/07/20 23:18:19  dtrg
 -- First version in CVS.
 --
