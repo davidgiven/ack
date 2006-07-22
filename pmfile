@@ -48,6 +48,7 @@ include "util/led/pmfile"
 
 include "lang/cem/cemcom/pmfile"
 include "lang/cem/cemcom.ansi/pmfile"
+include "lang/pc/pmfile"
 
 include "mach/proto/pmfile"
 include "mach/6500/pmfile"
@@ -159,7 +160,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.6  2006-07-22 20:10:41  dtrg
+-- Revision 1.7  2006-07-22 21:03:07  dtrg
+-- Added support for the Pascal compiler.
+--
+-- Revision 1.6  2006/07/22 20:10:41  dtrg
 -- Added support for the esize object inspection tool.
 --
 -- Revision 1.5  2006/07/22 20:04:41  dtrg
