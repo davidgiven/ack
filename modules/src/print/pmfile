@@ -13,12 +13,15 @@ module_print = clibrary {
 
 	outputs = {"%U%/libprint.a"},
 	install = {
-		pm.install(LIBDIR.."libprint.a"),
+		pm.install("%LIBDIR%libprint.a"),
+		pm.install(d.."print.h", "%HEADERDIR%print.h")
 	}
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
--- First version in CVS.
+-- Revision 1.2  2006-07-22 20:59:22  dtrg
+-- Changed to export a header file so it can be correctly referred to.
 --
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
+-- First version in CVS.
