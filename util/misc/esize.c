@@ -1,7 +1,8 @@
 /*	esize:		prints info from e.out header
 */
 
-#include	<stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifndef	MAGIC
 #define	MAGIC		07255
