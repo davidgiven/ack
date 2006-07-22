@@ -8,6 +8,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_reg.h>
 #include "../share/types.h"

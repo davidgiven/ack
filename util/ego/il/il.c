@@ -4,7 +4,10 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*  I N L I N E   S U B S T I T U T I O N */
+
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_path.h>
 #include <em_mnem.h>
 #include <em_pseu.h>

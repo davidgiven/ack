@@ -6,6 +6,7 @@
 /* S T R E N G T H   R E D U C T I O N  */
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "../share/types.h"
 #include "sr.h"

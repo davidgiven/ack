@@ -9,6 +9,7 @@
  */
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
 #include "types.h"

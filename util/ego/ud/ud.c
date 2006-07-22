@@ -5,6 +5,7 @@
  */
 /*  U S E  -  D E F I N I T I O N   A N A L Y S I S */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
 #include "../share/types.h"

@@ -10,6 +10,7 @@
 
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "types.h"
 #include "debug.h"
@@ -17,7 +18,6 @@
 
 
 char * myalloc();
-char * calloc();
 
 #ifdef DEBUG
 

@@ -9,7 +9,9 @@
  */
 
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_pseu.h>
 #include <em_mes.h>
 #include "../share/types.h"

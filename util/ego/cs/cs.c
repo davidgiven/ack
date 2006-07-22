@@ -7,6 +7,7 @@
 /* C O M M O N   S U B E X P R E S S I O N   E L I M I N A T I O N */
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "../share/types.h"
 #include "../share/lset.h"
