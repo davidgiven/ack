@@ -10,6 +10,7 @@ mach_arm = group {
 	
 	proto_as,
 	proto_ncg { ARCHDIR = "arm" },
+	proto_top,
 	tool_arm_cv,
 	
 	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
@@ -17,6 +18,9 @@ mach_arm = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-07-22 12:31:19  dtrg
+-- Added support for the top target peephole optimiser.
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --

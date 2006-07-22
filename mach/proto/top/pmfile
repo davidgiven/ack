@@ -1,0 +1,41 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/proto/top/"
+
+local make_tables = topgen {
+	file (ROOTDIR.."mach/%ARCH%/top/table")
+}
+
+local cfile_with_tables = cfile {
+	class = "cfile_with_tables",
+	dynamicheaders = {
+		make_tables,
+	}
+}
+
+proto_top = cprogram {
+	CINCLUDES = {
+		PARENT,
+		"-Imach/%ARCH%/ncg",
+		"-Imach",
+		"-I"..d
+	},
+			
+	cfile_with_tables (d.."queue.c"),
+	cfile_with_tables (d.."top.c"),
+	
+	lib_string,
+	
+	outputs = {"%U%/%ARCH%-top"},
+	install = pm.install("%BINDIR%%PLATDEP%/%ARCH%/top")
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-22 12:31:19  dtrg
+-- Added support for the top target peephole optimiser.
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
+-- First version in CVS.
+--

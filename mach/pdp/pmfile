@@ -9,6 +9,7 @@ mach_pdp = group {
 	proto_as,
 	proto_cg,
 	proto_ncg { ARCHDIR = "pdp" },
+	proto_top,
 	ego_descr,
 	
 	install = {
@@ -18,7 +19,10 @@ mach_pdp = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-22 00:52:01  dtrg
+-- Revision 1.3  2006-07-22 12:31:19  dtrg
+-- Added support for the top target peephole optimiser.
+--
+-- Revision 1.2  2006/07/22 00:52:01  dtrg
 -- Added support for the ego global optimisation suite.
 --
 -- Revision 1.1  2006/07/20 23:18:19  dtrg
