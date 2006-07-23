@@ -13,15 +13,15 @@ module_string = clibrary {
 	cfile (d.."long2str.c"),
 	cfile (d.."str2bts.c"),
 	cfile (d.."str2long.c"),
-	cfile (d.."strcat.c"),
-	cfile (d.."strcmp.c"),
-	cfile (d.."strcpy.c"),
-	cfile (d.."strindex.c"),
-	cfile (d.."strlen.c"),
-	cfile (d.."strncat.c"),
-	cfile (d.."strncmp.c"),
-	cfile (d.."strncpy.c"),
-	cfile (d.."strrindex.c"),
+--	cfile (d.."strcat.c"),
+--	cfile (d.."strcmp.c"),
+--	cfile (d.."strcpy.c"),
+--	cfile (d.."strindex.c"),
+--	cfile (d.."strlen.c"),
+--	cfile (d.."strncat.c"),
+--	cfile (d.."strncmp.c"),
+--	cfile (d.."strncpy.c"),
+--	cfile (d.."strrindex.c"),
 	cfile (d.."strzero.c"),
 	
 	outputs = {"%U%/lib_string.a"},
@@ -32,6 +32,10 @@ module_string = clibrary {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-07-23 19:58:27  dtrg
+-- Modified to no longer build unoptimised duplicates of all the standard
+-- string functions (strcpy, strlen, etc).
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --
