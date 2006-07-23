@@ -327,7 +327,7 @@ printnodes() {
 	for (p=nodes;p<lastnode;p++)
 		printf("/* %3d */\t%3d,%6u,%6u,\n",
 			p-nodes,p->ex_operator,p->ex_lnode,p->ex_rnode);
-	printf("};\n\niarg_t iargs[%d];\n",maxpatlen);
+	printf("};\n\niarg_t iargs[%d];\n", (maxpatlen>0 ? maxpatlen : 1));
 	if (patid[0])
 		printf("static char rcsid[] = %s;\n",patid);
 }
