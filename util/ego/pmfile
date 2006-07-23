@@ -224,7 +224,7 @@ tool_ego = group {
 ego_descr = simple {
 	outputs = {"%U%-%I%"},
 	command = {
-		"%BINDIR%bin/cpp -P -I%HEADERDIR% %in[1]% | sed -f %in[2]% > %out[1]%"
+		"%BINDIR%%PLATDEP%/cpp -P -I%HEADERDIR% %in[1]% | sed -f %in[2]% > %out[1]%"
 	},
 	
 	file (d.."descr/%ARCH%.descr"),
@@ -235,6 +235,8 @@ ego_descr = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-22 00:52:01  dtrg
--- Added support for the ego global optimisation suite.
+-- Revision 1.2  2006-07-23 17:52:23  dtrg
+-- cpp now gets installed in the right place.
 --
+-- Revision 1.1  2006/07/22 00:52:01  dtrg
+-- Added support for the ego global optimisation suite.
