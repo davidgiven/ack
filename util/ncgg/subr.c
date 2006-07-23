@@ -281,15 +281,13 @@ setallreg(vi) struct varinfo *vi; {
 
 freevi(vip) register struct varinfo *vip; {
 	register i;
-	extern char *end;
 
 	if (vip==0)
 		return;
 	freevi(vip->vi_next);
 	freevi(vip->vi_vi);
 	for (i=0;i<VI_NSTR;i++)
-		if (vip->vi_str[i]>end)
-			free((char *) vip->vi_str[i]);
+		free((char *) vip->vi_str[i]);
 	free(vip);
 }
 
