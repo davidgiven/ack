@@ -37,7 +37,7 @@
 
 extern char *bts2str();
 extern char *symbol2str();
-extern char *strindex();
+extern char *strchr();
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;
@@ -460,7 +460,7 @@ outargtype(tp)
 		printf("%s ", symbol2str(tp->tp_fund));
 		if (is_anon_idf(tp->tp_idf)) {
 			/* skip the #<num>, replace it by '#anonymous id' */
-			printf("#anonymous id%s", strindex(tp->tp_idf->id_text, ' '));
+			printf("#anonymous id%s", strchr(tp->tp_idf->id_text, ' '));
 		}
 		else printf(tp->tp_idf->id_text);
 		break;

@@ -12,12 +12,12 @@ sys_lock(path)
 {
 	char buf[1024];
 	char *tmpf = ".lockXXXXXX";
-	char *strrindex(), *strcpy(), *mktemp();
+	char *strrchr(), *strcpy(), *mktemp();
 	char *p;
 	int ok, fd;
 
 	strcpy(buf, path);
-	if (p = strrindex(buf, '/')) {
+	if (p = strrchr(buf, '/')) {
 		++p;
 		strcpy(p, tmpf);
 	}

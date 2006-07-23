@@ -19,7 +19,7 @@
 #include	"misc.h"
 
 extern char	*Salloc();
-extern char	*strindex();
+extern char	*strchr();
 extern char	*strcpy();
 extern void	signal_child();
 extern FILE	*db_in;
@@ -329,7 +329,7 @@ format_expression(p_tree *p;)
   expression(p, 0)
   [ '\\' name(&p1)	{ register char *c = p1->t_str;
 			  while (*c) {
-				if (! strindex("doshcax", *c)) {
+				if (! strchr("doshcax", *c)) {
 					error("illegal format: %c", *c);
 					break;
 				}

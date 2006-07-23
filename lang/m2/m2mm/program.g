@@ -125,7 +125,7 @@ import(register struct lnk **p;)
 DefinitionModule
 {
 	struct idf *id;
-	extern char *strrindex();
+	extern char *strrchr();
 }
 :
 	DEFINITION
@@ -146,7 +146,7 @@ DefinitionModule
 			  else if (strcmp(id->id_dir, WorkingDir)) {
 				Gerror("definition and implementation of module %s reside in different directories", id->id_text);
 			  }
-			  id->id_def = strrindex(FileName, '/');
+			  id->id_def = strrchr(FileName, '/');
 			  if (! id->id_def) id->id_def = FileName;
 			  else (id->id_def)++;
 			  CurrentArg->a_idf = id;

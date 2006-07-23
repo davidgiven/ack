@@ -19,7 +19,7 @@ REG		{is_register(VAL)};
 SREG		{is_scratchreg(VAL)};
 LAB,LAB2	{VAL[0] == LABEL_STARTER};
 A,B		{no_side_effects(VAL) };
-NO_INDEX	{strindex(VAL, '[') == 0};
+NO_INDEX	{strchr(VAL, '[') == 0};
 X,Y,LOG		{TRUE};
 
 %%;

@@ -18,7 +18,7 @@
 #include	"rd.h"
 #include	"misc.h"
 
-extern char	*strindex();
+extern char	*strchr();
 extern long	str2long();
 extern double	atof();
 
@@ -873,7 +873,7 @@ DbRead(f)
 			break;
 #ifdef N_SCOPE
 		case N_SCOPE:
-			if (n->on_mptr && strindex(n->on_mptr, ':')) {
+			if (n->on_mptr && strchr(n->on_mptr, ':')) {
 				n = DbString(n);
 			}
 			break;
@@ -898,7 +898,7 @@ DbRead(f)
 				needs_newscope = 0;
 				lbrac_required = 1;
 			}
-			if (n->on_mptr && strindex(n->on_mptr, ':')) {
+			if (n->on_mptr && strchr(n->on_mptr, ':')) {
 				n = DbString(n);
 			}
 			break;

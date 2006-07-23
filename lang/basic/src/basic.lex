@@ -235,7 +235,7 @@ File *stream;
     }
 }
 
-extern char *strindex();
+extern char *strchr();
 
 getline()
 {
@@ -244,7 +244,7 @@ getline()
 	if ( our_fgets(inputline,MAXLINELENGTH,yyin) == 0)
 		return(FALSE);
 	yylineno ++;
-	if ( strindex(inputline,'\n') == 0)
+	if ( strchr(inputline,'\n') == 0)
 		error("source line too long");
 	inputline[MAXLINELENGTH-1]=0;
 	if ( listing)

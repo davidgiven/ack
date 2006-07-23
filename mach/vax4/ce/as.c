@@ -39,7 +39,7 @@ struct t_operand *arg;
 
 char lab_buf[4][256],
      ind_buf[4][256],
-     *match(), *lab(), *ind(), *end_arg(), *strindex();
+     *match(), *lab(), *ind(), *end_arg(), *strchr();
 
 static int n_index = -1;
 
@@ -257,10 +257,10 @@ register struct t_operand *op;
 				}
 				break;
 		case LABEL : 	@text1( 0xef);
-				if ( strindex( op->lab, DOLLAR)) {
+				if ( strchr( op->lab, DOLLAR)) {
 			@reloc4( %$(op->lab), %$(op->offset), PC_REL);
 				}
-				else if ( strindex( op->lab, LEFT)) {
+				else if ( strchr( op->lab, LEFT)) {
 			@reloc4( %$(op->lab), %$(op->offset), PC_REL);
 				}
 				else {

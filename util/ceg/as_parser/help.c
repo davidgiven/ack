@@ -13,7 +13,7 @@ extern error(char *, ...);
 /* All the functions in this file will be called by the parser.
  */
 
-extern char	*strindex();
+extern char	*strchr();
 
 static struct Op_info { char *name, *type; }
 			op_info[ MAX_OPERANDS] = { { 0, 0}};

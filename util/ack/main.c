@@ -117,7 +117,7 @@ char *srcvar() {
 }
 
 char *getsuffix() {
-	return strrindex(orig.p_path, SUFCHAR) ;
+	return strrchr(orig.p_path, SUFCHAR) ;
 }
 
 varinit() {
@@ -250,7 +250,7 @@ vieuwargs(argc,argv) char **argv ; {
 firstarg(argp) register char *argp ; {
 	register char *name ;
 
-	name=strrindex(argp,'/') ;
+	name=strrchr(argp,'/') ;
 	if ( name && *(name+1) ) {
 		name++ ;
 	} else {
@@ -269,7 +269,7 @@ process(arg) char *arg ; {
 #ifdef DEBUG
 	if ( debug ) vprint("Processing %s\n",arg) ;
 #endif
-	p_suffix= strrindex(arg,SUFCHAR) ;
+	p_suffix= strrchr(arg,SUFCHAR) ;
 	orig.p_keep= YES ;      /* Don't throw away the original ! */
 	orig.p_keeps= NO;
 	orig.p_path= arg ;

@@ -160,9 +160,9 @@ char *skip_operand( ptr, instr)
 char *match_ch( c, str, instr)
 	char c, *str, *instr;
 {
-	char *ptr, *strindex();
+	char *ptr, *strchr();
 
-	ptr = strindex( str, c);
+	ptr = strchr( str, c);
 	if  ( ptr == 0)  {
 		error( "syntax error in %s : %c expected\n", instr, c);
 		return( str);

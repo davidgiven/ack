@@ -25,7 +25,7 @@
 extern FILE	*db_out;
 t_lineno	currline;
 t_lineno	listline;
-extern char	*strrindex();
+extern char	*strrchr();
 extern int	interrupted;
 
 #if __STDC__
@@ -465,7 +465,7 @@ newfile(id)
 	listfile = add_file(id->id_text);
 	listfile->sy_file->f_scope = FileScope;
   }
-  find_language(strrindex(id->id_text, '.'));
+  find_language(strrchr(id->id_text, '.'));
 }
 
 int	in_wheninvoked;

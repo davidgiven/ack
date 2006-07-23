@@ -22,12 +22,12 @@ getwdir(fn)
 	register char *fn;
 {
 	register char *p;
-	char *strrindex();
+	char *strrchr();
 
-	p = strrindex(fn, '/');
+	p = strrchr(fn, '/');
 	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
 		*p = '\0';
-		p = strrindex(fn, '/');
+		p = strrchr(fn, '/');
 	}
 
 	if (fn[0] == '\0' || (fn[0] == '/' && p == &fn[0])) /* absolute path */

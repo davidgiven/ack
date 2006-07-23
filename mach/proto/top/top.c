@@ -11,10 +11,6 @@
 #include "top.h"
 #include "queue.h"
 
-/* Defined in the string module, which has no header file. FIXME. */
-
-extern char* strindex(char *s, int c);
-
 /* STANDARD MACHINE-INDEPENT C CODE *************/
 
 extern char *lstrip();
@@ -358,8 +354,8 @@ bool operand(ip,n)
 	p = ip->rest_line;
 	while((*p != OP_SEPARATOR || nesting) && *p != '\n') {
 #ifdef PAREN_OPEN
-		if (strindex(PAREN_OPEN, *p) != 0) nesting++;
-		else if (strindex(PAREN_CLOSE, *p) != 0) nesting--;
+		if (strchr(PAREN_OPEN, *p) != 0) nesting++;
+		else if (strchr(PAREN_CLOSE, *p) != 0) nesting--;
 #endif
 		p++;
 	}

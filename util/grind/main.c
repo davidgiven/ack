@@ -27,7 +27,7 @@ FILE		*db_out;
 FILE		*db_in;
 int		debug;
 extern struct tokenname tkidf[];
-extern char	*strindex();
+extern char	*strchr();
 extern void	signal_child();
 extern void	init_del();
 extern void	init_run();
@@ -56,7 +56,7 @@ main(argc, argv)
   db_in = stdin;
   progname = argv[0];
   init_del();
-  while (p = strindex(progname, '/')) {
+  while (p = strchr(progname, '/')) {
 	progname = p + 1;
   }
   while (argv[1] && argv[1][0] == '-') {

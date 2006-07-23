@@ -98,7 +98,7 @@ Lookfromscope(id, class, sc)
   return (p_symbol) 0;
 }
 
-extern char *strrindex();
+extern char *strrchr();
 
 p_symbol
 add_file(s)
@@ -112,7 +112,7 @@ add_file(s)
 
   sym->sy_file = new_file();
   sym->sy_file->f_sym = sym;
-  p = strrindex(s, '.');
+  p = strrchr(s, '.');
   if (p) {
 	char c = *p;
 	p_symbol sym1;

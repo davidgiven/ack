@@ -56,11 +56,11 @@ struct t_operand *op;
  *	expr(reg)	->	IS_MEM
  */
 {
-	char *ptr, *strindex();
+	char *ptr, *strchr();
 
 	op->type = UNKNOWN;
 	if ( *last( str) == RIGHT) {
-		ptr = strindex( str, LEFT);
+		ptr = strchr( str, LEFT);
 		*last( str) = '\0';
 		*ptr = '\0';
 		if ( is_reg( ptr+1, op)) {
@@ -147,10 +147,10 @@ set_label( str, op)
 char *str;
 struct t_operand *op;
 {
-	char *ptr, *strindex(), *sprint();
+	char *ptr, *strchr(), *sprint();
 	static char buf[256];
 
-	ptr = strindex( str, '+');
+	ptr = strchr( str, '+');
 
 	if ( ptr == 0)
 		op->off = "0";
@@ -167,7 +167,7 @@ struct t_operand *op;
 	}
 	else {
 		op->type = IS_LABEL;
-		if ( strindex( str, DOLLAR) != 0)
+		if ( strchr( str, DOLLAR) != 0)
 			op->lab = str;
 		else 
 			op->lab = sprint( buf, "\"%s\"", str);

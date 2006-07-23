@@ -191,7 +191,7 @@ int satisfy(trafo,suffix) register trf *trafo; char *suffix ; {
 			fuerror("Illegal input suffix entry for %s",
 				trafo->t_name) ;
 		}
-		l_char=strindex(f_char+1,SUFCHAR);
+		l_char=strchr(f_char+1,SUFCHAR);
 		if ( l_char ) *l_char = 0;
 		if ( strcmp(f_char,suffix)==0 ) {
 			if ( l_char ) *l_char = SUFCHAR;

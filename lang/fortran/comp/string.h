@@ -2,8 +2,8 @@
 #define	NULL		0
 #endif
 
-#define strchr	strindex
-#define strrchr strrindex
+#define strchr	strchr
+#define strrchr strrchr
 
 extern char *	strcat();
 extern char *	strchr();

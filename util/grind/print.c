@@ -14,7 +14,7 @@
 #include "misc.h"
 
 extern FILE *db_out;
-extern char *strindex();
+extern char *strchr();
 extern char *malloc();
 
 static
@@ -24,7 +24,7 @@ print_unsigned(tp, v, format)
   register char	*format;
 {
   while (format && *format) {
-	if (strindex("cdohx", *format)) break;
+	if (strchr("cdohx", *format)) break;
 	format++;
   }
   switch(format == 0 ? 0 : *format) {
@@ -87,7 +87,7 @@ print_integer(tp, v, format)
   register char	*format;
 {
   while (format && *format) {
-	if (strindex("cdohx", *format)) break;
+	if (strchr("cdohx", *format)) break;
 	format++;
   }
   switch(format == 0 ? 0 : *format) {
@@ -203,7 +203,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	print_val(tp->ty_base, tp_sz, addr, compressed, indent, format);
 	break;
   case T_ARRAY:
-	if ((!format || strindex(format, 'a') == 0) &&
+	if ((!format || strchr(format, 'a') == 0) &&
 	    (tp->ty_elements == char_type ||
 	     tp->ty_elements == uchar_type)) {
 		print_val(string_type, tp_sz, addr, compressed, indent, format);
@@ -292,7 +292,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	t_addr a = get_int(addr, tp_sz, T_UNSIGNED);
 
 	fprintf(db_out, currlang->addr_fmt, a);
-	if (format && strindex(format, 's') &&
+	if (format && strchr(format, 's') &&
 	    (tp->ty_ptrto == char_type || tp->ty_ptrto == uchar_type)) {
 		char *naddr = malloc(512);
 

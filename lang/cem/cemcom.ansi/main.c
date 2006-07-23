@@ -139,7 +139,7 @@ main(argc, argv)
 #ifndef NOPP
 
 struct dependency    *file_head;
-extern char *strrindex();
+extern char *strrchr();
 
 list_dependencies(source)
 char *source;
@@ -147,7 +147,7 @@ char *source;
     register struct dependency *p = file_head;
 
     if (source) {
-	register char *s = strrindex(source, '.');
+	register char *s = strrchr(source, '.');
 
 	if (s && *(s+1)) {
 	    s++;
@@ -157,7 +157,7 @@ char *source;
 	     * object generated, so don't include the pathname
 	     * leading to it.
              */
-            if (s = strrindex(source, '/')) {
+            if (s = strrchr(source, '/')) {
 		source = s + 1;
 	    }
 	}

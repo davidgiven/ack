@@ -90,7 +90,7 @@ DoOption(text)
 		char c, *t;
 
 		while( c = *text++ )	{
-			char *strindex();
+			char *strchr();
 
 			t = text;
 			size = txt2int(&t);
@@ -100,7 +100,7 @@ DoOption(text)
 				align = txt2int(&t);
 				text = t;
 			}
-			if( !strindex("wilfpS", c) )
+			if( !strchr("wilfpS", c) )
 				error("-V: bad type indicator %c\n", c);
 			if( size )
 				switch( c )	{

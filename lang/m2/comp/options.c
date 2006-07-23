@@ -168,7 +168,7 @@ DoOption(text)
 		char *t;
 
 		while (c = *text++)	{
-			char *strindex();
+			char *strchr();
 
 			t = text;
 			size = txt2int(&t);
@@ -178,7 +178,7 @@ DoOption(text)
 				algn = txt2int(&t);
 				text = t;
 			}
-			if (! strindex("wislfdpS", c)) {
+			if (! strchr("wislfdpS", c)) {
 				error("-V: bad type indicator %c\n", c);
 			}
 			if (size != 0) switch (c)	{

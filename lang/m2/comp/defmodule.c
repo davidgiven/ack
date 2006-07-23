@@ -39,9 +39,9 @@ getwdir(fn)
 	register char *fn;
 {
 	register char *p;
-	char *strrindex();
+	char *strrchr();
 
-	while ((p = strrindex(fn,'/')) && *(p + 1) == '\0') {
+	while ((p = strrchr(fn,'/')) && *(p + 1) == '\0') {
 		/* remove trailing /'s */
 		*p = '\0';
 	}

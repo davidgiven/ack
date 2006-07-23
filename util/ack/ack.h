@@ -66,8 +66,8 @@ enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
 
 /* Library routines */
 
-extern char *strindex();
-extern char *strrindex();
+extern char *strchr();
+extern char *strrchr();
 extern char *strcpy();
 extern char *strcat();
 extern int  getpid();

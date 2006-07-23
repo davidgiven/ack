@@ -44,7 +44,7 @@ static char *phnames[] = {
 
 extern char	*mktemp();
 extern char	*strcpy(), *strcat();
-extern char	*strrindex();
+extern char	*strrchr();
 
 static char	ddump[128] = TMP_DIR;	/* data label dump file */
 static char	pdump[128] = TMP_DIR;	/* procedure name dump file */
@@ -181,7 +181,7 @@ new_outfiles()
   register char	**dst = &phargs[NTEMPS+1];
 
   if (! Bindex) {
-	Bindex = strrindex(tmpbufs[0], 'B') - tmpbufs[0];
+	Bindex = strrchr(tmpbufs[0], 'B') - tmpbufs[0];
   }
   for (i = 1; i <= NTEMPS; i++) {
 	*dst = tmpbufs[tmpindex];
@@ -404,7 +404,7 @@ main(argc, argv)
   for (i = 2*NTEMPS-1; i >= 1; i--) {
 	(void) strcpy(tmpbufs[i], tmpbufs[0]);
   }
-  i = strrindex(tmpbufs[0], 'A') - tmpbufs[0];
+  i = strrchr(tmpbufs[0], 'A') - tmpbufs[0];
   tmpbufs[0][i] = 'p'; tmpbufs[NTEMPS+0][i] = 'p';
   tmpbufs[1][i] = 'd'; tmpbufs[NTEMPS+1][i] = 'd';
   tmpbufs[2][i] = 'l'; tmpbufs[NTEMPS+2][i] = 'l';

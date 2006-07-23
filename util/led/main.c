@@ -123,7 +123,7 @@ first_pass(argv)
 	int			sectno;
 	int			h;
 	extern int		atoi();
-	extern char		*strindex();
+	extern char		*strchr();
 	extern int		hash();
 	extern struct outname	*searchname();
 
@@ -144,7 +144,7 @@ first_pass(argv)
 			 * section <section number>.
 			 */
 			sectno = atoi(++argp);
-			if ((argp = strindex(argp, ':')) == (char *)0)
+			if ((argp = strchr(argp, ':')) == (char *)0)
 				fatal("usage: -a<section number>:<alignment>");
 			setlign(sectno, number(++argp));
 			break;
@@ -157,7 +157,7 @@ first_pass(argv)
 			 * <section number>.
 			 */
 			sectno = atoi(++argp);
-			if ((argp = strindex(argp, ':')) == (char *)0)
+			if ((argp = strchr(argp, ':')) == (char *)0)
 				fatal("usage: -b<section number>:<base>");
 			setbase(sectno, number(++argp));
 			break;

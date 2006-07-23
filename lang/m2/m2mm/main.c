@@ -27,7 +27,7 @@ int		nDEF, mDEF;
 struct file_list *CurrentArg;
 extern int 	err_occurred;
 extern int 	Roption;
-extern char	*strrindex();
+extern char	*strrchr();
 extern char	*strcpy(), *strcat();
 
 char *
@@ -35,7 +35,7 @@ basename(s)
 	char *s;
 {
 	static char buf[256];
-	char *p = strrindex(s, '.');
+	char *p = strrchr(s, '.');
 
 	if (p != 0) *p = 0;
 	strcpy(buf, s);
@@ -49,10 +49,10 @@ getwdir(fn)
 {
         register char *p;
 
-        p = strrindex(fn, '/');
+        p = strrchr(fn, '/');
         while (p && *(p + 1) == '\0') { /* remove trailing /'s */
                 *p = '\0';
-                p = strrindex(fn, '/');
+                p = strrchr(fn, '/');
         }
 
         if (p) {
@@ -187,7 +187,7 @@ ProcessArgs()
 	register struct file_list *a;
 
 	f_walk(arglist, a) {
-		register char *p = strrindex(f_filename(a), '.');
+		register char *p = strrchr(f_filename(a), '.');
 
 		CurrentArg = a;
 		DEFPATH[0] = f_dir(a);
@@ -241,7 +241,7 @@ find_dependencies()
 	print("\nall:\t");
 	f_walk(arglist, arg) {
 		char *fn = f_filename(arg);
-		char *dotspot = strrindex(fn, '.');
+		char *dotspot = strrchr(fn, '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(arg);
@@ -260,7 +260,7 @@ find_dependencies()
 	print("objects:\t");
 	f_walk(arglist, arg) {
 		char *fn = f_filename(arg);
-		char *dotspot = strrindex(fn, '.');
+		char *dotspot = strrchr(fn, '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(arg);
@@ -320,7 +320,7 @@ object(arg)
 	register struct file_list *arg;
 {
 	static char buf[512];
-	char *dotp = strrindex(f_filename(arg), '.');
+	char *dotp = strrchr(f_filename(arg), '.');
 
 	buf[0] = 0;
 /*
@@ -353,7 +353,7 @@ print_dep()
 	register struct file_list *arg;
 
 	f_walk(arglist, arg) {
-		char *dotspot = strrindex(f_filename(arg), '.');
+		char *dotspot = strrchr(f_filename(arg), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(arg);
@@ -413,7 +413,7 @@ module_in_arglist(n)
 	register struct file_list *a;
 
 	f_walk(arglist, a) {
-		char *dotp = strrindex(f_filename(a), '.');
+		char *dotp = strrchr(f_filename(a), '.');
 
 		if (dotp && strcmp(dotp, ".mod") == 0 && ! f_notfound(a)) {
 			*dotp = 0;
@@ -459,7 +459,7 @@ programs()
 	register struct file_list *a;
 
 	f_walk(arglist, a) {
-		char *dotspot = strrindex(f_filename(a), '.');
+		char *dotspot = strrchr(f_filename(a), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
 			register struct idf *id = f_idf(a);

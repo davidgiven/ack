@@ -21,7 +21,7 @@ process_operand( str, op)
 register char *str;
 register struct t_operand *op;
 {
-	char *glob_lbl(), *strindex();
+	char *glob_lbl(), *strchr();
 
 	op->type = 0;
 
@@ -46,7 +46,7 @@ register struct t_operand *op;
 				op->lbl = NULL;
 		     break;
 
-	  case '(' : if ( strindex( str+1, ',') == NULL)
+	  case '(' : if ( strchr( str+1, ',') == NULL)
 			if ( is_reg( str+1)) {
 				op->reg = reg_val( str+1);
 

@@ -95,7 +95,7 @@ compile(argc, argv)
 }
 
 struct idf	*file_head;
-extern char *strrindex();
+extern char *strrchr();
 
 list_dependencies(source)
 	char *source;
@@ -103,7 +103,7 @@ list_dependencies(source)
 	register struct idf *p = file_head;
 
 	if (source) {
-		register char *s = strrindex(source, '.');
+		register char *s = strrchr(source, '.');
 
 		if (s && *(s+1)) {
 			s++;
@@ -113,7 +113,7 @@ list_dependencies(source)
                          * object generated, so don't include the pathname
                          * leading to it.
                          */
-                        if (s = strrindex(source, '/')) {
+                        if (s = strrchr(source, '/')) {
                                 source = s + 1;
                         }
 		}

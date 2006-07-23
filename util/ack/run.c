@@ -36,7 +36,7 @@ int runphase(phase) register trf *phase ; {
 			vprint("%s",phase->t_name) ;
 			if ( !phase->t_combine ) {
 				vprint(" %s%s\n",p_basename,
-					strrindex(in.p_path,SUFCHAR) ) ;
+					strrchr(in.p_path,SUFCHAR) ) ;
 			} else {
 				scanlist(l_first(phase->t_inputs), elem) {
 					vprint(" %s",p_cont(*elem)->p_path);
