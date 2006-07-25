@@ -45,9 +45,8 @@ RENAME(x,y) string x,y; {
 #ifdef USE_SYS
 	if(! sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
 #else
-	unlink(y);
-	if (link(x,y) != 0) fatal(1,"Cannot rename to %s",y);
-	unlink(x);
+	if (rename(x, y) == -1)
+		fatal(1, "Cannot rename to %s", y);
 #endif
 }
 
