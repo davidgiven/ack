@@ -15,9 +15,9 @@ CCOMPILER = "gcc"
 CC = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -c -o %out% %in%"
 CPROGRAM = "%CCOMPILER% %CBUILDFLAGS% %CLINKFLAGS% %CEXTRAFLAGS% -o %out% %in% %CLIBRARIES%"
 CDEPENDS = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -MM -MG %in% > %out%"
-AR = "%RM% %out% && ar cr %out% %in%"
+AR = "%RM% %out% && ar cr %out% %in% && ranlib %out%"
 
-CBUILDFLAGS = "-g -Os"
+CBUILDFLAGS = "-g -O"
 CINCLUDES = {}
 CDEFINES = {}
 CEXTRAFLAGS = ""
