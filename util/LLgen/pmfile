@@ -107,13 +107,16 @@ install = group {
 	
 	install = {
 		"mkdir -p %PREFIX%",
-		"(cd bin && tar chvf - .) | (cd %PREFIX% && tar xUf -)"
+		"(cd bin && tar chvf - $(find . ! -type d)) | (cd %PREFIX% && tar xUf -)"
 	}
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.4  2006-07-25 23:22:58  dtrg
+-- Revision 1.5  2006-07-25 23:29:12  dtrg
+-- Modified to not try to unlink directories when installing.
+--
+-- Revision 1.4  2006/07/25 23:22:58  dtrg
 -- Updated to the latest version of pm which installs files with symlinks.
 --
 -- Revision 1.3  2006/07/23 20:33:26  dtrg
