@@ -5,6 +5,7 @@
  */
 /*	OCCAM		*/
 {
+#include <stdlib.h>
 #include "token.h"
 #include "symtab.h"
 #include "expr.h"

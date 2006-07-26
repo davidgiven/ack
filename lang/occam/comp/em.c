@@ -3,10 +3,13 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+#include <stdlib.h>
+#include <string.h>
 #include "sizes.h"
 #include "Lpars.h"
-#include <em.h>
 #include "em.h"
+#include "occam-em.h"
 
 /* This file is used to shield code.c as much as possible from em dependant
  * details.  It introduces some call overhead but not enough for a coffee
