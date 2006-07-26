@@ -10,8 +10,6 @@ int
 sys_rename(path1, path2)
 	char *path1, *path2;
 {
-	unlink(path2);
-	return	link(path1, path2) == 0 &&
-		unlink(path1) == 0;
+	return rename(path1, path2) == 0;
 }
 
