@@ -1,0 +1,16 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/occam/"
+
+include (d.."comp/pmfile")
+
+lang_occam = group {
+	lang_m2_compiler
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-26 18:23:32  dtrg
+-- Added support for the Occam compiler.
+--

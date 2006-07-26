@@ -50,6 +50,7 @@ include "lang/cem/cemcom/pmfile"
 include "lang/cem/cemcom.ansi/pmfile"
 include "lang/pc/pmfile"
 include "lang/m2/pmfile"
+include "lang/occam/pmfile"
 
 include "mach/proto/pmfile"
 include "mach/6500/pmfile"
@@ -111,6 +112,7 @@ default = group {
 	lang_cem_cemcom_ansi,
 	lang_pc,
 	lang_m2,
+	lang_occam,
 
 	mach_6500,
 	mach_6800,
@@ -163,7 +165,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.9  2006-07-26 17:12:19  dtrg
+-- Revision 1.10  2006-07-26 18:23:32  dtrg
+-- Added support for the Occam compiler.
+--
+-- Revision 1.9  2006/07/26 17:12:19  dtrg
 -- Added support for the Modula-2 compiler.
 --
 -- Revision 1.8  2006/07/22 21:24:41  dtrg
