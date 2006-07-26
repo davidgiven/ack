@@ -64,18 +64,6 @@ typedef struct {
 /* Return values of setpath() */
 enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
 
-/* Library routines */
-
-extern char *strchr();
-extern char *strrchr();
-extern char *strcpy();
-extern char *strcat();
-extern int  getpid();
-extern int  unlink();
-extern int  close();
-extern int  open();
-extern int  creat();
-
 /* Own routines */
 enum f_path getpath();
 enum f_path scan_end();

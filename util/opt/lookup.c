@@ -18,8 +18,6 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-extern char *strncpy();
-
 unsigned hash(string) char *string; {
 	register char *p;
 	register unsigned i,sum;
