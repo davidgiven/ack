@@ -11,6 +11,8 @@ lang_m2 = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-26 17:12:19  dtrg
--- Added support for the Modula-2 compiler.
+-- Revision 1.2  2006-07-26 18:19:15  dtrg
+-- Tweaked the CVS settings.
 --
+-- Revision 1.1  2006/07/26 17:12:19  dtrg
+-- Added support for the Modula-2 compiler.
