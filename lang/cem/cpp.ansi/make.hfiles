@@ -32,5 +32,4 @@ p
 }' $1
 echo '!EOF!'
 echo $IFCOMMAND
-) |
-sh
+) | eval "$(cat)"
