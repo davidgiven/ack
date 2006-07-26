@@ -12,14 +12,14 @@ module_system = clibrary {
 	cfile (d.."create.c"),
 	cfile (d.."filesize.c"),
 	cfile (d.."modtime.c"),
-	cfile (d.."lock.c"),
+--	cfile (d.."lock.c"),
 	cfile (d.."open.c"),
 	cfile (d.."read.c"),
 	cfile (d.."remove.c"),
 	cfile (d.."stop.c"),
 	cfile (d.."system.c"),
 	cfile (d.."time.c"),
-	cfile (d.."unlock.c"),
+--	cfile (d.."unlock.c"),
 	cfile (d.."write.c"),
 	cfile (d.."seek.c"),
 	cfile (d.."rename.c"),
@@ -33,6 +33,10 @@ module_system = clibrary {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- Revision 1.2  2006-07-26 12:40:59  dtrg
+-- Changed to no longer build sys_lock() and sys_unlock(); they only work
+-- on platforms that support hardlinks, and nobody uses them anyway.
+--
+-- Revision 1.1  2006/07/20 23:18:19  dtrg
 -- First version in CVS.
 --

@@ -44,8 +44,10 @@ _PROTOTYPE(int sys_remove, (char *));
 _PROTOTYPE(int sys_rename, (char *, char *));
 _PROTOTYPE(long sys_filesize, (char *));
 _PROTOTYPE(int sys_chmode, (char *, int));
+#if 0
 _PROTOTYPE(int sys_lock, (char *));
 _PROTOTYPE(int sys_unlock, (char *));
+#endif
 _PROTOTYPE(char *sys_break, (int));
 _PROTOTYPE(void sys_stop, (int));
 _PROTOTYPE(long sys_time, (void));
