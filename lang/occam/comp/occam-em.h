@@ -13,6 +13,9 @@ int new_label(), new_dot_label();
 char *proc_label();
 extern char *curr_file;
 
+/* dtrg: hack to avoid clashing with the Posix exp() function. */
+#define exp myexp
+
 void cwv(), cvw();
 void bxx(), Loc(), Lol(), Lolp(), Lil(), Lof(), Lofp(), Lif();
 void Txx(), xxi(), Stl(), Inl(), Del(), Loe();
