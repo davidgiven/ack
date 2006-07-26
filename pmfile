@@ -51,6 +51,7 @@ include "lang/cem/cemcom.ansi/pmfile"
 include "lang/pc/pmfile"
 include "lang/m2/pmfile"
 include "lang/occam/pmfile"
+include "lang/basic/pmfile"
 
 include "mach/proto/pmfile"
 include "mach/6500/pmfile"
@@ -113,6 +114,7 @@ default = group {
 	lang_pc,
 	lang_m2,
 	lang_occam,
+	lang_basic,
 
 	mach_6500,
 	mach_6800,
@@ -165,7 +167,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.10  2006-07-26 18:23:32  dtrg
+-- Revision 1.11  2006-07-26 23:08:09  dtrg
+-- Added support for the Basic compiler.
+--
+-- Revision 1.10  2006/07/26 18:23:32  dtrg
 -- Added support for the Occam compiler.
 --
 -- Revision 1.9  2006/07/26 17:12:19  dtrg
@@ -191,4 +196,3 @@ configure = simple {
 --
 -- Revision 1.2  2006/07/20 23:24:42  dtrg
 -- Fixed revision history.
---
