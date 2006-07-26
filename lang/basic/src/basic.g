@@ -87,6 +87,8 @@
 
 {
 #define YYDEBUG
+#include <stdlib.h>
+#include <stdio.h>
 #include "bem.h"
 #include "llmess.c"
 
