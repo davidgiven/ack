@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ed -s Lpars.h <<'+'
+ed -s "${1:-Lpars.h}" <<'+'
 1d
 1,$s/# *define //
 1,$s/ ...$//
