@@ -9,6 +9,9 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include	"f_info.h"
 struct f_info	file_info;
 #include	"input.h"

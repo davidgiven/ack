@@ -12,6 +12,8 @@
 /*	Check expressions, and try to evaluate them as far as possible.
 */
 
+#include   <stdlib.h>
+#include   <string.h>
 #include	"debug.h"
 
 #include	<em_arith.h>

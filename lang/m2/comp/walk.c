@@ -13,6 +13,8 @@
 	code for these parts.
 */
 
+#include   <stdlib.h>
+#include   <string.h>
 #include	"debug.h"
 
 #include	<em_arith.h>
