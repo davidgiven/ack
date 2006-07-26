@@ -17,13 +17,13 @@ CPROGRAM = "%CCOMPILER% %CBUILDFLAGS% %CLINKFLAGS% %CEXTRAFLAGS% -o %out% %in% %
 CDEPENDS = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -MM -MG %in% > %out%"
 AR = "%RM% %out% && ar cr %out% %in% && ranlib %out%"
 
-CBUILDFLAGS = "-g"
-CINCLUDES = {}
-CDEFINES = {}
-CEXTRAFLAGS = ""
-CLINKFLAGS = ""
-CDYNINCLUDES = ""
-CLIBRARIES = ""
+CBUILDFLAGS = {"-g"}
+CINCLUDES = EMPTY
+CDEFINES = EMPTY
+CEXTRAFLAGS = EMPTY
+CLINKFLAGS = EMPTY
+CDYNINCLUDES = EMPTY
+CLIBRARIES = EMPTY
 
 --- Manage C file dependencies ----------------------------------------------
 
