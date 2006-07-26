@@ -1,0 +1,16 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/m2/"
+
+include (d.."comp/pmfile")
+
+lang_m2 = group {
+	lang_m2_compiler
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-26 17:12:19  dtrg
+-- Added support for the Modula-2 compiler.
+--

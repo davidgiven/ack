@@ -1,0 +1,172 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/m2/comp/"
+
+local extract_parameters = simple {
+	outputs = {
+		"%U%/errout.h",
+		"%U%/idfsize.h",
+		"%U%/numsize.h",
+		"%U%/strsize.h",
+		"%U%/target_sizes.h",
+		"%U%/debugcst.h",
+		"%U%/inputtype.h",
+		"%U%/density.h",
+		"%U%/squeeze.h",
+		"%U%/strict3rd.h",
+		"%U%/nocross.h",
+		"%U%/nostrict.h",
+		"%U%/bigresult.h",
+		"%U%/dbsymtab.h",
+		"%U%/use_insert.h",
+		"%U%/uns_arith.h",
+	},
+	
+	command = {
+		"cd %out[1]:dirname% && %in[1]% %in[2]%"
+	},
+	
+	file (d.."make.hfiles"),
+	file (d.."BigPars")
+}
+
+local lpars = LLgen {
+	simple {
+		outputs = {"%U%/tokenfile.g"},
+		command = {
+			"%in[1]% < %in[2]% > %out[1]%"
+		},
+		file (d.."make.tokfile"),
+		file (d.."tokenname.c")
+	},
+	file (d.."program.g"),
+	file (d.."declar.g"),
+	file (d.."expression.g"),
+	file (d.."statement.g"),
+}
+
+local allocd_header = simple {
+	class = "allocd_header",
+	command = {
+		"%in[1]% < %in[2]% > %out[1]%"
+	},
+	
+	file (d.."make.allocd")
+}
+	
+local cfile_with_headers = cfile {
+	class = "cfile_with_headers",
+	dynamicheaders = {
+		file (d),
+		extract_parameters,
+		allocd_header { outputs = {"%U%/def.h"},           (d.."def.H") },
+		allocd_header { outputs = {"%U%/type.h"},          (d.."type.H") },
+		allocd_header { outputs = {"%U%/real.h"},          (d.."real.H") },
+		allocd_header { outputs = {"%U%/node.h"},          (d.."node.H") },
+		lpars
+	}
+}
+	
+lang_m2_compiler = cprogram {
+	CDEFINES = {PARENT, "-DSTATIC=static"},
+	
+	cfile_with_headers (d.."LLlex.c"),
+	cfile_with_headers (d.."LLmessage.c"),
+	cfile_with_headers (d.."error.c"),
+	cfile_with_headers (d.."main.c"),
+	cfile_with_headers (d.."tokenname.c"),
+	cfile_with_headers (d.."idf.c"),
+	cfile_with_headers (d.."input.c"),
+	cfile_with_headers (d.."type.c"),
+	cfile_with_headers (d.."def.c"),
+	cfile_with_headers (d.."misc.c"),
+	cfile_with_headers (d.."enter.c"),
+	cfile_with_headers (d.."defmodule.c"),
+	cfile_with_headers (d.."typequiv.c"),
+	cfile_with_headers (d.."node.c"),
+	cfile_with_headers (d.."cstoper.c"),
+	cfile_with_headers (d.."chk_expr.c"),
+	cfile_with_headers (d.."options.c"),
+	cfile_with_headers (d.."walk.c"),
+	cfile_with_headers (d.."desig.c"),
+	cfile_with_headers (d.."code.c"),
+	cfile_with_headers (d.."lookup.c"),
+	cfile_with_headers (d.."stab.c"),
+
+	foreach {
+		rule = cfile_with_headers,
+		ith { lpars, from=2 }
+	},
+
+	cfile_with_headers {
+		simple {
+			outputs = {"%U%-symbol2str.c"},
+			command = {
+				"%in[1]% < %in[2]% > %out[1]%"
+			},
+			
+			file (d.."make.tokcase"),
+			file (d.."tokenname.c")
+		}
+	},
+	
+	cfile_with_headers {
+		CEXTRAFLAGS = "-I"..d,
+		tabgen (d.."char.tab")
+	},
+
+	cfile_with_headers {
+		simple {
+			outputs = {"%U%-next.c"},
+			command = {
+				"%in% > %out%"
+			},
+			
+			file (d.."make.next"),
+
+			file (d.."def.H"),
+			file (d.."type.H"),
+			file (d.."real.H"),
+			file (d.."node.H"),
+			file (d.."scope.C"),
+			file (d.."tmpvar.C"),
+			file (d.."casestat.C"),
+		}
+	},
+
+	cfile_with_headers {
+		allocd_header { outputs = {"%U%-scope.c"}, (d.."scope.C") }
+	},
+	
+	cfile_with_headers {
+		allocd_header { outputs = {"%U%-tmpvar.c"}, (d.."tmpvar.C") }
+	},
+	
+	cfile_with_headers {
+		allocd_header { outputs = {"%U%-casestat.c"}, (d.."casestat.C") }
+	},
+	
+	lib_em_mes,
+	lib_emk,
+	lib_em_data,
+	lib_input,
+	lib_assert,
+	lib_alloc,
+	lib_flt_arith,
+	lib_print,
+	lib_string,
+	lib_system,
+
+	outputs = {"%U%/em_m2"},
+	install = {
+		pm.install(              "%BINDIR%%PLATDEP%/em_m2"),
+		pm.install(d.."em_m2.6", "%BINDIR%/man/man6/em_m2.6"),
+	}
+}
+
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-07-26 17:12:19  dtrg
+-- Added support for the Modula-2 compiler.
+--
