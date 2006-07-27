@@ -1,0 +1,21 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/occam/lib/"
+
+lang_occam_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	
+	ackfile (d.."builtin.c"),
+	ackfile (d.."chan_strct.c"),
+	ackfile (d.."channel.c"),
+	ackfile (d.."co.c"),
+	ackfile (d.."misc.e"),
+	ackfile (d.."now.c"),
+	ackfile (d.."ocrt.c"),
+	ackfile (d.."par.c"),
+	ackfile (d.."par_misc.e"),
+	ackfile (d.."parco.c"),
+	
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_ocm.a")
+}

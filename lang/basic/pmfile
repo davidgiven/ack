@@ -4,13 +4,4 @@
 local d = ROOTDIR.."lang/basic/"
 
 include (d.."src/pmfile")
-
-lang_basic = group {
-	lang_basic_compiler
-}
-
--- Revision history
--- $Log$
--- Revision 1.1  2006-07-26 23:08:09  dtrg
--- Added support for the Basic compiler.
---
+include (d.."lib/pmfile")

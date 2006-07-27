@@ -4,8 +4,8 @@
 include "first/c.pm"
 include "first/yacc.pm"
 include "first/llgen.pm"
-include "first/ack-custom.pm"
 include "config.pm"
+include "first/ack.pm"
 
 CINCLUDES = {
 	"-I"..ROOTDIR.."h",
@@ -72,6 +72,13 @@ include "mach/vax4/pmfile"
 include "mach/z80/pmfile"
 include "mach/z8000/pmfile"
 
+-- This is the list of language runtimes that is built for each architecture.
+
+lang_runtimes = group {
+	lang_occam_runtime,
+	lang_basic_runtime,
+}
+
 default = group {
 	-- Some of the dependency management across modules isn't entirely
 	-- complete, for simplicity; as a result, the order here is important.
@@ -113,26 +120,26 @@ default = group {
 	lang_cem_cemcom_ansi,
 	lang_pc,
 	lang_m2,
-	lang_occam,
-	lang_basic,
+	lang_occam_compiler,
+	lang_basic_compiler,
 
-	mach_6500,
+	mach_6500,     lang_runtimes { ARCH="6500", OPTIMISATION="-O" },
 	mach_6800,
 	mach_6805,
 	mach_6809,
-	mach_arm,
-	mach_i386,
-	mach_i80,
-	mach_i86,
-	mach_m68020,
-	mach_m68k2,
-	mach_m68k4,
-	mach_ns,
-	mach_pdp,
+	mach_arm,      lang_runtimes { ARCH="arm", OPTIMISATION="-O" },
+	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O3" },
+	mach_i80,      lang_runtimes { ARCH="i80", OPTIMISATION="-O" },
+	mach_i86,      lang_runtimes { ARCH="i86", OPTIMISATION="-O6" },
+	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O6" },
+--	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
+--	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O6" },
+	mach_ns,       lang_runtimes { ARCH="ns", OPTIMISATION="-O" },
+	mach_pdp,      lang_runtimes { ARCH="pdp", OPTIMISATION="-O6" },
 	mach_s2650,
-	mach_vax4,
-	mach_z80,
-	mach_z8000,
+--	mach_vax4,     lang_runtimes { ARCH="vax4", OPTIMISATION="-O" },
+	mach_z80,      lang_runtimes { ARCH="z80", OPTIMISATION="-O" },
+	mach_z8000,    lang_runtimes { ARCH="z8000", OPTIMISATION="-O" },
 }
 
 -- Ensure that the work directories exist.
@@ -167,7 +174,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.11  2006-07-26 23:08:09  dtrg
+-- Revision 1.12  2006-07-27 21:58:13  dtrg
+-- Added support for the Basic and Occam language runtimes.
+--
+-- Revision 1.11  2006/07/26 23:08:09  dtrg
 -- Added support for the Basic compiler.
 --
 -- Revision 1.10  2006/07/26 18:23:32  dtrg
