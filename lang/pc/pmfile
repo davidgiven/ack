@@ -4,16 +4,4 @@
 local d = ROOTDIR.."lang/pc/"
 
 include (d.."comp/pmfile")
-
-lang_pc = group {
-	lang_pc_compiler
-}
-
--- Revision history
--- $Log$
--- Revision 1.1  2006-07-22 21:03:07  dtrg
--- Added support for the Pascal compiler.
---
--- Revision 1.1  2006/07/20 23:18:18  dtrg
--- First version in CVS.
---
+include (d.."libpc/pmfile")
