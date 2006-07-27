@@ -1,0 +1,57 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/m2/libm2/"
+
+lang_m2_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	
+	ackfile (d.."Termcap.mod"),
+	ackfile (d.."CSP.mod"),
+	ackfile (d.."PascalIO.mod"),
+	ackfile (d.."RealInOut.mod"),
+	ackfile (d.."InOut.mod"),
+	ackfile (d.."Streams.mod"),
+	ackfile (d.."Terminal.mod"),
+	ackfile (d.."MathLib0.mod"),
+	ackfile (d.."Mathlib.mod"),
+	ackfile (d.."Processes.mod"),
+	ackfile (d.."RealConver.mod"),
+	ackfile (d.."Storage.mod"),
+	ackfile (d.."Conversion.mod"),
+	ackfile (d.."Semaphores.mod"),
+	ackfile (d.."random.mod"),
+	ackfile (d.."Strings.mod"),
+	ackfile (d.."ArraySort.mod"),
+	ackfile (d.."catch.c"),
+	ackfile (d.."Traps.mod"),
+	ackfile (d.."XXTermcap.c"),
+	ackfile (d.."dvi.c"),
+	ackfile (d.."Arguments.c"),
+	ackfile (d.."LtoUset.e"),
+	ackfile (d.."StrAss.c"),
+	ackfile (d.."cap.c"),
+	ackfile (d.."absd.c"),
+	ackfile (d.."absf.e"),
+	ackfile (d.."absi.c"),
+	ackfile (d.."absl.c"),
+	ackfile (d.."halt.c"),
+	ackfile (d.."SYSTEM.c"),
+	ackfile (d.."par_misc.e"),
+	ackfile (d.."init.c"),
+	ackfile (d.."sigtrp.c"),
+	ackfile (d.."store.c"),
+	ackfile (d.."confarray.c"),
+	ackfile (d.."load.c"),
+	ackfile (d.."blockmove.c"),
+	ackfile (d.."stackprio.c"),
+	ackfile (d.."ucheck.c"),
+	ackfile (d.."rcka.c"),
+	ackfile (d.."rcku.c"),
+	ackfile (d.."rcki.c"),
+	ackfile (d.."rckul.c"),
+	ackfile (d.."rckil.c"),
+	ackfile (d.."EM.e"),
+	
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m2.a")
+}

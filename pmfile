@@ -76,6 +76,7 @@ include "mach/z8000/pmfile"
 
 lang_runtimes = group {
 	lang_pc_runtime,
+	lang_m2_runtime,
 	lang_occam_runtime,
 	lang_basic_runtime,
 }
@@ -120,7 +121,7 @@ default = group {
 	lang_cem_cemcom,
 	lang_cem_cemcom_ansi,
 	lang_pc_compiler,
-	lang_m2,
+	lang_m2_compiler,
 	lang_occam_compiler,
 	lang_basic_compiler,
 
@@ -136,7 +137,7 @@ default = group {
 --	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
 --	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O6" },
 	mach_ns,       lang_runtimes { ARCH="ns", OPTIMISATION="-O" },
-	mach_pdp,      lang_runtimes { ARCH="pdp", OPTIMISATION="-O6" },
+--	mach_pdp,      lang_runtimes { ARCH="pdp", OPTIMISATION="-O6" },
 	mach_s2650,
 --	mach_vax4,     lang_runtimes { ARCH="vax4", OPTIMISATION="-O" },
 	mach_z80,      lang_runtimes { ARCH="z80", OPTIMISATION="-O" },
@@ -175,7 +176,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.13  2006-07-27 22:07:38  dtrg
+-- Revision 1.14  2006-07-27 22:14:55  dtrg
+-- Added support for the Modula-2 language runtime.
+--
+-- Revision 1.13  2006/07/27 22:07:38  dtrg
 -- Added support for the Pascal language runtime.
 --
 -- Revision 1.12  2006/07/27 21:58:13  dtrg
