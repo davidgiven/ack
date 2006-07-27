@@ -46,8 +46,7 @@ include "util/ego/pmfile"
 include "util/topgen/pmfile"
 include "util/led/pmfile"
 
-include "lang/cem/cemcom/pmfile"
-include "lang/cem/cemcom.ansi/pmfile"
+include "lang/cem/pmfile"
 include "lang/pc/pmfile"
 include "lang/m2/pmfile"
 include "lang/occam/pmfile"
@@ -75,6 +74,7 @@ include "mach/z8000/pmfile"
 -- This is the list of language runtimes that is built for each architecture.
 
 lang_runtimes = group {
+	lang_cem_runtime,
 	lang_pc_runtime,
 	lang_m2_runtime,
 	lang_occam_runtime,
@@ -118,8 +118,8 @@ default = group {
 	tool_topgen,
 	tool_led,
 
-	lang_cem_cemcom,
-	lang_cem_cemcom_ansi,
+	lang_cem_compiler,
+	lang_cem_ansi_compiler,
 	lang_pc_compiler,
 	lang_m2_compiler,
 	lang_occam_compiler,
@@ -130,14 +130,14 @@ default = group {
 	mach_6805,
 	mach_6809,
 	mach_arm,      lang_runtimes { ARCH="arm", OPTIMISATION="-O" },
-	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O3" },
+	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O" },
 	mach_i80,      lang_runtimes { ARCH="i80", OPTIMISATION="-O" },
-	mach_i86,      lang_runtimes { ARCH="i86", OPTIMISATION="-O6" },
-	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O6" },
+	mach_i86,      lang_runtimes { ARCH="i86", OPTIMISATION="-O" },
+	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O" },
 --	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
---	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O6" },
+--	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O" },
 	mach_ns,       lang_runtimes { ARCH="ns", OPTIMISATION="-O" },
---	mach_pdp,      lang_runtimes { ARCH="pdp", OPTIMISATION="-O6" },
+--	mach_pdp,      lang_runtimes { ARCH="pdp", OPTIMISATION="-O" },
 	mach_s2650,
 --	mach_vax4,     lang_runtimes { ARCH="vax4", OPTIMISATION="-O" },
 	mach_z80,      lang_runtimes { ARCH="z80", OPTIMISATION="-O" },
@@ -176,7 +176,10 @@ configure = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.14  2006-07-27 22:14:55  dtrg
+-- Revision 1.15  2006-07-27 22:51:38  dtrg
+-- Added support for the K&R C language runtime.
+--
+-- Revision 1.14  2006/07/27 22:14:55  dtrg
 -- Added support for the Modula-2 language runtime.
 --
 -- Revision 1.13  2006/07/27 22:07:38  dtrg

@@ -1,0 +1,16 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/cem/libcc/"
+
+include (d.."gen/pmfile")
+include (d.."math/pmfile")
+include (d.."mon/pmfile")
+include (d.."stdio/pmfile")
+
+lang_cem_runtime = group {
+	lang_cem_gen_runtime,
+	lang_cem_math_runtime,
+	lang_cem_mon_runtime,
+	lang_cem_stdio_runtime
+}

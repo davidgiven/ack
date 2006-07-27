@@ -94,7 +94,7 @@ local cfile_with_headers = cfile {
 	}
 }
 	
-lang_cem_cemcom = cprogram {
+lang_cem_compiler = cprogram {
 	cfile_with_headers (d.."LLlex.c"),
 	cfile_with_headers (d.."LLmessage.c"),
 	cfile_with_headers (d.."arith.c"),
@@ -207,9 +207,3 @@ lang_cem_cemcom = cprogram {
 		pm.install(d.."cemcom.1",      BINDIR.."/man/man1/cemcom.1"),
 	}
 }
-
--- Revision history
--- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
--- First version in CVS.
---

@@ -1,0 +1,31 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/cem/libcc/math/"
+
+lang_cem_math_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	
+	ackfile (d.."asin.c"),
+	ackfile (d.."atan2.c"),
+	ackfile (d.."atan.c"),
+	ackfile (d.."ceil.c"),
+	ackfile (d.."fabs.c"),
+	ackfile (d.."gamma.c"),
+	ackfile (d.."hypot.c"),
+	ackfile (d.."jn.c"),
+	ackfile (d.."j0.c"),
+	ackfile (d.."j1.c"),
+	ackfile (d.."log10.c"),
+	ackfile (d.."pow.c"),
+	ackfile (d.."log.c"),
+	ackfile (d.."sin.c"),
+	ackfile (d.."sinh.c"),
+	ackfile (d.."sqrt.c"),
+	ackfile (d.."tan.c"),
+	ackfile (d.."tanh.c"),
+	ackfile (d.."exp.c"),
+	ackfile (d.."floor.c"),
+
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m.a")
+}

@@ -1,0 +1,58 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/cem/libcc/stdio/"
+
+lang_cem_stdio_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	
+	ackfile (d.."vsprintf.c"),
+	ackfile (d.."vfprintf.c"),
+	ackfile (d.."vprintf.c"),
+	ackfile (d.."termcap.c"),
+	ackfile (d.."getopt.c"),
+	ackfile (d.."clearerr.c"),
+	ackfile (d.."fgetc.c"),
+	ackfile (d.."fgets.c"),
+	ackfile (d.."fprintf.c"),
+	ackfile (d.."fputc.c"),
+	ackfile (d.."fputs.c"),
+	ackfile (d.."fread.c"),
+	ackfile (d.."freopen.c"),
+	ackfile (d.."fscanf.c"),
+	ackfile (d.."ftell.c"),
+	ackfile (d.."fwrite.c"),
+	ackfile (d.."getchar.c"),
+	ackfile (d.."getgrent.c"),
+	ackfile (d.."getpass.c"),
+	ackfile (d.."getpw.c"),
+	ackfile (d.."fopen.c"),
+	ackfile (d.."getpwent.c"),
+	ackfile (d.."gets.c"),
+	ackfile (d.."getw.c"),
+	ackfile (d.."popen.c"),
+	ackfile (d.."fdopen.c"),
+	ackfile (d.."printf.c"),
+	ackfile (d.."putchar.c"),
+	ackfile (d.."puts.c"),
+	ackfile (d.."putw.c"),
+	ackfile (d.."rewind.c"),
+	ackfile (d.."fseek.c"),
+	ackfile (d.."scanf.c"),
+	ackfile (d.."setbuf.c"),
+	ackfile (d.."sprintf.c"),
+	ackfile (d.."doprnt.c"),
+	ackfile (d.."fltpr.c"),
+	ackfile (d.."flushbuf.c"),
+	ackfile (d.."fclose.c"),
+	ackfile (d.."data.c"),
+	ackfile (d.."fflush.c"),
+	ackfile (d.."sscanf.c"),
+	ackfile (d.."doscan.c"),
+	ackfile (d.."fillbuf.c"),
+	ackfile (d.."system.c"),
+	ackfile (d.."timezone.c"),
+	ackfile (d.."ungetc.c"),
+
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_cc.1s.a")
+}
