@@ -94,6 +94,7 @@ gtobuf
  lfr _EM_WSIZE
  asp _EM_WSIZE
 #endif
+
  lal 0
  loi _EM_PSIZE	; address of jmpbuf
  lae gtobuf
