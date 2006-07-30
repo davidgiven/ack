@@ -1,0 +1,132 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/cem/cpp.ansi/"
+
+local extract_parameters = simple {
+	outputs = {
+		"%U%/pathlength.h",
+		"%U%/errout.h",
+		"%U%/idfsize.h",
+		"%U%/numsize.h",
+		"%U%/nparams.h",
+		"%U%/ifdepth.h",
+		"%U%/macbuf.h",
+		"%U%/strsize.h",
+		"%U%/botch_free.h",
+		"%U%/debug.h",
+		"%U%/parbufsize.h",
+		"%U%/textsize.h",
+		"%U%/inputtype.h",
+		"%U%/obufsize.h",
+		"%U%/dobits.h",
+		"%U%/ln_prefix.h",
+	},
+	
+	command = {
+		"cd %out[1]:dirname% && %in[1]% %in[2]%"
+	},
+	
+	file (d.."make.hfiles"),
+	file (d.."Parameters")
+}
+
+local lpars = LLgen {
+	simple {
+		outputs = {"%U%/tokenfile.g"},
+		command = {
+			"%in[1]% < %in[2]% > %out[1]%"
+		},
+		file (d.."make.tokfile"),
+		file (d.."tokenname.c")
+	},
+	file (d.."expression.g"),
+}
+
+local allocd_header = simple {
+	class = "allocd_header",
+	command = {
+		"%in[1]% < %in[2]% > %out[1]%"
+	},
+	
+	file (d.."make.allocd")
+}
+	
+local cfile_with_headers = cfile {
+	class = "cfile_with_headers",
+	dynamicheaders = {
+		file (d),
+		extract_parameters,
+		allocd_header { outputs = {"%U%/replace.h"},       (d.."replace.str") },
+		allocd_header { outputs = {"%U%/macro.h"},         (d.."macro.str") },
+		lpars
+	}
+}
+	
+tool_cpp_ansi = cprogram {
+	cfile_with_headers (d.."LLlex.c"),
+	cfile_with_headers (d.."LLmessage.c"),
+	cfile_with_headers (d.."ch3bin.c"),
+	cfile_with_headers (d.."ch3mon.c"),
+	cfile_with_headers (d.."domacro.c"),
+	cfile_with_headers (d.."error.c"),
+	cfile_with_headers (d.."idf.c"),
+	cfile_with_headers (d.."init.c"),
+	cfile_with_headers (d.."input.c"),
+	cfile_with_headers (d.."main.c"),
+	cfile_with_headers (d.."options.c"),
+	cfile_with_headers (d.."preprocess.c"),
+	cfile_with_headers (d.."replace.c"),
+	cfile_with_headers (d.."skip.c"),
+	cfile_with_headers (d.."tokenname.c"),
+	cfile_with_headers (d.."expr.c"),
+
+	foreach {
+		rule = cfile_with_headers,
+		ith { lpars, from=2 }
+	},
+
+	cfile_with_headers {
+		simple {
+			outputs = {"%U%-symbol2str.c"},
+			command = {
+				"%in[1]% < %in[2]% > %out[1]%"
+			},
+			
+			file (d.."make.tokcase"),
+			file (d.."tokenname.c")
+		}
+	},
+	
+	cfile_with_headers {
+		CEXTRAFLAGS = "-I"..d,
+		tabgen (d.."char.tab")
+	},
+
+	cfile_with_headers {
+		simple {
+			outputs = {"%U%-next.c"},
+			command = {
+				"%in% > %out%"
+			},
+			
+			file (d.."make.next"),
+			
+			file (d.."macro.str"),
+			file (d.."replace.str"),
+		}
+	},
+
+	lib_input,
+	lib_assert,
+	lib_alloc,
+	lib_print,
+	lib_system,
+	lib_string,
+	
+	outputs = {"%U%/cpp.ansi"},
+	install = {
+		pm.install(                    BINDIR..PLATDEP.."/cpp.ansi"),
+		pm.install(d.."ncpp.6",        BINDIR.."/man/man6/cpp.ansi.6"),
+	}
+}

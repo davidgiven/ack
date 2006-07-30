@@ -1,0 +1,296 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."lang/cem/libcc.ansi/"
+
+local crt = ackfile {
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h"},
+	file (d.."head_ac.e"),
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/head_ac")
+}
+	
+local libc = acklibrary {
+	ACKBUILDFLAGS = {PARENT, "-ansi"},
+	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I"..d.."headers", "-I%ROOTDIR%include/_tail_cc"},
+	outputs = {"%U%/tail_ac.a"},
+	
+	-- assert
+	
+	ackfile (d.."assert/assert.c"),
+	
+	-- ctype
+	
+	ackfile (d.."ctype/tolower.c"),
+	ackfile (d.."ctype/toupper.c"),
+	ackfile {
+		tabgen (d.."ctype/char.tab")
+	},
+	foreach {
+		rule = ackfile,
+		simple {
+			outputs = {
+				"%U%/isalnum.c",
+				"%U%/isalpha.c",
+				"%U%/iscntrl.c",
+				"%U%/isdigit.c",
+				"%U%/isgraph.c",
+				"%U%/islower.c",
+				"%U%/isprint.c",
+				"%U%/ispunct.c",
+				"%U%/isspace.c",
+				"%U%/isupper.c",
+				"%U%/isxdigit.c",
+				"%U%/isascii.c",
+			},
+			command = {
+				"cd %out[1]:dirname% && %in[1]%"
+			},
+			
+			file (d.."ctype/genfiles")
+		}
+	},
+
+	-- errno
+	
+	ackfile (d.."errno/errlist.c"),
+	
+	-- locale
+	
+	ackfile (d.."locale/localeconv.c"),
+	ackfile (d.."locale/setlocale.c"),
+	
+	-- math
+	
+	ackfile (d.."math/asin.c"),
+	ackfile (d.."math/atan2.c"),
+	ackfile (d.."math/atan.c"),
+	ackfile (d.."math/ceil.c"),
+	ackfile (d.."math/fabs.c"),
+	ackfile (d.."math/pow.c"),
+	ackfile (d.."math/log10.c"),
+	ackfile (d.."math/log.c"),
+	ackfile (d.."math/sin.c"),
+	ackfile (d.."math/sinh.c"),
+	ackfile (d.."math/sqrt.c"),
+	ackfile (d.."math/tan.c"),
+	ackfile (d.."math/tanh.c"),
+	ackfile (d.."math/exp.c"),
+	ackfile (d.."math/ldexp.c"),
+	ackfile (d.."math/fmod.c"),
+	ackfile (d.."math/floor.c"),
+	ackfile (d.."math/hugeval.c"),
+	ackfile (d.."math/frexp.e"),
+	ackfile (d.."math/modf.e"),
+	ackfile (d.."math/isnan.c"),
+
+	-- misc
+	
+	ackfile (d.."misc/getgrent.c"),
+	ackfile (d.."misc/getopt.c"),
+	ackfile (d.."misc/getpass.c"),
+	ackfile (d.."misc/getpw.c"),
+	ackfile (d.."misc/getw.c"),
+	ackfile (d.."misc/putw.c"),
+	ackfile (d.."misc/putenv.c"),
+	ackfile (d.."misc/environ.c"),
+	ackfile (d.."misc/popen.c"),
+	ackfile (d.."misc/sleep.c"),
+	ackfile (d.."misc/termcap.c"),
+	ackfile (d.."misc/fdopen.c"),
+	ackfile (d.."misc/closedir.c"),
+	group {
+		ACKINCLUDES = {PARENT, "-DUFS"},
+		ackfile (d.."misc/getdents.c")
+	},
+	ackfile (d.."misc/opendir.c"),
+	ackfile (d.."misc/readdir.c"),
+	ackfile (d.."misc/rewinddir.c"),
+	ackfile (d.."misc/seekdir.c"),
+	ackfile (d.."misc/telldir.c"),
+	ackfile (d.."misc/isatty.c"),
+	ackfile (d.."misc/mktemp.c"),
+	ackfile (d.."misc/hypot.c"),
+
+	-- setjmp
+	
+	ackfile (d.."setjmp/setjmp.e"),
+	ackfile (d.."setjmp/sigmisc.c"),
+	
+	-- signal
+	
+	ackfile (d.."signal/raise.c"),
+	
+	-- stdio
+	
+	ackfile (d.."stdio/tmpfile.c"),
+	ackfile (d.."stdio/tmpnam.c"),
+	ackfile (d.."stdio/rename.c"),
+	ackfile (d.."stdio/remove.c"),
+	ackfile (d.."stdio/fopen.c"),
+	ackfile (d.."stdio/freopen.c"),
+	ackfile (d.."stdio/setbuf.c"),
+	ackfile (d.."stdio/setvbuf.c"),
+	ackfile (d.."stdio/perror.c"),
+	ackfile (d.."stdio/fprintf.c"),
+	ackfile (d.."stdio/printf.c"),
+	ackfile (d.."stdio/sprintf.c"),
+	ackfile (d.."stdio/vfprintf.c"),
+	ackfile (d.."stdio/vprintf.c"),
+	ackfile (d.."stdio/vsprintf.c"),
+	ackfile (d.."stdio/doprnt.c"),
+	ackfile (d.."stdio/icompute.c"),
+	ackfile (d.."stdio/fscanf.c"),
+	ackfile (d.."stdio/scanf.c"),
+	ackfile (d.."stdio/sscanf.c"),
+	ackfile (d.."stdio/doscan.c"),
+	ackfile (d.."stdio/fgetc.c"),
+	ackfile (d.."stdio/fgets.c"),
+	ackfile (d.."stdio/getc.c"),
+	ackfile (d.."stdio/getchar.c"),
+	ackfile (d.."stdio/gets.c"),
+	ackfile (d.."stdio/putc.c"),
+	ackfile (d.."stdio/putchar.c"),
+	ackfile (d.."stdio/fputc.c"),
+	ackfile (d.."stdio/puts.c"),
+	ackfile (d.."stdio/fputs.c"),
+	ackfile (d.."stdio/ungetc.c"),
+	ackfile (d.."stdio/fread.c"),
+	ackfile (d.."stdio/fwrite.c"),
+	ackfile (d.."stdio/fgetpos.c"),
+	ackfile (d.."stdio/fsetpos.c"),
+	ackfile (d.."stdio/rewind.c"),
+	ackfile (d.."stdio/fseek.c"),
+	ackfile (d.."stdio/ftell.c"),
+	ackfile (d.."stdio/clearerr.c"),
+	ackfile (d.."stdio/feof.c"),
+	ackfile (d.."stdio/ferror.c"),
+	ackfile (d.."stdio/fileno.c"),
+	ackfile (d.."stdio/fltpr.c"),
+	ackfile (d.."stdio/ecvt.c"),
+	ackfile (d.."stdio/fillbuf.c"),
+	ackfile (d.."stdio/fclose.c"),
+	ackfile (d.."stdio/flushbuf.c"),
+	ackfile (d.."stdio/fflush.c"),
+	ackfile (d.."stdio/isatty.c"),
+	ackfile (d.."stdio/data.c"),
+
+	-- stdlib
+	
+	ackfile (d.."stdlib/abort.c"),
+	ackfile (d.."stdlib/abs.c"),
+	ackfile (d.."stdlib/atof.c"),
+	ackfile (d.."stdlib/atoi.c"),
+	ackfile (d.."stdlib/atol.c"),
+	ackfile (d.."stdlib/bsearch.c"),
+	ackfile (d.."stdlib/div.c"),
+	ackfile (d.."stdlib/atexit.c"),
+	ackfile (d.."stdlib/exit.c"),
+	ackfile (d.."stdlib/getenv.c"),
+	ackfile (d.."stdlib/labs.c"),
+	ackfile (d.."stdlib/ldiv.c"),
+	ackfile (d.."stdlib/mblen.c"),
+	ackfile (d.."stdlib/mbstowcs.c"),
+	ackfile (d.."stdlib/mbtowc.c"),
+	ackfile (d.."stdlib/qsort.c"),
+	ackfile (d.."stdlib/rand.c"),
+	ackfile (d.."stdlib/strtod.c"),
+	ackfile (d.."stdlib/strtol.c"),
+	ackfile (d.."stdlib/system.c"),
+	ackfile (d.."stdlib/wcstombs.c"),
+	ackfile (d.."stdlib/wctomb.c"),
+	ackfile (d.."stdlib/ext_comp.c"),
+	ackfile {
+		simple {
+			outputs = {"%U%/malloc.c"},
+			command = {
+				"rm -f %out% && for i in %in[2-]%; do %in[1]% $i >> %out%; done"
+			},
+			file (d.."stdlib/malloc/add_file"),
+			file (d.."stdlib/malloc/READ_ME"),
+			file (d.."stdlib/malloc/size_type.h"),
+			file (d.."stdlib/malloc/param.h"),
+			file (d.."stdlib/malloc/impl.h"),
+			file (d.."stdlib/malloc/check.h"),
+			file (d.."stdlib/malloc/log.h"),
+			file (d.."stdlib/malloc/phys.h"),
+			file (d.."stdlib/malloc/mal.c"),
+			file (d.."stdlib/malloc/log.c"),
+			file (d.."stdlib/malloc/phys.c"),
+			file (d.."stdlib/malloc/check.c"),
+		}
+	},
+
+	-- string
+	
+	ackfile (d.."string/memchr.c"),
+	ackfile (d.."string/memcmp.c"),
+	ackfile (d.."string/memcpy.c"),
+	ackfile (d.."string/memmove.c"),
+	ackfile (d.."string/memset.c"),
+	ackfile (d.."string/strcat.c"),
+	ackfile (d.."string/strchr.c"),
+	ackfile (d.."string/strcmp.c"),
+	ackfile (d.."string/strcoll.c"),
+	ackfile (d.."string/strcpy.c"),
+	ackfile (d.."string/strcspn.c"),
+	ackfile (d.."string/strerror.c"),
+	ackfile (d.."string/strncat.c"),
+	ackfile (d.."string/strncpy.c"),
+	ackfile (d.."string/strrchr.c"),
+	ackfile (d.."string/strstr.c"),
+	ackfile (d.."string/strlen.c"),
+	ackfile (d.."string/strtok.c"),
+	ackfile (d.."string/strpbrk.c"),
+	ackfile (d.."string/strspn.c"),
+	ackfile (d.."string/strncmp.c"),
+	ackfile (d.."string/strxfrm.c"),
+
+	-- time
+	
+	ackfile (d.."time/ctime.c"),
+	ackfile (d.."time/asctime.c"),
+	ackfile (d.."time/localtime.c"),
+	ackfile (d.."time/clock.c"),
+	ackfile (d.."time/difftime.c"),
+	ackfile (d.."time/gmtime.c"),
+	ackfile (d.."time/mktime.c"),
+	ackfile (d.."time/strftime.c"),
+	ackfile (d.."time/time.c"),
+	ackfile (d.."time/tzset.c"),
+	ackfile (d.."time/misc.c"),
+
+	install = {
+		pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_ac")
+	}
+}
+
+local headers = group {
+	install = {
+		pm.install(d.."headers/assert.h", "%BINDIR%include/assert.h"),
+		pm.install(d.."headers/ctype.h", "%BINDIR%include/ctype.h"),
+		pm.install(d.."headers/dirent.h", "%BINDIR%include/dirent.h"),
+		pm.install(d.."headers/errno.h", "%BINDIR%include/errno.h"),
+		pm.install(d.."headers/float.h", "%BINDIR%include/float.h"),
+		pm.install(d.."headers/grp.h", "%BINDIR%include/grp.h"),
+		pm.install(d.."headers/limits.h", "%BINDIR%include/limits.h"),
+		pm.install(d.."headers/locale.h", "%BINDIR%include/locale.h"),
+		pm.install(d.."headers/math.h", "%BINDIR%include/math.h"),
+		pm.install(d.."headers/mathconst.h", "%BINDIR%include/mathconst.h"),
+		pm.install(d.."headers/setjmp.h", "%BINDIR%include/setjmp.h"),
+		pm.install(d.."headers/signal.h", "%BINDIR%include/signal.h"),
+		pm.install(d.."headers/stdarg.h", "%BINDIR%include/stdarg.h"),
+		pm.install(d.."headers/stddef.h", "%BINDIR%include/stddef.h"),
+		pm.install(d.."headers/stdio.h", "%BINDIR%include/stdio.h"),
+		pm.install(d.."headers/stdlib.h", "%BINDIR%include/stdlib.h"),
+		pm.install(d.."headers/string.h", "%BINDIR%include/string.h"),
+		pm.install(d.."headers/time.h", "%BINDIR%include/time.h"),
+		pm.install(d.."headers/sys/dirent.h", "%BINDIR%include/sys/dirent.h"),
+		pm.install(d.."headers/sys/errno.h", "%BINDIR%include/sys/errno.h"),
+	}
+}
+
+lang_cem_ansi_runtime = group {
+	crt,
+	libc,
+	headers
+}
