@@ -8,11 +8,10 @@ local parser = yacc {
 		outputs = {"%U%-%I%.y"},
 		command = {
 			"cd %out[1]:dirname% && "..
-			  "%in[2]% -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES% %in[1]% > %out[1]%"
+			  "%BINDIR%%PLATDEP%/cpp -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES% %in[1]% > %out[1]%"
 		},
 		
 		file (d.."comm2.y"),
-		tool_cpp
 	}
 }
 
@@ -46,6 +45,9 @@ proto_as = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:19  dtrg
+-- Revision 1.2  2006-07-30 23:41:16  dtrg
+-- Broke dependency on tool_cpp in order to speed up the build.
+--
+-- Revision 1.1  2006/07/20 23:18:19  dtrg
 -- First version in CVS.
 --
