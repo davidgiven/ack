@@ -79,5 +79,5 @@ lang_pc_runtime = acklibrary {
 	ackfile (d.."rcka.c"),
 	ackfile (d.."trp.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_pc.a")
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_pc")
 }

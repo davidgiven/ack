@@ -80,5 +80,5 @@ lang_cem_gen_runtime = acklibrary {
 	ackfile (d.."modf.e"),
 	ackfile (d.."setjmp.e"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_cc.2g.a")
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_cc.2g")
 }

@@ -17,5 +17,5 @@ lang_occam_runtime = acklibrary {
 	ackfile (d.."par_misc.e"),
 	ackfile (d.."parco.c"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_ocm.a")
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_ocm")
 }

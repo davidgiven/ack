@@ -98,5 +98,5 @@ lang_cem_mon_runtime = acklibrary {
 	ackfile (d.."_wait.e"),
 	ackfile (d.."_write.e"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_mon.a")
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_mon")
 }

@@ -53,5 +53,5 @@ lang_m2_runtime = acklibrary {
 	ackfile (d.."rckil.c"),
 	ackfile (d.."EM.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m2.a")
+	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m2")
 }
