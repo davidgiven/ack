@@ -1,3 +1,4 @@
+#!/bin/sh
 
 for i in isalnum isalpha iscntrl isdigit isgraph islower isprint \
 	ispunct isspace isupper isxdigit isascii
