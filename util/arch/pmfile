@@ -12,11 +12,17 @@ tool_aal = cprogram {
 	lib_system,
 	lib_object,
 	
-	install = pm.install(BINDIR.."bin/aal")
+	install = {
+		pm.install("%BINDIR%bin/aal"),
+		pm.install(d.."aal.1", "%BINDIR%man/man1/aal.1")
+	}
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-07-30 23:45:35  dtrg
+-- Modified to install aal's manpage.
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --
