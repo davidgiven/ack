@@ -5,6 +5,7 @@
 local io_open = io.open
 local string_gsub = string.gsub
 local string_gfind = string.gfind
+local string_find = string.find
 local table_insert = table.insert
 local table_getn = table.getn
 local filetime = pm.filetime
@@ -14,7 +15,6 @@ local filetime = pm.filetime
 CCOMPILER = "gcc"
 CC = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -c -o %out% %in%"
 CPROGRAM = "%CCOMPILER% %CBUILDFLAGS% %CLINKFLAGS% %CEXTRAFLAGS% -o %out% %in% %CLIBRARIES%"
-CDEPENDS = "%CCOMPILER% %CBUILDFLAGS% %CDYNINCLUDES% %CINCLUDES% %CDEFINES% %CEXTRAFLAGS% -MM -MG %in% > %out%"
 AR = "%RM% %out% && ar cr %out% %in% && ranlib %out%"
 
 CBUILDFLAGS = {"-g"}
@@ -28,37 +28,61 @@ CLIBRARIES = EMPTY
 --- Manage C file dependencies ----------------------------------------------
 
 local dependency_cache = {}
-local function load_dependency_file(fn)
-	local o = dependency_cache[fn]
+local function calculate_dependencies(filename, includes)
+	-- Cache values, so we don't recalculate dependencies needlessly.
+	
+	local o = dependency_cache[filename]
 	if o then
 		return o
 	end
 	
-	-- Read in the dependency file.
+	local deps = {}
+	deps[filename] = true
 	
-	local f = io_open(fn)
-	if not f then
-		print("failed to open "..fn)
-		return nil
+	local calcdeps = 0
+	calcdeps = function(filename, file)
+		file = file or io.open(filename)
+		if not file then
+			return
+		end
+		
+		local localincludes = string_gsub(filename, "/[^/]*$", "")
+		if localincludes then
+			localincludes = {localincludes, unpack(includes)}
+		else
+			localincludes = includes
+		end
+			
+		for line in file:lines() do
+			local _, _, f = string_find(line, '^[ \t]*#[ \t]*include[ \t]*["<]([^"]+)[">]')
+			if f then
+				for _, path in ipairs(localincludes) do
+					local subfilename = path.."/"..f
+					local subfile = io.open(subfilename)
+					if subfile then
+						if not deps[subfilename] then
+							deps[subfilename] = true
+							calcdeps(subfilename, subfile)
+						end
+						break
+					end
+				end
+			end
+		end
+		
+		-- Explicit close to avoid having to wait for the garbage collector
+		-- to free up the underlying fd.
+		
+		file:close()
 	end
-	f = f:read("*a")
 	
-	-- Massage the dependency file into a string containing one unescaped
-	-- filename per line.
-	
-	f = string_gsub(f, "^.*[^\\]: *", "")
-	f = string_gsub(f, "\\\r?\n", "")
-	f = string_gsub(f, "([^\\]) +", "%1\n")
-	f = string_gsub(f, "\\", "")
-	
-	-- Parse the string.
-	
+	calcdeps(filename)
 	o = {}
-	for l in string_gfind(f, "[^\n]+") do
-		table_insert(o, l)
+	for i, _ in pairs(deps) do
+		table_insert(o, i)
 	end
-	
-	dependency_cache[fn] = o
+		
+	dependency_cache[filename] = o
 	return o
 end
 
@@ -91,18 +115,28 @@ simple_with_clike_dependencies = simple {
 		end
 	end,
 	
-	__dependencies = function(self, inputs, outputs)
-		local obj = simple {
-			CDYNINCLUDES = self.CDYNINCLUDES,
-			command = self.makedepends,
-			outputs = {"%U%-%I%.d"},
-			unpack(inputs)
-		}
-		local o = obj:__build()
-		local depends = load_dependency_file(o[1])
+	__dependencies = function(self, inputs, outputs)		
+		local cincludes = self.CINCLUDES
+		if (type(cincludes) == "string") then
+			cincludes = {cincludes}
+		end
+		
+		local includes = {}
+		for _, i in ipairs(cincludes) do
+			local _, _, p = string_find(i, "^-I[ \t]*(.+)$")
+			if p then
+				table_insert(includes, p)
+			end
+		end
+		
+		local depends = calculate_dependencies(inputs[1], includes)
 		if not depends then
 			self:__error("could not determine the dependencies for ",
 				pm.rendertable(inputs))
+		end
+		if pm.verbose then
+			pm.message('"', inputs[1], '" appears to depend on ',
+				pm.rendertable(depends))
 		end
 		return depends
 	end,
