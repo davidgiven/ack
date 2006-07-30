@@ -5,9 +5,11 @@
 /* $Id$ */
 /* PREPROCESSOR: INITIALIZATION ROUTINES */
 
-#include	<system.h>
-#include	<alloc.h>
-#include	<time.h>
+#include    <stdlib.h>
+#include    <string.h>
+#include	"system.h"
+#include	"alloc.h"
+#include	"time.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"

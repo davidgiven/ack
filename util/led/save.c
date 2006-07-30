@@ -10,8 +10,11 @@ static char rcsid[] = "$Id$";
  * If everything is kept in core, we must save some things for the second pass.
  */
 
-#include <arch.h>
-#include <out.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "arch.h"
+#include "out.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"
@@ -61,10 +64,8 @@ savechar(piece, off)
 {
 	register long	len;
 	register ind_t	newoff;
-	extern int	strlen();
 	extern ind_t	alloc();
 	extern ind_t	hard_alloc();
-	extern char	*strcpy();
 
 	if (off == (ind_t)0)
 		return 0;

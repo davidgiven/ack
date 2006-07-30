@@ -11,8 +11,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <alloc.h>
-#include <em_arith.h>
+#include <string.h>
+#include "alloc.h"
+#include "em_arith.h"
 #include "insert.h"
 #include "em_private.h"
 

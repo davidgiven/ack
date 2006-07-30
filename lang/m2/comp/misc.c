@@ -9,9 +9,13 @@
 
 /* $Id$ */
 
-#include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
+#include 	<stdlib.h>
+#include 	<stdio.h>
+#include	<string.h>
+
+#include	"alloc.h"
+#include	"em_arith.h"
+#include	"em_label.h"
 
 #include	"f_info.h"
 #include	"misc.h"

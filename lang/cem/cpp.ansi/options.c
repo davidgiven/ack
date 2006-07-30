@@ -5,7 +5,9 @@
 /* $Id$ */
 /* USER-OPTION HANDLING */
 
-#include	<alloc.h>
+#include    <stdlib.h>
+#include    <string.h>
+#include	"alloc.h"
 #include	"idfsize.h"
 #include	"class.h"
 #include	"macro.h"

@@ -5,12 +5,16 @@
 /* $Id$ */
 /*  M A C R O   R E P L A C E M E N T */
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
+
 #include	"pathlength.h"
 #include	"strsize.h"
 #include	"nparams.h"
 #include	"idfsize.h"
 #include	"numsize.h"
-#include	<alloc.h>
+#include	"alloc.h"
 #include	"idf.h"
 #include	"input.h"
 #include	"macro.h"
@@ -18,7 +22,7 @@
 #include	"LLlex.h"
 #include	"class.h"
 #include	"debug.h"
-#include	<assert.h>
+#include	"assert.h"
 #include	"macbuf.h"
 #include	"replace.h"
 

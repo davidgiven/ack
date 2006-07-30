@@ -9,15 +9,19 @@
 
 /* $Id$ */
 
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
+
 #include	"debug.h"
 #include	"idfsize.h"
 #include	"numsize.h"
 #include	"strsize.h"
 
-#include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<assert.h>
+#include	"alloc.h"
+#include	"em_arith.h"
+#include	"em_label.h"
+#include	"assert.h"
 
 #include	"LLlex.h"
 #include	"input.h"

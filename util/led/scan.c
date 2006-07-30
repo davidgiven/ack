@@ -6,13 +6,15 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
 #ifdef SYMDBUG
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif /* SYMDBUG */
-#include <arch.h>
-#include <out.h>
-#include <ranlib.h>
+#include "arch.h"
+#include "out.h"
+#include "ranlib.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"
