@@ -236,10 +236,15 @@ ProgramModule
 		{ 
 		  if (state == IMPLEMENTATION) {
 		  	int len = strlen(dot.TOK_IDF->id_text);
+		  	char* leafname = strrchr(FileName, '/');
+		  	if (leafname)
+		  		leafname++;
+		  	else
+		  		leafname = FileName;
 
 		  	if (len > 10) len = 10;
-		  	if (strncmp(FileName, dot.TOK_IDF->id_text, len)) {
-				warning(W_ORDINARY, "modulename %s does not match filename %s", dot.TOK_IDF->id_text, FileName);
+		  	if (strncmp(leafname, dot.TOK_IDF->id_text, len)) {
+				warning(W_ORDINARY, "modulename %s does not match filename %s", dot.TOK_IDF->id_text, leafname);
 		  	}
 			df = GetDefinitionModule(dot.TOK_IDF, 0);
 			CurrVis = df->mod_vis;
