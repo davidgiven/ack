@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/basic/lib/"
 
 lang_basic_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
 	
 	ackfile (d.."fif.e"),
 	ackfile (d.."fef.e"),

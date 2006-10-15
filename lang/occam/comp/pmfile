@@ -16,7 +16,7 @@ local cfile_with_headers = cfile {
 }
 	
 lang_occam_compiler = cprogram {
-	CLIBRARIES = {PARENT, "-lfl"},
+	CLIBRARIES = {PARENT, "fl"},
 	
 	cfile_with_headers (d.."builtin.c"),
 	cfile_with_headers (d.."code.c"),
@@ -54,6 +54,9 @@ lang_occam_compiler = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-26 18:23:32  dtrg
+-- Revision 1.2  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/26 18:23:32  dtrg
 -- Added support for the Occam compiler.
 --

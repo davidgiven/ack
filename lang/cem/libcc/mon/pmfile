@@ -4,8 +4,8 @@
 local d = ROOTDIR.."lang/cem/libcc/mon/"
 
 lang_cem_mon_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc",
-		"-I%ROOTDIR%include/_tail_mon"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc",
+		"%ROOTDIR%include/_tail_mon"},
 	
 	ackfile (d.."exit.c"),
 	ackfile (d.."gtty.c"),

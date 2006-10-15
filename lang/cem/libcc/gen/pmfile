@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/cem/libcc/gen/"
 
 lang_cem_gen_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
 	
 	ackfile (d.."abs.c"),
 	ackfile (d.."atof.c"),

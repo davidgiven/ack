@@ -64,7 +64,7 @@ local cfile_with_headers = cfile {
 }
 	
 lang_pc_compiler = cprogram {
-	CDEFINES = {PARENT, "-DSTATIC=static"},
+	CDEFINES = {PARENT, "STATIC=static"},
 	
 	cfile_with_headers (d.."LLlex.c"),
 	cfile_with_headers (d.."LLmessage.c"),
@@ -110,7 +110,7 @@ lang_pc_compiler = cprogram {
 	},
 	
 	cfile_with_headers {
-		CEXTRAFLAGS = "-I"..d,
+		CINCLUDES = {PARENT, d},
 		tabgen (d.."char.tab")
 	},
 
@@ -161,6 +161,9 @@ lang_pc_compiler = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-22 21:03:07  dtrg
+-- Revision 1.2  2006-10-15 00:28:11  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/22 21:03:07  dtrg
 -- Added support for the Pascal compiler.
 --

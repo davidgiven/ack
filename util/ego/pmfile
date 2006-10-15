@@ -57,7 +57,7 @@ local ego_core = cprogram {
 }
 
 tool_ego = group {
-	CDEFINES = {PARENT, "-DVERBOSE", "-DNOTCOMPACT"},
+	CDEFINES = {PARENT, "VERBOSE", "NOTCOMPACT"},
 	
 	ego_core {
 		cfile_with_headers (d.."bo/bo.c"),
@@ -235,7 +235,10 @@ ego_descr = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-23 17:52:23  dtrg
+-- Revision 1.3  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.2  2006/07/23 17:52:23  dtrg
 -- cpp now gets installed in the right place.
 --
 -- Revision 1.1  2006/07/22 00:52:01  dtrg

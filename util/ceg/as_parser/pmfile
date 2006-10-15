@@ -16,8 +16,8 @@ local cfile_with_headers = cfile {
 }
 	
 tool_ceg_as_parser = cprogram {
-	CEXTRAFLAGS = "-DFLEX",
-	CLIBRARIES = "-lfl",
+	CDEFINES = {PARENT, "FLEX"},
+	CLIBRARIES = {PARENT, "fl"},
 	
 	cfile_with_headers (d.."conversion.c"),
 	cfile_with_headers (d.."help.c"),
@@ -51,6 +51,9 @@ tool_ceg_as_parser_eval = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-10-15 00:28:11  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --

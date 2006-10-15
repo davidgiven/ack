@@ -8,7 +8,7 @@ local parser = yacc {
 		outputs = {"%U%-%I%.y"},
 		command = {
 			"cd %out[1]:dirname% && "..
-			  "%BINDIR%%PLATDEP%/cpp -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES% %in[1]% > %out[1]%"
+			  "%BINDIR%%PLATDEP%/cpp -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES:cincludes% %in[1]% > %out[1]%"
 		},
 		
 		file (d.."comm2.y"),
@@ -45,7 +45,10 @@ proto_as = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-30 23:41:16  dtrg
+-- Revision 1.3  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.2  2006/07/30 23:41:16  dtrg
 -- Broke dependency on tool_cpp in order to speed up the build.
 --
 -- Revision 1.1  2006/07/20 23:18:19  dtrg

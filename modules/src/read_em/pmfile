@@ -29,10 +29,10 @@ local withdynamic = cfile {
 }
 
 module_read_emk = clibrary {
-	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	CDEFINES = {PARENT, "PRIVATE=static", "EXPORT=", "NDEBUG"},
 	cfile (d.."EM_vars.c"),
 	cfile {
-		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCOMPACT",
+		CDEFINES = {PARENT, "COMPACT"},
 		(d.."read_em.c")
 	},
 	withdynamic (d.."mkcalls.c"),
@@ -42,14 +42,14 @@ module_read_emk = clibrary {
 }
 
 module_read_emkV = clibrary {
-	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	CDEFINES = {PARENT, "PRIVATE=static", "EXPORT=", "NDEBUG"},
 	cfile (d.."EM_vars.c"),
 	cfile {
-		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCOMPACT -DCHECKING",
+		CDEFINES = {PARENT, "COMPACT", "CHECKING"},
 		(d.."read_em.c")
 	},
 	withdynamic {
-		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		CDEFINES = {PARENT, "CHECKING"},
 		(d.."mkcalls.c"),
 	},
 	
@@ -58,14 +58,14 @@ module_read_emkV = clibrary {
 }
 
 module_read_emeV = clibrary {
-	CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG",
+	CDEFINES = {PARENT, "PRIVATE=static", "EXPORT=", "NDEBUG"},
 	cfile (d.."EM_vars.c"),
 	cfile {
-		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		CDEFINES = {PARENT, "CHECKING"},
 		(d.."read_em.c")
 	},
 	withdynamic {
-		CEXTRAFLAGS = "-DPRIVATE=static -DEXPORT= -DNDEBUG -DCHECKING",
+		CDEFINES = {PARENT, "CHECKING"},
 		(d.."mkcalls.c"),
 	},
 	
@@ -85,6 +85,9 @@ module_read_em = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-10-15 00:28:11  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --

@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/occam/lib/"
 
 lang_occam_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
 	
 	ackfile (d.."builtin.c"),
 	ackfile (d.."chan_strct.c"),

@@ -11,7 +11,7 @@ ackfile = simple_with_clike_dependencies {
 	class = "ackfile",
 	CINCLUDES = {REDIRECT, "ACKINCLUDES"},
 	command = {
-		"%BINDIR%bin/ack %ACKBUILDFLAGS% %ACKINCLUDES% %ACKDEFINES% -c -o %out% %in%"
+		"%BINDIR%bin/ack %ACKBUILDFLAGS% %ACKINCLUDES:cincludes% %ACKDEFINES:cdefines% -c -o %out% %in%"
 	},
 	outputs = {"%U%-%I%.o"},
 }

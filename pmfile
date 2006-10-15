@@ -1,3 +1,4 @@
+-- $Id$
 -- $Source$
 -- $State$
 
@@ -8,9 +9,9 @@ include "config.pm"
 include "first/ack.pm"
 
 CINCLUDES = {
-	"-I"..ROOTDIR.."h",
-	"-I"..ROOTDIR.."modules/h",
-	"-I"..HEADERDIR,
+	ROOTDIR.."h",
+	ROOTDIR.."modules/h",
+	HEADERDIR,
 }
 
 -- Load the pmfiles for the various modules.
@@ -40,7 +41,7 @@ include "util/cpp/pmfile"
 include "lang/cem/cpp.ansi/pmfile"
 include "util/cgg/pmfile"
 include "util/ncgg/pmfile"
-include "util/ceg/pmfile"
+-- include "util/ceg/pmfile"
 include "util/misc/pmfile"
 include "util/opt/pmfile"
 include "util/ego/pmfile"
@@ -128,14 +129,19 @@ default = group {
 	lang_occam_compiler,
 	lang_basic_compiler,
 
-	mach_6500,     lang_runtimes { ARCH="6500", OPTIMISATION="-O" },
+	mach_6500,
+	lang_runtimes { ARCH="6500", OPTIMISATION="-O" },
+
 	mach_6800,
 	mach_6805,
 	mach_6809,
 	mach_arm,      lang_runtimes { ARCH="arm", OPTIMISATION="-O" },
 	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O" },
 	mach_i80,      lang_runtimes { ARCH="i80", OPTIMISATION="-O" },
-	mach_i86,      lang_runtimes { ARCH="i86", OPTIMISATION="-O" },
+
+	mach_i86,      support_i86,
+	lang_runtimes { ARCH="i86", OPTIMISATION="-O" },
+
 	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O" },
 --	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
 --	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O" },

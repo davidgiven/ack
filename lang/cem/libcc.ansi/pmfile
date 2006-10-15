@@ -4,14 +4,14 @@
 local d = ROOTDIR.."lang/cem/libcc.ansi/"
 
 local crt = ackfile {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	file (d.."head_ac.e"),
 	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/head_ac")
 }
 	
 local libc = acklibrary {
 	ACKBUILDFLAGS = {PARENT, "-ansi"},
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I"..d.."headers", "-I%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", d.."headers", "%ROOTDIR%include/_tail_cc"},
 	outputs = {"%U%/tail_ac.a"},
 	
 	-- assert
@@ -99,7 +99,7 @@ local libc = acklibrary {
 	ackfile (d.."misc/fdopen.c"),
 	ackfile (d.."misc/closedir.c"),
 	group {
-		ACKINCLUDES = {PARENT, "-DUFS"},
+		ACKDEFINES = {PARENT, "UFS"},
 		ackfile (d.."misc/getdents.c")
 	},
 	ackfile (d.."misc/opendir.c"),

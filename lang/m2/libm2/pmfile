@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/m2/libm2/"
 
 lang_m2_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "-I%ROOTDIR%h", "-I%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
 	
 	ackfile (d.."Termcap.mod"),
 	ackfile (d.."CSP.mod"),

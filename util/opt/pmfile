@@ -48,7 +48,7 @@ local local_tool_opt = cprogram {
 			},
 
 			cprogram {
-				CLIBRARIES = {"-lfl"},
+				CLIBRARIES = {PARENT, "fl"},
 				
 				cfile {
 					yacc {
@@ -87,7 +87,7 @@ tool_opt = group {
 	},
 	
 	group {
-		CEXTRAFLAGS = "-DGLOBAL_OPT",
+		CDEFINES = {PARENT, "GLOBAL_OPT"},
 		local_tool_opt,
 		install = pm.install(BINDIR.."lib.bin/em_opt2")
 	},
@@ -95,6 +95,9 @@ tool_opt = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-07-20 23:10:07  dtrg
+-- Revision 1.3  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.2  2006/07/20 23:10:07  dtrg
 -- Fixed revision history.
 --

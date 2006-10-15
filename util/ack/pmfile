@@ -30,11 +30,11 @@ tool_ack = cprogram {
 	cfile (d.."files.c"),
 
 	cfile {
-		CEXTRAFLAGS = "-I"..d,
+		CINCLUDES = {PARENT, d},
 		ith { makeheaders, i = 1 }
 	},
 	cfile {
-		CEXTRAFLAGS = "-I"..d,
+		CINCLUDES = {PARENT, d},
 		ith { makeheaders, i = 2 }
 	},
 		
@@ -49,6 +49,9 @@ tool_ack = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --

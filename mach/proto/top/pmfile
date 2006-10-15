@@ -17,9 +17,9 @@ local cfile_with_tables = cfile {
 proto_top = cprogram {
 	CINCLUDES = {
 		PARENT,
-		"-Imach/%ARCH%/ncg",
-		"-Imach",
-		"-I"..d
+		"mach/%ARCH%/ncg",
+		"mach",
+		d
 	},
 			
 	cfile_with_tables (d.."queue.c"),
@@ -33,7 +33,10 @@ proto_top = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-22 12:31:19  dtrg
+-- Revision 1.2  2006-10-15 00:28:12  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/22 12:31:19  dtrg
 -- Added support for the top target peephole optimiser.
 --
 -- Revision 1.1  2006/07/20 23:18:18  dtrg

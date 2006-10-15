@@ -76,7 +76,7 @@ local library_core = group {
 }
 
 module_eme = clibrary {
-	CEXTRAFLAGS = "-DREADABLE_EM",
+	CDEFINES = {PARENT, "READABLE_EM"},
 	library_core,
 	
 	outputs = {"%U%/libeme.a"},
@@ -101,6 +101,9 @@ module_em_code = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-10-15 00:28:11  dtrg
+-- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --

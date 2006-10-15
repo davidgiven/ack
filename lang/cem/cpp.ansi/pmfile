@@ -99,7 +99,7 @@ tool_cpp_ansi = cprogram {
 	},
 	
 	cfile_with_headers {
-		CEXTRAFLAGS = "-I"..d,
+		CINCLUDES = {PARENT, d},
 		tabgen (d.."char.tab")
 	},
 
