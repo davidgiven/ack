@@ -3,6 +3,7 @@ static char	rcsid[] = "$Id$";
  * show - make the contents of an ACK object file human readable.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -204,7 +205,6 @@ myalloc(u)
 	unsigned int	u;
 {
 	register char	*rcp;
-	extern char	*malloc();
 
 	rcp = malloc(u);
 	if (rcp == (char *) 0) {

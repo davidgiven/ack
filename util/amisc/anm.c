@@ -10,12 +10,13 @@
 **	anm [-gopruns] [name ...]
 */
 
+#include	<stdio.h>
+#include	<stdlib.h>
+#include	<ctype.h>
+
 #include	"out.h"
 #include	"arch.h"
 #include	"ranlib.h"
-
-#include	<stdio.h>
-#include	<ctype.h>
 
 int	numsort_flg;
 int	sectsort_flg;
@@ -29,8 +30,6 @@ int	read_error;
 struct	outhead	hbuf;
 struct	outsect	sbuf;
 long	off;
-char	*malloc();
-char	*realloc();
 long	s_base[S_MAX];	/* for specially encoded bases */
 char	*filename;
 int	narg;

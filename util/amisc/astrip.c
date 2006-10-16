@@ -4,9 +4,10 @@
  */
 /* $Id$ */
 
-#include "out.h"
-#include <signal.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
+#include "out.h"
 
 /*
 
