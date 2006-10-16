@@ -3,15 +3,26 @@
 
 local d = "util/amisc/"
 
-tool_tabgen = cprogram {
-	cfile (d.."tabgen.c"),
+local simple_tool = cprogram {
+	class = "simple_tool",
 	
-	outputs = {"%U%/tabgen"},
-	install = pm.install(TOOLDIR.."tabgen")
+	cfile (d.."%S%.c"),
+	lib_object,
+	
+	outputs = {"%U%/%S%"},
+	install = pm.install("%BINDIR%bin/%S%")
 }
+
+tool_anm = simple_tool { S = "anm" }
+tool_ashow = simple_tool { S = "ashow" }
+tool_asize = simple_tool { S = "asize" }
+tool_astrip = simple_tool { S = "astrip" }
+tool_aslod = simple_tool { S = "aslod" }
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
--- First version in CVS.
+-- Revision 1.2  2006-10-16 23:25:56  dtrg
+-- Added support for anm, asize, ashow, astrip and the new aslod tool.
 --
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
+-- First version in CVS.

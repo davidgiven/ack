@@ -121,6 +121,11 @@ default = group {
 	tool_ego,
 	tool_topgen,
 	tool_led,
+	tool_anm,
+	tool_ashow,
+	tool_asize,
+	tool_astrip,
+	tool_aslod,
 
 	lang_cem_compiler,
 	lang_cem_ansi_compiler,
