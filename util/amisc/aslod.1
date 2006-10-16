@@ -1,0 +1,20 @@
+.TH ASLOD 1 "$Revision$"
+.SH NAME
+aslod \- ACK simple loader
+.SH SYNOPSIS
+aslod [-h] inputfile outputfile
+.SH DESCRIPTION
+.I aslod
+converts an absolute ack.out file into a simple binary memory
+dump. It is suitable for producing RAM images, executables for
+simple operating systems such as CP/M, DOS, etc.
+
+The input file must contain exactly four segments: TEXT, ROM,
+DATA and BSS, in that order, all occupying contiguous memory.
+The file must have all references resolved and be linked to a
+fixed address. aslod will dump the segments, in order, such
+that the first byte of TEXT is at offset 0 in the file
+(regardless of where it is in memory).
+
+.SH "SEE ALSO"
+ack.out(5)
