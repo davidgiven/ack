@@ -8,7 +8,7 @@ LLgen = simple {
 	class = "LLgen",
 	command = {
 		"rm -f %out%",
-		"cd %out[1]:dirname% && LLgen %in%"
+		"cd %out[1]:dirname% && %TOOLDIR%LLgen %in%"
 	},
 	
 	outputs = {"%U%/" },
@@ -29,6 +29,9 @@ LLgen = simple {
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
+-- Revision 1.2  2006-11-11 22:59:01  dtrg
+-- Now uses the version of LLgen included with the ACK instead of the standalone version.
+--
+-- Revision 1.1  2006/07/20 23:18:18  dtrg
 -- First version in CVS.
 --
