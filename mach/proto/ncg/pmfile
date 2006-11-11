@@ -12,14 +12,18 @@ local cfile_with_tables = cfile {
 	class = "cfile_with_tables",
 	dynamicheaders = {
 		make_tables,
-		file (ROOTDIR.."mach/%ARCH%/ncg/"),
-		file (ROOTDIR.."mach/%ARCHDIR%/ncg/"),
-		file (ROOTDIR.."mach/")
 	}
 }
 
 proto_ncg = cprogram {
 	class = "proto_ncg",
+	
+	CINCLUDES = {
+		PARENT,
+		"mach/%ARCH%/ncg",
+		"mach/%ARCHDIR%/ncg",
+		"mach"
+	},
 	
 	cfile_with_tables (d.."codegen.c"),
 	cfile_with_tables (d.."compute.c"),
@@ -40,11 +44,7 @@ proto_ncg = cprogram {
 	
 	cfile {
 		ith { make_tables, i = 1 },
-		dynamicheaders = {
-			file (ROOTDIR.."mach/%ARCH%/ncg/"),
-			file (ROOTDIR.."mach/%ARCHDIR%/ncg/"),
-			file (d)
-		}
+		CINCLUDES = {PARENT, d},
 	},
 	
 	lib_em_data,
@@ -53,9 +53,3 @@ proto_ncg = cprogram {
 	outputs = {"%U%/%ARCH%-ncg"},
 	install = pm.install("%BINDIR%%PLATDEP%/%ARCH%/ncg")
 }
-
--- Revision history
--- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
--- First version in CVS.
---
