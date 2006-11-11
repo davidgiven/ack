@@ -252,8 +252,8 @@ int main(int argc, char* argv[])
 		fatal("this isn't an ack object file.");
 	if (outhead.oh_nrelo > 0)
 		fprintf(stderr, "Warning: relocation information present.");
-	if (!(outhead.oh_nsect == NUM_SEGMENTS) ||
-	     (outhead.oh_nsect == (NUM_SEGMENTS+1)))
+	if (!((outhead.oh_nsect == NUM_SEGMENTS) ||
+	      (outhead.oh_nsect == (NUM_SEGMENTS+1))))
 		fatal("the input file must have %d sections, not %ld.",
 			NUM_SEGMENTS, outhead.oh_nsect);
 			
@@ -309,15 +309,15 @@ int main(int argc, char* argv[])
 	{
 		long ss = 0;
 		printf(" base : %08lX\n", outsect[TEXT].os_base) ;
-		printf(" text = %ld\n", outsect[TEXT].os_size);
-		printf(" rom  = %ld\n", outsect[ROM].os_size);
-		printf(" data = %ld\n", outsect[DATA].os_size);
-		printf(" bss  = %ld\n", outsect[BSS].os_size);
+		printf(" text = %08lX\n", outsect[TEXT].os_size);
+		printf(" rom  = %08lX\n", outsect[ROM].os_size);
+		printf(" data = %08lX\n", outsect[DATA].os_size);
+		printf(" bss  = %08lX\n", outsect[BSS].os_size);
 		ss += outsect[TEXT].os_size;
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;
 		ss += outsect[BSS].os_size;
-		printf("Total memory %ld bytes, plus heap and stack\n",ss);
+		printf("TOTAL = %08lX\n", ss);
 	}
 	
 	return 0;
