@@ -1,0 +1,37 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."util/LLgen/"
+
+tool_LLgen = cprogram {
+	CDEFINES = {PARENT, 'NON_CORRECTING', 'LIBDIR="'..d..'lib"'},
+	
+	cfile (d.."src/main.c"),
+	cfile (d.."src/gencode.c"),
+	cfile (d.."src/compute.c"),
+	cfile (d.."src/check.c"),
+	cfile (d.."src/reach.c"),
+	cfile (d.."src/global.c"),
+	cfile (d.."src/name.c"),
+	cfile (d.."src/sets.c"),
+	cfile (d.."src/alloc.c"),
+	cfile (d.."src/machdep.c"),
+	cfile (d.."src/cclass.c"),
+	cfile (d.."src/savegram.c"),
+
+	-- These use pre-LLgen'd version of the files. If LLgen.g gets updated,
+	-- they need rebuilding. Use the bootstrap script to do this.
+	
+	cfile (d.."src/LLgen.c"),
+	cfile (d.."src/Lpars.c"),
+	cfile (d.."src/tokens.c"),
+
+	outputs = {"%U%/LLgen"},
+	install = pm.install("%TOOLDIR%LLgen")
+}
+	
+-- Revision history
+-- $Log$
+-- Revision 1.1  2006-11-11 22:58:30  dtrg
+-- Added a pmfile to allow LLgen to be built as part of the ACK again.
+--
