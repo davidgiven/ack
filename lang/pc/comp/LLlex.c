@@ -418,7 +418,14 @@ again:
 		if( ch == EOI ) eofseen = 1;
 		else PushBack();
 
+		/* dtrg: removed to allow Pascal programs to access system routines
+		 * (necessary to make them do anything useful). What's this for,
+		 * anyway? */
+		 
+#if 0
 		if( buf[0] == '_' ) lexerror("underscore starts identifier");
+#endif
+
 		tk->TOK_IDF = id = str2idf(buf, 1);
 		return tk->tk_symb = id->id_reserved ? id->id_reserved : IDENT;
 	}
