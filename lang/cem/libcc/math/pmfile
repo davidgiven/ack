@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/cem/libcc/math/"
 
 lang_cem_math_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	
 	ackfile (d.."asin.c"),
 	ackfile (d.."atan2.c"),
@@ -27,5 +27,5 @@ lang_cem_math_runtime = acklibrary {
 	ackfile (d.."exp.c"),
 	ackfile (d.."floor.c"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_m")
 }

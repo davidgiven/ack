@@ -17,9 +17,10 @@ local parser = yacc {
 
 local cfile_with_tables = cfile {
 	class = "cfile_with_tables",
+	CINCLUDES = {PARENT, "%ROOTDIR%mach/%ARCH%/as"},
+	
 	dynamicheaders = {
 		parser,
-		file (ROOTDIR.."mach/%ARCH%/as/")
 	}
 }
 
@@ -39,13 +40,20 @@ proto_as = cprogram {
 	
 	lib_object,
 	
-	outputs = {"%U%/%ARCH%-as"},
-	install = pm.install(BINDIR.."%PLATDEP%/%ARCH%/as")
+	outputs = {"%U%/%PLATFORM%-as"},
+	install = pm.install(BINDIR.."%PLATDEP%/%PLATFORM%/as")
 }
 
 -- Revision history
 -- $Log$
--- Revision 1.3  2006-10-15 00:28:12  dtrg
+-- Revision 1.4  2007-02-20 00:45:19  dtrg
+-- Done a major overhaul of the way target include files are installed and
+-- how platform libraries are built. The ARCH pm variable has now been
+-- renamed PLATFORM (which is more accurate) and a different ARCH
+-- variable added, which represents the CPU family rather than the
+-- hardware platform.
+--
+-- Revision 1.3  2006/10/15 00:28:12  dtrg
 -- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
 --
 -- Revision 1.2  2006/07/30 23:41:16  dtrg

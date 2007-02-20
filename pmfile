@@ -7,6 +7,7 @@ include "first/yacc.pm"
 include "first/llgen.pm"
 include "config.pm"
 include "first/ack.pm"
+include "first/ack-custom.pm"
 
 CINCLUDES = {
 	ROOTDIR.."h",
@@ -17,6 +18,8 @@ CINCLUDES = {
 -- Load the pmfiles for the various modules.
 
 include "util/data/pmfile"
+
+include "util/LLgen/pmfile-ack"
 
 include "modules/src/alloc/pmfile"
 include "modules/src/assert/pmfile"
@@ -55,14 +58,15 @@ include "lang/occam/pmfile"
 include "lang/basic/pmfile"
 
 include "mach/proto/pmfile"
+
+include "mach/i386/pmfile"
+--[[
 include "mach/6500/pmfile"
 include "mach/6800/pmfile"
 include "mach/6805/pmfile"
 include "mach/6809/pmfile"
 include "mach/arm/pmfile"
-include "mach/i386/pmfile"
 include "mach/i80/pmfile"
-include "mach/i86/pmfile"
 include "mach/m68020/pmfile"
 include "mach/m68k2/pmfile"
 include "mach/m68k4/pmfile"
@@ -72,6 +76,7 @@ include "mach/s2650/pmfile"
 include "mach/vax4/pmfile"
 include "mach/z80/pmfile"
 include "mach/z8000/pmfile"
+--]]
 
 -- This is the list of language runtimes that is built for each architecture.
 
@@ -84,7 +89,16 @@ lang_runtimes = group {
 	lang_basic_runtime,
 }
 
+-- Include the platform descriptions.
+
+include "mach/i86/pmfile"              -- generic i86
+include "plat/pc86/pmfile"             -- PC standalone
+
 default = group {
+	-- Lots of things use LLgen, so we need to build it first.
+	
+	tool_LLgen,
+	
 	-- Some of the dependency management across modules isn't entirely
 	-- complete, for simplicity; as a result, the order here is important.
 	-- In particular, referencing a library does not cause the library to
@@ -134,6 +148,10 @@ default = group {
 	lang_occam_compiler,
 	lang_basic_compiler,
 
+	-- Build the code generators and the architecture-independent
+	-- libraries.
+	
+--[[
 	mach_6500,
 	lang_runtimes { ARCH="6500", OPTIMISATION="-O" },
 
@@ -144,9 +162,6 @@ default = group {
 	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O" },
 	mach_i80,      lang_runtimes { ARCH="i80", OPTIMISATION="-O" },
 
-	mach_i86,      support_i86,
-	lang_runtimes { ARCH="i86", OPTIMISATION="-O" },
-
 	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O" },
 --	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
 --	mach_m68k4,    lang_runtimes { ARCH="m68k4", OPTIMISATION="-O" },
@@ -156,6 +171,11 @@ default = group {
 --	mach_vax4,     lang_runtimes { ARCH="vax4", OPTIMISATION="-O" },
 	mach_z80,      lang_runtimes { ARCH="z80", OPTIMISATION="-O" },
 	mach_z8000,    lang_runtimes { ARCH="z8000", OPTIMISATION="-O" },
+--]]
+
+	-- Build the platform-specific libraries.
+	
+	platform_pc86
 }
 
 -- Ensure that the work directories exist.

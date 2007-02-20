@@ -3,9 +3,43 @@
 
 local d = ROOTDIR.."lang/m2/libm2/"
 
-lang_m2_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+local headers = group {
+	install = {
+		pm.install(d.."Arguments.def", "%BINDIR%include/m2/Arguments.def"),
+		pm.install(d.."ArraySort.def", "%BINDIR%include/m2/ArraySort.def"),
+		pm.install(d.."ASCII.def", "%BINDIR%include/m2/ASCII.def"),
+		pm.install(d.."Conversion.def", "%BINDIR%include/m2/Conversion.def"),
+		pm.install(d.."CSP.def", "%BINDIR%include/m2/CSP.def"),
+		pm.install(d.."EM.def", "%BINDIR%include/m2/EM.def"),
+		pm.install(d.."Epilogue.def", "%BINDIR%include/m2/Epilogue.def"),
+		pm.install(d.."InOut.def", "%BINDIR%include/m2/InOut.def"),
+		pm.install(d.."MathLib0.def", "%BINDIR%include/m2/MathLib0.def"),
+		pm.install(d.."Mathlib.def", "%BINDIR%include/m2/Mathlib.def"),
+		pm.install(d.."PascalIO.def", "%BINDIR%include/m2/PascalIO.def"),
+		pm.install(d.."Processes.def", "%BINDIR%include/m2/Processes.def"),
+		pm.install(d.."random.def", "%BINDIR%include/m2/random.def"),
+		pm.install(d.."RealConver.def", "%BINDIR%include/m2/RealConver.def"),
+		pm.install(d.."RealInOut.def", "%BINDIR%include/m2/RealInOut.def"),
+		pm.install(d.."Semaphores.def", "%BINDIR%include/m2/Semaphores.def"),
+		pm.install(d.."Storage.def", "%BINDIR%include/m2/Storage.def"),
+		pm.install(d.."Streams.def", "%BINDIR%include/m2/Streams.def"),
+		pm.install(d.."Strings.def", "%BINDIR%include/m2/Strings.def"),
+		pm.install(d.."StripUnix.def", "%BINDIR%include/m2/StripUnix.def"),
+		pm.install(d.."Termcap.def", "%BINDIR%include/m2/Termcap.def"),
+		pm.install(d.."Terminal.def", "%BINDIR%include/m2/Terminal.def"),
+		pm.install(d.."Traps.def", "%BINDIR%include/m2/Traps.def"),
+		pm.install(d.."Unix.def", "%BINDIR%include/m2/Unix.def"),
+		pm.install(d.."XXTermcap.def", "%BINDIR%include/m2/XXTermcap.def"),
+	}
+}
+
+local head = ackfile {
+	file (d.."head_m2.e"),
 	
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_m2")
+}
+
+local tail = acklibrary {
 	ackfile (d.."Termcap.mod"),
 	ackfile (d.."CSP.mod"),
 	ackfile (d.."PascalIO.mod"),
@@ -53,5 +87,13 @@ lang_m2_runtime = acklibrary {
 	ackfile (d.."rckil.c"),
 	ackfile (d.."EM.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_m2")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_m2")
+}
+
+lang_m2_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
+	
+	headers,
+	head,
+	tail
 }

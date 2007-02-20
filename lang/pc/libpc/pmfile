@@ -3,9 +3,13 @@
 
 local d = ROOTDIR.."lang/pc/libpc/"
 
-lang_pc_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+head = ackfile {
+	file (d.."head_pc.e"),
 	
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_pc")
+}
+
+tail = acklibrary {
 	ackfile (d.."abi.c"),
 	ackfile (d.."abl.c"),
 	ackfile (d.."abr.c"),
@@ -79,5 +83,13 @@ lang_pc_runtime = acklibrary {
 	ackfile (d.."rcka.c"),
 	ackfile (d.."trp.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_pc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_pc")
 }
+
+lang_pc_runtime = group {
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
+	
+	head,
+	tail
+}
+	

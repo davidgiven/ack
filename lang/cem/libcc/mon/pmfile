@@ -4,8 +4,7 @@
 local d = ROOTDIR.."lang/cem/libcc/mon/"
 
 lang_cem_mon_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc",
-		"%ROOTDIR%include/_tail_mon"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_mon"},
 	
 	ackfile (d.."exit.c"),
 	ackfile (d.."gtty.c"),
@@ -98,5 +97,5 @@ lang_cem_mon_runtime = acklibrary {
 	ackfile (d.."_wait.e"),
 	ackfile (d.."_write.e"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_mon")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_mon")
 }

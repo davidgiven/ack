@@ -4,8 +4,10 @@
 # Don't generate line updating code by default (i.e.: -L flag provided to cem).
 # To put it on again: use -NL
 var LFLAG=-L
-var C_INCLUDES=-I{EM}/include/_tail_cc
-var ANSI_C_INCLUDES=-I{EM}/include/tail_ac
+var MODULA2_INCLUDES=-I{EM}/include/m2
+var OCCAM_INCLUDES=-I{EM}/include/occam
+var C_INCLUDES=-I{EM}/include/knr
+var ANSI_C_INCLUDES=-I{EM}/include/ansi
 
 callname ack
 name cpp
@@ -19,14 +21,15 @@ name cpp
 	mapflag -C CPP_F={CPP_F?} -C
 	mapflag -wo CPP_F={CPP_F?} -o
 	mapflag -ansi ANSI_C=.ansi
-	args {CPP_F?} ({SUFFIX?}:.ocm=-I{EM}/include/occam) \
-		-D__{NAME} \
+	args {CPP_F?} \
+		({SUFFIX?}:.ocm={OCCAM_INCLUDES}) \
+		-D__{ARCH} -D__{PLATFORM} \
 		-D__ACK \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
 		{INCLUDES?} \
-		({ANSI_C?.xx}:.xx=-D{NAME} \
+		({ANSI_C?.xx}:.xx=-D{ARCH} \
 		-DEM_WSIZE={w} -DEM_PSIZE={p} \
 		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
 		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
@@ -75,13 +78,13 @@ name cem
 	need .c
 	args \
 		{CPP_F?} \
-		-D__{NAME} \
+		-D__{ARCH} -D__{PLATFORM} \
 		-D__ACK \
 		{SYSINCLUDES?} \
 		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
 		{INCLUDES?} \
-		({ANSI_C?.xx}:.xx=-D{NAME} \
+		({ANSI_C?.xx}:.xx=-D{ARCH} \
 		-DEM_WSIZE={w} -DEM_PSIZE={p} \
 		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
 		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
@@ -133,7 +136,7 @@ name m2
 	mapflag -V* M2_F={M2_F?} -V*
 	mapflag --* M2_F={M2_F?} -*
 	args \
-		{M2_INCL?} -I{EM}/lib/m2 {M2SYSLIB?} \
+		{M2_INCL?} {MODULA2_INCLUDES} {M2SYSLIB?} \
 		-Vw{w}.{w}i{w}.{w}p{p}.{w}l{l}.{w}f{f}.{w}d{d}.{w} \
 		{M2_ALIGN?} {M2_F?} < >
 	prep cond

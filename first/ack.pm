@@ -3,7 +3,7 @@
 
 -- Provides rules for building things with the half-built ACK itself.
 
-ACKBUILDFLAGS = {"-m%ARCH%", "%OPTIMISATION%"}
+ACKBUILDFLAGS = {"-m%PLATFORM%", "%OPTIMISATION%"}
 ACKDEFINES = EMPTY
 ACKINCLUDES = EMPTY
 

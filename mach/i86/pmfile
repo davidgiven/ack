@@ -3,21 +3,19 @@
 
 local d = ROOTDIR.."mach/i86/"
 
+include (d.."libem/pmfile")
+include (d.."libend/pmfile")
+
 mach_i86 = group {
-	ARCH = "i86",
-	
 	proto_as,
 	proto_ncg { ARCHDIR = "i86" },
 	ego_descr,
-	
-	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
 }
 
--- Revision history
--- $Log$
--- Revision 1.2  2006-07-22 00:52:01  dtrg
--- Added support for the ego global optimisation suite.
---
--- Revision 1.1  2006/07/20 23:18:18  dtrg
--- First version in CVS.
---
+support_i86 = group {
+	OPTIMISATION = "-O",
+
+	libem_i86,
+	libend_i86,
+}
+

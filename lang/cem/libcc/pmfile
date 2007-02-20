@@ -8,7 +8,31 @@ include (d.."math/pmfile")
 include (d.."mon/pmfile")
 include (d.."stdio/pmfile")
 
+local headers = group {
+	install = {
+		pm.install(d.."headers/assert.h", "%BINDIR%include/knr/assert.h"),
+		pm.install(d.."headers/ctype.h", "%BINDIR%include/knr/ctype.h"),
+		pm.install(d.."headers/errno.h", "%BINDIR%include/knr/errno.h"),
+		pm.install(d.."headers/fcntl.h", "%BINDIR%include/knr/fcntl.h"),
+		pm.install(d.."headers/grp.h", "%BINDIR%include/knr/grp.h"),
+		pm.install(d.."headers/math.h", "%BINDIR%include/knr/math.h"),
+		pm.install(d.."headers/pwd.h", "%BINDIR%include/knr/pwd.h"),
+		pm.install(d.."headers/setjmp.h", "%BINDIR%include/knr/setjmp.h"),
+		pm.install(d.."headers/sgtty.h", "%BINDIR%include/knr/sgtty.h"),
+		pm.install(d.."headers/signal.h", "%BINDIR%include/knr/signal.h"),
+		pm.install(d.."headers/stdio.h", "%BINDIR%include/knr/stdio.h"),
+		pm.install(d.."headers/time.h", "%BINDIR%include/knr/time.h"),
+		pm.install(d.."headers/varargs.h", "%BINDIR%include/knr/varargs.h"),
+		pm.install(d.."headers/sys/dir.h", "%BINDIR%include/knr/sys/dir.h"),
+		pm.install(d.."headers/sys/errno.h", "%BINDIR%include/knr/sys/errno.h"),
+		pm.install(d.."headers/sys/stat.h", "%BINDIR%include/knr/sys/stat.h"),
+		pm.install(d.."headers/sys/stdtypes.h", "%BINDIR%include/knr/sys/stdtypes.h"),
+		pm.install(d.."headers/sys/types.h", "%BINDIR%include/knr/sys/types.h"),
+	}
+}
+
 lang_cem_runtime = group {
+	headers,
 	lang_cem_gen_runtime,
 	lang_cem_math_runtime,
 	lang_cem_mon_runtime,

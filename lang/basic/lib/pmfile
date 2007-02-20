@@ -1,10 +1,11 @@
 -- $Source$
 -- $State$
+-- $Revision$
 
 local d = ROOTDIR.."lang/basic/lib/"
 
 lang_basic_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	
 	ackfile (d.."fif.e"),
 	ackfile (d.."fef.e"),
@@ -40,5 +41,5 @@ lang_basic_runtime = acklibrary {
 	ackfile (d.."trap.c"),
 	ackfile (d.."write.c"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_bc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_bc")
 }

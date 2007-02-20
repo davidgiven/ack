@@ -4,7 +4,7 @@
 local d = ROOTDIR.."lang/cem/libcc/stdio/"
 
 lang_cem_stdio_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	
 	ackfile (d.."vsprintf.c"),
 	ackfile (d.."vfprintf.c"),
@@ -54,5 +54,5 @@ lang_cem_stdio_runtime = acklibrary {
 	ackfile (d.."timezone.c"),
 	ackfile (d.."ungetc.c"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_cc.1s")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_cc.1s")
 }

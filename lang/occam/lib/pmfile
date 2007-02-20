@@ -3,8 +3,8 @@
 
 local d = ROOTDIR.."lang/occam/lib/"
 
-lang_occam_runtime = acklibrary {
-	ACKINCLUDES = {PARENT, "%ROOTDIR%h", "%ROOTDIR%include/_tail_cc"},
+lang_occam_lib_runtime = acklibrary {
+	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	
 	ackfile (d.."builtin.c"),
 	ackfile (d.."chan_strct.c"),
@@ -17,5 +17,5 @@ lang_occam_runtime = acklibrary {
 	ackfile (d.."par_misc.e"),
 	ackfile (d.."parco.c"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%ARCH%/tail_ocm")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_ocm")
 }

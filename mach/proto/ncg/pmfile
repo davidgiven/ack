@@ -20,7 +20,7 @@ proto_ncg = cprogram {
 	
 	CINCLUDES = {
 		PARENT,
-		"mach/%ARCH%/ncg",
+		"mach/%PLATFORM%/ncg",
 		"mach/%ARCHDIR%/ncg",
 		"mach"
 	},
@@ -50,6 +50,6 @@ proto_ncg = cprogram {
 	lib_em_data,
 	lib_flt_arith,
 	
-	outputs = {"%U%/%ARCH%-ncg"},
-	install = pm.install("%BINDIR%%PLATDEP%/%ARCH%/ncg")
+	outputs = {"%U%/%PLATFORM%-ncg"},
+	install = pm.install("%BINDIR%%PLATDEP%/%PLATFORM%/ncg")
 }
