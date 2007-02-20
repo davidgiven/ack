@@ -92,7 +92,7 @@ main(argc, argv)
 #ifndef NOPP
 	inctable = (char **) Malloc(10 * sizeof(char *));
 	inctable[0] = "";
-	inctable[1] = "/usr/include";
+	inctable[1] = 0;
 	inctable[2] = 0;
 	inc_total = 3;
 	inc_max = 10;
