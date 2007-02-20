@@ -1,5 +1,6 @@
 -- $Source$
 -- $State$
+-- $Revision$
 
 local d = ROOTDIR.."plat/pc86/"
 

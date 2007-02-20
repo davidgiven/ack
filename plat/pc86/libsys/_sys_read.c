@@ -1,3 +1,8 @@
+/* $Source$
+ * $State$
+ * $Revision$
+ */
+
 #include <stdlib.h>
 #include <errno.h>
 #include <sgtty.h>

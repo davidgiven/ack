@@ -1,3 +1,8 @@
+/* $Source$
+ * $State$
+ * $Revision$
+ */
+
 #ifndef LIBSYS_H
 #define LIBSYS_H
 
