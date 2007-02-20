@@ -1,7 +1,21 @@
+! $Source$
+! $State$
+! $Revision$
+
 .sect .text; .sect .rom; .sect .data; .sect .bss
 .sect .text
 .define	.strhp
 .extern .reghp, .limhp, EHEAP, .trp
+
+! Updates the heap pointer:
+!
+! int .strhp(void* newpointer)
+!
+! .reghp is the current heap pointer;
+! .limhp is the current top of memory.
+!
+! If the desired new heap pointer is above the top of memory, then BRK is
+! called to extend the memory.
 
 .strhp:
 	pop	bx
