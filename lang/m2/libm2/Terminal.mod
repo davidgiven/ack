@@ -108,7 +108,13 @@ IMPLEMENTATION MODULE Terminal;
   END WriteString;
 
 BEGIN
+(*
 	tty := "/dev/tty";
 	fildes := open(ADR(tty), 2);
 	unread := FALSE;
+*)
+(* dtrg: changed so that instead of opening /dev/tty, fd 0 is always used. *)
+    tty := "stdio";
+    fildes := 0;
+    unread := FALSE;
 END Terminal.
