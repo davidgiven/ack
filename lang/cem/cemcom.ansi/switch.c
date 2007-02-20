@@ -78,7 +78,7 @@ code_startswitch(expp)
 	sh->sh_table = l_table;
 	/* sh->sh_nrofentries = 0; */
 	sh->sh_type = (*expp)->ex_type;	/* the expression switched	*/
-	/* sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
+	/* sh->sh_entries = (struct case_entry *) 0; -- case-entry list	*/
 	sh->sh_expr = *expp;
 #ifdef LINT
 	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);

@@ -860,7 +860,7 @@ store_val(vl, tp)
 		register struct idf *id = vl->vl_data.vl_idf;
 		register struct def *df = id->id_def;
 
-		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
+		/* if (df->df_level == L_GLOBAL) { // } ??? re-examine */
 		if (df->df_sc == GLOBAL
 		    || df->df_sc == EXTERN
 		    || df->df_sc == STATIC) {
@@ -971,7 +971,7 @@ load_val(expr, rlval)
 			C_lpi(id->id_text);
 		}
 		else
-		/* if (df->df_level == L_GLOBAL) { /* } ??? re-examine */
+		/* if (df->df_level == L_GLOBAL) { // } ??? re-examine */
 		if ( df->df_sc == GLOBAL
 		    || df->df_sc == STATIC
 		    || df->df_sc == EXTERN) {
