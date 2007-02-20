@@ -1,0 +1,20 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."plat/pc86/libsys/"
+
+libsys_pc86 = acklibrary {
+	ACKBUILDFLAGS = {PARENT, "-ansi"},
+	ACKINCLUDES = {"%BINDIR%include"},
+	
+	ackfile (d.."errno.s"),
+	ackfile (d.."_mon.s"),
+	ackfile (d.."_brk.s"),
+	ackfile (d.."_sys_rawread.s"),
+	ackfile (d.."_sys_rawwrite.s"),
+	ackfile (d.."_sys_read.c"),
+	ackfile (d.."_sys_write.c"),
+	ackfile (d.."_sys_ioctl.c"),
+	
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libsys.a"),
+}

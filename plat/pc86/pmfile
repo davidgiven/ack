@@ -1,0 +1,37 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."plat/pc86/"
+
+include (d.."libsys/pmfile")
+
+local bootsector = ackfile {
+	file (d.."boot.s"),
+	install = pm.install("%BINDIR%lib/pc86/boot.o"),
+}
+
+local descr = group {
+	install = pm.install(d.."descr", "%BINDIR%%PLATIND%/%PLATFORM%/descr")
+}
+
+platform_pc86 = group {
+	ARCH = "i86",
+	PLATFORM = "pc86",
+	OPTIMISATION = "-O",
+	
+	-- Ensure the descr file is installed first because we'll need it
+	-- to build the libraries.
+	
+	descr,
+	
+	-- Build the back-end support.
+	
+	mach_i86,
+	support_i86,
+	lang_runtimes,
+
+	-- Build the PC standalone syscall library.
+	
+	libsys_pc86,
+	bootsector,
+}

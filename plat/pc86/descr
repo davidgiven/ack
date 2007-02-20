@@ -1,0 +1,67 @@
+# $Revision$
+var w=2
+var p=2
+var s=2
+var l=4
+var f=4
+var d=8
+var ARCH=i86
+var PLATFORM=pc86
+var PLATFORMDIR={EM}/lib/{PLATFORM}
+var CPP_F=-D__unix
+var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
+var C_LIB={PLATFORMDIR}/tail_cc.1s {PLATFORMDIR}/tail_cc.2g
+var OLD_C_LIB={C_LIB}
+var MACHOPT_F=-m8
+name be
+	from .m.g
+	to .s
+	program {EM}/lib.bin/{PLATFORM}/ncg
+	args <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib.bin/{PLATFORM}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib.bin/em_led
+	mapflag -l* LNAME={PLATFORMDIR}/tail_*
+	mapflag -i SEPID=-b1:0
+	mapflag -fp FLOATS={EM}/{ILIB}fp
+	mapflag -ansi C_LIB={PLATFORMDIR}/tail_ac
+	args {ALIGN} {SEPID?} \
+	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
+		({RTS}:.ocm.b={PLATFORMDIR}/head_cc) \
+		({RTS}{ANSI?}:.c={PLATFORMDIR}/head_cc) \
+		({RTS}{ANSI?}:.cansi={PLATFORMDIR}/head_ac) \
+		({RTS}:.mod={PLATFORMDIR}/head_m2) \
+		({RTS}:.p={PLATFORMDIR}/head_pc) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/tail_pc) \
+		(.b:{TAIL}={PLATFORMDIR}/tail_bc) \
+		(.mod:{TAIL}={PLATFORMDIR}/tail_m2) \
+		(.ocm:{TAIL}={PLATFORMDIR}/tail_ocm) \
+		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.c:{TAIL}={C_LIB}) \
+		{FLOATS?} \
+		(.e:{TAIL}={PLATFORMDIR}/libsys.a \
+		           {PLATFORMDIR}/tail_mon \
+		           {PLATFORMDIR}/libsys.a \
+		           {PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libend.a)
+	linker
+end
+name cv
+	from .out
+	to .img
+	program {EM}/bin/aslod
+	args < >
+	outfile pc86.img
+end
