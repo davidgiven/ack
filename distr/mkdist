@@ -79,6 +79,7 @@ process_dir() {
 	
 	path=$1
 	cd $path
+	echo $PWD
 	
 	# Look for a LIST file and cache the first line.
 	
@@ -88,7 +89,10 @@ process_dir() {
 	fi
 
 	for i in `cat $path/.distr`; do
-		if [ -d $i ]; then
+		if [ "${i:0:1}" = "#" ]; then
+			# Comment. Do nothing.
+			true
+		elif [ -d $i ]; then
 			# This is a directory. Recurse into it.
 			
 			( process_dir $path/$i )
@@ -102,20 +106,8 @@ process_dir() {
 			$arch cDr `cat LIST`
 			addfile $path/$archivename
 		else
-		(
-			PATH=$PATH:.
-			export PATH
-			make distr || make $i || (
-				echo "Don't know what to do with $i, listed in $1/.distr."
-				exit 1
-			)
-			
-			if [ ! -f "$path/$i" ]; then
-				echo "Make failed for $i, listed in $path/.distr"
-				exit 1
-			fi
-			addfile $path/$i
-		)
+			echo "Don't know what to do with $i, listed in $PWD/.distr."
+			exit 1
 		fi
 	done
 }
@@ -158,7 +150,12 @@ echo "Done."
 
 # Revision history
 # $Log$
-# Revision 1.2  2005-06-24 23:19:23  dtrg
+# Revision 1.3  2007-02-24 02:05:56  dtrg
+# Removed some bashish; added comment support; removed the make
+# distr functionality, as nothing was using it any more and it was
+# causing problems.
+#
+# Revision 1.2  2005/06/24 23:19:23  dtrg
 # Added new mkdist tool.
 #
 # Revision 1.1  2005/06/24 22:13:57  dtrg
