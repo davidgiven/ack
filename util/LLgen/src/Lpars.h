@@ -1,0 +1,25 @@
+/* LLgen generated code from source . */
+#define EOFILE 256
+#define LLILLEGAL 257
+#define C_IDENT 258
+#define C_NUMBER 259
+#define C_LITERAL 260
+#define C_EXPR 261
+#define C_PARAMS 262
+#define C_ACTION 263
+#define C_TOKEN 264
+#define C_START 265
+#define C_IF 266
+#define C_WHILE 267
+#define C_PERSISTENT 268
+#define C_FIRST 269
+#define C_LEXICAL 270
+#define C_PREFIX 271
+#define C_ONERROR 272
+#define C_AVOID 273
+#define C_PREFER 274
+#define C_DEFAULT 275
+#define C_SUBSTART 276
+#define C_ERRONEOUS 277
+#define C_ILLEGAL 278
+#define LL_MAXTOKNO 278
