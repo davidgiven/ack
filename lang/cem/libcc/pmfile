@@ -28,6 +28,7 @@ local headers = group {
 		pm.install(d.."headers/sys/stat.h", "%BINDIR%include/knr/sys/stat.h"),
 		pm.install(d.."headers/sys/stdtypes.h", "%BINDIR%include/knr/sys/stdtypes.h"),
 		pm.install(d.."headers/sys/types.h", "%BINDIR%include/knr/sys/types.h"),
+		pm.install(d.."headers/sys/timeb.h", "%BINDIR%include/knr/sys/timeb.h"),
 	}
 }
 
