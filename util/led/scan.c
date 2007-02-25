@@ -29,7 +29,6 @@ static char rcsid[] = "$Id$";
 #define IND_DBUG(x)	(IND_RELO(x) + sizeof(ind_t))
 #endif /* SYMDBUG */
 
-extern long	lseek();
 extern char 	*core_alloc();
 extern bool	incore;
 extern int	infile;

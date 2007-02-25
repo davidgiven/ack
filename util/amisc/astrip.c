@@ -40,8 +40,6 @@ char **argv;
 	exit(status);
 }
 
-extern long lseek();
-
 strip(name)
 char *name;
 {

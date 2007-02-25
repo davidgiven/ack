@@ -96,8 +96,6 @@ char **argv;
 }
 
 extern int rd_unsigned2();
-extern long lseek();
-extern char *strncpy();
 
 process(fd)
 	int	fd;
