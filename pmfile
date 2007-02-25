@@ -29,10 +29,8 @@ include "modules/src/read_em/pmfile"
 include "modules/src/em_code/pmfile"
 include "modules/src/em_mes/pmfile"
 include "modules/src/print/pmfile"
-include "modules/src/string/pmfile"
 include "modules/src/object/pmfile"
 include "modules/src/idf/pmfile"
-include "modules/src/print/pmfile"
 include "modules/src/input/pmfile"
 include "modules/src/flt_arith/pmfile"
 
@@ -59,8 +57,8 @@ include "lang/basic/pmfile"
 
 include "mach/proto/pmfile"
 
-include "mach/i386/pmfile"
 --[[
+include "mach/i386/pmfile"
 include "mach/6500/pmfile"
 include "mach/6800/pmfile"
 include "mach/6805/pmfile"
@@ -183,6 +181,12 @@ default = group {
 posix.mkdir(TEMPDIR)
 posix.mkdir(HEADERDIR)
 
+-- When doing the build, we want to ensure that the ACK looks in the staging
+-- area for its files, and not in the final installation directory (because
+-- we haven't been installed yet).
+
+posix.setenv("ACKDIR", BINDIR)
+
 -- Build the configuration headers, rather crudely. FIXME.
 
 configure = simple {
@@ -193,7 +197,7 @@ configure = simple {
 		
 		local f = io.open(HEADERDIR.."local.h", "w")
 		f:write("#define VERSION 3\n") -- EM byte-code version
-		f:write("#define ACKM \"", DEFAULT_ARCHITECTURE, "\"\n")
+		f:write("#define ACKM \"", DEFAULT_PLATFORM, "\"\n")
 		f:write("#define BIGMACHINE 1\n") -- No, we don't have a 16-bit architecture
 		f:write("#define SYS_5\n")
 		f:close()
@@ -205,5 +209,16 @@ configure = simple {
 		f:write("#define EM_DIR \"", PREFIX, "\"\n")
 		f:write("#define ACK_PATH \"", PLATIND, "/descr\"\n")
 		f:close()
+	end
+}
+
+-- Once built, do the installation, rather crudely. FIXME.
+
+install = simple {
+	outputs = {"dummy"},
+	command = "",
+	__dobuild = function(self, inputs, outputs)
+		os.execute("mkdir -p "..PREFIX)
+		os.execute("(cd "..BINDIR.." && tar chf - .) | (cd "..PREFIX.." && tar xvf -)")
 	end
 }
