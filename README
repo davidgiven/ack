@@ -1,162 +1,142 @@
 # $Source$
 # $State$
+# $Revision$
 
-Installing the ACK on a modern platform
-=======================================
+                     THE AMSTERDAM COMPILER KIT V6.0pre1
+                     ===================================
 
-This document provides some very quick and dirty instructions for installing
-the ACK on a modern platform. It is not intended as a substitute for the
-real instructions, which can be found in doc/install.pr.
+                  © 1987-2005 Vrije Universiteit, Amsterdam
 
-Let me repeat myself:
 
-THE FULL INSTALLATION INSTRUCTIONS ARE IN doc/install.pr.
+INTRODUCTION
+============
 
-The ACK is a very large and complex package and has received minimal
-maintenance for the best part of a decade. During that time, the Unix
-world has moved on, and many APIs have changed. It compiles cleanly on
-my, dtrg's, test machine, which is a Debian Ubuntu Linux system. Your
-mileage may vary.
+The Amsterdam Compiler Kit is a complete compiler toolchain consisting of
+front end compilers for a number of different languages, code generators,
+support libraries, and all the tools necessary to go from source code to
+executable on any of the platforms it supports.
 
-All disclaimers now done, now on to the good stuff:
+This is an early prerelease of the upcoming version 6.0 release. Not a
+lot is supported, the build mechanism needs work, and a lot of things are
+probably broken. However, what's there should be sufficient to get things
+done and to evaluate how the full 6.0 release should work. 
 
-Building the ACK
-----------------
 
-I'm assuming you're using Linux here, because that's what I use. If you
-don't use Linux, please let me know if you have any trouble and I'll update
-the instructions.
+SUPPORT
+=======
 
-1. Prerequisites
-   
-   The ACK wants to be built with a C compiler called cc. From what I've seen
-   so far of the build system, this can be changed, but not easily.
-   
-   Most platforms have their compiler set up so that 'cc' invokes it, whatever
-   it is; however, some don't. So far the only one I've met that doesn't do
-   this is Solaris with gcc installed, but without the Sun native compiler.
-   
-   If this is the case, the simplest thing to do is to place a symlink to gcc
-   (or your favourite C compiler) in your path somewhere. For example:
-   
-      ln -s /usr/bin/gcc ~/bin/cc
-   
-2. Configure the build.
+Languages:
 
-   To do this, run the first/first script. You will be asked several
-   questions.
-   
-   * What is the root of the ACK source tree?
-   
-     This is the directory that you have unpacked the distribution into.
-     For example, /home/dg/src/Ack-5.6.
-     
-   * What is the root of the configuration tree?
-   
-     This is the directory that the build process will use for temporary
-     files. You'll only need this during the compilation process; it can
-     be removed afterwards.
-     For example, /tmp/ack-conf
-     
-   * What is the root of the ACK binaries?
-   
-     This is the ACK's installation path; where the binaries will live.
-     This needs to be writable during the build process --- if you want
-     to install in /usr/local, you either have to make /usr/local
-     writable or compile as root. Sorry!
-     
-   * What is your system type?
-   
-     Linux isn't on the list. Choose ANY.
-     
-   * Is this the system you are running on?
-   
-     Yes.
-     
-   * Are you satisfied?
-   
-     Yes.
-     
-   * What default machine do you wish to compile for?
-   
-     The ACK wants to know what architecture to target if you don't manually
-     specify an architecture. Unfortunately, it can't generate runnable
-     binaries for Linux or any other modern system (except possible Solaris
-     on Sparc). I'd recommend you choose em44. This will produce portable
-     binaries using the ACK's intermediate format, which you can run using
-     the int interpreter.
-     
-   * What kind of Unix are you running?
-   
-     Linux is a mixture, but I pick SYS_5 and it works.
-     
-   * Do you wish to limit the installation?
-   
-     No. If you pick Yes, the script will ask detailed questions about
-     exactly what you want to build. Modern systems are fast enough that
-     we may as well build everything.
-     
-   * Which system call library do you wish to use on the VAX?
-   
-     I don't have a VAX; the only person I know who has one uses it to vacuum
-     his carpets. I pick libsysV_2 with no ill effects.
-     
-   If the configuration script is happy, it will generate a script called
-   INSTALL.
-   
-3. Do the compilation.
+ANSI C, K&R C, Pascal, Modula 2, Occam 1, and a Basic variant.
 
-   The configuration script will recommend a command line. Execute this. On
-   modern systems, the compilation doesn't take long.
-   
-   Check the output of the configuration script for "Failed" lines. On my
-   system there are two:
-   
-     $ grep Failed INSTALL.out
-     Failed for Intel 8080 download programs, see dl/Out
-     Failed for Intel 8080 support
-   
-   You can ignore these. They aren't important.
-   
-4. Use the ACK.
+Platforms:
 
-   Ensure that the ACK's binary directory is on your path; this is /bin in
-   the directory you specified during the configuration process. In my
-   example, this is /usr/local/bin. The /man subdirectory should go on your
-   manpath.
+pc86          produces bootable floppy disk images for 8086 PCs
 
-   To test your path, do: ack
-   
-   This should return silently.
-   
-   To test your manpath, do: man ack
-      
-   This will produce the documentation for the main compiler driver.
-   
-   If this works, you can remove the conf tree (/tmp/ack-conf in my example).
-   
-Gotchas
--------
+
+INSTALLATION
+============
+
+The version 6.0 build mechanism has been completely rewritten and is based
+around the Prime Mover build tool (see http://primemover.sf.net for more
+information). Installation ought to be fairly straightforward.
+
+Requirements:
+
+- an ANSI C compiler. Currently, I'm afraid, it's hard-coded to use gcc.
+  To change, try changing the variable definitions in first/c.pm. This also
+  needs to be available as 'cc' from the shell.
+  
+- about 20MB free in /tmp (or some other temporary directory).
+
+- about 6MB in the target directory.
+
+Instructions:
+
+- edit config.pm. There's a small section at the top containing some editable
+  variables. Probably the only one you may want to edit is PREFIX, which
+  changes where the ACK installs to.
+  
+- Run:
+
+    ./pm configure
+    
+  ...from the command line. This will write out a configuration file.
+  
+- Run:
+
+    ./pm
+    
+  ...from the command line. This will actually do the build. This takes
+  about two minutes on my 1.6GHz Athlon.
+  
+- Run:
+
+    ./pm install
+    
+  ...from the command line. This will install the built ACK into whatever
+  directory you nominated in PREFIX.
+  
+The ACK should now be ready to use.
+
+
+USAGE
+=====
+
+Currently I haven't sorted out all the documentation --- it's supplied in the
+distribution, but not all of it gets installed yet --- so here is a quickstart
+guide.
+
+The main command to use is 'ack'. This invokes the compiler and the linker.
+Some useful options include:
+
+  -m<platform>     build for the specified platform
+  -o <file>        specifies the output file
+  -c               produce a .o file
+  -c.s             produce a .s assembly file
+  -O               enable optimisation
+  -ansi            compile ANSI C (when using the C compiler)
+  <file>           build file
+
+ack figures out which language to use from the file extension:
+
+  .c               C (ANSI or K&R)
+  .b               Basic
+  .mod             Modula-2
+  .ocm             Occam 1
+  .p               Pascal
+  .o               object files
+  .s               assembly files
+
+For further information, see the man page (which actually does get
+installed, but is rather out of date).
+
+There are some (known working) example programs in the 'examples' directory.
+
+
+GOTCHAS
+=======
 
 There are some things you should be aware of.
 
-* The ACK's archiver tool is called 'arch'. This conflicts on Linux platforms
-  with a utility that displays the current architecture. If your compilation
-  occasionally fails obscurely and displays something like 'i686', you are
-  running afoul of this. As a workaround, rearrange your path so the ACK's
-  bin directory comes first --- but do be aware that some Linux system
-  tools may stop working.
+- The only platform supported so far is pc86, which generates 8086 tiny mode
+  executables that will work as floppy disk boot images. So, to run, simply dd
+  the output file (pc86.img by default) onto a floppy disk and boot from it.
+  Be aware that very little functionality is supported and that the entire
+  program, heap and stack and code and all, must fit within 64kB. See
+  plat/pc86/README for more information.
   
-* By default, the ack tool will compile K&R C. Practically all C source these
+- By default, the ack tool will compile K&R C. Practically all C source these
   days is ANSI C --- use the -ansi switch to enable ANSI mode. No, the ACK is
   not C99 compatible.
   
-* Not all combinations of optimisation and architectures work. This is
-  perfectly normal, but the combinations are not well documented. Everything
-  supports -O.
+- When compiling languages other than C, the ACK will usually look at the
+  first character of the file. If it's a #, then the file will be run through
+  the C preprocessor anyway.
+
   
-Disclaimer
-----------
+DISCLAIMER
+==========
 
 The ACK is mature, well-tested software, but the environment in which it was
 developed for and tested under is rather different from that available on
@@ -179,12 +159,4 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2005-06-24, 23:53
-
-# Revision history
-# $Log$
-# Revision 2.3  2006-07-18 17:21:34  dtrg
-# Added comment about the use of 'cc' rather than 'gcc'.
-#
-# Revision 2.2  2005/06/24 23:20:41  dtrg
-# Added some new readmes at the top level.
+2007-02-25
