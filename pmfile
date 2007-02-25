@@ -185,7 +185,7 @@ posix.mkdir(HEADERDIR)
 -- area for its files, and not in the final installation directory (because
 -- we haven't been installed yet).
 
-posix.setenv("ACKDIR", BINDIR)
+posix.putenv("ACKDIR="..BINDIR)
 
 -- Build the configuration headers, rather crudely. FIXME.
 
