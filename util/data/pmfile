@@ -14,7 +14,7 @@ local datafiles = simple {
 	},
 
 	command = {
-		"cd %ROOTDIR%etc && ./new_table %out[1]:dirname% %out[1]:dirname%"
+		"%in[1]% %in[2]% %out[1]:dirname% %out[1]:dirname%"
 	},
 	
 	install = {
@@ -23,7 +23,8 @@ local datafiles = simple {
 		pm.install("%U%/em_mnem.h", "%HEADERDIR%em_mnem.h")
 	},
 		
-	file "%ROOTDIR%etc/new_table",
+	file (d.."new_table"),
+	file ("%ROOTDIR%h/em_table"),
 }
 
 local cfile_with_headers = cfile {
@@ -48,6 +49,9 @@ lib_em_data = file "%LIBDIR%libem_data.a"
 
 -- Revision history
 -- $Log$
--- Revision 1.1  2006-07-20 23:24:28  dtrg
+-- Revision 1.2  2007-02-25 12:49:04  dtrg
+-- new_table is now in /util/data, not /etc.
+--
+-- Revision 1.1  2006/07/20 23:24:28  dtrg
 -- First version in CVS.
 --
