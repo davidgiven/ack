@@ -1,2 +1,11 @@
-LIST
-tail_ocm.a
+pmfile
+builtin.c
+chan_strct.c
+channel.c
+co.c
+now.c
+par.c
+parco.c
+misc.e
+ocrt.c
+par_misc.e

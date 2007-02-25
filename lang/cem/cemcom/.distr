@@ -1,5 +1,4 @@
-proto.make
-proto.main
+pmfile
 LLlex.c
 LLlex.h
 LLmessage.c

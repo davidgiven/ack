@@ -1,4 +1,4 @@
-proto.make
+pmfile
 doprnt.c
 format.c
 fprint.c

@@ -1,5 +1,4 @@
-proto.make
-proto.main
+pmfile
 basic.g
 basic.lex
 bem.c

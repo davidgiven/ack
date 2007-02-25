@@ -1,4 +1,3 @@
-proto.make
 cf.c
 cf.h
 cf_idom.c

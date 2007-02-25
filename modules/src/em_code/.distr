@@ -1,4 +1,4 @@
-proto.make
+pmfile
 C_out.c
 bhcst.c
 bhdlb.c

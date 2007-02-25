@@ -1,4 +1,4 @@
-proto.make
+pmfile
 assert.h
 cgg.y
 coerc.c

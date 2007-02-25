@@ -1,4 +1,3 @@
-proto.make
 alloc.c
 alloc.h
 aux.c

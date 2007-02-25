@@ -1,4 +1,4 @@
-proto.make
+pmfile
 access.c
 break.c
 chmode.c

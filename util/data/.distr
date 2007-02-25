@@ -1,5 +1,3 @@
-proto.make
-em_flag.c
-em_mnem.c
-em_pseu.c
+pmfile
 em_ptyp.c
+new_table

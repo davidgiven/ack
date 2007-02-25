@@ -1,10 +1,8 @@
-proto.make
-proto.main
+pmfile
 builtin.c
 code.c
 code.h
 em.c
-em.h
 expr.c
 expr.h
 keytab.c
@@ -15,3 +13,4 @@ sizes.h
 symtab.c
 symtab.h
 token.h
+occam-em.h

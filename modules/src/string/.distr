@@ -1,4 +1,4 @@
-proto.make
+pmfile
 bts2str.c
 btscat.c
 btscmp.c

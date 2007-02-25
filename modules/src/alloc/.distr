@@ -1,4 +1,4 @@
-proto.make
+pmfile
 Malloc.c
 Srealloc.c
 Realloc.c

@@ -1,4 +1,3 @@
-proto.make
 sr.c
 sr.h
 sr_aux.c

@@ -1,8 +1,7 @@
+pmfile
 LLlex.c
 LLlex.h
 LLmessage.c
-proto.main
-proto.make
 Parameters
 arith.h
 bits.h

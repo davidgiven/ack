@@ -1,4 +1,4 @@
-proto.make
+pmfile
 queue.c
 queue.h
 top.c

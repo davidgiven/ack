@@ -1,4 +1,4 @@
-proto.make
+pmfile
 b64_add.c
 b64_sft.c
 flt_add.c

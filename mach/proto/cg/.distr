@@ -1,4 +1,4 @@
-proto.make
+pmfile
 assert.h
 codegen.c
 compute.c

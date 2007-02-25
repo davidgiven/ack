@@ -1,5 +1,3 @@
-LIST
-Makefile
 clearerr.c
 data.c
 doprnt.c

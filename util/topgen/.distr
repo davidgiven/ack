@@ -1,4 +1,4 @@
-proto.make
+pmfile
 LLlex.c
 hash.c
 main.c

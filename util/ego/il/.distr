@@ -1,4 +1,3 @@
-proto.make
 il.c
 il.h
 il1_anal.c

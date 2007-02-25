@@ -1,4 +1,3 @@
-proto.make
 ic.c
 ic.h
 ic_aux.c
