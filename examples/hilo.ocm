@@ -1,0 +1,131 @@
+#
+-- $Source$
+-- $State$
+-- $Revision$
+
+#include "dec.ocm"
+
+-- General utilities: read and write strings.
+
+proc puts(value s[]) =
+  seq i = [1 for s[byte 0]]
+    output ! s[byte i]
+:
+
+proc gets(var s[]) =
+  var length, finished, c:
+  seq
+    finished := false
+    length := 0
+    
+    while not finished
+      seq
+        input ? c
+        if
+          c = 10
+            finished := true
+          true
+            seq
+              length := length + 1
+              s[byte length] := c
+    
+    s[byte 0] := length
+:
+
+-- Our random number generator.
+
+var seed:
+proc randomise(value s) =
+  seq
+    seed := s
+:
+
+proc random(value range, var result) =
+  seq
+    seed := (20077 * seed) + 12345
+    if 
+      seed < 0
+        seed := -seed
+      true
+        skip
+    result := seed \ range
+:
+
+-- Does the reading-in-the-name thing.
+
+proc getname =
+  var seed, buffer[128]:
+  seq
+    puts("*nHi there! Before we start, what is your name?*n")
+    puts("> ")
+    gets(buffer)
+    
+    seed := 0
+    seq i = [1 for buffer[byte 0]]
+      seed := seed + buffer[byte i]
+    randomise(seed)
+
+    puts("*nHello, ")
+    puts(buffer)
+    puts("! ")
+:
+
+-- Plays a single game.
+
+proc game =
+  var Number, Attempts, finished, guess:
+  seq
+    puts("See if you can guess my number.*n")
+    random(100, Number)
+    Attempts := 1
+    finished := false
+    while not finished
+      seq
+        puts("*n> ")
+        var c:
+          seq
+            c := '*s'
+            decin(input, guess, c)
+        
+        if
+          guess = Number
+            seq
+              puts("*nYou got it right in only ")
+              decout(output, Attempts, 0)
+              puts(" ")
+              if
+                Attempts = 1
+                  puts("go")
+                true
+                  puts("goes")
+              puts("!*n")
+              finished := true
+          
+          guess < Number
+            puts("*nTry a bit higher.*n")
+          guess > Number
+            puts("*nTry a bit lower.*n")
+        Attempts := Attempts + 1
+:
+
+var finished, buffer[128]:
+seq
+  output ! TEXT
+  getname
+  
+  finished := false
+  while not finished
+    seq
+      game
+      
+      puts("*nWould you like another go?*n")
+      puts("> ")
+      gets(buffer)
+      if
+        (buffer[byte 1] = 'n') or (buffer[byte 1] = 'N')
+          seq
+            finished := true
+            puts("*nThanks for playing --- goodbye!*n")
+        true
+          puts("*nExcellent! ")
+  

@@ -1,0 +1,26 @@
+# $Source$
+# $State$
+# $Revision$
+
+A few notes on the examples
+---------------------------
+
+This directory contains a handful of working example programs that can be
+built with the ACK. They're intended as a convention source of test code
+and as a starting point when writing your own programs.
+
+They consist of:
+
+hilo.c             ANSI C version of the Hi/Lo game
+hilo.b             Basic version of the Hi/Lo game
+hilo.mod           Modula-2 version of the Hi/Lo game
+hilo.ocm           Occam 1 version of the Hi/Lo game
+hilo.p             Pascal version of the Hi/Lo game
+
+paranoia.c         An ancient public domain K&R C adventure game
+
+Enjoy.
+
+David Given
+dg@cowlark.com
+2007-02-25
