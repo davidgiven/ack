@@ -36,7 +36,7 @@ local local_tool_opt = cprogram {
 			},
 			
 			file (d.."pop_push.awk"),
-			file (ROOTDIR.."etc/em_table")
+			file ("%ROOTDIR%h/em_table")
 		}
 	},
 
@@ -98,7 +98,10 @@ tool_opt = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.4  2007-02-20 00:27:01  dtrg
+-- Revision 1.5  2007-02-25 12:51:21  dtrg
+-- em_table is now in /h, not /etc.
+--
+-- Revision 1.4  2007/02/20 00:27:01  dtrg
 -- Fixed a compilation error that was causing opt to not have its
 -- peephole optimisation tables, which would make it generate
 -- duff code.

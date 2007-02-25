@@ -7,21 +7,21 @@ lib_read_emkV = file (LIBDIR.."libread_emkV.a")
 lib_read_emeV = file (LIBDIR.."libread_emeV.a")
 
 local C_mnem_h = simple {
-	command = {"(cd "..d.." && sh %in%) > %out%"},
+	command = {"(cd "..d.." && sh %in[1]% %in[2]%) > %out%"},
 	outputs = {"%U%-%I%.h"},
 	install = pm.install(HEADERDIR.."C_mnem.h"),
 	
 	file (ROOTDIR..d.."m_C_mnem"),
-	file (ROOTDIR.."etc/em_table")
+	file ("%ROOTDIR%h/em_table")
 }
 
 local C_mnem_narg_h = simple {
-	command = {"(cd "..d.." && %in%) > %out%"},
+	command = {"(cd "..d.." && %in[1]% %in[2]%) > %out%"},
 	outputs = {"%U%-%I%.h"},
 	install = pm.install(HEADERDIR.."C_mnem_narg.h"),
 	
 	file (ROOTDIR..d.."m_C_mnem_na"),
-	file (ROOTDIR.."etc/em_table")
+	file ("%ROOTDIR%h/em_table")
 }
 
 local withdynamic = cfile {
@@ -85,7 +85,10 @@ module_read_em = group {
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-10-15 00:28:11  dtrg
+-- Revision 1.3  2007-02-25 12:47:10  dtrg
+-- em_table is now in /h, not /etc.
+--
+-- Revision 1.2  2006/10/15 00:28:11  dtrg
 -- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
 --
 -- Revision 1.1  2006/07/20 23:18:18  dtrg
