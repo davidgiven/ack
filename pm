@@ -29,7 +29,7 @@ trap "rm -f $GZFILE $CFILE" EXIT
 extract_section() {
 	sed -e "1,/^XXXXSTART$1/d" "$THISFILE" | (
 		read size
-		head -c $size
+		dd bs=1 count=$size 2> /dev/null
 	) > $GZFILE
 	cat $GZFILE | cat
 }
