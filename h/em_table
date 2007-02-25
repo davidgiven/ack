@@ -1,0 +1,175 @@
+magic	173
+fmnem	1
+nmnem	149
+fpseu	150
+npseu	30
+filb0	180
+nilb0	60
+fcst0	0
+zcst0	120
+ncst0	240
+fspec	240
+nspec	16
+ilb1	240
+ilb2	241
+dlb1	242
+dlb2	243
+dnam	244
+cst2	245
+cst4	246
+cst8	247
+doff	248
+pnam	249
+scon	250
+icon	251
+ucon	252
+fcon	253
+cend	255
+
+bss	0	nvt
+con	1	a+
+end	2	n?
+exa	3	e
+exc	4	nn
+exp	5	p
+hol	6	nvt
+ina	7	e
+inp	8	p
+mes	9	na*
+pro	10	pn?
+rom	11	a+
+
+aar	w-	-p-a-p+p
+adf	w-	-a-a+a
+adi	w-	-a-a+a
+adp	f-	-p+p
+ads	w-	-a-p+p
+adu	w-	-a-a+a
+and	w-	-a-a+a
+asp	f-	-a
+ass	w-	-a-x
+beq	bc	-w-w
+bge	bc	-w-w
+bgt	bc	-w-w
+ble	bc	-w-w
+blm	z-	-p-p
+bls	w-	-a-p-p
+blt	bc	-w-w
+bne	bc	-w-w
+bra	bt	0
+cai	-p	-p
+cal	pp	0
+cff	--	-w-w-y+x
+cfi	--	-w-w-y+x
+cfu	--	-w-w-y+x
+cif	--	-w-w-y+x
+cii	--	-w-w-y+x
+ciu	--	-w-w-y+x
+cmf	w-	-a-a+w
+cmi	w-	-a-a+w
+cmp	--	-p-p+w
+cms	w-	-a-a+w
+cmu	w-	-a-a+w
+com	w-	-a-a+a
+csa	wt	-p-a
+csb	wt	-p-a
+cuf	--	-w-w-y+x
+cui	--	-w-w-y+x
+cuu	--	-w-w-y+x
+dch	--	-p+p
+dec	--	-w+w
+dee	g-	0
+del	l-	0
+dup	s-	-a+a+a
+dus	w-	-a-x+x+x
+dvf	w-	-a-a+a
+dvi	w-	-a-a+a
+dvu	w-	-a-a+a
+exg	w-	-a-a+a+a
+fef	w-	-a+a+w
+fif	w-	-a-a+a+a
+fil	g-	0
+gto	gt	-p-?
+inc	--	-w+w
+ine	g-	0
+inl	l-	0
+inn	w-	-w-a+w
+ior	w-	-a-a+a
+lae	g-	+p
+lal	l-	+p
+lar	w-	-p-a-p+?
+ldc	d-	+d
+lde	g-	+d
+ldf	f-	-p+d
+ldl	l-	+d
+lfr	s-	+a
+lil	l-	+w
+lim	--	+w
+lin	n-	0
+lni	--	0
+loc	c-	+w
+loe	g-	+w
+lof	f-	-p+w
+loi	o-	-p+a
+lol	l-	+w
+lor	r-	+p
+los	w-	-a-p+x
+lpb	--	-p+p
+lpi	p-	+p
+lxa	n-	+p
+lxl	n-	+p
+mlf	w-	-a-a+a
+mli	w-	-a-a+a
+mlu	w-	-a-a+a
+mon	--	-?+?
+ngf	w-	-a+a
+ngi	w-	-a+a
+nop	--	0
+rck	w-	-p-a+a
+ret	zt	-a-?
+rmi	w-	-a-a+a
+rmu	w-	-a-a+a
+rol	w-	-w-a+a
+ror	w-	-w-a+a
+rtt	-t	-?
+sar	w-	-p-a-p-?
+sbf	w-	-a-a+a
+sbi	w-	-a-a+a
+sbs	w-	-p-p+a
+sbu	w-	-a-a+a
+sde	g-	-d
+sdf	f-	-p-d
+sdl	l-	-d
+set	w-	-w+a
+sig	--	-p-p+p+p
+sil	l-	-w
+sim	--	-w
+sli	w-	-w-a+a
+slu	w-	-w-a+a
+sri	w-	-w-a+a
+sru	w-	-w-a+a
+ste	g-	-w
+stf	f-	-p-w
+sti	o-	-p-a
+stl	l-	-w
+str	r-	-p
+sts	w-	-a-p-x
+teq	--	-w+w
+tge	--	-w+w
+tgt	--	-w+w
+tle	--	-w+w
+tlt	--	-w+w
+tne	--	-w+w
+trp	-p	-w+?
+xor	w-	-a-a+a
+zeq	bc	-w
+zer	w-	+a
+zge	bc	-w
+zgt	bc	-w
+zle	bc	-w
+zlt	bc	-w
+zne	bc	-w
+zre	g-	0
+zrf	w-	+a
+zrl	l-	0
+
