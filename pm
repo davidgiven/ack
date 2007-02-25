@@ -58,7 +58,7 @@ echo "pm: bootstrap failed."
 exit 1
 
 XXXXSTARTscript
-38419
+38405
 #!/usr/bin/lua
 -- Prime Mover
 --
@@ -66,13 +66,13 @@ XXXXSTARTscript
 -- Prime Mover is licensed under the MIT open source license. Search
 -- for 'MIT' in this file to find the full license text.
 --
--- $Id: pm 74 2006-10-12 20:11:47Z dtrg $
+-- $Id: pm 93 2007-02-24 21:20:53Z dtrg $
 
 -- ======================================================================= --
 --                                GLOBALS                                  --
 -- ======================================================================= --
 
-local VERSION = "0.1"
+local VERSION = "0.1.1"
 
 -- Fast versions of useful system variables.
 
@@ -1694,19 +1694,19 @@ for _, i in ipairs(targets) do
 		usererror("'", i, "' doesn't seem to be a valid target")
 	end
 
---	xpcall(
---		function()
+	xpcall(
+		function()
 			o:__build()
---		end,
---		function(e)
---			message("rule engine execution error --- traceback follows:")
---			traceback(e)
---		end
---	)
+		end,
+		function(e)
+			message("rule engine execution error --- traceback follows:")
+			traceback(e)
+		end
+	)
 end
 
 XXXXSTARTinterpreter
-253576
+253583
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdarg.h>
@@ -4573,7 +4573,7 @@ int Pgetgroup(lua_State*L){struct group*g=NULL;if(lua_isnumber(L,1))g=getgrgid
 return 1;}static int Psetuid(lua_State*L){return lposix_pushresult(L,setuid(
 mygetuid(L,1)),NULL);}static int Psetgid(lua_State*L){return lposix_pushresult
 (L,setgid(mygetgid(L,1)),NULL);}struct mytimes{struct tms t;clock_t elapsed;};
-#define pushtime(L,x) lua_pushnumber(L,((lua_Number)x)/CLK_TCK)
+#define pushtime(L,x) lua_pushnumber(L,((lua_Number)x)/CLOCKS_PER_SEC)
 static int Ftimes(lua_State*L,int i,const void*data){const struct mytimes*t=
 data;switch(i){case 0:pushtime(L,t->t.tms_utime);break;case 1:pushtime(L,t->t.
 tms_stime);break;case 2:pushtime(L,t->t.tms_cutime);break;case 3:pushtime(L,t
