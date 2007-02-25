@@ -83,15 +83,16 @@ Machine assembly language code.
 .IP .o
 Object file.
 .PP
+
+.SH OPTIONS
+
 \fIAck\fP accepts the following flags:
-.SB machine used
 .IP \-m\fImachine\fP
 This flag tells \fIack\fP to generate a load file for \fImachine\fP.
 \fIMachine\fP can also be used as the program call
 name, instead of \fIack\fP.
 e.g. \fIack \-mi86 file.p\fP is equivalent to \fIi86
 file.p\fP.
-.SB output files
 .IP \-o
 Use the next argument as the name of the resulting file.
 \fIAck\fP produces \fIa.out\fP or \fIe.out\fP by default.
@@ -118,7 +119,7 @@ Note: \fIack\fP refuses to overwrite argument \fI.e\fP files.
 Preserve all intermediate files.
 If two \fB\-t\fP are used,
 \fIack\fP also preserves core dumps and output of failed transformations.
-.SB messages
+
 .IP \-w
 Suppress all warning messages.
 .IP \-v
@@ -130,7 +131,7 @@ Tell the C-compiler to conform to "Kernighan & Ritchie" C.
 Tell \fIack\fP to use the ANSI C compiler instead of the old one.
 .IP \-fp
 Use the software floating point package, if present.
-.SB preprocessing
+
 .IP \-I\fIdir\fP
 \&\`#include\' files whose names do not begin with \`/\' are
 always sought first in the directory of the \fIfile\fP argument,
@@ -148,7 +149,7 @@ preprocessing.
 Don't generate line directives.
 .IP \-C
 Leave C-comments in.
-.SB debugging
+
 .IP \-p
 This flag tells both the Pascal and C front ends to include
 code enabling the user to do some monitoring/debugging.
@@ -156,7 +157,7 @@ Each time a routine is entered the routine \fBprocentry\fP
 is called and just before each return \fBprocexit\fP is called.
 These routines are supplied with one parameter, a pointer
 to a string containing the name of the routine.
-.SB optimizing
+
 .IP \-O
 .IP \-O\fInum\fP
 .IP \-O\fIopt1,opt2,...\fP
@@ -245,7 +246,7 @@ for higher levels: as for \-O4.
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
 (This is the default for C and Fortran).
-.SB libraries
+
 .IP \-l\fIname\fP
 Tells \fIack\fP to insert a library module at this point.
 For example: the library \fImon\fP contains the
@@ -271,7 +272,7 @@ to each output module.
 This is needed by
 assembler/linkers when these modules are to be inserted
 in libraries.
-.SB interpreter
+
 .IP \-{xxx}
 The string starting after \`{\' and terminated by a \`}\' is passed
 as an option string to the Pascal compiler and supersedes corresponding
@@ -299,7 +300,7 @@ the defaults per program.
 The changed options are recorded in the "e.out" header.
 These flags \-\- and \-+ are passed to the assembler for this purpose.
 So, \-\-t and \-+pfce invert the defaults.
-.SB general
+
 .IP \-R\fIprogram=xxx\fP
 Replace the \fIprogram\fP by the pathname \fIxxx\fP.
 The program names referred to later in this manual are allowed here.
