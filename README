@@ -6,6 +6,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
+                                2007-02-25
 
 
 INTRODUCTION
@@ -68,14 +69,15 @@ Instructions:
     ./pm
     
   ...from the command line. This will actually do the build. This takes
-  about two minutes on my 1.6GHz Athlon.
+  about two minutes on my 1.6GHz Athlon Linux machine and about 30 on my
+  166MHz Pentium OpenBSD machine.
   
 - Run:
 
     ./pm install
     
-  ...from the command line. This will install the built ACK into whatever
-  directory you nominated in PREFIX.
+  ...from the command line (possibly with sudo). This will install the built
+  ACK into whatever directory you nominated in PREFIX.
   
 The ACK should now be ready to use.
 
@@ -134,7 +136,13 @@ There are some things you should be aware of.
   first character of the file. If it's a #, then the file will be run through
   the C preprocessor anyway.
 
+- BSD systems may need to up the number of file descriptors (e.g.
+  'ulimit -n 200') before the ACK will compile.
   
+- The ACK uses its own .o format. You won't be able to mix the ACK's object
+  files and another compiler's.
+
+
 DISCLAIMER
 ==========
 
