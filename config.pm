@@ -1,11 +1,11 @@
 -- ======================================================================= --
 --                          ACK CONFIGURATION                              --
---                      (Edit this before building                         --
+--                      (Edit this before building)                        --
 -- ======================================================================= --
 
--- What architecture to build for by default?
+-- What platform to build for by default?
 
-DEFAULT_ARCHITECTURE = "i386"
+DEFAULT_PLATFORM = "pc86"
 
 -- Where should the ACK put its temporary files?
 
@@ -13,10 +13,15 @@ ACK_TEMP_DIR = "/tmp"
 
 -- Where is the ACK going to be installed, eventually?
 
-PREFIX = "/tmp/ack-temp/staging"
+PREFIX = "/usr/local"
+
+-- ======================================================================= --
+--                       BROKEN ACK CONFIGURATION                          --
+--                       (Currently not editable)                          --
+-- ======================================================================= --
 
 -- FIXME: the following two variables must be set to their Minix variants
--- due to hard-coded references in the descr files.
+-- due to hard-coded references in the descr files. Don't c
 
 -- Name of the platform-independent library directory; 'share' on modern
 -- systems, 'lib' on Minix-like systems.
