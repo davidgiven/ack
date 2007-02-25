@@ -28,7 +28,6 @@ map.h
 parser.c
 parser.h
 pop_push.awk
-pop_push.h
 put.c
 put.h
 show.c
