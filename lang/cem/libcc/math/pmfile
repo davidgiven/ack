@@ -27,5 +27,5 @@ lang_cem_math_runtime = acklibrary {
 	ackfile (d.."exp.c"),
 	ackfile (d.."floor.c"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_m")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libm-knr.a")
 }

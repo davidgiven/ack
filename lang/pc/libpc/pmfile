@@ -6,7 +6,7 @@ local d = ROOTDIR.."lang/pc/libpc/"
 head = ackfile {
 	file (d.."head_pc.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_pc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/pascal.o")
 }
 
 tail = acklibrary {
@@ -83,7 +83,7 @@ tail = acklibrary {
 	ackfile (d.."rcka.c"),
 	ackfile (d.."trp.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_pc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libpascal.a")
 }
 
 lang_pc_runtime = group {

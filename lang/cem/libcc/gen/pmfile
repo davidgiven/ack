@@ -5,7 +5,7 @@ local d = ROOTDIR.."lang/cem/libcc/gen/"
 
 local head = acklibrary {
 	ackfile (d.."head_cc.e"),
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_cc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/c-knr.o")
 }
 
 local tail = acklibrary {
@@ -83,7 +83,7 @@ local tail = acklibrary {
 	ackfile (d.."modf.e"),
 	ackfile (d.."setjmp.e"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_cc.2g")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libc-knr.a")
 }
 
 lang_cem_gen_runtime = group {

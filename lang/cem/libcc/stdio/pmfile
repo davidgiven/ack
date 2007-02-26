@@ -54,5 +54,5 @@ lang_cem_stdio_runtime = acklibrary {
 	ackfile (d.."timezone.c"),
 	ackfile (d.."ungetc.c"),
 
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_cc.1s")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libc-stdio-knr.a")
 }

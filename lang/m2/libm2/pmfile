@@ -36,7 +36,7 @@ local headers = group {
 local head = ackfile {
 	file (d.."head_m2.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_m2")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/modula2.o")
 }
 
 local tail = acklibrary {
@@ -87,7 +87,7 @@ local tail = acklibrary {
 	ackfile (d.."rckil.c"),
 	ackfile (d.."EM.e"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_m2")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libmodula2.a")
 }
 
 lang_m2_runtime = acklibrary {

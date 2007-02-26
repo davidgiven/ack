@@ -41,5 +41,5 @@ lang_basic_runtime = acklibrary {
 	ackfile (d.."trap.c"),
 	ackfile (d.."write.c"),
 	
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_bc")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libbasic.a")
 }

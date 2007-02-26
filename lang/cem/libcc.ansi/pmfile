@@ -6,13 +6,13 @@ local d = ROOTDIR.."lang/cem/libcc.ansi/"
 local crt = ackfile {
 	ACKINCLUDES = {PARENT, "%ROOTDIR%h"},
 	file (d.."head_ac.e"),
-	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/head_ac")
+	install = pm.install("%BINDIR%%PLATIND%/%PLATFORM%/c-ansi.o")
 }
 	
 local libc = acklibrary {
 	ACKBUILDFLAGS = {PARENT, "-ansi"},
 	ACKINCLUDES = {PARENT, "%ROOTDIR%h", d.."headers"},
-	outputs = {"%U%/tail_ac.a"},
+	outputs = {"%U%/libc-ansi.a"},
 	
 	-- assert
 	
@@ -260,7 +260,7 @@ local libc = acklibrary {
 	ackfile (d.."time/misc.c"),
 
 	install = {
-		pm.install("%BINDIR%%PLATIND%/%PLATFORM%/tail_ac")
+		pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libc-ansi.a")
 	}
 }
 

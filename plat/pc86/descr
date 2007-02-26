@@ -13,7 +13,7 @@ var PLATFORM=pc86
 var PLATFORMDIR={EM}/lib/{PLATFORM}
 var CPP_F=-D__unix
 var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
-var C_LIB={PLATFORMDIR}/tail_cc.1s {PLATFORMDIR}/tail_cc.2g
+var C_LIB={PLATFORMDIR}/libc-stdio-knr.a {PLATFORMDIR}/libc-knr.a
 var OLD_C_LIB={C_LIB}
 var MACHOPT_F=-m8
 name be
@@ -35,27 +35,27 @@ name led
 	from .o.a
 	to .out
 	program {EM}/lib.bin/em_led
-	mapflag -l* LNAME={PLATFORMDIR}/tail_*
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
-	mapflag -ansi C_LIB={PLATFORMDIR}/tail_ac
+	mapflag -ansi C_LIB={PLATFORMDIR}/libc-ansi.a
 	args {ALIGN} {SEPID?} \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
-		({RTS}:.ocm.b={PLATFORMDIR}/head_cc) \
-		({RTS}{ANSI?}:.c={PLATFORMDIR}/head_cc) \
-		({RTS}{ANSI?}:.cansi={PLATFORMDIR}/head_ac) \
-		({RTS}:.mod={PLATFORMDIR}/head_m2) \
-		({RTS}:.p={PLATFORMDIR}/head_pc) \
+		({RTS}:.ocm.b={PLATFORMDIR}/c-knr.o) \
+		({RTS}{ANSI?}:.c={PLATFORMDIR}/c-knr.o) \
+		({RTS}{ANSI?}:.cansi={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
+		({RTS}:.p={PLATFORMDIR}/pascal.o) \
 		-o > < \
-		(.p:{TAIL}={PLATFORMDIR}/tail_pc) \
-		(.b:{TAIL}={PLATFORMDIR}/tail_bc) \
-		(.mod:{TAIL}={PLATFORMDIR}/tail_m2) \
-		(.ocm:{TAIL}={PLATFORMDIR}/tail_ocm) \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
 		(.ocm.b:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{FLOATS?} \
 		(.e:{TAIL}={PLATFORMDIR}/libsys.a \
-		           {PLATFORMDIR}/tail_mon \
+		           {PLATFORMDIR}/libmon.a \
 		           {PLATFORMDIR}/libsys.a \
 		           {PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libend.a)
