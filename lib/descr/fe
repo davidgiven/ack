@@ -6,32 +6,29 @@
 var LFLAG=-L
 var MODULA2_INCLUDES=-I{EM}/include/m2
 var OCCAM_INCLUDES=-I{EM}/include/occam
-var C_INCLUDES=-I{EM}/include/knr
-var ANSI_C_INCLUDES=-I{EM}/include/ansi
+var C_INCLUDES=-I{EM}/include/ansi
 
 callname ack
 name cpp
 	# no from, this is a preprocessor
 	to .i
-	program {EM}/lib.bin/cpp{ANSI_C?}
+	program {EM}/lib.bin/cpp.ansi
 	mapflag -I* CPP_F={CPP_F?} -I*
 	mapflag -U* CPP_F={CPP_F?} -U*
 	mapflag -D* CPP_F={CPP_F?} -D*
 	mapflag -P CPP_F={CPP_F?} -P
 	mapflag -C CPP_F={CPP_F?} -C
 	mapflag -wo CPP_F={CPP_F?} -o
-	mapflag -ansi ANSI_C=.ansi
 	args {CPP_F?} \
 		({SUFFIX?}:.ocm={OCCAM_INCLUDES}) \
 		-D__{ARCH} -D__{PLATFORM} \
 		-D__ACK \
 		{SYSINCLUDES?} \
-		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
 		{INCLUDES?} \
-		({ANSI_C?.xx}:.xx=-D{ARCH} \
+		-D{ARCH} \
 		-DEM_WSIZE={w} -DEM_PSIZE={p} \
-		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
+		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d} \
 		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
 		-D_EM_SSIZE={s} -D_EM_LSIZE={l} -D_EM_FSIZE={f} -D_EM_DSIZE={d} \
 		<
@@ -57,8 +54,7 @@ end
 name cem
 	from .c
 	to .k
-	program {EM}/lib.bin/em_cemcom{ANSI_C?}
-	mapflag -ansi ANSI=ansi
+	program {EM}/lib.bin/em_cemcom.ansi
 #	mapflag -I* CPP_F={CPP_F?} -I*
 #	mapflag -U* CPP_F={CPP_F?} -U*
 #	mapflag -D* CPP_F={CPP_F?} -D*
@@ -81,7 +77,6 @@ name cem
 		-D__{ARCH} -D__{PLATFORM} \
 		-D__ACK \
 		{SYSINCLUDES?} \
-		({ANSI_C?}:.ansi={ANSI_C_INCLUDES}) \
 		{C_INCLUDES} \
 		{INCLUDES?} \
 		({ANSI_C?.xx}:.xx=-D{ARCH} \
