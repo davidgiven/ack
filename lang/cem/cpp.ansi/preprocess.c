@@ -5,6 +5,8 @@
 /* $Id$ */
 /* PREPROCESSOR DRIVER */
 
+#include    <stdlib.h>
+#include    <stdio.h>
 #include	<system.h>
 #include	<alloc.h>
 #include	"input.h"
@@ -160,57 +162,58 @@ preprocess(fn)
 		while (startline) {
 		    /* first flush the saved pragma's */
 		    if (pragma_nr) {
-			register int i = 0;
-			int LiNo = LineNumber;
-			char *FiNam = FileName;
-
-			while (i < pragma_nr) {
-			    register char *c_ptr = "#pragma";
-
-			    LineNumber = pragma_tab[i].pr_linnr;
-			    FileName = pragma_tab[i].pr_fil;
-			    do_line_dir(lineno, fn);
-			    while (*c_ptr) { echo(*c_ptr++); }
-			    c_ptr = pragma_tab[i].pr_text;
-			    while (*c_ptr) { echo(*c_ptr++); }
-			    newline(); lineno++;
-			    free(pragma_tab[i].pr_text);
-			    i++;
-			}
-			free((char *) pragma_tab);
-			pragma_tab = (struct prag_info *)0;
-			pragma_nr = 0;
-			LineNumber = LiNo;
-			FileName = FiNam;
-			do_line_dir(lineno, fn);
+				register int i = 0;
+				int LiNo = LineNumber;
+				char *FiNam = FileName;
+	
+				while (i < pragma_nr) {
+				    register char *c_ptr = "#pragma";
+	
+				    LineNumber = pragma_tab[i].pr_linnr;
+				    FileName = pragma_tab[i].pr_fil;
+				    do_line_dir(lineno, fn);
+				    while (*c_ptr) { echo(*c_ptr++); }
+				    c_ptr = pragma_tab[i].pr_text;
+				    while (*c_ptr) { echo(*c_ptr++); }
+				    newline(); lineno++;
+				    free(pragma_tab[i].pr_text);
+				    i++;
+				}
+				free((char *) pragma_tab);
+				pragma_tab = (struct prag_info *)0;
+				pragma_nr = 0;
+				LineNumber = LiNo;
+				FileName = FiNam;
+				do_line_dir(lineno, fn);
 		    }
 
 
 		    while (class(c) == STSKIP || c == '/') {
-			if (c == '/') {
-			    if (!InputLevel) {
-				c = GetChar();
-				if (c == '*') {
-				    op = SkipComment(op, &lineno);
-				    if (!op) return;
-				    if (!options['C']) { echo(' '); }
-				    c = GetChar();
-				    continue;
+				if (c == '/') {
+				    if (!InputLevel) {
+					c = GetChar();
+					if (c == '*') {
+					    op = SkipComment(op, &lineno);
+					    if (!op) return;
+					    if (!options['C']) { echo(' '); }
+					    c = GetChar();
+					    continue;
+					}
+					UnGetChar();
+					c = '/';
+				    }
+				    break;
 				}
-				UnGetChar();
-				c = '/';
-			    }
-			    break;
-			}
-			echo(c);
-			c = GetChar();
+				echo(c);
+				c = GetChar();
 		    }
 
 		    if (c == '#') {
-			domacro();
-			lineno++;
-			newline();
-			c = GetChar();
+				domacro();
+				lineno++;
+				newline();
+				do_line_dir(lineno, fn);
+				c = GetChar();
 		    } else startline = 0;
 		}
 		do_line_dir(lineno, fn);
