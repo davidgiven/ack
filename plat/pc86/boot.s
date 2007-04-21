@@ -244,7 +244,6 @@ write_hex4:
 finished:
 	mov si, running_msg
 	call write_string
-	call pause
 	
 	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
 	
@@ -256,11 +255,9 @@ finished:
 	
 	! Push standard parameters onto the stack and go.
 	
-	mov ax, 1
+	xor ax, ax
 	push ax                  ! argc
-	mov ax, 2
-	push ax                  ! argc
-	mov ax, 3
+	push ax                  ! argv
 	push ax                  ! envp
 	call __m_a_i_n
 	! fall through into the exit routine.
@@ -301,18 +298,8 @@ running_msg: .asciz '\n\rRunning.\n\r'
 
 
 .define begtext,begdata,begbss
-.define hol0,.trppc,.ignmask
 .define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
 .extern _end
-
-.sect .data
-hol0:
-	.data2   0,0
-	.data2   0,0
-.ignmask:
-	.data2   0
-.trppc:
-	.data2   0
 
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
@@ -320,3 +307,9 @@ hol0:
 .sect .data;       begdata:
 .sect .rom;        begrom:
 .sect .bss;        begbss:
+
+! Some magic data. All EM systems need these.
+
+.define .trppc, .ignmask
+.comm .trppc, 4
+.comm .ignmask, 4

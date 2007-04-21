@@ -13,9 +13,13 @@ var PLATFORM=pc86
 var PLATFORMDIR={EM}/lib/{PLATFORM}
 var CPP_F=-D__unix
 var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
-var C_LIB={PLATFORMDIR}/libc-stdio-knr.a {PLATFORMDIR}/libc-knr.a
-var OLD_C_LIB={C_LIB}
 var MACHOPT_F=-m8
+
+# Override the setting in fe so that files compiled for linux386 can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/include/ansi
+
 name be
 	from .m.g
 	to .s
@@ -38,12 +42,10 @@ name led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
-	mapflag -ansi C_LIB={PLATFORMDIR}/libc-ansi.a
 	args {ALIGN} {SEPID?} \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
-		({RTS}:.ocm.b={PLATFORMDIR}/c-knr.o) \
-		({RTS}{ANSI?}:.c={PLATFORMDIR}/c-knr.o) \
-		({RTS}{ANSI?}:.cansi={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.ocm.b={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
 		({RTS}:.p={PLATFORMDIR}/pascal.o) \
 		-o > < \
@@ -51,12 +53,9 @@ name led
 		(.b:{TAIL}={PLATFORMDIR}/libbasic.a) \
 		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
-		(.ocm.b:{TAIL}={OLD_C_LIB}) \
-		(.c:{TAIL}={C_LIB}) \
+		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
 		{FLOATS?} \
 		(.e:{TAIL}={PLATFORMDIR}/libsys.a \
-		           {PLATFORMDIR}/libmon.a \
-		           {PLATFORMDIR}/libsys.a \
 		           {PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libend.a)
 	linker

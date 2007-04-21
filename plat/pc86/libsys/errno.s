@@ -14,6 +14,9 @@
 
 .sect .data
 
+! Define various ACK error numbers. Note that these are *not* ANSI C
+! errnos, and are used for different purposes.
+
 D(ERANGE)         = 1
 D(ESET)           = 2
 D(EIDIVZ)         = 6

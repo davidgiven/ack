@@ -5,51 +5,44 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <sgtty.h>
+#include <unistd.h>
 #include "libsys.h"
-
-extern struct
-{
-	int fd;
-	const char* buffer;
-	size_t count;
-} _sys_params_in;
-
-extern struct
-{
-	size_t byteswritten;
-} _sys_params_out;
-
-#define P _sys_params_in
 
 void _sys_write_tty(char c)
 {
 	_sys_rawwrite(c);
+#if 0
 	if ((c == '\n') && !(_sys_ttyflags & RAW))
+		_sys_rawwrite('\r');
+#endif
+	if (c == '\n')
 		_sys_rawwrite('\r');
 }
 
-int _sys_write(void)
+int write(int fd, void* buffer, size_t count)
 {
 	int i;
+	char* p = buffer;
 	
 	/* We're only allowed to write to fd 0, 1 or 2. */
 	
-	if ((P.fd < 0) || (P.fd > 2))
-		return EBADF;
+	if ((fd < 0) || (fd > 2))
+	{
+		errno = EBADF;
+		return -1;
+	}
 	
 	/* Write all data. */
 	
 	i = 0;
-	while (i < P.count)
+	while (i < count)
 	{
-		_sys_write_tty(*P.buffer++);
+		_sys_write_tty(*p++);
 			
 		i++;
 	}
 	
 	/* No failures. */
 	
-	_sys_params_out.byteswritten = P.count;
-	return 0;
+	return count;
 }
