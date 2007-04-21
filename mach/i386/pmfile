@@ -1,26 +1,22 @@
 -- $Source$
 -- $State$
+-- $Revision$
 
 local d = ROOTDIR.."mach/i386/"
 
-include (d.."cv/pmfile")
+include (d.."libem/pmfile")
+include (d.."libend/pmfile")
 
 mach_i386 = group {
-	ARCH = "i386",
-	
 	proto_as,
 	proto_ncg { ARCHDIR = "i386" },
 	ego_descr,
-	tool_i386_cv,	
-	
-	install = pm.install("%ROOTDIR%lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr"),
 }
 
--- Revision history
--- $Log$
--- Revision 1.2  2006-07-22 00:52:01  dtrg
--- Added support for the ego global optimisation suite.
---
--- Revision 1.1  2006/07/20 23:18:18  dtrg
--- First version in CVS.
---
+support_i386 = group {
+	OPTIMISATION = "-O",
+
+	libem_i386,
+	libend_i386,
+}
+
