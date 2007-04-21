@@ -14,6 +14,7 @@ mach_i86 = group {
 
 support_i86 = group {
 	OPTIMISATION = "-O",
+	ACKBUILDFLAGS = {PARENT, "-ansi"},
 
 	libem_i86,
 	libend_i86,
