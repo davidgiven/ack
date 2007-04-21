@@ -8,7 +8,7 @@ local parser = yacc {
 		outputs = {"%U%-%I%.y"},
 		command = {
 			"cd %out[1]:dirname% && "..
-			  "%BINDIR%%PLATDEP%/cpp -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES:cincludes% %in[1]% > %out[1]%"
+			  "%BINDIR%%PLATDEP%/cpp.ansi -P -I%ROOTDIR%mach/%ARCH%/as -I"..d.." %CINCLUDES:cincludes% %in[1]% > %out[1]%"
 		},
 		
 		file (d.."comm2.y"),
@@ -46,7 +46,10 @@ proto_as = cprogram {
 
 -- Revision history
 -- $Log$
--- Revision 1.4  2007-02-20 00:45:19  dtrg
+-- Revision 1.5  2007-04-21 22:55:59  dtrg
+-- yacc source files are now run through the ANSI C preprocessor, not the K&R one.
+--
+-- Revision 1.4  2007/02/20 00:45:19  dtrg
 -- Done a major overhaul of the way target include files are installed and
 -- how platform libraries are built. The ARCH pm variable has now been
 -- renamed PLATFORM (which is more accurate) and a different ARCH
