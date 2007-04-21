@@ -21,6 +21,7 @@ DEFINITION MODULE StripUnix;
   (* Sys5 *) PROCEDURE fcntl(fildes, request, arg: INTEGER) : INTEGER;
   PROCEDURE getpid() : INTEGER;
   PROCEDURE ioctl(fildes, request: INTEGER; arg: ADDRESS) : INTEGER;
+  PROCEDURE isatty(fildes: INTEGER) : INTEGER;
   PROCEDURE lseek(fildes: INTEGER; offset: LONGINT; whence: INTEGER) : LONGINT;
   PROCEDURE open(path: ADDRESS; oflag: INTEGER) : INTEGER;
   PROCEDURE read(fildes: INTEGER;
