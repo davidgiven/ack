@@ -2,7 +2,7 @@
 2 ' $State$
 3 ' $Revision$
 
-10 print "Hi there! Before we start, what is your name?"
+10 print "Hi there! I'm written in Basic. Before we start, what is your name?"
 20 input "> ", PlayerName$
 30 print
 40 print "Hello, "; PlayerName$; "!"

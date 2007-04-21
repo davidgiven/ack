@@ -59,7 +59,7 @@ void game(void)
 
 int main(int argc, char* argv[])
 {
-	printf("\nHi there! Before we start, what is your name?\n");
+	printf("\nHi there! I'm written in C. Before we start, what is your name?\n");
 	reads();
 	strcpy(PlayerName, buffer);
 	printf("\nHello, %s! ", PlayerName);

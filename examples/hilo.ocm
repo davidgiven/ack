@@ -56,7 +56,7 @@ proc random(value range, var result) =
 proc getname =
   var seed, buffer[128]:
   seq
-    puts("*nHi there! Before we start, what is your name?*n")
+    puts("*nHi there! I'm written in Occam. Before we start, what is your name?*n")
     puts("> ")
     gets(buffer)
     

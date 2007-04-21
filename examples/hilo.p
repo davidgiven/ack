@@ -29,10 +29,12 @@ function random(range : integer) : integer;
 		random := seed mod range;
 	end;
 
-{ Pascal doesn't provide string input, so we interface to the _read() syscall
-  and do it manually. }
+{ Pascal doesn't provide string input, so we interface to the read() syscall
+  and do it manually. But... we can't interface to read() directly because
+  that conflicts with a Pascal keyword. Luckily there's a private function
+  uread() in the ACK Pascal library that we can use instead. }
   
-function _read(fd : integer; var buffer : char; count : integer) : integer;
+function uread(fd : integer; var buffer : char; count : integer) : integer;
 	extern;
 
 function readchar : char;
@@ -42,7 +44,7 @@ function readchar : char;
 		
 	begin
 		c := chr(0);
-		dummy := _read(0, c, 1);
+		dummy := uread(0, c, 1);
 		readchar := c;
 	end;
 	
@@ -79,7 +81,7 @@ procedure getname;
 		
 	begin
 		writeln;
-		writeln('Hi there! Before we start, what is your name?');
+		writeln('Hi there! I''m written in Pascal. Before we start, what is your name?');
 		writeln;
 		readstring(name, namelen);
 		writeln;

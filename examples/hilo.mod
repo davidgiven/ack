@@ -66,7 +66,7 @@ VAR
 	finished : BOOLEAN;
 BEGIN
 	WriteLn;
-	WriteString("Hi there! Before we start, what is your name?");
+	WriteString("Hi there! I'm written in Modula-2. Before we start, what is your name?");
 	WriteLn;
 	reads;
 	WriteLn;
