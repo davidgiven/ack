@@ -6,7 +6,7 @@ A few notes on the examples
 ---------------------------
 
 This directory contains a handful of working example programs that can be
-built with the ACK. They're intended as a convention source of test code
+built with the ACK. They're intended as a convenient source of test code
 and as a starting point when writing your own programs.
 
 They consist of:
@@ -18,8 +18,13 @@ hilo.ocm           Occam 1 version of the Hi/Lo game
 hilo.p             Pascal version of the Hi/Lo game
 
 paranoia.c         An ancient public domain K&R C adventure game
+startrek.c         An even more ancient public domain ANSI C game
+startrek.doc       Manual for above (plus in current directory when running)
 
 Enjoy.
+
+(startrek.c was written by David Ahl and converted to C by Chris Nystrom. See
+http://www.cactus.org/%7Enystrom/startrek.html for more info.)
 
 David Given
 dg@cowlark.com
