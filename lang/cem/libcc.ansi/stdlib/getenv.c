@@ -4,14 +4,13 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-
-extern const char **_penvp;
+#include <stdlib.h>
+#include <unistd.h>
 
 char *
 getenv(const char *name)
 {
-	register const char **v = _penvp;
+	register char **v = environ;
 	register const char *p, *q;
 
 	if (v == NULL || name == NULL)

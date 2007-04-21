@@ -10,17 +10,7 @@
 
 #if	defined(__BSD4_2)
 
-struct timeval {
-	long	tv_sec;		/* seconds */
-	long	tv_usec;	/* and microseconds */
-};
-
-struct timezone {
-	int	tz_minuteswest;	/* minutes west of Greenwich */
-	int	tz_dsttime;	/* type of dst correction */
-};
-
-int _gettimeofday(struct timeval *tp, struct timezone *tzp);
+extern int _gettimeofday(struct timeval *tp, struct timezone *tzp);
 
 #elif	!defined(_POSIX_SOURCE) && !defined(__USG)
 #if	!defined(_MINIX)		/* MINIX has no ftime() */

@@ -3,8 +3,9 @@
  */
 /* $Id$ */
 
-#if !defined(_POSIX_SOURCE)
-#include	<stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 int _link(const char *name1, const char *name2);
 

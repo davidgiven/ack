@@ -3,11 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<string.h>
-#include	"loc_incl.h"
-
-unsigned int _getpid(void);
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include "loc_incl.h"
 
 FILE *
 tmpfile(void) {
@@ -17,7 +17,7 @@ tmpfile(void) {
 
 	if (!name) {
 		name = name_buffer + strlen(name_buffer);
-		name = _i_compute(_getpid(), 10, name, 5);
+		name = _i_compute(getpid(), 10, name, 5);
 		*name = '\0';
 	}
 

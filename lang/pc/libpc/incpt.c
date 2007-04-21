@@ -18,14 +18,13 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
-#define EINTR	4
-
-extern int	errno;
 extern		_trp();
-extern int	_read();
 
 _incpt(f) struct file *f; {
 
@@ -40,7 +39,7 @@ _incpt(f) struct file *f; {
 	if (f->count == 0) {
 		f->ptr = f->bufadr;
 		for(;;) {
-			f->count=_read(f->ufd,f->bufadr,f->buflen);
+			f->count=read(f->ufd,f->bufadr,f->buflen);
 			if ( f->count<0 ) {
 				if (errno != EINTR) _trp(EREAD) ;
 				continue ;

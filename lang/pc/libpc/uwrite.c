@@ -18,8 +18,9 @@
 
 /* function uwrite(fd:integer; var b:buf; n:integer):integer; */
 
-extern int	_write();
+#include <stdlib.h>
+#include <unistd.h>
 
 int uwrite(fd,b,n) char *b; int fd,n; {
-	return(_write(fd,b,n));
+	return(write(fd,b,n));
 }

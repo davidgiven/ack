@@ -23,11 +23,12 @@
 #ifdef SYSTEM
 #include	<system.h>
 #define SBRK	sys_break
+extern void *SBRK(int incr);
 #else
-#define SBRK	_sbrk
+#include <unistd.h>
+#define SBRK sbrk
 #define	ILL_BREAK		(void *)(-1)	/* funny failure value */
 #endif
-extern void *SBRK(int incr);
 #ifdef STORE
 #define	MAX_STORE	32
 private do_free(mallink *ml), sell_out(void);

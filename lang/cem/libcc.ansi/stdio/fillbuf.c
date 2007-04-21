@@ -3,11 +3,10 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	"loc_incl.h"
-
-int _read(int d, char *buf, int nbytes);
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "loc_incl.h"
 
 int
 __fillbuf(register FILE *stream)
@@ -53,7 +52,7 @@ __fillbuf(register FILE *stream)
 		stream->_bufsiz = 1;
 	}
 	stream->_ptr = stream->_buf;
-	stream->_count = _read(stream->_fd, (char *)stream->_buf, stream->_bufsiz);
+	stream->_count = read(stream->_fd, (char *)stream->_buf, stream->_bufsiz);
 
 	if (stream->_count <= 0){
 		if (stream->_count == 0) {

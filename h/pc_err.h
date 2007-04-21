@@ -3,6 +3,13 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+
+/* EBADF conflicts with the ANSI C definition. */
+
+#ifdef EBADF 
+#undef EBADF
+#endif
+
 #define	EARGC	64
 #define	EEXP	65
 #define	ELOG	66

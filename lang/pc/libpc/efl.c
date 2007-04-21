@@ -18,8 +18,10 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
 extern struct file	*_curfil;
 extern			_trp();

@@ -6,6 +6,12 @@
 #define LINO_AD         0
 #define FILN_AD         4
 
+/* ERANGE conflicts with a symbol in the ANSI C library. */
+
+#ifdef ERANGE
+#undef ERANGE
+#endif
+
 #define LINO            (*(int    *)(_hol0()+LINO_AD))
 #define FILN            (*(char  **)(_hol0()+FILN_AD))
 

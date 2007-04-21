@@ -18,8 +18,10 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
 extern struct file	**_extfl;
 extern int		_extflc;
@@ -31,33 +33,27 @@ extern char		**_penvp;
 extern			_cls();
 extern			_xcls();
 extern			_trp();
-extern int		_getpid();
-extern int		_creat();
-extern int		_open();
-extern int		_close();
-extern int		_unlink();
-extern long		_lseek();
 
 static int tmpfil() {
 	static char namebuf[] = "/tmp/plf.xxxxx";
 	int i; char *p,*q;
 
-	i = _getpid();
+	i = getpid();
 	p = namebuf;
 	q = p + 13;
 	do
 		*q++ = (i & 07) + '0';
 	while (i >>= 3);
 	*q = '\0';
-	if ((i = _creat(p,0644)) < 0)
-		if ((i = _creat(p += 4,0644)) < 0)
-			if ((i = _creat(p += 5,0644)) < 0)
+	if ((i = creat(p,0644)) < 0)
+		if ((i = creat(p += 4,0644)) < 0)
+			if ((i = creat(p += 5,0644)) < 0)
 				goto error;
-	if (_close(i) != 0)
+	if (close(i) != 0)
 		goto error;
-	if ((i = _open(p,2)) < 0)
+	if ((i = open(p,2)) < 0)
 		goto error;
-	if (_unlink(p) != 0)
+	if (remove(p) != 0)
 error:		_trp(EREWR);
 	return(i);
 }
@@ -77,7 +73,7 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 		f->fname = "LOCAL";
 		if ((descr & WRBIT) == 0 && (f->flags & 0377) == MAGIC) {
 			_xcls(f);
-			if (_lseek(f->ufd,(long)0,0) == -1)
+			if (lseek(f->ufd,(long)0,0) == -1)
 				_trp(ERESET);
 		} else {
 			_cls(f);

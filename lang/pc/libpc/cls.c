@@ -18,14 +18,15 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
 extern struct file	*_curfil;
 extern			_trp();
 extern			_flush();
 extern			_outcpt();
-extern int		_close();
 
 _xcls(f) struct file *f; {
 
@@ -61,7 +62,7 @@ _cls(f) struct file *f; {
 		return;
 #endif
 	_xcls(f);
-	if (_close(f->ufd) != 0)
+	if (close(f->ufd) != 0)
 		_trp(ECLOSE);
 	f->flags = 0;
 }

@@ -18,7 +18,7 @@
 
 /* function perrno:integer; extern; */
 
-extern int	errno;
+#include <errno.h>
 
 int perrno() {
 	return(errno);

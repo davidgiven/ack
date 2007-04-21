@@ -3,11 +3,12 @@
  */
 /* $Id$ */
 
+#include    <stdlib.h>
 #include	<signal.h>
 #include	<string.h>
 #include	<sgtty.h>
+#include    <fcntl.h>
 
-#define	O_RDONLY	0
 int _open(const char *path, int flags);
 int _write(int d, const char *buf, int nbytes);
 int _read(int d, char *buf, int nbytes);

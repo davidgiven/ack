@@ -3,17 +3,10 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-
-#if	(SEEK_CUR != 1) || (SEEK_END != 2) || (SEEK_SET != 0)
-#error SEEK_* values are wrong
-#endif
-
-#include	"loc_incl.h"
-
-#include	<sys/types.h>
-
-off_t _lseek(int fildes, off_t offset, int whence);
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "loc_incl.h"
 
 int
 fseek(FILE *stream, long int offset, int whence)
@@ -35,7 +28,7 @@ fseek(FILE *stream, long int offset, int whence)
 	} else	/* neither reading nor writing. The buffer must be empty */
 		/* EMPTY */ ;
 
-	pos = _lseek(fileno(stream), offset - adjust, whence);
+	pos = lseek(fileno(stream), offset - adjust, whence);
 	if (io_testflag(stream, _IOREAD) && io_testflag(stream, _IOWRITE))
 		stream->_flags &= ~(_IOREADING | _IOWRITING);
 

@@ -8,7 +8,7 @@
 #include	<errno.h>
 
 double
-atof(const char *nptr)
+(atof)(const char *nptr)
 {
 	double d;
 	int e = errno;

@@ -16,9 +16,12 @@
  *
  */
 
-#include	<em_abs.h>
-#include	<pc_err.h>
-#include	<pc_file.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <em_abs.h>
+#include <pc_err.h>
+#include <pc_file.h>
 
 /* to make it easier to patch ... */
 extern struct file	*_curfil;
@@ -85,8 +88,6 @@ extern char		**_penvp;
 
 extern char		*_hol0();
 extern			_trp();
-extern			_exit();
-extern int		_write();
 
 _catch(erno) unsigned erno; {
 	register struct errm *ep = &errors[0];
@@ -145,7 +146,7 @@ _catch(erno) unsigned erno; {
 		p = q;
 		while (*p)
 			p++;
-		if (_write(2,q,(int)(p-q)) < 0)
+		if (write(2,q,(int)(p-q)) < 0)
 			;
 	}
 	_exit(erno+1);

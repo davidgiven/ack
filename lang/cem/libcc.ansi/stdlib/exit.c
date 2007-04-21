@@ -4,15 +4,14 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #define	NEXITS	32
 
 void (*__functab[NEXITS])(void);
 int __funccnt = 0;
-
-extern void _exit(int);
 
 /* only flush output buffers when necessary */
 int (*_clean)(void) = NULL;

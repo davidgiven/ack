@@ -3,17 +3,10 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-
-#if	(SEEK_CUR != 1) || (SEEK_SET != 0) || (SEEK_END != 2)
-#error SEEK_* values are wrong
-#endif
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include	"loc_incl.h"
-
-#include	<sys/types.h>
-
-off_t _lseek(int fildes, off_t offset, int whence);
 
 long ftell(FILE *stream)
 {
@@ -28,7 +21,7 @@ long ftell(FILE *stream)
 		adjust = stream->_ptr - stream->_buf;
 	else adjust = 0;
 
-	result = _lseek(fileno(stream), 0, SEEK_CUR);
+	result = lseek(fileno(stream), 0, SEEK_CUR);
 
 	if ( result == -1 )
 		return result;

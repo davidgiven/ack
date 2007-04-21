@@ -13,23 +13,61 @@
 #include <em_abs.h>
 #include <m2_traps.h>
 
+static const char signals_list[] = {
+#ifdef SIGHUP
+	SIGHUP,
+#endif
+#ifdef SIGINT
+	SIGINT,
+#endif
+#ifdef SIGQUIT
+	SIGQUIT,
+#endif
+#ifdef SIGTRAP
+	SIGTRAP,
+#endif
+#ifdef SIGIOT
+	SIGIOT,
+#endif
+#ifdef SIGEMT
+	SIGEMT,
+#endif
+#ifdef SIGFPE
+	SIGFPE,
+#endif
+#ifdef SIGBUS
+	SIGBUS,
+#endif
+#ifdef SIGSEGV
+	SIGSEGV,
+#endif
+#ifdef SIGPIPE
+	SIGPIPE,
+#endif
+#ifdef SIGALRM
+	SIGALRM,
+#endif
+#ifdef SIGTERM
+	SIGTERM,
+#endif
+	-1
+};
+
 /* map unix signals onto EM traps */
-init()
+void init(void)
 {
-	sigtrp(M2_UNIXSIG, SIGHUP);
-	sigtrp(M2_UNIXSIG, SIGINT);
-	sigtrp(M2_UNIXSIG, SIGQUIT);
+	const char* p = signals_list;
+	do {
+		int i = *p++;
+		if (i == -1)
+			break;
+		sigtrp(M2_UNIXSIG, i);
+	} while (1);
+
 	sigtrp(EILLINS, SIGILL);
-	sigtrp(M2_UNIXSIG, SIGTRAP);
-	sigtrp(M2_UNIXSIG, SIGIOT);
-	sigtrp(M2_UNIXSIG, SIGEMT);
-	sigtrp(M2_UNIXSIG, SIGFPE);
-	sigtrp(M2_UNIXSIG, SIGBUS);
-	sigtrp(M2_UNIXSIG, SIGSEGV);
+#ifdef SIGSYS
 	sigtrp(EBADMON, SIGSYS);
-	sigtrp(M2_UNIXSIG, SIGPIPE);
-	sigtrp(M2_UNIXSIG, SIGALRM);
-	sigtrp(M2_UNIXSIG, SIGTERM);
+#endif
 }
 #if defined(__em22) || defined(__em24) || defined(__em44)
 killbss()

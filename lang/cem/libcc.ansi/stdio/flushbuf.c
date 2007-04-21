@@ -3,15 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	"loc_incl.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "loc_incl.h"
 
-#include	<sys/types.h>
-
-off_t _lseek(int fildes, off_t offset, int whence);
-int _write(int d, const char *buf, int nbytes);
-int _isatty(int d);
 extern void (*_clean)(void);
 
 static int
@@ -22,7 +18,7 @@ do_write(int d, char *buf, int nbytes)
 	/* POSIX actually allows write() to return a positive value less
 	   than nbytes, so loop ...
 	*/
-	while ((c = _write(d, buf, nbytes)) > 0 && c < nbytes) {
+	while ((c = write(d, buf, nbytes)) > 0 && c < nbytes) {
 		nbytes -= c;
 		buf += c;
 	}
@@ -41,7 +37,7 @@ __flushbuf(int c, FILE * stream)
 	stream->_flags |= _IOWRITING;
 	if (!io_testflag(stream, _IONBF)) {
 		if (!stream->_buf) {
-			if (stream == stdout && _isatty(fileno(stdout))) {
+			if (stream == stdout && isatty(fileno(stdout))) {
 				if (!(stream->_buf =
 					    (unsigned char *) malloc(BUFSIZ))) {
 					stream->_flags |= _IONBF;
@@ -71,12 +67,12 @@ __flushbuf(int c, FILE * stream)
 
 		stream->_count = 0;
 		if (io_testflag(stream, _IOAPPEND)) {
-			if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
+			if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
 				stream->_flags |= _IOERR;
 				return EOF;
 			}
 		}
-		if (_write(fileno(stream), &c1, 1) != 1) {
+		if (write(fileno(stream), &c1, 1) != 1) {
 			stream->_flags |= _IOERR;
 			return EOF;
 		}
@@ -91,7 +87,7 @@ __flushbuf(int c, FILE * stream)
 			stream->_count = 0;
 
 			if (io_testflag(stream, _IOAPPEND)) {
-				if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
+				if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
 					stream->_flags |= _IOERR;
 					return EOF;
 				}
@@ -110,7 +106,7 @@ __flushbuf(int c, FILE * stream)
 
 		if (count > 0) {
 			if (io_testflag(stream, _IOAPPEND)) {
-				if (_lseek(fileno(stream), 0L, SEEK_END) == -1) {
+				if (lseek(fileno(stream), 0L, SEEK_END) == -1) {
 					stream->_flags |= _IOERR;
 					return EOF;
 				}

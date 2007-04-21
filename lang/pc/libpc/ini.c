@@ -23,9 +23,6 @@
 
 extern          (*_sig())();
 extern          _catch();
-#ifndef CPM
-extern int      _gtty();
-#endif
 
 struct file     **_extfl;
 int		_extflc;	/* number of external files */
@@ -63,11 +60,7 @@ _ini(args,c,p,mainlb) char *args,*mainlb; int c; struct file **p; {
 		f->fname = "OUTPUT";
 		f->ufd = 1;
 		f->size = 1;
-#ifdef CPM
 		f->count = 1;
-#else
-		f->count = (_gtty(1,buf) >= 0 ? 1 : PC_BUFLEN);
-#endif
 		f->buflen = f->count;
 	}
 }

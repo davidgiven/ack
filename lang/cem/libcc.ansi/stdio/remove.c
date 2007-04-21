@@ -3,11 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-
-int _unlink(const char *path);
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 int
 remove(const char *filename) {
-	return _unlink(filename);
+	return unlink(filename);
 }

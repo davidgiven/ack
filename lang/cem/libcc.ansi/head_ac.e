@@ -21,9 +21,6 @@
 
  exa environ
  exa _end
- exa _penvp
-_penvp
- bss _EM_PSIZE,0,0
 
  exp $_m_a_i_n
  pro $_m_a_i_n,0
@@ -31,31 +28,8 @@ _penvp
  sim            ; ignored
  lal _EM_WSIZE+_EM_PSIZE
  loi _EM_PSIZE
- lae _penvp
- sti _EM_PSIZE
-/* Now test if environ is our own environ, or some user defined environ.
- * First test if environ < _end.  This is done for separate I&D systems.
- */
- lae environ
- lae _end
- cmp
- zge *1
-/* Now environ < end, which means that we can derefence it without trouble
- * on separate I&D systems.
- */
- lae environ
- loi 2
- loc 2
- loc _EM_WSIZE
- cii
- loc 21331	/*  == 0x5353 */
- bne *1
-/* environ contains the magic value. Assume it's our own environ */
- lae _penvp
- loi _EM_PSIZE
  lae environ
  sti _EM_PSIZE
-1
 #if __unix && ! (__em22 || __em24 || __em44)
  lpi $_ctch_
  sig
@@ -87,9 +61,9 @@ _penvp
  bra *3
 1
  loc 8
- cal $_getpid
+ cal $getpid
  lfr _EM_WSIZE
- cal $_kill
+ cal $kill
  asp 2*_EM_WSIZE
 3
  lpi $_ctch_

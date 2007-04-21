@@ -7,11 +7,6 @@
 
 #if	defined(__BSD4_2)
 
-struct timeval {
-	long	tv_sec;			/* seconds */
-	long	tv_usec;		/* and microseconds */
-};
-
 #define	RUSAGE_SELF	0
 #define	RUSAGE_CHILDREN	-1
 
