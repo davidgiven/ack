@@ -79,18 +79,21 @@ include "mach/z8000/pmfile"
 -- This is the list of language runtimes that is built for each architecture.
 
 lang_runtimes = group {
-	lang_cem_runtime,
-	lang_cem_ansi_runtime,
-	lang_pc_runtime,
-	lang_m2_runtime,
-	lang_occam_runtime,
-	lang_basic_runtime,
+--	lang_cem_runtime,        -- K&R C (obsolete and useless)
+	lang_cem_ansi_runtime,   -- ANSI C
+	lang_pc_runtime,         -- Pascal
+	lang_m2_runtime,         -- Modula-2
+--	lang_occam_runtime,      -- Occam 1 (obsolete and useless)
+--	lang_basic_runtime,      -- Basic
 }
 
 -- Include the platform descriptions.
 
 include "mach/i86/pmfile"              -- generic i86
 include "plat/pc86/pmfile"             -- PC standalone
+
+include "mach/i386/pmfile"             -- generic i386
+include "plat/linux386/pmfile"         -- Linux executables
 
 default = group {
 	-- Lots of things use LLgen, so we need to build it first.
@@ -121,8 +124,8 @@ default = group {
 	tool_tabgen,
 	tool_aal,
 	tool_ack,
-	tool_cpp,
-	tool_cpp_ansi,
+--	tool_cpp,                -- K&R C
+	tool_cpp_ansi,           -- ANSI C
 	tool_cgg,
 	tool_ncgg,
 --	tool_ceg,
@@ -138,13 +141,14 @@ default = group {
 	tool_asize,
 	tool_astrip,
 	tool_aslod,
+	tool_aelflod,
 
-	lang_cem_compiler,
+--	lang_cem_compiler,
 	lang_cem_ansi_compiler,
 	lang_pc_compiler,
 	lang_m2_compiler,
-	lang_occam_compiler,
-	lang_basic_compiler,
+--	lang_occam_compiler,
+--	lang_basic_compiler,
 
 	-- Build the code generators and the architecture-independent
 	-- libraries.
@@ -171,9 +175,10 @@ default = group {
 	mach_z8000,    lang_runtimes { ARCH="z8000", OPTIMISATION="-O" },
 --]]
 
-	-- Build the platform-specific libraries.
+	-- Build the platforms.
 	
-	platform_pc86
+	platform_pc86,
+	platform_linux386
 }
 
 -- Ensure that the work directories exist.
