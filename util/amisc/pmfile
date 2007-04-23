@@ -10,7 +10,10 @@ local simple_tool = cprogram {
 	lib_object,
 	
 	outputs = {"%U%/%S%"},
-	install = pm.install("%BINDIR%bin/%S%")
+	install = {
+		pm.install("%U%/%S%", "%BINDIR%bin/%S%"),
+		pm.install(d.."%S%.1", "%BINDIR%man/man1/%S%.1")
+	}
 }
 
 tool_anm = simple_tool { S = "anm" }
@@ -18,10 +21,14 @@ tool_ashow = simple_tool { S = "ashow" }
 tool_asize = simple_tool { S = "asize" }
 tool_astrip = simple_tool { S = "astrip" }
 tool_aslod = simple_tool { S = "aslod" }
+tool_aelflod = simple_tool { S = "aelflod" }
 
 -- Revision history
 -- $Log$
--- Revision 1.2  2006-10-16 23:25:56  dtrg
+-- Revision 1.3  2007-04-23 23:40:10  dtrg
+-- Added the aelflod tool for generating ELF executables. Added documentation for aelflod and ashow. Now installs the documentation when built.
+--
+-- Revision 1.2  2006/10/16 23:25:56  dtrg
 -- Added support for anm, asize, ashow, astrip and the new aslod tool.
 --
 -- Revision 1.1  2006/07/20 23:18:18  dtrg
