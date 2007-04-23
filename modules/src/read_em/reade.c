@@ -293,6 +293,11 @@ getnumber(c, ap)
 		c = getbyte();
 	}
 
+	/* Soak up any whitespace (to allow "- 4" to be considered a number). */
+	
+	while (isspace(c))
+		c = getbyte();
+		
 	if (! isdigit(c)) {
 		ungetbyte(c);
 		syntax("digit expected");
