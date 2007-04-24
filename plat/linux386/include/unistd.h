@@ -72,9 +72,9 @@ extern int isatty(int d);
 
 typedef int sig_atomic_t;
 
-#define SIG_ERR ((__sighandler_t) -1)           /* Error return.  */
-#define SIG_DFL ((__sighandler_t) 0)            /* Default action.  */
-#define SIG_IGN ((__sighandler_t) 1)            /* Ignore signal.  */
+#define SIG_ERR ((sighandler_t) -1)           /* Error return.  */
+#define SIG_DFL ((sighandler_t) 0)            /* Default action.  */
+#define SIG_IGN ((sighandler_t) 1)            /* Ignore signal.  */
 
 #define SIGHUP          1       /* Hangup (POSIX).  */
 #define SIGINT          2       /* Interrupt (ANSI).  */

@@ -55,11 +55,12 @@ extern int fcntl(int fd, int op, ...);
 
 typedef int sig_atomic_t;
 
-#define SIG_ERR ((__sighandler_t) -1)           /* Error return.  */
-#define SIG_DFL ((__sighandler_t) 0)            /* Default action.  */
-#define SIG_IGN ((__sighandler_t) 1)            /* Ignore signal.  */
+#define SIG_ERR ((sighandler_t) -1)           /* Error return.  */
+#define SIG_DFL ((sighandler_t) 0)            /* Default action.  */
+#define SIG_IGN ((sighandler_t) 1)            /* Ignore signal.  */
 
-#define SIGABRT         6       /* Abort (ANSI).  */
+#define SIGABRT         6       /* Abort (ANSI) */
+#define SIGILL          11      /* Illegal instruction */
 
 #define _NSIG           32      /* Biggest signal number + 1
                                    (not including real-time signals).  */
