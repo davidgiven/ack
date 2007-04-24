@@ -12,6 +12,19 @@
 
 .sect .text
 
+! ****** WARNING! ******
+!
+! The PC boot sector requires a magic number at the end to signify that the
+! disk is bootable. Unfortunately, the ACK assembler is a bit simple and we
+! can't tell it to put the 0xAA55 at a particular address without writing our
+! own custom binary generator. As a result, we need to manually insert just
+! the right amount of padding in order to make this work.
+!
+! If you ever need to change the boot code, this needs adjusting. I recommend
+! a hex editor.
+
+PADDING = 0xB9
+
 ! Some definitions.
 
 BOOT_SEGMENT = 0x07C0        ! Where we've been loaded
@@ -255,10 +268,9 @@ finished:
 	
 	! Push standard parameters onto the stack and go.
 	
-	xor ax, ax
-	push ax                  ! argc
-	push ax                  ! argv
-	push ax                  ! envp
+	push envp               ! envp
+	push argv               ! argv
+	push 1                  ! argc
 	call __m_a_i_n
 	! fall through into the exit routine.
 	
@@ -291,25 +303,28 @@ loading_msg: .asciz '\n\rLoading...\n\r'
 halted_msg: .asciz '\n\rHalted.\n\r'
 running_msg: .asciz '\n\rRunning.\n\r'
  
+ 	! The argv and env arrays.
+ 
+argv: .data2 exename, 0
+envp: .data2 0
+exename: .asciz 'pc86.img'
+
 	! ...and we need this to fool the PC into booting our boot sector.
 	
-	.align 510
+	.space PADDING
 	.data2 0xAA55
-
-
-.define begtext,begdata,begbss
-.define ERANGE,ESET,EHEAP,ECASE,EILLINS,EIDIVZ,EODDZ
-.extern _end
 
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
 
+.define begtext, begdata, begbss
 .sect .data;       begdata:
 .sect .rom;        begrom:
 .sect .bss;        begbss:
 
 ! Some magic data. All EM systems need these.
 
-.define .trppc, .ignmask
+.define .trppc, .ignmask, _errno
 .comm .trppc, 4
 .comm .ignmask, 4
+.comm _errno, 4

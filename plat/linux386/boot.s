@@ -60,6 +60,7 @@ EXIT:
 
 ! Some magic data. All EM systems need these.
 
-.define .trppc, .ignmask
+.define .trppc, .ignmask, _errno
 .comm .trppc, 4
 .comm .ignmask, 4
+.comm _errno, 4

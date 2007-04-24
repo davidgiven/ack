@@ -55,8 +55,8 @@ name led
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
 		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
 		{FLOATS?} \
-		(.e:{TAIL}={PLATFORMDIR}/libsys.a \
-		           {PLATFORMDIR}/libem.a \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libsys.a \
 		           {PLATFORMDIR}/libend.a)
 	linker
 end
