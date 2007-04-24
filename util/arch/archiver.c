@@ -33,6 +33,7 @@ static char RcsId[] = "$Id$";
 #include <signal.h>
 #include <arch.h>
 #include <ranlib.h>
+#include <unistd.h>
 #ifdef AAL
 #include <out.h>
 #define MAGIC_NUMBER	AALMAG
