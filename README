@@ -2,11 +2,11 @@
 # $State$
 # $Revision$
 
-                     THE AMSTERDAM COMPILER KIT V6.0pre1
+                     THE AMSTERDAM COMPILER KIT V6.0pre2
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2007-02-25
+                                2007-04-24
 
 
 INTRODUCTION
@@ -28,11 +28,12 @@ SUPPORT
 
 Languages:
 
-ANSI C, K&R C, Pascal, Modula 2, Occam 1, and a Basic variant.
+ANSI C, Pascal, Modula 2. K&R is supported via the ANSI C compiler.
 
 Platforms:
 
 pc86          produces bootable floppy disk images for 8086 PCs
+linux386      produces ELF executables for PC Linux systems
 
 
 INSTALLATION
@@ -114,6 +115,9 @@ For further information, see the man page (which actually does get
 installed, but is rather out of date).
 
 There are some (known working) example programs in the 'examples' directory.
+A sample command line is:
+
+ack -mlinux386 -O examples/paranoia.c
 
 
 GOTCHAS
@@ -121,16 +125,11 @@ GOTCHAS
 
 There are some things you should be aware of.
 
-- The only platform supported so far is pc86, which generates 8086 tiny mode
-  executables that will work as floppy disk boot images. So, to run, simply dd
-  the output file (pc86.img by default) onto a floppy disk and boot from it.
-  Be aware that very little functionality is supported and that the entire
-  program, heap and stack and code and all, must fit within 64kB. See
-  plat/pc86/README for more information.
+- Look at plat/linux386/README and plat/pc86/README for information about the
+  two supported platforms.
   
-- By default, the ack tool will compile K&R C. Practically all C source these
-  days is ANSI C --- use the -ansi switch to enable ANSI mode. No, the ACK is
-  not C99 compatible.
+- The library support is fairly limited; for C, it's at roughly the ANSI C
+  level, and for the other languages it's similar.
   
 - When compiling languages other than C, the ACK will usually look at the
   first character of the file. If it's a #, then the file will be run through
@@ -167,4 +166,4 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2007-02-25
+2007-04-24

@@ -1,0 +1,21 @@
+# $Source$
+# $State$
+# $Revision$
+
+6.0pre2
+
+  Much simplified the syscall interface by disabling libmon and instead
+  calling the syscalls directly. Disabled the K&R C compiler and libc because
+  it doesn't actually gain us anything and has a high maintenance load --- the
+  ANSI C compiler works fine with K&R C. Adapted the rest of the system to
+  build with the ANSI C compiler. Rewrote the pc86 syscall interface and added
+  linux386 support, using the i386 code generator. Lots and lots of bugfixes
+  and tweaks everywhere.
+  
+6.0pre1
+
+  First working version of the 6.0 release stream. Working frontends: both C
+  compilers, Pascal, Modula-2, Basic and Occam. Working backends: i86. Working
+  platforms: pc86, the very noddy testbed setup that produces floppy disk
+  images.
+  

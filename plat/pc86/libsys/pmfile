@@ -17,7 +17,6 @@ libsys_pc86 = acklibrary {
 	ackfile (d.."close.c"),
 	ackfile (d.."read.c"),
 	ackfile (d.."write.c"),
---	ackfile (d.."_sys_ioctl.c"),
 	ackfile (d.."brk.c"),
 	ackfile (d.."getpid.c"),
 	ackfile (d.."kill.c"),

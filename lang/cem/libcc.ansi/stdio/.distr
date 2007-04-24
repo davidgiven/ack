@@ -29,15 +29,12 @@ getc.c
 getchar.c
 gets.c
 icompute.c
-isatty.c
 loc_incl.h
 perror.c
 printf.c
 putc.c
 putchar.c
 puts.c
-remove.c
-rename.c
 rewind.c
 scanf.c
 setbuf.c

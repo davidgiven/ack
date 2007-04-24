@@ -1,4 +1,5 @@
 README
+CHANGES
 Copyright
 pm
 pmfile
@@ -29,7 +30,7 @@ util/cmisc
 util/ack
 lib/descr/fe
 util/arch
-util/cpp
+#util/cpp
 util/cgg
 util/ncgg
 util/misc
@@ -41,33 +42,14 @@ util/led
 lang/cem
 lang/pc
 lang/m2
-lang/occam
-lang/basic
+#lang/occam
+#lang/basic
 
 mach/proto
 mach/i86
+mach/i386
 
 plat/pc86
+plat/linux386
 
 examples
-
-#Action
-#NEW
-#README
-#TODO
-#TakeAction
-#bin
-#doc
-#emtest
-#etc
-#fast
-#fcc
-#first
-#h
-#include
-#modules
-#lang
-#lib
-#mach
-#man
-#util
