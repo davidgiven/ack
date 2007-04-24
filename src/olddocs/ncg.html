@@ -1,0 +1,6654 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:10 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The table driven code generator</title>
+</head>
+<body>
+
+<h1 align=center>The table driven code generator</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. What has changed since version 1 ?">2. What has changed since version 1 ?</a><br>
+<a href="#3. Global overview of the workings of the code generator.">3. Global overview of the workings of the code generator.</a><br>
+<a href="#4. Register variables">4. Register variables</a><br>
+<a href="#5. Description of the machine table">5. Description of the machine table</a><br>
+<a href="#5.1. Constant section">5.1. Constant section</a><br>
+<a href="#5.2. Property definition">5.2. Property definition</a><br>
+<a href="#5.3. Register definition">5.3. Register definition</a><br>
+<a href="#5.4. Stack token definition">5.4. Stack token definition</a><br>
+<a href="#5.5. Sets">5.5. Sets</a><br>
+<a href="#5.6. Instruction definitions">5.6. Instruction definitions</a><br>
+<a href="#5.7. Expressions">5.7. Expressions</a><br>
+<a href="#5.8. Token descriptions">5.8. Token descriptions</a><br>
+<a href="#5.9. Code rules">5.9. Code rules</a><br>
+<a href="#5.9.1. The EM pattern">5.9.1. The EM pattern</a><br>
+<a href="#5.9.2. The stack pattern">5.9.2. The stack pattern</a><br>
+<a href="#5.9.3. The kills part">5.9.3. The kills part</a><br>
+<a href="#5.9.4. The allocates part">5.9.4. The allocates part</a><br>
+<a href="#5.9.5. The generates part">5.9.5. The generates part</a><br>
+<a href="#5.9.6. Stack replacement">5.9.6. Stack replacement</a><br>
+<a href="#5.9.7. EM replacement">5.9.7. EM replacement</a><br>
+<a href="#5.9.8. Examples">5.9.8. Examples</a><br>
+<a href="#5.10. Code rules using procedures">5.10. Code rules using procedures</a><br>
+<a href="#5.11. Move definitions">5.11. Move definitions</a><br>
+<a href="#5.12. Test definitions">5.12. Test definitions</a><br>
+<a href="#5.13. Some explanation about the rules behind coercions">5.13. Some explanation about the rules behind coercions</a><br>
+<a href="#5.14. Stack definitions">5.14. Stack definitions</a><br>
+<a href="#5.15. Coercions">5.15. Coercions</a><br>
+<a href="#6. The files mach.h and mach.c">6. The files mach.h and mach.c</a><br>
+<a href="#6.1. Types in the code generator">6.1. Types in the code generator</a><br>
+<a href="#6.2. Global variables to work with">6.2. Global variables to work with</a><br>
+<a href="#6.3. Macros in mach.h">6.3. Macros in mach.h</a><br>
+<a href="#6.3.1. Example mach.h for the PDP-11">6.3.1. Example mach.h for the PDP-11</a><br>
+<a href="#6.4. Functions in mach.c">6.4. Functions in mach.c</a><br>
+<a href="#6.4.1. Example mach.c for the PDP-11">6.4.1. Example mach.c for the PDP-11</a><br>
+<a href="#7. Internal workings of the code generator.">7. Internal workings of the code generator.</a><br>
+<a href="#7.1. Description of tables.c and tables.h contents">7.1. Description of tables.c and tables.h contents</a><br>
+<a href="#7.1.1. Tables.c">7.1.1. Tables.c</a><br>
+<a href="#7.1.2. tables.h">7.1.2. tables.h</a><br>
+<a href="#7.2. Other important data structures">7.2. Other important data structures</a><br>
+<a href="#7.3. A tour through the sources">7.3. A tour through the sources</a><br>
+<a href="#7.3.1. codegen.c">7.3.1. codegen.c</a><br>
+<a href="#7.3.1.1. DO_DLINE">7.3.1.1. DO_DLINE</a><br>
+<a href="#7.3.1.2. DO_NEXTEM">7.3.1.2. DO_NEXTEM</a><br>
+<a href="#7.3.1.3. DO_COERC">7.3.1.3. DO_COERC</a><br>
+<a href="#7.3.1.4. DO_XMATCH">7.3.1.4. DO_XMATCH</a><br>
+<a href="#7.3.1.5. DO_MATCH">7.3.1.5. DO_MATCH</a><br>
+<a href="#7.3.1.6. DO_REMOVE">7.3.1.6. DO_REMOVE</a><br>
+<a href="#7.3.1.7. DO_DEALLOCATE">7.3.1.7. DO_DEALLOCATE</a><br>
+<a href="#7.3.1.8. DO_REALLOCATE">7.3.1.8. DO_REALLOCATE</a><br>
+<a href="#7.3.1.9. DO_ALLOCATE">7.3.1.9. DO_ALLOCATE</a><br>
+<a href="#7.3.1.10. DO_INSTR">7.3.1.10. DO_INSTR</a><br>
+<a href="#7.3.1.11. DO_MOVE">7.3.1.11. DO_MOVE</a><br>
+<a href="#7.3.1.12. DO_TEST">7.3.1.12. DO_TEST</a><br>
+<a href="#7.3.1.13. DO_ERASE">7.3.1.13. DO_ERASE</a><br>
+<a href="#7.3.1.14. DO_TOKREPLACE">7.3.1.14. DO_TOKREPLACE</a><br>
+<a href="#7.3.1.15. DO_EMREPLACE">7.3.1.15. DO_EMREPLACE</a><br>
+<a href="#7.3.1.16. DO_COST">7.3.1.16. DO_COST</a><br>
+<a href="#7.3.1.17. DO_RETURN">7.3.1.17. DO_RETURN</a><br>
+<a href="#7.3.1.18. DO_LABDEF">7.3.1.18. DO_LABDEF</a><br>
+<a href="#7.3.2. compute.c">7.3.2. compute.c</a><br>
+<a href="#7.3.3. equiv.c">7.3.3. equiv.c</a><br>
+<a href="#7.3.4. fillem.c">7.3.4. fillem.c</a><br>
+<a href="#7.3.5. gencode.c">7.3.5. gencode.c</a><br>
+<a href="#7.3.6. glosym.c">7.3.6. glosym.c</a><br>
+<a href="#7.3.7. label.c">7.3.7. label.c</a><br>
+<a href="#7.3.8. main.c">7.3.8. main.c</a><br>
+<a href="#7.3.9. move.c">7.3.9. move.c</a><br>
+<a href="#7.3.10. nextem.c">7.3.10. nextem.c</a><br>
+<a href="#7.3.11. reg.c">7.3.11. reg.c</a><br>
+<a href="#7.3.12. salloc.c">7.3.12. salloc.c</a><br>
+<a href="#7.3.13. state.c">7.3.13. state.c</a><br>
+<a href="#7.3.14. subr.c">7.3.14. subr.c</a><br>
+<a href="#7.3.14.1. match">7.3.14.1. match</a><br>
+<a href="#7.3.14.2. instance,cinstance">7.3.14.2. instance,cinstance</a><br>
+<a href="#7.3.14.3. eqtoken">7.3.14.3. eqtoken</a><br>
+<a href="#7.3.14.4. distance">7.3.14.4. distance</a><br>
+<a href="#7.3.14.5. split">7.3.14.5. split</a><br>
+<a href="#7.3.14.6. docoerc">7.3.14.6. docoerc</a><br>
+<a href="#7.3.14.7. stackupto">7.3.14.7. stackupto</a><br>
+<a href="#7.3.14.8. findcoerc">7.3.14.8. findcoerc</a><br>
+<a href="#7.3.15. var.c">7.3.15. var.c</a><br>
+
+<hr>
+
+<p><b>from the<br>
+Amsterdam Compiler Kit<br>
+Second Revised Edition</b></p>
+
+<p align=center><i><small>ABSTRACT</small></i></p>
+
+<p align=center><i><small>Hans van
+Staveren</small></i><small><br>
+Dept. of Mathematics and Computer Science<br>
+Vrije Universiteit<br>
+Amsterdam, The Netherlands</small></p>
+
+<p><small>The Amsterdam Compiler Kit is a collection of
+tools designed to help automate the process of compiler
+building. Part of it is a table driven code generator,
+called <i>cg</i>, and a program to check and translate
+machine description tables called <i>cgg</i>. This document
+provides a description of the internal workings of
+<i>cg</i>, and a description of syntax and semantics of the
+driving table. This is required reading for those wishing to
+write a new table.</small></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p><small>Part of the Amsterdam Compiler Kit is a code
+generator system consisting of a code generator generator
+(<i>cgg</i> for short) and some machine independent C code.
+<i>Cgg</i> reads a machine description table and creates two
+files, tables.h and tables.c. These are then used together
+with other C code to produce a code generator for the
+machine at hand.</small></p>
+
+<p><small>This in turn reads compact EM code and produces
+assembly code. The remainder of this document will first
+broadly describe the working of the code generator, then the
+machine table will be described after which some light is
+shed onto the internal workings of the code
+generator.</small></p>
+
+<p><small>The reader is assumed to have at least a vague
+notion about the semantics of the intermediary EM code.
+Someone wishing to write a table for a new machine should be
+thoroughly acquainted with EM code and the assembly code of
+the machine at hand.</small></p>
+<a name="2. What has changed since version 1 ?"></a>
+<h2>2. What has changed since version 1 ?</h2>
+
+<p><small>This section can be skipped by anyone not
+familiar with the first version. It is not needed to
+understand the current version.</small></p>
+
+<p><small>This paper describes the second version of the
+code generator system. Although the code generator itself is
+for the main part unchanged, the table format has been
+drastically redesigned and the opportunities to make faulty
+tables are reduced. The format is now aesthaticly more
+pleasing (according to <i>me</i> that is), mainly because
+the previous version was designed for one line code rules,
+which did not work out that way.</small></p>
+
+<p><small>The &lsquo;SCRATCH&rsquo; property is now
+automatically generated by <i>cgg</i>, <i>erase</i> and
+<i>setcc</i> calls and their ilk are now no longer needed
+(read: can no longer be forgotten) and all this because the
+table now <i>knows</i> what the machine instructions look
+like and what arguments they destroy.</small></p>
+
+<p><small>Checks are now made for register types, so it is
+no longer possible to generate a &lsquo;regind2&rsquo; token
+with a floating point register as a base. In general, if the
+instructions of the machine are correctly defined, it is no
+longer possible to generate code that does not assemble,
+which of course does not mean that it is not possible to
+generate assembly code that does not do what was
+intended!</small></p>
+
+<p><small>Checks are made now for missing moves, tests,
+coercions, etc. There is a form of procedure call now to
+reduce table size: it is no longer necessary to write the
+code for conditional instructions six times.</small></p>
+
+<p><small>The inreg() pseudo-function returns other
+results!!</small></p>
+<a name="3. Global overview of the workings of the code generator."></a>
+<h2>3. Global overview of the workings of the code generator.</h2>
+
+<p><small>The code generator or <i>cg</i> tries to generate
+good code by simulating the stack of the compiled program
+and delaying emission of code as long as possible. It also
+keeps track of register contents, which enables it to
+eliminate redundant moves, and tries to eliminate redundant
+tests by keeping information about condition code status, if
+applicable for the machine.</small></p>
+
+<p><small><i>Cg</i> maintains a &lsquo;fake stack&rsquo;
+containing &lsquo;tokens&rsquo; that are built by executing
+the pseudo code contained in the code rules given by the
+table writer. One can think of the fake stack as a logical
+extension of the real stack the compiled program will have
+when run. Alternatively one can think of the real stack as
+an infinite extension at the bottom of the fake stack. Both
+ways, the concatenation of the real stack and the fake stack
+will be the stack as it would have been on a real EM machine
+(see figure).</small></p>
+
+
+<p align=center><small><img src="grohtml-99451.png"></small></p>
+
+<p><small>During code generation tokens will be kept on the
+fake stack as long as possible but when they are moved to
+the real stack, by generating code for the push, all tokens
+above&dagger;</small></p>
+
+
+<p align=center><small><img src="grohtml-99452.png"></small></p>
+
+<p><small>the pushed tokens will be pushed also, so the
+fake stack will not contain holes.</small></p>
+
+<p><small>The information about the machine that <i>cg</i>
+needs has to be given in a machine description table, with
+as a major part a list of code rules telling <i>cg</i> what
+to do when certain EM-instructions occur with certain tokens
+on the fake stack. Not all possible fake stack possibilities
+have to be given of course, there is a possibility for
+providing rewriting rules, or <i>coercions</i> as they are
+called in this document.</small></p>
+
+<p><small>The main loop of <i>cg</i> is:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>find a pattern of EM instructions starting at the
+current one to generate code for. This pattern will usually
+be of length one but longer patterns can be used. Process
+any pseudo-instructions found.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Select one of the possibly many stack patterns
+that go with this EM pattern on the basis of heuristics,
+look ahead or both. The cost fields provided in the token
+definitions and instruction definitions are used to compute
+costs during look ahead.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Force the current fake stack contents to match
+the pattern. This may involve copying tokens to registers,
+making dummy transformations, e.g. to transform a
+&lsquo;local&rsquo; into an &lsquo;indexed from
+register&rsquo; or might even cause the move of the complete
+fake stack contents to the real stack and then back into
+registers if no suitable coercions were provided by the
+table writer.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Execute the pseudocode associated with the code
+rule just selected, this may cause registers to be
+allocated, code to be emitted etc..</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>5)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Put tokens onto the fake stack to reflect the
+result of the operation.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>6)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Insert some EM instructions into the stream; this
+is possible but not common.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>7)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Account for the cost. The cost is kept in a
+(space, time) vector and look ahead decisions are based on a
+linear combination of these. The code generator calls on
+itself recursively during look ahead, and the recursive
+incarnations return the costs they made. The costs the
+top-level code generator makes is of course
+irrelevant.</small></p>
+</td>
+</table>
+
+<p><small>The table that drives <i>cg</i> is not read in
+every time, but instead is used at compile time of <i>cg</i>
+to set parameters and to load pseudocode tables. A program
+called <i>cgg</i> reads the table and produces large lists
+of numbers that are compiled together with machine
+independent code to produce a code generator for the machine
+at hand.</small></p>
+
+<p><small>Part of the information needed is not easily
+expressed in this table format and must be supplied in two
+separate files, mach.h and mach.c. Their contents are
+described later in this document.</small></p>
+<a name="4. Register variables"></a>
+<h2>4. Register variables</h2>
+
+<p><small>If the machine has more than enough registers to
+generate code with, it is possible to reserve some of them
+for use as register variables. If it has not, this section
+may be skipped and any references to register variables in
+the rest of this document may be ignored.</small></p>
+
+<p><small>The front ends generate messages to the back ends
+telling them which local variables could go into registers.
+The information given is the offset of the local, its size
+and type and a scoring number, roughly the number of times
+it occurs.</small></p>
+
+<p><small>The decision which variable to put in which
+register is taken by the machine independent part of
+<i>cg</i> with the help of a scoring function provided by
+the table writer in mach.c. The types of variables known
+are</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>reg_any</small></p>
+</td>
+<td width="10%"></td>
+<td width="76%">
+
+<p><small>Just a variable of some integer type. Nothing
+special known about it.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>reg_float</small></p>
+</td>
+<td width="6%"></td>
+<td width="52%">
+
+<p><small>A floating point variable.</small></p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>reg_loop</small></p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p><small>A loop control variable.</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p><small>reg_pointer</small></p>
+</td>
+<td width="2%"></td>
+<td width="76%">
+
+<p><small>A pointer variable. Usually they are better
+candidates to put in registers.</small></p>
+</td>
+</table>
+
+<p><small>If register variables are used, more functions
+must be supplied in mach.c. These functions are explained
+later.</small></p>
+<a name="5. Description of the machine table"></a>
+<h2>5. Description of the machine table</h2>
+
+<p><small>The machine description table consists of the
+concatenation of the following sections:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p><small>Constant definitions</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p><small>Property definitions</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p><small>Register definitions</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4)</small></p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p><small>Token definitions</small></p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>5)</small></p>
+</td>
+<td width="6%"></td>
+<td width="30%">
+
+<p><small>Set definitions</small></p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>6)</small></p>
+</td>
+<td width="6%"></td>
+<td width="46%">
+
+<p><small>Instruction definitions</small></p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>7)</small></p>
+</td>
+<td width="6%"></td>
+<td width="32%">
+
+<p><small>Move definitions</small></p>
+</td>
+<td width="57%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>8)</small></p>
+</td>
+<td width="6%"></td>
+<td width="32%">
+
+<p><small>Test definitions</small></p>
+</td>
+<td width="57%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>9)</small></p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p><small>Stack definitions</small></p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>10)</small></p>
+</td>
+<td width="4%"></td>
+<td width="18%">
+
+<p><small>Coercions</small></p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>11)</small></p>
+</td>
+<td width="4%"></td>
+<td width="20%">
+
+<p><small>Code rules</small></p>
+</td>
+<td width="69%">
+</td>
+</table>
+
+<p><small>This is the order in the table but the
+descriptions in this document will use a slightly different
+order. All sections except the first start with an uppercase
+header word. Examples may be given in early stages that use
+knowledge that is explained in a later stage. If something
+is not clear the first time, please read on. All will clear
+up in a couple of pages.</small></p>
+
+<p><small>Input is in free format, white space and newlines
+may be used at will to improve legibility. Identifiers used
+in the table have the same syntax as C identifiers, upper
+and lower case considered different, all characters
+significant. Here is a list of reserved words; all of these
+are unavailable as identifiers.</small></p>
+
+
+<p align=center><small><img src="grohtml-99453.png"></small></p>
+
+<p><small>C style comments are accepted.</small></p>
+<pre><small>     /* this is a comment */
+</small></pre>
+
+<p><small>If the standard constant facility is not enough
+the C-preprocessor can be used to enhance the table
+format.</small></p>
+
+<p><small>Integers in the table have the normal C-style
+syntax. Decimal by default, octal when preceded by a 0 and
+hexadecimal when preceded by 0x.</small></p>
+<a name="5.1. Constant section"></a>
+<h2>5.1. Constant section</h2>
+
+<p><small>In the first part of the table some constants can
+be defined, most with the syntax</small></p>
+<pre><small>     NAME=value
+</small></pre>
+
+<p><small>value being an integer or string. Three constants
+must be defined here:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>EM_WSIZE</small></p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p><small>Number of bytes in a machine word. This is the
+number of bytes a <b>loc</b> instruction will put on the
+stack.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>EM_PSIZE</small></p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p><small>Number of bytes in a pointer. This is the number
+of bytes a <b>lal</b> instruction will put on the
+stack.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>EM_BSIZE</small></p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p><small>Number of bytes in the hole between AB and LB. If
+the calling sequence just saves PC and LB this size will be
+twice the pointersize.</small></p>
+</td>
+</table>
+
+<p><small>EM_WSIZE and EM_PSIZE are checked when a program
+is compiled with the resulting code generator. EM_BSIZE is
+used by <i>cg</i> to add to the offset of instructions
+dealing with locals having positive offsets, i.e.
+parameters.</small></p>
+
+<p><small>Other constants can be defined here to be used as
+mnemonics later in the table.</small></p>
+
+<p><small>Optional is the definition of a printformat for
+integers in the code file. This is given as</small></p>
+<pre><small>     FORMAT = string
+</small></pre>
+
+<p><small>The string must be a valid printf(III) format,
+and defaults to &quot;%ld&quot;. For example on the PDP-11
+one can use</small></p>
+<pre><small>     FORMAT= &quot;0%lo&quot;
+</small></pre>
+
+<p><small>to satisfy the old UNIX assembler that reads
+octal unless followed by a period, and the ACK assembler
+that follows C conventions.</small></p>
+
+<p><small>Tables under control of source code control
+systems like <i>sccs</i> or <i>rcs</i> can put their
+id-string here, for example</small></p>
+<pre><small>     rcsid=&quot;$Header$&quot;
+</small></pre>
+
+<p><small>These strings, like all strings in the table,
+will eventually end up in the binary code generator
+produced.</small></p>
+
+<p><small>Optionally one can give the factors with which
+the size and time parts of the cost vector have to be
+multiplied to ensure they have the same order of magnitude.
+This can be done as</small></p>
+<pre><small>     SIZEFACTOR = C3/C4
+
+
+     TIMEFACTOR = C1/C2
+</small></pre>
+
+<p><small>Above numbers must be read as rational numbers.
+Defaults are 1/1 for both of them. These constants set the
+default size/time tradeoff in the code generator, so if
+TIMEFACTOR and SIZEFACTOR are both 1 the code generator will
+choose at random between two code sequences where one has
+cost (10,4) and the other has cost (8,6). See also the
+description of the cost field below.</small></p>
+<a name="5.2. Property definition"></a>
+<h2>5.2. Property definition</h2>
+
+<p><small>This part of the table defines the list of
+properties that can be used to differentiate between
+register classes. It consists of a list of user-defined
+identifiers optionally followed by the size of the property
+in parentheses, default EM_WSIZE. Example for the
+PDP-11:</small></p>
+
+
+<p align=center><small><img src="grohtml-99454.png"></small></p>
+
+<p><small>Registers are allocated by asking for a property,
+so if for some reason in later parts of the table one
+particular register must be allocated it has to have a
+unique property.</small></p>
+<a name="5.3. Register definition"></a>
+<h2>5.3. Register definition</h2>
+
+<p><small>The next part of the tables describes the various
+registers of the machine and defines identifiers to be used
+in later parts of the tables. Syntax:</small></p>
+<pre><small>     &lt;register definitions&gt; : REGISTERS &lt;list of definitions&gt;
+     &lt;definition&gt; : &lt;registerlist&gt; &rsquo;:&rsquo; &lt;propertylist&gt; &lt;optional regvar&gt; &rsquo;.&rsquo;
+     &lt;register&gt; : ident [ &rsquo;(&rsquo; string &rsquo;)&rsquo; ] [ &rsquo;=&rsquo; ident [ &rsquo;+&rsquo; ident ] ]
+</small></pre>
+
+<p><small>Example for the PDP-11:</small></p>
+
+
+<p align=center><small><img src="grohtml-99455.png"></small></p>
+
+<p><small>The names in the left hand lists are names of
+registers as used in the table. They can optionally be
+followed by a string in parentheses, their name as far as
+the assembler is concerned. The default assembler name is
+the same as the table name. A name can also be followed
+by</small></p>
+<pre><small>     = othername
+</small></pre>
+
+<p><small>or</small></p>
+<pre><small>     = othername + othername
+</small></pre>
+
+<p><small>which says that the register is composed of the
+parts after the &rsquo;=&rsquo; sign. The identifiers at the
+right hand side of the lists are names of properties. The
+end of each register definition is a period.</small></p>
+
+<p><small>It might seem wise to list every property of a
+register, so one might give r0 the extra property MFPTREG
+named after the not too well known MFPT instruction on newer
+PDP-11 types, but this is not a good idea, especially since
+no use can be made of that instruction anyway. Every extra
+property means the register set is more unorthogonal and
+<i>cg</i> execution time is influenced by that, because it
+has to take into account a larger set of registers that are
+not equivalent. So try to keep the number of different
+register classes to a minimum. When faced with the choice
+between two possible code rules for a nonfrequent EM
+sequence, one being elegant but requiring an extra property,
+and the other less elegant, elegance should probably
+loose.</small></p>
+
+<p><small>Tables that implement register variables must
+mark registers to be used for variable storage here by
+following the list of properties by one of the
+following:</small></p>
+<pre><small>     regvar <i>or</i> regvar(reg_any)
+     regvar(reg_loop)
+     regvar(reg_pointer)
+     regvar(reg_float)
+</small></pre>
+
+<p><small>meaning they are candidates for that type of
+variable. All register variables of one type must be of the
+same size, and they may have no subregisters. Such registers
+are not available for normal code generation.</small></p>
+<a name="5.4. Stack token definition"></a>
+<h2>5.4. Stack token definition</h2>
+
+<p><small>The next part describes all possible tokens that
+can reside on the fake stack during code generation.
+Attributes of a token are described as a C struct
+declaration; this is followed by the size of the token in
+bytes, optionally followed by the cost of the token when
+used as an addressing mode and the format to be used on
+output.</small></p>
+
+<p><small>In general, when writing a table, it is not wise
+to try to think of all necessary tokens in advance. While
+writing the necessity or advisability for some token will be
+seen and it can then be added together with the stacking
+rules and coercions needed.</small></p>
+
+<p><small>Tokens should usually be declared for every
+addressing mode of the machine at hand and for every size
+directly usable in a machine instruction. Example for the
+PDP-11 (incomplete):</small></p>
+
+
+<p align=center><small><img src="grohtml-99456.png"></small></p>
+
+<p><small>Types allowed in the struct are ADDR, INT and all
+register properties. The type ADDR means a string and an
+integer, which is output as string+integer, and arithmetic
+on mixed ADDR and INT is possible. This is the right mode
+for anything that can be an assembler address expression.
+The type of the register in the token is strict. At any
+assignment of an expression of type register to a token
+attribute of type register <i>cgg</i> will check if the set
+of possible results from the expression is a subset of the
+set of permissible values for the token
+attribute.</small></p>
+
+<p><small>The cost-field is made up by the word <i>cost</i>
+followed by two numbers in parentheses, the size and
+timecosts of this token when output in the code file. If
+omitted, zero cost is assumed. While generating code,
+<i>cg</i> keeps track of a linear combination of these costs
+together with the costs of the instructions itself which we
+will see later. The coefficients of this linear combination
+are influenced by two things:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>The SIZEFACTOR and TIMEFACTOR constants, as
+mentioned above.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>A run time option to <i>cg</i> that can adjust
+the time/space tradeoff to all positions from 100% time to
+100% space.</small></p>
+</td>
+</table>
+
+<p><small>By supplying different code rules in certain
+situations it is possible to get a code generator that can
+adjust its code to the need of the moment. This is probably
+most useful with small machines, experience has shown that
+on the larger micro&rsquo;s and mini&rsquo;s the difference
+between time-optimal and space-optimal code is often
+small.</small></p>
+
+<p><small>The printformat consists of a list of strings
+intermixed with attributes from the token. Strings are
+output literally, attributes are printed according to their
+type and value. Tokens without a printformat should never be
+output, and <i>cgg</i> checks for this.</small></p>
+
+<p><small>Notice that tokens need not correspond to
+addressing modes; the regconst2 token listed above, meaning
+the sum of the contents of the register and the constant,
+has no corresponding addressing mode on the PDP-11, but is
+included so that a sequence of add constant, load indirect,
+can be handled efficiently. This regconst2 token is needed
+as part of the path</small></p>
+<pre><small>     REG -&gt; regconst2 -&gt; regind2
+</small></pre>
+
+<p><small>of which the first and the last &quot;exist&quot;
+and the middle is needed only as an intermediate
+step.</small></p>
+
+<p><small>Tokens with name &lsquo;LOCAL&rsquo; or
+&lsquo;DLOCAL&rsquo; are a special case when register
+variables are used, this is explained further in the section
+on token descriptions.</small></p>
+<a name="5.5. Sets"></a>
+<h2>5.5. Sets</h2>
+
+<p><small>Usually machines have certain collections of
+addressing modes that can be used with certain instructions.
+The stack patterns in the table are lists of these
+collections and since it is cumbersome to write out these
+long lists every time, there is a section here to give names
+to these collections. Please note that it is not forbidden
+to write out a set in the remainder of the table, but for
+clarity it is usually better not to.</small></p>
+
+<p><small>Example for the PDP-11 (incomplete):</small></p>
+
+
+<p align=center><small><img src="grohtml-99457.png"></small></p>
+
+<p><small>Permissible in the set construction are all the
+usual set operators, i.e.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>+</small></p>
+</td>
+<td width="8%"></td>
+<td width="18%">
+
+<p><small>set union</small></p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="28%">
+
+<p><small>set difference</small></p>
+</td>
+<td width="61%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>*</small></p>
+</td>
+<td width="8%"></td>
+<td width="32%">
+
+<p><small>set intersection</small></p>
+</td>
+<td width="57%">
+</td>
+</table>
+
+<p><small>Normal operator priorities apply, and parentheses
+can be used. Every token identifier is also a set identifier
+denoting the singleton collection of tokens containing just
+itself. Every register property as defined above is also a
+set matching all registers with that property. The standard
+set identifier ALL denotes the collection of all
+tokens.</small></p>
+<a name="5.6. Instruction definitions"></a>
+<h2>5.6. Instruction definitions</h2>
+
+<p><small>In the next part of the table the instructions
+for the machine are declared together with information about
+their operands. Example for the PDP-11(very
+incomplete):</small></p>
+<pre><small>     INSTRUCTIONS
+     /* default cost */
+
+
+     cost(2,600)
+
+
+     /* Normal instructions */
+
+
+     adc dst2:rw:cc .
+     add src2:ro,dst2:rw:cc cost(2,450).
+     ash src2:ro,REG:rw:cc .
+     ashc src2:ro,REGPAIR+ODDREG:rw .
+     asl dst2:rw:cc .
+     asr dst2:rw:cc .
+     bhis &quot;bcc&quot; label .
+
+
+     /* floating point instructions */
+
+
+     movf &quot;ldf&quot; fsrc,freg .
+     movf &quot;stf&quot; freg,fdst .
+</small></pre>
+
+<p><small>As the examples show an instruction definition
+consists of the name of the instruction, optionally followed
+by an assembler mnemonic in quotes-default is the name
+itself-and then a list of operands, optionally followed by
+the cost and then a period. If the cost is omitted the cost
+just after the word INSTRUCTIONS is assumed, if that is also
+omitted the cost is zero. The cost must be known by
+<i>cg</i> of course if it has multiple code generation paths
+to choose from.</small></p>
+
+<p><small>For each operand we have the set of possible
+token values, followed by a qualifier that can
+be</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>:ro</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>signifies that this operand is read only, so it
+can be replaced by a register with the same contents if
+available.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>:rw</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>signifies that the operand is
+read-write</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>:wo</small></p>
+</td>
+<td width="4%"></td>
+<td width="82%">
+
+<p><small>signifies that the operand is write
+only.</small></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>:cc</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>says that after the instruction is finished, the
+condition codes are set to this operand. If none of the
+operands have the :cc qualifier set, <i>cg</i> will assume
+that condition codes were unaffected (but see
+below).</small></p>
+</td>
+</table>
+
+<p><small>The first three qualifiers are of course mutually
+exclusive. The :ro qualifier does not cause any special
+action in the current implementation, and the :wo and :rw
+qualifiers are treated equal. It must be recommended however
+to be precise in the specifications, since later
+enhancements to the code generator might use
+them.</small></p>
+
+<p><small>As the last examples show it is not necessary to
+give one definition for an instruction. There are machines
+that have very unorthogonal instruction sets, in fact most
+of them do, and it is possible to declare each possible
+combination of operands. The <i>cgg</i> program will check
+all uses of the instruction to find out which one was
+meant.</small></p>
+
+<p><small>Although not in the PDP-11 example above there is
+a possibility to describe instructions that have side
+effects to registers not in the operand list. The only thing
+possible is to say that the instruction is destructive to
+some registers or the condition codes, by following the
+operand list with the word <i>kills</i> and a list of the
+things destroyed. Example for some hypothetic accumulator
+machine:</small></p>
+<pre><small>     add source2:ro kills ACCU :cc .
+</small></pre>
+
+<p><small>The cost fields in the definitions for tokens and
+instructions are added together when generating code. It
+depends on the machine at hand whether the costs are
+orthogonal enough to make use of both these costs, in
+extreme cases every combination of instructions and operands
+can be given in this section, all with their own
+costs.</small></p>
+<a name="5.7. Expressions"></a>
+<h2>5.7. Expressions</h2>
+
+<p><small>Throughout the rest of the table expressions can
+be used in some places. This section will give the syntax
+and semantics of expressions. There are four types of
+expressions: integer, address, register and undefined.
+Really the type register is nonexistent as such, for each
+register expression <i>cgg</i> keeps a set of possible
+values, and this set can be seen as the real
+type.</small></p>
+
+<p><small>Type checking is performed by <i>cgg</i>. An
+operator with at least one undefined operand returns
+undefined except for the defined() function mentioned below.
+An undefined expression is interpreted as FALSE when it is
+needed as a truth value. It is the responsibility of the
+table writer to ensure no undefined expressions are ever
+used as initialisers for token attributes. This is
+unfortunately almost impossible to check for <i>cgg</i> so
+be careful.</small></p>
+
+<p><small>Basic terms in an expression are</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><small>number</small></p>
+</td>
+<td width="20%"></td>
+<td width="68%">
+
+<p><small>A number is a constant of type integer. Also
+usable is an identifier defined to a number in the constant
+definition section.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>&quot;string&quot;</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>A string within double quotes is a constant of
+type address. All the normal C style escapes may be used
+within the string. Also usable is an identifier defined to a
+string in the constant definition section.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>[0-9][bf]</small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>This must be read as a grep-pattern. It evaluates
+to a string that is the label name for the temporary label
+meant. More about this in the section on code
+rules.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>REGIDENT</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>The name of a register is a constant of type
+register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>$<i>i</i></small></p>
+</td>
+<td width="28%"></td>
+<td width="68%">
+
+<p><small>A dollarsign followed by a number is the
+representation of the argument of EM instruction . The type
+of the operand is dependent on the instruction, sometimes it
+is integer, sometimes it is address. It is undefined when
+the instruction has no operand. Instructions with
+type-letter w can occur without an operand. This can be
+checked in the code rule with the defined() pseudo
+function.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="31%"></td>
+<td width="68%">
+<p><small>If it is unimaginable for the operand of the
+instruction ever to be something different from a plain
+integer, the type is integer, otherwise it is address.<br>
+Those who want to know it exactly, the integer instruction
+types are the instructions marked with the type-letters
+c,f,l,n,o,s,r,w,z in the EM manual.<i><br>
+Cg</i> makes all necessary conversions, like adding EM_BSIZE
+to positive arguments of instructions dealing with locals,
+prepending underlines to global names, converting code
+labels into a unique representation etc. Details about this
+can be found in the section about machine dependent C
+code.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>%1</small></p>
+</td>
+<td width="28%"></td>
+<td width="68%">
+
+<p><small>This in general means the token mentioned first
+in the stack pattern. When used inside an expression the
+token must be a simple register. Type of this is
+register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><small>%1.off</small></p>
+</td>
+<td width="20%"></td>
+<td width="68%">
+
+<p><small>This means attribute &quot;off&quot; of the first
+stack pattern token. Type is the same as that of attribute
+&quot;off&quot;. To use this expression implies a check that
+all tokens in the set used have the same attribute in the
+same place.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>%off</small></p>
+</td>
+<td width="24%"></td>
+<td width="68%">
+
+<p><small>This means attribute &quot;off&quot; in the
+&lsquo;current&rsquo; token. This can only be used when no
+confusion is possible about which token was meant, eg. in
+the optional boolean expressions following token sets in the
+move and test rules, in coercions or in the kills section
+inside the code rules. Same check as above.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>%1.1</small></p>
+</td>
+<td width="24%"></td>
+<td width="68%">
+
+<p><small>This is the first subregister of the first token.
+Previous comments apply.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>%b</small></p>
+</td>
+<td width="28%"></td>
+<td width="68%">
+
+<p><small>A percent sign followed by a lowercase letter
+stands for an allocated register. This is the second
+allocated register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>%a.2</small></p>
+</td>
+<td width="24%"></td>
+<td width="68%">
+
+<p><small>The second subregister of the first allocated
+register.</small></p>
+</td>
+</table>
+
+<p><small>All normal C operators apply to integers, the +
+operator on addresses behaves as one would expect and the
+only operators allowed on register expressions are == and !=
+. Furthermore there are some special
+&lsquo;functions&rsquo;:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><small>defined(e)</small></p>
+</td>
+<td width="12%"></td>
+<td width="68%">
+
+<p><small>Returns 1 if expression <i>e</i> is defined, 0
+otherwise.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="30%">
+
+<p><small>samesign(e1,e2)</small></p>
+</td>
+<td width="2%"></td>
+<td width="68%">
+
+<p><small>Returns 1 if integer expression <i>e1</i> and
+<i>e2</i> have the same sign.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p><small>sfit(e1,e2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="68%">
+
+<p><small>Returns 1 if integer expression <i>e1</i> fits as
+a signed integer into a field of <i>e2</i> bits, 0
+otherwise.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p><small>ufit(e1,e2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="68%">
+
+<p><small>Same as above but now for unsigned
+<i>e1</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>rom($a,n)</small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>Integer expression giving word <i>n</i> from the
+<b>rom</b> descriptor pointed at by EM instruction number
+<i>a</i> in the EM-pattern. Undefined if that descriptor
+does not exist.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><small>is_rom($a)</small></p>
+</td>
+<td width="12%"></td>
+<td width="68%">
+
+<p><small>Integer expression indicating whether EM
+instruction number <i>a</i> in the EM-pattern refers to ROM.
+This may be useful for generating position-independent code
+with the ROM in read-only memory. <i>Is_rom</i> enables one
+to see the difference between ROM references and other data
+references.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>loww($a)</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Returns the lower half of the argument of EM
+instruction number <i>a</i>. This is used to split the
+arguments of a <b>ldc</b> instruction.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>highw($a)</small></p>
+</td>
+<td width="14%"></td>
+<td width="40%">
+
+<p><small>Same for upper half.</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+
+<p><small>The next two &lsquo;functions&rsquo; are only
+needed in a table that implements register
+variables.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>inreg(e)</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Returns the status of the local variable with
+offset <i>e</i> from the localbase. Value is an integer,
+negative if the local was not allowed as a register
+variable, zero if it was allowed but not assigned to a
+register, and the type of the register if it was assigned to
+a register. This makes it possible to write</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="31%"></td>
+<td width="68%">
+<pre><small>     inreg($1)==reg_pointer
+</small></pre>
+<!-- INDENTATION -->
+<p><small>and similar things.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p><small>regvar(e,t)</small></p>
+</td>
+<td width="10%"></td>
+<td width="68%">
+
+<p><small>Type of this is register. It returns the register
+the local with offset <i>e</i> is assigned to. The table
+writer guarantees the register is one of type <i>t</i>, with
+<i>t</i> one of reg_any, reg_loop, reg_pointer or reg_float.
+If <i>t</i> is omitted reg_any is assumed. Undefined if
+inreg(<i>e</i>)&lt;=0 .</small></p>
+</td>
+</table>
+
+<p><small>The next two &lsquo;functions&rsquo; are only
+needed in a table that uses the top element size
+information.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p><small>topeltsize($a)</small></p>
+</td>
+<td width="4%"></td>
+<td width="68%">
+
+<p><small>Returns the size of the element on top of the
+EM-stack at the label identified by $a. This can be used to
+put the top of the stack in a register at the moment of an
+unconditional jump. At an unconditional jump, the size of
+the top-element will always look 0.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="30%">
+
+<p><small>fallthrough($a)</small></p>
+</td>
+<td width="2%"></td>
+<td width="68%">
+
+<p><small>Returns 1 if the label identified by $a can be
+reached via fallthrough, 0 otherwise.</small></p>
+</td>
+</table>
+<a name="5.8. Token descriptions"></a>
+<h2>5.8. Token descriptions</h2>
+
+<p><small>Throughout the rest of the table tokens must be
+described, be it as operands of instructions or as
+stack-replacements. In all those cases we will speak about a
+token description. The possibilities for these will be
+described here.</small></p>
+
+<p><small>All expressions of type register are token
+descriptions. The construct %1 means the token matched first
+in the stack pattern. All other token descriptions are those
+that are built on the spot. They look like this:</small></p>
+<pre><small>     { &lt;tokenname&gt; , &lt;list of token attribute initializing expressions&gt; }
+</small></pre>
+
+<p><small>All expressions are type-checked by <i>cgg</i>,
+and the number of initializers is also checked.</small></p>
+
+<p><small>A special case of the last token descriptions
+occurs when the token name is &lsquo;LOCAL&rsquo; or
+&lsquo;DLOCAL&rsquo; and the table uses register variables.
+The first token attribute then must be of type integer and
+the token description is automagically replaced by the
+register chosen if the LOCAL (wordsize) or DLOCAL (twice the
+wordsize) was assigned to a register.</small></p>
+<a name="5.9. Code rules"></a>
+<h2>5.9. Code rules</h2>
+
+<p><small>The largest section of the tables consists of the
+code generation rules. They specify EM patterns, stack
+patterns, code to be generated etc. Broadly the syntax
+is</small></p>
+<pre><small>code rule : EM-part code-part
+EM-part : EM-pattern | procedure-heading
+code-part : code-description | procedure-call
+code-description : stackpattern kills allocates generates yields leaving
+</small></pre>
+
+<p><small>Ignoring the &quot;procedure&quot;-part for now,
+the description for the EM-pattern and the code-description
+follows. Almost everything here is optional, the minimum
+code rule is:</small></p>
+<pre><small>     pat nop
+</small></pre>
+
+<p><small>that will simply throw away <i>nop</i>
+instructions.</small></p>
+<a name="5.9.1. The EM pattern"></a>
+<h2>5.9.1. The EM pattern</h2>
+
+<p><small>The EM pattern consists of a list of EM mnemonics
+preceded by the word <i>pat</i> optionally followed by a
+boolean expression. Examples:</small></p>
+<pre><small>     pat <b>loe
+</b></small></pre>
+
+<p><small>will match a single <b>loe</b>
+instruction,</small></p>
+<pre><small>     pat <b>loc loc cif</b> $1==2 &amp;&amp; $2==8
+</small></pre>
+
+<p><small>is a pattern that will match</small></p>
+<pre><small><b>     loc</b> 2
+<b>     loc</b> 8
+<b>     cif
+</b></small></pre>
+
+<p><small>and</small></p>
+<pre><small>     pat <b>lol inc stl</b> $1==$3
+</small></pre>
+
+<p><small>will match for example</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small><b>lol</b> 6</small></p>
+<td width="9%"></td>
+<td width="20%">
+
+<p><small><b>lol</b> -2</small></p>
+</td>
+<td width="20%">
+</td>
+<td width="20%">
+
+<p><small><b>lol</b> 4<b><br>
+inc</b></small></p>
+</td>
+<td width="20%"></td>
+<td width="9%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="20%">
+
+<p><small><b>inc</b></small></p>
+</td>
+<td width="20%">
+
+<p><small>but <i>not</i></small></p>
+</td>
+<td width="20%">
+
+<p><small><b>inc<br>
+stl</b> 6</small></p>
+</td>
+<td width="20%"></td>
+<td width="9%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="20%">
+
+<p><small><b>stl</b> -2</small></p>
+</td>
+<td width="20%">
+</td>
+<td width="20%">
+
+<p><small><b>stl</b> -4</small></p>
+</td>
+<td width="20%"></td>
+<td width="9%">
+</td>
+</table>
+
+<p><small>A missing boolean expression evaluates to
+TRUE.</small></p>
+
+<p><small>The code generator will match the longest EM
+pattern on every occasion, if two patterns of the same
+length match the first in the table will be chosen, while
+all patterns of length greater than or equal to three are
+considered to be of the same length. This rule of three is
+an unfortunate implementation dependent restriction, but
+patterns longer than three EM instructions are luckily not
+needed too often.</small></p>
+
+<p><small>The EM mnemonic may also be the
+pseudo-instruction <b>lab</b>, which matches a label. Its
+argument can be used in testing on topeltsize and
+fallthrough. When this pattern is specified, the label
+should be defined explicitly with a <i>labeldef</i>
+statement.</small></p>
+
+<p><small>Following the EM-pattern there may be more than
+one code rule, <i>cg</i> will choose using heuristics and
+the cost information provided with the instruction and token
+definitions. Owing to parsing reasons of the table, the word
+<i>with</i> (see below) is mandatory when there are more
+code rules attached to one EM-pattern. The stack pattern may
+be empty however.</small></p>
+<a name="5.9.2. The stack pattern"></a>
+<h2>5.9.2. The stack pattern</h2>
+
+<p><small>The optional stack pattern is a list of token
+sets preceded by the word <i>with</i>. The token sets are
+usually represented by set identifiers for clarity. No
+boolean expression is allowed here. The first expression is
+the one that matches the top of the stack.</small></p>
+
+<p><small>If the pattern is followed by the word STACK it
+only matches if there is nothing else on the fake stack, and
+the code generator will stack everything not matched at the
+start of the rule.</small></p>
+
+<p><small>The pattern can be preceded with the word
+<i>exact</i> following the <i>with</i> that tells the code
+generator not to try to coerce to the pattern but only to
+use it when it is already present on the fake stack. There
+are two reasons for this construction, correctness and
+speed. It is needed for correctness when the pattern
+contains a register that is not transparent when data is
+moved through it.</small></p>
+
+<p><small>Example: on the PDP-11 the shortest code
+for</small></p>
+<pre><small><b>     lae</b> a
+<b>     loi</b> 8
+<b>     lae</b> b
+<b>     sti</b> 8
+</small></pre>
+
+<p><small>is</small></p>
+<pre><small>     movf _a,fr0
+     movf fr0,_b
+</small></pre>
+
+<p><small>if the floating point processor is in double
+precision mode and fr0 is free. Unfortunately this is not
+correct since a trap can occur on certain kinds of data.
+This could happen if there was a stack pattern for
+<b>sti</b> 8 like this:</small></p>
+<pre><small>     with DBLREG
+</small></pre>
+
+<p><small>The code generator would then find that coercing
+the 8-byte global _a to a floating point register and then
+storing it to _b was the cheapest, if the space/time knob
+was turned far enough to space. This can be prevented by
+changing the stack pattern to</small></p>
+<pre><small>     with exact DBLREG
+</small></pre>
+
+<p><small>It is unfortunate that the type information is no
+longer present, since if _a really is a floating point
+number the move could be made without error.</small></p>
+
+<p><small>The second reason for the <i>exact</i> construct
+is speed. When the code generator has a long list of
+possible stack patterns for one EM pattern it can waste much
+time trying to find coercions to all of them, while the mere
+presence of such a long list indicates that the table writer
+has given many special cases. Prepending all the special
+cases by <i>exact</i> will stop the code generator from
+trying to find things that either cannot be done, or are too
+expensive anyway.</small></p>
+
+<p><small>So in general it is wise to prepend all stack
+patterns that cannot be made by coercions with
+<i>exact</i>.</small></p>
+
+<p><small>Using both <i>exact</i> and STACK in the stack
+pattern has the effect that the rule will only be taken if
+there is nothing else on the fake stack.</small></p>
+<a name="5.9.3. The kills part"></a>
+<h2>5.9.3. The kills part</h2>
+
+<p><small>The optional kills part describes certain tokens
+that should neither remain on the fake stack, nor remembered
+as contents of registers. This is usually only required with
+store operations. The entire fake stack, except for the part
+matched in the stack pattern, is searched for tokens
+matching the expression and they are copied to the real
+stack. Every register that contains the token is marked as
+empty.</small></p>
+
+<p><small>Syntax is</small></p>
+<pre><small>     kills &lt;list of things to kill separated by commas&gt;
+     thing to kill : token set optionally followed by boolean expression
+</small></pre>
+
+<p><small>Example:</small></p>
+<pre><small>     kills regind2 %reg != lb || %off == $1
+</small></pre>
+
+<p><small>is a kills part used for example in the
+<b>inl</b> or <b>stl</b> code rule. It removes all register
+offsetted tokens where the register is not the localbase
+plus the local in which the store is done. The necessity for
+this can be seen from the following example:</small></p>
+<pre><small><b>     lol</b> 4
+<b>     inl</b> 4
+<b>     stl</b> 6
+</small></pre>
+
+<p><small>Without a proper kills part in the rule for
+<b>inl</b> code would be generated as here</small></p>
+<pre><small>     inc 4(r5)
+     mov 4(r5),6(r5)
+</small></pre>
+
+<p><small>so local 6 would be given the new value of local
+4 instead of the old as the EM code prescribed.</small></p>
+
+<p><small>When generating code for an EM-instruction like
+<b>sti</b> it is necessary to write a line in the table
+like</small></p>
+<pre><small>     kills all_except_constant_or_register
+</small></pre>
+
+<p><small>where the long identifier is a set containing all
+tokens that can be the destination of some random indirect
+store. These indirect stores are the main reason to prevent
+this <i>kills</i> line to be deduced automatically by
+<i>cgg</i>.</small></p>
+
+<p><small>When generating something like a branch
+instruction it might be needed to empty the fake stack
+completely. This can of course be done with</small></p>
+<pre><small>     kills ALL
+</small></pre>
+
+<p><small>or by ending the stack pattern with the word
+STACK, if the stack pattern does not start with
+<i>exact</i>. The latter does not erase the contents of
+registers.</small></p>
+
+<p><small>It is unfortunate that this part is still present
+in the table but it is too much for now to let the
+<i>cgg</i> program discover what rules ruin what kind of
+tokens. Maybe some day .....</small></p>
+<a name="5.9.4. The allocates part"></a>
+<h2>5.9.4. The allocates part</h2>
+
+<p><small>The optional register allocation part describes
+the registers needed. Syntax is</small></p>
+<pre><small>     uses &lt;list of use elements separated by commas&gt;
+</small></pre>
+
+<p><small>where itemlist is a list of three kinds of
+things:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small><i>reusing</i> &lt; a token description &gt;, for
+example %1.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This will instruct the code generator that all
+registers contained in this token can be reused if they are
+not used in another token on the fakestack, so that they are
+available for allocation in this <i>uses</i> line if they
+were only used in that token. See example below.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p><small>a register property.</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This will allocate a register with that property,
+that is marked as empty at this point. Look ahead can be
+performed if there is more than one register
+available.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p><small>a register property with
+initialization.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This will allocate the register as in 2) but will
+also initialize it. This eases the task of the code
+generator because it can find a register already filled with
+the right value if it exists.</small></p>
+</td>
+</table>
+
+<p><small>Examples:</small></p>
+<pre><small>     uses ODDREG
+</small></pre>
+
+<p><small>will allocate an odd register, while</small></p>
+<pre><small>     uses REG={regind2,lb,$1}
+</small></pre>
+
+<p><small>will allocate a register while simultaneously
+filling it with the asked value.<br>
+Inside the coercion from xsrc2 to REG in the PDP-11 table
+the following line can be found.</small></p>
+<pre><small>     uses reusing %1, REG=%1
+</small></pre>
+
+<p><small>This tells the code generator that registers
+contained in %1 can be used again and asks to fill the
+register allocated with %1. So if
+%1={regind2,r3,&quot;4&quot;} and r3 is not in use elsewhere
+on the fake stack the following code might be
+generated.</small></p>
+<pre><small>     mov 4(r3),r3
+</small></pre>
+
+<p><small>In the rest of the line the registers allocated
+can be named by %a and %b.1,%b.2, i.e. with lower case
+letters in order of allocation.</small></p>
+<a name="5.9.5. The generates part"></a>
+<h2>5.9.5. The generates part</h2>
+
+<p><small>Code to be generated, also optionally, is
+specified as the word <i>gen</i> followed by a list of items
+of the following kind:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>An instruction name followed by a comma-separated
+list of token descriptions. <i>Cgg</i> will search the
+instruction definitions for the machine to find a suitable
+instruction. At code generation time the assembler name of
+the instruction will be output followed by a space, followed
+by a comma separated list of tokens.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>In the table an instruction without operands must
+be followed by a period. The author of <i>cgg</i> could not
+get <i>yacc</i> to accept his syntax without it. Sorry about
+this.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="88%">
+
+<p><small>a <i>move</i> call. This has the following
+syntax:</small></p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><small>     move &lt;token description&gt;,&lt;token description&gt;
+</small></pre>
+<!-- INDENTATION -->
+<p><small>Moves are handled specially since that enables the
+code generator to keep track of register contents.
+Example:</small></p>
+<!-- INDENTATION -->
+<pre><small>     move r3,{regind2,lb,$1}
+</small></pre>
+<!-- INDENTATION -->
+<p><small>will generate code to move r3 to $1(r5) except
+when r3 already was a copy of $1(r5). Then the code will be
+omitted. The rules describing how to move things to each
+other can be found in the move definitions section described
+below.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>For machines that have condition codes, which
+alas most of them do, there are provisions to remember
+condition code settings and prevent needless testing. To set
+the condition code to a token put in the code the following
+call:</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><small>     test &lt;token description&gt;
+</small></pre>
+<!-- INDENTATION -->
+<p><small>This will generate a test if the condition codes
+were not already set to that token. The rules describing how
+to test things can be found in the test definitions section
+described below. See also the :cc qualifier that can be used
+at instruction definition time.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>The <i>return</i> statement. Only used when
+register variables are in use. This statement causes a call
+to the machine dependent C-routine <i>regreturn</i>.
+Explanation of this must wait for the description of the
+file mach.c below.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>5)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>The <i>labeldef</i> statement. Its only argument
+should be that of the <i>lab</i> pseudo-instruction. This is
+needed to generate local labels when the top element size
+information is used. It takes the form</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>labeldef $i</small></p>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>6)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>A temporary label of the form &lt;digit&gt;: may
+be placed here. Expressions of the form [0-9][bf] in this
+code rule generate the same string as is used for this
+label. The code generator system could probably easily be
+changed to make this work for assemblers that do not support
+this type of label by generating unique labels itself.
+Implementation of this is not contemplated at the
+moment.</small></p>
+</td>
+</table>
+<a name="5.9.6. Stack replacement"></a>
+<h2>5.9.6. Stack replacement</h2>
+
+<p><small>The optional stack replacement is a possibly
+empty list of tokens to be pushed onto the fake stack. It
+start with the word <i>yields</i>, and is followed by a list
+of token descriptions.</small></p>
+
+<p><small>All tokens matched by the stack pattern at the
+beginning of the code rule are first removed and their
+registers deallocated. Items are pushed in the order of
+appearance. This means that the last item will be on the top
+of the stack after the push. So if the stack pattern
+contained two sets and they must be pushed back unchanged,
+they have to be specified as stack replacement</small></p>
+<pre><small>     yields %2 %1
+</small></pre>
+
+<p><small>and not the other way around. This is known to
+cause errors in tables so watch out for this!</small></p>
+<a name="5.9.7. EM replacement"></a>
+<h2>5.9.7. EM replacement</h2>
+
+<p><small>In exceptional cases it might be useful to leave
+part of an EM-pattern undone. For example, a <b>sdl</b>
+instruction might be split into two <b>stl</b> instructions
+when there is no 4-byte quantity on the stack. The EM
+replacement part allows one to express this. It is activated
+by the word <i>leaving</i>.</small></p>
+
+<p><small>Example:</small></p>
+<pre><small>     leaving <b>stl</b> $1 <b>stl</b> $1+2
+</small></pre>
+
+<p><small>The instructions are inserted in the stream so
+that they can match the first part of a pattern in the next
+step. Note that since the code generator traverses the EM
+instructions in a strict linear fashion, it is impossible to
+let the EM replacement match later parts of a pattern. So if
+there is a pattern</small></p>
+<pre><small><b>     loc stl</b> $1==0
+</small></pre>
+
+<p><small>and the input is</small></p>
+<pre><small><b>     loc</b> 0 <b>sdl</b> 4
+</small></pre>
+
+<p><small>the <b>loc</b> 0 will be processed first, then
+the <b>sdl</b> might be split into two <b>stl</b>&rsquo;s
+but the pattern cannot match now.</small></p>
+<a name="5.9.8. Examples"></a>
+<h2>5.9.8. Examples</h2>
+
+<p><small>A list of examples for the PDP-11 is given here.
+Far from being complete it gives examples of most kinds of
+instructions.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>pat loc</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {const2, $1}</small></p>
+
+<p><small>pat ldc</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {const2, loww($1)} {const2,
+highw($1)}</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>These simple patterns just push one or more
+tokens onto the fake stack.</small></p>
+<pre><small>     pat lof
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>with REG</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regind2,%1,$1}<br>
+with exact regconst2</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regind2,%1.reg,$1+%1.off}<br>
+with exact addr_external</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {relative2,$1+%1.off}<br>
+with exact addr_local</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {LOCAL, %1.ind + $1,2}</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>This pattern shows the possibility to do
+different things depending on the fake stack contents, there
+are some rules for some specific cases plus a general rule,
+not preceded by <i>exact</i> that can always be taken after
+a coercion, if necessary.</small></p>
+<pre><small>     pat lxl $1&gt;3
+     uses REG={LOCAL, SL, 2}, REG={const2,$1-1}
+     gen 1:
+         move {regind2,%a, SL},%a
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>sob %b,{label,1b}</small></p>
+<td width="17%"></td>
+<td width="50%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>This rule shows register allocation with
+initialisation, and the use of a temporary label. The
+constant SL used here is defined to be the offset from lb of
+the static link, that is pushed by the Pascal compiler as
+the last argument of a function.</small></p>
+<pre><small>     pat stf
+     with regconst2 xsrc2
+       kills allexeptcon
+       gen move %2,{regind2,%1.reg,$1+%1.off}
+     with addr_external xsrc2
+       kills allexeptcon
+       gen move %2,{relative2,$1+%1.off}
+</small></pre>
+
+<p><small>This rule shows the use of a <i>kills</i> part in
+a store instruction. The set allexeptcon contains all tokens
+that can be the destination of an indirect
+store.</small></p>
+<pre><small>     pat sde
+     with exact FLTREG
+       kills posextern
+       gen move %1,{relative4,$1}
+     with exact ftolong
+       kills posextern
+       gen setl.
+           movfi %1.reg,{relative4,$1}
+           seti.
+     with src2 src2
+       kills posextern
+       gen move %1, {relative2, $1 }
+           move %2, {relative2, $1+2}
+</small></pre>
+
+<p><small>The rule for <b>sde</b> shows the use of the
+<i>exact</i> clause in both qualities, the first is for
+correctness, the second for efficiency. The third rule is
+taken by default, resulting in two separate stores, nothing
+better exists on the PDP-11.</small></p>
+<pre><small>     pat sbi $1==2
+     with src2 REG
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen sub %1,%2</small></p>
+<td width="13%"></td>
+<td width="54%">
+
+<p><small>yields %2</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>with exact REG src2-REG<br>
+gen sub %2,%1</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>neg %1</small></p>
+<td width="21%"></td>
+<td width="46%">
+
+<p><small>yields %1</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>This rule for <i>sbi</i> has a normal first part,
+and a hand optimized special case as its second
+part.</small></p>
+<pre><small>     pat mli $1==2
+     with ODDREG src2
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen mul %2,%1</small></p>
+<td width="13%"></td>
+<td width="54%">
+
+<p><small>yields %1</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>with src2 ODDREG</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen mul %1,%2</small></p>
+<td width="13%"></td>
+<td width="54%">
+
+<p><small>yields %2</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>This shows the general property for rules with
+commutative operators, heuristics or look ahead will have to
+decide which rule is the best.</small></p>
+<pre><small>     pat loc sli $1==1 &amp;&amp; $2==2
+     with REG
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen asl %1</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %1</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>A simple rule involving a longer EM-pattern, to
+make use of a specialized instruction available.</small></p>
+<pre><small>     pat loc loc cii $1==1 &amp;&amp; $2==2
+     with src1or2
+     uses reusing %1,REG
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen movb %1,%a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>A somewhat more complicated example of the same.
+Note the <i>reusing</i> clause.</small></p>
+<pre><small>     pat loc loc loc cii $1&gt;=0 &amp;&amp; $2==2 &amp;&amp; $3==4
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>leaving loc $1 loc 0</small></p>
+</table>
+
+<p><small>Shows a trivial example of EM-replacement. This
+is a rule that could be done by the peephole optimizer, if
+word order in longs was defined in EM. On a
+&lsquo;big-endian&rsquo; machine the two replacement
+instructions would be the other way around.</small></p>
+<pre><small>     pat and $1==2
+     with const2 REG
+       gen bic {const2,~%1.num},%2yields %2
+     with REG const2
+       gen bic {const2,~%2.num},%1yields %1
+     with REG REG
+       gen com %1
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>bic %1,%2</small></p>
+<td width="21%"></td>
+<td width="46%">
+
+<p><small>yields %2</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>Shows the way to handle the absence of an
+<i>and</i>-instruction.</small></p>
+<pre><small>     pat set $1==2
+     with REG
+     uses REG={const2,1}
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen ash %1,%a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>Shows the building of a word-size
+set.</small></p>
+<pre><small>     pat lae aar $2==2 &amp;&amp; rom($1,3)==1 &amp;&amp; rom($1,1)==0
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>leaving adi 2</small></p>
+</table>
+
+<p><small>pat lae aar $2==2 &amp;&amp; rom($1,3)==1
+&amp;&amp; rom($1,1)!=0</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>leaving adi 2 adp 0-rom($1,1)</small></p>
+</table>
+
+<p><small>Two rules showing the use of the rom pseudo
+function, and some array optimalisation.</small></p>
+<pre><small>     pat bra
+     with STACK
+     gen jbr {label, $1}
+</small></pre>
+
+<p><small>A simple jump. The stack pattern guarantees that
+everything will be stacked before the jump is
+taken.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="11" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>pat lab</small></p>
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>topeltsize($1)==2 &amp;&amp; !fallthrough($1)<br>
+gen labeldef $1</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>yields r0</small></p>
+
+<p><small>pat lab</small></p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>topeltsize($1)==2 &amp;&amp;
+fallthrough($1)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+</table>
+
+<p><small>with src2<br>
+gen move %1,r0</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="9" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>labeldef $1</small></p>
+<td width="17%"></td>
+<td width="2%">
+</td>
+<td width="30%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>yields r0</small></p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+</table>
+
+<p><small>pat lab topeltsize($1)!=2<br>
+with STACK<br>
+kills all<br>
+gen labeldef $1</small></p>
+
+<p><small>pat bra topeltsize($1)==2<br>
+with src2 STACK<br>
+gen move %1,d0</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>jbr {label, $1}</small></p>
+</table>
+
+<p><small>pat bra topeltsize($1)!=2<br>
+with STACK<br>
+gen jbr {label, $1}</small></p>
+
+<p><small>The combination of these patterns make sure that
+the top of the EM-stack will be in register r0 whenever
+necessary. The top element size mechanism will also show a
+size of 0 whenever a conditional branch to a label occurs.
+This saves a lot of patterns and hardly decreases
+performance. When the same register is used to return
+function results, this can save many moves to and from the
+stack.</small></p>
+<pre><small>     pat cal
+     with STACK
+     gen jsr pc,{label, $1}
+</small></pre>
+
+<p><small>A simple call. Same comments as previous
+rule.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>pat lfr $1==2</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields r0<br>
+pat lfr $1==4</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields r1 r0</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>Shows the return area conventions of the PDP-11
+table. At this point a reminder: the <b>asp</b> instruction,
+and some other instructions must leave the function return
+area intact. See the defining document for EM for exact
+information.</small></p>
+<pre><small>     pat ret $1==0
+     with STACK
+     gen mov lb,sp
+         rts pc
+</small></pre>
+
+<p><small>This shows a rule for <b>ret</b> in a table not
+using register variables. In a table with register variables
+the <i>gen</i> part would just contain
+<i>return</i>.</small></p>
+<pre><small>     pat blm
+     with REG REG
+     uses REG={const2,$1/2}
+     gen 1:
+         mov {autoinc,%2},{autoinc,%1}
+         sob %a,{label,1b}
+</small></pre>
+
+<p><small>This rule for <b>blm</b> already uses three
+registers of the same type. <i>Cgg</i> contains code to
+check all rules to see if they can be applied from an empty
+fakestack. It uses the marriage thesis from Hall, a thesis
+from combinatorial mathematics, to accomplish
+this.</small></p>
+<pre><small>     pat exg $1==2
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>with src2 src2</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %1 %2</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>This rule shows the exchanging of two elements on
+the fake stack.</small></p>
+<a name="5.10. Code rules using procedures"></a>
+<h2>5.10. Code rules using procedures</h2>
+
+<p><small>To start this section it must be admitted at once
+that the word procedure is chosen here mainly for its
+advertising value. It more resembles a glorified goto but
+this of course can not be admitted in the glossy brochures.
+This document will continue to use the word
+procedure.</small></p>
+
+<p><small>The need for procedures was felt after the first
+version of the code generator system was made, mainly
+because of conditional instructions. Often the code
+sequences for <b>tlt</b>, <b>tle</b>, <b>teq</b>,
+<b>tne</b>, <b>tge</b> and <b>tgt</b> were identical apart
+from one opcode in the code rule. The code sequence had to
+be written out six times however. Not only did this increase
+the table size and bore the table writer, it also led to
+errors when changing the table since it happened now and
+then that five out of six rules were changed.</small></p>
+
+<p><small>In general the procedures in this table format
+are used to keep one copy instead of six of the code rules
+for all sorts of conditionals and one out of two for things
+like increment/decrement.</small></p>
+
+<p><small>And now the syntax, first the procedure
+definition, which must indeed be defined before the call
+because <i>cgg</i> is one-pass. The procedure heading
+replaces the EM-pattern in a code rule and looks like
+this:</small></p>
+<pre><small>     proc &lt;identifier&gt; &lt;optional example&gt;
+</small></pre>
+
+<p><small>The identifier is used in later calls and the
+example must be used if expressions like $1 are used in the
+code rule.</small></p>
+<pre><small>     &lt;optional example&gt; : example &lt;list of EM-instructions&gt;
+</small></pre>
+
+<p><small>so an example looks just like an EM-pattern, but
+without the optional boolean expression. The example is
+needed to know the types of $1 expressions. The current
+version of <i>cgg</i> does not check correctness of the
+example, so be careful.</small></p>
+
+<p><small>A procedure is called with string-parameters,
+that are assembler opcodes. They can be accessed by
+appending the string &lsquo;[&lt;number&gt;]&rsquo; to a
+table opcode, where &lt;number&gt; is the parameter number.
+The string &lsquo;*&rsquo; can be used as an equivalent for
+&lsquo;[1]&rsquo;. Just in case this is not clear, here is
+an example for a procedure to increment/decrement a
+register.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>incop REG:rw:cc .</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>/* in the INSTRUCTIONS part of course
+*/</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>proc incdec<br>
+with REG</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen incop* %1</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %1</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>The procedure is called with parameter
+&quot;inc&quot; or &quot;dec&quot;.</small></p>
+
+<p><small>The procedure call is given instead of the
+code-part of the code rule and looks like this</small></p>
+<pre><small>     call &lt;identifier&gt; &rsquo;(&rsquo; &lt;comma-separated list of strings&gt; &rsquo;)&rsquo;
+</small></pre>
+
+<p><small>which leads to the following large
+example:</small></p>
+<pre><small>     proc bxx example beq
+     with src2 src2 STACK
+     gen cmp %2,%1
+         jxx* {label, $1}
+
+
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>pat blt</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jlt&quot;)<br>
+pat ble</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jle&quot;)<br>
+pat beq</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jeq&quot;)<br>
+pat bne</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jne&quot;)<br>
+pat bgt</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jgt&quot;)<br>
+pat bge</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>call bxx(&quot;jge&quot;)</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+<a name="5.11. Move definitions"></a>
+<h2>5.11. Move definitions</h2>
+
+<p><small>We now jump back to near the beginning of the
+table where the move definitions are found. The move
+definitions directly follow the instruction
+definitions.</small></p>
+
+<p><small>In certain cases a move is called for, either
+explicitly when a <i>move</i> instruction is used in a code
+rule, or implicitly in a register initialization. The
+different code rules possible to move data from one spot to
+another are described here. Example for the
+PDP-11:</small></p>
+<pre><small>     MOVES
+
+
+     from const2 %num==0 to dst2
+     gen clr %2
+
+
+     from src2 to dst2
+     gen mov %1,%2
+
+
+     from FLTREG to longf4-FLTREG
+     gen movfo %1,%2
+
+
+     from longf4-FLTREG to FLTREG
+     gen movof %1,%2
+</small></pre>
+
+<p><small>The example shows that the syntax is
+just</small></p>
+<pre><small>     from &lt;source&gt; to &lt;destination&gt; gen &lt;list of instructions&gt;
+</small></pre>
+
+<p><small>Source and destination are a token set,
+optionally followed by a boolean expression. The code
+generator will take the first move that matches, whenever a
+move is necessary. <i>Cgg</i> checks whether all moves
+called for in the table are present.</small></p>
+<a name="5.12. Test definitions"></a>
+<h2>5.12. Test definitions</h2>
+
+<p><small>This part describes the instructions necessary to
+set the condition codes to a certain token. These rules are
+needed when the <i>test</i> instruction is used in code
+rules. Example for the PDP-11:</small></p>
+<pre><small>     TESTS
+
+
+     to test src2
+     gen tst %1
+</small></pre>
+
+<p><small>So syntax is just</small></p>
+<pre><small>     to test &lt;source&gt; gen &lt;instruction list&gt;
+</small></pre>
+
+<p><small>Source is the same thing as in the move
+definition. <i>Cgg</i> checks whether all tests called for
+in the table are present.</small></p>
+<a name="5.13. Some explanation about the rules behind coercions"></a>
+<h2>5.13. Some explanation about the rules behind coercions</h2>
+
+<p><small>A central part in code generation is taken by the
+<i>coercions</i>. It is the responsibility of the table
+writer to provide all necessary coercions so that code
+generation can continue. The minimal set of coercions are
+the coercions to unstack every token expression, in
+combination with the rules to stack every token. It should
+not be possible to smuggle a table through <i>cgg</i>
+without these basic set available.</small></p>
+
+<p><small>If these are present the code generator can
+always make the necessary transformations by stacking and
+unstacking. Of course for code quality it is usually best to
+provide extra coercions to prevent this stacking to take
+place. <i>Cg</i> discriminates three types of
+coercions:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Unstacking coercions. This category can use the
+<i>uses</i> clause in its code.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Splitting coercions, these are the coercions that
+split larger tokens into smaller ones.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Transforming coercions, these are the coercions
+that transform a token into another of the same size. This
+category can use the <i>uses</i> clause in its
+code.</small></p>
+</td>
+</table>
+
+<p><small>When a stack configuration does not match the
+stack pattern <i>coercions</i> are searched for in the
+following order:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>First tokens are split if necessary to get their
+sizes right.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Then transforming coercions are found that will
+make the pattern match.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Finally if the stack pattern is longer than the
+fake stack contents unstacking coercions will be used to
+fill up the pattern.</small></p>
+</td>
+</table>
+
+<p><small>At any point, when coercions are missing so code
+generation could not continue, the offending tokens are
+stacked.</small></p>
+<a name="5.14. Stack definitions"></a>
+<h2>5.14. Stack definitions</h2>
+
+<p><small>The next part of the table defines the stacking
+rules for the machine. Each token that may reside on the
+fake stack must have a rule attached to put it on the real
+stack. Example for the PDP-11:</small></p>
+<pre><small>     STACKINGRULES
+
+
+     from const2 %num==0 to STACK
+     gen clr {autodec,sp}
+
+
+     from src2 to STACK
+     gen mov %1,{autodec,sp}
+
+
+     from regconst2 to STACK
+     gen mov %1.reg,{autodec,sp}
+         add {addr_external, %1.off},{regdef2,sp}
+
+
+     from DBLREG to STACK
+     gen movf %1,{autodec,sp}
+
+
+     from FLTREG  to STACK
+     gen movfo %1,{autodec,sp}
+
+
+     from regind8 to STACK
+     uses REG
+     gen move %1.reg,%a
+         add {addr_external, 8+%1.off},%a
+         mov {autodec, %a},{autodec,sp}
+         mov {autodec, %a},{autodec,sp}
+         mov {autodec, %a},{autodec,sp}
+         mov {autodec, %a},{autodec,sp}
+</small></pre>
+
+<p><small>These examples should be self-explanatory, except
+maybe for the last one. It is possible inside a
+stacking-rule to use a register. Since however the stacking
+might also take place at a moment when no registers are
+free, it is mandatory that for each token there is one
+stackingrule that does not use a register. The code
+generator uses the first rule possible.</small></p>
+<a name="5.15. Coercions"></a>
+<h2>5.15. Coercions</h2>
+
+<p><small>The next part of the table defines the coercions
+that are possible on the defined tokens. Example for the
+PDP-11:</small></p>
+<pre><small>     COERCIONS
+
+
+     from STACK
+     uses REG
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen mov {autoinc,sp},%a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from STACK<br>
+uses DBLREG</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen movf {autoinc,sp},%a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from STACK<br>
+uses REGPAIR<br>
+gen mov {autoinc,sp},%a.1</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>mov {autoinc,sp},%a.2</small></p>
+<td width="17%"></td>
+<td width="50%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>These three coercions just deliver a certain type
+of register by popping it from the real stack.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>from LOCAL</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regind2,lb,%1.ind}</small></p>
+
+<p><small>from DLOCAL</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regind4,lb,%1.ind}</small></p>
+
+<p><small>from REG</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regconst2, %1, 0}</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>These three are zero-cost rewriting
+rules.</small></p>
+<pre><small>     from regconst2 %1.off==1
+     uses reusing %1,REG=%1.reg
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen inc %a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from regconst2<br>
+uses reusing %1,REG=%1.reg<br>
+gen add {addr_external, %1.off},%ayields %a</small></p>
+
+<p><small>from addr_local<br>
+uses REG<br>
+gen mov lb,%a</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>add {const2, %1.ind},%a</small></p>
+<td width="17%"></td>
+<td width="50%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>The last three are three different cases of the
+coercion register+constant to register. Only in the last
+case is it always necessary to allocate an extra register,
+since arithmetic on the localbase is
+unthinkable.</small></p>
+<pre><small>     from xsrc2
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>uses reusing %1, REG=%1</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from longf4</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>uses FLTREG=%1</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from double8</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>uses DBLREG=%1</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>from src1<br>
+uses REG={const2,0}</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>gen bisb %1,%a</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %a</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>These examples show the coercion of different
+tokens to a register of the needed type. The last one shows
+the trouble needed on a PDP-11 to ensure bytes are not
+sign-extended. In EM it is defined that the result of a
+<b>loi</b> 1 instruction is an integer in the range
+0..255.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>from REGPAIR</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields %1.2 %1.1</small></p>
+
+<p><small>from regind4</small></p>
+</td>
+<td width="32%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {regind2,%1.reg,2+%1.off}</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>{regind2,%1.reg,%1.off}</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>from relative4</small></p>
+<td width="9%"></td>
+<td width="58%">
+
+<p><small>yields {relative2,2+%1.off}</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+
+<p><small>{relative2,%1.off}</small></p>
+
+<p><small>The last examples are splitting
+rules.</small></p>
+
+<p><small>The examples show that all coercions change one
+token on the fake stack into one or more others, possibly
+generating code. The STACK token is supposed to be on the
+fake stack when it is really empty, and can only be changed
+into one other token.</small></p>
+<a name="6. The files mach.h and mach.c"></a>
+<h2>6. The files mach.h and mach.c</h2>
+
+<p><small>The table writer must also supply two files
+containing machine dependent declarations and C code. These
+files are mach.h and mach.c.</small></p>
+<a name="6.1. Types in the code generator"></a>
+<h2>6.1. Types in the code generator</h2>
+
+<p><small>Three different types of integer coexist in the
+code generator and their range depends on the machine at
+hand. They are defined depending on the Target EM_WSIZE, or
+TEM_WSIZE, and TEM_PSIZE. The type &rsquo;int&rsquo; is used
+for things like counters that won&rsquo;t require more than
+16 bits precision. The type &rsquo;word&rsquo; is used among
+others to assemble datawords and is of type
+&rsquo;long&rsquo;. The type &rsquo;full&rsquo; is used for
+addresses and is of type &rsquo;long&rsquo; if
+TEM_WSIZE&gt;2 or TEM_PSIZE&gt;2.</small></p>
+
+<p><small>In macro and function definitions in later
+paragraphs implicit typing will be used for parameters, that
+is parameters starting with an &rsquo;s&rsquo; will be of
+type string, and the letters
+&rsquo;i&rsquo;,&rsquo;w&rsquo;,&rsquo;f&rsquo; will stand
+for int, word and full respectively.</small></p>
+<a name="6.2. Global variables to work with"></a>
+<h2>6.2. Global variables to work with</h2>
+
+<p><small>Some global variables are present in the code
+generator that can be manipulated by the routines in mach.h
+and mach.c.</small></p>
+
+<p><small>The declarations are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="40%">
+
+<p><small>FILE *codefile;</small></p>
+</td>
+<td width="60%">
+
+<p><small>/* code is emitted on this stream */</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="40%">
+
+<p><small>word part_word;</small></p>
+</td>
+<td width="60%">
+
+<p><small>/* words to be output are put together here
+*/</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="40%">
+
+<p><small>int part_size;</small></p>
+</td>
+<td width="60%">
+
+<p><small>/* number of bytes already put in part_word
+*/</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="40%">
+
+<p><small>char str[];</small></p>
+</td>
+<td width="60%">
+
+<p><small>/* Last string read in */</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="40%">
+
+<p><small>long argval;</small></p>
+</td>
+<td width="60%">
+
+<p><small>/* Last int read and kept */</small></p>
+</td>
+</table>
+<a name="6.3. Macros in mach.h"></a>
+<h2>6.3. Macros in mach.h</h2>
+
+<p><small>In the file mach.h a collection of macros is
+defined that have to do with formatting of assembly code for
+the machine at hand. Some of these macros can of course be
+left undefined in which case the macro calls are left in the
+source and will be treated as function calls. These
+functions can then be defined in <i>mach.c</i>.</small></p>
+
+<p><small>The macros to be defined are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>ex_ap(s)</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Must print the magic incantations that will mark
+the symbol to be exported to other modules. This is the
+translation of the EM <b>exa</b> and <b>exp</b>
+instructions.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>in_ap(s)</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Same to import the symbol. Translation of
+<b>ina</b> and <b>inp</b>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>newplb(s)</small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>Must print the definition of procedure label
+<i>s</i>. If left undefined the newilb() macro is used
+instead.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>newilb(s)</small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>Must print the definition of instruction label
+<i>s</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>newdlb(s)</small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>Must print the definition of data label
+<i>s</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p><small>dlbdlb(s1,s2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="68%">
+
+<p><small>Must define data label <i>s1</i> to be equal to
+<i>s2</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p><small>newlbss(s,f)</small></p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p><small>Must declare a piece of memory initialized to
+BSS_INIT(see below) of length <i>f</i> and with label
+<i>s</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>cst_fmt</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used when converting constant
+arguments of EM instructions to string. Argument to be
+formatted will be &rsquo;full&rsquo;.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>off_fmt</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used for integer part of
+label+constant, argument will be
+&rsquo;full&rsquo;.</small></p>
+</td>
+</table>
+
+<p><small>fmt_ilb(ip,il,s)</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="31%"></td>
+<td width="68%">
+<p><small>Must use the numbers <i>ip</i> and <i>il</i> that
+are a procedure number and a label number respectively and
+copy a string to <i>s</i> that must be unique for that
+combination. This procedure is optional, if it is not given
+ilb_fmt must be defined as below.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>ilb_fmt</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used for creation of unique
+instruction labels. Arguments will be a unique procedure
+number (int) and the label number (int).</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>dlb_fmt</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used for printing numeric data
+labels. Argument will be &rsquo;int&rsquo;.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>hol_fmt</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used for generation of labels for
+space generated by a <b>hol</b> pseudo. Argument will be
+&rsquo;int&rsquo;.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>hol_off</small></p>
+</td>
+<td width="18%"></td>
+<td width="68%">
+
+<p><small>Format to be used for printing of the address of
+an element in <b>hol</b> space. Arguments will be the offset
+in the <b>hol</b> block (word) and the number of the
+<b>hol</b> (int).</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><small>con_cst(w)</small></p>
+</td>
+<td width="12%"></td>
+<td width="68%">
+
+<p><small>Must generate output that will assemble into one
+machine word.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><small>con_ilb(s)</small></p>
+</td>
+<td width="12%"></td>
+<td width="68%">
+
+<p><small>Must generate output that will put the address of
+the instruction label into the datastream.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><small>con_dlb(s)</small></p>
+</td>
+<td width="12%"></td>
+<td width="68%">
+
+<p><small>Must generate output that will put the address of
+the data label into the datastream.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p><small>fmt_id(sf,st)</small></p>
+</td>
+<td width="6%"></td>
+<td width="68%">
+
+<p><small>Must take the string in <i>sf</i> that is a
+nonnumeric global label, and transform it into a copy made
+to <i>st</i> that will not collide with reserved assembler
+words and system labels. This procedure is optional, if it
+is not given the id_first macro is used as defined
+below.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>id_first</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Must be a character. This is prepended to all
+nonnumeric global labels if their length is shorter than the
+maximum allowed(currently 8) or if they already start with
+that character. This is to avoid conflicts of user labels
+with system labels.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>BSS_INIT</small></p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p><small>Must be a constant. This is the value filled in
+all the words not initialized explicitly. This is loader and
+system dependent. If omitted no initialization is
+assumed.</small></p>
+</td>
+</table>
+<a name="6.3.1. Example mach.h for the PDP-11"></a>
+<h2>6.3.1. Example mach.h for the PDP-11</h2>
+<pre><small>#define ex_ap(y)fprintf(codefile,&quot;\t.globl %s\n&quot;,y)
+#define in_ap(y)/* nothing */
+
+
+#define newplb(x)fprintf(codefile,&quot;%s:\n&quot;,x)
+#define newilb(x)fprintf(codefile,&quot;%s:\n&quot;,x)
+#define newdlb(x)fprintf(codefile,&quot;%s:\n&quot;,x)
+#define dlbdlb(x,y)fprintf(codefile,&quot;%s=%s\n&quot;,x,y)
+#define newlbss(l,x)fprintf(codefile,&quot;%s:.=.+%d.\n&quot;,l,x);
+
+
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define cst_fmt</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;$%d.&quot;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define off_fmt</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;%d.&quot;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define ilb_fmt</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;I%x_%x&quot;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define dlb_fmt</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;_%d&quot;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define hol_fmt</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;hol%d&quot;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="32%">
+
+<p><small>#define hol_off</small></p>
+</td>
+<td width="68%">
+
+<p><small>&quot;%ld.+hol%d&quot;</small></p>
+</td>
+</table>
+
+<p><small>#define
+con_cst(x)fprintf(codefile,&quot;%ld.\n&quot;,x)<br>
+#define con_ilb(x)fprintf(codefile,&quot;%s\n&quot;,x)<br>
+#define
+con_dlb(x)fprintf(codefile,&quot;%s\n&quot;,x)</small></p>
+
+<p><small>#define id_first&rsquo;_&rsquo;<br>
+#define BSS_INIT0</small></p>
+<a name="6.4. Functions in mach.c"></a>
+<h2>6.4. Functions in mach.c</h2>
+
+<p><small>In mach.c some functions must be supplied, mostly
+manipulating data resulting from pseudoinstructions. The
+specifications are given here, implicit typing of parameters
+as above.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="36%">
+
+<p><small>con_part(isz,word)</small></p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function must manipulate the globals
+part_word and part_size to append the isz bytes contained in
+word to the output stream. If part_word is full, i.e.
+part_size==TEM_WSIZE the function part_flush() may be called
+to empty the buffer. This is the function that must go
+through the trouble of doing byte order in words
+correct.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="32%">
+
+<p><small>con_mult(w_size)</small></p>
+</td>
+<td width="57%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function must take the string str[] and
+create an integer from the string of size w_size and
+generate code to assemble global data for that integer. Only
+the sizes for which arithmetic is implemented need be
+handled, so if 200-byte integer division is not implemented,
+200-byte integer global data don&rsquo;t have to be
+implemented. Here one must take care of word order in long
+integers.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="22%">
+
+<p><small>con_float()</small></p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function must generate code to assemble a
+floating point number of which the size is contained in
+argval and the ASCII representation in str[].</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="34%">
+
+<p><small>prolog(f_nlocals)</small></p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function is called at the start of every
+procedure. Function prolog code must be generated, and room
+made for local variables for a total of f_nlocals
+bytes.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="24%">
+
+<p><small>mes(w_mesno)</small></p>
+</td>
+<td width="65%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function is called when a <b>mes</b> pseudo
+is seen that is not handled by the machine independent part.
+The example below shows all one probably have to know about
+that.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="18%">
+
+<p><small>segname[]</small></p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This is not a function, but an array of four
+strings. These strings are put out whenever the code
+generator switches segments. Segments are SEGTXT, SEGCON,
+SEGROM and SEGBSS in that order.</small></p>
+</td>
+</table>
+
+<p><small>If register variables are used in a table, the
+program <i>cgg</i> will define the word REGVARS during
+compilation of the sources. So the following functions
+described here should be bracketed by #ifdef REGVARS and
+#endif.</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><small>regscore(off,size,typ,freq,totyp) long
+off;</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function should assign a score to a register
+variable, the score should preferably be the estimated
+number of bytes gained when it is put in a register. Off and
+size are the offset and size of the variable, typ is the
+type, that is reg_any, reg_pointer, reg_loop or reg_float.
+Freq is the count of static occurrences, and totyp is the
+type of the register it is planned to go into.<br>
+Keep in mind that the gain should be net, that is the cost
+for register save/restore sequences and the cost of
+initialisation in the case of parameters should already be
+included.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="22%">
+
+<p><small>i_regsave()</small></p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function is called at the start of a
+procedure, just before register saves are done. It can be
+used to initialise some variables if needed.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="22%">
+
+<p><small>f_regsave()</small></p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This function is called at end of the register
+save sequence. It can be used to do the real saving if
+multiple register move instructions are
+available.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>regsave(regstr,off,size) char *regstr; long
+off;</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Should either do the real saving or set up a table
+to have it done by f_regsave. Note that initialisation of
+parameters should also be done, or planned here.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="22%">
+
+<p><small>regreturn()</small></p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Should restore saved registers and return. The
+function result is already in the function return area by
+now.</small></p></td>
+</table>
+<a name="6.4.1. Example mach.c for the PDP-11"></a>
+<h2>6.4.1. Example mach.c for the PDP-11</h2>
+
+<p><small>As an example of the sort of code expected, the
+mach.c for the PDP-11 is presented here.</small></p>
+<pre><small>/*
+ * machine dependent back end routines for the PDP-11
+ */
+
+
+con_part(sz,w) register sz; word w; {
+
+
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>while (part_size % sz)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>part_size++;</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>if (part_size == 2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>part_flush();</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>if (sz == 1) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>w &amp;= 0xFF;</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>if (part_size)</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>w &lt;&lt;= 8;</small></p>
+</td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>part_word |= w;</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>} else {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>assert(sz == 2);</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>part_word = w;</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>part_size += sz;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>con_mult(sz) word sz; {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>long l;</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (sz != 4)</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fatal(&quot;bad icon/ucon
+size&quot;);</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>l = atol(str);</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+
+<p><small>fprintf(codefile,&quot;\t%o;%o\n&quot;,(int)(l&gt;&gt;16),(int)l);</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>con_float() {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>double f;</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>register short *p,i;</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>/*</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>* This code is correct only when the code
+generator is</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>* run on a PDP-11 or VAX-11 since it assumes
+native</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>* floating point format is PDP-11
+format.</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>*/</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (argval != 4 &amp;&amp; argval !=
+8)</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fatal(&quot;bad fcon size&quot;);</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>f = atof(str);</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>p = (short *) &amp;f;</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>i = *p++;</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (argval == 8) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+
+<p><small>fprintf(codefile,&quot;\t%o;%o;&quot;,i,*p++);</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>i = *p++;</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+
+<p><small>fprintf(codefile,&quot;\t%o;%o\n&quot;,i,*p++);</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>#ifdef REGVARS</small></p>
+
+<p><small>char Rstring[10];<br>
+full lbytes;<br>
+struct regadm {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>char *ra_str;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>long ra_off;</small></p>
+</td>
+</table>
+
+<p><small>} regadm[2];<br>
+int n_regvars;</small></p>
+
+<p><small>regscore(off,size,typ,score,totyp) long off;
+{</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="9" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>/*</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>* This function is full of magic
+constants.</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>* They are a result of
+experimentation.</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>*/</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (size != 2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>return(-1);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>score -= 1;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>/* allow for save/restore */</small></p>
+</td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (off&gt;=0)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>score -= 2;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (typ==reg_pointer)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>score *= 17;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>else if (typ==reg_loop)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>score = 10*score+50;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%">
+
+<p><small>/* Guestimate */</small></p>
+</td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>else</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>score *= 10;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>return(score);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>/* 10 * estimated # of words of profit
+*/</small></p>
+</td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="19%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>i_regsave() {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>Rstring[0] = 0;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>n_regvars=0;</small></p>
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>f_regsave() {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="9" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>register i;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (n_regvars==0 || lbytes==0) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;mov r5,-(sp)\nmov
+sp,r5\n&quot;);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>if (lbytes == 2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;tst
+-(sp)\n&quot;);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>else if (lbytes!=0)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;sub
+$0%o,sp\n&quot;,lbytes);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>for (i=0;i&lt;n_regvars;i++)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;mov
+%s,-(sp)\n&quot;,regadm[i].ra_str);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>} else {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>if (lbytes&gt;6) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;mov
+$0%o,r0\n&quot;,lbytes);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;jsr
+r5,PR%s\n&quot;,Rstring);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>} else {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;jsr
+r5,PR%d%s\n&quot;,lbytes,Rstring);</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>for (i=0;i&lt;n_regvars;i++)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>if (regadm[i].ra_off&gt;=0)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;mov
+0%lo(r5),%s\n&quot;,regadm[i].ra_off,</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>regadm[i].ra_str);</small></p>
+</td>
+<td width="29%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>regsave(regstr,off,size) char *regstr; long off;
+{</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>fprintf(codefile,&quot;/ Local %ld into
+%s\n&quot;,off,regstr);</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>strcat(Rstring,regstr);</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>regadm[n_regvars].ra_str = regstr;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>regadm[n_regvars].ra_off = off;</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>n_regvars++;</small></p>
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>regreturn() {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>fprintf(codefile,&quot;jmp
+RT%s\n&quot;,Rstring);</small></p>
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>#endif</small></p>
+
+<p><small>prolog(nlocals) full nlocals; {</small></p>
+
+<p><small>#ifndef REGVARS</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;mov r5,-(sp)\nmov
+sp,r5\n&quot;);</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (nlocals == 0)</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>return;</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>if (nlocals == 2)</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;tst
+-(sp)\n&quot;);</small></p>
+</td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>else</small></p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;sub
+$0%o,sp\n&quot;,nlocals);</small></p>
+</td>
+<td width="69%">
+</td>
+</table>
+
+<p><small>#else</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>lbytes = nlocals;</small></p>
+</td>
+</table>
+
+<p><small>#endif<br>
+}</small></p>
+
+<p><small>mes(type) word type; {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>int argt ;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>switch ( (int)type ) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>case ms_ext :</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>for (;;) {</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>switch ( argt=getarg(</small></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ptyp(sp_cend)|ptyp(sp_pnam)|sym_ptyp) )
+{</small></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>case sp_cend :</small></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>return ;</small></p>
+</td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>default:</small></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>strarg(argt) ;</small></p>
+</td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>fprintf(codefile,&quot;.globl %s\n&quot;,argstr)
+;</small></p>
+</td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>break ;</small></p>
+</td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>default :</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>while ( getarg(any_ptyp) != sp_cend )
+;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>break ;</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p><small>}</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+
+<p><small>}</small></p>
+
+<p><small>char *segname[] = {</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>&quot;.text&quot;, /* SEGTXT */</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>&quot;.data&quot;, /* SEGCON */</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>&quot;.data&quot;, /* SEGROM */</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p><small>&quot;.bss&quot; /* SEGBSS */</small></p>
+</td>
+</table>
+
+<p><small>};</small></p>
+<a name="7. Internal workings of the code generator."></a>
+<h2>7. Internal workings of the code generator.</h2>
+<a name="7.1. Description of tables.c and tables.h contents"></a>
+<h2>7.1. Description of tables.c and tables.h contents</h2>
+
+<p><small>In this section the intermediate files will be
+described that are produced by <i>cgg</i> and compiled with
+machine independent code to produce a code
+generator.</small></p>
+<a name="7.1.1. Tables.c"></a>
+<h2>7.1.1. Tables.c</h2>
+
+<p><small>Tables.c contains a large number of initialized
+array&rsquo;s of all sorts. Description of each
+follows:</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>byte coderules[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Pseudo code interpreted by the code generator.
+Always starts with some opcode followed by operands
+depending on the opcode. Some of the opcodes have an
+argument encoded in the upper three bits of the opcode byte.
+Integers in this table are between 0 and 32767 and have a
+one byte encoding if between 0 and 127.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>char wrd_fmt[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>The format used for output of
+words.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>char stregclass[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Number of computed static register class per
+register. Two registers are in the same class if they have
+the same properties and don&rsquo;t share a common
+subregister.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>struct reginfo machregs[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Info per register. Initialized with representation
+string, size, members of the register and set of registers
+affected when this one is changed. Also contains room for
+run time information, like contents and reference
+count.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>tkdef_t tokens[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Information per tokentype. Initialized with size,
+cost, type of operands and formatstring.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>node_t enodes[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of triples representing expressions for the
+code generator.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>string codestrings[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of strings. All strings are put in a list and
+checked for duplication, so only one copy per string will
+reside here.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>set_t machsets[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of token expression sets. Bit 0 of the set is
+used for the SCRATCH property of registers, bit 1 upto NREG
+are for the corresponding registers and bit NREG+1 upto the
+end are for corresponding tokens.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>inst_t tokeninstances[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of descriptions for building tokens. Contains
+type of rule for building one, plus operands depending on
+the type.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>move_t moves[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of move rules. Contains token expressions for
+source and destination plus index for code
+rule.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>test_t tests[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of test rules. Contains token expressions for
+source plus index for code rule.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>byte pattern[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>EM patterns. This is structured internally as
+chains of patterns, each chain pointed at by pathash[].
+After each pattern the list of possible code rules is
+given.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>int pathash[256]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Indices into pattern[] for all patterns with a
+certain low order byte of the hashing
+function.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>c1_t c1coercs[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of rules to stack tokens. Contains token
+expressions, register needed, cost and code
+rule.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>c2_t c2coercs[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of splitting coercions. Token expressions,
+split factor, replacements and code rule.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>c3_t c3coercs[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of one to one coercions. Token expressions,
+register needed, replacement and code rule.</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>struct reginfo **reglist[]</small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>List of lists of pointers to register information.
+For every property the list is here to find the registers
+corresponding to it.</small></p></td>
+</table>
+<a name="7.1.2. tables.h"></a>
+<h2>7.1.2. tables.h</h2>
+
+<p><small>In tables.h various derived constants for the
+tables are given. They are then used to determine array
+sizes in the actual code generator, plus loop termination in
+some cases.</small></p>
+<a name="7.2. Other important data structures"></a>
+<h2>7.2. Other important data structures</h2>
+
+<p><small>During code generation some other data structures
+are used and here is a short description of some of the
+important ones.</small></p>
+
+<p><small>Tokens are kept in the code generator as a struct
+consisting of one integer <i>t_token</i> which is -1 if the
+token is a register, and the number of the token otherwise,
+plus an array of <i>TOKENSIZE</i> unions <i>t_att</i> of
+which the first is the register number in case of a
+register.</small></p>
+
+<p><small>The fakestack is an array of these tokens, there
+is a global variable <i>stackheight</i>.</small></p>
+
+<p><small>The results of expressions are kept in a struct
+<i>result</i> with elements <i>e_typ</i>, giving the type of
+the expression: <i>EV_INT</i>, <i>EV_REG</i> or
+<i>EV_ADDR</i>, and a union <i>e_v</i> which contains the
+real result.</small></p>
+<a name="7.3. A tour through the sources"></a>
+<h2>7.3. A tour through the sources</h2>
+<a name="7.3.1. codegen.c"></a>
+<h2>7.3.1. codegen.c</h2>
+
+<p><small>The file codegen.c contains one large function
+consisting of one giant switch statement. It is the
+interpreter for the code generator pseudo code as contained
+in code rules[]. This function can call itself recursively
+when doing look ahead. Arguments are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><small>codep</small></p>
+</td>
+<td width="10%"></td>
+<td width="80%">
+
+<p><small>Pointer into code rules, pseudo program
+counter.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>ply</small></p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p><small>Number of EM pattern look ahead
+allowed.</small></p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>toplevel</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>Boolean telling whether this is the toplevel
+codegen() or a deeper incarnation.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>costlimit</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>A cutoff value to limit searches. If the cost
+crosses costlimit the incarnation can terminate.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><small>forced</small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>A register number if nonzero. This is used inside
+coercions to force the allocate() call to allocate a
+register determined by earlier look ahead.</small></p>
+</td>
+</table>
+
+<p><small>The instructions inplemented in the
+switch:</small></p>
+<a name="7.3.1.1. DO_DLINE"></a>
+<h2>7.3.1.1. DO_DLINE</h2>
+
+<p><small>Prints debugging information if the code
+generator runs in debug mode. This information is only
+generated if <i>cgg</i> was called with the -d
+flag.</small></p>
+<a name="7.3.1.2. DO_NEXTEM"></a>
+<h2>7.3.1.2. DO_NEXTEM</h2>
+
+<p><small>Matches the next EM pattern and does look ahead
+if necessary to find the best code rule associated with this
+pattern. Heuristics are used to determine best code rule
+when possible. This is done by calling the distance()
+function. It can also handle the procedure
+mechanism.</small></p>
+<a name="7.3.1.3. DO_COERC"></a>
+<h2>7.3.1.3. DO_COERC</h2>
+
+<p><small>This sets the code generator in the state to do a
+from stack coercion.</small></p>
+<a name="7.3.1.4. DO_XMATCH"></a>
+<h2>7.3.1.4. DO_XMATCH</h2>
+
+<p><small>This is done when a match no longer has to be
+checked. Used when the nocoercions: trick is used in the
+table.</small></p>
+<a name="7.3.1.5. DO_MATCH"></a>
+<h2>7.3.1.5. DO_MATCH</h2>
+
+<p><small>This is the big one inside this function. It has
+the task to transform the contents of the current fake stack
+to match the pattern given after it.</small></p>
+
+<p><small>Since the code generator does not know combining
+coercions, i.e. there is no way to make a big token out of
+two smaller ones, the first thing done is to stack every
+token that is too small. After that all tokens too big are
+split if possible to the right size.</small></p>
+
+<p><small>Next the coercions are sought that would
+transform tokens in place to the right one, plus the
+coercions that would pop tokens of the stack. Each of those
+might need a register, so a list of registers is generated
+and at the end of looking for coercions the function
+<i>tuples()</i> is called to generate the list of all
+possible <i>n</i>-tuples, where <i>n</i> equals the number
+of registers needed.</small></p>
+
+<p><small>Look ahead is now performed if the number of
+tuples is greater than one. If no possibility is found
+within the costlimit, the fake stack is made smaller by
+pushing the bottom token, and this process is repeated until
+either a way is found or the fake stack is completely empty
+and there is still no way to make the match.</small></p>
+
+<p><small>If there is a way the corresponding coercions are
+executed and the code is finished.</small></p>
+<a name="7.3.1.6. DO_REMOVE"></a>
+<h2>7.3.1.6. DO_REMOVE</h2>
+
+<p><small>Here the kills clause is executed, all tokens
+matched by the token expression plus boolean expression are
+pushed. In the current implementation there is no attempt to
+move those tokens to registers, but that is a possible
+future extension.</small></p>
+<a name="7.3.1.7. DO_DEALLOCATE"></a>
+<h2>7.3.1.7. DO_DEALLOCATE</h2>
+
+<p><small>This one temporarily decrements by one the
+reference count of all registers contained in the token
+given as argument.</small></p>
+<a name="7.3.1.8. DO_REALLOCATE"></a>
+<h2>7.3.1.8. DO_REALLOCATE</h2>
+
+<p><small>Here all temporary deallocates are made
+undone.</small></p>
+<a name="7.3.1.9. DO_ALLOCATE"></a>
+<h2>7.3.1.9. DO_ALLOCATE</h2>
+
+<p><small>This is the part that allocates a register and
+decides which one to use. If the <i>forced</i> argument was
+given its task is simple, otherwise some work must be done.
+First the list of possible registers is scanned, all free
+registers noted and it is noted whether any of those
+registers is already containing the initialization. If no
+registers are available some fakestack token is stacked and
+the process is repeated.</small></p>
+
+<p><small>After that if an exact match was found, the list
+of registers is reduced to one register matching exactly out
+of every register class. Now look ahead is performed if
+necessary and the register chosen. If an initialization was
+given the corresponding move is performed, otherwise the
+register is marked empty.</small></p>
+<a name="7.3.1.10. DO_INSTR"></a>
+<h2>7.3.1.10. DO_INSTR</h2>
+
+<p><small>This prints an instruction and its operands. Only
+done on toplevel.</small></p>
+<a name="7.3.1.11. DO_MOVE"></a>
+<h2>7.3.1.11. DO_MOVE</h2>
+
+<p><small>Calls the move() function in the code generator
+to implement the move instruction in the table.</small></p>
+<a name="7.3.1.12. DO_TEST"></a>
+<h2>7.3.1.12. DO_TEST</h2>
+
+<p><small>Calls the test() function in the code generator
+to implement the test instruction in the table.</small></p>
+<a name="7.3.1.13. DO_ERASE"></a>
+<h2>7.3.1.13. DO_ERASE</h2>
+
+<p><small>Marks the register that is its argument as
+empty.</small></p>
+<a name="7.3.1.14. DO_TOKREPLACE"></a>
+<h2>7.3.1.14. DO_TOKREPLACE</h2>
+
+<p><small>This is the token replacement part. It is also
+called if there is no token replacement because it has some
+other functions as well.</small></p>
+
+<p><small>First the tokens that will be pushed on the fake
+stack are computed and stored in a temporary array. Then the
+tokens that were matched in this rule are popped and their
+embedded registers have their reference count decremented.
+After that the replacement tokens are pushed.</small></p>
+
+<p><small>Finally all registers allocated in this rule have
+their reference count decremented. If they were not pushed
+on the fake stack they will be available again in the next
+code rule.</small></p>
+<a name="7.3.1.15. DO_EMREPLACE"></a>
+<h2>7.3.1.15. DO_EMREPLACE</h2>
+
+<p><small>Places replacement EM instructions back into the
+instruction stream.</small></p>
+<a name="7.3.1.16. DO_COST"></a>
+<h2>7.3.1.16. DO_COST</h2>
+
+<p><small>Accounts for cost as given in the code
+rule.</small></p>
+<a name="7.3.1.17. DO_RETURN"></a>
+<h2>7.3.1.17. DO_RETURN</h2>
+
+<p><small>Returns from this level of codegen(). Is used at
+the end of coercions, move rules etc..</small></p>
+<a name="7.3.1.18. DO_LABDEF"></a>
+<h2>7.3.1.18. DO_LABDEF</h2>
+
+<p><small>This prints a label when the top element size
+mechanism is used. Only done on toplevel.</small></p>
+<a name="7.3.2. compute.c"></a>
+<h2>7.3.2. compute.c</h2>
+
+<p><small>This module computes the various expressions as
+given in the enodes[] array. Nothing very special happens
+here, it is just a recursive function computing leaves of
+expressions and applying the operator.</small></p>
+<a name="7.3.3. equiv.c"></a>
+<h2>7.3.3. equiv.c</h2>
+
+<p><small>In this module the tuples() function is
+implemented. It is given the number of registers needed and
+a list of register lists and it constructs a list of tuples
+where the <i>n</i>&rsquo;th register comes from the
+<i>n</i>&rsquo;th list. Before the list is constructed
+however the dynamic register classes are computed. Two
+registers are in the same dynamic class if they are in the
+same static class and their contents is the
+same.</small></p>
+
+<p><small>After that the permute() recursive function is
+called to generate the list of tuples. After construction a
+generated tuple is added to the list if it is not already
+pairwise in the same class or if the register relations are
+not the same, i.e. if the first and second register share a
+common subregister in one tuple and not in the other they
+are considered different.</small></p>
+<a name="7.3.4. fillem.c"></a>
+<h2>7.3.4. fillem.c</h2>
+
+<p><small>This is the routine that does the reading of EM
+instructions and the handling of pseudos. The mach.c module
+provided by the table writer is included at the end of this
+module. The routine fillemlines() is called by nextem() at
+toplevel to make sure there are enough instruction to match.
+It fills the EM instruction buffer up to 5 places from the
+end to keep room for EM replacement instructions, or up to a
+pseudo.</small></p>
+
+<p><small>The dopseudo() function performs the function of
+the pseudo last encountered. If the pseudo is a <b>rom</b>
+the corresponding label is saved with the contents of the
+<b>rom</b> to be available to the code generator later. The
+rest of the routines are small service routines for either
+input or data output.</small></p>
+<a name="7.3.5. gencode.c"></a>
+<h2>7.3.5. gencode.c</h2>
+
+<p><small>This module contains routines called by codegen()
+to generate the real code to the codefile. The function
+genstr() gets a string as argument and copies it to
+codefile. The prtoken() function interprets the tokenformat
+as given in the tokens[] array.</small></p>
+<a name="7.3.6. glosym.c"></a>
+<h2>7.3.6. glosym.c</h2>
+
+<p><small>This module maintains a list of global symbols
+that have a <b>rom</b> pseudo associated. There are
+functions to enter a symbol and to find a
+symbol.</small></p>
+<a name="7.3.7. label.c"></a>
+<h2>7.3.7. label.c</h2>
+
+<p><small>This module contains routines to handle the top
+element size messages.</small></p>
+<a name="7.3.8. main.c"></a>
+<h2>7.3.8. main.c</h2>
+
+<p><small>Main routine of the code generator. Processes
+arguments and flags. Flags available are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>-d</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Sets debug mode if the code generator was not
+compiled with the NDEBUG macro defined. The flag can be
+followed by a digit specifying the amount of debugging
+wanted, and by @labelname giving the start of debugging.
+Debug mode gives very long output on stderr indicating all
+steps of the code generation process including nesting of
+the codegen() function.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>-p<i>n</i></small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Sets the look ahead depth to <i>n</i>, the
+<i>p</i> stands for ply, a well known word in chess playing
+programs.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>-w<i>n</i></small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Sets the weight percentage for size in the cost
+function to <i>n</i> percent. Uses Euclides algorithm to
+simplify rationals.</small></p>
+</td>
+</table>
+<a name="7.3.9. move.c"></a>
+<h2>7.3.9. move.c</h2>
+
+<p><small>Function to implement the move instruction in the
+tables, register initialization and the test instruction and
+associated bookkeeping. First tests are made to try to
+prevent the move from really happening. After that, if there
+is an after that, the move rule is found and the code
+executed.</small></p>
+<a name="7.3.10. nextem.c"></a>
+<h2>7.3.10. nextem.c</h2>
+
+<p><small>The entry point of this module is nextem(). It
+hashes the next three EM instructions, and uses the low
+order byte of the hash as an index into the array pathash[],
+to find a chain of patterns in the array pattern[], that are
+all tried for a match.</small></p>
+
+<p><small>The function trypat() does most of the work
+checking patterns. When a pattern is found to match all
+instructions the operands of the instruction are placed into
+the dollar[] array. Then the boolean expression is tried. If
+it matches the function can return, leaving the operands
+still in the dollar[] array, so later in the code rule they
+can still be used.</small></p>
+<a name="7.3.11. reg.c"></a>
+<h2>7.3.11. reg.c</h2>
+
+<p><small>Collection of routines to handle registers.
+Reference count routines are here, chrefcount() and
+getrefcount(), plus routines to erase a single register or
+all of them, erasereg() and cleanregs().</small></p>
+
+<p><small>If NDEBUG hasn&rsquo;t been defined, here is also
+the routine that checks if the reference count kept with the
+register information is in agreement with the number of
+times it occurs on the fake stack.</small></p>
+<a name="7.3.12. salloc.c"></a>
+<h2>7.3.12. salloc.c</h2>
+
+<p><small>Module for string allocation and garbage
+collection. Contains entry points myalloc(), a routine
+calling malloc() and checking whether room is left,
+myfree(), just free(), popstr() a function called from
+state.c to free all strings made since the last saved
+status. Furthermore there is salloc() which has the size of
+the string as parameter and returns a pointer to the
+allocated space, while keeping a copy of the pointer for
+garbage allocation purposes.</small></p>
+
+<p><small>The function garbage_collect is called from
+codegen() at toplevel every now and then, and checks all
+places where strings may reside to mark strings as being in
+use. Strings not in use are returned to the pool of free
+space.</small></p>
+<a name="7.3.13. state.c"></a>
+<h2>7.3.13. state.c</h2>
+
+<p><small>Set of routines called to save current status and
+restore a previous saved state.</small></p>
+<a name="7.3.14. subr.c"></a>
+<h2>7.3.14. subr.c</h2>
+
+<p><small>Random set of leftover routines.</small></p>
+<a name="7.3.14.1. match"></a>
+<h2>7.3.14.1. match</h2>
+
+<p><small>Computes whether a certain token matches a
+certain token expression. Just computes a bitnumber
+according to the algorithm explained with machsets[], and
+tests the bit and the boolean expression if it is
+there.</small></p>
+<a name="7.3.14.2. instance,cinstance"></a>
+<h2>7.3.14.2. instance,cinstance</h2>
+
+<p><small>These two functions compute a token from a
+description. They differ very slight, cinstance() is used to
+compute the result of a coercion in a certain context and
+therefore has more arguments, which it uses instead of the
+global information instance() works on.</small></p>
+<a name="7.3.14.3. eqtoken"></a>
+<h2>7.3.14.3. eqtoken</h2>
+
+<p><small>eqtoken computes whether two tokens can be
+considered identical. Used to check register contents during
+moves mainly.</small></p>
+<a name="7.3.14.4. distance"></a>
+<h2>7.3.14.4. distance</h2>
+
+<p><small>This is the heuristic function that computes a
+distance from the current fake stack contents to the token
+pattern in the table. It likes exact matches most, then
+matches where at least the sizes are correct and if the
+sizes are not correct it likes too large sizes more than too
+small, since splitting a token is easier than combining
+one.</small></p>
+<a name="7.3.14.5. split"></a>
+<h2>7.3.14.5. split</h2>
+
+<p><small>This function tries to find a splitting coercion
+and executes it immediately when found. The fake stack is
+shuffled thoroughly when this happens, so pieces below the
+token that must be split are saved first.</small></p>
+<a name="7.3.14.6. docoerc"></a>
+<h2>7.3.14.6. docoerc</h2>
+
+<p><small>This function executes a coercion that was found.
+The same shuffling is done, so the top of the stack is again
+saved.</small></p>
+<a name="7.3.14.7. stackupto"></a>
+<h2>7.3.14.7. stackupto</h2>
+
+<p><small>This function gets a pointer into the fake stack
+and must stack every token including the one pointed at up
+to the bottom of the fake stack. The first stacking rule
+possible is used, so rules using registers must come
+first.</small></p>
+<a name="7.3.14.8. findcoerc"></a>
+<h2>7.3.14.8. findcoerc</h2>
+
+<p><small>Looks for a one to one coercion, if found it
+returns a pointer to it and leaves a list of possible
+registers to use in the global variable curreglist. This is
+used by codegen().</small></p>
+<a name="7.3.15. var.c"></a>
+<h2>7.3.15. var.c</h2>
+
+<p><small>Global variables used by more than one module.
+External definitions are in extern.h.</small></p>
+<hr>
+</body>
+</html>

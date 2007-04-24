@@ -1,0 +1,298 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:17 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>THE Z80 BACK END TABLE</title>
+</head>
+<body>
+
+<h1 align=center>THE Z80 BACK END TABLE</h1>
+<a href="#1. INTRODUCTION">1. INTRODUCTION</a><br>
+<a href="#2. IMPLEMENTATION">2. IMPLEMENTATION</a><br>
+
+<hr>
+<a name="1. INTRODUCTION"></a>
+<h2>1. INTRODUCTION</h2>
+
+<p>This table was written to make it run, not to make it
+clever! The effect is, that the table written for the intel
+8080, which was made very clever runs faster and requiers
+less space!! So, for anyone to run programs on a z80
+machine: n attempt could be made to make this table as
+clever as the one for the i80, or the i80 table could be
+used, for that can run on every z80 too.</p>
+<a name="2. IMPLEMENTATION"></a>
+<h2>2. IMPLEMENTATION</h2>
+
+<p>It will not be possible to run the entire Amsterdam
+Compiler Kit on a Z80-based computer system. One has to
+write a program on another system, a system where the
+compiler kit runs on. This program may be a mixture of
+high-level languages, such as C or Pascal, EM and z80
+assembly code. The program should be compiled using the
+compiler kit, producing z80 machine code. This code should
+come available to the z80 machine for example by downloading
+or by storing it in ROM (Read Only Memory). Depending on the
+characteristics of the particular z80 based system, some
+adaptions have to be made:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>In <i>head_em</i>: the base address, which is the
+address where the first z80 instruction will be stored, and
+the initial value of the stackpointer are set to 0x1000 and
+0x7ffe respectivally. The latter because it could run on a
+32K machine as well. Other systems require other values.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>In <i>head_em</i>: before calling &quot;__m_a_i_n&quot;,
+the environment pointer, argument vector and argument count
+will have to be pushed onto the stack. Since this back-end
+is tested on a system without any knowledge of these things,
+dummies are pushed now.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>In <i>tail_em</i>: proper routines &quot;putchar&quot;
+and &quot;getchar&quot; should be provided. They should
+write resp. read a character on/from the monitor. Maybe some
+conversions will have to be made. The ones for the Nascom
+and Hermac z80 micro&rsquo;s are to be found in the
+EM-library.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>In <i>head_em</i>: an application program returns
+control to the monitor by jumping to address 0x20. Thie may
+have to be changed on different systems. For an CPM-machine
+for example this should be 0x5, to provide a warm boot.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>In <i>tail_em</i>: the current version of the z80
+back-end has very limited I/O capabilities, because it was
+tested on a system that had no knowlegde of files. So the
+implementation of the EM-instruction <i>mon</i> is very
+simple; it can only do the following things:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>        Monitor call 1:
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>Exit</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Monitor call 3:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>read, always reads from the monitor.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>echos the read character.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>ignores file descriptor.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Monitor call 4:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>write, always writes on the monitor.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>ignores file descriptor.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Monitor call 5:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>open file, returns file descriptor -1.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Monitor call 6:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>close file, returns error code = 0.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Monitor call 54:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="10%">
+
+<p>io-control, returns error code = 0.</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>If the system should do file-handling the routine
+&quot;.mon&quot; should be extended thoroughly.</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

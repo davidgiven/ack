@@ -1,0 +1,3850 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:11 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The ABC compiler</title>
+</head>
+<body>
+
+<h1 align=center>The ABC compiler</h1>
+<a href="#INTRODUCTION.">INTRODUCTION.</a><br>
+<a href="#SYNTAX NOTATION">SYNTAX NOTATION</a><br>
+<a href="#1. GENERAL INFORMATION">1. GENERAL INFORMATION</a><br>
+<a href="#1.1. LINE FORMAT">1.1. LINE FORMAT</a><br>
+<a href="#1.2. CONSTANTS">1.2. CONSTANTS</a><br>
+<a href="#1.3. VARIABLES">1.3. VARIABLES</a><br>
+<a href="#1.4. EXPRESSIONS">1.4. EXPRESSIONS</a><br>
+<a href="#Arithmetic">Arithmetic</a><br>
+<a href="#Relational">Relational</a><br>
+<a href="#Logical">Logical</a><br>
+<a href="#Functional">Functional</a><br>
+<a href="#String operations">String operations</a><br>
+<a href="#1.5. ERROR MESSAGES">1.5. ERROR MESSAGES</a><br>
+<a href="#2. B-EM STATEMENTS">2. B-EM STATEMENTS</a><br>
+<a href="#2.1. CALL">2.1. CALL</a><br>
+<a href="#2.2. CLOSE">2.2. CLOSE</a><br>
+<a href="#2.3. DATA">2.3. DATA</a><br>
+<a href="#2.4. DEF FN">2.4. DEF FN</a><br>
+<a href="#2.5. DEFINT/SNG/DBL/STR">2.5. DEFINT/SNG/DBL/STR</a><br>
+<a href="#2.6. DIM">2.6. DIM</a><br>
+<a href="#2.7. END">2.7. END</a><br>
+<a href="#2.8. ERR and ERL">2.8. ERR and ERL</a><br>
+<a href="#2.9. ERROR">2.9. ERROR</a><br>
+<a href="#2.10. FIELD">2.10. FIELD</a><br>
+<a href="#2.11. FOR...NEXT">2.11. FOR...NEXT</a><br>
+<a href="#2.12. GET">2.12. GET</a><br>
+<a href="#2.13. GOSUB...RETURN">2.13. GOSUB...RETURN</a><br>
+<a href="#2.14. GOTO">2.14. GOTO</a><br>
+<a href="#2.15. IF...THEN">2.15. IF...THEN</a><br>
+<a href="#2.16. INPUT">2.16. INPUT</a><br>
+<a href="#2.17. INPUT [#]">2.17. INPUT [#]</a><br>
+<a href="#2.18. LET">2.18. LET</a><br>
+<a href="#2.19. LINE INPUT">2.19. LINE INPUT</a><br>
+<a href="#2.20. LINE INPUT [#]">2.20. LINE INPUT [#]</a><br>
+<a href="#2.21. LSET and RSET">2.21. LSET and RSET</a><br>
+<a href="#2.22. MID$">2.22. MID$</a><br>
+<a href="#2.23. ON ERROR GOTO">2.23. ON ERROR GOTO</a><br>
+<a href="#2.24. ON...GOSUB and ON ...GOTO">2.24. ON...GOSUB and ON ...GOTO</a><br>
+<a href="#2.25. OPEN">2.25. OPEN</a><br>
+<a href="#2.26. OPTION BASE">2.26. OPTION BASE</a><br>
+<a href="#2.27. POKE">2.27. POKE</a><br>
+<a href="#2.28. PRINT">2.28. PRINT</a><br>
+<a href="#2.29. PRINT USING">2.29. PRINT USING</a><br>
+<a href="#2.30. PUT">2.30. PUT</a><br>
+<a href="#2.31. RANDOMIZE">2.31. RANDOMIZE</a><br>
+<a href="#2.32. READ">2.32. READ</a><br>
+<a href="#2.33. REM">2.33. REM</a><br>
+<a href="#2.34. RESTORE">2.34. RESTORE</a><br>
+<a href="#2.35. STOP">2.35. STOP</a><br>
+<a href="#2.36. SWAP">2.36. SWAP</a><br>
+<a href="#2.37. TRON/TROFF">2.37. TRON/TROFF</a><br>
+<a href="#2.38. WHILE...WEND">2.38. WHILE...WEND</a><br>
+<a href="#2.39. WRITE">2.39. WRITE</a><br>
+<a href="#2.40. WRITE #">2.40. WRITE #</a><br>
+<a href="#3. FUNCTIONS">3. FUNCTIONS</a><br>
+<a href="#APPENDIX A DIFFERENCES WITH MICROSOFT BASIC">APPENDIX A DIFFERENCES WITH MICROSOFT BASIC</a><br>
+<a href="#APPENDIX B RESERVED WORDS IN BASIC-EM">APPENDIX B RESERVED WORDS IN BASIC-EM</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Martin L. Kersten<br>
+Gert-Jan Akkerman<br>
+Marcel Worring<br>
+Edo Westerhuis<br>
+Frans Kunst<br>
+Ronnie Lachniet</i><br>
+Department of Mathematics and Computer Science.<br>
+Free University<br>
+Amsterdam</p>
+
+<p>This manual describes the programming language BASIC and
+its compiler included in the Amsterdam Compiler Kit.</p>
+<a name="INTRODUCTION."></a>
+<h2>INTRODUCTION.</h2>
+
+<p>The BASIC-EM compiler is an extensive implementation of
+the programming language BASIC. The language structure and
+semantics are modelled after the BASIC interpreter/compiler
+of Microsoft (tr), a short comparison is provided in
+appendix A.</p>
+
+<p>The compiler generates code for a virtual machine, the
+EM machine [[ACM, etc]]. Using EM as an intermediate machine
+results in a highly portable compiler and BASIC code.<br>
+The drawback of EM is that it does not directly reflect one
+particular hardware design, which means that many of the low
+level operations available within BASIC are ill-defined or
+even inapplicable. To mention a few, the peek and poke
+instructions are likely to be behave errorneous, while line
+printer and tapedeck primitives are unknown.</p>
+
+<p>This manual is divided into three chapters.<br>
+Chapter 1 discusses the general language syntax and
+semantics.<br>
+Chapter 2 describes the statements available in
+BASIC-EM.<br>
+Chapter 3 describes the predefined functions, ordered
+alphabetically.</p>
+
+<p>Appendix A discusses the differences with Microsoft
+BASIC.<br>
+Appendix B describes all reserved symbols.</p>
+<a name="SYNTAX NOTATION"></a>
+<h2>SYNTAX NOTATION</h2>
+
+<p>The conventions for syntax presentation are as
+follows:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>CAPS</p>
+</td>
+<td width="12%"></td>
+<td width="80%">
+
+<p>Items are reserved words, must be input as shown.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&lt;&gt;</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>Items in lowercase letters enclosed in angular brackets
+are to be supplied by the user.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>[]</p>
+</td>
+<td width="16%"></td>
+<td width="38%">
+
+<p>Items are optional.</p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="82%">
+
+<p>Items may be repeated any number of times</p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>{}</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>A choice between two or more alternatives. At least one
+of the entries must be chosen.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>|</p>
+</td>
+<td width="18%"></td>
+<td width="80%">
+
+<p>Vertical bars separate the choices within braces.</p>
+</td>
+</table>
+
+<p>All punctuation must be included where shown.</p>
+<a name="1. GENERAL INFORMATION"></a>
+<h2>1. GENERAL INFORMATION</h2>
+
+<p>The BASIC-EM compiler is designed for a UNIX based
+environment. It accepts a text file with a BASIC program
+(suffix .b) and generates an executable file, called
+a.out.</p>
+<a name="1.1. LINE FORMAT"></a>
+<h2>1.1. LINE FORMAT</h2>
+
+<p>A BASIC program consists of a series of lines, starting
+with a positive line number in the range 0 to 32767. A line
+may consists of more than one physical line on a terminal,
+but is limited to 1024 characters. Multiple BASIC statements
+may be placed on a single line, provided they are separated
+by a colon (:).</p>
+<a name="1.2. CONSTANTS"></a>
+<h2>1.2. CONSTANTS</h2>
+
+<p>The BASIC compiler character set is comprised of
+alphabetic characters, numeric characters, and special
+characters shown below.</p>
+<pre>     = + - * / ^ ( ) % # $ \ _
+     ! [ ] , . ; : &amp; &rsquo; ? &gt; &lt;  \ (blanc)
+</pre>
+
+<p>BASIC uses two different types of constants during
+processing: numeric and string constants.<br>
+A string constant is a sequence of characters taken from the
+ASCII character set enclosed by double quotation marks.<br>
+Numeric constants are positive or negative numbers, grouped
+into five different classes.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="40%">
+
+<p>a) integer constants</p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>Whole numbers in the range of -32768 and 32767. Integer
+constants do not contain decimal points.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="48%">
+
+<p>b) fixed point constants</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>Positive or negative real numbers, i.e. numbers with a
+decimal point.</p>
+</td>
+</table>
+
+<p>c) floating point constants</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>Real numbers in scientific notation. A floating point
+constant consists of an optional signed integer or fixed
+point number followed by the letter E (or D) and an optional
+signed integer (the exponent). The allowable range of
+floating point constants is 10^-38 to 10^+38.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%">
+
+<p>d) Hex constants</p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>Hexadecimal numbers, denoted by the prefix &amp;H.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="36%">
+
+<p>e) Octal constants</p>
+</td>
+<td width="63%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>Octal numbers, denoted by the prefix &amp;O.</p></td>
+</table>
+<a name="1.3. VARIABLES"></a>
+<h2>1.3. VARIABLES</h2>
+
+<p>Variables are names used to represent values in a BASIC
+program. A variable is assigned a value by assigment
+specified in the program. Before a variable is assigned its
+value is assumed to be zero.<br>
+Variable names are composed of letters, digits or the
+decimal point, starting with a letter. Up to 40 characters
+are significant. A variable name can be followed by any of
+the following type declaration characters:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>%</p>
+</td>
+<td width="8%"></td>
+<td width="54%">
+
+<p>Defines an integer variable</p>
+</td>
+<td width="35%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>!</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Defines a single precision variable (see below)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>#</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>Defines a double precision variable</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>$</p>
+</td>
+<td width="8%"></td>
+<td width="52%">
+
+<p>Defines a string variable.</p>
+</td>
+<td width="37%">
+</td>
+</table>
+
+<p>Beside single valued variables, values may be grouped
+into tables or arrays. Each element in an array is
+referenced by the array name and an index, such a variable
+is called a subscripted variable. An array has as many
+subscripts as there are dimensions in the array, the maximum
+of which is 11.<br>
+If a variable starts with FN it is assumed to be a call to a
+user defined function.<br>
+A variable name may not be a reserved word nor the name of a
+predefined function. A list of all reserved identifiers is
+included as Appendix B.</p>
+
+<p>NOTES:<br>
+Two variables with the same name but different type is
+considered illegal.<br>
+The type of a variable without typedeclaration-character is
+set, at it&rsquo;s first occurence in the program, to the
+defaulttype which is (in this implementation) double
+precision.<br>
+Multi-dimensional array&rsquo;s must be declared before use
+(see DIM-statement ).<br>
+BASIC-EM differs from Microsoft BASIC in supporting floats
+in one precision only (due to EM), eg doubles and floats
+have the same precision.</p>
+<a name="1.4. EXPRESSIONS"></a>
+<h2>1.4. EXPRESSIONS</h2>
+
+<p>When necessary the compiler will convert a numeric value
+from one type to another. A value is always converted to the
+precision of the variable it is assigned to. When a floating
+point value is converted to an integer the fractional
+portion is rounded. In an expression all values are
+converted to the same degree of precision, i.e. that of the
+most precise operand.<br>
+Division by zero results in the message &quot;Division by
+zero&quot;. If overflow (or underflow) occurs, the
+&quot;Overflow (underflow)&quot; message is displayed and
+execution is terminated (contrary to Microsoft).</p>
+<a name="Arithmetic"></a>
+<h2>Arithmetic</h2>
+
+<p>The arithmetic operators in order of precedence,a
+re:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>^</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Exponentiation</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>-</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Negation</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>*,/,\\\\,MOD</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>Multiplication, Division, Remainder</p>
+</td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>+,-</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Addition, Substraction</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p>The operator \\ denotes integer division, its operands
+are rounded to integers before the operator is applied.
+Modulus arithmetic is denoted by the operator MOD, which
+yields the integer value that is the remainder of an integer
+division.<br>
+The order in which operators are performed can be changed
+with parentheses.</p>
+<a name="Relational"></a>
+<h2>Relational</h2>
+
+<p>The relational operators in order of precedence,
+are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>=</p>
+<td width="9%"></td>
+<td width="10%">
+
+<p>Equality<br>
+&lt;&gt;</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>Inequality<br>
+&lt;</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>Less than<br>
+&gt;</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>Greater than<br>
+&lt;=</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>Less than or equal to<br>
+&gt;=</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>Greater than or equal to</p>
+</td>
+<td width="10%"></td>
+<td width="69%">
+</td>
+</table>
+
+<p>The relational operators are used to compare two values
+and returns either &quot;true&quot; (-1) or
+&quot;false&quot; (0) (See IF statement). The precedence of
+the relational operators is lower then the arithmetic
+operators.</p>
+<a name="Logical"></a>
+<h2>Logical</h2>
+
+<p>The logical operators performs tests on multiple
+relations, bit manipulations, or boolean operations. The
+logical operators returns a bitwise result (&quot;true&quot;
+or &quot;false&quot;). In an expression, logical operators
+are performed after the relational and arithmetic operators.
+The logical operators work by converting their operands to
+signed two-complement integers in the range -32768 to
+32767.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>NOT</p>
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise negation<br>
+AND</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise and<br>
+OR</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise or<br>
+XOR</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise exclusive or<br>
+EQV</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise equivalence<br>
+IMP</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>Bitwise implies</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+<a name="Functional"></a>
+<h2>Functional</h2>
+
+<p>A function is used in an expression to call a system or
+user defined function. A list of predefined functions is
+presented in chapter 3.</p>
+<a name="String operations"></a>
+<h2>String operations</h2>
+
+<p>Strings can be concatenated by using +. Strings can be
+compared with the relational operators. String comparison is
+performed in lexicographic order.</p>
+<a name="1.5. ERROR MESSAGES"></a>
+<h2>1.5. ERROR MESSAGES</h2>
+
+<p>The occurence of an error results in termination of the
+program unless an ON....ERROR statement has been
+encountered.</p>
+<a name="2. B-EM STATEMENTS"></a>
+<h2>2. B-EM STATEMENTS</h2>
+
+<p>This chapter describes the statements available within
+the BASIC-EM compiler. Each description is formatted as
+follows:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>Shows the correct syntax for the statement. See
+introduction of syntax notation above.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Describes the purpose and details of the
+instructions.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Describes special cases, deviation from Microsoft BASIC
+etc.</p>
+</td>
+</table>
+<a name="2.1. CALL"></a>
+<h2>2.1. CALL</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="78%">
+
+<p>CALL &lt;variable name&gt;[(&lt;argument list&gt;)]</p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The CALL statement provides the means to execute
+procedures and functions written in another language
+included in the Amsterdam Compiler Kit. The argument list
+consist of (subscripted) variables. The BASIC compiler
+pushes the address of the arguments on the stack in order of
+encounter.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>Not yet available.</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<a name="2.2. CLOSE"></a>
+<h2>2.2. CLOSE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>CLOSE [[#]&lt;file number&gt;[,[#]&lt;file
+number...&gt;]]</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To terminate I/O on a disk file. &lt;file number&gt; is
+the number associated with the file when it was OPENed (See
+OPEN-statement). Ommission of parameters results in closing
+all files.</p>
+</td>
+</table>
+
+<p>The END statement and STOP statement always issue a
+CLOSE of all files.</p>
+<a name="2.3. DATA"></a>
+<h2>2.3. DATA</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p>DATA &lt;list of constants&gt;</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>DATA statements are used to construct a data bank of
+values that are accessed by the program&rsquo;s READ
+statement. DATA statements are non-executable, the data
+items are assembled in a data file by the BASIC compiler.
+This file can be replaced, provided the layout remains the
+same (otherwise the RESTORE won&rsquo;t function
+properly).</p>
+</td>
+</table>
+
+<p>The list of data items consists of numeric and string
+constants as discussed in section 1. Moreover, string
+constants starting with a letter and not containing blancs,
+newlines, commas, colon need not be enclosed with the string
+quotes.</p>
+
+<p>DATA statements can be reread using the RESTORE
+statement.</p>
+<a name="2.4. DEF FN"></a>
+<h2>2.4. DEF FN</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>DEF FN&lt;name&gt;
+[(&lt;parameterlist&gt;)]=&lt;expression&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To define and name a function that is written by the
+user. &lt;name&gt; must be an identifier and should be
+preceded by FN, which is considered integral part of the
+function name. &lt;expression&gt; defines the expression to
+be evaluated upon function call.</p>
+</td>
+</table>
+
+<p>The parameter list is comprised of a comma separated
+list of variable names, used within the function definition,
+that are to replaced by values upon function call. The
+variable names defined in the parameterlist, called formal
+parameters, do not affect the definition and use of
+variables defined with the same name in the rest of the
+BASIC program.</p>
+
+<p>A type declaration character may be suffixed to the
+function name to designate the data type of the function
+result.</p>
+<a name="2.5. DEFINT/SNG/DBL/STR"></a>
+<h2>2.5. DEFINT/SNG/DBL/STR</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p>DEF&lt;type&gt; &lt;range of letters&gt;</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Any undefined variable starting with the letter included
+in the range of letters is declared of type &lt;type&gt;
+unless a type declaration character is appended. The range
+of letters is a comma separated list of characters and
+character ranges (&lt;letter&gt;-&lt;letter&gt;).</p>
+</td>
+</table>
+<a name="2.6. DIM"></a>
+<h2>2.6. DIM</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p>DIM &lt;list of subscripted variable&gt;</p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The DIM statement allocates storage for subscripted
+variables. If an undefined subscripted variable is used the
+maximum value of the array subscript is assumed to be 10. A
+subscript out of range is signalled by the program (when ACK
+works) The minimum subscript value is 0, unless the OPTION
+BASE statement has been encountered.</p>
+</td>
+</table>
+
+<p>All variables in a subscripted variable are initially
+zero.</p>
+
+<p>BUGS. Multi-dimensional arrays MUST be defined.
+Subscript out of range is left unnotified.</p>
+<a name="2.7. END"></a>
+<h2>2.7. END</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="6%">
+
+<p>END</p>
+</td>
+<td width="73%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>END terminates a BASIC program and returns to the UNIX
+shell. An END statement at the end of the BASIC program is
+optional.</p>
+</td>
+</table>
+<a name="2.8. ERR and ERL"></a>
+<h2>2.8. ERR and ERL</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="44%">
+
+<p>&lt;identifier name&gt;= ERR</p>
+</td>
+<td width="35%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>&lt;identifier name&gt;= ERL</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Whenever an error occurs the variable ERR contains the
+error number and ERL the BASIC line where the error
+occurred. The variables are usually used in error handling
+routines provided by the user.</p>
+</td>
+</table>
+<a name="2.9. ERROR"></a>
+<h2>2.9. ERROR</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="52%">
+
+<p>ERROR &lt;integer expression&gt;</p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To simulate the occurrence of a BASIC error. To define a
+private error code a value must be used that is not already
+in use by the BASIC runtime system. The list of error
+messages currently in use can be found in appendix B.</p>
+</td>
+</table>
+<a name="2.10. FIELD"></a>
+<h2>2.10. FIELD</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>To be implemented.</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<a name="2.11. FOR...NEXT"></a>
+<h2>2.11. FOR...NEXT</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>FOR &lt;variable&gt;=
+&lt;low&gt;TO&lt;high&gt;[STEP&lt;size&gt;]</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>......<br>
+NEXT [&lt;variable&gt;][,&lt;variable&gt;...]</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The FOR statements allows a series of statements to be
+performed repeatedly. &lt;variable&gt; is used as a counter.
+During the first execution pass it is assigned the value
+&lt;low&gt;, an arithmetic expression. After each pass the
+counter is incremented (decremented) with the step size
+&lt;size&gt;, an expression. Ommission of the step size is
+intepreted as an increment of 1.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>Execution of the program lines specified between the FOR
+and the NEXT statement is terminated as soon as &lt;low&gt;
+is greater (less) than &lt;high&gt;</p>
+<!-- INDENTATION -->
+<p>The NEXT statement is labeled with the name(s) of the
+counter to be incremented.</p>
+<!-- INDENTATION -->
+<p>The variables mentioned in the NEXT statement may be
+ommitted, in which case the variable of increment the
+counter of the most recent FOR statement. If a NEXT
+statement is encountered before its corresponding FOR
+statement, the error message &quot;NEXT without FOR&quot; is
+generated.</p></td>
+</table>
+<a name="2.12. GET"></a>
+<h2>2.12. GET</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="78%">
+
+<p>GET [#]&lt;file number&gt;[, &lt;record number&gt;]</p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>To be implemented.</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<a name="2.13. GOSUB...RETURN"></a>
+<h2>2.13. GOSUB...RETURN</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="38%">
+
+<p>GOSUB &lt;line number&gt; ...</p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>RETURN</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The GOSUB statement branches to the first statement of a
+subroutine. The RETURN statement cause a branch back to the
+statement following the most recent GOSUB statement. A
+subroutine may contain more than one RETURN statement.</p>
+</td>
+</table>
+
+<p>Subroutines may be called recursively. Nesting of
+subroutine calls is limited, upon exceeding the maximum
+depth the error message &quot;XXXXX&quot; is displayed.</p>
+<a name="2.14. GOTO"></a>
+<h2>2.14. GOTO</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="36%">
+
+<p>GOTO &lt;line number&gt;</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To branch unconditionally to a specified line in the
+program. If &lt;line number&gt; does not exists, the
+compilation error message &quot;Line not defined&quot; is
+displayed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Microsoft BASIC continues at the first line equal or
+greater then the line specified.</p>
+</td>
+</table>
+<a name="2.15. IF...THEN"></a>
+<h2>2.15. IF...THEN</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="87%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>IF &lt;expression&gt; THEN {&lt;statements&gt;|&lt;line
+number&gt;} [ELSE {&lt;statements&gt;|&lt;line
+number&gt;}]</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>IF &lt;expression&gt; GOTO &lt;line number&gt; [ELSE
+{&lt;statements&gt;|&lt;line number&gt;}]</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The IF statement is used to make a decision regarding
+the program flow based on the result of the expressions. If
+the expression is not zero, the THEN or GOTO clause is
+executed. If the result of &lt;expression&gt; is zero, the
+THEN or GOTO clause is ignored and the ELSE clause, if
+present is executed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>IF..THEN..ELSE statements may be nested. Nesting is
+limited by the length of the line. The ELSE clause matches
+with the closests unmatched THEN.</p>
+<!-- INDENTATION -->
+<p>When using IF to test equality for a value that is the
+result of a floating point expression, remember that the
+internal representation of the value may not be exact.
+Therefore, the test should be against a range to handle the
+relative error.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Microsoft BASIC allows a comma before THEN.</p>
+</td>
+</table>
+<a name="2.16. INPUT"></a>
+<h2>2.16. INPUT</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>INPUT [;][&lt;&quot;prompt string&quot;&gt;;]&lt;list of
+variables&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>An INPUT statement can be used to obtain values from the
+user at the terminal. When an INPUT statement is encountered
+a question mark is printed to indicate the program is
+awaiting data. IF &lt;&quot;prompt string&quot;&gt; is
+included, the string is printed before the the question
+mark. The question mark is suppressed when the prompt string
+is followed by a comma, rather then a semicolon.</p>
+</td>
+</table>
+
+<p>For each variable in the variable a list a value should
+be supplied. Data items presented should be separated by a
+comma.</p>
+
+<p>The type of the variable in the variable list must
+aggree with the type of the data item entered. Responding
+with too few or too many data items causes the message
+&quot;?Redo&quot;. No assignment of input values is made
+until an acceptable response is given.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The option to disgard the carriage return with the
+semicolon after the input symbol is not yet implemented.</p>
+</td>
+</table>
+<a name="2.17. INPUT [#]"></a>
+<h2>2.17. INPUT [#]</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>INPUT #&lt;file number&gt;,&lt;list of variables&gt;</p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>The purpose of the INPUT# statement is to read data
+items from a sequential file and assign them to program
+variables. &lt;file number&gt; is the number used to open
+the file for input. The variables mentioned are
+(subscripted) variables. The type of the data items read
+should aggree with the type of the variables. A type
+mismatch results in the error message &quot;XXXXX&quot;.</p>
+</td>
+</table>
+
+<p>The data items on the sequential file are separated by
+commas and newlines. In scanning the file, leading spaces,
+new lines, tabs, and carriage returns are ignored. The first
+character encountered is assumed to be the state of a new
+item. String items need not be enclosed with double quotes,
+provided it does not contain spaces, tabs, newlines and
+commas,</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Microsoft BASIC won&rsquo;t assign values until the end
+of input statement. This means that the user has to supply
+all the information.</p>
+</td>
+</table>
+<a name="2.18. LET"></a>
+<h2>2.18. LET</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p>[LET]&lt;variable&gt;=&lt;expression&gt;</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To assign the value of an expression to a (subscribted)
+variable. The type convertions as dictated in chapter 1
+apply.</p>
+</td>
+</table>
+<a name="2.19. LINE INPUT"></a>
+<h2>2.19. LINE INPUT</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>LINE INPUT [;][&lt;&quot;prompt
+string&quot;&gt;;]&lt;string variable&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>An entire line of input is assigned to the string
+variable. See INPUT for the meaning of the &lt;&quot;prompt
+string&quot;&gt; option.</p>
+</td>
+</table>
+<a name="2.20. LINE INPUT [#]"></a>
+<h2>2.20. LINE INPUT [#]</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>LINE INPUT #&lt;file number&gt;,&lt;string
+variable&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Read an entire line of text from a sequential file
+&lt;file number&gt; and assign it to a string variable.</p>
+</td>
+</table>
+<a name="2.21. LSET and RSET"></a>
+<h2>2.21. LSET and RSET</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>To be implemented</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<a name="2.22. MID$"></a>
+<h2>2.22. MID$</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>MID$(&lt;string expr1&gt;,n[,m])=&lt;string
+expr2&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To replace a portion of a string with another string
+value. The characters of &lt;string expr2&gt; replaces
+characters in &lt;string expr1&gt; starting at position n.
+If m is present, at most m characters are copied, otherwise
+all characters are copied. However, the string obtained
+never exceeds the length of string expr1.</p>
+</td>
+</table>
+<a name="2.23. ON ERROR GOTO"></a>
+<h2>2.23. ON ERROR GOTO</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="54%">
+
+<p>ON ERROR GOTO &lt;line number&gt;</p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To enable error handling within the BASIC program. An
+error may result from arithmetic errors, disk problems,
+interrupts, or as a result of the ERROR statement. After
+printing an error message the program is continued at the
+statements associated with &lt;line number&gt;.</p>
+</td>
+</table>
+
+<p>Error handling is disabled using ON ERROR GOTO 0.
+Subsequent errors result in an error message and program
+termination.</p>
+<a name="2.24. ON...GOSUB and ON ...GOTO"></a>
+<h2>2.24. ON...GOSUB and ON ...GOTO</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>ON &lt;expression&gt; GOSUB &lt;list of line
+numbers&gt;</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>ON &lt;expression&gt; GOTO &lt;list of line
+numbers&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To branch to one of several specified line numbers or
+subroutines, based on the result of the &lt;expression&gt;.
+The list of line numbers are considered the first, second,
+etc alternative. Branching to the first occurs when the
+expression evaluates to one, to the second alternative on
+two, etc. If the value of the expression is zero or greater
+than the number of alternatives, processing continues at the
+first statement following the ON..GOTO (ON GOSUB)
+statement.</p>
+</td>
+</table>
+
+<p>When the expression results in a negative number the an
+&quot;Illegal function call&quot; error occurs.</p>
+
+<p>BUG If the value of the expression is zero or greater
+than the number of alternatives, processing does NOT
+continue at the first statement following the ON..GOTO (ON
+GOSUB) statement.</p>
+<a name="2.25. OPEN"></a>
+<h2>2.25. OPEN</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>OPEN {&quot;i&quot; | &quot;o&quot; | &quot;r&quot; } ,
+[#]&lt;file number&gt; , &lt;file-name&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To open &lt;file-name&gt; (filename should be quoted)
+for input/reading or output. If file is not opened for
+output it has to be existent, otherwise an &quot;file not
+found&quot; error will occur.</p>
+</td>
+</table>
+<a name="2.26. OPTION BASE"></a>
+<h2>2.26. OPTION BASE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="26%">
+
+<p>OPTION BASE n</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To declare the lower bound of subsequent array
+subscripts as either 0 or 1. The default lower bound is
+zero.</p>
+</td>
+</table>
+<a name="2.27. POKE"></a>
+<h2>2.27. POKE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p>POKE &lt;expr1&gt;,&lt;expr2&gt;</p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To poke around in memory. The use of this statement is
+not recommended, because it requires full understanding of
+both the implementation of the Amsterdam Compiler Kit and
+the hardware characteristics.</p>
+</td>
+</table>
+<a name="2.28. PRINT"></a>
+<h2>2.28. PRINT</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>PRINT &lt;list of variables and/or constants&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To print constants or the contents of variables on the
+terminal-device. If the variables or constants are seperated
+by comma&rsquo;s the values will be printed seperated by
+tabs. If the variables or constants are seperated by
+semi-colon&rsquo;s the values will be printed without spaces
+in between. The new-line generated at the end of the
+print-statement can be suppressed by a semi-colon at the end
+of list of variables or constants.</p>
+</td>
+</table>
+<a name="2.29. PRINT USING"></a>
+<h2>2.29. PRINT USING</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>To be implemented</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<a name="2.30. PUT"></a>
+<h2>2.30. PUT</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>To be implemented</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<a name="2.31. RANDOMIZE"></a>
+<h2>2.31. RANDOMIZE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p>RANDOMIZE [&lt;expression&gt;]</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To reset the random seed. When the expression is
+ommitted, the system will ask for a value between -32768 and
+32767. The random number generator returns the same sequence
+of values provided the same seed is used.</p>
+</td>
+</table>
+<a name="2.32. READ"></a>
+<h2>2.32. READ</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p>READ &lt;list of variables&gt;</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To read values from the DATA statements and assign them
+to variables. The type of the variables should match to the
+type of the items being read, otherwise a &quot;Syntax
+error&quot; occurs. If all data is read the message
+&quot;Out of data&quot; will be displayed.</p>
+</td>
+</table>
+<a name="2.33. REM"></a>
+<h2>2.33. REM</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="24%">
+
+<p>REM &lt;remark&gt;</p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To include explantory information in a program. The REM
+statements are not executed. A single quote has the same
+effect as : REM, which allows for the inclusion of comment
+at the end of the line.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>remarks</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>Microsoft BASIC does not allow REM statements as part of
+DATA lines.</p>
+</td>
+</table>
+<a name="2.34. RESTORE"></a>
+<h2>2.34. RESTORE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p>RESTORE [&lt;line number&gt;]</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To allow DATA statements to be re-read from a specific
+line. After a RESTORE statement is executed, the next READ
+accesses the first item of the DATA statements. If &lt;line
+number&gt; is specified, the next READ accesses the first
+item in the specified line.</p>
+</td>
+</table>
+
+<p>Note that data statements result in a sequential
+datafile generated by the compiler, being read by the read
+statements. This data file may be replaced using the
+operating system functions with a modified version, provided
+the same layout of items (same number of lines and items per
+line) is used.</p>
+<a name="2.35. STOP"></a>
+<h2>2.35. STOP</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="8%">
+
+<p>STOP</p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To terminate the execution of a program and return to
+the operating system command interpreter. A STOP statement
+results in the message &quot;Break in line ???&quot;</p>
+</td>
+</table>
+<a name="2.36. SWAP"></a>
+<h2>2.36. SWAP</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="52%">
+
+<p>SWAP &lt;variable&gt;,&lt;variable&gt;</p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To exchange the values of two variables.</p>
+</td>
+<td width="0%">
+</td>
+</table>
+
+<p>BUG. Strings cannot be swapped !</p>
+<a name="2.37. TRON/TROFF"></a>
+<h2>2.37. TRON/TROFF</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="8%">
+
+<p>TRON</p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="10%">
+
+<p>TROFF</p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>As an aid in debugging the TRON statement results in a
+program listing each line being interpreted. TROFF disables
+generation of this code.</p>
+</td>
+</table>
+<a name="2.38. WHILE...WEND"></a>
+<h2>2.38. WHILE...WEND</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="36%">
+
+<p>WHILE &lt;expression&gt; ..... WEND</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To execute a series of BASIC statements as long as a
+conditional expression is true. WHILE...WEND loops may be
+nested.</p>
+</td>
+</table>
+<a name="2.39. WRITE"></a>
+<h2>2.39. WRITE</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="58%">
+
+<p>WRITE [&lt;list of expressions&gt;]</p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To write data at the terminal in DATA statement layout
+conventions. The expressions should be separated by
+commas.</p>
+</td>
+</table>
+<a name="2.40. WRITE #"></a>
+<h2>2.40. WRITE #</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><b>syntax</b></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>WRITE #&lt;file number&gt; ,&lt;list of
+expressions&gt;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><b>purpose</b></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>To write a sequential data file, being opened with the
+&quot;O&quot; mode. The values are being writting using the
+DATA statements layout conventions.</p>
+</td>
+</table>
+<a name="3. FUNCTIONS"></a>
+<h2>3. FUNCTIONS</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>ABS(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the absolute value of expression X</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>ASC(X$)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the numeric value of the first character of the
+string. If X$ is not initialized an &quot;Illegal function
+call&quot; error is returned.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>ATN(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the arctangent of X in radians. Result is in the
+range of -pi/2 to pi/2.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>CDBL(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts X to a double precision number.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>CHR$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts the integer value X to its ASCII character. X
+must be in the range of 0 to 257. It is used for cursor
+addressing and generating bel signals.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>CINT(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts X to an integer by rounding the fractional
+portion. If X is not in the range -32768 to 32767 an
+&quot;Overflow&quot; error occurs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>COS(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the cosine of X in radians.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>CSNG(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts X to a single precision number.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p>CVI(&lt;2-bytes&gt;)</p>
+</td>
+<td width="22%"></td>
+<td width="50%">
+
+<p>Convert two byte string value to integer number.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p>CVS(&lt;4-bytes&gt;)</p>
+</td>
+<td width="22%"></td>
+<td width="50%">
+
+<p>Convert four byte string value to single precision
+number.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p>CVD(&lt;8-bytes&gt;)</p>
+</td>
+<td width="22%"></td>
+<td width="50%">
+
+<p>Convert eight byte string value to double precision
+number.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="40%">
+
+<p>EOF[(&lt;file-number&gt;)]</p>
+</td>
+<td width="10%"></td>
+<td width="50%">
+
+<p>Returns -1 (true) if the end of a sequential file has
+been reached.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>EXP(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns e(base of natural logarithm) to the power of X.
+X should be less then 10000.0.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>FIX(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the truncated integer part of X. FIX(X) is
+equivalent to SGN(X)*INT(ABS(X)). The major difference
+between FIX and INT is that FIX does not return the next
+lower number for negative X.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>HEX$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the string which represents the hexadecimal
+value of the decimal argument. X is rounded to an integer
+using CINT before HEX$ is evaluated.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>INT(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the largest integer &lt;= X.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p>INP$(X[,[#]Y])</p>
+</td>
+<td width="22%"></td>
+<td width="50%">
+
+<p>Returns the string of X characters read from the
+terminal or the designated file.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>LEN(X$)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the number of characters in the string X$. Non
+printable and blancs are counted too.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="36%">
+
+<p>LOC(&lt;file number&gt;)</p>
+</td>
+<td width="14%"></td>
+<td width="50%">
+
+<p>For sequential files LOC returns position of the
+read/write head, counted in number of bytes. For random
+files the function returns the record number just read or
+written from a GET or PUT statement. If nothing was read or
+written 0 is returned.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>LOG(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the natural logarithm of X. X must be greater
+than zero.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p>MID$(X,I,[J])</p>
+</td>
+<td width="24%"></td>
+<td width="50%">
+
+<p>Returns first J characters from string X starting at
+position I in X. If J is omitted all characters starting of
+from position I in X are returned.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>MKI$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts an integer expression to a two-byte string.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>MKS$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts a single precision expression to a four-byte
+string.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>MKD$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Converts a double precision expression to a eight-byte
+string.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>OCT$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the string which represents the octal value of
+the decimal argument. X is rounded to an integer using CINT
+before OCTS is evaluated.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>PEEK(I)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the byte read from the indicated memory. (Of
+limited use in the context of ACK)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>POS(I)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the current cursor position. To be
+implemented.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>RIGHT$(X$,I)</p>
+</td>
+<td width="26%"></td>
+<td width="50%">
+
+<p>Returns the right most I characters of string X$. If I=0
+then the empty string is returned.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>RND(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns a random number between 0 and 1. X is a dummy
+argument.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>SGN(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>If X&gt;0 , SGN(X) returns 1.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="49%"></td>
+<td width="50%">
+<p>if X=0, SGN(X) returns 0.<br>
+if X&lt;0, SGN(X) returns -1.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>SIN(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the sine of X in radians.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>SPACE$(X)</p>
+</td>
+<td width="32%"></td>
+<td width="50%">
+
+<p>Returns a string of spaces length X. The expression X is
+rounded to an integer using CINT.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>STR$(X)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the string representation value of X.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>STRING$(I,J)</p>
+</td>
+<td width="26%"></td>
+<td width="50%">
+
+<p>Returns thes string of length Iwhose characters all have
+ASCII code J. (or first character when J is a string)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>TAB(I)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Spaces to position I on the terminal. If the current
+print position is already beyond space I,TAB goes to that
+position on the next line. Space 1 is leftmost position, and
+the rightmost position is width minus 1. To be used within
+PRINT statements only.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>TAN(X)</p>
+</td>
+<td width="38%"></td>
+<td width="50%">
+
+<p>Returns the tangent of X in radians. If TAN overflows
+the &quot;Overflow&quot; message is displayed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>VAL(X$)</p>
+</td>
+<td width="36%"></td>
+<td width="50%">
+
+<p>Returns the numerical value of string X$. The VAL
+function strips leading blanks and tabs from the argument
+string.</p>
+</td>
+</table>
+<a name="APPENDIX A DIFFERENCES WITH MICROSOFT BASIC"></a>
+<h2>APPENDIX A DIFFERENCES WITH MICROSOFT BASIC</h2>
+
+<p>The following list of Microsoft commands and statements
+are not recognized by the compiler.</p>
+<pre>     SPC
+     USR
+     VARPTR
+     AUTO
+     CHAIN
+     CLEAR
+     CLOAD
+     COMMON
+     CONT
+     CSAVE
+     DELETE
+     EDIT
+     ERASE
+     FRE
+     KILL
+     LIST
+     LLIST
+     LOAD
+     LPRINT
+     MERGE
+     NAME
+     NEW
+     NULL
+     RENUM
+     RESUME
+     RUN
+     SAVE
+     WAIT
+     WIDTH LPRINT
+</pre>
+
+<p>Some statements are in the current implementation not
+available, but will be soon. These include:</p>
+<pre>     CALL
+     DEFUSR
+     FIELD
+     GET
+     INKEY
+     INPUT$
+     INSTR$
+     LEFT$
+     LSET
+     RSET
+     PUT
+</pre>
+<a name="APPENDIX B RESERVED WORDS IN BASIC-EM"></a>
+<h2>APPENDIX B RESERVED WORDS IN BASIC-EM</h2>
+
+<p>The following list of words/symbols/names/identifiers
+are reserved, which means that they can not be used for
+variable-names.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="11" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>ABS</p>
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>AND</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ASC</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>AS<br>
+ATN</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>AUTO</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>BASE</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CALL<br>
+CDBL</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CHAIN</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CHR</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CINT<br>
+CLEAR</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CLOAD</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>CLOSE</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>COMMON<br>
+CONT</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>COS</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CSNG</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CSAVE<br>
+CVI</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CVS</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>CVD</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>DATA<br>
+DEFINT</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>DEFSNG</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>DEFDBL</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>DEFSTR<br>
+DEF</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>DELETE</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>DIM</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>EDIT<br>
+ELSE</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>END</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>EOF</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ERASE<br>
+ERROR</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ERR</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ERL</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ELSE<br>
+EQV</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>EXP</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>FIELD</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>FIX<br>
+FOR</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>FRE</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>GET</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>GOSUB<br>
+GOTO</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>HEX</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>IF</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>IMP<br>
+INKEY</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>INPUT</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>INP</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>INSTR<br>
+INT</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>KILL</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LEFT</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LEN</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LET</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LINE</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LIST</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LLIST<br>
+LOAD</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LOC</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LOG</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>LPOS<br>
+LPRINT</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>LSET</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>MERGE</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>MID<br>
+MKI</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>MKS</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>MKD</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>MOD<br>
+NAME</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>NEW</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>NEXT</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>NOT</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>NULL</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ON</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>OCT</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>OPEN<br>
+OPTION</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>OR</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>OUT</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>PEEK<br>
+POKE</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>PRINT</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>POS</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>PUT<br>
+RANDOMIZE</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>READ</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>REM</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>RENUM<br>
+REN</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>RESTORE</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>RESUME</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>RETURN<br>
+RIGHT</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>RND</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>RUN</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SAVE<br>
+STEP</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SGN</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SIN</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SPACE<br>
+SPC</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SQR</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>STOP</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>STRING<br>
+STR</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>SWAP</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>TAB</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>TAN<br>
+THEN</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>TO</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>TRON</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>TROFF<br>
+USING</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>USR</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>VAL</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>VARPTR<br>
+WAIT</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>WHILE</p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>WEND</p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>WIDTH<br>
+WRITE</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>XOR</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+</table>
+<hr>
+</body>
+</html>

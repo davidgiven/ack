@@ -1,0 +1,4 @@
+<page src="index.i">
+	<page src="about.i"/>
+	<page src="olddocs.i"/>
+</page>

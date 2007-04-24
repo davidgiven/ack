@@ -1,0 +1,1391 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:17 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Back end table for the Intel 8080 micro-processor</title>
+</head>
+<body>
+
+<h1 align=center>Back end table for the Intel 8080 micro-processor</h1>
+<a href="#1. THE 8080 MICRO PROCESSOR">1. THE 8080 MICRO PROCESSOR</a><br>
+<a href="#1.1. Registers">1.1. Registers</a><br>
+<a href="#1.2. Flip-flops">1.2. Flip-flops</a><br>
+<a href="#1.3. Addressing modes">1.3. Addressing modes</a><br>
+<a href="#1.3.1. Implied addressing">1.3.1. Implied addressing</a><br>
+<a href="#1.3.2. Register addressing">1.3.2. Register addressing</a><br>
+<a href="#1.3.3. Register indirect addressing">1.3.3. Register indirect addressing</a><br>
+<a href="#1.3.4. Immediate addressing">1.3.4. Immediate addressing</a><br>
+<a href="#1.3.5. Direct addressing">1.3.5. Direct addressing</a><br>
+<a href="#2. THE 8080 BACK END TABLE">2. THE 8080 BACK END TABLE</a><br>
+<a href="#2.1. Constant definitions">2.1. Constant definitions</a><br>
+<a href="#2.2. Registers and their properties">2.2. Registers and their properties</a><br>
+<a href="#2.3. Tokens">2.3. Tokens</a><br>
+<a href="#2.4. Sets">2.4. Sets</a><br>
+<a href="#2.5. Instructions">2.5. Instructions</a><br>
+<a href="#2.6. Moves">2.6. Moves</a><br>
+<a href="#2.7. Tests">2.7. Tests</a><br>
+<a href="#2.8. Stacking rules">2.8. Stacking rules</a><br>
+<a href="#2.9. Coercions">2.9. Coercions</a><br>
+<a href="#2.10. Patterns">2.10. Patterns</a><br>
+<a href="#2.10.1. Group 1: Load instructions">2.10.1. Group 1: Load instructions</a><br>
+<a href="#2.10.2. Group 2: Store instructions">2.10.2. Group 2: Store instructions</a><br>
+<a href="#2.10.3. Groups 3 and 4: Signed and unsigned integer arithmetic">2.10.3. Groups 3 and 4: Signed and unsigned integer arithmetic</a><br>
+<a href="#2.10.4. Group 5: Floating point arithmetic">2.10.4. Group 5: Floating point arithmetic</a><br>
+<a href="#2.10.5. Group 12: Compare instructions">2.10.5. Group 12: Compare instructions</a><br>
+<a href="#2.10.6. Group 9: Logical instructions">2.10.6. Group 9: Logical instructions</a><br>
+<a href="#2.10.7. Group 14: Procedure call instructions">2.10.7. Group 14: Procedure call instructions</a><br>
+<a href="#3. LIBRARY ROUTINES">3. LIBRARY ROUTINES</a><br>
+<a href="#4. TRAPS">4. TRAPS</a><br>
+<a href="#5. IMPLEMENTATION">5. IMPLEMENTATION</a><br>
+<a href="#6. INTEL 8080 VERSUS ZILOG Z80 AND INTEL 8086">6. INTEL 8080 VERSUS ZILOG Z80 AND INTEL 8086</a><br>
+<a href="#6.1. Introduction">6.1. Introduction</a><br>
+<a href="#6.2. Differences between the 8080 and z80 processors">6.2. Differences between the 8080 and z80 processors</a><br>
+<a href="#6.3. Consequences for the 8080 and z80 back end">6.3. Consequences for the 8080 and z80 back end</a><br>
+<a href="#6.4. What did I do?">6.4. What did I do?</a><br>
+<a href="#6.5. The results">6.5. The results</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Gerard Buskermolen</i></p>
+
+<p>A back end is a part of the Amsterdam Compiler Kit
+(ACK). It translates EM, a family of intermediate languages,
+into the assembly language of some target machine, here the
+Intel 8080 and Intel 8085 microprocessors. INTRODUCTION</p>
+
+<p>To simplify the task of producing portable (cross)
+compilers and interpreters, the Vrije Universiteit designed
+an integrated collection of programs, the Amsterdam Compiler
+Kit (ACK). It is based on the old UNCOL-idea ([4]) which
+attempts to solve the problem of making a compiler for each
+of <b>N</b> languages on <b>M</b> different machines without
+having to write <b>N * M</b> programs.</p>
+
+<p>The UNCOL approach is to write <b>N</b> &quot;front
+ends&quot;, each of which translates one source language
+into a common intermediate language, UNCOL (UNiversal
+Computer Oriented Language), and <b>M</b> &quot;back
+ends&quot;, each of which translates programs in UNCOL into
+a specific machine language. Under these conditions, only
+<b>N + M</b> programs should be written to provide all
+<b>N</b> languages on all <b>M</b> machines, instead of <b>N
+* M</b> programs.</p>
+
+<p>The intermediate language for the Amsterdam Compiler Kit
+is the machine language for a simple stack machine called EM
+(Encoding Machine). So a back end for the Intel 8080 micro
+translates EM code into 8080 assembly language.</p>
+
+<p>The back end is a single program that is driven by a
+machine dependent driving table. This driving table, or back
+end table, defines the mapping from EM code to the
+machine&rsquo;s assembly language.</p>
+<a name="1. THE 8080 MICRO PROCESSOR"></a>
+<h2>1. THE 8080 MICRO PROCESSOR</h2>
+
+<p>This back end table can be used without modification for
+the Intel 8085 processor. Except for two additional
+instructions, the 8085 instruction set is identical and
+fully compatible with the 8080 instruction set. So
+everywhere in this document &rsquo;8080&rsquo; can be read
+as &rsquo;8080 and 8085&rsquo;.</p>
+<a name="1.1. Registers"></a>
+<h2>1.1. Registers</h2>
+
+<p>The 8080 processor has an 8 bit accumulator, six general
+purpose 8-bit registers, a 16 bit programcounter and a 16
+bit stackpointer. Assembler programs can refer the
+accumulator by A and the general purpose registers by B, C,
+D, E, H and L. (*)</p>
+
+<p align=center><img src="grohtml-102111.png"></p>
+
+<p>Several instructions address registers in groups of two,
+thus creating 16 bit registers:</p>
+<pre>     Registers referenced:   Symbolic reference:
+           B and C                   B
+           D and E                   D
+           H and L                   H
+</pre>
+
+<p>The first named register, contains the high order byte
+(H and L stand for High and Low).<br>
+The instruction determines how the processor interprets the
+reference. For example, ADD B is an 8 bit operation, adding
+the contents of register B to accumulator A. By contrast
+PUSH B is a 16 bit operation pushing B and C onto the
+stack.</p>
+
+<p>There are no index registers.</p>
+<a name="1.2. Flip-flops"></a>
+<h2>1.2. Flip-flops</h2>
+
+<p>The 8080 microprocessor provides five flip-flops used as
+condition flags (S, Z, P, C, AC) and one interrupt enable
+flip-flop IE.<br>
+The sign bit S is set (cleared) by certain instructions when
+the most significant bit of the result of an operation
+equals one (zero). The zero bit Z is set (cleared) by
+certain operations when the 8-bit result of an operation
+equals (does not equal) zero. The parity bit P is set
+(cleared) if the 8-bit result of an operation includes an
+even (odd) number of ones. C is the normal carry bit. AC is
+an auxiliary carry that indicates whether there has been a
+carry out of bit 3 of the accumulator. This auxiliary carry
+is used only by the DAA instruction, which adjusts the 8-bit
+value in the accumulator to form two 4-bit binary coded
+decimal digits. Needless to say this instruction is not used
+in the back-end.</p>
+
+<p>The interrupt enable flip-flop IE is set and cleared
+under program control using the instructions EI (Enable
+Interrupt) and DI (Disable Interrupt). It is automatically
+cleared when the CPU is reset and when an interrupt occurs,
+disabling further interrupts until IE = 1 again.</p>
+<a name="1.3. Addressing modes"></a>
+<h2>1.3. Addressing modes</h2>
+<a name="1.3.1. Implied addressing"></a>
+<h2>1.3.1. Implied addressing</h2>
+
+<p>The addressing mode of some instructions is implied by
+the instruction itself. For example, the RAL (rotate
+accumulator left) instruction deals only with the
+accumulator, and PCHL loads the programcounter with the
+contents of register-pair HL.</p>
+<a name="1.3.2. Register addressing"></a>
+<h2>1.3.2. Register addressing</h2>
+
+<p>With each instruction using register addressing, only
+one register is specified (except for the MOV instruction),
+although in many of them the accumulator is implied as
+second operand. Examples are CMP E, which compares register
+E with the accumulator, and DCR B, which decrements register
+B. A few instructions deal with 16 bit register-pairs:
+examples are DCX B, which decrements register-pair BC and
+the PUSH and POP instructions.</p>
+<a name="1.3.3. Register indirect addressing"></a>
+<h2>1.3.3. Register indirect addressing</h2>
+
+<p>Each instruction that may refer to an 8 bit register,
+may refer also to a memory location. In this case the letter
+M (for Memory) has to be used instead of a register. It
+indicates the memory location pointed to by H and L, so ADD
+M adds the contents of the memory location specified by H
+and L to the contents of the accumulator.<br>
+The register-pairs BC and DE can also be used for indirect
+addressing, but only to load or store the accumulator. For
+example, STAX B stores the contents of the accumulator into
+the memory location addressed by register-pair BC.</p>
+<a name="1.3.4. Immediate addressing"></a>
+<h2>1.3.4. Immediate addressing</h2>
+
+<p>The immediate value can be an 8 bit value, as in ADI 10
+which adds 10 to the accumulator, or a 16 bit value, as in
+LXI H,1000, which loads 1000 in the register-pair HL.</p>
+<a name="1.3.5. Direct addressing"></a>
+<h2>1.3.5. Direct addressing</h2>
+
+<p>Jump instructions include a 16 bit address as part of
+the instruction.<br>
+The instruction SHLD 1234 stores the contents of register
+pair HL on memory locations 1234 and 1235. The high order
+byte is stored at the highest address.</p>
+<a name="2. THE 8080 BACK END TABLE"></a>
+<h2>2. THE 8080 BACK END TABLE</h2>
+
+<p>The back end table is designed as described in [5]. For
+an overall design of a back end table I refer to this
+document.<br>
+This section deals with problems encountered in writing the
+8080 back-end table. Some remarks are made about particular
+parts of the table that might not seem clear at first
+sight.</p>
+<a name="2.1. Constant definitions"></a>
+<h2>2.1. Constant definitions</h2>
+
+<p>Word size (EM_WSIZE) and pointer size (EM_PSIZE) are
+both defined as two bytes. The hole between AB and LB
+(EM_BSIZE) is four bytes: only the return address and the
+local base are saved.</p>
+<a name="2.2. Registers and their properties"></a>
+<h2>2.2. Registers and their properties</h2>
+
+<p>All properties have the default size of two bytes,
+because one-byte registers also cover two bytes when put on
+the real stack.</p>
+
+<p>The next considerations led to the choice of
+register-pair BC as local base. Though saving the local base
+in memory would leave one more register-pair available as
+scratch register, it would slow down instructions as
+&rsquo;lol&rsquo; and &rsquo;stl&rsquo; too much. So a
+register-pair should be sacrificed as local base. Because a
+back-end without a free register-pair HL is completely
+broken-winged, the only reasonable choices are BC and DE.
+Though the choice between them might seem arbitrary at first
+sight, there is a difference between register-pairs BC and
+DE: the instruction XCHG exchanges the contents of
+register-pairs DE and HL. When DE and HL are both heavily
+used on the fake-stack, this instruction is very useful.
+Since it won&rsquo;t be useful too often to exchange HL with
+the local base and since an instruction exchanging BC and HL
+does not exist, BC is chosen as local base.</p>
+
+<p>Many of the register properties are never mentioned in
+the PATTERNS part of the table. They are only needed to
+define the INSTRUCTIONS correctly.</p>
+
+<p>The properties really used in the PATTERNS part are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>areg:</p>
+</td>
+<td width="38%"></td>
+<td width="40%">
+
+<p>the accumulator only</p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>reg:</p>
+</td>
+<td width="40%"></td>
+<td width="52%">
+
+<p>any of the registers A, D, E, H or L. Of course the
+registers B and C which are used as local base don&rsquo;t
+possess this property. When there is a single register on
+the fake-stack, its value is always considered
+non-negative.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>dereg:</p>
+</td>
+<td width="36%"></td>
+<td width="42%">
+
+<p>register-pair DE only</p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>hlreg:</p>
+</td>
+<td width="36%"></td>
+<td width="42%">
+
+<p>register-pair HL only</p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>hl_or_de:</p>
+</td>
+<td width="30%"></td>
+<td width="52%">
+
+<p>register-pairs HL and DE both have this property</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>local</p>
+</td>
+<td width="38%"></td>
+<td width="52%">
+
+<p>used only once (i.e. in the EM-instruction &rsquo;str
+0&rsquo;)</p>
+</td>
+</table>
+
+<p>The stackpointer SP and the processor status word PSW
+have to be defined explicitly because they are needed in
+some instructions (i.e. SP in LXI, DCX and INX and PSW in
+PUSH and POP).<br>
+It doesn&rsquo;t matter that the processor status word is
+not just register A but includes the condition flags.</p>
+<a name="2.3. Tokens"></a>
+<h2>2.3. Tokens</h2>
+
+<p>The tokens &rsquo;m&rsquo; and &rsquo;const1&rsquo; are
+used in the INSTRUCTIONS- and MOVES parts only. They will
+never be on the fake-stack.</p>
+
+<p>The token &rsquo;label&rsquo; reflects addresses known
+at assembly time. It is used to take full profit of the
+instructions LHLD (Load HL Direct) and SHLD (Store HL
+Direct).</p>
+
+<p>Compared with many other back-end tables, there are only
+a small number of different tokens (four). Reasons are the
+limited addressing modes of the 8080 microprocessor, no
+index registers etc. For example to translate the
+EM-instruction</p>
+<pre>     lol 10
+</pre>
+
+<p>the next 8080 instructions are generated:</p>
+<pre>LXI H,10        /* load registers pair HL with value 10 */
+DAD B           /* add local base (BC) to HL            */
+MOV E,M         /* load E with byte pointed to by HL    */
+INX H           /* increment HL                         */
+MOV D,M         /* load D with next byte                */
+</pre>
+
+<p>Of course, instead of emitting code immediately, it
+could be postponed by placing something like a {LOCAL,10} on
+the fake-stack, but some day the above mentioned code will
+have to be generated, so a LOCAL-token is hardly useful. See
+also the comment on the load instructions.</p>
+<a name="2.4. Sets"></a>
+<h2>2.4. Sets</h2>
+
+<p>Only &rsquo;src1or2&rsquo; is used in the PATTERNS.</p>
+<a name="2.5. Instructions"></a>
+<h2>2.5. Instructions</h2>
+
+<p>Each instruction indicates whether or not the condition
+flags are affected, but this information will never have any
+influence because there are no tests in the PATTERNS part of
+the table.</p>
+
+<p>For each instruction a cost vector indicates the number
+of bytes the instruction occupies and the number of time
+periods it takes to execute the instruction. The length of a
+time period depends on the clock frequency and may range
+from 480 nanoseconds to 2 microseconds on a 8080 system and
+from 320 nanoseconds to 2 microseconds on a 8085 system.</p>
+
+<p>In the TOKENS-part the cost of token &rsquo;m&rsquo; is
+defined as (0,3). In fact it usually takes 3 extra time
+periods when this register indirect mode is used instead of
+register mode, but since the costs are not completely
+orthogonal this results in small deficiencies for the DCR,
+INR and MOV instructions. Although it is not particularly
+useful these deficiencies are corrected in the INSTRUCTIONS
+part, by treating the register indirect mode separately.</p>
+
+<p>The costs of the conditional call and return
+instructions really depend on whether or not the call resp.
+return is actually made. However, this is not important to
+the behaviour of the back end.</p>
+
+<p>Instructions not used in this table have been commented
+out. Of course many of them are used in the library
+routines.</p>
+<a name="2.6. Moves"></a>
+<h2>2.6. Moves</h2>
+
+<p>This section is supposed to be straight-forward.</p>
+<a name="2.7. Tests"></a>
+<h2>2.7. Tests</h2>
+
+<p>The TESTS section is only included to refrain <b>cgg</b>
+from complaining.</p>
+<a name="2.8. Stacking rules"></a>
+<h2>2.8. Stacking rules</h2>
+
+<p>When, for example, the token {const2,10} has to be
+stacked while no free register-pair is available, the next
+code is generated:</p>
+<pre>     PUSH H
+     LXI H,10
+     XTHL
+</pre>
+
+<p>The last instruction exchanges the contents of HL with
+the value on top of the stack, giving HL its original value
+again.</p>
+<a name="2.9. Coercions"></a>
+<h2>2.9. Coercions</h2>
+
+<p>The coercion to unstack register A, is somewhat tricky,
+but unfortunately just popping PSW leaves the high-order
+byte in the accumulator.</p>
+
+<p>The cheapest way to coerce HL to DE (or DE to HL) is by
+using the XCHG instruction, but it is not possible to
+explain <b>cgg</b> this instruction in fact exchanges the
+contents of these register-pairs. Before the coercion is
+carried out other appearances of DE and HL on the fake-stack
+will be moved to the real stack, because in the
+INSTRUCTION-part is told that XCHG destroys the contents of
+both DE and HL. The coercion transposing one register-pair
+to another one by emitting two MOV-instructions, will be
+used only if one of the register-pairs is the local
+base.</p>
+<a name="2.10. Patterns"></a>
+<h2>2.10. Patterns</h2>
+
+<p>As a general habit I have allocated (uses ...) all
+registers that should be free to generate the code, although
+it is not always necessary. For example in the code rule</p>
+<pre>     pat loe
+     uses hlreg
+     gen lhld {label,$1}                   yields hl
+</pre>
+
+<p>the &rsquo;uses&rsquo;-clause could have been omitted
+because <b>cgg</b> knows that LHLD destroys register-pair
+HL.</p>
+
+<p>Since there is only one register with property
+&rsquo;hlreg&rsquo;, there is no difference between
+&rsquo;uses hlreg&rsquo; (allocate a register with property
+&rsquo;hlreg&rsquo;) and &rsquo;kills hlreg&rsquo; (remove
+all registers with property &rsquo;hlreg&rsquo; from the
+fake-stack). The same applies for the property
+&rsquo;dereg&rsquo;.<br>
+Consequently &rsquo;kills&rsquo; is rarely used in this
+back-end table.</p>
+<a name="2.10.1. Group 1: Load instructions"></a>
+<h2>2.10.1. Group 1: Load instructions</h2>
+
+<p>When a local variable must be squared, there will
+probably be EM-code like:</p>
+<pre>     lol 10
+     lol 10
+     mli 2
+</pre>
+
+<p>When the code for the first &rsquo;lol 10&rsquo; has
+been executed, DE contains the wanted value. To refrain
+<b>cgg</b> from emitting the code for &rsquo;lol 10&rsquo;
+again, an extra pattern is included in the table for cases
+like this. The same applies for two consecutive
+&rsquo;loe&rsquo;-s or &rsquo;lil&rsquo;-s.</p>
+
+<p>A bit tricky is &rsquo;lof&rsquo;. It expects either DE
+or HL on the fake-stack, moves {const2,$1} into the other
+one, and eventually adds them. The &rsquo;kills&rsquo; part
+is necessary here because if DE was on the fake-stack,
+<b>cgg</b> doesn&rsquo;t see that the contents of DE is
+destroyed by the code (in fact &rsquo;kills dereg&rsquo;
+would have been sufficient: because of the DAD instruction
+<b>cgg</b> knows that HL is destroyed).</p>
+
+<p>By lookahead, <b>cgg</b> can make a clever choice
+between the first and second code rule of &rsquo;loi
+4&rsquo;. The same applies for several other
+instructions.</p>
+<a name="2.10.2. Group 2: Store instructions"></a>
+<h2>2.10.2. Group 2: Store instructions</h2>
+
+<p>A similar idea as with the two consecutive identical
+load instructions in Group 1, applies for a store
+instruction followed by a corresponding load
+instruction.</p>
+<a name="2.10.3. Groups 3 and 4: Signed and unsigned integer arithmetic"></a>
+<h2>2.10.3. Groups 3 and 4: Signed and unsigned integer arithmetic</h2>
+
+<p>Since the 8080 instruction set doesn&rsquo;t provide
+multiply and divide instructions, special routines are made
+to accomplish these tasks.</p>
+
+<p>Instead of providing four slightly differing routines
+for 16 bit signed or unsigned division, yielding the
+quotient or the remainder, the routines are merged. This
+saves space and assembly time when several variants are used
+in a particular program, at the cost of a little speed. When
+the routine is called, bit 7 of register A indicates whether
+the operands should be considered as signed or as unsigned
+integers, and bit 0 of register A indicates whether the
+quotient or the remainder has to be delivered.<br>
+The same applies for 32 bit division.</p>
+
+<p>The routine doing the 16 bit unsigned multiplication
+could have been used for 16 bit signed multiplication too.
+Nevertheless a special 16 bit signed multiplication routine
+is provided, because this one will usually be much
+faster.</p>
+<a name="2.10.4. Group 5: Floating point arithmetic"></a>
+<h2>2.10.4. Group 5: Floating point arithmetic</h2>
+
+<p>Floating point is not implemented. Whenever an
+EM-instruction involving floating points is offered to the
+code-generator, it calls the corresponding library routine
+with the proper parameters. Each floating point library
+routine calls &rsquo;eunimpl&rsquo;, trapping with trap
+number 63. Some of the Pascal and C library routines output
+floating point EM-instructions, so code has to be generated
+for them. Of course this does not imply the code will ever
+be executed.</p>
+<a name="2.10.5. Group 12: Compare instructions"></a>
+<h2>2.10.5. Group 12: Compare instructions</h2>
+
+<p>The code for &rsquo;cmu 2&rsquo;, with its 4 labels, is
+terrible. But it is the best I could find.</p>
+<a name="2.10.6. Group 9: Logical instructions"></a>
+<h2>2.10.6. Group 9: Logical instructions</h2>
+
+<p>I have tried to merge both variants of the instructions
+&rsquo;and 2&rsquo;, &rsquo;ior 2&rsquo; and &rsquo;xor
+2&rsquo;, as in</p>
+<pre>     pat and $1==2
+     with hl_or_de hl_or_de
+     uses reusing %1, reusing %2, hl_or_de, areg
+     gen mov a,%1.2
+         ana %2.2
+         mov %a.2,a
+         mov a,%1.1
+         ana %2.1
+         mov %a.1,a                     yields %a
+</pre>
+
+<p>but the current version of <b>cgg</b> doesn&rsquo;t
+approve this. In any case <b>cgg</b> chooses either DE or HL
+to store the result, using lookahead.</p>
+<a name="2.10.7. Group 14: Procedure call instructions"></a>
+<h2>2.10.7. Group 14: Procedure call instructions</h2>
+
+<p>There is an 8 bytes function return area, called
+&rsquo;.fra&rsquo;. If only 2 bytes have to be returned,
+register-pair DE is used.</p>
+<a name="3. LIBRARY ROUTINES"></a>
+<h2>3. LIBRARY ROUTINES</h2>
+
+<p>Most of the library routines start with saving the
+return address and the local base, so that the parameters
+are on the top of the stack and the registers B and C are
+available as scratch registers. Since register-pair HL is
+needed to accomplish these tasks, and also to restore
+everything just before the routine returns, it is not
+possible to transfer data between the routines and the
+surrounding world through register H or L. Only registers A,
+D and E can be used for this.</p>
+
+<p>When a routine returns 2 bytes, they are usually
+returned in registers-pair DE. When it returns more than 2
+bytes they are pushed onto the stack.<br>
+It would have been possible to let the 32 bit arithmetic
+routines return 2 bytes in DE and the remaining 2 bytes on
+the stack (this often would have saved some space and
+execution time), but I don&rsquo;t consider that as
+well-structured programming.</p>
+<a name="4. TRAPS"></a>
+<h2>4. TRAPS</h2>
+
+<p>Whenever a trap, for example trying to divide by zero,
+occurs in a program that originally was written in C or
+Pascal, a special trap handler is called. This trap handler
+wants to write an appropriate error message on the monitor.
+It tries to read the message from a file (e.g.
+etc/pc_rt_errors in the EM home directory for Pascal
+programs), but since the 8080 back-end doesn&rsquo;t know
+about files, we are in trouble. This problem is solved, as
+far as possible, by including the &rsquo;open&rsquo;-monitor
+call in the mon-routine. It returns with file descriptor -1.
+The trap handler reacts by generating another trap, with the
+original trap number. But this time, instead of calling the
+C- or Pascal trap handler again, the next message is printed
+on the monitor:</p>
+<pre>        trap number &lt;TN&gt;
+        line &lt;LN&gt; of file &lt;FN&gt;
+
+
+where   &lt;TN&gt; is the trap number (decimal)
+        &lt;LN&gt; is the line number (decimal)
+        &lt;FN&gt; is the filename of the original program
+</pre>
+
+<p>Trap numbers are subdivided as follows:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>1-27:</p>
+</td>
+<td width="30%"></td>
+<td width="60%">
+
+<p>EM-machine error, as described in [3]</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>63:</p>
+</td>
+<td width="34%"></td>
+<td width="60%">
+
+<p>an unimplemented EM-instruction is used</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>64-127:</p>
+</td>
+<td width="26%"></td>
+<td width="60%">
+
+<p>generated by compilers, runtime systems, etc.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>128-252:</p>
+</td>
+<td width="24%"></td>
+<td width="52%">
+
+<p>generated by user programs</p>
+</td>
+<td width="7%">
+</td>
+</table>
+<a name="5. IMPLEMENTATION"></a>
+<h2>5. IMPLEMENTATION</h2>
+
+<p>It will not be possible to run the entire Amsterdam
+Compiler Kit on a 8080-based computer system. One has to
+write a program on another system, a system where the
+compiler kit runs on. This program may be a mixture of
+high-level languages, such as C or Pascal, EM and 8080
+assembly code. The program should be compiled using the
+compiler kit, producing 8080 machine code. This code should
+come available to the 8080 machine for example by
+downloading or by storing it in ROM (Read Only Memory).</p>
+
+<p>Depending on the characteristics of the particular 8080
+based system, some adaptations have to be made:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>In &rsquo;head_em&rsquo;: the base address, which is the
+address where the first 8080 instruction will be stored, and
+the initial value of the stackpointer are set to 0x1000 and
+0x8000 respectively.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>Other systems require other values.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>In &rsquo;head_em&rsquo;: before calling
+&quot;__m_a_i_n&quot;, the environment pointer, argument
+vector and argument count will have to be pushed onto the
+stack. Since this back-end is tested on a system without any
+knowledge of these things, dummies are pushed now.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>In &rsquo;tail_em&rsquo;: proper routines
+&quot;putchar&quot; and &quot;getchar&quot; should be
+provided. They should write resp. read a character on/from
+the monitor. Maybe some conversions will have to be
+made.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4)</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>In &rsquo;head_em&rsquo;: an application program returns
+control to the monitor by jumping to address 0xFB52. This
+may have to be changed for different systems.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5)</p>
+</td>
+<td width="16%"></td>
+<td width="80%">
+
+<p>In &rsquo;tail_em&rsquo;: the current version of the
+8080 back-end has very limited I/O capabilities, because it
+was tested on a system that had no knowledge of files. So
+the implementation of the EM-instruction &rsquo;mon&rsquo;
+is very simple; it can only do the following things:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="30%">
+
+<p>Monitor call 1:</p>
+</td>
+<td width="50%"></td>
+<td width="0%">
+
+<p>exit</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="30%">
+
+<p>Monitor call 3:</p>
+</td>
+<td width="50%"></td>
+<td width="0%">
+
+<p>read, always reads from the monitor.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="99%"></td>
+<td width="0%">
+<p>echos the read character.<br>
+ignores file descriptor.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="30%">
+
+<p>Monitor call 4:</p>
+</td>
+<td width="50%"></td>
+<td width="0%">
+
+<p>write, always writes on the monitor.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="99%"></td>
+<td width="0%">
+<p>ignores file descriptor.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="30%">
+
+<p>Monitor call 5:</p>
+</td>
+<td width="50%"></td>
+<td width="0%">
+
+<p>open file, returns file descriptor -1.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="99%"></td>
+<td width="0%">
+<p>(compare chapter about TRAPS)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="30%">
+
+<p>Monitor call 6:</p>
+</td>
+<td width="50%"></td>
+<td width="0%">
+
+<p>close file, returns error code = 0.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="32%">
+
+<p>Monitor call 54:</p>
+</td>
+<td width="48%"></td>
+<td width="0%">
+
+<p>io-control, returns error code = 0.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>If the system should do file-handling the routine
+&quot;.mon&quot; should be extended thoroughly.</p></td>
+</table>
+<a name="6. INTEL 8080 VERSUS ZILOG Z80 AND INTEL 8086"></a>
+<h2>6. INTEL 8080 VERSUS ZILOG Z80 AND INTEL 8086</h2>
+<a name="6.1. Introduction"></a>
+<h2>6.1. Introduction</h2>
+
+<p>At about the same time I developed the back end for the
+Intel 8080 and Intel 8085, Frans van Haarlem did the same
+job for the Zilog z80 microprocessor. Since the z80
+processor is an extension of the 8080, any machine code
+offered to a 8080 processor can be offered to a z80 too. The
+assembly languages are quite different however.<br>
+During the developments of the back ends we have used two
+micro-computers, both equipped with a z80 microprocessor. Of
+course the output of the 8080 back end is assembled by an
+8080 assembler. This should assure I have never used any of
+the features that are potentially available in the z80
+processor, but are not part of a true 8080 processor.</p>
+
+<p>As a final job, I have investigated the differences
+between the 8080 and z80 processors and their influence on
+the back ends. I have tried to measure this influence by
+examining the length of the generated code. I have also
+involved the 8086 micro-processor in this measurements.</p>
+<a name="6.2. Differences between the 8080 and z80 processors"></a>
+<h2>6.2. Differences between the 8080 and z80 processors</h2>
+
+<p>Except for some features that are less important
+concerning back ends, there are two points where the z80
+improves upon the 8080:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>First,</p>
+</td>
+<td width="24%"></td>
+<td width="64%">
+
+<p>the z80 has two additional index registers, IX and IY.
+They are used as in</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="64%">
+<pre>              LD B,(IX+10)
+</pre>
+<!-- INDENTATION -->
+<p>The offset, here 10, should fit in one byte.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>Second,</p>
+</td>
+<td width="22%"></td>
+<td width="64%">
+
+<p>the z80 has several additional instructions. The most
+important ones are:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>The 8080 can only load or store register-pair HL direct
+(using LHLD or SHLD). The z80 can handle BC, DE and SP
+too.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>Instructions are included to ease block movements.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>There is a 16 bit subtract instruction.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="4%">
+
+<p>4)</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>While the 8080 can only rotate the accumulator, the z80
+can rotate and shift each 8 bit register.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="4%">
+
+<p>5)</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>Special routines are included to jump to near locations,
+saving 1 byte.</p>
+</td>
+</table>
+<a name="6.3. Consequences for the 8080 and z80 back end"></a>
+<h2>6.3. Consequences for the 8080 and z80 back end</h2>
+
+<p>The most striking difference between the 8080 and z80
+back ends is the choice of the local base. The writer of the
+z80 back end chose index register IY as local base, because
+this results in the cheapest coding of EM-instructions like
+&rsquo;lol&rsquo; and &rsquo;stl&rsquo;. The z80
+instructions that load local 10, for example</p>
+<pre>     LD E,(IY+10)
+     LD D,(IY+11)
+</pre>
+
+<p>occupy 6 bytes and take 38 time periods to execute. The
+five corresponding 8080 instructions loading a local occupy
+7 bytes and take 41 time periods. Although the profit of the
+z80 might be not world-shocking, it should be noted that as
+a side effect it may save some pushing and popping since
+register pair HL is not used.</p>
+
+<p>The choice of IY as local base has its drawbacks too.
+The root of the problem is that it is not possible to add IY
+to HL. For the EM-instruction</p>
+<pre>     lal 20
+</pre>
+
+<p>the z80 back end generates code like</p>
+<pre>     LD BC,20
+     PUSH IY
+     POP HL
+     ADD HL,BC
+</pre>
+
+<p>leaving the wanted address in HL.<br>
+This annoying push and pop instructions are also needed in
+some other instructions, for instance in &rsquo;lol&rsquo;
+when the offset doesn&rsquo;t fit in one byte.</p>
+
+<p>Beside the choice of the local base, I think there is no
+fundamental difference between the 8080 and z80 back ends,
+except of course that the z80 back end has register pair BC
+and, less important, index register IX available as scratch
+registers.</p>
+
+<p>Most of the PATTERNS in the 8080 and z80 tables are more
+or less a direct translation of each other.</p>
+<a name="6.4. What did I do?"></a>
+<h2>6.4. What did I do?</h2>
+
+<p>To get an idea of the quality of the code generated by
+the 8080, z80 and 8086 back ends I have gathered some C
+programs and some Pascal programs. Then I produced 8080, z80
+and 8086 code for them. Investigating the assembler listing
+I found the lengths of the different parts of the generated
+code. I have checked two areas:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="12%"></td>
+<td width="40%">
+
+<p>the entire text part</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="12%"></td>
+<td width="84%">
+
+<p>the text part without any library routine, so only the
+plain user program</p>
+</td>
+</table>
+
+<p>I have to admit that neither one of them is really
+honest. When the entire text part is checked, the result is
+disturbed because not always the same library routines are
+loaded. And when only the user program itself is considered,
+the result is disturbed too. For example the 8086 has a
+multiply instruction, so the EM-instruction &rsquo;mli
+2&rsquo; is translated in the main program, but the 8080 and
+z80 call a library routine that is not counted. Also the
+8080 uses library routines at some places where the z80 does
+not.</p>
+
+<p>But nevertheless I think the measurements will give an
+idea about the code produced by the three back ends.</p>
+<a name="6.5. The results"></a>
+<h2>6.5. The results</h2>
+
+<p>The table below should be read as follows. For all
+programs I have computed the ratio of the code-lengths of
+the 8080, z80 and 8086. The averages of all Pascal/C
+programs are listed in the table, standardized to
+&rsquo;100&rsquo; for the 8080. So the listed
+&rsquo;107&rsquo; indicates that the lengths of the text
+parts of the z80 programs that originally were Pascal
+programs, averaged 7 percent larger than in the
+corresponding 8080 programs.</p>
+
+
+<p align=center>--------------------------------------------------<br>
+| | 8080 | z80 | 8086 |<br>
+--------------------------------------------------<br>
+| C, text part | 100 | 103 | 65 |<br>
+| Pascal, text part | 100 | 107 | 55 |<br>
+| C, user program | 100 | 110 | 71 |<br>
+| Pascal, user program | 100 | 118 | 67 |<br>
+--------------------------------------------------</p>
+
+<p>The most striking thing in this table is that the z80
+back end appears to produce larger code than the 8080 back
+end. The reason is that the current z80 back end table is
+not very sophisticated yet. For instance it doesn&rsquo;t
+look for any EM-pattern longer than one. So the table shows
+that the preparations in the 8080 back end table to produce
+faster code (like recognizing special EM-patterns and
+permitting one byte registers on the fake-stack) was not
+just for fun, but really improved the generated code
+significantly.</p>
+
+<p>The table shows that the 8080 table is relatively better
+when only the plain user program is considered instead of
+the entire text part. This is not very surprising since the
+8080 back end sometimes uses library routines where the z80
+and especially the 8086 don&rsquo;t.</p>
+
+<p>The difference between the 8080 and z80 on the one hand
+and the 8086 on the other is very big. But of course it was
+not equal game: the 8086 is a 16 bit processor that is much
+more advanced than the 8080 or z80 and the 8086 back end is
+known to produce very good code.</p>
+
+<p><b>REFERENCES</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[1]</p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p>8080/8085 Assembly Language Programming Manual,</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>Intel Corporation (1977,1978)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[2]</p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p>Andrew S. Tanenbaum, Hans van Staveren, E.G. Keizer and
+Johan W. Stevenson,</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>A practical tool kit for making portable compilers,<br>
+Informatica report 74, Vrije Universiteit, Amsterdam,
+1983.</p>
+<!-- INDENTATION -->
+<p>An overview on the Amsterdam Compiler Kit.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[3]</p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p>Tanenbaum, A.S., Stevenson, J.W., Keizer, E.G., and van
+Staveren, H.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>Description of an experimental machine architecture for
+use with block structured languages,<br>
+Informatica report 81, Vrije Universiteit, Amsterdam,
+1983.</p>
+<!-- INDENTATION -->
+<p>The defining document for EM.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[4]</p>
+</td>
+<td width="14%"></td>
+<td width="32%">
+
+<p>Steel, T.B., Jr.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>UNCOL: The myth and the Fact. in Ann. Rev. Auto.
+Prog.<br>
+Goodman, R. (ed.), vol. 2, (1960), p325-344.</p>
+<!-- INDENTATION -->
+<p>An introduction to the UNCOL idea by its originator.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[5]</p>
+</td>
+<td width="14%"></td>
+<td width="36%">
+
+<p>van Staveren, Hans</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>The table driven code generator from the Amsterdam
+Compiler Kit (Second Revised Edition),<br>
+Vrije Universiteit, Amsterdam.</p>
+<!-- INDENTATION -->
+<p>The defining document for writing a back end table.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[6]</p>
+</td>
+<td width="14%"></td>
+<td width="20%">
+
+<p>Voors, Jan</p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>A back end for the Zilog z8000 micro,<br>
+Vrije Universiteit, Amsterdam.</p>
+<!-- INDENTATION -->
+<p>A document like this one, but for the z8000.</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

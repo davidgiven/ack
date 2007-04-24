@@ -1,0 +1,1527 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:36 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>A Tour of the New Peephole Optimizer</title>
+</head>
+<body>
+
+<h1 align=center>A Tour of the New Peephole Optimizer</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The optimization table">2. The optimization table</a><br>
+<a href="#3. Incompatibilities with Previous Optimizer">3. Incompatibilities with Previous Optimizer</a><br>
+<a href="#4. The Parser">4. The Parser</a><br>
+<a href="#5. Structure of the Resulting Library">5. Structure of the Resulting Library</a><br>
+<a href="#6. Miscellaneous Issues">6. Miscellaneous Issues</a><br>
+
+<hr>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>The peephole optimizer consists of four major parts:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>a)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>the table describing the optimization to be
+performed</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>b)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>a program to parse these tables and build input and
+output routines to interface to the library and a dfa based
+routine to recognize patterns and make the requested
+replacements.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>c)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>common routines for the library that are independent of
+the table of a)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>d)</p>
+</td>
+<td width="6%"></td>
+<td width="78%">
+
+<p>a stand alone version of the optimizer.</p>
+</td>
+<td width="11%">
+</td>
+</table>
+
+<p>The library conforms to the <i>EM_CODE(3)</i> module
+interface but with routine names of the form
+<b><i>C_</i></b>xxx replaced by names like
+<b><i>O_</i></b>xxx. Furthermore there is also no routine
+<i>O_getid</i> and no variable <i>O_tmpdir</i> in the
+module. The library module results in calls to the usual
+<i>EM_CODE(3)</i> module. It is possible to write a front
+end so that it can call either the normal <i>EM_CODE(3)</i>
+module or this new module by adding <b>#define PEEPHOLE</b>
+before the line <b>#include &lt;em.h&gt;</b> This will map
+all calls to the routine <b><i>C_</i></b>xxx into a call to
+the routine <b><i>O_</i></b>xxx.</p>
+
+<p>We shall now describe each of these major parts in some
+detail.</p>
+<a name="2. The optimization table"></a>
+<h2>2. The optimization table</h2>
+
+<p>The file <i>patterns</i> contains the patterns of EM
+instructions to be recognized by the optimizer and the EM
+instructions to replace them. Each pattern may have an
+optional restriction that must be satisfied before the
+replacement is made. The syntax of the table will be
+described using extended BNF notation used by <i>LLGen</i>
+where:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>[...]</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>- are used to group items<br>
+|</i></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>- is used to separate alternatives<br>
+;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>- terminates a rule<br>
+?</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>- indicates item is optional<br>
+*</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>- indicates item is repeated zero or more times<br>
++</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>- indicates item is repeated one or more
+times</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+
+<p>The format of each rule in the table is:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>rule</i></p>
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>: pattern global_restriction? &rsquo;:&rsquo;
+replacement</i></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p>Each rule must be on a single line except that it may be
+broken after the colon if the next line begins with a tab
+character. The pattern has the syntax:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>pattern</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: [ EM_mnem [ local_restriction ]? ]+</i></p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>;<br>
+EM-mnem : &quot;An EM instruction mnemonic&quot;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;lab&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+
+<p>and consists of a sequence of one or more EM
+instructions or <i>lab</i> which stands for a defined
+instruction label. Each EM-mnem may optionally be followed
+by a local restriction on the argument of the mnemonic and
+take one of the following forms depending on the type of the
+EM instruction it follows:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>local_restriction</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: normal_restriction</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| opt_arg_restriction</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| ext_arg_restriction</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+
+<p>A normal restriction is used after all types of EM
+instruction except for those that allow an optional
+argument, (such as <i>adi</i> ) or those involving external
+names, (such as <i>lae</i> ) and takes the form:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>normal_restriction</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: [ rel_op ]? expression</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;<br>
+rel_op</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: &rsquo;==&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;!=&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;&lt;=&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;&lt;&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;&gt;=&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>| &rsquo;&gt;&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+
+<p>If the rel_op is missing, the equality <i>==</i>
+operator is assumed. The general form of expression is
+defined later but basically it involves simple constants,
+references to EM_mnem arguments that appear earlier in the
+pattern and expressions similar to those used in C
+expressions.</p>
+
+<p>The form of the restriction after those EM instructions
+like <i>adi</i> whose arguments are optional takes the
+form:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>opt_arg_restriction</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: normal_restriction</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;defined&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;undefined&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+
+<p>The <i>defined</i> and <i>undefined</i> indicate that
+the argument is present or absent respectively. The normal
+restriction form implies that the argument is present and
+satisfies the restriction.</p>
+
+<p>The form of the restriction after those EM instructions
+like <i>lae</i> whose arguments refer to external object
+take the form:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>ext_arg_restriction</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: patarg offset_part?</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;<br>
+offset_part</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>: [ &rsquo;+&rsquo; | &rsquo;-&rsquo; ]
+expression</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+
+<p>Such an argument has one of three forms: a offset with
+no name, an offset form a name or an offset from a label.
+With no offset part the restriction requires the argument to
+be identical to a previous external argument. With an offset
+part it requires an identical name part, (either empty, same
+name or same label) and supplies a relationship among the
+offset parts. It is possible to refer to test for the same
+external argument, the same name or to obtain the offset
+part of an external argument using the <i>sameext</i> ,
+<i>samenam</i> and <i>offset</i> functions given below.</p>
+
+<p>The general form of an expression is:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>expression</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: expression binop expression</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| unaryop expression</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;(&rsquo; expression &rsquo;)&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| bin_function &rsquo;(&rsquo; expression
+&rsquo;,&rsquo; expression &rsquo;)&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| ext_function &rsquo;(&rsquo; patarg &rsquo;,&rsquo;
+patarg &rsquo;)&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;offset&rsquo; &rsquo;(&rsquo; patarg
+&rsquo;)&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| patarg</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;p&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;w2&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;w&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| INTEGER</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>bin_function</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: &rsquo;sfit&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;ufit&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;samesign&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;rotate&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>ext_function</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: &rsquo;samenam&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>| &rsquo;sameext&rsquo;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;<br>
+patarg</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>: &rsquo;$&rsquo; INTEGER</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;<br>
+binop</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>: &quot;As for C language&quot;<br>
+unaryop</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>: &quot;As for C language&quot;</i></p>
+</td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+</table>
+
+<p>The INTEGER in the <i>patarg</i> refers to the first,
+second, etc. argument in the pattern and it is required to
+refer to a pattern that appears earlier in the pattern The
+<i>w</i> and <i>p</i> refer to the word size and pointer
+size (in bytes) respectively. The <i>w2</i> refers to twice
+the word size. The various function test for:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>sfit</p>
+</td>
+<td width="12%"></td>
+<td width="80%">
+
+<p>the first argument fits as a signed value of the number
+of bit specified by the second argument.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>ufit</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>as for sfit but for unsigned values.</p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>samesign</p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p>the first argument has the same sign as the second.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>rotate</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>the value of the first argument rotated by the number of
+bit specified by the second argument.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>samenam</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>both arguments refer to externals and have either no
+name, the same name or same label.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>sameext</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>both arguments refer to the same external.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>offset</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>the argument is an external and this yields it offset
+part.</p>
+</td>
+</table>
+
+<p>The global restriction takes the form:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>global_restriction</i></p>
+<td width="19%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><i>: &rsquo;?&rsquo; expression</i></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><i>;</i></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+
+<p>and is used to express restrictions that cannot be
+expressed as simple restrictions on a single argument or are
+can be expressed in a more readable fashion as a global
+restriction. An example of such a rule is:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>dup w ldl stf ? p==2*w : ldl $2 stf $3 ldl $2 lof
+$3</i></p>
+</table>
+
+<p>which says that this rule only applies if the pointer
+size is twice the word size.</p>
+<a name="3. Incompatibilities with Previous Optimizer"></a>
+<h2>3. Incompatibilities with Previous Optimizer</h2>
+
+<p>The current table format is not compatible with previous
+versions of the peephole optimizer tables. In particular the
+previous table had no provision for local restrictions and
+only the equivalent of the global restriction. This meant
+that our <i>&rsquo;?&rsquo;</i> character that announces the
+presence of the optional global restriction was not
+required. The previous optimizer performed a number of other
+tasks that were unrelated to optimization that were possible
+because the old optimizer read the EM code for a complete
+procedure at a time. This included tasks such as register
+variable reference counting and moving the information
+regarding the number of bytes of local storage required by a
+procedure from it <i>end</i> pseudo instruction to
+it&rsquo;s <i>pro</i> pseudo instruction. These tasks are no
+longer done by this module but have been moved to other
+modules or programs in the pipeline. The register variable
+reference counting is now performed by the front end. The
+reordering of code, such as the moving of mes instructions
+and the local storage requirements from the end to beginning
+of procedures, is now performed using the insertpart
+mechanism in the <i>EM_CODE</i> (or <i>EM_OPT</i> ) module.
+The removal of dead code is performed by the global
+optimizer. Various <i>ext_functions</i> available in the old
+tables are no longer available as they rely on information
+that is not available to the current program. These are the
+<i>notreg</i> and the <i>rom</i> functions. The previous
+optimizer allowed the use of <i>LLP, LEP, SLP</i> and
+<i>SEP</i> in patterns. For example <i>LLP</i> stood for
+either <i>lol</i> if the pointer size was the same as the
+word size, or for <i>ldl</i> if the pointer size was twice
+the word size. In the current optimizer it is necessary to
+include two patterns for each such single pattern in the old
+table. For example for a pattern containing <i>LLP</i> there
+would be one pattern with <i>lol</i> and with a global
+restriction of the form <i>p=w</i> and another pattern with
+ldl and a global restriction of the form <i>p=2*w.</i></p>
+<a name="4. The Parser"></a>
+<h2>4. The Parser</h2>
+
+<p>The program to parse the tables and build the pattern
+table dependent dfa routines is built from the files:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>parser.h</p>
+</td>
+<td width="14%"></td>
+<td width="22%">
+
+<p>header file</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>parser.g</p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>LLGen source file defining syntax of table</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>syntax.l</p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>Lex sources file defining form of tokens in table.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>initlex.c</p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>Uses the data in the library <i>em_data.a</i> to
+initialize the lexical analyzer to recognize EM instruction
+mnemonics.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>outputdfa.c</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>Routines to output the dfa when it has been constructed.
+It outputs the files <i>dfa.c</i> and <i>trans.c</i></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>outcalls.c</p>
+</td>
+<td width="10%"></td>
+<td width="70%">
+
+<p>Routines to output the file <i>incalls.r</i> defined in
+the next section.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>findworst.c</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>Routines to analyze patterns to find how to continue
+matching after a successful replacement or failed match.</p>
+</td>
+</table>
+
+<p>The parser checks that the tables conform to the syntax
+outlined in the previous section and also makes a number of
+semantic checks on their validity. Further versions could
+make further checks such as looking for cycles in the rules
+or checking that each replacement leaves the same number of
+bytes on the stack as the pattern it replaces. The parser
+builds an internal dfa representation of the rules by
+combining rules with common prefixes. All local and global
+restrictions are combined into a single test to be performed
+are a complete pattern has been detected in the input. The
+idea is to build a structure so that each of the patterns
+can be matched and then the corresponding tests made and the
+first that succeeds is replaced. If two rules have the same
+pattern and both their tests also succeed the one that
+appears first in the tables file will be done. Somewhat less
+obvious is that if one pattern is a proper prefix of a
+longer pattern and its test succeeds then the second pattern
+will not be checked for.</p>
+
+<p>A major task of the parser if to decide on the action to
+take when a rule has been partially matched or when a
+pattern has been completely matched but its test does not
+succeed. This requires a search of all patterns to see if
+any part of the part matched could be part of some other
+pattern. for example given the two patterns:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>loc adi w loc adi w : loc $1+$3 adi w<br>
+loc adi w loc sbi w : loc $1-$3 adi w</i></p>
+</table>
+
+<p>If the first pattern fails after seeing the input:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>loc adi loc</i></p>
+</table>
+
+<p>the parser will still need to check whether the second
+pattern matches. This requires a decision on how to fix up
+any internal data structures in the dfa matcher, such as
+moving some instructions from the pattern to the output
+queue and moving the pattern along and then deciding what
+state it should continue from. Similar decisions are
+requires after a pattern has been replaced. For example if
+the replacement is empty it is necessary to backup
+<i>n-1</i> instructions where <i>n</i> is the length of the
+longest pattern in the tables.</p>
+<a name="5. Structure of the Resulting Library"></a>
+<h2>5. Structure of the Resulting Library</h2>
+
+<p>The major data structures maintained by the library
+consist of three queues; an <i>output</i> queue of
+instructions awaiting output, a <i>pattern</i> queue
+containing instructions that match the current prefix, and a
+<i>backup</i> queue of instructions that have been backed up
+over and need to be reparsed for further pattern matches.
+These three queues are maintained in a single fixed size
+buffer as explained in more detail in the next section.
+Also, after a successful match, a replacement queue is
+constructed.</p>
+
+<p>If no errors are detected by the parser in the tables it
+output the following files if they have changed from the
+existing version of the file:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>dfa.c</p>
+</td>
+<td width="10%"></td>
+<td width="80%">
+
+<p>this contains the dfa encoded into a number of arrays
+using the technique of row displacement for compacted sparse
+matricies. Given an opcode and the current state, the value
+of <i>OO_base[OO_state]</i> is consulted to obtain a pointer
+into the array <i>OO_checknext.</i> If this pointer in zero
+or the <i>check</i> field of the addressed structure does
+not correspond to the curerent state then it is known there
+is no entry for this opcode/state pair and the
+<i>OO_default</i> array is consulted instead. If the check
+field does match then the <i>next</i> field contains the new
+state. After each transition the array <i>OO_ftrans</i> is
+consulted to see if this state corresponds to a final state
+(i.e. a complete pattern) and if so the corresponding
+function is called.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>trans.c</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>this contains external declarations of transition
+routines with names like <b>OO_xxxdotrans</b> (where
+<i>xxx</i> is a small integer). These are called when there
+a transition to state <i>xxx</i> that corresponds to a
+complete pattern. Any tests are performed if necessary to
+confirm that the pattern matches and then the replacement
+instructions are placed on the output queue and the routine
+<i>OO_mkrepl</i> is called to make the replacement and if
+backup the amount required. If there are a number of
+patterns with the same instructions but different tests,
+these will all appear in the same routine and the tests
+performed in the order they appear in the original
+<i>patterns</i> file.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>incalls.r</p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p>this contains an entry for every EM instruction (plus
+<i>lab</i> ) giving information on how to build a routine
+with the name <b><i>O_</i></b>xxx for the library version of
+the module. If the EM instruction does not appear in the
+tables patterns at all then the dfa routine is called to
+flush any current queued output and the the output
+<b><i>C_</i></b>xxx routine is called. If the EM instruction
+does appear in a pattern then the instruction data structure
+fields are initialized and it is added onto the end of the
+pattern queue. The dfa routines are then called to attempted
+to make a transition. This file is input to the <i>awk</i>
+program <i>makefuns.awk.</i></p>
+</td>
+</table>
+
+<p>The following files contain code that is independent of
+the pattern tables:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>main.c</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>this is used only in the stand alone version of the
+optimizer and consists of code to open the input file, read
+the input using the <i>READ_EM(3)</i> module and call the
+dfa routines. This version does not require the routines
+constructed from the incalls.r file described above.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>nopt.c</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>general routines to initialize, and maintain the data
+structures. The file handling routines <i>O_open</i> etc are
+defined here. Also defined are routines for flushing the
+output queue by calling the <i>EM_mkcalls</i> routine from
+the <i>READ_EM(3)</i> module and moving instructions from
+the output to the backup queue. Routines to free the strings
+stored in instructions with types of <i>sof_ptyp, pro_ptyp,
+str_ptyp, ico_ptyp, uco_ptyp,</i> and also<i>fco_ptyp</i>are
+is extended by <i>Realloc</i> if it overflows. The strings
+can be thrown away on any flush that occurs when the backup
+queue is empty.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>mkstrct.c</p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p>contains routines to build the data structure from the
+input <b><i>C_</i></b>xxx routines and place the structure
+on the pattern queue. These routines are also used to build
+the data structures when a replacement is constructed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>aux.c</p>
+</td>
+<td width="10%"></td>
+<td width="80%">
+
+<p>routines to implement the external functions used in the
+pattern table.</p>
+</td>
+</table>
+
+<p>The following files are also used in building the module
+library:</p>
+
+<p>makefuns.awk</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>this <i>awk</i> program is used to produce individual C
+files with names like <b><i>O_</i></b>xxx.c each containing
+a single function definition and then call the <i>cc</i>
+compiler to produce a single output file. This enables the
+loader to only load those routines that are actually needed
+when the library is loaded.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>pseudo.r</p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p>this file is like the <i>incalls.r</i> file produced by
+the parser but is built by hand and handles the pseudo EM
+instructions. It is also processed by
+<i>makefuns.awk.</i></p>
+</td>
+</table>
+<a name="6. Miscellaneous Issues"></a>
+<h2>6. Miscellaneous Issues</h2>
+
+<p>The output, pattern and backup queues are maintained in
+fixed length array, <i>OO_buffer</i> allocated of size
+<i>MAXBUFFER</i> (a constant declared in nopt.h) at run
+time. It consists of an array of the <i>e_instr</i> data
+structure used by the <i>READ_EM(3)</i> module. At any time
+the pointers <i>OO_patternqueue</i> and <i>OO_nxtpatt</i>
+point to the beginning and end of the current pattern prefix
+that corresponds to the current state. Any instructions on
+the backup queue are between <i>OO_nxtpatt</i> and
+<i>OO_endbackup.</i> If there are no instructions on the
+backup queue then <i>OO_endbackup</i> will be 0 (zero). The
+size of the replacement queue is set to the length of the
+maximum replacement length by the tables output by the
+parser.</p>
+
+<p>The fixed size of the buffer causes no difficulty in
+practice and can only result in some potential optimizations
+being missed. When space for a new instruction is required
+and the buffer is full the routine <i>OO_halfflush</i> is
+called to flush half the buffer and move all the data
+structures left. It should be noted that it is not possible
+to statically determine the maximum possible size for these
+queues as they need to be unbounded in the worst case. A
+study of the rule</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><i>inc dec :</i></p>
+</table>
+
+<p>with the input consisting of <i>N inc</i> and then <i>N
+dec</i> instructions requires an output queue length of
+<i>N-1</i> to find all possible replacements.</p>
+<hr>
+</body>
+</html>

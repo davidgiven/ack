@@ -1,0 +1,2352 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:13 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title></title>
+</head>
+<body>
+
+<hr>
+
+<p align=center><b>Pascal Validation Suite Report</b></p>
+
+<p><b>Pascal processor identification</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>The ACK-Pascal compiler produces code for an EM machine
+as defined in [1]. It is up to the implementor of the EM
+machine whether errors like integer overflow, undefined
+operand and range bound error are recognized or not.
+Therefore it depends on the EM machine implementation
+whether these errors are recognized in Pascal programs or
+not. The validation suite results of all known
+implementations are given.</p>
+<!-- INDENTATION -->
+<p>There does not (yet) exist a hardware EM machine.
+Therefore, EM programs must be interpreted, or translated
+into instructions for a target machine. The following
+implementations currently exist:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: an interpreter running on a PDP-11
+(using UNIX). The normal mode of operation for this
+interpreter is to check for undefined integers, overflow,
+range errors etc.</p>
+<!-- INDENTATION -->
+<p>Implementation 2: a translator into PDP-11 instructions
+(using UNIX). Less checks are performed than in the
+interpreter, because the translator is intended to speed up
+the execution of well-debugged programs.</p></td>
+</table>
+
+<p><b>Test Conditions</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Tester: E.G. Keizer<br>
+Date: October 1983<br>
+Validation Suite version: 3.0</p>
+<!-- INDENTATION -->
+<p>The final test run is made with a slightly modified
+validation suite.</p>
+<!-- INDENTATION -->
+<p><b>Erroneous programs</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Some test did not conform to the standard proposal of
+February 1979. It is this version of the standard proposal
+that is used by the authors of the validation suite.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.7-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The semicolon between high and integer on line 17 is
+replaced by a colon.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-13:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The div operator on line 14 replaced by mod.</p></td>
+</table>
+
+<p><b>Conformance tests</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of tests passed = 150<br>
+Number of tests failed = 6</p>
+<!-- INDENTATION -->
+<p><b>Details of failed tests</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.2-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Character sequences starting with the 8 characters
+&rsquo;procedur&rsquo; or &rsquo;function&rsquo; are
+erroneously classified as the word-symbols
+&rsquo;procedure&rsquo; and &rsquo;function&rsquo;.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.3-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Identifiers identical in the first eight characters, but
+differing in ninth or higher numbered characters are treated
+as identical.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.1-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>ACK-Pascal requires all formal program parameters to be
+declared with type <i>file</i>.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.5-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Gives run-time error eof seen at call to eoln. A have a
+hunch that this is a error in the suit.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.4.1-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Redefining the names of some standard procedures leads to
+incorrect behaviour of the runtime system. In this case it
+crashes without a sensible error message.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.5.1-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>This test can not be translated by our compiler because
+two non-identical variables are used in the same block with
+the same first eight characters. The test passed after
+replacement of one of those names.</p></td>
+</table>
+
+<p><b>Deviance tests</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of deviations correctly detected = 120<br>
+Number of tests not detecting deviations = 20</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p><b>Details of deviations</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>The following tests are compiled without a proper error
+indication although they do not conform to the standard.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.6-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>ACK-Pascal allows labels in the range 0..32767. A warning
+is produced when testing for deviations from the
+standard.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.8-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>A missing space between a number and a word symbol is not
+detected.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.2-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.3-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.1-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.1-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.1-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Undetected scope error. The scope of an identifier should
+start at the beginning of the block in which it is declared.
+In the ACK-Pascal compiler the scope starts just after the
+declaration, however.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The values of fields from one variant are accessible from
+another variant. The correlation is exact.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.3-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The passing as a variable parameter of the selector of a
+variant part is not detected. A runtime error is produced
+because the variant selector is not initialized.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.4-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.4-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.4-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.4-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.4-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The ACK-Pascal compiler does not restrict the places from
+where a jump to a label by means of a goto-statement is
+allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-16:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>There are no errors produced for assignments to a
+variable in use as control-variable of a
+for-statement.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-9:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Use of a controlled variable after leaving the loop
+without intervening initialization is not detected.</p></td>
+</table>
+
+<p><b>Error handling</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>The results depend on the EM implementation.</p>
+<!-- INDENTATION -->
+<p>Number of errors correctly detected =</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: 32<br>
+Implementation 2: 17</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of errors not detected =</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: 21<br>
+Implementation 2: 36</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of errors incorrectly detected =</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: 2<br>
+Implementation 2: 2</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p><b>Details of errors not detected</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>The following test fails because the ACK-Pascal compiler
+only generates a warning that does not prevent to run the
+tests.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.2-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>A warning is produced if there is no assignment to a
+function-identifier.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>With this test the ACK-Pascal compiler issues an error
+message for a legal construct not directly related to the
+error to be detected.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.5-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Program does not compile. Buffer variable of text file is
+not allowed as variable parameter.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>The following errors are not detected at all.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.1-11:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Implementation 2: The use of an undefined integer is not
+caught as an error.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-11:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-12:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-13:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The notion of &rsquo;current variant&rsquo; is not
+implemented, not even if a tagfield is present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.5-15:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.6-9:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.6-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.6-11:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.3.2-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Implementation 2: Subrange bounds are not checked.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.6-12:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.6-13:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.4-4:</p></td>
+</table>
+
+<p>If the base-type of a set is a subrange, then the set
+elements are not checked against the bounds of the subrange.
+Only the host-type of this subrange-type is relevant for
+ACK-Pascal.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.4-1:</p></td>
+</table>
+
+<p>Implementation 2: Nil pointers are not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.4-2:</p></td>
+</table>
+
+<p>Implementation 2: Undefined pointers are not
+detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.5-3:</p></td>
+</table>
+
+<p>Changing the file position while the window is in use as
+actual variable parameter or as an element of the record
+variable list of a with-statement is not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.2-9:</p></td>
+</table>
+
+<p>An undefined function result is not detected, because it
+is never used in an expression.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-7:</p></td>
+</table>
+
+<p>Disposing a variable while it is in use as actual
+variable parameter or as an element of the record variable
+list of a with-statement is not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-9:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-10:</p></td>
+</table>
+
+<p>It is not detected that a record variable, created with
+the variant form of new, is used as an operand in an
+expression or as the variable in an assignment or as an
+actual value parameter.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-11:</p></td>
+</table>
+
+<p>Use of a variable that is not reinitialized after a
+dispose is not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.4-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.4-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.4-7:</p></td>
+</table>
+
+<p>Implementation 2: There are no range checks for pred,
+succ and chr.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.5-6:</p></td>
+</table>
+
+<p>ACK-Pascal considers a rewrite of a file as a defining
+occurence.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-9:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-12:</p></td>
+</table>
+
+<p>Implementation 2: Division by 0 or integer overflow
+is</p>
+
+<p>not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-18:</p></td>
+</table>
+
+<p>The use of the some control variable in two nested for
+statements in not detected.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-19:</p></td>
+</table>
+
+<p>Access of a control variable after leaving the loop
+results in the final-value, although an error should be
+produced.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.2-3:</p></td>
+</table>
+
+<p>The program stops with a file not open error. The
+rewrite before the write is missing in the program.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.2-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.2-5:</p></td>
+</table>
+
+<p>Illegal FracDigits values are not detected.</p>
+
+<p><b>Implementation dependence</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of tests run = 14<br>
+Number of tests incorrectly handled = 0</p>
+<!-- INDENTATION -->
+<p><b>Details of implementation dependence</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.9-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Alternate comment delimiters are implemented</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.9-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The equivalent symbols @ for ^, (. for [ and .) for ] are
+not implemented.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.2.2-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Maxint = 32767</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.4-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Only elements with non-negative ordinal value are allowed
+in sets.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.1-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Standard procedures and functions are not allowed as
+parameters.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-11:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Details of the machine characteristics regarding real
+numbers:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<pre>beta =       2
+t =         56
+rnd =        1
+ngrd =       0
+
+
+<p>machep = -56<br>
+negep = -56<br>
+iexp = 8<br>
+minexp = -128<br>
+maxexp = 127<br>
+eps = 1.387779e-17<br>
+epsneg = 1.387779e-17<br>
+xmin = 2.938736e-39<br>
+xmax = 1.701412e+38</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.3-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.3-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>All operands of boolean expressions are evaluated.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.2-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.2-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The expression in an assignment statement is evaluated
+before the variable selection if this involves pointer
+dereferencing or array indexing.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.2.3-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Actual parameters are evaluated in reverse order.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.2-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The default width for integer, Boolean and real are 6, 5
+and 13.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.5.1-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The number of digits written in an exponent is 2.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.6-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The representations of true and false are ( true) and
+(false). The parenthesis serve to indicate width.</p></td>
+</table>
+
+<p><b>Quality measurement</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of tests run = 60<br>
+Number of tests handled incorrectly = 1</p>
+<!-- INDENTATION -->
+<p><b>Results of tests</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Several test perform operations on reals on indicate the
+error introduced by these operations. For each of these
+tests the following two quality measures are extracted:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>maxRE: maximum relative error<br>
+rmsRE: root-mean-square relative error</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 1.2-1:</p></td>
+</table>
+
+<p>Implementation 1: 25 thousand Whetstone instructions per
+second.<br>
+Implementation 2: 169 thousand Whetstone instructions per
+second.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 1.2-2:</p></td>
+</table>
+
+<p>The value of (TRUEACC-ACC)*2^56/100000 is 1.4 . This is
+well within the bounds specified in [3].<br>
+The GAMM measure is:<br>
+Implementation 1: 238 microseconds<br>
+Implementation 2: 26.3 microseconds.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 1.2-3:</p></td>
+</table>
+
+<p>The number of procedure calls calculated in this test
+exceeds the maximum integer value. The program stops
+indicating overflow.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.3-3:</p></td>
+</table>
+
+<p>The number of significant characters for identifiers is
+8.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.5-8:</p></td>
+</table>
+
+<p>There is no maximum to the line length.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.5-9:</p></td>
+</table>
+
+<p>The error message &quot;too many digits&quot; is given
+for numbers larger than maxint.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.5-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.5-11:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.5-12:</p></td>
+</table>
+
+<p>Normal values are allowed for real constants and
+variables.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.7-14:</p></td>
+</table>
+
+<p>A reasonably large number of strings is allowed.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.8-6:</p></td>
+</table>
+
+<p>No warning is given for possibly unclosed comments.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.1-12:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.1-13:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.1-14:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.2.1-15:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.1-2:</p></td>
+</table>
+
+<p>Large lists of declarations are possible in each
+block.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.2-6:</p></td>
+</table>
+
+<p>An &rsquo;array[integer] of&rsquo; is not allowed.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.2-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.2-8:</p></td>
+</table>
+
+<p>Large values are allowed for arrays and indices.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-14:</p></td>
+</table>
+
+<p>Large amounts of case-constant values are allowed in
+variants.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-15:</p></td>
+</table>
+
+<p>Large amounts of record sections can appear in the fixed
+part of a record.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.3-16:</p></td>
+</table>
+
+<p>Large amounts of variants are allowed in a record.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.4.3.4-4:</p></td>
+</table>
+
+<p>Size and speed of Warshall&rsquo;s algorithm depend on
+the implementation of EM:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>Implementation 1:<br>
+size: 122 bytes<br>
+speed: 5.2 seconds</p>
+<!-- INDENTATION -->
+<p>Implementation 2:<br>
+size: 196 bytes<br>
+speed: 0.7 seconds</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.3.2-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Deep nesting of array indices is allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.3.2-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.5.3.2-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Arrays can have at least 8 dimensions.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.1-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Deep static nesting of procedure is allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.1-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Large amounts of formal parameters are allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.5.3-12:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Dispose is fully implemented.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-6:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test sqrt(x): no errors. The error is within acceptable
+bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -55.50<br>
+rmsRE: 2 ** -57.53</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test arctan(x): may cause underflow or overflow errors.
+The error is within acceptable bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -55.00<br>
+rmsRE: 2 ** -56.36</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test exp(x): may cause underflow or overflow errors. The
+error is not within acceptable bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -50.03<br>
+rmsRE: 2 ** -51.03</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-9:</p></td>
+</table>
+
+<p>Test sin(x): may cause underflow errors. The error is
+not within acceptable bounds.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -38.20<br>
+rmsRE: 2 ** -43.68</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test cos(x): may cause underflow errors. The error is not
+within acceptable bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -41.33<br>
+rmsRE: 2 ** -46.62</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.6.2-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test ln(x): The error is not within acceptable
+bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -54.05<br>
+rmsRE: 2 ** -55.77</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.1-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.1-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.1-5:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Complex nested expressions are allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-14:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Test real division: The error is within acceptable
+bounds.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 0<br>
+rmsRE: 0</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.2.2-15:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Operations of reals in the integer range are exact.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.7.3-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.2-1:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.4-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.5-15:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.7-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.8-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.9-20:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.10-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Static deep nesting of function calls, compound
+statements, if statements, case statements, repeat loops,
+while loops, for loops and with statements is possible.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.2-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Large amounts of statements are allowed in a compound
+statement.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.5-12:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The compiler requires case constants to be compatible
+with the case selector.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.5-13:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.5-14:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Large case statements are possible.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9-2:</p></td>
+</table>
+
+<p>Recursive IO on the same file is well-behaved.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.1-6:</p></td>
+</table>
+
+<p>The reading of real values from a text file is done with
+sufficient accuracy.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -54.61<br>
+rmsRE: 2 ** -56.32</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.1-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.2-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3-3:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.4-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Read, readln, write and writeln may have large amounts of
+parameters.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.1-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The loss of precision for reals written on a text file
+and read back is:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 2 ** -53.95<br>
+rmsRE: 2 ** -55.90</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>File IO buffers without trailing marker are correctly
+flushed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.9.3.5.2-2:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Reals are written with sufficient accuracy.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="32%"></td>
+<td width="67%">
+<p>maxRE: 0<br>
+rmsRE: 0</p></td>
+</table>
+
+<p><b>Level 1 conformance tests</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of test passed = 4<br>
+Number of tests failed = 1</p>
+<!-- INDENTATION -->
+<p><b>Details of failed tests</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.7-4:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>An expression indicated by parenthesis whose value is a
+conformant array is not allowed.</p></td>
+</table>
+
+<p><b>Level 1 deviance tests</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of deviations correctly detected = 4<br>
+Number of tests not detecting deviations = 0</p></td>
+</table>
+
+<p><b>Level 1 error handling</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>The results depend on the EM implementation.</p>
+<!-- INDENTATION -->
+<p>Number of errors correctly detected =</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: 1<br>
+Implementation 2: 0</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of errors not detected =</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Implementation 1: 0<br>
+Implementation 2: 1</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p><b>Details of errors not detected</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.7-9:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Implementation 2: Subrange bounds are not
+checked.</p></td>
+</table>
+
+<p><b>Level 1 quality measurement</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of tests run = 1</p>
+<!-- INDENTATION -->
+<p><b>Results of test</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.6.3.7-10:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>Large conformant arrays are allowed.</p></td>
+</table>
+
+<p><b>Extensions</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="7%"></td>
+<td width="91%">
+<p>Number of tests run = 3</p>
+<!-- INDENTATION -->
+<p><b>Details</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.9-7:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The alternative relational operators are not allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.1.9-8:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The alternative symbols for colon, semicolon and
+assignment are not allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%"></td>
+<td width="83%">
+<p>Test 6.8.3.5-16:</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%"></td>
+<td width="75%">
+<p>The otherwise selector in case statements is not
+allowed.</p></td>
+</table>
+
+<p><b>References</b></p>
+
+<p>[1] A.S.Tanenbaum, E.G.Keizer, J.W.Stevenson, Hans van
+Staveren, &quot;Description of a machine architecture for
+use with block structured languages&quot;, Informatica
+rapport IR-81. [2] ISO standard proposal ISO/TC97/SC5-N462,
+dated February 1979. The same proposal, in slightly modified
+form, can be found in: A.M.Addyman e.a., &quot;A draft
+description of Pascal&quot;, Software, practice and
+experience, May 1979. An improved version, received March
+1980, is followed as much as possible for the current
+ACK-Pascal. [3] B. A. Wichman and J du Croz, A program to
+calculate the GAMM measure, Computer Journal, November
+1979.</p>
+<hr>
+</body>
+</html>

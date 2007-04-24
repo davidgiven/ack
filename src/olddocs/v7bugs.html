@@ -1,0 +1,2025 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:05 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title></title>
+</head>
+<body>
+
+<hr>
+
+<p align=center>UNIX version 7 bugs</p>
+
+<p>This document describes the UNIX version 7 errors fixed
+at the Vrije Universiteit, Amsterdam. Several of these are
+discovered at the VU. Others are quoted from a list of bugs
+distributed by BellLabs.</p>
+
+<p>For each error the differences between the original and
+modified source files are given, as well as a test
+program.</p>
+
+<p>ERROR 1: C optimizer bug for unsigned comparison</p>
+
+<p>The following C program caused an IOT trap, while it
+should not (compile with &rsquo;cc -O prog.c&rsquo;):</p>
+<!-- TABS -->
+
+<p>unsigned</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>i = 0;</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>main() {</p></td>
+</table>
+<!-- TABS -->
+
+<p>register j;</p>
+
+<p>j = -1;<br>
+if (i &gt; 40000)</p>
+<td width="-148%"></td>
+<td width="249%">
+
+<p>abort();</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>}</p>
+<!-- INDENTATION -->
+<p>BellLabs suggests to make the following patch in
+c21.c:</p>
+<!-- INDENTATION -->
+<pre>     /* modified /usr/src/cmd/c/c21.c */
+
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<p>189</p>
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if (r==0) {<br>
+190</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* next 2 lines replaced as indicated by<br>
+191</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* Bell Labs bug distribution ( v7optbug )<br>
+192</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;back-&gt;back-&gt;forw = p-&gt;forw;<br>
+193</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;forw-&gt;back = p-&gt;back-&gt;back;<br>
+194</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>End of lines changed */<br>
+195</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if (p-&gt;forw-&gt;op==CBR<br>
+196</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>|| p-&gt;forw-&gt;op==SXT<br>
+197</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>|| p-&gt;forw-&gt;op==CFCC) {<br>
+198</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;back-&gt;forw = p-&gt;forw;<br>
+199</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;forw-&gt;back = p-&gt;back;<br>
+200</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>} else {<br>
+201</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;back-&gt;back-&gt;forw = p-&gt;forw;<br>
+202</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;forw-&gt;back = p-&gt;back-&gt;back;<br>
+203</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}<br>
+204</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* End of new lines */<br>
+205</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>decref(p-&gt;ref);<br>
+206</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p = p-&gt;back-&gt;back;<br>
+207</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>nchange++;<br>
+208</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>} else if (r&gt;0) {</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>Use the previous program to test before and after the
+modification.</p></td>
+</table>
+
+<p>ERROR 2: The loader fails for large data or text
+portions</p>
+
+<p>The loader &rsquo;ld&rsquo; produces a &quot;local
+symbol botch&quot; error for the following C program.</p>
+<!-- TABS -->
+
+<p>int</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>big1[10000] = {</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>1</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>};</p></td>
+</table>
+<!-- TABS -->
+
+<p>int</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>big2[10000] = {</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>2</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>};</p>
+<!-- INDENTATION -->
+<p>main() {</p></td>
+</table>
+<!-- TABS -->
+
+<p>printf(&quot;loader is fine\n&quot;);</p>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>}</p>
+<!-- INDENTATION -->
+<p>We have made the following fix:</p>
+<!-- INDENTATION -->
+<pre>     /* original /usr/src/cmd/ld.c */
+
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<p>113</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>struct {<br>
+114</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>fmagic;<br>
+115</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>tsize;<br>
+116</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>dsize;<br>
+117</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>bsize;<br>
+118</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>ssize;<br>
+119</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>entry;<br>
+120</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>pad;<br>
+121</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>relflg;<br>
+122</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>} filhdr;</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>/* modified /usr/src/cmd/ld.c */</p>
+</td>
+</table>
+<!-- TABS -->
+
+<p>113</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+114</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* The original Version 7 loader had problems loading
+large<br>
+115</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* text or data portions.<br>
+116</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* Why not include &lt;a.out.h&gt; ???<br>
+117</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* then they would be declared unsigned<br>
+118</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/<br>
+119</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>struct {<br>
+120</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>int</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>fmagic;<br>
+121</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>tsize;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+122</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>dsize;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+123</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>bsize;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+124</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>ssize;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+125</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>entry;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+126</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>pad;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+127</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>relflg;</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* not int !!! */<br>
+128</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>} filhdr;</p>
+</td>
+</table>
+
+<p>ERROR 3: Floating point registers</p>
+
+<p>When a program is swapped to disk if it needs more
+memory, then the floating point registers were not saved, so
+that it may have different registers when it is restarted. A
+small assembly program demonstrates this for the status
+register. If the error is not fixed, then the program
+generates an IOT error. A &quot;memory fault&quot; is
+generated if all is fine.</p>
+<!-- TABS -->
+
+<p>start:</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>ldfps</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>$7400<br>
+1:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>stfps</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r0</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>mov</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r0,-(sp)</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>cmp</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r0,$7400</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>beq</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>1b</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>4</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>Some digging into the kernel is required to fix it. The
+following patch will do:</p>
+<!-- INDENTATION -->
+<pre>     /* original /usr/sys/sys/slp.c */
+
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<p>563</p>
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>a2 = malloc(coremap, newsize);<br>
+564</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if(a2 == NULL) {<br>
+565</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>xswap(p, 1, n);<br>
+566</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;p_flag |= SSWAP;<br>
+567</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>qswtch();<br>
+568</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* no return */<br>
+569</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>/* modified /usr/sys/sys/slp.c */</p>
+</td>
+</table>
+<!-- TABS -->
+
+<p>590</p>
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>a2 = malloc(coremap, newsize);<br>
+591</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if(a2 == NULL) {<br>
+592</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>#ifdef FPBUG<br>
+593</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+594</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* copy floating point register and status,<br>
+595</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* but only if you must switch processes<br>
+596</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/<br>
+597</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if(u.u_fpsaved == 0) {<br>
+598</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>savfp(&amp;u.u_fps);<br>
+599</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>u.u_fpsaved = 1;<br>
+600</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}<br>
+601</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>#endif<br>
+602</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>xswap(p, 1, n);<br>
+603</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>p-&gt;p_flag |= SSWAP;<br>
+604</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>qswtch();<br>
+605</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* no return */<br>
+606</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}</p>
+</td>
+</table>
+
+<p>ERROR 4: Floating point registers.</p>
+
+<p>A similar problem arises when a process forks. The child
+will have random floating point registers as is demonstrated
+by the following assembly language program. The child
+process will die by an IOT trap and the father prints the
+message &quot;child failed&quot;.</p>
+<!-- TABS -->
+
+<p>exit</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>= 1.<br>
+fork</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>= 2.<br>
+write</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>= 4.<br>
+wait</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>= 7.</p>
+
+<p>start:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>ldfps</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>$7400</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sys</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>fork</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>br</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>child</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sys</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>wait</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>tst</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r1</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>bne</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>bad</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>stfps</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r2</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>cmp</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r2,$7400</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>beq</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>start</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>4<br>
+child:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>stfps</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r2</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>cmp</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r2,$7400</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>beq</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>ex</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>4<br>
+bad:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>clr</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r0</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sys</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>write;mess;13.<br>
+ex:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>clr</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>r0</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sys</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>exit</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>.data<br>
+mess:</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>&lt;child failed\n&gt;</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>The same file slp.c should be patched as follows:</p>
+<!-- INDENTATION -->
+<pre>     /* original /usr/sys/sys/slp.c */
+
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<p>499</p>
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+500</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* When the resume is executed for the new process,<br>
+501</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* here&rsquo;s where it will resume.<br>
+502</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/<br>
+503</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if (save(u.u_ssav)) {<br>
+504</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sureg();<br>
+505</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>return(1);<br>
+506</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}<br>
+507</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>a2 = malloc(coremap, n);<br>
+508</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+509</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* If there is not enough core for the<br>
+510</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* new process, swap out the current process to generate
+the<br>
+511</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* copy.<br>
+512</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/</p>
+</td>
+</table>
+
+<p>/* modified /usr/sys/sys/slp.c */</p>
+<!-- TABS -->
+
+<p>519</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+520</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* When the resume is executed for the new process,<br>
+521</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* here&rsquo;s where it will resume.<br>
+522</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/<br>
+523</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if (save(u.u_ssav)) {<br>
+524</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>sureg();<br>
+525</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>return(1);<br>
+526</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}<br>
+527 #ifdef FPBUG<br>
+528</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/* copy the floating point registers and status to child
+*/<br>
+529</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>if(u.u_fpsaved == 0) {<br>
+530</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>savfp(&amp;u.u_fps);<br>
+531</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>u.u_fpsaved = 1;<br>
+532</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>}<br>
+533 #endif<br>
+534</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>a2 = malloc(coremap, n);<br>
+535</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>/*<br>
+536</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* If there is not enough core for the<br>
+537</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* new process, swap out the current process to generate
+the<br>
+538</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>* copy.<br>
+539</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>*/</p>
+</td>
+</table>
+
+<p>ERROR 5: /usr/src/libc/v6/stat.c</p>
+
+<p>Some system calls are changed from version 6 to version
+7. A library of system call entries, that make a version 6
+UNIX look like a version 7 system, is provided to run some
+useful version 7 utilities, like &rsquo;tar&rsquo;, on
+UNIX-6. The entry for &rsquo;stat&rsquo; contained two bugs:
+the 24-bit file size was incorrectly converted to 32 bits
+(sign extension of bit 15) and the uid/gid fields suffered
+from sign extension.</p>
+
+<p>Transferring files from version 6 to version 7 using
+&rsquo;tar&rsquo; will fail for all files for which</p>
+<!-- TABS -->
+<td width="-49%"></td>
+<td width="149%">
+
+<p>( (size &amp; 0100000) != 0 )</p>
+</td>
+</table>
+
+<p>These two errors are fixed if stat.c is modified as
+follows:</p>
+<!-- INDENTATION -->
+<td width="-49%"></td>
+<td width="149%">
+<p>/* original /usr/src/libc/v6/stat.c */</p>
+</td>
+</table>
+<!-- TABS -->
+
+<p>11</p>
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>char os_size0;<br>
+12</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>short os_size1;<br>
+13</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>short os_addr[8];</p>
+
+<p>49</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_nlink = osbuf.os_nlinks;<br>
+50</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_uid = osbuf.os_uid;<br>
+51</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_gid = osbuf.os_gid;<br>
+52</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_rdev = 0;</p>
+</td>
+</table>
+
+<p>/* modified /usr/src/libc/v6/stat.c */</p>
+<!-- TABS -->
+
+<p>11</p>
+<td width="-99%"></td>
+<td width="199%">
+
+<p>char os_size0;<br>
+12</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>unsigned os_size1;<br>
+13</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>short os_addr[8];</p>
+
+<p>49</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_nlink = osbuf.os_nlinks;<br>
+50</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_uid = osbuf.os_uid &amp; 0377;<br>
+51</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_gid = osbuf.os_gid &amp; 0377;<br>
+52</p>
+</td>
+<tr valign="top" align="left">
+<td width="-99%"></td>
+<td width="199%">
+
+<p>buf-&gt;st_rdev = 0;</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

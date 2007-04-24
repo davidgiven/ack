@@ -1,0 +1,1917 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:36 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The Code Expander Generator</title>
+</head>
+<body>
+
+<h1 align=center>The Code Expander Generator</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The code expander generator">2. The code expander generator</a><br>
+<a href="#3. Description of the EM_table">3. Description of the EM_table</a><br>
+<a href="#3.1. Grammar">3.1. Grammar</a><br>
+<a href="#3.2. Semantics">3.2. Semantics</a><br>
+<a href="#3.2.1. Actions">3.2.1. Actions</a><br>
+<a href="#3.2.2. Labels">3.2.2. Labels</a><br>
+<a href="#3.2.3. Arguments of an EM instruction">3.2.3. Arguments of an EM instruction</a><br>
+<a href="#3.2.4. Conditionals">3.2.4. Conditionals</a><br>
+<a href="#3.2.5. Abbreviations">3.2.5. Abbreviations</a><br>
+<a href="#3.2.6. Implicit arguments">3.2.6. Implicit arguments</a><br>
+<a href="#3.2.7. Pseudo instructions">3.2.7. Pseudo instructions</a><br>
+<a href="#3.2.8. Storage instructions">3.2.8. Storage instructions</a><br>
+<a href="#3.3. User supplied definitions and functions">3.3. User supplied definitions and functions</a><br>
+<a href="#3.4. Generating assembly code">3.4. Generating assembly code</a><br>
+<a href="#4. Description of the as_table">4. Description of the as_table</a><br>
+<a href="#4.1. Grammar">4.1. Grammar</a><br>
+<a href="#4.2. Semantics">4.2. Semantics</a><br>
+<a href="#4.2.1. Rules">4.2.1. Rules</a><br>
+<a href="#4.2.2. Declaration of types.">4.2.2. Declaration of types.</a><br>
+<a href="#4.2.3. The function of the @-sign and the if-statement.">4.2.3. The function of the @-sign and the if-statement.</a><br>
+<a href="#4.2.4. References to operands">4.2.4. References to operands</a><br>
+<a href="#4.2.5. The functions assemble() and block_assemble()">4.2.5. The functions assemble() and block_assemble()</a><br>
+<a href="#4.3. Generating assembly code">4.3. Generating assembly code</a><br>
+<a href="#5. Building a code expander">5. Building a code expander</a><br>
+<a href="#5.1. Phase one">5.1. Phase one</a><br>
+<a href="#5.2. Phase two">5.2. Phase two</a><br>
+<a href="#6. Acknowledgements">6. Acknowledgements</a><br>
+<a href="#7. References">7. References</a><br>
+<a href="#References">References</a><br>
+<a href="#Appendix A, the back -primitives">Appendix A, the back -primitives</a><br>
+<a href="#Appendix B, description of ACK-a.out library">Appendix B, description of ACK-a.out library</a><br>
+
+<hr>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>A <b>code expander</b> (<b>ce</b> for short) is a part
+of the Amsterdam Compiler Kit
+<sup><small><small>1</small></small></sup> (<b>ACK</b>) and
+provides the user with high-speed generation of
+medium-quality code. Although conceptually equivalent to the
+more usual <b>code generator</b>, it differs in some
+aspects.</p>
+
+<p>Normally, a program to be compiled with <b>ACK</b> is
+first fed to the preprocessor. The output of the
+preprocessor goes into the appropriate front end, which
+produces EM <sup><small><small>2</small></small></sup> (a
+machine independent low level intermediate code). The
+generated EM code is fed into the peephole optimizer, which
+scans it with a window of a few instructions, replacing
+certain inefficient code sequences by better ones. After the
+peephole optimizer a back end follows, which produces
+high-quality assembly code. The assembly code goes via the
+target optimizer into the assembler and the object code then
+goes into the linker/loader, the final component in the
+pipeline.</p>
+
+<p>For various applications this scheme is too slow. When
+debugging, for example, compile time is more important than
+execution time of a program. For this purpose a new scheme
+is introduced:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>The code generator and assembler are replaced by a
+library, the <b>code expander</b>, consisting of a set of
+routines, one for every EM-instruction. Each routine expands
+its EM-instruction into relocatable object code. In
+contrast, the usual ACK code generator uses expensive
+pattern matching on sequences of EM-instructions. The
+peephole and target optimizer are not used.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>These routines replace the usual EM-generating routines
+in the front end; this eliminates the overhead of
+intermediate files.</p>
+</td>
+</table>
+
+<p>This results in a fast compiler producing object file,
+ready to be linked and loaded, at the cost of unoptimized
+object code.</p>
+
+<p>Because of the simple nature of the code expander, it is
+much easier to build, to debug, and to test. Experience has
+demonstrated that a code expander can be constructed,
+debugged, and tested in less than two weeks.</p>
+
+<p>This document describes the tools for automatically
+generating a <b>ce</b> (a library of C files) from two
+tables and a few machine-dependent functions. A thorough
+knowledge of EM is necessary to understand this
+document.</p>
+<a name="2. The code expander generator"></a>
+<h2>2. The code expander generator</h2>
+
+<p>The code expander generator (<b>ceg</b>) generates a
+code expander from two tables and a few machine-dependent
+functions. This section explains how <b>ceg</b> works. The
+first half describes the transformations that are done on
+the two tables. The second half tells how these
+transformations are done by the <b>ceg</b>.</p>
+
+<p>A code expander consists of a set of routines that
+convert EM-instructions directly to relocatable object code.
+These routines are called by a front end through the
+EM_CODE(3ACK) <sup><small><small>3</small></small></sup>
+interface. To free the table writer of the burden of
+building an object file, we supply a set of routines that
+build an object file in the ACK.OUT(5ACK)
+<sup><small><small>4</small></small></sup> format (see
+appendix B). This set of routines is called the
+<b>back</b>-primitives (see appendix A). In short, a code
+expander consists of a set of routines that map the EM_CODE
+interface on the <b>back</b>-primitives interface.</p>
+
+<p>To avoid repetition of the same sequences of
+<b>back</b>-primitives in different EM-instructions and to
+improve readability, the EM-to-object information must be
+supplied in two tables. The EM_table maps EM to an assembly
+language, and the as_table maps assembly code to
+<b>back</b>-primitives. The assembly language is chosen by
+the table writer. It can either be an actual assembly
+language or his ad-hoc designed language.</p>
+
+<p>The following picture shows the dependencies between the
+different components:</p>
+
+<p align=center><img src="grohtml-106561.png"></p>
+
+<p>The picture suggests that, during compilation, the EM
+instructions are first transformed into assembly
+instructions and then the assembly instructions are
+transformed into object-generating calls. This is not what
+happens in practice, although the user is free to think it
+does. Actually, however the EM_table and the as_table are
+combined during code expander generation time, yielding an
+imaginary compound table that results in routines from the
+EM_CODE interface that generate object code directly.</p>
+
+<p>As already indicated, the compound table does not exist
+either. Instead, each assembly instruction in the as_table
+is converted to a routine generating C
+<sup><small><small>5</small></small></sup> code to generate
+C code to call the <b>back</b>-primitives. The EM_table is
+converted into a program that for each EM instruction
+generates a routine, using the routines generated from the
+as_table. Execution of the latter program will then generate
+the code expander.</p>
+
+<p>This scheme allows great flexibility in the table
+writing, while still resulting in a very efficient code
+expander. One implication is that the as_table is
+interpreted twice and the EM_table only once. This has
+consequences for their structure.</p>
+
+<p>To illustrate what happens, we give an example. The
+example is an entry in the tables for the VAX-machine. The
+assembly language chosen is a subset of the VAX assembly
+language.</p>
+
+<p>One of the most fundamental operations in EM is
+&lsquo;&lsquo;loc c&rsquo;&rsquo;, load the value of c on
+the stack. To expand this instruction the tables contain the
+following information:</p>
+<pre>     EM_table   :
+        C_loc   ==&gt;   &quot;pushl $$$1&quot;.
+          /* $1 refers to the first argument of C_loc.
+           * $$ is a quoted $. */
+
+
+
+
+     as_table   :
+        pushl  src : CONST   ==&gt;
+                              @text1( 0xd0);
+                              @text1( 0xef);
+                              @text4( %$( src-&gt;num)).
+</pre>
+
+<p>The as_table is transformed in the following
+routine:</p>
+<pre>     pushl_instr(src)
+     t_operand *src;
+     /* &lsquo;&lsquo;t_operand&rsquo;&rsquo; is a struct defined by the
+      * table writer. */
+     {
+        printf(&quot;swtxt();&quot;);
+        printf(&quot;text1( 0xd0 );&quot;);
+        printf(&quot;text1( 0xef );&quot;);
+        printf(&quot;text4(%s);&quot;, substitute_dollar( src-&gt;num));
+     }
+</pre>
+
+<p>Using &lsquo;&lsquo;pushl_instr()&rsquo;&rsquo;, the
+following routine is generated from the EM_table:</p>
+<pre>     C_loc( c)
+     arith c;
+     /* text1() and text4() are library routines that fill the
+      * text segment. */
+     {
+         swtxt();
+         text1( 0xd0);
+         text1( 0xef);
+         text4( c);
+     }
+</pre>
+
+<p>A compiler call to &lsquo;&lsquo;C_loc()&rsquo;&rsquo;
+will cause the 1-byte numbers
+&lsquo;&lsquo;0xd0&rsquo;&rsquo; and
+&lsquo;&lsquo;0xef&rsquo;&rsquo; and the 4-byte value of the
+variable &lsquo;&lsquo;c&rsquo;&rsquo; to be stored in the
+text segment.</p>
+
+<p>The transformations on the tables are done automatically
+by the code expander generator. The code expander generator
+is made up of two tools: <b>emg</b> and <b>asg</b>.
+<b>Asg</b> transforms each assembly instruction into a C
+routine. These C routines generate calls to the
+<b>back</b>-primitives. The generated C routines are used by
+<b>emg</b> to generate the actual code expander from the
+EM_table.</p>
+
+<p>The link between <b>emg</b> and <b>asg</b> is an
+assembly language. We did not enforce a specific syntax for
+the assembly language; instead we have given the table
+writer the freedom to make an ad-hoc assembly language or to
+use an actual assembly language suitable for his purpose.
+Apart from a greater flexibility this has another advantage;
+if the table writer adopts the assembly language that runs
+on the machine at hand, he can test the EM_table
+independently from the as_table. Of course there is a price
+to pay: the table writer has to do the decoding of the
+operands himself. See section 4 for more details.</p>
+
+<p>Before we describe the structure of the tables in
+detail, we will give an overview of the four main
+phases.</p>
+
+<p>phase 1:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The as_table is transformed by <b>asg</b>. This results
+in a set of C routines. Each assembly-opcode generates one C
+routine. Note that a call to such a routine does not
+generate the corresponding object code; it generates C code,
+which, when executed, generates the desired object code.</p>
+</td>
+</table>
+
+<p>phase 2:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The C routines generated by <b>asg</b> are used by emg to
+expand the EM_table. This results in a set of C routines,
+the code expander, which conform to the procedural interface
+EM_CODE(3ACK). A call to such a routine does indeed generate
+the desired object code.</p>
+</td>
+</table>
+
+<p>phase 3:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The front end that uses the procedural interface is
+linked/loaded with the code expander generated in phase 2
+and the <b>back</b>-primitives (a supplied library). This
+results in a compiler.</p>
+</td>
+</table>
+
+<p>phase 4:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The compiler runs. The routines in the code expander are
+executed and produce object code.</p>
+</td>
+</table>
+<a name="3. Description of the EM_table"></a>
+<h2>3. Description of the EM_table</h2>
+
+<p>This section describes the EM_table. It contains four
+subsections. The first 3 sections describe the syntax of the
+EM_table, the semantics of the EM_table, and the functions
+and constants that must be present in the EM_table, in the
+file &lsquo;&lsquo;mach.c&rsquo;&rsquo; or in the file
+&lsquo;&lsquo;mach.h&rsquo;&rsquo;. The last section
+explains how a table writer can generate assembly code
+instead of object code. The section on semantics contains
+many examples.</p>
+<a name="3.1. Grammar"></a>
+<h2>3.1. Grammar</h2>
+
+<p>The following grammar describes the syntax of the
+EM_table.</p>
+
+<p align=center><img src="grohtml-106562.png"></p>
+
+<p>The &lsquo;&lsquo;(&rsquo;&rsquo;
+&lsquo;&lsquo;)&rsquo;&rsquo; brackets are used for
+grouping, &lsquo;&lsquo;[&rsquo;&rsquo; ...
+&lsquo;&lsquo;]&rsquo;&rsquo; means ... 0 or 1 time, a
+&lsquo;&lsquo;*&rsquo;&rsquo; means zero or more times, and
+a &lsquo;&lsquo;|&rsquo;&rsquo; means a choice between left
+or right. A <b>C_instr</b> is a name in the EM_CODE(3ACK)
+interface. <b>condition</b> is a C expression.
+<b>function-call</b> is a call of a C function.
+<b>label</b>, <b>mnemonic</b>, and <b>operand</b> are
+arbitrary strings. If an <b>operand</b> contains brackets,
+the brackets must match. There is an upper bound on the
+number of operands; the maximum number is defined by the
+constant MAX_OPERANDS in de file
+&lsquo;&lsquo;const.h&rsquo;&rsquo; in the directory
+assemble.c. Comments in the table should be placed between
+&lsquo;&lsquo;/*&rsquo;&rsquo; and
+&lsquo;&lsquo;*/&rsquo;&rsquo;. The table is processed by
+the C preprocessor, before being parsed by <b>emg</b>.</p>
+<a name="3.2. Semantics"></a>
+<h2>3.2. Semantics</h2>
+
+<p>The EM_table is processed by <b>emg</b>. <b>Emg</b>
+generates a C function for every instruction in the
+EM_CODE(3ACK). For every EM-instruction not mentioned in the
+EM_table, a C function that prints an error message is
+generated. It is possible to divide the
+EM_CODE(3ACK)-interface into four parts :</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>text instructions (e.g., C_loc, C_adi, ..)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>pseudo instructions (e.g., C_open, C_df_ilb, ..)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>3:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>storage instructions (e.g., C_rom_icon, ..)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>4:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>message instructions (e.g., C_mes_begin, ..)</p>
+</td>
+</table>
+
+<p>This section starts with giving the semantics of the
+grammar. The examples are text instructions. The section
+ends with remarks on the pseudo instructions and the storage
+instructions. Since message instructions are not useful for
+a code expander, they are ignored.</p>
+<a name="3.2.1. Actions"></a>
+<h2>3.2.1. Actions</h2>
+
+<p>The EM_table is made up of rules describing how to
+expand a <b>C_instr</b> defined by the
+EM_CODE(3ACK)-interface (corresponding to an EM instruction)
+into actions. There are two kinds of actions: assembly
+instructions and C function calls. An assembly instruction
+is defined as a mnemonic followed by zero or more operands
+separated by commas. The semantics of an assembly
+instruction is defined by the table writer. When the
+assembly language is not expressive enough, then, as an
+escape route, function calls can be made. However, this
+reduces the speed of the actual code expander. Finally,
+actions can be grouped into a list of actions; actions are
+separated by a semicolon and terminated by a
+&lsquo;&lsquo;.&rsquo;&rsquo;.</p>
+<pre>     C_nop   ==&gt; .
+            /* Empty action list : no operation. */
+
+
+     C_inc   ==&gt; &quot;incl (sp)&quot;.
+            /* Assembler instruction, which is evaluated
+             * during expansion of the EM_table */
+
+
+     C_slu   ==&gt; C_sli( $1).
+            /* Function call, which is evaluated during
+             *  execution of the compiler. */
+</pre>
+<a name="3.2.2. Labels"></a>
+<h2>3.2.2. Labels</h2>
+
+<p>Since an assembly language without instruction labels is
+a rather weak language, labels inside a contiguous block of
+assembly instructions are allowed. When using labels two
+rules must be observed:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>The name of a label should be unique inside an action
+list.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>The labels used in an assembler instruction should be
+defined in the same action list.</p>
+</td>
+</table>
+
+<p>The following example illustrates the usage of
+labels.</p>
+<pre>        /* Compare the two top elements on the stack. */
+     C_cmp      ==&gt;     &quot;pop bx&quot;;
+                        &quot;pop cx&quot;;
+                        &quot;xor ax, ax&quot;;
+                        &quot;cmp cx, bx&quot;;
+                     /* Forward jump to local label */
+                        &quot;je 2f&quot;;
+                        &quot;jb 1f&quot;;
+                        &quot;inc ax&quot;;
+                        &quot;jmp 2f&quot;;
+                        &quot;1: dec ax&quot;;
+                        &quot;2: push ax&quot;.
+</pre>
+
+<p>We will come back to labels in the section on the
+as_table.</p>
+<a name="3.2.3. Arguments of an EM instruction"></a>
+<h2>3.2.3. Arguments of an EM instruction</h2>
+
+<p>In most cases the translation of a <b>C_instr</b>
+depends on its arguments. The arguments of a <b>C_instr</b>
+are numbered from 1 to <i>n</i>, where <i>n</i> is the total
+number of arguments of the current <b>C_instr</b> (there are
+a few exceptions, see Implicit arguments). The table writer
+may refer to an argument as $<i>i</i>. If a plain $-sign is
+needed in an assembly instruction, it must be preceded by a
+extra $-sign.</p>
+
+<p>There are two groups of <b>C_instr</b>s whose arguments
+are handled specially:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>1: Instructions dealing with local offsets</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>The value of the $<i>i</i> argument referring to a
+parameter ($<i>i</i> &gt;= 0) is increased by
+&lsquo;&lsquo;EM_BSIZE&rsquo;&rsquo;.
+&lsquo;&lsquo;EM_BSIZE&rsquo;&rsquo; is the size of the
+return status block and must be defined in the file
+&lsquo;&lsquo;mach.h&rsquo;&rsquo; (see section 3.3). For
+example :</p>
+<!-- INDENTATION -->
+<pre>     C_lol   ==&gt;     &quot;push $1(bp)&quot;.
+            /* automatic conversion of $1 */
+</pre>
+</td>
+</table>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>2: Instructions using global names or instruction
+labels</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>All the arguments referring to global names or
+instruction labels will be transformed into a unique
+assembly name. To prevent name clashes with library names
+the table writer has to provide the conversions in the file
+&lsquo;&lsquo;mach.h&rsquo;&rsquo;. For example :</p>
+<!-- INDENTATION -->
+<pre>     C_bra   ==&gt;     &quot;jmp $1&quot;.
+             /* automatic conversion of $1 */
+             /* type arith is converted to string */
+</pre>
+</td>
+</table>
+<a name="3.2.4. Conditionals"></a>
+<h2>3.2.4. Conditionals</h2>
+
+<p>The rules in the EM_table can be divided into two
+groups: simple rules and conditional rules. The simple rules
+are made up of a <b>C_instr</b> followed by a list of
+actions, as described above. The conditional rules
+(COND_SEQUENCE) allow the table writer to select an action
+list depending on the value of a condition.</p>
+
+<p>A CONDITIONAL is a list of a boolean expression with the
+corresponding simple rule. If the expression evaluates to
+true then the corresponding simple rule is carried out. If
+more than one condition evaluates to true, the first one is
+chosen. The last case of a COND_SEQUENCE of a <b>C_instr</b>
+must handle the default case. The boolean expressions in a
+COND_SEQUENCE must be C expressions. Besides the ordinary C
+operators and constants, $<i>i</i> references can be used in
+an expression.</p>
+<pre>         /* Load address of LB $1 levels back. */
+     C_lxl
+         $1 == 0    ==&gt;    &quot;pushl fp&quot;.
+         $1 == 1    ==&gt;    &quot;pushl 4(ap)&quot;.
+         default    ==&gt;    &quot;movl $$$1, r0&quot;;
+                           &quot;jsb .lxl&quot;;
+                           &quot;pushl r0&quot;.
+</pre>
+<a name="3.2.5. Abbreviations"></a>
+<h2>3.2.5. Abbreviations</h2>
+
+<p>EM instructions with an external as an argument come in
+three variants in the EM_CODE(3ACK) interface. In most cases
+it will be possible to take these variants together. For
+this purpose the &lsquo;&lsquo;..&rsquo;&rsquo; notation is
+introduced. For the code expander there is no difference
+between the following instructions.</p>
+<pre>     C_loe_dlb    ==&gt;    &quot;pushl $1 + $2&quot;.
+     C_loe_dnam   ==&gt;    &quot;pushl $1 + $2&quot;.
+     C_loe        ==&gt;    &quot;pushl $1 + $2&quot;.
+</pre>
+
+<p>So it can be written in the following way.</p>
+<pre>     C_loe..      ==&gt;    &quot;pushl $1 + $2&quot;.
+</pre>
+<a name="3.2.6. Implicit arguments"></a>
+<h2>3.2.6. Implicit arguments</h2>
+
+<p>In the last example &lsquo;&lsquo;C_loe&rsquo;&rsquo;
+has two arguments, but in the EM_CODE interface it has one
+argument. This argument depends on the current
+&lsquo;&lsquo;hol&rsquo;&rsquo; block; in the EM_table this
+is made explicit. Every <b>C_instr</b> whose argument
+depends on a &lsquo;&lsquo;hol&rsquo;&rsquo; block has one
+extra argument; argument 1 refers to the
+&lsquo;&lsquo;hol&rsquo;&rsquo; block.</p>
+<a name="3.2.7. Pseudo instructions"></a>
+<h2>3.2.7. Pseudo instructions</h2>
+
+<p>Most pseudo instructions are machine independent and are
+provided by <b>ceg</b>. The table writer has only to supply
+the following functions, which are used to build a
+stackframe:</p>
+<pre>     C_prolog()
+     /* Performs the prolog, for example save
+      * return address */
+
+
+     C_locals( n)
+     arith n;
+     /* Allocate n bytes for locals on the stack */
+
+
+     C_jump( label)
+     char *label;
+     /* Generates code for a jump to &lsquo;&lsquo;label&rsquo;&rsquo; */
+</pre>
+
+<p>These functions can be defined in
+&lsquo;&lsquo;mach.c&rsquo;&rsquo; or in the EM_table (see
+section 3.3).</p>
+<a name="3.2.8. Storage instructions"></a>
+<h2>3.2.8. Storage instructions</h2>
+
+<p>The storage instructions
+&lsquo;&lsquo;C_bss_<i>cstp()</i>&rsquo;&rsquo;,
+&lsquo;&lsquo;C_hol_<i>cstp()</i>&rsquo;&rsquo;, dealing
+with constants of type string (C_..._icon, C_..._ucon,
+C_..._fcon), are generated automatically. No information is
+needed in the table. To generate the C_..._icon, C_..._ucon,
+C_..._fcon instructions <b>ceg</b> only has to know how to
+convert a number of type string to bytes; this can be
+defined with the constants ONE_BYTE, TWO_BYTES, and
+FOUR_BYTES. C_rom_icon, C_con_icon, C_bss_icon, C_hol_icon
+can be abbreviated by ..icon. This also holds for ..ucon and
+..fcon. For example :</p>
+<pre>     \.\.icon
+         $2 == 1   ==&gt;  gen1( (ONE_BYTE) atoi( $1)).
+         $2 == 2   ==&gt;  gen2( (TWO_BYTES) atoi( $1)).
+         $2 == 4   ==&gt;  gen4( (FOUR_BYTES) atol( $1)).
+         default   ==&gt;   arg_error( &quot;..icon&quot;, $2).
+</pre>
+
+<p>Gen1(), gen2() and gen4() are <b>back</b>-primitives
+(see appendix A), and generate one, two, or four byte
+constants. Atoi() is a C library function that converts
+strings to integers. The constants
+&lsquo;&lsquo;ONE_BYTE&rsquo;&rsquo;,
+&lsquo;&lsquo;TWO_BYTES&rsquo;&rsquo;, and
+&lsquo;&lsquo;FOUR_BYTES&rsquo;&rsquo; must be defined in
+the file &lsquo;&lsquo;mach.h&rsquo;&rsquo;.</p>
+<a name="3.3. User supplied definitions and functions"></a>
+<h2>3.3. User supplied definitions and functions</h2>
+
+<p>If the table writer uses all the default functions he
+has only to supply the following constants and functions
+:</p>
+
+<p align=center><img src="grohtml-106563.png"></p>
+
+<p>An example of the file
+&lsquo;&lsquo;mach.h&rsquo;&rsquo; for the vax4.</p>
+
+<p align=center><img src="grohtml-106565.png"></p>
+
+<p>Notice that EM_BSIZE is zero. The vax
+&lsquo;&lsquo;call&rsquo;&rsquo; instruction takes
+automatically care of the base block.</p>
+
+<p>There are three primitives that have to be defined by
+the table writer, either as functions in the file
+&lsquo;&lsquo;mach.c&rsquo;&rsquo; or as rules in the
+EM_table. For example, for the 8086 they look like this:</p>
+<pre>     C_jump       ==&gt;       &quot;jmp $1&quot;.
+
+
+     C_prolog     ==&gt;       &quot;push bp&quot;;
+                          &quot;mov bp, sp&quot;.
+
+
+     C_locals
+       $1  == 0   ==&gt;     .
+       $1  == 2   ==&gt;     &quot;push ax&quot;.
+       $1  == 4   ==&gt;     &quot;push ax&quot;;
+                          &quot;push ax&quot;.
+       default    ==&gt;     &quot;sub sp, $1&quot;.
+</pre>
+<a name="3.4. Generating assembly code"></a>
+<h2>3.4. Generating assembly code</h2>
+
+<p>When the code expander generator is used for generating
+assembly instead of object code (see section 5), additional
+print formats have to be defined in
+&lsquo;&lsquo;mach.h&rsquo;&rsquo;. The following table
+lists these formats.</p>
+
+<p align=center><img src="grohtml-106566.png"></p>
+<a name="4. Description of the as_table"></a>
+<h2>4. Description of the as_table</h2>
+
+<p>This section describes the as_table. Like the previous
+section, it is divided into four parts: the first two parts
+describe the grammar and the semantics of the as_table; the
+third part gives an overview of the functions and the
+constants that must be present in the as_table (in the file
+&lsquo;&lsquo;as.h&rsquo;&rsquo; or in the file
+&lsquo;&lsquo;as.c&rsquo;&rsquo;); the last part describes
+the case when assembly is generated instead of object code.
+The part on semantics contains examples that appear in the
+as_table for the VAX or for the 8086.</p>
+<a name="4.1. Grammar"></a>
+<h2>4.1. Grammar</h2>
+
+<p>The form of the as_table is given by the following
+grammar :</p>
+
+<p align=center><img src="grohtml-106567.png"></p>
+
+<p><b>mnemonic</b>, <b>operand</b>, and <b>type</b> are all
+C identifiers; <b>condition</b> is a normal C expression;
+<b>function-call</b> must be a C function call. A function
+can be called with standard C arguments or with a reference
+(see section 4.2.4). Since the as_table is interpreted
+during code expander generation as well as during code
+expander execution, two levels of calls are present in it. A
+&lsquo;&lsquo;function-call&rsquo;&rsquo; is done during
+code expander generation, a
+&lsquo;&lsquo;@function-call&rsquo;&rsquo; during code
+expander execution.</p>
+<a name="4.2. Semantics"></a>
+<h2>4.2. Semantics</h2>
+
+<p>The as_table is made up of rules that map assembly
+instructions onto <b>back</b>-primitives, a set of functions
+that construct an object file. The table is processed by
+<b>asg</b>, which generates a C functions for each assembler
+mnemonic. The names of these functions are the assembler
+mnemonics postfixed with &lsquo;&lsquo;_instr&rsquo;&rsquo;
+(e.g., &lsquo;&lsquo;add&rsquo;&rsquo; becomes
+&lsquo;&lsquo;add_instr()&rsquo;&rsquo;). These functions
+will be used by the function assemble() during the expansion
+of the EM_table. After explaining the semantics of the
+as_table the function assemble() will be described.</p>
+<a name="4.2.1. Rules"></a>
+<h2>4.2.1. Rules</h2>
+
+<p>A rule in the as_table is made up of a left and a right
+hand side; the left hand side describes an assembler
+instruction (mnemonic and operands); the right hand side
+gives the corresponding actions as <b>back</b>-primitives or
+as functions defined by the table writer, which call
+<b>back-primitives</b>. Two simple examples from the VAX
+as_table and the 8086 as_table, resp.:</p>
+<pre>     movl src, dst  ==&gt; @text1( 0xd0);
+                        gen_operand( src);
+                        gen_operand( dst).
+         /* &lsquo;&lsquo;gen_operand&rsquo;&rsquo; is a function that encodes
+          * operands by calling back-primitives. */
+
+
+     rep ens:MOVS   ==&gt;  @text1( 0xf3);
+                         @text1( 0xa5).
+
+
+</pre>
+<a name="4.2.2. Declaration of types."></a>
+<h2>4.2.2. Declaration of types.</h2>
+
+<p>In general, a machine instruction is encoded as an
+opcode followed by zero or more the operands. There are two
+methods for mapping assembler mnemonics onto opcodes: the
+mnemonic determines the opcode, or mnemonic and operands
+together determine the opcode. Both cases can be easily
+expressed in the as_table. The first case is obvious. The
+second case is handled by introducing type fields for the
+operands.</p>
+
+<p>When mnemonic and operands together determine the
+opcode, the table writer has to give several rules for each
+combination of mnemonic and operands. The rules differ in
+the type fields of the operands. The table writer has to
+supply functions that check the type of the operand. The
+name of such a function is the name of the type; it has one
+argument: a pointer to a struct of type <i>t_operand</i>; it
+returns non-zero when the operand is of this type, otherwise
+it returns 0.</p>
+
+<p>This will usually lead to a list of rules per mnemonic.
+To reduce the amount of work an abbreviation is supplied.
+Once the mnemonic is specified it can be referred to in the
+following rules by &lsquo;&lsquo;...&rsquo;&rsquo;. One has
+to make sure that each mnemonic is mentioned only once in
+the as_table, otherwise <b>asg</b> will generate more than
+one function with the same name.</p>
+
+<p>The following example shows the usage of type
+fields.</p>
+<pre>      mov dst:REG, src:EADDR  ==&gt;
+               @text1( 0x8b);                /* opcode */
+               mod_RM( %d(dst-&gt;reg), src). /* operands */
+
+
+      ... dst:EADDR, src:REG  ==&gt;
+               @text1( 0x89);                /* opcode */
+               mod_RM( %d(src-&gt;reg), dst). /* operands */
+</pre>
+
+<p>The table-writer must supply the restriction functions,
+<tt>REG</tt> and <tt>EADDR</tt> in the previous example, in
+&lsquo;&lsquo;as.c&rsquo;&rsquo; or
+&rsquo;&rsquo;as.h&rsquo;&rsquo;.</p>
+<a name="4.2.3. The function of the @-sign and the if-statement."></a>
+<h2>4.2.3. The function of the @-sign and the if-statement.</h2>
+
+<p>The right hand side of a rule is made up of function
+calls. Since the as_table is interpreted on two levels,
+during code expander generation and during code expander
+execution, two levels of calls are present in it. A
+function-call without an &lsquo;&lsquo;@&rsquo;&rsquo;-sign
+is called during code expander generation (e.g., the
+<tt>gen_operand()</tt> in the first example). A function
+call with an &lsquo;&lsquo;@&rsquo;&rsquo;-sign is called
+during code expander execution (e.g., the
+<b>back</b>-primitives). So the last group will be part of
+the compiler.</p>
+
+<p>The need for the &lsquo;&lsquo;@&rsquo;&rsquo;-sign
+construction arises, for example, when implementing push/pop
+optimization (e.g., &lsquo;&lsquo;push x&rsquo;&rsquo;
+followed by &lsquo;&lsquo;pop y&rsquo;&rsquo; can be
+replaced by &lsquo;&lsquo;move x, y&rsquo;&rsquo;). In this
+case flags need to be set, unset, and tested during the
+execution of the compiler:</p>
+<pre>PUSH src  ==&gt;   /* save in ax */
+                mov_instr( AX_oper, src);
+                /* set flag */
+                @assign( push_waiting, TRUE).
+</pre>
+<pre>     POP dst   ==&gt;   @if ( push_waiting)
+                            /* &lsquo;&lsquo;mov_instr&rsquo;&rsquo; is asg-generated */
+                            mov_instr( dst, AX_oper);
+                            @assign( push_waiting, FALSE).
+                     @else
+                            /* &lsquo;&lsquo;pop_instr&rsquo;&rsquo; is asg-generated */
+                            pop_instr( dst).
+                     @fi.
+</pre>
+
+<p>Although the @-sign is followed syntactically by a
+function name, this function can very well be the name of a
+macro defined in C. This is in fact the case with
+&lsquo;&lsquo;@assign()&rsquo;&rsquo; in the above
+example.</p>
+
+<p>The case may arise when information is needed that is
+not known until execution of the compiler. For example one
+needs to know if a &lsquo;&lsquo;$<i>i</i>&rsquo;&rsquo;
+argument fits in one byte. In this case one can use a
+special if-statement provided by <b>asg</b>: @if, @elsif,
+@else, @fi. This means that the conditions will be evaluated
+at run time of the <b>ce</b>. In such a condition one may of
+course refer to the &rsquo;&rsquo;$<i>i</i>&rsquo;&rsquo;
+arguments. For example, constants can be packed into one or
+two byte arguments as follows:</p>
+<pre>     mov dst:ACCU, src:DATA ==&gt;
+                            @if ( fits_byte( %$(dst-&gt;expr)))
+                                 @text1( 0xc0);
+                                 @text1( %$(dst-&gt;expr)).
+                            @else
+                                 @text1( 0xc8);
+                                 @text2( %$(dst-&gt;expr)).
+                            @fi.
+</pre>
+<a name="4.2.4. References to operands"></a>
+<h2>4.2.4. References to operands</h2>
+
+<p>As noted before, the operands of an assembler
+instruction may be used as pointers to the struct
+<i>t_operand</i> in the right hand side of the table.
+Because of the free format assembler, the types of the
+fields in the struct <i>t_operand</i> are unknown to
+<b>asg</b>. As these fields can appear in calls to
+functions, <b>asg</b> must know these types. This section
+explains how these types must be specified.</p>
+
+<p>References to operands come in three forms: ordinary
+operands, operands that contain
+&lsquo;&lsquo;$<i>i</i>&rsquo;&rsquo; references, and
+operands that refer to names of local labels. The
+&lsquo;&lsquo;$<i>i</i>&rsquo;&rsquo; in operands represent
+names or numbers of a <b>C_instr</b> and must be given as
+arguments to the <b>back</b>-primitives. Labels in operands
+must be converted to a number that tells the distance, the
+number of bytes, between the label and the current position
+in the text-segment.</p>
+
+<p>All these three cases are treated in an uniform way.
+When the table writer makes a reference to an operand of an
+assembly instruction, he must describe the type of the
+operand in the following way.</p>
+
+<p align=center><img src="grohtml-106568.png"></p>
+
+<p>The three cases differ only in the conversion field. The
+printformat conversion applies to ordinary operands. The
+&lsquo;&lsquo;%$&rsquo;&rsquo; applies to operands that
+contain a &lsquo;&lsquo;$<i>i</i>&rsquo;&rsquo;. The
+expression between parentheses must result in a pointer to a
+char. The result of &lsquo;&lsquo;%$&rsquo;&rsquo; is of the
+type of &lsquo;&lsquo;$<i>i</i>&rsquo;&rsquo;. The
+&lsquo;&lsquo;%dist&rsquo;&rsquo; applies to operands that
+refer to a local label. The expression between the brackets
+must result in a pointer to a char. The result of
+&lsquo;&lsquo;%dist&rsquo;&rsquo; is of type arith.</p>
+
+<p>The following example illustrates the usage of
+&lsquo;&lsquo;%$&rsquo;&rsquo;. (For an example that
+illustrates the usage of ordinary fields see the section on
+&lsquo;&lsquo;User supplied definitions and
+functions&rsquo;&rsquo;).</p>
+<pre>     jmp dst ==&gt;
+         @text1( 0xe9);
+         @reloc2( %$(dst-&gt;lab), %$(dst-&gt;off), PC_REL).
+</pre>
+
+<p>A useful function concerning $<i>i</i>s is arg_type(),
+which takes as input a string starting with $<i>i</i> and
+returns the type of the <i>i</i>&rsquo;&rsquo;th argument of
+the current EM-instruction, which can be STRING, ARITH or
+INT. One may need this function while decoding operands if
+the context of the $<i>i</i> does not give enough
+information. If the function arg_type() is used, the file
+arg_type.h must contain the definition of STRING, ARITH and
+INT.</p>
+
+<p>%dist is only guaranteed to work when called as a
+parameter of text1(), text2() or text4(). The goal of the
+%dist conversion is to reduce the number of reloc1(),
+reloc2() and reloc4() calls, saving space and time (no
+relocation at compiler run time). The following example
+illustrates the usage of
+&lsquo;&lsquo;%dist&rsquo;&rsquo;.</p>
+<pre>      jmp dst:ILB    ==&gt; /* label in an instruction list */
+          @text1( 0xeb);
+          @text1( %dist( dst-&gt;lab)).
+
+
+      ... dst:LABEL  ==&gt; /* global label */
+          @text1( 0xe9);
+          @reloc2( %$(dst-&gt;lab), %$(dst-&gt;off), PC_REL).
+</pre>
+
+<a name="4.2.5. The functions assemble() and block_assemble()"></a>
+
+<h2>4.2.5. The functions assemble() and block_assemble()</h2>
+
+<p>The functions assemble() and block_assemble() are
+provided by <b>ceg</b>. If, however, the table writer is not
+satisfied with the way they work he can supply his own
+assemble() or block_assemble(). The default function
+assemble() splits an assembly string into a label, mnemonic,
+and operands and performs the following actions on them:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>It processes the local label; it records the name and
+current position. Thereafter it calls the function
+process_label() with one argument of type string, the label.
+The table writer has to define this function.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>Thereafter it calls the function process_mnemonic() with
+one argument of type string, the mnemonic. The table writer
+has to define this function.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>3:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>It calls process_operand() for each operand.
+Process_operand() must be written by the table-writer since
+no fixed representation for operands is enforced. It has two
+arguments: a string (the operand to decode) and a pointer to
+the struct <i>t_operand</i>. The declaration of the struct
+<i>t_operand</i> must be given in the file
+&lsquo;&lsquo;as.h&rsquo;&rsquo;, and the table-writer can
+put all the information needed for encoding the operand in
+machine format in it.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>4:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>It examines the mnemonic and calls the associated
+function, generated by <b>asg</b>, with pointers to the
+decoded operands as arguments. This makes it possible to use
+the decoded operands in the right hand side of a rule (see
+below).</p>
+</td>
+</table>
+
+<p>If the default assemble() does not work the way the
+table writer wants, he can supply his own version of it.
+Assemble() has the following arguments:</p>
+<pre>     assemble( instruction )
+         char *instruction;
+</pre>
+
+<p><i>instruction</i> points to a null-terminated
+string.</p>
+
+<p>The default function block_assemble() is called with a
+sequence of assembly instructions that belong to one action
+list. It calls assemble() for every assembly instruction in
+this block. But if a special action is required on a block
+of assembly instructions, the table writer only has to
+rewrite this function to get a new <b>ceg</b> that obliges
+to his wishes. The function block_assemble has the following
+arguments:</p>
+<pre>     block_assemble( instructions, nr, first, last)
+           char   **instruction;
+           int      nr, first, last;
+</pre>
+
+<p><i>Instruction</i> point to an array of pointers to
+strings representing assembly instructions. <i>Nr</i> is the
+number of instructions that must be assembled. <i>First</i>
+and <i>last</i> have no function in the default
+block_assemble(), but are useful when optimizations are done
+in block_assemble().</p>
+
+<p>Four things have to be specified in
+&lsquo;&lsquo;as.h&rsquo;&rsquo; and
+&lsquo;&lsquo;as.c&rsquo;&rsquo;. First the user must give
+the declaration of struct <i>t_operand</i> in
+&lsquo;&lsquo;as.h&rsquo;&rsquo;, and the functions
+process_operand(), process_mnemonic(), and process_label()
+must be given in &lsquo;&lsquo;as.c&rsquo;&rsquo;. If the
+right hand side of the as_table contains function calls
+other than the <b>back</b>-primitives, these functions must
+also be present in &lsquo;&lsquo;as.c&rsquo;&rsquo;. Note
+that both the &lsquo;&lsquo;@&rsquo;&rsquo;-sign (see 4.2.3)
+and &lsquo;&lsquo;references&rsquo;&rsquo; (see 4.2.4) also
+work in the functions defined in
+&lsquo;&lsquo;as.c&rsquo;&rsquo;.</p>
+
+<p>The following example shows the representative and
+essential parts of the 8086 &lsquo;&lsquo;as.h&rsquo;&rsquo;
+and &lsquo;&lsquo;as.c&rsquo;&rsquo; files.</p>
+<pre><small>/* Constants and type definitions in as.h */
+
+
+#define        UNKNOWN                0
+#define        IS_REG                 0x1
+#define        IS_ACCU                0x2
+#define        IS_DATA                0x4
+#define        IS_LABEL               0x8
+#define        IS_MEM                 0x10
+#define        IS_ADDR                0x20
+#define        IS_ILB                 0x40
+
+
+#define AX                0
+#define BX                3
+#define CL                1
+#define SP                4
+#define BP                5
+#define SI                6
+#define DI                7
+
+
+#define REG( op)         ( op-&gt;type &amp; IS_REG)
+#define ACCU( op)        ( op-&gt;type &amp; IS_REG  &amp;&amp;  op-&gt;reg == AX)
+#define REG_CL( op)      ( op-&gt;type &amp; IS_REG  &amp;&amp;  op-&gt;reg == CL)
+#define DATA( op)        ( op-&gt;type &amp; IS_DATA)
+#define LABEL( op)       ( op-&gt;type &amp; IS_LABEL)
+#define ILB( op)         ( op-&gt;type &amp; IS_ILB)
+#define MEM( op)         ( op-&gt;type &amp; IS_MEM)
+#define ADDR( op)        ( op-&gt;type &amp; IS_ADDR)
+#define EADDR( op)       ( op-&gt;type &amp; ( IS_ADDR | IS_MEM | IS_REG))
+#define CONST1( op)      ( op-&gt;type &amp; IS_DATA  &amp;&amp; strcmp( &quot;1&quot;, op-&gt;expr) == 0)
+#define MOVS( op)        ( op-&gt;type &amp; IS_LABEL&amp;&amp;strcmp(&quot;
+#define IMMEDIATE( op)   ( op-&gt;type &amp; ( IS_DATA | IS_LABEL))
+
+
+struct t_operand {
+        unsigned type;
+        int reg;
+        char *expr, *lab, *off;
+       };
+
+
+extern struct t_operand saved_op, *AX_oper;
+</small></pre>
+<pre><small>/* Some functions in as.c. */
+
+
+#include &quot;arg_type.h&quot;
+#include &quot;as.h&quot;
+
+
+#define last( s)     ( s + strlen( s) - 1)
+#define LEFT         &rsquo;(&rsquo;
+#define RIGHT        &rsquo;)&rsquo;
+#define DOLLAR       &rsquo;$&rsquo;
+
+
+process_operand( str, op)
+char *str;
+struct t_operand *op;
+
+
+/*        expr            -&gt;        IS_DATA en IS_LABEL
+ *        reg             -&gt;        IS_REG en IS_ACCU
+ *        (expr)          -&gt;        IS_ADDR
+ *        expr(reg)       -&gt;        IS_MEM
+ */
+{
+        char *ptr, *index();
+
+
+        op-&gt;type = UNKNOWN;
+        if ( *last( str) == RIGHT) {
+                ptr = index( str, LEFT);
+                *last( str) = &rsquo; &rsquo;;
+                *ptr = &rsquo; &rsquo;;
+                if ( is_reg( ptr+1, op)) {
+                        op-&gt;type = IS_MEM;
+                        op-&gt;expr = ( *str == &rsquo; &rsquo; ? &quot;0&quot; : str);
+                }
+                else {
+                        set_label( ptr+1, op);
+                        op-&gt;type = IS_ADDR;
+                }
+        }
+        else
+                if ( is_reg( str, op))
+                        op-&gt;type = IS_REG;
+                else {
+                        if ( contains_label( str))
+                                set_label( str, op);
+                        else {
+                                op-&gt;type = IS_DATA;
+                                op-&gt;expr = str;
+                        }
+                }
+}
+
+
+/*********************************************************************/
+
+
+mod_RM( reg, op)
+int reg;
+struct t_operand *op;
+
+
+/* This function helps to decode operands in machine format.
+ * Note the $-operators
+ */
+{
+      if ( REG( op))
+              R233( 0x3, reg, op-&gt;reg);
+      else if ( ADDR( op)) {
+              R233( 0x0, reg, 0x6);
+              @reloc2( %$(op-&gt;lab), %$(op-&gt;off), ABSOLUTE);
+      }
+      else if ( strcmp( op-&gt;expr, &quot;0&quot;) == 0)
+              switch( op-&gt;reg) {
+                case SI : R233( 0x0, reg, 0x4);
+                          break;
+
+
+                case DI : R233( 0x0, reg, 0x5);
+                          break;
+
+
+                case BP : R233( 0x1, reg, 0x6);        /* exception! */
+                          @text1( 0);
+                          break;
+
+
+                case BX : R233( 0x0, reg, 0x7);
+                          break;
+
+
+                default : fprint( STDERR, &quot;Wrong index register %d\n&quot;,
+                                  op-&gt;reg);
+              }
+      else {
+              @if ( fit_byte( %$(op-&gt;expr)))
+                      switch( op-&gt;reg) {
+                          case SI : R233( 0x1, reg, 0x4);
+                                  break;
+
+
+                        case DI : R233( 0x1, reg, 0x5);
+                                  break;
+
+
+                        case BP : R233( 0x1, reg, 0x6);
+                                  break;
+
+
+                        case BX : R233( 0x1, reg, 0x7);
+                                  break;
+
+
+                        default : fprint( STDERR, &quot;Wrong index register %d\n&quot;,
+                                          op-&gt;reg);
+                      }
+                      @text1( %$(op-&gt;expr));
+              @else
+                      switch( op-&gt;reg) {
+                        case SI : R233( 0x2, reg, 0x4);
+                                  break;
+
+
+                        case DI : R233( 0x2, reg, 0x5);
+                                  break;
+
+
+                        case BP : R233( 0x2, reg, 0x6);
+                                  break;
+
+
+                        case BX : R233( 0x2, reg, 0x7);
+                                  break;
+
+
+                        default : fprint( STDERR, &quot;Wrong index register %d\n&quot;,
+                                          op-&gt;reg);
+                      }
+                      @text2( %$(op-&gt;expr));
+              @fi
+      }
+}
+</small></pre>
+<a name="4.3. Generating assembly code"></a>
+<h2>4.3. Generating assembly code</h2>
+
+<p>It is possible to generate assembly instead of object
+files (see section 5), in which case there is no need to
+supply &lsquo;&lsquo;as_table&rsquo;&rsquo;,
+&lsquo;&lsquo;as.h&rsquo;&rsquo;, and
+&lsquo;&lsquo;as.c&rsquo;&rsquo;. This option is useful for
+debugging the EM_table.</p>
+<a name="5. Building a code expander"></a>
+<h2>5. Building a code expander</h2>
+
+<p>This section describes how to generate a code expander
+in two phases. In phase one, the EM_table is written and
+assembly code is generated. If the assembly code is an
+actual language, the EM_table can be tested by assembling
+and running the generated code. If an ad-hoc assembly
+language is used by the table writer, it is not possible to
+test the EM_table, but the code generated is at least in
+readable form. In the second phase, the as_table is written
+and object code is generated. After the generated object
+code is fed into the loader, it can be tested.</p>
+<a name="5.1. Phase one"></a>
+<h2>5.1. Phase one</h2>
+
+<p>The following is a list of instructions to make a code
+expander that generates assembly instructions.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="2%"></td>
+<td width="54%">
+
+<p>Create a new directory.</p>
+</td>
+<td width="34%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>Create the &lsquo;&lsquo;EM_table&rsquo;&rsquo;,
+&lsquo;&lsquo;mach.h&rsquo;&rsquo;, and
+&lsquo;&lsquo;mach.c&rsquo;&rsquo; files; there is no need
+for &lsquo;&lsquo;as_table&rsquo;&rsquo;,
+&lsquo;&lsquo;as.h&rsquo;&rsquo;, and
+&lsquo;&lsquo;as.c&rsquo;&rsquo; at this moment.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>3:</p>
+</td>
+<td width="2%"></td>
+<td width="9%">
+
+<p>type</p>
+</td>
+<td width="79%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><tt>install_ceg -as</tt><br>
+install_ceg will create a Makefile and three directories :
+ceg, ce, and back. Ceg will contain the program ceg; this
+program will be used to turn
+&lsquo;&lsquo;EM_table&rsquo;&rsquo; into a set of C source
+files (in the ce directory), one for each EM-instruction.
+All these files will be compiled and put in a library called
+<b>ce.a</b>.<br>
+The option <tt>-as</tt> means that a <b>back</b>-library
+will be generated (in the directory
+&lsquo;&lsquo;back&rsquo;&rsquo;) that supports the
+generation of assembly language. The library is named
+&lsquo;&lsquo;back.a&rsquo;&rsquo;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>4:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>Link a front end, &lsquo;&lsquo;ce.a&rsquo;&rsquo;, and
+&lsquo;&lsquo;back.a&rsquo;&rsquo; together resulting in a
+compiler that generates assembly code.</p>
+</td>
+</table>
+
+<p>If the table writer has chosen an actual assembly
+language, the EM_table can be tested (e.g., by running the
+compiler on the EM test set). If an error occurs, change the
+EM_table and type</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><tt>update_ceg</tt> <b>C_instr</b></p>
+</td>
+</table>
+
+<p>where <b>C_instr</b> stands for the name of the
+erroneous EM-instruction. If the table writer has chosen an
+ad-hoc assembly language, he can at least read the generated
+code and look for possible errors. If an error is found, the
+same procedure as described above can be followed.</p>
+<a name="5.2. Phase two"></a>
+<h2>5.2. Phase two</h2>
+
+<p>The next phase is to generate a <b>ce</b> that produces
+relocatable object code.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>Remove the &lsquo;&lsquo;ce&rsquo;&rsquo;,
+&lsquo;&lsquo;ceg&rsquo;&rsquo;, and
+&lsquo;&lsquo;back&rsquo;&rsquo; directories.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="2%"></td>
+<td width="89%">
+
+<p>Write the &lsquo;&lsquo;as_table&rsquo;&rsquo;,
+&lsquo;&lsquo;as.h&rsquo;&rsquo;, and
+&lsquo;&lsquo;as.c&rsquo;&rsquo; files.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>3:</p>
+</td>
+<td width="2%"></td>
+<td width="9%">
+
+<p>type</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p><tt>install_ceg -obj</tt></p>
+
+<p>The option <tt>-obj</tt> means that
+&lsquo;&lsquo;back.a&rsquo;&rsquo; will contain a library
+for generating ACK.OUT(5ACK) object files, see appendix B.
+If the writer does not want to use the default
+&lsquo;&lsquo;back.a&rsquo;&rsquo;, the <tt>-obj</tt> flag
+must omitted and a &lsquo;&lsquo;back.a&rsquo;&rsquo; should
+be supplied that generates the generates object code in the
+desired format.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>4:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>Link a front end, &lsquo;&lsquo;ce.a&rsquo;&rsquo;, and
+&lsquo;&lsquo;back.a&rsquo;&rsquo; together resulting in a
+compiler that generates object code.</p>
+</td>
+</table>
+
+<p>The as_table is ready to be tested. If an error occurs,
+adapt the table. Then there are two ways to proceed:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="2%"></td>
+<td width="68%">
+
+<p>recompile the whole EM_table,</p>
+</td>
+<td width="20%">
+</td>
+</table>
+
+<p><tt>update_ceg ALL</tt></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="1%"></td>
+<td width="90%">
+
+<p>recompile just the few EM-instructions that contained
+the error,</p>
+</td>
+</table>
+
+<p><tt>update_ceg</tt> <b>C_instr</b></p>
+
+<p>where <b>C_instr</b> is an erroneous EM-instruction.
+This has to be done for every EM-instruction that contained
+the erroneous assembly instruction.</p>
+<a name="6. Acknowledgements"></a>
+<h2>6. Acknowledgements</h2>
+
+<p>We want to thank Henri Bal, Dick Grune, and Ceriel
+Jacobs for their valuable suggestions and the critical
+reading of this paper.</p>
+<a name="7. References"></a>
+<h2>7. References</h2>
+<a name="References"></a>
+<h2>References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>A.S. Tanenbaum, H. v. Staveren, E.G. Keizer, and J.W.
+Stevenson, &ldquo;APractical Toolkit For Making
+Compilers,&rdquo; <i>Communications of the ACM,</i> 26, 9
+(September 1983).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>A.S. Tanenbuum, H. v. Staveren, E.G. Keizer, and J.W.
+Stevenson, &ldquo;Description of a Machine Architecture for
+Use with Block Structured Languages,&rdquo; IR-81, Dept.
+Mathematics and Computer Science, Vrije Universiteit,
+Amsterdam (August 1983).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>ACK Documentation, <i>EM_CODE(3ACK),</i> Dept.
+Mathematics and Computer Science, Vrije Universiteit,
+Amsterdam.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>ACK Documentation, <i>ACK.OUT(5ACK),</i> Dept.
+Mathematics and Computer Science, Vrije Universiteit,
+Amsterdam.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>B.W. Kernighan and D.M. Ritchie, <i>The C Programming
+Language,</i> Prentice-Hall Inc., Englewood Cliffs, New
+Jersey (1978).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>6.</p>
+</td>
+<td width="5%"></td>
+<td width="90%">
+
+<p>ACK Documentation, <i>PRINT(3ACK),</i> Dept. Mathematics
+and Computer Science, Vrije Universiteit, Amsterdam.</p>
+</td>
+</table>
+<a name="Appendix A, the back -primitives"></a>
+<h2>Appendix A, the back -primitives</h2>
+
+<p>This appendix describes the routines available to
+generate relocatable object code. If the default back.a is
+used, the object code is in ACK.OUT(5ACK) format. In de
+default back.a, the names defined here are remapped to more
+hidden names, to avoid name conflicts with for instance
+names used in the front-end. This remapping is done in an
+include-file, &quot;back.h&quot;. A user-implemented back.a
+should do the same thing.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A1.</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Text and data generation; with ONE_BYTE b;
+TWO_BYTES w; FOUR_BYTES l; arith n;</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-106569.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A2.</small></p>
+</td>
+<td width="4%"></td>
+<td width="82%">
+
+<p><small>Relocation; with char *s; arith o; int
+r;</small></p>
+</td>
+<td width="7%">
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-1065610.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A3.</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Symbol table interaction; with int seg; char
+*s;</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-1065611.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A4.</small></p>
+</td>
+<td width="4%"></td>
+<td width="64%">
+
+<p><small>Start/end actions; with char *f;</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-1065612.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A5.</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Label generation routines; with int n; arith g;
+char *l; These routines all return a &quot;char *&quot; to a
+static area, which is overwritten at each call.</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-1065613.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>A6.</small></p>
+</td>
+<td width="4%"></td>
+<td width="84%">
+
+<p><small>Some miscellaneous routines, with char
+*l;</small></p>
+</td>
+<td width="5%">
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-1065614.png"></small></p>
+<a name="Appendix B, description of ACK-a.out library"></a>
+<h2>Appendix B, description of ACK-a.out library</h2>
+
+<p>The object file produced by <b>ce</b> is by default in
+ACK.OUT(5ACK) format. The object file is made up of one
+header, followed by four segment headers, followed by text,
+data, relocation information, symbol table, and the string
+area. The object file is tuned for the ACK-LED, so there are
+some special things done just before the object file is
+dumped. First, four relocation records are added which
+contain the names of the four segments. Second, all the
+local relocation is resolved. This is done by the function
+do_relo(). If there is a record belonging to a local name
+this address is relocated in the segment to which the record
+belongs. Besides doing the local relocation, do_relo()
+changes the &lsquo;&lsquo;nami&rsquo;&rsquo;-field of the
+local relocation records. This field receives the index of
+one of the four relocation records belonging to a segment.
+After the local relocation has been resolved the routine
+output_back() dumps the ACK object file.</p>
+
+<p>If a different a.out format is wanted, one can choose
+between three strategies:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="3%"></td>
+<td width="90%">
+
+<p>The most simple one is to use a conversion program,
+which converts the ACK a.out format to the wanted a.out
+format. This program exists for all most all machines on
+which ACK runs. However, not all conversion programs can
+generate relocation information. The disadvantage is that
+the compiler will become slower.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="3%"></td>
+<td width="90%">
+
+<p>A better solution is to change the functions
+output_back(), do_relo(), open_back(), and close_back() in
+such a way that they produce the wanted a.out format. This
+strategy saves a lot of I/O.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="4%">
+
+<p>3:</p>
+</td>
+<td width="3%"></td>
+<td width="90%">
+
+<p>If this still is not satisfactory, the
+<b>back</b>-primitives can be adapted to produce the wanted
+a.out format.</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

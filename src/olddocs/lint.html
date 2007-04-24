@@ -1,0 +1,3054 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:38 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Lint, a C Program Checker</title>
+</head>
+<body>
+
+<h1 align=center>Lint, a C Program Checker</h1>
+<a href="#Contents">Contents</a><br>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. Outline of the program">2. Outline of the program</a><br>
+<a href="#3. What lint checks">3. What lint checks</a><br>
+<a href="#3.1. Set, used and unused variables">3.1. Set, used and unused variables</a><br>
+<a href="#3.2. Flow of control">3.2. Flow of control</a><br>
+<a href="#3.3. Functions">3.3. Functions</a><br>
+<a href="#3.4. Undefined evaluation order">3.4. Undefined evaluation order</a><br>
+<a href="#3.5. Pointer alignment problems">3.5. Pointer alignment problems</a><br>
+<a href="#3.6. Libraries">3.6. Libraries</a><br>
+<a href="#4. How lint checks">4. How lint checks</a><br>
+<a href="#4.1. The first pass first pass data structure">4.1. The first pass first pass data structure</a><br>
+<a href="#4.1.1. The changes">4.1.1. The changes</a><br>
+<a href="#4.1.1.1. Idf descriptor">4.1.1.1. Idf descriptor</a><br>
+<a href="#4.1.1.2. Def descriptor">4.1.1.2. Def descriptor</a><br>
+<a href="#4.1.2. The additions">4.1.2. The additions</a><br>
+<a href="#4.1.2.1. Lint_stack_entry descriptor">4.1.2.1. Lint_stack_entry descriptor</a><br>
+<a href="#4.1.2.2. State descriptor">4.1.2.2. State descriptor</a><br>
+<a href="#4.1.2.3. Auto_def descriptor">4.1.2.3. Auto_def descriptor</a><br>
+<a href="#4.1.2.4. Expr_state descriptor">4.1.2.4. Expr_state descriptor</a><br>
+<a href="#4.1.2.5. Outdef descriptor">4.1.2.5. Outdef descriptor</a><br>
+<a href="#4.2. The first pass checking mechanism">4.2. The first pass checking mechanism</a><br>
+<a href="#4.2.1. Used and/or set variables">4.2.1. Used and/or set variables</a><br>
+<a href="#4.2.2. Undefined evaluation orders">4.2.2. Undefined evaluation orders</a><br>
+<a href="#4.2.3. Useless statements">4.2.3. Useless statements</a><br>
+<a href="#4.2.4. Not-reachable statements">4.2.4. Not-reachable statements</a><br>
+<a href="#4.2.5. Functions returning expressions and just returning">4.2.5. Functions returning expressions and just returning</a><br>
+<a href="#4.2.6. Output definitions for the second pass">4.2.6. Output definitions for the second pass</a><br>
+<a href="#4.2.7. Generating libraries">4.2.7. Generating libraries</a><br>
+<a href="#4.2.8. Interpreting the pseudocomments">4.2.8. Interpreting the pseudocomments</a><br>
+<a href="#4.3. The second pass data structure">4.3. The second pass data structure</a><br>
+<a href="#4.3.1. Inp_def descriptor">4.3.1. Inp_def descriptor</a><br>
+<a href="#4.4. The second pass checking mechanism">4.4. The second pass checking mechanism</a><br>
+<a href="#4.4.1. Read_defs()">4.4.1. Read_defs()</a><br>
+<a href="#4.4.2. Check()">4.4.2. Check()</a><br>
+<a href="#4.4.3. Check_usage()">4.4.3. Check_usage()</a><br>
+<a href="#5. How to make lint shut up">5. How to make lint shut up</a><br>
+<a href="#6. User options">6. User options</a><br>
+<a href="#7. Ideas for further development">7. Ideas for further development</a><br>
+<a href="#8. Testing the program">8. Testing the program</a><br>
+<a href="#9. References">9. References</a><br>
+<a href="#Appendix A">Appendix A</a><br>
+<a href="#The warnings">The warnings</a><br>
+<a href="#Pass one warnings">Pass one warnings</a><br>
+<a href="#Pass two warnings">Pass two warnings</a><br>
+<a href="#Appendix B">Appendix B</a><br>
+
+<hr>
+
+<p><b>Lint, a C Program Checker</b></p>
+
+<p align=center><small>Afstudeer verslag</small></p>
+
+<p align=center><small>18 mei 1988</small></p>
+
+<p align=center><small><i>Frans Kunst</i></small></p>
+
+<p align=center><small>Vrije Universiteit<br>
+Amsterdam<br>
+This document describes an implementation of a program
+which<br>
+does an extensive consistency and plausibility check on a
+set<br>
+of C program files.<br>
+This may lead to warnings which help the programmer to
+debug<br>
+the program, to remove useless code and to improve his
+style.<br>
+The program has been used to test itself and has found<br>
+bugs in sources of some heavily used code.</small></p>
+<a name="Contents"></a>
+<h2>Contents</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="24%">
+
+<p>Introduction</p>
+</td>
+<td width="65%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="44%">
+
+<p>Outline of the program</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="32%">
+
+<p>What lint checks</p>
+</td>
+<td width="57%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.1</p>
+</td>
+<td width="4%"></td>
+<td width="60%">
+
+<p>Set, used and unused variables</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.2</p>
+</td>
+<td width="4%"></td>
+<td width="30%">
+
+<p>Flow of control</p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.3</p>
+</td>
+<td width="4%"></td>
+<td width="18%">
+
+<p>Functions</p>
+</td>
+<td width="61%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.4</p>
+</td>
+<td width="4%"></td>
+<td width="52%">
+
+<p>Undefined evaluation order</p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.5</p>
+</td>
+<td width="4%"></td>
+<td width="52%">
+
+<p>Pointer alignment problems</p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>3.6</p>
+</td>
+<td width="4%"></td>
+<td width="18%">
+
+<p>Libraries</p>
+</td>
+<td width="61%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4.</p>
+</td>
+<td width="6%"></td>
+<td width="30%">
+
+<p>How lint checks</p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>4.1</p>
+</td>
+<td width="4%"></td>
+<td width="58%">
+
+<p>The first pass data structure</p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>4.2</p>
+</td>
+<td width="4%"></td>
+<td width="66%">
+
+<p>The first pass checking mechanism</p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>4.3</p>
+</td>
+<td width="4%"></td>
+<td width="60%">
+
+<p>The second pass data structure</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p>4.4</p>
+</td>
+<td width="4%"></td>
+<td width="68%">
+
+<p>The second pass checking mechanism</p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5.</p>
+</td>
+<td width="6%"></td>
+<td width="48%">
+
+<p>How to make lint shut up</p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>6.</p>
+</td>
+<td width="6%"></td>
+<td width="24%">
+
+<p>User options</p>
+</td>
+<td width="65%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>7.</p>
+</td>
+<td width="6%"></td>
+<td width="58%">
+
+<p>Ideas for further development</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>8.</p>
+</td>
+<td width="6%"></td>
+<td width="38%">
+
+<p>Testing the program</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>9.</p>
+</td>
+<td width="6%"></td>
+<td width="20%">
+
+<p>References</p>
+</td>
+<td width="69%">
+</td>
+</table>
+
+<p>Appendix A &minus; The warnings<br>
+Appendix B &minus; The Ten Commandments for C
+programmers</p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>C [1][2] is a dangerous programming language. The
+programmer is allowed to do almost anything, as long as the
+syntax of the program is correct. This has a reason. In this
+way it is possible to make a fast compiler which produces
+fast code. The compiler will be fast because it
+doesn&rsquo;t do much checking at compile time. The code is
+fast because the compiler doesn&rsquo;t generate run time
+checks. The programmer should protect himself against
+producing error prone code. One way to do that is to obey
+the <i>Ten Commandments for C programmers</i> [appendix B].
+This document describes an implementation of the <i>lint</i>
+program, as referred to in Commandment 1. It is a common
+error to run <i>lint</i> only after a few hours of debugging
+and some bug can&rsquo;t be found. <i>Lint</i> should be run
+when large pieces of new code are accepted by the compiler
+and as soon as bugs arise. Even for working programs it is
+useful to run <i>lint,</i> because it can find constructions
+that may lead to problems in the future.</p>
+<a name="2. Outline of the program"></a>
+<h2>2. Outline of the program</h2>
+
+<p>The program can be divided into three parts. A first
+pass, which parses C program files and outputs definitions,
+a second pass which processes the definitions and a driver,
+which feeds the set of files to the first pass and directs
+its output to the second pass. Both passes produce the
+warnings on standard error output, which are redirected to
+standard output by the driver.</p>
+
+<p>The first pass is based on an existing C front end,
+called <i>cem</i> [3]. <i>Cem</i> is part of the Amsterdam
+Compiler Kit (ACK), as described in [4].</p>
+
+<p>Most of the code of <i>cem</i> is left unchanged. This
+has several reasons. A lot of work, which is done by
+<i>cem</i> , must also be done by <i>lint.</i> E.g. the
+lexical analysis, the macro expansions, the parsing part and
+the semantical analysis. Only the code generation part is
+turned off. An advantage of this approach is, that a person
+who understands <i>cem</i> will not have to spend to much
+time in understanding <i>lint.</i></p>
+
+<p>All changes and extensions to <i>cem</i> can be turned
+off by not defining the compiler directive <tt>LINT.</tt>
+Compiling should then result in the original C compiler.</p>
+
+<p>The second pass is a much less complex program. It reads
+simple definitions generated by the first pass and checks
+their consistency. This second pass gives warnings about
+wrong usage of function arguments, their results and about
+external variables, which are used and defined in more than
+one file.</p>
+
+<p>The driver is a shell program, to be executed by the
+<small>UNIX</small> &reg; shell <i>sh.</i> It executes the
+two passes and let them communicate through a filter (sort).
+Actually it is simplex communication: the first pass only
+talks to the second pass through the filter.</p>
+<a name="3. What lint checks"></a>
+<h2>3. What lint checks</h2>
+<a name="3.1. Set, used and unused variables"></a>
+<h2>3.1. Set, used and unused variables</h2>
+
+<p>We make a distinction between two classes of variables:
+the class of automatic variables (including register
+variables) and the other variables. The other variables,
+global variables, static variables, formal parameters et
+cetera, are assumed to have a defined value. Global
+variables e.g., are initialized by the compiled code at
+zeros; formal parameters have a value which is equal to the
+value of the corresponding actual parameter. These variables
+can be used without explicitly initializing them. The
+initial value of automatic variables is undefined (if they
+are not initialized at declaration). These variables should
+be set before they are used. A variable is set by</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>an assignment (including an initialization)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>taking the address</p>
+</td>
+<td width="43%">
+</td>
+</table>
+
+<p>The first case is clear. The second case is plausible.
+It would take to much effort (if at all possible) to check
+if a variable is set through one of its aliases. Because
+<i>lint</i> should not warn about correct constructs, it
+does this conservative approach. Structures (and unions) can
+also be set by setting at least one member. Again a
+conservative approach. An array can be set by using its name
+(e.g. as actual parameter of a function call). <i>Lint</i>
+warns for usage as <i>rvalue</i> of automatic variables
+which are not set.</p>
+
+<p>A variable is used if</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="44%">
+
+<p>it is used as a <i>rvalue</i></p>
+</td>
+<td width="35%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>2</p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p>its address is taken</p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>Arrays and structures (and unions) are also used if one
+entry or one member respectively is used.</p>
+</td>
+</table>
+
+<p>When a variable is never used in the part of the program
+where it is visible, a warning is given. For variables
+declared at the beginning of a compound statement, a check
+is made at the end of this statement. For formal parameters
+a check is made at the end of the function definition. At
+the end of a file this is done for global static
+definitions. For external variables a warning can be given
+when all the files are parsed.</p>
+<a name="3.2. Flow of control"></a>
+<h2>3.2. Flow of control</h2>
+
+<p>The way <i>lint</i> keeps track of the flow of control
+is best explained by means of an example. See the program of
+figure 1.</p>
+<pre>   if (cond)
+        /* a statement which is executed if cond is true,
+         * the if-part
+         */
+   else
+        /* the else-part */
+
+
+</pre>
+
+<p align=center><i>figure 1.</i></p>
+
+<p>After evaluation of <tt>cond</tt>, two things can
+happen. The if-part is executed or the else-part is executed
+(but not both). Variables which are set in the if-part but
+not in the else-part, need not be set after the if
+statement, and vice versa. <i>Lint</i> detects this and
+assumes these variables after the if statement to be
+<i>maybe set</i>. (See figure 2.)</p>
+<pre>  int cond;
+
+
+  main()
+  {
+          int i, j;
+
+
+          if (cond) {
+                  i = 0;
+                  j = 0;
+          }
+          else
+                  use(i);  /* i may be used before set */
+          use(j);          /* maybe j used before set  */
+  }
+
+
+</pre>
+
+<p align=center><i>figure 2.</i></p>
+
+<p>If both the if-part and the else-part are never left
+(i.e. they contain an endless loop or a return statement),
+<i>lint</i> knows that the if statement is never left too.
+Besides the if statement, <i>lint</i> knows the possible
+flows of control in while, do, for and switch statements. It
+also detects some endless loops like <tt>while(1)</tt>,
+<tt>do ... while (1)</tt>, <tt>for (;;)</tt>.</p>
+<a name="3.3. Functions"></a>
+<h2>3.3. Functions</h2>
+
+<p>Most C compilers will not complain if a function is
+called with actual parameters of a different type than the
+function expects. Using a function in one file as a function
+of type <i>A</i> while defining it in another file as a
+function of type <i>B</i> is also allowed by most compilers.
+It needs no explanation that this can lead to serious
+trouble.</p>
+
+<p><i>Lint</i> checks if functions are called with the
+correct number of arguments, if the types of the actual
+parameters correspond with the types of the formal
+parameters and if function values are used in a way
+consistently with their declaration. When the result of a
+function is used, a check is made to see if the function
+returns a value. When a function returns a value,
+<i>lint</i> checks if the values of all calls of this
+function are used.</p>
+<a name="3.4. Undefined evaluation order"></a>
+<h2>3.4. Undefined evaluation order</h2>
+
+<p>The semantics of C do not define evaluation orders for
+some constructs, which, at first sight, seem well defined.
+The evaluation order of the expression <tt>a[i] = i++;</tt>
+e.g., is undefined. It can be translated to something with
+the semantics of <tt>a[i] = i; i++;</tt> which is what
+probably was meant, or <tt>a[i+1] = i; i++;.</tt> An easier
+example to explain why, is <tt>j = a[i] + i++;.</tt>
+&lsquo;<tt>+</tt>&rsquo; Is a so called <i>commutative</i>
+operator (with respect to the evaluation order) , as is
+&lsquo;<tt>=</tt>&rsquo;. This allows the compiler to choose
+which term to evaluate first. It is easy to see, that it
+makes a difference for the value of <tt>j,</tt> which order
+is chosen. The expression <tt>i++</tt> is said to have
+<i>side effects.</i> It affects the value of <tt>i.</tt>
+Because this value is used in the other term, this gives a
+conflict.</p>
+
+<p>A function call with reference to a variable as argument
+can have side effects to. Therefor, the evaluation order of
+<tt>i</tt> in the expression <tt>f(&amp;i) + i</tt> is
+undefined. When a function is called with an array as
+argument, this array can be affected by the function,
+because only the address of the array is passed to the
+function. (In Pascal a copy of the array is passed to the
+function if the formal parameter is not declared
+<i>var</i>.) So the evaluation order of <tt>a</tt> in the
+expression <tt>f(a) + a[0]</tt> is undefined. This one is
+not yet detected by <i>lint.</i></p>
+
+<p>Global variables can still cause trouble. If function
+<tt>f</tt> affects the global variable <tt>i,</tt> the value
+of the expression <tt>f() + i</tt> is undefined, because the
+evaluation order of <tt>i</tt> is undefined.</p>
+
+<p>The evaluation order of the arguments of a function is
+not defined, so the expression <tt>f(i, i++)</tt> gives a
+warning <tt>i evaluation order undefined.</tt></p>
+<a name="3.5. Pointer alignment problems"></a>
+<h2>3.5. Pointer alignment problems</h2>
+
+<p>For pointers to objects of different types there are
+different alignment restrictions. On some machines pointers
+to type char can have both odd and even values, whereas
+pointers to type int should contain an even address.
+<i>Lint</i> could warn for all pointer conversions. This is
+not what <i>lint</i> does. <i>Lint</i> assumes that some
+pointers are more restricted than others, and that pointers
+of some types can safely be converted to a pointer of a less
+restrictive type. The order of restriction is as follows
+(&lsquo;&le;&rsquo; means &lsquo;is not more restricted
+than&rsquo;) :</p>
+
+<p align=center>char &le; short &le; int &le; long</p>
+
+<p align=center>float &le; double</p>
+<a name="3.6. Libraries"></a>
+<h2>3.6. Libraries</h2>
+
+<p>C is a small language. As a matter of fact it has no i/o
+routines. To make it a useful language, C is supported by
+libraries. These libraries contain functions and variables
+that can be used by any C program. <i>Lint</i> knows some
+libraries too. At this moment it knows the
+&lsquo;-<i>lc</i>&rsquo;, &lsquo;-<i>lm</i>&rsquo; and
+&lsquo;-<i>lcurses</i>&rsquo; libraries. The
+&lsquo;-<i>lc</i>&rsquo; library, containing definitions for
+functions from chapter two and three of the
+<small>UNIX</small> programmers manual, is default.
+<i>Lint</i> warns for definitions of functions or global
+variables with the same name as a function definition in a
+library.</p>
+<a name="4. How lint checks"></a>
+<h2>4. How lint checks</h2>
+<a name="4.1. The first pass first pass data structure"></a>
+<h2>4.1. The first pass first pass data structure</h2>
+
+<p>The data structure of <i>cem</i> is changed a little and
+some structures have been added.</p>
+<a name="4.1.1. The changes"></a>
+<h2>4.1.1. The changes</h2>
+<a name="4.1.1.1. Idf descriptor"></a>
+<h2>4.1.1.1. Idf descriptor</h2>
+
+<p>A member <tt>id_line</tt> is added to the <i>idf</i>
+selector. This line number is used for some warnings.</p>
+<a name="4.1.1.2. Def descriptor"></a>
+<h2>4.1.1.2. Def descriptor</h2>
+
+<p>The <i>def</i> selector is extended with the members
+<tt>df_set</tt> df_line. The <tt>df_used</tt> member did
+exist already, but was only used for code generation. This
+usage is eliminated so it can be used by <i>lint.</i> The
+meaning of these members should be clear.</p>
+<a name="4.1.2. The additions"></a>
+<h2>4.1.2. The additions</h2>
+<a name="4.1.2.1. Lint_stack_entry descriptor"></a>
+<h2>4.1.2.1. Lint_stack_entry descriptor</h2>
+<pre>     struct lint_stack_entry {
+             struct lint_stack_entry *next;
+             struct lint_stack_entry *previous;
+             short ls_class;
+             int ls_level;
+             struct state *ls_current;
+             union {
+                     struct state *S_if;
+                     struct state *S_end;
+                     struct switch_states switch_state;
+             } ls_states;
+     };
+</pre>
+
+<p>Structure to simulate a stacking mechanism.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><tt>next</tt></p>
+</td>
+<td width="22%"></td>
+<td width="70%">
+
+<p>Pointer to the entry on top of this one.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>previous</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>Pointer to the entry beneath this one.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>ls_class</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>The class of statement this entry belongs to. Possible
+classes are <tt>IF</tt>, <tt>WHILE</tt>, <tt>DO</tt>,
+<tt>FOR</tt>, <tt>SWITCH</tt> and <tt>CASE</tt>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>ls_level</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>The level the corresponding statement is nested.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><tt>ls_current</tt></p>
+</td>
+<td width="10%"></td>
+<td width="70%">
+
+<p>A pointer to the state descriptor which describes the
+state of the function (the state of the automatic variables,
+if the next statement can be reached, et cetera) if control
+passes the flow of control to the part of the program
+currently parsed. The initialization of this state is as
+follows</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="39%"></td>
+<td width="60%">
+<p>If <tt>ls_class</tt> in [<tt>IF</tt>, <tt>SWITCH</tt>]
+the state after parsing the conditional expression.</p>
+<!-- INDENTATION -->
+<p>If <tt>ls_class</tt> in [<tt>WHILE</tt>, <tt>FOR</tt>]
+the state after parsing the code between the brackets.</p>
+<!-- INDENTATION -->
+<p>If <tt>ls_class</tt> in [<tt>DO</tt>, <tt>CASE</tt>] the
+state at entrance of the statement after the <tt>DO</tt> or
+<tt>CASE</tt> token.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><tt>ls_states</tt></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>Union of pointers to state descriptors containing
+different information for different values of
+<tt>ls_class</tt>.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="39%"></td>
+<td width="60%">
+<p>If <tt>ls_class</tt> is <tt>IF</tt> and in case of
+parsing an else part, <tt>ls_states.S_if</tt> points to the
+state that is reached after the if part.</p>
+<!-- INDENTATION -->
+<p>If <tt>ls_class</tt> in [<tt>WHILE</tt>, <tt>FOR</tt>,
+<tt>DO</tt>] then <tt>ls_states.S_end</tt> contains a
+conservative description of the state of the program after
+&lsquo;jumping&rsquo; to the end of the statement after the
+<tt>WHILE</tt>, <tt>DO</tt> or <tt>FOR</tt> token. I.e. the
+state at reaching a break (not inside a switch) or continue
+statement.</p>
+<!-- INDENTATION -->
+<p>If ls_class is <tt>SWITCH</tt>, <tt>ls_states</tt> is
+used as a structure</p>
+<!-- INDENTATION -->
+<pre>     struct switch_states {
+             struct state S_case;
+             struct state S_break;
+     };
+</pre>
+<!-- INDENTATION -->
+<p>containing two pointers to state descriptors.
+<tt>ls_states.switch_state.S_case</tt> contains a
+conservative description of the state of the program after
+<tt>case ... case</tt> parts are parsed.
+<tt>ls_states.switch_state.S_break</tt> the state after
+parsing all the <tt>case ... break</tt> parts. The reason
+for <tt>ls_states.switch_state.default_met</tt> should be
+self-explanatory.</p>
+<!-- INDENTATION -->
+<p>In case <tt>ls_class</tt> is <tt>CASE</tt>,
+<tt>ls_states</tt> is not used.</p>
+</td>
+</table>
+<a name="4.1.2.2. State descriptor"></a>
+<h2>4.1.2.2. State descriptor</h2>
+<pre>           struct state {
+                   struct state *next;
+                   struct auto_def *st_auto_list;
+                   int st_nrchd;
+                   int st_warned;
+           };
+</pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>st_auto_list</p>
+</td>
+<td width="6%"></td>
+<td width="70%">
+
+<p>Pointer to a list of definitions of the automatic
+variables whose scope contain the current position in the
+program.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>st_nrchd</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>True if the next statement can&rsquo;t be reached.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><tt>st_warned</tt></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>True if a warning has already been given.</p>
+</td>
+</table>
+<a name="4.1.2.3. Auto_def descriptor"></a>
+<h2>4.1.2.3. Auto_def descriptor</h2>
+<pre>               struct auto_def {
+                       struct auto_def *next;
+                       struct idf *ad_idf;
+                       struct def *ad_def;
+                       int ad_used;
+                       int ad_set;
+                       int ad_maybe_set;
+               };
+</pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>next</p>
+</td>
+<td width="22%"></td>
+<td width="70%">
+
+<p>Points to the next auto_definition of the list.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><tt>ad_idf</tt></p>
+</td>
+<td width="18%"></td>
+<td width="70%">
+
+<p>Pointer to the idf descriptor associated with this
+auto_definition.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><tt>ad_def</tt></p>
+</td>
+<td width="18%"></td>
+<td width="50%">
+
+<p>Ditto for def descriptor.</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><tt>ad_used</tt></p>
+</td>
+<td width="16%"></td>
+<td width="70%">
+
+<p>Indicates the state of this automatic variable. Ditto
+for <tt>ad_set</tt> and <tt>ad_maybe_set</tt>. Only one of
+<tt>ad_set</tt> and <tt>ad_maybe_set</tt> may be true.</p>
+</td>
+</table>
+<a name="4.1.2.4. Expr_state descriptor"></a>
+<h2>4.1.2.4. Expr_state descriptor</h2>
+<pre>              struct expr_state {
+                      struct expr_state *next;
+                      struct idf *es_idf;
+                      arith es_offset;
+                      int es_used;
+                      int es_set;
+              };
+</pre>
+
+<p>This structure is introduced to keep track of which
+variables, array entries and structure members (union
+members) are set and/or used in evaluating an
+expression.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><tt>next</tt></p>
+</td>
+<td width="22%"></td>
+<td width="70%">
+
+<p>Pointer to the next descriptor of this list.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><tt>es_idf</tt></p>
+</td>
+<td width="18%"></td>
+<td width="70%">
+
+<p>Pointer to the idf descriptor this descriptor belongs
+to.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><tt>es_offset</tt></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>In case of an array, a structure or union, this member
+contains the offset the compiler would generate for locating
+the array entry or structure/union member.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><tt>es_used</tt></p>
+</td>
+<td width="16%"></td>
+<td width="70%">
+
+<p>True if the indicated memory location is used in
+evaluating the expression.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><tt>es_set</tt></p>
+</td>
+<td width="18%"></td>
+<td width="28%">
+
+<p>Ditto for set.</p>
+</td>
+<td width="41%">
+</td>
+</table>
+<a name="4.1.2.5. Outdef descriptor"></a>
+<h2>4.1.2.5. Outdef descriptor</h2>
+<pre>             struct outdef {
+                     int od_class;
+                     char *od_name;
+                     char *od_file;
+                     unsigned int od_line;
+                     int od_nrargs;
+                     struct tp_entry *od_entry;
+                     int od_returns;
+                     struct type *od_type;
+             };
+</pre>
+
+<p>As structures of this type are not allocated dynamically
+by a storage allocator, it contains no next member. An
+outdef can be given to to <tt>output_def()</tt> to be passed
+to the second pass. Basically this forms the interface with
+the second pass.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>od_class</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>Indicates what kind of definition it is. Possible
+classes are <tt>EFDF</tt>, <tt>EVDF</tt>, <tt>SFDF</tt>,
+<tt>SVDF</tt>, <tt>LFDF</tt>, <tt>LVDF</tt>, <tt>EFDC</tt>,
+<tt>EVDC</tt>, <tt>IFDC</tt>, <tt>FC</tt>, <tt>VU</tt>.
+([<tt>E</tt>xternal, <tt>S</tt>tatic, <tt>L</tt>ibrary,
+<tt>I</tt>mplicit] [<tt>F</tt>unction, <tt>V</tt>ariable]
+[<tt>D</tt>e<tt>F</tt>inition,
+<tt>D</tt>e<tt>C</tt>laration, <tt>C</tt>all,
+<tt>U</tt>sage])</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><tt>od_name</tt></p>
+</td>
+<td width="16%"></td>
+<td width="70%">
+
+<p>The name of the function or variable.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><tt>od_file</tt></p>
+</td>
+<td width="16%"></td>
+<td width="70%">
+
+<p>The file this definition comes from.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><tt>od_nrargs</tt></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>If <tt>od_class</tt> is one of <tt>EFDF</tt>,
+<tt>SFDF</tt> or <tt>LFDF</tt>, this member contains the
+number of arguments this function has. If the function was
+preceded by the pseudocomment <tt>/* VARARGS */</tt>,
+<tt>od_nrargs</tt> gets the value <tt>-1-n</tt>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><tt>od_entry</tt></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p>A pointer to a list of <tt>od_nrargs</tt> cells, each
+containing a pointer to the type descriptor of an argument.
+(<tt>-1-od_nrargs</tt> cells if <tt>od_nrargs &lt; 0</tt>.)
+<tt>Tp_entry</tt> is defined as</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="70%">
+<pre>struct tp_entry {
+        struct tp_entry *next; /* pointer to next cell */
+        struct type *te_type;  /* an argument type     */
+};
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>od_returns</p>
+</td>
+<td width="10%"></td>
+<td width="70%">
+
+<p>For classes <tt>EFDF</tt>, <tt>SFDF</tt> and
+<tt>LFDF</tt> this member tells if the function returns an
+expression or not. In case <tt>od_class</tt> is <tt>FC</tt>
+it is true if the value of the function is used, false
+otherwise. For other classes this member is not used.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><tt>od_type</tt></p>
+</td>
+<td width="16%"></td>
+<td width="70%">
+
+<p>A pointer to the type of the function or variable
+defined or declared. Not used for classes <tt>FC</tt> and
+<tt>VU</tt>.</p>
+</td>
+</table>
+<a name="4.2. The first pass checking mechanism"></a>
+<h2>4.2. The first pass checking mechanism</h2>
+
+<p>In the description of the implementation of the pass one
+warnings, it is assumed that the reader is familiar with the
+<i>LLgen</i> parser generator, as described in [6].</p>
+<a name="4.2.1. Used and/or set variables"></a>
+<h2>4.2.1. Used and/or set variables</h2>
+
+<p>To be able to give warnings like <tt>%s used before
+set</tt> and <tt>%s set but not used in function %s</tt> ,
+there needs to be a way to keep track of the state of a
+variable. A first approach to do this was by adding two
+fields to the <i>def</i> selector: <tt>df_set</tt> and
+<tt>df_used.</tt> While parsing the program, each time an
+expression was met this expression was analyzed and the
+fields of each <i>def</i> selector were possibly set during
+this analysis. This analysis was done by passing each
+expression to a function <tt>lint_expr</tt> , which walks
+the expression tree in a way similar to the function
+<tt>EVAL</tt> in the file <i>eval.c</i> of the original
+<i>cem</i> compiler. This approach has one big disadvantage:
+it is impossible to keep track of the flow of control of the
+program. No warning will be given for the program fragment
+of figure 3.</p>
+<pre>  func()
+  {
+          int i;
+
+
+          if (cond)
+                  i = 0;
+          else
+                  use(i);  /* i may be used before set */
+  }
+
+
+</pre>
+
+<p align=center>figure 3.</p>
+
+<p>It is clear that it would be nice having <i>lint</i>
+warn for this construction.</p>
+
+<p>This was done in the second approach. When there was a
+choice between two statements, each statement was parsed
+with its own copy of the state at entrance of the
+<i>choosing statement.</i> A state consisted of the state of
+the automatic variables (including register variables). In
+addition to the possibilities of being used and set, a
+variable could be <i>maybe set</i>. These states were passed
+between the statement parsing routines using the
+<i>LLgen</i> parameter mechanism. At the end of a choosing
+statement, the two states were merged into one state, which
+became the state after this statement. The construction of
+figure 4 was now detected, but switch statements still gave
+problems and continue and break statements were not
+understood. The main problem of a switch statement is, that
+the closing bracket (&lsquo;<tt>)</tt>&rsquo;) has to be
+followed by a <i>statement</i>. The syntax shows no choice
+of statements, as is the case with if, while, do and for
+statements. Using the <i>LLgen</i> parameter mechanism, it
+is not a trivial task to parse the different case parts of a
+switch statement with the same initial state and to merge
+the results into one state. This observation led to the
+third and final approach, as described next.</p>
+
+<p>Instead of passing the state of the program through the
+statements parsing routines using the <i>LLgen</i>
+parameters, a special stack is introduced, the
+<i>lint_stack.</i> When a choosing statement is parsed, an
+entry is pushed on the stack containing the information that
+is needed to keep track of the state of the program. Each
+entry contains a description of the <i>current</i> state of
+the program and a field that indicates what part of the
+program the parser is currently parsing. For all the
+possible choosing statements I describe the actions to be
+taken.</p>
+
+<p>At entrance of an if statement, an entry is pushed on
+the stack with the current state being a copy of the current
+state of the stack element one below. The class of this
+entry is <tt>IF</tt>. At reaching the else part, the current
+state is moved to another place in this stack entry (to
+<tt>S_IF</tt>), and a new copy of the current state at
+entrance of this if statement is made. At the end of the
+else part, the two states are merged into one state, the new
+current state, and the <tt>IF</tt> entry is popped from the
+stack. If there is no else part, then the state that is
+reached after parsing the if part is merged with the current
+state at entrance of the if statement into the new current
+state.</p>
+
+<p>At entrance of a while statement a <tt>WHILE</tt> entry
+is pushed on the stack containing a copy of the current
+state. If a continue or break statement is met in the while
+statement, the state at reaching this continue or break
+statement is merged with a special state in the
+<tt>WHILE</tt> entry, called <tt>S_END</tt>. (If
+<tt>S_END</tt> did not yet contain a state, the state is
+copied to <tt>S_END</tt>.) At the end of the while statement
+this <tt>S_END</tt> is merged with the current state, which
+result is merged with the state at entrance of the while
+statement into the new current state.</p>
+
+<p>A for statement is treated similarly. A do statement is
+treated the same way too, except that <tt>S_END</tt>
+isn&rsquo;t merged with the state at entrance of the do
+statement, but becomes the new current state.</p>
+
+<p>For switch statements a <tt>SWITCH</tt> entry is pushed
+on the stack. Apart from the current state, this entry
+contains two other states, <tt>S_BREAK</tt> and
+<tt>S_CASE</tt>. <tt>S_BREAK</tt> initially contains no
+state, <tt>S_CASE</tt> initially contains a copy of the
+current state at entrance of the switch statement. After
+parsing a case label, a <tt>CASE</tt> entry is pushed on the
+stack, containing a copy of the current state. If, after
+zero or more statements, we meet another case label, the
+state at reaching this case label is merged with
+<tt>S_CASE</tt> of the <tt>SWITCH</tt> entry below and a new
+copy of the state at entrance of the switch statement is put
+in the <tt>CASE</tt> entry. If we meet a break statement, we
+merge the current state with <tt>S_BREAK</tt> of the
+<tt>SWITCH</tt> entry below and pop the <tt>CASE</tt> entry.
+In addition to this, the occurrence of a default statement
+inside the switch statement is recorded in the
+<tt>SWITCH</tt> entry. At the end of the switch statement we
+check if we have met a default statement. If not,
+<tt>S_BREAK</tt> is merged with the current state at
+entrance of the switch statement. (Because it is possible
+that no case label will be chosen.) Next the <tt>S_CASE</tt>
+is &lsquo;special_merged&rsquo; with <tt>S_BREAK</tt> into
+the new current state. For more details about these merge
+functions see the sources.</p>
+
+<p>With the approach described above, <i>lint</i> is aware
+of the flow of control in the program. There still are some
+doubtful constructions <i>lint</i> will not detect and there
+are some constructions (although rare) for which <i>lint</i>
+gives an incorrect warning (see figure 4).</p>
+<pre>       {
+               int i;
+
+
+               for (;;) {
+                       if (cond) {
+                               i = 0;
+                               break;
+                       }
+               }
+               use(i);
+               /* lint warns: maybe i used before set
+                * although  the  fragment  is correct
+                */
+       }
+
+
+</pre>
+
+<p align=center><i>figure 4.</i></p>
+
+<p>A nice advantage of the method is, that the parser stays
+clear, i.e. it isn&rsquo;t extended with extra parameters
+which must pass the states. In this way the parser still is
+very readable and we have a nice interface with <i>lint</i>
+using function calls.</p>
+<a name="4.2.2. Undefined evaluation orders"></a>
+<h2>4.2.2. Undefined evaluation orders</h2>
+
+<p>In expressions the values of some variables are used and
+some variables are set. Of course, the same holds for
+subexpressions. The compiler is allowed to choose the order
+of evaluation of subexpressions involving a commutative and
+associative operator (<tt>*</tt>, <tt>+</tt>,
+<tt>&amp;</tt>, <tt>|</tt>, <tt>^</tt>), the comma in a
+parameter list or an assignment operator. In section 3.4 it
+is made clear that this will lead to statements with
+ambiguous semantics.</p>
+
+<p>The way these constructs are detected is rather straight
+forward. The function which parses an expression
+(<tt>lint_expr</tt>) returns a linked list containing
+information telling which variables are set and which
+variables are used. A variable is indicated by its
+<i>idf</i> descriptor and an <i>offset.</i> This offset is
+needed for discriminating entries of the same array and
+members of the same structure or union, so it is possible to
+warn about the statement <tt>a[b[0]] = b[0]++;.</tt> When
+<tt>lint_expr</tt> meets a commutative operator (with
+respect to the evaluation order), it calls itself
+recursively with the operands of the operator as expression.
+The returned results are checked for undefined evaluation
+orders and are put together. This is done by the function
+<tt>check_and_merge</tt>.</p>
+<a name="4.2.3. Useless statements"></a>
+<h2>4.2.3. Useless statements</h2>
+
+<p>Statements which compute a value that is not used, are
+said to have a <i>null effect</i>. Examples are <tt>x = 2,
+3;</tt>, <tt>f() + g();</tt> and <tt>*p++;</tt>. (<tt>*</tt>
+and <tt>++</tt> have the same precedence and associate from
+right to left.)</p>
+
+<p>A conditional expression computes a value too. If this
+value isn&rsquo;t used, it is better to use an if-else
+statement. So, if <i>lint</i> sees</p>
+<pre>                       b ? f() : g();
+</pre>
+
+<p>it warns <tt>use if-else construction</tt>.</p>
+<a name="4.2.4. Not-reachable statements"></a>
+<h2>4.2.4. Not-reachable statements</h2>
+
+<p>The algorithm to detect not-reachable statements
+(including not reachable initializations) is as follows.
+Statements after a label and a case statement and the
+compound statement of a function are always reachable. Other
+statements are not-reachable after:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a goto statement</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a return statement</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a break statement</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a continue statement</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a switch statement</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>an endless loop (a while, do or for loop with a
+conditional which always evaluates to true and without a
+break statement)</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>an if-else statement of which both if part and else part
+end up in a not-reachable state</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>a switch statement of which all <tt>case ... break</tt>
+parts (including a <tt>default ... break</tt> part) end up
+in a not-reachable state</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>the pseudocomment <tt>/* NOTREACHED */</tt></p>
+</td>
+</table>
+
+<p>The algorithm is easily implemented using the
+<tt>st_nrchd</tt> selector in the <i>state</i> descriptor.
+The <tt>st_warned</tt> selector is used to prevent
+superfluous warnings. To detect an endless loop, after a
+while (&lt;true&gt;), for (..;&lt;true&gt;;..) and do part
+the current state of the stack entry beneath the top one is
+set to not reached. If, in the statement following, a break
+statement is met, this same state is set to reached. If the
+while (&lt;cond&gt;) part of the do statement is met, this
+state is set to reached if &lt;cond&gt; doesn&rsquo;t
+evaluates to true. The detection of not-reachable statements
+after a switch statement is done in a similar way. In
+addition it is checked if a default statement isn&rsquo;t
+met, in which case the statement after the switch statement
+can be reached. The warning <tt>statement not reached</tt>
+is not given for compound statements. If <i>lint</i> did, it
+would warn for the compound statement in a switch statement,
+which would be incorrect.</p>
+
+<p>Not-reachable statements are still interpreted by
+<i>lint.</i> I.e. when <i>lint</i> warns that some statement
+can&rsquo;t be reached, it assumes this is not what the
+programmer really wants and it ignores this fact. In this
+way a lot of useless warnings are prevented in the case of a
+not-reachable statement. See figure 5.</p>
+<pre> {
+         int i;
+
+
+         for (;;) {
+                 /* A loop in which the programmer
+                  * forgot to introduce a conditional
+                  * break statement.
+                  * Suppose i is not used in this part.
+                  */
+         }
+         /* some more code in which i is used */
+ }
+ /* The warning &quot;statement not reached&quot; highlights the bug.
+  * An additional warning &quot;i unused in function %s&quot; is
+  * formally correct, but doesn&rsquo;t provide the programmer
+  * with useful information.
+  */
+
+
+</pre>
+
+<p align=center><i>figure 5.</i></p>
+<a name="4.2.5. Functions returning expressions and just returning"></a>
+<h2>4.2.5. Functions returning expressions and just returning</h2>
+
+<p>Each time a return statement is met, <i>lint</i> checks
+if an expression is returned or not. If a function has a
+return with expression and a return without expression,
+<i>lint</i> warns <tt>function %s has return(e); and
+return;.</tt> If the flow of control can <i>fall through</i>
+the end of the compound statement of a function, this
+indicates an implicit return statement without an
+expression. If the end of the compound statement of the
+function can be reached, <i>lint</i> introduces this
+implicit return statement without expression.</p>
+
+<p>Sometimes the programmer knows for sure that all case
+parts inside a switch statement include all possible cases,
+so he doesn&rsquo;t introduce a default statement. This can
+lead to an incorrect warning. Figure 6 shows how to prevent
+this warning.</p>
+<pre>            func()
+            {
+                    switch (cond) {
+                    case 0: return(e0);
+                    case 1: return(e1);
+                    }
+                    /* NOTREACHED */
+            }
+/* no warning: &quot;function func has return(e); and return; */
+
+
+</pre>
+
+<p align=center><i>figure 6.</i></p>
+
+<p>The pseudocomment <tt>/* NOTREACHED */</tt> can also be
+used to tell <i>lint</i> that some function doesn&rsquo;t
+return. See figure 7.</p>
+<pre>  func()
+  {
+          switch (cond) {
+          case 0: return(e0);
+          case 1: return(e1);
+          default: error();   /* calls exit or abort */
+                   /* NOTREACHED */
+          }
+  }
+/* no warning: &quot;function func has return(e); and return;&quot; */
+
+
+</pre>
+
+<p align=center>figure 7.</p>
+<a name="4.2.6. Output definitions for the second pass"></a>
+<h2>4.2.6. Output definitions for the second pass</h2>
+
+<p>The first pass can only process one program file. To be
+able to process a program that spreads over more than one
+file, the first pass outputs definitions that are processed
+by a second pass. The format of such a definition is
+different for different classes:</p>
+
+<p>For class in {EFDF, SFDF, LFDF}</p>
+
+
+<p align=center>&lt;name&gt;:&lt;class&gt;:&lt;file&gt;:&lt;line&gt;:&lt;nr
+of args&gt;:&lt;type of args&gt;:&lt;returns
+value&gt;:&lt;type&gt;</p>
+
+<p>A negative <i>nr of args</i> indicates that the function
+can be called with a varying number of arguments.</p>
+
+<p>For class = FC</p>
+
+
+<p align=center>&lt;name&gt;:&lt;class&gt;:&lt;file&gt;:&lt;line&gt;:&lt;value
+is used&gt;:&lt;type&gt;</p>
+
+<p>The <i>value is used</i> part can have three meanings:
+the value of the function is ignored; the value of the
+function is used; the value of the function is cast to type
+<i>void</i>.</p>
+
+<p>For other classes</p>
+
+
+<p align=center>&lt;name&gt;:&lt;class&gt;:&lt;file&gt;:&lt;line&gt;:&lt;type&gt;</p>
+
+<p>Definitions of class VU (Variable Usage) are only output
+for <i>used</i> global variables.</p>
+
+<p>Structure and union types that are output to the
+intermediate file are simplified. (The following occurrences
+of <i>structure</i> should be read as <i>structure or
+union</i> and <i>struct</i> as <i>struct or union</i>.)
+Structures that are identified by a <i>structure tag</i> are
+output to the intermediate file as <tt>struct
+&lt;tag&gt;</tt>. Structures without a structure tag are
+output as <tt>struct {&lt;mems&gt;}</tt> with
+<tt>&lt;mems&gt;</tt> a semicolon-separated list of types of
+the members of this structure. An alternative way would be
+to output the complete structure definition. However, this
+gives practical problems. It is allowed to define some
+object of a structure type with a structure tag, without
+this structure being defined at that place. The first
+approach leaves errors, such as in figure 8, undetected.</p>
+<pre>       &quot;a.c&quot;                           &quot;b.c&quot;
+
+
+   struct str {                    struct str {
+           float f;                        int i;
+   } s;                            };
+
+
+   main()                          func(s)
+   {                                       struct str s;
+           func(s);                {}
+   }
+
+
+</pre>
+
+<p align=center>figure 8.</p>
+
+<p>To be able to detect these errors, the first pass should
+also output definitions of structure tags. The example of
+figure 8 would then get a warning like <tt>structure str
+defined inconsistently</tt></p>
+
+<p>More information on these definitions in section 4.3 and
+4.4.</p>
+<a name="4.2.7. Generating libraries"></a>
+<h2>4.2.7. Generating libraries</h2>
+
+<p><i>Lint</i> knows the library &lsquo;-lc&rsquo;,
+&lsquo;-lm&rsquo; and &lsquo;-lcurses&rsquo;. If a program
+uses some other library, it is possible to generate a
+corresponding <i>lint library</i>. To do this, precede all
+the C source files of this library by the pseudocomment
+<tt>/* LINTLIBRARY */</tt>. Then feed these files one by one
+to the first pass of <i>lint</i> collecting the standard
+output in a file and ignoring the warnings. The resulting
+file contains library definitions of the functions and
+external variables defined in the library sources, and not
+more than that. If this file is called
+&lsquo;llib-l<i>name</i>.ln <i>lint</i> can be told to
+search the library by passing it as argument in the command
+line &lsquo;-llib-l<i>name</i>.ln. The implementation of
+this feature is simple.</p>
+
+<p>As soon as the pseudocomment <tt>/* LINTLIBRARY */</tt>
+is met, only function and variable definitions are output
+with class LFDF and LVDF respectively. Other definitions,
+which otherwise would have been output, are discarded.</p>
+
+<p>Instead of generating a special lint library file, one
+can make a file containing the library definitions and
+starting with <tt>/* LINTLIBRARY */</tt>. This file can then
+be passed to <i>lint</i> just by its name. This method
+isn&rsquo;t as efficient as the first one.</p>
+<a name="4.2.8. Interpreting the pseudocomments"></a>
+<h2>4.2.8. Interpreting the pseudocomments</h2>
+
+<p>The interpretation of the pseudocomments is done by the
+lexical analyzer, because this part of the program already
+took care of the comments. At first sight this seems very
+easy: as soon as some pseudocomment is met, raise the
+corresponding flag. Unfortunately this doesn&rsquo;t work.
+The lexical analyzer is a <i>one token look ahead
+scanner</i>. This causes the above procedure to raise the
+flags one token too soon. A solution to get the right effect
+is to reserve two flags per pseudocomment. The first is set
+as soon as the corresponding pseudocomment is scanned. At
+the returning of each token this flag is moved to the second
+flag. The delay in this way achieved makes the
+pseudocomments have effect at the correct place.</p>
+<a name="4.3. The second pass data structure"></a>
+<h2>4.3. The second pass data structure</h2>
+<a name="4.3.1. Inp_def descriptor"></a>
+<h2>4.3.1. Inp_def descriptor</h2>
+<pre>             struct inp_def {
+                     struct inp_def *next;
+                     int id_class;
+                     char id_name[NAMESIZE];
+                     char id_file[FNAMESIZE];
+                     unsigned int id_line;
+                     int id_nrargs;
+                     char argtps[ARGSTPSSIZE];
+                     int id_returns;
+                     char id_type[TYPESIZE];
+                     int id_called;
+                     int id_used;
+                     int id_ignored;
+                     int id_voided;
+             };
+</pre>
+
+<p>This description is almost similar to the <i>outdef</i>
+descriptor as described in 4.1.2.5. There are some
+differences too.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><tt>next</tt></p>
+</td>
+<td width="22%"></td>
+<td width="70%">
+
+<p>As structures of this type are allocated dynamically,
+this field is added so the same memory allocator as used in
+the first pass can be used.</p>
+</td>
+</table>
+
+<p><tt>id_called<br>
+id_used<br>
+id_ignored</tt></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><tt>id_voided</tt></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p>Some additional fields only used for function
+definitions.Their meaning should be clear.</p>
+</td>
+</table>
+
+<p>The other fields have the same meaning as the
+corresponding fields in the <i>outdef</i> descriptor. Some
+attention should be paid to <tt>id_argtps</tt> and
+<tt>id_type</tt>. These members have type <tt>array of
+char</tt>, in contrast to their counterparts in the
+<i>outdef</i> descriptor. The only operation performed on
+types is a check on equality. Types are output by the first
+pass as a string describing the type. The type of <tt>i</tt>
+in <tt>int *i();</tt> e.g. is output as <tt>int *()</tt>.
+Such a string is best put in an <tt>array of char</tt> to be
+compared easily.</p>
+<a name="4.4. The second pass checking mechanism"></a>
+<h2>4.4. The second pass checking mechanism</h2>
+
+<p>After all the definitions that are output by the first
+pass are sorted by name, the definitions belonging to one
+name are ordered as follows.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>external definitions</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>static definitions</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>library definitions</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>declarations</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>function calls</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p>-</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="78%">
+<p>variable usages</p>
+</td>
+</table>
+
+<p>The main program of the second pass is easily explained.
+For all different names, do the following. First read the
+definitions. If there is more than one definition, check for
+conflicts. Then read the declarations, function calls and
+variable usages and check them against the definitions.
+After having processed all the declarations, function calls
+and variable usages, check the definitions to see if they
+are used correctly. The next three paragraphs will explain
+the three most important functions of the program.</p>
+<a name="4.4.1. Read_defs()"></a>
+<h2>4.4.1. Read_defs()</h2>
+
+<p>This function reads all definitions belonging to the
+same name. Only one external definition is allowed, so if
+there are more, a warning is given. In different files it is
+allowed to define static functions or variables with the
+same name. So if a static function is read,
+<tt>read_defs</tt> checks if there isn&rsquo;t already an
+external definition, and if not it puts the static
+definition in the list of static definitions, to be used
+later. If no external or static definitions are met, a
+library definition is taken as definition. If a function or
+a variable is defined with the same name as a function or a
+variable in a library (which is allowed) <i>lint</i> gives a
+warning. Of course it is also possible that there is no
+definition at all. In that case <tt>check</tt> will
+warn.</p>
+<a name="4.4.2. Check()"></a>
+<h2>4.4.2. Check()</h2>
+
+<p><tt>Check</tt> verifies declarations, function calls and
+variable usages against the definitions. For each of these
+entries the corresponding definition is looked up. As there
+may be more than one static definition, first a static
+definition from the same file as the entry is searched. If
+not present, the external definition (which may be a library
+definition) is taken as definition. If no definition can be
+found and the current entry is an external declaration,
+<i>lint</i> warns. However in the case of an implicit
+function declaration <i>lint</i> will not warn, because we
+will get a warning <tt>%s used but not defined</tt> later
+on. Next a check is done if the declarations are consistent
+with their definitions. After the declarations, the function
+calls and variable usages are verified against their
+corresponding definitions. If no definition exists,
+<i>lint</i> warns. Else the field <tt>id_called</tt> is set
+to 1. (For variable definitions this should be interpreted
+as <i>used</i>.) For variable usages this will be all. If we
+are processing a function call we also check the number and
+types of the arguments and we warn for function values which
+are used from functions that don&rsquo;t return a value. For
+each function call we administrate if a function value is
+used, ignored or voided.</p>
+<a name="4.4.3. Check_usage()"></a>
+<h2>4.4.3. Check_usage()</h2>
+
+<p>Checks if the external definition and static definitions
+are used correctly. If a function or variable is defined but
+never used, <i>lint</i> warns, except for library
+definitions. Functions, which return a value but whose value
+is always or sometimes ignored, get a warning. (A function
+value which is voided (cast to void) is not ignored, but it
+isn&rsquo;t used either.)</p>
+<a name="5. How to make lint shut up"></a>
+<h2>5. How to make lint shut up</h2>
+
+<p>It can be very annoying having <i>lint</i> warn about
+questionable constructs of which the programmer already is
+aware. There should be a mechanism to give <i>lint</i> some
+extra information in the source code. This could be done by
+introducing some special keywords, which would have a
+special meaning to <i>lint.</i> This is a bad solution,
+because these keywords would cause existing C compilers not
+to work on these programs. A neater solution is to invent
+some comments having a special meaning to <i>lint.</i> We
+call these comments <i>pseudocomments.</i> The
+pseudocomments have no meaning to existing C compilers, so
+compilers will not have to be rewritten for C programs
+containing the previously proposed special keywords. The
+following pseudocomments are recognized by <i>lint.</i></p>
+
+<p><tt>/* VARARGS</tt><i>n</i> <tt>*/</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The next function can be called with a variable number of
+arguments. Only check the first <i>n</i> arguments. The
+<i>n</i> must follow the word <tt>VARARGS</tt> immediately.
+This pseudocomment is useful for functions like e.g. printf.
+(The definition of the function printf should be preceded by
+<tt>/* VARARGS1 */</tt>.)</p></td>
+</table>
+
+<p><tt>/* VARARGS */</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Means the same as <tt>/* VARARGS0 */</tt>.</p></td>
+</table>
+
+<p><tt>/* ARGSUSED */</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Don&rsquo;t complain about unused arguments in the next
+function. When we are developing a program we sometimes
+write functions of which we do not yet use the arguments.
+Because we do want to use <i>lint</i> on these programs, it
+is nice to have this pseudocomment.</p></td>
+</table>
+
+<p><tt>/* NOTREACHED */</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><i>Lint</i> makes no attempt to discover functions which
+never return, although it <i>is</i> possible to find
+functions that don&rsquo;t return. This would require a
+transitive closure with respect to the already known
+<i>not-returning</i> functions; an inacceptable time
+consuming process. To make <i>lint</i> aware of a function
+that doesn&rsquo;t return, a call of this function should be
+followed by the pseudocomment <tt>/* NOTREACHED */</tt>.
+This pseudocomment can also be used to indicate that some
+case part inside a switch (especially a default part)
+can&rsquo;t be reached. The above mentioned cases of use of
+this pseudocomment are examples. The comment can be used
+just to indicate that some part of the program can&rsquo;t
+be reached. It sometimes is necessary to introduce an extra
+compound statement to get the right effect. See figure
+9.</p>
+</td>
+</table>
+<pre>         if (cond)
+                 /* if part */ ;
+         else {
+                 error();  /* doesn&rsquo;t return */
+                 /* NOTREACHED */
+         }
+ /* Without  the compound  else  part, lint  would  assume
+  * the statement after the if statement to be NOTREACHED,
+  * instead of the end of the else part.
+  */
+
+
+</pre>
+
+<p align=center>figure 9.</p>
+
+<p><tt>/* LINTLIBRARY */</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>All definitions following this comment are assumed to be
+library definitions. It shuts off complaints about unused
+functions and variables. See also section 4.2.7 for how to
+use this comment for generating lint libraries.</p></td>
+</table>
+<a name="6. User options"></a>
+<h2>6. User options</h2>
+
+<p><i>Lint</i> recognizes the following command line flags.
+Some of them are identical to the flags of <i>cem. Lint</i>
+warns for flags it doesn&rsquo;t know.</p>
+
+<p><tt>-D&lt;name&gt;<br>
+-D&lt;name&gt;=&lt;text&gt;</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Causes <tt>&lt;name&gt;</tt> to be defined as a macro.
+The first form is equivalent to
+&lsquo;<tt>-D&lt;name&gt;=1</tt>&rsquo;. The second form is
+equivalent to putting &lsquo;<tt>#define &lt;name&gt;
+&lt;text&gt;</tt>&rsquo; in front of all the source
+files.</p></td>
+</table>
+
+<p><tt>-U&lt;name&gt;</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Acts as if the line &lsquo;<tt>#undef
+&lt;name&gt;</tt>&rsquo; is put in front of all the source
+files.</p></td>
+</table>
+
+<p><tt>-I&lt;directory&gt;</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This puts <tt>&lt;directory&gt;</tt> in the include
+directory list.</p></td>
+</table>
+
+<p><tt>-R</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Turn off the &lsquo;strict&rsquo; option. Default
+<i>lint</i> checks the program according to the Reference
+Manual, because this gives a definition of the language with
+which there is a better chance of writing portable programs.
+With this flag on, some constructs, otherwise not allowed,
+are accepted.</p></td>
+</table>
+
+<p><tt>-l&lt;name&gt;<br>
+-llib-l&lt;name&gt;.ln<br>
+-l</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>&lsquo;<tt>-l&lt;name&gt;</tt>&rsquo; tells <i>lint</i>
+to search the lint library <tt>llib-l&lt;name&gt;.ln</tt>
+for missing definitions of functions and variables. The
+option &lsquo;<tt>-llib-l&lt;name&gt;.ln</tt>&rsquo; makes
+<i>lint</i> search the lint library file
+<tt>llib-l&lt;name&gt;.ln</tt> in the current directory for
+missing definitions. Default is &lsquo;<tt>-lc</tt>&rsquo;;
+this default can be suppressed by
+&lsquo;<tt>-l</tt>&rsquo;.</p></td>
+</table>
+
+<p><tt>-a</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Warn for conversions from integer to long and vice
+versa.</p></td>
+</table>
+
+<p><tt>-b</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Don&rsquo;t report not-reachable break statements. This
+flag is useful for running <i>lint</i> on a <i>lex</i>- or
+<i>yacc</i>-generated source file.</p></td>
+</table>
+
+<p><tt>-h</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Check for useless statements and possible pointer
+alignment problems.</p></td>
+</table>
+
+<p><tt>-n</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Don&rsquo;t complain about unused and undefined functions
+and variables.</p></td>
+</table>
+
+<p><tt>-v</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Don&rsquo;t warn about unused arguments of
+functions.</p></td>
+</table>
+
+<p><tt>-x</tt></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Complain about unused external variables.</p></td>
+</table>
+<a name="7. Ideas for further development"></a>
+<h2>7. Ideas for further development</h2>
+
+<p>Although the program in its current state is a useful
+program, there are still a lot of features that should be
+implemented in following versions. I&rsquo;ll summarize them
+in this section.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Actually the program consists of three passes. The
+filter <i>sort</i> is a complete pass, just as the first and
+the second pass. I think we speed up the program by removing
+the filter and making the second pass accept an unsorted
+file. The sorting process can be done in parallel to the
+first pass if both processes communicate through a pipe. In
+addition to this sorting, the second pass can generate
+already some warnings. (Warnings like <tt>%s defined but
+never used</tt> can only be generated after having processed
+all the input.) These warnings generated in parallel to the
+warnings of the first pass, should be sent to an
+intermediate file, otherwise the warnings would get messed
+up. Such an improvement will have best effect on a multi
+processing machine, but even on single processing machines
+this will give a better performance. (On a single processing
+machine the pipe should be replaced by an intermediate
+file.)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Expressions could be classified so <i>lint</i> can warn
+for some classes of expressions in strange contexts. Suppose
+as class &lt;boolean&gt;. <tt>b</tt> Will be of class
+&lt;boolean&gt; if e.g. <tt>b</tt> is assigned to the
+expression <tt>&lt;ex1&gt; || &lt;ex2&gt;</tt>. The
+following expression should then give a warning</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>           b + i;    /* weird expression */
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A mechanism to check printf like routines. This
+mechanism should verify the format string against the
+following arguments. There is a public domain program that
+can be used to do this job. It is called printfck and should
+be used as a filter between the source files and
+<i>lint.</i></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Raise warnings for incomplete initializer lists like</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>          int a[10] = {0, 1, 2};
+          /* initializer list not complete */
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p>Warnings for constructs like</p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>     for (i = 0; i &lt; 10; i++) {
+             . . . .
+             i--;
+             /* loop control variable affected */
+             . . . .
+     }
+</pre>
+<!-- INDENTATION -->
+<p>and</p>
+<!-- INDENTATION -->
+<pre>       while (var) {
+               /* statements in which the value
+                * of var is never changed
+                */
+       }
+       /* loop control variable not updated */
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A warning <tt>bad layout</tt> for program fragments
+like</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>             if (cond1)
+                     if (cond2)
+                             statement();
+             else  /* bad layout */
+                     statement();
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A warning <tt>assignment in conditional context</tt> in
+case of</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>                      if (a = b)
+</pre>
+<!-- INDENTATION -->
+<p>The programmer probably meant <tt>if (a == b)</tt>. No
+warning should be given for <tt>if ((a = b) != c)</tt>, nor
+for <tt>if ((a = b))</tt>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Warnings for empty statements in strange contexts,
+like</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>               if (cond);  /* mistake */
+                       statement();
+</pre>
+<!-- INDENTATION -->
+<p>(This mistake would also be detected by a warning <tt>bad
+layout</tt>.)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A mechanism to prevent the warning <tt>possible pointer
+alignment problem</tt> for functions of which the programmer
+already knows that no problem will arise. E.g. for functions
+like malloc and family.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&bull;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The current version of <i>lint</i> warns for conversions
+from long to int (if -a flag is on). It even warns if the
+programmer used the proper cast, as e.g.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre>                     int i;
+                     long l = 0L;
+
+
+                     i = (int)l;
+</pre>
+<!-- INDENTATION -->
+<p>In this case I think <i>lint</i> need not warn. The
+explicit cast indicates that the programmer knows what he is
+doing. This feature is not implemented because the
+expression tree doesn&rsquo;t show if the cast was implicit
+or explicit.</p>
+</td>
+</table>
+<a name="8. Testing the program"></a>
+<h2>8. Testing the program</h2>
+
+<p>There is no test-suite for testing <i>lint.</i> I have
+written a lot of small files that each test one particular
+property of the program. At this moment there are about 220
+test programs.</p>
+
+<p>It would take a lot of time and effort to run these
+tests by hand. To ease this work I wrote a program that runs
+these tests automatically. The test program (the program
+that runs the tests) needs, associated with each .c file, a
+.w file, containing from each expected warning a substring.
+E.g. when the following warnings should be given by
+<i>lint:</i></p>
+<pre>        file t.c, line 3, i evaluation order undefined
+        file t.c, line 6, a set but not used in function main
+</pre>
+
+<p>it is sufficient to write a file <tt>t.w</tt>
+containing</p>
+<pre>                a set but not used in function main
+                i evaluation order undefined
+</pre>
+
+<p>The test program is called with all the .c files to be
+tested as arguments.</p>
+
+<p>Sometimes it is necessary to test <i>lint</i> on two
+files. The test program runs <i>lint</i> on two files when
+two consecutive arguments are of the form <i>name</i>a.c and
+<i>name</i>b.c. It then compares the output of <i>lint</i>
+with the file <i>name</i>.w.</p>
+
+<p><i>Lint</i> is also tested by running it on existing
+programs. <i>Lint</i> has been run on some
+<small>UNIX</small> utility programs in /usr/src/cmd, on
+Unipress Emacs (consisting of more than 30,000 lines of
+code) and the program itself. Bugs have been found in e.g.
+/usr/src/cmd/cat.c and /usr/src/cmd/ld.c. To test the
+robustness of the program, it was run on the password file
+/etc/passwd and on &lsquo;mixed&rsquo; C program files.
+These mixed C program files are C program files that were
+broken in chunks and then put together in a different
+order.</p>
+<a name="9. References"></a>
+<h2>9. References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[1]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Dennis M. Ritchie, <i>C Reference Manual,</i> Bell
+Laboratories, Murray Hill, New Jersey, 1978.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[2]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>B.W. Kernighan and D.M. Ritchie, <i>The C Programming
+Language,</i> Prentice Hall, 1978.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[3]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Eric H. Baalbergen, Dick Grune, Maarten Waage, <i>The
+CEM Compiler,</i> Manual IM-4, Vrije Universiteit,
+Amsterdam, 1985.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[4]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Andrew S. Tanenbaum et al., <i>A practical tool kit for
+making portable compilers,</i> Comm. ACM, Sep. 1983.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[5]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>S. C. Johnson, <i>Lint, a C program verifier,</i> Bell
+Laboratories, Murray Hill, New Jersey, 1978.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[6]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Dick Grune, Ceriel J. H. Jacobs, <i>A
+Programmer-friendly LL(1) Parser Generator,</i> IR 127,
+Vrije Universiteit, Amsterdam, 1987.</p>
+</td>
+</table>
+<a name="Appendix A"></a>
+<h2>Appendix A</h2>
+<a name="The warnings"></a>
+<h2>The warnings</h2>
+<a name="Pass one warnings"></a>
+<h2>Pass one warnings</h2>
+<pre>     %s may be used before set
+     maybe %s used before set
+     %s unused in function %s
+     %s set but not used in function %s
+     argument %s unused in function %s
+     static [variable, function] %s unused
+     %s declared extern but never used
+
+
+     long conversion may lose accuracy
+     comparison of unsigned with negative constant
+     unsigned comparison with 0?
+     degenerate unsigned comparison
+     nonportable character comparison
+     possible pointer alignment problem
+
+
+     %s evaluation order undefined
+
+
+     null effect
+     constant in conditional context
+     use if-else construction
+     while (0) ?
+     do ... while (0) ?
+     [case, default] statement in strange context
+
+
+     function %s has return(e); and return;
+     statement not reached
+     function %s declared %s but no value returned
+</pre>
+<a name="Pass two warnings"></a>
+<h2>Pass two warnings</h2>
+<pre>     %s variable # of args
+     %s arg %d used inconsistently
+     %s multiply defined
+     %s value declared inconsistently
+     %s used but not defined
+     %s defined (%s(%d)) but never used
+     %s declared but never defined
+     %s value is used but none is returned
+     %s returns value which is [sometimes, always] ignored
+     %s also defined in library
+</pre>
+<a name="Appendix B"></a>
+<h2>Appendix B</h2>
+
+<p align=center><b><big>The Ten Commandments for C
+Programmers</big></b></p>
+
+<p align=center><i>Henry Spencer</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>1</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt run <i>lint</i> frequently and study its
+pronouncements with care, for verily its perception and
+judgement oft exceed thine.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>2</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt not follow the NULL pointer, for chaos and
+madness await thee at its end.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>3</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt cast all function arguments to the expected
+type if they are not of that type already, even when thou
+art convinced that this is unnecessary, lest they take cruel
+vengeance upon thee when thou least expect it.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>4</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>If thy header files fail to declare the return types of
+thy library functions, thou shalt declare them thyself with
+the most meticulous care, lest grievous harm befall thy
+program.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>5</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt check the array bounds of all strings
+(indeed, all arrays), for surely where thou typest
+&lsquo;&lsquo;foo&rsquo;&rsquo; someone someday shall type
+&lsquo;&lsquo;supercalifragilisticexpialidocious&rsquo;&rsquo;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>6</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>If a function be advertised to return an error code in
+the event of difficulties, thou shalt check for that code,
+yea, even though the checks triple the size of thy code and
+produce aches in thy typing fingers, for if thou thinkest
+&lsquo;&lsquo;it cannot happen to me&rsquo;&rsquo;, the gods
+shall surely punish thee for thy arrogance.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>7</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt study thy libraries and strive not to
+re-invent them without cause, that thy code may be short and
+readable and thy days pleasant and productive.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>8</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thou shalt make thy program&rsquo;s purpose and
+structure clear to thy fellow man by using the One True
+Brace Style, even if thou likest it not, for thy creativity
+is better used in solving problems than in creating
+beautiful new impediments to understanding.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>9</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Thy external identifiers shall be unique in the first
+six characters, though this harsh discipline be irksome and
+the years of its necessity stretch before thee seemingly
+without end, lest thou tear thy hair out and go mad on that
+fateful day when thou desirest to make thy program run on an
+old system.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>10</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>Thou shalt foreswear, renounce, and abjure the vile
+heresy which claimeth that &lsquo;&lsquo;All the
+world&rsquo;s a VAX&rsquo;&rsquo;, and have no commerce with
+the benighted heathens who cling to this barbarous belief,
+that the days of thy program may be long even though the
+days of thy current machine be short.</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

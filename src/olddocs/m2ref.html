@@ -1,0 +1,831 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:32 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The ACK Modula-2 Compiler</title>
+</head>
+<body>
+
+<h1 align=center>The ACK Modula-2 Compiler</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The language implemented">2. The language implemented</a><br>
+<a href="#2.1. Syntax (section 2)">2.1. Syntax (section 2)</a><br>
+<a href="#2.2. Vocabulary and Representation (section 3)">2.2. Vocabulary and Representation (section 3)</a><br>
+<a href="#2.3. Declarations and scope rules (section 4)">2.3. Declarations and scope rules (section 4)</a><br>
+<a href="#2.4. Constant expressions (section 5)">2.4. Constant expressions (section 5)</a><br>
+<a href="#2.5. Type declarations (section 6)">2.5. Type declarations (section 6)</a><br>
+<a href="#2.5.1. Basic types (section 6.1)">2.5.1. Basic types (section 6.1)</a><br>
+<a href="#2.5.2. Enumerations (section 6.2)">2.5.2. Enumerations (section 6.2)</a><br>
+<a href="#2.5.3. Record types (section 6.5)">2.5.3. Record types (section 6.5)</a><br>
+<a href="#2.5.4. Set types (section 6.6)">2.5.4. Set types (section 6.6)</a><br>
+<a href="#2.6. Expressions (section 8)">2.6. Expressions (section 8)</a><br>
+<a href="#2.6.1. Operators (section 8.2)">2.6.1. Operators (section 8.2)</a><br>
+<a href="#2.6.1.1. Arithmetic operators (section 8.2.1)">2.6.1.1. Arithmetic operators (section 8.2.1)</a><br>
+<a href="#2.7. Statements (section 9)">2.7. Statements (section 9)</a><br>
+<a href="#2.7.1. Assignments (section 9.1)">2.7.1. Assignments (section 9.1)</a><br>
+<a href="#2.7.2. Case statements (section 9.5)">2.7.2. Case statements (section 9.5)</a><br>
+<a href="#2.7.3. For statements (section 9.8)">2.7.3. For statements (section 9.8)</a><br>
+<a href="#2.7.4. Return and exit statements (section 9.11)">2.7.4. Return and exit statements (section 9.11)</a><br>
+<a href="#2.8. Procedure declarations (section 10)">2.8. Procedure declarations (section 10)</a><br>
+<a href="#2.8.1. Standard procedures (section 10.2)">2.8.1. Standard procedures (section 10.2)</a><br>
+<a href="#2.9. System-dependent facilities (section 12)">2.9. System-dependent facilities (section 12)</a><br>
+<a href="#3. Backwards compatibility">3. Backwards compatibility</a><br>
+<a href="#4. Compile time errors">4. Compile time errors</a><br>
+<a href="#5. Runtime errors">5. Runtime errors</a><br>
+<a href="#6. Calling the compiler">6. Calling the compiler</a><br>
+<a href="#7. The procedure call interface">7. The procedure call interface</a><br>
+<a href="#8. References">8. References</a><br>
+
+<hr>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p align=center><i>Ceriel J.H. Jacobs</i><br>
+Department of Mathematics and Computer Science<br>
+Vrije Universiteit<br>
+Amsterdam<br>
+The Netherlands</p>
+</td>
+</table>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>This document describes the implementation-specific
+features of the ACK Modula-2 compiler. It is not intended to
+teach Modula-2 programming. For a description of the
+Modula-2 language, the reader is referred to [1].</p>
+
+<p>The ACK Modula-2 compiler is currently available for use
+with the VAX, Motorola MC68020, Motorola MC68000, PDP-11,
+and Intel 8086 code-generators. For the 8086, MC68000, and
+MC68020, floating point emulation is used. This is made
+available with the <i>-fp</i> option, which must be passed
+to <i>ack</i>[4,5].</p>
+<a name="2. The language implemented"></a>
+<h2>2. The language implemented</h2>
+
+<p>This section discusses the deviations from the Modula-2
+language as described in the &quot;Report on The Programming
+Language Modula-2&quot;, as it appeared in [1], from now on
+referred to as &quot;the Report&quot;. Also, the Report
+sometimes leaves room for interpretation. The section
+numbers mentioned are the section numbers of the Report.</p>
+<a name="2.1. Syntax (section 2)"></a>
+<h2>2.1. Syntax (section 2)</h2>
+
+<p>The syntax recognized is that of the Report, with some
+extensions to also recognize the syntax of an earlier
+definition, given in [2]. Only one compilation unit per file
+is accepted.</p>
+<a name="2.2. Vocabulary and Representation (section 3)"></a>
+<h2>2.2. Vocabulary and Representation (section 3)</h2>
+
+<p>The input &quot;<tt>10..</tt>&quot; is parsed as two
+tokens: &quot;<tt>10</tt>&quot; and
+&quot;<tt>..</tt>&quot;.</p>
+
+<p>The empty string <tt>&quot;&quot;</tt> has type</p>
+<pre>     ARRAY [0 .. 0] OF CHAR
+</pre>
+
+<p>and contains one character: <tt>0C</tt>.</p>
+
+<p>When the text of a comment starts with a
+&rsquo;<tt>$</tt>&rsquo;, it may be a pragma. Currently, the
+following pragmas exist:</p>
+<pre>     (*$F      (F stands for Foreign) *)
+     (*$R[+|-] (Runtime checks, on or off, default on) *)
+     (*$A[+|-] (Array bound checks, on or off, default off) *)
+     (*$U      (Allow for underscores within identifiers) *)
+</pre>
+
+<p>The Foreign pragma is only meaningful in a
+<tt>DEFINITION MODULE</tt>, and indicates that this
+<tt>DEFINITION MODULE</tt> describes an interface to a
+module written in another language (for instance C, Pascal,
+or EM). Runtime checks that can be disabled are: range
+checks, <tt>CARDINAL</tt> overflow checks, checks when
+assigning a <tt>CARDINAL</tt> to an <tt>INTEGER</tt> and
+vice versa, and checks that <tt>FOR</tt>-loop
+control-variables are not changed in the body of the loop.
+Array bound checks can be enabled, because many EM
+implementations do not implement the array bound checking of
+the EM array instructions. When enabled, the compiler
+generates a check before generating an EM array instruction.
+Even when underscores are enabled, they still may not start
+an identifier.</p>
+
+<p>Constants of type <tt>LONGINT</tt> are integers with a
+suffix letter <tt>D</tt> (for instance <tt>1987D</tt>).
+Constants of type <tt>LONGREAL</tt> have suffix <tt>D</tt>
+if a scale factor is missing, or have <tt>D</tt> in place of
+<tt>E</tt> in the scale factor (f.i. <tt>1.0D</tt>,
+<tt>0.314D1</tt>). This addition was made, because there was
+no way to indicate long constants, and also because the
+addition was made in Wirth&rsquo;s newest Modula-2
+compiler.</p>
+<a name="2.3. Declarations and scope rules (section 4)"></a>
+<h2>2.3. Declarations and scope rules (section 4)</h2>
+
+<p>Standard identifiers are considered to be predeclared,
+and valid in all parts of a program. They are called
+<i>pervasive</i>. Unfortunately, the Report does not state
+how this pervasiveness is accomplished. However, page 87 of
+[1] states: &quot;Standard identifiers are automatically
+imported into all modules&quot;. Our implementation
+therefore allows redeclarations of standard identifiers
+within procedures, but not within modules.</p>
+<a name="2.4. Constant expressions (section 5)"></a>
+<h2>2.4. Constant expressions (section 5)</h2>
+
+<p>Each operand of a constant expression must be a
+constant: a string, a number, a set, an enumeration literal,
+a qualifier denoting a constant expression, a type transfer
+with a constant argument, or one of the standard procedures
+<tt>ABS</tt>, <tt>CAP</tt>, <tt>CHR</tt>, <tt>LONG</tt>,
+<tt>MAX</tt>, <tt>MIN</tt>, <tt>ODD</tt>, <tt>ORD</tt>,
+<tt>SIZE</tt>, <tt>SHORT</tt>, <tt>TSIZE</tt>, or
+<tt>VAL</tt>, with constant argument(s); <tt>TSIZE</tt> and
+<tt>SIZE</tt> may also have a variable as argument.</p>
+
+<p>Floating point expressions are never evaluated compile
+time, because the compiler basically functions as a
+cross-compiler, and thus cannot use the floating point
+instructions of the machine on which it runs. Also,
+<tt>MAX(REAL)</tt> and <tt>MIN(REAL)</tt> are not
+allowed.</p>
+<a name="2.5. Type declarations (section 6)"></a>
+<h2>2.5. Type declarations (section 6)</h2>
+<a name="2.5.1. Basic types (section 6.1)"></a>
+<h2>2.5.1. Basic types (section 6.1)</h2>
+
+<p>The type <tt>CHAR</tt> includes the ASCII character set
+as a subset. Values range from <tt>0C</tt> to <tt>377C</tt>,
+not from <tt>0C</tt> to <tt>177C</tt>.</p>
+<a name="2.5.2. Enumerations (section 6.2)"></a>
+<h2>2.5.2. Enumerations (section 6.2)</h2>
+
+<p>The maximum number of enumeration literals in any one
+enumeration type is <tt>MAX(INTEGER)</tt>.</p>
+<a name="2.5.3. Record types (section 6.5)"></a>
+<h2>2.5.3. Record types (section 6.5)</h2>
+
+<p>The syntax of variant sections in [1] is different from
+the one in [2]. Our implementation recognizes both, giving a
+warning for the older one. However, see section 3.</p>
+<a name="2.5.4. Set types (section 6.6)"></a>
+<h2>2.5.4. Set types (section 6.6)</h2>
+
+<p>The only limitation imposed by the compiler is that the
+base type of the set must be a subrange type, an enumeration
+type, <tt>CHAR</tt>, or <tt>BOOLEAN</tt>. So, the lower
+bound may be negative. However, if a negative lower bound is
+used, the compiler gives a warning of the <i>restricted</i>
+class (see the manual page of the compiler).</p>
+
+<p>The standard type <tt>BITSET</tt> is defined as</p>
+<pre>     TYPE BITSET = SET OF [0 .. 8*SIZE(INTEGER)-1];
+</pre>
+<a name="2.6. Expressions (section 8)"></a>
+<h2>2.6. Expressions (section 8)</h2>
+<a name="2.6.1. Operators (section 8.2)"></a>
+<h2>2.6.1. Operators (section 8.2)</h2>
+
+<a name="2.6.1.1. Arithmetic operators (section 8.2.1)"></a>
+<h2>2.6.1.1. Arithmetic operators (section 8.2.1)</h2>
+
+<p>The Report does not specify the priority of the unary
+operators <tt>+</tt> or <tt>-</tt>: It does not specify
+whether</p>
+<pre>     - 1 + 1
+</pre>
+
+<p>means</p>
+<pre>     - (1 + 1)
+</pre>
+
+<p>or</p>
+<pre>     (-1) + 1
+</pre>
+
+<p>I have seen some compilers that implement the first
+alternative, and others that implement the second. Our
+compiler implements the second, which is suggested by the
+fact that their priority is not specified, which might
+indicate that it is the same as that of their binary
+counterparts. And then the rule about left to right decides
+for the second. On the other hand one might argue that,
+since the grammar only allows for one unary operator in a
+simple expression, it must apply to the whole simple
+expression, not just the first term.</p>
+<a name="2.7. Statements (section 9)"></a>
+<h2>2.7. Statements (section 9)</h2>
+<a name="2.7.1. Assignments (section 9.1)"></a>
+<h2>2.7.1. Assignments (section 9.1)</h2>
+
+<p>The Report does not define the evaluation order in an
+assignment. Our compiler certainly chooses an evaluation
+order, but it is explicitly left undefined. Therefore,
+programs that depend on it may cease to work later.</p>
+
+<p>The types <tt>INTEGER</tt> and <tt>CARDINAL</tt> are
+assignment-compatible with <tt>LONGINT</tt>, and
+<tt>REAL</tt> is assignment-compatible with
+<tt>LONGREAL</tt>.</p>
+<a name="2.7.2. Case statements (section 9.5)"></a>
+<h2>2.7.2. Case statements (section 9.5)</h2>
+
+<p>The size of the type of the case-expression must be less
+than or equal to the word-size.</p>
+
+<p>The Report does not specify what happens if the value of
+the case-expression does not occur as a label of any case,
+and there is no <tt>ELSE</tt>-part. In our implementation,
+this results in a runtime error.</p>
+<a name="2.7.3. For statements (section 9.8)"></a>
+<h2>2.7.3. For statements (section 9.8)</h2>
+
+<p>The Report does not specify the legal types for a
+control variable. Our implementation allows the basic types
+(except <tt>REAL</tt>), enumeration types, and subranges. A
+runtime warning is generated when the value of the control
+variable is changed by the statement sequence that forms the
+body of the loop, unless runtime checking is disabled.</p>
+<a name="2.7.4. Return and exit statements (section 9.11)"></a>
+<h2>2.7.4. Return and exit statements (section 9.11)</h2>
+
+<p>The Report does not specify which result-types are
+legal. Our implementation allows any result type.</p>
+<a name="2.8. Procedure declarations (section 10)"></a>
+<h2>2.8. Procedure declarations (section 10)</h2>
+
+<p>Function procedures must exit through a RETURN
+statement, or a runtime error occurs.</p>
+<a name="2.8.1. Standard procedures (section 10.2)"></a>
+<h2>2.8.1. Standard procedures (section 10.2)</h2>
+
+<p>Our implementation supports <tt>NEW</tt> and
+<tt>DISPOSE</tt> for backwards compatibility, but issues
+warnings for their use. However, see section 3.</p>
+
+<p>Also, some new standard procedures were added, similar
+to the new standard procedures in Wirth&rsquo;s newest
+compiler:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><tt>LONG</tt> converts an argument of type
+<tt>INTEGER</tt> or <tt>REAL</tt> to the types
+<tt>LONGINT</tt> or <tt>LONGREAL</tt>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><tt>SHORT</tt> performs the inverse transformation,
+without range checks.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><tt>FLOATD</tt> is analogous to <tt>FLOAT</tt>, but
+yields a result of type <tt>LONGREAL</tt>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><tt>TRUNCD</tt> is analogous to <tt>TRUNC</tt>, but
+yields a result of type <tt>LONGINT</tt>.</p>
+</td>
+</table>
+<a name="2.9. System-dependent facilities (section 12)"></a>
+<h2>2.9. System-dependent facilities (section 12)</h2>
+
+<p>The type <tt>BYTE</tt> is added to the <tt>SYSTEM</tt>
+module. It occupies a storage unit of 8 bits. <tt>ARRAY OF
+BYTE</tt> has a similar effect to <tt>ARRAY OF WORD</tt>,
+but is safer. In some obscure cases the <tt>ARRAY OF
+WORD</tt> mechanism does not quite work properly.</p>
+
+<p>The procedure <tt>IOTRANSFER</tt> is not
+implemented.</p>
+<a name="3. Backwards compatibility"></a>
+<h2>3. Backwards compatibility</h2>
+
+<p>Besides recognizing the language as described in [1],
+the compiler recognizes most of the language described in
+[2], for backwards compatibility. It warns the user for
+old-fashioned constructions (constructions that [1] does not
+allow). If the <i>-Rm2-3</i> option (see [6]) is passed to
+<i>ack</i>, this backwards compatibility feature is
+disabled. Also, it may not be present on some smaller
+machines, like the PDP-11.</p>
+<a name="4. Compile time errors"></a>
+<h2>4. Compile time errors</h2>
+
+<p>The compile time error messages are intended to be
+self-explanatory, and not listed here. The compiler also
+sometimes issues warnings, recognizable by a
+warning-classification between parentheses. Currently, there
+are 3 classifications:</p>
+
+<p>(old-fashioned use)</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>These warnings are given on constructions that are not
+allowed by [1], but are allowed by [2].</p>
+</td>
+</table>
+
+<p>(strict)</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>These warnings are given on constructions that are
+supported by the ACK Modula-2 compiler, but might not be
+supported by others. Examples: functions returning
+structured types, SET types of subranges with negative lower
+bound.</p>
+</td>
+</table>
+
+<p>(warning)</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The other warnings, such as warnings about variables that
+are never assigned, never used, etc.</p></td>
+</table>
+<a name="5. Runtime errors"></a>
+<h2>5. Runtime errors</h2>
+
+<p>The ACK Modula-2 compiler produces code for an EM
+machine as defined in [3]. Therefore, it depends on the
+implementation of the EM machine for detection some of the
+runtime errors that could occur.</p>
+
+<p>The <i>Traps</i> module enables the user to install his
+own runtime error handler. The default one just displays
+what happened and exits. Basically, a trap handler is just a
+procedure that takes an INTEGER as parameter. The INTEGER is
+the trap number. This INTEGER can be one of the EM trap
+numbers, listed in [3], or one of the numbers listed in the
+<i>Traps</i> definition module.</p>
+
+<p>The following runtime errors may occur:</p>
+
+<p>array bound error</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>range bound error</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>Range bound errors are always detected, unless runtime
+checks are disabled.</p>
+</td>
+</table>
+
+<p>set bound error</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation. The current implementations detect this
+error.</p>
+</td>
+</table>
+
+<p>integer overflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>cardinal overflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error is detected, unless runtime checks are
+disabled.</p>
+</td>
+</table>
+
+<p>cardinal underflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error is detected, unless runtime checks are
+disabled.</p>
+</td>
+</table>
+
+<p>real overflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>real underflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>divide by 0</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>divide by 0.0</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>undefined integer</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>undefined real</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>conversion error</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error occurs when assigning a negative value of type
+INTEGER to a variable of type CARDINAL, or when assigning a
+value of CARDINAL that is &gt; MAX(INTEGER), to a variable
+of type INTEGER. It is detected, unless runtime checking is
+disabled.</p>
+</td>
+</table>
+
+<p>stack overflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation.</p>
+</td>
+</table>
+
+<p>heap overflow</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The detection of this error depends on the EM
+implementation. Might happen when ALLOCATE fails.</p>
+</td>
+</table>
+
+<p>case error</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error occurs when non of the cases in a CASE
+statement are selected, and the CASE statement has no ELSE
+part. The detection of this error depends on the EM
+implementation. All current EM implementations detect this
+error.</p>
+</td>
+</table>
+
+<p>stack size of process too large</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This is most likely to happen if the reserved space for a
+coroutine stack is too small. In this case, increase the
+size of the area given to <tt>NEWPROCESS</tt>. It can also
+happen if the stack needed for the main process is too large
+and there are coroutines. In this case, the only fix is to
+reduce the stack size needed by the main process, f.i. by
+avoiding local arrays.</p>
+</td>
+</table>
+
+<p>too many nested traps + handlers</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error can only occur when the user has installed his
+own trap handler. It means that during execution of the trap
+handler another trap has occurred, and that several times.
+In some cases, this is an error because of overflow of some
+internal tables.</p>
+</td>
+</table>
+
+<p>no RETURN from function procedure</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error occurs when a function procedure does not
+return properly (&quot;falls&quot; through).</p>
+</td>
+</table>
+
+<p>illegal instruction</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>This error might occur when floating point operations are
+used on an implementation that does not have floating
+point.</p>
+</td>
+</table>
+
+<p>In addition, some of the library modules may give error
+messages. The <b>Traps</b>-module has a suitable mechanism
+for this.</p>
+<a name="6. Calling the compiler"></a>
+<h2>6. Calling the compiler</h2>
+
+<p>See [4,5,6] for a detailed explanation.</p>
+
+<p>The compiler itself has no version checking mechanism. A
+special linker would be needed to do that. Therefore, a
+makefile generator is included [7].</p>
+<a name="7. The procedure call interface"></a>
+<h2>7. The procedure call interface</h2>
+
+<p>Parameters are pushed on the stack in reversed order, so
+that the EM AB (argument base) register indicates the first
+parameter. For VAR parameters, its address is passed, for
+value parameters its value. The only exception to this rule
+is with conformant arrays. For conformant arrays, the
+address is passed, and an array descriptor is passed. The
+descriptor is an EM array descriptor. It consists of three
+fields: the lower bound (always 0), upper bound - lower
+bound, and the size of the elements. The descriptor is
+pushed first. If the parameter is a value parameter, the
+called routine must make sure that its value is never
+changed, for instance by making its own copy of the array.
+The Modula-2 compiler does exactly this.</p>
+
+<p>When the size of the return value of a function
+procedure is larger than the maximum of
+<tt>SIZE(LONGREAL)</tt> and twice the pointer-size, the
+caller reserves this space on the stack, above the
+parameters. Callee then stores its result there, and returns
+no other value.</p>
+<a name="8. References"></a>
+<h2>8. References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[1]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Niklaus Wirth, <i>Programming in Modula-2, third,
+corrected edition,</i> Springer-Verlag, Berlin (1985)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[2]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>Niklaus Wirth, <i>Programming in Modula-2,</i>
+Stringer-Verlag, Berlin (1983)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[3]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>A.S.Tanenbaum, J.W.Stevenson, Hans van Staveren,
+E.G.Keizer, <i>Description of a machine architecture for use
+with block structured languages,</i> Informatica rapport
+IR-81, Vrije Universiteit, Amsterdam</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[4]</p>
+</td>
+<td width="4%"></td>
+<td width="36%">
+
+<p>UNIX manual <i>ack</i>(1)</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[5]</p>
+</td>
+<td width="4%"></td>
+<td width="46%">
+
+<p>UNIX manual <i>modula-2</i>(1)</p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[6]</p>
+</td>
+<td width="4%"></td>
+<td width="40%">
+
+<p>UNIX manual <i>em_m2</i>(6)</p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[7]</p>
+</td>
+<td width="4%"></td>
+<td width="38%">
+
+<p>UNIX manual <i>m2mm</i>(1)</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<hr>
+</body>
+</html>

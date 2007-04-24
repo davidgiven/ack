@@ -1,0 +1,1189 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:05 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Internal documentation on the peephole optimizer</title>
+</head>
+<body>
+
+<h1 align=center>Internal documentation on the peephole optimizer</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. Table format">2. Table format</a><br>
+<a href="#3. Internal format">3. Internal format</a><br>
+<a href="#4. A tour through the sources">4. A tour through the sources</a><br>
+<a href="#4.1. The header files">4.1. The header files</a><br>
+<a href="#4.1.1. alloc.h">4.1.1. alloc.h</a><br>
+<a href="#4.1.2. assert.h">4.1.2. assert.h</a><br>
+<a href="#4.1.3. ext.h">4.1.3. ext.h</a><br>
+<a href="#4.1.4. line.h">4.1.4. line.h</a><br>
+<a href="#4.1.5. lookup.h">4.1.5. lookup.h</a><br>
+<a href="#4.1.6. optim.h">4.1.6. optim.h</a><br>
+<a href="#4.1.7. param.h">4.1.7. param.h</a><br>
+<a href="#4.1.8. pattern.h">4.1.8. pattern.h</a><br>
+<a href="#4.1.9. proinf.h">4.1.9. proinf.h</a><br>
+<a href="#4.1.10. tes.h">4.1.10. tes.h</a><br>
+<a href="#4.1.11. types.h">4.1.11. types.h</a><br>
+<a href="#4.2. The C code itself.">4.2. The C code itself.</a><br>
+<a href="#4.2.1. main.c">4.2.1. main.c</a><br>
+<a href="#4.2.2. getline.c">4.2.2. getline.c</a><br>
+<a href="#4.2.3. process.c">4.2.3. process.c</a><br>
+<a href="#4.2.4. backward.c">4.2.4. backward.c</a><br>
+<a href="#4.2.5. peephole.c">4.2.5. peephole.c</a><br>
+<a href="#4.2.6. tes.c">4.2.6. tes.c</a><br>
+<a href="#4.2.7. putline.c">4.2.7. putline.c</a><br>
+
+<hr>
+
+<p><b>from the Amsterdam Compiler Kit</b></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p><small>Part of the Amsterdam Compiler Kit is a program
+to do peephole optimization on an EM program. The optimizer
+scans the program to match patterns from a table and if
+found makes the optimization from the table, and with the
+result of the optimization it tries to find yet another
+optimization continuing until no more optimizations are
+found.</small></p>
+
+<p><small>Furthermore it does some optimizations that can
+not be called peephole optimizations for historical reasons,
+like branch chaining and the deletion of unreachable
+code.</small></p>
+
+<p><small>The peephole optimizer consists of three
+parts</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="30%">
+
+<p><small>A driving table</small></p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>A program translating the table to internal
+format</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>C code compiled with the table to make the
+optimizer proper</small></p>
+</td>
+</table>
+
+<p><small>In this document the table format, internal
+format and data structures in the optimizer will be
+explained, plus a hint on what the code does where it might
+not be obvious. It is a simple program mostly.</small></p>
+<a name="2. Table format"></a>
+<h2>2. Table format</h2>
+
+<p><small>The driving table consists of pattern/replacement
+pairs, in principle one per line, although a line starting
+with white space is considered a continuation line for the
+previous. The general format is:</small></p>
+<pre><small>     optimization : pattern &rsquo;:&rsquo; replacement &rsquo;\n&rsquo;
+
+
+     pattern : EMlist optional_boolean_expression
+
+
+     replacement : EM_plus_operand_list
+</small></pre>
+
+<p><small>Example of a simple one</small></p>
+<pre><small>     loc stl $1==0 : zrl $2
+</small></pre>
+
+<p><small>There is no real limit for the length of the
+pattern or the replacement, the replacement might even be
+longer than the pattern, and expressions can be made
+arbitrarily complicated.</small></p>
+
+<p><small>The expressions in the table are made of the
+following pieces:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="34%">
+
+<p><small>Integer constants</small></p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>$<i>n</i>, standing for the operand of the
+<i>n</i>&rsquo;th EM instruction in the pattern, undefined
+if that instruction has no operand.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>w, standing for the wordsize of the code
+optimized.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="46%">
+
+<p><small>p, for the pointersize.</small></p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="88%">
+
+<p><small>defined(expr), true if expression is
+defined</small></p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>samesign(expr,expr), true if expressions have the
+same sign.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>sfit(expr,expr), ufit(expr,expr), true if the
+first expression fits signed or unsigned in the number of
+bits given in the second expression.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>rotate(expr,expr), first expression rotated left
+the number of bits given by the second
+expression.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>notreg(expr), true if the local with the
+expression as number is not a candidate to put in a
+register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>rom(<i>n</i>,expr), contents of the rom
+descriptor at index expr that is associated with the global
+label that should be the argument of the <i>n</i>&rsquo;th
+EM instruction. Undefined if such a thing does not
+exist.</small></p>
+</td>
+</table>
+
+<p><small>The usual arithmetic operators may be used on
+integer values, if any operand is undefined the expression
+is undefined, except for the defined() function above. An
+undefined expression used for its truth value is false. All
+arithmetic on local label operands is forbidden, only things
+allowed are tests for equality. Arithmetic on global labels
+makes sense, i.e. one can add a global label and a constant,
+but not two global labels.</small></p>
+
+<p><small>In the table one can use five additional EM
+instructions in patterns. These are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>lab</small></p>
+</td>
+<td width="4%"></td>
+<td width="48%">
+
+<p><small>Stands for a local label</small></p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>LLP</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Load Local Pointer, translates into a <b>lol</b>
+or into a <b>ldl</b> depending on the relationship between
+wordsize and pointersize.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>LEP</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Load External Pointer, translates into a
+<b>loe</b> or into a <b>lde</b>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>SLP</small></p>
+</td>
+<td width="4%"></td>
+<td width="64%">
+
+<p><small>Store Local Pointer, <b>stl</b> or
+<b>sdl</b>.</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>SEP</small></p>
+</td>
+<td width="4%"></td>
+<td width="70%">
+
+<p><small>Store External Pointer, <b>ste</b> or
+<b>sde</b>.</small></p>
+</td>
+<td width="19%">
+</td>
+</table>
+
+<p><small>There is only one peephole optimizer, so the
+substitutions to be made for the last four instructions are
+made at run time before the first optimizations are
+made.</small></p>
+<a name="3. Internal format"></a>
+<h2>3. Internal format</h2>
+
+<p><small>The translating program, <i>mktab</i> converts
+the table into an array of bytes where all patterns follow
+unaligned. Format of a pattern is:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>One byte for high byte of hash value, will be
+explained later on.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Two bytes for the index of the next pattern in a
+chain.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3)</small></p>
+</td>
+<td width="6%"></td>
+<td width="24%">
+
+<p><small>An integer*,</small></p>
+</td>
+<td width="65%">
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-99071.png"></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>pattern length.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4)</small></p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p><small>The list of pattern opcodes, one per
+byte.</small></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>5)</small></p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><small>An integer expression index, 0 if not
+used.</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>6)</small></p>
+</td>
+<td width="6%"></td>
+<td width="62%">
+
+<p><small>An integer, replacement length.</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>7)</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>A list of pairs consisting of a one byte opcode
+and an integer expression index.</small></p>
+</td>
+</table>
+
+<p><small>The expressions are kept in an array of triples,
+implementing a binary tree. The <i>mktab</i> program tries
+to minimize the number of triples by reusing duplicates and
+even reverses the operands of commutative operators when
+doing so would spare a triple.</small></p>
+<a name="4. A tour through the sources"></a>
+<h2>4. A tour through the sources</h2>
+
+<p><small>Now we will walk through the sources and note
+things of interest.</small></p>
+<a name="4.1. The header files"></a>
+<h2>4.1. The header files</h2>
+
+<p><small>The header files are the place where data
+structures and options reside.</small></p>
+<a name="4.1.1. alloc.h"></a>
+<h2>4.1.1. alloc.h</h2>
+
+<p><small>In the header file alloc.h several defines can be
+used to select various kinds of core allocation schemes.
+This is important on small machines like the PDP-11 since a
+complete procedure must be in core at the same space, and
+the peephole optimizer should not be the limiting factor in
+determining the maximum size of procedures if possible.
+Options are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>USEMALLOC, standard malloc() and free() are used
+instead of the own core allocation package. Not recommended
+unless the own package does not work on some bizarre
+machine.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>COREDEBUG, prints large amounts of information
+about core management. Not recommended unless the code is
+changed and it stops working.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>SEPID, defining this will add an extra procedure
+that will go through a lot of work to scrape the last bytes
+together if the system won&rsquo;t provide more. This is not
+a good idea if memory is scarce and code and data reside in
+the same spaces, since the room used by the procedure might
+well be more than the room saved.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>STACKROOM, number of shorts used in stack space.
+This is used if memory is scarce and stack space and data
+space are different. On the PDP-11 a UNIX process starts
+with an 8K stack segment which cannot be transferred to the
+data segment. Under these conditions one can use a lot of
+the stack space for storage.</small></p>
+</td>
+</table>
+<a name="4.1.2. assert.h"></a>
+<h2>4.1.2. assert.h</h2>
+
+<p><small>Just defines the assert macro. When compiled with
+-DNDEBUG all asserts will be off.</small></p>
+<a name="4.1.3. ext.h"></a>
+<h2>4.1.3. ext.h</h2>
+
+<p><small>Gives external definitions of variables used by
+more than one module.</small></p>
+<a name="4.1.4. line.h"></a>
+<h2>4.1.4. line.h</h2>
+
+<p><small>Defines the structures used to keep instructions,
+one structure per line of EM code, and the structure to keep
+arguments of pseudos, one structure per argument. Both
+structures essentially contain a pointer to the next, a
+type, and a union containing information depending on the
+type. Core is allocated only for the part of the union
+used.</small></p>
+
+<p><small>The <i>struct line</i> has a very compact
+encoding for small integers, they are encoded in the type
+field. On the PDP-11 this gives a line structure of only 4
+bytes for most instructions.</small></p>
+<a name="4.1.5. lookup.h"></a>
+<h2>4.1.5. lookup.h</h2>
+
+<p><small>Contains definition of the struct used for symbol
+table management, global labels and procedure names are kept
+in one table.</small></p>
+<a name="4.1.6. optim.h"></a>
+<h2>4.1.6. optim.h</h2>
+
+<p><small>If one defines the DIAGOPT option in this header
+file, for every optimization performed a number is written
+on stderr. The number gives the number of the pattern in the
+table or one of the four special numbers in this header
+file.</small></p>
+<a name="4.1.7. param.h"></a>
+<h2>4.1.7. param.h</h2>
+
+<p><small>Contains one settable option, LONGOFF. If this is
+not defined the optimizer can only optimize programs with
+wordsize 2 and pointersize 2. Set this only if it must be
+run on a Z80 or something pathetic like that.</small></p>
+
+<p><small>Other defines here should not be
+touched.</small></p>
+<a name="4.1.8. pattern.h"></a>
+<h2>4.1.8. pattern.h</h2>
+
+<p><small>Contains defines of indices in a pattern,
+definition of the expression triples, definitions of the
+various expression operators and definition of the result
+struct where expression results are put.</small></p>
+
+<p><small>This header file is the main one that is also
+included by <i>mktab</i>.</small></p>
+<a name="4.1.9. proinf.h"></a>
+<h2>4.1.9. proinf.h</h2>
+
+<p><small>This one contains definitions for the local label
+table structs and for the struct where all information for
+one procedure is kept. This is in one struct so it can be
+saved easily when recursive procedures have to be
+resolved.</small></p>
+<a name="4.1.10. tes.h"></a>
+<h2>4.1.10. tes.h</h2>
+
+<p><small>Contains the data structure used by the top
+element size computation.</small></p>
+<a name="4.1.11. types.h"></a>
+<h2>4.1.11. types.h</h2>
+
+<p><small>Collection of typedefs to be used by almost all
+modules.</small></p>
+<a name="4.2. The C code itself."></a>
+<h2>4.2. The C code itself.</h2>
+
+<p><small>The C code will now be the center of our
+attention. We will make a walk through the sources and we
+will try to follow the sources in a logical order. So we
+will start at</small></p>
+<a name="4.2.1. main.c"></a>
+<h2>4.2.1. main.c</h2>
+
+<p><small>The main.c module contains the main() function.
+Here nothing spectacular happens, only thing of interest is
+the handling of flags:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>-L</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>This is an instruction to the peephole optimizer
+to perform one of its auxiliary functions, the generation of
+a library module. This makes the peephole optimizer write
+its output on a temporary file, and at the end making the
+real output by first generating a list of exported symbols
+and then copying the temporary file behind it.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>-n</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Disables all optimization. Only thing the
+optimizer does now is filling in the blank after the
+<i>END</i> pseudo and resolving recursive
+procedures.</small></p>
+</td>
+</table>
+
+<p><small>The place where main() is left is the call to
+getlines() which brings us to</small></p>
+<a name="4.2.2. getline.c"></a>
+<h2>4.2.2. getline.c</h2>
+
+<p><small>This module reads the EM code and constructs a
+list of <i>struct line</i> records, linked together
+backwards, i.e. the first instruction read is the last in
+the list. Pseudos are handled here also, for most pseudos
+this just means that a chain of argument records is linked
+into the linked line list but some pseudos get special
+attention:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>exc</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>This pseudo is acted upon right away. Lines read
+are shuffled around according to instruction.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>mes</small></p>
+</td>
+<td width="4%"></td>
+<td width="82%">
+
+<p><small>Some messages are acted upon. These
+are:</small></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="12%">
+
+<p><small>ms_err</small></p>
+</td>
+<td width="4%"></td>
+<td width="74%">
+
+<p><small>The input is drained, just in case it is a pipe.
+After that the optimizer exits.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="12%">
+
+<p><small>ms_opt</small></p>
+</td>
+<td width="4%"></td>
+<td width="74%">
+
+<p><small>The do not optimize flag is set. Acts just like
+-n on the command line.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="12%">
+
+<p><small>ms_emx</small></p>
+</td>
+<td width="4%"></td>
+<td width="74%">
+
+<p><small>The word- and pointersize are read, complain if
+we are not able to handle this.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="12%">
+
+<p><small>ms_reg</small></p>
+</td>
+<td width="4%"></td>
+<td width="74%">
+
+<p><small>We take notice of the offset of this local. See
+also comments in the description of peephole.c</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>pro</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>A new procedure starts, if we are already in one
+save the status, else process collected input. Collect
+information about this procedure and if already in a
+procedure call getlines() recursively.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>end</small></p>
+</td>
+<td width="4%"></td>
+<td width="48%">
+
+<p><small>Process collected input.</small></p>
+</td>
+<td width="41%">
+</td>
+</table>
+
+<p><small>The phrase &quot;process collected input&quot; is
+used twice, which brings us to</small></p>
+<a name="4.2.3. process.c"></a>
+<h2>4.2.3. process.c</h2>
+
+<p><small>This module contains the entry point process()
+which is called at any time the collected input must be
+processed. It calls a variety of other routines to get the
+real work done. Routines in this module are in chronological
+order:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>symknown</small></p>
+</td>
+<td width="8%"></td>
+<td width="76%">
+
+<p><small>Marks all symbols seen until now as known, i.e.
+it is now known whether their scope is local or global. This
+information is used again during output.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small>symvalue</small></p>
+</td>
+<td width="8%"></td>
+<td width="76%">
+
+<p><small>Runs through the chain of pseudos to give values
+to data labels. This needs an extra pass. It cannot be done
+during the getlines pass, since an <b>exc</b> pseudo could
+destroy things. Nor can it be done during the backward pass
+since it is impossible to do good fragment numbering
+backward.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small>checklocs</small></p>
+</td>
+<td width="6%"></td>
+<td width="76%">
+
+<p><small>Checks whether all local labels referenced are
+defined. It needs to be sure about this since otherwise the
+semi global optimizations made cannot work.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>relabel</small></p>
+</td>
+<td width="10%"></td>
+<td width="76%">
+
+<p><small>This routine finds the final destination for each
+label in the procedure. Labels followed by unconditional
+branches or other labels are marked during the peephole fase
+and this leeds to chains of identical labels. These chains
+are followed here, and in the local label table each label
+has associated with it its replacement label, after this
+procedure is run. Care is taken in this routine to prevent a
+loop in the program to cause the optimizer to
+loop.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p><small>cleanlocals</small></p>
+</td>
+<td width="2%"></td>
+<td width="76%">
+
+<p><small>This routine empties the local label table after
+everything is processed.</small></p>
+</td>
+</table>
+
+<p><small>But before this can all be done, the backward
+linked list of instructions first has to be reversed, so
+here comes</small></p>
+<a name="4.2.4. backward.c"></a>
+<h2>4.2.4. backward.c</h2>
+
+<p><small>The routine backward has a number of
+functions:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>It reverses the backward linked list, making two
+forward linked lists, one for the instructions and one for
+the pseudos.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>It notes the last occurrence of data labels in
+the backward linked list and puts it in the global symbol
+table. This is of course the first occurence in the
+procedure. This information is needed to decide whether the
+symbols are global or local to this module.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>It decides about the fragment boundaries of data
+blocks. Fragments are numbered backwards starting at 3. This
+is done to be able to make the type of an expression
+containing a symbol equal to its fragment. This type can
+then not clash with the types integer and local
+label.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>It allocates a rom buffer to every data label
+with a rom behind it, if that rom contains only plain
+integers at the start.</small></p>
+</td>
+</table>
+
+<p><small>The first thing done after process() has called
+backward() and some of its own little routines is a call to
+the real routine, the one that does the work the program was
+written for</small></p>
+<a name="4.2.5. peephole.c"></a>
+<h2>4.2.5. peephole.c</h2>
+
+<p><small>The first routines in peephole.c implement a
+linked list for the offsets of local variables that are
+candidates for a register implementation. Several patterns
+use the notreg() function, since it is forbidden to combine
+a load of that variable with the load of another and it is
+not allowed to take the address of that
+variable.</small></p>
+
+<p><small>The routine peephole hashes the patterns the
+first time it is called after which it doesn&rsquo;t do much
+more than calling optimize. But first
+hashpatterns().</small></p>
+
+<p><small>The patterns are hashed at run time of the
+optimizer because of the <b>LLP</b>, <b>LEP</b>, <b>SLP</b>
+and <b>SEP</b> instructions added to the instruction set in
+this optimizer. These are first replaced everywhere in the
+table by the correct replacement after which the first three
+instructions of the pattern are hashed and the pattern is
+linked into one of the 256 linked lists. There is a define
+CHK_HASH in this module that can be set if the randomness of
+the hashing function is not trusted.</small></p>
+
+<p><small>The attention now shifts to optimize(). This
+routine calls basicblock() for every piece of code between
+two labels. It also notes which labels have another label or
+a branch behind them so the relabel() routine from process.c
+can do something with that.</small></p>
+
+<p><small>Basicblock() keeps making passes over its basic
+block until no more optimizations are found. This might be
+inefficient if there is a long basicblock with some deep
+recursive optimization in one part of it. The entire basic
+block is then scanned a lot of times just for that one
+piece. The alternative is backing up after making an
+optimization and running through the same code again, but
+that is difficult in a single linked list.</small></p>
+
+<p><small>It hashes instructions and calls trypat() for
+every pattern that has a full hash value match, i.e. lower
+byte and upper byte equal. Longest pattern is tried
+first.</small></p>
+
+<p><small>Trypat() checks length and opcodes of the
+pattern. If correct it fills the iargs[] array with argument
+values and calculates the expression. If that is also
+correct the work shifts to tryrepl().</small></p>
+
+<p><small>Tryrepl() generates the list of replacement
+instructions, links it into the list and returns true. Why
+then the name tryrepl() if it always succeeds? Well, there
+is a mechanism in the optimizer, unused until today that
+makes it possible to do optimizations that cannot be
+described by the table. It is possible to give a number as a
+replacement which will cause the optimizer to call a routine
+special() to do some work. This routine might decide not to
+do an optimization and return false.</small></p>
+
+<p><small>The last routine that is called from process() is
+putline() to write the optimized code, bringing us
+to</small></p>
+<a name="4.2.6. tes.c"></a>
+<h2>4.2.6. tes.c</h2>
+
+<p><small>Contains the routines used by the top element
+size computation phase, which is run after the
+peephole-optimisation. The main routine of tes.c is
+tes_instr(). This looks at an instruction and decides the
+size of the element on top of the stack after the
+instruction is executed. When a label is defined or used,
+the size of the top element is remembered for later use.
+When the information in consistent throuhout the procedure,
+it is passed to the code generator by means of an ms_tes
+message.</small></p>
+<a name="4.2.7. putline.c"></a>
+<h2>4.2.7. putline.c</h2>
+
+<p><small>The major part of putline.c is the standard set
+of routines that makes EM compact code. The extra functions
+performed are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>For every occurence of a global symbol it might
+be necessary to output a <b>exa</b>, <b>exp</b>, <b>ina</b>
+or <b>inp</b> pseudo instruction. That task is
+performed.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>-</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>The <b>lin</b> instructions are optimized here,
+<b>lni</b> instructions added for <b>lin</b> instructions
+and superfluous <b>lin</b> instructions deleted.</small></p>
+</td>
+</table>
+<hr>
+</body>
+</html>

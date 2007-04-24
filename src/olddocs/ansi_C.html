@@ -1,0 +1,1254 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:14 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Amsterdam Compiler Kit-ANSI C compiler compliance statements</title>
+</head>
+<body>
+
+<h1 align=center>Amsterdam Compiler Kit-ANSI C compiler compliance statements</h1>
+<a href="#References">References</a><br>
+
+<hr>
+
+<p>This document specifies the implementation-defined
+behaviour of the ANSI-C front end of the Amsterdam Compiler
+Kit as required by ANS X3.159-1989. Since the
+implementation-defined behaviour sometimes depends on the
+machine compiling on or for, some items will be left
+unspecified in this document&dagger;.</p>
+
+<p align=center><img src="grohtml-101091.png"></p>
+
+<p>The compiler assumes that it runs on a UNIX system.</p>
+
+<p><b>ANS A.6.3.1:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Diagnostics are placed on the standard error output.
+They have the following specification:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>&quot;&lt;file&gt;&quot;, line &lt;nr&gt;:
+[(&lt;class&gt;)] &lt;diagnostic&gt;<br>
+There are three classes of diagnostics: &quot;error&quot;,
+&quot;strict&quot; and &quot;warning&quot;. When the class
+is &quot;error&quot;, the &lt;class&gt; is absent.<br>
+The class &quot;strict&quot; is used for violations of the
+standard which are not severe enough to stop compilation. An
+example is the the occurrence of non white-space after an
+&rsquo;#else&rsquo; or &rsquo;#endif&rsquo; pre-processing
+directive. The class &quot;warning&quot; is used for legal
+but dubious constructions. An example is overflow of
+constant expressions.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.2:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The function &rsquo;main&rsquo; can have two arguments.
+The first argument is an integer specifying the number of
+arguments on the command line. The second argument is a
+pointer to an array of pointers to the arguments (as
+strings).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p>Interactive devices are terminals.</p>
+</td>
+<td width="21%">
+</td>
+</table>
+
+<p><b>ANS A.6.3.3:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The number of significant characters is an option. By
+default it is 64. There is a distinction between upper and
+lower case.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.4:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The compiler assumes ASCII-characters in both the source
+and execution character set.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>There are no multi-byte characters.</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p>There 8 bits in a character.</p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Character constants with values that can not be
+represented in 8 bits are truncated.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Character constants that are more than 1 character wide
+will have the first character specified in the least
+significant byte.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="66%">
+
+<p>The only supported locale is &quot;C&quot;.</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A plain &rsquo;char&rsquo; has the same range of values
+as &rsquo;signed char&rsquo;.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.5:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The compiler assumes that it works on and compiles for a
+2-complement binary-number system. Shorts will use 2 bytes
+and longs will use 4 bytes. The size of integers are machine
+dependent.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Converting an integer to a shorter signed integer is
+implemented by ignoring the high-order byte(s) of the
+former. Converting a unsigned integer to a signed integer of
+the same type is only done in administration. This means
+that the bit-pattern remains unchanged.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The result of bitwise operations on signed integers are
+what can be expected on a 2-complement machine.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>If either operand is negative, whether the result of the
+/ operator is the largest integer less than or equal to the
+algebraic quotient or the smallest integer greater than or
+equal to the algebraic quotient is machine dependent, as is
+the sign of the result of the % operator.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The right-shift of a negative value is negative.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.6:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The representation of floating-point values is
+machine-dependent. When native floating-point is not present
+an IEEE-emulation is used. The compiler uses high-precision
+floating-point for constant folding.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Truncation is always to the nearest floating-point
+number that can be represented.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.7:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The type returned by the sizeof-operator (also known as
+size_t) is &rsquo;unsigned int&rsquo;. This is done for
+backward compatibility reasons.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Casting an integer to a pointer or vice versa has no
+effect in bit-pattern when the sizes are equal. Otherwise
+the value will be truncated or zero-extended (depending on
+the direction of the conversion and the relative sizes).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When a pointer is as large as an integer, the type of a
+&rsquo;ptrdiff_t&rsquo; will be &rsquo;int&rsquo;. Otherwise
+the type will be &rsquo;long&rsquo;.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.8:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Since the front end has only limited control over the
+registers, it can only make it more likely that variables
+that are declared as registers also end up in registers. The
+only things that can possibly be put into registers are :
+&rsquo;int&rsquo;, &rsquo;long&rsquo;, &rsquo;float&rsquo;,
+&rsquo;double&rsquo;, &rsquo;long double&rsquo; and
+pointers.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.9:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When a member of a union object is accessed using a
+member of a different type, the resulting value will usually
+be garbage. The compiler makes no effort to catch these
+errors.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The alignment of types is a compile-time option. The
+alignment of a structure-member is the alignment of its
+type. Usually, the alignment is passed on to the compiler by
+the &rsquo;ack&rsquo; program. When a user wants to do this
+manually, he/she should be prepared for trouble.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A &quot;plain&quot; &rsquo;int&rsquo; bit-field is taken
+as a &rsquo;signed int&rsquo;. This means that a field with
+a size of 1 bit can only store the values 0 and -1.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The order of allocation of bit-fields is a compile-time
+option. By default, high-order bits are allocated first.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>An enum has the same size as a &quot;plain&quot;
+&rsquo;int&rsquo;.</p>
+</td>
+<td width="0%">
+</td>
+</table>
+
+<p><b>ANS A.6.3.10:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>An access to a volatile declared variable is done by
+just mentioning the variable. E.g. the statement
+&quot;x;&quot; where x is declared volatile, constitutes an
+access.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>There is no fixed limit on the number of declarators
+that may modify an arithmetic, structure or union type,
+although specifying too many may cause the compiler to run
+out of memory.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.12:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The maximum number of cases in a switch-statement is in
+the order of 1e9, although the compiler may run out of
+memory somewhat earlier.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.13:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Since both the pre-processor and the compiler assume
+ASCII-characters, a single character constant in a
+conditional-inclusion directive matches the same value in
+the execution character set.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The pre-processor recognizes -I... command-line options.
+The directories thus specified are searched first. After
+that, depending on the command that the preprocessor is
+called with, machine/system-dependant directories are
+searched. After that, ~em/include/_tail_ac and /usr/include
+are visited.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Quoted names are first looked for in the directory in
+which the file which does the include resides.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The characters in a h- or q- char-sequence are taken to
+be UNIX paths.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Neither the compiler nor the preprocessor know any
+pragmas.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Since the compiler runs on UNIX, __DATE__ and __TIME__
+will always be defined.</p>
+</td>
+</table>
+
+<p><b>ANS A.6.3.14:</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>NULL is defined as ((void *)0). This in order to flag
+dubious constructions like &quot;int x = NULL;&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The diagnostic printed by &rsquo;assert&rsquo; is as
+follows:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="82%">
+<p>&quot;Assertion &quot;&lt;expr&gt;&quot; failed, file
+&quot;&lt;file&gt;&quot;, line &lt;line&gt;&quot;,</p></td>
+</table>
+</td>
+</table>
+
+<p>where &lt;expr&gt; is the argument to the assert macro,
+printed as string. (the &lt;file&gt; and &lt;line&gt; should
+be clear)</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>The sets for character test macros.</p>
+</td>
+<td width="19%">
+</td>
+</table>
+
+<p align=center><img src="grohtml-101092.png"></p>
+
+<p>As an addition, there is an isascii() macro, which tests
+whether a character is an ascii character. Characters in the
+range from \000 to \177 are ascii characters.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The behaviour of mathematic functions on domain
+error:</p>
+</td>
+</table>
+
+<p align=center><img src="grohtml-101093.png"></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Underflow range errors do not cause errno to be set.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The function fmod() returns 0.0 and sets errno to EDOM
+when the second argument is 0.0.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The set of signals for the signal() function depends on
+the UNIX-system which the compiler is compiling for. The
+default handling, semantics and behaviour of these signals
+are those specified by the operating system vendor. The
+default handling is not reset when SIGILL is received.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A text-stream need not end in a new-line character.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>White space characters before a new-line appear when
+read in.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>There may be any number of null characters appended to a
+binary stream.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The file position indicator of an append mode stream is
+initially positioned at the beginning of the file.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A write on a text stream does not cause the associated
+file to be truncated beyond that point.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The buffering intended by the standard is fully
+supported.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p>A zero-length file actually exists.</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A file name can consist of any character, except for the
+&rsquo;\0&rsquo; and the &rsquo;/&rsquo;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p>A file can be open multiple times.</p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When a remove() is done on an open file, reading and
+writing behave just as can be expected from a non-removed
+file. When the associated stream is closed, all written data
+will be lost.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When a file exists prior to a call to rename(), the
+behaviour is that of the underlying UNIX system. Normally,
+the call would fail.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The %p conversion in fprintf() has the same effect as
+%#x or %#lx, depending on the sizes of pointer and
+integer.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The %p conversion in fscanf() has the same effect as %x
+or %lx, depending on the sizes of pointer and integer.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>A - character that is neither the first nor the last
+character in the scanlist for %[ conversion is taken to be a
+range indicator. When the first character has a higher
+ASCII-value than the second, the - will just be put into the
+scanlist.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The value of errno when fgetpos() or ftell() failed is
+that of lseek(). This means:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="14%">
+
+<p>EBADF &minus;</p>
+</td>
+<td width="6%"></td>
+<td width="56%">
+
+<p>when the stream is not valid</p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="16%">
+
+<p>ESPIPE &minus;</p>
+</td>
+<td width="4%"></td>
+<td width="70%">
+
+<p>when fildes is associated with a pipe (and on some
+systems: sockets)</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="16%">
+
+<p>EINVAL &minus;</p>
+</td>
+<td width="4%"></td>
+<td width="70%">
+
+<p>the resulting file pointer would be negative</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The messages generated by perror() depend on the value
+of errno. The mapping of errors to strings is done by
+strerror().</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When the requested size is zero, malloc(), calloc() and
+realloc() return a null-pointer.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>When abort() is called, output buffers will be flushed.
+Temporary files (made with the tmpfile() function) will have
+disappeared when SIGABRT is not caught or ignored.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The exit() function returns the low-order eight bits of
+its argument to the environment.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The predefined environment names are controlled by the
+user. Setting environment variables is done through the
+putenv() function. This function accepts a pointer to char
+as its argument. To set f.i. the environment variable TERM
+to a230 one writes</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="82%">
+<p>putenv(&quot;TERM=a230&quot;);</p></td>
+</table>
+</td>
+</table>
+
+<p>The argument to putenv() is stored in an internal table,
+so malloc&rsquo;ed strings can not be freed until another
+call to putenv() (which sets the same environment variable)
+is made. The function returns 1 if it fails, 0
+otherwise.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The argument to system is passed as argument to /bin/sh
+-c.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The strings returned by strerror() depend on errno in
+the following way:</p>
+</td>
+</table>
+
+<p align=center><img src="grohtml-101094.png"></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>everything else causes strerror() to return &quot;unknown
+error&quot;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The local time zone is per default MET (GMT + 1:00:00).
+This can be changed through the TZ environment variable, or
+by some changes in the sources.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>The clock() function returns the number of ticks since
+process startup.</p>
+</td>
+</table>
+<a name="References"></a>
+<h2>References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[1]</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>ANS X3.159-1989 <i>American National Standard for
+Information Systems - Programming Language C</i></p>
+</td>
+</table>
+<hr>
+</body>
+</html>

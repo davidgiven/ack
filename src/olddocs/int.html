@@ -1,0 +1,3910 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:37 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The EM Interpreter</title>
+</head>
+<body>
+
+<h1 align=center>The EM Interpreter</h1>
+<a href="#1. INTRODUCTION.">1. INTRODUCTION.</a><br>
+<a href="#1.1. The virtual EM machine.">1.1. The virtual EM machine.</a><br>
+<a href="#1.1.1. Instruction Space">1.1.1. Instruction Space</a><br>
+<a href="#1.1.2. The Procedure Table">1.1.2. The Procedure Table</a><br>
+<a href="#1.1.3. The Data Space">1.1.3. The Data Space</a><br>
+<a href="#1.2. Physical lay-out">1.2. Physical lay-out</a><br>
+<a href="#1.3. Speed.">1.3. Speed.</a><br>
+<a href="#2. IMPLEMENTATION DETAILS.">2. IMPLEMENTATION DETAILS.</a><br>
+<a href="#2.1. Stack manipulation and start-up">2.1. Stack manipulation and start-up</a><br>
+<a href="#2.1.1. The anomalous value of the ML register">2.1.1. The anomalous value of the ML register</a><br>
+<a href="#2.1.2. The absence of an initial Return Status Block">2.1.2. The absence of an initial Return Status Block</a><br>
+<a href="#2.2. Floating point numbers.">2.2. Floating point numbers.</a><br>
+<a href="#2.3. Pointers.">2.3. Pointers.</a><br>
+<a href="#2.3.1. Pointer arithmetic.">2.3.1. Pointer arithmetic.</a><br>
+<a href="#2.3.2. Null pointer.">2.3.2. Null pointer.</a><br>
+<a href="#2.4. Function Return Area (FRA).">2.4. Function Return Area (FRA).</a><br>
+<a href="#2.5. Environment interaction.">2.5. Environment interaction.</a><br>
+<a href="#2.5.1. Traps and interrupts.">2.5.1. Traps and interrupts.</a><br>
+<a href="#2.5.2. Monitor calls.">2.5.2. Monitor calls.</a><br>
+<a href="#2.6. Internal arithmetic.">2.6. Internal arithmetic.</a><br>
+<a href="#2.7. Shadow bytes implementation.">2.7. Shadow bytes implementation.</a><br>
+<a href="#2.8. Return Status Block (RSB)">2.8. Return Status Block (RSB)</a><br>
+<a href="#2.9. Operand access.">2.9. Operand access.</a><br>
+<a href="#2.9.1. The Dispatch Table, Method 1.">2.9.1. The Dispatch Table, Method 1.</a><br>
+<a href="#2.9.2. Intelligent Routines, Method 2.">2.9.2. Intelligent Routines, Method 2.</a><br>
+<a href="#2.9.3. Intelligent Calls, Method 3.">2.9.3. Intelligent Calls, Method 3.</a><br>
+<a href="#2.9.4. Static Evaluation.">2.9.4. Static Evaluation.</a><br>
+<a href="#2.10. Disassembly.">2.10. Disassembly.</a><br>
+<a href="#3. THE LOGGING MACHINE.">3. THE LOGGING MACHINE.</a><br>
+<a href="#3.1. Implementation.">3.1. Implementation.</a><br>
+<a href="#3.2. Controlling the Logging machine.">3.2. Controlling the Logging machine.</a><br>
+<a href="#3.3. Dumps.">3.3. Dumps.</a><br>
+<a href="#3.4. Forking.">3.4. Forking.</a><br>
+<a href="#List of Warnings.">List of Warnings.</a><br>
+<a href="#How to use the interpreter">How to use the interpreter</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Eddo de Groot<br>
+Leo van den Berge<br>
+Dick Grune</i><br>
+Faculteit Wiskunde en Informatica<br>
+Vrije Universiteit, Amsterdam</p>
+
+<p>This document describes the implementation and usage of
+a new interpreter for the EM machine language. This
+interpreter implements the full EM machine and can be
+helpful to people writing new front-ends. Moreover, it can
+be used as a thorough testing and debugging tool by anyone
+familiar with the EM language.</p>
+
+<p>A list of all warnings is given in appendix A; appendix
+B is a simple tutorial.</p>
+<a name="1. INTRODUCTION."></a>
+<h2>1. INTRODUCTION.</h2>
+
+<p>This document describes an EM interpreter which does
+extensive checking. The interpreter exists in two versions:
+the normal version with full checking and debugging
+facilities, and a fast stripped version that does
+interpretation only. This document assumes that the full
+version is used.</p>
+
+<p>First the virtual EM machine embodied by the interpreter
+(called <b>int</b>) is described, followed by some remarks
+on performance. The second section gives some specific
+implementation decisions. Section three explains the usage
+of the built-in debugging tool.</p>
+
+<p>Appendix A gives an overview of the various warnings
+<b>int</b> gives, with possible causes and solutions.
+Appendix B is a simple tutorial on the use of <b>int</b>. A
+separate manual page exists.</p>
+
+<p>The document assumes a good understanding of what EM is
+and what the assembly code looks like [1]. Notions like
+&rsquo;procedure descriptor&rsquo;, &rsquo;mini&rsquo;,
+&rsquo;shortie&rsquo; etc. are not explained. In the sequel,
+any word in <i>this font</i> refers to the name of a
+variable, constant, function or whatever, used in the source
+code under the same name.</p>
+
+<p>To avoid confusion: <b>int</b> interprets EM machine
+language (e.out files), <i>not</i> the assembly language (.e
+files) and <i>not</i> the compact code (.k files).</p>
+<a name="1.1. The virtual EM machine."></a>
+<h2>1.1. The virtual EM machine.</h2>
+
+<p>The memory layout of the virtual EM machine represented
+by the interpreter differs in details from the description
+in [1]. Virtual memory is split up into two separate spaces:
+one space containing the instructions, the other all the
+data, including stack and heap (D-space). The procedure
+descriptors are preprocessed and stored in a separate array,
+<i>proctab[]</i>. Both spaces start off at address 0. This
+is possible because pointers in the two different spaces are
+distinguishable by context (and shadow-bytes: see 2.6).</p>
+<a name="1.1.1. Instruction Space"></a>
+<h2>1.1.1. Instruction Space</h2>
+
+<p>Figure 1 shows the I-space, together with the position
+of some important EM registers.</p>
+<pre>                      NEXT --&gt;  |________________|  &lt;-- DB    \
+                                |                |            |
+                                |                |            |  T
+                                |                |  &lt;-- PC    |
+                                |     Program    |            |  e
+                                |                |            |
+                                |      Text      |            |  x
+                                |                |            |
+                                |                |            |  t
+                         0 --&gt;  |________________|  &lt;--(PB)   /
+
+</pre>
+
+<p align=center><i>Fig 1. Virtual instruction space
+(I-space).</i></p>
+
+<p>The I-space is just big enough to contain all the
+instructions. The size needed for the program text
+(<i>NTEXT</i>) is found from the header-bytes of the
+loadfile. Legal values for the program counter (<i>PC</i>)
+consist of all addresses in the range from 0 through
+<i>NTEXT</i> &minus; 1. If the <i>PC</i> is made to point to
+an illegal address, a trap will occur.</p>
+<a name="1.1.2. The Procedure Table"></a>
+<h2>1.1.2. The Procedure Table</h2>
+
+<p>The <i>NProc</i> constant indicates how many procedure
+descriptors there are in the proctab array. Elements of this
+array contain for each procedure: the number of locals, the
+entry point and the entry point of the textually following
+procedure. This is used in testing the restriction that the
+program counter may not wander from procedure to
+procedure.</p>
+<a name="1.1.3. The Data Space"></a>
+<h2>1.1.3. The Data Space</h2>
+
+<p>Figure 2 shows the layout of the data space, which
+closely conforms to the EM Manual.</p>
+<pre>                                __________________
+            maxaddr(psize) --&gt;  |                |  &lt;-- ML    \
+                                |                |            |  S
+                                |     Locals     |            |  t
+                                |       &amp;        |            |  a
+                                |      RSBs      |            |  c
+                                |                |            |  k
+                                |________________|  &lt;-- SP    /
+                                .                .
+                                .                .
+                                .     Unused     .
+                                .                .
+                                .                .
+                                .                .
+                                .                .
+                                .                .
+                                .     Unused     .
+                                .                .
+                                .                .
+                                |________________|  &lt;-- HP
+                                |                |            \
+                                |      Heap      |            |
+                                |________________|  &lt;-- HB    |
+                                |                |            |  D
+                                |    Arguments   |            |
+                                |     Environ    |            |  a
+                                |  _   _   _   _ |            |
+                                |                |            |  t
+                                |                |            |
+                                |                |            |  a
+                                |   Global data  |            |
+                                |                |            |
+                                |                |            |
+                         0 --&gt;  |________________|  &lt;--(EB)   /
+
+</pre>
+
+<p align=center><i>Fig 2. Virtual dataspace
+(D-space).</i></p>
+
+<p>D-space begins at address 0, and ends at the largest
+address representable by the pointer size (<i>psize</i>)
+being used; for a 2-byte pointer size this maximum address
+is</p>
+<pre>     ((2 ^ 16 &minus; 1) / word size * word size) &minus; 1
+</pre>
+
+<p>for a 4-byte pointer size it is</p>
+<pre>     ((2 ^ 31 &minus; 1) / word size * word size) &minus; 1
+</pre>
+
+<p>(not 2 ^ 32, to allow illegal pointers to be implemented
+in the future). The funny rounding construction is required
+to make ML+1 expressible as the initialisation value of LB
+and SP.</p>
+
+<p>D-space is split into two partitions: Data and Stack
+(indicated by the brackets). The Data partition holds the
+global data area (GDA) and the heap. Its initial size is
+given by the loadfile constant SZDATA. Some space is added
+to it, because arguments and environment are stored here
+also. This total size is static while interpreting. However,
+as the heap may grow during execution (e.g. caused by
+dynamic allocation) this results in a variable size for the
+Data partition. Initially, the size for the Data partition
+is the sum of the space needed by the GDA (including the
+space needed for arguments and environment) and the initial
+heapspace. The lowest legal Data address is 0; the highest
+<i>HP</i> &minus; 1.</p>
+
+<p>The Stack partition holds the stack. It begins at the
+highest available D-space address, and grows towards the low
+addresses, so the Stack partition is of variable size too.
+The lowest legal Stack address is the stackpointer
+(<i>SP</i>), the highest is the memory limit
+(<i>ML</i>).</p>
+<a name="1.2. Physical lay-out"></a>
+<h2>1.2. Physical lay-out</h2>
+
+<p>Each partition is mapped onto a piece of physical memory
+with the same name: <i>text</i> (fig. 1), <i>stack</i> and
+<i>data</i> (fig. 2). These are the storage structures which
+<b>int</b> uses to physically store the contents of the
+virtual EM spaces. Figure 2 thus shows the mapping of
+D-space onto two different physical parts: <i>stack</i> and
+<i>data</i>. The I-space is represented by one physical
+part: <i>text</i>.</p>
+
+<p>Each time more space is needed, the actual partition is
+reallocated, with the new size being computed with the
+formula:</p>
+<pre><i>     new size</i> = 1.5 &times; (<i>old size</i> + <i>extra</i>)
+</pre>
+
+<p><i>extra</i> is the number of bytes exceeding the <i>old
+size</i>. One can prove that using this method, there is a
+linear relationship between allocation time and needed
+partition size.</p>
+
+<p>A virtual D-space starting at address 0 is in
+correspondence with the definition in [1], p. 3&minus;6. The
+main reason for having D-space start at address 0, is that
+it induces a one-one correspondence between the heap &minus;
+and GDA addresses on the virtual machine (and hence the
+definition) on one hand, and the offset within the
+<i>data</i> partition on the other. This implies that no
+extra calculation is needed to perform load and storage
+operations.</p>
+
+<p>Some calculation however cannot be avoided, because the
+stack part of the D-space grows downwards by EM definition.
+The first address of the virtual stack (<i>ML</i>, the
+maximum address for the given <i>psize</i>) is mapped onto
+the beginning of the <i>stack</i> partition. When the stack
+grows (i.e. EM addresses get lower), the offset within the
+<i>stack</i> partition gets higher. By taking offset <i>ML
+&minus; A</i> in the stack partition, one obtains the
+physical address corresponding to some virtual EM (stack)
+address <i>A</i>.</p>
+<a name="1.3. Speed."></a>
+<h2>1.3. Speed.</h2>
+
+<p>From several test results with both versions of the
+interpreter, the following may be concluded. The speed of
+the interpreter depends strongly on the type of program
+being interpreted. If plain CPU arithmetic is performed, the
+interpreter is relatively slow (1000 &times; the cc
+version). When stack manipulation is at hand, the
+interpreter is quite fast (100 &times; the cc version).</p>
+
+<p>Most programs however will not be this extreme, so an
+interpretation time of somewhere between 300 and 500 times
+direct execution for a normal program is to be expected.</p>
+
+<p>The fast version runs in about 60% of the time of the
+full version, at the expense of a considerably lower
+functionality. Tallying costs about 10%.</p>
+<a name="2. IMPLEMENTATION DETAILS."></a>
+<h2>2. IMPLEMENTATION DETAILS.</h2>
+
+<p>The pertinent issues are addressed below, in arbitrary
+order.</p>
+<a name="2.1. Stack manipulation and start-up"></a>
+<h2>2.1. Stack manipulation and start-up</h2>
+
+<p>It is not at all easy to start the EM machine with the
+stack in a reasonable and consistent state. One reason is
+the anomalous value of the ML register and another is the
+absence of a proper RSB. It may be argued that the initial
+stack does not have to be in a consistent state, since the
+first instruction proper is only executed after <i>argc</i>,
+<i>argv</i> and <i>environ</i> have been stacked (which
+takes care of the empty stack) and the initial procedure has
+been called (which creates a RSB). We would, however, like
+to preform the stacking of these values and the calling of
+the initial procedure using the normal stack and call
+routines, which again require the stack to be in an
+acceptable state.</p>
+<a name="2.1.1. The anomalous value of the ML register"></a>
+<h2>2.1.1. The anomalous value of the ML register</h2>
+
+<p>All registers in the EM machine point to word
+boundaries, and all of them, except ML, address the
+even-numbered byte at the boundary. The exception has a good
+reason: the even numbered byte at the ML boundary does not
+exist. This problem is not particular to EM but is inherent
+in the number system: the number of N-digit numbers can
+itself not be expressed in an N-digit number, and the number
+of addresses in an N-bit machine will itself not fit in an
+N-bit address. The problem is solved in the interpreter by
+having ML point to the highest word boundary that has bytes
+on either side; this makes ML+1 expressible.</p>
+<a name="2.1.2. The absence of an initial Return Status Block"></a>
+<h2>2.1.2. The absence of an initial Return Status Block</h2>
+
+<p>When the stack is empty, there is no legal value for AB,
+since there are no actuals; LB can be set naturally to ML+1.
+This is all right when the interpreter starts with a call of
+the initial routine which stores the value of LB in the
+first RSB, but causes problems when finally this call
+returns. We want this call to return completely before
+stopping the interpreter, to check the integrity of the last
+RSB; restoring information from it will, however, cause
+illegal values to be stored in LB and AB (ML+1 and
+ML+1+rsbsize, resp.). On top of this, the initial (illegal)
+Procedure Identifier of the running procedure will be
+restored; then, upon restoring the likewise illegal PC will
+cause a check to see if it still is inside the running
+procedure. After a few attempts at writing special cases, we
+have decided that it is possible, but not worth the effort;
+the final (= initial) RSB will not be unstacked.</p>
+<a name="2.2. Floating point numbers."></a>
+<h2>2.2. Floating point numbers.</h2>
+
+<p>The interpreter is capable of working with 4- and 8-byte
+floating point (FP) numbers. In C-terms, this corresponds to
+objects of type float and double respectively. Both types
+fit in a C-double so the obvious way to manipulate these
+entities internally is in doubles. Pushing a 8-byte FP, all
+bytes of the C-double are pushed. Pushing a 4-byte FP causes
+the 4 bytes representing the smallest fraction to be
+discarded.</p>
+
+<p>In EM, floats can be obtained in two different ways: via
+conversion of another type, or via initialization in the
+loadfile. Initialized floats are represented in the loadfile
+by an ASCII string in the syntax of a Pascal real (signed
+UnsignedReal). I.e. a float looks like:</p>
+<pre>     [ <i>Sign</i> ] <i>Digit</i>+ [ . <i>Digit</i>+ ] [ <i>Exp</i> [ <i>Sign</i> ] <i>Digit</i>+ ]                                (G1)
+</pre>
+
+<p>followed by a null byte. Here <i>Sign</i> = {+,
+&minus;}; <i>Digit</i> = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+<i>Exp</i> = {e, E}; [ <i>Anything</i> ] means that
+<i>Anything</i> is optional; and a + means one or more
+times. To accommodate some loose code generators, the actual
+grammar accepted is:</p>
+<pre>     [ <i>Sign</i> ] <i>Digit</i>&lowast; [ . <i>Digit</i>&lowast; ] [ <i>Exp</i> [ <i>Sign</i> ] <i>Digit</i>+ ]                                (G2)
+</pre>
+
+<p>followed by a null byte. Here &lowast; means zero or
+more times. A floating denotation which is in G2 but not in
+G1 draws a warning, one that is not even in G2 causes a
+fatal error.</p>
+
+<p>A string, representing a float which does not fit in a
+double causes a warning to be given. In that case, the
+returned value will be the double 0.0.</p>
+
+<p>Floating point arithmetic is handled by some simple
+routines, checking for over/underflow, and returning
+appropriate values in case of an ignored error.</p>
+
+<p>Since not all C compilers provide floating point
+operations, there is a compile time flag NOFLOAT, which, if
+defined, suppresses the use of all fp operations in the
+interpreter. The resulting interpreter will still load EM
+files with floats in the global data area (and ignore them)
+but will give a fatal error upon attempt to execute a
+floating point instruction; consequently code involving
+floating point operations can be run as long as the actual
+instructions are avoided.</p>
+<a name="2.3. Pointers."></a>
+<h2>2.3. Pointers.</h2>
+
+<p>The following sub-sections both deal with problems
+concerning pointers. First, something is said about pointer
+arithmetic in general. Then, the null-pointer problem is
+dealt with.</p>
+<a name="2.3.1. Pointer arithmetic."></a>
+<h2>2.3.1. Pointer arithmetic.</h2>
+
+<p>Strictly speaking, pointer arithmetic is defined only
+within a <b>fragment</b>. From the explanation of the term
+fragment however (as given in [1], page 3), it is not quite
+clear what a fragment should look like from an
+interpreter&rsquo;s point of view. For this reason we
+introduced the term <b>segment</b>, bordering the various
+areas within which pointer arithmetic is allowed. Every
+stack-frame is a segment, and so are the global data area
+(GDA) and the heap area. Thus, the number of segments varies
+over time, and at some point in time is given by the number
+of currently active stack-frames (#CAL + #CAI &minus; #RET
+&minus; #RTT) plus 2 (gda, heap). Pointers in the area
+between heap and stack (which is inaccessible by
+definition), are assumed to be in the heap segment.</p>
+
+<p>The interpreter, while building a new stack-frame (i.e.
+segment), stores the value of the last ActualBase in a
+pointer-array (<i>AB_list[ ]</i>). When a pointer (say
+<i>P</i>) is available for arithmetic, the number of the
+segment where it points (say <i>S <small>P</small></i> ), is
+determined first. Next, the arithmetic is performed,
+followed by a check on the number of the segment where the
+resulting pointer <i>R</i> points (say <i>S
+<small>R</small></i> ). Now, if <i>S <small>P</small> != S
+<small>R</small></i> , a warning is given: <b>Pointer
+arithmetic yields pointer to bad segment</b>.<br>
+It may also be clear now, why the illegal area between heap
+and stack was joined with the heap segment. When calculating
+a new heap pointer (<i>HP</i>), one will obtain intermediate
+results being pointers in this area just before it is made
+legal. We do not want error messages all of the time, just
+because someone is allocating space in the heap.</p>
+
+<p>A similar treatment is given to the pointers in the SBS
+instruction; they have to point into the same fragment for
+subtraction to be meaningful.</p>
+
+<p>The length of the <i>AB_list[ ]</i> is initially 100,
+and it is reallocated in the same way the dynamically
+growing partitions are (see 1.1).</p>
+<a name="2.3.2. Null pointer."></a>
+<h2>2.3.2. Null pointer.</h2>
+
+<p>Because the EM language lacks an instruction for loading
+a null pointer, most programs solve this problem by loading
+a pointer-sized integer of value zero, and using this as a
+null pointer (this is also proposed in [1]). <b>Int</b>
+allows this, and will not complain. A warning is given
+however, when an attempt is made to add something to a null
+pointer (i.e. the pointer-sized integer zero).</p>
+
+<p>Since many programming languages use a pointer to
+location 0 as an illegal value, it is desirable to detect
+its use. The big problem is though that 0 is a perfectly
+legal EM address; address 0 holds the current line number in
+the source file. It may be freely read but is written only
+by means of the LIN instruction. This allows us to declare
+the area consisting of the line number and the file name
+pointer to be read-only memory. Thus a store will be caught
+(and result in a warning) but a read will succeed (and yield
+the EM information stored there).</p>
+<a name="2.4. Function Return Area (FRA)."></a>
+<h2>2.4. Function Return Area (FRA).</h2>
+
+<p>The Function Return Area (<i>FRA[ ]</i>) has a default
+size of 8 bytes; this default can be overridden through the
+use of the <b>&minus;r</b>-option, but cannot be made
+smaller than the size of two pointers, in accordance with
+the remark on page 5 of [1]. The global variable
+<i>FRASize</i> keeps track of how many bytes were stored in
+the FRA, the last time a RET instruction was executed. The
+LFR instruction only works when its argument is equal to
+this size. If not, the FRA contents are loaded anyhow, but
+one of the following warnings is given: <b>Returned function
+result too large</b> (<i>FRASize</i> &gt; LFR size) or
+<b>Returned function result too small</b> (<i>FRASize</i>
+&lt; LFR size).</p>
+
+<p>Note that a C-program, falling through the end of its
+code without doing a proper <i>return</i> or <i>exit()</i>,
+will generate this warning.</p>
+
+<p>The only instructions that do not disturb the contents
+of the FRA are GTO, BRA, ASP and RET. This is expressed in
+the program by setting <i>FRA_def</i> to
+&quot;undefined&quot; in any instruction except these four.
+We realize this is a useless action most of the time, but a
+more efficient solution does not seem to be at hand. If a
+result is loaded when <i>FRA_def</i> is
+&quot;undefined&quot;, the warning: <b>Returned function
+result may be garbled</b> is generated.</p>
+
+<p>Note that the FRA needs a shadow-FRA in order to store
+the shadow information when performing a LFR
+instruction.</p>
+<a name="2.5. Environment interaction."></a>
+<h2>2.5. Environment interaction.</h2>
+
+<p>The EM machine represented by <b>int</b> can communicate
+with the environment in three different ways. A first
+possibility is by means of (UNIX) interrupts; the second by
+executing (relatively) high level system calls (called
+monitor calls). A third means of interaction, especially
+interesting for the debugging programmer, is via internal
+variables set on the command line. The former two
+techniques, and the way they are implemented will be
+described in this section. The latter has been allotted a
+separate section (3).</p>
+<a name="2.5.1. Traps and interrupts."></a>
+<h2>2.5.1. Traps and interrupts.</h2>
+
+<p>Simple user programs will generally not mess around with
+UNIX-signals. In interpreting these programs, the default
+actions will be taken when a signal is received by the
+program: it gives a message and stops running.</p>
+
+<p>There are programs however, which try to handle certain
+signals themselves. In C, this is achieved by the system
+call <i>signal( sig_no, catch )</i>, which calls the
+handling routine <i>catch()</i>, as soon as signal
+<b>sig_no</b> occurs. EM does not provide this call;
+instead, the <i>sigtrp()</i> monitor call is available for
+mapping UNIX signals onto EM traps. This implies that a
+<i>signal()</i> call in a C-program must be translated by
+the EM library routine to a <i>sigtrp()</i> call in EM.</p>
+
+<p>The interpreter keeps an administration of the mapping
+of UNIX-signals onto EM traps in the array
+<i>sig_map[NSIG]</i>. Initially, the signals all have their
+default values. Now assume a <i>sigtrp()</i> occurs, telling
+to map signal <b>sig_no</b> onto trap <b>trap_no</b>. This
+results in:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>setting the relevant array element
+<i>sig_map[sig_no]</i> to <b>trap_no</b> (after saving the
+old value),</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>catching the next to come <b>sig_no</b> signal with the
+handling routine <i>HndlEMSig</i> (by a plain UNIX
+<i>signal()</i> of course), and</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>returning the saved map-value on the stack so the user
+can know the previous trap value onto which <b>sig_no</b>
+was mapped.</p>
+</td>
+</table>
+
+<p>On an incoming signal, the handling routine for signal
+<b>sig_no</b> arms the correct EM trap by calling the
+routine <i>arm_trap()</i> with argument
+<i>sig_map[sig_no]</i>. At the end of the EM instruction the
+proper call of <i>trap()</i> is done. <i>Trap()</i> on its
+turn examines the value of the <i>HaltOnTrap</i> variable;
+if it is set, the interpreter will stop with a message. In
+the normal case of controlled trap handling this bit is not
+on and the interpreter examines the value of the
+<i>TrapPI</i> variable, which contains the procedure
+identifier of the EM trap handling routine. It then
+initiates a call to this routine and performs a
+<i>longjmp()</i> to the main loop to bypass all further
+processing of the instruction that caused the trap.
+<i>TrapPI</i> should be set properly by the library
+routines, through the SIG instruction.</p>
+
+<p>In short:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>A UNIX interrupt is caught by the interpreter.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>A handling routine is called which generates the
+corresponding EM trap (according to the mapping).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>The trap handler calls the corresponding EM routine
+which emulates a UNIX interrupt for the benefit of the
+interpreted program.</p>
+</td>
+</table>
+
+<p>When considering UNIX signals, it is important to notice
+that some of them are real signals, i.e., messages coming
+from outside the program, like DEL and QUIT, but some are
+actually program-caused synchronous traps, like Illegal
+Instruction. The latter, if they happen, are incurred by the
+interpreter itself and consequently are of no concern to the
+interpreted program: it cannot catch them. The present code
+assumes that the UNIX signals between SIGILL (4) and SIGSYS
+(12) are really traps; <i>do_sigtrp()</i> will fail on
+them.</p>
+
+<p>To avoid losing the last line(s) of output files, the
+interpreter should always do a proper close-down, even in
+the presence of signals. To this end, all non-ignored
+genuine signals are initially caught by the interpreter,
+through the routine <i>HndlIntSig</i>, which gives a message
+and preforms a proper close-down. Synchronous trap can only
+be caused by the interpreter itself; they are never caught,
+and consequently the UNIX default action prevails. Generally
+they cause a core dump. Signals requested by the interpreted
+program are caught by the routine <i>HndlEMSig</i>, as
+explained above.</p>
+<a name="2.5.2. Monitor calls."></a>
+<h2>2.5.2. Monitor calls.</h2>
+
+<p>For the convenience of the programmer, as many monitor
+calls as possible have been implemented. The list of monitor
+calls given in [1] pages 20/21, has been implemented
+completely, except for <i>ptrace()</i>, <i>profil()</i> and
+<i>mpxcall()</i>. The semantics of <i>ptrace()</i> and
+<i>profil()</i> from an interpreted program is unclear; the
+data structure passed to <i>mpxcall()</i> is non-trivial and
+the system call has low portability and applicability. For
+these calls, on invocation a warning is generated, and the
+arguments which were meant for the call are popped properly,
+so the program can continue without the stack being messed
+up. The errorcode 5 (IOERROR) is pushed onto the stack
+(twice), in order to fake an unsuccessful monitor call. No
+other &minus; more meaningful &minus; errorcode is available
+in the errno-list.</p>
+
+<p>Now for the implemented monitor calls. The returned
+value is zero for a successful call. When something goes
+wrong, the value of the external <i>errno</i> variable is
+pushed, thus enabling the user to find out what the reason
+of failure was. The implementation of the majority of the
+monitor calls is straightforward. Those working with a
+special format buffer, (e.g. <i>ioctl()</i>, <i>time()</i>
+and <i>stat()</i> variants), need some extra attention. This
+is due to the fact that working with varying word/pointer
+size combinations may cause alignment problems.</p>
+
+<p>The data structure returned by the UNIX system call
+results from C code that has been translated with the
+regular C compiler, which, on the VAX, happens to be a 4-4
+compiler. The data structure expected by the interpreted
+program conforms to the translation by <b>ack</b> of the
+pertinent include file. Depending on the exact call of
+<b>ack</b>, sizes and alignment may differ.</p>
+
+<p>An example is in order. The EM MON 18 instruction in the
+interpreted program leads to a UNIX <i>stat()</i> system
+call by the interpreter. This call fills the given struct
+with stat information, the contents and alignments of which
+are determined by the version of UNIX and the used C
+compiler, resp. The interpreter, like any program wishing to
+do system calls that fill structs, has to be translated by a
+C compiler that uses the appropriate struct definition and
+alignments, so that it can use, e.g., <i>stab.st_mtime</i>
+and expect to obtain the right field. This struct cannot be
+copied directly to the EM memory to fulfill the MON
+instruction. First, the struct may contain extraneous,
+system-dependent fields, pertaining, e.g., to symbolic
+links, sockets, etc. Second, it may contain holes, due to
+alignment requirements. The EM program runs on an EM
+machine, knows nothing about these requirements and expects
+UNIX Version 7 fields, with offsets as determined by the
+em22, em24 or em44 compiler, resp. To do the conversion, the
+interpreter has a built-in table of the offsets of all the
+fields in the structs that are filled by the MON
+instruction. The appropriate fields from the result of the
+UNIX <i>stat()</i> are copied one by one to the appropriate
+positions in the EM memory to be filled by MON 18.</p>
+
+<p>The <i>ioctl()</i> call (MON 54) poses additional
+problems. Not only does it have a second argument which is a
+pointer to a struct, the type of which is dynamically
+determined, but its first argument is an opcode that varies
+considerably between the versions of UNIX. To solve the
+first problem, the interpreter examines the opcode (request)
+and treats the second argument accordingly. The second
+problem can be solved by translating the UNIX Version 7
+<i>ioctl()</i> request codes to their proper values on the
+various systems. This is, however, not always useful, since
+some EM run-time systems use the local request codes. There
+is a compile-time flag, V7IOCTL, which, if defined, will
+restrict the <i>ioctl()</i> call to the version 7 request
+codes and emulate them on the local system; otherwise the
+request codes of the local system will be used (as far as
+implemented).</p>
+
+<p>Minor problems also showed up with the implementation of
+<i>execve()</i> and <i>fork()</i>. <i>Execve()</i> expects
+three pointers on the stack. The first points to the name of
+the program to be executed, the second and third are the
+beginnings of the <b>argv</b> and <b>envp</b> pointer arrays
+respectively. We cannot pass these pointers to the system
+call however, because the EM addresses to which they point
+do not correspond with UNIX addresses. Moreover, (it is not
+very likely to happen but) what if someone constructs a
+program holding the contents for one of these pointers in
+the stack? The stack is implemented upside down, so passing
+the pointer to <i>execve()</i> causes trouble for this
+reason too. The only solution was to copy the pointer
+contents completely to fresh UNIX memory, constructing
+vectors which can be passed to the system call. Any
+impending memory fault while making these copies results in
+failure of the system call, with <i>errno</i> set to
+EFAULT.</p>
+
+<p>The implementation of the <i>fork()</i> call faced us
+with problems concerning IO-channels. Checking messages (as
+well as logging) must be divided over different files.
+Otherwise, these messages will coincide. This problem was
+solved by post-fixing the default message file
+<b>int.mess</b> (as well as the logging file <b>int.log</b>)
+with an automatically leveled number for every new forked
+process. Children of the original process do their
+diagnostics in files with postfix 1,2,3 etc. Second
+generation processes are assigned files numbered 11, 12, 21
+etc. When 6 generations of processes exist at one moment,
+the seventh will get the same message file as the sixth, for
+the length of the filename will become too long.</p>
+
+<p>Some of the monitor calls receive pointers (addresses)
+from to program, to be passed to the kernel; examples are
+the struct stat for <i>stat()</i>, the area to be filled for
+<i>read()</i>, etc. If the address is wrong, the kernel does
+not generate a trap, but rather the system call returns with
+failure, while <i>errno</i> is set to EFAULT. This is
+implemented by consistent checking of all pointers in the
+MON instruction.</p>
+<a name="2.6. Internal arithmetic."></a>
+<h2>2.6. Internal arithmetic.</h2>
+
+<p>Doing arithmetic on signed integers, the smallest
+negative integer (<i>minsint</i>) is considered a legal
+value. This is in contradiction with the EM Manual [1], page
+14, which proposes using <i>minsint</i> for uninitialized
+integers. The shadow bytes already check for uninitialized
+integers however, so we do not need this special illegal
+value. Although the EM Manual provides two traps, for
+undefined integers and floats, undefined objects occur so
+frequently (e.g. in block copying partially initialized
+areas) that the interpreter just gives a warning.</p>
+
+<p>Except for arithmetic on unsigneds, all arithmetic
+checks for overflow. The value that is pushed on the stack
+after an overflow occurs depends on the UNIX behavior with
+regard to that particular calculation. If UNIX would not
+accept the calculation (e.g. division by zero), a zero is
+pushed as a convention. Illegal computations which UNIX does
+accept in silence (e.g. one&rsquo;s complement of
+<i>minsint</i>), simply push the UNIX-result after giving a
+trap message.</p>
+<a name="2.7. Shadow bytes implementation."></a>
+<h2>2.7. Shadow bytes implementation.</h2>
+
+<p>A great deal of run-time checking is performed by the
+interpreter (except if used in the fast version). This
+section gives all details about the shadow bytes. In order
+to keep track of information about the contents of D-space
+(stack and global data area), there is one shadow-byte for
+each byte in these spaces. Each bit in a shadow-byte
+represents some piece of information about the contents of
+its corresponding &rsquo;sun-byte&rsquo;. All bits off
+indicates an undefined sun-byte. One or more bits on always
+guarantees a well-defined sun-byte. The bits have the
+following meaning:</p>
+
+<p>&bull; bit 0:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>indicates that the sun-byte is (a part of) an
+integer.</p>
+</td>
+</table>
+
+<p>&bull; bit 1:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>the sun-byte is a part of a floating point number.</p>
+</td>
+</table>
+
+<p>&bull; bit 2:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>the sun-byte is a part of a pointer in dataspace.</p>
+</td>
+</table>
+
+<p>&bull; bit 3:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>the sun-byte is a part of a pointer in the instruction
+space. According to [1] (paragraph 6.4), there are two types
+pointers which must be distinguishable. Conversion between
+these two types is impossible. The shadow-bytes make the
+distinction here.</p>
+</td>
+</table>
+
+<p>&bull; bit 4:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>protection bit. Indicates that the sun-byte is part of a
+protected piece of memory. There is a protected area in the
+stack, the Return Status Block. The EM machine language has
+no possibility to declare protected memory, as is possible
+in EM assembly (the ROM instruction). The protection bit is,
+however, set for the line number and filename pointer area
+near location 0, to aid in catching references to location
+0.</p>
+</td>
+</table>
+
+<p>&bull; bit 5/6/7:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>free for later use.</p>
+</td>
+</table>
+
+<p>The shadow bytes are managed by the routines declared in
+<i>shadow.h</i>. The warnings originating from checking
+these shadow-bytes during run-time are various. A list of
+them is given in appendix A, together with suggestions
+(primarily for the C-programmer) where to look for the
+trouble maker(s).</p>
+
+<p>A point to notice is, that once a warning is generated,
+it may be repeated thousands of times. Since repetitive
+warnings carry little information, but consume much file
+space, the interpreter keeps track of the number of times a
+given warning has been produced from a given line in a given
+file. The warning message will be printed only if the
+corresponding counter is a power of four (starting at 1). In
+this way, a logarithmic back-off in warning generation is
+established.</p>
+
+<p>It might be argued that the counter should be kept for
+each (warning, PC value) pair rather than for each (warning,
+file position) pair. Suppose, however, that two instruction
+in a given line would cause the same message regularly; this
+would produce two intertwined streams of identical messages,
+with their counters jumping up and down. This does not seem
+desirable.</p>
+<a name="2.8. Return Status Block (RSB)"></a>
+<h2>2.8. Return Status Block (RSB)</h2>
+
+<p>According to the description in [1], at least the return
+address and the base address of the previous RSB have to be
+pushed when performing a call. Besides these two pointers,
+other information can be stored in the RSB also. The
+interpreter pushes the following items:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p>a pointer to the current filename,</p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="88%">
+
+<p>the current line number (always four bytes),</p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="30%">
+
+<p>the Local Base,</p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="74%">
+
+<p>the return address (Program Counter),</p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="64%">
+
+<p>the current procedure identifier</p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>the RSB code, which distinguishes between initial
+start-up, normal call, returnable trap and non-returnable
+trap (a word-size integer).</p>
+</td>
+</table>
+
+<p>Consequently, the size of the RSB varies, depending on
+word size and pointer size; its value is available as
+<i>rsbsize</i>. When the RSB is removed from the stack (by a
+RET or RTT) the RSB code is under the Stack Pointer for
+immediate checking. It is not clear what should be done if
+RSB code and return instruction do not match; at present we
+give a message and continue, for what it is worth.</p>
+
+<p>The reason for pushing filename and line number is that
+some front-ends tend to forget the LIN and FIL instructions
+after returning from a function. This may result in error
+messages in wrong source files and/or line numbers.</p>
+
+<p>The procedure identifier is kept and restored to check
+that the PC will not move out of the running procedure. The
+PI is an index in the proctab, which tells the limits in the
+text segment of the running procedure.</p>
+
+<p>If the Return Status Block is generated as a result of a
+trap, more is stacked. Before stacking the normal RSB, the
+trap function pushes the following items:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>the contents of the entire Function Return Area,</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>the number of bytes significant in the above (a
+word-size integer),</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>a word-size flag indicating if the contents of the FRA
+are valid,</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="76%">
+
+<p>the trap number (a word-size integer).</p>
+</td>
+<td width="13%">
+</td>
+</table>
+
+<p>The latter is followed directly by the RSB, and
+consequently acts as the only parameter to the trap
+handler.</p>
+<a name="2.9. Operand access."></a>
+<h2>2.9. Operand access.</h2>
+
+<p>The EM Manual mentions two ways to access the operands
+of an instruction. It should be noticed that the operand in
+EM is often not the direct operand of the operation; the
+operand of the ADI instruction, e.g., is the width of the
+integers to be added, not one of the integers themselves.
+The various operand types are described in [1]. Each opcode
+in the text segment identifies an instruction with a
+particular operand type; these relations are described in
+computer-readable format in a file in the EM tree,
+<i>ip_spec.t</i>.</p>
+
+<p>The interpreter uses the third method. Several other
+approaches can be designed, with increasing efficiency and
+equally increasing complexity. They are briefly treated
+below.</p>
+<a name="2.9.1. The Dispatch Table, Method 1."></a>
+<h2>2.9.1. The Dispatch Table, Method 1.</h2>
+
+<p>When the interpreter starts, it reads the ip_spec.t file
+and constructs from it a dispatch table. This table (of
+which there are actually three, for primary, secondary and
+tertiary opcodes) has 256 entries, each describing an
+instruction with indications on how to decode the operand.
+For each instruction executed, the interpreter finds the
+entry in the dispatch table, finds information there on how
+to access the operand, constructs the operand and calls the
+appropriate routine with the operand as calculated. There is
+one routine for each instruction, which is called with the
+ready-made operand. Method 1 is easy to program but requires
+constant interpretation of the dispatch table.</p>
+<a name="2.9.2. Intelligent Routines, Method 2."></a>
+<h2>2.9.2. Intelligent Routines, Method 2.</h2>
+
+<p>For each opcode there is a separate routine, and since
+an opcode uniquely defines the instruction and the operand
+format, the routine knows how to get the operand; this
+knowledge is built into the routine. Preferably the heading
+of the routine is generated automatically from the ip_spec.t
+file. Operand decoding is immediate, and no dispatch table
+is needed. Generation of the 469 required routines is,
+however, far from simple. Either a generated array of
+routine names or a generated switch statement is used to map
+the opcode onto the correct routine. The switch approach has
+the advantage that parameters can be passed to the
+routines.</p>
+<a name="2.9.3. Intelligent Calls, Method 3."></a>
+<h2>2.9.3. Intelligent Calls, Method 3.</h2>
+
+<p>The call in the switch statement does full operand
+construction, and the resulting operand is passed to the
+routine. This reduces the number of routines to 133, the
+number of EM instructions. Generation of the switch
+statement from ip_spec.t is more complicated, but the
+routine space is much cleaner. This does not give any
+speed-up since the same actions are still required; they are
+just performed in a different place.</p>
+<a name="2.9.4. Static Evaluation."></a>
+<h2>2.9.4. Static Evaluation.</h2>
+
+<p>It can be observed that the evaluation of the operand of
+a given instruction in the text segment will always give the
+same result. It is therefore possible to preprocess the text
+segment, decomposing the instructions into structs which
+contain the address, the instruction code and the operand.
+No operand decoding will be necessary at run-time: all
+operands have been precalculated. This will probably give a
+considerable speed-up. Jumps, especially GTO jumps, will,
+however, require more attention.</p>
+<a name="2.10. Disassembly."></a>
+<h2>2.10. Disassembly.</h2>
+
+<p>A disassembly facility is available, which gives a
+readable but not letter-perfect disassembly of the EM
+object. The procedure structure is indicated by placing the
+indication <b>P[n]</b> at the entry point of each procedure,
+where <b>n</b> is the procedure identifier. The number of
+locals is given in a comment.</p>
+
+<p>The disassembler was generated by the software in the
+directory <i>switch</i> and then further processed by
+hand.</p>
+<a name="3. THE LOGGING MACHINE."></a>
+<h2>3. THE LOGGING MACHINE.</h2>
+
+<p>Since messages and warnings provided by <b>int</b>
+include source code file names and line numbers, they alone
+often suffice to identify the error. If, however, the
+necessity arises, much more extensive debugging information
+can be obtained by activating the the Logging Machine. This
+Logging Machine, which monitors all actions of the EM
+machine, is the subject of this chapter.</p>
+<a name="3.1. Implementation."></a>
+<h2>3.1. Implementation.</h2>
+
+<p>When inspecting the source code of <b>int</b>, many
+lines in the following format will show up:</p>
+<pre>     LOG((&quot;@&lt;<i>letter</i>&gt;&lt;<i>digit</i>&gt; message&quot;, args));
+</pre>
+
+<p>or</p>
+<pre>     LOG((&quot; &lt;<i>letter</i>&gt;&lt;<i>digit</i>&gt; message&quot;, args));
+</pre>
+
+<p>The double parentheses are needed, because <i>LOG()</i>
+is declared as a define, and has a printf-like argument
+structure.</p>
+
+<p>The &lt;<i>letter</i>&gt; classifies the log message and
+corresponds to an entry in the <i>logmask</i>, which holds a
+threshold for each class of messages. The following classes
+exist:</p>
+
+<p align=center><img src="grohtml-107771.png"></p>
+
+<p>When the interpreter reaches a LOG(()) statement it
+scans its first argument; if <i>letter</i> occurs in the
+logmask, and if <i>digit</i> is lower or equal to the
+threshold in the logmask, the message is given. Depending on
+the first character, the message will be preceded by a
+position indication (with the @) or will be printed as is
+(with the space). The <i>letter</i> is determines the
+message class and the <i>digit</i> is used to distinguish
+various levels of logging, with a lower digit indicating a
+more important message. We will call the
+&lt;<i>letter</i>&gt;&lt;<i>digit</i>&gt; combination the
+<b>id</b> of the logging.</p>
+
+<p>In general, the lower the <i>digit</i> following the
+<i>letter</i>, the more important the message. E.g. m5
+reports about unsuccessful monitor calls only, m9 also
+reports about successful monitors (which are obviously less
+interesting). New logging messages can be added to the
+source code on relevant places.</p>
+
+<p>Reasonable settings for the logmask are:</p>
+
+<p align=center><img src="grohtml-107772.png"></p>
+
+<p>An EM interpreter without a Logging Machine can be
+obtained by undefining the macro <i>CHECKING</i> in the file
+<i>checking.h</i>.</p>
+<a name="3.2. Controlling the Logging machine."></a>
+<h2>3.2. Controlling the Logging machine.</h2>
+
+<p>The actions of the Logging Machine are controlled by a
+set of internal variables (one of which is the log mask).
+These variables can be set through assignments on the
+command line, as explained int the manual page <i>int.1</i>,
+q.v. Since there are a great many logging statements in the
+program, of which only a few will be executed in any call of
+the interpreter, it is important to be able to decide
+quickly if a given <i>id</i> has to be checked at all. To
+this end all logging statements are guarded (in the #define)
+by a test for the boolean variable <i>logging</i>. This
+variable will only be set if the command line assignments
+show the potential need for logging (<i>must_log</i>) and
+the instruction count (<i>inr</i>) is at least equal to
+<i>log_start</i> (which derives from the parameter
+<b>LOG</b>).</p>
+
+<p>The log mask can be set by the assignment</p>
+<pre>     &quot;LOGMASK=<i>logstring</i>&quot;
+</pre>
+
+<p>which sets the current logmask to <i>logstring</i>. A
+logstring has the following form:</p>
+<pre>     [ [ <i>letter</i> | <i>letter</i> &minus; <i>letter</i> ]+ <i>digit</i> ]+
+</pre>
+
+<p>E.g. LOGMASK=A&minus;D8x9R7c0hi4 will print all messages
+belonging to loggings with <b>id</b>s:
+<i>A0..A8,B0..B8,C0..C8,D0..D8,x0..x9,R0..R7,c0,h0..h4,i0..i4</i>.</p>
+
+<p>The logging variable STOP can be used to prevent
+run-away logging past the point where the user expects an
+error to occur. STOP=<i>nr</i> will stop the interpreter
+after instruction number <i>nr</i>.</p>
+
+<p>To simplify the use of the logging machine, a number of
+abbreviations have been defined. E.g., AT=<i>nr</i> can be
+thought of as an abbreviation of LOG=<i>nr&minus;1</i>
+STOP=<i>nr+1</i>; this causes three stack dumps, one before
+the suspect instruction, one on it and one after it; then
+the interpreter stops.</p>
+
+<p>Logging results will appear in a special logging file
+(default: <i>int.log</i>).</p>
+<a name="3.3. Dumps."></a>
+<h2>3.3. Dumps.</h2>
+
+<p>There are three routines available to examine the memory
+contents:</p>
+
+<p align=center><img src="grohtml-107773.png"></p>
+
+<p>These routines can be used everywhere in the program to
+examine the contents of memory. The internal variables allow
+the gda and heap to be dumped only once (according to the
+corresponding internal variable). The stack is dumped after
+each instruction if the log mask contains d1 or d2; d2 gives
+a full formatted dump, d1 produces a listing of the Return
+Status Blocks only. An attempt is made to format the stack
+correctly, based on the shadow bytes, which identify the
+Return Status Block.</p>
+
+<p>Remember to set the correct <b>id</b> in the LOGMASK,
+and to give LOG the correct value. If dumping is needed
+before the first instruction, then LOG must be set to 0.</p>
+
+<p>The dumps of the global data area and the heap are
+controlled internally by the id-s +1 and *1 resp.; the
+corresponding logmask entries are set automatically by
+setting the GDA and HEAP variables.</p>
+<a name="3.4. Forking."></a>
+<h2>3.4. Forking.</h2>
+
+<p>As mentioned earlier, a call to <i>fork()</i>, causes an
+image of the current program to start running. To prevent a
+messy logfile, the child process gets its own logfile (and
+message file, tally file, etc.). These logfiles are
+distinguished from the parent logfile by the a postfix,
+e.g., <i>logfile_1</i> for the first child, <i>logfile_2</i>
+for the second child, <i>logfile_1_2</i> for the second
+child of the first child, etc.<i><br>
+Note</i>: the implementation of this feature is shaky; it
+works for the log file but should also work for other files
+and for the names of the logging variables.</p>
+
+<p align=center>APPENDIX A</p>
+<a name="List of Warnings."></a>
+<h2>List of Warnings.</h2>
+
+<p>The shadow-byte administration makes it possible to
+check for a wide range of errors during run-time. We have
+tried to make the diagnostics self-explanatory and
+especially useful for the C-programmer. The warnings are
+printed in the message file, together with source file and
+line number. The complete list of warnings is presented
+here, followed by an explanation of what might be wrong.
+Often, these explanations implicitly assume that the program
+being interpreted, was originally written in C (and not
+Pascal, Basic etc.).</p>
+
+<p><i>Reading the load file</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="10%"></td>
+<td width="86%">
+
+<p><b>Floating point instructions flag in header
+ignored</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="10%"></td>
+<td width="78%">
+
+<p><b>No float initialisation in this version</b></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The interpreter was compiled with the NOFLOAT option;
+code involving floating point operations can be run as long
+as the actual instructions are avoided.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4.</p>
+</td>
+<td width="10%"></td>
+<td width="66%">
+
+<p><b>Extra-test flag in header ignored</b></p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The interpreter already tests anything conceivable.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5.</p>
+</td>
+<td width="10%"></td>
+<td width="70%">
+
+<p><b>Maximum line number in header was 0</b></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>This number could be used to allocate tables for
+tallying; these tables are, however, expanded as needed, so
+the number is immaterial.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>7.</p>
+</td>
+<td width="10%"></td>
+<td width="48%">
+
+<p><b>Bad float initialisation</b></p>
+</td>
+<td width="37%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The loadfile contains a floating point denotation which
+does not satisfy the syntax (see 2.6). Examining the
+loadfile (with <b>od &minus;c</b>) might show the syntax
+error. Probably there is a bug in the front-end, creating
+floats with a bad syntax.</p>
+</td>
+</table>
+
+<p><i>System calls</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>11.</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p><b>IOCTL &minus; bad or unimplemented request</b></p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The second parameter to the ioctl() request (the
+operation code) is invalid or not implemented; since there
+are many different opcodes on the various UNIX systems, it
+is difficult to tell which. The system call fails.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>14.</p>
+</td>
+<td width="8%"></td>
+<td width="62%">
+
+<p><b>MPXCALL &minus; not (yet) implemented</b></p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>15.</p>
+</td>
+<td width="8%"></td>
+<td width="60%">
+
+<p><b>PROFIL &minus; not (yet) implemented</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>16.</p>
+</td>
+<td width="8%"></td>
+<td width="60%">
+
+<p><b>PTRACE &minus; not (yet) implemented</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The monitor calls <i>mpxcall()</i>, <i>profil()</i> and
+<i>ptrace()</i> have not been implemented. The monitor call
+fails.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>21.</p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p><b>Inaccessible memory in system call</b></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>Bad pointers passed to system calls do not cause a memory
+fault (which in UNIX would happen to the kernel), but cause
+the system call to fail with the UNIX variable errno set to
+14 (EFAULT). It seems likely that the program is at fault,
+but there is also a good possibility that a library routine
+made unwarranted assumptions about word size and pointer
+size.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>23.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>READ &minus; buffer resides in unallocated
+memory</b></p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>24.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>READ &minus; buffer across global data area and
+heap</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>When the buffer passed to the read() system call is
+situated (completely or partially) in unallocated memory
+(beyond <i>HP</i>) or begins in the global data area and
+ends in the heap, the appropriate warning is given. The
+buffer is not written.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>25.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>WRITE &minus; buffer resides in unallocated
+memory</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>26.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>WRITE &minus; buffer across global data area and
+heap</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>27.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>WRITE &minus; (part of) global buffer is
+undefined</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>28.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>WRITE &minus; (part of) local buffer is
+undefined</b></p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The first two are equivalent to the READ-errors above.
+Writing out a buffer usually makes no sense when the
+contents are undefined, so one of the latter two warnings
+will be generated in this case. A global buffer resides in
+the data partition; a local buffer resides in the stack
+partition. This corresponds to global and local variables in
+a C-program. In the first two cases the WRITE is not
+performed, in the latter two cases it is.</p>
+</td>
+</table>
+
+<p><i>Traps and signals</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>31.</p>
+</td>
+<td width="8%"></td>
+<td width="54%">
+
+<p><b>SIGTRP &minus; bad signo argument</b></p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The <i>sigtrp()</i> monitor call allows <i>sig_no</i>
+arguments in the range [1..17] (UNIX Version 7 signals); the
+actual argument is out of range.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>32.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>SIGTRP &minus; signo argument is a synchronous
+trap</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The signal is one that can only be caused synchronously
+by the running program on UNIX; it cannot occur to an
+interpreted program.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>33.</p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p><b>SIGTRP &minus; bad trapno argument</b></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The <i>sigtrp()</i> monitor call allows <i>trap_no</i>
+arguments between 0 and 252, and the special values &minus;2
+and &minus;3; the actual argument is not one of these.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>36.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Heap overflow due to command line limitation</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>37.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Stack overflow due to command line limitation</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The maximum sizes of the heap and the stack can be
+limited by options on the command line. If overflow occurs
+due to such limitations, the corresponding trap is taken,
+preceded by one of the above warnings. If the memory of the
+interpreter itself is exhausted, a fatal error follows.</p>
+</td>
+</table>
+
+<p><i>Run-time type checking</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>41.</p>
+</td>
+<td width="8%"></td>
+<td width="48%">
+
+<p><b>Local character expected</b></p>
+</td>
+<td width="37%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>42.</p>
+</td>
+<td width="8%"></td>
+<td width="50%">
+
+<p><b>Global character expected</b></p>
+</td>
+<td width="35%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>43.</p>
+</td>
+<td width="8%"></td>
+<td width="44%">
+
+<p><b>Local integer expected</b></p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>44.</p>
+</td>
+<td width="8%"></td>
+<td width="46%">
+
+<p><b>Global integer expected</b></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>45.</p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p><b>Local float expected</b></p>
+</td>
+<td width="45%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>46.</p>
+</td>
+<td width="8%"></td>
+<td width="42%">
+
+<p><b>Global float expected</b></p>
+</td>
+<td width="43%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>47.</p>
+</td>
+<td width="8%"></td>
+<td width="54%">
+
+<p><b>Local data pointer expected</b></p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>48.</p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p><b>Global data pointer expected</b></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>49.</p>
+</td>
+<td width="8%"></td>
+<td width="68%">
+
+<p><b>Local instruction pointer expected</b></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>50.</p>
+</td>
+<td width="8%"></td>
+<td width="70%">
+
+<p><b>Global instruction pointer expected</b></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>In general, a type violation has taken place when one of
+these warnings is given. The <b>float</b>- and
+<b>instruction pointer</b> warnings are rare and will
+usually be easy traceable. <b>Integer/character expected</b>
+will normally occur when unsigned arithmetic is performed on
+datapointers or when memory containing objects other than
+integers is copied bytewise. Often, this warning is followed
+by a warning <b>datapointer expected</b>. This is due to our
+decision of transforming pointers to (unsigned) integers
+after doing unsigned arithmetic on them. When such a
+transformed integer is dereferenced (as if it were a
+pointer) or, in general, when it is treated as a pointer,
+this results in a warning. The present library
+implementation of malloc() causes such a sequence of
+errors.</p>
+</td>
+</table>
+
+<p>These messages are always followed by a tentative
+description of what is found in memory at the offending
+place.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>61.</p>
+</td>
+<td width="8%"></td>
+<td width="52%">
+
+<p><b>Actual memory is undefined</b></p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>62.</p>
+</td>
+<td width="8%"></td>
+<td width="66%">
+
+<p><b>Actual memory contains an integer</b></p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>63.</p>
+</td>
+<td width="8%"></td>
+<td width="60%">
+
+<p><b>Actual memory contains a float</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>64.</p>
+</td>
+<td width="8%"></td>
+<td width="74%">
+
+<p><b>Actual memory contains a data pointer</b></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>65.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Actual memory contains an instruction pointer</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>66.</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><b>Actual memory contains mixed information</b></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>If the contents of the area was undefined, check the
+source code for an uninitialized variable of the mentioned
+type. Officially, the use of an undefined value should
+result in a EIUND or EFUND trap but the occurrence is so
+common that a warning is more appropriate. The contents of
+memory are described as mixed if the data consists of pieces
+of different types. This happens, e.g., when caller and
+callee do not agree on the types and lengths of the
+parameters.</p>
+</td>
+</table>
+
+<p><i>Protection</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>71.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Destroying contents of ROM (at or near loc 0)</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The program stores a value in Read-Only Memory; the only
+ROM in the present implementation is the area near location
+0. The warning probably results from storing under a NULL
+pointer. This is only a warning, the store operation is
+executed normally. Reads from location 0 are not
+detected.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>72.</p>
+</td>
+<td width="8%"></td>
+<td width="84%">
+
+<p><b>Destroying contents of Return Status Block</b></p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The Return Status Block is the stack area containing the
+return address, the dynamic link, etc. This may or may not
+be an error. The current implementation of
+<i>setjmp()</i>/<i>longjmp()</i> may be responsible for it.
+If the program does not use setjmp(), there <i>is</i>
+something very wrong (e.g. argument for ASP too large). Note
+that there are some library routines (such as
+<i>alarm()</i>) which use <i>setjmp()</i>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>81.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Logical operation using undefined operand(s)</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>82.</p>
+</td>
+<td width="8%"></td>
+<td width="60%">
+
+<p><b>Comparing undefined operand(s)</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The logical operations AND, XOR, IOR, COM and the compare
+operation CMS do their jobs bytewise. If one of the bytes is
+found to be undefined, the corresponding warning is given,
+and the operation is stopped immediately. The stack is
+adjusted so interpretation may continue.<br>
+It is hard to say what went wrong. Possibly, the argument of
+the instruction at hand (which indicates the size of the
+objects to be compared), was too large.</p>
+</td>
+</table>
+
+<p><i>Bad operands</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>91.</p>
+</td>
+<td width="8%"></td>
+<td width="56%">
+
+<p><b>Shift over negative distance</b></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>92.</p>
+</td>
+<td width="8%"></td>
+<td width="58%">
+
+<p><b>Shift over too large distance</b></p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>Shift instructions yield undefined results if the shift
+distance is negative or larger than the object size.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>93.</p>
+</td>
+<td width="8%"></td>
+<td width="86%">
+
+<p><b>Pointer arithmetic yields pointer to bad
+segment</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>When doing pointer arithmetic (ADP, ADS), the operand and
+result pointer must be in the same <i>segment</i> (see sec.
+4). E.g. loading the address of the first local and adding
+20 to it will certainly give this warning.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>94.</p>
+</td>
+<td width="8%"></td>
+<td width="84%">
+
+<p><b>Subtracting pointers to different segments</b></p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>Pointers may be subtracted only if they point into the
+same segment.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>96.</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p><b>Pointer arithmetic with NULL pointer</b></p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>By definition it is illegal to do arithmetic with null
+pointers. Integers with the size of a pointer and the value
+zero are recognized as NULL pointers. A well-known C-trick
+to compute the offset of some field in a struct is
+converting the null-pointer to the type of the struct and
+simply taking the address of the field. This trick will
+&minus;when translated and interpreted&minus; generate this
+warning because it results in arithmetic with the NULL
+pointer.</p>
+</td>
+</table>
+
+<p><i>Return area</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>101.</p>
+</td>
+<td width="6%"></td>
+<td width="68%">
+
+<p><b>Returned function result too large</b></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>102.</p>
+</td>
+<td width="6%"></td>
+<td width="68%">
+
+<p><b>Returned function result too small</b></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>This warning is generated when the size of the expected
+return value is not equal to the size actually returned.<br>
+An interpreted program may have fallen through the end of
+the code without explicitly doing an <i>exit()</i> or
+<i>return()</i>. The start-up routine (<i>crt0()</i>)
+however always expects to get some value returned by the
+program proper.<br>
+Another (less probable) possibility of course is that the
+code contains a subroutine or function call that does not
+return properly (e.g. it returns a short instead of a
+long).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>103.</p>
+</td>
+<td width="6%"></td>
+<td width="78%">
+
+<p><b>Returned function result may be garbled</b></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>This warning will be generated, when the contents of the
+FRA are fetched after some instruction is executed which can
+mess up the area. Compiler-generated loadfiles should not
+generate this message.</p>
+</td>
+</table>
+
+<p><i>Return Status Block</i></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>111.</p>
+</td>
+<td width="6%"></td>
+<td width="76%">
+
+<p><b>RET did not find a Return Status Block</b></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>112.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Used RET to return from a trap</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The RET instruction found a garbled Return Status Block,
+or on that resulted from a trap.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>115.</p>
+</td>
+<td width="6%"></td>
+<td width="76%">
+
+<p><b>RTT did not find a Return Status Block</b></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>116.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p><b>RTT on empty stack</b></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>117.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Used RTT to return from a call</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>118.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Used RTT to return from a non-returnable trap</b></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>The RTT (Return from Trap) instruction found a Return
+Status block that was not created properly by a trap.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>121.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Stack Pointer too large in RET</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>122.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Stack Pointer too small in RET</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>125.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Stack Pointer too large in RTT</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>126.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Stack Pointer too small in RTT</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<p>According to the EM Manual (4.2), &quot;the value of SP
+just after the return value has been popped must be the same
+as the value of SP just before executing the first
+instruction of the invocation.&quot; If the Stack Pointer is
+too large, some dynamically allocated item or some temporary
+result may have been left behind on the stack. If the Stack
+Pointer is too small, some locals have been unstacked. Since
+the interpreter has enough information in the Return Status
+Block, it recovers correctly from these errors.</p>
+</td>
+</table>
+
+<p><i>Traps</i></p>
+
+<p>Some traps have ambiguous or non-obvious causes. As far
+as possible, these are preceded by a warning, explaining the
+circumstances of the trap.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>131.</p>
+</td>
+<td width="6%"></td>
+<td width="52%">
+
+<p><b>Trap ESTACK: DCH on bad LB</b></p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>132.</p>
+</td>
+<td width="6%"></td>
+<td width="52%">
+
+<p><b>Trap ESTACK: LPB on bad LB</b></p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>133.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap ESTACK: SP retracted over Return Status
+Block</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>134.</p>
+</td>
+<td width="6%"></td>
+<td width="72%">
+
+<p><b>Trap ESTACK: SP moved into data area</b></p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>135.</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p><b>Trap ESTACK: SP set to non-word-boundary</b></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>136.</p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p><b>Trap ESTACK: LB set out of stack</b></p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>137.</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p><b>Trap ESTACK: LB set to non-word-boundary</b></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>138.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap ESTACK: LB set to position where there is no
+RSB</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>141.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EHEAP: HP retracted into Global Data
+Area</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>142.</p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p><b>Trap EHEAP: HP pushed into stack</b></p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>143.</p>
+</td>
+<td width="6%"></td>
+<td width="78%">
+
+<p><b>Trap EHEAP: HP set to non-word-boundary</b></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>151.</p>
+</td>
+<td width="6%"></td>
+<td width="56%">
+
+<p><b>Trap EILLINS: unknown opcode</b></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>152.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: conversion with unacceptable size for
+this machine</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>153.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: FIL with non-existing address</b></p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>154.</p>
+</td>
+<td width="6%"></td>
+<td width="74%">
+
+<p><b>Trap EILLINS: LFR with too large size</b></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>155.</p>
+</td>
+<td width="6%"></td>
+<td width="74%">
+
+<p><b>Trap EILLINS: RET with too large size</b></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>156.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: instruction argument of class c does
+not fit a word</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>157.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: instruction on double word on machine
+with word size 4</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>158.</p>
+</td>
+<td width="6%"></td>
+<td width="72%">
+
+<p><b>Trap EILLINS: local offset too large</b></p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>159.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: instruction argument of class g not in
+GDA</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>160.</p>
+</td>
+<td width="6%"></td>
+<td width="78%">
+
+<p><b>Trap EILLINS: fragment offset too large</b></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>161.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: counter in lexical instruction out of
+range</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>162.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EILLINS: non-existent procedure
+identifier</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>163.</p>
+</td>
+<td width="6%"></td>
+<td width="74%">
+
+<p><b>Trap EILLINS: illegal register number</b></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>172.</p>
+</td>
+<td width="6%"></td>
+<td width="74%">
+
+<p><b>Trap EBADPC: jump out of text segment</b></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>173.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EBADPC: jump out of procedure fragment</b></p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>181.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p><b>Trap EBADGTO: GTO does not restore an existing
+RSB</b></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>182.</p>
+</td>
+<td width="6%"></td>
+<td width="82%">
+
+<p><b>Trap EBADGTO: GTO descriptor on the stack</b></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>191.</p>
+</td>
+<td width="6%"></td>
+<td width="60%">
+
+<p><b>Trap caused by TRP instruction</b></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="86%">
+<pre>     APPENDIX B
+</pre>
+</td>
+</table>
+<a name="How to use the interpreter"></a>
+<h2>How to use the interpreter</h2>
+
+<p>The interpreter is not normally used for the debugging
+of programs under construction. Its primary application is
+as a verification tool for almost completed programs.
+Although the proper operation of the interpreter is
+obviously a black art, this chapter tries to provide some
+guidelines.</p>
+
+<p>For the sake of the argument, the source language is
+assumed to be C, but most hints apply equally well to other
+languages supported by ACK.</p>
+
+<p><i>Initial measures</i></p>
+
+<p>Start with a test case of trivial size; to be on the
+safe side, reckon with a time dilatation factor of about
+500, i.e., a second grows into 10 minutes. (The interpreter
+takes 0.5 msec to do one EM instruction on a Sun 3/50).
+Fortunately many trivial test cases are much shorter than
+one second.</p>
+
+<p>Compile the program into an <i>e.out</i>, the EM machine
+version of a <i>a.out</i>, by calling <i>em22</i> (for
+2-byte integers and 2-byte pointers), <i>em24</i> (for 2 and
+4) or <i>em44</i> (for 4 and 4) as seems appropriate; if in
+doubt, use <i>em44</i>. These compilers can be found in the
+ACK <i>bin</i> directory, and should be used instead of
+<i>acc</i> (or normal <small>UNIX</small> &reg; <i>cc</i>).
+Alternatively, <i>acc &minus;memNN</i> can be used instead
+of <i>emNN</i>.</p>
+
+<p>If a C program consists of more than one file, as it
+usually does, there is a small problem. The <i>acc</i> and
+<i>cc</i> compilers generate .o files, whereas the
+<i>emNN</i> compilers generate .m files as object files. A
+simple technique to avoid the problem is to call</p>
+<pre>     em44 *.c
+</pre>
+
+<p>if possible. If not, the following hack on the
+<i>Makefile</i> generally works.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Make sure the <i>Makefile</i> is reasonably clean and
+complete: all calls to the compiler are through
+<i>$(CC)</i>, <i>CFLAGS</i> is used properly and all
+dependencies are specified.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Add the following lines to the <i>Makefile</i> (possibly
+permanently):</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>.SUFFIXES:</p>
+<td width="19%"></td>
+<td width="10%">
+
+<p>.o</p>
+</td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>.c.o:</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>$(CC) &minus;c $(CFLAGS) $&lt;</p>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Set CC to <i>em44 &minus;.c</i> (for example). Make sure
+CFLAGS includes the &minus;O option; this yields a speed-up
+of about 15 %.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Change all .o to .m (or .k if the &minus;O option is not
+used).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>If necessary, change <i>a.out</i> to <i>e.out</i>.</p>
+</td>
+<td width="17%">
+</td>
+</table>
+
+<p>With these changes, <i>make</i> will produce an EM
+object; <i>esize</i> can be used to verify that it is indeed
+an EM object and obtain some statistics. Then call the
+interpreter:</p>
+<pre>     int &lt;EM-object-file&gt; [ parameters ]
+</pre>
+
+<p>where the parameters are the normal parameters of the
+program. This should work exactly like the original program,
+though slower. It reads from the terminal if the original
+does, it opens and closes files like the original and it
+accepts interrupts.</p>
+
+<p><i>Interpreting the results</i></p>
+
+<p>Now there are several possibilities.</p>
+
+<p>It does all this. Great! This means the program does not
+do very uncouth things. Now read the file <i>int.mess</i> to
+see if any messages were generated. If there are none, the
+program did not really run (perhaps the original cc
+<i>a.out</i> got called instead?) Normally there is at least
+a termination message like</p>
+<pre>     (Message): program exits with status 0 at &quot;awa.p&quot;, line 64, INR = 4124
+</pre>
+
+<p>This says that the program terminated through an exit(0)
+on line 64 of the file <i>awa.p</i> after 4124 EM
+instructions. If this is the only message it is time to move
+to a bigger test case.</p>
+
+<p>On the other hand, the program may come to a grinding
+halt with an error message. All messages (errors and
+warnings) have a format in which the sequence</p>
+<pre>     &quot;&lt;file name&gt;&quot;, line &lt;ln#&gt;
+</pre>
+
+<p>occurs, which is the same sequence many compilers
+produce for their error messages. Consequently, the
+<i>int.mess</i> file can be processed as any compiler
+message output.</p>
+
+<p>One such message can be</p>
+<pre>     (Fatal error) a.em: trap &quot;Addressing non existent memory&quot; not caught at &quot;a.c&quot;, line 2, INR = 16
+</pre>
+
+<p>produced by the abysmal program</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>main()</p>
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>{</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>*(int*)200000 = 1;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p>}</p>
+
+<p>Often the effects are more subtle, however. The
+program</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>main()</p>
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>{</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>int *a, b = 777;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>b = *a;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p>}</p>
+
+<p>produces the following five warnings (in far less than a
+second):</p>
+<pre>     (Warning 47, #1): Local data pointer expected at &quot;t.c&quot;, line 4, INR = 17
+     (Warning 61, cont.): Actual memory is undefined at &quot;t.c&quot;, line 4, INR = 17
+     (Warning 102, #1): Returned function result too small at &quot;&lt;unknown&gt;&quot;, line 0, INR = 21
+     (Warning 43, #1): Local integer expected at &quot;exit.c&quot;, line 11, INR = 34
+     (Warning 61, cont.): Actual memory is undefined at &quot;exit.c&quot;, line 11, INR = 34
+</pre>
+
+<p>The one about the function result looks the most
+frightening, but is the most easily solved: <i>main</i> is a
+function returning an int, so the start-up routine expects a
+(four-byte) integer but gets an empty (zero-byte) return
+area.</p>
+
+<p><i>Note</i>: The experts are divided about this. The
+traditional school holds that <i>main</i> is an int function
+and its result is the return code; this leaves them with two
+ways of supplying a return code: one as the parameter of
+<i>exit()</i> and one as the result of <i>main</i>. The
+modern school (Berkeley 4.2 etc.) claims that return codes
+are supplied exclusively by <i>exit()</i>, and they have an
+<i>exit(0)</i> in the start-up routine, just after the call
+to <i>main()</i>; leaving <i>main()</i> through the bottom
+implies successful termination.</p>
+
+<p>We shall satisfy both groups by</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>main()</p>
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p>{</p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>int *a, b = 777;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>b = *a;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>exit(0);</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+
+<p>}</p>
+
+<p>This results in</p>
+<pre>     (Warning 47, #1): Local data pointer expected at &quot;t.c&quot;, line 4, INR = 17
+     (Warning 61, cont.): Actual memory is undefined at &quot;t.c&quot;, line 4, INR = 17
+     (Message): program exits with status 0 at &quot;exit.c&quot;, line 11, INR = 33
+</pre>
+
+<p>which is pretty clear as it stands.</p>
+
+<p><i>Using stack dumps</i></p>
+
+<p>Let&rsquo;s, for the sake of argument and to avoid the
+fierce realism of 10000-line programs, assume that the above
+still does not give enough information. Since the error
+occurred in EM instruction number 17, we should like to see
+more information around that moment. Call the interpreter
+again, now with the shell variable AT set at 17:</p>
+<pre>     int AT=17 t.em
+</pre>
+
+<p>(The interpreter has a number of internal variables that
+can be set by assignments on the command line, like with
+<i>make</i>.) This gives a file called <i>int.log</i>
+containing the stack dump of 150 lines presented at the end
+of this chapter.</p>
+
+<p>Since dumping is a subfacility of logging in the
+interpreter, the formats of the lines are the same. If a
+line starts with an @, it will contain a
+file-name/line-number indication; the next two characters
+are the subject and the log level. Then comes the
+information, preceded by a space. The text contains three
+stack dumps, one before the offending instruction, one at
+it, and one after it; then the interpreter stops. All kinds
+of other dumps can be obtained, but this is default.</p>
+
+<p>For each instruction we have, in order:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>an @x9 line, giving the position in the program,</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>the messages, warnings and errors from the instruction
+as it is being executed,</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="44%">
+
+<p>dump(s), as requested.</p>
+</td>
+<td width="45%">
+</td>
+</table>
+
+<p>The first two lines mean that at line 4 in file
+<i>t.c</i> the interpreter performed its 16-th instruction,
+with the Program Counter at 30 pointing at opcode 180 in the
+text segment; the instruction was an LOL (LOad Local) with
+the operand &minus;4 derived from the opcode. It copies the
+local at offset &minus;4 to the top of the stack. The effect
+can be seen from the subsequent stack dump, where the
+undefined word at addresses 2147483568 to ...571 (the
+variable <i>a</i>) has been copied to the top of the stack
+at 2147483560 (copying undefined values does not generate a
+warning). Since we used the <i>em44</i> compiler, all
+pointers and ints in our dump are 4 bytes long. So a
+variable at address X in reality extends from address X to
+X+3.<br>
+Note that this is not the offending instruction; this stack
+dump represents the situation just before the error.</p>
+
+<p>The stack consists of a sequence of frames, each
+containing data followed by a Return Status Block resulting
+from a call; the last frame ends in top-of-stack. The first
+frame represents the stack when the program starts, through
+a call to the start-up routine. This routine prepares the
+second stack frame with the actual parameters to
+<i>main()</i>: <i>argc</i> at 2147483596, <i>argv</i> at
+2147483600 and <i>environ</i> at 2147483604.</p>
+
+<p>The RSB line shows that the call to <i>main()</i> was
+made from procedure 0 which has 0 locals, with PC at 16, an
+LB of 2147483608 and file name and line number still
+unknown. The <i>code</i> in the RSB tells how this RSB was
+made; possible values are STP (start-up), CAL, RTT
+(returnable trap) and NRT (non-returnable trap).</p>
+
+<p>The next frame shows the local variable(s) of
+<i>main()</i>; there are two of them, the pointer <i>a</i>
+at 2147483568, which is undefined, and variable <i>b</i> at
+2147483564, which has the value 777. Then comes a copy of
+<i>a</i>, just made by the LOL instruction, at 2147483560.
+The following line shows that the Function Return Area
+(which does not reside at the end of the stack, but just
+happens to be printed here) has size 0 and is presently
+undefined. The stack dump ends by showing that the Actuals
+Base is at 2147483596 (pointing at <i>argc</i>), the Locals
+Base at 2147483572 (pointing just above the local <i>a</i>),
+the Stack Pointer at 2147483560 (pointing at the undefined
+pointer), the line count is 4 and the file name is
+&quot;t.c&quot;.</p>
+
+<p>(Notice that there is one more stack frame than one
+would probably expect, the one above the start-up
+routine.)</p>
+
+<p>The Function Return Area could have a size larger than 0
+and still be undefined, for example when an instruction that
+does not preserve the contents of the FRA has just been
+executed; likewise the FRA could have size 0 and be defined
+nevertheless, for example just after a RET 0
+instruction.</p>
+
+<p>All this has set the scene for the distaster which is
+about to strike in the next instruction. This is indeed a
+LOI (LOad Indirect) of size 4, opcode 169; it causes the
+message</p>
+<pre>     warning: Local data pointer expected [stack.c: 242]
+</pre>
+
+<p>and its continuation</p>
+<pre>     warning cont.: Actual memory is undefined
+</pre>
+
+<p>(detected in the interpreter file <i>stack.c</i> at line
+242; this can be useful for sorting out dubious semantics).
+We see that the effect, as shown in the third frame of this
+stack dump (at instruction number 17) is somewhat
+unexpected: the LOI has fetched the value 4 and stacked it.
+The reason is that, unfortunately, undefinedness is not
+transitive in the interpreter. When an undefined value is
+used in an operation (other than copying) a warning is
+given, but thereafter the value is treated as if it were
+zero. So, after the warning a normal null pointer remains,
+which is then used to pick up the value at location 0. This
+is the place where the EM machine stores its current line
+number, which is presently 4.</p>
+
+<p>The third stack dump shows the final effect: the value 4
+has been unstacked and copied to variable <i>b</i> at
+2147483564 through an STL (STore Local) instruction.</p>
+
+<p>Since this form of logging dumps the stack only, the log
+file is relatively small as dumps go. Nevertheless, a useful
+excerpt can be obtained with the command</p>
+<pre>     grep &rsquo;d1&rsquo; int.log
+</pre>
+
+<p>This extracts the Return Status Block lines from the
+log, thus producing three traces of calls, one for each
+instruction in the log:</p>
+<pre>      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483560, HP = 848, LIN = 4, FIL = &quot;t.c&quot;
+      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483560, HP = 848, LIN = 4, FIL = &quot;t.c&quot;
+      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483564, HP = 848, LIN = 4, FIL = &quot;t.c&quot;
+</pre>
+
+<p>Theoretically, the pertinent trace is the middle one,
+but in practice all three are equal. In the present case
+there isn&rsquo;t much to trace, but in real programs the
+trace can be useful.</p>
+
+<p><i>Errors in libraries</i></p>
+
+<p>Since libraries are generally compiled with suppression
+of line number and file name information, the line number
+and file name in the interpreter will not be updated when it
+enters a library routine. Consequently, all messages
+generated by interpreting library routines will seem to
+originate from the line of the call. This is especially true
+for the routine malloc(), which, from the nature of its
+business, often contains dubitable code.</p>
+
+<p>A usual message is:</p>
+<pre>     (Warning 43, #1): Local integer expected at &quot;buff.c&quot;, line 18, INR = 266
+     (Warning 64, cont.): Actual memory contains a data pointer at &quot;buff.c&quot;, line 18, INR = 266
+</pre>
+
+<p>and indeed at line 18 of the file buff.c we find:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>buff = malloc(buff_size = BFSIZE);</p>
+</table>
+
+<p>This problem can be avoided by using a specially
+compiled version of the library that contains the correct
+LIN and FIL instructions, or, less elegantly, by including
+the source code of the library routines in the program; in
+the latter case, one has to be sure to have them all.</p>
+
+<p><i>Unavoidable messages</i><br>
+Some messages produced by the logging are almost
+unavoidable; sometimes the writer of a library routine is
+forced to take liberties with the semantics of EM.</p>
+
+<p>Examples from C include the memory allocation routines.
+For efficiency reasons, one bit of an pointer in the
+administration is used as a flag; setting, clearing and
+reading this bit requires bitwise operations on pointers,
+which gives the above messages. Realloc causes a problem in
+that it may have to copy the originally allocated area to a
+different place; this area may contain uninitialised
+bytes.</p>
+<pre>     @x9 &quot;t.c&quot;, line 4, INR = 16, PC = 30 OPCODE = 180
+     @L6 &quot;t.c&quot;, line 4, INR = 16, DoLOLm(-4)
+      d2
+      d2 . . STACK_DUMP[4/4] . . INR = 16 . . STACK_DUMP . .
+      d2 ----------------------------------------------------------------
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483643        0                  (Dp)
+      d2    2147483642        0                  (Dp)
+      d2    2147483641        0                  (Dp)
+      d2    2147483640       40    [        40]  (Dp)
+      d2    2147483639        0                  (Dp)
+      d2    2147483638        0                  (Dp)
+      d2    2147483637        3                  (Dp)
+      d2    2147483636       64    [       832]  (Dp)
+      d2    2147483635        0                  (In)
+      d2    2147483634        0                  (In)
+      d2    2147483633        0                  (In)
+      d2    2147483632        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483607        0                  (Dp)
+      d2    2147483606        0                  (Dp)
+      d2    2147483605        0                  (Dp)
+      d2    2147483604       40    [        40]  (Dp)
+      d2    2147483603        0                  (Dp)
+      d2    2147483602        0                  (Dp)
+      d2    2147483601        3                  (Dp)
+      d2    2147483600       64    [       832]  (Dp)
+      d2    2147483599        0                  (In)
+      d2    2147483598        0                  (In)
+      d2    2147483597        0                  (In)
+      d2    2147483596        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483571    undef
+      d2         | | |    | | |
+      d2    2147483568    undef (1 word)
+      d2    2147483567        0                  (In)
+      d2    2147483566        0                  (In)
+      d2    2147483565        3                  (In)
+      d2    2147483564        9    [       777]  (In)
+      d2    2147483563    undef
+      d2         | | |    | | |
+      d2    2147483560    undef (1 word)
+      d2        FRA: size = 0, undefined
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483560, HP = 848, \
+                                        LIN = 4, FIL = &quot;t.c&quot;
+      d2 ----------------------------------------------------------------
+      d2
+     @x9 &quot;t.c&quot;, line 4, INR = 17, PC = 31 OPCODE = 169
+     @w1 &quot;t.c&quot;, line 4, INR = 17, warning: Local data pointer expected [stack.c: 242]
+     @w1 &quot;t.c&quot;, line 4, INR = 17, warning cont.: Actual memory is undefined
+     @L6 &quot;t.c&quot;, line 4, INR = 17, DoLOIm(4)
+      d2
+      d2 . . STACK_DUMP[4/4] . . INR = 17 . . STACK_DUMP . .
+      d2 ----------------------------------------------------------------
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483643        0                  (Dp)
+      d2    2147483642        0                  (Dp)
+      d2    2147483641        0                  (Dp)
+      d2    2147483640       40    [        40]  (Dp)
+      d2    2147483639        0                  (Dp)
+      d2    2147483638        0                  (Dp)
+      d2    2147483637        3                  (Dp)
+      d2    2147483636       64    [       832]  (Dp)
+      d2    2147483635        0                  (In)
+      d2    2147483634        0                  (In)
+      d2    2147483633        0                  (In)
+      d2    2147483632        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483607        0                  (Dp)
+      d2    2147483606        0                  (Dp)
+      d2    2147483605        0                  (Dp)
+      d2    2147483604       40    [        40]  (Dp)
+      d2    2147483603        0                  (Dp)
+      d2    2147483602        0                  (Dp)
+      d2    2147483601        3                  (Dp)
+      d2    2147483600       64    [       832]  (Dp)
+      d2    2147483599        0                  (In)
+      d2    2147483598        0                  (In)
+      d2    2147483597        0                  (In)
+      d2    2147483596        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483571    undef
+      d2         | | |    | | |
+      d2    2147483568    undef (1 word)
+      d2    2147483567        0                  (In)
+      d2    2147483566        0                  (In)
+      d2    2147483565        3                  (In)
+      d2    2147483564        9    [       777]  (In)
+      d2    2147483563        0                  (In)
+      d2    2147483562        0                  (In)
+      d2    2147483561        0                  (In)
+      d2    2147483560        4    [         4]  (In)
+      d2        FRA: size = 0, undefined
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483560, HP = 848, \
+                                        LIN = 4, FIL = &quot;t.c&quot;
+      d2 ----------------------------------------------------------------
+      d2
+     @x9 &quot;t.c&quot;, line 4, INR = 18, PC = 32 OPCODE = 229
+     @S6 &quot;t.c&quot;, line 4, INR = 18, DoSTLm(-8)
+      d2
+      d2 . . STACK_DUMP[4/4] . . INR = 18 . . STACK_DUMP . .
+      d2 ----------------------------------------------------------------
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483643        0                  (Dp)
+      d2    2147483642        0                  (Dp)
+      d2    2147483641        0                  (Dp)
+      d2    2147483640       40    [        40]  (Dp)
+      d2    2147483639        0                  (Dp)
+      d2    2147483638        0                  (Dp)
+      d2    2147483637        3                  (Dp)
+      d2    2147483636       64    [       832]  (Dp)
+      d2    2147483635        0                  (In)
+      d2    2147483634        0                  (In)
+      d2    2147483633        0                  (In)
+      d2    2147483632        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = STP, PI = uninit, PC = 0, LB = 2147483644, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483607        0                  (Dp)
+      d2    2147483606        0                  (Dp)
+      d2    2147483605        0                  (Dp)
+      d2    2147483604       40    [        40]  (Dp)
+      d2    2147483603        0                  (Dp)
+      d2    2147483602        0                  (Dp)
+      d2    2147483601        3                  (Dp)
+      d2    2147483600       64    [       832]  (Dp)
+      d2    2147483599        0                  (In)
+      d2    2147483598        0                  (In)
+      d2    2147483597        0                  (In)
+      d2    2147483596        1    [         1]  (In)
+      d1 &gt;&gt; RSB: code = CAL, PI = (0,0), PC = 16, LB = 2147483608, LIN = 0, FIL = NULL
+      d2
+      d2       ADDRESS     BYTE     ITEM VALUE   SHADOW
+      d2    2147483571    undef
+      d2         | | |    | | |
+      d2    2147483568    undef (1 word)
+      d2    2147483567        0                  (In)
+      d2    2147483566        0                  (In)
+      d2    2147483565        0                  (In)
+      d2    2147483564        4    [         4]  (In)
+      d2        FRA: size = 0, undefined
+      d1 &gt;&gt; AB = 2147483596, LB = 2147483572, SP = 2147483564, HP = 848, \
+                                        LIN = 4, FIL = &quot;t.c&quot;
+      d2 ----------------------------------------------------------------
+      d2
+</pre>
+
+<p align=center>BIBLIOGRAPHY</p>
+
+<p>[1] A.S. Tanenbaum, H. van Staveren, E.G. Keizer and
+J.W. Stevenson. <i>Description of a Machine Architecture for
+use with Block Structured Languages</i>. VU Informatica
+Rapport IR-81, august 1983.</p>
+
+<p>[2] E.G. Keizer. <i>Ack description file reference
+manual.</i></p>
+
+<p>[3] K. Jensen and N. Wirth. <i>PASCAL, User Manual and
+Report</i>. Springer Verlag.</p>
+
+<p>[4] B.W. Kernighan and D.M. Ritchie. <i>The C
+Programming Language</i>. Prentice-Hall, 1978.</p>
+
+<p>[5] D.M. Ritchie. <i>C Reference Manual</i>.</p>
+
+<p>[6] <i>Amsterdam Compiler Kit, reference manual.</i></p>
+
+<p>[7] <i>Unix Programmer&rsquo;s Manual, 4.1BSD</i>. UCB,
+August 1983.</p>
+<hr>
+</body>
+</html>

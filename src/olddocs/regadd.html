@@ -1,0 +1,510 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:11 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Addition of register variables to an existing table.</title>
+</head>
+<body>
+
+<h1 align=center>Addition of register variables to an existing table.</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. Modifications to the table itself.">2. Modifications to the table itself.</a><br>
+<a href="#2.1. Register section">2.1. Register section</a><br>
+<a href="#2.2. Codesection">2.2. Codesection</a><br>
+<a href="#3. Modifications to mach.c">3. Modifications to mach.c</a><br>
+<a href="#4. Examples">4. Examples</a><br>
+<a href="#5. Afterthoughts.">5. Afterthoughts.</a><br>
+
+<hr>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>This is a short description of the newest feature in the
+table driven code generator for the Amsterdam Compiler Kit.
+It describes how to add register variables to an existing
+table. This assumes a distribution of October 1983 or later.
+It is not clear whether one should read this when starting
+with a table for a new machine, or waiting till the table is
+well debugged already.</p>
+<a name="2. Modifications to the table itself."></a>
+<h2>2. Modifications to the table itself.</h2>
+<a name="2.1. Register section"></a>
+<h2>2.1. Register section</h2>
+
+<p>Just before the properties of the register one of the
+following can be added:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="12%">
+
+<p>regvar</p>
+</td>
+<td width="83%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="36%">
+
+<p>regvar ( pointer )</p>
+</td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="30%">
+
+<p>regvar ( loop )</p>
+</td>
+<td width="65%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="32%">
+
+<p>regvar ( float )</p>
+</td>
+<td width="63%">
+</td>
+</table>
+
+<p>All register variables of one type must be of the same
+size, and they may have no subregisters.</p>
+<a name="2.2. Codesection"></a>
+<h2>2.2. Codesection</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="96%">
+
+<p>Two pseudo functions are added to the list allowed
+inside expressions:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="2%"></td>
+<td width="90%">
+
+<p>inreg ( expr ) has as a parameter the offset of a local,
+and returns 0,1 or 2:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>2:</p>
+</td>
+<td width="2%"></td>
+<td width="66%">
+
+<p>if the variable is in a register.</p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>1:</p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p>if the variable could be in a register but
+isn&rsquo;t.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>0:</p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p>if the variable cannot be in a register.</p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="2%"></td>
+<td width="90%">
+
+<p>regvar ( expr ) returns the register associated with the
+variable. Undefined if it is not in a register. So regvar (
+expr ) is defined if and only if inreg (expr ) == 2.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="96%">
+
+<p>It is now possible to remove() a register expression,
+this is of course needed for a store into a register
+local.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="96%">
+
+<p>The return out of a procedure may now involve register
+restores, so the special word &rsquo;return&rsquo; in the
+table will invoke a user defined function.</p>
+</td>
+</table>
+<a name="3. Modifications to mach.c"></a>
+<h2>3. Modifications to mach.c</h2>
+
+<p>If register variables are used in a table, the program
+<i>cgg</i> will define the word REGVARS during compilation
+of the sources. So the following functions described here
+should be bracketed by #ifdef REGVARS and #endif.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="86%">
+
+<p>regscore(off,size,typ,freq,totyp) long off;</p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p>This function should assign a score to a register
+variable, the score should preferably be the estimated
+number of bytes gained when it is put in a register. Off and
+size are the offset and size of the variable, typ is the
+type, that is reg_any, reg_pointer, reg_loop or reg_float.
+Freq is the number of times it occurs statically, and totyp
+is the type of the register it is planned to go into.<br>
+Keep in mind that the gain should be net, that is the cost
+for register save/restore sequences and the cost of
+initialisation in the case of parameters should already be
+included.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="22%">
+
+<p>i_regsave()</p>
+</td>
+<td width="73%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p>This function is called at the start of a procedure, just
+before register saves are done. It can be used to initialise
+some variables if needed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="22%">
+
+<p>f_regsave()</p>
+</td>
+<td width="73%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p>This function is called at end of the register save
+sequence. It can be used to do the real saving if multiple
+register move instructions are available.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="96%">
+
+<p>regsave(regstr,off,size) char *regstr; long off;</p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p>Should either do the real saving or set up a table to
+have it done by f_regsave. Note that initialisation of
+parameters should also be done, or planned here.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="2%"></td>
+<td width="22%">
+
+<p>regreturn()</p>
+</td>
+<td width="73%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p>Should restore saved registers and return. The function
+result is already in the function return area by
+now.</p></td>
+</table>
+<a name="4. Examples"></a>
+<h2>4. Examples</h2>
+
+<p>Here are some examples out of the PDP 11 table</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="8" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>lol inreg($1)==2| |</p>
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="30%"></td>
+<td width="10%">
+
+<p>| regvar($1)</p>
+</td>
+<td width="10%">
+</td>
+<td width="20%"></td>
+<td width="10%">
+</td>
+<td width="0%">
+
+<p>| |</p>
+
+<p>lil inreg($1)==2| |</p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="30%"></td>
+<td width="10%">
+
+<p>| {regdef2, regvar($1)}</p>
+</td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="30%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="0%">
+
+<p>| |</p>
+</td>
+</table>
+
+<p>stl inreg($1)==2| xsource2 |</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>remove(regvar($1))</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>move(%[1],regvar($1)) | | |</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+
+<p>inl inreg($1)==2| | remove(regvar($1))</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>&quot;inc %(regvar($1)%)&quot;</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>setcc(regvar($1)) | | |</p>
+</td>
+<td width="10%"></td>
+<td width="49%">
+</td>
+</table>
+<a name="5. Afterthoughts."></a>
+<h2>5. Afterthoughts.</h2>
+
+<p>At the time of this writing the tables for the PDP 11
+and the M68000 and the VAX are converted, in all cases the
+two byte wordsize versions. No big problems have occurred,
+but experience has shown that it is necessary to check the
+table carefully for all patterns with locals in them. Code
+may be generated that uses the memoryslot the local is not
+in.</p>
+<hr>
+</body>
+</html>

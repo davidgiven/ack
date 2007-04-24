@@ -1,0 +1,1772 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:30 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>A back end table for the Motorola MC68000, MC68010 and MC68020 microprocessors</title>
+</head>
+<body>
+
+<h1 align=center>A back end table for the Motorola MC68000, MC68010 and MC68020 microprocessors</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The MC68000 and MC68020 micro processors">2. The MC68000 and MC68020 micro processors</a><br>
+<a href="#2.1. Registers">2.1. Registers</a><br>
+<a href="#2.2. Addressing modes">2.2. Addressing modes</a><br>
+<a href="#2.2.1. General addressing modes">2.2.1. General addressing modes</a><br>
+<a href="#2.2.1.1. Register Direct Addressing">2.2.1.1. Register Direct Addressing</a><br>
+<a href="#2.2.1.2. Address Register Indirect">2.2.1.2. Address Register Indirect</a><br>
+<a href="#2.2.1.3. Address Register Indirect With Postincrement">2.2.1.3. Address Register Indirect With Postincrement</a><br>
+<a href="#2.2.1.4. Address Register Indirect With Predecrement">2.2.1.4. Address Register Indirect With Predecrement</a><br>
+<a href="#2.2.1.5. Address Register Indirect With Displacement">2.2.1.5. Address Register Indirect With Displacement</a><br>
+<a href="#2.2.1.6. Address Register Indirect With Index">2.2.1.6. Address Register Indirect With Index</a><br>
+<a href="#2.2.1.7. Absolute Data Addressing">2.2.1.7. Absolute Data Addressing</a><br>
+<a href="#2.2.1.8. Program Counter With Displacement.">2.2.1.8. Program Counter With Displacement.</a><br>
+<a href="#2.2.1.9. Program Counter With Index">2.2.1.9. Program Counter With Index</a><br>
+<a href="#2.2.1.10. Immediate Data">2.2.1.10. Immediate Data</a><br>
+<a href="#2.2.2. Extra MC68020 addressing modes">2.2.2. Extra MC68020 addressing modes</a><br>
+<a href="#2.2.2.1. Address Register Indirect With Index (Base Displacement)">2.2.2.1. Address Register Indirect With Index (Base Displacement)</a><br>
+<a href="#2.2.2.2. Memory Indirect Post-Indexed">2.2.2.2. Memory Indirect Post-Indexed</a><br>
+<a href="#2.2.2.3. Memory Indirect Pre-Indexed">2.2.2.3. Memory Indirect Pre-Indexed</a><br>
+<a href="#2.2.3. Addressing modes used in the table">2.2.3. Addressing modes used in the table</a><br>
+<a href="#3. The M68000 and MC68020 back end table">3. The M68000 and MC68020 back end table</a><br>
+<a href="#3.1. Constant Definitions">3.1. Constant Definitions</a><br>
+<a href="#3.2. Properties">3.2. Properties</a><br>
+<a href="#3.3. Registers">3.3. Registers</a><br>
+<a href="#3.4. Tokens">3.4. Tokens</a><br>
+<a href="#3.4.1. Token names">3.4.1. Token names</a><br>
+<a href="#3.4.2. Special tokens for the MC68000">3.4.2. Special tokens for the MC68000</a><br>
+<a href="#3.5. Sets">3.5. Sets</a><br>
+<a href="#3.6. Instructions">3.6. Instructions</a><br>
+<a href="#3.7. Moves">3.7. Moves</a><br>
+<a href="#3.8. Tests">3.8. Tests</a><br>
+<a href="#3.9. Stackingrules">3.9. Stackingrules</a><br>
+<a href="#3.10. Coercions">3.10. Coercions</a><br>
+<a href="#3.11. Patterns">3.11. Patterns</a><br>
+<a href="#3.11.1. Group 0: rules for register variables">3.11.1. Group 0: rules for register variables</a><br>
+<a href="#3.11.2. Groups 1 and 2: load and store instructions">3.11.2. Groups 1 and 2: load and store instructions</a><br>
+<a href="#3.11.3. Groups 3 and 4: integer and unsigned arithmetic">3.11.3. Groups 3 and 4: integer and unsigned arithmetic</a><br>
+<a href="#3.11.4. Group 5: floating point arithmetic">3.11.4. Group 5: floating point arithmetic</a><br>
+<a href="#3.11.5. Group 6: pointer arithmetic">3.11.5. Group 6: pointer arithmetic</a><br>
+<a href="#3.11.6. Group 9: logical instructions">3.11.6. Group 9: logical instructions</a><br>
+<a href="#3.11.7. Group 11: arrays">3.11.7. Group 11: arrays</a><br>
+<a href="#3.11.8. Group 14: procedure calls instructions">3.11.8. Group 14: procedure calls instructions</a><br>
+<a href="#3.11.9. Group 15: miscellaneous instructions">3.11.9. Group 15: miscellaneous instructions</a><br>
+<a href="#3.11.10. Extra group: optimalization">3.11.10. Extra group: optimalization</a><br>
+<a href="#4. The library routines">4. The library routines</a><br>
+<a href="#5. Testing the table">5. Testing the table</a><br>
+<a href="#6. Performance of the back end">6. Performance of the back end</a><br>
+<a href="#7. Some timing results">7. Some timing results</a><br>
+<a href="#8. Some final remarks">8. Some final remarks</a><br>
+<a href="#References">References</a><br>
+
+<hr>
+
+<p align=center><i><small>ABSTRACT</small></i></p>
+
+<p align=center><i><small>Frank Doodeman</small></i></p>
+
+<p><small>A back end table is part of the Amsterdam
+Compiler Kit (ACK). It is used to produce the actual back
+end, a program that translates the intermediate language
+family EM to assembly language for some target machine. The
+table discussed here can be used for two back ends, suitable
+for in total three machines: the MC68000 and MC68010 (the
+difference between these two is so small that one back end
+table can be used for either one), or for the
+MC68020.</small></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p><small>To simplify the task of producing portable
+(cross) compilers and interpreters the Vrije Universiteit
+designed an integrated collection of programs, the Amsterdam
+Compiler Kit (ACK) [2]. It is based on the old UNCOL idea
+[1] which attempts to solve the problem of how to make a
+compiler for each of N languages on M different machines
+without having to write N&times;M programs.</small></p>
+
+<p><small>The UNCOL approach is to write N <i>front
+ends,</i> which translate the source language into a common
+intermediate language UNCOL (Universal Computer Oriented
+Language), and M <i>back ends,</i> each of which translates
+programs in UNCOL into a specific machine language. Under
+these conditions only M+N programs must be written to
+provide all N languages on all M machines, instead of
+M&times;N programs.</small></p>
+
+<p><small>The intermediate language for the Amsterdam
+Compiler Kit is the machine language for a simple stack
+machine called EM (Encoding Machine) [3]. So a back end for
+the MC68020 translates EM code into MC68020 assembly
+language. Writing such a table [4] suffices to get the back
+end.</small></p>
+
+<p><small>The back end is a single program that is driven
+by a machine dependent driving table. This table, the back
+end table, defines the mapping of EM code to the MC68000,
+MC68010 or MC68020 assembly language.</small></p>
+<a name="2. The MC68000 and MC68020 micro processors"></a>
+<h2>2. The MC68000 and MC68020 micro processors</h2>
+
+<p><small>In this document the name MC68000 will be used
+for both the MC68000 and the MC68010 micro processors,
+because as far as the back end table is concerned there is
+no difference between them. For a complete and detailed
+description of the MC68020 one is referred to [5]; for the
+MC68000 one might also use [6]. In this section some
+relevant parts will be handled.</small></p>
+<a name="2.1. Registers"></a>
+<h2>2.1. Registers</h2>
+
+<p><small>Both the MC68000 and the MC68020 have eight
+32-bit data registers (D <small><small>0</small></small> -D
+<small><small>7</small></small> ) that can be used for byte
+(8-bit), word (16-bit) and long word (32-bit) data
+operations. They also have seven 32-bit address registers (A
+<small><small>0</small></small> -A
+<small><small>6</small></small> ) that may be used as
+software stack pointers and base address registers; address
+register A <small><small>7</small></small> is used as the
+system stack pointer. Address registers may also be used for
+word and long word address operations.</small></p>
+<a name="2.2. Addressing modes"></a>
+<h2>2.2. Addressing modes</h2>
+
+<p><small>First the MC68000 addressing modes will be
+discussed. Since the MC68020&rsquo;s set of addressing modes
+is an extension of the MC68000&rsquo;s set, of course this
+section also applies to the MC68020.</small></p>
+
+<p><small>In the description we use:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+<p><small>A <small><small>n</small></small></small></p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p><small>for address register;</small></p>
+</td>
+<td width="48%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+<p><small>D <small><small>n</small></small></small></p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p><small>for data register;</small></p>
+</td>
+<td width="54%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+<p><small>R <small><small>n</small></small></small></p>
+</td>
+<td width="6%"></td>
+<td width="58%">
+
+<p><small>for address or data register;</small></p>
+</td>
+<td width="32%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+<p><small>X <small><small>n</small></small></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>for index register (either data or address
+register);</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>PC</small></p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p><small>for program counter;</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+<p><small>d <small><small>8</small></small></small></p>
+</td>
+<td width="6%"></td>
+<td width="62%">
+
+<p><small>for 8 bit displacement integer;</small></p>
+</td>
+<td width="28%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>d <small><small>16</small></small></small></p>
+</td>
+<td width="4%"></td>
+<td width="64%">
+
+<p><small>for 16 bit displacement integer;</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>bd</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>for base displacement (may be null, word or
+long);</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>od</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>for outer displacement (may be null, word or
+long).</small></p>
+</td>
+</table>
+<a name="2.2.1. General addressing modes"></a>
+<h2>2.2.1. General addressing modes</h2>
+<a name="2.2.1.1. Register Direct Addressing"></a>
+<h2>2.2.1.1. Register Direct Addressing</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="3%">
+
+<p><small>R <small><small>n</small></small></small></p>
+</td>
+<td width="80%">
+</td>
+</table>
+
+<p><small>This addressing mode (it can be used with either
+a data register or an address register) specifies that the
+operand is in one of the 16 multifunction
+registers.</small></p>
+<a name="2.2.1.2. Address Register Indirect"></a>
+<h2>2.2.1.2. Address Register Indirect</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="7%">
+
+<p><small>(A <small><small>n</small></small> )</small></p>
+</td>
+<td width="76%">
+</td>
+</table>
+
+<p><small>The address of the operand is in the address
+register specified.</small></p>
+<a name="2.2.1.3. Address Register Indirect With Postincrement"></a>
+<h2>2.2.1.3. Address Register Indirect With Postincrement</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="9%">
+
+<p><small>(A <small><small>n</small></small> )+</small></p>
+</td>
+<td width="74%">
+</td>
+</table>
+
+<p><small>The address of the operand is in the address
+register specified. After the operand address is used, the
+address register is incremented by one, two or four
+depending upon whether the size of the operand is byte, word
+or long. If the address register is the stack pointer and
+the operand size is byte, the address register is
+incremented by two rather than one to keep the stack pointer
+on a word boundary.</small></p>
+<a name="2.2.1.4. Address Register Indirect With Predecrement"></a>
+<h2>2.2.1.4. Address Register Indirect With Predecrement</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="9%">
+
+<p><small>&minus;(A <small><small>n</small></small>
+)</small></p>
+</td>
+<td width="74%">
+</td>
+</table>
+
+<p><small>The address of the operand is in the address
+register specified. Before the operand address is used, the
+address register is decremented by one, two or four
+depending upon whether the size of the operand is byte, word
+or long. If the address register is the stack pointer and
+the operand size is byte, the address register is
+decremented by two rather than one to keep the stack pointer
+on a word boundary.</small></p>
+<a name="2.2.1.5. Address Register Indirect With Displacement"></a>
+<h2>2.2.1.5. Address Register Indirect With Displacement</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p><small>d <small><small>16</small></small> (A
+<small><small>n</small></small> ) for the MC68000, (d
+<small><small>16</small></small> ,A
+<small><small>n</small></small> ) for the
+MC68020</small></p>
+</td>
+</table>
+
+<p><small>This address mode requires one word of extension.
+The address of the operand is the sum of the contents of the
+address register and the sign extended 16-bit integer in the
+extension word.</small></p>
+<a name="2.2.1.6. Address Register Indirect With Index"></a>
+<h2>2.2.1.6. Address Register Indirect With Index</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p><small>d <small><small>8</small></small> (A
+<small><small>n</small></small> ,X
+<small><small>n</small></small> .size) for the MC68000, (d
+<small><small>8</small></small> ,A
+<small><small>n</small></small> ,X
+<small><small>n</small></small> .size) for the
+MC68020</small></p>
+</td>
+</table>
+
+<p><small>This address mode requires one word of extension
+according to a certain format, which specifies</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1.</small></p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p><small>which register to use as index
+register;</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>a flag that indicates whether the index register
+is a data register or an address register;</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>a flag that indicates the index size; this is
+<i>word</i> when the low order part of the index register is
+to be used, and <i>long</i> when the whole long value in the
+register is to be used as index;</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>an 8-bit displacement integer (the low order byte
+of the extension word).</small></p>
+</td>
+</table>
+
+<p><small>The address of the operand is the sum of the
+contents of the address register, the possibly sign extended
+contents of index register and the sign extended 8-bit
+displacement.</small></p>
+<a name="2.2.1.7. Absolute Data Addressing"></a>
+<h2>2.2.1.7. Absolute Data Addressing</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p><small>address for the MC68000, (address) for the
+MC68020</small></p>
+</td>
+</table>
+
+<p><small>Two different kinds of this mode are
+available:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Absolute Short Address; this mode requires one
+word of extension. The address of the operand is the sign
+extended 16-bit extension word.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Absolute Long Address; this mode requires two
+words of extension. The address of the operand is developed
+by concatenation of the two extension words; the high order
+part of the address is the first extension word, the low
+order part is the second.</small></p>
+</td>
+</table>
+<a name="2.2.1.8. Program Counter With Displacement."></a>
+<h2>2.2.1.8. Program Counter With Displacement.</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p><small>d <small><small>16</small></small> (PC) for the
+MC68000, (d <small><small>16</small></small> ,PC) for the
+MC68020</small></p>
+</td>
+</table>
+
+<p><small>This mode requires one word of extension. The
+address of the operand is the sum of the address in the
+program counter and the sign extended 16-bit displacement
+integer in the extension word. The value in the program
+counter is the address of the extension word.</small></p>
+<a name="2.2.1.9. Program Counter With Index"></a>
+<h2>2.2.1.9. Program Counter With Index</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="84%">
+
+<p><small>d <small><small>8</small></small> (PC,X
+<small><small>n</small></small> .size) for the MC68000, (d
+<small><small>8</small></small> ,PC,X
+<small><small>n</small></small> .size) for the
+MC68020</small></p>
+</td>
+</table>
+
+<p><small>This mode requires one word of extension as
+described under <i>Address Register Indirect With Index.</i>
+The address of the operand is the sum of the value in the
+program counter, the possibly sign extended index register
+and the sign extended 8-bit displacement integer in the
+extension word. The value in the program counter is the
+address of the extension word.</small></p>
+<a name="2.2.1.10. Immediate Data"></a>
+<h2>2.2.1.10. Immediate Data</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="34%">
+
+<p><small>.if !r0x .nr 0x 0</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+
+<p><small>This addressing mode requires either one or two
+words of extension, depending on the size of the
+operation;</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>byte operation - the operand is in the low order
+byte of extension word;</small></p>
+<!-- INDENTATION -->
+<p><small>word operation - the operand is in the extension
+word;</small></p>
+<!-- INDENTATION -->
+<p><small>long operation - the operand is in the two
+extension words, the high order 16-bits are in the first
+extension word, the low order 16-bits in the
+second.</small></p></td>
+</table>
+<a name="2.2.2. Extra MC68020 addressing modes"></a>
+<h2>2.2.2. Extra MC68020 addressing modes</h2>
+
+<p><small>The MC68020 has three more addressing modes.
+These modes all use a displacement (some even two), an
+address register and an index register. Instead of the
+address register one may also use the program counter. Any
+of these may be omitted. If all addends are omitted the
+processor creates an effective address of zero. All of these
+three modes require at least one extension word, the <i>Full
+Format Extension Word,</i> which specifies:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>1.</small></p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p><small>the index register number (0-7);</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>2.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>the index register type (address or data
+register);</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>3.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>the size of the index (only low order part or the
+whole register)</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>4.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>a scale factor. This is a number from 0 to 3
+which specifies how many bits the contents of the index
+register is to be shifted to the left before being used as
+an index;</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>5.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>a flag that specifies whether the base (address)
+register is to be added or to be suppressed;</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>6.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>a flag that specifies whether to add or suppress
+the index operand;</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>7.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>two bits that specify the size of the base
+displacement (null, word or long);</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small>8.</small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>three bits that in combination with (6) above
+specify which of the three addressing modes (described
+below) to use and, if used, the size of the outer
+displacement (null, word or long).</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>N.B.</small></p>
+</td>
+<td width="2%"></td>
+<td width="90%">
+
+<p><small>All modes mentioned above for the MC68000 that
+use an index register may have this register scaled (only
+when using the MC68020).</small></p>
+</td>
+</table>
+
+<p><small>The three extra addressing modes are:</small></p>
+<a name="2.2.2.1. Address Register Indirect With Index (Base Displacement)"></a>
+<h2>2.2.2.1. Address Register Indirect With Index (Base Displacement)</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="70%">
+
+<p><small>(bd,A <small><small>n</small></small> ,X
+<small><small>n</small></small> .size*scale) (MC68020
+only)</small></p>
+</td>
+<td width="13%">
+</td>
+</table>
+
+<p><small>The address of the operand is the sum of the
+contents of the address register, the scaled contents of the
+possibly scaled index register and the possibly sign
+extended base displacement. When the program counter is used
+instead of the address register, the value in the program
+counter is the address of the full format extension word.
+This mode requires one or two more extension words when the
+size of the base displacement is word or long
+respectively.</small></p>
+
+<p><small>Note that without the index operand, this mode is
+an extension of the <i>Address Register Indirect With
+Displacement</i> mode; when using the MC68020 one is no
+longer limited to a 16-bit displacement. Also note that with
+the index operand added, this mode is an extension of the
+<i>Address Register Indirect With Index</i> mode; when using
+the MC68020 one is no longer limited to an 8-bit
+displacement.</small></p>
+<a name="2.2.2.2. Memory Indirect Post-Indexed"></a>
+<h2>2.2.2.2. Memory Indirect Post-Indexed</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>([bd,A <small><small>n</small></small> ],X
+<small><small>n</small></small> .size*scale,od) (MC68020
+only)</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+
+<p><small>This mode may use an outer displacement. First an
+intermediate memory address is calculated by adding the
+contents of the address register and the possibly sign
+extended base displacement. This address is used for in
+indirect memory access of a long word, followed by adding
+the index operand (scaled and possibly signed extended).
+Finally the outer displacement is added to yield the address
+of the operand. When the program counter is used, the value
+in the program counter is the address of the full format
+extension word.</small></p>
+<a name="2.2.2.3. Memory Indirect Pre-Indexed"></a>
+<h2>2.2.2.3. Memory Indirect Pre-Indexed</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small>Syntax:</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>([bd,A <small><small>n</small></small> ,X
+<small><small>n</small></small> .size*scale],od) (MC68020
+only)</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+
+<p><small>This mode may use an outer displacement. First an
+intermediate memory address is calculated by adding the
+contents of the address register, the scaled contents of the
+possibly sign extended index register and the possibly sign
+extended base displacement. This address is used for an
+indirect memory access of a long word, followed by adding
+the outer displacement to yield the address of the operand.
+When the program counter is used, the value in the program
+counter is the address of the full format extension
+word.</small></p>
+<a name="2.2.3. Addressing modes used in the table"></a>
+<h2>2.2.3. Addressing modes used in the table</h2>
+
+<p><small>Not all addressing modes mentioned above are used
+in code generation. It is clear that none of the modes that
+use the program counter PC can be used, since at code
+generation time nothing is known about the value in PC. Also
+some of the possibilities of the three MC68020 addressing
+modes are not used; e.g. it is possible to use a <i>Data
+Register Indirect</i> mode, which actually is the <i>Address
+Register Indirect With Index</i> mode, with the address
+register and the displacement left out. However such a mode
+would require two extra bytes for the full format extension
+word, and it would also be much slower than using <i>Address
+Register Indirect.</i> For this kind of reasons several
+possible addressing modes are not used in the generation of
+code. In the table address registers are only used for
+holding addresses, and for index registers only data
+registers are used.</small></p>
+<a name="3. The M68000 and MC68020 back end table"></a>
+<h2>3. The M68000 and MC68020 back end table</h2>
+
+<p><small>The table itself has to be run through the C
+preprocessor before it can be used to generate the back end
+(called <i>code generator</i> or <i>cg</i> for short). When
+no flags are given to the preprocessor an MC68020 code
+generator is produced; for the MC68000 code generator one
+has to run the table through the preprocessor using the
+<i>-Dm68k4</i> flag.</small></p>
+
+<p><small>The table is designed as described in [4]. For
+the overall design of a back end table one is referred to
+this document. This section only deals with problems
+encountered in writing the table and other things worth
+noting.</small></p>
+<a name="3.1. Constant Definitions"></a>
+<h2>3.1. Constant Definitions</h2>
+
+<p><small>Wordsize and pointersize (EM_WSIZE and EM_PSIZE
+respectively) are defined as four (bytes). EM_BSIZE, the
+hole between AB (the parameter base) and LB (the local
+base), is eight bytes: only the return address and the
+localbase are saved.</small></p>
+<a name="3.2. Properties"></a>
+<h2>3.2. Properties</h2>
+
+<p><small>Since Hans van Staveren in his document [4]
+clearly states that <i>cg</i> execution time is negatively
+influenced by the number of properties, only four different
+properties have been defined. Besides, since the registers
+really are multifunctional, these four are really all that
+are needed.</small></p>
+<a name="3.3. Registers"></a>
+<h2>3.3. Registers</h2>
+
+<p><small>The table uses register variables: D
+<small><small>3</small></small> - D
+<small><small>7</small></small> are used as general register
+variables, and address registers A
+<small><small>2</small></small> - A
+<small><small>5</small></small> are used as pointer register
+variables. A <small><small>6</small></small> is reserved for
+the localbase.</small></p>
+<a name="3.4. Tokens"></a>
+<h2>3.4. Tokens</h2>
+
+<p><small>At first glance one might wonder about the amount
+of tokens, especially for the MC68020, considering the small
+amount of different addressing modes. However, the last
+three addressing modes mentioned for the MC68020 may omit
+any of the addends, and this leads to a large amount of
+different tokens. I did consider the possibility of
+enlarging the number of tokens and sets even further,
+because there might be assemblers that don&rsquo;t handle
+displacements of zero optimally (they might generate a 2
+byte extension word holding zero). The small profit in bytes
+in the generated code however does not justify the increase
+in size of the token section, the set section and the
+patterns section, so this idea was not developed any
+further.</small></p>
+
+<p><small>The timing cost of the tokens may be incorrect
+for some MC68000 tokens. This is because the MC68000 uses a
+16-bit data bus which causes the need of two separate memory
+accesses for getting 32-bit operands.</small></p>
+<a name="3.4.1. Token names"></a>
+<h2>3.4.1. Token names</h2>
+
+<p><small>The amount of tokens and the limited capability
+of the authors imagination might have caused the names of
+some tokens not to be very clarifying. Some information
+about the names may be in place here.</small></p>
+
+<p><small>Whenever part of a token name is in capitals that
+part is memory indirected (i.e. in square brackets). In
+token names <i>OFF</i> and <i>off</i> mean an offsetted
+address register, so an address register with a displacement
+(either base displacement or outer displacement). <i>IND,
+ind</i> and <i>index</i> stand for indexed, or index
+register. <i>ABS</i> and <i>abs</i> stand for absolute,
+which actually is just a displacement (base or outer). These
+&lsquo;rules&rsquo; only apply to names of tokens that
+represent actual operands. There are also tokens that
+represent addresses of operands. These (with a few
+exceptions) contain <i>regA, regX</i> and <i>con</i> as
+parts of there names, which stand for address register,
+index register and displacement (always base displacement)
+respectively. If the address to which the token refers uses
+memory indirection, that part of the name comes first (in
+small letters), followed by an underscore. The memory
+indirection part follows the &lsquo;rules&rsquo; for operand
+token names.</small></p>
+
+<p><small>Of course there are exceptions to these
+&lsquo;rules&rsquo; but in those cases the names are self
+explanatory.</small></p>
+
+<p><small>Two special cases: <i>ext_regX</i> is the name of
+the token that represents the address of an absolute indexed
+operand, syntax (bd,X <small><small>n</small></small>
+.size*scale); <i>regX</i> does not represent any real mode,
+but is used with EM array instructions and pointer
+arithmetic.</small></p>
+<a name="3.4.2. Special tokens for the MC68000"></a>
+<h2>3.4.2. Special tokens for the MC68000</h2>
+
+<p><small>The MC68000 requires two extra tokens, which are
+called <i>t_regAcon</i> and <i>t_regAregXcon.</i> They are
+necessary because <i>regAcon</i> can only have a 16-bit
+displacement on the MC68000, and <i>regAregXcon</i> uses
+only 8 bits for its displacement. To prevent these
+addressing modes to be used with displacements that are too
+large, the extra tokens are needed. Whenever the
+displacements become too large and they need to be used in
+the generation of assembly code, these tokens are
+transformed into other tokens. To prevent the table from
+becoming too messy I defined <i>t_regAcon</i> and
+<i>t_regAregXcon</i> to be identical to <i>regAcon</i> and
+<i>regAregXcon</i> respectively for the MC68020.</small></p>
+<a name="3.5. Sets"></a>
+<h2>3.5. Sets</h2>
+
+<p><small>Most set names used in the table are self
+explanatory, especially to the reader who is familiar with
+the four addressing categories as mentioned in [5]: <i>data,
+memory, alterable</i> and <i>control.</i> In the sets
+definition part some sets are defined that are not used
+elsewhere in the table, but are only used to be part of the
+definition of some other set. This keeps the set definition
+part from getting too unreadable.</small></p>
+
+<p><small>The sets called <i>imm_cmp</i> consist of all
+tokens that can be used to compare with a
+constant.</small></p>
+<a name="3.6. Instructions"></a>
+<h2>3.6. Instructions</h2>
+
+<p><small>Only the instructions that are used in code
+generation are listed here. The first few instructions are
+meant especially for the use with register variables. The
+operand LOCAL used here refers to a register variable. The
+reader may not conclude that these operations are also
+allowed on ordinary locals. The space and timing cost of
+these instructions have been adapted, but the use of the
+word LOCAL for register variables causes these cost to be
+inaccurate anyway.</small></p>
+
+<p><small>The <i>killreg</i> instruction, which generates a
+comment in the assembly language output and which is meant
+to let <i>cg</i> know that the data register operand has its
+contents destroyed, needs some explaining but this
+explanation is better in place in the discussion of groups 3
+and 4 of the section about patterns.</small></p>
+
+<p><small>The timing cost of the instructions are probably
+not very accurate for the MC68020 because the MC68020 uses
+an instruction cache and prefetch. The cost used in the
+table are the &lsquo;worst case cost&rsquo; as mentioned in
+section 9 of [5].</small></p>
+<a name="3.7. Moves"></a>
+<h2>3.7. Moves</h2>
+
+<p><small>These are all pretty straightforward, except
+perhaps when <i>t_regAcon</i> and <i>t_regAregXcon</i> are
+used. In these cases the size of the displacement has to be
+checked before moving. This also applies to the stacking
+rules and the coercions.</small></p>
+<a name="3.8. Tests"></a>
+<h2>3.8. Tests</h2>
+
+<p><small>These three tests (one fore each operation size)
+could not be more straightforward than they are
+now.</small></p>
+<a name="3.9. Stackingrules"></a>
+<h2>3.9. Stackingrules</h2>
+
+<p><small>The only peculiar stackingrule is the one for
+<i>regX.</i> This token is only used with EM array
+instructions and with pointer arithmetic. Whenever it is put
+on the fake stack, some EM instructions are left in the
+instruction stream to remove this token. Consequently it
+should never have to be stacked. However the <i>code
+generator generator</i> (or <i>cgg</i> for short) complained
+about not having a stackingrule for this token, so it had to
+be added nevertheless.</small></p>
+<a name="3.10. Coercions"></a>
+<h2>3.10. Coercions</h2>
+
+<p><small>These are all straightforward. There are no
+splitting coercions since the fake stack never contains any
+tokens that can be split. There are only two unstacking
+coercions. The rest are all transforming coercions. Almost
+all coercions transform tokens into either a data register
+or an address register, except in the MC68000 part of the
+table the <i>t_regAcon</i> and <i>t_regAregXcon</i> tokens
+are transformed into real <i>regAcon</i> and
+<i>regAregXcon</i> tokens with displacements that are
+properly sized.</small></p>
+<a name="3.11. Patterns"></a>
+<h2>3.11. Patterns</h2>
+
+<p><small>This is the largest part of the table. It is
+subdivided into 17 groups. We will take a closer look at the
+more interesting groups.</small></p>
+<a name="3.11.1. Group 0: rules for register variables"></a>
+<h2>3.11.1. Group 0: rules for register variables</h2>
+
+<p><small>This group makes sure that EM instructions using
+register variables are handled efficiently. This group
+includes: local loads and stores; arithmetic, shifts and
+logical operations on locals and indirect locals and pointer
+handling, where C expressions like <i>*cp++</i> are handled.
+For such an expression there are several EM instruction
+sequences the front end might generate. For an integer
+pointer e.g.:</small></p>
+<pre><small><b>     lol lol adp stl loi $1==$2 &amp;&amp; $1==$4 &amp;&amp; $3==4 &amp;&amp; $5==4
+</b></small></pre>
+
+<p><small>or</small></p>
+<pre><small><b>     lol loi lol adp stl $1==$3 &amp;&amp; $3==$5 &amp;&amp; $2==4 &amp;&amp; $5==4
+</b></small></pre>
+
+<p><small>or perhaps even</small></p>
+<pre><small><b>     lil lol adp stl $1==$2 &amp;&amp; $2==$4 &amp;&amp; $3==4
+</b></small></pre>
+
+<p><small>Each of these is included, since which one is
+generated is is up to the front end. If the front end is
+consistent this will mean that some of these patterns will
+never be used in code generation. This might seem a waist,
+but anyone who thinks that will certainly change his mind
+when his new C front end generates a different EM
+instruction sequence.</small></p>
+<a name="3.11.2. Groups 1 and 2: load and store instructions"></a>
+<h2>3.11.2. Groups 1 and 2: load and store instructions</h2>
+
+<p><small>In these groups <b>lof</b> and <b>stf</b> ,
+<b>loi</b> and <b>sti</b> , <b>ldf</b> and <b>sdf</b> are
+the important instructions. These are the large parts in
+this group, especially the <b>loi</b> and <b>sti</b>
+instructions, because they come in three basic sizes (byte,
+word and long). Note that with these instructions in the
+MC68000 part the <i>exact</i> is omitted in front of
+<i>regAcon</i> and <i>regAregXcon.</i> This makes sure that
+<i>t_regAcon</i> and <i>t_regAregXcon</i> are transformed
+into proper tokens before they are used as
+addresses.</small></p>
+
+<p><small>Also note that the <i>regAregXcon</i> token is
+completely left out from the <b>lof</b>, <b>stf</b>,
+<b>ldf</b> and <b>sdf</b> instruction handling. This is
+because the sum of the token displacement and the offset
+provided in the instruction cannot be checked and is likely
+to exceed 8 bits. Unfortunately <i>cgg</i> does not allow
+the inspection of subregisters of tokens that are on the
+fake stack. This same problem might also occur with the
+<i>regAcon</i> token, but this is less likely because it
+uses 16-bit displacements. Besides if it would have been
+left out the <b>lof</b>, <b>stf</b>, <b>ldf</b> and
+<b>sdf</b> instructions would have been handled considerably
+less efficient.</small></p>
+<a name="3.11.3. Groups 3 and 4: integer and unsigned arithmetic"></a>
+<h2>3.11.3. Groups 3 and 4: integer and unsigned arithmetic</h2>
+
+<p><small>EM instruction <b>sbi</b> also works with address
+registers, because the <b>cmp</b> instruction in group 12 is
+replaced by <b>sbi 4</b>.</small></p>
+
+<p><small>For the MC68000 <b>mli</b>, <b>mlu</b>,
+<b>dvi</b>, <b>dvu</b>, <b>rmi</b> and <b>rmu</b> are
+handled by library routines. This is because the MC68000 has
+only 16-bit multiplications and divisions.</small></p>
+
+<p><small>The MC68020 does have 32-bit multiplications and
+divisions, but for the <b>rmi</b> and <b>rmu</b> EM
+instructions peculiar things happen anyway: they generate
+the <i>killreg</i> instruction. This is necessary because
+the data register that first held the dividend now holds the
+quotient; the original contents are destroyed without
+<i>cg</i> knowing about it (the destruction of the two
+registers that make up the <i>DREG_pair</i> token
+couldn&rsquo;t be noted in the instructions part of the
+table). To let <i>cg</i> know that these contents are
+destroyed, we have to use this &lsquo;pseudo
+instruction&rsquo; from lack of a better
+solution.</small></p>
+<a name="3.11.4. Group 5: floating point arithmetic"></a>
+<h2>3.11.4. Group 5: floating point arithmetic</h2>
+
+<p><small>Since floating point arithmetic is not
+implemented traps will be generated here.</small></p>
+<a name="3.11.5. Group 6: pointer arithmetic"></a>
+<h2>3.11.5. Group 6: pointer arithmetic</h2>
+
+<p><small>This also is a very important group, along with
+groups 1 and 2. The MC68020 has many different addressing
+modes and if possible they should be used in the generation
+of assembly language.</small></p>
+
+<p><small>The <i>regX</i> token is generated here too. It
+is meant to make efficient use of the MC68020 possibility of
+scaling index registers.</small></p>
+
+<p><small>Note that I would have liked one extra pattern to
+handle C-statements like</small></p>
+<pre><small><i>     pointer += expr ? constant1 : constant2;
+</i></small></pre>
+
+<p><small>efficiently. This pattern would have looked
+like:</small></p>
+<pre><small>     pat ads
+     with const
+     leaving adp %1.num
+</small></pre>
+
+<p><small>but when <i>cg</i> is coming to the EM
+replacement part, the constant has already been removed from
+the fake stack, causing <i>%1.num</i> to have a wrong
+value.</small></p>
+<a name="3.11.6. Group 9: logical instructions"></a>
+<h2>3.11.6. Group 9: logical instructions</h2>
+
+<p><small>The EM instructions <b>and</b>, <b>ior</b> and
+<b>xor</b> are so much alike that procedures can be used
+here, except for the <b>xor $1==4</b> instruction, because
+the MC68000 <i>eor</i> instruction does not allow as many
+kinds of operands as <i>and</i> and <i>or.</i></small></p>
+<a name="3.11.7. Group 11: arrays"></a>
+<h2>3.11.7. Group 11: arrays</h2>
+
+<p><small>This group also tries to make efficient use of
+the available addressing modes, but it leaves the actual
+work to group 6 mentioned above.</small></p>
+
+<p><small>The <i>regX</i> token is also generated here. In
+this group this token is very useful for handling array
+instructions for arrays with one, two, four or eight byte
+elements; the array index goes into the index register,
+which can then be scaled appropriately. An offset is used
+when the first array element has an index other than
+zero.</small></p>
+
+<p><small>I would have liked some extra patterns here too
+but they won&rsquo;t work for the same reasons as explained
+in the discussion of group 6.</small></p>
+<a name="3.11.8. Group 14: procedure calls instructions"></a>
+<h2>3.11.8. Group 14: procedure calls instructions</h2>
+
+<p><small>The function return area consists of registers D
+<small><small>0</small></small> and D
+<small><small>1</small></small> .</small></p>
+<a name="3.11.9. Group 15: miscellaneous instructions"></a>
+<h2>3.11.9. Group 15: miscellaneous instructions</h2>
+
+<p><small>In many cases here library routines are called.
+These will be discussed later.</small></p>
+
+<p><small>Two special EM instructions are included here:
+<b>dch</b>, and <b>lpb</b>. I don&rsquo;t know when they are
+generated by a front end, but these instructions were also
+in the back end table for the PDP. In the PDP table these
+instructions were replaced by <b>loi 4</b> and <b>adp 8</b>
+respectively. I included them both, since they
+couldn&rsquo;t do any harm.</small></p>
+<a name="3.11.10. Extra group: optimalization"></a>
+<h2>3.11.10. Extra group: optimalization</h2>
+
+<p><small>This group is handling EM patterns with more than
+one instruction. This group is not absolutely necessary but
+it makes the generation of code more efficient. Among the
+things that are handled here are: arithmetic and logical
+operations on locals, externals and indirect locals;
+shifting of locals, externals and indirect locals by one;
+some pointer arithmetic; tests in combination with logical
+and&rsquo;s and or&rsquo;s or with branches. Finally there
+are sixteen patterns about divisions that could be handled
+more efficiently by right shifts and which I think should be
+handled by the peephole optimizer (since it also handles the
+same patterns with multiplication).</small></p>
+<a name="4. The library routines"></a>
+<h2>4. The library routines</h2>
+
+<p><small>The table is supplied with two separate
+libraries: one for the MC68000 and one for the MC68020. The
+MC68000 uses a couple more routines than the MC68020 because
+it doesn&rsquo;t have 32-bit division and
+multiplication.</small></p>
+
+<p><small>The routines that need to pop their operands
+first store their return address. Routines that need other
+register besides D <small><small>0</small></small> -D
+<small><small>2</small></small> and A
+<small><small>0</small></small> -A
+<small><small>1</small></small> first store the original
+contents of those registers. D
+<small><small>0</small></small> -D
+<small><small>2</small></small> and A
+<small><small>0</small></small> -A
+<small><small>1</small></small> do not have to be saved
+because if they contain anything useful, their contents are
+pushed on the stack before the routine is
+called.</small></p>
+
+<p><small>The <i>.trp</i> routine just prints a message
+stating the trap number and exits (except of course when
+that particular trap number is masked). Usually higher level
+languages use their own trap handling routines.</small></p>
+
+<p><small>The <i>.mon</i> routine doesn&rsquo;t do anything
+useful at all. It just prints a message stating that the
+specified system call is not implemented and then exits.
+Front ends usually generate calls to special routines rather
+than the EM instruction <b>mon</b>. These routines have to
+be supplied in another library. They may be system dependent
+(e.g. the MC68000 machine this table was tested on first
+moves the parameters to registers, then moves the system
+call number to D <small><small>0</small></small> and then
+executes <i>trap #0,</i> whereas the MC68020 machine this
+table was tested on required the parameters to be on the
+stack rather than in registers). Therefor this library is
+not discussed here.</small></p>
+
+<p><small>The <i>.printf</i> routine is included for EM
+diagnostic messages. It can print strings using %s, 16-bit
+decimal numbers using %d and 32-bit hexadecimal numbers
+using %x.</small></p>
+
+<p><small>The <i>.strhp</i> routine stores a new EM heap
+pointer, and sometimes it needs to allocate more heap space.
+This is done by calling the system call routine <i>_brk</i>.
+Chunks of 1K bytes are allocated, but this can easily be
+changed into larger or smaller chunks.</small></p>
+
+<p><small>The MC68000 library also contains a routine to
+handle the EM instruction <b>rck</b>. The MC68020 has an
+instruction <i>cmp2</i> that is specially meant for range
+checking so the MC68020 library can do without that
+routine.</small></p>
+
+<p><small>The MC68000 library has two multiplication
+routines, one for unsigned and the other for signed
+multiplication. The one for signed multiplication first
+tests the sizes of the operands, to see if it can perform
+the 16 bit machine instruction instead of the routine. If
+not, it considers it&rsquo;s two operands being two digit
+numbers in a 65535-radix system. It uses the 16-bit unsigned
+multiply instruction <i>mulu</i> three times (it does not
+calculate the high order result), and adds up the
+intermediary results the proper way. The signed
+multiplication routine calculates the sign of the result,
+calculates the result as it it were an unsigned
+multiplication, and adjusts the sign of the result. Here
+testing the operands for there sizes would be less simple,
+because the operands are signeds; so that is not done
+here.</small></p>
+
+<p><small>The MC68000 library also has two division
+routines. The routine for unsigned division uses the popular
+algorithm, where the divisor is shifted out and the quotient
+shifted in. The signed division routine calculates the sign
+of both the quotient and the remainder, calls the unsigned
+division routine and adjusts the signs for the quotient and
+the remainder.</small></p>
+
+<p><small>The <i>.nop</i> routine is included for testing
+purposes. This routine prints the line number and the value
+in the stack pointer. Calls to this routine are generated by
+the EM instruction <b>nop</b>, which is ordinarily left out
+by the peephole optimizer.</small></p>
+<a name="5. Testing the table"></a>
+<h2>5. Testing the table</h2>
+
+<p><small>There are special test programs available for
+testing back end tables. First there is the EM test set,
+which tests most EM instructions, making good use of the
+<b>nop</b> instruction. Then there are the Pascal and C test
+programs. The Pascal test programs report errors, which
+makes it relatively easy to find out what was wrong in the
+table. The C test programs just generate some output, which
+then has to be compared to the expected output. Differences
+are not only caused by errors but also e.g. by the use of
+four byte integers and unsigneds (which this table does),
+the use of signed characters instead of unsigned characters
+(the C front end I used generated signed characters) or
+because the back end does not support floating point. These
+differences have to be &lsquo;filtered out&rsquo; to reveal
+the differences caused by actual errors in the back end
+table. These errors then have to be found out by examining
+the assembly code, for no proper diagnostic messages are
+generated.</small></p>
+
+<p><small>After these three basic tests there still remain
+a number of patterns that haven&rsquo;t been tested yet.
+Fortunately <i>cgg</i> offers the possibility of generating
+a special <i>cg</i> that can print a list of patterns that
+haven&rsquo;t been used in code generation yet. For these
+patterns the table writer has to write his own test
+programs. This may complicate things a bit because errors
+may now be caused by errors in the back end table as well as
+errors in the test programs. The latter happened quite often
+to me, because I found EM to be an uncomfortable programming
+language (of course it isn&rsquo;t meant to be a programming
+language, but an intermediary language).</small></p>
+
+<p><small>There still remain a couple of patterns in this
+table that haven&rsquo;t been tested yet. However these
+patterns all have very similar cases that have been tested
+(an example of this is mentioned in the section on group 0
+of the patterns section of the table). Some patterns have to
+do with floating point numbers. These EM instructions all
+generate traps, so they didn&rsquo;t all have to be tested.
+The two instructions <b>dch</b> and <b>lpb</b> haven&rsquo;t
+been tested in this table, but since they only use EM
+replacement and they have been tested in the PDP back end
+table, these two should be all right.</small></p>
+<a name="6. Performance of the back end"></a>
+<h2>6. Performance of the back end</h2>
+
+<p><small>To test the performance of the back end I
+gathered a couple of C programs and compiled them on the
+machines I used to test the back ends on. I compiled them
+using the C compiler that was available there and I also
+compiled them using the back end. I then compared the sizes
+of the text segments in the object files. The final results
+of these comparisons are in fig. 1 and fig. 2.</small></p>
+
+
+<p align=center><small><img src="grohtml-105631.png"></small></p>
+
+<p align=center><small>fig 1.</small></p>
+
+
+<p align=center><small><img src="grohtml-105632.png"></small></p>
+
+<p align=center><small>fig 2.</small></p>
+
+<p><small>Fig. 1 also includes results of an old m68k4 back
+end (a back end for the MC68000 with four byte word and
+pointersize). The table for this back end was given to me as
+an example, but I thought it didn&rsquo;t make good use of
+the MC68000&rsquo;s addressing capabilities, it hardly did
+any optimalization, and it sometimes even generated code
+that the assembler would not swallow. This was sufficient
+reason for me to write a completely new table.</small></p>
+
+<p><small>The results from the table may not be taken too
+seriously. The sizes measured are the sizes of the text
+segments of the user programs, i.e. without the inclusion of
+library routines. Of course these segments do contain calls
+to these routines. Another thing is that the <i>rom</i>
+segment may be included in the text segment (this is why the
+results for the MC68000 for <i>compute.c</i> look so
+bad).</small></p>
+
+<p><small>Some other things must be said about these
+results. The quality of EM code generated by the C front end
+is certainly not optimal. The front end uses temporary
+locals (extra locals that are used to evaluate expressions)
+far too quickly: for a simple C expression like</small></p>
+<pre><small><i>     *(pointer) += constant
+</i></small></pre>
+
+<p><small>where <i>pointer</i> is a register variable, the
+C front end generates (for obscure reasons) a temporary
+local that holds the contents of <i>pointer</i>. This way
+the pattern for</small></p>
+<pre><small><b>     loc lil adi sil $2==$4 &amp;&amp; $3==4
+</b></small></pre>
+
+<p><small>for register variables is not used and longer,
+less efficient code is generated. But even in spite of this,
+the back end seems to generate rather compact
+code.</small></p>
+<a name="7. Some timing results"></a>
+<h2>7. Some timing results</h2>
+
+<p><small>In order to measure the performance of the code
+generated by the back end some timing tests were done. The
+reason I chose these particular tests is that they were also
+done for many other back ends; the reader can compare the
+results if he so wishes (of course comparing the results
+only show a global difference in speed of the various
+machines; it doesn&rsquo;t show whether some back end
+generates relatively better code than another).</small></p>
+
+<p><small>On the MC68000 machine the statements were
+executed one million times. On the MC68020 machine the
+statements had to be executed four million times because
+this machine was so fast that timing results would be very
+unreliable if the statements were executed only one million
+times.</small></p>
+
+<p><small>For testing I used the following C test
+program:</small></p>
+<pre><small><i>     main()
+     {
+         int i, j, ...
+         ...
+         for (i=0; i&lt;1000; i++)
+             for (j=0; j&lt;1000; j++)
+</i></small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small><i>STATEMENT;</i></small></p>
+</table>
+
+<p><small><i>}</i></small></p>
+
+<p><small>where <i>STATEMENT</i> is any of the test
+statements or the empty statement. For the MC68020 tests I
+used 2000 instead of 1000. The results of the test with the
+empty statement were used to calculate the execution times
+of the other test statements.</small></p>
+
+<p><small>Figures 3 and 4 show many results. For each
+machine actually two tests were done: one with register
+variables, and the other without them. I noticed that the
+original C compilers on both machines did not generate the
+use of register variables, unless specifically requested.
+The back end uses register variables when and where they are
+profitable, even if the user did not ask for
+them.</small></p>
+
+
+<p align=center><small><img src="grohtml-105633.png"></small></p>
+
+<p align=center><small>Fig. 3</small></p>
+
+
+<p align=center><small><img src="grohtml-105634.png"></small></p>
+
+<p align=center><small>Fig. 4</small></p>
+
+<p><small>The reader may have noticed that on both machines
+the back end seems to generate considerably slower code for
+tests where a &lsquo;condition&rsquo; is used in the rhs of
+an assignment statement. This is in fact not true: it is the
+front end that generates bad code. Two examples: for the C
+statement</small></p>
+<pre><small><i>     int1 = (int2 &lt; 0);
+</i></small></pre>
+
+<p><small>the front end generates the following code for
+the rhs (I used arbitrary labels):</small></p>
+<pre><small><b>     lol -16
+     zlt *10
+     loc 0
+     bra *11
+     10
+     loc 1
+     11
+</b></small></pre>
+
+<p><small>while in this case (to my opinion) it should have
+generated</small></p>
+<pre><small><b>     lol -16
+     tlt
+</b></small></pre>
+
+<p><small>which is much shorter. Another example: for the C
+statement</small></p>
+<pre><small><i>     int1 = (int2 &lt; 3);
+</i></small></pre>
+
+<p><small>the front end generates for the rhs</small></p>
+<pre><small><b>     lol -16
+     loc 3
+     blt *10
+     loc 0
+     bra *11
+     10
+     loc 1
+     11
+</b></small></pre>
+
+<p><small>while a much better translation would
+be</small></p>
+<pre><small><b>     lol -16
+     loc 3
+     cmi 4
+     tlt
+</b></small></pre>
+
+<p><small>Another statement that the back end seems to
+generate slower code for is the C switch statement. This is
+true, but it is also caused by the way these things are done
+in EM. EM uses the <b>csa</b> or <b>csb</b> instruction, and
+for these two I had to use library routines. On larger
+switch statements the <i>.csa</i> routine will perform
+relatively better.</small></p>
+
+<p><small>The back end generates considerably faster code
+for procedure and function calls, especially in the MC68020
+case, and also for the C statement</small></p>
+<pre><small><i>     int1 = int1 + 1;
+</i></small></pre>
+
+<p><small>The original C compilers use the same method for
+this instruction as for</small></p>
+<pre><small><i>     int1 = int2 - 1;
+</i></small></pre>
+
+<p><small>they perform the addition in a scratch register,
+and then store the result. For the former C statement this
+is not necessary, because the MC68000 and MC68020 have an
+instruction that can add constants to almost anything (in
+this case: to locals). The MC68000 and MC68020 back ends do
+use this instruction.</small></p>
+<a name="8. Some final remarks"></a>
+<h2>8. Some final remarks</h2>
+
+<p><small>As mentioned a few times before, the C front end
+compiler does not generate optimal code and as a consequence
+of this the back end does not always generate optimal code.
+This is especially the case with temporary locals, which the
+front end generates much too quickly, and also with
+conditional expressions that are used in the rhs of an
+assignment statement (fortunately this is not needed so
+much).</small></p>
+
+<p><small>If <i>cgg</i> would have been able to accept
+operands separated by any character instead of just by
+commas (in the instruction definitions part), I
+wouldn&rsquo;t have had the need of the <i>killreg</i>
+pseudo instruction. It would also be handy to have
+<i>cgg</i> accept all normal C operators. At the moment
+<i>cgg</i> does not accept binary ands, ors and exors, even
+though in [4] it is stated that <i>cgg</i> does accept all
+normal C operators. As it happens I did not need the binary
+operators, but at some time in developing the table I
+thought I did.</small></p>
+
+<p><small>I would also like <i>cg</i> to do more with the
+condition codes information that is supplied with each
+instruction in the instruction definitions section of the
+table. Sometimes <i>cg</i> generates test instructions which
+actually were not necessary. This of course causes the
+generated programs to be slightly larger and slightly
+slower.</small></p>
+
+<p><small>In spite of the few minor shortcomings mentioned
+above I found <i>cgg</i> a very comfortable tool to
+use.</small></p>
+<a name="References"></a>
+<h2>References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[1]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>T. B. Steel Jr., <i>UNCOL: The myth and the
+Fact,</i> in Ann. Rev. Auto. Prog., R. Goodman (ed.), Vol. 2
+(1969), pp 325 - 344</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[2]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>A. S. Tanenbaum, H. van Staveren, E. G. Keizer,
+J. W. Stevenson, <i>A practical toolkit for making portable
+compilers,</i> Informatica Report 74, Vrije Universiteit,
+Amsterdam, 1983</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[3]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>A. S. Tanenbaum, H. van Staveren, E. G. Keizer,
+J. W. Stevenson, <i>Description of an experimental machine
+architecture for use with block structured languages,</i>
+Informatica Report 81, Vrije Universiteit, Amsterdam,
+1983</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[4]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>H. van Staveren <i>The table driven code
+generator from the Amsterdam Compiler Kit, Second Revised
+Edition,</i> Vrije Universiteit, Amsterdam</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[5]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small><i>MC68020 32-bit Microprocessor User&rsquo;s
+Manual,</i> Second Edition, Motorola Inc., 1985,
+1984</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[6]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small><i>MC68000 16-bit Microprocessor User&rsquo;s
+Manual, Preliminary,</i> Motorola Inc., 1979</small></p>
+</td>
+</table>
+<hr>
+</body>
+</html>

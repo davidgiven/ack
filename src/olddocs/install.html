@@ -1,0 +1,2645 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:16:57 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Amsterdam Compiler Kit Installation Guide</title>
+</head>
+<body>
+
+<h1 align=center>Amsterdam Compiler Kit Installation Guide</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The ACK installation process">2. The ACK installation process</a><br>
+<a href="#3. Restoring the ACK tree">3. Restoring the ACK tree</a><br>
+<a href="#4. Adapting ACK to the local system">4. Adapting ACK to the local system</a><br>
+<a href="#5. Compiling the Kit">5. Compiling the Kit</a><br>
+<a href="#5.1. Problems">5.1. Problems</a><br>
+<a href="#5.1.1. on Unisoft m68000 systems.">5.1.1. on Unisoft m68000 systems.</a><br>
+<a href="#5.1.2. with backends">5.1.2. with backends</a><br>
+<a href="#5.2. An example output of TakeAction.">5.2. An example output of TakeAction.</a><br>
+<a href="#6. Commands">6. Commands</a><br>
+<a href="#7. Machines">7. Machines</a><br>
+<a href="#8. Compilation on a different machine.">8. Compilation on a different machine.</a><br>
+<a href="#8.1. Backend">8.1. Backend</a><br>
+<a href="#8.2. Universal assembler/loader, link editor">8.2. Universal assembler/loader, link editor</a><br>
+<a href="#9. Options">9. Options</a><br>
+<a href="#9.1. Default machine">9.1. Default machine</a><br>
+<a href="#9.2. Pathnames">9.2. Pathnames</a><br>
+<a href="#10. Makefiles">10. Makefiles</a><br>
+<a href="#11. Testing">11. Testing</a><br>
+<a href="#12. Documentation">12. Documentation</a><br>
+
+<hr>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>This document describes the process of installing the
+Amsterdam Compiler Kit (ACK). It depends on the combination
+of hard- and software how hard it will be to install the
+Kit. This description is intended for a Sun-3 or SPARC
+workstation. Installation on VAXen running Berkeley
+<small>UNIX</small> &reg; or Ultrix, Sun-2 systems and most
+System V <small>UNIX</small> systems should be easy. As of
+this distribution, installation on PDP-11&rsquo;s or other
+systems with a small address space is no longer supported.
+See section 8 for installation on other systems.</p>
+<a name="2. The ACK installation process"></a>
+<h2>2. The ACK installation process</h2>
+
+<p>In the ACK installation process, three directory trees
+are used:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>the ACK source tree. This is the tree on the ACK
+distribution medium. For the rest of this document, we will
+refer to this directory as $SRC_HOME;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>a configuration tree. This tree is built by the
+installation process and is used to do compilations in. Its
+structure reflects that of the source tree, but this tree
+will mostly contain Makefiles and relocatable objects. For
+the rest of this document, we will refer to this directory
+as $CONFIG;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>an ACK users tree. This tree is also built by the
+installation process. For the rest of this document, we will
+refer to this directory as $TARGET_HOME;</p>
+</td>
+</table>
+
+<p>After installation, the directories in $TARGET_HOME
+contain the following information:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>bin</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>the few utilities that knot things together. See the
+section about &quot;Commands&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>lib</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>root of a tree containing almost all libraries used by
+commands. Files specific to a certain machine are collected
+in one subtree per machine. E.g. &quot;lib/pdp&quot;,
+&quot;lib/z8000&quot;. The names used here are the same
+names as used for subtrees of
+&quot;$SRC_HOME/mach&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>lib/descr</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>command descriptor files used by the program ack.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>lib/LLgen</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>files used by the LL(1) parser generator.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>lib/flex</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>files used by the lexical analyzer generator Flex.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>lib/m2</p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p>definition modules for Modula-2.</p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>lib.bin</p>
+</td>
+<td width="14%"></td>
+<td width="72%">
+
+<p>root of a tree containing almost all binaries used by
+commands. All programs specific to a certain machine are
+collected in one subtree per machine. E.g.
+&quot;lib.bin/pdp&quot;, &quot;lib.bin/z8000&quot;. The
+names used here are the same names as used for subtrees of
+&quot;$SRC_HOME/mach&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>lib.bin/ego</p>
+</td>
+<td width="6%"></td>
+<td width="70%">
+
+<p>files used by the global optimizer.</p>
+</td>
+<td width="1%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lib.bin/lint</p>
+</td>
+<td width="4%"></td>
+<td width="72%">
+
+<p>binaries for the lint passes and lint libraries.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>lib.bin/ceg</p>
+</td>
+<td width="6%"></td>
+<td width="72%">
+
+<p>files used by the code-expander-generator.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>etc</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>contains the file &quot;ip_spec.t&quot; needed for EM
+interpreters and EM documentation.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>config</p>
+</td>
+<td width="16%"></td>
+<td width="54%">
+
+<p>contains two include files:</p>
+</td>
+<td width="17%">
+</td>
+</table>
+
+<p align=center><img src="grohtml-96851.png"></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>These include files are specific for the current machine,
+so they are in a separate directory.</p>
+</td>
+</table>
+
+<p>include/_tail_cc</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>include files needed by modules in the C library from
+lang/cem/libcc.</p>
+</td>
+</table>
+
+<p>include/tail_ac</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>include files for ANSI C.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p>include/occam</p>
+</td>
+<td width="2%"></td>
+<td width="48%">
+
+<p>include files for occam.</p>
+</td>
+<td width="23%">
+</td>
+</table>
+
+<p>include/_tail_mon</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>more or less system independent include files needed by
+modules in the library lang/cem/libcc/mon.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>h</p>
+</td>
+<td width="26%"></td>
+<td width="46%">
+
+<p>the #include files for:</p>
+</td>
+<td width="25%">
+</td>
+</table>
+
+<p align=center><img src="grohtml-96852.png"></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>modules</p>
+</td>
+<td width="14%"></td>
+<td width="72%">
+
+<p>root of a tree containing modules for compiler
+writers.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>modules/man</p>
+</td>
+<td width="6%"></td>
+<td width="58%">
+
+<p>manual pages for all modules.</p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>modules/lib</p>
+</td>
+<td width="6%"></td>
+<td width="48%">
+
+<p>contains module objects.</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>modules/h</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>include files for some of the modules.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>modules/pkg</p>
+</td>
+<td width="6%"></td>
+<td width="72%">
+
+<p>include files for some of the modules.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>doc</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>this directory contains the unformatted documents for
+the Kit. A list of the available documents can be found in
+the last section. These documents must be processed by
+[nt]roff.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>man</p>
+</td>
+<td width="22%"></td>
+<td width="64%">
+
+<p>man files for various utilities.</p>
+</td>
+<td width="7%">
+</td>
+</table>
+
+<p>When installing ACK on several types of machines with a
+shared file system, it may be useful to know that the
+&quot;doc&quot;, &quot;etc&quot;, &quot;h&quot;,
+&quot;include&quot;, &quot;lib&quot; and &quot;man&quot;
+sub-directories do not depend on this particular
+installation. They do not contain binaries or path-dependent
+information. These directories can therefore be shared
+between the ACK installations. This can be accomplished by
+creating the tree and suitable symbolic links before
+starting the installation process.</p>
+
+<p>For instance, let us say there is a file-system that is
+accessible from the different machines as
+&quot;/usr/share/local&quot;, and the ACK binary tree must
+be installed in &quot;/usr/local/ack&quot;. In this case,
+proceed as follows:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>create a directory &quot;/usr/share/local/ack&quot;,
+with subdirectories &quot;doc&quot;, &quot;etc&quot;,
+&quot;h&quot;, &quot;include&quot;, &quot;lib&quot; and
+&quot;man&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>create a directory &quot;/usr/local/ack&quot; and then
+create symbolic links &quot;doc&quot; to
+&quot;/usr/share/local/ack/doc&quot;, etc.</p>
+</td>
+</table>
+
+<p>If this is done on all machines on which ACK will be
+installed, the machine-independent part only has to be
+installed once, preferably on the fastest processor (it
+takes a long time to install all libraries).</p>
+
+<p>The directories in the source tree contain the following
+information:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>bin</p>
+</td>
+<td width="22%"></td>
+<td width="58%">
+
+<p>source of some shell-scripts.</p>
+</td>
+<td width="13%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>lib</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>mostly description files for the &quot;ack&quot;
+program.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>etc</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>the main description of EM sits here. Files (e.g.
+em_table) describing the opcodes and pseudos in use, the
+operands allowed, effect in stack etc. etc.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>mach</p>
+</td>
+<td width="20%"></td>
+<td width="72%">
+
+<p>just there to group the directories with all sources for
+each machine. The section about &quot;Machines&quot; of this
+manual indicates which subdirectories are used for which
+systems.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>These directories have subdirectories named:</p></td>
+</table>
+
+<p align=center><img src="grohtml-96853.png"></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>Actually, some of these directories will only appear in
+the configuration tree.<br>
+The directory proto contains files used by most machines,
+like machine-independent sources and Makefiles.</p></td>
+</table>
+
+<p align=center><img src="grohtml-96854.png"></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>emtest</p>
+</td>
+<td width="16%"></td>
+<td width="68%">
+
+<p>contains prototype of em test set.</p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>lang</p>
+</td>
+<td width="20%"></td>
+<td width="72%">
+
+<p>just there to group the directories for all
+front-ends.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>lang/pc</p>
+</td>
+<td width="14%"></td>
+<td width="42%">
+
+<p>the Pascal front-end.</p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p>lang/pc/libpc</p>
+</td>
+<td width="73%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>source of Pascal run-time system (in EM or C).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/pc/test</p>
+</td>
+<td width="4%"></td>
+<td width="72%">
+
+<p>some test programs written in Pascal.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/pc/comp</p>
+</td>
+<td width="4%"></td>
+<td width="54%">
+
+<p>the Pascal compiler proper.</p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>lang/cem</p>
+</td>
+<td width="12%"></td>
+<td width="32%">
+
+<p>the C front-end.</p>
+</td>
+<td width="39%">
+</td>
+</table>
+
+<p>lang/cem/libcc</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>directories with sources of C runtime system, libraries
+(in EM or C).</p>
+</td>
+</table>
+
+<p>lang/cem/libcc/gen</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>sources for routines in chapter III of
+<small>UNIX</small> programmers manual, excluding stdio.</p>
+</td>
+</table>
+
+<p>lang/cem/libcc/stdio</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>stdio sources.</p>
+</td>
+</table>
+
+<p>lang/cem/libcc/math</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>sources for mathematical routines, normally available
+with the <b>-lm</b> option to <i>cc</i>.</p>
+</td>
+</table>
+
+<p>lang/cem/libcc/mon</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>sources for routines in chapter II, mostly written in
+EM.</p>
+</td>
+</table>
+
+<p>lang/cem/cemcom</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the compiler proper.</p>
+</td>
+</table>
+
+<p>lang/cem/cemcom.ansi</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the ANSI C compiler proper.</p>
+</td>
+</table>
+
+<p>lang/cem/cpp.ansi</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the ANSI C preprocessor.</p>
+</td>
+</table>
+
+<p>lang/cem/libcc.ansi</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the ANSI C library sources.</p>
+</td>
+</table>
+
+<p>lang/cem/ctest</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the C test set.</p>
+</td>
+</table>
+
+<p>lang/cem/ctest/cterr</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>programs developed for pinpointing previous errors.</p>
+</td>
+</table>
+
+<p>lang/cem/ctest/ct*</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the test programs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p>lang/cem/lint</p>
+</td>
+<td width="2%"></td>
+<td width="40%">
+
+<p>a C program checker.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+
+<p>lang/cem/lint/lpass1</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the first pass of lint.</p>
+</td>
+</table>
+
+<p>lang/cem/lint/lpass1.ansi</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the first pass of lint, this time for ANSI C.</p>
+</td>
+</table>
+
+<p>lang/cem/lint/lpass2</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the second pass of lint, shared between ANSI C and
+&quot;old-fashioned&quot; C.</p>
+</td>
+</table>
+
+<p>lang/cem/lint/llib</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>programs for producing lint libraries.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>lang/basic</p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p>the Basic front-end.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+
+<p>lang/basic/src</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the compiler proper.</p>
+</td>
+</table>
+
+<p>lang/basic/lib</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the Basic run-time library source.</p>
+</td>
+</table>
+
+<p>lang/basic/test</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>various Basic programs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>lang/occam</p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p>the occam front-end.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+
+<p>lang/occam/comp</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the compiler proper.</p>
+</td>
+</table>
+
+<p>lang/occam/lib</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>source of occam run-time system (in EM or C).</p>
+</td>
+</table>
+
+<p>lang/occam/test</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>some occam programs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>lang/m2</p>
+</td>
+<td width="14%"></td>
+<td width="46%">
+
+<p>the Modula-2 front-end.</p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/m2/comp</p>
+</td>
+<td width="4%"></td>
+<td width="40%">
+
+<p>the compiler proper.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p>lang/m2/libm2</p>
+</td>
+<td width="2%"></td>
+<td width="72%">
+
+<p>source of Modula-2 run-time system (in EM, C and
+Modula-2).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/m2/m2mm</p>
+</td>
+<td width="4%"></td>
+<td width="64%">
+
+<p>the Modula-2 makefile generator.</p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/m2/test</p>
+</td>
+<td width="4%"></td>
+<td width="62%">
+
+<p>some Modula-2 example programs.</p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p>lang/fortran</p>
+</td>
+<td width="4%"></td>
+<td width="72%">
+
+<p>the Fortran front-end (translates Fortran into C). This
+compiler is not a part of ACK, but is included because it
+adds another language. The Fortran system carries the
+following copyright notice:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<pre>/**************************************************************
+Copyright 1990, 1991 by AT&amp;T Bell Laboratories and Bellcore.
+
+Permission to use, copy, modify, and distribute this software
+and its documentation for any purpose and without fee is hereby
+granted, provided that the above copyright notice appear in all
+copies and that both that the copyright notice and this
+permission notice and warranty disclaimer appear in supporting
+documentation, and that the names of AT&amp;T Bell Laboratories or
+Bellcore or any of their entities not be used in advertising or
+publicity pertaining to distribution of the software without
+specific, written prior permission.
+
+AT&amp;T and Bellcore disclaim all warranties with regard to this
+software, including all implied warranties of merchantability
+and fitness.  In no event shall AT&amp;T or Bellcore be liable for
+any special, indirect or consequential damages or any damages
+whatsoever resulting from loss of use, data or profits, whether
+in an action of contract, negligence or other tortious action,
+arising out of or in connection with the use or performance of
+this software.
+**************************************************************/
+</pre>
+</td>
+</table>
+
+<p>lang/fortran/comp</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the compiler proper.</p>
+</td>
+</table>
+
+<p>lang/fortran/lib</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>source of Fortran runtime system and libraries.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>fast</p>
+</td>
+<td width="20%"></td>
+<td width="72%">
+
+<p>contains sub-directories for installing the fast ACK
+compatible compilers.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>fast/driver</p>
+</td>
+<td width="77%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>contains the sources of the fast ACK compatible compiler
+drivers.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>fcc</p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>contains the fast cc-compatible C compiler for SUN-3 and
+VAX.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>util</p>
+</td>
+<td width="20%"></td>
+<td width="72%">
+
+<p>contains directories with sources for various
+utilities.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/ack</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>the program used for translation with the Kit.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/opt</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>the EM peephole optimizer (*.k =&gt; *.m).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/ego</p>
+</td>
+<td width="12%"></td>
+<td width="42%">
+
+<p>the global optimizer.</p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="22%">
+
+<p>util/topgen</p>
+</td>
+<td width="6%"></td>
+<td width="62%">
+
+<p>the target optimizer generator.</p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>util/misc</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>decode (*.[km] =&gt; *.e) + encode (*.e =&gt; *.k).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>util/data</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>the C-code for $TARGET_HOME/lib.bin/em_data.a. These
+sources are created by the Makefile in
+&lsquo;etc&lsquo;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/ass</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>the EM assembler (*.[km] + libraries =&gt; e.out).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>util/arch</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>the archivers to be used for all EM utilities.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/cgg</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>a program needed for compiling backends.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>util/ncgg</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>a program needed for compiling the newest backends.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/cpp</p>
+</td>
+<td width="12%"></td>
+<td width="38%">
+
+<p>the C preprocessor.</p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/shf</p>
+</td>
+<td width="12%"></td>
+<td width="40%">
+
+<p>various shell files.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>util/LLgen</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>the extended LL(1) parser generator.</p>
+</td>
+<td width="0%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>util/amisc</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>contains some programs handling ACK a.out format, such
+as anm, asize.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>util/cmisc</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>contains some programs to help in resolving name
+conflicts, and a dependency generator for makefiles.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/led</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>the ACK link-editor, reading ACK relocatable a.out
+format, and writing ACK a.out format.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/int</p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>an EM interpreter, written in C. Very useful for
+checking out software, but slow.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p>util/ceg</p>
+</td>
+<td width="12%"></td>
+<td width="48%">
+
+<p>code expander generator.</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>util/grind</p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p>a symbolic debugger.</p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>util/byacc</p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>this is Berkeley yacc, in the public domain.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>util/flex</p>
+</td>
+<td width="10%"></td>
+<td width="72%">
+
+<p>this is a replacement for lex. It carries the following
+copyright notice:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<pre>Copyright (c) 1990 The Regents of the University of California.
+All rights reserved.
+
+This code is derived from software contributed to Berkeley by
+Vern Paxson.
+
+The United States Government has rights in this work pursuant
+to contract no. DE-AC03-76SF00098 between the United States
+Department of Energy and the University of California.
+
+Redistribution and use in source and binary forms are permitted
+provided that: (1) source distributions retain this entire
+copyright notice and comment, and (2) distributions including
+binaries display the following acknowledgement:  &lsquo;&lsquo;This product
+includes software developed by the University of California,
+Berkeley and its contributors&rsquo;&rsquo; in the documentation or other
+materials provided with the distribution and in all advertising
+materials mentioning features or use of this software.  Neither the
+name of the University nor the names of its contributors may be
+used to endorse or promote products derived from this software
+without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED &lsquo;&lsquo;AS IS&rsquo;&rsquo; AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.
+</pre>
+</td>
+</table>
+
+<p>All path names mentioned in the text of this document
+are relative to $SRC_HOME, unless they start with
+&rsquo;/&rsquo; or one of $SRC_HOME, $TARGET_HOME or
+$CONFIG.</p>
+<a name="3. Restoring the ACK tree"></a>
+<h2>3. Restoring the ACK tree</h2>
+
+<p>The process of installing the Amsterdam Compiler Kit is
+quite simple. The first step is to restore the Amsterdam
+Compiler Kit distribution tree structure. Proceed as
+follows</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p>Create a directory, for example
+/usr/share/local/src/ack, on a device with at least 15
+Megabytes left. This directory will be $SRC_HOME.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p>Change to that directory (cd ...).</p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="14%"></td>
+<td width="80%">
+
+<p>Extract all files from the distribution medium, for
+instance magtape: <b>tar x</b>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="12%"></td>
+<td width="80%">
+
+<p>Keep a copy of the original distribution to be able to
+repeat the process of installation in case of disasters.
+This copy is also useful as a reference point for
+diff-listings.</p>
+</td>
+</table>
+<a name="4. Adapting ACK to the local system"></a>
+<h2>4. Adapting ACK to the local system</h2>
+
+<p>Before compiling the sources in the Kit some
+installation dependent actions have to be taken. Most of
+these are performed by an interactive shell script in the
+file <i>$SRC_HOME/first/first.</i> Calling this script
+should be done from another directory, for instance an empty
+directory which will later become $CONFIG.</p>
+
+<p>The actions of the <i>first</i> script are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Asking for the path names of the ACK source directory
+($SRC_HOME), the configuration directory ($CONFIG), and the
+ACK users directory ($TARGET_HOME). About 5M are needed for
+the configuration tree. The disk space needed for the ACK
+users tree depends on which front-ends and back-ends are to
+be installed. For instance, on our SPARC systems we have
+installed all languages and 6 back-ends, including the
+system-independent part. This amounts to about 16M. On our
+SUN-3 systems, we have installed all front-ends and 5
+back-ends, but only the machine-dependent part. The
+machine-independent directories are symbolic links to the
+SPARC ACK users tree. We also have the fast ACK compilers
+installed on the SUN-3&rsquo;s. The total amount of
+disk-space used is less than 8M.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Asking for what type of system the binary tree must be
+produced for and creating the shell script
+&quot;ack_sys&quot; in the Kit&rsquo;s bin directory.
+Several utilities make use of &quot;ack_sys&quot; to
+determine the type of system. The current choice is
+between:</p>
+</td>
+</table>
+
+<p align=center><img src="grohtml-96855.png"></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>For some of these, the installation procedure has not
+been tested, as we don&rsquo;t have them. For others, the
+installation procedure has only been tested with earlier
+distributions, as we don&rsquo;t have those systems anymore.
+However, the sun3 and sparc systems are known to behave
+reasonably. The sparc_solaris system has only been tested
+with the GNU C compiler, because we don&rsquo;t have the SUN
+C compiler (it is unbundled in Solaris 2). The Sun systems
+should run SunOs Release 3.0 or newer. The i386 choice may
+also be used for Intel 80386 or 80486 systems running
+<small>UNIX</small> System V Release 4. These systems are
+also able to run Xenix System V binaries. If the target
+system is not on this list, choose one that comes close. If
+none of them come close, use the &quot;ANY&quot; choice. For
+ANY, any name can be used, but the Kit will not be able to
+compile programs for the target system. See the section
+about &quot;compilation on a different machine&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Setting the default machine for which code is produced
+to the local type of system according to the table above.
+This in done in the file
+&quot;$TARGET_HOME/config/local.h&quot;. See also section
+9.1.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Asking for things that don&rsquo;t have to be
+installed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Producing a shell script called &quot;INSTALL&quot; that
+will take care of the ACK installation process.</p>
+</td>
+</table>
+<a name="5. Compiling the Kit"></a>
+<h2>5. Compiling the Kit</h2>
+
+<p>The next step in the installation process is to run the
+&quot;INSTALL&quot; shell-script. When using a Bourne-shell,
+type:</p>
+<pre>     sh INSTALL &gt; INSTALL.out 2&gt;&amp;1 &amp;
+</pre>
+
+<p>When using a C-shell, type:</p>
+<pre>     sh INSTALL &gt;&amp; INSTALL.out &amp;
+</pre>
+
+<p>This shell-script performs the following steps:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Produce a configuration tree ($CONFIG), reflecting the
+structure of the source tree.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Produce Makefiles in $CONFIG. As mentioned before,
+compilations will be done in the configuration tree, not in
+the source tree. Most configuration directories will have
+Makefiles used to compile and install the programs in that
+directory. All programs needed for compilation and/or cross
+compilation with the Kit are installed in $TARGET_HOME by
+these Makefiles. These Makefiles are produced from
+corresponding files called &quot;proto.make&quot; in the
+source tree. In fact, the &quot;proto.make&quot; files are
+almost complete Makefiles, except for some macro definitions
+that are collected by the <i>first</i> script. The Makefiles
+adhere to a standard which is described in the section
+9.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Copy &quot;Action&quot; files to the configuration tree
+and editing them to reflect the choices concerning the parts
+of ACK that have to be installed. &quot;Action&quot; files
+are described below.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Copy part of the source tree to the ACK users tree
+(include files, manual pages, documentation, et cetera).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>&minus;</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>Calling the &quot;TakeAction&quot; script. All these
+Makefiles do not have to be called separately. We wrote a
+shell script calling the make&rsquo;s needed to install the
+whole Kit. This script consists of the file
+$SRC_HOME/TakeAction and a few files called Action in some
+configuration directories. The Action files describe in a
+very simple form which actions have to be performed in which
+directories. The default action is to start &quot;make
+install &amp;&amp; make clean&quot;. The output of each make
+is diverted to a file called &quot;Out&quot; in the same
+directory as the make was started in. If the make was
+successful (return code 0) the Out file is removed and the
+script TakeAction produces a small message indicating that
+it succeeded in fulfilling its goal. If the make was not
+successful (any other return code) the Out file is left
+alone for further examination and the script TakeAction
+produces a small message indicating that it failed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>For some programs the scripts already know they
+can&rsquo;t be installed on the local type of system. In
+that case they produce a message &quot;Sorry, .....&quot;
+and happily proceed with further installation commands.</p>
+</td>
+</table>
+
+<p>Installation of the Kit might take anything from a few
+hours to more than a day, depending on the speed of the
+local machine and what must be installed.</p>
+
+<p>If the installation succeeded, the Kit is ready to be
+used. Read section 6 and the manuals provided with the Kit
+(in the $TARGET_HOME/man directory) on how to use it.</p>
+<a name="5.1. Problems"></a>
+<h2>5.1. Problems</h2>
+<a name="5.1.1. on Unisoft m68000 systems."></a>
+<h2>5.1.1. on Unisoft m68000 systems.</h2>
+
+<p>The Unisoft C compiler has a bug which impedes the
+correct translation of the peephole optimizer. For a more
+detailed description of this phenomenon see the file
+&quot;$SRC_HOME/mach/m68k2/Unisoft_bug&quot;. (This
+observation was made in 1985 or so, so it is probably no
+longer true).</p>
+<a name="5.1.2. with backends"></a>
+<h2>5.1.2. with backends</h2>
+
+<p>The backends for the PDP11, VAX, Motorola 68000 and
+68020, SPARC, Intel 8086, and Intel 80386 have been heavily
+used by ourselves and are well tested. The backends for the
+other machines are known to run our own test programs, but
+might reveal errors when more heavily used.</p>
+<a name="5.2. An example output of TakeAction."></a>
+<h2>5.2. An example output of TakeAction.</h2>
+<pre>    System definition -- done
+    EM definition library -- done
+    C utilities -- done
+    Flex lexical analyzer generator -- done
+    Yacc parser generator -- done
+    system-call interface module -- done
+        .
+        .
+        .
+    EM Global optimizer -- done
+    ACK archiver -- done
+    Program &rsquo;ack&rsquo; -- done
+    Bootstrap for backend tables -- done
+    Bootstrap for newest form of backend tables -- done
+        .
+        .
+        .
+    C frontend -- done
+    ANSI-C frontend -- done
+    ANSI-C preprocessor -- done
+    ANSI-C header files -- done
+    Failed for LINT C program checker, see lang/cem/lint/Out
+    Pascal frontend -- done
+    Basic frontend -- done
+        .
+        .
+        .
+    Vax 4-4 assembler -- done
+    Vax 4-4 backend -- done
+    Vax target optimizer -- done
+    ACK a.out to VAX a.out conversion program -- done
+    Sorry, Vax code expander library can only be made on vax* systems
+    Vax 4-4 EM library -- done
+    Vax 4-4 debugger support library -- done
+    Vax 4-4 etext,edata,end library -- done
+    Vax 4-4 systemcall interface -- done
+        .
+        .
+        .
+
+</pre>
+
+<p>The lines starting with &quot;Sorry, &quot; indicate
+that certain programs cannot be translated on the local
+machine. The lines starting with &quot;Failed for&quot;
+indicate that certain programs/libraries were expected to,
+but did not compile. In this example, the installation of
+LINT failed. To repeat a certain part of the installation,
+look in the Action file, which resides in the root of the
+configuration tree, for the directory in which that part is
+to be found. If that directory contains an Action file issue
+the command &quot;sh $CONFIG/bin/TakeAction&quot;, otherwise
+type &quot;make install&quot;.</p>
+<a name="6. Commands"></a>
+<h2>6. Commands</h2>
+
+<p>The following commands are available in the
+$TARGET_HOME/bin directory after compilation of the Kit:</p>
+
+<p><i>ack</i>, <i>acc</i>, <i>abc</i>, <i>apc</i>,
+<i>ocm</i>, <i>m2</i>, <i>f2c</i> and their links</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>the names mentioned here can be used to compile Pascal,
+C, etc... programs. Most of the links can be used to
+generate code for a particular machine. See also the section
+about &quot;Machines&quot;.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><i>arch</i></p>
+</td>
+<td width="20%"></td>
+<td width="72%">
+
+<p>the archiver used for the EM- and universal
+assembler/loader.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><i>aal</i></p>
+</td>
+<td width="22%"></td>
+<td width="68%">
+
+<p>the archiver used for ACK objects.</p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><i>em</i></p>
+</td>
+<td width="24%"></td>
+<td width="72%">
+
+<p>this program selects a interpreter to execute an e.out
+file. Interpreters exist for PDP-11 and Motorola 68000
+systems.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><i>eminform</i></p>
+</td>
+<td width="12%"></td>
+<td width="72%">
+
+<p>the program to unravel the post-mortem information of
+the EM interpretator for the PDP-11.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><i>LLgen</i></p>
+</td>
+<td width="18%"></td>
+<td width="54%">
+
+<p>the LL(1) parser generator.</p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><i>ack_sys</i></p>
+</td>
+<td width="14%"></td>
+<td width="72%">
+
+<p>a shell script producing an identification of the target
+system. Used by some utilities to determine what is, and
+what is not feasible on the target system.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><i>march</i></p>
+</td>
+<td width="18%"></td>
+<td width="72%">
+
+<p>a shell script used while compiling libraries.</p>
+</td>
+</table>
+
+<p><i>asize</i>, <i>anm</i>, <i>astrip</i></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>do the same as <i>size</i>, <i>nm</i> and <i>strip</i>,
+but for ACK object format.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><i>mkdep</i></p>
+</td>
+<td width="18%"></td>
+<td width="72%">
+
+<p>a dependency generator for makefiles.</p>
+</td>
+</table>
+
+<p><i>cid</i>, <i>prid</i>, <i>cclash</i></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>some utilities for handling name clashes in C programs.
+Some systems have C-compilers with only 7 or 8 characters
+significant in identifiers.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><i>tabgen</i></p>
+</td>
+<td width="16%"></td>
+<td width="72%">
+
+<p>a utility for generating character tables for
+C-programs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><i>int</i></p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>an EM interpreter. This one is written in C, and is very
+useful for checking out programs.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><i>grind</i></p>
+</td>
+<td width="18%"></td>
+<td width="72%">
+
+<p>a source level debugger for C, ANSI-C, Modula-2 and
+Pascal.</p>
+</td>
+</table>
+
+<p><i>afcc</i>, <i>afm2</i>, <i>afpc</i></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>these are ACK-compatible fast C, Modula-2 and Pascal
+compilers, available for M68020, VAX and Intel 80386
+systems. They compile very fast, but produce slow code.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><i>fcc</i></p>
+</td>
+<td width="22%"></td>
+<td width="72%">
+
+<p>this is a cc-compatible fast C compiler, available on
+SUN-3 and VAX systems. It compiles very fast, but produces
+slow code.</p>
+</td>
+</table>
+
+<p>We currently make the Kit available to our users by
+telling them that they should include the $TARGET_HOME/bin
+directory in their PATH shell variable. The programs will
+still work when moved to a different directory or linked to.
+Copying should preferably be done with tar, since links are
+heavily used. Renaming of the programs linked to <i>ack</i>
+will not always produce the desired result. This program
+uses its call name as an argument. Any call name not being
+<i>cc</i>, <i>acc</i>, <i>abc</i>, <i>pc</i>, <i>f2c</i>,
+<i>ocm</i>, <i>m2</i>, or <i>apc</i> will be interpreted as
+the name of a &rsquo;machine description&rsquo; and the
+program will try to find a description file with that name.
+The installation process will only touch the utilities in
+the $TARGET_HOME/bin directory, not copies of these
+utilities.</p>
+<a name="7. Machines"></a>
+<h2>7. Machines</h2>
+
+<p>Below is a table with entries for all commands in the
+bin directory used to (cross)compile for a particular
+machine. The name in the first column gives the name in the
+bin directory. The column headed dir indicates which
+subdirectories of $TARGET_HOME/lib and/or
+$TARGET_HOME/lib.bin are needed for compilation. The column
+head i/p contains the integer and pointer size used in units
+of bytes. The subdirectories with the same name in mach
+contain the sources. A * in the column headed
+&rsquo;fp&rsquo; indicates that floating point can be used
+for that particular machine. A + in that column indicates
+that floating point is available under the &rsquo;-fp&rsquo;
+option. In this case, software floating point emulation is
+used.</p>
+
+<p align=center><img src="grohtml-96856.png"></p>
+
+<p>The commands <b>em22</b>, <b>em24</b> and <b>em44</b>
+produce e.out files with EM machine code which must be
+interpreted. The Kit contains three interpreters: one
+running under PDP 11/V7 UNIX, one for the M68000, running
+under the PMDS system, Sun systems, the Mantra system, etc,
+and a portable one, written in C. The first one can only
+interpret 2/2 e.out files, the second takes 2/4 and 4/4
+files, and the last one takes 2/2, 2/4 and 4/4. The PDP 11
+interpreter executes floating point instructions.</p>
+
+<p>The program <b>$TARGET_HOME/bin/em</b> calls the
+appropriate interpreter. The interpreters are looked for in
+the em22, em24 and em44 subdirectories of
+$TARGET_HOME/lib.bin. The third interpreter is available as
+the program <b>$TARGET_HOME/bin/int</b> in the bin
+directory.</p>
+<a name="8. Compilation on a different machine."></a>
+<h2>8. Compilation on a different machine.</h2>
+
+<p>The installation mechanism of the Kit is supposed to be
+portable across <small>UNIX</small> machines, so the Kit can
+be installed and used as a cross-compiler for the languages
+it supports on any <small>UNIX</small> machine. The presence
+of most <small>UNIX</small> utilities is essential for
+compilation. A few of the programs certainly needed are: sh,
+C-compiler, sed, ed, make, and awk.</p>
+<a name="8.1. Backend"></a>
+<h2>8.1. Backend</h2>
+
+<p>The existence of a backend with a system call library
+for the target system is essential for producing executable
+files for that system. Rewriting the system call library if
+the one supplied does not work on the target system is
+fairly straightforward. If no backend exists for the target
+CPU type, a new backend has to be written which is a major
+undertaking.</p>
+<a name="8.2. Universal assembler/loader, link editor"></a>
+<h2>8.2. Universal assembler/loader, link editor</h2>
+
+<p>For most machines, the description files in
+$TARGET_HOME/lib/*/descr use our universal assembler and our
+link editor. The load file produced is not directly usable
+in any system known to us, but has to be converted before it
+can be put to use. The <i>cv</i> programs convert our a.out
+format into executable files. The <i>dl</i> programs present
+for some machines unravel our a.out files and transmit
+commands to load memory to a microprocessor over a serial
+line. The file $TARGET_HOME/man/man5/ack.out.5 contains a
+description of the format of the universal assembler load
+file. It might be useful to those who wish or need to write
+their own conversion programs. Also, a module is included to
+read and write our a.out format. See
+$TARGET_HOME/man/man3/object.3.</p>
+<a name="9. Options"></a>
+<h2>9. Options</h2>
+<a name="9.1. Default machine"></a>
+<h2>9.1. Default machine</h2>
+
+<p>There is one important option in
+$TARGET_HOME/config/local.h. The utility <i>ack</i> uses a
+default machine name when called as <i>acc</i>, <i>cc</i>,
+<i>abc</i>, <i>apc</i>, <i>pc</i>, <i>ocm</i>, <i>m2</i>,
+<i>f2c</i>, or <i>ack</i>. The machine name used by default
+is determined by the definition of ACKM in
+$TARGET_HOME/config/local.h. The Kit is distributed with
+&quot;sun3&quot; as the default machine, but the shell
+script &quot;first&quot; in the directory &quot;first&quot;
+alters this to suit the target system. There is nothing
+against using the Kit as a cross-compiler and by default
+produce code that can&rsquo;t run on the local system.</p>
+<a name="9.2. Pathnames"></a>
+<h2>9.2. Pathnames</h2>
+
+<p>Absolute path names are concentrated in
+&quot;$TARGET_HOME/config/em_path.h&quot;. Only the
+utilities <i>ack</i>, <i>flex</i>, and <i>LLgen</i> use
+absolute path names to access files in the Kit. The tree is
+distributed with /usr/em as the working directory. The
+definition of EM_DIR in em_path.h should be altered to
+specify the root directory for the Compiler Kit binaries on
+the local system ($TARGET_HOME). This is done automatically
+by the shell script &quot;first&quot; in the directory
+&quot;first&quot;. Em_path.h also specifies which directory
+should be used for temporary files. Most programs from the
+Kit do indeed use that directory although some remain
+stubborn and use /tmp.</p>
+
+<p>The shape of the tree should not be altered lightly
+because most Makefiles and the utility <i>ack</i> know the
+shape of the ACK tree. The knowledge of the utility
+<i>ack</i> about the shape of the tree is concentrated in
+the files in the directory $TARGET_HOME/lib/*/descr and
+$TARGET_HOME/lib/descr/*.</p>
+<a name="10. Makefiles"></a>
+<h2>10. Makefiles</h2>
+
+<p>Most directories contain a &quot;proto.make&quot;, from
+which a Makefile is derived. Apart from commands applying to
+that specific directory these files all recognize a few
+special commands. When called with one of these they will
+apply the command to their own directory. The special
+commands are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>install</p>
+</td>
+<td width="26%"></td>
+<td width="60%">
+
+<p>recompile and install all binaries and libraries.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="39%"></td>
+<td width="60%">
+<p>Some Makefiles allow errors to occur in the programs they
+call. They ignore such errors and notify the user with the
+message &quot;~....... error code n: ignored&quot;. Whenever
+such a message appears in the output it can be ignored.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>cmp</p>
+</td>
+<td width="34%"></td>
+<td width="60%">
+
+<p>recompile all binaries and libraries and compare them to
+the ones already installed.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>pr</p>
+</td>
+<td width="36%"></td>
+<td width="60%">
+
+<p>print the sources and documentation on the standard
+output.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>opr</p>
+</td>
+<td width="34%"></td>
+<td width="26%">
+
+<p>make pr | opr</p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="39%"></td>
+<td width="60%">
+<p>Opr should be an off-line printer daemon. On some systems
+it exists under another name e.g. lpr. The easiest way to
+call such a spooler is using a shell script with the name
+opr that calls lpr. This script should be placed in /usr/bin
+or $TARGET_HOME/bin or one of the directories in the PATH
+environment variable.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>clean</p>
+</td>
+<td width="30%"></td>
+<td width="60%">
+
+<p>remove all files not needed for day-to-day use, that is
+binaries not in $TARGET_HOME/bin or $TARGET_HOME/lib.bin,
+object files etc.</p>
+</td>
+</table>
+
+<p>Example:</p>
+<pre>     make install
+</pre>
+
+<p>given as command in a configuration directory will cause
+compilation of all programs in the directory and copying of
+the results to the $TARGET_HOME/bin and $TARGET_HOME/lib.bin
+directories.</p>
+<a name="11. Testing"></a>
+<h2>11. Testing</h2>
+
+<p>Test sets are available in Pascal, C, Basic and EM
+assembly:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>EM</p>
+</td>
+<td width="12%"></td>
+<td width="84%">
+
+<p>the directory $SRC_HOME/emtest contains a few EM test
+programs. The EM assembly files in these tests must be
+transformed into load files. These tests use the LIN and NOP
+instructions to mark the passing of each test. The NOP
+instruction prints the current line number during the test
+phase. Each test notifies its correctness by calling LIN
+with a unique number followed by a NOP which prints this
+line number. The test finishes normally with 0 as the last
+number printed In all other cases a bug showed its
+existence.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>Pascal</p>
+</td>
+<td width="4%"></td>
+<td width="84%">
+
+<p>the directory $SRC_HOME/lang/pc/test contains a few
+Pascal test programs. All these programs print the number of
+errors found and a identification of these errors.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="23%"></td>
+<td width="76%">
+<p>We also tested Pascal with the Validation Suite. The
+Validation Suite is a collection of more than 200 Pascal
+programs, designed by Brian Wichmann and Arthur Sale to test
+Pascal compilers. We are not allowed to distribute it, but a
+copy may be requested from</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<pre>     Richard J. Cichelli
+     A.N.P.A.
+     1350 Sullivan Trail
+     P.O. Box 598
+     Easton, Pennsylvania 18042
+     USA
+</pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>C</p>
+</td>
+<td width="14%"></td>
+<td width="84%">
+
+<p>the sub-directories in $SRC_HOME/lang/cem/ctest contain
+C test programs. The idea behind these tests is: if there is
+a program called xx.c, compile it into xx.cem. Run it with
+standard output to xx.cem.r, compare this file to xx.cem.g,
+a file containing the &rsquo;ideal&rsquo; output. Any
+differences will point to implementation differences or
+bugs. Giving the command &quot;run gen&quot; or plain
+&quot;run&quot; starts this process. The differences will be
+presented on standard output. The contents of the result
+files depend on the word size, the xx.cem.g files on the
+distribution are intended for a 32-bit machine.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>Basic</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>the directory $SRC_HOME/lang/basic/test contains some
+forty Basic programs. Not all of these programs are correct,
+some have syntactic errors, some simply don&rsquo;t work.
+The Makefile in that directory attempts to compile and run
+these tests. If it compiles its output is compared to a file
+with suffix .g which contains the output to be expected. The
+make should be started with its standard input diverted to
+/dev/null. An example of the output of a make is present in
+the file Out.std.</p>
+</td>
+</table>
+<a name="12. Documentation"></a>
+<h2>12. Documentation</h2>
+
+<p>After installation, the manual pages for Amsterdam
+Compiler Kit can be found in the $TARGET_HOME/man directory.
+Also, the following documents are provided in the
+$TARGET_HOME/doc directory:</p>
+
+<p align=center><img src="grohtml-96857.png"></p>
+
+<p>Use the Makefile to get readable copies.</p>
+
+<p>Good luck.</p>
+<hr>
+</body>
+</html>

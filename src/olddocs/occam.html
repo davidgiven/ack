@@ -1,0 +1,445 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:31 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>An Occam Compiler</title>
+</head>
+<body>
+
+<h1 align=center>An Occam Compiler</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The Compiler">2. The Compiler</a><br>
+<a href="#2.1. The LLgen Parser Generator">2.1. The LLgen Parser Generator</a><br>
+<a href="#2.2. Indentation">2.2. Indentation</a><br>
+<a href="#3. Implementation">3. Implementation</a><br>
+<a href="#3.1. Channels">3.1. Channels</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Kees Bot<br>
+Edwin Scheffer</i><br>
+Vrije Universiteit<br>
+Amsterdam, The Netherlands</p>
+
+<p>This document describes the implementation of an
+<b>Occam</b> to <b>EM</b> compiler. The lexical analysis is
+done using <b>Lex</b>. For the semantic analysis the
+extended LL(1) parser generator <b>LLgen</b> is used. To
+handle the Occam-specific features as channels and
+parallelism some library routines are required.</p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>Occam [1] is a programming language which is based on
+the concepts of concurrency and communication. These
+concepts enable today&rsquo;s applications of
+microprocessors and computers to be implemented more
+effectively.</p>
+
+<p>An Occam program consists of a (dynamically determined)
+number of processes communicating through channels. To
+communicate with the outside world some predefined channels
+are needed. A channel has only one writer and one reader; it
+carries machine words and bytes, at the
+reader/writer&rsquo;s discretion. The process with its
+communication in Occam replaces the procedure with
+parameters in other languages (there are no procedures in
+Occam).</p>
+
+<p>In addition to the normal assignment statement, Occam
+has two more information-transfer statements, the input and
+the output:</p>
+<pre>          chan1 ? x        -- reads a value from chan1 into x
+          chan2 ! x        -- writes the value of x onto chan2
+</pre>
+
+<p>Both the outputting and the inputting processes wait
+until the other is there. Channels are declared and given
+names.</p>
+
+<p><b>2</b></p>
+
+<p>Arrays of channels are possible.</p>
+
+<p>Processes come in 5 varieties: sequential, parallel,
+alternative, conditional and repetitive. A process starts
+with a reserved word telling its nature, followed by an
+indented list of other processes. (Indentation is used to
+indicate block structure.) It may be preceded by
+declarations. The processes in a sequential/parallel process
+are executed sequentially/in parallel. The processes in an
+alternative process have guards based on the availability of
+input; the first to be ready is executed (this is waiting
+for multiple input). The conditional and repetitive
+processes are normal <b>IF</b>s and <b>WHILE</b>s.</p>
+
+<p><i>Producer-consumer example:</i></p>
+<pre>     CHAN buffer:                    -- declares the channel buffer
+     PAR
+       WHILE TRUE                    -- the producer
+         VAR x:                      -- a local variable
+         SEQ
+           produce(x)                -- in some way
+           buffer ! x                -- and send it
+       WHILE TRUE                    -- the consumer
+         VAR x:
+         SEQ
+           buffer ? x                -- get a value
+           consume(x)                -- in some way
+</pre>
+
+<p><b>3</b></p>
+
+<p>Processes can be replicated from a given template; this
+combines with arrays of variables and/or channels.</p>
+
+<p><i>Example: 20 window-sorters in series:</i></p>
+<pre>     CHAN s[20]:                     -- 20 channels
+     PAR i = [ 0 FOR 19 ]            -- 19 processes
+       WHILE TRUE
+         VAR v1, v2:
+         SEQ
+           s[i] ? v1; v2             -- wait for 2 variables from s[i]
+           IF
+             v1 &lt;= v2                -- ok
+               s[i+1] ! v1; v2
+             v1 &gt; v2                 -- reorder
+               s[i+1] ! v2; v1
+</pre>
+
+<p>A process may wait for a condition, which must include a
+comparison with <b>NOW</b>, the present clock value.</p>
+
+<p>Processes may be distributed over several processors;
+all processes under a <b>VAR</b> declaration must run on the
+same processor. Concurrency can be improved by avoiding
+<b>VAR</b> declarations, and replacing them by <b>CHAN</b>
+declarations. Processes can be allocated explicitly on named
+processors and channels can be connected to physical
+ports.</p>
+<a name="2. The Compiler"></a>
+<h2>2. The Compiler</h2>
+
+<p>The compiler is written in <b>C</b> using LLgen and Lex
+and compiles Occam programs to EM code, using the procedural
+interface as defined for EM. In the following sub-sections
+we describe the LLgen parser generator and the aspect of
+indentation.</p>
+<a name="2.1. The LLgen Parser Generator"></a>
+<h2>2.1. The LLgen Parser Generator</h2>
+
+<p>LLgen accepts a Context Free syntax extended with the
+operators &lsquo;<tt>*</tt>&rsquo;, &lsquo;<tt>?</tt>&rsquo;
+and &lsquo;<tt>+</tt>&rsquo; that have effects similar to
+those in regular expressions. The &lsquo;<tt>*</tt>&rsquo;
+is the closure set operator without an upperbound;
+&lsquo;<tt>+</tt>&rsquo; is the positive closure operator
+without an upperbound; &lsquo;<tt>?</tt>&rsquo; is the
+optional operator; &lsquo;<tt>[</tt>&rsquo; and
+&lsquo;<tt>]</tt>&rsquo; can be used for grouping. For
+example, a comma-separated list of expressions can be</p>
+
+<p><b>4</b></p>
+
+<p>described as:</p>
+<pre>          expression_list:
+                 expression [ &rsquo;,&rsquo; expression ]*
+               ;
+</pre>
+
+<p>Alternatives must be separated by
+&lsquo;<tt>|</tt>&rsquo;. C code
+(&lsquo;&lsquo;actions&rsquo;&rsquo;) can be inserted at all
+points between the colon and the semicolon. Variables global
+to the complete rule can be declared just in front of the
+colon enclosed in the brackets &lsquo;<tt>{</tt>&rsquo; and
+&lsquo;<tt>}</tt>&rsquo;. All other declarations are local
+to their actions. Nonterminals can have parameters to pass
+information. A more mature version of the above example
+would be:</p>
+<pre>            expression_list(expr *e;)       {     expr e1, e2;   } :
+                     expression(&amp;e1)
+                     [ &rsquo;,&rsquo; expression(&amp;e2)
+                                            {     e1=append(e1, e2);  }
+                     ]*
+                                            {     *e=e1;    }
+                   ;
+</pre>
+
+<p>As LLgen generates a recursive-descent parser with no
+backtrack, it must at all times be able to determine what to
+do, based on the current input symbol. Unfortunately, this
+cannot be done for all grammars. Two kinds of conflicts are
+possible, viz. the <b>alternation</b> and <b>repetition</b>
+conflict. An alternation confict arises if two sides of an
+alternation can start with the same symbol. E.g.</p>
+
+<p><b>5</b></p>
+<pre>          plus:     &rsquo;+&rsquo; | &rsquo;+&rsquo; ;
+</pre>
+
+<p>The parser doesn&rsquo;t know which
+&lsquo;<tt>+</tt>&rsquo; to choose (neither do we). Such a
+conflict can be resolved by putting an <b>if-condition</b>
+in front of the first conflicting production. It consists of
+a <b>&lsquo;&lsquo;%if&rsquo;&rsquo;</b> followed by a
+C-expression between parentheses. If a conflict occurs (and
+only if it does) the C-expression is evaluated and parsing
+continues along this path if non-zero. Example:</p>
+<pre>          plus:
+                 %if (some_plusses_are_more_equal_than_others())
+                 &rsquo;+&rsquo;
+               |
+                 &rsquo;+&rsquo;
+               ;
+</pre>
+
+<p>A repetition conflict arises when the parser cannot
+decide whether
+&lsquo;&lsquo;<tt>productionrule</tt>&rsquo;&rsquo; in e.g.
+&lsquo;&lsquo;<tt>[ productionrule ]*</tt>&rsquo;&rsquo;
+must be chosen once more, or that it should continue. This
+kind of conflicts can be resolved by putting a
+<b>while-condition</b> right after the opening parentheses.
+It consists of a <b>&lsquo;&lsquo;%while&rsquo;&rsquo;</b>
+followed by a C-expression between parentheses. As an
+example, we can look at the <b>comma-expression</b> in C.
+The comma may only be used for the comma-expression if the
+total expression is not part of another comma-separated
+list:</p>
+<pre>          comma_expression:
+                 sub_expression
+                 [ %while (not_part_of_comma_separated_list())
+                      &rsquo;,&rsquo; sub_expression
+                 ]*
+</pre>
+
+<p><b>6</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><tt>;</tt></p>
+</td>
+<td width="69%">
+</td>
+</table>
+
+<p>Again, the <b>&lsquo;&lsquo;%while&rsquo;&rsquo;</b> is
+only used in case of a conflict.</p>
+
+<p>Error recovery is done almost completely automatically.
+All the LLgen-user has to do is write a routine called
+<i>LLmessage</i> to give the necessary error messages and
+supply information about terminals found missing.</p>
+<a name="2.2. Indentation"></a>
+<h2>2.2. Indentation</h2>
+
+<p>The way conflicts can be resolved are of great use to
+Occam. The use of indentation, to group statements, leads to
+many conflicts because the spaces used for indentation are
+just token separators to the lexical analyzer, i.e.
+&lsquo;&lsquo;white space&rsquo;&rsquo;. The lexical
+analyzer can be instructed to generate &lsquo;BEGIN&rsquo;
+and &lsquo;END&rsquo; tokens at each indentation change, but
+that leads to great difficulties as expressions may occupy
+several lines, thus leading to indentation changes at the
+strangest moments. So we decided to resolve the conflicts by
+looking at the indentation ourselves. The lexical analyzer
+puts the current indentation level in the global variable
+<i>ind</i> for use by the parser. The best example is the
+<b>SEQ</b> construct, which exists in two flavors, one with
+a replicator and one process:</p>
+<pre>          seq i = [ 1 for str[byte 0] ]
+               out ! str[byte i]
+</pre>
+
+<p>and one without a replicator and several processes:</p>
+<pre>          seq
+               in ? c
+               out ! c
+</pre>
+
+<p><b>7</b></p>
+
+<p>The LLgen skeleton grammar to handle these two is:</p>
+<pre>          SEQ            {    line=yylineno; oind=ind; }
+          [      %if (line==yylineno)
+                 replicator
+                 process
+               |
+                 [ %while (ind&gt;oind) process ]*
+          ]
+</pre>
+
+<p>This shows clearly that, a replicator must be on the
+same line as the <b>SEQ</b>, and new processes are collected
+as long as the indentation level of each process is greater
+than the indentation level of <b>SEQ</b> (with appropriate
+checks on this identation).</p>
+
+<p>Different indentation styles are accepted, as long as
+the same amount of spaces is used for each indentation
+shift. The ascii tab character sets the indentation level to
+an eight space boundary. The first indentation level found
+in a file is used to compare all other indentation levels
+to.</p>
+<a name="3. Implementation"></a>
+<h2>3. Implementation</h2>
+
+<p>It is now time to describe the implementation of some of
+the occam-specific features such as channels and <b>NOW</b>.
+Also the way communication with UNIX&dagger; is performed
+must be described.</p>
+
+<p align=center><img src="grohtml-106061.png"></p>
+
+<p>For a thorough description of the library routines to
+simulate parallelism, which are e.g. used by the channel
+routines and by the <b>PAR</b> construct in Appendix B, see
+[6].</p>
+<a name="3.1. Channels"></a>
+<h2>3.1. Channels</h2>
+
+<p>There are currently two types of channels (see Figure
+1.) indicated by the type field of a channel variable:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>An interprocess communication channel with two
+additional fields:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>A synchronization field to hold the state of an
+interprocess communication channel.</p>
+</td>
+</table>
+
+<p><b>8</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>An integer variable to hold the value to be send.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p>An outside world communication channel. This is a member
+of an array of channels connected to UNIX files. Its
+additional fields are:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>A flags field holding a readahead flag and a flag that
+tells if this channel variable is currently connected to a
+file.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>A preread character, if readahead is done.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p>-</p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p>An index field to find the corresponding UNIX file.</p>
+</td>
+</table>
+
+<p align=center><img src="grohtml-106062.png"></p>
+
+<p align=center><i>Figure 1. Interprocess and outside world
+communication channels</i></p>
+
+<p>The basic channel handling is done by <tt>chan_in</tt>
+and <tt>chan_out</tt>. All other routines are based on them.
+The routine <tt>chan_any</tt> only checks if there&rsquo;s a
+value available on a given channel. (It does not read this
+value!) <tt>C_init</tt> initializes an array of interprocess
+communication channels.</p>
+
+<p><b>9</b></p>
+
+<p>The following table shows Occam statements paired with
+the routines used to execute them.</p>
+<hr>
+</body>
+</html>

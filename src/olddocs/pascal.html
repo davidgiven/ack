@@ -1,0 +1,4088 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:13 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The ACK Pascal Compiler</title>
+</head>
+<body>
+
+<h1 align=center>The ACK Pascal Compiler</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The compiler">2. The compiler</a><br>
+<a href="#2.1. Lexical Analysis">2.1. Lexical Analysis</a><br>
+<a href="#2.2. Syntax Analysis">2.2. Syntax Analysis</a><br>
+<a href="#2.2.1. Alternation conflict">2.2.1. Alternation conflict</a><br>
+<a href="#2.2.2. Repetition conflict">2.2.2. Repetition conflict</a><br>
+<a href="#2.3. Semantic Analysis">2.3. Semantic Analysis</a><br>
+<a href="#2.4. Code Generation">2.4. Code Generation</a><br>
+<a href="#2.5. Error Handling">2.5. Error Handling</a><br>
+<a href="#2.6. Memory Allocation and Garbage Collection">2.6. Memory Allocation and Garbage Collection</a><br>
+<a href="#3. Translation of Pascal to EM code">3. Translation of Pascal to EM code</a><br>
+<a href="#3.1. Global Variables">3.1. Global Variables</a><br>
+<a href="#3.2. Expressions">3.2. Expressions</a><br>
+<a href="#3.3. Statements">3.3. Statements</a><br>
+<a href="#3.3.1. Assignment Statement">3.3.1. Assignment Statement</a><br>
+<a href="#3.3.2. Goto Statement">3.3.2. Goto Statement</a><br>
+<a href="#3.3.3. If Statement">3.3.3. If Statement</a><br>
+<a href="#3.3.4. Repeat Statement">3.3.4. Repeat Statement</a><br>
+<a href="#3.3.5. While Statement">3.3.5. While Statement</a><br>
+<a href="#3.3.6. Case Statement">3.3.6. Case Statement</a><br>
+<a href="#3.3.7. For Statement">3.3.7. For Statement</a><br>
+<a href="#3.3.8. With Statement">3.3.8. With Statement</a><br>
+<a href="#3.4. Procedure and Function Calls">3.4. Procedure and Function Calls</a><br>
+<a href="#3.5. Register Messages">3.5. Register Messages</a><br>
+<a href="#3.6. Compile-time optimizations">3.6. Compile-time optimizations</a><br>
+<a href="#4. Conformant Arrays">4. Conformant Arrays</a><br>
+<a href="#4.1. Variable conformant array parameters">4.1. Variable conformant array parameters</a><br>
+<a href="#4.2. Value conformant array parameters">4.2. Value conformant array parameters</a><br>
+<a href="#5. Compiler options">5. Compiler options</a><br>
+<a href="#5.1. Compile time options">5.1. Compile time options</a><br>
+<a href="#5.2. Run time options">5.2. Run time options</a><br>
+<a href="#6. Extensions to Pascal as specified by ISO 7185">6. Extensions to Pascal as specified by ISO 7185</a><br>
+<a href="#7. Deviations from the standard">7. Deviations from the standard</a><br>
+<a href="#8. Hints to change the standard">8. Hints to change the standard</a><br>
+<a href="#9. Testing the compiler">9. Testing the compiler</a><br>
+<a href="#10. Comparison with the Pascal-VU compiler">10. Comparison with the Pascal-VU compiler</a><br>
+<a href="#10.1. Deviations">10.1. Deviations</a><br>
+<a href="#10.2. Extensions">10.2. Extensions</a><br>
+<a href="#10.3. Compiler options">10.3. Compiler options</a><br>
+<a href="#11. Improvements to the compiler">11. Improvements to the compiler</a><br>
+<a href="#12. History &amp; Acknowledgements">12. History &amp; Acknowledgements</a><br>
+<a href="#13. References">13. References</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Aad Geudeke<br>
+Frans Hofmeester</i><br>
+Dept. of Mathematics and Computer Science<br>
+Vrije Universiteit<br>
+Amsterdam, The Netherlands</p>
+
+<p>This document describes the implementation of a Pascal
+to EM compiler. The compiler is written in C. The lexical
+analysis is done using a hand-written lexical analyzer.
+Semantic analysis makes use of the extended LL(1) parser
+generator LLgen. Several EM utility modules are used in the
+compiler.</p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>The Pascal front end of the Amsterdam Compiler Kit (ACK)
+complies with the requirements of the international standard
+published by the International Organization for
+Standardization (ISO) [ISO]. An informal description, which
+unfortunately is not conforming to the standard, of the
+programming language Pascal is given in [JEN].</p>
+
+<p>The main reason for rewriting the Pascal compiler was
+that the old Pascal compiler was written in Pascal itself,
+and a disadvantage of it was its lack of flexibility. The
+compiler did not meet the needs of the current
+ACK-framework, which makes use of modern parsing techniques
+and utility modules. In this framework it is, for example,
+possible to use a fast back end. Such a back end translates
+directly to object code [ACK]. Our compiler is written in C
+and it is designed similar to the current C and Modula-2
+compiler of ACK.</p>
+
+<p>Chapter 2 describes the basic structure of the compiler.
+Chapter 3 discusses the code generation of the main Pascal
+constructs. Chapter 4 covers one of the major components of
+Pascal, viz. the conformant array. In Chapter 5 the various
+compiler options that can be used are enumerated. The
+extensions to the standard and the deviations from the
+standard are listed in Chapter 6 and 7. Chapter 8 presents
+some ideas to improve the standard. Chapter 9 gives a short
+overview of testing the compiler. The major differences
+between the old and new compiler can be found in Chapter 10.
+Suggestions to improve the compiler are described in Chapter
+11. The appendices contain the grammar of Pascal and the
+changes made to the ACK Pascal run time library. A
+translation of a Pascal program to EM code as example is
+presented.</p>
+<a name="2. The compiler"></a>
+<h2>2. The compiler</h2>
+
+<p>The compiler can be divided roughly into four
+modules:</p>
+
+<p>&bull; lexical analysis<br>
+&bull; syntax analysis<br>
+&bull; semantic analysis<br>
+&bull; code generation</p>
+
+<p>The four modules are grouped into one pass. The activity
+of these modules is interleaved during the pass.<br>
+The lexical analyzer, some expression handling routines and
+various datastructures from the Modula-2 compiler
+contributed to the project.</p>
+<a name="2.1. Lexical Analysis"></a>
+<h2>2.1. Lexical Analysis</h2>
+
+<p>The first module of the compiler is the lexical
+analyzer. In this module, the stream of input characters
+making up the source program is grouped into <i>tokens</i>,
+as defined in <b>ISO 6.1</b>. The analyzer is hand-written,
+because the lexical analyzer generator, which was at our
+disposal, <i>Lex</i> [LEX], produces much slower analyzers.
+A character table, in the file <i>char.c</i>, is created
+using the program <i>tab</i> which takes as input the file
+<i>char.tab</i>. In this table each character is placed into
+a particular class. The classes, as defined in the file
+<i>class.h</i>, represent a set of tokens. The strategy of
+the analyzer is as follows: the first character of a new
+token is used in a multiway branch to eliminate as many
+candidate tokens as possible. Then the remaining characters
+of the token are read. The constant INP_NPUSHBACK, defined
+in the file <i>input.h</i>, specifies the maximum number of
+characters the analyzer looks ahead. The value has to be at
+least 3, to handle input sequences such as:<br>
+1e+4 (which is a real number)<br>
+1e+a (which is the integer 1, followed by the identifier
+&quot;e&quot;, a plus, and the identifier &quot;a&quot;)</p>
+
+<p>Another aspect of this module is the insertion and
+deletion of tokens required by the parser for the recovery
+of syntactic errors (see also section 2.2). A generic input
+module [ACK] is used to avoid the burden of I/O.</p>
+<a name="2.2. Syntax Analysis"></a>
+<h2>2.2. Syntax Analysis</h2>
+
+<p>The second module of the compiler is the parser, which
+is the central part of the compiler. It invokes the routines
+of the other modules. The tokens obtained from the lexical
+analyzer are grouped into grammatical phrases. These phrases
+are stored as parse trees and handed over to the next part.
+The parser is generated using <i>LLgen</i>[LL], a tool for
+generating an efficient recursive descent parser with no</p>
+
+<p>backtrack from an Extended Context Free Syntax.<br>
+An error recovery mechanism is generated almost completely
+automatically. A routine called <i>LLmessage</i> had to be
+written, which gives the necessary error messages and deals
+with the insertion and deletion of tokens. The routine
+<i>LLmessage</i> must accept one parameter, whose value is a
+token number, zero or -1. A zero parameter indicates that
+the current token (the one in the external variable
+<i>LLsymb</i>) is deleted. A -1 parameter indicates that the
+parser expected end of file, but did not get it. The parser
+will then skip tokens until end of file is detected. A
+parameter that is a token number (a positive parameter)
+indicates that this token is to be inserted in front of the
+token currently in <i>LLsymb</i>. Also, care must be taken,
+that the token currently in <i>LLsymb</i> is again returned
+by the <b>next</b> call to the lexical analyzer, with the
+proper attributes. So, the lexical analyzer must have a
+facility to push back one token.<br>
+Calls to the two standard procedures <i>write</i> and
+<i>writeln</i> can be different from calls to other
+procedures. The syntax of a write-parameter is different
+from the syntax of an actual-parameter. We decided to
+include them, together with <i>read</i> and <i>readln</i>,
+in the grammar. An alternate solution would be to make the
+syntax of an actual-parameter identical to the syntax of a
+write-parameter. Afterwards the parameter has to be checked
+to see whether it is used properly or not.</p>
+
+<p>As the parser is LL(1), it must always be able to
+determine what to do, based on the last token read
+(<i>LLsymb</i>). Unfortunately, this was not the case with
+the grammar as specified in [ISO]. Two kinds of problems
+appeared, viz. the <b>alternation</b> and <b>repetition</b>
+conflict. The examples given in the following paragraphs are
+taken from the grammar.</p>
+<a name="2.2.1. Alternation conflict"></a>
+<h2>2.2.1. Alternation conflict</h2>
+
+<p>An alternation conflict arises when the parser can not
+decide which production to choose.<b><br>
+Example:</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<pre>procedure-declaration    : procedure-heading <b>&rsquo;;&rsquo;</b> directive |
+                           procedure-identification <b>&rsquo;;&rsquo;</b> procedure-block |
+                           procedure-heading <b>&rsquo;;&rsquo;</b> procedure-block ;
+procedure-heading        : <b>procedure</b> identifier [ formal-parameter-list ]? ;
+procedure-identification : <b>procedure</b> procedure-identifier ;
+</pre>
+</td>
+</table>
+
+<p>A sentence that starts with the terminal
+<b>procedure</b> is derived from the three alternative
+productions. This conflict can be resolved in two ways:
+adjusting the grammar, usually some rules are replaced by
+one rule and more work has to be done in the semantic
+analysis; using the LLgen conflict resolver,
+&quot;<b>%if</b> (C-expression)&quot;, if the C-expression
+evaluates to non-zero, the production in question is chosen,
+otherwise one of the remaining rules is chosen. The grammar
+rules were rewritten to solve this conflict. The new rules
+are given below. For more details see the file
+<i>declar.g</i>.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<pre>procedure-declaration : procedure-heading <b>&rsquo;;&rsquo;</b> ( directive | procedure-block ) ;
+procedure-heading     : <b>procedure</b> identifier [ formal-parameter-list ]? ;
+</pre>
+</td>
+</table>
+
+<p>A special case of an alternation conflict, which is
+common to many block structured languages, is the
+<i>&quot;dangling-else&quot;</i> ambiguity.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<pre>if-statement : <b>if</b> boolean-expression <b>then</b> statement [ else-part ]? ;
+else-part    : <b>else</b> statement ;
+</pre>
+</td>
+</table>
+
+<p>The following statement that can be derived from the
+rules above is ambiguous:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<p><b>if</b> <tt>boolean-expr-1</tt> <b>then if</b>
+<tt>boolean-expr-2</tt> <b>then</b> <tt>statement-1</tt>
+<b>else</b> <tt>statement-2</tt></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-100601.png"></small></p>
+
+<p><small>(a) (b)</small></p>
+
+<p align=center><small>Two parse trees showing the
+<i>dangling-else</i> ambiguity</small></p>
+
+<p><small>According to the standard, <b>else</b> is matched
+with the nearest preceding unmatched <b>then</b>, i.e. parse
+tree (a) is valid (<b>ISO 6.8.3.4</b>). This conflict is
+statically resolved in LLgen by using
+&quot;<b>%prefer</b>&quot;, which is equivalent in behaviour
+to &quot;<b>%if</b>(1)&quot;.</small></p>
+<a name="2.2.2. Repetition conflict"></a>
+<h2>2.2.2. Repetition conflict</h2>
+
+<p>A repetition conflict arises when the parser can not
+decide whether to choose a production once more, or
+not.<b><br>
+Example:</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%"></td>
+<td width="96%">
+<pre>field-list : [ ( fixed-part [ <b>&rsquo;;&rsquo;</b> variant-part ]? | variantpart ) [;]? ]? ;
+fixed-part : record-section [ <b>&rsquo;;&rsquo;</b> record-section ]* ;
+</pre>
+</td>
+</table>
+
+<p>When the parser sees the semicolon, it can not decide
+whether another record-section or a variant-part follows.
+This conflict can be resolved in two ways: adjusting the
+grammar or using the conflict resolver, &quot;<b>%while</b>
+(C-expression)&quot;. The grammar rules that deal with this
+conflict were completely rewritten. For more details, the
+reader is referred to the file <i>declar.g</i>.</p>
+<a name="2.3. Semantic Analysis"></a>
+<h2>2.3. Semantic Analysis</h2>
+
+<p>The third module of the compiler is the checking of
+semantic conventions of ISO-Pascal. To check the program
+being parsed, actions have been used in LLgen. An action
+consists of several C-statements, enclosed in brackets
+&quot;{&quot; and &quot;}&quot;. In order to facilitate
+communication between the actions and <i>LLparse</i>, the
+parsing routines can be given C-like parameters and local
+variables. An important part of the semantic analyzer is the
+symbol table. This table stores all information concerning
+identifiers and their definitions. Symbol-table lookup and
+hashing is done by a generic namelist module [ACK]. The
+parser turns each program construction into a parse tree,
+which is the major datastructure in the compiler. This parse
+tree is used to exchange information between various
+routines.</p>
+<a name="2.4. Code Generation"></a>
+<h2>2.4. Code Generation</h2>
+
+<p>The final module in the compiler is that of code
+generation. The information stored in the parse trees is
+used to generate the EM code [EM]. EM code is generated with
+the help of a procedural EM-code interface [ACK]. The use of
+static exchanges is not desired, since the fast back end can
+not cope with static code exchanges, hence the EM
+pseudoinstruction <b>exc</b> is never generated.<br>
+Chapter 3 discusses the code generation in more detail.</p>
+<a name="2.5. Error Handling"></a>
+<h2>2.5. Error Handling</h2>
+
+<p>The first three modules have in common that they can
+detect errors in the Pascal program being compiled. If this
+is the</p>
+
+<p>case, a proper message is given and some action is
+performed. If code generation has to be aborted, an error
+message is given, otherwise a warning is given. The constant
+MAXERR_LINE, defined in the file <i>errout.h</i>, specifies
+the maximum number of messages given per line. This can be
+used to avoid long lists of error messages caused by, for
+example, the omission of a &rsquo;;&rsquo;. Three kinds of
+errors can be distinguished: the lexical error, the
+syntactic error, and the semantic error. Examples of these
+errors are respectively, nested comments, an expression with
+unbalanced parentheses, and the addition of two
+characters.</p>
+<a name="2.6. Memory Allocation and Garbage Collection"></a>
+<h2>2.6. Memory Allocation and Garbage Collection</h2>
+
+<p>The routines <i>st_alloc</i> and <i>st_free</i> provide
+a mechanism for maintaining free lists of structures, whose
+first field is a pointer called <b>next</b>. This field is
+used to chain free structures together. Each structure,
+suppose the tag of the structure is ST, has a free list
+pointed by h_ST. Associated with this list are the
+operations: <i>new_ST()</i>, an allocating mechanism which
+supplies the space for a new ST struct; and
+<i>free_ST()</i>, a garbage collecting mechanism which links
+the specified structure into the free list.</p>
+<a name="3. Translation of Pascal to EM code"></a>
+<h2>3. Translation of Pascal to EM code</h2>
+
+<p>A short description of the translation of Pascal
+constructs to EM code is given in the following paragraphs.
+The EM instructions and Pascal terminal symbols are printed
+in <b>boldface</b>. A sentence in <i>italics</i> is a
+description of a group of EM (pseudo)instructions.</p>
+<a name="3.1. Global Variables"></a>
+<h2>3.1. Global Variables</h2>
+
+<p>For every global variable, a <b>bss</b> block is
+reserved. To enhance the readability of the EM-code
+generated, the variable-identifier is used as a data label
+to address the block.</p>
+<a name="3.2. Expressions"></a>
+<h2>3.2. Expressions</h2>
+
+<p>Operands are always evaluated, so the execution of</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>if</b> ( p &lt;&gt; nil ) <b>and</b> ( p^.value
+&lt;&gt; 0 ) <b>then</b> .....</p></td>
+</table>
+
+<p>might cause a run-time error, if p is equal to nil.</p>
+
+<p>The left-hand operand of a dyadic operator is almost
+always evaluated before the right-hand side. Peculiar
+evaluations exist for the following cases:</p>
+
+<p>the expression: set1 &lt;= set2, is evaluated as follows
+:</p>
+<pre>- evaluate set2
+- evaluate set1
+- compute set2+set1
+- test set2 and set2+set1 for equality
+</pre>
+
+<p>the expression: set1 &gt;= set2, is evaluated as follows
+:</p>
+<pre>- evaluate set1
+- evaluate set2
+- compute set1+set2
+- test set1 and set1+set2 for equality
+</pre>
+
+<p>Where allowed, according to the standard, constant
+integral expressions are compile-time evaluated while an
+effort is made to report overflow on target machine basis.
+The integral expressions are evaluated in the type
+<i>arith</i>. The size of an arith is assumed to be at least
+the size of the integer type on the target machine. If the
+target machine&rsquo;s integer size is less than the size of
+an arith, overflow can be detected at compile-time. However,
+the following call to the standard procedure new, <i>new(p,
+3+5)</i>, is illegal, because the second parameter is not a
+constant according to the grammar.</p>
+
+<p>Constant floating expressions are not compile-time
+evaluated, because the precision on the target machine and
+the precision on the machine on which the compiler runs
+could be different. The boolean expression <i>(1.0 + 1.0) =
+2.0</i> could evaluate to false.</p>
+<a name="3.3. Statements"></a>
+<h2>3.3. Statements</h2>
+<a name="3.3.1. Assignment Statement"></a>
+<h2>3.3.1. Assignment Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><tt>(variable-access | function-identifier)</tt>
+<b>:=</b> <tt>expression</tt></p>
+<!-- INDENTATION -->
+<p>EM :</p>
+<!-- INDENTATION -->
+<p><i>evaluate expression<br>
+store in variable-access or function-identifier</i></p>
+<!-- INDENTATION -->
+<p>In case of a function-identifier, a hidden temporary
+variable is used to keep the function result.</p>
+</td>
+</table>
+<a name="3.3.2. Goto Statement"></a>
+<h2>3.3.2. Goto Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>GOTO</b> <tt>label</tt></p>
+<!-- INDENTATION -->
+<p>EM : Two cases can be distinguished :</p></td>
+</table>
+
+<p>- local goto,</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>in which a <b>bra</b> is generated.</p>
+<!-- INDENTATION -->
+<p>- non-local goto, a goto_descriptor is build, containing
+the ProgramCounter of the instruction jumped to and an
+offset in the target procedure frame which contains the
+value of the StackPointer after the jump. The code for the
+jump itself is to load the address of the goto_descriptor,
+followed by a push of the LocalBase of the target procedure
+and a <b>cal</b> $_gto. A message is generated to indicate
+that a procedure or function contains a statement which is
+the target of a non-local goto.</p></td>
+</table>
+<a name="3.3.3. If Statement"></a>
+<h2>3.3.3. If Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>IF</b> <tt>boolean-expression</tt> <b>THEN</b>
+<tt>statement</tt></p>
+</td>
+</table>
+
+<p>EM :</p>
+<pre><i>    evaluation boolean-expression
+</i><b>    zeq</b> *exit_label
+<i>    code statement
+</i>   exit_label
+</pre>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>IF</b> <tt>boolean-expression</tt> <b>THEN</b>
+<tt>statement-1</tt> <b>ELSE</b> <tt>statement-2</tt></p>
+</td>
+</table>
+
+<p>EM :</p>
+<pre><i>    evaluation boolean-expression
+</i><b>    zeq</b> *else_label
+<i>    code statement-1
+</i><b>    bra</b> *exit_label
+   else_label
+<i>    code statement-2
+</i>   exit_label
+</pre>
+<a name="3.3.4. Repeat Statement"></a>
+<h2>3.3.4. Repeat Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>REPEAT</b> <tt>statement-sequence</tt> <b>UNTIL</b>
+<tt>boolean-expression</tt></p>
+</td>
+</table>
+
+<p>EM :</p>
+<pre>   repeat_label
+</pre>
+
+<p><i>code statement-sequence evaluation
+boolean-expression</i> <b>zeq</b> *repeat_label</p>
+<a name="3.3.5. While Statement"></a>
+<h2>3.3.5. While Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>WHILE</b> <tt>boolean-expression</tt> <b>DO</b>
+<tt>statement</tt></p>
+</td>
+</table>
+
+<p>EM :</p>
+<pre>   while_label
+<i>    evaluation boolean-expression
+</i><b>    zeq</b> *exit_label
+<i>    code statement
+</i><b>    bra</b> *while_label
+   exit_label
+</pre>
+<a name="3.3.6. Case Statement"></a>
+<h2>3.3.6. Case Statement</h2>
+
+<p>The case-statement is implemented using the <b>csa</b>
+and <b>csb</b> instructions.</p>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>CASE</b> <tt>case-expression</tt> <b>OF</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p><tt>case-constant-list-1</tt> <b>:</b>
+<tt>statement-1</tt> <b>;</b><tt><br>
+case-constant-list-2</tt> <b>:</b> <tt>statement-2</tt>
+<b>;</b><tt><br>
+.<br>
+.<br>
+case-constant-list-n</tt> <b>:</b> <tt>statement-n
+[</tt><b>;</b><tt>]</tt></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>END</b></p></td>
+</table>
+
+<p>The <b>csa</b> instruction is used if the range of the
+case-expression value is dense, i.e.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><tt>( upperbound &minus; lowerbound ) /
+number_of_cases</tt></p></td>
+</table>
+
+<p>is less than the constant DENSITY, defined in the file
+<i>density.h</i>.</p>
+
+<p>If the range is sparse, a <b>csb</b> instruction is
+used.</p>
+
+<p>EM :</p>
+<pre><i>    evaluation case-expression
+</i><b>    bra</b> *l1
+   c1
+<i>    code statement-1
+</i><b>    bra *</b>exit_label
+   c2
+<i>    code statement-2
+</i><b>    bra *</b>exit_label
+    .
+    .
+   cn
+<i>    code statement-n
+</i><b>    bra *</b>exit_label
+   .case_descriptor
+<i>    generation case_descriptor
+</i>   l1
+<b>    lae</b> .case_descriptor
+<b>    csa</b> size of (case-expression)
+   exit_label
+</pre>
+<a name="3.3.7. For Statement"></a>
+<h2>3.3.7. For Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>FOR</b> <tt>control-variable</tt> <b>:=</b>
+<tt>initial-value (</tt><b>TO</b> <tt>|</tt>
+<b>DOWNTO</b><tt>) final-value</tt> <b>DO</b>
+<tt>statement</tt></p>
+</td>
+</table>
+
+<p>The initial-value and final-value are evaluated at the
+beginning of the loop. If the values are not constant, they
+are evaluated once and stored in a temporary.</p>
+
+<p>EM :</p>
+<pre><i>    load initial-value
+    load final-value
+</i><b>    bgt</b> exit-label            (* DOWNTO : <b>blt</b> <i>exit-label</i> *)
+<i>    load initial-value
+</i>   l1
+<i>    store in control-variable
+    code statement
+    load control-variable
+</i><b>    dup</b> <i>control-variable
+    load final-value
+</i><b>    beq</b> exit_label
+<b>    inc</b> <i>control-variable</i>    (* DOWNTO : <b>dec</b> <i>control-variable</i> *)
+<b>    bra *</b>l1
+   exit_label
+</pre>
+
+<p>Note: testing must be done before
+incrementing(decrementing) the control-variable,<br>
+because wraparound could occur, which could lead to an
+infinite loop.</p>
+<a name="3.3.8. With Statement"></a>
+<h2>3.3.8. With Statement</h2>
+
+<p>PASCAL :</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>WITH</b> <tt>record-variable-list</tt> <b>DO</b>
+<tt>statement</tt></p>
+<!-- INDENTATION -->
+<p>The statement <b>WITH</b> r
+<small><small>1</small></small> , r
+<small><small>2</small></small> , ..., r
+<small><small>n</small></small> <b>DO</b>
+<tt>statement</tt></p>
+<!-- INDENTATION -->
+<p>is equivalent to <b>WITH</b> r
+<small><small>1</small></small> <b>DO WITH</b> r
+<small><small>2</small></small> <b>DO</b> ... <b>WITH</b> r
+<small><small>n</small></small> <b>DO</b>
+<tt>statement</tt></p>
+</td>
+</table>
+
+<p>The translation of</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>WITH</b> r <small><small>1</small></small> <b>DO</b>
+<tt>statement</tt></p></td>
+</table>
+
+<p>is</p>
+<pre><i>   push address of r<small><small>1
+</small></small>   store address in temporary
+   code statement
+</i></pre>
+
+<p>An occurrence of a field is translated into:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><i>load temporary<br>
+add field-offset</i></p></td>
+</table>
+<a name="3.4. Procedure and Function Calls"></a>
+<h2>3.4. Procedure and Function Calls</h2>
+
+<p>In general, the call</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>p(a <small><small>1</small></small> , a
+<small><small>2</small></small> , ...., a
+<small><small>n</small></small> )</p></td>
+</table>
+
+<p>is translated into the sequence:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><i>evaluate a<small><small>n
+</small></small>.
+.
+evaluate a<small><small>2
+</small></small>evaluate a<small><small>1
+</small></small>push localbase
+</i><b>cal</b> $p
+<i>pop parameters
+</i></pre>
+</td>
+</table>
+
+<p>i.e. the order of evaluation and binding of the
+actual-parameters is from right to left. In general, a copy
+of the actual-parameter is made when the formal-parameter is
+a value-parameter. If the formal-parameter is a
+variable-parameter, a pointer to the actual-parameter is
+pushed.</p>
+
+<p>In case of a function call, a <b>lfr</b> is generated,
+which pushes the function result on top of the stack.</p>
+<a name="3.5. Register Messages"></a>
+<h2>3.5. Register Messages</h2>
+
+<p>A register message can be generated to indicate that a
+local variable is never referenced indirectly. This implies
+that a register can be used for a variable. We distinguish
+the following classes, given in decreasing priority:</p>
+
+<p>&bull; control-variable and final-value of a
+for-statement</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>to speed up testing, and execution of the body of the
+for-statement</p>
+<!-- INDENTATION -->
+<p>&bull; record-variable of a with-statement</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>to improve the field selection of a record</p>
+<!-- INDENTATION -->
+<p>&bull; remaining local variables and parameters</p>
+</td>
+</table>
+<a name="3.6. Compile-time optimizations"></a>
+<h2>3.6. Compile-time optimizations</h2>
+
+<p>The only optimization that is performed is the
+evaluation of constant integral expressions. The
+optimization of constructs like</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><b>if</b> <tt>false</tt> <b>then</b>
+<tt>statement</tt>,</p></td>
+</table>
+
+<p>is left to either the peephole optimizer, or a global
+optimizer.</p>
+<a name="4. Conformant Arrays"></a>
+<h2>4. Conformant Arrays</h2>
+
+<p>A fifth kind of parameter, besides the value, variable,
+procedure, and function parameter, is the conformant array
+parameter (<b>ISO 6.6.3.7</b>). This parameter, undoubtedly
+the major addition to Pascal from the compiler
+writer&rsquo;s point of view, has been implemented. With
+this kind of parameter, the required bounds of the
+index-type of an actual parameter are not fixed, but are
+restricted to a specified range of values. Two types of
+conformant array parameters can be distinguished: variable
+conformant array parameters and value conformant array
+parameters.</p>
+<a name="4.1. Variable conformant array parameters"></a>
+<h2>4.1. Variable conformant array parameters</h2>
+
+<p>The treatment of variable conformant array parameters is
+comparable with the normal variable parameter. Both have in
+common that the parameter mechanism used is <i>call by
+reference</i>.<br>
+An example is:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>to sort variable length arrays of integers, the following
+Pascal procedure could be used:</p>
+<!-- INDENTATION -->
+<pre><b>procedure</b> bubblesort(<b>var</b> A : <b>array</b>[low..high : integer] <b>of</b> integer);
+<b>var</b> i, j : integer;
+<b>begin
+        for</b> j := high - 1 <b>downto</b> low <b>do
+                for</b> i := low <b>to</b> j <b>do
+                        if</b> A[i+1] &lt; A[i] <b>then</b> <i>interchange A[i] and A[i+1]
+</i><b>end</b>;
+</pre>
+</td>
+</table>
+
+<p>For every actual parameter, the base address of the
+array is pushed on the stack and for every
+index-type-specification, exactly one array descriptor is
+pushed.</p>
+<a name="4.2. Value conformant array parameters"></a>
+<h2>4.2. Value conformant array parameters</h2>
+
+<p>The treatment of value conformant array parameters is
+more complex than its variable counterpart.<br>
+An example is:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>an unpacked array of characters could be printed as a
+string with the following program part:</p>
+<!-- INDENTATION -->
+<pre><b>procedure</b> WriteAsString( A : <b>array</b>[low..high : integer] <b>of</b> char);
+<b>var</b> i : integer;
+<b>begin
+        for</b> i := low <b>to</b> high <b>do</b> write(A[i]);
+<b>end</b>;
+</pre>
+</td>
+</table>
+
+<p>The calling procedure pushes the base address of the
+actual parameter and the array descriptors belonging to it
+on the stack. Subsequently the procedure using the
+conformant array parameter is called. Because it is a
+<i>call by value</i>, the called procedure has to create a
+copy of the actual</p>
+
+<p>parameter. This implies that the calling procedure knows
+how much space on the stack must be reserved for the
+parameters. If the actual-parameter is a conformant array,
+the called procedure keeps track of the size of the
+activation record. Hence the restrictions on the use of
+value conformant array parameters, as specified in <b>ISO
+6.6.3.7.2</b>, are dropped.</p>
+
+<p>A description of the EM code generated by the compiler
+is:</p>
+<pre><i>load the stack adjustment sofar
+load base address of array parameter
+compute the size in bytes of the array
+add this size to the stack adjustment
+copy the array
+remember the new address of the array
+</i></pre>
+<a name="5. Compiler options"></a>
+<h2>5. Compiler options</h2>
+
+<p>There are some options available to control the
+behaviour of the compiler. Two types of options can be
+distinguished: compile-time options and run-time
+options.</p>
+<a name="5.1. Compile time options"></a>
+<h2>5.1. Compile time options</h2>
+
+<p>There are some options that can be set when the compiler
+is installed. Those options can be found in the file
+<i>Parameters</i>. To set a parameter just modify its
+definition in the file <i>Parameters</i>. The shell script
+in the file <i>make.hfiles</i> creates for each parameter a
+separate .h file. This mechanism is derived from the C
+compiler in ACK.</p>
+
+<p><b>IDFSIZE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>The maximum number of characters that are significant in
+an identifier. This value has to be at least the value of
+<b>MINIDFSIZE</b>, defined in the file <i>options.c</i>. A
+compile-time check is included to see if the value of
+<b>MINIDFSIZE</b> is legal. The compiler will not recognize
+some keywords if <b>IDFSIZE</b> is too small.</p></td>
+</table>
+
+<p><b>ISTRSIZE</b>, <b>RSTRSIZE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>The lexical analyzer uses these two values for the
+allocation of memory needed to store a string.
+<b>ISTRSIZE</b> is the initial number of bytes allocated.
+<b>RSTRSIZE</b> is the step size used for enlarging the
+memory needed.</p></td>
+</table>
+
+<p><b>NUMSIZE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>The maximum length of a numeric constant recognized by
+the lexical analyzer. It is an error if this length is
+exceeded.</p></td>
+</table>
+
+<p><b>ERROUT</b>, <b>MAXERR_LINE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>Used for error messages. <b>ERROUT</b> defines the file
+on which the messages are written. <b>MAXERR_LINE</b> is the
+maximum number of error messages given per line.</p></td>
+</table>
+
+<p><b>SZ_CHAR</b>, <b>AL_CHAR</b>, etc</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>The default values of the target machine sizes and
+alignments. The values can be overruled with the &minus;V
+option.</p></td>
+</table>
+
+<p><b>MAXSIZE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>This value must be set to the maximum of the values of
+the target machine sizes. This parameter is used in overflow
+detection (see also section 3.2).</p></td>
+</table>
+
+<p><b>DENSITY</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>This parameter is used to decide what EM instruction has
+to be generated for a case-statement. If the range of the
+index value is sparse, i.e.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="84%">
+<p>(upperbound - lowerbound) / number_of_cases</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>is more than some threshold (<b>DENSITY</b>) the
+<b>csb</b> instruction is chosen. If the range is dense a
+jump table is generated (<b>csa</b>). This uses more space.
+Reasonable values are 2, 3 or 4.<br>
+Higher values might also be reasonable on machines, which
+have lots of address space and memory (see also section
+3.3.3).</p></td>
+</table>
+
+<p><b>INP_READ_IN_ONE</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>Used by the generic input module. It can either be
+defined or not defined. Defining it has the effect that
+files will be read completely into memory using only one
+read-system call. This should be used only on machines with
+lots of memory.</p></td>
+</table>
+
+<p><b>DEBUG</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<pre>If this parameter is defined some built-in compiler-debugging tools can be used:
+  &bull; only lexical analyzing is done, if the &minus;l option is given.
+  &bull; if the &minus;I option is turned on, the allocated number of structures is printed.
+  &bull; the routine debug can be used to print miscellaneous information.
+  &bull; the routine PrNode prints a tree of nodes.
+  &bull; the routine DumpType prints information about a type structure.
+  &bull; the macro DO_DEBUG(x,y) defined as ((x) &amp;&amp; (y)) can be used to perform
+    several actions.
+
+
+</pre>
+</td>
+</table>
+<a name="5.2. Run time options"></a>
+<h2>5.2. Run time options</h2>
+
+<p>The run time options can be given in the command line
+when the compiler is called.<br>
+They all have the form: &minus;&lt;character&gt;<br>
+Depending on the option, a character string has to be
+specified. The following options are currently
+available:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>C</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>The lower case and upper case letters are treated
+different (<b>ISO 6.1.1</b>).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>u</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>The character &rsquo;_&rsquo; is treated like a letter,
+so it is allowed to use the underscore in identifiers.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="64%">
+<p>Note: identifiers starting with an underscore may cause
+problems, because<br>
+most identifiers in library routines start with an
+underscore.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>n</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>This option suppresses the generation of register
+messages.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>r</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>With this option rangechecks are generated where
+necessary.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>L</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>Do not generate EM <b>lin</b> and <b>fil</b>
+instructions. These instructions are used only for
+profiling.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>&minus;<b>M</b>&lt;number&gt;</p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p>Set the number of characters that are significant in an
+identifier to &lt;number&gt;. The maximum significant
+identifier length depends on the constant IDFSIZE, defined
+in <i>idfsize.h</i>.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p>&minus;<b>i</b>&lt;number&gt;</p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p>With this flag the setsize for a set of integers can be
+changed. The number must be the number of bits per set.
+Default value : (#bits in a word) &minus; 1</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>&minus;<b>w</b></p>
+</td>
+<td width="32%"></td>
+<td width="64%">
+
+<p>Suppress warning messages (see also section 2.5).</p>
+</td>
+</table>
+
+
+<p>&minus;<b>V</b>[[<b>w</b>|<b>i</b>|<b>f</b>|<b>p</b>|<b>S</b>][<i>size</i>]?[<i>.alignment</i>]?]*</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="35%"></td>
+<td width="64%">
+<p>Option to set the object sizes and alignments on the
+target machine dynamically. The objects that can be
+manipulated are:<b><br>
+w</b> word<b><br>
+i</b> integer<b><br>
+f</b> float<b><br>
+p</b> pointer<b><br>
+S</b> structure<br>
+In case of a structure, <i>size</i> is discarded and the
+<i>alignment</i> is the initial alignment of the structure.
+The effective alignment is the least common multiple of
+<i>alignment</i> and the alignment of its members. This
+option has been implemented so that the compiler can be used
+as cross compiler.</p>
+</td>
+</table>
+<a name="6. Extensions to Pascal as specified by ISO 7185"></a>
+<h2>6. Extensions to Pascal as specified by ISO 7185</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><b>ISO 6.1.3:</b></p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>The underscore is treated as a letter when the &minus;u
+option is turned on (see also section 5.2). This is
+implemented to be compatible with Pascal-VU and can be used
+in identifiers to increase readability.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p><b>ISO 6.1.4:</b></p>
+</td>
+<td width="4%"></td>
+<td width="72%">
+
+<p>The directive <i>extern</i> can be used in a
+procedure-declaration or function-declaration to specify
+that the procedure-block or function-block corresponding to
+that declaration is external to the program-block. This can
+be used in conjunction with library routines.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="30%">
+
+<p><b>ISO 6.1.9:</b> An</p>
+</td>
+<td width="2%"></td>
+<td width="68%">
+
+<p>alternative representation for the following</p>
+</td>
+</table>
+
+<p>tokens and delimiting characters is recognized:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="37%"></td>
+<td width="62%">
+<p><b>token alternative token</b></p>
+<!-- INDENTATION -->
+<p><tt>^ @</tt></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><tt>[ (.<br>
+] .)</tt></p>
+<!-- INDENTATION -->
+<p><b>delimiting character alternative delimiting pair of
+characters</b></p>
+<!-- INDENTATION -->
+<p><tt>{ (*<br>
+} *)</tt></p>
+</td>
+</table>
+
+<p><b>ISO 6.6.3.7.2:</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p>A conformant array parameter can be passed as value
+conformant array parameter without the restrictions imposed
+by the standard. The compiler gives a warning. This is
+implemented to keep the parameter mechanism orthogonal (see
+also Chapter 4).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="30%">
+
+<p><b>ISO 6.9.3.1:</b> If</p>
+</td>
+<td width="2%"></td>
+<td width="68%">
+
+<p>the value of the argument <i>TotalWidth</i> of the</p>
+</td>
+</table>
+
+<p>required procedure <i>write</i> is zero or negative, no
+characters are written for character, string or boolean type
+arguments. If the value of the argument <i>FracDigits</i> of
+the required procedure <i>write</i> is zero or negative, the
+fraction and &rsquo;.&rsquo; character are suppressed for
+fixed-point arguments.</p>
+<a name="7. Deviations from the standard"></a>
+<h2>7. Deviations from the standard</h2>
+
+<p>The compiler deviates from the ISO 7185 standard with
+respect to the following clauses:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><b>ISO 6.1.3:</b></p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>Identifiers may be of any length and all characters of
+an identifier shall be significant in distinguishing between
+them.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>The constant IDFSIZE, defined in the file
+<i>idfsize.h</i>, determines the (maximum) significant
+length of an identifier. It can be set at run time with the
+&minus;M option (see also section on compiler
+options).</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><b>ISO 6.1.8:</b></p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>There shall be at least one separator between any pair
+of consecutive tokens made up of identifiers, word-symbols,
+labels or unsigned-numbers.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>A token separator is not needed when a number is followed
+by an identifier or a word-symbol. For example the input
+sequence, 2<b>then</b>, is recognized as the integer 2
+followed by the keyword <b>then</b>.</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="34%">
+
+<p><b>ISO 6.2.1:</b> The</p>
+</td>
+<td width="4%"></td>
+<td width="62%">
+
+<p>label-declaration-part shall specify all</p>
+</td>
+</table>
+
+<p>labels that prefix a statement in the corresponding
+statement-part.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>The compiler generates a warning if a label is declared
+but never defined.</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="20%">
+
+<p><b>ISO 6.2.2:</b></p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p>The scope of identifiers and labels should start at the
+beginning of the block in which these identifiers or labels
+are declared.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>The compiler, as most other one pass compilers deviates
+in this respect, because the scope of variables and labels
+start at their defining-point.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><b>program</b> deviates<b>;<br>
+const</b><br>
+x <b>=</b> 3<b>;<br>
+procedure</b> p<b>;<br>
+const</b></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>y <b>=</b> x<b>;</b><br>
+x <b>=</b> true<b>;</b></p>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><b>begin end;<br>
+begin<br>
+end.</b></p>
+<!-- INDENTATION -->
+<p>In procedure p, the constant y has the integer value 3.
+This program does not conform to the standard. In [SAL] a
+simple algorithm is described for enforcing the scope rules,
+it involves numbering all scopes encoutered in the program
+in order of their opening, and recording in each identifier
+table entry the number of the latest scope in which it is
+used.</p>
+<!-- INDENTATION -->
+<p>Note: The compiler does not deviate from the standard in
+the following program:</p>
+<!-- INDENTATION -->
+<pre><b>       program</b> conforms<b>;
+       type
+</b></pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>x <b>=</b> real<b>;</b></p>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><b>procedure</b> p<b>;<br>
+type</b></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>y <b>= ^</b>x<b>;</b><br>
+x <b>=</b> boolean<b>;</b></p>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><b>var</b></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>p <b>:</b> y<b>;</b></p>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="27%"></td>
+<td width="72%">
+<p><b>begin end;<br>
+begin<br>
+end.</b></p>
+<!-- INDENTATION -->
+<p>In procedure p, the variable p is a pointer to
+boolean.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="26%">
+
+<p><b>ISO 6.4.3.2:</b></p>
+</td>
+<td width="2%"></td>
+<td width="72%">
+
+<p>The standard specifies that any ordinal type is allowed
+as index-type.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>The required type <i>integer</i> is not allowed as
+index-type, i.e.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="37%"></td>
+<td width="62%">
+<p><b>ARRAY [</b> <i>integer</i> <b>] OF</b>
+&lt;component-type&gt; is not permitted.</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>This could be implemented, but this might cause problems
+on machines with a small memory.</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="24%">
+
+<p><b>ISO 6.4.3.3:</b></p>
+</td>
+<td width="4%"></td>
+<td width="72%">
+
+<p>The type possessed by the variant-selector, called the
+tag-type, must be an ordinal type, so the integer type is
+permitted. The values denoted by all case-constants shall be
+distinct and the set thereof shall be equal to the set of
+values specified by the tag-type.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>Because it is impracticable to enumerate all integers as
+case-constants, the integer type is not permitted as
+tag-type. It would not make a great difference to allow it
+as tagtype.</p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="30%">
+
+<p><b>ISO 6.8.3.9:</b></p>
+</td>
+<td width="4%"></td>
+<td width="66%">
+
+<p>The standard specifies that the</p>
+</td>
+</table>
+
+<p>control-variable of a for-statement is not allowed to be
+modified while executing the loop.</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="33%"></td>
+<td width="66%">
+<p>Violation of this rule is not detected. An algorithm to
+implement this rule can be found in [PCV].</p>
+</td>
+</table>
+<a name="8. Hints to change the standard"></a>
+<h2>8. Hints to change the standard</h2>
+
+<p>We encoutered some difficulties when the compiler was
+developed. In this chapter some hints are presented to
+change the standard, which would make the implementation of
+the compiler less difficult. The semantics of Pascal would
+not be altered by these adaptions.</p>
+
+<p>&minus; Some minor changes in the grammar of Pascal from
+the user&rsquo;s point of view, but which make the writing
+of an LL(1) parser considerably easier, could be:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<pre>field-list   : [ ( fixed-part [ variant-part ] | variant-part ) ] .
+fixed-part   : record-section <b>;</b> { record-section <b>;</b> } .
+variant-part : <b>case</b> variant-selector <b>of</b> variant <b>;</b> { variant <b>;</b> } .
+
+case-statement : <b>case</b> case-index <b>of</b> case-list-element <b>;</b> { case-list-element <b>;</b> } <b>end</b> .
+</pre>
+</td>
+</table>
+
+<p>&minus; To ease the semantic checking on sets, the
+principle of qualified sets could be used, every
+set-constructor must be preceeded by its
+type-identifier:</p>
+<pre>   set-constructor : type-identifier <b>[</b> [ member-designator { <b>,</b> member-designator } ] <b>]</b> .
+</pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>Example:</p>
+</td>
+<td width="10%">
+
+<p>t1 = set of 1..5;</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="10%">
+
+<p>t2 = set of integer;</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p>The type of [3, 5] would be ambiguous, but the type of
+t1[3, 5] not.</p>
+
+<p>&minus; Another problem arises from the fact that a
+function name can appear in three distinct &rsquo;use&rsquo;
+contexts: function call, assignment of function result and
+as function parameter.<br>
+Example:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><b>program</b> function_name;
+
+<b>function</b> p(x : integer; function y : integer) : integer;
+<b>begin</b> .. <b>end</b>;
+
+<b>function</b> f : integer;
+<b>begin
+</b>        f := p(f, f);     (*)
+<b>end</b>;
+
+<b>begin</b> .. <b>end</b>.
+</pre>
+</td>
+</table>
+
+<p>A possible solution in case of a call (also a procedure
+call) would be to make the (possibly empty)
+actual-parameter-list mandatory. The assignment of the
+function result could be changed in a <i>return</i>
+statement. Though this would change the semantics of the
+program slightly.<br>
+The above statement (*) would look like this: return p(f(),
+f);</p>
+
+<p>&minus; Another extension to the standard could be the
+implementation of an <i>otherwise</i> clause in a
+case-statement. This would behave exactly like the
+<i>default</i> clause in a switch-statement in C.</p>
+<a name="9. Testing the compiler"></a>
+<h2>9. Testing the compiler</h2>
+
+<p>Although it is practically impossible to prove the
+correctness of a compiler, a systematic method of testing
+the compiler is used to increase the confidence that it will
+work satisfactorily in practice. The first step was to see
+if the lexical analysis was performed correctly. For this
+purpose, the routine LexScan() was used (see also the
+&minus;l option). Next we tested the parser generated by
+LLgen, to see whether correct Pascal programs were accepted
+and garbage was dealed with gracefully. The biggest test
+involved was the validation of the semantic analysis.
+Simultaneously we tested the code generation. First some
+small Pascal test programs were translated and executed.
+When these programs work correctly, the Pascal validation
+suite and a large set of Pascal test programs were compiled
+to see whether they behaved in the manner the standard
+specifies. For more details about the Pascal validation
+suite, the reader is referred to [PCV].</p>
+<a name="10. Comparison with the Pascal-VU compiler"></a>
+<h2>10. Comparison with the Pascal-VU compiler</h2>
+
+<p>In this chapter, the differences with the Pascal-VU
+compiler [IM2] are listed. The points enumerated below can
+be used as improvements to the compiler (see also Chapter
+11).</p>
+<a name="10.1. Deviations"></a>
+<h2>10.1. Deviations</h2>
+
+<p>- large labels</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>only labels in the closed interval 0..9999 are allowed,
+as opposed to the Pascal-VU compiler. The Pascal-VU compiler
+allows every unsigned integer as label.</p></td>
+</table>
+
+<p>- goto</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>the new compiler conforms to the standard as opposed to
+the old one. The following program, which contains an
+illegal jump to label 1, is accepted by the Pascal-VU
+compiler.</p>
+<!-- INDENTATION -->
+<pre><b>program</b> illegal_goto(output);
+<b>label</b> 1;
+<b>var</b> i : integer;
+<b>begin
+</b></pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="10%">
+
+<p><b>goto</b> 1;</p>
+</td>
+<td width="10%"></td>
+<td width="63%">
+</td>
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="10%">
+
+<p><b>for</b> i := 1 <b>to</b> 10 <b>do</b></p>
+</td>
+<td width="10%"></td>
+<td width="63%">
+</td>
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="10%">
+
+<p><b>begin</b></p>
+</td>
+<td width="10%"></td>
+<td width="63%">
+</td>
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>1 : writeln(i);</p>
+</td>
+<td width="63%">
+</td>
+<tr valign="top" align="left">
+<td width="15%"></td>
+<td width="10%">
+
+<p><b>end</b>;</p>
+</td>
+<td width="10%"></td>
+<td width="63%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p><b>end</b>.</p>
+</td>
+</table>
+
+<p>This program is rejected by the new compiler.</p>
+<a name="10.2. Extensions"></a>
+<h2>10.2. Extensions</h2>
+
+<p>The extensions implemented by the Pascal-VU compiler are
+listed in Chapter 5 of [IM2].</p>
+
+<p>- separate compilation</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>the new compiler only accepts programs, not modules.</p>
+<!-- INDENTATION -->
+<p>- assertions not implemented.</p>
+<!-- INDENTATION -->
+<p>- additional procedures the procedures <i>halt, mark</i>
+and <i>release</i> are not available.</p>
+</td>
+</table>
+
+<p>- UNIX&trade; interfacing</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>the &minus;c option is not implemented.</p></td>
+</table>
+
+<p align=center><img src="grohtml-100602.png"></p>
+
+<p>- double length integers</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="5%"></td>
+<td width="94%">
+<p>integer size can be set with the &minus;V option, so the
+additional type <i>long</i> is not implemented.</p>
+</td>
+</table>
+<a name="10.3. Compiler options"></a>
+<h2>10.3. Compiler options</h2>
+
+<p>The options implemented by the Pascal-VU compiler are
+listed in Chapter 7 of [IM2].</p>
+
+<p>The construction &quot;{$....}&quot; is not
+recognized.</p>
+
+<p>The options: <i>a, c, d, s</i> and <i>t</i> are not
+available.</p>
+
+<p>The &minus;l option has been changed into the &minus;L
+option.</p>
+
+<p>The size of reals can be set with the &minus;V
+option.</p>
+<a name="11. Improvements to the compiler"></a>
+<h2>11. Improvements to the compiler</h2>
+
+<p>In consideration of portability, a restricted option
+could be implemented. Under this option, the extensions and
+warnings should be considered as errors.</p>
+
+<p>The restrictions imposed by the standard on the control
+variable of a for-statment should be implemented (<b>ISO
+6.8.3.9</b>).</p>
+
+<p>To check whether a function returns a valid result, the
+following algorithm could be used. When a function is
+entered a hidden temporary variable of type boolean is
+created. This variable is initialized with the value false.
+The variable is set to true, when an assignment to the
+function name occurs. On exit of the function a test is
+performed on the variable. If the value of the variable is
+false, a run-time error occurs.<br>
+Note: The check has to be done run-time.</p>
+
+<p>The <i>undefined value</i> should be implemented. A
+problem arises with local variables, for which space on the
+stack is allocated. A possible solution would be to generate
+code for the initialization of the local variables with the
+undefined value at the beginning of a procedure or
+function.</p>
+
+<p>The implementation for the global variables is easy,
+because <b>bss</b> blocks are used.</p>
+
+<p>Closely related to the last point is the generation of
+warnings when variables are never used or assigned. This is
+not yet implemented.</p>
+
+<p>The error messages could specify more details about the
+errors occurred, if some additional testing is done.</p>
+
+<p>Every time the compiler detects sets with different
+base-types, a warning is given. Sometimes this is
+superfluous.</p>
+<pre><b>program</b> sets(output);
+<b>type
+</b></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>week = (sunday, monday, tuesday, wednesday, thursday,
+friday, saturday);</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>workweek = monday..friday;</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p><b>var</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p>s : <b>set of</b> workweek;</p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p>day : week;</p>
+</td>
+</table>
+
+<p><b>begin</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p>day := monday;</p>
+</td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p>s := [day];</p>
+</td>
+<td width="20%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>(* warning *)</p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p>day := saturday;</p>
+</td>
+<td width="20%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="0%"></td>
+<td width="10%">
+
+<p>s := [day];</p>
+</td>
+<td width="20%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>(* warning *)</p>
+</td>
+<td width="39%">
+</td>
+</table>
+
+<p><b>end</b>.<br>
+The new compiler gives two warnings, the first one is
+redundant.</p>
+
+<p>A nasty point in the compiler is the way the procedures
+<i>read, readln, write</i> and <i>writeln</i> are handled
+(see also section 2.2). They have been added to the grammar.
+This implies that they can not be redefined as opposed to
+the other required procedures and functions. They should be
+removed from the grammar altogether. This could imply that
+more semantic checks have to be performed.</p>
+
+<p>No effort is made to detect possible run-time errors
+during compilation.<br>
+E.g. a : <b>array</b>[1..10] <b>of</b> <i>something</i>, and
+the array selection a[11] would occur.</p>
+
+<p>Some assistance to implement the improvements mentioned
+above, can be obtained from [PCV].</p>
+<a name="12. History &amp; Acknowledgements"></a>
+<h2>12. History &amp; Acknowledgements</h2>
+
+<p><b>History</b></p>
+
+<p>The purpose of this project was to make a Pascal
+compiler which should satisfy the conditions of the ISO
+standard. The task was considerably simplified, because
+parts of the Modula-2 compiler were used. This gave the
+advantage of increasing the uniformity of the compilers in
+ACK.<br>
+While developing the compiler, a number of errors were
+detected in the Modula-2 compiler, EM utility modules and
+the old Pascal compiler.</p>
+
+<p><b>Acknowledgements</b></p>
+
+<p>During the development of the compiler, valuable support
+was received from a number of persons. In this regard we owe
+a debt of gratitude to Fred van Beek, Casper Capel, Rob
+Dekker, Frank Engel, Jos&eacute; Gouweleeuw and Sonja
+Keijzer (Jut and Jul !!), Herold Kroon, Martin van
+Nieuwkerk, Sjaak Schouten, Eric Valk, and Didan Westra.<br>
+Special thanks are reserved for Dick Grune, who introduced
+us to the field of Compiler Design and who helped testing
+the compiler. Ceriel Jacobs, who developed LLgen and the
+Modula-2 compiler of ACK. Finally we would like to thank
+Erik Baalbergen, who had the supervision on this entire
+project and gave us many valuable suggestions.</p>
+<a name="13. References"></a>
+<h2>13. References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[ISO]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>ISO 7185 Specification for Computer Programming Language
+Pascal, 1982, Acornsoft ISO-PASCAL, 1984</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>[EM]</p>
+</td>
+<td width="8%"></td>
+<td width="84%">
+
+<p>A.S. Tanenbaum, H. van Staveren, E.G. Keizer and J.W.
+Stevenson, <i>Description Of A Machine Architecture for use
+with Block Structured Languages</i>, Informatica Rapport
+IR-81, Vrije Universiteit, Amsterdam, 1983</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>[C]</p>
+</td>
+<td width="10%"></td>
+<td width="84%">
+
+<p>B.W. Kernighan and D.M. Ritchie, <i>The C Programming
+Language</i>, Prentice-Hall, 1978</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>[LL]</p>
+</td>
+<td width="8%"></td>
+<td width="84%">
+
+<p>C.J.H. Jacobs, <i>Some Topics in Parser Generation</i>,
+Informatica Rapport IR-105, Vrije Universiteit, Amsterdam,
+October 1985</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[IM2]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>J.W. Stevenson, <i>Pascal-VU Reference Manual and Unix
+Manual Pages</i>, Informatica Manual IM-2, Vrije
+Universiteit, Amsterdam, 1980</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[JEN]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>K. Jensen and N.Wirth, <i>Pascal User Manual and
+Report</i>, Springer-Verlag, 1978</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[ACK]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p><i>ACK Manual Pages</i>: ALLOC, ASSERT, EM_CODE, EM_MES,
+IDF, INPUT, PRINT, STRING, SYSTEM</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[AHO]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>A.V. Aho, R. Sethi and J.D. Ullman, <i>Compiler
+Principles, Techniques, and Tools</i>, Addison Wesley,
+1985</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[LEX]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>M.E. Lesk, <i>Lex - A Lexical Analyser Generator</i>,
+Comp. Sci. Tech. Rep. No. 39, Bell Laboratories, Murray
+Hill, New Jersey, October 1975</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[PCV]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>B.A. Wichmann and Z.J. Ciechanowicz, <i>Pascal Compiler
+Validation</i>, John Wiley &amp; Sons, 1983</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>[SAL]</p>
+</td>
+<td width="6%"></td>
+<td width="84%">
+
+<p>A.H.J. Sale, <i>A Note on Scope, One-Pass Compilers and
+Pascal</i>, Australian Communications, 1, 1, 80-82, 1979</p>
+</td>
+</table>
+
+<p><b>Appendix A: ISO-PASCAL grammar</b></p>
+
+<p><b>A.1 Lexical tokens</b></p>
+
+<p>The syntax describes the formation of lexical tokens
+from characters and the separation of these tokens, and
+therefore does not adhere to the same rules as the syntax in
+A.2.</p>
+
+<p>The lexical tokens used to construct Pascal programs
+shall be classified into special-symbols, identifiers,
+directives, unsigned-numbers, labels and character-strings.
+The representation of any letter (upper-case or lower-case,
+differences of font, etc) occurring anywhere outside of a
+character-string shall be insignificant in that occurrence
+to the meaning of the program.</p>
+
+<p>letter = <b>a</b> | <b>b</b> | <b>c</b> | <b>d</b> |
+<b>e</b> | <b>f</b> | <b>g</b> | <b>h</b> | <b>i</b> |
+<b>j</b> | <b>k</b> | <b>l</b> | <b>m</b> | <b>n</b> |
+<b>o</b> | <b>p</b> | <b>q</b> | <b>r</b> | <b>s</b> |
+<b>t</b> | <b>u</b> | <b>v</b> | <b>w</b> | <b>x</b> |
+<b>y</b> | <b>z</b> .</p>
+
+<p>digit = <b>0</b> | <b>1</b> | <b>2</b> | <b>3</b> |
+<b>4</b> | <b>5</b> | <b>6</b> | <b>7</b> | <b>8</b> |
+<b>9</b> .</p>
+
+<p>The special symbols are tokens having special meanings
+and shall be used to delimit the syntactic units of the
+language.</p>
+
+<p>special-symbol = <b>+</b> | <b>&minus;</b> | <b>*</b> |
+<b>/</b> | <b>=</b> | <b>&lt;</b> | <b>&gt;</b> | <b>[</b> |
+<b>]</b> | <b>.</b> | <b>,</b> | <b>:</b> | <b>;</b> |
+<b>^</b> | <b>(</b> | <b>)</b> | <b>&lt;&gt;</b> |
+<b>&lt;=</b> | <b>&gt;=</b> | <b>:=</b> | <b>..</b> |
+word-symbol .</p>
+
+<p>word-symbol = <b>and</b> | <b>array</b> | <b>begin</b> |
+<b>case</b> | <b>const</b> | <b>div</b> | <b>do</b> |
+<b>downto</b> | <b>else</b> | <b>end</b> | <b>file</b> |
+<b>for</b> | <b>function</b> | <b>goto</b> | <b>if</b> |
+<b>in</b> | <b>label</b> | <b>mod</b> | <b>nil</b> |
+<b>not</b> | <b>of</b> | <b>or</b> | <b>packed</b> |
+<b>procedure</b> | <b>program</b> | <b>record</b> |
+<b>repeat</b> | <b>set</b> | <b>then</b> | <b>to</b> |
+<b>type</b> | <b>until</b> | <b>var</b> | <b>while</b> |
+<b>with</b> .</p>
+
+<p>Identifiers may be of any length. All characters of an
+identifier shall be significant. No identifier shall have
+the same spelling as any word-symbol.</p>
+
+<p>identifier = letter { letter | digit } .</p>
+
+<p>A directive shall only occur in a procedure-declaration
+or function-declaration. No directive shall have the same
+spelling as any word-symbol.</p>
+
+<p>directive = letter {letter | digit} .</p>
+
+<p>Numbers are given in decimal notation.</p>
+<pre>unsigned-integer = digit-sequence .
+unsigned-real = unsigned-integer <b>.</b> fractional-part [ <b>e</b> scale-factor ] | unsigned-integer <b>e</b> scale-factor .
+digit-sequence = digit {digit} .
+fractional-part = digit-sequence .
+</pre>
+
+<p>scale-factor = signed-integer . signed-integer = [sign]
+unsigned-integer . sign = <b>+</b> | <b>&minus;</b> .</p>
+
+<p>Labels shall be digit-sequences and shall be
+distinguished by their apparent integral values and shall be
+in the closed interval 0 to 9999.</p>
+
+<p>label = digit-sequence .</p>
+
+<p>A character-string containing a single string-element
+shall denote a value of the required char-type. Each
+string-character shall denote an implementation- defined
+value of the required char-type.</p>
+<pre>character-string = <b>&rsquo;</b> string-element { string-element } <b>&rsquo;</b> .
+string-element = apostrophe-image | string-character .
+apostrophe-image = <b>&rsquo;&rsquo;</b> .
+string-character = All 7-bits ASCII characters except linefeed (10), vertical tab (11), and new page (12).
+</pre>
+
+<p>The construct:</p>
+
+<p><b>{</b>
+any-sequence-of-characters-and-separations-of-lines-
+not-containing-right-brace <b>}</b></p>
+
+<p>shall be a comment if the &quot;{&quot; does not occur
+within a character-string or within a comment. The
+substitution of a space for a comment shall not alter the
+meaning of a program.</p>
+
+<p>Comments, spaces (except in character-strings), and the
+separation of consecutive lines shall be considered to be
+token separators. Zero or more token separators may occur
+between any two consecutive tokens, or before the first
+token of a program text. No separators shall occur within
+tokens.</p>
+
+<p><b>A.2 Grammar</b></p>
+
+<p>The non-terminal symbol <i>program</i> is the start
+symbol of the grammar.</p>
+<pre>actual-parameter : expression | variable-access | procedure-identifier | function-identifier .
+actual-parameter-list : <b>(</b> actual-parameter { <b>,</b> actual-parameter } <b>)</b> .
+adding-operator : <b>+</b> | <b>&minus;</b> | <b>or</b> .
+array-type : <b>array [</b> index-type { <b>,</b> index-type } <b>] of</b> component-type .
+array-variable : variable-access .
+assignment-statement : ( variable-access | function-identifier ) <b>:=</b> expression .
+
+base-type : ordinal-type .
+block : label-declaration-part constant-definition-part type-definition-part variable-declaration-part
+        procedure-and-function-declaration-part statement-part .
+Boolean-expression : expression .
+bound-identifier : identifier .
+buffer-variable : file-variable <b>^</b> .
+
+case-constant : constant .
+case-constant-list : case-constant { <b>,</b> case-constant } .
+case-index : expression .
+case-list-element : case-constant-list <b>:</b> statement .
+case-statement : <b>case</b> case-index <b>of</b> case-list-element { <b>;</b> case-list-element } [ <b>;</b> ] <b>end</b> .
+component-type : type-denoter .
+component-variable : indexed-variable | field-designator .
+compound-statement : <b>begin</b> statement-sequence <b>end</b> .
+conditional-statement : if-statement | case-statement .
+conformant-array-parameter-specification : value-conformant-array-specification |
+                  variable-conformant-array-specification .
+conformant-array-schema : packed-conformant-array-schema | unpacked-conformant-array-schema .
+constant : [ sign ] ( unsigned-number | constant-identifier ) | character-string .
+constant-definition : identifier <b>=</b> constant .
+constant-definition-part : [ <b>const</b> constant-definition <b>;</b> { constant-definition <b>;</b> } ] .
+constant-identifier : identifier .
+control-variable : entire-variable .
+
+domain-type : type-identifier .
+
+else-part : <b>else</b> statement .
+empty-statement : .
+entire-variable : variable-identifier .
+enumerated-type : <b>(</b> identifier-list <b>)</b> .
+expression : simple-expression [ relational-operator simple-expression ] .
+</pre>
+
+<p>factor : variable-access | unsigned-constant |
+bound-identifier | function-designator | set-constructor |
+<b>(</b> expression <b>)</b> | <b>not</b> factor .
+field-designator : record-variable <b>.</b> field-specifier
+| field-designator-identifier . field-designator-identifier
+: identifier . field-identifier : identifier . field-list :
+[ ( fixed-part [ <b>;</b> variant-part ] | variant-part ) [
+<b>;</b> ] ] . field-specifier : field-identifier .
+file-type : <b>file of</b> component-type . file-variable :
+variable-access . final-value : expression . fixed-part :
+record-section { <b>;</b> record-section } . for-statement :
+<b>for</b> control-variable <b>:=</b> initial-value (
+<b>to</b> | <b>downto</b> ) final-value <b>do</b> statement
+. formal-parameter-list : <b>(</b> formal-parameter-section
+{ <b>;</b> formal-parameter-section } <b>)</b> .
+formal-parameter-section : value-parameter-specification |
+variable-parameter-specification |
+procedural-parameter-specification |
+functional-parameter-specification |
+conformant-array-parameter-specification . function-block :
+block . function-declaration : function-heading <b>;</b>
+directive | function-identification <b>;</b> function-block
+| function-heading <b>;</b> function-block .
+function-designator : function-identifier [
+actual-parameter-list ] . function-heading : <b>function</b>
+identifier [ formal-parameter-list ] <b>:</b> result-type .
+function-identification : <b>function</b>
+function-identifier . function-identifier : identifier .
+functional-parameter-specification : function-heading .</p>
+
+<p>goto-statement : <b>goto</b> label .</p>
+
+<p>identified-variable : pointer-variable <b>^</b> .
+identifier-list : identifier { <b>,</b> identifier } .
+if-statement : <b>if</b> Boolean-expression <b>then</b>
+statement [ else-part ] . index-expression : expression .
+index-type : ordinal-type . index-type-specification :
+identifier <b>..</b> identifier <b>:</b>
+ordinal-type-identifier . indexed-variable : array-variable
+<b>[</b> index-expression { <b>,</b> index-expression }
+<b>]</b> . initial-value : expression .</p>
+
+<p>label : digit-sequence . label-declaration-part : [
+<b>label</b> label { <b>,</b> label } <b>;</b> ] .</p>
+
+<p>member-designator : expression [ <b>..</b> expression ]
+. multiplying-operator : <b>*</b> | <b>/</b> | <b>div</b> |
+<b>mod</b> | <b>and</b> .</p>
+
+<p>new-ordinal-type : enumerated-type | subrange-type .
+new-pointer-type : <b>^</b> domain-type .
+new-structured-type : [ <b>packed</b> ]
+unpacked-structured-type . new-type : new-ordinal-type |
+new-structured-type | new-pointer-type .</p>
+
+<p>ordinal-type : new-ordinal-type |
+ordinal-type-identifier . ordinal-type-identifier :
+type-identifier .</p>
+
+<p>packed-conformant-array-schema : <b>packed array [</b>
+index-type-specification <b>] of</b> type-identifier .
+pointer-type-identifier : type-identifier . pointer-variable
+: variable-access . procedural-parameter-specification :
+procedure-heading . procedure-and-function-declaration-part
+: { ( procedure-declaration | function-declaration )
+<b>;</b> } . procedure-block : block . procedure-declaration
+: procedure-heading <b>;</b> directive |
+procedure-identification <b>;</b> procedure-block |
+procedure-heading <b>;</b> procedure-block .
+procedure-heading : <b>procedure</b> identifier [
+formal-parameter-list ] . procedure-identification :
+<b>procedure</b> procedure-identifier . procedure-identifier
+: identifier . procedure-statement : procedure-identifier (
+[ actual-parameter-list ] | read-parameter-list |
+readln-parameter-list | write-parameter-list |
+writeln-parameter-list ) . program : program-heading
+<b>;</b> program-block <b>.</b> . program-block : block .
+program-heading : <b>program</b> identifier [ <b>(</b>
+program-parameters <b>)</b> ] . program-parameters :
+identifier-list .</p>
+
+<p>read-parameter-list : <b>(</b> [ file-variable <b>,</b>
+] variable-access { <b>,</b> variable-access } <b>)</b> .
+readln-parameter-list : [ <b>(</b> ( file-variable |
+variable-access ) { <b>,</b> variable-access } <b>)</b> ] .
+record-section : identifier-list <b>:</b> type-denoter .
+record-type : <b>record</b> field-list <b>end</b> .
+record-variable : variable-access . record-variable-list :
+record-variable { <b>,</b> record-variable } .
+relational-operator : <b>=</b> | <b>&lt;&gt;</b> |
+<b>&lt;</b> | <b>&gt;</b> | <b>&lt;=</b> | <b>&gt;=</b> |
+<b>in</b> . repeat-statement : <b>repeat</b>
+statement-sequence <b>until</b> Boolean-expression .
+repetitive-statement : repeat-statement | while-statement |
+for-statement . result-type : simple-type-identifier |
+pointer-type-identifier .</p>
+
+<p>set-constructor : <b>[</b> [ member-designator {
+<b>,</b> member-designator } ] <b>]</b> . set-type : <b>set
+of</b> base-type . sign : <b>+</b> | <b>&minus;</b> .
+simple-expression : [ sign ] term { adding-operator term } .
+simple-statement : empty-statement | assignment-statement |
+procedure-statement | goto-statement .
+simple-type-identifier : type-identifier .</p>
+
+<p>statement : [ label <b>:</b> ] ( simple-statement |
+structured-statement ) . statement-part : compound-statement
+. statement-sequence : statement { <b>;</b> statement } .
+structured-statement : compound-statement |
+conditional-statement | repetitive-statement |
+with-statement . subrange-type : constant <b>..</b> constant
+.</p>
+
+<p>tag-field : identifier . tag-type :
+ordinal-type-identifier . term : factor {
+multiplying-operator factor } . type-definition : identifier
+<b>=</b> type-denoter . type-definition-part : [ <b>type</b>
+type-definition <b>;</b> { type-definition <b>;</b> } ] .
+type-denoter : type-identifier | new-type . type-identifier
+: identifier .</p>
+
+<p>unpacked-conformant-array-schema : <b>array [</b>
+index-type-specification { <b>;</b> index-type-specification
+} <b>] of</b> ( type-identifier | conformant-array-schema )
+. unpacked-structured-type : array-type | record-type |
+set-type | file-type . unsigned-constant : unsigned-number |
+character-string | constant-identifier | <b>nil</b> .
+unsigned-number : unsigned-integer | unsigned-real .</p>
+
+<p>value-conformant-array-specification : identifier-list
+<b>:</b> conformant-array-schema .
+value-parameter-specification : identifier-list <b>:</b>
+type-identifier . variable-access : entire-variable |
+component-variable | identified-variable | buffer-variable .
+variable-conformant-array-specification : <b>var</b>
+identifier-list <b>:</b> conformant-array-schema .
+variable-declaration : identifier-list <b>:</b> type-denoter
+. variable-declaration-part : [ <b>var</b>
+variable-declaration <b>;</b> { variable-declaration
+<b>;</b> } ] . variable-identifier : identifier .
+variable-parameter-specification : <b>var</b>
+identifier-list <b>:</b> type-identifier . variant :
+case-constant-list <b>: (</b> field-list <b>)</b> .
+variant-part : <b>case</b> variant-selector <b>of</b>
+variant { <b>;</b> variant } . variant-selector : [
+tag-field <b>:</b> ] tag-type .</p>
+
+<p>while-statement : <b>while</b> Boolean-expression
+<b>do</b> statement . with-statement : <b>with</b>
+record-variable-list <b>do</b> statement . write-parameter :
+expression [ <b>:</b> expression [ <b>:</b> expression ] ] .
+write-parameter-list : <b>(</b> [ file-variable <b>,</b> ]
+write-parameter { <b>,</b> write-parameter } <b>)</b> .
+writeln-parameter-list : [ <b>(</b> ( file-variable |
+write-parameter ) { <b>,</b> write-parameter } <b>)</b> ]
+.</p>
+
+<p><b>Appendix B: Changes to the run time library</b></p>
+
+<p>Some minor changes in the run time library have been
+made concerning the external files (i.e. program arguments).
+The old compiler reserved space for the file structures of
+the external files in one <b>hol</b> block. In the new
+compiler, every file structure is placed in a separate
+<b>bss</b> block. This implies that the arguments with which
+<i>_ini</i> is called are slightly different. The second
+argument was the base of the <b>hol</b> block to relocate
+the buffer addresses, it is changed into an integer denoting
+the size of the array passed as third argument. The third
+argument was a pointer to an array of integers containing
+the description of external files, this argument is changed
+into a pointer to an array of pointers to file
+structures.</p>
+
+<p>The differences in the generated EM code for an
+arbitrary Pascal program are listed below (only the relevant
+parts are shown):</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><b>program</b> external_files(output,f);
+<b>var
+</b></pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="10%">
+
+<p>f : <b>file of</b> <i>some-type</i>;</p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>.<br>
+.<b><br>
+end</b>.</p>
+<!-- INDENTATION -->
+<p>EM code generated by Pascal-VU:<br>
+.<br>
+.<br>
+hol 1088,-2147483648,0 ; space belonging to file structures
+of the program arguments<br>
+.<br>
+.<br>
+.<br>
+.2<br>
+con 3, -1, 544, 0 ; description of external files<br>
+lxl 0<br>
+lae .2<br>
+lae 0 ; base of hol block, to relocate buffer addresses<br>
+lxa 0<br>
+cal $_ini<br>
+asp 16<br>
+.<br>
+.</p>
+<!-- INDENTATION -->
+<p>EM code generated by our compiler:<br>
+.<br>
+.<br>
+f<br>
+bss 540,0,0 ; space belonging to file structure of program
+argument f<br>
+output<br>
+bss 540,0,0 ; space belonging to file structure of standard
+output</p>
+</td>
+</table>
+
+<p>. . . .2 con 0U4, output, f ; the absence of standard
+input is denoted by a null pointer lxl 0 lae .2 loc 3 ;
+denotes the size of the array of pointers to file structures
+lxa 0 cal $_ini asp 16 . .</p>
+
+<p>The following files in the run time library have been
+changed:</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="98%">
+<p>pc_file.h hlt.c ini.c opn.c pentry.c pexit.c</p></td>
+</table>
+
+<p><b>Appendix C: An example</b></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>1</p>
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p><b>program</b> factorials(input, output);<br>
+2</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p>{ This program prints factorials }</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p>3</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>4</p>
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p><b>const</b><br>
+5</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p>FAC1 = 1;<br>
+6</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p><b>var</b><br>
+7</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="1%"></td>
+<td width="8%"></td>
+<td width="10%">
+
+<p>i : integer;</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p>8</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>9</p>
+</td>
+<td width="10%">
+
+<p><b>function</b> factorial(n : integer) : integer;</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>10</p>
+</td>
+<td width="10%">
+
+<p><b>begin</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>11</p>
+</td>
+<td width="10%">
+
+<p><b>if</b> n = FAC1 <b>then</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>12</p>
+</td>
+<td width="10%">
+
+<p>factorial := FAC1</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>13</p>
+</td>
+<td width="10%">
+
+<p><b>else</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>14</p>
+</td>
+<td width="10%">
+
+<p>factorial := n * factorial(n-1);</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>15</p>
+</td>
+<td width="10%">
+
+<p><b>end</b>;</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p>16</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>17</p>
+</td>
+<td width="10%">
+
+<p><b>begin</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>18</p>
+</td>
+<td width="10%">
+
+<p>write(&rsquo;Give a number : &rsquo;);</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>19</p>
+</td>
+<td width="10%">
+
+<p>readln(i);</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>20</p>
+</td>
+<td width="10%">
+
+<p><b>if</b> i &lt; 1 <b>then</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>21</p>
+</td>
+<td width="10%">
+
+<p>writeln(&rsquo;No factorial&rsquo;)</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>22</p>
+</td>
+<td width="10%">
+
+<p><b>else</b></p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>23</p>
+</td>
+<td width="10%">
+
+<p>writeln(factorial(i):1);</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>24</p>
+</td>
+<td width="10%">
+
+<p><b>end</b>.</p>
+</td>
+<td width="79%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="11" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p>mes 2,4,4</p>
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loc 16<br>
+.1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_wrs<br>
+rom &rsquo;factorials.p\000&rsquo;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 12<br>
+i</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lin 19<br>
+bss 4,0,0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae input<br>
+output</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_rdi<br>
+bss 540,0,0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 4<br>
+input</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lfr 4<br>
+bss 540,0,0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>ste i<br>
+exp $factorial</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae input<br>
+pro $factorial, ?</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_rln<br>
+mes 9,4</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 4<br>
+lin 11</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lin 20<br>
+lol 0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loe i<br>
+loc 1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loc 1<br>
+cmi 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cmi 4<br>
+teq</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>tlt<br>
+zeq *1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>zeq *1<br>
+lin 12</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lin 21<br>
+loc 1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>.4<br>
+stl -4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>rom &rsquo;No factorial&rsquo;<br>
+bra *2</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae output<br>
+1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae .4<br>
+lin 14</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loc 12<br>
+lol 0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_wrs<br>
+lol 0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 12<br>
+loc 1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae output<br>
+sbi 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_wln<br>
+cal $factorial</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 4<br>
+asp 4</p>
+</td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>bra *2<br>
+lfr 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>1<br>
+mli 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lin 23<br>
+stl -4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae output<br>
+2</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loe i<br>
+lin 15</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $factorial<br>
+mes 3,0,4,0,0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 4<br>
+lol -4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lfr 4<br>
+ret 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loc 1<br>
+end 4</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_wsi<br>
+exp $m_a_i_n</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 12<br>
+pro $m_a_i_n, ?</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lae output<br>
+mes 9,0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_wln<br>
+fil .1</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>asp 4<br>
+.2</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>2<br>
+con input, output</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>lin 24<br>
+lxl 0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>loc 0<br>
+lae .2</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>cal $_hlt<br>
+loc 2</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>end 0<br>
+lxa 0</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p>mes 4,24,&rsquo;factorials.p\000&rsquo;</p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="0%">
+</td>
+</table>
+
+<p>cal $_ini asp 16 lin 18 .3 rom &rsquo;Give a number :
+&rsquo; lae output lae .3</p>
+<hr>
+</body>
+</html>

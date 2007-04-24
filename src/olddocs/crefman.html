@@ -1,0 +1,1410 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:12 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>ACK/CEM Compiler</title>
+</head>
+<body>
+
+<h1 align=center>ACK/CEM Compiler</h1>
+<a href="#1. C Language">1. C Language</a><br>
+<a href="#2.2 Identifiers">2.2 Identifiers</a><br>
+<a href="#2.3 Keywords">2.3 Keywords</a><br>
+<a href="#asm">asm</a><br>
+<a href="#enum">enum</a><br>
+<a href="#entry , fortran">entry , fortran</a><br>
+<a href="#2.4.1 Integer Constants">2.4.1 Integer Constants</a><br>
+<a href="#2.4.3 Character Constants">2.4.3 Character Constants</a><br>
+<a href="#2.4.4 Floating Constants">2.4.4 Floating Constants</a><br>
+<a href="#2.6 Hardware characteristics">2.6 Hardware characteristics</a><br>
+<a href="#4 What&rsquo;s in a name?">4 What&rsquo;s in a name?</a><br>
+<a href="#char">char</a><br>
+<a href="#unsigned">unsigned</a><br>
+<a href="#enum">enum</a><br>
+<a href="#void">void</a><br>
+<a href="#Fundamental types">Fundamental types</a><br>
+<a href="#7 Expressions">7 Expressions</a><br>
+<a href="#7.2 Unary operators">7.2 Unary operators</a><br>
+<a href="#7.13 Conditional operator">7.13 Conditional operator</a><br>
+<a href="#7.14 Assignment operators">7.14 Assignment operators</a><br>
+<a href="#8.2 Type specifiers">8.2 Type specifiers</a><br>
+<a href="#8.5 Structure and union declarations">8.5 Structure and union declarations</a><br>
+<a href="#9.7 Switch statement">9.7 Switch statement</a><br>
+<a href="#10 External definitions">10 External definitions</a><br>
+<a href="#10.1 External function definitions">10.1 External function definitions</a><br>
+<a href="#11.1 Lexical scope">11.1 Lexical scope</a><br>
+<a href="#12 Compiler control lines">12 Compiler control lines</a><br>
+<a href="#12.1 Token replacement">12.1 Token replacement</a><br>
+<a href="#12.2 File inclusion">12.2 File inclusion</a><br>
+<a href="#12.3 Conditional compilation">12.3 Conditional compilation</a><br>
+<a href="#12.4 Line control">12.4 Line control</a><br>
+<a href="#14.2 Functions">14.2 Functions</a><br>
+<a href="#15 Constant expressions">15 Constant expressions</a><br>
+<a href="#2. Compiler flags">2. Compiler flags</a><br>
+<a href="#References">References</a><br>
+<a href="#Appendix A - Enumeration Type">Appendix A - Enumeration Type</a><br>
+<a href="#Appendix B: C grammar in LL(1) form">Appendix B: C grammar in LL(1) form</a><br>
+
+<hr>
+
+<p><b>Reference Manual</b></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p align=center><i><small>Erik H.
+Baalbergen</small></i><small><br>
+Department of Mathematics and Computer Science<br>
+Vrije Universiteit<br>
+Amsterdam<br>
+The Netherlands</small></p>
+</td>
+</table>
+<a name="1. C Language"></a>
+<h2>1. C Language</h2>
+
+<p><small>This section discusses the extensions to and
+deviations from the C language, as described in [1]. The
+issues are numbered according to the reference
+manual.</small></p>
+<a name="2.2 Identifiers"></a>
+<h2>2.2 Identifiers</h2>
+
+<p><small>Upper and lower case letters are different. The
+number of significant letters is 32 by default, but may be
+set to another value using the <b>&minus;M</b> option. The
+identifier length should be set according to the rest of the
+compilation programs.</small></p>
+<a name="2.3 Keywords"></a>
+<h2>2.3 Keywords</h2>
+<a name="asm"></a>
+<h2>asm</h2>
+
+<p><small>The keyword <tt>asm</tt> is recognized. However,
+the statement</small></p>
+<pre><small>     asm(string);
+</small></pre>
+
+<p><small>is skipped, while a warning is given.</small></p>
+<a name="enum"></a>
+<h2>enum</h2>
+
+<p><small>The <tt>enum</tt> keyword is recognized and
+interpreted.</small></p>
+<a name="entry , fortran"></a>
+<h2>entry , fortran</h2>
+
+<p><small>The words <tt>entry</tt> and <tt>fortran</tt> are
+reserved under the restricted option. The words are not
+interpreted by the compiler.</small></p>
+<a name="2.4.1 Integer Constants"></a>
+<h2>2.4.1 Integer Constants</h2>
+
+<p><small>The type of an integer constant is the first of
+the corresponding list in which its value can be
+represented. Decimal: <tt>int, long, unsigned long</tt>;
+octal or hexadecimal: <tt>int, unsigned, long, unsigned
+long</tt>; suffixed by the letter L or l: <tt>long, unsigned
+long</tt>.</small></p>
+<a name="2.4.3 Character Constants"></a>
+<h2>2.4.3 Character Constants</h2>
+
+<p><small>A character constant is a sequence of 1 up to
+<tt>sizeof(int)</tt> characters enclosed in single quotes.
+The value of a character constant &rsquo;<i>c</i>
+<small><small>1</small></small> <i>c</i>
+<small><small>2</small></small> ...<i>c
+<small><small>n</small></small></i> &rsquo; is <i>d
+<small><small>n</small></small></i> +<i>M</i>&times;<i>d
+<small><small>n</small></small></i><small><small>&minus;1</small></small>
++...+<i>M
+<small><small>n</small></small></i><small><small>&minus;1</small></small>
+&times;<i>d</i> <small><small>2</small></small> +<i>M
+<small><small>n</small></small></i> &times;<i>d</i>
+<small><small>1</small></small> , where M is 1 + maximum
+unsigned number representable in an <tt>unsigned char</tt>,
+and <i>d <small><small>i</small></small></i> is the signed
+value (ASCII) of character <i>c
+<small><small>i</small></small></i> .</small></p>
+<a name="2.4.4 Floating Constants"></a>
+<h2>2.4.4 Floating Constants</h2>
+
+<p><small>The compiler does not support compile-time
+floating point arithmetic.</small></p>
+<a name="2.6 Hardware characteristics"></a>
+<h2>2.6 Hardware characteristics</h2>
+
+<p><small>The compiler is capable of producing EM code for
+machines with the following properties</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="32%">
+
+<p><small>a <tt>char</tt> is 8 bits</small></p>
+</td>
+<td width="57%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="82%">
+
+<p><small>the size of <tt>int</tt> is equal to the word
+size</small></p>
+</td>
+<td width="7%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>the size of <tt>short</tt> may not exceed the
+size of <tt>int</tt></small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>the size of <tt>int</tt> may not exceed the size
+of <tt>long</tt></small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="90%">
+
+<p><small>the size of pointers is equal to the size of
+either <tt>short</tt>, <tt>int</tt> or
+<tt>long</tt></small></p>
+</td>
+</table>
+<a name="4 What&rsquo;s in a name?"></a>
+<h2>4 What&rsquo;s in a name?</h2>
+<a name="char"></a>
+<h2>char</h2>
+
+<p><small>Objects of type <tt>char</tt> are taken to be
+signed. The combination <tt>unsigned char</tt> is
+legal.</small></p>
+<a name="unsigned"></a>
+<h2>unsigned</h2>
+
+<p><small>The type combinations <tt>unsigned char</tt>,
+<tt>unsigned short</tt> and <tt>unsigned long</tt> are
+supported.</small></p>
+<a name="enum"></a>
+<h2>enum</h2>
+
+<p><small>The data type <tt>enum</tt> is implemented as
+described in <i>Recent Changes to C</i> (see appendix A).
+<i>Cem</i> treats enumeration variables as if they were
+<tt>int</tt>.</small></p>
+<a name="void"></a>
+<h2>void</h2>
+
+<p><small>Type <tt>void</tt> is implemented. The type
+specifies an empty set of values, which takes no storage
+space.</small></p>
+<a name="Fundamental types"></a>
+<h2>Fundamental types</h2>
+
+<p><small>The names of the fundamental types can be
+redefined by the user, using <tt>typedef</tt>.</small></p>
+<a name="7 Expressions"></a>
+<h2>7 Expressions</h2>
+
+<p><small>The order of evaluation of expressions depends on
+the complexity of the subexpressions. In case of commutative
+operations, the most complex subexpression is evaluated
+first. Parameter lists are evaluated from right to
+left.</small></p>
+<a name="7.2 Unary operators"></a>
+<h2>7.2 Unary operators</h2>
+
+<p><small>The type of a <tt>sizeof</tt> expression is
+<tt>unsigned int</tt>.</small></p>
+<a name="7.13 Conditional operator"></a>
+<h2>7.13 Conditional operator</h2>
+
+<p><small>Both the second and the third expression in a
+conditional expression may include assignment operators.
+They may be structs or unions.</small></p>
+<a name="7.14 Assignment operators"></a>
+<h2>7.14 Assignment operators</h2>
+
+<p><small>Structures may be assigned, passed as arguments
+to functions, and returned by functions. The types of
+operands taking part must be the same.</small></p>
+<a name="8.2 Type specifiers"></a>
+<h2>8.2 Type specifiers</h2>
+
+<p><small>The combinations <tt>unsigned char</tt>,
+<tt>unsigned short</tt> and <tt>unsigned long</tt> are
+implemented.</small></p>
+<a name="8.5 Structure and union declarations"></a>
+<h2>8.5 Structure and union declarations</h2>
+
+<p><small>Fields of any integral type, either signed or
+unsigned, are supported, as long as the type fits in a word
+on the target machine.</small></p>
+
+<p><small>Fields are left adjusted by default; the first
+field is put into the left part of a word, the next one on
+the right side of the first one, etc. The <tt>-Vr</tt>
+option in the call of the compiler causes fields to be right
+adjusted within a machine word.</small></p>
+
+<p><small>The tags of structs and unions occupy a different
+name space from that of variables and that of member
+names.</small></p>
+<a name="9.7 Switch statement"></a>
+<h2>9.7 Switch statement</h2>
+
+<p><small>The type of <i>expression</i> in</small></p>
+<pre><small>     switch (<i>expression</i>) <i>statement
+</i></small></pre>
+
+<p><small>must be integral. A warning is given under the
+restricted option if the type is <tt>long</tt>.</small></p>
+<a name="10 External definitions"></a>
+<h2>10 External definitions</h2>
+
+<p><small>See [4] for a discussion on this complicated
+issue.</small></p>
+<a name="10.1 External function definitions"></a>
+<h2>10.1 External function definitions</h2>
+
+<p><small>Structures may be passed as arguments to
+functions, and returned by functions.</small></p>
+<a name="11.1 Lexical scope"></a>
+<h2>11.1 Lexical scope</h2>
+
+<p><small>Typedef names may be redeclared like any other
+variable name; the ice mentioned in &sect;11.1 is walked
+correctly.</small></p>
+<a name="12 Compiler control lines"></a>
+<h2>12 Compiler control lines</h2>
+
+<p><small>Lines which do not occur within comment, and with
+<tt>#</tt> as first character, are interpreted as compiler
+control line. There may be an arbitrary number of spaces,
+tabs and comments (collectively referred as <i>white
+space</i>) following the <tt>#</tt>. Comments may contain
+newline characters. Control lines with only white space
+between the <tt>#</tt> and the line separator are
+skipped.</small></p>
+
+<p><small>The #<tt>include</tt>, #<tt>ifdef</tt>,
+#<tt>ifndef</tt>, #<tt>undef</tt>, #<tt>else</tt> and
+#<tt>endif</tt> control lines and line directives consist of
+a fixed number of arguments. The list of arguments may be
+followed an arbitrary sequence of characters, in which
+comment is interpreted as such. (I.e., the text between
+<tt>/*</tt> and <tt>*/</tt> is skipped, regardless of
+newlines; note that commented-out lines beginning with
+<tt>#</tt> are not considered to be control
+lines.)</small></p>
+<a name="12.1 Token replacement"></a>
+<h2>12.1 Token replacement</h2>
+
+<p><small>The replacement text of macros is taken to be a
+string of characters, in which an identifier may stand for a
+formal parameter, and in which comment is interpreted as
+such. Comments and newline characters, preceeded by a
+backslash, in the replacement text are replaced by a space
+character.</small></p>
+
+<p><small>The actual parameters of a macro are considered
+tokens and are balanced with regard to <tt>()</tt>,
+<tt>{}</tt> and <tt>[]</tt>. This prevents the use of macros
+like</small></p>
+<pre><small>     CTL([)
+</small></pre>
+
+<p><small>Formal parameters of a macro must have unique
+names within the formal-parameter list of that
+macro.</small></p>
+
+<p><small>A message is given at the definition of a macro
+if the macro has already been #<tt>defined</tt>, while the
+number of formal parameters differ or the replacement texts
+are not equal (apart from leading and trailing white
+space).</small></p>
+
+<p><small>Recursive use of macros is detected by the
+compiler.</small></p>
+
+<p><small>Standard #<tt>defined</tt> macros are</small></p>
+<pre><small>     __FILE__  name of current input file as string constant
+     __DATE__  curent date as string constant; e.g. &quot;Tue Wed  2 14:45:23 1986&quot;
+     __LINE__  current line number as an integer
+</small></pre>
+
+<p><small>No message is given if <i>identifier</i> is not
+known in</small></p>
+<pre><small>     #undef <i>identifier
+</i></small></pre>
+<a name="12.2 File inclusion"></a>
+<h2>12.2 File inclusion</h2>
+
+<p><small>A newline character is appended to each file
+which is included.</small></p>
+<a name="12.3 Conditional compilation"></a>
+<h2>12.3 Conditional compilation</h2>
+
+<p><small>The #<tt>if</tt>, #<tt>ifdef</tt> and
+#<tt>ifndef</tt> control lines may be followed by an
+arbitrary number of</small></p>
+<pre><small>     #elif <i>constant-expression
+</i></small></pre>
+
+<p><small>control lines, before the corresponding
+#<tt>else</tt> or #<tt>endif</tt> is encountered. The
+construct</small></p>
+<pre><small>     #elif <i>constant-expression
+</i>     some text
+     #endif /* corresponding to #elif */
+</small></pre>
+
+<p><small>is equivalent to</small></p>
+<pre><small>     #else
+     #if <i>constant-expression
+</i>     some text
+     #endif /* corresponding to #if */
+     #endif /* corresponding to #else */
+</small></pre>
+
+<p><small>The <i>constant-expression</i> in #<tt>if</tt>
+and #<tt>elif</tt> control lines may contain the
+construction</small></p>
+<pre><small>     defined(<i>identifier</i>)
+</small></pre>
+
+<p><small>which is replaced by <tt>1</tt>, if
+<i>identifier</i> has been #<tt>defined</tt>, and by
+<tt>0</tt>, if not.</small></p>
+
+<p><small>Comments in skipped lines are interpreted as
+such.</small></p>
+<a name="12.4 Line control"></a>
+<h2>12.4 Line control</h2>
+
+<p><small>Line directives may occur in the following
+forms:</small></p>
+<pre><small>     #line <i>constant
+</i>     #line <i>constant</i> &quot;<i>filename</i>&quot;
+     #<i>constant
+</i>     #<i>constant</i> &quot;<i>filename</i>&quot;
+</small></pre>
+
+<p><small>Note that <i>filename</i> is enclosed in double
+quotes.</small></p>
+<a name="14.2 Functions"></a>
+<h2>14.2 Functions</h2>
+
+<p><small>If a pointer to a function is called, the
+function the pointer points to is called
+instead.</small></p>
+<a name="15 Constant expressions"></a>
+<h2>15 Constant expressions</h2>
+
+<p><small>The compiler distinguishes the following types of
+integral constant expressions</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="42%">
+
+<p><small>field-width specifier</small></p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p><small>case-entry specifier</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p><small>array-size specifier</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>global variable initialization value</small></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="40%">
+
+<p><small>enum-value specifier</small></p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+<p><small>&bull;</small></p>
+</td>
+<td width="8%"></td>
+<td width="62%">
+
+<p><small>truth value in <tt>#if</tt> control
+line</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+
+<p><small>Constant integral expressions are compile-time
+evaluated while an effort is made to report overflow.
+Constant floating expressions are not compile-time
+evaluated.</small></p>
+<a name="2. Compiler flags"></a>
+<h2>2. Compiler flags</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;C</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Run the preprocessor stand-alone while
+maintaining the comments. Line directives are produced
+whenever needed.</small></p>
+</td>
+</table>
+
+
+<p><small><b>&minus;D</b><i>name</i>=<i>string-of-characters</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Define <i>name</i> as macro with
+<i>string-of-characters</i> as replacement text.</small></p>
+</td>
+</table>
+
+<p><small><b>&minus;D</b><i>name</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Equal to
+<b>&minus;D</b><i>name</i><b>=1</b>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;E</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Run the preprocessor stand alone, i.e., list the
+sequence of input tokens and delete any comments. Line
+directives are produced whenever needed.</small></p>
+</td>
+</table>
+
+<p><small><b>&minus;I</b><i>path</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Prepend <i>path</i> to the list of include
+directories. To put the directories &quot;include&quot;,
+&quot;sys/h&quot; and &quot;util/h&quot; into the include
+directory list in that order, the user has to
+specify</small></p>
+<!-- INDENTATION -->
+<pre><small>     -Iinclude -Isys/h -Iutil/h
+</small></pre>
+<!-- INDENTATION -->
+<p><small>An empty <i>path</i> causes the standard include
+directory (usually <tt>/usr/include</tt>) to be
+forgotten.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><b>&minus;M</b><i>n</i></small></p>
+</td>
+<td width="93%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Set maximum significant identifier length to
+<i>n</i>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;n</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Suppress EM register messages. The user-declared
+variables are not stored into registers on the target
+machine.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;p</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Generate the EM <b>fil</b> and <b>lin</b>
+instructions in order to enable an interpreter to keep track
+of the current location in the source code.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;P</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Equivalent with <b>&minus;E</b>, but without line
+directives.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;R</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p><small>Interpret the input as restricted C (according to
+the language as described in [1]).</small></p>
+</td>
+</table>
+
+<p><small><b>&minus;T</b><i>path</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Create temporary files, if necessary, in directory
+<i>path</i>.</small></p>
+</td>
+</table>
+
+<p><small><b>&minus;U</b><i>name</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Get rid of the compiler-predefined macro
+<i>name</i>, i.e., consider</small></p>
+<!-- INDENTATION -->
+<pre><small>     #undef <i>name
+</i></small></pre>
+<!-- INDENTATION -->
+<p><small>to appear in the beginning of the
+file.</small></p>
+</td>
+</table>
+
+<p><small><b>&minus;V</b><i>cm</i>.<i>n</i>,
+<b>&minus;V</b><i>cm</i>.<i>ncm</i>.<i>n</i> ...</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Set the size and alignment requirements. The
+letter <i>c</i> indicates the simple type, which is one of
+<b>s</b>(short), <b>i</b>(int), <b>l</b>(long),
+<b>f</b>(float), <b>d</b>(double) or <b>p</b>(pointer). If
+<i>c</i> is <b>S</b> or <b>U</b>, then <i>n</i> is taken to
+be the initial alignment of structs or unions, respectively.
+The effective alignment of a struct or union is the least
+common multiple of the initial struct/union alignment and
+the alignments of its members. The <i>m</i> parameter can be
+used to specify the length of the type (in bytes) and the
+<i>n</i> parameter for the alignment of that type. Absence
+of <i>m</i> or <i>n</i> causes the default value to be
+retained. To specify that the bitfields should be right
+adjusted instead of the default left adjustment, specify
+<b>r</b> as <i>c</i> parameter.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><b>&minus;w</b></small></p>
+</td>
+<td width="6%"></td>
+<td width="50%">
+
+<p><small>Suppress warning messages</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+
+
+<p><small><b>&minus;&minus;</b><i>character</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Set debug-flag <i>character</i>. This enables some
+special features offered by a debug and develop version of
+the compiler. Some particular flags may be recognized,
+others may have surprising effects.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>d</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>Generate a dependency graph, reflecting the
+calling structure of functions. Lines of the
+form</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<pre><small>     DFA: <i>calling-function</i>: <i>called-function
+</i></small></pre>
+<!-- INDENTATION -->
+<p><small>are generated whenever a function call is
+encountered.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>f</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>Dump whole identifier table, including macros and
+reserved words.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>h</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="58%">
+
+<p><small>Supply hash-table statistics.</small></p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>i</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="60%">
+
+<p><small>Print names of included files.</small></p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>m</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>Supply statistics concerning the memory
+allocation.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>t</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="52%">
+
+<p><small>Dump table of identifiers.</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>u</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>Generate extra statistics concerning the
+predefined types and identifiers. Works in combination with
+<b>f</b> or <b>t</b>.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="2%">
+
+<p><small><b>x</b></small></p>
+</td>
+<td width="8%"></td>
+<td width="80%">
+
+<p><small>Print expression trees in human-readable
+format.</small></p>
+</td>
+</table>
+<a name="References"></a>
+<h2>References</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[1]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Brian W. Kernighan, Dennis M. Ritchie, <i>The C
+Programming Language</i></small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[2]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>L. Rosler, <i>Draft Proposed Standard -
+Programming Language C,</i> ANSI X3J11 Language
+Subcommittee</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[3]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Erik H. Baalbergen, Dick Grune, Maarten Waage,
+<i>The CEM Compiler,</i> Informatica Manual IM-4, Dept. of
+Mathematics and Computer Science, Vrije Universiteit,
+Amsterdam, The Netherlands</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>[4]</small></p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p><small>Erik H. Baalbergen, <i>Modeling global
+declarations in C,</i> internal paper</small></p>
+</td>
+</table>
+<a name="Appendix A - Enumeration Type"></a>
+<h2>Appendix A - Enumeration Type</h2>
+
+<p>The syntax is</p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><i>enum-specifier</i>:</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><tt>enum</tt> { <i>enum-list</i> }<tt><br>
+enum</tt> <i>identifier</i> { <i>enum-list</i> }<tt><br>
+enum</tt> <i>identifier</i></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><i>enum-list</i> :</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><i>enumerator<br>
+enum-list</i> , <i>enumerator</i></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><i>enumerator</i> :</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><i>identifier<br>
+identifier</i> = <i>constant-expression</i></p>
+</td>
+</table>
+
+<p>The identifier has the same role as the structure tag in
+a struct specification. It names a particular enumeration
+type.</p>
+
+<p>The identifiers in the enum-list are declared as
+constants, and may appear whenever constants are required.
+If no enumerators with <b>=</b> appear, then the values of
+the constants begin at 0 and increase by 1 as the
+declaration is read from left to right. An enumerator with
+<b>=</b> gives the associated identifier the value
+indicated; subsequent identifiers continue the progression
+from the assigned value.</p>
+
+<p>Enumeration tags and constants must all be distinct,
+and, unlike structure tags and members, are drawn from the
+same set as ordinary identifiers.</p>
+
+<p>Objects of a given enumeration type are regarded as
+having a type distinct from objects of all other types.</p>
+<a name="Appendix B: C grammar in LL(1) form"></a>
+<h2>Appendix B: C grammar in LL(1) form</h2>
+
+<p>The <b>bold-faced</b> and <i>italicized</i> tokens
+represent terminal symbols.</p>
+<pre><b>external definitions
+</b>program:  external-definition*
+external-definition:  ext-decl-specifiers [declarator [function  |  non-function]  |  &rsquo;<b>;</b>&rsquo;]  |  asm-statement
+ext-decl-specifiers:  decl-specifiers?
+non-function:  initializer? [&rsquo;<b>,</b>&rsquo; init-declarator]* &rsquo;<b>;</b>&rsquo;
+function:  declaration* compound-statement
+
+<b>declarations
+</b>declaration:  decl-specifiers init-declarator-list? &rsquo;<b>;</b>&rsquo;
+decl-specifiers:  other-specifier+ [single-type-specifier other-specifier*]?  |  single-type-specifier other-specifier*
+other-specifier: <b> auto</b>  | <b> static</b>  | <b> extern</b>  | <b> typedef</b>  | <b> register</b>  | <b> short</b>  | <b> long</b>  | <b> unsigned
+</b>type-specifier:  decl-specifiers
+single-type-specifier: <i> type-identifier</i>  |  struct-or-union-specifier  |  enum-specifier
+init-declarator-list:  init-declarator [&rsquo;<b>,</b>&rsquo; init-declarator]*
+init-declarator:  declarator initializer?
+declarator:  primary-declarator [&rsquo;<b>(</b>&rsquo; formal-list ? &rsquo;<b>)</b>&rsquo;  |  arrayer]*  |  &rsquo;<b>*</b>&rsquo; declarator
+primary-declarator:  identifier  |  &rsquo;<b>(</b>&rsquo; declarator &rsquo;<b>)</b>&rsquo;
+arrayer:  &rsquo;<b>[</b>&rsquo; constant-expression? &rsquo;<b>]</b>&rsquo;
+formal-list:  formal [&rsquo;<b>,</b>&rsquo; formal]*
+formal:  identifier
+enum-specifier: <b> enum</b> [enumerator-pack  |  identifier enumerator-pack?]
+enumerator-pack:  &rsquo;<b>{</b>&rsquo; enumerator [&rsquo;<b>,</b>&rsquo; enumerator]* &rsquo;<b>,</b>&rsquo;? &rsquo;<b>}</b>&rsquo;
+enumerator:  identifier [&rsquo;<b>=</b>&rsquo; constant-expression]?
+struct-or-union-specifier:  [ <b>struct</b>  | <b> union</b>] [ struct-declaration-pack  |  identifier struct-declaration-pack?]
+struct-declaration-pack:  &rsquo;<b>{</b>&rsquo; struct-declaration+ &rsquo;<b>}</b>&rsquo;
+struct-declaration:  type-specifier struct-declarator-list &rsquo;<b>;</b>&rsquo;?
+struct-declarator-list:  struct-declarator [&rsquo;<b>,</b>&rsquo; struct-declarator]*
+struct-declarator:  declarator bit-expression?  |  bit-expression
+bit-expression:  &rsquo;<b>:</b>&rsquo; constant-expression
+initializer:  &rsquo;<b>=</b>&rsquo;? initial-value
+cast:  &rsquo;<b>(</b>&rsquo; type-specifier abstract-declarator &rsquo;<b>)</b>&rsquo;
+abstract-declarator:  primary-abstract-declarator [&rsquo;<b>(</b>&rsquo; &rsquo;<b>)</b>&rsquo;  |  arrayer]*  |  &rsquo;<b>*</b>&rsquo; abstract-declarator
+primary-abstract-declarator:  [&rsquo;<b>(</b>&rsquo; abstract-declarator &rsquo;<b>)</b>&rsquo;]?
+
+<b>statements
+</b>statement:
+</pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>expression-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| label &rsquo;<b>:</b>&rsquo; statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| compound-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| if-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| while-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| do-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| for-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| switch-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| case-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| default-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| break-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| continue-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| return-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| jump</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| &rsquo;<b>;</b>&rsquo;</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>| asm-statement</p>
+</td>
+<td width="79%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p>;</p>
+</td>
+<td width="79%">
+</td>
+</table>
+
+<p>expression-statement: expression
+&rsquo;<b>;</b>&rsquo;<br>
+label: identifier<br>
+if-statement: <b>if</b> &rsquo;<b>(</b>&rsquo; expression
+&rsquo;<b>)</b>&rsquo; statement [<b>else</b>
+statement]?<br>
+while-statement: <b>while</b> &rsquo;<b>(</b>&rsquo;
+expression &rsquo;<b>)</b>&rsquo; statement<br>
+do-statement: <b>do</b> statement <b>while</b>
+&rsquo;<b>(</b>&rsquo; expression &rsquo;<b>)</b>&rsquo;
+&rsquo;<b>;</b>&rsquo;<br>
+for-statement: <b>for</b> &rsquo;<b>(</b>&rsquo; expression?
+&rsquo;<b>;</b>&rsquo; expression? &rsquo;<b>;</b>&rsquo;
+expression? &rsquo;<b>)</b>&rsquo; statement<br>
+switch-statement: <b>switch</b> &rsquo;<b>(</b>&rsquo;
+expression &rsquo;<b>)</b>&rsquo; statement<br>
+case-statement: <b>case</b> constant-expression
+&rsquo;<b>:</b>&rsquo; statement<br>
+default-statement: <b>default</b> &rsquo;<b>:</b>&rsquo;
+statement<br>
+break-statement: <b>break</b> &rsquo;<b>;</b>&rsquo;<br>
+continue-statement: <b>continue</b>
+&rsquo;<b>;</b>&rsquo;<br>
+return-statement: <b>return</b> expression?
+&rsquo;<b>;</b>&rsquo;<br>
+jump: <b>goto</b> identifier &rsquo;<b>;</b>&rsquo;<br>
+compound-statement: &rsquo;<b>{</b>&rsquo; declaration*
+statement* &rsquo;<b>}</b>&rsquo;<br>
+asm-statement: <b>asm</b> &rsquo;<b>(</b>&rsquo;
+<i>string</i> &rsquo;<b>)</b>&rsquo;
+&rsquo;<b>;</b>&rsquo;</p>
+
+<p><b>expressions</b><br>
+initial-value: assignment-expression |
+initial-value-pack<br>
+initial-value-pack: &rsquo;<b>{</b>&rsquo;
+initial-value-list &rsquo;<b>}</b>&rsquo;<br>
+initial-value-list: initial-value [&rsquo;<b>,</b>&rsquo;
+initial-value]* &rsquo;<b>,</b>&rsquo;?<br>
+primary: <i>identifier</i> | constant | <i>string</i> |
+&rsquo;<b>(</b>&rsquo; expression &rsquo;<b>)</b>&rsquo;<br>
+secundary: primary [index-pack | parameter-pack |
+selection]*<br>
+index-pack: &rsquo;<b>[</b>&rsquo; expression
+&rsquo;<b>]</b>&rsquo;<br>
+parameter-pack: &rsquo;<b>(</b>&rsquo; parameter-list?
+&rsquo;<b>)</b>&rsquo;<br>
+selection: [&rsquo;<b>.</b>&rsquo; |
+&rsquo;<b>&minus;&gt;</b>&rsquo;] identifier<br>
+parameter-list: assignment-expression
+[&rsquo;<b>,</b>&rsquo; assignment-expression]*<br>
+postfixed: secundary postop?<br>
+unary: cast unary | postfixed | unop unary | size-of<br>
+size-of: <b>sizeof</b> [cast | unary]<br>
+binary-expression: unary [binop binary-expression]*<br>
+conditional-expression: binary-expression
+[&rsquo;<b>?</b>&rsquo; expression &rsquo;<b>:</b>&rsquo;
+assignment-expression]?<br>
+assignment-expression: conditional-expression [asgnop
+assignment-expression]?<br>
+expression: assignment-expression [&rsquo;<b>,</b>&rsquo;
+assignment-expression]*<br>
+unop: &rsquo;<b>*</b>&rsquo; | &rsquo;<b>&amp;</b>&rsquo; |
+&rsquo;<b>&minus;</b>&rsquo; | &rsquo;<b>!</b>&rsquo; |
+&rsquo;<b>~</b> &rsquo; | &rsquo;<b>++</b>&rsquo; |
+&rsquo;<b>&minus;&minus;</b>&rsquo;<br>
+postop: &rsquo;<b>++</b>&rsquo; |
+&rsquo;<b>&minus;&minus;</b>&rsquo;<br>
+multop: &rsquo;<b>*</b>&rsquo; | &rsquo;<b>/</b>&rsquo; |
+&rsquo;<b>%</b>&rsquo;<br>
+addop: &rsquo;<b>+</b>&rsquo; |
+&rsquo;<b>&minus;</b>&rsquo;<br>
+shiftop: &rsquo;<b>&lt;&lt;</b>&rsquo; |
+&rsquo;<b>&gt;&gt;</b>&rsquo;<br>
+relop: &rsquo;<b>&lt;</b>&rsquo; | &rsquo;<b>&gt;</b>&rsquo;
+| &rsquo;<b>&lt;=</b>&rsquo; |
+&rsquo;<b>&gt;=</b>&rsquo;<br>
+eqop: &rsquo;<b>==</b>&rsquo; | &rsquo;<b>!=</b>&rsquo;<br>
+arithop: multop | addop | shiftop |
+&rsquo;<b>&amp;</b>&rsquo; | &rsquo;<b>^</b> &rsquo; |
+&rsquo;<b>|</b>&rsquo;<br>
+binop: arithop | relop | eqop |
+&rsquo;<b>&amp;&amp;</b>&rsquo; |
+&rsquo;<b>||</b>&rsquo;<br>
+asgnop: &rsquo;<b>=</b>&rsquo; | &rsquo;<b>+</b>&rsquo;
+&rsquo;<b>=</b>&rsquo; | &rsquo;<b>&minus;</b>&rsquo;
+&rsquo;<b>=</b>&rsquo; | &rsquo;<b>*</b>&rsquo;
+&rsquo;<b>=</b>&rsquo; | &rsquo;<b>/</b>&rsquo;
+&rsquo;<b>=</b>&rsquo; | &rsquo;<b>%</b>&rsquo;
+&rsquo;<b>=</b>&rsquo;</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p>| &rsquo;<b>&lt;&lt;</b>&rsquo; &rsquo;<b>=</b>&rsquo; |
+&rsquo;<b>&gt;&gt;</b>&rsquo; &rsquo;<b>=</b>&rsquo; |
+&rsquo;<b>&amp;</b>&rsquo; &rsquo;<b>=</b>&rsquo; |
+&rsquo;<b>^</b> &rsquo; &rsquo;<b>=</b>&rsquo; |
+&rsquo;<b>|</b>&rsquo; &rsquo;<b>=</b>&rsquo;</p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p>| &rsquo;<b>+=</b>&rsquo; |
+&rsquo;<b>&minus;=</b>&rsquo; | &rsquo;<b>*=</b>&rsquo; |
+&rsquo;<b>/=</b>&rsquo; | &rsquo;<b>%=</b>&rsquo;</p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+
+<p>| &rsquo;<b>&lt;&lt;=</b>&rsquo; |
+&rsquo;<b>&gt;&gt;=</b>&rsquo; | &rsquo;<b>&amp;=</b>&rsquo;
+| &rsquo;<b>^=</b>&rsquo; | &rsquo;<b>|=</b>&rsquo;</p>
+</td>
+</table>
+
+<p>constant: <i>integer</i> | <i>floating</i><br>
+constant-expression: assignment-expression<br>
+identifier: <i>identifier</i> | <i>type-identifier</i></p>
+<hr>
+</body>
+</html>

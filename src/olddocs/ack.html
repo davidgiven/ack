@@ -1,0 +1,1353 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:05 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>Ack Description File</title>
+</head>
+<body>
+
+<h1 align=center>Ack Description File</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. Which descriptions are used">2. Which descriptions are used</a><br>
+<a href="#3. Using the description file">3. Using the description file</a><br>
+<a href="#4. Conventions used in description files">4. Conventions used in description files</a><br>
+<a href="#5. Example">5. Example</a><br>
+
+<hr>
+
+<p><b>Reference Manual</b></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p><small>The program <i>ack</i>(I) internally maintains a
+table of possible transformations and a table of string
+variables. The transformation table contains one entry for
+each possible transformation of a file. Which
+transformations are used depends on the suffix of the source
+file. Each transformation table entry tells which input
+suffixes are allowed and what suffix/name the output file
+has. When the output file does not already satisfy the
+request of the user (indicated with the flag
+<b>&minus;c.suffix</b>), the table is scanned starting with
+the next transformation in the table for another
+transformation that has as input suffix the output suffix of
+the previous transformation. A few special transformations
+are recognized, among them is the combiner, which is a
+program combining several files into one. When no stop
+suffix was specified (flag <b>&minus;c.suffix</b>)
+<i>ack</i> stops after executing the combiner with as
+arguments the &minus; possibly transformed &minus; input
+files and libraries. <i>Ack</i> will only perform the
+transformations in the order in which they are presented in
+the table.</small></p>
+
+<p><small>The string variables are used while creating the
+argument list and program call name for a particular
+transformation.</small></p>
+<a name="2. Which descriptions are used"></a>
+<h2>2. Which descriptions are used</h2>
+
+<p><small><i>Ack</i> always uses two description files: one
+to define the front-end transformations and one for the
+machine dependent back-end transformations. Each description
+has a name. First the way of determining the name of the
+descriptions needed is described.</small></p>
+
+<p><small>When the shell environment variable ACKFE is set
+<i>ack</i> uses that to determine the front-end table name,
+otherwise it uses <b>fe</b>.</small></p>
+
+<p><small>The way the backend table name is determined is
+more convoluted.<br>
+First, when the last filename in the program call name is
+not one of <i>ack</i> or the front-end call-names, this
+filename is used as the backend description name. Second,
+when the <b>&minus;m</b> is present the <b>&minus;m</b> is
+chopped of this flag and the rest is used as the backend
+description name. Third, when both failed the shell
+environment variable ACKM is used. Last, when also ACKM was
+not present the default backend is used, determined by the
+definition of ACKM in h/local.h. The presence and value of
+the definition of ACKM is determined at compile time of
+<i>ack</i>.</small></p>
+
+<p><small>Now, we have the names, but that is only the
+first step. <i>Ack</i> stores a few descriptions at compile
+time. This descriptions are simply files read in at compile
+time. At the moment of writing this document, the
+descriptions included are: pdp, fe, i86, m68k2, vax2 and
+int. The name of a description is first searched for
+internally, then in lib/descr/<i>name</i>, then in
+lib/<i>name</i>/descr, and finally in the current directory
+of the user.</small></p>
+<a name="3. Using the description file"></a>
+<h2>3. Using the description file</h2>
+
+<p><small>Before starting on a narrative of the description
+file, the introduction of a few terms is necessary. All
+these terms are used to describe the scanning of zero
+terminated strings, thereby producing another string or
+sequence of strings.</small></p>
+
+<p><small>Backslashing</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>All characters preceded by \ are modified to
+prevent recognition at further scanning. This modification
+is undone before a string is passed to the outside world as
+argument or message. When reading the description files the
+sequences \\, \# and \&lt;newline&gt; have a special
+meaning. \\ translates to a single \, \# translates to a
+single # that is not recognized as the start of comment, but
+can be used in recognition and finally, \&lt;newline&gt;
+translates to nothing at all, thereby allowing continuation
+lines.</small></p>
+</td>
+</table>
+
+<p><small>Variable replacement</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The scan recognizes the sequences {{, {NAME} and
+{NAME?text} Where NAME can be any combination if characters
+excluding ? and } and text may be anything excluding }. ( \}
+is allowed of course ) The first sequence produces an
+unescaped single {. The second produces the contents of the
+NAME, definitions are done by <i>ack</i> and in description
+files. When the NAME is not defined an error message is
+produced on the diagnostic output. The last sequence
+produces the contents of NAME if it is defined and text
+otherwise.</small></p>
+</td>
+</table>
+
+<p><small>Expression replacement</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Syntax: (<i>suffix sequence</i>:<i>suffix
+sequence</i>=<i>text</i>)<br>
+Example: (.c.p.e:.e=tail_em)<br>
+If the two suffix sequences have a common member &minus; .e
+in this case &minus; the text is produced. When no common
+member is present the empty string is produced. Thus the
+example given is a constant expression. Normally, one of the
+suffix sequences is produced by variable replacement.
+<i>Ack</i> sets three variables while performing the diverse
+transformations: HEAD, TAIL and RTS. All three variables
+depend on the properties <i>rts</i> and <i>need</i> from the
+transformations used. Whenever a transformation is used for
+the first time, the text following the <i>need</i> is
+appended to both the HEAD and TAIL variable. The value of
+the variable RTS is determined by the first transformation
+used with a <i>rts</i> property.</small></p>
+<!-- INDENTATION -->
+<p><small>Two runtime flags have effect on the value of one
+or more of these variables. The flag <b>&minus;.suffix</b>
+has the same effect on these three variables as if a file
+with that <b>suffix</b> was included in the argument list
+and had to be translated. The flag <b>&minus;r.suffix</b>
+only has that effect on the TAIL variable. The program call
+names <i>acc</i> and <i>cc</i> have the effect of an
+automatic <b>&minus;.c</b> flag. <i>Apc</i> and <i>pc</i>
+have the effect of an automatic <b>&minus;.p</b>
+flag.</small></p>
+</td>
+</table>
+
+<p><small>Line splitting</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The string is transformed into a sequence of
+strings by replacing the blank space by string separators
+(nulls).</small></p>
+</td>
+</table>
+
+<p><small>IO replacement</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The &gt; in the string is replaced by the output
+file name. The &lt; in the string is replaced by the input
+file name. When multiple input files are present the string
+is duplicated for each input file name.</small></p>
+</td>
+</table>
+
+<p><small>Each description is a sequence of variable
+definitions followed by a sequence of transformation
+definitions. Variable definitions use a line each,
+transformations definitions consist of a sequence of lines.
+Empty lines are discarded, as are lines with nothing but
+comment. Comment is started by a # character, and continues
+to the end of the line. Three special two-characters
+sequences exist: \#, \\ and \&lt;newline&gt;. Their effect
+is described under &rsquo;backslashing&rsquo; above. Each
+&minus; nonempty &minus; line starts with a keyword,
+possibly preceded by blank space. The keyword can be
+followed by a further specification. The two are separated
+by blank space.</small></p>
+
+<p><small>Variable definitions use the keyword <i>var</i>
+and look like this:</small></p>
+<pre><small>   var NAME=text
+</small></pre>
+
+<p><small>The name can be any identifier, the text may
+contain any character. Blank space before the equal sign is
+not part of the NAME. Blank space after the equal is
+considered as part of the text. The text is scanned for
+variable replacement before it is associated with the
+variable name.</small></p>
+
+<p><small>The start of a transformation definition is
+indicated by the keyword <i>name</i>. The last line of such
+a definition contains the keyword <i>end</i>. The lines in
+between associate properties to a transformation and may be
+presented in any order. The identifier after the <i>name</i>
+keyword determines the name of the transformation. This name
+is used for debugging and by the <b>&minus;R</b> flag. The
+keywords are used to specify which input suffices are
+recognized by that transformation, the program to run, the
+arguments to be handed to that program and the name or
+suffix of the resulting output file. Two keywords are used
+to indicate which run-time startoffs and libraries are
+needed. The possible keywords are:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>from</i></small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>followed by a sequence of suffices. Each file with
+one of these suffices is allowed as input file. Preprocessor
+transformations do not need the <i>from</i> keyword. All
+other transformations do.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>to</i></small></p>
+</td>
+<td width="95%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>followed by the suffix of the output file name or
+in the case of a linker the output file name.</small></p>
+</td>
+</table>
+
+<p><small><i>program</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>followed by name of the load file of the program,
+a pathname most likely starts with either a / or {EM}. This
+keyword must be present, the remainder of the line is
+subject to backslashing and variable
+replacement.</small></p>
+</td>
+</table>
+
+<p><small><i>mapflag</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The mapflags are used to grab flags given to
+<i>ack</i> and pass them on to a specific transformation.
+This feature uses a few simple pattern matching and
+replacement facilities. Multiple occurrences of this keyword
+are allowed. This text following the keyword is subjected to
+backslashing. The keyword is followed by a match expression
+and a variable assignment separated by blank space. As soon
+as both description files are read, <i>ack</i> looks at all
+transformations in these files to find a match for the flags
+given to <i>ack</i>. The flags <b>&minus;m</b>,
+<b>&minus;o</b>, <b>&minus;O</b>, <b>&minus;r</b>,
+<b>&minus;v</b>, <b>&minus;g</b>, &minus;<b>&minus;c</b>,
+<b>&minus;t</b>, <b>&minus;k</b>, <b>&minus;R</b> and
+&minus;<b>&minus;.</b> are specific to <i>ack</i> and not
+handed down to any transformation. The matching is performed
+in the order in which the entries appear in the definition.
+The scanning stops after first match is found. When a match
+is found, the variable assignment is executed. A * in the
+match expression matches any sequence of characters, a * in
+the right hand part of the assignment is replaced by the
+characters matched by the * in the expression. The right
+hand part is also subject to variable replacement. The
+variable will probably be used in the program arguments. The
+<b>&minus;l</b> flags are special, the order in which they
+are presented to <i>ack</i> must be preserved. The
+identifier LNAME is used in conjunction with the scanning of
+<b>&minus;l</b> flags. The value assigned to LNAME is used
+to replace the flag. The example further on shows the use of
+all this.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>args</i></small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The keyword is followed by the program call
+arguments. It is subject to backslashing, variable
+replacement, expression replacement, line splitting and IO
+replacement. The variables assigned to by <i>mapflags</i>
+will probably be used here. The flags not recognized by
+<i>ack</i> or any of the transformations are passed to the
+linker and inserted before all other arguments.</small></p>
+</td>
+</table>
+
+<p><small><i>stdin</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This keyword indicates that the transformation
+reads from standard input.</small></p>
+</td>
+</table>
+
+<p><small><i>stdout</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This keyword indicates that the transformation
+writes on standard output.</small></p>
+</td>
+</table>
+
+<p><small><i>optimizer</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The presence of this keyword indicates that this
+transformation is an optimizer. It can be followed by a
+number, indicating the &quot;level&quot; of the optimizer
+(see description of the -O option in the ack(1ACK) manual
+page).</small></p>
+</td>
+</table>
+
+<p><small><i>priority</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This &minus; optional &minus; keyword is followed
+by a number. Positive priority means that the transformation
+is likely to be used, negative priority means that the
+transformation is unlikely to be used. Priorities can also
+be set with a ack(1ACK) command line option. Priorities come
+in handy when there are several implementations of a certain
+transformation. They can then be used to select a default
+one.</small></p>
+</td>
+</table>
+
+<p><small><i>linker</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This keyword indicates that this transformation is
+the linker.</small></p>
+</td>
+</table>
+
+<p><small><i>combiner</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This keyword indicates that this transformation is
+a combiner. A combiner is a program combining several files
+into one, but is not a linker. An example of a combiner is
+the global optimizer.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>prep</i></small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This &minus; optional &minus; keyword is followed
+an option indicating its relation to the preprocessor. The
+possible options are:</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>always</small></p>
+<td width="13%"></td>
+<td width="6%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>the input files must be preprocessed<br>
+cond</small></p>
+</td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="6%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>the input files must be preprocessed when
+starting with #<br>
+is</small></p>
+</td>
+<td width="59%">
+</td>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="6%"></td>
+<td width="10%">
+
+<p><small>this transformation is the
+preprocessor</small></p>
+</td>
+<td width="10%"></td>
+<td width="59%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>rts</i></small></p>
+</td>
+<td width="93%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This &minus; optional &minus; keyword indicates
+that the rest of the line must be used to set the variable
+RTS, if it was not already set. Thus the variable RTS is set
+by the first transformation executed which such a property
+or as a result from <i>ack</i>&rsquo;s program call name
+(acc, cc, apc or pc) or by the <b>&minus;.suffix</b>
+flag.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>need</i></small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>This &minus; optional &minus; keyword indicates
+that the rest of the line must be concatenated to the HEAD
+and TAIL variables. This is done once for every
+transformation used or indicated by one of the program call
+names mentioned above or indicated by the
+<b>&minus;.suffix</b> flag.</small></p></td>
+</table>
+<a name="4. Conventions used in description files"></a>
+<h2>4. Conventions used in description files</h2>
+
+<p><small><i>Ack</i> reads two description files. A few of
+the variables defined in the machine specific file are used
+by the descriptions of the front-ends. Other variables, set
+by <i>ack</i>, are of use to all
+transformations.</small></p>
+
+<p><small><i>Ack</i> sets the variable EM to the home
+directory of the Amsterdam Compiler Kit. The variable SOURCE
+is set to the name of the argument that is currently being
+massaged, this is useful for debugging. The variable SUFFIX
+is set to the suffix of the argument that is currently being
+massaged.<br>
+The variable M indicates the directory in lib/{M}/tail_.....
+and NAME is the string to be defined by the preprocessor
+with &minus;D{NAME}. The definitions of {w}, {s}, {l}, {d},
+{f} and {p} indicate EM_WSIZE, EM_SSIZE, EM_LSIZE, EM_DSIZE,
+EM_FSIZE and EM_PSIZE respectively.<br>
+The variable INCLUDES is used as the last argument to
+<i>cpp</i>. It is used to add directories to the list of
+directories containing #include files.</small></p>
+
+<p><small>The variables HEAD, TAIL and RTS are set by
+<i>ack</i> and used to compose the arguments for the
+linker.</small></p>
+<a name="5. Example"></a>
+<h2>5. Example</h2>
+
+<p><small>Description for front-end</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>name cpp</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># the C-preprocessor</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># no from, it&rsquo;s governed by the P
+property</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>to .i</small></p>
+</td>
+<td width="20%">
+
+<p><small># result files have suffix i</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>program {EM}/lib/cpp</small></p>
+</td>
+<td width="20%">
+
+<p><small># pathname of loadfile</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;I* CPP_F={CPP_F?}
+&minus;I*</small></p>
+</td>
+<td width="20%">
+
+<p><small># grab &minus;I.. &minus;U.. and</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;U* CPP_F={CPP_F?}
+&minus;U*</small></p>
+</td>
+<td width="20%">
+
+<p><small># &minus;D.. to use as arguments</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;D* CPP_F={CPP_F?}
+&minus;D*</small></p>
+</td>
+<td width="20%">
+
+<p><small># in the variable CPP_F</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>args {CPP_F?} {INCLUDES?} &minus;D{NAME}
+&minus;DEM_WSIZE={w} &minus;DEM_PSIZE={p} \</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>&minus;DEM_SSIZE={s} &minus;DEM_LSIZE={l}
+&minus;DEM_FSIZE={f} &minus;DEM_DSIZE={d} &lt;</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># The arguments are: first the
+&minus;[IUD]...</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># then the include dir&rsquo;s for this
+machine</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># then the NAME and size values
+finally</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># followed by the input file name</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>stdout</small></p>
+</td>
+<td width="20%">
+
+<p><small># Output on stdout</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>prep is</small></p>
+</td>
+<td width="20%">
+
+<p><small># Is preprocessor</small></p>
+</td>
+</table>
+
+<p><small>end</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>name cem</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># the C-compiler proper</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>from .c</small></p>
+</td>
+<td width="20%">
+
+<p><small># used for files with suffix .c</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>to .k</small></p>
+</td>
+<td width="20%">
+
+<p><small># produces compact code files</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>program {EM}/lib/em_cem</small></p>
+</td>
+<td width="20%">
+
+<p><small># pathname of loadfile</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;p CEM_F={CEM_F?}
+&minus;Xp</small></p>
+</td>
+<td width="20%">
+
+<p><small># pass &minus;p as &minus;Xp to cem</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;L CEM_F={CEM_F?}
+&minus;l</small></p>
+</td>
+<td width="20%">
+
+<p><small># pass &minus;L as &minus;l to cem</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>args &minus;Vw{w}i{w}p{p}f{f}s{s}l{l}d{d}
+{CEM_F?}</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># the arguments are the object sizes
+in</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># the &minus;V... flag and possibly &minus;l and
+&minus;Xp</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>stdin</small></p>
+</td>
+<td width="20%">
+
+<p><small># input from stdin</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>stdout</small></p>
+</td>
+<td width="20%">
+
+<p><small># output on stdout</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>prep always</small></p>
+</td>
+<td width="20%">
+
+<p><small># use cpp</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>rts .c</small></p>
+</td>
+<td width="20%">
+
+<p><small># use the C run-time system</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>need .c</small></p>
+</td>
+<td width="20%">
+
+<p><small># use the C libraries</small></p>
+</td>
+</table>
+
+<p><small>end</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>name decode</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># make human readable files from compact
+code</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>from .k.m</small></p>
+</td>
+<td width="20%">
+
+<p><small># accept files with suffix .k or .m</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>to .e</small></p>
+</td>
+<td width="20%">
+
+<p><small># produce .e files</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>program {EM}/lib/em_decode</small></p>
+</td>
+<td width="20%">
+
+<p><small># pathname of loadfile</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>args &lt;</small></p>
+</td>
+<td width="20%">
+
+<p><small># the input file name is the only
+argument</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>stdout</small></p>
+</td>
+<td width="20%">
+
+<p><small># the output comes on stdout</small></p>
+</td>
+</table>
+
+<p><small>end</small></p>
+<pre><small>Example of a backend, in this case the EM assembler/loader.
+
+
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var w=2</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># wordsize 2</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var p=2</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># pointersize 2</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var s=2</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># short size 2</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var l=4</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># long size 4</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var f=4</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># float size 4</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var d=8</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># double size 8</small></p>
+</td>
+</table>
+
+<p><small>var M=em22</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var NAME=em22</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># for cpp (NAME=em22 results in #define em22
+1)</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var LIB=lib/{M}/tail_</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># part of file name for libraries</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var RT=lib/{M}/head_</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># part of file name for run-time
+startoff</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var SIZE_FLAG=&minus;sm</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># default internal table size flag</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>var INCLUDES=&minus;I{EM}/include</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># use {EM}/include for #include files</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>name asld</small></p>
+</td>
+<td width="72%"></td>
+<td width="20%">
+
+<p><small># Assembler/loader</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>from .k.m.a</small></p>
+</td>
+<td width="20%">
+
+<p><small># accepts compact code and archives</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>to e.out</small></p>
+</td>
+<td width="20%">
+
+<p><small># output file name</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>program {EM}/lib/em_ass</small></p>
+</td>
+<td width="20%">
+
+<p><small># load file pathname</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;l* LNAME={EM}/{LIB}*</small></p>
+</td>
+<td width="20%">
+
+<p><small># e.g. &minus;ly becomes</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small>#{EM}/mach/int/lib/tail_y</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>mapflag &minus;+* ASS_F={ASS_F?} &minus;+* #
+recognize &minus;+ and &minus;&minus;</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>mapflag &minus;&minus;* ASS_F={ASS_F?}
+&minus;&minus;*</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+
+<p><small>mapflag &minus;s* SIZE_FLAG=&minus;s*</small></p>
+</td>
+<td width="20%">
+
+<p><small># overwrite old value of SIZE_FLAG</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>args {SIZE_FLAG} \</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>({RTS}:.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc)
+&minus;o &gt; &lt; \</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>(.p:{TAIL}={EM}/{LIB}pc) \</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>(.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g)
+\</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>(.c.p:{TAIL}={EM}/{LIB}mon)</small></p>
+</td>
+<td width="20%">
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># &minus;s[sml] must be first
+argument</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># the next line contains the choice for head_cc
+or head_pc</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># and the specification of in- and
+output.</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+</td>
+<td width="72%">
+</td>
+<td width="20%">
+
+<p><small># the last three args lines choose
+libraries</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="72%">
+
+<p><small>linker</small></p>
+</td>
+<td width="20%">
+</td>
+</table>
+
+<p><small>end</small></p>
+
+<p><small>The command <i>ack &minus;mem22 &minus;v &minus;v
+&minus;I../h &minus;L &minus;ly prog.c</i> would result in
+the following calls (with exec(II)):</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>1)</small></p>
+</td>
+<td width="92%">
+
+<p><small>/lib/cpp &minus;I../h &minus;I/usr/em/include
+&minus;Dem22 &minus;DEM_WSIZE=2 &minus;DEM_PSIZE=2
+\</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="92%">
+
+<p><small>&minus;DEM_SSIZE=2 &minus;DEM_LSIZE=4
+&minus;DEM_FSIZE=4 &minus;DEM_DSIZE=8 prog.c</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>2)</small></p>
+</td>
+<td width="92%">
+
+<p><small>/usr/em/lib/em_cem &minus;Vw2i2p2f4s2l4d8
+&minus;l</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>3)</small></p>
+</td>
+<td width="92%">
+
+<p><small>/usr/em/lib/em_ass &minus;sm
+/usr/em/lib/em22/head_cc &minus;o e.out prog.k</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="92%">
+
+<p><small>/usr/em/lib/em22/tail_y
+/usr/em/lib/em22/tail_cc.1s</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="8%"></td>
+<td width="92%">
+
+<p><small>/usr/em/lib/em22/tail_cc.2g
+/usr/em/lib/em22/tail_mon</small></p>
+</td>
+</table>
+<hr>
+</body>
+</html>

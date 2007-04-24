@@ -1,0 +1,2168 @@
+<!-- Creator     : groff version 1.18.1 -->
+<!-- CreationDate: Fri Feb 11 22:17:16 2005 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>A backend table for the 6500 microprocessor</title>
+</head>
+<body>
+
+<h1 align=center>A backend table for the 6500 microprocessor</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. The MOS Technology MCS6500">2. The MOS Technology MCS6500</a><br>
+<a href="#3. The MCS6500 CPU programmable registers">3. The MCS6500 CPU programmable registers</a><br>
+<a href="#3.1. The accumulator A.">3.1. The accumulator A.</a><br>
+<a href="#3.2. The index register X.">3.2. The index register X.</a><br>
+<a href="#3.3. The index register Y.">3.3. The index register Y.</a><br>
+<a href="#3.4. The program counter PC">3.4. The program counter PC</a><br>
+<a href="#3.5. The stack pointer SP">3.5. The stack pointer SP</a><br>
+<a href="#3.6. The status register">3.6. The status register</a><br>
+<a href="#4. The MCS6500 memory layout.">4. The MCS6500 memory layout.</a><br>
+<a href="#4.1. Top page.">4.1. Top page.</a><br>
+<a href="#4.2. Zero page.">4.2. Zero page.</a><br>
+<a href="#4.3. The stack.">4.3. The stack.</a><br>
+<a href="#5. The memory adressing modes">5. The memory adressing modes</a><br>
+<a href="#5.1. direct addressing.">5.1. direct addressing.</a><br>
+<a href="#5.2. Base page, indexed addressing.">5.2. Base page, indexed addressing.</a><br>
+<a href="#5.3. Absolute indexed addressing.">5.3. Absolute indexed addressing.</a><br>
+<a href="#5.4. Indirect addressing.">5.4. Indirect addressing.</a><br>
+<a href="#5.4.1. Pre-indexed indirect addressing.">5.4.1. Pre-indexed indirect addressing.</a><br>
+<a href="#5.4.2. Post-indexed indirect addressing.">5.4.2. Post-indexed indirect addressing.</a><br>
+<a href="#6. What the CPU has and doesn&rsquo;t has.">6. What the CPU has and doesn&rsquo;t has.</a><br>
+<a href="#1. Description of the machine table.">1. Description of the machine table.</a><br>
+<a href="#1.1. Macro definitions.">1.1. Macro definitions.</a><br>
+<a href="#1.2. Constant definitions.">1.2. Constant definitions.</a><br>
+<a href="#2. Register definitions.">2. Register definitions.</a><br>
+<a href="#2.1. Token definitions">2.1. Token definitions</a><br>
+<a href="#2.2. Token expression definitions.">2.2. Token expression definitions.</a><br>
+<a href="#2.3. Code rules.">2.3. Code rules.</a><br>
+<a href="#2.3.1. The EM pattern.">2.3.1. The EM pattern.</a><br>
+<a href="#2.3.2. The stack pattern.">2.3.2. The stack pattern.</a><br>
+<a href="#2.3.3. The code part.">2.3.3. The code part.</a><br>
+<a href="#2.3.3.1. Stack cleanup.">2.3.3.1. Stack cleanup.</a><br>
+<a href="#2.3.3.2. Register allocation.">2.3.3.2. Register allocation.</a><br>
+<a href="#2.3.3.3. Code to be generated.">2.3.3.3. Code to be generated.</a><br>
+<a href="#2.3.4. stack replacement.">2.3.4. stack replacement.</a><br>
+<a href="#2.3.5. EM replacement.">2.3.5. EM replacement.</a><br>
+<a href="#2.3.6. Move definitions.">2.3.6. Move definitions.</a><br>
+<a href="#2.3.7. Test definitions.">2.3.7. Test definitions.</a><br>
+<a href="#2.3.8. Stack definitions.">2.3.8. Stack definitions.</a><br>
+<a href="#3. Some remarks.">3. Some remarks.</a><br>
+<a href="#1. Introduction.">1. Introduction.</a><br>
+<a href="#2. The instructions.">2. The instructions.</a><br>
+<a href="#2.1. The load instructions.">2.1. The load instructions.</a><br>
+<a href="#2.1.1. The lol instruction with indirect offsetting.">2.1.1. The lol instruction with indirect offsetting.</a><br>
+<a href="#2.1.2. The lol instruction whose offset is to big.">2.1.2. The lol instruction whose offset is to big.</a><br>
+<a href="#2.2. The store instructions.">2.2. The store instructions.</a><br>
+<a href="#2.2.1. The stl instruction with indirect offsetting.">2.2.1. The stl instruction with indirect offsetting.</a><br>
+<a href="#2.2.2. The stl instruction whose offset is to big.">2.2.2. The stl instruction whose offset is to big.</a><br>
+<a href="#2.3. Integer arithmetic instructions.">2.3. Integer arithmetic instructions.</a><br>
+<a href="#2.3.1. The adi instruction.">2.3.1. The adi instruction.</a><br>
+<a href="#2.3.2. The mli instruction.">2.3.2. The mli instruction.</a><br>
+<a href="#2.4. The unsgned arithmetic instructions.">2.4. The unsgned arithmetic instructions.</a><br>
+<a href="#2.4.1. Unsigned addition.">2.4.1. Unsigned addition.</a><br>
+<a href="#2.5. Floating point arithmetic.">2.5. Floating point arithmetic.</a><br>
+<a href="#2.6. Pointer arithmetic instructions.">2.6. Pointer arithmetic instructions.</a><br>
+<a href="#2.7. Increment, decrement and zero instructions.">2.7. Increment, decrement and zero instructions.</a><br>
+<a href="#2.8. Convert instructions.">2.8. Convert instructions.</a><br>
+<a href="#2.8.1. The in line conversion.">2.8.1. The in line conversion.</a><br>
+<a href="#2.9. Logical instructions.">2.9. Logical instructions.</a><br>
+<a href="#2.9.1. The logical and on 2-byte groups.">2.9.1. The logical and on 2-byte groups.</a><br>
+<a href="#2.10. Set manipulation instructions.">2.10. Set manipulation instructions.</a><br>
+<a href="#2.11. Array instructions.">2.11. Array instructions.</a><br>
+<a href="#2.12. Compare instructions.">2.12. Compare instructions.</a><br>
+<a href="#2.13. Branch instructions.">2.13. Branch instructions.</a><br>
+<a href="#2.14. Procedure call instructions.">2.14. Procedure call instructions.</a><br>
+<a href="#2.15. Miscellaneous instructions.">2.15. Miscellaneous instructions.</a><br>
+<a href="#1. Introduction.">1. Introduction.</a><br>
+<a href="#1. Testing Pascal statements.">1. Testing Pascal statements.</a><br>
+<a href="#2. The results.">2. The results.</a><br>
+<a href="#3. Pascal statements which don&rsquo;t have a C equivalent.">3. Pascal statements which don&rsquo;t have a C equivalent.</a><br>
+<a href="#4. Length tests.">4. Length tests.</a><br>
+<a href="#1. Summary">1. Summary</a><br>
+<a href="#1. REFERENCES.">1. REFERENCES.</a><br>
+
+<hr>
+
+<p align=center><i>ABSTRACT</i></p>
+
+<p align=center><i>Jan van Dalen</i></p>
+
+<p>The backend table is part of the Amsterdam Compiler Kit
+(ACK). It translates the intermediate language family EM to
+a machine code for the MCS6500 microprocessor family.</p>
+
+<p align=center><b>THE MCS6500 MICROPROCESSOR.</b></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p>Why a back end table for the MCS6500 microprocessor
+family. Although the MCS6500 microprocessor family has an
+simple instruction set and internal structure, it is used in
+a variety of microcomputers and homecomputers. This is
+because of is low cost. As an example the Apple II, a well
+known and width spread microprocessor, uses the MCS6502 CPU.
+Also the BBC homecomputer, whose popularity is growing day
+by day uses the MCS6502 CPU. The BBC homecomputer is based
+on the MCS6502 CPU although better and stronger
+microprocessors are available. The designers of Acorn
+computer Industries have probably choosen for the MCS6502
+because of the amount of software available for this CPU.
+Since its width spreaded use, a variaty of software will be
+needed for it. One can think of games!!, administration
+programs, teaching programs, basic interpreters and other
+application programs. Even do it will not be possible to run
+the total compiler kit on a MCS6500 based computer, it is
+possible to write application programs in a high level
+language, such as Pascal or C on a minicomputer. These
+application programs can be tested and compiled on that
+minicomputer and put in a ROM (Read Only Memory), for
+example, cso that it an be executed by a MCS6500 CPU. The
+strategy of writing testprograms on a minicomputer, compile
+it and then execute it on a MCS6500 based microprocessor is
+used by the development of the back end. The minicomputer
+used is M68000 based one, manufactured by Bleasdale Computer
+Systems Ltd.. The micro- or homecomputer used is a BBC
+microcomputer, manufactured by Acorn Computer Ltd..</p>
+<a name="2. The MOS Technology MCS6500"></a>
+<h2>2. The MOS Technology MCS6500</h2>
+
+<p>The MCS6500 is as a family of CPU devices developed by
+MOS Technology [1]. The members of the MCS6500 family are
+the same chips in a different housing. The MCS6502, the big
+brother in the family, can handle 64k bytes of memory, while
+for example the MCS6504 can only handle 8k bytes of memory.
+This difference is due to the fact that the MCS6502 is in a
+40 pins house and the MCS6504 has a 28 pins house, so less
+address lines are available.</p>
+<a name="3. The MCS6500 CPU programmable registers"></a>
+<h2>3. The MCS6500 CPU programmable registers</h2>
+
+<p>The MCS6500 series is based on the same chip so all have
+the same programmable registers.</p>
+<a name="3.1. The accumulator A."></a>
+<h2>3.1. The accumulator A.</h2>
+
+<p>The accumulator A is the only register on which the
+arithmetic and logical instructions can be used. For
+example, the instruction ADC (add with carry) adds the
+contents of the accumulator A and a byte from memory or
+data.</p>
+<a name="3.2. The index register X."></a>
+<h2>3.2. The index register X.</h2>
+
+<p>As the name suggests this register can be used for some
+indirect addressing modes. The modes are explaned below.</p>
+<a name="3.3. The index register Y."></a>
+<h2>3.3. The index register Y.</h2>
+
+<p>This register is, just as the index register X, used for
+certain indirect addressing modes. These addressing modes
+are different from the modes which use index register X.</p>
+<a name="3.4. The program counter PC"></a>
+<h2>3.4. The program counter PC</h2>
+
+<p>This is the only 16-bit register available. It is used
+to point to the next instruction to be carried out.</p>
+<a name="3.5. The stack pointer SP"></a>
+<h2>3.5. The stack pointer SP</h2>
+
+<p>The stack pointer is an 8-bit register, so the stack can
+contain at most 256 bytes. The CPU always appends 00000001
+as highbyte of any stack address, which means that memory
+locations <b>0100</b> through <b>01FF</b> are permanently
+assigned to the stack.</p>
+<a name="3.6. The status register"></a>
+<h2>3.6. The status register</h2>
+
+<p>The status register maintains six status flags and a
+master interrupt control bit.<br>
+These are the six status flags: Carry (c) Zero (z) Overflow
+(o) Sign (n) Decimal mode (d) Break (b)</p>
+
+<p>The bit (i) is the master interrupt control bit.</p>
+<a name="4. The MCS6500 memory layout."></a>
+<h2>4. The MCS6500 memory layout.</h2>
+
+<p>In the MCS6500 memory space three area&rsquo;s have
+special meaning. These area&rsquo;s are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="6%"></td>
+<td width="18%">
+
+<p>Top page.</p>
+</td>
+<td width="71%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="6%"></td>
+<td width="20%">
+
+<p>Zero page.</p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="6%"></td>
+<td width="20%">
+
+<p>The stack.</p>
+</td>
+<td width="69%">
+</td>
+</table>
+
+<p>MCS6500 memory is divided up into pages. These pages
+consist 256 bytes. So in a memory address the highbyte
+denotes the page number and the lowbyte the offset within
+the page.</p>
+<a name="4.1. Top page."></a>
+<h2>4.1. Top page.</h2>
+
+<p>When a MCS6500 is restared it jumps indirect via memory
+address <b>FFFC.</b> At <b>FFFC</b> (lowbyte) and
+<b>FFFD</b> (highbyte) there must be the address of the
+bootstrap subroutine. When a break instruction (BRK) occurs
+or an interrupt takes place, the MCS6500 jumps indirect
+through memory address <b>FFFE. FFFE</b> and <b>FFFF</b>
+thus, must contain the address of the interrupt routine. The
+former only goes for maskeble interrupt. There also exist a
+nonmaskeble interrupt. This cause the MCS6500 to jump
+indirect through memory address <b>FFFA.</b> So the top six
+bytes of memory are used by the operating system and
+therefore not available for the back end.</p>
+<a name="4.2. Zero page."></a>
+<h2>4.2. Zero page.</h2>
+
+<p>This page has a special meaning in the sence that
+addressing this page uses special opcodes. Since a page
+consists of 256 bytes, only one byte is needed for
+addressing zero page. So an instruction which uses zero page
+occupies two bytes. It also uses less clock cycle&rsquo;s
+while carrying out the instruction. Zero page is also needed
+when indirect addressing is used. This means that when
+indirect addressing is used, the address must reside in zero
+page (two consecutive bytes). In this case (the back end),
+zero page is used, for example to hold the local base, the
+second local base, the stack pointer etc.</p>
+<a name="4.3. The stack."></a>
+<h2>4.3. The stack.</h2>
+
+<p>The stack is described in paragraph 3.5 about the
+MCS6500 programmable registers.</p>
+<a name="5. The memory adressing modes"></a>
+<h2>5. The memory adressing modes</h2>
+
+<p>MCS6500 memory reference instructions use direct
+addressing, indexed addressing, and indirect addressing.</p>
+<a name="5.1. direct addressing."></a>
+<h2>5.1. direct addressing.</h2>
+
+<p>Three-byte instructions use the second and third bytes
+of the object code to provide a direct 16-bit address:
+therefore, 65.536 bytes of memory can be addressed directly.
+The commonly used memory reference instructions also have a
+two-byte object code variation, where the second byte
+directly addresses one of the first 256 bytes.</p>
+<a name="5.2. Base page, indexed addressing."></a>
+<h2>5.2. Base page, indexed addressing.</h2>
+
+<p>In this case, the instruction has two bytes of object
+code. The contents of either the X or Y index registers are
+added to the second object code byte in order to compute a
+memory address. This may be illustrated as follows:</p>
+
+<p>Base page, indexed addressing, as illustrated above, is
+wraparound - which means that there is no carry. If the sum
+of the index register and second object code byte contents
+is more than <b>FF</b> , the carry bit will be dicarded.
+This may be illustrated as follows:</p>
+<a name="5.3. Absolute indexed addressing."></a>
+<h2>5.3. Absolute indexed addressing.</h2>
+
+<p>In this case, the contents of either the X or Y register
+are added to a 16-bit direct address provided by the second
+and third bytes of an instruction&rsquo;s object code. This
+may be illustrated as follows:</p>
+<a name="5.4. Indirect addressing."></a>
+<h2>5.4. Indirect addressing.</h2>
+
+<p>Instructions that use simple indirect addressing have
+three bytes of object code. The second and third object code
+bytes provide a 16-bit address; therefore, the indirect
+address can be located anywhere in memory. This is
+straightforward indirect addressing.</p>
+<a name="5.4.1. Pre-indexed indirect addressing."></a>
+<h2>5.4.1. Pre-indexed indirect addressing.</h2>
+
+<p>In this case, the object code consists of two bytes and
+the second object code byte provides an 8-bit address.
+Instructions that use pre-indexed indirect addressing add
+the contents of the X index register and the second object
+code byte to access a memory location in the first 256 bytes
+of memory, where the indirect address will be found:</p>
+
+<p>When using pre-indexed indirect addressing, once again
+wraparound addition is used, which means that when the X
+index register contents are added to the second object code
+byte, any carry will be discarded. Note that only the X
+index register can be used with pre-indexed addressing.</p>
+<a name="5.4.2. Post-indexed indirect addressing."></a>
+<h2>5.4.2. Post-indexed indirect addressing.</h2>
+
+<p>In this case, the object code consists of two bytes and
+the second object code byte provides an 8-bit address. Now
+the second object code byte indentifies a location in the
+first 256 bytes of memory where an indirect address will be
+found. The contents of the Y index register are added to
+this indirect address. This may be illustrated as
+follows:</p>
+
+<p>Note that only the Y index register can be used with
+post-indexed indirect addressing.</p>
+<a name="6. What the CPU has and doesn&rsquo;t has."></a>
+<h2>6. What the CPU has and doesn&rsquo;t has.</h2>
+
+<p>Although the designers of the MCS6500 CPUs family state
+that there is nothing very significant about the short stack
+(only 256 bytes) this stack caused problems for the back
+end. The designers say that a 256-byte stack usually is
+sufficient for any typical microcomputer, this is only true
+if the stack is used only for return addresses of the JSR
+(jump to subroutine) instruction. But since the EM machine
+is suppost to be a stack machine and high level languages
+need the ability of parameters and locals in there
+procedures and function, this short stack is unsufficiant.
+So an software stack is implemented in this back end,
+requiring two additional subroutines for stack handling.
+These two stack handling subroutines slow down the
+processing time of a program since the stack is used
+heavely.</p>
+
+<p>Since parameters and locals of EM procedures are
+offseted from the localbase of that procedure, indirect
+addressing is havily used. Offsets are positive (for
+parameters) and negative (for local variables). As explaned
+before the addressing modes the MCS6500 have a post indexed
+indirect addressing mode. This addressing mode can only
+handle positive offsets. This raises a problem for accessing
+the local variables I have chosen for the next solution. A
+second local base is introduced. This second local base is
+the real local base subtracted by a constant BASE. In the
+present situation of the back end the value of BASE is 240.
+This means that there are 240 bytes reseved for local
+variables to be indirect addressed and 14 bytes for the
+parameters.</p>
+
+<p align=center><b>THE CODE GENERATOR.</b></p>
+<a name="1. Description of the machine table."></a>
+<h2>1. Description of the machine table.</h2>
+
+<p>The machine description table consists of the following
+sections:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="44%">
+
+<p>The macro definitions.</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p>Constant definitions.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p>Register definitions.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>Token definitions.</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>Token expressions.</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>6.</p>
+</td>
+<td width="6%"></td>
+<td width="22%">
+
+<p>Code rules.</p>
+</td>
+<td width="67%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>7.</p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>Move definitions.</p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>8.</p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>Test definitions.</p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>9.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>Stack definitions.</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<a name="1.1. Macro definitions."></a>
+<h2>1.1. Macro definitions.</h2>
+
+<p>The macro definitions at the top of the table are
+expanded by the preprocessor on occurence in the rest of the
+table.</p>
+<a name="1.2. Constant definitions."></a>
+<h2>1.2. Constant definitions.</h2>
+
+<p>There are three constants which must be defined at
+first. The are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>EM_WSIZE:</p>
+</td>
+<td width="4%"></td>
+<td width="78%">
+
+<p>Number of bytes in a machine word. This is the number of
+bytes a simple <b>loc</b> instruction will put on the
+stack.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>EM_PSIZE:</p>
+</td>
+<td width="4%"></td>
+<td width="78%">
+
+<p>Number of bytes in a pointer. This is the number of
+bytes a <b>lal</b> instruction will put on the stack.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p>EM_BSIZE:</p>
+</td>
+<td width="4%"></td>
+<td width="78%">
+
+<p>Number of bytes in the hole between AB and LB. The
+calling sequence only saves LB on the stack so this constant
+is equal to the pointer size.</p>
+</td>
+</table>
+<a name="2. Register definitions."></a>
+<h2>2. Register definitions.</h2>
+
+<p>The only important register definition is the definition
+of the registerpair AX. Since the rest of the
+machine&rsquo;s registers Y, PC, ST serve special purposes,
+the code generator cannot use them.</p>
+<a name="2.1. Token definitions"></a>
+<h2>2.1. Token definitions</h2>
+
+<p>There is a fake token. This token is put in the table,
+since the code generator generator complains if it cannot
+find one.</p>
+<a name="2.2. Token expression definitions."></a>
+<h2>2.2. Token expression definitions.</h2>
+
+<p>The token expression is also a fake one. This token
+expression is put in the table, since the code generator
+generator complains if it cannot find one.</p>
+<a name="2.3. Code rules."></a>
+<h2>2.3. Code rules.</h2>
+
+<p>The code rule section is the largest section in the
+table. They specify EM patterns, stack patterns, code to be
+generated, etc. The syntax is:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>code</p>
+</td>
+<td width="2%"></td>
+<td width="90%">
+
+<p>EM pattern &rsquo;|&rsquo; stack pattern &rsquo;|&rsquo;
+code &rsquo;|&rsquo; stack replacement &rsquo;|&rsquo; EM
+replacement &rsquo;|&rsquo;</p>
+</td>
+</table>
+
+<p>All patterns are optional, however there must be at
+least one pattern present. If the EM pattern is missing the
+rule becomes a rewriting rule or a <b>coercion</b> to be
+used when code generation cannot continue because of an
+invalid stack pattern. The code rules are preceeded by the
+word CODE:.</p>
+<a name="2.3.1. The EM pattern."></a>
+<h2>2.3.1. The EM pattern.</h2>
+
+<p>The EM pattern consists of a list of EM mnemonics
+followed by a boolean expression. Examples:</p>
+
+<p><b>loe</b></p>
+
+<p>will match a single <b>loe</b> instruction,</p>
+
+<p><b>loc loc cif</b> $1==2 &amp;&amp; $2==8</p>
+
+<p>is a pattern that will match</p>
+
+<p><b>loc</b> 2<b><br>
+loc</b> 8<b><br>
+cif</b></p>
+
+<p>and</p>
+
+<p><b>lol inc stl</b> $1==$3</p>
+
+<p>will match for example</p>
+
+<p><b>lol</b> 6<b><br>
+inc<br>
+stl</b> 6</p>
+
+<p>A missing boolean expession evaluates to TRUE.</p>
+
+<p>The code generator will match the longest EM pattern on
+every occasion, if two patterns of the same length match the
+first in the table will be chosen, while all patterns of
+length greater than or equal to three are considered to be
+of the same length.</p>
+<a name="2.3.2. The stack pattern."></a>
+<h2>2.3.2. The stack pattern.</h2>
+
+<p>The only stack pattern that can occur is R16, which
+means that the registerpair AX contains the word on top of
+the stack. If this is not the case a coersion occurs. This
+coersion generates a &quot;jsr Pop&quot;, which means that
+the top of the stack is popped and stored in the
+registerpair AX.</p>
+<a name="2.3.3. The code part."></a>
+<h2>2.3.3. The code part.</h2>
+
+<p>The code part consists of three parts, stack cleanup,
+register allocation, and code to be generated. All of these
+may be omitted.</p>
+<a name="2.3.3.1. Stack cleanup."></a>
+<h2>2.3.3.1. Stack cleanup.</h2>
+
+<p>When generating something like a branch instruction it
+might be needed to empty the fake stack, that is, remove the
+AX registerpair. This is done by the instruction
+remove(ALL)</p>
+<a name="2.3.3.2. Register allocation."></a>
+<h2>2.3.3.2. Register allocation.</h2>
+
+<p>If the machine code to be generated uses the
+registerpair AX, this is signaled to the code generator by
+the allocate(R16) instruction. If the registerpair AX
+resides on the fake stack, this will result in a &quot;jsr
+Push&quot;, which means that the registerpair AX is pushed
+on the stack and will be free for further use. If
+registerpair AX is not on the fake stack nothing
+happens.</p>
+<a name="2.3.3.3. Code to be generated."></a>
+<h2>2.3.3.3. Code to be generated.</h2>
+
+<p>Code to be generated is specified as a list of items of
+the following kind:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>A string in double quotes(&quot;This is a string&quot;).
+This is copied to the codefile and a newline (&rsquo;0) is
+appended. Inside the string all normal C string conventions
+are allowed, and substitutions can be made of the following
+sorts.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>a)</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>$1, $2 etc. These are the operand of the corresponding
+EM instructions and are printed according to there type. To
+put a real &rsquo;$&rsquo; inside the string it must be
+doubled (&rsquo;$$&rsquo;).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>b)</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>%[1], %[2.reg], %[b.1] etc. these have there obvious
+meaning. If they describe a complete token (%[1]) the
+printformat for the token is used. If they stand fo a basic
+term in an expression they will be printed according to
+their type. To put a real &rsquo;%&rsquo; inside the string
+it must be doubled (&rsquo;%%&rsquo;).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="4%">
+
+<p>c)</p>
+</td>
+<td width="6%"></td>
+<td width="80%">
+
+<p>%( arbitrary expression %). This allows inclusion of
+arbitrary expressions inside strings. Usually not needed
+very often, so that the akward notation is not too bad. Note
+that %(%[1]%) is equivalent to %[1].</p>
+</td>
+</table>
+<a name="2.3.4. stack replacement."></a>
+<h2>2.3.4. stack replacement.</h2>
+
+<p>The stack replacement is a possibly empty list of items
+to be pushed on the fake stack. Three things can occur:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>%[1] is used if the registerpair AX was on the fake
+stack and is to be pushed back onto it.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>%[a] is used if the registerpair AX is allocated with
+allocate(R16) and is to be pushed onto the fake stack.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p>It can also be empty.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<a name="2.3.5. EM replacement."></a>
+<h2>2.3.5. EM replacement.</h2>
+
+<p>In exeptional cases it might be useful to leave part of
+the an EM pattern undone. For example, a <b>sdl</b>
+instruction might be split into two <b>stl</b> instructions
+when there is no 4-byte quantity on the stack. The EM
+replacement part allows one to express this. Example:</p>
+
+<p><b>stl</b> $1 <b>stl</b> $1+2</p>
+
+<p>The instructions are inserted in the stream so they can
+match the first part of a pattern in the next step. Note
+that since the code generator traverses the EM instructions
+in a strict linear fashion, it is impossible to let the EM
+replacement match later parts of a pattern. So if there is a
+pattern</p>
+
+<p><b>loc stl</b> $1==0 and the input is</p>
+
+<p><b>loc</b> 0 <b>sdl</b> 4</p>
+
+<p>the <b>loc</b> 0 will be processed first, then the
+<b>sdl</b> might be split into two <b>stl</b></p>
+<a name="2.3.6. Move definitions."></a>
+<h2>2.3.6. Move definitions.</h2>
+
+<p>This definition is a fake. This definition is put in the
+table, since the code generator generator complains if it
+cannot find one.</p>
+<a name="2.3.7. Test definitions."></a>
+<h2>2.3.7. Test definitions.</h2>
+
+<p>Test definitions aren&rsquo;t used by the table.</p>
+<a name="2.3.8. Stack definitions."></a>
+<h2>2.3.8. Stack definitions.</h2>
+
+<p>When the generator has to push the registerpair AX, it
+must know how to do so. The machine code to be generated is
+defined here.</p>
+<a name="3. Some remarks."></a>
+<h2>3. Some remarks.</h2>
+
+<p>The above description of the machine table is a
+description of the table for the MCS6500. It uses only a
+part of the possibilities which the code generator generator
+offers. For a more precise and detailed description see
+[2].</p>
+
+<p align=center><b>THE BACK END TABLE.</b></p>
+<a name="1. Introduction."></a>
+<h2>1. Introduction.</h2>
+
+<p>The code rules are divided in 15 groups. These groups
+are:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="36%">
+
+<p>Load instructions.</p>
+</td>
+<td width="53%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="38%">
+
+<p>Store instructions.</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p>Integer arithmetic instructions.</p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4.</p>
+</td>
+<td width="6%"></td>
+<td width="66%">
+
+<p>Unsigned arithmetic instructions.</p>
+</td>
+<td width="23%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5.</p>
+</td>
+<td width="6%"></td>
+<td width="78%">
+
+<p>Floating point arithmetic instructions.</p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>6.</p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p>Pointer arithmetic instructions.</p>
+</td>
+<td width="25%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>7.</p>
+</td>
+<td width="6%"></td>
+<td width="86%">
+
+<p>Increment, decrement and zero instructions.</p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>8.</p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p>Convert instructions.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>9.</p>
+</td>
+<td width="6%"></td>
+<td width="42%">
+
+<p>Logical instructions.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>10.</p>
+</td>
+<td width="4%"></td>
+<td width="60%">
+
+<p>Set manipulation instructions.</p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>11.</p>
+</td>
+<td width="4%"></td>
+<td width="38%">
+
+<p>Array instructions.</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>12.</p>
+</td>
+<td width="4%"></td>
+<td width="42%">
+
+<p>Compare instructions.</p>
+</td>
+<td width="47%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>13.</p>
+</td>
+<td width="4%"></td>
+<td width="40%">
+
+<p>Branch instructions.</p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>14.</p>
+</td>
+<td width="4%"></td>
+<td width="56%">
+
+<p>Procedure call instructions.</p>
+</td>
+<td width="33%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>15.</p>
+</td>
+<td width="4%"></td>
+<td width="54%">
+
+<p>Miscellaneous instructions.</p>
+</td>
+<td width="35%">
+</td>
+</table>
+
+<p>From all of these groups one or two typical EM pattern
+will be explained in the next paragraphs. Comment is placed
+between /* and */ (/* This is a comment */).</p>
+<a name="2. The instructions."></a>
+<h2>2. The instructions.</h2>
+<a name="2.1. The load instructions."></a>
+<h2>2.1. The load instructions.</h2>
+
+<p>In this group a typical instruction is <b>lol</b> A
+<b>lol</b> instruction pushes the word at local base +
+offset, where offset is the instructions argument, onto the
+stack. Since the MCS6500 can only offset by 256 bytes, as
+explaned at the memory addressing modes, there is a need for
+two code rules in the table. One which can offset directly
+and one that must explicit calculate the address of the
+local.</p>
+<a name="2.1.1. The lol instruction with indirect offsetting."></a>
+<h2>2.1.1. The lol instruction with indirect offsetting.</h2>
+
+<p>In this case an indirect offsetted load from the second
+local base is possible. The table content is:</p>
+
+<p><b>lol</b> IN($1) | |<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;ldy #BASE+$1&quot; /* load Y with the offset from the
+second<br>
+local base */<br>
+&quot;lda (LBl),y&quot; /* load indirect the lowbyte of the
+word */<br>
+&quot;tax&quot; /* move register A to register X */<br>
+&quot;iny&quot; /* increment register Y (offset) */<br>
+&quot;lda (LBl),y&quot; /* load indirect the highbyte of the
+word */<br>
+| %[a] | | /* push the word onto the fake stack */</p>
+<a name="2.1.2. The lol instruction whose offset is to big."></a>
+<h2>2.1.2. The lol instruction whose offset is to big.</h2>
+
+<p>In this case, the library subroutine &quot;Lol&quot; is
+used. This subroutine expects the offset in registerpair AX,
+then calculates the address of the local or parameter, and
+loads it into registerpair AX. The table content is:</p>
+
+<p><b>lol</b> | |<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;lda #[$1].h&quot; /* load highbyte of offset into
+register A */<br>
+&quot;ldx #[$1].l&quot; /* load lowbyte of offset into
+register X */<br>
+&quot;jsr Lol&quot; /* perform the subroutine */<br>
+| %[a] | | /* push word onto the fake stack */</p>
+<a name="2.2. The store instructions."></a>
+<h2>2.2. The store instructions.</h2>
+
+<p>In this group a typical instruction is <b>stl.</b> A
+<b>stl</b> instruction poppes a word from the stack and
+stores it in the word at local base + offset, where offset
+is the instructions argument. Here also is the need for two
+code rules in the table as a result of the offset
+limits.</p>
+<a name="2.2.1. The stl instruction with indirect offsetting."></a>
+<h2>2.2.1. The stl instruction with indirect offsetting.</h2>
+
+<p>In this case it an indirect offsetted store from the
+second local base is possible. The table content is:</p>
+
+<p><b>stl</b> IN($1) | R16 | /* expect registerpair AX on
+top of the<br>
+fake stack */<br>
+&quot;ldy #BASE+1+$1&quot; /* load Y with the offset from
+the<br>
+second local base */<br>
+&quot;sta (LBl),y&quot; /* store the highbyte of the word
+from A */<br>
+&quot;txa&quot; /* move register X to register A */<br>
+&quot;dey&quot; /* decrement offset */<br>
+&quot;sta (LBl),y&quot; /* store the lowbyte of the word
+from A */<br>
+| | |</p>
+<a name="2.2.2. The stl instruction whose offset is to big."></a>
+<h2>2.2.2. The stl instruction whose offset is to big.</h2>
+
+<p>In this case the library subroutine &rsquo;Stl&rsquo; is
+used. This subroutine expects the offset in registerpair AX,
+then calculates the address, poppes the word stores it at
+its place. The table content is:</p>
+
+<p><b>stl</b> | |<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;lda #[$1].h&quot; /* load highbyte of offset in
+register A */<br>
+&quot;ldx #[$1].l&quot; /* load lowbyte of offset in
+register X */<br>
+&quot;jsr Stl&quot; /* perform the subroutine */<br>
+| | |</p>
+<a name="2.3. Integer arithmetic instructions."></a>
+<h2>2.3. Integer arithmetic instructions.</h2>
+
+<p>In this group typical instructions are <b>adi</b> and
+<b>mli.</b> These instructions, in this table, are
+implemented for 2-byte and 4-byte integers. The only
+arithmetic instructions available on the MCS6500 are the ADC
+(add with carry), and SBC (subtract with not(carry)).
+Not(carry) here means that in a subtraction, the one&rsquo;s
+complement of the carry is taken. The absence of multiply
+and division instructions forces the use of subroutines to
+handle these cases. Because there are no registers left to
+perform on the multiply and division, zero page is used
+here. The 4-byte integer arithmetic is implemented, because
+in C there exists the integer type long. A user is freely to
+use the type long, but will pay in performance.</p>
+<a name="2.3.1. The adi instruction."></a>
+<h2>2.3.1. The adi instruction.</h2>
+
+<p>In case of the <b>adi</b> 2 (and <b>sbi</b> 2)
+instruction there are many EM patterns, so that the
+instruction can be performed in line in most cases. For the
+worst case there exists a subroutine in the library which
+deals with the EM instruction. In case of a <b>adi</b> 4 (or
+<b>sbi</b> 4) there only is a subroutine to deal with it. A
+table content is:</p>
+
+<p><b>lol lol adi</b> (IN($1) &amp;&amp; IN($2) &amp;&amp;
+$3==2) | | /* is it in range */<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;ldy #BASE+$1+1&quot; /* load Y with offset for first
+operand */<br>
+&quot;lda (LBl),y&quot; /* load indirect highbyte first
+operand */<br>
+&quot;pha&quot; /* save highbyte first operand on hard_stack
+*/<br>
+&quot;dey&quot; /* decrement offset first operand */<br>
+&quot;lda (LBl),y&quot; /* load indirect lowbyte first
+operand */<br>
+&quot;ldy #BASE+$2&quot; /* load Y with offset for second
+operand */<br>
+&quot;clc&quot; /* clear carry for addition */<br>
+&quot;adc (LBl),y&quot; /* add the lowbytes of the operands
+*/<br>
+&quot;tax&quot; /* store lowbyte of result in place */<br>
+&quot;iny&quot; /* increment offset second operand */<br>
+&quot;pla&quot; /* get highbyte first operand */<br>
+&quot;adc (LBl),y&quot; /* add the highbytes of the operands
+*/<br>
+| %[a] | | /* push the result onto the fake stack */</p>
+<a name="2.3.2. The mli instruction."></a>
+<h2>2.3.2. The mli instruction.</h2>
+
+<p>The <b>mli</b> 2 instruction uses most the subroutine
+&rsquo;Mlinp&rsquo;. This subroutine expects the
+multiplicand in zero page at locations ARTH, ARTH+1, while
+the multiplier is in zero page locations ARTH+2, ARTH+3. For
+a description of the algorithms used for multiplication and
+division, see [3]. A table content is:</p>
+
+<p><b>lol lol mli</b> (IN($1) &amp;&amp; IN($2) &amp;&amp;
+$3==2) | |<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;ldy #BASE+$1&quot; /* load Y with offset of
+multiplicand */<br>
+&quot;lda (LBl),y&quot; /* load indirect lowbyte of
+multiplicand */<br>
+&quot;sta ARTH&quot; /* store lowbyte in zero page */<br>
+&quot;iny&quot; /* increment offset of multiplicand */<br>
+&quot;lda (LBl),y&quot; /* load indirect highbyte of
+multiplicand */<br>
+&quot;sta ARTH+1&quot; /* store highbyte in zero page */<br>
+&quot;ldy #BASE+$2&quot; /* load Y with offset of multiplier
+*/<br>
+&quot;lda (LBl),y&quot; /* load indirect lowbyte of
+multiplier */<br>
+&quot;sta ARTH+2&quot; /* store lowbyte in zero page */<br>
+&quot;iny&quot; /* increment offset of multiplier */<br>
+&quot;lda (LBl),y&quot; /* load indirect highbyte of
+multiplier */<br>
+&quot;sta ARTH+3&quot; /* store highbyte in zero page */<br>
+&quot;jsr Mlinp&quot; /* perform the multiply */<br>
+| %[a] | | /* push result onto fake stack */</p>
+<a name="2.4. The unsgned arithmetic instructions."></a>
+<h2>2.4. The unsgned arithmetic instructions.</h2>
+
+<p>Since unsigned addition an subtraction is performed in
+the same way as signed addition and subtraction, these cases
+are dealt with by an EM replacement. For mutiplication and
+division there are special subroutines.</p>
+<a name="2.4.1. Unsigned addition."></a>
+<h2>2.4.1. Unsigned addition.</h2>
+
+<p>This is an example of the EM replacement strategy.</p>
+
+<p><b>lol lol adu</b> | | | | <b>lol</b> $1 <b>lol</b> $2
+<b>adi</b> $3 |</p>
+<a name="2.5. Floating point arithmetic."></a>
+<h2>2.5. Floating point arithmetic.</h2>
+
+<p>Floating point arithmetic isn&rsquo;t implemented in
+this table.</p>
+<a name="2.6. Pointer arithmetic instructions."></a>
+<h2>2.6. Pointer arithmetic instructions.</h2>
+
+<p>A typical pointer arithmetic instruction is <b>adp</b>
+2. This instruction adds an offset and a pointer. A table
+content is:</p>
+
+<p><b>adp</b> | | | | <b>loc</b> $1 <b>adi</b> 2 |</p>
+<a name="2.7. Increment, decrement and zero instructions."></a>
+<h2>2.7. Increment, decrement and zero instructions.</h2>
+
+<p>In this group a typical instruction is <b>inl</b> ,
+which increments a local or parameter. The MCS6500
+doesn&rsquo;t have an instruction to increment the
+accumulator A, so the &rsquo;ADC&rsquo; instruction must be
+used. A table content is:</p>
+
+<p><b>inl</b> IN($1) | |<br>
+allocate(R16) /* allocate registerpair AX */<br>
+&quot;ldy #BASE+$1&quot; /* load Y with offset of the local
+*/<br>
+&quot;clc&quot; /* clear carry for addition */<br>
+&quot;lda (LBl),y&quot; /* load indirect lowbyte of local
+*/<br>
+&quot;adc #1&quot; /* increment lowbyte */<br>
+&quot;sta (LBl),y&quot; /* restore indirect the incremented
+lowbyte */<br>
+&quot;bcc 1f&quot; /* if carry is clear then ready */<br>
+&quot;iny&quot; /* increment offset of local */<br>
+&quot;lda (LBl),y&quot; /* load indirect highbyte of local
+*/<br>
+&quot;adc #0&quot; /* add carry to highbyte */<br>
+&quot;sta (LBl),y\n1:&quot; /* restore indirect the highbyte
+*/</p>
+
+<p>If the offset of the local or parameter is to big, first
+the local or parameter is fetched, than incremented, and
+then restored.</p>
+<a name="2.8. Convert instructions."></a>
+<h2>2.8. Convert instructions.</h2>
+
+<p>In this case there are two convert instructions which
+really do something. One of them is in line code, and deals
+with the extension of a character (1-byte) to an integer.
+The other one is a subroutine which handles the conversion
+between 2-byte integers and 4-byte integers.</p>
+<a name="2.8.1. The in line conversion."></a>
+<h2>2.8.1. The in line conversion.</h2>
+
+<p>The table content is:</p>
+
+<p><b>loc loc cii</b> $1==1 &amp;&amp; $2==2 | R16 |<br>
+&quot;txa&quot; /* see if sign extension is needed */<br>
+&quot;bpl 1f&quot; /* there is no need for sign extension
+*/<br>
+&quot;lda #0FFh&quot; /* sign extension here */<br>
+&quot;bne 2f&quot; /* conversion ready */<br>
+&quot;1: lda #0\n2:&quot; /* no sign extension here */</p>
+<a name="2.9. Logical instructions."></a>
+<h2>2.9. Logical instructions.</h2>
+
+<p>A typical instruction in this group is the logical
+<b>and</b> on two 2-byte words. The logical <b>and</b> on
+groups of more than two bytes (max 254) is also possible and
+uses a library subroutine.</p>
+<a name="2.9.1. The logical and on 2-byte groups."></a>
+<h2>2.9.1. The logical and on 2-byte groups.</h2>
+
+<p>The table content is:</p>
+
+<p><b>and</b> $1==2 | R16 | /* one group must be on the
+fake stack */<br>
+&quot;sta ARTH+1&quot; /* temporary save of first group
+highbyte */<br>
+&quot;stx ARTH&quot; /* temporary save of first group
+lowbyte */<br>
+&quot;jsr Pop&quot; /* pop second group from the stack
+*/<br>
+&quot;and ARTH+1&quot; /* logical and on highbytes */<br>
+&quot;pha&quot; /* temporary save the result&rsquo;s
+highbyte */<br>
+&quot;txa&quot; /* logical and can only be done in A */<br>
+&quot;and ARTH&quot; /* logical and on lowbytes */<br>
+&quot;tax&quot; /* restore results lowbyte */<br>
+&quot;pla&quot; /* restore results highbyte */<br>
+| %[1] | | /* push result onto fake stack */</p>
+<a name="2.10. Set manipulation instructions."></a>
+<h2>2.10. Set manipulation instructions.</h2>
+
+<p>A typical EM pattern in this group is <b>loc inn zeq</b>
+$1&gt;0 &amp;&amp; $1&lt;16 &amp;&amp; $2==2. This EM
+pattern works on sets of 16 bits. Sets can be bigger (max
+256 bytes = 2048 bits), but than a library routine is used
+instead of in line code. The table content of the above EM
+pattern is:</p>
+
+<p><b>loc inn zeq</b> $1&gt;0 &amp;&amp; $1&lt;16
+&amp;&amp; $2==2 | R16 |<br>
+&quot;ldy #$1+1&quot; /* load Y with bit number */<br>
+&quot;stx ARTH&quot; /* cannot rotate X, so use zero page
+*/<br>
+&quot;1: lsr a&quot; /* right shift A */<br>
+&quot;ror ARTH&quot; /* right rotate zero page location
+*/<br>
+&quot;dey&quot; /* decrement Y */<br>
+&quot;bne 1b&quot; /* shift $1 times */<br>
+&quot;bcc $1&quot; /* no carry, so bit is zero */</p>
+<a name="2.11. Array instructions."></a>
+<h2>2.11. Array instructions.</h2>
+
+<p>In this group a typical EM pattern is <b>lae lar</b>
+defined(rom(1,3)) | | | | <b>lae</b> $1 <b>aar</b> $2
+<b>loi</b> rom(1,3). This pattern uses the <b>aar</b>
+instruction, which is part of a typical EM pattern:</p>
+
+<p><b>lae aar</b> $2==2 &amp;&amp; rom(1,3)==2 &amp;&amp;
+rom(1,1)==0 | R16 | /* registerpair AX contains the index in
+the array */<br>
+&quot;pha&quot; /* save highbyte of index */<br>
+&quot;txa&quot; /* move lowbyte of index to A */<br>
+&quot;asl a&quot; /* shift left lowbyte == 2 times lowbyte
+*/<br>
+&quot;tax&quot; /* restore lowbyte */<br>
+&quot;pla&quot; /* restore highbyte */<br>
+&quot;rol a&quot; /* rotate left highbyte == 2 times
+highbyte */<br>
+| %[1] | adi 2 | /* push new index, add to lowerbound array
+*/</p>
+<a name="2.12. Compare instructions."></a>
+<h2>2.12. Compare instructions.</h2>
+
+<p>In this group all EM patterns are performed by calling a
+subroutine. Subroutines are used here because comparison is
+only possible byte by byte. This means a lot of code, and
+since compare are used frequently a lot of in line code
+would be generated, and thus reducing the space left for the
+software stack. These subroutines can be found in the
+library.</p>
+<a name="2.13. Branch instructions."></a>
+<h2>2.13. Branch instructions.</h2>
+
+<p>A typical branch instruction is <b>beq.</b> The table
+content for it is:</p>
+
+<p><b>beq</b> | R16 |<br>
+&quot;sta BRANCH+1&quot; /* save highbyte second operand in
+zero page */<br>
+&quot;stx BRANCH&quot; /* save lowbyte second operand in
+zero page */<br>
+&quot;jsr Pop&quot; /* pop the first operand */<br>
+&quot;cmp BRANCH+1&quot; /* compare the highbytes */<br>
+&quot;bne 1f&quot; /* there not equal so go on */<br>
+&quot;cpx BRANCH&quot; /* compare the lowbytes */<br>
+&quot;beq $1\n1:&quot; /* lowbytes are also equal, so branch
+*/</p>
+
+<p>Another typical instruction in this group is <b>zeq.</b>
+The table content is:</p>
+
+<p><b>zeq</b> | R16 |<br>
+&quot;tay&quot; /* move A to Y for setting testbits */<br>
+&quot;bmi $1&quot; /* highbyte s minus so branch */<br>
+&quot;txa&quot; /* move X to A for setting testbits */<br>
+&quot;beq $1\n1:&quot; /* lowbyte also zero, thus branch
+*/</p>
+<a name="2.14. Procedure call instructions."></a>
+<h2>2.14. Procedure call instructions.</h2>
+
+<p>In this group one code generation might seem a little
+akward. It is the EM instruction <b>cai</b> which generates
+a &rsquo;jsr Indir&rsquo;. This is because there is no
+indirect jump_subroutine in the MCS6500. The only solution
+is to store the address in zero page, and then do a
+&rsquo;jsr&rsquo; to a known label. At this label there must
+be an indirect jump instruction, which perform a jump to the
+address stored in zero page. In this case the label is
+Indir, and the address is stored in zero page at the
+addresses ADDR, ADDR+1. The tabel content is:</p>
+
+<p><b>cai</b> | R16 |<br>
+&quot;stx ADDR&quot; /* store lowbyte of address in zero
+page */<br>
+&quot;sta ADDR+1&quot; /* store highbyte of address in zero
+page */<br>
+&quot;jsr Indir&quot; /* use the indirect jump */<br>
+| | |</p>
+<a name="2.15. Miscellaneous instructions."></a>
+<h2>2.15. Miscellaneous instructions.</h2>
+
+<p>In this group, as the name suggests, there is no typical
+EM instruction or EM pattern. Most of the MCS6500 code to be
+generated uses a library subroutine or is
+straightforward.</p>
+
+<p align=center><b>PERFORMANCE.</b></p>
+<a name="1. Introduction."></a>
+<h2>1. Introduction.</h2>
+
+<p>To measure the performance of the back end table some
+timing tests are done. What to time? In this case, the
+execution time of several Pascal statements are timed.
+Statements in C, which have a Pascal equivalence are timed
+also. The statements are timed as follows. A test program is
+been written, which executes two nested for_loops from 1 to
+1.000. Within these for_loops the statement, which is to be
+tested, is placed, so the statement will be executed
+1.000.000 times. Then the same program is executed without
+the test statement. The time difference between the two
+executions is the time neccesairy to execute the test
+statement 1.000.000 times. The total time to execute the
+test statement requires thus the time difference divided by
+1.000.000.</p>
+<a name="1. Testing Pascal statements."></a>
+<h2>1. Testing Pascal statements.</h2>
+
+<p>The next statements are tested.</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1)</p>
+</td>
+<td width="6%"></td>
+<td width="20%">
+
+<p>int1 := 0;</p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2)</p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>int1 := int2 - 1;</p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3)</p>
+</td>
+<td width="6%"></td>
+<td width="34%">
+
+<p>int1 := int1 + 1;</p>
+</td>
+<td width="55%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>4)</p>
+</td>
+<td width="6%"></td>
+<td width="44%">
+
+<p>int1 := icon1 - icon2;</p>
+</td>
+<td width="45%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>5)</p>
+</td>
+<td width="6%"></td>
+<td width="48%">
+
+<p>int1 := icon2 div icon1;</p>
+</td>
+<td width="41%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>6)</p>
+</td>
+<td width="6%"></td>
+<td width="40%">
+
+<p>int1 := int2 * int3;</p>
+</td>
+<td width="49%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>7)</p>
+</td>
+<td width="6%"></td>
+<td width="38%">
+
+<p>bool := (int1 &lt; 0);</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>8)</p>
+</td>
+<td width="6%"></td>
+<td width="38%">
+
+<p>bool := (int1 &lt; 3);</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>9)</p>
+</td>
+<td width="6%"></td>
+<td width="68%">
+
+<p>bool := ((int1 &gt; 3) or (int1 &lt; 3))</p>
+</td>
+<td width="21%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>10)</p>
+</td>
+<td width="4%"></td>
+<td width="90%">
+
+<p>case int1 of 1: bool := false; 2: bool := true end;</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>11)</p>
+</td>
+<td width="4%"></td>
+<td width="54%">
+
+<p>if int1 = 0 then int2 := 3;</p>
+</td>
+<td width="35%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>12)</p>
+</td>
+<td width="4%"></td>
+<td width="70%">
+
+<p>while int1 &gt; 0 do int1 := int1 - 1;</p>
+</td>
+<td width="19%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>13)</p>
+</td>
+<td width="4%"></td>
+<td width="20%">
+
+<p>m := a[k];</p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>14)</p>
+</td>
+<td width="4%"></td>
+<td width="38%">
+
+<p>let2 := [&rsquo;a&rsquo;..&rsquo;c&rsquo;];</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>15)</p>
+</td>
+<td width="4%"></td>
+<td width="12%">
+
+<p>P3(x);</p>
+</td>
+<td width="77%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>16)</p>
+</td>
+<td width="4%"></td>
+<td width="26%">
+
+<p>dum := F3(x);</p>
+</td>
+<td width="63%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>17)</p>
+</td>
+<td width="4%"></td>
+<td width="38%">
+
+<p>s.overhead := 5400;</p>
+</td>
+<td width="51%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p>18)</p>
+</td>
+<td width="4%"></td>
+<td width="54%">
+
+<p>with s do overhead := 5400;</p>
+</td>
+<td width="35%">
+</td>
+</table>
+
+<p>These statement were tested in a procedure test.</p>
+
+<p>procedure test;<br>
+var i, j, ... : integer;<br>
+bool : boolean;<br>
+let2 : set of char;<br>
+begin<br>
+for i := 1 to 1000<br>
+for j := 1 to 1000<br>
+STATEMENT<br>
+end;</p>
+
+<p>STATEMENT is one of the statements as shown above, or it
+is the empty statement. The assignment of used variables, if
+neccesairy, is done before the first for_loop. In case of
+the statement which uses the procedure call, statement 15, a
+dummy procedure is declared whose body is empty. In case of
+the statement which uses the function, statement 16, this
+function returns its argument. for the timing of C
+statements a similar test program was written.</p>
+
+<p>main()<br>
+{<br>
+int i, j, ...;<br>
+for (i = 1; i &lt;= 1000; i++)<br>
+for (j = 1; j &lt;= 1000; j++)<br>
+STATEMENT<br>
+}</p>
+<a name="2. The results."></a>
+<h2>2. The results.</h2>
+
+<p>Here are tables with the results of the time
+measurments. Times are in microseconds (10^-6). Some
+statements appear twice in the tables. In the second case an
+array of 200 integers was declerated before the variable to
+be tested, so this variable cannot be accessed by indirect
+addressing from the second local base. This results in a
+larger execution time of the statement to be tested. The
+column 68000 contains the times measured on a Bleasdale,
+M68000 based, computer. The times in column pdp are measured
+on a DEC pdp11/44, where the times from column 6500 come
+from a BBC microcomputer.</p>
+
+<p align=center><img src="grohtml-101481.png"></p>
+
+<p align=center><img src="grohtml-101482.png"></p>
+<a name="3. Pascal statements which don&rsquo;t have a C equivalent."></a>
+<h2>3. Pascal statements which don&rsquo;t have a C equivalent.</h2>
+
+<p>At first, the two statements who perform an operation on
+constants are left out. These are left out while the C front
+end does constant folding, while the Pascal front end
+doesn&rsquo;t. So in C the statements int1 = icon1 + icon2;
+and int1 = icon1 / icont2; will use the same amount of time
+since the expression is evaluated by the front end. The two
+other statements (let2 :=
+[&rsquo;a&rsquo;..&rsquo;c&rsquo;]; and <b>with</b> s
+<b>do</b> overhead := 5400;), aren&rsquo;t included in the C
+statement timing table, because there constructs do not
+exist in C. Although in C there can be direct bit
+manipulation, and thus can be used to implement sets I have
+not used it here. The <b>with</b> statement does not exists
+in C and there is nothing with the slightest resemblance to
+it.</p>
+
+<p>At first sight in the table , it looked if there is no
+much difference in the times for the M68000 and the
+pdp11/44, in comparison with the times needed by the
+MCS6500. To verify this impression, I calculated the
+correlation coefficient between the times of the M68000 and
+pdp11/44. It turned out to be 0.997 for both the Pascal time
+tests and the C time tests. Since the correlation
+coefficient is near to one and the difference between the
+times is small, they can be considered to be the same as
+seen from the times of the MCS6500. Then I have tried to
+make a grafic of the times from the M68000 and the MCS6500.
+Well, there was&rsquo;t any correlation to been seen, taken
+all the times. The only correlation one could see, with some
+effort, was in the times for the first three Pascal
+statements. The two first C statements show also a
+correlation, which two points always do.</p>
+
+<p>Also the three Pascal statements <b>case</b> , <b>if</b>
+, and <b>while</b> have a correlation coefficient of 0.999.
+This is probably because the <b>case</b> statement uses a
+subroutine in both cases and the other two statements
+<b>if</b> and, <b>while</b> generate in line code. The last
+two Pascal statements use the same time, since the front end
+wil generate the same EM code for both.</p>
+
+<p>The independence between the rest of the test times is
+because in these cases the object code for the MCS6500 uses
+library subroutines, while the other processors can handle
+the EM code with in line code.</p>
+
+<p>It is clear that the MCS6500 is a slower device, it
+needs longer execution times, the need of more library
+subroutines, but there is no constant factor between it
+execution times and those of other processors.</p>
+
+<p>The slowing down of the MCS6500 as result of the need of
+a library subroutine is illustrated by the muliplication
+statement. The MCS6500 needs a library subroutine, while the
+other two processors have a machine instruction to perform
+the multiply. This results in a factor of 48.5, when the
+operands can be accessed indirect by the MCS6500. When the
+MCS6500 cannot access the operands indirectly the situation
+is even worse. The slight differences between the MCS6500
+execution times for Pascal statements and C statements is
+probably the result of the front end, and thus beyond the
+scope of this discussion.</p>
+
+<p>Another timing test is done in C on the statement k = i
++ j + 1983. This statement is tested on many UNIX*</p>
+
+<p align=center><img src="grohtml-101483.png"></p>
+
+<p>systems. For a complete list see appendix A. The slowest
+one is the IBM XT, which runs on a 8088 microprocessor. The
+fasted one is the Amdahl computer. Here is short table to
+illustrate the performance of the MCS6500.</p>
+
+<p align=center><img src="grohtml-101484.png"></p>
+
+<p>The MCS6500 is three times slower than the IBM XT, but
+threehundred times slower than the Amdahl. The reason why
+the times on the IBM XT and the MCS6500 are the same for
+short&rsquo;s and int&rsquo;s, is that most C compilers make
+the types short and integer the same size on 16-bit
+machines. In this project the MCS6500 is regarded as a
+16-bit machine.</p>
+<a name="4. Length tests."></a>
+<h2>4. Length tests.</h2>
+
+<p>I have also compiled several programs written in Pascal
+and C to see if there is a resemblance between the number of
+bytes generated in the machine&rsquo;s language. In the
+tables:</p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p>length:</p>
+</td>
+<td width="4%"></td>
+<td width="82%">
+
+<p>The number of bytes of the source program.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p>68000:</p>
+</td>
+<td width="6%"></td>
+<td width="82%">
+
+<p>The number of bytes of the a.out file for a M68000.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p>pdp:</p>
+</td>
+<td width="10%"></td>
+<td width="82%">
+
+<p>The number of bytes of the a.out file for a
+pdp11/44.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p>6500:</p>
+</td>
+<td width="8%"></td>
+<td width="82%">
+
+<p>The number of bytes of the a.out file for a MCS6500.</p>
+</td>
+</table>
+
+<p>These are the results:</p>
+
+<p align=center><img src="grohtml-101485.png"></p>
+
+<p align=center><img src="grohtml-101486.png"></p>
+
+<p>In contrast to the execution times of the test
+statements, the object code files sizes show a constant
+factor between them. After calculating the correlation
+coefficient, I have calculated the line fitted between
+sizes.</p>
+
+<p align=center><img src="grohtml-101487.png"></p>
+
+<p align=center><img src="grohtml-101488.png"></p>
+
+<p align=center><img src="grohtml-101489.png"></p>
+
+<p>As seen from the tables above the correlation
+coefficient for Pascal programs is better than the ones for
+C programs. Thus the line fits best for Pascal programs.
+With the formula of the best fitted line one can now
+estimate the size of the object code, which a program needs,
+for a MCS6500 without having the compiler at hand. One also
+can see from these formula that the object code generated
+for a MCS6500 is about 1.8 times more than for the other
+processors. Since the number of bytes in the source file
+havily depends on the programmer, how many spaces he or she
+uses, the size of the indenting in structured programs,
+etc., there is no correlation between the size of the source
+file and the size of the object file. Also the use of
+comments has its influence on the size.</p>
+
+<p align=center><b>SUMMARY.</b></p>
+<a name="1. Summary"></a>
+<h2>1. Summary</h2>
+
+<p>In this chapter some final conclusions are made.</p>
+
+<p>In spite of its simplicity, the MCS6500 is strong enough
+to implement a EM machine. A serious deficy of the MCS6500
+is the missing of 16-bit general purpose registers, and
+especially the missing of a 16-bit stackpointer. As pointed
+out before, one 16-bit register can be simulated by a pair
+of 8-bit registers, in fact, the accumulator A to hold the
+highbyte, and the index register X to hold the lowbyte of
+the word. By lack of a 16-bit stackpointer, zero page must
+be used to hold a stackpointer and there are also two
+subroutines needed for manipulating the stack (Push and
+Pop).</p>
+
+<p>As seen at the time tests, the simple instruction set of
+the MCS6500 forces the use of library subroutines. These
+library subroutines increas the execution time of the
+programs.</p>
+
+<p>The sizes of the object code files show a strong
+correlation in contrast to the execution times. With this
+correlatiuon one canestimate the size of a program if it is
+to be used on a MCS6500.</p>
+<a name="1. REFERENCES."></a>
+<h2>1. REFERENCES.</h2>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>1.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>Osborn, A., Jacobson, S., and Kane, J. The Mos
+Technology MCS6500. <b>An Introduction to Microcomputers
+,</b> Volume II, Some Real Products (june 1977) chap. 9.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>A hardware description of some real existing CPU&rsquo;s,
+such as the Intel Z80, MCS6500, etc. is given in this
+book.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>2.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>van Staveren, H. The table driven code generator from
+the Amsterdam Compiler Kit. Vrije Universiteit, Amsterdam,
+(July 11, 1983).</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>The defining document for writing a back end table.</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p>3.</p>
+</td>
+<td width="6%"></td>
+<td width="90%">
+
+<p>Tanenbaum, A.S. Structured Computer Organization.
+Prentice Hall. (1976).</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p>In this book computers are described as a hierarchy of
+levels, with each one performing some well-defined
+function.</p>
+</td>
+</table>
+<hr>
+</body>
+</html>
