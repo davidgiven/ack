@@ -6,37 +6,32 @@
  */
 /* $Id$ */
 
-#if	!defined(_STRING_H)
+#ifndef _STRING_H
 #define	_STRING_H
 
-#define	NULL		((void *)0)
+#include <stddef.h>
 
-#if	!defined(_SIZE_T)
-#define	_SIZE_T
-typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* _SIZE_T */
+extern void	*memcpy(void *_s1, const void *_s2, size_t _n);
+extern void	*memmove(void *_s1, const void *_s2, size_t _n);
+extern char	*strcpy(char *_s1, const char *_s2);
+extern char	*strncpy(char *_s1, const char *_s2, size_t _n);
+extern char	*strcat(char *_s1, const char *_s2);
+extern char	*strncat(char *_s1, const char *_s2, size_t _n);
+extern int	memcmp(const void *_s1, const void *_s2, size_t _n);
+extern int	strcmp(const char *_s1, const char *_s2);
+extern int	strcoll(const char *_s1, const char *_s2);
+extern int	strncmp(const char *_s1, const char *_s2, size_t _n);
+extern size_t	strxfrm(char *_s1, const char *_s2, size_t _n);
+extern void	*memchr(const void *_s, int _c, size_t _n);
+extern char	*strchr(const char *_s, int _c);
+extern size_t	strcspn(const char *_s1, const char *_s2);
+extern char	*strpbrk(const char *_s1, const char *_s2);
+extern char	*strrchr(const char *_s, int _c);
+extern size_t	strspn(const char *_s1, const char *_s2);
+extern char	*strstr(const char *_s1, const char *_s2);
+extern char	*strtok(char *_s1, const char *_s2);
+extern void	*memset(void *_s, int _c, size_t _n);
+extern char	*strerror(int _errnum);
+extern size_t	strlen(const char *_s);
 
-void	*memcpy(void *_s1, const void *_s2, size_t _n);
-void	*memmove(void *_s1, const void *_s2, size_t _n);
-char	*strcpy(char *_s1, const char *_s2);
-char	*strncpy(char *_s1, const char *_s2, size_t _n);
-char	*strcat(char *_s1, const char *_s2);
-char	*strncat(char *_s1, const char *_s2, size_t _n);
-int	memcmp(const void *_s1, const void *_s2, size_t _n);
-int	strcmp(const char *_s1, const char *_s2);
-int	strcoll(const char *_s1, const char *_s2);
-int	strncmp(const char *_s1, const char *_s2, size_t _n);
-size_t	strxfrm(char *_s1, const char *_s2, size_t _n);
-void	*memchr(const void *_s, int _c, size_t _n);
-char	*strchr(const char *_s, int _c);
-size_t	strcspn(const char *_s1, const char *_s2);
-char	*strpbrk(const char *_s1, const char *_s2);
-char	*strrchr(const char *_s, int _c);
-size_t	strspn(const char *_s1, const char *_s2);
-char	*strstr(const char *_s1, const char *_s2);
-char	*strtok(char *_s1, const char *_s2);
-void	*memset(void *_s, int _c, size_t _n);
-char	*strerror(int _errnum);
-size_t	strlen(const char *_s);
-
-#endif	/* _STRING_H */
+#endif

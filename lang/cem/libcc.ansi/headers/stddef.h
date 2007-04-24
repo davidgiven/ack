@@ -6,29 +6,25 @@
  */
 /* $Id$ */
 
-#if	!defined(_STDDEF_H)
+#ifndef _STDDEF_H
 #define	_STDDEF_H
 
-#define	NULL		((void *)0)
+#define	NULL 0
 
 #define	offsetof(type, ident)	((size_t) (unsigned long) &((type *)0)->ident)
 
 #if	_EM_PSIZE == _EM_WSIZE
 typedef int	ptrdiff_t;	/* result of substracting two pointers */
-#elif	_EM_PSIZE == _EM_LSIZE
-typedef long	ptrdiff_t;	/* result of substracting two pointers */
+typedef int intptr_t; /* an integer big enough to store a pointer */
+#elif _EM_PSIZE == _EM_LSIZE
+typedef long ptrdiff_t;	/* result of substracting two pointers */
+typedef long intptr_t; /* an integer big enough to store a pointer */
 #else
-#error garbage pointer size
+#error unsupported pointer size
 #endif	/* _EM_PSIZE */
 
-#if	!defined(_SIZE_T)
-#define	_SIZE_T
-typedef unsigned int	size_t;		/* type returned by sizeof */
-#endif	/* _SIZE_T */
+typedef unsigned int size_t; /* type returned by sizeof */
+typedef char wchar_t; /* type of a wide character */
+typedef long off_t; /* type of a position offset */
 
-#if	!defined(_WCHAR_T)
-#define	_WCHAR_T
-typedef char	wchar_t;		/* type expanded character set */
-#endif	/* _WCHAR_T */
-
-#endif	/* _STDDEF_H */
+#endif

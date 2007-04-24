@@ -6,7 +6,10 @@
  */
 /* $Id$ */
 
-void __bad_assertion(const char *_mess);
+#ifndef _ASSERT_H
+#define _ASSERT_H
+
+extern void __bad_assertion(const char *_mess);
 
 #undef	assert
 
@@ -21,3 +24,5 @@ void __bad_assertion(const char *_mess);
 				    "\" failed, file " __xstr(__FILE__) \
 				    ", line " __xstr(__LINE__) "\n"))
 #endif	/* NDEBUG */
+
+#endif

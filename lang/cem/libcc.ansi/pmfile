@@ -12,7 +12,7 @@ local crt = ackfile {
 local libc = acklibrary {
 	ACKBUILDFLAGS = {PARENT, "-ansi"},
 	ACKINCLUDES = {PARENT, "%ROOTDIR%h", d.."headers"},
-	outputs = {"%U%/libc-ansi.a"},
+	outputs = {"%U%/libc.a"},
 	
 	-- assert
 	
@@ -85,6 +85,8 @@ local libc = acklibrary {
 
 	-- misc
 	
+	ackfile (d.."misc/environ.c"),
+	--[[
 	ackfile (d.."misc/getgrent.c"),
 	ackfile (d.."misc/getopt.c"),
 	ackfile (d.."misc/getpass.c"),
@@ -110,11 +112,12 @@ local libc = acklibrary {
 	ackfile (d.."misc/isatty.c"),
 	ackfile (d.."misc/mktemp.c"),
 	ackfile (d.."misc/hypot.c"),
+	--]]
 
 	-- setjmp
 	
 	ackfile (d.."setjmp/setjmp.e"),
-	ackfile (d.."setjmp/sigmisc.c"),
+	--ackfile (d.."setjmp/sigmisc.c"),
 	
 	-- signal
 	
@@ -124,8 +127,8 @@ local libc = acklibrary {
 	
 	ackfile (d.."stdio/tmpfile.c"),
 	ackfile (d.."stdio/tmpnam.c"),
-	ackfile (d.."stdio/rename.c"),
-	ackfile (d.."stdio/remove.c"),
+--	ackfile (d.."stdio/rename.c"),
+--	ackfile (d.."stdio/remove.c"),
 	ackfile (d.."stdio/fopen.c"),
 	ackfile (d.."stdio/freopen.c"),
 	ackfile (d.."stdio/setbuf.c"),
@@ -171,7 +174,7 @@ local libc = acklibrary {
 	ackfile (d.."stdio/fclose.c"),
 	ackfile (d.."stdio/flushbuf.c"),
 	ackfile (d.."stdio/fflush.c"),
-	ackfile (d.."stdio/isatty.c"),
+--	ackfile (d.."stdio/isatty.c"),
 	ackfile (d.."stdio/data.c"),
 
 	-- stdlib
@@ -195,7 +198,7 @@ local libc = acklibrary {
 	ackfile (d.."stdlib/rand.c"),
 	ackfile (d.."stdlib/strtod.c"),
 	ackfile (d.."stdlib/strtol.c"),
-	ackfile (d.."stdlib/system.c"),
+--	ackfile (d.."stdlib/system.c"),
 	ackfile (d.."stdlib/wcstombs.c"),
 	ackfile (d.."stdlib/wctomb.c"),
 	ackfile (d.."stdlib/ext_comp.c"),
@@ -260,22 +263,24 @@ local libc = acklibrary {
 	ackfile (d.."time/misc.c"),
 
 	install = {
-		pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libc-ansi.a")
+		pm.install("%BINDIR%%PLATIND%/%PLATFORM%/libc.a")
 	}
 }
 
 local headers = group {
 	install = {
+		pm.install(d.."headers/sys/time.h", "%BINDIR%include/ansi/sys/time.h"),
+		pm.install(d.."headers/sys/ioctl.h", "%BINDIR%include/ansi/sys/ioctl.h"),
 		pm.install(d.."headers/assert.h", "%BINDIR%include/ansi/assert.h"),
 		pm.install(d.."headers/ctype.h", "%BINDIR%include/ansi/ctype.h"),
-		pm.install(d.."headers/dirent.h", "%BINDIR%include/ansi/dirent.h"),
+--		pm.install(d.."headers/dirent.h", "%BINDIR%include/ansi/dirent.h"),
 		pm.install(d.."headers/errno.h", "%BINDIR%include/ansi/errno.h"),
 		pm.install(d.."headers/float.h", "%BINDIR%include/ansi/float.h"),
-		pm.install(d.."headers/grp.h", "%BINDIR%include/ansi/grp.h"),
+--		pm.install(d.."headers/grp.h", "%BINDIR%include/ansi/grp.h"),
 		pm.install(d.."headers/limits.h", "%BINDIR%include/ansi/limits.h"),
-		pm.install(d.."headers/locale.h", "%BINDIR%include/ansi/locale.h"),
+--		pm.install(d.."headers/locale.h", "%BINDIR%include/ansi/locale.h"),
 		pm.install(d.."headers/math.h", "%BINDIR%include/ansi/math.h"),
-		pm.install(d.."headers/mathconst.h", "%BINDIR%include/ansi/mathconst.h"),
+--		pm.install(d.."headers/mathconst.h", "%BINDIR%include/ansi/mathconst.h"),
 		pm.install(d.."headers/setjmp.h", "%BINDIR%include/ansi/setjmp.h"),
 		pm.install(d.."headers/signal.h", "%BINDIR%include/ansi/signal.h"),
 		pm.install(d.."headers/stdarg.h", "%BINDIR%include/ansi/stdarg.h"),
@@ -284,8 +289,6 @@ local headers = group {
 		pm.install(d.."headers/stdlib.h", "%BINDIR%include/ansi/stdlib.h"),
 		pm.install(d.."headers/string.h", "%BINDIR%include/ansi/string.h"),
 		pm.install(d.."headers/time.h", "%BINDIR%include/ansi/time.h"),
-		pm.install(d.."headers/sys/dirent.h", "%BINDIR%include/ansi/sys/dirent.h"),
-		pm.install(d.."headers/sys/errno.h", "%BINDIR%include/ansi/sys/errno.h"),
 	}
 }
 

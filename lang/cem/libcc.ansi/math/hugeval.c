@@ -5,10 +5,7 @@
  * Author: Hans van Eck
  */
 /* $Id$ */
-#include	<math.h>
 
-double
-__huge_val(void)
-{
-	return 1.0e+1000;	/* This will generate a warning */
-}
+#include <math.h>
+
+double __huge_val = 1.0e+1000; /* This will generate a warning */

@@ -3,7 +3,7 @@
  */
 /* $Id$ */
 
-#if	!defined(_CTYPE_H)
+#ifndef _CTYPE_H
 #define	_CTYPE_H
 
 extern char	__ctype[];	/* located in chartab.c */
@@ -16,19 +16,19 @@ extern char	__ctype[];	/* located in chartab.c */
 #define _C		0x20	/* this bit is for control characters */
 #define _X		0x40	/* this bit is for hex digits [a-f] and [A-F]*/
 
-int isalnum(int _c);		/* alphanumeric [a-z], [A-Z], [0-9] */
-int isalpha(int _c);		/* alphabetic */
-int iscntrl(int _c);		/* control characters */
-int isdigit(int _c);		/* digit [0-9] */
-int isgraph(int _c);		/* graphic character */
-int islower(int _c);		/* lower-case letter [a-z] */
-int isprint(int _c);		/* printable character */
-int ispunct(int _c);		/* punctuation mark */
-int isspace(int _c);		/* white space sp, \f, \n, \r, \t, \v */
-int isupper(int _c);		/* upper-case letter [A-Z] */
-int isxdigit(int _c);		/* hex digit [0-9], [a-f], [A-F] */
-int tolower(int _c);		/* convert to lower case character */
-int toupper(int _c);		/* convert to upper case character */
+extern int isalnum(int _c);		/* alphanumeric [a-z], [A-Z], [0-9] */
+extern int isalpha(int _c);		/* alphabetic */
+extern int iscntrl(int _c);		/* control characters */
+extern int isdigit(int _c);		/* digit [0-9] */
+extern int isgraph(int _c);		/* graphic character */
+extern int islower(int _c);		/* lower-case letter [a-z] */
+extern int isprint(int _c);		/* printable character */
+extern int ispunct(int _c);		/* punctuation mark */
+extern int isspace(int _c);		/* white space sp, \f, \n, \r, \t, \v */
+extern int isupper(int _c);		/* upper-case letter [A-Z] */
+extern int isxdigit(int _c);		/* hex digit [0-9], [a-f], [A-F] */
+extern int tolower(int _c);		/* convert to lower case character */
+extern int toupper(int _c);		/* convert to upper case character */
 
 #define isalpha(c)	((__ctype+1)[c]&(_U|_L))
 #define isspace(c)	((__ctype+1)[c]&_S)

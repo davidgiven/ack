@@ -1,14 +1,18 @@
 /*
- * signal.h - signal handling
+ * stdarg.h - variable arguments
  *
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Id$ */
 
-#ifndef _SIGNAL_H
-#define _SIGNAL_H
+#ifndef _STDBOOL_H
+#define _STDBOOL_H
 
-#include <unistd.h>
+typedef int bool;
+
+#define bool    int
+#define true    1
+#define false   0
 
 #endif

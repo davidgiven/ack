@@ -6,10 +6,10 @@
  */
 /* $Id$ */
 
-#if	!defined(_STDARG_H)
+#ifndef _STDARG_H
 #define	_STDARG_H
 
-typedef	char	*va_list;
+typedef char* va_list;
 
 #define __vasz(x)		((sizeof(x)+sizeof(int)-1) & ~(sizeof(int) -1))
 
@@ -17,4 +17,4 @@ typedef	char	*va_list;
 #define va_arg(ap, type)	(*((type *)(void *)((ap += __vasz(type)) - __vasz(type))))
 #define va_end(ap)
 
-#endif	/* _STDARG_H */
+#endif
