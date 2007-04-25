@@ -33,7 +33,7 @@ rebuild() {
 	fi
 }
 
-inputs=$(cd src && find -wholename "*/.*" -prune -o -type f -print)
+inputs=$(cd src && find -ipath "*/.*" -prune -o -type f -print)
 
 for f in $inputs; do
 	srcextension=${f##*.}
