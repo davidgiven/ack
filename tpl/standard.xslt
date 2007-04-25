@@ -55,7 +55,7 @@
 							alt="Valid CSS" height="31" width="88"/>
 					</a>
 					<br/>
-					<a href="http://sourceforge.net/projects/primemover">
+					<a href="http://sourceforge.net/projects/tack">
 						<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=157791&amp;type=1"
 							width="88" height="31" alt="SourceForge.net Logo"/>
 					</a>
