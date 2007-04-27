@@ -35,8 +35,7 @@ int		_fp_hook = 1;	/* This is for Minix, but does not harm others */
 
 _ini(args,c,p,mainlb) char *args,*mainlb; int c; struct file **p; {
 	struct file *f;
-	char buf[128];
-
+	
 	_pargc= *(int *)args; args += sizeof (int);
 	_pargv= *(char ***)args; args += sizeof (char **);
 	_penvp= *(char ***)args;
