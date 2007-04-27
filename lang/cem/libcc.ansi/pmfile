@@ -281,6 +281,7 @@ local headers = group {
 		pm.install(d.."headers/signal.h",    "%BINDIR%include/ansi/signal.h"),
 		pm.install(d.."headers/stdarg.h",    "%BINDIR%include/ansi/stdarg.h"),
 		pm.install(d.."headers/stddef.h",    "%BINDIR%include/ansi/stddef.h"),
+		pm.install(d.."headers/stdint.h",    "%BINDIR%include/ansi/stdint.h"),
 		pm.install(d.."headers/stdio.h",     "%BINDIR%include/ansi/stdio.h"),
 		pm.install(d.."headers/stdlib.h",    "%BINDIR%include/ansi/stdlib.h"),
 		pm.install(d.."headers/string.h",    "%BINDIR%include/ansi/string.h"),
