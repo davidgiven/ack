@@ -3,10 +3,11 @@
  */
 /* $Id$ */
 
-#ifndef	NOFLOAT
 #include	<string.h>
 #include	<stdarg.h>
 #include	"loc_incl.h"
+
+#ifndef	ACKCONF_NO_STDIO_FLOAT
 
 static char *
 _pfloat(long double r, register char *s, int n, int flags)
@@ -175,4 +176,4 @@ _f_print(va_list *ap, int flags, char *s, char c, int precision)
 	}
 	return s;
 }
-#endif	/* NOFLOAT */
+#endif	/* ACKCONF_NO_STDIO_FLOAT */

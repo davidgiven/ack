@@ -15,6 +15,7 @@
 #include	<float.h>
 #include	<errno.h>
 #include	<ctype.h>
+#include    <ack/config.h>
 
 static int b64_add(struct mantissa *e1, struct mantissa *e2);
 static b64_sft(struct mantissa *e1, int n);

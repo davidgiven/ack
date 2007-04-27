@@ -4,6 +4,7 @@
 /* $Id$ */
 
 #include	<stdio.h>
+#include    <ack/config.h>
 
 #define	fileno(p)		((p)->_fd)
 #define	io_testflag(p,x)	((p)->_flags & (x))
@@ -18,10 +19,10 @@ void __cleanup(void);
 FILE *popen(const char *command, const char *type);
 FILE *fdopen(int fd, const char *mode);
 
-#ifndef	NOFLOAT
+#ifndef	ACKCONF_NO_STDIO_FLOAT
 char *_ecvt(long double value, int ndigit, int *decpt, int *sign);
 char *_fcvt(long double value, int ndigit, int *decpt, int *sign);
-#endif	/* NOFLOAT */
+#endif	/* ACKCONF_NO_STDIO_FLOAT */
 
 #define	FL_LJUST	0x0001		/* left-justify field */
 #define	FL_SIGN		0x0002		/* sign in signed conversions */
