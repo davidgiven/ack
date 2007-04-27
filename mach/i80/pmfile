@@ -3,6 +3,9 @@
 
 local d = ROOTDIR.."mach/i80/"
 
+include (d.."libem/pmfile")
+include (d.."libend/pmfile")
+
 mach_i80 = group {
 	ARCH = "i80",
 	
@@ -12,8 +15,10 @@ mach_i80 = group {
 	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
 }
 
--- Revision history
--- $Log$
--- Revision 1.1  2006-07-20 23:18:18  dtrg
--- First version in CVS.
---
+support_i80 = group {
+	OPTIMISATION = "-O",
+
+	libem_i80,
+	libend_i80,
+}
+

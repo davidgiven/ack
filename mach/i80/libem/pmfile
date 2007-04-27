@@ -1,0 +1,49 @@
+-- $Source$
+-- $State$
+-- $Revision$
+
+local d = ROOTDIR.."mach/i80/libem/"
+
+libem_i80 = acklibrary {
+	outputs = {"%U%/libem-%PLATFORM%.a"},
+
+	ackfile (d.."aar2.s"),
+	ackfile (d.."adi4.s"),
+	ackfile (d.."and.s"),
+	ackfile (d.."blm.s"),
+	ackfile (d.."cii.s"),
+	ackfile (d.."cmi4.s"),
+	ackfile (d.."cms.s"),
+	ackfile (d.."com.s"),
+	ackfile (d.."csa.s"),
+	ackfile (d.."csb.s"),
+	ackfile (d.."dup.s"),
+	ackfile (d.."dvi2.s"),
+	ackfile (d.."exg.s"),
+	ackfile (d.."flp.s"),
+	ackfile (d.."inn.s"),
+	ackfile (d.."ior.s"),
+	ackfile (d.."lar2.s"),
+	ackfile (d.."mli2.s"),
+	ackfile (d.."mli4.s"),
+	ackfile (d.."mlu2.s"),
+	ackfile (d.."ngi4.s"),
+	ackfile (d.."nop.s"),
+	ackfile (d.."rol4.s"),
+	ackfile (d.."ror4.s"),
+	ackfile (d.."sar2.s"),
+	ackfile (d.."sbi4.s"),
+	ackfile (d.."set.s"),
+	ackfile (d.."set2.s"),
+	ackfile (d.."sli2.s"),
+	ackfile (d.."sli4.s"),
+	ackfile (d.."sri2.s"),
+	ackfile (d.."sri4.s"),
+	ackfile (d.."xor.s"),
+	ackfile (d.."loi.s"),
+	ackfile (d.."sti.s"),
+	ackfile (d.."dvi4.s"),
+	ackfile (d.."rck.s"),
+
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libem.a"),
+}

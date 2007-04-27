@@ -95,6 +95,9 @@ include "plat/pc86/pmfile"             -- PC standalone
 include "mach/i386/pmfile"             -- generic i386
 include "plat/linux386/pmfile"         -- Linux executables
 
+include "mach/i80/pmfile"              -- generic 8080
+include "plat/cpm/pmfile"              -- CP/M
+
 default = group {
 	-- Lots of things use LLgen, so we need to build it first.
 	
@@ -161,8 +164,6 @@ default = group {
 	mach_6805,
 	mach_6809,
 	mach_arm,      lang_runtimes { ARCH="arm", OPTIMISATION="-O" },
-	mach_i386,     lang_runtimes { ARCH="i386", OPTIMISATION="-O" },
-	mach_i80,      lang_runtimes { ARCH="i80", OPTIMISATION="-O" },
 
 	mach_m68020,   lang_runtimes { ARCH="m68020", OPTIMISATION="-O" },
 --	mach_m68k2,    lang_runtimes { ARCH="m68k2", OPTIMISATION="-O" },
@@ -178,7 +179,8 @@ default = group {
 	-- Build the platforms.
 	
 	platform_pc86,
-	platform_linux386
+	platform_linux386,
+	platform_cpm
 }
 
 -- Ensure that the work directories exist.

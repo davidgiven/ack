@@ -1,0 +1,33 @@
+# $Source$
+# $State$
+# $Revision$
+
+
+The cpm platform
+=================
+
+cpm is an i80-based BSP that generates CP/M executables that can be run on any
+CP/M-compliant machine.
+
+This port only implements a very limited set of syscalls --- and most of those
+are stubs required to make the demo apps link. File descriptors 0, 1 and 2
+represent the console. All reads block. There's enough TTY emulation to allow
+\n conversion and local echo (but it can't be turned off).
+
+There's a special, if rather minimilist, interface to give applications access
+to CP/M. See include/cpm.h for details.
+
+
+Example command line
+====================
+
+ack -mcpm -O -o cpm.com examples/paranoia.c
+
+The file cpm.com can then be run.
+
+(Although note that Paranoia is very big, and you'll need a CP/M machine with
+lots of memory for it to fit. Which it does, just.)
+
+
+David Given
+dg@cowlark.com

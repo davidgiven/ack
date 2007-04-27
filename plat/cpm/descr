@@ -1,0 +1,69 @@
+# $Source$
+# $State$
+# $Revision$
+
+var w=2
+var p=2
+var s=2
+var l=4
+var f=4
+var d=8
+var ARCH=i80
+var PLATFORM=cpm
+var PLATFORMDIR={EM}/lib/{PLATFORM}
+var CPP_F=-D__unix
+var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1 -b0:0x0100
+var MACHOPT_F=-m8
+
+# Override the setting in fe so that files compiled for linux386 can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/include/ansi
+
+name be
+	from .m.g
+	to .s
+	program {EM}/lib.bin/{PLATFORM}/ncg
+	args <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib.bin/{PLATFORM}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib.bin/em_led
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	mapflag -i SEPID=-b1:0
+	mapflag -fp FLOATS={EM}/{ILIB}fp
+	args {ALIGN} {SEPID?} \
+	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
+		({RTS}:.ocm.b={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
+		({RTS}:.p={PLATFORMDIR}/pascal.o) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
+		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		{FLOATS?} \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libsys.a \
+		           {PLATFORMDIR}/libend.a)
+	linker
+end
+name cv
+	from .out
+	to .img
+	program {EM}/bin/aslod
+	args < >
+	outfile cpm.com
+end

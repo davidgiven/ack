@@ -1,0 +1,16 @@
+-- $Source$
+-- $State$
+-- $Revision$
+
+local d = ROOTDIR.."mach/i80/libend/"
+
+libend_i80 = acklibrary {
+	outputs = {"%U%/libend-%PLATFORM%.a"},
+
+	ackfile (d.."edata.s"),
+	ackfile (d.."em_end.s"),
+	ackfile (d.."end.s"),
+	ackfile (d.."etext.s"),
+
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libend.a"),
+}
