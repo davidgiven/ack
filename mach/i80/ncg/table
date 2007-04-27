@@ -532,7 +532,7 @@ gen dad lb
     mov {m},e
 
 pat stf
-with hl_or_de
+with hl_or_de STACK
 uses hl_or_de={const2,$1}
 gen dad de
     pop de
