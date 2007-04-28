@@ -17,8 +17,10 @@ hilo.mod           Modula-2 version of the Hi/Lo game
 hilo.ocm           Occam 1 version of the Hi/Lo game
 hilo.p             Pascal version of the Hi/Lo game
 
+mandelbrot.c       A simple Mandelbrot generator, using floating-point maths
 paranoia.c         An ancient public domain K&R C adventure game
 startrek.c         An even more ancient public domain ANSI C game
+                     (uses the FPU for distance calculation)
 startrek.doc       Manual for above (plus in current directory when running)
 
 Enjoy.
