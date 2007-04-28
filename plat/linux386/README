@@ -16,6 +16,8 @@ proof-of-concept stage right now.
 Important note: you *can't* link access ELF shared libraries from these
 executables. In other words, you have to all your work from inside ACK.
 
+IEEE floating point is available, but requires an FPU.
+
 The executables are generated with aelfslod and are extremely simple; there's
 one rwx ELF section which contains all the application's code and data. This
 is not optimal, but it does work.

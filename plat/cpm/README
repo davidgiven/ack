@@ -17,6 +17,9 @@ represent the console. All reads block. There's enough TTY emulation to allow
 There's a special, if rather minimilist, interface to give applications access
 to CP/M. See include/cpm.h for details.
 
+IEEE floating point is not available. Attempts to use floating-point numbers 
+will cause the program to terminate.
+
 
 Example command line
 ====================

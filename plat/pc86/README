@@ -16,6 +16,8 @@ This means that there's not very much memory available. It would be very easy
 to change it to run in SMALL mode, where CS occupies one segment and DS and SS
 another, which would give 64kB for nearly all programs; I just haven't done it.
 
+IEEE floating point is available, but requires an FPU.
+
 This port only implements a very limited set of syscalls --- and most of those
 are stubs required to make the demo apps link. File descriptors 0, 1 and 2
 represent the console. All reads block. There's enough TTY emulation to allow
