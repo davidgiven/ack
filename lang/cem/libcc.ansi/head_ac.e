@@ -17,6 +17,9 @@
  *
  */
 
+/* Disabled catch handler --- this is the platform's job. dtrg */
+#undef CATCHHANDLER
+
  mes 2,_EM_WSIZE,_EM_PSIZE
 
  exa environ
@@ -30,10 +33,12 @@
  loi _EM_PSIZE
  lae environ
  sti _EM_PSIZE
+#ifdef CATCHHANDLER
 #if __unix && ! (__em22 || __em24 || __em44)
  lpi $_ctch_
  sig
  asp _EM_PSIZE
+#endif
 #endif
  lal _EM_WSIZE+_EM_PSIZE
  loi _EM_PSIZE
@@ -47,6 +52,7 @@
  cal $exit
  end
 
+#ifdef CATCHHANDLER
 #if __unix && ! (__em22 || __em24 || __em44)
  exp $_ctch_
  pro $_ctch_,0
@@ -71,4 +77,5 @@
  asp _EM_PSIZE
  rtt
  end 0
+#endif
 #endif
