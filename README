@@ -2,11 +2,11 @@
 # $State$
 # $Revision$
 
-                     THE AMSTERDAM COMPILER KIT V6.0pre2
+                     THE AMSTERDAM COMPILER KIT V6.0pre3
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2007-04-24
+                                2007-04-29
 
 
 INTRODUCTION
@@ -34,6 +34,7 @@ Platforms:
 
 pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
+cpm           produces i80 CP/M .COM files
 
 
 INSTALLATION
@@ -125,8 +126,8 @@ GOTCHAS
 
 There are some things you should be aware of.
 
-- Look at plat/linux386/README and plat/pc86/README for information about the
-  two supported platforms.
+- Look at plat/<PLATFORMNAME>/README for information about the two supported
+  platforms.
   
 - The library support is fairly limited; for C, it's at roughly the ANSI C
   level, and for the other languages it's similar.
@@ -166,4 +167,4 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2007-04-24
+2007-04-29

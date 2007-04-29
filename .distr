@@ -46,9 +46,11 @@ lang/m2
 #lang/basic
 
 mach/proto
+mach/i80
 mach/i86
 mach/i386
 
+plat/cpm
 plat/pc86
 plat/linux386
 

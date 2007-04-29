@@ -11,6 +11,7 @@ mach_i80 = group {
 	
 	proto_as,
 	proto_ncg { ARCHDIR = "i80" },
+	proto_top,
 	
 	install = pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr")
 }

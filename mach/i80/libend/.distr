@@ -1,2 +1,5 @@
-LIST
-end_s.a
+pmfile
+edata.s
+em_end.s
+end.s
+etext.s

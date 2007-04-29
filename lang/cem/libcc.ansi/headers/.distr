@@ -20,4 +20,3 @@ stdbool.h
 fcntl.h
 tgmath.h
 locale.h
-stdint.h

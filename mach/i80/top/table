@@ -1,0 +1,16 @@
+
+/* 68020 desciptor table for ACK target optimizer */
+
+MAXOP 2;
+
+%%;
+
+X, Y, Z             { TRUE };
+%%;
+
+mvi X, Y : mov X, Z          -> mov X, Z ;
+
+xchg : inx h : xchg          -> inx d ;
+xchg : inx d : xchg          -> inx h ;
+
+%%;

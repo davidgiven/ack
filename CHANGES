@@ -2,6 +2,15 @@
 # $State$
 # $Revision$
 
+6.0pre3
+
+  Added the cpm platform. Made some optimisations to the i80 code generator,
+  including getting topgen up and running and adding some peephole optimiser
+  rules. Fixed loads of bugs in ego so that it now works on platforms that
+  support it (pc86 and linux386). Made the floating point work on platforms
+  that support it (pc86 and linux386 again). Made stdint.h work. Lots and lots
+  of bugfixes and tweaks everywhere.
+  
 6.0pre2
 
   Much simplified the syscall interface by disabling libmon and instead
