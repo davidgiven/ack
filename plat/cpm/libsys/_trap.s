@@ -206,11 +206,11 @@ eunimpl:lxi h,EUNIMPL
 	pop d
 	ret
 1:
-	lxi h, 1
+	lxi h, 6
 	push h
 	lxi h, text
 	push h
-	lxi h, 6
+	lxi h, 1
 	push h
 	call _write
 	jmp EXIT
