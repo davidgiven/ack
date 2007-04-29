@@ -224,7 +224,7 @@ tool_ego = group {
 ego_descr = simple {
 	outputs = {"%U%-%I%"},
 	command = {
-		"%BINDIR%%PLATDEP%/cpp -P -I%HEADERDIR% %in[1]% | sed -f %in[2]% > %out[1]%"
+		"%BINDIR%%PLATDEP%/cpp.ansi -P -I%HEADERDIR% %in[1]% | sed -f %in[2]% > %out[1]%"
 	},
 	
 	file (d.."descr/%ARCH%.descr"),
@@ -232,17 +232,3 @@ ego_descr = simple {
 	
 	install = pm.install("%BINDIR%%PLATDEP%/ego/%ARCH%descr")
 }
-
--- Revision history
--- $Log$
--- Revision 1.4  2007-02-25 12:49:20  dtrg
--- em_table is now in /h, not /etc.
---
--- Revision 1.3  2006/10/15 00:28:12  dtrg
--- Updated to the version 0.1 of Prime Mover (which involves some syntax changes).
---
--- Revision 1.2  2006/07/23 17:52:23  dtrg
--- cpp now gets installed in the right place.
---
--- Revision 1.1  2006/07/22 00:52:01  dtrg
--- Added support for the ego global optimisation suite.
