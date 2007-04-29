@@ -227,7 +227,7 @@ name ego
 	mapflag -O* EGO_F={EGO_F?} -O*
 	args \
 		{EGO_F?} -P {EM}/lib.bin/ego \
-		-M{EM}/lib.bin/ego/{M}descr <
+		-M{EM}/lib.bin/ego/{ARCH}descr <
 	optimizer 2
 	stdout
 	combiner
