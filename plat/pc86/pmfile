@@ -25,7 +25,7 @@ local headers = group {
 platform_pc86 = group {
 	ARCH = "i86",
 	PLATFORM = "pc86",
-	OPTIMISATION = "-O",
+	OPTIMISATION = "-O6",
 	
 	-- Ensure the descr and headers are installed first because we'll need
 	-- them to build the libraries.
