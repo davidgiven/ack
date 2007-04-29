@@ -25,7 +25,7 @@ local headers = group {
 platform_linux386 = group {
 	ARCH = "i386",
 	PLATFORM = "linux386",
-	OPTIMISATION = "-O6",
+	OPTIMISATION = "-O",
 	
 	-- Ensure the descr and headers are installed first because we'll need it
 	-- to build the libraries.
