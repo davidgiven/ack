@@ -728,12 +728,17 @@ gen xra a
     mov %1.2,a
     mvi a,{const1,0}
     sbb %1.1
-    mov %1.1,a				yields %1
+    mov %1.1,a                  yields %1
 
 pat ngi $1==4
 kills ALL
 gen Call {label,".ngi4"}
 
+pat loc sli ($1 == 8) && ($2 == 2)
+with hl_or_de
+gen move %1.2, %1.1
+    mvi %1.2, {const1,0}        yields %1
+    
 pat sli $1==2
 kills ALL
 gen Call {label,".sli2"}		yields de
@@ -790,6 +795,11 @@ gen Call {label,".dvi4"}
 
 pat slu						leaving sli $1
 
+pat loc sru ($1 == 8) && ($2 == 2)
+with hl_or_de
+gen move %1.1, %1.2
+    mvi %1.1, {const1,0}        yields %1
+    
 pat sru $1==2
 kills ALL
 uses areg={const1,0}
