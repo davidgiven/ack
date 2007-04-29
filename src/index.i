@@ -42,6 +42,17 @@ list</a>.</p>
 
 <h1>News</h1>
 
+<h2>2007-04-29</h2>
+
+<p>I've just uploaded 6.0pre3 to the <a
+href="http://sourceforge.net/project/showfiles.php?group_id=130811">download
+page</a>. Lots of bugfixes, and we now support compilation for CP/M using the
+8080 code generator.</p>
+
+<p>Other things that are new: better optimisation, slightly lighter-weight
+binaries, better ANSI C headers, and floating point works on the pc86 and
+linux386 platforms (although only if you have an FPU).</p>
+
 <h2>2007-04-25</h2>
 
 <p>I'm pleased to announce 6.0pre2 has just hit the <a

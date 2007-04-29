@@ -81,7 +81,7 @@ is far smaller, faster and easier to port.</p>
     <tr>
       <td>i80</td>
       <td>+</td>
-      <td></td>
+      <td>+</td>
     </tr>
     <tr>
       <td>Z80</td>
@@ -96,12 +96,12 @@ is far smaller, faster and easier to port.</p>
     <tr>
       <td>i86</td>
       <td>+</td>
-      <td>+</td>
+      <td>+F</td>
     </tr>
     <tr>
       <td>i386</td>
       <td>+</td>
-      <td>+</td>
+      <td>+F</td>
     </tr>
     <tr>
       <td>68000</td>
@@ -144,6 +144,9 @@ is far smaller, faster and easier to port.</p>
 <p>+ indicates that the particular architecture is supported by the code
 generator and assembler; - indicates that it is supported by the assembler
 only.</p>
+
+<p>F indicates that the architecture has floating point support (if there is
+an FPU).</p>
 
 <p>Note: all the code generators <em>run</em> on 6.0, but as there are no
 platforms yet that use them they are not currently shipped. If you wish to
@@ -219,6 +222,10 @@ with no operating system other than a monitor.</p>
 
 <table border="0">
   <tbody>
+    <tr>
+      <td>i80</td>
+      <td>cpm (CP/M 8080 executables)</td>
+    </tr>
     <tr>
       <td>i86</td>
       <td>pc86 (bootable floppy disk images)</td>
