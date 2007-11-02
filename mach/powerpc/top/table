@@ -1,0 +1,20 @@
+
+/* 68020 desciptor table for ACK target optimizer */
+
+MAXOP 3;
+
+%%;
+
+P, Q, R             { TRUE };
+X, Y, Z             { TRUE };
+
+%%;
+
+/* Whitespace is significant here! */
+
+addi  X, X, 0                -> ;
+addis X, X, 0                -> ;
+
+or X, Y, Z : or. X, X, X     -> or. X, Y, Z ;
+
+%%;

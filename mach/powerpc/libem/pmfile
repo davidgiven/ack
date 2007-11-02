@@ -1,0 +1,30 @@
+-- $Source$
+-- $State$
+-- $Revision$
+
+local d = ROOTDIR.."mach/powerpc/libem/"
+
+libem_powerpc = acklibrary {
+	outputs = {"%U%/libem-%PLATFORM%.a"},
+
+	ACKINCLUDES = {PARENT, d},
+	
+	ackfile (d.."ret.s"),
+	ackfile (d.."tge.s"),
+	ackfile (d.."csa.s"),
+	ackfile (d.."csb.s"),
+	ackfile (d.."los.s"),
+	ackfile (d.."sts.s"),
+	ackfile (d.."aar4.s"),
+	ackfile (d.."fef8.c"),
+	ackfile (d.."fif8.s"),
+	ackfile (d.."cif8.s"),
+	ackfile (d.."cuf8.s"),
+	ackfile (d.."cfi8.s"),
+	ackfile (d.."cfu8.s"),
+	ackfile (d.."fd_00000000.s"),
+	ackfile (d.."fd_80000000.s"),
+	ackfile (d.."fd_FFFFFFFF.s"),
+
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libem.a"),
+}

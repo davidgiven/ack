@@ -1,0 +1,23 @@
+-- $Source$
+-- $State$
+
+local d = ROOTDIR.."mach/powerpc/"
+
+include (d.."libem/pmfile")
+include (d.."libend/pmfile")
+
+mach_powerpc = group {
+	ARCH = "powerpc",
+	
+	proto_as,
+	proto_ncg { ARCHDIR = "powerpc" },
+	proto_top,
+--	ego_descr,
+}
+
+support_powerpc = group {
+	OPTIMISATION = "-O",
+
+	libem_powerpc,
+	libend_powerpc,
+}
