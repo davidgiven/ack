@@ -562,6 +562,8 @@ instr_p read_instr()
 			return ip;
 		}
 		c = getc(inp);
+		if (c == EOF)
+			break;
 	}
 	ungetc(c,inp);
 	*p = '\0';
