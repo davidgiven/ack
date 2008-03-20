@@ -1,0 +1,15 @@
+
+/* 8080 desciptor table for ACK target optimizer */
+
+MAXOP 2;
+
+%%;
+
+X, Y, Z             { TRUE };
+%%;
+
+/* Whitespace is significant here! */
+
+ld X, Y : ld X, Z          -> mov X, Z ;
+
+%%;
