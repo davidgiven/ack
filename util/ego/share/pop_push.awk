@@ -2,13 +2,13 @@ BEGIN {
 	print "char *pop_push[]="
 	print "{"
 	print "\"\","
-	switch = 0
+	s = 0
 }
 /aar/	{
-	switch = 1
+	s = 1
 }
 	{
-	if (switch) printf("\"%s\",\n",$3)
+	if (s) printf("\"%s\",\n",$3)
 }
 END {
 	print "};"

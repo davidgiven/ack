@@ -2,21 +2,21 @@ BEGIN	{ print "#include \"pop_push.h\""
 	  print
 	  print "char *pop_push[] = {"
 	  print "\"\","
-	  switch = 0
+	  s = 0
 }
-/aar/	{ switch = NR }
-	{ if (switch) {
+/aar/	{ s = NR }
+	{ if (s) {
 	      if ($1 == "cal" || $1 == "cai") $3 = "-?"
 	      printf("/* %s */ \"%s\",\n",$1,$3) 
-	      col_2[NR-switch] = $2
-	      comment[NR-switch] = $1
+	      col_2[NR-s] = $2
+	      comment[NR-s] = $1
 	  }
 	}
 END	{ print "};"
 	  print
 	  print "char flow_tab[]= {"
 	  print "'\\000',"
-	  for(i=0; i < NR-switch; i++) {
+	  for(i=0; i < NR-s; i++) {
 		inf = col_2[i]
 		f_out = "/* " comment[i] " */ "
 		if (substr(inf,1,1)=="b") f_out = f_out "HASLABEL|"
