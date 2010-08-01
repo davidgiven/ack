@@ -49,7 +49,7 @@ static char rcs_dmach[] = RCS_DMACH ;
 extern growstring scanb();
 extern growstring scanvars();
 
-int getline() ;
+int getln() ;
 int getinchar() ;
 static char *ty_name ;
 static char *bol ;
@@ -65,7 +65,7 @@ setlist(name) char *name ; {
 
 	inname=name ;
 	open_in(name) ;
-	while ( getline() ) {
+	while ( getln() ) {
 		if ( strcmp(VAR,ty_name)==0 ) {
 			doassign(bol,(char *)0,0) ;
 		} else
@@ -114,7 +114,7 @@ intrf() {
 	new= (trf *)getcore(sizeof *new) ;
 	new->t_name= keeps(bol) ;
 	for (;;) {
-		if ( !getline() ) {
+		if ( !getln() ) {
 			fuerror("unexpected EOF on %s",inname) ;
 		}
 		twice= NO ;
@@ -366,7 +366,7 @@ int getinchar() {
 	return token ;
 }
 
-int getline() {
+int getln() {
 	register char *c_ptr ;
 
 	do {

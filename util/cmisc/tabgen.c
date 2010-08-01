@@ -291,7 +291,7 @@ quoted(pstr)
 }
 
 char *
-getline(s, n, fp)
+getln(s, n, fp)
 	char *s;
 	FILE *fp;
 {
@@ -326,7 +326,7 @@ DoFile(name)
 		fprintf(stderr, "%s: cannot read file %s\n", ProgCall, name);
 		exit(1);
 	}
-	while (getline(text, BUFSIZE, fp) != NULL) {
+	while (getln(text, BUFSIZE, fp) != NULL) {
 		if (text[0] == FILECOM) {
 			option(text);
 		}
