@@ -490,7 +490,7 @@ optstack
 	;
 
 code    :
-		{ $$ = codebytes; cchandled=ccspoiled=0; }
+		{ $<yy_int>$ = codebytes; cchandled=ccspoiled=0; }
 	  initcode restcode
 		{ if (cchandled==0 && ccspoiled!=0) {
 			outbyte(DO_ERASE);
