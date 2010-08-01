@@ -43,7 +43,7 @@ local libc = acklibrary {
 				"%U%/isascii.c",
 			},
 			command = {
-				"cd %out[1]:dirname% && %in[1]%"
+				"cd %out[1]:dirname% && sh %in[1]%"
 			},
 			
 			file (d.."ctype/genfiles")
