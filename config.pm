@@ -21,7 +21,7 @@ PREFIX = "/usr/local"
 -- ======================================================================= --
 
 -- FIXME: the following two variables must be set to their Minix variants
--- due to hard-coded references in the descr files. Don't c
+-- due to hard-coded references in the descr files.
 
 -- Name of the platform-independent library directory; 'share' on modern
 -- systems, 'lib' on Minix-like systems.
