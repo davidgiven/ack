@@ -1,4 +1,0 @@
-case $# in
-1)      make $1.t ; ntout $1.t ;;
-*)      echo $0 heeft een argument nodig ;;
-esac
