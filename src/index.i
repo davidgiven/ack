@@ -42,6 +42,13 @@ list</a>.</p>
 
 <h1>News</h1>
 
+<h2>2010-08-08</h2>
+
+<p>I've just uploaded 6.0pre4 to the <a 
+href="https://sourceforge.net/projects/tack/files/">download
+page</a>. This contains some minor fixes to sort out some bitrot associated
+with new Linux systems, that was preventing compilation.</p>
+
 <h2>2007-04-29</h2>
 
 <p>I've just uploaded 6.0pre3 to the <a
