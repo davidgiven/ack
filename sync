@@ -1,0 +1,3 @@
+#!/bin/sh
+rsync -avP --delete -e ssh staging/ dtrg,tack@web.sourceforge.net:htdocs
+

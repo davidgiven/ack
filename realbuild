@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec ./build "`pwd`/src" "`pwd`/staging" "http://tack.sf.net"
