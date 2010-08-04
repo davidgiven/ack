@@ -26,7 +26,7 @@ is far smaller, faster and easier to port.</p>
 
 <p>This project currently hosts two versions of the ACK.</p>
 <ul>
-  <li>ACK 5.6 is an incremental update of Vrije University's last release.
+  <li>ACK 5.6 is an incremental update of Vrije Universiteit's last release.
     This has had minimum fixes necessary to make it run on modern Linux
     machines; unfortunately, the build system is designed for the Unixes of
     yesteryear and is not really up to modern standards. This version is the
@@ -249,7 +249,7 @@ only the Minix platform on the i386 and i86 architectures and was done by <a
 href="http://www.laurasia.com.au/ack">Michael Kennett</a>.</p>
 
 <p>In addition, the original 5.5 release is still available on <a
-href="http://www.cs.vu.nl/ack/">the Vrije University ACK page</a>.</p>
+href="http://www.cs.vu.nl/ack/">the Vrije Universiteit ACK page</a>.</p>
 
 <p>There may also be other versions elsewhere. The ACK is BSD licensed and as
 a result if people want to fork the codebase and use it elsewhere, they don't
@@ -257,13 +257,13 @@ even need to ask, or indeed tell anyone. If you know of any other uses of the
 compiler, please let me (dtrg) know --- I'd like to put in a link.</p>
 
 <h1>What's the involvement of Andrew Tanenbaum, Ceriel Jacobs and Vrije
-University?</h1>
+Universiteit?</h1>
 
 <p>They have no official involvement.</p>
 
 <p>They're aware that I, dtrg, am doing this, and are quite happy with it and
 maintain an interest, but are not actively participating in the project. (Due
 to being busy people with other things to do.) I, dtrg, have nothing to do
-with Vrije University and have never even been to Holland.</p>
+with Vrije Universiteit and have never even been to Holland.</p>
 </body>
 </html>
