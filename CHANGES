@@ -2,6 +2,11 @@
 # $State$
 # $Revision$
 
+6.0pre4
+
+  Fixed some minor bit-rotting issues that were preventing compilation on
+  modern Linux systems.
+  
 6.0pre3
 
   Added the cpm platform. Made some optimisations to the i80 code generator,

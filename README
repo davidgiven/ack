@@ -1,12 +1,8 @@
-# $Source$
-# $State$
-# $Revision$
-
                      THE AMSTERDAM COMPILER KIT V6.0pre3
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2007-04-29
+                                2010-08-08
 
 
 INTRODUCTION
@@ -17,7 +13,7 @@ front end compilers for a number of different languages, code generators,
 support libraries, and all the tools necessary to go from source code to
 executable on any of the platforms it supports.
 
-This is an early prerelease of the upcoming version 6.0 release. Not a
+This is an early prerelease of the apocryphal version 6.0 release. Not a
 lot is supported, the build mechanism needs work, and a lot of things are
 probably broken. However, what's there should be sufficient to get things
 done and to evaluate how the full 6.0 release should work. 
@@ -167,4 +163,8 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2007-04-29
+2010-08-08
+
+# $Source$
+# $State$
+# $Revision$
