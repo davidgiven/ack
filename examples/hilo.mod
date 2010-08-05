@@ -6,13 +6,22 @@
 MODULE HiLo;
 FROM InOut IMPORT WriteInt, WriteLn, WriteString, ReadString, ReadInt;
 FROM random IMPORT Uniform;
+FROM Streams IMPORT FlushStream, OutputStream, StreamResult;
 
 VAR
 	buffer : ARRAY [0..32] OF CHAR;
 	
+PROCEDURE flush;
+VAR
+	strus : StreamResult;
+BEGIN
+	FlushStream(OutputStream, strus);
+END flush;
+
 PROCEDURE reads;
 BEGIN
 	WriteString("> ");
+	flush;
 	ReadString(buffer);
 END reads;
 
@@ -31,8 +40,8 @@ BEGIN
 	finished := FALSE;
 	
 	WHILE NOT finished DO
-		WriteLn;
 		WriteString("> ");
+		flush;
 		ReadInt(guess);
 		
 		IF guess = Number THEN
