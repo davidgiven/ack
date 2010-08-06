@@ -199,6 +199,13 @@ string sG2;                 /* Used to pass string results */
 FILE *stream;
 bool bFlag = FALSE;         /* Prevent multiple file opens */
 
+void
+reads(char* buffer)
+{
+  fflush(stdout);
+  gets(buffer);
+}
+
 /* Main Program */
 
 int
@@ -228,7 +235,7 @@ intro(void)
 
   printf("\nDo you need instructions (y/n): ");
 
-  gets(sTemp);
+  reads(sTemp);
 
   if (sTemp[0] == 'y' || sTemp[0] == 'Y')
     showfile("startrek.doc");
@@ -271,7 +278,7 @@ new_game(void)
 
       printf("Command? ");
 
-      gets(sTemp);
+      reads(sTemp);
       printf("\n");
 
       if (! strncmp(sTemp, "nav", 3))
@@ -516,7 +523,7 @@ course_control(void)
 
   printf("Course (0-9): ");
 
-  gets(sTemp);
+  reads(sTemp);
 
   printf("\n");
 
@@ -537,7 +544,7 @@ course_control(void)
 
   printf("Warp Factor (0-%s): ", sX);
 
-  gets(sTemp);
+  reads(sTemp);
 
   printf("\n");
 
@@ -916,7 +923,7 @@ phaser_control(void)
 
   printf("Number of units to fire: ");
 
-  gets(sTemp);
+  reads(sTemp);
 
   printf("\n");
 
@@ -1002,7 +1009,7 @@ photon_torpedoes(void)
 
   printf("Course (0-9): ");
 
-  gets(sTemp);
+  reads(sTemp);
 
   printf("\n");
 
@@ -1214,7 +1221,7 @@ sheild_control(void)
 
   printf("Input number of units to shields: ");
 
-  gets(sTemp);
+  reads(sTemp);
 
   printf("\n");
 
@@ -1254,7 +1261,7 @@ library_computer(void)
 
   printf("Computer active and awating command: ");
 
-  gets(sTemp);
+  reads(sTemp);
   printf("\n");
 
   if (! strncmp(sTemp, "0", 1))
@@ -1406,19 +1413,19 @@ dirdist_calc(void)
     (int)s1, (int)s2);
     
   printf("Please enter initial X coordinate: ");
-  gets(sTemp);
+  reads(sTemp);
   c1 = atoi(sTemp);
 
   printf("Please enter initial Y coordinate: ");
-  gets(sTemp);
+  reads(sTemp);
   a = atoi(sTemp);
 
   printf("Please enter final X coordinate: ");
-  gets(sTemp);
+  reads(sTemp);
   w1 = atoi(sTemp);
 
   printf("Please enter final Y coordinate: ");
-  gets(sTemp);
+  reads(sTemp);
   x = atoi(sTemp);
 
   compute_vector();
@@ -1589,7 +1596,7 @@ end_of_game(void)
       printf("If there is a volunteer, let him step forward and");
       printf(" enter 'aye': ");
 
-      gets(sTemp);
+      reads(sTemp);
       printf("\n");
 
       if (! strncmp(sTemp, "aye", 3))
@@ -1921,6 +1928,7 @@ closefile(void)
 int
 getline(char *s)
 {
+  fflush(stdout);
   if (fgets(s, MAXCOL, stream) == NULL)
     return(0);
   else
