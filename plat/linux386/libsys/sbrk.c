@@ -9,23 +9,27 @@
 
 #define	OUT_OF_MEMORY (void*)(-1)	/* sbrk returns this on failure */
 
-extern char _end[1];
-
-static char* current = _end;
+static char* current = NULL;
  
 void* sbrk(intptr_t increment)
 {
 	char* old;
 	char* new;
+	char* actual;
 	
+	if (!current)
+		current = (char*) _syscall(__NR_brk, 0, 0, 0);
+
 	if (increment == 0)
 		return current;
 		
 	old = current;
 	new = old + increment;
-	if (brk(new) < 0)
+
+	actual = (char*) _syscall(__NR_brk, (quad) new, 0, 0);
+	if (actual < new)
 		return OUT_OF_MEMORY;
 		
-	current = new;
+	current = actual;
 	return old;
 }
