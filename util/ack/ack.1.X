@@ -15,20 +15,6 @@
 ack \- Amsterdam Compiler Kit
 .SH SYNOPSIS
 \fBack\fP arguments
-.br
-\fBacc\fP arguments
-.br
-\fBapc\fP arguments
-.br
-\fBabc\fP arguments
-.br
-\fBm2\fP arguments
-.br
-\fBocm\fP arguments
-.br
-\fBf2c\fP arguments
-.br
-\fImachine\fP arguments
 .SH DESCRIPTION
 This program transforms sources in several
 languages to load files for a variety of machines,
@@ -89,10 +75,6 @@ Object file.
 \fIAck\fP accepts the following flags:
 .IP \-m\fImachine\fP
 This flag tells \fIack\fP to generate a load file for \fImachine\fP.
-\fIMachine\fP can also be used as the program call
-name, instead of \fIack\fP.
-e.g. \fIack \-mi86 file.p\fP is equivalent to \fIi86
-file.p\fP.
 .IP \-o
 Use the next argument as the name of the resulting file.
 \fIAck\fP produces \fIa.out\fP or \fIe.out\fP by default.
