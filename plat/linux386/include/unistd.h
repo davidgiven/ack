@@ -43,9 +43,9 @@ enum
 	O_WRONLY = 1,
 	O_RDWR = 2,
 	
-	O_CREAT = 0x10,
-	O_TRUNC = 0x20,
-	O_APPEND = 0x40
+	O_CREAT = 0x40,
+	O_TRUNC = 0x200,
+	O_APPEND = 0x400
 };
 
 extern int open(const char* path, int access, ...);
