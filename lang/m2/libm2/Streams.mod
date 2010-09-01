@@ -340,7 +340,7 @@ IMPLEMENTATION MODULE Streams;
 		RETURN;
 	END;
 	IF s^.mode = reading THEN
-		position := position + LONG(s^.maxcnt - s^.cnt + 1);
+		position := position - LONG(s^.maxcnt - s^.cnt + 1);
 	END;
   END GetPosition;
 
