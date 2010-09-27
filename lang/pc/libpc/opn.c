@@ -87,10 +87,10 @@ static int initfl(descr,sz,f) int descr; int sz; struct file *f; {
 		f->fname = _pargv[i];
 		_cls(f);
 		if ((descr & WRBIT) == 0) {
-			if ((f->ufd = _open(f->fname,0)) < 0)
+			if ((f->ufd = open(f->fname,0)) < 0)
 				_trp(ERESET);
 		} else {
-			if ((f->ufd = _creat(f->fname,0644)) < 0)
+			if ((f->ufd = creat(f->fname,0644)) < 0)
 				_trp(EREWR);
 		}
 	}
