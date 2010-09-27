@@ -55,6 +55,8 @@ extern int read(int fd, void* buffer, size_t count);
 extern int write(int fd, void* buffer, size_t count);
 extern off_t lseek(int fildes, off_t offset, int whence);
 extern int fcntl(int fd, int op, ...);
+extern int unlink(const char* path);
+extern int remove(const char* path);
 
 /* Special variables */
 

@@ -26,6 +26,8 @@ libsys_linux386 = acklibrary {
 	ackfile (d.."sbrk.c"),
 	ackfile (d.."signal.c"),
 	ackfile (d.."write.c"),
+	ackfile (d.."unlink.c"),
+	ackfile (d.."remove.c"),
 	
 	install = pm.install("%BINDIR%lib/%PLATFORM%/libsys.a"),
 }
