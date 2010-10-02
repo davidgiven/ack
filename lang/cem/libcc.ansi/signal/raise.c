@@ -9,13 +9,10 @@
 #endif
 #include	<signal.h>
 
-int _kill(int pid, int sig);
-int _getpid(void);
-
 int
 raise(int sig)
 {
 	if (sig < 0 || sig > _NSIG)
 		return -1;
-	return _kill(_getpid(), sig);
+	return kill(getpid(), sig);
 }
