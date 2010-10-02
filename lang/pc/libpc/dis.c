@@ -1,3 +1,15 @@
+/*
+ * File:  -  dis.c
+ *
+ * dispose() built in standard procedure in Pascal (6.6.5.3)
+ *
+ * Re-implementation of storage allocator for Ack Pascal compiler
+ * under Linux, and other UNIX-like systems.
+ *
+ * Written by Erik Backerud, 2010-10-01
+ *
+ * Original copyright and author info below:
+ */
 /* $Id$ */
 /*
  * (c) copyright 1983 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -23,65 +35,67 @@
 #define assert()	/* nothing */
 
 /*
- * use circular list of free blocks from low to high addresses
- * _highp points to free block with highest address
+ * use a singly linked list of free blocks.
  */
 struct adm {
 	struct adm	*next;
 	int		size;
 };
 
-extern struct adm	*_lastp;
-extern struct adm	*_highp;
-extern			_trp();
+struct adm *freep = 0;			/* first element on free list */
 
-static int merge(p1,p2) struct adm *p1,*p2; {
-	struct adm *p;
+extern void _trp(int);
 
-	p = (struct adm *)((char *)p1 + p1->size);
-	if (p > p2)
+/*
+ * Dispose
+ * Called with two arguments:
+ * n the size of the block to be freed, in bytes,
+ * pp address of pointer to data.
+ */
+void
+_dis(int n, struct adm **pp)
+{
+    struct adm *block;	/* the block of data being freed (inc. header) */
+    struct adm *p, *q;
+
+    if (*pp == 0) {
+	_trp(EFREE);
+    }
+    block = *pp - 1;
+    if (freep == 0) {
+	freep = block;
+	block->next = 0;
+    } else {
+	q = 0;	/* trail one behind */
+	for (p = freep; p < block; p = p->next) {
+	    if (p == 0) {	/* We reached the end of the free list. */
+		break;
+	    }
+	    q = p;
+	    /* check if block is contained in the free block p */
+	    if (p+p->size > block) {
 		_trp(EFREE);
-	if (p != p2)
-		return(0);
-	p1->size += p2->size;
-	p1->next = p2->next;
-	return(1);
-}
-
-_dis(n,pp) int n; struct adm **pp; {
-	struct adm *p1,*p2;
-
-	/*
-	 * NOTE: dispose only objects whose size is a multiple of sizeof(*pp).
-	 *       this is always true for objects allocated by _new()
-	 */
-	n = ((n+sizeof(*p1)-1) / sizeof(*p1)) * sizeof(*p1);
-	if (n == 0)
-		return;
-	if ((p1= *pp) == (struct adm *) 0)
-		_trp(EFREE);
-	p1->size = n;
-	if ((p2 = _highp) == 0)  /*p1 is the only free block*/
-		p1->next = p1;
-	else {
-		if (p2 > p1) {
-			/*search for the preceding free block*/
-			if (_lastp < p1)  /*reduce search*/
-				p2 = _lastp;
-			while (p2->next < p1)
-				p2 = p2->next;
-		}
-		/* if p2 preceeds p1 in the circular list,
-		 * try to merge them			*/
-		p1->next = p2->next; p2->next = p1;
-		if (p2 <= p1 && merge(p2,p1))
-			p1 = p2;
-		p2 = p1->next;
-		/* p1 preceeds p2 in the circular list */
-		if (p2 > p1) merge(p1,p2);
+	    }
 	}
-	if (p1 >= p1->next)
-		_highp = p1;
-	_lastp = p1;
-	*pp = (struct adm *) 0;
-}
+	if (p == block) {	/* this block already freed */
+	  _trp(EFREE);
+	}
+	if (q == 0) {	/* block is first */
+	    freep = block;
+	    block->next = p;
+	} else {
+	    q->next = block;
+	}
+	block->next = p;
+	/* merge with successor on free list? */
+	if (block + block->size == p) {
+	    block->size = block->size + p->size;
+	    block->next = p->next;
+	}
+	/* merge with preceding block on free list? */
+	if (q != 0 && q+q->size == block) {
+	    q->size = q->size + block->size;
+	    q->next = block->next;
+	}
+    }
+}   /* _dis */
