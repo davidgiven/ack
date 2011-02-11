@@ -42,6 +42,24 @@ list</a>.</p>
 
 <h1>News</h1>
 
+<h2>2011-02-11</h2>
+
+<p>ACK development (such as it is) has moved from the CVS repository to a new
+Mercurial repository. The whole CVS repository has been imported, so the
+entire revision history (branches and tags included) is available. I did have
+to make a few fixes due to corruption in the CVS repository, but these only
+affect files which no longer exist; it is possible that checkouts of very old
+revisions may have some broken files. Instructions on how to access the
+Mercurial repository can be found on the <a
+href="http://sourceforge.net/projects/tack">Sourceforge project page</a>.</p>
+
+<p>The old CVS repository will not be going away and will remain as a reference
+but will no longer be modified.</p>
+
+<p>The <a href="http://tack.hg.sourceforge.net/hgweb/tack/tack/rev/4bea19e501ed">very
+first checkin in the ACK project</a> happened at 13:42 UTC on Thursday,
+May 17 1984. This is older than CVS itself.</p>
+ 
 <h2>2010-08-08</h2>
 
 <p>I've just uploaded 6.0pre4 to the <a 
