@@ -189,7 +189,13 @@ cons_t xgetarb(l,f) int l; FILE *f ; {
 
 	shift=0 ; val=0 ;
 	while ( l-- ) {
-		val += ((cons_t)(c = ctrunc(xgetc(f))))<<shift ;
+		// val += ((cons_t)(c = ctrunc(xgetc(f))))<<shift ;
+		// Bug here: shifts with too large shift counts
+		// get unspecified results. --Ceriel
+		c = ctrunc(xgetc(f));
+		if (shift < 8 * sizeof(cons_t)) {
+			val += ((cons_t)c)<<shift ;
+		}
 		shift += 8 ;
 	}
 	if (c == 0377 && shift > 8 && ((shift>>3)&1)) {
