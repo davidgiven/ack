@@ -357,22 +357,22 @@ DoCFU()
 			wtrap(WILLCONV, EILLINS);
 		}
 		f = fpop(4L);
-		npush((long) f, 2L);
+		npush((unsigned long) f, 2L);
 		return;
 	case 44:
 		f = fpop(4L);
-		npush((long) f, 4L);
+		npush((unsigned long) f, 4L);
 		return;
 	case 82:
 		if (wsize == 4) {
 			wtrap(WILLCONV, EILLINS);
 		}
 		f = fpop(8L);
-		npush((long) f, 2L);
+		npush((unsigned long) f, 2L);
 		return;
 	case 84:
 		f = fpop(8L);
-		npush((long) f, 4L);
+		npush((unsigned long) f, 4L);
 		return;
 	default:
 		wtrap(WILLCONV, EILLINS);
