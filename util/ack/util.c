@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include "ack.h"
@@ -83,19 +84,26 @@ char *firstblank(str) char *str ; {
 }
 
 /* VARARGS1 */
-fatal(fmt,p1,p2,p3,p4,p5,p6,p7) char *fmt ; {
+void fatal(const char* fmt, ...)
+{
 	/* Fatal internal error */
+	va_list ap;
+	va_start(ap, fmt);
 	fprintf(STDOUT,"%s: fatal internal error, ",progname) ;
-	fprintf(STDOUT,fmt,p1,p2,p3,p4,p5,p6,p7);
+	vfprintf(STDOUT, fmt, ap);
 	fprintf(STDOUT,"\n") ;
 	quit(-2) ;
 }
 
 
 /* VARARGS1 */
-vprint(fmt,p1,p2,p3,p4,p5,p6,p7) char *fmt ; {
+void vprint(const char* fmt, ...)
+{
 	/* Diagnostic print, no auto NL */
-	fprintf(STDOUT,fmt,p1,p2,p3,p4,p5,p6,p7);
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(STDOUT, fmt, ap);
+	va_end(ap);
 }
 
 #ifdef DEBUG
