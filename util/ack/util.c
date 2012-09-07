@@ -116,30 +116,38 @@ prns(s) register char *s ; {
 #endif
 
 /* VARARGS1 */
-fuerror(fmt,p1,p2,p3,p4,p5,p6,p7) char *fmt ; {
+void fuerror(const char *fmt, ...) {
 	/* Fatal user error */
+	va_list ap;
+	va_start(ap, fmt);
 	fprintf(STDOUT,"%s: ",progname) ;
-	fprintf(STDOUT,fmt,p1,p2,p3,p4,p5,p6,p7);
+	vfprintf(STDOUT, fmt, ap);
 	fprintf(STDOUT,"\n") ;
 	quit(-1) ;
 }
 
 /* VARARGS1 */
-werror(fmt,p1,p2,p3,p4,p5,p6,p7) char *fmt ; {
+void werror(const char *fmt, ...) {
 	/* Warning user error, w_flag */
+	va_list ap;
 	if ( w_flag ) return ;
+	va_start(ap, fmt);
 	fprintf(STDOUT,"%s: warning, ",progname) ;
-	fprintf(STDOUT,fmt,p1,p2,p3,p4,p5,p6,p7);
+	vfprintf(STDOUT, fmt, ap);
 	fprintf(STDOUT,"\n") ;
+	va_end(ap);
 }
 
 /* VARARGS1 */
-error(fmt,p1,p2,p3,p4,p5,p6,p7) char *fmt ; {
+void error(const char *fmt, ...) {
 	/* User error, it is the callers responsibility to quit */
+	va_list ap;
+	va_start(ap, fmt);
 	fprintf(STDOUT,"%s: ",progname) ;
-	fprintf(STDOUT,fmt,p1,p2,p3,p4,p5,p6,p7);
+	vfprintf(STDOUT, fmt, ap);
 	fprintf(STDOUT,"\n") ;
 	n_error++ ;
+	va_end(ap);
 }
 
 do_flush() {
