@@ -16,7 +16,8 @@
 #include	"Lpars.h"
 #include	"assert.h"
 
-arith full_mask[MAXSIZE];/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
+/* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
+arith full_mask[MAXSIZE + 1];
 #ifndef NOCROSS
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
@@ -247,7 +248,7 @@ init_cst()
 
 	while (!(bt < 0))	{
 		bt = (bt << 8) + 0377, i++;
-		if (i == MAXSIZE)
+		if (i > MAXSIZE)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 	}

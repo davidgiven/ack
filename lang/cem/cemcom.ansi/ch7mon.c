@@ -18,7 +18,7 @@
 #include	"def.h"
 
 extern char options[];
-extern arith full_mask[/*MAXSIZE*/];	/* cstoper.c */
+extern arith full_mask[/*MAXSIZE + 1*/];	/* cstoper.c */
 char *symbol2str();
 
 ch7mon(oper, expp)
