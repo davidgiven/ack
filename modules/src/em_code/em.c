@@ -353,7 +353,7 @@ C_magic()
 }
 
 /***    the compact code generating routines	***/
-#define	fit16i(x)	((x) >= (long)0xFFFF8000 && (x) <= (long)0x00007FFF)
+#define	fit16i(x)	((x) >= (long)(-0x8000) && (x) <= (long)0x7FFF)
 #define	fit8u(x)	((x) <= 0xFF)		/* x is already unsigned */
 
 void
