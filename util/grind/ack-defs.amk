@@ -1,5 +1,0 @@
-# definition of EMHOME
-
-%if (%not defined(EMHOME), {
-    EMHOME = /usr/proj/em/Work;
-});

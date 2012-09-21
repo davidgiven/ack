@@ -1,8 +1,0 @@
-!definitions
-!#define		lword
-!#define	FLTRAP
-#define		opfreq	0
-#define		last	1
-#define		test	1
-#define		count	0
-#define		flow	0

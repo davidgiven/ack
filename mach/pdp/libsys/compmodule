@@ -1,4 +1,0 @@
-if pdp -L -O -c -I../../../h -I. $1 1>&2
-then echo `basename $1 $2`.o
-else exit 1
-fi
