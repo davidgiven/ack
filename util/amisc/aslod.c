@@ -140,42 +140,29 @@ void emits(struct outsect* section)
 }
 
 
-void iconvert(char* buf, char* str, char* fmt)
-{
-	register char *nf, *ni, *no ;
-	int last, i ;
-	long value ;
-	ni=buf ; no=str ; nf=fmt ;
-	while ( last = *nf++ ) {
-		last -= '0' ;
-		if ( last<1 || last >9 ) fatal("illegal out.h format string\n");
-		value=0 ;
-		i=last ;
-		while ( i-- ) {
-			value = (value<<8) + (ni[i]&0xFF) ;
-		}
-		switch ( last ) {
-		case 0 : break ;
-		case 1 : *no= value ; break ;
-		case 2 : *(unsigned short *)no = value ; break ;
-		case 4 : *(long *)no = value ; break ;
-		default :
-			 fatal("illegal out.h format string\n");
-		}
-		ni += last ; no += last ;
-	}
-}
+/* Macros from modules/src/object/obj.h */
+#define Xchar(ch)	((ch) & 0377)
+#define uget2(c)	(Xchar((c)[0]) | ((unsigned) Xchar((c)[1]) << 8))
+#define get4(c)		(uget2(c) | ((long) uget2((c)+2) << 16))
 
 /* Read the ack.out file header. */
 
 int rhead(FILE* f, struct outhead* head)
 {
-	char buf[sizeof(struct outhead)];
+	char buf[SZ_HEAD], *c;
 	
 	if (fread(buf, sizeof(buf), 1, f) != 1)
 		return 0;
-		
-	iconvert(buf, (char*) head, SF_HEAD);
+
+	c = buf;
+	head->oh_magic = uget2(c); c += 2;
+	head->oh_stamp = uget2(c); c += 2;
+	head->oh_flags = uget2(c); c += 2;
+	head->oh_nsect = uget2(c); c += 2;
+	head->oh_nrelo = uget2(c); c += 2;
+	head->oh_nname = uget2(c); c += 2;
+	head->oh_nemit = get4(c); c += 4;
+	head->oh_nchar = get4(c);
 	return 1;
 }
 
@@ -183,12 +170,17 @@ int rhead(FILE* f, struct outhead* head)
  
 int rsect(FILE* f, struct outsect* sect)
 {
-	char buf[sizeof(struct outsect)];
+	char buf[SZ_SECT], *c;
 	
 	if (fread(buf, sizeof(buf), 1, f) != 1)
 		return 0;
-		
-	iconvert(buf, (char*) sect, SF_SECT);
+
+	c = buf;
+	sect->os_base = get4(c); c += 4;
+	sect->os_size = get4(c); c += 4;
+	sect->os_foff = get4(c); c += 4;
+	sect->os_flen = get4(c); c += 4;
+	sect->os_lign = get4(c);
 	return 1 ;
 }
 
