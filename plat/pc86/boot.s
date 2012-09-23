@@ -23,7 +23,7 @@
 ! If you ever need to change the boot code, this needs adjusting. I recommend
 ! a hex editor.
 
-PADDING = 0xB9
+PADDING = 0xB7
 
 ! Some definitions.
 
@@ -45,8 +45,8 @@ start2:
 
 	mov ax, cs
 	mov ds, ax
-	mov es, ax
 	mov ss, ax
+	! Defer setting es until after probing the drive.
 	
 	! Initialise the stack, which will start at the top of our segment and work
 	! down.
@@ -65,10 +65,13 @@ start2:
 	call write_string
 
 	! Probe the drive to figure out its geometry.
+	! This might clobber es.
 	
-	push dx	
+	push dx
 	mov ax, 0x0800           ! service number
 	int 0x13
+	mov ax, cs               ! restore es
+	mov es, ax
 	pop ax
 	jc cant_boot
 	
