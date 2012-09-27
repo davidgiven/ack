@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <string.h>
 #include "out.h"
 
@@ -221,7 +222,7 @@ void iconvert(char* buf, char* str, char* fmt)
 {
 	register char *nf, *ni, *no ;
 	int last, i ;
-	long value ;
+	uint32_t value ;
 	ni=buf ; no=str ; nf=fmt ;
 	while ( last = *nf++ ) {
 		last -= '0' ;
@@ -234,8 +235,8 @@ void iconvert(char* buf, char* str, char* fmt)
 		switch ( last ) {
 		case 0 : break ;
 		case 1 : *no= value ; break ;
-		case 2 : *(unsigned short *)no = value ; break ;
-		case 4 : *(long *)no = value ; break ;
+		case 2 : *(uint16_t *)no = value ; break ;
+		case 4 : *(uint32_t *)no = value ; break ;
 		default :
 			 fatal("illegal out.h format string\n");
 		}
