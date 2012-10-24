@@ -6,13 +6,14 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <out.h>
 #include "const.h"
 
 static short	nerrors = 0;
-static		diag();
+static void	diag(char *, char *, va_list);
 
 stop()
 {
@@ -28,40 +29,49 @@ stop()
 }
 
 /* VARARGS1 */
-fatal(format, a1, a2, a3, a4)
-	char	*format;
+void
+fatal(char *format, ...)
 {
+	va_list ap;
+	va_start(ap, format);
 	nerrors++;
-	diag("fatal", format, a1, a2, a3, a4);
+	diag("fatal", format, ap);
 	stop();
 }
 
 /* VARARGS1 */
-warning(format, a1, a2, a3, a4)
-	char	*format;
+void
+warning(char *format, ...)
 {
-	diag("warning", format, a1, a2, a3, a4);
+	va_list ap;
+	va_start(ap, format);
+	diag("warning", format, ap);
+	va_end(ap);
 }
 
 /* VARARGS1 */
-error(format, a1, a2, a3, a4)
-	char	*format;
+void
+error(char *format, ...)
 {
+	va_list ap;
+	va_start(ap, format);
 	nerrors++;
-	diag("error", format, a1, a2, a3, a4);
+	diag("error", format, ap);
+	va_end(ap);
 }
 
 /* VARARGS1 */
-do_verbose(format, a1, a2, a3, a4)
-	char	*format;
+void
+do_verbose(char *format, ...)
 {
-	diag((char *) 0, format, a1, a2, a3, a4);
+	va_list ap;
+	va_start(ap, format);
+	diag((char *) 0, format, ap);
+	va_end(ap);
 }
 
-static
-diag(tail, format, a1, a2, a3, a4)
-	char	*tail;
-	char	*format;
+static void
+diag(char *tail, char *format, va_list ap)
 {
 	extern char	*progname, *archname, *modulname; 
 
@@ -72,7 +82,7 @@ diag(tail, format, a1, a2, a3, a4)
 		fprintf(stderr, "%s: ", archname);
 	else if (modulname)
 		fprintf(stderr, "%s: ", modulname);
-	fprintf(stderr, format, a1, a2, a3, a4);
+	vfprintf(stderr, format, ap);
 	if (tail) fprintf(stderr, " (%s)\n", tail);
 	else putc('\n', stderr);
 }
