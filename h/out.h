@@ -6,22 +6,19 @@
 
 #ifndef __OUT_H_INCLUDED
 #define __OUT_H_INCLUDED
-
-#include <stdint.h>
-
 /*
  * output format for ACK assemblers
  */
 
 struct outhead {
-	uint16_t oh_magic;	/* magic number */
-	uint16_t oh_stamp;	/* version stamp */
-	uint16_t oh_flags;	/* several format flags */
-	uint16_t oh_nsect;	/* number of outsect structures */
-	uint16_t oh_nrelo;	/* number of outrelo structures */
-	uint16_t oh_nname;	/* number of outname structures */
-	uint32_t oh_nemit;	/* sum of all os_flen */
-	uint32_t oh_nchar;	/* size of string area */
+	unsigned short 	oh_magic;	/* magic number */
+	unsigned short 	oh_stamp;	/* version stamp */
+	unsigned short	oh_flags;	/* several format flags */
+	unsigned short	oh_nsect;	/* number of outsect structures */
+	unsigned short	oh_nrelo;	/* number of outrelo structures */
+	unsigned short	oh_nname;	/* number of outname structures */
+	long	oh_nemit;		/* sum of all os_flen */
+	long	oh_nchar;		/* size of string area */
 };
 
 #define O_MAGIC	0x0201			/* magic number of output file */
@@ -32,30 +29,30 @@ struct outhead {
 #define	HF_8086	0x0008			/* os_base specially encoded */
 
 struct outsect {
-	uint32_t os_base;		/* startaddress in machine */
-	uint32_t os_size;		/* section size in machine */
-	uint32_t os_foff;		/* startaddress in file */
-	uint32_t os_flen;		/* section size in file */
-	uint32_t os_lign;		/* section alignment */
+	long 	os_base;		/* startaddress in machine */
+	long	os_size;		/* section size in machine */
+	long	os_foff;		/* startaddress in file */
+	long	os_flen;		/* section size in file */
+	long	os_lign;		/* section alignment */
 };
 
 struct outrelo {
-	int8_t or_type;		/* type of reference */
-	int8_t or_sect;		/* referencing section */
-	uint16_t or_nami;	/* referenced symbol index */
-	uint32_t or_addr;		/* referencing address */
+	char	or_type;		/* type of reference */
+	char	or_sect;		/* referencing section */
+	unsigned short	or_nami;	/* referenced symbol index */
+	long	or_addr;		/* referencing address */
 };
 
 struct outname {
 	union {
-	  int8_t *on_ptr;		/* symbol name (in core) */
-	  uint32_t on_off;			/* symbol name (in file) */
+	  char	*on_ptr;		/* symbol name (in core) */
+	  long	on_off;			/* symbol name (in file) */
 	}	on_u;
 #define on_mptr	on_u.on_ptr
 #define on_foff	on_u.on_off
-	uint16_t on_type;	/* symbol type */
-	uint16_t on_desc;	/* debug info */
-	uint32_t on_valu;		/* symbol value */
+	unsigned short	on_type;	/* symbol type */
+	unsigned short	on_desc;	/* debug info */
+	long	on_valu;		/* symbol value */
 };
 
 /*
@@ -118,9 +115,9 @@ struct outname {
  */
 #define BADMAGIC(x)	((x).oh_magic!=O_MAGIC)
 #define OFF_SECT(x)	SZ_HEAD
-#define OFF_EMIT(x)	(OFF_SECT(x) + ((uint32_t)(x).oh_nsect * SZ_SECT))
+#define OFF_EMIT(x)	(OFF_SECT(x) + ((long)(x).oh_nsect * SZ_SECT))
 #define OFF_RELO(x)	(OFF_EMIT(x) + (x).oh_nemit)
-#define OFF_NAME(x)	(OFF_RELO(x) + ((uint32_t)(x).oh_nrelo * SZ_RELO))
-#define OFF_CHAR(x)	(OFF_NAME(x) + ((uint32_t)(x).oh_nname * SZ_NAME))
+#define OFF_NAME(x)	(OFF_RELO(x) + ((long)(x).oh_nrelo * SZ_RELO))
+#define OFF_CHAR(x)	(OFF_NAME(x) + ((long)(x).oh_nname * SZ_NAME))
 
 #endif /* __OUT_H_INCLUDED */
