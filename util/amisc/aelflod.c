@@ -66,7 +66,7 @@ const char elf_le_ident_string[] = {
 
 char hdr[HDR_LENGTH] ;
 
-/* Segment numbers understood by aslod. */
+/* Segment numbers understood by aelflod. */
 
 enum {
 	TEXT = 0,
@@ -218,42 +218,29 @@ void emitphdr(unsigned long address, unsigned long filesize,
 	fileoffset += filesize;
 }
 
-void iconvert(char* buf, char* str, char* fmt)
-{
-	register char *nf, *ni, *no ;
-	int last, i ;
-	uint32_t value ;
-	ni=buf ; no=str ; nf=fmt ;
-	while ( last = *nf++ ) {
-		last -= '0' ;
-		if ( last<1 || last >9 ) fatal("illegal out.h format string\n");
-		value=0 ;
-		i=last ;
-		while ( i-- ) {
-			value = (value<<8) + (ni[i]&0xFF) ;
-		}
-		switch ( last ) {
-		case 0 : break ;
-		case 1 : *no= value ; break ;
-		case 2 : *(uint16_t *)no = value ; break ;
-		case 4 : *(uint32_t *)no = value ; break ;
-		default :
-			 fatal("illegal out.h format string\n");
-		}
-		ni += last ; no += last ;
-	}
-}
+/* Macros from modules/src/object/obj.h */
+#define Xchar(ch)	((ch) & 0377)
+#define uget2(c)	(Xchar((c)[0]) | ((unsigned) Xchar((c)[1]) << 8))
+#define get4(c)		(uget2(c) | ((long) uget2((c)+2) << 16))
 
 /* Read the ack.out file header. */
 
 int rhead(FILE* f, struct outhead* head)
 {
-	char buf[sizeof(struct outhead)];
+	char buf[SZ_HEAD], *c;
 	
 	if (fread(buf, sizeof(buf), 1, f) != 1)
 		return 0;
-		
-	iconvert(buf, (char*) head, SF_HEAD);
+
+	c = buf;
+	head->oh_magic = uget2(c); c += 2;
+	head->oh_stamp = uget2(c); c += 2;
+	head->oh_flags = uget2(c); c += 2;
+	head->oh_nsect = uget2(c); c += 2;
+	head->oh_nrelo = uget2(c); c += 2;
+	head->oh_nname = uget2(c); c += 2;
+	head->oh_nemit = get4(c); c += 4;
+	head->oh_nchar = get4(c);
 	return 1;
 }
 
@@ -261,12 +248,17 @@ int rhead(FILE* f, struct outhead* head)
  
 int rsect(FILE* f, struct outsect* sect)
 {
-	char buf[sizeof(struct outsect)];
+	char buf[SZ_SECT], *c;
 	
 	if (fread(buf, sizeof(buf), 1, f) != 1)
 		return 0;
-		
-	iconvert(buf, (char*) sect, SF_SECT);
+
+	c = buf;
+	sect->os_base = get4(c); c += 4;
+	sect->os_size = get4(c); c += 4;
+	sect->os_foff = get4(c); c += 4;
+	sect->os_flen = get4(c); c += 4;
+	sect->os_lign = get4(c);
 	return 1 ;
 }
 
@@ -285,13 +277,13 @@ int main(int argc, char* argv[])
 		switch (argv[1][1])
 		{
 			case 'h':
-				fprintf(stderr, "%s: Syntax: aslod [-h] <inputfile> <outputfile>\n",
+				fprintf(stderr, "%s: Syntax: aelflod [-h] <inputfile> <outputfile>\n",
 					program);
 				exit(0);
 				
 			default:
 			syntaxerror:
-				fatal("syntax error --- try -h for help)");
+				fatal("syntax error --- try -h for help");
 		}
 		
 		argv++;
@@ -405,7 +397,7 @@ int main(int argc, char* argv[])
 	emit16(ELF_HEADER_SIZE);           /* elf header size */
 	emit16(PROGRAM_HEADER_SIZE);       /* program header entry size */
 	emit16(1);                         /* number of program header entries */
-	emit16(0);                         /* section header entry size */
+	emit16(0x28);                      /* section header entry size */
 	emit16(0);                         /* number of section header entries */
 	emit16(0);                         /* section header string table index = SHN_UNDEF */
 	

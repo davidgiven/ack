@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 				
 			default:
 			syntaxerror:
-				fatal("syntax error --- try -h for help)");
+				fatal("syntax error --- try -h for help");
 		}
 		
 		argv++;
