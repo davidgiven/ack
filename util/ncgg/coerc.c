@@ -127,6 +127,15 @@ struct varinfo *gen_preturn() {
 	return(vp);
 }
 
+struct varinfo *gen_stackadjust(int expr) {
+	register struct varinfo *vp;
+
+	NEW(vp,struct varinfo);
+	vp->vi_int[0] = INSSTACKADJUST;
+	vp->vi_int[1] = expr;
+	return(vp);
+}
+
 struct varinfo *gen_tlab(n) {
 	register struct varinfo *vp;
 

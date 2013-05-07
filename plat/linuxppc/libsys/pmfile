@@ -2,12 +2,13 @@
 -- $State: Exp $
 -- $Revision: 1.1 $
 
-local d = ROOTDIR.."plat/linux386/libsys/"
+local d = ROOTDIR.."plat/linuxppc/libsys/"
 
-libsys_linux386 = acklibrary {
+libsys_linuxppc = acklibrary {
 	ACKINCLUDES = {"%BINDIR%include"},
 	
 	ackfile (d.."_syscall.s"),
+	ackfile (d.."trap.s"),
 	
 	install = pm.install("%BINDIR%lib/%PLATFORM%/libsys.a"),
 }

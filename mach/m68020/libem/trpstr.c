@@ -1,4 +1,5 @@
 #include <em_abs.h>
+
 char *
 _trpstr(d)
 {

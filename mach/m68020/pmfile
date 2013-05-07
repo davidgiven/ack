@@ -3,6 +3,9 @@
 
 local d = ROOTDIR.."mach/m68020/"
 
+include (d.."libem/pmfile")
+include (d.."libend/pmfile")
+
 mach_m68020 = group {
 	ARCH = "m68020",
 	
@@ -10,20 +13,11 @@ mach_m68020 = group {
 	proto_ncg { ARCHDIR = "m68020" },
 	proto_top,
 	ego_descr,
-	
-	install = {
-		pm.install("%ROOTDIR%/lib/%ARCH%/descr", "%BINDIR%%PLATIND%/%ARCH%/descr"),
-	}
 }
 
--- Revision history
--- $Log$
--- Revision 1.3  2006-07-22 12:31:19  dtrg
--- Added support for the top target peephole optimiser.
---
--- Revision 1.2  2006/07/22 00:52:01  dtrg
--- Added support for the ego global optimisation suite.
---
--- Revision 1.1  2006/07/20 23:18:18  dtrg
--- First version in CVS.
---
+support_m68020 = group {
+	OPTIMISATION = "-O6",
+
+	libem_m68020,
+	libend_m68020,
+}

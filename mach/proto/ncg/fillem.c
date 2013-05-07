@@ -60,8 +60,6 @@ long con();
 #define get8()  getc(emfile)
 
 FILE *emfile;
-extern FILE *codefile;
-extern FILE *freopen();
 
 int nextispseu,savetab1;
 int opcode;

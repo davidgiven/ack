@@ -16,6 +16,33 @@ static char rcsid[] = "$Id$";
 
 #define UBYTE(x)	((x) & BYTEMASK)
 
+static long read2(char* addr, int type)
+{
+	unsigned short word0, word1;
+
+	if (type & RELBR)
+		return (UBYTE(addr[0]) << WIDTH) + UBYTE(addr[1]);
+	else
+		return (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
+}
+
+static long read4(char* addr, int type)
+{
+	unsigned short word0, word1;
+
+	if (type & RELBR) {
+		word0 = (UBYTE(addr[0]) << WIDTH) + UBYTE(addr[1]);
+		word1 = (UBYTE(addr[2]) << WIDTH) + UBYTE(addr[3]);
+	} else {
+		word0 = (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
+		word1 = (UBYTE(addr[3]) << WIDTH) + UBYTE(addr[2]);
+	}
+	if (type & RELWR)
+		return ((long)word0 << (2 * WIDTH)) + word1;
+	else
+		return ((long)word1 << (2 * WIDTH)) + word0;
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
@@ -25,32 +52,58 @@ getvalu(addr, type)
 	char	addr[];
 	char	type;
 {
-	unsigned short	word0, word1;
-
 	switch (type & RELSZ) {
 	case RELO1:
 		return UBYTE(addr[0]);
 	case RELO2:
-		if (type & RELBR)
-			return (UBYTE(addr[0]) << WIDTH) + UBYTE(addr[1]);
-		else
-			return (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
+		return read2(addr, type);
 	case RELO4:
-		if (type & RELBR) {
-			word0 = (UBYTE(addr[0]) << WIDTH) + UBYTE(addr[1]);
-			word1 = (UBYTE(addr[2]) << WIDTH) + UBYTE(addr[3]);
-		} else {
-			word0 = (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
-			word1 = (UBYTE(addr[3]) << WIDTH) + UBYTE(addr[2]);
-		}
-		if (type & RELWR)
-			return ((long)word0 << (2 * WIDTH)) + word1;
-		else
-			return ((long)word1 << (2 * WIDTH)) + word0;
+		return read4(addr, type);
+	case RELOPPC:
+		return read4(addr, type) & 0x03FFFFFD;
+	case RELOH2:
+		return read2(addr, type) << 16;
 	default:
 		fatal("bad relocation size");
 	}
 	/* NOTREACHED */
+}
+
+static void write2(long valu, char* addr, int type)
+{
+	unsigned short	word0, word1;
+
+	if (type & RELBR) {
+		addr[0] = valu >> WIDTH;
+		addr[1] = valu;
+	} else {
+		addr[0] = valu;
+		addr[1] = valu >> WIDTH;
+	}
+}
+
+static void write4(long valu, char* addr, int type)
+{
+	unsigned short	word0, word1;
+
+	if (type & RELWR) {
+		word0 = valu >> (2 * WIDTH);
+		word1 = valu;
+	} else {
+		word0 = valu;
+		word1 = valu >> (2 * WIDTH);
+	}
+	if (type & RELBR) {
+		addr[0] = word0 >> WIDTH;
+		addr[1] = word0;
+		addr[2] = word1 >> WIDTH;
+		addr[3] = word1;
+	} else {
+		addr[0] = word0;
+		addr[1] = word0 >> WIDTH;
+		addr[2] = word1;
+		addr[3] = word1 >> WIDTH;
+	}
 }
 
 /*
@@ -64,40 +117,26 @@ putvalu(valu, addr, type)
 	char	addr[];
 	char	type;
 {
-	unsigned short	word0, word1;
 
 	switch (type & RELSZ) {
 	case RELO1:
 		addr[0] = valu;
 		break;
 	case RELO2:
-		if (type & RELBR) {
-			addr[0] = valu >> WIDTH;
-			addr[1] = valu;
-		} else {
-			addr[0] = valu;
-			addr[1] = valu >> WIDTH;
-		}
+		write2(valu, addr, type);
 		break;
 	case RELO4:
-		if (type & RELWR) {
-			word0 = valu >> (2 * WIDTH);
-			word1 = valu;
-		} else {
-			word0 = valu;
-			word1 = valu >> (2 * WIDTH);
-		}
-		if (type & RELBR) {
-			addr[0] = word0 >> WIDTH;
-			addr[1] = word0;
-			addr[2] = word1 >> WIDTH;
-			addr[3] = word1;
-		} else {
-			addr[0] = word0;
-			addr[1] = word0 >> WIDTH;
-			addr[2] = word1;
-			addr[3] = word1 >> WIDTH;
-		}
+		write4(valu, addr, type);
+		break;
+	case RELOPPC:
+	{
+		long i = read4(addr, type) & ~0x03FFFFFD;
+		i |= valu & 0x03FFFFFD;
+		write4(i, addr, type);
+		break;
+	}
+	case RELOH2:
+		write2(valu>>16, addr, type);
 		break;
 	default:
 		fatal("bad relocation size");
@@ -182,6 +221,7 @@ relocate(head, emit, names, relo, off)
 	 * Pick up previous value at location to be relocated.
 	 */
 	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
+
 	/*
 	 * Or_nami is an index in the name table of the considered module.
 	 * The name of which it is an index can be:

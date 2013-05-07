@@ -61,27 +61,7 @@ ncgg = simple {
 	
 	outputs = {"%U%/tables.c", "%U%/tables.h"},
 	command = {
-		"cd %out[1]:dirname% && (%BINDIR%%PLATDEP%/cpp.ansi -P -I%NCGGINCLUDEDIR% %in% | %TOOLDIR%ncgg)",
+		"cd %out[1]:dirname% && (%BINDIR%%PLATDEP%/cpp.ansi -I%NCGGINCLUDEDIR% %in% | %TOOLDIR%ncgg)",
 		"mv %out[1]:dirname%/tables.H %out[2]%"
 	},
 }
-
---[[
-	@echo HOSTNCG $SRCDIR/src/arch/$table/ncg/table
-	@mkdir -p \$(dir \$@)
-	@(cd $OBJDIR/src/arch/$1/ncg && $DESTDIR/bin/cpp -P -I$SRCDIR/src/arch/$1/ncg $SRCDIR/src/arch/$table/ncg/table | \
-		$DESTDIR/bin/ncgg) > /dev/null
-	@(cd $OBJDIR/src/arch/$1/ncg && mv tables.H tables.h)
---]]
-
--- Revision history
--- $Log$
--- Revision 1.3  2007-04-23 23:40:59  dtrg
--- Modified to run ncgg input files through the ANSI preprocessor rather than the K&R one.
---
--- Revision 1.2  2006/07/22 20:58:27  dtrg
--- cpp now gets installed in the right place.
---
--- Revision 1.1  2006/07/20 23:24:28  dtrg
--- First version in CVS.
---

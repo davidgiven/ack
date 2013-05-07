@@ -9,7 +9,7 @@
 	move.l	(.limhp),-(sp)
 	move.l	(.reghp),-(sp)
 	pea	(12, sp)
-	move.l	(.lino),-(sp)
+	move.l	(hol0),-(sp)
 	pea	(fmt)
 	jsr	(.diagnos)
 	lea	(20, sp), sp

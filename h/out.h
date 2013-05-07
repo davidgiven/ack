@@ -61,7 +61,10 @@ struct outname {
 #define RELSZ	0x07			/* relocation length */
 #define RELO1	   1			/* 1 byte */
 #define RELO2	   2			/* 2 bytes */
-#define RELO4	   4			/* 4 bytes */
+#define RELO4	   3			/* 4 bytes */
+#define RELOPPC    4            /* PowerPC 26-bit address */
+#define RELOH2     5            /* write top 2 bytes of 4 byte word */
+
 #define RELPC	0x08			/* pc relative */
 #define RELBR	0x10			/* High order byte lowest address. */
 #define RELWR	0x20			/* High order word lowest address. */

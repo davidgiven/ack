@@ -95,6 +95,12 @@ include "plat/pc86/pmfile"             -- PC standalone
 include "mach/i386/pmfile"             -- generic i386
 include "plat/linux386/pmfile"         -- Linux executables
 
+include "mach/powerpc/pmfile"          -- generic PowerPC
+include "plat/linuxppc/pmfile"         -- Linux executables
+
+include "mach/m68020/pmfile"           -- generic M68k
+include "plat/linux68k/pmfile"         -- Linux executables
+
 include "mach/i80/pmfile"              -- generic 8080
 include "plat/cpm/pmfile"              -- CP/M
 
@@ -180,7 +186,9 @@ default = group {
 	
 	platform_pc86,
 	platform_linux386,
-	platform_cpm
+	platform_linuxppc,
+	platform_linux68k,
+	platform_cpm,
 }
 
 -- Ensure that the work directories exist.

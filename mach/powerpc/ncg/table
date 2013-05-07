@@ -53,12 +53,12 @@ PROPERTIES
 	GPR24 GPR25 GPR26 GPR27 GPR28 GPR29 GPR30 GPR31
 	
 	CR0   CR1
-	
+
 	FPR0  FPR1  FPR2  FPR3  FPR4  FPR5  FPR6  FPR7
 	FPR8  FPR9  FPR10 FPR11 FPR12 FPR13 FPR14 FPR15
 	FPR16 FPR17 FPR18 FPR19 FPR20 FPR21 FPR22 FPR23
 	FPR24 FPR25 FPR26 FPR27 FPR28 FPR29 FPR30 FPR31
-	
+
 REGISTERS
 
 	/* Reverse order to encourage ncg to allocate them from r31 down */
@@ -95,7 +95,7 @@ REGISTERS
 	FP("fp")           : GPR, GPRFP.
 	SP("sp")           : GPR, GPRSP.
 	R0("r0")           : GPR, GPR0.
-	
+
 	F31("f31")         : FPR, FREG, FPR31.
 	F30("f30")         : FPR, FREG, FPR30.
 	F29("f29")         : FPR, FREG, FPR29.
@@ -1996,7 +1996,7 @@ PATTERNS
 
 	/* All very cheap and nasty --- this needs to be properly integrated into
 	 * the code generator. ncg doesn't like having separate FPU registers. */
-	 
+
 	/* Single-precision */
 	
 	pat zrf $1==INT32                  /* Push zero */
@@ -2158,4 +2158,3 @@ PATTERNS
 			gen
 				bl {LABEL, ".fif8"}
 				
-		

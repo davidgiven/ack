@@ -41,7 +41,7 @@
 
 #define	GENLAB		"I"		/* compiler generated labels */
 
-#define	valu_t		short		/* type of expression values */
+#define	valu_t		long		/* type of expression values */
 #define	ADDR_T		unsigned short	/* type of dot */
 #define	word_t		short		/* type of keyword value */
 /*
@@ -113,6 +113,7 @@ _include	<signal.h>
 #define	lowb(z)		((int)(z) & 0xFF)
 #define	loww(z)		((int)(z) & 0xFFFF)
 
+#define fitx(x, d)  ((((x) + (1<<(d-1))) & ~((int)(1<<(d))-1)) == 0)
 #define	fitb(x)		((((x) + 0x80) & ~((int)0xFF)) == 0)
 #define	fitw(x)		((((x) + 0x8000L) & ~0xFFFFL) == 0)
 

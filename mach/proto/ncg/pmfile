@@ -1,5 +1,5 @@
--- $Source$
--- $State$
+-- $Source: /cvsroot/tack/Ack/mach/proto/ncg/pmfile,v $
+-- $State: Exp $
 
 local d = ROOTDIR.."mach/proto/ncg/"
 
@@ -17,6 +17,8 @@ local cfile_with_tables = cfile {
 
 proto_ncg = cprogram {
 	class = "proto_ncg",
+	
+	exename = "ncg",
 	
 	CINCLUDES = {
 		PARENT,
@@ -50,6 +52,6 @@ proto_ncg = cprogram {
 	lib_em_data,
 	lib_flt_arith,
 	
-	outputs = {"%U%/%PLATFORM%-ncg"},
-	install = pm.install("%BINDIR%%PLATDEP%/%PLATFORM%/ncg")
+	outputs = {"%U%/%PLATFORM%-%exename%"},
+	install = pm.install("%BINDIR%%PLATDEP%/%PLATFORM%/%exename%")
 }

@@ -112,10 +112,10 @@ showsect()
 	struct outsect	section;
 
 	rd_sect(&section, 1);
-	printf("\tstartaddress in machine\t%ld\n",	section.os_base);
-	printf("\tsection size in machine\t%ld\n",	section.os_size);
-	printf("\tstartaddress in file\t%ld\n",		section.os_foff);
-	printf("\tsection size in file\t%ld\n",		section.os_flen);
+	printf("\tstartaddress in machine\t0x%lX\n",	section.os_base);
+	printf("\tsection size in machine\t0x%lX\n",	section.os_size);
+	printf("\tstartaddress in file\t0x%lX\n",		section.os_foff);
+	printf("\tsection size in file\t0x%lX\n",		section.os_flen);
 	printf("\tsection alignment\t%ld\n",		section.os_lign);
 }
 
@@ -137,8 +137,14 @@ showrelo()
 	case RELO4:
 		printf("\t4 bytes\n");
 		break;
+	case RELOPPC:
+		printf("\tPowerPC 26-bit address\n");
+		break;
+	case RELOH2:
+		printf("\ttop 2 bytes of a 4 byte word\n");
+		break;
 	default:
-		error("\tunexpected relocation length\n");
+		printf("\tunknown relocation type %d\n", relrec.or_type & RELSZ);
 		break;
 	}
 	if (relrec.or_type & RELPC) printf("\tpc relative\n");
@@ -194,7 +200,7 @@ showname(namep)
 		printf("\tstab 0x%x\n", namep->on_type >> 8);
 		printf("\tdesc 0x%x\n", namep->on_desc);
 	}
-	printf("\tvalue %ld\n", namep->on_valu);
+	printf("\tvalue 0x%lX\n", namep->on_valu);
 }
 
 /*

@@ -15,7 +15,7 @@ fmt:	.asciz "%s\n"
 	move.l	d0, (12, sp)
 	cmp.l	#16, d0
 	bcc	1f
-	move.l	(.trpim), d1
+	move.l	(.ignmask), d1
 	btst	d0, d1
 	bne	3f
 1:
