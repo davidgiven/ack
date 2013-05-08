@@ -1,0 +1,29 @@
+-- $Source: /cvsroot/tack/Ack/plat/linux386/libsys/pmfile,v $
+-- $State: Exp $
+-- $Revision: 1.1 $
+
+local d = ROOTDIR.."plat/linux/liblinux/"
+
+liblinux = acklibrary {
+	ACKINCLUDES = {"%BINDIR%include"},
+	
+	ackfile (d.."errno.s"),
+	ackfile (d.."_hol0.s"),
+	
+	ackfile (d.."brk.c"),
+	ackfile (d.."close.c"),
+	ackfile (d.."creat.c"),
+	ackfile (d.."getpid.c"),
+	ackfile (d.."gettimeofday.c"),
+	ackfile (d.."_exit.c"),
+	ackfile (d.."isatty.c"),
+	ackfile (d.."kill.c"),
+	ackfile (d.."lseek.c"),
+	ackfile (d.."open.c"),
+	ackfile (d.."read.c"),
+	ackfile (d.."sbrk.c"),
+	ackfile (d.."signal.c"),
+	ackfile (d.."write.c"),
+	
+	install = pm.install("%BINDIR%lib/%PLATFORM%/liblinux.a"),
+}
