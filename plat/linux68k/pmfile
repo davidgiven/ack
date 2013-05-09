@@ -1,0 +1,48 @@
+-- $Source: /cvsroot/tack/Ack/plat/linux386/pmfile,v $
+-- $State: Exp $
+-- $Revision: 1.3 $
+
+local d = ROOTDIR.."plat/linux68k/"
+
+include (d.."libsys/pmfile")
+include "plat/linux/liblinux/pmfile"
+
+local bootsector = ackfile {
+	file (d.."boot.s"),
+	install = pm.install("%BINDIR%lib/%PLATFORM%/boot.o"),
+}
+
+local descr = group {
+	install = pm.install(d.."descr", "%BINDIR%%PLATIND%/%PLATFORM%/descr")
+}
+
+local headers = group {
+	install = {
+		pm.install(d.."include/ack/config.h", "%BINDIR%%PLATIND%/%PLATFORM%/include/ack/config.h"),
+		pm.install(d.."include/unistd.h",     "%BINDIR%%PLATIND%/%PLATFORM%/include/unistd.h"),
+	}
+}
+
+platform_linux68k = group {
+	ARCH = "m68020",
+	PLATFORM = "linux68k",
+	OPTIMISATION = "-O6",
+	
+	-- Ensure the descr and headers are installed first because we'll need it
+	-- to build the libraries.
+	
+	descr,
+	headers,
+	
+	-- Build the back-end support.
+	
+	mach_m68020,
+	support_m68020,
+	lang_runtimes,
+
+	-- Build the PC standalone syscall library.
+	
+	liblinux,
+	libsys_linux68k,
+	bootsector,
+}

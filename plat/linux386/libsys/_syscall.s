@@ -3,8 +3,6 @@
 ! $State$
 ! $Revision$
 
-#include "syscalls.h"
-
 ! Declare segments (the order is important).
 
 .sect .text

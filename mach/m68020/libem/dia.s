@@ -14,8 +14,8 @@ del	= 0177
 .sect .text
 .diagnos:
 	movem.l	d0/d1/d2/a0, -(sp)
-	move.l	(.lino), -(sp)
-	move.l	(.filn), d2
+	move.l	(hol0), -(sp)
+	move.l	(hol0+4), d2
 	beq	1f
 	move.l	d2, a0
 	move.l	#40, d0

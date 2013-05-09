@@ -6,4 +6,4 @@
 
 #define	WORD_SIZE	4	/* should be 2 or 4 */
 #define TBL68020	1	/* should be TBL68020 or TBL68000 */
-/* #define TBL68881	1 	/* use floating point processor */
+#define TBL68881	1 	/* use floating point processor */

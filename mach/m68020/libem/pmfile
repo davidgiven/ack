@@ -1,0 +1,38 @@
+-- $Source: /cvsroot/tack/Ack/mach/i386/libem/pmfile,v $
+-- $State: Exp $
+-- $Revision: 1.1 $
+
+local d = ROOTDIR.."mach/m68020/libem/"
+
+libem_m68020 = acklibrary {
+	outputs = {"%U%/libem-%PLATFORM%.a"},
+
+	ACKINCLUDES = {PARENT, ROOTDIR.."h"},
+	
+	ackfile (d.."fp68881.s"),
+	ackfile (d.."aar.s"),
+	ackfile (d.."lar.s"),
+	ackfile (d.."sar.s"),
+	ackfile (d.."csa.s"),
+	ackfile (d.."csb.s"),
+	ackfile (d.."shp.s"),
+	ackfile (d.."set.s"),
+	ackfile (d.."inn.s"),
+	ackfile (d.."fat.s"),
+	ackfile (d.."trp.s"),
+	ackfile (d.."trpstr.c"),
+	ackfile (d.."mon.s"),
+	ackfile (d.."nop.s"),
+	ackfile (d.."dia.s"),
+	ackfile (d.."cii.s"),
+	ackfile (d.."cuu.s"),
+	ackfile (d.."cmi.s"),
+	ackfile (d.."cms.s"),
+	ackfile (d.."cmu.s"),
+	ackfile (d.."cvf.s"),
+	ackfile (d.."exg.s"),
+	ackfile (d.."los.s"),
+	ackfile (d.."sts.s"),
+
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libem.a"),
+}

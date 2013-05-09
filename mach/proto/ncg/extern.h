@@ -20,6 +20,9 @@ extern rl_p curreglist;                 /* side effect of findcoerc() */
 #ifndef NDEBUG
 extern int Debug;                       /* on/off debug printout */
 #endif
+#ifdef USE_NOFRAMEPOINTER
+extern int stackoffset;                 /* offset from localbase to sp */
+#endif
 
 /*
  * Next descriptions are external declarations for tables created
@@ -52,3 +55,6 @@ extern struct reginfo **reglist[];	/* lists of registers per property */
 extern int nregvar[];			/* # of register variables per type */
 extern int *rvnumbers[];		/* lists of numbers */
 #endif
+
+extern FILE *codefile;
+extern FILE *freopen();

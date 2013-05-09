@@ -2,6 +2,8 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -778,7 +780,10 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	compute(&enodes[nodeno], &result);
 	assert(result.e_typ!=EV_INT && result.e_typ!=EV_ADDR);
 	if (result.e_typ==EV_REG)
-		erasereg(result.e_v.e_reg);
+	{
+		int regno = result.e_v.e_reg;
+		erasereg(regno);
+	}
 	break;
     }
     case DO_TOKREPLACE: {
@@ -904,6 +909,23 @@ normalfailed:	if (stackpad!=tokpatlen) {
 
 	break;
     }
+#endif
+#ifdef USE_NOFRAMEPOINTER
+	case DO_STACKADJUST: {
+	result_t result;
+	int nodeno;
+	
+	DEBUG("STACKADJUST");
+	/* The offset is an expression, which we need to evaluate. */
+	
+	getint(nodeno,codep);
+	compute(&enodes[nodeno], &result);
+	assert(result.e_typ==EV_INT);
+	
+	if (toplevel)
+		stackoffset += result.e_v.e_con;
+	break;
+	}
 #endif
 	}
 	}

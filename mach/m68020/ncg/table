@@ -5840,7 +5840,7 @@ with any_int STACK
 	jsr {absolute4, ".exg"}
 
 pat fil
-    gen move_l {ext_addr, $1}, {absolute4, ".filn"}
+    gen move_l {ext_addr, $1}, {absolute4, "hol0+4"}
 
 pat gto
 with STACK
@@ -5854,15 +5854,15 @@ with STACK
 	jmp {indirect4, %a}
 #endif
 
-pat lim			yields	{absolute_int, ".trpim"}
+pat lim			yields	{absolute_int, ".ignmask"}
 
 pat lin
     kills posextern
-    gen move_i {const, $1}, {absolute_int, ".lino"}
+    gen move_i {const, $1}, {absolute_int, "hol0"}
     
 pat lni
     kills posextern
-    gen add_i {const, 1}, {absolute_int, ".lino"}
+    gen add_i {const, 1}, {absolute_int, "hol0"}
 
 pat lor $1==0		yields	lb
 
@@ -5955,7 +5955,7 @@ with any4
 pat sim
 with any_int
     kills posextern
-    gen move_i %1, {absolute_int, ".trpim"}
+    gen move_i %1, {absolute_int, ".ignmask"}
 
 pat str $1==0
 with any4 STACK

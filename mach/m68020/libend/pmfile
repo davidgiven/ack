@@ -1,0 +1,16 @@
+-- $Source: /cvsroot/tack/Ack/mach/i386/libend/pmfile,v $
+-- $State: Exp $
+-- $Revision: 1.1 $
+
+local d = ROOTDIR.."mach/m68020/libend/"
+
+libend_m68020 = acklibrary {
+	outputs = {"%U%/libend-%PLATFORM%.a"},
+
+	ackfile (d.."edata.s"),
+	ackfile (d.."em_end.s"),
+	ackfile (d.."end.s"),
+	ackfile (d.."etext.s"),
+
+	install = pm.install("%BINDIR%lib/%PLATFORM%/libend.a"),
+}
