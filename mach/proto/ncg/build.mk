@@ -3,7 +3,7 @@ define build-ncg-impl
 $(call reset)
 
 $(eval cflags += -Imach/$(ARCH)/ncg -I$(OBJDIR)/$D -Imach/proto/ncg)
-$(eval objdir := $D/ncg)
+$(eval objdir := $(PLATFORM))
 
 $(call cfile, mach/proto/ncg/codegen.c)
 $(call cfile, mach/proto/ncg/compute.c)
@@ -29,7 +29,7 @@ $(OBJDIR)/$D/tables.h: $(NCGG) $(CPPANSI) mach/$(ARCH)/ncg/table
 	@echo NCGG $$@
 	@mkdir -p $$(dir $$@)
 	$(hide) cd $$(dir $$@) && \
-		$(abspath $(CPPANSI)) $(abspath mach/$(ARCH)/ncg/table) | $(abspath $(NCGG))
+		$(abspath $(CPPANSI)) -I$(abspath mach/$(ARCH)/ncg) $(abspath mach/$(ARCH)/ncg/table) | $(abspath $(NCGG))
 	$(hide) mv $(OBJDIR)/$D/tables.H $(OBJDIR)/$D/tables.h
 
 $(call cfile, $(OBJDIR)/$D/tables.c)

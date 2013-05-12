@@ -34,7 +34,8 @@ $o: $s $(ACK) \
 		$(PLATIND)/descr/$(PLATFORM) \
 		$(PLATDEP)/$(PLATFORM)/as \
 		$(CCOMPILER) \
-		$(PLATFORM_$(PLATFORM))
+		$(PLATFORM_$(PLATFORM)) \
+		$(EM_ENCODE)
 	@echo ACK $o
 	@mkdir -p $(dir $o)
 	$(hide) ACKDIR=$(INSDIR) $(ACK) $(ACKFLAGS) $(ackflags) -m$(PLATFORM) -c -o $o $s
@@ -42,8 +43,8 @@ endef
 
 define ackfile
 	$(eval s := $1)
-	$(eval o := $(OBJDIR)/$(basename $1).o)
-	$(eval d := $(OBJDIR)/$(basename $1).d)
+	$(eval o := $(OBJDIR)/$(objdir)/$(basename $1).o)
+	$(eval d := $(OBJDIR)/$(objdir)/$(basename $1).d)
 	$(eval DEPENDS += $d)
 	$(eval CLEANABLES += $o $d)
 	$(eval q += $o)

@@ -2,7 +2,7 @@ define build-as-impl
     $(call reset)
 
     $(eval cflags += -Imach/$(ARCH)/as -I$(OBJDIR)/$D)
-    $(eval objdir := $D)
+    $(eval objdir := $(PLATFORM))
 
     $(call cfile, mach/proto/as/comm3.c)
     $(call dependson, $(OBJDIR)/$D/y.tab.h)

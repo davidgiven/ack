@@ -39,6 +39,7 @@ include modules/src/print/build.mk
 include modules/src/flt_arith/build.mk
 include modules/src/em_code/build.mk
 include modules/src/em_mes/build.mk
+include modules/src/read_em/build.mk
 
 include util/amisc/build.mk
 include util/cmisc/build.mk
@@ -48,15 +49,21 @@ include util/data/build.mk
 include util/opt/build.mk
 include util/ncgg/build.mk
 include util/arch/build.mk
+include util/misc/build.mk
 
 include lang/cem/build.mk
 
 include mach/proto/as/build.mk
 include mach/proto/ncg/build.mk
 
+include plat/linux/liblinux/build.mk
+
 include plat/build.mk
 include plat/pc86/build.mk
 include plat/cpm/build.mk
+include plat/linux386/build.mk
+include plat/linux68k/build.mk
+include plat/linuxppc/build.mk
 
 .PHONY: installables
 installables: $(INSTALLABLES)

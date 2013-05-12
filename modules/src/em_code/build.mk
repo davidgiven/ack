@@ -7,7 +7,7 @@ D := modules/src/em_code
 define build-em_code-impl
 	$(call reset)
 	$(eval cflags += $3)
-	$(eval objdir := $D/$1)
+	$(eval objdir := $1)
 	$(call cfile, $D/bhcst.c)
 	$(call cfile, $D/bhdlb.c)
 	$(call cfile, $D/bhdnam.c)

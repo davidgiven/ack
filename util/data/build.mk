@@ -11,7 +11,8 @@ $(eval g := \
 	$(OBJDIR)/$D/em_mnem.c)
 
 $(eval CLEANABLES += $g)
-$g: $D/new_table h/em_table
+$(wordlist 2, $(words $g), $g): $(firstword $g)
+$(firstword $g): $D/new_table h/em_table
 	@echo DATA
 	@mkdir -p $(dir $g)
 	$(hide) $D/new_table h/em_table $(INCDIR) $(OBJDIR)/$D

@@ -16,7 +16,7 @@ $(eval $(build-tabgen-impl))
 # Output file is compiled with cfile and queued.
 
 define tabgen-impl
-$(eval g := $(OBJDIR)/$(strip $1).c)
+$(eval g := $(OBJDIR)/$(objdir)/$(strip $1).c)
 
 $g: $1 $(TABGEN)
 	@echo TABGEN $g
@@ -24,8 +24,9 @@ $g: $1 $(TABGEN)
 	$(hide) $(TABGEN) -f$(strip $1) > $g || $(RM) $g
 
 $(eval CLEANABLES += $g)
-$(call cfile,$g)
+$(call $2,$g)
 endef
 
-tabgen = $(eval $(call tabgen-impl,$1))
+tabgen = $(eval $(call tabgen-impl,$1,cfile))
+acktabgen = $(eval $(call tabgen-impl,$1,ackfile))
 
