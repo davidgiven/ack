@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	Lint outdef construction	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 
 #ifdef	LINT
 
@@ -26,7 +26,6 @@
 #include	"def.h"
 #include	"struct.h"
 #include	"field.h"
-#include	"idf.h"
 #include	"level.h"
 #include	"label.h"
 #include	"code.h"

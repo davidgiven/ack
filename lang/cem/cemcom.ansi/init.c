@@ -7,15 +7,15 @@
 
 #include	<stdlib.h>
 #include	<string.h>
-#include	"nopp.h"
+#include	"parameters.h"
 
 #ifndef NOPP
 #include	<system.h>
 #include	<alloc.h>
 #include	<time.h>
+#include    "idf.h"
 #include	"class.h"
 #include	"macro.h"
-#include	"idf.h"
 
 extern char *sprint();
 

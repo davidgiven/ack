@@ -9,7 +9,7 @@
 
 /* $Id$ */
 
-#include	"dbsymtab.h"
+#include	"parameters.h"
 
 #ifdef	DBSYMTAB
 
@@ -20,13 +20,13 @@
 #include	<flt_arith.h>
 #include	<stb.h>
 
+#include    "idf.h"
 #include	"LLlex.h"
 #include	"stack.h"
 #include	"def.h"
 #include	"type.h"
 #include	"struct.h"
 #include	"field.h"
-#include	"idf.h"
 #include	"Lpars.h"
 #include	"level.h"
 

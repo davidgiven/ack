@@ -6,7 +6,6 @@
 /*		PARSER ERROR ADMINISTRATION		*/
 
 #include	<alloc.h>
-#include	"idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"

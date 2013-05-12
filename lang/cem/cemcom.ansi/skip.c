@@ -5,7 +5,7 @@
 /* $Id$ */
 /* PREPROCESSOR: INPUT SKIP FUNCTIONS */
 
-#include	"nopp.h"
+#include	"parameters.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"

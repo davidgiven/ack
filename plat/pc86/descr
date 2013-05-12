@@ -10,20 +10,20 @@ var f=4
 var d=8
 var ARCH=i86
 var PLATFORM=pc86
-var PLATFORMDIR={EM}/lib/{PLATFORM}
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
 var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
 var MACHOPT_F=-m8
 
-# Override the setting in fe so that files compiled for linux386 can see
+# Override the setting in fe so that files compiled for this platform can see
 # the platform-specific headers.
 
-var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/include/ansi
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
 
 name be
 	from .m.g
 	to .s
-	program {EM}/lib.bin/{PLATFORM}/ncg
+	program {EM}/lib/ack/{PLATFORM}/ncg
 	args <
 	stdout
 	need .e
@@ -31,14 +31,14 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib.bin/{PLATFORM}/as
+	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib.bin/em_led
+	program {EM}/lib/ack/em_led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp

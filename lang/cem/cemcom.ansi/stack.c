@@ -5,21 +5,19 @@
 /* $Id$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #include	<system.h>
 #ifndef	LINT
 #include	<em.h>
 #else
 #include	"l_em.h"
 #endif	/* LINT */
-#include	"debug.h"
-#include	"botch_free.h"
 #include	<alloc.h>
+#include    "idf.h"
 #include	"Lpars.h"
 #include	"arith.h"
 #include	"stack.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"struct.h"
 #include	"level.h"

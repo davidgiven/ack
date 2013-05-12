@@ -45,13 +45,10 @@
 %start		If_expr, control_if_expression;
 
 {
-#include	"lint.h"
-#include	"nopp.h"
-#include	"debug.h"
+#include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"type.h"
 #include	"declar.h"
@@ -59,6 +56,7 @@
 #include	"code.h"
 #include	"expr.h"
 #include	"def.h"
+#include    "stack.h"
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	/* LINT */

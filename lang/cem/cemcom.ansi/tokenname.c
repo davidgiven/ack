@@ -5,7 +5,8 @@
 /* $Id$ */
 /* TOKEN NAME DEFINITIONS */
 
-#include	"idf.h"
+#include	"parameters.h"
+#include    "idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"tokenname.h"

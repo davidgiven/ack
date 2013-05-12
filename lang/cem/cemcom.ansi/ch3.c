@@ -5,12 +5,10 @@
 /* $Id$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  3.3		*/
 
-#include	"debug.h"
-#include	"lint.h"
-#include	"nobitfield.h"
-#include	"idf.h"
+#include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
+#include    "idf.h"
 #include	"proto.h"
 #include	"type.h"
 #include	"struct.h"

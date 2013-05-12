@@ -5,7 +5,7 @@
 /* $Id$ */
 /* IDENTIFIER DESCRIPTOR */
 
-#include	"nopp.h"
+#include	"parameters.h"
 
 struct id_u {
 #ifndef NOPP

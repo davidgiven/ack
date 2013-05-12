@@ -7,23 +7,18 @@
 
 #include	<stdlib.h>
 #include	<string.h>
-#include	"lint.h"
-#include	"debug.h"
-#include	"dbsymtab.h"
+#include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
 #endif	/* LINT */
-#include	"botch_free.h"
 #include	<alloc.h>
-#include	"dataflow.h"
-#include	"use_tmp.h"
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"code.h"
 #include	"stmt.h"

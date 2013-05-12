@@ -12,8 +12,8 @@
 #include	<varargs.h>
 #endif
 
+#include    "parameters.h"
 #include	"arith.h"
-#include	"errout.h"
 #include	"LLlex.h"
 
 /*	This file contains the (non-portable) error-message and diagnostic

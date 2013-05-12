@@ -5,8 +5,7 @@
 /* $Id$ */
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
-#include	"debug.h"
-#include	"botch_free.h"
+#include	"parameters.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -15,7 +14,6 @@
 #include	"Lpars.h"
 #include	"declar.h"
 #include	"def.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"

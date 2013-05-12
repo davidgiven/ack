@@ -25,6 +25,7 @@
  */
 
 
+#include <stdlib.h>
 # include "types.h"
 # include "extern.h"
 # include "io.h"

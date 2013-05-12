@@ -5,7 +5,7 @@
 /* $Id$ */
 /* IDENTIFIER DEFINITION DESCRIPTOR */
 
-#include	"lint.h"
+#include	"parameters.h"
 
 struct def	{		/* for ordinary tags */
 	struct def *next;

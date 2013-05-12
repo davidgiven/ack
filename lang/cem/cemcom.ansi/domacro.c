@@ -5,29 +5,20 @@
 /* $Id$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
-#include	"debug.h"
+#include    <stdlib.h>
+#include	"parameters.h"
+#include    "idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
-#include	"idf.h"
 #include	"input.h"
-#include	"nopp.h"
-#include	"lint.h"
+#include    "replace.h"
 
 #ifndef NOPP
-#include	"ifdepth.h"
-#include	"botch_free.h"
-#include	"nparams.h"
-#include	"parbufsize.h"
-#include	"textsize.h"
-#include	"idfsize.h"	
 #include	"assert.h"
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
-#include	"macbuf.h"
-#include	"replace.h"
-#include	"dbsymtab.h"
 #ifdef DBSYMTAB
 #include	<stb.h>
 #include	<em.h>

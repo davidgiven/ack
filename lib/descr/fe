@@ -4,15 +4,15 @@
 # Don't generate line updating code by default (i.e.: -L flag provided to cem).
 # To put it on again: use -NL
 var LFLAG=-L
-var MODULA2_INCLUDES=-I{EM}/include/m2
-var OCCAM_INCLUDES=-I{EM}/include/occam
-var C_INCLUDES=-I{EM}/include/ansi
+var MODULA2_INCLUDES=-I{EM}/share/ack/include/m2
+var OCCAM_INCLUDES=-I{EM}/share/ack/include/occam
+var C_INCLUDES=-I{EM}/share/ack/include/ansi
 
 callname ack
 name cpp
 	# no from, this is a preprocessor
 	to .i
-	program {EM}/lib.bin/cpp.ansi
+	program {EM}/lib/ack/cpp.ansi
 	mapflag -I* CPP_F={CPP_F?} -I*
 	mapflag -U* CPP_F={CPP_F?} -U*
 	mapflag -D* CPP_F={CPP_F?} -D*
@@ -38,7 +38,7 @@ end
 name f77
 	from .f
 	to .c
-	program {EM}/lib.bin/f2c
+	program {EM}/lib/ack/f2c
 	mapflag -ansi F2_F={F2_F?} -A
 	mapflag -w* F2_F={F2_F?} -w*
 	args \
@@ -54,7 +54,7 @@ end
 name cem
 	from .c
 	to .k
-	program {EM}/lib.bin/em_cemcom.ansi
+	program {EM}/lib/ack/em_cemcom.ansi
 #	mapflag -I* CPP_F={CPP_F?} -I*
 #	mapflag -U* CPP_F={CPP_F?} -U*
 #	mapflag -D* CPP_F={CPP_F?} -D*
@@ -93,7 +93,7 @@ end
 name pc
 	from .p
 	to .k
-	program {EM}/lib.bin/em_pc
+	program {EM}/lib/ack/em_pc
 	mapflag -L PC_F={PC_F?} -L
 #	mapflag -s PC_F={PC_F?} -s
 	mapflag -_ PC_F={PC_F?} -U
@@ -118,7 +118,7 @@ end
 name m2
 	from .mod.def
 	to .k
-	program {EM}/lib.bin/em_m2
+	program {EM}/lib/ack/em_m2
 	mapflag -I* M2_INCL={M2_INCL?} -I*
 	mapflag -L M2_F={M2_F?} -L
 	mapflag -g* M2_F={M2_F?} -g*
@@ -142,7 +142,7 @@ end
 name ocm
 	from .ocm
 	to .k
-	program {EM}/lib.bin/em_occam
+	program {EM}/lib/ack/em_occam
 	mapflag -L OCM_F={OCM_F?} -L
 	mapflag -V* OCM_F={OCM_F?} -V*
 	args -Vw{w}p{p}l{l} {OCM_F?}
@@ -168,7 +168,7 @@ name abc
 	need .b
 	callname abc
 end
-var A68INIT={EM}/lib.bin/em_a68s_init
+var A68INIT={EM}/lib/ack/em_a68s_init
 name a68s
         from .8.a68
         to .k
@@ -183,7 +183,7 @@ end
 name encode
 	from .e
 	to .k
-	program {EM}/lib.bin/em_encode
+	program {EM}/lib/ack/em_encode
 	args <
 	prep cond
 	stdout
@@ -191,7 +191,7 @@ end
 name opt
 	from .k
 	to .m
-	program {EM}/lib.bin/em_opt
+	program {EM}/lib/ack/em_opt
 	mapflag -LIB OPT_F={OPT_F?} -L
 # when running the global optimizer, no multiplication optimization here.
 	mapflag -O2 OPT2_F=-m0
@@ -204,7 +204,7 @@ end
 name ego
 	from .m.ma
 	to .gk
-	program {EM}/lib.bin/em_ego
+	program {EM}/lib/ack/em_ego
 	mapflag -EGO-* EGO_F={EGO_F?} -*
 # The following lines are obsolete, but here for backwards compatibility.
 # They should be removed some day.
@@ -237,7 +237,7 @@ name opt2
 	# of the em peephole optimizer
 	from .gk
 	to .g
-	program {EM}/lib.bin/em_opt2
+	program {EM}/lib/ack/em_opt2
 #	mapflag -LIB OPT_F={OPT_F?} -L
 	args {OPT_F?} {MACHOPT_F?} <
 	optimizer
@@ -246,7 +246,7 @@ end
 name decode
 	from .k.m.g.gk
 	to .e
-	program {EM}/lib.bin/em_decode
+	program {EM}/lib/ack/em_decode
 	args <
 	stdout
 end

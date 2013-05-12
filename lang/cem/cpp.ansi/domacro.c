@@ -5,25 +5,19 @@
 /* $Id$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
+#include    <stdlib.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"input.h"
 
-#include	"ifdepth.h"	
-#include	"botch_free.h"	
-#include	"nparams.h"	
-#include	"parbufsize.h"	
-#include	"textsize.h"	
-#include	"idfsize.h"	
-#include	"debug.h"
+#include    "parameters.h"
 #include	<assert.h>
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
 #include	"bits.h"
-#include	"macbuf.h"
 #include	"replace.h"
 
 extern char options[];

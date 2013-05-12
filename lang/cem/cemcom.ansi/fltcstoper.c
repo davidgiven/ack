@@ -6,11 +6,9 @@
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 /*	  F O R   F L O A T I N G   P O I N T   N U M B E R S		*/
 
-#include	"debug.h"
+#include	"parameters.h"
 #include	"assert.h"
 #include	<alloc.h>
-#include	"trgt_sizes.h"
-#include	"idf.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"

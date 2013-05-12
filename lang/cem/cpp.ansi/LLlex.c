@@ -5,9 +5,7 @@
 /* $Id$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
-#include	"idfsize.h"
-#include	"numsize.h"
-#include	"strsize.h"
+#include	"parameters.h"
 
 #include	<alloc.h>
 #include	"input.h"

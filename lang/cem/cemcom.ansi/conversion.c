@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	C O N V E R S I O N - C O D E  G E N E R A T O R	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 
 #include	<em.h>

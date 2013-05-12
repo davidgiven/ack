@@ -5,9 +5,10 @@
 /* $Id$ */
 /*		L A B E L   H A N D L I N G		*/
 
+#include    "parameters.h"
+#include    "idf.h"
 #include	"Lpars.h"
 #include	"level.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"arith.h"
 #include	"def.h"

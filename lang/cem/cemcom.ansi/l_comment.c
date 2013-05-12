@@ -5,9 +5,8 @@
 /* $Id$ */
 /*	Lint-specific comment handling	*/
 
+#include	"parameters.h"
 #include	<ctype.h>
-
-#include	"lint.h"
 
 #ifdef	LINT
 

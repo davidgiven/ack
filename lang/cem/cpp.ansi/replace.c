@@ -9,11 +9,7 @@
 #include	<stdio.h>
 #include	<string.h>
 
-#include	"pathlength.h"
-#include	"strsize.h"
-#include	"nparams.h"
-#include	"idfsize.h"
-#include	"numsize.h"
+#include	"parameters.h"
 #include	"alloc.h"
 #include	"idf.h"
 #include	"input.h"
@@ -21,9 +17,7 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
-#include	"debug.h"
 #include	"assert.h"
-#include	"macbuf.h"
 #include	"replace.h"
 
 extern char *GetIdentifier();

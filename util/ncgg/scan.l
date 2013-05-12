@@ -7,6 +7,20 @@
 static char rcsid2[]= "$Id$";
 #endif
 
+#include "param.h"
+#include "varinfo.h"
+#include "lookup.h"
+#include "set.h"
+#include "iocc.h"
+#include "instruct.h"
+#include "expr.h"
+#include "extern.h"
+#include <cgg_cg.h>
+#include <em_reg.h>
+#include "y.tab.h"
+
+extern int emhere;
+
 char *mystrcpy();
 int   myatoi();
 

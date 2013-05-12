@@ -421,4 +421,3 @@ out(w) {
 	}
 }
 
-#include "scan.c"

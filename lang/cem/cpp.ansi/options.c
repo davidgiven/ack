@@ -8,7 +8,7 @@
 #include    <stdlib.h>
 #include    <string.h>
 #include	"alloc.h"
-#include	"idfsize.h"
+#include    "parameters.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"

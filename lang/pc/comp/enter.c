@@ -219,7 +219,7 @@ EnterParTypes(fpl, parlist)
 	register struct node *fpl;
 	struct paramlist **parlist;
 {
-	/* Parameters in heading of procedural and functional
+	/* parameters.h in heading of procedural and functional
 	   parameters (only types are important, not the names).
 	*/
 	register arith nb_pars = 0;
