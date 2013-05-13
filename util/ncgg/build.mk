@@ -32,6 +32,8 @@ $(OBJDIR)/$D/enterkeyw.c: $D/cvtkeywords $D/keywords
 	$(hide) cd $$(dir $$@) && sh $(abspath $D/cvtkeywords) $(abspath $D/keywords)
 $(call cfile, $(OBJDIR)/$D/enterkeyw.c)
 
+$(eval $q: $(INCDIR)/em_spec.h)
+
 $(call file, $(LIBEM_DATA))
 $(call cprogram, $(BINDIR)/ncgg)
 $(eval NCGG := $o)

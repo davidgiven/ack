@@ -37,8 +37,8 @@ $(call cfile, $(OBJDIR)/$D/tables.c)
 $(call file, $(LIBEM_DATA))
 $(call file, $(LIBFLT_ARITH))
 
-$(call cprogram, $(BINDIR)/$(ARCH)/ncg)
-$(call installto, $(PLATDEP)/$(ARCH)/ncg)
+$(call cprogram, $(BINDIR)/$(PLATFORM)/ncg)
+$(call installto, $(PLATDEP)/$(PLATFORM)/ncg)
 
 endef
 

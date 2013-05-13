@@ -35,8 +35,8 @@ $(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI)
 		mach/proto/as/comm2.y > $$@
 
 	$(call file, $(LIBOBJECT))
-    $(call cprogram, $(BINDIR)/$(ARCH)/as)
-    $(call installto, $(PLATDEP)/$(ARCH)/as)
+    $(call cprogram, $(BINDIR)/$(PLATFORM)/as)
+    $(call installto, $(PLATDEP)/$(PLATFORM)/as)
 endef
 
 build-as = $(eval $(build-as-impl))

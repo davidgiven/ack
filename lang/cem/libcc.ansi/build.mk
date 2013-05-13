@@ -254,6 +254,14 @@ $(call ackfile, lang/cem/libcc.ansi/time/misc.c)
 $(call acklibrary, $(LIBDIR)/$(PLATFORM)/libc.a)
 $(call installto, $(PLATIND)/$(PLATFORM)/libc.a)
 
+# CRT
+
+$(call reset)
+$(eval objdir := $(PLATFORM))
+$(eval ackflags += -Ih)
+$(call ackfile, lang/cem/libcc.ansi/head_ac.e)
+$(call installto, $(PLATIND)/$(PLATFORM)/c-ansi.o)
+
 endef
 
 build-runtime-libcc-ansi = $(eval $(build-runtime-libcc-ansi-impl))

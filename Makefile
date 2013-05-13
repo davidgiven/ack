@@ -50,15 +50,17 @@ include util/opt/build.mk
 include util/ncgg/build.mk
 include util/arch/build.mk
 include util/misc/build.mk
+include util/led/build.mk
+include util/topgen/build.mk
 
 include lang/cem/build.mk
 
 include mach/proto/as/build.mk
 include mach/proto/ncg/build.mk
+include mach/proto/top/build.mk
 
 include plat/linux/liblinux/build.mk
 
-include mach/build.mk
 include mach/i80/build.mk
 include mach/i386/build.mk
 include mach/i86/build.mk

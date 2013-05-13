@@ -15,3 +15,14 @@ platform-libsys := \
 $(eval $(call build-platform))
 $(eval $(call build-liblinux))
 
+define build-linux386-boot-impl
+	$(call reset)
+	$(call ackfile, $D/boot.s)
+	$(call installto, $(PLATIND)/$(PLATFORM)/boot.o)
+endef
+
+$(eval $(build-linux386-boot-impl))
+
+
+
+

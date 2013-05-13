@@ -28,4 +28,11 @@ platform-libsys := \
 
 $(eval $(call build-platform))
 
+define build-pc86-boot-impl
+	$(call reset)
+	$(call ackfile, $D/boot.s)
+	$(call installto, $(PLATIND)/$(PLATFORM)/boot.o)
+endef
+
+$(eval $(build-pc86-boot-impl))
 

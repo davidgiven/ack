@@ -30,5 +30,13 @@ platform-libsys := \
 
 $(eval $(call build-platform))
 
+define build-cpm-boot-impl
+	$(call reset)
+	$(call ackfile, $D/boot.s)
+	$(call installto, $(PLATIND)/$(PLATFORM)/boot.o)
+endef
+
+$(eval $(build-cpm-boot-impl))
+
 
 

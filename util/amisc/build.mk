@@ -19,4 +19,5 @@ $(call build-simple-tool,ashow)
 $(call build-simple-tool,asize)
 $(call build-simple-tool,aslod)
 $(call build-simple-tool,astrip)
+$(call build-simple-tool,aelflod)
 

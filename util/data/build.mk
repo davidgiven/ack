@@ -22,6 +22,9 @@ $(call cfile, $(OBJDIR)/$D/em_flag.c)
 $(call cfile, $(OBJDIR)/$D/em_pseu.c)
 $(call cfile, $(OBJDIR)/$D/em_mnem.c)
 $(call cfile, $D/em_ptyp.c)
+
+$(eval $q: $g)
+
 $(call clibrary, $(LIBDIR)/libem_data.a)
 $(eval LIBEM_DATA := $q)
 
