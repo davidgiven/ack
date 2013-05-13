@@ -149,7 +149,7 @@ $(call installto, $(PLATDEP)/em_cemcom.ansi)
 $(eval CEMCOMANSI := $o)
 
 $(call reset)
-$(eval q := $D/cemcom.1)
+$(eval q := $D/cemcom.ansi.1)
 $(call installto, $(INSDIR)/share/man/man1/cemcom.6)
 endef
 
