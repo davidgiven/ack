@@ -186,7 +186,7 @@ default = group {
 	
 	platform_pc86,
 	platform_linux386,
-	platform_linuxppc,
+--	platform_linuxppc,
 	platform_linux68k,
 	platform_cpm,
 }

@@ -69,6 +69,6 @@ name cv
 	from .out
 	to .exe
 	program {EM}/bin/aelflod
-	args 4 1 < >
+	args -m4 -b < >
 	outfile linux68k.exe
 end

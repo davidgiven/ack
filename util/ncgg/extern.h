@@ -37,7 +37,10 @@ extern int regclass;
 extern int maxtokensize;
 extern int nprocargs, maxprocargs;
 extern int use_tes;
-extern int use_noframepointer;
 
 extern char *mystrcpy();
 extern char *myalloc();
+
+extern void error(const char* s, ...);
+extern void fatal(const char* s, ...);
+

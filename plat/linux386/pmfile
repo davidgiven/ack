@@ -5,6 +5,7 @@
 local d = ROOTDIR.."plat/linux386/"
 
 include (d.."libsys/pmfile")
+include "plat/linux/liblinux/pmfile"
 
 local bootsector = ackfile {
 	file (d.."boot.s"),
@@ -41,6 +42,7 @@ platform_linux386 = group {
 
 	-- Build the PC standalone syscall library.
 	
+	liblinux,
 	libsys_linux386,
 	bootsector,
 }

@@ -38,7 +38,7 @@ int Xstackflag=0; /* set in coercions, moves, and tests. %1 means something
 		   */
 
 struct varinfo *gen_inst(),*gen_move(),*gen_test(),*gen_preturn(),*gen_tlab();
-struct varinfo *gen_label(), *gen_stackadjust(), *make_erase();
+struct varinfo *gen_label(), *make_erase();
 expr_t make_expr(),ident_expr(),subreg_expr(),tokm_expr(),all_expr();
 expr_t perc_ident_expr(),sum_expr(),regvar_expr();
 
@@ -74,9 +74,9 @@ iocc_t iops[20];
 %token TOPELTSIZE FALLTHROUGH LABELDEF
 %token PROC CALL EXAMPLE
 %token FROM TO
-%token TEST MOVE STACK RETURN STACKADJUST
+%token TEST MOVE STACK RETURN
 %token PATTERNS PAT WITH EXACT KILLS USES REUSING GEN YIELDS LEAVING
-%token DEFINED SAMESIGN SFIT UFIT ROM LOWW HIGHW ISROM STACKOFFSET
+%token DEFINED SAMESIGN SFIT UFIT ROM LOWW HIGHW ISROM
 %token CMPEQ CMPNE CMPLT CMPGT CMPLE CMPGE OR2 AND2 LSHIFT RSHIFT NOT COMP
 %token INREG REGVAR REG_ANY REG_FLOAT REG_LOOP REG_POINTER
 %token <yy_int> ADORNACCESS
@@ -635,8 +635,8 @@ coderule
 			maxempatlen=empatlen;
 		}
 	  patterns
-		{ /* if (!saferulefound)
-			error("Previous rule impossible on empty stack"); */
+		{ if (!saferulefound)
+			error("Previous rule impossible on empty stack");
 		  outpatterns();
 		}
 	| PROC IDENT example
@@ -849,8 +849,6 @@ gen_instruction
 		{ $$ = gen_label($2-1); use_tes++; }
 	| RETURN
 		{ $$ = gen_preturn(); }
-	| STACKADJUST expr
-		{ $$ = gen_stackadjust($2.ex_index); use_noframepointer++; }
 	;
 optstar
 	: /* empty */
@@ -1030,8 +1028,6 @@ expr
 		{ $$ = make_expr(TYPINT,EX_LOWW,$3-1,0); }
 	| HIGHW '(' emarg ')'
 		{ $$ = make_expr(TYPINT,EX_HIGHW,$3-1,0); }
-	| STACKOFFSET '(' ')'
-		{ $$ = make_expr(TYPINT,EX_STACKOFFSET, 0, 0); }
 /* Excluded, because it causes a shift-reduce conflict
    (problems with a tokenset_no followed by an optexpr)
 	| '-' expr %prec UMINUS

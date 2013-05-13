@@ -76,6 +76,6 @@ name cv
 	from .out
 	to .exe
 	program {EM}/bin/aelflod
-	args 20 1 < >
+	args -m20 -b < >
 	outfile linuxppc.exe
 end

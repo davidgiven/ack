@@ -32,7 +32,8 @@
 /* Global settings. */
 
 int bigendian = 0;
-int elfmachine;
+int elfabi = 3;                         /* abi = Linux */
+int elfmachine = 3;                     /* machine = EM_386 */
 
 /* Header and section table of an ack object file. */
  
@@ -116,7 +117,7 @@ int follows(struct outsect* pa, struct outsect* pb)
 {
 	/* return 1 if pa follows pb */
  
-	return (pa->os_base == align(pb->os_base+pb->os_size, pa->os_lign));
+	return (pa->os_base >= align(pb->os_base+pb->os_size, pa->os_lign));
 }
 
 /* Writes a byte. */
@@ -276,11 +277,27 @@ int main(int argc, char* argv[])
 	{
 		switch (argv[1][1])
 		{
+			case 'a':
+				elfabi = atoi(&argv[1][2]);
+				break;
+
+			case 'b':
+				bigendian = 1;
+				break;
+
 			case 'h':
-				fprintf(stderr, "%s: Syntax: aelflod [-h] <inputfile> <outputfile>\n",
+				fprintf(stderr, "%s: Syntax: aelflod [-a<number>] [-b] [-h] [-l]\n\t[-m<number>] <inputfile> <outputfile>\n",
 					program);
 				exit(0);
-				
+
+			case 'l':
+				bigendian = 0;
+				break;
+
+			case 'm':
+				elfmachine = atoi(&argv[1][2]);
+				break;
+
 			default:
 			syntaxerror:
 				fatal("syntax error --- try -h for help");
@@ -382,13 +399,13 @@ int main(int argc, char* argv[])
 	emit8(1);                          /* class = ELFCLASS32 */
 	emit8(bigendian ? 2 : 1);          /* endianness */
 	emit8(1);                          /* ELF version */
-	emit8(3);                          /* ABI = Linux */
+	emit8(elfabi);                     /* ABI */
 	emit8(0);                          /* ABI version */
 	emit8(0); emit16(0);               /* padding... */
 	emit32(0);                         /* ...to offset 0x10 */
 	
 	emit16(2);                         /* type = ET_EXEC */
-	emit16(3);                         /* machine = EM_386 */
+	emit16(elfmachine);                /* machine */
 	emit32(1);                         /* ELF version again */
 	emit32(outsect[TEXT].os_base);     /* entry point */
 	emit32(ELF_HEADER_SIZE);           /* program header offset */

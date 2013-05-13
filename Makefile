@@ -63,7 +63,7 @@ include plat/pc86/build.mk
 include plat/cpm/build.mk
 include plat/linux386/build.mk
 include plat/linux68k/build.mk
-include plat/linuxppc/build.mk
+# include plat/linuxppc/build.mk
 
 .PHONY: installables
 installables: $(INSTALLABLES)
