@@ -58,6 +58,13 @@ include mach/proto/ncg/build.mk
 
 include plat/linux/liblinux/build.mk
 
+include mach/build.mk
+include mach/i80/build.mk
+include mach/i386/build.mk
+include mach/i86/build.mk
+include mach/m68020/build.mk
+# include mach/powerpc/build.mk
+
 include plat/build.mk
 include plat/pc86/build.mk
 include plat/cpm/build.mk

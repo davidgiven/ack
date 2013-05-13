@@ -12,8 +12,9 @@ define build-platform-impl
 	$(call installto, $(PLATIND)/descr/$(PLATFORM))
 
 	$(eval PLATFORM_$(PLATFORM) := \
+			$(PLATIND)/descr/$(PLATFORM) \
 			$(PLATFORM_HEADERS_$(PLATFORM)) \
-			$(PLATDEP)/$(PLATFORM)/ncg)
+			$(ARCHITECTURE_$(ARCH)))
 
 	$(foreach f, $(platform-headers), $(call build-platform-headers, $f))
 
@@ -21,9 +22,6 @@ define build-platform-impl
 	$(foreach f, $(platform-libsys), $(call ackfile, $D/libsys/$f))
 	$(call acklibrary, $(LIBDIR)/$(PLATFORM)/libsys.a)
 	$(call installto, $(PLATIND)/$(PLATFORM)/libsys.a)
-
-    $(call build-as)
-    $(call build-ncg)
 
     $(foreach runtime, $(RUNTIMES), $(build-runtime-$(runtime)))
 endef

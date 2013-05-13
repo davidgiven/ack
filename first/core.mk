@@ -31,8 +31,6 @@ endef
 
 define ackfile-rule
 $o: $s $(ACK) \
-		$(PLATIND)/descr/$(PLATFORM) \
-		$(PLATDEP)/$(PLATFORM)/as \
 		$(CCOMPILER) \
 		$(PLATFORM_$(PLATFORM)) \
 		$(EM_ENCODE)

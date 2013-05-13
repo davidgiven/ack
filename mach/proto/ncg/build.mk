@@ -3,7 +3,7 @@ define build-ncg-impl
 $(call reset)
 
 $(eval cflags += -Imach/$(ARCH)/ncg -I$(OBJDIR)/$D -Imach/proto/ncg)
-$(eval objdir := $(PLATFORM))
+$(eval objdir := $(ARCH))
 
 $(call cfile, mach/proto/ncg/codegen.c)
 $(call cfile, mach/proto/ncg/compute.c)
@@ -37,8 +37,8 @@ $(call cfile, $(OBJDIR)/$D/tables.c)
 $(call file, $(LIBEM_DATA))
 $(call file, $(LIBFLT_ARITH))
 
-$(call cprogram, $(BINDIR)/$(PLATFORM)/ncg)
-$(call installto, $(PLATDEP)/$(PLATFORM)/ncg)
+$(call cprogram, $(BINDIR)/$(ARCH)/ncg)
+$(call installto, $(PLATDEP)/$(ARCH)/ncg)
 
 endef
 

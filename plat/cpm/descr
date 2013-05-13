@@ -23,7 +23,7 @@ var C_INCLUDES=-I{EM}/share/ack/{PLATFORM}/include -I{EM}/share/ack/include/ansi
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/ack/{PLATFORM}/ncg
+	program {EM}/lib/ack/{ARCH}/ncg
 	args <
 	stdout
 	need .e
@@ -31,7 +31,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/ack/{PLATFORM}/top
+	program {EM}/lib/ack/{ARCH}/top
 	args
 	optimizer
 	stdin
@@ -40,7 +40,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/ack/{PLATFORM}/as
+	program {EM}/lib/ack/{ARCH}/as
 	args - -o > <
 	prep cond
 end

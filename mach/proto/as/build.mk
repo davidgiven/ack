@@ -2,7 +2,7 @@ define build-as-impl
     $(call reset)
 
     $(eval cflags += -Imach/$(ARCH)/as -I$(OBJDIR)/$D)
-    $(eval objdir := $(PLATFORM))
+    $(eval objdir := $(ARCH))
 
     $(call cfile, mach/proto/as/comm3.c)
     $(call dependson, $(OBJDIR)/$D/y.tab.h)
@@ -35,8 +35,8 @@ $(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI)
 		mach/proto/as/comm2.y > $$@
 
 	$(call file, $(LIBOBJECT))
-    $(call cprogram, $(BINDIR)/$(PLATFORM)/as)
-    $(call installto, $(PLATDEP)/$(PLATFORM)/as)
+    $(call cprogram, $(BINDIR)/$(ARCH)/as)
+    $(call installto, $(PLATDEP)/$(ARCH)/as)
 endef
 
 build-as = $(eval $(build-as-impl))
