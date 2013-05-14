@@ -67,6 +67,7 @@ $(eval $q: $(INCDIR)/em_spec.h)
 $(call cprogram, $(BINDIR)/em_opt)
 $(call installto, $(PLATDEP)/em_opt)
 $(eval EM_OPT := $o)
+$(eval ACK_CORE_TOOLS += $o)
 
 $(call reset)
 $(eval q := $D/em_opt.6)

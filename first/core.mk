@@ -33,7 +33,7 @@ define ackfile-rule
 $o: $s $(ACK) \
 		$(CCOMPILER) \
 		$(PLATFORM_$(PLATFORM)) \
-		$(EM_ENCODE)
+		$(ACK_CORE_TOOLS)
 	@echo ACK $o
 	@mkdir -p $(dir $o)
 	$(hide) ACKDIR=$(INSDIR) $(ACK) $(ACKFLAGS) $(ackflags) -m$(PLATFORM) -c -o $o $s

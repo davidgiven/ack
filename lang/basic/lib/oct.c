@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "bc_string.h"
 
 /* $Id$ */

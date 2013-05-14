@@ -24,6 +24,7 @@ define build-misc-impl
 	$(call cprogram, $(BINDIR)/em_encode)
 	$(call installto, $(PLATDEP)/em_encode)
 	$(eval EM_ENCODE := $o)
+	$(eval ACK_CORE_TOOLS += $o)
 
 	$(call reset)
 	$(eval objdir := decode)

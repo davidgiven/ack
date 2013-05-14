@@ -11,14 +11,14 @@ define build-platform-impl
 	$(eval q := $D/descr)
 	$(call installto, $(PLATIND)/descr/$(PLATFORM))
 
+	$(foreach f, $(platform-headers), $(call build-platform-headers, $f))
+
 	$(eval PLATFORM_$(PLATFORM) := \
 			$(PLATIND)/descr/$(PLATFORM) \
 			$(PLATFORM_HEADERS_$(PLATFORM)) \
 			$(PLATDEP)/$(PLATFORM)/as \
 			$(PLATDEP)/$(PLATFORM)/ncg \
 			$(ARCHITECTURE_$(ARCH)))
-
-	$(foreach f, $(platform-headers), $(call build-platform-headers, $f))
 
 	# libsys
 
