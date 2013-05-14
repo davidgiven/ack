@@ -9,5 +9,6 @@
 
 /* $Id$ */
 
+#include "parameters.h"
 #include	"idf.h"
 #include	<idf_pkg.body>

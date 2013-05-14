@@ -9,8 +9,6 @@
 
 /* $Id$ */
 
-#include "dbsymtab.h"
-
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *par_next;
 	struct def *par_def;	/* "df" of parameter */
@@ -142,9 +140,7 @@ extern t_type
 	*std_type,
 	*error_type;		/* All from type.c */
 
-#include "nocross.h"
 #ifdef NOCROSS
-#include "target_sizes.h"
 #define	word_align	(AL_WORD)
 #define	short_align	(AL_SHORT)
 #define	int_align	(AL_INT)

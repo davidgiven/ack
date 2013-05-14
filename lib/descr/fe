@@ -4,7 +4,7 @@
 # Don't generate line updating code by default (i.e.: -L flag provided to cem).
 # To put it on again: use -NL
 var LFLAG=-L
-var MODULA2_INCLUDES=-I{EM}/share/ack/include/m2
+var MODULA2_INCLUDES=-I{EM}/share/ack/include/modula2
 var OCCAM_INCLUDES=-I{EM}/share/ack/include/occam
 var C_INCLUDES=-I{EM}/share/ack/include/ansi
 

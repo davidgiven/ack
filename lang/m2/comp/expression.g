@@ -10,6 +10,7 @@
 /* $Id$ */
 
 {
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>

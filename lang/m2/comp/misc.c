@@ -17,6 +17,7 @@
 #include	"em_arith.h"
 #include	"em_label.h"
 
+#include "parameters.h"
 #include	"f_info.h"
 #include	"misc.h"
 #include	"LLlex.h"

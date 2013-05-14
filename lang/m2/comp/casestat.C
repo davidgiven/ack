@@ -16,6 +16,7 @@
 	cases themselves.
 */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_label.h>
@@ -32,8 +33,6 @@
 #include	"walk.h"
 #include	"chk_expr.h"
 #include	"def.h"
-
-#include	"density.h"
 
 struct switch_hdr	{
 	label sh_break;			/* label of statement after this one */
