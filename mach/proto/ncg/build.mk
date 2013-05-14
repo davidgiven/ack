@@ -34,6 +34,8 @@ $(OBJDIR)/$D/tables.h: $(NCGG) $(CPPANSI) mach/$(ARCH)/ncg/table
 
 $(call cfile, $(OBJDIR)/$D/tables.c)
 
+$(eval $q: $(INCDIR)/flt_arith.h)
+
 $(call file, $(LIBEM_DATA))
 $(call file, $(LIBFLT_ARITH))
 
