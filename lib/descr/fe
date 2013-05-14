@@ -156,7 +156,7 @@ end
 name abc
 	from .b
 	to .k
-	program {EM}/lib.bin/em_bem
+	program {EM}/lib/ack/em_bem
 	mapflag -h ABC_F={ABC_F?} -h
 	mapflag -w ABC_F={ABC_F?} -w
 	mapflag -L ABC_F={ABC_F?} -L

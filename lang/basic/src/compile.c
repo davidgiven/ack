@@ -23,7 +23,7 @@ compileprogram()
 	prolog2(); /* Some statements are moved from prolog2 to 
                       epilogcode in the new version of the compiler */
 
-	while( basicline = 0, getline())
+	while( basicline = 0, getinputline())
 		(void) LLparse();
 	epilogcode(); 	
 	sys_close(yyin);
