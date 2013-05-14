@@ -1,5 +1,6 @@
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>

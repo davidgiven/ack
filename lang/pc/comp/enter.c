@@ -5,6 +5,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
+#include    "parameters.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"idf.h"
@@ -12,7 +13,6 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include	"dbsymtab.h"
 
 extern int	proclevel;
 extern int	parlevel;

@@ -3,6 +3,7 @@
 /*	Routines for testing type equivalence & type compatibility.
 */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>

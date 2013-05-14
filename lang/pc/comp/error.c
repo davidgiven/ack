@@ -5,8 +5,8 @@
 	number of arguments!
 */
 
+#include    "parameters.h"
 #include	"debug.h"
-#include	"errout.h"
 
 #if __STDC__
 #include	<stdarg.h>

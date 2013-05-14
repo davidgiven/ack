@@ -18,14 +18,14 @@ $(call cfile, $D/func.c)
 
 $(call llgen, $(OBJDIR)/$D, $D/basic.g)
 
-$(eval g := $(OBJDIR)/$D/token.h)
+$(eval g := $(OBJDIR)/$D/tokentab.h)
+$(eval $q: $g)
 $(eval CLEANABLES += $g)
 $g: $D/maketokentab $(OBJDIR)/$D/Lpars.h
 	@echo TOKENTAB $$@
 	@mkdir -p $$(dir $$@)
 	$(hide) cd $(OBJDIR)/$D && $(abspath $$^)
 
-$(eval $q: $(OBJDIR)/$D/token.h)
 $(eval $q: $(OBJDIR)/$D/Lpars.h)
 $(eval $q: $(INCDIR)/print.h)
 

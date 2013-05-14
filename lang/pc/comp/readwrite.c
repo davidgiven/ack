@@ -1,5 +1,6 @@
 /* R E A D ( L N )   &   W R I T E ( L N ) */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>

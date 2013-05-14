@@ -1,6 +1,7 @@
 /* The grammar of ISO-Pascal as given by the specification, BS6192: 1982. */
 
 {
+#include    "parameters.h"
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -14,7 +15,6 @@
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
-#include	"dbsymtab.h"
 }
 
 %lexical LLlex;

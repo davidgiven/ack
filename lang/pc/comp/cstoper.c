@@ -2,8 +2,8 @@
 
 #include    <stdlib.h>
 #include    <string.h>
+#include    "parameters.h"
 #include	"debug.h"
-#include	"target_sizes.h"
 
 #include	<alloc.h>
 #include	<assert.h>

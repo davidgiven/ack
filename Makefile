@@ -55,6 +55,7 @@ include util/topgen/build.mk
 
 include lang/cem/build.mk
 include lang/basic/build.mk
+include lang/pc/build.mk
 
 include mach/proto/as/build.mk
 include mach/proto/ncg/build.mk

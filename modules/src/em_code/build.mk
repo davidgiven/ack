@@ -60,6 +60,9 @@ define build-em_code-impl
 	$(call cfile, $D/em.c)
 
 	$(eval $q: $(INCDIR)/em_codeEK.h)
+	$(eval $q: $(INCDIR)/em_path.h)
+	$(eval $q: $(INCDIR)/system.h)
+	$(eval $q: $(INCDIR)/local.h)
 
 	$(call clibrary, $(LIBDIR)/libem$2.a)
 	$(eval LIBEM$1 := $o)

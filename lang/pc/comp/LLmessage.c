@@ -10,6 +10,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
+#include    "parameters.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"idf.h"
