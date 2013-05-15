@@ -57,6 +57,10 @@ define build-platform-impl
     # Language runtimes
 
     $(foreach runtime, $(RUNTIMES), $(build-runtime-$(runtime)))
+
+    # Install the ego descr file for this architecture
+
+    $(call build-ego-descr)
 endef
 
 build-platform = $(eval $(call build-platform-impl, $1))

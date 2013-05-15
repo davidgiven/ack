@@ -52,6 +52,7 @@ include util/arch/build.mk
 include util/misc/build.mk
 include util/led/build.mk
 include util/topgen/build.mk
+include util/ego/build.mk
 
 include lang/cem/build.mk
 include lang/basic/build.mk

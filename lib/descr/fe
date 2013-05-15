@@ -172,7 +172,7 @@ var A68INIT={EM}/lib/ack/em_a68s_init
 name a68s
         from .8.a68
         to .k
-        program {EM}/lib.bin/em_a68s{w}{p}
+        program {EM}/lib/ack/em_a68s{w}{p}
         mapflag -PA* A68INIT=*
         args < > {SOURCE}.lst {A68INIT}{w}{p} /dev/null
         prep cond
@@ -226,8 +226,8 @@ name ego
 	mapflag -a EGO_F={EGO_F?} -a
 	mapflag -O* EGO_F={EGO_F?} -O*
 	args \
-		{EGO_F?} -P {EM}/lib.bin/ego \
-		-M{EM}/lib.bin/ego/{ARCH}descr <
+		{EGO_F?} -P {EM}/lib/ack/ego \
+		-M{EM}/share/ack/ego/{ARCH}.descr <
 	optimizer 2
 	stdout
 	combiner

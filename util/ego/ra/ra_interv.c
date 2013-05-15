@@ -9,6 +9,7 @@
  */
 
 
+#include <stdlib.h>
 #include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
