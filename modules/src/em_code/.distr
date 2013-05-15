@@ -1,4 +1,4 @@
-pmfile
+build.mk
 C_out.c
 bhcst.c
 bhdlb.c

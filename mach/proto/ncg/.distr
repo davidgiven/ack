@@ -1,4 +1,4 @@
-pmfile
+build.mk
 assert.h
 codegen.c
 compute.c

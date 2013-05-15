@@ -1,4 +1,4 @@
-pmfile
+build.mk
 abs.c
 asc.c
 asrt.c

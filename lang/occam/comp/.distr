@@ -1,4 +1,4 @@
-pmfile
+build.mk
 builtin.c
 code.c
 code.h

@@ -1,4 +1,4 @@
-pmfile
+build.mk
 doprnt.c
 format.c
 fprint.c

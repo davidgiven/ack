@@ -1,4 +1,4 @@
-pmfile
+build.mk
 AtEoIF.c
 AtEoIT.c
 inp_pkg.body

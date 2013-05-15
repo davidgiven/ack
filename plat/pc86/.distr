@@ -1,10 +1,9 @@
 descr
 boot.s
-pmfile
+build.mk
 README
 include/ack/config.h
 include/unistd.h
-libsys/pmfile
 libsys/_hol0.s
 libsys/brk.c
 libsys/close.c

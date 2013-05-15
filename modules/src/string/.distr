@@ -1,4 +1,4 @@
-pmfile
+build.mk
 bts2str.c
 btscat.c
 btscmp.c

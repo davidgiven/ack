@@ -1,4 +1,4 @@
-pmfile
+build.mk
 builtin.c
 chan_strct.c
 channel.c

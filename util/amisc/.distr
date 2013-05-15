@@ -1,4 +1,4 @@
-pmfile
+build.mk
 ashow.c
 ashow.1
 anm.c

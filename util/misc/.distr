@@ -1,4 +1,4 @@
-pmfile
+build.mk
 convert.c
 em_decode.6
 esize.1

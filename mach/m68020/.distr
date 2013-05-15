@@ -1,12 +1,5 @@
-Action
+build.mk
 as
-cv
+ncg
 libem
 libend
-libsys
-ncg
-libfp
-libdb
-top
-ce
-mach_params

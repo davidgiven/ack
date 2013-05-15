@@ -1,4 +1,4 @@
-pmfile
+build.mk
 basic.g
 basic.lex
 bem.c
