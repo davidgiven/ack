@@ -1,4 +1,36 @@
-BUILDDIR = /tmp/obj
+# ======================================================================= #
+#                          ACK CONFIGURATION                              #
+#                      (Edit this before building)                        #
+# ======================================================================= #
+
+# What platform to build for by default?
+
+DEFAULT_PLATFORM = pc86
+
+# Where should the ACK put its temporary files?
+
+ACK_TEMP_DIR = /tmp
+
+# Where is the ACK going to be installed, eventually?
+
+PREFIX = /usr/local
+
+# Where do you want to put the object files used when building?
+
+BUILDDIR = $(ACK_TEMP_DIR)/ack-build
+
+# What build flags do you want to use?
+
+CFLAGS = -g
+LDFLAGS = -s
+
+# ======================================================================= #
+#                         END OF CONFIGURATION                            #
+# ======================================================================= #
+#
+# You shouldn't need to change anything below this point unless you are
+# actually developing ACK.
+
 OBJDIR = $(BUILDDIR)/obj
 BINDIR = $(BUILDDIR)/bin
 LIBDIR = $(BUILDDIR)/lib
@@ -15,13 +47,12 @@ CP = cp
 
 hide = @
 
-CFLAGS = \
-	-g \
+CFLAGS += \
 	-I$(INCDIR) \
 	-Imodules/h \
 	-Ih
 
-LDFLAGS =
+LDFLAGS +=
 
 all: installables
 
@@ -81,6 +112,11 @@ include plat/linux68k/build.mk
 .PHONY: installables
 installables: $(INSTALLABLES)
 
+.PHONY: install
+install: installables
+	@echo INSTALLING into $(PREFIX)
+	$(hide) tar cf - -C $(INSDIR) . | tar xvf - -C $(PREFIX)
+
 .PHONY: clean
 clean:
 	@echo CLEAN
@@ -90,15 +126,15 @@ $(INCDIR)/local.h:
 	@echo LOCAL
 	@mkdir -p $(dir $@)
 	$(hide) echo '#define VERSION 3' > $@
-	$(hide) echo '#define ACKM "pc86"' >> $@
+	$(hide) echo '#define ACKM "$(DEFAULT_PLATFORM)"' >> $@
 	$(hide) echo '#define BIGMACHINE 1' >> $@
 	$(hide) echo '#define SYS_5' >> $@
 
 $(INCDIR)/em_path.h:
 	@echo EM_PATH
 	@mkdir -p $(dir $@)
-	$(hide) echo '#define TMP_DIR "/tmp"' > $@
-	$(hide) echo '#define EM_DIR "/tmp/obj/staging"' >> $@
+	$(hide) echo '#define TMP_DIR "$(ACK_TEMP_DIR)"' > $@
+	$(hide) echo '#define EM_DIR "$(PREFIX)"' >> $@
 	$(hide) echo '#define ACK_PATH "share/ack/descr"' >> $@
 
 -include $(DEPENDS)

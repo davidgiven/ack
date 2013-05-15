@@ -23,7 +23,7 @@ $(call cfile, mach/proto/ncg/subr.c)
 $(call cfile, mach/proto/ncg/var.c)
 
 $(eval $q: $(OBJDIR)/$D/tables.h)
-$(eval CLEANABLES += $(OBJDIR)/$D/tables.h $(OBJDIR)/$D/table.c)
+$(eval CLEANABLES += $(OBJDIR)/$D/tables.h $(OBJDIR)/$D/tables.c)
 $(OBJDIR)/$D/tables.c: $(OBJDIR)/$D/tables.h
 $(OBJDIR)/$D/tables.h: $(NCGG) $(CPPANSI) mach/$(ARCH)/ncg/table
 	@echo NCGG $$@
