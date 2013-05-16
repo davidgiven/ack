@@ -111,6 +111,8 @@ include plat/linux68k/build.mk
 
 .PHONY: installables
 installables: $(INSTALLABLES)
+	@echo ""
+	@echo "Build completed successfully."
 
 .PHONY: install
 install: installables
