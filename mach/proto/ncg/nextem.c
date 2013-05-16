@@ -87,6 +87,13 @@ extern char em_flag[];
 
 argtyp(mn) {
 
+	/* op_lab is a special opcode which represents a label definition. It's
+	 * not actually a real EM instruction. Therefore if we try to look it
+	 * up in em_flag, we'll get a buffer overrun... */
+
+	if (mn == op_lab)
+		return EV_UNDEF;
+
 	switch(em_flag[mn-sp_fmnem]&EM_PAR) {
 	case PAR_W:
 	case PAR_S:
