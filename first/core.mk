@@ -13,7 +13,7 @@ define cfile-rule
 $o: $s
 	@echo CC $o
 	@mkdir -p $(dir $o)
-	@$(CC) $(CFLAGS) $(cflags) -MM -MQ $d -o $d $s
+	@$(CC) $(CFLAGS) $(cflags) -MM -MQ $o -o $d $s
 	$(hide) $(CC) $(CFLAGS) $(cflags) -c -o $o $s
 endef
 
