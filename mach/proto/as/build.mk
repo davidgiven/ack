@@ -25,7 +25,9 @@ define build-as-impl
 	$(call yacc, $(OBJDIR)/$D, $(OBJDIR)/$D/preprocessed-comm2.y)
 
 $(eval CLEANABLES += $(OBJDIR)/$D/preprocessed-comm2.y)
-$(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI)
+$(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI) \
+		mach/$(ARCH)/as/mach2.c \
+		mach/$(ARCH)/as/mach4.c
 	@echo PREPROCESS $$@
 	@mkdir -p $$(dir $$@)
 	$(hide) $(CPPANSI) -P \

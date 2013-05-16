@@ -93,7 +93,7 @@ endef
 # --- ACK library linking
 
 define acklibrary-rule
-$o: $s $(ACKAR)
+$o: $s $(AAL)
 	@echo ACKLIBRARY $o
 	@mkdir -p $(dir $o)
 	@$(RM) $o
