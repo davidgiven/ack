@@ -11,6 +11,7 @@
 
 #include   <stdlib.h>
 #include   <string.h>
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>

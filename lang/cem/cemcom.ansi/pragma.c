@@ -5,8 +5,7 @@
 /* $Id$ */
 /* PREPROCESSOR: PRAGMA INTERPRETER */
 
-#include	"debug.h"
-#include	"idf.h"
+#include	"parameters.h"
 
 #define P_UNKNOWN	0
 #define NR_PRAGMAS	0

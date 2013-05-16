@@ -10,7 +10,7 @@ var f=4
 var d=8
 var ARCH=powerpc
 var PLATFORM=linuxppc
-var PLATFORMDIR={EM}/lib/{PLATFORM}
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix -D__POWERPC
 var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b0:0x80000054
 var C_LIB={PLATFORMDIR}/libc-ansi.a
@@ -22,12 +22,12 @@ var MACHOPT_F=
 # Override the setting in fe so that files compiled for linuxppc can see
 # the platform-specific headers.
 
-var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/include/ansi
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
 
 name be
 	from .m.g
 	to .s
-	program {EM}/lib.bin/{PLATFORM}/ncg
+	program {EM}/lib/ack/{ARCH}/ncg
 	mapflag -gdb GF=-gdb
 	args {GF?} <
 	stdout
@@ -36,7 +36,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib.bin/{PLATFORM}/top
+	program {EM}/lib/ack/{ARCH}/top
 	args
 	optimizer
 	stdin
@@ -45,14 +45,14 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib.bin/{PLATFORM}/as
+	program {EM}/lib/ack/{ARCH}/as
 	args - -o > <
 	prep cond
 end
 name led
 	from .o.a
 	to .out
-	program {EM}/lib.bin/em_led
+	program {EM}/lib/ack/em_led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -fp FLOATS={EM}/{LIB}fp
 	args {ALIGN} {SEPID?} \

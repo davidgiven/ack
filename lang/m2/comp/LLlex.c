@@ -13,10 +13,8 @@
 #include	<stdio.h>
 #include	<string.h>
 
+#include "parameters.h"
 #include	"debug.h"
-#include	"idfsize.h"
-#include	"numsize.h"
-#include	"strsize.h"
 
 #include	"alloc.h"
 #include	"em_arith.h"
@@ -32,7 +30,6 @@
 #include	"def.h"
 #include	"type.h"
 #include	"warning.h"
-#include	"errout.h"
 
 extern char *getwdir();
 

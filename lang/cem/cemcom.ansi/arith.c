@@ -11,11 +11,8 @@
 	semantics of C is a mess.
 */
 
+#include    "parameters.h"
 #include	<alloc.h>
-#include	"debug.h"
-#include	"lint.h"
-#include	"nobitfield.h"
-#include	"idf.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"sizes.h"

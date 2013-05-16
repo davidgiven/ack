@@ -1,2 +1,4 @@
-LIST
-end_s.a
+edata.s
+em_end.s
+end.s
+etext.s

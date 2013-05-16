@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo '#include "debug.h"'
+echo '#include "parameters.h"'
 sed -n '
 s:^.*ALLOCDEF.*"\(.*\)".*$:struct \1 *h_\1 = 0;\
 #ifdef DEBUG\

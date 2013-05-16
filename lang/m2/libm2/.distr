@@ -1,4 +1,4 @@
-pmfile
+build.mk
 Termcap.mod
 CSP.mod
 PascalIO.mod

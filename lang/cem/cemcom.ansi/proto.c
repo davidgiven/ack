@@ -5,19 +5,15 @@
 /* $Id$ */
 /*  P R O T O T Y P E   F I D D L I N G  */
 
-#include	"lint.h"
-#include	"debug.h"
-#include	"idfsize.h"
-#include	"nparams.h"
-#include	"botch_free.h"
+#include	"parameters.h"
 #include	<alloc.h>
+#include    "idf.h"
 #include	"Lpars.h"
 #include	"level.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"align.h"
 #include	"stack.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"type.h"
 #include	"struct.h"

@@ -5,8 +5,7 @@
 /* $Id$ */
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 
-#include	"trgt_sizes.h"
-#include	"idf.h"
+#include    "parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"

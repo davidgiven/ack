@@ -9,6 +9,7 @@
  */
 
 
+#include <stdlib.h>
 #include "types.h"
 #include "lset.h"
 #include "alloc.h"

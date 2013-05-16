@@ -19,8 +19,6 @@ extern int (*WalkTable[])();
 extern label	text_label;
 extern label	data_label;
 
-#include "squeeze.h"
-
 #ifndef SQUEEZE
 #define c_loc(x)	C_loc((arith) (x))
 #define c_lae_dlb(x)	C_lae_dlb(x,(arith) 0)

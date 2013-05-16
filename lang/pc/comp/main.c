@@ -2,6 +2,7 @@
 
 #include    <stdlib.h>
 #include    <string.h>
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<em.h>
@@ -23,7 +24,6 @@
 #include	"tokenname.h"
 #include	"type.h"
 #include	"scope.h"
-#include	"dbsymtab.h"
 
 char		options[128];
 char		*ProgName;

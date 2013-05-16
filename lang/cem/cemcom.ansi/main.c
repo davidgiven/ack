@@ -5,16 +5,11 @@
 /* $Id$ */
 /* MAIN PROGRAM */
 
-#include	"lint.h"
+#include	"parameters.h"
 #include	<system.h>
-#include	"debug.h"
-#include	"nopp.h"
-#include	"trgt_sizes.h"
-#include	"use_tmp.h"
-#include	"inputtype.h"
+#include    "idf.h"
 #include	"input.h"
 #include	"level.h"
-#include	"idf.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"proto.h"
@@ -24,7 +19,6 @@
 #include	"LLlex.h"
 #include	<alloc.h>
 #include	"specials.h"
-#include	"nocross.h"
 #include	"sizes.h"
 #include	"align.h"
 #include	"macro.h"

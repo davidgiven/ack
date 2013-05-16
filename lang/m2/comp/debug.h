@@ -9,8 +9,6 @@
 
 /* $Id$ */
 
-#include "debugcst.h"
-
 #ifdef DEBUG
 #define DO_DEBUG(x, y)	((x) && (y))
 #define STATIC

@@ -1,4 +1,4 @@
-pmfile
+build.mk
 edata.s
 em_end.s
 end.s

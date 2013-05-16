@@ -9,6 +9,7 @@
    they can be written immediately.
 */
 
+#include <stdlib.h>
 #include <em_path.h>
 #include <alloc.h>
 #include "insert.h"

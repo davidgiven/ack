@@ -5,13 +5,11 @@
 /* $Id$ */
 /*	ADMINISTRATION OF STRUCT AND UNION DECLARATIONS	*/
 
-#include	"nobitfield.h"
-#include	"debug.h"
-#include	"botch_free.h"
+#include	"parameters.h"
 #include	<alloc.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"stack.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"type.h"
 #include	"proto.h"

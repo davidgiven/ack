@@ -5,6 +5,7 @@
 #include	<alloc.h>
 #include	<em.h>
 
+#include    "parameters.h"
 #include	"LLlex.h"
 #include	"f_info.h"
 #include	"idf.h"

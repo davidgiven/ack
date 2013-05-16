@@ -7,6 +7,7 @@
  *  L O C A L S . C
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_mnem.h>
 #include <em_spec.h>

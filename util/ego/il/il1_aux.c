@@ -8,6 +8,7 @@
  *  I L 1 _ A U X . C
  */
 
+#include <stdlib.h>
 #include <em_spec.h>
 #include "../share/types.h"
 #include "il.h"

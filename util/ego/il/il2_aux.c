@@ -8,6 +8,7 @@
  *  I L 2 _ A U X . C
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>

@@ -1,5 +1,6 @@
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -18,7 +19,6 @@
 #include	"type.h"
 
 #ifndef NOCROSS
-#include	"target_sizes.h"
 int
 	word_align	= AL_WORD,
 	int_align	= AL_INT,

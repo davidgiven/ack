@@ -1,7 +1,5 @@
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
 
-#include "dbsymtab.h"
-
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
 	struct def *par_def;	/* "df" of parameter */
@@ -131,7 +129,6 @@ extern struct type
 	*void_type,
 	*error_type;		/* All from type.c */
 
-#include "nocross.h"
 #ifdef NOCROSS
 #include "target_sizes.h"
 #define	word_align	(AL_WORD)

@@ -9,6 +9,7 @@
 
 /* $Id$ */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<system.h>
@@ -19,8 +20,6 @@
 #include	<assert.h>
 #include	<stb.h>
 
-#include	"strict3rd.h"
-#include	"dbsymtab.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"idf.h"

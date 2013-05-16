@@ -1,3 +1,4 @@
+echo '#include "parameters.h"'
 echo '#include "debug.h"'
 sed -n '
 s:^.*[ 	]ALLOCDEF[ 	].*"\(.*\)".*$:struct \1 *h_\1 = 0;\

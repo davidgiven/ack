@@ -1,6 +1,4 @@
-/* $Id$ */
-
-extern char *malloc() ;
+#include <stdlib.h>
 
 char * salloc(length)
 unsigned length;

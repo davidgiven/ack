@@ -1,4 +1,5 @@
 /* C A S E   S T A T E M E N T   C O D E   G E N E R A T I O N */
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -8,7 +9,6 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"chk_expr.h"
-#include	"density.h"
 #include	"main.h"
 #include	"node.h"
 #include	"type.h"

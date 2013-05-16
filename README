@@ -1,8 +1,8 @@
-                     THE AMSTERDAM COMPILER KIT V6.0pre4
+                     THE AMSTERDAM COMPILER KIT V6.0pre5
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2010-08-08
+                                2013-05-15
 
 
 INTRODUCTION
@@ -24,59 +24,58 @@ SUPPORT
 
 Languages:
 
-ANSI C, Pascal, Modula 2. K&R is supported via the ANSI C compiler.
+ANSI C, Pascal, Modula 2, Basic. K&R is supported via the ANSI C compiler.
 
 Platforms:
 
 pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
+linux68k      produces ELF executables for m68020 Linux systems
 cpm           produces i80 CP/M .COM files
 
 
 INSTALLATION
 ============
 
-The version 6.0 build mechanism has been completely rewritten and is based
-around the Prime Mover build tool (see http://primemover.sf.net for more
-information). Installation ought to be fairly straightforward.
+The version 5.0 build mechanism has been completely rewritten. Installation
+ought to be fairly straightforward.
 
 Requirements:
 
-- an ANSI C compiler. Currently, I'm afraid, it's hard-coded to use gcc.
-  To change, try changing the variable definitions in first/c.pm. This also
-  needs to be available as 'cc' from the shell.
-  
-- about 20MB free in /tmp (or some other temporary directory).
+- an ANSI C compiler. This defaults to gcc. You can change this by setting
+  the CC make variable.
+
+- about 40MB free in /tmp (or some other temporary directory).
 
 - about 6MB in the target directory.
 
 Instructions:
 
-- edit config.pm. There's a small section at the top containing some editable
-  variables. Probably the only one you may want to edit is PREFIX, which
-  changes where the ACK installs to.
-  
+- edit the Makefile. There's a small section at the top where you can change
+  the configuration. Probably the only one you may want to edit is PREFIX,
+  which changes where the ACK installs to.
+
 - Run:
 
-    ./pm configure
-    
-  ...from the command line. This will write out a configuration file.
-  
+    make
+
+  ...from the command line. This will do the build.
+
+  The make system is fully parallelisable. If you have a multicore system,
+  you probably want to do:
+
+    make -j8
+
+  ...instead (substituting the right number of cores, of course). You can
+  also shave a few seconds of the build time by using the -r flag.
+
 - Run:
 
-    ./pm
-    
-  ...from the command line. This will actually do the build. This takes
-  about two minutes on my 1.6GHz Athlon Linux machine and about 30 on my
-  166MHz Pentium OpenBSD machine.
-  
-- Run:
+    sudo make install
 
-    ./pm install
-    
-  ...from the command line (possibly with sudo). This will install the built
-  ACK into whatever directory you nominated in PREFIX.
-  
+  ...from the command line. This will install the ACK in your PREFIX
+  directory (by default, /usr/local).
+
 The ACK should now be ready to use.
 
 
@@ -94,8 +93,9 @@ Some useful options include:
   -o <file>        specifies the output file
   -c               produce a .o file
   -c.s             produce a .s assembly file
-  -O               enable optimisation
+  -O               enable optimisation (optimisation levels go up to 6)
   -ansi            compile ANSI C (when using the C compiler)
+  -v               be more verbose (repeatable)
   <file>           build file
 
 ack figures out which language to use from the file extension:
@@ -107,6 +107,7 @@ ack figures out which language to use from the file extension:
   .p               Pascal
   .o               object files
   .s               assembly files
+  .e               ACK intermediate code assembly files
 
 For further information, see the man page (which actually does get
 installed, but is rather out of date).
@@ -115,6 +116,7 @@ There are some (known working) example programs in the 'examples' directory.
 A sample command line is:
 
 ack -mlinux386 -O examples/paranoia.c
+
 
 
 GOTCHAS
@@ -163,8 +165,4 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2010-08-08
-
-# $Source$
-# $State$
-# $Revision$
+2013-05-13

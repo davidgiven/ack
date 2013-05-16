@@ -12,13 +12,13 @@
 /*	Routines for testing type equivalence, type compatibility, and
 	assignment compatibility
 */
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
 
-#include	"strict3rd.h"
 #include	"type.h"
 #include	"LLlex.h"
 #include	"idf.h"

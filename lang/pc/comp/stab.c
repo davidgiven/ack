@@ -9,7 +9,7 @@
 
 /* $Id$ */
 
-#include	"dbsymtab.h"
+#include    "parameters.h"
 
 #ifdef	DBSYMTAB
 

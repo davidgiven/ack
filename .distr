@@ -1,9 +1,7 @@
 README
 CHANGES
 Copyright
-pm
-pmfile
-config.pm
+Makefile
 
 h
 modules/h
@@ -13,7 +11,7 @@ util/data
 util/LLgen
 
 modules/src/alloc
-modules/src/assert
+#modules/src/assert
 modules/src/system
 modules/src/string
 modules/src/read_em
@@ -31,7 +29,7 @@ util/ack
 lib/descr/fe
 util/arch
 #util/cpp
-util/cgg
+#util/cgg
 util/ncgg
 util/misc
 util/opt
@@ -43,15 +41,19 @@ lang/cem
 lang/pc
 lang/m2
 #lang/occam
-#lang/basic
+lang/basic
 
 mach/proto
 mach/i80
 mach/i86
 mach/i386
+mach/m68020
 
+plat
 plat/cpm
 plat/pc86
+plat/linux
 plat/linux386
+plat/linux68k
 
 examples

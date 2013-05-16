@@ -237,7 +237,7 @@ File *stream;
 
 extern char *strchr();
 
-getline()
+getinputline()
 {
 	/* get next input line */
 

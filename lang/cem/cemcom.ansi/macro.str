@@ -5,7 +5,7 @@
 /* $Id$ */
 /* PREPROCESSOR: DEFINITION OF MACRO DESCRIPTOR */
 
-#include	"nopp.h"
+#include	"parameters.h"
 
 #ifndef NOPP
 /*	The flags of the mc_flag field of the macro structure. Note that

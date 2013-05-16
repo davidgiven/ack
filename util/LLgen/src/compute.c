@@ -17,6 +17,7 @@
  * Also checks the continuation grammar from the specified grammar.
  */
 
+# include <stdlib.h>
 # include "types.h"
 # include "extern.h"
 # include "sets.h"

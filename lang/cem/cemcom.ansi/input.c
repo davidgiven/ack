@@ -4,10 +4,10 @@
  */
 /* $Id$ */
 
+#include "parameters.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "inputtype.h"
 #include "file_info.h"
 #include "input.h"
 
@@ -15,12 +15,9 @@
 #define INP_TYPE	struct file_info
 #define INP_VAR		finfo
 struct file_info	finfo;
-#include "nopp.h"
 #include <inp_pkg.body>
 #include <alloc.h>
 
-#include        "dbsymtab.h"
-#include	"lint.h"
 #ifndef NOPP
 #ifdef DBSYMTAB
 #include <stb.h>

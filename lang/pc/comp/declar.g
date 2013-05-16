@@ -1,7 +1,8 @@
 /* D E C L A R A T I O N S */
 
 {
-/* next line DEBUG */ 
+#include    "parameters.h"
+/* next line DEBUG */
 #include	"debug.h"
 
 #include	<alloc.h>
@@ -19,7 +20,6 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include	"dbsymtab.h"
 
 #define	PC_BUFSIZ	(sizeof(struct file) - (int)((struct file *)0)->bufadr)
 

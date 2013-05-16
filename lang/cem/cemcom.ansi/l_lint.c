@@ -5,12 +5,11 @@
 /* $Id$ */
 /*	Lint main routines	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
-#include	"debug.h"
 #include	"interface.h"
 #include	"assert.h"
 #ifdef ANSI
@@ -19,7 +18,6 @@
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"code.h"	/* RVAL etc */
 #include	"LLlex.h"

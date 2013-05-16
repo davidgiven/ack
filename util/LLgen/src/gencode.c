@@ -18,6 +18,7 @@
  * This file is a mess, it should be cleaned up some time.
  */
 
+#include <stdlib.h>
 # include "types.h"
 # include "io.h"
 # include "extern.h"

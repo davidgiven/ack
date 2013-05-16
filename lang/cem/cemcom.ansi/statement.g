@@ -6,7 +6,7 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
@@ -14,15 +14,11 @@
 #include	"l_lint.h"
 #endif	/* LINT */
 
-#include	"debug.h"
-#include	"botch_free.h"
-#include	"dbsymtab.h"
-
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"

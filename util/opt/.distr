@@ -1,4 +1,4 @@
-pmfile
+build.mk
 alloc.c
 alloc.h
 assert.h

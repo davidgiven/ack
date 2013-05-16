@@ -1,8 +1,8 @@
-pmfile
+build.mk
 LLlex.c
 LLlex.h
 LLmessage.c
-Parameters
+parameters.h
 arith.h
 bits.h
 ch3bin.c
@@ -22,7 +22,6 @@ input.h
 macro.str
 main.c
 make.allocd
-make.hfiles
 make.next
 make.tokcase
 make.tokfile

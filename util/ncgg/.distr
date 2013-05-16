@@ -1,4 +1,4 @@
-pmfile
+build.mk
 assert.h
 cgg.y
 coerc.c

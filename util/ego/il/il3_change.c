@@ -9,6 +9,7 @@
  */
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_mnem.h>
 #include <em_pseu.h>

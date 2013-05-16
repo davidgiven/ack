@@ -4,7 +4,6 @@
  */
 /* $Id$ */
 #define INP_PUSHBACK 3
-#include "inputtype.h"
 #include <inp_pkg.spec>
 
 /*	Note: The following macro only garuantees one PushBack.

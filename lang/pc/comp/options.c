@@ -3,13 +3,11 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
+#include    "parameters.h"
 #include	"class.h"
 #include	"const.h"
-#include	"idfsize.h"
 #include	"main.h"
 #include	"type.h"
-#include	"nocross.h"
-#include	"dbsymtab.h"
 
 #define	MINIDFSIZE	9
 

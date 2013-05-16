@@ -39,7 +39,7 @@ arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 
 /*	EVAL() is the main expression-tree evaluator, which turns
-	any legal expression tree into EM code. Parameters:
+	any legal expression tree into EM code. parameters.h:
 
 	struct expr *expr
 		pointer to root of the expression tree to be evaluated

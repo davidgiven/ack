@@ -1,4 +1,4 @@
-pmfile
+build.mk
 vsprintf.c
 vfprintf.c
 vprintf.c

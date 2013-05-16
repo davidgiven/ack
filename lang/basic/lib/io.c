@@ -1,9 +1,8 @@
 #include "bc_io.h"
-#include <sgtty.h>
 
-/* $Id$ */
-
-struct sgttyb _ttydef;
+/* dtrg --- this originally used sgtty.h to do clever tty manipulation.
+ * Strictly this should be converted to use termios, but for simplicity
+ * we're going to stick with plain stdio for now. */
 
 /* BASIC has some nasty io characteristics */
 
@@ -65,9 +64,6 @@ char *buf;
 	if( _chann == -1)
 	{
 		pos= _pos;
-		gtty(0,_ttydef);
-		_ttydef.sg_flags &= ~ECHO;
-		stty(0,_ttydef);
 	}else pos= _fdtable[_chann].pos;
 	c= buf;
 	while( (holder = fgetc(_chanrd)) != EOF && holder != '\n'){
@@ -79,8 +75,6 @@ char *buf;
 	if( _chann== -1) 
 	{
 		_pos=pos;
-		_ttydef.sg_flags |= ECHO;
-		stty(0,_ttydef);
 	} else _fdtable[_chann].pos= pos;
 }
 _tab(x)

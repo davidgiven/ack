@@ -11,7 +11,6 @@
 */
 
 #include "file_info.h"
-#include "nopp.h"
 
 /* the structure of a token:	*/
 struct token	{

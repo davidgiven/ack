@@ -143,7 +143,7 @@ echo ""
 if [ -e $destdir ]; then
 	if [ "$delete" = "yes" ]; then
 		echo "Press RETURN to erase $destdir and its contents, or CTRL+C to abort."
-		read
+		read _ _
 		echo "Erasing..."
 		rm -rf "$destdir"
 	else

@@ -12,6 +12,7 @@
 /*	Code generation for expressions and coercions
 */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -30,7 +31,6 @@
 #include	"Lpars.h"
 #include	"standards.h"
 #include	"walk.h"
-#include	"bigresult.h"
 
 extern int	proclevel;
 extern char	options[];

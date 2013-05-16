@@ -9,6 +9,7 @@
 
 /* $Id$ */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>

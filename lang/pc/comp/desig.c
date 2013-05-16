@@ -7,6 +7,7 @@
 	or perform a store.
 */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>

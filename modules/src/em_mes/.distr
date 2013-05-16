@@ -1,4 +1,4 @@
-pmfile
+build.mk
 C_ms_com.c
 C_ms_ego.c
 C_ms_emx.c

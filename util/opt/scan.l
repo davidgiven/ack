@@ -11,6 +11,11 @@ static char rcsid2[] = "$Id$";
  */
 
 extern long atol();
+extern char patid[128];
+extern int lino;
+
+#include "y.tab.h"
+
 %}
 %%
 \"[^"]*\"	{ strncpy(patid,yytext,sizeof(patid)); return(STRING); }

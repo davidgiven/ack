@@ -5,8 +5,7 @@
 /* $Id$ */
 /*	 A L I G N M E N T   D E F I N I T I O N S	*/
 
-#include "nocross.h"
-#include "trgt_sizes.h"
+#include "parameters.h"
 
 #ifndef NOCROSS
 extern int

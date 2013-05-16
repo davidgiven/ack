@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	Lint evaluation order checking	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 
 #ifdef	LINT
 
@@ -18,7 +18,6 @@
 #include	"arith.h"	/* definition arith */
 #include	"label.h"	/* definition label */
 #include	"expr.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"code.h"	/* RVAL etc */
 #include	"LLlex.h"

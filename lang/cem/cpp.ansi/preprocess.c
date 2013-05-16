@@ -10,16 +10,13 @@
 #include	<system.h>
 #include	<alloc.h>
 #include	"input.h"
-#include	"obufsize.h"
+#include	"parameters.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
-#include	"idfsize.h"
 #include	"bits.h"
-#include	"ln_prefix.h"
-#include	"textsize.h"
 
 char	_obuf[OBUFSIZE];
 #ifdef DOBITS
