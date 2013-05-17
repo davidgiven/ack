@@ -8,6 +8,7 @@ static char rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include "out.h"
 #include "const.h"
 #include "debug.h"
@@ -63,6 +64,22 @@ getvalu(addr, type)
 		return read4(addr, type) & 0x03FFFFFD;
 	case RELOH2:
 		return read2(addr, type) << 16;
+	case RELOVC4:
+	{
+		long i = read4(addr, type);
+		if (i & 0x00800000)
+		{
+            /* Branch instruction. */
+            return (i<<9)>>9;
+		}
+		else
+		{
+			/* Branch-link instruction. */
+			long hi = (i<<4)>>28;
+			long lo = (i & 0x007fffff);
+			return lo | (hi<<23);
+		}
+	}
 	default:
 		fatal("bad relocation size");
 	}
@@ -138,6 +155,28 @@ putvalu(valu, addr, type)
 	case RELOH2:
 		write2(valu>>16, addr, type);
 		break;
+	case RELOVC4:
+	{
+		long i = read4(addr, type);
+		if (i & 0x00800000)
+		{
+			/* Branch instruction. */
+			unsigned v = (valu/2) & 0x007fffff;
+			i &= ~0x007fffff;
+			i |= v;
+		}
+		else
+		{
+			/* Branch-link instruction. */
+	        unsigned v = (valu/2) & 0x07ffffff;
+	        unsigned hiv = v >> 23;
+	        unsigned lov = v & 0x007fffff;
+			i &= ~0x0f7fffff;
+			i |= (lov>>16) | (hiv<<24);
+		}
+		write4(i, addr, type);
+		break;
+	}
 	default:
 		fatal("bad relocation size");
 	}
