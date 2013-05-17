@@ -6,13 +6,17 @@
  */
 
 %token <y_word> GPR
+%token <y_word> CC
 
 %token <y_word> OP
+%token <y_word> OP_BRANCH
 %token <y_word> OP_ONEREG
 %token <y_word> OP_ONELREG
 %token <y_word> OP_ALU
+%token <y_word> OP_FPU
 %token <y_word> OP_MEM
-%token <y_word> OP_BREG
+%token <y_word> OP_MISC
+%token <y_word> OP_MISCL
 %token <y_word> OP_STACK
 
 /* Other token types */
