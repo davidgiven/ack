@@ -45,6 +45,10 @@ Requirements:
 - an ANSI C compiler. This defaults to gcc. You can change this by setting
   the CC make variable.
 
+- flex and yacc.
+
+- GNU make.
+
 - about 40MB free in /tmp (or some other temporary directory).
 
 - about 6MB in the target directory.
@@ -57,14 +61,14 @@ Instructions:
 
 - Run:
 
-    make
+    make            # or gmake
 
   ...from the command line. This will do the build.
 
   The make system is fully parallelisable. If you have a multicore system,
   you probably want to do:
 
-    make -j8
+    make -j8        # or gmake -j8
 
   ...instead (substituting the right number of cores, of course). You can
   also shave a few seconds of the build time by using the -r flag.

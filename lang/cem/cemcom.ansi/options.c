@@ -11,6 +11,7 @@
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
+#include	"idf.h"
 #include	"arith.h"
 #include	"sizes.h"
 #include	"align.h"

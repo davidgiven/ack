@@ -45,9 +45,9 @@ $(eval CLEANABLES += $o $1/Lpars.h)
 $o: $1/Lpars.h
 $1/Lpars.h: $2 $(LLGEN)
 	@echo LLGEN $1/Lpars.c
-	@mkdir -p $(dir $o)
+	@mkdir -p $1
 	$(hide) $(RM) $o $1/Lpars.h
-	$(hide) cd $(dir $o) && $(LLGEN) $(abspath $2)
+	$(hide) cd $1 && $(LLGEN) $(abspath $2)
 
 $(foreach f,$o,$(call cfile,$f))
 
