@@ -9,19 +9,21 @@
 
 #define ALWAYS 14
 
-extern void alu_instr_reg(unsigned opcode, unsigned cc, unsigned rd,
-	unsigned ra, unsigned rb);
+extern void alu_instr_reg(quad opcode, quad cc, quad rd,
+	quad ra, quad rb);
 
-extern void alu_instr_lit(unsigned opcode, unsigned cc, unsigned rd,
-	unsigned ra, unsigned value);
+extern void alu_instr_lit(quad opcode, quad cc, quad rd,
+	quad ra, quad value);
 
-extern void misc_instr_reg(unsigned opcode, unsigned cc, unsigned rd,
-	unsigned ra, unsigned rb);
+extern void misc_instr_reg(quad opcode, quad cc, quad rd,
+	quad ra, quad rb);
 
-extern void misc_instr_lit(unsigned opcode, unsigned cc, unsigned rd,
-	unsigned ra, unsigned value);
+extern void misc_instr_lit(quad opcode, quad cc, quad rd,
+	quad ra, quad value);
 
-extern void branch_instr(unsigned bl, unsigned cc, struct expr_t* expr);
+extern void branch_instr(quad bl, quad cc, struct expr_t* expr);
 
-extern void stack_instr(unsigned opcode, unsigned loreg, unsigned hireg,
-	unsigned extrareg);
+extern void stack_instr(quad opcode, quad loreg, quad hireg,
+	quad extrareg);
+
+extern void mem_instr(quad opcode, quad cc, quad rd, long offset, quad rs);

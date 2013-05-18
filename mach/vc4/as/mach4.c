@@ -41,78 +41,16 @@ operation
 	| OP_STACK GPR ',' GPR                 { stack_instr($1, $2, $2, $4); }
 	| OP_STACK GPR '-' GPR                 { stack_instr($1, $2, $4, -1); }
 	| OP_STACK GPR '-' GPR ',' GPR         { stack_instr($1, $2, $4, $6); }
-	;
 
-e16
-	: expr
-	{
-		DOTVAL += 2;
-		newrelo($1.typ, RELO2 | FIXUPFLAGS);
-		DOTVAL -= 2;
-		$$ = $1.val & 0xFFFF;
-	}
-	;
-		
-u8
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0xFF))
-			serror("8-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u7
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0x7F))
-			serror("7-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u6
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0x3F))
-			serror("6-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u5
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0x1F))
-			serror("5-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u4
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0xF))
-			serror("4-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u1
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 1))
-			serror("1-bit unsigned value out of range");
-		$$ = $1;
-	}
-	;
-	
-u2
-	: absexp
-	{
-		if (($1 < 0) || ($1 > 0x3))
-			serror("2-bit unsigned value out of range");
-		$$ = $1;
-	}
+	| OP_MEM GPR ',' '(' GPR ')'           { mem_instr($1, ALWAYS, $2, 0, $5); }
+	| OP_MEM CC GPR ',' '(' GPR ')'        { mem_instr($1, $2, $3, 0, $6); }
+	| OP_MEM GPR ',' absexp '(' GPR ')'    { mem_instr($1, ALWAYS, $2, $4, $6); }
+	| OP_MEM CC GPR ',' absexp '(' GPR ')' { mem_instr($1, $2, $3, $5, $7); }
+
+    | OP_MEM GPR ',' '(' GPR ',' GPR ')'
+    | OP_MEM CC GPR ',' '(' GPR ',' GPR ')'
+
+    | OP_MEM GPR ',' '(' GPR ')' '+' '+'
+    | OP_MEM CC GPR ',' '(' GPR ')' '+' '+'
 	;
 

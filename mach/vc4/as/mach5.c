@@ -5,10 +5,11 @@
  * See the file 'Copying' in the root of the distribution for the full text.
  */
 
+#define maskx(v, x) (v & ((1<<(x))-1))
+
 /* Assemble an ALU instruction where rb is a register. */
 
-void alu_instr_reg(unsigned op, unsigned cc,
-	unsigned rd, unsigned ra, unsigned rb)
+void alu_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
 {
 	/* Can we use short form? */
 
@@ -26,8 +27,7 @@ void alu_instr_reg(unsigned op, unsigned cc,
 
 /* Assemble an ALU instruction where rb is a literal. */
 
-void alu_instr_lit(unsigned op, unsigned cc,
-	unsigned rd, unsigned ra, unsigned value)
+void alu_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
 {
 	/* 16 bit short form? */
 
@@ -68,8 +68,7 @@ void alu_instr_lit(unsigned op, unsigned cc,
 
 /* Miscellaneous instructions with three registers and a cc. */
 
-void misc_instr_reg(unsigned op, unsigned cc,
-	unsigned rd, unsigned ra, unsigned rb)
+void misc_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
 {
 	emit2(op | (rd<<0));
 	emit2(B16(00000000,00000000) | (ra<<11) | (cc<<7) | (rb<<0));
@@ -77,8 +76,7 @@ void misc_instr_reg(unsigned op, unsigned cc,
 
 /* Miscellaneous instructions with two registers, a literal, and a cc. */
 
-void misc_instr_lit(unsigned op, unsigned cc,
-	unsigned rd, unsigned ra, unsigned value)
+void misc_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
 {
     if (value < 0x1f)
         serror("only constants from 0..31 can be used here");
@@ -90,9 +88,9 @@ void misc_instr_lit(unsigned op, unsigned cc,
 /* Assemble a branch instruction. This may be a near branch into this
  * object file, or a far branch which requires a fixup. */
 
-void branch_instr(unsigned bl, unsigned cc, struct expr_t* expr)
+void branch_instr(quad bl, quad cc, struct expr_t* expr)
 {
-	unsigned type = expr->typ & S_TYP;
+	quad type = expr->typ & S_TYP;
 
 	/* Sanity checking. */
 
@@ -142,15 +140,15 @@ void branch_instr(unsigned bl, unsigned cc, struct expr_t* expr)
 
 			if (bl)
 			{
-				unsigned v = d & 0x07ffffff;
-				unsigned hiv = v >> 23;
-				unsigned lov = v & 0x007fffff;
+				quad v = d & 0x07ffffff;
+				quad hiv = v >> 23;
+				quad lov = v & 0x007fffff;
 				emit2(B16(10010000,10000000) | (lov>>16) | (hiv<<8));
 				emit2(B16(00000000,00000000) | (lov&0xffff));
 			}
 			else
 			{
-				unsigned v = d & 0x007fffff;
+				quad v = d & 0x007fffff;
 				emit2(B16(10010000,00000000) | (cc<<8) | (v>>16));
 				emit2(B16(00000000,00000000) | (v&0xffff));
 			}
@@ -159,10 +157,11 @@ void branch_instr(unsigned bl, unsigned cc, struct expr_t* expr)
 	}
 }
 
-void stack_instr(unsigned opcode, unsigned loreg, unsigned hireg,
-	unsigned extrareg)
+/* Push/pop. */
+
+void stack_instr(quad opcode, quad loreg, quad hireg, quad extrareg)
 {
-    unsigned b;
+    quad b;
 
     switch (loreg)
     {
@@ -209,4 +208,105 @@ void stack_instr(unsigned opcode, unsigned loreg, unsigned hireg,
 		((extrareg != -1) ? 0x0100 : 0));
 }
 
+/* Memory operations where the offset is a fixed value (including zero). */
+
+void mem_instr(quad opcode, quad cc, quad rd, long offset, quad rs)
+{
+	quad uoffset = (quad) offset;
+	int multiple4 = !(offset & 3);
+	int intonly = ((opcode & B8(00000110)) == 0);
+
+	/* If no CC, there are some special forms we can use. */
+
+	if (cc == ALWAYS)
+	{
+		/* Very short form, special for stack offsets. */
+
+		if (intonly && (rs == 25) && multiple4 && fitx(offset, 7) && (rd < 0x10))
+		{
+			quad o = maskx(offset, 7) / 4;
+			emit2(B16(00000100,00000000) | (opcode<<9) | (o<<4) | (rd<<0));
+			return;
+		}
+
+		/* Slightly longer form for directly dereferencing via a register. */
+
+		if ((rs < 0x10) && (rd < 0x10) && (offset == 0))
+		{
+			emit2(B16(00001000,00000000) | (opcode<<8) | (rs<<4) | (rd<<4));
+			return;
+		}
+
+	    /* Integer only, but a limited offset. */
+
+	    if (intonly && (uoffset <= 0x3f) && (rs < 0x10) && (rd < 0x10))
+		{
+			quad o = uoffset / 4;
+			emit2(B16(00100000,00000000) | (opcode<<12) | (o<<8) |
+				(rs<<4) | (rd<<0));
+			return;
+		}
+
+		/* Certain registers support 16-bit offsets. */
+
+		if (fitx(offset, 16))
+		{
+			switch (rs)
+			{
+                case 0: opcode = B16(10101011,00000000) | (opcode<<5); goto specialreg;
+                case 24: opcode = B16(10101000,00000000) | (opcode<<5); goto specialreg;
+                case 25: opcode = B16(10101001,00000000) | (opcode<<5); goto specialreg;
+                case 31: opcode = B16(10101010,00000000) | (opcode<<5); goto specialreg;
+                default: break;
+
+                specialreg:
+                {
+                    quad o = maskx(offset, 16);
+                    emit2(opcode | (rd<<0));
+                    emit2(o);
+                    return;
+                }
+			}
+		}
+
+        /* 12-bit displacements. */
+
+        if (fitx(offset, 12))
+        {
+        	quad looffset = maskx(offset, 11);
+        	quad hioffset = (offset >> 11) & 1;
+
+        	emit2(B16(10100010,00000000) | (opcode<<5) | (rd<<0) | (hioffset<<8));
+        	emit2(B16(00000000,00000000) | (rs<<11) | (looffset<<0));
+        	return;
+        }
+
+        /* Everything else uses Very Long Form. */
+
+		if (!fitx(offset, 27))
+			serror("offset will not fit into load/store instruction");
+
+		if (rs == 31)
+			opcode = B16(11100111,00000000) | (opcode<<5);
+		else
+			opcode = B16(11100110,00000000) | (opcode<<5);
+
+		emit2(opcode | (rd<<0));
+		emit4((rs<<27) | maskx(offset, 27));
+		return;
+	}
+
+	/* Now we're on to load/store instructions with ccs. */
+
+	if (uoffset <= 0x1f)
+	{
+		emit2(B16(10100000,00000000) | (opcode<<5) | (rd<<0));
+		emit2(B16(00000000,01000000) | (rs<<11) | (cc<<7) | (uoffset<<0));
+		return;
+	}
+
+	/* No encoding for this instruction. */
+
+	serror("invalid load/store instruction");
+}
 

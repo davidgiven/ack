@@ -19,6 +19,8 @@
 #undef word_t
 #define word_t long
 
+typedef unsigned long quad;
+
 #undef ALIGNWORD
 #define ALIGNWORD	4
 
