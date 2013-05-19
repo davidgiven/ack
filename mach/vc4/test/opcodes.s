@@ -333,3 +333,14 @@ forward:
 	st.f r0, (r1)
 	ld.f r0, 8 (r1)
 	st.f r0, 8 (r1)
+
+	ld r0, (r1, r2)
+	st r0, (r1, r2)
+	ld.f r0, (pc, pc)
+	st.f r0, (pc, pc)
+
+	ld r0, (r1)++
+	st r0, (r1)++
+	ld.f pc, (pc)++
+	st.f pc, (pc)++
+

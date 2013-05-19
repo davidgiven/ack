@@ -6,7 +6,7 @@
  */
 
 operation
-	: OP                                              { emit2($1); }
+	: OP                                   { emit2($1); }
 
 	| OP_BRANCH GPR                        { emit2($1 | ($2<<0)); }
 	| OP_BRANCH expr                       { branch_instr($1, ALWAYS, &$2); }
@@ -47,10 +47,10 @@ operation
 	| OP_MEM GPR ',' absexp '(' GPR ')'    { mem_instr($1, ALWAYS, $2, $4, $6); }
 	| OP_MEM CC GPR ',' absexp '(' GPR ')' { mem_instr($1, $2, $3, $5, $7); }
 
-    | OP_MEM GPR ',' '(' GPR ',' GPR ')'
-    | OP_MEM CC GPR ',' '(' GPR ',' GPR ')'
+    | OP_MEM GPR ',' '(' GPR ',' GPR ')'   { mem_offset_instr($1, ALWAYS, $2, $5, $7); }
+    | OP_MEM CC GPR ',' '(' GPR ',' GPR ')' { mem_offset_instr($1, $2, $3, $6, $8); }
 
-    | OP_MEM GPR ',' '(' GPR ')' '+' '+'
-    | OP_MEM CC GPR ',' '(' GPR ')' '+' '+'
+    | OP_MEM GPR ',' '(' GPR ')' '+' '+'   { mem_postincr_instr($1, ALWAYS, $2, $5); }
+    | OP_MEM CC GPR ',' '(' GPR ')' '+' '+' { mem_postincr_instr($1, $2, $3, $6); }
 	;
 

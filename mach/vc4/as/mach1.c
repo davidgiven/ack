@@ -9,21 +9,12 @@
 
 #define ALWAYS 14
 
-extern void alu_instr_reg(quad opcode, quad cc, quad rd,
-	quad ra, quad rb);
-
-extern void alu_instr_lit(quad opcode, quad cc, quad rd,
-	quad ra, quad value);
-
-extern void misc_instr_reg(quad opcode, quad cc, quad rd,
-	quad ra, quad rb);
-
-extern void misc_instr_lit(quad opcode, quad cc, quad rd,
-	quad ra, quad value);
-
-extern void branch_instr(quad bl, quad cc, struct expr_t* expr);
-
-extern void stack_instr(quad opcode, quad loreg, quad hireg,
-	quad extrareg);
-
-extern void mem_instr(quad opcode, quad cc, quad rd, long offset, quad rs);
+extern void alu_instr_reg(quad opcode, int cc, int rd, int ra, int rb);
+extern void alu_instr_lit(quad opcode, int cc, int rd, int ra, quad value);
+extern void misc_instr_reg(quad opcode, int cc, int rd, int ra, int rb);
+extern void misc_instr_lit(quad opcode, int cc, int rd, int ra, quad value);
+extern void branch_instr(int bl, int cc, struct expr_t* expr);
+extern void stack_instr(quad opcode, int loreg, int hireg, int extrareg);
+extern void mem_instr(quad opcode, int cc, int rd, long offset, int rs);
+extern void mem_offset_instr(quad opcode, int cc, int rd, int qa, int rb);
+extern void mem_postincr_instr(quad opcode, int cc, int rd, int rs);

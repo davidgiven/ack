@@ -9,7 +9,7 @@
 
 /* Assemble an ALU instruction where rb is a register. */
 
-void alu_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
+void alu_instr_reg(quad op, int cc, int rd, int ra, int rb)
 {
 	/* Can we use short form? */
 
@@ -27,7 +27,7 @@ void alu_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
 
 /* Assemble an ALU instruction where rb is a literal. */
 
-void alu_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
+void alu_instr_lit(quad op, int cc, int rd, int ra, quad value)
 {
 	/* 16 bit short form? */
 
@@ -68,7 +68,7 @@ void alu_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
 
 /* Miscellaneous instructions with three registers and a cc. */
 
-void misc_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
+void misc_instr_reg(quad op, int cc, int rd, int ra, int rb)
 {
 	emit2(op | (rd<<0));
 	emit2(B16(00000000,00000000) | (ra<<11) | (cc<<7) | (rb<<0));
@@ -76,7 +76,7 @@ void misc_instr_reg(quad op, quad cc, quad rd, quad ra, quad rb)
 
 /* Miscellaneous instructions with two registers, a literal, and a cc. */
 
-void misc_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
+void misc_instr_lit(quad op, int cc, int rd, int ra, quad value)
 {
     if (value < 0x1f)
         serror("only constants from 0..31 can be used here");
@@ -88,7 +88,7 @@ void misc_instr_lit(quad op, quad cc, quad rd, quad ra, quad value)
 /* Assemble a branch instruction. This may be a near branch into this
  * object file, or a far branch which requires a fixup. */
 
-void branch_instr(quad bl, quad cc, struct expr_t* expr)
+void branch_instr(int bl, int cc, struct expr_t* expr)
 {
 	quad type = expr->typ & S_TYP;
 
@@ -159,9 +159,9 @@ void branch_instr(quad bl, quad cc, struct expr_t* expr)
 
 /* Push/pop. */
 
-void stack_instr(quad opcode, quad loreg, quad hireg, quad extrareg)
+void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
 {
-    quad b;
+    int b;
 
     switch (loreg)
     {
@@ -210,7 +210,7 @@ void stack_instr(quad opcode, quad loreg, quad hireg, quad extrareg)
 
 /* Memory operations where the offset is a fixed value (including zero). */
 
-void mem_instr(quad opcode, quad cc, quad rd, long offset, quad rs)
+void mem_instr(quad opcode, int cc, int rd, long offset, int rs)
 {
 	quad uoffset = (quad) offset;
 	int multiple4 = !(offset & 3);
@@ -310,3 +310,19 @@ void mem_instr(quad opcode, quad cc, quad rd, long offset, quad rs)
 	serror("invalid load/store instruction");
 }
 
+/* Memory operations where the destination address is a sum of two
+ * registers. */
+
+void mem_offset_instr(quad opcode, int cc, int rd, int ra, int rb)
+{
+    emit2(B16(10100000,00000000) | (opcode<<5) | (rd<<0));
+    emit2(B16(00000000,00000000) | (ra<<11) | (cc<<7) | (rb<<0));
+}
+
+/* Memory operations with postincrement. */
+
+void mem_postincr_instr(quad opcode, int cc, int rd, int rs)
+{
+    emit2(B16(10100101,00000000) | (opcode<<5) | (rd<<0));
+    emit2(B16(00000000,00000000) | (rs<<11) | (cc<<7));
+}
