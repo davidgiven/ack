@@ -9,7 +9,7 @@
 %token <y_word> CC
 
 %token <y_word> OP
-%token <y_word> OP_BRANCH
+%token <y_word> OP_BRANCH OP_BRANCHLINK OP_ADDCMPB
 %token <y_word> OP_ONEREG
 %token <y_word> OP_ONELREG
 %token <y_word> OP_ALU

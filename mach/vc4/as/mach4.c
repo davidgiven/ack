@@ -8,9 +8,26 @@
 operation
 	: OP                                   { emit2($1); }
 
-	| OP_BRANCH GPR                        { emit2($1 | ($2<<0)); }
-	| OP_BRANCH expr                       { branch_instr($1, ALWAYS, &$2); }
-	| OP_BRANCH CC expr                    { branch_instr($1, $2, &$3); }
+	| OP_BRANCH GPR                        { emit2(B16(00000000,01000000) | ($2<<0)); }
+	| OP_BRANCHLINK GPR                    { emit2(B16(00000000,01100000) | ($2<<0)); }
+
+	| OP_BRANCH expr                       { branch_instr(0, ALWAYS, &$2); }
+	| OP_BRANCHLINK expr                   { branch_instr(1, ALWAYS, &$2); }
+	| OP_BRANCH CC expr                    { branch_instr(0, $2, &$3); }
+	| OP_BRANCHLINK CC expr                { branch_instr(1, $2, &$3); }
+
+	| OP_BRANCH GPR ',' GPR ',' expr       { branch_addcmp_lit_reg_instr(ALWAYS, 0, $2, $4, &$6); }
+	| OP_BRANCH CC GPR ',' GPR ',' expr    { branch_addcmp_lit_reg_instr($2, 0, $3, $5, &$7); }
+	| OP_BRANCH GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr(ALWAYS, 0, $2, $5, &$7); }
+	| OP_BRANCH CC GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr($2, 0, $3, $6, &$8); }
+	| OP_ADDCMPB GPR ',' GPR ',' GPR ',' expr { branch_addcmp_reg_reg_instr(ALWAYS, $2, $4, $6, &$8); }
+	| OP_ADDCMPB CC GPR ',' GPR ',' GPR ',' expr { branch_addcmp_reg_reg_instr($2, $3, $5, $7, &$9); }
+	| OP_ADDCMPB GPR ',' '#' absexp ',' GPR ',' expr { branch_addcmp_reg_reg_instr(ALWAYS, $2, $5, $7, &$9); }
+	| OP_ADDCMPB CC GPR ',' '#' absexp ',' GPR ',' expr { branch_addcmp_reg_reg_instr($2, $3, $6, $8, &$10); }
+	| OP_ADDCMPB GPR ',' GPR ',' '#' absexp ',' expr { branch_addcmp_reg_lit_instr(ALWAYS, $2, $4, $7, &$9); }
+	| OP_ADDCMPB CC GPR ',' GPR ',' '#' absexp ',' expr { branch_addcmp_reg_lit_instr($2, $3, $5, $8, &$10); }
+	| OP_ADDCMPB GPR ',' '#' absexp ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr(ALWAYS, $2, $5, $8, &$10); }
+	| OP_ADDCMPB CC GPR ',' '#' absexp ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr($2, $3, $6, $9, &$11); }
 
 	| OP_ONELREG GPR
 	{

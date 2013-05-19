@@ -73,7 +73,8 @@
 0,     OP,                    B16(00000000,00001010),                  "rti",
 
 0,     OP_BRANCH,             0,                                       "b",
-0,     OP_BRANCH,             1,                                       "bl",
+0,     OP_BRANCHLINK,         0,                                       "bl",
+0,     OP_ADDCMPB,            0,                                       "addcmpb",
 
 0,     OP_ONELREG,            B16(00000000,10000000),                  "tbb",
 0,     OP_ONELREG,            B16(00000000,10100000),                  "tbs",

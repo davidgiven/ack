@@ -353,3 +353,10 @@ near:
 	ldb r0, main
 	stb r0, near
 	stb r0, main
+
+	b.eq r0, r1, near
+	b r0, r1, near
+	addcmpb r0, r1, r2, .
+	addcmpb r0, #1, r2, .
+	addcmpb r0, r1, #1, .
+	addcmpb r0, #1, #2, .

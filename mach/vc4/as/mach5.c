@@ -388,3 +388,87 @@ void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 	}
 }
 
+/* Common code for handling addcmp: merge in as much of expr as will fit to
+ * the second pair of the addcmp opcode. */
+
+static void branch_addcmp_common(quad opcode, int bits, struct expr_t* expr)
+{
+	quad type = expr->typ & S_TYP;
+
+	switch (pass)
+	{
+		case 0:
+			/* Calculate size of instructions only. */
+
+			emit2(0);
+			break;
+
+		case 1:
+		case 2:
+		{
+			if (type != DOTTYP)
+				serror("can't use this type of branch to jump outside the section");
+
+			/* The VC4 branch instructions express distance in 2-byte
+			 * words. */
+
+			int d = (expr->val - DOTVAL-2 + 4) / 2;
+
+			if (!fitx(d, bits))
+				serror("target of branch is too far away");
+
+			emit2(opcode | maskx(d, bits));
+			break;
+        }
+	}
+}
+
+void branch_addcmp_reg_reg_instr(int cc, int rd, int ra, int rs, struct expr_t* expr)
+{
+    if ((rd >= 0x10) || (ra >= 0x10) || (rs >= 0x10))
+        serror("can only use r0-r15 in this instruction");
+
+	emit2(B16(10000000,00000000) | (cc<<8) | (ra<<4) | (rd<<0));
+	branch_addcmp_common(B16(00000000,00000000) | (rs<<10), 10, expr);
+}
+
+void branch_addcmp_lit_reg_instr(int cc, int rd, long va, int rs, struct expr_t* expr)
+{
+    if ((rd >= 0x10) || (rs >= 0x10))
+        serror("can only use r0-r15 in this instruction");
+
+	if (!fitx(va, 4))
+		serror("value too big to encode into instruction");
+    va = maskx(va, 4);
+
+    emit2(B16(10000000,00000000) | (cc<<8) | (va<<4) | (rd<<0));
+    branch_addcmp_common(B16(01000000,00000000) | (rs<<10), 10, expr);
+}
+
+void branch_addcmp_reg_lit_instr(int cc, int rd, int ra, long vs, struct expr_t* expr)
+{
+    if ((rd >= 0x10) || (ra >= 0x10))
+        serror("can only use r0-r15 in this instruction");
+
+	if (!fitx(vs, 6))
+		serror("value too big to encode into instruction");
+	vs = maskx(vs, 6);
+
+	emit2(B16(10000000,00000000) | (cc<<8) | (ra<<4) | (rd<<0));
+	branch_addcmp_common(B16(10000000,00000000) | (vs<<8), 8, expr);
+}
+
+void branch_addcmp_lit_lit_instr(int cc, int rd, long va, long vs, struct expr_t* expr)
+{
+    if (rd >= 0x10)
+        serror("can only use r0-r15 in this instruction");
+
+	if (!fitx(va, 4) || !fitx(vs, 6))
+		serror("value too big to encode into instruction");
+	va = maskx(va, 4);
+	vs = maskx(vs, 6);
+
+	emit2(B16(10000000,00000000) | (cc<<8) | (va<<4) | (rd<<0));
+	branch_addcmp_common(B16(11000000,00000000) | (vs<<8), 8, expr);
+}
+
