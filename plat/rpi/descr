@@ -2,8 +2,8 @@
 # $State$
 # $Revision$
 
-var w=2
-var p=2
+var w=4
+var p=4
 var s=2
 var l=4
 var f=4
@@ -12,7 +12,7 @@ var ARCH=vc4
 var PLATFORM=rpi
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
-var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1
+var ALIGN=-a0:2 -a1:4 -a2:4 -a3:4
 var MACHOPT_F=-m8
 
 # Override the setting in fe so that files compiled for this platform can see

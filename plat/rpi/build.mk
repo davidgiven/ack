@@ -43,5 +43,5 @@ define build-rpi-boot-impl
 	$(call installto, $(PLATIND)/$(PLATFORM)/boot.o)
 endef
 
-#(eval $(build-rpi-boot-impl))
+$(eval $(build-rpi-boot-impl))
 
