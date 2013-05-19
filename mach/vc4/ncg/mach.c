@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#ifndef NORCSID
-static char rcsid[]=	"$Id$" ;
-#endif
-
 int framesize;
 
 /*
@@ -57,15 +53,14 @@ con_mult(word sz)
 #define FL_MSB_AT_LOW_ADDRESS	1
 #include <con_float>
 
-prolog(full nlocals)
+void prolog(full nlocals)
 {
 	int ss = nlocals + 8;
-	fprintf(codefile, "addi sp, sp, %d\n", -ss);
-	fprintf(codefile, "stw fp, %d(sp)\n", nlocals);
-	fprintf(codefile, "mfspr r0, lr\n"
-	                  "stw r0, %d(sp)\n", nlocals+4);
-	fprintf(codefile, "addi fp, sp, %d\n", nlocals);
-	
+	fprintf(codefile, "push fp, lr\n");
+	fprintf(codefile, "mov fp, sp\n");
+	if (nlocals > 0)
+		fprintf(codefile, "sub sp, #%d\n", nlocals);
+
 	framesize = nlocals;
 }
 
@@ -106,7 +101,7 @@ static int numsaved;
 
 /* Initialise regvar system for one function. */
 
-i_regsave()
+void i_regsave(void)
 {
 	int i;
 	
@@ -118,7 +113,7 @@ i_regsave()
 
 /* Mark a register as being saved. */
 
-regsave(const char* regname, full offset, int size)
+void regsave(const char* regname, full offset, int size)
 {
 	int regnum = atoi(regname+1);
 	savedregsi[regnum] = offset;
@@ -134,34 +129,29 @@ regsave(const char* regname, full offset, int size)
 
 /* Finish saving ragisters. */
 
-void saveloadregs(const char* ops, const char* opm)
+static void saveloadregs(const char* op)
 {
-	int offset = -(framesize + numsaved*4);
-	int reg = 32;
-	
-	/* Check for the possibility of a multiple. */
-	
-	do
+	int minreg = 32;
+	int maxreg = -1;
+	int i;
+
+	for (i=0; i<32; i++)
 	{
-		reg--;
-	}
-	while ((reg > 0) && (savedregsi[reg] != INT_MAX));
-	if (reg < 31)
-	{
-		fprintf(codefile, "%s r%d, %d(fp)\n", opm, reg+1, offset);
-		offset += (31-reg)*4;
-	}
-	
-	/* Saved everything else singly. */
-	
-	while (reg > 0)
-	{
-		if (savedregsi[reg] != INT_MAX)
+		if (savedregsi[i] != INT_MAX)
 		{
-			fprintf(codefile, "%s r%d, %d(fp)\n", ops, reg, offset);
-			offset += 4;
+			if (i < minreg)
+				minreg = i;
+			if (i > maxreg)
+				maxreg = i;
 		}
-		reg--;
+	}
+
+	if (minreg != 32)
+	{
+		fprintf(codefile, "! saving registers %d to %d\n", minreg, maxreg);
+		assert(minreg == 6);
+
+		fprintf(codefile, "%s r6-r%d\n", op, maxreg);
 	}
 }
 
@@ -169,13 +159,14 @@ f_regsave()
 {
 	int i;
 	fprintf(codefile, "! f_regsave()\n");
-	fprintf(codefile, "addi sp, sp, %d\n", -numsaved*4);
-	
-	saveloadregs("stw", "stmw");
-	
+	saveloadregs("push");
+
 	for (i=0; i<32; i++)
-		if ((savedregsi[i] != INT_MAX) && (savedregsi[i] > 0))
-			fprintf(codefile, "lwz r%d, %d(fp)\n", i, savedregsi[i]);
+	{
+		int o = savedregsi[i];
+		if ((o != INT_MAX) && (o > 0))
+			fprintf(codefile, "ld r%d, %d (fp)\n", i, savedregsi[i]);
+	}
 }
 
 /* Restore all saved registers. */
@@ -183,7 +174,7 @@ f_regsave()
 regreturn()
 {
 	fprintf(codefile, "! regreturn()\n");
-	saveloadregs("lwz", "lmw");
+	saveloadregs("pop");
 }
 
 /* Calculate the score of a given register. */
