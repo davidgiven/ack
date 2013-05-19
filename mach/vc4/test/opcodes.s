@@ -339,8 +339,17 @@ forward:
 	ld.f r0, (pc, pc)
 	st.f r0, (pc, pc)
 
+near:
 	ld r0, (r1)++
 	st r0, (r1)++
 	ld.f pc, (pc)++
 	st.f pc, (pc)++
 
+	ld r0, near
+	ld r0, main
+	st r0, near
+	st r0, main
+	ldb r0, near
+	ldb r0, main
+	stb r0, near
+	stb r0, main

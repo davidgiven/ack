@@ -18,3 +18,4 @@ extern void stack_instr(quad opcode, int loreg, int hireg, int extrareg);
 extern void mem_instr(quad opcode, int cc, int rd, long offset, int rs);
 extern void mem_offset_instr(quad opcode, int cc, int rd, int qa, int rb);
 extern void mem_postincr_instr(quad opcode, int cc, int rd, int rs);
+extern void mem_address_instr(quad opcode, int rd, struct expr_t* expr);

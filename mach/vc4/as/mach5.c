@@ -326,3 +326,65 @@ void mem_postincr_instr(quad opcode, int cc, int rd, int rs)
     emit2(B16(10100101,00000000) | (opcode<<5) | (rd<<0));
     emit2(B16(00000000,00000000) | (rs<<11) | (cc<<7));
 }
+
+/* Memory operations where the destination is an address literal. */
+
+void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
+{
+	quad type = expr->typ & S_TYP;
+
+	/* Sanity checking. */
+
+	if (type == S_ABS)
+		serror("can't use absolute addresses here");
+
+	switch (pass)
+	{
+		case 0:
+			/* Calculate size of instructions only. For now we just assume
+			 * that they're going to be the maximum size, 48 bits. */
+
+			emit2(0);
+			emit4(0);
+			break;
+
+		case 1:
+		case 2:
+		{
+			/* The VC4 branch instructions express distance in 2-byte
+			 * words. */
+
+			int d = (expr->val - DOTVAL) / 2;
+
+        	/* We now know the worst case for the instruction layout. At
+        	 * this point we can emit the instructions, which may shrink
+        	 * the code. */
+
+			if (type == DOTTYP)
+			{
+        	    /* This is a reference to an address within this section. If
+        	     * it's close enough to the program counter, we can use a
+        	     * shorter instruction. */
+
+				if (fitx(d, 16))
+				{
+                    emit2(B16(10101010,00000000) | (opcode<<5) | (rd<<0));
+                    emit2(d);
+                    return;
+                }
+			}
+
+			/* Otherwise we need the full 48 bits. */
+
+            if (!fitx(d, 27))
+                serror("offset too big to encode into instruction");
+
+			newrelo(expr->typ, RELOVC4 | RELPC);
+
+            emit2(B16(11100111,00000000) | (opcode<<5) | (rd<<0));
+            emit4((31<<27) | maskx(d, 27));
+			break;
+        }
+	}
+}
+
