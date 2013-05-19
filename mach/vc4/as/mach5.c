@@ -40,7 +40,7 @@ void alu_instr_lit(quad op, int cc, int rd, int ra, quad value)
 
 	/* 32 bit medium form? */
 
-    if (value >= 0x1f)
+    if (value <= 0x1f)
     {
         emit2(B16(11000000,00000000) | (op<<5) | (rd<<0));
         emit2(B16(00000000,01000000) | (ra<<11) | (cc<<7) | (value<<0));
