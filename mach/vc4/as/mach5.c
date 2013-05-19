@@ -13,7 +13,7 @@ void alu_instr_reg(quad op, int cc, int rd, int ra, int rb)
 {
 	/* Can we use short form? */
 
-	if ((cc == ALWAYS) && (ra == rd))
+	if ((cc == ALWAYS) && (ra == rd) && (ra < 0x10) && (rb < 0x10))
 	{
 		emit2(B16(01000000,00000000) | (op<<8) | (rb<<4) | (rd<<0));
 		return;
@@ -32,7 +32,7 @@ void alu_instr_lit(quad op, int cc, int rd, int ra, quad value)
 	/* 16 bit short form? */
 
 	if ((cc == ALWAYS) && !(op & 1) && (value <= 0x1f) && (ra == rd) &&
-		!(ra & 0x10))
+		(ra < 0x10))
 	{
 		emit2(B16(01100000,00000000) | (op<<8) | (value<<4) | (rd<<0));
 		return;
@@ -162,6 +162,7 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
 {
     int b;
+    int m;
 
     switch (loreg)
     {
@@ -172,15 +173,13 @@ void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
 
         case 26: /* lr */
             extrareg = 26;
-            hireg = 31;
-            loreg = 0;
+            hireg = loreg = -1;
             b = 0;
             break;
 
 		case 31: /* pc */
 			extrareg = 31;
-			hireg = 31;
-			loreg = 0;
+			hireg = loreg = -1;
 			b = 0;
 			break;
 
@@ -190,22 +189,26 @@ void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
 
 	if (opcode & 0x0080)
 	{
-		/* Pop */
-		if (extrareg == 26)
-			serror("cannot pop lr");
-	}
-	else
-	{
 		/* Push */
 		if (extrareg == 31)
 			serror("cannot push pc");
+	}
+	else
+	{
+		/* Pop */
+		if (extrareg == 26)
+			serror("cannot pop lr");
 	}
 
 	if (hireg < loreg)
 		serror("invalid register range");
 
-	emit2(opcode | (b<<5) | (hireg<<0) |
-		((extrareg != -1) ? 0x0100 : 0));
+	if (hireg == -1)
+		m = 31;
+	else
+		m = hireg - loreg;
+
+	emit2(opcode | (b<<5) | (m<<0) | ((extrareg != -1) ? 0x0100 : 0));
 }
 
 /* Memory operations where the offset is a fixed value (including zero). */
