@@ -28,43 +28,34 @@ PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
-	LREG            /* any allocatable low register (r0-r15) */
-	HREG            /* any allocatable high register (r0-r15) */
 	STACKABLE       /* a push/popable register (r0, r6, r16, fp) */
 
 	GPR0  GPR1  GPR2  GPR3  GPR4  GPR5  GPR6  GPR7
 	GPR8  GPR9  GPR10 GPR11 GPR12 GPR13 GPR14 GPR15
 	GPR16 GPR17 GPR18 GPR19 GPR20 GPR21 GPR22 GPR23
 
-	GPRFP GPRSP GPRLR GPRPC
+	GPRGP GPRFP GPRSP GPRLR GPRPC
 
 REGISTERS
 
-	R0("r0")           : GPR, REG, LREG, STACKABLE, GPR0.
-	R1("r1")           : GPR, REG, LREG, GPR1.
-	R2("r2")           : GPR, REG, LREG, GPR2.
-	R3("r3")           : GPR, REG, LREG, GPR3.
-	R4("r4")           : GPR, REG, LREG, GPR4.
-	R5("r5")           : GPR, REG, LREG, GPR5.
-	R6("r6")           : GPR, REG, LREG, STACKABLE, GPR6 regvar.
-	R7("r7")           : GPR, REG, LREG, GPR7 regvar.
-	R8("r8")           : GPR, REG, LREG, GPR8 regvar.
-	R9("r9")           : GPR, REG, LREG, GPR9 regvar.
-	R10("r10")         : GPR, REG, LREG, GPR10 regvar.
-	R11("r11")         : GPR, REG, LREG, GPR11 regvar.
-	R12("r12")         : GPR, REG, LREG, GPR12 regvar.
-	R13("r13")         : GPR, REG, LREG, GPR13 regvar.
-	R14("r14")         : GPR, REG, LREG, GPR14 regvar.
-	R15("r15")         : GPR, REG, LREG, GPR15 regvar.
+	R0("r0")           : GPR, REG, STACKABLE, GPR0.
+	R1("r1")           : GPR, REG, GPR1.
+	R2("r2")           : GPR, REG, GPR2.
+	R3("r3")           : GPR, REG, GPR3.
+	R4("r4")           : GPR, REG, GPR4.
+	R5("r5")           : GPR, REG, GPR5.
+	R6("r6")           : GPR, REG, STACKABLE, GPR6 regvar.
+	R7("r7")           : GPR, REG, GPR7 regvar.
+	R8("r8")           : GPR, REG, GPR8 regvar.
+	R9("r9")           : GPR, REG, GPR9 regvar.
+	R10("r10")         : GPR, REG, GPR10 regvar.
+	R11("r11")         : GPR, REG, GPR11 regvar.
+	R12("r12")         : GPR, REG, GPR12 regvar.
+	R13("r13")         : GPR, REG, GPR13 regvar.
+	R14("r14")         : GPR, REG, GPR14 regvar.
+	GP("r15")          : GPR, GPRGP.
 
-	R16("r16")         : GPR, REG, HREG, STACKABLE, GPR16 regvar.
-	R17("r17")         : GPR, REG, HREG, GPR17 regvar.
-	R18("r18")         : GPR, REG, HREG, GPR18 regvar.
-	R19("r19")         : GPR, REG, HREG, GPR19 regvar.
-	R20("r20")         : GPR, REG, HREG, GPR20 regvar.
-	R21("r21")         : GPR, REG, HREG, GPR21 regvar.
-	R22("r22")         : GPR, REG, HREG, GPR22 regvar.
-	R23("r23")         : GPR, GPR23.
+	R23("r23")         : GPR.
 	FP("fp")           : GPR, GPRFP, STACKABLE.
 	SP("sp")           : GPR, GPRSP.
 	LR("lr")           : GPR, GPRLR.
@@ -84,94 +75,61 @@ TOKENS
 
 	LABEL              = { ADDR adr; }            4    adr.
 	CONST              = { INT val; }             4    "#" val.
-	LOCAL              = { INT off; }             4.
 
 /* Allows us to use regvar() to refer to registers */
 
 	GPRE               = { GPR reg; }             4    reg.
 
-/* Expression partial results */
-	
-	SUM_RC             = { GPR reg; INT off; }    4.
-	SUM_RR             = { GPR reg1; GPR reg2; }  4.
-	
-	SEX_B              = { GPR reg; }             4.
-	SEX_H              = { GPR reg; }             4.
-	
-	IND_RC_B           = { GPR reg; INT off; }    4.
-	IND_RR_B           = { GPR reg1; GPR reg2; }  4.
-	IND_LABEL_B        = { ADDR adr; }            4.
+/* The results of comparisons. */
 
-	IND_RC_H           = { GPR reg; INT off; }    4.
-	IND_RR_H           = { GPR reg1; GPR reg2; }  4.
-	IND_LABEL_H        = { ADDR adr; }            4.
-
-	IND_RC_H_S         = { GPR reg; INT off; }    4.
-
-	IND_RC_Q           = { GPR reg; INT off; }    4.
-	IND_RR_Q           = { GPR reg1; GPR reg2; }  4.
-	IND_LABEL_Q        = { ADDR adr; }            4.
-
-	IND_RC_D           = { GPR reg; INT off; }    8.
-	IND_RR_D           = { GPR reg1; GPR reg2; }  8.
-	IND_LABEL_D        = { ADDR adr; }            8.
-	
-/* Comments */
-
-	LABELI             = { ADDR msg; INT num; }   4    msg " " num.
-
+	TRISTATE_RC_S      = { GPR reg; INT val; }    4.
+	TRISTATE_RC_U      = { GPR reg; INT val; }    4.
+	TRISTATE_RR_S      = { GPR reg1; GPR reg2; }  4.
+	TRISTATE_RR_U      = { GPR reg1; GPR reg2; }  4.
 
 
 
 SETS
 
-	TOKEN              = LABEL + CONST + LOCAL.
+	TOKEN              = LABEL + CONST.
 	GPRI               = GPR + GPRE.
-	
-	SUM_ALL            = SUM_RC + SUM_RR.
-	
-	SEX_ALL            = SEX_B + SEX_H.
-	
-	IND_ALL_B          = IND_RC_B + IND_RR_B + IND_LABEL_B.
-	IND_ALL_H          = IND_RC_H + IND_RR_H + IND_LABEL_H.
-	IND_ALL_Q          = IND_RC_Q + IND_RR_Q + IND_LABEL_Q.
 
-	IND_ALL_D          = IND_RC_D + IND_RR_D + IND_LABEL_D.
 
-#if 0
-	OP_ALL_Q           = SUM_ALL + TRISTATE_ALL + SEX_ALL + LOGICAL_ALL +
-	                     IND_ALL_Q.
-#endif
-
-	OP_ALL_Q           = SUM_ALL + SEX_ALL + IND_ALL_B + IND_ALL_H + IND_ALL_Q.
 
 INSTRUCTIONS
 
 	add           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
+	add           GPRI:rw, GPRI+CONST:ro.
 	beq "b.eq"    LABEL:ro.
 	bne "b.ne"    LABEL:ro.
+	bgt "b.gt"    LABEL:ro.
+	bgt "b.gt"    LABEL:ro.
+	bhi "b.hi"    LABEL:ro.
 	b             GPRI+LABEL:ro.
 	bl            GPRI+LABEL:ro.
-	cmp           GPRI:ro, GPRI+CONST:ro.
+	cmp           GPRI:ro, GPRI+CONST:ro kills :cc.
 	exts          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
+	exts          GPRI:rw, GPRI+CONST:ro.
 	ld            GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldb           GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldh           GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldhs          GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	lea           GPRI:wo, LABEL:ro.
+	lsl           GPRI:rw, GPRI+CONST:ro.
 	lsl           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
 	mov           GPRI:wo, GPRI+CONST:ro.
+	neg           GPRI:rw, GPRI+CONST:ro.
 	pop           STACKABLE:wo.
 	pop           STACKABLE:wo, GPRLR+GPRPC:wo.
 	push          STACKABLE:ro.
 	sub           GPRI:wo, GPRI:ro, CONST+GPRI:ro.
+	sub           GPRI:rw, GPRI+CONST:ro.
 	st            GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
 	stb           GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
 	sth           GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
 	sths          GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
 
 	invalid "invalid".
-	comment "!" LABEL+LABELI:ro.
 
 
   
@@ -185,173 +143,33 @@ MOVES
 /* GPRE exists solely to allow us to use regvar() (which can only be used in
    an expression) as a register constant. */
    
-	from GPR to GPRE
-		gen
-			COMMENT("move GPR->GPRE")
-			mov %2, %1
-
 	from GPRE to GPR
 		gen
-			COMMENT("move GPRE->GPR")
 			mov %2, %1
 
 /* Constants */
 
 	from CONST to GPR
 		gen
-			COMMENT("move CONST->GPR")
 			mov %2, %1
 
 	from LABEL to GPR
 		gen
-			COMMENT("move LABEL->GPR")
 			lea %2, {LABEL, %1.adr}
-
-/* Sign extension */
-
-	from SEX_B to GPR
-		gen
-			COMMENT("move SEX_B->GPR")
-			exts %2, %1.reg, {CONST, 8}
-
-	from SEX_H to GPR
-		gen
-			COMMENT("move SEX_H->GPR")
-			exts %2, %1.reg, {CONST, 16}
-
-/* Register + something */
-
-	from SUM_RC to GPR
-		gen	
-			COMMENT("move SUM_RC->GPR")
-			add %2, %1.reg, {CONST, %1.off}
-
-	from SUM_RR to GPR
-		gen
-			COMMENT("move SUM_RR->GPR")
-			add %2, %1.reg1, %1.reg2
-
-	from SUM_RR to GPR
-		gen
-			COMMENT("move SUM_RR->GPRE")
-			add %2, %1.reg1, %1.reg2
-
-/* Read byte */
-
-	from IND_RC_B to GPR
-		gen
-			COMMENT("move IND_RC_B->GPR")
-			ldb %2, {GPROFFSET, %1.reg, %1.off}
-
-	from IND_RR_B to GPR
-		gen
-			COMMENT("move IND_RR_B->GPR")
-			ldb %2, {GPRGPR, %1.reg1, %1.reg2}
-
-	from IND_LABEL_B to GPR
-		gen
-			COMMENT("move IND_LABEL_B->GPR")
-			ldb %2, {LABEL, %1.adr}
-
-/* Write byte */
-
-	from GPR to IND_RC_B
-		gen
-			COMMENT("move GPR->IND_RC_B")
-			stb %1, {GPROFFSET, %2.reg, %2.off}
-
-	from GPR to IND_RR_B
-		gen
-			COMMENT("move GPR->IND_RR_B")
-			stb %1, {GPRGPR, %2.reg1, %2.reg2}
-
-	from GPR to IND_LABEL_B
-		gen
-			COMMENT("move GPR->IND_LABEL_B")
-			stb %1, {LABEL, %2.adr}
-
-/* Read short */
-
-	from IND_RC_H to GPR
-		gen
-			COMMENT("move IND_RC_H->GPR")
-			ldh %2, {GPROFFSET, %1.reg, %1.off}
-
-	from IND_RR_H to GPR
-		gen
-			COMMENT("move IND_RR_H->GPR")
-			ldh %2, {GPRGPR, %1.reg1, %1.reg2}
-
-	from IND_LABEL_H to GPR
-		gen
-			COMMENT("move IND_LABEL_H->GPR")
-			ldh %2, {LABEL, %1.adr}
-
-/* Write short */
-
-	from GPR to IND_RC_H
-		gen
-			COMMENT("move GPR->IND_RC_H")
-			sth %1, {GPROFFSET, %2.reg, %2.off}
-
-	from GPR to IND_RR_H
-		gen
-			COMMENT("move GPR->IND_RR_H")
-			sth %1, {GPRGPR, %2.reg1, %2.reg2}
-
-	from GPR to IND_LABEL_H
-		gen
-			COMMENT("move GPR->IND_LABEL_H")
-			sth %1, {LABEL, %2.adr}
-
-/* Read quad */
-
-	from IND_RC_Q to GPR
-		gen
-			COMMENT("move IND_RC_Q->GPR")
-			ld %2, {GPROFFSET, %1.reg, %1.off}
-	
-	from IND_RR_Q to GPR
-		gen
-			COMMENT("move IND_RR_Q->GPR")
-			ld %2, {GPRGPR, %1.reg1, %1.reg2}
-			
-	from IND_LABEL_Q to GPR
-		gen
-			COMMENT("move IND_LABEL_Q->GPR")
-			ld %2, {LABEL, %1.adr}
-
-/* Write quad */
-
-	from GPR to IND_RC_Q
-		gen
-			COMMENT("move GPR->IND_RC_Q")
-			st %1, {GPROFFSET, %2.reg, %2.off}
-
-	from GPR to IND_RR_Q
-		gen
-			COMMENT("move GPR->IND_RR_Q")
-			st %1, {GPRGPR, %2.reg1, %2.reg2}
-
-	from GPR to IND_LABEL_Q
-		gen
-			COMMENT("move GPR->IND_LABEL_Q")
-			st %1, {LABEL, %2.adr}
+			sub %2, GP
 
 /* Miscellaneous */
 
-	from CONST + LABEL + GPR + OP_ALL_Q to GPRE
+	from CONST+LABEL+GPR+GPRE to GPRE
 		gen
 			move %1, %2.reg
 
 
-#if 0
 TESTS
 
 	to test GPR
 		gen
-			invalid
-#endif
+			cmp %1, {CONST, 0}
 
 
 
@@ -359,54 +177,48 @@ STACKINGRULES
 
 	from STACKABLE to STACK
 		gen
-			COMMENT("stack STACKABLE")
 			push %1
 
-	from REG to STACK
+	from GPR to STACK
 		uses STACKABLE
         gen
-            COMMENT("stack non-STACKABLE")
             move %1, %a
             push %a
 
-	from REG to STACK
+	from GPR to STACK
 		gen
-			COMMENT("stack non-STACKABLE, fallback")
 			sub SP, SP, {CONST, 4}
 			st %1, {GPROFFSET, SP, 0}
 
-	from CONST + OP_ALL_Q to STACK
+	from GPRE to STACK
+		uses STACKABLE
+        gen
+            move %1, %a
+            push %a
+
+	from GPRE to STACK
+		gen
+			sub SP, {CONST, 4}
+			st %1, {GPROFFSET, SP, 0}
+
+	from TOKEN to STACK
 		uses STACKABLE
 		gen
 			move %1, %a
 			push %a
 
-	from CONST + OP_ALL_Q to STACK
+	from TOKEN to STACK
 		gen
 			COMMENT("fallback stack")
 			move %1, SCRATCH
 			sub SP, SP, {CONST, 4}
 			st SCRATCH, {GPROFFSET, SP, 0}
-			
-	from TOKEN to STACK
-		gen
-			invalid.
 
 		
 COERCIONS
 
-	from REG
-		uses REG
-		gen
-			COMMENT("coerce REG->REG")
-			move %1, %a
-		yields %a
-
 	from GPRE
-		uses REG
-		gen
-			COMMENT("coerce GPRE->REG")
-			move %1, %a
+		uses reusing %1, REG=%1
 		yields %a
 
 	from CONST
@@ -430,40 +242,6 @@ COERCIONS
 			pop %a
 		yields %a
 
-	from SEX_B
-		uses REG
-		gen
-			COMMENT("coerce SEX_B->REG")
-            exts %a, %1.reg, {CONST, 8}
-		yields %a
-		
-	from SEX_H
-		uses REG
-		gen
-			COMMENT("coerce SEX_H->REG")
-			exts %a, %1.reg, {CONST, 16}
-		yields %a
-
-#if 0
-	from SUM_ALL + TRISTATE_ALL + LOGICAL_ALL
-		uses REG
-		gen
-			move %1, {GPRE, %a}
-		yields %a
-	
-	from IND_ALL_Q
-		uses REG
-		gen
-			move %1, %a
-		yields %a
-#endif
-	from OP_ALL_Q
-		uses REG
-		gen
-			move %1, %a
-		yields %a
-
-	
 
 
 PATTERNS
@@ -473,26 +251,28 @@ PATTERNS
 	pat loc                            /* Load constant */
 		yields {CONST, $1}
 
-	pat dup $1==INT32                  /* Duplicate word on top of stack */
-		with REG
+	pat dup $1<=INT32                  /* Duplicate word on top of stack */
+		with GPR
 			yields %1 %1
-								
+
 	pat dup $1==INT64                  /* Duplicate double-word on top of stack */
-		with REG REG
+		with GPR GPR
 			yields %2 %1 %2 %1
 								
 	pat exg $1==INT32                  /* Exchange top two words on stack */
-		with REG REG
+		with GPR GPR
 			yields %1 %2
-		
+
+#if 0
 	pat stl lol $1==$2                 /* Store then load local */
 		leaving
-			dup 4
+			dup INT32
 			stl $1
+#endif
 			
 	pat lal sti lal loi $1==$3 && $2==$4 /* Store then load local, of a different size */
 		leaving
-			dup INT32
+			dup $2
 			lal $1
 			sti $2
 			
@@ -537,30 +317,39 @@ PATTERNS
 	pat loc loc cui $1==INT16 && $2==INT32 /* unsigned short -> signed int */
 		/* nop */
 	
-	pat loc loc cii $1==INT8 && $2==INT32 /* signed char -> signed int */
+	pat loc loc cii $1==INT8 && $2>INT8 /* signed char -> anything */
 		with REG
-			yields {SEX_B, %1}
+			uses reusing %1, REG=%1
+			gen
+				exts %a, {CONST, 8}
+			yields %a
 	
-	pat loc loc cii $1==2 && $2==4     /* signed char -> signed short */
+	pat loc loc cii $1==INT16 && $2>INT16 /* signed short -> anything */
 		with REG
-			yields {SEX_H, %1}
-	
+			uses reusing %1, REG=%1
+	        gen
+	            exts %a, {CONST, 16}
+	        yields %a
 
-		
 	
 		
 /* Local variables */
 
 	pat lal                            /* Load address of local */
-		yields {SUM_RC, FP, $1}
+		uses REG
+		gen
+			add %a, FP, {CONST, $1}
+			sub %a, GP
+		yields %a
 
 	pat lol inreg($1)>0                /* Load from local */
-		yields {LOCAL, $1}
-		
-	pat lol                            /* Load from local */
-		leaving
-			lal $1
-			loi INT32
+		yields {GPRE, regvar($1)}
+
+	pat lol                            /* Load quad from local */
+		uses REG
+		gen
+			ld %a, {GPROFFSET, FP, $1}
+		yields %a
 
 	pat ldl                            /* Load double-word from local */
 		leaving
@@ -568,16 +357,16 @@ PATTERNS
 			loi INT32*2
 
 	pat stl inreg($1)>0                /* Store to local */
-		with CONST + LABEL + GPR + OP_ALL_Q
-			kills regvar($1), LOCAL %off==$1
+		with CONST+GPRI
+			kills regvar($1)
 			gen
 				move %1, {GPRE, regvar($1)}
 
 	pat stl                            /* Store to local */
-		leaving
-			lal $1
-			sti INT32
-		
+		with GPRI
+			gen
+				st %1, {GPROFFSET, FP, $1}
+
 	pat sdl                            /* Store double-word to local */
 		leaving
 			lal $1
@@ -704,11 +493,15 @@ PATTERNS
 
 	pat loi $1==INT8                   /* Load byte indirect */
 		with GPR
-			yields {IND_RC_B, %1, 0}
-		with SUM_RR
-			yields {IND_RR_B, %1.reg1, %1.reg2}
-		with SUM_RC
-			yields {IND_RC_B, %1.reg, %1.off}
+			uses reusing %1, REG
+			gen
+				ldb %a, {GPRGPR, %1, GP}
+			yields %a
+		with GPRE
+			uses reusing %1.reg, REG
+			gen
+				ldb %a, {GPRGPR, %1.reg, GP}
+			yields %a
 
 #if 0
 	pat loi loc loc cii $1==INT16 && $2==INT16 && $3==INT32 /* Load half-word indirect and sign extend */
@@ -748,13 +541,11 @@ PATTERNS
 		
 	pat loi $1==INT32                  /* Load quad indirect */
 		with GPR
-			yields {IND_RC_Q, %1, 0}
-		with SUM_RC
-			yields {IND_RC_Q, %1.reg, %1.off}
-		with SUM_RR
-			yields {IND_RR_Q, %1.reg1, %1.reg2}
-		with LABEL
-			yields {IND_LABEL_Q, %1.adr}
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				ld %a, {GPROFFSET, %a, 0}
+			yields %a
 
 #if 0
 	pat loi $1==INT64                  /* Load double-quad indirect */
@@ -780,64 +571,26 @@ PATTERNS
 				bl {LABEL, ".los"}
 				
 	pat sti $1==INT8                   /* Store byte indirect */
-		with GPR GPR
+		with GPR GPRI
 			gen
-				move %2, {IND_RC_B, %1, 0}
-		with SUM_RR GPR
+				stb %2, {GPRGPR, %1, GP}
+		with GPRE GPRI
 			gen
-				move %2, {IND_RR_B, %1.reg1, %1.reg2}
-		with SUM_RC GPR
-			gen
-				move %2, {IND_RC_B, %1.reg, %1.off}
-		with GPR SEX_B
-			gen
-				move %2.reg, {IND_RC_B, %1, 0}
-		with SUM_RR SEX_B
-			gen
-				move %2.reg, {IND_RR_B, %1.reg1, %1.reg2}
-		with SUM_RC SEX_B
-			gen
-				move %2.reg, {IND_RC_B, %1.reg, %1.off}
-		with LABEL GPR
-			gen
-				move %2, {IND_LABEL_B, %1.adr}
+				stb %2, {GPRGPR, %1.reg, GP}
 
 	pat sti $1==INT16                  /* Store half-word indirect */
 		with GPR GPR
+			uses REG
 			gen
-				move %2, {IND_RC_H, %1, 0}
-		with SUM_RR GPR
-			gen
-				move %2, {IND_RR_H, %1.reg1, %1.reg2}
-		with SUM_RC GPR
-			gen
-				move %2, {IND_RC_H, %1.reg, %1.off}
-		with GPR SEX_H
-			gen
-				move %2.reg, {IND_RC_H, %1, 0}
-		with SUM_RR SEX_H
-			gen
-				move %2.reg, {IND_RR_H, %1.reg1, %1.reg2}
-		with SUM_RC SEX_H
-			gen
-				move %2.reg, {IND_RC_H, %1.reg, %1.off}
-		with LABEL GPR
-			gen
-				move %2, {IND_LABEL_H, %1.adr}
+				add %a, %1, GP
+				sth %2, {GPROFFSET, %a, 0}
 
 	pat sti $1==INT32                  /* Store quad indirect */
 		with GPR GPR
+			uses REG
 			gen
-				move %2, {IND_RC_Q, %1, 0}
-		with SUM_RR GPR
-			gen
-				move %2, {IND_RR_Q, %1.reg1, %1.reg2}
-		with SUM_RC GPR
-			gen
-				move %2, {IND_RC_Q, %1.reg, %1.off}
-		with LABEL GPR
-			gen
-				move %2, {IND_LABEL_Q, %1.adr}
+				add %a, %1, GP
+				st %2, {GPROFFSET, %a, 0}
 
 #if 0
 	pat sti $1==INT64                  /* Store double-word indirect */
@@ -931,38 +684,32 @@ PATTERNS
 /* Word arithmetic */
 
 	pat adi $1==INT32                  /* Add word (second + top) */
-		with REG REG
-			yields {SUM_RR, %1, %2}
-		with CONST REG
-			yields {SUM_RC, %2, %1.val}
-		with REG CONST
-			yields {SUM_RC, %1, %2.val}
-		with CONST SUM_RC
-			yields {SUM_RC, %2.reg, %2.off+%1.val}
-		with CONST LABEL
-			yields {LABEL, %2.adr+%1.val}
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				add %a, %1
+			yields %a
+		with GPRI GPRI+CONST
+			uses reusing %1, REG=%1
+			gen
+				add %a, %2
+			yields %a
+
+	pat sbi $1==INT32                  /* Subtract word (second - top) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				sub %a, %1
+			yields %a
+
+	pat ngi $1==INT32                  /* Negate word */
+		with GPRI
+			uses reusing %1, REG=%1
+			gen
+				neg %a, %a
+			yields %a
 
 #if 0
-	pat sbi $1==4                      /* Subtract word (second - top) */
-		with REG REG
-			uses reusing %2, REG
-			gen
-				subf %a, %1, %2
-			yields %a
-		with CONST REG
-			yields {SUM_RC, %2, 0-%1.val}
-		with CONST SUM_RC
-			yields {SUM_RC, %2.reg, %2.off-%1.val}
-		with CONST LABEL
-			yields {LABEL, %2.adr+(0-%1.val)}
-				
-	pat ngi $1==4                      /* Negate word */
-		with REG
-			uses reusing %1, REG
-			gen
-				neg %a, %1
-			yields %a
-		
 	pat mli $1==4                      /* Multiply word (second * top) */
 		with REG REG
 			uses reusing %2, REG
@@ -1087,10 +834,10 @@ PATTERNS
 #endif
 				
 	pat sli $1==4                      /* Shift left (second << top) */
-		with CONST+GPR GPR
-			uses reusing %2, REG
+		with CONST+GPRI GPRI
+			uses reusing %2, REG=%2
 			gen
-            	lsl %a, %2, %1
+            	lsl %a, %1
 			yields %a
 
 #if 0
@@ -1248,79 +995,40 @@ PATTERNS
 
 /* Simple branches */
 
-	pat zeq                            /* Branch if signed top == 0 */
-		with GPR STACK
-			gen
-                cmp %1, {CONST, 0}
-                beq {LABEL, $1}
-
-	pat beq
-		with GPR GPR STACK
-			gen
-				cmp %1, %2
-				beq {LABEL, $1}
-
-	pat zne                            /* Branch if signed top != 0 */
-		with GPR STACK
+	proc anyz example zeq
+		with GPRI STACK
 			gen
 				cmp %1, {CONST, 0}
-				bne {LABEL, $1}
+				beq[1] {LABEL, $1}
 
-	pat bne
-		with GPR GPR STACK
+	pat zeq call anyz("b.eq")          /* Branch if signed top == 0 */
+	pat zne call anyz("b.ne")          /* Branch if signed top != 0 */
+	pat zgt call anyz("b.gt")          /* Branch if signed top > 0 */
+	pat zlt call anyz("b.lt")          /* Branch if signed top > 0 */
+
+	proc anyb example beq
+		with GPR+CONST GPRI STACK
 			gen
-                cmp %1, %2
-				bne {LABEL, $1}
+				cmp %2, %1
+				beq[1] {LABEL, $1}
+
+	pat beq call anyz("b.eq")          /* Branch if signed second == top */
+	pat bne call anyz("b.ne")          /* Branch if signed second != top */
+	pat bgt call anyz("b.gt")          /* Branch if signed second > top */
+
+	proc anycmpb example cmu zeq
+		with GPR+CONST GPRI STACK
+			gen
+				cmp %2, %1
+				beq[1] {LABEL, $2}
+
+	pat cmu zgt call anycmpb("b.hi")   /* Branch if unsigned second > top */
+	pat cmu zlt call anycmpb("b.lo")   /* Branch if unsigned second < top */
+	pat cmu zge call anycmpb("b.hs")   /* Branch if unsigned second >= top */
+	pat cmu zle call anycmpb("b.ls")   /* Branch if unsigned second <= top */
+
 
 #if 0
-	pat zgt                            /* Branch if signed top > 0 */
-		with TRISTATE_ALL+GPR STACK
-			gen
-				move %1, C0
-				bc IFTRUE, GT, {LABEL, $1}
-
-	pat bgt
-		leaving
-			cmi INT32
-			zgt $1
-			
-	pat zge                            /* Branch if signed top >= 0 */
-		with TRISTATE_ALL+GPR STACK
-			gen
-				move %1, C0
-				bc IFFALSE, LT, {LABEL, $1}
-
-	pat bge
-		leaving
-			cmi INT32
-			zge $1
-			
-	pat zlt                            /* Branch if signed top < 0 */
-		with TRISTATE_ALL+GPR STACK
-			gen
-				move %1, C0
-				bc IFTRUE, LT, {LABEL, $1}
-
-	pat blt
-		leaving
-			cmi INT32
-			zlt $1
-			
-	pat zle                            /* Branch if signed top >= 0 */
-		with TRISTATE_ALL+GPR STACK
-			gen
-				move %1, C0
-				bc IFFALSE, GT, {LABEL, $1}
-
-	pat ble
-		leaving
-			cmi INT32
-			zle $1
-#endif
-			
-
-#if 0
-/* Compare and jump */
 
 	pat cmi                            /* Signed tristate compare */
 		with CONST GPR
@@ -1333,6 +1041,7 @@ PATTERNS
 			yields {TRISTATE_RC_U, %2, %1.val}
 		with GPR GPR
 			yields {TRISTATE_RR_U, %2, %1}
+#endif
 						
 	pat cmp                            /* Compare pointers */
 		leaving
@@ -1342,7 +1051,7 @@ PATTERNS
 		leaving
 			cmi INT32
 			
-			
+#if 0
 			
 
 /* Other branching and labelling */
@@ -1554,27 +1263,24 @@ PATTERNS
 			loe ".reghp"
 			
 	pat str $1==0                      /* Store FP */
-		with GPR
+		with GPRI
 			gen
-				move %1, FP
-				
+				sub FP, %1, GP
+
 	pat str $1==1                      /* Store SP */
-		with GPR
+		with GPRI
 			gen
-				move %1, SP
-			
+				sub SP, %1, GP
+
 	pat str $1==2                      /* Store HP */
 		leaving
 			ste ".reghp"
 
 	pat ass                            /* Adjust stack by variable amount */
-		with CONST
-			gen
-				move {SUM_RC, SP, %1.val}, SP
-		with GPR
-			gen
-				move {SUM_RR, SP, %1}, SP
-				
+		with CONST+GPRI
+		gen
+			add SP, %1
+
 	pat asp                            /* Adjust stack by constant amount */
 		leaving
 			loc $1
