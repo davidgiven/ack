@@ -13,6 +13,8 @@ INT8 = 1        /* Size of values */
 INT16 = 2
 INT32 = 4
 INT64 = 8
+FLOAT32 = 4
+FLOAT64 = 8
 
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
@@ -100,6 +102,7 @@ INSTRUCTIONS
 
 	add           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
 	add           GPRI:rw, GPRI+CONST:ro.
+	and           GPRI:rw, GPRI+CONST:ro.
 	beq "b.eq"    LABEL:ro.
 	bne "b.ne"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
@@ -108,6 +111,9 @@ INSTRUCTIONS
 	b             GPRI+LABEL:ro.
 	bl            GPRI+LABEL:ro.
 	cmp           GPRI:ro, GPRI+CONST:ro kills :cc.
+	divs          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
+	divu          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
+	eor           GPRI:rw, GPRI+CONST:ro.
 	exts          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
 	exts          GPRI:rw, GPRI+CONST:ro.
 	ld            GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
@@ -118,7 +124,9 @@ INSTRUCTIONS
 	lsl           GPRI:rw, GPRI+CONST:ro.
 	lsl           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
 	mov           GPRI:wo, GPRI+CONST:ro.
+	mul           GPRI:rw, GPRI+CONST:ro.
 	neg           GPRI:rw, GPRI+CONST:ro.
+	or            GPRI:rw, GPRI+CONST:ro.
 	pop           STACKABLE:wo.
 	pop           STACKABLE:wo, GPRLR+GPRPC:wo.
 	push          STACKABLE:ro.
@@ -547,17 +555,14 @@ PATTERNS
 				ld %a, {GPROFFSET, %a, 0}
 			yields %a
 
-#if 0
 	pat loi $1==INT64                  /* Load double-quad indirect */
-		with GPR
-			yields {IND_RC_D, %1, 0}
-		with SUM_RC
-			yields {IND_RC_D, %1.reg, %1.off}
-		with SUM_RR
-			yields {IND_RR_D, %1.reg1, %1.reg2}
-		with LABEL
-			yields {IND_LABEL_D, %1.adr}
-#endif
+		with GPRI
+			uses reusing %1, REG, REG
+			gen
+				add %a, %1, GP
+				ld %b, {GPROFFSET, %a, 4}
+				ld %a, {GPROFFSET, %a, 0}
+			yields %a %b
 
 	pat loi                            /* Load arbitrary size */
 		leaving
@@ -565,7 +570,7 @@ PATTERNS
 			los INT32
 					
 	pat los                            /* Load arbitrary size */
-		with GPR0 GPR1 STACK
+		with STACK
 			kills ALL
 			gen
 				bl {LABEL, ".los"}
@@ -592,29 +597,13 @@ PATTERNS
 				add %a, %1, GP
 				st %2, {GPROFFSET, %a, 0}
 
-#if 0
-	pat sti $1==INT64                  /* Store double-word indirect */
-		with GPR FD
+	pat sti $1==INT64                  /* Store double-quad indirect */
+		with GPR GPR
+			uses REG
 			gen
-				move %2, {IND_RC_D, %1, 0}
-		with SUM_RR FD
-			gen
-				move %2, {IND_RR_D, %1.reg1, %1.reg2}
-		with SUM_RC FD
-			gen
-				move %2, {IND_RC_D, %1.reg, %1.off}
-		with GPR GPR GPR
-			gen
-				stw %2, {GPROFFSET, %1, 0}
-				stw %3, {GPROFFSET, %1, 4}
-		with SUM_RC GPR GPR
-			gen
-				move %2, {IND_RC_Q, %1.reg, %1.off}
-				move %3, {IND_RC_Q, %1.reg, %1.off+4}
-		with LABEL FD
-			gen
-				move %2, {IND_LABEL_D, %1.adr}
-				
+				add %a, %1, GP
+				st %1, {GPROFFSET, %a, 0}
+				st %2, {GPROFFSET, %a, 4}
 
 	pat sti                            /* Store arbitrary size */
 		leaving
@@ -622,12 +611,11 @@ PATTERNS
 			sts INT32
 					
 	pat sts                            /* Load arbitrary size */
-		with GPR3 GPR4 STACK
+		with STACK
 			kills ALL
 			gen
 				bl {LABEL, ".sts"}
-#endif
-				
+
 
 
 /* Arithmetic wrappers */
@@ -709,6 +697,65 @@ PATTERNS
 				neg %a, %a
 			yields %a
 
+	pat and $1==INT32                  /* AND word */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				and %a, %1
+			yields %a
+		with GPRI GPRI+CONST
+			uses reusing %1, REG=%1
+			gen
+				and %a, %2
+			yields %a
+
+	pat ior $1==INT32                  /* OR word */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				or %a, %1
+			yields %a
+		with GPRI GPRI+CONST
+			uses reusing %1, REG=%1
+			gen
+				or %a, %2
+			yields %a
+
+	pat xor $1==INT32                  /* XOR word */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				eor %a, %1
+			yields %a
+		with GPRI GPRI+CONST
+			uses reusing %1, REG=%1
+			gen
+				eor %a, %2
+			yields %a
+
+	pat dvi $1==INT32                  /* Divide word (second / top) */
+		with GPRI GPRI
+			uses reusing %2, REG
+			gen
+				divs %a, %2, %1
+			yields %a
+
+	pat dvu $1==INT32                  /* Divide unsigned word (second / top) */
+		with GPRI GPRI
+			uses reusing %2, REG
+			gen
+				divu %a, %2, %1
+			yields %a
+
+	pat rmu $1==INT32                  /* Remainder unsigned word (second % top) */
+		with GPRI GPRI
+			uses REG
+			gen
+				divu %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
 #if 0
 	pat mli $1==4                      /* Multiply word (second * top) */
 		with REG REG
@@ -717,20 +764,6 @@ PATTERNS
 				mullw %a, %2, %1
 			yields %a
 		
-	pat dvi $1==4                      /* Divide word (second / top) */
-		with REG REG
-			uses reusing %2, REG
-			gen
-				divw %a, %2, %1
-			yields %a
-					
-	pat dvu $1==4                      /* Divide unsigned word (second / top) */
-		with REG REG
-			uses reusing %2, REG
-			gen
-				divwu %a, %2, %1
-			yields %a
-
 	pat rmi $1==4                      /* Remainder word (second % top) */
 		with REG REG
 			uses REG
@@ -740,56 +773,11 @@ PATTERNS
 				subf %a, %a, %2
 			yields %a
 								
-	pat rmu $1==4                      /* Remainder unsigned word (second % top) */
-		with REG REG
-			uses REG
-			gen
-				divwu %a, %2, %1
-				mullw %a, %a, %1
-				subf %a, %a, %2
-			yields %a
-
-	pat and $1==4                      /* AND word */
-		with GPR NOT_R
-			uses reusing %1, REG
-			gen
-				andc %a, %1, %2.reg
-			yields %a
-		with NOT_R GPR
-			uses reusing %1, REG
-			gen
-				andc %a, %2, %1.reg
-			yields %a
-		with GPR GPR
-			yields {AND_RR, %1, %2}
-		with GPR CONST
-			yields {AND_RC, %1, %2.val}
-		with CONST GPR
-			yields {AND_RC, %2, %1.val}
-		
 	pat and !defined($1)               /* AND set */
 		with STACK
 			gen
 				bl {LABEL, ".and"}
 				
-	pat ior $1==4                      /* OR word */
-		with GPR NOT_R
-			uses reusing %1, REG
-			gen
-				orc %a, %1, %2.reg
-			yields %a
-		with NOT_R GPR
-			uses reusing %2, REG
-			gen
-				orc %a, %2, %1.reg
-			yields %a
-		with GPR GPR
-			yields {OR_RR, %1, %2}
-		with GPR CONST
-			yields {OR_RC, %1, %2.val}
-		with CONST GPR
-			yields {OR_RC, %2, %1.val}
-		
 	pat ior !defined($1)               /* OR set */
 		with STACK
 			gen
@@ -924,72 +912,27 @@ PATTERNS
 		with GPR3 STACK
 			gen
 				bl {LABEL, ".inn"}
+#endif
 			
 			
 			
 /* Boolean resolutions */
 
-	pat teq                            /* top = (top == 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
+	proc anyt example teq
+		with GPRI
+			uses reusing %1, REG=%1
 			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".teq_table"}, %a
-				lwzx %a, %a, SCRATCH
-			yields %a
-				
-	pat tne                            /* top = (top != 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
-			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".tne_table"}, %a
-				lwzx %a, %a, SCRATCH
-			yields %a
-				
-	pat tlt                            /* top = (top < 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
-			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".tlt_table"}, %a
-				lwzx %a, %a, SCRATCH
-			yields %a
-				
-	pat tle                            /* top = (top <= 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
-			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".tle_table"}, %a
-				lwzx %a, %a, SCRATCH
-			yields %a
-				
-	pat tgt                            /* top = (top > 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
-			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".tgt_table"}, %a
-				lwzx %a, %a, SCRATCH
+				cmp %1, {CONST, 0}
+                mov %a, {CONST, 0}
+                add[1] %a, {CONST, 1}
 			yields %a
 
-	pat tge                            /* top = (top >= 0) */
-		with TRISTATE_ALL + GPR
-			uses reusing %1, REG
-			gen
-				move %1, C0
-				move C0, SCRATCH
-				move {LABEL, ".tge_table"}, %a
-				lwzx %a, %a, SCRATCH
-			yields %a
-
-#endif
+	pat cmu teq call anyt("add.eq")        /* top = (top == 0) */
+	pat cmu tne call anyt("add.ne")        /* top = (top != 0) */
+	pat cmu tlt call anyt("add.lo")        /* top = unsigned (top < 0) */
+	pat cmu tle call anyt("add.ls")        /* top = unsigned (top <= 0) */
+	pat cmu tgt call anyt("add.hi")        /* top = unsigned (top > 0) */
+	pat cmu tge call anyt("add.hs")        /* top = unsigned (top >= 0) */
 
 
 
@@ -1004,7 +947,9 @@ PATTERNS
 	pat zeq call anyz("b.eq")          /* Branch if signed top == 0 */
 	pat zne call anyz("b.ne")          /* Branch if signed top != 0 */
 	pat zgt call anyz("b.gt")          /* Branch if signed top > 0 */
-	pat zlt call anyz("b.lt")          /* Branch if signed top > 0 */
+	pat zlt call anyz("b.lt")          /* Branch if signed top < 0 */
+	pat zge call anyz("b.ge")          /* Branch if signed top >= 0 */
+	pat zle call anyz("b.le")          /* Branch if signed top <= 0 */
 
 	proc anyb example beq
 		with GPR+CONST GPRI STACK
@@ -1015,6 +960,9 @@ PATTERNS
 	pat beq call anyz("b.eq")          /* Branch if signed second == top */
 	pat bne call anyz("b.ne")          /* Branch if signed second != top */
 	pat bgt call anyz("b.gt")          /* Branch if signed second > top */
+	pat bge call anyz("b.ge")          /* Branch if signed second >= top */
+	pat blt call anyz("b.lt")          /* Branch if signed second < top */
+	pat ble call anyz("b.le")          /* Branch if signed second <= top */
 
 	proc anycmpb example cmu zeq
 		with GPR+CONST GPRI STACK
@@ -1050,7 +998,22 @@ PATTERNS
 	pat cms $1==INT32                  /* Compare blocks (word sized) */
 		leaving
 			cmi INT32
-			
+
+	proc anycmf64 example teq
+        with STACK
+			uses REG
+			gen
+				bl {LABEL, ".cmf8"}
+                mov %a, {CONST, 0}
+                add[1] %a, {CONST, 1}
+			yields %a
+
+	pat cmf tlt $1==FLOAT64 call anyt("add.lo") /* top = unsigned (top < 0) */
+	pat cmf tle $1==FLOAT64 call anyt("add.ls") /* top = unsigned (top <= 0) */
+	pat cmf tgt $1==FLOAT64 call anyt("add.hi") /* top = unsigned (top > 0) */
+	pat cmf tge $1==FLOAT64 call anyt("add.hs") /* top = unsigned (top >= 0) */
+
+
 #if 0
 			
 
@@ -1121,18 +1084,19 @@ PATTERNS
             mov SP, FP
             pop FP, PC
 
-#if 0
 	pat blm                            /* Block move constant length */
-		with GPR GPR STACK
+		with GPRI GPRI STACK
 			uses REG
 			gen
-				move {CONST, $1}, %a
-				stwu %a, {GPROFFSET, SP, 0-4}
-				stwu %2, {GPROFFSET, SP, 0-4}
-				stwu %1, {GPROFFSET, SP, 0-4}
+				sub SP, {CONST, 12}
+				mov %a, {CONST, $1}
+				st %1, {GPROFFSET, SP, 0}
+				st %2, {GPROFFSET, SP, 4}
+				st %a, {GPROFFSET, SP, 8}
 				bl {LABEL, "_memmove"}
-				addi SP, SP, {CONST, 12}
+				add SP, {CONST, 12}
 				
+#if 0
 	pat bls                            /* Block move variable length */
 		with GPR GPR GPR STACK
 			gen
@@ -1141,16 +1105,17 @@ PATTERNS
 				stwu %2, {GPROFFSET, SP, 0-4}
 				bl {LABEL, "_memmove"}
 				addi SP, SP, {CONST, 12}
+#endif
 				
 	pat csa                            /* Array-lookup switch */
-		with GPR3 GPR4 STACK
+		with STACK
 			gen
-				b {LABEL, ".csa"}
+				bl {LABEL, ".csa"}
 				
 	pat csb                            /* Table-lookup switch */
-		with GPR3 GPR4 STACK
+		with STACK
 			gen
-				b {LABEL, ".csb"}
+				bl {LABEL, ".csb"}
 
 				
 
@@ -1179,7 +1144,7 @@ PATTERNS
 			ste ".ignmask"
 			
 	pat trp                            /* Raise EM trap */
-		with GPR3
+		with GPR0
 			gen
 				bl {LABEL, ".trap"}
 				
@@ -1204,7 +1169,8 @@ PATTERNS
 		with GPR
 			uses reusing %1, REG
 			gen
-				lwz %a, {GPROFFSET, %1, FP_OFFSET}
+				ld %a, {GPROFFSET, %1, FP_OFFSET}
+				sub %a, GP
 			yields %a
 
 	pat lpb                            /* Convert FP to argument address */
@@ -1217,15 +1183,17 @@ PATTERNS
 			lpb
 			
 	pat gto                            /* longjmp */
-		uses REG
+		uses REG, REG
 		gen
 			move {LABEL, $1}, %a
-			move {IND_RC_Q, %a, 8}, FP
-			move {IND_RC_Q, %a, 4}, SP
-			move {IND_RC_Q, %a, 0}, %a
-			mtspr CTR, %a
-			bcctr ALWAYS, {CONST, 0}, {CONST, 0}
-				
+			ld %b, {GPROFFSET, %a, 8}
+			add FP, %b, GP
+			ld %b, {GPROFFSET, %a, 4}
+			add SP, %b, GP
+			ld %b, {GPROFFSET, %a, 0}
+			add %b, GP
+			b %b
+
 #if 0
 			
 	pat gto                            /* longjmp */
@@ -1243,7 +1211,6 @@ PATTERNS
 			gen
 				wspec {CONST, $1}
 				
-#endif
 #endif
 
 	pat lor $1==0                      /* Load FP */
