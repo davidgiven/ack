@@ -475,3 +475,26 @@ void branch_addcmp_lit_lit_instr(int cc, int rd, long va, long vs, struct expr_t
 	branch_addcmp_common(B16(11000000,00000000) | (vs<<8), 8, expr);
 }
 
+/* lea, where the source is relative to the stack. */
+
+void lea_stack_instr(int rd, long va, int rs)
+{
+    if (rs != 25)
+        serror("source register must be sp");
+
+	if (!fitx(va, 6))
+		serror("offset too big to encode in instruction");
+	va = maskx(va, 6);
+
+	emit2(B16(00010000,00000000) | (rd<<0) | (va<<5));
+}
+
+/* lea, where the source is an address. */
+
+void lea_address_instr(int rd, struct expr_t* expr)
+{
+	newrelo(expr->typ, RELOVC4);
+	emit2(B16(11100101,00000000) | (rd<<0));
+	emit4(expr->val);
+}
+

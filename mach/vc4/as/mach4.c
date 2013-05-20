@@ -71,5 +71,8 @@ operation
     | OP_MEM CC GPR ',' '(' GPR ')' '+' '+' { mem_postincr_instr($1, $2, $3, $6); }
 
     | OP_MEM GPR ',' expr                  { mem_address_instr($1, $2, &$4); }
+
+    | OP_LEA GPR ',' absexp '(' GPR ')'    { lea_stack_instr($2, $4, $6); }
+	| OP_LEA GPR ',' expr                  { lea_address_instr($2, &$4); }
 	;
 

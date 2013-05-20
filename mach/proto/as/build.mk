@@ -26,7 +26,9 @@ define build-as-impl
 
 $(eval CLEANABLES += $(OBJDIR)/$D/preprocessed-comm2.y)
 $(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI) \
+		mach/$(ARCH)/as/mach1.c \
 		mach/$(ARCH)/as/mach2.c \
+		mach/$(ARCH)/as/mach3.c \
 		mach/$(ARCH)/as/mach4.c
 	@echo PREPROCESS $$@
 	@mkdir -p $$(dir $$@)

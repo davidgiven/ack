@@ -18,5 +18,6 @@
 %token <y_word> OP_MISC
 %token <y_word> OP_MISCL
 %token <y_word> OP_STACK
+%token <y_word> OP_LEA
 
 

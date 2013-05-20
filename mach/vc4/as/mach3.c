@@ -145,3 +145,4 @@
 0,     OP_MEM,                B8(00000110),                            "ldhs",
 0,     OP_MEM,                B8(00000111),                            "sths",
 
+0,     OP_LEA,                0,                                       "lea",
