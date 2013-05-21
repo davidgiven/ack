@@ -5,6 +5,8 @@
  * See the file 'Copying' in the root of the distribution for the full text.
  */
 
+#include <stdint.h>
+
 #define maskx(v, x) (v & ((1<<(x))-1))
 
 static void toobig(void)
@@ -120,7 +122,7 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 			/* The VC4 branch instructions express distance in 2-byte
 			 * words. */
 
-			int d = (expr->val - pc) / 2;
+			int d = ((int32_t)expr->val - (int32_t)pc) / 2;
 
         	/* We now know the worst case for the instruction layout. At
         	 * this point we can emit the instructions, which may shrink
