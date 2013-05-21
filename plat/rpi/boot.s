@@ -43,7 +43,7 @@ begtext:
 	mov r2, #0
 _1:
 	stb r2, (r0)
-	addcmpb.lt r2, #1, r1, _1
+	addcmpb.lt r0, #1, r1, _1
 	
 	! Push standard parameters onto the stack and go.
 	
