@@ -15,27 +15,47 @@
 
 .sect .text
 
+#define gp r15
+
 begtext:
-	lea r15, begtext
+	! Set up system registers.
+
+	lea gp, begtext
 	st sp, .returnsp
 	st lr, .returnlr
 
-#if 0
+	! The GPU kernel code will load parameters into r0-r5. Save them
+	! so that the user code can access them.
+
+	sub r0, gp ! pointer
+	sub r1, gp ! pointer
+	sub r2, gp ! pointer
+	sub r3, gp ! pointer
+	! r4-r5 are not pointers and don't need adjusting
+	push r0-r5
+	sub r0, sp, gp
+	st r0, _gpu_parameters
+
 	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
 	
-	mov di, begbss
-	mov cx, endbss
-	sub cx, di
-	mov ax, 0
-	rep stosb
+	lea r0, begbss
+	lea r1, endbss
+	mov r2, #0
+_1:
+	stb r2, (r0)
+	addcmpb.lt r2, #1, r1, _1
 	
 	! Push standard parameters onto the stack and go.
 	
-	push envp               ! envp
-	push argv               ! argv
-	push 1                  ! argc
-#endif
-	b __m_a_i_n
+	mov r0, #0
+	push r0                 ! envp
+	push r0                 ! argv
+	push r0                 ! argc
+
+	! Call the language startup code.
+
+	bl __m_a_i_n
+	! Fall through to __exit if this returns.
 
 .define __exit
 __exit:
@@ -63,3 +83,9 @@ __exit:
 
 .comm .returnsp, 4
 .comm .returnlr, 4
+
+! User pointer to the GPU kernel parameter block.
+
+.define _gpu_parameters
+.comm _gpu_parameters, 4
+
