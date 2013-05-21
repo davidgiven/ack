@@ -3,11 +3,19 @@
 # $Revision$
 
 var w=2
+var wa=1
 var p=2
+var pa=1
 var s=2
+var sa=1
 var l=4
+var la=1
 var f=4
+var fa=1
 var d=8
+var da=1
+var x=8
+var xa=1
 var ARCH=i86
 var PLATFORM=pc86
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}

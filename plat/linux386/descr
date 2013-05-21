@@ -3,11 +3,19 @@
 # $Revision$
 
 var w=4
-var p=4
+var wa=4
+var p={w}
+var pa={w}
 var s=2
-var l=4
-var f=4
+var sa={s}
+var l={w}
+var la={w}
+var f={w}
+var fa={w}
 var d=8
+var da={d}
+var x=8
+var xa={x}
 var ARCH=i386
 var PLATFORM=linux386
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
