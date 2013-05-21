@@ -7,6 +7,11 @@
 
 #define maskx(v, x) (v & ((1<<(x))-1))
 
+static void toobig(void)
+{
+	serror("offset too big to encode into instruction");
+}
+
 /* Assemble an ALU instruction where rb is a register. */
 
 void alu_instr_reg(quad op, int cc, int rd, int ra, int rb)
@@ -90,6 +95,7 @@ void misc_instr_lit(quad op, int cc, int rd, int ra, quad value)
 
 void branch_instr(int bl, int cc, struct expr_t* expr)
 {
+	quad pc = DOTVAL;
 	quad type = expr->typ & S_TYP;
 
 	/* Sanity checking. */
@@ -114,7 +120,7 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 			/* The VC4 branch instructions express distance in 2-byte
 			 * words. */
 
-			int d = (expr->val - DOTVAL) / 2;
+			int d = (expr->val - pc) / 2;
 
         	/* We now know the worst case for the instruction layout. At
         	 * this point we can emit the instructions, which may shrink
@@ -126,7 +132,7 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
         	     * close enough to the program counter, we can use a short-
         	     * form instruction. */
 
-        	    if ((d >= -128) && (d < 127))
+        	    if (fitx(d, 7))
         	    {
 					emit2(B16(00011000,00000000) | (cc<<7) | (d&0x7f));
 					break;
@@ -136,19 +142,29 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 			/* Absolute addresses and references to other sections
 			 * need the full 32 bits. */
 
-			newrelo(expr->typ, RELOVC4 | RELPC);
+			newrelo(expr->typ, RELOVC4|RELPC);
 
 			if (bl)
 			{
-				quad v = d & 0x07ffffff;
-				quad hiv = v >> 23;
-				quad lov = v & 0x007fffff;
+				quad v, hiv, lov;
+
+				if (!fitx(d, 27))
+					toobig();
+
+				v = maskx(d, 27);
+				hiv = v >> 23;
+				lov = v & 0x007fffff;
 				emit2(B16(10010000,10000000) | (lov>>16) | (hiv<<8));
 				emit2(B16(00000000,00000000) | (lov&0xffff));
 			}
 			else
 			{
-				quad v = d & 0x007fffff;
+				quad v;
+
+				if (!fitx(d, 23))
+					toobig();
+
+				v = maskx(d, 23);
 				emit2(B16(10010000,00000000) | (cc<<8) | (v>>16));
 				emit2(B16(00000000,00000000) | (v&0xffff));
 			}
@@ -334,6 +350,8 @@ void mem_postincr_instr(quad opcode, int cc, int rd, int rs)
 
 void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 {
+	static const char sizes[] = {4, 2, 1, 2};
+	int size = sizes[opcode];
 	quad type = expr->typ & S_TYP;
 
 	/* Sanity checking. */
@@ -354,10 +372,7 @@ void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 		case 1:
 		case 2:
 		{
-			/* The VC4 branch instructions express distance in 2-byte
-			 * words. */
-
-			int d = (expr->val - DOTVAL) / 2;
+			int d = expr->val - DOTVAL;
 
         	/* We now know the worst case for the instruction layout. At
         	 * this point we can emit the instructions, which may shrink
@@ -365,24 +380,30 @@ void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 
 			if (type == DOTTYP)
 			{
+				int scaledd = d/size;
+
         	    /* This is a reference to an address within this section. If
         	     * it's close enough to the program counter, we can use a
         	     * shorter instruction. */
 
-				if (fitx(d, 16))
+				if (fitx(scaledd, 16))
 				{
                     emit2(B16(10101010,00000000) | (opcode<<5) | (rd<<0));
-                    emit2(d);
+                    emit2(scaledd);
                     return;
                 }
 			}
 
 			/* Otherwise we need the full 48 bits. */
 
-            if (!fitx(d, 27))
-                serror("offset too big to encode into instruction");
+			newrelo(expr->typ, RELOVC4|RELPC);
 
-			newrelo(expr->typ, RELOVC4 | RELPC);
+			/* VC4 relocations store the PC-relative delta into the
+			 * destination section in the instruction data. The linker will
+			 * massage this, and scale it appropriately. */
+
+            if (!fitx(d, 27))
+				toobig();
 
             emit2(B16(11100111,00000000) | (opcode<<5) | (rd<<0));
             emit4((31<<27) | maskx(d, 27));
@@ -493,8 +514,19 @@ void lea_stack_instr(int rd, long va, int rs)
 
 void lea_address_instr(int rd, struct expr_t* expr)
 {
-	newrelo(expr->typ, RELOVC4);
+	quad pc = DOTVAL;
+	quad type = expr->typ & S_TYP;
+
+	if (type == S_ABS)
+		serror("can't use absolute addresses here");
+
+	newrelo(expr->typ, RELOVC4|RELPC);
+
+	/* VC4 relocations store the PC-relative delta into the
+	 * destination section in the instruction data. The linker will
+	 * massage this, and scale it appropriately. */
+
 	emit2(B16(11100101,00000000) | (rd<<0));
-	emit4(expr->val);
+	emit4(expr->val - pc);
 }
 

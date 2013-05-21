@@ -7,3 +7,8 @@
  */
 
 #include "videocore.h"
+
+.define	__dummy
+.sect .data
+__dummy:
+

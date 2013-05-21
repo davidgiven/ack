@@ -16,6 +16,10 @@
 .sect .text
 
 begtext:
+	lea r15, begtext
+	st sp, .returnsp
+	st lr, .returnlr
+
 #if 0
 	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
 	
@@ -33,6 +37,12 @@ begtext:
 #endif
 	b __m_a_i_n
 
+.define __exit
+__exit:
+	ld sp, .returnsp
+	ld lr, .returnlr
+	b lr
+
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
 
@@ -47,3 +57,9 @@ begtext:
 .comm .trppc, 4
 .comm .ignmask, 4
 .comm _errno, 4
+
+! We store the stack pointer and return address on entry so that we can
+! cleanly exit.
+
+.comm .returnsp, 4
+.comm .returnlr, 4
