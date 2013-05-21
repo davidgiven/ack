@@ -1044,17 +1044,17 @@ PATTERNS
 	pat zle call anyz("b.le")          /* Branch if signed top <= 0 */
 
 	proc anyb example beq
-		with GPR+CONST GPRI STACK
+		with GPRI+CONST GPRI STACK
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $1}
 
-	pat beq call anyz("b.eq")          /* Branch if signed second == top */
-	pat bne call anyz("b.ne")          /* Branch if signed second != top */
-	pat bgt call anyz("b.gt")          /* Branch if signed second > top */
-	pat bge call anyz("b.ge")          /* Branch if signed second >= top */
-	pat blt call anyz("b.lt")          /* Branch if signed second < top */
-	pat ble call anyz("b.le")          /* Branch if signed second <= top */
+	pat beq call anyb("b.eq")          /* Branch if signed second == top */
+	pat bne call anyb("b.ne")          /* Branch if signed second != top */
+	pat bgt call anyb("b.gt")          /* Branch if signed second > top */
+	pat bge call anyb("b.ge")          /* Branch if signed second >= top */
+	pat blt call anyb("b.lt")          /* Branch if signed second < top */
+	pat ble call anyb("b.le")          /* Branch if signed second <= top */
 
 	proc cmu_z example cmu zeq
 		with GPR+CONST GPRI STACK
