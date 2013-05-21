@@ -12,6 +12,7 @@ OPTIMISATION := -O
 D := plat/rpi/
 
 platform-headers := \
+	unistd.h \
 	ack/config.h
 
 platform-libsys := \
