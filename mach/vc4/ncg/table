@@ -293,7 +293,8 @@ PATTERNS
 		leaving
 			dup 4
 			ste $1
-		
+
+
 		
 /* Type conversions */
 
@@ -450,22 +451,30 @@ PATTERNS
 			loc 0
 			ste $1
 	
-#if 0
 	pat ine                             /* Increment external */
-		uses REG={LABEL, $1}, REG
-			gen
-				lwz %b, {GPROFFSET, %a, 0}
-				addi %b, %b, {CONST, 1}
-				stw %b, {GPROFFSET, %a, 0}
-					
+		leaving
+            lae $1
+            dup QUAD
+            loi QUAD
+            inc
+            sti QUAD
+
 	pat dee                             /* Decrement external */
-		uses REG={LABEL, $1}, REG
-			gen
-				lwz %b, {GPROFFSET, %a, 0}
-				addi %b, %b, {CONST, 0-1}
-				stw %b, {GPROFFSET, %a, 0}
-#endif
-					
+		leaving
+            lae $1
+            dup QUAD
+            loi QUAD
+            dec
+            sti QUAD
+
+	pat lde                             /* Load external */
+		uses REG, REG
+		gen
+			lea %a, {LABEL, $1}
+			ld %b, {GPROFFSET, %a, 4}
+			ld %a, {GPROFFSET, %a, 0}
+		yields %b %a
+
 
 
 /* Structures */
@@ -474,13 +483,30 @@ PATTERNS
 		leaving
 			adp $1
 			loi QUAD
-			
-			
+
+	pat ldf                            /* Load double offsetted */
+		with GPRI
+			uses reusing %1, REG=%1, REG
+			gen
+				add %a, GP
+				ld %b, {GPROFFSET, %a, $1+4}
+				ld %a, {GPROFFSET, %a, $1+0}
+			yields %a %b
+
 	pat stf                            /* Store word offsetted */
 		leaving
 			adp $1
 			sti QUAD
-			
+
+	pat sdf                            /* Store double offsetted */
+		with GPRI GPRI GPRI
+			uses reusing %3, REG=%3
+			gen
+				add %a, GP
+				st %1, {GPROFFSET, %a, $1+0}
+				st %2, {GPROFFSET, %a, $1+4}
+
+
 			
 
 /* Loads and stores */
@@ -659,6 +685,54 @@ PATTERNS
 				sub %a, %1
 			yields %a
 
+	pat mli $1==QUAD                  /* Multiply word (second * top) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				mul %a, %1
+			yields %a
+		with GPRI GPRI+CONST
+			uses reusing %1, REG=%1
+			gen
+				mul %a, %2
+			yields %a
+
+	pat mlu
+		leaving
+			mli $1
+
+	pat dvi $1==QUAD                  /* Divide word (second / top) */
+		with GPRI GPRI
+			uses reusing %2, REG
+			gen
+				divs %a, %2, %1
+			yields %a
+
+	pat dvu $1==QUAD                  /* Divide unsigned word (second / top) */
+		with GPRI GPRI
+			uses reusing %2, REG
+			gen
+				divu %a, %2, %1
+			yields %a
+
+	pat rmu $1==QUAD                  /* Remainder unsigned word (second % top) */
+		with GPRI GPRI
+			uses REG
+			gen
+				divu %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
+	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
+		with GPRI GPRI
+			uses REG
+			gen
+				divs %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
 	pat ngi $1==QUAD                  /* Negate word */
 		with GPRI
 			uses reusing %1, REG=%1
@@ -725,6 +799,15 @@ PATTERNS
                 sub %a, %2
 			yields %a
 
+	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
+		with GPRI GPRI
+			uses REG
+			gen
+				divs %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
 #if 0
 	pat mli $1==4                      /* Multiply word (second * top) */
 		with REG REG
@@ -733,15 +816,7 @@ PATTERNS
 				mullw %a, %2, %1
 			yields %a
 		
-	pat rmi $1==4                      /* Remainder word (second % top) */
-		with REG REG
-			uses REG
-			gen
-				divw %a, %2, %1
-				mullw %a, %a, %1
-				subf %a, %a, %2
-			yields %a
-								
+
 	pat and !defined($1)               /* AND set */
 		with STACK
 			gen
@@ -810,30 +885,41 @@ PATTERNS
 			gen
 				lsr %2, %1
 			yields %a
-#if 0
-			
+
 
 
 /* Arrays */
 
 	pat aar $1==QUAD                  /* Index array */
-		with GPR3 GPR4 GPR5
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".aar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
 			gen
 				bl {LABEL, ".aar4"}
-			yields R3
-			
+			yields R0
+
 	pat lae lar $2==QUAD && nicesize(rom($1, 3)) /* Load array */
 		leaving
 			lae $1
 			aar QUAD
 			loi rom($1, 3)
-			
+
 	pat lar $1==QUAD                  /* Load array */
-		with GPR3 GPR4 GPR5 STACK
-			kills ALL
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".lar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
 			gen
 				bl {LABEL, ".lar4"}
-			
+			yields R0
+
 	pat lae sar $2==QUAD && nicesize(rom($1, 3)) /* Store array */
 		leaving
 			lae $1
@@ -841,11 +927,15 @@ PATTERNS
 			sti rom($1, 3)
 
 	pat sar $1==QUAD                  /* Store array */
-		with GPR3 GPR4 GPR5 STACK
-			kills ALL
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".sar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
 			gen
 				bl {LABEL, ".sar4"}
-			
 
 
 			
@@ -854,25 +944,30 @@ PATTERNS
 	pat set defined($1)                /* Create word with set bit */
 		leaving
 			loc 1
-			exg QUAD
-			sli QUAD
-			
+			exg $1
+			sli $1
+
 	pat set !defined($1)               /* Create structure with set bit (variable) */
-		with GPR3 GPR4 STACK
+		with STACK
 			gen
 				bl {LABEL, ".set"}
-			
+
 	pat inn defined($1)                /* Test for set bit */
 		leaving
 			set QUAD
 			and QUAD
-			
+
 	pat inn !defined($1)               /* Test for set bit (variable) */
-		with GPR3 STACK
+		with GPR0 STACK
 			gen
 				bl {LABEL, ".inn"}
-#endif
-			
+			yields R0
+
+	pat ior !defined($1)               /* Or two sets */
+		with STACK
+			gen
+				bl {LABEL, ".ior"}
+
 			
 			
 /* Boolean resolutions */
@@ -1095,28 +1190,16 @@ PATTERNS
 				pop FP, PC
 
 	pat blm                            /* Block move constant length */
-		with GPRI GPRI STACK
-			uses REG
-			gen
-				sub SP, {CONST, 12}
-				mov %a, {CONST, $1}
-				st %1, {GPROFFSET, SP, 0}
-				st %2, {GPROFFSET, SP, 4}
-				st %a, {GPROFFSET, SP, 8}
-				bl {LABEL, "_memmove"}
-				add SP, {CONST, 12}
-				
-#if 0
+		leaving
+			loc $1
+			bls
+
 	pat bls                            /* Block move variable length */
-		with GPR GPR GPR STACK
+		with STACK
+			kills ALL
 			gen
-				stwu %1, {GPROFFSET, SP, 0-4}
-				stwu %3, {GPROFFSET, SP, 0-4}
-				stwu %2, {GPROFFSET, SP, 0-4}
 				bl {LABEL, "_memmove"}
-				addi SP, SP, {CONST, 12}
-#endif
-				
+
 	pat csa                            /* Array-lookup switch */
 		with STACK
 			gen
@@ -1328,3 +1411,6 @@ PATTERNS
 				bl {LABEL, ".fef"}
 			yields R0 R1
 
+	pat zrf                            /* Load a floating zero */
+		leaving
+			loc 0

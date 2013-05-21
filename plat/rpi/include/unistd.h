@@ -9,11 +9,31 @@
 #define _UNISTD_H
 
 #include <stddef.h>
+#include <time.h>
 
 /* Types */
 
 typedef int pid_t;
 typedef int mode_t;
+
+typedef long suseconds_t;
+
+/* Time handling. */
+
+struct timeval
+{
+	time_t tv_sec;
+	suseconds_t tv_usec;
+};
+
+struct timezone
+{
+	int tz_minuteswest;
+	int tz_dsttime;
+}; /* obsolete, unused */
+
+extern int gettimeofday(struct timeval* tv, struct timezone* tz);
+extern int settimeofday(const struct timeval* tv, const struct timezone* tz);
 
 /* Constants for file access (open and friends) */
 
