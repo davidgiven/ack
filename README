@@ -32,6 +32,7 @@ pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
 cpm           produces i80 CP/M .COM files
+rpi           produces Raspberry Pi GPU binaries
 
 
 INSTALLATION
@@ -124,7 +125,7 @@ GOTCHAS
 
 There are some things you should be aware of.
 
-- Look at plat/<PLATFORMNAME>/README for information about the two supported
+- Look at plat/<PLATFORMNAME>/README for information about the supported
   platforms.
   
 - The library support is fairly limited; for C, it's at roughly the ANSI C
