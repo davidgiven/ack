@@ -99,6 +99,11 @@ INSTRUCTIONS
 
 	add           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
 	add           GPRI:rw, GPRI+CONST:ro.
+	adds2         GPRI:rw, GPRI+CONST:ro.
+	adds4         GPRI:rw, GPRI+CONST:ro.
+	adds8         GPRI:rw, GPRI+CONST:ro.
+	adds16        GPRI:rw, GPRI+CONST:ro.
+	adds256       GPRI:rw, GPRI:rw, GPRI:ro.
 	and           GPRI:rw, GPRI+CONST:ro.
 	asr           GPRI:rw, GPRI+CONST:ro.
 	beq "b.eq"    LABEL:ro.
@@ -632,16 +637,16 @@ PATTERNS
 
 /* Arithmetic wrappers */
 
-	pat ads $1==4                      /* Add var to pointer */
+	pat ads                            /* Add var to pointer */
 		leaving adi $1
 	
-	pat sbs $1==4                      /* Subtract var from pointer */
+	pat sbs                            /* Subtract var from pointer */
 		leaving sbi $1
 		
 	pat adp                            /* Add constant to pointer */
 		leaving
 			loc $1
-			adi 4
+			adi QUAD
 
 	pat adu                            /* Add unsigned */
 		leaving
@@ -654,21 +659,21 @@ PATTERNS
 	pat inc                            /* Add 1 */
 		leaving
 			loc 1
-			adi 4
+			adi QUAD
 			
 	pat dec                            /* Subtract 1 */
 		leaving
 			loc 1
-			sbi 4
+			sbi QUAD
 	
-	pat loc mlu $2==2                  /* Unsigned multiply by constant */
+	pat loc mlu                        /* Unsigned multiply by constant */
 		leaving
 			loc $1
-			mli 4
+			mli QUAD
 			
 	pat mlu                            /* Unsigned multiply by var */
 		leaving
-			mli $1
+			mli QUAD
 			
 	pat loc slu                        /* Shift left unsigned by constant amount */
 		leaving
@@ -905,6 +910,51 @@ PATTERNS
 
 
 
+/* Special arithmetic */
+
+	pat loc sli adi $1==1 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<1) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				adds2 %a, %1
+			yields %a
+
+	pat loc sli adi $1==2 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<2) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				adds4 %a, %1
+			yields %a
+
+	pat loc sli adi $1==3 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<3) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				adds8 %a, %1
+			yields %a
+
+	pat loc sli adi $1==4 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<4) */
+		with GPRI+CONST GPRI
+			uses reusing %2, REG=%2
+			gen
+				adds16 %a, %1
+			yields %a
+
+	pat loc sli adi $1==8 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<8) */
+		with GPRI GPRI
+			uses reusing %2, REG
+			gen
+				adds256 %a, %2, %1
+			yields %a
+
+	pat loc sli ads
+		leaving
+			loc $1
+			sli $2
+			adi $3
+
+
+
 /* Arrays */
 
 	pat aar $1==QUAD                  /* Index array */
@@ -1097,22 +1147,6 @@ PATTERNS
 	pat cmf zge call cmf_z("b.ge")   /* Branch if float second >= top */
 	pat cmf zle call cmf_z("b.le")   /* Branch if float second <= top */
 
-
-#if 0
-
-	pat cmi                            /* Signed tristate compare */
-		with CONST GPR
-			yields {TRISTATE_RC_S, %2, %1.val}
-		with GPR GPR
-			yields {TRISTATE_RR_S, %2, %1}
-			
-	pat cmu                            /* Unsigned tristate compare */
-		with CONST GPR
-			yields {TRISTATE_RC_U, %2, %1.val}
-		with GPR GPR
-			yields {TRISTATE_RR_U, %2, %1}
-#endif
-						
 	pat cmp                            /* Compare pointers */
 		leaving
 			cmu QUAD
