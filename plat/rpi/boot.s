@@ -24,13 +24,8 @@
 ! the startup sequence mustn't disturb these.
 
 begtext:
-	! Set up system registers.
-
-	lea gp, begtext
-	st sp, .returnsp
-	st lr, .returnlr
-
-	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
+	! Wipe the bss. This must happen absolutely first, because we need
+	! to store the old system registers into it.
 	
 	lea r6, begbss
 	lea r7, endbss
@@ -39,15 +34,32 @@ _1:
 	stb r8, (r6)
 	addcmpb.lt r6, #1, r7, _1
 
+	! Set up system registers.
+
+	lea gp, begtext
+	st fp, .returnfp
+	st sp, .returnsp
+	st lr, .returnlr
+
 	! Set up the new stack and save the kernel parameters to it.
 
-	lea sp, .stack + STACKSIZE
+	lea sp, .stack + STACKSIZE - 6*4
+
 	sub r0, gp ! pointer
+	st r0, 0 (sp)
+
 	sub r1, gp ! pointer
+	st r1, 4 (sp)
+
 	sub r2, gp ! pointer
+	st r2, 8 (sp)
+
 	sub r3, gp ! pointer
+	st r3, 12 (sp)
+
 	! r4-r5 are not pointers and don't need adjusting
-	push r0-r5
+	st r4, 16 (sp)
+	st r5, 20 (sp)
 
 	sub r0, sp, gp
 	st r0, _gpu_parameters
@@ -62,10 +74,12 @@ _1:
 	! Call the language startup code.
 
 	bl __m_a_i_n
+
 	! Fall through to __exit if this returns.
 
 .define __exit
 __exit:
+	ld fp, .returnfp
 	ld sp, .returnsp
 	ld lr, .returnlr
 	b lr
@@ -88,6 +102,7 @@ __exit:
 ! We store the stack pointer and return address on entry so that we can
 ! cleanly exit.
 
+.comm .returnfp, 4
 .comm .returnsp, 4
 .comm .returnlr, 4
 
