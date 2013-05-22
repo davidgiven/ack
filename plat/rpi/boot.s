@@ -16,6 +16,12 @@
 .sect .text
 
 #define gp r15
+#define STACKSIZE 16*1024
+
+! MAIN ENTRY POINT
+!
+! When running as a kernel, our parameters are passed in in r0-r5, so
+! the startup sequence mustn't disturb these.
 
 begtext:
 	! Set up system registers.
@@ -24,27 +30,28 @@ begtext:
 	st sp, .returnsp
 	st lr, .returnlr
 
-	! The GPU kernel code will load parameters into r0-r5. Save them
-	! so that the user code can access them.
+	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
+	
+	lea r6, begbss
+	lea r7, endbss
+	mov r8, #0
+_1:
+	stb r8, (r6)
+	addcmpb.lt r6, #1, r7, _1
 
+	! Set up the new stack and save the kernel parameters to it.
+
+	lea sp, .stack + STACKSIZE
 	sub r0, gp ! pointer
 	sub r1, gp ! pointer
 	sub r2, gp ! pointer
 	sub r3, gp ! pointer
 	! r4-r5 are not pointers and don't need adjusting
 	push r0-r5
+
 	sub r0, sp, gp
 	st r0, _gpu_parameters
 
-	! Wipe the bss. (I'm a little suprised that __m_a_i_n doesn't do this.)
-	
-	lea r0, begbss
-	lea r1, endbss
-	mov r2, #0
-_1:
-	stb r2, (r0)
-	addcmpb.lt r0, #1, r1, _1
-	
 	! Push standard parameters onto the stack and go.
 	
 	mov r0, #0
@@ -88,4 +95,8 @@ __exit:
 
 .define _gpu_parameters
 .comm _gpu_parameters, 4
+
+! User stack.
+
+.comm .stack, STACKSIZE
 
