@@ -254,7 +254,7 @@ void mem_instr(quad opcode, int cc, int rd, long offset, int rs)
 
 		if ((rs < 0x10) && (rd < 0x10) && (offset == 0))
 		{
-			emit2(B16(00001000,00000000) | (opcode<<8) | (rs<<4) | (rd<<4));
+			emit2(B16(00001000,00000000) | (opcode<<8) | (rs<<4) | (rd<<0));
 			return;
 		}
 
