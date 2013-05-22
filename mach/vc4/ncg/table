@@ -79,6 +79,12 @@ TOKENS
 
 	GPRE               = { GPR reg; }             4    reg.
 
+/* Sign extended values. */
+
+	/* The size refers to the *source*. */
+	SIGNEX8            = { GPR reg; }             4    reg.
+	SIGNEX16           = { GPR reg; }             4    reg.
+
 /* The results of comparisons. */
 
 	TRISTATE_RC_S      = { GPR reg; INT val; }    4.
@@ -92,59 +98,61 @@ SETS
 
 	TOKEN              = LABEL + CONST.
 	GPRI               = GPR + GPRE.
+	OP                 = TOKEN + SIGNEX8 + SIGNEX16.
+	XREG               = GPRI + SIGNEX8 + SIGNEX16.
 
 
 
 INSTRUCTIONS
 
-	add           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
-	add           GPRI:rw, GPRI+CONST:ro.
-	adds2         GPRI:rw, GPRI+CONST:ro.
-	adds4         GPRI:rw, GPRI+CONST:ro.
-	adds8         GPRI:rw, GPRI+CONST:ro.
-	adds16        GPRI:rw, GPRI+CONST:ro.
-	adds256       GPRI:rw, GPRI:rw, GPRI:ro.
-	and           GPRI:rw, GPRI+CONST:ro.
-	asr           GPRI:rw, GPRI+CONST:ro.
+	add           XREG:wo, XREG:ro, XREG+CONST:ro.
+	add           XREG:rw, XREG+CONST:ro.
+	adds2         XREG:rw, XREG+CONST:ro.
+	adds4         XREG:rw, XREG+CONST:ro.
+	adds8         XREG:rw, XREG+CONST:ro.
+	adds16        XREG:rw, XREG+CONST:ro.
+	adds256       XREG:rw, XREG:rw, XREG:ro.
+	and           XREG:rw, XREG+CONST:ro.
+	asr           XREG:rw, XREG+CONST:ro.
 	beq "b.eq"    LABEL:ro.
 	bne "b.ne"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
 	bhi "b.hi"    LABEL:ro.
-	b             GPRI+LABEL:ro.
-	bl            GPRI+LABEL:ro.
-	cmp           GPRI:ro, GPRI+CONST:ro kills :cc.
-	divs          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
-	divu          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
-	eor           GPRI:rw, GPRI+CONST:ro.
-	exts          GPRI:wo, GPRI:ro, GPRI+CONST:ro.
-	exts          GPRI:rw, GPRI+CONST:ro.
-	fadd          GPRI:wo, GPRI:ro, GPRI:ro.
-	fcmp          GPRI:wo, GPRI:ro, GPRI:ro.
-	fdiv          GPRI:wo, GPRI:ro, GPRI:ro.
-	fmul          GPRI:wo, GPRI:ro, GPRI:ro.
-	fsub          GPRI:wo, GPRI:ro, GPRI:ro.
-	ld            GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldb           GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldh           GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldhs          GPRI:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	lea           GPRI:wo, LABEL:ro.
-	lsl           GPRI:rw, GPRI+CONST:ro.
-	lsl           GPRI:wo, GPRI:ro, GPRI+CONST:ro.
-	lsr           GPRI:rw, GPRI+CONST:ro.
-	mov           GPRI:wo, GPRI+CONST:ro.
-	mul           GPRI:rw, GPRI+CONST:ro.
-	neg           GPRI:rw, GPRI+CONST:ro.
-	or            GPRI:rw, GPRI+CONST:ro.
+	b             XREG+LABEL:ro.
+	bl            XREG+LABEL:ro.
+	cmp           XREG:ro, XREG+CONST:ro kills :cc.
+	divs          XREG:wo, XREG:ro, XREG+CONST:ro.
+	divu          XREG:wo, XREG:ro, XREG+CONST:ro.
+	eor           XREG:rw, XREG+CONST:ro.
+	exts          XREG:wo, XREG:ro, XREG+CONST:ro.
+	exts          XREG:rw, XREG+CONST:ro.
+	fadd          XREG:wo, XREG:ro, XREG:ro.
+	fcmp          XREG:wo, XREG:ro, XREG:ro.
+	fdiv          XREG:wo, XREG:ro, XREG:ro.
+	fmul          XREG:wo, XREG:ro, XREG:ro.
+	fsub          XREG:wo, XREG:ro, XREG:ro.
+	ld            XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldb           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldh           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldhs          XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	lea           XREG:wo, LABEL:ro.
+	lsl           XREG:rw, XREG+CONST:ro.
+	lsl           XREG:wo, XREG:ro, XREG+CONST:ro.
+	lsr           XREG:rw, XREG+CONST:ro.
+	mov           XREG:wo, XREG+CONST:ro.
+	mul           XREG:rw, XREG+CONST:ro.
+	neg           XREG:rw, XREG+CONST:ro.
+	or            XREG:rw, XREG+CONST:ro.
 	pop           STACKABLE:wo.
 	pop           STACKABLE:wo, GPRLR+GPRPC:wo.
 	push          STACKABLE:ro.
-	sub           GPRI:wo, GPRI:ro, CONST+GPRI:ro.
-	sub           GPRI:rw, GPRI+CONST:ro.
-	st            GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	stb           GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	sth           GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	sths          GPRI:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sub           XREG:wo, XREG:ro, CONST+XREG:ro.
+	sub           XREG:rw, XREG+CONST:ro.
+	st            XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	stb           XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sth           XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sths          XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
 
 	invalid "invalid".
 
@@ -174,6 +182,16 @@ MOVES
 		gen
 			lea %2, {LABEL, %1.adr}
 			sub %2, GP
+
+/* Sign extension */
+
+	from SIGNEX8 to GPR
+		gen
+			exts %2, %1.reg, {CONST, 8}
+
+	from SIGNEX16 to GPR
+		gen
+			exts %2, %1.reg, {CONST, 16}
 
 /* Miscellaneous */
 
@@ -218,13 +236,13 @@ STACKINGRULES
 			sub SP, {CONST, 4}
 			st %1, {GPROFFSET, SP, 0}
 
-	from TOKEN to STACK
+	from OP to STACK
 		uses STACKABLE
 		gen
 			move %1, %a
 			push %a
 
-	from TOKEN to STACK
+	from OP to STACK
 		gen
 			COMMENT("fallback stack")
 			move %1, SCRATCH
@@ -239,20 +257,12 @@ COERCIONS
 		uses reusing %1, REG=%1
 		yields %a
 
-	from CONST
+	from OP
 		uses REG
 		gen
-			COMMENT("coerce CONST->REG")
 			move %1, %a
 		yields %a
 		
-	from LABEL
-		uses REG
-		gen
-			COMMENT("coerce LABEL->REG")
-			move %1, %a
-		yields %a
-
 	from STACK
 		uses STACKABLE
 		gen
@@ -335,18 +345,24 @@ PATTERNS
 		/* nop */
 	
 	pat loc loc cii $1==BYTE && $2>BYTE /* signed char -> anything */
-		with REG
-			uses reusing %1, REG=%1
-			gen
-				exts %a, {CONST, 8}
-			yields %a
-	
+		with GPR
+			yields {SIGNEX8, %1}
+		with GPRE
+			yields {SIGNEX8, %1.reg}
+		with SIGNEX8
+			yields {SIGNEX8, %1.reg}
+		with SIGNEX16
+			yields {SIGNEX8, %1.reg}
+
 	pat loc loc cii $1==WORD && $2>WORD /* signed short -> anything */
-		with REG
-			uses reusing %1, REG=%1
-	        gen
-	            exts %a, {CONST, 16}
-	        yields %a
+		with GPR
+			yields {SIGNEX16, %1}
+		with GPRE
+			yields {SIGNEX16, %1.reg}
+		with SIGNEX8
+			yields {SIGNEX16, %1.reg}
+		with SIGNEX16
+			yields {SIGNEX16, %1.reg}
 
 	
 		
@@ -592,21 +608,21 @@ PATTERNS
 				bl {LABEL, ".los"}
 				
 	pat sti $1==BYTE                   /* Store byte indirect */
-		with LABEL GPRI
+		with LABEL GPRI+SIGNEX8+SIGNEX16
 			gen
 				stb %2, %1
-		with GPR GPRI
+		with GPR GPRI+SIGNEX8+SIGNEX16
 			gen
 				stb %2, {GPRGPR, %1, GP}
-		with GPRE GPRI
+		with GPRE GPRI+SIGNEX8+SIGNEX16
 			gen
 				stb %2, {GPRGPR, %1.reg, GP}
 
 	pat sti $1==WORD                  /* Store half-word indirect */
-		with LABEL GPRI
+		with LABEL GPRI+SIGNEX16
 			gen
 				sth %2, %1
-		with GPRI GPRI
+		with GPRI GPRI+SIGNEX16
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
