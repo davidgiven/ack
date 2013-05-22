@@ -386,8 +386,8 @@ PATTERNS
 
 	pat ldl                            /* Load double-word from local */
 		leaving
-			lol $1 + QUAD*0
 			lol $1 + QUAD*1
+			lol $1 + QUAD*0
 
 	pat stl inreg($1)>0                /* Store to local */
 		with CONST+GPRI
@@ -402,8 +402,8 @@ PATTERNS
 
 	pat sdl                            /* Store double-word to local */
 		leaving
-			stl $1 + QUAD*1
 			stl $1 + QUAD*0
+			stl $1 + QUAD*1
 			
 	pat lil inreg($1)>0                /* Load from indirected local */
 		uses REG
@@ -496,14 +496,15 @@ PATTERNS
             dec
             sti QUAD
 
-	pat lde                             /* Load external */
-		uses REG, REG
-		gen
-			lea %a, {LABEL, $1}
-			ld %b, {GPROFFSET, %a, 4}
-			ld %a, {GPROFFSET, %a, 0}
-		yields %b %a
+	pat lde                             /* Load double external */
+		leaving
+			lae $1
+			loi QUAD*2
 
+	pat sde                             /* Store double external */
+		leaving
+			lae $1
+			sti QUAD*2
 
 
 /* Structures */
@@ -570,7 +571,7 @@ PATTERNS
 				ldhs %a, {GPROFFSET, %a, 0}
 			yields %a
 		
-	pat loi $1==WORD                  /* Load short indirect */
+	pat loi $1==WORD                   /* Load short indirect */
 		with LABEL
 			uses REG
 			gen
@@ -583,7 +584,7 @@ PATTERNS
 				ldh %a, {GPROFFSET, %a, 0}
 			yields %a
 
-	pat loi $1==QUAD                  /* Load quad indirect */
+	pat loi $1==QUAD                   /* Load quad indirect */
 		with LABEL
 			uses REG
 			gen
@@ -595,6 +596,22 @@ PATTERNS
 				add %a, %1, GP
 				ld %a, {GPROFFSET, %a, 0}
 			yields %a
+
+	pat loi $1==2*QUAD                 /* Load double-quad indirect */
+		with LABEL
+			uses REG, REG
+			gen
+				lea %b, %1
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+			yields %b %a
+		with GPRI
+			uses reusing %1, REG, REG
+			gen
+				add %b, %1, GP
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+			yields %b %a
 
 	pat loi !nicesize($1)              /* Load arbitrary size */
 		leaving
@@ -637,6 +654,20 @@ PATTERNS
 			gen
 				add %a, %1, GP
 				st %2, {GPROFFSET, %a, 0}
+
+	pat sti $1==2*QUAD                 /* Load double-quad indirect */
+		with LABEL GPRI GPRI
+			uses REG
+			gen
+				lea %a, %1
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
+		with GPRI GPRI GPRI
+			uses reusing %1, REG=%1
+			gen
+				add %a, GP
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
 
 	pat sti                            /* Store arbitrary size */
 		leaving
