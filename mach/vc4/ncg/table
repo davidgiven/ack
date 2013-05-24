@@ -27,7 +27,6 @@ PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
-	STACKABLE       /* a push/popable register (r0, r6, r16, fp) */
 
 	GPR0  GPR1  GPR2  GPR3  GPR4  GPR5  GPR6  GPR7
 	GPR8  GPR9  GPR10 GPR11 GPR12 GPR13 GPR14 GPR15
@@ -37,13 +36,13 @@ PROPERTIES
 
 REGISTERS
 
-	R0("r0")           : GPR, REG, STACKABLE, GPR0.
+	R0("r0")           : GPR, REG, GPR0.
 	R1("r1")           : GPR, REG, GPR1.
 	R2("r2")           : GPR, REG, GPR2.
 	R3("r3")           : GPR, REG, GPR3.
 	R4("r4")           : GPR, REG, GPR4.
 	R5("r5")           : GPR, REG, GPR5.
-	R6("r6")           : GPR, REG, STACKABLE, GPR6 regvar.
+	R6("r6")           : GPR, REG, GPR6 regvar.
 	R7("r7")           : GPR, REG, GPR7 regvar.
 	R8("r8")           : GPR, REG, GPR8 regvar.
 	R9("r9")           : GPR, REG, GPR9 regvar.
@@ -54,14 +53,16 @@ REGISTERS
 	R14("r14")         : GPR, REG, GPR14 regvar.
 	GP("r15")          : GPR, GPRGP.
 
+	R16("r16")         : GPR, GPR16.
+
 	R23("r23")         : GPR.
-	FP("fp")           : GPR, GPRFP, STACKABLE.
+	FP("fp")           : GPR, GPRFP.
 	SP("sp")           : GPR, GPRSP.
 	LR("lr")           : GPR, GPRLR.
 	PC("pc")           : GPR, GPRPC.
 	/* r26 to r31 are special and the code generator doesn't touch them. */
 
-#define SCRATCH R23
+#define SCRATCH R16
 
 TOKENS
 
@@ -69,6 +70,7 @@ TOKENS
 
 	GPROFFSET          = { GPR reg; INT off; }    4    off "(" reg ")".
 	GPRGPR             = { GPR reg1; GPR reg2; }  4    "(" reg1 "," reg2 ")".
+	GPRINC             = { GPR reg; }             4    "(" reg ")++".
 
 /* Primitives */
 
@@ -119,6 +121,7 @@ INSTRUCTIONS
 	bgt "b.gt"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
 	bhi "b.hi"    LABEL:ro.
+	bset          XREG:rw, XREG+CONST:ro.
 	b             XREG+LABEL:ro.
 	bl            XREG+LABEL:ro.
 	cmp           XREG:ro, XREG+CONST:ro kills :cc.
@@ -132,6 +135,7 @@ INSTRUCTIONS
 	fdiv          XREG:wo, XREG:ro, XREG:ro.
 	fmul          XREG:wo, XREG:ro, XREG:ro.
 	fsub          XREG:wo, XREG:ro, XREG:ro.
+	ld            XREG:wo, GPRINC:rw.
 	ld            XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldb           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldh           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
@@ -144,9 +148,10 @@ INSTRUCTIONS
 	mul           XREG:rw, XREG+CONST:ro.
 	neg           XREG:rw, XREG+CONST:ro.
 	or            XREG:rw, XREG+CONST:ro.
-	pop           STACKABLE:wo.
-	pop           STACKABLE:wo, GPRLR+GPRPC:wo.
-	push          STACKABLE:ro.
+	pop           GPR0+GPR6+GPR16+GPRFP+GPRPC:wo.
+	pop           GPR0+GPR6+GPR16+GPRFP:wo, GPRPC:wo.
+	push          GPR0+GPR6+GPR16+GPRFP+GPRLR:ro.
+	push          GPR0+GPR6+GPR16+GPRFP:ro, GPRLR:ro.
 	sub           XREG:wo, XREG:ro, CONST+XREG:ro.
 	sub           XREG:rw, XREG+CONST:ro.
 	st            XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
@@ -155,6 +160,7 @@ INSTRUCTIONS
 	sths          XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
 
 	invalid "invalid".
+	comment "!" LABEL:ro.
 
 
   
@@ -210,53 +216,35 @@ TESTS
 
 STACKINGRULES
 
-	from STACKABLE to STACK
+	from GPR0+GPR6+GPR16 to STACK
 		gen
-			push %1
+			comment {LABEL, "push stackable"}
+		    push %1
 
-	from GPR to STACK
-		uses STACKABLE
+	from OP+GPRI to STACK
 		gen
-		    move %1, %a
-		    push %a
-
-	from GPR to STACK
-		gen
-			sub SP, SP, {CONST, 4}
-			st %1, {GPROFFSET, SP, 0}
-
-	from GPRE to STACK
-		uses STACKABLE
-		gen
-			move %1, %a
-			push %a
-
-	from GPRE to STACK
-		gen
-			sub SP, {CONST, 4}
-			st %1, {GPROFFSET, SP, 0}
-
-	from OP to STACK
-		uses STACKABLE
-		gen
-			move %1, %a
-			push %a
-
-	from OP to STACK
-		gen
-			COMMENT("fallback stack")
+			comment {LABEL, "push via scratch"}
 			move %1, SCRATCH
-			sub SP, SP, {CONST, 4}
-			st SCRATCH, {GPROFFSET, SP, 0}
+			push SCRATCH
+
 
 
 		
 COERCIONS
 
-	from GPRE
+	from GPRI
 		uses reusing %1, REG=%1
 		yields %a
 
+	from GPR
+		yields {GPRE, %1}
+
+	from OP
+		uses GPR0
+		gen
+			move %1, %a
+		yields %a
+		
 	from OP
 		uses REG
 		gen
@@ -264,10 +252,10 @@ COERCIONS
 		yields %a
 		
 	from STACK
-		uses STACKABLE
+		uses REG
 		gen
-			COMMENT("coerce STACK->REG")
-			pop %a
+			pop R0
+			move R0, %a
 		yields %a
 
 
@@ -619,10 +607,8 @@ PATTERNS
 			los QUAD
 					
 	pat los                            /* Load arbitrary size */
-		with STACK
-			kills ALL
-			gen
-				bl {LABEL, ".los"}
+		leaving
+			cal ".los"
 				
 	pat sti $1==BYTE                   /* Store byte indirect */
 		with LABEL GPRI+SIGNEX8+SIGNEX16
@@ -735,6 +721,9 @@ PATTERNS
 			
 /* Word arithmetic */
 
+	pat loc adi $1==0                 /* Add nothing */
+		/* nop */
+
 	pat adi $1==QUAD                  /* Add word (second + top) */
 		with GPRI+CONST GPRI
 			uses reusing %2, REG=%2
@@ -746,6 +735,9 @@ PATTERNS
 			gen
 				add %a, %2
 			yields %a
+
+	pat loc sbi $1==0                 /* Subtract nothing */
+		/* nop */
 
 	pat sbi $1==QUAD                  /* Subtract word (second - top) */
 		with GPRI+CONST GPRI
@@ -886,16 +878,6 @@ PATTERNS
 			yields %a
 		
 
-	pat and !defined($1)               /* AND set */
-		with STACK
-			gen
-				bl {LABEL, ".and"}
-				
-	pat ior !defined($1)               /* OR set */
-		with STACK
-			gen
-				bl {LABEL, ".ior"}
-				
 	pat xor $1==4                      /* XOR word */
 		with GPR GPR
 			yields {XOR_RR, %1, %2}
@@ -1055,33 +1037,48 @@ PATTERNS
 			
 /* Sets */
 
-	pat set defined($1)                /* Create word with set bit */
+	pat set $1==QUAD                   /* Create quad with one bit set */
+		with GPRI
+			uses reusing %1, REG
+			gen
+				bset %a, %1
+			yields %a
+
+	pat set defined($1)                /* Any other set */
 		leaving
-			loc 1
-			exg $1
-			sli $1
+			loc $1
+			cal ".set"
 
 	pat set !defined($1)               /* Create structure with set bit (variable) */
-		with STACK
-			gen
-				bl {LABEL, ".set"}
+		leaving
+			cal ".set"
 
 	pat inn defined($1)                /* Test for set bit */
 		leaving
-			set QUAD
-			and QUAD
+			set $1
+			and $1
 
 	pat inn !defined($1)               /* Test for set bit (variable) */
-		with GPR0 STACK
-			gen
-				bl {LABEL, ".inn"}
-			yields R0
+		leaving
+			cal ".inn"
 
-	pat ior !defined($1)               /* Or two sets */
-		with STACK
-			gen
-				bl {LABEL, ".ior"}
+	pat ior !nicesize($1)              /* OR set */
+		leaving
+			cal ".ior"
 
+	pat ior !defined($1)               /* OR set */
+		leaving
+			cal ".ior"
+
+	pat and !nicesize($1)              /* AND set */
+		leaving
+			loc $1
+			cal ".and"
+
+	pat and !defined($1)               /* AND set */
+		leaving
+			cal ".and"
+				
 			
 			
 /* Boolean resolutions */
@@ -1171,15 +1168,23 @@ PATTERNS
 	pat ble call anyb("b.le")          /* Branch if signed second <= top */
 
 	proc cmu_z example cmu zeq
-		with GPR+CONST GPRI STACK
+		with GPRI+CONST GPRI STACK
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $2}
 
+	pat cmu zeq call cmu_z("b.eq")   /* Branch if unsigned second == top */
+	pat cmu zne call cmu_z("b.ne")   /* Branch if unsigned second != top */
 	pat cmu zgt call cmu_z("b.hi")   /* Branch if unsigned second > top */
 	pat cmu zlt call cmu_z("b.lo")   /* Branch if unsigned second < top */
 	pat cmu zge call cmu_z("b.hs")   /* Branch if unsigned second >= top */
 	pat cmu zle call cmu_z("b.ls")   /* Branch if unsigned second <= top */
+	pat cmi zeq call cmu_z("b.eq")   /* Branch if signed second == top */
+	pat cmi zne call cmu_z("b.ne")   /* Branch if signed second != top */
+	pat cmi zgt call cmu_z("b.gt")   /* Branch if signed second > top */
+	pat cmi zlt call cmu_z("b.lt")   /* Branch if signed second < top */
+	pat cmi zge call cmu_z("b.ge")   /* Branch if signed second >= top */
+	pat cmi zle call cmu_z("b.le")   /* Branch if signed second <= top */
 
 	proc cmf_z example cmu zeq
 		with GPRI GPRI STACK
@@ -1268,6 +1273,9 @@ PATTERNS
 	pat lfr $1==QUAD                  /* Load function result, word */
 		yields R0
 		
+	pat lfr $1==QUAD*2                /* Load function result, word */
+		yields R1 R0
+		
 	pat ret $1==0                      /* Return from procedure */
 		gen
 			return
@@ -1280,9 +1288,12 @@ PATTERNS
 				return
 				mov SP, FP
 				pop FP, PC
-		with STACK
+
+	pat ret $1==QUAD*2                /* Return from procedure, word */
+		with GPRI GPRI
 			gen
-				pop R0
+				move %1, R0
+				move %2, R1
 				return
 				mov SP, FP
 				pop FP, PC
@@ -1335,9 +1346,8 @@ PATTERNS
 			ste ".ignmask"
 			
 	pat trp                            /* Raise EM trap */
-		with GPR0
-			gen
-				bl {LABEL, ".trap"}
+		leaving
+			cal ".trap"
 				
 	pat sig                            /* Set trap handler */
 		leaving
@@ -1467,47 +1477,38 @@ PATTERNS
 	pat dvf call simple_f("fdiv")      /* Float divide (second / top) */
 
 	pat loc loc cff $1==$2 && $1==QUAD /* Convert float to float */
-                leaving
+		leaving
 			nop
                                         
 	pat loc loc cfi $1==$2 && $1==QUAD /* Convert float -> integer */
-		with GPR0
-			gen
-				bl {LABEL, ".cfi"}
-			yields R0
+		leaving
+			cal ".cfi"
+			lfr QUAD
 
 	pat loc loc cfu $1==$2 && $1==QUAD /* Convert float -> unsigned */
-		with GPR0
-			gen
-				bl {LABEL, ".cfu"}
-			yields R0
+		leaving
+			cal ".cfu"
+			lfr QUAD
 
 	pat loc loc cif $1==$2 && $1==QUAD /* Convert integer -> float */
-		with GPR0
-			gen
-				bl {LABEL, ".cif"}
-			yields R0
+		leaving
+			cal ".cif"
+			lfr QUAD
 
 	pat loc loc cuf $1==$2 && $1==QUAD /* Convert unsigned -> float */
-		with GPR0
-			gen
-				bl {LABEL, ".cuf"}
-			yields R0
+		leaving
+			cal ".cuf"
+			lfr QUAD
 
 	pat fef                            /* Split float */
-		with GPR0
-			kills GPR1
-			gen
-				bl {LABEL, ".fef"}
-			yields R0 R1
+		leaving
+			cal ".cuf"
+			lfr QUAD*2
 
 	pat fif                            /* Multiply float and split (?) */
-		with GPRI GPRI
-			kills GPR0, GPR1
-			gen
-				fmul R0, %2, %1
-				bl {LABEL, ".fef"}
-			yields R0 R1
+		leaving
+			mlf QUAD
+			fef
 
 	pat zrf                            /* Load a floating zero */
 		leaving
