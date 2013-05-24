@@ -13,10 +13,15 @@ D := plat/rpi/
 
 platform-headers := \
 	unistd.h \
+	pi.h \
 	ack/config.h
 
 platform-libsys := \
 	_hol0.s \
+	phys_to_user.s \
+	user_to_phys.s \
+	uart.s \
+	write.c \
 
 ifeq (x,y)
 	errno.s \
@@ -26,7 +31,6 @@ ifeq (x,y)
 	creat.c \
 	close.c \
 	read.c \
-	write.c \
 	brk.c \
 	getpid.c \
 	kill.c \

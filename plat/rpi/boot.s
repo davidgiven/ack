@@ -19,14 +19,17 @@
 #define STACKSIZE 16*1024
 
 ! MAIN ENTRY POINT
-!
-! When running as a kernel, our parameters are passed in in r0-r5, so
-! the startup sequence mustn't disturb these.
 
 begtext:
+	! This empty space is required by the boot loader.
+
+	b start
+	.space 508 ! 512 minus space needed for branch instruction
+
 	! Wipe the bss. This must happen absolutely first, because we need
 	! to store the old system registers into it.
-	
+
+start:
 	lea r6, begbss
 	lea r7, endbss
 	mov r8, #0
@@ -79,6 +82,7 @@ _1:
 
 .define __exit
 __exit:
+	mov r0, sr
 	ld fp, .returnfp
 	ld sp, .returnsp
 	ld lr, .returnlr
