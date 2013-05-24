@@ -222,6 +222,12 @@ STACKINGRULES
 		    push %1
 
 	from OP+GPRI to STACK
+		uses GPR0
+		gen
+			move %1, %a
+			push %a
+
+	from OP+GPRI to STACK
 		gen
 			comment {LABEL, "push via scratch"}
 			move %1, SCRATCH

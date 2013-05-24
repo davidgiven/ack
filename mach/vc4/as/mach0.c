@@ -30,4 +30,3 @@ typedef unsigned long quad;
 #undef VALWIDTH
 #define VALWIDTH	8
 
-#define FIXUPFLAGS (RELBR | RELWR)

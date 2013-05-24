@@ -10,9 +10,7 @@
 
 int framesize;
 
-/*
- * machine dependent back end routines for the Zilog Z80.
- */
+/* Write out a constant data section. */
 
 con_part(int sz, word w)
 {
@@ -20,19 +18,12 @@ con_part(int sz, word w)
 		part_size++;
 	if (part_size == TEM_WSIZE)
 		part_flush();
-	if (sz == 1) {
-		w &= 0xFF;
-		w <<= 8*(3-part_size);
-		part_word |= w;
-	} else if (sz == 2) {
-		w &= 0xFFFF;
-		if (part_size == 0) {
-			/* Shift 8 for m68k2, 16 otherwise */
-			w <<= 4 * TEM_WSIZE;
-		}
+	if (sz == 1 || sz == 2) {
+		w &= (sz == 1 ? 0xFF : 0xFFFF);
+		w <<= 8 * part_size;
 		part_word |= w;
 	} else {
-		assert(sz == TEM_WSIZE);
+		assert(sz == 4);
 		part_word = w;
 	}
 	part_size += sz;
@@ -40,7 +31,6 @@ con_part(int sz, word w)
 
 con_mult(word sz)
 {
-
 	if (argval != 4)
 		fatal("bad icon/ucon size");
 	fprintf(codefile,".data4 %s\n", str);
@@ -48,9 +38,9 @@ con_mult(word sz)
 
 #define CODE_GENERATOR  
 #define IEEEFLOAT  
-#define FL_MSL_AT_LOW_ADDRESS	1
-#define FL_MSW_AT_LOW_ADDRESS	1
-#define FL_MSB_AT_LOW_ADDRESS	1
+#define FL_MSL_AT_LOW_ADDRESS	0
+#define FL_MSW_AT_LOW_ADDRESS	0
+#define FL_MSB_AT_LOW_ADDRESS	0
 #include <con_float>
 
 void prolog(full nlocals)
@@ -149,7 +139,7 @@ static void saveloadregs(const char* op)
 	if (minreg != 32)
 	{
 		fprintf(codefile, "! saving registers %d to %d\n", minreg, maxreg);
-		assert(minreg == 6);
+		assert((minreg == 6) || (minreg == 16));
 
 		fprintf(codefile, "%s r6-r%d\n", op, maxreg);
 	}
