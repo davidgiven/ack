@@ -16,10 +16,10 @@ operation
 	| OP_BRANCH CC expr                    { branch_instr(0, $2, &$3); }
 	| OP_BRANCHLINK CC expr                { branch_instr(1, $2, &$3); }
 
-	| OP_BRANCH GPR ',' GPR ',' expr       { branch_addcmp_lit_reg_instr(ALWAYS, 0, $2, $4, &$6); }
-	| OP_BRANCH CC GPR ',' GPR ',' expr    { branch_addcmp_lit_reg_instr($2, 0, $3, $5, &$7); }
-	| OP_BRANCH GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr(ALWAYS, 0, $2, $5, &$7); }
-	| OP_BRANCH CC GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr($2, 0, $3, $6, &$8); }
+	| OP_BRANCH GPR ',' GPR ',' expr       { branch_addcmp_lit_reg_instr(ALWAYS, $2, 0, $4, &$6); }
+	| OP_BRANCH CC GPR ',' GPR ',' expr    { branch_addcmp_lit_reg_instr($2, $3, 0, $5, &$7); }
+	| OP_BRANCH GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr(ALWAYS, $2, 0, $5, &$7); }
+	| OP_BRANCH CC GPR ',' '#' absexp ',' expr { branch_addcmp_lit_lit_instr($2, $3, 0, $6, &$8); }
 	| OP_ADDCMPB GPR ',' GPR ',' GPR ',' expr { branch_addcmp_reg_reg_instr(ALWAYS, $2, $4, $6, &$8); }
 	| OP_ADDCMPB CC GPR ',' GPR ',' GPR ',' expr { branch_addcmp_reg_reg_instr($2, $3, $5, $7, &$9); }
 	| OP_ADDCMPB GPR ',' '#' absexp ',' GPR ',' expr { branch_addcmp_lit_reg_instr(ALWAYS, $2, $5, $7, &$9); }
