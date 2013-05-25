@@ -21,12 +21,6 @@ PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 
 #define nicesize(x) ((x)==BYTE || (x)==WORD || (x)==QUAD)
 
-/* #define REGVARS */
-
-#ifndef REGVARS
-#define regvar
-#define return
-#endif
 
 
 PROPERTIES
@@ -49,19 +43,15 @@ REGISTERS
 	R3("r3")           : GPR, REG, GPR3.
 	R4("r4")           : GPR, REG, GPR4.
 	R5("r5")           : GPR, REG, GPR5.
-#if defined REGVARS
-	R6("r6")           : GPR, REG, GPR6, STACKABLE.
-#else
 	R6("r6")           : GPR, GPR6.
-#endif
-	R7("r7")           : GPR, REG, GPR7 regvar.
-	R8("r8")           : GPR, REG, GPR8 regvar.
-	R9("r9")           : GPR, REG, GPR9 regvar.
-	R10("r10")         : GPR, REG, GPR10 regvar.
-	R11("r11")         : GPR, REG, GPR11 regvar.
-	R12("r12")         : GPR, REG, GPR12 regvar.
-	R13("r13")         : GPR, REG, GPR13 regvar.
-	R14("r14")         : GPR, REG, GPR14 regvar.
+	R7("r7")           : GPR, REG, GPR7.
+	R8("r8")           : GPR, REG, GPR8.
+	R9("r9")           : GPR, REG, GPR9.
+	R10("r10")         : GPR, REG, GPR10.
+	R11("r11")         : GPR, REG, GPR11.
+	R12("r12")         : GPR, REG, GPR12.
+	R13("r13")         : GPR, REG, GPR13.
+	R14("r14")         : GPR, REG, GPR14.
 	GP("r15")          : GPR, GPRGP.
 
 	R16("r16")         : GPR, GPR16.
@@ -73,11 +63,7 @@ REGISTERS
 	PC("pc")           : GPR, GPRPC.
 	/* r26 to r31 are special and the code generator doesn't touch them. */
 
-#if defined REGVARS
-	#define SCRATCH R16
-#else
 	#define SCRATCH R6
-#endif
 
 TOKENS
 
@@ -91,10 +77,6 @@ TOKENS
 
 	LABEL              = { ADDR adr; }            4    adr.
 	CONST              = { INT val; }             4    "#" val.
-
-/* Allows us to use regvar() to refer to registers */
-
-	GPRE               = { GPR reg; }             4    reg.
 
 /* Sign extended values. */
 
@@ -114,65 +96,64 @@ TOKENS
 SETS
 
 	TOKEN              = LABEL + CONST.
-	GPRI               = GPR + GPRE.
 	OP                 = TOKEN + SIGNEX8 + SIGNEX16.
-	XREG               = GPRI + SIGNEX8 + SIGNEX16.
+	ANY                = GPR + OP.
 
 
 
 INSTRUCTIONS
 
-	add           XREG:wo, XREG:ro, XREG+CONST:ro.
-	add           XREG:rw, XREG+CONST:ro.
-	adds2         XREG:rw, XREG+CONST:ro.
-	adds4         XREG:rw, XREG+CONST:ro.
-	adds8         XREG:rw, XREG+CONST:ro.
-	adds16        XREG:rw, XREG+CONST:ro.
-	adds256       XREG:rw, XREG:rw, XREG:ro.
-	and           XREG:rw, XREG+CONST:ro.
-	asr           XREG:rw, XREG+CONST:ro.
+	add           GPR:wo, GPR:ro, GPR+CONST:ro.
+	add           GPR:rw, GPR+CONST:ro.
+	adds2         GPR:rw, GPR+CONST:ro.
+	adds4         GPR:rw, GPR+CONST:ro.
+	adds8         GPR:rw, GPR+CONST:ro.
+	adds16        GPR:rw, GPR+CONST:ro.
+	adds256       GPR:rw, GPR:rw, GPR:ro.
+	and           GPR:rw, GPR+CONST:ro.
+	asr           GPR:rw, GPR+CONST:ro.
 	beq "b.eq"    LABEL:ro.
 	bne "b.ne"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
 	bhi "b.hi"    LABEL:ro.
-	bset          XREG:rw, XREG+CONST:ro.
-	b             XREG+LABEL:ro.
-	bl            XREG+LABEL:ro.
-	cmp           XREG:ro, XREG+CONST:ro kills :cc.
-	divs          XREG:wo, XREG:ro, XREG+CONST:ro.
-	divu          XREG:wo, XREG:ro, XREG+CONST:ro.
-	eor           XREG:rw, XREG+CONST:ro.
-	exts          XREG:wo, XREG:ro, XREG+CONST:ro.
-	exts          XREG:rw, XREG+CONST:ro.
-	fadd          XREG:wo, XREG:ro, XREG:ro.
-	fcmp          XREG:wo, XREG:ro, XREG:ro.
-	fdiv          XREG:wo, XREG:ro, XREG:ro.
-	fmul          XREG:wo, XREG:ro, XREG:ro.
-	fsub          XREG:wo, XREG:ro, XREG:ro.
-	ld            XREG:wo, GPRINC:rw.
-	ld            XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldb           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldh           XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	ldhs          XREG:wo, GPROFFSET+GPRGPR+LABEL:ro.
-	lea           XREG:wo, LABEL:ro.
-	lsl           XREG:rw, XREG+CONST:ro.
-	lsl           XREG:wo, XREG:ro, XREG+CONST:ro.
-	lsr           XREG:rw, XREG+CONST:ro.
-	mov           XREG:wo, XREG+CONST:ro.
-	mul           XREG:rw, XREG+CONST:ro.
-	neg           XREG:rw, XREG+CONST:ro.
-	or            XREG:rw, XREG+CONST:ro.
+	bset          GPR:rw, GPR+CONST:ro.
+	b             GPR+LABEL:ro.
+	bl            GPR+LABEL:ro.
+	cmp           GPR:ro, GPR+CONST:ro kills :cc.
+	divs          GPR:wo, GPR:ro, GPR+CONST:ro.
+	divu          GPR:wo, GPR:ro, GPR+CONST:ro.
+	eor           GPR:rw, GPR+CONST:ro.
+	exts          GPR:wo, GPR:ro, GPR+CONST:ro.
+	exts          GPR:rw, GPR+CONST:ro.
+	fadd          GPR:wo, GPR:ro, GPR:ro.
+	fcmp          GPR:wo, GPR:ro, GPR:ro.
+	fdiv          GPR:wo, GPR:ro, GPR:ro.
+	fmul          GPR:wo, GPR:ro, GPR:ro.
+	fsub          GPR:wo, GPR:ro, GPR:ro.
+	ld            GPR:wo, GPRINC:rw.
+	ld            GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldb           GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldh           GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldhs          GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	lea           GPR:wo, LABEL:ro.
+	lsl           GPR:rw, GPR+CONST:ro.
+	lsl           GPR:wo, GPR:ro, GPR+CONST:ro.
+	lsr           GPR:rw, GPR+CONST:ro.
+	mov           GPR:wo, GPR+CONST:ro.
+	mul           GPR:rw, GPR+CONST:ro.
+	neg           GPR:rw, GPR+CONST:ro.
+	or            GPR:rw, GPR+CONST:ro.
 	pop           GPR0+GPR6+GPR16+GPRFP+GPRPC:wo.
 	pop           GPR0+GPR6+GPR16+GPRFP:wo, GPRPC:wo.
 	push          GPR0+GPR6+GPR16+GPRFP+GPRLR:ro.
 	push          GPR0+GPR6+GPR16+GPRFP:ro, GPRLR:ro.
-	sub           XREG:wo, XREG:ro, CONST+XREG:ro.
-	sub           XREG:rw, XREG+CONST:ro.
-	st            XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	stb           XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	sth           XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
-	sths          XREG:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sub           GPR:wo, GPR:ro, CONST+GPR:ro.
+	sub           GPR:rw, GPR+CONST:ro.
+	st            GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	stb           GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sth           GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sths          GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
 
 	invalid "invalid".
 	comment "!" LABEL:ro.
@@ -184,13 +165,6 @@ MOVES
 	from GPR to GPR
 		gen
 			COMMENT("mov GPR->GPR")
-			mov %2, %1
-
-/* GPRE exists solely to allow us to use regvar() (which can only be used in
-   an expression) as a register constant. */
-   
-	from GPRE to GPR
-		gen
 			mov %2, %1
 
 /* Constants */
@@ -216,9 +190,9 @@ MOVES
 
 /* Miscellaneous */
 
-	from CONST+LABEL+GPR+GPRE to GPRE
+	from CONST+LABEL+GPR to GPR
 		gen
-			move %1, %2.reg
+			move %1, %2
 
 
 TESTS
@@ -236,7 +210,7 @@ STACKINGRULES
 			comment {LABEL, "push stackable"}
 		    push %1
 
-	from OP+GPRI to STACK
+	from OP+GPR to STACK
 		uses GPR0
 		gen
 			move %1, %a
@@ -248,7 +222,7 @@ STACKINGRULES
 			move %1, %a
 			push %a
 
-	from OP+GPRI to STACK
+	from OP+GPR to STACK
 		gen
 			comment {LABEL, "push via scratch"}
 			move %1, SCRATCH
@@ -259,19 +233,6 @@ STACKINGRULES
 		
 COERCIONS
 
-	from GPRI
-		uses reusing %1, REG=%1
-		yields %a
-
-	from GPR
-		yields {GPRE, %1}
-
-	from OP
-		uses GPR0
-		gen
-			move %1, %a
-		yields %a
-		
 	from OP
 		uses REG
 		gen
@@ -281,8 +242,8 @@ COERCIONS
 	from STACK
 		uses REG
 		gen
-			pop R0
-			move R0, %a
+			pop SCRATCH
+			move SCRATCH, %a
 		yields %a
 
 
@@ -295,15 +256,15 @@ PATTERNS
 		yields {CONST, $1}
 
 	pat dup $1<=QUAD                  /* Duplicate word on top of stack */
-		with GPRI
+		with ANY
 			yields %1 %1
 
 	pat dup $1<=(2*QUAD)              /* Duplicate word pair on top of stack */
-		with GPRI GPRI
+		with ANY ANY
 			yields %1 %2 %1 %2
 
 	pat exg $1==QUAD                  /* Exchange top two words on stack */
-		with GPRI GPRI
+		with ANY ANY
 			yields %1 %2
 
 	pat stl lol $1==$2                 /* Store then load local */
@@ -362,8 +323,6 @@ PATTERNS
 	pat loc loc cii $1==BYTE && $2>BYTE /* signed char -> anything */
 		with GPR
 			yields {SIGNEX8, %1}
-		with GPRE
-			yields {SIGNEX8, %1.reg}
 		with SIGNEX8
 			yields {SIGNEX8, %1.reg}
 		with SIGNEX16
@@ -372,8 +331,6 @@ PATTERNS
 	pat loc loc cii $1==WORD && $2>WORD /* signed short -> anything */
 		with GPR
 			yields {SIGNEX16, %1}
-		with GPRE
-			yields {SIGNEX16, %1.reg}
 		with SIGNEX8
 			yields {SIGNEX16, %1.reg}
 		with SIGNEX16
@@ -390,11 +347,6 @@ PATTERNS
 			add %a, {CONST, $1}
 		yields %a
 
-#if defined REGVARS
-	pat lol inreg($1)>0                /* Load from local */
-		yields {GPRE, regvar($1)}
-#endif
-
 	pat lol                            /* Load quad from local */
 		uses REG
 		gen
@@ -406,16 +358,8 @@ PATTERNS
 			lol $1 + QUAD*1
 			lol $1 + QUAD*0
 
-#if defined REGVARS
-	pat stl inreg($1)>0                /* Store to local */
-		with CONST+GPRI
-			kills regvar($1)
-			gen
-				move %1, {GPRE, regvar($1)}
-#endif
-
 	pat stl                            /* Store to local */
-		with GPRI
+		with GPR
 			gen
 				st %1, {GPROFFSET, FP, $1}
 
@@ -424,14 +368,6 @@ PATTERNS
 			stl $1 + QUAD*0
 			stl $1 + QUAD*1
 
-#if defined REGVARS
-	pat lil inreg($1)>0                /* Load from indirected local */
-		uses REG
-		gen
-			ld %a, {GPROFFSET, regvar($1), 0}
-		yields %a
-#endif
-		
 	pat lil                            /* Load from indirected local */
 		leaving
 			lol $1
@@ -452,31 +388,6 @@ PATTERNS
 			loc 0
 			stl $1
 
-#if defined REGVARS
-	pat inl inreg($1)>0                /* Increment local in register */
-		kills regvar($1)
-		gen
-			add {GPRE, regvar($1)}, {CONST, 1}
-
-	pat inl inreg($1)<=0               /* Increment local */
-		leaving
-			lol $1
-			loc 1
-			adi QUAD
-			stl $1
-
-	pat del inreg($1)>0                /* Decrement local in register */
-		kills regvar($1)
-		gen
-			sub {GPRE, regvar($1)}, {CONST, 1}
-			
-	pat del inreg($1)<=0               /* Decrement local */
-		leaving
-			lol $1
-			loc 1
-			sbi QUAD
-			stl $1
-#else
 	pat inl                            /* Increment local in register */
 		leaving
 			lol $1
@@ -490,7 +401,7 @@ PATTERNS
 			loc 1
 			sbi QUAD
 			stl $1
-#endif
+
 
 
 /* Global variables */
@@ -552,7 +463,7 @@ PATTERNS
 			loi QUAD
 
 	pat ldf                            /* Load double offsetted */
-		with GPRI
+		with GPR
 			uses reusing %1, REG=%1, REG
 			gen
 				add %a, GP
@@ -566,7 +477,7 @@ PATTERNS
 			sti QUAD
 
 	pat sdf                            /* Store double offsetted */
-		with GPRI GPRI GPRI
+		with GPR GPR GPR
 			uses reusing %3, REG=%3
 			gen
 				add %a, GP
@@ -589,11 +500,6 @@ PATTERNS
 			gen
 				ldb %a, {GPRGPR, %1, GP}
 			yields %a
-		with GPRE
-			uses reusing %1.reg, REG
-			gen
-				ldb %a, {GPRGPR, %1.reg, GP}
-			yields %a
 
 	pat loi loc loc cii $1==WORD && $2==WORD && $3==QUAD /* Load short indirect and sign extend */
 		with LABEL
@@ -601,7 +507,7 @@ PATTERNS
 			gen
 				ldhs %a, %1
 			yields %a
-		with GPRI
+		with GPR
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
@@ -614,7 +520,7 @@ PATTERNS
 			gen
 				ldh %a, %1
 			yields %a
-		with GPRI
+		with GPR
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
@@ -627,7 +533,7 @@ PATTERNS
 			gen
 				ld %a, %1
 			yields %a
-		with GPRI
+		with GPR
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
@@ -642,7 +548,7 @@ PATTERNS
 				ld %a, {GPROFFSET, %b, 0}
 				ld %b, {GPROFFSET, %b, 4}
 			yields %b %a
-		with GPRI
+		with GPR
 			uses reusing %1, REG, REG
 			gen
 				add %b, %1, GP
@@ -660,44 +566,55 @@ PATTERNS
 			cal ".los"
 				
 	pat sti $1==BYTE                   /* Store byte indirect */
-		with LABEL GPRI+SIGNEX8+SIGNEX16
+		with LABEL GPR
 			gen
 				stb %2, %1
-		with GPR GPRI+SIGNEX8+SIGNEX16
+		with LABEL SIGNEX8+SIGNEX16
+			gen
+				stb %2.reg, %1
+		with GPR GPR
 			gen
 				stb %2, {GPRGPR, %1, GP}
-		with GPRE GPRI+SIGNEX8+SIGNEX16
+		with GPR SIGNEX8+SIGNEX16
 			gen
-				stb %2, {GPRGPR, %1.reg, GP}
+				stb %2.reg, {GPRGPR, %1, GP}
 
 	pat sti $1==WORD                  /* Store half-word indirect */
-		with LABEL GPRI+SIGNEX16
+		with LABEL GPR
 			gen
 				sth %2, %1
-		with GPRI GPRI+SIGNEX16
+		with LABEL SIGNEX16
+			gen
+				sth %2.reg, %1
+		with GPR GPR
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
 				sth %2, {GPROFFSET, %a, 0}
+		with GPR SIGNEX16
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				sth %2.reg, {GPROFFSET, %a, 0}
 
 	pat sti $1==QUAD                  /* Store quad indirect */
-		with LABEL GPRI
+		with LABEL GPR
 			gen
 				st %2, %1
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %1, REG
 			gen
 				add %a, %1, GP
 				st %2, {GPROFFSET, %a, 0}
 
 	pat sti $1==2*QUAD                 /* Load double-quad indirect */
-		with LABEL GPRI GPRI
+		with LABEL GPR GPR
 			uses REG
 			gen
 				lea %a, %1
 				st %2, {GPROFFSET, %a, 0}
 				st %3, {GPROFFSET, %a, 4}
-		with GPRI GPRI GPRI
+		with GPR GPR GPR
 			uses reusing %1, REG=%1
 			gen
 				add %a, GP
@@ -774,12 +691,12 @@ PATTERNS
 		/* nop */
 
 	pat adi $1==QUAD                  /* Add word (second + top) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				add %a, %1
 			yields %a
-		with GPRI GPRI+CONST
+		with GPR GPR+CONST
 			uses reusing %1, REG=%1
 			gen
 				add %a, %2
@@ -789,19 +706,19 @@ PATTERNS
 		/* nop */
 
 	pat sbi $1==QUAD                  /* Subtract word (second - top) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				sub %a, %1
 			yields %a
 
 	pat mli $1==QUAD                  /* Multiply word (second * top) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				mul %a, %1
 			yields %a
-		with GPRI GPRI+CONST
+		with GPR GPR+CONST
 			uses reusing %1, REG=%1
 			gen
 				mul %a, %2
@@ -812,21 +729,21 @@ PATTERNS
 			mli $1
 
 	pat dvi $1==QUAD                  /* Divide word (second / top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %2, REG
 			gen
 				divs %a, %2, %1
 			yields %a
 
 	pat dvu $1==QUAD                  /* Divide unsigned word (second / top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %2, REG
 			gen
 				divu %a, %2, %1
 			yields %a
 
 	pat rmu $1==QUAD                  /* Remainder unsigned word (second % top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses REG
 			gen
 				divu %a, %2, %1
@@ -835,7 +752,7 @@ PATTERNS
 			yields %a
 
 	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses REG
 			gen
 				divs %a, %2, %1
@@ -844,64 +761,64 @@ PATTERNS
 			yields %a
 
 	pat ngi $1==QUAD                  /* Negate word */
-		with GPRI
+		with GPR
 			uses reusing %1, REG=%1
 			gen
 				neg %a, %a
 			yields %a
 
 	pat and $1==QUAD                  /* AND word */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				and %a, %1
 			yields %a
-		with GPRI GPRI+CONST
+		with GPR GPR+CONST
 			uses reusing %1, REG=%1
 			gen
 				and %a, %2
 			yields %a
 
 	pat ior $1==QUAD                  /* OR word */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				or %a, %1
 			yields %a
-		with GPRI GPRI+CONST
+		with GPR GPR+CONST
 			uses reusing %1, REG=%1
 			gen
 				or %a, %2
 			yields %a
 
 	pat xor $1==QUAD                  /* XOR word */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				eor %a, %1
 			yields %a
-		with GPRI GPRI+CONST
+		with GPR GPR+CONST
 			uses reusing %1, REG=%1
 			gen
 				eor %a, %2
 			yields %a
 
 	pat dvi $1==QUAD                  /* Divide word (second / top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %2, REG
 			gen
 				divs %a, %2, %1
 			yields %a
 
 	pat dvu $1==QUAD                  /* Divide unsigned word (second / top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %2, REG
 			gen
 				divu %a, %2, %1
 			yields %a
 
 	pat rmu $1==QUAD                  /* Remainder unsigned word (second % top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses REG
 			gen
 				divu %a, %2, %1
@@ -910,7 +827,7 @@ PATTERNS
 			yields %a
 
 	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
-		with GPRI GPRI
+		with GPR GPR
 			uses REG
 			gen
 				divs %a, %2, %1
@@ -966,21 +883,21 @@ PATTERNS
 #endif
 				
 	pat sli $1==4                      /* Shift left (second << top) */
-		with CONST+GPRI GPRI
+		with CONST+GPR GPR
 			uses reusing %2, REG=%2
 			gen
             	lsl %a, %1
 			yields %a
 
 	pat sri $1==4                      /* Shift right signed (second >> top) */
-		with CONST+GPRI GPRI
+		with CONST+GPR GPR
 			uses reusing %2, REG=%2
 			gen
 				asr %2, %1
 			yields %a
 
 	pat sru $1==4                      /* Shift right unsigned (second >> top) */
-		with CONST+GPRI GPRI
+		with CONST+GPR GPR
 			uses reusing %2, REG=%2
 			gen
 				lsr %2, %1
@@ -991,35 +908,35 @@ PATTERNS
 /* Special arithmetic */
 
 	pat loc sli adi $1==1 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<1) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				adds2 %a, %1
 			yields %a
 
 	pat loc sli adi $1==2 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<2) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				adds4 %a, %1
 			yields %a
 
 	pat loc sli adi $1==3 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<3) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				adds8 %a, %1
 			yields %a
 
 	pat loc sli adi $1==4 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<4) */
-		with GPRI+CONST GPRI
+		with GPR+CONST GPR
 			uses reusing %2, REG=%2
 			gen
 				adds16 %a, %1
 			yields %a
 
 	pat loc sli adi $1==8 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<8) */
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %2, REG
 			gen
 				adds256 %a, %2, %1
@@ -1087,7 +1004,7 @@ PATTERNS
 /* Sets */
 
 	pat set $1==QUAD                   /* Create quad with one bit set */
-		with GPRI
+		with GPR
 			uses reusing %1, REG
 			gen
 				bset %a, %1
@@ -1133,7 +1050,7 @@ PATTERNS
 /* Boolean resolutions */
 
 	proc cm_t example teq
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %1, REG
 			gen
 				cmp %1, %2
@@ -1155,7 +1072,7 @@ PATTERNS
 	pat cmi tge call cm_t("add.ge")        /* top = signed (second >= top) */
 
 	proc cmf_t example teq
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %1, REG
 			gen
 				fcmp %a, %1, %2
@@ -1171,7 +1088,7 @@ PATTERNS
 	pat cmf tge call cmf_t("add.hs")        /* top = float (second >= top) */
 
 	proc fallback_t example teq
-		with GPRI
+		with GPR
 			uses reusing %1, REG
 			gen
 				cmp %1, {CONST, 0}
@@ -1191,7 +1108,7 @@ PATTERNS
 /* Simple branches */
 
 	proc anyz example zeq
-		with GPRI STACK
+		with GPR STACK
 			gen
 				cmp %1, {CONST, 0}
 				beq[1] {LABEL, $1}
@@ -1204,7 +1121,7 @@ PATTERNS
 	pat zle call anyz("b.le")          /* Branch if signed top <= 0 */
 
 	proc anyb example beq
-		with GPRI+CONST GPRI STACK
+		with GPR+CONST GPR STACK
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $1}
@@ -1217,7 +1134,7 @@ PATTERNS
 	pat ble call anyb("b.le")          /* Branch if signed second <= top */
 
 	proc cmu_z example cmu zeq
-		with GPRI+CONST GPRI STACK
+		with GPR+CONST GPR STACK
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $2}
@@ -1236,7 +1153,7 @@ PATTERNS
 	pat cmi zle call cmu_z("b.le")   /* Branch if signed second <= top */
 
 	proc cmf_z example cmu zeq
-		with GPRI GPRI STACK
+		with GPR GPR STACK
 			gen
 				fcmp %2, %2, %1
 				beq[1] {LABEL, $2}
@@ -1327,23 +1244,20 @@ PATTERNS
 		
 	pat ret $1==0                      /* Return from procedure */
 		gen
-			return
 			mov SP, FP
 			pop FP, PC
 
 	pat ret $1==QUAD                  /* Return from procedure, word */
 		with GPR0
 			gen
-				return
 				mov SP, FP
 				pop FP, PC
 
 	pat ret $1==QUAD*2                /* Return from procedure, word */
-		with GPRI GPRI
+		with GPR GPR
 			gen
 				move %1, R0
 				move %2, R1
-				return
 				mov SP, FP
 				pop FP, PC
 
@@ -1480,12 +1394,12 @@ PATTERNS
 			loe ".reghp"
 			
 	pat str $1==0                      /* Store FP */
-		with GPRI
+		with GPR
 			gen
 				sub FP, %1, GP
 
 	pat str $1==1                      /* Store SP */
-		with GPRI
+		with GPR
 			gen
 				sub SP, %1, GP
 
@@ -1494,7 +1408,7 @@ PATTERNS
 			ste ".reghp"
 
 	pat ass                            /* Adjust stack by variable amount */
-		with CONST+GPRI
+		with CONST+GPR
 		gen
 			add SP, %1
 
@@ -1518,7 +1432,7 @@ PATTERNS
 			sbf QUAD
 
 	proc simple_f example adf
-		with GPRI GPRI
+		with GPR GPR
 			uses reusing %1, REG
 			gen
 				fadd[1] %a, %2, %1
