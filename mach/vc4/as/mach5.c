@@ -383,7 +383,7 @@ static void branch_addcmp_common(quad opcode, int bits, struct expr_t* expr)
 	quad type = expr->typ & S_TYP;
 	int d;
 
-	if (type != DOTTYP)
+	if ((pass>0) && (type != DOTTYP))
 		serror("can't use this type of branch to jump outside the section");
 
 	/* The VC4 branch instructions express distance in 2-byte
