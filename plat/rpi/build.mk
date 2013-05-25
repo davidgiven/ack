@@ -29,16 +29,11 @@ platform-libsys := \
 	write.c \
 	isatty.c \
 	brk.c \
-
-ifeq (x,y)
-	_sys_rawread.s \
-	_sys_rawwrite.s \
 	getpid.c \
 	kill.c \
 	lseek.c \
 	time.c \
 	signal.c
-endif
 
 $(eval $(call build-platform))
 
