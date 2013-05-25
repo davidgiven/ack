@@ -18,23 +18,23 @@ platform-headers := \
 
 platform-libsys := \
 	_hol0.s \
+	errno.s \
 	phys_to_user.s \
 	user_to_phys.s \
 	uart.s \
-	write.c \
-
-ifeq (x,y)
-	errno.s \
-	_sys_rawread.s \
-	_sys_rawwrite.s \
-	open.c \
 	creat.c \
 	close.c \
+	open.c \
 	read.c \
+	write.c \
+	isatty.c \
 	brk.c \
+
+ifeq (x,y)
+	_sys_rawread.s \
+	_sys_rawwrite.s \
 	getpid.c \
 	kill.c \
-	isatty.c \
 	lseek.c \
 	time.c \
 	signal.c
