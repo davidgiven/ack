@@ -19,9 +19,9 @@ platform-headers := \
 platform-libsys := \
 	_hol0.s \
 	errno.s \
-	phys_to_user.s \
-	user_to_phys.s \
-	uart.s \
+	pi_phys_to_user.s \
+	pi_user_to_phys.s \
+	pi_uart.s \
 	creat.c \
 	close.c \
 	open.c \

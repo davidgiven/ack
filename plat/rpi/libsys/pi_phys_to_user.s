@@ -12,8 +12,8 @@
 
 ! Transforms a physical address into a user address.
 
-.define _phys_to_user
-_phys_to_user:
+.define _pi_phys_to_user
+_pi_phys_to_user:
 	ld r0, 0 (sp)
 	sub r0, gp
 	b lr

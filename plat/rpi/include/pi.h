@@ -9,13 +9,13 @@
 #define PI_H
 
 /* Initialise the mini UART (only do this if running on bare metal! */
-extern void init_uart(void);
+extern void pi_init_uart(void);
 
 /* Converts a pointer from a physical address to a user address. */
-extern void* phys_to_user(void* ptr);
+extern void* pi_phys_to_user(void* ptr);
 
 /* Converts a pointer from a user address to a physical address. */
-extern void* user_to_phys(void* ptr);
+extern void* pi_user_to_phys(void* ptr);
 
 #endif
 

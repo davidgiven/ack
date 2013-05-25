@@ -38,8 +38,8 @@ AUX_MU_BAUD_REG = 0x7e215068
 
 ! Sets up the mini UART for use as a console.
 
-.define _init_uart
-_init_uart:
+.define _pi_init_uart
+_pi_init_uart:
 	! Configure TX and RX GPIO pins for Mini Uart function.
 	mov	r1, #GPFSEL1
 	ld	r0, (r1)
