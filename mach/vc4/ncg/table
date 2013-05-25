@@ -21,12 +21,19 @@ PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 
 #define nicesize(x) ((x)==BYTE || (x)==WORD || (x)==QUAD)
 
+/* #define REGVARS */
+
+#ifndef REGVARS
+#define regvar
+#define return
+#endif
 
 
 PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
+	STACKABLE       /* a register than can be used with push/pop */
 
 	GPR0  GPR1  GPR2  GPR3  GPR4  GPR5  GPR6  GPR7
 	GPR8  GPR9  GPR10 GPR11 GPR12 GPR13 GPR14 GPR15
@@ -36,13 +43,17 @@ PROPERTIES
 
 REGISTERS
 
-	R0("r0")           : GPR, REG, GPR0.
+	R0("r0")           : GPR, REG, GPR0, STACKABLE.
 	R1("r1")           : GPR, REG, GPR1.
 	R2("r2")           : GPR, REG, GPR2.
 	R3("r3")           : GPR, REG, GPR3.
 	R4("r4")           : GPR, REG, GPR4.
 	R5("r5")           : GPR, REG, GPR5.
-	R6("r6")           : GPR, REG, GPR6 regvar.
+#if defined REGVARS
+	R6("r6")           : GPR, REG, GPR6, STACKABLE.
+#else
+	R6("r6")           : GPR, GPR6.
+#endif
 	R7("r7")           : GPR, REG, GPR7 regvar.
 	R8("r8")           : GPR, REG, GPR8 regvar.
 	R9("r9")           : GPR, REG, GPR9 regvar.
@@ -62,7 +73,11 @@ REGISTERS
 	PC("pc")           : GPR, GPRPC.
 	/* r26 to r31 are special and the code generator doesn't touch them. */
 
-#define SCRATCH R16
+#if defined REGVARS
+	#define SCRATCH R16
+#else
+	#define SCRATCH R6
+#endif
 
 TOKENS
 
@@ -227,6 +242,12 @@ STACKINGRULES
 			move %1, %a
 			push %a
 
+	from OP to STACK
+		uses STACKABLE
+		gen
+			move %1, %a
+			push %a
+
 	from OP+GPRI to STACK
 		gen
 			comment {LABEL, "push via scratch"}
@@ -369,8 +390,10 @@ PATTERNS
 			add %a, {CONST, $1}
 		yields %a
 
+#if defined REGVARS
 	pat lol inreg($1)>0                /* Load from local */
 		yields {GPRE, regvar($1)}
+#endif
 
 	pat lol                            /* Load quad from local */
 		uses REG
@@ -383,11 +406,13 @@ PATTERNS
 			lol $1 + QUAD*1
 			lol $1 + QUAD*0
 
+#if defined REGVARS
 	pat stl inreg($1)>0                /* Store to local */
 		with CONST+GPRI
 			kills regvar($1)
 			gen
 				move %1, {GPRE, regvar($1)}
+#endif
 
 	pat stl                            /* Store to local */
 		with GPRI
@@ -398,12 +423,14 @@ PATTERNS
 		leaving
 			stl $1 + QUAD*0
 			stl $1 + QUAD*1
-			
+
+#if defined REGVARS
 	pat lil inreg($1)>0                /* Load from indirected local */
 		uses REG
 		gen
 			ld %a, {GPROFFSET, regvar($1), 0}
 		yields %a
+#endif
 		
 	pat lil                            /* Load from indirected local */
 		leaving
@@ -424,19 +451,20 @@ PATTERNS
 		leaving
 			loc 0
 			stl $1
-	
+
+#if defined REGVARS
 	pat inl inreg($1)>0                /* Increment local in register */
 		kills regvar($1)
 		gen
 			add {GPRE, regvar($1)}, {CONST, 1}
-			
+
 	pat inl inreg($1)<=0               /* Increment local */
 		leaving
 			lol $1
 			loc 1
 			adi QUAD
 			stl $1
-					
+
 	pat del inreg($1)>0                /* Decrement local in register */
 		kills regvar($1)
 		gen
@@ -448,6 +476,21 @@ PATTERNS
 			loc 1
 			sbi QUAD
 			stl $1
+#else
+	pat inl                            /* Increment local in register */
+		leaving
+			lol $1
+			loc 1
+			adi QUAD
+			stl $1
+
+	pat del                            /* Decrement local in register */
+		leaving
+			lol $1
+			loc 1
+			sbi QUAD
+			stl $1
+#endif
 
 
 /* Global variables */
@@ -1288,7 +1331,7 @@ PATTERNS
 			mov SP, FP
 			pop FP, PC
 
-	pat ret $1<=QUAD                  /* Return from procedure, word */
+	pat ret $1==QUAD                  /* Return from procedure, word */
 		with GPR0
 			gen
 				return
@@ -1316,10 +1359,10 @@ PATTERNS
 				bl {LABEL, "_memmove"}
 
 	pat csa                            /* Array-lookup switch */
-		with STACK
+		with GPR0 GPR1 STACK
 			gen
-				bl {LABEL, ".csa"}
-				
+				b {LABEL, ".csa"}
+
 	pat csb                            /* Table-lookup switch */
 		with STACK
 			gen
@@ -1454,6 +1497,10 @@ PATTERNS
 		with CONST+GPRI
 		gen
 			add SP, %1
+
+	pat asp $1==QUAD                   /* Adjust stack by constant amount */
+		gen
+			pop SCRATCH
 
 	pat asp                            /* Adjust stack by constant amount */
 		leaving

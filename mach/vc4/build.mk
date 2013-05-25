@@ -1,5 +1,5 @@
 arch-libem-vc4 := \
-	dummy.s
+	csa.s
 
 arch-libend-vc4 = \
 	edata.s \
