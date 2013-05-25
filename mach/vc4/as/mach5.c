@@ -34,12 +34,12 @@ void alu_instr_reg(quad op, int cc, int rd, int ra, int rb)
 
 /* Assemble an ALU instruction where rb is a literal. */
 
-void alu_instr_lit(quad op, int cc, int rd, int ra, quad value)
+void alu_instr_lit(quad op, int cc, int rd, int ra, long value)
 {
 	/* 16 bit short form? */
 
-	if ((cc == ALWAYS) && !(op & 1) && (value <= 0x1f) && (ra == rd) &&
-		(ra < 0x10))
+	if ((cc == ALWAYS) && !(op & 1) && (value >= 0) && (value <= 0x1f) &&
+	    (ra == rd) && (ra < 0x10))
 	{
 		emit2(B16(01100000,00000000) | (op<<8) | (value<<4) | (rd<<0));
 		return;
@@ -47,7 +47,7 @@ void alu_instr_lit(quad op, int cc, int rd, int ra, quad value)
 
 	/* 32 bit medium form? */
 
-    if (value <= 0x1f)
+    if ((value >= 0) && (value <= 0x1f))
     {
         emit2(B16(11000000,00000000) | (op<<5) | (rd<<0));
         emit2(B16(00000000,01000000) | (ra<<11) | (cc<<7) | (value<<0));
@@ -99,6 +99,7 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 {
 	quad pc = DOTVAL;
 	quad type = expr->typ & S_TYP;
+	int d;
 
 	/* Sanity checking. */
 
@@ -107,71 +108,52 @@ void branch_instr(int bl, int cc, struct expr_t* expr)
 	if (type == S_ABS)
 		serror("can't use absolute addresses here");
 
-	switch (pass)
+	/* The VC4 branch instructions express distance in 2-byte
+	 * words. */
+
+	d = (int32_t)expr->val - (int32_t)pc;
+	if ((pass == 2) && (d > 0) && !(expr->typ & S_DOT))
+        d -= DOTGAIN;
+	d /= 2;
+
+    /* If this is a reference to code within this section, and it's
+     * close enough to the program counter, we can use a short-
+     * form instruction. */
+
+    if (small(!bl && (type == DOTTYP) && fitx(d, 7), 2))
+    {
+		emit2(B16(00011000,00000000) | (cc<<7) | (d&0x7f));
+		return;
+	}
+
+	/* Absolute addresses and references to other sections
+	 * need the full 32 bits. */
+
+	newrelo(expr->typ, RELOVC4|RELPC);
+
+	if (bl)
 	{
-		case 0:
-			/* Calculate size of instructions only. For now we just assume
-			 * that they're going to be the maximum size, 32 bits. */
+		quad v, hiv, lov;
 
-			emit4(0);
-			break;
+		if (!fitx(d, 27))
+			toobig();
 
-		case 1:
-		case 2:
-		{
-			/* The VC4 branch instructions express distance in 2-byte
-			 * words. */
+		v = maskx(d, 27);
+		hiv = v >> 23;
+		lov = v & 0x007fffff;
+		emit2(B16(10010000,10000000) | (lov>>16) | (hiv<<8));
+		emit2(B16(00000000,00000000) | (lov&0xffff));
+	}
+	else
+	{
+		quad v;
 
-			int d = ((int32_t)expr->val - (int32_t)pc) / 2;
+		if (!fitx(d, 23))
+			toobig();
 
-        	/* We now know the worst case for the instruction layout. At
-        	 * this point we can emit the instructions, which may shrink
-        	 * the code. */
-
-			if (!bl && (type == DOTTYP))
-			{
-        	    /* This is a reference to code within this section. If it's
-        	     * close enough to the program counter, we can use a short-
-        	     * form instruction. */
-
-        	    if (fitx(d, 7))
-        	    {
-					emit2(B16(00011000,00000000) | (cc<<7) | (d&0x7f));
-					break;
-				}
-			}
-
-			/* Absolute addresses and references to other sections
-			 * need the full 32 bits. */
-
-			newrelo(expr->typ, RELOVC4|RELPC);
-
-			if (bl)
-			{
-				quad v, hiv, lov;
-
-				if (!fitx(d, 27))
-					toobig();
-
-				v = maskx(d, 27);
-				hiv = v >> 23;
-				lov = v & 0x007fffff;
-				emit2(B16(10010000,10000000) | (lov>>16) | (hiv<<8));
-				emit2(B16(00000000,00000000) | (lov&0xffff));
-			}
-			else
-			{
-				quad v;
-
-				if (!fitx(d, 23))
-					toobig();
-
-				v = maskx(d, 23);
-				emit2(B16(10010000,00000000) | (cc<<8) | (v>>16));
-				emit2(B16(00000000,00000000) | (v&0xffff));
-			}
-			break;
-        }
+		v = maskx(d, 23);
+		emit2(B16(10010000,00000000) | (cc<<8) | (v>>16));
+		emit2(B16(00000000,00000000) | (v&0xffff));
 	}
 }
 
@@ -352,66 +334,45 @@ void mem_postincr_instr(quad opcode, int cc, int rd, int rs)
 
 void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 {
-	static const char sizes[] = {4, 2, 1, 2};
+	static const char sizes[] = {4, 4, 2, 2, 1, 1, 2, 2};
 	int size = sizes[opcode];
 	quad type = expr->typ & S_TYP;
+	int d, scaledd;
 
 	/* Sanity checking. */
 
 	if (type == S_ABS)
 		serror("can't use absolute addresses here");
 
-	switch (pass)
+	d = expr->val - DOTVAL;
+	if ((pass == 2) && (d > 0) && !(expr->typ & S_DOT))
+        d -= DOTGAIN;
+    scaledd = d/size;
+
+    /* If this is a reference to an address within this section, and
+     * it's close enough to the program counter, we can use a
+     * shorter instruction. */
+
+	if (small((type==DOTTYP) && fitx(scaledd, 16), 2))
 	{
-		case 0:
-			/* Calculate size of instructions only. For now we just assume
-			 * that they're going to be the maximum size, 48 bits. */
+        emit2(B16(10101010,00000000) | (opcode<<5) | (rd<<0));
+        emit2(scaledd);
+        return;
+    }
 
-			emit2(0);
-			emit4(0);
-			break;
+	/* Otherwise we need the full 48 bits. */
 
-		case 1:
-		case 2:
-		{
-			int d = expr->val - DOTVAL;
+	newrelo(expr->typ, RELOVC4|RELPC);
 
-        	/* We now know the worst case for the instruction layout. At
-        	 * this point we can emit the instructions, which may shrink
-        	 * the code. */
+	/* VC4 relocations store the PC-relative delta into the
+	 * destination section in the instruction data. The linker will
+	 * massage this, and scale it appropriately. */
 
-			if (type == DOTTYP)
-			{
-				int scaledd = d/size;
+    if (!fitx(d, 27))
+		toobig();
 
-        	    /* This is a reference to an address within this section. If
-        	     * it's close enough to the program counter, we can use a
-        	     * shorter instruction. */
-
-				if (fitx(scaledd, 16))
-				{
-                    emit2(B16(10101010,00000000) | (opcode<<5) | (rd<<0));
-                    emit2(scaledd);
-                    return;
-                }
-			}
-
-			/* Otherwise we need the full 48 bits. */
-
-			newrelo(expr->typ, RELOVC4|RELPC);
-
-			/* VC4 relocations store the PC-relative delta into the
-			 * destination section in the instruction data. The linker will
-			 * massage this, and scale it appropriately. */
-
-            if (!fitx(d, 27))
-				toobig();
-
-            emit2(B16(11100111,00000000) | (opcode<<5) | (rd<<0));
-            emit4((31<<27) | maskx(d, 27));
-			break;
-        }
-	}
+    emit2(B16(11100111,00000000) | (opcode<<5) | (rd<<0));
+    emit4((31<<27) | maskx(d, 27));
 }
 
 /* Common code for handling addcmp: merge in as much of expr as will fit to
@@ -420,33 +381,23 @@ void mem_address_instr(quad opcode, int rd, struct expr_t* expr)
 static void branch_addcmp_common(quad opcode, int bits, struct expr_t* expr)
 {
 	quad type = expr->typ & S_TYP;
+	int d;
 
-	switch (pass)
-	{
-		case 0:
-			/* Calculate size of instructions only. */
+	if (type != DOTTYP)
+		serror("can't use this type of branch to jump outside the section");
 
-			emit2(0);
-			break;
+	/* The VC4 branch instructions express distance in 2-byte
+	 * words. */
 
-		case 1:
-		case 2:
-		{
-			if (type != DOTTYP)
-				serror("can't use this type of branch to jump outside the section");
+	d = (expr->val - DOTVAL-2 + 4);
+	if ((pass == 2) && (d > 0) && !(expr->typ & S_DOT))
+        d -= DOTGAIN;
+    d /= 2;
 
-			/* The VC4 branch instructions express distance in 2-byte
-			 * words. */
+	if (!fitx(d, bits))
+		serror("target of branch is too far away");
 
-			int d = (expr->val - DOTVAL-2 + 4) / 2;
-
-			if (!fitx(d, bits))
-				serror("target of branch is too far away");
-
-			emit2(opcode | maskx(d, bits));
-			break;
-        }
-	}
+	emit2(opcode | maskx(d, bits));
 }
 
 void branch_addcmp_reg_reg_instr(int cc, int rd, int ra, int rs, struct expr_t* expr)
@@ -518,6 +469,10 @@ void lea_address_instr(int rd, struct expr_t* expr)
 {
 	quad pc = DOTVAL;
 	quad type = expr->typ & S_TYP;
+	int d = expr->val - pc;
+
+	if ((pass == 2) && (d > 0) && !(expr->typ & S_DOT))
+	    d -= DOTGAIN;
 
 	if (type == S_ABS)
 		serror("can't use absolute addresses here");

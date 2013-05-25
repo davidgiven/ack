@@ -10,7 +10,7 @@
 #define ALWAYS 14
 
 extern void alu_instr_reg(quad opcode, int cc, int rd, int ra, int rb);
-extern void alu_instr_lit(quad opcode, int cc, int rd, int ra, quad value);
+extern void alu_instr_lit(quad opcode, int cc, int rd, int ra, long value);
 extern void misc_instr_reg(quad opcode, int cc, int rd, int ra, int rb);
 extern void misc_instr_lit(quad opcode, int cc, int rd, int ra, quad value);
 extern void branch_instr(int bl, int cc, struct expr_t* expr);
