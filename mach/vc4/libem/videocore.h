@@ -13,3 +13,5 @@
 .sect .data
 .sect .bss
 
+#define gp r15
+
