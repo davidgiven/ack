@@ -113,12 +113,19 @@ delay2:
 	mov	r0, #3
 	st	r0, (r1)
 
+	! Mark the uart as being initialised.
+	mov r0, #1
+	stb r0, __uart_status
+
 	b lr
 
 ! Send a single byte.
 
 .define __sys_rawwrite
 __sys_rawwrite:
+	ldb r0, __uart_status
+	b.eq r0, #0, 1f
+
 	ld r0, (sp)
 	mov r1, #AUX_MU_LSR_REG
 	! loop until space available in Tx buffer
@@ -131,5 +138,27 @@ sendwait:
 	mov	r1, #AUX_MU_IO_REG
 	stb	r0, (r1)
 
+1:
 	b lr
 
+! Receive a single byte.
+
+.define __sys_rawread
+__sys_rawread:
+	ldb r0, __uart_status
+	b.eq r0, #0, 1b
+
+	! receive 1 byte (returned in r0)
+	mov	r1, #AUX_MU_LSR_REG
+	mov	r2, #AUX_MU_IO_REG
+	! loop until char available
+recvwait:
+	ld r3, (r1)
+	and	r3, #0x1
+	b.ne r3, #0x1, recvwait
+
+	ldb	r0, (r2)
+1:
+	b lr
+
+.comm __uart_status, 1
