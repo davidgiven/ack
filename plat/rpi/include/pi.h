@@ -8,6 +8,21 @@
 #ifndef PI_H
 #define PI_H
 
+/* When running in kernel mode, this structure gets the incoming parameters.
+ * In bare metal mode, it's gibberish. */
+
+struct pi_kernel_parameters
+{
+	int r5;
+	int r4;
+	void* r3;
+	void* r2;
+	void* r1;
+	void* r0;
+};
+
+extern struct pi_kernel_parameters* pi_kernel_parameters;
+
 /* Initialise the mini UART (only do this if running on bare metal! */
 extern void pi_init_uart(void);
 

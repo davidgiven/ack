@@ -23,13 +23,15 @@
 begtext:
 	! This empty space is required by the boot loader.
 
-	b start
-	.space 508 ! 512 minus space needed for branch instruction
+kernel_start:
+	! When running as a kernel, we need to preserve all registers. We save
+	! them onto the default stack.
+	push r0-r24
+	b baremetal_start
+	.space 506 ! first 512 bytes are ignored by the boot loader
+baremetal_start:
+	! Wipe the bss (including the new stack).
 
-	! Wipe the bss. This must happen absolutely first, because we need
-	! to store the old system registers into it.
-
-start:
 	lea r6, begbss
 	lea r7, endbss
 	mov r8, #0
@@ -37,35 +39,23 @@ _1:
 	stb r8, (r6)
 	addcmpb.lt r6, #1, r7, _1
 
-	! Set up system registers.
+	! Save system registers.
 
-	lea gp, begtext
 	st fp, .returnfp
 	st sp, .returnsp
 	st lr, .returnlr
 
-	! Set up the new stack and save the kernel parameters to it.
+	lea gp, begtext
 
-	lea sp, .stack + STACKSIZE - 6*4
+	! Save the kernel parameters.
 
-	sub r0, gp ! pointer
-	st r0, 0 (sp)
-
-	sub r1, gp ! pointer
-	st r1, 4 (sp)
-
-	sub r2, gp ! pointer
-	st r2, 8 (sp)
-
-	sub r3, gp ! pointer
-	st r3, 12 (sp)
-
-	! r4-r5 are not pointers and don't need adjusting
-	st r4, 16 (sp)
-	st r5, 20 (sp)
-
+	sub r0, gp ! fix up pointer
+	sub r1, gp ! fix up pointer
+	sub r2, gp ! fix up pointer
+	sub r3, gp ! fix up pointer
+	push r0-r5
 	sub r0, sp, gp
-	st r0, _gpu_parameters
+	st r0, _pi_kernel_parameters
 
 	! Push standard parameters onto the stack and go.
 	
@@ -82,10 +72,16 @@ _1:
 
 .define __exit
 __exit:
+	! It only makes sense to get here if we're in kernel mode. If we're in
+	! bare-metal mode, we'll just crash, but that's fine.
+
+	st r0, _pi_kernel_parameters ! save return value
 	mov r0, sr
 	ld fp, .returnfp
 	ld sp, .returnsp
 	ld lr, .returnlr
+	pop r0-r24
+	ld r0, _pi_kernel_parameters ! restore return value
 	b lr
 
 ! Define symbols at the beginning of our various segments, so that we can find
@@ -110,10 +106,8 @@ __exit:
 .comm .returnsp, 4
 .comm .returnlr, 4
 
-! User pointer to the GPU kernel parameter block.
-
-.define _gpu_parameters
-.comm _gpu_parameters, 4
+.define _pi_kernel_parameters
+.comm _pi_kernel_parameters, 4
 
 ! User stack.
 
