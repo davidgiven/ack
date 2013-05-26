@@ -256,6 +256,8 @@ PATTERNS
 
 /* Intrinsics */
 
+	pat nop                            /* Does nothing */
+
 	pat loc                            /* Load constant */
 		yields {CONST, $1}
 
