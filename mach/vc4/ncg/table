@@ -150,6 +150,7 @@ INSTRUCTIONS
 	pop           GPR0+GPR6+GPR16+GPRFP:wo, GPRPC:wo.
 	push          GPR0+GPR6+GPR16+GPRFP+GPRLR:ro.
 	push          GPR0+GPR6+GPR16+GPRFP:ro, GPRLR:ro.
+	rsb           GPR:rw, GPR+CONST:ro.
 	sub           GPR:wo, GPR:ro, CONST+GPR:ro.
 	sub           GPR:rw, GPR+CONST:ro.
 	st            GPR:ro, GPRINC:rw.
@@ -783,7 +784,7 @@ PATTERNS
 			gen
 				divu %a, %2, %1
                 mul %a, %1
-                sub %a, %2
+                rsb %a, %2
 			yields %a
 
 	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
@@ -792,7 +793,7 @@ PATTERNS
 			gen
 				divs %a, %2, %1
                 mul %a, %1
-                sub %a, %2
+                rsb %a, %2
 			yields %a
 
 	pat ngi $1==QUAD                  /* Negate word */
