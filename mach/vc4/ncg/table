@@ -1309,11 +1309,13 @@ PATTERNS
 
 	pat csa                            /* Array-lookup switch */
 		with GPR0 GPR1 STACK
+			kills ALL
 			gen
 				b {LABEL, ".csa"}
 
 	pat csb                            /* Table-lookup switch */
-		with STACK
+		with GPR0 GPR1 STACK
+			kills ALL
 			gen
 				bl {LABEL, ".csb"}
 
@@ -1484,28 +1486,44 @@ PATTERNS
                                         
 	pat loc loc cfi $1==$2 && $1==QUAD /* Convert float -> integer */
 		leaving
+			loc 0
+#if 0
 			cal ".cfi"
 			lfr QUAD
+#endif
 
 	pat loc loc cfu $1==$2 && $1==QUAD /* Convert float -> unsigned */
 		leaving
+			loc 0
+#if 0
 			cal ".cfu"
 			lfr QUAD
+#endif
 
 	pat loc loc cif $1==$2 && $1==QUAD /* Convert integer -> float */
 		leaving
+			loc 0
+#if 0
 			cal ".cif"
 			lfr QUAD
+#endif
 
 	pat loc loc cuf $1==$2 && $1==QUAD /* Convert unsigned -> float */
 		leaving
+			loc 0
+#if 0
 			cal ".cuf"
 			lfr QUAD
+#endif
 
 	pat fef                            /* Split float */
 		leaving
+			loc 0
+			loc 0
+#if 0
 			cal ".cuf"
 			lfr QUAD*2
+#endif
 
 	pat fif                            /* Multiply float and split (?) */
 		leaving
