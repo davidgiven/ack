@@ -434,19 +434,15 @@ PATTERNS
 	
 	pat ine                             /* Increment external */
 		leaving
-            lae $1
-            dup QUAD
-            loi QUAD
+            loe $1
             inc
-            sti QUAD
+            ste $1
 
 	pat dee                             /* Decrement external */
 		leaving
-            lae $1
-            dup QUAD
-            loi QUAD
+            loe $1
             dec
-            sti QUAD
+            ste $1
 
 	pat lde                             /* Load double external */
 		leaving
