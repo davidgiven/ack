@@ -293,16 +293,16 @@ valu_t val;
 int n;
 {
 	switch (n) {
-	case 1:
+	case RELO1:
 		emit1((int)val); break;
-	case 2:
+	case RELO2:
 #ifdef BYTES_REVERSED
 		emit1(((int)val>>8)); emit1((int)val);
 #else
 		emit1((int)val); emit1(((int)val>>8));
 #endif
 		break;
-	case 4:
+	case RELO4:
 #ifdef WORDS_REVERSED
 		emit2((int)(val>>16)); emit2((int)(val));
 #else

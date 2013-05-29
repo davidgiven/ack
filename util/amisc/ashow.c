@@ -70,7 +70,7 @@ show(headp)
 	/*
 	 * We get all struct outname's and the strings in core first.
 	 */
-	name = (struct outname *) myalloc(headp->oh_nname * SZ_NAME);
+	name = (struct outname *) myalloc(headp->oh_nname * sizeof(struct outname));
 	string = myalloc((unsigned) headp->oh_nchar);
 	rd_name(name, headp->oh_nname);
 	for (np = &name[0]; np < &name[headp->oh_nname]; np++) {

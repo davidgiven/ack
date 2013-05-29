@@ -5,8 +5,8 @@ $(eval g := $(OBJDIR)/$D/dmach.c $(OBJDIR)/$D/intable.c)
 $(wordlist 2, $(words $g), $g): $(firstword $g)
 $(firstword $g): $(util-ack-mktables)
 	@echo MKTABLES
-	@mkdir -p $(dir $g)
-	$(hide) cd $(dir $g) && $(util-ack-mktables) $(INSDIR)/share
+	@mkdir -p $(OBJDIR)/$D
+	$(hide) cd $(OBJDIR)/$D && $(util-ack-mktables) $(INSDIR)/share
 
 $(eval CLEANABLES += $g)
 endef
