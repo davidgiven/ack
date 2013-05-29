@@ -100,13 +100,19 @@ struct outname {
 /*
  * structure format strings
  */
+#if 0
+/* The following strings only make sense on 32-bit platforms, so we're going
+ * to try and deprecate them. */
 #define SF_HEAD		"22222244"
 #define SF_SECT		"44444"
 #define SF_RELO		"1124"
 #define SF_NAME		"4224"
+#endif
 
 /*
- * structure sizes (bytes in file; add digits in SF_*)
+ * structure sizes on disk (bytes in file; add digits in SF_*)
+ * Note! These are NOT the sizes in memory (64-bit architectures will have
+ * a different layout).
  */
 #define SZ_HEAD		20
 #define SZ_SECT		20
