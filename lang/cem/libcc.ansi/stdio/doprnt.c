@@ -38,6 +38,16 @@ gnum(register const char *f, int *ip, va_list *app)
 #define set_pointer(flags)		/* compilation might continue */
 #endif
 
+#define PUTC(c) \
+	do { \
+		int i = putc(c, stream); \
+		if (i == EOF) \
+		{ \
+			if (ferror(stream)) \
+				return -1; \
+		} \
+	} while (0)
+
 /* print an ordinal number */
 static char *
 o_print(va_list *ap, int flags, char *s, char c, int precision, int is_signed)
@@ -125,13 +135,10 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		if (c != '%') {
 #ifdef	CPM
 			if (c == '\n') {
-				if (putc('\r', stream) == EOF)
-					return nrchars ? -nrchars : -1;
-				nrchars++;
+				PUTC('\r');
 			}
 #endif
-			if (putc(c, stream) == EOF)
-				return nrchars ? -nrchars : -1;
+			PUTC(c);
 			nrchars++;
 			continue;
 		}
@@ -181,13 +188,11 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 		default:
 #ifdef	CPM
 			if (c == '\n') {
-				if (putc('\r', stream) == EOF)
-					return nrchars ? -nrchars : -1;
+				PUTC('\r');
 				nrchars++;
 			}
 #endif
-			if (putc(c, stream) == EOF)
-				return nrchars ? -nrchars : -1;
+			PUTC(c);
 			nrchars++;
 			continue;
 		case 'n':
@@ -280,31 +285,26 @@ _doprnt(register const char *fmt, va_list ap, FILE *stream)
 				if (between_fill) {
 				    if (flags & FL_SIGNEDCONV) {
 					j--; nrchars++;
-					if (putc(*s1++, stream) == EOF)
-						return nrchars ? -nrchars : -1;
+					PUTC(*s1++);
 				    } else {
 					j -= 2; nrchars += 2;
-					if ((putc(*s1++, stream) == EOF)
-					    || (putc(*s1++, stream) == EOF))
-						return nrchars ? -nrchars : -1;
-				    }
+					PUTC(*s1++);
+					PUTC(*s1++);
+					}
 				}
 				do {
-					if (putc(zfill, stream) == EOF)
-						return nrchars ? -nrchars : -1;
+					PUTC(zfill);
 				} while (--i);
 			}
 
 		nrchars += j;
 		while (--j >= 0) {
-			if (putc(*s1++, stream) == EOF)
-				return nrchars ? -nrchars : -1;
+			PUTC(*s1++);
 		}
 
 		if (i > 0) nrchars += i;
 		while (--i >= 0)
-			if (putc(zfill, stream) == EOF)
-				return nrchars ? -nrchars : -1;
+			PUTC(zfill);
 	}
 	return nrchars;
 }
