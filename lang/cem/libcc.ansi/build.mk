@@ -186,6 +186,7 @@ $(call ackfile, lang/cem/libcc.ansi/stdlib/div.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/atexit.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/exit.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/getenv.c)
+$(call ackfile, lang/cem/libcc.ansi/stdlib/setenv.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/labs.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/ldiv.c)
 $(call ackfile, lang/cem/libcc.ansi/stdlib/mblen.c)
@@ -238,6 +239,7 @@ $(call ackfile, lang/cem/libcc.ansi/string/strpbrk.c)
 $(call ackfile, lang/cem/libcc.ansi/string/strspn.c)
 $(call ackfile, lang/cem/libcc.ansi/string/strncmp.c)
 $(call ackfile, lang/cem/libcc.ansi/string/strxfrm.c)
+$(call ackfile, lang/cem/libcc.ansi/string/strdup.c)
 
 # Time
 

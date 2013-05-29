@@ -36,6 +36,9 @@ extern int atexit(void (*_func)(void));
 extern void exit(int _status);
 extern void _Exit(int _status);
 extern char* getenv(const char *_name);
+extern int setenv(const char *_name, const char *_value, int _overwrite);
+extern int unsetenv(const char *_name);
+extern int putenv(char *_string);
 extern int system(const char *_string);
 extern void* bsearch(const void *_key, const void *_base,
 			size_t _nmemb, size_t _size,
