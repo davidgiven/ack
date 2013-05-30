@@ -16,6 +16,7 @@ int tcgetattr(int fd, struct termios* t)
     t->c_iflag = _sys_ttyflags & INLCR;
     t->c_oflag = _sys_ttyflags & ONLCR;
     t->c_lflag = _sys_ttyflags & ECHO;
+    t->c_cflag = 0;
     return 0;
 }
 

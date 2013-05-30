@@ -15,11 +15,27 @@ struct termios
     tcflag_t c_iflag;
     tcflag_t c_oflag;
     tcflag_t c_lflag;
+    tcflag_t c_cflag;
 };
 
 #define ONLCR 1
 #define ECHO 2
 #define INLCR 4
+
+/* Dummied parameters for compatibility --- only the ones above are
+ * honoured. */
+
+#define BRKINT 0
+#define ICRNL 0
+#define INPCK 0
+#define ISTRIP 0
+#define IXON 0
+#define CS8 0
+#define ICANON 0
+#define IEXTEN 0
+#define ISIG 0
+
+#define OPOST ONLCR
 
 #define TCSANOW 0
 #define TCSADRAIN 1
