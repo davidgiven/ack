@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <termios.h>
 #include "libsys.h"
 
 int read(int fd, void* buffer, size_t count)
@@ -30,16 +31,11 @@ int read(int fd, void* buffer, size_t count)
 	/* Read one byte. */
 	
 	i = _sys_rawread();
-#if 0
-	if ((i == '\r') && !(_sys_ttyflags & RAW)) 
+	if ((i == '\r') && !(_sys_ttyflags & INLCR))
 		i = '\n';
 	if (_sys_ttyflags & ECHO)
 		_sys_write_tty(i);
-#endif
-	if (i == '\r') 
-		i = '\n';
-	_sys_write_tty(i);
-	
+
 	*(char*)buffer = i;
 	return 1;
 }

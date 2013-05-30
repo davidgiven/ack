@@ -13,6 +13,7 @@ D := plat/rpi/
 
 platform-headers := \
 	unistd.h \
+	termios.h \
 	pi.h \
 	ack/config.h
 
@@ -33,7 +34,9 @@ platform-libsys := \
 	kill.c \
 	lseek.c \
 	time.c \
-	signal.c
+	signal.c \
+	tcgetattr.c \
+	tcsetattr.c
 
 $(eval $(call build-platform))
 

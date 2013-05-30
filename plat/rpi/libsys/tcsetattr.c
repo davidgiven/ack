@@ -5,14 +5,15 @@
  * See the file 'Copying' in the root of the distribution for the full text.
  */
 
-#ifndef LIBSYS_H
-#define LIBSYS_H
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <termios.h>
+#include "libsys.h"
 
-extern void _sys_rawwrite(unsigned char b);
-extern unsigned char _sys_rawread(void);
+int tcsetattr(int fd, int actions, struct termios* t)
+{
+	_sys_ttyflags = t->c_iflag | t->c_oflag | t->c_lflag;
+    return 0;
+}
 
-extern void _sys_write_tty(char c);
-
-extern int _sys_ttyflags;
-
-#endif

@@ -8,16 +8,15 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <termios.h>
 #include "libsys.h"
+
+int _sys_ttyflags = ONLCR | INLCR | ECHO;
 
 void _sys_write_tty(char c)
 {
 	_sys_rawwrite(c);
-#if 0
-	if ((c == '\n') && !(_sys_ttyflags & RAW))
-		_sys_rawwrite('\r');
-#endif
-	if (c == '\n')
+	if ((c == '\n') && (_sys_ttyflags & ONLCR))
 		_sys_rawwrite('\r');
 }
 
