@@ -144,6 +144,7 @@ INSTRUCTIONS
 	lsr           GPR:rw, GPR+CONST:ro.
 	mov           GPR:wo, GPR+CONST:ro.
 	mul           GPR:rw, GPR+CONST:ro.
+	mvn           GPR:wo, GPR+CONST:ro.
 	neg           GPR:rw, GPR+CONST:ro.
 	or            GPR:rw, GPR+CONST:ro.
 	pop           GPR0+GPR6+GPR16+GPRFP+GPRPC:wo.
@@ -836,6 +837,13 @@ PATTERNS
 			gen
 				eor %a, %2
 			yields %a
+
+	pat com $1==QUAD                  /* Complement */
+		with GPR
+			uses reusing %1, REG=%1
+			gen
+                mvn %a, %1
+            yields %a
 
 	pat dvi $1==QUAD                  /* Divide word (second / top) */
 		with GPR GPR
