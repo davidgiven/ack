@@ -19,7 +19,7 @@ static char* current = _end;
 /* Top of heap: we assume that the block of memory the binary is loaded in
  * is 256kB long. Because user pointers are always relative to the beginning
  * of the block, this makes the end address easy to calculate. */
-static char* max = (char*) (256*1024);
+static char* max = (char*) (128*1024);
 
 int brk(void* newend)
 {

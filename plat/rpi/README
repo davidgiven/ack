@@ -11,7 +11,7 @@ you're running in bare-metal mode, you can hook stdin/stdout up to the
 mini UART. (Obviously, in kernel mode you can't.)
 
 Important note! The malloc heap expects your program to be loaded into a
-chunk of memory that's 256kB large. You must make sure that this is the case,
+chunk of memory that's 128kB large. You must make sure that this is the case,
 or Bad Stuff will happen.
 
 Output binaries are fully PIC and can be loaded anywhere (this is one of the
@@ -57,10 +57,10 @@ variable. It's a structure that is initialised with the data that's passed in
 from mailbox.c (currently four pointers and two integers).
 
 If you want to use malloc() and friends, you'll need to hack mailbox.c so
-that the buffer containing the code is at least 256kB, or you're likely to
+that the buffer containing the code is at least 128kB, or you're likely to
 corrupt the VideoCore's workspace and crash it.
 
 
 David Given <dg@cowlark.com>
-2013-05-26
+2013-06-06
 
