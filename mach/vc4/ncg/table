@@ -117,7 +117,7 @@ INSTRUCTIONS
 	beq "b.eq"    LABEL:ro.
 	bne "b.ne"    LABEL:ro.
 	bgt "b.gt"    LABEL:ro.
-	bgt "b.gt"    LABEL:ro.
+	blt "b.lt"    LABEL:ro.
 	bhi "b.hi"    LABEL:ro.
 	bset          GPR:rw, GPR+CONST:ro.
 	b             GPR+LABEL:ro.
@@ -266,28 +266,32 @@ PATTERNS
 		with ANY
 			yields %1 %1
 
-	pat dup $1<=(2*QUAD)              /* Duplicate word pair on top of stack */
+	pat dup $1==(2*QUAD)              /* Duplicate word pair on top of stack */
 		with ANY ANY
 			yields %1 %2 %1 %2
 
-	pat exg $1==QUAD                  /* Exchange top two words on stack */
+	pat exg $1<=QUAD                  /* Exchange top two words on stack */
 		with ANY ANY
 			yields %1 %2
+
+	pat exg $1==(2*QUAD)              /* Exchange top two word pairs on stack */
+		with ANY ANY ANY ANY
+			yields %2 %1 %4 %3
 
 	pat stl lol $1==$2                 /* Store then load local */
 		leaving
 			dup QUAD
 			stl $1
-			
+
 	pat lal sti lal loi $1==$3 && $2==$4 /* Store then load local, of a different size */
 		leaving
 			dup $2
 			lal $1
 			sti $2
-			
+
 	pat ste loe $1==$2                 /* Store then load external */
 		leaving
-			dup 4
+			dup QUAD
 			ste $1
 
 
@@ -1126,7 +1130,7 @@ PATTERNS
 	pat cmf tne call cmf_t("add.ne")        /* top = float (second != top) */
 	pat cmf tlt call cmf_t("add.lo")        /* top = float (second < top) */
 	pat cmf tle call cmf_t("add.ls")        /* top = float (second <= top) */
-	pat cmf tgt call cmf_t("add.hi")        /* top = float (second < top) */
+	pat cmf tgt call cmf_t("add.hi")        /* top = float (second > top) */
 	pat cmf tge call cmf_t("add.hs")        /* top = float (second >= top) */
 
 	proc fallback_t example teq
@@ -1142,7 +1146,7 @@ PATTERNS
 	pat tne call fallback_t("add.ne")       /* top = float (top != 0) */
 	pat tlt call fallback_t("add.lo")       /* top = float (top < 0) */
 	pat tle call fallback_t("add.ls")       /* top = float (top <= 0) */
-	pat tgt call fallback_t("add.hi")       /* top = float (top < 0) */
+	pat tgt call fallback_t("add.hi")       /* top = float (top > 0) */
 	pat tge call fallback_t("add.hs")       /* top = float (top >= 0) */
 
 
@@ -1151,6 +1155,7 @@ PATTERNS
 
 	proc anyz example zeq
 		with GPR STACK
+			kills ALL
 			gen
 				cmp %1, {CONST, 0}
 				beq[1] {LABEL, $1}
@@ -1164,6 +1169,7 @@ PATTERNS
 
 	proc anyb example beq
 		with GPR+CONST GPR STACK
+			kills ALL
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $1}
@@ -1177,6 +1183,7 @@ PATTERNS
 
 	proc cmu_z example cmu zeq
 		with GPR+CONST GPR STACK
+			kills ALL
 			gen
 				cmp %2, %1
 				beq[1] {LABEL, $2}
@@ -1196,6 +1203,7 @@ PATTERNS
 
 	proc cmf_z example cmu zeq
 		with GPR GPR STACK
+			kills ALL
 			gen
 				fcmp %2, %2, %1
 				beq[1] {LABEL, $2}
@@ -1258,6 +1266,7 @@ PATTERNS
 
 	pat bra
 		with STACK
+			kills ALL
 			gen
 				b {LABEL, $1}
 			
@@ -1452,13 +1461,23 @@ PATTERNS
 			ste ".reghp"
 
 	pat ass                            /* Adjust stack by variable amount */
-		with CONST+GPR
+		with CONST+GPR STACK
 		gen
 			add SP, %1
 
 	pat asp $1==QUAD                   /* Adjust stack by constant amount */
-		gen
-			pop SCRATCH
+		with GPR
+			/* silently ignore GPR */
+		with STACK
+			gen
+				pop SCRATCH
+
+	pat asp $1==(2*QUAD)               /* Adjust stack by constant amount */
+		with GPR GPR
+			/* silently ignore GPR */
+		with STACK
+			gen
+				add SP, {CONST, 2*QUAD}
 
 	pat asp                            /* Adjust stack by constant amount */
 		leaving
