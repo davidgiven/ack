@@ -36,7 +36,8 @@ platform-libsys := \
 	time.c \
 	signal.c \
 	tcgetattr.c \
-	tcsetattr.c
+	tcsetattr.c \
+	select.c
 
 $(eval $(call build-platform))
 

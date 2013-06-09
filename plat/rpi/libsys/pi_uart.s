@@ -141,6 +141,20 @@ sendwait:
 1:
 	b lr
 
+! Poll to see if there's incoming data available.
+
+.define __sys_rawpoll
+.define __sys_rawpoll
+__sys_rawpoll:
+	ldb r0, __uart_status
+	b.eq r0, #0, 1b
+
+	mov r1, #AUX_MU_LSR_REG
+	ld r0, (r1)
+	and r0, #0x1 ! 0 if no data, 1 if data
+1:
+	b lr
+
 ! Receive a single byte.
 
 .define __sys_rawread

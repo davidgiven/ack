@@ -90,4 +90,16 @@ typedef void (*sighandler_t)(int);
 extern sighandler_t signal(int signum, sighandler_t handler);
 extern int raise(int signum);
 
+/* Select */
+
+typedef uint32_t fd_set;
+
+extern int select(int nfds, fd_set *readfds, fd_set *writefds,
+                  fd_set *exceptfds, struct timeval *timeout);
+
+#define FD_ZERO(set) do { *set = 0; } while (0)
+#define FD_SET(fd, set) do { *set |= (1<<fd); } while (0);
+#define FD_CLR(fd, set) do { *set &= ~(1<<fd); } while (0);
+#define FD_ISSET(fd, set) (*set | (1<<fd))
+
 #endif
