@@ -16,7 +16,7 @@
 .sect .text
 
 #define gp r15
-#define STACKSIZE 16*1024
+#define STACKSIZE 1*1024
 
 ! MAIN ENTRY POINT
 
@@ -46,6 +46,7 @@ _1:
 	st lr, .returnlr
 
 	lea gp, begtext
+	lea sp, .stack + STACKSIZE
 
 	! Save the kernel parameters.
 
