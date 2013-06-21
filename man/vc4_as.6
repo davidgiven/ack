@@ -1,0 +1,45 @@
+.\" $Header$
+.TH VC4_AS 1
+.ad
+.SH NAME
+vc4_as \- assembler for Broadcom VideoCore IV
+
+.SH SYNOPSIS
+/usr/em/lib/vc4_as [options] argument ...
+
+.SH DESCRIPTION
+This assembler is made with the general framework
+described in \fIuni_ass\fP(6).
+
+.SH SYNTAX
+The assembler uses a modified version of the syntax described in
+https://github.com/hermanhermitage/videocoreiv/wiki/VideoCore-IV-Programmers-Manual:
+condition codes must be prefixed with a full stop. Vector instructions are not
+yet supported.
+
+.SH "SEE ALSO"
+uni_ass(6),
+ack(1),
+.br
+https://github.com/hermanhermitage/videocoreiv
+.SH EXAMPLE
+.nf
+.ta 8n 16n 24n 32n 40n 48n
+An example of VideoCore IV assembly language:
+
+        ldb r0, __uart_status
+        b.eq r0, #0, 1b
+
+        ! receive 1 byte (returned in r0)
+        mov r1, #AUX_MU_LSR_REG
+        mov r2, #AUX_MU_IO_REG
+        ! loop until char available
+recvwait:
+        ld r3, (r1)
+        and r3, #0x1
+        b.ne r3, #0x1, recvwait
+
+        ldb r0, (r2)
+1:
+        b lr
+.fi

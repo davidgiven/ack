@@ -5,6 +5,9 @@ This is a fairly crude port of the ACK to produce VideoCore IV machine
 code, suitable for use on the Raspberry Pi. It produces terrible but
 working code. The resulting binaries can be used either bare metal or
 loaded as a GPU kernel and executed using a modified mailbox.c (see below).
+Currently floating point support is present but incomplete; and as the
+VideoCore IV does not have double-precision float support, the C compiler
+treats doubles as single precision.
 
 As much of the standard C library as is relevant works; if
 you're running in bare-metal mode, you can hook stdin/stdout up to the
