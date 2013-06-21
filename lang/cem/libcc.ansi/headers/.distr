@@ -20,3 +20,4 @@ stdbool.h
 fcntl.h
 tgmath.h
 locale.h
+malloc.h

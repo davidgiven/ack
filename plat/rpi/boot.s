@@ -110,6 +110,10 @@ __exit:
 .define _pi_kernel_parameters
 .comm _pi_kernel_parameters, 4
 
+.define .linenumber, .filename
+.comm .linenumber, 4         ! current linenumber (used for debugging)
+.comm .filename, 4           ! ptr to current filename (used for debugging)
+
 ! User stack.
 
 .comm .stack, STACKSIZE
