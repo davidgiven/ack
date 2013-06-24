@@ -14,9 +14,6 @@
 ! So be careful with your serial/terminal, some adjustment may be necessary.
 TARGET_BAUD_RATE = 115200
 
-! System clock is running directly off the 19.2MHz crystal at initial reset
-SYSTEM_CLOCK = 19200000
-
 GPFSEL1 = 0x7e200004
 GPSET0 = 0x7e20001C
 GPCLR0 = 0x7e200028
@@ -102,7 +99,10 @@ delay2:
 	st	r0, (r1)
 
 	mov	r1, #AUX_MU_BAUD_REG
-	mov	r0, #[[SYSTEM_CLOCK/[TARGET_BAUD_RATE*8]]-1]
+	ld r0, _pi_clock_speed
+	mov r2, #TARGET_BAUD_RATE*8
+	divu r0, r0, r2
+	sub r0, #1
 	st	r0, (r1)
 
 	mov	r1, #AUX_MU_LCR_REG
@@ -176,3 +176,10 @@ recvwait:
 	b lr
 
 .comm __uart_status, 1
+
+.sect .data
+.define _pi_clock_speed
+
+! System clock is running directly off the 19.2MHz crystal at initial reset
+_pi_clock_speed:
+	.data4 19200000

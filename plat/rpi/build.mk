@@ -23,6 +23,7 @@ platform-libsys := \
 	pi_phys_to_user.s \
 	pi_user_to_phys.s \
 	pi_uart.s \
+	pi_fast_mode.s \
 	creat.c \
 	close.c \
 	open.c \

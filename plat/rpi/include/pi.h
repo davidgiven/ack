@@ -32,5 +32,17 @@ extern void* pi_phys_to_user(void* ptr);
 /* Converts a pointer from a user address to a physical address. */
 extern void* pi_user_to_phys(void* ptr);
 
+/* Change the clock speed from 19.2MHz to 250MHz. Must be called *before*
+ * pi_init_uart(). */
+extern void pi_fast_mode(void);
+
+/* Initialise the RAM. */
+extern void pi_init_ram(void);
+
+/* The current clock speed (used by pi_init_uart to calculate the correct
+ * UART settings). */
+
+extern int pi_clock_speed;
+
 #endif
 
