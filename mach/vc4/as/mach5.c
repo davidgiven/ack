@@ -394,7 +394,7 @@ static void branch_addcmp_common(quad opcode, int bits, struct expr_t* expr)
         d -= DOTGAIN;
     d /= 2;
 
-	if (!fitx(d, bits))
+	if ((pass == 2) && !fitx(d, bits))
 		serror("target of branch is too far away");
 
 	emit2(opcode | maskx(d, bits));
