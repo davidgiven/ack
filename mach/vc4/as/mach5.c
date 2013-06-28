@@ -457,6 +457,7 @@ void lea_stack_instr(int rd, long va, int rs)
     if (rs != 25)
         serror("source register must be sp");
 
+	va /= 4;
 	if (!fitx(va, 6))
 		serror("offset too big to encode in instruction");
 	va = maskx(va, 6);
