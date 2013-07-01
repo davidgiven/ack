@@ -25,3 +25,4 @@ extern void branch_addcmp_reg_lit_instr(int cc, int rd, int ra, long vs, struct 
 extern void branch_addcmp_lit_lit_instr(int cc, int rd, long va, long vs, struct expr_t* expr);
 extern void lea_stack_instr(int rd, long va, int rs);
 extern void lea_address_instr(int rd, struct expr_t* expr);
+extern void fltcnv_instr(quad opcode, int cc, int rd, int ra, quad shift);

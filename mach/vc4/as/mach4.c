@@ -74,5 +74,14 @@ operation
 
     | OP_LEA GPR ',' absexp '(' GPR ')'    { lea_stack_instr($2, $4, $6); }
 	| OP_LEA GPR ',' expr                  { lea_address_instr($2, &$4); }
+
+	| OP_FLTCNV GPR ',' GPR                { fltcnv_instr($1, ALWAYS, $2, $4, 0); }
+	| OP_FLTCNV CC GPR ',' GPR             { fltcnv_instr($1, $2, $3, $5, 0); }
+	| OP_FLTCNV GPR ',' GPR ',' shift '#' absexp { fltcnv_instr($1, ALWAYS, $2, $4, $8); }
+	| OP_FLTCNV CC GPR ',' GPR ',' shift '#' absexp { fltcnv_instr($1, $2, $3, $5, $9); }
 	;
+
+shift
+	: 'l' 's' 'r'
+    | 'l' 's' 'l';
 

@@ -131,8 +131,11 @@ INSTRUCTIONS
 	fadd          GPR:wo, GPR:ro, GPR:ro.
 	fcmp          GPR:wo, GPR:ro, GPR:ro.
 	fdiv          GPR:wo, GPR:ro, GPR:ro.
+	flts          GPR:wo, GPR:ro.
+	fltu          GPR:wo, GPR:ro.
 	fmul          GPR:wo, GPR:ro, GPR:ro.
 	fsub          GPR:wo, GPR:ro, GPR:ro.
+	ftrunc        GPR:wo, GPR:ro.
 	ld            GPR:wo, GPRINC:rw.
 	ld            GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
 	ldb           GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
@@ -1511,36 +1514,32 @@ PATTERNS
 			nop
                                         
 	pat loc loc cfi $1==$2 && $1==QUAD /* Convert float -> integer */
-		leaving
-			loc 0
-#if 0
-			cal ".cfi"
-			lfr QUAD
-#endif
+		with GPR
+			uses reusing %1, REG
+			gen
+				ftrunc %a, %1
+			yields %a
 
 	pat loc loc cfu $1==$2 && $1==QUAD /* Convert float -> unsigned */
-		leaving
-			loc 0
-#if 0
-			cal ".cfu"
-			lfr QUAD
-#endif
+		with GPR
+			uses reusing %1, REG
+			gen
+				ftrunc %a, %1
+			yields %a
 
 	pat loc loc cif $1==$2 && $1==QUAD /* Convert integer -> float */
-		leaving
-			loc 0
-#if 0
-			cal ".cif"
-			lfr QUAD
-#endif
+		with GPR
+			uses reusing %1, REG
+			gen
+				flts %a, %1
+			yields %a
 
 	pat loc loc cuf $1==$2 && $1==QUAD /* Convert unsigned -> float */
-		leaving
-			loc 0
-#if 0
-			cal ".cuf"
-			lfr QUAD
-#endif
+		with GPR
+			uses reusing %1, REG
+			gen
+				fltu %a, %1
+			yields %a
 
 	pat fef                            /* Split float */
 		leaving

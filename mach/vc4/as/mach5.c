@@ -487,3 +487,13 @@ void lea_address_instr(int rd, struct expr_t* expr)
 	emit4(expr->val - pc);
 }
 
+/* Floating point conversion opcodes (ftrunc, floor, flts, fltu). */
+
+void fltcnv_instr(quad opcode, int cc, int rd, int ra, quad shift)
+{
+	fitx(shift, 6);
+
+	emit2(opcode | (rd<<0));
+	emit2(B16(00000000,01000000) | (ra<<11) | (cc<<7) | shift);
+}
+
