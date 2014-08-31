@@ -114,9 +114,7 @@ start_child(p)
   char	*in_redirect = 0;			/* standard input redirected */
   char	*out_redirect = 0;			/* standard output redirected */
 
-  signal_child(SIGKILL); /* like families in China, this debugger is only
-			    allowed one child
-			 */
+  signal_child(SIGKILL);
 
   if (p != run_command) {
 	freenode(run_command);
