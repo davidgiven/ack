@@ -26,7 +26,7 @@ $(call cfile, $D/var.c)
 $(call cfile, $D/hall.c)
 
 $(eval CLEANABLES += $(OBJDIR)/$D/enterkeyw.c)
-$(OBJDIR)/$D/enterkeyw.c: $D/cvtkeywords $D/keywords
+$(OBJDIR)/$D/enterkeyw.c: $D/cvtkeywords $D/keywords $(OBJDIR)/$D/y.tab.h
 	@echo KEYWORDS $$@
 	@mkdir -p $$(dir $$@)
 	$(hide) cd $$(dir $$@) && sh $(abspath $D/cvtkeywords) $(abspath $D/keywords)
