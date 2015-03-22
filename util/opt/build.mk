@@ -11,7 +11,6 @@ $(call flex, $(OBJDIR)/$D, $D/scan.l)
 $(call dependson, $(OBJDIR)/$D/y.tab.h)
 
 $(call rawfile, $(LIBEM_DATA))
-$(call rawfile, -lfl)
 $(call cprogram, $(OBJDIR)/$D/mktab)
 
 endef
