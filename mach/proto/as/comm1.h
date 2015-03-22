@@ -116,6 +116,10 @@ extern valu_t	load();
 extern FILE	*ffcreat();
 extern FILE	*fftemp();
 
+extern void fatal(const char* s, ...);
+extern void serror(const char* s, ...);
+extern void warning(const char* s, ...);
+
 /* ========== Machine dependent C declarations ========== */
 
 #include	"mach1.c"

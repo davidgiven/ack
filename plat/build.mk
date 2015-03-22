@@ -17,7 +17,7 @@ define build-platform-impl
 			$(PLATIND)/descr/$(PLATFORM) \
 			$(PLATFORM_HEADERS_$(PLATFORM)) \
 			$(PLATDEP)/$(PLATFORM)/as \
-			$(PLATDEP)/$(PLATFORM)/ncg \
+			$(if $(arch-cg-$(ARCH)), $(PLATDEP)/$(PLATFORM)/cg, $(PLATDEP)/$(PLATFORM)/ncg) \
 			$(ARCHITECTURE_$(ARCH)))
 
 	# libsys
@@ -48,7 +48,7 @@ define build-platform-impl
     # The tools themselves
 
     $(call build-as)
-    $(call build-ncg)
+    $(if $(arch-cg-$(ARCH)), $(call build-cg), $(call build-ncg))
 
 	# Build top only if the architecture asks for it.
 

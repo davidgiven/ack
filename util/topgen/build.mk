@@ -15,11 +15,11 @@ define build-topgen-impl
 
 	$(call llgen, $(OBJDIR)/$D, $D/topgen.g)
 
-	$(call file, $(LIBASSERT))
-	$(call file, $(LIBPRINT))
-	$(call file, $(LIBALLOC))
-	$(call file, $(LIBSYSTEM))
-	$(call file, $(LIBSTRING))
+	$(call rawfile, $(LIBASSERT))
+	$(call rawfile, $(LIBPRINT))
+	$(call rawfile, $(LIBALLOC))
+	$(call rawfile, $(LIBSYSTEM))
+	$(call rawfile, $(LIBSTRING))
 
 	$(call cprogram, $(BINDIR)/topgen)
 	TOPGEN := $o

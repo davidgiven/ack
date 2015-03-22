@@ -2,7 +2,7 @@
 define build-simple-tool-impl
 	$(call reset)
 	$(call cfile, util/amisc/$1.c)
-	$(call file, $(LIBOBJECT))
+	$(call rawfile, $(LIBOBJECT))
 	$(call cprogram, $(BINDIR)/$1)
 	$(eval INSTALLABLES += $o)
 	$(call installto, $(INSDIR)/bin/$1)

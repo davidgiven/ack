@@ -265,3 +265,4 @@ typedef	struct sect_t	sect_t;
 #endif
 
 extern FILE *fopen();   /* some systems don't have this in stdio.h */
+

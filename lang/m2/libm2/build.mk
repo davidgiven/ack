@@ -95,7 +95,7 @@ $(eval g := \
 
 $(foreach f, $g, \
 	$(call reset) \
-	$(call file, lang/m2/libm2/$f) \
+	$(call rawfile, lang/m2/libm2/$f) \
 	$(call installto, $(PLATIND)/include/modula2/$f))
 
 endef
