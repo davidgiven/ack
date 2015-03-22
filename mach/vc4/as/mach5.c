@@ -174,13 +174,11 @@ void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
         case 26: /* lr */
             extrareg = 26;
             hireg = loreg = -1;
-            b = 0;
             break;
 
 		case 31: /* pc */
 			extrareg = 31;
 			hireg = loreg = -1;
-			b = 0;
 			break;
 
 		default:
@@ -204,7 +202,10 @@ void stack_instr(quad opcode, int loreg, int hireg, int extrareg)
 		serror("invalid register range");
 
 	if (hireg == -1)
-		m = 31;
+	{
+		b = 3;
+		m = 15;
+	}
 	else
 		m = hireg - loreg;
 
@@ -456,6 +457,7 @@ void lea_stack_instr(int rd, long va, int rs)
     if (rs != 25)
         serror("source register must be sp");
 
+	va /= 4;
 	if (!fitx(va, 6))
 		serror("offset too big to encode in instruction");
 	va = maskx(va, 6);
