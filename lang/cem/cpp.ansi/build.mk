@@ -71,12 +71,12 @@ define build-cpp-ansi-impl
 
 	$(call llgen, $(OBJDIR)/$D, $(OBJDIR)/$D/tokenfile.g $D/expression.g)
 
-	$(call file, $(LIBINPUT))
-	$(call file, $(LIBASSERT))
-	$(call file, $(LIBALLOC))
-	$(call file, $(LIBPRINT))
-	$(call file, $(LIBSYSTEM))
-	$(call file, $(LIBSTRING))
+	$(call rawfile, $(LIBINPUT))
+	$(call rawfile, $(LIBASSERT))
+	$(call rawfile, $(LIBALLOC))
+	$(call rawfile, $(LIBPRINT))
+	$(call rawfile, $(LIBSYSTEM))
+	$(call rawfile, $(LIBSTRING))
 
 	$(call tabgen, $D/char.tab)
 

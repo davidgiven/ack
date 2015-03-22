@@ -34,7 +34,7 @@ $(call cfile, $(OBJDIR)/$D/enterkeyw.c)
 
 $(eval $q: $(INCDIR)/em_spec.h)
 
-$(call file, $(LIBEM_DATA))
+$(call rawfile, $(LIBEM_DATA))
 $(call cprogram, $(BINDIR)/ncgg)
 $(eval NCGG := $o)
 
