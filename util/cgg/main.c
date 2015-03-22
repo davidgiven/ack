@@ -1009,3 +1009,8 @@ max(a,b) {
 		return(a);
 	return(b);
 }
+
+int yywrap(void) {
+	return 1;
+}
+
