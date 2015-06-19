@@ -1,3 +1,5 @@
+before_install:
+    - sudo apt-get install ed
 language: c
 script:
     - make PREFIX=/tmp/acki -j4
