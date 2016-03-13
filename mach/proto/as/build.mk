@@ -43,7 +43,7 @@ $(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI) \
     $(call installto, $(PLATDEP)/$(PLATFORM)/as)
 
     $(call reset)
-    $(call file, man/$(ARCH)_as.6)
+    $(call rawfile, man/$(ARCH)_as.6)
     $(call installto, $(INSDIR)/share/man/man6/$(ARCH)_as.6)
 endef
 
