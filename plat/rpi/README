@@ -1,0 +1,69 @@
+VideoCore IV support in the ACK
+===============================
+
+This is a fairly crude port of the ACK to produce VideoCore IV machine
+code, suitable for use on the Raspberry Pi. It produces terrible but
+working code. The resulting binaries can be used either bare metal or
+loaded as a GPU kernel and executed using a modified mailbox.c (see below).
+Currently floating point support is present but incomplete; and as the
+VideoCore IV does not have double-precision float support, the C compiler
+treats doubles as single precision.
+
+As much of the standard C library as is relevant works; if
+you're running in bare-metal mode, you can hook stdin/stdout up to the
+mini UART. (Obviously, in kernel mode you can't.)
+
+Important note! The malloc heap expects your program to be loaded into a
+chunk of memory that's 128kB large. You must make sure that this is the case,
+or Bad Stuff will happen.
+
+Output binaries are fully PIC and can be loaded anywhere (this is one of the
+things that makes the code so terrible). You must use the pi_user_to_phys()
+and pi_phys_to_user() to translate pointers from physical to user and vice
+versa. If you don't, Bad Stuff will happen.
+
+
+
+Bare metal mode
+---------------
+
+To run a binary bare metal, compile it:
+
+    ack -mrpi -O program.c -o bootcode.bin
+
+...and copy the bootcode.bin file to the root of an SD card. Boot the Pi.
+Your program will run.
+
+To use the UART, #include <pi.h> and call pi_init_uart() at the top of your
+program. This will set it up and connect it to stdin/stdout. It's 115200 8n1.
+
+
+
+Kernel mode
+-----------
+
+This will require some hacking at your end.
+
+Go here, and follow the instructions.
+
+https://github.com/hermanhermitage/videocoreiv/wiki/VideoCore-IV-Kernels-under-Linux
+
+Now compile your program:
+
+    ack -mrpi -O program.c -o alpha.bin
+
+MAKE SURE YOU AREN'T USING ANY MEMORY ALLOCATION. Copy the alpha.bin onto
+the Pi, and run it with mailbox.c.
+
+To get data in and out, #include <pi.h> and look at the pi_kernel_parameters
+variable. It's a structure that is initialised with the data that's passed in
+from mailbox.c (currently four pointers and two integers).
+
+If you want to use malloc() and friends, you'll need to hack mailbox.c so
+that the buffer containing the code is at least 128kB, or you're likely to
+corrupt the VideoCore's workspace and crash it.
+
+
+David Given <dg@cowlark.com>
+2013-06-06
+

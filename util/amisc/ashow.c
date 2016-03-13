@@ -143,6 +143,9 @@ showrelo()
 	case RELOH2:
 		printf("\ttop 2 bytes of a 4 byte word\n");
 		break;
+	case RELOVC4:
+		printf("\tVideoCore IV address in 32-bit instruction\n");
+		break;
 	default:
 		printf("\tunknown relocation type %d\n", relrec.or_type & RELSZ);
 		break;

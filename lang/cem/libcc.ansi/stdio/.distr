@@ -39,6 +39,7 @@ rewind.c
 scanf.c
 setbuf.c
 setvbuf.c
+snprintf.c
 sprintf.c
 sscanf.c
 tmpfile.c
@@ -47,3 +48,4 @@ ungetc.c
 vfprintf.c
 vprintf.c
 vsprintf.c
+vsnprintf.c

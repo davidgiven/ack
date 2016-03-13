@@ -1,0 +1,1560 @@
+/*
+ * VideoCore IV code generator for the ACK
+ * © 2013 David Given
+ * This file is redistributable under the terms of the 3-clause BSD license.
+ * See the file 'Copying' in the root of the distribution for the full text.
+ */
+
+EM_WSIZE = 4
+EM_PSIZE = 4
+EM_BSIZE = 8    /* two words saved in call frame */
+
+BYTE = 1        /* Size of values */
+WORD = 2
+QUAD = 4
+
+FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
+PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
+
+#define COMMENT(n) /* noop */
+
+
+#define nicesize(x) ((x)==BYTE || (x)==WORD || (x)==QUAD)
+
+
+
+PROPERTIES
+
+	GPR             /* any GPR */
+	REG             /* any allocatable GPR */
+	STACKABLE       /* a register than can be used with push/pop */
+
+	GPR0  GPR1  GPR2  GPR3  GPR4  GPR5  GPR6  GPR7
+	GPR8  GPR9  GPR10 GPR11 GPR12 GPR13 GPR14 GPR15
+	GPR16 GPR17 GPR18 GPR19 GPR20 GPR21 GPR22 GPR23
+
+	GPRGP GPRFP GPRSP GPRLR GPRPC
+
+REGISTERS
+
+	R0("r0")           : GPR, REG, GPR0, STACKABLE.
+	R1("r1")           : GPR, REG, GPR1.
+	R2("r2")           : GPR, REG, GPR2.
+	R3("r3")           : GPR, REG, GPR3.
+	R4("r4")           : GPR, REG, GPR4.
+	R5("r5")           : GPR, REG, GPR5.
+	R6("r6")           : GPR, GPR6.
+	R7("r7")           : GPR, REG, GPR7.
+	R8("r8")           : GPR, REG, GPR8.
+	R9("r9")           : GPR, REG, GPR9.
+	R10("r10")         : GPR, REG, GPR10.
+	R11("r11")         : GPR, REG, GPR11.
+	R12("r12")         : GPR, REG, GPR12.
+	R13("r13")         : GPR, REG, GPR13.
+	R14("r14")         : GPR, REG, GPR14.
+	GP("r15")          : GPR, GPRGP.
+
+	R16("r16")         : GPR, GPR16.
+
+	R23("r23")         : GPR.
+	FP("fp")           : GPR, GPRFP.
+	SP("sp")           : GPR, GPRSP.
+	LR("lr")           : GPR, GPRLR.
+	PC("pc")           : GPR, GPRPC.
+	/* r26 to r31 are special and the code generator doesn't touch them. */
+
+	#define SCRATCH R6
+
+TOKENS
+
+/* Used only in instruction descriptions (to generate the correct syntax). */
+
+	GPROFFSET          = { GPR reg; INT off; }    4    off "(" reg ")".
+	GPRGPR             = { GPR reg1; GPR reg2; }  4    "(" reg1 "," reg2 ")".
+	GPRINC             = { GPR reg; }             4    "(" reg ")++".
+	ADDCMPB_LL         = { GPR rd; INT val; INT vs; ADDR dest; } 4 rd ",#" val ",#" vs "," dest.
+
+/* Primitives */
+
+	LABEL              = { ADDR adr; }            4    adr.
+	CONST              = { INT val; }             4    "#" val.
+
+/* Sign extended values. */
+
+	/* The size refers to the *source*. */
+	SIGNEX8            = { GPR reg; }             4    reg.
+	SIGNEX16           = { GPR reg; }             4    reg.
+
+/* The results of comparisons. */
+
+	TRISTATE_RC_S      = { GPR reg; INT val; }    4.
+	TRISTATE_RC_U      = { GPR reg; INT val; }    4.
+	TRISTATE_RR_S      = { GPR reg1; GPR reg2; }  4.
+	TRISTATE_RR_U      = { GPR reg1; GPR reg2; }  4.
+
+
+
+SETS
+
+	TOKEN              = LABEL + CONST.
+	OP                 = TOKEN + SIGNEX8 + SIGNEX16.
+	ANY                = GPR + OP.
+
+
+
+INSTRUCTIONS
+
+	add           GPR:wo, GPR:ro, GPR+CONST:ro.
+	add           GPR:rw, GPR+CONST:ro.
+	addcmpbge "addcmpb.ge" ADDCMPB_LL:rw.
+	adds2         GPR:rw, GPR+CONST:ro.
+	adds4         GPR:rw, GPR+CONST:ro.
+	adds8         GPR:rw, GPR+CONST:ro.
+	adds16        GPR:rw, GPR+CONST:ro.
+	adds256       GPR:rw, GPR:rw, GPR:ro.
+	and           GPR:rw, GPR+CONST:ro.
+	asr           GPR:rw, GPR+CONST:ro.
+	beq "b.eq"    LABEL:ro.
+	bne "b.ne"    LABEL:ro.
+	bgt "b.gt"    LABEL:ro.
+	blt "b.lt"    LABEL:ro.
+	bhi "b.hi"    LABEL:ro.
+	bset          GPR:rw, GPR+CONST:ro.
+	b             GPR+LABEL:ro.
+	bl            GPR+LABEL:ro.
+	cmp           GPR:ro, GPR+CONST:ro kills :cc.
+	divs          GPR:wo, GPR:ro, GPR+CONST:ro.
+	divu          GPR:wo, GPR:ro, GPR+CONST:ro.
+	eor           GPR:rw, GPR+CONST:ro.
+	exts          GPR:wo, GPR:ro, GPR+CONST:ro.
+	exts          GPR:rw, GPR+CONST:ro.
+	fadd          GPR:wo, GPR:ro, GPR:ro.
+	fcmp          GPR:wo, GPR:ro, GPR:ro.
+	fdiv          GPR:wo, GPR:ro, GPR:ro.
+	flts          GPR:wo, GPR:ro.
+	fltu          GPR:wo, GPR:ro.
+	fmul          GPR:wo, GPR:ro, GPR:ro.
+	fsub          GPR:wo, GPR:ro, GPR:ro.
+	ftrunc        GPR:wo, GPR:ro.
+	ld            GPR:wo, GPRINC:rw.
+	ld            GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldb           GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldh           GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	ldhs          GPR:wo, GPROFFSET+GPRGPR+LABEL:ro.
+	lea           GPR:wo, LABEL:ro.
+	lsl           GPR:rw, GPR+CONST:ro.
+	lsl           GPR:wo, GPR:ro, GPR+CONST:ro.
+	lsr           GPR:rw, GPR+CONST:ro.
+	mov           GPR:wo, GPR+CONST:ro.
+	mul           GPR:rw, GPR+CONST:ro.
+	mvn           GPR:wo, GPR+CONST:ro.
+	neg           GPR:rw, GPR+CONST:ro.
+	or            GPR:rw, GPR+CONST:ro.
+	pop           GPR0+GPR6+GPR16+GPRFP+GPRPC:wo.
+	pop           GPR0+GPR6+GPR16+GPRFP:wo, GPRPC:wo.
+	push          GPR0+GPR6+GPR16+GPRFP+GPRLR:ro.
+	push          GPR0+GPR6+GPR16+GPRFP:ro, GPRLR:ro.
+	rsb           GPR:rw, GPR+CONST:ro.
+	sub           GPR:wo, GPR:ro, CONST+GPR:ro.
+	sub           GPR:rw, GPR+CONST:ro.
+	st            GPR:ro, GPRINC:rw.
+	st            GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	stb           GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sth           GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+	sths          GPR:ro, GPROFFSET+GPRGPR+LABEL:ro.
+
+	invalid "invalid".
+	comment "!" LABEL:ro.
+
+
+  
+MOVES
+
+	from GPR to GPR
+		gen
+			COMMENT("mov GPR->GPR")
+			mov %2, %1
+
+/* Constants */
+
+	from CONST to GPR
+		gen
+			mov %2, %1
+
+	from LABEL to GPR
+		gen
+			lea %2, {LABEL, %1.adr}
+			sub %2, GP
+
+/* Sign extension */
+
+	from SIGNEX8 to GPR
+		gen
+			exts %2, %1.reg, {CONST, 8}
+
+	from SIGNEX16 to GPR
+		gen
+			exts %2, %1.reg, {CONST, 16}
+
+/* Miscellaneous */
+
+	from CONST+LABEL+GPR to GPR
+		gen
+			move %1, %2
+
+
+TESTS
+
+	to test GPR
+		gen
+			cmp %1, {CONST, 0}
+
+
+
+STACKINGRULES
+
+	from GPR0+GPR6+GPR16 to STACK
+		gen
+			comment {LABEL, "push stackable"}
+		    push %1
+
+	from OP+GPR to STACK
+		uses GPR0
+		gen
+			move %1, %a
+			push %a
+
+	from OP to STACK
+		uses STACKABLE
+		gen
+			move %1, %a
+			push %a
+
+	from OP+GPR to STACK
+		gen
+			comment {LABEL, "push via scratch"}
+			move %1, SCRATCH
+			push SCRATCH
+
+
+
+		
+COERCIONS
+
+	from OP
+		uses REG
+		gen
+			move %1, %a
+		yields %a
+		
+	from STACK
+		uses REG
+		gen
+			pop SCRATCH
+			move SCRATCH, %a
+		yields %a
+
+
+
+PATTERNS
+
+/* Intrinsics */
+
+	pat nop                            /* Does nothing */
+
+	pat loc                            /* Load constant */
+		yields {CONST, $1}
+
+	pat dup $1<=QUAD                  /* Duplicate word on top of stack */
+		with ANY
+			yields %1 %1
+
+	pat dup $1==(2*QUAD)              /* Duplicate word pair on top of stack */
+		with ANY ANY
+			yields %1 %2 %1 %2
+
+	pat exg $1<=QUAD                  /* Exchange top two words on stack */
+		with ANY ANY
+			yields %1 %2
+
+	pat exg $1==(2*QUAD)              /* Exchange top two word pairs on stack */
+		with ANY ANY ANY ANY
+			yields %2 %1 %4 %3
+
+	pat stl lol $1==$2                 /* Store then load local */
+		leaving
+			dup QUAD
+			stl $1
+
+	pat lal sti lal loi $1==$3 && $2==$4 /* Store then load local, of a different size */
+		leaving
+			dup $2
+			lal $1
+			sti $2
+
+	pat ste loe $1==$2                 /* Store then load external */
+		leaving
+			dup QUAD
+			ste $1
+
+
+		
+/* Type conversions */
+
+	pat loc loc cii loc loc cii $1==$4 && $2==$5 /* madness, generated by the C compiler */
+		leaving
+			loc $1
+			loc $2
+			cii
+			
+	pat loc loc cii loc loc cii $2==QUAD && $5==QUAD && $4<$2 /* madness, generated by the C compiler */
+		leaving
+			loc $4
+			loc $5
+			cii
+			
+	pat loc loc ciu                    /* signed X -> unsigned X */
+		leaving
+			loc $1
+			loc $2
+			cuu
+			
+	pat loc loc cuu $1==$2             /* unsigned X -> unsigned X */
+		/* nop */
+
+	pat loc loc cii $1==$2             /* signed X -> signed X */
+		/* nop */
+
+	pat loc loc cui $1==$2             /* unsigned X -> signed X */
+		/* nop */
+		
+	pat loc loc cui $1==BYTE && $2==QUAD /* unsigned char -> signed int */
+		/* nop */
+	
+	pat loc loc cui $1==WORD && $2==QUAD /* unsigned short -> signed int */
+		/* nop */
+	
+	pat loc loc cii $1==BYTE && $2>BYTE /* signed char -> anything */
+		with GPR
+			yields {SIGNEX8, %1}
+		with SIGNEX8
+			yields {SIGNEX8, %1.reg}
+		with SIGNEX16
+			yields {SIGNEX8, %1.reg}
+
+	pat loc loc cii $1==WORD && $2>WORD /* signed short -> anything */
+		with GPR
+			yields {SIGNEX16, %1}
+		with SIGNEX8
+			yields {SIGNEX16, %1.reg}
+		with SIGNEX16
+			yields {SIGNEX16, %1.reg}
+
+	
+		
+/* Local variables */
+
+	pat lal                            /* Load address of local */
+		uses REG
+		gen
+			sub %a, FP, GP
+			add %a, {CONST, $1}
+		yields %a
+
+	pat lol                            /* Load quad from local */
+		uses REG
+		gen
+			ld %a, {GPROFFSET, FP, $1}
+		yields %a
+
+	pat ldl                            /* Load double-word from local */
+		leaving
+			lol $1 + QUAD*1
+			lol $1 + QUAD*0
+
+	pat stl                            /* Store to local */
+		with GPR
+			gen
+				st %1, {GPROFFSET, FP, $1}
+
+	pat sdl                            /* Store double-word to local */
+		leaving
+			stl $1 + QUAD*0
+			stl $1 + QUAD*1
+
+	pat lil                            /* Load from indirected local */
+		leaving
+			lol $1
+			loi QUAD
+			
+	pat sil                            /* Save to indirected local */
+		leaving
+			lol $1
+			sti QUAD
+			
+	pat stl lol $1==$2                 /* Save then load (generated by C compiler) */
+		leaving
+			dup QUAD
+			stl $1
+			
+	pat zrl                            /* Zero local */
+		leaving
+			loc 0
+			stl $1
+
+	pat inl                            /* Increment local in register */
+		leaving
+			lol $1
+			loc 1
+			adi QUAD
+			stl $1
+
+	pat del                            /* Decrement local in register */
+		leaving
+			lol $1
+			loc 1
+			sbi QUAD
+			stl $1
+
+
+
+/* Global variables */
+		
+	pat lpi                            /* Load address of external function */
+		leaving
+			lae $1
+				
+	pat lae                            /* Load address of external */
+		yields {LABEL, $1}
+		
+	pat loe                            /* Load word external */
+		leaving
+			lae $1
+			loi QUAD
+
+	pat ste                            /* Store word external */
+		leaving
+			lae $1
+			sti QUAD
+			
+	pat zre                             /* Zero external */
+		leaving
+			loc 0
+			ste $1
+	
+	pat ine                             /* Increment external */
+		leaving
+            loe $1
+            inc
+            ste $1
+
+	pat dee                             /* Decrement external */
+		leaving
+            loe $1
+            dec
+            ste $1
+
+	pat lde                             /* Load double external */
+		leaving
+			lae $1
+			loi QUAD*2
+
+	pat sde                             /* Store double external */
+		leaving
+			lae $1
+			sti QUAD*2
+
+
+/* Structures */
+
+	pat lof                            /* Load word offsetted */
+		leaving
+			adp $1
+			loi QUAD
+
+	pat ldf                            /* Load double offsetted */
+		with GPR
+			uses reusing %1, REG=%1, REG
+			gen
+				add %a, GP
+				ld %b, {GPROFFSET, %a, $1+4}
+				ld %a, {GPROFFSET, %a, $1+0}
+			yields %a %b
+
+	pat stf                            /* Store word offsetted */
+		leaving
+			adp $1
+			sti QUAD
+
+	pat sdf                            /* Store double offsetted */
+		with GPR GPR GPR
+			uses reusing %3, REG=%3
+			gen
+				add %a, GP
+				st %1, {GPROFFSET, %a, $1+0}
+				st %2, {GPROFFSET, %a, $1+4}
+
+
+			
+
+/* Loads and stores */
+
+	pat loi $1==BYTE                   /* Load byte indirect */
+		with LABEL
+			uses REG
+			gen
+				ldb %a, %1
+			yields %a
+		with GPR
+			uses reusing %1, REG
+			gen
+				ldb %a, {GPRGPR, %1, GP}
+			yields %a
+
+	pat loi loc loc cii $1==WORD && $2==WORD && $3==QUAD /* Load short indirect and sign extend */
+		with LABEL
+			uses REG
+			gen
+				ldhs %a, %1
+			yields %a
+		with GPR
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				ldhs %a, {GPROFFSET, %a, 0}
+			yields %a
+		
+	pat loi $1==WORD                   /* Load short indirect */
+		with LABEL
+			uses REG
+			gen
+				ldh %a, %1
+			yields %a
+		with GPR
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				ldh %a, {GPROFFSET, %a, 0}
+			yields %a
+
+	pat loi $1==QUAD                   /* Load quad indirect */
+		with LABEL
+			uses REG
+			gen
+				ld %a, %1
+			yields %a
+		with GPR
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				ld %a, {GPROFFSET, %a, 0}
+			yields %a
+
+	pat loi $1==2*QUAD                 /* Load double-quad indirect */
+		with LABEL
+			uses REG, REG
+			gen
+				lea %b, %1
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+			yields %b %a
+		with GPR
+			uses reusing %1, REG, REG
+			gen
+				add %b, %1, GP
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+			yields %b %a
+
+	pat loi $1==3*QUAD                 /* Load triple-quad indirect */
+		with LABEL
+			uses REG, REG, REG
+			gen
+				lea %b, %1
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+				ld %b, {GPROFFSET, %b, 8}
+			yields %c %b %a
+		with GPR
+			uses reusing %1, REG, REG, REG
+			gen
+				add %b, %1, GP
+				ld %a, {GPROFFSET, %b, 0}
+				ld %b, {GPROFFSET, %b, 4}
+				ld %c, {GPROFFSET, %b, 8}
+			yields %c %b %a
+
+	pat loi                            /* Load arbitrary size */
+		leaving
+			loc $1
+			los QUAD
+					
+	pat los                            /* Load arbitrary size */
+		leaving
+			cal ".los"
+				
+	pat sti $1==BYTE                   /* Store byte indirect */
+		with LABEL GPR
+			gen
+				stb %2, %1
+		with LABEL SIGNEX8+SIGNEX16
+			gen
+				stb %2.reg, %1
+		with GPR GPR
+			gen
+				stb %2, {GPRGPR, %1, GP}
+		with GPR SIGNEX8+SIGNEX16
+			gen
+				stb %2.reg, {GPRGPR, %1, GP}
+
+	pat sti $1==WORD                  /* Store half-word indirect */
+		with LABEL GPR
+			gen
+				sth %2, %1
+		with LABEL SIGNEX16
+			gen
+				sth %2.reg, %1
+		with GPR GPR
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				sth %2, {GPROFFSET, %a, 0}
+		with GPR SIGNEX16
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				sth %2.reg, {GPROFFSET, %a, 0}
+
+	pat sti $1==QUAD                  /* Store quad indirect */
+		with LABEL GPR
+			gen
+				st %2, %1
+		with GPR GPR
+			uses reusing %1, REG
+			gen
+				add %a, %1, GP
+				st %2, {GPROFFSET, %a, 0}
+
+	pat sti $1==2*QUAD                 /* Load double-quad indirect */
+		with LABEL GPR GPR
+			uses REG
+			gen
+				lea %a, %1
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
+		with GPR GPR GPR
+			uses reusing %1, REG=%1
+			gen
+				add %a, GP
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
+
+	pat sti $1==3*QUAD                 /* Load triple-quad indirect */
+		with LABEL GPR GPR GPR
+			uses REG
+			gen
+				lea %a, %1
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
+				st %4, {GPROFFSET, %a, 8}
+		with GPR GPR GPR GPR
+			uses reusing %1, REG=%1
+			gen
+				add %a, GP
+				st %2, {GPROFFSET, %a, 0}
+				st %3, {GPROFFSET, %a, 4}
+				st %4, {GPROFFSET, %a, 8}
+
+	pat sti                            /* Store arbitrary size */
+		leaving
+			loc $1
+			sts QUAD
+					
+	pat sts                            /* Store arbitrary size */
+		leaving
+			cal ".sts"
+
+
+
+/* Arithmetic wrappers */
+
+	pat ads                            /* Add var to pointer */
+		leaving adi $1
+	
+	pat sbs                            /* Subtract var from pointer */
+		leaving sbi $1
+		
+	pat adp                            /* Add constant to pointer */
+		leaving
+			loc $1
+			adi QUAD
+
+	pat adu                            /* Add unsigned */
+		leaving
+			adi $1
+			
+	pat sbu                            /* Subtract unsigned */
+		leaving
+			sbi $1
+			
+	pat inc                            /* Add 1 */
+		leaving
+			loc 1
+			adi QUAD
+			
+	pat dec                            /* Subtract 1 */
+		leaving
+			loc 1
+			sbi QUAD
+	
+	pat loc mlu                        /* Unsigned multiply by constant */
+		leaving
+			loc $1
+			mli QUAD
+			
+	pat mlu                            /* Unsigned multiply by var */
+		leaving
+			mli QUAD
+			
+	pat loc slu                        /* Shift left unsigned by constant amount */
+		leaving
+			loc $1
+			sli $2
+			
+	pat slu                            /* Shift left unsigned by variable amount */
+		leaving
+			sli $1
+
+			
+			
+/* Word arithmetic */
+
+	pat loc adi $1==0                 /* Add nothing */
+		/* nop */
+
+	pat adi $1==QUAD                  /* Add word (second + top) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				add %a, %1
+			yields %a
+		with GPR GPR+CONST
+			uses reusing %1, REG=%1
+			gen
+				add %a, %2
+			yields %a
+
+	pat loc sbi $1==0                 /* Subtract nothing */
+		/* nop */
+
+	pat sbi $1==QUAD                  /* Subtract word (second - top) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				sub %a, %1
+			yields %a
+
+	pat mli $1==QUAD                  /* Multiply word (second * top) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				mul %a, %1
+			yields %a
+		with GPR GPR+CONST
+			uses reusing %1, REG=%1
+			gen
+				mul %a, %2
+			yields %a
+
+	pat mlu
+		leaving
+			mli $1
+
+	pat dvi $1==QUAD                  /* Divide word (second / top) */
+		with GPR GPR
+			uses reusing %2, REG
+			gen
+				divs %a, %2, %1
+			yields %a
+
+	pat dvu $1==QUAD                  /* Divide unsigned word (second / top) */
+		with GPR GPR
+			uses reusing %2, REG
+			gen
+				divu %a, %2, %1
+			yields %a
+
+	pat rmu $1==QUAD                  /* Remainder unsigned word (second % top) */
+		with GPR GPR
+			uses REG
+			gen
+				divu %a, %2, %1
+                mul %a, %1
+                rsb %a, %2
+			yields %a
+
+	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
+		with GPR GPR
+			uses REG
+			gen
+				divs %a, %2, %1
+                mul %a, %1
+                rsb %a, %2
+			yields %a
+
+	pat ngi $1==QUAD                  /* Negate word */
+		with GPR
+			uses reusing %1, REG=%1
+			gen
+				neg %a, %a
+			yields %a
+
+	pat and $1==QUAD                  /* AND word */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				and %a, %1
+			yields %a
+		with GPR GPR+CONST
+			uses reusing %1, REG=%1
+			gen
+				and %a, %2
+			yields %a
+
+	pat ior $1==QUAD                  /* OR word */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				or %a, %1
+			yields %a
+		with GPR GPR+CONST
+			uses reusing %1, REG=%1
+			gen
+				or %a, %2
+			yields %a
+
+	pat xor $1==QUAD                  /* XOR word */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				eor %a, %1
+			yields %a
+		with GPR GPR+CONST
+			uses reusing %1, REG=%1
+			gen
+				eor %a, %2
+			yields %a
+
+	pat com $1==QUAD                  /* Complement */
+		with GPR
+			uses reusing %1, REG=%1
+			gen
+                mvn %a, %1
+            yields %a
+
+	pat dvi $1==QUAD                  /* Divide word (second / top) */
+		with GPR GPR
+			uses reusing %2, REG
+			gen
+				divs %a, %2, %1
+			yields %a
+
+	pat dvu $1==QUAD                  /* Divide unsigned word (second / top) */
+		with GPR GPR
+			uses reusing %2, REG
+			gen
+				divu %a, %2, %1
+			yields %a
+
+	pat rmu $1==QUAD                  /* Remainder unsigned word (second % top) */
+		with GPR GPR
+			uses REG
+			gen
+				divu %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
+	pat rmi $1==QUAD                  /* Remainder signed word (second % top) */
+		with GPR GPR
+			uses REG
+			gen
+				divs %a, %2, %1
+                mul %a, %1
+                sub %a, %2
+			yields %a
+
+#if 0
+	pat mli $1==4                      /* Multiply word (second * top) */
+		with REG REG
+			uses reusing %2, REG
+			gen
+				mullw %a, %2, %1
+			yields %a
+		
+
+	pat xor $1==4                      /* XOR word */
+		with GPR GPR
+			yields {XOR_RR, %1, %2}
+		with GPR CONST
+			yields {XOR_RC, %1, %2.val}
+		with CONST GPR
+			yields {XOR_RC, %2, %1.val}
+	
+	pat xor !defined($1)               /* XOR set */
+		with STACK
+			gen
+				bl {LABEL, ".xor"}
+				
+	pat com $1==QUAD                  /* NOT word */
+		with AND_RR
+			uses REG
+			gen
+				nand %a, %1.reg1, %1.reg2
+			yields %a
+		with OR_RR
+			uses REG
+			gen
+				nor %a, %1.reg1, %1.reg2
+			yields %a
+		with XOR_RR
+			uses REG
+			gen
+				eqv %a, %1.reg1, %1.reg2
+			yields %a
+		with GPR
+			yields {NOT_R, %1}
+				
+	pat com !defined($1)               /* NOT set */
+		with STACK
+			gen
+				bl {LABEL, ".com"}
+#endif
+				
+	pat sli $1==4                      /* Shift left (second << top) */
+		with CONST+GPR GPR
+			uses reusing %2, REG=%2
+			gen
+            	lsl %a, %1
+			yields %a
+
+	pat sri $1==4                      /* Shift right signed (second >> top) */
+		with CONST+GPR GPR
+			uses reusing %2, REG=%2
+			gen
+				asr %2, %1
+			yields %a
+
+	pat sru $1==4                      /* Shift right unsigned (second >> top) */
+		with CONST+GPR GPR
+			uses reusing %2, REG=%2
+			gen
+				lsr %2, %1
+			yields %a
+
+
+
+/* Special arithmetic */
+
+	pat loc sli adi $1==1 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<1) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				adds2 %a, %1
+			yields %a
+
+	pat loc sli adi $1==2 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<2) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				adds4 %a, %1
+			yields %a
+
+	pat loc sli adi $1==3 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<3) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				adds8 %a, %1
+			yields %a
+
+	pat loc sli adi $1==4 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<4) */
+		with GPR+CONST GPR
+			uses reusing %2, REG=%2
+			gen
+				adds16 %a, %1
+			yields %a
+
+	pat loc sli adi $1==8 && $2==QUAD && $3==QUAD /* Shift and add (second + top<<8) */
+		with GPR GPR
+			uses reusing %2, REG
+			gen
+				adds256 %a, %2, %1
+			yields %a
+
+	pat loc sli ads
+		leaving
+			loc $1
+			sli $2
+			adi $3
+
+
+
+/* Arrays */
+
+	pat aar $1==QUAD                  /* Index array */
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".aar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
+			gen
+				bl {LABEL, ".aar4"}
+			yields R0
+
+	pat lae lar $2==QUAD && nicesize(rom($1, 3)) /* Load array */
+		leaving
+			lae $1
+			aar QUAD
+			loi rom($1, 3)
+
+	pat lar $1==QUAD                  /* Load array */
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".lar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
+			gen
+				bl {LABEL, ".lar4"}
+			yields R0
+
+	pat lae sar $2==QUAD && nicesize(rom($1, 3)) /* Store array */
+		leaving
+			lae $1
+			aar QUAD
+			sti rom($1, 3)
+
+	pat sar $1==QUAD                  /* Store array */
+		with STACK
+			uses GPR0
+			gen
+				bl {LABEL, ".sar4stack"}
+			yields R0
+		with GPR0 GPR1 GPR2
+			uses GPR0
+			gen
+				bl {LABEL, ".sar4"}
+
+
+			
+/* Sets */
+
+	pat set $1==QUAD                   /* Create quad with one bit set */
+		with GPR
+			uses reusing %1, REG
+			gen
+				bset %a, %1
+			yields %a
+
+	pat set defined($1)                /* Any other set */
+		leaving
+			loc $1
+			cal ".set"
+
+	pat set !defined($1)               /* Create structure with set bit (variable) */
+		leaving
+			cal ".set"
+
+	pat inn defined($1)                /* Test for set bit */
+		leaving
+			set $1
+			and $1
+
+	pat inn !defined($1)               /* Test for set bit (variable) */
+		leaving
+			cal ".inn"
+
+	pat ior !nicesize($1)              /* OR set */
+		leaving
+			cal ".ior"
+
+	pat ior !defined($1)               /* OR set */
+		leaving
+			cal ".ior"
+
+	pat and !nicesize($1)              /* AND set */
+		leaving
+			loc $1
+			cal ".and"
+
+	pat and !defined($1)               /* AND set */
+		leaving
+			cal ".and"
+				
+			
+			
+/* Boolean resolutions */
+
+	proc cm_t example teq
+		with GPR GPR
+			uses reusing %1, REG
+			gen
+				cmp %1, %2
+				mov %a, {CONST, 0}
+				add[1] %a, {CONST, 1}
+			yields %a
+
+	pat cmu teq call cm_t("add.eq")        /* top = (second == top) */
+	pat cmu tne call cm_t("add.ne")        /* top = (second != top) */
+	pat cmu tlt call cm_t("add.lo")        /* top = unsigned (second < top) */
+	pat cmu tle call cm_t("add.ls")        /* top = unsigned (second <= top) */
+	pat cmu tgt call cm_t("add.hi")        /* top = unsigned (second < top) */
+	pat cmu tge call cm_t("add.hs")        /* top = unsigned (second >= top) */
+	pat cmi teq call cm_t("add.eq")        /* top = (second == top) */
+	pat cmi tne call cm_t("add.ne")        /* top = (second != top) */
+	pat cmi tlt call cm_t("add.lt")        /* top = signed (second < top) */
+	pat cmi tle call cm_t("add.le")        /* top = signed (second <= top) */
+	pat cmi tgt call cm_t("add.gt")        /* top = signed (second < top) */
+	pat cmi tge call cm_t("add.ge")        /* top = signed (second >= top) */
+
+	proc cmf_t example teq
+		with GPR GPR
+			uses reusing %1, REG
+			gen
+				fcmp %a, %1, %2
+				mov %a, {CONST, 0}
+				add[1] %a, {CONST, 1}
+			yields %a
+
+	pat cmf teq call cmf_t("add.eq")        /* top = float (second == top) */
+	pat cmf tne call cmf_t("add.ne")        /* top = float (second != top) */
+	pat cmf tlt call cmf_t("add.lo")        /* top = float (second < top) */
+	pat cmf tle call cmf_t("add.ls")        /* top = float (second <= top) */
+	pat cmf tgt call cmf_t("add.hi")        /* top = float (second > top) */
+	pat cmf tge call cmf_t("add.hs")        /* top = float (second >= top) */
+
+	proc fallback_t example teq
+		with GPR
+			uses reusing %1, REG
+			gen
+				cmp %1, {CONST, 0}
+				mov %a, {CONST, 0}
+				add[1] %a, {CONST, 1}
+			yields %a
+
+	pat teq call fallback_t("add.eq")       /* top = float (top == 0) */
+	pat tne call fallback_t("add.ne")       /* top = float (top != 0) */
+	pat tlt call fallback_t("add.lo")       /* top = float (top < 0) */
+	pat tle call fallback_t("add.ls")       /* top = float (top <= 0) */
+	pat tgt call fallback_t("add.hi")       /* top = float (top > 0) */
+	pat tge call fallback_t("add.hs")       /* top = float (top >= 0) */
+
+
+
+/* Simple branches */
+
+	proc anyz example zeq
+		with GPR STACK
+			kills ALL
+			gen
+				cmp %1, {CONST, 0}
+				beq[1] {LABEL, $1}
+
+	pat zeq call anyz("b.eq")          /* Branch if signed top == 0 */
+	pat zne call anyz("b.ne")          /* Branch if signed top != 0 */
+	pat zgt call anyz("b.gt")          /* Branch if signed top > 0 */
+	pat zlt call anyz("b.lt")          /* Branch if signed top < 0 */
+	pat zge call anyz("b.ge")          /* Branch if signed top >= 0 */
+	pat zle call anyz("b.le")          /* Branch if signed top <= 0 */
+
+	proc anyb example beq
+		with GPR+CONST GPR STACK
+			kills ALL
+			gen
+				cmp %2, %1
+				beq[1] {LABEL, $1}
+
+	pat beq call anyb("b.eq")          /* Branch if signed second == top */
+	pat bne call anyb("b.ne")          /* Branch if signed second != top */
+	pat bgt call anyb("b.gt")          /* Branch if signed second > top */
+	pat bge call anyb("b.ge")          /* Branch if signed second >= top */
+	pat blt call anyb("b.lt")          /* Branch if signed second < top */
+	pat ble call anyb("b.le")          /* Branch if signed second <= top */
+
+	proc cmu_z example cmu zeq
+		with GPR+CONST GPR STACK
+			kills ALL
+			gen
+				cmp %2, %1
+				beq[1] {LABEL, $2}
+
+	pat cmu zeq call cmu_z("b.eq")   /* Branch if unsigned second == top */
+	pat cmu zne call cmu_z("b.ne")   /* Branch if unsigned second != top */
+	pat cmu zgt call cmu_z("b.hi")   /* Branch if unsigned second > top */
+	pat cmu zlt call cmu_z("b.lo")   /* Branch if unsigned second < top */
+	pat cmu zge call cmu_z("b.hs")   /* Branch if unsigned second >= top */
+	pat cmu zle call cmu_z("b.ls")   /* Branch if unsigned second <= top */
+	pat cmi zeq call cmu_z("b.eq")   /* Branch if signed second == top */
+	pat cmi zne call cmu_z("b.ne")   /* Branch if signed second != top */
+	pat cmi zgt call cmu_z("b.gt")   /* Branch if signed second > top */
+	pat cmi zlt call cmu_z("b.lt")   /* Branch if signed second < top */
+	pat cmi zge call cmu_z("b.ge")   /* Branch if signed second >= top */
+	pat cmi zle call cmu_z("b.le")   /* Branch if signed second <= top */
+
+	proc cmf_z example cmu zeq
+		with GPR GPR STACK
+			kills ALL
+			gen
+				fcmp %2, %2, %1
+				beq[1] {LABEL, $2}
+
+	pat cmf zeq call cmf_z("b.eq")   /* Branch if float second == top */
+	pat cmf zne call cmf_z("b.ne")   /* Branch if float second != top */
+	pat cmf zgt call cmf_z("b.gt")   /* Branch if float second > top */
+	pat cmf zlt call cmf_z("b.lt")   /* Branch if float second < top */
+	pat cmf zge call cmf_z("b.ge")   /* Branch if float second >= top */
+	pat cmf zle call cmf_z("b.le")   /* Branch if float second <= top */
+
+	pat cmp                            /* Compare pointers */
+		leaving
+			cmu QUAD
+			
+	pat cms $1==QUAD                  /* Compare blocks (word sized) */
+		leaving
+			cmi QUAD
+
+
+
+			
+
+/* Other branching and labelling */
+
+#if 0
+	pat lab topeltsize($1)<=4 && !fallthrough($1)
+		gen
+			labeldef $1
+			yields R0
+			
+	pat lab topeltsize($1)<=4 && fallthrough($1)
+		with GPR0
+			gen
+				labeldef $1
+			yields %1
+			
+	pat lab topeltsize($1)>4
+		with STACK
+			kills ALL
+			gen
+				labeldef $1
+
+        pat bra topeltsize($1)<=4          /* Unconditional jump with TOS register */
+                with GPR0 STACK
+                gen
+                        b {LABEL, $1}
+
+	pat bra topeltsize($1)>4           /* Unconditional jump without TOS register */
+		with STACK
+			gen
+				b {LABEL, $1}
+#endif
+
+	pat lab
+		with STACK
+			kills ALL
+			gen
+				labeldef $1
+
+	pat bra
+		with STACK
+			kills ALL
+			gen
+				b {LABEL, $1}
+			
+
+				
+						
+/* Miscellaneous */
+
+	pat cal                            /* Call procedure */
+		with STACK
+			kills ALL
+			gen
+				bl {LABEL, $1}
+
+	pat cai                            /* Call procedure indirect */
+		with GPR STACK
+			kills ALL
+			gen
+				bl %1
+
+	pat lfr $1==QUAD                  /* Load function result, word */
+		yields R0
+		
+	pat lfr $1==QUAD*2                /* Load function result, word */
+		yields R1 R0
+		
+	pat ret $1==0                      /* Return from procedure */
+		gen
+			mov SP, FP
+			pop FP, PC
+
+	pat ret $1==QUAD                  /* Return from procedure, word */
+		with GPR0
+			gen
+				mov SP, FP
+				pop FP, PC
+
+	pat ret $1==QUAD*2                /* Return from procedure, word */
+		with GPR GPR
+			gen
+				move %1, R0
+				move %2, R1
+				mov SP, FP
+				pop FP, PC
+
+	pat blm                            /* Block move constant length */
+		leaving
+			loc $1
+			bls
+
+	pat bls                            /* Block move variable length */
+		with STACK
+			kills ALL
+			gen
+				bl {LABEL, "_memmove"}
+
+	pat csa                            /* Array-lookup switch */
+		with GPR0 GPR1 STACK
+			kills ALL
+			gen
+				b {LABEL, ".csa"}
+
+	pat csb                            /* Table-lookup switch */
+		with GPR0 GPR1 STACK
+			kills ALL
+			gen
+				bl {LABEL, ".csb"}
+
+				
+
+/* EM specials */
+
+	pat fil                            /* Set current filename */
+		leaving
+			lae $1
+			ste ".filename"
+			
+	pat lin                            /* Set current line number */
+		leaving
+			loc $1
+			ste ".linenumber"
+
+	pat lni                            /* Increment line number */
+		leaving
+			ine ".linenumber"			
+			
+	pat lim                            /* Load EM trap ignore mask */
+		leaving
+			lde ".ignmask"
+			
+	pat sim                            /* Store EM trap ignore mask */
+		leaving
+			ste ".ignmask"
+			
+	pat trp                            /* Raise EM trap */
+		leaving
+			cal ".trap"
+				
+	pat sig                            /* Set trap handler */
+		leaving
+			ste ".trppc"
+			
+	pat rtt                            /* Return from trap */
+		leaving
+			ret 0
+			
+	pat lxl $1==0                      /* Load FP */
+		leaving
+			lor 0
+		
+	pat lxl $1==1                      /* Load caller's FP */
+		leaving
+			lxl 0
+			dch
+			
+	pat dch                            /* FP -> caller FP */
+		with GPR
+			uses reusing %1, REG
+			gen
+				ld %a, {GPROFFSET, %1, FP_OFFSET}
+				sub %a, GP
+			yields %a
+
+	pat lpb                            /* Convert FP to argument address */
+		leaving
+			adp EM_BSIZE
+			
+	pat lxa                            /* Load caller's SP */
+		leaving
+			lxl $1
+			lpb
+			
+	pat gto                            /* longjmp */
+		uses REG, REG
+		gen
+			move {LABEL, $1}, %a
+			ld %b, {GPROFFSET, %a, 8}
+			add FP, %b, GP
+			ld %b, {GPROFFSET, %a, 4}
+			add SP, %b, GP
+			ld %b, {GPROFFSET, %a, 0}
+			add %b, GP
+			b %b
+
+#if 0
+			
+	pat gto                            /* longjmp */
+		with STACK
+			gen
+				ld {LABEL, $1+2}
+				wspec {CONST, 1}
+				ld {LABEL, $1+4}
+				wspec {CONST, 0}
+				ld {LABEL, $1+0}
+				wspec {CONST, 2}
+			
+	pat str $1==1                      /* Store special GPRister */
+		with GPR0
+			gen
+				wspec {CONST, $1}
+				
+#endif
+
+	pat lor $1==0                      /* Load FP */
+		uses REG
+		gen
+			move FP, %a
+		yields %a
+		
+	pat lor $1==1                      /* Load SP */
+		uses REG
+		gen
+			move SP, %a
+		yields %a
+		
+	pat lor $1==2                      /* Load HP */
+		leaving
+			loe ".reghp"
+			
+	pat str $1==0                      /* Store FP */
+		with GPR
+			gen
+				sub FP, %1, GP
+
+	pat str $1==1                      /* Store SP */
+		with GPR
+			gen
+				sub SP, %1, GP
+
+	pat str $1==2                      /* Store HP */
+		leaving
+			ste ".reghp"
+
+	pat ass                            /* Adjust stack by variable amount */
+		with CONST+GPR STACK
+		gen
+			add SP, %1
+
+	pat asp $1==QUAD                   /* Adjust stack by constant amount */
+		with GPR
+			/* silently ignore GPR */
+		with STACK
+			gen
+				pop SCRATCH
+
+	pat asp $1==(2*QUAD)               /* Adjust stack by constant amount */
+		with GPR GPR
+			/* silently ignore GPR */
+		with STACK
+			gen
+				add SP, {CONST, 2*QUAD}
+
+	pat asp                            /* Adjust stack by constant amount */
+		leaving
+			loc $1
+			ass
+
+
+
+/* Floating point */
+
+	pat ngf                            /* Negate float */
+		leaving
+			loc 0
+			exg QUAD
+			sbf QUAD
+
+	proc simple_f example adf
+		with GPR GPR
+			uses reusing %1, REG
+			gen
+				fadd[1] %a, %2, %1
+			yields %a
+
+	pat adf call simple_f("fadd")      /* Float subtract (second + top) */
+	pat sbf call simple_f("fsub")      /* Float subtract (second - top) */
+	pat mlf call simple_f("fmul")      /* Float multiply (second * top) */
+	pat dvf call simple_f("fdiv")      /* Float divide (second / top) */
+
+	pat loc loc cff $1==$2 && $1==QUAD /* Convert float to float */
+		leaving
+			nop
+                                        
+	pat loc loc cfi $1==$2 && $1==QUAD /* Convert float -> integer */
+		with GPR
+			uses reusing %1, REG
+			gen
+				ftrunc %a, %1
+			yields %a
+
+	pat loc loc cfu $1==$2 && $1==QUAD /* Convert float -> unsigned */
+		with GPR
+			uses reusing %1, REG
+			gen
+				ftrunc %a, %1
+			yields %a
+
+	pat loc loc cif $1==$2 && $1==QUAD /* Convert integer -> float */
+		with GPR
+			uses reusing %1, REG
+			gen
+				flts %a, %1
+			yields %a
+
+	pat loc loc cuf $1==$2 && $1==QUAD /* Convert unsigned -> float */
+		with GPR
+			uses reusing %1, REG
+			gen
+				fltu %a, %1
+			yields %a
+
+	pat fef                            /* Split float */
+		leaving
+			loc 0
+			loc 0
+#if 0
+			cal ".cuf"
+			lfr QUAD*2
+#endif
+
+	pat fif                            /* Multiply float and split (?) */
+		leaving
+			mlf QUAD
+			fef
+
+	pat zrf                            /* Load a floating zero */
+		leaving
+			loc 0

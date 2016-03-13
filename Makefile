@@ -54,6 +54,8 @@ CFLAGS += \
 
 LDFLAGS +=
 
+ACKFLAGS = -Ih
+
 all: installables
 
 .DELETE_ON_ERROR:
@@ -101,6 +103,7 @@ include mach/i386/build.mk
 include mach/i86/build.mk
 include mach/m68020/build.mk
 # include mach/powerpc/build.mk
+include mach/vc4/build.mk
 
 include plat/build.mk
 include plat/pc86/build.mk
@@ -108,6 +111,7 @@ include plat/cpm/build.mk
 include plat/linux386/build.mk
 include plat/linux68k/build.mk
 # include plat/linuxppc/build.mk
+include plat/rpi/build.mk
 
 .PHONY: installables
 installables: $(INSTALLABLES)

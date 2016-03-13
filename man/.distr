@@ -1,14 +1,8 @@
-6500_as.6
-6800_as.6
-6805_as.6
-6809_as.6
-8080_as.6
-z8000_as.6
+i80_as.6
 i86_as.6
 i386_as.6
-m68k2_as.6
-ns_as.6
-pdp_as.6
+m68020_as.6
+vc4_as.6
 z80_as.6
 em_cg.6
 em_ncg.6
@@ -17,4 +11,3 @@ libpc.7
 head
 pc_prlib.7
 uni_ass.6
-proto.make

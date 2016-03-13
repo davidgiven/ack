@@ -8,6 +8,8 @@ static char rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
 #include "out.h"
 #include "const.h"
 #include "debug.h"
@@ -43,6 +45,65 @@ static long read4(char* addr, int type)
 		return ((long)word1 << (2 * WIDTH)) + word0;
 }
 
+/* VideoCore 4 fixups are complex as we need to patch the instruction in
+ * one of several different ways (depending on what the instruction is).
+ */
+
+static long get_vc4_valu(char* addr)
+{
+	uint16_t opcode = read2(addr, 0);
+
+	if ((opcode & 0xff00) == 0xe700)
+	{
+		/* ld<w> rd, $+o:  [1110 0111 ww 0 d:5] [11111 o:27]
+		 * st<w> rd, $+o:  [1110 0111 ww 1 d:5] [11111 o:27]
+		 */
+
+		int32_t value = read4(addr+2, 0);
+		value &= 0x07ffffff;
+		value = value<<5>>5;
+		return value;
+	}
+
+	if ((opcode & 0xf080) == 0x9000)
+	{
+		/* b<cc> $+o*2:  [1001 cccc 0ooo oooo] [oooo oooo oooo oooo]
+		 * Yes, big-endian (the first 16 bits is the MSB).
+		 */
+
+		uint32_t value = read4(addr, RELWR);
+		value &= 0x007fffff;
+		value = value<<9>>9;
+		value *= 2;
+		return value;
+	}
+
+	if ((opcode & 0xf080) == 0x9080)
+	{
+		/* bl $+o*2:  [1001 oooo 1ooo oooo] [oooo oooo oooo oooo]
+		 * Yes, big-endian (the first 16 bits is the MSB).
+		 * (Note that o is split.)
+		 */
+
+		int32_t value = read4(addr, RELWR);
+		int32_t lov = value & 0x007fffff;
+		int32_t hiv = value & 0x0f000000;
+		value = lov | (hiv>>1);
+		value = value<<5>>5;
+		value *= 2;
+		return value;
+	}
+
+	if ((opcode & 0xffe0) == 0xe500)
+	{
+        /* lea: [1110 0101 000 d:5] [o:32] */
+
+        return read4(addr+2, 0);
+    }
+
+	assert(0 && "unrecognised VC4 instruction");
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
@@ -63,6 +124,8 @@ getvalu(addr, type)
 		return read4(addr, type) & 0x03FFFFFD;
 	case RELOH2:
 		return read2(addr, type) << 16;
+	case RELOVC4:
+		return get_vc4_valu(addr);
 	default:
 		fatal("bad relocation size");
 	}
@@ -106,6 +169,60 @@ static void write4(long valu, char* addr, int type)
 	}
 }
 
+/* VideoCore 4 fixups are complex as we need to patch the instruction in
+ * one of several different ways (depending on what the instruction is).
+ */
+
+static void put_vc4_valu(char* addr, long value)
+{
+	uint16_t opcode = read2(addr, 0);
+
+	if ((opcode & 0xff00) == 0xe700)
+	{
+		/* ld<w> rd, o, (pc):  [1110 0111 ww 0 d:5] [11111 o:27]
+		 * st<w> rd, o, (pc):  [1110 0111 ww 1 d:5] [11111 o:27]
+		 */
+
+		uint32_t v = read4(addr+2, 0);
+		v &= 0xf8000000;
+		v |= value & 0x07ffffff;
+		write4(v, addr+2, 0);
+	}
+	else if ((opcode & 0xf080) == 0x9000)
+	{
+		/* b<cc> dest:  [1001 cccc 0ooo oooo] [oooo oooo oooo oooo]
+		 * Yes, big-endian (the first 16 bits is the MSB).
+		 */
+
+		uint32_t v = read4(addr, RELWR);
+		v &= 0xff800000;
+		v |= (value/2) & 0x007fffff;
+		write4(v, addr, RELWR);
+	}
+	else if ((opcode & 0xf080) == 0x9080)
+	{
+		/* bl dest:  [1001 oooo 1ooo oooo] [oooo oooo oooo oooo]
+		 * Yes, big-endian (the first 16 bits is the MSB).
+		 * (Note that o is split.)
+		 */
+
+		uint32_t v = read4(addr, RELWR);
+		uint32_t lovalue = (value/2) & 0x007fffff;
+		uint32_t hivalue = (value/2) & 0x07800000;
+		v &= 0xf0800000;
+		v |= lovalue | (hivalue<<1);
+		write4(v, addr, RELWR);
+	}
+	else if ((opcode & 0xffe0) == 0xe500)
+	{
+        /* lea: [1110 0101 000 d:5] [o:32] */
+
+		write4(value, addr+2, 0);
+    }
+    else
+		assert(0 && "unrecognised VC4 instruction");
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
@@ -137,6 +254,9 @@ putvalu(valu, addr, type)
 	}
 	case RELOH2:
 		write2(valu>>16, addr, type);
+		break;
+	case RELOVC4:
+		put_vc4_valu(addr, valu);
 		break;
 	default:
 		fatal("bad relocation size");

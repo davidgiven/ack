@@ -16,6 +16,7 @@ define build-libcc-ansi-headers-impl
 		float.h \
 		limits.h \
 		math.h \
+		malloc.h \
 		setjmp.h \
 		signal.h \
 		stdarg.h \

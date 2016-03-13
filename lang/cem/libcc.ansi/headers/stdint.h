@@ -26,7 +26,7 @@ typedef unsigned short  uint16_t;
 
 #if	_EM_WSIZE == 4
 typedef signed int      int32_t;
-typedef unsigned short  uint32_t;
+typedef unsigned int    uint32_t;
 #else
 typedef signed long     int32_t;
 typedef unsigned long   uint32_t;

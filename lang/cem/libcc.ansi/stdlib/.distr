@@ -17,6 +17,7 @@ mbstowcs.c
 mbtowc.c
 qsort.c
 rand.c
+setenv.c
 strtod.c
 strtol.c
 system.c

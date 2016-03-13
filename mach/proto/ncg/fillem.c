@@ -82,6 +82,8 @@ extern char em_flag[];
 extern short em_ptyp[];
 extern double atof();
 
+void prolog(full nlocals);
+
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
 */

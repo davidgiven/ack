@@ -3,6 +3,7 @@ define reset
 	$(eval o :=)
 	$(eval s :=)
 	$(eval cflags :=)
+	$(eval ackflags :=)
 	$(eval ldflags :=)
 	$(eval objdir :=)
 endef
