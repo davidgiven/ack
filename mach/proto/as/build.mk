@@ -38,7 +38,7 @@ $(OBJDIR)/$D/preprocessed-comm2.y: mach/proto/as/comm2.y $(CPPANSI) \
 		-Ih \
 		mach/proto/as/comm2.y > $$@
 
-	$(call file, $(LIBOBJECT))
+	$(call rawfile, $(LIBOBJECT))
     $(call cprogram, $(BINDIR)/$(PLATFORM)/as)
     $(call installto, $(PLATDEP)/$(PLATFORM)/as)
 

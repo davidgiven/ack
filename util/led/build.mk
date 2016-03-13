@@ -16,8 +16,8 @@ define build-led-impl
 	$(call cfile, $D/sym.c)
 	$(call cfile, $D/write.c)
 
-	$(call file, $(LIBSTRING))
-	$(call file, $(LIBOBJECT))
+	$(call rawfile, $(LIBSTRING))
+	$(call rawfile, $(LIBOBJECT))
 
 	$(call cprogram, $(BINDIR)/em_led)
 	$(call installto, $(PLATDEP)/em_led)

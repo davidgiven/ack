@@ -6,10 +6,10 @@ define build-aal-impl
 
 	$(call cfile, $D/archiver.c)
 
-	$(call file, $(LIBOBJECT))
-	$(call file, $(LIBPRINT))
-	$(call file, $(LIBSTRING))
-	$(call file, $(LIBSYSTEM))
+	$(call rawfile, $(LIBOBJECT))
+	$(call rawfile, $(LIBPRINT))
+	$(call rawfile, $(LIBSTRING))
+	$(call rawfile, $(LIBSYSTEM))
 
 	$(call cprogram, $(BINDIR)/aal)
 	$(call installto, $(INSDIR)/bin/aal)

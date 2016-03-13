@@ -3,12 +3,13 @@ D := util/data
 define util-data-impl
 
 $(eval g := \
+	$(OBJDIR)/$D/em_flag.c \
+	$(OBJDIR)/$D/em_pseu.c \
+	$(OBJDIR)/$D/em_mnem.c \
 	$(INCDIR)/em_spec.h \
 	$(INCDIR)/em_pseu.h \
 	$(INCDIR)/em_mnem.h \
-	$(OBJDIR)/$D/em_flag.c \
-	$(OBJDIR)/$D/em_pseu.c \
-	$(OBJDIR)/$D/em_mnem.c)
+)
 
 $(eval CLEANABLES += $g)
 $(wordlist 2, $(words $g), $g): $(firstword $g)

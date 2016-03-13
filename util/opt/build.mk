@@ -10,11 +10,13 @@ $(call yacc, $(OBJDIR)/$D, $D/mktab.y)
 $(call flex, $(OBJDIR)/$D, $D/scan.l)
 $(call dependson, $(OBJDIR)/$D/y.tab.h)
 
-$(call file, $(LIBEM_DATA))
-$(call file, -lfl)
+$(call rawfile, $(LIBEM_DATA))
 $(call cprogram, $(OBJDIR)/$D/mktab)
 
 endef
+
+.PHONY: -lfl
+-lfl:
 
 define build-opt-impl
 
@@ -53,12 +55,12 @@ $g: $(OBJDIR)/$D/mktab $D/patterns $(BINDIR)/cpp.ansi
 	$(hide) $(BINDIR)/cpp.ansi < $D/patterns | $(OBJDIR)/$D/mktab > $$@
 $(call cfile, $g)
 
-$(call file, $(LIBEM_DATA))
-$(call file, $(LIBASSERT))
-$(call file, $(LIBPRINT))
-$(call file, $(LIBALLOC))
-$(call file, $(LIBSYSTEM))
-$(call file, $(LIBSTRING))
+$(call rawfile, $(LIBEM_DATA))
+$(call rawfile, $(LIBASSERT))
+$(call rawfile, $(LIBPRINT))
+$(call rawfile, $(LIBALLOC))
+$(call rawfile, $(LIBSYSTEM))
+$(call rawfile, $(LIBSTRING))
 
 $(eval $q: $(INCDIR)/em_spec.h)
 

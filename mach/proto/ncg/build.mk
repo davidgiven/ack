@@ -36,8 +36,8 @@ $(call cfile, $(OBJDIR)/$D/tables.c)
 
 $(eval $q: $(INCDIR)/flt_arith.h)
 
-$(call file, $(LIBEM_DATA))
-$(call file, $(LIBFLT_ARITH))
+$(call rawfile, $(LIBEM_DATA))
+$(call rawfile, $(LIBFLT_ARITH))
 
 $(call cprogram, $(BINDIR)/$(PLATFORM)/ncg)
 $(call installto, $(PLATDEP)/$(PLATFORM)/ncg)

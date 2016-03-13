@@ -52,7 +52,7 @@ endef
 
 # --- Add a raw to the queue
 
-define file
+define rawfile
 	$(eval q += $1)
 endef
 
