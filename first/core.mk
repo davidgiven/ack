@@ -28,6 +28,26 @@ define cfile
 	$(eval $(cfile-rule))
 endef
 
+# --- Host preprocessor
+
+define cppfile-rule
+$o: $s
+	@echo CPP $o
+	@mkdir -p $(dir $o)
+	@$(CC) $(CFLAGS) $(cflags) -MM -MQ $o -o $d -x c $s
+	$(hide) $(CC) $(CFLAGS) $(cflags) -E -P -o $o -x c $s
+endef
+
+define cppfile
+	$(eval s := $1)
+	$(eval o := $(OBJDIR)/$(objdir)/$(1:=.m))
+	$(eval d := $(OBJDIR)/$(objdir)/$(1:=.d))
+	$(eval DEPENDS += $d)
+	$(eval CLEANABLES += $o $d)
+	$(eval q += $o)
+	$(eval $(cppfile-rule))
+endef
+
 # --- ACK compiler
 
 define ackfile-rule
