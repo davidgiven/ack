@@ -6,22 +6,25 @@
 
 #ifndef __OUT_H_INCLUDED
 #define __OUT_H_INCLUDED
+
+#include <stdint.h>
+
 /*
  * output format for ACK assemblers
  */
 
 struct outhead {
-	unsigned short 	oh_magic;	/* magic number */
-	unsigned short 	oh_stamp;	/* version stamp */
-	unsigned short	oh_flags;	/* several format flags */
-	unsigned short	oh_nsect;	/* number of outsect structures */
-	unsigned short	oh_nrelo;	/* number of outrelo structures */
-	unsigned short	oh_nname;	/* number of outname structures */
-	long	oh_nemit;		/* sum of all os_flen */
-	long	oh_nchar;		/* size of string area */
+	uint16_t oh_magic;	/* magic number */
+	uint16_t oh_stamp;	/* version stamp */
+	uint16_t oh_flags;	/* several format flags */
+	uint16_t oh_nsect;	/* number of outsect structures */
+	uint16_t oh_nrelo;	/* number of outrelo structures */
+	uint16_t oh_nname;	/* number of outname structures */
+	uint32_t oh_nemit;		/* sum of all os_flen */
+	uint32_t oh_nchar;		/* size of string area */
 };
 
-#define O_MAGIC	0x0201			/* magic number of output file */
+#define O_MAGIC	0x0202			/* magic number of output file */
 #define	O_STAMP	0			/* version stamp */
 #define MAXSECT	64			/* Maximum number of sections */
 
@@ -29,18 +32,19 @@ struct outhead {
 #define	HF_8086	0x0008			/* os_base specially encoded */
 
 struct outsect {
-	long 	os_base;		/* startaddress in machine */
-	long	os_size;		/* section size in machine */
-	long	os_foff;		/* startaddress in file */
-	long	os_flen;		/* section size in file */
-	long	os_lign;		/* section alignment */
+	uint32_t os_base;		/* startaddress in machine */
+	uint32_t os_size;		/* section size in machine */
+	uint32_t os_foff;		/* startaddress in file */
+	uint32_t os_flen;		/* section size in file */
+	uint32_t os_lign;		/* section alignment */
 };
 
 struct outrelo {
-	char	or_type;		/* type of reference */
-	char	or_sect;		/* referencing section */
-	unsigned short	or_nami;	/* referenced symbol index */
-	long	or_addr;		/* referencing address */
+	uint16_t or_type;		/* type of reference */
+	uint16_t or_sect;		/* referencing section */
+	uint16_t or_nami;       /* referenced symbol index */
+	uint16_t _padding;      /* padding for alignment */
+	uint32_t or_addr;		/* referencing address */
 };
 
 struct outname {
@@ -50,15 +54,15 @@ struct outname {
 	}	on_u;
 #define on_mptr	on_u.on_ptr
 #define on_foff	on_u.on_off
-	unsigned short	on_type;	/* symbol type */
-	unsigned short	on_desc;	/* debug info */
-	long	on_valu;		/* symbol value */
+	uint16_t on_type;		/* symbol type */
+	uint16_t on_desc;		/* debug info */
+	uint32_t on_valu;		/* symbol value */
 };
 
 /*
  * relocation type bits
  */
-#define RELSZ	0x07			/* relocation length */
+#define RELSZ	0x0fff			/* relocation length */
 #define RELO1	   1			/* 1 byte */
 #define RELO2	   2			/* 2 bytes */
 #define RELO4	   3			/* 4 bytes */
@@ -66,9 +70,9 @@ struct outname {
 #define RELOH2     5            /* write top 2 bytes of 4 byte word */
 #define RELOVC4    6            /* VideoCore IV address in 32-bit instruction */
 
-#define RELPC	0x08			/* pc relative */
-#define RELBR	0x10			/* High order byte lowest address. */
-#define RELWR	0x20			/* High order word lowest address. */
+#define RELPC	0x2000			/* pc relative */
+#define RELBR	0x4000			/* High order byte lowest address. */
+#define RELWR	0x8000			/* High order word lowest address. */
 
 /*
  * section type bits and fields
