@@ -1,0 +1,28 @@
+#	$Id: Makefile.in,v 1.7 2011/06/07 13:56:05 plunky Exp $
+#
+# Makefile.in for top-level of pcc.
+#
+
+@SET_MAKE@
+
+ALL_SUBDIRS=    f77 fcom
+DIST_SUBDIRS=   $(ALL_SUBDIRS)
+
+all install clean:
+	@for subdir in $(ALL_SUBDIRS); do \
+		_nextdir_=$${_thisdir_+$$_thisdir_/}$$subdir; \
+		echo "===> $$_nextdir_"; \
+		(_thisdir_=$$_nextdir_; export _thisdir_; cd $$subdir && \
+		    exec $(MAKE) $(MFLAGS) $@) || exit $$?; \
+		echo "<=== $$_nextdir_"; \
+	done
+
+distclean:
+	@for subdir in $(DIST_SUBDIRS); do \
+		_nextdir_=$${_thisdir_+$$_thisdir_/}$$subdir; \
+		echo "===> $$_nextdir_"; \
+		(_thisdir_=$$_nextdir_; export _thisdir_; cd $$subdir && \
+		    exec $(MAKE) $(MFLAGS) $@) || exit $$?; \
+		echo "<=== $$_nextdir_"; \
+	done
+	rm -f Makefile
