@@ -82,10 +82,9 @@ AtEoIF()
 	}
 	IncludeLevel--;
 #endif
-	if (WorkingDir[0] != '\0') free(WorkingDir);
+	/* We don't free WorkingDir and FileName here because the rest of the
+	 * compiler may be holding pointers to them for displaying error messages.
+	 */
 #endif /* NOPP */
-#ifndef LINT
-	if (FileName != source) free(FileName);
-#endif
 	return 0;
 }
