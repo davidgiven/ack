@@ -11,9 +11,12 @@ DEFAULT_PLATFORM = pc86
 
 ACK_TEMP_DIR = /tmp
 
-# Where is the ACK going to be installed, eventually?
+# Where is the ACK going to be installed, eventually? If you don't want to
+# install it and just want to run the ACK from the build directory
+# (/tmp/ack-build/staging, by default), leave this as $(INSDIR).
 
-PREFIX = /usr/local
+#PREFIX = /usr/local
+PREFIX = $(INSDIR)
 
 # Where do you want to put the object files used when building?
 
