@@ -11,9 +11,6 @@ rd_ranlib(fd, ran, cnt)
 	register long	cnt;
 {
 	rd_bytes(fd, (char *) ran, cnt * SZ_RAN);
-#if BYTE_ORDER == 0x0123
-	if (sizeof (struct ranlib) != SZ_RAN)
-#endif
 	{
 		register char *c = (char *) ran + cnt * SZ_RAN;
 

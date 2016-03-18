@@ -281,8 +281,8 @@ newrelo(s, n)
 		return;
 	}
 	s &= ~S_VAR;
-	outrelo.or_type = (char)n;
-	outrelo.or_sect = (char)DOTTYP;
+	outrelo.or_type = n;
+	outrelo.or_sect = DOTTYP;
 #ifndef ASLD
 	if (s == S_UND || iscomm) {
 		assert(relonami != 0);
