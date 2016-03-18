@@ -65,4 +65,13 @@ endef
 
 build-platform = $(eval $(call build-platform-impl, $1))
 
+define build-pcc-platform-impl
+	$(eval PLATFORM_$(PLATFORM) := \
+			$(PLATDEP)/$(PLATFORM)/pcc_ccom \
+	)
+
+	$(call build-pcc)
+endef
+
+build-pcc-platform = $(eval $(call build-pcc-platform-impl, $1))
 

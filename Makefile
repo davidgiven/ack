@@ -91,6 +91,7 @@ include lang/cem/build.mk
 include lang/basic/build.mk
 include lang/pc/build.mk
 include lang/m2/build.mk
+include lang/pcc/build.mk
 
 include mach/proto/as/build.mk
 include mach/proto/ncg/build.mk
@@ -102,7 +103,7 @@ include mach/i80/build.mk
 include mach/i386/build.mk
 include mach/i86/build.mk
 include mach/m68020/build.mk
-# include mach/powerpc/build.mk
+include mach/powerpc/build.mk
 include mach/vc4/build.mk
 
 include plat/build.mk
@@ -110,7 +111,8 @@ include plat/pc86/build.mk
 include plat/cpm/build.mk
 include plat/linux386/build.mk
 include plat/linux68k/build.mk
-# include plat/linuxppc/build.mk
+#include plat/linuxppc/build.mk
+include plat/linuxarm/build.mk
 include plat/rpi/build.mk
 
 .PHONY: installables
