@@ -8,7 +8,7 @@ endef
 
 define build-platform-impl
     $(call reset)
-	$(eval q := $D/descr)
+	$(call rawfile, $D/descr)
 	$(call installto, $(PLATIND)/descr/$(PLATFORM))
 
 	$(foreach f, $(platform-headers), $(call build-platform-headers, $f))
@@ -66,10 +66,17 @@ endef
 build-platform = $(eval $(call build-platform-impl, $1))
 
 define build-pcc-platform-impl
+    $(call reset)
+	$(call rawfile, $D/descr)
+	$(call installto, $(PLATIND)/descr/$(PLATFORM))
+
 	$(eval PLATFORM_$(PLATFORM) := \
+			$(PLATIND)/descr/$(PLATFORM) \
+			$(PLATDEP)/$(PLATFORM)/as \
 			$(PLATDEP)/$(PLATFORM)/pcc_ccom \
 	)
 
+	$(call build-as)
 	$(call build-pcc)
 endef
 
