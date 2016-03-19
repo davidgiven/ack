@@ -1,21 +1,22 @@
 /* $Header; mach0.c, v1.2 06-Mar-89 AJM */
 
-#define LISTING
-#define ASLD
+#include <stdint.h>
+
 #define THREE_PASS
-#define DEBUG 0
+#define LISTING     /* enable listing facilities */
+#define RELOCATION  /* generate relocation info */
 /*
 #define WORDS_REVERSED
 #define BYTES_REVERSED
 */
 #undef valu_t
-#define valu_t 	long
+#define valu_t 	int32_t
 
 #undef ADDR_T
-#define ADDR_T long
+#define ADDR_T uint32_t
 
 #undef word_t
-#define word_t	long
+#define word_t	uint32_t
 
 #undef ALIGNWORD
 #define ALIGNWORD	4

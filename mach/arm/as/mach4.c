@@ -1,7 +1,7 @@
 /* $Id: mach4.c, v1.9 15-Mar-89 AJM */
 
 operation	: BRANCH optlink expr
-			{branch($1, $2, $3.val);}
+			{branch($1, $2, &$3);}
 		| DATA1 optcond opts optp REG ',' REG ',' operand
 			{data($1,$2|$3|$4|$5<<12|$7<<16,$9.val,$9.typ);}
 		| DATA2 optcond opts optp REG ',' operand

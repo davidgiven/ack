@@ -1,19 +1,29 @@
-/* $Id: mach5.c, v3.3 25-Apr-89 AJM */
+#include <stdint.h>
 
-branch(brtyp, link, val)
-word_t brtyp;
-word_t link;
-valu_t val;
+#define maskx(v, x) (v & ((1<<(x))-1))
+
+void branch(word_t brtyp, word_t link, struct expr_t* expr)
 {
-	valu_t offset;
+	uint32_t pc = DOTVAL;
+	uint32_t type = expr->typ & S_TYP;
+	int d;
 
-	offset = val - DOTVAL - 8;		/* Allow for pipeline */
-	if ((offset & 0xFC000000) != 0 && (offset & 0xFC000000) != 0xFC000000){
-		serror("offset out of range");
-	}
-	offset = offset>>2 & 0xFFFFFF; 
-	emit4(brtyp|link|offset);
-	return;
+	/* Sanity checking. */
+
+	if (type == S_ABS)
+		serror("can't use absolute addresses here");
+	
+	/* Calculate the instruction displacement. */
+
+	d = (int32_t)expr->val - (int32_t)pc;
+	if ((pass == 2) && (d > 0) && !(expr->typ & S_DOT))
+		d -= DOTGAIN;
+	d = (d - 8) >> 2;
+
+	if (type != DOTTYP)
+		newrelo(expr->typ, RELOARM|RELPC);
+
+	emit4(brtyp|link | maskx(d, 24));
 }
 
 data(opc, ins, val, typ)
