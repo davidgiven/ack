@@ -1803,25 +1803,25 @@ struct optab table[] = {
         SAREG,  TWORD|TPOINT|TSHORT|TUSHORT|TCHAR|TUCHAR,
         SANY,   TWORD|TPOINT|TSHORT|TUSHORT|TCHAR|TUCHAR,
                 0,      0,
-		"	stmfd sp!,{AL}" COM "save function arg to stack\n", },
+		"	stmfd sp<,{AL}" COM "save function arg to stack\n", },
 
 { FUNARG,       FOREFF,
         SBREG,  TLONGLONG|TULONGLONG,
         SANY,	TLONGLONG|TULONGLONG,
                 0,      0,
-		"	stmfd sp!,{AL,UL}" COM "save function arg to stack (endianness problem here?)\n", },
+		"	stmfd sp<,{AL,UL}" COM "save function arg to stack (endianness problem here?)\n", },
 
 { FUNARG,	FOREFF,
 	SCREG,	TFLOAT,
 	SANY,	TFLOAT,
 		0,	0,
-		"	stmfd sp!,{AL}" COM "save function arg to stack\n", },
+		"	stmfd sp<,{AL}" COM "save function arg to stack\n", },
 
 { FUNARG,       FOREFF,
         SCREG,  TDOUBLE|TLDOUBLE,
         SANY,  TDOUBLE|TLDOUBLE,
                 0,      0,
-		"	stmfd sp!,{AL,UL}" COM "save function arg to stack (endianness problem here?)\n", },
+		"	stmfd sp<,{AL,UL}" COM "save function arg to stack (endianness problem here?)\n", },
 
 # define DF(x) FORREW,SANY,TANY,SANY,TANY,REWRITE,x,""
 

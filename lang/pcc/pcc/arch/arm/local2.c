@@ -193,7 +193,7 @@ prologue(struct interpass_prolog *ipp)
 
 	printf("\tsub %s,%s,#%d\n", rnames[SP], rnames[SP], 16);
 	printf("\tmov %s,%s\n", rnames[IP], rnames[SP]);
-	printf("\tstmfd %s!,{%s,%s,%s,%s}\n", rnames[SP], rnames[FP],
+	printf("\tstmfd %s<,{%s,%s,%s,%s}\n", rnames[SP], rnames[FP],
 	    rnames[IP], rnames[LR], rnames[PC]);
 	printf("\tsub %s,%s,#4\n", rnames[FP], rnames[IP]);
 
@@ -224,8 +224,6 @@ eoftn(struct interpass_prolog *ipp)
 		    rnames[SP], rnames[PC]);
 		printf("\tadd %s,%s,#%d\n", rnames[SP], rnames[SP], 16);
 	}
-	printf("\t.size %s,.-%s\n", exname(ipp->ipp_name),
-	    exname(ipp->ipp_name));
 }
 
 
@@ -1054,10 +1052,10 @@ flshlab(void)
 		int l = 32+strlen(el->name);
 		c = tmpalloc(l);
 		if (el->num)
-			snprintf(c, l, "%s:\n\t.word %s+%d\n",
+			snprintf(c, l, "%s:\n\t.data4 %s+%d\n",
 			    el->str, el->name, el->num);
 		else
-			snprintf(c, l, "%s:\n\t.word %s\n", el->str, el->name);
+			snprintf(c, l, "%s:\n\t.data4 %s\n", el->str, el->name);
 		ip = anode(c);
 		DLIST_INSERT_BEFORE(ipbase, ip, qelem);
 	}
@@ -1116,10 +1114,10 @@ prtaddr(NODE *p, void *arg)
 		lab = prtnumber++;
 		if (nodcnt <= 1000 && notfirst == 0) {
 			if (getlval(l))
-				printf(PRTLAB ":\n\t.word %s+%lld\n",
+				printf(PRTLAB ":\n\t.data4 %s+%lld\n",
 				    lab, l->n_name, getlval(l));
 			else
-				printf(PRTLAB ":\n\t.word %s\n",
+				printf(PRTLAB ":\n\t.data4 %s\n",
 				    lab, l->n_name);
 		}
 		el = tmpalloc(sizeof(struct addrsymb));

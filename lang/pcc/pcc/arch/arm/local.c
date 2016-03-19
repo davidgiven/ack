@@ -428,7 +428,7 @@ ninval(CONSZ off, int fsz, NODE *p)
 		break;
 	case INT:
 	case UNSIGNED:
-		printf("\t.word 0x%x", (int)glval(p));
+		printf("\t.data4 0x%x", (int)glval(p));
 		if ((q = p->n_sp) != NULL) {
 			if ((q->sclass == STATIC && q->slevel > 0)) {
 				printf("+" LABFMT, q->soffset);
@@ -445,15 +445,15 @@ ninval(CONSZ off, int fsz, NODE *p)
 #else
 		if (!features(FEATURE_BIGENDIAN))
 #endif
-			printf("\t.word\t0x%x\n\t.word\t0x%x\n",
+			printf("\t.data4\t0x%x\n\t.data4\t0x%x\n",
 			    u.i[0], u.i[1]);
 		else
-			printf("\t.word\t0x%x\n\t.word\t0x%x\n",
+			printf("\t.data4\t0x%x\n\t.data4\t0x%x\n",
 			    u.i[1], u.i[0]);
 		break;
 	case FLOAT:
 		u.f = (float)((FLT *)p->n_dcon)->fp;
-		printf("\t.word\t0x%x\n", u.i[0]);
+		printf("\t.data4\t0x%x\n", u.i[0]);
 		break;
 	default:
 		return 0;

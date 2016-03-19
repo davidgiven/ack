@@ -2,15 +2,17 @@ D := lang/pcc
 
 define pcc-cfile-impl
 	$(call cfile, $1)
-	$(call dependson, $(OBJDIR)/$D/external.h)
+	$(call dependson, $(OBJDIR)/$D/pcc/external.h)
 endef
 pcc-cfile = $(eval $(pcc-cfile-impl))
 
 define build-pcc-impl
 
+$(eval E := $(OBJDIR)/$D/pcc)
+
 $(eval pcc-cflags = \
 	-Ilang/pcc \
-	-I$(OBJDIR)/$D \
+	-I$E \
 	-Ilang/pcc/pcc/common \
 	-Ilang/pcc/pcc/mip \
 	-Ilang/pcc/pcc/cc/ccom \
@@ -27,7 +29,7 @@ $(eval pcc-cflags = \
 $(call reset)
 $(eval cflags += $(pcc-cflags))
 
-$(call pcc-cfile, $(OBJDIR)/$D/external.c)
+$(call pcc-cfile, $E/external.c)
 $(call pcc-cfile, lang/pcc/pcc/arch/$(PCCARCH)/code.c)
 $(call pcc-cfile, lang/pcc/pcc/arch/$(PCCARCH)/local.c)
 $(call pcc-cfile, lang/pcc/pcc/arch/$(PCCARCH)/local2.c)
@@ -51,27 +53,24 @@ $(call pcc-cfile, lang/pcc/pcc/mip/reader.c)
 $(call pcc-cfile, lang/pcc/pcc/mip/regs.c)
 
 $(call pcc-cfile, lang/pcc/pcc/cc/ccom/gcc_compat.c)
-$(call dependson, $(OBJDIR)/$D/cgram.h)
+$(call dependson, $E/cgram.h)
 
 $(call pcc-cfile, lang/pcc/pcc/cc/ccom/pftn.c)
-$(call dependson, $(OBJDIR)/$D/cgram.h)
+$(call dependson, $E/cgram.h)
 
-$(call yacc, $(OBJDIR)/$D, lang/pcc/pcc/cc/ccom/cgram.y)
+$(call yacc, $E, lang/pcc/pcc/cc/ccom/cgram.y)
 
-$(call flex, $(OBJDIR)/$D, lang/pcc/pcc/cc/ccom/scan.l)
-$(call dependson, $(OBJDIR)/$D/cgram.h)
+$(call flex, $E, lang/pcc/pcc/cc/ccom/scan.l)
+$(call dependson, $E/cgram.h)
 
 $(call cprogram, $(BINDIR)/$(PLATFORM)/pcc_ccom)
 $(call installto, $(PLATDEP)/$(PLATFORM)/pcc_ccom)
 
 
 $(call reset)
-$(call rawfile, $(OBJDIR)/$D/y.tab.h)
-$(call installto, $(OBJDIR)/$D/cgram.h)
-
-
-$(call reset)
-$(eval cflags += $(pcc-cflags))
+$(call rawfile, $E/y.tab.h)
+$(call dependson, $E/y.tab.c)
+$(call installto, $E/cgram.h)
 
 
 $(call reset)
@@ -80,11 +79,11 @@ $(eval cflags += $(pcc-cflags) -DMKEXT)
 $(call cfile, lang/pcc/pcc/mip/mkext.c)
 $(call cfile, lang/pcc/pcc/mip/common.c)
 $(call cfile, lang/pcc/pcc/arch/$(PCCARCH)/table.c)
-$(call cprogram, $(OBJDIR)/$D/mkext)
+$(call cprogram, $E/mkext)
 $(eval pcc_mkext := $o)
 
-$(OBJDIR)/$D/external.h: $(OBJDIR)/$D/external.c
-$(OBJDIR)/$D/external.c: $(pcc_mkext)
+$E/external.h: $E/external.c
+$E/external.c: $(pcc_mkext)
 	@echo MKEXT
 	@mkdir -p $$(dir $$@)
 	$(hide) (cd $$(dir $$@) && $(pcc_mkext))

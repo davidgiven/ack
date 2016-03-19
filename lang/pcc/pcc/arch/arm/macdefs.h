@@ -265,5 +265,5 @@ NODE *arm_builtin_va_end(const struct bitable *bt, NODE *a);
 NODE *arm_builtin_va_copy(const struct bitable *bt, NODE *a);
 #undef NODE
 
-#define COM     "\t@ "
+#define COM     "\t! "
 #define NARGREGS	4

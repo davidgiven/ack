@@ -55,15 +55,15 @@ void
 setseg(int seg, char *name)
 {
 	switch (seg) {
-	case PROG: name = ".text"; break;
+	case PROG: name = ".sect .text"; break;
 	case DATA:
-	case LDATA: name = ".data"; break;
+	case LDATA: name = ".sect .data"; break;
 	case UDATA: break;
 	case PICLDATA: name = ".section .data.rel.local,\"aw\",@progbits";break;
 	case PICDATA: name = ".section .data.rel.rw,\"aw\",@progbits"; break;
 	case PICRDATA: name = ".section .data.rel.ro,\"aw\",@progbits"; break;
 	case STRNG:
-	case RDATA: name = ".section .rodata"; break;
+	case RDATA: name = ".sect .rom"; break;
 	case TLSDATA: name = ".section .tdata,\"awT\",@progbits"; break;
 	case TLSUDATA: name = ".section .tbss,\"awT\",@nobits"; break;
 	case CTORS: name = ".section\t.ctors,\"aw\",@progbits"; break;
@@ -91,9 +91,11 @@ defloc(struct symtab *sp)
 		printf("\t.type %s,%%function\n", n);
 #endif
 	if (sp->sclass == EXTDEF)
-		printf("\t.global %s\n", n);
+		printf("\t.extern %s\n", n);
+#if 0 // dg
 	if (sp->slevel == 0)
 		printf("%s:\n", n);
+#endif
 	else
 		printf(LABFMT ":\n", sp->soffset);
 }
@@ -440,7 +442,6 @@ efcode(void)
 void
 ejobcode(int flag)
 {
-	printf("\t.ident \"PCC: %s\"\n", VERSSTR);
 }
 
 /*
@@ -451,6 +452,7 @@ ejobcode(int flag)
 void
 bjobcode(void)
 {
+	printf(".sect .text; .sect .rom; .sect .data; .sect .bss\n");
 }
 
 /*
