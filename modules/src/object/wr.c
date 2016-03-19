@@ -198,7 +198,7 @@ wr_ohead(head)
 		BEGINSEEK(PARTDBUG, off);
 #endif
 	}
-	if (BYTE_ORDER != 0x0123 || sizeof(struct outhead) != SZ_HEAD)
+
 	{
 		char buf[SZ_HEAD];
 
@@ -214,7 +214,6 @@ wr_ohead(head)
 		put4(head->oh_nchar, c);
 		OUTWRITE(PARTEMIT, buf, (long)SZ_HEAD);
 	}
-	else OUTWRITE(PARTEMIT, (char *)head, (long)SZ_HEAD);
 }
 
 void
@@ -233,9 +232,6 @@ wr_sect(sect, cnt)
 		}
 		sect -= cnt;
 	}
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outsect) != SZ_SECT)
-#endif
 	while (cnt)
 	{
 		register char *c;
@@ -259,11 +255,6 @@ wr_sect(sect, cnt)
 			__wr_flush(&__parts[PARTEMIT]);
 		}
 	}
-#if BYTE_ORDER == 0x0123
-	else {
-		OUTWRITE(PARTEMIT, (char *) sect, (long) cnt * SZ_SECT);
-	}
-#endif
 }
 
 void
@@ -313,9 +304,6 @@ wr_relo(relo, cnt)
 	unsigned int cnt;
 {
 
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outrelo) != SZ_RELO)
-#endif
 	while (cnt)
 	{
 		register char *c;
@@ -327,8 +315,8 @@ wr_relo(relo, cnt)
 		cnt -= i;
 		__parts[PARTRELO].cnt -= (i*SZ_RELO);
 		while (i--) {
-			*c++ = relo->or_type;
-			*c++ = relo->or_sect;
+			put2(relo->or_type, c); c += 2;
+			put2(relo->or_sect, c); c += 2;
 			put2(relo->or_nami, c); c += 2;
 			put4(relo->or_addr, c); c += 4;
 			relo++;
@@ -338,11 +326,6 @@ wr_relo(relo, cnt)
 			__wr_flush(&__parts[PARTRELO]);
 		}
 	}
-#if BYTE_ORDER == 0x0123
-	else {
-		OUTWRITE(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
-	}
-#endif
 }
 
 void
@@ -350,9 +333,6 @@ wr_name(name, cnt)
 	register struct outname	*name;
 	unsigned int cnt;
 {
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outname) != SZ_NAME)
-#endif
 	while (cnt)
 	{
 		register char *c;
@@ -373,12 +353,6 @@ wr_name(name, cnt)
 		__parts[PARTNAME].pnow = c;
 		if (cnt) __wr_flush(&__parts[PARTNAME]);
 	}
-#if BYTE_ORDER == 0x0123
-	else {
-		OUTWRITE(PARTNAME, (char *) name, (long)cnt * SZ_NAME);
-	}
-#endif
-
 }
 
 void

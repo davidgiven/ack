@@ -108,10 +108,7 @@ static long get_vc4_valu(char* addr)
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
  */
-static long
-getvalu(addr, type)
-	char	addr[];
-	char	type;
+static long getvalu(char* addr, uint16_t type)
 {
 	switch (type & RELSZ) {
 	case RELO1:
@@ -127,7 +124,7 @@ getvalu(addr, type)
 	case RELOVC4:
 		return get_vc4_valu(addr);
 	default:
-		fatal("bad relocation size");
+		fatal("bad relocation type %x", type & RELSZ);
 	}
 	/* NOTREACHED */
 }
@@ -228,11 +225,7 @@ static void put_vc4_valu(char* addr, long value)
  * significance should be attributed to each byte.
  * We do not check for overflow.
  */
-static
-putvalu(valu, addr, type)
-	long	valu;
-	char	addr[];
-	char	type;
+static putvalu(long valu, char* addr, uint16_t type)
 {
 
 	switch (type & RELSZ) {
@@ -259,7 +252,7 @@ putvalu(valu, addr, type)
 		put_vc4_valu(addr, valu);
 		break;
 	default:
-		fatal("bad relocation size");
+		fatal("bad relocation type %x", type & RELSZ);
 	}
 }
 

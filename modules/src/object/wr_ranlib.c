@@ -10,9 +10,6 @@ wr_ranlib(fd, ran, cnt1)
 	struct ranlib	*ran;
 	long	cnt1;
 {
-#if BYTE_ORDER == 0x0123
-	if (sizeof (struct ranlib) != SZ_RAN)
-#endif
 	{
 		register long cnt = cnt1;
 		register struct ranlib *r = ran;

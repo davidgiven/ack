@@ -150,7 +150,6 @@ struct outrelo {
 	uint16_t or_type;	/* type of reference */
 	uint16_t or_sect;	/* referencing section */
 	uint16_t or_nami;	/* referenced symbol index */
-	uint16_t _padding;  /* padding for alignment; ignore */
 	uint32_t or_addr;	/* referencing address */
 };
 .fi
@@ -285,15 +284,6 @@ object file.
 .br
 The following miscellaneous defines might come in handy when reading
 object files:
-.PP
-.nf
-/*
- * structure format strings
- */
-#define SF_HEAD	"22222244"
-#define SF_SECT	"44444"
-#define SF_RELO "1124"
-#define SF_NAME "4224"
 .fi
 .PP
 .nf
@@ -302,7 +292,7 @@ object files:
  */
 #define SZ_HEAD	20
 #define SZ_SECT	20
-#define SZ_RELO	8
+#define SZ_RELO	10
 #define SZ_NAME	12
 .fi
 .PP
