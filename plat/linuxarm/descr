@@ -1,0 +1,76 @@
+# $Source: /cvsroot/tack/Ack/plat/linux386/descr,v $
+# $State: Exp $
+# $Revision: 1.1 $
+
+var w=4
+var wa=4
+var p={w}
+var pa={w}
+var s=2
+var sa={s}
+var l={w}
+var la={w}
+var f={w}
+var fa={w}
+var d=8
+var da={d}
+var x=8
+var xa={x}
+var ARCH=arm
+var PLATFORM=linuxarm
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
+var CPP_F=-D__unix -D__ARM
+var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b0:0x80000054
+var C_LIB={PLATFORMDIR}/libc-ansi.a
+# bitfields reversed for compatibility with (g)cc.
+var CC_ALIGN=-Vr
+var OLD_C_LIB={C_LIB}
+var MACHOPT_F=
+
+# Override the setting in fe so that files compiled for linuxarm can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+
+name pcc_ccom
+	from .c
+	to .s
+	program {EM}/lib/ack/{PLATFORM}/pcc_ccom
+	rts .c
+	need .c
+	args 
+	stdin
+	stdout
+	prep always
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/ack/{PLATFORM}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/ack/em_led
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	mapflag -fp FLOATS={EM}/{LIB}fp
+	args {ALIGN} {SEPID?} \
+	    {PLATFORMDIR}/boot.o \
+		({RTS}:.ocm.b.c={PLATFORMDIR}/c-ansi.o) \
+		-o > < \
+		(.c:{TAIL}={PLATFORMDIR}/libc.a) \
+		{PLATFORMDIR}/liblinux.a \
+		{PLATFORMDIR}/libem.a \
+		{PLATFORMDIR}/libsys.a \
+		{PLATFORMDIR}/libend.a
+	linker
+end
+name cv
+	from .out
+	to .exe
+	program {EM}/bin/aelflod
+	args -m20 -b < >
+	outfile linuxarm.exe
+end
