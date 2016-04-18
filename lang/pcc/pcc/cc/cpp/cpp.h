@@ -1,4 +1,4 @@
-/*	$Id: cpp.h,v 1.93 2016/03/12 15:46:06 ragge Exp $	*/
+/*	$Id: cpp.h,v 1.102 2016/04/12 18:49:35 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -26,9 +26,11 @@
  */
 
 #include <stdio.h>	/* for debug/printf */
+#if LIBVMF
+#include <vmf.h>
+#endif
 
 typedef unsigned char usch;
-extern usch *stringbuf;
 
 extern	int	trulvl;
 extern	int	flslvl;
@@ -38,28 +40,23 @@ extern	int	dflag;
 extern	int	tflag, Aflag, Cflag, Pflag;
 extern	int	Mflag, dMflag, MPflag, MMDflag;
 extern	char	*Mfile, *MPfile;
-extern	int	defining;
-extern	FILE	*of;
+extern	int	defining, inclevel;
 
 /* args for lookup() */
 #define FIND    0
 #define ENTER   1
 
 /* buffer used internally */
-#ifndef CPPBUF
-#if defined(mach_pdp11)
-#define CPPBUF  BUFSIZ
-#define	BUF_STACK
+#if SIZEOF_INT_P == 2 || LIBVMF
+#define CPPBUF  1024
 #else
 #define CPPBUF	16384
-#endif
 #endif
 
 #define	MAXARGS	128	/* Max # of args to a macro. Should be enough */
 #define	MAXIDSZ	63	/* Max length of C99 identifier; 5.2.4.1 */
 
 #define	PBMAX	10	/* min pushbackbuffer size */
-#define	BBUFSZ	(PBMAX+CPPBUF+1)
 
 #define	CTRLOC	0xf8	/* __COUNTER__ */
 #define	DEFLOC	0xf9	/* defined */
@@ -96,6 +93,31 @@ extern usch spechr[];
 #define ISID0(x)	(spechr[x] & C_ID0)
 #define	ISDIGIT(x)	(spechr[x] & C_DIGIT)
 
+/* buffer definition */
+#define	BNORMAL	0	/* standard buffer */
+#define	BMAC	1	/* store macro definitions */
+#define	BINBUF	2	/* read data from input files */
+#define	BUTBUF	3	/* write data to stdout */
+struct iobuf {
+	usch *buf;
+	int cptr;	/* current pointer */
+	int bsz;	/* bufsize */
+	int ro:1, inuse:1, type:4;
+};
+struct iobuf *getobuf(int);
+void putob(struct iobuf *ob, int ch);
+void bufree(struct iobuf *iob);
+extern struct iobuf pb;
+
+#define	curptr	ib->cptr
+#define	maxread	ib->bsz
+#define	buffer	ib->buf+PBMAX
+#define	bbuf	ib->buf
+
+#if LIBVMF
+extern struct vspace ibspc;
+#endif
+
 /*
  * definition for include file info
  */
@@ -106,17 +128,12 @@ struct includ {
 	int lineno;
 	int escln;		/* escaped newlines, to be added */
 	int infil;
-	usch *curptr;
-	usch *maxread;
-	usch *ostr;
-	usch *buffer;
+	struct iobuf *ib;
 	int idx;
 	void *incs;
 	const usch *fn;
-#ifdef BUF_STACK
-	usch bbuf[BBUFSZ];
-#else
-	usch *bbuf;
+#if LIBVMF
+	struct vseg *vseg;
 #endif
 };
 #define INCINC 0
@@ -130,24 +147,9 @@ struct symtab {
 	const usch *value;
 	const usch *file;
 	int line;
+	unsigned char type;	/* macro type */
+	unsigned char narg;	/* # of args (if feasible) */
 };
-
-struct initar {
-	struct initar *next;
-	int type;
-	char *str;
-};
-
-/* buffer definition */
-struct iobuf {
-	usch *buf;
-	usch *cptr;
-	usch *bsz;
-	int ro:1, inuse:1;
-};
-struct iobuf *getobuf(void);
-void putob(struct iobuf *ob, int ch);
-void bufree(struct iobuf *iob);
 
 /*
  * Struct used in parse tree evaluation.
@@ -188,20 +190,21 @@ void prtline(int nl);
 int yylex(void);
 void cunput(int);
 int yyparse(void);
-usch *savstr(const usch *str);
-void savch(int c);
 void putch(int);
 void putstr(const usch *s);
 usch *sheap(const char *fmt, ...);
 struct iobuf *bsheap(struct iobuf *, const char *fmt, ...);
+struct iobuf *strtobuf(const usch *str, struct iobuf *iob);
+struct iobuf *buftobuf(struct iobuf *in, struct iobuf *iob);
 void warning(const char *fmt, ...);
 void error(const char *fmt, ...);
 int cinput(void);
 int inc2(void);
 int Ccmnt(void (*d)(int));
-usch *heapid(int ch);
+usch *bufid(int ch, struct iobuf *);
 usch *readid(int ch);
-void faststr(int bc, void (*d)(int));
-int fastnum(int ch, void (*d)(int));
+struct iobuf *faststr(int bc, struct iobuf *);
+int fastnum(int ch, struct iobuf *);
 void *xrealloc(void *p, int sz);
 void *xmalloc(int sz);
+void fastscan(void);
