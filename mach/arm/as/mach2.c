@@ -11,7 +11,7 @@
 %token <y_word> SHIFT
 %token <y_word> RRX
 %token <y_word> SDT
-%token <y_word> BYTE
+%token <y_word> SDT2
 %token <y_word> TRANS
 %token <y_word> BDT
 %token <y_word> SWI
@@ -21,4 +21,5 @@
 
 %type <y_word> optlink optcond opts optt optp optb optexc reglist rlist
 %type <y_word> optsign optpsr optshift shftcnt address offset aoptshift
+%type <y_word> splitaddress splitoffset
 %type <y_expr> operand

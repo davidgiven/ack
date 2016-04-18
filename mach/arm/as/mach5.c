@@ -186,128 +186,63 @@ short typ;
 
 /* Calculate an offset in an address */
 
-word_t
-calcoffset(val)
-valu_t val;
+word_t calcoffset(valu_t val)
 {
-	if((val & 0xFFFFF000) == 0)
-		return(val|0x00800000);
-	val *= -1;
-	if((val & 0xFFFFF000) == 0)
-		return(val);
+	if (fitu(val, 12))
+		return val|0x00800000;
+	val = -val;
+	if (fitu(val, 12))
+		return val;
+
 	serror("offset out of range");
-	return(0);
+	return 0;
 }
 
+/* Calculate a split offset (for strh and friends). */
+
+word_t splitoffset(valu_t val)
+{
+	if (fitu(val, 8))
+		return (val&0x0f) | ((val&0xf0)<<4) | 0x00800000;
+	val = -val;
+	if (fitu(val, 8))
+		return (val&0x0f) | ((val&0xf0)<<4) | 0x00800000;
+
+	serror("offset out of range");
+	return 0;
+}
 
 /* This routine deals with STR and LDR instructions */
 
-strldr(opc, ins, val)
-long opc, ins;
-valu_t val;
+void strldr(uint32_t opc, valu_t val)
 {
-
-	long reg, reg2;	/* The registers we are using */
-	long tmpval;
+	uint32_t d;
 
 /* If the expression was a register, then just output it and save 24
    bytes */
 
-	if (success){ 
-		emit4(opc|ins|val);
+	if (success)
+	{ 
+		emit4(opc|val);
 		return;
 	}
 
-	reg = ins & 0x0000F000;		/* Extract register from instruction */
-
-	if (opc == LDR){
-
-		tmpval = val - DOTVAL - 8;
-		if (oursmall((tmpval & 0xFFFFF000) == 0, 16)){	/* If it's +ve */
-			emit4(opc|ins|tmpval|0x018F0000);	/* PC rel, up bit */
-			return;
-		}
-
-		tmpval *= -1;
-		if (oursmall((tmpval & 0xFFFFF000) == 0, 16)){	/* If it's -ve */
-			emit4(opc|ins|tmpval|0x010F0000);	/* PC rel, no up bit */
-			return;
-		}
-
-		if (!bflag && pass == PASS_3){	/* Debugging info */
-			/* warning("LDR address extension"); */
-			if (dflag)
-				printf("value: %lx\n", val);
-		}
-
-		opc = 0x03A00000;	/* Set opc for putaddr */
-
-		if (oursmall((val & 0xFFFF0000) == 0, 8)){
-			putaddr(opc, ins & 0xFFBFFFFF, val, 2);
-			emit4(0x05100000|ins|reg<<4);
-			return;
-		}
-		if (oursmall((val & 0xFF000000) == 0, 4)){
-			putaddr(opc, ins & 0xFFBFFFFF, val, 3);
-			emit4(0x05100000|ins|reg<<4);
-			return;
-		}
-		putaddr(opc, ins & 0xFFBFFFFF, val, 4);
-		emit4(0x05100000|ins|reg<<4);
+	d = val - DOTVAL - 8;
+	if (fitu(d, 12))
+	{	/* If it's +ve */
+		emit4(opc|d|0x018F0000);	/* PC rel, up bit */
 		return;
 	}
 
-/* If the failure was an STR instruction, things are a bit more complicated as
-   we can't overwrite the register before we store its value.  We therefore
-   need to use another register as well, which must be saved and restored. 
-   This register is saved on a stack pointed to by R12.  Apart from this
-   complication, the scheme is similar to the LDR above.  */
-
-	if (opc == STR){
-		reg2 = reg >> 12;	    /* Use R6 as the second register, */
-		reg2 = (reg2 == 6 ? 0 : 6); /* or R0 if we can't */
-
-		tmpval = val - DOTVAL - 8;
-		if (oursmall((tmpval & 0xFFFFF000) == 0, 24)){	/* If it's +ve */
-			emit4(opc|ins|tmpval|0x018F0000);	/* PC rel, up bit */
-			return;
-		}
-
-		tmpval *= -1;
-		if (oursmall((tmpval & 0xFFFFF000) == 0, 24)){	/* If it's -ve */
-			emit4(opc|ins|tmpval|0x010F0000);	/* PC rel, no up bit */
-			return;
-		}
-
-		if (!bflag && pass == PASS_3){	/* Debugging info */
-			/* warning("STR address extension"); */
-			if (dflag)
-				printf("value: %lx\n", val);
-		}
-
-		opc = 0x03A00000;	/* Set opc for putaddr */
-
-		if (oursmall((val & 0xFFFF0000) == 0, 8)){
-			emit4(0xE92C0000|1<<reg2);
-			putaddr(opc, (ins & 0xFFBF0FFF)|reg2<<12, val, 2);
-			emit4(0x05000000|ins|reg2<<16);
-			emit4(0xE8BC0000|1<<reg2);
-			return;
-		}
-		if (oursmall((val & 0xFF000000) == 0, 4)){
-			emit4(0xE92C0000|1<<reg2);
-			putaddr(opc, (ins & 0xFFBF0FFF)|reg2<<12, val, 3);
-			emit4(0x05000000|ins|reg2<<16);
-			emit4(0xE8BC0000|1<<reg2);
-			return;
-		}
-		emit4(0xE92C0000|1<<reg2);
-		putaddr(opc, (ins & 0xFFBF0FFF)|reg2<<12, val, 4);
-		emit4(0x05000000|ins|reg2<<16);
-		emit4(0xE8BC0000|1<<reg2);	
+	d = -d;
+	if (fitu(d, 12))
+	{	/* If it's -ve */
+		emit4(opc|d|0x010F0000);	/* PC rel, no up bit */
 		return;
 	}
 
+	serror("displacement overflow: 0x%x", d);
+	return;
 }
 
 

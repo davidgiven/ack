@@ -23,7 +23,7 @@ $(eval pcc-cflags = \
 	-DNATIVE_FLOATING_POINT \
 	-D_ISOC99_SOURCE \
 	-Dos_ack \
-	-Dmach_$(PCCMACH) \
+	-Dmach_$(PCCARCH) \
 )
 
 $(call reset)

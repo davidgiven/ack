@@ -10,7 +10,7 @@
 #include "loc_incl.h"
 
 FILE *
-tmpfile(void) {
+tmpfilez(void) {
 	static char name_buffer[L_tmpnam] = "/tmp/tmp." ;
 	static char *name = NULL;
 	FILE *file;

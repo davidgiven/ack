@@ -38,9 +38,7 @@ name pcc_ccom
 	program {EM}/lib/ack/{PLATFORM}/pcc_ccom
 	rts .c
 	need .c
-	args 
-	stdin
-	stdout
+	args -xtemps -xdeljumps < > 
 	prep always
 end
 name as

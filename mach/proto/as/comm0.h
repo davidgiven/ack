@@ -113,6 +113,7 @@ _include	<signal.h>
 #define	lowb(z)		((int)(z) & 0xFF)
 #define	loww(z)		((int)(z) & 0xFFFF)
 
+#define fitu(x, d)  (((x) & ~((int)(1<<(d))-1)) == 0)
 #define fitx(x, d)  ((((x) + (1<<(d-1))) & ~((int)(1<<(d))-1)) == 0)
 #define	fitb(x)		((((x) + 0x80) & ~((int)0xFF)) == 0)
 #define	fitw(x)		((((x) + 0x8000L) & ~0xFFFFL) == 0)

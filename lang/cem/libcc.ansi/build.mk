@@ -5,6 +5,15 @@ define build-libcc-ansi-headers-install-one-impl
 	$(eval LIBCCANSIHEADERS += $o)
 endef
 
+define ackfile-flag-impl
+	$(if $(filter n, $(libc-ansi-$(PLATFORM)-wants-$(strip $1))), \
+		, \
+		$(call ackfile, $2) \
+	)
+endef
+
+ackfile-flag = $(eval $(call ackfile-flag-impl, $1, $2))
+
 define build-libcc-ansi-headers-impl
 	$(eval g := \
 		sys/time.h \
@@ -87,27 +96,27 @@ $(call ackfile, lang/cem/libcc.ansi/locale/setlocale.c)
 
 # math
 
-$(call ackfile, lang/cem/libcc.ansi/math/asin.c)
-$(call ackfile, lang/cem/libcc.ansi/math/atan2.c)
-$(call ackfile, lang/cem/libcc.ansi/math/atan.c)
-$(call ackfile, lang/cem/libcc.ansi/math/ceil.c)
-$(call ackfile, lang/cem/libcc.ansi/math/fabs.c)
-$(call ackfile, lang/cem/libcc.ansi/math/pow.c)
-$(call ackfile, lang/cem/libcc.ansi/math/log10.c)
-$(call ackfile, lang/cem/libcc.ansi/math/log.c)
-$(call ackfile, lang/cem/libcc.ansi/math/sin.c)
-$(call ackfile, lang/cem/libcc.ansi/math/sinh.c)
-$(call ackfile, lang/cem/libcc.ansi/math/sqrt.c)
-$(call ackfile, lang/cem/libcc.ansi/math/tan.c)
-$(call ackfile, lang/cem/libcc.ansi/math/tanh.c)
-$(call ackfile, lang/cem/libcc.ansi/math/exp.c)
-$(call ackfile, lang/cem/libcc.ansi/math/ldexp.c)
-$(call ackfile, lang/cem/libcc.ansi/math/fmod.c)
-$(call ackfile, lang/cem/libcc.ansi/math/floor.c)
-$(call ackfile, lang/cem/libcc.ansi/math/hugeval.c)
-$(call ackfile, lang/cem/libcc.ansi/math/frexp.e)
-$(call ackfile, lang/cem/libcc.ansi/math/modf.e)
-$(call ackfile, lang/cem/libcc.ansi/math/isnan.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/asin.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/atan2.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/atan.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/ceil.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/fabs.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/pow.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/log10.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/log.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/sin.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/sinh.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/sqrt.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/tan.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/tanh.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/exp.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/ldexp.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/fmod.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/floor.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/hugeval.c)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/frexp.e)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/modf.e)
+$(call ackfile-flag, math, lang/cem/libcc.ansi/math/isnan.c)
 
 # Misc
 
@@ -116,7 +125,7 @@ $(call ackfile, lang/cem/libcc.ansi/misc/environ.c)
 
 # setjmp
 
-$(call ackfile, lang/cem/libcc.ansi/setjmp/setjmp.e)
+$(call ackfile-flag, em, lang/cem/libcc.ansi/setjmp/setjmp.e)
 
 # signal
 

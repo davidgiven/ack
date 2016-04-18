@@ -1555,7 +1555,7 @@ struct optab table[] = {
 	SAREG,	TWORD|TSHORT|TUSHORT|TCHAR|TUCHAR,
 	SAREG,	TWORD|TSHORT|TUSHORT|TCHAR|TUCHAR,
 		NAREG|NASL,	RESC1,
-		"	Os A1,AL,AR\n", },
+		"	O.s A1,AL,AR\n", },
 
 
 /*

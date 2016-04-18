@@ -8,8 +8,10 @@ operation	: BRANCH optlink expr
 			{data($1,$2|$3|$4|$5<<12,$7.val,$7.typ);}
 		| DATA3 optcond opts optp REG ',' operand
 			{data($1,$2|$3|$4|$5<<16,$7.val,$7.typ);}
-		| SDT optcond optb optt REG ',' address
-			{strldr($1,$2|$3|$4|$5<<12,$7);}
+		| SDT optcond optt REG ',' address
+			{strldr($1|$2|$3|$4<<12,$6);}
+		| SDT2 optcond optt REG ',' splitaddress
+			{strldr($1|$2|$3|$4<<12,$6);}
 		| BDT optcond REG optexc ',' reglist optpsr
 			{emit4($1|$2|$3<<16|$4|$6|$7);}
 		| SWI optcond expr
@@ -44,11 +46,6 @@ optt		: 	{$$=0;}
 
 optp		: 	{$$=0;}
 		| PEE
-			{$$=$1;}
-		;
-
-optb		: 	{$$=0;}
-		| BYTE
 			{$$=$1;}
 		;
 
@@ -95,7 +92,7 @@ address		: expr
 		| '[' REG ']'
 			{success = 1; $$ = 0x01000000|$2<<16;}
 		| '[' REG ',' offset ']' optexc
-			{success = 1; $$ = $2<<16|$4|$6|0x01000000;}
+			{success = 1; $$ = 0x01000000|$2<<16|$4|$6;}
 		| '[' REG ']' ',' offset
 			{success = 1; $$ = $2<<16|$5;}
 		;
@@ -104,6 +101,20 @@ offset		: '#' expr
 			{$$ = calcoffset($2.val);}
 		| optsign REG aoptshift
 			{$$ = 0x02000000|$1|$2|$3;}
+		;
+	
+splitaddress		: expr
+			{success = 0; $$ = $1.val;}
+		| '[' REG ']'
+			{success = 1; $$ = 0x01000000|$2<<16;}
+		| '[' REG ',' splitoffset ']' optexc
+			{success = 1; $$ = 0x01000000|$2<<16|$4|$6;}
+		| '[' REG ']' ',' splitoffset
+			{success = 1; $$ = $2<<16|$5;}
+		;
+
+splitoffset		: '#' expr
+			{$$ = splitoffset($2.val);}
 		;
 	
 optsign		:	{$$ = 0x00800000;}

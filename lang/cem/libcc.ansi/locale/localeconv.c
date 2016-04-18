@@ -11,7 +11,7 @@ extern struct lconv _lc;
 struct lconv *
 localeconv(void)
 {
-	register struct lconv *lcp = &_lc;
+	struct lconv *lcp = &_lc;
 
 	lcp->decimal_point = ".";
 	lcp->thousands_sep = "";

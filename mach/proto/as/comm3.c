@@ -26,6 +26,7 @@ item_t	keytab[] = {
 	0,	EXTERN,		0,		".define",
 	0,	EXTERN,		0,		".extern",
 	0,	DOT,		0,		".",
+	0,	DATA,		RELO1,	".byte",
 	0,	DATA,		RELO1,	".data1",
 	0,	DATA,		RELO2,	".data2",
 	0,	DATA,		RELO4,	".data4",

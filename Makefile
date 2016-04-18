@@ -25,7 +25,7 @@ BUILDDIR = $(ACK_TEMP_DIR)/ack-build
 # What build flags do you want to use?
 
 CFLAGS = -g
-LDFLAGS = -s
+LDFLAGS =
 
 # ======================================================================= #
 #                         END OF CONFIGURATION                            #

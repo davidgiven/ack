@@ -94,9 +94,14 @@
 0,		RRX,		0x00000060,	"rrx",
 
 0,		SDT,		0x04100000,	"ldr",
+0,		SDT,		0x04500000,	"ldrb",
 0,		SDT,		0x04000000,	"str",
+0,		SDT,		0x04400000,	"strb",
 
-0,		BYTE,		0x00400000,	".b",
+0,		SDT2,		0x001000b0,	"ldrh",
+0,		SDT2,		0x000000b0,	"strh",
+0,		SDT2,		0x001000d0,	"ldrsb",
+0,		SDT2,		0x000000d0,	"strsb",
 
 0,		TRANS,		0x00200000,	".t",
 

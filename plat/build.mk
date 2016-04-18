@@ -18,7 +18,8 @@ define build-platform-impl
 			$(PLATFORM_HEADERS_$(PLATFORM)) \
 			$(PLATDEP)/$(PLATFORM)/as \
 			$(if $(arch-cg-$(ARCH)), $(PLATDEP)/$(PLATFORM)/cg, $(PLATDEP)/$(PLATFORM)/ncg) \
-			$(ARCHITECTURE_$(ARCH)))
+			$(ARCHITECTURE_$(ARCH)) \
+	)
 
 	# libsys
 
@@ -66,18 +67,25 @@ endef
 build-platform = $(eval $(call build-platform-impl, $1))
 
 define build-pcc-platform-impl
+	$(eval libc-ansi-$(PLATFORM)-wants-em := n)
+
     $(call reset)
 	$(call rawfile, $D/descr)
 	$(call installto, $(PLATIND)/descr/$(PLATFORM))
+
+	$(foreach f, $(platform-headers), $(call build-platform-headers, $f))
 
 	$(eval PLATFORM_$(PLATFORM) := \
 			$(PLATIND)/descr/$(PLATFORM) \
 			$(PLATDEP)/$(PLATFORM)/as \
 			$(PLATDEP)/$(PLATFORM)/pcc_ccom \
+			$(ARCHITECTURE_$(ARCH)) \
 	)
 
 	$(call build-as)
 	$(call build-pcc)
+
+	$(call build-runtime-libcc-ansi)
 endef
 
 build-pcc-platform = $(eval $(call build-pcc-platform-impl, $1))

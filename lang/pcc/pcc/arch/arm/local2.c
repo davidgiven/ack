@@ -887,7 +887,7 @@ conput(FILE *fp, NODE *p)
 			else if (val < 0)
 				fprintf(fp, "-%d", -val);
 		} else
-			fprintf(fp, CONFMT, (CONSZ)val);
+			fprintf(fp, "#" CONFMT, (CONSZ)val);
 		return;
 
 	default:
