@@ -1,4 +1,4 @@
-/*	$Id: trees.c,v 1.373 2016/03/05 15:49:36 ragge Exp $	*/
+/*	$Id: trees.c,v 1.374 2016/04/02 09:47:12 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -2702,7 +2702,7 @@ p2print(NODE *p)
 
 	printf("%d %d ", p->n_type, p->n_qual);
 	if (ty == LTYPE)
-		printf(CONFMT " ", p->n_lval);
+		printf(CONFMT " ", glval(p));
 	if (ty != BITYPE) {
 		if (p->n_op != NAME && p->n_op != ICON)
 			printf("%d ", p->n_rval);

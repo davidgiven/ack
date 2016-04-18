@@ -1,4 +1,4 @@
-/*	$Id: init.c,v 1.99 2015/11/17 19:19:40 ragge Exp $	*/
+/*	$Id: init.c,v 1.100 2016/04/02 09:02:57 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004, 2007 Anders Magnusson (ragge@ludd.ltu.se).
@@ -1238,7 +1238,7 @@ simpleinit(struct symtab *sp, NODE *p)
 			sz = (int)tsize(sp->stype, sp->sdf, sp->sap);
 			p->n_type = ctype(LONGLONG);
 			inval(0, sz/2, p);
-			p->n_lval = 0; /* XXX fix signed types */
+			slval(p, 0); /* XXX fix signed types */
 			inval(0, sz/2, p);
 			tfree(p);
 			tfree(q);

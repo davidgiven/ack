@@ -1,4 +1,4 @@
-/*	$Id: optim.c,v 1.61 2016/02/09 17:57:35 ragge Exp $	*/
+/*	$Id: optim.c,v 1.63 2016/04/02 20:16:23 ragge Exp $	*/
 /*
  * Copyright(C) Caldera International Inc. 2001-2002. All rights reserved.
  *
@@ -42,10 +42,10 @@
 # define SWAP(p,q) {sp=p; p=q; q=sp;}
 # define RCON(p) (p->n_right->n_op==ICON)
 # define RO(p) p->n_right->n_op
-# define RV(p) getlval(p->n_right)
+# define RV(p) glval(p->n_right)
 # define LCON(p) (p->n_left->n_op==ICON)
 # define LO(p) p->n_left->n_op
-# define LV(p) getlval(p->n_left)
+# define LV(p) glval(p->n_left)
 
 /* remove left node */
 static NODE *
@@ -253,6 +253,7 @@ again:	o = p->n_op;
 			p->n_right->n_left = p->n_right->n_right;
 		}
 		p->n_right->n_op = UMUL; /* for tfree() */
+		p1walkf(p, putjops, 0);
 		tfree(p);
 		p = q;
 		break;
@@ -367,7 +368,7 @@ again:	o = p->n_op;
 		break;
 
 	case DIV:
-		if( nncon( p->n_right ) && getlval(p->n_right) == 1 )
+		if( nncon( p->n_right ) && glval(p->n_right) == 1 )
 			goto zapright;
 		if (LCON(p) && RCON(p) && conval(p->n_left, DIV, p->n_right))
 			goto zapright;

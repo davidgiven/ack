@@ -1,4 +1,4 @@
-/*      $Id: gcc_compat.c,v 1.119 2015/11/13 17:11:40 ragge Exp $     */
+/*      $Id: gcc_compat.c,v 1.120 2016/04/02 09:02:56 ragge Exp $     */
 /*
  * Copyright (c) 2004 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -785,7 +785,7 @@ ticast(NODE *p, int u)
 	switch (p->n_op) {
 	case ICON:
 		val = 0;
-		if (u == 0 && p->n_lval < 0)
+		if (u == 0 && glval(p) < 0)
 			val = -1;
 		q = eve(biop(DOT, bdty(NAME, n), bdty(NAME, loti)));
 		q = buildtree(ASSIGN, q, p);
@@ -803,7 +803,7 @@ ticast(NODE *p, int u)
 		if (u2) {
 			p = eve(biop(ASSIGN, p, bcon(0)));
 		} else {
-			q = buildtree(ASSIGN, eve(ccopy(p)), q);
+			q = buildtree(ASSIGN, eve(p1tcopy(p)), q);
 			p = buildtree(RSEQ, eve(p), bcon(SZLONG-1));
 		}
 		q = buildtree(COMOP, q, p);
@@ -822,11 +822,12 @@ gcc_eval_ticast(int op, NODE *p1, NODE *p2)
 	struct attr *a1, *a2;
 	int t;
 
+	a2 = NULL; /* XXX flow analysis */
 	if ((a1 = isti(p1)) == NULL && (a2 = isti(p2)) == NULL)
 		return NIL;
 
 	if (op == RETURN)
-		p1 = ccopy(p1);
+		p1 = p1tcopy(p1);
 	if (a1 == NULL) {
 		if (a2 == NULL)
 			cerror("gcc_eval_ticast error");
@@ -906,16 +907,16 @@ gcc_andorer(int op, NODE *p1, NODE *p2)
 	t1 = tempnode(0, p1->n_type, p1->n_df, p1->n_ap);
 	t2 = tempnode(0, p2->n_type, p2->n_df, p2->n_ap);
 
-	p1 = buildtree(ASSIGN, ccopy(t1), p1);
-	p2 = buildtree(ASSIGN, ccopy(t2), p2);
+	p1 = buildtree(ASSIGN, p1tcopy(t1), p1);
+	p2 = buildtree(ASSIGN, p1tcopy(t2), p2);
 	p = buildtree(COMOP, p1, p2);
 
 	p3 = buildtree(ADDROF, eve(bdty(NAME, n)), NIL);
-	p1 = buildtree(ASSIGN, structref(ccopy(p3), STREF, hiti),
-	    buildtree(op, structref(ccopy(t1), STREF, hiti),
-	    structref(ccopy(t2), STREF, hiti)));
+	p1 = buildtree(ASSIGN, structref(p1tcopy(p3), STREF, hiti),
+	    buildtree(op, structref(p1tcopy(t1), STREF, hiti),
+	    structref(p1tcopy(t2), STREF, hiti)));
 	p = buildtree(COMOP, p, p1);
-	p1 = buildtree(ASSIGN, structref(ccopy(p3), STREF, loti),
+	p1 = buildtree(ASSIGN, structref(p1tcopy(p3), STREF, loti),
 	    buildtree(op, structref(t1, STREF, loti),
 	    structref(t2, STREF, loti)));
 	p = buildtree(COMOP, p, p1);
@@ -1019,8 +1020,8 @@ gcc_eval_timode(int op, NODE *p1, NODE *p2)
 		sp = op == LS || op == LSEQ ? ashldi3sp :
 		    isu ? lshrdi3sp : ashrdi3sp;
 		p2 = cast(p2, INT, 0);
-		/* XXX p1 ccopy may have side effects */
-		p = doacall(sp, nametree(sp), buildtree(CM, ccopy(p1), p2));
+		/* XXX p1 p1tcopy may have side effects */
+		p = doacall(sp, nametree(sp), buildtree(CM, p1tcopy(p1), p2));
 		if (op == LSEQ || op == RSEQ) {
 			p = buildtree(ASSIGN, p1, p);
 		} else
@@ -1045,8 +1046,8 @@ gcc_eval_timode(int op, NODE *p1, NODE *p2)
 		    op == MUL ? mulvti3sp :
 		    op == DIV ? (isu ? udivti3sp : divti3sp) :
 		    op == MOD ? (isu ? umodti3sp : modti3sp) : 0;
-		/* XXX p1 ccopy may have side effects */
-		p = doacall(sp, nametree(sp), buildtree(CM, ccopy(p1), p2));
+		/* XXX p1 p1tcopy may have side effects */
+		p = doacall(sp, nametree(sp), buildtree(CM, p1tcopy(p1), p2));
 		if (isaop)
 			p = buildtree(ASSIGN, p1, p);
 		else

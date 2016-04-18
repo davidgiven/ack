@@ -384,6 +384,11 @@ AC_ARG_WITH(linker,
 		[Specify alternate linker.]),
 	linker=$withval,
 	[])
+AC_ARG_WITH(libvmf,
+	AS_HELP_STRING([--with-libvmf=<path>],
+		[Use libvmf.]),
+	libvmf=$withval,
+	libvmf=no)
 AC_ARG_ENABLE(tls,
 	AS_HELP_STRING([--enable-tls],
 		[Enable Thread-local storage (TLS).]),
@@ -610,6 +615,8 @@ if test $ac_cv_have_c99_format = yes; then
     [Define to 1 if printf supports C99 size specifiers])
 fi
 
+AC_CHECK_SIZEOF([int *])
+
 # Byteorder of host
 AC_C_BIGENDIAN([AC_DEFINE(HOST_BIG_ENDIAN, 1, [Define if host is BIG endian])],
 	[AC_DEFINE(HOST_LITTLE_ENDIAN, 1, [Define if host is LITTLE endian])],
@@ -622,6 +629,13 @@ AC_PROG_YACC
 AC_PROG_LEX
 
 # Checks for libraries.
+if test $libvmf != no ; then
+	LIBS=-lvmf
+	AC_DEFINE(LIBVMF, 1, [Use libvmf.])
+if test $libvmf != yes ; then
+	LDFLAGS=-L$libvmf
+fi
+fi
 
 # Checks for header files.
 # AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
@@ -651,6 +665,8 @@ AC_SUBST(ADD_CPPFLAGS)
 AC_SUBST(CCNAMES)
 AC_SUBST(CF0)
 AC_SUBST(CF1)
+AC_SUBST(LIBS)
+AC_SUBST(LDFLAGS)
 
 pcc_major=`echo $PACKAGE_VERSION | awk -F. '{print $1}'`
 pcc_minor=`echo $PACKAGE_VERSION | awk -F. '{print $2}'`
@@ -692,6 +708,7 @@ echo "Using linker ..................... ${linker-<default>}"
 echo "Using Multi-Arch path ............ ${multiarch}"
 echo "Using include path ............... ${altincdir-<default>}"
 echo "Using library path ............... ${altlibdir-<default>}"
+echo "Use libvmf ....................... $libvmf"
 echo "Has TLS support .................. $tls"
 echo "Has native floating point ........ $nativefp"
 echo "Has GCC compatibility ............ $gcccompat"

@@ -1,4 +1,4 @@
-/*	$Id: token.c,v 1.162 2016/03/12 15:46:06 ragge Exp $	*/
+/*	$Id: token.c,v 1.172 2016/04/12 18:49:35 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004,2009 Anders Magnusson. All rights reserved.
@@ -92,7 +92,7 @@ static void unch(int c);
 #define	PUTCH(ch) if (!flslvl) putch(ch)
 /* protection against recursion in #include */
 #define MAX_INCLEVEL	100
-static int inclevel;
+int inclevel;
 
 struct includ *ifiles;
 
@@ -157,13 +157,12 @@ inpbuf(void)
 
 	if (ifiles->infil == -1)
 		return 0;
-	len = read(ifiles->infil, ifiles->buffer, CPPBUF);
+	len = read(ifiles->infil, ifiles->buffer, CPPBUF-PBMAX);
 	if (len == -1)
 		error("read error on file %s", ifiles->orgfn);
 	if (len > 0) {
-		ifiles->buffer[len] = 0;
-		ifiles->curptr = ifiles->buffer;
-		ifiles->maxread = ifiles->buffer + len;
+		ifiles->ib->cptr = PBMAX;
+		ifiles->ib->bsz = PBMAX + len;
 	}
 	return len;
 }
@@ -180,15 +179,15 @@ refill(int minsz)
 	if (ifiles->curptr+minsz < ifiles->maxread)
 		return 0; /* already enough in input buffer */
 
-	sz = ifiles->maxread - ifiles->curptr;
-	dp = ifiles->buffer - sz;
+	sz = ifiles->ib->bsz - ifiles->ib->cptr;
+	dp = ifiles->ib->buf+PBMAX - sz;
 	for (i = 0; i < sz; i++)
-		dp[i] = ifiles->curptr[i];
+		dp[i] = ifiles->ib->buf[ifiles->ib->cptr+i];
 	i = inpbuf();
-	ifiles->curptr = dp;
+	ifiles->ib->cptr = dp - ifiles->ib->buf;
 	if (i == 0) {
-		ifiles->maxread = ifiles->buffer;
-		ifiles->buffer[0] = 0;
+		ifiles->ib->bsz = PBMAX;
+		ifiles->ib->buf[PBMAX] = 0;
 	}
 	return 0;
 }
@@ -202,8 +201,8 @@ inpch(void)
 {
 
 	do {
-		if (ifiles->curptr < ifiles->maxread)
-			return *ifiles->curptr++;
+		if (ifiles->ib->cptr < ifiles->ib->bsz)
+			return ifiles->ib->buf[ifiles->ib->cptr++];
 	} while (inpbuf() > 0);
 
 	return -1;
@@ -218,10 +217,10 @@ unch(int c)
 	if (c == -1)
 		return;
 
-	ifiles->curptr--;
-	if (ifiles->curptr < ifiles->bbuf)
+	ifiles->ib->cptr--;
+	if (ifiles->ib->cptr < 0)
 		error("pushback buffer full");
-	*ifiles->curptr = (usch)c;
+	ifiles->ib->buf[ifiles->ib->cptr] = (usch)c;
 }
 
 /*
@@ -479,6 +478,27 @@ fastspcg(void)
 	return ch;
 }
 
+/*
+ * readin chars and store in buf. Warn about too long names.
+ */
+usch *
+bufid(int ch, struct iobuf *ob)
+{
+	int n = ob->cptr;
+
+	do {
+		if (ob->cptr - n == MAXIDSZ)
+			warning("identifier exceeds C99 5.2.4.1");
+		if (ob->cptr < ob->bsz)
+			ob->buf[ob->cptr++] = ch;
+		else
+			putob(ob, ch);
+	} while (spechr[ch = inch()] & C_ID);
+	ob->buf[ob->cptr] = 0; /* legal */
+	unch(ch);
+	return ob->buf+n;
+}
+
 usch idbuf[MAXIDSZ+1];
 /*
  * readin chars and store in buf. Warn about too long names.
@@ -503,40 +523,45 @@ readid(int ch)
 /*
  * get a string or character constant and save it as given by d.
  */
-void
-faststr(int bc, void (*d)(int))
+struct iobuf *
+faststr(int bc, struct iobuf *ob)
 {
 	int ch;
 
+	if (ob == NULL)
+		ob = getobuf(BNORMAL);
+
 	incmnt = 1;
-	d(bc);
+	putob(ob, bc);
 	while ((ch = inc2()) != bc) {
 		if (ch == '\n') {
 			warning("unterminated literal");
 			incmnt = 0;
 			unch(ch);
-			return;
+			return ob;
 		}
 		if (ch < 0)
-			return;
+			return ob;
 		if (ch == '\\') {
 			incmnt = 0;
 			if (chkucn())
 				continue;
 			incmnt = 1;
-			d(ch);
+			putob(ob, ch);
 			ch = inc2();
 		}
-		d(ch);
+		putob(ob, ch);
 	}
-	d(ch);
+	putob(ob, ch);
+	ob->buf[ob->cptr] = 0;
 	incmnt = 0;
+	return ob;
 }
 
 /*
- * get a preprocessing number and save it as given by d.
- * Initial char ch is always stored.
+ * get a preprocessing number and save it as given by ob.
  * returns first non-pp-number char.
+ * We know that this is a valid number already.
  *
  *	pp-number:	digit
  *			. digit
@@ -549,19 +574,17 @@ faststr(int bc, void (*d)(int))
  *			pp-number .
  */
 int
-fastnum(int ch, void (*d)(int))
+fastnum(int ch, struct iobuf *ob)
 {
 	int c2;
 
 	if ((spechr[ch] & C_DIGIT) == 0) {
 		/* not digit, dot */
-		d(ch);
+		putob(ob, ch);
 		ch = inch();
-		if ((spechr[ch] & C_DIGIT) == 0)
-			return ch;
 	}
 	for (;;) {
-		d(ch);
+		putob(ob, ch);
 		if ((ch = inch()) < 0)
 			return -1;
 		if ((spechr[ch] & C_EP)) {
@@ -570,7 +593,7 @@ fastnum(int ch, void (*d)(int))
 					unch(c2);
 				break;
 			}
-			d(ch);
+			putob(ob, ch);
 			ch = c2;
 		} else if (ch == '.' || (spechr[ch] & C_ID)) {
 			continue;
@@ -590,13 +613,19 @@ fastnum(int ch, void (*d)(int))
  *	Only data from pp files are scanned here, never any rescans.
  *	This loop is always at trulvl.
  */
-static void
+void
 fastscan(void)
 {
-	struct iobuf *ob;
+	struct iobuf *ob, rbs, *rb = &rbs;
+	extern struct iobuf pb;
 	struct symtab *nl;
 	int ch, c2, i, nch;
-	usch *cp, *dp;
+	usch *dp;
+
+#define	IDSIZE	128
+	rb->buf = xmalloc(IDSIZE+1);
+	rb->cptr = 0;
+	rb->bsz = IDSIZE;
 
 	goto run;
 
@@ -604,22 +633,25 @@ fastscan(void)
 		/* tight loop to find special chars */
 		/* should use getchar/putchar here */
 		for (;;) {
-			if (ifiles->curptr < ifiles->maxread) {
-				ch = *ifiles->curptr++;
+			if (ifiles->ib->cptr < ifiles->ib->bsz) {
+				ch = ifiles->ib->buf[ifiles->ib->cptr++];
 			} else {
 				if (inpbuf() > 0)
 					continue;
+				free(rb->buf);
 				return;
 			}
-xloop:			if (ch < 0)
+xloop:			if (ch < 0) {
+				free(rb->buf);
 				return; /* EOF */
+			}
 			if ((spechr[ch] & C_SPEC) != 0)
 				break;
 			putch(ch);
 		}
 
 		REFILL(2);
-		nch = *ifiles->curptr;
+		nch = ifiles->ib->buf[ifiles->curptr];
 		switch (ch) {
 		case WARN:
 		case CONC:
@@ -674,17 +706,21 @@ run:			while ((ch = inch()) == '\t' || ch == ' ')
 			}
 			/* FALLTHROUGH */
 		case '\"': /* strings */
-			faststr(ch, putch);
+			faststr(ch, &pb);
 			break;
 
 		case '.':  /* for pp-number */
+			if ((spechr[nch] & C_DIGIT) == 0) {
+				putch('.');
+				break;
+			}
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			ch = fastnum(ch, putch);
+			ch = fastnum(ch, &pb);
 			goto xloop;
 
 		case 'u':
-			if (nch == '8' && ifiles->curptr[1] == '\"') {
+			if (nch == '8' && ifiles->ib->buf[ifiles->curptr+1] == '\"') {
 				putch(ch);
 				break;
 			}
@@ -704,20 +740,22 @@ run:			while ((ch = inch()) == '\t' || ch == ' ')
 		ident:
 			if (flslvl)
 				error("fastscan flslvl");
-			dp = readid(ch);
-			if ((nl = lookup(dp, FIND))) {
-				if ((ob = kfind(nl))) {
+			rb->cptr = 0;
+			dp = bufid(ch, rb);
+			if ((nl = lookup(dp, FIND)) != NULL) {
+				if ((ob = kfind(nl)) != NULL) {
 					if (*ob->buf == '-' || *ob->buf == '+')
 						putch(' ');
-					for (cp = ob->buf; cp < ob->cptr; cp++)
-						putch(*cp);
-					if (ob->cptr[-1] == '-' ||
-					    ob->cptr[-1] == '+')
+					buftobuf(ob, &pb);
+					if (ob->cptr > 0 &&
+					    (ob->buf[ob->cptr-1] == '-' ||
+					    ob->buf[ob->cptr-1] == '+'))
 						putch(' ');
 					bufree(ob);
 				}
-			} else
+			} else {
 				putstr(dp);
+			}
 			break;
 
 		case '\\':
@@ -748,24 +786,32 @@ int inexpr;
 static int
 exprline(void)
 {
-	struct iobuf *ob;
+	extern int nbufused;
+	struct iobuf *ob, *rb;
 	struct symtab *nl;
 	int oCflag = Cflag;
-	usch *bp = stringbuf, *dp;
+	usch *dp;
 	int c, d, ifdef;
 
+	rb = getobuf(BNORMAL);
+	nbufused--;
 	Cflag = ifdef = 0;
 
-	while ((c = inch()) != '\n') {
-		if (c == '\'' || c == '\"') {
-			faststr(c, savch);
-			continue;
+	for (;;) {
+		c = inch();
+xloop:		if (c == '\n')
+			break;
+		if (c == '.') {
+			putob(rb, '.');
+			if ((spechr[c = inch()] & C_DIGIT) == 0)
+				goto xloop;
 		}
-		if (ISDIGIT(c) || c == '.') {
-			c = fastnum(c, savch);
-			if (c == '\n')
-				break;
-			unch(c);
+		if (ISDIGIT(c)) {
+			c = fastnum(c, rb);
+			goto xloop;
+		}
+		if (c == '\'' || c == '\"') {
+			faststr(c, rb);
 			continue;
 		}
 		if (c == 'L' || c == 'u' || c == 'U') {
@@ -776,30 +822,31 @@ exprline(void)
 		if (ISID0(c)) {
 			dp = readid(c);
 			nl = lookup(dp, FIND);
-			if (nl && *nl->value == DEFLOC) {
+			if (nl && nl->type == DEFLOC) {
 				ifdef = 1;
 			} else if (ifdef) {
-				savch(nl ? '1' : '0');
+				putob(rb, nl ? '1' : '0');
 				ifdef = 0;
 			} else if (nl != NULL) {
 				inexpr = 1;
 				if ((ob = kfind(nl))) {
-					putob(ob, 0);
-					savstr(ob->buf);
+					ob->buf[ob->cptr] = 0;
+					strtobuf(ob->buf, rb);
 					bufree(ob);
 				} else
-					savch('0');
+					putob(rb, '0');
 				inexpr = 0;
 			} else
-				savch('0');
+				putob(rb, '0');
 		} else
-			savch(c);
+			putob(rb, c);
 	}
-	savch(0);
+	rb->buf[rb->cptr] = 0;
 	unch('\n');
-	yyinp = bp;
+	yyinp = rb->buf;
 	c = yyparse();
-	stringbuf = bp;
+	bufree(rb);
+	nbufused++;
 	Cflag = oCflag;
 	return c;
 }
@@ -869,48 +916,6 @@ yylex(void)
 }
 
 /*
- * Let the command-line args be faked defines at beginning of file.
- */
-static void
-prinit(struct initar *it, struct includ *ic)
-{
-	const char *pre, *post;
-	char *a;
-
-	if (it->next)
-		prinit(it->next, ic);
-	pre = post = NULL; /* XXX gcc */
-	switch (it->type) {
-	case 'D':
-		pre = "#define ";
-		if ((a = strchr(it->str, '=')) != NULL) {
-			*a = ' ';
-			post = "\n";
-		} else
-			post = " 1\n";
-		break;
-	case 'U':
-		pre = "#undef ";
-		post = "\n";
-		break;
-	case 'i':
-		pre = "#include \"";
-		post = "\"\n";
-		break;
-	default:
-		error("prinit");
-	}
-	strlcat((char *)ic->buffer, pre, CPPBUF+1);
-	strlcat((char *)ic->buffer, it->str, CPPBUF+1);
-	if (strlcat((char *)ic->buffer, post, CPPBUF+1) >= CPPBUF+1)
-		error("line exceeds buffer size");
-
-	ic->lineno--;
-	while (*ic->maxread)
-		ic->maxread++;
-}
-
-/*
  * A new file included.
  * If ifiles == NULL, this is the first file and already opened (stdin).
  * Return 0 on success, -1 if file to be included is not found.
@@ -918,7 +923,6 @@ prinit(struct initar *it, struct includ *ic)
 int
 pushfile(const usch *file, const usch *fn, int idx, void *incs)
 {
-	extern struct initar *initar;
 	struct includ ibuf;
 	struct includ *ic;
 	int otrulvl;
@@ -936,12 +940,16 @@ pushfile(const usch *file, const usch *fn, int idx, void *incs)
 		ic->infil = 0;
 		ic->orgfn = ic->fname = (const usch *)"<stdin>";
 	}
-#ifndef BUF_STACK
-	ic->bbuf = malloc(BBUFSZ);
+#if LIBVMF
+	if (ifiles) {
+		vmmodify(ifiles->vseg);
+		vmunlock(ifiles->vseg);
+	}
+	ic->vseg = vmmapseg(&ibspc, inclevel);
+	vmlock(ic->vseg);
 #endif
-	ic->buffer = ic->bbuf+PBMAX;
-	ic->curptr = ic->buffer;
 	ifiles = ic;
+	ic->ib = getobuf(BINBUF);
 	ic->lineno = 1;
 	ic->escln = 0;
 	ic->maxread = ic->curptr;
@@ -949,19 +957,6 @@ pushfile(const usch *file, const usch *fn, int idx, void *incs)
 	ic->incs = incs;
 	ic->fn = fn;
 	prtline(1);
-	if (initar) {
-		int oin = ic->infil;
-		ic->infil = -1;
-		*ic->maxread = 0;
-		prinit(initar, ic);
-		initar = NULL;
-		if (dMflag)
-			printf("%s", (char *)ic->buffer);
-		fastscan();
-		prtline(1);
-		ic->infil = oin;
-	}
-
 	otrulvl = trulvl;
 
 	fastscan();
@@ -969,12 +964,26 @@ pushfile(const usch *file, const usch *fn, int idx, void *incs)
 	if (otrulvl != trulvl || flslvl)
 		error("unterminated conditional");
 
-#ifndef BUF_STACK
-	free(ic->bbuf);
-#endif
 	ifiles = ic->next;
-	close(ic->infil);
 	inclevel--;
+#if LIBVMF
+	vmmodify(ic->vseg);
+	vmunlock(ic->vseg);
+	ic->ib->ro = 1; /* XXX no free */
+	if (ifiles) {
+		int diff;
+
+		ifiles->vseg = vmmapseg(&ibspc, inclevel);
+		vmlock(ifiles->vseg);
+		/* XXX recalc ptr diffs */
+		diff = (usch *)ifiles->vseg->s_cinfo - ifiles->bbuf;
+		ifiles->bbuf += diff;
+		ifiles->maxread += diff;
+		ifiles->curptr += diff;
+	}
+#endif
+	close(ic->infil);
+	bufree(ic->ib);
 	return 0;
 }
 
@@ -991,18 +1000,18 @@ prtline(int nl)
 			return; /* no output */
 		if (ifiles->lineno == 1 &&
 		    (MMDflag == 0 || ifiles->idx != SYSINC)) {
-			printf("%s: %s\n", Mfile, ifiles->fname);
+			ob = bsheap(0, "%s: %s\n", Mfile, ifiles->fname);
 			if (MPflag &&
 			    strcmp((const char *)ifiles->fname, (char *)MPfile))
-				printf("%s:\n", ifiles->fname);
+				bsheap(ob, "%s:\n", ifiles->fname);
+			write(1, ob->buf, ob->cptr);
+			bufree(ob);
 		}
 	} else if (!Pflag) {
-		ob = bsheap(0, "\n# %d \"%s\"", ifiles->lineno, ifiles->fname);
+		bsheap(&pb, "\n# %d \"%s\"", ifiles->lineno, ifiles->fname);
 		if (ifiles->idx == SYSINC)
-			bsheap(ob, " 3");
-		if (nl) bsheap(ob, "\n");
-		putstr(ob->buf);
-		bufree(ob);
+			strtobuf((usch *)" 3", &pb);
+		if (nl) strtobuf((usch *)"\n", &pb);
 	}
 }
 
@@ -1224,43 +1233,38 @@ elifstmt(void)
 		error("#elif in non-conditional section");
 }
 
-/* save line into stringbuf */
-static usch *
+/* save line into iobuf */
+static struct iobuf *
 savln(void)
 {
+	struct iobuf *ob = getobuf(BNORMAL);
 	int c;
-	usch *cp = stringbuf;
 
 	while ((c = inch()) != -1) {
 		if (c == '\n') {
 			unch(c);
 			break;
 		}
-		savch(c);
+		putob(ob, c);
 	}
-	savch(0);
-
-	return cp;
+	ob->buf[ob->cptr] = 0;
+	return ob;
 }
 
 static void
 cpperror(void)
 {
-	usch *cp;
-
-	cp = savln();
-	error("#error %s", cp);
-	stringbuf = cp;
+	struct iobuf *ob = savln();
+	error("#error %s", ob->buf);
+	bufree(ob);
 }
 
 static void
 cppwarning(void)
 {
-	usch *cp;
-
-	cp = savln();
-	warning("#warning %s", cp);
-	stringbuf = cp;
+	struct iobuf *ob = savln();
+	error("#warning %s", ob->buf);
+	bufree(ob);
 }
 
 static void
@@ -1295,7 +1299,8 @@ identstmt(void)
 		if (ob)
 			bufree(ob);
 	} else if (ch == '\"') {
-		faststr(ch, savch);
+		bufree(faststr(ch, NULL));
+		
 	} else
 		goto bad;
 	chknl(1);
