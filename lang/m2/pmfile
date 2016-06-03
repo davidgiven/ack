@@ -1,7 +1,0 @@
--- $Source$
--- $State$
-
-local d = ROOTDIR.."lang/m2/"
-
-include (d.."comp/pmfile")
-include (d.."libm2/pmfile")
