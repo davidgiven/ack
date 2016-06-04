@@ -18,7 +18,7 @@ ANSI C toolchain which will run in a 64/64kB address space on an 8086.
 
 The ACK runs on Unix systems; most development happens on Linux.
 
-For more information, see the [About the ACK](about) page.
+For more information, see the [About the ACK](about.html) page.
 
 Getting it
 ----------
