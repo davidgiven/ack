@@ -46,6 +46,28 @@ list](http://sourceforge.net/mail/?group_id=130811).
 New news
 --------
 
+### 2016-06-05
+
+After... far too many... years, I've finally pushed out another release,
+6.0pre5.  Work hasn't stopped in the mean time; it's just been sporadic and
+unreleased. The big news is that there's a mostly-working VideoCore IV code
+generator which will make binaries you can run on the Raspberry Pi GPU, but
+there's been lots of other changes.
+
+As always, get it (and the proper release notes) from [the Github release
+page](https://github.com/davidgiven/ack/releases/latest).
+
+### 2015-06-18
+
+Because SourceForge has been acting... strange, I've moved everything to Github.
+Yes, now you can use git, and SVN too. hg is still supported via the hg-git extension.
+
+tl;dr:
+
+	git clone https://github.com/davidgiven/ack.git
+	hg clone git+ssh://git@github.com:davidgiven/ack.git
+	svn co https://github.com/davidgiven/ack
+    
 ### 2011-02-11
 
 ACK development (such as it is) has moved from the CVS repository to a new
