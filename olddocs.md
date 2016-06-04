@@ -1,18 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-  <title>White Papers</title>
-</head>
+---
+layout: default
+---
 
-<body>
-<h1>White Papers</h1>
+White Papers
+------------
 
-<p>These documents are all white papers that came with the full 5.5 release
+These documents are all white papers that came with the full 5.5 release
 and have varying degrees of relevance to the 6.0 release. These are converted
 automatically into HTML and PDF from the original troff source files, and so
 the quality is not always the greatest. However, there should be enough here
-to give some insight into how the ACK works. </p>
+to give some insight into how the ACK works.
 
 <table class="grid" border="0" cellpadding="2" cellspacing="2">
     <tr>
@@ -184,5 +181,4 @@ to give some insight into how the ACK works. </p>
       <td>the Zilog Z80 code generator</td>
     </tr>
 </table>
-</body>
-</html>
+
