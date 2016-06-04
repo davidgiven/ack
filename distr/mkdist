@@ -6,7 +6,7 @@
 
 destdir=
 srcdir=`pwd`
-arch=/usr/local/bin/arch
+aal=/usr/local/bin/aal
 delete=no
 copy="ln"
 
@@ -36,8 +36,8 @@ while [ "$1" != "" ]; do
 			copy="ln -s"
 			;;
 			
-		-a|--arch)
-			arch="$2"
+		-a|--aal)
+			aal="$2"
 			shift
 			;;
 			
@@ -49,7 +49,7 @@ while [ "$1" != "" ]; do
 			echo "  -x --delete          Erase the destination directory first."
 			echo "  -c --copy            Make physical copies of the files. (default: hardlink)"
 			echo "  -S --symlink         Make symbolic links instead of copying or hardlinking."
-			echo "  -a --arch <path>     Where the ACK 'arch' tool is."
+			echo "  -a --aal <path>      Where the ACK 'aal' tool is."
 			echo "  -h --help            Display this message."
 			exit 0
 			;;
@@ -110,7 +110,7 @@ process_dir() {
 					elif [ "$i" = "$archivename" ]; then
 						# Build the named archive.
 			
-						$arch cDr `cat LIST`
+						$aal cDr `cat LIST`
 						addfile $path/$archivename
 					else
 						echo "Don't know what to do with $i, listed in $PWD/.distr."
@@ -123,12 +123,10 @@ process_dir() {
 
 # --- Main program ----------------------------------------------------------
 
-# Test to make sure that $arch points to the right thing.
+# Test to make sure that $aal points to the right thing.
 
-if !(strings $arch | grep archiver > /dev/null); then
-	echo "$arch does not seem to point at the ACK archiver tool."
-	echo "(Don't confuse this with the Linux tool for displaying your"
-	echo "architecture.)"
+if !(strings $aal | grep archiver > /dev/null); then
+	echo "$aal does not seem to point at the ACK archiver tool."
 	echo ""
 	echo "Press RETURN to go ahead anyway, or CTRL+C to abort."
 	read ignored

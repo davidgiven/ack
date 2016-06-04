@@ -22,6 +22,7 @@ libsys/open.c
 libsys/pi_phys_to_user.s
 libsys/pi_uart.s
 libsys/pi_user_to_phys.s
+libsys/pi_fast_mode.s
 libsys/read.c
 libsys/select.c
 libsys/signal.c
