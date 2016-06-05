@@ -23,9 +23,13 @@ For more information, see the [About the ACK](about.html) page.
 Getting it
 ----------
 
-You can download the latest release of the ACK from [the Github release
-page](https://github.com/davidgiven/ack/releases/latest). Installation
-instructions are provided in the source package.
+Want to use it? See [the Github release page](https://github.com/davidgiven/ack/releases/latest).
+
+Want to develop for it? See [the Github repository](https://github.com/davidgiven/ack).
+
+The release package is pruned and simplified to remove a lot of the non-working
+code (so unless you're interested in said code, I would recommend it).
+Installation instructions are in the README.
 
 Note that I recommend that if you want to *use* the ACK, you get the source
 tarball rather than a Github snapshot --- it's edited and pruned and easier to
