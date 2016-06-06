@@ -30,11 +30,15 @@ local function asstring(o)
 	elseif (t == "number") then
 		return o
 	elseif (t == "table") then
-		local s = {}
-		for _, v in pairs(o) do
-			s[#s+1] = asstring(v)
+		if o.outs then
+			return asstring(o.outs)
+		else
+			local s = {}
+			for _, v in pairs(o) do
+				s[#s+1] = asstring(v)
+			end
+			return table.concat(s, " ")
 		end
-		return table.concat(s, " ")
 	else
 		error(string.format("can't turn values of type '%s' into strings", t))
 	end
@@ -99,23 +103,54 @@ local function emit(...)
 	end
 end
 
-local function loadbuildfile(filename)
-	local data, chunk, e
-	data = io.open(filename):read("*a")
-	if not e then
-		local thisglobals = {_G = thisglobals}
-		setmetatable(thisglobals, {__index = globals})
-		chunk, e = loadstring(data, filename, "text", thisglobals)
-	end
-	if e then
-		error(string.format("couldn't load '%s': %s", filename, e))
-	end
+local function templateexpand(list, vars)
+	setmetatable(vars, { __index = globals })
 
-	chunk()
+	local o = {}
+	for _, s in ipairs(list) do
+		o[#o+1] = s:gsub("%%%b{}",
+			function(expr)
+				expr = expr:sub(3, -2)
+				local chunk, e = loadstring("return "..expr, expr, "text", vars)
+				if e then
+					error(string.format("error evaluating expression: %s", e))
+				end
+				return asstring(chunk())
+			end
+		)
+	end
+	return o
+end
+	
+local function loadbuildfile(filename)
+	if not buildfiles[filename] then
+		buildfiles[filename] = true
+
+		local fp, data, chunk, e
+		io.stderr:write("loading ", filename, "\n")
+		fp, e = io.open(filename)
+		if not e then
+			data, e = fp:read("*a")
+			fp:close()
+			if not e then
+				local thisglobals = {_G = thisglobals}
+				setmetatable(thisglobals, {__index = globals})
+				chunk, e = loadstring(data, filename, "text", thisglobals)
+			end
+		end
+		if e then
+			error(string.format("couldn't load '%s': %s", filename, e))
+		end
+
+		local oldcwd = cwd
+		cwd = dirname(filename)
+		chunk()
+		cwd = oldcwd
+	end
 end
 
 local function loadtarget(targetname)
-	if targets[target] then
+	if targets[targetname] then
 		return targets[targetname]
 	end
 
@@ -129,23 +164,20 @@ local function loadtarget(targetname)
 		}
 		targets[targetname] = target
 	else
-		local _, _, filepart, targetpart = targetname:find("^([^:]+):(%w+)$")
+		local _, _, filepart, targetpart = targetname:find("^([^:]*):(%w+)$")
 		if not filepart or not targetpart then
 			error(string.format("malformed target name '%s'", targetname))
 		end
-		if not buildfiles[filepart] then
-			buildfiles[filepart] = true
-
-			local oldcwd = cwd
-			cwd = filepart
-			loadbuildfile(filepart.."/build.lua")
-			cwd = oldcwd
+		if (filepart == "") then
+			filepart = cwd
 		end
+		local filename = concatpath(filepart, "/build.lua")
+		loadbuildfile(concatpath(filename))
 
 		target = targets[targetname]
 		if not target then
 			error(string.format("build file '%s' contains no rule '%s'",
-				filepart, targetpart))
+				filename, targetpart))
 		end
 	end
 
@@ -168,6 +200,8 @@ local typeconverters = {
 
 			if s:find("^//") then
 				s = s:gsub("^//", "")
+			elseif s:find("^:") then
+				s = cwd..s
 			elseif s:find("^[^/]") then
 				s = concatpath(cwd, s)
 			end
@@ -228,7 +262,11 @@ local function definerule(rulename, types, cb)
 		end
 
 		args.environment = environment
-		cb(args)
+
+		local result = cb(args) or {}
+		result.is = result.is or {}
+		result.is[rulename] = true
+		targets[cwd..":"..args.name] = result
 	end
 end
 
@@ -260,11 +298,11 @@ function environment:mkdirs(dirs)
 end
 
 function environment:exec(commands)
-	local o = {}
-	for _, s in ipairs(commands) do
-		o[#o+1] = "("..s..")"
-	end
-	emit("\t$(hide)", table.concat(o, " && "), "\n")
+	emit("\t$(hide)", table.concat(commands, " && "), "\n")
+end
+
+function environment:endrule()
+	emit("\n")
 end
 
 definerule("simplerule",
@@ -278,7 +316,19 @@ definerule("simplerule",
 		e.environment:rule(filenamesof(e.ins), e.outs)
 		e.environment:label(e.name, " ", e.label or "")
 		e.environment:mkdirs(dirnames(e.outs))
-		e.environment:exec(e.commands)
+		e.environment:exec(
+			templateexpand(e.commands,
+				{
+					ins = e.ins,
+					outs = e.outs
+				}
+			)
+		)
+		e.environment:endrule()
+
+		return {
+			outs = e.outs
+		}
 	end
 )
 
