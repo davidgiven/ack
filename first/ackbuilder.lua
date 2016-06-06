@@ -40,6 +40,52 @@ local function asstring(o)
 	end
 end
 
+local function concatpath(...)
+	local p = table.concat({...}, "/")
+	return p:gsub("/+", "/"):gsub("^%./", "")
+end
+
+local function dirname(filename)
+	local _, _, b = filename:find("^(.*)/[^/]*$")
+	if not b then
+		return ""
+	end
+	return b
+end
+
+local function dirnames(collection)
+	local o = {}
+	for _, s in pairs(collection) do
+		local b = dirname(s)
+		if (b ~= "") then
+			o[#o+1] = b
+		end
+	end
+	return o
+end
+
+local function filenamesof(results)
+	local f = {}
+	for _, r in pairs(results) do
+		for _, o in pairs(r.outs) do
+			f[#f+1] = o
+		end
+	end
+	return f
+end
+
+local function uniquify(collection)
+	local s = {}
+	local o = {}
+	for _, v in pairs(collection) do
+		if not s[v] then
+			s[v] = true
+			o[#o+1] = s
+		end
+	end
+	return o
+end
+
 local function emit(...)
 	local n = select("#", ...)
 	local args = {...}
@@ -74,7 +120,7 @@ local function loadtarget(targetname)
 	end
 
 	local target
-	if not target:find(":") then
+	if not targetname:find(":") then
 		target = {
 			outs = {targetname},
 			is = {
@@ -122,11 +168,12 @@ local typeconverters = {
 
 			if s:find("^//") then
 				s = s:gsub("^//", "")
-			elseif s:find("^[/]") then
+			elseif s:find("^[^/]") then
 				s = concatpath(cwd, s)
 			end
-			o[#o+1] = s
+			o[#o+1] = loadtarget(s)
 		end
+		return o
 	end,
 
 	strings = function(propname, i)
@@ -135,7 +182,6 @@ local typeconverters = {
 		elseif (type(i) ~= "table") then
 			error(string.format("property '%s' must be a string list", propname))
 		end
-
 		return i
 	end,
 
@@ -143,6 +189,7 @@ local typeconverters = {
 		if (type(i) ~= "string") then
 			error(string.format("property '%s' must be a string", propname))
 		end
+		return i
 	end,
 }
 	
@@ -163,18 +210,25 @@ local function definerule(rulename, types, cb)
 	rules[rulename] = function(e)
 		local args = {}
 		for propname, typespec in pairs(types) do
-			if not e[propname] and not typespec.optional then
-				error(string.format("missing mandatory property '%s'", propname))
-			end
+			if not e[propname] then
+				if not typespec.optional then
+					error(string.format("missing mandatory property '%s'", propname))
+				end
 
-			args[propname] = typeconverters[typespec.type](propname, e[propname])
-			e[propname] = nil
+				args[propname] = typespec.default
+			else
+				args[propname] = typeconverters[typespec.type](propname, e[propname])
+				e[propname] = nil
+			end
 		end
 
 		local propname, _ = next(e)
 		if propname then
 			error(string.format("don't know what to do with property '%s'", propname))
 		end
+
+		args.environment = environment
+		cb(args)
 	end
 end
 
@@ -182,12 +236,49 @@ end
 --                              DEFAULT RULES                              --
 -----------------------------------------------------------------------------
 
+function environment:rule(ins, outs)
+	local firstout = outs[1]
+	for i = 2, #outs do
+		emit(outs[i], ":", outs[1], "\n")
+	end
+	for i = 1, #ins do
+		emit(firstout, ":", ins[i], "\n")
+	end
+	emit(firstout, ":\n")
+end
+
+function environment:label(...)
+	local s = table.concat({...}, " ")
+	emit("\t@echo", s, "\n")
+end
+
+function environment:mkdirs(dirs)
+	dirs = uniquify(dirs)
+	if (#dirs > 0) then
+		emit("\t@mkdir -p ", dirs, "\n")
+	end
+end
+
+function environment:exec(commands)
+	local o = {}
+	for _, s in ipairs(commands) do
+		o[#o+1] = "("..s..")"
+	end
+	emit("\t$(hide)", table.concat(o, " && "), "\n")
+end
+
 definerule("simplerule",
 	{
 		ins = { type="targets" },
 		outs = { type="strings" },
+		label = { type="string", optional=true },
+		commands = { type="strings" },
 	},
 	function (e)
+		e.environment:rule(filenamesof(e.ins), e.outs)
+		e.environment:label(e.name, " ", e.label or "")
+		e.environment:mkdirs(dirnames(e.outs))
+		e.environment:exec(e.commands)
 	end
 )
 
