@@ -1,7 +1,32 @@
-simplerule {
+definerule("normalrule",
+	{
+		ins = { type="targets" },
+		outleaves = { type="strings" },
+		label = { type="string", optional=true },
+		commands = { type="strings" },
+	},
+	function (e)
+		local objpath = "$(OBJDIR)/"..e.name
+		local realouts = {}
+		for k, v in pairs(e.outleaves) do
+			realouts[k] = concatpath(objpath, v)
+		end
+
+		return simplerule {
+			name = e.name,
+			ins = e.ins,
+			outs = realouts,
+			label = e.label,
+			commands = e.commands,
+		}
+	end
+)
+
+
+normalrule {
 	name = "random",
 	ins = {},
-	outs = {"out"},
+	outleaves = {"out"},
 	commands = {
 		"dd if=/dev/random of=%{outs} bs=1024 count=1"
 	}

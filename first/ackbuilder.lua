@@ -1,3 +1,5 @@
+local posix = require("posix")
+
 -- Targets:
 --
 -- {
@@ -25,12 +27,14 @@ end
 
 local function asstring(o)
 	local t = type(o)
-	if (t == "string") then
+	if (t == "nil") then
+		return ""
+	elseif (t == "string") then
 		return o
 	elseif (t == "number") then
 		return o
 	elseif (t == "table") then
-		if o.outs then
+		if o.is then
 			return asstring(o.outs)
 		else
 			local s = {}
@@ -71,8 +75,14 @@ end
 local function filenamesof(results)
 	local f = {}
 	for _, r in pairs(results) do
-		for _, o in pairs(r.outs) do
-			f[#f+1] = o
+		if (type(r) == "string") then
+			f[#f+1] = r
+		elseif (type(r) == "table") then
+			if r.is and r.outs then
+				for _, o in pairs(r.outs) do
+					f[#f+1] = o
+				end
+			end
 		end
 	end
 	return f
@@ -84,7 +94,7 @@ local function uniquify(collection)
 	for _, v in pairs(collection) do
 		if not s[v] then
 			s[v] = true
-			o[#o+1] = s
+			o[#o+1] = v
 		end
 	end
 	return o
@@ -267,6 +277,7 @@ local function definerule(rulename, types, cb)
 		result.is = result.is or {}
 		result.is[rulename] = true
 		targets[cwd..":"..args.name] = result
+		return result
 	end
 end
 
@@ -277,12 +288,12 @@ end
 function environment:rule(ins, outs)
 	local firstout = outs[1]
 	for i = 2, #outs do
-		emit(outs[i], ":", outs[1], "\n")
+		emit(outs[i]..":", outs[1], "\n")
 	end
 	for i = 1, #ins do
-		emit(firstout, ":", ins[i], "\n")
+		emit(firstout..":", ins[i], "\n")
 	end
-	emit(firstout, ":\n")
+	emit(firstout..":\n")
 end
 
 function environment:label(...)
@@ -293,7 +304,7 @@ end
 function environment:mkdirs(dirs)
 	dirs = uniquify(dirs)
 	if (#dirs > 0) then
-		emit("\t@mkdir -p ", dirs, "\n")
+		emit("\t@mkdir -p", dirs, "\n")
 	end
 end
 
@@ -314,8 +325,8 @@ definerule("simplerule",
 	},
 	function (e)
 		e.environment:rule(filenamesof(e.ins), e.outs)
-		e.environment:label(e.name, " ", e.label or "")
-		e.environment:mkdirs(dirnames(e.outs))
+		e.environment:label(cwd..":"..e.name, " ", e.label or "")
+		e.environment:mkdirs(dirnames(filenamesof(e.outs)))
 		e.environment:exec(
 			templateexpand(e.commands,
 				{
@@ -338,6 +349,8 @@ definerule("simplerule",
 
 globals = {
 	asstring = asstring,
+	concatpath = concatpath,
+	cwd = cwd,
 	definerule = definerule,
 	emit = emit,
 	environment = environment,
