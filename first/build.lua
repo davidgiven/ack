@@ -32,6 +32,25 @@ normalrule {
 	}
 }
 
+normalrule {
+	name = "onetwo",
+	ins = {},
+	outleaves = {"one.txt", "two.txt"},
+	commands = {
+		"echo 1 >> %{outs[1]}",
+		"echo 2 >> %{outs[2]}",
+	}
+}
+
+normalrule {
+	name = "concat",
+	ins = {":onetwo"},
+	outleaves = {"result.txt"},
+	commands = {
+		"cat %{ins} > %{outs}"
+	}
+}
+
 simplerule {
 	name = "sorted",
 	ins = { ":random" },

@@ -204,18 +204,21 @@ local typeconverters = {
 
 		local o = {}
 		for _, s in ipairs(i) do
-			if (type(s) ~= "string") then
-				error(string.format("member of target list '%s' is not a string", propname))
+			if (type(s) == "table") and s.is then
+				o[#o+1] = s
+			elseif (type(s) == "string") then
+				if s:find("^//") then
+					s = s:gsub("^//", "")
+				elseif s:find("^:") then
+					s = cwd..s
+				elseif s:find("^[^/]") then
+					s = concatpath(cwd, s)
+				end
+				o[#o+1] = loadtarget(s)
+			else
+				error(string.format("member of target list '%s' is not a string or a target",
+					propname))
 			end
-
-			if s:find("^//") then
-				s = s:gsub("^//", "")
-			elseif s:find("^:") then
-				s = cwd..s
-			elseif s:find("^[^/]") then
-				s = concatpath(cwd, s)
-			end
-			o[#o+1] = loadtarget(s)
 		end
 		return o
 	end,
