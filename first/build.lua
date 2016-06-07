@@ -4,6 +4,7 @@ definerule("normalrule",
 		outleaves = { type="strings" },
 		label = { type="string", optional=true },
 		commands = { type="strings" },
+		vars = { type="table", default={} },
 	},
 	function (e)
 		local objpath = "$(OBJDIR)/"..e.name
@@ -12,76 +13,76 @@ definerule("normalrule",
 			realouts[k] = concatpath(objpath, v)
 		end
 
-		return simplerule {
+		local result = simplerule {
 			name = e.name,
 			ins = e.ins,
 			outs = realouts,
 			label = e.label,
 			commands = e.commands,
+			vars = e.vars,
+		}
+		result.dir = objpath
+		return result
+	end
+)
+
+definerule("cfile",
+	{
+		srcs = { type="targets" },
+		hdrs = { type="targets", default={} },
+		commands = {
+			type="strings",
+			default={
+				"$CC -c -o %{outs[1]} %{ins[1]} %{hdrpaths}"
+			},
+		}
+	},
+	function (e)
+		if (#e.srcs ~= 1) then
+			error("you must have exactly one .c file")
+		end
+		
+		hdrpaths = {}
+		for _, t in pairs(e.hdrs) do
+			hdrpaths[#hdrpaths+1] = "-I"..t.dir
+		end
+
+		local outleaf = basename(filenamesof(e.srcs)[1]):gsub("%.c$", ".o")
+
+		return normalrule {
+			name = e.name,
+			ins = {e.srcs[1], unpack(e.hdrs)},
+			outleaves = {outleaf},
+			label = e.label,
+			commands = e.commands,
+			vars = {
+				hdrpaths = hdrpaths
+			}
 		}
 	end
 )
 
-
 normalrule {
-	name = "random",
+	name = "mkheader",
 	ins = {},
-	outleaves = {"out"},
+	outleaves = {"foo.h"},
 	commands = {
-		"dd if=/dev/random of=%{outs} bs=1024 count=1"
+		"echo 1 >> %{outs}"
 	}
 }
 
-normalrule {
-	name = "onetwo",
-	ins = {},
-	outleaves = {"one.txt", "two.txt"},
-	commands = {
-		"echo 1 >> %{outs[1]}",
-		"echo 2 >> %{outs[2]}",
-	}
+cfile {
+	name = "testfile-foo",
+	srcs = "foo.c",
 }
 
-normalrule {
-	name = "concat",
-	ins = {":onetwo"},
-	outleaves = {"result.txt"},
-	commands = {
-		"cat %{ins} > %{outs}"
-	}
-}
-
-simplerule {
-	name = "sorted",
-	ins = { ":random" },
-	outs = { "sorted" },
-	commands = {
-		"sort %{ins} > %{outs}"
-	}
+cfile {
+	name = "testfile-bar",
+	srcs = "bar.c",
+	hdrs = ":mkheader",
 }
 
 --[[
-function environment:cfileflags()
-	emit("$CFLAGS")
-end
-
-function environment:cfile(srcs, obj, includes)
-	emit("$CC -o", obj, srcs)
-	emit(ab.expand(includes, "-I%"))
-	self:cflags()
-	emit("\n")
-end
-
-function environment:clinkflags()
-	emit("$LDFLAGS")
-end
-
-function environment:clink(objs, exe, libraryFlags)
-	emit("$CC -o", exe, objs, libraryFlags)
-	self:clinkflags()
-	emit("\n")
-end
-
 --
 -- Targets:
 --

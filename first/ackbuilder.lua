@@ -53,6 +53,25 @@ local function concatpath(...)
 	return p:gsub("/+", "/"):gsub("^%./", "")
 end
 
+local function basename(filename)
+	local _, _, b = filename:find("^.*/([^/]*)$")
+	if not b then
+		return ""
+	end
+	return b
+end
+
+local function basenames(collection)
+	local o = {}
+	for _, s in pairs(collection) do
+		local b = basename(s)
+		if (b ~= "") then
+			o[#o+1] = b
+		end
+	end
+	return o
+end
+
 local function dirname(filename)
 	local _, _, b = filename:find("^(.*)/[^/]*$")
 	if not b then
@@ -74,18 +93,41 @@ end
 
 local function filenamesof(results)
 	local f = {}
-	for _, r in pairs(results) do
-		if (type(r) == "string") then
-			f[#f+1] = r
-		elseif (type(r) == "table") then
-			if r.is and r.outs then
-				for _, o in pairs(r.outs) do
-					f[#f+1] = o
+	if results then
+		for _, r in pairs(results) do
+			if (type(r) == "string") then
+				f[#f+1] = r
+			elseif (type(r) == "table") then
+				if r.is and r.outs then
+					for _, o in pairs(r.outs) do
+						f[#f+1] = o
+					end
 				end
 			end
 		end
 	end
 	return f
+end
+
+local function selectof(pattern, targets)
+	local o = {}
+	for k, v in pairs(targets) do
+		if v.is and v.outs then
+			local targetmatches = nil
+			for _, f in pairs(v.outs) do
+				local matches = not not f:find(pattern)
+				if (targetmatches == nil) then
+					targetmatches = matches
+				elseif (targetmatches ~= matches) then
+					error("selectof() is matching only part of a target")
+				end
+			end
+			if targetmatches then
+				o[#o+1] = v
+			end
+		end
+	end
+	return o
 end
 
 local function uniquify(collection)
@@ -238,6 +280,13 @@ local typeconverters = {
 		end
 		return i
 	end,
+
+	table = function(propname, i)
+		if (type(i) ~= "table") then
+			error(string.format("property '%s' must be a table", propname))
+		end
+		return i
+	end,
 }
 	
 local function definerule(rulename, types, cb)
@@ -258,7 +307,7 @@ local function definerule(rulename, types, cb)
 		local args = {}
 		for propname, typespec in pairs(types) do
 			if not e[propname] then
-				if not typespec.optional then
+				if not typespec.optional and not typespec.default then
 					error(string.format("missing mandatory property '%s'", propname))
 				end
 
@@ -325,19 +374,22 @@ definerule("simplerule",
 		outs = { type="strings" },
 		label = { type="string", optional=true },
 		commands = { type="strings" },
+		vars = { type="table", default={} },
 	},
 	function (e)
 		e.environment:rule(filenamesof(e.ins), e.outs)
 		e.environment:label(cwd..":"..e.name, " ", e.label or "")
 		e.environment:mkdirs(dirnames(filenamesof(e.outs)))
-		e.environment:exec(
-			templateexpand(e.commands,
-				{
-					ins = e.ins,
-					outs = e.outs
-				}
-			)
-		)
+
+		local vars = {
+			ins = e.ins,
+			outs = e.outs
+		}
+		for k, v in pairs(e.vars) do
+			vars[k] = v
+		end
+
+		e.environment:exec(templateexpand(e.commands, vars))
 		e.environment:endrule()
 
 		return {
@@ -352,11 +404,17 @@ definerule("simplerule",
 
 globals = {
 	asstring = asstring,
+	basename = basename,
+	basenames = basenames,
 	concatpath = concatpath,
 	cwd = cwd,
 	definerule = definerule,
+	dirname = dirname,
+	dirnames = dirnames,
 	emit = emit,
 	environment = environment,
+	filenamesof = filenamesof,
+	selectof = selectof,
 }
 setmetatable(globals,
 	{
