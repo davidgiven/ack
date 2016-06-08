@@ -29,7 +29,6 @@ definerule("normalrule",
 definerule("cfile",
 	{
 		srcs = { type="targets" },
-		hdrs = { type="targets", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -38,20 +37,23 @@ definerule("cfile",
 		}
 	},
 	function (e)
-		if (#e.srcs ~= 1) then
+		local csrcs = filenamesof(e.srcs, "%.c$")
+		if (#csrcs ~= 1) then
 			error("you must have exactly one .c file")
 		end
 		
-		hdrpaths = {}
-		for _, t in pairs(e.hdrs) do
+		local htargets = selectof(e.srcs, "%.h$")
+		local hdrpaths = {}
+		for _, t in pairs(htargets) do
 			hdrpaths[#hdrpaths+1] = "-I"..t.dir
 		end
+		hdrpaths = uniquify(hdrpaths)
 
-		local outleaf = basename(filenamesof(e.srcs)[1]):gsub("%.c$", ".o")
+		local outleaf = basename(csrcs[1]):gsub("%.c$", ".o")
 
 		return normalrule {
 			name = e.name,
-			ins = {e.srcs[1], unpack(e.hdrs)},
+			ins = {csrcs[1], unpack(htargets)},
 			outleaves = {outleaf},
 			label = e.label,
 			commands = e.commands,
@@ -78,8 +80,7 @@ cfile {
 
 cfile {
 	name = "testfile-bar",
-	srcs = "bar.c",
-	hdrs = ":mkheader",
+	srcs = {"bar.c", ":mkheader"},
 }
 
 --[[

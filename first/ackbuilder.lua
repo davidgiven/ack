@@ -91,38 +91,40 @@ local function dirnames(collection)
 	return o
 end
 
-local function filenamesof(results)
+local function filenamesof(targets, pattern)
 	local f = {}
-	if results then
-		for _, r in pairs(results) do
-			if (type(r) == "string") then
-				f[#f+1] = r
-			elseif (type(r) == "table") then
-				if r.is and r.outs then
+	if targets then
+		for _, r in pairs(targets) do
+			if (type(r) == "table") and r.is then
+				if r.outs then
 					for _, o in pairs(r.outs) do
-						f[#f+1] = o
+						if not pattern or o:find(pattern) then
+							f[#f+1] = o
+						end
 					end
 				end
+			else
+				error("list of targets contains something which isn't a target")
 			end
 		end
 	end
 	return f
 end
 
-local function selectof(pattern, targets)
+-- Selects all targets containing at least one output file that matches
+-- the pattern.
+local function selectof(targets, pattern)
 	local o = {}
 	for k, v in pairs(targets) do
 		if v.is and v.outs then
-			local targetmatches = nil
+			local matches = false
 			for _, f in pairs(v.outs) do
-				local matches = not not f:find(pattern)
-				if (targetmatches == nil) then
-					targetmatches = matches
-				elseif (targetmatches ~= matches) then
-					error("selectof() is matching only part of a target")
+				if f:find(pattern) then
+					matches = true
+					break
 				end
 			end
-			if targetmatches then
+			if matches then
 				o[#o+1] = v
 			end
 		end
@@ -379,7 +381,7 @@ definerule("simplerule",
 	function (e)
 		e.environment:rule(filenamesof(e.ins), e.outs)
 		e.environment:label(cwd..":"..e.name, " ", e.label or "")
-		e.environment:mkdirs(dirnames(filenamesof(e.outs)))
+		e.environment:mkdirs(dirnames(e.outs))
 
 		local vars = {
 			ins = e.ins,
@@ -415,6 +417,7 @@ globals = {
 	environment = environment,
 	filenamesof = filenamesof,
 	selectof = selectof,
+	uniquify = uniquify,
 }
 setmetatable(globals,
 	{
