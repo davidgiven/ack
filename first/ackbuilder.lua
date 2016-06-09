@@ -15,14 +15,18 @@ local buildfiles = {}
 local globals
 local cwd = "."
 
-local function subenv(old, cb)
-	if not old then
-		old = environment
-	end
-	local new = {}
-	setmetatable(new, {__index = old})
-	cb(new, old)
-	return new
+local function inherit(high, low)
+	local o = {}
+	setmetatable(o, {
+		__index = function(self, k)
+			local x = high[k]
+			if x then
+				return x
+			end
+			return low[k]
+		end
+	})
+	return o
 end
 
 local function asstring(o)
@@ -50,7 +54,7 @@ end
 
 local function concatpath(...)
 	local p = table.concat({...}, "/")
-	return p:gsub("/+", "/"):gsub("^%./", "")
+	return p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/")
 end
 
 local function basename(filename)
@@ -144,6 +148,10 @@ local function uniquify(collection)
 	return o
 end
 
+local function startswith(needle, haystack)
+	return haystack:sub(1, #needle) == needle
+end
+
 local function emit(...)
 	local n = select("#", ...)
 	local args = {...}
@@ -158,7 +166,7 @@ local function emit(...)
 end
 
 local function templateexpand(list, vars)
-	setmetatable(vars, { __index = globals })
+	vars = inherit(vars, globals)
 
 	local o = {}
 	for _, s in ipairs(list) do
@@ -210,8 +218,18 @@ local function loadtarget(targetname)
 
 	local target
 	if not targetname:find(":") then
+		local files
+		if targetname:find("[?*]") then
+			files = posix.glob(targetname)
+			if not files then
+				error(string.format("glob '%s' matches no files", targetname))
+			end
+		else
+			files = {targetname}
+		end
+
 		target = {
-			outs = {targetname},
+			outs = files,
 			is = {
 				__implicitfile = true
 			}
@@ -251,11 +269,9 @@ local typeconverters = {
 			if (type(s) == "table") and s.is then
 				o[#o+1] = s
 			elseif (type(s) == "string") then
-				if s:find("^//") then
-					s = s:gsub("^//", "")
-				elseif s:find("^:") then
+				if s:find("^:") then
 					s = cwd..s
-				elseif s:find("^[^/]") then
+				elseif s:find("^%./") then
 					s = concatpath(cwd, s)
 				end
 				o[#o+1] = loadtarget(s)
@@ -383,13 +399,10 @@ definerule("simplerule",
 		e.environment:label(cwd..":"..e.name, " ", e.label or "")
 		e.environment:mkdirs(dirnames(e.outs))
 
-		local vars = {
+		local vars = inherit(e.vars, {
 			ins = e.ins,
 			outs = e.outs
-		}
-		for k, v in pairs(e.vars) do
-			vars[k] = v
-		end
+		})
 
 		e.environment:exec(templateexpand(e.commands, vars))
 		e.environment:endrule()
@@ -416,7 +429,9 @@ globals = {
 	emit = emit,
 	environment = environment,
 	filenamesof = filenamesof,
+	inherit = inherit,
 	selectof = selectof,
+	startswith = startswith,
 	uniquify = uniquify,
 }
 setmetatable(globals,
