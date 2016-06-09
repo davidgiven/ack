@@ -60,7 +60,7 @@ end
 local function basename(filename)
 	local _, _, b = filename:find("^.*/([^/]*)$")
 	if not b then
-		return ""
+		return filename
 	end
 	return b
 end
@@ -108,7 +108,8 @@ local function filenamesof(targets, pattern)
 					end
 				end
 			else
-				error("list of targets contains something which isn't a target")
+				error(string.format("list of targets contains a %s which isn't a target",
+					type(r)))
 			end
 		end
 	end
