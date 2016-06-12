@@ -1,20 +1,25 @@
+local function objdir(e)
+	return concatpath("$(OBJDIR)", cwd(), e.name)
+end
+
 definerule("normalrule",
 	{
 		ins = { type="targets" },
 		outleaves = { type="strings" },
 		label = { type="string", optional=true },
+		objdir = { type="string", optional=true },
 		commands = { type="strings" },
 		vars = { type="table", default={} },
 	},
 	function (e)
-		local objpath = "$(OBJDIR)/"..e.name
+		local dir = e.objdir or objdir(e)
 		local realouts = {}
 		for k, v in pairs(e.outleaves) do
-			realouts[k] = concatpath(objpath, v)
+			realouts[k] = concatpath(dir, v)
 		end
 
 		local vars = inherit(e.vars, {
-			dir = objpath
+			dir = dir
 		})
 
 		local result = simplerule {
@@ -25,7 +30,7 @@ definerule("normalrule",
 			commands = e.commands,
 			vars = vars,
 		}
-		result.dir = objpath
+		result.dir = dir
 		return result
 	end
 )
@@ -34,10 +39,11 @@ definerule("cfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
+		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
-				"$(CC) -c -o %{outs[1]} %{ins[1]} %{hdrpaths}"
+				"$(CC) -c -o %{outs[1]} %{ins[1]} %{hdrpaths} %{cflags}"
 			},
 		}
 	},
@@ -68,7 +74,8 @@ definerule("cfile",
 			label = e.label,
 			commands = e.commands,
 			vars = {
-				hdrpaths = hdrpaths
+				hdrpaths = hdrpaths,
+				cflags = e.cflags,
 			}
 		}
 	end
@@ -87,7 +94,7 @@ definerule("bundle",
 	function (e)
 		local outleaves = {}
 		local commands = {}
-		for _, f in pairs(filenamesof(e.srcs)) do
+		for _, f in fpairs(e.srcs) do
 			local localf = basename(f)
 			outleaves[#outleaves+1] = localf
 			commands[#commands+1] = "cp "..f.." %{dir}/"..localf
@@ -107,6 +114,7 @@ definerule("clibrary",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
+		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -124,12 +132,16 @@ definerule("clibrary",
 		local hsrcs = filenamesof(e.srcs, "%.h$")
 
 		local ins = {}
-		for _, csrc in pairs(csrcs) do
+		for _, csrc in fpairs(csrcs) do
 			local n = basename(csrc):gsub("%.%w*$", "")
 			ins[#ins+1] = cfile {
 				name = e.name.."/"..n,
 				srcs = {csrc, unpack(hsrcs)},
 				deps = e.deps,
+				cflags = {
+					"-I"..cwd(),
+					unpack(e.cflags)
+				},
 			}
 		end
 
@@ -179,14 +191,4 @@ definerule("cprogram",
 		}
 	end
 )
-
-cprogram {
-	name = "test",
-	srcs = {
-		"foo.c",
-	},
-	deps = {
-		"modules:string"
-	}
-}
 

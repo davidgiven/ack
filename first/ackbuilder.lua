@@ -57,44 +57,6 @@ local function concatpath(...)
 	return p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/")
 end
 
-local function basename(filename)
-	local _, _, b = filename:find("^.*/([^/]*)$")
-	if not b then
-		return filename
-	end
-	return b
-end
-
-local function basenames(collection)
-	local o = {}
-	for _, s in pairs(collection) do
-		local b = basename(s)
-		if (b ~= "") then
-			o[#o+1] = b
-		end
-	end
-	return o
-end
-
-local function dirname(filename)
-	local _, _, b = filename:find("^(.*)/[^/]*$")
-	if not b then
-		return ""
-	end
-	return b
-end
-
-local function dirnames(collection)
-	local o = {}
-	for _, s in pairs(collection) do
-		local b = dirname(s)
-		if (b ~= "") then
-			o[#o+1] = b
-		end
-	end
-	return o
-end
-
 local function filenamesof(targets, pattern)
 	local f = {}
 	if targets then
@@ -107,6 +69,8 @@ local function filenamesof(targets, pattern)
 						end
 					end
 				end
+			elseif (type(r) == "string") then
+				f[#f+1] = r
 			else
 				error(string.format("list of targets contains a %s which isn't a target",
 					type(r)))
@@ -116,8 +80,75 @@ local function filenamesof(targets, pattern)
 	return f
 end
 
+local function dotocollection(collection, callback)
+	if (type(collection) == "string") then
+		return callback(collection)
+	elseif collection.is then
+		local files = filenamesof(collection.outs)
+		if (#files ~= 1) then
+			error("inputs with more than one output need to be in a list")
+		end
+		return callback(files[1])
+	end
+
+	local o = {}
+	for _, s in pairs(collection) do
+		if s.is then
+			for _, b in pairs(dotocollection(filenamesof(s), callback)) do
+				o[#o+1] = b
+			end
+		else
+			local b = callback(s)
+			if (b ~= "") then
+				o[#o+1] = b
+			end
+		end
+	end
+	return o
+end
+
+local function abspath(collection)
+	return dotocollection(collection,
+		function(filename)
+			return concatpath(posix.getcwd(), filename)
+		end
+	)
+end
+	
+local function basename(collection)
+	return dotocollection(collection,
+		function(filename)
+			local _, _, b = filename:find("^.*/([^/]*)$")
+			if not b then
+				return filename
+			end
+			return b
+		end
+	)
+end
+
+local function dirname(collection)
+	return dotocollection(collection,
+		function(filename)
+			local _, _, b = filename:find("^(.*)/[^/]*$")
+			if not b then
+				return ""
+			end
+			return b
+		end
+	)
+end
+
+local function fpairs(collection)
+	if (type(collection) == "string") or collection.is then
+		return tpairs({collection})
+	end
+
+	return pairs(filenamesof(collection))
+end
+
 -- Selects all targets containing at least one output file that matches
--- the pattern.
+-- the pattern (or all, if the pattern is nil).
 local function selectof(targets, pattern)
 	local o = {}
 	for k, v in pairs(targets) do
@@ -237,7 +268,7 @@ local function loadtarget(targetname)
 		}
 		targets[targetname] = target
 	else
-		local _, _, filepart, targetpart = targetname:find("^([^:]*):(%w+)$")
+		local _, _, filepart, targetpart = targetname:find("^([^:]*):([%w-_]+)$")
 		if not filepart or not targetpart then
 			error(string.format("malformed target name '%s'", targetname))
 		end
@@ -398,7 +429,7 @@ definerule("simplerule",
 	function (e)
 		e.environment:rule(filenamesof(e.ins), e.outs)
 		e.environment:label(cwd..":"..e.name, " ", e.label or "")
-		e.environment:mkdirs(dirnames(e.outs))
+		e.environment:mkdirs(dirname(e.outs))
 
 		local vars = inherit(e.vars, {
 			ins = e.ins,
@@ -419,20 +450,20 @@ definerule("simplerule",
 -----------------------------------------------------------------------------
 
 globals = {
+	abspath = abspath,
 	asstring = asstring,
 	basename = basename,
-	basenames = basenames,
 	concatpath = concatpath,
-	cwd = cwd,
+	cwd = function() return cwd end,
 	definerule = definerule,
 	dirname = dirname,
-	dirnames = dirnames,
 	emit = emit,
 	environment = environment,
 	filenamesof = filenamesof,
 	inherit = inherit,
 	selectof = selectof,
 	startswith = startswith,
+	fpairs = fpairs,
 	uniquify = uniquify,
 }
 setmetatable(globals,
