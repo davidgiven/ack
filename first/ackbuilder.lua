@@ -3,6 +3,7 @@ local posix = require("posix")
 -- Targets:
 --
 -- {
+--   fullname = full name of target
 --   dir = target's build directory
 --   outs = target's object files
 --   is = { set of rule types which made the target }
@@ -60,6 +61,10 @@ end
 local function filenamesof(targets, pattern)
 	local f = {}
 	if targets then
+		if targets.is then
+			targets = {targets}
+		end
+
 		for _, r in pairs(targets) do
 			if (type(r) == "table") and r.is then
 				if r.outs then
@@ -141,7 +146,7 @@ end
 
 local function fpairs(collection)
 	if (type(collection) == "string") or collection.is then
-		return tpairs({collection})
+		return fpairs({collection})
 	end
 
 	return pairs(filenamesof(collection))
@@ -249,7 +254,7 @@ local function loadtarget(targetname)
 	end
 
 	local target
-	if not targetname:find(":") then
+	if not targetname:find("%+") then
 		local files
 		if targetname:find("[?*]") then
 			files = posix.glob(targetname)
@@ -268,7 +273,7 @@ local function loadtarget(targetname)
 		}
 		targets[targetname] = target
 	else
-		local _, _, filepart, targetpart = targetname:find("^([^:]*):([%w-_]+)$")
+		local _, _, filepart, targetpart = targetname:find("^([^+]*)%+([%w-_]+)$")
 		if not filepart or not targetpart then
 			error(string.format("malformed target name '%s'", targetname))
 		end
@@ -297,16 +302,16 @@ local typeconverters = {
 		end
 
 		local o = {}
-		for _, s in ipairs(i) do
+		for k, s in pairs(i) do
 			if (type(s) == "table") and s.is then
-				o[#o+1] = s
+				o[k] = s
 			elseif (type(s) == "string") then
-				if s:find("^:") then
+				if s:find("^%+") then
 					s = cwd..s
 				elseif s:find("^%./") then
 					s = concatpath(cwd, s)
 				end
-				o[#o+1] = loadtarget(s)
+				o[k] = loadtarget(s)
 			else
 				error(string.format("member of target list '%s' is not a string or a target",
 					propname))
@@ -374,11 +379,13 @@ local function definerule(rulename, types, cb)
 		end
 
 		args.environment = environment
+		args.fullname = cwd.."+"..args.name
 
 		local result = cb(args) or {}
 		result.is = result.is or {}
 		result.is[rulename] = true
-		targets[cwd..":"..args.name] = result
+		result.fullname = args.fullname
+		targets[result.fullname] = result
 		return result
 	end
 end
@@ -398,6 +405,11 @@ function environment:rule(ins, outs)
 	emit(firstout..":\n")
 end
 
+function environment:phony(ins, outs)
+	emit(".PHONY:", outs, "\n")
+	self:rule(ins, outs)
+end
+
 function environment:label(...)
 	local s = table.concat({...}, " ")
 	emit("\t@echo", s, "\n")
@@ -411,7 +423,9 @@ function environment:mkdirs(dirs)
 end
 
 function environment:exec(commands)
-	emit("\t$(hide)", table.concat(commands, " && "), "\n")
+	for _, s in ipairs(commands) do
+		emit("\t$(hide)", s, "\n")
+	end
 end
 
 function environment:endrule()
@@ -428,7 +442,7 @@ definerule("simplerule",
 	},
 	function (e)
 		e.environment:rule(filenamesof(e.ins), e.outs)
-		e.environment:label(cwd..":"..e.name, " ", e.label or "")
+		e.environment:label(e.fullname, " ", e.label or "")
 		e.environment:mkdirs(dirname(e.outs))
 
 		local vars = inherit(e.vars, {
@@ -442,6 +456,51 @@ definerule("simplerule",
 		return {
 			outs = e.outs
 		}
+	end
+)
+
+definerule("installable",
+	{
+		map = { type="targets", default={} },
+	},
+	function (e)
+		local deps = {}
+		local commands = {}
+		local srcs = {}
+		local dests = {}
+		for dest, src in pairs(e.map) do
+			if src.is.installable then
+				if (type(dest) ~= "number") then
+					error("can't specify a destination filename when installing an installable")
+				end
+				deps[#deps+1] = src.fullname
+			elseif (type(dest) == "number") then
+				error("only references to other installables can be missing a destination")
+			else
+				local f = filenamesof(src)
+				if (#f ~= 1) then
+					error("installable can only cope with targets emitting single files")
+				end
+
+				srcs[#srcs+1] = src
+				dests[#dests+1] = dest
+				commands[#commands+1] = "cp "..f[1].." "..dest
+				deps[#deps+1] = dest
+			end
+		end
+
+		if (#dests > 0) then
+			e.environment:rule(srcs, dests)
+			e.environment:label(e.fullname, " ", e.label or "")
+			if (#commands > 0) then
+				e.environment:mkdirs(dirname(dests))
+				e.environment:exec(commands)
+			end
+			e.environment:endrule()
+		end
+
+		e.environment:phony(deps, {cwd.."+"..e.name})
+		e.environment:endrule()
 	end
 )
 

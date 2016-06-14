@@ -6,6 +6,6 @@ bundle {
 clibrary {
 	name = "string",
 	srcs = { "./src/string/*.c" },
-	deps = { ":headers" },
+	deps = { "#headers" },
 }
 

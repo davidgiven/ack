@@ -7,7 +7,7 @@ normalrule {
 	name = "tables",
 	outleaves = { "dmach.c", "intable.c" },
 	ins = {
-		":mktables",
+		"+mktables",
 		"lib/descr/fe",
 	},
 	commands = {
@@ -20,11 +20,20 @@ cprogram {
 	srcs = {
 		"./*.c",
 		"./*.h",
-		":tables",
+		"+tables",
 	},
 	deps = {
-		"h:emheaders",
-		"h:local",
+		"h+emheaders",
+		"h+local",
+	}
+}
+
+installable {
+	name = "ack-pkg",
+	map = {
+		["$(INSDIR)/bin/ack"] = "+ack",
+		["$(INSDIR)/share/man/man1/ack.1"] = "./ack.1.X",
+		["$(PLATIND)/descr/fe"] = "lib/descr/fe",
 	}
 }
 
