@@ -13,6 +13,7 @@ bundle {
 	name = "emheaders",
 	srcs = {
 		"./em_*.h",
+		"./out.h",
 		"+em_path",
 	}
 }

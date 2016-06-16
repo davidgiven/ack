@@ -119,7 +119,7 @@ definerule("clibrary",
 			type="strings",
 			default={
 				"rm -f %{outs}",
-				"$(AR) qs %{outs} %{ins}"
+				"$(AR) cqs %{outs} %{ins}"
 			},
 		}
 	},

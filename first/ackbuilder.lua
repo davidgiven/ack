@@ -394,32 +394,30 @@ end
 --                              DEFAULT RULES                              --
 -----------------------------------------------------------------------------
 
-function environment:rule(ins, outs)
-	local firstout = outs[1]
-	for i = 2, #outs do
-		emit(outs[i]..":", outs[1], "\n")
-	end
+function environment:rule(name, ins, outs)
+	emit(".INTERMEDIATE:", name, "\n")
 	for i = 1, #ins do
-		emit(firstout..":", ins[i], "\n")
+		emit(name..":", ins[i], "\n")
 	end
-	emit(firstout..":\n")
+	for i = 1, #outs do
+		emit(outs[i]..":", name, "\n")
+	end
+	emit(name..":\n")
+
+	local dirs = uniquify(dirname(outs))
+	if (#dirs > 0) then
+		emit("\t@mkdir -p", dirs, "\n")
+	end
 end
 
-function environment:phony(ins, outs)
-	emit(".PHONY:", outs, "\n")
-	self:rule(ins, outs)
+function environment:phony(name, ins, outs)
+	emit(".PHONY:", name, "\n")
+	self:rule(name, ins, outs)
 end
 
 function environment:label(...)
 	local s = table.concat({...}, " ")
 	emit("\t@echo", s, "\n")
-end
-
-function environment:mkdirs(dirs)
-	dirs = uniquify(dirs)
-	if (#dirs > 0) then
-		emit("\t@mkdir -p", dirs, "\n")
-	end
 end
 
 function environment:exec(commands)
@@ -441,9 +439,8 @@ definerule("simplerule",
 		vars = { type="table", default={} },
 	},
 	function (e)
-		e.environment:rule(filenamesof(e.ins), e.outs)
+		e.environment:rule(e.fullname, filenamesof(e.ins), e.outs)
 		e.environment:label(e.fullname, " ", e.label or "")
-		e.environment:mkdirs(dirname(e.outs))
 
 		local vars = inherit(e.vars, {
 			ins = e.ins,
@@ -482,24 +479,17 @@ definerule("installable",
 					error("installable can only cope with targets emitting single files")
 				end
 
-				srcs[#srcs+1] = src
+				deps[#deps+1] = src
 				dests[#dests+1] = dest
 				commands[#commands+1] = "cp "..f[1].." "..dest
-				deps[#deps+1] = dest
 			end
 		end
 
-		if (#dests > 0) then
-			e.environment:rule(srcs, dests)
-			e.environment:label(e.fullname, " ", e.label or "")
-			if (#commands > 0) then
-				e.environment:mkdirs(dirname(dests))
-				e.environment:exec(commands)
-			end
-			e.environment:endrule()
+		e.environment:rule(e.fullname, deps, dests)
+		e.environment:label(e.fullname, " ", e.label or "")
+		if (#commands > 0) then
+			e.environment:exec(commands)
 		end
-
-		e.environment:phony(deps, {cwd.."+"..e.name})
 		e.environment:endrule()
 	end
 )
