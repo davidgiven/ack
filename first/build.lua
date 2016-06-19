@@ -162,7 +162,7 @@ definerule("cprogram",
 		commands = {
 			type="strings",
 			default={
-				"$(CC) -o %{outs[1]} %{ins}"
+				"$(CC) -o %{outs[1]} %{ins} %{ins}"
 			},
 		}
 	},

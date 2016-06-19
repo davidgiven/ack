@@ -13,7 +13,9 @@ bundle {
 	name = "emheaders",
 	srcs = {
 		"./em_*.h",
+		"./arch.h",
 		"./out.h",
+		"./ranlib.h",
 		"+em_path",
 	}
 }
