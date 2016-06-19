@@ -394,40 +394,81 @@ end
 --                              DEFAULT RULES                              --
 -----------------------------------------------------------------------------
 
-function environment:rule(name, ins, outs)
-	emit(".INTERMEDIATE:", name, "\n")
-	for i = 1, #ins do
-		emit(name..":", ins[i], "\n")
-	end
-	for i = 1, #outs do
-		emit(outs[i]..":", name, "\n")
-	end
-	emit(name..":\n")
+local function install_make_environment()
+	emit("hide = @\n")
+	function environment:rule(name, ins, outs)
+		emit(".INTERMEDIATE:", name, "\n")
+		for i = 1, #ins do
+			emit(name..":", ins[i], "\n")
+		end
+		for i = 1, #outs do
+			emit(outs[i]..":", name, "\n")
+		end
+		emit(name..":\n")
 
-	local dirs = uniquify(dirname(outs))
-	if (#dirs > 0) then
-		emit("\t@mkdir -p", dirs, "\n")
+		local dirs = uniquify(dirname(outs))
+		if (#dirs > 0) then
+			emit("\t@mkdir -p", dirs, "\n")
+		end
+	end
+
+	function environment:phony(name, ins, outs)
+		emit(".PHONY:", name, "\n")
+		self:rule(name, ins, outs)
+	end
+
+	function environment:label(...)
+		local s = table.concat({...}, " ")
+		emit("\t@echo", s, "\n")
+	end
+
+	function environment:exec(commands)
+		for _, s in ipairs(commands) do
+			emit("\t$(hide)", s, "\n")
+		end
+	end
+
+	function environment:endrule()
+		emit("\n")
 	end
 end
 
-function environment:phony(name, ins, outs)
-	emit(".PHONY:", name, "\n")
-	self:rule(name, ins, outs)
-end
-
-function environment:label(...)
-	local s = table.concat({...}, " ")
-	emit("\t@echo", s, "\n")
-end
-
-function environment:exec(commands)
-	for _, s in ipairs(commands) do
-		emit("\t$(hide)", s, "\n")
-	end
-end
-
-function environment:endrule()
+local function install_ninja_environment()
+	emit("rule build\n")
+	emit("  command = $command\n")
 	emit("\n")
+
+	local function unmake(collection)
+		return dotocollection(collection,
+			function(s)
+				return s:gsub("%$%b()",
+					function(expr)
+						return "${"..expr:sub(3, -2).."}"
+					end
+				)
+			end
+		)
+	end
+
+	function environment:rule(name, ins, outs)
+		if (#outs == 0) then
+			emit("build", name, ": phony", unmake(ins), "\n")
+		else
+			emit("build", name, ": phony", unmake(outs), "\n")
+			emit("build", unmake(outs), ": build", unmake(ins), "\n")
+		end
+	end
+
+	function environment:label(...)
+	end
+
+	function environment:exec(commands)
+		emit("  command =", table.concat(unmake(commands), " && "), "\n")
+	end
+
+	function environment:endrule()
+		emit("\n")
+	end
 end
 
 definerule("simplerule",
@@ -498,6 +539,51 @@ definerule("installable",
 --                               MAIN PROGRAM                              --
 -----------------------------------------------------------------------------
 
+local function parse_arguments(argmap, arg)
+	local i = 1
+	local files = {}
+
+	local function unrecognisedarg(arg)
+		argmap[" unrecognised"](arg)
+	end
+
+	while (i <= #arg) do
+		local o = arg[i]
+		local op
+
+		if (o:byte(1) == 45) then
+			-- This is an option.
+			if (o:byte(2) == 45) then
+				-- ...with a -- prefix.
+				o = o:sub(3)
+				local fn = argmap[o]
+				if not fn then
+					unrecognisedarg("--"..o)
+				end
+				i = i + fn(arg[i+1], arg[i+2])
+			else
+				-- ...without a -- prefix.
+				local od = o:sub(2, 2)
+				local fn = argmap[od]
+				if not fn then
+					unrecognisedarg("-"..od)
+				end
+				op = o:sub(3)
+				if (op == "") then
+					i = i + fn(arg[i+1], arg[i+2])
+				else
+					fn(op)
+				end
+			end
+		else
+			files[#files+1] = o
+		end
+		i = i + 1
+	end
+
+	argmap[" files"](files)
+end
+
 globals = {
 	abspath = abspath,
 	asstring = asstring,
@@ -528,8 +614,32 @@ setmetatable(globals,
 	}
 )
 
-emit("hide=@\n")
-for _, file in ipairs({...}) do
-	loadbuildfile(file)
+do
+	local environment_type = install_make_environment
+	parse_arguments(
+		{
+			["make"] = function()
+				environment_type = install_make_environment
+				return 1
+			end,
+
+			["ninja"] = function()
+				environment_type = install_ninja_environment
+				return 1
+			end,
+
+			[" unrecognised"] = function(arg)
+				error(string.format("unrecognised argument '%s'", arg))
+			end,
+
+			[" files"] = function(files)
+				environment_type()
+				for _, f in ipairs(files) do
+					loadbuildfile(f)
+				end
+			end
+		},
+		{...}
+	)
 end
 
