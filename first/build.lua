@@ -113,13 +113,14 @@ definerule("bundle",
 definerule("clibrary",
 	{
 		srcs = { type="targets" },
+		hdrs = { type="targets", default={} },
 		deps = { type="targets", default={} },
 		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
-				"rm -f %{outs}",
-				"$(AR) cqs %{outs} %{ins}"
+				"rm -f %{outs[1]}",
+				"$(AR) cqs %{outs[1]} %{ins}",
 			},
 		}
 	},
@@ -145,12 +146,25 @@ definerule("clibrary",
 			}
 		end
 
+		local hdrs = filenamesof(e.hdrs, "%.h$")
+
+		local commands = {}
+		for _, s in ipairs(e.commands) do
+			commands[#commands+1] = s
+		end
+		if (#hdrs > 0) then
+			commands[#commands+1] = "cp %{hdrs} %{dir}"
+		end
+
 		return normalrule {
 			name = e.name,
 			ins = ins,
-			outleaves = { e.name..".a" },
+			outleaves = { e.name..".a", unpack(basename(hdrs)) },
 			label = e.label,
-			commands = e.commands
+			commands = commands,
+			vars = {
+				hdrs = hdrs
+			}
 		}
 	end
 )
@@ -159,6 +173,7 @@ definerule("cprogram",
 	{
 		srcs = { type="targets", default={} },
 		deps = { type="targets", default={} },
+		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -174,7 +189,8 @@ definerule("cprogram",
 					clibrary {
 						name = e.name .. "/main",
 						srcs = e.srcs,
-						deps = e.deps
+						deps = e.deps,
+						cflags = e.cflags,
 					}
 				},
 				"%.a$"
