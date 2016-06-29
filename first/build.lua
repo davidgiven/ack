@@ -1,5 +1,5 @@
 local function objdir(e)
-	return concatpath("$(OBJDIR)", cwd(), e.name)
+	return concatpath("$(OBJDIR)", e.cwd, e.name)
 end
 
 definerule("normalrule",
@@ -69,6 +69,7 @@ definerule("cfile",
 
 		return normalrule {
 			name = e.name,
+			cwd = e.cwd,
 			ins = {csrcs[1], unpack(hsrcs)},
 			outleaves = {outleaf},
 			label = e.label,
@@ -102,6 +103,7 @@ definerule("bundle",
 
 		return normalrule {
 			name = e.name,
+			cwd = e.cwd,
 			ins = e.srcs,
 			outleaves = outleaves,
 			label = e.label,
@@ -137,10 +139,11 @@ definerule("clibrary",
 			local n = basename(csrc):gsub("%.%w*$", "")
 			ins[#ins+1] = cfile {
 				name = e.name.."/"..n,
+				cwd = e.cwd,
 				srcs = {csrc, unpack(hsrcs)},
 				deps = e.deps,
 				cflags = {
-					"-I"..cwd(),
+					"-I"..e.cwd,
 					unpack(e.cflags)
 				},
 			}
@@ -158,6 +161,7 @@ definerule("clibrary",
 
 		return normalrule {
 			name = e.name,
+			cwd = e.cwd,
 			ins = ins,
 			outleaves = { e.name..".a", unpack(basename(hdrs)) },
 			label = e.label,
@@ -188,6 +192,7 @@ definerule("cprogram",
 				{
 					clibrary {
 						name = e.name .. "/main",
+						cwd = e.cwd,
 						srcs = e.srcs,
 						deps = e.deps,
 						cflags = e.cflags,
@@ -201,6 +206,7 @@ definerule("cprogram",
 
 		return normalrule {
 			name = e.name,
+			cwd = e.cwd,
 			ins = libs,
 			outleaves = { e.name },
 			commands = e.commands,

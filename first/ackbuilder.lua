@@ -358,6 +358,7 @@ local function definerule(rulename, types, cb)
 	end
 
 	types.name = { type="string" }
+	types.cwd = { type="string", optional=true }
 
 	for propname, typespec in pairs(types) do
 		if not typeconverters[typespec.type] then
@@ -366,6 +367,7 @@ local function definerule(rulename, types, cb)
 		end
 	end
 
+	local rulecwd = cwd
 	local rule = function(e)
 		local args = {}
 		for propname, typespec in pairs(types) do
@@ -388,8 +390,16 @@ local function definerule(rulename, types, cb)
 
 		args.environment = environment
 		args.fullname = cwd.."+"..args.name
+		args.rulecwd = rulecwd
+		if not args.cwd then
+			args.cwd = cwd
+		end
 
+		local oldcwd = cwd
+		cwd = rulecwd
 		local result = cb(args) or {}
+		cwd = oldcwd
+
 		result.is = result.is or {}
 		result.is[rulename] = true
 		result.fullname = args.fullname
