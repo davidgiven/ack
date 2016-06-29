@@ -144,6 +144,14 @@ local function dirname(collection)
 	)
 end
 
+local function replace(collection, pattern, repl)
+	return dotocollection(collection,
+		function(filename)
+			return filename:gsub(pattern, repl)
+		end
+	)
+end
+
 local function fpairs(collection)
 	if (type(collection) == "string") or collection.is then
 		return fpairs({collection})
@@ -345,7 +353,7 @@ local typeconverters = {
 }
 	
 local function definerule(rulename, types, cb)
-	if rules[rulename] then
+	if rulename and rules[rulename] then
 		error(string.format("rule '%s' is already defined", rulename))
 	end
 
@@ -358,7 +366,7 @@ local function definerule(rulename, types, cb)
 		end
 	end
 
-	rules[rulename] = function(e)
+	local rule = function(e)
 		local args = {}
 		for propname, typespec in pairs(types) do
 			if not e[propname] then
@@ -388,6 +396,11 @@ local function definerule(rulename, types, cb)
 		targets[result.fullname] = result
 		return result
 	end
+
+	if rulename then	
+		rules[rulename] = rule
+	end
+	return rule
 end
 
 -----------------------------------------------------------------------------
@@ -595,7 +608,9 @@ globals = {
 	emit = emit,
 	environment = environment,
 	filenamesof = filenamesof,
+	include = loadbuildfile,
 	inherit = inherit,
+	replace = replace,
 	selectof = selectof,
 	startswith = startswith,
 	fpairs = fpairs,
