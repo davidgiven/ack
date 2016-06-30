@@ -54,9 +54,8 @@ definerule("cfile",
 		end
 		
 		local hsrcs = filenamesof(e.srcs, "%.h$")
-		local hdeps = selectof(e.deps, "%.h$")
 		local hdrpaths = {}
-		for _, t in pairs(hdeps) do
+		for _, t in pairs(e.deps) do
 			hdrpaths[#hdrpaths+1] = "-I"..t.dir
 		end
 		hdrpaths = uniquify(hdrpaths)
@@ -128,9 +127,6 @@ definerule("clibrary",
 	},
 	function (e)
 		local csrcs = filenamesof(e.srcs, "%.c$")
-		if (#csrcs < 1) then
-			error("you must supply at least one C source file")
-		end
 
 		local hsrcs = filenamesof(e.srcs, "%.h$")
 
@@ -149,7 +145,7 @@ definerule("clibrary",
 			}
 		end
 
-		local hdrs = filenamesof(e.hdrs, "%.h$")
+		local hdrs = filenamesof(e.hdrs)
 
 		local commands = {}
 		for _, s in ipairs(e.commands) do
