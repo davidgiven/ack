@@ -425,7 +425,7 @@ local function install_make_environment()
 			emit(name..":", ins[i], "\n")
 		end
 		for i = 1, #outs do
-			emit(outs[i]..":", name, "\n")
+			emit(outs[i]..":", name, ";\n")
 		end
 		emit(name..":\n")
 
