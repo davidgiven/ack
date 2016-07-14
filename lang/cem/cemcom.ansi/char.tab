@@ -1,4 +1,6 @@
 %
+hdrs = { "./src/system/system.h" },
+hdrs = { "./src/system/system.h" },
 %	CHARACTER CLASSES
 %
 % some general settings:
