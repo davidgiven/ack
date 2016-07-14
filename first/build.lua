@@ -5,6 +5,7 @@ end
 definerule("normalrule",
 	{
 		ins = { type="targets" },
+		deps = { type="targets", default={} },
 		outleaves = { type="strings" },
 		label = { type="string", optional=true },
 		objdir = { type="string", optional=true },
@@ -25,6 +26,7 @@ definerule("normalrule",
 		local result = simplerule {
 			name = e.name,
 			ins = e.ins,
+			deps = e.deps,
 			outs = realouts,
 			label = e.label,
 			commands = e.commands,
@@ -69,7 +71,8 @@ definerule("cfile",
 		return normalrule {
 			name = e.name,
 			cwd = e.cwd,
-			ins = {csrcs[1], unpack(hsrcs)},
+			ins = {csrcs[1]},
+			deps = e.deps,
 			outleaves = {outleaf},
 			label = e.label,
 			commands = e.commands,
@@ -127,7 +130,6 @@ definerule("clibrary",
 	},
 	function (e)
 		local csrcs = filenamesof(e.srcs, "%.c$")
-
 		local hsrcs = filenamesof(e.srcs, "%.h$")
 
 		local ins = {}
@@ -203,6 +205,7 @@ definerule("cprogram",
 		return normalrule {
 			name = e.name,
 			cwd = e.cwd,
+			deps = e.deps,
 			ins = libs,
 			outleaves = { e.name },
 			commands = e.commands,

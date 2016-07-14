@@ -53,6 +53,16 @@ local function asstring(o)
 	end
 end
 
+local function concat(...)
+	local r = {}
+	for _, t in ipairs({...}) do
+		for _, v in ipairs(t) do
+			r[#r+1] = v
+		end
+	end
+	return r
+end
+
 local function concatpath(...)
 	local p = table.concat({...}, "/")
 	return p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/")
@@ -74,6 +84,27 @@ local function filenamesof(targets, pattern)
 						end
 					end
 				end
+			elseif (type(r) == "string") then
+				f[#f+1] = r
+			else
+				error(string.format("list of targets contains a %s which isn't a target",
+					type(r)))
+			end
+		end
+	end
+	return f
+end
+
+local function targetnamesof(targets)
+	local f = {}
+	if targets then
+		if targets.is then
+			targets = {targets}
+		end
+
+		for _, r in pairs(targets) do
+			if (type(r) == "table") and r.is then
+				f[#f+1] = r.fullname
 			elseif (type(r) == "string") then
 				f[#f+1] = r
 			else
@@ -389,25 +420,28 @@ local function definerule(rulename, types, cb)
 		end
 
 		args.environment = environment
-		args.fullname = cwd.."+"..args.name
-		args.rulecwd = rulecwd
 		if not args.cwd then
 			args.cwd = cwd
 		end
+		args.fullname = args.cwd.."+"..args.name
 
-		local oldcwd = cwd
-		cwd = rulecwd
 		local result = cb(args) or {}
-		cwd = oldcwd
 
 		result.is = result.is or {}
 		result.is[rulename] = true
 		result.fullname = args.fullname
+
+		if targets[arg.fullname] and (targets[arg.fullname] ~= result) then
+			error(string.format("target '%s' is already defined", args.fullname))
+		end
 		targets[result.fullname] = result
 		return result
 	end
 
 	if rulename then	
+		if rules[rulename] then
+			error(string.format("rule '%s' is already defined", rulename))
+		end
 		rules[rulename] = rule
 	end
 	return rule
@@ -498,12 +532,15 @@ definerule("simplerule",
 	{
 		ins = { type="targets" },
 		outs = { type="strings" },
+		deps = { type="targets", default={} },
 		label = { type="string", optional=true },
 		commands = { type="strings" },
 		vars = { type="table", default={} },
 	},
 	function (e)
-		e.environment:rule(e.fullname, filenamesof(e.ins), e.outs)
+		e.environment:rule(e.fullname,
+			concat(filenamesof(e.ins), filenamesof(e.deps)),
+			e.outs)
 		e.environment:label(e.fullname, " ", e.label or "")
 
 		local vars = inherit(e.vars, {
@@ -611,6 +648,7 @@ globals = {
 	abspath = abspath,
 	asstring = asstring,
 	basename = basename,
+	concat = concat,
 	concatpath = concatpath,
 	cwd = function() return cwd end,
 	definerule = definerule,
@@ -618,12 +656,13 @@ globals = {
 	emit = emit,
 	environment = environment,
 	filenamesof = filenamesof,
+	fpairs = fpairs,
 	include = loadbuildfile,
 	inherit = inherit,
 	replace = replace,
 	selectof = selectof,
 	startswith = startswith,
-	fpairs = fpairs,
+	targetnamesof = targetnamesof,
 	uniquify = uniquify,
 }
 setmetatable(globals,
