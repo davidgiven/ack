@@ -146,7 +146,10 @@ end
 local function abspath(collection)
 	return dotocollection(collection,
 		function(filename)
-			return concatpath(posix.getcwd(), filename)
+			if not filename:find("^[/$]") then
+				filename = concatpath(posix.getcwd(), filename)
+			end
+			return filename
 		end
 	)
 end
