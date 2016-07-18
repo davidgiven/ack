@@ -13,7 +13,7 @@ normalrule {
 	}
 }
 
-local str_files = basename(posix.glob("lang/cem/cemcom.ansi/*.str"))
+local str_files = basename(posix.glob(cwd().."/*.str"))
 local str_targets = {}
 
 for _, f in ipairs(str_files) do

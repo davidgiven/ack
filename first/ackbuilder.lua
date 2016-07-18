@@ -65,7 +65,7 @@ end
 
 local function concatpath(...)
 	local p = table.concat({...}, "/")
-	return p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/")
+	return (p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/"))
 end
 
 local function filenamesof(targets, pattern)
@@ -153,7 +153,7 @@ local function abspath(collection)
 		end
 	)
 end
-	
+
 local function basename(collection)
 	return dotocollection(collection,
 		function(filename)
@@ -648,6 +648,8 @@ local function parse_arguments(argmap, arg)
 end
 
 globals = {
+	posix = posix,
+
 	abspath = abspath,
 	asstring = asstring,
 	basename = basename,

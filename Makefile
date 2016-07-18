@@ -39,11 +39,11 @@ CC = gcc
 # You shouldn't need to change anything below this point unless you are
 # actually developing ACK.
 
-OBJDIR = $(BUILDDIR)/obj
-BINDIR = $(BUILDDIR)/bin
-LIBDIR = $(BUILDDIR)/lib
-INCDIR = $(BUILDDIR)/include
-INSDIR = $(BUILDDIR)/staging
+OBJDIR = $(abspath $(BUILDDIR)/obj)
+BINDIR = $(abspath $(BUILDDIR)/bin)
+LIBDIR = $(abspath $(BUILDDIR)/lib)
+INCDIR = $(abspath $(BUILDDIR)/include)
+INSDIR = $(abspath $(BUILDDIR)/staging)
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
@@ -91,11 +91,11 @@ endif
 
 $(BUILDDIR)/rules.ninja: first/ackbuilder.lua $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
-	lua5.2 first/ackbuilder.lua first/build.lua build.lua --ninja > $(BUILDDIR)/rules.ninja
+	@lua5.2 first/ackbuilder.lua first/build.lua build.lua --ninja > $(BUILDDIR)/rules.ninja
 
 $(BUILDDIR)/rules.mk: first/ackbuilder.lua $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
-	lua5.2 first/ackbuilder.lua first/build.lua build.lua --make > $(BUILDDIR)/rules.mk
+	@lua5.2 first/ackbuilder.lua first/build.lua build.lua --make > $(BUILDDIR)/rules.mk
 
 clean:
 	@rm -rf $(BUILDDIR)

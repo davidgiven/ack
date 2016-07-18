@@ -6,7 +6,7 @@ cprogram {
 	-- do this.
 
 	srcs = { "./src/*.c" },
-	cflags = { "-DLIBDIR=\\\""..abspath("util/LLgen/lib").."\\\"", "-DNON_CORRECTING" },
+	cflags = { "-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"", "-DNON_CORRECTING" },
 }
 
 definerule("llgen",
