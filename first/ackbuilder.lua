@@ -256,7 +256,11 @@ local function templateexpand(list, vars)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
-				return asstring(chunk())
+				local value = chunk()
+				if (value == nil) then
+					error(string.format("template expression expands to nil (probably an undefined variable)"))
+				end
+				return asstring(value)
 			end
 		)
 	end
