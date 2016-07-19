@@ -119,10 +119,13 @@ cprogram {
 		"+llgen",
 		"h+emheaders",
 		"modules+alloc",
+		"modules+em_code_k",
 		"modules+flt_arith",
 		"modules+idf",
+		"modules+input",
 		"modules+headers",
 		"modules+system",
+		"util/data+libem",
 	},
 }
 

@@ -60,21 +60,21 @@ $(MAKECMDGOALS): $(BUILDDIR)/build.ninja $(BUILDDIR)/rules.ninja
 
 $(BUILDDIR)/build.ninja: Makefile
 	@mkdir -p $(BUILDDIR)
-	echo "OBJDIR = $(OBJDIR)" > $@
-	echo "BINDIR = $(BINDIR)" >> $@
-	echo "LIBDIR = $(LIBDIR)" >> $@
-	echo "INCDIR = $(INCDIR)" >> $@
-	echo "INSDIR = $(INSDIR)" >> $@
-	echo "PLATIND = $(PLATIND)" >> $@
-	echo "PLATDEP = $(PLATDEP)" >> $@
-	echo "AR = $(AR)" >> $@
-	echo "CC = $(CC)" >> $@
-	echo "subninja $(BUILDDIR)/rules.ninja" >> $@
+	@echo "OBJDIR = $(OBJDIR)" > $@
+	@echo "BINDIR = $(BINDIR)" >> $@
+	@echo "LIBDIR = $(LIBDIR)" >> $@
+	@echo "INCDIR = $(INCDIR)" >> $@
+	@echo "INSDIR = $(INSDIR)" >> $@
+	@echo "PLATIND = $(PLATIND)" >> $@
+	@echo "PLATDEP = $(PLATDEP)" >> $@
+	@echo "AR = $(AR)" >> $@
+	@echo "CC = $(CC)" >> $@
+	@echo "subninja $(BUILDDIR)/rules.ninja" >> $@
 
 else
 
 $(MAKECMDGOALS): $(BUILDDIR)/rules.mk
-	make -r -f $(BUILDDIR)/rules.mk $@ \
+	@make -r -f $(BUILDDIR)/rules.mk $@ \
 		$(MAKEFLAGS) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
