@@ -4,7 +4,7 @@ local function simpleprogram(name)
 		srcs = { "./"..name..".c" },
 		deps = {
 			"h+emheaders",
-			"modules+object",
+			"modules/src/object+lib",
 		}
 	}
 

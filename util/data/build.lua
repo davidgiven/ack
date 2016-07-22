@@ -21,7 +21,7 @@ normalrule {
 }
 
 clibrary {
-	name = "libem",
+	name = "em_data",
 	srcs = {
 		"./em_ptyp.c",
 		"+generated", -- so we build the C files

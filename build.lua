@@ -1,9 +1,11 @@
 installable {
 	name = "ack",
 	map = {
-		"util/ack+ack-pkg",
-		"util/amisc+pkg",
 		"lang/cem/cemcom.ansi+pkg",
+		"util/ack+pkg",
+		"util/amisc+pkg",
+		"util/arch+pkg",
+		"util/misc+pkg",
 	}
 }
 
