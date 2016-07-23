@@ -62,10 +62,6 @@ definerule("cfile",
 		end
 		hdrpaths = uniquify(hdrpaths)
 
-		for _, f in pairs(filenamesof(hdeps)) do
-			hsrcs[#hsrcs+1] = f
-		end
-
 		local outleaf = basename(csrcs[1]):gsub("%.c$", ".o")
 
 		return normalrule {
@@ -74,6 +70,46 @@ definerule("cfile",
 			ins = {csrcs[1]},
 			deps = e.deps,
 			outleaves = {outleaf},
+			label = e.label,
+			commands = e.commands,
+			vars = {
+				hdrpaths = hdrpaths,
+				cflags = e.cflags,
+			}
+		}
+	end
+)
+
+definerule("cppfile",
+	{
+		srcs = { type="targets" },
+		deps = { type="targets", default={} },
+		outleaf = { type="string" },
+		cflags = { type="strings", default={} },
+		commands = {
+			type="strings",
+			default={
+				"$(CC) -E -P -o %{outs[1]} %{hdrpaths} %{cflags} -x c %{ins}"
+			}
+		},
+	},
+	function (e)
+		if (#e.srcs ~= 1) then
+			error("you must have exactly one input file")
+		end
+
+		local hdrpaths = {}
+		for _, t in pairs(e.deps) do
+			hdrpaths[#hdrpaths+1] = "-I"..t.dir
+		end
+		hdrpaths = uniquify(hdrpaths)
+
+		return normalrule {
+			name = e.name,
+			cwd = e.cwd,
+			ins = e.srcs,
+			deps = e.deps,
+			outleaves = {e.outleaf},
 			label = e.label,
 			commands = e.commands,
 			vars = {

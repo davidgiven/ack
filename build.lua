@@ -6,6 +6,7 @@ installable {
 		"util/amisc+pkg",
 		"util/arch+pkg",
 		"util/misc+pkg",
+		"plat/pc86+pkg",
 	}
 }
 

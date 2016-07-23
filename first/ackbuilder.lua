@@ -375,6 +375,13 @@ local typeconverters = {
 		return i
 	end,
 
+	boolean = function(propname, i)
+		if (type(i) ~= "boolean") then
+			error(string.format("property '%s' must be a boolean", propname))
+		end
+		return i
+	end,
+
 	string = function(propname, i)
 		if (type(i) ~= "string") then
 			error(string.format("property '%s' must be a string", propname))
@@ -410,7 +417,7 @@ local function definerule(rulename, types, cb)
 		local args = {}
 		for propname, typespec in pairs(types) do
 			if not e[propname] then
-				if not typespec.optional and not typespec.default then
+				if not typespec.optional and (typespec.default == nil) then
 					error(string.format("missing mandatory property '%s'", propname))
 				end
 
