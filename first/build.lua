@@ -10,7 +10,6 @@ definerule("normalrule",
 		label = { type="string", optional=true },
 		objdir = { type="string", optional=true },
 		commands = { type="strings" },
-		vars = { type="table", default={} },
 	},
 	function (e)
 		local dir = e.objdir or objdir(e)
@@ -41,7 +40,6 @@ definerule("cfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
-		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -74,7 +72,6 @@ definerule("cfile",
 			commands = e.commands,
 			vars = {
 				hdrpaths = hdrpaths,
-				cflags = e.cflags,
 			}
 		}
 	end
@@ -85,7 +82,6 @@ definerule("cppfile",
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
 		outleaf = { type="string" },
-		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -114,7 +110,6 @@ definerule("cppfile",
 			commands = e.commands,
 			vars = {
 				hdrpaths = hdrpaths,
-				cflags = e.cflags,
 			}
 		}
 	end
@@ -155,7 +150,6 @@ definerule("clibrary",
 		srcs = { type="targets", default={} },
 		hdrs = { type="targets", default={} },
 		deps = { type="targets", default={} },
-		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -176,9 +170,8 @@ definerule("clibrary",
 				cwd = e.cwd,
 				srcs = {csrc, unpack(hsrcs)},
 				deps = e.deps,
-				cflags = {
-					"-I"..e.cwd,
-					unpack(e.cflags)
+				vars = {
+					["+cflags"] = { "-I"..e.cwd, },
 				},
 			}
 		end
@@ -212,7 +205,6 @@ definerule("cprogram",
 	{
 		srcs = { type="targets", default={} },
 		deps = { type="targets", default={} },
-		cflags = { type="strings", default={} },
 		commands = {
 			type="strings",
 			default={
@@ -230,7 +222,6 @@ definerule("cprogram",
 						cwd = e.cwd,
 						srcs = e.srcs,
 						deps = e.deps,
-						cflags = e.cflags,
 					}
 				},
 				"%.a$"

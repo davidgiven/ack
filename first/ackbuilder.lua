@@ -15,6 +15,18 @@ local targets = {}
 local buildfiles = {}
 local globals
 local cwd = "."
+local vars = {}
+local parente = {}
+
+local function concat(...)
+	local r = {}
+	for k, t in ipairs({...}) do
+		for _, v in ipairs(t) do
+			r[#r+1] = v
+		end
+	end
+	return r
+end
 
 local function inherit(high, low)
 	local o = {}
@@ -27,6 +39,12 @@ local function inherit(high, low)
 			return low[k]
 		end
 	})
+	for k, v in pairs(high) do
+		local _, _, kk = k:find("^%+(.*)$")
+		if kk then
+			o[kk] = concat(low[kk], v)
+		end
+	end
 	return o
 end
 
@@ -51,16 +69,6 @@ local function asstring(o)
 	else
 		error(string.format("can't turn values of type '%s' into strings", t))
 	end
-end
-
-local function concat(...)
-	local r = {}
-	for _, t in ipairs({...}) do
-		for _, v in ipairs(t) do
-			r[#r+1] = v
-		end
-	end
-	return r
 end
 
 local function concatpath(...)
@@ -404,6 +412,7 @@ local function definerule(rulename, types, cb)
 
 	types.name = { type="string" }
 	types.cwd = { type="string", optional=true }
+	types.vars = { type="table", default={} }
 
 	for propname, typespec in pairs(types) do
 		if not typeconverters[typespec.type] then
@@ -414,6 +423,11 @@ local function definerule(rulename, types, cb)
 
 	local rulecwd = cwd
 	local rule = function(e)
+		local definedprops = {}
+		for propname, _ in pairs(e) do
+			definedprops[propname] = true
+		end
+
 		local args = {}
 		for propname, typespec in pairs(types) do
 			if not e[propname] then
@@ -424,11 +438,11 @@ local function definerule(rulename, types, cb)
 				args[propname] = typespec.default
 			else
 				args[propname] = typeconverters[typespec.type](propname, e[propname])
-				e[propname] = nil
+				definedprops[propname] = nil
 			end
 		end
 
-		local propname, _ = next(e)
+		local propname, _ = next(definedprops)
 		if propname then
 			error(string.format("don't know what to do with property '%s'", propname))
 		end
@@ -438,7 +452,11 @@ local function definerule(rulename, types, cb)
 		end
 		args.fullname = args.cwd.."+"..args.name
 
+		local oldparente = parente
+		parente = args
+		args.vars = inherit(args.vars, oldparente.vars)
 		local result = cb(args) or {}
+		parente = oldparente
 
 		result.is = result.is or {}
 		result.is[rulename] = true
@@ -678,6 +696,7 @@ globals = {
 	startswith = startswith,
 	targetnamesof = targetnamesof,
 	uniquify = uniquify,
+	vars = vars,
 }
 setmetatable(globals,
 	{
@@ -691,6 +710,9 @@ setmetatable(globals,
 		end
 	}
 )
+
+vars.cflags = {}
+parente.vars = vars
 
 do
 	local emitter_type = install_make_emitter

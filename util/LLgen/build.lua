@@ -6,7 +6,12 @@ cprogram {
 	-- do this.
 
 	srcs = { "./src/*.c" },
-	cflags = { "-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"", "-DNON_CORRECTING" },
+	vars = {
+		["+cflags"] = {
+			"-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"",
+			"-DNON_CORRECTING"
+		},
+	}
 }
 
 definerule("llgen",

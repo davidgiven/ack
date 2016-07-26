@@ -79,10 +79,12 @@ local function build_variant(code, cflags)
 			"modules/src/system+lib",
 			"util/data+em_data",
 		},
-		cflags = { cflags }
+		vars = {
+			["+cflags"] = cflags
+		},
 	}
 end
 
-build_variant("e", "-DREADABLE_EM")
-build_variant("k", "")
+build_variant("e", { "-DREADABLE_EM" })
+build_variant("k", { })
 

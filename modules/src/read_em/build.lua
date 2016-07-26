@@ -27,11 +27,13 @@ normalrule {
 	
 clibrary {
 	name = "lib_ev",
-	cflags = {
-		"-DPRIVATE=static",
-		"-DEXPORT=",
-		"-DNDEBUG",
-		"-DCHECKING"
+	vars = {
+		["+cflags"] = {
+			"-DPRIVATE=static",
+			"-DEXPORT=",
+			"-DNDEBUG",
+			"-DCHECKING"
+		},
 	},
 	srcs = {
 		"./EM_vars.c",

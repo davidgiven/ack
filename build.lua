@@ -1,3 +1,7 @@
+vars.cflags = {
+	"-g", "-O"
+}
+
 installable {
 	name = "ack",
 	map = {
