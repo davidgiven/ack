@@ -25,6 +25,7 @@ clibrary {
 	name = "emheaders",
 	hdrs = {
 		"./*.h",
+		"./con_float",
 		"+em_path",
 		"+local",
 	}

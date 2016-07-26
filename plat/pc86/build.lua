@@ -1,14 +1,7 @@
-include("mach/proto/as/build.lua")
+include("plat/build.lua")
 
-build_as {
-	name = "as",
-	arch = "i86"
-}
-
-installable {
+build_plat {
 	name = "pkg",
-	map = {
-		["$(PLATDEP)/pc86/as"] = "+as"
-	}
+	arch = "i86",
+	plat = "pc86",
 }
-
