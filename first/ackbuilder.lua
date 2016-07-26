@@ -9,7 +9,7 @@ local posix = require("posix")
 --   is = { set of rule types which made the target }
 -- }
 
-local environment = {}
+local emitter = {}
 local rules = {}
 local targets = {}
 local buildfiles = {}
@@ -433,7 +433,6 @@ local function definerule(rulename, types, cb)
 			error(string.format("don't know what to do with property '%s'", propname))
 		end
 
-		args.environment = environment
 		if not args.cwd then
 			args.cwd = cwd
 		end
@@ -465,9 +464,9 @@ end
 --                              DEFAULT RULES                              --
 -----------------------------------------------------------------------------
 
-local function install_make_environment()
+local function install_make_emitter()
 	emit("hide = @\n")
-	function environment:rule(name, ins, outs)
+	function emitter:rule(name, ins, outs)
 		emit(".INTERMEDIATE:", name, "\n")
 		for i = 1, #ins do
 			emit(name..":", ins[i], "\n")
@@ -483,28 +482,28 @@ local function install_make_environment()
 		end
 	end
 
-	function environment:phony(name, ins, outs)
+	function emitter:phony(name, ins, outs)
 		emit(".PHONY:", name, "\n")
 		self:rule(name, ins, outs)
 	end
 
-	function environment:label(...)
+	function emitter:label(...)
 		local s = table.concat({...}, " ")
 		emit("\t@echo", s, "\n")
 	end
 
-	function environment:exec(commands)
+	function emitter:exec(commands)
 		for _, s in ipairs(commands) do
 			emit("\t$(hide)", s, "\n")
 		end
 	end
 
-	function environment:endrule()
+	function emitter:endrule()
 		emit("\n")
 	end
 end
 
-local function install_ninja_environment()
+local function install_ninja_emitter()
 	emit("rule build\n")
 	emit("  command = $command\n")
 	emit("\n")
@@ -521,7 +520,7 @@ local function install_ninja_environment()
 		)
 	end
 
-	function environment:rule(name, ins, outs)
+	function emitter:rule(name, ins, outs)
 		if (#outs == 0) then
 			emit("build", name, ": phony", unmake(ins), "\n")
 		else
@@ -530,14 +529,14 @@ local function install_ninja_environment()
 		end
 	end
 
-	function environment:label(...)
+	function emitter:label(...)
 	end
 
-	function environment:exec(commands)
+	function emitter:exec(commands)
 		emit("  command =", table.concat(unmake(commands), " && "), "\n")
 	end
 
-	function environment:endrule()
+	function emitter:endrule()
 		emit("\n")
 	end
 end
@@ -552,18 +551,18 @@ definerule("simplerule",
 		vars = { type="table", default={} },
 	},
 	function (e)
-		e.environment:rule(e.fullname,
+		emitter:rule(e.fullname,
 			concat(filenamesof(e.ins), filenamesof(e.deps)),
 			e.outs)
-		e.environment:label(e.fullname, " ", e.label or "")
+		emitter:label(e.fullname, " ", e.label or "")
 
 		local vars = inherit(e.vars, {
 			ins = e.ins,
 			outs = e.outs
 		})
 
-		e.environment:exec(templateexpand(e.commands, vars))
-		e.environment:endrule()
+		emitter:exec(templateexpand(e.commands, vars))
+		emitter:endrule()
 
 		return {
 			outs = e.outs
@@ -600,12 +599,12 @@ definerule("installable",
 			end
 		end
 
-		e.environment:rule(e.fullname, deps, dests)
-		e.environment:label(e.fullname, " ", e.label or "")
+		emitter:rule(e.fullname, deps, dests)
+		emitter:label(e.fullname, " ", e.label or "")
 		if (#commands > 0) then
-			e.environment:exec(commands)
+			emitter:exec(commands)
 		end
-		e.environment:endrule()
+		emitter:endrule()
 	end
 )
 
@@ -670,7 +669,6 @@ globals = {
 	definerule = definerule,
 	dirname = dirname,
 	emit = emit,
-	environment = environment,
 	filenamesof = filenamesof,
 	fpairs = fpairs,
 	include = loadbuildfile,
@@ -695,16 +693,16 @@ setmetatable(globals,
 )
 
 do
-	local environment_type = install_make_environment
+	local emitter_type = install_make_emitter
 	parse_arguments(
 		{
 			["make"] = function()
-				environment_type = install_make_environment
+				emitter_type = install_make_emitter
 				return 1
 			end,
 
 			["ninja"] = function()
-				environment_type = install_ninja_environment
+				emitter_type = install_ninja_emitter
 				return 1
 			end,
 
@@ -713,7 +711,7 @@ do
 			end,
 
 			[" files"] = function(files)
-				environment_type()
+				emitter_type()
 				for _, f in ipairs(files) do
 					loadbuildfile(f)
 				end
