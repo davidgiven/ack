@@ -18,6 +18,16 @@ local cwd = "."
 local vars = {}
 local parente = {}
 
+local function print(...)
+	for _, s in ipairs({...}) do
+		if (type(s) ~= "string") then
+			s = tostring(s)
+		end
+		io.stderr:write(s)
+	end
+	io.stderr:write("\n")
+end
+
 local function concat(...)
 	local r = {}
 	for k, t in ipairs({...}) do
@@ -459,7 +469,9 @@ local function definerule(rulename, types, cb)
 		parente = oldparente
 
 		result.is = result.is or {}
-		result.is[rulename] = true
+		if rulename then
+			result.is[rulename] = true
+		end
 		result.fullname = args.fullname
 
 		if targets[arg.fullname] and (targets[arg.fullname] ~= result) then
@@ -623,6 +635,10 @@ definerule("installable",
 			emitter:exec(commands)
 		end
 		emitter:endrule()
+
+		return {
+			outs = dests
+		}
 	end
 )
 
@@ -691,6 +707,7 @@ globals = {
 	fpairs = fpairs,
 	include = loadbuildfile,
 	inherit = inherit,
+	print = print,
 	replace = replace,
 	selectof = selectof,
 	startswith = startswith,
