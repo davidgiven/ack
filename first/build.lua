@@ -48,24 +48,20 @@ definerule("cfile",
 		}
 	},
 	function (e)
-		local csrcs = filenamesof(e.srcs, "%.c$")
-		if (#csrcs ~= 1) then
-			error("you must have exactly one .c file")
-		end
-		
-		local hsrcs = filenamesof(e.srcs, "%.h$")
 		local hdrpaths = {}
 		for _, t in pairs(e.deps) do
-			hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			if t.dir then
+				hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			end
 		end
 		hdrpaths = uniquify(hdrpaths)
 
-		local outleaf = basename(csrcs[1]):gsub("%.c$", ".o")
+		local outleaf = basename(e.name)..".o"
 
 		return normalrule {
 			name = e.name,
 			cwd = e.cwd,
-			ins = {csrcs[1]},
+			ins = e.srcs,
 			deps = e.deps,
 			outleaves = {outleaf},
 			label = e.label,

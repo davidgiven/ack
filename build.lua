@@ -1,6 +1,9 @@
 vars.cflags = {
 	"-g", "-O"
 }
+vars.ackcflags = {
+	"-O"
+}
 
 installable {
 	name = "ack",

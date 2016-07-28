@@ -3,7 +3,7 @@ normalrule {
 	ins = {},
 	outleaves = { "em_path.h" },
 	commands = {
-		"echo '#define TMP_DIR \"$(ACK_TEMP_DIR)\"' > %{outs}",
+		"echo '#define TMP_DIR \"/tmp\"' > %{outs}",
 		"echo '#define EM_DIR \"$(PREFIX)\"' >> %{outs}",
 		"echo '#define ACK_PATH \"share/ack/descr\"' >> %{outs}",
 	}
