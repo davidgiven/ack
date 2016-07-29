@@ -19,7 +19,6 @@ cprogram {
 	name = "ack",
 	srcs = {
 		"./*.c",
-		"./*.h",
 		"+tables",
 	},
 	deps = {

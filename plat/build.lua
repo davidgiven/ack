@@ -25,11 +25,33 @@ definerule("ackfile",
 	end
 )
 
+definerule("acklibrary",
+	{
+		srcs = { type="targets", default={} },
+		hdrs = { type="targets", default={} },
+		deps = { type="targets", default={} },
+	},
+	function (e)
+		return clibrary {
+			name = e.name,
+			srcs = e.srcs,
+			hdrs = e.hdrs,
+			deps = {
+				"util/arch+pkg",
+				unpack(e.deps)
+			},
+			_cfile = ackfile,
+			commands = {
+				"ACKDIR=$(INSDIR) $(INSDIR)/bin/aal q %{outs[1]} %{ins}"
+			}
+		}
+	end
+)
 
 definerule("build_plat_tools",
 	{
-		arch = { type = "string" },
-		plat = { type = "string" },
+		arch = { type="string" },
+		plat = { type="string" },
 	},
 	function(e)
 		local descr = "plat/"..e.plat.."/descr"
@@ -54,3 +76,20 @@ definerule("build_plat_tools",
 		}
 	end
 )
+
+definerule("build_plat_libs",
+	{
+		arch = { type="string" },
+		plat = { type="string" },
+	},
+	function(e)
+		return installable {
+			name = e.name,
+			map = {
+				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat
+			}
+		}
+	end
+)
+
+

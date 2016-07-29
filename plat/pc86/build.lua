@@ -12,10 +12,17 @@ ackfile {
 	vars = { plat = "pc86" }
 }
 
+build_plat_libs {
+	name = "libs",
+	arch = "i86",
+	plat = "pc86",
+}
+
 installable {
 	name = "pkg",
 	map = {
 		"+tools",
+		"+libs",
 		["$(PLATIND)/pc86/boot.o"] = "+boot"
 	}
 }

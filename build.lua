@@ -4,6 +4,9 @@ vars.cflags = {
 vars.ackcflags = {
 	"-O"
 }
+vars.plats = {
+	"pc86"
+}
 
 installable {
 	name = "ack",

@@ -146,6 +146,7 @@ definerule("clibrary",
 		srcs = { type="targets", default={} },
 		hdrs = { type="targets", default={} },
 		deps = { type="targets", default={} },
+		_cfile = { type="object", default=cfile },
 		commands = {
 			type="strings",
 			default={
@@ -155,16 +156,13 @@ definerule("clibrary",
 		}
 	},
 	function (e)
-		local csrcs = filenamesof(e.srcs, "%.c$")
-		local hsrcs = filenamesof(e.srcs, "%.h$")
-
 		local ins = {}
-		for _, csrc in fpairs(csrcs) do
-			local n = basename(csrc):gsub("%.%w*$", "")
-			ins[#ins+1] = cfile {
+		for _, src in fpairs(e.srcs) do
+			local n = basename(src):gsub("%.%w*$", "")
+			ins[#ins+1] = e._cfile {
 				name = e.name.."/"..n,
 				cwd = e.cwd,
-				srcs = {csrc, unpack(hsrcs)},
+				srcs = {src},
 				deps = e.deps,
 				vars = {
 					["+cflags"] = { "-I"..e.cwd, },

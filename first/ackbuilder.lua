@@ -30,9 +30,13 @@ end
 
 local function concat(...)
 	local r = {}
-	for k, t in ipairs({...}) do
-		for _, v in ipairs(t) do
-			r[#r+1] = v
+	for _, t in ipairs({...}) do
+		if (type(t) == "table") and not t.is then
+			for _, v in ipairs(t) do
+				r[#r+1] = v
+			end
+		else
+			r[#r+1] = t
 		end
 	end
 	return r
@@ -411,6 +415,10 @@ local typeconverters = {
 		if (type(i) ~= "table") then
 			error(string.format("property '%s' must be a table", propname))
 		end
+		return i
+	end,
+
+	object = function(propname, i)
 		return i
 	end,
 }

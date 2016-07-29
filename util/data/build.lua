@@ -1,4 +1,4 @@
-normalrule {
+local generated = normalrule {
 	name = "generated",
 	ins = {
 		"./new_table",
@@ -22,10 +22,10 @@ normalrule {
 
 clibrary {
 	name = "em_data",
-	srcs = {
+	srcs = concat(
 		"./em_ptyp.c",
-		"+generated", -- so we build the C files
-	},
+		filenamesof(generated, "%.c$")
+	),
 	hdrs = {
 		"+generated" -- so we export the H files
 	},

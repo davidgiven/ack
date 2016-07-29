@@ -65,7 +65,7 @@ normalrule {
 	}
 }
 
-llgen {
+local llgen = llgen {
 	name = "llgen",
 	srcs = {
 		"+tokenfile_g",
@@ -80,13 +80,13 @@ tabgen {
 
 cprogram {
 	name = "cpp",
-	srcs = {
+	srcs = concat(
 		"./*.c",
-		"+llgen",
+		filenamesof(llgen, "%.c$"),
 		"+next_c",
 		"+symbol2str_c",
-		"+tabgen_c",
-	},
+		"+tabgen_c"
+	),
 	deps = {
 		"+llgen",
 		"+macro_h",

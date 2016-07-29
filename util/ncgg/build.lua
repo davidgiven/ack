@@ -5,18 +5,18 @@ local cggparser = yacc {
 	srcs = { "./cgg.y" }
 }
 
-flex {
+local cgglexer = flex {
 	name = "cgglexer",
 	srcs = { "./scan.l" }
 }
 
 normalrule {
 	name = "keywords",
-	ins = {
+	ins = concat(
 		"./cvtkeywords",
 		"./keywords",
-		unpack(filenamesof({cggparser}, "%.h$"))
-	},
+		filenamesof({cggparser}, "%.h$")
+	),
 	outleaves = { "enterkeyw.c" },
 	commands = {
 		"%{ins[1]} %{ins[2]} %{ins[3]} %{outs[1]}"
@@ -25,12 +25,12 @@ normalrule {
 
 cprogram {
 	name = "ncgg",
-	srcs = {
+	srcs = concat(
 		"./*.c",
-		"+cggparser", -- for .c file
-		"+cgglexer", -- for .c file
-		"+keywords",
-	},
+		filenamesof({cggparser}, "%.c$"),
+		filenamesof({cgglexer}, "%.c$"),
+		"+keywords"
+	),
 	deps = {
 		"+cggparser", -- for .h file
 		"+cgglexer", -- for .h file

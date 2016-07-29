@@ -30,15 +30,15 @@ definerule("build_as",
 
 		return cprogram {
 			name = e.name,
-			srcs = {
+			srcs = concat(
 				"mach/proto/as/*.c",
-				yaccfiles, -- for .c file
-			},
+				filenamesof(yaccfiles, "%.c$")
+			),
 			deps = {
 				"h+emheaders",
 				"modules/src/object+lib",
 				archlib,
-				yaccfiles, -- for .h file
+				yaccfiles
 			}
 		}
 	end

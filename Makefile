@@ -74,7 +74,7 @@ $(BUILDDIR)/build.ninja: Makefile
 else
 
 $(MAKECMDGOALS): $(BUILDDIR)/rules.mk
-	@make -r -f $(BUILDDIR)/rules.mk $@ \
+	+@make -r -f $(BUILDDIR)/rules.mk $@ \
 		$(MAKEFLAGS) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
