@@ -1,4 +1,3 @@
-local posix = require("posix")
 include("util/LLgen/build.lua")
 
 normalrule {
@@ -13,7 +12,7 @@ normalrule {
 	}
 }
 
-local str_files = basename(posix.glob(cwd().."/*.str"))
+local str_files = basename(filenamesof("./*.str"))
 local str_targets = {}
 
 for _, f in ipairs(str_files) do
@@ -46,7 +45,7 @@ clibrary {
 	hdrs = str_targets,
 	deps = {
 		"+parameters",
-		unpack(str_targets)
+		str_targets
 	}
 }
 

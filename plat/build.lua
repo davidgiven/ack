@@ -16,7 +16,7 @@ definerule("ackfile",
 				"plat/"..plat.."+tools",
 				"util/ack+pkg",
 				"lang/cem/cpp.ansi+pkg",
-				unpack(e.deps)
+				e.deps
 			},
 			commands = {
 				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -c -o %{outs} %{ins} %{hdrpaths} %{ackcflags}"
@@ -38,10 +38,11 @@ definerule("acklibrary",
 			hdrs = e.hdrs,
 			deps = {
 				"util/arch+pkg",
-				unpack(e.deps)
+				e.deps
 			},
 			_cfile = ackfile,
 			commands = {
+				"rm -f %{outs[1]}",
 				"ACKDIR=$(INSDIR) $(INSDIR)/bin/aal q %{outs[1]} %{ins}"
 			}
 		}

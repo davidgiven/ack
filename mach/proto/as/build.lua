@@ -32,7 +32,7 @@ definerule("build_as",
 			name = e.name,
 			srcs = concat(
 				"mach/proto/as/*.c",
-				filenamesof(yaccfiles, "%.c$")
+				matching(filenamesof(yaccfiles), "%.c$")
 			),
 			deps = {
 				"h+emheaders",

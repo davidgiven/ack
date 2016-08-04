@@ -12,11 +12,11 @@ local cgglexer = flex {
 
 normalrule {
 	name = "keywords",
-	ins = concat(
+	ins = {
 		"./cvtkeywords",
 		"./keywords",
-		filenamesof({cggparser}, "%.h$")
-	),
+		matching(filenamesof(cggparser), "%.h$")
+	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
 		"%{ins[1]} %{ins[2]} %{ins[3]} %{outs[1]}"
@@ -27,8 +27,8 @@ cprogram {
 	name = "ncgg",
 	srcs = concat(
 		"./*.c",
-		filenamesof({cggparser}, "%.c$"),
-		filenamesof({cgglexer}, "%.c$"),
+		matching(filenamesof(cggparser), "%.c$"),
+		matching(filenamesof(cgglexer), "%.c$"),
 		"+keywords"
 	),
 	deps = {

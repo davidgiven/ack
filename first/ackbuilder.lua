@@ -18,27 +18,51 @@ local cwd = "."
 local vars = {}
 local parente = {}
 
+-- Forward references
+local loadtarget
+
 local function print(...)
-	for _, s in ipairs({...}) do
-		if (type(s) ~= "string") then
-			s = tostring(s)
+	local function print_no_nl(list)
+		for _, s in ipairs(list) do
+			if (type(s) == "table") then
+				io.stderr:write("{")
+				for k, v in pairs(s) do
+					print_no_nl({k})
+					io.stderr:write("=")
+					print_no_nl({v})
+					io.stderr:write(" ")
+				end
+				io.stderr:write("}")
+			else
+				io.stderr:write(tostring(s))
+			end
 		end
-		io.stderr:write(s)
 	end
+
+	print_no_nl({...})
 	io.stderr:write("\n")
+end
+
+local function assertString(s, i)
+	if (type(s) ~= "string") then
+		error(string.format("parameter %d must be a string", i))
+	end
 end
 
 local function concat(...)
 	local r = {}
-	for _, t in ipairs({...}) do
-		if (type(t) == "table") and not t.is then
-			for _, v in ipairs(t) do
-				r[#r+1] = v
+
+	local function process(list)
+		for _, t in ipairs(list) do
+			if (type(t) == "table") and not t.is then
+				process(t)
+			else
+				r[#r+1] = t
 			end
-		else
-			r[#r+1] = t
 		end
 	end
+	process({...})
+
 	return r
 end
 
@@ -90,84 +114,108 @@ local function concatpath(...)
 	return (p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/"))
 end
 
-local function filenamesof(targets, pattern)
-	local f = {}
-	if targets then
-		if targets.is then
-			targets = {targets}
-		end
+-- Turns a list of strings or targets into a list of targets, expanding
+-- recursive lists and wildcards.
+local function targetsof(...)
+	local o = {}
 
-		for _, r in pairs(targets) do
-			if (type(r) == "table") and r.is then
-				if r.outs then
-					for _, o in pairs(r.outs) do
-						if not pattern or o:find(pattern) then
-							f[#f+1] = o
-						end
-					end
+	local function process(items)
+		for _, item in ipairs(items) do
+			if (type(item) == "table") then
+				if item.is then
+					-- This is a target.
+					o[#o+1] = item
+				else
+					-- This is a list.
+					process(item)
 				end
-			elseif (type(r) == "string") then
-				f[#f+1] = r
+			elseif (type(item) == "string") then
+				-- Filename!
+				if item:find("^%+") then
+					item = cwd..item
+				elseif item:find("^%./") then
+					item = concatpath(cwd, item)
+				end
+				o[#o+1] = loadtarget(item)
 			else
-				error(string.format("list of targets contains a %s which isn't a target",
-					type(r)))
+				error(string.format("member of target list is not a string or a target"))
 			end
 		end
 	end
-	return f
+
+	process({...})
+	return o
 end
 
-local function targetnamesof(targets)
+local function filenamesof(...)
+	local targets = targetsof(...)
+
 	local f = {}
-	if targets then
-		if targets.is then
-			targets = {targets}
-		end
-
-		for _, r in pairs(targets) do
-			if (type(r) == "table") and r.is then
-				f[#f+1] = r.fullname
-			elseif (type(r) == "string") then
-				f[#f+1] = r
-			else
-				error(string.format("list of targets contains a %s which isn't a target",
-					type(r)))
+	for _, r in ipairs(targets) do
+		if (type(r) == "table") and r.is then
+			if r.outs then
+				for _, o in ipairs(r.outs) do
+					f[#f+1] = o
+				end
 			end
+		elseif (type(r) == "string") then
+			f[#f+1] = r
+		else
+			error(string.format("list of targets contains a %s which isn't a target",
+				type(r)))
 		end
 	end
 	return f
 end
 
-local function dotocollection(collection, callback)
-	if (type(collection) == "string") then
-		return callback(collection)
-	elseif collection.is then
-		local files = filenamesof(collection.outs)
-		if (#files ~= 1) then
-			error("inputs with more than one output need to be in a list")
+local function targetnamesof(...)
+	local targets = targetsof(...)
+
+	local f
+	for _, r in pairs(targets) do
+		if (type(r) == "table") and r.is then
+			f[#f+1] = r.fullname
+		elseif (type(r) == "string") then
+			f[#f+1] = r
+		else
+			error(string.format("list of targets contains a %s which isn't a target",
+				type(r)))
 		end
+	end
+	return f
+end
+
+local function dotocollection(files, callback)
+	if (#files == 1) and (type(files[1]) == "string") then
 		return callback(files[1])
 	end
 
 	local o = {}
-	for _, s in pairs(collection) do
-		if s.is then
-			for _, b in pairs(dotocollection(filenamesof(s), callback)) do
-				o[#o+1] = b
-			end
-		else
-			local b = callback(s)
-			if (b ~= "") then
-				o[#o+1] = b
+	local function process(files)
+		for _, s in ipairs(files) do
+			if (type(s) == "table") then
+				if s.is then
+					error("passed target to a filename manipulation function")
+				else
+					process(s)
+				end
+			else
+				local b = callback(s)
+				if (b ~= "") then
+					o[#o+1] = b
+				end
 			end
 		end
 	end
+	process(files)
 	return o
 end
 
-local function abspath(collection)
-	return dotocollection(collection,
+
+local function abspath(...)
+	return dotocollection({...},
 		function(filename)
+			assertString(filename, 1)
 			if not filename:find("^[/$]") then
 				filename = concatpath(posix.getcwd(), filename)
 			end
@@ -176,9 +224,11 @@ local function abspath(collection)
 	)
 end
 
-local function basename(collection)
-	return dotocollection(collection,
+
+local function basename(...)
+	return dotocollection({...},
 		function(filename)
+			assertString(filename, 1)
 			local _, _, b = filename:find("^.*/([^/]*)$")
 			if not b then
 				return filename
@@ -188,9 +238,11 @@ local function basename(collection)
 	)
 end
 
-local function dirname(collection)
-	return dotocollection(collection,
+
+local function dirname(...)
+	return dotocollection({...},
 		function(filename)
+			assertString(filename, 1)
 			local _, _, b = filename:find("^(.*)/[^/]*$")
 			if not b then
 				return ""
@@ -200,25 +252,34 @@ local function dirname(collection)
 	)
 end
 
-local function replace(collection, pattern, repl)
-	return dotocollection(collection,
+local function replace(files, pattern, repl)
+	return dotocollection(files,
 		function(filename)
 			return filename:gsub(pattern, repl)
 		end
 	)
 end
 
-local function fpairs(collection)
-	if (type(collection) == "string") or collection.is then
-		return fpairs({collection})
-	end
-
-	return pairs(filenamesof(collection))
+local function fpairs(...)
+	return ipairs(filenamesof(...))
 end
 
+local function matching(collection, pattern)
+	local o = {}
+	dotocollection(collection,
+		function(filename)
+			if filename:find(pattern) then
+				o[#o+1] = filename
+			end
+		end
+	)
+	return o
+end
+		
 -- Selects all targets containing at least one output file that matches
 -- the pattern (or all, if the pattern is nil).
 local function selectof(targets, pattern)
+	local targets = targetsof(targets)
 	local o = {}
 	for k, v in pairs(targets) do
 		if v.is and v.outs then
@@ -237,16 +298,16 @@ local function selectof(targets, pattern)
 	return o
 end
 
-local function uniquify(collection)
+local function uniquify(...)
 	local s = {}
-	local o = {}
-	for _, v in pairs(collection) do
-		if not s[v] then
-			s[v] = true
-			o[#o+1] = v
+	return dotocollection({...},
+		function(filename)
+			if not s[filename] then
+				s[filename] = true
+				return filename
+			end
 		end
-	end
-	return o
+	)
 end
 
 local function startswith(needle, haystack)
@@ -274,13 +335,13 @@ local function templateexpand(list, vars)
 		o[#o+1] = s:gsub("%%%b{}",
 			function(expr)
 				expr = expr:sub(3, -2)
-				local chunk, e = loadstring("return "..expr, expr, "text", vars)
+				local chunk, e = load("return ("..expr..")", expr, "text", vars)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
 				local value = chunk()
 				if (value == nil) then
-					error(string.format("template expression expands to nil (probably an undefined variable)"))
+					error(string.format("template expression '%s' expands to nil (probably an undefined variable)", expr))
 				end
 				return asstring(value)
 			end
@@ -302,7 +363,7 @@ local function loadbuildfile(filename)
 			if not e then
 				local thisglobals = {_G = thisglobals}
 				setmetatable(thisglobals, {__index = globals})
-				chunk, e = loadstring(data, filename, "text", thisglobals)
+				chunk, e = load(data, "@"..filename, "text", thisglobals)
 			end
 		end
 		if e then
@@ -316,7 +377,7 @@ local function loadbuildfile(filename)
 	end
 end
 
-local function loadtarget(targetname)
+loadtarget = function(targetname)
 	if targets[targetname] then
 		return targets[targetname]
 	end
@@ -368,24 +429,7 @@ local typeconverters = {
 		elseif (type(i) ~= "table") then
 			error(string.format("property '%s' must be a target list", propname))
 		end
-
-		local o = {}
-		for k, s in pairs(i) do
-			if (type(s) == "table") and s.is then
-				o[k] = s
-			elseif (type(s) == "string") then
-				if s:find("^%+") then
-					s = cwd..s
-				elseif s:find("^%./") then
-					s = concatpath(cwd, s)
-				end
-				o[k] = loadtarget(s)
-			else
-				error(string.format("member of target list '%s' is not a string or a target",
-					propname))
-			end
-		end
-		return o
+		return targetsof(i)
 	end,
 
 	strings = function(propname, i)
@@ -394,7 +438,7 @@ local typeconverters = {
 		elseif (type(i) ~= "table") then
 			error(string.format("property '%s' must be a string list", propname))
 		end
-		return i
+		return concat(i)
 	end,
 
 	boolean = function(propname, i)
@@ -547,7 +591,7 @@ local function install_ninja_emitter()
 	emit("\n")
 
 	local function unmake(collection)
-		return dotocollection(collection,
+		return dotocollection({collection},
 			function(s)
 				return s:gsub("%$%b()",
 					function(expr)
@@ -589,14 +633,12 @@ definerule("simplerule",
 		vars = { type="table", default={} },
 	},
 	function (e)
-		emitter:rule(e.fullname,
-			concat(filenamesof(e.ins), filenamesof(e.deps)),
-			e.outs)
+		emitter:rule(e.fullname, filenamesof(e.ins, e.deps), e.outs)
 		emitter:label(e.fullname, " ", e.label or "")
 
 		local vars = inherit(e.vars, {
-			ins = e.ins,
-			outs = e.outs
+			ins = filenamesof(e.ins),
+			outs = filenamesof(e.outs)
 		})
 
 		emitter:exec(templateexpand(e.commands, vars))
@@ -610,7 +652,7 @@ definerule("simplerule",
 
 definerule("installable",
 	{
-		map = { type="targets", default={} },
+		map = { type="table", default={} },
 	},
 	function (e)
 		local deps = {}
@@ -618,6 +660,12 @@ definerule("installable",
 		local srcs = {}
 		local dests = {}
 		for dest, src in pairs(e.map) do
+			src = targetsof(src)
+			if (#src ~= 1) then
+				error("installable can only cope with one target at a time")
+			end
+			src = src[1]
+
 			if src.is.installable then
 				if (type(dest) ~= "number") then
 					error("can't specify a destination filename when installing an installable")
@@ -631,7 +679,7 @@ definerule("installable",
 					error("installable can only cope with targets emitting single files")
 				end
 
-				deps[#deps+1] = src
+				deps[#deps+1] = src.fullname
 				dests[#dests+1] = dest
 				commands[#commands+1] = "cp "..f[1].." "..dest
 			end
@@ -717,9 +765,9 @@ globals = {
 	inherit = inherit,
 	print = print,
 	replace = replace,
+	matching = matching,
 	selectof = selectof,
 	startswith = startswith,
-	targetnamesof = targetnamesof,
 	uniquify = uniquify,
 	vars = vars,
 }

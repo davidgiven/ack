@@ -35,7 +35,6 @@ definerule("build_ncg",
 				"modules/src/flt_arith+lib",
 				"modules/src/object+lib",
 				"util/data+em_data",
-				archlib, -- for .h file
 				headers,
 				tables, -- for .h file
 			}

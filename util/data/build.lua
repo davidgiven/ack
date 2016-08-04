@@ -24,7 +24,7 @@ clibrary {
 	name = "em_data",
 	srcs = concat(
 		"./em_ptyp.c",
-		filenamesof(generated, "%.c$")
+		matching(filenamesof(generated), "%.c$")
 	),
 	hdrs = {
 		"+generated" -- so we export the H files

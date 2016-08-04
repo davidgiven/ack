@@ -9,9 +9,9 @@ local allocd_header = definerule(null,
 			name = e.name,
 			ins = {
 				"./make.allocd",
-				unpack(e.srcs)
+				e.srcs
 			},
-			outleaves = replace(basename(e.srcs), "%.str$", ".h"),
+			outleaves = basename(filenamesof(e.srcs)[1]):gsub("%.str$", ".h"),
 			commands = {
 				"%{ins[1]} < %{ins[2]} > %{outs}"
 			}
@@ -82,7 +82,7 @@ cprogram {
 	name = "cpp",
 	srcs = concat(
 		"./*.c",
-		filenamesof(llgen, "%.c$"),
+		matching(filenamesof(llgen), "%.c$"),
 		"+next_c",
 		"+symbol2str_c",
 		"+tabgen_c"

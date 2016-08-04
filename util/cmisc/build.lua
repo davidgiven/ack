@@ -8,13 +8,13 @@ definerule("tabgen",
 		srcs = { type="targets" },
 	},
 	function(e)
-		local symname = replace(basename(e.srcs[1]), "%.tab$", "")
+		local symname = basename(filenamesof(e.srcs)[1]):gsub("%.tab$", "")
 
 		return normalrule {
 			name = e.name,
 			ins = {
 				"util/cmisc+tabgen",
-				unpack(e.srcs)
+				e.srcs
 			},
 			outleaves = { symname..".c" },
 			commands = {

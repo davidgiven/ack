@@ -14,8 +14,8 @@ definerule("normalrule",
 	function (e)
 		local dir = e.objdir or objdir(e)
 		local realouts = {}
-		for k, v in pairs(e.outleaves) do
-			realouts[k] = concatpath(dir, v)
+		for _, v in pairs(e.outleaves) do
+			realouts[#realouts+1] = concatpath(dir, v)
 		end
 
 		local vars = inherit(e.vars, {
@@ -185,7 +185,7 @@ definerule("clibrary",
 			cwd = e.cwd,
 			ins = ins,
 			deps = concat(e.hdrs, e.deps),
-			outleaves = { e.name..".a", unpack(basename(hdrs)) },
+			outleaves = concat(e.name..".a", basename(hdrs)),
 			label = e.label,
 			commands = commands,
 			vars = {
@@ -207,19 +207,21 @@ definerule("cprogram",
 		}
 	},
 	function (e)
-		local libs = filenamesof(e.deps, "%.a$")
+		local libs = matching(filenamesof(e.deps), "%.a$")
 		if (#e.srcs > 0) then
-			for _, f in pairs(filenamesof(
-				{
-					clibrary {
-						name = e.name .. "/main",
-						cwd = e.cwd,
-						srcs = e.srcs,
-						deps = e.deps,
-					}
-				},
-				"%.a$"
-			)) do
+			for _, f in pairs(
+				matching(
+					filenamesof(
+						clibrary {
+							name = e.name .. "/main",
+							cwd = e.cwd,
+							srcs = e.srcs,
+							deps = e.deps,
+						}
+					),
+					"%.a$"
+				)
+			) do
 				libs[#libs+1] = f
 			end
 		end

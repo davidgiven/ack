@@ -21,7 +21,7 @@ definerule("llgen",
 	function(e)
 		-- Remember this is executed from the caller's directory; local
 		-- target names will resolve there
-		local fs = replace(basename(e.srcs), "%.g$", "")
+		local fs = replace(basename(filenamesof(e.srcs)), "%.g$", "")
 
 		return normalrule {
 			name = e.name,
@@ -29,11 +29,11 @@ definerule("llgen",
 			outleaves = {
 				"Lpars.c",
 				"Lpars.h",
-				unpack(replace(fs, "$", ".c"))
+				replace(fs, "$", ".c")
 			},
 			ins = {
 				"util/LLgen+llgen",
-				unpack(e.srcs),
+				e.srcs,
 			},
 			commands = {
 				"cd %{dir} && %{abspath(ins)}"
