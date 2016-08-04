@@ -26,8 +26,7 @@ definerule("build_ncg",
 			srcs = {
 				"mach/proto/ncg/*.c",
 				"mach/"..e.arch.."/ncg/mach.h",
-				archlib, -- for .c file
-				tables, -- for .c file
+				matching(filenamesof(tables), "%.c$")
 			},
 			deps = {
 				"h+emheaders",

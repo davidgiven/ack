@@ -361,7 +361,8 @@ local function loadbuildfile(filename)
 			data, e = fp:read("*a")
 			fp:close()
 			if not e then
-				local thisglobals = {_G = thisglobals}
+				local thisglobals = {}
+				thisglobals._G = thisglobals
 				setmetatable(thisglobals, {__index = globals})
 				chunk, e = load(data, "@"..filename, "text", thisglobals)
 			end
@@ -787,6 +788,18 @@ setmetatable(globals,
 vars.cflags = {}
 parente.vars = vars
 
+setmetatable(_G,
+	{
+		__index = function(self, k)
+			local value = rawget(_G, k)
+			if not value then
+				error(string.format("access of undefined variable '%s'", k))
+			end
+			return value
+		end
+	}
+)
+		
 do
 	local emitter_type = install_make_emitter
 	parse_arguments(

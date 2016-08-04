@@ -1,6 +1,6 @@
 include("util/cmisc/build.lua")
 
-local allocd_header = definerule(null,
+local allocd_header = definerule(nil,
 	{
 		srcs = { type="targets" }
 	},
