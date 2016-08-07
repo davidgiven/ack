@@ -25,34 +25,39 @@ normalrule {
 	}
 }
 	
-clibrary {
-	name = "lib_ev",
-	vars = {
-		["+cflags"] = {
-			"-DPRIVATE=static",
-			"-DEXPORT=",
-			"-DNDEBUG",
-			"-DCHECKING"
+local function variant(name, cflags)
+	clibrary {
+		name = name,
+		vars = {
+			["+cflags"] = {
+				"-DPRIVATE=static",
+				"-DEXPORT=",
+				"-DNDEBUG",
+				"-DCHECKING",
+				unpack(cflags)
+			},
 		},
-	},
-	srcs = {
-		"./EM_vars.c",
-		"./read_em.c",
-		"./mkcalls.c",
-	},
-	hdrs = {
-		"./em_comp.h",
-	},
-	deps = {
-		"+c_mnem_h",
-		"+c_mnem_narg_h",
-		"h+emheaders",
-		"modules+headers",
-		"modules/src/alloc+lib",
-		"modules/src/em_code+em_code_ek_h",
-		"modules/src/system+lib",
-		"util/data+em_data",
+		srcs = {
+			"./EM_vars.c",
+			"./read_em.c",
+			"./mkcalls.c",
+		},
+		hdrs = {
+			"./em_comp.h",
+		},
+		deps = {
+			"+c_mnem_h",
+			"+c_mnem_narg_h",
+			"h+emheaders",
+			"modules+headers",
+			"modules/src/alloc+lib",
+			"modules/src/em_code+em_code_ek_h",
+			"modules/src/system+lib",
+			"util/data+em_data",
+		}
 	}
-}
+end
 
+variant("lib_ev", {})
+variant("lib_kv", { "-DCOMPACT" })
 

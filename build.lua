@@ -12,11 +12,12 @@ installable {
 	name = "ack",
 	map = {
 		"lang/cem/cemcom.ansi+pkg",
+		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
 		"util/misc+pkg",
-		"plat/pc86+pkg",
+		"util/opt+pkg",
 	}
 }
 

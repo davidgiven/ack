@@ -1,4 +1,5 @@
 include("plat/build.lua")
+include("lang/build.lua")
 
 build_plat_tools {
 	name = "tools",

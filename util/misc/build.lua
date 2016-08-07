@@ -19,10 +19,27 @@ cprogram {
 	}
 }
 
+cprogram {
+	name = "decode",
+	srcs = { "./convert.c" },
+	deps = {
+		"h+emheaders",
+		"modules+headers",
+		"modules/src/alloc+lib",
+		"modules/src/em_code+lib_k",
+		"modules/src/print+lib",
+		"modules/src/read_em+lib_kv",
+		"modules/src/string+lib",
+		"modules/src/system+lib",
+		"util/data+em_data",
+	}
+}
+
 installable {
 	name = "pkg",
 	map = {
 		["$(PLATDEP)/em_encode"] = "+encode",
+		["$(PLATDEP)/em_decode"] = "+decode",
 		["$(INSDIR)/bin/esize"] = "+esize",
 		["$(PLATIND)/man/man1/esize.1"] = "./esize.1",
 		["$(PLATIND)/man/man6/em_decode.6"] = "./em_decode.6"

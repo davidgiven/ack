@@ -415,7 +415,7 @@ loadtarget = function(targetname)
 
 		target = targets[targetname]
 		if not target then
-			error(string.format("build file '%s' contains no rule '%s'",
+			error(string.format("build file '%s' contains no target '%s'",
 				filename, targetpart))
 		end
 	end

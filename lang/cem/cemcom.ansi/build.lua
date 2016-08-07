@@ -1,4 +1,5 @@
 include("util/LLgen/build.lua")
+include("util/cmisc/build.lua")
 
 normalrule {
 	name = "parameters",
@@ -50,12 +51,24 @@ clibrary {
 }
 
 normalrule {
-	name = "tokenname-g",
+	name = "tokenfile-g",
 	ins = {
 		"./make.tokfile",
 		"./tokenname.c",
 	},
-	outleaves = { "tokenname.g" },
+	outleaves = { "tokenfile.g" },
+	commands = {
+		"sh %{ins[1]} < %{ins[2]} > %{outs}",
+	}
+}
+
+normalrule {
+	name = "symbol2str-c",
+	ins = {
+		"./make.tokcase",
+		"./tokenname.c",
+	},
+	outleaves = { "symbol2str.c" },
 	commands = {
 		"sh %{ins[1]} < %{ins[2]} > %{outs}",
 	}
@@ -64,14 +77,23 @@ normalrule {
 llgen {
 	name = "llgen",
 	srcs = {
-		"+tokenname-g", -- must be first
+		"+tokenfile-g", -- must be first
 		"./*.g",
 	},
+}
+
+tabgen {
+	name = "tabgen",
+	srcs = { "./char.tab" }
 }
 
 cprogram {
 	name = "cemcom",
 	srcs = {
+		"./LLlex.c",
+		"./LLmessage.c",
+		"./arith.c",
+		"./blocks.c",
 		"./ch3.c",
 		"./ch3bin.c",
 		"./ch3mon.c",
@@ -111,17 +133,24 @@ cprogram {
 		"./tokenname.c",
 		"./type.c",
 		"./util.c",
+		"+symbol2str-c",
+		"+tabgen",
+		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
+		"./*.h",
 		"+parameters",
 		"+nextlib",
 		"+llgen",
 		"h+emheaders",
 		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",
+		"modules/src/em_mes+lib",
 		"modules/src/flt_arith+lib",
 		"modules/src/idf+lib",
 		"modules/src/input+lib",
+		"modules/src/print+lib",
+		"modules/src/string+lib",
 		"modules/src/system+lib",
 		"modules+headers",
 		"util/data+em_data",
