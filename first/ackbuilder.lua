@@ -114,13 +114,13 @@ local function concatpath(...)
 	return (p:gsub("/+", "/"):gsub("^%./", ""):gsub("/%./", "/"))
 end
 
--- Turns a list of strings or targets into a list of targets, expanding
--- recursive lists and wildcards.
+-- Returns a list of the targets within the given collection; the keys of any
+-- keyed items are lost. Lists and wildcards are expanded.
 local function targetsof(...)
 	local o = {}
 
 	local function process(items)
-		for _, item in ipairs(items) do
+		for _, item in pairs(items) do
 			if (type(item) == "table") then
 				if item.is then
 					-- This is a target.
@@ -430,7 +430,23 @@ local typeconverters = {
 		elseif (type(i) ~= "table") then
 			error(string.format("property '%s' must be a target list", propname))
 		end
-		return targetsof(i)
+
+		local m = {}
+		for k, v in pairs(i) do
+			local ts = targetsof(v)
+			if (type(k) == "number") then
+				for _, t in ipairs(ts) do
+					m[#m+1] = t
+				end
+			else
+				if (#ts ~= 1) then
+					error(string.format("named target '%s' can only be assigned from a single target", k))
+				else
+					m[k] = ts[1]
+				end
+			end
+		end
+		return m
 	end,
 
 	strings = function(propname, i)
@@ -653,7 +669,7 @@ definerule("simplerule",
 
 definerule("installable",
 	{
-		map = { type="table", default={} },
+		map = { type="targets", default={} },
 	},
 	function (e)
 		local deps = {}
@@ -661,12 +677,6 @@ definerule("installable",
 		local srcs = {}
 		local dests = {}
 		for dest, src in pairs(e.map) do
-			src = targetsof(src)
-			if (#src ~= 1) then
-				error("installable can only cope with one target at a time")
-			end
-			src = src[1]
-
 			if src.is.installable then
 				if (type(dest) ~= "number") then
 					error("can't specify a destination filename when installing an installable")

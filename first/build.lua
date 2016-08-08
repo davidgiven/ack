@@ -170,27 +170,44 @@ definerule("clibrary",
 			}
 		end
 
-		local hdrs = filenamesof(e.hdrs)
-
 		local commands = {}
-		for _, s in ipairs(e.commands) do
-			commands[#commands+1] = s
+		local outleaves = {}
+		if (#e.srcs > 0) then
+			for _, s in ipairs(e.commands) do
+				commands[#commands+1] = s
+			end
+			outleaves[#outleaves+1] = e.name..".a"
 		end
-		if (#hdrs > 0) then
-			commands[#commands+1] = "cp %{hdrs} %{dir}"
+
+		local hdrsin = {}
+		for dest, src in pairs(e.hdrs) do
+			if (type(dest) == "number") then
+				for _, f in ipairs(filenamesof(src)) do
+					hdrsin[#hdrsin+1] = f
+					outleaves[#outleaves+1] = basename(f)
+					commands[#commands+1] = "cp "..asstring(f).." %{dir}"
+				end
+			else
+				local fs = filenamesof(src)
+				if (#fs ~= 1) then
+					error(string.format("keyed header '%s' can only be a single file", dest))
+				end
+				local f = fs[1]
+
+				hdrsin[#hdrsin+1] = f
+				outleaves[#outleaves+1] = dest
+				commands[#commands+1] = "cp "..asstring(f).." %{dir}/"..dest
+			end
 		end
 
 		return normalrule {
 			name = e.name,
 			cwd = e.cwd,
 			ins = ins,
-			deps = concat(e.hdrs, e.deps),
-			outleaves = concat(e.name..".a", basename(hdrs)),
+			deps = {hdrsin, e.deps},
+			outleaves = outleaves,
 			label = e.label,
 			commands = commands,
-			vars = {
-				hdrs = hdrs
-			}
 		}
 	end
 )
