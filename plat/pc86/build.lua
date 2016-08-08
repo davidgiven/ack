@@ -13,6 +13,14 @@ ackfile {
 	vars = { plat = "pc86" }
 }
 
+acklibrary {
+	name = "headers",
+	hdrs = {
+		["ack/config.h"] = "./include/ack/config.h",
+		["unistd.h"] = "./include/unistd.h",
+	}
+}
+
 build_plat_libs {
 	name = "libs",
 	arch = "i86",

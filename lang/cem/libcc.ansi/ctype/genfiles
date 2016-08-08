@@ -3,7 +3,7 @@
 for i in isalnum isalpha iscntrl isdigit isgraph islower isprint \
 	ispunct isspace isupper isxdigit isascii
 do
-sed "s/xxxx/$i/" > $i.c << 'EOF'
+sed "s/xxxx/$i/" > $1/$i.c << 'EOF'
 #include	<ctype.h>
 
 int (xxxx)(int c) {
