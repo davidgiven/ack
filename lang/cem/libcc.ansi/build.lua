@@ -1,19 +1,4 @@
-local headers = {}
-
-local function addheader(dir, list)
-	for _, f in ipairs(list) do
-		local b = basename(f)
-		headers[dir..b] = f
-	end
-end
-
-addheader("", filenamesof("./headers/*.h"))
-addheader("sys/", filenamesof("./headers/sys/*.h"))
-
-acklibrary {
-	name = "headers",
-	hdrs = headers
-}
+include("plat/build.lua")
 
 tabgen {
 	name = "ctype_tab",
@@ -49,14 +34,15 @@ for _, plat in ipairs(vars.plats) do
 			"+ctype_files",
 			"+ctype_tab",
 			"./ctype/*.c",
-            "./assert/*.c",
 			"./errno/*.c",
 			"./locale/*.c",
+			"./malloc/*.c",
 			"./math/*.c",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
 			"./setjmp/*.c",
 			"./setjmp/*.e",
 			"./signal/*.c",
+            "./assert/*.c",
 			"./stdio/*.c",
 			"./stdlib/*.c",
 			"./string/*.c",
@@ -65,7 +51,7 @@ for _, plat in ipairs(vars.plats) do
         },
 		hdrs = {}, -- must be empty
 		deps = {
-			"+headers",
+			"lang/cem/libcc.ansi/headers+headers",
 			"plat/"..plat.."+headers",
 		},
         vars = { plat = plat }
@@ -83,6 +69,7 @@ for _, plat in ipairs(vars.plats) do
 	installable {
 		name = "pkg_"..plat,
 		map = {
+			"lang/cem/libcc.ansi/headers+pkg",
 			["$(PLATIND)/"..plat.."/c-ansi.o"] = "+crt_"..plat,
 			["$(PLATIND)/"..plat.."/libc.a"] = "+lib_"..plat,
 		}
