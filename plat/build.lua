@@ -90,10 +90,11 @@ definerule("build_plat_libs",
 		return installable {
 			name = e.name,
 			map = {
-				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libsys.a"] = "mach/"..e.arch.."/libsys+lib_"..e.plat,
+				"lang/basic/lib+pkg_"..e.plat,
 				"lang/cem/libcc.ansi+pkg_"..e.plat,
+				["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
+				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
+				["$(PLATIND)/"..e.plat.."/libsys.a"] = "mach/"..e.arch.."/libsys+lib_"..e.plat,
 			}
 		}
 	end
