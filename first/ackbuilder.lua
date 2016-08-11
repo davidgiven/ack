@@ -253,7 +253,7 @@ local function dirname(...)
 end
 
 local function replace(files, pattern, repl)
-	return dotocollection(files,
+	return dotocollection({files},
 		function(filename)
 			return filename:gsub(pattern, repl)
 		end
