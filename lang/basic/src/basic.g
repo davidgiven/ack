@@ -90,7 +90,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "bem.h"
-#include "llmess.c"
+#include "llmess.h"
 
 typedef union {
 	int	integer ;
@@ -112,7 +112,7 @@ int	in_data = 0;	/* set if processing DATA statement */
 char	*formatstring;	/* formatstring used for printing */
 Symbol	*s;		/* Symbol dummy */
 
-#include "yylexp.c"
+#include "yylexp.h"
 #include "basic.lex"
 }
 

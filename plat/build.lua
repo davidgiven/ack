@@ -13,6 +13,7 @@ definerule("ackfile",
 			name = e.name,
 			srcs = e.srcs,
 			deps = {
+				"lang/cem/cemcom.ansi+pkg",
 				"lang/cem/cpp.ansi+pkg",
 				"plat/"..plat.."+tools",
 				"util/ack+pkg",
