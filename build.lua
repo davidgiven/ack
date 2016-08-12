@@ -11,8 +11,9 @@ vars.plats = {
 installable {
 	name = "ack",
 	map = {
-		"lang/cem/cemcom.ansi+pkg",
 		"lang/basic/src+pkg",
+		"lang/cem/cemcom.ansi+pkg",
+		"lang/m2/comp+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
