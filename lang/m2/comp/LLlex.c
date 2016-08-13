@@ -188,55 +188,57 @@ CheckForLineDirective()
 	register char	*c = buf;
 
 
-	if (ch != '#') {
-		PushBack();
-		return;
-	}
-	do {	/*
-		 * Skip to next digit
-		 * Do not skip newlines
-		 */
-		ch = getch();
-		if (class(ch) == STNL || class(ch) == STEOI) {
-			LineNumber++;
-			error(s_error);
+	for (;;) {
+		if (ch != '#') {
+			PushBack();
 			return;
 		}
-	} while (class(ch) != STNUM);
-	while (class(ch) == STNUM)  {
-		i = i*10 + (ch - '0');
-		ch = getch();
-	}
-	while (ch != '"' && class(ch) != STNL && class(ch) != STEOI)
-		ch = getch();
-	if (ch == '"') {
-		c = buf;
-		do {
+		do {	/*
+			 * Skip to next digit
+			 * Do not skip newlines
+			 */
 			ch = getch();
-			if (c < &buf[IDFSIZE]) *c++ = ch;
 			if (class(ch) == STNL || class(ch) == STEOI) {
 				LineNumber++;
 				error(s_error);
 				return;
 			}
-		} while (ch != '"');
-		*--c = '\0';
-		do {
+		} while (class(ch) != STNUM);
+		while (class(ch) == STNUM)  {
+			i = i*10 + (ch - '0');
 			ch = getch();
-		} while (class(ch) != STNL && class(ch) != STEOI);
-		/*
-		 * Remember the file name
-		 */
-		if (class(ch) == STNL && strcmp(FileName,buf)) {
-			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
-			WorkingDir = getwdir(FileName);
 		}
+		while (ch != '"' && class(ch) != STNL && class(ch) != STEOI)
+			ch = getch();
+		if (ch == '"') {
+			c = buf;
+			do {
+				ch = getch();
+				if (c < &buf[IDFSIZE]) *c++ = ch;
+				if (class(ch) == STNL || class(ch) == STEOI) {
+					LineNumber++;
+					error(s_error);
+					return;
+				}
+			} while (ch != '"');
+			*--c = '\0';
+			do {
+				ch = getch();
+			} while (class(ch) != STNL && class(ch) != STEOI);
+			/*
+			 * Remember the file name
+			 */
+			if (class(ch) == STNL && strcmp(FileName,buf)) {
+				FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+				WorkingDir = getwdir(FileName);
+			}
+		}
+		if (class(ch) == STEOI) {
+			error(s_error);
+			return;
+		}
+		LineNumber = i;
 	}
-	if (class(ch) == STEOI) {
-		error(s_error);
-		return;
-	}
-	LineNumber = i;
 }
 
 STATIC
