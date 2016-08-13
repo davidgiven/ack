@@ -17,6 +17,7 @@ local globals
 local cwd = "."
 local vars = {}
 local parente = {}
+local loadingstack = {}
 
 -- Forward references
 local loadtarget
@@ -64,6 +65,16 @@ local function concat(...)
 	process({...})
 
 	return r
+end
+
+-- Test table membership (crudely).
+local function contains(needle, haystack)
+	for _, k in ipairs(haystack) do
+		if (k == needle) then
+			return true
+		end
+	end
+	return false
 end
 
 local function inherit(high, low)
@@ -351,6 +362,12 @@ local function templateexpand(list, vars)
 end
 	
 local function loadbuildfile(filename)
+	if contains(filename, loadingstack) then
+		error(string.format("build file cycle; '%s' refers to itself indirectly; stack is: %s %s",
+				filename, asstring(loadingstack), filename))
+	end
+
+	loadingstack[#loadingstack+1] = filename
 	if not buildfiles[filename] then
 		buildfiles[filename] = true
 
@@ -376,6 +393,7 @@ local function loadbuildfile(filename)
 		chunk()
 		cwd = oldcwd
 	end
+	loadingstack[#loadingstack] = nil
 end
 
 loadtarget = function(targetname)
@@ -411,7 +429,12 @@ loadtarget = function(targetname)
 			filepart = cwd
 		end
 		local filename = concatpath(filepart, "/build.lua")
-		loadbuildfile(concatpath(filename))
+		if posix.access(filename, "r") then
+			loadbuildfile(filename)
+		else
+			filename = concatpath(filepart, "/build-"..targetpart..".lua")
+			loadbuildfile(filename)
+		end
 
 		target = targets[targetname]
 		if not target then
