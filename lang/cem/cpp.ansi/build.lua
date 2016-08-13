@@ -1,4 +1,5 @@
 include("util/cmisc/build.lua")
+include("util/LLgen/build.lua")
 
 local allocd_header = definerule(nil,
 	{

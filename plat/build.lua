@@ -1,5 +1,6 @@
 include("mach/proto/as/build.lua")
 include("mach/proto/ncg/build.lua")
+include("mach/proto/top/build.lua")
 
 definerule("ackfile",
 	{
@@ -53,36 +54,6 @@ definerule("acklibrary",
 	end
 )
 
-definerule("build_plat_tools",
-	{
-		arch = { type="string" },
-		plat = { type="string" },
-	},
-	function(e)
-		local descr = "plat/"..e.plat.."/descr"
-
-		local as = build_as {
-			name = "as",
-			arch = e.arch
-		}
-
-		local ncg = build_ncg {
-			name = "ncg",
-			arch = e.arch,
-		}
-
-		return installable {
-			name = e.name,
-			map = {
-				["$(PLATDEP)/"..e.plat.."/as"] = as,
-				["$(PLATDEP)/"..e.plat.."/ncg"] = ncg,
-				["$(PLATIND)/descr/"..e.plat] = descr,
-				"util/opt+pkg",
-			}
-		}
-	end
-)
-
 definerule("build_plat_libs",
 	{
 		arch = { type="string" },
@@ -93,15 +64,13 @@ definerule("build_plat_libs",
 			name = e.name,
 			map = {
 				"lang/basic/lib+pkg_"..e.plat,
-				"lang/cem/libcc.ansi+pkg_"..e.plat,
-				"lang/m2/libm2+pkg_"..e.plat,
-				"lang/pc/libpc+pkg_"..e.plat,
+				--"lang/cem/libcc.ansi+pkg_"..e.plat,
+				--"lang/m2/libm2+pkg_"..e.plat,
+				--"lang/pc/libpc+pkg_"..e.plat,
 				["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
 				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libsys.a"] = "mach/"..e.arch.."/libsys+lib_"..e.plat,
 			}
 		}
 	end
 )
-
 

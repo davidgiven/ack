@@ -5,7 +5,8 @@ vars.ackcflags = {
 	"-O"
 }
 vars.plats = {
-	"pc86"
+	"pc86",
+	"cpm",
 }
 
 installable {
@@ -15,6 +16,7 @@ installable {
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
+		"plat/cpm+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
