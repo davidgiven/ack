@@ -23,7 +23,7 @@ normalrule {
 	name = "parameters_h",
 	ins = {
 		"./make.parameters",
-		"./BigPars",
+		"./Parameters",
 	},
 	outleaves = { "parameters.h" },
 	commands = {
@@ -92,23 +92,23 @@ tabgen {
 }
 
 cprogram {
-	name = "em_m2",
+	name = "em_pc",
 	srcs = {
 		"./*.c",
 		"+casestat_c",
+		"+chartab_c",
 		"+next_c",
-		"+scope_c",
 		"+symbol2str_c",
 		"+tmpvar_c",
-		"+chartab_c",
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
 		"+def_h",
+		"+desig_h",
 		"+llgen",
 		"+node_h",
 		"+parameters_h",
-		"+real_h",
+		"+scope_h",
 		"+type_h",
 		"h+emheaders",
 		"modules+headers",
@@ -122,13 +122,16 @@ cprogram {
 		"modules/src/print+lib",
 		"modules/src/em_mes+lib",
 		"util/data+em_data",
+	},
+	vars = {
+		["+cflags"] = "-DSTATIC=static"
 	}
 }
 
 installable {
 	name = "pkg",
 	map = {
-		["$(PLATDEP)/em_m2"] = "+em_m2",
-		["$(INSDIR)/share/man/man6/em_m2.6"] = "./em_m2.6"
+		["$(PLATDEP)/em_pc"] = "+em_pc",
+		["$(INSDIR)/share/man/man6/em_pc.6"] = "./em_pc.6"
 	}
 }

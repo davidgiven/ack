@@ -14,6 +14,7 @@ installable {
 		"lang/basic/src+pkg",
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
+		"lang/pc/comp+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
