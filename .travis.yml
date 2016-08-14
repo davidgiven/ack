@@ -1,5 +1,5 @@
 before_install:
-    - sudo apt-get install ed
+    - sudo apt-get install ed lua5.2 ninja
 language: c
 script:
     - make PREFIX=/tmp/acki -j4
