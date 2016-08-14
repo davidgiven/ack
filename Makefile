@@ -49,7 +49,7 @@ PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
 
 MAKECMDGOALS ?= +ack
-BUILD_FILES = $(shell find * -name build.lua)
+BUILD_FILES = $(shell find * -name '*.lua')
 
 NINJA := $(shell which ninja)
 ifneq ($(findstring +, $(MAKECMDGOALS)),)

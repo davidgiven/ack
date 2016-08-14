@@ -5,8 +5,9 @@ vars.ackcflags = {
 	"-O"
 }
 vars.plats = {
-	"pc86",
 	"cpm",
+	"linux386",
+	"pc86",
 }
 
 installable {
@@ -17,6 +18,7 @@ installable {
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
 		"plat/cpm+pkg",
+		"plat/linux386+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
