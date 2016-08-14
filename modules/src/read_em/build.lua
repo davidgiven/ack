@@ -51,7 +51,7 @@ local function variant(name, cflags)
 			"h+emheaders",
 			"modules+headers",
 			"modules/src/alloc+lib",
-			"modules/src/em_code+em_code_ek_h",
+			"modules/src/em_code+headers",
 			"modules/src/em_data+lib",
 			"modules/src/system+lib",
 		}

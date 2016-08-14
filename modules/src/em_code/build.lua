@@ -12,6 +12,17 @@ normalrule {
 	}
 }
 
+clibrary {
+    name = "headers",
+    srcs = {},
+    hdrs = {
+        "+em_code_ek_h",
+        "./em_code.h",
+        "./em_codeCE.h",
+        "./em_codeO.h",
+    }
+}
+
 local function build_variant(code, cflags)
 	clibrary {
 		name = "lib_"..code,
@@ -68,10 +79,10 @@ local function build_variant(code, cflags)
 			"./ucon.c",
 		},
 		hdrs = {
-			"+em_code_ek_h"
+            "+headers"
 		},
 		deps = {
-			"+em_code_ek_h",
+			"+headers",
 			"h+emheaders",
 			"h+local",
 			"modules+headers",
