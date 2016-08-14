@@ -11,7 +11,7 @@ for _, plat in ipairs(vars.plats) do
 		deps = {
 			"h+emheaders",
 			"lang/cem/libcc.ansi/headers+headers",
-			"plat/"..plat.."+headers",
+			"plat/"..plat.."/include+headers",
 		},
         vars = { plat = plat }
     }

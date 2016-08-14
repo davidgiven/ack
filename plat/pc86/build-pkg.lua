@@ -17,6 +17,7 @@ installable {
 	map = {
 		"+tools",
 		"+libs",
+        "./include+pkg",
 		["$(PLATIND)/pc86/boot.o"] = "+boot"
 	}
 }

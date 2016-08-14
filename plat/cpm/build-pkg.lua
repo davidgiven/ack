@@ -18,6 +18,7 @@ installable {
 	map = {
 		"+tools",
 		"+libs",
+        "./include+pkg",
 		["$(PLATIND)/cpm/boot.o"] = "+boot"
 	}
 }
