@@ -713,7 +713,7 @@ definerule("installable",
 					error("installable can only cope with targets emitting single files")
 				end
 
-				deps[#deps+1] = src.fullname
+				deps[#deps+1] = f
 				dests[#dests+1] = dest
 				commands[#commands+1] = "cp "..f[1].." "..dest
 			end
