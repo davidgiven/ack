@@ -7,6 +7,7 @@ vars.ackcflags = {
 vars.plats = {
 	"cpm",
 	"linux386",
+	"linux68k",
 	"pc86",
 }
 
@@ -19,6 +20,7 @@ installable {
 		"lang/pc/comp+pkg",
 		"plat/cpm+pkg",
 		"plat/linux386+pkg",
+		"plat/linux68k+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",

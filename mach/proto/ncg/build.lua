@@ -12,7 +12,8 @@ definerule("build_ncg",
 			srcs = {},
 			hdrs = {
 				"mach/proto/ncg/*.h",
-				"mach/"..e.arch.."/ncg/mach*"
+				"mach/"..e.arch.."/ncg/mach.c",
+				"mach/"..e.arch.."/ncg/*.h",
 			}
 		}
 
@@ -25,7 +26,6 @@ definerule("build_ncg",
 			name = e.name,
 			srcs = {
 				"mach/proto/ncg/*.c",
-				"mach/"..e.arch.."/ncg/mach.h",
 				matching(filenamesof(tables), "%.c$")
 			},
 			deps = {
