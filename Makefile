@@ -55,27 +55,21 @@ NINJA := $(shell which ninja)
 ifneq ($(findstring +, $(MAKECMDGOALS)),)
 ifneq ($(NINJA),)
 
-$(MAKECMDGOALS): $(BUILDDIR)/build.ninja $(BUILDDIR)/rules.ninja
+$(MAKECMDGOALS): $(BUILDDIR)/build.ninja
 	@ninja -f $(BUILDDIR)/build.ninja $(MAKECMDGOALS)
-
-$(BUILDDIR)/build.ninja: Makefile
-	@mkdir -p $(BUILDDIR)
-	@echo "OBJDIR = $(OBJDIR)" > $@
-	@echo "BINDIR = $(BINDIR)" >> $@
-	@echo "LIBDIR = $(LIBDIR)" >> $@
-	@echo "INCDIR = $(INCDIR)" >> $@
-	@echo "INSDIR = $(INSDIR)" >> $@
-	@echo "PLATIND = $(PLATIND)" >> $@
-	@echo "PLATDEP = $(PLATDEP)" >> $@
-	@echo "AR = $(AR)" >> $@
-	@echo "CC = $(CC)" >> $@
-	@echo "subninja $(BUILDDIR)/rules.ninja" >> $@
 
 else
 
 $(MAKECMDGOALS): $(BUILDDIR)/rules.mk
 	+@make -r -f $(BUILDDIR)/rules.mk $@ \
-		$(MAKEFLAGS) \
+		$(MAKEFLAGS)
+
+endif
+endif
+
+$(BUILDDIR)/build.ninja: first/ackbuilder.lua Makefile $(BUILD_FILES)
+	@mkdir -p $(BUILDDIR)
+	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --ninja \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
 		LIBDIR=$(LIBDIR) \
@@ -84,18 +78,22 @@ $(MAKECMDGOALS): $(BUILDDIR)/rules.mk
 		PLATIND=$(PLATIND) \
 		PLATDEP=$(PLATDEP) \
 		AR=$(AR) \
-		CC=$(CC)
+		CC=$(CC) \
+		> $(BUILDDIR)/build.ninja
 
-endif
-endif
-
-$(BUILDDIR)/rules.ninja: first/ackbuilder.lua $(BUILD_FILES)
+$(BUILDDIR)/rules.mk: first/ackbuilder.lua Makefile $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
-	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --ninja > $(BUILDDIR)/rules.ninja
-
-$(BUILDDIR)/rules.mk: first/ackbuilder.lua $(BUILD_FILES)
-	@mkdir -p $(BUILDDIR)
-	@lua5.2 first/ackbuilder.lua first/build.lua build.lua --make > $(BUILDDIR)/rules.mk
+	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --make \
+		OBJDIR=$(OBJDIR) \
+		BINDIR=$(BINDIR) \
+		LIBDIR=$(LIBDIR) \
+		INCDIR=$(INCDIR) \
+		INSDIR=$(INSDIR) \
+		PLATIND=$(PLATIND) \
+		PLATDEP=$(PLATDEP) \
+		AR=$(AR) \
+		CC=$(CC) \
+		> $(BUILDDIR)/rules.mk
 
 clean:
 	@rm -rf $(BUILDDIR)

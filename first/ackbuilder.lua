@@ -602,6 +602,12 @@ end
 
 local function install_make_emitter()
 	emit("hide = @\n")
+
+	function emitter:var(name, value)
+		-- Don't let emit insert spaces.
+		emit(name.."="..value.."\n")
+	end
+
 	function emitter:rule(name, ins, outs)
 		emit(".INTERMEDIATE:", name, "\n")
 		for i = 1, #ins do
@@ -654,6 +660,11 @@ local function install_ninja_emitter()
 				)
 			end
 		)
+	end
+
+	function emitter:var(name, value)
+		-- Don't let emit insert spaces.
+		emit(name.."="..unmake(value).."\n")
 	end
 
 	function emitter:rule(name, ins, outs)
@@ -853,13 +864,14 @@ do
 		{
 			["make"] = function()
 				emitter_type = install_make_emitter
-				return 1
+				return 0
 			end,
 
 			["ninja"] = function()
 				emitter_type = install_ninja_emitter
-				return 1
+				return 0
 			end,
+
 
 			[" unrecognised"] = function(arg)
 				error(string.format("unrecognised argument '%s'", arg))
@@ -867,8 +879,18 @@ do
 
 			[" files"] = function(files)
 				emitter_type()
+
 				for _, f in ipairs(files) do
-					loadbuildfile(f)
+					local _, _, name, value = f:find("^([%w_]+)=(.*)$")
+					if name then
+						emitter:var(name, value)
+					end
+				end
+						
+				for _, f in ipairs(files) do
+					if not f:find("=") then
+						loadbuildfile(f)
+					end
 				end
 			end
 		},
