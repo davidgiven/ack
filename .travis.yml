@@ -1,5 +1,5 @@
 before_install:
-    - sudo apt-get install ed lua5.1 liblua5.1-posix1 ninja
+    - sudo apt-get install ed lua5.1 liblua5.1-posix1 ninja-build
 language: c
 script:
     - make PREFIX=/tmp/acki -j4
