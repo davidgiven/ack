@@ -73,7 +73,7 @@ init_core()
 	register struct memory	*mem;
 	extern char		*sbrk();
 
-#include "mach.c"
+#include "mach.h"
 #define ALIGN 8			/* minimum alignment for pieces */
 #define AT_LEAST	(ind_t)2*ALIGN	/* See comment about string areas. */
 

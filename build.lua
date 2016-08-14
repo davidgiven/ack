@@ -25,6 +25,7 @@ installable {
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
+		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
 	}
