@@ -35,7 +35,7 @@ cprogram {
 		"+cggparser", -- for .h file
 		"+cgglexer", -- for .h file
 		"h+emheaders",
-		"util/data+em_data",
+		"modules/src/em_data+lib",
 	}
 }
 	

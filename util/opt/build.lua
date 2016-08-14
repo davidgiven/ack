@@ -19,7 +19,7 @@ cprogram {
 	deps = {
 		"+flex",
 		"+yacc",
-		"util/data+em_data",
+		"modules/src/em_data+lib",
 	}
 }
 
@@ -63,7 +63,7 @@ local function variant(name, cflags)
 			"modules/src/print+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
-			"util/data+em_data",
+			"modules/src/em_data+lib",
 		},
 		vars = {
 			["+cflags"] = cflags

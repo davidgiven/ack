@@ -15,7 +15,7 @@ cprogram {
 		"modules/src/read_em+lib_ev",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"util/data+em_data",
+		"modules/src/em_data+lib",
 	}
 }
 
@@ -31,7 +31,7 @@ cprogram {
 		"modules/src/read_em+lib_kv",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"util/data+em_data",
+		"modules/src/em_data+lib",
 	}
 }
 

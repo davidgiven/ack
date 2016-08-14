@@ -5,7 +5,7 @@ clibrary {
 		"h+emheaders",
 		"modules+headers",
 		"modules/src/em_code+em_code_ek_h",
-		"util/data+em_data",
+		"modules/src/em_data+lib",
 	}
 }
 

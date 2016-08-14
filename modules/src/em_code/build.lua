@@ -76,8 +76,8 @@ local function build_variant(code, cflags)
 			"h+local",
 			"modules+headers",
 			"modules/src/alloc+lib",
+			"modules/src/em_data+lib",
 			"modules/src/system+lib",
-			"util/data+em_data",
 		},
 		vars = {
 			["+cflags"] = cflags

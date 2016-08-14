@@ -114,14 +114,14 @@ cprogram {
 		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",
+		"modules/src/em_data+lib",
+		"modules/src/em_mes+lib",
 		"modules/src/flt_arith+lib",
 		"modules/src/idf+lib",
 		"modules/src/input+lib",
+		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"modules/src/print+lib",
-		"modules/src/em_mes+lib",
-		"util/data+em_data",
 	}
 }
 

@@ -33,7 +33,7 @@ definerule("build_ncg",
 				"modules+headers",
 				"modules/src/flt_arith+lib",
 				"modules/src/object+lib",
-				"util/data+em_data",
+				"modules/src/em_data+lib",
 				headers,
 				tables, -- for .h file
 			}

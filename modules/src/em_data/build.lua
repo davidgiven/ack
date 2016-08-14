@@ -21,7 +21,7 @@ local generated = normalrule {
 }
 
 clibrary {
-	name = "em_data",
+	name = "lib",
 	srcs = concat(
 		"./em_ptyp.c",
 		matching(filenamesof(generated), "%.c$")

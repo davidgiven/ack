@@ -139,12 +139,14 @@ cprogram {
 	},
 	deps = {
 		"./*.h",
-		"+parameters",
-		"+nextlib",
 		"+llgen",
+		"+nextlib",
+		"+parameters",
 		"h+emheaders",
+		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",
+		"modules/src/em_data+lib",
 		"modules/src/em_mes+lib",
 		"modules/src/flt_arith+lib",
 		"modules/src/idf+lib",
@@ -152,8 +154,6 @@ cprogram {
 		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"modules+headers",
-		"util/data+em_data",
 	},
 }
 
