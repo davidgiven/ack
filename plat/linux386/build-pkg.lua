@@ -18,7 +18,8 @@ installable {
 		"+tools",
 		"+libs",
 		"./include+pkg",
-		["$(PLATIND)/linux386/boot.o"] = "+boot"
+		["$(PLATIND)/linux386/boot.o"] = "+boot",
+        ["$(PLATIND)/linux386/libsys.a"] = "./libsys+lib",
 	}
 }
 

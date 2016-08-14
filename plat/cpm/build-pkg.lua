@@ -19,7 +19,8 @@ installable {
 		"+tools",
 		"+libs",
         "./include+pkg",
-		["$(PLATIND)/cpm/boot.o"] = "+boot"
+		["$(PLATIND)/cpm/boot.o"] = "+boot",
+        ["$(PLATIND)/cpm/libsys.a"] = "./libsys+lib",
 	}
 }
 

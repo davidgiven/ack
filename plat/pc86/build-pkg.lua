@@ -18,7 +18,8 @@ installable {
 		"+tools",
 		"+libs",
         "./include+pkg",
-		["$(PLATIND)/pc86/boot.o"] = "+boot"
+		["$(PLATIND)/pc86/boot.o"] = "+boot",
+        ["$(PLATIND)/pc86/libsys.a"] = "./libsys+lib",
 	}
 }
 
