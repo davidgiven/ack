@@ -346,10 +346,11 @@ local function templateexpand(list, vars)
 		o[#o+1] = s:gsub("%%%b{}",
 			function(expr)
 				expr = expr:sub(3, -2)
-				local chunk, e = load("return ("..expr..")", expr, "text", vars)
+				local chunk, e = loadstring("return ("..expr..")", expr)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
+				setfenv(chunk, vars)
 				local value = chunk()
 				if (value == nil) then
 					error(string.format("template expression '%s' expands to nil (probably an undefined variable)", expr))
@@ -381,7 +382,10 @@ local function loadbuildfile(filename)
 				local thisglobals = {}
 				thisglobals._G = thisglobals
 				setmetatable(thisglobals, {__index = globals})
-				chunk, e = load(data, "@"..filename, "text", thisglobals)
+				chunk, e = loadstring(data, "@"..filename)
+				if not e then
+					setfenv(chunk, thisglobals)
+				end
 			end
 		end
 		if e then
@@ -394,6 +398,22 @@ local function loadbuildfile(filename)
 		cwd = oldcwd
 	end
 	loadingstack[#loadingstack] = nil
+end
+
+local function loadbuildfilefor(filepart, targetpart)
+	local normalname = concatpath(filepart, "/build.lua")
+	if posix.access(normalname, "r") then
+		loadbuildfile(normalname)
+		return
+	end
+
+	local extendedname = concatpath(filepart, "/build-"..targetpart..".lua")
+	if posix.access(extendedname, "r") then
+		loadbuildfile(extendedname)
+		return
+	end
+
+	error(string.format("could not access either '%s' or '%s'", normalname, extendedname))
 end
 
 loadtarget = function(targetname)
@@ -428,13 +448,7 @@ loadtarget = function(targetname)
 		if (filepart == "") then
 			filepart = cwd
 		end
-		local filename = concatpath(filepart, "/build.lua")
-		if posix.access(filename, "r") then
-			loadbuildfile(filename)
-		else
-			filename = concatpath(filepart, "/build-"..targetpart..".lua")
-			loadbuildfile(filename)
-		end
+		loadbuildfilefor(filepart, targetpart)
 
 		target = targets[targetname]
 		if not target then

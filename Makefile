@@ -91,7 +91,7 @@ endif
 
 $(BUILDDIR)/rules.ninja: first/ackbuilder.lua $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
-	@lua5.2 first/ackbuilder.lua first/build.lua build.lua --ninja > $(BUILDDIR)/rules.ninja
+	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --ninja > $(BUILDDIR)/rules.ninja
 
 $(BUILDDIR)/rules.mk: first/ackbuilder.lua $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
