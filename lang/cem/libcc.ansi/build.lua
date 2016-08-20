@@ -38,6 +38,7 @@ for _, plat in ipairs(vars.plats) do
 			"./locale/*.c",
 			"./malloc/*.c",
 			"./math/*.c",
+			"./math/*.e",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
 			"./setjmp/*.c",
 			"./setjmp/*.e",
