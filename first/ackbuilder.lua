@@ -427,7 +427,7 @@ loadtarget = function(targetname)
 		if targetname:find("[?*]") then
 			files = posix.glob(targetname)
 			if not files then
-				error(string.format("glob '%s' matches no files", targetname))
+				files = {}
 			end
 		else
 			files = {targetname}
