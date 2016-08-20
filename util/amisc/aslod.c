@@ -303,11 +303,11 @@ int main(int argc, char* argv[])
 	
 	{
 		long ss = 0;
-		printf(" base : "PRIu32"\n", outsect[TEXT].os_base) ;
-		printf(" text = "PRIu32"\n", outsect[TEXT].os_size);
-		printf(" rom  = "PRIu32"\n", outsect[ROM].os_size);
-		printf(" data = "PRIu32"\n", outsect[DATA].os_size);
-		printf(" bss  = "PRIu32"\n", outsect[BSS].os_size);
+		printf(" base : %08"PRIx32"\n", outsect[TEXT].os_base) ;
+		printf(" text = %08"PRIx32"\n", outsect[TEXT].os_size);
+		printf(" rom  = %08"PRIx32"\n", outsect[ROM].os_size);
+		printf(" data = %08"PRIx32"\n", outsect[DATA].os_size);
+		printf(" bss  = %08"PRIx32"\n", outsect[BSS].os_size);
 		ss += outsect[TEXT].os_size;
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;
