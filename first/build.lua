@@ -216,6 +216,7 @@ definerule("cprogram",
 	{
 		srcs = { type="targets", default={} },
 		deps = { type="targets", default={} },
+		_clibrary = { type="object", default=clibrary },
 		commands = {
 			type="strings",
 			default={
@@ -229,7 +230,7 @@ definerule("cprogram",
 			for _, f in pairs(
 				matching(
 					filenamesof(
-						clibrary {
+						e._clibrary {
 							name = e.name .. "/main",
 							cwd = e.cwd,
 							srcs = e.srcs,

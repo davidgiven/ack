@@ -12,6 +12,11 @@ vars.plats = {
 	"rpi",
 }
 
+local plat_packages = {}
+for _, p in ipairs(vars.plats) do
+	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
+end
+
 installable {
 	name = "ack",
 	map = {
@@ -19,17 +24,14 @@ installable {
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
-		"plat/cpm+pkg",
-		"plat/linux386+pkg",
-		"plat/linux68k+pkg",
-		"plat/rpi+pkg",
-		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
+		"examples+pkg",
+		plat_packages
 	}
 }
 

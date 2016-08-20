@@ -54,6 +54,30 @@ definerule("acklibrary",
 	end
 )
 
+definerule("ackprogram",
+	{
+		srcs = { type="targets", default={} },
+		deps = { type="targets", default={} },
+	},
+	function (e)
+		return cprogram {
+			name = e.name,
+			srcs = e.srcs,
+			deps = {
+				"plat/"..e.vars.plat.."+pkg",
+				"util/ack+pkg",
+				"util/led+pkg",
+				"util/amisc+pkg",
+				e.deps
+			},
+			_clibrary = acklibrary,
+			commands = {
+				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -.%{lang} -o %{outs} %{ins}"
+			}
+		}
+	end
+)
+
 definerule("build_plat_libs",
 	{
 		arch = { type="string" },
