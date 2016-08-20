@@ -7,6 +7,9 @@ cprogram {
 		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib"
+	},
+	vars = {
+		["+cflags"] = "-DAAL"
 	}
 }
 
