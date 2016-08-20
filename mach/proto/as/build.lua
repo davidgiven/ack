@@ -10,7 +10,10 @@ definerule("build_as",
 		local archlib = clibrary {
 			name = e.name.."/archlib",
 			srcs = {},
-			hdrs = { "mach/"..e.arch.."/as/mach*.c" }
+			hdrs = {
+				"mach/"..e.arch.."/as/mach*.c",
+				"mach/"..e.arch.."/as/*.h"
+			}
 		}
 
 		local preprocessedy = cppfile {

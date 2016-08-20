@@ -9,6 +9,7 @@ vars.plats = {
 	"linux386",
 	"linux68k",
 	"pc86",
+	"rpi",
 }
 
 installable {
@@ -21,6 +22,7 @@ installable {
 		"plat/cpm+pkg",
 		"plat/linux386+pkg",
 		"plat/linux68k+pkg",
+		"plat/rpi+pkg",
 		"plat/pc86+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
