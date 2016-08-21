@@ -9,8 +9,7 @@
  *
  */
 
-
-extern go();		/* ( int argc; char *argv[];
+extern go(); /* ( int argc; char *argv[];
 			 *   int (*initialize)(); int (*optimize)(); 
 			 *   int (*phase_machinit)(); int (*proc_flag)()  )
 			 * This is the main driving routine of the optimizer.
@@ -26,14 +25,14 @@ extern go();		/* ( int argc; char *argv[];
 			 * and 'optimize' is called with the current procedure
 			 * as parameter.
 			 */
-extern no_action();	/* ()
+extern no_action(); /* ()
 			 * Parameter to be supplied for e.g. 'initialize' if
 			 * no action is required.
 			 */
-extern core_usage();	/* ()
+extern core_usage(); /* ()
 			 * Report core usage, if core_flag is set.
 			 */
-extern report();	/* ( char *s; int n)
+extern report(); /* ( char *s; int n)
 			 * Report number of optimizations found, if 
 			 * report_flag is set
 			 */
