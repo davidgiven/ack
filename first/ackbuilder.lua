@@ -723,6 +723,7 @@ definerule("installable",
 		local deps = {}
 		local commands = {}
 		local srcs = {}
+		local outs = {}
 		local dests = {}
 		for dest, src in pairs(e.map) do
 			if src.is.installable then
@@ -730,6 +731,7 @@ definerule("installable",
 					error("can't specify a destination filename when installing an installable")
 				end
 				deps[#deps+1] = src.fullname
+				outs = concat(outs, filenamesof(src))
 			elseif (type(dest) == "number") then
 				error("only references to other installables can be missing a destination")
 			else
@@ -740,6 +742,7 @@ definerule("installable",
 
 				deps[#deps+1] = f
 				dests[#dests+1] = dest
+				outs[#outs+1] = dest
 				commands[#commands+1] = "cp "..f[1].." "..dest
 			end
 		end
@@ -752,7 +755,7 @@ definerule("installable",
 		emitter:endrule()
 
 		return {
-			outs = dests
+			outs = outs
 		}
 	end
 )
