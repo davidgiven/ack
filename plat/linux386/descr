@@ -26,6 +26,7 @@ var C_LIB={PLATFORMDIR}/libc-ansi.a
 var CC_ALIGN=-Vr
 var OLD_C_LIB={C_LIB}
 var MACHOPT_F=-m10
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
 
 # Override the setting in fe so that files compiled for linux386 can see
 # the platform-specific headers.

@@ -224,7 +224,7 @@ STATIC bool read_hdr()
 	return 1;
 }
 
-STATIC int argcnt = ARGSTART - 1;
+STATIC int argcnt = 0;
 STATIC short arstate = NO_ARCHIVE;
 
 FILE* next_file(argc, argv) int argc;

@@ -4,38 +4,54 @@
    optimizer itself one day ...
 */
 
-#include <em_path.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
 #include <signal.h>
-#include <system.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <string.h>
+#include "em_path.h"
+#include "system.h"
+#include "print.h"
 
-#define IC 1
-#define CF 2
-#define IL 3
-#define CS 4
-#define SR 5
-#define UD 6
-#define LV 7
-#define RA 8
-#define SP 9
-#define BO 10
-#define CJ 11
-#define CA 12
+enum
+{
+	NONE = 0,
+	IC,
+	CF,
+	IL,
+	CS,
+	SR,
+	UD,
+	LV,
+	RA,
+	SP,
+	BO,
+	CJ,
+	CA
+};
 
-static char* phnames[] = {
-	0,
-	"ic",
-	"cf",
-	"il",
-	"cs",
-	"sr",
-	"ud",
-	"lv",
-	"ra",
-	"sp",
-	"bo",
-	"cj",
-	"ca",
-	0
+static const struct
+{
+	const char* name;
+	bool needsdescr;
+
+} phase_data[] = {
+	{},
+	{ "ic" },
+	{ "cf" },
+	{ "il" },
+	{ "cs", true },
+	{ "sr" },
+	{ "ud", true },
+	{ "lv" },
+	{ "ra" },
+	{ "sp" },
+	{ "bo" },
+	{ "cj" },
+	{ "ca" },
 };
 
 #define MAXUPHASES 64 /* max # of phases to be run */
@@ -77,8 +93,9 @@ static int keeptemps = 0;
 static char** phase_args;
 static int nphase_args;
 
-static char* opt_dir;
-static char* prog_name;
+static const char* descr_file;
+static const char* opt_dir;
+static const char* prog_name;
 
 static int v_flag;
 
@@ -93,7 +110,7 @@ cleanup()
 
 		for (i = NTEMPS * 2; i > 0; i--)
 		{
-			register char* f = phargs[i];
+			const char* f = phargs[i];
 			if (f != 0 && *f != '\0' && *f != '-')
 				(void)unlink(f);
 		}
@@ -167,8 +184,8 @@ get_infiles()
 	/*	Make output temps from previous phase input temps of next phase. */
 
 	register int i;
-	register char** dst = &phargs[1];
-	register char** src = &phargs[NTEMPS + 1];
+	char** dst = &phargs[1];
+	char** src = &phargs[NTEMPS + 1];
 
 	for (i = 1; i <= NTEMPS; i++)
 	{
@@ -184,7 +201,7 @@ new_outfiles()
 	static char dig1 = '1';
 	static char dig2 = '0';
 	register int i;
-	register char** dst = &phargs[NTEMPS + 1];
+	char** dst = &phargs[NTEMPS + 1];
 
 	if (!Bindex)
 	{
@@ -219,14 +236,21 @@ static void
 	char buf[256];
 	int pid, status;
 
+	/* Skip this phase if it requires a descr file and one hasn't been
+	 * provided. */
+
+	if (phase_data[phase].needsdescr && !descr_file)
+		return;
+
 	phargs[0] = buf;
 	(void)strcpy(buf, opt_dir);
 	(void)strcat(buf, "/");
-	(void)strcat(buf, phnames[phase]);
+	(void)strcat(buf, phase_data[phase].name);
 
 	switch (phase)
 	{
 		case IC:
+			/* always first */
 			phargs[1] = pdump;
 			phargs[2] = ddump;
 			for (i = 3; i <= NTEMPS; i++)
@@ -237,6 +261,7 @@ static void
 			break;
 
 		case CA:
+			/* always last */
 			old_infiles();
 			get_infiles();
 			phargs[NTEMPS + 1] = pdump;
@@ -248,20 +273,24 @@ static void
 			break;
 
 		default:
+		{
 			old_infiles();
 			get_infiles();
 			new_outfiles();
-			if (!flags_added)
+
+			argc = 2 * NTEMPS + 1;
+			if (descr_file)
 			{
-				flags_added = 1;
-				argc = 2 * NTEMPS + 1;
-				while (--nphase_args >= 0)
-				{
-					phargs[argc++] = *phase_args++;
-				}
-				phargs[argc] = 0;
+				phargs[argc++] = "-M";
+				phargs[argc++] = descr_file;
 			}
+			
+			for (i=0; i<nphase_args; i++)
+				phargs[argc++] = phase_args[i];
+
+			phargs[argc] = NULL;
 			break;
+		}
 	}
 	if ((pid = fork()) < 0)
 	{
@@ -300,10 +329,10 @@ static void
 	}
 }
 
-main(argc, argv) int argc;
-char* argv[];
+int main(int argc, char* argv[])
 {
-	register int i = 0;
+	int opt;
+	int i;
 
 	if (signal(SIGHUP, catch) == SIG_IGN)
 		(void)signal(SIGHUP, SIG_IGN);
@@ -312,113 +341,58 @@ char* argv[];
 	if (signal(SIGINT, catch) == SIG_IGN)
 		(void)signal(SIGINT, SIG_IGN);
 	prog_name = argv[0];
+
+	nphase_args = 0;
 	phase_args = &argv[1];
-	while (--argc > 0)
+
+	opterr = 0;
+	for (;;)
 	{
-		argv++;
-		if (argv[0][0] == '-')
+		int opt = getopt(argc, argv, "-M:P:O:vt");
+		if (opt == -1)
+			break;
+
+		switch (opt)
 		{
-			switch (argv[0][1])
+			case 'M':
+				descr_file = optarg;
+				break;
+
+			case 'P':
+				opt_dir = optarg;
+				break;
+
+			case 'O':
 			{
-				case 'P':
-					if (argv[0][2] == '\0')
-					{
-						opt_dir = argv[1];
-						argc--;
-						argv++;
-						continue;
-					}
+				int o = atoi(optarg);
+				if (o <= 2)
 					break;
-				case 't':
-					if (argv[0][2] == '\0')
-					{
-						keeptemps = 1;
-						/* no continue; IL also needs this */
-					}
-					break;
-				case 'v':
-					v_flag = 1;
-					break;
-				case 'O':
-					if (argv[0][2] == '2' || argv[0][2] == '\0')
-						continue;
-					if (argv[0][2] == '3')
-					{
-						Ophase = &O3phases[0];
-						continue;
-					}
-					Ophase = &O4phases[0];
-					continue;
-				case 'I':
-					if (!strcmp(&argv[0][1], "IL"))
-					{
-						add_uphase(IL);
-						add_uphase(CF);
-						continue;
-					}
-					break;
-				case 'B':
-					if (!strcmp(&argv[0][1], "BO"))
-					{
-						add_uphase(BO);
-						continue;
-					}
-					break;
-				case 'R':
-					if (!strcmp(&argv[0][1], "RA"))
-					{
-						add_uphase(RA);
-						continue;
-					}
-					break;
-				case 'U':
-					if (!strcmp(&argv[0][1], "UD"))
-					{
-						add_uphase(UD);
-						continue;
-					}
-					break;
-				case 'L':
-					if (!strcmp(&argv[0][1], "LV"))
-					{
-						add_uphase(LV);
-						continue;
-					}
-					break;
-				case 'C':
-					if (!strcmp(&argv[0][1], "CS"))
-					{
-						add_uphase(CS);
-						continue;
-					}
-					if (!strcmp(&argv[0][1], "CJ"))
-					{
-						add_uphase(CJ);
-						continue;
-					}
-					break;
-				case 'S':
-					if (!strcmp(&argv[0][1], "SR"))
-					{
-						add_uphase(SR);
-						continue;
-					}
-					if (!strcmp(&argv[0][1], "SP"))
-					{
-						add_uphase(SP);
-						continue;
-					}
-					break;
+				if (o <= 3)
+					Ophase = &O3phases[0];
+				Ophase = &O4phases[0];
+				break;
 			}
-			phase_args[i++] = argv[0];
-		}
-		else
-		{
-			add_file(argv[0]);
+
+			case 1:
+				add_file(optarg);
+				break;
+
+			case 't':
+				keeptemps = 1;
+				goto addopt;
+
+			case 'v':
+				v_flag = 1;
+				goto addopt;
+
+			case '?':
+			addopt:
+				phase_args[nphase_args++] = argv[optind - 1];
+				break;
 		}
 	}
-	phase_args[i] = 0;
-	nphase_args = i;
+
+	phase_args[nphase_args] = 0;
 	if (nuphases)
 		Ophase = uphases;
 

@@ -206,19 +206,6 @@ name ego
 	to .gk
 	program {EM}/lib/ack/em_ego
 	mapflag -EGO-* EGO_F={EGO_F?} -*
-# The following lines are obsolete, but here for backwards compatibility.
-# They should be removed some day.
-	mapflag -IL* EGO_F={EGO_F?} -IL*
-	mapflag -CS* EGO_F={EGO_F?} -CS*
-	mapflag -SR* EGO_F={EGO_F?} -SR*
-	mapflag -UD* EGO_F={EGO_F?} -UD*
-	mapflag -LV* EGO_F={EGO_F?} -LV*
-	mapflag -SA* EGO_F={EGO_F?} -RA*
-	mapflag -SP* EGO_F={EGO_F?} -SP*
-	mapflag -BO* EGO_F={EGO_F?} -BO*
-	mapflag -CJ* EGO_F={EGO_F?} -CJ*
-	mapflag -EV EGO_F={EGO_F?} -V
-# End of obsolete lines
 	mapflag -Q* EGO_F={EGO_F?} -Q*
 	mapflag -T* EGO_F={EGO_F?} -T*
 	mapflag -S* EGO_F={EGO_F?} -S*
@@ -227,7 +214,7 @@ name ego
 	mapflag -O* EGO_F={EGO_F?} -O*
 	args \
 		{EGO_F?} -P {EM}/lib/ack/ego \
-		-M{EM}/share/ack/ego/{ARCH}.descr <
+		{EGO_PLAT_FLAGS?} <
 	optimizer 2
 	stdout
 	combiner

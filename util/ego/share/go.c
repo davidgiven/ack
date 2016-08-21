@@ -10,24 +10,24 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "types.h"
 #include "debug.h"
 #include "global.h"
-#include "files.h"
 #include "get.h"
 #include "put.h"
 #include "lset.h"
 #include "map.h"
 #include "alloc.h"
 #include "go.h"
+#include "files.h"
 
 STATIC bool report_flag = FALSE; /* report #optimizations found? */
 #ifdef DEBUG
 STATIC bool core_flag = FALSE; /* report core usage? */
 #endif
 
-STATIC mach_init(machfile, phase_machinit) char* machfile;
-int (*phase_machinit)();
+static mach_init(char* machfile, int (*phase_machinit)())
 {
 	/* Read target machine dependent information */
 
@@ -42,13 +42,10 @@ int (*phase_machinit)();
 	fclose(f);
 }
 
-go(argc, argv, initialize, optimize, phase_machinit, proc_flag) int argc;
-char* argv[];
-int (*initialize)();
-int (*optimize)();
-int (*phase_machinit)();
-int (*proc_flag)();
+void go(int argc, const char** argv,
+	int (*initialize)(), int (*optimize)(), int (*phase_machinit)(), int (*proc_flag)())
 {
+	struct files* files = findfiles(argc, argv);
 	FILE* f, *gf, *f2, *gf2; /* The EM input and output and
 				 * the basic block graphs input and output
 				 */
@@ -60,49 +57,56 @@ int (*proc_flag)();
 	bool time_opt = TRUE;
 
 	linecount = 0;
-	for (i = ARGSTART; i < argc; i++)
+	opterr = 0;
+	for (;;)
 	{
-		p = argv[i];
-		if (*p++ != '-')
-			error("illegal argument");
-		switch (*p)
+		int opt = getopt(files->argc, files->argv, "STM:CQV");
+		if (opt == -1)
+			break;
+
+		switch (opt)
 		{
 			case 'S':
 				time_opt = FALSE;
 				break;
+
 			case 'T':
 				time_opt = TRUE;
 				break;
+
 			case 'M':
-				p++;
-				mach_init(p, phase_machinit);
+				mach_init(optarg, phase_machinit);
 				break;
+
 			case 'C':
 #ifdef DEBUG
 				core_flag = TRUE;
 #endif
 				break;
+
 			case 'Q':
 				report_flag = TRUE;
 				break;
+
 			case 'V':
 				verbose_flag = TRUE;
 				break;
-			default:
-				(*proc_flag)(p);
+
+			case '?':
+				proc_flag(argv[optind - 1]);
 				break;
 		}
 	}
 	time_space_ratio = (time_opt ? 100 : 0);
-	fproc = getptable(pname); /* proc table */
-	fdblock = getdtable(dname); /* data block table */
+	fproc = getptable(files->pname_in); /* proc table */
+	fdblock = getdtable(files->dname_in); /* data block table */
 	(*initialize)();
 	if (optimize == no_action)
 		return;
-	f = openfile(lname, "r");
-	gf = openfile(bname, "r");
-	f2 = openfile(lname2, "w");
-	gf2 = openfile(bname2, "w");
+	f = openfile(files->lname_in, "r");
+	gf = openfile(files->bname_in, "r");
+	f2 = openfile(files->lname_out, "w");
+	gf2 = openfile(files->bname_out, "w");
 	mesregs = Lempty_set();
 	while (getunit(gf, f, &kind, &g, &l, &curproc, TRUE))
 	{
@@ -130,18 +134,18 @@ int (*proc_flag)();
 	fclose(f2);
 	fclose(gf);
 	fclose(gf2);
-	f = openfile(dname2, "w");
+	f = openfile(files->dname_out, "w");
 	putdtable(fdblock, f);
 	/* fclose(f); done by putdtable */
-	f = openfile(pname2, "w");
+	f = openfile(files->pname_out, "w");
 	putptable(fproc, f, TRUE);
 	/* fclose(f); done by putptable */
 	core_usage();
 }
 
-no_action() {}
+int no_action() {}
 
-core_usage()
+void core_usage(void)
 {
 #ifdef DEBUG
 	if (core_flag)
@@ -151,8 +155,7 @@ core_usage()
 #endif
 }
 
-report(s, n) char* s;
-int n;
+void report(char* s, int n)
 {
 	/* Report number of optimizations found, if report_flag is set */
 

@@ -2,7 +2,7 @@ vars.cflags = {
 	"-g", "-O"
 }
 vars.ackcflags = {
-	"-O"
+	"-O6"
 }
 vars.plats = {
 	"cpm",
@@ -27,6 +27,7 @@ installable {
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
+		"util/ego+pkg",
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",

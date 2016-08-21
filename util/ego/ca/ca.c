@@ -220,24 +220,50 @@ main(argc, argv) int argc;
 char* argv[];
 {
 	/* CA does not output proctable etc. files. Instead, its
-	 * pname2 and dname2 arguments contain the names of the
+	 * pname_out and dname_out arguments contain the names of the
 	 * dump files created by IC.
 	 */
+	struct files* files = findfiles(argc, argv);
+
 	FILE* f, *f2; /* The EM input and output. */
 	FILE* df, *pf; /* The dump files */
 	line_p lnp;
 
-	fproc = getptable(pname); /* proc table */
-	fdblock = getdtable(dname); /* data block table */
+	/* The names of the input files of every phase are passed as
+	 * arguments to the phase. First come the input file names,
+	 * then the output file names. We use a one-letter convention
+	 * to denote the type of file:
+	 *  p: procedure table file
+	 *  d: data table file
+	 *  l: EM text file (lines of EM instructions)
+	 *  b: basic block file (Control Flow Graph file)
+	 */
+
+	/* The input file names */
+
+	char* pname_in = argv[1];
+	char* dname_in = argv[2];
+	char* lname_in = argv[3];
+	char* bname_in = argv[4];
+
+	/* The output file names */
+
+	char* pname_out = argv[5];
+	char* dname_out = argv[6];
+	char* lname_out = argv[7];
+	char* bname_out = argv[8];
+
+	fproc = getptable(pname_in); /* proc table */
+	fdblock = getdtable(dname_in); /* data block table */
 	dlength = makedmap(fdblock); /* allocate dmap table */
-	df = openfile(dname2, "r");
+	df = openfile(dname_out, "r");
 	getdnames(df);
 	fclose(df);
-	pf = openfile(pname2, "r");
+	pf = openfile(pname_out, "r");
 	getpnames(pf);
 	fclose(pf);
 	uniq_names();
-	f = openfile(lname, "r");
+	f = openfile(lname_in, "r");
 	f2 = stdout;
 	cputmagic(f2); /* write magic number */
 	while ((lnp = get_ca_lines(f, &curproc)) != (line_p)0)

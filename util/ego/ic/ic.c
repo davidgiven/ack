@@ -72,13 +72,26 @@ char* argv[];
 	 *  - ddump: the names of all data blocks
 	 */
 
-	FILE* lfile, *dfile, *pfile, *pdump, *ddump;
+	/* The input file names */
 
-	lfile = openfile(lname2, "w");
-	pdump = openfile(argv[1], "w");
-	ddump = openfile(argv[2], "w");
+	const char* pdump_out = argv[1];
+	const char* ddump_out = argv[2];
+
+	/* The output file names */
+
+	const char* pname_out = argv[5];
+	const char* dname_out = argv[6];
+	const char* lname_out = argv[7];
+
+	FILE* lfile = openfile(lname_out, "w");
+	FILE* pdump = openfile(pdump_out, "w");
+	FILE* ddump = openfile(ddump_out, "w");
+
+	FILE* dfile;
+	FILE* pfile;
+
 	hol0_db = block_of_lab((char*)0);
-	while (next_file(argc, argv) != NULL)
+	while (next_file(argc-8, argv+8) != NULL)
 	{
 		/* Read all EM input files, process the code
 		 * and concatenate all output.
@@ -104,9 +117,9 @@ char* argv[];
 	cleanprocs(prochash, NPROCHASH, 0);
 	cleandblocks(symhash, NSYMHASH, 0);
 	/* Now write the datablock table and the proctable */
-	dfile = openfile(dname2, "w");
+	dfile = openfile(dname_out, "w");
 	putdtable(fdblock, dfile);
-	pfile = openfile(pname2, "w");
+	pfile = openfile(pname_out, "w");
 	putptable(fproc, pfile, FALSE);
 	exit(0);
 }

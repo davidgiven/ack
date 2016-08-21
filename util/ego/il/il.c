@@ -325,6 +325,7 @@ il_flags(p) char* p;
 main(argc, argv) int argc;
 char* argv[];
 {
+	struct files* files = findfiles(argc, argv);
 	FILE* f;
 
 	go(argc, argv, no_action, no_action, no_action, il_flags);
@@ -337,14 +338,14 @@ char* argv[];
 	mktemp(ccname);
 	mktemp(sname);
 	mktemp(cname2);
-	pass1(lname, bname, cname); /* grep calls, analyse procedures */
+	pass1(files->lname_in, files->bname_in, cname); /* grep calls, analyse procedures */
 	space = total_size * space / 100;
 	pass2(cname, space); /* select calls to be expanded */
-	pass3(lname, lname2); /* do substitutions */
-	f = openfile(dname2, "w");
+	pass3(files->lname_in, files->lname_out); /* do substitutions */
+	f = openfile(files->dname_out, "w");
 	il_cleanptab(fproc); /* remove extended data structures */
 	putdtable(fdblock, f);
-	f = openfile(pname2, "w");
+	f = openfile(files->pname_out, "w");
 	putptable(fproc, f, FALSE);
 	report("inline substitutions", Ssubst);
 #ifdef VERBOSE

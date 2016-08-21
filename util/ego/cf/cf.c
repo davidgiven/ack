@@ -530,22 +530,46 @@ char* argv[];
 	short n, kind;
 	line_p l;
 
+	/* The names of the input files of every phase are passed as
+	 * arguments to the phase. First come the input file names,
+	 * then the output file names. We use a one-letter convention
+	 * to denote the type of file:
+	 *  p: procedure table file
+	 *  d: data table file
+	 *  l: EM text file (lines of EM instructions)
+	 *  b: basic block file (Control Flow Graph file)
+	 */
+
+	/* The input file names */
+
+	char* pname_in = argv[1];
+	char* dname_in = argv[2];
+	char* lname_in = argv[3];
+	char* bname_in = argv[4];
+
+	/* The output file names */
+
+	char* pname_out = argv[5];
+	char* dname_out = argv[6];
+	char* lname_out = argv[7];
+	char* bname_out = argv[8];
+
 	linecount = 0;
-	fproc = getptable(pname); /* proc table */
-	fdblock = getdtable(dname); /* data block table */
+	fproc = getptable(pname_in); /* proc table */
+	fdblock = getdtable(dname_in); /* data block table */
 	lpi_set = Cempty_set(plength);
 	cai_set = Cempty_set(plength);
-	if ((f = fopen(lname, "r")) == NULL)
+	if ((f = fopen(lname_in, "r")) == NULL)
 	{
-		error("cannot open %s", lname);
+		error("cannot open %s", lname_in);
 	}
-	if ((f2 = fopen(lname2, "w")) == NULL)
+	if ((f2 = fopen(lname_out, "w")) == NULL)
 	{
-		error("cannot open %s", lname2);
+		error("cannot open %s", lname_out);
 	}
-	if ((gf2 = fopen(bname2, "w")) == NULL)
+	if ((gf2 = fopen(bname_out, "w")) == NULL)
 	{
-		error("cannot open %s", bname2);
+		error("cannot open %s", bname_out);
 	}
 	while (getbblocks(f, &kind, &n, &g, &l))
 	{
@@ -581,14 +605,14 @@ char* argv[];
 	/* Compute transitive closure of used/changed
 	 * variables information for every procedure.
 	 */
-	if ((f = fopen(dname2, "w")) == NULL)
+	if ((f = fopen(dname_out, "w")) == NULL)
 	{
-		error("cannot open %s", dname2);
+		error("cannot open %s", dname_out);
 	}
 	putdtable(fdblock, f);
-	if ((f = fopen(pname2, "w")) == NULL)
+	if ((f = fopen(pname_out, "w")) == NULL)
 	{
-		error("cannot open %s", pname2);
+		error("cannot open %s", pname_out);
 	}
 	putptable(fproc, f, TRUE);
 	exit(0);

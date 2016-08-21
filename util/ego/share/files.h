@@ -15,21 +15,29 @@
  *  b: basic block file (Control Flow Graph file)
  */
 
-/* The input file names */
+struct files
+{
+	/* Input files */
 
-#define pname argv[1]
-#define dname argv[2]
-#define lname argv[3]
-#define bname argv[4]
+	const char* pname_in;
+	const char* dname_in;
+	const char* lname_in;
+	const char* bname_in;
 
-/* The output file names */
+	/* Output files */
 
-#define pname2 argv[5]
-#define dname2 argv[6]
-#define lname2 argv[7]
-#define bname2 argv[8]
+	const char* pname_out;
+	const char* dname_out;
+	const char* lname_out;
+	const char* bname_out;
 
-#define ARGSTART 9
+	/* The rest of the arguments. */
+
+	const char** argv;
+	int argc;
+};
+
+extern struct files* findfiles(int argc, const char** argv);
 
 extern FILE *openfile();	/* (char *name, *mode)
 				 * Open a file with the given name
