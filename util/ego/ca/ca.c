@@ -8,7 +8,6 @@
  *
  */
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,26 +24,22 @@
 #include "../share/get.h"
 #include "ca_put.h"
 
-
 /* This phase transforms the Intermediate Code of the global optimizer
  * to 'standard' compact assembly language, which will be processed
  * by the code generator.
  */
 
+short dlength;
+dblock_p* dmap;
 
-short	dlength;
-dblock_p *dmap;
-
-char **dnames, **pnames;  /* Dynamically allocated arrays of strings.
+char** dnames, **pnames; /* Dynamically allocated arrays of strings.
 			 * pnames[i] contains a pointer to the name
 			 * of the procedure  with proc_id i.
 			 */
 
-
-
-STATIC line_p get_ca_lines(lf,p_out)
-	FILE *lf;
-	proc_p *p_out;
+STATIC line_p get_ca_lines(lf, p_out)
+    FILE* lf;
+proc_p* p_out;
 {
 	/* Read lines of EM text and link them.
 	 * Register messages are outputted immediately after the PRO.
@@ -57,35 +52,46 @@ STATIC line_p get_ca_lines(lf,p_out)
 	curinp = lf; /* EM input file */
 	pp = &head;
 	mp = &headm;
-	headm = (line_p) 0;
-	while (TRUE) {
+	headm = (line_p)0;
+	while (TRUE)
+	{
 		l = read_line(p_out);
-		if (feof(curinp)) break;
-		assert (l != (line_p) 0);
-		if (INSTR(l) == ps_end && INSTR(head) != ps_pro) {
+		if (feof(curinp))
+			break;
+		assert(l != (line_p)0);
+		if (INSTR(l) == ps_end && INSTR(head) != ps_pro)
+		{
 			/* Delete end pseudo after data-unit */
 			oldline(l);
 			break;
 		}
-		if (INSTR(l) == ps_mes && l->l_a.la_arg->a_a.a_offset == ms_reg) {
+		if (INSTR(l) == ps_mes && l->l_a.la_arg->a_a.a_offset == ms_reg)
+		{
 			/* l is a register message */
-			if (l->l_a.la_arg->a_next == (arg_p) 0) {
+			if (l->l_a.la_arg->a_next == (arg_p)0)
+			{
 				/* register message without arguments */
 				oldline(l);
-			} else {
+			}
+			else
+			{
 				*mp = l;
 				mp = &l->l_next;
 			}
-		} else {
+		}
+		else
+		{
 			*pp = l;
 			pp = &l->l_next;
 		}
-		if (INSTR(l) == ps_end) {
+		if (INSTR(l) == ps_end)
+		{
 			break;
 		}
 	}
-	*pp = (line_p) 0;
-	if (head != (line_p) 0 && INSTR(head) == ps_pro) {
+	*pp = (line_p)0;
+	if (head != (line_p)0 && INSTR(head) == ps_pro)
+	{
 		/* append register message without arguments to list */
 		l = newline(OPLIST);
 		l->l_instr = ps_mes;
@@ -94,14 +100,16 @@ STATIC line_p get_ca_lines(lf,p_out)
 		*mp = l;
 		l->l_next = head->l_next;
 		head->l_next = headm;
-	} else {
-		assert(headm == (line_p) 0);
+	}
+	else
+	{
+		assert(headm == (line_p)0);
 	}
 	return head;
 }
 
 STATIC int makedmap(dbl)
-	dblock_p dbl;
+    dblock_p dbl;
 {
 	/* construct the dmap table */
 
@@ -111,75 +119,74 @@ STATIC int makedmap(dbl)
 	/* determine the length of the table */
 
 	cnt = 0;
-	for (d = dbl; d != (dblock_p) 0; d = d->d_next) cnt++;
-	dmap = (dblock_p *) newmap(cnt);
-	for (d = dbl; d != (dblock_p) 0; d = d->d_next) {
+	for (d = dbl; d != (dblock_p)0; d = d->d_next)
+		cnt++;
+	dmap = (dblock_p*)newmap(cnt);
+	for (d = dbl; d != (dblock_p)0; d = d->d_next)
+	{
 		assert(d->d_id <= cnt);
 		dmap[d->d_id] = d;
 	}
 	return cnt;
 }
 
-
-
 STATIC getdnames(dumpd)
-	FILE *dumpd;
+    FILE* dumpd;
 {
 	/* Read the names of the datalabels from
 	 * the dump file.
 	 */
 
-	char str[IDL+1];
+	char str[IDL + 1];
 	int id;
 
-	dnames = (char **) newmap(dlength);
-	for (;;) {
-		if (fscanf(dumpd,"%d	%s",&id,str) == EOF) return;
+	dnames = (char**)newmap(dlength);
+	for (;;)
+	{
+		if (fscanf(dumpd, "%d	%s", &id, str) == EOF)
+			return;
 		assert(id <= dlength);
-		dnames[id] = (char *) newcore(strlen(str)+1);
+		dnames[id] = (char*)newcore(strlen(str) + 1);
 		strcpy(dnames[id], str);
 	}
 }
 
 STATIC getpnames(dumpp)
-	FILE *dumpp;
+    FILE* dumpp;
 {
 	/* Read the names of the procedures from
 	 * the dump file.
 	 */
 
-	char str[IDL+1];
+	char str[IDL + 1];
 	int id;
 
-	pnames = (char **) newmap(plength);
-	for (;;) {
-		if (fscanf(dumpp,"%d	%s",&id,str) == EOF) return;
+	pnames = (char**)newmap(plength);
+	for (;;)
+	{
+		if (fscanf(dumpp, "%d	%s", &id, str) == EOF)
+			return;
 		assert(id <= plength);
-		pnames[id] = (char *) newcore(strlen(str)+1);
+		pnames[id] = (char*)newcore(strlen(str) + 1);
 		strcpy(pnames[id], str);
 	}
 }
 
-
-
-STATIC new_name(s)
-	char **s;
+STATIC new_name(s) char** s;
 {
 	static int nn = 0;
 	char buf[20];
 	int len = strlen(*s);
 
-	oldcore(*s, len+1);
+	oldcore(*s, len + 1);
 	buf[0] = '_';
 	buf[1] = 'I';
 	buf[2] = 'I';
-	sprintf(&buf[3],"%d",nn);
+	sprintf(&buf[3], "%d", nn);
 	nn++;
-	*s = (char *) newcore(strlen(buf)+1);
+	*s = (char*)newcore(strlen(buf) + 1);
 	strcpy(*s, buf);
 }
-
-
 
 STATIC uniq_names()
 {
@@ -193,46 +200,49 @@ STATIC uniq_names()
 	proc_p p;
 	dblock_p d;
 
-	for (p = fproc; p != (proc_p) 0; p = p->p_next) {
-		if (!(p->p_flags1 & PF_EXTERNAL)) {
+	for (p = fproc; p != (proc_p)0; p = p->p_next)
+	{
+		if (!(p->p_flags1 & PF_EXTERNAL))
+		{
 			new_name(&(pnames[p->p_id]));
 		}
 	}
-	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
-		if (!(d->d_flags1 & DF_EXTERNAL) && dnames[d->d_id]) {
+	for (d = fdblock; d != (dblock_p)0; d = d->d_next)
+	{
+		if (!(d->d_flags1 & DF_EXTERNAL) && dnames[d->d_id])
+		{
 			new_name(&(dnames[d->d_id]));
 		}
 	}
 }
 
-
-main(argc,argv)
-	int argc;
-	char *argv[];
+main(argc, argv) int argc;
+char* argv[];
 {
 	/* CA does not output proctable etc. files. Instead, its
 	 * pname2 and dname2 arguments contain the names of the
 	 * dump files created by IC.
 	 */
-	FILE *f, *f2;	  /* The EM input and output. */
-	FILE *df, *pf;    /* The dump files */
+	FILE* f, *f2; /* The EM input and output. */
+	FILE* df, *pf; /* The dump files */
 	line_p lnp;
 
 	fproc = getptable(pname); /* proc table */
-	fdblock = getdtable(dname);  /* data block table */
+	fdblock = getdtable(dname); /* data block table */
 	dlength = makedmap(fdblock); /* allocate dmap table */
-	df = openfile(dname2,"r");
+	df = openfile(dname2, "r");
 	getdnames(df);
 	fclose(df);
-	pf = openfile(pname2,"r");
+	pf = openfile(pname2, "r");
 	getpnames(pf);
 	fclose(pf);
 	uniq_names();
-	f = openfile(lname,"r");
+	f = openfile(lname, "r");
 	f2 = stdout;
 	cputmagic(f2); /* write magic number */
-	while ((lnp = get_ca_lines(f,&curproc)) != (line_p) 0) {
-		cputlines(lnp,f2);
+	while ((lnp = get_ca_lines(f, &curproc)) != (line_p)0)
+	{
+		cputlines(lnp, f2);
 	}
 	fclose(f);
 	fclose(f2);
