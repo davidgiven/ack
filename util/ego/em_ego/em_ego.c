@@ -418,8 +418,9 @@ int main(int argc, char* argv[])
 	(void)strcat(pdump, "/ego.pd.XXXXXX");
 	(void)mktemp(pdump);
 
-	(void)strcat(tmpbufs[0], "/ego.A.BB.XXXXXX");
+	(void)strcat(tmpbufs[0], "/ego.XXXXXX");
 	(void)mktemp(tmpbufs[0]);
+	(void)strcat(tmpbufs[0], ".A.BB");
 	for (i = 2 * NTEMPS - 1; i >= 1; i--)
 	{
 		(void)strcpy(tmpbufs[i], tmpbufs[0]);
