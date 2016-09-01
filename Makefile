@@ -32,6 +32,19 @@ LDFLAGS =
 AR = ar
 CC = gcc
 
+# Which build system to use; use 'ninja' or 'make' (in lower case). Leave
+# blank to autodetect.
+
+BUILDSYSTEM =
+
+# Build flags for ninja.
+
+NINJAFLAGS =
+
+# Build flags for make.
+
+MAKEFLAGS = -r
+
 # ======================================================================= #
 #                         END OF CONFIGURATION                            #
 # ======================================================================= #
@@ -51,25 +64,26 @@ PLATDEP = $(INSDIR)/lib/ack
 MAKECMDGOALS ?= +ack
 BUILD_FILES = $(shell find * -name '*.lua')
 
-NINJA := $(shell which ninja)
-ifneq ($(findstring +, $(MAKECMDGOALS)),)
-ifneq ($(NINJA),)
-
-$(MAKECMDGOALS): $(BUILDDIR)/build.ninja
-	@ninja -f $(BUILDDIR)/build.ninja $(MAKECMDGOALS)
-
+ifneq ($(shell which ninja),)
+BUILDSYSTEM = ninja
+BUILDFLAGS = $(NINJAFLAGS)
 else
-
-$(MAKECMDGOALS): $(BUILDDIR)/rules.mk
-	+@make -r -f $(BUILDDIR)/rules.mk $@ \
-		$(MAKEFLAGS)
-
-endif
+BUILDSYSTEM = make
+BUILDFLAGS = $(MAKEFLAGS)
 endif
 
-$(BUILDDIR)/build.ninja: first/ackbuilder.lua Makefile $(BUILD_FILES)
+ifneq ($(findstring +, $(MAKECMDGOALS)),)
+
+$(MAKECMDGOALS): $(BUILDDIR)/build.$(BUILDSYSTEM)
+	@$(BUILDSYSTEM) $(BUILDFLAGS) -f $^ $(MAKECMDGOALS)
+
+endif
+
+$(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES)
 	@mkdir -p $(BUILDDIR)
-	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --ninja \
+	@lua5.1 first/ackbuilder.lua \
+		first/build.lua build.lua \
+		--$(BUILDSYSTEM) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
 		LIBDIR=$(LIBDIR) \
@@ -79,21 +93,7 @@ $(BUILDDIR)/build.ninja: first/ackbuilder.lua Makefile $(BUILD_FILES)
 		PLATDEP=$(PLATDEP) \
 		AR=$(AR) \
 		CC=$(CC) \
-		> $(BUILDDIR)/build.ninja
-
-$(BUILDDIR)/rules.mk: first/ackbuilder.lua Makefile $(BUILD_FILES)
-	@mkdir -p $(BUILDDIR)
-	@lua5.1 first/ackbuilder.lua first/build.lua build.lua --make \
-		OBJDIR=$(OBJDIR) \
-		BINDIR=$(BINDIR) \
-		LIBDIR=$(LIBDIR) \
-		INCDIR=$(INCDIR) \
-		INSDIR=$(INSDIR) \
-		PLATIND=$(PLATIND) \
-		PLATDEP=$(PLATDEP) \
-		AR=$(AR) \
-		CC=$(CC) \
-		> $(BUILDDIR)/rules.mk
+		> $(BUILDDIR)/build.$(BUILDSYSTEM)
 
 clean:
 	@rm -rf $(BUILDDIR)
