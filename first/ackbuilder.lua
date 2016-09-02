@@ -609,15 +609,28 @@ local function install_make_emitter()
 	end
 
 	function emitter:rule(name, ins, outs)
+		if (#outs == 0) then
+			local n = name.."-IMAGINARY-OUT"
+			emit(".INTERMEDIATE:", n, "\n")
+			outs = {n}
+		end
+
+		local impl = name.."-IMPL"
 		emit(".INTERMEDIATE:", name, "\n")
-		for i = 1, #ins do
-			emit(name..":", ins[i], "\n")
+		emit(".INTERMEDIATE:", impl, "\n")
+
+		for i = 1, #outs do
+			emit(name..":", outs[i], "\n")
 		end
 		for i = 1, #outs do
-			emit(outs[i]..":", name, ";\n")
+			emit(outs[i]..":", impl, ";\n")
 		end
-		emit(name..":\n")
 
+		for i = 1, #ins do
+			emit(impl..":", ins[i], "\n")
+		end
+
+		emit(impl..":", "\n")
 		local dirs = uniquify(dirname(outs))
 		if (#dirs > 0) then
 			emit("\t@mkdir -p", dirs, "\n")
