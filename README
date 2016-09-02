@@ -1,8 +1,8 @@
-                     THE AMSTERDAM COMPILER KIT V6.0pre5
+                     THE AMSTERDAM COMPILER KIT V6.1pre1
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2016-06-02
+                                2016-08-02
 
 
 INTRODUCTION
@@ -13,10 +13,10 @@ front end compilers for a number of different languages, code generators,
 support libraries, and all the tools necessary to go from source code to
 executable on any of the platforms it supports.
 
-This is an early prerelease of the apocryphal version 6.0 release. Not a
+This is an early prerelease of the apocryphal version 6.1 release. Not a
 lot is supported, the build mechanism needs work, and a lot of things are
 probably broken. However, what's there should be sufficient to get things
-done and to evaluate how the full 6.0 release should work. 
+done and to evaluate how the full 6.1 release should work. 
 
 
 SUPPORT
@@ -50,6 +50,11 @@ Requirements:
 
 - GNU make.
 
+- Lua 5.1 and the luaposix library (used by the build system).
+
+- (optionally) ninja; if you've got this, this will be autodetected and give
+  you faster builds.
+
 - about 40MB free in /tmp (or some other temporary directory).
 
 - about 6MB in the target directory.
@@ -62,17 +67,17 @@ Instructions:
 
 - Run:
 
-    make            # or gmake
+    make
 
   ...from the command line. This will do the build.
 
   The make system is fully parallelisable. If you have a multicore system,
-  you probably want to do:
+  install ninja and it'll use all your cores. If you don't have ninja, you
+  can still use make for parallel builds with:
 
-    make -j8        # or gmake -j8
+    make MAKEFLAGS='-r -j8'   # or however many cores you have
 
-  ...instead (substituting the right number of cores, of course). You can
-  also shave a few seconds of the build time by using the -r flag.
+  ...but frankly, I recommend ninja.
 
 - Run:
 
@@ -145,6 +150,10 @@ There are some things you should be aware of.
 - The ACK uses its own .o format. You won't be able to mix the ACK's object
   files and another compiler's.
 
+- The distribution contains *everything*, including the weird, ancient,
+  archaic stuff that doesn't work any more and never will, such as the int EM
+  interpreter and the assembler-linkers. Only some of it builds. Look for
+  build.lua files.
 
 DISCLAIMER
 ==========
@@ -170,4 +179,4 @@ Please enjoy.
 
 David Given (dtrg on Sourceforge)
 dg@cowlark.com
-2016-06-02
+2016-08-02

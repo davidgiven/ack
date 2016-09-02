@@ -1,8 +1,0 @@
-descr
-boot.s
-build.mk
-README
-include/sys/ioctl.h
-include/ack/config.h
-include/unistd.h
-libsys/_syscall.s
