@@ -1,7 +1,0 @@
-#!/bin/sh
-
-if read ANS
-then	echo
-else	echo "Sorry, got EOF when reading your answer"
-	exit 1
-fi
