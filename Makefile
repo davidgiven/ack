@@ -95,6 +95,10 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES)
 		CC=$(CC) \
 		> $(BUILDDIR)/build.$(BUILDSYSTEM)
 
+install:
+	mkdir -p $(PREFIX)
+	tar cf - -C $(INSDIR) . | tar xvf - -C $(PREFIX)
+
 clean:
 	@rm -rf $(BUILDDIR)
 
