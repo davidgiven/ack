@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo '#ifndef PARAMETERS_H'
+echo '#define PARAMETERS_H'
+grep -v '^!'
+echo '#endif'
+

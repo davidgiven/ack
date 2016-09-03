@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ed -s "${1:-Lpars.h}" <<'+'
+ed -s "${1:-Lpars.h}" > $2 <<'+'
 1d
 1,$s/# *define //
 1,$s/ ...$//
@@ -13,6 +13,6 @@ char *tokentab[] = {
 $a
 };
 .
-w tokentab.h
+1,$p
 q
 +

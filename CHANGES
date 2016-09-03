@@ -2,6 +2,11 @@
 # $State$
 # $Revision$
 
+6.1pre1
+
+  Threw away the make-based build system, because it just didn't work. Wrote
+  ackbuilder. Many, many little bugfixes and cleanups, too many to remember.
+
 6.0pre4
 
   Fixed some minor bit-rotting issues that were preventing compilation on

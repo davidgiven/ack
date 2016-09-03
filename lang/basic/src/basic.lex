@@ -235,8 +235,6 @@ File *stream;
     }
 }
 
-extern char *strchr();
-
 getinputline()
 {
 	/* get next input line */

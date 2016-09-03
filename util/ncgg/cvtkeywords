@@ -1,8 +1,8 @@
 #!/bin/sh
 : '$Id$'
 
-grep '^#' y.tab.h >tokendefs
-ed -s $1 <<'!Funky!Stuff!'
+grep '^#' $2 >tokendefs
+ed -s $1 > $3 <<'!Funky!Stuff!'
 g/^#/d
 1,$s/\([^ 	]*\)[ 	][ 	]*\(.*\)/	sy_p=lookup("\1",symkeyw,newsymbol);sy_p->sy_value.syv_keywno=\2;/
 1i
@@ -18,7 +18,8 @@ enterkeyw() {
 $a
 }
 .
-w enterkeyw.c
+,p
 q
 !Funky!Stuff!
 rm tokendefs
+

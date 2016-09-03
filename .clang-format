@@ -1,0 +1,11 @@
+﻿---
+BasedOnStyle: WebKit
+AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakAfterDefinitionReturnType: false
+BreakBeforeBraces: Allman
+IndentCaseLabels: 'true'
+PointerAlignment: Left
+TabWidth: '4'
+UseTab: ForIndentation
+
+...

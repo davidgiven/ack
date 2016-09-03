@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+/* Disabled, dtrg: rename is a system call these days. */
+#if 0
 int _link(const char *name1, const char *name2);
 
 int

@@ -26,6 +26,7 @@ var C_LIB={PLATFORMDIR}/libc-ansi.a
 var CC_ALIGN=-Vr
 var OLD_C_LIB={C_LIB}
 var MACHOPT_F=-m10
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
 
 # Override the setting in fe so that files compiled for linux386 can see
 # the platform-specific headers.
@@ -67,9 +68,7 @@ name led
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
 		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
 		{FLOATS?} \
-		(.e:{TAIL}={PLATFORMDIR}/liblinux.a \
-		           {PLATFORMDIR}/libem.a \
-		           {PLATFORMDIR}/liblinux.a \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libsys.a \
 		           {PLATFORMDIR}/libend.a)
 	linker

@@ -23,6 +23,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <inttypes.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "out.h"
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }
@@ -300,11 +303,11 @@ int main(int argc, char* argv[])
 	
 	{
 		long ss = 0;
-		printf(" base : %08lX\n", outsect[TEXT].os_base) ;
-		printf(" text = %08lX\n", outsect[TEXT].os_size);
-		printf(" rom  = %08lX\n", outsect[ROM].os_size);
-		printf(" data = %08lX\n", outsect[DATA].os_size);
-		printf(" bss  = %08lX\n", outsect[BSS].os_size);
+		printf(" base : %08"PRIx32"\n", outsect[TEXT].os_base) ;
+		printf(" text = %08"PRIx32"\n", outsect[TEXT].os_size);
+		printf(" rom  = %08"PRIx32"\n", outsect[ROM].os_size);
+		printf(" data = %08"PRIx32"\n", outsect[DATA].os_size);
+		printf(" bss  = %08"PRIx32"\n", outsect[BSS].os_size);
 		ss += outsect[TEXT].os_size;
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;

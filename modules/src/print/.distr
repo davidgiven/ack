@@ -1,9 +1,0 @@
-build.mk
-doprnt.c
-format.c
-fprint.c
-param.h
-print.3
-print.c
-print.h
-sprint.c

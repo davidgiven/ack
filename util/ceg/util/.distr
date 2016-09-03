@@ -1,8 +1,0 @@
-proto.make
-install_ceg
-make_asobj
-make_back
-make_ce
-make_ceg
-make_own
-update_ceg

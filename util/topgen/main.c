@@ -22,12 +22,16 @@ char *inpfile;
 main(argc,argv) char *argv[]; {
 
     newline = 1;
-    if (argc != 2) {
-	fprintf(stderr,"Usage : %s targetoptimizerdescription\n",argv[0]);
+    if (argc != 3) {
+	fprintf(stderr,"Usage : %s targetoptimizerdescription outputdir\n",argv[0]);
 	exit(1);
     }
     if ((input = fopen(argv[1],"r")) == NULL) {
 	fprintf(stderr,"Fatal error : couldn't open %s\n",argv[1]);
+	exit(1);
+    }
+	if (chdir(argv[2]) != 0) {
+	fprintf(stderr,"Fatal error : couldn't chdir to %s\n",argv[2]);
 	exit(1);
     }
     if ((genc = fopen("gen.c","w")) == NULL) {
