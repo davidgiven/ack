@@ -82,18 +82,39 @@ definerule("build_plat_libs",
 	{
 		arch = { type="string" },
 		plat = { type="string" },
+		libraries = { type="table", default={
+			libbasic = true,
+			libc = true,
+			libm2 = true,
+			libpc = true,
+			libem = true,
+			libend = true,
+		}}
 	},
 	function(e)
+		local map = {}
+		if e.libraries.libbasic then
+			map[#map+1] = "lang/basic/lib+pkg_"..e.plat
+		end
+		if e.libraries.libc then
+			map[#map+1] = "lang/cem/libcc.ansi+pkg_"..e.plat
+		end
+		if e.libraries.libm2 then
+			map[#map+1] = "lang/m2/libm2+pkg_"..e.plat
+		end
+		if e.libraries.libpc then
+			map[#map+1] = "lang/pc/libpc+pkg_"..e.plat
+		end
+		if e.libraries.libem then
+			map["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat
+		end
+		if e.libraries.libend then
+			map["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat
+		end
+
 		return installable {
 			name = e.name,
-			map = {
-				"lang/basic/lib+pkg_"..e.plat,
-				"lang/cem/libcc.ansi+pkg_"..e.plat,
-				"lang/m2/libm2+pkg_"..e.plat,
-				"lang/pc/libpc+pkg_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
-			}
+			map = map
 		}
 	end
 )

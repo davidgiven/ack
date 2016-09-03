@@ -11,9 +11,15 @@ vars.emplats = {
 	"pc86",
 	"rpi",
 }
+vars.pccplats = {
+	"linuxarm"
+}
 
 local plat_packages = {}
 for _, p in ipairs(vars.emplats) do
+	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
+end
+for _, p in ipairs(vars.pccplats) do
 	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
 end
 
@@ -24,7 +30,6 @@ installable {
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
-		"lang/pcc+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
