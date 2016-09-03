@@ -52,16 +52,16 @@ If we move the library into another directory, we can invoke it like this:
       deps = { "path/to/library+library" }
     }
 
-* Targets starting with `./` are relative to **the current directory** (i.e.
-  the one the build file is in).
+  * Targets starting with `./` are relative to **the current directory** (i.e.
+    the one the build file is in).
 
-* Targets starting with a path are relative to the top directory of the
-  project.
+  * Targets starting with a path are relative to the top directory of the
+    project.
 
-* Targets containing a `+` refer to a named target in another build file. So,
-  on encountering the library in `prog3` above, ackbuilder will look for
-  `path/to/library/build.lua`, load it, and then try to find a target in it
-  called `library`.
+  * Targets containing a `+` refer to a named target in another build file. So,
+    on encountering the library in `prog3` above, ackbuilder will look for
+    `path/to/library/build.lua`, load it, and then try to find a target in it
+    called `library`.
 
 **Warning**: files are interpreted from top to bottom; every time a target
 referring to another build file is seen for the first time, that file is
@@ -86,13 +86,13 @@ want to run your own programs, you will be using these.
 and it does it.
 
     simplerule {
-	  name = 'sorted-input',
-	  ins = { './input.txt' },
-	  outs = { './output.txt' },
-	  commands = {
-	  	"sort < %{ins} > %{outs}"
-	  }
-	}
+      name = 'sorted-input',
+      ins = { './input.txt' },
+      outs = { './output.txt' },
+      commands = {
+        "sort < %{ins} > %{outs}"
+      }
+    }
 
 In a command block, `%{...}` will evaluate the Lua expression between the
 braces; various useful things are in scope, including the list of inputs and
@@ -104,13 +104,13 @@ directory, which we don't want, so we usually use `normalrule` instead.
 library along with `cprogram` and `clibrary`.)
 
     normalrule {
-	  name = 'sorted-input',
-	  ins = { './input.txt' },
-	  outleaves = { 'output.txt' },
-	  commands = {
-	    "sort < %{ins} > %{outs}"
-	  }
-	}
+      name = 'sorted-input',
+      ins = { './input.txt' },
+      outleaves = { 'output.txt' },
+      commands = {
+        "sort < %{ins} > %{outs}"
+      }
+    }
 
 Note `outleaves`; there is no `./`. This is a list of leaf filenames. The rule
 will create a directory in the object tree and put the files specified in it,
@@ -118,30 +118,30 @@ somewhere; you don't care where. You can refer to the output file via the
 target name, so:
 
     normalrule {
-	  name = 'reversed',
-	  ins = { '+sorted-input' },
-	  outleaves = { 'reversed.txt' },
-	  commands = {
-	    "rev < %{ins} > %{outs}"
+      name = 'reversed',
+      ins = { '+sorted-input' },
+      outleaves = { 'reversed.txt' },
+      commands = {
+        "rev < %{ins} > %{outs}"
       }
     }
 
 One common use for this is to generate C header or source files.
 
     normalrule {
-	  name = 'reversed_h',
-	  ins = { '+reversed' },
-	  outleaves = { 'reversed.h' },
-	  commands = {
-	    'xxd -i %{ins} > %{outs}'
+      name = 'reversed_h',
+      ins = { '+reversed' },
+      outleaves = { 'reversed.h' },
+      commands = {
+        'xxd -i %{ins} > %{outs}'
       }
-	}
+    }
 
-	cprogram {
-	  name = 'prog',
-	  srcs = { './*.c' },
-	  deps = { '+reversed_h' }
-	}
+    cprogram {
+      name = 'prog',
+      srcs = { './*.c' },
+      deps = { '+reversed_h' }
+    }
 
 Now you can refer to `reversed.h` in one of your C files and it'll just work
 (`+reversed_h`'s output directory gets added to the include path
@@ -151,26 +151,26 @@ automatically).
 
 Like this:
 
-  definerule("sort",
-    {
-	  srcs = { type="targets" },
-	},
-	function(e)
-	  return normalrule {
-	    name = e.name,
-		ins = e.srcs,
-		outleaves = { 'sorted.txt' },
-		commands = {
-		  "sort < %{ins} > %{outs}"
-		}
+    definerule("sort",
+      {
+        srcs = { type="targets" },
+      },
+      function(e)
+        return normalrule {
+          name = e.name,
+          ins = e.srcs,
+          outleaves = { 'sorted.txt' },
+          commands = {
+            "sort < %{ins} > %{outs}"
+          }
+        }
       }
-	}
-  )
+    )
 
-  sort {
-    name = 'sorted',
-	srcs = { './input.txt' }
-  }
+    sort {
+      name = 'sorted',
+      srcs = { './input.txt' }
+    }
 
 You give `definerule()` the name of the rule you want to define, a description
 of the properties the rule will take, and a callback that does the work.
@@ -194,11 +194,11 @@ have a default value).  If you try to invoke a rule with a property which isn't
 declared, or missing a property which should be declared, you'll get an error.
 
     definerule("sort",
-	  {
-	     srcs = { type="targets" },
-		 numeric = { type="boolean", optional=true, default=false }
-	  }
-	  ...omitted...
+    {
+      srcs = { type="targets" },
+      numeric = { type="boolean", optional=true, default=false }
+    }
+    ...omitted...
 
 (The `optional=true` part can be omitted if you specify a default which isn't
 `nil`.)
@@ -206,8 +206,8 @@ declared, or missing a property which should be declared, you'll get an error.
 Types include:
 
   * `targets`: the most common one. When the rule is invoked, ackbuilder will
-	resolve these for you so that when your callback fires, the property is a
-	flattened list of target objects.
+    resolve these for you so that when your callback fires, the property is a
+    flattened list of target objects.
 
   * `strings`: a Lua table of strings. If the invoker supplies a single string
     which isn't a table, it'll get wrapped in one.
@@ -226,8 +226,8 @@ When a rule callback is run, any targets it needs will be resolved into target
 objects. These are Lua objects with assorted useful stuff in them.
 
   * `object.is`: contains a set telling you which rules made the object. e.g.
-	`object.is.cprogram` is true if `object` was built with `cprogram`. Bear in
-	mind that `object.is.normalrule` is _also_ going to be true.
+    `object.is.cprogram` is true if `object` was built with `cprogram`. Bear in
+    mind that `object.is.normalrule` is _also_ going to be true.
 
   * `object.dir`: the object's build directory. Only exists if the object was
     built with `normalrule`.
@@ -250,16 +250,16 @@ e.g. `targetsof(a, b)` is equivalent to `targetsof({a, b})` is equivalent to
 `targetsof({a, {b}})`.
 
   * `targetsof(...)`: just flattens the list and resolves any string target
-	names.
+    names.
 
   * `filenamesof(...)`: returns a list of output files for all the supplied
-	targets.
+    targets.
 
   * `targetnamesof(...)`: returns a list of fully qualified target names for
-	all the supplied stargets.
+    all the supplied stargets.
 
   * `selectof(targets, pattern)`: returns only those targets whose outputs
-	contain at least one file matching the pattern.
+    contain at least one file matching the pattern.
 
 ### Manipulating filename lists
 
@@ -271,18 +271,18 @@ string, they return just a string.
 e.g. `abspath({f})` returns a table; `abspath(f)` returns a string.
 
   * `abspath(...)`: attempts to return the absolute path of its arguments. This
-	isn't always possible due to variable references.
+    isn't always possible due to variable references.
 
   * `basename(...)`: returns the basenames of its arguments (the file part of
-	the path).
+    the path).
 
   * `dirname(...)`: returns the directory name of its arguments.
 
   * `matching(files, pattern)`: returns only those files which match a Lua
-	pattern.
+    pattern.
 
   * `replace(files, pattern, repl)`: performs a Lua pattern replace on the list
-	of files.
+    of files.
 
   * `uniquify(...)`: removes duplicates.
 
@@ -319,12 +319,12 @@ build file).
 Easiest to explain with an example:
 
     cprogram {
-	  name = 'another_test',
-	  srcs = { './*.c' },
-	  vars = {
-	    cflags = { '-g', '-O3' }
-	  }
-	}
+      name = 'another_test',
+      srcs = { './*.c' },
+      vars = {
+        cflags = { '-g', '-O3' }
+      }
+    }
 
 When `cprogram` builds each C file, the command will refer to `%{cflags}`. The
 value above will be flattened into a space-separated string and substituted in.
@@ -334,16 +334,18 @@ stack. However, you can do this:
 
     vars.cflags = { '-g' }
 
-	cprogram {
-	  name = 'another_test',
-	  srcs = { './*.c' },
-	  vars = {
-	  	["+cflags"] = { '-O3' }
-	  }
-	}
+    cprogram {
+      name = 'another_test',
+      srcs = { './*.c' },
+      vars = {
+        ["+cflags"] = { '-O3' }
+      }
+    }
 
 Now `cflags` will default to `-g` everywhere, because it's set at the top
 level; but when `another_test` is built, it'll be `-g -O3`.
 
 ackbuilder variables are only expanded in command templates, not in filenames.
+
+<!-- # vim: set ts=2 sw=2 expandtab : -->
 
