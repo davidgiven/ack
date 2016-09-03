@@ -20,7 +20,7 @@ for _, file in ipairs(sourcefiles) do
 	local be = replace(b, "%.", "_")
 	local _, _, e = b:find("%.(%w*)$")
 
-	for _, plat in ipairs(vars.plats) do
+	for _, plat in ipairs(vars.emplats) do
 		if (e == "c") or not conly[plat] then
 			local exe = ackprogram {
 				name = be.."_"..plat,

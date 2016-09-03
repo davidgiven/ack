@@ -4,7 +4,7 @@ vars.cflags = {
 vars.ackcflags = {
 	"-O6"
 }
-vars.plats = {
+vars.emplats = {
 	"cpm",
 	"linux386",
 	"linux68k",
@@ -13,7 +13,7 @@ vars.plats = {
 }
 
 local plat_packages = {}
-for _, p in ipairs(vars.plats) do
+for _, p in ipairs(vars.emplats) do
 	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
 end
 

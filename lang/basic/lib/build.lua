@@ -1,6 +1,6 @@
 include("plat/build.lua")
 
-for _, plat in ipairs(vars.plats) do
+for _, plat in ipairs(vars.emplats) do
     acklibrary {
         name = "lib_"..plat,
         srcs = {
