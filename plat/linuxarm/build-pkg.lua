@@ -22,6 +22,6 @@ installable {
 		"+libs",
 		"./include+pkg",
 		["$(PLATIND)/linuxarm/boot.o"] = "+boot",
-		--["$(PLATIND)/linuxarm/libsys.a"] = "./libsys+lib",
+		["$(PLATIND)/linuxarm/libsys.a"] = "./libsys+lib",
 	}
 }
