@@ -26,9 +26,7 @@ void branch(word_t brtyp, word_t link, struct expr_t* expr)
 	emit4(brtyp | link | maskx(d, 24));
 }
 
-data(opc, ins, val, typ) long opc, ins;
-valu_t val;
-short typ;
+void data(long opc, long ins, valu_t val, short typ)
 {
 	valu_t tmpval;
 	int adrflag = 0;
@@ -111,10 +109,7 @@ short typ;
    12-bit field.  Unfortunately this means that some numbers may not fit at
    all. */
 
-calcimm(opc, val, typ)
-    word_t* opc;
-valu_t* val;
-short typ;
+void calcimm(word_t* opc, valu_t* val, short typ)
 {
 	int i = 0;
 
@@ -265,11 +260,7 @@ void strldr(uint32_t opc, valu_t val)
    still use two instructions; the second is a no-op.  This is to cure the
    optimisation problem with mobile addresses ! */
 
-calcadr(ins, reg, val, typ)
-    word_t ins,
-    reg;
-valu_t val;
-short typ;
+void calcadr(word_t ins, word_t reg, valu_t val, short typ)
 {
 	valu_t tmpval = val;
 	word_t opc = 0xff; /* Dummy opc used as a flag for data() */
@@ -291,11 +282,7 @@ short typ;
 	return;
 }
 
-word_t
-    calcshft(val, typ, styp)
-        valu_t val;
-short typ;
-word_t styp;
+word_t calcshft(valu_t val, short typ, word_t styp)
 {
 	if (typ == S_UND)
 		return (0);
@@ -309,7 +296,7 @@ word_t styp;
 	return ((val & 0x1F) << 7);
 }
 
-rotateleft2(x) long* x;
+void rotateleft2(long* x)
 {
 	unsigned long bits;
 
@@ -334,8 +321,7 @@ rotateleft2(x) long* x;
    less instruction, because that will upset other addresses.
 */
 
-putaddr(opc, ins, val, count) long opc, ins, val;
-int count;
+void putaddr(long opc, long ins, long val, int count)
 {
 	long tmpval = val;
 	long reg = ins & 0x0000F000;
@@ -404,7 +390,7 @@ int count;
 #define PBITTABSZ 128
 static char* pbittab[PBITTABSZ];
 
-oursmall(fitsmall, gain)
+int oursmall(int fitsmall, int gain)
 {
 	register bit;
 	register char* p;
