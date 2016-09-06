@@ -1,4 +1,4 @@
-/*	$Id: cgram.y,v 1.9 2015/11/24 17:30:20 ragge Exp $	*/
+/*	$Id: cgram.y,v 1.10 2016/08/09 17:30:26 ragge Exp $	*/
 
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
@@ -1590,7 +1590,7 @@ genswitch(int num, TWORD type, struct swents **p, int n)
 static struct symtab *
 init_declarator(NODE *tn, NODE *p, int assign, NODE *a)
 {
-	int class = glval(tn);
+	int class = (int)glval(tn);
 	struct symtab *sp;
 
 	p = aryfix(p);
@@ -1746,7 +1746,7 @@ fundef(NODE *tp, NODE *p)
 	extern int prolab;
 	struct symtab *s, *nsthis;
 	NODE *q, *typ;
-	int class = glval(tp), oclass, ctval;
+	int class = (int)glval(tp), oclass, ctval;
 	char *c;
 
 	/*
@@ -2448,9 +2448,9 @@ int
 con_e(NODE *p)
 {
 #ifdef WORD_ADDRESSED
-	return icons(optim(eve(p)));
+	return (int)icons(optim(eve(p)));
 #else
-	return icons(optim(rmpconv(eve(p))));
+	return (int)icons(optim(rmpconv(eve(p))));
 #endif
 }
 

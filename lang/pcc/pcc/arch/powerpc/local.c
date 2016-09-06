@@ -1,4 +1,4 @@
-/*	$Id: local.c,v 1.34 2012/09/06 13:07:29 plunky Exp $	*/
+/*	$Id: local.c,v 1.35 2016/07/10 09:49:52 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -26,6 +26,21 @@
 
 #include <assert.h>
 #include "pass1.h"
+
+#undef NIL
+#define NIL NULL
+
+#ifdef LANG_CXX
+#define P1ND NODE
+#define p1nfree nfree
+#define p1tfree tfree
+#define p1fwalk fwalk
+#define p1walkf walkf
+#define p1tcopy tcopy
+#else
+#define NODE P1ND
+#define nfree p1nfree
+#endif
 
 #define IALLOC(sz) (isinlining ? permalloc(sz) : tmpalloc(sz))
 
@@ -68,10 +83,10 @@ picsymtab(char *p, char *s, char *s2)
 	struct symtab *sp = IALLOC(sizeof(struct symtab));
 	size_t len = strlen(p) + strlen(s) + strlen(s2) + 1;
 
-	sp->sname = sp->soname = IALLOC(len);
-	strlcpy(sp->soname, p, len);
-	strlcat(sp->soname, s, len);
-	strlcat(sp->soname, s2, len);
+	sp->sname = IALLOC(len);
+	strlcpy(sp->sname, p, len);
+	strlcat(sp->sname, s, len);
+	strlcat(sp->sname, s2, len);
 	sp->sclass = EXTERN;
 	sp->sflags = sp->slevel = 0;
 
@@ -90,7 +105,7 @@ picext(NODE *p)
 	struct symtab *sp;
 	char *name;
 
-	name = p->n_sp->soname ? p->n_sp->soname : exname(p->n_sp->sname);
+	name = getexname(p->n_sp);
 
 	if (strncmp(name, "__builtin", 9) == 0)
 		return p;
@@ -133,7 +148,7 @@ picext(NODE *p)
 
 	q = block(UMUL, q, 0, p->n_type, p->n_df, p->n_ap);
 	q->n_sp = p->n_sp; /* for init */
-	nfree(p);
+	p1nfree(p);
 
 	return q;
 }
@@ -156,15 +171,15 @@ picstatic(NODE *p)
 		snprintf(buf, 64, LABFMT, (int)p->n_sp->soffset);
 		sp = picsymtab("", buf, "@got(31)");
 	} else  {
-		n = p->n_sp->soname ? p->n_sp->soname : p->n_sp->sname;
-		sp = picsymtab("", exname(n), "@got(31)");
+		n = getexname(p->n_sp);
+		sp = picsymtab("", n, "@got(31)");
 	}
 	sp->sclass = STATIC;
 	sp->stype = p->n_sp->stype;
 	q = xbcon(0, sp, PTR+VOID);
 	q = block(UMUL, q, 0, p->n_type, p->n_df, p->n_ap);
 	q->n_sp = p->n_sp;
-	nfree(p);
+	p1nfree(p);
 
 #elif defined(MACHOABI)
 
@@ -229,7 +244,8 @@ convert_ulltof(NODE *p)
 	q = block(SCONV, q, NIL, LONGLONG, 0, 0);
 	q = block(SCONV, q, NIL, ty, 0, 0);
 	t = block(FCON, NIL, NIL, ty, 0, 0);
-	t->n_dcon = 2;
+	t->n_dcon = fltallo();
+	FCAST(t->n_dcon)->fp = 2.0;
 	l = block(MUL, q, t, ty, 0, 0);
 
 	r = buildtree(COLON, l, r);
@@ -269,7 +285,7 @@ clocal(NODE *p)
 #ifdef PCC_DEBUG
 	if (xdebug) {
 		printf("clocal: %p\n", p);
-		fwalk(p, eprint, 0);
+		p1fwalk(p, eprint, 0);
 	}
 #endif
 	switch (o = p->n_op) {
@@ -310,7 +326,7 @@ clocal(NODE *p)
 		case AUTO:
 			/* fake up a structure reference */
 			r = block(REG, NIL, NIL, PTR+STRTY, 0, 0);
-			r->n_lval = 0;
+			slval(r, 0);
 			r->n_rval = FPREG;
 			p = stref(block(STREF, r, p, 0, 0, 0));
 			break;
@@ -324,7 +340,7 @@ clocal(NODE *p)
 			if (kflag == 0) {
 				if (q->slevel == 0)
 					break;
-				p->n_lval = 0;
+				slval(p, 0);
 			} else if (blevel > 0) {
 				p = picstatic(p);
 			}
@@ -332,7 +348,7 @@ clocal(NODE *p)
 
 		case REGISTER:
 			p->n_op = REG;
-			p->n_lval = 0;
+			slval(p, 0);
 			p->n_rval = q->soffset;
 			break;
 
@@ -406,7 +422,7 @@ clocal(NODE *p)
 		/* Remove redundant PCONV's. Be careful */
 		l = p->n_left;
 		if (l->n_op == ICON) {
-			l->n_lval = (unsigned)l->n_lval;
+			slval(l, (unsigned)glval(l));
 			goto delp;
 		}
 		if (l->n_type < INT || DEUNSIGN(l->n_type) == LONGLONG) {
@@ -479,38 +495,38 @@ clocal(NODE *p)
 		m = p->n_type;
 
 		if (o == ICON) {
-			CONSZ val = l->n_lval;
+			CONSZ val = glval(l);
 
 			if (!ISPTR(m)) /* Pointers don't need to be conv'd */
 			    switch (m) {
 			case BOOL:
-				l->n_lval = l->n_lval != 0;
+				slval(l, val != 0);
 				break;
 			case CHAR:
-				l->n_lval = (char)val;
+				slval(l, (char)val);
 				break;
 			case UCHAR:
-				l->n_lval = val & 0377;
+				slval(l, val & 0377);
 				break;
 			case SHORT:
-				l->n_lval = (short)val;
+				slval(l, (short)val);
 				break;
 			case USHORT:
-				l->n_lval = val & 0177777;
+				slval(l, val & 0177777);
 				break;
 			case ULONG:
 			case UNSIGNED:
-				l->n_lval = val & 0xffffffff;
+				slval(l, val & 0xffffffff);
 				break;
 			case LONG:
 			case INT:
-				l->n_lval = (int)val;
+				slval(l, (int)val);
 				break;
 			case LONGLONG:
-				l->n_lval = (long long)val;
+				slval(l, (long long)val);
 				break;
 			case ULONGLONG:
-				l->n_lval = val;
+				slval(l, val);
 				break;
 			case VOID:
 				break;
@@ -518,7 +534,8 @@ clocal(NODE *p)
 			case DOUBLE:
 			case FLOAT:
 				l->n_op = FCON;
-				l->n_dcon = val;
+				l->n_dcon = fltallo();
+				FCAST(l->n_dcon)->fp = val;
 				break;
 			default:
 				cerror("unknown type %d", m);
@@ -528,7 +545,7 @@ clocal(NODE *p)
 			nfree(p);
 			return l;
 		} else if (o == FCON) {
-			l->n_lval = l->n_dcon;
+			slval(l, FCAST(l->n_dcon)->fp);
 			l->n_sp = NULL;
 			l->n_op = ICON;
 			l->n_type = m;
@@ -605,7 +622,7 @@ clocal(NODE *p)
 #ifdef PCC_DEBUG
 	if (xdebug) {
 		printf("clocal end: %p\n", p);
-		fwalk(p, eprint, 0);
+		p1fwalk(p, eprint, 0);
 	}
 #endif
 	return(p);
@@ -618,7 +635,7 @@ static void
 fixnames(NODE *p, void *arg)
 {
         struct symtab *sp;
-        struct attr *ap;
+        struct attr *ap, *ap2;
         NODE *q;
         char *c;
         int isu;
@@ -659,8 +676,8 @@ fixnames(NODE *p, void *arg)
 		c = NULL;
 #if defined(ELFABI)
 
-		if (sp->soname == NULL ||
-                    (c = strstr(sp->soname, "@got(31)")) == NULL)
+		if ((ap2 = attr_find(sp->sap, ATTR_SONAME)) == NULL ||
+		    (c = strstr(ap2->sarg(0), "@got(31)")) == NULL)
                         cerror("fixnames2");
                 if (isu) {
 			memcpy(c, "@plt", sizeof("@plt"));
@@ -698,7 +715,7 @@ myp2tree(NODE *p)
 	struct symtab *sp;
 
 	if (kflag)
-		walkf(p, fixnames, 0);
+		p1walkf(p, fixnames, 0);
 	if (o != FCON) 
 		return;
 
@@ -718,7 +735,7 @@ myp2tree(NODE *p)
 	ninval(0, tsize(sp->stype, sp->sdf, sp->sap), p);
 
 	p->n_op = NAME;
-	p->n_lval = 0;	
+	slval(p, 0);	
 	p->n_sp = sp;
 }
 
@@ -846,7 +863,6 @@ ninval(CONSZ off, int fsz, NODE *p)
 {
 	union { float f; double d; long double l; int i[3]; } u;
 	struct symtab *q;
-	char *c;
 	TWORD t;
 	int i;
 
@@ -854,8 +870,9 @@ ninval(CONSZ off, int fsz, NODE *p)
 	if (t > BTMASK)
 		p->n_type = t = INT; /* pointer */
 
-
+#if 0 /* not needed anymore */
 	if (kflag && (p->n_op == PLUS || p->n_op == UMUL)) {
+		char *c;
 		if (p->n_op == UMUL)
 			p = p->n_left;
 		p = p->n_right;
@@ -878,6 +895,7 @@ ninval(CONSZ off, int fsz, NODE *p)
 #endif
 
 	}
+#endif
 
 	if (p->n_op == ICON && p->n_sp != NULL && DEUNSIGN(t) != INT)
 		uerror("element not constant");
@@ -887,30 +905,30 @@ ninval(CONSZ off, int fsz, NODE *p)
 	case ULONGLONG:
 #if 0
 		/* little-endian */
-		i = (p->n_lval >> 32);
-		p->n_lval &= 0xffffffff;
+		i = (glval(p) >> 32);
+		slval(p, glval(p) & 0xffffffff);
 		p->n_type = INT;
 		ninval(off, 32, p);
-		p->n_lval = i;
+		slval(p, i);
 		ninval(off+32, 32, p);
 #endif
 		/* big-endian */
-		i = (p->n_lval & 0xffffffff);
-		p->n_lval >>= 32;
+		i = (glval(p) & 0xffffffff);
+		slval(p, glval(p) >> 32);
 		p->n_type = INT;
 		ninval(off, 32, p);
-		p->n_lval = i;
+		slval(p, i);
 		ninval(off+32, 32, p);
 
 		break;
 	case INT:
 	case UNSIGNED:
-		printf("\t.long %d", (int)p->n_lval);
+		printf("\t.long %d", (int)glval(p));
 		if ((q = p->n_sp) != NULL) {
 			if ((q->sclass == STATIC && q->slevel > 0)) {
 				printf("+" LABFMT, q->soffset);
 			} else {
-				char *name = q->soname ? q->soname : exname(q->sname);
+				char *name = getexname(q);
 				printf("+%s", name);
 			}
 		}
@@ -918,7 +936,7 @@ ninval(CONSZ off, int fsz, NODE *p)
 		break;
 	case LDOUBLE:
 		u.i[2] = 0;
-		u.l = (long double)p->n_dcon;
+		u.l = (long double)FCAST(p->n_dcon)->fp;
 #if 0
 		/* little-endian */
 		printf("\t.long 0x%x,0x%x,0x%x\n", u.i[0], u.i[1], u.i[2]);
@@ -927,11 +945,11 @@ ninval(CONSZ off, int fsz, NODE *p)
 		printf("\t.long 0x%x,0x%x,0x%x\n", u.i[0], u.i[1], u.i[2]);
 		break;
 	case DOUBLE:
-		u.d = (double)p->n_dcon;
+		u.d = (double)FCAST(p->n_dcon)->fp;
 		printf("\t.long 0x%x\n\t.long 0x%x\n", u.i[0], u.i[1]);
 		break;
 	case FLOAT:
-		u.f = (float)p->n_dcon;
+		u.f = (float)FCAST(p->n_dcon)->fp;
 		printf("\t.long 0x%x\n", u.i[0]);
 		break;
 	default:
@@ -1015,7 +1033,7 @@ defzero(struct symtab *sp)
 	off = tsize(sp->stype, sp->sdf, sp->sap);
 	off = (off+(SZCHAR-1))/SZCHAR;
 	printf("\t.%scomm ", sp->sclass == STATIC ? "l" : "");
-	n = sp->soname ? sp->soname : exname(sp->sname);
+	n = getexname(sp);
 	if (sp->slevel == 0)
 		printf("%s,%d\n", n, off);
 	else
@@ -1032,7 +1050,7 @@ commdec(struct symtab *q)
 
 	off = tsize(q->stype, q->sdf, q->ssue);
 	off = (off+(SZCHAR-1))/SZCHAR;
-	printf("\t.comm %s,0%o\n", q->soname ? q->soname : exname(q->sname), off);
+	printf("\t.comm %s,0%o\n", getexname(q), off);
 }
 
 /* make a local common declaration for id, if reasonable */
@@ -1044,7 +1062,7 @@ lcommdec(struct symtab *q)
 	off = tsize(q->stype, q->sdf, q->ssue);
 	off = (off+(SZCHAR-1))/SZCHAR;
 	if (q->slevel == 0)
-		printf("\t.lcomm %s,%d\n", q->soname ? q->soname : exname(q->sname), off);
+		printf("\t.lcomm %s,%d\n", getexname(q), off);
 	else
 		printf("\t.lcomm " LABFMT ",%d\n", q->soffset, off);
 }
@@ -1098,9 +1116,9 @@ simmod(NODE *p)
 #define ISPOW2(n) ((n) && (((n)&((n)-1)) == 0))
 
 	/* if the right is a constant power of two, then replace with AND */
-	if (r->n_op == ICON && ISPOW2(r->n_lval)) {
+	if (r->n_op == ICON && ISPOW2(glval(r))) {
 		p->n_op = AND;
-		r->n_lval--;
+		slval(r, glval(r) - 1);
 		return;
 	}
 
@@ -1168,15 +1186,10 @@ fixdef(struct symtab *sp)
  */
 
 NODE *
-powerpc_builtin_stdarg_start(NODE *f, NODE *a, TWORD t)
+powerpc_builtin_stdarg_start(const struct bitable *bi, NODE *a)
 {
         NODE *p, *q;
         int sz = 1;
-
-        /* check num args and type */
-        if (a == NULL || a->n_op != CM || a->n_left->n_op == CM ||
-            !ISPTR(a->n_left->n_type))
-                goto bad;
 
         /* must first deal with argument size; use int size */
         p = a->n_right;
@@ -1193,26 +1206,16 @@ powerpc_builtin_stdarg_start(NODE *f, NODE *a, TWORD t)
         nfree(q->n_left);
         nfree(q);
         p = buildtree(ASSIGN, a->n_left, p);
-        tfree(f);
         nfree(a);
 
         return p;
-
-bad:
-        uerror("bad argument to __builtin_stdarg_start");
-        return bcon(0);
 }
 
 NODE *
-powerpc_builtin_va_arg(NODE *f, NODE *a, TWORD t)
+powerpc_builtin_va_arg(const struct bitable *bi, NODE *a)
 {
         NODE *p, *q, *r;
         int sz, tmpnr;
-
-        /* check num args and type */
-        if (a == NULL || a->n_op != CM || a->n_left->n_op == CM ||
-            !ISPTR(a->n_left->n_type) || a->n_right->n_op != TYPE)
-                goto bad;
 
         r = a->n_right;
 
@@ -1227,7 +1230,7 @@ powerpc_builtin_va_arg(NODE *f, NODE *a, TWORD t)
 		r->n_ap = 0;
         }
 
-        p = tcopy(a->n_left);
+        p = p1tcopy(a->n_left);
 
 #if defined(ELFABI)
 
@@ -1252,56 +1255,39 @@ powerpc_builtin_va_arg(NODE *f, NODE *a, TWORD t)
 
         nfree(a->n_right);
         nfree(a);
-        nfree(f);
 
         p = tempnode(tmpnr, INCREF(r->n_type), r->n_df, r->n_ap);
         p = buildtree(UMUL, p, NIL);
         p = buildtree(COMOP, q, p);
 
         return p;
+}
 
-bad:
-        uerror("bad argument to __builtin_va_arg");
+NODE *
+powerpc_builtin_va_end(const struct bitable *bi, NODE *a)
+{
+        p1tfree(a);
         return bcon(0);
 }
 
 NODE *
-powerpc_builtin_va_end(NODE *f, NODE *a, TWORD t)
+powerpc_builtin_va_copy(const struct bitable *bi, NODE *a)
 {
-        tfree(f);
-        tfree(a);
- 
-        return bcon(0);
-}
-
-NODE *
-powerpc_builtin_va_copy(NODE *f, NODE *a, TWORD t)
-{
-        if (a == NULL || a->n_op != CM || a->n_left->n_op == CM)
-                goto bad;
-        tfree(f);
-        f = buildtree(ASSIGN, a->n_left, a->n_right);
-        nfree(a);
+        P1ND *f = buildtree(ASSIGN, a->n_left, a->n_right);
+        p1nfree(a);
         return f;
-
-bad:
-        uerror("bad argument to __buildtin_va_copy");
-        return bcon(0);
 }
 
 NODE *
-powerpc_builtin_return_address(NODE *f, NODE *a, TWORD t)
+builtin_return_address(const struct bitable *bt, NODE *a)
 {
+	P1ND *f;
 	int nframes;
 	int i = 0;
 
-	if (a == NULL || a->n_op != ICON)
-		goto bad;
+	nframes = glval(a);
 
-	nframes = a->n_lval;
-
-	tfree(f);
-	tfree(a);
+	p1tfree(a);
 
 	f = block(REG, NIL, NIL, PTR+VOID, 0, 0);
 	regno(f) = SPREG;
@@ -1314,24 +1300,18 @@ powerpc_builtin_return_address(NODE *f, NODE *a, TWORD t)
 	f = buildtree(UMUL, f, NIL);
 
 	return f;
-bad:
-        uerror("bad argument to __builtin_return_address");
-        return bcon(0);
 }
 
 NODE *
-powerpc_builtin_frame_address(NODE *f, NODE *a, TWORD t)
+builtin_frame_address(const struct bitable *bt, NODE *a)
 {
+	P1ND *f;
 	int nframes;
 	int i = 0;
 
-	if (a == NULL || a->n_op != ICON)
-		goto bad;
+	nframes = glval(a);
 
-	nframes = a->n_lval;
-
-	tfree(f);
-	tfree(a);
+	p1tfree(a);
 
 	if (nframes == 0) {
 		f = block(REG, NIL, NIL, PTR+VOID, 0, 0);
@@ -1347,10 +1327,18 @@ powerpc_builtin_frame_address(NODE *f, NODE *a, TWORD t)
 	}
 
 	return f;
-bad:
-        uerror("bad argument to __builtin_frame_address");
+}
+
+/*
+ * Return "canonical frame address".
+ */
+NODE *
+builtin_cfa(const struct bitable *bt, NODE *a)
+{
+	cerror("builtin_cfa");
         return bcon(0);
 }
+
 
 void
 pass1_lastchance(struct interpass *ip)

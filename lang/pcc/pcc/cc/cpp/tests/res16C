@@ -28,8 +28,8 @@ multi-line list of tokens
 
 
 --> 28 28
- /*/ comment with escaped newlines /*
-         in the markers
+/*/ comment with escaped newlines /*
+in the markers
 */
 
 
@@ -40,7 +40,7 @@ multi-line list of tokens
 
 
 --> 40 40
-  //   C++ comment with leading whitespace and escaped newlines
+//   C++ comment with leading whitespace and escaped newlines
 
 
 
@@ -69,7 +69,7 @@ multi-line macro /* with a comment */ embedded
 --> 64 64
 BAR
 --> 66 66
- 	
+
 
 
 --> 70 70

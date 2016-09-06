@@ -24,11 +24,11 @@ multi-line list of tokens
 
 
 --> 24 24
- 
+
 
 
 --> 28 28
- 
+
 
 
 
@@ -36,11 +36,11 @@ multi-line list of tokens
 
 
 --> 36 36
- 
+
 
 
 --> 40 40
-   
+
 
 
 
@@ -62,14 +62,14 @@ multi-line list of tokens
 --> 57 57
 multi-line macro embedded
 --> 59 59
-  
+
 
 
 
 --> 64 64
 macro with a leading comment
 --> 66 66
- 	
+
 
 
 --> 70 70
@@ -95,7 +95,7 @@ a token split by escaped newlines
 --> 87 87
 
 --> 89 89
-  
+
 #pragma with a preceding comment
 # 90 "<stdin>"
 

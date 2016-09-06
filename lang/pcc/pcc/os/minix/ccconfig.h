@@ -1,4 +1,4 @@
-/*	 $Id: ccconfig.h,v 1.6 2014/12/24 08:43:28 plunky Exp $ */
+/*	 $Id: ccconfig.h,v 1.7 2016/05/15 08:13:53 ragge Exp $ */
 /*
  * Escrit per Antoine Leca pel projecte PCC, 2011-03.
  * Copyright (C) 2011 Anders Magnusson (ragge@ludd.luth.se).
@@ -88,7 +88,9 @@
 #define CRTEND_T	0
 
 #define CRTI		0
-#define CRTN		"-lend"
+#define CRTN		"end.a"
+
+#define DEFLIBS         {"-lc", "-lpccsoftfloat", "-lpcc", "-lc", NULL }
 
 #if defined(mach_i386)
 #define CPPMDADD { "-D__i386", "-D__i386__", \

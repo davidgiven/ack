@@ -1,4 +1,4 @@
-/*	$Id: cgram.y,v 1.415 2016/04/02 09:02:56 ragge Exp $	*/
+/*	$Id: cgram.y,v 1.416 2016/08/09 17:30:26 ragge Exp $	*/
 
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
@@ -1644,7 +1644,7 @@ genswitch(int num, TWORD type, struct swents **p, int n)
 static struct symtab *
 init_declarator(P1ND *tn, P1ND *p, int assign, P1ND *a, char *as)
 {
-	int class = glval(tn);
+	int class = (int)glval(tn);
 	struct symtab *sp;
 
 	p = aryfix(p);
@@ -1801,7 +1801,7 @@ fundef(P1ND *tp, P1ND *p)
 	extern int prolab;
 	struct symtab *s;
 	P1ND *q, *typ;
-	int class = glval(tp), oclass, ctval;
+	int class = (int)glval(tp), oclass, ctval;
 
 	/*
 	 * We discard all names except for those needed for
@@ -2414,7 +2414,7 @@ eve(P1ND *p)
 int
 con_e(P1ND *p)
 {
-	return icons(optloop(eve(p)));
+	return (int)icons(optloop(eve(p)));
 }
 
 void

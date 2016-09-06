@@ -1,4 +1,4 @@
-/*	$Id: cpp.c,v 1.274 2016/04/12 18:49:35 ragge Exp $	*/
+/*	$Id: cpp.c,v 1.281 2016/08/10 17:33:23 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -83,10 +83,11 @@ static void prrep(const usch *s);
 #define IMP(x)
 #endif
 
+static int istty;
 int Aflag, Cflag, Eflag, Mflag, dMflag, Pflag, MPflag, MMDflag;
 char *Mfile, *MPfile;
 char *Mxfile;
-int warnings, Mxlen;
+int warnings, Mxlen, skpows;
 static usch utbuf[CPPBUF];
 struct iobuf pb = { utbuf, 0, CPPBUF, 0, 1, BUTBUF };
 #if LIBVMF
@@ -158,6 +159,8 @@ static void addidir(char *idir, struct incs **ww);
 static void vsheap(struct iobuf *, const char *, va_list);
 static int skipws(struct iobuf *ib);
 static int getyp(usch *s);
+static void macsav(int ch);
+static void fstrstr(struct iobuf *ib, struct iobuf *ob);
 
 int
 main(int argc, char **argv)
@@ -328,6 +331,7 @@ main(int argc, char **argv)
 		if (open(argv[1], O_WRONLY|O_CREAT, 0600) < 0)
 			error("Can't creat %s", argv[1]);
 	}
+	istty = isatty(1);
 
 	if (argc && strcmp(argv[0], "-")) {
 		fn1 = fn2 = (usch *)argv[0];
@@ -356,8 +360,11 @@ main(int argc, char **argv)
 	if (pushfile(fn1, fn2, 0, NULL))
 		error("cannot open %s", argv[0]);
 
-	if (Mflag == 0)
+	if (Mflag == 0) {
+		if (skpows)
+			pb.buf[pb.cptr++] = '\n';
 		write(1, pb.buf, pb.cptr);
+	}
 #ifdef TIMING
 	(void)gettimeofday(&t2, NULL);
 	t2.tv_sec -= t1.tv_sec;
@@ -575,64 +582,60 @@ addidir(char *idir, struct incs **ww)
 void
 line(void)
 {
-	struct iobuf *ob;
-	struct symtab *nl;
-	int c, n, ln;
-	usch *cp, *dp;
+	struct iobuf *ib, *ob;
+	int n, ln;
 
-	c = skipws(0);
-	if (ISID0(c)) { /* expand macro */
-		dp = readid(c);
-		if ((nl = lookup(dp, FIND)) == 0 || (ob = kfind(nl)) == 0)
-			goto bad;
-	} else {
-		ob = getobuf(BNORMAL);
-		do {
-			putob(ob, c);
-		} while (ISDIGIT(c = cinput()));
-		cunput(c);
-		putob(ob, 0);
-	}
-	cp = ob->buf;
+
+	ob = savln();
+	ob->cptr = 0;
+	ib = getobuf(BNORMAL);
+	exparg(1, ob, ib, NULL);
+
+	ib->cptr = 0;
+	while (ISWSNL(ib->buf[ib->cptr]))
+		ib->cptr++;
 
 	n = 0;
-	while (ISDIGIT(*cp))
-		n = n * 10 + *cp++ - '0';
-	if (*cp != 0)
-		goto bad;
-	bufree(ob);
+	while (ISDIGIT(ib->buf[ib->cptr]))
+		n = n * 10 + ib->buf[ib->cptr++] - '0';
 
 	/* Can only be decimal number here between 1-2147483647 */
 	if (n < 1 || n > 2147483647)
 		goto bad;
 
+	while (ISWSNL(ib->buf[ib->cptr]))
+		ib->cptr++;
+
 	ln = n;
 	ifiles->escln = 0;
-	if ((c = skipws(NULL)) != '\n') {
-		if (c == 'L' || c == 'U' || c == 'u') {
-			n = c, c = cinput();
-			if (n == 'u' && c == '8')
-				c = cinput();
-			if (c == '\"')
-				warning("#line only allows character literals");
-		}
-		if (c != '\"')
-			goto bad;
 
-		ob = faststr(c, NULL);
-		if (strcmp((char *)ifiles->fname, (char *)ob->buf))
-			ifiles->fname = xstrdup(ob->buf);
-		bufree(ob);
+	if (ib->buf[ib->cptr] == 0)
+		goto out;
 
-		c = skipws(0);
-	}
-	if (c != '\n')
+	if (getyp(ib->buf+ib->cptr) != STRING)
+		goto bad;
+	if (ib->buf[ib->cptr] != '\"')
+		warning("#line only allows character literals");
+
+	ob->cptr = 0;
+	fstrstr(ib, ob);
+	ob->buf[ob->cptr] = 0;
+
+	if (strcmp((char *)ifiles->fname, (char *)ob->buf))
+		ifiles->fname = xstrdup(ob->buf);
+	bufree(ob);
+
+	while (ISWSNL(ib->buf[ib->cptr]))
+		ib->cptr++;
+
+	if (ib->buf[ib->cptr] != 0)
 		goto bad;
 
-	ifiles->lineno = ln;
+	bufree(ib);
+
+out:	ifiles->lineno = ln;
 	prtline(1);
 	ifiles->lineno--;
-	cunput('\n');
 	return;
 
 bad:	error("bad #line");
@@ -915,6 +918,7 @@ findarg(usch *s, struct iobuf *ab, int *arg, int narg)
 void
 define(void)
 {
+	extern int incmnt;
 	struct iobuf *ib, *ab;
 	struct symtab *np;
 	usch cc[2], *vararg, *dp;
@@ -944,7 +948,7 @@ define(void)
 	ab = getobuf(BNORMAL);
 	vararg = NULL;
 	if ((c = cinput()) == '(') {
-		type = 0;
+		type = FUNLIKE;
 		/* function-like macros, deal with identifiers */
 		c = skipws(0);
 		for (;;) {
@@ -1006,7 +1010,9 @@ define(void)
 	/* parse replacement-list, substituting arguments */
 	wascon = 0;
 	while (c != '\n') {
-		cc[0] = c, cc[1] = inc2();
+		incmnt++;
+		cc[0] = c, cc[1] = cinput();
+		incmnt--;
 		t = getyp(cc);
 		cunput(cc[1]);
 
@@ -1024,7 +1030,7 @@ define(void)
 				(void)cinput(); /* eat # */
 				DELEWS();
 				macsav(CONC);
-				if (ISID0(c = skipws(0)) && type == 0)
+				if (ISID0(c = skipws(0)) && type == FUNLIKE)
 					wascon = 1;
 				if (c == '\n')
 					goto bad; /* 6.10.3.3 p1 */
@@ -1058,7 +1064,7 @@ define(void)
 			break;
 
 		case CMNT:
-			Ccmnt(macsav);
+			Ccmnt2(macsav, cinput());
 			break;
 
 		case NUMBER: 
@@ -1221,13 +1227,12 @@ static void
 pragoper(struct iobuf *ib)
 {
 	int t;
-	struct iobuf *ob = getobuf(BNORMAL);
 
 	if (skipws(ib) != '(' || ((t = skipws(ib)) != '\"' && t != 'L'))
 		goto err;
 	if (t == 'L' && (t = pragwin(ib)) != '\"')
 		goto err;
-	strtobuf((usch *)"\n#pragma ", ob);
+	putstr((usch *)"\n#pragma ");
 	while ((t = pragwin(ib)) != '\"') {
 		if (t == BLKID) {
 			pragwin(ib);
@@ -1237,13 +1242,11 @@ pragoper(struct iobuf *ib)
 			continue;
 		if (t == '\\') {
 			if ((t = pragwin(ib)) != '\"' && t != '\\')
-				putob(ob, '\\');
+				putch('\\');
 		}
-		putob(ob, t);
+		putch(t);
 	}
-	bsheap(ob, "\n# %d \"%s\"\n", ifiles->lineno, ifiles->fname);
-	putstr(ob->buf);
-	bufree(ob);
+	prtline(1);
 	if (skipws(ib) == ')')
 		return;
 
@@ -1373,6 +1376,7 @@ static void
 fstrnum(struct iobuf *ib, struct iobuf *ob)  
 {	
 	usch *s = ib->buf+ib->cptr;
+	int c2;
 
 	if (*s == '.') {
 		/* not digit, dot.  Next will be digit */
@@ -1380,7 +1384,7 @@ fstrnum(struct iobuf *ib, struct iobuf *ob)
 	}
 	for (;;) {
 		putob(ob, *s++);
-		if ((spechr[*s] & C_EP)) {
+		if ((c2 = (*s & 0337)) == 'E' || c2 == 'P') {
 			if (s[1] != '-' && s[1] != '+')
 				break;
 			putob(ob, *s++);
@@ -1759,8 +1763,8 @@ chkdir(void)
 			return;
 		while ((ch = cinput()) != '\n')
 			;
-		ifiles->lineno++;
 		putch('\n');
+		ifiles->lineno++;
 	}
 }
 
@@ -1822,7 +1826,12 @@ readargs1(struct symtab *sp, const usch **args)
 				error("eof in macro");
 			else if (c == '/') {
 				int mp = macpos;
-				Ccmnt(macsav);
+				if ((c = ra1_wsnl()) == '*' || c == '/')
+					Ccmnt2(macsav, c);
+				else {
+					macsav('/');
+					cunput(c);
+				}
 				macsav(0);
 				strtobuf(macbase+mp, ab);
 				macpos = mp;
@@ -1841,7 +1850,7 @@ readargs1(struct symtab *sp, const usch **args)
 				putob(ab, c);
 			if ((c = cinput()) == '\n') {
 				chkdir();
-				ifiles->lineno++, putch(c), c = ' ';
+				putch(c), ifiles->lineno++, c = ' ';
 			}
 		}
 
@@ -2049,6 +2058,36 @@ readargs2(struct iobuf *in, struct symtab *sp, const usch **args)
 }
 
 /*
+ * escape "\ inside strings.
+ */
+static void
+escstr(const usch *bp, struct iobuf *ob)
+{
+	int instr = 0;
+
+	while (*bp) {
+		if (!instr && ISWS(*bp)) {
+			while (ISWS(*bp))
+				bp++;
+			putob(ob, ' ');
+		}
+
+		if (*bp == '\'' || *bp == '"') {
+			instr ^= 1;
+			if (*bp == '"')
+				putob(ob, '\\');
+		} 
+		if (instr && *bp == '\\') {
+			putob(ob, *bp);
+			if (bp[1] == '\"') 
+				putob(ob, *bp), putob(ob, *bp++);
+		}
+		putob(ob, *bp);
+		bp++;
+	}
+}
+
+/*
  * expand a function-like macro.
  * vp points to end of replacement-list
  * reads function arguments from input stream.
@@ -2059,8 +2098,8 @@ subarg(struct symtab *nl, const usch **args, int lvl, struct blocker *bl)
 {
 	struct blocker *w;
 	struct iobuf *ob, *cb, *nb;
-	int narg, instr, snuff;
-	const usch *sp, *bp, *ap, *vp, *tp;
+	int narg, instr, snuff, c2;
+	const usch *sp, *bp, *ap, *vp;
 
 	DPRINT(("%d:subarg '%s'\n", lvl, nl->namep));
 	ob = getobuf(BNORMAL);
@@ -2112,7 +2151,8 @@ subarg(struct symtab *nl, const usch **args, int lvl, struct blocker *bl)
 				printf("'\n");
 			}
 #endif
-			if (sp[-2] != CONC && !snuff && sp[1] != CONC) {
+			c2 = (sp-2 < vp ? 0 : sp[-2]);
+			if (c2 != CONC && !snuff && sp[1] != CONC) {
 				/*
 				 * Expand an argument; 6.10.3.1:
 				 * "A parameter in the replacement list,
@@ -2130,26 +2170,10 @@ subarg(struct symtab *nl, const usch **args, int lvl, struct blocker *bl)
 				strtobuf(nb->buf, ob);
 				bufree(nb);
 			} else {
-				while (*bp) {
-					if (snuff && !instr && ISWS(*bp)) {
-						while (ISWS(*bp))
-							bp++;
-						putob(ob, ' ');
-					}
-
-					if (snuff &&
-					    (*bp == '\'' || *bp == '"')) {
-						instr ^= 1;
-						for (tp = bp - 1; *tp == '\\'; tp--)
-							instr ^= 1;
-						if (*bp == '"')
-							putob(ob, '\\');
-					} 
-					if (snuff && instr && *bp == '\\')
-						putob(ob, '\\');
-					putob(ob, *bp);
-					bp++;
-				}
+				if (snuff)
+					escstr(bp, ob);
+				else
+					strtobuf(bp, ob);
 			}
 		} else if (ISID0(*sp)) {
 			if (lookup(sp, FIND))
@@ -2168,10 +2192,10 @@ subarg(struct symtab *nl, const usch **args, int lvl, struct blocker *bl)
 }
 
 /*
- * Do a (correct) expansion of a WARN-terminated buffer of tokens.
- * Data is read from the lex buffer, result on lex buffer, WARN-terminated.
+ * Do a (correct) expansion of a buffer of tokens.
+ * Data is read from the input buffer, result on output buffer.
  * Expansion blocking is not altered here unless when tokens are
- * concatenated, in which case they are removed.
+ * concatenated, in which case the blocking is removed.
  */
 struct iobuf *
 exparg(int lvl, struct iobuf *ib, struct iobuf *ob, struct blocker *bl)
@@ -2328,14 +2352,43 @@ prline(const usch *s)
 #endif
 
 void
+cntline(void)
+{
+	if (skpows < 10)
+		for (; skpows > 0; skpows--)
+			putob(&pb, '\n');
+	else
+		prtline(1);
+	skpows = 0;
+}
+
+void
 putch(int ch)
 {
-	putob(&pb, ch);
+	if (skpows) {
+		if (ch == '\n')
+			skpows++;
+		if (ISWSNL(ch))
+			return;
+		cntline();
+	} else if (ch == '\n' && tflag == 0) {
+		skpows = 1;
+		return;
+	}
+	if (pb.cptr == pb.bsz)
+		putob(&pb, ch);
+	else
+		pb.buf[pb.cptr++] = ch;
+	if (ch == '\n' && istty && Mflag == 0)
+		(void)write(1, pb.buf, pb.cptr), pb.cptr = 0;
+		
 }
 
 void
 putstr(const usch *s)
 {
+	if (skpows)
+		cntline();
 	strtobuf(s, &pb);
 }
 

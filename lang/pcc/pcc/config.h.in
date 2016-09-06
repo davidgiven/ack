@@ -165,6 +165,9 @@
 /* Version string */
 #undef VERSSTR
 
+/* Target string */
+#undef TARGSTR
+
 /* Size of wide-character type in chars */
 #undef WCHAR_SIZE
 

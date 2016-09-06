@@ -1,4 +1,4 @@
-/*	$Id: macdefs.h,v 1.10 2016/03/05 15:53:04 ragge Exp $	*/
+/*	$Id: macdefs.h,v 1.12 2016/06/27 11:47:06 ragge Exp $	*/
 /*
  * Copyright (c) 2006 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -101,7 +101,7 @@ typedef long OFFSZ;
 
 #define BACKAUTO 		/* stack grows negatively for automatics */
 #define BACKTEMP 		/* stack grows negatively for temporaries */
-#define ARGINIT		0	/* first arg at 0 offset */
+#define ARGINIT		16	/* first arg at 0 offset */
 #define AUTOINIT	32	/* first var below 32-bit offset */
 
 
@@ -127,6 +127,11 @@ typedef long OFFSZ;
  *	B - AC2-AC3 (as index registers)	: reg 4-5
  * FP/SP as 6/7.
  */
+#define	AC0	0
+#define	AC1	1
+#define	AC2	2
+#define	AC3	3
+
 #define	MAXREGS	8	/* 0-29 */
 
 #define	RSTATUS	\
@@ -159,7 +164,10 @@ int COLORMAP(int c, int *r);
 #define	MAXZP	030	/* number of locations used as stack */
 #define	ZPOFF	050	/* offset of zero page regs */
 
-#define	MYSTOREMOD
+#ifdef os_none
+#define	MYINSTRING
+#endif
+#undef	MYSTOREMOD
 #define	MYLONGTEMP(p,w) {					\
 	if (w->r_class == 0) {					\
 		w->r_color = freetemp(szty(p->n_type));		\
@@ -167,7 +175,7 @@ int COLORMAP(int c, int *r);
 	}							\
 	if (w->r_color < MAXZP*2) { /* color in bytes */	\
 		p->n_op = NAME;					\
-		p->n_lval = w->r_color/2 + ZPOFF;		\
+		setlval(p, w->r_color/2 + ZPOFF);		\
 		p->n_name = "";					\
 		break;						\
 	}							\

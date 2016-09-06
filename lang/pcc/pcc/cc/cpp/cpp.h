@@ -1,4 +1,4 @@
-/*	$Id: cpp.h,v 1.102 2016/04/12 18:49:35 ragge Exp $	*/
+/*	$Id: cpp.h,v 1.107 2016/08/10 17:33:23 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -58,14 +58,16 @@ extern	int	defining, inclevel;
 
 #define	PBMAX	10	/* min pushbackbuffer size */
 
-#define	CTRLOC	0xf8	/* __COUNTER__ */
-#define	DEFLOC	0xf9	/* defined */
-#define	PRAGLOC	0xfa	/* _Pragma */
-#define	LINLOC	0xfb	/* __LINE__ */
-#define	FILLOC	0xfc	/* __FILE__ */
-#define GCCARG	0xfd	/* has gcc varargs that may be replaced with 0 */
-#define VARG	0xfe	/* has varargs */
-#define OBJCT	0xff
+#define	FUNLIKE	0
+#define	CTRLOC	1	/* __COUNTER__ */
+#define	DEFLOC	2	/* defined */
+#define	PRAGLOC	3	/* _Pragma */
+#define	LINLOC	4	/* __LINE__ */
+#define	FILLOC	5	/* __FILE__ */
+#define GCCARG	6	/* has gcc varargs that may be replaced with 0 */
+#define VARG	7	/* has varargs */
+#define OBJCT	8
+
 #define WARN	1	/* SOH, not legal char */
 #define CONC	2	/* STX, not legal char */
 #define SNUFF	3	/* ETX, not legal char */
@@ -81,7 +83,7 @@ extern	int	defining, inclevel;
 #define C_WSNL	0004		/* ' ','\t','\r','\n' */
 #define C_ID	0010		/* [_a-zA-Z0-9] */
 #define C_ID0	0020		/* [_a-zA-Z] */
-#define C_EP	0040		/* [epEP] */
+#define C_Q	0040		/* [\r\\\?] */
 #define C_DIGIT	0100		/* [0-9] */
 #define C_HEX	0200		/* [0-9a-fA-F] */
 
@@ -92,6 +94,7 @@ extern usch spechr[];
 #define ISID(x)		(spechr[x] & C_ID)
 #define ISID0(x)	(spechr[x] & C_ID0)
 #define	ISDIGIT(x)	(spechr[x] & C_DIGIT)
+#define	ISCQ(x)		(spechr[x] & C_Q)
 
 /* buffer definition */
 #define	BNORMAL	0	/* standard buffer */
@@ -147,7 +150,8 @@ struct symtab {
 	const usch *value;
 	const usch *file;
 	int line;
-	unsigned char type;	/* macro type */
+	unsigned char type:4,	/* macro type */
+		      wraps:1;	/* macro wraps in buffer */
 	unsigned char narg;	/* # of args (if feasible) */
 };
 
@@ -200,7 +204,7 @@ void warning(const char *fmt, ...);
 void error(const char *fmt, ...);
 int cinput(void);
 int inc2(void);
-int Ccmnt(void (*d)(int));
+void Ccmnt2(void (*d)(int), int);
 usch *bufid(int ch, struct iobuf *);
 usch *readid(int ch);
 struct iobuf *faststr(int bc, struct iobuf *);
@@ -208,3 +212,5 @@ int fastnum(int ch, struct iobuf *);
 void *xrealloc(void *p, int sz);
 void *xmalloc(int sz);
 void fastscan(void);
+void cntline(void);
+struct iobuf *savln(void);

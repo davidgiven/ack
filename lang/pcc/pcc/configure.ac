@@ -99,6 +99,8 @@ case "$target_os" in
 	    arm*) targmach=arm ;;
 	    i?86) targmach=i386 ;;
 	    x86_64) targmach=amd64 ;;
+	    mips64el) targmach=mips64 ;;
+	    mips64) targmach=mips64 endian=big ;;
 	    mipseb) targmach=mips endian=big ;;
 	    mips*) targmach=mips ;;
 	esac
@@ -113,6 +115,8 @@ case "$target_os" in
 	    i?86) targmach=i386 ;;
 	    powerpc*) targmach=powerpc endian=big ;;
 	    x86_64) targmach=amd64 ;;
+	    mips64el) targmach=mips64 ;;
+	    mips64) targmach=mips64 endian=big ;;
 	    mipseb) targmach=mips endian=big ;;
 	    mips*) targmach=mips ;;
 	esac
@@ -124,7 +128,6 @@ case "$target_os" in
     litebsd*)
 	targos=litebsd
 	abi=elf
-	wchar_type=USHORT
 	case "$target_cpu" in
 	    mips*) targmach=mips ;;
 	esac
@@ -149,22 +152,33 @@ case "$target_os" in
 	altlibdir="c:/mingw/lib"
 	;;
 
-    minix*)
-	targos=minix
-	stabs=yes
-	case "$target_os" in
-	    minix3) abi=aout ;;
-	    minix3.*) abi=elf ;;
-	    # default to ELF
-	    *) abi=elf ;;
-	esac
-	case "$target_cpu" in
-	    i86) targmach=i86 ;;
-	    i?86) targmach=i386 ;;
-	    arm*) targmach=arm ;;
-	    x86_64) targmach=amd64 ;;
-	esac
-	;;
+   minix*)
+        targos=minix
+        targosver=`uname -v` 
+        stabs=yes
+        case "$targosver" in
+            # explicit setting
+            1.*)
+                # pcc works for 3.1.6
+                # not tested for 3.1.7 and 3.1.8
+                targosver=3.1.x
+                abi=aout ;;  
+           *3*)
+                # Minix switched to ELF with 3.2
+                targosver=3.2+
+                abi=elf ;;
+            *)
+                # default to elf
+               targosver=unknown
+               abi=elf ;;
+        esac     
+        case "$target_cpu" in
+            i86) targmach=i86 ;;
+            i?86) targmach=i386 ;;
+            arm*) targmach=arm ;;
+            x86_64) targmach=amd64 ;;
+        esac
+        ;; 
 
     mirbsd*)
 	targos=mirbsd
@@ -194,6 +208,8 @@ case "$target_os" in
 	    arm*) targmach=arm ;;
 	    i?86) targmach=i386 ;;
 	    m68k*) targmach=m68k endian=big ;;
+	    mips64el) targmach=mips64 ;;
+	    mips64) targmach=mips64 endian=big ;;
 	    mipseb) targmach=mips endian=big ;;
 	    mips*) targmach=mips ;;
 	    pdp10) targmach=pdp10 ;;
@@ -224,6 +240,8 @@ case "$target_os" in
 	case "$target_cpu" in
 	    i?86) targmach=i386 ;;
 	    vax) targmach=vax ;;
+	    mips64el) targmach=mips64 ;;
+	    mips64) targmach=mips64 endian=big ;;
 	    powerpc) targmach=powerpc endian=big ;;
 	    sparc64) targmach=sparc64 endian=big ;;
 	    m68k) targmach=m68k endian=big ;;
@@ -673,11 +691,13 @@ pcc_minor=`echo $PACKAGE_VERSION | awk -F. '{print $2}'`
 pcc_minorminor=`echo $PACKAGE_VERSION | awk -F. '{print $3}'`
 test -n "$MPVERSION" && MPVERSION=", $MPVERSION"
 versstr="\"$PACKAGE_STRING `cat $srcdir/DATESTAMP` for $target$MPVERSION\""
+targstr="\"$target$MPVERSION\""
 
 AC_DEFINE_UNQUOTED(PCC_MAJOR, $pcc_major, [Major version no])
 AC_DEFINE_UNQUOTED(PCC_MINOR, $pcc_minor, [Minor version no])
 AC_DEFINE_UNQUOTED(PCC_MINORMINOR, $pcc_minorminor, [Minor minor version no])
 AC_DEFINE_UNQUOTED(VERSSTR, $versstr, [Version string])
+AC_DEFINE_UNQUOTED(TARGSTR, $targstr, [Target string])
 
 AC_CONFIG_FILES([Makefile
 		cc/Makefile

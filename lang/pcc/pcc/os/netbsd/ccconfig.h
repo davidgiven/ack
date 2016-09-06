@@ -1,4 +1,4 @@
-/*	$Id: ccconfig.h,v 1.31 2014/12/24 08:43:29 plunky Exp $	*/
+/*	$Id: ccconfig.h,v 1.32 2016/07/06 07:49:48 ragge Exp $	*/
 
 /*
  * Copyright (c) 2004 Anders Magnusson (ragge@ludd.luth.se).
@@ -63,6 +63,12 @@
 #define STARTLABEL "_start"
 #elif defined(mach_mips)
 #define	CPPMDADD { "-D__mips__", NULL, }
+#elif defined(mach_mips64)
+#ifdef TARGET_BIG_ENDIAN
+#define	CPPMDADD { "-D__MIPSEB__", "-D__mips__", "-D__mips64__", NULL, }
+#else
+#define CPPMDADD { "-D__MIPSEL__", "-D__mips__", "-D__mips64__", "-D__mipsel__", "-D__mips64el__", NULL, }
+#endif
 #elif defined(mach_pdp10)
 #define CPPMDADD { "-D__pdp10__", NULL, }
 #elif defined(mach_powerpc)

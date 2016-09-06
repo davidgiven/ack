@@ -1,4 +1,4 @@
-/*      $Id: cpc.c,v 1.7 2016/01/10 16:17:45 ragge Exp $      */
+/*      $Id: cpc.c,v 1.8 2016/08/08 16:38:29 ragge Exp $      */
 
 /*
  * Copyright (c) 2014 Anders Magnusson (ragge@ludd.luth.se).
@@ -302,7 +302,6 @@ eval(int op, ND *n1, ND *n2)
 		case GE: n1->nd_val = n1->nd_val >= n2->nd_val; break;
 		case RS: n1->nd_val >>= n2->nd_val; break;
 		}
-		return;
 	} else /* op == UNUMBER */ {
 		switch (op) {
 		case '*': n1->nd_uval *= n2->nd_uval; break;
@@ -314,7 +313,5 @@ eval(int op, ND *n1, ND *n2)
 		case GE: n1->nd_uval = n1->nd_uval >= n2->nd_uval; break;
 		case RS: n1->nd_uval >>= n2->nd_uval; break;
 		}
-		return;
 	}
-	error("unexpected arithmetic");
 }

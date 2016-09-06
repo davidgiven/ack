@@ -1,4 +1,4 @@
-/*	$Id: code.c,v 1.96 2015/11/17 19:19:40 ragge Exp $	*/
+/*	$Id: code.c,v 1.98 2016/08/09 17:16:58 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -141,7 +141,7 @@ efcode(void)
 		return;
 
 	/* struct return for small structs */
-	sz = tsize(BTYPE(cftnsp->stype), cftnsp->sdf, cftnsp->sap);
+	sz = (int)tsize(BTYPE(cftnsp->stype), cftnsp->sdf, cftnsp->sap);
 #if defined(os_openbsd)
 	if (sz == SZCHAR || sz == SZSHORT || sz == SZINT || sz == SZLONGLONG) {
 #else
@@ -159,8 +159,11 @@ efcode(void)
 		else if (sz > SZSHORT) sz = INT;
 		else sz = SHORT;
 		q = block(OREG, NIL, NIL, sz, 0, 0);
-		p = block(REG, NIL, NIL, sz, 0, 0);
-		ecomp(buildtree(ASSIGN, p, q));
+		if (sz < SZINT)
+			q = cast(q, INT, 0);
+		p = block(REG, NIL, NIL, INT, 0, 0);
+		p = (buildtree(ASSIGN, p, q));
+		ecomp(p);
 		return;
 	}
 
@@ -263,7 +266,7 @@ bfcode(struct symtab **sp, int cnt)
 
 	/* Function returns struct, create return arg node */
 	if (cftnsp->stype == STRTY+FTN || cftnsp->stype == UNIONTY+FTN) {
-		sz = tsize(BTYPE(cftnsp->stype), cftnsp->sdf, cftnsp->sap);
+		sz = (int)tsize(BTYPE(cftnsp->stype), cftnsp->sdf, cftnsp->sap);
 #if defined(os_openbsd)
 		/* OpenBSD uses non-standard return for small structs */
 		if (sz > SZLONGLONG)
@@ -296,7 +299,7 @@ bfcode(struct symtab **sp, int cnt)
 	 */
 	for (i = 0; i < cnt; i++) {
 		sp2 = sp[i];
-		sz = tsize(sp2->stype, sp2->sdf, sp2->sap);
+		sz = (int)tsize(sp2->stype, sp2->sdf, sp2->sap);
 
 		SETOFF(sz, SZINT);
 
@@ -324,7 +327,7 @@ bfcode(struct symtab **sp, int cnt)
 		if ((ISSOU(sp2->stype) && sp2->sclass == REGISTER) ||
 		    (sp2->sclass == REGISTER && xtemps == 0)) {
 			/* must move to stack */
-			sz = tsize(sp2->stype, sp2->sdf, sp2->sap);
+			sz = (int)tsize(sp2->stype, sp2->sdf, sp2->sap);
 			SETOFF(sz, SZINT);
 			SETOFF(autooff, SZINT);
 			reg = sp2->soffset;
@@ -457,7 +460,7 @@ addreg(NODE *p)
 	NODE *q;
 	int sz, r;
 
-	sz = tsize(p->n_type, p->n_df, p->n_ap)/SZCHAR;
+	sz = (int)tsize(p->n_type, p->n_df, p->n_ap)/SZCHAR;
 	sz = (sz + 3) >> 2;	/* sz in regs */
 	if ((regcvt+sz) > rparg) {
 		regcvt = rparg;

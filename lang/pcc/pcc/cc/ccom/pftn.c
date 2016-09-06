@@ -1,4 +1,4 @@
-/*	$Id: pftn.c,v 1.421 2016/03/05 15:31:24 ragge Exp $	*/
+/*	$Id: pftn.c,v 1.422 2016/08/09 17:30:26 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -1534,7 +1534,7 @@ falloc(struct symtab *p, int w, NODE *pty)
 	}
 
 	al = talign(type, NULL);
-	sz = tsize(type, NULL, NULL);
+	sz = (int)tsize(type, NULL, NULL);
 
 	if (w > sz) {
 		uerror("field too big");
@@ -1730,7 +1730,7 @@ typwalk(NODE *p, void *arg)
 	switch (p->n_op) {
 	case ALIGN:
 		if (tc->align < glval(p))
-			tc->align = glval(p);
+			tc->align = (int)glval(p);
                 break;
 	case ATTRIB:
 #ifdef GCC_COMPAT

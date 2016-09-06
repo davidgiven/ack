@@ -1,4 +1,4 @@
-/*	$Id: local.c,v 1.200 2016/03/05 15:31:24 ragge Exp $	*/
+/*	$Id: local.c,v 1.201 2016/08/09 17:30:26 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -703,7 +703,7 @@ clocal(P1ND *p)
 		r = p->n_right;
 		if (r->n_op != STCALL && r->n_op != USTCALL)
 			break;
-		m = tsize(BTYPE(r->n_type), r->n_df, r->n_ap);
+		m = (int)tsize(BTYPE(r->n_type), r->n_df, r->n_ap);
 		if (m == SZCHAR)
 			m = CHAR;
 		else if (m == SZSHORT)
