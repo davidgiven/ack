@@ -179,37 +179,38 @@ word_t splitoffset(valu_t val)
 	return 0;
 }
 
-/* This routine deals with STR and LDR instructions */
-
-void strldr(uint32_t opc, valu_t val)
+void strldr(uint32_t opc, struct expr_t* expr)
 {
+	quad type = expr->typ & S_TYP;
 	uint32_t d;
+	
+	/* Sanity checking. */
 
-	/* If the expression was a register, then just output it and save 24
-   bytes */
-
-	if (success)
+	if (type == S_ABS)
+		serror("can't use absolute addresses here");
+	
+	if (type == DOTTYP)
 	{
-		emit4(opc | val);
-		return;
+		/* Reference to code in this section. */
+
+		uint32_t d = expr->val - DOTVAL - 8;
+		if (fitu(d, 12))
+		{ /* If it's +ve */
+			emit4(opc | d | 0x018F0000); /* PC rel, up bit */
+			return;
+		}
+
+		d = -d;
+		if (fitu(d, 12))
+		{ /* If it's -ve */
+			emit4(opc | d | 0x010F0000); /* PC rel, no up bit */
+			return;
+		}
+
+		serror("displacement to near constant is too big");
 	}
 
-	d = val - DOTVAL - 8;
-	if (fitu(d, 12))
-	{ /* If it's +ve */
-		emit4(opc | d | 0x018F0000); /* PC rel, up bit */
-		return;
-	}
-
-	d = -d;
-	if (fitu(d, 12))
-	{ /* If it's -ve */
-		emit4(opc | d | 0x010F0000); /* PC rel, no up bit */
-		return;
-	}
-
-	serror("displacement overflow: 0x%x", d);
-	return;
+	serror("cannot directly address symbols in another section");
 }
 
 word_t calcshft(valu_t val, short typ, word_t styp)
