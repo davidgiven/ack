@@ -2,6 +2,8 @@
 
 #define maskx(v, x) (v & ((1 << (x)) - 1))
 
+static int calcimm(word_t* opc, valu_t* val, short typ);
+
 void branch(word_t brtyp, word_t link, struct expr_t* expr)
 {
 	uint32_t pc = DOTVAL;
@@ -29,7 +31,6 @@ void branch(word_t brtyp, word_t link, struct expr_t* expr)
 void data(long opc, long ins, valu_t val, short typ)
 {
 	valu_t tmpval;
-	int adrflag = 0;
 
 	if (typ == S_REG)
 	{ /* The argument is a register */
@@ -37,24 +38,8 @@ void data(long opc, long ins, valu_t val, short typ)
 		return;
 	}
 
-	/* Do a bit of optimisation here, since the backend might produce instructions
-   of the type    MOV R0, R0, #0.   We can ignore these. */
-
-	if (((opc == ADD) || (opc == SUB)) && (val == 0))
-	{ /* ADD or SUB 0 ? */
-		if ((ins & 0x000F0000) == ((ins & 0x0000F000) << 4)) /* Same reg ? */
-			return; /* Don't emit anything */
-	}
-
-	/* No optimisation, so carry on ... */
-
 	ins |= 0x02000000; /* The argument is an immediate value */
 	tmpval = val;
-	if (opc == 0xff)
-	{ /* This is an ADR */
-		adrflag = 1;
-		opc = MOV;
-	}
 
 	if (typ == S_ABS)
 	{ /* An absolute value */
@@ -66,39 +51,14 @@ void data(long opc, long ins, valu_t val, short typ)
 	}
 
 	tmpval = val;
-	if (!adrflag)
-	{ /* Don't do this for ADRs */
-		if (oursmall(calcimm(&opc, &tmpval, typ), 12))
-		{
-			emit4(opc | ins | tmpval);
-			return;
-		}
-	}
-
-	if (opc == MOV || opc == MVN || opc == ADD || opc == SUB)
+	if (oursmall(calcimm(&opc, &tmpval, typ), 12))
 	{
-		if (!bflag && pass == PASS_3)
-		{ /* Debugging info */
-			/* warning("MOV/ADD extension"); */
-			/* if (dflag)
-				printf("value: %lx\n", val);*/
-		}
-		if (oursmall((val & 0xFFFF0000) == 0, 8))
-		{
-			putaddr(opc, ins, val, 2);
-			return;
-		}
-		if (oursmall((val & 0xFF000000) == 0, 4))
-		{
-			putaddr(opc, ins, val, 3);
-			return;
-		}
-		putaddr(opc, ins, val, 4);
+		emit4(opc | ins | tmpval);
 		return;
 	}
 
 	if (pass == PASS_1)
-		DOTVAL += 16; /* Worst case we can emit */
+		DOTVAL += 4; /* Worst case we can emit */
 	else
 		serror("immediate value out of range");
 	return;
@@ -109,7 +69,7 @@ void data(long opc, long ins, valu_t val, short typ)
    12-bit field.  Unfortunately this means that some numbers may not fit at
    all. */
 
-void calcimm(word_t* opc, valu_t* val, short typ)
+static int calcimm(word_t* opc, valu_t* val, short typ)
 {
 	int i = 0;
 
@@ -252,36 +212,6 @@ void strldr(uint32_t opc, valu_t val)
 	return;
 }
 
-/* This routine deals with ADR instructions.  The ARM does not have a
-   'calculate effective address' instruction, so we use ADD, SUB, MOV or
-   MVN instead.  ADR is not a genuine instruction, but is provided to make
-   life easier.  At present these are all calculated by using a MOV and
-   successive ADDs.  Even if the address will fit into a single MOV, we 
-   still use two instructions; the second is a no-op.  This is to cure the
-   optimisation problem with mobile addresses ! */
-
-void calcadr(word_t ins, word_t reg, valu_t val, short typ)
-{
-	valu_t tmpval = val;
-	word_t opc = 0xff; /* Dummy opc used as a flag for data() */
-
-	/* First check that the address is in range */
-
-	if (val < 0)
-		tmpval = ~tmpval; /* Invert negative addresses for check */
-
-	if ((tmpval & 0xFC000000) && (typ != S_UND))
-	{
-		serror("adr address out of range");
-		return;
-	}
-
-	/* Can't do it PC relative, so use an absolute MOV instead */
-
-	data(opc, ins | reg << 12, val, typ);
-	return;
-}
-
 word_t calcshft(valu_t val, short typ, word_t styp)
 {
 	if (typ == S_UND)
@@ -307,67 +237,6 @@ void rotateleft2(long* x)
 		bits >>= 30;
 		*x |= bits;
 	}
-	return;
-}
-
-/* 
-   This routine overcomes the 12-bit encoding problem by outputting a number
-   a byte at a time.  For a MOV, it first uses a MOV, then successive ADDs.  
-   It will not use any more ADDs than needed to completely output the number.  
-   A similar approach is used for ADDs and SUBs.
-   There is a problem here with optimisation in the third pass; if the 
-   instruction needed two ADDs in the second pass, but only one in the third 
-   pass, then the second ADD is replaced with a no-op.  We cannot emit one 
-   less instruction, because that will upset other addresses.
-*/
-
-void putaddr(long opc, long ins, long val, int count)
-{
-	long tmpval = val;
-	long reg = ins & 0x0000F000;
-
-	emit4(opc | ins | (val & 0x000000FF));
-
-	tmpval = (val & 0x0000FF00) >> 8 | 0x00000C00;
-
-	/* Decide what to use for the additional instructions */
-
-	if (opc == 0x03a00000) /* This one is for strldr */
-		opc = 0x02800000;
-
-	if (opc == MOV)
-		opc = ADD;
-
-	if (opc == MVN)
-		opc = SUB;
-
-	if ((tmpval & 0x000000FF) != 0)
-		emit4(opc | ins | reg << 4 | tmpval);
-	else
-		emit4(0xF0000000); /* No-op if a zero argument */
-
-	if (count == 3 || count == 4)
-	{ /* Must use three or more instructions */
-		if ((val & 0xFFFF0000) != 0)
-		{
-			tmpval = (val & 0x00FF0000) >> 16 | 0x00000800;
-			emit4(opc | ins | reg << 4 | tmpval);
-		}
-		else
-			emit4(0xF0000000); /* No-op */
-	}
-
-	if (count == 4)
-	{ /* Must use four instructions */
-		if ((val & 0xFF000000) != 0)
-		{
-			tmpval = (val & 0xFF000000) >> 24 | 0x00000400;
-			emit4(opc | ins | reg << 4 | tmpval);
-		}
-		else
-			emit4(0xF0000000); /* No-op */
-	}
-
 	return;
 }
 

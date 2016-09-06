@@ -3,11 +3,11 @@
 operation	: BRANCH optlink expr
 			{branch($1, $2, &$3);}
 		| DATA1 optcond opts optp REG ',' REG ',' operand
-			{data($1,$2|$3|$4|$5<<12|$7<<16,$9.val,$9.typ);}
+			{data($1, $2|$3|$4|$5<<12|$7<<16, $9.val, $9.typ);}
 		| DATA2 optcond opts optp REG ',' operand
-			{data($1,$2|$3|$4|$5<<12,$7.val,$7.typ);}
+			{data($1, $2|$3|$4|$5<<12, $7.val, $7.typ);}
 		| DATA3 optcond opts optp REG ',' operand
-			{data($1,$2|$3|$4|$5<<16,$7.val,$7.typ);}
+			{data($1, $2|$3|$4|$5<<16, $7.val, $7.typ);}
 		| SDT optcond optt REG ',' address
 			{strldr($1|$2|$3|$4<<12,$6);}
 		| SDT2 optcond optt REG ',' splitaddress
@@ -16,8 +16,6 @@ operation	: BRANCH optlink expr
 			{emit4($1|$2|$3<<16|$4|$6|$7);}
 		| SWI optcond expr
 			{emit4($1|$2|$3.val);}
-		| ADR optcond REG ',' expr
-			{calcadr($2,$3,$5.val,$5.typ);}
 		| MUL optcond REG ',' REG ',' REG
 			{emit4($1|$2|$3<<16|$5|$7<<8);}
 		| MLA optcond REG ',' REG ',' REG ',' REG
