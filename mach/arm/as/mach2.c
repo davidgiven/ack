@@ -22,4 +22,4 @@
 %type <y_word> optlink optcond opts optt optp optb optexc reglist rlist
 %type <y_word> optsign optpsr optshift shftcnt address offset aoptshift
 %type <y_word> splitaddress splitoffset
-%type <y_expr> operand
+%type <y_expr> operand 
