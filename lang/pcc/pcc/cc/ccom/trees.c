@@ -1,4 +1,4 @@
-/*	$Id: trees.c,v 1.374 2016/04/02 09:47:12 ragge Exp $	*/
+/*	$Id: trees.c,v 1.377 2016/08/09 17:29:35 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -1600,6 +1600,7 @@ tymatch(P1ND *p)
 
 	if (casgop(o)) {
 		if (r->n_op != ICON && tl < FLOAT && tr < FLOAT &&
+		    tr > UNSIGNED &&
 		    DEUNSIGN(tl) < DEUNSIGN(tr) && o != CAST)
 			warner(Wtruncate, tnames[tr], tnames[tl]);
 		if (l->n_type == BOOL && r->n_type != BOOL) {
@@ -2061,6 +2062,7 @@ logwalk(P1ND *p)
 			 */
 		} else {
 			slval(p, glval(l));
+			p->n_sp = NULL;
 			p->n_op = ICON;
 			p1nfree(l);
 			p1nfree(r);
@@ -2078,7 +2080,7 @@ fixbranch(P1ND *p, int label)
 	logwalk(p);
 
 	if (p->n_op == ICON) {
-		if (glval(p) != 0)
+		if (glval(p) != 0 || p->n_sp != NULL)
 			branch(label);
 		p1nfree(p);
 	} else {

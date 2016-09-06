@@ -1,4 +1,4 @@
-.\"	$Id: cc.1,v 1.43 2014/12/24 09:55:32 plunky Exp $
+.\"	$Id: cc.1,v 1.44 2016/07/10 08:21:10 ragge Exp $
 .\"
 .\" Copyright (c) 2007 Jeremy C. Reed <reed@reedmedia.net>
 .\"
@@ -23,7 +23,7 @@
 .Nd front-end to the C compiler
 .Sh SYNOPSIS
 .Nm
-.Op Fl cEgkMPStvX
+.Op Fl cEgkMPSstvX
 .Op Fl B Ns Ar prefix
 .Op Fl D Ar macro Ns Oo = Ns Ar value Oc
 .Op Fl d Ns Ar flags
@@ -43,12 +43,14 @@
 .Op Fl pthread
 .Op Fl shared
 .Op Fl static
+.Op Fl std= Ns Ar standard
 .Op Fl U Ar macro
 .Op Fl Wa Ns , Ns Ar options
 .Op Fl Wc Ns , Ns Ar options
 .Op Fl Wl Ns , Ns Ar options
 .Op Fl Wp Ns , Ns Ar options
 .Op Fl x Ar language
+.Op Fl z Ar keyword
 .Op Ar
 .Sh DESCRIPTION
 The
@@ -259,9 +261,12 @@ and
 .Fl xinline
 to
 .Xr ccom 1 .
-If no level is given the optimization level is increased, or
-optimizations can be disabled using
+If no level is given the optimization level is
+.Fl O1 .
+Optimizations can be disabled using
 .Fl O0 .
+In situations where multiple optimization flags are given, the last flag is the
+one used.
 .It Fl o Ar outfile
 Save result to
 .Ar outfile .
@@ -293,6 +298,14 @@ option is used.
 Note: cannot be combined with
 .Fl o
 if multiple files are given.
+.It Fl s
+Passed to
+.Xr ld 1
+to remove all symbol table and relocation information from the generated
+executable.
+This option is silently ignored if
+.Nm
+does not invoke the linker.
 .It Fl shared
 Create a shared object of the result.
 Tells the linker not to generate an executable.
@@ -300,6 +313,18 @@ Tells the linker not to generate an executable.
 Do not use dynamic linkage.
 By default, it will link using the dynamic linker options
 and/or shared objects for the platform.
+.It Fl std= Ns Ar standard
+Compile to the specified
+.Ar standard .
+Accepted values for
+.Ar standard
+are
+.Ar c89 ,
+.Ar c99 ,
+.Ar gnu99 ,
+.Ar gnu9x ,
+and
+.Ar c11 .
 .It Fl t
 Passed to
 .Xr cpp 1
@@ -342,6 +367,11 @@ Any unknown
 .Fl x
 options are passed to
 .Xr ccom 1 .
+.It Fl z Ar keyword
+Passed to
+.Xr ld 1 .
+Please refer to the documentation of your linker for acceptable values of
+.Ar keyword .
 .El
 .Ss Predefined Macros
 A few

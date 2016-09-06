@@ -1,4 +1,4 @@
-/*	$Id: local2.c,v 1.28 2015/01/04 19:17:23 ragge Exp $	*/
+/*	$Id: local2.c,v 1.29 2016/07/10 09:49:52 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -308,21 +308,21 @@ shiftop(NODE *p)
 	NODE *r = p->n_right;
 	TWORD ty = p->n_type;
 
-	if (p->n_op == LS && r->n_op == ICON && r->n_lval < 32) {
+	if (p->n_op == LS && r->n_op == ICON && getlval(r) < 32) {
 		expand(p, INBREG, "\tsrwi A1,AL,32-AR" COM "64-bit left-shift\n");
 		expand(p, INBREG, "\tslwi U1,UL,AR\n");
 		expand(p, INBREG, "\tor U1,U1,A1\n");
 		expand(p, INBREG, "\tslwi A1,AL,AR\n");
-	} else if (p->n_op == LS && r->n_op == ICON && r->n_lval < 64) {
+	} else if (p->n_op == LS && r->n_op == ICON && getlval(r) < 64) {
 		expand(p, INBREG, "\tli A1,0" COM "64-bit left-shift\n");
-		if (r->n_lval == 32)
+		if (getlval(r) == 32)
 			expand(p, INBREG, "\tmr U1,AL\n");
 		else
 			expand(p, INBREG, "\tslwi U1,AL,AR-32\n");
 	} else if (p->n_op == LS && r->n_op == ICON) {
 		expand(p, INBREG, "\tli A1,0" COM "64-bit left-shift\n");
 		expand(p, INBREG, "\tli U1,0\n");
-	} else if (p->n_op == RS && r->n_op == ICON && r->n_lval < 32) {
+	} else if (p->n_op == RS && r->n_op == ICON && getlval(r) < 32) {
 		expand(p, INBREG, "\tslwi U1,UL,32-AR" COM "64-bit right-shift\n");
 		expand(p, INBREG, "\tsrwi A1,AL,AR\n");
 		expand(p, INBREG, "\tor A1,A1,U1\n");
@@ -330,12 +330,12 @@ shiftop(NODE *p)
 			expand(p, INBREG, "\tsrawi U1,UL,AR\n");
 		else
 			expand(p, INBREG, "\tsrwi U1,UL,AR\n");
-	} else if (p->n_op == RS && r->n_op == ICON && r->n_lval < 64) {
+	} else if (p->n_op == RS && r->n_op == ICON && getlval(r) < 64) {
 		if (ty == LONGLONG)
 			expand(p, INBREG, "\tli U1,-1" COM "64-bit right-shift\n");
 		else
 			expand(p, INBREG, "\tli U1,0" COM "64-bit right-shift\n");
-		if (r->n_lval == 32)
+		if (getlval(r) == 32)
 			expand(p, INBREG, "\tmr A1,UL\n");
 		else if (ty == LONGLONG)
 			expand(p, INBREG, "\tsrawi A1,UL,AR-32\n");
@@ -354,7 +354,7 @@ static void
 stasg(NODE *p)
 {
 	NODE *l = p->n_left;
-	int val = l->n_lval;
+	int val = getlval(l);
 
         /* R3 = dest, R4 = src, R5 = len */
         printf("\tli %s,%d\n", rnames[R5], attr_find(p->n_ap, ATTR_P2STRUCT)->iarg(0));
@@ -960,7 +960,7 @@ adrcon(CONSZ val)
 void
 conput(FILE *fp, NODE *p)
 {
-	int val = p->n_lval;
+	int val = getlval(p);
 
 	switch (p->n_op) {
 	case ICON:
@@ -970,7 +970,7 @@ conput(FILE *fp, NODE *p)
 				fprintf(fp, "+%d", val);
 		} else {
 			if (GCLASS(p->n_type) == CLASSB)
-				fprintf(fp, CONFMT, p->n_lval >> 32);
+				fprintf(fp, CONFMT, getlval(p) >> 32);
 			else
 				fprintf(fp, "%d", val);
 		}
@@ -1022,14 +1022,14 @@ upput(NODE *p, int size)
 	case NAME:
 	case OREG:
 		if (features(FEATURE_BIGENDIAN))
-			printf("%d", (int)p->n_lval);
+			printf("%d", (int)getlval(p));
 		else
-			printf("%d", (int)(p->n_lval + 4));
+			printf("%d", (int)(getlval(p) + 4));
 		printf("(%s)", rnames[regno(p)]);
 		break;
 
 	case ICON:
-		printf(CONFMT, p->n_lval >> 32);
+		printf(CONFMT, getlval(p) >> 32);
 		break;
 
 	default:
@@ -1050,18 +1050,18 @@ adrput(FILE *io, NODE *p)
 	case NAME:
 		if (p->n_name[0] != '\0') {
 			fputs(p->n_name, io);
-			if (p->n_lval != 0)
-				fprintf(io, "+" CONFMT, p->n_lval);
+			if (getlval(p) != 0)
+				fprintf(io, "+" CONFMT, getlval(p));
 		} else
-			fprintf(io, CONFMT, p->n_lval);
+			fprintf(io, CONFMT, getlval(p));
 		return;
 
 	case OREG:
 		if (DEUNSIGN(p->n_type) == LONGLONG &&
 		    features(FEATURE_BIGENDIAN))
-			fprintf(io, "%d", (int)(p->n_lval + 4));
+			fprintf(io, "%d", (int)getlval(p) + 4);
 		else
-			fprintf(io, "%d", (int)p->n_lval);
+			fprintf(io, "%d", (int)getlval(p));
 		fprintf(io, "(%s)", rnames[regno(p)]);
 		return;
 
@@ -1472,7 +1472,7 @@ special(NODE *p, int shape)
 			return SRREG;
 		break;
 	case SPCON:
-		if (o == ICON && p->n_name[0] == 0 && (p->n_lval & ~0x7fff) == 0)
+		if (o == ICON && p->n_name[0] == 0 && (getlval(p) & ~0x7fff) == 0)
 			return SRDIR;
 		break;
 	}

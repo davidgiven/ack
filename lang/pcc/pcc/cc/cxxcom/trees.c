@@ -1,4 +1,4 @@
-/*	$Id: trees.c,v 1.21 2016/03/05 15:31:25 ragge Exp $	*/
+/*	$Id: trees.c,v 1.22 2016/08/09 17:11:57 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -3086,7 +3086,7 @@ send_passt(int type, ...)
 		ip->ip_node = va_arg(ap, NODE *);
 		if (ip->ip_node->n_op == LABEL) {
 			NODE *p = ip->ip_node;
-			ip->ip_lbl = glval(p->n_left);
+			ip->ip_lbl = (int)glval(p->n_left);
 			ip->type = IP_DEFLAB;
 			nfree(nfree(p));
 		}

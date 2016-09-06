@@ -1,4 +1,4 @@
-/*	$Id: optim.c,v 1.63 2016/04/02 20:16:23 ragge Exp $	*/
+/*	$Id: optim.c,v 1.65 2016/07/09 15:59:43 ragge Exp $	*/
 /*
  * Copyright(C) Caldera International Inc. 2001-2002. All rights reserved.
  *
@@ -459,10 +459,12 @@ again:	o = p->n_op;
 			p1walkf(p, putjops, 0);
 			p1tfree(p);
 			p = bcon(0);
+#ifdef notyet /* result may be logical value */
 		} else {
 			q = p->n_right;
 			nfree(nfree(p));
 			p = cast(q, INT, 0);
+#endif
 		}
 		break;
 	case OROR:
@@ -472,10 +474,12 @@ again:	o = p->n_op;
 			p1walkf(p, putjops, 0);
 			p1tfree(p);
 			p = bcon(1);
+#ifdef notyet /* result may be logical value */
 		} else {
 			q = p->n_right;
 			nfree(nfree(p));
 			p = cast(q, INT, 0);
+#endif
 		}
 		break;
 	}

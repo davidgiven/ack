@@ -1,4 +1,4 @@
-/*	$Id: code.c,v 1.11 2014/06/03 20:19:50 ragge Exp $	*/
+/*	$Id: code.c,v 1.13 2016/06/27 11:47:06 ragge Exp $	*/
 /*
  * Copyright (c) 2006 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -29,6 +29,14 @@
 
 # include "pass1.h"
 
+#ifdef LANG_CXX
+#define P1ND NODE
+#define p1alloc talloc
+#define p1nfree nfree
+#define p1fwalk fwalk
+#define p1tcopy ccopy
+#endif
+
 /*
  * cause the alignment to become a multiple of n
  * never called for text segment.
@@ -45,16 +53,20 @@ defalign(int n)
 void
 setseg(int seg, char *name)
 {
+#ifndef os_none
 	switch (seg) {
 	case PROG: name = ".text"; break;
 	case DATA:
 	case LDATA: name = ".data"; break;
 	case STRNG:
-	case RDATA: name = ".section .rodata"; break;
+	case RDATA: name = ".rodata"; break;
 	case UDATA: break;
 	default:
 		cerror((char *)__func__);
 	}
+#else
+	name = ".NREL";
+#endif
 	printf("\t%s\n", name);
 }
 
@@ -67,8 +79,7 @@ defloc(struct symtab *sp)
 {
 	char *name;
 
-	if ((name = sp->soname) == NULL)
-		name = exname(sp->sname);
+	name = getexname(sp);
 
 	if (ISFTN(sp->stype))
 		return;
@@ -87,8 +98,7 @@ defzero(struct symtab *sp)
 	int off, al;
 	char *name;
 
-	if ((name = sp->soname) == NULL)
-		name = exname(sp->sname);
+	name = getexname(sp);
 	off = tsize(sp->stype, sp->sdf, sp->sap);
 	SETOFF(off,SZCHAR);
 	off /= SZCHAR;
@@ -115,7 +125,7 @@ defzero(struct symtab *sp)
 void
 efcode(void)
 {
-	NODE *p, *q;
+	P1ND *p, *q;
 //	int sz;
 
 #if 0
@@ -133,11 +143,11 @@ cerror("efcode");
 	/* address of return struct is in eax */
 	/* create a call to memcpy() */
 	/* will get the result in eax */
-	p = block(REG, NIL, NIL, CHAR+PTR, 0, 0);
+	p = block(REG, NULL, NULL, CHAR+PTR, 0, 0);
 //	p->n_rval = EAX;
-	q = block(OREG, NIL, NIL, CHAR+PTR, 0, 0);
+	q = block(OREG, NULL, NULL, CHAR+PTR, 0, 0);
 //	q->n_rval = EBP;
-	q->n_lval = 8; /* return buffer offset */
+	slval(q, 8); /* return buffer offset */
 	p = block(CM, q, p, INT, 0, 0);
 //	sz = (tsize(STRTY, cftnsp->sdf, cftnsp->ssue)+SZCHAR-1)/SZCHAR;
 //	p = block(CM, p, bcon(sz), INT, 0, 0);
@@ -155,7 +165,7 @@ cerror("efcode");
 void
 bfcode(struct symtab **a, int n)
 {
-//	NODE *p, *q;
+//	P1ND *p, *q;
 	int i;
 
 	for (i = 0; i < n; i++) {
@@ -179,11 +189,20 @@ cerror("bfcode");
 void
 ejobcode(int flag)
 {
+#ifdef os_none
+	printf("\t.END\n");
+#endif
 }
 
 void
 bjobcode(void)
 {
+#ifdef os_none
+	printf("\t.TITL foo\n");
+	printf("\t.TXTM 1\n");	/* big endian */
+	printf("\t.NREL\n");	/* relocatable */
+	printf("\t.EXTU\n");	/* undefined syms are external */
+#endif
 }
 
 /* fix up type of field p */
@@ -200,38 +219,53 @@ mygenswitch(int num, TWORD type, struct swents **p, int n)
 {
 	return 0;
 }
+
+static int xoff;
+
+static void
+fnummer(P1ND *p)
+{
+	if (p->n_op != FUNARG)
+		return;
+	p->n_rval = xoff;
+	xoff += tsize(p->n_type, p->n_df, p->n_ap)/SZSHORT;
+}
+
 /*
  * Called with a function call with arguments as argument.
  * This is done early in buildtree() and only done once.
  */
-NODE *
-funcode(NODE *p)
+P1ND *
+funcode(P1ND *p)
 {
-	NODE *r, *l;
+	P1ND *r, *l;
 
 	/* Fix function call arguments. On nova, just add funarg */
 	for (r = p->n_right; r->n_op == CM; r = r->n_left) {
-		if (r->n_right->n_op != STARG)
-			r->n_right = block(FUNARG, r->n_right, NIL,
+		if (r->n_right->n_op != STARG) {
+			r->n_right = block(FUNARG, r->n_right, NULL,
 			    r->n_right->n_type, r->n_right->n_df,
 			    r->n_right->n_ap);
+		}
 	}
 	if (r->n_op != STARG) {
-		l = talloc();
+		l = p1alloc();
 		*l = *r;
 		r->n_op = FUNARG;
 		r->n_left = l;
 		r->n_type = l->n_type;
 	}
 
+	xoff = 1;
+	p1listf(p->n_right, fnummer);
 	return p;
 }
 
 /*
  * Return return as given by a.
  */
-NODE *
-builtin_return_address(const struct bitable *bt, NODE *a)
+P1ND *
+builtin_return_address(const struct bitable *bt, P1ND *a)
 {
 	cerror((char *)__func__);
 	return 0;
@@ -240,8 +274,8 @@ builtin_return_address(const struct bitable *bt, NODE *a)
 /*
  * Return frame as given by a.
  */
-NODE *
-builtin_frame_address(const struct bitable *bt, NODE *a)
+P1ND *
+builtin_frame_address(const struct bitable *bt, P1ND *a)
 {
 	cerror((char *)__func__);
 	return 0;
@@ -250,8 +284,8 @@ builtin_frame_address(const struct bitable *bt, NODE *a)
 /*
  * Return "canonical frame address".
  */
-NODE *
-builtin_cfa(const struct bitable *bt, NODE *a)
+P1ND *
+builtin_cfa(const struct bitable *bt, P1ND *a)
 {
 	cerror((char *)__func__);
 	return 0;

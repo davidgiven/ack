@@ -1,5 +1,5 @@
 %{
-/*	$Id: scan.l,v 1.147 2016/03/08 18:17:45 ragge Exp $	*/
+/*	$Id: scan.l,v 1.148 2016/08/07 08:54:56 ragge Exp $	*/
 
 /*
  * Copyright (c) 2002 Anders Magnusson. All rights reserved.
@@ -59,6 +59,7 @@ static P1ND *charcon(void);
 static P1ND *wcharcon(void);
 static void control(int);
 static void pragma(void);
+static int dotfile;
 int notype, parbal, inattr, parlvl, nodinit, inoso;
 int kwdecode(struct symtab *s);
 
@@ -718,6 +719,23 @@ wcharcon(void)
 	return xbcon(val, NULL, ctype(UNSIGNED));
 }
 
+#ifndef MYDOTFILE
+/*
+ * Get basename and print it as '.file "basename.c"'
+ */
+static void
+printdotfile(char *file)
+{
+	char *p;
+
+	if ((p = strrchr(file, '/')) == NULL)
+		p = file;
+	else
+		p++;
+	printf(PRTPREF "\t.file \"%s\"\n", p);
+}
+#endif
+
 void
 control(int t)
 {
@@ -766,6 +784,10 @@ control(int t)
 		if (gflag)
 			stabs_file(ftitle);
 #endif
+		if (dotfile == 0) {
+			dotfile++;
+			printdotfile(ftitle);
+		}
 	}
 	return;
 bad:

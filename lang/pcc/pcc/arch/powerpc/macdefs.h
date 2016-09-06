@@ -1,4 +1,4 @@
-/*	$Id: macdefs.h,v 1.18 2016/03/05 15:53:04 ragge Exp $	*/
+/*	$Id: macdefs.h,v 1.19 2016/07/10 09:49:52 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -381,22 +381,27 @@ void addstub(struct stub *list, char *name);
 
 #define TARGET_STDARGS
 #define TARGET_BUILTINS							\
-	{ "__builtin_stdarg_start", powerpc_builtin_stdarg_start },	\
-	{ "__builtin_va_arg", powerpc_builtin_va_arg },			\
-	{ "__builtin_va_end", powerpc_builtin_va_end },			\
-	{ "__builtin_va_copy", powerpc_builtin_va_copy },		\
-	{ "__builtin_frame_address", powerpc_builtin_frame_address },	\
-	{ "__builtin_return_address", powerpc_builtin_return_address },
+	{ "__builtin_stdarg_start", powerpc_builtin_stdarg_start,	\
+						0, 2, 0, VOID },	\
+	{ "__builtin_va_arg", powerpc_builtin_va_arg, 			\
+			BTNORVAL|BTNOPROTO, 2, 0, 0 },			\
+	{ "__builtin_va_end", powerpc_builtin_va_end, 0, 1, 0, VOID },	\
+	{ "__builtin_va_copy", powerpc_builtin_va_copy, 0, 2, 0, VOID },
 
-#define NODE struct node
+#ifdef LANG_CXX
+#define P1ND struct node
+#else
+#define P1ND struct p1node
+#endif
 struct node;
-NODE *powerpc_builtin_stdarg_start(NODE *f, NODE *a, unsigned int);
-NODE *powerpc_builtin_va_arg(NODE *f, NODE *a, unsigned int);
-NODE *powerpc_builtin_va_end(NODE *f, NODE *a, unsigned int);
-NODE *powerpc_builtin_va_copy(NODE *f, NODE *a, unsigned int);
-NODE *powerpc_builtin_frame_address(NODE *f, NODE *a, unsigned int);
-NODE *powerpc_builtin_return_address(NODE *f, NODE *a, unsigned int);
-#undef NODE
+struct bitable;
+P1ND *powerpc_builtin_stdarg_start(const struct bitable *, P1ND *a);
+P1ND *powerpc_builtin_va_arg(const struct bitable *f, P1ND *a);
+P1ND *powerpc_builtin_va_end(const struct bitable *f, P1ND *a);
+P1ND *powerpc_builtin_va_copy(const struct bitable *f, P1ND *a);
+P1ND *powerpc_builtin_frame_address(const struct bitable *f, P1ND *a);
+P1ND *powerpc_builtin_return_address(const struct bitable *f, P1ND *a);
+#undef P1ND
 
 #define NARGREGS	8
 

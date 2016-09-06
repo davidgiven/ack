@@ -6,6 +6,7 @@ when calling functions.  Some locations have predefined functions though.
 Arrays allocated as automatics are stored on the stack with a pointer
 in zero page to its destination.
 
+#ifdef 2bsd
 0-7	Unused (by us)
 10	Stack pointer
 11	Frame pointer
@@ -18,6 +19,13 @@ in zero page to its destination.
 40-47	Used by HW stack and MMPU
 50-77	Permanent, save before use.
 100-377	Addresses for subroutines, written by the linker
+#elif rdos
+0-17	Unused (by us)
+20-27	(Auto-increment), scratch
+30-37	(Auto-decrement), scratch
+40-47	Used by HW stack and MMPU
+50-377	Addresses for subroutines, written by the linker
+#endif
 
 The normal registers (AC0-AC3) are all considered scratch registers.
 
@@ -28,21 +36,28 @@ Register classes are assigned as:
 
 In byte code the left half of a word is the first byte (big-endian).
 This is bit 0-7 in Nova syntax.
-The stack is growing towards lower adresses (as opposed to the Eclipse stack).
+The stack is growing towards lower adresses (as opposed to the HW stack).
 Stack pointer points to the last used stack entry, which means:
-PUSH: dec sp, store value
-POP:  fetch val, inc sp
+PUSH: store value, dec sp
+POP:  inc sp, fetch val
 
 Note that internally is the first 24 words stored in loc 50-77!
 So an offset is subtracted in adrput().
 
-Stack layout:
+Functions which modifies stack (like calls to alloca) will have a frame
+pointer to which everything relates.  Functions that do not only have 
+stack pointer.  
 
-	! arg1	! 1
- fp ->	! arg0	! 0
- 	! old pc! -1
- 	! old fp! -2
- sp ->	! saved ! -3
+Space for all possible arguments are allocated on stack by the compiler,
+so no pushing and popping.
+
+Stack layout (with frame pointer):
+
+	! arg1	! 2
+ 	! arg0	! 1
+ fp ->	! ret pc! 0	<- stack pointer when enter new function
+ 	! old fp! -1
+ sp ->	! saved ! -2
 
 
 Stack references to zero page are converted to NAMEs, using word addresses.

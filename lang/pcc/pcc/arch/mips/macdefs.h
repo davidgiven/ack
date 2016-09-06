@@ -1,4 +1,4 @@
-/*	$Id: macdefs.h,v 1.23 2016/03/05 15:53:04 ragge Exp $	*/
+/*	$Id: macdefs.h,v 1.24 2016/07/10 09:54:57 ragge Exp $	*/
 /*
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -92,8 +92,8 @@
 #define	MAX_INT		0x7fffffff
 #define	MAX_UNSIGNED	0xffffffffU
 #define	MIN_LONG	MIN_INT
-#define	MAX_LONG	MAX_INT
-#define	MAX_ULONG	MAX_UNSIGNED
+#define	MAX_LONG	0x7fffffffL
+#define	MAX_ULONG	0xffffffffUL
 #define	MIN_LONGLONG	(-0x7fffffffffffffffLL-1)
 #define	MAX_LONGLONG	0x7fffffffffffffffLL
 #define	MAX_ULONGLONG	0xffffffffffffffffULL

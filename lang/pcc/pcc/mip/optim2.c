@@ -1,4 +1,4 @@
-/*	$Id: optim2.c,v 1.92 2015/11/17 19:19:40 ragge Exp $	*/
+/*	$Id: optim2.c,v 1.93 2016/08/09 17:14:58 ragge Exp $	*/
 /*
  * Copyright (c) 2004 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.
@@ -315,13 +315,13 @@ listsetup(struct interpass *ipole, struct dlnod *dl)
 			case GOTO:
 				if (q->n_left->n_op == ICON) {
 					p->op = JBR;
-					p->labno = getlval(q->n_left);
+					p->labno = (int)getlval(q->n_left);
 				} else 
 					p->op = STMT;
 				break;
 			case CBRANCH:
 				p->op = CBR;
-				p->labno = getlval(q->n_right);
+				p->labno = (int)getlval(q->n_right);
 				break;
 			case ASSIGN:
 				/* remove ASSIGN to self for regs */

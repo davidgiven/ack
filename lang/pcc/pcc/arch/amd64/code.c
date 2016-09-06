@@ -1,4 +1,4 @@
-/*	$Id: code.c,v 1.85 2015/12/13 09:00:04 ragge Exp $	*/
+/*	$Id: code.c,v 1.86 2016/07/15 20:31:01 ragge Exp $	*/
 /*
  * Copyright (c) 2008 Michael Shalayeff
  * Copyright (c) 2003 Anders Magnusson (ragge@ludd.luth.se).
@@ -765,17 +765,17 @@ movtomem(NODE *p, int off, int reg)
  * will have the first 64 bits passed in general reg and the second in SSE.
  *
  * sp below is a pointer to a member list.
- * off tells whether is is the first or second eight-byte to check.
+ * off tells how many bits in that the classification should start.
  */
 static int
-classifystruct(struct symtab *sp, int off)
+classifystruct(struct symtab *sp, int off, int osz)
 {
 	struct symtab sps[16];
 	union dimfun *df;
 	TWORD t;
 	int cl, cl2, sz, i;
 
-
+//printf("classifystruct off %d, osz %d\n", off, osz);
 	for (cl = 0; sp; sp = sp->snext) {
 		t = sp->stype;
 
@@ -788,6 +788,10 @@ classifystruct(struct symtab *sp, int off)
 				t = DECREF(t);
 				df++;
 			} while (ISARY(t));
+#ifdef PCC_DEBUG
+			if (sz >= 16)
+				cerror("classifystruct");
+#endif
 			for (i = 0; i < sz; i++) {
 				sps[i] = *sp;
 				sps[i].stype = t;
@@ -799,31 +803,20 @@ classifystruct(struct symtab *sp, int off)
 			sps[i-1].snext = sp->snext;
 			sp = &sps[0];
 		}
-
-		if (off == 0) {
-			if (sp->soffset >= SZLONG)
-				continue;
-		} else {
-			if (sp->soffset < SZLONG)
-				continue;
-		}
-
-		if (t <= ULONGLONG || ISPTR(t)) {
-			if (cl == 0 || cl == STRSSE)
-				cl = STRREG;
-		} else if (t <= DOUBLE) {
-			if (cl == 0)
-				cl = STRSSE;
-		} else if (t == LDOUBLE) {
-			return STRMEM;
-		} else if (ISSOU(t)) {
+		if (sp->soffset >= osz)
+			break;
+		if (ISSOU(t)) {
 #ifdef GCC_COMPAT
 			if (attr_find(sp->sap, GCC_ATYP_PACKED)) {
 				cl = STRMEM;
 			} else
 #endif
-			{
-				cl2 = classifystruct(strmemb(sp->sap), off);
+			if ((sp->soffset +
+			    tsize(sp->stype, sp->sdf, sp->sap)) < off) {
+				continue;
+			} else {
+				cl2 = classifystruct(strmemb(sp->sap),
+				    off - sp->soffset, osz - sp->soffset);
 				if (cl2 == STRMEM) {
 					cl = STRMEM;
 				} else if (cl2 == STRREG) {
@@ -834,6 +827,20 @@ classifystruct(struct symtab *sp, int off)
 						cl = STRSSE;
 				}
 			}
+			continue;
+		}
+
+		if (sp->soffset < off)
+			continue;
+
+		if (t <= ULONGLONG || ISPTR(t)) {
+			if (cl == 0 || cl == STRSSE)
+				cl = STRREG;
+		} else if (t <= DOUBLE) {
+			if (cl == 0)
+				cl = STRSSE;
+		} else if (t == LDOUBLE) {
+			return STRMEM;
 		} else
 			cerror("classifystruct: unknown type %x", t);
 		if (cl == STRMEM)
@@ -884,14 +891,14 @@ argtyp(TWORD t, union dimfun *df, struct attr *ap)
 			cl = STRMEM;
 		} else if (sz <= SZLONG) {
 			/* only one member to check */
-			cl = classifystruct(strmemb(ap), 0);
+			cl = classifystruct(strmemb(ap), 0, SZLONG);
 			if (cl == STRREG && ngpr > 5)
 				cl = STRMEM;
 			else if (cl == STRSSE && nsse > 7)
 				cl = STRMEM;
 		} else {
-			cl = classifystruct(strmemb(ap), 0);
-			cl2 = classifystruct(strmemb(ap), 1);
+			cl = classifystruct(strmemb(ap), 0, SZLONG);
+			cl2 = classifystruct(strmemb(ap), SZLONG, 2*SZLONG);
 			if (cl == STRMEM || cl2 == STRMEM)
 				cl = STRMEM;
 			else if (cl == STRREG && cl2 == STRSSE)
