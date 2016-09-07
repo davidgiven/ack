@@ -210,7 +210,10 @@ void strldr(uint32_t opc, struct expr_t* expr)
 		serror("displacement to near constant is too big");
 	}
 
-	serror("cannot directly address symbols in another section");
+	if (pass == PASS_1)
+		DOTVAL += 4; /* Worst case we can emit */
+	else
+		serror("cannot directly address symbols in another section");
 }
 
 word_t calcshft(valu_t val, short typ, word_t styp)
