@@ -386,6 +386,7 @@ putunit(kind,p,l,gf,lf)
 	register bblock_p b;
 	register short n = 0;
 	Lindex   pi;
+	bblock_p nextb;
 	loop_p   lp;
 
 	curoutp = gf;
@@ -432,10 +433,12 @@ putunit(kind,p,l,gf,lf)
 	 * after it has been written, because there may be references
 	 * to it from other (later) blocks.
 	 */
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p) 0; b = nextb) {
 		Ldeleteset(b->b_loops);
 		Ldeleteset(b->b_succ);
 		Ldeleteset(b->b_pred);
+		/* Must read b->b_next before releasing b */
+		nextb = b->b_next;
 		oldbblock(b);
 	}
 	/* Release the memory for the lmap, lbmap, bmap, lpmap tables */
