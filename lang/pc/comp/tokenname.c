@@ -1,5 +1,6 @@
 /* T O K E N   D E F I N I T I O N S */
 
+#include    "parameters.h"
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"tokenname.h"

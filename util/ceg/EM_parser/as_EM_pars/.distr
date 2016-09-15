@@ -1,6 +1,0 @@
-proto.make
-arg_type.h
-dist.c
-em_decl.h
-em_parser.h
-error.c

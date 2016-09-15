@@ -13,7 +13,7 @@
 	be handy.
 */
 
-#include	"spec_arith.h"
+#include	"parameters.h"
 
 #ifndef	SPECIAL_ARITHMETICS
 

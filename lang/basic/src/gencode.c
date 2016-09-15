@@ -644,7 +644,7 @@ prolog2()
 	C_loi((arith) BEMPTRSIZE);
 	C_exa_dnam("trpbuf");
 	C_lae_dnam("trpbuf",(arith)0);
-	C_cal("setjmp");
+	C_cal("__setjmp");
 	C_df_ilb(l);
 	C_asp((arith)(BEMPTRSIZE+BEMPTRSIZE));
 	C_lfr((arith)BEMINTSIZE);

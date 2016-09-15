@@ -5,18 +5,14 @@
 /* $Id$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
 #include	"l_em.h"
 #endif	/* LINT */
-#include	"debug.h"
-#include	"botch_free.h"
 #include	<alloc.h>
-#include	"density.h"
 #include	"Lpars.h"
-#include	"idf.h"
 #include	"label.h"
 #include	<flt_arith.h>
 #include	"arith.h"

@@ -5,21 +5,19 @@
 /* $Id$ */
 /*	Lint status checking	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 
 #ifdef	LINT
 
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
 #include	"assert.h"
-#include	"debug.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"code.h"	/* RVAL etc */
 #include	"LLlex.h"

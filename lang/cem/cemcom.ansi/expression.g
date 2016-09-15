@@ -7,13 +7,11 @@
 
 {
 #include	<alloc.h>
-#include	"lint.h"
-#include	"debug.h"
+#include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"

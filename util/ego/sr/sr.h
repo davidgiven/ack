@@ -57,7 +57,7 @@ struct code_info {
 #define LP_HEADER	lp_extend->lpx_sr.lpx_header
 #define LP_INSTR	lp_extend->lpx_sr.lpx_instr
 
-/* Parameters to be provided by environment: */
+/* parameters.h to be provided by environment: */
 
 extern int ovfl_harmful;  /* Does overflow during multiplication
 			    * cause a trap ?

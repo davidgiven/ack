@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	B L O C K   S T O R I N G   A N D   L O A D I N G	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 
 #include <em.h>

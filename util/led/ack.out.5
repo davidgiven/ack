@@ -44,14 +44,14 @@ The header of an object file has the following structure:
 .PP
 .nf
 struct outhead {
-	unsigned short 	oh_magic;	/* magic number */
-	unsigned short 	oh_stamp;	/* version stamp */
-	unsigned short	oh_flags;	/* several format flags */
-	unsigned short	oh_nsect;	/* number of outsect structures */
-	unsigned short	oh_nrelo;	/* number of outrelo structures */
-	unsigned short	oh_nname;	/* number of outname structures */
-	long	oh_nemit;	/* length of sections */
-	long	oh_nchar;	/* size of string area */
+	uint16_t oh_magic;	/* magic number */
+	uint16_t oh_stamp;	/* version stamp */
+	uint16_t oh_flags;	/* several format flags */
+	uint16_t oh_nsect;	/* number of outsect structures */
+	uint16_t oh_nrelo;	/* number of outrelo structures */
+	uint16_t oh_nname;	/* number of outname structures */
+	uint32_t oh_nemit;	/* length of sections */
+	uint32_t oh_nchar;	/* size of string area */
 };
 .fi
 .PP
@@ -92,11 +92,11 @@ An outsect structure has the following layout:
 .PP
 .nf
 struct outsect {
-	long 	os_base;	/* start address in machine */
-	long	os_size;	/* section size in machine */
-	long	os_foff;	/* start address in file */
-	long	os_flen;	/* section size in file */
-	long	os_lign;	/* section alignment */
+	uint32_t os_base;	/* start address in machine */
+	uint32_t os_size;	/* section size in machine */
+	uint32_t os_foff;	/* start address in file */
+	uint32_t os_flen;	/* section size in file */
+	uint32_t os_lign;	/* section alignment */
 };
 .fi
 .PP
@@ -147,10 +147,10 @@ relocatable datum. The information has the following structure:
 .PP
 .nf
 struct outrelo {
-	char	or_type;	/* type of reference */
-	char	or_sect;	/* referencing section */
-	unsigned short	or_nami;	/* referenced symbol index */
-	long	or_addr;	/* referencing address */
+	uint16_t or_type;	/* type of reference */
+	uint16_t or_sect;	/* referencing section */
+	uint16_t or_nami;	/* referenced symbol index */
+	uint32_t or_addr;	/* referencing address */
 };
 .fi
 .PP
@@ -158,15 +158,16 @@ struct outrelo {
 /*
  * relocation type bits
  */
-#define RELSZ	0x07		/* relocation length */
+#define RELSZ	0x0fffi     /* relocation length */
 #define RELO1	0x01		/* 1 byte */
 #define RELO2	0x02		/* 2 bytes */
 #define RELO4	0x03		/* 4 bytes */
 #define RELOPPC	0x04		/* 26-bit PowerPC address */
 #define RELOH2  0x05        /* write top 2 bytes of 4 byte word */
-#define RELPC	0x08		/* pc relative */
-#define RELBR	0x10		/* High order byte lowest address. */
-#define RELWR	0x20		/* High order word lowest address. */
+#define RELOVC4 0x06        /* VideoCore IV address in 32-bit insruction */
+#define RELPC	0x2000		/* pc relative */
+#define RELBR	0x4000		/* High order byte lowest address. */
+#define RELWR	0x8000		/* High order word lowest address. */
 .fi
 .PP
 .nf
@@ -231,9 +232,9 @@ struct outname {
 	}	on_u;
 #define on_mptr	on_u.on_ptr
 #define on_foff	on_u.on_off
-	unsigned short	on_type;	/* symbol type */
-	unsigned short	on_desc;	/* debug info */
-	long	on_valu;	/* symbol value */
+	uint16_t on_type;	/* symbol type */
+	uint16_t on_desc;	/* debug info */
+	uint32_t on_valu;	/* symbol value */
 };
 .fi
 .PP
@@ -283,15 +284,6 @@ object file.
 .br
 The following miscellaneous defines might come in handy when reading
 object files:
-.PP
-.nf
-/*
- * structure format strings
- */
-#define SF_HEAD	"22222244"
-#define SF_SECT	"44444"
-#define SF_RELO "1124"
-#define SF_NAME "4224"
 .fi
 .PP
 .nf
@@ -300,7 +292,7 @@ object files:
  */
 #define SZ_HEAD	20
 #define SZ_SECT	20
-#define SZ_RELO	8
+#define SZ_RELO	10
 #define SZ_NAME	12
 .fi
 .PP

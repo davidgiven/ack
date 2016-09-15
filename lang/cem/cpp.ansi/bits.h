@@ -3,7 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Id$ */
-#include "dobits.h"
+#include "parameters.h"
 #ifdef DOBITS
 #define bit0	0x01
 #define bit1	0x02

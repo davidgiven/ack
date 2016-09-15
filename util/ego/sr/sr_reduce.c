@@ -10,6 +10,7 @@
  */
 
 
+#include <stdlib.h>
 #include <em_pseu.h>
 #include <em_reg.h>
 #include <em_mes.h>

@@ -1,4 +1,5 @@
-/* $Id$ */
+#include <stdlib.h>
+#include <stdio.h>
 
 #if !defined(EM_WSIZE)
 #define EM_WSIZE _EM_WSIZE

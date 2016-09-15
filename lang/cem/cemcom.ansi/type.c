@@ -5,14 +5,12 @@
 /* $Id$ */
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
-#include	"nobitfield.h"
-#include	"debug.h"
-#include	"botch_free.h"
+#include	"parameters.h"
 #include	<alloc.h>
+#include    "idf.h"
 #include	"Lpars.h"
 #include	"arith.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"proto.h"
 #include	"sizes.h"

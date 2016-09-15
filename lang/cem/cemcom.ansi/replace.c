@@ -7,26 +7,18 @@
 
 #include	<stdlib.h>
 #include	<string.h>
-#include	"nopp.h"
+#include	"parameters.h"
 
 #ifndef NOPP
 
-#include	"debug.h"
-#include	"pathlength.h"
-#include	"strsize.h"
-#include	"nparams.h"
-#include	"idfsize.h"
-#include	"numsize.h"
 #include	<alloc.h>
-#include	"idf.h"
+#include    "idf.h"
 #include	"input.h"
 #include	"macro.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
 #include	"assert.h"
-#include	"static.h"
-#include	"macbuf.h"
 #include	"replace.h"
 
 extern struct idf *GetIdentifier();

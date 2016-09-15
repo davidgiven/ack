@@ -5,6 +5,7 @@
  */
 /* P U T . C */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <em_pseu.h>
 #include <em_spec.h>

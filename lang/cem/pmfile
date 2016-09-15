@@ -1,9 +1,0 @@
--- $Source$
--- $State$
-
-local d = ROOTDIR.."lang/cem/"
-
--- include (d.."cemcom/pmfile")
-include (d.."cemcom.ansi/pmfile")
--- include (d.."libcc/pmfile")
-include (d.."libcc.ansi/pmfile")

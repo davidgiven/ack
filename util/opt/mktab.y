@@ -294,6 +294,10 @@ main() {
 	return nerrors;
 }
 
+int yywrap(void) {
+	return 1;
+}
+
 yyerror(s) char *s; {
 
 	fprintf(stderr,"line %d: %s\n",lino,s);
@@ -421,4 +425,3 @@ out(w) {
 	}
 }
 
-#include "scan.c"

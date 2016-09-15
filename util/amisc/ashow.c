@@ -70,7 +70,7 @@ show(headp)
 	/*
 	 * We get all struct outname's and the strings in core first.
 	 */
-	name = (struct outname *) myalloc(headp->oh_nname * SZ_NAME);
+	name = (struct outname *) myalloc(headp->oh_nname * sizeof(struct outname));
 	string = myalloc((unsigned) headp->oh_nchar);
 	rd_name(name, headp->oh_nname);
 	for (np = &name[0]; np < &name[headp->oh_nname]; np++) {
@@ -142,6 +142,9 @@ showrelo()
 		break;
 	case RELOH2:
 		printf("\ttop 2 bytes of a 4 byte word\n");
+		break;
+	case RELOVC4:
+		printf("\tVideoCore IV address in 32-bit instruction\n");
 		break;
 	default:
 		printf("\tunknown relocation type %d\n", relrec.or_type & RELSZ);

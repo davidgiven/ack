@@ -1,5 +1,6 @@
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Id$ */
@@ -10,7 +11,8 @@
 	there is no reasonable method to prove that a program is 100%
 	correct, these assertions are needed in some places.
 */
-#include	"debug.h"	/* UF */
+
+#include	"parameters.h"
 
 #ifdef	DEBUG
 /*	Note: this macro uses parameter substitution inside strings */

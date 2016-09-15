@@ -8,6 +8,8 @@ static char rcsid[]= "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include "extern.h"
 
 int nerrors=0;
 
@@ -24,24 +26,38 @@ goodbye() {
 #endif
 }
 
-/*VARARGS1*/
-fatal(s,a,b,c,d) char *s; {
+void errorv(const char* s, va_list ap)
+{
+	extern int lineno;
+	extern char *filename;
 
-	error(s,a,b,c,d);
+	fprintf(stderr, "\"%s\", line %d:", filename, lineno);
+	vfprintf(stderr, s, ap);
+	fprintf(stderr, "\n");
+	nerrors++;
+}
+
+void fatal(const char* s, ...)
+{
+
+	va_list ap;
+
+	va_start(ap, s);
+	errorv(s, ap);
+	va_end(ap);
+
 	errorexit();
 	goodbye();
 	exit(-1);
 }
 
-/*VARARGS1*/
-error(s,a,b,c,d) char *s; {
-	extern int lineno;
-	extern char *filename;
+void error(const char* s, ...)
+{
+	va_list ap;
 
-	fprintf(stderr,"\"%s\", line %d:",filename,lineno);
-	fprintf(stderr,s,a,b,c,d);
-	fprintf(stderr,"\n");
-	nerrors++;
+	va_start(ap, s);
+	errorv(s, ap);
+	va_end(ap);
 }
 
 #ifndef NDEBUG

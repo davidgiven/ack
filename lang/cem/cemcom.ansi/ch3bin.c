@@ -5,11 +5,8 @@
 /* $Id$ */
 /* SEMANTIC ANALYSIS (CHAPTER 3.3)  --  BINARY OPERATORS */
 
-#include	"botch_free.h"
-#include	"debug.h"
+#include	"parameters.h"
 #include	<alloc.h>
-#include	"lint.h"
-#include	"idf.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"

@@ -5,19 +5,16 @@
 /* $Id$ */
 /* EXPRESSION-CODE GENERATOR */
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 
 #include	<em.h>
 #include	<em_reg.h>
 #include	<alloc.h>
-#include	"debug.h"
-#include	"nobitfield.h"
-#include	"dataflow.h"
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"code.h"
 #include	"assert.h"
@@ -41,7 +38,7 @@ arith NewLocal();	/* util.c */
 extern int	err_occurred; /* error.c */
 
 /*	EVAL() is the main expression-tree evaluator, which turns
-	any legal expression tree into EM code. Parameters:
+	any legal expression tree into EM code. parameters.h:
 
 	struct expr *expr
 		pointer to root of the expression tree to be evaluated

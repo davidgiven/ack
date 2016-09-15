@@ -5,23 +5,16 @@
 /* $Id$ */
 /*	U S E R   O P T I O N - H A N D L I N G		*/
 
+#include	"parameters.h"
 #include	<stdlib.h>
 #include	<string.h>
-#include	"lint.h"
-#include	"botch_free.h"
 #include	<alloc.h>
-#include	"nopp.h"
-#include	"idfsize.h"
-#include	"nobitfield.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"sizes.h"
 #include	"align.h"
-#include	"use_tmp.h"
-#include	"dataflow.h"
-#include	"dbsymtab.h"
 
 #ifndef NOPP
 extern char **inctable;

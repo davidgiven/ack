@@ -33,5 +33,8 @@ extern char	*strtok(char *_s1, const char *_s2);
 extern void	*memset(void *_s, int _c, size_t _n);
 extern char	*strerror(int _errnum);
 extern size_t	strlen(const char *_s);
+extern char *strdup(const char *_s);
+
+#define bcopy(s, d, z) memmove(d, s, z)
 
 #endif

@@ -9,6 +9,7 @@
 
 /* $Id$ */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
@@ -17,7 +18,6 @@
 #include	<em_label.h>
 #include	<em_code.h>
 
-#include	"nostrict.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -28,10 +28,8 @@
 #include	"main.h"
 #include	"chk_expr.h"
 #include	"warning.h"
-#include	"uns_arith.h"
 
 #ifndef NOCROSS
-#include	"target_sizes.h"
 int
 	word_align = AL_WORD,
 	short_align = AL_SHORT,

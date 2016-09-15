@@ -5,13 +5,12 @@
 /* $Id$ */
 /* EXPRESSION TREE HANDLING */
 
-#include	"lint.h"
-#include	"debug.h"
+#include    <stdlib.h>
+#include	"parameters.h"
 #include	"assert.h"
-#include	"botch_free.h"
 #include	<alloc.h>
-#include	"idf.h"
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"def.h"
 #include	"type.h"
@@ -23,7 +22,6 @@
 #include	"declar.h"
 #include	"sizes.h"
 #include	"level.h"
-#include	"use_tmp.h"
 
 extern char *symbol2str();
 extern char options[];

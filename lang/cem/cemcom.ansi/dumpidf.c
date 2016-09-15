@@ -5,16 +5,13 @@
 /* $Id$ */
 /*	DUMP ROUTINES	*/
 
-#include	"debug.h"
 
 #ifdef	DEBUG
+#include	"parameters.h"
 #include	<alloc.h>
-#include	"nopp.h"
-#include	"nobitfield.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"stack.h"
-#include	"idf.h"
 #include	"def.h"
 #include	"type.h"
 #include	"proto.h"

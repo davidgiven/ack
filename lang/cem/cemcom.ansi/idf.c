@@ -7,20 +7,15 @@
 
 #include	<stdlib.h>
 #include	<string.h>
-#include	"lint.h"
+#include	"parameters.h"
 #include	<em_reg.h>
-#include	"debug.h"
-#include	"idfsize.h"
-#include	"botch_free.h"
-#include	"nopp.h"
-#include	"nparams.h"
 #include	<alloc.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"align.h"
 #include	"LLlex.h"
 #include	"level.h"
 #include	"stack.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"def.h"
 #include	"type.h"

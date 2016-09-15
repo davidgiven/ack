@@ -9,21 +9,16 @@
 
 /* $Id$ */
 
-#include	"idfsize.h"
+#include "parameters.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<alloc.h>
 
-#include	"strict3rd.h"
-#include	"dbsymtab.h"
 #include	"type.h"
 #include	"main.h"
 #include	"warning.h"
-#include	"nostrict.h"
-#include	"nocross.h"
 #include	"class.h"
-#include	"squeeze.h"
 
 #define	MINIDFSIZE	14
 

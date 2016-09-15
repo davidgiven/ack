@@ -15,12 +15,21 @@ MAX_ARGV = 8
 .sect .bss
 STACKSIZE = 2*1024
 .comm stack, STACKSIZE
-.comm oldstack, 2
 
 .sect .text
 begtext:
-	! The absolute first thing we have to do is to clear the bss. (argify
-	! requires it.)
+	! Check if bss would overlap BDOS.  We must not overwrite
+	! BDOS and crash CP/M.  We cheat by comparing only high bytes
+	! of each address.
+
+	lxi b, __end
+	lda 0x0007
+	mov c, a		! c = high byte of BDOS address
+	mov a, b		! a = high byte of _end
+	cmp c
+	jnc __exit		! emergency exit if a >= c
+
+	! We have to clear the bss. (argify requires it.)
 	
 	lxi h, begbss
 	lxi b, endbss
@@ -36,8 +45,8 @@ begtext:
 	jnz 1b
 
 	! Set up the stack (now it's been cleared, since it's in the BSS).
-		
-	lxi sp, oldstack + STACKSIZE
+
+	lxi sp, stack + STACKSIZE
 
 	! C-ify the command line at 0x0080.
 	
@@ -54,43 +63,38 @@ begtext:
 	! Now argify it.
 	
 	lxi b, 0x0081            ! bc = command line pointer
-	lxi d, argv              ! de = argv pointer
-		
-	ldax b                   ! peek for any leading whitespace
-	ora a
-	cpi ' '
-	jz 3f
-	
-1:  xchg                     ! write out the next argument
-    mov m, c
-    inx h
-    mov m, b
-    inx h
-    xchg
+	lxi h, argv              ! hl = argv pointer
 
-	lda argc                 ! exit if this was the last argument
+loop_of_argify:
+	ldax b			! a = next character
+	ora a			! check for end of string
+	jz end_of_argify
+	cpi ' '			! scan for non-space
+	jz 2f
+
+	mov m, c		! put next argument in argv
+	inx h
+	mov m, b
+	inx h
+
+	lda argc		! increment argc
 	inr a
 	sta argc
-	cpi MAX_ARGV
-    jz end_of_argify
-    
-2:  inx b                    ! scan for whitespace
-    ldax b
-    ora a
-    jz end_of_argify
-    cpi ' '
-    jnz 2b
-    
-    xra a                    ! replace the space with a \0
-    stax b
-    
-3:  inx b                    ! scan for non-whitespace
-    ldax b
-    ora a
-    jz end_of_argify
-    cpi ' '
-    jz 3b
-    jmp 1b
+	cpi MAX_ARGV		! exit loop if argv is full
+	jz end_of_argify
+
+1:	inx b			! scan for space
+	ldax b
+	ora a
+	jz end_of_argify
+	cpi ' '
+	jnz 1b
+
+	xra a			! replace the space with a '\0'
+	stax b
+
+2:	inx b
+	jmp loop_of_argify
 end_of_argify:
 
 	! Add the fake parameter for the program name.
@@ -110,8 +114,8 @@ end_of_argify:
 	mvi h, 0
 	push h
 	call __m_a_i_n
-	jmp EXIT
-	
+	! FALLTHROUGH
+
 ! Emergency exit routine.
 
 .define EXIT, __exit

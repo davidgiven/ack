@@ -14,7 +14,7 @@
 	number of arguments!
 */
 
-#include	"errout.h"
+#include "parameters.h"
 #include	"debug.h"
 
 #if __STDC__
@@ -28,14 +28,12 @@
 #include	<em_label.h>
 #include	<em_code.h>
 
-#include	"strict3rd.h"
 #include	"input.h"
 #include	"f_info.h"
 #include	"LLlex.h"
 #include	"main.h"
 #include	"node.h"
 #include	"warning.h"
-#include	"nostrict.h"
 
 /* error classes */
 #define	ERROR		1

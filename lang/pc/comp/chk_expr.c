@@ -3,8 +3,10 @@
 /*	Check expressions, and try to evaluate them as far as possible.
 */
 
+#include    "parameters.h"
 #include	"debug.h"
 
+#include    <stdlib.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>

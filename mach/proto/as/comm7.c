@@ -11,6 +11,7 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
+#include <stdarg.h>
 
 valu_t
 load(ip)
@@ -27,7 +28,7 @@ register item_t *ip;
 	if ((ip->i_type & S_TYP) == S_UND || (ip->i_type & S_COM)) {
 		if (pass == PASS_3) {
 			if (relonami != 0)
-				serror("relocation error");
+				serror("relocation error (relonami=%d, type=%08x)", relonami, ip->i_type);
 			relonami = ip->i_valu+1;
 		}
 		return(0);
@@ -293,16 +294,16 @@ valu_t val;
 int n;
 {
 	switch (n) {
-	case 1:
+	case RELO1:
 		emit1((int)val); break;
-	case 2:
+	case RELO2:
 #ifdef BYTES_REVERSED
 		emit1(((int)val>>8)); emit1((int)val);
 #else
 		emit1((int)val); emit1(((int)val>>8));
 #endif
 		break;
-	case 4:
+	case RELO4:
 #ifdef WORDS_REVERSED
 		emit2((int)(val>>16)); emit2((int)(val));
 #else
@@ -380,13 +381,28 @@ wr_fatal()
 	fatal("write error");
 }
 
-/* VARARGS1 */
-fatal(s, a1, a2, a3, a4)
-char *s;
+void diag(const char* tail, const char* s, va_list ap)
 {
+	fflush(stdout);
+	if (modulename)
+		fprintf(stderr, "\"%s\", line %ld: ", modulename, lineno);
+	else
+		fprintf(stderr, "%s: ", progname);
+	vfprintf(stderr, s, ap);
+	fprintf(stderr, "%s", tail);
+}
+
+/* VARARGS1 */
+void fatal(const char* s, ...)
+{
+	va_list ap;
+	va_start(ap, s);
+
 	nerrors++;
-	diag(" (fatal)\n", s, a1, a2, a3, a4);
+	diag(" (fatal)\n", s, ap);
 	stop();
+
+	va_end(ap);
 }
 
 #if DEBUG == 2
@@ -400,37 +416,34 @@ char *file;
 #if DEBUG == 1
 assert1()
 {
-	diag(" (fatal)\n", "assertion failed");
+	fatal("assertion failed");
 	abort();
 }
 #endif
 
-/* VARARGS1 */
-serror(s, a1, a2, a3, a4)
-char *s;
+void serror(const char* s, ...)
 {
+	va_list ap;
+	va_start(ap, s);
+
 	nerrors++;
-	diag("\n", s, a1, a2, a3, a4);
+	diag("\n", s, ap);
+	stop();
+
+	va_end(ap);
 }
 
 /* VARARGS1 */
-warning(s, a1, a2, a3, a4)
-char *s;
+void warning(const char* s, ...)
 {
-	diag(" (warning)\n", s, a1, a2, a3, a4);
-}
+	va_list ap;
+	va_start(ap, s);
 
-/* VARARGS1 */
-diag(tail, s, a1, a2, a3, a4)
-char *tail, *s;
-{
-	fflush(stdout);
-	if (modulename)
-		fprintf(stderr, "\"%s\", line %ld: ", modulename, lineno);
-	else
-		fprintf(stderr, "%s: ", progname);
-	fprintf(stderr, s, a1, a2, a3, a4);
-	fprintf(stderr, tail);
+	nerrors++;
+	diag(" (warning)\n", s, ap);
+	stop();
+
+	va_end(ap);
 }
 
 nofit()

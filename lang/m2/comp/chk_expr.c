@@ -14,6 +14,7 @@
 
 #include   <stdlib.h>
 #include   <string.h>
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -21,7 +22,6 @@
 #include	<assert.h>
 #include	<alloc.h>
 
-#include	"strict3rd.h"
 #include	"Lpars.h"
 #include	"idf.h"
 #include	"type.h"
@@ -34,7 +34,6 @@
 #include	"misc.h"
 #include	"warning.h"
 #include	"main.h"
-#include	"nostrict.h"
 
 extern char *symbol2str();
 extern char *sprint();

@@ -417,14 +417,14 @@ eval_t compute(pexp) register expr_p pexp; {
 	case EX_SFIT:
 		mask = 0;
 		for (i=leaf2.e_v.e_con - 1;i < 8*sizeof(offset); i++)
-			mask |= 1<<i;
+			mask |= ((offset)1)<<i;
 		res.e_v.e_con = (leaf1.e_v.e_con&mask) == 0 ||
 				       (leaf1.e_v.e_con&mask) == mask;
 		break;
 	case EX_UFIT:
 		mask = 0;
 		for (i=leaf2.e_v.e_con;i < 8*sizeof(offset); i++)
-			mask |= 1<<i;
+			mask |= ((offset)1)<<i;
 		res.e_v.e_con = (leaf1.e_v.e_con&mask) == 0;
 		break;
 	case EX_ROTATE:

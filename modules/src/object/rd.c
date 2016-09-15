@@ -109,9 +109,6 @@ rd_ohead(head)
 	register long off;
 
 	OUTREAD(PARTEMIT, (char *) head, (long) SZ_HEAD);
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outhead) != SZ_HEAD)
-#endif
 	{
 		register char *c = (char *) head + (SZ_HEAD-4);
 		
@@ -157,16 +154,13 @@ rd_sect(sect, cnt)
 	offcnt += cnt;
 	while (cnt--) {
 		sect--;
-#if BYTE_ORDER == 0x0123
-		if (sizeof(struct outsect) != SZ_SECT)
-#endif
-		{
-			c -= 4; sect->os_lign = get4(c);
-			c -= 4; sect->os_flen = get4(c);
-			c -= 4; sect->os_foff = get4(c);
-			c -= 4; sect->os_size = get4(c);
-			c -= 4; sect->os_base = get4(c);
-		}
+
+		c -= 4; sect->os_lign = get4(c);
+		c -= 4; sect->os_flen = get4(c);
+		c -= 4; sect->os_foff = get4(c);
+		c -= 4; sect->os_size = get4(c);
+		c -= 4; sect->os_base = get4(c);
+
 		offset[--offcnt] = sect->os_foff + rd_base;
 	}
 }
@@ -197,9 +191,6 @@ rd_relo(relo, cnt)
 {
 
 	OUTREAD(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outrelo) != SZ_RELO)
-#endif
 	{
 		register char *c = (char *) relo + (long) cnt * SZ_RELO;
 
@@ -208,8 +199,8 @@ rd_relo(relo, cnt)
 			relo--;
 			c -= 4; relo->or_addr = get4(c);
 			c -= 2; relo->or_nami = uget2(c);
-			relo->or_sect = *--c;
-			relo->or_type = *--c;
+			c -= 2; relo->or_sect = uget2(c);
+			c -= 2; relo->or_type = uget2(c);
 		}
 	}
 }
@@ -221,9 +212,6 @@ rd_name(name, cnt)
 {
 
 	OUTREAD(PARTNAME, (char *) name, (long) cnt * SZ_NAME);
-#if BYTE_ORDER == 0x0123
-	if (sizeof(struct outname) != SZ_NAME)
-#endif
 	{
 		register char *c = (char *) name + (long) cnt * SZ_NAME;
 

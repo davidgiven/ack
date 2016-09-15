@@ -13,6 +13,7 @@ static char rcsid[]= "$Id$";
 #include "set.h"
 #include "instruct.h"
 #include "lookup.h"
+#include "extern.h"
 #include <cgg_cg.h>
 
 int wordsize;

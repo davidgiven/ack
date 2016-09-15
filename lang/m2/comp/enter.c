@@ -13,6 +13,7 @@
 #include	<stdio.h>
 #include	<string.h>
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	"alloc.h"
@@ -21,7 +22,6 @@
 #include	"em_code.h"
 #include	"assert.h"
 
-#include	"dbsymtab.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"

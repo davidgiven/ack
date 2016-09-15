@@ -1100,4 +1100,3 @@ optregvartype
 		{ $$ = $2; }
 	;
 %%
-#include "scan.c"

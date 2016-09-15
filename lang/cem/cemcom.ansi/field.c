@@ -5,19 +5,16 @@
 /* $Id$ */
 /*	BITFIELD EXPRESSION EVALUATOR	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 
-#include	"nobitfield.h"
 
 #ifndef NOBITFIELD
 #include	<em.h>
 #include	<em_reg.h>
-#include	"debug.h"
 #include	<flt_arith.h>
 #include	"arith.h"
 #include	"type.h"
-#include	"idf.h"
 #include	"label.h"
 #include	"code.h"
 #include	"assert.h"

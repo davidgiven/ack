@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 #include "out.h"
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }
@@ -453,11 +454,11 @@ int main(int argc, char* argv[])
 	{
 		long ss = 0;
 		printf("        address  length\n");
-		printf(" ehdr : %08lX %08lX\n", outsect[TEXT].os_base & ~0x1FFF, codeoffset);
-		printf(" text : %08lX %08lX\n", outsect[TEXT].os_base, outsect[TEXT].os_size);
-		printf(" rom  : %08lX %08lX\n", outsect[ROM].os_base, outsect[ROM].os_size);
-		printf(" data : %08lX %08lX\n", outsect[DATA].os_base, outsect[DATA].os_size);
-		printf(" bss  : %08lX %08lX\n", outsect[BSS].os_base, outsect[BSS].os_size);
+		printf(" ehdr : %08"PRIx32" %08"PRIx32"\n", outsect[TEXT].os_base & ~0x1FFF, codeoffset);
+		printf(" text : %08"PRIx32" %08"PRIx32"\n", outsect[TEXT].os_base, outsect[TEXT].os_size);
+		printf(" rom  : %08"PRIx32" %08"PRIx32"\n", outsect[ROM].os_base, outsect[ROM].os_size);
+		printf(" data : %08"PRIx32" %08"PRIx32"\n", outsect[DATA].os_base, outsect[DATA].os_size);
+		printf(" bss  : %08"PRIx32" %08"PRIx32"\n", outsect[BSS].os_base, outsect[BSS].os_size);
 		ss += outsect[TEXT].os_size;
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;

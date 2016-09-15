@@ -1,10 +1,11 @@
 #!/bin/sh
 
 EM_TABLE=$1
+ARGTYPE=$2
 echo "switch(p->em_opcode) {"
 for i in - cdflnorswz p b
 do
-	list=`./argtype $i $EM_TABLE`
+	list=`$ARGTYPE $i $EM_TABLE`
 	case $i in
 	-)	args='()'
 		echo "	/* no arguments */"
@@ -34,7 +35,7 @@ do
 EOF
 	done
 done
-list=`./argtype g $EM_TABLE`
+list=`$ARGTYPE g $EM_TABLE`
 cat << 'EOF'
 	default:
 /* a "g" argument */

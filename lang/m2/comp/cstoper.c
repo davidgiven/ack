@@ -9,9 +9,9 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
+#include "parameters.h"
 #include	"debug.h"
-#include	"target_sizes.h"
-#include	"uns_arith.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>

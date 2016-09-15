@@ -70,7 +70,7 @@ replace(idef)
 				return 0;
 		}
 		if (++mac->mc_count > 100) {
-			/* 100 must be some number in Parameters */
+			/* 100 must be some number in parameters.h */
 			lexwarning("macro %s is assumed recursive",
 				    idef->id_text);
 			return 0;

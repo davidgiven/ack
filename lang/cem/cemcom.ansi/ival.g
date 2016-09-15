@@ -6,18 +6,18 @@
 /* CODE FOR THE INITIALISATION OF GLOBAL VARIABLES */
 
 {
-#include	"lint.h"
+#include    <stdlib.h>
+#include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
 #include	"l_em.h"
 #include	"l_lint.h"
 #endif	/* LINT */
-#include	"debug.h"
 #include	<alloc.h>
 #include	<assert.h>
-#include	"nobitfield.h"
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"label.h"
 #include	"expr.h"
@@ -29,11 +29,11 @@
 #include	"Lpars.h"
 #include	"sizes.h"
 #include	"align.h"
-#include	"idf.h"
 #include	"level.h"
 #include	"def.h"
 #include	"LLlex.h"
 #include	"estack.h"
+#include    "stack.h"
 
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)

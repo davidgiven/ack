@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "ack.h"
 #include <em_path.h>
 #include "list.h"
@@ -11,7 +13,6 @@
 #include "grows.h"
 #include "dmach.h"
 #include "data.h"
-#include <stdio.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Id$" ;

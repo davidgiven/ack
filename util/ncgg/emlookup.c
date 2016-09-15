@@ -10,6 +10,7 @@ static char rcsid[]= "$Id$";
 #include <string.h>
 #include "param.h"
 #include "expr.h"
+#include "extern.h"
 #include <em_spec.h>
 #include <em_flag.h>
 

@@ -9,6 +9,7 @@
 
 /* $Id$ */
 
+#include "parameters.h"
 #include	"tokenname.h"
 #include	"Lpars.h"
 #include	"idf.h"

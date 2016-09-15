@@ -3,6 +3,7 @@
 #include	<alloc.h>
 #include	<em.h>
 
+#include    "parameters.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"idf.h"

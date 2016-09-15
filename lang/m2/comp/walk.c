@@ -15,6 +15,7 @@
 
 #include   <stdlib.h>
 #include   <string.h>
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -26,8 +27,6 @@
 #include	<alloc.h>
 #include	<stb.h>
 
-#include	"strict3rd.h"
-#include	"dbsymtab.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
@@ -42,8 +41,6 @@
 #include	"walk.h"
 #include	"misc.h"
 #include	"warning.h"
-#include	"bigresult.h"
-#include	"use_insert.h"
 
 extern arith		NewPtr();
 extern arith		NewInt();

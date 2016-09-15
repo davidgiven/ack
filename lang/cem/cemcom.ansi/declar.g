@@ -6,17 +6,14 @@
 /*	DECLARATION SYNTAX PARSER	*/
 
 {
-#include	"lint.h"
-#include	"dbsymtab.h"
+#include	"parameters.h"
 #include	<alloc.h>
-#include	"nobitfield.h"
-#include	"debug.h"
 #include	<flt_arith.h>
+#include    "idf.h"
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"label.h"
 #include	"code.h"
-#include	"idf.h"
 #include	"type.h"
 #include	"proto.h"
 #include	"struct.h"

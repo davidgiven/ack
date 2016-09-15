@@ -1,5 +1,6 @@
 /* D E F I N I T I O N   M E C H A N I S M */
 
+#include    "parameters.h"
 #include	"debug.h"
 
 #include	<alloc.h>

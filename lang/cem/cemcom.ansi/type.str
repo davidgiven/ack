@@ -5,8 +5,7 @@
 /* $Id$ */
 /* TYPE DESCRIPTOR */
 
-#include	"nobitfield.h"
-#include	"dbsymtab.h"
+#include	"parameters.h"
 
 struct type	{
 	struct type *next;	/* used for ARRAY and for qualifiers */

@@ -5,8 +5,7 @@
 /* $Id$ */
 /* VARIOUS TARGET MACHINE SIZE DESCRIPTORS */
 
-#include "nocross.h"
-#include "trgt_sizes.h"
+#include "parameters.h"
 
 #ifndef NOCROSS
 extern arith

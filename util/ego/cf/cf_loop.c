@@ -9,6 +9,7 @@
  */
 
 
+#include <stdlib.h>
 #include "../share/types.h"
 #include "../share/debug.h"
 #include "../share/lset.h"

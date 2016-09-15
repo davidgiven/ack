@@ -1,5 +1,6 @@
 /* S T A T E M E N T S */
 {
+#include    "parameters.h"
 #include	<alloc.h>
 #include	<em.h>
 #include	<stb.h>
@@ -15,7 +16,6 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include	"dbsymtab.h"
 
 int slevel = 0;		/* nesting level of statements */
 }

@@ -1,4 +1,4 @@
-/* $Id$ */
+#include <stdlib.h>
 
 _hlt(nr)
 int nr;

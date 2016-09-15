@@ -9,6 +9,7 @@ static char rcsid[]= "$Id$";
 #include "assert.h"
 #include "param.h"
 #include "lookup.h"
+#include "extern.h"
 
 char *myalloc();
 char *mystrcpy();

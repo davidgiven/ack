@@ -8,6 +8,7 @@ static char rcsid[]= "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "extern.h"
 
 char *filename;
 char *beg_sbrk;

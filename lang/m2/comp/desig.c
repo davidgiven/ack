@@ -16,6 +16,7 @@
 	or perform a store.
 */
 
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -32,7 +33,6 @@
 #include	"node.h"
 #include	"warning.h"
 #include	"walk.h"
-#include	"squeeze.h"
 
 extern int	proclevel;
 extern arith	NewPtr();

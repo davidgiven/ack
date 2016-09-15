@@ -1,5 +1,6 @@
 EM_TABLE=$1
-list=`./argtype w $EM_TABLE`
+ARGTYPE=$2
+list=`$ARGTYPE w $EM_TABLE`
 echo "switch(p->em_opcode) {"
 for i in $list
 do

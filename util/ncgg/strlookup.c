@@ -7,6 +7,7 @@ static char rcsid[]= "$Id$";
 #endif
 
 #include "param.h"
+#include "extern.h"
 
 int nstrings=0;
 char *l_strings[MAXSTRINGS];

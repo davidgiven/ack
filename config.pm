@@ -13,7 +13,7 @@ ACK_TEMP_DIR = "/tmp"
 
 -- Where is the ACK going to be installed, eventually?
 
-PREFIX = "/usr/local"
+PREFIX = "/tmp/ack-temp/staging"
 
 -- ======================================================================= --
 --                       BROKEN ACK CONFIGURATION                          --

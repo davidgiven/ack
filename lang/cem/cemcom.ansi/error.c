@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	E R R O R   A N D  D I A G N O S T I C   R O U T I N E S	*/
 
-#include	"lint.h"
+#include	"parameters.h"
 #if __STDC__
 #include	<stdarg.h>
 #else
@@ -17,11 +17,6 @@
 #else
 #include	"l_em.h"
 #endif	/* LINT */
-
-#include	"debug.h"
-#include	"lint.h"
-#include	"nopp.h"
-#include	"errout.h"
 
 #include	"tokenname.h"
 #include	<flt_arith.h>

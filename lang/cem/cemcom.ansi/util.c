@@ -11,7 +11,7 @@
 	allowing re-use.
 */
 
-#include	"lint.h"
+#include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
@@ -22,10 +22,7 @@
 #include	<alloc.h>
 #include	<em_mes.h>
 
-#include	"debug.h"
 #include	"util.h"
-#include	"use_tmp.h"
-#include	"regcount.h"
 #include	"sizes.h"
 #include	"align.h"
 #include	"stack.h"

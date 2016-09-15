@@ -5,14 +5,14 @@
 /* $Id$ */
 /* MAIN PROGRAM */
 
-#include	"debug.h"
+#include    <stdlib.h>
+#include	"parameters.h"
 
 #include	<alloc.h>
 #include	<assert.h>
 #include	<system.h>
 #include 	"arith.h"
 #include	"file_info.h"
-#include	"idfsize.h"
 #include	"idf.h"
 #include	"macro.h"
 

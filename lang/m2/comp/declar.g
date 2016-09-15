@@ -10,6 +10,7 @@
 /* $Id$ */
 
 {
+#include "parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -17,7 +18,6 @@
 #include	<alloc.h>
 #include	<assert.h>
 
-#include	"strict3rd.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
@@ -28,7 +28,6 @@
 #include	"main.h"
 #include	"chk_expr.h"
 #include	"warning.h"
-#include	"nostrict.h"
 
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
