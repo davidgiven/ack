@@ -13,15 +13,15 @@
 
 .define .cfu8
 .cfu8:
-	la(r3, .fd_00000000)
+	la r3, .fd_00000000
 	lfd f0, 0(r3)            ! f0 = 0.0
 	
 	lfd f1, 0(sp)            ! value to be converted
 
-	la(r3, .fd_FFFFFFFF)
+	la r3, .fd_FFFFFFFF
 	lfd f3, 0(r3)            ! f3 = 0xFFFFFFFF	
 
-	la(r3, .fd_80000000)
+	la r3, .fd_80000000
 	lfd f4, 0(r3)            ! f4 = 0x80000000 	
 	
 	fsel f2, f1, f1, f0

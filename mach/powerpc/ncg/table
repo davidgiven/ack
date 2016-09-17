@@ -262,6 +262,7 @@ INSTRUCTIONS
   fsub            FD:wo, FD:ro, FD:ro.
   fsubs           FS:wo, FS:ro, FS:ro.
   fmr             FS+FD:wo, FS+FD:ro.
+  la              GPRI:wo, LABEL:ro.
   lbzx            GPRI:wo, GPR:ro, GPR:ro.
   lbz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfd             FD:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
@@ -353,8 +354,7 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			addis %2, R0, {HILABEL, %1.adr}
-			ori %2, %2, {LOLABEL, %1.adr}
+			la %2, {LABEL, %1.adr}
 	
 /* Sign extension */
 

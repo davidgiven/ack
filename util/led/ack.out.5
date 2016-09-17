@@ -158,12 +158,11 @@ struct outrelo {
 /*
  * relocation type bits
  */
-#define RELSZ	0x0fffi     /* relocation length */
+#define RELSZ	0x0fff      /* relocation length */
 #define RELO1	0x01		/* 1 byte */
 #define RELO2	0x02		/* 2 bytes */
 #define RELO4	0x03		/* 4 bytes */
 #define RELOPPC	0x04		/* 26-bit PowerPC address */
-#define RELOH2  0x05        /* write top 2 bytes of 4 byte word */
 #define RELOVC4 0x06        /* VideoCore IV address in 32-bit insruction */
 #define RELPC	0x2000		/* pc relative */
 #define RELBR	0x4000		/* High order byte lowest address. */
