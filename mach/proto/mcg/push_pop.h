@@ -6,7 +6,7 @@ struct stackop {
 	char type : 7;
 };
 
-extern const struct stackop* stackops[];
+extern const struct stackop* const stackops[];
 
 #endif
 

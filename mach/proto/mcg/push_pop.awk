@@ -44,9 +44,9 @@ END {
 		print "";
 	}
 
-	print "const struct stackop* stackops[] = {";
+	print "const struct stackop* const stackops[] = {";
 	for (i=0; i<count; i++)
-		print "\t&so_" opcode[i] ","
+		print "\tso_" opcode[i] ","
 	print "};"
 }
 

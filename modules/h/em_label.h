@@ -4,4 +4,5 @@
  */
 /* $Id$ */
 
-#define label unsigned int
+typedef unsigned int label;
+
