@@ -59,7 +59,7 @@ STATIC traverse_defs(p,action)
 		def_to_copynr = newtable(nrdefs);
 		cnt = 1;
 	}
-	if (defcnt > nrdefs) return;
+	if (defcnt > nrexpldefs) return;
 	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
 		for (l = b->b_start; l != (line_p) 0; l = l->l_next) {
 			if (defs[defcnt] == l) {
@@ -75,7 +75,7 @@ STATIC traverse_defs(p,action)
 						}
 					}
 				}
-				if (++defcnt > nrdefs) return;
+				if (++defcnt > nrexpldefs) return;
 			}
 		}
 	}

@@ -171,9 +171,12 @@ STATIC collapse_loops(loops_p)
 	for (li1 = Lfirst(*loops_p); li1 != (Lindex) 0; li1 = Lnext(li1,*loops_p)) {
 		lp1 = (loop_p) Lelem(li1);
 		lp1->lp_level = (short) 0;
-		for (li2 = Lfirst(*loops_p); li2 != (Lindex) 0;
-					li2 = Lnext(li2,*loops_p)) {
+		/* Lnext(li2,*loops_p) must happen before
+		 * Lremove(lp2,loops_p) releases the memory for li2.
+		 */
+		for (li2 = Lfirst(*loops_p); li2 != (Lindex) 0;) {
 			lp2 = (loop_p) Lelem(li2);
+			li2 = Lnext(li2,*loops_p);
 			if (lp1 != lp2 && lp1->lp_entry == lp2->lp_entry) {
 			    Ljoin(lp2->LP_BLOCKS,&lp1->LP_BLOCKS);
 			    oldcflpx(lp2->lp_extend);
