@@ -27,7 +27,7 @@ struct idf	{
 
 	Initializes the namelist.
 */
-_PROTOTYPE(void init_idf, (void));
+extern void init_idf(void);
 
 /*	struct idf * str2idf(tg, cp)
 		char *tg;
@@ -40,6 +40,6 @@ _PROTOTYPE(void init_idf, (void));
 	If cp < 0, the string is not entered, but only looked for.
 */
 
-_PROTOTYPE(struct idf *str2idf, (char *, int));
+struct idf *str2idf(char* tg, int cp);
 
 #define	findidf(tg)	str2idf(tg, -1)
