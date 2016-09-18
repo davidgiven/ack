@@ -1,12 +1,12 @@
 normalrule {
-	name = "push_pop_c",
-	outleaves = { "push_pop.c" },
+	name = "ircodes",
+	outleaves = { "ircodes.h", "ircodes.c" },
 	ins = {
-		"./push_pop.awk",
-		"h/em_table"
+		"./ircodes.sh",
+		"./ir.dat"
 	},
 	commands = {
-		"awk -f %{ins[1]} %{ins[2]} > %{outs}"
+		"%{ins[1]} %{ins[2]} %{outs[1]} %{outs[2]}"
 	}
 }
 
@@ -14,16 +14,22 @@ cprogram {
 	name = "mcg",
 	srcs = {
 		"./*.c",
-		"+push_pop_c",
+		matching(filenamesof("+ircodes"), "%.c$")
 	},
 	deps = {
+		"+ircodes",
 		"h+emheaders",
 		"modules+headers",
-		"modules/src/read_em+lib_kv",
+		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",
 		"modules/src/em_data+lib",
-		"modules/src/alloc+lib",
+		"modules/src/idf+lib",
+		"modules/src/read_em+lib_kv",
 		"modules/src/system+lib",
+		"./*.h",
+	},
+	vars = {
+		["+cflags"] = {"-Werror-implicit-function-declaration"}
 	}
 }
 

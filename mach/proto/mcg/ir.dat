@@ -1,0 +1,33 @@
+# Simple terminals
+ICONST
+REG
+LABEL
+BLOCK
+ANY
+PHI
+
+# Memory operations
+LOAD
+STORE
+
+# Arithemetic operations
+ADD
+
+# Conversions
+FROMI1
+FROMI2
+FROMI4
+FROMI8
+
+# Comparisons
+COMPARES
+COMPAREU
+
+# Flow control
+JUMP
+CJUMP
+RET
+
+# Special
+SETREG
+

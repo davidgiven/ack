@@ -1,6 +1,7 @@
 #include "mcg.h"
 
 static struct e_instr insn;
+static const char* current_proc;
 
 static const char* type_to_str(int type)
 {
@@ -44,35 +45,15 @@ static void unknown_type(const char* s)
         argtype_to_str(insn.em_arg.ema_argtype));
 }
 
-static const uint8_t* arith_to_bytes(arith a, size_t sz)
-{
-    uint8_t* p = malloc(8);
-
-    switch (sz)
-    {
-        case 1: *(uint8_t*)p = a; break;
-        case 2: *(uint16_t*)p = a; break;
-        case 4: *(uint32_t*)p = a; break;
-        case 8: *(uint64_t*)p = a; break;
-        default:
-            fatal("bad constant size '%d'", sz);
-    }
-
-    return p;
-}
-
 static const char* ilabel_to_str(label l)
 {
-    char s[16];
-    sprintf(s, "__I%d", l);
-    return strdup(s);
+    assert(current_proc != NULL);
+    return aprintf("__%s_I%d", current_proc, l);
 }
 
 static const char* dlabel_to_str(label l)
 {
-    char s[16];
-    sprintf(s, ".%d", l);
-    return strdup(s);
+    return aprintf("__D%d", l);
 }
 
 static void parse_pseu(void)
@@ -90,17 +71,17 @@ static void parse_pseu(void)
 			switch (insn.em_arg.ema_argtype)
 			{
 				case pro_ptyp:
-					tb_symbol(strdup(insn.em_pnam), export, proc);
+					symbol_declare(strdup(insn.em_pnam), export, proc);
 					break;
 
 				case sof_ptyp:
                     assert(insn.em_off == 0);
-					tb_symbol(strdup(insn.em_dnam), export, proc);
+					symbol_declare(strdup(insn.em_dnam), export, proc);
 					break;
 
                 case nof_ptyp:
                     assert(insn.em_off == 0);
-                    tb_symbol(dlabel_to_str(insn.em_dlb), export, proc);
+                    symbol_declare(dlabel_to_str(insn.em_dlb), export, proc);
                     break;
 
 				default:
@@ -120,24 +101,24 @@ static void parse_pseu(void)
 				case uco_ptyp:
                 {
                     arith val = atol(insn.em_string);
-                    tb_data(arith_to_bytes(val, insn.em_size), insn.em_size, ro);
+                    data_int(val, insn.em_size, ro);
                     break;
                 }
 
 				case str_ptyp:
-                    tb_data(strdup(insn.em_string), insn.em_size, ro);
+                    data_block(strdup(insn.em_string), insn.em_size, ro);
 					break;
 
                 case cst_ptyp:
-                    tb_data(arith_to_bytes(insn.em_cst, EM_wordsize), EM_wordsize, ro);
+                    data_int(insn.em_cst, EM_wordsize, ro);
                     break;
                     
                 case nof_ptyp:
-                    tb_data_offset(dlabel_to_str(insn.em_dlb), insn.em_off, ro);
+                    data_offset(dlabel_to_str(insn.em_dlb), insn.em_off, ro);
                     break;
 
                 case ilb_ptyp:
-                    tb_data_offset(ilabel_to_str(insn.em_ilb), 0, ro);
+                    data_offset(ilabel_to_str(insn.em_ilb), 0, ro);
                     break;
 
 				default:
@@ -151,7 +132,7 @@ static void parse_pseu(void)
             switch (insn.em_arg.ema_argtype)
             {
                 case cst_ptyp:
-                    tb_bss(EM_bsssize, EM_bssinit);
+                    data_bss(EM_bsssize, insn.em_cst);
                     break;
                     
                 default:
@@ -164,11 +145,13 @@ static void parse_pseu(void)
             if (insn.em_nlocals == -1)
                 fatal("procedures with unspecified number of locals are not supported yet");
 
-            tb_procstart(strdup(insn.em_pnam), insn.em_nlocals);
+            current_proc = strdup(insn.em_pnam);
+            tb_procstart(current_proc, insn.em_nlocals);
             break;
 
 		case ps_end: /* procedure end */
             tb_procend();
+            current_proc = NULL;
 			break;
 
 		default:
@@ -228,16 +211,16 @@ void parse_em(void)
                 break;
 
             case EM_DEFDLB:
-                tb_dlabel(dlabel_to_str(insn.em_dlb));
+                data_label(dlabel_to_str(insn.em_dlb));
                 break;
 
             case EM_DEFDNAM:
-                tb_dlabel(strdup(insn.em_dnam));
+                data_label(strdup(insn.em_dnam));
                 break;
 
             case EM_STARTMES:
                 parse_mes();
-                 break;
+                break;
 
             case EM_MNEM:
             {
@@ -268,8 +251,12 @@ void parse_em(void)
                             break;
 
                         case cst_ptyp:
-                            tb_insn_value(insn.em_opcode, flags,
-                                insn.em_cst);
+                            if ((flags & EM_PAR) == PAR_B)
+                                tb_insn_label(insn.em_opcode, flags,
+                                    ilabel_to_str(insn.em_ilb), 0);
+                            else
+                                tb_insn_value(insn.em_opcode, flags,
+                                    insn.em_cst);
                             break;
 
                         default:
