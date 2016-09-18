@@ -44,6 +44,7 @@ PROPERTIES
 	REG             /* any allocatable GPR */
 	FPR             /* any FPR */
 	FREG            /* any allocatable FPR */
+	FSREG           /* any allocatable single-precision FPR */
 	SPR             /* any SPR */
 	CR              /* any CR */
 	
@@ -127,7 +128,40 @@ REGISTERS
 	F3("f3")           : FPR, FREG, FPR3.
 	F2("f2")           : FPR, FREG, FPR2.
 	F1("f1")           : FPR, FREG, FPR1.
-	F0("f0")           : FPR, FREG, FPR0.
+	F0("f0")           : FPR, FPR0.
+
+	FS31("f31")=F31    : FSREG.
+	FS30("f30")=F30    : FSREG.
+	FS29("f29")=F29    : FSREG.
+	FS28("f28")=F28    : FSREG.
+	FS27("f27")=F27    : FSREG.
+	FS26("f26")=F26    : FSREG.
+	FS25("f25")=F25    : FSREG.
+	FS24("f24")=F24    : FSREG.
+	FS23("f23")=F23    : FSREG.
+	FS22("f22")=F22    : FSREG.
+	FS21("f21")=F21    : FSREG.
+	FS20("f20")=F20    : FSREG.
+	FS19("f19")=F19    : FSREG.
+	FS18("f18")=F18    : FSREG.
+	FS17("f17")=F17    : FSREG.
+	FS16("f16")=F16    : FSREG.
+	FS15("f15")=F15    : FSREG.
+	FS14("f14")=F14    : FSREG.
+	FS13("f13")=F13    : FSREG.
+	FS12("f12")=F12    : FSREG.
+	FS11("f11")=F11    : FSREG.
+	FS10("f10")=F10    : FSREG.
+	FS9("f9")=F9       : FSREG.
+	FS8("f8")=F8       : FSREG.
+	FS7("f7")=F7       : FSREG.
+	FS6("f6")=F6       : FSREG.
+	FS5("f5")=F5       : FSREG.
+	FS4("f4")=F4       : FSREG.
+	FS3("f3")=F3       : FSREG.
+	FS2("f2")=F2       : FSREG.
+	FS1("f1")=F1       : FSREG.
+	/* FS0("f0")=F0 */
 
 	LR("lr")           : SPR.
 	CTR("ctr")         : SPR.
@@ -190,11 +224,6 @@ TOKENS
 	XOR_RR             = { GPR reg1; GPR reg2; }  4.
 	XOR_RC             = { GPR reg; INT val; }  4.
 
-/* Floats */
-
-    FD                 = { FPR reg; }             8 reg.
-    FS                 = { FPR reg; }             4 reg.
-    
 /* Comments */
 
 	LABELI             = { ADDR msg; INT num; }   4    msg " " num.
@@ -250,27 +279,29 @@ INSTRUCTIONS
   eqv             GPRI:wo, GPRI:ro, GPRI:ro.
   extsb           GPRI:wo, GPRI:ro.
   extsh           GPRI:wo, GPRI:ro.
-  fadd            FD:wo, FD:ro, FD:ro.
-  fadds           FS:wo, FS:ro, FS:ro.
-  fcmpo           CR:wo, FD:ro, FD:ro.
-  fdiv            FD:wo, FD:ro, FD:ro.
-  fdivs           FS:wo, FS:ro, FS:ro.
-  fneg            FS+FD:wo, FS+FD:ro.
-  fmul            FD:wo, FD:ro, FD:ro.
-  fmuls           FS:wo, FS:ro, FS:ro.
-  frsp            FS:wo, FD:ro.
-  fsub            FD:wo, FD:ro, FD:ro.
-  fsubs           FS:wo, FS:ro, FS:ro.
-  fmr             FS+FD:wo, FS+FD:ro.
+  fadd            FREG:wo, FREG:ro, FREG:ro.
+  fadds           FSREG:wo, FSREG:ro, FSREG:ro.
+  fcmpo           CR:wo, FPR:ro, FPR:ro.
+  fdiv            FREG:wo, FREG:ro, FREG:ro.
+  fdivs           FSREG:wo, FSREG:ro, FSREG:ro.
+  fneg            FREG:wo, FREG:ro.
+  fneg            FSREG:wo, FSREG:ro.
+  fmul            FREG:wo, FREG:ro, FREG:ro.
+  fmuls           FSREG:wo, FSREG:ro, FSREG:ro.
+  frsp            FSREG:wo, FREG:ro.
+  fsub            FREG:wo, FREG:ro, FREG:ro.
+  fsubs           FSREG:wo, FSREG:ro, FSREG:ro.
+  fmr             FPR:wo, FPR:ro.
+  fmr             FSREG:wo, FSREG:ro.
   la              GPRI:wo, LABEL:ro.
   lbzx            GPRI:wo, GPR:ro, GPR:ro.
   lbz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfd             FD:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfdu            FD:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfdx            FD:wo, GPR:ro, GPR:ro.
-  lfs             FS:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfsu            FS:wo, GPRINDIRECT+GPRINDIRECTLO:rw.
-  lfsx            FS:wo, GPR:ro, GPR:ro.
+  lfd             FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lfdu            FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lfdx            FPR:wo, GPR:ro, GPR:ro.
+  lfs             FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lfsu            FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:rw.
+  lfsx            FSREG:wo, GPR:ro, GPR:ro.
   lhzx            GPRI:wo, GPR:ro, GPR:ro.
   lhax            GPRI:wo, GPR:ro, GPR:ro.
   lha             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
@@ -297,12 +328,12 @@ INSTRUCTIONS
   srw             GPRI:wo, GPRI:ro, GPRI:ro.
   stb             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   stbx            GPRI:ro, GPR:ro, GPR:ro.
-  stfd            FD:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfdu           FD:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfdx           FD:ro, GPR:ro, GPR:ro.
-  stfs            FS:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfsu           FS:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfsx           FS:ro, GPR:ro, GPR:ro.
+  stfd            FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfdu           FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfdx           FPR:ro, GPR:ro, GPR:ro.
+  stfs            FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfsu           FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfsx           FSREG:ro, GPR:ro, GPR:ro.
   sth             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   sthx            GPRI:ro, GPR:ro, GPR:ro.
   stw             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
@@ -474,25 +505,25 @@ MOVES
 			move {LABEL, %1.adr}, SCRATCH
 			lwz %2, {GPRINDIRECT, SCRATCH, 0}
 		
-	from IND_RC_W smalls(%off) to FS
+	from IND_RC_W smalls(%off) to FSREG
 		gen
-			COMMENT("move IND_RC_W->FS small")
+			COMMENT("move IND_RC_W->FSREG small")
 			lfs %2, {GPRINDIRECT, %1.reg, %1.off}
 	
-	from IND_RC_W to FS
+	from IND_RC_W to FSREG
 		gen
-			COMMENT("move IND_RC_W->FS large")
+			COMMENT("move IND_RC_W->FSREG large")
 			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
 			lfs %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
 
-	from IND_RR_W to FS
+	from IND_RR_W to FSREG
 		gen
-			COMMENT("move IND_RR_W->FS")
+			COMMENT("move IND_RR_W->FSREG")
 			lfsx %2, %1.reg1, %1.reg2
 			
-	from IND_LABEL_W to FS
+	from IND_LABEL_W to FSREG
 		gen
-			COMMENT("move IND_LABEL_W->FS")
+			COMMENT("move IND_LABEL_W->FSREG")
 			move {LABEL, %1.adr}, SCRATCH
 			lfs %2, {GPRINDIRECT, SCRATCH, 0}
 		
@@ -520,73 +551,73 @@ MOVES
 			move {LABEL, %2.adr}, SCRATCH
 			stw %1, {GPRINDIRECT, SCRATCH, 0}
 			
-	from FS to IND_RC_W smalls(%off)
+	from FSREG to IND_RC_W smalls(%off)
 		gen
-			COMMENT("move FS->IND_RC_W small")
+			COMMENT("move FSREG->IND_RC_W small")
 			stfs %1, {GPRINDIRECT, %2.reg, %2.off}
 	
-	from FS to IND_RC_W
+	from FSREG to IND_RC_W
 		gen
-			COMMENT("move FS->IND_RC_W large")
+			COMMENT("move FSREG->IND_RC_W large")
 			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
 			stfs %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
 
-	from FS to IND_RR_W
+	from FSREG to IND_RR_W
 		gen
-			COMMENT("move FS->IND_RR_W")
+			COMMENT("move FSREG->IND_RR_W")
 			stfsx %1, %2.reg1, %2.reg2
 
-	from FS to IND_LABEL_W
+	from FSREG to IND_LABEL_W
 		gen
-			COMMENT("move FS->IND_LABEL_D")
+			COMMENT("move FSREG->IND_LABEL_D")
 			move {LABEL, %2.adr}, SCRATCH
 			stfs %1, {GPRINDIRECT, SCRATCH, 0}
 			
 /* Read double */
 
-	from IND_RC_D smalls(%off) to FD
+	from IND_RC_D smalls(%off) to FPR
 		gen
-			COMMENT("move IND_RC_D->FD small")
+			COMMENT("move IND_RC_D->FPR small")
 			lfd %2, {GPRINDIRECT, %1.reg, %1.off}
 	
-	from IND_RC_D to FD
+	from IND_RC_D to FPR
 		gen
-			COMMENT("move IND_RC_D->FD large")
+			COMMENT("move IND_RC_D->FPR large")
 			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
 			lfd %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
 			
-	from IND_RR_D to FD
+	from IND_RR_D to FPR
 		gen
-			COMMENT("move IND_RR_D->FD")
+			COMMENT("move IND_RR_D->FPR")
 			lfdx %2, %1.reg1, %1.reg2
 
-	from IND_LABEL_D to FD
+	from IND_LABEL_D to FPR
 		gen
-			COMMENT("move IND_LABEL_D->FD")
+			COMMENT("move IND_LABEL_D->FPR")
 			move {LABEL, %1.adr}, SCRATCH
 			lfd %2, {GPRINDIRECT, SCRATCH, 0}
 		
 /* Write double */
 
-	from FD to IND_RC_D smalls(%off)
+	from FPR to IND_RC_D smalls(%off)
 		gen
-			COMMENT("move FD->IND_RC_D small")
+			COMMENT("move FPR->IND_RC_D small")
 			stfd %1, {GPRINDIRECT, %2.reg, %2.off}
 	
-	from FD to IND_RC_D
+	from FPR to IND_RC_D
 		gen
-			COMMENT("move FD->IND_RC_D large")
+			COMMENT("move FPR->IND_RC_D large")
 			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
 			stfd %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
 
-	from FD to IND_RR_D
+	from FPR to IND_RR_D
 		gen
-			COMMENT("move FD->IND_RR_W")
+			COMMENT("move FPR->IND_RR_W")
 			stfdx %1, %2.reg1, %2.reg2
 			
-	from FD to IND_LABEL_D
+	from FPR to IND_LABEL_D
 		gen
-			COMMENT("move FD->IND_LABEL_D")
+			COMMENT("move FPR->IND_LABEL_D")
 			move {LABEL, %2.adr}, SCRATCH
 			stfd %1, {GPRINDIRECT, SCRATCH, 0}
 			
@@ -628,7 +659,7 @@ MOVES
 	from TRISTATE_FF to CR0
 		gen
 			COMMENT("move TRISTATE_FF->CR0")
-			fcmpo %2, {FD, %1.reg1}, {FD, %1.reg2}
+			fcmpo %2, %1.reg1, %1.reg2
 			
 	from GPR to CR0
 		gen
@@ -766,17 +797,17 @@ STACKINGRULES
 			
 	from IND_ALL_D to STACK
 		gen
-			move %1, {FD, FSCRATCH}
-			stfdu {FD, FSCRATCH}, {GPRINDIRECT, SP, 0-8}
+			move %1, FSCRATCH
+			stfdu FSCRATCH, {GPRINDIRECT, SP, 0-8}
 			
-	from FD to STACK
+	from FPR to STACK
 		gen
-			COMMENT("stack FD")
+			COMMENT("stack FPR")
 			stfdu %1, {GPRINDIRECT, SP, 0-8}
 			
-	from FS to STACK
+	from FSREG to STACK
 		gen
-			COMMENT("stack FS")
+			COMMENT("stack FSREG")
 			stfsu %1, {GPRINDIRECT, SP, 0-4}
 			
 	from TOKEN to STACK
@@ -836,33 +867,33 @@ COERCIONS
 			move %1, {GPRE, %a}
 		yields %a
 	
-	from FS
-		uses FREG
+	from FSREG
+		uses FSREG
 		gen
-			fmr {FS, %a}, %1
-		yields {FS, %a}
+			fmr %a, %1
+		yields %a
 		
-	from FD
-		uses FREG
+	from FPR
+		uses FPR
 		gen
-			fmr {FD, %a}, %1
-		yields {FD, %a}
+			fmr %a, %1
+		yields %a
 		
 	from STACK
 		uses FREG
 		gen
-			COMMENT("coerce STACK->FD")
-			lfd {FD, %a}, {GPRINDIRECT, SP, 0}
+			COMMENT("coerce STACK->FREG")
+			lfd %a, {GPRINDIRECT, SP, 0}
 			addi SP, SP, {CONST, 8}
-		yields {FD, %a}
+		yields %a
 
 	from STACK
-		uses FREG
+		uses FSREG
 		gen
-			COMMENT("coerce STACK->FS")
-			lfs {FS, %a}, {GPRINDIRECT, SP, 0}
+			COMMENT("coerce STACK->FSREG")
+			lfs %a, {GPRINDIRECT, SP, 0}
 			addi SP, SP, {CONST, 4}
-		yields {FS, %a}
+		yields %a
 		
 	from IND_ALL_W
 		uses REG
@@ -871,16 +902,16 @@ COERCIONS
 		yields %a
 		
 	from IND_ALL_W
-		uses FREG
+		uses FSREG
 		gen
-			move %1, {FS, %a}
-		yields {FS, %a}
+			move %1, %a
+		yields %a
 		
 	from IND_ALL_D
 		uses FREG
 		gen
-			move %1, {FD, %a}
-		yields {FD, %a}
+			move %1, %a
+		yields %a
 		
 	
 
@@ -1242,27 +1273,27 @@ PATTERNS
 				move %2.reg, {IND_RC_H, %1.reg, %1.off}
 
 	pat sti $1==INT32                  /* Store word indirect */
-		with GPR GPR+FS
+		with GPR GPR+FSREG
 			gen
 				move %2, {IND_RC_W, %1, 0}
-		with SUM_RR GPR+FS
+		with SUM_RR GPR+FSREG
 			gen
 				move %2, {IND_RR_W, %1.reg1, %1.reg2}
-		with SUM_RC GPR+FS
+		with SUM_RC GPR+FSREG
 			gen
 				move %2, {IND_RC_W, %1.reg, %1.off}
-		with LABEL GPR+FS
+		with LABEL GPR+FSREG
 			gen
 				move %2, {IND_LABEL_W, %1.adr}
 
 	pat sti $1==INT64                  /* Store double-word indirect */
-		with GPR FD
+		with GPR FREG
 			gen
 				move %2, {IND_RC_D, %1, 0}
-		with SUM_RR FD
+		with SUM_RR FREG
 			gen
 				move %2, {IND_RR_D, %1.reg1, %1.reg2}
-		with SUM_RC FD
+		with SUM_RC FREG
 			gen
 				move %2, {IND_RC_D, %1.reg, %1.off}
 		with GPR GPR GPR
@@ -1273,7 +1304,7 @@ PATTERNS
 			gen
 				move %2, {IND_RC_W, %1.reg, %1.off}
 				move %3, {IND_RC_W, %1.reg, %1.off+4}
-		with LABEL FD
+		with LABEL FREG
 			gen
 				move %2, {IND_LABEL_D, %1.adr}
 				
@@ -2004,47 +2035,47 @@ PATTERNS
 			loe ".fs_00000000"
 		
 	pat adf $1==INT32                  /* Add single */
-		with FS FS
-			uses reusing %1, FREG
+		with FSREG FSREG
+			uses reusing %1, FSREG
 			gen
-				fadds {FS, %a}, %2, %1
-			yields {FS, %a}
+				fadds %a, %2, %1
+			yields %a
 				
 	pat sbf $1==INT32                  /* Subtract single */
-		with FS FS
-			uses reusing %1, FREG
+		with FSREG FSREG
+			uses reusing %1, FSREG
 			gen
-				fsubs {FS, %a}, %2, %1
-			yields {FS, %a}
+				fsubs %a, %2, %1
+			yields %a
 				
 	pat mlf $1==INT32                  /* Multiply single */
-		with FS FS
-			uses reusing %1, FREG
+		with FSREG FSREG
+			uses reusing %1, FSREG
 			gen
-				fmuls {FS, %a}, %2, %1
-			yields {FS, %a}
+				fmuls %a, %2, %1
+			yields %a
 
 	pat dvf $1==INT32                  /* Divide single */
-		with FS FS
-			uses reusing %1, FREG
+		with FSREG FSREG
+			uses reusing %1, FSREG
 			gen
-				fdivs {FS, %a}, %2, %1
-			yields {FS, %a}
+				fdivs %a, %2, %1
+			yields %a
 
 	pat ngf $1==INT32                  /* Negate single */
-		with FS
-			uses reusing %1, FREG
+		with FSREG
+			uses reusing %1, FSREG
 			gen
-				fneg {FS, %a}, %1
-			yields {FS, %a}
+				fneg %a, %1
+			yields %a
 
 	pat cmf $1==INT32                  /* Compare single */
-		with FS FS
-			yields {TRISTATE_FF, %2.reg, %1.reg}
+		with FSREG FSREG
+			yields {TRISTATE_FF, %2.1, %1.1}
 			
 	pat loc loc cff $1==INT32 && $2==INT64 /* Convert single to double */
-		with FS
-			yields {FD, %1.reg}
+		with FSREG
+			yields %1.1
 					
 	pat loc loc cfu $1==INT32 && $2==INT32 /* Convert single to unsigned int */
 		with STACK
@@ -2078,50 +2109,50 @@ PATTERNS
 			lde ".fd_00000000"
 		
 	pat adf $1==INT64                  /* Add double */
-		with FD FD
+		with FREG FREG
 			uses FREG
 			gen
-				fadd {FD, %a}, %2, %1
-			yields {FD, %a}
+				fadd %a, %2, %1
+			yields %a
 				
 	pat sbf $1==INT64                  /* Subtract double */
-		with FD FD
+		with FREG FREG
 			uses FREG
 			gen
-				fsub {FD, %a}, %2, %1
-			yields {FD, %a}
+				fsub %a, %2, %1
+			yields %a
 				
 	pat mlf $1==INT64                  /* Multiply double */
-		with FD FD
+		with FREG FREG
 			uses reusing %1, FREG
 			gen
-				fmul {FD, %a}, %2, %1
-			yields {FD, %a}
+				fmul %a, %2, %1
+			yields %a
 
 	pat dvf $1==INT64                  /* Divide double */
-		with FD FD
+		with FREG FREG
 			uses reusing %1, FREG
 			gen
-				fdiv {FD, %a}, %2, %1
-			yields {FD, %a}
+				fdiv %a, %2, %1
+			yields %a
 
 	pat ngf $1==INT64                  /* Negate double */
-		with FD
+		with FREG
 			uses reusing %1, FREG
 			gen
-				fneg {FD, %a}, %1
-			yields {FD, %a}
+				fneg %a, %1
+			yields %a
 
 	pat cmf $1==INT64                  /* Compare double */
-		with FD FD
-			yields {TRISTATE_FF, %2.reg, %1.reg}
+		with FREG FREG
+			yields {TRISTATE_FF, %2, %1}
 				
 	pat loc loc cff $1==INT64 && $2==INT32 /* Convert double to single */
-		with FD
-			uses reusing %1, FREG
+		with FREG
+			uses reusing %1, FSREG
 			gen
-				frsp {FS, %a}, %1
-			yields {FS, %a}
+				frsp %a, %1
+			yields %a
 					
 	pat loc loc cfu $1==INT64 && $2==INT32 /* Convert double to unsigned int */
 		with STACK
@@ -2145,7 +2176,7 @@ PATTERNS
 				bl {LABEL, ".cuf8"}
 				
 	pat fef $1==INT64                  /* Split double */
-		with FD
+		with FREG
 			gen
 				addi SP, SP, {CONST, 0-8}
 				stfd %1, {GPRINDIRECT, SP, 0}

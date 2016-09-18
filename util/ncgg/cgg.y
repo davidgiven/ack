@@ -635,8 +635,8 @@ coderule
 			maxempatlen=empatlen;
 		}
 	  patterns
-		{ /* if (!saferulefound)
-			error("Previous rule impossible on empty stack"); */
+		{ if (!saferulefound)
+			error("Previous rule impossible on empty stack");
 		  outpatterns();
 		}
 	| PROC IDENT example
