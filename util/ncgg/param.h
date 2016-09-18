@@ -15,7 +15,7 @@
 #define BORS(x,y) y
 #endif
 
-#define MAXREGS BORS(80,30)
+#define MAXREGS BORS(200,30)
 #define MAXPROPS BORS(120,20)
 #define MAXTOKENS BORS(100,60)
 #define MAXATT 6
