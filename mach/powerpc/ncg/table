@@ -293,7 +293,6 @@ INSTRUCTIONS
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro.
   fmr             FPR:wo, FPR:ro.
   fmr             FSREG:wo, FSREG:ro.
-  la              GPRI:wo, LABEL:ro.
   lbzx            GPRI:wo, GPR:ro, GPR:ro.
   lbz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfd             FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
@@ -306,6 +305,7 @@ INSTRUCTIONS
   lhax            GPRI:wo, GPR:ro, GPR:ro.
   lha             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lhz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  li32            GPRI:wo, LABEL:ro.
   lwzu            GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lwzx            GPRI:wo, GPR:ro, GPR:ro.
   lwz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
@@ -385,7 +385,7 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			la %2, {LABEL, %1.adr}
+			li32 %2, {LABEL, %1.adr}
 	
 /* Sign extension */
 

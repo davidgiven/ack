@@ -98,7 +98,7 @@
 
 /* Special instructions */
 
-0,     OP_LA,                 0,                                       "la",
+0,     OP_LI32,               0,                                       "li32",
 
 /* Branch processor instructions (page 20) */
 
