@@ -24,16 +24,20 @@ MOD
 NEG
 NOT
 
-# Conversions
-FROMI1
-FROMI2
-FROMI4
-FROMI8
+AND
+OR
+EOR
 
-FROMU1
-FROMU2
-FROMU4
-FROMU8
+# Conversions
+CII1
+CII2
+CII4
+CII8
+
+CIU1
+CIU2
+CIU4
+CIU8
 
 # Tristate comparisons
 COMPARES

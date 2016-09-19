@@ -4,6 +4,8 @@ static struct e_instr insn;
 static struct procedure* current_proc;
 static struct basicblock* current_bb;
 
+static void queue_insn_label(int opcode, const char* label, arith offset);
+
 static const char* type_to_str(int type)
 {
 	switch (type)
@@ -57,6 +59,12 @@ static const char* dlabel_to_str(label l)
     return aprintf("__D%d", l);
 }
 
+static void terminate_block(void)
+{
+    current_bb->is_terminated = true;
+    current_bb = NULL;
+}
+
 static struct insn* new_insn(int opcode)
 {
     struct insn* insn = calloc(sizeof(struct insn), 1);
@@ -72,19 +80,38 @@ static void queue_insn_simple(int opcode)
 
     switch (opcode)
     {
-        case op_ret:
-            current_bb->is_terminated = true;
-            current_bb = NULL;
+        case op_bra:
+            terminate_block();
             break;
     }
 }
 
 static void queue_insn_value(int opcode, arith value)
 {
-    struct insn* insn = new_insn(opcode);
-    insn->paramtype = PARAM_IVALUE;
-    insn->u.ivalue = value;
-    APPEND(current_bb->insns, insn);
+    switch (opcode)
+    {
+        case op_csa:
+        case op_csb:
+        {
+            const char* helper = aprintf(".%s%d",
+                (opcode == op_csa) ? "csa" : "csb",
+                value);
+
+            queue_insn_label(op_cal, helper, 0);
+            queue_insn_value(op_asp, value + EM_pointersize);
+            queue_insn_value(op_lfr, value);
+            queue_insn_simple(op_bra);
+            break;
+        }
+
+        default:
+        {
+            struct insn* insn = new_insn(opcode);
+            insn->paramtype = PARAM_IVALUE;
+            insn->u.ivalue = value;
+            APPEND(current_bb->insns, insn);
+        }
+    }
 }
 
 static void queue_insn_label(int opcode, const char* label, arith offset)
@@ -109,8 +136,7 @@ static void queue_insn_block(int opcode, struct basicblock* left, struct basicbl
         APPENDU(current_bb->outblocks, right);
     APPENDU(current_bb->inblocks, current_bb);
 
-    current_bb->is_terminated = true;
-    current_bb = NULL;
+    terminate_block();
 }
 
 static void queue_insn_ilabel(int opcode, int label)

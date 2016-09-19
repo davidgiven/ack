@@ -23,7 +23,7 @@ static void push(struct ir* ir)
      * first. */
 
     if (ir->size < EM_wordsize)
-        ir = convert(ir, EM_wordsize, IR_FROMU1);
+        ir = convert(ir, EM_wordsize, IR_CIU1);
 
     stack[stackptr++] = ir;
 }
@@ -48,7 +48,7 @@ static struct ir* pop(int size)
         /* If we try to pop something which is smaller than a word, convert it first. */
         
         if (size < EM_wordsize)
-            ir = convert(ir, size, IR_FROMU1);
+            ir = convert(ir, size, IR_CIU1);
 
         if (ir->size != size)
             fatal("expected an item on stack of size %d, but got %d\n", size, ir->size);
@@ -153,31 +153,61 @@ static struct ir* tristate_compare(int size, int opcode)
         );
 }
 
+static void simple_convert(opcode)
+{
+    struct ir* destsize = pop(EM_wordsize);
+    struct ir* srcsize = pop(EM_wordsize);
+    struct ir* value;
+
+    assert(srcsize->opcode == IR_ICONST);
+    assert(destsize->opcode == IR_ICONST);
+
+    value = pop(srcsize->u.ivalue);
+    push(
+        convert(value, destsize->u.ivalue, opcode)
+    );
+}
+
 static void insn_simple(int opcode)
 {
     switch (opcode)
     {
-        case op_cii:
+        case op_bra:
         {
-            struct ir* destsize = pop(EM_wordsize);
-            struct ir* srcsize = pop(EM_wordsize);
-            struct ir* value;
+            struct ir* dest = pop(EM_pointersize);
 
-            assert(srcsize->opcode == IR_ICONST);
-            assert(destsize->opcode == IR_ICONST);
-
-            value = pop(srcsize->u.ivalue);
-            push(
-                convert(value, destsize->u.ivalue, IR_FROMI1)
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_JUMP, 0,
+                    dest
+                )
             );
             break;
         }
+            
+        case op_cii: simple_convert(IR_CII1); break;
+        case op_ciu: simple_convert(IR_CIU1); break;
 
         case op_cmp:
             push(
                 tristate_compare(EM_pointersize, IR_COMPAREU)
             );
             break;
+
+        case op_cai:
+        {
+            struct ir* dest = pop(EM_pointersize);
+
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    dest
+                )
+            );
+            break;
+        }
 
         default:
             fatal("treebuilder: unknown simple instruction '%s'",
@@ -287,6 +317,11 @@ static void insn_ivalue(int opcode, arith value)
         case op_rmi: simple_alu2(opcode, value, IR_MOD); break;
         case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
 
+        case op_and: simple_alu2(opcode, value, IR_AND); break;
+        case op_ior: simple_alu2(opcode, value, IR_OR); break;
+        case op_xor: simple_alu2(opcode, value, IR_EOR); break;
+        case op_com: simple_alu1(opcode, value, IR_NOT); break;
+
         case op_lol:
             push(
                 new_ir1(
@@ -359,7 +394,7 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
 
             if (value != EM_pointersize)
-                off = convert(off, EM_pointersize, IR_FROMI1);
+                off = convert(off, EM_pointersize, IR_CII1);
 
             push(
                 new_ir2(
@@ -396,7 +431,7 @@ static void insn_ivalue(int opcode, arith value)
                 );
 
             if (value != EM_pointersize)
-                delta = convert(delta, value, IR_FROMI1);
+                delta = convert(delta, value, IR_CII1);
 
             push(delta);
             break;
