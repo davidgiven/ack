@@ -85,7 +85,7 @@ static void materialise_stack(void)
 {
     int i;
 
-    for (i=stackptr-1; i>=0; i--)
+    for (i=0; i<stackptr; i++)
     {
         struct ir* ir = stack[i];
         appendir(
@@ -122,6 +122,20 @@ static struct ir* address_of_local(int index)
         );
 }
 
+static struct ir* address_of_external(const char* label, arith offset)
+{
+    if (offset != 0)
+        return
+            new_ir2(
+                IR_ADD, EM_pointersize,
+                new_labelir(label),
+                new_wordir(offset)
+            );
+    else
+        return
+            new_labelir(label);
+}
+
 static struct ir* convert(struct ir* src, int destsize, int opcode)
 {
     switch (src->size)
@@ -153,7 +167,7 @@ static struct ir* tristate_compare(int size, int opcode)
         );
 }
 
-static void simple_convert(opcode)
+static void simple_convert(int opcode)
 {
     struct ir* destsize = pop(EM_wordsize);
     struct ir* srcsize = pop(EM_wordsize);
@@ -513,6 +527,42 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
+        case op_csa:
+        case op_csb:
+        {
+            struct basicblock* data_bb;
+            int i;
+            const char* helper = aprintf(".%s%d",
+                (opcode == op_csa) ? "csa" : "csb",
+                value);
+            struct ir* descriptor = pop(EM_pointersize);
+
+            if (descriptor->opcode != IR_LABEL)
+                fatal("csa/csb are only supported if they refer "
+                    "directly to a descriptor block");
+
+            /* Splice the outgoing bbs in the data block into our own. */
+
+            data_bb = bb_get(descriptor->u.lvalue);
+            for (i=0; i<data_bb->outblocks_count; i++)
+            {
+                struct basicblock* bb = data_bb->outblocks[i];
+                printf("\t;   may jump to %s\n", bb->name);
+                APPENDU(current_bb->outblocks, bb);
+                APPENDU(bb->inblocks, current_bb);
+            }
+
+            push(descriptor);
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_JUMP, 0,
+                    new_labelir(helper)
+                )
+            );
+            break;
+        }
+
         default:
             fatal("treebuilder: unknown ivalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
@@ -525,11 +575,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
     {
         case op_lae:
             push(
-                new_ir2(
-                    IR_ADD, EM_pointersize,
-                    new_labelir(label),
-                    new_wordir(offset)
-                )
+                address_of_external(label, offset)
             );
             break;
 
@@ -537,11 +583,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             push(
                 new_ir1(
                     IR_LOAD, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        new_labelir(label),
-                        new_wordir(offset)
-                    )
+                    address_of_external(label, offset)
                 )
             );
             break;
@@ -550,11 +592,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        new_labelir(label),
-                        new_wordir(offset)
-                    ),
+                    address_of_external(label, offset),
                     pop(EM_wordsize)
                 )
             );
@@ -566,6 +604,17 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             appendir(
                 new_ir1(
                     IR_CALL, 0,
+                    new_labelir(label)
+                )
+            );
+            break;
+
+        case op_bra:
+            assert(offset == 0);
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_JUMP, 0,
                     new_labelir(label)
                 )
             );
@@ -582,6 +631,13 @@ static void generate_tree(struct basicblock* bb)
     int i;
 
     printf("; BLOCK %s\n", bb->name);
+    if (bb->inblocks_count > 0)
+    {
+        printf("; Entered from:\n");
+        for (i=0; i<bb->inblocks_count; i++)
+            printf(";    %s\n", bb->inblocks[i]->name);
+    }
+
     current_bb = bb;
     reset_stack();
 
@@ -623,6 +679,14 @@ static void generate_tree(struct basicblock* bb)
     }
 
     assert(stackptr == 0);
+
+    if (bb->outblocks_count > 0)
+    {
+        printf("; Exiting to:\n");
+        for (i=0; i<bb->outblocks_count; i++)
+            printf(";    %s\n", bb->outblocks[i]->name);
+    }
+    printf("\n");
 }
 
 void tb_procedure(struct procedure* current_proc)

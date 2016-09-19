@@ -39,32 +39,4 @@ void bb_alias(struct basicblock* block, const char* name)
 	p->block = block;
 }
 
-void bb_wire_outs_to_ins(struct basicblock* inblock, struct basicblock* outblock)
-{
-	int i;
-
-    if (!outblock->is_wired)
-    {
-        for (i=0; i<inblock->outs_count; i++)
-        {
-            struct ir* value = inblock->outs[i];
-            APPEND(outblock->ins,
-                new_phiir(value->size)
-            );
-        }
-        outblock->is_wired = true;
-    }
-
-    assert(inblock->outs_count == outblock->ins_count);
-    for (i=0; i<inblock->outs_count; i++)
-    {
-        struct ir* srcvalue = inblock->outs[i];
-        struct ir* destvalue = outblock->ins[i];
-        assert(srcvalue->size == destvalue->size);
-        assert(destvalue->opcode == IR_PHI);
-
-        APPENDU(destvalue->u.phivalue.srcs, srcvalue);
-    }
-}
-
 /* vim: set sw=4 ts=4 expandtab : */

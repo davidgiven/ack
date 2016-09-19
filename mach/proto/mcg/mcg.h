@@ -82,7 +82,7 @@ struct basicblock
     ARRAY(struct basicblock, outblocks);
     ARRAY(struct ir, outs);
     ARRAY(struct ir, ins);
-    bool is_wired : 1;
+    bool is_root : 1;
     bool is_terminated : 1;
 };
 
@@ -105,7 +105,6 @@ extern void data_bss(arith size, int init);
 extern void bb_init(void);
 extern struct basicblock* bb_get(const char* name);
 extern void bb_alias(struct basicblock* block, const char* name);
-extern void bb_wire_outs_to_ins(struct basicblock* outblock, struct basicblock* inblock);
 
 extern void tb_filestart(void);
 extern void tb_fileend(void);
