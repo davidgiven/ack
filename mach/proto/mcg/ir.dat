@@ -3,8 +3,13 @@ ICONST
 REG
 LABEL
 BLOCK
+PAIR
 ANY
 PHI
+
+# Magic stack operations
+PUSH
+POP
 
 # Memory operations
 LOAD
@@ -12,6 +17,12 @@ STORE
 
 # Arithemetic operations
 ADD
+SUB
+MUL
+DIV
+MOD
+NEG
+NOT
 
 # Conversions
 FROMI1
@@ -19,15 +30,27 @@ FROMI2
 FROMI4
 FROMI8
 
-# Comparisons
+FROMU1
+FROMU2
+FROMU4
+FROMU8
+
+# Tristate comparisons
 COMPARES
 COMPAREU
 
+# Boolean comparisons
+IFEQ
+IFLT
+IFLE
+
 # Flow control
+CALL
 JUMP
 CJUMP
 RET
 
 # Special
 SETREG
+GETREG
 

@@ -16,7 +16,8 @@ struct ir
 	int id;
 	int opcode;
 	int size;
-	struct ir* children[3];
+	struct ir* left;
+	struct ir* right;
 	union {
 		arith ivalue;
 		int rvalue;
@@ -26,8 +27,7 @@ struct ir
 			ARRAY(struct ir, srcs);
 		} phivalue;
 	} u;
-	bool sequence : 1;
-	bool terminates : 1;
+	bool is_sequence : 1;
 };
 
 extern const char* ir_names[];
@@ -37,8 +37,6 @@ extern struct ir* new_ir1(int opcode, int size,
 	struct ir* c1);
 extern struct ir* new_ir2(int opcode, int size,
 	struct ir* c1, struct ir* c2);
-extern struct ir* new_ir3(int opcode, int size,
-	struct ir* c1, struct ir* c2, struct ir* c3);
 
 extern struct ir* new_labelir(const char* label);
 extern struct ir* new_regir(int reg);

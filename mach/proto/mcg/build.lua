@@ -29,7 +29,10 @@ cprogram {
 		"./*.h",
 	},
 	vars = {
-		["+cflags"] = {"-Werror-implicit-function-declaration"}
+		["+cflags"] = {
+			"-Werror-implicit-function-declaration",
+			"-Wint-conversion"
+		}
 	}
 }
 

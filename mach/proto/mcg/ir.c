@@ -8,42 +8,23 @@ struct ir* new_ir0(int opcode, int size)
 	ir->id = next_id++;
 	ir->opcode = opcode;
 	ir->size = size;
-
-	switch (ir->opcode)
-	{
-		case IR_JUMP:
-		case IR_CJUMP:
-			ir->terminates = true;
-			break;
-	}
-
 	return ir;
 }
 
 struct ir* new_ir1(int opcode, int size,
-	struct ir* c1)
+	struct ir* left)
 {
 	struct ir* ir = new_ir0(opcode, size);
-	ir->children[0] = c1;
+	ir->left = left;
 	return ir;
 }
 
 struct ir* new_ir2(int opcode, int size,
-	struct ir* c1, struct ir* c2)
+	struct ir* left, struct ir* right)
 {
 	struct ir* ir = new_ir0(opcode, size);
-	ir->children[0] = c1;
-	ir->children[1] = c2;
-	return ir;
-}
-
-struct ir* new_ir3(int opcode, int size,
-	struct ir* c1, struct ir* c2, struct ir* c3)
-{
-	struct ir* ir = new_ir0(opcode, size);
-	ir->children[0] = c1;
-	ir->children[1] = c2;
-	ir->children[2] = c3;
+	ir->left = left;
+	ir->right = right;
 	return ir;
 }
 
@@ -87,15 +68,13 @@ struct ir* new_phiir(int size)
 
 void ir_print(const struct ir* ir)
 {
-	int i;
-	for (i=0; i<sizeof(ir->children)/sizeof(*ir->children); i++)
-	{
-		if (ir->children[i])
-			ir_print(ir->children[i]);
-	}
+    if (ir->left)
+        ir_print(ir->left);
+    if (ir->right)
+        ir_print(ir->right);
 
 	printf("\t; %c ",
-		ir->sequence ? 'S' : ' ');
+		ir->is_sequence ? 'S' : ' ');
 	printf("$%d = ", ir->id);
 	printf("%s%d(",
 		ir_names[ir->opcode],
@@ -120,15 +99,10 @@ void ir_print(const struct ir* ir)
 			break;
 
 		default:
-			for (i=0; i<sizeof(ir->children)/sizeof(*ir->children); i++)
-			{
-				if (ir->children[i])
-				{
-					if (i > 0)
-						printf(", ");
-					printf("$%d", ir->children[i]->id);
-				}
-			}
+            if (ir->left)
+                printf("$%d", ir->left->id);
+            if (ir->right)
+                printf(", $%d", ir->right->id);
 	}
 
 	printf(")\n");

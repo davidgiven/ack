@@ -1,13 +1,15 @@
 #include "mcg.h"
 
 static struct symbol* currentproc;
-static struct basicblock* rootbb;
-static struct basicblock* currentbb;
+static struct basicblock* current_bb;
 
 static int stackptr;
 static struct ir* stack[64];
 
-static void resetstack(void)
+static struct ir* convert(struct ir* src, int destsize, int opcode);
+static struct ir* appendir(struct ir* ir);
+
+static void reset_stack(void)
 {
     stackptr = 0;
 }
@@ -17,25 +19,84 @@ static void push(struct ir* ir)
     if (stackptr == sizeof(stack)/sizeof(*stack))
         fatal("stack overflow");
 
+    /* If we try to push something which is too small, convert it to a word
+     * first. */
+
+    if (ir->size < EM_wordsize)
+        ir = convert(ir, EM_wordsize, IR_FROMU1);
+
     stack[stackptr++] = ir;
 }
 
-static struct ir* pop(void)
+static struct ir* pop(int size)
 {
     if (stackptr == 0)
-        fatal("stack underflow");
+    {
+        /* Nothing in our fake stack, so we have to read from the real stack. */
 
-    return stack[--stackptr];
+        if (size < EM_wordsize)
+            size = EM_wordsize;
+        return
+            new_ir0(
+                IR_POP, size
+            );
+    }
+    else
+    {
+        struct ir* ir = stack[--stackptr];
+
+        /* If we try to pop something which is smaller than a word, convert it first. */
+        
+        if (size < EM_wordsize)
+            ir = convert(ir, size, IR_FROMU1);
+
+        if (ir->size != size)
+            fatal("expected an item on stack of size %d, but got %d\n", size, ir->size);
+        return ir;
+    }
+}
+
+static void print_stack(void)
+{
+    int i;
+
+    printf("\t; stack:");
+    for (i=0; i<stackptr; i++)
+    {
+        struct ir* ir = stack[i];
+        printf(" $%d.%d", ir->id, ir->size);
+    }
+    printf("  (top)\n");
 }
 
 static struct ir* appendir(struct ir* ir)
 {
-    assert(currentbb != NULL);
-    ir->sequence = true;
-    APPEND(currentbb->irs, ir);
+    int i;
+
+    assert(current_bb != NULL);
+    ir->is_sequence = true;
+    APPEND(current_bb->irs, ir);
 
     ir_print(ir);
     return ir;
+}
+
+static void materialise_stack(void)
+{
+    int i;
+
+    for (i=stackptr-1; i>=0; i--)
+    {
+        struct ir* ir = stack[i];
+        appendir(
+            new_ir1(
+                IR_PUSH, ir->size,
+                ir
+            )
+        );
+    }
+
+    reset_stack();
 }
 
 void tb_filestart(void)
@@ -44,105 +105,6 @@ void tb_filestart(void)
 
 void tb_fileend(void)
 {
-}
-
-static void materialise(void)
-{
-    int i;
-
-    for (i=0; i<stackptr; i++)
-        appendir(stack[i]);
-}
-
-static void changeblock(struct basicblock* bb)
-{
-    int i;
-
-    if (stackptr > 0)
-    {
-        printf("\t; block exiting with %d on stack:\n", stackptr);
-        for (i=0; i<stackptr; i++)
-        {
-            struct ir* ir = stack[i];
-            printf("\t;   $%d size %d\n", ir->id, ir->size);
-            APPENDU(currentbb->outs, ir);
-        }
-    }
-
-    for (i=0; i<currentbb->outblocks_count; i++)
-        bb_wire_outs_to_ins(currentbb, currentbb->outblocks[i]);
-
-    currentbb = bb;
-    printf("; new block: %s\n", currentbb->name);
-
-    resetstack();
-
-    if (currentbb->ins_count > 0)
-    {
-        printf("\t; block entering with %d on stack:\n", currentbb->ins_count);
-        for (i=0; i<currentbb->ins_count; i++)
-        {
-            struct ir* ir = currentbb->ins[i];
-            printf("\t;   $%d size %d\n", ir->id, ir->size);
-            push(ir);
-        }
-    }
-}
-
-void tb_ilabel(const char* label)
-{
-    materialise();
-
-    #if 0
-    if (currentbb->irs_count == 0)
-    {
-        /* Current BB has no instructions, so just alias it to the
-         * new name.
-         */
-        bb_alias(currentbb, label);
-    }
-    else
-    #endif
-    {
-        struct basicblock* newbb = bb_get(label);
-
-        if ((currentbb->irs_count == 0) ||
-            !currentbb->irs[currentbb->irs_count-1]->terminates)
-        {
-            APPEND(currentbb->outblocks, newbb);
-            appendir(
-                new_ir1(
-                    IR_JUMP, 0,
-                    new_labelir(label)
-                )
-            );
-        }
-
-        changeblock(newbb);
-    }
-}
-
-void tb_procstart(const char* label, size_t nlocals)
-{
-    assert(currentproc == NULL);
-
-    currentproc = symbol_get(label);
-    currentproc->section = SECTION_TEXT;
-
-    rootbb = calloc(sizeof(struct basicblock), 1);
-    currentbb = rootbb;
-
-    resetstack();
-}
-
-void tb_procend(void)
-{
-    assert(currentproc != NULL);
-
-    printf("\n.text\n");
-    printf("%s:\n", currentproc->name);
-
-    currentproc = NULL;
 }
 
 void tb_regvar(arith offset, int size, int type, int priority)
@@ -160,10 +122,29 @@ static struct ir* address_of_local(int index)
         );
 }
 
+static struct ir* convert(struct ir* src, int destsize, int opcode)
+{
+    switch (src->size)
+    {
+        case 1: opcode += 0; break;
+        case 2: opcode += 1; break;
+        case 4: opcode += 2; break;
+        case 8: opcode += 3; break;
+        default:
+            fatal("can't convert from things of size %d", src->size);
+    }
+
+    return
+        new_ir1(
+            opcode, destsize,
+            src
+        );
+}
+
 static struct ir* tristate_compare(int size, int opcode)
 {
-    struct ir* right = pop();
-    struct ir* left = pop();
+    struct ir* right = pop(size);
+    struct ir* left = pop(size);
 
     return
         new_ir2(
@@ -172,103 +153,140 @@ static struct ir* tristate_compare(int size, int opcode)
         );
 }
 
-static struct ir* convert(int destsize, int srcsize, int opcode)
-{
-    switch (srcsize)
-    {
-        case 1: opcode += 0; break;
-        case 2: opcode += 1; break;
-        case 4: opcode += 2; break;
-        case 8: opcode += 3; break;
-        default:
-            fatal("can't convert from things of size %d", srcsize);
-    }
-
-    return
-        new_ir1(
-            opcode, destsize,
-            pop()
-        );
-}
-
-void tb_insn_simple(int opcode, int flags)
+static void insn_simple(int opcode)
 {
     switch (opcode)
     {
         case op_cii:
         {
-            struct ir* destsize = pop();
-            struct ir* srcsize = pop();
+            struct ir* destsize = pop(EM_wordsize);
+            struct ir* srcsize = pop(EM_wordsize);
+            struct ir* value;
 
             assert(srcsize->opcode == IR_ICONST);
             assert(destsize->opcode == IR_ICONST);
 
+            value = pop(srcsize->u.ivalue);
             push(
-                convert(destsize->u.ivalue, srcsize->u.ivalue, IR_FROMI1)
+                convert(value, destsize->u.ivalue, IR_FROMI1)
             );
             break;
         }
 
+        case op_cmp:
+            push(
+                tristate_compare(EM_pointersize, IR_COMPAREU)
+            );
+            break;
+
         default:
-            fatal("unknown insn_simple instruction '%s'",
+            fatal("treebuilder: unknown simple instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
     }
 }
 
-void tb_insn_label(int opcode, int flags, const char* label, arith offset)
+static void simple_branch2(int opcode, int size,
+    struct basicblock* truebb, struct basicblock* falsebb,
+    int irop)
 {
-    materialise();
+    struct ir* right = pop(size);
+    struct ir* left = pop(size);
 
+    materialise_stack();
+    appendir(
+        new_ir2(
+            IR_CJUMP, 0,
+            new_ir2(
+                irop, size,
+                left, right
+            ),
+            new_ir2(
+                IR_PAIR, 0,
+                new_bbir(truebb),
+                new_bbir(falsebb)
+            )
+        )
+    );
+}
+
+static void compare0_branch2(int opcode,
+    struct basicblock* truebb, struct basicblock* falsebb,
+    int irop)
+{
+    push(
+        new_wordir(0)
+    );
+
+    simple_branch2(opcode, EM_wordsize, truebb, falsebb, irop);
+}
+
+static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock* rightbb)
+{
     switch (opcode)
     {
-        case op_zne:
-        {
-            struct basicblock* truebb = bb_get(label);
-            struct basicblock* falsebb = bb_get(NULL);
+        case op_zeq: compare0_branch2(opcode, leftbb, rightbb, IR_IFEQ); break;
+        case op_zlt: compare0_branch2(opcode, leftbb, rightbb, IR_IFLT); break;
+        case op_zle: compare0_branch2(opcode, leftbb, rightbb, IR_IFLE); break;
 
-            APPENDU(currentbb->outblocks, truebb);
-            APPENDU(currentbb->outblocks, falsebb);
-
-            appendir(
-                new_ir3(
-                    IR_CJUMP, 0,
-                    pop(),
-                    new_bbir(truebb),
-                    new_bbir(falsebb)
-                )
-            );
-
-            changeblock(falsebb);
-            break;
-        }
+        case op_zne: compare0_branch2(opcode, rightbb, leftbb, IR_IFEQ); break;
+        case op_zge: compare0_branch2(opcode, rightbb, leftbb, IR_IFLT); break;
+        case op_zgt: compare0_branch2(opcode, rightbb, leftbb, IR_IFLE); break;
 
         case op_bra:
         {
-            struct basicblock* destbb = bb_get(label);
-            APPENDU(currentbb->outblocks, destbb);
+            materialise_stack();
 
             appendir(
                 new_ir1(
                     IR_JUMP, 0,
-                    new_bbir(destbb)
+                    new_bbir(leftbb)
                 )
             );
             break;
         }
 
         default:
-            fatal("unknown insn_label instruction '%s'",
+            fatal("treebuilder: unknown bvalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
     }
 }
 
-void tb_insn_value(int opcode, int flags, arith value)
+static void simple_alu1(int opcode, int size, int irop)
 {
-    struct ir* left;
-    struct ir* right;
+    struct ir* val = pop(size);
 
+    push(
+        new_ir1(
+            irop, size,
+            val
+        )
+    );
+}
+
+static void simple_alu2(int opcode, int size, int irop)
+{
+    struct ir* right = pop(size);
+    struct ir* left = pop(size);
+
+    push(
+        new_ir2(
+            irop, size,
+            left, right
+        )
+    );
+}
+
+static void insn_ivalue(int opcode, arith value)
+{
     switch (opcode)
     {
+        case op_adi: simple_alu2(opcode, value, IR_ADD); break;
+        case op_sbi: simple_alu2(opcode, value, IR_SUB); break;
+        case op_mli: simple_alu2(opcode, value, IR_MUL); break;
+        case op_dvi: simple_alu2(opcode, value, IR_DIV); break;
+        case op_rmi: simple_alu2(opcode, value, IR_MOD); break;
+        case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
+
         case op_lol:
             push(
                 new_ir1(
@@ -283,8 +301,14 @@ void tb_insn_value(int opcode, int flags, arith value)
                 new_ir2(
                     IR_STORE, EM_wordsize,
                     address_of_local(value),
-                    pop()
+                    pop(EM_wordsize)
                 )
+            );
+            break;
+
+        case op_lal:
+            push(
+                address_of_local(value)
             );
             break;
 
@@ -298,22 +322,24 @@ void tb_insn_value(int opcode, int flags, arith value)
             push(
                 new_ir1(
                     IR_LOAD, value,
-                    pop()
+                    pop(EM_pointersize)
                 )
             );
             break;
 
         case op_sti:
-            right = pop();
-            left = pop();
+        {
+            struct ir* ptr = pop(EM_pointersize);
+            struct ir* val = pop(value);
 
             appendir(
                 new_ir2(
                     IR_STORE, value,
-                    right, left
+                    ptr, val
                 )
             );
             break;
+        }
 
         case op_cmi:
             push(
@@ -328,24 +354,59 @@ void tb_insn_value(int opcode, int flags, arith value)
             break;
 
         case op_ads:
-            right = pop();
-            left = pop();
+        {
+            struct ir* off = pop(value);
+            struct ir* ptr = pop(EM_pointersize);
 
             if (value != EM_pointersize)
-                right = convert(EM_pointersize, value, IR_FROMI1);
+                off = convert(off, EM_pointersize, IR_FROMI1);
 
             push(
                 new_ir2(
-                    IR_ADD, EM_wordsize,
-                    left, right
+                    IR_ADD, EM_pointersize,
+                    ptr, off
                 )
             );
             break;
+        }
 
+        case op_adp:
+        {
+            struct ir* ptr = pop(EM_pointersize);
+
+            push(
+                new_ir2(
+                    IR_ADD, EM_pointersize,
+                    ptr,
+                    new_wordir(value)
+                )
+            );
+            break;
+        }
+
+        case op_sbs:
+        {
+            struct ir* right = pop(EM_pointersize);
+            struct ir* left = pop(EM_pointersize);
+
+            struct ir* delta = 
+                new_ir2(
+                    IR_SUB, EM_pointersize,
+                    left, right
+                );
+
+            if (value != EM_pointersize)
+                delta = convert(delta, value, IR_FROMI1);
+
+            push(delta);
+            break;
+        }
+            
         case op_dup:
         {
-            struct ir* v = pop();
-            appendir(v);
+            struct ir* v = pop(value);
+            if (!v->is_sequence)
+                appendir(v);
             push(v);
             push(v);
             break;
@@ -386,13 +447,12 @@ void tb_insn_value(int opcode, int flags, arith value)
         {
             if (value > 0)
             {
-                left = pop();
-                assert(left->size == value);
+                struct ir* retval = pop(value);
                 appendir(
                     new_ir2(
                         IR_SETREG, value,
                         new_regir(IRR_RR),
-                        left
+                        retval
                     )
                 );
             }
@@ -405,10 +465,137 @@ void tb_insn_value(int opcode, int flags, arith value)
             break;
         }
                     
+        case op_lfr:
+        {
+            push(
+                appendir(
+                    new_ir1(
+                        IR_GETREG, value,
+                        new_regir(IRR_RR)
+                    )
+                )
+            );
+            break;
+        }
+
         default:
-            fatal("unknown insn_value instruction '%s'",
+            fatal("treebuilder: unknown ivalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
     }
+}
+
+static void insn_lvalue(int opcode, const char* label, arith offset)
+{
+    switch (opcode)
+    {
+        case op_lae:
+            push(
+                new_ir2(
+                    IR_ADD, EM_pointersize,
+                    new_labelir(label),
+                    new_wordir(offset)
+                )
+            );
+            break;
+
+        case op_loe:
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        new_labelir(label),
+                        new_wordir(offset)
+                    )
+                )
+            );
+            break;
+
+        case op_ste:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        new_labelir(label),
+                        new_wordir(offset)
+                    ),
+                    pop(EM_wordsize)
+                )
+            );
+            break;
+
+        case op_cal:
+            assert(offset == 0);
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir(label)
+                )
+            );
+            break;
+                    
+        default:
+            fatal("treebuilder: unknown lvalue instruction '%s'",
+                em_mnem[opcode - sp_fmnem]);
+    }
+}
+
+static void generate_tree(struct basicblock* bb)
+{
+    int i;
+
+    printf("; BLOCK %s\n", bb->name);
+    current_bb = bb;
+    reset_stack();
+
+    for (i=0; i<bb->insns_count; i++)
+    {
+        struct insn* insn = bb->insns[i];
+        printf("\t; EM: %s ", em_mnem[insn->opcode - sp_fmnem]);
+        switch (insn->paramtype)
+        {
+            case PARAM_NONE:
+                printf("\n");
+                insn_simple(insn->opcode);
+                break;
+
+            case PARAM_IVALUE:
+                printf("value=%d\n", insn->u.ivalue);
+                insn_ivalue(insn->opcode, insn->u.ivalue);
+                break;
+
+            case PARAM_LVALUE:
+                printf("label=%s offset=%d\n", 
+                    insn->u.lvalue.label, insn->u.lvalue.offset);
+                insn_lvalue(insn->opcode, insn->u.lvalue.label, insn->u.lvalue.offset);
+                break;
+
+            case PARAM_BVALUE:
+                printf("true=%s", insn->u.bvalue.left->name);
+                if (insn->u.bvalue.right)
+                    printf(" false=%s", insn->u.bvalue.right->name);
+                printf("\n");
+                insn_bvalue(insn->opcode, insn->u.bvalue.left, insn->u.bvalue.right);
+                break;
+
+            default:
+                assert(0);
+        }
+
+        print_stack();
+    }
+
+    assert(stackptr == 0);
+}
+
+void tb_procedure(struct procedure* current_proc)
+{
+    int i;
+
+    for (i=0; i<current_proc->blocks_count; i++)
+        generate_tree(current_proc->blocks[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

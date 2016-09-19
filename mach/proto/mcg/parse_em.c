@@ -1,7 +1,8 @@
 #include "mcg.h"
 
 static struct e_instr insn;
-static const char* current_proc;
+static struct procedure* current_proc;
+static struct basicblock* current_bb;
 
 static const char* type_to_str(int type)
 {
@@ -48,12 +49,109 @@ static void unknown_type(const char* s)
 static const char* ilabel_to_str(label l)
 {
     assert(current_proc != NULL);
-    return aprintf("__%s_I%d", current_proc, l);
+    return aprintf("__%s_I%d", current_proc->name, l);
 }
 
 static const char* dlabel_to_str(label l)
 {
     return aprintf("__D%d", l);
+}
+
+static struct insn* new_insn(int opcode)
+{
+    struct insn* insn = calloc(sizeof(struct insn), 1);
+    insn->opcode = opcode;
+    return insn;
+}
+
+static void queue_insn_simple(int opcode)
+{
+    struct insn* insn = new_insn(opcode);
+    insn->paramtype = PARAM_NONE;
+    APPEND(current_bb->insns, insn);
+
+    switch (opcode)
+    {
+        case op_ret:
+            current_bb->is_terminated = true;
+            current_bb = NULL;
+            break;
+    }
+}
+
+static void queue_insn_value(int opcode, arith value)
+{
+    struct insn* insn = new_insn(opcode);
+    insn->paramtype = PARAM_IVALUE;
+    insn->u.ivalue = value;
+    APPEND(current_bb->insns, insn);
+}
+
+static void queue_insn_label(int opcode, const char* label, arith offset)
+{
+    struct insn* insn = new_insn(opcode);
+    insn->paramtype = PARAM_LVALUE;
+    insn->u.lvalue.label = label;
+    insn->u.lvalue.offset = offset;
+    APPEND(current_bb->insns, insn);
+}
+
+static void queue_insn_block(int opcode, struct basicblock* left, struct basicblock* right)
+{
+    struct insn* insn = new_insn(opcode);
+    insn->paramtype = PARAM_BVALUE;
+    insn->u.bvalue.left = left;
+    insn->u.bvalue.right = right;
+    APPEND(current_bb->insns, insn);
+    
+    APPENDU(current_bb->outblocks, left);
+    if (right)
+        APPENDU(current_bb->outblocks, right);
+    APPENDU(current_bb->inblocks, current_bb);
+
+    current_bb->is_terminated = true;
+    current_bb = NULL;
+}
+
+static void queue_insn_ilabel(int opcode, int label)
+{
+    const char* name = ilabel_to_str(insn.em_ilb);
+    struct basicblock* left = bb_get(name);
+
+    switch (opcode)
+    {
+        case op_bra:
+            queue_insn_block(insn.em_opcode, left, NULL);
+            break;
+
+        case op_zeq:
+        case op_zne:
+        case op_zlt:
+        case op_zle:
+        case op_zgt:
+        case op_zge:
+            queue_insn_block(insn.em_opcode, left, bb_get(NULL));
+            break;
+
+        default:
+            fatal("parse_em: unhandled conditional '%s'", 
+                em_mnem[opcode - sp_fmnem]);
+    }
+}
+
+static void change_basicblock(struct basicblock* newbb)
+{
+    APPENDU(current_proc->blocks, newbb);
+
+    if (current_bb && !current_bb->is_terminated)
+        queue_insn_block(op_bra, newbb, NULL);
+
+    current_bb = newbb;
+}
+
+static void queue_ilabel(arith label)
+{
+    change_basicblock(bb_get(ilabel_to_str(label)));
 }
 
 static void parse_pseu(void)
@@ -142,16 +240,19 @@ static void parse_pseu(void)
         }
 
 		case ps_pro: /* procedure start */
-            if (insn.em_nlocals == -1)
-                fatal("procedures with unspecified number of locals are not supported yet");
-
-            current_proc = strdup(insn.em_pnam);
-            tb_procstart(current_proc, insn.em_nlocals);
+            current_proc = calloc(sizeof(struct procedure), 1);
+            current_proc->name = strdup(insn.em_pnam);
+            current_proc->root_bb = bb_get(current_proc->name);
+            current_proc->nlocals = insn.em_nlocals;
+            current_bb = current_proc->root_bb;
+            APPEND(current_proc->blocks, current_bb);
             break;
 
 		case ps_end: /* procedure end */
-            tb_procend();
+            tb_procedure(current_proc);
+
             current_proc = NULL;
+            current_bb = NULL;
 			break;
 
 		default:
@@ -207,7 +308,7 @@ void parse_em(void)
                 break;
 
             case EM_DEFILB:
-                tb_ilabel(ilabel_to_str(insn.em_ilb));
+                queue_ilabel(insn.em_ilb);
                 break;
 
             case EM_DEFDLB:
@@ -223,51 +324,48 @@ void parse_em(void)
                 break;
 
             case EM_MNEM:
-            {
-                int flags = em_flag[insn.em_opcode - sp_fmnem];
-
-                if (flags & EM_PAR)
+                if (current_bb)
                 {
-                    switch (insn.em_argtype)
+                    int flags = em_flag[insn.em_opcode - sp_fmnem];
+
+                    if (flags & EM_PAR)
                     {
-                        case ilb_ptyp:
-                            tb_insn_label(insn.em_opcode, flags,
-                                ilabel_to_str(insn.em_ilb), 0);
-                            break;
+                        switch (insn.em_argtype)
+                        {
+                            case ilb_ptyp:
+                                queue_insn_ilabel(insn.em_opcode, insn.em_ilb);
+                                break;
 
-                        case nof_ptyp:
-                            tb_insn_label(insn.em_opcode, flags,
-                                dlabel_to_str(insn.em_dlb), insn.em_off);
-                            break;
+                            case nof_ptyp:
+                                queue_insn_label(insn.em_opcode,
+                                    dlabel_to_str(insn.em_dlb), insn.em_off);
+                                break;
 
-                        case sof_ptyp:
-                            tb_insn_label(insn.em_opcode, flags,
-                                strdup(insn.em_dnam), insn.em_off);
-                            break;
+                            case sof_ptyp:
+                                queue_insn_label(insn.em_opcode,
+                                    strdup(insn.em_dnam), insn.em_off);
+                                break;
 
-                        case pro_ptyp:
-                            tb_insn_label(insn.em_opcode, flags,
-                                strdup(insn.em_pnam), 0);
-                            break;
+                            case pro_ptyp:
+                                queue_insn_label(insn.em_opcode,
+                                    strdup(insn.em_pnam), 0);
+                                break;
 
-                        case cst_ptyp:
-                            if ((flags & EM_PAR) == PAR_B)
-                                tb_insn_label(insn.em_opcode, flags,
-                                    ilabel_to_str(insn.em_ilb), 0);
-                            else
-                                tb_insn_value(insn.em_opcode, flags,
-                                    insn.em_cst);
-                            break;
+                            case cst_ptyp:
+                                if ((flags & EM_PAR) == PAR_B)
+                                    queue_insn_ilabel(insn.em_opcode, insn.em_ilb);
+                                else
+                                    queue_insn_value(insn.em_opcode, insn.em_cst);
+                                break;
 
-                        default:
-                            unknown_type("instruction");
+                            default:
+                                unknown_type("instruction");
+                        }
                     }
+                    else
+                        queue_insn_simple(insn.em_opcode);
                 }
-                else
-                    tb_insn_simple(insn.em_opcode, flags);
-
                 break;
-            }
 
             default:
                 fatal("unrecognised instruction type '%d'", insn.em_type);

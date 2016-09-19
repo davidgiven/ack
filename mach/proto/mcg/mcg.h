@@ -31,7 +31,8 @@ enum {
 	SECTION_TEXT
 };
 
-struct symbol {
+struct symbol
+{
 	const char* name;
 	int section;
 	bool is_defined : 1;
@@ -39,20 +40,50 @@ struct symbol {
 	bool is_proc : 1;
 };
 
-enum {
+enum
+{
     PARAM_NONE,
-    PARAM_VALUE,
-    PARAM_LABEL
+    PARAM_IVALUE,
+    PARAM_LVALUE,
+    PARAM_BVALUE,
 };
 
-struct basicblock {
+struct insn
+{
+    int opcode;
+    int paramtype;
+    union {
+        arith ivalue;
+        struct {
+            const char* label;
+            arith offset;
+        } lvalue;
+        struct {
+            struct basicblock* left;
+            struct basicblock* right;
+        } bvalue;
+    } u;
+};
+    
+struct procedure
+{
     const char* name;
+    struct basicblock* root_bb;
+    size_t nlocals;
+    ARRAY(struct basicblock, blocks);
+};
+
+struct basicblock
+{
+    const char* name;
+    ARRAY(struct insn, insns);
     ARRAY(struct ir, irs);
     ARRAY(struct basicblock, inblocks);
     ARRAY(struct basicblock, outblocks);
     ARRAY(struct ir, outs);
     ARRAY(struct ir, ins);
     bool is_wired : 1;
+    bool is_terminated : 1;
 };
 
 extern void fatal(const char* s, ...);
@@ -78,14 +109,8 @@ extern void bb_wire_outs_to_ins(struct basicblock* outblock, struct basicblock* 
 
 extern void tb_filestart(void);
 extern void tb_fileend(void);
-extern void tb_ilabel(const char* label);
-extern void tb_procstart(const char* label, size_t nlocals);
-extern void tb_procend(void);
+extern void tb_procedure(struct procedure* proc);
 extern void tb_regvar(arith offset, int size, int type, int priority);
-
-extern void tb_insn_simple(int opcode, int flags);
-extern void tb_insn_label(int opcode, int flags, const char* label, arith offset);
-extern void tb_insn_value(int opcode, int flags, arith value);
 
 #endif
 
