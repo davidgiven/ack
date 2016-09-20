@@ -1,0 +1,39 @@
+Tue Aug 12 10:03:34 PDT 1997
+
+makefile:
+Customized for use under NT.
+
+gram.y:
+Fixed diagnostic formatting, handled cases when \n doesn't terminate
+the input buffer; protected against versions of fgets that touch
+buffer at EOF.
+
+sample4.brg:
+Changed state value from int to long for 64-bit machines.
+
+
+Tue May  7 14:20:11 PDT 1996
+
+The distribution now includes the RCS files.
+Specific changes are as follows; thanks to Francisco Arzu
+(farzu@uvg.edu.gt) for these suggestions.
+
+gram.y:
+Changed TERM to TERMINAL for bison.
+Moved definition of yylineno for bison.
+Changed hard-coded 32767 to maxcost, and checked
+only costs against maxcost.
+Replaced 0s in calls with NULL.
+
+iburg.1:
+Document STATE_TYPE, -maxcost=ddd, and use of SHRT_MAX.
+
+iburg.c:
+Implemented STATE_TYPE, default int.
+Changed 32767 to maxcost, which is SHRT_MAX, SHRT_MAX/2
+(when sizeof(int)==sizeof(short)), or maxcost. Included limits.h.
+
+
+Thu May 12 11:33:48 EDT 1994
+
+initial release.

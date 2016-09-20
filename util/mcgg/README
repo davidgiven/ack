@@ -1,0 +1,11 @@
+mcgg is very heavily based on the iburg code generator by C. W. Fraser, D. R.
+Hanson and T. A. Proebsting, described in ACM Letters on Prog. Languages and
+Systems 1, 3 (Sep. 1992), 213-226:
+
+http://storage.webhop.net/documents/iburg.pdf
+
+For the original source, see the iburg-import branch (this is the version with
+all the mcgg extensions).
+
+iburg is licensed under the MIT open source license; see the LICENSE file.
+

@@ -1,0 +1,85 @@
+%{
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+
+#define TRACE
+
+enum { MOVE=1, MEM=2, PLUS=3, NAME=4, CONST=6 };
+
+#define STATE_TYPE void*
+typedef struct tree {
+	int op;
+	struct tree *kids[2];
+	STATE_TYPE state_label;
+} *NODEPTR_TYPE;
+#define OP_LABEL(p) ((p)->op)
+#define LEFT_CHILD(p) ((p)->kids[0])
+#define RIGHT_CHILD(p) ((p)->kids[1])
+#define STATE_LABEL(p) ((p)->state_label)
+#define PANIC printf
+
+static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
+#ifdef TRACE
+	extern char *burm_string[];
+
+	fprintf(stderr, "0x%p matched %s with cost %d vs. %d\n", p,
+		burm_string[eruleno], cost, bestcost);
+#endif
+}
+%}
+%term MOVE=1 MEM=2 PLUS=3 NAME=4 CONST=6
+%%
+stm:    MOVE(MEM(loc),reg) = 1 (4);
+
+reg:    PLUS(con,reg) = 2 (3);
+reg:    PLUS(reg,reg) = 3 (2);
+reg:    PLUS(MEM(loc),reg) = 4 (4);
+reg:    MEM(loc) = 5 (4);
+reg:    con = 6 (2);
+
+loc:    reg = 7;
+loc:    NAME = 8;
+loc:    PLUS(NAME,reg) = 9;
+
+con:    CONST = 10;
+%%
+static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
+#ifdef TRACE
+	int eruleno = burm_rule(STATE_LABEL(p), goalnt);
+	short *nts = burm_nts[eruleno];
+	NODEPTR_TYPE kids[10];
+	int i;
+
+	for (i = 0; i < indent; i++)
+		fprintf(stderr, " ");
+	fprintf(stderr, "%s\n", burm_string[eruleno]);
+	burm_kids(p, eruleno, kids);
+	for (i = 0; nts[i]; i++)
+		dumpCover(kids[i], nts[i], indent + 1);
+#endif
+}
+
+static NODEPTR_TYPE tree(int op, NODEPTR_TYPE l, NODEPTR_TYPE r) {
+	NODEPTR_TYPE p = malloc(sizeof *p);
+
+	assert(p);
+	p->op = op;
+	p->kids[0] = l; p->kids[1] = r;
+	return p;
+}
+
+main(void) {
+	NODEPTR_TYPE p;
+
+	p = tree(MOVE,
+		tree(MEM, tree(NAME, 0, 0), 0),
+		tree(PLUS,
+			tree(MEM, tree(PLUS,
+				tree(NAME, 0, 0),
+				tree(MEM, tree(NAME, 0, 0), 0)), 0),
+			tree(CONST, 0, 0) ) );
+	burm_label(p);
+	dumpCover(p, 1, 0);
+	return 0;
+}
