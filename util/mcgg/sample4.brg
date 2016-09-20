@@ -1,0 +1,109 @@
+%{
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+enum {
+	ADDI=309, ADDRLP=295, ASGNI=53,
+	CNSTI=21, CVCI=85, I0I=661, INDIRC=67
+};
+
+#define STATE_TYPE long
+typedef struct tree {
+	int op;
+	struct tree *kids[2];
+	int val;
+	struct { STATE_TYPE state; } x;
+} *NODEPTR_TYPE, *Tree;
+#define LEFT_CHILD(p) ((p)->kids[0])
+#define RIGHT_CHILD(p) ((p)->kids[1])
+#define PANIC printf
+#define STATE_LABEL(p) ((p)->x.state)
+
+int OP_LABEL(NODEPTR_TYPE p) {
+	switch (p->op) {
+	case CNSTI:  if (p->val == 0) return 661 /* I0I */;
+	default:     return p->op;
+	}
+}
+
+static void burm_trace(NODEPTR_TYPE, int, int, int);
+%}
+%term ADDI=309 ADDRLP=295 ASGNI=53
+%term CNSTI=21 CVCI=85 I0I=661 INDIRC=67
+%%
+stmt:	ASGNI(disp,reg) = 4 (1);
+stmt:	reg = 5;
+reg:	ADDI(reg,rc) = 6 (1);
+reg:	CVCI(INDIRC(disp)) = 7 (1);
+reg:	I0I = 8;
+reg:	disp = 9 (1);
+disp:	ADDI(reg,con) = 10;
+disp:	ADDRLP = 11;
+rc:	con = 12;
+rc:	reg = 13;
+con:	CNSTI = 14;
+con:	I0I = 15;
+%%
+
+static int trace;
+
+/* burm_trace - print trace message for matching p; decrement trace */
+static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
+	if (trace < 0)
+		fprintf(stderr, "0x%p matched %s = %d with cost %d vs. %d\n", p,
+			burm_string[eruleno], eruleno, cost, bestcost);
+	else if (trace > 0 && cost < bestcost) {
+		--trace;
+		fprintf(stderr, "0x%p matched %s = %d with cost %d\n", p,
+			burm_string[eruleno], eruleno, cost);
+	}
+}
+
+/* dumpCover - print the matched cover for p */
+static void dumpCover(Tree p, int goalnt, int indent) {
+	int eruleno = burm_rule(p->x.state, goalnt);
+	short *nts = burm_nts[eruleno];
+	Tree kids[10];
+	int i;
+
+	for (i = 0; i < indent; i++)
+		fprintf(stderr, " ");
+	fprintf(stderr, "%s\n", burm_string[eruleno]);
+	burm_kids(p, eruleno, kids);
+	for (i = 0; nts[i]; i++)
+		dumpCover(kids[i], nts[i], indent + 1);
+}
+
+static void gen(NODEPTR_TYPE p) {
+	if (burm_label(p) == 0)
+		fprintf(stderr, "no cover\n");
+	else
+		dumpCover(p, 1, 0);
+}
+
+static Tree tree(int op, Tree l, Tree r) {
+	Tree t = malloc(sizeof *t);
+
+	t->op = op;
+	t->kids[0] = l; t->kids[1] = r;
+	t->val = 0;
+	t->x.state = 0;
+	return t;
+}
+
+main(void) {
+	Tree t;
+
+	if (getenv("Trace"))
+		trace = atoi(getenv("Trace"));
+	printf("i = c + 4;\n");
+	t = tree(ASGNI,
+		tree(ADDRLP, 0, 0),
+		tree(ADDI,
+			tree(CVCI, tree(INDIRC, tree(ADDRLP, 0, 0), 0), 0),
+			(t = tree(CNSTI, 0, 0), t->val = 4, t)
+		)
+	);
+	gen(t);
+	return 0;
+}
