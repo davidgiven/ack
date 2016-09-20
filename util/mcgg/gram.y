@@ -3,65 +3,105 @@
 #include <stdio.h>
 #include <limits.h>
 #include "iburg.h"
+
+#define YYDEBUG 1
+
 static char rcsid[] = "$Id$";
-static int yylineno = 0;
+static int nextesn = 0;
+static int nextern = 0;
+
 %}
 %union {
 	int n;
-	char *string;
+	char* string;
 	Tree tree;
+    Stringlist stringlist;
 }
 %term TERMINAL
 %term START
 %term PPERCENT
 
-%token  <string>        ID
-%token  <n>             INT
-%type	<string>	lhs
-%type   <tree>          tree
-%type   <n>             cost
+%term PATTERNS
+%term PAT
+%term WHEN
+%term EMIT
+%term COST
+
+%token <string>     ID
+%token <string>     CFRAGMENT
+%token <n>          INT
+
+%type  <string>     lhs
+%type  <tree>       rhs
+%type  <n>          cost
+%type  <stringlist> when
+%type  <stringlist> stringlist
 %%
-spec	: decls PPERCENT rules		{ yylineno = 0; }
-	| decls				{ yylineno = 0; }
+spec
+    : decls PPERCENT patterns
+	| decls
 	;
 
 decls	: /* lambda */
 	| decls decl
 	;
 
-decl	: TERMINAL blist '\n'
-	| START lhs   '\n'		{
-		if (nonterm($2)->number != 1)
-			yyerror("redeclaration of the start symbol\n");
-		}
-	| '\n'
-	| error '\n'			{ yyerrok; }
+decl
+    : TERMINAL blist ';'
+	| START lhs ';'
+    {
+        if (nonterm($2)->number != 1)
+            yyerror("redeclaration of the start symbol\n");
+    }
+	| ';'
+	| error ';'			{ yyerrok; }
 	;
 
-blist	: /* lambda */
-	| blist ID '=' INT      	{ term($2, $4); }
+blist
+    : /* nothing */
+    | blist ID              { term($2, nextesn++); }
+    ;
+
+patterns
+    : /* nothing */
+	| patterns pattern ';'
+	| patterns ';'
+	| patterns error ';'		{ yyerrok; }
 	;
 
-rules	: /* lambda */
-	| rules lhs ':' tree '=' INT cost ';' '\n'	{ rule($2, $4, $6, $7); }
-	| rules '\n'
-	| rules error '\n'		{ yyerrok; }
+pattern
+    : lhs '=' rhs when cost         { rule($1, $3, nextern++, $4, $5); }
+    ;
+
+lhs
+    : ID				            { $$ = $1; nonterm($$); }
 	;
 
-lhs	: ID				{ nonterm($$ = $1); }
+rhs
+    : ID                            { $$ = tree($1, NULL, NULL); }
+	| ID '(' rhs ')'                { $$ = tree($1,   $3, NULL); }
+	| ID '(' rhs ',' rhs ')'        { $$ = tree($1,   $3, $5); }
 	;
 
-tree	: ID                            { $$ = tree($1, NULL, NULL); }
-	| ID '(' tree ')'               { $$ = tree($1,   $3, NULL); }
-	| ID '(' tree ',' tree ')'      { $$ = tree($1,   $3, $5); }
-	;
+when
+    : /* nothing */                 { $$ = NULL; }
+    | WHEN stringlist               { $$ = $2; }
+    ;
 
-cost	: /* lambda */			{ $$ = 0; }
-	| '(' INT ')'			{ if ($2 > maxcost) {
-						yyerror("%d exceeds maximum cost of %d\n", $2, maxcost);
-						$$ = maxcost;
-					} else
-						$$ = $2; }
+stringlist 
+    : /* nothing */                 { $$ = NULL; }
+    | CFRAGMENT stringlist          { $$ = pushstring($1, $2); }
+    ;
+    
+cost
+    : /* lambda */			        { $$ = 0; }
+	| COST INT  			        {
+                                        if ($2 > maxcost) {
+                                            yyerror("%d exceeds maximum cost of %d\n", $2, maxcost);
+                                            $$ = maxcost;
+                                        } else
+                                            $$ = $2;
+                                    }
 	;
 %%
 #include <stdarg.h>
@@ -72,32 +112,6 @@ FILE *infp = NULL;
 FILE *outfp = NULL;
 static char buf[BUFSIZ], *bp = buf;
 static int ppercent = 0;
-
-static int get(void) {
-	if (*bp == 0) {
-		bp = buf;
-		*bp = 0;
-		if (fgets(buf, sizeof buf, infp) == NULL)
-			return EOF;
-		yylineno++;
-		while (buf[0] == '%' && buf[1] == '{' && (buf[2] == '\n' || buf[2] == '\r')) {
-			for (;;) {
-				if (fgets(buf, sizeof buf, infp) == NULL) {
-					yywarn("unterminated %{...%}\n");
-					return EOF;
-				}
-				yylineno++;
-				if (strcmp(buf, "%}\n") == 0 || strcmp(buf, "%}\r\n") == 0)
-					break;
-				fputs(buf, outfp);
-			}
-			if (fgets(buf, sizeof buf, infp) == NULL)
-				return EOF;
-			yylineno++;
-		}
-	}
-	return *bp++;
-}
 
 void yyerror(char *fmt, ...) {
 	va_list ap;
@@ -111,58 +125,6 @@ void yyerror(char *fmt, ...) {
 	errcnt++;
 }
 
-int yylex(void) {
-	int c;
-
-	while ((c = get()) != EOF) {
-		switch (c) {
-		case ' ': case '\f': case '\t': case '\r':
-			continue;
-		case '\n':
-		case '(': case ')': case ',':
-		case ';': case '=': case ':':
-			return c;
-		}
-		if (c == '%' && *bp == '%') {
-			bp++;
-			return ppercent++ ? 0 : PPERCENT;
-		} else if (c == '%' && strncmp(bp, "term", 4) == 0
-		&& isspace(bp[4])) {
-			bp += 4;
-			return TERMINAL;
-		} else if (c == '%' && strncmp(bp, "start", 5) == 0
-		&& isspace(bp[5])) {
-			bp += 5;
-			return START;
-		} else if (isdigit(c)) {
-			int n = 0;
-			do {
-				int d = c - '0';
-				if (n > (INT_MAX - d)/10)
-					yyerror("integer greater than %d\n", INT_MAX);
-				else
-					n = 10*n + d;
-				c = get();
-			} while (c != EOF && isdigit(c));
-			bp--;
-			yylval.n = n;
-			return INT;
-		} else if (isalpha(c)) {
-			char *p = bp - 1;
-			while (isalpha(*bp) || isdigit(*bp) || *bp == '_')
-				bp++;
-			yylval.string = alloc(bp - p + 1);
-			strncpy(yylval.string, p, bp - p);
-			yylval.string[bp - p] = 0;
-			return ID;
-		} else if (isprint(c))
-			yyerror("invalid character `%c'\n", c);
-		else
-			yyerror("invalid character `\\%03o'\n", (unsigned char)c);
-	}
-	return 0;
-}
-
 void yywarn(char *fmt, ...) {
 	va_list ap;
 
@@ -172,3 +134,5 @@ void yywarn(char *fmt, ...) {
 	fprintf(stderr, "warning: ");
 	vfprintf(stderr, fmt, ap);
 }
+
+/* vim: set sw=4 ts=4 expandtab : */

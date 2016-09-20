@@ -3,7 +3,14 @@
 
 /* $Id$ */
 /* iburg.c: */
-extern void* alloc(int nbytes);
+extern char* stringf(char* fmt, ...);
+
+typedef struct stringlist* Stringlist;
+struct stringlist {
+    const char* payload;
+    Stringlist next;
+};
+extern Stringlist pushstring(const char* data, Stringlist list);
 
 typedef enum
 {
@@ -48,18 +55,19 @@ extern Tree tree(char* op, Tree left, Tree right);
 
 struct rule
 { /* rules: */
-	Nonterm lhs; /* lefthand side non-terminal */
-	Tree pattern; /* rule pattern */
-	int ern; /* external rule number */
-	int packed; /* packed external rule number */
-	int cost; /* associated cost */
-	Rule link; /* next rule in ern order */
-	Rule next; /* next rule with same pattern root */
-	Rule chain; /* next chain rule with same rhs */
-	Rule decode; /* next rule with same lhs */
-	Rule kids; /* next rule with same burm_kids pattern */
+	Nonterm lhs;     /* lefthand side non-terminal */
+	Tree pattern;    /* rule pattern */
+	int ern;         /* external rule number */
+	int packed;      /* packed external rule number */
+	int cost;        /* associated cost */
+	Rule link;       /* next rule in ern order */
+	Rule next;       /* next rule with same pattern root */
+	Rule chain;      /* next chain rule with same rhs */
+	Rule decode;     /* next rule with same lhs */
+	Rule kids;       /* next rule with same burm_kids pattern */
+	Stringlist when; /* C predicate string */
 };
-extern Rule rule(char* id, Tree pattern, int ern, int cost);
+extern Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost);
 extern int maxcost; /* maximum cost */
 
 /* gram.y: */
@@ -69,5 +77,12 @@ void yywarn(char* fmt, ...);
 extern int errcnt;
 extern FILE* infp;
 extern FILE* outfp;
+
+/* Stupid flex imports --- why mo header file? */
+
+extern FILE* yyin;
+extern int yylineno;
+
+extern void printlineno(void);
 
 #endif

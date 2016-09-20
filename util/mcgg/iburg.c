@@ -20,7 +20,6 @@ static Nonterm nts;
 static Rule rules;
 static int nrules;
 
-static char* stringf(char* fmt, ...);
 static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
 static void emitclosure(Nonterm nts);
@@ -34,6 +33,8 @@ static void emitleaf(Term p, int ntnumber);
 static void emitnts(Rule rules, int nrules);
 static void emitrecord(char* pre, Rule r, int cost);
 static void emitrule(Nonterm nts);
+static void emitpredicatedefinitions(Rule rules);
+static void emitpredicatecall(Rule rule);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
@@ -44,6 +45,11 @@ int main(int argc, char* argv[])
 {
 	int c, i;
 	Nonterm p;
+
+	#if 0
+	extern int yydebug;
+	yydebug = 1;
+	#endif
 
 	if (sizeof(short) == sizeof(int))
 		maxcost = SHRT_MAX / 2;
@@ -88,7 +94,10 @@ int main(int argc, char* argv[])
 		infp = stdin;
 	if (outfp == NULL)
 		outfp = stdout;
+
+	yyin = infp;
 	yyparse();
+
 	if (start)
 		ckreach(start);
 	for (p = nts; p; p = p->link)
@@ -103,6 +112,7 @@ int main(int argc, char* argv[])
 		emitstring(rules);
 	emitrule(nts);
 	emitclosure(nts);
+	emitpredicatedefinitions(rules);
 	if (start)
 		emitstate(terms, start, ntnumber);
 	print("#ifdef STATE_LABEL\n");
@@ -111,35 +121,30 @@ int main(int argc, char* argv[])
 	emitkids(rules, nrules);
 	emitfuncs();
 	print("#endif\n");
-	if (!feof(infp))
-		while ((c = getc(infp)) != EOF)
-			putc(c, outfp);
+	print("#include \"mcgg_generated_footer.h\"\n");
 	return errcnt > 0;
 }
 
-/* alloc - allocate nbytes or issue fatal error */
-void* alloc(int nbytes)
-{
-	void* p = calloc(1, nbytes);
-
-	if (p == NULL)
-	{
-		yyerror("out of memory\n");
-		exit(1);
-	}
-	return p;
-}
-
 /* stringf - format and save a string */
-static char* stringf(char* fmt, ...)
+char* stringf(char* fmt, ...)
 {
-	va_list ap;
-	char* s, buf[512];
+    int n;
+    char* p;
+    va_list ap;
 
-	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
-	va_end(ap);
-	return strcpy(alloc(strlen(buf) + 1), buf);
+    va_start(ap, fmt);
+    n = vsnprintf(NULL, 0, fmt, ap) + 1;
+    va_end(ap);
+
+    p = malloc(n);
+    if (!p)
+        return NULL;
+
+    va_start(ap, fmt);
+    vsnprintf(p, n, fmt, ap);
+    va_end(ap);
+
+    return p;
 }
 
 struct entry
@@ -178,7 +183,7 @@ static void* lookup(char* name)
 /* install - install symbol name */
 static void* install(char* name)
 {
-	struct entry* p = alloc(sizeof *p);
+	struct entry* p = calloc(1, sizeof *p);
 	int i = hash(name) % HASHSIZE;
 
 	p->sym.name = name;
@@ -228,13 +233,16 @@ Term term(char* id, int esn)
 		    p->name, p->esn);
 	p->link = *q;
 	*q = p;
+
+	if (esn != -1)
+		print("enum { %s = %d };\n", id, esn);
 	return p;
 }
 
 /* tree - create & initialize a tree node with the given fields */
 Tree tree(char* id, Tree left, Tree right)
 {
-	Tree t = alloc(sizeof *t);
+	Tree t = calloc(1, sizeof *t);
 	Term p = lookup(id);
 	int arity = 0;
 
@@ -268,12 +276,17 @@ Tree tree(char* id, Tree left, Tree right)
 }
 
 /* rule - create & initialize a rule with the given fields */
-Rule rule(char* id, Tree pattern, int ern, int cost)
+Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost)
 {
-	Rule r = alloc(sizeof *r), *q;
+	Rule r = calloc(1, sizeof *r);
+	Rule *q;
 	Term p = pattern->op;
 
+	if (when && (p->arity == 0))
+		yyerror("can't have a when clause on leaf nodes");
+
 	nrules++;
+	r->when = when;
 	r->lhs = nonterm(id);
 	r->packed = ++r->lhs->lhscount;
 	for (q = &r->lhs->rules; *q; q = &(*q)->decode)
@@ -300,6 +313,14 @@ Rule rule(char* id, Tree pattern, int ern, int cost)
 	r->link = *q;
 	*q = r;
 	return r;
+}
+
+Stringlist pushstring(const char* data, Stringlist list)
+{
+    Stringlist sl = calloc(1, sizeof *sl);
+    sl->payload = data;
+    sl->next = list;
+    return sl;
 }
 
 /* print - formatted output */
@@ -360,6 +381,11 @@ static void print(char* fmt, ...)
 	va_end(ap);
 }
 
+void printlineno(void)
+{
+	print("#line %d\n", yylineno);
+}
+
 /* reach - mark all non-terminals in tree t as reachable */
 static void reach(Tree t)
 {
@@ -415,17 +441,26 @@ static void emitcase(Term p, int ntnumber)
 		{
 			case 0:
 			case -1:
-				print("%2{%1/* %R */\n%3c = ", r);
+				print("%2if (");
+				emitpredicatecall(r);
+				print(")\n%2{%1/* %R */\n%3c = ", r);
 				break;
 			case 1:
 				if (r->pattern->nterms > 1)
 				{
 					print("%2if (%1/* %R */\n", r);
 					emittest(r->pattern->left, "l", " ");
+					print("%3&& ");
+					emitpredicatecall(r);
+					print("\n");
 					print("%2) {\n%3c = ");
 				}
 				else
-					print("%2{%1/* %R */\n%3c = ", r);
+				{
+					print("%2if (");
+					emitpredicatecall(r);
+					print(")\n%2{%1/* %R */\n%3c = ", r);
+				}
 				emitcost(r->pattern->left, "l");
 				break;
 			case 2:
@@ -435,10 +470,17 @@ static void emitcase(Term p, int ntnumber)
 					emittest(r->pattern->left, "l",
 					    r->pattern->right->nterms ? " && " : " ");
 					emittest(r->pattern->right, "r", " ");
+					print("%3&& ");
+					emitpredicatecall(r);
+					print("\n");
 					print("%2) {\n%3c = ");
 				}
 				else
-					print("%2{%1/* %R */\n%3c = ", r);
+				{
+					print("%2if (");
+					emitpredicatecall(r);
+					print(")\n%2{%1/* %R */\n%3c = ", r);
+				}
 				emitcost(r->pattern->left, "l");
 				emitcost(r->pattern->right, "r");
 				break;
@@ -555,8 +597,8 @@ static char* computekids(Tree t, char* v, char* bp, int* ip)
 static void emitkids(Rule rules, int nrules)
 {
 	int i;
-	Rule r, * rc = alloc((nrules + 1) * sizeof *rc);
-	char** str = alloc((nrules + 1) * sizeof *str);
+	Rule r, * rc = calloc(nrules+1, sizeof *rc);
+	char** str = calloc(nrules+1, sizeof *str);
 
 	for (i = 0, r = rules; r; r = r->link)
 	{
@@ -566,7 +608,7 @@ static void emitkids(Rule rules, int nrules)
 		for (j = 0; str[j] && strcmp(str[j], buf); j++)
 			;
 		if (str[j] == NULL)
-			str[j] = strcpy(alloc(strlen(buf) + 1), buf);
+			str[j] = strdup(buf);
 		r->kids = rc[j];
 		rc[j] = r;
 	}
@@ -592,16 +634,16 @@ static void emitlabel(Nonterm start)
 	      "%1case 0:\n");
 	if (Tflag)
 		print("%2%Pnp = p;\n");
-	print("%2STATE_LABEL(p) = %Pstate(OP_LABEL(p), 0, 0);\n%2break;\n"
+	print("%2STATE_LABEL(p) = %Pstate(p, 0, 0);\n%2break;\n"
 	      "%1case 1:\n%2%Plabel1(LEFT_CHILD(p));\n");
 	if (Tflag)
 		print("%2%Pnp = p;\n");
-	print("%2STATE_LABEL(p) = %Pstate(OP_LABEL(p),\n"
+	print("%2STATE_LABEL(p) = %Pstate(p,\n"
 	      "%3STATE_LABEL(LEFT_CHILD(p)), 0);\n%2break;\n"
 	      "%1case 2:\n%2%Plabel1(LEFT_CHILD(p));\n%2%Plabel1(RIGHT_CHILD(p));\n");
 	if (Tflag)
 		print("%2%Pnp = p;\n");
-	print("%2STATE_LABEL(p) = %Pstate(OP_LABEL(p),\n"
+	print("%2STATE_LABEL(p) = %Pstate(p,\n"
 	      "%3STATE_LABEL(LEFT_CHILD(p)),\n%3STATE_LABEL(RIGHT_CHILD(p)));\n%2break;\n"
 	      "%1}\n}\n\n");
 	print(
@@ -635,8 +677,8 @@ static void emitleaf(Term p, int ntnumber)
 
 	if (cost == NULL)
 	{
-		cost = alloc((ntnumber + 1) * sizeof *cost);
-		rule = alloc((ntnumber + 1) * sizeof *rule);
+		cost = calloc(ntnumber+1, sizeof *cost);
+		rule = calloc(ntnumber+1, sizeof *rule);
 	}
 	for (i = 0; i <= ntnumber; i++)
 	{
@@ -686,8 +728,8 @@ static char* computents(Tree t, char* bp)
 static void emitnts(Rule rules, int nrules)
 {
 	Rule r;
-	int i, j, * nts = alloc(nrules * sizeof *nts);
-	char** str = alloc(nrules * sizeof *str);
+	int i, j, * nts = calloc(nrules, sizeof *nts);
+	char** str = calloc(nrules, sizeof *str);
 
 	for (i = 0, r = rules; r; r = r->link)
 	{
@@ -698,7 +740,7 @@ static void emitnts(Rule rules, int nrules)
 		if (str[j] == NULL)
 		{
 			print("static short %Pnts_%d[] = { %s0 };\n", j, buf);
-			str[j] = strcpy(alloc(strlen(buf) + 1), buf);
+			str[j] = strdup(buf);
 		}
 		nts[i++] = j;
 	}
@@ -752,15 +794,48 @@ static void emitrule(Nonterm nts)
 	print("%1default:\n%2%Passert(0, PANIC(\"Bad goal nonterminal %%d in %Prule\\n\", goalnt));\n%1}\n%1return 0;\n}\n\n");
 }
 
+/* emitpredicates - emit predicates for rules */
+static void emitpredicatedefinitions(Rule r)
+{
+	while (r)
+	{
+		Stringlist s = r->when;
+		if (s)
+		{
+			print("static int %Ppredicate_%d(NODEPTR_TYPE n) {\n", r->ern);
+			while (s)
+			{
+				print("%s", s->payload);
+				s = s->next;
+			}
+			print("\n}\n\n");
+		}
+		r = r->link;
+	}
+}
+
+/* emitpredicatecall - emit a call to a predicate */
+static void emitpredicatecall(Rule r)
+{
+	if (r->when)
+		print("%Ppredicate_%d(node)", r->ern);
+	else
+		print("1");
+}
+
 /* emitstate - emit state function */
 static void emitstate(Term terms, Nonterm start, int ntnumber)
 {
 	int i;
 	Term p;
 
-	print("STATE_TYPE %Pstate(int op, STATE_TYPE left, STATE_TYPE right) {\n%1int c;\n"
-	      "%1struct %Pstate *p, *l = (struct %Pstate *)left,\n"
-	      "%2*r = (struct %Pstate *)right;\n\n%1assert(sizeof (STATE_TYPE) >= sizeof (void *));\n%1");
+	print("STATE_TYPE %Pstate(NODEPTR_TYPE node, STATE_TYPE left, STATE_TYPE right) {\n%1int c;\n"
+		  "%1int op = OP_LABEL(node);\n"
+	      "%1struct %Pstate* p;\n"
+		  "%1struct %Pstate* l = (struct %Pstate *)left;\n"
+	      "%1struct %Pstate* r = (struct %Pstate *)right;\n"
+		  "\n"
+		  "%1assert(sizeof (STATE_TYPE) >= sizeof (void *));\n%1");
 	if (!Tflag)
 		print("if (%Parity[op] > 0) ");
 	print("{\n%2p = ALLOC(sizeof *p);\n"

@@ -27,6 +27,7 @@ cprogram {
 		"modules/src/read_em+lib_kv",
 		"modules/src/system+lib",
 		"./*.h",
+		"util/mcgg+mcgg",
 	},
 	vars = {
 		["+cflags"] = {
