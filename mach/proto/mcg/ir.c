@@ -35,18 +35,16 @@ struct ir* new_labelir(const char* label)
 	return ir;
 }
 
-struct ir* new_wordir(arith value)
+struct ir* new_constir(int size, arith value)
 {
-	struct ir* ir = new_ir0(IR_ICONST, EM_wordsize);
+	struct ir* ir = new_ir0(IR_CONST, size);
 	ir->u.ivalue = value;
 	return ir;
 }
 
-struct ir* new_regir(int reg)
+struct ir* new_wordir(arith value)
 {
-	struct ir* ir = new_ir0(IR_REG, EM_pointersize);
-	ir->u.rvalue = reg;
-	return ir;
+    return new_constir(EM_wordsize, value);
 }
 
 struct ir* new_bbir(struct basicblock* bb)
@@ -61,51 +59,50 @@ struct ir* new_anyir(int size)
 	return new_ir0(IR_ANY, size);
 }
 
-struct ir* new_phiir(int size)
+struct ir* new_localir(int offset)
 {
-	return new_ir0(IR_PHI, size);
+    struct ir* ir = new_ir0(IR_LOCAL, EM_pointersize);
+    ir->u.ivalue = offset;
+    return ir;
 }
 
-void ir_print(const struct ir* ir)
+void ir_print(char k, const struct ir* ir)
 {
-    if (ir->left)
-        ir_print(ir->left);
-    if (ir->right)
-        ir_print(ir->right);
+    if (ir->left && !ir->left->is_sequence)
+        ir_print(k, ir->left);
+    if (ir->right && !ir->right->is_sequence)
+        ir_print(k, ir->right);
 
-	printf("\t; %c ",
-		ir->is_sequence ? 'S' : ' ');
-	printf("$%d = ", ir->id);
-	printf("%s%d(",
-		ir_names[ir->opcode],
-		ir->size);
+	tracef(k, "%c: %c ", k, ir->is_sequence ? 'S' : ' ');
+	tracef(k, "$%d = ", ir->id);
+    tracef(k, "%s", ir_names[ir->opcode]);
+    if (ir->size)
+        tracef(k, "%d", ir->size);
+    tracef(k, "(");
 
 	switch (ir->opcode)
 	{
-		case IR_ICONST:
-			printf("%d", ir->u.ivalue);
+		case IR_CONST:
+        case IR_LOCAL:
+			tracef(k, "%d", ir->u.ivalue);
 			break;
 
 		case IR_LABEL:
-			printf("%s", ir->u.lvalue);
-			break;
-
-		case IR_REG:
-			printf("%d", ir->u.rvalue);
+			tracef(k, "%s", ir->u.lvalue);
 			break;
 
 		case IR_BLOCK:
-			printf("%s", ir->u.bvalue->name);
+			tracef(k, "%s", ir->u.bvalue->name);
 			break;
 
 		default:
             if (ir->left)
-                printf("$%d", ir->left->id);
+                tracef(k, "$%d", ir->left->id);
             if (ir->right)
-                printf(", $%d", ir->right->id);
+                tracef(k, ", $%d", ir->right->id);
 	}
 
-	printf(")\n");
+	tracef(k, ")\n");
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

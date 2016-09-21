@@ -33,6 +33,30 @@ const char* aprintf(const char* fmt, ...)
     return p;
 }
 
+bool tracing(char k)
+{
+    switch (k)
+    {
+        case 'E': return true;
+        case '0': return true;
+        case '1': return true;
+        case '2': return true;
+        default:  return true;
+    }
+}
+
+void tracef(char k, const char* fmt, ...)
+{
+    va_list ap;
+
+    if (tracing(k))
+    {
+        va_start(ap, fmt);
+        vprintf(fmt, ap);
+        va_end(ap);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     symbol_init();

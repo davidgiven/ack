@@ -39,4 +39,8 @@ void bb_alias(struct basicblock* block, const char* name)
 	p->block = block;
 }
 
+void bb_print(char k, struct basicblock* block)
+{
+}
+
 /* vim: set sw=4 ts=4 expandtab : */

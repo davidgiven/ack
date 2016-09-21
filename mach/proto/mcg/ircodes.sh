@@ -4,11 +4,33 @@ in=$1
 header=$2
 source=$3
 
-echo "enum {" > $header
-sed -n 's/^[A-Z].*$/IR_&,/p' < $in >> $header
-echo "};" >> $header
+awk -f - $in >$header << "EOF"
+	BEGIN {
+		print "enum {"
+	}
 
-echo "const char* ir_names[] = {" > $source
-sed -n 's/^[A-Z].*$/"&",/p' < $in >> $source
-echo "};" >> $source
+	/^[^#]+/ {
+		print "\tIR_" $1 ","
+	}
+
+	END {
+		print "};"
+	}
+EOF
+
+awk -f - $in >$source << "EOF"
+	BEGIN {
+		print "#include \"mcg.h\""
+		print "#include \"ir.h\""
+		print "const char* ir_names[] = {"
+	}
+
+	/^[^#]+/ {
+		printf("\t\"%s\",\n", $1)
+	}
+
+	END {
+		print "};"
+	}
+EOF
 

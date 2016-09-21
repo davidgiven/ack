@@ -1,11 +1,11 @@
 # Simple terminals
-ICONST
+CONST
 REG
 LABEL
 BLOCK
 PAIR
 ANY
-PHI
+LOCAL
 
 # Magic stack operations
 PUSH
@@ -22,11 +22,17 @@ MUL
 DIV
 MOD
 NEG
-NOT
+
+ADDF
+SUBF
+MULF
+DIVF
+NEGF
 
 AND
 OR
 EOR
+NOT
 
 # Conversions
 CII1
@@ -55,6 +61,7 @@ CJUMP
 RET
 
 # Special
-SETREG
-GETREG
+STACKADJUST
+GETRET
+SETRET
 

@@ -77,17 +77,18 @@ struct basicblock
 {
     const char* name;
     ARRAY(struct insn, insns);
+    ARRAY(struct ir, allirs);
     ARRAY(struct ir, irs);
     ARRAY(struct basicblock, inblocks);
     ARRAY(struct basicblock, outblocks);
-    ARRAY(struct ir, outs);
-    ARRAY(struct ir, ins);
     bool is_root : 1;
     bool is_terminated : 1;
 };
 
 extern void fatal(const char* s, ...);
 extern const char* aprintf(const char* fmt, ...);
+extern void tracef(char k, const char* fmt, ...);
+extern bool tracing(char k);
 
 extern void parse_em(void);
 
@@ -105,11 +106,14 @@ extern void data_bss(arith size, int init);
 extern void bb_init(void);
 extern struct basicblock* bb_get(const char* name);
 extern void bb_alias(struct basicblock* block, const char* name);
+extern void bb_print(char k, struct basicblock* block);
 
 extern void tb_filestart(void);
 extern void tb_fileend(void);
 extern void tb_procedure(struct procedure* proc);
 extern void tb_regvar(arith offset, int size, int type, int priority);
+
+extern void compile(struct procedure* proc);
 
 #endif
 

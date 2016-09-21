@@ -6,7 +6,7 @@ static struct basicblock* current_bb;
 static int stackptr;
 static struct ir* stack[64];
 
-static struct ir* convert(struct ir* src, int destsize, int opcode);
+static struct ir* convert(struct ir* src, int destsize, int opcodebase);
 static struct ir* appendir(struct ir* ir);
 
 static void reset_stack(void)
@@ -37,8 +37,10 @@ static struct ir* pop(int size)
         if (size < EM_wordsize)
             size = EM_wordsize;
         return
-            new_ir0(
-                IR_POP, size
+            appendir(
+                new_ir0(
+                    IR_POP, size
+                )
             );
     }
     else
@@ -60,13 +62,25 @@ static void print_stack(void)
 {
     int i;
 
-    printf("\t; stack:");
+    tracef('E', "E: stack:");
     for (i=0; i<stackptr; i++)
     {
         struct ir* ir = stack[i];
-        printf(" $%d.%d", ir->id, ir->size);
+        tracef('E', " $%d.%d", ir->id, ir->size);
     }
-    printf("  (top)\n");
+    tracef('E', "  (top)\n");
+}
+
+static void appendallirs(struct ir* ir)
+{
+    if (CONTAINS(current_bb->allirs, ir))
+        fatal("ir reachable from more than one place");
+
+    APPEND(current_bb->allirs, ir);
+    if (ir->left && !ir->left->is_sequence)
+        appendallirs(ir->left);
+    if (ir->right && !ir->right->is_sequence)
+        appendallirs(ir->right);
 }
 
 static struct ir* appendir(struct ir* ir)
@@ -76,8 +90,9 @@ static struct ir* appendir(struct ir* ir)
     assert(current_bb != NULL);
     ir->is_sequence = true;
     APPEND(current_bb->irs, ir);
+    appendallirs(ir);
 
-    ir_print(ir);
+    ir_print('0', ir);
     return ir;
 }
 
@@ -110,16 +125,6 @@ void tb_fileend(void)
 void tb_regvar(arith offset, int size, int type, int priority)
 {
     /* ignored */
-}
-
-static struct ir* address_of_local(int index)
-{
-    return
-        new_ir2(
-            IR_ADD, EM_pointersize,
-            new_regir((index < 0) ? IRR_LB : IRR_AB),
-            new_wordir(index)
-        );
 }
 
 static struct ir* address_of_external(const char* label, arith offset)
@@ -162,7 +167,7 @@ static struct ir* tristate_compare(int size, int opcode)
 
     return
         new_ir2(
-            opcode, size,
+            opcode, EM_wordsize,
             left, right
         );
 }
@@ -173,8 +178,8 @@ static void simple_convert(int opcode)
     struct ir* srcsize = pop(EM_wordsize);
     struct ir* value;
 
-    assert(srcsize->opcode == IR_ICONST);
-    assert(destsize->opcode == IR_ICONST);
+    assert(srcsize->opcode == IR_CONST);
+    assert(destsize->opcode == IR_CONST);
 
     value = pop(srcsize->u.ivalue);
     push(
@@ -241,7 +246,7 @@ static void simple_branch2(int opcode, int size,
         new_ir2(
             IR_CJUMP, 0,
             new_ir2(
-                irop, size,
+                irop,  size,
                 left, right
             ),
             new_ir2(
@@ -336,11 +341,17 @@ static void insn_ivalue(int opcode, arith value)
         case op_xor: simple_alu2(opcode, value, IR_EOR); break;
         case op_com: simple_alu1(opcode, value, IR_NOT); break;
 
+        case op_adf: simple_alu2(opcode, value, IR_ADDF); break;
+        case op_sbf: simple_alu2(opcode, value, IR_SUBF); break;
+        case op_mlf: simple_alu2(opcode, value, IR_MULF); break;
+        case op_dvf: simple_alu2(opcode, value, IR_DIVF); break;
+        case op_ngf: simple_alu1(opcode, value, IR_NEGF); break;
+
         case op_lol:
             push(
                 new_ir1(
                     IR_LOAD, EM_wordsize,
-                    address_of_local(value)
+                    new_localir(value)
                 )
             );
             break;
@@ -349,7 +360,7 @@ static void insn_ivalue(int opcode, arith value)
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
-                    address_of_local(value),
+                    new_localir(value),
                     pop(EM_wordsize)
                 )
             );
@@ -357,7 +368,7 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_lal:
             push(
-                address_of_local(value)
+                new_localir(value)
             );
             break;
 
@@ -476,17 +487,21 @@ static void insn_ivalue(int opcode, arith value)
                     break;
 
                 default:
-                    appendir(
-                        new_ir2(
-                            IR_SETREG, EM_pointersize,
-                            new_regir(IRR_SP),
-                            new_ir2(
-                                IR_ADD, EM_pointersize,
-                                new_regir(IRR_SP),
+                    while ((value > 0) && (stackptr > 0))
+                    {
+                        struct ir* ir = pop(stack[stackptr-1]->size);
+                        value -= ir->size;
+                    }
+
+                    if (value != 0)
+                    {
+                        appendir(
+                            new_ir1(
+                                IR_STACKADJUST, EM_pointersize,
                                 new_wordir(value)
                             )
-                        )
-                    );
+                        );
+                    }
                     break;
             }
             break;
@@ -497,10 +512,10 @@ static void insn_ivalue(int opcode, arith value)
             if (value > 0)
             {
                 struct ir* retval = pop(value);
+                materialise_stack();
                 appendir(
-                    new_ir2(
-                        IR_SETREG, value,
-                        new_regir(IRR_RR),
+                    new_ir1(
+                        IR_SETRET, value,
                         retval
                     )
                 );
@@ -518,9 +533,8 @@ static void insn_ivalue(int opcode, arith value)
         {
             push(
                 appendir(
-                    new_ir1(
-                        IR_GETREG, value,
-                        new_regir(IRR_RR)
+                    new_ir0(
+                        IR_GETRET, value
                     )
                 )
             );
@@ -630,13 +644,7 @@ static void generate_tree(struct basicblock* bb)
 {
     int i;
 
-    printf("; BLOCK %s\n", bb->name);
-    if (bb->inblocks_count > 0)
-    {
-        printf("; Entered from:\n");
-        for (i=0; i<bb->inblocks_count; i++)
-            printf(";    %s\n", bb->inblocks[i]->name);
-    }
+    tracef('0', "0: block %s\n", bb->name);
 
     current_bb = bb;
     reset_stack();
@@ -644,30 +652,30 @@ static void generate_tree(struct basicblock* bb)
     for (i=0; i<bb->insns_count; i++)
     {
         struct insn* insn = bb->insns[i];
-        printf("\t; EM: %s ", em_mnem[insn->opcode - sp_fmnem]);
+        tracef('E', "E: read %s ", em_mnem[insn->opcode - sp_fmnem]);
         switch (insn->paramtype)
         {
             case PARAM_NONE:
-                printf("\n");
+                tracef('E', "\n");
                 insn_simple(insn->opcode);
                 break;
 
             case PARAM_IVALUE:
-                printf("value=%d\n", insn->u.ivalue);
+                tracef('E', "value=%d\n", insn->u.ivalue);
                 insn_ivalue(insn->opcode, insn->u.ivalue);
                 break;
 
             case PARAM_LVALUE:
-                printf("label=%s offset=%d\n", 
+                tracef('E', "label=%s offset=%d\n", 
                     insn->u.lvalue.label, insn->u.lvalue.offset);
                 insn_lvalue(insn->opcode, insn->u.lvalue.label, insn->u.lvalue.offset);
                 break;
 
             case PARAM_BVALUE:
-                printf("true=%s", insn->u.bvalue.left->name);
+                tracef('E', "true=%s", insn->u.bvalue.left->name);
                 if (insn->u.bvalue.right)
-                    printf(" false=%s", insn->u.bvalue.right->name);
-                printf("\n");
+                    tracef('E', " false=%s", insn->u.bvalue.right->name);
+                tracef('E', "\n");
                 insn_bvalue(insn->opcode, insn->u.bvalue.left, insn->u.bvalue.right);
                 break;
 
@@ -675,18 +683,11 @@ static void generate_tree(struct basicblock* bb)
                 assert(0);
         }
 
-        print_stack();
+        if (tracing('E'))
+            print_stack();
     }
 
     assert(stackptr == 0);
-
-    if (bb->outblocks_count > 0)
-    {
-        printf("; Exiting to:\n");
-        for (i=0; i<bb->outblocks_count; i++)
-            printf(";    %s\n", bb->outblocks[i]->name);
-    }
-    printf("\n");
 }
 
 void tb_procedure(struct procedure* current_proc)

@@ -289,6 +289,7 @@ static void parse_pseu(void)
 
 		case ps_end: /* procedure end */
             tb_procedure(current_proc);
+            compile(current_proc);
 
             current_proc = NULL;
             code_bb = NULL;
