@@ -24,11 +24,16 @@ struct ir
 	int size;
 	struct ir* left;
 	struct ir* right;
-	union {
+	union
+	{
 		arith ivalue;
 		int rvalue;
 		const char* lvalue;
 		struct basicblock* bvalue;
+		struct
+		{
+			ARRAY(struct ir, imports);
+		} phivalue;
 	} u;
 	bool is_sequence : 1;
 };
@@ -47,6 +52,8 @@ extern struct ir* new_constir(int size, arith value);
 extern struct ir* new_bbir(struct basicblock* bb);
 extern struct ir* new_anyir(int size);
 extern struct ir* new_localir(int offset);
+
+extern struct ir* ir_find(struct ir* ir, int opcode);
 
 extern void ir_print(char k, const struct ir* ir);
 

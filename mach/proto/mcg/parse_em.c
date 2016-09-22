@@ -98,6 +98,7 @@ static void queue_insn_value(int opcode, arith value)
     {
         case op_csa:
         case op_csb:
+        case op_ret:
             terminate_block();
             break;
     }
@@ -138,6 +139,16 @@ static void queue_insn_block(int opcode, struct basicblock* left, struct basicbl
     terminate_block();
 }
 
+static void change_basicblock(struct basicblock* newbb)
+{
+    APPENDU(current_proc->blocks, newbb);
+
+    if (code_bb && !code_bb->is_terminated)
+        queue_insn_block(op_bra, newbb, NULL);
+
+    code_bb = newbb;
+}
+
 static void queue_insn_ilabel(int opcode, int label)
 {
     const char* name = ilabel_to_str(insn.em_ilb);
@@ -155,23 +166,17 @@ static void queue_insn_ilabel(int opcode, int label)
         case op_zle:
         case op_zgt:
         case op_zge:
-            queue_insn_block(insn.em_opcode, left, bb_get(NULL));
+        {
+            struct basicblock* bb = bb_get(NULL);
+            queue_insn_block(insn.em_opcode, left, bb);
+            change_basicblock(bb);
             break;
+        }
 
         default:
             fatal("parse_em: unhandled conditional '%s'", 
                 em_mnem[opcode - sp_fmnem]);
     }
-}
-
-static void change_basicblock(struct basicblock* newbb)
-{
-    APPENDU(current_proc->blocks, newbb);
-
-    if (code_bb && !code_bb->is_terminated)
-        queue_insn_block(op_bra, newbb, NULL);
-
-    code_bb = newbb;
 }
 
 static void queue_ilabel(arith label)

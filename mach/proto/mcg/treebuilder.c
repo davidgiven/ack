@@ -71,18 +71,6 @@ static void print_stack(void)
     tracef('E', "  (top)\n");
 }
 
-static void appendallirs(struct ir* ir)
-{
-    if (CONTAINS(current_bb->allirs, ir))
-        fatal("ir reachable from more than one place");
-
-    APPEND(current_bb->allirs, ir);
-    if (ir->left && !ir->left->is_sequence)
-        appendallirs(ir->left);
-    if (ir->right && !ir->right->is_sequence)
-        appendallirs(ir->right);
-}
-
 static struct ir* appendir(struct ir* ir)
 {
     int i;
@@ -90,7 +78,6 @@ static struct ir* appendir(struct ir* ir)
     assert(current_bb != NULL);
     ir->is_sequence = true;
     APPEND(current_bb->irs, ir);
-    appendallirs(ir);
 
     ir_print('0', ir);
     return ir;

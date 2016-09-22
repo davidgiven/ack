@@ -35,5 +35,24 @@ void array_appendu(void*** array, int* count, int* max, void* value)
 		array_append(array, count, max, value);
 }
 
+void array_remove(void** array, int* count, void* value)
+{
+    int i;
+
+    for (i=0; i<*count; i++)
+    {
+        if (array[i] == value)
+        {
+            while (i < (*count-1))
+            {
+                array[i] = array[i+1];
+                i++;
+            }
+            (*count)--;
+            return;
+        }
+    }
+}
+
 /* vim: set sw=4 ts=4 expandtab : */
 

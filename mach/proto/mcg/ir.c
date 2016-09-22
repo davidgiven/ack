@@ -66,15 +66,30 @@ struct ir* new_localir(int offset)
     return ir;
 }
 
-void ir_print(char k, const struct ir* ir)
+struct ir* ir_find(struct ir* ir, int opcode)
 {
-    if (ir->left && !ir->left->is_sequence)
-        ir_print(k, ir->left);
-    if (ir->right && !ir->right->is_sequence)
-        ir_print(k, ir->right);
+    if (ir->opcode == opcode)
+        return ir;
 
-	tracef(k, "%c: %c ", k, ir->is_sequence ? 'S' : ' ');
-	tracef(k, "$%d = ", ir->id);
+    if (ir->left && !ir->left->is_sequence)
+    {
+        struct ir* irr = ir_find(ir->left, opcode);
+        if (irr)
+            return irr;
+    }
+
+    if (ir->right && !ir->right->is_sequence)
+    {
+        struct ir* irr = ir_find(ir->right, opcode);
+        if (irr)
+            return irr;
+    }
+
+    return NULL;
+}
+
+static void print_expr(char k, const struct ir* ir)
+{
     tracef(k, "%s", ir_names[ir->opcode]);
     if (ir->size)
         tracef(k, "%d", ir->size);
@@ -95,14 +110,44 @@ void ir_print(char k, const struct ir* ir)
 			tracef(k, "%s", ir->u.bvalue->name);
 			break;
 
+        case IR_PHI:
+        {
+            int i;
+
+            for (i=0; i<ir->u.phivalue.imports_count; i++)
+            {
+                if (i > 0)
+                    tracef(k, ", ");
+                tracef(k, "$%d", ir->u.phivalue.imports[i]->id);
+            }
+        }
+
 		default:
             if (ir->left)
-                tracef(k, "$%d", ir->left->id);
+            {
+                if (ir->left->is_sequence)
+                    tracef(k, "$%d", ir->left->id);
+                else
+                    print_expr(k, ir->left);
+            }
             if (ir->right)
-                tracef(k, ", $%d", ir->right->id);
+            {
+                tracef(k, ", ");
+                if (ir->right->is_sequence)
+                    tracef(k, "$%d", ir->right->id);
+                else
+                    print_expr(k, ir->right);
+            }
 	}
 
-	tracef(k, ")\n");
+	tracef(k, ")");
+}
+
+void ir_print(char k, const struct ir* ir)
+{
+	tracef(k, "%c: $%d = ", k, ir->id);
+    print_expr(k, ir);
+    tracef(k, "\n");
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

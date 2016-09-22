@@ -77,10 +77,11 @@ struct basicblock
 {
     const char* name;
     ARRAY(struct insn, insns);
-    ARRAY(struct ir, allirs);
     ARRAY(struct ir, irs);
     ARRAY(struct basicblock, inblocks);
     ARRAY(struct basicblock, outblocks);
+    ARRAY(struct ir, inparams);
+    ARRAY(struct ir, outparams);
     bool is_root : 1;
     bool is_terminated : 1;
 };
@@ -112,6 +113,8 @@ extern void tb_filestart(void);
 extern void tb_fileend(void);
 extern void tb_procedure(struct procedure* proc);
 extern void tb_regvar(arith offset, int size, int type, int priority);
+
+extern void sse_convert_block_parameters(struct basicblock* bb);
 
 extern void compile(struct procedure* proc);
 

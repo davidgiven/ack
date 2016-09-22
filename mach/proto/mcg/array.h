@@ -15,9 +15,13 @@
 #define APPENDU(ARRAY, VALUE) \
 	array_appendu((void***) &ARRAY, &ARRAY##_count, &ARRAY##_max, VALUE)
 
+#define REMOVE(ARRAY, VALUE) \
+	array_remove((void**) ARRAY, &ARRAY##_count, VALUE)
+
 extern void array_append(void*** array, int* count, int* max, void* value);
 extern bool array_contains(void** array, int count, void* value);
 extern void array_appendu(void*** array, int* count, int* max, void* value);
+extern void array_remove(void** array, int* count, void* value);
 
 #endif
 

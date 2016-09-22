@@ -6,10 +6,12 @@ BLOCK
 PAIR
 ANY
 LOCAL
+PHI
 
 # Magic stack operations
 PUSH
 POP
+SET
 
 # Memory operations
 LOAD
@@ -54,8 +56,10 @@ IFEQ
 IFLT
 IFLE
 
-# Flow control
+# Procedures
 CALL
+
+# Flow control --- these never return
 JUMP
 CJUMP
 RET
