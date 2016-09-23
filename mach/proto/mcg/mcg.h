@@ -114,7 +114,9 @@ extern void tb_fileend(void);
 extern void tb_procedure(struct procedure* proc);
 extern void tb_regvar(arith offset, int size, int type, int priority);
 
-extern void sse_convert_block_parameters(struct basicblock* bb);
+extern void pass_convert_stack_ops(struct procedure* proc);
+extern void pass_remove_dead_blocks(struct procedure* proc);
+extern void pass_splice_adjacent_blocks(struct procedure* proc);
 
 extern void compile(struct procedure* proc);
 

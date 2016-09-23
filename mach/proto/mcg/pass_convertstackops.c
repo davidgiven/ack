@@ -37,7 +37,7 @@ static struct ir* get_first_pop(struct basicblock* bb)
     return NULL;
 }
 
-void sse_convert_block_parameters(struct basicblock* bb)
+static void convert_block(struct basicblock* bb)
 {
     int i, j;
     struct ir* ir;
@@ -94,6 +94,14 @@ void sse_convert_block_parameters(struct basicblock* bb)
             }
         }
     }
+}
+
+void pass_convert_stack_ops(struct procedure* proc)
+{
+    int i;
+
+    for (i=0; i<proc->blocks_count; i++)
+        convert_block(proc->blocks[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
