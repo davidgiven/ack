@@ -1,10 +1,7 @@
 #include "mcg.h"
 
-typedef int idf_walker_t(struct idf* idf, void* user);
-
 static void init_idf();
 static struct idf* str2idf(char* tg, int cp);
-static struct idf* walk_idf(idf_walker_t* cb, void* user);
 
 #define IDF_TYPE struct symbol
 #define IDF_NAME symbol
@@ -53,7 +50,7 @@ struct symbol* symbol_walk(symbol_walker_t* cb, void* user)
 		{	
 			struct symbol* symbol = &idf->symbol;
 			if (cb(symbol, user))
-				return &symbol;
+				return symbol;
 			idf = idf->id_next;
 		}
 	}
