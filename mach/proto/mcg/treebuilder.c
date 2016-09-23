@@ -281,6 +281,12 @@ static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock
             break;
         }
 
+        case op_lae:
+            push(
+                new_bbir(leftbb)
+            );
+            break;
+
         default:
             fatal("treebuilder: unknown bvalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
@@ -310,6 +316,27 @@ static void simple_alu2(int opcode, int size, int irop)
             left, right
         )
     );
+}
+
+static struct ir* extract_block_refs(struct basicblock* bb)
+{
+    struct ir* outir = NULL;
+    int i;
+
+    for (i=0; i<bb->insns_count; i++)
+    {
+        struct insn* insn = bb->insns[i];
+        assert(insn->opcode == op_bra);
+        assert(insn->paramtype == PARAM_BVALUE);
+
+        outir = new_ir2(
+            IR_PAIR, 0,
+            new_bbir(insn->u.bvalue.left),
+            outir
+        );
+    }
+
+    return outir;
 }
 
 static void insn_ivalue(int opcode, arith value)
@@ -540,17 +567,13 @@ static void insn_ivalue(int opcode, arith value)
                 fatal("csa/csb are only supported if they refer "
                     "directly to a descriptor block");
 
-            /* Turn the label reference into a block. */
-
-            descriptor->opcode = IR_BLOCK;
-            descriptor->u.bvalue = bb_get(descriptor->u.lvalue);
-
             push(descriptor);
             materialise_stack();
             appendir(
-                new_ir1(
+                new_ir2(
                     IR_JUMP, 0,
-                    new_labelir(helper)
+                    new_labelir(helper),
+                    extract_block_refs(bb_get(descriptor->u.lvalue))
                 )
             );
             break;
@@ -675,6 +698,7 @@ void tb_procedure(struct procedure* current_proc)
 
     for (i=0; i<current_proc->blocks_count; i++)
         generate_tree(current_proc->blocks[i]);
+
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

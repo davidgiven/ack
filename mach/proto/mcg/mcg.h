@@ -36,6 +36,7 @@ struct symbol
 {
 	const char* name;
 	int section;
+    struct procedure* proc;
 	bool is_defined : 1;
 	bool is_exported : 1;
 	bool is_proc : 1;
@@ -96,6 +97,9 @@ extern bool symbol_exists(const char* name);
 extern struct symbol* symbol_get(const char* name);
 extern void symbol_declare(const char* name, bool is_exported, bool is_proc);
 
+typedef bool symbol_walker_t(struct symbol* symbol, void* user);
+extern struct symbol* symbol_walk(symbol_walker_t* walker, void* user);
+
 extern void data_label(const char* name);
 extern void data_int(arith data, size_t size, bool is_ro);
 extern void data_block(const uint8_t* data, size_t size, bool is_ro);
@@ -116,7 +120,7 @@ extern void pass_convert_stack_ops(struct procedure* proc);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 
-extern void compile(struct procedure* proc);
+extern void procedure_compile(struct procedure* proc);
 
 #endif
 

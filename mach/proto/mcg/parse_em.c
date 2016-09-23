@@ -280,6 +280,9 @@ static void parse_pseu(void)
         }
 
 		case ps_pro: /* procedure start */
+        {
+            struct symbol* symbol;
+
             current_proc = calloc(sizeof(struct procedure), 1);
             current_proc->name = strdup(insn.em_pnam);
             current_proc->root_bb = bb_get(current_proc->name);
@@ -287,11 +290,16 @@ static void parse_pseu(void)
             code_bb = current_proc->root_bb;
             code_bb->is_root = true;
             APPEND(current_proc->blocks, code_bb);
+
+            symbol = symbol_get(current_proc->name);
+            symbol->section = SECTION_TEXT;
+            symbol->proc = current_proc;
+            symbol->is_proc = true;
             break;
+        }
 
 		case ps_end: /* procedure end */
             tb_procedure(current_proc);
-            compile(current_proc);
 
             current_proc = NULL;
             code_bb = NULL;
@@ -336,6 +344,17 @@ static void parse_mes(void)
         fatal("malformed MES");
 }
 
+static void create_data_label(const char* label)
+{
+    data_label(label);
+    if (current_proc)
+    {
+        data_bb = bb_get(label);
+        data_bb->is_fake = true;
+        APPEND(current_proc->blocks, data_bb);
+    }
+}
+
 void parse_em(void)
 {
     EM_getinstr(&insn);
@@ -354,16 +373,11 @@ void parse_em(void)
                 break;
 
             case EM_DEFDLB:
-            {
-                const char* label = dlabel_to_str(insn.em_dlb);
-                data_label(label);
-                data_bb = bb_get(label);
-                data_bb->is_fake = true;
+                create_data_label(dlabel_to_str(insn.em_dlb));
                 break;
-            }
 
             case EM_DEFDNAM:
-                data_label(strdup(insn.em_dnam));
+                create_data_label(strdup(insn.em_dnam));
                 break;
 
             case EM_STARTMES:

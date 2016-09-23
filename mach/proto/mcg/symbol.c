@@ -1,7 +1,10 @@
 #include "mcg.h"
 
+typedef int idf_walker_t(struct idf* idf, void* user);
+
 static void init_idf();
 static struct idf* str2idf(char* tg, int cp);
+static struct idf* walk_idf(idf_walker_t* cb, void* user);
 
 #define IDF_TYPE struct symbol
 #define IDF_NAME symbol
@@ -37,5 +40,24 @@ void symbol_declare(const char* name, bool is_exported, bool is_proc)
 		else if (s->section != SECTION_TEXT)
 			fatal("section mismatch for '%s'", name);
 	}
+}
+
+struct symbol* symbol_walk(symbol_walker_t* cb, void* user)
+{
+	int i;
+
+	for (i=0; i<IDF_HASHSIZE; i++)
+	{
+		struct idf* idf = IDF_hashtable[i];
+		while (idf)
+		{	
+			struct symbol* symbol = &idf->symbol;
+			if (cb(symbol, user))
+				return &symbol;
+			idf = idf->id_next;
+		}
+	}
+
+	return NULL;
 }
 

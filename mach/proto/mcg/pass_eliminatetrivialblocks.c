@@ -5,7 +5,8 @@ static bool rewrite_jumps_cb(struct ir* ir, void* user)
     if (ir->opcode == IR_BLOCK)
     {
         struct basicblock* bb = ir->u.bvalue;
-        if ((bb->irs_count > 0)
+		if (!bb->is_fake
+			&& (bb->irs_count > 0)
             && (bb->irs[0]->opcode == IR_JUMP)
             && (bb->irs[0]->left->opcode == IR_BLOCK))
         {

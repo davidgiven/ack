@@ -11,14 +11,16 @@ static void print_blocks(char k, struct procedure* proc)
 		int j;
 
         tracef(k, "%c:\n", k);
-		tracef(k, "%c: BLOCK: %s\n", k, bb->name);
+		tracef(k, "%c: %sBLOCK: %s\n", k,
+            bb->is_fake ? "FAKE " : "",
+            bb->name);
 
 		for (int j=0; j<bb->irs_count; j++)
 			ir_print(k, bb->irs[j]);
 	}
 }
 
-void compile(struct procedure* proc)
+void procedure_compile(struct procedure* proc)
 {
 	int i;
 
