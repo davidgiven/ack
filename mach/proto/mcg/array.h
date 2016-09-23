@@ -6,6 +6,11 @@
 	int NAME##_count; \
 	int NAME##_max
 
+#define STATICARRAY(TYPE, NAME) \
+	static TYPE** NAME; \
+	static int NAME##_count; \
+	static int NAME##_max
+
 #define APPEND(ARRAY, VALUE) \
 	array_append((void***) &ARRAY, &ARRAY##_count, &ARRAY##_max, VALUE)
 

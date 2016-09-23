@@ -1,6 +1,8 @@
 #ifndef IR_H
 #define IR_H
 
+#include "ircodes.h"
+
 enum
 {
 	IRR_LB = -1,
@@ -20,7 +22,7 @@ enum
 struct ir
 {
 	int id;
-	int opcode;
+	enum ir_opcode opcode;
 	int size;
 	struct ir* left;
 	struct ir* right;
@@ -30,10 +32,6 @@ struct ir
 		int rvalue;
 		const char* lvalue;
 		struct basicblock* bvalue;
-		struct
-		{
-			ARRAY(struct ir, imports);
-		} phivalue;
 	} u;
 	bool is_sequence : 1;
 };
@@ -53,11 +51,11 @@ extern struct ir* new_bbir(struct basicblock* bb);
 extern struct ir* new_anyir(int size);
 extern struct ir* new_localir(int offset);
 
+typedef bool ir_walker_t(struct ir* node, void* user);
+extern struct ir* ir_walk(struct ir* ir, ir_walker_t* callback, void* user);
 extern struct ir* ir_find(struct ir* ir, int opcode);
 
 extern void ir_print(char k, const struct ir* ir);
-
-#include "ircodes.h"
 
 #endif
 

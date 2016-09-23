@@ -13,24 +13,8 @@ static void print_blocks(char k, struct procedure* proc)
         tracef(k, "%c:\n", k);
 		tracef(k, "%c: BLOCK: %s\n", k, bb->name);
 
-        tracef(k, "%c:  from:", k);
-		for (int j=0; j<bb->inblocks_count; j++)
-		{
-			struct basicblock* obb = bb->inblocks[j];
-			tracef(k, " %s",  obb->name);
-		}
-        tracef(k, "\n");
-        tracef(k, "%c:    to:", k);
-		for (int j=0; j<bb->outblocks_count; j++)
-		{
-			struct basicblock* obb = bb->outblocks[j];
-			tracef(k, " %s", obb->name);
-		}
-        tracef(k, "\n");
-
 		for (int j=0; j<bb->irs_count; j++)
 			ir_print(k, bb->irs[j]);
-
 	}
 }
 
@@ -40,9 +24,9 @@ void compile(struct procedure* proc)
 
 	print_blocks('1', proc);
 
+    pass_eliminate_trivial_blocks(proc);
     pass_remove_dead_blocks(proc);
     pass_convert_stack_ops(proc);
-    pass_splice_adjacent_blocks(proc);
 
     print_blocks('2', proc);
 }

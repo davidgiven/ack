@@ -17,6 +17,7 @@
 #include "em_flag.h"
 #include "em_ptyp.h"
 #include "array.h"
+#include "map.h"
 #include "ir.h"
 
 extern char em_pseu[][4];
@@ -78,10 +79,7 @@ struct basicblock
     const char* name;
     ARRAY(struct insn, insns);
     ARRAY(struct ir, irs);
-    ARRAY(struct basicblock, inblocks);
-    ARRAY(struct basicblock, outblocks);
-    ARRAY(struct ir, inparams);
-    ARRAY(struct ir, outparams);
+    bool is_fake : 1;
     bool is_root : 1;
     bool is_terminated : 1;
 };
@@ -116,7 +114,7 @@ extern void tb_regvar(arith offset, int size, int type, int priority);
 
 extern void pass_convert_stack_ops(struct procedure* proc);
 extern void pass_remove_dead_blocks(struct procedure* proc);
-extern void pass_splice_adjacent_blocks(struct procedure* proc);
+extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 
 extern void compile(struct procedure* proc);
 

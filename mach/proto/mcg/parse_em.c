@@ -128,14 +128,6 @@ static void queue_insn_block(int opcode, struct basicblock* left, struct basicbl
     insn->u.bvalue.right = right;
     APPEND(code_bb->insns, insn);
     
-    APPENDU(code_bb->outblocks, left);
-    APPENDU(left->inblocks, code_bb);
-    if (right)
-    {
-        APPENDU(code_bb->outblocks, right);
-        APPENDU(right->inblocks, code_bb);
-    }
-
     terminate_block();
 }
 
@@ -256,7 +248,12 @@ static void parse_pseu(void)
                      */
 
                     if (data_bb)
-                        APPENDU(data_bb->outblocks, bb_get(label));
+                    {
+                        struct insn* insn = new_insn(op_bra);
+                        insn->paramtype = PARAM_BVALUE;
+                        insn->u.bvalue.left = bb_get(label);
+                        APPEND(data_bb->insns, insn);
+                    }
 
                     data_offset(label, 0, ro);
                     break;
@@ -361,6 +358,7 @@ void parse_em(void)
                 const char* label = dlabel_to_str(insn.em_dlb);
                 data_label(label);
                 data_bb = bb_get(label);
+                data_bb->is_fake = true;
                 break;
             }
 

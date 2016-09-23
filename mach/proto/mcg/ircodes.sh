@@ -6,7 +6,7 @@ source=$3
 
 awk -f - $in >$header << "EOF"
 	BEGIN {
-		print "enum {"
+		print "enum ir_opcode {"
 	}
 
 	/^[^#]+/ {

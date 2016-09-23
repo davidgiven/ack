@@ -66,26 +66,39 @@ struct ir* new_localir(int offset)
     return ir;
 }
 
-struct ir* ir_find(struct ir* ir, int opcode)
+struct ir* ir_walk(struct ir* ir, ir_walker_t* cb, void* user)
 {
-    if (ir->opcode == opcode)
+    if (cb(ir, user))
         return ir;
 
     if (ir->left && !ir->left->is_sequence)
     {
-        struct ir* irr = ir_find(ir->left, opcode);
+        struct ir* irr = ir_walk(ir->left, cb, user);
         if (irr)
             return irr;
     }
 
     if (ir->right && !ir->right->is_sequence)
     {
-        struct ir* irr = ir_find(ir->right, opcode);
+        struct ir* irr = ir_walk(ir->right, cb, user);
         if (irr)
             return irr;
     }
 
     return NULL;
+}
+
+static bool finder_cb(struct ir* ir, void* user)
+{
+    int opcode = *(int*)user;
+    if (ir->opcode == opcode)
+        return true;
+    return false;
+}
+
+struct ir* ir_find(struct ir* ir, int opcode)
+{
+    return ir_walk(ir, finder_cb, &opcode);
 }
 
 static void print_expr(char k, const struct ir* ir)
@@ -109,18 +122,6 @@ static void print_expr(char k, const struct ir* ir)
 		case IR_BLOCK:
 			tracef(k, "%s", ir->u.bvalue->name);
 			break;
-
-        case IR_PHI:
-        {
-            int i;
-
-            for (i=0; i<ir->u.phivalue.imports_count; i++)
-            {
-                if (i > 0)
-                    tracef(k, ", ");
-                tracef(k, "$%d", ir->u.phivalue.imports[i]->id);
-            }
-        }
 
 		default:
             if (ir->left)

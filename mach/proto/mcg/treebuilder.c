@@ -531,8 +531,6 @@ static void insn_ivalue(int opcode, arith value)
         case op_csa:
         case op_csb:
         {
-            struct basicblock* data_bb;
-            int i;
             const char* helper = aprintf(".%s%d",
                 (opcode == op_csa) ? "csa" : "csb",
                 value);
@@ -542,16 +540,10 @@ static void insn_ivalue(int opcode, arith value)
                 fatal("csa/csb are only supported if they refer "
                     "directly to a descriptor block");
 
-            /* Splice the outgoing bbs in the data block into our own. */
+            /* Turn the label reference into a block. */
 
-            data_bb = bb_get(descriptor->u.lvalue);
-            for (i=0; i<data_bb->outblocks_count; i++)
-            {
-                struct basicblock* bb = data_bb->outblocks[i];
-                printf("\t;   may jump to %s\n", bb->name);
-                APPENDU(current_bb->outblocks, bb);
-                APPENDU(bb->inblocks, current_bb);
-            }
+            descriptor->opcode = IR_BLOCK;
+            descriptor->u.bvalue = bb_get(descriptor->u.lvalue);
 
             push(descriptor);
             materialise_stack();
