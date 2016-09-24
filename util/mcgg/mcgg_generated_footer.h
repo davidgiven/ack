@@ -32,7 +32,10 @@ int main(void) {
 	NODEPTR_TYPE p;
 
 	p = tree(STORE,
-			tree(LABEL, 0, 0),
+			tree(ADD,
+				tree(LABEL, 0, 0),
+				tree(CONST, 0, 0)
+			),
 			tree(ADD,
 				tree(LOAD,
 					tree(LABEL, 0, 0),

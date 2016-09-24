@@ -24,6 +24,7 @@ static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
 static void emitclosure(Nonterm nts);
 static void emitcost(Tree t, char* v);
+static void emitcostcalc(Rule r);
 static void emitdefs(Nonterm nts, int ntnumber);
 static void emitfuncs(void);
 static void emitheader(void);
@@ -34,7 +35,6 @@ static void emitnts(Rule rules, int nrules);
 static void emitrecord(char* pre, Rule r, int cost);
 static void emitrule(Nonterm nts);
 static void emitpredicatedefinitions(Rule rules);
-static void emitpredicatecall(Rule rule);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
@@ -283,9 +283,6 @@ Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost)
 	Rule *q;
 	Term p = pattern->op;
 
-	if (when && (p->arity == 0))
-		yyerror("can't have a when clause on leaf nodes");
-
 	nrules++;
 	r->when = when;
 	r->lhs = nonterm(id);
@@ -421,11 +418,6 @@ static void emitcase(Term p, int ntnumber)
 	{
 		case 0:
 		case -1:
-			if (!Tflag)
-			{
-				emitleaf(p, ntnumber);
-				return;
-			}
 			break;
 		case 1:
 			print("%2assert(l);\n");
@@ -442,26 +434,21 @@ static void emitcase(Term p, int ntnumber)
 		{
 			case 0:
 			case -1:
-				print("%2if (");
-				emitpredicatecall(r);
-				print(")\n%2{%1/* %R */\n%3c = ", r);
+				print("%2{%1/* %R */\n%3c = ", r);
+				emitcostcalc(r);
 				break;
 			case 1:
 				if (r->pattern->nterms > 1)
 				{
 					print("%2if (%1/* %R */\n", r);
 					emittest(r->pattern->left, "l", " ");
-					print("%3&& ");
-					emitpredicatecall(r);
-					print("\n");
 					print("%2) {\n%3c = ");
 				}
 				else
 				{
-					print("%2if (");
-					emitpredicatecall(r);
-					print(")\n%2{%1/* %R */\n%3c = ", r);
+					print("%2{%1/* %R */\n%3c = ", r);
 				}
+				emitcostcalc(r);
 				emitcost(r->pattern->left, "l");
 				break;
 			case 2:
@@ -471,17 +458,13 @@ static void emitcase(Term p, int ntnumber)
 					emittest(r->pattern->left, "l",
 					    r->pattern->right->nterms ? " && " : " ");
 					emittest(r->pattern->right, "r", " ");
-					print("%3&& ");
-					emitpredicatecall(r);
-					print("\n");
 					print("%2) {\n%3c = ");
 				}
 				else
 				{
-					print("%2if (");
-					emitpredicatecall(r);
-					print(")\n%2{%1/* %R */\n%3c = ", r);
+					print("%2{%1/* %R */\n%3c = ", r);
 				}
+				emitcostcalc(r);
 				emitcost(r->pattern->left, "l");
 				emitcost(r->pattern->right, "r");
 				break;
@@ -668,46 +651,6 @@ static void closure(int cost[], Rule rule[], Nonterm p, int c)
 		}
 }
 
-/* emitleaf - emit state code for a leaf */
-static void emitleaf(Term p, int ntnumber)
-{
-	int i;
-	Rule r;
-	static int* cost;
-	static Rule* rule;
-
-	if (cost == NULL)
-	{
-		cost = calloc(ntnumber+1, sizeof *cost);
-		rule = calloc(ntnumber+1, sizeof *rule);
-	}
-	for (i = 0; i <= ntnumber; i++)
-	{
-		cost[i] = maxcost;
-		rule[i] = NULL;
-	}
-	for (r = p->rules; r; r = r->next)
-		if (r->pattern->left == NULL && r->pattern->right == NULL)
-		{
-			cost[r->lhs->number] = r->cost;
-			rule[r->lhs->number] = r;
-			closure(cost, rule, r->lhs, r->cost);
-		}
-	print("%2{\n%3static struct %Pstate z = { %d, 0, 0,\n%4{%10,\n", p->esn);
-	for (i = 1; i <= ntnumber; i++)
-		if (cost[i] < maxcost)
-			print("%5%d,%1/* %R */\n", cost[i], rule[i]);
-		else
-			print("%5%d,\n", cost[i]);
-	print("%4},{\n");
-	for (i = 1; i <= ntnumber; i++)
-		if (rule[i])
-			print("%5%d,%1/* %R */\n", rule[i]->packed, rule[i]);
-		else
-			print("%50,\n");
-	print("%4}\n%3};\n%3return (STATE_TYPE)&z;\n%2}\n");
-}
-
 /* computents - fill in bp with burm_nts vector for tree t */
 static char* computents(Tree t, char* bp)
 {
@@ -815,13 +758,11 @@ static void emitpredicatedefinitions(Rule r)
 	}
 }
 
-/* emitpredicatecall - emit a call to a predicate */
-static void emitpredicatecall(Rule r)
+/* emitcost - emit a cost calculation via a predicate */
+static void emitcostcalc(Rule r)
 {
 	if (r->when)
-		print("%Ppredicate_%d(node)", r->ern);
-	else
-		print("1");
+		print("!%Ppredicate_%d(node) ? %d : ", r->ern, maxcost);
 }
 
 /* emitstate - emit state function */
@@ -837,15 +778,17 @@ static void emitstate(Term terms, Nonterm start, int ntnumber)
 	      "%1struct %Pstate* r = (struct %Pstate *)right;\n"
 		  "\n"
 		  "%1assert(sizeof (STATE_TYPE) >= sizeof (void *));\n%1");
-	if (!Tflag)
-		print("if (%Parity[op] > 0) ");
-	print("{\n%2p = ALLOC(sizeof *p);\n"
-	      "%2%Passert(p, PANIC(\"ALLOC returned NULL in %Pstate\\n\"));\n"
-	      "%2p->op = op;\n%2p->left = l;\n%2p->right = r;\n%2p->rule.%P%S = 0;\n",
+	print("%1p = ALLOC(sizeof *p);\n"
+	      "%1%Passert(p, PANIC(\"ALLOC returned NULL in %Pstate\\n\"));\n"
+	      "%1p->op = op;\n"
+		  "%1p->left = l;\n"
+		  "%1p->right = r;\n"
+		  "%1p->rule.%P%S = 0;\n",
 	    start);
 	for (i = 1; i <= ntnumber; i++)
-		print("%2p->cost[%d] =\n", i);
-	print("%3%d;\n%1}\n%1switch (op) {\n", maxcost);
+		print("%1p->cost[%d] =\n", i);
+	print("%2%d;\n"
+		  "%1switch (op) {\n", maxcost);
 	for (p = terms; p; p = p->link)
 		emitcase(p, ntnumber);
 	print("%1default:\n"
