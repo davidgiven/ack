@@ -1,0 +1,74 @@
+# Flags:
+#   S: has size (use in CONST1, CONST2, CONST4, CONST8 forms)
+#   V: has no size (use in JUMP, CJUMP, RET forms)
+
+# Simple terminals
+S CONST
+S REG
+S LABEL
+S BLOCK
+S PAIR
+S ANY
+S LOCAL
+S PHI
+
+# Magic stack operations
+S PUSH
+S POP
+
+# Memory operations
+S LOAD
+S STORE
+ 
+# Arithemetic operations
+S ADD
+S SUB
+S MUL
+S DIV
+S MOD
+S NEG
+ 
+S ADDF
+S SUBF
+S MULF
+S DIVF
+S NEGF
+ 
+S AND
+S OR
+S EOR
+S NOT
+ 
+# Conversions
+S CII1
+S CII2
+S CII4
+S CII8
+ 
+S CIU1
+S CIU2
+S CIU4
+S CIU8
+ 
+# Tristate comparisons
+S COMPARES
+S COMPAREU
+ 
+# Boolean comparisons
+S IFEQ
+S IFLT
+S IFLE
+ 
+# Procedures
+V CALL
+ 
+# Flow control --- these never return
+V JUMP
+V CJUMP
+V RET
+ 
+# Special
+S STACKADJUST
+S GETRET
+S SETRET
+

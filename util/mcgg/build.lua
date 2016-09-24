@@ -10,6 +10,28 @@ yacc {
 	srcs = { "./*.y" },
 }
 
+normalrule {
+	name = "ircodes",
+	outleaves = { "ircodes.h", "ircodes.c" },
+	ins = {
+		"./ircodes.sh",
+		"./ir.dat"
+	},
+	commands = {
+		"%{ins[1]} %{ins[2]} %{outs[1]} %{outs[2]}"
+	}
+}
+
+clibrary {
+	name = "lib",
+	srcs = {
+		matching(filenamesof("+ircodes"), "%.c$")
+	},
+	hdrs = {
+		matching(filenamesof("+ircodes"), "%.h$")
+	}
+}
+
 cprogram {
 	name = "mcgg",
 	srcs = {
@@ -19,6 +41,7 @@ cprogram {
 	},
 	deps = {
 		"./*.h",
+		"+lib",
 		"+yacc"
 	}
 }
@@ -51,7 +74,7 @@ definerule("mcgg",
 				cpptable
 			},
 			commands = {
-				"%{ins[1]} < %{ins[2]} > %{outs}",
+				"%{ins[1]} -i %{ins[2]} -o %{outs}",
 			}
 		}
 	end

@@ -1,17 +1,5 @@
 include("util/mcgg/build.lua")
 
-normalrule {
-	name = "ircodes",
-	outleaves = { "ircodes.h", "ircodes.c" },
-	ins = {
-		"./ircodes.sh",
-		"./ir.dat"
-	},
-	commands = {
-		"%{ins[1]} %{ins[2]} %{outs[1]} %{outs[2]}"
-	}
-}
-
 mcgg {
 	name = "mcgg_c",
 	srcs = { "./table" }
@@ -22,10 +10,9 @@ cprogram {
 	srcs = {
 		"./*.c",
 		"+mcgg_c",
-		matching(filenamesof("+ircodes"), "%.c$")
 	},
 	deps = {
-		"+ircodes",
+		"util/mcgg+lib",
 		"h+emheaders",
 		"modules+headers",
 		"modules/src/alloc+lib",

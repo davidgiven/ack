@@ -31,17 +31,17 @@ static NODEPTR_TYPE tree(int op, NODEPTR_TYPE l, NODEPTR_TYPE r) {
 int main(void) {
 	NODEPTR_TYPE p;
 
-	p = tree(STORE,
-			tree(ADD,
-				tree(LABEL, 0, 0),
-				tree(CONST, 0, 0)
+	p = tree(STORE4,
+			tree(ADD4,
+				tree(LABEL4, 0, 0),
+				tree(CONST4, 0, 0)
 			),
-			tree(ADD,
-				tree(LOAD,
-					tree(LABEL, 0, 0),
+			tree(ADD4,
+				tree(LOAD4,
+					tree(LABEL4, 0, 0),
 					0
 				),
-				tree(CONST, 0, 0)
+				tree(CONST4, 0, 0)
 			)
 		);
 	burm_label(p);

@@ -6,7 +6,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
 #include "iburg.h"
+#include "ircodes.h"
 
 static char rcsid[] = "$Id$";
 
@@ -23,6 +25,7 @@ static int nrules;
 
 static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
+static void registerterminals(void);
 static void emitclosure(Nonterm nts);
 static void emitcost(Tree t, char* v);
 static void emitcostcalc(Rule r);
@@ -52,9 +55,12 @@ int main(int argc, char* argv[])
 	yydebug = 1;
 	#endif
 
+	infp = stdin;
+	outfp = stdout;
+
 	for (;;)
 	{
-		int opt = getopt(argc, argv, "p:");
+		int opt = getopt(argc, argv, "p:i:o:");
 		if (opt == -1)
 			break;
 
@@ -64,16 +70,32 @@ int main(int argc, char* argv[])
 				prefix = optarg;
 				break;
 
+			case 'i':
+				infp = fopen(optarg, "r");
+				if (!infp)
+				{
+					yyerror("cannot open input file: %s\n", strerror(errno));
+					exit(1);
+				}
+				break;
+
+			case 'o':
+				outfp = fopen(optarg, "w");
+				if (!outfp)
+				{
+					yyerror("cannot open output file: %s\n", strerror(errno));
+					exit(1);
+				}
+				break;
+
 			default:
 				yyerror("usage: %s [-p prefix] < input > output\n", argv[0]);
 				exit(1);
 		}
 	}
 				
-	infp = stdin;
-	outfp = stdout;
-
 	emitheader();
+	registerterminals();
 
 	yyin = infp;
 	yyparse();
@@ -124,6 +146,32 @@ char* stringf(char* fmt, ...)
     va_end(ap);
 
     return p;
+}
+
+static void registerterminal(const char* name, int iropcode, int size)
+{
+	const char* s = (size == 0) ? name : stringf("%s%d", name, size);
+	int esn = ir_to_esn(iropcode, size);
+
+	term(s, esn);
+}
+
+static void registerterminals(void)
+{
+	int i;
+
+	for (i=0; i<IR__COUNT; i++)
+	{
+		if (ir_flags[i] & IRF_SIZED)
+		{
+			registerterminal(ir_names[i], i, 1);
+			registerterminal(ir_names[i], i, 2);
+			registerterminal(ir_names[i], i, 4);
+			registerterminal(ir_names[i], i, 8);
+		}
+		else
+			registerterminal(ir_names[i], i, 0);
+	}
 }
 
 struct entry
@@ -196,10 +244,14 @@ Nonterm nonterm(const char* id)
 /* term - create a new terminal id with external symbol number esn */
 Term term(const char* id, int esn)
 {
-	Term p = lookup(id), * q = &terms;
+	Term p = lookup(id);
+	Term* q = &terms;
 
 	if (p)
+	{
 		yyerror("redefinition of terminal `%s'\n", id);
+		exit(1);
+	}
 	else
 		p = install(id);
 	p->kind = TERM;

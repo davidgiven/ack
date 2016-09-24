@@ -29,20 +29,19 @@ static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
 }
 #endif
 %}
-%term LOAD STORE LABEL CONST ADD FOO BAR BAZ BOO;
 %%
 
-	stm = STORE(addr:address, value:reg)
+	stm = STORE4(addr:address, value:reg)
 		ins value:GPR
 		emit "str %value, %addr"
 		cost 4;
 
-	reg = LOAD(addr:address)
+	reg = LOAD4(addr:address)
 		outs dest:ANY
 		emit "ld %dest, %addr"
 		cost 4;
 
-	address = ADD(addr:reg, offset:CONST)
+	address = ADD4(addr:reg, offset:CONST)
 		ins addr:GPR
 		fragment "[%addr, #%offset.ivalue]";
 
@@ -52,19 +51,19 @@ static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
 
 	stm = reg;
 
-	reg = ADD(left:reg, right:aluparam)
+	reg = ADD4(left:reg, right:aluparam)
 		ins left:GPR, right:GPR
 		outs out:GPR
 		emit "add %out, %left, %right"
 		cost 4;
 
-	reg = ADD(left:aluparam, right:reg)
+	reg = ADD4(left:aluparam, right:reg)
 		ins left:GPR, right:GPR
 		outs out:GPR
 		emit "add %out, %right, %left"
 		cost 4;
 
-	aluparam = value:CONST
+	aluparam = value:CONST4
 		when { return false; }
 		fragment "#%value.ivalue";
 
@@ -75,12 +74,12 @@ static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
 		emit "mov %out, %value"
 		cost 4;
 
-	reg = value:LABEL
+	reg = value:LABEL4
 		outs out:GPR
 		emit "adr %out, #value.lvalue"
 		cost 4;
 
-	reg = value:CONST
+	reg = value:CONST4
 		outs out:GPR
 		emit "ldr %out, #value.lvalue"
 		cost 4;
