@@ -1,0 +1,86 @@
+%{
+#if 0
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define TRACE
+
+#define STATE_TYPE void*
+typedef struct tree {
+	int op;
+	struct tree *kids[2];
+	STATE_TYPE state_label;
+} *NODEPTR_TYPE;
+#define OP_LABEL(p) ((p)->op)
+#define LEFT_CHILD(p) ((p)->kids[0])
+#define RIGHT_CHILD(p) ((p)->kids[1])
+#define STATE_LABEL(p) ((p)->state_label)
+#define PANIC printf
+
+static void burm_trace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost) {
+#ifdef TRACE
+	extern const char *burm_string[];
+
+	fprintf(stderr, "0x%p matched %s with cost %d vs. %d\n", p,
+		burm_string[eruleno], cost, bestcost);
+#endif
+}
+#endif
+%}
+%term LOAD STORE LABEL CONST ADD FOO BAR BAZ BOO;
+%%
+
+	stm = STORE(addr:address, value:reg)
+		ins value:GPR
+		emit "str %value, %addr"
+		cost 4;
+
+	reg = LOAD(addr:address)
+		outs dest:ANY
+		emit "ld %dest, %addr"
+		cost 4;
+
+	address = ADD(addr:reg, offset:CONST)
+		ins addr:GPR
+		fragment "[%addr, #%offset.ivalue]";
+
+	address = addr:reg
+		ins addr:GPR
+		fragment "[%addr]";
+
+	stm = reg;
+
+	reg = ADD(left:reg, right:aluparam)
+		ins left:GPR, right:GPR
+		outs out:GPR
+		emit "add %out, %left, %right"
+		cost 4;
+
+	reg = ADD(left:aluparam, right:reg)
+		ins left:GPR, right:GPR
+		outs out:GPR
+		emit "add %out, %right, %left"
+		cost 4;
+
+	aluparam = value:CONST
+		when { return false; }
+		fragment "#%value.ivalue";
+
+	aluparam = reg;
+
+	reg = value:aluparam
+		outs out:GPR
+		emit "mov %out, %value"
+		cost 4;
+
+	reg = value:LABEL
+		outs out:GPR
+		emit "adr %out, #value.lvalue"
+		cost 4;
+
+	reg = value:CONST
+		outs out:GPR
+		emit "ldr %out, #value.lvalue"
+		cost 4;

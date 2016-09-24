@@ -1,3 +1,5 @@
+include("util/mcgg/build.lua")
+
 normalrule {
 	name = "ircodes",
 	outleaves = { "ircodes.h", "ircodes.c" },
@@ -10,10 +12,16 @@ normalrule {
 	}
 }
 
+mcgg {
+	name = "mcgg_c",
+	srcs = { "./table" }
+}
+
 cprogram {
 	name = "mcg",
 	srcs = {
 		"./*.c",
+		"+mcgg_c",
 		matching(filenamesof("+ircodes"), "%.c$")
 	},
 	deps = {
@@ -28,7 +36,6 @@ cprogram {
 		"modules/src/string+lib",
 		"modules/src/system+lib",
 		"./*.h",
-		"util/mcgg+mcgg",
 	},
 	vars = {
 		["+cflags"] = {

@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
 	infp = stdin;
 	outfp = stdout;
 
+	emitheader();
+
 	yyin = infp;
 	yyparse();
 
@@ -81,7 +83,7 @@ int main(int argc, char* argv[])
 	for (p = nts; p; p = p->link)
 		if (!p->reached)
 			yyerror("can't reach non-terminal `%s'\n", p->name);
-	emitheader();
+
 	emitdefs(nts, ntnumber);
 	emitstruct(nts, ntnumber);
 	emitnts(rules, nrules);
@@ -524,10 +526,7 @@ static void emitfuncs(void)
 /* emitheader - emit initial definitions */
 static void emitheader(void)
 {
-	print("#include <limits.h>\n#include <stdlib.h>\n");
-	print("#ifndef STATE_TYPE\n#define STATE_TYPE int\n#endif\n");
-	print("#ifndef ALLOC\n#define ALLOC(n) malloc(n)\n#endif\n"
-	      "#ifndef %Passert\n#define %Passert(x,y) if (!(x)) { y; abort(); }\n#endif\n\n");
+	print("#include \"mcgg_generated_header.h\"\n");
 	if (Tflag)
 		print("static NODEPTR_TYPE %Pnp;\n\n");
 }
@@ -752,8 +751,7 @@ static void emitstate(Term terms, Nonterm start, int ntnumber)
 	      "%1struct %Pstate* r = (struct %Pstate *)right;\n"
 		  "\n"
 		  "%1assert(sizeof (STATE_TYPE) >= sizeof (void *));\n%1");
-	print("%1p = ALLOC(sizeof *p);\n"
-	      "%1%Passert(p, PANIC(\"ALLOC returned NULL in %Pstate\\n\"));\n"
+	print("%1p = malloc(sizeof *p);\n"
 	      "%1p->op = op;\n"
 		  "%1p->left = l;\n"
 		  "%1p->right = r;\n"
