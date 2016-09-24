@@ -151,7 +151,7 @@ struct entry
 {
 	union
 	{
-		char* name;
+		const char* name;
 		struct term t;
 		struct nonterm nt;
 	} sym;
@@ -160,7 +160,7 @@ struct entry
 #define HASHSIZE (sizeof table / sizeof table[0])
 
 /* hash - return hash number for str */
-static unsigned hash(char* str)
+static unsigned hash(const char* str)
 {
 	unsigned h = 0;
 
@@ -170,7 +170,7 @@ static unsigned hash(char* str)
 }
 
 /* lookup - lookup symbol name */
-static void* lookup(char* name)
+static void* lookup(const char* name)
 {
 	struct entry* p = table[hash(name) % HASHSIZE];
 
@@ -181,7 +181,7 @@ static void* lookup(char* name)
 }
 
 /* install - install symbol name */
-static void* install(char* name)
+static void* install(const char* name)
 {
 	struct entry* p = calloc(1, sizeof *p);
 	int i = hash(name) % HASHSIZE;
@@ -193,7 +193,7 @@ static void* install(char* name)
 }
 
 /* nonterm - create a new terminal id, if necessary */
-Nonterm nonterm(char* id)
+Nonterm nonterm(const char* id)
 {
 	Nonterm p = lookup(id), * q = &nts;
 
@@ -215,7 +215,7 @@ Nonterm nonterm(char* id)
 }
 
 /* term - create a new terminal id with external symbol number esn */
-Term term(char* id, int esn)
+Term term(const char* id, int esn)
 {
 	Term p = lookup(id), * q = &terms;
 
@@ -240,7 +240,7 @@ Term term(char* id, int esn)
 }
 
 /* tree - create & initialize a tree node with the given fields */
-Tree tree(char* id, Tree left, Tree right)
+Tree tree(const char* id, const char* label, Tree left, Tree right)
 {
 	Tree t = calloc(1, sizeof *t);
 	Term p = lookup(id);
@@ -267,6 +267,7 @@ Tree tree(char* id, Tree left, Tree right)
 	if (p->kind == TERM && arity != p->arity)
 		yyerror("inconsistent arity for terminal `%s'\n", id);
 	t->op = p;
+	t->label = label;
 	t->nterms = p->kind == TERM;
 	if (t->left = left)
 		t->nterms += left->nterms;

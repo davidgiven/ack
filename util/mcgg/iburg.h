@@ -41,17 +41,18 @@ struct nonterm
 	Rule chain; /* chain rules w/non-terminal on rhs */
 	Nonterm link; /* next terminal in number order */
 };
-extern Nonterm nonterm(char* id);
-extern Term term(char* id, int esn);
+extern Nonterm nonterm(const char* id);
+extern Term term(const char* id, int esn);
 
 typedef struct tree* Tree;
 struct tree
 { /* tree patterns: */
-	void* op; /* a terminal or non-terminal */
-	Tree left, right; /* operands */
-	int nterms; /* number of terminal nodes in this tree */
+	void* op;           /* a terminal or non-terminal */
+	const char* label;  /* user label for this node */
+	Tree left, right;   /* operands */
+	int nterms;         /* number of terminal nodes in this tree */
 };
-extern Tree tree(char* op, Tree left, Tree right);
+extern Tree tree(const char* op, const char* label, Tree left, Tree right);
 
 struct rule
 { /* rules: */

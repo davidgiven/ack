@@ -16,6 +16,7 @@ static int nextern = 0;
 	char* string;
 	Tree tree;
     Stringlist stringlist;
+    char* stringpair[2];
 }
 %term TERMINAL
 %term START
@@ -27,15 +28,17 @@ static int nextern = 0;
 %term EMIT
 %term COST
 
+%token <n>          INT
 %token <string>     ID
 %token <string>     CFRAGMENT
-%token <n>          INT
 
-%type  <string>     lhs
-%type  <tree>       rhs
 %type  <n>          cost
-%type  <stringlist> when
+%type  <string>     label
+%type  <string>     lhs
 %type  <stringlist> stringlist
+%type  <stringlist> when
+%type  <tree>       rhs
+%type  <stringpair> labelledid
 %%
 spec
     : decls PPERCENT patterns
@@ -78,10 +81,15 @@ lhs
 	;
 
 rhs
-    : ID                            { $$ = tree($1, NULL, NULL); }
-	| ID '(' rhs ')'                { $$ = tree($1,   $3, NULL); }
-	| ID '(' rhs ',' rhs ')'        { $$ = tree($1,   $3, $5); }
+    : labelledid                      { $$ = tree($1[1], $1[0], NULL, NULL); }
+	| labelledid '(' rhs ')'          { $$ = tree($1[1], $1[0],   $3, NULL); }
+	| labelledid '(' rhs ',' rhs ')'  { $$ = tree($1[1], $1[0],   $3, $5); }
 	;
+
+labelledid
+    : ID                            { $$[0] = NULL; $$[1] = $1; }
+    | ID ':' ID                     { $$[0] = $1; $$[1] = $3; }
+    ;
 
 when
     : /* nothing */                 { $$ = NULL; }
