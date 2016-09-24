@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
 	for (;;)
 	{
-		int opt = getopt(argc, argv, "p:i:o:");
+		int opt = getopt(argc, argv, "p:i:o:y");
 		if (opt == -1)
 			break;
 
@@ -88,6 +88,13 @@ int main(int argc, char* argv[])
 				}
 				break;
 
+			case 'y':
+			{
+				extern int yydebug;
+				yydebug = 1;
+				break;
+			}
+
 			default:
 				yyerror("usage: %s [-p prefix] < input > output\n", argv[0]);
 				exit(1);
@@ -96,6 +103,8 @@ int main(int argc, char* argv[])
 				
 	emitheader();
 	registerterminals();
+
+	start = nonterm("stmt");
 
 	yyin = infp;
 	yyparse();
@@ -308,14 +317,13 @@ Tree tree(const char* id, const char* label, Tree left, Tree right)
 }
 
 /* rule - create & initialize a rule with the given fields */
-Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost)
+Rule rule(char* id, Tree pattern, int ern)
 {
 	Rule r = calloc(1, sizeof *r);
 	Rule *q;
 	Term p = pattern->op;
 
 	nrules++;
-	r->when = when;
 	r->lhs = nonterm(id);
 	r->packed = ++r->lhs->lhscount;
 	for (q = &r->lhs->rules; *q; q = &(*q)->decode)
@@ -323,7 +331,6 @@ Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost)
 	*q = r;
 	r->pattern = pattern;
 	r->ern = ern;
-	r->cost = cost;
 	if (p->kind == TERM)
 	{
 		r->next = p->rules;

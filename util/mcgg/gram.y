@@ -7,14 +7,14 @@
 #define YYDEBUG 1
 
 static char rcsid[] = "$Id$";
-static int nextesn = 0;
-static int nextern = 0;
+static int nextern = 1;
 
 %}
 %union {
 	int n;
 	char* string;
 	Tree tree;
+    Rule rule;
     Stringlist stringlist;
     char* stringpair[2];
 }
@@ -36,36 +36,15 @@ static int nextern = 0;
 %token <string>     STRING
 
 %type  <n>          cost
-%type  <string>     lhs
+%type  <rule>       pattern
 %type  <stringlist> stringlist
 %type  <stringlist> when
 %type  <tree>       rhs
 %type  <stringpair> labelledid
 %%
 spec
-    : decls PPERCENT patterns
-	| decls
+    : PATTERNS patterns
 	;
-
-decls	: /* lambda */
-	| decls decl
-	;
-
-decl
-    : TERMINAL blist ';'
-	| START lhs ';'
-    {
-        if (nonterm($2)->number != 1)
-            yyerror("redeclaration of the start symbol\n");
-    }
-	| ';'
-	| error ';'			{ yyerrok; }
-	;
-
-blist
-    : /* nothing */
-    | blist ID              { term($2, nextesn++); }
-    ;
 
 patterns
     : /* nothing */
@@ -75,12 +54,15 @@ patterns
 	;
 
 pattern
-    : lhs '=' rhs when ins outs emits cost { rule($1, $3, nextern++, $4, $8); }
+    : ID '=' rhs                      { nonterm($1); $$ = rule($1, $3, nextern++); }
+    | rhs                             {              $$ = rule("stmt", $1, nextern++); }
+    | pattern WHEN stringlist         { $$ = $1; $$->when = $3; }
+    | pattern INS ins                 { $$ = $1; }
+    | pattern OUTS outs               { $$ = $1; }
+    | pattern EMIT STRING             { $$ = $1; }
+    | pattern FRAGMENT STRING         { $$ = $1; }
+    | pattern COST INT                { $$ = $1; $$->cost = $3; }
     ;
-
-lhs
-    : ID				              { $$ = $1; nonterm($$); }
-	;
 
 rhs
     : labelledid                      { $$ = tree($1[1], $1[0], NULL, NULL); }
@@ -104,12 +86,7 @@ stringlist
     ;
     
 ins
-    : /* nothing */
-    | INS inslist
-    ;
-
-inslist
-    : inslist ',' in
+    : ins ',' in
     | in
     ;
 
@@ -118,12 +95,7 @@ in
     ;
 
 outs
-    : /* nothing */
-    | OUTS outslist
-    ;
-
-outslist
-    : outslist ',' out
+    : outs ',' out
     | out
     ;
 
@@ -131,22 +103,6 @@ out
     : ID ':' ID
     ;
 
-emits
-    : /* nothing */
-    | EMIT STRING
-    | FRAGMENT STRING
-    ;
-
-cost
-    : /* lambda */			          { $$ = 0; }
-	| COST INT  			          {
-                                          if ($2 > maxcost) {
-                                              yyerror("%d exceeds maximum cost of %d\n", $2, maxcost);
-                                              $$ = maxcost;
-                                          } else
-                                              $$ = $2;
-                                      }
-	;
 %%
 #include <stdarg.h>
 #include <ctype.h>

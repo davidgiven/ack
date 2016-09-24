@@ -68,7 +68,7 @@ struct rule
 	Rule kids;       /* next rule with same burm_kids pattern */
 	Stringlist when; /* C predicate string */
 };
-extern Rule rule(char* id, Tree pattern, int ern, Stringlist when, int cost);
+extern Rule rule(char* id, Tree pattern, int ern);
 extern int maxcost; /* maximum cost */
 
 /* gram.y: */
