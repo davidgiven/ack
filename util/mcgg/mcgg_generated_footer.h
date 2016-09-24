@@ -10,7 +10,12 @@ static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
 	fprintf(stderr, "%s\n", burm_string[eruleno]);
 	burm_kids(p, eruleno, kids);
 	for (i = 0; nts[i]; i++)
-		dumpCover(kids[i], nts[i], indent + 1);
+	{
+		if (kids[i])
+			dumpCover(kids[i], nts[i], indent + 1);
+		else
+			fprintf(stderr, "failed!\n");
+	}
 #endif
 }
 

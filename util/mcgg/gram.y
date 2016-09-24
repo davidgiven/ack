@@ -23,17 +23,19 @@ static int nextern = 0;
 %term PPERCENT
 
 %term PATTERNS
-%term PAT
 %term WHEN
 %term EMIT
+%term FRAGMENT
 %term COST
+%term INS
+%term OUTS
 
 %token <n>          INT
 %token <string>     ID
 %token <string>     CFRAGMENT
+%token <string>     STRING
 
 %type  <n>          cost
-%type  <string>     label
 %type  <string>     lhs
 %type  <stringlist> stringlist
 %type  <stringlist> when
@@ -69,15 +71,15 @@ patterns
     : /* nothing */
 	| patterns pattern ';'
 	| patterns ';'
-	| patterns error ';'		{ yyerrok; }
+	| patterns error ';'		      { yyerrok; }
 	;
 
 pattern
-    : lhs '=' rhs when cost         { rule($1, $3, nextern++, $4, $5); }
+    : lhs '=' rhs when ins outs emits cost { rule($1, $3, nextern++, $4, $8); }
     ;
 
 lhs
-    : ID				            { $$ = $1; nonterm($$); }
+    : ID				              { $$ = $1; nonterm($$); }
 	;
 
 rhs
@@ -87,29 +89,63 @@ rhs
 	;
 
 labelledid
-    : ID                            { $$[0] = NULL; $$[1] = $1; }
-    | ID ':' ID                     { $$[0] = $1; $$[1] = $3; }
+    : ID                              { $$[0] = NULL; $$[1] = $1; }
+    | ID ':' ID                       { $$[0] = $1; $$[1] = $3; }
     ;
 
 when
-    : /* nothing */                 { $$ = NULL; }
-    | WHEN stringlist               { $$ = $2; }
+    : /* nothing */                   { $$ = NULL; }
+    | WHEN stringlist                 { $$ = $2; }
     ;
 
 stringlist 
-    : /* nothing */                 { $$ = NULL; }
-    | CFRAGMENT stringlist          { $$ = pushstring($1, $2); }
+    : /* nothing */                   { $$ = NULL; }
+    | CFRAGMENT stringlist            { $$ = pushstring($1, $2); }
     ;
     
+ins
+    : /* nothing */
+    | INS inslist
+    ;
+
+inslist
+    : inslist ',' in
+    | in
+    ;
+
+in
+    : ID ':' ID
+    ;
+
+outs
+    : /* nothing */
+    | OUTS outslist
+    ;
+
+outslist
+    : outslist ',' out
+    | out
+    ;
+
+out
+    : ID ':' ID
+    ;
+
+emits
+    : /* nothing */
+    | EMIT STRING
+    | FRAGMENT STRING
+    ;
+
 cost
-    : /* lambda */			        { $$ = 0; }
-	| COST INT  			        {
-                                        if ($2 > maxcost) {
-                                            yyerror("%d exceeds maximum cost of %d\n", $2, maxcost);
-                                            $$ = maxcost;
-                                        } else
-                                            $$ = $2;
-                                    }
+    : /* lambda */			          { $$ = 0; }
+	| COST INT  			          {
+                                          if ($2 > maxcost) {
+                                              yyerror("%d exceeds maximum cost of %d\n", $2, maxcost);
+                                              $$ = maxcost;
+                                          } else
+                                              $$ = $2;
+                                      }
 	;
 %%
 #include <stdarg.h>

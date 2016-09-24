@@ -55,11 +55,14 @@ static int braces = 0;
 "%start"					return START;
 
 "PATTERNS"                  return PATTERNS;
-"pat"                       return PAT;
 "when"                      return WHEN;
+"ins"                       return INS;
+"outs"                      return OUTS;
 "emit"                      return EMIT;
+"fragment"                  return FRAGMENT;
 "cost"                      return COST;
 
+\"[^"\n]*\"                 { yylval.string = strdup(yytext); return STRING; }
 [A-Za-z_][A-Za-z0-9_]*      { yylval.string = strdup(yytext); return ID; }
 [0-9]+                      { yylval.n = atoi(yytext); return INT; }
 [ \t\r\n]*                  ;
