@@ -1,12 +1,14 @@
 %{
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <limits.h>
 #include "iburg.h"
 
 #define YYDEBUG 1
 
-static char rcsid[] = "$Id$";
+extern int yylex(void);
+
 static int nextern = 1;
 
 %}
@@ -33,15 +35,16 @@ static int nextern = 1;
 %token <n>          INT
 %token <string>     ID
 %token <string>     CFRAGMENT
-%token <string>     STRING
+%token <string>     QFRAGMENT
 
-%type  <n>          cost
 %type  <rule>       pattern
-%type  <stringlist> stringlist
-%type  <stringlist> when
+%type  <rule>       emit
+%type  <stringlist> cfragments
+%type  <stringlist> qfragments
 %type  <tree>       rhs
 %type  <stringpair> labelledid
 %%
+
 spec
     : PATTERNS patterns
 	;
@@ -50,17 +53,15 @@ patterns
     : /* nothing */
 	| patterns pattern ';'
 	| patterns ';'
-	| patterns error ';'		      { yyerrok; }
 	;
 
 pattern
     : ID '=' rhs                      { nonterm($1); $$ = rule($1, $3, nextern++); }
     | rhs                             {              $$ = rule("stmt", $1, nextern++); }
-    | pattern WHEN stringlist         { $$ = $1; $$->when = $3; }
+    | pattern WHEN cfragments         { $$ = $1; $$->when = $3; }
     | pattern INS ins                 { $$ = $1; }
     | pattern OUTS outs               { $$ = $1; }
-    | pattern EMIT STRING             { $$ = $1; }
-    | pattern FRAGMENT STRING         { $$ = $1; }
+    | emit                            { $$ = $1; }
     | pattern COST INT                { $$ = $1; $$->cost = $3; }
     ;
 
@@ -75,14 +76,9 @@ labelledid
     | ID ':' ID                       { $$[0] = $1; $$[1] = $3; }
     ;
 
-when
+cfragments 
     : /* nothing */                   { $$ = NULL; }
-    | WHEN stringlist                 { $$ = $2; }
-    ;
-
-stringlist 
-    : /* nothing */                   { $$ = NULL; }
-    | CFRAGMENT stringlist            { $$ = pushstring($1, $2); }
+    | CFRAGMENT cfragments            { $$ = pushstring($1, $2); }
     ;
     
 ins
@@ -100,7 +96,18 @@ outs
     ;
 
 out
-    : ID ':' ID
+    : ID
+    | ID ':' ID
+    ;
+
+emit
+    : pattern EMIT qfragments         { $$ = $1; $$->code = $3; $$->is_fragment = false; }
+    | pattern FRAGMENT qfragments     { $$ = $1; $$->code = $3; $$->is_fragment = true; }
+    ;
+
+qfragments
+    : QFRAGMENT                       { $$ = pushstring($1, NULL); }
+    | QFRAGMENT qfragments            { $$ = pushstring($1, $2); }
     ;
 
 %%

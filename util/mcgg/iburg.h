@@ -67,6 +67,8 @@ struct rule
 	Rule decode;     /* next rule with same lhs */
 	Rule kids;       /* next rule with same burm_kids pattern */
 	Stringlist when; /* C predicate string */
+	Stringlist code; /* compiler output code strings */
+	bool is_fragment; /* does this rule generate an instruction fragment? */
 };
 extern Rule rule(char* id, Tree pattern, int ern);
 extern int maxcost; /* maximum cost */

@@ -48,7 +48,7 @@ static void queue_instructions(struct ir* ir, int goal)
 	for (i=0; nts[i]; i++)
 		queue_instructions(children[i], nts[i]);
 
-	printf("selected insn %d: %s\n", ruleno, burm_string[ruleno]);
+    tracef('I', "I: $%d selected insn %d: %s\n", ir->id, ruleno, burm_string[ruleno]);
 }
 
 static void select_instructions(struct basicblock* bb)

@@ -1,4 +1,5 @@
 %{
+#include <stdbool.h>
 #include "iburg.h"
 #include "y.tab.h"
 
@@ -9,17 +10,13 @@ static int braces = 0;
 %option nodefault
 %option noyywrap
 %option yylineno
+%option debug
 
 %x CSTRING
+%x QSTRING
 %x ECHO
 
 %%
-
-<INITIAL>"%{"               { printlineno(); BEGIN(ECHO); }
-
-<ECHO>"%}"                  BEGIN(INITIAL);
-<ECHO>[%\n]                 fputc(yytext[0], outfp);
-<ECHO>[^%\n]*               fputs(yytext, outfp);
 
 <INITIAL>"{"                {
                                 yylval.string = ""; //stringf("#line %d\n", yylineno);
@@ -50,6 +47,19 @@ static int braces = 0;
                                 return CFRAGMENT;
                             }
 
+<INITIAL>"\""               BEGIN(QSTRING);
+<QSTRING>"\""               BEGIN(INITIAL);
+
+<QSTRING>%[a-zA-Z_]+        {
+                                yylval.string = strdup(yytext);
+                                return QFRAGMENT;
+                            }
+
+<QSTRING>[^\r\n%"]+         {
+                                yylval.string = strdup(yytext);
+                                return QFRAGMENT;
+                            }
+
 "%%"                        return PPERCENT;
 "%term"						return TERMINAL;
 "%start"					return START;
@@ -62,7 +72,6 @@ static int braces = 0;
 "fragment"                  return FRAGMENT;
 "cost"                      return COST;
 
-\"[^"\n]*\"                 { yylval.string = strdup(yytext); return STRING; }
 [A-Za-z_][A-Za-z0-9_]*      { yylval.string = strdup(yytext); return ID; }
 [0-9]+                      { yylval.n = atoi(yytext); return INT; }
 [ \t\r\n]*                  ;

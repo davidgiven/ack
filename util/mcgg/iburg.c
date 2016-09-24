@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
@@ -45,6 +46,8 @@ static void emitstruct(Nonterm nts, int ntnumber);
 static void emitterms(Term terms);
 static void emittest(Tree t, char* v, char* suffix);
 
+extern int yy_flex_debug;
+
 int main(int argc, char* argv[])
 {
 	int c, i;
@@ -57,10 +60,11 @@ int main(int argc, char* argv[])
 
 	infp = stdin;
 	outfp = stdout;
+	yy_flex_debug = 0;
 
 	for (;;)
 	{
-		int opt = getopt(argc, argv, "p:i:o:y");
+		int opt = getopt(argc, argv, "p:i:o:yf");
 		if (opt == -1)
 			break;
 
@@ -92,6 +96,12 @@ int main(int argc, char* argv[])
 			{
 				extern int yydebug;
 				yydebug = 1;
+				break;
+			}
+
+			case 'f':
+			{
+				yy_flex_debug = 1;
 				break;
 			}
 

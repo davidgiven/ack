@@ -53,18 +53,18 @@ PATTERNS
 
 	reg = in:LOCAL4
 		outs out:GPR
-		emit "add %out, fp, #%in.ivalue"
+		emit "add %out, fp, #%in"
 		cost 4;
 
 	address = in:LOCAL4
-		fragment "[fp, #%in.ivalue]";
+		fragment "[fp, #%in]";
 
 
 /* Memory addressing modes */
 
 	address = ADD4(addr:reg, offset:CONST)
 		ins addr:GPR
-		fragment "[%addr, #%offset.ivalue]";
+		fragment "[%addr, #%offset]";
 
 	address = addr:reg
 		ins addr:GPR
@@ -74,12 +74,12 @@ PATTERNS
 /* Branches */
 
 	JUMP(addr:BLOCK4)
-		emit "b %addr.bvalue"
+		emit "b %addr"
 		cost 4;
 
 	CJUMPEQ(value:tristate, PAIR(true:BLOCK4, false:BLOCK4))
-		emit "beq %trueblock.bvalue"
-		emit "bne %falseblock.bvalue"
+		emit "beq %true"
+		emit "bne %false"
 		cost 8;
 
 
@@ -136,15 +136,15 @@ PATTERNS
 
 	reg = value:LABEL4
 		outs out:GPR
-		emit "adr %out, %value.lvalue"
+		emit "adr %out, %value"
 		cost 4;
 
 	reg = value:BLOCK4
 		outs out:GPR
-		emit "adr %out, %value.bvalue"
+		emit "adr %out, %value"
 		cost 4;
 
 	reg = value:CONST4
 		outs out:GPR
-		emit "ldr %out, #value.lvalue"
+		emit "ldr %out, #value"
 		cost 4;
