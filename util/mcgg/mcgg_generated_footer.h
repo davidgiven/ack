@@ -1,7 +1,7 @@
 static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
 #ifdef TRACE
 	int eruleno = burm_rule(STATE_LABEL(p), goalnt);
-	short *nts = burm_nts[eruleno];
+	const short *nts = burm_nts[eruleno];
 	NODEPTR_TYPE kids[10];
 	int i;
 

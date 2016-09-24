@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,10 +10,10 @@
 
 static char rcsid[] = "$Id$";
 
-int maxcost = SHRT_MAX;
+int maxcost = SHRT_MAX / 2;
 
 static char* prefix = "burm";
-static int Iflag = 0, Tflag = 0;
+static int Tflag = 1; /* tracing */
 static int ntnumber = 0;
 static Nonterm start = 0;
 static Term terms;
@@ -51,49 +52,26 @@ int main(int argc, char* argv[])
 	yydebug = 1;
 	#endif
 
-	if (sizeof(short) == sizeof(int))
-		maxcost = SHRT_MAX / 2;
-	for (i = 1; i < argc; i++)
-		if (strcmp(argv[i], "-I") == 0)
-			Iflag = 1;
-		else if (strcmp(argv[i], "-T") == 0)
-			Tflag = 1;
-		else if (strncmp(argv[i], "-maxcost=", 9) == 0 && isdigit(argv[i][9]))
-			maxcost = atoi(argv[i] + 9);
-		else if (strncmp(argv[i], "-p", 2) == 0 && argv[i][2])
-			prefix = &argv[i][2];
-		else if (strncmp(argv[i], "-p", 2) == 0 && i + 1 < argc)
-			prefix = argv[++i];
-		else if (*argv[i] == '-' && argv[i][1])
+	for (;;)
+	{
+		int opt = getopt(argc, argv, "p:");
+		if (opt == -1)
+			break;
+
+		switch (opt)
 		{
-			yyerror("usage: %s [-T | -I | -p prefix | -maxcost=ddd ]... [ [ input ] output \n",
-			    argv[0]);
-			exit(1);
-		}
-		else if (infp == NULL)
-		{
-			if (strcmp(argv[i], "-") == 0)
-				infp = stdin;
-			else if ((infp = fopen(argv[i], "r")) == NULL)
-			{
-				yyerror("%s: can't read `%s'\n", argv[0], argv[i]);
+			case 'p':
+				prefix = optarg;
+				break;
+
+			default:
+				yyerror("usage: %s [-p prefix] < input > output\n", argv[0]);
 				exit(1);
-			}
 		}
-		else if (outfp == NULL)
-		{
-			if (strcmp(argv[i], "-") == 0)
-				outfp = stdout;
-			if ((outfp = fopen(argv[i], "w")) == NULL)
-			{
-				yyerror("%s: can't write `%s'\n", argv[0], argv[i]);
-				exit(1);
-			}
-		}
-	if (infp == NULL)
-		infp = stdin;
-	if (outfp == NULL)
-		outfp = stdout;
+	}
+				
+	infp = stdin;
+	outfp = stdout;
 
 	yyin = infp;
 	yyparse();
@@ -108,8 +86,7 @@ int main(int argc, char* argv[])
 	emitstruct(nts, ntnumber);
 	emitnts(rules, nrules);
 	emitterms(terms);
-	if (Iflag)
-		emitstring(rules);
+	emitstring(rules);
 	emitrule(nts);
 	emitclosure(nts);
 	emitpredicatedefinitions(rules);
@@ -521,14 +498,11 @@ static void emitdefs(Nonterm nts, int ntnumber)
 
 	for (p = nts; p; p = p->link)
 		print("#define %P%S_NT %d\n", p, p->number);
-	print("int %Pmax_nt = %d;\n\n", ntnumber);
-	if (Iflag)
-	{
-		print("char *%Pntname[] = {\n%10,\n");
-		for (p = nts; p; p = p->link)
-			print("%1\"%S\",\n", p);
-		print("%10\n};\n\n");
-	}
+	print("static const int %Pmax_nt = %d;\n\n", ntnumber);
+	print("const char *%Pntname[] = {\n%10,\n");
+	for (p = nts; p; p = p->link)
+		print("%1\"%S\",\n", p);
+	print("%10\n};\n\n");
 }
 
 /* emitfuncs - emit functions to access node fields */
@@ -683,12 +657,12 @@ static void emitnts(Rule rules, int nrules)
 			;
 		if (str[j] == NULL)
 		{
-			print("static short %Pnts_%d[] = { %s0 };\n", j, buf);
+			print("static const short %Pnts_%d[] = { %s0 };\n", j, buf);
 			str[j] = strdup(buf);
 		}
 		nts[i++] = j;
 	}
-	print("\nshort *%Pnts[] = {\n");
+	print("\nconst short *%Pnts[] = {\n");
 	for (i = j = 0, r = rules; r; r = r->link)
 	{
 		for (; j < r->ern; j++)
@@ -722,7 +696,7 @@ static void emitrule(Nonterm nts)
 	for (p = nts; p; p = p->link)
 	{
 		Rule r;
-		print("static short %Pdecode_%S[] = {\n%10,\n", p);
+		print("static const short %Pdecode_%S[] = {\n%10,\n", p);
 		for (r = p->rules; r; r = r->decode)
 			print("%1%d,\n", r->ern);
 		print("};\n\n");
@@ -802,14 +776,14 @@ static void emitstring(Rule rules)
 	Rule r;
 	int k;
 
-	print("short %Pcost[][4] = {\n");
+	print("static const short %Pcost[][4] = {\n");
 	for (k = 0, r = rules; r; r = r->link)
 	{
 		for (; k < r->ern; k++)
 			print("%1{ 0 },%1/* %d */\n", k);
 		print("%1{ %d },%1/* %d = %R */\n", r->cost, k++, r);
 	}
-	print("};\n\nchar *%Pstring[] = {\n");
+	print("};\n\nconst char *%Pstring[] = {\n");
 	for (k = 0, r = rules; r; r = r->link)
 	{
 		for (; k < r->ern; k++)
@@ -841,7 +815,7 @@ static void emitterms(Term terms)
 	Term p;
 	int k;
 
-	print("char %Parity[] = {\n");
+	print("static const char %Parity[] = {\n");
 	for (k = 0, p = terms; p; p = p->link)
 	{
 		for (; k < p->esn; k++)
@@ -849,17 +823,15 @@ static void emitterms(Term terms)
 		print("%1%d,%1/* %d=%S */\n", p->arity < 0 ? 0 : p->arity, k++, p);
 	}
 	print("};\n\n");
-	if (Iflag)
+
+	print("static const char *%Popname[] = {\n");
+	for (k = 0, p = terms; p; p = p->link)
 	{
-		print("char *%Popname[] = {\n");
-		for (k = 0, p = terms; p; p = p->link)
-		{
-			for (; k < p->esn; k++)
-				print("%1/* %d */%10,\n", k);
-			print("%1/* %d */%1\"%S\",\n", k++, p);
-		}
-		print("};\n\n");
+		for (; k < p->esn; k++)
+			print("%1/* %d */%10,\n", k);
+		print("%1/* %d */%1\"%S\",\n", k++, p);
 	}
+	print("};\n\n");
 }
 
 /* emittest - emit clause for testing a match */
