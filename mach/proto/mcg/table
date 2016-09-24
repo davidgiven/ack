@@ -1,5 +1,33 @@
 PATTERNS
 
+/* Special */
+
+	reg;
+
+	PAIR(BLOCK4, BLOCK4);
+
+
+/* Miscellaneous special things */
+
+	PUSH4(in:reg)
+		emit "push %in"
+		cost 4;
+
+	reg = POP4
+		outs out:ANY
+		emit "pop %out"
+		cost 4;
+
+	RET
+		emit "ret"
+		cost 4;
+
+	SETRET4(in:reg)
+		emit "mov r0, %in"
+		cost 4;
+
+/* Memory operations */
+
 	STORE4(addr:address, value:reg)
 		ins value:GPR
 		emit "str %value, %addr"
@@ -7,8 +35,32 @@ PATTERNS
 
 	reg = LOAD4(addr:address)
 		outs dest:ANY
-		emit "ld %dest, %addr"
+		emit "ldr %dest, %addr"
 		cost 4;
+
+	reg = LOAD1(addr:address)
+		outs dest:ANY
+		emit "ldrb %dest, %addr"
+		cost 4;
+
+	reg = CIU14(LOAD1(addr:address))
+		outs dest:ANY
+		emit "ldrb %dest, %addr"
+		cost 4;
+
+
+/* Locals */
+
+	reg = in:LOCAL4
+		outs out:GPR
+		emit "add %out, fp, #%in.ivalue"
+		cost 4;
+
+	address = in:LOCAL4
+		fragment "[fp, #%in.ivalue]";
+
+
+/* Memory addressing modes */
 
 	address = ADD4(addr:reg, offset:CONST)
 		ins addr:GPR
@@ -18,7 +70,47 @@ PATTERNS
 		ins addr:GPR
 		fragment "[%addr]";
 
-	reg;
+
+/* Branches */
+
+	JUMP(addr:BLOCK4)
+		emit "b %addr.bvalue"
+		cost 4;
+
+	CJUMPEQ(value:tristate, PAIR(true:BLOCK4, false:BLOCK4))
+		emit "beq %trueblock.bvalue"
+		emit "bne %falseblock.bvalue"
+		cost 8;
+
+
+/* Comparisons */
+
+	tristate = COMPARES4(val1:reg, val2:aluparam)
+		outs CC
+		emit "cmp %val1, %val2"
+		cost 4;
+
+	reg = tristate
+		emit "mov %out, #0"
+		emit "movlt %out, #-1"
+		emit "movgt %out, #1"
+		cost 12;
+
+
+/* Conversions */
+
+	reg = CII14(CIU41(value:reg))
+		outs out:GPR
+		emit "sxtb %out, %value"
+		cost 4;
+
+	reg = CIU41(in:reg)
+		outs out:GPR
+		emit "and %out, %in, #0xff"
+		cost 4;
+
+
+/* ALU operations */
 
 	reg = ADD4(left:reg, right:aluparam)
 		ins left:GPR, right:GPR
@@ -33,7 +125,6 @@ PATTERNS
 		cost 4;
 
 	aluparam = value:CONST4
-		when { return false; }
 		fragment "#%value.ivalue";
 
 	aluparam = reg;
@@ -45,7 +136,12 @@ PATTERNS
 
 	reg = value:LABEL4
 		outs out:GPR
-		emit "adr %out, #value.lvalue"
+		emit "adr %out, %value.lvalue"
+		cost 4;
+
+	reg = value:BLOCK4
+		outs out:GPR
+		emit "adr %out, %value.bvalue"
 		cost 4;
 
 	reg = value:CONST4

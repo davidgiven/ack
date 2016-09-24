@@ -28,7 +28,8 @@ clibrary {
 		matching(filenamesof("+ircodes"), "%.c$")
 	},
 	hdrs = {
-		matching(filenamesof("+ircodes"), "%.h$")
+		matching(filenamesof("+ircodes"), "%.h$"),
+		"./mcgg.h"
 	}
 }
 
@@ -40,7 +41,7 @@ cprogram {
 		matching(filenamesof("+yacc"), "%.c$")
 	},
 	deps = {
-		"./*.h",
+		"./iburg.h",
 		"+lib",
 		"+yacc"
 	}

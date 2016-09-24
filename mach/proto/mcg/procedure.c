@@ -31,6 +31,8 @@ void procedure_compile(struct procedure* proc)
     pass_convert_stack_ops(proc);
 
     print_blocks('2', proc);
+
+    pass_instruction_selector(proc);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

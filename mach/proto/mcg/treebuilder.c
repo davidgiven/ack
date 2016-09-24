@@ -231,9 +231,9 @@ static void simple_branch2(int opcode, int size,
     materialise_stack();
     appendir(
         new_ir2(
-            IR_CJUMP, 0,
+            irop, 0,
             new_ir2(
-                irop,  size,
+                IR_COMPARES,  size,
                 left, right
             ),
             new_ir2(
@@ -260,13 +260,13 @@ static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock
 {
     switch (opcode)
     {
-        case op_zeq: compare0_branch2(opcode, leftbb, rightbb, IR_IFEQ); break;
-        case op_zlt: compare0_branch2(opcode, leftbb, rightbb, IR_IFLT); break;
-        case op_zle: compare0_branch2(opcode, leftbb, rightbb, IR_IFLE); break;
+        case op_zeq: compare0_branch2(opcode, leftbb, rightbb, IR_CJUMPEQ); break;
+        case op_zlt: compare0_branch2(opcode, leftbb, rightbb, IR_CJUMPLT); break;
+        case op_zle: compare0_branch2(opcode, leftbb, rightbb, IR_CJUMPLE); break;
 
-        case op_zne: compare0_branch2(opcode, rightbb, leftbb, IR_IFEQ); break;
-        case op_zge: compare0_branch2(opcode, rightbb, leftbb, IR_IFLT); break;
-        case op_zgt: compare0_branch2(opcode, rightbb, leftbb, IR_IFLE); break;
+        case op_zne: compare0_branch2(opcode, rightbb, leftbb, IR_CJUMPEQ); break;
+        case op_zge: compare0_branch2(opcode, rightbb, leftbb, IR_CJUMPLT); break;
+        case op_zgt: compare0_branch2(opcode, rightbb, leftbb, IR_CJUMPLE); break;
 
         case op_bra:
         {

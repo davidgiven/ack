@@ -37,9 +37,10 @@ bool tracing(char k)
 {
     switch (k)
     {
+        case 0:   return true;
         case 'E': return false;
         case '0': return false;
-        case '1': return true;
+        case '1': return false;
         case '2': return true;
         default:  return true;
     }

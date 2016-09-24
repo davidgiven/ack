@@ -419,7 +419,7 @@ static void print(char* fmt, ...)
 
 void printlineno(void)
 {
-	print("#line %d\n", yylineno);
+	//print("#line %d\n", yylineno);
 }
 
 /* reach - mark all non-terminals in tree t as reachable */
@@ -450,6 +450,9 @@ static void ckreach(Nonterm p)
 static void emitcase(Term p, int ntnumber)
 {
 	Rule r;
+
+	if (!p->rules)
+		return;
 
 	print("%1case %d: /* %S */\n", p->esn, p);
 	switch (p->arity)
@@ -823,7 +826,8 @@ static void emitstate(Term terms, Nonterm start, int ntnumber)
 	for (p = terms; p; p = p->link)
 		emitcase(p, ntnumber);
 	print("%1default:\n"
-	      "%2%Passert(0, PANIC(\"Bad operator %%d in %Pstate\\n\", op));\n%1}\n"
+          "%2%Ppanic_cannot_match(node);\n"
+		  "%1}\n"
 	      "%1return (STATE_TYPE)p;\n}\n\n");
 }
 

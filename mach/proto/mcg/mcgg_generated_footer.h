@@ -19,6 +19,7 @@ static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
 #endif
 }
 
+#if 0
 static NODEPTR_TYPE tree(int op, NODEPTR_TYPE l, NODEPTR_TYPE r) {
 	NODEPTR_TYPE p = malloc(sizeof *p);
 
@@ -48,4 +49,5 @@ int main(void) {
 	dumpCover(p, 1, 0);
 	return 0;
 }
+#endif
 

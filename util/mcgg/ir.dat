@@ -7,7 +7,7 @@ S CONST
 S REG
 S LABEL
 S BLOCK
-S PAIR
+V PAIR
 S ANY
 S LOCAL
 S PHI
@@ -64,7 +64,9 @@ V CALL
  
 # Flow control --- these never return
 V JUMP
-V CJUMP
+V CJUMPEQ
+V CJUMPLT
+V CJUMPLE
 V RET
  
 # Special

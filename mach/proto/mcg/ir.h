@@ -33,7 +33,11 @@ struct ir
 		const char* lvalue;
 		struct basicblock* bvalue;
 	} u;
+
+	void* state_label; /* used by the iburg instruction selector */
+
 	bool is_sequence : 1;
+	bool is_generated : 1;
 };
 
 extern const char* ir_names[];

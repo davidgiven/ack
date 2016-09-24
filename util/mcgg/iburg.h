@@ -86,15 +86,6 @@ extern int yylineno;
 
 extern void printlineno(void);
 
-/* Excruciating macro which packs ir opcodes and sizes into an int for iburg's benefit.
- *
- * Sizes are mapped as: 0=1, 1=1, 2=2, 4=3, 8=4.
- */
-#define ir_to_esn(iropcode, size) \
-	((iropcode)*4 + \
-		(((size) == 4) ? 2 : \
-		 ((size) == 8) ? 3 : \
-		 ((size) == 0) ? 0 : \
-		  (size-1)))
+#include "mcgg.h"
 
 #endif

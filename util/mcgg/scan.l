@@ -22,7 +22,7 @@ static int braces = 0;
 <ECHO>[^%\n]*               fputs(yytext, outfp);
 
 <INITIAL>"{"                {
-                                yylval.string = stringf("#line %d\n", yylineno);
+                                yylval.string = ""; //stringf("#line %d\n", yylineno);
                                 braces = 1;
                                 BEGIN(CSTRING);
                                 return CFRAGMENT;
