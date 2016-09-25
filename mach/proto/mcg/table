@@ -42,22 +42,26 @@ PATTERNS
 	reg = CIU14(LOAD1(addr:address))
 		emit "ldrb %reg, %addr"
 		cost 4;
+	
+	reg = CII14(CIU41(CIU14(LOAD1(addr:address))))
+		emit "ldrsb %reg, %addr"
+		cost 4;
 
 
 /* Locals */
 
 	reg = in:LOCAL4
-		emit "add %reg, fp, #%in"
+		emit "add %reg, fp, #$in"
 		cost 4;
 
 	address = in:LOCAL4
-		fragment "[fp, #%in]";
+		fragment "[fp, #$in]";
 
 
 /* Memory addressing modes */
 
 	address = ADD4(addr:reg, offset:CONST)
-		fragment "[%addr, #%offset]";
+		fragment "[%addr, #$offset]";
 
 	address = addr:reg
 		fragment "[%addr]";
@@ -66,12 +70,12 @@ PATTERNS
 /* Branches */
 
 	JUMP(addr:BLOCK4)
-		emit "b %addr"
+		emit "b $addr"
 		cost 4;
 
 	CJUMPEQ(value:tristate, PAIR(true:BLOCK4, false:BLOCK4))
-		emit "beq %true"
-		emit "bne %false"
+		emit "beq $true"
+		emit "bne $false"
 		cost 8;
 
 
@@ -111,7 +115,7 @@ PATTERNS
 		cost 4;
 
 	aluparam = value:CONST4
-		fragment "#%value.ivalue";
+		fragment "#$value";
 
 	aluparam = reg;
 
@@ -120,13 +124,13 @@ PATTERNS
 		cost 4;
 
 	reg = value:LABEL4
-		emit "adr %reg, %value"
+		emit "adr %reg, $value"
 		cost 4;
 
 	reg = value:BLOCK4
-		emit "adr %reg, %value"
+		emit "adr %reg, $value"
 		cost 4;
 
 	reg = value:CONST4
-		emit "ldr %reg, #value"
+		emit "ldr %reg, #$value"
 		cost 4;

@@ -25,8 +25,9 @@ static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
 #endif
 
 void burm_trace(struct ir* p, int ruleno, int cost, int bestcost) {
+    const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
 	tracef('I', "I: 0x%p matched %s with cost %d vs. %d\n", p,
-		burm_string[ruleno], cost, bestcost);
+		insndata->name, cost, bestcost);
 }
 
 void burm_panic_cannot_match(struct ir* ir)
@@ -41,6 +42,7 @@ static void queue_instructions(struct ir* ir, int goal)
 {
 	struct ir* children[10];
 	int ruleno = burm_rule(ir->state_label, goal);
+    const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
 	const short* nts = burm_nts[ruleno];
 	int i;
 
@@ -48,7 +50,11 @@ static void queue_instructions(struct ir* ir, int goal)
 	for (i=0; nts[i]; i++)
 		queue_instructions(children[i], nts[i]);
 
-    tracef('I', "I: $%d selected insn %d: %s\n", ir->id, ruleno, burm_string[ruleno]);
+    tracef('I', "I: $%d selected %s %d: %s\n",
+        ir->id,
+        insndata->is_fragment ? "fragment" : "instruction",
+        ruleno,
+        insndata->name);
 }
 
 static void select_instructions(struct basicblock* bb)

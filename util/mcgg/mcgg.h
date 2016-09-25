@@ -20,7 +20,6 @@ typedef struct ir* NODEPTR_TYPE;
 
 extern void* burm_label(struct ir* ir);
 extern int burm_rule(void* state, int goalnt);
-extern const char* burm_string[];
 extern const short *burm_nts[];
 extern struct ir** burm_kids(struct ir* p, int eruleno, struct ir* kids[]);
 extern void burm_trace(struct ir* p, int ruleno, int cost, int bestcost);
@@ -34,7 +33,15 @@ struct burm_emitter_data
 };
 
 typedef void burm_emitter_t(struct ir* ir, struct burm_emitter_data* data);
-extern burm_emitter_t* const burm_emitters[];
+
+struct burm_instruction_data
+{
+    const char* name;
+    burm_emitter_t* emitter;
+    bool is_fragment;
+};
+
+extern const struct burm_instruction_data burm_instruction_data[];
 
 #endif
 

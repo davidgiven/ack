@@ -41,7 +41,7 @@ static void emitnts(Rule rules, int nrules);
 static void emitrecord(char* pre, Rule r, int cost);
 static void emitrule(Nonterm nts);
 static void emitpredicatedefinitions(Rule rules);
-static void emitemitters(Rule rules);
+static void emitinsndata(Rule rules);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	emitrule(nts);
 	emitclosure(nts);
 	emitpredicatedefinitions(rules);
-	emitemitters(rules);
+	emitinsndata(rules);
 	if (start)
 		emitstate(terms, start, ntnumber);
 	print("#ifdef STATE_LABEL\n");
@@ -800,59 +800,51 @@ static void emitpredicatedefinitions(Rule r)
 	}
 }
 
-static void emittreefetchers(uint32_t path, Tree tree)
+static void print_path(uint32_t path)
 {
-	if (tree->label)
+	int i = 0;
+
+	while (path > 0)
 	{
-		int i = 0;
-		uint32_t p = path;
-		print("%1NODEPTR_TYPE node_%s = ", tree->label);
-		while (p > 0)
+		switch (path % 3)
 		{
-			switch (p % 3)
-			{
-				case 1: print("LEFT_CHILD("); break;
-				case 2: print("RIGHT_CHILD("); break;
-			}
-			p /= 3;
-			i++;
+			case 1: print("LEFT_CHILD("); break;
+			case 2: print("RIGHT_CHILD("); break;
 		}
-
-		print("node");
-
-		while (i > 0)
-		{
-			print(")");
-			i--;
-		}
-		
-		print(";\n");
+		path /= 3;
+		i++;
 	}
 
-	if (tree->left)
-		emittreefetchers(path*3 + 1, tree->left);
-	if (tree->right)
-		emittreefetchers(path*3 + 2, tree->right);
+	print("node");
+
+	while (i > 0)
+	{
+		print(")");
+		i--;
+	}
 }
 
-static Tree find_label(Tree root, const char* name)
+static const uint32_t PATH_MISSING = 0xffffffff;
+
+static uint32_t find_label(Tree root, const char* name, uint32_t path)
 {
-	Tree t;
+	uint32_t p;
 
 	if (root->label && (strcmp(root->label, name) == 0))
-		return root;
+		return path;
 
-	t = NULL;
-	if (root->left && !t)
-		t = find_label(root->left, name);
-	if (root->right && !t)
-		t = find_label(root->right, name);
-	return t;
+	p = PATH_MISSING;
+	if (root->left && (p == PATH_MISSING))
+		p = find_label(root->left, name, path*3 + 1);
+	if (root->right && (p == PATH_MISSING))
+		p = find_label(root->right, name, path*3 + 2);
+	return p;
 }
 
-/* emitemitters - emit the code generation routines */
-static void emitemitters(Rule rules)
+/* emitinsndata - emit the code generation data */
+static void emitinsndata(Rule rules)
 {
+	int k;
 	Rule r;
 
 	r = rules;
@@ -863,8 +855,6 @@ static void emitemitters(Rule rules)
 		{
 			print("/* %R */\n", r);
 			print("static void %Pemitter_%d(NODEPTR_TYPE node, struct %Pemitter_data* data) {\n", r->ern);
-			emittreefetchers(0, r->pattern);
-			print("%1NODEPTR_TYPE node_%s = node;\n", r->lhs->name);
 
 			while (f)
 			{
@@ -873,14 +863,22 @@ static void emitemitters(Rule rules)
 					case '%':
 					{
 						const char* label = f->data + 1;
-						Tree t = find_label(r->pattern, label);
-						if (!t && (strcmp(label, r->lhs->name) != 0))
+
+						print("%1data->emit_ir(");
+						if (strcmp(label, r->lhs->name) == 0)
+							print("node");
+						else
 						{
-							yylineno = r->lineno;
-							yyerror("label '%s' not found", label);
-							exit(1);
+							uint32_t path = find_label(r->pattern, label, 0);
+							if (path == PATH_MISSING)
+							{
+								yylineno = r->lineno;
+								yyerror("label '%s' not found", label);
+								exit(1);
+							}
+							print_path(path);
 						}
-						print("%1data->emit_ir(node_%s);\n", label);
+						print(");\n");
 						break;
 					}
 
@@ -903,18 +901,27 @@ static void emitemitters(Rule rules)
 	}
 
 	r = rules;
-	print("%Pemitter_t* const %Pemitters[] = {\n");
+	print("const struct %Pinstruction_data %Pinstruction_data[] = {\n");
+	k = 0;
 	while (r)
 	{
-		struct stringfragment* f = r->code.first;
+		for (; k < r->ern; k++)
+			print("%1{ 0 }, /* %d */\n", k);
+		k++;
 
-		print("%1");
-		if (f)
-			print("&%Pemitter_%d,", r->ern);
+		print("%1{ /* %d: %R */\n", r->ern, r);
+
+		print("%2\"%R\",\n", r);
+
+		print("%2");
+		if (r->code.first)
+			print("&%Pemitter_%d,\n", r->ern);
 		else
-			print("NULL,");
-		print(" /* %R */\n", r);
+			print("NULL,\n");
 
+		print("%2%s,\n", r->is_fragment ? "true" : "false");
+
+		print("%1},\n");
 		r = r->link;
 	}
 	print("};\n\n");
@@ -970,13 +977,6 @@ static void emitstring(Rule rules)
 		for (; k < r->ern; k++)
 			print("%1{ 0 },%1/* %d */\n", k);
 		print("%1{ %d },%1/* %d = %R */\n", r->cost, k++, r);
-	}
-	print("};\n\nconst char *%Pstring[] = {\n");
-	for (k = 0, r = rules; r; r = r->link)
-	{
-		for (; k < r->ern; k++)
-			print("%1/* %d */%10,\n", k);
-		print("%1/* %d */%1\"%R\",\n", k++, r);
 	}
 	print("};\n\n");
 }
