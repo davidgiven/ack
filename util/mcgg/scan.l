@@ -50,12 +50,12 @@ static int braces = 0;
 <INITIAL>"\""               BEGIN(QSTRING);
 <QSTRING>"\""               BEGIN(INITIAL);
 
-<QSTRING>%[a-zA-Z_][a-zA_Z_0-9]+ {
+<QSTRING>[%$][a-zA-Z_][a-zA_Z_0-9]+ {
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
 
-<QSTRING>[^\r\n%"]+         {
+<QSTRING>[^\r\n%$"]+        {
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
@@ -65,17 +65,16 @@ static int braces = 0;
 <COMMENT>[^*]*              ;
 <COMMENT>"*"                ;
 
-"%%"                        return PPERCENT;
-"%term"						return TERMINAL;
-"%start"					return START;
-
+"DECLARATIONS"              return DECLARATIONS;
 "PATTERNS"                  return PATTERNS;
-"when"                      return WHEN;
-"ins"                       return INS;
-"outs"                      return OUTS;
+"REGISTERS"                 return REGISTERS;
+"allocates"                 return ALLOCATES;
+"cost"                      return COST;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;
-"cost"                      return COST;
+"ins"                       return INS;
+"outs"                      return OUTS;
+"when"                      return WHEN;
 
 "//"[^\n]*\n                ;
 

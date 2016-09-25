@@ -26,18 +26,20 @@ extern void burm_trace(struct ir* p, int ruleno, int cost, int bestcost);
 
 struct burm_emitter_data
 {
-	void* user;
     void (*emit_string)(const char* data);
-    void (*emit_ir)(struct ir* ir);
+    void (*emit_reg)(struct ir* ir);
+    void (*emit_value)(struct ir* ir);
+    void (*emit_resultreg)(void);
     void (*emit_eoi)(void);
 };
 
-typedef void burm_emitter_t(struct ir* ir, struct burm_emitter_data* data);
+typedef void burm_emitter_t(struct ir* ir, const struct burm_emitter_data* data);
 
 struct burm_instruction_data
 {
     const char* name;
     burm_emitter_t* emitter;
+    int allocate;
     bool is_fragment;
 };
 

@@ -38,24 +38,74 @@ void burm_panic_cannot_match(struct ir* ir)
 	exit(1);
 }
 
-static void queue_instructions(struct ir* ir, int goal)
+static const struct burm_emitter_data emitter_data;
+
+static void emit_string(const char* data)
 {
-	struct ir* children[10];
-	int ruleno = burm_rule(ir->state_label, goal);
-    const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
-	const short* nts = burm_nts[ruleno];
-	int i;
-
-	burm_kids(ir, ruleno, children);
-	for (i=0; nts[i]; i++)
-		queue_instructions(children[i], nts[i]);
-
-    tracef('I', "I: $%d selected %s %d: %s\n",
-        ir->id,
-        insndata->is_fragment ? "fragment" : "instruction",
-        ruleno,
-        insndata->name);
+    tracef('I', "I: emit: %s\n", data);
 }
+
+static void emit_reg(struct ir* ir)
+{
+    const struct burm_instruction_data* insndata = &burm_instruction_data[ir->insn_no];
+    if (insndata->is_fragment)
+        insndata->emitter(ir, &emitter_data);
+    else
+        tracef('I', "I: emit reg $%d\n", ir->id);
+}
+
+static void emit_value(struct ir* ir)
+{
+    tracef('I', "I: emit value\n");
+}
+
+static void emit_resultreg(void)
+{
+    tracef('I', "I: emit resultreg\n");
+}
+
+static void emit_eoi(void)
+{
+    tracef('I', "I: emit eoi\n");
+}
+
+static const struct burm_emitter_data emitter_data =
+{
+    &emit_string,
+    &emit_reg,
+    &emit_value,
+    &emit_resultreg,
+    &emit_eoi
+};
+
+static void walk_instructions(struct ir* ir, int goal)
+{
+    struct ir* children[10];
+    int insn_no = burm_rule(ir->state_label, goal);
+    const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
+    const short* nts = burm_nts[insn_no];
+    int i;
+
+    ir->insn_no = insn_no;
+
+    burm_kids(ir, insn_no, children);
+    for (i=0; nts[i]; i++)
+        walk_instructions(children[i], nts[i]);
+
+    tracef('I', "I: $%d %s selected %s %d: %s\n",
+        ir->id,
+        ir->is_sequence ? "S" : " ",
+        insndata->is_fragment ? "fragment" : "instruction",
+        insn_no,
+        insndata->name);
+    ir->is_generated = true;
+
+    if (insndata->allocate)
+        tracef('I', "I: allocate reg of class %d\n", insndata->allocate);
+    if (!insndata->is_fragment && insndata->emitter)
+        insndata->emitter(ir, &emitter_data);
+}
+
 
 static void select_instructions(struct basicblock* bb)
 {
@@ -73,7 +123,7 @@ static void select_instructions(struct basicblock* bb)
 		if (!insnno)
 			burm_panic_cannot_match(ir);
 
-		queue_instructions(ir, 1);
+		walk_instructions(ir, 1);
 	}
 }
 
@@ -86,7 +136,6 @@ void pass_instruction_selector(struct procedure* proc)
         struct basicblock* bb = proc->blocks[i];
         select_instructions(bb);
     }
-	exit(1);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

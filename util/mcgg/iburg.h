@@ -8,10 +8,33 @@ extern char* stringf(char* fmt, ...);
 typedef enum
 {
 	TERM = 1,
-	NONTERM
+	NONTERM,
+	REG,
+	REGCLASS
 } Kind;
 typedef struct rule* Rule;
 typedef struct term* Term;
+
+struct reg
+{
+	const char* name;      /* register name */
+	Kind kind;             /* REG */
+	int number;            /* identifying number */
+	struct reg* link;      /* next in list */
+};
+
+struct regclass
+{
+	const char* name;      /* class name */
+	Kind kind;             /* REGCLASS */
+	int number;            /* identifying number */
+	struct regclass* link; /* next in list */
+};
+
+extern struct reg* makereg(const char* name);
+extern void addregclass(struct reg* reg, const char* regclass);
+extern struct regclass* getregclass(const char* name);
+
 struct term
 { /* terminals: */
 	char* name; /* terminal name */
@@ -25,16 +48,19 @@ struct term
 typedef struct nonterm* Nonterm;
 struct nonterm
 { /* non-terminals: */
-	char* name; /* non-terminal name */
-	Kind kind; /* NONTERM */
-	int number; /* identifying number */
-	int lhscount; /* # times nt appears in a rule lhs */
-	int reached; /* 1 iff reached from start non-terminal */
-	Rule rules; /* rules w/non-terminal on lhs */
-	Rule chain; /* chain rules w/non-terminal on rhs */
-	Nonterm link; /* next terminal in number order */
+	char* name;       /* non-terminal name */
+	Kind kind;        /* NONTERM */
+	int number;       /* identifying number */
+	int lhscount;     /* # times nt appears in a rule lhs */
+	int reached;      /* 1 iff reached from start non-terminal */
+	Rule rules;       /* rules w/non-terminal on lhs */
+	Rule chain;       /* chain rules w/non-terminal on rhs */
+	Nonterm link;     /* next terminal in number order */
+	bool is_fragment; /* these instructions are all fragments */
+	struct regclass* allocate; /* allocate this kind of register */
 };
-extern Nonterm nonterm(const char* id);
+extern void* lookup(const char* name);
+extern Nonterm nonterm(const char* id, bool allocate);
 extern Term term(const char* id, int esn);
 
 typedef struct tree* Tree;
@@ -62,7 +88,6 @@ struct rule
 	Rule kids;               /* next rule with same burm_kids pattern */
 	struct stringlist when;  /* C predicate string */
 	struct stringlist code;  /* compiler output code strings */
-	bool is_fragment;        /* does this rule generate an instruction fragment? */
 };
 extern Rule rule(char* id, Tree pattern, int ern);
 extern int maxcost; /* maximum cost */

@@ -35,6 +35,7 @@ struct ir
 	} u;
 
 	void* state_label; /* used by the iburg instruction selector */
+	int insn_no;
 
 	bool is_sequence : 1;
 	bool is_generated : 1;

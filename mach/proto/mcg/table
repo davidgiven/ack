@@ -1,8 +1,34 @@
+REGISTERS
+
+	r0  GPR RET0;
+	r1  GPR RET1;
+	r2  GPR;
+	r3  GPR;
+	r4  GPR;
+	r5  GPR;
+	r6  GPR;
+	r7  GPR;
+	r8  GPR;
+	r9  GPR;
+	r10 GPR;
+	r11 GPR;
+
+	cc  CC;
+
+DECLARATIONS
+
+	address   fragment;
+	aluparam  fragment;
+	reg       allocates(GPR);
+	tristate  allocates(CC);
+
 PATTERNS
 
 /* Special */
 
 	reg;
+
+	reg = REG4;
 
 	PAIR(BLOCK4, BLOCK4);
 
@@ -24,6 +50,7 @@ PATTERNS
 	SETRET4(in:reg)
 		emit "mov r0, %in"
 		cost 4;
+
 
 /* Memory operations */
 
@@ -55,16 +82,16 @@ PATTERNS
 		cost 4;
 
 	address = in:LOCAL4
-		fragment "[fp, #$in]";
+		emit "[fp, #$in]";
 
 
 /* Memory addressing modes */
 
-	address = ADD4(addr:reg, offset:CONST)
-		fragment "[%addr, #$offset]";
+	address = ADD4(addr:reg, offset:CONST4)
+		emit "[%addr, #$offset]";
 
 	address = addr:reg
-		fragment "[%addr]";
+		emit "[%addr]";
 
 
 /* Branches */
@@ -82,7 +109,6 @@ PATTERNS
 /* Comparisons */
 
 	tristate = COMPARES4(left:reg, right:aluparam)
-		outs CC
 		emit "cmp %left, %right"
 		cost 4;
 
@@ -115,7 +141,7 @@ PATTERNS
 		cost 4;
 
 	aluparam = value:CONST4
-		fragment "#$value";
+		emit "#$value";
 
 	aluparam = reg;
 

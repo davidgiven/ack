@@ -20,6 +20,8 @@ static char* prefix = "burm";
 static int Tflag = 1; /* tracing */
 static int ntnumber = 0;
 static Nonterm start = 0;
+static struct reg* regs = NULL;
+static struct regclass* regclasses = NULL;
 static Term terms;
 static Nonterm nts;
 static Rule rules;
@@ -34,14 +36,16 @@ static void emitcostcalc(Rule r);
 static void emitdefs(Nonterm nts, int ntnumber);
 static void emitfuncs(void);
 static void emitheader(void);
+static void emitinsndata(Rule rules);
 static void emitkids(Rule rules, int nrules);
 static void emitlabel(Nonterm start);
 static void emitleaf(Term p, int ntnumber);
 static void emitnts(Rule rules, int nrules);
-static void emitrecord(char* pre, Rule r, int cost);
-static void emitrule(Nonterm nts);
 static void emitpredicatedefinitions(Rule rules);
-static void emitinsndata(Rule rules);
+static void emitrecord(char* pre, Rule r, int cost);
+static void emitregisterclasses(struct regclass* rc);
+static void emitregisters(struct reg* regs);
+static void emitrule(Nonterm nts);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
@@ -116,7 +120,7 @@ int main(int argc, char* argv[])
 	emitheader();
 	registerterminals();
 
-	start = nonterm("stmt");
+	start = nonterm("stmt", true);
 
 	yyin = infp;
 	yyparse();
@@ -127,6 +131,8 @@ int main(int argc, char* argv[])
 		if (!p->reached)
 			yyerror("can't reach non-terminal `%s'\n", p->name);
 
+	emitregisterclasses(regclasses);
+	emitregisters(regs);
 	emitdefs(nts, ntnumber);
 	emitstruct(nts, ntnumber);
 	emitnts(rules, nrules);
@@ -203,6 +209,8 @@ struct entry
 		const char* name;
 		struct term t;
 		struct nonterm nt;
+		struct reg r;
+		struct regclass rc;
 	} sym;
 	struct entry* link;
 } * table[211];
@@ -219,7 +227,7 @@ static unsigned hash(const char* str)
 }
 
 /* lookup - lookup symbol name */
-static void* lookup(const char* name)
+void* lookup(const char* name)
 {
 	struct entry* p = table[hash(name) % HASHSIZE];
 
@@ -241,15 +249,69 @@ static void* install(const char* name)
 	return &p->sym;
 }
 
-/* nonterm - create a new terminal id, if necessary */
-Nonterm nonterm(const char* id)
+struct reg* makereg(const char* id)
 {
-	Nonterm p = lookup(id), * q = &nts;
+	struct reg* p = lookup(id);
+	struct reg** q = &regs;
+	static int number = 1;
+
+	if (p)
+		yyerror("redefinition of '%s'", id);
+	p = install(id);
+	p->kind = REG;
+	p->number = number++;
+
+	while (*q && (*q)->number < p->number)
+		q = &(*q)->link;
+	assert(*q == 0 || (*q)->number != p->number);
+	p->link = *q;
+	*q = p;
+	return p;
+}
+
+void addregclass(struct reg* reg, const char* id)
+{
+	struct regclass* p = lookup(id);
+	struct regclass** q = &regclasses;
+	static int number = 1;
+
+	if (p && (p->kind != REGCLASS))
+		yyerror("redefinition of '%s' as something else\n", id);
+	if (!p)
+	{
+		p = install(id);
+		p->kind = REGCLASS;
+		p->number = number++;
+
+		while (*q && (*q)->number < p->number)
+			q = &(*q)->link;
+		assert(*q == 0 || (*q)->number != p->number);
+		p->link = *q;
+		*q = p;
+	}
+}
+
+struct regclass* getregclass(const char* id)
+{
+	struct regclass* p = lookup(id);
+	if (!p || (p->kind != REGCLASS))
+		yyerror("'%p' is not the name of a register class");
+	return p;
+}
+
+/* nonterm - create a new terminal id, if necessary */
+Nonterm nonterm(const char* id, bool allocate)
+{
+	Nonterm p = lookup(id);
+	Nonterm* q = &nts;
 
 	if (p && p->kind == NONTERM)
 		return p;
-	if (p && p->kind == TERM)
-		yyerror("`%s' is a terminal\n", id);
+	if (p)
+		yyerror("redefinition of '%s' as something else\n", id);
+	if (!allocate)
+		yyerror("'%s' has not been declared\n", id);
+
 	p = install(id);
 	p->kind = NONTERM;
 	p->number = ++ntnumber;
@@ -270,12 +332,9 @@ Term term(const char* id, int esn)
 	Term* q = &terms;
 
 	if (p)
-	{
-		yyerror("redefinition of terminal `%s'\n", id);
-		exit(1);
-	}
-	else
-		p = install(id);
+		yyerror("redefinition of '%s'\n", id);
+
+	p = install(id);
 	p->kind = TERM;
 	p->esn = esn;
 	p->arity = -1;
@@ -309,7 +368,7 @@ Tree tree(const char* id, const char* label, Tree left, Tree right)
 		p = term(id, -1);
 	}
 	else if (p == NULL && arity == 0)
-		p = (Term)nonterm(id);
+		p = (Term)nonterm(id, false);
 	else if (p && p->kind == NONTERM && arity > 0)
 	{
 		yyerror("`%s' is a non-terminal\n", id);
@@ -338,7 +397,7 @@ Rule rule(char* id, Tree pattern, int ern)
 
 	nrules++;
 	r->lineno = yylineno;
-	r->lhs = nonterm(id);
+	r->lhs = nonterm(id, false);
 	r->packed = ++r->lhs->lhscount;
 	for (q = &r->lhs->rules; *q; q = &(*q)->decode)
 		;
@@ -450,6 +509,38 @@ static void ckreach(Nonterm p)
 	p->reached = 1;
 	for (r = p->rules; r; r = r->decode)
 		reach(r->pattern);
+}
+
+static void emitregisterclasses(struct regclass* rc)
+{
+	int k = 0;
+	print("const char* %Pregister_class_names[] = {\n");
+	while (rc)
+	{
+		for (; k < rc->number; k++)
+			print("%1NULL,\n");
+		k++;
+
+		print("%1\"%s\",\n", rc->name);
+		rc = rc->link;
+	}
+	print("};\n\n");
+}
+
+static void emitregisters(struct reg* r)
+{
+	int k = 0;
+	print("const char* %Pregister_names[] = {\n");
+	while (r)
+	{
+		for (; k < r->number; k++)
+			print("%1NULL,\n");
+		k++;
+
+		print("%1\"%s\",\n", r->name);
+		r = r->link;
+	}
+	print("};\n\n");
 }
 
 /* emitcase - emit one case in function state */
@@ -841,6 +932,13 @@ static uint32_t find_label(Tree root, const char* name, uint32_t path)
 	return p;
 }
 
+static void label_not_found(Rule rule, const char* label)
+{
+	yylineno = rule->lineno;
+	yyerror("label '%s' not found", label);
+	exit(1);
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -854,7 +952,7 @@ static void emitinsndata(Rule rules)
 		if (f)
 		{
 			print("/* %R */\n", r);
-			print("static void %Pemitter_%d(NODEPTR_TYPE node, struct %Pemitter_data* data) {\n", r->ern);
+			print("static void %Pemitter_%d(NODEPTR_TYPE node, const struct %Pemitter_data* data) {\n", r->ern);
 
 			while (f)
 			{
@@ -864,20 +962,28 @@ static void emitinsndata(Rule rules)
 					{
 						const char* label = f->data + 1;
 
-						print("%1data->emit_ir(");
 						if (strcmp(label, r->lhs->name) == 0)
-							print("node");
+							print("%1data->emit_resultreg();\n");
 						else
 						{
 							uint32_t path = find_label(r->pattern, label, 0);
+							print("%1data->emit_reg(");
 							if (path == PATH_MISSING)
-							{
-								yylineno = r->lineno;
-								yyerror("label '%s' not found", label);
-								exit(1);
-							}
+								label_not_found(r, label);
 							print_path(path);
+							print(");\n");
 						}
+						break;
+					}
+
+					case '$':
+					{
+						const char* label = f->data + 1;
+						uint32_t path = find_label(r->pattern, label, 0);
+						print("%1data->emit_value(");
+						if (path == PATH_MISSING)
+							label_not_found(r, label);
+						print_path(path);
 						print(");\n");
 						break;
 					}
@@ -919,7 +1025,12 @@ static void emitinsndata(Rule rules)
 		else
 			print("NULL,\n");
 
-		print("%2%s,\n", r->is_fragment ? "true" : "false");
+		if (r->lhs->allocate)
+			print("%2%d,\n", r->lhs->allocate->number);
+		else
+			print("%20,\n");
+
+		print("%2%s,\n", r->lhs->is_fragment ? "true" : "false");
 
 		print("%1},\n");
 		r = r->link;
