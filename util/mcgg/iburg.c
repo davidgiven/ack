@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
@@ -40,6 +41,7 @@ static void emitnts(Rule rules, int nrules);
 static void emitrecord(char* pre, Rule r, int cost);
 static void emitrule(Nonterm nts);
 static void emitpredicatedefinitions(Rule rules);
+static void emitemitters(Rule rules);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
@@ -133,6 +135,7 @@ int main(int argc, char* argv[])
 	emitrule(nts);
 	emitclosure(nts);
 	emitpredicatedefinitions(rules);
+	emitemitters(rules);
 	if (start)
 		emitstate(terms, start, ntnumber);
 	print("#ifdef STATE_LABEL\n");
@@ -334,6 +337,7 @@ Rule rule(char* id, Tree pattern, int ern)
 	Term p = pattern->op;
 
 	nrules++;
+	r->lineno = yylineno;
 	r->lhs = nonterm(id);
 	r->packed = ++r->lhs->lhscount;
 	for (q = &r->lhs->rules; *q; q = &(*q)->decode)
@@ -791,6 +795,7 @@ static void emitpredicatedefinitions(Rule r)
 		Stringlist s = r->when;
 		if (s)
 		{
+			print("/* %R */\n", r);
 			print("static int %Ppredicate_%d(NODEPTR_TYPE n) {\n", r->ern);
 			while (s)
 			{
@@ -801,6 +806,115 @@ static void emitpredicatedefinitions(Rule r)
 		}
 		r = r->link;
 	}
+}
+
+static void emittreefetchers(uint32_t path, Tree tree)
+{
+	if (tree->label)
+	{
+		int i = 0;
+		uint32_t p = path;
+		print("%1NODEPTR_TYPE node_%s = ", tree->label);
+		while (p > 0)
+		{
+			switch (p % 3)
+			{
+				case 1: print("LEFT_CHILD("); break;
+				case 2: print("RIGHT_CHILD("); break;
+			}
+			p /= 3;
+			i++;
+		}
+
+		print("node");
+
+		while (i > 0)
+		{
+			print(")");
+			i--;
+		}
+		
+		print(";\n");
+	}
+
+	if (tree->left)
+		emittreefetchers(path*3 + 1, tree->left);
+	if (tree->right)
+		emittreefetchers(path*3 + 2, tree->right);
+}
+
+static Tree find_label(Tree root, const char* name)
+{
+	Tree t;
+
+	if (root->label && (strcmp(root->label, name) == 0))
+		return root;
+
+	t = NULL;
+	if (root->left && !t)
+		t = find_label(root->left, name);
+	if (root->right && !t)
+		t = find_label(root->right, name);
+	return t;
+}
+
+/* emitemitters - emit the code generation routines */
+static void emitemitters(Rule rules)
+{
+	Rule r;
+
+	r = rules;
+	while (r)
+	{
+		Stringlist s = r->code;
+		if (s)
+		{
+			print("/* %R */\n", r);
+			print("static void %Pemitter_%d(NODEPTR_TYPE node, struct %Pemitter_data* data) {\n", r->ern);
+			emittreefetchers(0, r->pattern);
+			print("%1NODEPTR_TYPE node_%s = node;\n", r->lhs->name);
+
+			while (s)
+			{
+				if (s->payload[0] == '%')
+				{
+					const char* label = s->payload + 1;
+					Tree t = find_label(r->pattern, label);
+					if (!t && (strcmp(label, r->lhs->name) != 0))
+					{
+						yylineno = r->lineno;
+						yyerror("label '%s' not found", label);
+						exit(1);
+					}
+					print("%1data->emit_ir(node_%s);\n", label);
+				}
+				else
+					print("%1data->emit_string(\"%s\");\n", s->payload);
+
+				s = s->next;
+			}
+
+			print("}\n\n");
+		}
+
+		r = r->link;
+	}
+
+	r = rules;
+	print("%Pemitter_t* const %Pemitters[] = {\n");
+	while (r)
+	{
+		Stringlist s = r->code;
+		print("%1");
+		if (s)
+			print("&%Pemitter_%d,", r->ern);
+		else
+			print("NULL,");
+		print(" /* %R */\n", r);
+
+		r = r->link;
+	}
+	print("};\n\n");
 }
 
 /* emitcost - emit a cost calculation via a predicate */

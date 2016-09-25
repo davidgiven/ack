@@ -58,6 +58,7 @@ struct rule
 { /* rules: */
 	Nonterm lhs;     /* lefthand side non-terminal */
 	Tree pattern;    /* rule pattern */
+	int lineno;      /* line number where allocated */
 	int ern;         /* external rule number */
 	int packed;      /* packed external rule number */
 	int cost;        /* associated cost */

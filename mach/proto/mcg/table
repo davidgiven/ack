@@ -14,8 +14,7 @@ PATTERNS
 		cost 4;
 
 	reg = POP4
-		outs out:ANY
-		emit "pop %out"
+		emit "pop %reg"
 		cost 4;
 
 	RET
@@ -29,31 +28,26 @@ PATTERNS
 /* Memory operations */
 
 	STORE4(addr:address, value:reg)
-		ins value:GPR
 		emit "str %value, %addr"
 		cost 4;
 
 	reg = LOAD4(addr:address)
-		outs dest:ANY
-		emit "ldr %dest, %addr"
+		emit "ldr %reg, %addr"
 		cost 4;
 
 	reg = LOAD1(addr:address)
-		outs dest:ANY
-		emit "ldrb %dest, %addr"
+		emit "ldrb %reg, %addr"
 		cost 4;
 
 	reg = CIU14(LOAD1(addr:address))
-		outs dest:ANY
-		emit "ldrb %dest, %addr"
+		emit "ldrb %reg, %addr"
 		cost 4;
 
 
 /* Locals */
 
 	reg = in:LOCAL4
-		outs out:GPR
-		emit "add %out, fp, #%in"
+		emit "add %reg, fp, #%in"
 		cost 4;
 
 	address = in:LOCAL4
@@ -63,11 +57,9 @@ PATTERNS
 /* Memory addressing modes */
 
 	address = ADD4(addr:reg, offset:CONST)
-		ins addr:GPR
 		fragment "[%addr, #%offset]";
 
 	address = addr:reg
-		ins addr:GPR
 		fragment "[%addr]";
 
 
@@ -85,43 +77,37 @@ PATTERNS
 
 /* Comparisons */
 
-	tristate = COMPARES4(val1:reg, val2:aluparam)
+	tristate = COMPARES4(left:reg, right:aluparam)
 		outs CC
-		emit "cmp %val1, %val2"
+		emit "cmp %left, %right"
 		cost 4;
 
 	reg = tristate
-		emit "mov %out, #0"
-		emit "movlt %out, #-1"
-		emit "movgt %out, #1"
+		emit "mov %reg, #0"
+		emit "movlt %reg, #-1"
+		emit "movgt %reg, #1"
 		cost 12;
 
 
 /* Conversions */
 
 	reg = CII14(CIU41(value:reg))
-		outs out:GPR
-		emit "sxtb %out, %value"
+		emit "sxtb %reg, %value"
 		cost 4;
 
 	reg = CIU41(in:reg)
-		outs out:GPR
-		emit "and %out, %in, #0xff"
+		emit "and %reg, %in, #0xff"
 		cost 4;
 
 
 /* ALU operations */
 
 	reg = ADD4(left:reg, right:aluparam)
-		ins left:GPR, right:GPR
-		outs out:GPR
-		emit "add %out, %left, %right"
+		emit "add %reg, %left, %right"
 		cost 4;
 
 	reg = ADD4(left:aluparam, right:reg)
-		ins left:GPR, right:GPR
-		outs out:GPR
-		emit "add %out, %right, %left"
+		emit "add %reg, %right, %left"
 		cost 4;
 
 	aluparam = value:CONST4
@@ -130,21 +116,17 @@ PATTERNS
 	aluparam = reg;
 
 	reg = value:aluparam
-		outs out:GPR
-		emit "mov %out, %value"
+		emit "mov %reg, %value"
 		cost 4;
 
 	reg = value:LABEL4
-		outs out:GPR
-		emit "adr %out, %value"
+		emit "adr %reg, %value"
 		cost 4;
 
 	reg = value:BLOCK4
-		outs out:GPR
-		emit "adr %out, %value"
+		emit "adr %reg, %value"
 		cost 4;
 
 	reg = value:CONST4
-		outs out:GPR
-		emit "ldr %out, #value"
+		emit "ldr %reg, #value"
 		cost 4;

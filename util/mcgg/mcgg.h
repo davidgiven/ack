@@ -25,6 +25,16 @@ extern const short *burm_nts[];
 extern struct ir** burm_kids(struct ir* p, int eruleno, struct ir* kids[]);
 extern void burm_trace(struct ir* p, int ruleno, int cost, int bestcost);
 
+struct burm_emitter_data
+{
+	void* user;
+    void (*emit_string)(const char* data);
+    void (*emit_ir)(struct ir* ir);
+};
+
+typedef void burm_emitter_t(struct ir* ir, struct burm_emitter_data* data);
+extern burm_emitter_t* const burm_emitters[];
+
 #endif
 
 /* vim: set sw=4 ts=4 expandtab : */

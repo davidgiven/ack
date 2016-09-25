@@ -14,7 +14,7 @@ static int braces = 0;
 
 %x CSTRING
 %x QSTRING
-%x ECHO
+%x COMMENT
 
 %%
 
@@ -50,7 +50,7 @@ static int braces = 0;
 <INITIAL>"\""               BEGIN(QSTRING);
 <QSTRING>"\""               BEGIN(INITIAL);
 
-<QSTRING>%[a-zA-Z_]+        {
+<QSTRING>%[a-zA-Z_][a-zA_Z_0-9]+ {
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
@@ -59,6 +59,11 @@ static int braces = 0;
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
+
+<INITIAL>"/*"               BEGIN(COMMENT);
+<COMMENT>"*/"               BEGIN(INITIAL);
+<COMMENT>[^*]*              ;
+<COMMENT>"*"                ;
 
 "%%"                        return PPERCENT;
 "%term"						return TERMINAL;
@@ -71,6 +76,8 @@ static int braces = 0;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;
 "cost"                      return COST;
+
+"//"[^\n]*\n                ;
 
 [A-Za-z_][A-Za-z0-9_]*      { yylval.string = strdup(yytext); return ID; }
 [0-9]+                      { yylval.n = atoi(yytext); return INT; }
