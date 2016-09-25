@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static struct e_instr insn;
+static struct e_instr em;
 static struct procedure* current_proc;
 static struct basicblock* code_bb;
 static struct basicblock* data_bb;
@@ -46,7 +46,7 @@ static void unknown_type(const char* s)
 {
     fatal("%s with unknown type '%s'",
         s,
-        argtype_to_str(insn.em_arg.ema_argtype));
+        argtype_to_str(em.em_arg.ema_argtype));
 }
 
 static const char* ilabel_to_str(label l)
@@ -66,18 +66,18 @@ static void terminate_block(void)
     code_bb = NULL;
 }
 
-static struct insn* new_insn(int opcode)
+static struct em* new_insn(int opcode)
 {
-    struct insn* insn = calloc(sizeof(struct insn), 1);
-    insn->opcode = opcode;
-    return insn;
+    struct em* em = calloc(sizeof(struct em), 1);
+    em->opcode = opcode;
+    return em;
 }
 
 static void queue_insn_simple(int opcode)
 {
-    struct insn* insn = new_insn(opcode);
-    insn->paramtype = PARAM_NONE;
-    APPEND(code_bb->insns, insn);
+    struct em* em = new_insn(opcode);
+    em->paramtype = PARAM_NONE;
+    APPEND(code_bb->ems, em);
 
     switch (opcode)
     {
@@ -89,10 +89,10 @@ static void queue_insn_simple(int opcode)
 
 static void queue_insn_value(int opcode, arith value)
 {
-    struct insn* insn = new_insn(opcode);
-    insn->paramtype = PARAM_IVALUE;
-    insn->u.ivalue = value;
-    APPEND(code_bb->insns, insn);
+    struct em* em = new_insn(opcode);
+    em->paramtype = PARAM_IVALUE;
+    em->u.ivalue = value;
+    APPEND(code_bb->ems, em);
 
     switch (opcode)
     {
@@ -106,11 +106,11 @@ static void queue_insn_value(int opcode, arith value)
 
 static void queue_insn_label(int opcode, const char* label, arith offset)
 {
-    struct insn* insn = new_insn(opcode);
-    insn->paramtype = PARAM_LVALUE;
-    insn->u.lvalue.label = label;
-    insn->u.lvalue.offset = offset;
-    APPEND(code_bb->insns, insn);
+    struct em* em = new_insn(opcode);
+    em->paramtype = PARAM_LVALUE;
+    em->u.lvalue.label = label;
+    em->u.lvalue.offset = offset;
+    APPEND(code_bb->ems, em);
 
     switch (opcode)
     {
@@ -122,11 +122,11 @@ static void queue_insn_label(int opcode, const char* label, arith offset)
 
 static void queue_insn_block(int opcode, struct basicblock* left, struct basicblock* right)
 {
-    struct insn* insn = new_insn(opcode);
-    insn->paramtype = PARAM_BVALUE;
-    insn->u.bvalue.left = left;
-    insn->u.bvalue.right = right;
-    APPEND(code_bb->insns, insn);
+    struct em* em = new_insn(opcode);
+    em->paramtype = PARAM_BVALUE;
+    em->u.bvalue.left = left;
+    em->u.bvalue.right = right;
+    APPEND(code_bb->ems, em);
     
     terminate_block();
 }
@@ -143,13 +143,13 @@ static void change_basicblock(struct basicblock* newbb)
 
 static void queue_insn_ilabel(int opcode, int label)
 {
-    const char* name = ilabel_to_str(insn.em_ilb);
+    const char* name = ilabel_to_str(em.em_ilb);
     struct basicblock* left = bb_get(name);
 
     switch (opcode)
     {
         case op_bra:
-            queue_insn_block(insn.em_opcode, left, NULL);
+            queue_insn_block(em.em_opcode, left, NULL);
             break;
 
         case op_zeq:
@@ -160,7 +160,7 @@ static void queue_insn_ilabel(int opcode, int label)
         case op_zge:
         {
             struct basicblock* bb = bb_get(NULL);
-            queue_insn_block(insn.em_opcode, left, bb);
+            queue_insn_block(em.em_opcode, left, bb);
             change_basicblock(bb);
             break;
         }
@@ -178,30 +178,30 @@ static void queue_ilabel(arith label)
 
 static void parse_pseu(void)
 {
-	switch (insn.em_opcode)
+	switch (em.em_opcode)
 	{
 		case ps_exp: /* external proc */
 		case ps_exa: /* external array */
 		case ps_inp: /* internal proc */
 		case ps_ina: /* internal array */
 		{
-			bool export = (insn.em_opcode == ps_exp) || (insn.em_opcode == ps_exa);
-			bool proc = (insn.em_opcode == ps_exp) || (insn.em_opcode == ps_inp);
+			bool export = (em.em_opcode == ps_exp) || (em.em_opcode == ps_exa);
+			bool proc = (em.em_opcode == ps_exp) || (em.em_opcode == ps_inp);
 
-			switch (insn.em_arg.ema_argtype)
+			switch (em.em_arg.ema_argtype)
 			{
 				case pro_ptyp:
-					symbol_declare(strdup(insn.em_pnam), export, proc);
+					symbol_declare(strdup(em.em_pnam), export, proc);
 					break;
 
 				case sof_ptyp:
-                    assert(insn.em_off == 0);
-					symbol_declare(strdup(insn.em_dnam), export, proc);
+                    assert(em.em_off == 0);
+					symbol_declare(strdup(em.em_dnam), export, proc);
 					break;
 
                 case nof_ptyp:
-                    assert(insn.em_off == 0);
-                    symbol_declare(dlabel_to_str(insn.em_dlb), export, proc);
+                    assert(em.em_off == 0);
+                    symbol_declare(dlabel_to_str(em.em_dlb), export, proc);
                     break;
 
 				default:
@@ -213,33 +213,33 @@ static void parse_pseu(void)
 		case ps_con: /* .data */
 		case ps_rom: /* .rom */
         {
-            bool ro = (insn.em_opcode == ps_rom);
+            bool ro = (em.em_opcode == ps_rom);
 
-			switch (insn.em_arg.ema_argtype)
+			switch (em.em_arg.ema_argtype)
 			{
 				case ico_ptyp:
 				case uco_ptyp:
                 {
-                    arith val = atol(insn.em_string);
-                    data_int(val, insn.em_size, ro);
+                    arith val = atol(em.em_string);
+                    data_int(val, em.em_size, ro);
                     break;
                 }
 
 				case str_ptyp:
-                    data_block(strdup(insn.em_string), insn.em_size, ro);
+                    data_block(strdup(em.em_string), em.em_size, ro);
 					break;
 
                 case cst_ptyp:
-                    data_int(insn.em_cst, EM_wordsize, ro);
+                    data_int(em.em_cst, EM_wordsize, ro);
                     break;
                     
                 case nof_ptyp:
-                    data_offset(dlabel_to_str(insn.em_dlb), insn.em_off, ro);
+                    data_offset(dlabel_to_str(em.em_dlb), em.em_off, ro);
                     break;
 
                 case ilb_ptyp:
                 {
-                    const char* label = ilabel_to_str(insn.em_ilb);
+                    const char* label = ilabel_to_str(em.em_ilb);
 
                     /* This is really hacky; to handle basic block flow
                      * descriptor blocks, we need to track which bbs a descriptor
@@ -249,10 +249,10 @@ static void parse_pseu(void)
 
                     if (data_bb)
                     {
-                        struct insn* insn = new_insn(op_bra);
-                        insn->paramtype = PARAM_BVALUE;
-                        insn->u.bvalue.left = bb_get(label);
-                        APPEND(data_bb->insns, insn);
+                        struct em* em = new_insn(op_bra);
+                        em->paramtype = PARAM_BVALUE;
+                        em->u.bvalue.left = bb_get(label);
+                        APPEND(data_bb->ems, em);
                     }
 
                     data_offset(label, 0, ro);
@@ -267,10 +267,10 @@ static void parse_pseu(void)
 
         case ps_bss:
         {
-            switch (insn.em_arg.ema_argtype)
+            switch (em.em_arg.ema_argtype)
             {
                 case cst_ptyp:
-                    data_bss(EM_bsssize, insn.em_cst);
+                    data_bss(EM_bsssize, em.em_cst);
                     break;
                     
                 default:
@@ -284,9 +284,9 @@ static void parse_pseu(void)
             struct symbol* symbol;
 
             current_proc = calloc(sizeof(struct procedure), 1);
-            current_proc->name = strdup(insn.em_pnam);
+            current_proc->name = strdup(em.em_pnam);
             current_proc->root_bb = bb_get(current_proc->name);
-            current_proc->nlocals = insn.em_nlocals;
+            current_proc->nlocals = em.em_nlocals;
             code_bb = current_proc->root_bb;
             code_bb->is_root = true;
             APPEND(current_proc->blocks, code_bb);
@@ -306,22 +306,22 @@ static void parse_pseu(void)
 			break;
 
 		default:
-            fatal("unknown pseudo with opcode %d\n", insn.em_opcode);
+            fatal("unknown pseudo with opcode %d\n", em.em_opcode);
 	}
 }
 
 static arith mes_get_cst(void)
 {
-    EM_getinstr(&insn);
-    if (insn.em_type != EM_MESARG)
+    EM_getinstr(&em);
+    if (em.em_type != EM_MESARG)
         fatal("malformed MES");
-    return insn.em_cst;
+    return em.em_cst;
 }
 
 static void parse_mes(void)
 {
-    assert(insn.em_arg.ema_argtype == cst_ptyp);
-    switch (insn.em_cst)
+    assert(em.em_arg.ema_argtype == cst_ptyp);
+    switch (em.em_cst)
     {
         case 0: /* error */
             fatal("MES 0 received (explicit halt)");
@@ -337,10 +337,10 @@ static void parse_mes(void)
         }
     }
 
-    while ((insn.em_type == EM_STARTMES) || (insn.em_type == EM_MESARG))
-        EM_getinstr(&insn);
+    while ((em.em_type == EM_STARTMES) || (em.em_type == EM_MESARG))
+        EM_getinstr(&em);
 
-    if (insn.em_type != EM_ENDMES)
+    if (em.em_type != EM_ENDMES)
         fatal("malformed MES");
 }
 
@@ -357,27 +357,27 @@ static void create_data_label(const char* label)
 
 void parse_em(void)
 {
-    EM_getinstr(&insn);
+    EM_getinstr(&em);
 	tb_filestart();
 
-	while (insn.em_type != EM_EOF)
+	while (em.em_type != EM_EOF)
 	{
-        switch (insn.em_type)
+        switch (em.em_type)
         {
             case EM_PSEU:
 				parse_pseu();
                 break;
 
             case EM_DEFILB:
-                queue_ilabel(insn.em_ilb);
+                queue_ilabel(em.em_ilb);
                 break;
 
             case EM_DEFDLB:
-                create_data_label(dlabel_to_str(insn.em_dlb));
+                create_data_label(dlabel_to_str(em.em_dlb));
                 break;
 
             case EM_DEFDNAM:
-                create_data_label(strdup(insn.em_dnam));
+                create_data_label(strdup(em.em_dnam));
                 break;
 
             case EM_STARTMES:
@@ -387,36 +387,36 @@ void parse_em(void)
             case EM_MNEM:
                 if (code_bb)
                 {
-                    int flags = em_flag[insn.em_opcode - sp_fmnem];
+                    int flags = em_flag[em.em_opcode - sp_fmnem];
 
                     if (flags & EM_PAR)
                     {
-                        switch (insn.em_argtype)
+                        switch (em.em_argtype)
                         {
                             case ilb_ptyp:
-                                queue_insn_ilabel(insn.em_opcode, insn.em_ilb);
+                                queue_insn_ilabel(em.em_opcode, em.em_ilb);
                                 break;
 
                             case nof_ptyp:
-                                queue_insn_label(insn.em_opcode,
-                                    dlabel_to_str(insn.em_dlb), insn.em_off);
+                                queue_insn_label(em.em_opcode,
+                                    dlabel_to_str(em.em_dlb), em.em_off);
                                 break;
 
                             case sof_ptyp:
-                                queue_insn_label(insn.em_opcode,
-                                    strdup(insn.em_dnam), insn.em_off);
+                                queue_insn_label(em.em_opcode,
+                                    strdup(em.em_dnam), em.em_off);
                                 break;
 
                             case pro_ptyp:
-                                queue_insn_label(insn.em_opcode,
-                                    strdup(insn.em_pnam), 0);
+                                queue_insn_label(em.em_opcode,
+                                    strdup(em.em_pnam), 0);
                                 break;
 
                             case cst_ptyp:
                                 if ((flags & EM_PAR) == PAR_B)
-                                    queue_insn_ilabel(insn.em_opcode, insn.em_ilb);
+                                    queue_insn_ilabel(em.em_opcode, em.em_ilb);
                                 else
-                                    queue_insn_value(insn.em_opcode, insn.em_cst);
+                                    queue_insn_value(em.em_opcode, em.em_cst);
                                 break;
 
                             default:
@@ -424,15 +424,15 @@ void parse_em(void)
                         }
                     }
                     else
-                        queue_insn_simple(insn.em_opcode);
+                        queue_insn_simple(em.em_opcode);
                 }
                 break;
 
             default:
-                fatal("unrecognised instruction type '%d'", insn.em_type);
+                fatal("unrecognised instruction type '%d'", em.em_type);
         }
 
-		EM_getinstr(&insn);
+		EM_getinstr(&em);
 	}
 
 	tb_fileend();

@@ -50,7 +50,7 @@ enum
     PARAM_BVALUE,
 };
 
-struct insn
+struct em
 {
     int opcode;
     int paramtype;
@@ -78,7 +78,7 @@ struct procedure
 struct basicblock
 {
     const char* name;
-    ARRAY(struct insn, insns);
+    ARRAY(struct em, ems);
     ARRAY(struct ir, irs);
     bool is_fake : 1;
     bool is_root : 1;

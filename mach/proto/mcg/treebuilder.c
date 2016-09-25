@@ -323,15 +323,15 @@ static struct ir* extract_block_refs(struct basicblock* bb)
     struct ir* outir = NULL;
     int i;
 
-    for (i=0; i<bb->insns_count; i++)
+    for (i=0; i<bb->ems_count; i++)
     {
-        struct insn* insn = bb->insns[i];
-        assert(insn->opcode == op_bra);
-        assert(insn->paramtype == PARAM_BVALUE);
+        struct em* em = bb->ems[i];
+        assert(em->opcode == op_bra);
+        assert(em->paramtype == PARAM_BVALUE);
 
         outir = new_ir2(
             IR_PAIR, 0,
-            new_bbir(insn->u.bvalue.left),
+            new_bbir(em->u.bvalue.left),
             outir
         );
     }
@@ -651,34 +651,34 @@ static void generate_tree(struct basicblock* bb)
     current_bb = bb;
     reset_stack();
 
-    for (i=0; i<bb->insns_count; i++)
+    for (i=0; i<bb->ems_count; i++)
     {
-        struct insn* insn = bb->insns[i];
-        tracef('E', "E: read %s ", em_mnem[insn->opcode - sp_fmnem]);
-        switch (insn->paramtype)
+        struct em* em = bb->ems[i];
+        tracef('E', "E: read %s ", em_mnem[em->opcode - sp_fmnem]);
+        switch (em->paramtype)
         {
             case PARAM_NONE:
                 tracef('E', "\n");
-                insn_simple(insn->opcode);
+                insn_simple(em->opcode);
                 break;
 
             case PARAM_IVALUE:
-                tracef('E', "value=%d\n", insn->u.ivalue);
-                insn_ivalue(insn->opcode, insn->u.ivalue);
+                tracef('E', "value=%d\n", em->u.ivalue);
+                insn_ivalue(em->opcode, em->u.ivalue);
                 break;
 
             case PARAM_LVALUE:
                 tracef('E', "label=%s offset=%d\n", 
-                    insn->u.lvalue.label, insn->u.lvalue.offset);
-                insn_lvalue(insn->opcode, insn->u.lvalue.label, insn->u.lvalue.offset);
+                    em->u.lvalue.label, em->u.lvalue.offset);
+                insn_lvalue(em->opcode, em->u.lvalue.label, em->u.lvalue.offset);
                 break;
 
             case PARAM_BVALUE:
-                tracef('E', "true=%s", insn->u.bvalue.left->name);
-                if (insn->u.bvalue.right)
-                    tracef('E', " false=%s", insn->u.bvalue.right->name);
+                tracef('E', "true=%s", em->u.bvalue.left->name);
+                if (em->u.bvalue.right)
+                    tracef('E', " false=%s", em->u.bvalue.right->name);
                 tracef('E', "\n");
-                insn_bvalue(insn->opcode, insn->u.bvalue.left, insn->u.bvalue.right);
+                insn_bvalue(em->opcode, em->u.bvalue.left, em->u.bvalue.right);
                 break;
 
             default:
