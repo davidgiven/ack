@@ -43,7 +43,8 @@ cprogram {
 	deps = {
 		"./iburg.h",
 		"+lib",
-		"+yacc"
+		"+yacc",
+		"modules/src/data+lib",
 	}
 }
 	

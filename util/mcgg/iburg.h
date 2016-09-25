@@ -1,16 +1,9 @@
 #ifndef BURG_INCLUDED
 #define BURG_INCLUDED
 
-/* $Id$ */
-/* iburg.c: */
-extern char* stringf(char* fmt, ...);
+#include "stringlist.h"
 
-typedef struct stringlist* Stringlist;
-struct stringlist {
-    const char* payload;
-    Stringlist next;
-};
-extern Stringlist pushstring(const char* data, Stringlist list);
+extern char* stringf(char* fmt, ...);
 
 typedef enum
 {
@@ -56,20 +49,20 @@ extern Tree tree(const char* op, const char* label, Tree left, Tree right);
 
 struct rule
 { /* rules: */
-	Nonterm lhs;     /* lefthand side non-terminal */
-	Tree pattern;    /* rule pattern */
-	int lineno;      /* line number where allocated */
-	int ern;         /* external rule number */
-	int packed;      /* packed external rule number */
-	int cost;        /* associated cost */
-	Rule link;       /* next rule in ern order */
-	Rule next;       /* next rule with same pattern root */
-	Rule chain;      /* next chain rule with same rhs */
-	Rule decode;     /* next rule with same lhs */
-	Rule kids;       /* next rule with same burm_kids pattern */
-	Stringlist when; /* C predicate string */
-	Stringlist code; /* compiler output code strings */
-	bool is_fragment; /* does this rule generate an instruction fragment? */
+	Nonterm lhs;             /* lefthand side non-terminal */
+	Tree pattern;            /* rule pattern */
+	int lineno;              /* line number where allocated */
+	int ern;                 /* external rule number */
+	int packed;              /* packed external rule number */
+	int cost;                /* associated cost */
+	Rule link;               /* next rule in ern order */
+	Rule next;               /* next rule with same pattern root */
+	Rule chain;              /* next chain rule with same rhs */
+	Rule decode;             /* next rule with same lhs */
+	Rule kids;               /* next rule with same burm_kids pattern */
+	struct stringlist when;  /* C predicate string */
+	struct stringlist code;  /* compiler output code strings */
+	bool is_fragment;        /* does this rule generate an instruction fragment? */
 };
 extern Rule rule(char* id, Tree pattern, int ern);
 extern int maxcost; /* maximum cost */

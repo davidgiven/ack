@@ -1,4 +1,5 @@
 %{
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -17,7 +18,7 @@ static int nextern = 1;
 	char* string;
 	Tree tree;
     Rule rule;
-    Stringlist stringlist;
+    struct stringlist* stringlist;
     char* stringpair[2];
 }
 %term TERMINAL
@@ -58,7 +59,7 @@ patterns
 pattern
     : ID '=' rhs                      { nonterm($1); $$ = rule($1, $3, nextern++); }
     | rhs                             {              $$ = rule("stmt", $1, nextern++); }
-    | pattern WHEN cfragments         { $$ = $1; $$->when = $3; }
+    | pattern WHEN cfragments         { $$ = $1; stringlist_addall(&$$->when, $3); }
     | pattern INS ins                 { $$ = $1; }
     | pattern OUTS outs               { $$ = $1; }
     | emit                            { $$ = $1; }
@@ -77,8 +78,8 @@ labelledid
     ;
 
 cfragments 
-    : /* nothing */                   { $$ = NULL; }
-    | CFRAGMENT cfragments            { $$ = pushstring($1, $2); }
+    : /* nothing */                   { $$ = calloc(1, sizeof *$$); }
+    | cfragments CFRAGMENT            { $$ = $1; stringlist_add($$, $2); }
     ;
     
 ins
@@ -101,13 +102,22 @@ out
     ;
 
 emit
-    : pattern EMIT qfragments         { $$ = $1; $$->code = $3; $$->is_fragment = false; }
-    | pattern FRAGMENT qfragments     { $$ = $1; $$->code = $3; $$->is_fragment = true; }
+    : pattern EMIT qfragments           {
+                                            $$ = $1;
+                                            stringlist_add($3, "\n");
+                                            stringlist_addall(&$$->code, $3);
+                                            $$->is_fragment = false;
+                                        }
+    | pattern FRAGMENT qfragments       {
+                                            $$ = $1;
+                                            stringlist_addall(&$$->code, $3);
+                                            $$->is_fragment = true;
+                                        }
     ;
 
 qfragments
-    : QFRAGMENT                       { $$ = pushstring($1, NULL); }
-    | QFRAGMENT qfragments            { $$ = pushstring($1, $2); }
+    : /* nothing */                   { $$ = calloc(1, sizeof *$$); }
+    | qfragments QFRAGMENT            { $$ = $1; stringlist_add($$, $2); }
     ;
 
 %%

@@ -365,14 +365,6 @@ Rule rule(char* id, Tree pattern, int ern)
 	return r;
 }
 
-Stringlist pushstring(const char* data, Stringlist list)
-{
-    Stringlist sl = calloc(1, sizeof *sl);
-    sl->payload = data;
-    sl->next = list;
-    return sl;
-}
-
 /* print - formatted output */
 static void print(char* fmt, ...)
 {
@@ -792,15 +784,15 @@ static void emitpredicatedefinitions(Rule r)
 {
 	while (r)
 	{
-		Stringlist s = r->when;
-		if (s)
+		struct stringfragment* f = r->when.first;
+		if (f)
 		{
 			print("/* %R */\n", r);
 			print("static int %Ppredicate_%d(NODEPTR_TYPE n) {\n", r->ern);
-			while (s)
+			while (f)
 			{
-				print("%s", s->payload);
-				s = s->next;
+				print("%s", f->data);
+				f = f->next;
 			}
 			print("\n}\n\n");
 		}
@@ -866,32 +858,42 @@ static void emitemitters(Rule rules)
 	r = rules;
 	while (r)
 	{
-		Stringlist s = r->code;
-		if (s)
+		struct stringfragment* f = r->code.first;
+		if (f)
 		{
 			print("/* %R */\n", r);
 			print("static void %Pemitter_%d(NODEPTR_TYPE node, struct %Pemitter_data* data) {\n", r->ern);
 			emittreefetchers(0, r->pattern);
 			print("%1NODEPTR_TYPE node_%s = node;\n", r->lhs->name);
 
-			while (s)
+			while (f)
 			{
-				if (s->payload[0] == '%')
+				switch (f->data[0])
 				{
-					const char* label = s->payload + 1;
-					Tree t = find_label(r->pattern, label);
-					if (!t && (strcmp(label, r->lhs->name) != 0))
+					case '%':
 					{
-						yylineno = r->lineno;
-						yyerror("label '%s' not found", label);
-						exit(1);
+						const char* label = f->data + 1;
+						Tree t = find_label(r->pattern, label);
+						if (!t && (strcmp(label, r->lhs->name) != 0))
+						{
+							yylineno = r->lineno;
+							yyerror("label '%s' not found", label);
+							exit(1);
+						}
+						print("%1data->emit_ir(node_%s);\n", label);
+						break;
 					}
-					print("%1data->emit_ir(node_%s);\n", label);
-				}
-				else
-					print("%1data->emit_string(\"%s\");\n", s->payload);
 
-				s = s->next;
+					case '\n':
+						assert(f->data[1] == 0);
+						print("%1data->emit_eoi();\n");
+						break;
+					
+					default:
+						print("%1data->emit_string(\"%s\");\n", f->data);
+				}
+
+				f = f->next;
 			}
 
 			print("}\n\n");
@@ -904,9 +906,10 @@ static void emitemitters(Rule rules)
 	print("%Pemitter_t* const %Pemitters[] = {\n");
 	while (r)
 	{
-		Stringlist s = r->code;
+		struct stringfragment* f = r->code.first;
+
 		print("%1");
-		if (s)
+		if (f)
 			print("&%Pemitter_%d,", r->ern);
 		else
 			print("NULL,");
@@ -920,7 +923,7 @@ static void emitemitters(Rule rules)
 /* emitcost - emit a cost calculation via a predicate */
 static void emitcostcalc(Rule r)
 {
-	if (r->when)
+	if (r->when.first)
 		print("!%Ppredicate_%d(node) ? %d : ", r->ern, maxcost);
 }
 

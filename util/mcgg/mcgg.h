@@ -30,6 +30,7 @@ struct burm_emitter_data
 	void* user;
     void (*emit_string)(const char* data);
     void (*emit_ir)(struct ir* ir);
+    void (*emit_eoi)(void);
 };
 
 typedef void burm_emitter_t(struct ir* ir, struct burm_emitter_data* data);
