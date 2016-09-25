@@ -19,6 +19,8 @@
 #include "array.h"
 #include "map.h"
 #include "ir.h"
+#include "mcgg.h"
+#include "hop.h"
 
 extern char em_pseu[][4];
 extern char em_mnem[][4];
@@ -80,6 +82,7 @@ struct basicblock
     const char* name;
     ARRAY(struct em, ems);
     ARRAY(struct ir, irs);
+    ARRAY(struct hop, hops);
     bool is_fake : 1;
     bool is_root : 1;
     bool is_terminated : 1;

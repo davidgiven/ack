@@ -1,5 +1,6 @@
 #include "mcg.h"
-#include "mcgg.h"
+
+static int vregcount;
 
 #if 0
 static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
@@ -26,8 +27,8 @@ static void dumpCover(NODEPTR_TYPE p, int goalnt, int indent) {
 
 void burm_trace(struct ir* p, int ruleno, int cost, int bestcost) {
     const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
-	tracef('I', "I: 0x%p matched %s with cost %d vs. %d\n", p,
-		insndata->name, cost, bestcost);
+	//tracef('I', "I: 0x%p matched %s with cost %d vs. %d\n", p,
+	//	insndata->name, cost, bestcost);
 }
 
 void burm_panic_cannot_match(struct ir* ir)
@@ -51,7 +52,7 @@ static void emit_reg(struct ir* ir)
     if (insndata->is_fragment)
         insndata->emitter(ir, &emitter_data);
     else
-        tracef('I', "I: emit reg $%d\n", ir->id);
+        tracef('I', "I: emit reg %d\n", ir->vreg);
 }
 
 static void emit_value(struct ir* ir)
@@ -85,12 +86,25 @@ static void walk_instructions(struct ir* ir, int goal)
     const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
     const short* nts = burm_nts[insn_no];
     int i;
+    int resultreg = 0;
 
     ir->insn_no = insn_no;
+
+    if (insndata->allocate)
+    {
+        resultreg = vregcount++;
+        tracef('I', "I: new %s %d\n",
+            burm_register_class_names[insndata->allocate], resultreg);
+    }
 
     burm_kids(ir, insn_no, children);
     for (i=0; nts[i]; i++)
         walk_instructions(children[i], nts[i]);
+
+    if (ir->vreg)
+        tracef('I', "I: use %d\n", ir->vreg);
+    if (resultreg)
+        ir->vreg = resultreg;
 
     tracef('I', "I: $%d %s selected %s %d: %s\n",
         ir->id,
@@ -100,8 +114,6 @@ static void walk_instructions(struct ir* ir, int goal)
         insndata->name);
     ir->is_generated = true;
 
-    if (insndata->allocate)
-        tracef('I', "I: allocate reg of class %d\n", insndata->allocate);
     if (!insndata->is_fragment && insndata->emitter)
         insndata->emitter(ir, &emitter_data);
 }
@@ -130,6 +142,8 @@ static void select_instructions(struct basicblock* bb)
 void pass_instruction_selector(struct procedure* proc)
 {
     int i;
+
+    vregcount = 1;
 
     for (i=0; i<proc->blocks_count; i++)
     {

@@ -31,6 +31,7 @@ struct burm_emitter_data
     void (*emit_value)(struct ir* ir);
     void (*emit_resultreg)(void);
     void (*emit_eoi)(void);
+    void (*emit_usereg)(struct ir* ir);
 };
 
 typedef void burm_emitter_t(struct ir* ir, const struct burm_emitter_data* data);
@@ -44,6 +45,7 @@ struct burm_instruction_data
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];
+extern const char* burm_register_class_names[];
 
 #endif
 
