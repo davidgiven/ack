@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-STATICMAP(graph);
+static MAPOF(struct basicblock, struct basicblock) graph;
 static ARRAYOF(struct ir) pops;
 static ARRAYOF(struct ir) pushes;
 
@@ -46,7 +46,7 @@ static bool collect_outputs_cb(struct ir* ir, void* user)
     struct basicblock* caller = user;
 
     if (ir->opcode == IR_BLOCK)
-        MAP_SET(graph, caller, ir->u.bvalue);
+        map_addp(&graph, caller, ir->u.bvalue);
     return false;
 }
 
@@ -54,7 +54,7 @@ static void make_bb_graph(struct procedure* proc)
 {
     int i, j;
 
-    graph_count = 0;
+    graph.count = 0;
     for (i=0; i<proc->blocks.count; i++)
     {
         struct basicblock* bb = proc->blocks.item[i];
@@ -78,11 +78,11 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
         /* Abort unless *every* successor block of this one starts with a pop
          * of the same size... */
 
-        for (i=0; i<graph_count; i++)
+        for (i=0; i<graph.count; i++)
         {
-            if (graph[i].left == bb)
+            if (graph.item[i].left == bb)
             {
-                struct basicblock* outbb = graph[i].right;
+                struct basicblock* outbb = graph.item[i].right;
 
                 ir = get_first_pop(outbb);
                 if (!ir || (ir->size != lastpush->size))
@@ -92,11 +92,11 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
                 /* Also abort unless *every* predecessor block of the one we've
                  * just found *also* ends in a push of the same size. */
 
-                for (j=0; j<graph_count; j++)
+                for (j=0; j<graph.count; j++)
                 {
-                    if (graph[j].right == outbb)
+                    if (graph.item[j].right == outbb)
                     {
-                        struct basicblock* inbb = graph[j].left;
+                        struct basicblock* inbb = graph.item[j].left;
 
                         ir = get_last_push(inbb);
                         if (!ir || (ir->size != lastpush->size))
