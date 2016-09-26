@@ -3,27 +3,12 @@
 
 #include "ircodes.h"
 
-enum
-{
-	IRR_LB = -1,
-	IRR_AB = -2,
-	IRR_SP = -3,
-	IRR_RR = -4,
-};
-
-enum
-{
-	IRS_1,
-	IRS_2,
-	IRS_4,
-	IRS_8
-};
-
 struct ir
 {
 	int id;
 	enum ir_opcode opcode;
 	int size;
+	enum ir_type type;
 	struct ir* left;
 	struct ir* right;
 	union

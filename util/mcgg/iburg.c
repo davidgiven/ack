@@ -176,9 +176,9 @@ char* stringf(char* fmt, ...)
     return p;
 }
 
-static void registerterminal(const char* name, int iropcode, int size)
+static void registerterminal(const struct ir_data* data, int iropcode, int size)
 {
-	const char* s = (size == 0) ? name : stringf("%s%d", name, size);
+	const char* s = (size == 0) ? data->name : stringf("%s%d", data->name, size);
 	int esn = ir_to_esn(iropcode, size);
 
 	term(s, esn);
@@ -190,15 +190,15 @@ static void registerterminals(void)
 
 	for (i=0; i<IR__COUNT; i++)
 	{
-		if (ir_flags[i] & IRF_SIZED)
+		if (ir_data[i].flags & IRF_SIZED)
 		{
-			registerterminal(ir_names[i], i, 1);
-			registerterminal(ir_names[i], i, 2);
-			registerterminal(ir_names[i], i, 4);
-			registerterminal(ir_names[i], i, 8);
+			registerterminal(&ir_data[i], i, 1);
+			registerterminal(&ir_data[i], i, 2);
+			registerterminal(&ir_data[i], i, 4);
+			registerterminal(&ir_data[i], i, 8);
 		}
 		else
-			registerterminal(ir_names[i], i, 0);
+			registerterminal(&ir_data[i], i, 0);
 	}
 }
 

@@ -16,42 +16,34 @@ awk -f - $in >$header << "EOF"
 	END {
 		print "\tIR__COUNT"
 		print "};"
-		print ""
-		print "enum {"
-		print "\tIRF_SIZED = 1"
-		print "};"
-		print ""
-		print "extern const char* ir_names[IR__COUNT];"
-		print "extern const char ir_flags[IR__COUNT];"
 	}
 EOF
 
 awk -f - $in >$source << "EOF"
 	BEGIN {
 		print "#include \"ircodes.h\""
-		print "const char* ir_names[IR__COUNT] = {"
+		print "const struct ir_data ir_data[IR__COUNT] = {"
+	}
+
+	function char_to_type(c) {
+		if (c == "I") return "IRT_INT"
+		if (c == "F") return "IRT_FLOAT"
+		if (c == "A") return "IRT_ANY"
+		return "IRT_UNSET"
+	}
+
+	function char_to_flags(c) {
+		if (c == "S") return "IRF_SIZED"
+		return "0"
 	}
 
 	/^ *[^# ]+/ {
-		printf("\t\"%s\",\n", $2)
-	}
-
-	END {
-		print "};"
-	}
-EOF
-
-awk -f - $in >>$source << "EOF"
-	BEGIN {
-		print ""
-		print "const char ir_flags[IR__COUNT] = {"
-	}
-
-	/^ *[^# ]+/ {
-		if ($1 == "S")
-			print("\tIRF_SIZED,")
-		else
-			print("\t0,")
+		printf("\t{ \"%s\", ", $2)
+		printf("%s, ", char_to_flags(substr($1, 1, 1)))
+		printf("%s, ", char_to_type(substr($1, 2, 1)))
+		printf("%s, ", char_to_type(substr($1, 3, 1)))
+		printf("%s", char_to_type(substr($1, 4, 1)))
+		printf(" },\n")
 	}
 
 	END {

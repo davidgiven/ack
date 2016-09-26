@@ -123,6 +123,7 @@ extern void pass_convert_stack_ops(struct procedure* proc);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 extern void pass_instruction_selector(struct procedure* proc);
+extern void pass_type_inference(struct procedure* proc);
 
 extern void procedure_compile(struct procedure* proc);
 

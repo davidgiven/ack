@@ -12,7 +12,7 @@ yacc {
 
 normalrule {
 	name = "ircodes",
-	outleaves = { "ircodes.h", "ircodes.c" },
+	outleaves = { "ircodes-dyn.h", "ircodes.c" },
 	ins = {
 		"./ircodes.sh",
 		"./ir.dat"
@@ -25,10 +25,15 @@ normalrule {
 clibrary {
 	name = "lib",
 	srcs = {
-		matching(filenamesof("+ircodes"), "%.c$")
+		matching(filenamesof("+ircodes"), "%.c$"),
+	},
+	deps = {
+		"+ircodes",
+		"./ircodes.h"
 	},
 	hdrs = {
 		matching(filenamesof("+ircodes"), "%.h$"),
+		"./ircodes.h",
 		"./mcgg.h"
 	}
 }
