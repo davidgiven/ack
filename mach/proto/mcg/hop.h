@@ -1,26 +1,20 @@
 #ifndef HOP_H
 #define HOP_H
 
-struct vreg
-{
-	int id;
-	int regclass;
-};
-
-#define HOP_INOUT_REGS 4
-
 struct hop
 {
 	int insn_no;
 	struct ir* ir;
-	struct vreg* invregs[HOP_INOUT_REGS];
-	struct vreg* outvregs[HOP_INOUT_REGS];
+	struct vreg* resultvreg;
+	ARRAYOF(struct vreg) invregs;
+	ARRAYOF(struct vreg) outvregs;
+	ARRAYOF(struct vreg) newvregs;
+	ARRAYOF(struct vreg) deadvregs;
 };
 
 extern struct hop* new_hop(int insn_no, struct ir* ir);
 
-extern void hop_add_in_reg(struct hop* hop, struct vreg* reg);
-extern void hop_add_out_reg(struct hop* hop, struct vreg* reg);
+extern void hop_print(char k, struct hop* hop);
 
 #endif
 

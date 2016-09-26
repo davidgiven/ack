@@ -102,7 +102,7 @@ PATTERNS
 
 	CJUMPEQ(value:tristate, PAIR(true:BLOCK4, false:BLOCK4))
 		emit "beq $true"
-		emit "bne $false"
+		emit "b $false"
 		cost 8;
 
 

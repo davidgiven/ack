@@ -41,7 +41,8 @@ bool tracing(char k)
         case 'E': return false;
         case '0': return false;
         case '1': return false;
-        case '2': return true;
+        case '2': return false;
+        case 'I': return true;
         default:  return true;
     }
 }
