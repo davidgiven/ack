@@ -5,9 +5,9 @@ static void print_blocks(char k, struct procedure* proc)
 	int i;
 
 	tracef(k, "%c: procedure %s\n", k, proc->name);
-	for (int i=0; i<proc->blocks_count; i++)
+	for (int i=0; i<proc->blocks.count; i++)
 	{
-		struct basicblock* bb = proc->blocks[i];
+		struct basicblock* bb = proc->blocks.item[i];
 		int j;
 
         tracef(k, "%c:\n", k);
@@ -15,8 +15,8 @@ static void print_blocks(char k, struct procedure* proc)
             bb->is_fake ? "FAKE " : "",
             bb->name);
 
-		for (int j=0; j<bb->irs_count; j++)
-			ir_print(k, bb->irs[j]);
+		for (int j=0; j<bb->irs.count; j++)
+			ir_print(k, bb->irs.item[j]);
 	}
 }
 

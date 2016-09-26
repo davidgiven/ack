@@ -6,11 +6,11 @@ static bool rewrite_jumps_cb(struct ir* ir, void* user)
     {
         struct basicblock* bb = ir->u.bvalue;
 		if (!bb->is_fake
-			&& (bb->irs_count > 0)
-            && (bb->irs[0]->opcode == IR_JUMP)
-            && (bb->irs[0]->left->opcode == IR_BLOCK))
+			&& (bb->irs.count > 0)
+            && (bb->irs.item[0]->opcode == IR_JUMP)
+            && (bb->irs.item[0]->left->opcode == IR_BLOCK))
         {
-            ir->u.bvalue = bb->irs[0]->left->u.bvalue;
+            ir->u.bvalue = bb->irs.item[0]->left->u.bvalue;
         }
     }
 
@@ -21,9 +21,9 @@ static void rewrite_jumps(struct basicblock* bb)
 {
     int i;
 
-    for (i=0; i<bb->irs_count; i++)
+    for (i=0; i<bb->irs.count; i++)
     {
-        struct ir* ir = bb->irs[i];
+        struct ir* ir = bb->irs.item[i];
         ir_walk(ir, rewrite_jumps_cb, NULL);
     }
 }
@@ -32,9 +32,9 @@ void pass_eliminate_trivial_blocks(struct procedure* proc)
 {
     int i;
 
-    for (i=0; i<proc->blocks_count; i++)
+    for (i=0; i<proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks[i];
+        struct basicblock* bb = proc->blocks.item[i];
         rewrite_jumps(bb);
     }
 }

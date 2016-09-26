@@ -1,16 +1,16 @@
 #include "mcg.h"
 
 STATICMAP(graph);
-STATICARRAY(struct ir, pops);
-STATICARRAY(struct ir, pushes);
+static ARRAYOF(struct ir) pops;
+static ARRAYOF(struct ir) pushes;
 
 static struct ir* get_last_push(struct basicblock* bb)
 {
     int i;
 
-    for (i=bb->irs_count-1; i>=0; i--)
+    for (i=bb->irs.count-1; i>=0; i--)
     {
-        struct ir* ir = bb->irs[i];
+        struct ir* ir = bb->irs.item[i];
 
         if (ir->opcode == IR_PUSH)
             return ir;
@@ -25,10 +25,10 @@ static struct ir* get_first_pop(struct basicblock* bb)
 {
     int i;
 
-    for (i=0; i<bb->irs_count; i++)
+    for (i=0; i<bb->irs.count; i++)
     {
         struct ir* irr;
-        struct ir* ir = bb->irs[i];
+        struct ir* ir = bb->irs.item[i];
 
         if (ir->opcode == IR_PUSH)
             return NULL;
@@ -55,11 +55,11 @@ static void make_bb_graph(struct procedure* proc)
     int i, j;
 
     graph_count = 0;
-    for (i=0; i<proc->blocks_count; i++)
+    for (i=0; i<proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks[i];
-        for (j=0; j<bb->irs_count; j++)
-            ir_walk(bb->irs[j], collect_outputs_cb, bb);
+        struct basicblock* bb = proc->blocks.item[i];
+        for (j=0; j<bb->irs.count; j++)
+            ir_walk(bb->irs.item[j], collect_outputs_cb, bb);
     }
 }
 
@@ -68,7 +68,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
     int i, j;
     struct ir* ir;
 
-    pushes_count = pops_count = 0;
+    pushes.count = pops.count = 0;
     for (;;)
     {
         struct ir* lastpush = get_last_push(bb);
@@ -87,7 +87,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
                 ir = get_first_pop(outbb);
                 if (!ir || (ir->size != lastpush->size))
                     return;
-                APPENDU(pops, ir);
+                array_appendu(&pops, ir);
 
                 /* Also abort unless *every* predecessor block of the one we've
                  * just found *also* ends in a push of the same size. */
@@ -101,7 +101,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
                         ir = get_last_push(inbb);
                         if (!ir || (ir->size != lastpush->size))
                             return;
-                        APPENDU(pushes, ir);
+                        array_appendu(&pushes, ir);
                     }
                 }
             }
@@ -109,22 +109,22 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
 
         /* Okay, now we can wire them all up. */
 
-        for (i=0; i<pushes_count; i++)
+        for (i=0; i<pushes.count; i++)
         {
-            struct ir* ir = pushes[i];
+            struct ir* ir = pushes.item[i];
             assert(ir->is_sequence);
             *ir = *ir->left;
             ir->is_sequence = true;
         }
 
-        for (i=0; i<pops_count; i++)
+        for (i=0; i<pops.count; i++)
         {
-            struct ir* ir = pops[i];
-            struct ir* pushir = pushes[0];
+            struct ir* ir = pops.item[i];
+            struct ir* pushir = pushes.item[0];
             struct ir* phi = new_ir1(IR_PHI, ir->size, pushir);
 
-            for (j=1; j<pushes_count; j++)
-                phi = new_ir2(IR_PHI, ir->size, phi, pushes[j]);
+            for (j=1; j<pushes.count; j++)
+                phi = new_ir2(IR_PHI, ir->size, phi, pushes.item[j]);
 
             phi->is_sequence = ir->is_sequence;
             *ir = *phi;
@@ -138,8 +138,8 @@ void pass_convert_stack_ops(struct procedure* proc)
 
     make_bb_graph(proc);
 
-    for (i=0; i<proc->blocks_count; i++)
-        convert_block(proc, proc->blocks[i]);
+    for (i=0; i<proc->blocks.count; i++)
+        convert_block(proc, proc->blocks.item[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

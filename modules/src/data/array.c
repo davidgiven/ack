@@ -2,52 +2,56 @@
 #include <stdbool.h>
 #include "array.h"
 
-void array_append(void*** array, int* count, int* max, void* value)
+void array_append(void* arrayp, void* value)
 {
-	if (*count == *max)
-	{
-		int newmax = (*max == 0) ? 8 : (*max * 2);
-		void** newarray = realloc(*array, newmax * sizeof(void*));
+    struct array* array = arrayp;
 
-		*max = newmax;
-		*array = newarray;
+	if (array->count == array->max)
+	{
+		int newmax = (array->max == 0) ? 8 : (array->max * 2);
+		void** newarray = realloc(array->item, newmax * sizeof(void*));
+
+		array->max = newmax;
+		array->item = newarray;
 	}
 
-	(*array)[*count] = value;
-	(*count)++;
+    array->item[array->count] = value;
+    array->count++;
 }
 
-bool array_contains(void** array, int count, void* value)
+bool array_contains(void* arrayp, void* value)
 {
+    struct array* array = arrayp;
 	int i;
 
-	for (i=0; i<count; i++)
-		if (array[i] == value)
+	for (i=0; i<array->count; i++)
+		if (array->item[i] == value)
 			return true;
 
 	return false;
 }
 
-void array_appendu(void*** array, int* count, int* max, void* value)
+void array_appendu(void* arrayp, void* value)
 {
-	if (!array_contains(*array, *count, value))
-		array_append(array, count, max, value);
+	if (!array_contains(arrayp, value))
+		array_append(arrayp, value);
 }
 
-void array_remove(void** array, int* count, void* value)
+void array_remove(void* arrayp, void* value)
 {
+    struct array* array = arrayp;
     int i;
 
-    for (i=0; i<*count; i++)
+    for (i=0; i<array->count; i++)
     {
-        if (array[i] == value)
+        if (array->item[i] == value)
         {
-            while (i < (*count-1))
+            while (i < (array->count-1))
             {
-                array[i] = array[i+1];
+                array->item[i] = array->item[i+1];
                 i++;
             }
-            (*count)--;
+            array->count--;
             return;
         }
     }

@@ -77,7 +77,7 @@ static struct ir* appendir(struct ir* ir)
 
     assert(current_bb != NULL);
     ir->is_sequence = true;
-    APPEND(current_bb->irs, ir);
+    array_append(&current_bb->irs, ir);
 
     ir_print('0', ir);
     return ir;
@@ -323,9 +323,9 @@ static struct ir* extract_block_refs(struct basicblock* bb)
     struct ir* outir = NULL;
     int i;
 
-    for (i=0; i<bb->ems_count; i++)
+    for (i=0; i<bb->ems.count; i++)
     {
-        struct em* em = bb->ems[i];
+        struct em* em = bb->ems.item[i];
         assert(em->opcode == op_bra);
         assert(em->paramtype == PARAM_BVALUE);
 
@@ -651,9 +651,9 @@ static void generate_tree(struct basicblock* bb)
     current_bb = bb;
     reset_stack();
 
-    for (i=0; i<bb->ems_count; i++)
+    for (i=0; i<bb->ems.count; i++)
     {
-        struct em* em = bb->ems[i];
+        struct em* em = bb->ems.item[i];
         tracef('E', "E: read %s ", em_mnem[em->opcode - sp_fmnem]);
         switch (em->paramtype)
         {
@@ -696,8 +696,8 @@ void tb_procedure(struct procedure* current_proc)
 {
     int i;
 
-    for (i=0; i<current_proc->blocks_count; i++)
-        generate_tree(current_proc->blocks[i]);
+    for (i=0; i<current_proc->blocks.count; i++)
+        generate_tree(current_proc->blocks.item[i]);
 
 }
 

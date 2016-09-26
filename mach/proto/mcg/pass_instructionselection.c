@@ -125,10 +125,10 @@ static void select_instructions(struct basicblock* bb)
 
 	tracef('I', "I: BLOCK: %s\n", bb->name);
 
-	for (i=0; i<bb->irs_count; i++)
+	for (i=0; i<bb->irs.count; i++)
 	{
 		int insnno;
-		struct ir* ir = bb->irs[i];
+		struct ir* ir = bb->irs.item[i];
 		burm_label(ir);
 
 		insnno = burm_rule(ir->state_label, 1);
@@ -145,9 +145,9 @@ void pass_instruction_selector(struct procedure* proc)
 
     vregcount = 1;
 
-    for (i=0; i<proc->blocks_count; i++)
+    for (i=0; i<proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks[i];
+        struct basicblock* bb = proc->blocks.item[i];
         select_instructions(bb);
     }
 }

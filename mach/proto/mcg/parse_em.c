@@ -77,7 +77,7 @@ static void queue_insn_simple(int opcode)
 {
     struct em* em = new_insn(opcode);
     em->paramtype = PARAM_NONE;
-    APPEND(code_bb->ems, em);
+    array_append(&code_bb->ems, em);
 
     switch (opcode)
     {
@@ -92,7 +92,7 @@ static void queue_insn_value(int opcode, arith value)
     struct em* em = new_insn(opcode);
     em->paramtype = PARAM_IVALUE;
     em->u.ivalue = value;
-    APPEND(code_bb->ems, em);
+    array_append(&code_bb->ems, em);
 
     switch (opcode)
     {
@@ -110,7 +110,7 @@ static void queue_insn_label(int opcode, const char* label, arith offset)
     em->paramtype = PARAM_LVALUE;
     em->u.lvalue.label = label;
     em->u.lvalue.offset = offset;
-    APPEND(code_bb->ems, em);
+    array_append(&code_bb->ems, em);
 
     switch (opcode)
     {
@@ -126,14 +126,14 @@ static void queue_insn_block(int opcode, struct basicblock* left, struct basicbl
     em->paramtype = PARAM_BVALUE;
     em->u.bvalue.left = left;
     em->u.bvalue.right = right;
-    APPEND(code_bb->ems, em);
+    array_append(&code_bb->ems, em);
     
     terminate_block();
 }
 
 static void change_basicblock(struct basicblock* newbb)
 {
-    APPENDU(current_proc->blocks, newbb);
+    array_appendu(&current_proc->blocks, newbb);
 
     if (code_bb && !code_bb->is_terminated)
         queue_insn_block(op_bra, newbb, NULL);
@@ -252,7 +252,7 @@ static void parse_pseu(void)
                         struct em* em = new_insn(op_bra);
                         em->paramtype = PARAM_BVALUE;
                         em->u.bvalue.left = bb_get(label);
-                        APPEND(data_bb->ems, em);
+                        array_append(&data_bb->ems, em);
                     }
 
                     data_offset(label, 0, ro);
@@ -289,7 +289,7 @@ static void parse_pseu(void)
             current_proc->nlocals = em.em_nlocals;
             code_bb = current_proc->root_bb;
             code_bb->is_root = true;
-            APPEND(current_proc->blocks, code_bb);
+            array_append(&current_proc->blocks, code_bb);
 
             symbol = symbol_get(current_proc->name);
             symbol->section = SECTION_TEXT;
@@ -351,7 +351,7 @@ static void create_data_label(const char* label)
     {
         data_bb = bb_get(label);
         data_bb->is_fake = true;
-        APPEND(current_proc->blocks, data_bb);
+        array_append(&current_proc->blocks, data_bb);
     }
 }
 

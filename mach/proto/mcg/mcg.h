@@ -74,15 +74,15 @@ struct procedure
     const char* name;
     struct basicblock* root_bb;
     size_t nlocals;
-    ARRAY(struct basicblock, blocks);
+    ARRAYOF(struct basicblock) blocks;
 };
 
 struct basicblock
 {
     const char* name;
-    ARRAY(struct em, ems);
-    ARRAY(struct ir, irs);
-    ARRAY(struct hop, hops);
+    ARRAYOF(struct em) ems;
+    ARRAYOF(struct ir) irs;
+    ARRAYOF(struct hop) hops;
     bool is_fake : 1;
     bool is_root : 1;
     bool is_terminated : 1;

@@ -43,9 +43,9 @@ static void push_types_up(struct basicblock* bb)
 {
 	int i;
 
-	for (i=0; i<bb->irs_count; i++)
+	for (i=0; i<bb->irs.count; i++)
 	{
-		struct ir* ir = bb->irs[i];
+		struct ir* ir = bb->irs.item[i];
 		ir->type = search_for_type(ir, ir->type);
 	}
 }
@@ -54,8 +54,8 @@ void pass_type_inference(struct procedure* proc)
 {
     int i;
     
-	for (i=0; i<proc->blocks_count; i++)
-		push_types_up(proc->blocks[i]);
+	for (i=0; i<proc->blocks.count; i++)
+		push_types_up(proc->blocks.item[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
