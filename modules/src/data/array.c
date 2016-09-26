@@ -1,4 +1,5 @@
-#include "mcg.h"
+#include <stdlib.h>
+#include <stdbool.h>
 #include "array.h"
 
 void array_append(void*** array, int* count, int* max, void* value)
@@ -7,8 +8,6 @@ void array_append(void*** array, int* count, int* max, void* value)
 	{
 		int newmax = (*max == 0) ? 8 : (*max * 2);
 		void** newarray = realloc(*array, newmax * sizeof(void*));
-		if (!newarray)
-			fatal("memory allocation failure");
 
 		*max = newmax;
 		*array = newarray;

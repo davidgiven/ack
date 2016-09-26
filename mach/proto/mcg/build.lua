@@ -16,6 +16,7 @@ cprogram {
 		"h+emheaders",
 		"modules+headers",
 		"modules/src/alloc+lib",
+		"modules/src/data+lib",
 		"modules/src/em_code+lib_k",
 		"modules/src/em_data+lib",
 		"modules/src/idf+lib",
