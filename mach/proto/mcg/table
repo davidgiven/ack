@@ -21,6 +21,7 @@ DECLARATIONS
 	aluparam  fragment;
 	reg       allocates(GPR);
 	tristate  allocates(CC);
+	bistate   allocates(CC);
 
 PATTERNS
 
@@ -105,10 +106,19 @@ PATTERNS
 		emit "b $false"
 		cost 8;
 
+	CJUMPEQ(value:bistate, PAIR(true:BLOCK4, false:BLOCK4))
+		emit "beq $true"
+		emit "b $false"
+		cost 8;
+
 
 /* Comparisons */
 
 	tristate = COMPARES4(left:reg, right:aluparam)
+		emit "cmp %left, %right"
+		cost 4;
+
+	bistate = COMPARES4(COMPARES4(left:reg, right:aluparam), CONST4)
 		emit "cmp %left, %right"
 		cost 4;
 
@@ -117,6 +127,11 @@ PATTERNS
 		emit "movlt %reg, #-1"
 		emit "movgt %reg, #1"
 		cost 12;
+
+	reg = bistate
+		emit "moveq %reg, #1"
+		emit "movne %reg, #0"
+		cost 8;
 
 
 /* Conversions */

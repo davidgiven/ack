@@ -20,7 +20,6 @@
 #include "map.h"
 #include "ir.h"
 #include "mcgg.h"
-#include "vreg.h"
 #include "hop.h"
 
 extern char em_pseu[][4];

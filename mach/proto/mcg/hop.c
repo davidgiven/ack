@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static char outbuf[256];
+static int hop_count = 1;
 static struct hop* current_hop;
 
 static const struct burm_emitter_data emitter_data;
@@ -8,85 +8,97 @@ static const struct burm_emitter_data emitter_data;
 struct hop* new_hop(int insn_no, struct ir* ir)
 {
 	struct hop* hop = calloc(1, sizeof *hop);
+	hop->id = hop_count++;
 	hop->insn_no = insn_no;
 	hop->ir = ir;
 	return hop;
 }
 
-static void append(const char* fmt, ...)
+static struct insel* new_insel(enum insel_type type)
 {
-	va_list ap;
-	
-	va_start(ap, fmt);
-	vsprintf(outbuf + strlen(outbuf), fmt, ap);
-	va_end(ap);
+	struct insel* insel = calloc(1, sizeof(*insel));
+	insel->type = type;
+	return insel;
 }
 
-static void emit_reg(struct ir* ir)
+void hop_add_string_insel(struct hop* hop, const char* string)
 {
-	struct hop* hop = ir->hop;
-	if (hop)
-	{
-		/* Reference to another hop must be its result register. */
-		append("%%%d", hop->resultvreg->id);
-	}
-	else
-	{
-		/* ...if there is no hop, it's a fragment. */
-		const struct burm_instruction_data* insndata = &burm_instruction_data[ir->insn_no];
-        insndata->emitter(ir, &emitter_data);
-	}
+	struct insel* insel = new_insel(INSEL_STRING);
+	insel->u.string = string;
+	array_append(&hop->insels, insel);
 }
 
-static void emit_string(const char* data)
+void hop_add_reg_insel(struct hop* hop, struct hop* reg)
 {
-	append("%s", data);
+	struct insel* insel = new_insel(INSEL_REG);
+	insel->u.reg = reg;
+	array_append(&hop->insels, insel);
 }
 
-static void emit_value(struct ir* ir)
+void hop_add_value_insel(struct hop* hop, struct ir* ir)
 {
-	append("(val)");
+	struct insel* insel = new_insel(INSEL_VALUE);
+	insel->u.value = ir;
+	array_append(&hop->insels, insel);
 }
 
-static void emit_resultreg(void)
+void hop_add_eoi_insel(struct hop* hop)
 {
-	append("%%%d", current_hop->resultvreg->id);
+	struct insel* insel = new_insel(INSEL_EOI);
+	array_append(&hop->insels, insel);
 }
-
-static void emit_eoi(void)
-{
-	append("\n");
-}
-
-static const struct burm_emitter_data emitter_data =
-{
-    &emit_string,
-    &emit_reg,
-    &emit_value,
-    &emit_resultreg,
-    &emit_eoi
-};
 
 void hop_print(char k, struct hop* hop)
 {
-	char* s;
-    const struct burm_instruction_data* insndata = &burm_instruction_data[hop->insn_no];
+	int i;
+	bool soi = true;
 
-	current_hop = hop;
-	outbuf[0] = 0;
-	if (insndata->emitter)
+	i = 0;
+	for (i=0; i<hop->insels.count; i++)
 	{
-		insndata->emitter(hop->ir, &emitter_data);
+		struct insel* insel = hop->insels.item[i];
 
-		s = strtok(outbuf, "\n");
-		do
+		if (soi)
 		{
-			tracef(k, "%c: %p: %s\n", k, hop, s);
-			s = strtok(NULL, "\n");
+			tracef(k, "%c: %d: ", k, hop->id);
+			soi = false;
 		}
-		while (s);
+
+		switch (insel->type)
+		{
+			case INSEL_EOI:
+				tracef(k, "\n");
+				soi = true;
+				break;
+
+			case INSEL_REG:
+				tracef(k, "%%%d", insel->u.reg->id);
+				break;
+
+			case INSEL_STRING:
+				tracef(k, "%s", insel->u.string);
+				break;
+
+			case INSEL_VALUE:
+			{
+				struct ir* ir = insel->u.value;
+				switch (ir->opcode)
+				{
+					case IR_BLOCK:
+						tracef(k, "%s", ir->u.bvalue->name);
+						break;
+
+					case IR_LOCAL:
+					case IR_CONST:
+						tracef(k, "0x%d", ir->u.ivalue);
+						break;
+				}
+				break;
+			}
+		}
 	}
-	else
-		tracef(k, "%c: %p: (empty)\n", k, hop);
+
+	if (!soi)
+		tracef(k, "\n", k);
 }
 

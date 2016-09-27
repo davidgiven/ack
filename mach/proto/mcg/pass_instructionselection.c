@@ -1,6 +1,9 @@
 #include "mcg.h"
 
 static struct basicblock* current_bb;
+static struct hop* current_hop;
+
+static const struct burm_emitter_data emitter_data;
 
 void burm_trace(struct ir* p, int ruleno, int cost, int bestcost) {
     const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
@@ -16,28 +19,67 @@ void burm_panic_cannot_match(struct ir* ir)
 	exit(1);
 }
 
-static void walk_instructions(struct hop* hop, struct ir* ir, int goal)
+static void emit_reg(struct ir* ir)
+{
+    if (ir->hop)
+		hop_add_reg_insel(current_hop, ir->hop);
+    else
+    {
+        const struct burm_instruction_data* insndata = &burm_instruction_data[ir->insn_no];
+        if (insndata->emitter)
+            insndata->emitter(ir, &emitter_data);
+    }
+}
+
+static void emit_string(const char* data)
+{
+	hop_add_string_insel(current_hop, data);
+}
+
+static void emit_value(struct ir* ir)
+{
+	hop_add_value_insel(current_hop, ir);
+}
+
+static void emit_resultreg(void)
+{
+	hop_add_reg_insel(current_hop, current_hop);
+}
+
+static void emit_eoi(void)
+{
+	hop_add_eoi_insel(current_hop);
+}
+
+static const struct burm_emitter_data emitter_data =
+{
+    &emit_string,
+    &emit_reg,
+    &emit_value,
+    &emit_resultreg,
+    &emit_eoi
+};
+
+
+static void walk_instructions(struct ir* ir, int goal)
 {
     struct ir* children[10];
     int insn_no = burm_rule(ir->state_label, goal);
     const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
     const short* nts = burm_nts[insn_no];
+    struct hop* parent_hop = NULL;
     int i;
     
     ir->insn_no = insn_no;
     if (!insndata->is_fragment)
-        hop = ir->hop = new_hop(insn_no, ir);;
-
-    if (insndata->allocate)
     {
-        hop->resultvreg = new_vreg();
-        array_append(&hop->newvregs, hop->resultvreg);
-        array_append(&hop->outvregs, hop->resultvreg);
+        parent_hop = current_hop;
+        current_hop = ir->hop = new_hop(insn_no, ir);
     }
 
     burm_kids(ir, insn_no, children);
     for (i=0; nts[i]; i++)
-        walk_instructions(hop, children[i], nts[i]);
+        walk_instructions(children[i], nts[i]);
 
     ir->is_generated = true;
 
@@ -50,8 +92,12 @@ static void walk_instructions(struct hop* hop, struct ir* ir, int goal)
 
     if (!insndata->is_fragment)
     {
-        array_append(&current_bb->hops, hop);
-        hop_print('I', hop);
+        if (insndata->emitter)
+            insndata->emitter(ir, &emitter_data);
+
+        hop_print('I', current_hop);
+        array_append(&current_bb->hops, current_hop);
+        current_hop = parent_hop;
     }
 }
 
@@ -73,7 +119,7 @@ static void select_instructions(void)
 			burm_panic_cannot_match(ir);
 
         ir_print('I', ir);
-		walk_instructions(NULL, ir, 1);
+		walk_instructions(ir, 1);
 	}
 }
 

@@ -28,7 +28,6 @@ cprogram {
 	vars = {
 		["+cflags"] = {
 			"-Werror-implicit-function-declaration",
-			"-Wint-conversion"
 		}
 	}
 }
