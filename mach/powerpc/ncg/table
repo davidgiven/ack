@@ -233,7 +233,6 @@ TOKENS
 
 SETS
 
-	TOKEN              = LABEL + CONST + LOCAL.
 	GPRI               = GPR + GPRE.
 	
 	SUM_ALL            = SUM_RC + SUM_RR.
@@ -348,8 +347,7 @@ INSTRUCTIONS
   gpr_ro_gpr_gpr  GPRI:ro, GPRI:ro, GPRI:ro.
   gpr_wo_gprindirect GPRI:wo, GPRINDIRECT:ro.
   gpr_wo_gpr_gpr  GPRI:wo, GPRI:ro, GPRI:ro.
-  
-  invalid "invalid".
+
   comment "!" LABEL+LABELI:ro.
 
 
@@ -753,25 +751,28 @@ TESTS
 
 
 STACKINGRULES
-	
+
+	from LOCAL to STACK
+		gen
+			COMMENT("stack LOCAL")
+			stwu {GPRE, regvar(%1.off)}, {GPRINDIRECT, SP, 0-4}
+
 	from GPR to STACK
 		gen
 			COMMENT("stack GPR")
 			stwu %1, {GPRINDIRECT, SP, 0-4}
 	
 	from CONST to STACK
-		uses REG
 		gen
 			COMMENT("stack CONST")
-			move %1, %a
-			stwu %a, {GPRINDIRECT, SP, 0-4}
+			move %1, SCRATCH
+			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from LABEL to STACK
-		uses REG
 		gen
 			COMMENT("stack LABEL")
-			move %1, {GPRE, %a}
-			stwu %a, {GPRINDIRECT, SP, 0-4}
+			move %1, SCRATCH
+			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from SEX_B to STACK
 		gen
@@ -809,13 +810,9 @@ STACKINGRULES
 		gen
 			COMMENT("stack FSREG")
 			stfsu %1, {GPRINDIRECT, SP, 0-4}
-			
-	from TOKEN to STACK
-		gen
-			invalid.
-			
-		
-		
+
+
+
 COERCIONS
 
 	from REG
