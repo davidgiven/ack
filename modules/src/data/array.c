@@ -31,10 +31,13 @@ bool array_contains(void* arrayp, void* value)
 	return false;
 }
 
-void array_appendu(void* arrayp, void* value)
+bool array_appendu(void* arrayp, void* value)
 {
-	if (!array_contains(arrayp, value))
-		array_append(arrayp, value);
+	if (array_contains(arrayp, value))
+        return true;
+
+    array_append(arrayp, value);
+    return false;
 }
 
 void array_remove(void* arrayp, void* value)
