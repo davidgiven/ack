@@ -2004,12 +2004,19 @@ PATTERNS
 	pat str $1==2                      /* Store HP */
 		leaving
 			ste ".reghp"
-				
+
+	pat loc ass $1==4                  /* Drop 4 bytes from stack */
+		with exact GPR
+			/* nop */
+		with STACK
+			gen
+				addi SP, SP, {CONST, 4}
+
 	pat ass                            /* Adjust stack by variable amount */
-		with CONST
+		with CONST STACK
 			gen
 				move {SUM_RC, SP, %1.val}, {GPRE, SP}
-		with GPR
+		with GPR STACK
 			gen
 				move {SUM_RR, SP, %1}, {GPRE, SP}
 				
