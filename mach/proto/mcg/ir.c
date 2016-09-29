@@ -71,14 +71,14 @@ struct ir* ir_walk(struct ir* ir, ir_walker_t* cb, void* user)
     if (cb(ir, user))
         return ir;
 
-    if (ir->left && !ir->left->is_sequence)
+    if (ir->left && !ir->left->is_root)
     {
         struct ir* irr = ir_walk(ir->left, cb, user);
         if (irr)
             return irr;
     }
 
-    if (ir->right && !ir->right->is_sequence)
+    if (ir->right && !ir->right->is_root)
     {
         struct ir* irr = ir_walk(ir->right, cb, user);
         if (irr)
@@ -126,7 +126,7 @@ static void print_expr(char k, const struct ir* ir)
 		default:
             if (ir->left)
             {
-                if (ir->left->is_sequence)
+                if (ir->left->is_root)
                     tracef(k, "$%d", ir->left->id);
                 else
                     print_expr(k, ir->left);
@@ -134,7 +134,7 @@ static void print_expr(char k, const struct ir* ir)
             if (ir->right)
             {
                 tracef(k, ", ");
-                if (ir->right->is_sequence)
+                if (ir->right->is_root)
                     tracef(k, "$%d", ir->right->id);
                 else
                     print_expr(k, ir->right);

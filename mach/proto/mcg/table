@@ -1,27 +1,38 @@
 REGISTERS
 
-	r0  GPR RET0;
-	r1  GPR RET1;
-	r2  GPR;
-	r3  GPR;
-	r4  GPR;
-	r5  GPR;
-	r6  GPR;
-	r7  GPR;
-	r8  GPR;
-	r9  GPR;
-	r10 GPR;
-	r11 GPR;
+	r0  reg4 int ret0;
+	r1  reg4 int ret1;
+	r2  reg4 int;
+	r3  reg4 int;
+	r4  reg4 int;
+	r5  reg4 int;
+	r6  reg4 int;
+	r7  reg4 int;
+	r8  reg4 int;
+	r9  reg4 int;
+	r10 reg4 int;
+	r11 reg4 int;
 
-	cc  CC;
+	s0  reg4 float;
+	s1  reg4 float;
+	s2  reg4 float;
+	s3  reg4 float;
+	s4  reg4 float;
+	s5  reg4 float;
+	s6  reg4 float;
+	s7  reg4 float;
+	s8  reg4 float;
+	s9  reg4 float;
+
+	cc  conditioncode;
 
 DECLARATIONS
 
 	address   fragment;
 	aluparam  fragment;
-	reg       allocates(GPR);
-	tristate  allocates(CC);
-	bistate   allocates(CC);
+	reg       allocates(reg4);
+	tristate  allocates(conditioncode);
+	bistate   allocates(conditioncode);
 
 PATTERNS
 
@@ -158,7 +169,8 @@ PATTERNS
 	aluparam = value:CONST4
 		emit "#$value";
 
-	aluparam = reg;
+	aluparam = value:reg
+		emit "%value";
 
 	reg = value:aluparam
 		emit "mov %reg, %value"
@@ -175,3 +187,10 @@ PATTERNS
 	reg = value:CONST4
 		emit "ldr %reg, #$value"
 		cost 8;
+
+/* FPU operations */
+
+	reg = ADDF4(left:reg, right:reg)
+		emit "fadds %reg, %left, %right"
+		cost 4;
+

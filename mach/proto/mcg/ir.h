@@ -20,9 +20,9 @@ struct ir
 
 	void* state_label; /* used by the iburg instruction selector */
 	int insn_no;       /* the table rule number for this instruction */
-	struct hop* hop;   /* only for IRs that root a hardware op */
+	ARRAYOF(struct hop) hops; /* only for root IRs */
 
-	bool is_sequence : 1;
+	bool is_root : 1;
 	bool is_generated : 1;
 };
 

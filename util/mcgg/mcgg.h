@@ -27,7 +27,8 @@ extern void burm_trace(struct ir* p, int ruleno, int cost, int bestcost);
 struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
-    void (*emit_reg)(struct ir* ir);
+    void (*emit_fragment)(struct ir* ir, int goal);
+    void (*emit_reg)(struct ir* ir, int goal);
     void (*emit_value)(struct ir* ir);
     void (*emit_resultreg)(void);
     void (*emit_eoi)(void);

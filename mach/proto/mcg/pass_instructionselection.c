@@ -19,21 +19,22 @@ void burm_panic_cannot_match(struct ir* ir)
 	exit(1);
 }
 
-static void emit_reg(struct ir* ir)
+static void emit_reg(struct ir* ir, int goal)
 {
-    if (ir->hop)
-		hop_add_reg_insel(current_hop, ir->hop);
-    else
-    {
-        const struct burm_instruction_data* insndata = &burm_instruction_data[ir->insn_no];
-        if (insndata->emitter)
-            insndata->emitter(ir, &emitter_data);
-    }
+    hop_add_reg_insel(current_hop, ir, goal);
 }
 
 static void emit_string(const char* data)
 {
 	hop_add_string_insel(current_hop, data);
+}
+
+static void emit_fragment(struct ir* ir, int goal)
+{
+    int insn_no = burm_rule(ir->state_label, goal);
+    const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
+    if (insndata->emitter)
+        insndata->emitter(ir, &emitter_data);
 }
 
 static void emit_value(struct ir* ir)
@@ -43,7 +44,6 @@ static void emit_value(struct ir* ir)
 
 static void emit_resultreg(void)
 {
-	hop_add_reg_insel(current_hop, current_hop);
 }
 
 static void emit_eoi(void)
@@ -54,6 +54,7 @@ static void emit_eoi(void)
 static const struct burm_emitter_data emitter_data =
 {
     &emit_string,
+    &emit_fragment,
     &emit_reg,
     &emit_value,
     &emit_resultreg,
@@ -70,11 +71,10 @@ static void walk_instructions(struct ir* ir, int goal)
     struct hop* parent_hop = NULL;
     int i;
     
-    ir->insn_no = insn_no;
     if (!insndata->is_fragment)
     {
         parent_hop = current_hop;
-        current_hop = ir->hop = new_hop(insn_no, ir);
+        current_hop = new_hop(insn_no, ir);
     }
 
     burm_kids(ir, insn_no, children);
@@ -82,10 +82,11 @@ static void walk_instructions(struct ir* ir, int goal)
         walk_instructions(children[i], nts[i]);
 
     ir->is_generated = true;
+    ir->insn_no = insn_no;
 
     tracef('I', "I: $%d %s selected %s %d: %s\n",
         ir->id,
-        ir->is_sequence ? "S" : " ",
+        ir->is_root ? "S" : " ",
         insndata->is_fragment ? "fragment" : "instruction",
         insn_no,
         insndata->name);
@@ -96,11 +97,10 @@ static void walk_instructions(struct ir* ir, int goal)
             insndata->emitter(ir, &emitter_data);
 
         hop_print('I', current_hop);
-        array_append(&current_bb->hops, current_hop);
+        array_append(&ir->hops, current_hop);
         current_hop = parent_hop;
     }
 }
-
 
 static void select_instructions(void)
 {

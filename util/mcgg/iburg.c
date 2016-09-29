@@ -295,7 +295,7 @@ struct regclass* getregclass(const char* id)
 {
 	struct regclass* p = lookup(id);
 	if (!p || (p->kind != REGCLASS))
-		yyerror("'%p' is not the name of a register class");
+		yyerror("'%s' is not the name of a register class", id);
 	return p;
 }
 
@@ -917,18 +917,22 @@ static void print_path(uint32_t path)
 
 static const uint32_t PATH_MISSING = 0xffffffff;
 
-static uint32_t find_label(Tree root, const char* name, uint32_t path)
+static uint32_t find_label(Tree root, const char* name, uint32_t path, Tree* found)
 {
 	uint32_t p;
 
 	if (root->label && (strcmp(root->label, name) == 0))
+	{
+		if (found)
+			*found = root;
 		return path;
+	}
 
 	p = PATH_MISSING;
 	if (root->left && (p == PATH_MISSING))
-		p = find_label(root->left, name, path*3 + 1);
+		p = find_label(root->left, name, path*3 + 1, found);
 	if (root->right && (p == PATH_MISSING))
-		p = find_label(root->right, name, path*3 + 2);
+		p = find_label(root->right, name, path*3 + 2, found);
 	return p;
 }
 
@@ -963,15 +967,23 @@ static void emitinsndata(Rule rules)
 						const char* label = f->data + 1;
 
 						if (strcmp(label, r->lhs->name) == 0)
-							print("%1data->emit_resultreg();\n");
+							print("%1data->emit_reg(node, %P%s_NT);\n", label);
 						else
 						{
-							uint32_t path = find_label(r->pattern, label, 0);
-							print("%1data->emit_reg(");
+							Tree node;
+							uint32_t path = find_label(r->pattern, label, 0, &node);
+							Nonterm nt = node->op;
+
 							if (path == PATH_MISSING)
 								label_not_found(r, label);
+
+							if (nt->is_fragment)
+								print("%1data->emit_fragment(");
+							else
+								print("%1data->emit_reg(");
+
 							print_path(path);
-							print(");\n");
+							print(", %P%s_NT);\n", ((Nonterm)node->op)->name);
 						}
 						break;
 					}
@@ -979,7 +991,7 @@ static void emitinsndata(Rule rules)
 					case '$':
 					{
 						const char* label = f->data + 1;
-						uint32_t path = find_label(r->pattern, label, 0);
+						uint32_t path = find_label(r->pattern, label, 0, NULL);
 						print("%1data->emit_value(");
 						if (path == PATH_MISSING)
 							label_not_found(r, label);

@@ -6,9 +6,8 @@
 
 static int OP_LABEL(struct ir* ir)
 {
-	if (ir->is_generated)
+	if (ir->is_root && ir->is_generated)
 	{
-		assert(ir->is_sequence);
 		return ir_to_esn(IR_REG, ir->size);
 	}
 	return ir_to_esn(ir->opcode, ir->size);
