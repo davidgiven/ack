@@ -2180,13 +2180,11 @@ PATTERNS
 				bl {LABEL, ".cuf8"}
 				
 	pat fef $1==INT64                  /* Split double */
-		with FREG
+		with GPR3 GPR4
+			kills FPR0, FPR1, GPR6, GPR7
 			gen
-				addi SP, SP, {CONST, 0-8}
-				stfd %1, {GPRINDIRECT, SP, 0}
-				stwu SP, {GPRINDIRECT, SP, 0-4}
-				bl {LABEL, "___fef8"}
-				stw R3, {GPRINDIRECT, SP, 0}
+				bl {LABEL, ".fef8"}
+			yields R4 R3 R5
 				
 	pat fif $1==INT64                  /* Multiply and split double (?) */
 		with STACK
