@@ -1014,6 +1014,15 @@ static void emitinsndata(Rule rules)
 
 			print("}\n\n");
 		}
+		else
+		{
+			/* This instruction has no code; make sure it's not a fragment. */
+			if (r->lhs->is_fragment)
+			{
+				yylineno = r->lineno;
+				yyerror("rule is a fragment, but doesn't emit anything");
+			}
+		}
 
 		r = r->link;
 	}
