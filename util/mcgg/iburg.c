@@ -289,6 +289,8 @@ void addregclass(struct reg* reg, const char* id)
 		p->link = *q;
 		*q = p;
 	}
+
+	reg->classes |= 1<<(p->number);
 }
 
 struct regclass* getregclass(const char* id)
@@ -437,12 +439,19 @@ static void print(char* fmt, ...)
 				case 'd':
 					fprintf(outfp, "%d", va_arg(ap, int));
 					break;
+
+				case 'x':
+					fprintf(outfp, "%x", va_arg(ap, uint32_t));
+					break;
+
 				case 's':
 					fputs(va_arg(ap, char*), outfp);
 					break;
+
 				case 'P':
 					fprintf(outfp, "%s_", prefix);
 					break;
+
 				case 'T':
 				{
 					Tree t = va_arg(ap, Tree);
@@ -453,15 +462,18 @@ static void print(char* fmt, ...)
 						print("(%T)", t->left);
 					break;
 				}
+
 				case 'R':
 				{
 					Rule r = va_arg(ap, Rule);
 					print("%S: %T", r->lhs, r->pattern);
 					break;
 				}
+
 				case 'S':
 					fputs(va_arg(ap, Term)->name, outfp);
 					break;
+
 				case '1':
 				case '2':
 				case '3':
@@ -473,6 +485,7 @@ static void print(char* fmt, ...)
 						putc('\t', outfp);
 					break;
 				}
+
 				default:
 					putc(*fmt, outfp);
 					break;
@@ -530,14 +543,14 @@ static void emitregisterclasses(struct regclass* rc)
 static void emitregisters(struct reg* r)
 {
 	int k = 0;
-	print("const char* %Pregister_names[] = {\n");
+	print("const struct %Pregister_data %Pregister_data[] = {\n");
 	while (r)
 	{
 		for (; k < r->number; k++)
-			print("%1NULL,\n");
+			print("%1{ 0 },\n");
 		k++;
 
-		print("%1\"%s\",\n", r->name);
+		print("%1{ \"%s\", %d },\n", r->name, r->classes);
 		r = r->link;
 	}
 	print("};\n\n");
@@ -659,7 +672,7 @@ static void emitdefs(Nonterm nts, int ntnumber)
 
 	for (p = nts; p; p = p->link)
 		print("#define %P%S_NT %d\n", p, p->number);
-	print("static const int %Pmax_nt = %d;\n\n", ntnumber);
+	print("#define %Pmax_nt %d\n\n", ntnumber);
 	print("const char *%Pntname[] = {\n%10,\n");
 	for (p = nts; p; p = p->link)
 		print("%1\"%S\",\n", p);

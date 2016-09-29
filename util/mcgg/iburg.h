@@ -20,6 +20,7 @@ struct reg
 	const char* name;      /* register name */
 	Kind kind;             /* REG */
 	int number;            /* identifying number */
+	uint32_t classes;      // bitfield of classes */
 	struct reg* link;      /* next in list */
 };
 

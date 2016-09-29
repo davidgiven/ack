@@ -46,6 +46,14 @@ struct burm_instruction_data
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];
+
+struct burm_register_data
+{
+    const char* name;
+    uint32_t classes;
+};
+
+extern const struct burm_register_data burm_register_data[];
 extern const char* burm_register_class_names[];
 
 #endif
