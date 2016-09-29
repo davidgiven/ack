@@ -174,4 +174,4 @@ PATTERNS
 
 	reg = value:CONST4
 		emit "ldr %reg, #$value"
-		cost 4;
+		cost 8;

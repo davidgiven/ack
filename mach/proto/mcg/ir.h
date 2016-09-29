@@ -8,7 +8,6 @@ struct ir
 	int id;
 	enum ir_opcode opcode;
 	int size;
-	enum ir_type type;
 	struct ir* left;
 	struct ir* right;
 	union

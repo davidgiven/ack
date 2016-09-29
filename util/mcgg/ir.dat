@@ -1,92 +1,76 @@
 # Flags:
 #   S: has size (use in CONST1, CONST2, CONST4, CONST8 forms)
 #   V: has no size (use in JUMP, CJUMP, RET forms)
-#
-# Types:
-#   I, F: integer, float
-#   A: any (will be coerced to I or F during IR postprocessing)
-#
-# Any instruction with an A type must be followed by the corresponding F
-# version.
 
 # Simple terminals
-SA.. CONST
-SF.. CONSTF
-SA.. REG
-SF.. REGF
-SI.. LABEL
-SI.. BLOCK
-V... PAIR
-SA.. ANY
-SF.. ANYF
-S... LOCAL
-S... PHI
+S CONST
+S REG
+S LABEL
+S BLOCK
+V PAIR
+S ANY
+S LOCAL
+S PHI
 
 # Magic stack operations
-S.A. PUSH
-S.F. PUSHF
-SA.. POP
-SF.. POPF
+S PUSH
+S POP
 
 #... Memory operations
-SAI. LOAD
-SFI. LOADF
-S.IA STORE
-S.IF STOREF
+S LOAD
+S STORE
 
 # Arithemetic operations
-SIII ADD
-SIII SUB
-SIII MUL
-SIII DIV
-SIII MOD
-SIII NEG
+S ADD
+S SUB
+S MUL
+S DIV
+S MOD
+S NEG
 
-SFFF ADDF
-SFFF SUBF
-SFFF MULF
-SFFF DIVF
-SFFF NEGF
+S ADDF
+S SUBF
+S MULF
+S DIVF
+S NEGF
 
-SIII AND
-SIII OR
-SIII EOR
-SIII NOT
+S AND
+S OR
+S EOR
+S NOT
 
 # Conversions
-SIII CII1
-SIII CII2
-SIII CII4
-SIII CII8
+S CII1
+S CII2
+S CII4
+S CII8
 
-SIII CIU1
-SIII CIU2
-SIII CIU4
-SIII CIU8
+S CIU1
+S CIU2
+S CIU4
+S CIU8
 
 # Tristate comparisons
-SIII COMPARES
-SIII COMPAREU
+S COMPARES
+S COMPAREU
 
 # Boolean comparisons
-SIII IFEQ
-SIII IFLT
-SIII IFLE
+S IFEQ
+S IFLT
+S IFLE
 
 # Procedures
-VI.. CALL
+V CALL
 
 # Flow control --- these never return
-V.I. JUMP
-VIII CJUMPEQ
-VIII CJUMPLT
-VIII CJUMPLE
-V... RET
+V JUMP
+V CJUMPEQ
+V CJUMPLT
+V CJUMPLE
+V RET
  
 # Special
-SI.. STACKADJUST
-SA.. GETRET
-SF.. GETRETF
-S.A. SETRET
-S.F. SETRETF
+S STACKADJUST
+S GETRET
+S SETRET
 
