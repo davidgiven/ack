@@ -11,6 +11,7 @@
 #include <errno.h>
 #include "iburg.h"
 #include "ircodes.h"
+#include "astring.h"
 
 static char rcsid[] = "$Id$";
 
@@ -31,7 +32,7 @@ static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
 static void registerterminals(void);
 static void emitclosure(Nonterm nts);
-static void emitcost(Tree t, char* v);
+static void emitcost(Tree t, const char* v);
 static void emitcostcalc(Rule r);
 static void emitdefs(Nonterm nts, int ntnumber);
 static void emitfuncs(void);
@@ -50,7 +51,7 @@ static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
 static void emitstruct(Nonterm nts, int ntnumber);
 static void emitterms(Term terms);
-static void emittest(Tree t, char* v, char* suffix);
+static void emittest(Tree t, const char* v, const char* suffix);
 
 extern int yy_flex_debug;
 
@@ -154,31 +155,9 @@ int main(int argc, char* argv[])
 	return errcnt > 0;
 }
 
-/* stringf - format and save a string */
-char* stringf(char* fmt, ...)
-{
-    int n;
-    char* p;
-    va_list ap;
-
-    va_start(ap, fmt);
-    n = vsnprintf(NULL, 0, fmt, ap) + 1;
-    va_end(ap);
-
-    p = malloc(n);
-    if (!p)
-        return NULL;
-
-    va_start(ap, fmt);
-    vsnprintf(p, n, fmt, ap);
-    va_end(ap);
-
-    return p;
-}
-
 static void registerterminal(const struct ir_data* data, int iropcode, int size)
 {
-	const char* s = (size == 0) ? data->name : stringf("%s%d", data->name, size);
+	const char* s = (size == 0) ? data->name : aprintf("%s%d", data->name, size);
 	int esn = ir_to_esn(iropcode, size);
 
 	term(s, esn);
@@ -650,16 +629,16 @@ static void emitclosure(Nonterm nts)
 }
 
 /* emitcost - emit cost computation for tree t */
-static void emitcost(Tree t, char* v)
+static void emitcost(Tree t, const char* v)
 {
 	Nonterm p = t->op;
 
 	if (p->kind == TERM)
 	{
 		if (t->left)
-			emitcost(t->left, stringf("%s->left", v));
+			emitcost(t->left, aprintf("%s->left", v));
 		if (t->right)
-			emitcost(t->right, stringf("%s->right", v));
+			emitcost(t->right, aprintf("%s->right", v));
 	}
 	else
 		print("%s->cost[%P%S_NT] + ", v, p);
@@ -704,7 +683,7 @@ static void emitheader(void)
 }
 
 /* computekids - compute paths to kids in tree t */
-static char* computekids(Tree t, char* v, char* bp, int* ip)
+static char* computekids(Tree t, const char* v, char* bp, int* ip)
 {
 	Term p = t->op;
 
@@ -715,9 +694,9 @@ static char* computekids(Tree t, char* v, char* bp, int* ip)
 	}
 	else if (p->arity > 0)
 	{
-		bp = computekids(t->left, stringf("LEFT_CHILD(%s)", v), bp, ip);
+		bp = computekids(t->left, aprintf("LEFT_CHILD(%s)", v), bp, ip);
 		if (p->arity == 2)
-			bp = computekids(t->right, stringf("RIGHT_CHILD(%s)", v), bp, ip);
+			bp = computekids(t->right, aprintf("RIGHT_CHILD(%s)", v), bp, ip);
 	}
 	return bp;
 }
@@ -1168,7 +1147,7 @@ static void emitterms(Term terms)
 }
 
 /* emittest - emit clause for testing a match */
-static void emittest(Tree t, char* v, char* suffix)
+static void emittest(Tree t, const char* v, const char* suffix)
 {
 	Term p = t->op;
 
@@ -1177,9 +1156,9 @@ static void emittest(Tree t, char* v, char* suffix)
 		print("%3%s->op == %d%s/* %S */\n", v, p->esn,
 		    t->nterms > 1 ? " && " : suffix, p);
 		if (t->left)
-			emittest(t->left, stringf("%s->left", v),
+			emittest(t->left, aprintf("%s->left", v),
 			    t->right && t->right->nterms ? " && " : suffix);
 		if (t->right)
-			emittest(t->right, stringf("%s->right", v), suffix);
+			emittest(t->right, aprintf("%s->right", v), suffix);
 	}
 }

@@ -1,28 +1,28 @@
 REGISTERS
 
-	r0  reg4 int ret0;
-	r1  reg4 int ret1;
-	r2  reg4 int;
-	r3  reg4 int;
-	r4  reg4 int;
-	r5  reg4 int;
-	r6  reg4 int;
-	r7  reg4 int;
-	r8  reg4 int;
-	r9  reg4 int;
-	r10 reg4 int;
-	r11 reg4 int;
+	r0  reg4 i ret0;
+	r1  reg4 i;
+	r2  reg4 i;
+	r3  reg4 i;
+	r4  reg4 i;
+	r5  reg4 i;
+	r6  reg4 i;
+	r7  reg4 i;
+	r8  reg4 i;
+	r9  reg4 i;
+	r10 reg4 i;
+	r11 reg4 i;
 
-	s0  reg4 float;
-	s1  reg4 float;
-	s2  reg4 float;
-	s3  reg4 float;
-	s4  reg4 float;
-	s5  reg4 float;
-	s6  reg4 float;
-	s7  reg4 float;
-	s8  reg4 float;
-	s9  reg4 float;
+	s0  reg4 f;
+	s1  reg4 f;
+	s2  reg4 f;
+	s3  reg4 f;
+	s4  reg4 f;
+	s5  reg4 f;
+	s6  reg4 f;
+	s7  reg4 f;
+	s8  reg4 f;
+	s9  reg4 f;
 
 	cc  conditioncode;
 

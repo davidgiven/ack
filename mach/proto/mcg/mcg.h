@@ -18,6 +18,8 @@
 #include "em_ptyp.h"
 #include "array.h"
 #include "map.h"
+#include "diagnostics.h"
+#include "astring.h"
 #include "ir.h"
 #include "mcgg.h"
 #include "hop.h"
@@ -88,7 +90,6 @@ struct basicblock
     bool is_terminated : 1;
 };
 
-extern void fatal(const char* s, ...);
 extern const char* aprintf(const char* fmt, ...);
 extern void tracef(char k, const char* fmt, ...);
 extern bool tracing(char k);
