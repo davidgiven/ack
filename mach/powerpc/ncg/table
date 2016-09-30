@@ -1893,16 +1893,16 @@ PATTERNS
 	pat fil                            /* Set current filename */
 		leaving
 			lae $1
-			ste ".filename"
+			ste "hol0+4"
 			
 	pat lin                            /* Set current line number */
 		leaving
 			loc $1
-			ste ".linenumber"
+			ste "hol0"
 
 	pat lni                            /* Increment line number */
 		leaving
-			ine ".linenumber"			
+			ine "hol0"
 			
 	pat lim                            /* Load EM trap ignore mask */
 		leaving

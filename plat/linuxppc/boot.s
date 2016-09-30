@@ -57,7 +57,3 @@ begtext:
 .define .trppc, .ignmask
 .comm .trppc, 4              ! ptr to user trap handler
 .comm .ignmask, 4            ! user trap ignore mask 
-
-.define .linenumber, .filename
-.comm .linenumber, 4         ! current linenumber (used for debugging)
-.comm .filename, 4           ! ptr to current filename (used for debugging)
