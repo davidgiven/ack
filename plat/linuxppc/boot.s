@@ -41,7 +41,14 @@ begtext:
 	stwu r3, -4(sp)
 	
 	b __m_a_i_n
-	
+
+! Define symbols at the beginning of our various segments, so that we can find
+! them. (Except .text, which has already been done.)
+
+.sect .data;       begdata:
+.sect .rom;        begrom:
+.sect .bss;        begbss:
+
 ! Some magic data. All EM systems need these.
 
 .define _errno
