@@ -328,11 +328,18 @@ static void parse_mes(void)
 
         case 3: /* register variable */
         {
-            arith offset = mes_get_cst();
-            int size = mes_get_cst();
-            int type = mes_get_cst();
-            int priority = mes_get_cst();
-            tb_regvar(offset, size, type, priority);
+            /* ego will sometimes generate 'mes 3' pseudos with no actual
+             * parameters. Detect and ignore these. */
+            
+            EM_getinstr(&em);
+            if (em.em_type == EM_MESARG)
+            {
+                arith offset = em.em_cst;
+                int size = mes_get_cst();
+                int type = mes_get_cst();
+                int priority = mes_get_cst();
+                tb_regvar(offset, size, type, priority);
+            }
             break;
         }
     }
