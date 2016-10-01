@@ -56,3 +56,19 @@ void imap_add(void* mapp, int left, void* right)
     append(map, left, right);
 }
 
+void* imap_get(void* mapp, int left)
+{
+    struct imap* map = mapp;
+    int i;
+
+    for (i=0; i<map->count; i++)
+    {
+        struct imap_node* node = &map->item[i];
+		if (node->left == left)
+			return node->right;
+    }
+
+	return NULL;
+}
+
+

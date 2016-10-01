@@ -15,21 +15,24 @@ typedef enum
 typedef struct rule* Rule;
 typedef struct term* Term;
 
+struct terminfo
+{
+	const char* name;
+	const char* label;
+	const char* regattr;
+};
+
 struct reg
 {
 	const char* name;      /* register name */
-	Kind kind;             /* REG */
 	int number;            /* identifying number */
-	uint32_t classes;      // bitfield of classes */
-	struct reg* link;      /* next in list */
+	uint64_t classes;      // bitfield of classes */
 };
 
 struct regclass
 {
 	const char* name;      /* class name */
-	Kind kind;             /* REGCLASS */
 	int number;            /* identifying number */
-	struct regclass* link; /* next in list */
 };
 
 extern struct reg* makereg(const char* name);
@@ -72,7 +75,7 @@ struct tree
 	Tree left, right;   /* operands */
 	int nterms;         /* number of terminal nodes in this tree */
 };
-extern Tree tree(const char* op, const char* label, Tree left, Tree right);
+extern Tree tree(struct terminfo* ti, Tree left, Tree right);
 
 struct rule
 { /* rules: */

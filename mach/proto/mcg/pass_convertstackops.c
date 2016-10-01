@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static MAPOF(struct basicblock, struct basicblock) graph;
+static PMAPOF(struct basicblock, struct basicblock) graph;
 static ARRAYOF(struct ir) pops;
 static ARRAYOF(struct ir) pushes;
 
@@ -46,7 +46,7 @@ static bool collect_outputs_cb(struct ir* ir, void* user)
     struct basicblock* caller = user;
 
     if (ir->opcode == IR_BLOCK)
-        map_addp(&graph, caller, ir->u.bvalue);
+        pmap_add(&graph, caller, ir->u.bvalue);
     return false;
 }
 

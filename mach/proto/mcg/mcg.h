@@ -17,7 +17,7 @@
 #include "em_flag.h"
 #include "em_ptyp.h"
 #include "array.h"
-#include "map.h"
+#include "pmap.h"
 #include "diagnostics.h"
 #include "astring.h"
 #include "ir.h"

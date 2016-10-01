@@ -9,9 +9,11 @@
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
+#include <inttypes.h>
 #include "iburg.h"
 #include "ircodes.h"
 #include "astring.h"
+#include "smap.h"
 
 static char rcsid[] = "$Id$";
 
@@ -21,12 +23,13 @@ static char* prefix = "burm";
 static int Tflag = 1; /* tracing */
 static int ntnumber = 0;
 static Nonterm start = 0;
-static struct reg* regs = NULL;
-static struct regclass* regclasses = NULL;
 static Term terms;
 static Nonterm nts;
 static Rule rules;
 static int nrules;
+
+static SMAPOF(struct reg) registers;
+static SMAPOF(struct regclass) registerclasses;
 
 static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
@@ -44,8 +47,8 @@ static void emitleaf(Term p, int ntnumber);
 static void emitnts(Rule rules, int nrules);
 static void emitpredicatedefinitions(Rule rules);
 static void emitrecord(char* pre, Rule r, int cost);
-static void emitregisterclasses(struct regclass* rc);
-static void emitregisters(struct reg* regs);
+static void emitregisterclasses();
+static void emitregisters();
 static void emitrule(Nonterm nts);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
 static void emitstring(Rule rules);
@@ -128,12 +131,14 @@ int main(int argc, char* argv[])
 
 	if (start)
 		ckreach(start);
+	#if 0
 	for (p = nts; p; p = p->link)
 		if (!p->reached)
 			yyerror("can't reach non-terminal `%s'\n", p->name);
+	#endif
 
-	emitregisterclasses(regclasses);
-	emitregisters(regs);
+	emitregisterclasses();
+	emitregisters();
 	emitdefs(nts, ntnumber);
 	emitstruct(nts, ntnumber);
 	emitnts(rules, nrules);
@@ -230,52 +235,40 @@ static void* install(const char* name)
 
 struct reg* makereg(const char* id)
 {
-	struct reg* p = lookup(id);
-	struct reg** q = &regs;
+	struct reg* p = smap_get(&registers, id);
 	static int number = 1;
 
 	if (p)
 		yyerror("redefinition of '%s'", id);
-	p = install(id);
-	p->kind = REG;
+	p = calloc(1, sizeof(*p));
+	p->name = id;
 	p->number = number++;
+	smap_put(&registers, id, p);
 
-	while (*q && (*q)->number < p->number)
-		q = &(*q)->link;
-	assert(*q == 0 || (*q)->number != p->number);
-	p->link = *q;
-	*q = p;
 	return p;
 }
 
 void addregclass(struct reg* reg, const char* id)
 {
-	struct regclass* p = lookup(id);
-	struct regclass** q = &regclasses;
+	struct regclass* p = smap_get(&registerclasses, id);
 	static int number = 1;
 
-	if (p && (p->kind != REGCLASS))
-		yyerror("redefinition of '%s' as something else\n", id);
 	if (!p)
 	{
-		p = install(id);
-		p->kind = REGCLASS;
+		p = calloc(1, sizeof(*p));
+		p->name = id;
 		p->number = number++;
-
-		while (*q && (*q)->number < p->number)
-			q = &(*q)->link;
-		assert(*q == 0 || (*q)->number != p->number);
-		p->link = *q;
-		*q = p;
+		smap_put(&registerclasses, id, p);
 	}
 
 	reg->classes |= 1<<(p->number);
+	nonterm(id, true);
 }
 
 struct regclass* getregclass(const char* id)
 {
-	struct regclass* p = lookup(id);
-	if (!p || (p->kind != REGCLASS))
+	struct regclass* p = smap_get(&registerclasses, id);
+	if (!p)
 		yyerror("'%s' is not the name of a register class", id);
 	return p;
 }
@@ -333,10 +326,10 @@ Term term(const char* id, int esn)
 }
 
 /* tree - create & initialize a tree node with the given fields */
-Tree tree(const char* id, const char* label, Tree left, Tree right)
+Tree tree(struct terminfo* ti, Tree left, Tree right)
 {
 	Tree t = calloc(1, sizeof *t);
-	Term p = lookup(id);
+	Term p = lookup(ti->name);
 	int arity = 0;
 
 	if (left && right)
@@ -345,22 +338,22 @@ Tree tree(const char* id, const char* label, Tree left, Tree right)
 		arity = 1;
 	if (p == NULL && arity > 0)
 	{
-		yyerror("undefined terminal `%s'\n", id);
-		p = term(id, -1);
+		yyerror("undefined terminal `%s'\n", ti->name);
+		p = term(ti->name, -1);
 	}
 	else if (p == NULL && arity == 0)
-		p = (Term)nonterm(id, false);
+		p = (Term)nonterm(ti->name, false);
 	else if (p && p->kind == NONTERM && arity > 0)
 	{
-		yyerror("`%s' is a non-terminal\n", id);
-		p = term(id, -1);
+		yyerror("`%s' is a non-terminal\n", ti->name);
+		p = term(ti->name, -1);
 	}
 	if (p->kind == TERM && p->arity == -1)
 		p->arity = arity;
 	if (p->kind == TERM && arity != p->arity)
-		yyerror("inconsistent arity for terminal `%s'\n", id);
+		yyerror("inconsistent arity for terminal `%s'\n", ti->name);
 	t->op = p;
-	t->label = label;
+	t->label = ti->label;
 	t->nterms = p->kind == TERM;
 	if (t->left = left)
 		t->nterms += left->nterms;
@@ -421,6 +414,10 @@ static void print(char* fmt, ...)
 
 				case 'x':
 					fprintf(outfp, "%x", va_arg(ap, uint32_t));
+					break;
+
+				case 'X':
+					fprintf(outfp, "0x%" PRIx64 "ULL", va_arg(ap, uint64_t));
 					break;
 
 				case 's':
@@ -503,34 +500,34 @@ static void ckreach(Nonterm p)
 		reach(r->pattern);
 }
 
-static void emitregisterclasses(struct regclass* rc)
+static void emitregisterclasses(void)
 {
-	int k = 0;
+	int i;
+
 	print("const char* %Pregister_class_names[] = {\n");
-	while (rc)
+	print("%1NULL,\n"); /* register class id 0 is invalid */
+	for (i=0; i<registerclasses.count; i++)
 	{
-		for (; k < rc->number; k++)
-			print("%1NULL,\n");
-		k++;
+		struct regclass* rc = registerclasses.item[i].right;
+		assert(rc->number == (i+1));
 
 		print("%1\"%s\",\n", rc->name);
-		rc = rc->link;
 	}
 	print("};\n\n");
 }
 
-static void emitregisters(struct reg* r)
+static void emitregisters(void)
 {
-	int k = 0;
-	print("const struct %Pregister_data %Pregister_data[] = {\n");
-	while (r)
-	{
-		for (; k < r->number; k++)
-			print("%1{ 0 },\n");
-		k++;
+	int i;
 
-		print("%1{ \"%s\", %d },\n", r->name, r->classes);
-		r = r->link;
+	print("const struct %Pregister_data %Pregister_data[] = {\n");
+	print("%1{ 0 },\n"); /* register id 0 is invalid */
+	for (i=0; i<registers.count; i++)
+	{
+		struct reg* r = registers.item[i].right;
+		assert(r->number == (i+1));
+
+		print("%1{ \"%s\", %X },\n", r->name, r->classes);
 	}
 	print("};\n\n");
 }

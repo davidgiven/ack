@@ -25,6 +25,7 @@ struct imap
 
 extern void imap_put(void* map, int left, void* right);
 extern void imap_add(void* map, int left, void* right);
+extern void* imap_get(void* map, int left);
 
 #endif
 

@@ -22,7 +22,7 @@ static int nextern = 1;
     Rule rule;
     struct reg* reg;
     struct stringlist* stringlist;
-    char* stringpair[2];
+    struct terminfo terminfo;
 }
 
 %term ALLOCATES
@@ -48,7 +48,7 @@ static int nextern = 1;
 %type  <rule>       pattern
 %type  <stringlist> cfragments
 %type  <stringlist> qfragments
-%type  <stringpair> labelledid
+%type  <terminfo>   terminfo
 %type  <tree>       rhs
 %%
 
@@ -106,14 +106,16 @@ pattern
     ;
 
 rhs
-    : labelledid                      { $$ = tree($1[1], $1[0], NULL, NULL); }
-	| labelledid '(' rhs ')'          { $$ = tree($1[1], $1[0],   $3, NULL); }
-	| labelledid '(' rhs ',' rhs ')'  { $$ = tree($1[1], $1[0],   $3, $5); }
+    : terminfo                        { $$ = tree(&$1, NULL, NULL); }
+	| terminfo '(' rhs ')'            { $$ = tree(&$1,   $3, NULL); }
+	| terminfo '(' rhs ',' rhs ')'    { $$ = tree(&$1,   $3, $5); }
 	;
 
-labelledid
-    : ID                              { $$[0] = NULL; $$[1] = $1; }
-    | ID ':' ID                       { $$[0] = $1; $$[1] = $3; }
+terminfo
+    : ID                              { $$.name = $1; }
+    | ID '.' ID                       { $$.name = $1; $$.regattr = $3; }
+    | ID ':' ID                       { $$.label = $1; $$.name = $3; }
+    | ID ':' ID '.' ID                { $$.label = $1; $$.name = $3; $$.regattr = $5; }
     ;
 
 cfragments 
