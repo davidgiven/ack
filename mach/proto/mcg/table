@@ -61,6 +61,10 @@ PATTERNS
 		emit "mov r0, %in"
 		cost 4;
 
+	STACKADJUST4(delta:aluparam)
+		emit "add sp, sp, %delta"
+		cost 4;
+
 	int = in:REG4
 		prefers int(in)
 		cost 1;
@@ -80,6 +84,10 @@ PATTERNS
 
 	STORE4(addr:address, value:int)
 		emit "str %value, %addr"
+		cost 4;
+
+	STORE1(addr:address, value:int)
+		emit "strb %value, %addr"
 		cost 4;
 
 	int = LOAD4(addr:address)
@@ -114,8 +122,12 @@ PATTERNS
 	address = ADD4(addr:int, offset:CONST4)
 		emit "[%addr, #$offset]";
 
+	address = ADD4(addr1:int, addr2:int)
+		emit "[%addr1, %addr2]";
+
 	address = addr:int
 		emit "[%addr]";
+
 
 
 /* Branches */
@@ -128,6 +140,15 @@ PATTERNS
 		emit "beq $true"
 		emit "b $false"
 		cost 8;
+
+	CJUMPLE(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
+		emit "ble $true"
+		emit "b $false"
+		cost 8;
+
+	CALL(dest:LABEL4)
+		emit "bl $dest"
+		cost 4;
 
 
 /* Comparisons */
@@ -166,6 +187,15 @@ PATTERNS
 
 	int = ADD4(left:aluparam, right:int)
 		emit "add %int, %right, %left"
+		cost 4;
+
+	int = MOD4(left:int, right:int)
+		emit "udiv %int, %left, %right"
+		emit "mls %int, %int, %right, %left"
+		cost 8;
+
+	int = DIV4(left:int, right:aluparam)
+		emit "div %int, %left, %right"
 		cost 4;
 
 	aluparam = value:CONST4
