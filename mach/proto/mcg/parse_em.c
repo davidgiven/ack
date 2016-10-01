@@ -338,7 +338,7 @@ static void parse_mes(void)
                 int size = mes_get_cst();
                 int type = mes_get_cst();
                 int priority = mes_get_cst();
-                tb_regvar(offset, size, type, priority);
+                tb_regvar(current_proc, offset, size, type, priority);
             }
             break;
         }

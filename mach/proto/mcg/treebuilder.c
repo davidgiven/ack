@@ -107,9 +107,12 @@ void tb_fileend(void)
 {
 }
 
-void tb_regvar(arith offset, int size, int type, int priority)
+void tb_regvar(struct procedure* procedure, arith offset, int size, int type, int priority)
 {
-    /* ignored */
+    struct local* local = calloc(1, sizeof(*local));
+    local->size = size;
+    local->is_register = true;
+    imap_put(&procedure->locals, offset, local);
 }
 
 static struct ir* address_of_external(const char* label, arith offset)
