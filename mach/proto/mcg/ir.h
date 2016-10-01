@@ -10,21 +10,20 @@ struct ir
 	int size;
 	struct ir* left;
 	struct ir* right;
+	struct ir* root;
 	union
 	{
 		arith ivalue;
 		int rvalue;
 		const char* lvalue;
 		struct basicblock* bvalue;
+		ARRAYOF(struct ir) phivalue;
 	} u;
 
 	void* state_label; /* used by the iburg instruction selector */
 	int insn_no;       /* the table rule number for this instruction */
 	int goal_no;       /* the semantic type of this instruction; not stmt */
 	ARRAYOF(struct hop) hops; /* only for root IRs */
-
-	bool is_root : 1;
-	bool is_generated : 1;
 };
 
 extern const char* ir_names[];

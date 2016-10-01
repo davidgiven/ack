@@ -2,6 +2,7 @@
 
 static struct basicblock* current_bb;
 static struct hop* current_hop;
+static struct ir* current_ir;
 
 static const struct burm_emitter_data emitter_data;
 
@@ -17,6 +18,13 @@ void burm_panic_cannot_match(struct ir* ir)
 	ir_print(0, ir);
 	fprintf(stderr, "aborting!\n");
 	exit(1);
+}
+
+int burm_calculate_label(struct ir* ir)
+{
+    if (ir->root != current_ir)
+		return ir_to_esn(IR_REG, ir->size);
+	return ir_to_esn(ir->opcode, ir->size);
 }
 
 static void emit_reg(struct ir* ir, int goal)
@@ -81,14 +89,12 @@ static void walk_instructions(struct ir* ir, int goal)
     for (i=0; nts[i]; i++)
         walk_instructions(children[i], nts[i]);
 
-    ir->is_generated = true;
     ir->insn_no = insn_no;
     if (goal != 1)
         ir->goal_no = goal;
 
-    tracef('I', "I: $%d %s goal %d selected %s %d: %s\n",
+    tracef('I', "I: $%d goal %d selected %s %d: %s\n",
         ir->id,
-        ir->is_root ? "S" : " ",
         ir->goal_no,
         insndata->is_fragment ? "fragment" : "instruction",
         insn_no,
@@ -114,15 +120,15 @@ static void select_instructions(void)
 	for (i=0; i<current_bb->irs.count; i++)
 	{
 		int insnno;
-		struct ir* ir = current_bb->irs.item[i];
-		burm_label(ir);
+		current_ir = current_bb->irs.item[i];
+		burm_label(current_ir);
 
-		insnno = burm_rule(ir->state_label, 1);
+		insnno = burm_rule(current_ir->state_label, 1);
 		if (!insnno)
-			burm_panic_cannot_match(ir);
+			burm_panic_cannot_match(current_ir);
 
-        ir_print('I', ir);
-		walk_instructions(ir, 1);
+        ir_print('I', current_ir);
+		walk_instructions(current_ir, 1);
 	}
 }
 

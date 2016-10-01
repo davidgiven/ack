@@ -68,17 +68,18 @@ struct ir* new_localir(int offset)
 
 struct ir* ir_walk(struct ir* ir, ir_walker_t* cb, void* user)
 {
+    assert(ir->root);
     if (cb(ir, user))
         return ir;
 
-    if (ir->left && !ir->left->is_root)
+    if (ir->left && (ir->left->root == ir->root))
     {
         struct ir* irr = ir_walk(ir->left, cb, user);
         if (irr)
             return irr;
     }
 
-    if (ir->right && !ir->right->is_root)
+    if (ir->right && (ir->right->root == ir->root))
     {
         struct ir* irr = ir_walk(ir->right, cb, user);
         if (irr)
@@ -106,7 +107,7 @@ static void print_expr(char k, const struct ir* ir)
     tracef(k, "%s", ir_data[ir->opcode].name);
     if (ir->size)
         tracef(k, "%d", ir->size);
-    tracef(k, "(");
+    tracef(k, ":%d(", ir->id);
 
 	switch (ir->opcode)
 	{
@@ -123,10 +124,23 @@ static void print_expr(char k, const struct ir* ir)
 			tracef(k, "%s", ir->u.bvalue->name);
 			break;
 
+        case IR_PHI:
+        {
+            int i;
+
+            for (i=0; i<ir->u.phivalue.count; i++)
+            {
+                if (i > 0)
+                    tracef(k, ", ");
+                tracef(k, "$%d", ir->u.phivalue.item[i]->id);
+            }
+            break;
+        }
+
 		default:
             if (ir->left)
             {
-                if (ir->left->is_root)
+                if (ir->left->root == ir->root)
                     tracef(k, "$%d", ir->left->id);
                 else
                     print_expr(k, ir->left);
@@ -134,7 +148,7 @@ static void print_expr(char k, const struct ir* ir)
             if (ir->right)
             {
                 tracef(k, ", ");
-                if (ir->right->is_root)
+                if (ir->right->root == ir->root)
                     tracef(k, "$%d", ir->right->id);
                 else
                     print_expr(k, ir->right);

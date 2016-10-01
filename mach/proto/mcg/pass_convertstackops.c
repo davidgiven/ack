@@ -112,22 +112,20 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
         for (i=0; i<pushes.count; i++)
         {
             struct ir* ir = pushes.item[i];
-            assert(ir->is_root);
             *ir = *ir->left;
-            ir->is_root = true;
         }
 
         for (i=0; i<pops.count; i++)
         {
             struct ir* ir = pops.item[i];
-            struct ir* pushir = pushes.item[0];
-            struct ir* phi = new_ir1(IR_PHI, ir->size, pushir);
+            struct ir* phi = new_ir0(IR_PHI, ir->size);
 
-            for (j=1; j<pushes.count; j++)
-                phi = new_ir2(IR_PHI, ir->size, phi, pushes.item[j]);
+            for (j=0; j<pushes.count; j++)
+                array_appendu(&phi->u.phivalue, pushes.item[j]);
+            phi->root = phi;
 
-            phi->is_root = ir->is_root;
             *ir = *phi;
+            array_insert(&bb->irs, ir, 0);
         }
     }
 }

@@ -1,6 +1,5 @@
 #include "mcg.h"
 
-static struct symbol* currentproc;
 static struct basicblock* current_bb;
 
 static int stackptr;
@@ -76,7 +75,6 @@ static struct ir* appendir(struct ir* ir)
     int i;
 
     assert(current_bb != NULL);
-    ir->is_root = true;
     array_append(&current_bb->irs, ir);
 
     ir_print('0', ir);
@@ -479,8 +477,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_dup:
         {
             struct ir* v = pop(value);
-            if (!v->is_root)
-                appendir(v);
+            appendir(v);
             push(v);
             push(v);
             break;

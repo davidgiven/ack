@@ -19,6 +19,7 @@ struct array
 
 extern void array_append(void* array, void* value);
 extern bool array_appendu(void* array, void* value);
+extern void array_insert(void* array, void* value, int before);
 extern void array_remove(void* array, void* value);
 extern bool array_contains(void* array, void* value);
 

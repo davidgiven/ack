@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "array.h"
 
-void array_append(void* arrayp, void* value)
+static void extend(struct array* array)
 {
-    struct array* array = arrayp;
-
 	if (array->count == array->max)
 	{
 		int newmax = (array->max == 0) ? 8 : (array->max * 2);
@@ -14,7 +13,13 @@ void array_append(void* arrayp, void* value)
 		array->max = newmax;
 		array->item = newarray;
 	}
+}
 
+void array_append(void* arrayp, void* value)
+{
+    struct array* array = arrayp;
+
+    extend(array);
     array->item[array->count] = value;
     array->count++;
 }
@@ -38,6 +43,17 @@ bool array_appendu(void* arrayp, void* value)
 
     array_append(arrayp, value);
     return false;
+}
+
+void array_insert(void* arrayp, void* value, int before)
+{
+    struct array* array = arrayp;
+
+    extend(array);
+    memmove(&array->item[before+1], &array->item[before],
+        (array->count-before) * sizeof(*array));
+    array->item[before] = value;
+    array->count++;
 }
 
 void array_remove(void* arrayp, void* value)

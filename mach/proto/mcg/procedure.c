@@ -26,6 +26,7 @@ void procedure_compile(struct procedure* proc)
 
 	print_blocks('1', proc);
 
+    pass_group_irs(proc);
     pass_eliminate_trivial_blocks(proc);
     pass_remove_dead_blocks(proc);
     pass_convert_stack_ops(proc);
