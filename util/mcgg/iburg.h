@@ -2,6 +2,7 @@
 #define BURG_INCLUDED
 
 #include "stringlist.h"
+#include "array.h"
 
 extern char* stringf(char* fmt, ...);
 
@@ -14,6 +15,12 @@ typedef enum
 } Kind;
 typedef struct rule* Rule;
 typedef struct term* Term;
+
+struct expr
+{
+	const char* name;
+	struct expr* next;
+};
 
 struct terminfo
 {
@@ -90,7 +97,8 @@ struct rule
 	Rule chain;              /* next chain rule with same rhs */
 	Rule decode;             /* next rule with same lhs */
 	Rule kids;               /* next rule with same burm_kids pattern */
-	struct stringlist when;  /* C predicate string */
+	ARRAYOF(struct predicate) prefers;  /* C predicates */
+	ARRAYOF(struct predicate) requires; /* C predicates */
 	struct stringlist code;  /* compiler output code strings */
 };
 extern Rule rule(char* id, Tree pattern, int ern);

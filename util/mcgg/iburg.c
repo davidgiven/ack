@@ -598,7 +598,7 @@ static void emitcase(Term p, int ntnumber)
 			default:
 				assert(0);
 		}
-		print("%d;\n", r->cost);
+		print("%d);\n", r->cost);
 		emitrecord("\t\t\t", r, 0);
 		print("%2}\n");
 	}
@@ -859,27 +859,6 @@ static void emitrule(Nonterm nts)
 	print("%1default:\n%2%Passert(0, PANIC(\"Bad goal nonterminal %%d in %Prule\\n\", goalnt));\n%1}\n%1return 0;\n}\n\n");
 }
 
-/* emitpredicates - emit predicates for rules */
-static void emitpredicatedefinitions(Rule r)
-{
-	while (r)
-	{
-		struct stringfragment* f = r->when.first;
-		if (f)
-		{
-			print("/* %R */\n", r);
-			print("static int %Ppredicate_%d(NODEPTR_TYPE n) {\n", r->ern);
-			while (f)
-			{
-				print("%s", f->data);
-				f = f->next;
-			}
-			print("\n}\n\n");
-		}
-		r = r->link;
-	}
-}
-
 static void print_path(uint32_t path)
 {
 	int i = 0;
@@ -930,6 +909,50 @@ static void label_not_found(Rule rule, const char* label)
 	yylineno = rule->lineno;
 	yyerror("label '%s' not found", label);
 	exit(1);
+}
+
+/* emitpredicates - emit predicates for rules */
+static void emitpredicatedefinitions(Rule r)
+{
+	int i;
+
+	while (r)
+	{
+		print("/* %R */\n", r);
+		print("static int %Padjust_cost_%d(NODEPTR_TYPE node, int cost) {\n", r->ern);
+
+		for (i=0; i<r->prefers.count; i++)
+		{
+			struct expr* p = r->prefers.item[i];
+			bool first = true;
+
+			print("%1if (%Ppredicate_%s(", p->name);
+
+			p = p->next;
+			while (p)
+			{
+				uint32_t path = find_label(r->pattern, p->name, 0, NULL);
+				if (path == PATH_MISSING)
+					label_not_found(r, p->name);
+
+				if (!first)
+					print(", ");
+				else
+					first = false;
+
+				print_path(path);
+				p = p->next;
+			}
+
+			print(")) cost -= 1;\n");
+		}
+
+		print("%1if (cost > %d) return %d;\n", maxcost, maxcost);
+		print("%1if (cost < 1) return 1;\n");
+		print("%1return cost;\n");
+		print("}\n\n");
+		r = r->link;
+	}
 }
 
 /* emitinsndata - emit the code generation data */
@@ -1051,8 +1074,7 @@ static void emitinsndata(Rule rules)
 /* emitcost - emit a cost calculation via a predicate */
 static void emitcostcalc(Rule r)
 {
-	if (r->when.first)
-		print("!%Ppredicate_%d(node) ? %d : ", r->ern, maxcost);
+	print("%Padjust_cost_%d(node, ", r->ern);
 }
 
 /* emitstate - emit state function */

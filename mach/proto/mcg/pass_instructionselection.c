@@ -83,10 +83,13 @@ static void walk_instructions(struct ir* ir, int goal)
 
     ir->is_generated = true;
     ir->insn_no = insn_no;
+    if (goal != 1)
+        ir->goal_no = goal;
 
-    tracef('I', "I: $%d %s selected %s %d: %s\n",
+    tracef('I', "I: $%d %s goal %d selected %s %d: %s\n",
         ir->id,
         ir->is_root ? "S" : " ",
+        ir->goal_no,
         insndata->is_fragment ? "fragment" : "instruction",
         insn_no,
         insndata->name);

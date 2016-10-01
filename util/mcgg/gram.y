@@ -23,6 +23,7 @@ static int nextern = 1;
     struct reg* reg;
     struct stringlist* stringlist;
     struct terminfo terminfo;
+    struct expr* expr;
 }
 
 %term ALLOCATES
@@ -30,15 +31,13 @@ static int nextern = 1;
 %term DECLARATIONS
 %term EMIT
 %term FRAGMENT
-%term INS
-%term OUTS
 %term PATTERNS
 %term REGISTERS
-%term WHEN
+%term PREFERS
+%term REQUIRES
 
 %token <n>          INT
 %token <string>     ID
-%token <string>     CFRAGMENT
 %token <string>     QFRAGMENT
 
 %type  <nonterm>    allocates
@@ -50,6 +49,8 @@ static int nextern = 1;
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
 %type  <tree>       rhs
+%type  <expr>       predicate
+%type  <expr>       predicate_args
 %%
 
 spec
@@ -100,7 +101,8 @@ patterns
 pattern
     : ID '=' rhs                      { nonterm($1, false); $$ = rule($1,     $3, nextern++); }
     | rhs                             {                     $$ = rule("stmt", $1, nextern++); }
-    | pattern WHEN cfragments         { $$ = $1; stringlist_addall(&$$->when, $3); }
+    | pattern PREFERS predicate       { $$ = $1; array_append(&$$->prefers, $3); }
+    | pattern REQUIRES predicate      { $$ = $1; array_append(&$$->requires, $3); }
     | emit                            { $$ = $1; }
     | pattern COST INT                { $$ = $1; $$->cost = $3; }
     ;
@@ -118,11 +120,6 @@ terminfo
     | ID ':' ID '.' ID                { $$.label = $1; $$.name = $3; $$.regattr = $5; }
     ;
 
-cfragments 
-    : /* nothing */                   { $$ = calloc(1, sizeof *$$); }
-    | cfragments CFRAGMENT            { $$ = $1; stringlist_add($$, $2); }
-    ;
-    
 emit
     : pattern EMIT qfragments           {
                                             $$ = $1;
@@ -135,6 +132,16 @@ emit
 qfragments
     : /* nothing */                     { $$ = calloc(1, sizeof *$$); }
     | qfragments QFRAGMENT              { $$ = $1; stringlist_add($$, $2); }
+    ;
+
+predicate
+    : ID '(' predicate_args ')'         { $$ = calloc(1, sizeof *$$); $$->name = $1; $$->next = $3; }
+    ;
+
+predicate_args
+    : /* nothing */
+    | ID                                { $$ = calloc(1, sizeof *$$); $$->name = $1; }
+    | ID ',' predicate_args             { $$ = calloc(1, sizeof *$$); $$->name = $1; $$->next = $3; }
     ;
 
 %%
@@ -157,6 +164,7 @@ void yyerror(char *fmt, ...) {
 	if (fmt[strlen(fmt)-1] != '\n')
 		 fprintf(stderr, "\n");
 	errcnt++;
+    exit(1);
 }
 
 void yywarn(char *fmt, ...) {

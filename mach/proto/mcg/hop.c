@@ -89,6 +89,10 @@ void hop_print(char k, struct hop* hop)
 						tracef(k, "%s", ir->u.bvalue->name);
 						break;
 
+					case IR_LABEL:
+						tracef(k, "%s", ir->u.lvalue);
+						break;
+
 					case IR_LOCAL:
 					case IR_CONST:
 						tracef(k, "0x%d", ir->u.ivalue);

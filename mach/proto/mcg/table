@@ -61,13 +61,19 @@ PATTERNS
 		emit "mov r0, %in"
 		cost 4;
 
-	int = REG4 cost 1;
-	float = REG4 cost 1;
+	int = in:REG4
+		prefers int(in)
+		cost 1;
 
-	any = int cost 1;
-	int = any cost 1;
-	any = float cost 1;
-	float = any cost 1;
+	float = in:REG4
+		prefers float(in)
+		cost 1;
+
+	ret = in:any emit "mov %ret, %in" cost 1;
+	any = in:int emit "mov %any, %in" cost 1;
+	int = in:any emit "mov %int, %in" cost 1;
+	any = in:float emit "mov %any, %in" cost 1;
+	float = in:any emit "mov %float, %in" cost 1;
 
 
 /* Memory operations */
@@ -180,8 +186,12 @@ PATTERNS
 		emit "adr %int, $value"
 		cost 4;
 
-	any = value:CONST4
-		emit "ldr %any, address-containing-$value"
+	int = value:CONST4
+		emit "ldr %int, address-containing-$value"
+		cost 8;
+
+	float = value:CONST4
+		emit "vldr %float, address-containing-$value"
 		cost 8;
 
 /* FPU operations */

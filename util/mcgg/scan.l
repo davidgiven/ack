@@ -12,40 +12,10 @@ static int braces = 0;
 %option yylineno
 %option debug
 
-%x CSTRING
 %x QSTRING
 %x COMMENT
 
 %%
-
-<INITIAL>"{"                {
-                                yylval.string = ""; //stringf("#line %d\n", yylineno);
-                                braces = 1;
-                                BEGIN(CSTRING);
-                                return CFRAGMENT;
-                            }
-
-<CSTRING>"{"                {
-                                braces++;
-                                yylval.string = strdup(yytext);
-                                return CFRAGMENT;
-                            }
-
-<CSTRING>"}"                {
-                                braces--;
-                                if (braces == 0)
-                                    BEGIN(INITIAL);
-                                else
-                                {
-                                    yylval.string = strdup(yytext);
-                                    return CFRAGMENT;
-                                }
-                            }
-
-<CSTRING>[^{}]+             {
-                                yylval.string = strdup(yytext);
-                                return CFRAGMENT;
-                            }
 
 <INITIAL>"\""               BEGIN(QSTRING);
 <QSTRING>"\""               BEGIN(INITIAL);
@@ -72,9 +42,8 @@ static int braces = 0;
 "cost"                      return COST;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;
-"ins"                       return INS;
-"outs"                      return OUTS;
-"when"                      return WHEN;
+"prefers"                   return PREFERS;
+"requires"                  return REQUIRES;
 
 "//"[^\n]*\n                ;
 
