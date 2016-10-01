@@ -107,6 +107,11 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
             }
         }
 
+        /* If we didn't actually find anything, give up. */
+
+        if ((pushes.count == 0) || (pops.count == 0))
+            return;
+            
         /* Okay, now we can wire them all up. */
 
         for (i=0; i<pushes.count; i++)
