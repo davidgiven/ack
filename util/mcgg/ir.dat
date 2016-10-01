@@ -3,7 +3,8 @@
 #   V: has no size (use in JUMP, CJUMP, RET forms)
 
 # Simple terminals
-S CONST
+S CONST # must be followed by float form
+S CONSTF
 S REG
 S LABEL
 S BLOCK
@@ -14,10 +15,12 @@ S PHI
 
 # Magic stack operations
 S PUSH
-S POP
+S POP # must be followed by float form
+S POPF
 
 #... Memory operations
-S LOAD
+S LOAD # must be followed by float form
+S LOADF
 S STORE
 
 # Arithemetic operations

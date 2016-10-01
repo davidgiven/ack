@@ -29,6 +29,7 @@ void procedure_compile(struct procedure* proc)
     pass_eliminate_trivial_blocks(proc);
     pass_remove_dead_blocks(proc);
     pass_convert_stack_ops(proc);
+    pass_promote_float_ops(proc);
 
     print_blocks('2', proc);
 

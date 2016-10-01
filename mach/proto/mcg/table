@@ -190,7 +190,7 @@ PATTERNS
 		emit "ldr %int, address-containing-$value"
 		cost 8;
 
-	float = value:CONST4
+	float = value:CONSTF4
 		emit "vldr %float, address-containing-$value"
 		cost 8;
 
