@@ -140,7 +140,7 @@ static void print_expr(char k, const struct ir* ir)
 		default:
             if (ir->left)
             {
-                if (ir->left->root == ir->root)
+                if (ir->left->root != ir->root)
                     tracef(k, "$%d", ir->left->id);
                 else
                     print_expr(k, ir->left);
@@ -148,7 +148,7 @@ static void print_expr(char k, const struct ir* ir)
             if (ir->right)
             {
                 tracef(k, ", ");
-                if (ir->right->root == ir->root)
+                if (ir->right->root != ir->root)
                     tracef(k, "$%d", ir->right->id);
                 else
                     print_expr(k, ir->right);
