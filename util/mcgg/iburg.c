@@ -262,7 +262,6 @@ void addregclass(struct reg* reg, const char* id)
 	}
 
 	reg->classes |= 1<<(p->number);
-	nonterm(id, true);
 }
 
 struct regclass* getregclass(const char* id)

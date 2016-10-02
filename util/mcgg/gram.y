@@ -24,28 +24,34 @@ static int nextern = 1;
     struct stringlist* stringlist;
     struct terminfo terminfo;
     struct expr* expr;
+    struct constraint* constraint;
 }
 
 %term ALLOCATES
 %term COST
 %term DECLARATIONS
 %term EMIT
+%term EQUALS
 %term FRAGMENT
+%term NOTEQUALS
 %term PATTERNS
-%term REGISTERS
 %term PREFERS
-%term REQUIRES
+%term REGISTERS
+%term WHEN
+%term WITH
 
 %token <n>          INT
 %token <string>     ID
 %token <string>     QFRAGMENT
 
 %type  <nonterm>    allocates
+%type  <constraint> constraint
+%type  <constraint> constraints
 %type  <nonterm>    declaration
 %type  <reg>        register
-%type  <rule>       emit
+%type  <rule>       pattern_constraints
+%type  <rule>       pattern_emit
 %type  <rule>       pattern
-%type  <stringlist> cfragments
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
 %type  <tree>       rhs
@@ -102,9 +108,10 @@ pattern
     : ID '=' rhs                      { nonterm($1, false); $$ = rule($1,     $3, nextern++); }
     | rhs                             {                     $$ = rule("stmt", $1, nextern++); }
     | pattern PREFERS predicate       { $$ = $1; array_append(&$$->prefers, $3); }
-    | pattern REQUIRES predicate      { $$ = $1; array_append(&$$->requires, $3); }
-    | emit                            { $$ = $1; }
+    | pattern WHEN predicate          { $$ = $1; array_append(&$$->requires, $3); }
     | pattern COST INT                { $$ = $1; $$->cost = $3; }
+    | pattern_constraints             { $$ = $1; }
+    | pattern_emit                    { $$ = $1; }
     ;
 
 rhs
@@ -115,18 +122,43 @@ rhs
 
 terminfo
     : ID                              { $$.name = $1; }
-    | ID '.' ID                       { $$.name = $1; $$.regattr = $3; }
     | ID ':' ID                       { $$.label = $1; $$.name = $3; }
-    | ID ':' ID '.' ID                { $$.label = $1; $$.name = $3; $$.regattr = $5; }
     ;
 
-emit
+pattern_emit
     : pattern EMIT qfragments           {
                                             $$ = $1;
                                             if (!$$->lhs->is_fragment)
                                                 stringlist_add($3, "\n");
                                             stringlist_addall(&$$->code, $3);
                                         }
+    ;
+
+pattern_constraints
+    : pattern WITH constraints          {
+                                            struct constraint* c = $3;
+                                            $$ = $1;
+                                            while (c)
+                                            {
+                                                array_append(&$$->constraints, c);
+                                                c = c->next;
+                                            }
+                                        }
+    ;
+
+constraints
+    : constraint                        { $$ = $1; }
+    | constraints ',' constraint        { $$ = $3; $$->next = $1; }
+    ;
+
+constraint
+    : '(' constraint ')'                { $$ = $2; }
+    | ID ID                             { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_ATTR; $$->left = $1; $$->right = $2; }
+    | ID EQUALS ID                      { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_EQUALS; $$->left = $1; $$->right = $3; }
+    | ID NOTEQUALS ID                   { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_NOTEQUALS; $$->left = $1; $$->right = $3; }
     ;
 
 qfragments
@@ -139,7 +171,7 @@ predicate
     ;
 
 predicate_args
-    : /* nothing */
+    : /* nothing */                     { $$ = NULL; }
     | ID                                { $$ = calloc(1, sizeof *$$); $$->name = $1; }
     | ID ',' predicate_args             { $$ = calloc(1, sizeof *$$); $$->name = $1; $$->next = $3; }
     ;

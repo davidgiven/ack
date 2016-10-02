@@ -43,7 +43,10 @@ static int braces = 0;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;
 "prefers"                   return PREFERS;
-"requires"                  return REQUIRES;
+"when"                      return WHEN;
+"with"                      return WITH;
+"=="                        return EQUALS;
+"!="                        return NOTEQUALS;
 
 "//"[^\n]*\n                ;
 

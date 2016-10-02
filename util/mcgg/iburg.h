@@ -16,6 +16,21 @@ typedef enum
 typedef struct rule* Rule;
 typedef struct term* Term;
 
+enum
+{
+	CONSTRAINT_ATTR,
+	CONSTRAINT_EQUALS,
+	CONSTRAINT_NOTEQUALS
+};
+
+struct constraint
+{
+	int type;
+	const char* left;
+	const char* right;
+	struct constraint* next;
+};
+
 struct expr
 {
 	const char* name;
@@ -26,7 +41,6 @@ struct terminfo
 {
 	const char* name;
 	const char* label;
-	const char* regattr;
 };
 
 struct reg
@@ -97,8 +111,9 @@ struct rule
 	Rule chain;              /* next chain rule with same rhs */
 	Rule decode;             /* next rule with same lhs */
 	Rule kids;               /* next rule with same burm_kids pattern */
-	ARRAYOF(struct predicate) prefers;  /* C predicates */
-	ARRAYOF(struct predicate) requires; /* C predicates */
+	ARRAYOF(struct expr) prefers;  /* C predicates */
+	ARRAYOF(struct expr) requires; /* C predicates */
+	ARRAYOF(struct constraint) constraints; /* register constraints */
 	struct stringlist code;  /* compiler output code strings */
 };
 extern Rule rule(char* id, Tree pattern, int ern);
