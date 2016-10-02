@@ -6,6 +6,7 @@
 S CONST # must be followed by float form
 S CONSTF
 S REG
+S NOP
 S LABEL
 S BLOCK
 V PAIR

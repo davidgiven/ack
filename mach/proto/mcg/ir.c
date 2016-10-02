@@ -107,7 +107,7 @@ static void print_expr(char k, const struct ir* ir)
     tracef(k, "%s", ir_data[ir->opcode].name);
     if (ir->size)
         tracef(k, "%d", ir->size);
-    tracef(k, ":%d(", ir->id);
+    tracef(k, "(");
 
 	switch (ir->opcode)
 	{

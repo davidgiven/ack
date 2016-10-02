@@ -24,6 +24,7 @@
 #include "ir.h"
 #include "mcgg.h"
 #include "hop.h"
+#include "basicblock.h"
 #include "procedure.h"
 
 extern char em_pseu[][4];
@@ -73,17 +74,6 @@ struct em
     } u;
 };
     
-struct basicblock
-{
-    const char* name;
-    ARRAYOF(struct em) ems;
-    ARRAYOF(struct ir) irs;
-    ARRAYOF(struct hop) hops;
-    bool is_fake : 1;
-    bool is_root : 1;
-    bool is_terminated : 1;
-};
-
 extern const char* aprintf(const char* fmt, ...);
 extern void tracef(char k, const char* fmt, ...);
 extern bool tracing(char k);
@@ -104,11 +94,6 @@ extern void data_block(const uint8_t* data, size_t size, bool is_ro);
 extern void data_offset(const char* label, arith offset, bool is_ro);
 extern void data_bss(arith size, int init);
 
-extern void bb_init(void);
-extern struct basicblock* bb_get(const char* name);
-extern void bb_alias(struct basicblock* block, const char* name);
-extern void bb_print(char k, struct basicblock* block);
-
 extern void tb_filestart(void);
 extern void tb_fileend(void);
 extern void tb_procedure(struct procedure* proc);
@@ -120,6 +105,7 @@ extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 extern void pass_instruction_selector(struct procedure* proc);
 extern void pass_promote_float_ops(struct procedure* proc);
 extern void pass_group_irs(struct procedure* proc);
+extern void pass_convert_locals_to_ssa(struct procedure* proc);
 
 #endif
 

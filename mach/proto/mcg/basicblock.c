@@ -24,7 +24,7 @@ struct basicblock* bb_get(const char* name)
 	p = str2idf((char*) name, 0);
 	if (!p->block)
 	{
-		p->block = calloc(sizeof(struct basicblock), 1);
+		p->block = calloc(1, sizeof(*p->block));
 		p->block->name = name;
 	}
 	return p->block;
@@ -37,10 +37,6 @@ void bb_alias(struct basicblock* block, const char* name)
 
 	p = str2idf((char*) name, 0);
 	p->block = block;
-}
-
-void bb_print(char k, struct basicblock* block)
-{
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

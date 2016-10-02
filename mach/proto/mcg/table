@@ -39,6 +39,7 @@ PATTERNS
 
 	int;
 	float;
+	any;
 
 	PAIR(BLOCK4, BLOCK4);
 
@@ -68,6 +69,13 @@ PATTERNS
 	int = in:REG4
 		prefers int(in)
 		cost 1;
+
+	int = NOP4(in:int)
+		emit "mov %int, %in"
+		cost 1;
+
+	any = PHI4
+		cost 0;
 
 	float = in:REG4
 		prefers float(in)
@@ -143,6 +151,11 @@ PATTERNS
 
 	CJUMPLE(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
 		emit "ble $true"
+		emit "b $false"
+		cost 8;
+
+	CJUMPLT(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
+		emit "blt $true"
 		emit "b $false"
 		cost 8;
 

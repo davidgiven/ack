@@ -41,28 +41,6 @@ static struct ir* get_first_pop(struct basicblock* bb)
     return NULL;
 }
 
-static bool collect_outputs_cb(struct ir* ir, void* user)
-{
-    struct basicblock* caller = user;
-
-    if (ir->opcode == IR_BLOCK)
-        pmap_add(&graph, caller, ir->u.bvalue);
-    return false;
-}
-
-static void make_bb_graph(struct procedure* proc)
-{
-    int i, j;
-
-    graph.count = 0;
-    for (i=0; i<proc->blocks.count; i++)
-    {
-        struct basicblock* bb = proc->blocks.item[i];
-        for (j=0; j<bb->irs.count; j++)
-            ir_walk(bb->irs.item[j], collect_outputs_cb, bb);
-    }
-}
-
 static void convert_block(struct procedure* proc, struct basicblock* bb)
 {
     int i, j;
@@ -78,32 +56,26 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
         /* Abort unless *every* successor block of this one starts with a pop
          * of the same size... */
 
-        for (i=0; i<graph.count; i++)
+        for (i=0; i<bb->nexts.count; i++)
         {
-            if (graph.item[i].left == bb)
-            {
-                struct basicblock* outbb = graph.item[i].right;
+            struct basicblock* outbb = bb->nexts.item[i];
 
-                ir = get_first_pop(outbb);
+            ir = get_first_pop(outbb);
+            if (!ir || (ir->size != lastpush->size))
+                return;
+            array_appendu(&pops, ir);
+
+            /* Also abort unless *every* predecessor block of the one we've
+             * just found *also* ends in a push of the same size. */
+
+            for (j=0; j<outbb->prevs.count; j++)
+            {
+                struct basicblock* inbb = outbb->prevs.item[j];
+
+                ir = get_last_push(inbb);
                 if (!ir || (ir->size != lastpush->size))
                     return;
-                array_appendu(&pops, ir);
-
-                /* Also abort unless *every* predecessor block of the one we've
-                 * just found *also* ends in a push of the same size. */
-
-                for (j=0; j<graph.count; j++)
-                {
-                    if (graph.item[j].right == outbb)
-                    {
-                        struct basicblock* inbb = graph.item[j].left;
-
-                        ir = get_last_push(inbb);
-                        if (!ir || (ir->size != lastpush->size))
-                            return;
-                        array_appendu(&pushes, ir);
-                    }
-                }
+                array_appendu(&pushes, ir);
             }
         }
 
@@ -138,8 +110,6 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
 void pass_convert_stack_ops(struct procedure* proc)
 {
     int i;
-
-    make_bb_graph(proc);
 
     for (i=0; i<proc->blocks.count; i++)
         convert_block(proc, proc->blocks.item[i]);

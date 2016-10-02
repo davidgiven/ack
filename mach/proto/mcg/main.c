@@ -5,10 +5,15 @@ bool tracing(char k)
     switch (k)
     {
         case 0:   return true;
+        case 'S': return true;
         case 'E': return false;
+        case 'G': return true;
         case '0': return false;
         case '1': return false;
         case '2': return false;
+        case '3': return false;
+        case '4': return false;
+        case '5': return false;
         case 'I': return true;
         default:  return true;
     }
