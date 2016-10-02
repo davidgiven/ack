@@ -111,6 +111,7 @@ void tb_regvar(struct procedure* procedure, arith offset, int size, int type, in
 {
     struct local* local = calloc(1, sizeof(*local));
     local->size = size;
+    local->offset = offset;
     local->is_register = true;
     imap_put(&procedure->locals, offset, local);
 }
@@ -411,6 +412,16 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_del:
             change_by(new_localir(value), -1);
+            break;
+
+        case op_zrl:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_localir(value),
+                    new_wordir(0)
+                )
+            );
             break;
 
         case op_loc:

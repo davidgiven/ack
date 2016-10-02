@@ -3,6 +3,8 @@
 
 struct local
 {
+    int size;
+    int offset;
     bool is_register;
 };
 
@@ -16,6 +18,7 @@ struct procedure
 };
 
 extern void procedure_compile(struct procedure* proc);
+extern void procedure_update_bb_graph(struct procedure* proc);
 
 #endif
 
