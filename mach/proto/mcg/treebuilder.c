@@ -340,6 +340,24 @@ static struct ir* extract_block_refs(struct basicblock* bb)
     return outir;
 }
 
+static void change_by(struct ir* address, int amount)
+{
+    appendir(
+        new_ir2(
+            IR_STORE, EM_wordsize,
+            address,
+            new_ir2(
+                IR_ADD, EM_wordsize,
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    address
+                ),
+                new_wordir(amount)
+            )
+        )
+    );
+}
+
 static void insn_ivalue(int opcode, arith value)
 {
     switch (opcode)
@@ -385,6 +403,14 @@ static void insn_ivalue(int opcode, arith value)
             push(
                 new_localir(value)
             );
+            break;
+
+        case op_inl:
+            change_by(new_localir(value), 1);
+            break;
+
+        case op_del:
+            change_by(new_localir(value), -1);
             break;
 
         case op_loc:
