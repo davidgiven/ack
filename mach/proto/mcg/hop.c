@@ -28,11 +28,10 @@ void hop_add_string_insel(struct hop* hop, const char* string)
 	array_append(&hop->insels, insel);
 }
 
-void hop_add_reg_insel(struct hop* hop, struct ir* ir, int insn_no)
+void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg)
 {
-	struct insel* insel = new_insel(INSEL_REG);
-	insel->u.reg.ir = ir;
-	insel->u.reg.insn_no = insn_no;
+	struct insel* insel = new_insel(INSEL_VREG);
+	insel->u.vreg = vreg;
 	array_append(&hop->insels, insel);
 }
 
@@ -61,7 +60,7 @@ void hop_print(char k, struct hop* hop)
 
 		if (soi)
 		{
-			tracef(k, "%c: %d: ", k, hop->id);
+			tracef(k, "%c: %d from $%d: ", k, hop->id, hop->ir->id);
 			soi = false;
 		}
 
@@ -72,8 +71,8 @@ void hop_print(char k, struct hop* hop)
 				soi = true;
 				break;
 
-			case INSEL_REG:
-				tracef(k, "$%d.%d", insel->u.reg.ir->id, insel->u.reg.insn_no);
+			case INSEL_VREG:
+				tracef(k, "%%%d", insel->u.vreg->id);
 				break;
 
 			case INSEL_STRING:

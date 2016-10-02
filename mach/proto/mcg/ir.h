@@ -23,7 +23,7 @@ struct ir
 	void* state_label; /* used by the iburg instruction selector */
 	int insn_no;       /* the table rule number for this instruction */
 	int goal_no;       /* the semantic type of this instruction; not stmt */
-	ARRAYOF(struct hop) hops; /* only for root IRs */
+	IMAPOF(struct hop) hops; /* only for root IRs; by goal */
 };
 
 extern const char* ir_names[];

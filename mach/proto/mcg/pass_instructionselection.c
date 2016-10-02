@@ -29,7 +29,9 @@ int burm_calculate_label(struct ir* ir)
 
 static void emit_reg(struct ir* ir, int goal)
 {
-    hop_add_reg_insel(current_hop, ir, goal);
+    struct hop* hop = imap_get(&current_ir->hops, goal);
+
+    hop_add_vreg_insel(current_hop, hop->output);
 }
 
 static void emit_string(const char* data)
@@ -50,13 +52,20 @@ static void emit_value(struct ir* ir)
 	hop_add_value_insel(current_hop, ir);
 }
 
-static void emit_resultreg(void)
-{
-}
-
 static void emit_eoi(void)
 {
 	hop_add_eoi_insel(current_hop);
+}
+
+static void emit_constraint_equals(struct ir* ir, int goal)
+{
+    struct hop* hop;
+    
+    if (!goal)
+        goal = 2;
+    hop = imap_get(&current_ir->hops, goal);
+
+    current_hop->output = hop->output;
 }
 
 static const struct burm_emitter_data emitter_data =
@@ -65,8 +74,8 @@ static const struct burm_emitter_data emitter_data =
     &emit_fragment,
     &emit_reg,
     &emit_value,
-    &emit_resultreg,
-    &emit_eoi
+    &emit_eoi,
+    &emit_constraint_equals
 };
 
 
@@ -83,6 +92,11 @@ static void walk_instructions(struct ir* ir, int goal)
     {
         parent_hop = current_hop;
         current_hop = new_hop(insn_no, ir);
+        if (goal != 1)
+        {
+            current_hop->output = new_vreg();
+            imap_add(&current_ir->hops, goal, current_hop);
+        }
     }
 
     burm_kids(ir, insn_no, children);
@@ -102,8 +116,10 @@ static void walk_instructions(struct ir* ir, int goal)
 
     if (!insndata->is_fragment)
     {
-        if (insndata->emitter)
-            insndata->emitter(ir, &emitter_data);
+        /* This may cause the vregs to be reassigned for this instruction (and
+         * fragments contained within it). */
+
+        insndata->emitter(ir, &emitter_data);
 
         hop_print('I', current_hop);
         array_append(&ir->hops, current_hop);

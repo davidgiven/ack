@@ -12,7 +12,6 @@
 		 ((size) == 0) ? 0 : \
 		  (size-1)))
 
-
 #define STATE_TYPE void*
 typedef struct ir* NODEPTR_TYPE;
 
@@ -30,9 +29,8 @@ struct burm_emitter_data
     void (*emit_fragment)(struct ir* ir, int goal);
     void (*emit_reg)(struct ir* ir, int goal);
     void (*emit_value)(struct ir* ir);
-    void (*emit_resultreg)(void);
     void (*emit_eoi)(void);
-    void (*emit_usereg)(struct ir* ir);
+    void (*emit_constraint_equals)(struct ir* rightir, int rightgoal);
 };
 
 typedef void burm_emitter_t(struct ir* ir, const struct burm_emitter_data* data);

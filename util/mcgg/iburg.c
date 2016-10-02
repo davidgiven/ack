@@ -954,6 +954,49 @@ static void emitpredicatedefinitions(Rule r)
 	}
 }
 
+static void invalid_equals_constraint(Rule rule)
+{
+	yylineno = rule->lineno;
+	yyerror("left hand side of an equality constraint must be the output register");
+	exit(1);
+}
+
+static void emit_ir_expr(Rule rule, const char* label)
+{
+	if (strcmp(label, rule->lhs->name) == 0)
+		print("node, %P%s_NT", label);
+	else
+	{
+		Tree node;
+		uint32_t path = find_label(rule->pattern, label, 0, &node);
+		Nonterm nt = node->op;
+
+		if (path == PATH_MISSING)
+			label_not_found(rule, label);
+
+		print_path(path);
+		if (nt->kind == NONTERM)
+			print(", %P%s_NT", ((Nonterm)node->op)->name);
+		else
+			print(", 0");
+	}
+}
+
+static void emit_constraint(Rule rule, struct constraint* c)
+{
+	switch (c->type)
+	{
+		case CONSTRAINT_EQUALS:
+			if (strcmp(c->left, rule->lhs->name) != 0)
+				invalid_equals_constraint(rule);
+
+			print("%1data->emit_constraint_equals(");
+			emit_ir_expr(rule, c->right);
+			print(");\n");
+			break;
+	}
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -964,68 +1007,8 @@ static void emitinsndata(Rule rules)
 	while (r)
 	{
 		struct stringfragment* f = r->code.first;
-		if (f)
-		{
-			print("/* %R */\n", r);
-			print("static void %Pemitter_%d(NODEPTR_TYPE node, const struct %Pemitter_data* data) {\n", r->ern);
 
-			while (f)
-			{
-				switch (f->data[0])
-				{
-					case '%':
-					{
-						const char* label = f->data + 1;
-
-						if (strcmp(label, r->lhs->name) == 0)
-							print("%1data->emit_reg(node, %P%s_NT);\n", label);
-						else
-						{
-							Tree node;
-							uint32_t path = find_label(r->pattern, label, 0, &node);
-							Nonterm nt = node->op;
-
-							if (path == PATH_MISSING)
-								label_not_found(r, label);
-
-							if (nt->is_fragment)
-								print("%1data->emit_fragment(");
-							else
-								print("%1data->emit_reg(");
-
-							print_path(path);
-							print(", %P%s_NT);\n", ((Nonterm)node->op)->name);
-						}
-						break;
-					}
-
-					case '$':
-					{
-						const char* label = f->data + 1;
-						uint32_t path = find_label(r->pattern, label, 0, NULL);
-						print("%1data->emit_value(");
-						if (path == PATH_MISSING)
-							label_not_found(r, label);
-						print_path(path);
-						print(");\n");
-						break;
-					}
-
-					case '\n':
-						assert(f->data[1] == 0);
-						print("%1data->emit_eoi();\n");
-						break;
-					
-					default:
-						print("%1data->emit_string(\"%s\");\n", f->data);
-				}
-
-				f = f->next;
-			}
-
-			print("}\n\n");
-		}
-		else
+		if (!f)
 		{
 			/* This instruction has no code; make sure it's not a fragment. */
 			if (r->lhs->is_fragment)
@@ -1035,6 +1018,77 @@ static void emitinsndata(Rule rules)
 			}
 		}
 
+		print("/* %R */\n", r);
+		print("static void %Pemitter_%d(NODEPTR_TYPE node, const struct %Pemitter_data* data) {\n", r->ern);
+
+		/* Constraints come first, because they may cause vreg reassignment, which
+		 * we want to happen before the instruction emission. */
+
+		{
+			int i;
+
+			for (i=0; i<r->constraints.count; i++)
+			{
+				struct constraint* c = r->constraints.item[i];
+				emit_constraint(r, c);
+			}
+		}
+
+		while (f)
+		{
+			switch (f->data[0])
+			{
+				case '%':
+				{
+					const char* label = f->data + 1;
+
+					if (strcmp(label, r->lhs->name) == 0)
+						print("%1data->emit_reg(node, %P%s_NT);\n", label);
+					else
+					{
+						Tree node;
+						uint32_t path = find_label(r->pattern, label, 0, &node);
+						Nonterm nt = node->op;
+
+						if (path == PATH_MISSING)
+							label_not_found(r, label);
+
+						if (nt->is_fragment)
+							print("%1data->emit_fragment(");
+						else
+							print("%1data->emit_reg(");
+
+						print_path(path);
+						print(", %P%s_NT);\n", ((Nonterm)node->op)->name);
+					}
+					break;
+				}
+
+				case '$':
+				{
+					const char* label = f->data + 1;
+					uint32_t path = find_label(r->pattern, label, 0, NULL);
+					print("%1data->emit_value(");
+					if (path == PATH_MISSING)
+						label_not_found(r, label);
+					print_path(path);
+					print(");\n");
+					break;
+				}
+
+				case '\n':
+					assert(f->data[1] == 0);
+					print("%1data->emit_eoi();\n");
+					break;
+				
+				default:
+					print("%1data->emit_string(\"%s\");\n", f->data);
+			}
+
+			f = f->next;
+		}
+
+		print("}\n\n");
 		r = r->link;
 	}
 
@@ -1051,11 +1105,7 @@ static void emitinsndata(Rule rules)
 
 		print("%2\"%R\",\n", r);
 
-		print("%2");
-		if (r->code.first)
-			print("&%Pemitter_%d,\n", r->ern);
-		else
-			print("NULL,\n");
+		print("%2&%Pemitter_%d,\n", r->ern);
 
 		if (r->lhs->allocate)
 			print("%2%d,\n", r->lhs->allocate->number);

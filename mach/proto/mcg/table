@@ -69,6 +69,7 @@ PATTERNS
 
 	reg = in:REG4
 		with (reg == in)
+		emit "reg %reg"
 		cost 1;
 
 	reg = NOP4(in:reg)

@@ -24,6 +24,7 @@
 #include "ir.h"
 #include "mcgg.h"
 #include "hop.h"
+#include "vreg.h"
 #include "basicblock.h"
 #include "procedure.h"
 

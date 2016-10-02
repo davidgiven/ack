@@ -4,7 +4,7 @@
 enum insel_type
 {
 	INSEL_STRING,
-	INSEL_REG,
+	INSEL_VREG,
 	INSEL_VALUE,
 	INSEL_EOI
 };
@@ -15,12 +15,7 @@ struct insel
 	union
 	{
 		const char* string;
-		struct
-		{
-			struct ir* ir;
-			int insn_no;
-		}
-		reg;
+		struct vreg* vreg;
 		struct ir* value;
 	}
 	u;
@@ -32,12 +27,13 @@ struct hop
 	int insn_no;
 	struct ir* ir;
 	ARRAYOF(struct insel) insels;
+	struct vreg* output;
 };
 
 extern struct hop* new_hop(int insn_no, struct ir* ir);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
-extern void hop_add_reg_insel(struct hop* hop, struct ir* ir, int insn_no);
+extern void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg);
 extern void hop_add_value_insel(struct hop* hop, struct ir* ir);
 extern void hop_add_eoi_insel(struct hop* hop);
 
