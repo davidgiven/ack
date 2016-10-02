@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include "array.h"
 
 static void extend(struct array* array)
@@ -8,7 +9,7 @@ static void extend(struct array* array)
 	if (array->count == array->max)
 	{
 		int newmax = (array->max == 0) ? 8 : (array->max * 2);
-		void** newarray = realloc(array->item, newmax * sizeof(void*));
+		struct array* newarray = realloc(array->item, newmax * sizeof(*newarray));
 
 		array->max = newmax;
 		array->item = newarray;
@@ -24,16 +25,21 @@ void array_append(void* arrayp, void* value)
     array->count++;
 }
 
-bool array_contains(void* arrayp, void* value)
+int array_indexof(void* arrayp, void* value)
 {
     struct array* array = arrayp;
 	int i;
 
 	for (i=0; i<array->count; i++)
 		if (array->item[i] == value)
-			return true;
+			return i;
 
-	return false;
+	return -1;
+}
+
+bool array_contains(void* arrayp, void* value)
+{
+    return (array_indexof(arrayp, value) != -1);
 }
 
 bool array_appendu(void* arrayp, void* value)
@@ -74,6 +80,14 @@ void array_remove(void* arrayp, void* value)
             return;
         }
     }
+}
+
+void* array_pop(void* arrayp)
+{
+    struct array* array = arrayp;
+
+    assert(array->count > 0);
+    return array->item[array->count--];
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
