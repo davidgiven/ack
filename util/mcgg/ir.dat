@@ -5,14 +5,14 @@
 # Simple terminals
 S CONST # must be followed by float form
 S CONSTF
-S REG
-S NOP
+V REG
+V NOP
 S LABEL
 S BLOCK
 V PAIR
 S ANY
 S LOCAL
-S PHI
+V PHI
 
 # Magic stack operations
 S PUSH

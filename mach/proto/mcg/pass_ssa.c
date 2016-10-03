@@ -174,6 +174,7 @@ static bool rewrite_loads_cb(struct ir* ir, void* user)
     if (is_local(ir))
     {
         ir->opcode = IR_NOP;
+        ir->size = 0;
         ir->left = definition;
         ir->right = NULL;
     }
@@ -214,6 +215,7 @@ static void recursively_rewrite_tree(struct basicblock* bb)
             if (ir->opcode == IR_STORE)
             {
                 ir->opcode = IR_NOP;
+                ir->size = 0;
                 ir->left = ir->right;
                 ir->right = NULL;
             }

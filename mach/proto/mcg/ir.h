@@ -20,9 +20,6 @@ struct ir
 		ARRAYOF(struct ir) phivalue;
 	} u;
 
-	void* state_label; /* used by the iburg instruction selector */
-	int insn_no;       /* the table rule number for this instruction */
-	int goal_no;       /* the semantic type of this instruction; not stmt */
 	IMAPOF(struct hop) hops; /* only for root IRs; by goal */
 };
 

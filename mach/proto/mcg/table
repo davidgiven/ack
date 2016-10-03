@@ -67,12 +67,12 @@ PATTERNS
 		emit "add sp, sp, %delta"
 		cost 4;
 
-	reg = in:REG4
+	reg = in:REG
 		with (reg == in)
 		emit "reg %reg"
 		cost 1;
 
-	reg = NOP4(in:reg)
+	reg = NOP(in:reg)
 		with (reg == in)
 		cost 1;
 

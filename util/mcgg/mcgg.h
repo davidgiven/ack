@@ -13,27 +13,40 @@
 		  (size-1)))
 
 #define STATE_TYPE void*
-typedef struct ir* NODEPTR_TYPE;
 
 #define STATE_LABEL(p) ((p)->state_label)
+#define OP_LABEL(p) ((p)->label)
+#define LEFT_CHILD(p) ((p)->left)
+#define RIGHT_CHILD(p) ((p)->right)
 
-extern void* burm_label(struct ir* ir);
+struct burm_node
+{
+    int label;
+    void* state_label;
+    struct burm_node* left;
+    struct burm_node* right;
+    struct ir* ir;
+};
+
+typedef struct burm_node* NODEPTR_TYPE;
+
+extern void* burm_label(NODEPTR_TYPE node);
 extern int burm_rule(void* state, int goalnt);
 extern const short *burm_nts[];
-extern struct ir** burm_kids(struct ir* p, int eruleno, struct ir* kids[]);
-extern void burm_trace(struct ir* p, int ruleno, int cost, int bestcost);
+extern NODEPTR_TYPE* burm_kids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]);
+extern void burm_trace(NODEPTR_TYPE p, int ruleno, int cost, int bestcost);
 
 struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
-    void (*emit_fragment)(struct ir* ir, int goal);
-    void (*emit_reg)(struct ir* ir, int goal);
-    void (*emit_value)(struct ir* ir);
+    void (*emit_fragment)(NODEPTR_TYPE node, int goal);
+    void (*emit_reg)(NODEPTR_TYPE node, int goal);
+    void (*emit_value)(NODEPTR_TYPE node);
     void (*emit_eoi)(void);
-    void (*emit_constraint_equals)(struct ir* rightir, int rightgoal);
+    void (*emit_constraint_equals)(NODEPTR_TYPE node, int goal);
 };
 
-typedef void burm_emitter_t(struct ir* ir, const struct burm_emitter_data* data);
+typedef void burm_emitter_t(NODEPTR_TYPE node, const struct burm_emitter_data* data);
 
 struct burm_instruction_data
 {
