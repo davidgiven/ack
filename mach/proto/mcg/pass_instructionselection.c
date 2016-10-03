@@ -1,10 +1,22 @@
 #include "mcg.h"
 
+#define MAX_CHILDREN 10
+
+struct insn
+{
+    struct ir* ir;
+    struct hop* hop;
+    const struct burm_instruction_data* insndata;
+    int num_children;
+    struct insn* children[MAX_CHILDREN];
+};
+
 static struct basicblock* current_bb;
 static struct hop* current_hop;
 static struct ir* current_ir;
+static struct insn* current_insn;
 
-static const struct burm_emitter_data emitter_data;
+static void emit(struct insn* insn);
 
 void burm_trace(struct burm_node* p, int ruleno, int cost, int bestcost) {
     const struct burm_instruction_data* insndata = &burm_instruction_data[ruleno];
@@ -20,11 +32,23 @@ void burm_panic_cannot_match(struct burm_node* node)
 	exit(1);
 }
 
-static void emit_reg(struct burm_node* node, int goal)
+static void emit_return_reg(void)
 {
-    struct hop* hop = imap_get(&current_ir->hops, goal);
+    hop_add_vreg_insel(current_hop, current_hop->output);
+}
 
-    hop_add_vreg_insel(current_hop, hop->output);
+static void emit_reg(int child)
+{
+    struct insn* insn = current_insn->children[child];
+    struct vreg* vreg;
+
+    if (insn->hop)
+        vreg = insn->hop->output;
+    else
+        vreg = insn->ir->result;
+
+    if (vreg)
+        hop_add_vreg_insel(current_hop, vreg);
 }
 
 static void emit_string(const char* data)
@@ -32,17 +56,14 @@ static void emit_string(const char* data)
 	hop_add_string_insel(current_hop, data);
 }
 
-static void emit_fragment(struct burm_node* node, int goal)
+static void emit_fragment(int child)
 {
-    int insn_no = burm_rule(node->state_label, goal);
-    const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
-    if (insndata->emitter)
-        insndata->emitter(node, &emitter_data);
+    emit(current_insn->children[child]);
 }
 
-static void emit_value(struct burm_node* node)
+static void emit_value(int child)
 {
-	hop_add_value_insel(current_hop, node->ir);
+	hop_add_value_insel(current_hop, current_insn->children[child]->ir);
 }
 
 static void emit_eoi(void)
@@ -50,73 +71,75 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
-static void emit_constraint_equals(struct burm_node* node, int goal)
-{
-#if 0
-    struct hop* hop;
-    
-    if (!goal)
-        goal = ir->goal_no;
-    hop = imap_get(&current_ir->hops, goal);
-
-    current_hop->output = hop->output;
-#endif
-}
-
 static const struct burm_emitter_data emitter_data =
 {
     &emit_string,
     &emit_fragment,
+    &emit_return_reg,
     &emit_reg,
     &emit_value,
     &emit_eoi,
-    &emit_constraint_equals
 };
 
-
-static void walk_instructions(struct burm_node* node, int goal)
+static void emit(struct insn* insn)
 {
-    struct burm_node* children[10];
-    int insn_no = burm_rule(node->state_label, goal);
-    const struct burm_instruction_data* insndata = &burm_instruction_data[insn_no];
-    const short* nts = burm_nts[insn_no];
-    struct hop* parent_hop = NULL;
-    struct ir* ir = node->ir;
+    struct insn* old = current_insn;
+    current_insn = insn;
+
+    insn->insndata->emitter(&emitter_data);
+
+    current_insn = old;
+}
+
+static struct insn* walk_instructions(struct burm_node* node, int goal)
+{
+    struct insn* insn = calloc(1, sizeof(*insn));
     int i;
-    
-    if (!insndata->is_fragment)
+
+    insn->ir = node->ir;
+    insn->num_children = 0;
+
+    if (goal)
     {
-        parent_hop = current_hop;
-        current_hop = new_hop(insn_no, ir);
-        if (goal != 1)
+        int insn_no = burm_rule(node->state_label, goal);
+        const short* nts = burm_nts[insn_no];
+        struct burm_node* children[MAX_CHILDREN] = {0};
+
+        insn->insndata = &burm_instruction_data[insn_no];
+
+        burm_kids(node, insn_no, children);
+
+        i = 0;
+        for (;;)
         {
-            current_hop->output = new_vreg();
-            imap_add(&current_ir->hops, goal, current_hop);
+            if (!children[i])
+                break;
+
+            insn->children[i] = walk_instructions(children[i], nts[i]);
+            insn->num_children++;
+            i++;
+        }
+
+        tracef('I', "I: $%d goal %d %s selected %d: %s\n",
+            node->ir->id,
+            goal,
+            insn->insndata->is_fragment ? "fragment" : "instruction",
+            insn_no,
+            insn->insndata->name);
+
+        if (!insn->insndata->is_fragment)
+        {
+            insn->hop = current_hop = new_hop(0, insn->ir);
+            insn->hop->output = new_vreg();
+            emit(insn);
+            hop_print('I', current_hop);
+
+            if (goal != 1)
+                insn->ir->result = insn->hop->output;
         }
     }
 
-    burm_kids(node, insn_no, children);
-    for (i=0; nts[i]; i++)
-        walk_instructions(children[i], nts[i]);
-
-    tracef('I', "I: $%d goal %d selected %s %d: %s\n",
-        ir->id,
-        goal,
-        insndata->is_fragment ? "fragment" : "instruction",
-        insn_no,
-        insndata->name);
-
-    if (!insndata->is_fragment)
-    {
-        /* This may cause the vregs to be reassigned for this instruction (and
-         * fragments contained within it). */
-
-        insndata->emitter(node, &emitter_data);
-
-        hop_print('I', current_hop);
-        array_append(&ir->hops, current_hop);
-        current_hop = parent_hop;
-    }
+    return insn;
 }
 
 static struct burm_node* build_shadow_tree(struct ir* root, struct ir* ir)

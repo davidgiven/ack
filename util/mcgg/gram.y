@@ -28,6 +28,7 @@ static int nextern = 1;
 }
 
 %term ALLOCATES
+%term COPY
 %term COST
 %term DECLARATIONS
 %term EMIT
@@ -105,24 +106,24 @@ patterns
 	;
 
 pattern
-    : ID '=' rhs                      { nonterm($1, false); $$ = rule($1,     $3, nextern++); }
-    | rhs                             {                     $$ = rule("stmt", $1, nextern++); }
-    | pattern PREFERS predicate       { $$ = $1; array_append(&$$->prefers, $3); }
-    | pattern WHEN predicate          { $$ = $1; array_append(&$$->requires, $3); }
-    | pattern COST INT                { $$ = $1; $$->cost = $3; }
-    | pattern_constraints             { $$ = $1; }
-    | pattern_emit                    { $$ = $1; }
+    : ID '=' rhs                        { nonterm($1, false); $$ = rule($1,     $3, nextern++); }
+    | rhs                               {                     $$ = rule("stmt", $1, nextern++); }
+    | pattern PREFERS predicate         { $$ = $1; array_append(&$$->prefers, $3); }
+    | pattern WHEN predicate            { $$ = $1; array_append(&$$->requires, $3); }
+    | pattern COST INT                  { $$ = $1; $$->cost = $3; }
+    | pattern_constraints               { $$ = $1; }
+    | pattern_emit                      { $$ = $1; }
     ;
 
 rhs
-    : terminfo                        { $$ = tree(&$1, NULL, NULL); }
-	| terminfo '(' rhs ')'            { $$ = tree(&$1,   $3, NULL); }
-	| terminfo '(' rhs ',' rhs ')'    { $$ = tree(&$1,   $3, $5); }
+    : terminfo                          { $$ = tree(&$1, NULL, NULL); }
+	| terminfo '(' rhs ')'              { $$ = tree(&$1,   $3, NULL); }
+	| terminfo '(' rhs ',' rhs ')'      { $$ = tree(&$1,   $3, $5); }
 	;
 
 terminfo
-    : ID                              { $$.name = $1; }
-    | ID ':' ID                       { $$.label = $1; $$.name = $3; }
+    : ID                                { $$.name = $1; }
+    | ID ':' ID                         { $$.label = $1; $$.name = $3; }
     ;
 
 pattern_emit

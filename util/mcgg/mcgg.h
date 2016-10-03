@@ -39,14 +39,14 @@ extern void burm_trace(NODEPTR_TYPE p, int ruleno, int cost, int bestcost);
 struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
-    void (*emit_fragment)(NODEPTR_TYPE node, int goal);
-    void (*emit_reg)(NODEPTR_TYPE node, int goal);
-    void (*emit_value)(NODEPTR_TYPE node);
+    void (*emit_fragment)(int child);
+    void (*emit_return_reg)(void);
+    void (*emit_reg)(int child);
+    void (*emit_value)(int child);
     void (*emit_eoi)(void);
-    void (*emit_constraint_equals)(NODEPTR_TYPE node, int goal);
 };
 
-typedef void burm_emitter_t(NODEPTR_TYPE node, const struct burm_emitter_data* data);
+typedef void burm_emitter_t(const struct burm_emitter_data* data);
 
 struct burm_instruction_data
 {

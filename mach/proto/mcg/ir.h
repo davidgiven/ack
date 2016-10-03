@@ -20,6 +20,7 @@ struct ir
 		ARRAYOF(struct ir) phivalue;
 	} u;
 
+	struct vreg* result;     /* vreg containing IR result */
 	IMAPOF(struct hop) hops; /* only for root IRs; by goal */
 };
 

@@ -52,6 +52,7 @@ PATTERNS
 		cost 4;
 
 	reg = POP4
+		with int reg
 		emit "pop %reg"
 		cost 4;
 
@@ -68,12 +69,11 @@ PATTERNS
 		cost 4;
 
 	reg = in:REG
-		with (reg == in)
-		emit "reg %reg"
+		emit "mov %reg, %in"
 		cost 1;
 
 	reg = NOP(in:reg)
-		with (reg == in)
+		emit "mov %reg, %in"
 		cost 1;
 
 
@@ -90,18 +90,22 @@ PATTERNS
 		cost 4;
 
 	reg = LOAD4(addr:address)
+		with int reg
 		emit "ldr %reg, %addr"
 		cost 4;
 
 	reg = LOAD1(addr:address)
+		with int reg
 		emit "ldrb %reg, %addr"
 		cost 4;
 
 	reg = CIU14(LOAD1(addr:address))
+		with int reg
 		emit "ldrb %reg, %addr"
 		cost 4;
 	
 	reg = CII14(CIU41(CIU14(LOAD1(addr:address))))
+		with int reg
 		emit "ldrsb %reg, %addr"
 		cost 4;
 
@@ -109,6 +113,7 @@ PATTERNS
 /* Locals */
 
 	reg = in:LOCAL4
+		with int reg
 		emit "add %reg, fp, #$in"
 		cost 4;
 
@@ -161,14 +166,17 @@ PATTERNS
 /* Comparisons */
 
 	cc = COMPARES4(left:reg, right:aluparam)
+		with cc cc
 		emit "cmp %left, %right"
 		cost 4;
 
 	cc = COMPARES4(COMPARES4(left:reg, right:aluparam), CONST4)
+		with cc cc
 		emit "cmp %left, %right"
 		cost 4;
 
 	reg = cc
+		with int reg
 		emit "mov %reg, #0"
 		emit "movlt %reg, #-1"
 		emit "movgt %reg, #1"
@@ -178,10 +186,12 @@ PATTERNS
 /* Conversions */
 
 	reg = CII14(CIU41(value:reg))
+		with int reg
 		emit "sxtb %reg, %value"
 		cost 4;
 
 	reg = CIU41(in:reg)
+		with int reg
 		emit "and %reg, %in, #0xff"
 		cost 4;
 
@@ -189,19 +199,23 @@ PATTERNS
 /* ALU operations */
 
 	reg = ADD4(left:reg, right:aluparam)
+		with int reg
 		emit "add %reg, %left, %right"
 		cost 4;
 
 	reg = ADD4(left:aluparam, right:reg)
+		with int reg
 		emit "add %reg, %right, %left"
 		cost 4;
 
 	reg = MOD4(left:reg, right:reg)
+		with int reg
 		emit "udiv %reg, %left, %right"
 		emit "mls %reg, %reg, %right, %left"
 		cost 8;
 
 	reg = DIV4(left:reg, right:aluparam)
+		with int reg
 		emit "div %reg, %left, %right"
 		cost 4;
 
@@ -212,28 +226,34 @@ PATTERNS
 		emit "%value";
 
 	reg = value:aluparam
+		with int reg
 		emit "mov %reg, %value"
 		cost 4;
 
 	reg = value:LABEL4
+		with int reg
 		emit "adr %reg, $value"
 		cost 4;
 
 	reg = value:BLOCK4
+		with int reg
 		emit "adr %reg, $value"
 		cost 4;
 
 	reg = value:CONST4
+		with int reg
 		emit "ldr %reg, address-containing-$value"
 		cost 8;
 
 	reg = value:CONSTF4
+		with int reg
 		emit "vldr %reg, address-containing-$value"
 		cost 8;
 
 /* FPU operations */
 
 	reg = ADDF4(left:reg, right:reg)
+		with int reg
 		emit "fadds %reg, %left, %right"
 		cost 4;
 

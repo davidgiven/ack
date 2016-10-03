@@ -679,20 +679,22 @@ static void emitheader(void)
 }
 
 /* computekids - compute paths to kids in tree t */
-static char* computekids(Tree t, const char* v, char* bp, int* ip)
+static char* computekids(Tree node, const char* v, char* bp, int* ip)
 {
-	Term p = t->op;
+	Term t = node->op;
 
-	if (p->kind == NONTERM)
+	if (!node->left && !node->right)
 	{
 		sprintf(bp, "\t\tkids[%d] = %s;\n", (*ip)++, v);
 		bp += strlen(bp);
 	}
-	else if (p->arity > 0)
+
+	if (t->kind == TERM)
 	{
-		bp = computekids(t->left, aprintf("LEFT_CHILD(%s)", v), bp, ip);
-		if (p->arity == 2)
-			bp = computekids(t->right, aprintf("RIGHT_CHILD(%s)", v), bp, ip);
+		if (t->arity >= 1)
+			bp = computekids(node->left, aprintf("LEFT_CHILD(%s)", v), bp, ip);
+		if (t->arity == 2)
+			bp = computekids(node->right, aprintf("RIGHT_CHILD(%s)", v), bp, ip);
 	}
 	return bp;
 }
@@ -910,6 +912,27 @@ static void label_not_found(Rule rule, const char* label)
 	exit(1);
 }
 
+static bool find_child_index(Tree node, const char* name, int* index, Tree* found)
+{
+	/* This must return the same ordering as the burm_kids() function uses. */
+
+	if (node->label && strcmp(node->label, name) == 0)
+	{
+		if (found)
+			*found = node;
+		return true;
+	}
+
+	if (!node->left && !node->right)
+		(*index)++;
+
+	if (node->left && find_child_index(node->left, name, index, found))
+		return true;
+	if (node->right && find_child_index(node->right, name, index, found))
+		return true;
+	return false;
+}
+	
 /* emitpredicates - emit predicates for rules */
 static void emitpredicatedefinitions(Rule r)
 {
@@ -954,49 +977,6 @@ static void emitpredicatedefinitions(Rule r)
 	}
 }
 
-static void invalid_equals_constraint(Rule rule)
-{
-	yylineno = rule->lineno;
-	yyerror("left hand side of an equality constraint must be the output register");
-	exit(1);
-}
-
-static void emit_ir_expr(Rule rule, const char* label)
-{
-	if (strcmp(label, rule->lhs->name) == 0)
-		print("node, %P%s_NT", label);
-	else
-	{
-		Tree node;
-		uint32_t path = find_label(rule->pattern, label, 0, &node);
-		Nonterm nt = node->op;
-
-		if (path == PATH_MISSING)
-			label_not_found(rule, label);
-
-		print_path(path);
-		if (nt->kind == NONTERM)
-			print(", %P%s_NT", ((Nonterm)node->op)->name);
-		else
-			print(", 0");
-	}
-}
-
-static void emit_constraint(Rule rule, struct constraint* c)
-{
-	switch (c->type)
-	{
-		case CONSTRAINT_EQUALS:
-			if (strcmp(c->left, rule->lhs->name) != 0)
-				invalid_equals_constraint(rule);
-
-			print("%1data->emit_constraint_equals(");
-			emit_ir_expr(rule, c->right);
-			print(");\n");
-			break;
-	}
-}
-
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -1007,6 +987,7 @@ static void emitinsndata(Rule rules)
 	while (r)
 	{
 		struct stringfragment* f = r->code.first;
+		yylineno = r->lineno;
 
 		if (!f)
 		{
@@ -1019,20 +1000,7 @@ static void emitinsndata(Rule rules)
 		}
 
 		print("/* %R */\n", r);
-		print("static void %Pemitter_%d(NODEPTR_TYPE node, const struct %Pemitter_data* data) {\n", r->ern);
-
-		/* Constraints come first, because they may cause vreg reassignment, which
-		 * we want to happen before the instruction emission. */
-
-		{
-			int i;
-
-			for (i=0; i<r->constraints.count; i++)
-			{
-				struct constraint* c = r->constraints.item[i];
-				emit_constraint(r, c);
-			}
-		}
+		print("static void %Pemitter_%d(const struct %Pemitter_data* data) {\n", r->ern);
 
 		while (f)
 		{
@@ -1043,23 +1011,26 @@ static void emitinsndata(Rule rules)
 					const char* label = f->data + 1;
 
 					if (strcmp(label, r->lhs->name) == 0)
-						print("%1data->emit_reg(node, %P%s_NT);\n", label);
+						print("%1data->emit_return_reg();\n", label);
 					else
 					{
 						Tree node;
-						uint32_t path = find_label(r->pattern, label, 0, &node);
+						int index = 0;
+						if (!find_child_index(r->pattern, label, &index, &node))
+							label_not_found(r, label);
 						Nonterm nt = node->op;
 
-						if (path == PATH_MISSING)
-							label_not_found(r, label);
-
-						if (nt->is_fragment)
-							print("%1data->emit_fragment(");
+						if (nt->kind == NONTERM)
+						{
+							if (nt->is_fragment)
+								print("%1data->emit_fragment(");
+							else
+								print("%1data->emit_reg(");
+						}
 						else
 							print("%1data->emit_reg(");
 
-						print_path(path);
-						print(", %P%s_NT);\n", ((Nonterm)node->op)->name);
+						print("%d);\n", index);
 					}
 					break;
 				}
@@ -1067,12 +1038,11 @@ static void emitinsndata(Rule rules)
 				case '$':
 				{
 					const char* label = f->data + 1;
-					uint32_t path = find_label(r->pattern, label, 0, NULL);
-					print("%1data->emit_value(");
-					if (path == PATH_MISSING)
+					int index = 0;
+					if (!find_child_index(r->pattern, label, &index, NULL))
 						label_not_found(r, label);
-					print_path(path);
-					print(");\n");
+
+					print("%1data->emit_value(%d);\n", index);
 					break;
 				}
 
