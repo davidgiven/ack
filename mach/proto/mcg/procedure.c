@@ -15,7 +15,23 @@ static void print_blocks(char k, struct procedure* proc)
             bb->is_fake ? "FAKE " : "",
             bb->name);
 
-		for (int j=0; j<bb->irs.count; j++)
+        if (bb->prevs.count > 0)
+        {
+            tracef(k, "%c: FROM:", k);
+            for (j=0; j<bb->prevs.count; j++)
+                tracef(k, " %s", bb->prevs.item[j]->name);
+            tracef(k, "\n");
+        }
+
+        if (bb->nexts.count > 0)
+        {
+            tracef(k, "%c:   TO:", k);
+            for (j=0; j<bb->nexts.count; j++)
+                tracef(k, " %s", bb->nexts.item[j]->name);
+            tracef(k, "\n");
+        }
+
+		for (j=0; j<bb->irs.count; j++)
 			ir_print(k, bb->irs.item[j]);
 	}
 }
@@ -40,8 +56,10 @@ void procedure_compile(struct procedure* proc)
     print_blocks('3', proc);
     pass_convert_locals_to_ssa(proc);
     print_blocks('4', proc);
-    pass_promote_float_ops(proc);
+    pass_split_critical_edges(proc);
     print_blocks('5', proc);
+    pass_promote_float_ops(proc);
+    print_blocks('6', proc);
 
 
     pass_instruction_selector(proc);
