@@ -1,22 +1,14 @@
 #include "mcg.h"
+#include <unistd.h>
+
+static const char* tracechars = NULL;
 
 bool tracing(char k)
 {
-    switch (k)
-    {
-        case 0:   return true;
-        case 'S': return true;
-        case 'E': return false;
-        case 'G': return true;
-        case '0': return false;
-        case '1': return false;
-        case '2': return false;
-        case '3': return false;
-        case '4': return false;
-        case '5': return false;
-        case 'I': return true;
-        default:  return true;
-    }
+    if (!tracechars)
+        return false;
+
+    return index(tracechars, k);
 }
 
 void tracef(char k, const char* fmt, ...)
@@ -38,12 +30,32 @@ static bool find_procedures_cb(struct symbol* symbol, void* user)
     return false;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char* const argv[])
 {
+    program_name = argv[0];
+
+    opterr = 1;
+    for (;;)
+    {
+        int c = getopt(argc, argv, "-d:");
+        if (c == -1)
+            break;
+
+        switch (c)
+        {
+            case 'd':
+                tracechars = optarg;
+                break;
+
+            case 1:
+                fatal("unexpected argument '%s'", optarg);
+        }
+    }
+
     symbol_init();
 
-	if (!EM_open(argv[1]))
-		fatal("Couldn't open input file: %s", EM_error);
+	if (!EM_open(NULL))
+		fatal("couldn't open stdin: %s", EM_error);
 	
     /* Reads in the EM, outputs the data sections, parses any code and
      * generates IR trees. */
