@@ -129,8 +129,24 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 
         if (!insn->insndata->is_fragment)
         {
+            struct vreg* vreg = NULL;
+
+            switch (node->label)
+            {
+                case ir_to_esn(IR_REG, 0):
+                    vreg = node->ir->result;
+                    break;
+
+                case ir_to_esn(IR_NOP, 0):
+                    vreg = node->left->ir->result;
+                    break;
+
+                default:
+                    vreg = new_vreg();
+            }
+
             insn->hop = current_hop = new_hop(0, insn->ir);
-            insn->hop->output = new_vreg();
+            insn->hop->output = vreg;
             emit(insn);
             hop_print('I', current_hop);
 

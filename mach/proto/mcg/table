@@ -69,11 +69,9 @@ PATTERNS
 		cost 4;
 
 	reg = in:REG
-		emit "mov %reg, %in"
 		cost 1;
 
 	reg = NOP(in:reg)
-		emit "mov %reg, %in"
 		cost 1;
 
 
