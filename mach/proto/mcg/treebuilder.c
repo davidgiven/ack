@@ -270,6 +270,14 @@ static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock
         case op_zge: compare0_branch2(opcode, rightbb, leftbb, IR_CJUMPLT); break;
         case op_zgt: compare0_branch2(opcode, rightbb, leftbb, IR_CJUMPLE); break;
 
+        case op_beq: simple_branch2(opcode, EM_wordsize, leftbb, rightbb, IR_CJUMPEQ); break;
+        case op_blt: simple_branch2(opcode, EM_wordsize, leftbb, rightbb, IR_CJUMPLT); break;
+        case op_ble: simple_branch2(opcode, EM_wordsize, leftbb, rightbb, IR_CJUMPLE); break;
+
+        case op_bne: simple_branch2(opcode, EM_wordsize, rightbb, leftbb, IR_CJUMPEQ); break;
+        case op_bge: simple_branch2(opcode, EM_wordsize, rightbb, leftbb, IR_CJUMPLT); break;
+        case op_bgt: simple_branch2(opcode, EM_wordsize, rightbb, leftbb, IR_CJUMPLE); break;
+
         case op_bra:
         {
             materialise_stack();

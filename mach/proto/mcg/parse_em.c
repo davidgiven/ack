@@ -158,6 +158,12 @@ static void queue_insn_ilabel(int opcode, int label)
         case op_zle:
         case op_zgt:
         case op_zge:
+        case op_beq:
+        case op_bne:
+        case op_blt:
+        case op_ble:
+        case op_bgt:
+        case op_bge:
         {
             struct basicblock* bb = bb_get(NULL);
             queue_insn_block(em.em_opcode, left, bb);
