@@ -21,7 +21,6 @@ struct ir
 	} u;
 
 	struct vreg* result;     /* vreg containing IR result */
-	IMAPOF(struct hop) hops; /* only for root IRs; by goal */
 };
 
 extern const char* ir_names[];
