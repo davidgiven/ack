@@ -191,15 +191,30 @@ static void select_instructions(void)
 		int insnno;
 
 		current_ir = current_bb->irs.item[i];
-        shadow = build_shadow_tree(current_ir, current_ir);
-		burm_label(shadow);
 
-		insnno = burm_rule(shadow->state_label, 1);
-		if (!insnno)
-			burm_panic_cannot_match(shadow);
+        if (current_ir->opcode == IR_PHI)
+        {
+            int j;
 
-        ir_print('I', current_ir);
-		walk_instructions(shadow, 1);
+            current_ir->result = new_vreg();
+            array_append(&current_bb->liveins, current_ir->result);
+            tracef('I', "I: %d is phi:", current_ir->result->id);
+            for (j=0; j<current_ir->u.phivalue.count; j++)
+                tracef('I', " $%d", current_ir->u.phivalue.item[j]->id);
+            tracef('I', "\n");
+        }
+        else
+        {
+            shadow = build_shadow_tree(current_ir, current_ir);
+            burm_label(shadow);
+
+            insnno = burm_rule(shadow->state_label, 1);
+            if (!insnno)
+                burm_panic_cannot_match(shadow);
+
+            ir_print('I', current_ir);
+            walk_instructions(shadow, 1);
+        }
 	}
 }
 

@@ -12,6 +12,8 @@ struct basicblock
     ARRAYOF(struct basicblock) nexts;
     int order; /* used by SSA code */
 
+	ARRAYOF(struct vreg) liveins;
+
     bool is_fake : 1;
     bool is_root : 1;
     bool is_terminated : 1;

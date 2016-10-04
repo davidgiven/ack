@@ -62,6 +62,7 @@ PATTERNS
 
 	SETRET4(in:reg)
 		with ret reg
+		emit "mov r0, %in"
 		cost 4;
 
 	STACKADJUST4(delta:aluparam)
