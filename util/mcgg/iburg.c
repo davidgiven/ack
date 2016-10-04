@@ -779,9 +779,12 @@ static char* computents(Tree t, char* bp)
 	if (t)
 	{
 		Nonterm p = t->op;
-		if (p->kind == NONTERM)
+		if (!t->left && !t->right)
 		{
-			sprintf(bp, "%s_%s_NT, ", prefix, p->name);
+			if (p->kind == NONTERM)
+				sprintf(bp, "%s_%s_NT, ", prefix, p->name);
+			else
+				sprintf(bp, "0, ");
 			bp += strlen(bp);
 		}
 		else
