@@ -58,7 +58,7 @@ int main(int argc, char* const argv[])
 
     symbol_init();
 
-	if (!EM_open(inputfile))
+	if (!EM_open((char*) inputfile))
 		fatal("couldn't open '%s': %s",
             inputfile ? inputfile : "<stdin>", EM_error);
 	
