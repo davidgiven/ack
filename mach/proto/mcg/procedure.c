@@ -61,8 +61,9 @@ void procedure_compile(struct procedure* proc)
     pass_promote_float_ops(proc);
     print_blocks('6', proc);
 
-
     pass_instruction_selector(proc);
+
+    register_allocator(proc);
 }
 
 static bool collect_outputs_cb(struct ir* ir, void* user)

@@ -11,8 +11,6 @@
 
 extern int yylex(void);
 
-static int nextern = 1;
-
 %}
 %union {
 	int n;
@@ -86,17 +84,6 @@ declarations
 declaration
     : ID                              { $$ = nonterm($1, true); }
     | declaration FRAGMENT            { $$ = $1; $$->is_fragment = true; }
-    | allocates                       { $$ = $1; }
-    ;
-
-allocates
-    : declaration ALLOCATES '(' ID ')'
-        {
-            $$ = $1;
-            if ($$->allocate)
-                yyerror("pattern type is defined to already allocate a register");
-            $$->allocate = getregattr($4);
-        }
     ;
 
 patterns
@@ -106,8 +93,8 @@ patterns
 	;
 
 pattern
-    : ID '=' rhs                        { nonterm($1, false); $$ = rule($1,     $3, nextern++); }
-    | rhs                               {                     $$ = rule("stmt", $1, nextern++); }
+    : terminfo '=' rhs                  { nonterm($1.name, false); $$ = rule(&$1,  $3); }
+    | rhs                               {                          $$ = rule(NULL, $1); }
     | pattern PREFERS predicate         { $$ = $1; array_append(&$$->prefers, $3); }
     | pattern WHEN predicate            { $$ = $1; array_append(&$$->requires, $3); }
     | pattern COST INT                  { $$ = $1; $$->cost = $3; }
@@ -123,7 +110,9 @@ rhs
 
 terminfo
     : ID                                { $$.name = $1; }
+    | '(' ID ')' ID                     { $$.attr = $2; $$.name = $4; }
     | ID ':' ID                         { $$.label = $1; $$.name = $3; }
+    | ID ':' '(' ID ')' ID              { $$.label = $1; $$.attr = $4; $$.name = $6; }
     ;
 
 pattern_emit

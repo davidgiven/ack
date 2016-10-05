@@ -41,6 +41,7 @@ struct terminfo
 {
 	const char* name;
 	const char* label;
+	const char* attr;
 };
 
 struct reg
@@ -82,7 +83,7 @@ struct nonterm
 	Rule chain;       /* chain rules w/non-terminal on rhs */
 	Nonterm link;     /* next terminal in number order */
 	bool is_fragment; /* these instructions are all fragments */
-	struct regattr* allocate; /* allocate this kind of register */
+	struct regattr* attr; /* input register attribute */
 };
 extern void* lookup(const char* name);
 extern Nonterm nonterm(const char* id, bool allocate);
@@ -96,7 +97,7 @@ struct tree
 	Tree left, right;   /* operands */
 	int nterms;         /* number of terminal nodes in this tree */
 };
-extern Tree tree(struct terminfo* ti, Tree left, Tree right);
+extern Tree tree(const struct terminfo* ti, Tree left, Tree right);
 
 struct rule
 { /* rules: */
@@ -106,6 +107,8 @@ struct rule
 	int ern;                 /* external rule number */
 	int packed;              /* packed external rule number */
 	int cost;                /* associated cost */
+	const char* label;       /* label for LHS */
+	struct regattr* attr;    /* register attribute of result */
 	Rule link;               /* next rule in ern order */
 	Rule next;               /* next rule with same pattern root */
 	Rule chain;              /* next chain rule with same rhs */
@@ -116,7 +119,7 @@ struct rule
 	ARRAYOF(struct constraint) constraints; /* register constraints */
 	struct stringlist code;  /* compiler output code strings */
 };
-extern Rule rule(char* id, Tree pattern, int ern);
+extern Rule rule(const struct terminfo* ti, Tree pattern);
 extern int maxcost; /* maximum cost */
 
 /* gram.y: */

@@ -29,7 +29,6 @@ REGISTERS
 
 DECLARATIONS
 
-	reg;
 	cc;
 
 	address   fragment;
@@ -40,28 +39,24 @@ PATTERNS
 
 /* Special */
 
-	reg;
-
 	PAIR(BLOCK4, BLOCK4);
 
 
 /* Miscellaneous special things */
 
-	PUSH4(in:reg)
+	PUSH4(in:(int)reg)
 		emit "push %in"
 		cost 4;
 
-	reg = POP4
-		with int reg
-		emit "pop %reg"
+	out:(int)reg = POP4
+		emit "pop %out"
 		cost 4;
 
 	RET
 		emit "ret"
 		cost 4;
 
-	SETRET4(in:reg)
-		with ret reg
+	SETRET4(in:(ret)reg)
 		emit "mov r0, %in"
 		cost 4;
 
@@ -69,51 +64,38 @@ PATTERNS
 		emit "add sp, sp, %delta"
 		cost 4;
 
-	reg = in:REG
-		cost 1;
-
-	reg = NOP(in:reg)
-		cost 1;
-
 
 /* Memory operations */
 
-	STORE4(addr:address, value:reg)
-		with int value
+	STORE4(addr:address, value:(int)reg)
 		emit "str %value, %addr"
 		cost 4;
 
-	STORE1(addr:address, value:reg)
-		with int value
+	STORE1(addr:address, value:(int)reg)
 		emit "strb %value, %addr"
 		cost 4;
 
-	reg = LOAD4(addr:address)
-		with int reg
-		emit "ldr %reg, %addr"
+	out:(int)reg = LOAD4(addr:address)
+		emit "ldr %out, %addr"
 		cost 4;
 
-	reg = LOAD1(addr:address)
-		with int reg
-		emit "ldrb %reg, %addr"
+	out:(int)reg = LOAD1(addr:address)
+		emit "ldrb %out, %addr"
 		cost 4;
 
-	reg = CIU14(LOAD1(addr:address))
-		with int reg
-		emit "ldrb %reg, %addr"
+	out:(int)reg = CIU14(LOAD1(addr:address))
+		emit "ldrb %out, %addr"
 		cost 4;
 	
-	reg = CII14(CIU41(CIU14(LOAD1(addr:address))))
-		with int reg
-		emit "ldrsb %reg, %addr"
+	out:(int)reg = CII14(CIU41(CIU14(LOAD1(addr:address))))
+		emit "ldrsb %out, %addr"
 		cost 4;
 
 
 /* Locals */
 
-	reg = in:LOCAL4
-		with int reg
-		emit "add %reg, fp, #$in"
+	out:(int)reg = in:LOCAL4
+		emit "add %out, fp, #$in"
 		cost 4;
 
 	address = in:LOCAL4
@@ -122,16 +104,13 @@ PATTERNS
 
 /* Memory addressing modes */
 
-	address = ADD4(addr:reg, offset:CONST4)
-		with int addr
+	address = ADD4(addr:(int)reg, offset:CONST4)
 		emit "[%addr, #$offset]";
 
-	address = ADD4(addr1:reg, addr2:reg)
-		with int addr1, int addr2
+	address = ADD4(addr1:(int)reg, addr2:(int)reg)
 		emit "[%addr1, %addr2]";
 
-	address = addr:reg
-		with int addr
+	address = addr:(int)reg
 		emit "[%addr]";
 
 
@@ -142,17 +121,17 @@ PATTERNS
 		emit "b $addr"
 		cost 4;
 
-	CJUMPEQ(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPEQ(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
 		emit "beq $true"
 		emit "b $false"
 		cost 8;
 
-	CJUMPLE(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPLE(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
 		emit "ble $true"
 		emit "b $false"
 		cost 8;
 
-	CJUMPLT(value:cc, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPLT(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
 		emit "blt $true"
 		emit "b $false"
 		cost 8;
@@ -164,96 +143,81 @@ PATTERNS
 
 /* Comparisons */
 
-	cc = COMPARES4(left:reg, right:aluparam)
-		with cc cc
+	(cc)cc = COMPARES4(left:(int)reg, right:aluparam)
 		emit "cmp %left, %right"
 		cost 4;
 
-	cc = COMPARES4(COMPARES4(left:reg, right:aluparam), CONST4)
-		with cc cc
+	(cc)cc = COMPARES4(COMPARES4(left:(int)reg, right:aluparam), CONST4)
 		emit "cmp %left, %right"
 		cost 4;
 
-	reg = cc
-		with int reg
-		emit "mov %reg, #0"
-		emit "movlt %reg, #-1"
-		emit "movgt %reg, #1"
+	out:(int)reg = (cc)cc
+		emit "mov %out, #0"
+		emit "movlt %out, #-1"
+		emit "movgt %out, #1"
 		cost 12;
 
 
 /* Conversions */
 
-	reg = CII14(CIU41(value:reg))
-		with int reg
-		emit "sxtb %reg, %value"
+	out:(int)reg = CII14(CIU41(value:(int)reg))
+		emit "sxtb %out, %value"
 		cost 4;
 
-	reg = CIU41(in:reg)
-		with int reg
-		emit "and %reg, %in, #0xff"
+	out:(int)reg = CIU41(in:(int)reg)
+		emit "and %out, %in, #0xff"
 		cost 4;
 
 
 /* ALU operations */
 
-	reg = ADD4(left:reg, right:aluparam)
-		with int reg
-		emit "add %reg, %left, %right"
+	out:(int)reg = ADD4(left:(int)reg, right:aluparam)
+		emit "add %out, %left, %right"
 		cost 4;
 
-	reg = ADD4(left:aluparam, right:reg)
-		with int reg
-		emit "add %reg, %right, %left"
+	out:(int)reg = ADD4(left:aluparam, right:(int)reg)
+		emit "add %out, %right, %left"
 		cost 4;
 
-	reg = MOD4(left:reg, right:reg)
-		with int reg
-		emit "udiv %reg, %left, %right"
-		emit "mls %reg, %reg, %right, %left"
+	out:(int)reg = MOD4(left:(int)reg, right:(int)reg)
+		emit "udiv %out, %left, %right"
+		emit "mls %out, %out, %right, %left"
 		cost 8;
 
-	reg = DIV4(left:reg, right:aluparam)
-		with int reg
-		emit "div %reg, %left, %right"
+	out:(int)reg = DIV4(left:(int)reg, right:aluparam)
+		emit "div %out, %left, %right"
 		cost 4;
 
 	aluparam = value:CONST4
 		emit "#$value";
 
-	aluparam = value:reg
+	aluparam = value:(int)reg
 		emit "%value";
 
-	reg = value:aluparam
-		with int reg
-		emit "mov %reg, %value"
+	out:(int)reg = value:aluparam
+		emit "mov %out, %value"
 		cost 4;
 
-	reg = value:LABEL4
-		with int reg
-		emit "adr %reg, $value"
+	out:(int)reg = value:LABEL4
+		emit "adr %out, $value"
 		cost 4;
 
-	reg = value:BLOCK4
-		with int reg
-		emit "adr %reg, $value"
+	out:(int)reg = value:BLOCK4
+		emit "adr %out, $value"
 		cost 4;
 
-	reg = value:CONST4
-		with int reg
-		emit "ldr %reg, address-containing-$value"
+	out:(int)reg = value:CONST4
+		emit "ldr %out, address-containing-$value"
 		cost 8;
 
-	reg = value:CONSTF4
-		with int reg
-		emit "vldr %reg, address-containing-$value"
+	out:(int)reg = value:CONSTF4
+		emit "vldr %out, address-containing-$value"
 		cost 8;
 
 /* FPU operations */
 
-	reg = ADDF4(left:reg, right:reg)
-		with int reg
-		emit "fadds %reg, %left, %right"
+	out:(float)reg = ADDF4(left:(float)reg, right:(float)reg)
+		emit "fadds %out, %left, %right"
 		cost 4;
 
 /* vim: set sw=4 ts=4 expandtab : */

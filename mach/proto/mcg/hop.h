@@ -28,6 +28,9 @@ struct hop
 	struct ir* ir;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
+
+	ARRAYOF(struct vreg) ins;
+	ARRAYOF(struct vreg) outs;
 	PMAPOF(struct vreg, struct hreg) registers;
 };
 

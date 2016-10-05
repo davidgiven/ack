@@ -14,6 +14,7 @@
 #include "ircodes.h"
 #include "astring.h"
 #include "smap.h"
+#include "mcgg.h"
 
 static char rcsid[] = "$Id$";
 
@@ -130,6 +131,20 @@ int main(int argc, char* argv[])
 	makeregattr("bytes2");
 	makeregattr("bytes4");
 	makeregattr("bytes8");
+
+	/* Define some standard terms. */
+
+	{
+		const static struct terminfo reg = { "reg", NULL, "" };
+		const static struct terminfo REG = { "REG", NULL, NULL };
+		const static struct terminfo NOP = { "NOP", NULL, NULL };
+
+		nonterm("reg", true);
+
+		rule(NULL, tree(&reg, NULL, NULL))->cost = 1;
+		rule(&reg, tree(&REG, NULL, NULL))->cost = 1;
+		rule(&reg, tree(&NOP, tree(&reg, NULL, NULL), NULL))->cost = 1;
+	}
 
 	yyin = infp;
 	yyparse();
@@ -336,7 +351,7 @@ Term term(const char* id, int esn)
 }
 
 /* tree - create & initialize a tree node with the given fields */
-Tree tree(struct terminfo* ti, Tree left, Tree right)
+Tree tree(const struct terminfo* ti, Tree left, Tree right)
 {
 	Tree t = calloc(1, sizeof *t);
 	Term p = lookup(ti->name);
@@ -363,31 +378,57 @@ Tree tree(struct terminfo* ti, Tree left, Tree right)
 	if (p->kind == TERM && arity != p->arity)
 		yyerror("inconsistent arity for terminal `%s'\n", ti->name);
 	t->op = p;
-	t->label = ti->label;
 	t->nterms = p->kind == TERM;
 	if (t->left = left)
 		t->nterms += left->nterms;
 	if (t->right = right)
 		t->nterms += right->nterms;
+
+	/* Special rules that have no output register attribute use "" as the
+	 * attribute name; these can't be made by the grammar. */
+
+	t->label = ti->label;
+	if ((p->kind == TERM) && (ti->attr))
+		yyerror("can't specify an input register attribute for terminal '%s'", ti->name);
+	if (p->kind == NONTERM)
+	{
+		Nonterm nt = (Nonterm)p;
+		if (nt->is_fragment && ti->attr)
+			yyerror("can't specify an input register attribute for fragment '%s'", ti->name);
+		if (!nt->is_fragment && !ti->attr)
+			yyerror("must specify an input register attribute for non-fragment '%s'", ti->name);
+
+		if (ti->attr && ti->attr[0])
+		{
+			nt->attr = smap_get(&registerattrs, ti->attr);
+			if (!nt->attr)
+				yyerror("'%s' doesn't seem to be a known register attribute", ti->attr);
+		}
+	}
 	return t;
 }
 
 /* rule - create & initialize a rule with the given fields */
-Rule rule(char* id, Tree pattern, int ern)
+Rule rule(const struct terminfo* ti, Tree pattern)
 {
+	static int number = 1;
+	static const struct terminfo stmt = { "stmt", NULL, NULL };
 	Rule r = calloc(1, sizeof *r);
 	Rule *q;
 	Term p = pattern->op;
 
+	if (!ti)
+		ti = &stmt;
+
 	nrules++;
 	r->lineno = yylineno;
-	r->lhs = nonterm(id, false);
+	r->lhs = nonterm(ti->name, false);
 	r->packed = ++r->lhs->lhscount;
 	for (q = &r->lhs->rules; *q; q = &(*q)->decode)
 		;
 	*q = r;
 	r->pattern = pattern;
-	r->ern = ern;
+	r->ern = number++;
 	if (p->kind == TERM)
 	{
 		r->next = p->rules;
@@ -405,6 +446,23 @@ Rule rule(char* id, Tree pattern, int ern)
 		yyerror("duplicate external rule number `%d'\n", r->ern);
 	r->link = *q;
 	*q = r;
+
+	r->label = ti->label;
+	if (r->lhs->is_fragment && ti->attr)
+		yyerror("can't specify an output register attribute for a fragment");
+	if (!r->lhs->is_fragment && !ti->attr && (r->lhs->number != NONTERM_STMT))
+		yyerror("must specify an output register attribute for non-fragments");
+
+	/* Special rules that have no output register attribute use "" as the
+	 * attribute name; these can't be made by the grammar. */
+
+	if (ti->attr && ti->attr[0])
+	{
+		r->attr = smap_get(&registerattrs, ti->attr);
+		if (!r->attr)
+			yyerror("'%s' doesn't seem to be a known register attribute", ti->attr);
+	}
+
 	return r;
 }
 
@@ -986,6 +1044,28 @@ static void emitpredicatedefinitions(Rule r)
 	}
 }
 
+static void emit_input_regs(Tree node, int* index)
+{
+	/* This must return the same ordering as the burm_kids() function uses. */
+
+	Nonterm nt = node->op;
+	if ((nt->kind == NONTERM) && !nt->is_fragment && !node->left && !node->right)
+	{
+		uint32_t attr = 0;
+		if (nt->attr->number)
+			attr = 1<<nt->attr->number;
+		print("%1data->constrain_input_reg(%d, 0x%x);\n", *index, attr);
+	}
+
+	if (!node->left && !node->right)
+		(*index)++;
+
+	if (node->left)
+		emit_input_regs(node->left, index);
+	if (node->right)
+		emit_input_regs(node->right, index);
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -1011,6 +1091,14 @@ static void emitinsndata(Rule rules)
 		print("/* %R */\n", r);
 		print("static void %Pemitter_%d(const struct %Pemitter_data* data) {\n", r->ern);
 
+		if (r->attr)
+			print("%1data->constrain_output_reg(0x%x);\n", 1<<r->attr->number);
+
+		{
+			int index = 0;
+			emit_input_regs(r->pattern, &index);
+		}
+
 		while (f)
 		{
 			switch (f->data[0])
@@ -1019,7 +1107,7 @@ static void emitinsndata(Rule rules)
 				{
 					const char* label = f->data + 1;
 
-					if (strcmp(label, r->lhs->name) == 0)
+					if (r->label && (strcmp(label, r->label) == 0))
 						print("%1data->emit_return_reg();\n", label);
 					else
 					{
@@ -1085,11 +1173,6 @@ static void emitinsndata(Rule rules)
 		print("%2\"%R\",\n", r);
 
 		print("%2&%Pemitter_%d,\n", r->ern);
-
-		if (r->lhs->allocate)
-			print("%2%d,\n", r->lhs->allocate->number);
-		else
-			print("%20,\n");
 
 		print("%2%s,\n", r->lhs->is_fragment ? "true" : "false");
 

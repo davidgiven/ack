@@ -37,15 +37,19 @@ static void emit_return_reg(void)
     hop_add_vreg_insel(current_hop, current_hop->output);
 }
 
-static void emit_reg(int child)
+static struct vreg* find_vreg_of_child(int child)
 {
     struct insn* insn = current_insn->children[child];
-    struct vreg* vreg;
 
     if (insn->hop)
-        vreg = insn->hop->output;
+        return insn->hop->output;
     else
-        vreg = insn->ir->result;
+        return insn->ir->result;
+}
+
+static void emit_reg(int child)
+{
+    struct vreg* vreg = find_vreg_of_child(child);
 
     if (vreg)
         hop_add_vreg_insel(current_hop, vreg);
@@ -71,6 +75,18 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
+static void constrain_input_reg(int child, int attr)
+{
+    struct vreg* vreg = find_vreg_of_child(child);
+
+    if (vreg)
+        array_appendu(&current_hop->ins, vreg);
+}
+
+static void constrain_output_reg(int attr)
+{
+}
+
 static const struct burm_emitter_data emitter_data =
 {
     &emit_string,
@@ -79,6 +95,8 @@ static const struct burm_emitter_data emitter_data =
     &emit_reg,
     &emit_value,
     &emit_eoi,
+    &constrain_input_reg,
+    &constrain_output_reg
 };
 
 static void emit(struct insn* insn)
@@ -142,11 +160,16 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                     break;
 
                 default:
+                    /* FIXME: some instructions don't emit anything, so
+                     * allocating a register for them is a waste of time. */
                     vreg = new_vreg();
             }
 
             insn->hop = current_hop = new_hop(0, insn->ir);
             insn->hop->output = vreg;
+            if (vreg)
+                array_appendu(&current_hop->outs, vreg);
+
             emit(insn);
             hop_print('I', current_hop);
 

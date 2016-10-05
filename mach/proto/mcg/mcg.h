@@ -109,6 +109,8 @@ extern void pass_promote_float_ops(struct procedure* proc);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_split_critical_edges(struct procedure* proc);
 
+extern void register_allocator(struct procedure* proc);
+
 #endif
 
 /* vim: set sw=4 ts=4 expandtab : */

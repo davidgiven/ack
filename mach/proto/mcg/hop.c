@@ -50,7 +50,7 @@ void hop_add_eoi_insel(struct hop* hop)
 
 void hop_print(char k, struct hop* hop)
 {
-	int i;
+	int i, j;
 	bool soi = true;
 
 	i = 0;
@@ -60,7 +60,14 @@ void hop_print(char k, struct hop* hop)
 
 		if (soi)
 		{
-			tracef(k, "%c: %d from $%d: ", k, hop->id, hop->ir->id);
+			tracef(k, "%c: %d from $%d:", k, hop->id, hop->ir->id);
+
+			for (j=0; j<hop->ins.count; j++)
+				tracef(k, " <%%%d", hop->ins.item[j]->id);
+			for (j=0; j<hop->outs.count; j++)
+				tracef(k, " >%%%d", hop->outs.item[j]->id);
+			tracef(k, " ");
+
 			soi = false;
 		}
 

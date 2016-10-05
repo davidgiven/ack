@@ -44,6 +44,8 @@ struct burm_emitter_data
     void (*emit_reg)(int child);
     void (*emit_value)(int child);
     void (*emit_eoi)(void);
+    void (*constrain_input_reg)(int child, int attr);
+    void (*constrain_output_reg)(int attr);
 };
 
 typedef void burm_emitter_t(const struct burm_emitter_data* data);
@@ -52,7 +54,6 @@ struct burm_instruction_data
 {
     const char* name;
     burm_emitter_t* emitter;
-    int allocate;
     bool is_fragment;
 };
 
@@ -73,6 +74,11 @@ enum
     REGATTR_BYTES2,
     REGATTR_BYTES4,
     REGATTR_BYTES8
+};
+
+enum
+{
+    NONTERM_STMT = 1
 };
 
 #endif
