@@ -49,7 +49,9 @@ void procedure_compile(struct procedure* proc)
     pass_remove_dead_blocks(proc);
 
     procedure_update_bb_graph(proc);
-    /* Passes from here on can't alter the BB graph */
+
+    /* Passes from here on can't alter the BB graph without also updating prevs
+     * and nexts. */
 
     print_blocks('2', proc);
     pass_convert_stack_ops(proc);
@@ -62,8 +64,7 @@ void procedure_compile(struct procedure* proc)
     print_blocks('6', proc);
 
     pass_instruction_selector(proc);
-
-    register_allocator(proc);
+    pass_register_allocator(proc);
 }
 
 static bool collect_outputs_cb(struct ir* ir, void* user)

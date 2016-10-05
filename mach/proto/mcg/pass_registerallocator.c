@@ -20,7 +20,7 @@ static void recursively_walk_dominance_graph(struct basicblock* bb)
 	}
 }
 
-void register_allocator(struct procedure* proc)
+void pass_register_allocator(struct procedure* proc)
 {
 	calculate_dominance_graph(proc);
 
