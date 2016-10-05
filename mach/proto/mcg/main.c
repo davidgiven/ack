@@ -32,6 +32,8 @@ static bool find_procedures_cb(struct symbol* symbol, void* user)
 
 int main(int argc, char* const argv[])
 {
+    const char* inputfile = NULL;
+
     program_name = argv[0];
 
     opterr = 1;
@@ -48,14 +50,17 @@ int main(int argc, char* const argv[])
                 break;
 
             case 1:
-                fatal("unexpected argument '%s'", optarg);
+                if (inputfile)
+                    fatal("unexpected argument '%s'", optarg);
+                inputfile = optarg;
         }
     }
 
     symbol_init();
 
-	if (!EM_open(NULL))
-		fatal("couldn't open stdin: %s", EM_error);
+	if (!EM_open(inputfile))
+		fatal("couldn't open '%s': %s",
+            inputfile ? inputfile : "<stdin>", EM_error);
 	
     /* Reads in the EM, outputs the data sections, parses any code and
      * generates IR trees. */
