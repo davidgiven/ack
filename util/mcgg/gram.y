@@ -74,7 +74,7 @@ registers
 
 register
     : ID                              { $$ = makereg($1); }
-    | register ID                     { $$ = $1; addregclass($1, $2); }
+    | register ID                     { $$ = $1; addregattr($1, $2); }
     ;
 
 declarations
@@ -95,7 +95,7 @@ allocates
             $$ = $1;
             if ($$->allocate)
                 yyerror("pattern type is defined to already allocate a register");
-            $$->allocate = getregclass($4);
+            $$->allocate = getregattr($4);
         }
     ;
 

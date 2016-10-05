@@ -47,18 +47,18 @@ struct reg
 {
 	const char* name;      /* register name */
 	int number;            /* identifying number */
-	uint64_t classes;      // bitfield of classes */
+	uint32_t attrs;        /* bitfield of register attributes */
 };
 
-struct regclass
+struct regattr
 {
 	const char* name;      /* class name */
 	int number;            /* identifying number */
 };
 
 extern struct reg* makereg(const char* name);
-extern void addregclass(struct reg* reg, const char* regclass);
-extern struct regclass* getregclass(const char* name);
+extern void addregattr(struct reg* reg, const char* regattr);
+extern struct regattr* getregattr(const char* name);
 
 struct term
 { /* terminals: */
@@ -82,7 +82,7 @@ struct nonterm
 	Rule chain;       /* chain rules w/non-terminal on rhs */
 	Nonterm link;     /* next terminal in number order */
 	bool is_fragment; /* these instructions are all fragments */
-	struct regclass* allocate; /* allocate this kind of register */
+	struct regattr* allocate; /* allocate this kind of register */
 };
 extern void* lookup(const char* name);
 extern Nonterm nonterm(const char* id, bool allocate);

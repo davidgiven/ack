@@ -88,4 +88,3 @@ void pass_split_critical_edges(struct procedure* proc)
 
 /* vim: set sw=4 ts=4 expandtab : */
 
-

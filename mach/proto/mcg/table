@@ -1,28 +1,28 @@
 REGISTERS
 
-	r0  any int ret;
-	r1  any int;
-	r2  any int;
-	r3  any int;
-	r4  any int;
-	r5  any int;
-	r6  any int;
-	r7  any int;
-	r8  any int;
-	r9  any int;
-	r10 any int;
-	r11 any int;
+	r0  bytes4 int ret;
+	r1  bytes4 int;
+	r2  bytes4 int;
+	r3  bytes4 int;
+	r4  bytes4 int;
+	r5  bytes4 int;
+	r6  bytes4 int;
+	r7  bytes4 int;
+	r8  bytes4 int;
+	r9  bytes4 int;
+	r10 bytes4 int;
+	r11 bytes4 int;
 
-	s0  any float;
-	s1  any float;
-	s2  any float;
-	s3  any float;
-	s4  any float;
-	s5  any float;
-	s6  any float;
-	s7  any float;
-	s8  any float;
-	s9  any float;
+	s0  bytes4 float;
+	s1  bytes4 float;
+	s2  bytes4 float;
+	s3  bytes4 float;
+	s4  bytes4 float;
+	s5  bytes4 float;
+	s6  bytes4 float;
+	s7  bytes4 float;
+	s8  bytes4 float;
+	s9  bytes4 float;
 
 	cc  cc;
 

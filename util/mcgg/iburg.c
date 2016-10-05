@@ -29,11 +29,12 @@ static Rule rules;
 static int nrules;
 
 static SMAPOF(struct reg) registers;
-static SMAPOF(struct regclass) registerclasses;
+static SMAPOF(struct regattr) registerattrs;
 
 static void print(char* fmt, ...);
 static void ckreach(Nonterm p);
 static void registerterminals(void);
+static struct regattr* makeregattr(const char* id);
 static void emitclosure(Nonterm nts);
 static void emitcost(Tree t, const char* v);
 static void emitcostcalc(Rule r);
@@ -47,7 +48,7 @@ static void emitleaf(Term p, int ntnumber);
 static void emitnts(Rule rules, int nrules);
 static void emitpredicatedefinitions(Rule rules);
 static void emitrecord(char* pre, Rule r, int cost);
-static void emitregisterclasses();
+static void emitregisterattrs();
 static void emitregisters();
 static void emitrule(Nonterm nts);
 static void emitstate(Term terms, Nonterm start, int ntnumber);
@@ -125,6 +126,10 @@ int main(int argc, char* argv[])
 	registerterminals();
 
 	start = nonterm("stmt", true);
+	makeregattr("bytes1");
+	makeregattr("bytes2");
+	makeregattr("bytes4");
+	makeregattr("bytes8");
 
 	yyin = infp;
 	yyparse();
@@ -137,7 +142,7 @@ int main(int argc, char* argv[])
 			yyerror("can't reach non-terminal `%s'\n", p->name);
 	#endif
 
-	emitregisterclasses();
+	emitregisterattrs();
 	emitregisters();
 	emitdefs(nts, ntnumber);
 	emitstruct(nts, ntnumber);
@@ -194,7 +199,7 @@ struct entry
 		struct term t;
 		struct nonterm nt;
 		struct reg r;
-		struct regclass rc;
+		struct regattr rc;
 	} sym;
 	struct entry* link;
 } * table[211];
@@ -236,7 +241,7 @@ static void* install(const char* name)
 struct reg* makereg(const char* id)
 {
 	struct reg* p = smap_get(&registers, id);
-	static int number = 1;
+	static int number = 0;
 
 	if (p)
 		yyerror("redefinition of '%s'", id);
@@ -248,25 +253,34 @@ struct reg* makereg(const char* id)
 	return p;
 }
 
-void addregclass(struct reg* reg, const char* id)
+struct regattr* makeregattr(const char* id)
 {
-	struct regclass* p = smap_get(&registerclasses, id);
-	static int number = 1;
+	struct regattr* p = smap_get(&registerattrs, id);
+	static int number = 0;
 
-	if (!p)
-	{
-		p = calloc(1, sizeof(*p));
-		p->name = id;
-		p->number = number++;
-		smap_put(&registerclasses, id, p);
-	}
+	if (p)
+		yyerror("redefinition of '%s'", id);
+	p = calloc(1, sizeof(*p));
+	p->name = id;
+	p->number = number++;
+	smap_put(&registerattrs, id, p);
 
-	reg->classes |= 1<<(p->number);
+	return p;
 }
 
-struct regclass* getregclass(const char* id)
+void addregattr(struct reg* reg, const char* id)
 {
-	struct regclass* p = smap_get(&registerclasses, id);
+	struct regattr* p = smap_get(&registerattrs, id);
+
+	if (!p)
+		p = makeregattr(id);
+
+	reg->attrs |= 1<<(p->number);
+}
+
+struct regattr* getregattr(const char* id)
+{
+	struct regattr* p = smap_get(&registerattrs, id);
 	if (!p)
 		yyerror("'%s' is not the name of a register class", id);
 	return p;
@@ -318,9 +332,6 @@ Term term(const char* id, int esn)
 		    p->name, p->esn);
 	p->link = *q;
 	*q = p;
-
-	if (esn != -1)
-		print("enum { %s = %d };\n", id, esn);
 	return p;
 }
 
@@ -415,10 +426,6 @@ static void print(char* fmt, ...)
 					fprintf(outfp, "%x", va_arg(ap, uint32_t));
 					break;
 
-				case 'X':
-					fprintf(outfp, "0x%" PRIx64 "ULL", va_arg(ap, uint64_t));
-					break;
-
 				case 's':
 					fputs(va_arg(ap, char*), outfp);
 					break;
@@ -499,16 +506,15 @@ static void ckreach(Nonterm p)
 		reach(r->pattern);
 }
 
-static void emitregisterclasses(void)
+static void emitregisterattrs(void)
 {
 	int i;
 
 	print("const char* %Pregister_class_names[] = {\n");
-	print("%1NULL,\n"); /* register class id 0 is invalid */
-	for (i=0; i<registerclasses.count; i++)
+	for (i=0; i<registerattrs.count; i++)
 	{
-		struct regclass* rc = registerclasses.item[i].right;
-		assert(rc->number == (i+1));
+		struct regattr* rc = registerattrs.item[i].right;
+		assert(rc->number == i);
 
 		print("%1\"%s\",\n", rc->name);
 	}
@@ -520,14 +526,14 @@ static void emitregisters(void)
 	int i;
 
 	print("const struct %Pregister_data %Pregister_data[] = {\n");
-	print("%1{ 0 },\n"); /* register id 0 is invalid */
 	for (i=0; i<registers.count; i++)
 	{
 		struct reg* r = registers.item[i].right;
-		assert(r->number == (i+1));
+		assert(r->number == i);
 
-		print("%1{ \"%s\", %X },\n", r->name, r->classes);
+		print("%1{ \"%s\", 0x%x },\n", r->name, r->attrs);
 	}
+	print("%1{ NULL }\n");
 	print("};\n\n");
 }
 
@@ -1167,6 +1173,11 @@ static void emitterms(Term terms)
 {
 	Term p;
 	int k;
+
+	print("enum {\n");
+	for (k = 0, p = terms; p; p = p->link)
+		print("%1%S = %d,\n", p, p->esn);
+	print("};\n\n");
 
 	print("static const char %Parity[] = {\n");
 	for (k = 0, p = terms; p; p = p->link)
