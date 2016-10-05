@@ -10,7 +10,7 @@ struct basicblock
 
     ARRAYOF(struct basicblock) prevs;
     ARRAYOF(struct basicblock) nexts;
-    int order; /* used by SSA code */
+    int order; /* used by dominance graph code */
 
 	ARRAYOF(struct vreg) liveins;
 

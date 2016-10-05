@@ -27,6 +27,7 @@
 #include "reg.h"
 #include "basicblock.h"
 #include "procedure.h"
+#include "dominance.h"
 
 extern char em_pseu[][4];
 extern char em_mnem[][4];
