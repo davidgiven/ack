@@ -58,3 +58,5 @@ struct symbol* symbol_walk(symbol_walker_t* cb, void* user)
 	return NULL;
 }
 
+/* vim: set sw=4 ts=4 expandtab : */
+

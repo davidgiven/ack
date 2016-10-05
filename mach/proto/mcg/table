@@ -256,3 +256,5 @@ PATTERNS
 		emit "fadds %reg, %left, %right"
 		cost 4;
 
+/* vim: set sw=4 ts=4 expandtab : */
+

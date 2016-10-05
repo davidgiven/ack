@@ -25,3 +25,5 @@ extern void bb_alias(struct basicblock* block, const char* name);
 
 #endif
 
+/* vim: set sw=4 ts=4 expandtab : */
+

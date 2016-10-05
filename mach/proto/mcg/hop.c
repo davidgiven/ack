@@ -106,3 +106,5 @@ void hop_print(char k, struct hop* hop)
 		tracef(k, "\n", k);
 }
 
+/* vim: set sw=4 ts=4 expandtab : */
+

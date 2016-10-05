@@ -46,3 +46,4 @@ extern void ir_print(char k, const struct ir* ir);
 
 #endif
 
+/* vim: set sw=4 ts=4 expandtab : */

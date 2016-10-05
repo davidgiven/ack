@@ -28,6 +28,7 @@ struct hop
 	struct ir* ir;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
+	PMAPOF(struct vreg, struct hreg) registers;
 };
 
 extern struct hop* new_hop(int insn_no, struct ir* ir);
@@ -40,4 +41,6 @@ extern void hop_add_eoi_insel(struct hop* hop);
 extern void hop_print(char k, struct hop* hop);
 
 #endif
+
+/* vim: set sw=4 ts=4 expandtab : */
 
