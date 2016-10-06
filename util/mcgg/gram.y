@@ -25,7 +25,6 @@ extern int yylex(void);
     struct constraint* constraint;
 }
 
-%term ALLOCATES
 %term COPY
 %term COST
 %term DECLARATIONS
@@ -43,7 +42,6 @@ extern int yylex(void);
 %token <string>     ID
 %token <string>     QFRAGMENT
 
-%type  <nonterm>    allocates
 %type  <constraint> constraint
 %type  <constraint> constraints
 %type  <nonterm>    declaration
