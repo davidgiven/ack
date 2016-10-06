@@ -1,6 +1,5 @@
 #include "mcg.h"
 
-static PMAPOF(struct basicblock, struct basicblock) graph;
 static ARRAYOF(struct ir) pops;
 static ARRAYOF(struct ir) pushes;
 

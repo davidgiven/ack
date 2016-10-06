@@ -11,10 +11,10 @@ static void recursively_walk_dominance_graph(struct basicblock* bb)
 
 	/* Skip the entry block (which is its own dominator). */
 	
-	for (i=1; i<dominators.count; i++)
+	for (i=1; i<dominance.graph.count; i++)
 	{
-		struct basicblock* left = dominators.item[i].left;
-		struct basicblock* right = dominators.item[i].right;
+		struct basicblock* left = dominance.graph.item[i].left;
+		struct basicblock* right = dominance.graph.item[i].right;
 		if (right == bb)
 			recursively_walk_dominance_graph(left);
 	}
@@ -22,10 +22,8 @@ static void recursively_walk_dominance_graph(struct basicblock* bb)
 
 void pass_register_allocator(struct procedure* proc)
 {
-	calculate_dominance_graph(proc);
-
 	blocks.count = 0;
-	recursively_walk_dominance_graph(proc->blocks.item[0]);
+	recursively_walk_dominance_graph(cfg.entry);
 	assert(blocks.count == proc->blocks.count);
 }
 

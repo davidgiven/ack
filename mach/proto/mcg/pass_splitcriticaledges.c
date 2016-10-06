@@ -36,12 +36,14 @@ static void split_edge(struct basicblock* source, struct basicblock* sink)
 	struct rewrite_params rwp;
 	struct basicblock* bb = bb_get(NULL);
 	
-	array_append(&bb->irs,
+    struct ir* jump = 
 		new_ir1(
 			IR_JUMP, 0,
 			new_bbir(sink)
-		)
-	);
+		);
+
+    jump->root = jump->left->root = jump;
+	array_append(&bb->irs, jump);
 
 	rwp.find = sink;
 	rwp.replace = bb;

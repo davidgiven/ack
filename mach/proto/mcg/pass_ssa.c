@@ -1,6 +1,5 @@
 #include "mcg.h"
 
-static struct basicblock* entry;
 static PMAPOF(struct basicblock, struct basicblock) dominancefrontiers;
 
 static struct local* current_local;
@@ -24,10 +23,10 @@ static void calculate_dominance_frontier_graph(void)
 
     dominancefrontiers.count = 0;
 
-    for (i=0; i<postorder.count; i++)
+    for (i=0; i<cfg.postorder.count; i++)
     {
-        struct basicblock* b = postorder.item[i];
-        struct basicblock* dominator = pmap_get(&dominators, b);
+        struct basicblock* b = cfg.postorder.item[i];
+        struct basicblock* dominator = pmap_get(&dominance.graph, b);
         if (b->prevs.count >= 2)
         {
             for (j=0; j<b->prevs.count; j++)
@@ -38,7 +37,7 @@ static void calculate_dominance_frontier_graph(void)
                     tracef('S', "S: %s is in %s's dominance frontier\n",
                         b->name, runner->name);
                     pmap_add(&dominancefrontiers, runner, b);
-                    runner = pmap_get(&dominators, runner);
+                    runner = pmap_get(&dominance.graph, runner);
                 }
             }
         }
@@ -158,7 +157,7 @@ static void ssa_convert(void)
         ir->left->root = ir;
         ir->right->root = ir;
         ir->right->left->root = ir;
-        array_insert(&entry->irs, ir, 0);
+        array_insert(&cfg.entry->irs, ir, 0);
     }
 
     defining.count = 0;
@@ -166,9 +165,9 @@ static void ssa_convert(void)
 
     /* Find everwhere where the variable is *defined*. */
 
-    for (i=0; i<postorder.count; i++)
+    for (i=0; i<cfg.postorder.count; i++)
     {
-        struct basicblock* bb = postorder.item[i];
+        struct basicblock* bb = cfg.postorder.item[i];
         for (j=0; j<bb->irs.count; j++)
         {
             struct ir* ir = bb->irs.item[j];
@@ -210,15 +209,13 @@ static void ssa_convert(void)
 
     definitions.count = 0;
     rewritten.count = 0;
-    recursively_rewrite_tree(entry);
+    recursively_rewrite_tree(cfg.entry);
 }
 
 void pass_convert_locals_to_ssa(struct procedure* proc)
 {
     int i;
 
-    entry = proc->blocks.item[0];
-    calculate_dominance_graph(proc);
     calculate_dominance_frontier_graph();
 
     for (i=0; i<proc->locals.count; i++)
