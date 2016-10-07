@@ -233,8 +233,6 @@ TOKENS
 
 SETS
 
-	GPRI               = GPR + GPRE.
-	
 	SUM_ALL            = SUM_RC + SUM_RR.
 	
 	TRISTATE_ALL       = TRISTATE_RC_S + TRISTATE_RC_U + TRISTATE_RR_S +
@@ -255,29 +253,29 @@ SETS
 
 INSTRUCTIONS
 
-  add             GPRI:wo, GPRI:ro, GPRI:ro.
-  addX "add."     GPRI:wo, GPRI:ro, GPRI:ro.
-  addi            GPRI:wo, GPRI:ro, CONST:ro.
-  addis           GPRI:wo, GPRI:ro, CONST+HILABEL:ro.
-  and             GPRI:wo, GPRI:ro, GPRI:ro.
-  andc            GPRI:wo, GPRI:ro, GPRI:ro.
-  andiX  "andi."  GPRI:wo, GPRI:ro, CONST:ro kills :cc.
-  andisX "andis." GPRI:wo, GPRI:ro, CONST:ro kills :cc.
+  add             GPR:wo, GPR:ro, GPR:ro.
+  addX "add."     GPR:wo, GPR:ro, GPR:ro.
+  addi            GPR:wo, GPR:ro, CONST:ro.
+  addis           GPR:wo, GPR:ro, CONST+HILABEL:ro.
+  and             GPR:wo, GPR:ro, GPR:ro.
+  andc            GPR:wo, GPR:ro, GPR:ro.
+  andiX  "andi."  GPR:wo, GPR:ro, CONST:ro kills :cc.
+  andisX "andis." GPR:wo, GPR:ro, CONST:ro kills :cc.
   b               LABEL:ro.
   bc              CONST:ro, CONST:ro, LABEL:ro.
   bcctr           CONST:ro, CONST:ro, CONST:ro.
   bcctrl          CONST:ro, CONST:ro, CONST:ro.
   bclr            CONST:ro, CONST:ro, CONST:ro.
   bl              LABEL:ro.
-  cmp             CR:ro, CONST:ro, GPRI:ro, GPR:ro kills :cc.
-  cmpi            CR:ro, CONST:ro, GPRI:ro, CONST:ro kills :cc.
-  cmpl            CR:ro, CONST:ro, GPRI:ro, GPR:ro kills :cc.
-  cmpli           CR:ro, CONST:ro, GPRI:ro, CONST:ro kills :cc.
-  divw            GPRI:wo, GPRI:ro, GPRI:ro.
-  divwu           GPRI:wo, GPRI:ro, GPRI:ro.
-  eqv             GPRI:wo, GPRI:ro, GPRI:ro.
-  extsb           GPRI:wo, GPRI:ro.
-  extsh           GPRI:wo, GPRI:ro.
+  cmp             CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
+  cmpi            CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
+  cmpl            CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
+  cmpli           CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
+  divw            GPR:wo, GPR:ro, GPR:ro.
+  divwu           GPR:wo, GPR:ro, GPR:ro.
+  eqv             GPR:wo, GPR:ro, GPR:ro.
+  extsb           GPR:wo, GPR:ro.
+  extsh           GPR:wo, GPR:ro.
   fadd            FREG:wo, FREG:ro, FREG:ro.
   fadds           FSREG:wo, FSREG:ro, FSREG:ro.
   fcmpo           CR:wo, FPR:ro, FPR:ro.
@@ -292,61 +290,54 @@ INSTRUCTIONS
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro.
   fmr             FPR:wo, FPR:ro.
   fmr             FSREG:wo, FSREG:ro.
-  lbzx            GPRI:wo, GPR:ro, GPR:ro.
-  lbz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lbzx            GPR:wo, GPR:ro, GPR:ro.
+  lbz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfd             FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfdu            FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfdx            FPR:wo, GPR:ro, GPR:ro.
   lfs             FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
   lfsu            FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:rw.
   lfsx            FSREG:wo, GPR:ro, GPR:ro.
-  lhzx            GPRI:wo, GPR:ro, GPR:ro.
-  lhax            GPRI:wo, GPR:ro, GPR:ro.
-  lha             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lhz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  li32            GPRI:wo, LABEL:ro.
-  lwzu            GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lwzx            GPRI:wo, GPR:ro, GPR:ro.
-  lwz             GPRI:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  nand            GPRI:wo, GPRI:ro, GPRI:ro.
-  neg             GPRI:wo, GPRI:ro.
-  nor             GPRI:wo, GPRI:ro, GPRI:ro.
-  mfcr            GPRI:wo.
-  mullw           GPRI:wo, GPRI:ro, GPRI:ro.
-  mfspr           GPRI:wo, SPR:ro.
-  mtspr           SPR:wo, GPRI:ro.
-  or              GPRI:wo, GPRI:ro, GPRI:ro.
-  orc             GPRI:wo, GPRI:ro, GPRI:ro.
-  ori             GPRI:wo, GPRI:ro, CONST+LOLABEL:ro.
-  orX "or."       GPRI:wo, GPRI:ro, GPRI:ro kills :cc.
-  rlwinm          GPRI:wo, GPRI:ro, CONST:ro, CONST:ro, CONST:ro.
-  slw             GPRI:wo, GPRI:ro, GPRI:ro.
-  subf            GPRI:wo, GPRI:ro, GPRI:ro.
-  sraw            GPRI:wo, GPRI:ro, GPRI:ro.
-  srawi           GPRI:wo, GPRI:ro, CONST:ro.
-  srw             GPRI:wo, GPRI:ro, GPRI:ro.
-  stb             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stbx            GPRI:ro, GPR:ro, GPR:ro.
+  lhzx            GPR:wo, GPR:ro, GPR:ro.
+  lhax            GPR:wo, GPR:ro, GPR:ro.
+  lha             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lhz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  li32            GPR:wo, LABEL:ro.
+  lwzu            GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lwzx            GPR:wo, GPR:ro, GPR:ro.
+  lwz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  nand            GPR:wo, GPR:ro, GPR:ro.
+  neg             GPR:wo, GPR:ro.
+  nor             GPR:wo, GPR:ro, GPR:ro.
+  mfcr            GPR:wo.
+  mullw           GPR:wo, GPR:ro, GPR:ro.
+  mfspr           GPR:wo, SPR:ro.
+  mtspr           SPR:wo, GPR:ro.
+  or              GPR:wo, GPR:ro, GPR:ro.
+  orc             GPR:wo, GPR:ro, GPR:ro.
+  ori             GPR:wo, GPR:ro, CONST+LOLABEL:ro.
+  orX "or."       GPR:wo, GPR:ro, GPR:ro kills :cc.
+  rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
+  slw             GPR:wo, GPR:ro, GPR:ro.
+  subf            GPR:wo, GPR:ro, GPR:ro.
+  sraw            GPR:wo, GPR:ro, GPR:ro.
+  srawi           GPR:wo, GPR:ro, CONST:ro.
+  srw             GPR:wo, GPR:ro, GPR:ro.
+  stb             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stbx            GPR:ro, GPR:ro, GPR:ro.
   stfd            FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   stfdu           FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   stfdx           FPR:ro, GPR:ro, GPR:ro.
   stfs            FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   stfsu           FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
   stfsx           FSREG:ro, GPR:ro, GPR:ro.
-  sth             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  sthx            GPRI:ro, GPR:ro, GPR:ro.
-  stw             GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stwx            GPRI:ro, GPR:ro, GPR:ro.
-  stwu            GPRI:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  xor             GPRI:wo, GPRI:ro, GPRI:ro.
-  xori            GPRI:wo, GPRI:ro, CONST:ro.
-
-  gpr_gpr_gpr     GPRI:wo, GPRI:ro, GPRI:ro.
-  gpr_gpr_si      GPRI:wo, GPRI:ro, CONST:ro.
-  gpr_ro_gprindirect GPRI:ro, GPRINDIRECT:rw.
-  gpr_ro_gpr_gpr  GPRI:ro, GPRI:ro, GPRI:ro.
-  gpr_wo_gprindirect GPRI:wo, GPRINDIRECT:ro.
-  gpr_wo_gpr_gpr  GPRI:wo, GPRI:ro, GPRI:ro.
+  sth             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  sthx            GPR:ro, GPR:ro, GPR:ro.
+  stw             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stwx            GPR:ro, GPR:ro, GPR:ro.
+  stwu            GPR+GPRE:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  xor             GPR:wo, GPR:ro, GPR:ro.
+  xori            GPR:wo, GPR:ro, CONST:ro.
 
   comment "!" LABEL+LABELI:ro.
 
@@ -365,18 +356,18 @@ MOVES
 	from GPR to GPRE
 		gen
 			COMMENT("move GPR->GPRE")
-			or %2, %1, %1
+			or %2.reg, %1, %1
 		
 /* Constants */
 
 	from CONST smalls(%val) to GPR
 		gen
-			COMMENT("move CONST->GPRE")
+			COMMENT("move CONST->GPR")
 			addi %2, R0, {CONST, lo(%1.val)}
 		
 	from CONST to GPR
 		gen
-			COMMENT("move CONST->GPRE")
+			COMMENT("move CONST->GPR")
 			addis %2, R0, {CONST, hi(%1.val)}
 			ori %2, %2, {CONST, lo(%1.val)}
 		
@@ -414,12 +405,7 @@ MOVES
 		gen
 			COMMENT("move SUM_RR->GPR")
 			add %2, %1.reg1, %1.reg2
-		
-	from SUM_RR to GPR
-		gen
-			COMMENT("move SUM_RR->GPRE")
-			add %2, %1.reg1, %1.reg2
-		
+
 /* Read/write byte */
 
 	from IND_RC_B smalls(%off) to GPR
@@ -788,7 +774,7 @@ STACKINGRULES
 			
 	from SUM_ALL + TRISTATE_ALL + LOGICAL_ALL to STACK
 		gen
-			move %1, {GPRE, RSCRATCH}
+			move %1, RSCRATCH
 			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from IND_ALL_W to STACK
@@ -833,7 +819,7 @@ COERCIONS
 		uses REG
 		gen
 			COMMENT("coerce LABEL->REG")
-			move %1, {GPRE, %a}
+			move %1, %a
 		yields %a
 		
 	from STACK
@@ -861,7 +847,7 @@ COERCIONS
 	from SUM_ALL + TRISTATE_ALL + LOGICAL_ALL
 		uses REG
 		gen
-			move %1, {GPRE, %a}
+			move %1, %a
 		yields %a
 	
 	from FSREG
@@ -2019,10 +2005,10 @@ PATTERNS
 	pat ass                            /* Adjust stack by variable amount */
 		with CONST STACK
 			gen
-				move {SUM_RC, SP, %1.val}, {GPRE, SP}
+				move {SUM_RC, SP, %1.val}, SP
 		with GPR STACK
 			gen
-				move {SUM_RR, SP, %1}, {GPRE, SP}
+				move {SUM_RR, SP, %1}, SP
 				
 	pat asp                            /* Adjust stack by constant amount */
 		leaving
