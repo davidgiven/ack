@@ -167,7 +167,7 @@ REGISTERS
 	CTR("ctr")         : SPR.
 	C0("cr0")          : CR, CR0.
 
-#define SCRATCH R11
+#define RSCRATCH R11
 #define FSCRATCH F0
 
 
@@ -430,8 +430,8 @@ MOVES
 	from IND_RC_B to GPR
 		gen
 			COMMENT("move IND_RC_B->GPR large")
-			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
-			lbz %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
+			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
+			lbz %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
 	
 	from GPR to IND_RC_B smalls(%off)
 		gen
@@ -441,8 +441,8 @@ MOVES
 	from GPR to IND_RC_B
 		gen
 			COMMENT("move GPR->IND_RC_B large")
-			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
-			stb %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
+			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
+			stb %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
 	
 /* Read/write short */
 
@@ -454,8 +454,8 @@ MOVES
 	from IND_RC_H to GPR
 		gen
 			COMMENT("move IND_RC_H->GPR large")
-			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
-			lhz %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
+			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
+			lhz %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
 	
 	from IND_RC_H_S smalls(%off) to GPR
 		gen
@@ -465,8 +465,8 @@ MOVES
 	from IND_RC_H_S to GPR
 		gen
 			COMMENT("move IND_RC_H_S->GPR large")
-			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
-			lha %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
+			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
+			lha %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
 	
 	from GPR to IND_RC_H smalls(%off)
 		gen
@@ -476,8 +476,8 @@ MOVES
 	from GPR to IND_RC_H
 		gen
 			COMMENT("move GPR->IND_RC_H large")
-			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
-			sth %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
+			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
+			sth %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
 	
 /* Read word */
 
@@ -500,8 +500,8 @@ MOVES
 	from IND_LABEL_W to GPR
 		gen
 			COMMENT("move IND_LABEL_W->GPR")
-			move {LABEL, %1.adr}, SCRATCH
-			lwz %2, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %1.adr}, RSCRATCH
+			lwz %2, {GPRINDIRECT, RSCRATCH, 0}
 		
 	from IND_RC_W smalls(%off) to FSREG
 		gen
@@ -511,8 +511,8 @@ MOVES
 	from IND_RC_W to FSREG
 		gen
 			COMMENT("move IND_RC_W->FSREG large")
-			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
-			lfs %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
+			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
+			lfs %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
 
 	from IND_RR_W to FSREG
 		gen
@@ -522,8 +522,8 @@ MOVES
 	from IND_LABEL_W to FSREG
 		gen
 			COMMENT("move IND_LABEL_W->FSREG")
-			move {LABEL, %1.adr}, SCRATCH
-			lfs %2, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %1.adr}, RSCRATCH
+			lfs %2, {GPRINDIRECT, RSCRATCH, 0}
 		
 /* Write word */
 
@@ -535,8 +535,8 @@ MOVES
 	from GPR to IND_RC_W
 		gen
 			COMMENT("move GPR->IND_RC_W large")
-			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
-			stw %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
+			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
+			stw %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
 
 	from GPR to IND_RR_W
 		gen
@@ -546,8 +546,8 @@ MOVES
 	from GPR to IND_LABEL_W
 		gen
 			COMMENT("move GPR->IND_LABEL_D")
-			move {LABEL, %2.adr}, SCRATCH
-			stw %1, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %2.adr}, RSCRATCH
+			stw %1, {GPRINDIRECT, RSCRATCH, 0}
 			
 	from FSREG to IND_RC_W smalls(%off)
 		gen
@@ -557,8 +557,8 @@ MOVES
 	from FSREG to IND_RC_W
 		gen
 			COMMENT("move FSREG->IND_RC_W large")
-			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
-			stfs %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
+			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
+			stfs %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
 
 	from FSREG to IND_RR_W
 		gen
@@ -568,8 +568,8 @@ MOVES
 	from FSREG to IND_LABEL_W
 		gen
 			COMMENT("move FSREG->IND_LABEL_D")
-			move {LABEL, %2.adr}, SCRATCH
-			stfs %1, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %2.adr}, RSCRATCH
+			stfs %1, {GPRINDIRECT, RSCRATCH, 0}
 			
 /* Read double */
 
@@ -581,8 +581,8 @@ MOVES
 	from IND_RC_D to FPR
 		gen
 			COMMENT("move IND_RC_D->FPR large")
-			addis SCRATCH, %1.reg, {CONST, his(%1.off)}
-			lfd %2, {GPRINDIRECT, SCRATCH, los(%1.off)}
+			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
+			lfd %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
 			
 	from IND_RR_D to FPR
 		gen
@@ -592,8 +592,8 @@ MOVES
 	from IND_LABEL_D to FPR
 		gen
 			COMMENT("move IND_LABEL_D->FPR")
-			move {LABEL, %1.adr}, SCRATCH
-			lfd %2, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %1.adr}, RSCRATCH
+			lfd %2, {GPRINDIRECT, RSCRATCH, 0}
 		
 /* Write double */
 
@@ -605,8 +605,8 @@ MOVES
 	from FPR to IND_RC_D
 		gen
 			COMMENT("move FPR->IND_RC_D large")
-			addis SCRATCH, %2.reg, {CONST, his(%2.off)}
-			stfd %1, {GPRINDIRECT, SCRATCH, los(%2.off)}
+			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
+			stfd %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
 
 	from FPR to IND_RR_D
 		gen
@@ -616,8 +616,8 @@ MOVES
 	from FPR to IND_LABEL_D
 		gen
 			COMMENT("move FPR->IND_LABEL_D")
-			move {LABEL, %2.adr}, SCRATCH
-			stfd %1, {GPRINDIRECT, SCRATCH, 0}
+			move {LABEL, %2.adr}, RSCRATCH
+			stfd %1, {GPRINDIRECT, RSCRATCH, 0}
 			
 /* Extract condition code field (actually produces (CC&3)<<2) */
 
@@ -640,8 +640,8 @@ MOVES
 	from TRISTATE_RC_S to CR0
 		gen
 			COMMENT("move TRISTATE_RC_S->CR0 large")
-			move {CONST, %1.val}, SCRATCH
-			cmp %2, {CONST, 0}, %1.reg, SCRATCH
+			move {CONST, %1.val}, RSCRATCH
+			cmp %2, {CONST, 0}, %1.reg, RSCRATCH
 			
 	from TRISTATE_RC_U smallu(%val) to CR0
 		gen
@@ -651,8 +651,8 @@ MOVES
 	from TRISTATE_RC_U to CR0
 		gen
 			COMMENT("move TRISTATE_RC_U->CR0")
-			move {CONST, %1.val}, SCRATCH
-			cmpl %2, {CONST, 0}, %1.reg, SCRATCH
+			move {CONST, %1.val}, RSCRATCH
+			cmpl %2, {CONST, 0}, %1.reg, RSCRATCH
 		
 	from TRISTATE_FF to CR0
 		gen
@@ -662,23 +662,23 @@ MOVES
 	from GPR to CR0
 		gen
 			COMMENT("move GPR->CR0")
-			orX SCRATCH, %1, %1 /* alas, can't call test */
+			orX RSCRATCH, %1, %1 /* alas, can't call test */
 			
 	from TRISTATE_RR_S + TRISTATE_RC_S + TRISTATE_FF to GPR
 		gen
 			COMMENT("move TRISTATE_R*_S->GPR")
 			move %1, C0
-			move C0, SCRATCH
+			move C0, RSCRATCH
 			move {LABEL, ".tristate_s_table"}, %2
-			lwzx %2, %2, SCRATCH				
+			lwzx %2, %2, RSCRATCH
 
 	from TRISTATE_RR_U + TRISTATE_RC_U to GPR
 		gen
 			COMMENT("move TRISTATE_R*_U->GPR")
 			move %1, C0
-			move C0, SCRATCH
+			move C0, RSCRATCH
 			move {LABEL, ".tristate_u_table"}, %2
-			lwzx %2, %2, SCRATCH				
+			lwzx %2, %2, RSCRATCH
 
 /* Logicals */
 
@@ -700,8 +700,8 @@ MOVES
 	from AND_RC to GPR
 		gen
 			COMMENT("move AND_RC->GPR")
-			move {CONST, %1.val}, SCRATCH
-			and %2, %1.reg, SCRATCH
+			move {CONST, %1.val}, RSCRATCH
+			and %2, %1.reg, RSCRATCH
 
 	from OR_RR to GPR
 		gen
@@ -716,8 +716,8 @@ MOVES
 	from OR_RC to GPR
 		gen
 			COMMENT("move OR_RC->GPR")
-			move {CONST, %1.val}, SCRATCH
-			or %2, %1.reg, SCRATCH
+			move {CONST, %1.val}, RSCRATCH
+			or %2, %1.reg, RSCRATCH
 
 	from XOR_RR to GPR
 		gen
@@ -732,8 +732,8 @@ MOVES
 	from XOR_RC to GPR
 		gen
 			COMMENT("move XOR_RC->GPR")
-			move {CONST, %1.val}, SCRATCH
-			xor %2, %1.reg, SCRATCH
+			move {CONST, %1.val}, RSCRATCH
+			xor %2, %1.reg, RSCRATCH
 
 /* Miscellaneous */
 
@@ -746,7 +746,7 @@ TESTS
 	
 	to test GPR
 		gen
-			orX SCRATCH, %1, %1
+			orX RSCRATCH, %1, %1
 
 
 
@@ -757,51 +757,51 @@ STACKINGRULES
 			COMMENT("stack LOCAL")
 			stwu {GPRE, regvar(%1.off)}, {GPRINDIRECT, SP, 0-4}
 
-	from GPR to STACK
+	from REG to STACK
 		gen
-			COMMENT("stack GPR")
+			COMMENT("stack REG")
 			stwu %1, {GPRINDIRECT, SP, 0-4}
 	
 	from CONST to STACK
 		gen
 			COMMENT("stack CONST")
-			move %1, SCRATCH
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			move %1, RSCRATCH
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from LABEL to STACK
 		gen
 			COMMENT("stack LABEL")
-			move %1, SCRATCH
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			move %1, RSCRATCH
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from SEX_B to STACK
 		gen
 			COMMENT("stack SEX_B")
-			extsb SCRATCH, %1.reg
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			extsb RSCRATCH, %1.reg
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from SEX_H to STACK
 		gen
 			COMMENT("stack SEX_H")
-			extsh SCRATCH, %1.reg
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			extsh RSCRATCH, %1.reg
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from SUM_ALL + TRISTATE_ALL + LOGICAL_ALL to STACK
 		gen
-			move %1, {GPRE, SCRATCH}
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			move %1, {GPRE, RSCRATCH}
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from IND_ALL_W to STACK
 		gen
-			move %1, SCRATCH
-			stwu SCRATCH, {GPRINDIRECT, SP, 0-4}
+			move %1, RSCRATCH
+			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from IND_ALL_D to STACK
 		gen
 			move %1, FSCRATCH
 			stfdu FSCRATCH, {GPRINDIRECT, SP, 0-8}
 			
-	from FPR to STACK
+	from FREG to STACK
 		gen
 			COMMENT("stack FPR")
 			stfdu %1, {GPRINDIRECT, SP, 0-8}
@@ -870,8 +870,8 @@ COERCIONS
 			fmr %a, %1
 		yields %a
 		
-	from FPR
-		uses FPR
+	from FREG
+		uses FREG
 		gen
 			fmr %a, %1
 		yields %a
@@ -921,19 +921,19 @@ PATTERNS
 		yields {CONST, $1}
 
 	pat dup $1==INT32                  /* Duplicate word on top of stack */
-		with GPR
+		with REG
 			yields %1 %1
 		with FSREG
 			yields %1 %1
 								
 	pat dup $1==INT64                  /* Duplicate double-word on top of stack */
-		with GPR GPR
+		with REG REG
 			yields %2 %1 %2 %1
 		with FREG
 			yields %1 %1
 								
 	pat exg $1==INT32                  /* Exchange top two words on stack */
-		with GPR GPR
+		with REG REG
 			yields %1 %2
 		
 	pat stl lol $1==$2                 /* Store then load local */
@@ -1635,9 +1635,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".teq_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 				
 	pat tne                            /* top = (top != 0) */
@@ -1645,9 +1645,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".tne_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 				
 	pat tlt                            /* top = (top < 0) */
@@ -1655,9 +1655,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".tlt_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 				
 	pat tle                            /* top = (top <= 0) */
@@ -1665,9 +1665,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".tle_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 				
 	pat tgt                            /* top = (top > 0) */
@@ -1675,9 +1675,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".tgt_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 
 	pat tge                            /* top = (top >= 0) */
@@ -1685,9 +1685,9 @@ PATTERNS
 			uses reusing %1, REG
 			gen
 				move %1, C0
-				move C0, SCRATCH
+				move C0, RSCRATCH
 				move {LABEL, ".tge_table"}, %a
-				lwzx %a, %a, SCRATCH
+				lwzx %a, %a, RSCRATCH
 			yields %a
 				
 
