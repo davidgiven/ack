@@ -27,5 +27,11 @@ extern int array_indexof(void* array, void* value);
 #define array_push(a, v) array_append(a, v)
 extern void* array_pop(void* array);
 
+extern void array_appendall(void* dest, void* src);
+extern void array_removeall(void* dest, void* src);
+
+/* Returns false if *any* items were added. */
+extern bool array_appendallu(void* dest, void* src);
+
 #endif
 

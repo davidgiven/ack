@@ -90,5 +90,38 @@ void* array_pop(void* arrayp)
     return array->item[array->count--];
 }
 
+void array_appendall(void* arrayp, void* srcp)
+{
+    struct array* array = arrayp;
+    struct array* src = srcp;
+    int i;
+
+    for (i=0; i<src->count; i++)
+        array_append(array, src->item[i]);
+}
+
+void array_removeall(void* arrayp, void* srcp)
+{
+    struct array* array = arrayp;
+    struct array* src = srcp;
+    int i;
+
+    for (i=0; i<src->count; i++)
+        array_remove(array, src->item[i]);
+}
+
+bool array_appendallu(void* arrayp, void* srcp)
+{
+    struct array* array = arrayp;
+    struct array* src = srcp;
+    bool unchanged = true;
+    int i;
+
+    for (i=0; i<src->count; i++)
+        unchanged &= array_appendu(array, src->item[i]);
+
+    return unchanged;
+}
+
 /* vim: set sw=4 ts=4 expandtab : */
 
