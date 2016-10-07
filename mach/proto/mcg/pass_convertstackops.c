@@ -1,7 +1,7 @@
 #include "mcg.h"
 
 static ARRAYOF(struct ir) pops;
-static ARRAYOF(struct ir) pushes;
+static PMAPOF(struct basicblock, struct ir) pushes;
 
 static struct ir* get_last_push(struct basicblock* bb)
 {
@@ -74,7 +74,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
                 ir = get_last_push(inbb);
                 if (!ir || (ir->size != lastpush->size))
                     return;
-                array_appendu(&pushes, ir);
+                pmap_add(&pushes, inbb, ir);
             }
         }
 
@@ -87,7 +87,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
 
         for (i=0; i<pushes.count; i++)
         {
-            struct ir* ir = pushes.item[i];
+            struct ir* ir = pushes.item[i].right;
             *ir = *ir->left;
         }
 
@@ -97,7 +97,9 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
             struct ir* phi = new_ir0(IR_PHI, ir->size);
 
             for (j=0; j<pushes.count; j++)
-                array_appendu(&phi->u.phivalue, pushes.item[j]);
+                pmap_add(&phi->u.phivalue,
+                    pushes.item[j].left,
+                    pushes.item[j].right);
             phi->root = phi;
 
             *ir = *phi;

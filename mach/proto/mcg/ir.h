@@ -17,7 +17,7 @@ struct ir
 		int rvalue;
 		const char* lvalue;
 		struct basicblock* bvalue;
-		ARRAYOF(struct ir) phivalue;
+        PMAPOF(struct basicblock, struct ir) phivalue;
 	} u;
 
 	struct vreg* result;     /* vreg containing IR result */

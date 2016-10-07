@@ -1,30 +1,7 @@
 #include "mcg.h"
 
-static ARRAYOF(struct basicblock) blocks;
-
-static void recursively_walk_dominance_graph(struct basicblock* bb)
+void pass_register_allocator(void)
 {
-	int i;
-
-	array_append(&blocks, bb);
-	tracef('R', "R: considering block %s\n", bb->name);
-
-	/* Skip the entry block (which is its own dominator). */
-	
-	for (i=1; i<dominance.graph.count; i++)
-	{
-		struct basicblock* left = dominance.graph.item[i].left;
-		struct basicblock* right = dominance.graph.item[i].right;
-		if (right == bb)
-			recursively_walk_dominance_graph(left);
-	}
-}
-
-void pass_register_allocator(struct procedure* proc)
-{
-	blocks.count = 0;
-	recursively_walk_dominance_graph(cfg.entry);
-	assert(blocks.count == proc->blocks.count);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -14,6 +14,8 @@ struct hreg
 struct vreg
 {
 	int id;
+    struct hop* defined;
+    ARRAYOF(struct hop) used;
 };
 
 extern struct vreg* new_vreg(void);

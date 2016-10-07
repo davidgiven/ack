@@ -1,7 +1,11 @@
 #include "mcg.h"
+#include <errno.h>
 #include <unistd.h>
 
 static const char* tracechars = NULL;
+
+FILE* dominance_dot_file = NULL;
+FILE* cfg_dot_file = NULL;
 
 bool tracing(char k)
 {
@@ -39,12 +43,28 @@ int main(int argc, char* const argv[])
     opterr = 1;
     for (;;)
     {
-        int c = getopt(argc, argv, "-d:");
+        int c = getopt(argc, argv, "-d:D:C:");
         if (c == -1)
             break;
 
         switch (c)
         {
+            case 'C':
+                cfg_dot_file = fopen(optarg, "w");
+                if (!cfg_dot_file)
+                    fatal("couldn't open output file '%s': %s",
+                        optarg, strerror(errno));
+                fprintf(cfg_dot_file, "digraph {\n");
+                break;
+
+            case 'D':
+                dominance_dot_file = fopen(optarg, "w");
+                if (!dominance_dot_file)
+                    fatal("couldn't open output file '%s': %s",
+                        optarg, strerror(errno));
+                fprintf(dominance_dot_file, "digraph {\n");
+                break;
+
             case 'd':
                 tracechars = optarg;
                 break;
@@ -74,6 +94,16 @@ int main(int argc, char* const argv[])
     symbol_walk(find_procedures_cb, NULL);
 
 	EM_close();
+    if (cfg_dot_file)
+    {
+        fprintf(cfg_dot_file, "}\n");
+        fclose(cfg_dot_file);
+    }
+    if (dominance_dot_file)
+    {
+        fprintf(dominance_dot_file, "}\n");
+        fclose(dominance_dot_file);
+    }
 	return 0;
 }
 

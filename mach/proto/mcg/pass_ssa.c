@@ -125,7 +125,8 @@ static void recursively_rewrite_tree(struct basicblock* bb)
             (ir->opcode == IR_PHI) &&
             array_contains(&needsphis, nextbb))
         {
-            array_appendu(&ir->u.phivalue, definitions.item[definitions.count-1]);
+            pmap_add(&ir->u.phivalue,
+                bb, definitions.item[definitions.count-1]);
         }
 
         recursively_rewrite_tree(nextbb);

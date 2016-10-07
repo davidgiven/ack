@@ -24,17 +24,18 @@ struct insel
 struct hop
 {
 	int id;
-	int insn_no;
+    struct basicblock* bb;
 	struct ir* ir;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
 
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;
+    ARRAYOF(struct vreg) throughs;
 	PMAPOF(struct vreg, struct hreg) registers;
 };
 
-extern struct hop* new_hop(int insn_no, struct ir* ir);
+extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg);

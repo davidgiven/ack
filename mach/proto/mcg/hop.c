@@ -5,11 +5,11 @@ static struct hop* current_hop;
 
 static const struct burm_emitter_data emitter_data;
 
-struct hop* new_hop(int insn_no, struct ir* ir)
+struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 {
 	struct hop* hop = calloc(1, sizeof *hop);
 	hop->id = hop_count++;
-	hop->insn_no = insn_no;
+    hop->bb = bb;
 	hop->ir = ir;
 	return hop;
 }
@@ -63,9 +63,11 @@ void hop_print(char k, struct hop* hop)
 			tracef(k, "%c: %d from $%d:", k, hop->id, hop->ir->id);
 
 			for (j=0; j<hop->ins.count; j++)
-				tracef(k, " <%%%d", hop->ins.item[j]->id);
+				tracef(k, " r%%%d", hop->ins.item[j]->id);
+			for (j=0; j<hop->throughs.count; j++)
+				tracef(k, " =%%%d", hop->throughs.item[j]->id);
 			for (j=0; j<hop->outs.count; j++)
-				tracef(k, " >%%%d", hop->outs.item[j]->id);
+				tracef(k, " w%%%d", hop->outs.item[j]->id);
 			tracef(k, " ");
 
 			soi = false;

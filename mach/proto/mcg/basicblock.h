@@ -1,6 +1,12 @@
 #ifndef BASICBLOCK_H
 #define BASICBLOCK_H
 
+struct phi
+{
+    struct basicblock* prev; /* Predecessor that this phi is referring to */
+    struct ir* ir;           /* IR of variable definition */
+};
+
 struct basicblock
 {
     const char* name;
@@ -12,7 +18,11 @@ struct basicblock
     ARRAYOF(struct basicblock) nexts;
     int order; /* used by dominance graph code */
 
-	ARRAYOF(struct vreg) liveins;
+    PMAPOF(struct vreg, struct phi) phis;
+
+    /* Used by liveness calculation. */
+    ARRAYOF(struct vreg) liveins;
+    ARRAYOF(struct vreg) liveouts;
 
     bool is_fake : 1;
     bool is_root : 1;

@@ -52,7 +52,10 @@ static void emit_reg(int child)
     struct vreg* vreg = find_vreg_of_child(child);
 
     if (vreg)
+    {
         hop_add_vreg_insel(current_hop, vreg);
+        array_appendu(&vreg->used, current_hop);
+    }
 }
 
 static void emit_string(const char* data)
@@ -165,13 +168,17 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                     vreg = new_vreg();
             }
 
-            insn->hop = current_hop = new_hop(0, insn->ir);
+            insn->hop = current_hop = new_hop(current_bb, insn->ir);
             insn->hop->output = vreg;
             if (vreg)
+            {
                 array_appendu(&current_hop->outs, vreg);
+                vreg->defined = current_hop;
+            }
 
             emit(insn);
             hop_print('I', current_hop);
+            array_append(&current_bb->hops, current_hop);
 
             if (goal != 1)
                 insn->ir->result = insn->hop->output;
@@ -220,10 +227,18 @@ static void select_instructions(void)
             int j;
 
             current_ir->result = new_vreg();
-            array_append(&current_bb->liveins, current_ir->result);
-            tracef('I', "I: %d is phi:", current_ir->result->id);
+            tracef('I', "I: $%d is phi:", current_ir->result->id);
             for (j=0; j<current_ir->u.phivalue.count; j++)
-                tracef('I', " $%d", current_ir->u.phivalue.item[j]->id);
+            {
+                struct basicblock* parentbb = current_ir->u.phivalue.item[j].left;
+                struct ir* parentir = current_ir->u.phivalue.item[j].right;
+                struct phi* phi = calloc(1, sizeof(*phi));
+                tracef('I', " %s=>$%d", parentbb->name, parentir->id);
+
+                phi->prev = parentbb;
+                phi->ir = parentir;
+                pmap_add(&current_bb->phis, current_ir->result, phi);
+            }
             tracef('I', "\n");
         }
         else
@@ -241,13 +256,13 @@ static void select_instructions(void)
 	}
 }
 
-void pass_instruction_selector(struct procedure* proc)
+void pass_instruction_selector(void)
 {
     int i;
 
-    for (i=0; i<proc->blocks.count; i++)
+    for (i=0; i<cfg.preorder.count; i++)
     {
-        current_bb = proc->blocks.item[i];
+        current_bb = cfg.preorder.item[i];
         select_instructions();
     }
 }

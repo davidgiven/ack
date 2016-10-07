@@ -13,6 +13,7 @@ static bool collect_outputs_cb(struct ir* ir, void* user)
     {
         array_appendu(&caller->nexts, ir->u.bvalue);
         array_appendu(&ir->u.bvalue->prevs, caller);
+        pmap_add(&cfg.graph, caller, ir->u.bvalue);
     }
     return false;
 }
@@ -191,6 +192,7 @@ static void walk_dominance_graph(void)
 void update_graph_data(struct procedure* proc)
 {
     cfg.entry = proc->blocks.item[0];
+    cfg.graph.count = 0;
     update_block_pointers_from_ir(proc);
 
     walk_cfg_graph();

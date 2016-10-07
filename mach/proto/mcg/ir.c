@@ -132,7 +132,9 @@ static void print_expr(char k, const struct ir* ir)
             {
                 if (i > 0)
                     tracef(k, ", ");
-                tracef(k, "$%d", ir->u.phivalue.item[i]->id);
+                tracef(k, "%s=>$%d",
+                    ir->u.phivalue.item[i].left->name,
+                    ir->u.phivalue.item[i].right->id);
             }
             break;
         }

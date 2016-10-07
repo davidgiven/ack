@@ -105,11 +105,15 @@ extern void pass_convert_locals_to_ssa(struct procedure* proc);
 extern void pass_convert_stack_ops(struct procedure* proc);
 extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 extern void pass_group_irs(struct procedure* proc);
-extern void pass_instruction_selector(struct procedure* proc);
+extern void pass_instruction_selector(void);
+extern void pass_live_vreg_analysis(void);
 extern void pass_promote_float_ops(struct procedure* proc);
-extern void pass_register_allocator(struct procedure* proc);
+extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_split_critical_edges(struct procedure* proc);
+
+extern FILE* dominance_dot_file;
+extern FILE* cfg_dot_file;
 
 #endif
 

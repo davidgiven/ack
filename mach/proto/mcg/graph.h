@@ -4,6 +4,7 @@
 struct graph_data
 {
     struct basicblock* entry;
+    PMAPOF(struct basicblock, struct basicblock) graph;
     ARRAYOF(struct basicblock) preorder;
     ARRAYOF(struct basicblock) postorder;
 };
