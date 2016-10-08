@@ -88,6 +88,13 @@ static void constrain_input_reg(int child, int attr)
 
 static void constrain_output_reg(int attr)
 {
+    struct vreg* vreg = current_hop->output;
+
+    if (!vreg)
+        current_hop->output = vreg = new_vreg();
+
+    array_appendu(&current_hop->outs, vreg);
+    vreg->defined = current_hop;
 }
 
 static const struct burm_emitter_data emitter_data =
@@ -161,22 +168,12 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                 case ir_to_esn(IR_NOP, 0):
                     vreg = node->left->ir->result;
                     break;
-
-                default:
-                    /* FIXME: some instructions don't emit anything, so
-                     * allocating a register for them is a waste of time. */
-                    vreg = new_vreg();
             }
 
             insn->hop = current_hop = new_hop(current_bb, insn->ir);
-            insn->hop->output = vreg;
-            if (vreg)
-            {
-                array_appendu(&current_hop->outs, vreg);
-                vreg->defined = current_hop;
-            }
-
+            current_hop->output = vreg;
             emit(insn);
+
             hop_print('I', current_hop);
             array_append(&current_bb->hops, current_hop);
 
