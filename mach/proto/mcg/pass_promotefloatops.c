@@ -97,4 +97,3 @@ void pass_promote_float_ops(struct procedure* proc)
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
-

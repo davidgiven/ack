@@ -103,7 +103,7 @@ void hop_print(char k, struct hop* hop)
 
 					case IR_LOCAL:
 					case IR_CONST:
-						tracef(k, "0x%d", ir->u.ivalue);
+						tracef(k, "%d", ir->u.ivalue);
 						break;
 				}
 				break;

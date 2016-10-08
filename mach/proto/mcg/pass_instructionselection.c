@@ -243,6 +243,7 @@ static void select_instructions(void)
         }
         else
         {
+            ir_print('I', current_ir);
             shadow = build_shadow_tree(current_ir, current_ir);
             burm_label(shadow);
 
@@ -250,7 +251,6 @@ static void select_instructions(void)
             if (!insnno)
                 burm_panic_cannot_match(shadow);
 
-            ir_print('I', current_ir);
             walk_instructions(shadow, 1);
         }
 	}
