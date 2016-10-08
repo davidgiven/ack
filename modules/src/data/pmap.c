@@ -56,7 +56,7 @@ void pmap_add(void* mapp, void* left, void* right)
     append(map, left, right);
 }
 
-void* pmap_get(void* mapp, void* left)
+void* pmap_findleft(void* mapp, void* left)
 {
     struct pmap* map = mapp;
     int i;
@@ -66,6 +66,21 @@ void* pmap_get(void* mapp, void* left)
         struct pmap_node* node = &map->item[i];
 		if (node->left == left)
 			return node->right;
+    }
+
+	return NULL;
+}
+
+void* pmap_findright(void* mapp, void* right)
+{
+    struct pmap* map = mapp;
+    int i;
+
+    for (i=0; i<map->count; i++)
+    {
+        struct pmap_node* node = &map->item[i];
+		if (node->right == right)
+			return node->left;
     }
 
 	return NULL;
