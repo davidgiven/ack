@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static ARRAYOF(struct ir) pops;
+static PMAPOF(struct basicblock, struct ir) pops;
 static PMAPOF(struct basicblock, struct ir) pushes;
 
 static struct ir* get_last_push(struct basicblock* bb)
@@ -62,7 +62,7 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
             ir = get_first_pop(outbb);
             if (!ir || (ir->size != lastpush->size))
                 return;
-            array_appendu(&pops, ir);
+            pmap_add(&pops, outbb, ir);
 
             /* Also abort unless *every* predecessor block of the one we've
              * just found *also* ends in a push of the same size. */
@@ -93,7 +93,8 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
 
         for (i=0; i<pops.count; i++)
         {
-            struct ir* ir = pops.item[i];
+            struct basicblock* outbb = pops.item[i].left;
+            struct ir* ir = pops.item[i].right;
             struct ir* phi = new_ir0(IR_PHI, ir->size);
 
             for (j=0; j<pushes.count; j++)
@@ -103,7 +104,6 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
             phi->root = phi;
 
             *ir = *phi;
-            array_insert(&bb->irs, ir, 0);
         }
     }
 }
