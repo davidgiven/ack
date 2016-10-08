@@ -32,7 +32,8 @@ struct hop
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;
     ARRAYOF(struct vreg) throughs;
-	PMAPOF(struct vreg, struct hreg) registers;
+    register_assignment_t regsin;
+    register_assignment_t regsout;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);

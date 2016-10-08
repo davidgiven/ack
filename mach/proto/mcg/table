@@ -104,7 +104,7 @@ PATTERNS
 		cost 4;
 
 	SETRET4(in:(ret)reg)
-		emit "mov r0, %in"
+		emit "mr r3, %in"
 		cost 4;
 
     (ret)reg = GETRET4

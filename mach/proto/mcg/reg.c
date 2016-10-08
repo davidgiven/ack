@@ -9,7 +9,7 @@ struct vreg* new_vreg(void)
 	return vreg;
 }
 
-struct hreg* new_hreg(struct burm_register_data* brd)
+struct hreg* new_hreg(const struct burm_register_data* brd)
 {
 	struct hreg* hreg = calloc(1, sizeof *hreg);
 	hreg->name = brd->name;

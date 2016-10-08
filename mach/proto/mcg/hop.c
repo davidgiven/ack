@@ -81,8 +81,17 @@ void hop_print(char k, struct hop* hop)
 				break;
 
 			case INSEL_VREG:
-				tracef(k, "%%%d", insel->u.vreg->id);
+            {
+                struct vreg* vreg = insel->u.vreg;
+                struct hreg* hreg = pmap_findright(&hop->regsin, vreg);
+                if (!hreg)
+                    hreg = pmap_findright(&hop->regsout, vreg);
+                if (hreg)
+                    tracef(k, "%s", hreg->name);
+                else
+                    tracef(k, "%%%d", vreg->id);
 				break;
+            }
 
 			case INSEL_STRING:
 				tracef(k, "%s", insel->u.string);

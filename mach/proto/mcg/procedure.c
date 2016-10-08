@@ -167,9 +167,11 @@ void procedure_compile(struct procedure* proc)
     print_blocks('6', proc);
 
     pass_instruction_selector();
-    pass_live_vreg_analysis();
     print_hops('7', proc);
-    //pass_register_allocator();
+    pass_live_vreg_analysis();
+    print_hops('8', proc);
+    pass_register_allocator();
+    print_hops('9', proc);
 
     if (cfg_dot_file)
         write_cfg_graph(proc->name);

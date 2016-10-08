@@ -87,10 +87,10 @@ static struct basicblock* intersect(struct basicblock* p1, struct basicblock* p2
     while (p1 != p2)
     {
         while (p1->order < p2->order)
-            p1 = pmap_get(&dominance.graph, p1);
+            p1 = pmap_findleft(&dominance.graph, p1);
 
         while (p2->order < p1->order)
-            p2 = pmap_get(&dominance.graph, p2);
+            p2 = pmap_findleft(&dominance.graph, p2);
     }
 
     return p1;
@@ -129,16 +129,16 @@ static void calculate_dominance_graph(void)
                 struct basicblock* p = b->prevs.item[j];
                 
                 /* Skip unprocessed blocks. */
-                if (!pmap_get(&dominance.graph, p))
+                if (!pmap_findleft(&dominance.graph, p))
                     continue;
 
                 if (!new_idom)
                     new_idom = p;
-                else if (pmap_get(&dominance.graph, p))
+                else if (pmap_findleft(&dominance.graph, p))
                     new_idom = intersect(p, new_idom);
             }
 
-            if (pmap_get(&dominance.graph, b) != new_idom)
+            if (pmap_findleft(&dominance.graph, b) != new_idom)
             {
                 pmap_put(&dominance.graph, b, new_idom);
                 changed = true;

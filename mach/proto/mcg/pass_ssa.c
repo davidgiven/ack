@@ -26,7 +26,7 @@ static void calculate_dominance_frontier_graph(void)
     for (i=0; i<cfg.postorder.count; i++)
     {
         struct basicblock* b = cfg.postorder.item[i];
-        struct basicblock* dominator = pmap_get(&dominance.graph, b);
+        struct basicblock* dominator = pmap_findleft(&dominance.graph, b);
         if (b->prevs.count >= 2)
         {
             for (j=0; j<b->prevs.count; j++)
@@ -37,7 +37,7 @@ static void calculate_dominance_frontier_graph(void)
                     tracef('S', "S: %s is in %s's dominance frontier\n",
                         b->name, runner->name);
                     pmap_add(&dominancefrontiers, runner, b);
-                    runner = pmap_get(&dominance.graph, runner);
+                    runner = pmap_findleft(&dominance.graph, runner);
                 }
             }
         }
@@ -187,7 +187,7 @@ static void ssa_convert(void)
     for (i=0; i<defining.count; i++)
     {
         struct basicblock* bb = defining.item[i];
-        struct basicblock* dominates = pmap_get(&dominancefrontiers, bb);
+        struct basicblock* dominates = pmap_findleft(&dominancefrontiers, bb);
         if (dominates)
         {
             array_appendu(&needsphis, dominates);
