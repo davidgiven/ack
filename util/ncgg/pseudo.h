@@ -12,4 +12,3 @@
 #define INSERASE	(-6)
 #define INSREMOVE	(-7)
 #define INSLABDEF	(-8)
-#define INSSTACKADJUST (-9)

@@ -12,8 +12,6 @@ int	tabledebug=0;	/* do not generate code for table debugging */
 #endif
 int	verbose=0;	/* print all statistics */
 int	use_tes;	/* use top element size information */
-int use_noframepointer;	/* use stackadjust mechanism to remove requirement
-                           for frame pointer */
 char	*c_file=	"tables.c";
 char	*h_file=	"tables.H";
 char	*cd_file=	"code";
@@ -614,8 +612,6 @@ outdefs() {
 		cdef("TABLEDEBUG",1);
 	if (use_tes)
 		cdef("USE_TES",1);
-	if (use_noframepointer)
-		cdef("USE_NOFRAMEPOINTER",1);
 }
 
 outars() {
@@ -853,11 +849,6 @@ varinfo *kills,*allocates,*generates,*yields,*leaving;
 		case INSLABDEF:
 			cocono = 0;
 			code8(DO_LABDEF);
-			codeint(vp->vi_int[1]);
-			codenl();
-			break;
-		case INSSTACKADJUST:
-			code8(DO_STACKADJUST);
 			codeint(vp->vi_int[1]);
 			codenl();
 			break;

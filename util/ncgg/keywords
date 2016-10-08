@@ -43,8 +43,6 @@ reusing	REUSING
 rom	ROM
 samesign	SAMESIGN
 sfit	SFIT
-stackadjust STACKADJUST
-stackoffset STACKOFFSET
 topeltsize	TOPELTSIZE
 test	TEST
 to	TO

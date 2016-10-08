@@ -910,23 +910,6 @@ normalfailed:	if (stackpad!=tokpatlen) {
 	break;
     }
 #endif
-#ifdef USE_NOFRAMEPOINTER
-	case DO_STACKADJUST: {
-	result_t result;
-	int nodeno;
-	
-	DEBUG("STACKADJUST");
-	/* The offset is an expression, which we need to evaluate. */
-	
-	getint(nodeno,codep);
-	compute(&enodes[nodeno], &result);
-	assert(result.e_typ==EV_INT);
-	
-	if (toplevel)
-		stackoffset += result.e_v.e_con;
-	break;
-	}
-#endif
 	}
 	}
     doreturn:
