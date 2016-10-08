@@ -1,38 +1,78 @@
 REGISTERS
 
-	r0  bytes4 int ret;
-	r1  bytes4 int;
-	r2  bytes4 int;
-	r3  bytes4 int;
-	r4  bytes4 int;
-	r5  bytes4 int;
-	r6  bytes4 int;
-	r7  bytes4 int;
-	r8  bytes4 int;
-	r9  bytes4 int;
-	r10 bytes4 int;
-	r11 bytes4 int;
+    /* Reverse order because registers are assigned from top down. */
 
-	s0  bytes4 float;
-	s1  bytes4 float;
-	s2  bytes4 float;
-	s3  bytes4 float;
-	s4  bytes4 float;
-	s5  bytes4 float;
-	s6  bytes4 float;
-	s7  bytes4 float;
-	s8  bytes4 float;
-	s9  bytes4 float;
+    r31 bytes4 int; 
+    r30 bytes4 int; 
+    r29 bytes4 int; 
+    r28 bytes4 int; 
+    r27 bytes4 int; 
+    r26 bytes4 int; 
+    r25 bytes4 int; 
+    r24 bytes4 int; 
+    r23 bytes4 int; 
+    r22 bytes4 int; 
+    r21 bytes4 int; 
+    r20 bytes4 int; 
+    r19 bytes4 int; 
+    r18 bytes4 int; 
+    r17 bytes4 int; 
+    r16 bytes4 int; 
+    r15 bytes4 int; 
+    r14 bytes4 int; 
+    r13 bytes4 int; 
+    r12 bytes4 int; 
+    r11 bytes4 int; 
+    r10 bytes4 int; 
+    r9  bytes4 int;
+    r8  bytes4 int;
+    r7  bytes4 int;
+    r6  bytes4 int;
+    r5  bytes4 int;
+    r4  bytes4 int;
+    r3  bytes4 int ret;
 
-	cc  cc;
+    f31 bytes4 bytes8 float;
+    f30 bytes4 bytes8 float;
+    f29 bytes4 bytes8 float;
+    f28 bytes4 bytes8 float;
+    f27 bytes4 bytes8 float;
+    f26 bytes4 bytes8 float;
+    f25 bytes4 bytes8 float;
+    f24 bytes4 bytes8 float;
+    f23 bytes4 bytes8 float;
+    f22 bytes4 bytes8 float;
+    f21 bytes4 bytes8 float;
+    f20 bytes4 bytes8 float;
+    f19 bytes4 bytes8 float;
+    f18 bytes4 bytes8 float;
+    f17 bytes4 bytes8 float;
+    f16 bytes4 bytes8 float;
+    f15 bytes4 bytes8 float;
+    f14 bytes4 bytes8 float;
+    f13 bytes4 bytes8 float;
+    f12 bytes4 bytes8 float;
+    f11 bytes4 bytes8 float;
+    f10 bytes4 bytes8 float;
+    f9  bytes4 bytes8 float;
+    f8  bytes4 bytes8 float;
+    f7  bytes4 bytes8 float;
+    f6  bytes4 bytes8 float;
+    f5  bytes4 bytes8 float;
+    f4  bytes4 bytes8 float;
+    f3  bytes4 bytes8 float;
+    f2  bytes4 bytes8 float;
+    f1  bytes4 bytes8 float;
+    f0  bytes4 bytes8 float;
+
+	cr0  cr;
 
 
 DECLARATIONS
 
-	cc;
+	cr;
 
 	address   fragment;
-	aluparam  fragment;
 
 
 PATTERNS
@@ -42,16 +82,23 @@ PATTERNS
 	PAIR(BLOCK4, BLOCK4);
 
 
+
 /* Miscellaneous special things */
 
 	PUSH4(in:(int)reg)
-		emit "push %in"
+		emit "stwu %in, -4(sp)"
 		cost 4;
 
 	out:(int)reg = POP4
-		emit "pop %out"
-		cost 4;
+		emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+		cost 8;
 
+	out:(float)reg = POPF4
+		emit "lfs %out, 0(sp)"
+		emit "addi sp, sp, 4"
+		cost 8;
+		
 	RET
 		emit "ret"
 		cost 4;
@@ -60,58 +107,71 @@ PATTERNS
 		emit "mov r0, %in"
 		cost 4;
 
-	STACKADJUST4(delta:aluparam)
-		emit "add sp, sp, %delta"
+    (ret)reg = GETRET4
+        cost 1;
+
+	STACKADJUST4(delta:CONST4)
+        when constant_signed_16_bit(delta)
+		emit "addi sp, sp, $delta"
 		cost 4;
+
 
 
 /* Memory operations */
 
 	STORE4(addr:address, value:(int)reg)
-		emit "str %value, %addr"
+		emit "stw %value, %addr"
+		cost 4;
+
+	STORE2(addr:address, value:(int)reg)
+		emit "sth %value, %addr"
 		cost 4;
 
 	STORE1(addr:address, value:(int)reg)
-		emit "strb %value, %addr"
+		emit "stb %value, %addr"
 		cost 4;
 
 	out:(int)reg = LOAD4(addr:address)
-		emit "ldr %out, %addr"
+		emit "lwz %out, %addr"
+		cost 4;
+
+	out:(int)reg = LOAD2(addr:address)
+		emit "lhz %out, %addr"
 		cost 4;
 
 	out:(int)reg = LOAD1(addr:address)
-		emit "ldrb %out, %addr"
+		emit "lbz %out, %addr"
 		cost 4;
 
 	out:(int)reg = CIU14(LOAD1(addr:address))
-		emit "ldrb %out, %addr"
+		emit "lbz %out, %addr"
+		cost 4;
+
+	out:(int)reg = CIU24(LOAD2(addr:address))
+		emit "lhz %out, %addr"
 		cost 4;
 	
-	out:(int)reg = CII14(CIU41(CIU14(LOAD1(addr:address))))
-		emit "ldrsb %out, %addr"
-		cost 4;
 
 
 /* Locals */
 
 	out:(int)reg = in:LOCAL4
-		emit "add %out, fp, #$in"
+		emit "addi %out, fp, #$in"
 		cost 4;
 
 	address = in:LOCAL4
-		emit "[fp, #$in]";
+		emit "$in(fp)";
+
 
 
 /* Memory addressing modes */
 
 	address = ADD4(addr:(int)reg, offset:CONST4)
-		emit "[%addr, #$offset]";
-
-	address = ADD4(addr1:(int)reg, addr2:(int)reg)
-		emit "[%addr1, %addr2]";
+        when constant_signed_16_bit(offset)
+		emit "$offset(%addr)";
 
 	address = addr:(int)reg
-		emit "[%addr]";
+		emit "0(%addr)";
 
 
 
@@ -121,98 +181,152 @@ PATTERNS
 		emit "b $addr"
 		cost 4;
 
-	CJUMPEQ(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
-		emit "beq $true"
+	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+        emit "bc IFTRUE, EQ, $true"
 		emit "b $false"
 		cost 8;
 
-	CJUMPLE(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
-		emit "ble $true"
-		emit "b $false"
+	CJUMPLE(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+        emit "bc IFTRUE, LE, $true"
+        emit "b $false"
 		cost 8;
 
-	CJUMPLT(value:(cc)cc, PAIR(true:BLOCK4, false:BLOCK4))
-		emit "blt $true"
-		emit "b $false"
+	CJUMPLT(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+        emit "bc IFTRUE, LT, $true"
+        emit "b $false"
 		cost 8;
 
 	CALL(dest:LABEL4)
 		emit "bl $dest"
 		cost 4;
 
+    CALL(dest:(int)reg)
+        emit "mtspr ctr, %dest"
+        emit "bcctrl ALWAYS, 0, 0"
+        cost 8;
+
+    JUMP(dest:LABEL4)
+        emit "b $dest"
+        cost 4;
+
+
 
 /* Comparisons */
 
-	(cc)cc = COMPARES4(left:(int)reg, right:aluparam)
-		emit "cmp %left, %right"
+	cr:(cr)cr = COMPARES4(left:(int)reg, right:(int)reg)
+        emit "cmp %cr, 0, %left, %right"
 		cost 4;
 
-	(cc)cc = COMPARES4(COMPARES4(left:(int)reg, right:aluparam), CONST4)
-		emit "cmp %left, %right"
+	cr:(cr)cr = COMPARES4(left:(int)reg, right:CONST4)
+        when constant_signed_16_bit(right)
+        emit "cmpi %cr, 0, %left, $right"
 		cost 4;
 
-	out:(int)reg = (cc)cc
-		emit "mov %out, #0"
-		emit "movlt %out, #-1"
-		emit "movgt %out, #1"
-		cost 12;
+	cr:(cr)cr = COMPAREU4(left:(int)reg, right:(int)reg)
+        emit "cmpl %cr, 0, %left, %right"
+		cost 4;
+
+	cr:(cr)cr = COMPAREU4(left:(int)reg, right:CONST4)
+        when constant_signed_16_bit(right)
+        emit "cmpli %cr, 0, %left, $right"
+		cost 4;
+
+    cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:(int)reg), result:CONST4)
+        when constant_is_zero(result)
+        emit "cmp %cr, 0, %left, %right"
+        cost 4;
+
+    cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:CONST4), result:CONST4)
+        when constant_is_zero(result)
+        when constant_signed_16_bit(right)
+        emit "cmpi %cr, 0, %left, $right"
+        cost 4;
+
+    cr:(cr)cr = COMPARES4(COMPAREU4(left:(int)reg, right:(int)reg), result:CONST4)
+        when constant_is_zero(result)
+        emit "cmpl %cr, 0, %left, %right"
+        cost 4;
+
 
 
 /* Conversions */
 
 	out:(int)reg = CII14(CIU41(value:(int)reg))
-		emit "sxtb %out, %value"
+		emit "extsb %out, %value"
+		cost 4;
+
+	out:(int)reg = CII24(CIU42(value:(int)reg))
+		emit "extsh %out, %value"
 		cost 4;
 
 	out:(int)reg = CIU41(in:(int)reg)
-		emit "and %out, %in, #0xff"
+		emit "andi %out, %in, 0xff"
 		cost 4;
+
+	out:(int)reg = CIU42(in:(int)reg)
+		emit "andi %out, %in, 0xffff"
+		cost 4;
+
+    out:(int)reg = CIU44(in:(int)reg)
+        emit "mr %out, %in"
+        cost 4;
+
 
 
 /* ALU operations */
 
-	out:(int)reg = ADD4(left:(int)reg, right:aluparam)
+	out:(int)reg = ADD4(left:(int)reg, right:(int)reg)
 		emit "add %out, %left, %right"
 		cost 4;
 
-	out:(int)reg = ADD4(left:aluparam, right:(int)reg)
-		emit "add %out, %right, %left"
+	out:(int)reg = ADD4(left:(int)reg, right:CONST4)
+        when constant_signed_16_bit(right)
+		emit "addi %out, %left, $right"
+		cost 4;
+
+	out:(int)reg = SUB4(left:(int)reg, right:(int)reg)
+		emit "sub %out, %right, %left"
+		cost 4;
+
+	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
+		emit "mullw %out, %right, %left"
 		cost 4;
 
 	out:(int)reg = MOD4(left:(int)reg, right:(int)reg)
-		emit "udiv %out, %left, %right"
-		emit "mls %out, %out, %right, %left"
-		cost 8;
+		emit "divw %out, %left, %right"
+        emit "mullw %out, %out, %right"
+        emit "subf %out, %out, %left"
+		cost 12;
 
-	out:(int)reg = DIV4(left:(int)reg, right:aluparam)
-		emit "div %out, %left, %right"
+	out:(int)reg = DIV4(left:(int)reg, right:(int)reg)
+		emit "divw %out, %left, %right"
 		cost 4;
 
-	aluparam = value:CONST4
-		emit "#$value";
+    out:(int)reg = NEG4(left:(int)reg)
+        emit "neg %out, %left"
+        cost 4;
 
-	aluparam = value:(int)reg
-		emit "%value";
-
-	out:(int)reg = value:aluparam
-		emit "mov %out, %value"
+	out:(int)reg = EOR4(left:(int)reg, right:(int)reg)
+		emit "xor %out, %right, %left"
 		cost 4;
 
 	out:(int)reg = value:LABEL4
-		emit "adr %out, $value"
+		emit "la %out, $value"
 		cost 4;
 
 	out:(int)reg = value:BLOCK4
-		emit "adr %out, $value"
+		emit "la %out, $value"
 		cost 4;
 
 	out:(int)reg = value:CONST4
-		emit "ldr %out, address-containing-$value"
+		emit "la %out, $value"
 		cost 8;
 
 	out:(int)reg = value:CONSTF4
-		emit "vldr %out, address-containing-$value"
+		emit "lfs %out, address-containing-$value"
 		cost 8;
+
+
 
 /* FPU operations */
 

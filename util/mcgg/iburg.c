@@ -1000,6 +1000,31 @@ static bool find_child_index(Tree node, const char* name, int* index, Tree* foun
 	return false;
 }
 	
+static void emit_predicate_expr(Rule r, struct expr* p)
+{
+	bool first = true;
+
+	print("%1if (%Ppredicate_%s(", p->name);
+
+	p = p->next;
+	while (p)
+	{
+		uint32_t path = find_label(r->pattern, p->name, 0, NULL);
+		if (path == PATH_MISSING)
+			label_not_found(r, p->name);
+
+		if (!first)
+			print(", ");
+		else
+			first = false;
+
+		print_path(path);
+		p = p->next;
+	}
+
+	print("))");
+}
+
 /* emitpredicates - emit predicates for rules */
 static void emitpredicatedefinitions(Rule r)
 {
@@ -1012,28 +1037,14 @@ static void emitpredicatedefinitions(Rule r)
 
 		for (i=0; i<r->prefers.count; i++)
 		{
-			struct expr* p = r->prefers.item[i];
-			bool first = true;
+			emit_predicate_expr(r, r->prefers.item[i]);
+			print(" cost -= 1;\n");
+		}
 
-			print("%1if (%Ppredicate_%s(", p->name);
-
-			p = p->next;
-			while (p)
-			{
-				uint32_t path = find_label(r->pattern, p->name, 0, NULL);
-				if (path == PATH_MISSING)
-					label_not_found(r, p->name);
-
-				if (!first)
-					print(", ");
-				else
-					first = false;
-
-				print_path(path);
-				p = p->next;
-			}
-
-			print(")) cost -= 1;\n");
+		for (i=0; i<r->requires.count; i++)
+		{
+			emit_predicate_expr(r, r->requires.item[i]);
+			print(" {} else return %d;\n", maxcost);
 		}
 
 		print("%1if (cost > %d) return %d;\n", maxcost, maxcost);
