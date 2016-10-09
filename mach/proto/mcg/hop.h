@@ -21,6 +21,11 @@ struct insel
 	u;
 };
 
+struct constraint
+{
+    uint32_t attrs;
+};
+
 struct hop
 {
 	int id;
@@ -28,6 +33,8 @@ struct hop
 	struct ir* ir;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
+
+    PMAPOF(struct vreg, struct constraint) constraints;
 
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;

@@ -96,7 +96,6 @@ struct nonterm
 	Rule chain;       /* chain rules w/non-terminal on rhs */
 	Nonterm link;     /* next terminal in number order */
 	bool is_fragment; /* these instructions are all fragments */
-	struct regattr* attr; /* input register attribute */
 };
 extern void* lookup(const char* name);
 extern Nonterm nonterm(const char* id, bool allocate);
@@ -109,6 +108,7 @@ struct tree
 	const char* label;  /* user label for this node */
 	Tree left, right;   /* operands */
 	int nterms;         /* number of terminal nodes in this tree */
+	struct regattr* attr; /* input register attribute */
 };
 extern Tree tree(const struct terminfo* ti, Tree left, Tree right);
 

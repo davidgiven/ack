@@ -78,15 +78,29 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
-static void constrain_input_reg(int child, int attr)
+static struct constraint* get_constraint(struct vreg* vreg)
+{
+    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
+    if (!c)
+    {
+        c = calloc(1, sizeof(*c));
+        pmap_put(&current_hop->constraints, vreg, c);
+    }
+    return c;
+}
+
+static void constrain_input_reg(int child, uint32_t attr)
 {
     struct vreg* vreg = find_vreg_of_child(child);
+    struct constraint* c;
 
     if (vreg)
         array_appendu(&current_hop->ins, vreg);
+
+    get_constraint(vreg)->attrs = attr;
 }
 
-static void constrain_output_reg(int attr)
+static void constrain_output_reg(uint32_t attr)
 {
     struct vreg* vreg = current_hop->output;
 
@@ -95,6 +109,8 @@ static void constrain_output_reg(int attr)
 
     array_appendu(&current_hop->outs, vreg);
     vreg->defined = current_hop;
+
+    get_constraint(vreg)->attrs = attr;
 }
 
 static const struct burm_emitter_data emitter_data =

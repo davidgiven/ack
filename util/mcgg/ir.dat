@@ -42,6 +42,10 @@ S AND
 S OR
 S EOR
 S NOT
+S ASL
+S ASR
+S LSL
+S LSR
 
 # Conversions
 S CII1

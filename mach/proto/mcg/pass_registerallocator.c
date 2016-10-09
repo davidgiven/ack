@@ -28,7 +28,7 @@ static void wire_up_blocks_ins_outs(void)
     }
 }
 
-static struct hreg* allocate_hreg(register_assignment_t* regs, struct vreg* vreg)
+static struct hreg* allocate_hreg(register_assignment_t* regs, struct vreg* vreg, uint32_t attr)
 {
     int i;
 
@@ -37,8 +37,11 @@ static struct hreg* allocate_hreg(register_assignment_t* regs, struct vreg* vreg
         struct hreg* hreg = hregs.item[i];
         if (!pmap_findleft(regs, hreg))
         {
-            pmap_put(regs, hreg, vreg);
-            return hreg;
+            if (hreg->attrs & attr)
+            {
+                pmap_put(regs, hreg, vreg);
+                return hreg;
+            }
         }
     }
 
@@ -81,7 +84,8 @@ static void select_registers(struct hop* hop,
     for (i=0; i<hop->outs.count; i++)
     {
         struct vreg* vreg = hop->outs.item[i];
-        allocate_hreg(out, vreg);
+        struct constraint* c = pmap_findleft(&hop->constraints, vreg);
+        allocate_hreg(out, vreg, c->attrs);
     }
 }
 
@@ -97,7 +101,7 @@ void pass_register_allocator(void)
         struct basicblock* bb = dominance.preorder.item[i];
         register_assignment_t* old = bb->regsin;
         
-        tracef('R', "R: allocating block %s\n", bb->name);
+        tracef('R', "R: considering block %s\n", bb->name);
 
         /* Attempt to import any block input registers from a predecessor. At
          * least one predecessor should export it; our graph traversal order
@@ -151,20 +155,41 @@ void pass_register_allocator(void)
 
         /* It's possible for the previous stage to fail because in in has
          * clobbered the physical register we were wanting. So we need to
-         * allocate a new register for that phi value. */
+         * allocate a new register for that phi value.
+         *
+         * We don't bother allocating anything if the vreg is never used.
+         * */
 
         for (j=0; j<bb->phis.count; j++)
         {
             struct vreg* vreg = bb->phis.item[j].left;
-            if (!pmap_findright(old, vreg))
-                allocate_hreg(old, vreg);
+            struct phi* phi = bb->phis.item[j].right;
+            if (!pmap_findright(old, vreg) && (vreg->used.count > 0))
+            {
+                struct hop* used = vreg->used.item[0];
+                struct constraint* c = pmap_findleft(&used->constraints, vreg);
+                struct hreg* hreg = allocate_hreg(old, vreg, c->attrs);
+
+                tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",
+                    hreg->name, vreg->id, phi->prev->name);
+            }
         }
             
         for (j=0; j<bb->hops.count; j++)
         {
+            int k;
             struct hop* hop = bb->hops.item[j];
             register_assignment_t* in = &hop->regsin;
             register_assignment_t* out = &hop->regsout;;
+
+			tracef('R', "R: %d from $%d:", hop->id, hop->ir->id);
+			for (k=0; k<hop->ins.count; k++)
+				tracef('R', " r%%%d", hop->ins.item[k]->id);
+			for (k=0; k<hop->throughs.count; k++)
+				tracef('R', " =%%%d", hop->throughs.item[k]->id);
+			for (k=0; k<hop->outs.count; k++)
+				tracef('R', " w%%%d", hop->outs.item[k]->id);
+            tracef('R', "\n");
 
             select_registers(hop, old, in, out);
 

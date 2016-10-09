@@ -400,8 +400,8 @@ Tree tree(const struct terminfo* ti, Tree left, Tree right)
 
 		if (ti->attr && ti->attr[0])
 		{
-			nt->attr = smap_get(&registerattrs, ti->attr);
-			if (!nt->attr)
+			t->attr = smap_get(&registerattrs, ti->attr);
+			if (!t->attr)
 				yyerror("'%s' doesn't seem to be a known register attribute", ti->attr);
 		}
 	}
@@ -1077,10 +1077,12 @@ static void emit_input_regs(Tree node, int* index)
 	Nonterm nt = node->op;
 	if ((nt->kind == NONTERM) && !nt->is_fragment && !node->left && !node->right)
 	{
-		uint32_t attr = 0;
-		if (nt->attr->number)
-			attr = 1<<nt->attr->number;
-		print("%1data->constrain_input_reg(%d, 0x%x);\n", *index, attr);
+		if (node->attr)
+		{
+			uint32_t attr = 1<<node->attr->number;
+			print("%1data->constrain_input_reg(%d, 0x%x /* %s */);\n",
+				*index, attr, node->attr->name);
+		}
 	}
 
 	if (!node->left && !node->right)
@@ -1118,7 +1120,8 @@ static void emitinsndata(Rule rules)
 		print("static void %Pemitter_%d(const struct %Pemitter_data* data) {\n", r->ern);
 
 		if (r->attr)
-			print("%1data->constrain_output_reg(0x%x);\n", 1<<r->attr->number);
+			print("%1data->constrain_output_reg(0x%x /* %s */);\n",
+				1<<r->attr->number, r->attr->name);
 
 		{
 			int index = 0;
