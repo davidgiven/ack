@@ -376,6 +376,10 @@ static void insn_ivalue(int opcode, arith value)
         case op_mli: simple_alu2(opcode, value, IR_MUL); break;
         case op_dvi: simple_alu2(opcode, value, IR_DIV); break;
         case op_rmi: simple_alu2(opcode, value, IR_MOD); break;
+        case op_sli: simple_alu2(opcode, value, IR_ASL); break;
+        case op_sri: simple_alu2(opcode, value, IR_ASR); break;
+        case op_slu: simple_alu2(opcode, value, IR_LSL); break;
+        case op_sru: simple_alu2(opcode, value, IR_LSR); break;
         case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
 
         case op_and: simple_alu2(opcode, value, IR_AND); break;
@@ -411,6 +415,31 @@ static void insn_ivalue(int opcode, arith value)
         case op_lal:
             push(
                 new_localir(value)
+            );
+            break;
+
+        case op_lil:
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    new_ir1(
+                        IR_LOAD, EM_wordsize,
+                        new_localir(value)
+                    )
+                )
+            );
+            break;
+
+        case op_sil:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_ir1(
+                        IR_LOAD, EM_wordsize,
+                        new_localir(value)
+                    ),
+                    pop(EM_wordsize)
+                )
             );
             break;
 

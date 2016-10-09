@@ -1,6 +1,18 @@
 REGISTERS
 
-    /* Reverse order because registers are assigned from top down. */
+    /* Registers are allocated top down; the order here is odd in order to make
+     * sure that non-volatile registers get allocated from r31 (or f31) down. */
+
+    r12 bytes4 int volatile; 
+    r11 bytes4 int volatile; 
+    r10 bytes4 int volatile; 
+    r9  bytes4 int volatile;
+    r8  bytes4 int volatile;
+    r7  bytes4 int volatile;
+    r6  bytes4 int volatile;
+    r5  bytes4 int volatile;
+    r4  bytes4 int volatile;
+    r3  bytes4 int ret volatile;
 
     r31 bytes4 int; 
     r30 bytes4 int; 
@@ -17,55 +29,45 @@ REGISTERS
     r19 bytes4 int; 
     r18 bytes4 int; 
     r17 bytes4 int; 
-    r16 bytes4 int; 
-    r15 bytes4 int; 
-    r14 bytes4 int; 
-    r13 bytes4 int; 
-    r12 bytes4 int; 
-    r11 bytes4 int; 
-    r10 bytes4 int; 
-    r9  bytes4 int;
-    r8  bytes4 int;
-    r7  bytes4 int;
-    r6  bytes4 int;
-    r5  bytes4 int;
-    r4  bytes4 int;
-    r3  bytes4 int ret;
+    r16 bytes4 int;
+    r15 bytes4 int;
+    r14 bytes4 int;
 
-    f31 bytes4 bytes8 float;
-    f30 bytes4 bytes8 float;
-    f29 bytes4 bytes8 float;
-    f28 bytes4 bytes8 float;
-    f27 bytes4 bytes8 float;
-    f26 bytes4 bytes8 float;
-    f25 bytes4 bytes8 float;
-    f24 bytes4 bytes8 float;
-    f23 bytes4 bytes8 float;
-    f22 bytes4 bytes8 float;
-    f21 bytes4 bytes8 float;
-    f20 bytes4 bytes8 float;
-    f19 bytes4 bytes8 float;
-    f18 bytes4 bytes8 float;
-    f17 bytes4 bytes8 float;
-    f16 bytes4 bytes8 float;
-    f15 bytes4 bytes8 float;
-    f14 bytes4 bytes8 float;
-    f13 bytes4 bytes8 float;
-    f12 bytes4 bytes8 float;
-    f11 bytes4 bytes8 float;
-    f10 bytes4 bytes8 float;
-    f9  bytes4 bytes8 float;
-    f8  bytes4 bytes8 float;
-    f7  bytes4 bytes8 float;
-    f6  bytes4 bytes8 float;
-    f5  bytes4 bytes8 float;
-    f4  bytes4 bytes8 float;
-    f3  bytes4 bytes8 float;
-    f2  bytes4 bytes8 float;
-    f1  bytes4 bytes8 float;
-    f0  bytes4 bytes8 float;
+    f14 bytes4 float volatile;
+    f13 bytes4 float volatile;
+    f12 bytes4 float volatile;
+    f11 bytes4 float volatile;
+    f10 bytes4 float volatile;
+    f9  bytes4 float volatile;
+    f8  bytes4 float volatile;
+    f7  bytes4 float volatile;
+    f6  bytes4 float volatile;
+    f5  bytes4 float volatile;
+    f4  bytes4 float volatile;
+    f3  bytes4 float volatile;
+    f2  bytes4 float volatile;
+    f1  bytes4 float volatile;
+    f0  bytes4 float volatile;
 
-	cr0  cr;
+    f31 bytes4 float;
+    f30 bytes4 float;
+    f29 bytes4 float;
+    f28 bytes4 float;
+    f27 bytes4 float;
+    f26 bytes4 float;
+    f25 bytes4 float;
+    f24 bytes4 float;
+    f23 bytes4 float;
+    f22 bytes4 float;
+    f21 bytes4 float;
+    f20 bytes4 float;
+    f19 bytes4 float;
+    f18 bytes4 float;
+    f17 bytes4 float;
+    f16 bytes4 float;
+    f15 bytes4 float;
+
+	cr0 cr;
 
 
 DECLARATIONS
@@ -301,6 +303,10 @@ PATTERNS
 	out:(int)reg = DIV4(left:(int)reg, right:(int)reg)
 		emit "divw %out, %left, %right"
 		cost 4;
+
+    out:(int)reg = ASL4(left:(int)reg, right:(int)reg)
+        emit "slw %out, %left, %right"
+        cost 4;
 
     out:(int)reg = NEG4(left:(int)reg)
         emit "neg %out, %left"
