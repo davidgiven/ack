@@ -328,17 +328,21 @@ PATTERNS
 		emit "la %out, $value"
 		cost 8;
 
-	out:(int)reg = value:CONSTF4
-		emit "lfs %out, address-containing-$value"
-		cost 8;
-
-
 
 /* FPU operations */
+
+	out:(float)reg = value:CONSTF4
+		emit "lfs %out, address-containing-$value"
+		cost 8;
 
 	out:(float)reg = ADDF4(left:(float)reg, right:(float)reg)
 		emit "fadds %out, %left, %right"
 		cost 4;
+
+	out:(float)reg = SUBF4(left:(float)reg, right:(float)reg)
+		emit "fsubs %out, %left, %right"
+		cost 4;
+
 
 /* vim: set sw=4 ts=4 expandtab : */
 

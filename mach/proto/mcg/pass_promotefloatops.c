@@ -41,14 +41,12 @@ static void promote(struct ir* ir)
             break;
 
         case IR_PHI:
-            if (!array_appendu(&promotable, ir))
-            {
-                if (ir->left)
-                    promote(ir->left);
-                if (ir->right)
-                    promote(ir->right);
-            }
+        {
+            int i;
+            for (i=0; i<ir->u.phivalue.count; i++)
+                array_appendu(&promotable, ir->u.phivalue.item[i].right);
             break;
+        }
     }
 }
 
