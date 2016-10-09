@@ -164,10 +164,9 @@ void pass_register_allocator(void)
         {
             struct vreg* vreg = bb->phis.item[j].left;
             struct phi* phi = bb->phis.item[j].right;
-            if (!pmap_findright(old, vreg) && (vreg->used.count > 0))
+            if (!pmap_findright(old, vreg))
             {
-                struct hop* used = vreg->used.item[0];
-                struct constraint* c = pmap_findleft(&used->constraints, vreg);
+                struct phicongruence* c = vreg->congruence;
                 struct hreg* hreg = allocate_hreg(old, vreg, c->attrs);
 
                 tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",

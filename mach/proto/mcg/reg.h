@@ -3,6 +3,14 @@
 
 #define WITH_ATTR(a) (1<<(a))
 
+struct phicongruence
+{
+    int id;
+    ARRAYOF(struct vreg) vregs;
+    ARRAYOF(struct hop) definitions;
+    uint32_t attrs;
+};
+
 struct hreg
 {
 	const char* name;
@@ -14,6 +22,7 @@ struct hreg
 struct vreg
 {
 	int id;
+    struct phicongruence* congruence;
     struct hop* defined;
     ARRAYOF(struct hop) used;
 };
