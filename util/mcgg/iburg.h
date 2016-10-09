@@ -1,6 +1,7 @@
 #ifndef BURG_INCLUDED
 #define BURG_INCLUDED
 
+#include "em_arith.h"
 #include "stringlist.h"
 #include "array.h"
 
@@ -31,10 +32,22 @@ struct constraint
 	struct constraint* next;
 };
 
+enum
+{
+	PREDICATE_FUNCTION,
+	PREDICATE_NODE,
+	PREDICATE_NUMBER
+};
+
 struct expr
 {
-	const char* name;
+	int type;
 	struct expr* next;
+	union
+	{
+		const char* name;
+		arith number;
+	} u;
 };
 
 struct terminfo

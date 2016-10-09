@@ -50,7 +50,8 @@ static int braces = 0;
 "//"[^\n]*\n                ;
 
 [A-Za-z_][A-Za-z0-9_]*      { yylval.string = strdup(yytext); return ID; }
-[0-9]+                      { yylval.n = atoi(yytext); return INT; }
+-?[0-9]+                    { yylval.n = atoi(yytext); return INT; }
+-?0x[0-9a-fA-F]+            { yylval.n = strtol(yytext, NULL, 0); return INT; }
 [ \t\r\n]*                  ;
 .                           return yytext[0];
 

@@ -50,6 +50,7 @@ cprogram {
 		"+lib",
 		"+yacc",
 		"modules/src/data+lib",
+		"modules+headers",
 	}
 }
 	

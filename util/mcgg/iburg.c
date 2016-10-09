@@ -1004,21 +1004,36 @@ static void emit_predicate_expr(Rule r, struct expr* p)
 {
 	bool first = true;
 
-	print("%1if (%Ppredicate_%s(", p->name);
+	assert(p->type == PREDICATE_FUNCTION);
+	print("%1if (%Ppredicate_%s(", p->u.name);
 
 	p = p->next;
 	while (p)
 	{
-		uint32_t path = find_label(r->pattern, p->name, 0, NULL);
-		if (path == PATH_MISSING)
-			label_not_found(r, p->name);
-
 		if (!first)
 			print(", ");
 		else
 			first = false;
 
-		print_path(path);
+		switch (p->type)
+		{
+			case PREDICATE_NODE:
+			{
+				uint32_t path = find_label(r->pattern, p->u.name, 0, NULL);
+				if (path == PATH_MISSING)
+					label_not_found(r, p->u.name);
+
+				print_path(path);
+				break;
+			}
+
+			case PREDICATE_NUMBER:
+			{
+				print("%d", p->u.number);
+				break;
+			}
+		}
+
 		p = p->next;
 	}
 

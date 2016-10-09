@@ -111,7 +111,7 @@ PATTERNS
         cost 1;
 
 	STACKADJUST4(delta:CONST4)
-        when constant_signed_16_bit(delta)
+        when signed_constant(%delta, 16)
 		emit "addi sp, sp, $delta"
 		cost 4;
 
@@ -167,7 +167,7 @@ PATTERNS
 /* Memory addressing modes */
 
 	address = ADD4(addr:(int)reg, offset:CONST4)
-        when constant_signed_16_bit(offset)
+        when signed_constant(%offset, 16)
 		emit "$offset(%addr)";
 
 	address = addr:(int)reg
@@ -218,7 +218,7 @@ PATTERNS
 		cost 4;
 
 	cr:(cr)cr = COMPARES4(left:(int)reg, right:CONST4)
-        when constant_signed_16_bit(right)
+        when signed_constant(%right, 16)
         emit "cmpi %cr, 0, %left, $right"
 		cost 4;
 
@@ -227,23 +227,23 @@ PATTERNS
 		cost 4;
 
 	cr:(cr)cr = COMPAREU4(left:(int)reg, right:CONST4)
-        when constant_signed_16_bit(right)
+        when signed_constant(%right, 16)
         emit "cmpli %cr, 0, %left, $right"
 		cost 4;
 
     cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:(int)reg), result:CONST4)
-        when constant_is_zero(result)
+        when specific_constant(%result, 0)
         emit "cmp %cr, 0, %left, %right"
         cost 4;
 
     cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:CONST4), result:CONST4)
-        when constant_is_zero(result)
-        when constant_signed_16_bit(right)
+        when specific_constant(%result, 0)
+        when signed_constant(%right, 16)
         emit "cmpi %cr, 0, %left, $right"
         cost 4;
 
     cr:(cr)cr = COMPARES4(COMPAREU4(left:(int)reg, right:(int)reg), result:CONST4)
-        when constant_is_zero(result)
+        when specific_constant(%result, 0)
         emit "cmpl %cr, 0, %left, %right"
         cost 4;
 
@@ -280,7 +280,7 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = ADD4(left:(int)reg, right:CONST4)
-        when constant_signed_16_bit(right)
+        when signed_constant(%right, 16)
 		emit "addi %out, %left, $right"
 		cost 4;
 

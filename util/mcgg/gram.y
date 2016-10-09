@@ -13,8 +13,8 @@ extern int yylex(void);
 
 %}
 %union {
-	int n;
-	char* string;
+	arith n;
+	const char* string;
     Nonterm nonterm;
 	Tree tree;
     Rule rule;
@@ -44,16 +44,17 @@ extern int yylex(void);
 
 %type  <constraint> constraint
 %type  <constraint> constraints
+%type  <expr>       predicate
+%type  <expr>       predicate_arg
+%type  <expr>       predicate_args
 %type  <nonterm>    declaration
 %type  <reg>        register
+%type  <rule>       pattern
 %type  <rule>       pattern_constraints
 %type  <rule>       pattern_emit
-%type  <rule>       pattern
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
 %type  <tree>       rhs
-%type  <expr>       predicate
-%type  <expr>       predicate_args
 %%
 
 spec
@@ -155,13 +156,23 @@ qfragments
     ;
 
 predicate
-    : ID '(' predicate_args ')'         { $$ = calloc(1, sizeof *$$); $$->name = $1; $$->next = $3; }
+    : ID '(' predicate_args ')'         {
+                                            $$ = calloc(1, sizeof *$$);
+                                            $$->type = PREDICATE_FUNCTION;
+                                            $$->u.name = $1;
+                                            $$->next = $3;
+                                        }
     ;
 
 predicate_args
     : /* nothing */                     { $$ = NULL; }
-    | ID                                { $$ = calloc(1, sizeof *$$); $$->name = $1; }
-    | ID ',' predicate_args             { $$ = calloc(1, sizeof *$$); $$->name = $1; $$->next = $3; }
+    | predicate_arg                     { $$ = $1; }
+    | predicate_arg ',' predicate_args  { $$ = $1; $$->next = $3; }
+    ;
+
+predicate_arg
+    : '%' ID                            { $$ = calloc(1, sizeof *$$); $$->type = PREDICATE_NODE; $$->u.name = $2; }
+    | INT                               { $$ = calloc(1, sizeof *$$); $$->type = PREDICATE_NUMBER; $$->u.number = $1; }
     ;
 
 %%

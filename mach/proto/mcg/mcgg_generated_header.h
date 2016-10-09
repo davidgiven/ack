@@ -8,8 +8,9 @@
 
 extern void burm_panic_cannot_match(NODEPTR_TYPE node);
 
-extern bool burm_predicate_constant_signed_16_bit(struct burm_node* node);
-extern bool burm_predicate_constant_is_zero(struct burm_node* node);
+extern bool burm_predicate_signed_constant(struct burm_node* node, arith size);
+extern bool burm_predicate_unsigned_constant(struct burm_node* node, arith size);
+extern bool burm_predicate_specific_constant(struct burm_node* node, arith value);
 
 /* vim: set sw=4 ts=4 expandtab : */
 
