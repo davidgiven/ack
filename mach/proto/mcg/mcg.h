@@ -106,6 +106,7 @@ extern void pass_convert_stack_ops(struct procedure* proc);
 extern void pass_eliminate_trivial_blocks(struct procedure* proc);
 extern void pass_find_phi_congruence_groups(void);
 extern void pass_group_irs(struct procedure* proc);
+extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
 extern void pass_promote_float_ops(struct procedure* proc);

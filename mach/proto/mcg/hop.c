@@ -28,6 +28,13 @@ void hop_add_string_insel(struct hop* hop, const char* string)
 	array_append(&hop->insels, insel);
 }
 
+void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg)
+{
+	struct insel* insel = new_insel(INSEL_HREG);
+	insel->u.hreg = hreg;
+	array_append(&hop->insels, insel);
+}
+
 void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg)
 {
 	struct insel* insel = new_insel(INSEL_VREG);
@@ -48,10 +55,30 @@ void hop_add_eoi_insel(struct hop* hop)
 	array_append(&hop->insels, insel);
 }
 
+static void print_header(char k, struct hop* hop)
+{
+    int i;
+
+    tracef(k, "%c: %d", k, hop->id);
+    if (hop->ir)
+        tracef(k, " from $%d", hop->ir->id);
+    tracef(k, ":");
+
+    for (i=0; i<hop->ins.count; i++)
+        tracef(k, " r%%%d", hop->ins.item[i]->id);
+    for (i=0; i<hop->throughs.count; i++)
+        tracef(k, " =%%%d", hop->throughs.item[i]->id);
+    for (i=0; i<hop->outs.count; i++)
+        tracef(k, " w%%%d", hop->outs.item[i]->id);
+    tracef(k, " ");
+}
+
 void hop_print(char k, struct hop* hop)
 {
-	int i, j;
-	bool soi = true;
+	int i;
+	bool soi = false;
+
+    print_header(k, hop);
 
 	i = 0;
 	for (i=0; i<hop->insels.count; i++)
@@ -60,16 +87,7 @@ void hop_print(char k, struct hop* hop)
 
 		if (soi)
 		{
-			tracef(k, "%c: %d from $%d:", k, hop->id, hop->ir->id);
-
-			for (j=0; j<hop->ins.count; j++)
-				tracef(k, " r%%%d", hop->ins.item[j]->id);
-			for (j=0; j<hop->throughs.count; j++)
-				tracef(k, " =%%%d", hop->throughs.item[j]->id);
-			for (j=0; j<hop->outs.count; j++)
-				tracef(k, " w%%%d", hop->outs.item[j]->id);
-			tracef(k, " ");
-
+            print_header(k, hop);
 			soi = false;
 		}
 
@@ -79,6 +97,13 @@ void hop_print(char k, struct hop* hop)
 				tracef(k, "\n");
 				soi = true;
 				break;
+
+            case INSEL_HREG:
+            {
+                struct hreg* hreg = insel->u.hreg;
+                tracef(k, "%s", hreg->name);
+                break;
+            }
 
 			case INSEL_VREG:
             {

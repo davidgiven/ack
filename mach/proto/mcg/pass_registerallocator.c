@@ -3,6 +3,9 @@
 static ARRAYOF(struct hreg) hregs;
 static int stacksize;
 
+static int insert_moves(struct basicblock* bb, int index,
+    register_assignment_t* srcregs, register_assignment_t* destregs);
+
 static void populate_hregs(void)
 {
     const struct burm_register_data* brd = burm_register_data;
@@ -89,12 +92,9 @@ static void select_registers(struct hop* hop,
     }
 }
 
-void pass_register_allocator(void)
+static void assign_hregs_to_vregs(void)
 {
     int i, j, k;
-
-    populate_hregs();
-    wire_up_blocks_ins_outs();
 
     for (i=0; i<dominance.preorder.count; i++)
     {
@@ -181,6 +181,8 @@ void pass_register_allocator(void)
             register_assignment_t* in = &hop->regsin;
             register_assignment_t* out = &hop->regsout;;
 
+            select_registers(hop, old, in, out);
+
 			tracef('R', "R: %d from $%d:", hop->id, hop->ir->id);
 			for (k=0; k<hop->ins.count; k++)
 				tracef('R', " r%%%d", hop->ins.item[k]->id);
@@ -188,13 +190,191 @@ void pass_register_allocator(void)
 				tracef('R', " =%%%d", hop->throughs.item[k]->id);
 			for (k=0; k<hop->outs.count; k++)
 				tracef('R', " w%%%d", hop->outs.item[k]->id);
-            tracef('R', "\n");
+            tracef('R', " [");
+            for (k=0; k<hop->regsin.count; k++)
+            {
+                struct hreg* hreg = hop->regsin.item[k].left;
+                struct vreg* vreg = hop->regsin.item[k].right;
+                if (k != 0)
+                    tracef('R', " ");
+                tracef('R', "%%%d=>%s", vreg->id, hreg->name);
+            }
+            tracef('R', "] [");
+            for (k=0; k<hop->regsout.count; k++)
+            {
+                struct hreg* hreg = hop->regsout.item[k].left;
+                struct vreg* vreg = hop->regsout.item[k].right;
+                if (k != 0)
+                    tracef('R', " ");
+                tracef('R', "%%%d=>%s", vreg->id, hreg->name);
+            }
+            tracef('R', "]\n");
 
-            select_registers(hop, old, in, out);
+            if (j > 0)
+                j += insert_moves(bb, j, old, in);
 
             old = out;
         }
     }
+}
+
+static struct hop* create_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+{
+    struct hop* hop = new_hop(bb, NULL);
+
+    hop_add_string_insel(hop, "! move ");
+    hop_add_hreg_insel(hop, src);
+    hop_add_string_insel(hop, " -> ");
+    hop_add_hreg_insel(hop, dest);
+    hop_add_eoi_insel(hop);
+
+    return hop;
+}
+
+static struct hop* create_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+{
+    struct hop* hop = new_hop(bb, NULL);
+
+    hop_add_string_insel(hop, "! swap ");
+    hop_add_hreg_insel(hop, src);
+    hop_add_string_insel(hop, " <-> ");
+    hop_add_hreg_insel(hop, dest);
+    hop_add_eoi_insel(hop);
+
+    return hop;
+}
+
+/* returns the number of instructions inserted */
+static int insert_moves(struct basicblock* bb, int index,
+    register_assignment_t* srcregs, register_assignment_t* destregs)
+{
+    int i;
+    int inserted = 0;
+    static PMAPOF(struct hreg, struct hreg) copies;
+
+    copies.count = 0;
+    for (i=0; i<destregs->count; i++)
+    {
+        struct hreg* dest = destregs->item[i].left;
+        struct vreg* vreg = destregs->item[i].right;
+        struct hreg* src = pmap_findright(srcregs, vreg);
+        assert(src != NULL);
+
+        if (src != dest)
+            pmap_add(&copies, src, dest);
+    }
+
+    while (copies.count > 0)
+    {
+        struct hreg* src;
+        struct hreg* dest;
+        struct hreg* temp;
+        struct hop* hop;
+
+        /* Try and find a destination which isn't a source. */
+
+        src = NULL;
+        for (i=0; i<copies.count; i++)
+        {
+            dest = copies.item[i].right;
+            if (!pmap_findleft(&copies, dest))
+            {
+                src = copies.item[i].left;
+                break;
+            }
+        }
+
+        if (src)
+        {
+            /* Copy. */
+
+            hop = create_move(bb, src, dest);
+            pmap_remove(&copies, src, dest);
+        }
+        else
+        {
+            /* Swap. */
+
+            src = copies.item[0].left;
+            dest = pmap_findleft(&copies, src);
+            hop = create_move(bb, src, dest);
+            pmap_remove(&copies, src, dest);
+            pmap_remove(&copies, dest, src);
+        }
+
+        array_insert(&bb->hops, hop, index + inserted);
+        inserted++;
+    }
+
+    return inserted;
+}
+
+static void insert_phi_copies(void)
+{
+    int i, j, k;
+
+    /* If we're importing an hreg from a parent block via a phi, insert a move
+     * at the end of the parent block to put the result into the right
+     * register. */
+
+    for (i=0; i<cfg.preorder.count; i++)
+    {
+        struct basicblock* bb = cfg.preorder.item[i];
+
+        /* Group together copies from each predecessor, so we can generate the
+         * appropriate parallel move. */
+
+        for (j=0; j<bb->prevs.count; j++)
+        {
+            struct basicblock* prevbb = bb->prevs.item[j];
+            static register_assignment_t destregs;
+
+            tracef('R', "R: inserting phis for %s -> %s\n",
+                prevbb->name, bb->name);
+            destregs.count = 0;
+            for (k=0; k<bb->phis.count; k++)
+            {
+                struct vreg* vreg = bb->phis.item[k].left;
+                struct phi* phi = bb->phis.item[k].right;
+                struct hreg* dest = pmap_findright(bb->regsin, vreg);
+
+                if ((phi->prev == prevbb) && dest)
+                {
+                    /* We inserted critical edges to guarantee this. */
+                    assert(prevbb->nexts.count == 1);
+
+                    tracef('R', "R: map %%%d -> %%%d (%s)\n",
+                        phi->ir->result->id, 
+                        vreg->id, dest->name);
+
+                    pmap_put(&destregs, dest, phi->ir->result);
+                }
+            }
+
+            /* Add any non-phi inputs. */
+
+            for (k=0; k<bb->regsin->count; k++)
+            {
+                struct hreg* hreg = bb->regsin->item[k].left;
+                struct vreg* vreg = bb->regsin->item[k].right;
+                if (!pmap_findleft(&bb->phis, vreg))
+                    pmap_add(&destregs, hreg, vreg);
+            }
+
+            /* The last instruction of a block should be the jump that sends us
+             * to the next block. Insert the moves before then. */
+
+            insert_moves(prevbb, prevbb->hops.count-1, prevbb->regsout, &destregs);
+        }
+    }
+}
+
+void pass_register_allocator(void)
+{
+    populate_hregs();
+    wire_up_blocks_ins_outs();
+    assign_hregs_to_vregs();
+    insert_phi_copies();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
