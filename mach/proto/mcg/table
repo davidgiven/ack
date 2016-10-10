@@ -73,6 +73,7 @@ REGISTERS
 DECLARATIONS
 
 	cr;
+    ubyte_to_be;
 
 	address   fragment;
 
@@ -129,9 +130,22 @@ PATTERNS
 		emit "sth %value, %addr"
 		cost 4;
 
-	STORE1(addr:address, value:(int)reg)
+    STORE1(addr:address, value:(int)ubyte_to_be)
 		emit "stb %value, %addr"
 		cost 4;
+
+    STORE1(ADD4(left:(int)reg, right:(int)reg), value:(int)ubyte_to_be)
+        emit "stbx %value, %left, %right"
+        cost 4;
+
+    out:(int)ubyte_to_be = in:(int)reg
+        cost 1;
+
+    out:(int)ubyte_to_be = CIU41(value:(int)reg)
+        cost 1;
+
+    out:(int)ubyte_to_be = CIU41(CII14(CIU41(value:(int)reg)))
+        cost 1;
 
 	out:(int)reg = LOAD4(addr:address)
 		emit "lwz %out, %addr"
@@ -325,7 +339,7 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = value:CONST4
-		emit "la %out, $value"
+		emit "li %out, $value"
 		cost 8;
 
 
