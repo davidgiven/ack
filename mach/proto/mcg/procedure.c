@@ -104,6 +104,23 @@ static void print_hops(char k, struct procedure* proc)
     }
 }
 
+static void emit_procedure(struct procedure* proc)
+{
+    int i, j;
+
+    for (i=0; i<dominance.preorder.count; i++)
+    {
+        struct basicblock* bb = dominance.preorder.item[i];
+        
+        fprintf(outputfile, "%s:\n", bb->name);
+        for (j=0; j<bb->hops.count; j++)
+        {
+            struct hop* hop = bb->hops.item[j];
+            fprintf(outputfile, "%s", hop_render(hop));
+        }
+    }
+}
+
 static void write_cfg_graph(const char* name)
 {
     int i;
@@ -173,6 +190,8 @@ void procedure_compile(struct procedure* proc)
     print_hops('8', proc);
     pass_register_allocator();
     print_hops('9', proc);
+
+    emit_procedure(proc);
 
     if (cfg_dot_file)
         write_cfg_graph(proc->name);

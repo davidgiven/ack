@@ -114,6 +114,7 @@ extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_split_critical_edges(struct procedure* proc);
 
+extern FILE* outputfile;
 extern FILE* dominance_dot_file;
 extern FILE* cfg_dot_file;
 

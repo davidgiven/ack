@@ -36,8 +36,8 @@ static void emit_header(int desired_section)
 		else if (pending->section != desired_section)
 			fatal("label '%s' can't change sections", pending->name);
 
-		printf("\n.sect %s\n", section_to_str(pending->section));
-        printf("%s:\n", pending->name);
+		fprintf(outputfile, "\n.sect %s\n", section_to_str(pending->section));
+        fprintf(outputfile, "%s:\n", pending->name);
         pending = NULL;
     }
 }
@@ -46,7 +46,7 @@ void data_int(arith data, size_t size, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
-    printf("\t.data%d 0x%0*lld\n", size, size*2, data);
+    fprintf(outputfile, "\t.data%d 0x%0*lld\n", size, size*2, data);
 }
 
 void data_block(const uint8_t* data, size_t size, bool is_ro)
@@ -65,13 +65,13 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
 
         if (start < p)
         {
-            printf("\t.ascii \"");
+            fprintf(outputfile, "\t.ascii \"");
             while (start < p)
             {
-                printf("%c", *start);
+                fprintf(outputfile, "%c", *start);
                 start++;
             }
-            printf("\"\n");
+            fprintf(outputfile, "\"\n");
         }
 
         while ((p < end) && !isprint(*p))
@@ -81,16 +81,16 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
         {
             bool first = true;
 
-            printf("\t.data1 ");
+            fprintf(outputfile, "\t.data1 ");
             while (start < p)
             {
                 if (!first)
-                    printf(", ");
-                printf("0x%02x", *start);
+                    fprintf(outputfile, ", ");
+                fprintf(outputfile, "0x%02x", *start);
                 start++;
                 first = false;
             }
-            printf("\n");
+            fprintf(outputfile, "\n");
         }
     }
 }
@@ -98,7 +98,7 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
 void data_offset(const char* label, arith offset, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    printf("\t.data%d %s+%lld\n", EM_pointersize, label, offset);
+    fprintf(outputfile, "\t.data%d %s+%lld\n", EM_pointersize, label, offset);
 }
 
 void data_bss(arith size, int init)
@@ -107,7 +107,7 @@ void data_bss(arith size, int init)
         fatal("non-zero-initialised bss not supported");
 
     emit_header(SECTION_BSS);
-    printf("\t.space %lld\n", size);
+    fprintf(outputfile, "\t.space %lld\n", size);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

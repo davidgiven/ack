@@ -4,6 +4,7 @@
 
 static const char* tracechars = NULL;
 
+FILE* outputfile = NULL;
 FILE* dominance_dot_file = NULL;
 FILE* cfg_dot_file = NULL;
 
@@ -36,7 +37,9 @@ static bool find_procedures_cb(struct symbol* symbol, void* user)
 
 int main(int argc, char* const argv[])
 {
-    const char* inputfile = NULL;
+    const char* inputfilename = NULL;
+    const char* outputfilename = NULL;
+    FILE* output;
 
     program_name = argv[0];
 
@@ -69,19 +72,35 @@ int main(int argc, char* const argv[])
                 tracechars = optarg;
                 break;
 
+            case 'o':
+                if (outputfilename)
+                    fatal("already specified an output file");
+                outputfilename = optarg;
+                break;
+
             case 1:
-                if (inputfile)
+                if (inputfilename)
                     fatal("unexpected argument '%s'", optarg);
-                inputfile = optarg;
+                inputfilename = optarg;
         }
     }
 
     symbol_init();
 
-	if (!EM_open((char*) inputfile))
-		fatal("couldn't open '%s': %s",
-            inputfile ? inputfile : "<stdin>", EM_error);
+	if (!EM_open((char*) inputfilename))
+		fatal("couldn't open input '%s': %s",
+            inputfilename ? inputfilename : "<stdin>", EM_error);
 	
+    if (outputfilename)
+    {
+        outputfile = fopen(outputfilename, "w");
+        if (!outputfile)
+            fatal("couldn't open output '%s': %s",
+                outputfilename, strerror(errno));
+    }
+    else
+        outputfile = stdout;
+
     /* Reads in the EM, outputs the data sections, parses any code and
      * generates IR trees. */
 
@@ -93,7 +112,10 @@ int main(int argc, char* const argv[])
 
     symbol_walk(find_procedures_cb, NULL);
 
+    if (outputfilename)
+        fclose(outputfile);
 	EM_close();
+
     if (cfg_dot_file)
     {
         fprintf(cfg_dot_file, "}\n");
@@ -104,6 +126,7 @@ int main(int argc, char* const argv[])
         fprintf(dominance_dot_file, "}\n");
         fclose(dominance_dot_file);
     }
+
 	return 0;
 }
 

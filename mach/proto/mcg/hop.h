@@ -53,6 +53,7 @@ extern void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg);
 extern void hop_add_value_insel(struct hop* hop, struct ir* ir);
 extern void hop_add_eoi_insel(struct hop* hop);
 
+extern char* hop_render(struct hop* hop);
 extern void hop_print(char k, struct hop* hop);
 
 #endif

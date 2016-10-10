@@ -2,6 +2,9 @@
 
 static int hop_count = 1;
 static struct hop* current_hop;
+static char* buffer = NULL;
+static int bufferlen = 0;
+static int buffersize = 0;
 
 static const struct burm_emitter_data emitter_data;
 
@@ -73,35 +76,54 @@ static void print_header(char k, struct hop* hop)
     tracef(k, " ");
 }
 
-void hop_print(char k, struct hop* hop)
+static char* appendf(const char* fmt, ...)
 {
-	int i;
-	bool soi = false;
+    int n;
+    char* p;
+    va_list ap;
 
-    print_header(k, hop);
+    va_start(ap, fmt);
+    n = bufferlen + vsnprintf(NULL, 0, fmt, ap) + 1;
+    va_end(ap);
 
-	i = 0;
+    if (n > buffersize)
+    {
+        buffersize *= 2;
+		if (buffersize < n)
+			buffersize = n*2;
+        buffer = realloc(buffer, buffersize);
+    }
+
+    va_start(ap, fmt);
+    vsprintf(buffer+bufferlen, fmt, ap);
+    va_end(ap);
+
+    bufferlen = n - 1; /* remember the \0 at the end */
+    return p;
+}
+
+char* hop_render(struct hop* hop)
+{
+    int i;
+
+    appendf(""); /* ensure the buffer has been allocated */
+    bufferlen = 0;
+	buffer[0] = '\0';
+
 	for (i=0; i<hop->insels.count; i++)
 	{
 		struct insel* insel = hop->insels.item[i];
 
-		if (soi)
-		{
-            print_header(k, hop);
-			soi = false;
-		}
-
 		switch (insel->type)
 		{
 			case INSEL_EOI:
-				tracef(k, "\n");
-				soi = true;
+				appendf("\n");
 				break;
 
             case INSEL_HREG:
             {
                 struct hreg* hreg = insel->u.hreg;
-                tracef(k, "%s", hreg->name);
+                appendf("%s", hreg->name);
                 break;
             }
 
@@ -112,14 +134,14 @@ void hop_print(char k, struct hop* hop)
                 if (!hreg)
                     hreg = pmap_findright(&hop->regsout, vreg);
                 if (hreg)
-                    tracef(k, "%s", hreg->name);
+                    appendf("%s", hreg->name);
                 else
-                    tracef(k, "%%%d", vreg->id);
+                    appendf("%%%d", vreg->id);
 				break;
             }
 
 			case INSEL_STRING:
-				tracef(k, "%s", insel->u.string);
+				appendf("%s", insel->u.string);
 				break;
 
 			case INSEL_VALUE:
@@ -128,16 +150,16 @@ void hop_print(char k, struct hop* hop)
 				switch (ir->opcode)
 				{
 					case IR_BLOCK:
-						tracef(k, "%s", ir->u.bvalue->name);
+						appendf("%s", ir->u.bvalue->name);
 						break;
 
 					case IR_LABEL:
-						tracef(k, "%s", ir->u.lvalue);
+						appendf("%s", ir->u.lvalue);
 						break;
 
 					case IR_LOCAL:
 					case IR_CONST:
-						tracef(k, "%d", ir->u.ivalue);
+						appendf("%d", ir->u.ivalue);
 						break;
 				}
 				break;
@@ -145,8 +167,24 @@ void hop_print(char k, struct hop* hop)
 		}
 	}
 
-	if (!soi)
-		tracef(k, "\n", k);
+    return buffer;
+}
+
+void hop_print(char k, struct hop* hop)
+{
+	int i;
+	bool soi = false;
+    char* p;
+
+    hop_render(hop);
+
+    p = strtok(buffer, "\n");
+    while (p)
+    {
+        print_header(k, hop);
+        tracef(k, "%s\n", p);
+        p = strtok(NULL, "\n");
+    }
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
