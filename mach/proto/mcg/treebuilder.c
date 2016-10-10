@@ -217,6 +217,30 @@ static void insn_simple(int opcode)
             break;
         }
 
+        case op_inc:
+        {
+            push(
+                new_ir2(
+                    IR_ADD, EM_wordsize,
+                    pop(EM_wordsize),
+                    new_wordir(1)
+                )
+            );
+            break;
+        }
+
+        case op_dec:
+        {
+            push(
+                new_ir2(
+                    IR_SUB, EM_wordsize,
+                    pop(EM_wordsize),
+                    new_wordir(1)
+                )
+            );
+            break;
+        }
+
         default:
             fatal("treebuilder: unknown simple instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);

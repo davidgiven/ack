@@ -301,7 +301,11 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = SUB4(left:(int)reg, right:(int)reg)
-		emit "sub %out, %right, %left"
+		emit "subf %out, %left, %right"
+		cost 4;
+
+	out:(int)reg = SUB4(left:(int)reg, right:CONST4)
+		emit "addi %out, %left, -($right)"
 		cost 4;
 
 	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
