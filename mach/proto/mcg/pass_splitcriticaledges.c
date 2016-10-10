@@ -63,29 +63,44 @@ static void split_edge(struct basicblock* source, struct basicblock* sink)
 	array_append(&current_proc->blocks, bb);
 }
 
-static void consider_edges_leading_to(struct basicblock* bb)
+static bool consider_edges_leading_from(struct basicblock* bb)
 {
-	if (bb->prevs.count > 1)
+    bool changed = false;
+
+	if (bb->nexts.count > 1)
 	{
 		int i;
 
-		for (i=0; i<bb->prevs.count; i++)
+		for (i=0; i<bb->nexts.count; i++)
 		{
-			struct basicblock* prev = bb->prevs.item[i];
-			if (prev->nexts.count > 1)
-				split_edge(prev, bb);
+			struct basicblock* next = bb->nexts.item[i];
+			if (next->prevs.count > 1)
+            {
+				split_edge(bb, next);
+                changed = true;
+            }
 		}
 	}
+
+    return changed;
 }
 
 void pass_split_critical_edges(struct procedure* proc)
 {
 	int i;
+    bool changed;
 
 	current_proc = proc;
 
-    for (i=0; i<proc->blocks.count; i++)
-		consider_edges_leading_to(proc->blocks.item[i]);
+    do
+    {
+        changed = false;
+
+        for (i=0; i<proc->blocks.count; i++)
+            changed |= consider_edges_leading_from(proc->blocks.item[i]);
+
+    }
+    while (changed);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
