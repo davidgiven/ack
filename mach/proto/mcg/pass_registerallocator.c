@@ -1,7 +1,17 @@
 #include "mcg.h"
 
+struct assignment
+{
+    struct vreg* in;
+    struct vreg* out;
+};
+
 static ARRAYOF(struct hreg) hregs;
-static int stacksize;
+
+static ARRAYOF(struct vreg) evicted;
+static struct hop* current_hop;
+static register_assignment_t* current_ins;
+static register_assignment_t* current_outs;
 
 static int insert_moves(struct basicblock* bb, int index,
     register_assignment_t* srcregs, register_assignment_t* destregs);
@@ -10,7 +20,7 @@ static void populate_hregs(void)
 {
     const struct burm_register_data* brd = burm_register_data;
 
-    stacksize = 0;
+    hregs.count = 0;
     while (brd->name)
     {
         array_append(&hregs, new_hreg(brd));
@@ -31,30 +41,97 @@ static void wire_up_blocks_ins_outs(void)
     }
 }
 
-static struct hreg* allocate_hreg(register_assignment_t* regs, struct vreg* vreg, uint32_t attr)
+static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
+    struct vreg* vreg, uint32_t attrs)
 {
     int i;
+
+    /* We need a new register at the beginning of the block to put a phi value
+     * into. */
 
     for (i=0; i<hregs.count; i++)
     {
         struct hreg* hreg = hregs.item[i];
-        if (!pmap_findleft(regs, hreg))
+        if (!pmap_findleft(regs, hreg) && (hreg->attrs & attrs))
         {
-            if (hreg->attrs & attr)
-            {
-                pmap_put(regs, hreg, vreg);
-                return hreg;
-            }
+            /* This one is unused. Use it. */
+            return hreg;
         }
     }
 
-    fatal("ran out of registers");
+    /* We'll need to allocate a new stack slot for it. */
+    assert(false);
+}
+
+static bool allocatable(struct hreg* hreg, struct vreg* vreg)
+{
+    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
+    return (hreg->attrs & c->attrs);
+}
+
+static void add_input_register(struct vreg* vreg, struct hreg* hreg)
+{
+    int i;
+
+    /* Register hint for an input? */
+
+    if (hreg)
+    {
+        /* If it's already assigned, it's most likely a through. */
+        if (!pmap_findleft(current_ins, hreg))
+            pmap_add(current_ins, hreg, vreg);
+        return;
+    }
+
+    /* Find an unused input register of the right class. */
+
+    for (i=0; i<hregs.count; i++)
+    {
+        hreg = hregs.item[i];
+        if (allocatable(hreg, vreg) &&
+            !pmap_findright(current_ins, vreg))
+        {
+            /* Got one --- use it. */
+            pmap_add(current_ins, hreg, vreg);
+            return;
+        }
+    }
+
+    /* Um, oops --- ran out of registers. Evict one and try again. */
+    assert(false);
+}
+
+static void add_output_register(struct vreg* vreg)
+{
+    int i;
+
+    /* Find an unused output register of the right class. */
+
+    for (i=0; i<hregs.count; i++)
+    {
+        struct hreg* hreg = hregs.item[i];
+        if (allocatable(hreg, vreg) &&
+            !pmap_findleft(current_outs, hreg))
+        {
+            /* Got one --- use it. */
+            pmap_add(current_outs, hreg, vreg);
+            return;
+        }
+    }
+
+    /* Evicting an output register is exciting, because the only possible
+     * candidates are throughs. */
+    assert(false);
 }
 
 static void select_registers(struct hop* hop,
     register_assignment_t* old, register_assignment_t* in, register_assignment_t* out)
 {
     int i;
+
+    current_hop = hop;
+    current_ins = in;
+    current_outs = out;
 
     /* First, any vregs passing through the instruction stay in the same
      * registers they are currently in. */
@@ -65,8 +142,8 @@ static void select_registers(struct hop* hop,
         struct hreg* hreg = pmap_findright(old, vreg);
         assert(hreg != NULL);
 
-        pmap_put(in, hreg, vreg);
-        pmap_put(out, hreg, vreg);
+        pmap_put(current_ins, hreg, vreg);
+        pmap_put(current_outs, hreg, vreg);
     }
 
     /* Any registers being *read* by the instruction should also stay where
@@ -76,9 +153,7 @@ static void select_registers(struct hop* hop,
     {
         struct vreg* vreg = hop->ins.item[i];
         struct hreg* hreg = pmap_findright(old, vreg);
-        assert(hreg != NULL);
-
-        pmap_put(in, hreg, vreg);
+        add_input_register(vreg, hreg);
     }
 
     /* Any output registers will be *new* vregs (because SSA). So, allocate
@@ -87,8 +162,7 @@ static void select_registers(struct hop* hop,
     for (i=0; i<hop->outs.count; i++)
     {
         struct vreg* vreg = hop->outs.item[i];
-        struct constraint* c = pmap_findleft(&hop->constraints, vreg);
-        allocate_hreg(out, vreg, c->attrs);
+        add_output_register(vreg);
     }
 }
 
@@ -156,9 +230,7 @@ static void assign_hregs_to_vregs(void)
         /* It's possible for the previous stage to fail because in in has
          * clobbered the physical register we were wanting. So we need to
          * allocate a new register for that phi value.
-         *
-         * We don't bother allocating anything if the vreg is never used.
-         * */
+         */
 
         for (j=0; j<bb->phis.count; j++)
         {
@@ -167,16 +239,16 @@ static void assign_hregs_to_vregs(void)
             if (!pmap_findright(old, vreg))
             {
                 struct phicongruence* c = vreg->congruence;
-                struct hreg* hreg = allocate_hreg(old, vreg, c->attrs);
+                struct hreg* hreg = allocate_phi_hreg(old, vreg, c->attrs);
 
                 tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",
                     hreg->name, vreg->id, phi->prev->name);
+                pmap_add(old, hreg, vreg);
             }
         }
             
         for (j=0; j<bb->hops.count; j++)
         {
-            int k;
             struct hop* hop = bb->hops.item[j];
             register_assignment_t* in = &hop->regsin;
             register_assignment_t* out = &hop->regsout;;
@@ -373,6 +445,7 @@ void pass_register_allocator(void)
 {
     populate_hregs();
     wire_up_blocks_ins_outs();
+
     assign_hregs_to_vregs();
     insert_phi_copies();
 }
