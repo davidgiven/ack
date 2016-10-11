@@ -75,7 +75,7 @@ static struct ir* appendir(struct ir* ir)
     int i;
 
     assert(current_bb != NULL);
-    array_append(&current_bb->irs, ir);
+    array_appendu(&current_bb->irs, ir);
 
     ir_print('0', ir);
     return ir;
@@ -196,6 +196,7 @@ static void insn_simple(int opcode)
             
         case op_cii: simple_convert(IR_CII1); break;
         case op_ciu: simple_convert(IR_CIU1); break;
+        case op_cui: simple_convert(IR_CUI1); break;
 
         case op_cmp:
             push(
@@ -405,6 +406,9 @@ static void insn_ivalue(int opcode, arith value)
         case op_slu: simple_alu2(opcode, value, IR_LSL); break;
         case op_sru: simple_alu2(opcode, value, IR_LSR); break;
         case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
+
+        case op_adu: simple_alu2(opcode, value, IR_ADD); break;
+        case op_sbu: simple_alu2(opcode, value, IR_SUB); break;
 
         case op_and: simple_alu2(opcode, value, IR_AND); break;
         case op_ior: simple_alu2(opcode, value, IR_OR); break;
@@ -712,6 +716,16 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             );
             break;
 
+        case op_zre:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    address_of_external(label, offset),
+                    new_wordir(0)
+                )
+            );
+            break;
+                
         case op_cal:
             assert(offset == 0);
             materialise_stack();
