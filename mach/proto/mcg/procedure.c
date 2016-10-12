@@ -159,9 +159,9 @@ void procedure_compile(struct procedure* proc)
 {
 	int i;
 
+    pass_group_irs(proc);
 	print_blocks('1', proc);
 
-    pass_group_irs(proc);
     /* Passes from here on must preserve IR grouping */
 
     pass_eliminate_trivial_blocks(proc);
@@ -180,6 +180,7 @@ void procedure_compile(struct procedure* proc)
     print_blocks('4', proc);
     pass_convert_locals_to_ssa(proc);
     print_blocks('5', proc);
+    pass_remove_dead_phis();
     pass_promote_float_ops(proc);
     print_blocks('6', proc);
 

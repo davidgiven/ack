@@ -112,6 +112,7 @@ extern void pass_live_vreg_analysis(void);
 extern void pass_promote_float_ops(struct procedure* proc);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(struct procedure* proc);
+extern void pass_remove_dead_phis(void);
 extern void pass_split_critical_edges(struct procedure* proc);
 
 extern FILE* outputfile;
