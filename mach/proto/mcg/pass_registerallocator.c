@@ -8,7 +8,7 @@ struct assignment
 
 static ARRAYOF(struct hreg) hregs;
 
-static ARRAYOF(struct vreg) evicted;
+static PMAPOF(struct vreg, struct hreg) evicted;
 static struct hop* current_hop;
 static register_assignment_t* current_ins;
 static register_assignment_t* current_outs;
@@ -63,6 +63,42 @@ static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
     assert(false);
 }
 
+static bool evictable(struct hreg* hreg, struct vreg* vreg)
+{
+    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
+    return (hreg->attrs & c->attrs) && !array_contains(&current_hop->ins, vreg);
+    /* Find an unused output register of the right class which is not also being used as an input register. */
+}
+
+static struct hreg* evict(struct vreg* vreg)
+{
+    int i;
+
+    /* Look for a through register which matches our requirements. We should be
+     * doing some calculation here to figure out the cheapest register to
+     * evict, but for now we're picking the first one. FIXME. */
+
+    for (i=0; i<hregs.count; i++)
+    {
+        struct hreg* hreg = hregs.item[i];
+        struct vreg* candidate = pmap_findleft(current_ins, hreg);
+
+        if (candidate &&
+            (pmap_findleft(current_outs, hreg) == candidate) &&
+            evictable(hreg, vreg))
+        {
+            tracef('R', "R: evicting %%%d from %s\n", candidate->id, hreg->name);
+            pmap_put(&evicted, candidate, hreg);
+            pmap_remove(current_ins, hreg, candidate);
+            pmap_remove(current_outs, hreg, candidate);
+            return hreg;
+        }
+    }
+
+    /* Couldn't find anything to evict */
+    assert(false);
+}
+
 static bool allocatable(struct hreg* hreg, struct vreg* vreg)
 {
     struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
@@ -75,7 +111,7 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
     /* Register hint for an input? */
 
-    if (hreg)
+    if (hreg && allocatable(hreg, vreg))
     {
         /* If it's already assigned, it's most likely a through. */
         if (!pmap_findleft(current_ins, hreg))
@@ -85,6 +121,7 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
     /* Find an unused input register of the right class. */
 
+    hreg = NULL;
     for (i=0; i<hregs.count; i++)
     {
         hreg = hregs.item[i];
@@ -103,25 +140,59 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
 static void add_output_register(struct vreg* vreg)
 {
+    struct hreg* hreg;
     int i;
 
     /* Find an unused output register of the right class. */
 
+    hreg = NULL;
     for (i=0; i<hregs.count; i++)
     {
-        struct hreg* hreg = hregs.item[i];
+        hreg = hregs.item[i];
         if (allocatable(hreg, vreg) &&
             !pmap_findleft(current_outs, hreg))
         {
-            /* Got one --- use it. */
-            pmap_add(current_outs, hreg, vreg);
-            return;
+            goto found;
         }
     }
 
-    /* Evicting an output register is exciting, because the only possible
-     * candidates are throughs. */
+    /* If we couldn't find one, evict a register. */
+
+    hreg = evict(vreg);
+
+found:
+    pmap_add(current_outs, hreg, vreg);
+}
+
+static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* src)
+{
+    uint32_t srctype = src->type;
+    struct hreg* hreg;
+    int i;
+
+    /* Find an unused output register of the right class which is not also
+     * being used as an input register. */
+
+    hreg = NULL;
+    for (i=0; i<hregs.count; i++)
+    {
+        hreg = hregs.item[i];
+        if ((hreg->type == src->type) &&
+            !pmap_findleft(current_ins, hreg) &&
+            !pmap_findleft(current_outs, hreg))
+        {
+            goto found;
+        }
+    }
+
+    /* No more registers --- allocate a stack slot. */
+
     assert(false);
+
+found:
+    tracef('R', "R: evicted %%%d moving to %s\n", vreg->id, hreg->name);
+    pmap_add(current_ins, hreg, vreg);
+    pmap_add(current_outs, hreg, vreg);
 }
 
 static void select_registers(struct hop* hop,
@@ -132,6 +203,7 @@ static void select_registers(struct hop* hop,
     current_hop = hop;
     current_ins = in;
     current_outs = out;
+    evicted.count = 0;
 
     /* First, any vregs passing through the instruction stay in the same
      * registers they are currently in. */
@@ -163,6 +235,16 @@ static void select_registers(struct hop* hop,
     {
         struct vreg* vreg = hop->outs.item[i];
         add_output_register(vreg);
+    }
+
+    /* Any evicted registers now need to go somewhere (potentially, the stack).
+     * */
+
+    for (i=0; i<evicted.count; i++)
+    {
+        struct vreg* vreg = evicted.item[i].left;
+        struct hreg* src = evicted.item[i].right;
+        find_new_home_for_evicted_register(vreg, src);
     }
 }
 
@@ -253,16 +335,11 @@ static void assign_hregs_to_vregs(void)
             register_assignment_t* in = &hop->regsin;
             register_assignment_t* out = &hop->regsout;;
 
+            hop_print('R', hop);
+
             select_registers(hop, old, in, out);
 
-			tracef('R', "R: %d from $%d:", hop->id, hop->ir->id);
-			for (k=0; k<hop->ins.count; k++)
-				tracef('R', " r%%%d", hop->ins.item[k]->id);
-			for (k=0; k<hop->throughs.count; k++)
-				tracef('R', " =%%%d", hop->throughs.item[k]->id);
-			for (k=0; k<hop->outs.count; k++)
-				tracef('R', " w%%%d", hop->outs.item[k]->id);
-            tracef('R', " [");
+            tracef('R', "R: %d from $%d: [", hop->id, hop->ir->id);
             for (k=0; k<hop->regsin.count; k++)
             {
                 struct hreg* hreg = hop->regsin.item[k].left;

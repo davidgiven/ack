@@ -1,73 +1,77 @@
 REGISTERS
 
     /* Registers are allocated top down; the order here is odd in order to make
-     * sure that non-volatile registers get allocated from r31 (or f31) down. */
+     * sure that non-volatile registers get allocated from r31 (or f31) down.
+     *
+     * Attributes ending in an exclamation mark must match exactly when copying
+     * a register into another register (e.g. for eviction).
+     */
 
-    r12 bytes4 int volatile; 
-    r11 bytes4 int volatile; 
-    r10 bytes4 int volatile; 
-    r9  bytes4 int volatile;
-    r8  bytes4 int volatile;
-    r7  bytes4 int volatile;
-    r6  bytes4 int volatile;
-    r5  bytes4 int volatile;
-    r4  bytes4 int volatile;
-    r3  bytes4 int ret volatile;
+    r12 bytes4! int! volatile; 
+    r11 bytes4! int! volatile; 
+    r10 bytes4! int! volatile; 
+    r9  bytes4! int! volatile;
+    r8  bytes4! int! volatile;
+    r7  bytes4! int! volatile;
+    r6  bytes4! int! volatile;
+    r5  bytes4! int! volatile;
+    r4  bytes4! int! volatile;
+    r3  bytes4! int! ret volatile;
 
-    r31 bytes4 int; 
-    r30 bytes4 int; 
-    r29 bytes4 int; 
-    r28 bytes4 int; 
-    r27 bytes4 int; 
-    r26 bytes4 int; 
-    r25 bytes4 int; 
-    r24 bytes4 int; 
-    r23 bytes4 int; 
-    r22 bytes4 int; 
-    r21 bytes4 int; 
-    r20 bytes4 int; 
-    r19 bytes4 int; 
-    r18 bytes4 int; 
-    r17 bytes4 int; 
-    r16 bytes4 int;
-    r15 bytes4 int;
-    r14 bytes4 int;
+    r31 bytes4! int!; 
+    r30 bytes4! int!; 
+    r29 bytes4! int!; 
+    r28 bytes4! int!; 
+    r27 bytes4! int!; 
+    r26 bytes4! int!; 
+    r25 bytes4! int!; 
+    r24 bytes4! int!; 
+    r23 bytes4! int!; 
+    r22 bytes4! int!; 
+    r21 bytes4! int!; 
+    r20 bytes4! int!; 
+    r19 bytes4! int!; 
+    r18 bytes4! int!; 
+    r17 bytes4! int!; 
+    r16 bytes4! int!;
+    r15 bytes4! int!;
+    r14 bytes4! int!;
 
-    f14 bytes4 float volatile;
-    f13 bytes4 float volatile;
-    f12 bytes4 float volatile;
-    f11 bytes4 float volatile;
-    f10 bytes4 float volatile;
-    f9  bytes4 float volatile;
-    f8  bytes4 float volatile;
-    f7  bytes4 float volatile;
-    f6  bytes4 float volatile;
-    f5  bytes4 float volatile;
-    f4  bytes4 float volatile;
-    f3  bytes4 float volatile;
-    f2  bytes4 float volatile;
-    f1  bytes4 float volatile;
-    f0  bytes4 float volatile;
+    f14 bytes4! float! volatile;
+    f13 bytes4! float! volatile;
+    f12 bytes4! float! volatile;
+    f11 bytes4! float! volatile;
+    f10 bytes4! float! volatile;
+    f9  bytes4! float! volatile;
+    f8  bytes4! float! volatile;
+    f7  bytes4! float! volatile;
+    f6  bytes4! float! volatile;
+    f5  bytes4! float! volatile;
+    f4  bytes4! float! volatile;
+    f3  bytes4! float! volatile;
+    f2  bytes4! float! volatile;
+    f1  bytes4! float! volatile;
+    f0  bytes4! float! volatile;
 
-    f31 bytes4 float;
-    f30 bytes4 float;
-    f29 bytes4 float;
-    f28 bytes4 float;
-    f27 bytes4 float;
-    f26 bytes4 float;
-    f25 bytes4 float;
-    f24 bytes4 float;
-    f23 bytes4 float;
-    f22 bytes4 float;
-    f21 bytes4 float;
-    f20 bytes4 float;
-    f19 bytes4 float;
-    f18 bytes4 float;
-    f17 bytes4 float;
-    f16 bytes4 float;
-    f15 bytes4 float;
+    f31 bytes4! float!;
+    f30 bytes4! float!;
+    f29 bytes4! float!;
+    f28 bytes4! float!;
+    f27 bytes4! float!;
+    f26 bytes4! float!;
+    f25 bytes4! float!;
+    f24 bytes4! float!;
+    f23 bytes4! float!;
+    f22 bytes4! float!;
+    f21 bytes4! float!;
+    f20 bytes4! float!;
+    f19 bytes4! float!;
+    f18 bytes4! float!;
+    f17 bytes4! float!;
+    f16 bytes4! float!;
+    f15 bytes4! float!;
 
-	cr0 cr;
+	cr0 cr!;
 
 
 DECLARATIONS
@@ -75,7 +79,7 @@ DECLARATIONS
 	cr;
     ubyte_to_be;
 
-	address   fragment;
+	address fragment;
 
 
 PATTERNS
@@ -107,10 +111,11 @@ PATTERNS
 		cost 4;
 
 	SETRET4(in:(ret)reg)
-		emit "mr r3, %in"
+		emit "! setret4"
 		cost 4;
 
     (ret)reg = GETRET4
+        emit "! getret4"
         cost 1;
 
 	STACKADJUST4(delta:CONST4)
@@ -139,12 +144,15 @@ PATTERNS
         cost 4;
 
     out:(int)ubyte_to_be = in:(int)reg
+        emit "! reg -> ubyte"
         cost 1;
 
     out:(int)ubyte_to_be = CIU41(value:(int)reg)
+        emit "! CIU41(reg) -> ubyte"
         cost 1;
 
     out:(int)ubyte_to_be = CIU41(CII14(CIU41(value:(int)reg)))
+        emit "! CIU41(CII14(CIU41(reg))) -> ubyte"
         cost 1;
 
 	out:(int)reg = LOAD4(addr:address)
@@ -284,9 +292,12 @@ PATTERNS
 		cost 4;
 
     out:(int)reg = CIU44(in:(int)reg)
-        emit "mr %out, %in"
+        emit "mr %out, %in ! ciu44"
         cost 4;
 
+    out:(int)reg = CUI44(in:(int)reg)
+        emit "mr %out, %in ! cui44"
+        cost 4;
 
 
 /* ALU operations */

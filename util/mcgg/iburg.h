@@ -62,6 +62,7 @@ struct reg
 	const char* name;      /* register name */
 	int number;            /* identifying number */
 	uint32_t attrs;        /* bitfield of register attributes */
+	uint32_t type;         /* register type */
 };
 
 struct regattr
@@ -71,7 +72,7 @@ struct regattr
 };
 
 extern struct reg* makereg(const char* name);
-extern void addregattr(struct reg* reg, const char* regattr);
+extern void addregattr(struct reg* reg, const char* regattr, bool exact);
 extern struct regattr* getregattr(const char* name);
 
 struct term

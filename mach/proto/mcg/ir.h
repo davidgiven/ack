@@ -20,6 +20,8 @@ struct ir
         PMAPOF(struct basicblock, struct ir) phivalue;
 	} u;
 
+    ARRAYOF(struct ir) uses; /* all places this IR is used */
+
 	struct vreg* result;     /* vreg containing IR result */
 };
 

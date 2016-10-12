@@ -177,7 +177,10 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 
             switch (node->label)
             {
-                case ir_to_esn(IR_REG, 0):
+                case ir_to_esn(IR_REG, 1):
+                case ir_to_esn(IR_REG, 2):
+                case ir_to_esn(IR_REG, 4):
+                case ir_to_esn(IR_REG, 8):
                     vreg = node->ir->result;
                     break;
 

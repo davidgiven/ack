@@ -28,7 +28,7 @@ static void collect_irs(struct procedure* proc)
 		{
 			struct ir* ir = bb->irs.item[j];
             addall(ir);
-			array_appendu(&rootirs, ir);
+			array_append(&rootirs, ir);
 		}
     }
 }

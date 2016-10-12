@@ -71,7 +71,8 @@ registers
 
 register
     : ID                              { $$ = makereg($1); }
-    | register ID                     { $$ = $1; addregattr($1, $2); }
+    | register ID                     { $$ = $1; addregattr($1, $2, false); }
+    | register ID '!'                 { $$ = $1; addregattr($1, $2, true); }
     ;
 
 declarations

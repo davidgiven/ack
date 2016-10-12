@@ -283,7 +283,7 @@ struct regattr* makeregattr(const char* id)
 	return p;
 }
 
-void addregattr(struct reg* reg, const char* id)
+void addregattr(struct reg* reg, const char* id, bool exact)
 {
 	struct regattr* p = smap_get(&registerattrs, id);
 
@@ -291,6 +291,8 @@ void addregattr(struct reg* reg, const char* id)
 		p = makeregattr(id);
 
 	reg->attrs |= 1<<(p->number);
+	if (exact)
+		reg->type |= 1<<(p->number);
 }
 
 struct regattr* getregattr(const char* id)
@@ -589,7 +591,7 @@ static void emitregisters(void)
 		struct reg* r = registers.item[i].right;
 		assert(r->number == i);
 
-		print("%1{ \"%s\", 0x%x },\n", r->name, r->attrs);
+		print("%1{ \"%s\", 0x%x, 0x%x },\n", r->name, r->type, r->attrs);
 	}
 	print("%1{ NULL }\n");
 	print("};\n\n");

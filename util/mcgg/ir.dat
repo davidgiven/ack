@@ -58,6 +58,11 @@ S CIU2
 S CIU4
 S CIU8
 
+S CUI1
+S CUI2
+S CUI4
+S CUI8
+
 # Tristate comparisons
 S COMPARES
 S COMPAREU
