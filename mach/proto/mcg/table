@@ -77,7 +77,8 @@ REGISTERS
 DECLARATIONS
 
 	cr;
-    ubyte_to_be;
+    ubyte;
+    ushort;
 
 	address fragment;
 
@@ -127,53 +128,74 @@ PATTERNS
 
 /* Memory operations */
 
+    /* Stores */
+
 	STORE4(addr:address, value:(int)reg)
 		emit "stw %value, %addr"
 		cost 4;
 
-	STORE2(addr:address, value:(int)reg)
+	STORE2(addr:address, value:(int)ushort)
 		emit "sth %value, %addr"
 		cost 4;
 
-    STORE1(addr:address, value:(int)ubyte_to_be)
+    STORE2(ADD4(left:(int)reg, right:(int)reg), value:(int)ushort)
+        emit "sthx %value, %left, %right"
+        cost 4;
+
+    STORE1(addr:address, value:(int)ubyte)
 		emit "stb %value, %addr"
 		cost 4;
 
-    STORE1(ADD4(left:(int)reg, right:(int)reg), value:(int)ubyte_to_be)
+    STORE1(ADD4(left:(int)reg, right:(int)reg), value:(int)ubyte)
         emit "stbx %value, %left, %right"
         cost 4;
 
-    out:(int)ubyte_to_be = in:(int)reg
-        emit "! reg -> ubyte"
-        cost 1;
-
-    out:(int)ubyte_to_be = CIU41(value:(int)reg)
-        emit "! CIU41(reg) -> ubyte"
-        cost 1;
-
-    out:(int)ubyte_to_be = CIU41(CII14(CIU41(value:(int)reg)))
-        emit "! CIU41(CII14(CIU41(reg))) -> ubyte"
-        cost 1;
+    /* Loads */
 
 	out:(int)reg = LOAD4(addr:address)
 		emit "lwz %out, %addr"
 		cost 4;
 
-	out:(int)reg = LOAD2(addr:address)
+	out:(int)ushort = LOAD2(addr:address)
 		emit "lhz %out, %addr"
 		cost 4;
 
-	out:(int)reg = LOAD1(addr:address)
+	out:(int)ubyte = LOAD1(addr:address)
 		emit "lbz %out, %addr"
 		cost 4;
 
-	out:(int)reg = CIU14(LOAD1(addr:address))
-		emit "lbz %out, %addr"
-		cost 4;
+    /* Conversions to ubyte and ushort */
 
-	out:(int)reg = CIU24(LOAD2(addr:address))
-		emit "lhz %out, %addr"
-		cost 4;
+    out:(int)ubyte = in:(int)reg
+        emit "mr %out, %in ! reg -> ubyte"
+        cost 1;
+
+    out:(int)ubyte = CIU41(value:(int)reg)
+        emit "mr %out, %value ! CIU41(reg) -> ubyte"
+        cost 1;
+
+    out:(int)ubyte = CIU41(CII14(CIU41(value:(int)reg)))
+        emit "mr %out, %value ! CIU41(CII14(CIU41(reg))) -> ubyte"
+        cost 1;
+
+    out:(int)ushort = in:(int)reg
+        emit "mr %out, %in ! reg -> ushort"
+        cost 1;
+
+    out:(int)ushort = CIU42(value:(int)reg)
+        emit "mr %out, %value ! CIU42(reg) -> ushort"
+        cost 1;
+
+    out:(int)ushort = CIU42(CII24(CIU42(value:(int)reg)))
+        emit "mr %out, %value ! CIU42(CII24(CIU42(reg))) -> ushort"
+        cost 1;
+
+    /* Conversions from ubyte and ushort */
+
+    out:(int)reg = CIU14(in:(int)ubyte)
+        emit "mr %out, %in ! CIU14"
+        cost 4;
+
 	
 
 
