@@ -46,6 +46,7 @@ struct burm_emitter_data
     void (*emit_eoi)(void);
     void (*constrain_input_reg)(int child, uint32_t attr);
     void (*constrain_output_reg)(uint32_t attr);
+    void (*constrain_output_reg_equal_to)(int child);
 };
 
 typedef void burm_emitter_t(const struct burm_emitter_data* data);

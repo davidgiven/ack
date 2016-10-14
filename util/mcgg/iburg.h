@@ -19,9 +19,7 @@ typedef struct term* Term;
 
 enum
 {
-	CONSTRAINT_ATTR,
 	CONSTRAINT_EQUALS,
-	CONSTRAINT_NOTEQUALS
 };
 
 struct constraint

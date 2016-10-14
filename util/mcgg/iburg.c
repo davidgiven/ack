@@ -1096,6 +1096,36 @@ static void emit_input_regs(Tree node, int* index)
 		emit_input_regs(node->right, index);
 }
 
+static void emit_output_constraints(Rule r)
+{
+	int i;
+	struct constraint* outputc = NULL;
+
+	for (i=0; i<r->constraints.count; i++)
+	{
+		struct constraint* c = r->constraints.item[i];
+
+		if (c->type == CONSTRAINT_EQUALS)
+		{
+			if (strcmp(c->left, r->label) != 0)
+				yyerror("equality register constraints must have an output register on the left hand side");
+			if (outputc != NULL)
+				yyerror("you can't specify more than one output register constraint");
+			outputc = c;
+		}
+	}
+
+	if (outputc)
+	{
+		int index = 0;
+
+		if (!find_child_index(r->pattern, outputc->right, &index, NULL))
+			label_not_found(r, outputc->right);
+
+		print("%1data->constrain_output_reg_equal_to(%d);\n", index);
+	}
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -1129,7 +1159,9 @@ static void emitinsndata(Rule rules)
 			int index = 0;
 			emit_input_regs(r->pattern, &index);
 		}
-
+		
+		emit_output_constraints(r);
+		
 		while (f)
 		{
 			switch (f->data[0])

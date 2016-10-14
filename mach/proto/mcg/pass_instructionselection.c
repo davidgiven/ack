@@ -113,6 +113,13 @@ static void constrain_output_reg(uint32_t attr)
     get_constraint(vreg)->attrs = attr;
 }
 
+static void constrain_output_reg_equal_to(int child)
+{
+    struct vreg* vreg = find_vreg_of_child(child);
+
+    get_constraint(current_hop->output)->equals_to = vreg;
+}
+
 static const struct burm_emitter_data emitter_data =
 {
     &emit_string,
@@ -122,7 +129,8 @@ static const struct burm_emitter_data emitter_data =
     &emit_value,
     &emit_eoi,
     &constrain_input_reg,
-    &constrain_output_reg
+    &constrain_output_reg,
+    &constrain_output_reg_equal_to,
 };
 
 static void emit(struct insn* insn)

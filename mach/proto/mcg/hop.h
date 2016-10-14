@@ -26,6 +26,7 @@ struct insel
 struct constraint
 {
     uint32_t attrs;
+    struct vreg* equals_to;
 };
 
 struct hop

@@ -143,12 +143,8 @@ constraints
 
 constraint
     : '(' constraint ')'                { $$ = $2; }
-    | ID ID                             { $$ = calloc(1, sizeof(*$$));
-                                          $$->type = CONSTRAINT_ATTR; $$->left = $1; $$->right = $2; }
-    | ID EQUALS ID                      { $$ = calloc(1, sizeof(*$$));
-                                          $$->type = CONSTRAINT_EQUALS; $$->left = $1; $$->right = $3; }
-    | ID NOTEQUALS ID                   { $$ = calloc(1, sizeof(*$$));
-                                          $$->type = CONSTRAINT_NOTEQUALS; $$->left = $1; $$->right = $3; }
+    | '%' ID EQUALS '%' ID              { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_EQUALS; $$->left = $2; $$->right = $5; }
     ;
 
 qfragments

@@ -142,26 +142,74 @@ static void add_output_register(struct vreg* vreg)
 {
     struct hreg* hreg;
     int i;
+    struct constraint* c;
 
-    /* Find an unused output register of the right class. */
+    /* Is this register supposed to be the same as one of the input registers?
+     * */
 
-    hreg = NULL;
-    for (i=0; i<hregs.count; i++)
+    c = pmap_findleft(&current_hop->constraints, vreg);
+    if (c->equals_to)
     {
-        hreg = hregs.item[i];
-        if (allocatable(hreg, vreg) &&
-            !pmap_findleft(current_outs, hreg))
+        /* This output register is constrained to be in the same hreg as an
+         * input register (most likely for a 2op instruction). */
+
+        hreg = pmap_findright(current_ins, c->equals_to);
+
+        /* If this register is current unused as an output, use it. */
+
+        if (!pmap_findleft(current_outs, hreg))
         {
-            goto found;
+            pmap_add(current_outs, hreg, vreg);
+            return;
         }
+
+        /* Okay, something's in it. Most likely it's a through being used as an
+         * input register.  Trying to evict it would be pointless as that would
+         * also evict the input. So, we're going to have to do this the hard
+         * way: we try to allocate a matched set of input and output registers.
+         * */
+
+        hreg = NULL;
+        for (i=0; i<hregs.count; i++)
+        {
+            hreg = hregs.item[i];
+            if (allocatable(hreg, vreg) &&
+                !pmap_findleft(current_ins, hreg) &&
+                !pmap_findleft(current_outs, hreg))
+            {
+                goto found1;
+            }
+        }
+
+        /* If we couldn't find one, evict a register. */
+
+        hreg = evict(vreg);
+    found1:
+        pmap_add(current_outs, hreg, vreg);
+        pmap_add(current_ins, hreg, c->equals_to);
     }
+    else
+    {
+        /* This is an ordinary new register. */
 
-    /* If we couldn't find one, evict a register. */
+        hreg = NULL;
+        for (i=0; i<hregs.count; i++)
+        {
+            hreg = hregs.item[i];
+            if (allocatable(hreg, vreg) &&
+                !pmap_findleft(current_outs, hreg))
+            {
+                goto found2;
+            }
+        }
 
-    hreg = evict(vreg);
+        /* If we couldn't find one, evict a register. */
 
-found:
-    pmap_add(current_outs, hreg, vreg);
+        hreg = evict(vreg);
+
+    found2:
+        pmap_add(current_outs, hreg, vreg);
+    }
 }
 
 static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* src)
