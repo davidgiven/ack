@@ -178,7 +178,14 @@ void hop_print(char k, struct hop* hop)
 
     hop_render(hop);
 
+    print_header(k, hop);
+
     p = strtok(buffer, "\n");
+    if (!p)
+    {
+        print_header(k, hop);
+        tracef(k, "\n");
+    }
     while (p)
     {
         print_header(k, hop);
