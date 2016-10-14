@@ -181,25 +181,25 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 
         if (!insn->insndata->is_fragment)
         {
-            struct vreg* vreg = NULL;
-
-            switch (node->label)
-            {
-                case ir_to_esn(IR_REG, 1):
-                case ir_to_esn(IR_REG, 2):
-                case ir_to_esn(IR_REG, 4):
-                case ir_to_esn(IR_REG, 8):
-                    vreg = node->ir->result;
-                    break;
-
-                case ir_to_esn(IR_NOP, 0):
-                    vreg = node->left->ir->result;
-                    break;
-            }
-
             insn->hop = current_hop = new_hop(current_bb, insn->ir);
-            current_hop->output = vreg;
             emit(insn);
+
+            if (!current_hop->output)
+            {
+                switch (node->label)
+                {
+                    case ir_to_esn(IR_REG, 1):
+                    case ir_to_esn(IR_REG, 2):
+                    case ir_to_esn(IR_REG, 4):
+                    case ir_to_esn(IR_REG, 8):
+                        current_hop->output = node->ir->result;
+                        break;
+
+                    case ir_to_esn(IR_NOP, 0):
+                        current_hop->output = node->left->ir->result;
+                        break;
+                }
+            }
 
             hop_print('I', current_hop);
             array_append(&current_bb->hops, current_hop);
