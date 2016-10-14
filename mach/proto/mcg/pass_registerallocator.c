@@ -105,6 +105,61 @@ static bool allocatable(struct hreg* hreg, struct vreg* vreg)
     return (hreg->attrs & c->attrs);
 }
 
+static struct hreg* find_input_reg(struct vreg* vreg)
+{
+    int i;
+    struct hreg* hreg = NULL;
+
+    for (i=0; i<hregs.count; i++)
+    {
+        hreg = hregs.item[i];
+        if (allocatable(hreg, vreg) &&
+            !pmap_findleft(current_ins, hreg))
+        {
+            return hreg;
+        }
+    }
+
+    return NULL;
+}
+
+static struct hreg* find_output_reg(struct vreg* vreg)
+{
+    int i;
+    struct hreg* hreg = NULL;
+
+    for (i=0; i<hregs.count; i++)
+    {
+        hreg = hregs.item[i];
+        if (allocatable(hreg, vreg) &&
+            !pmap_findleft(current_outs, hreg))
+        {
+            return hreg;
+        }
+    }
+
+    return NULL;
+}
+
+static struct hreg* find_through_reg(struct vreg* vreg)
+{
+    int i;
+    struct hreg* hreg = NULL;
+
+    for (i=0; i<hregs.count; i++)
+    {
+        hreg = hregs.item[i];
+        if (allocatable(hreg, vreg) &&
+            !pmap_findleft(current_ins, hreg) &&
+            !pmap_findleft(current_outs, hreg))
+        {
+            return hreg;
+        }
+    }
+
+    return NULL;
+}
+
 static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 {
     int i;
@@ -121,21 +176,11 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
     /* Find an unused input register of the right class. */
 
-    hreg = NULL;
-    for (i=0; i<hregs.count; i++)
-    {
-        hreg = hregs.item[i];
-        if (allocatable(hreg, vreg) &&
-            !pmap_findright(current_ins, vreg))
-        {
-            /* Got one --- use it. */
-            pmap_add(current_ins, hreg, vreg);
-            return;
-        }
-    }
+    hreg = find_input_reg(vreg);
+    if (!hreg)
+        hreg = evict(hreg);
 
-    /* Um, oops --- ran out of registers. Evict one and try again. */
-    assert(false);
+    pmap_add(current_ins, hreg, vreg);
 }
 
 static void add_output_register(struct vreg* vreg)
@@ -169,45 +214,23 @@ static void add_output_register(struct vreg* vreg)
          * way: we try to allocate a matched set of input and output registers.
          * */
 
-        hreg = NULL;
-        for (i=0; i<hregs.count; i++)
-        {
-            hreg = hregs.item[i];
-            if (allocatable(hreg, vreg) &&
-                !pmap_findleft(current_ins, hreg) &&
-                !pmap_findleft(current_outs, hreg))
-            {
-                goto found1;
-            }
-        }
+        hreg = find_through_reg(vreg);
+        if (!hreg)
+            hreg = evict(vreg);
 
-        /* If we couldn't find one, evict a register. */
-
-        hreg = evict(vreg);
-    found1:
         pmap_add(current_outs, hreg, vreg);
+        tracef('R', "R: output equality constraint requires extra move of %%%d => %s\n",
+            c->equals_to->id, hreg->name);
         pmap_add(current_ins, hreg, c->equals_to);
     }
     else
     {
         /* This is an ordinary new register. */
 
-        hreg = NULL;
-        for (i=0; i<hregs.count; i++)
-        {
-            hreg = hregs.item[i];
-            if (allocatable(hreg, vreg) &&
-                !pmap_findleft(current_outs, hreg))
-            {
-                goto found2;
-            }
-        }
+        hreg = find_output_reg(vreg);
+        if (!hreg)
+            hreg = evict(vreg);
 
-        /* If we couldn't find one, evict a register. */
-
-        hreg = evict(vreg);
-
-    found2:
         pmap_add(current_outs, hreg, vreg);
     }
 }
