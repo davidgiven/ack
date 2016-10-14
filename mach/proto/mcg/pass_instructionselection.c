@@ -182,6 +182,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
         if (!insn->insndata->is_fragment)
         {
             insn->hop = current_hop = new_hop(current_bb, insn->ir);
+            current_hop->insndata = insn->insndata;
             emit(insn);
 
             if (!current_hop->output)

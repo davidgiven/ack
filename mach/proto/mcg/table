@@ -305,10 +305,12 @@ PATTERNS
 		cost 8;
 
 	CALL(dest:LABEL4)
+        with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
 
     CALL(dest:(int)reg)
+        with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl ALWAYS, 0, 0"
         cost 8;

@@ -26,6 +26,7 @@ extern int yylex(void);
 }
 
 %term COPY
+%term CORRUPTED
 %term COST
 %term DECLARATIONS
 %term EMIT
@@ -145,6 +146,8 @@ constraint
     : '(' constraint ')'                { $$ = $2; }
     | '%' ID EQUALS '%' ID              { $$ = calloc(1, sizeof(*$$));
                                           $$->type = CONSTRAINT_EQUALS; $$->left = $2; $$->right = $5; }
+    | CORRUPTED '(' ID ')'              { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_CORRUPTED_ATTR; $$->left = $3; }
     ;
 
 qfragments

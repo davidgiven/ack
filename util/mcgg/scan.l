@@ -38,6 +38,7 @@ static int braces = 0;
 "DECLARATIONS"              return DECLARATIONS;
 "PATTERNS"                  return PATTERNS;
 "REGISTERS"                 return REGISTERS;
+"corrupted"                 return CORRUPTED;
 "cost"                      return COST;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;

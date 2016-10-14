@@ -99,10 +99,19 @@ static struct hreg* evict(struct vreg* vreg)
     assert(false);
 }
 
-static bool allocatable(struct hreg* hreg, struct vreg* vreg)
+static bool allocatable_input(struct hreg* hreg, struct vreg* vreg)
 {
     struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    return (hreg->attrs & c->attrs);
+    return !pmap_findleft(current_ins, hreg) &&
+        (!c || (hreg->attrs & c->attrs));
+}
+
+static bool allocatable_output(struct hreg* hreg, struct vreg* vreg)
+{
+    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
+    return !pmap_findleft(current_outs, hreg) &&
+        (!c || (hreg->attrs & c->attrs)) &&
+        !(hreg->attrs & current_hop->insndata->corrupts);
 }
 
 static struct hreg* find_input_reg(struct vreg* vreg)
@@ -113,8 +122,7 @@ static struct hreg* find_input_reg(struct vreg* vreg)
     for (i=0; i<hregs.count; i++)
     {
         hreg = hregs.item[i];
-        if (allocatable(hreg, vreg) &&
-            !pmap_findleft(current_ins, hreg))
+        if (allocatable_input(hreg, vreg))
         {
             return hreg;
         }
@@ -131,8 +139,7 @@ static struct hreg* find_output_reg(struct vreg* vreg)
     for (i=0; i<hregs.count; i++)
     {
         hreg = hregs.item[i];
-        if (allocatable(hreg, vreg) &&
-            !pmap_findleft(current_outs, hreg))
+        if (allocatable_output(hreg, vreg))
         {
             return hreg;
         }
@@ -149,9 +156,8 @@ static struct hreg* find_through_reg(struct vreg* vreg)
     for (i=0; i<hregs.count; i++)
     {
         hreg = hregs.item[i];
-        if (allocatable(hreg, vreg) &&
-            !pmap_findleft(current_ins, hreg) &&
-            !pmap_findleft(current_outs, hreg))
+        if (allocatable_input(hreg, vreg) &&
+            allocatable_output(hreg, vreg))
         {
             return hreg;
         }
@@ -166,19 +172,31 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
     /* Register hint for an input? */
 
-    if (hreg && allocatable(hreg, vreg))
+    if (hreg)
     {
-        /* If it's already assigned, it's most likely a through. */
-        if (!pmap_findleft(current_ins, hreg))
-            pmap_add(current_ins, hreg, vreg);
-        return;
+        if (pmap_findleft(current_ins, hreg) == vreg)
+        {
+            /* Yup, already there. */
+        }
+        else if (allocatable_input(hreg, vreg))
+        {
+            /* The register is free. */
+        }
+        else
+        {
+            /* Can't honour the hint. */
+            hreg = NULL;
+        }
     }
 
-    /* Find an unused input register of the right class. */
-
-    hreg = find_input_reg(vreg);
     if (!hreg)
-        hreg = evict(hreg);
+    {
+        /* Find an unused input register of the right class. */
+
+        hreg = find_input_reg(vreg);
+        if (!hreg)
+            hreg = evict(vreg);
+    }
 
     pmap_add(current_ins, hreg, vreg);
 }
@@ -195,14 +213,17 @@ static void add_output_register(struct vreg* vreg)
     c = pmap_findleft(&current_hop->constraints, vreg);
     if (c->equals_to)
     {
+        tracef('R', "R: outputput equality constraint of %%%d to %%%d\n",
+            vreg->id, c->equals_to->id);
+
         /* This output register is constrained to be in the same hreg as an
          * input register (most likely for a 2op instruction). */
 
         hreg = pmap_findright(current_ins, c->equals_to);
 
-        /* If this register is current unused as an output, use it. */
+        /* If this register is currently unused as an output, use it. */
 
-        if (!pmap_findleft(current_outs, hreg))
+        if (allocatable_output(hreg, c->equals_to))
         {
             pmap_add(current_outs, hreg, vreg);
             return;
@@ -235,6 +256,38 @@ static void add_output_register(struct vreg* vreg)
     }
 }
 
+static void add_through_register(struct vreg* vreg, struct hreg* hreg)
+{
+    /* Register hint for an input? */
+
+    if (hreg)
+    {
+        bool infree = allocatable_input(hreg, vreg);
+        bool outfree = allocatable_output(hreg, vreg);
+
+        if (infree && outfree)
+        {
+            /* Register unused --- use it. */
+        }
+        if ((infree || pmap_findleft(current_ins, hreg) == vreg) &&
+            (outfree || pmap_findleft(current_outs, hreg) == vreg))
+        {
+            /* Input and output are either free or already assigned. */
+        }
+        else
+        {
+            /* Nope, can't honour the hint. */
+            hreg = NULL;
+        }
+    }
+    
+    if (!hreg)
+        hreg = find_through_reg(vreg);
+
+    pmap_put(current_ins, hreg, vreg);
+    pmap_put(current_outs, hreg, vreg);
+}
+
 static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* src)
 {
     uint32_t srctype = src->type;
@@ -249,8 +302,8 @@ static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* s
     {
         hreg = hregs.item[i];
         if ((hreg->type == src->type) &&
-            !pmap_findleft(current_ins, hreg) &&
-            !pmap_findleft(current_outs, hreg))
+            allocatable_input(hreg, vreg) &&
+            allocatable_output(hreg, vreg))
         {
             goto found;
         }
@@ -283,10 +336,7 @@ static void select_registers(struct hop* hop,
     {
         struct vreg* vreg = hop->throughs.item[i];
         struct hreg* hreg = pmap_findright(old, vreg);
-        assert(hreg != NULL);
-
-        pmap_put(current_ins, hreg, vreg);
-        pmap_put(current_outs, hreg, vreg);
+        add_through_register(vreg, hreg);
     }
 
     /* Any registers being *read* by the instruction should also stay where

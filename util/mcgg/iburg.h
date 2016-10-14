@@ -20,6 +20,7 @@ typedef struct term* Term;
 enum
 {
 	CONSTRAINT_EQUALS,
+	CONSTRAINT_CORRUPTED_ATTR,
 };
 
 struct constraint

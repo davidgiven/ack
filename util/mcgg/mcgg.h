@@ -56,6 +56,7 @@ struct burm_instruction_data
     const char* name;
     burm_emitter_t* emitter;
     bool is_fragment;
+    uint32_t corrupts;
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];

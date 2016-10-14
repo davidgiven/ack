@@ -1239,6 +1239,27 @@ static void emitinsndata(Rule rules)
 
 		print("%2%s,\n", r->lhs->is_fragment ? "true" : "false");
 
+		{
+			int i;
+			uint32_t attrs = 0;
+
+			for (i=0; i<r->constraints.count; i++)
+			{
+				struct constraint* c = r->constraints.item[i];
+
+				if (c->type == CONSTRAINT_CORRUPTED_ATTR)
+				{
+					struct regattr* p = smap_get(&registerattrs, c->left);
+					if (!p)
+						yyerror("no such register attribute '%s'", c->left);
+
+					attrs |= 1<<(p->number);
+				}
+			}
+
+			print("%2%d, /* corruption attrs */\n", attrs);
+		}
+
 		print("%1},\n");
 		r = r->link;
 	}
