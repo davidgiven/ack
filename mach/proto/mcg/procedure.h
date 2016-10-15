@@ -17,7 +17,7 @@ struct procedure
     int spills_size;
     int saved_size;
     int fp_to_st;
-    int fp_to_ap;
+    int fp_to_ab;
     int fp_to_lb;
     ARRAYOF(struct basicblock) blocks;
     IMAPOF(struct local) locals;

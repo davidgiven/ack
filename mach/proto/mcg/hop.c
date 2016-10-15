@@ -227,15 +227,15 @@ char* hop_render(struct hop* hop)
 				break;
 
             case INSEL_ST_OFFSET:
-                appendf("(st+%d)", insel->u.hreg->offset);
+                appendf("%d", current_proc->fp_to_st + insel->u.hreg->offset);
                 break;
 
             case INSEL_AB_OFFSET:
-                appendf("(ab+%d)", insel->u.offset);
+                appendf("%d", current_proc->fp_to_ab + insel->u.offset);
                 break;
 
             case INSEL_LB_OFFSET:
-                appendf("(lb+%d)", insel->u.offset);
+                appendf("%d", current_proc->fp_to_lb + insel->u.offset);
                 break;
 
 			case INSEL_VALUE:
@@ -252,6 +252,12 @@ char* hop_render(struct hop* hop)
 						break;
 
 					case IR_LOCAL:
+                        if (ir->u.ivalue >= 0)
+                            appendf("%d", current_proc->fp_to_ab + ir->u.ivalue);
+                        else
+                            appendf("%d", current_proc->fp_to_lb + ir->u.ivalue);
+                        break;
+
 					case IR_CONST:
 						appendf("%d", ir->u.ivalue);
 						break;
