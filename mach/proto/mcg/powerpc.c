@@ -30,9 +30,9 @@ struct hop* platform_prologue(void)
 	hop_add_insel(hop, "! spills_size = %d bytes", current_proc->spills_size);
 	hop_add_insel(hop, "! locals_size = %d bytes", current_proc->locals_size);
 	hop_add_insel(hop, "addi sp, sp, %d", -(current_proc->fp_to_ab + current_proc->locals_size));
-	hop_add_insel(hop, "mfspr 0, lr");
+	hop_add_insel(hop, "mfspr r0, lr");
 	hop_add_insel(hop, "stw fp, %d(sp)", current_proc->fp_to_st + current_proc->locals_size);
-	hop_add_insel(hop, "stw 0, %d(sp)", current_proc->fp_to_st + current_proc->locals_size + 4);
+	hop_add_insel(hop, "stw r0, %d(sp)", current_proc->fp_to_st + current_proc->locals_size + 4);
 	hop_add_insel(hop, "addi fp, sp, %d", current_proc->locals_size);
 
 	return hop;

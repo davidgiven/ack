@@ -101,6 +101,8 @@ int main(int argc, char* const argv[])
     else
         outputfile = stdout;
 
+    fprintf(outputfile, ".sect .text\n.sect .rom\n.sect .data\n.sect .bss\n");
+
     /* Reads in the EM, outputs the data sections, parses any code and
      * generates IR trees. */
 

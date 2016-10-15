@@ -110,6 +110,7 @@ static void emit_procedure(struct procedure* proc)
 {
     int i, j;
 
+    fprintf(outputfile, "\n.sect .text\n");
     for (i=0; i<dominance.preorder.count; i++)
     {
         struct basicblock* bb = dominance.preorder.item[i];
