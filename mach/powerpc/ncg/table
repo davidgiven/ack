@@ -18,14 +18,14 @@ PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 #define smalls(n) sfit(n, 16)
 #define smallu(n) ufit(n, 16)
 
-#define lo(n) (n & 0xFFFF)
-#define hi(n) ((n>>16) & 0xFFFF)
+#define lo(n) ((n) & 0xFFFF)
+#define hi(n) (((n)>>16) & 0xFFFF)
 
 /* Use these for instructions that treat the low half as signed --- his()
  * includes a modifier to produce the correct value when the low half gets
  * sign extended. Er, do make sure you load the low half second. */
-#define los(n) (n & 0xFFFF)
-#define his(n) ((hi(n) - (lo(n)>>15)) & 0xFFFF)
+#define los(n) (lo(n) | (((0-(lo(n)>>15)) & ~0xFFFF)))
+#define his(n) ((hi(n) + (lo(n)>>15)) & 0xFFFF)
 
 #define IFFALSE {CONST, 4}
 #define IFTRUE {CONST, 12}
