@@ -143,6 +143,7 @@ void yywarn(char* fmt, ...);
 extern int errcnt;
 extern FILE* infp;
 extern FILE* outfp;
+extern FILE* hdrfp;
 
 /* Stupid flex imports --- why mo header file? */
 

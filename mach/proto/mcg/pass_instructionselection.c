@@ -205,7 +205,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             hop_print('I', current_hop);
             array_append(&current_bb->hops, current_hop);
 
-            if (goal != 1)
+            if (goal != burm_stmt_NT)
                 insn->ir->result = insn->hop->output;
         }
     }
@@ -276,7 +276,7 @@ static void select_instructions(void)
             if (!insnno)
                 burm_panic_cannot_match(shadow);
 
-            walk_instructions(shadow, 1);
+            walk_instructions(shadow, burm_stmt_NT);
         }
 	}
 }

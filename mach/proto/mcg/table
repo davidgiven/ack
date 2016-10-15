@@ -7,69 +7,69 @@ REGISTERS
      * a register into another register (e.g. for eviction).
      */
 
-    r12 "12" bytes4! int! volatile; 
-    r11 "11" bytes4! int! volatile; 
-    r10 "10" bytes4! int! volatile; 
-    r9  "9"  bytes4! int! volatile;
-    r8  "8"  bytes4! int! volatile;
-    r7  "7"  bytes4! int! volatile;
-    r6  "6"  bytes4! int! volatile;
-    r5  "5"  bytes4! int! volatile;
-    r4  "4"  bytes4! int! volatile;
-    r3  "3"  bytes4! int! ret volatile;
+    r12 "r12" bytes4! int! volatile; 
+    r11 "r11" bytes4! int! volatile; 
+    r10 "r10" bytes4! int! volatile; 
+    r9  "r9"  bytes4! int! volatile;
+    r8  "r8"  bytes4! int! volatile;
+    r7  "r7"  bytes4! int! volatile;
+    r6  "r6"  bytes4! int! volatile;
+    r5  "r5"  bytes4! int! volatile;
+    r4  "r4"  bytes4! int! volatile;
+    r3  "r3"  bytes4! int! ret volatile;
 
-    r31 "31" bytes4! int!; 
-    r30 "30" bytes4! int!; 
-    r29 "29" bytes4! int!; 
-    r28 "28" bytes4! int!; 
-    r27 "27" bytes4! int!; 
-    r26 "26" bytes4! int!; 
-    r25 "25" bytes4! int!; 
-    r24 "24" bytes4! int!; 
-    r23 "23" bytes4! int!; 
-    r22 "22" bytes4! int!; 
-    r21 "21" bytes4! int!; 
-    r20 "20" bytes4! int!; 
-    r19 "19" bytes4! int!; 
-    r18 "18" bytes4! int!; 
-    r17 "17" bytes4! int!; 
-    r16 "16" bytes4! int!;
-    r15 "15" bytes4! int!;
-    r14 "14" bytes4! int!;
+    r31 "r31" bytes4! int!; 
+    r30 "r30" bytes4! int!; 
+    r29 "r29" bytes4! int!; 
+    r28 "r28" bytes4! int!; 
+    r27 "r27" bytes4! int!; 
+    r26 "r26" bytes4! int!; 
+    r25 "r25" bytes4! int!; 
+    r24 "r24" bytes4! int!; 
+    r23 "r23" bytes4! int!; 
+    r22 "r22" bytes4! int!; 
+    r21 "r21" bytes4! int!; 
+    r20 "r20" bytes4! int!; 
+    r19 "r19" bytes4! int!; 
+    r18 "r18" bytes4! int!; 
+    r17 "r17" bytes4! int!; 
+    r16 "r16" bytes4! int!;
+    r15 "r15" bytes4! int!;
+    r14 "r14" bytes4! int!;
 
-    f14 "14" bytes4! float! volatile;
-    f13 "13" bytes4! float! volatile;
-    f12 "12" bytes4! float! volatile;
-    f11 "11" bytes4! float! volatile;
-    f10 "10" bytes4! float! volatile;
-    f9  "9"  bytes4! float! volatile;
-    f8  "8"  bytes4! float! volatile;
-    f7  "7"  bytes4! float! volatile;
-    f6  "6"  bytes4! float! volatile;
-    f5  "5"  bytes4! float! volatile;
-    f4  "4"  bytes4! float! volatile;
-    f3  "3"  bytes4! float! volatile;
-    f2  "2"  bytes4! float! volatile;
-    f1  "1"  bytes4! float! volatile;
-    f0  "0"  bytes4! float! volatile;
+    f14 "f14" bytes4! float! volatile;
+    f13 "f13" bytes4! float! volatile;
+    f12 "f12" bytes4! float! volatile;
+    f11 "f11" bytes4! float! volatile;
+    f10 "f10" bytes4! float! volatile;
+    f9  "f9"  bytes4! float! volatile;
+    f8  "f8"  bytes4! float! volatile;
+    f7  "f7"  bytes4! float! volatile;
+    f6  "f6"  bytes4! float! volatile;
+    f5  "f5"  bytes4! float! volatile;
+    f4  "f4"  bytes4! float! volatile;
+    f3  "f3"  bytes4! float! volatile;
+    f2  "f2"  bytes4! float! volatile;
+    f1  "f1"  bytes4! float! volatile;
+    f0  "f0"  bytes4! float! volatile;
 
-    f31 "31" bytes4! float!;
-    f30 "30" bytes4! float!;
-    f29 "29" bytes4! float!;
-    f28 "28" bytes4! float!;
-    f27 "27" bytes4! float!;
-    f26 "26" bytes4! float!;
-    f25 "25" bytes4! float!;
-    f24 "24" bytes4! float!;
-    f23 "23" bytes4! float!;
-    f22 "22" bytes4! float!;
-    f21 "21" bytes4! float!;
-    f20 "20" bytes4! float!;
-    f19 "19" bytes4! float!;
-    f18 "18" bytes4! float!;
-    f17 "17" bytes4! float!;
-    f16 "16" bytes4! float!;
-    f15 "15" bytes4! float!;
+    f31 "f31" bytes4! float!;
+    f30 "f30" bytes4! float!;
+    f29 "f29" bytes4! float!;
+    f28 "f28" bytes4! float!;
+    f27 "f27" bytes4! float!;
+    f26 "f26" bytes4! float!;
+    f25 "f25" bytes4! float!;
+    f24 "f24" bytes4! float!;
+    f23 "f23" bytes4! float!;
+    f22 "f22" bytes4! float!;
+    f21 "f21" bytes4! float!;
+    f20 "f20" bytes4! float!;
+    f19 "f19" bytes4! float!;
+    f18 "f18" bytes4! float!;
+    f17 "f17" bytes4! float!;
+    f16 "f16" bytes4! float!;
+    f15 "f15" bytes4! float!;
             
 	cr0 "cr0" cr!;
 
@@ -109,10 +109,6 @@ PATTERNS
 		emit "addi sp, sp, 4"
 		cost 8;
 		
-	RET
-		emit "ret"
-		cost 4;
-
 	SETRET4(in:(ret)reg)
 		emit "! setret4"
 		cost 4;
@@ -400,6 +396,11 @@ PATTERNS
 	out:(int)reg = ADD4(left:(int)reg, right:CONST4)
         when signed_constant(%right, 16)
 		emit "addi %out, %left, $right"
+		cost 4;
+
+	out:(int)reg = ADD4(left:CONST4, right:(int)reg)
+        when signed_constant(%left, 16)
+		emit "addi %out, %right, $left"
 		cost 4;
 
 	out:(int)reg = SUB4(left:(int)reg, right:(int)reg)

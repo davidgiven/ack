@@ -9,10 +9,11 @@ cprogram {
 	name = "mcg",
 	srcs = {
 		"./*.c",
-		"+mcgg_c",
+		matching(filenamesof("+mcgg_c"), "%.c$"),
 	},
 	deps = {
-		"util/mcgg+lib",
+		"+mcgg_c",
+		"./*.h",
 		"h+emheaders",
 		"modules+headers",
 		"modules/src/alloc+lib",
@@ -23,7 +24,7 @@ cprogram {
 		"modules/src/read_em+lib_ev",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"./*.h",
+		"util/mcgg+lib",
 	},
 	vars = {
 		["+cflags"] = {

@@ -11,7 +11,8 @@ struct local
 struct procedure
 {
     const char* name;
-    struct basicblock* root_bb;
+    struct basicblock* entry;
+    struct basicblock* exit;
     size_t nlocals;
     ARRAYOF(struct basicblock) blocks;
     IMAPOF(struct local) locals;

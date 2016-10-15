@@ -488,19 +488,6 @@ static void assign_hregs_to_vregs(void)
     }
 }
 
-static struct hop* create_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
-{
-    struct hop* hop = new_hop(bb, NULL);
-
-    hop_add_string_insel(hop, "! move ");
-    hop_add_hreg_insel(hop, src);
-    hop_add_string_insel(hop, " -> ");
-    hop_add_hreg_insel(hop, dest);
-    hop_add_eoi_insel(hop);
-
-    return hop;
-}
-
 static struct hop* create_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
@@ -558,7 +545,7 @@ static int insert_moves(struct basicblock* bb, int index,
         {
             /* Copy. */
 
-            hop = create_move(bb, src, dest);
+            hop = platform_move(bb, src, dest);
             pmap_remove(&copies, src, dest);
         }
         else
@@ -567,7 +554,7 @@ static int insert_moves(struct basicblock* bb, int index,
 
             src = copies.item[0].left;
             dest = pmap_findleft(&copies, src);
-            hop = create_move(bb, src, dest);
+            hop = create_swap(bb, src, dest);
             pmap_remove(&copies, src, dest);
             pmap_remove(&copies, dest, src);
         }

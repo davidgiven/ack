@@ -20,6 +20,10 @@ static char rcsid[] = "$Id$";
 
 int maxcost = SHRT_MAX / 2;
 
+FILE* infp = NULL;
+FILE* outfp = NULL;
+FILE* hdrfp = NULL;
+
 static char* prefix = "burm";
 static int Tflag = 1; /* tracing */
 static int ntnumber = 0;
@@ -32,8 +36,8 @@ static int nrules;
 static SMAPOF(struct reg) registers;
 static SMAPOF(struct regattr) registerattrs;
 
-static void print(char* fmt, ...);
-static void ckreach(Nonterm p);
+static void print(const char* fmt, ...);
+static void printh(const char* fmt, ...);
 static void registerterminals(void);
 static struct regattr* makeregattr(const char* id);
 static void emitclosure(Nonterm nts);
@@ -72,11 +76,12 @@ int main(int argc, char* argv[])
 
 	infp = stdin;
 	outfp = stdout;
+	hdrfp = NULL;
 	yy_flex_debug = 0;
 
 	for (;;)
 	{
-		int opt = getopt(argc, argv, "p:i:o:yf");
+		int opt = getopt(argc, argv, "p:i:o:h:yf");
 		if (opt == -1)
 			break;
 
@@ -100,6 +105,15 @@ int main(int argc, char* argv[])
 				if (!outfp)
 				{
 					yyerror("cannot open output file: %s\n", strerror(errno));
+					exit(1);
+				}
+				break;
+
+			case 'h':
+				hdrfp = fopen(optarg, "w");
+				if (!hdrfp)
+				{
+					yyerror("cannot open output header file: %s\n", strerror(errno));
 					exit(1);
 				}
 				break;
@@ -138,24 +152,18 @@ int main(int argc, char* argv[])
 		const static struct terminfo reg = { "reg", NULL, "" };
 		const static struct terminfo REG = { "REG", NULL, NULL };
 		const static struct terminfo NOP = { "NOP", NULL, NULL };
+		const static struct terminfo RET = { "RET", NULL, NULL };
 
 		nonterm("reg", true);
 
 		rule(NULL, tree(&reg, NULL, NULL))->cost = 1;
 		rule(&reg, tree(&REG, NULL, NULL))->cost = 1;
 		rule(&reg, tree(&NOP, tree(&reg, NULL, NULL), NULL))->cost = 1;
+		rule(NULL, tree(&RET, NULL, NULL))->cost = 1;
 	}
 
 	yyin = infp;
 	yyparse();
-
-	if (start)
-		ckreach(start);
-	#if 0
-	for (p = nts; p; p = p->link)
-		if (!p->reached)
-			yyerror("can't reach non-terminal `%s'\n", p->name);
-	#endif
 
 	emitregisterattrs();
 	emitregisters();
@@ -177,6 +185,13 @@ int main(int argc, char* argv[])
 	emitfuncs();
 	print("#endif\n");
 	print("#include \"mcgg_generated_footer.h\"\n");
+	printh("#endif\n");
+
+	if (outfp)
+		fclose(outfp);
+	if (hdrfp)
+		fclose(hdrfp);
+
 	return errcnt > 0;
 }
 
@@ -470,29 +485,30 @@ Rule rule(const struct terminfo* ti, Tree pattern)
 }
 
 /* print - formatted output */
-static void print(char* fmt, ...)
-{
-	va_list ap;
 
-	va_start(ap, fmt);
+static void printto(FILE* fp, const char* fmt, va_list ap)
+{
+	if (!fp)
+		return;
+
 	for (; *fmt; fmt++)
 		if (*fmt == '%')
 			switch (*++fmt)
 			{
 				case 'd':
-					fprintf(outfp, "%d", va_arg(ap, int));
+					fprintf(fp, "%d", va_arg(ap, int));
 					break;
 
 				case 'x':
-					fprintf(outfp, "%x", va_arg(ap, uint32_t));
+					fprintf(fp, "%x", va_arg(ap, uint32_t));
 					break;
 
 				case 's':
-					fputs(va_arg(ap, char*), outfp);
+					fputs(va_arg(ap, char*), fp);
 					break;
 
 				case 'P':
-					fprintf(outfp, "%s_", prefix);
+					fprintf(fp, "%s_", prefix);
 					break;
 
 				case 'T':
@@ -514,7 +530,7 @@ static void print(char* fmt, ...)
 				}
 
 				case 'S':
-					fputs(va_arg(ap, Term)->name, outfp);
+					fputs(va_arg(ap, Term)->name, fp);
 					break;
 
 				case '1':
@@ -525,46 +541,32 @@ static void print(char* fmt, ...)
 				{
 					int n = *fmt - '0';
 					while (n-- > 0)
-						putc('\t', outfp);
+						putc('\t', fp);
 					break;
 				}
 
 				default:
-					putc(*fmt, outfp);
+					putc(*fmt, fp);
 					break;
 			}
 		else
-			putc(*fmt, outfp);
+			putc(*fmt, fp);
+}
+
+static void print(const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	printto(outfp, fmt, ap);
 	va_end(ap);
 }
 
-void printlineno(void)
+static void printh(const char* fmt, ...)
 {
-	//print("#line %d\n", yylineno);
-}
-
-/* reach - mark all non-terminals in tree t as reachable */
-static void reach(Tree t)
-{
-	Nonterm p = t->op;
-
-	if (p->kind == NONTERM)
-		if (!p->reached)
-			ckreach(p);
-	if (t->left)
-		reach(t->left);
-	if (t->right)
-		reach(t->right);
-}
-
-/* ckreach - mark all non-terminals reachable from p */
-static void ckreach(Nonterm p)
-{
-	Rule r;
-
-	p->reached = 1;
-	for (r = p->rules; r; r = r->decode)
-		reach(r->pattern);
+	va_list ap;
+	va_start(ap, fmt);
+	printto(hdrfp, fmt, ap);
+	va_end(ap);
 }
 
 static void emitregisterattrs(void)
@@ -578,8 +580,10 @@ static void emitregisterattrs(void)
 		assert(rc->number == i);
 
 		print("%1\"%s\",\n", rc->name);
+		printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
 	}
 	print("};\n\n");
+	printh("\n");
 }
 
 static void emitregisters(void)
@@ -713,9 +717,12 @@ static void emitdefs(Nonterm nts, int ntnumber)
 {
 	Nonterm p;
 
+	printh("enum {\n");
 	for (p = nts; p; p = p->link)
-		print("#define %P%S_NT %d\n", p, p->number);
-	print("#define %Pmax_nt %d\n\n", ntnumber);
+		printh("%1%P%S_NT = %d,\n", p, p->number);
+	printh("%1%Pmax_nt = %d\n", ntnumber);
+	printh("};\n\n");
+
 	print("const char *%Pntname[] = {\n%10,\n");
 	for (p = nts; p; p = p->link)
 		print("%1\"%S\",\n", p);
@@ -744,6 +751,9 @@ static void emitheader(void)
 	print("#include \"mcgg_generated_header.h\"\n");
 	if (Tflag)
 		print("static NODEPTR_TYPE %Pnp;\n\n");
+
+	printh("#ifndef MCG_DEFS_H\n");
+	printh("#define MCG_DEFS_H\n\n");
 }
 
 /* computekids - compute paths to kids in tree t */
@@ -1342,11 +1352,6 @@ static void emitterms(Term terms)
 {
 	Term p;
 	int k;
-
-	print("enum {\n");
-	for (k = 0, p = terms; p; p = p->link)
-		print("%1%S = %d,\n", p, p->esn);
-	print("};\n\n");
 
 	print("static const char %Parity[] = {\n");
 	for (k = 0, p = terms; p; p = p->link)

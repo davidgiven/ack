@@ -34,7 +34,7 @@ typedef PMAPOF(struct hreg, struct vreg) register_assignment_t;
 extern struct vreg* new_vreg(void);
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);
-extern struct hreg* new_stacked_hreg(int offset, uint32_t attrs);
+extern struct hreg* new_stacked_hreg(int offset, uint32_t type);
 
 #endif
 

@@ -180,8 +180,6 @@ predicate_arg
 #include <ctype.h>
 
 int errcnt = 0;
-FILE *infp = NULL;
-FILE *outfp = NULL;
 static char buf[BUFSIZ], *bp = buf;
 static int ppercent = 0;
 

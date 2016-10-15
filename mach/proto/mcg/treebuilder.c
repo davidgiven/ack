@@ -1,5 +1,6 @@
 #include "mcg.h"
 
+static struct procedure* current_proc;
 static struct basicblock* current_bb;
 
 static int stackptr;
@@ -712,9 +713,25 @@ static void insn_ivalue(int opcode, arith value)
                 );
             }
 
+            if (!current_proc->exit)
+            {
+                current_proc->exit = bb_get(NULL);
+                array_append(&current_proc->blocks, current_proc->exit);
+
+                /* This is actually ignored --- the entire block gets special
+                 * treatment. But a lot of the rest of the code assumes that
+                 * all basic blocks have one instruction, so we insert one. */
+                array_append(&current_proc->exit->irs,
+                    new_ir0(
+                        IR_RET, 0
+                    )
+                );
+            }
+
             appendir(
-                new_ir0(
-                    IR_RET, 0
+                new_ir1(
+                    IR_JUMP, 0,
+                    new_bbir(current_proc->exit)
                 )
             );
             break;
@@ -971,10 +988,11 @@ static void generate_tree(struct basicblock* bb)
     assert(stackptr == 0);
 }
 
-void tb_procedure(struct procedure* current_proc)
+void tb_procedure(struct procedure* proc)
 {
     int i;
 
+    current_proc = proc;
     for (i=0; i<current_proc->blocks.count; i++)
         generate_tree(current_proc->blocks.item[i]);
 

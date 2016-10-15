@@ -70,13 +70,14 @@ definerule("mcgg",
 			cwd = e.cwd,
 			outleaves = {
 				"tables.c",
+				"tables.h",
 			},
 			ins = {
 				"util/mcgg+mcgg",
 				e.srcs[1]
 			},
 			commands = {
-				"%{ins[1]} -i %{ins[2]} -o %{outs}",
+				"%{ins[1]} -i %{ins[2]} -o %{outs[1]} -h %{outs[2]}",
 			}
 		}
 	end

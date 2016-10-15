@@ -58,6 +58,55 @@ void hop_add_eoi_insel(struct hop* hop)
 	array_append(&hop->insels, insel);
 }
 
+void hop_add_insel(struct hop* hop, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    while (*fmt)
+    {
+        if (*fmt == '%')
+        {
+            fmt += 2;
+            switch (fmt[-1])
+            {
+                case 'd':
+                    hop_add_string_insel(hop, aprintf("%d", va_arg(ap, int)));
+                    break;
+
+                case 'H':
+                    hop_add_hreg_insel(hop, va_arg(ap, struct hreg*));
+                    break;
+
+                case 'V':
+                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*));
+                    break;
+            }
+        }
+        else
+        {
+            const char* end = strchr(fmt, '%');
+            const char* s;
+            if (end)
+            {
+                int len = end - fmt;
+                s = strndup(fmt, len);
+                fmt = end;
+            }
+            else
+            {
+                s = fmt;
+                fmt += strlen(fmt);
+            }
+
+            hop_add_string_insel(hop, s);
+        }
+    }
+
+    hop_add_eoi_insel(hop);
+    va_end(ap);
+}
+
 static void print_header(char k, struct hop* hop)
 {
     int i;

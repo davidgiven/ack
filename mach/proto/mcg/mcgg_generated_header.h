@@ -1,7 +1,6 @@
 #include "mcg.h"
 #include "mcgg.h"
 
-
 #define PANIC printf
 
 #define burm_assert(b, s) assert(b)
