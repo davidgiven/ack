@@ -504,6 +504,23 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
 
+        case op_lof:
+        {
+            struct ir* ptr = pop(EM_pointersize);
+
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        ptr,
+                        new_wordir(value)
+                    )
+                )
+            );
+            break;
+        }
+
         case op_sti:
         {
             struct ir* ptr = pop(EM_pointersize);
@@ -513,6 +530,25 @@ static void insn_ivalue(int opcode, arith value)
                 new_ir2(
                     IR_STORE, value,
                     ptr, val
+                )
+            );
+            break;
+        }
+
+        case op_stf:
+        {
+            struct ir* ptr = pop(EM_pointersize);
+            struct ir* val = pop(value);
+
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        ptr,
+                        new_wordir(value)
+                    ),
+                    val
                 )
             );
             break;
