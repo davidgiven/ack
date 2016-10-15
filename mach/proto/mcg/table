@@ -225,11 +225,6 @@ PATTERNS
         emit "! CIU41(ubyteX) -> ubyteX"
         cost 1;
         
-    out:(int)reg = CII14(in:(int)ubyte0)
-        with %out == %in
-        emit "! CII14(ubyte0) -> reg"
-        cost 4;
-        
     out:(int)reg = CII14(in:(int)ubyteX)
         emit "extsb %out, %in ! CII14(ubyteX) -> reg"
         cost 4;
