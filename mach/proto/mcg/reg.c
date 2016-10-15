@@ -20,15 +20,16 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 	return hreg;
 }
 
-struct hreg* new_stacked_hreg(int offset, uint32_t type)
+struct hreg* new_stacked_hreg(uint32_t type)
 {
+    static int hreg_count = 1;
 	struct hreg* hreg = calloc(1, sizeof *hreg);
-	hreg->name = aprintf("stacked_%d", offset);
+	hreg->name = aprintf("stacked_%d_id_%d", type, hreg_count++);
     hreg->realname = hreg->name;
     hreg->type = type;
 	hreg->attrs = type;
 	hreg->is_stacked = true;
-	hreg->offset = offset;
+	hreg->offset = -1;
 	return hreg;
 }
 

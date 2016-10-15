@@ -112,7 +112,7 @@ extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
 extern void pass_add_prologue_epilogue(struct procedure* proc);
 extern void pass_promote_float_ops(struct procedure* proc);
-extern void pass_register_allocator(void);
+extern void pass_register_allocator(struct procedure* proc);
 extern void pass_remove_dead_blocks(struct procedure* proc);
 extern void pass_remove_dead_phis(void);
 extern void pass_split_critical_edges(struct procedure* proc);
@@ -120,6 +120,7 @@ extern void pass_split_critical_edges(struct procedure* proc);
 extern struct hop* platform_prologue(struct procedure* proc);
 extern struct hop* platform_epilogue(struct procedure* proc);
 extern struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest);
+extern void platform_calculate_offsets(struct procedure* proc);
 
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;

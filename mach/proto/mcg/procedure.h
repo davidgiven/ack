@@ -13,7 +13,12 @@ struct procedure
     const char* name;
     struct basicblock* entry;
     struct basicblock* exit;
-    size_t nlocals;
+    int locals_size;
+    int spills_size;
+    int saved_size;
+    int fp_to_st;
+    int fp_to_ap;
+    int fp_to_lb;
     ARRAYOF(struct basicblock) blocks;
     IMAPOF(struct local) locals;
 };

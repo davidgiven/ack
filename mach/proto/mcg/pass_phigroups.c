@@ -34,8 +34,9 @@ static void recursively_associate_group(struct phicongruence* c, struct vreg* vr
     if (vreg->defined)
     {
         struct constraint* constraint = pmap_findleft(&vreg->defined->constraints, vreg);
-        if ((c->attrs == 0) || (constraint->attrs < c->attrs))
-            c->attrs = constraint->attrs;
+        if (c->type == 0)
+            c->type = vreg->type;
+        assert(c->type == vreg->type);
 
         array_appendu(&c->definitions, vreg->defined);
     }

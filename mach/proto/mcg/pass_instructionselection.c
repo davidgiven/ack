@@ -100,6 +100,26 @@ static void constrain_input_reg(int child, uint32_t attr)
     get_constraint(vreg)->attrs = attr;
 }
 
+static uint32_t find_type_from_constraint(uint32_t attr)
+{
+    /* Looks through the registers and finds a concrete register implementing
+     * that attribute, and returns the type. We assume that all registers
+     * implementing an attribute (which anyone is going to ask for, 'volatile'
+     * doesn't count) will have the same type. TODO: mcgg should check for
+     * this. */
+
+    const struct burm_register_data* brd = burm_register_data;
+    while (brd->name)
+    {
+        if (brd->attrs & attr)
+            return brd->type;
+        brd++;
+    }
+
+    fatal("unable to find a register matching attribute 0x%x", attr);
+    return 0;
+}
+
 static void constrain_output_reg(uint32_t attr)
 {
     struct vreg* vreg = current_hop->output;
@@ -109,6 +129,7 @@ static void constrain_output_reg(uint32_t attr)
 
     array_appendu(&current_hop->outs, vreg);
     vreg->defined = current_hop;
+    vreg->type = find_type_from_constraint(attr);
 
     get_constraint(vreg)->attrs = attr;
 }

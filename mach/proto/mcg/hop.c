@@ -52,6 +52,27 @@ void hop_add_value_insel(struct hop* hop, struct ir* ir)
 	array_append(&hop->insels, insel);
 }
 
+void hop_add_st_offset_insel(struct hop* hop, struct hreg* hreg)
+{
+	struct insel* insel = new_insel(INSEL_ST_OFFSET);
+	insel->u.hreg = hreg;
+	array_append(&hop->insels, insel);
+}
+
+void hop_add_ab_offset_insel(struct hop* hop, int offset)
+{
+	struct insel* insel = new_insel(INSEL_AB_OFFSET);
+	insel->u.offset = offset;
+	array_append(&hop->insels, insel);
+}
+
+void hop_add_lb_offset_insel(struct hop* hop, int offset)
+{
+	struct insel* insel = new_insel(INSEL_LB_OFFSET);
+	insel->u.offset = offset;
+	array_append(&hop->insels, insel);
+}
+
 void hop_add_eoi_insel(struct hop* hop)
 {
 	struct insel* insel = new_insel(INSEL_EOI);
@@ -72,6 +93,18 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
             {
                 case 'd':
                     hop_add_string_insel(hop, aprintf("%d", va_arg(ap, int)));
+                    break;
+
+                case 'S':
+                    hop_add_st_offset_insel(hop, va_arg(ap, struct hreg*));
+                    break;
+
+                case 'A':
+                    hop_add_ab_offset_insel(hop, va_arg(ap, int));
+                    break;
+
+                case 'L':
+                    hop_add_lb_offset_insel(hop, va_arg(ap, int));
                     break;
 
                 case 'H':
@@ -192,6 +225,18 @@ char* hop_render(struct hop* hop)
 			case INSEL_STRING:
 				appendf("%s", insel->u.string);
 				break;
+
+            case INSEL_ST_OFFSET:
+                appendf("(st+%d)", insel->u.hreg->offset);
+                break;
+
+            case INSEL_AB_OFFSET:
+                appendf("(ab+%d)", insel->u.offset);
+                break;
+
+            case INSEL_LB_OFFSET:
+                appendf("(lb+%d)", insel->u.offset);
+                break;
 
 			case INSEL_VALUE:
 			{

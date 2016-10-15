@@ -6,6 +6,8 @@ struct assignment
     struct vreg* out;
 };
 
+static struct procedure* current_proc;
+
 static ARRAYOF(struct hreg) hregs;
 
 static PMAPOF(struct vreg, struct hreg) evicted;
@@ -42,7 +44,7 @@ static void wire_up_blocks_ins_outs(void)
 }
 
 static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
-    struct vreg* vreg, uint32_t attrs)
+    struct vreg* vreg, uint32_t type)
 {
     int i;
 
@@ -52,7 +54,7 @@ static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
     for (i=0; i<hregs.count; i++)
     {
         struct hreg* hreg = hregs.item[i];
-        if (!pmap_findleft(regs, hreg) && (hreg->attrs & attrs))
+        if (!pmap_findleft(regs, hreg) && (hreg->type == type))
         {
             /* This one is unused. Use it. */
             return hreg;
@@ -99,19 +101,39 @@ static struct hreg* evict(struct vreg* vreg)
     assert(false);
 }
 
-static bool allocatable_input(struct hreg* hreg, struct vreg* vreg)
+static bool type_match(struct hreg* hreg, struct vreg* vreg)
 {
     struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
+    if (c)
+        return (hreg->attrs & c->attrs);
+    if (vreg->congruence)
+        return (hreg->type == vreg->congruence->type);
+    return (hreg->type == vreg->type);
+}
+
+static bool allocatable_stackable_input(struct hreg* hreg, struct vreg* vreg)
+{
     return !pmap_findleft(current_ins, hreg) &&
-        (!c || (hreg->attrs & c->attrs));
+        type_match(hreg, vreg);
+}
+
+static bool allocatable_stackable_output(struct hreg* hreg, struct vreg* vreg)
+{
+    return !pmap_findleft(current_outs, hreg) &&
+        type_match(hreg, vreg) &&
+        !(hreg->attrs & current_hop->insndata->corrupts);
+}
+
+static bool allocatable_input(struct hreg* hreg, struct vreg* vreg)
+{
+    return allocatable_stackable_input(hreg, vreg) &&
+        !hreg->is_stacked;
 }
 
 static bool allocatable_output(struct hreg* hreg, struct vreg* vreg)
 {
-    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    return !pmap_findleft(current_outs, hreg) &&
-        (!c || (hreg->attrs & c->attrs)) &&
-        !(hreg->attrs & current_hop->insndata->corrupts);
+    return allocatable_stackable_output(hreg, vreg) &&
+        !hreg->is_stacked;
 }
 
 static struct hreg* find_input_reg(struct vreg* vreg)
@@ -174,7 +196,32 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 
     if (hreg)
     {
-        if (pmap_findleft(current_ins, hreg) == vreg)
+        if (hreg->is_stacked)
+        {
+            /* This vreg is stacked; we need to put it in a register. That's
+             * slightly exciting because the vreg might be a through, which
+             * means we need an output register too... which we might not be
+             * able to allocate. */
+
+            if (array_contains(&current_hop->throughs, vreg))
+            {
+                struct hreg* src = hreg;
+                hreg = find_through_reg(vreg);
+                assert(hreg);
+                pmap_remove(current_ins, src, vreg);
+                pmap_remove(current_outs, src, vreg);
+                pmap_add(current_ins, hreg, vreg);
+                pmap_add(current_outs, hreg, vreg);
+                return;
+            }
+            else
+            {
+                /* Not a through. */
+                pmap_remove(current_ins, hreg, vreg);
+                hreg = NULL;
+            }
+        }
+        else if (pmap_findleft(current_ins, hreg) == vreg)
         {
             /* Yup, already there. */
         }
@@ -213,7 +260,7 @@ static void add_output_register(struct vreg* vreg)
     c = pmap_findleft(&current_hop->constraints, vreg);
     if (c->equals_to)
     {
-        tracef('R', "R: outputput equality constraint of %%%d to %%%d\n",
+        tracef('R', "R: output equality constraint of %%%d to %%%d\n",
             vreg->id, c->equals_to->id);
 
         /* This output register is constrained to be in the same hreg as an
@@ -262,28 +309,31 @@ static void add_through_register(struct vreg* vreg, struct hreg* hreg)
 
     if (hreg)
     {
-        bool infree = allocatable_input(hreg, vreg);
-        bool outfree = allocatable_output(hreg, vreg);
+        bool infree = allocatable_stackable_input(hreg, vreg);
+        bool outfree = allocatable_stackable_output(hreg, vreg);
+        struct vreg* inuse = pmap_findleft(current_ins, hreg);
+        struct vreg* outuse = pmap_findleft(current_outs, hreg);
 
-        if (infree && outfree)
+        if ((infree || (inuse == vreg)) &&
+            (outfree || (outuse == vreg)))
         {
-            /* Register unused --- use it. */
-        }
-        if ((infree || pmap_findleft(current_ins, hreg) == vreg) &&
-            (outfree || pmap_findleft(current_outs, hreg) == vreg))
-        {
-            /* Input and output are either free or already assigned. */
+            /* Input and output are either free or already assigned to this
+             * vreg. */
         }
         else
         {
-            /* Nope, can't honour the hint. */
-            hreg = NULL;
+            /* Nope, can't honour the hint. Mark the register as evicted; we'll
+             * put it in something later (probably a stack slot). */
+
+            tracef('R', "R: cannot place %%%d in %s, evicting\n", vreg->id, hreg->name);
+            pmap_put(&evicted, vreg, hreg);
+            pmap_remove(current_ins, hreg, vreg);
+            pmap_remove(current_outs, hreg, vreg);
+            return;
         }
     }
     
-    if (!hreg)
-        hreg = find_through_reg(vreg);
-
+    assert(hreg);
     pmap_put(current_ins, hreg, vreg);
     pmap_put(current_outs, hreg, vreg);
 }
@@ -302,8 +352,8 @@ static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* s
     {
         hreg = hregs.item[i];
         if ((hreg->type == src->type) &&
-            allocatable_input(hreg, vreg) &&
-            allocatable_output(hreg, vreg))
+            allocatable_stackable_input(hreg, vreg) &&
+            allocatable_stackable_output(hreg, vreg))
         {
             goto found;
         }
@@ -311,7 +361,8 @@ static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* s
 
     /* No more registers --- allocate a stack slot. */
 
-    assert(false);
+    hreg = new_stacked_hreg(src->type);
+    array_append(&hregs, hreg);
 
 found:
     tracef('R', "R: evicted %%%d moving to %s\n", vreg->id, hreg->name);
@@ -442,7 +493,7 @@ static void assign_hregs_to_vregs(void)
             if (!pmap_findright(old, vreg))
             {
                 struct phicongruence* c = vreg->congruence;
-                struct hreg* hreg = allocate_phi_hreg(old, vreg, c->attrs);
+                struct hreg* hreg = allocate_phi_hreg(old, vreg, c->type);
 
                 tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",
                     hreg->name, vreg->id, phi->prev->name);
@@ -551,7 +602,8 @@ static int insert_moves(struct basicblock* bb, int index,
         else
         {
             /* Swap. */
-
+            
+            assert(false);
             src = copies.item[0].left;
             dest = pmap_findleft(&copies, src);
             hop = create_swap(bb, src, dest);
@@ -626,13 +678,43 @@ static void insert_phi_copies(void)
     }
 }
 
-void pass_register_allocator(void)
+static int pack_stackframe(int stacksize, int size, uint32_t attr)
 {
+    int i;
+
+    for (i=0; i<hregs.count; i++)
+    {
+        struct hreg* hreg = hregs.item[i];
+        if (hreg->is_stacked && (hreg->type & attr))
+        {
+            hreg->offset = stacksize;
+            stacksize += size;
+        }
+    }
+
+    return stacksize;
+}
+
+static void layout_stack_frame(void)
+{
+    int stacksize = 0;
+    stacksize = pack_stackframe(stacksize, 8, burm_bytes8_ATTR);
+    stacksize = pack_stackframe(stacksize, 4, burm_bytes4_ATTR);
+    stacksize = pack_stackframe(stacksize, 2, burm_bytes2_ATTR);
+    stacksize = pack_stackframe(stacksize, 1, burm_bytes1_ATTR);
+    current_proc->spills_size = stacksize;
+}
+
+void pass_register_allocator(struct procedure* proc)
+{
+    current_proc = proc;
+
     populate_hregs();
     wire_up_blocks_ins_outs();
 
     assign_hregs_to_vregs();
     insert_phi_copies();
+    layout_stack_frame();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

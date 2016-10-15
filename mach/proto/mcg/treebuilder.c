@@ -721,6 +721,7 @@ static void insn_ivalue(int opcode, arith value)
                 /* This is actually ignored --- the entire block gets special
                  * treatment. But a lot of the rest of the code assumes that
                  * all basic blocks have one instruction, so we insert one. */
+
                 array_append(&current_proc->exit->irs,
                     new_ir0(
                         IR_RET, 0

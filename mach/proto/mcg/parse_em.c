@@ -308,7 +308,7 @@ static void parse_pseu(void)
             current_proc = calloc(sizeof(struct procedure), 1);
             current_proc->name = strdup(em.em_pnam);
             current_proc->entry = bb_get(current_proc->name);
-            current_proc->nlocals = em.em_nlocals;
+            current_proc->locals_size = em.em_nlocals;
             code_bb = current_proc->entry;
             code_bb->is_root = true;
             array_append(&current_proc->blocks, code_bb);

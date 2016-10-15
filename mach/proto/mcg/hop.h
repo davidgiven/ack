@@ -7,6 +7,9 @@ enum insel_type
     INSEL_HREG,
 	INSEL_VREG,
 	INSEL_VALUE,
+    INSEL_ST_OFFSET,
+    INSEL_AB_OFFSET,
+    INSEL_LB_OFFSET,
 	INSEL_EOI
 };
 
@@ -19,6 +22,7 @@ struct insel
         struct hreg* hreg;
 		struct vreg* vreg;
 		struct ir* value;
+        int offset;
 	}
 	u;
 };
@@ -53,6 +57,9 @@ extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg);
 extern void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg);
 extern void hop_add_value_insel(struct hop* hop, struct ir* ir);
+extern void hop_add_st_offset_insel(struct hop* hop, struct hreg* hreg);
+extern void hop_add_ab_offset_insel(struct hop* hop, int offset);
+extern void hop_add_lb_offset_insel(struct hop* hop, int offset);
 extern void hop_add_eoi_insel(struct hop* hop);
 
 extern void hop_add_insel(struct hop* hop, const char* fmt, ...);

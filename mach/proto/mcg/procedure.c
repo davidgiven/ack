@@ -1,5 +1,7 @@
 #include "mcg.h"
 
+extern struct procedure* current_proc;
+
 static void print_blocks(char k, struct procedure* proc)
 {
 	int i;
@@ -157,8 +159,6 @@ static void write_dominance_graph(const char* name)
 
 void procedure_compile(struct procedure* proc)
 {
-	int i;
-
     pass_group_irs(proc);
 	print_blocks('1', proc);
 
@@ -189,10 +189,11 @@ void procedure_compile(struct procedure* proc)
     pass_find_phi_congruence_groups();
     pass_live_vreg_analysis();
     print_hops('8', proc);
-    pass_register_allocator();
+    pass_register_allocator(proc);
     pass_add_prologue_epilogue(proc);
     print_hops('9', proc);
 
+    platform_calculate_offsets(proc);
     emit_procedure(proc);
 
     if (cfg_dot_file)
