@@ -46,7 +46,7 @@ int main(int argc, char* const argv[])
     opterr = 1;
     for (;;)
     {
-        int c = getopt(argc, argv, "-d:D:C:");
+        int c = getopt(argc, argv, "-d:D:C:o:");
         if (c == -1)
             break;
 
