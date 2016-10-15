@@ -205,7 +205,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             hop_print('I', current_hop);
             array_append(&current_bb->hops, current_hop);
 
-            if (goal != burm_stmt_NT)
+            if ((goal != burm_stmt_NT) && !insn->ir->result)
                 insn->ir->result = insn->hop->output;
         }
     }
