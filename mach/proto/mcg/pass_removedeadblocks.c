@@ -24,16 +24,16 @@ static void walk_blocks(struct basicblock* bb)
     }
 }
 
-void pass_remove_dead_blocks(struct procedure* proc)
+void pass_remove_dead_blocks(void)
 {
     int i, j;
     
     used.count = 0;
-    walk_blocks(proc->blocks.item[0]);
+    walk_blocks(current_proc->blocks.item[0]);
 
-    proc->blocks.count = 0;
+    current_proc->blocks.count = 0;
     for (i=0; i<used.count; i++)
-        array_append(&proc->blocks, used.item[i]);
+        array_append(&current_proc->blocks, used.item[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

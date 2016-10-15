@@ -1,7 +1,6 @@
 #include "mcg.h"
 
 static struct e_instr em;
-static struct procedure* current_proc;
 static struct basicblock* code_bb;
 static struct basicblock* data_bb;
 
@@ -321,7 +320,7 @@ static void parse_pseu(void)
         }
 
 		case ps_end: /* procedure end */
-            tb_procedure(current_proc);
+            tb_procedure();
 
             current_proc = NULL;
             code_bb = NULL;

@@ -40,7 +40,7 @@ static struct ir* get_first_pop(struct basicblock* bb)
     return NULL;
 }
 
-static void convert_block(struct procedure* proc, struct basicblock* bb)
+static void convert_block(struct basicblock* bb)
 {
     int i, j;
     struct ir* ir;
@@ -108,12 +108,12 @@ static void convert_block(struct procedure* proc, struct basicblock* bb)
     }
 }
 
-void pass_convert_stack_ops(struct procedure* proc)
+void pass_convert_stack_ops(void)
 {
     int i;
 
-    for (i=0; i<proc->blocks.count; i++)
-        convert_block(proc, proc->blocks.item[i]);
+    for (i=0; i<cfg.preorder.count; i++)
+        convert_block(cfg.preorder.item[i]);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

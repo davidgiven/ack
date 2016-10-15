@@ -19,7 +19,7 @@ struct dominance_data
 extern struct graph_data cfg;
 extern struct dominance_data dominance;
 
-extern void update_graph_data(struct procedure* proc);
+extern void update_graph_data(void);
 
 #endif
 

@@ -14,29 +14,29 @@
  *
  */
 
-void platform_calculate_offsets(struct procedure* proc)
+void platform_calculate_offsets(void)
 {
-	proc->fp_to_st = proc->spills_size;
-	proc->fp_to_ap = proc->fp_to_st + proc->saved_size + 8;
-	proc->fp_to_lb = 0;
+	current_proc->fp_to_st = current_proc->spills_size;
+	current_proc->fp_to_ap = current_proc->fp_to_st + current_proc->saved_size + 8;
+	current_proc->fp_to_lb = 0;
 }
 
-struct hop* platform_prologue(struct procedure* proc)
+struct hop* platform_prologue(void)
 {
-	struct hop* hop = new_hop(proc->entry, NULL);
+	struct hop* hop = new_hop(current_proc->entry, NULL);
 
-	hop_add_insel(hop, "addi sp, sp, %d", proc->fp_to_ap + proc->locals_size);
+	hop_add_insel(hop, "addi sp, sp, %d", current_proc->fp_to_ap + current_proc->locals_size);
 	hop_add_insel(hop, "mfspr 0, lr");
-	hop_add_insel(hop, "stw fp, %d(sp)", proc->fp_to_st + proc->locals_size);
-	hop_add_insel(hop, "stw 0, %d(sp)", proc->fp_to_st + proc->locals_size + 4);
-	hop_add_insel(hop, "addi fp, sp, %d", proc->locals_size);
+	hop_add_insel(hop, "stw fp, %d(sp)", current_proc->fp_to_st + current_proc->locals_size);
+	hop_add_insel(hop, "stw 0, %d(sp)", current_proc->fp_to_st + current_proc->locals_size + 4);
+	hop_add_insel(hop, "addi fp, sp, %d", current_proc->locals_size);
 
 	return hop;
 }
 
-struct hop* platform_epilogue(struct procedure* proc)
+struct hop* platform_epilogue(void)
 {
-	struct hop* hop = new_hop(proc->exit, NULL);
+	struct hop* hop = new_hop(current_proc->exit, NULL);
 
 	hop_add_insel(hop, "b .ret");
 

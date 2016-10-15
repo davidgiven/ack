@@ -18,26 +18,26 @@ static bool collect_outputs_cb(struct ir* ir, void* user)
     return false;
 }
 
-static void update_block_pointers_from_ir(struct procedure* proc)
+static void update_block_pointers_from_ir(void)
 {
     int i, j;
 
-    for (i=0; i<proc->blocks.count; i++)
+    for (i=0; i<current_proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = current_proc->blocks.item[i];
         bb->prevs.count = bb->nexts.count = 0;
     }
 
-    for (i=0; i<proc->blocks.count; i++)
+    for (i=0; i<current_proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = current_proc->blocks.item[i];
         for (j=0; j<bb->irs.count; j++)
             ir_walk(bb->irs.item[j], collect_outputs_cb, bb);
     }
 
-    for (i=0; i<proc->blocks.count; i++)
+    for (i=0; i<current_proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = current_proc->blocks.item[i];
 
         for (j=0; j<bb->nexts.count; j++)
         {
@@ -189,15 +189,15 @@ static void walk_dominance_graph(void)
     }
 }
 
-void update_graph_data(struct procedure* proc)
+void update_graph_data(void)
 {
-    cfg.entry = proc->blocks.item[0];
+    cfg.entry = current_proc->blocks.item[0];
     cfg.graph.count = 0;
-    update_block_pointers_from_ir(proc);
+    update_block_pointers_from_ir();
 
     walk_cfg_graph();
-    assert(cfg.postorder.count == proc->blocks.count);
-    assert(cfg.preorder.count == proc->blocks.count);
+    assert(cfg.postorder.count == current_proc->blocks.count);
+    assert(cfg.preorder.count == current_proc->blocks.count);
 
     calculate_dominance_graph();
     

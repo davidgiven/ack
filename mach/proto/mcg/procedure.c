@@ -1,15 +1,15 @@
 #include "mcg.h"
 
-extern struct procedure* current_proc;
+struct procedure* current_proc;
 
-static void print_blocks(char k, struct procedure* proc)
+static void print_blocks(char k)
 {
 	int i;
 
-	tracef(k, "%c: procedure %s\n", k, proc->name);
-	for (int i=0; i<proc->blocks.count; i++)
+	tracef(k, "%c: procedure %s\n", k, current_proc->name);
+	for (int i=0; i<current_proc->blocks.count; i++)
 	{
-		struct basicblock* bb = proc->blocks.item[i];
+		struct basicblock* bb = current_proc->blocks.item[i];
 		int j;
 
         tracef(k, "%c:\n", k);
@@ -38,11 +38,11 @@ static void print_blocks(char k, struct procedure* proc)
 	}
 }
 
-static void print_hops(char k, struct procedure* proc)
+static void print_hops(char k)
 {
     int i;
 
-    tracef(k, "%c: procedure %s\n", k, proc->name);
+    tracef(k, "%c: procedure %s\n", k, current_proc->name);
     for (int i=0; i<dominance.preorder.count; i++)
     {
 		struct basicblock* bb = dominance.preorder.item[i];
@@ -159,41 +159,42 @@ static void write_dominance_graph(const char* name)
 
 void procedure_compile(struct procedure* proc)
 {
-    pass_group_irs(proc);
-	print_blocks('1', proc);
+    current_proc = proc;
+
+    pass_group_irs();
+	print_blocks('1');
 
     /* Passes from here on must preserve IR grouping */
 
-    pass_eliminate_trivial_blocks(proc);
-    pass_remove_dead_blocks(proc);
+    pass_eliminate_trivial_blocks();
+    pass_remove_dead_blocks();
 
-    print_blocks('2', proc);
-    update_graph_data(proc);
-    pass_split_critical_edges(proc);
-    update_graph_data(proc);
+    print_blocks('2');
+    update_graph_data();
+    pass_split_critical_edges();
+    update_graph_data();
 
     /* Passes from here on can't alter the BB graph without also updating prevs
      * and nexts (and then calling update_graph_data()). */
 
-    print_blocks('3', proc);
-    pass_convert_stack_ops(proc);
-    print_blocks('4', proc);
-    pass_convert_locals_to_ssa(proc);
-    print_blocks('5', proc);
+    print_blocks('3');
+    pass_convert_stack_ops();
+    print_blocks('4');
+    pass_convert_locals_to_ssa();
+    print_blocks('5');
     pass_remove_dead_phis();
-    pass_promote_float_ops(proc);
-    print_blocks('6', proc);
+    pass_promote_float_ops();
+    print_blocks('6');
 
     pass_instruction_selector();
-    print_hops('7', proc);
+    print_hops('7');
     pass_find_phi_congruence_groups();
     pass_live_vreg_analysis();
-    print_hops('8', proc);
-    pass_register_allocator(proc);
-    pass_add_prologue_epilogue(proc);
-    print_hops('9', proc);
+    print_hops('8');
+    pass_register_allocator();
+    pass_add_prologue_epilogue();
+    print_hops('9');
 
-    platform_calculate_offsets(proc);
     emit_procedure(proc);
 
     if (cfg_dot_file)

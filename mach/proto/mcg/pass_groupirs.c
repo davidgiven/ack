@@ -14,14 +14,14 @@ static void addall(struct ir* ir)
         addall(ir->right);
 }
 
-static void collect_irs(struct procedure* proc)
+static void collect_irs(void)
 {
     int i;
     
     allirs.count = rootirs.count = 0;
-	for (i=0; i<proc->blocks.count; i++)
+	for (i=0; i<current_proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = current_proc->blocks.item[i];
         int j;
 
         for (j=0; j<bb->irs.count; j++)
@@ -82,9 +82,9 @@ static void find_non_roots(void)
 	}
 }
 
-void pass_group_irs(struct procedure* proc)
+void pass_group_irs(void)
 {
-	collect_irs(proc);
+	collect_irs();
 	clear_roots();
 	find_roots();
 	find_non_roots();

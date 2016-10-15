@@ -26,6 +26,8 @@ struct procedure
 extern void procedure_compile(struct procedure* proc);
 extern void procedure_update_bb_graph(struct procedure* proc);
 
+extern struct procedure* current_proc;
+
 #endif
 
 /* vim: set sw=4 ts=4 expandtab : */

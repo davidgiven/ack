@@ -14,15 +14,15 @@ static void addall(struct ir* ir)
         addall(ir->right);
 }
 
-static void collect_irs(struct procedure* proc)
+static void collect_irs(void)
 {
     int i;
     
     pending.count = 0;
     promotable.count = 0;
-	for (i=0; i<proc->blocks.count; i++)
+	for (i=0; i<cfg.preorder.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = cfg.preorder.item[i];
         int j;
 
         for (j=0; j<bb->irs.count; j++)
@@ -87,9 +87,9 @@ static void modify_promotable_irs(void)
     }
 }
 
-void pass_promote_float_ops(struct procedure* proc)
+void pass_promote_float_ops(void)
 {
-	collect_irs(proc);
+	collect_irs();
     search_for_promotable_irs();
     modify_promotable_irs();
 }

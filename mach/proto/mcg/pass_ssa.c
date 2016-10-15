@@ -213,15 +213,15 @@ static void ssa_convert(void)
     recursively_rewrite_tree(cfg.entry);
 }
 
-void pass_convert_locals_to_ssa(struct procedure* proc)
+void pass_convert_locals_to_ssa(void)
 {
     int i;
 
     calculate_dominance_frontier_graph();
 
-    for (i=0; i<proc->locals.count; i++)
+    for (i=0; i<current_proc->locals.count; i++)
     {
-        current_local = proc->locals.item[i].right;
+        current_local = current_proc->locals.item[i].right;
         if (current_local->is_register)
             ssa_convert();
     }

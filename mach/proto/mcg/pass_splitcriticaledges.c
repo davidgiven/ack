@@ -12,8 +12,6 @@
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.25.749
  */
 
-static struct procedure* current_proc;
-
 struct rewrite_params
 {
 	struct basicblock* find;
@@ -85,19 +83,17 @@ static bool consider_edges_leading_from(struct basicblock* bb)
     return changed;
 }
 
-void pass_split_critical_edges(struct procedure* proc)
+void pass_split_critical_edges(void)
 {
 	int i;
     bool changed;
-
-	current_proc = proc;
 
     do
     {
         changed = false;
 
-        for (i=0; i<proc->blocks.count; i++)
-            changed |= consider_edges_leading_from(proc->blocks.item[i]);
+        for (i=0; i<current_proc->blocks.count; i++)
+            changed |= consider_edges_leading_from(current_proc->blocks.item[i]);
 
     }
     while (changed);

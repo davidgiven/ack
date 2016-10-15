@@ -6,8 +6,6 @@ struct assignment
     struct vreg* out;
 };
 
-static struct procedure* current_proc;
-
 static ARRAYOF(struct hreg) hregs;
 
 static PMAPOF(struct vreg, struct hreg) evicted;
@@ -705,10 +703,8 @@ static void layout_stack_frame(void)
     current_proc->spills_size = stacksize;
 }
 
-void pass_register_allocator(struct procedure* proc)
+void pass_register_allocator(void)
 {
-    current_proc = proc;
-
     populate_hregs();
     wire_up_blocks_ins_outs();
 

@@ -1,6 +1,5 @@
 #include "mcg.h"
 
-static struct procedure* current_proc;
 static struct basicblock* current_bb;
 
 static int stackptr;
@@ -989,11 +988,10 @@ static void generate_tree(struct basicblock* bb)
     assert(stackptr == 0);
 }
 
-void tb_procedure(struct procedure* proc)
+void tb_procedure(void)
 {
     int i;
 
-    current_proc = proc;
     for (i=0; i<current_proc->blocks.count; i++)
         generate_tree(current_proc->blocks.item[i]);
 

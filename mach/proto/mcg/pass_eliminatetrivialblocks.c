@@ -28,13 +28,13 @@ static void rewrite_jumps(struct basicblock* bb)
     }
 }
 
-void pass_eliminate_trivial_blocks(struct procedure* proc)
+void pass_eliminate_trivial_blocks(void)
 {
     int i;
 
-    for (i=0; i<proc->blocks.count; i++)
+    for (i=0; i<current_proc->blocks.count; i++)
     {
-        struct basicblock* bb = proc->blocks.item[i];
+        struct basicblock* bb = current_proc->blocks.item[i];
         rewrite_jumps(bb);
     }
 }

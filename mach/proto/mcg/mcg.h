@@ -99,28 +99,28 @@ extern void data_bss(arith size, int init);
 
 extern void tb_filestart(void);
 extern void tb_fileend(void);
-extern void tb_procedure(struct procedure* proc);
+extern void tb_procedure(void);
 extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, int priority);
 
-extern void pass_convert_locals_to_ssa(struct procedure* proc);
-extern void pass_convert_stack_ops(struct procedure* proc);
-extern void pass_eliminate_trivial_blocks(struct procedure* proc);
+extern void pass_convert_locals_to_ssa(void);
+extern void pass_convert_stack_ops(void);
+extern void pass_eliminate_trivial_blocks(void);
 extern void pass_find_phi_congruence_groups(void);
-extern void pass_group_irs(struct procedure* proc);
+extern void pass_group_irs(void);
 extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
-extern void pass_add_prologue_epilogue(struct procedure* proc);
-extern void pass_promote_float_ops(struct procedure* proc);
-extern void pass_register_allocator(struct procedure* proc);
-extern void pass_remove_dead_blocks(struct procedure* proc);
+extern void pass_add_prologue_epilogue(void);
+extern void pass_promote_float_ops(void);
+extern void pass_register_allocator(void);
+extern void pass_remove_dead_blocks(void);
 extern void pass_remove_dead_phis(void);
-extern void pass_split_critical_edges(struct procedure* proc);
+extern void pass_split_critical_edges(void);
 
-extern struct hop* platform_prologue(struct procedure* proc);
-extern struct hop* platform_epilogue(struct procedure* proc);
+extern void platform_calculate_offsets(void);
+extern struct hop* platform_prologue(void);
+extern struct hop* platform_epilogue(void);
 extern struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest);
-extern void platform_calculate_offsets(struct procedure* proc);
 
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;

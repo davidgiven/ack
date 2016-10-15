@@ -74,6 +74,7 @@ REGISTERS
 	cr0 "cr0" cr!;
 
 
+
 DECLARATIONS
 
 	cr;
@@ -83,6 +84,7 @@ DECLARATIONS
     ushort0; /* bottom 16 bits valid, the rest 0 */
 
 	address fragment;
+
 
 
 PATTERNS
