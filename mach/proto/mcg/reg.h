@@ -14,6 +14,7 @@ struct phicongruence
 struct hreg
 {
 	const char* name;
+    const char* realname;
     uint32_t type;
 	uint32_t attrs;
 	bool is_stacked;

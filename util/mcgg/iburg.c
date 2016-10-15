@@ -253,7 +253,7 @@ static void* install(const char* name)
 	return &p->sym;
 }
 
-struct reg* makereg(const char* id)
+struct reg* makereg(const char* id, const char* realname)
 {
 	struct reg* p = smap_get(&registers, id);
 	static int number = 0;
@@ -262,6 +262,7 @@ struct reg* makereg(const char* id)
 		yyerror("redefinition of '%s'", id);
 	p = calloc(1, sizeof(*p));
 	p->name = id;
+	p->realname = realname;
 	p->number = number++;
 	smap_put(&registers, id, p);
 
@@ -591,7 +592,8 @@ static void emitregisters(void)
 		struct reg* r = registers.item[i].right;
 		assert(r->number == i);
 
-		print("%1{ \"%s\", 0x%x, 0x%x },\n", r->name, r->type, r->attrs);
+		print("%1{ \"%s\", \"%s\", 0x%x, 0x%x },\n",
+			r->name, r->realname, r->type, r->attrs);
 	}
 	print("%1{ NULL }\n");
 	print("};\n\n");

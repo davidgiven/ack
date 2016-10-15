@@ -123,7 +123,7 @@ char* hop_render(struct hop* hop)
             case INSEL_HREG:
             {
                 struct hreg* hreg = insel->u.hreg;
-                appendf("%s", hreg->name);
+                appendf("%s", hreg->realname);
                 break;
             }
 
@@ -134,7 +134,7 @@ char* hop_render(struct hop* hop)
                 if (!hreg)
                     hreg = pmap_findright(&hop->regsout, vreg);
                 if (hreg)
-                    appendf("%s", hreg->name);
+                    appendf("%s", hreg->realname);
                 else
                     appendf("%%%d", vreg->id);
 				break;

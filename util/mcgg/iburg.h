@@ -58,7 +58,8 @@ struct terminfo
 
 struct reg
 {
-	const char* name;      /* register name */
+	const char* name;      /* friendly register name */
+	const char* realname;  /* name used in assembly output */
 	int number;            /* identifying number */
 	uint32_t attrs;        /* bitfield of register attributes */
 	uint32_t type;         /* register type */
@@ -70,7 +71,7 @@ struct regattr
 	int number;            /* identifying number */
 };
 
-extern struct reg* makereg(const char* name);
+extern struct reg* makereg(const char* name, const char* realname);
 extern void addregattr(struct reg* reg, const char* regattr, bool exact);
 extern struct regattr* getregattr(const char* name);
 

@@ -13,6 +13,7 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 {
 	struct hreg* hreg = calloc(1, sizeof *hreg);
 	hreg->name = brd->name;
+    hreg->realname = brd->realname;
 	hreg->attrs = brd->attrs;
 	hreg->is_stacked = false;
 	return hreg;
@@ -22,6 +23,7 @@ struct hreg* new_stacked_hreg(int offset, uint32_t attrs)
 {
 	struct hreg* hreg = calloc(1, sizeof *hreg);
 	hreg->name = aprintf("stacked_%d", offset);
+    hreg->realname = hreg->name;
 	hreg->attrs = attrs;
 	hreg->is_stacked = true;
 	hreg->offset = offset;
