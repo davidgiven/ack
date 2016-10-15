@@ -126,6 +126,18 @@ PATTERNS
 		emit "addi sp, sp, $delta"
 		cost 4;
 
+    out:(int)reg = GETFP4
+        emit "mr %out, fp"
+        cost 4;
+
+    out:(int)reg = FPTOARGS4(GETFP4)
+        emit "addi %out, fp, 8"
+        cost 4;
+
+    out:(int)reg = FPTOARGS4(in:(int)reg)
+        emit "addi %out, %in, 8"
+        cost 4;
+
 
 
 /* Memory operations */
@@ -354,6 +366,20 @@ PATTERNS
 
 
 
+/* Booleans */
+
+    out:(int)reg = IFEQ4(in:(cr)cr)
+        emit "mfcr %out" /* get cr0 */
+        emit "rlwinmi %out, %out, 32-2, 2, 31" /* extract just EQ */
+        cost 8;
+
+    out:(int)reg = IFEQ4(in:(int)reg)
+        emit "cntlzw %out, %in" /* returns 0..32 */
+        emit "rlwinmi %out, %out, 32-5, 5, 31" /* if 32, return 1, otherwise 0 */
+        cost 8;
+
+
+
 /* Conversions */
 
     out:(int)reg = CIU44(in:(int)reg)
@@ -405,6 +431,10 @@ PATTERNS
     out:(int)reg = NEG4(left:(int)reg)
         emit "neg %out, %left"
         cost 4;
+
+	out:(int)reg = OR4(left:(int)reg, right:(int)reg)
+		emit "or %out, %right, %left"
+		cost 4;
 
 	out:(int)reg = EOR4(left:(int)reg, right:(int)reg)
 		emit "xor %out, %right, %left"

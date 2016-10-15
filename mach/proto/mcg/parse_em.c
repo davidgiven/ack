@@ -243,6 +243,10 @@ static void parse_pseu(void)
                     data_offset(dlabel_to_str(em.em_dlb), em.em_off, ro);
                     break;
 
+                case sof_ptyp:
+                    data_offset(strdup(em.em_dnam), em.em_off, ro);
+                    break;
+
                 case ilb_ptyp:
                 {
                     const char* label = ilabel_to_str(em.em_ilb);
@@ -279,6 +283,18 @@ static void parse_pseu(void)
                     data_bss(EM_bsssize, em.em_cst);
                     break;
                     
+				case ico_ptyp:
+				case uco_ptyp:
+                {
+                    arith val = atol(em.em_string);
+                    data_int(val, em.em_size, false);
+                    break;
+                }
+
+                case sof_ptyp:
+                    data_offset(strdup(em.em_dnam), em.em_off, false);
+                    break;
+
                 default:
                     unknown_type("bss");
             }

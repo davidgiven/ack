@@ -204,6 +204,15 @@ static void insn_simple(int opcode)
             );
             break;
 
+        case op_teq: 
+            push(
+                new_ir1(
+                    IR_IFEQ, EM_wordsize,
+                    pop(EM_wordsize)
+                )
+            );
+            break;
+
         case op_cai:
         {
             struct ir* dest = pop(EM_pointersize);
@@ -239,6 +248,35 @@ static void insn_simple(int opcode)
                     new_wordir(1)
                 )
             );
+            break;
+        }
+
+        case op_lim:
+        {
+            push(
+                new_ir1(
+                    IR_LOAD, 2,
+                    new_labelir(".ignmask")
+                )
+            );
+            break;
+        }
+
+        case op_sim:
+        {
+            appendir(
+                new_ir2(
+                    IR_STORE, 2,
+                    new_labelir(".ignmask"),
+                    pop(EM_wordsize)
+                )
+            );
+            break;
+        }
+
+        case op_lni:
+        {
+            /* Increment line number --- ignore. */
             break;
         }
 
@@ -561,6 +599,7 @@ static void insn_ivalue(int opcode, arith value)
             break;
 
         case op_cmu:
+        case op_cms:
             push(
                 tristate_compare(value, IR_COMPAREU)
             );
@@ -717,6 +756,92 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
+        case op_sar:
+        case op_lar:
+        case op_aar:
+        {
+            const char* helper;
+            if (value != EM_wordsize)
+                fatal("sar/lar/aar are only supported when using "
+                    "word-size descriptors");
+
+            switch (opcode)
+            {
+                case op_sar: helper = ".sar4"; break;
+                case op_lar: helper = ".lar4"; break;
+                case op_aar: helper = ".aar4"; break;
+            }
+
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir(helper)
+                )
+            );
+            push(
+                new_ir0(
+                    IR_GETRET, EM_wordsize
+                )
+            );
+            break;
+        }
+
+        case op_lxl:
+        {
+            struct ir* ir;
+
+            /* Walk the static chain. */
+
+            ir = new_ir0(
+                IR_GETFP, EM_pointersize
+            );
+
+            while (value--)
+            {
+                ir = new_ir1(
+                    IR_CHAINFP, EM_pointersize,
+                    ir
+                );
+            }
+
+            push(ir);
+            break;
+        }
+
+        case op_lxa:
+        {
+            struct ir* ir;
+
+            /* Walk the static chain. */
+
+            ir = new_ir0(
+                IR_GETFP, EM_pointersize
+            );
+
+            while (value--)
+            {
+                ir = new_ir1(
+                    IR_CHAINFP, EM_pointersize,
+                    ir
+                );
+            }
+
+            push(
+                new_ir1(
+                    IR_FPTOARGS, EM_pointersize,
+                    ir
+                )
+            );
+            break;
+        }
+
+        case op_lin:
+        {
+            /* Set line number --- ignore. */
+            break;
+        }
+
         default:
             fatal("treebuilder: unknown ivalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
@@ -783,6 +908,12 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
                 )
             );
             break;
+
+        case op_fil:
+        {
+            /* Set filename --- ignore. */
+            break;
+        }
                     
         default:
             fatal("treebuilder: unknown lvalue instruction '%s'",
