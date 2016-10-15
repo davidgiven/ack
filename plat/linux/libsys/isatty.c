@@ -1,13 +1,12 @@
-/* $Source: /cvsroot/tack/Ack/plat/linux386/libsys/isatty.c,v $
- * $State: Exp $
- * $Revision: 1.1 $
+/*
+ * XXX - can't #include <sys/ioctl.h> because libcc.ansi and libsys
+ * both provide it, and we might find the wrong one.
  */
-
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
+#define TIOCGETD 0x5424
+int ioctl(int fd, unsigned long, ...);
 
 int isatty(int fd)
 {
-	return 0;
+	int line_disc;
+	return 0 <= ioctl(fd, TIOCGETD, &line_disc);
 }
