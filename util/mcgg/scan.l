@@ -1,5 +1,6 @@
 %{
 #include <stdbool.h>
+#include <stdint.h>
 #include "iburg.h"
 #include "y.tab.h"
 
