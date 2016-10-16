@@ -106,5 +106,6 @@ clean:
 
 $(LUA): first/lua-5.1/*.c first/lua-5.1/*.h
 	@echo Bootstrapping build
+	@mkdir -p $(BUILDDIR)
 	@$(CC) -o $(LUA) -O first/lua-5.1/*.c -lm
 
