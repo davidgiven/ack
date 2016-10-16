@@ -424,75 +424,39 @@ MOVES
 
 /* Read/write byte */
 
-	from IND_RC_B smalls(%off) to GPR
-		gen
-			COMMENT("move IND_RC_B->GPR small")
-			lbz %2, {GPRINDIRECT, %1.reg, %1.off}
-	
 	from IND_RC_B to GPR
 		gen
-			COMMENT("move IND_RC_B->GPR large")
-			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
-			lbz %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
-	
-	from GPR to IND_RC_B smalls(%off)
-		gen
-			COMMENT("move GPR->IND_RC_B small")
-			stb %1, {GPRINDIRECT, %2.reg, %2.off}
-	
+			COMMENT("move IND_RC_B->GPR")
+			lbz %2, {GPRINDIRECT, %1.reg, %1.off}
+
 	from GPR to IND_RC_B
 		gen
-			COMMENT("move GPR->IND_RC_B large")
-			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
-			stb %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
-	
-/* Read/write short */
+			COMMENT("move GPR->IND_RC_B")
+			stb %1, {GPRINDIRECT, %2.reg, %2.off}
 
-	from IND_RC_H smalls(%off) to GPR
-		gen
-			COMMENT("move IND_RC_H->GPR small")
-			lhz %2, {GPRINDIRECT, %1.reg, %1.off}
-	
+/* Read/write halfword (short) */
+
 	from IND_RC_H to GPR
 		gen
-			COMMENT("move IND_RC_H->GPR large")
-			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
-			lhz %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
-	
-	from IND_RC_H_S smalls(%off) to GPR
-		gen
-			COMMENT("move IND_RC_H_S->GPR small")
-			lha %2, {GPRINDIRECT, %1.reg, %1.off}
-	
+			COMMENT("move IND_RC_H->GPR")
+			lhz %2, {GPRINDIRECT, %1.reg, %1.off}
+
 	from IND_RC_H_S to GPR
 		gen
-			COMMENT("move IND_RC_H_S->GPR large")
-			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
-			lha %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
-	
-	from GPR to IND_RC_H smalls(%off)
-		gen
-			COMMENT("move GPR->IND_RC_H small")
-			sth %1, {GPRINDIRECT, %2.reg, %2.off}
-	
+			COMMENT("move IND_RC_H_S->GPR")
+			lha %2, {GPRINDIRECT, %1.reg, %1.off}
+
 	from GPR to IND_RC_H
 		gen
-			COMMENT("move GPR->IND_RC_H large")
-			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
-			sth %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
-	
+			COMMENT("move GPR->IND_RC_H")
+			sth %1, {GPRINDIRECT, %2.reg, %2.off}
+
 /* Read word */
 
-	from IND_RC_W smalls(%off) to GPR
-		gen
-			COMMENT("move IND_RC_W->GPR small")
-			lwz %2, {GPRINDIRECT, %1.reg, %1.off}
-	
 	from IND_RC_W to GPR
 		gen
-			COMMENT("move IND_RC_W->GPR large")
-			addis %2, %1.reg, {CONST, his(%1.off)}
-			lwz %2, {GPRINDIRECT, %2, los(%1.off)}
+			COMMENT("move IND_RC_W->GPR")
+			lwz %2, {GPRINDIRECT, %1.reg, %1.off}
 
 	from IND_RR_W to GPR
 		gen
@@ -504,17 +468,11 @@ MOVES
 			COMMENT("move IND_LABEL_W->GPR")
 			move {LABEL, %1.adr}, RSCRATCH
 			lwz %2, {GPRINDIRECT, RSCRATCH, 0}
-		
-	from IND_RC_W smalls(%off) to FSREG
-		gen
-			COMMENT("move IND_RC_W->FSREG small")
-			lfs %2, {GPRINDIRECT, %1.reg, %1.off}
-	
+
 	from IND_RC_W to FSREG
 		gen
-			COMMENT("move IND_RC_W->FSREG large")
-			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
-			lfs %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
+			COMMENT("move IND_RC_W->FSREG")
+			lfs %2, {GPRINDIRECT, %1.reg, %1.off}
 
 	from IND_RR_W to FSREG
 		gen
@@ -529,16 +487,10 @@ MOVES
 		
 /* Write word */
 
-	from GPR to IND_RC_W smalls(%off)
-		gen
-			COMMENT("move GPR->IND_RC_W small")
-			stw %1, {GPRINDIRECT, %2.reg, %2.off}
-	
 	from GPR to IND_RC_W
 		gen
-			COMMENT("move GPR->IND_RC_W large")
-			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
-			stw %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
+			COMMENT("move GPR->IND_RC_W")
+			stw %1, {GPRINDIRECT, %2.reg, %2.off}
 
 	from GPR to IND_RR_W
 		gen
@@ -550,17 +502,11 @@ MOVES
 			COMMENT("move GPR->IND_LABEL_D")
 			move {LABEL, %2.adr}, RSCRATCH
 			stw %1, {GPRINDIRECT, RSCRATCH, 0}
-			
-	from FSREG to IND_RC_W smalls(%off)
-		gen
-			COMMENT("move FSREG->IND_RC_W small")
-			stfs %1, {GPRINDIRECT, %2.reg, %2.off}
-	
+
 	from FSREG to IND_RC_W
 		gen
-			COMMENT("move FSREG->IND_RC_W large")
-			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
-			stfs %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
+			COMMENT("move FSREG->IND_RC_W")
+			stfs %1, {GPRINDIRECT, %2.reg, %2.off}
 
 	from FSREG to IND_RR_W
 		gen
@@ -575,17 +521,11 @@ MOVES
 			
 /* Read double */
 
-	from IND_RC_D smalls(%off) to FPR
-		gen
-			COMMENT("move IND_RC_D->FPR small")
-			lfd %2, {GPRINDIRECT, %1.reg, %1.off}
-	
 	from IND_RC_D to FPR
 		gen
-			COMMENT("move IND_RC_D->FPR large")
-			addis RSCRATCH, %1.reg, {CONST, his(%1.off)}
-			lfd %2, {GPRINDIRECT, RSCRATCH, los(%1.off)}
-			
+			COMMENT("move IND_RC_D->FPR")
+			lfd %2, {GPRINDIRECT, %1.reg, %1.off}
+
 	from IND_RR_D to FPR
 		gen
 			COMMENT("move IND_RR_D->FPR")
@@ -599,16 +539,10 @@ MOVES
 		
 /* Write double */
 
-	from FPR to IND_RC_D smalls(%off)
-		gen
-			COMMENT("move FPR->IND_RC_D small")
-			stfd %1, {GPRINDIRECT, %2.reg, %2.off}
-	
 	from FPR to IND_RC_D
 		gen
-			COMMENT("move FPR->IND_RC_D large")
-			addis RSCRATCH, %2.reg, {CONST, his(%2.off)}
-			stfd %1, {GPRINDIRECT, RSCRATCH, los(%2.off)}
+			COMMENT("move FPR->IND_RC_D")
+			stfd %1, {GPRINDIRECT, %2.reg, %2.off}
 
 	from FPR to IND_RR_D
 		gen
