@@ -176,9 +176,6 @@ TOKENS
 /* Used only in instruction descriptions (to generate the correct syntax). */
 
 	GPRINDIRECT        = { GPR reg; INT off; }    4    off "(" reg ")".
-	GPRINDIRECTLO      = { GPR reg; ADDR adr; }   4    ">" adr "(" reg ")". /* Warning! Do not use on labels. */
-	HILABEL            = { ADDR adr; }            4    "<" adr.
-	LOLABEL            = { ADDR adr; }            4    ">" adr.
 
 /* Primitives */
 
@@ -224,12 +221,6 @@ TOKENS
 	XOR_RR             = { GPR reg1; GPR reg2; }  4.
 	XOR_RC             = { GPR reg; INT val; }  4.
 
-/* Comments */
-
-	LABELI             = { ADDR msg; INT num; }   4    msg " " num.
-
-
-
 
 SETS
 
@@ -256,7 +247,7 @@ INSTRUCTIONS
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
-  addis           GPR:wo, GPR:ro, CONST+HILABEL:ro.
+  addis           GPR:wo, GPR:ro, CONST:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
   andiX  "andi."  GPR:wo, GPR:ro, CONST:ro kills :cc.
@@ -291,21 +282,21 @@ INSTRUCTIONS
   fmr             FPR:wo, FPR:ro.
   fmr             FSREG:wo, FSREG:ro.
   lbzx            GPR:wo, GPR:ro, GPR:ro.
-  lbz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfd             FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfdu            FPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lbz             GPR:wo, GPRINDIRECT:ro.
+  lfd             FPR:wo, GPRINDIRECT:ro.
+  lfdu            FPR:wo, GPRINDIRECT:ro.
   lfdx            FPR:wo, GPR:ro, GPR:ro.
-  lfs             FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lfsu            FSREG:wo, GPRINDIRECT+GPRINDIRECTLO:rw.
+  lfs             FSREG:wo, GPRINDIRECT:ro.
+  lfsu            FSREG:wo, GPRINDIRECT:rw.
   lfsx            FSREG:wo, GPR:ro, GPR:ro.
   lhzx            GPR:wo, GPR:ro, GPR:ro.
   lhax            GPR:wo, GPR:ro, GPR:ro.
-  lha             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
-  lhz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lha             GPR:wo, GPRINDIRECT:ro.
+  lhz             GPR:wo, GPRINDIRECT:ro.
   li32            GPR:wo, LABEL:ro.
-  lwzu            GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lwzu            GPR:wo, GPRINDIRECT:ro.
   lwzx            GPR:wo, GPR:ro, GPR:ro.
-  lwz             GPR:wo, GPRINDIRECT+GPRINDIRECTLO:ro.
+  lwz             GPR:wo, GPRINDIRECT:ro.
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -315,7 +306,7 @@ INSTRUCTIONS
   mtspr           SPR:wo, GPR:ro.
   or              GPR:wo, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
-  ori             GPR:wo, GPR:ro, CONST+LOLABEL:ro.
+  ori             GPR:wo, GPR:ro, CONST:ro.
   orX "or."       GPR:wo, GPR:ro, GPR:ro kills :cc.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
   slw             GPR:wo, GPR:ro, GPR:ro.
@@ -323,23 +314,23 @@ INSTRUCTIONS
   sraw            GPR:wo, GPR:ro, GPR:ro.
   srawi           GPR:wo, GPR:ro, CONST:ro.
   srw             GPR:wo, GPR:ro, GPR:ro.
-  stb             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stb             GPR:ro, GPRINDIRECT:rw.
   stbx            GPR:ro, GPR:ro, GPR:ro.
-  stfd            FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfdu           FPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfd            FPR:ro, GPRINDIRECT:rw.
+  stfdu           FPR:ro, GPRINDIRECT:rw.
   stfdx           FPR:ro, GPR:ro, GPR:ro.
-  stfs            FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
-  stfsu           FSREG:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stfs            FSREG:ro, GPRINDIRECT:rw.
+  stfsu           FSREG:ro, GPRINDIRECT:rw.
   stfsx           FSREG:ro, GPR:ro, GPR:ro.
-  sth             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  sth             GPR:ro, GPRINDIRECT:rw.
   sthx            GPR:ro, GPR:ro, GPR:ro.
-  stw             GPR:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stw             GPR:ro, GPRINDIRECT:rw.
   stwx            GPR:ro, GPR:ro, GPR:ro.
-  stwu            GPR+GPRE:ro, GPRINDIRECT+GPRINDIRECTLO:rw.
+  stwu            GPR+GPRE:ro, GPRINDIRECT:rw.
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
 
-  comment "!" LABEL+LABELI:ro.
+  comment "!" LABEL:ro.
 
 
   
@@ -1945,25 +1936,6 @@ PATTERNS
 			move {IND_RC_W, %a, 0}, %a
 			mtspr CTR, %a
 			bcctr ALWAYS, {CONST, 0}, {CONST, 0}
-				
-#if 0
-			
-	pat gto                            /* longjmp */
-		with STACK
-			gen
-				ld {LABEL, $1+2}
-				wspec {CONST, 1}
-				ld {LABEL, $1+4}
-				wspec {CONST, 0}
-				ld {LABEL, $1+0}
-				wspec {CONST, 2}
-			
-	pat str $1==1                      /* Store special GPRister */
-		with GPR0
-			gen
-				wspec {CONST, $1}
-				
-#endif
 
 	pat lor $1==0                      /* Load FP */
 		uses REG
