@@ -72,6 +72,8 @@ BUILDSYSTEM = make
 BUILDFLAGS = $(MAKEFLAGS)
 endif
 
+LUA = $(BUILDDIR)/lua
+
 ifneq ($(findstring +, $(MAKECMDGOALS)),)
 
 $(MAKECMDGOALS): $(BUILDDIR)/build.$(BUILDSYSTEM)
@@ -79,9 +81,9 @@ $(MAKECMDGOALS): $(BUILDDIR)/build.$(BUILDSYSTEM)
 
 endif
 
-$(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES)
+$(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $(LUA)
 	@mkdir -p $(BUILDDIR)
-	@lua5.1 first/ackbuilder.lua \
+	@$(LUA) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
 		OBJDIR=$(OBJDIR) \
@@ -101,4 +103,8 @@ install:
 
 clean:
 	@rm -rf $(BUILDDIR)
+
+$(LUA): first/lua-5.1/*.c first/lua-5.1/*.h
+	@echo Bootstrapping build
+	@$(CC) -o $(LUA) -O first/lua-5.1/*.c -lm
 
