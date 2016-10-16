@@ -214,8 +214,11 @@ TOKENS
 	SEX_H              = { GPR reg; }             4.
 	
 	IND_RC_B           = { GPR reg; INT off; }    4.
+	IND_RR_B           = { GPR reg1; GPR reg2; }  4.
 	IND_RC_H           = { GPR reg; INT off; }    4.
+	IND_RR_H           = { GPR reg1; GPR reg2; }  4.
 	IND_RC_H_S         = { GPR reg; INT off; }    4.
+	IND_RR_H_S         = { GPR reg1; GPR reg2; }  4.
 	IND_RC_W           = { GPR reg; INT off; }    4.
 	IND_RR_W           = { GPR reg1; GPR reg2; }  4.
 	IND_RC_D           = { GPR reg; INT off; }    8.
@@ -253,11 +256,18 @@ SETS
 	
 	LOGICAL_ALL        = NOT_R + AND_RR + OR_RR + OR_RC + XOR_RR +
 	                     XOR_RC.
-	
-	IND_ALL_W          = IND_RC_W + IND_RR_W.
 
+	/* indirect 4-byte value */
+	IND_ALL_W          = IND_RC_W + IND_RR_W.
+	/* indirect 8-byte value */
 	IND_ALL_D          = IND_RC_D + IND_RR_D.
-	
+	/* any indirect value that fits in a GPR */
+	IND_ALL_BHW        = IND_RC_B + IND_RR_B + IND_RC_H + IND_RR_H +
+	                     IND_RC_H_S + IND_RR_H_S + IND_ALL_W.
+
+	/* anything killed by sti (store indirect) */
+	MEMORY             = IND_ALL_BHW + IND_ALL_D.
+
 	OP_ALL_W           = SUM_ALL + TRISTATE_ALL + SEX_ALL + LOGICAL_ALL +
 	                     IND_ALL_W.
 
@@ -301,18 +311,18 @@ INSTRUCTIONS
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro.
   fmr             FPR:wo, FPR:ro.
   fmr             FSREG:wo, FSREG:ro.
-  lbzx            GPR:wo, GPR:ro, GPR:ro.
   lbz             GPR:wo, GPRINDIRECT:ro.
+  lbzx            GPR:wo, GPR:ro, GPR:ro.
   lfd             FPR:wo, GPRINDIRECT:ro.
   lfdu            FPR:wo, GPRINDIRECT:ro.
   lfdx            FPR:wo, GPR:ro, GPR:ro.
   lfs             FSREG:wo, GPRINDIRECT:ro.
   lfsu            FSREG:wo, GPRINDIRECT:rw.
   lfsx            FSREG:wo, GPR:ro, GPR:ro.
-  lhzx            GPR:wo, GPR:ro, GPR:ro.
-  lhax            GPR:wo, GPR:ro, GPR:ro.
   lha             GPR:wo, GPRINDIRECT:ro.
+  lhax            GPR:wo, GPR:ro, GPR:ro.
   lhz             GPR:wo, GPRINDIRECT:ro.
+  lhzx            GPR:wo, GPR:ro, GPR:ro.
   li32            GPR:wo, LABEL:ro.
   lwzu            GPR:wo, GPRINDIRECT:ro.
   lwzx            GPR:wo, GPR:ro, GPR:ro.
@@ -420,34 +430,63 @@ MOVES
 			COMMENT("move SUM_RR->GPR")
 			add %2, %1.reg1, %1.reg2
 
-/* Read/write byte */
+/* Read byte */
 
 	from IND_RC_B to GPR
 		gen
 			COMMENT("move IND_RC_B->GPR")
 			lbz %2, {GPRINDIRECT, %1.reg, %1.off}
 
+	from IND_RR_B to GPR
+		gen
+			COMMENT("move IND_RR_B->GPR")
+			lbzx %2, %1.reg1, %1.reg2
+
+/* Write byte */
+
 	from GPR to IND_RC_B
 		gen
 			COMMENT("move GPR->IND_RC_B")
 			stb %1, {GPRINDIRECT, %2.reg, %2.off}
 
-/* Read/write halfword (short) */
+	from GPR to IND_RR_B
+		gen
+			COMMENT("move GPR->IND_RR_B")
+			stbx %1, %2.reg1, %2.reg2
+
+/* Read halfword (short) */
 
 	from IND_RC_H to GPR
 		gen
 			COMMENT("move IND_RC_H->GPR")
 			lhz %2, {GPRINDIRECT, %1.reg, %1.off}
 
+	from IND_RR_H to GPR
+		gen
+			COMMENT("move IND_RR_H->GPR")
+			lhzx %2, %1.reg1, %1.reg2
+
 	from IND_RC_H_S to GPR
 		gen
 			COMMENT("move IND_RC_H_S->GPR")
 			lha %2, {GPRINDIRECT, %1.reg, %1.off}
 
+	from IND_RR_H_S to GPR
+		gen
+			COMMENT("move IND_RR_H_S->GPR")
+			lhax %2, %1.reg1, %1.reg2
+
+/* Write halfword */
+
 	from GPR to IND_RC_H
 		gen
 			COMMENT("move GPR->IND_RC_H")
 			sth %1, {GPRINDIRECT, %2.reg, %2.off}
+
+	from GPR to IND_RR_H
+		gen
+			COMMENT("move GPR->IND_RR_H")
+			sthx %1, %2.reg1, %2.reg2
 
 /* Read word */
 
@@ -670,7 +709,7 @@ STACKINGRULES
 			move %1, RSCRATCH
 			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
-	from IND_ALL_W to STACK
+	from IND_ALL_BHW to STACK
 		gen
 			move %1, RSCRATCH
 			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
@@ -771,7 +810,7 @@ COERCIONS
 			addi SP, SP, {CONST, 4}
 		yields %a
 		
-	from IND_ALL_W
+	from IND_ALL_BHW
 		uses REG
 		gen
 			move %1, %a
@@ -1048,55 +1087,29 @@ PATTERNS
 
 	pat loi $1==INT8                   /* Load byte indirect */
 		with GPR
-			uses REG
-			gen
-				lbz %a, {GPRINDIRECT, %1, 0}
-			yields %a
+			yields {IND_RC_B, %1, 0}
 		with SUM_RR
-			uses reusing %1, REG
-			gen
-				lbzx %a, %1.reg1, %1.reg2
-			yields %a
+			yields {IND_RR_B, %1.reg1, %1.reg2}
 		with SUM_RC
-			uses REG
-			gen
-				move {IND_RC_B, %1.reg, %1.off}, %a
-			yields %a
-		
-	pat loi loc loc cii $1==INT16 && $2==INT16 && $3==INT32 /* Load half-word indirect and sign extend */
+			yields {IND_RC_B, %1.reg, %1.off}
+
+	pat loi loc loc cii $1==INT16 && $2==INT16 && $3==INT32
+	/* Load half-word indirect and sign extend */
 		with GPR
-			uses REG
-			gen
-				lha %a, {GPRINDIRECT, %1, 0}
-			yields %a
+			yields {IND_RC_H_S, %1, 0}
 		with SUM_RR
-			uses reusing %1, REG
-			gen
-				lhax %a, %1.reg1, %1.reg2
-			yields %a
+			yields {IND_RR_H_S, %1.reg1, %1.reg2}
 		with SUM_RC
-			uses REG
-			gen
-				move {IND_RC_H_S, %1.reg, %1.off}, %a
-			yields %a
-		
+			yields {IND_RC_H_S, %1.reg, %1.off}
+
 	pat loi $1==INT16                  /* Load half-word indirect */
 		with GPR
-			uses REG
-			gen
-				lhz %a, {GPRINDIRECT, %1, 0}
-			yields %a
+			yields {IND_RC_H, %1, 0}
 		with SUM_RR
-			uses reusing %1, REG
-			gen
-				lhzx %a, %1.reg1, %1.reg2
-			yields %a
+			yields {IND_RR_H, %1.reg1, %1.reg2}
 		with SUM_RC
-			uses REG
-			gen
-				move {IND_RC_H, %1.reg, %1.off}, %a
-			yields %a
-		
+			yields {IND_RC_H, %1.reg, %1.off}
+
 	pat loi $1==INT32                  /* Load word indirect */
 		with GPR
 			yields {IND_RC_W, %1, 0}
@@ -1123,73 +1136,93 @@ PATTERNS
 			kills ALL
 			gen
 				bl {LABEL, ".los"}
-				
+
 	pat sti $1==INT8                   /* Store byte indirect */
 		with GPR GPR
+			kills MEMORY
 			gen
 				stb %2, {GPRINDIRECT, %1, 0}
 		with SUM_RR GPR
+			kills MEMORY
 			gen
 				stbx %2, %1.reg1, %1.reg2
 		with SUM_RC GPR
+			kills MEMORY
 			gen
 				move %2, {IND_RC_B, %1.reg, %1.off}
 		with GPR SEX_B
+			kills MEMORY
 			gen
 				stb %2.reg, {GPRINDIRECT, %1, 0}
 		with SUM_RR SEX_B
+			kills MEMORY
 			gen
 				stbx %2.reg, %1.reg1, %1.reg2
 		with SUM_RC SEX_B
+			kills MEMORY
 			gen
 				move %2.reg, {IND_RC_B, %1.reg, %1.off}
 
 	pat sti $1==INT16                  /* Store half-word indirect */
 		with GPR GPR
+			kills MEMORY
 			gen
 				sth %2, {GPRINDIRECT, %1, 0}
 		with SUM_RR GPR
+			kills MEMORY
 			gen
 				sthx %2, %1.reg1, %1.reg2
 		with SUM_RC GPR
+			kills MEMORY
 			gen
 				move %2, {IND_RC_H, %1.reg, %1.off}
 		with GPR SEX_H
+			kills MEMORY
 			gen
 				sth %2.reg, {GPRINDIRECT, %1, 0}
 		with SUM_RR SEX_H
+			kills MEMORY
 			gen
 				sthx %2.reg, %1.reg1, %1.reg2
 		with SUM_RC SEX_H
+			kills MEMORY
 			gen
 				move %2.reg, {IND_RC_H, %1.reg, %1.off}
 
 	pat sti $1==INT32                  /* Store word indirect */
 		with GPR GPR+FSREG
+			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1, 0}
 		with SUM_RR GPR+FSREG
+			kills MEMORY
 			gen
 				move %2, {IND_RR_W, %1.reg1, %1.reg2}
 		with SUM_RC GPR+FSREG
+			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1.reg, %1.off}
 
 	pat sti $1==INT64                  /* Store double-word indirect */
 		with GPR FREG
+			kills MEMORY
 			gen
 				move %2, {IND_RC_D, %1, 0}
 		with SUM_RR FREG
+			kills MEMORY
 			gen
 				move %2, {IND_RR_D, %1.reg1, %1.reg2}
 		with SUM_RC FREG
+			kills MEMORY
 			gen
 				move %2, {IND_RC_D, %1.reg, %1.off}
 		with GPR GPR GPR
+			kills MEMORY
 			gen
 				stw %2, {GPRINDIRECT, %1, 0}
 				stw %3, {GPRINDIRECT, %1, 4}
 		with SUM_RC GPR GPR
+			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1.reg, %1.off}
 				move %3, {IND_RC_W, %1.reg, %1.off+4}
@@ -1198,8 +1231,8 @@ PATTERNS
 		leaving
 			loc $1
 			sts INT32
-					
-	pat sts                            /* Load arbitrary size */
+
+	pat sts                            /* Store arbitrary size */
 		with GPR3 GPR4 STACK
 			kills ALL
 			gen
