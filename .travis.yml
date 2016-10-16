@@ -2,14 +2,12 @@ matrix:
     include:
         - os: linux
         - os: osx
-          before_install:
-          - brew update
+
 addons:
     apt:
         packages:
         - ed
-        - lua5.1
-        - liblua5.1-posix1
+
 git:
     depth: 10
 language: c
