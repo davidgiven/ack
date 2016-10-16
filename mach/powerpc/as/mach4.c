@@ -58,6 +58,7 @@ operation
 	| OP_LEV               u7                         { emit4($1 | ($2<<5)); }
 	| OP_LIA               lia                        { emit4($1 | $2); }
 	| OP_LIL               lil                        { emit4($1 | $2); }
+	| OP_LA                la                         /* emitted in subrule */
 	;
 
 c
@@ -66,26 +67,12 @@ c
 	;
 	
 e16
-	: '<' expr
+	: absexp
 	{
-		DOTVAL += 2;
-		newrelo($2.typ, RELOH2 | FIXUPFLAGS);
-		DOTVAL -= 2;
-		$$ = ($2.val >> 16) & 0xFFFF;
-	}
-	| '>' expr
-	{
-		DOTVAL += 2;
-		newrelo($2.typ, RELO2 | FIXUPFLAGS);
-		DOTVAL -= 2;
-		$$ = $2.val & 0xFFFF;
-	}
-	| expr
-	{
-		DOTVAL += 2;
-		newrelo($1.typ, RELO2 | FIXUPFLAGS);
-		DOTVAL -= 2;
-		$$ = $1.val & 0xFFFF;
+		/* Allow signed or unsigned 16-bit values. */
+		if (($1 < -0x8000) || ($1 > 0xffff))
+			serror("16-bit value out of range");
+		$$ = (uint16_t) $1;
 	}
 	;
 		
@@ -206,6 +193,15 @@ bda
 	}
 	;
 	
+la
+	: GPR ',' expr
+	{
+		newrelo($3.typ, RELOPPC | FIXUPFLAGS);
+		emit4((15<<26) | ($1<<21) | (0<<16)  | ($3.val >> 16)); /* addis */
+		emit4((24<<26) | ($1<<21) | ($1<<16) | ($3.val & 0xffff)); /* ori */
+	}
+	;
+
 lil
 	: expr
 	{

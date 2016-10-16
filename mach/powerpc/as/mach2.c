@@ -80,7 +80,7 @@
 %token <y_word> OP_TO_RA_RB
 %token <y_word> OP_TO_RA_SI
 
-%token <y_word> OP_la
+%token <y_word> OP_LA
 
 /* Other token types */
 

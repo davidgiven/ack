@@ -20,4 +20,3 @@
 #define EQ 2
 #define OV 3
 	
-#define la(reg, val) addis reg, r0, <val; ori reg, reg, >val

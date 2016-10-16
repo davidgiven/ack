@@ -18,7 +18,7 @@ static char rcsid[] = "$Id$";
 
 #define UBYTE(x)	((x) & BYTEMASK)
 
-static long read2(char* addr, int type)
+static uint16_t read2(char* addr, int type)
 {
 	unsigned short word0, word1;
 
@@ -28,7 +28,7 @@ static long read2(char* addr, int type)
 		return (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
 }
 
-static long read4(char* addr, int type)
+static uint32_t read4(char* addr, int type)
 {
 	unsigned short word0, word1;
 
@@ -49,7 +49,7 @@ static long read4(char* addr, int type)
  * one of several different ways (depending on what the instruction is).
  */
 
-static long get_vc4_valu(char* addr)
+static uint32_t get_vc4_valu(char* addr)
 {
 	uint16_t opcode = read2(addr, 0);
 
@@ -104,11 +104,36 @@ static long get_vc4_valu(char* addr)
 	assert(0 && "unrecognised VC4 instruction");
 }
 
+/* PowerPC fixups are complex as we need to patch up to the next two
+ * instructions in one of several different ways, depending on what the
+ * instructions area.
+ */
+
+static uint32_t get_powerpc_valu(char* addr, uint16_t type)
+{
+	uint32_t opcode1 = read4(addr+0, type);
+	uint32_t opcode2 = read4(addr+4, type);
+
+	if ((opcode1 & 0xfc000000) == 0x48000000)
+	{
+		/* branch instruction */
+		return opcode1 & 0x03fffffd;
+	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         ((opcode2 & 0xfc000000) == 0x60000000))
+	{
+		/* addis / ori instruction pair */
+		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
+	}
+
+	assert(0 && "unrecognised PowerPC instruction");
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
  */
-static long getvalu(char* addr, uint16_t type)
+static uint32_t getvalu(char* addr, uint16_t type)
 {
 	switch (type & RELSZ) {
 	case RELO1:
@@ -118,9 +143,7 @@ static long getvalu(char* addr, uint16_t type)
 	case RELO4:
 		return read4(addr, type);
 	case RELOPPC:
-		return read4(addr, type) & 0x03FFFFFD;
-	case RELOH2:
-		return read2(addr, type) << 16;
+		return get_powerpc_valu(addr, type);
 	case RELOVC4:
 		return get_vc4_valu(addr);
 	default:
@@ -129,7 +152,7 @@ static long getvalu(char* addr, uint16_t type)
 	/* NOTREACHED */
 }
 
-static void write2(long valu, char* addr, int type)
+static void write2(uint16_t valu, char* addr, int type)
 {
 	unsigned short	word0, word1;
 
@@ -142,7 +165,7 @@ static void write2(long valu, char* addr, int type)
 	}
 }
 
-static void write4(long valu, char* addr, int type)
+static void write4(uint32_t valu, char* addr, int type)
 {
 	unsigned short	word0, word1;
 
@@ -170,7 +193,7 @@ static void write4(long valu, char* addr, int type)
  * one of several different ways (depending on what the instruction is).
  */
 
-static void put_vc4_valu(char* addr, long value)
+static void put_vc4_valu(char* addr, uint32_t value)
 {
 	uint16_t opcode = read2(addr, 0);
 
@@ -220,12 +243,42 @@ static void put_vc4_valu(char* addr, long value)
 		assert(0 && "unrecognised VC4 instruction");
 }
 
+/* PowerPC fixups are complex as we need to patch up to the next two
+ * instructions in one of several different ways, depending on what the
+ * instructions area.
+ */
+
+static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
+{
+	uint32_t opcode1 = read4(addr+0, type);
+	uint32_t opcode2 = read4(addr+4, type);
+
+	if ((opcode1 & 0xfc000000) == 0x48000000)
+	{
+		/* branch instruction */
+		uint32_t i = opcode1 & ~0x03fffffd;
+		i |= value & 0x03fffffd;
+		write4(i, addr, type);
+	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         ((opcode2 & 0xfc000000) == 0x60000000))
+	{
+		uint16_t hi = value >> 16;
+		uint16_t lo = value & 0xffff;
+
+		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
+		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
+	}
+	else
+		assert(0 && "unrecognised PowerPC instruction");
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
  * We do not check for overflow.
  */
-static putvalu(long valu, char* addr, uint16_t type)
+static putvalu(uint32_t valu, char* addr, uint16_t type)
 {
 
 	switch (type & RELSZ) {
@@ -239,14 +292,7 @@ static putvalu(long valu, char* addr, uint16_t type)
 		write4(valu, addr, type);
 		break;
 	case RELOPPC:
-	{
-		long i = read4(addr, type) & ~0x03FFFFFD;
-		i |= valu & 0x03FFFFFD;
-		write4(i, addr, type);
-		break;
-	}
-	case RELOH2:
-		write2(valu>>16, addr, type);
+		put_powerpc_valu(addr, valu, type);
 		break;
 	case RELOVC4:
 		put_vc4_valu(addr, valu);

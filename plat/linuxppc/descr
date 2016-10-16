@@ -35,25 +35,26 @@ var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/ack/{ARCH}/ncg
+	program {EM}/lib/ack/{PLATFORM}/ncg
 	mapflag -gdb GF=-gdb
 	args {GF?} <
 	stdout
 	need .e
 end
-name asopt
-	from .s
-	to .so
-	program {EM}/lib/ack/{ARCH}/top
-	args
-	optimizer
-	stdin
-	stdout
-end
+# FIXME(dtrg): not working yet
+#name asopt
+#	from .s
+#	to .so
+#	program {EM}/lib/ack/{PLATFORM}/top
+#	args
+#	optimizer
+#	stdin
+#	stdout
+#end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/ack/{ARCH}/as
+	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
 end
@@ -74,7 +75,6 @@ name led
 		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
 		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
-		{PLATFORMDIR}/liblinux.a \
 		{PLATFORMDIR}/libem.a \
 		{PLATFORMDIR}/libsys.a \
 		{PLATFORMDIR}/libend.a

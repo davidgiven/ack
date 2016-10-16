@@ -16,8 +16,7 @@
 
 .define .aar4
 .aar4:
-	addis r0, r0, <.trap_earray
-	ori r0, r0, >.trap_earray
+	la r0, .trap_earray
 	mtspr ctr, r0            ! load CTR with trap address
 
 	lwz r0, 0(r3)
