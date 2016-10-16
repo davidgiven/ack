@@ -1,43 +1,51 @@
 include("util/mcgg/build.lua")
 
-mcgg {
-	name = "mcgg_c",
-	srcs = { "./table" }
-}
-
-cprogram {
-	name = "mcg",
-	srcs = {
-		"./*.c",
-		matching(filenamesof("+mcgg_c"), "%.c$"),
+definerule("build_mcg",
+	{
+		arch = { type="string" }
 	},
-	deps = {
-		"+mcgg_c",
-		"./*.h",
-		"h+emheaders",
-		"modules+headers",
-		"modules/src/alloc+lib",
-		"modules/src/data+lib",
-		"modules/src/em_code+lib_k",
-		"modules/src/em_data+lib",
-		"modules/src/idf+lib",
-		"modules/src/read_em+lib_ev",
-		"modules/src/string+lib",
-		"modules/src/system+lib",
-		"util/mcgg+lib",
-	},
-	vars = {
-		["+cflags"] = {
-			"-Werror-implicit-function-declaration",
+	function(e)
+		-- Remember this is executed from the caller's directory; local
+		-- target names will resolve there
+		local headers = clibrary {
+			name = e.name.."/headers",
+			srcs = {},
+			hdrs = {
+				"mach/proto/mcg/*.h",
+				"mach/"..e.arch.."/mcg/*.h",
+			}
 		}
-	}
-}
 
--- Just for test purposes for now
-installable {
-	name = "pkg",
-	map = {
-		["$(PLATDEP)/mcg"] = "+mcg"
-	}
-}
+		local tables = mcgg {
+			name = e.name.."/tables",
+			srcs = { "mach/"..e.arch.."/mcg/table" }
+		}
+
+		return cprogram {
+			name = e.name,
+			srcs = {
+				"mach/proto/mcg/*.c",
+				"mach/"..e.arch.."/mcg/platform.c",
+				matching(filenamesof(tables), "%.c$")
+			},
+			deps = {
+				"h+emheaders",
+				"modules+headers",
+				"modules/src/alloc+lib",
+				"modules/src/data+lib",
+				"modules/src/em_code+lib_k",
+				"modules/src/em_data+lib",
+				"modules/src/flt_arith+lib",
+				"modules/src/idf+lib",
+				"modules/src/object+lib",
+				"modules/src/read_em+lib_kv",
+				"modules/src/string+lib",
+				"modules/src/system+lib",
+				"util/mcgg+lib",
+				headers,
+				tables, -- for .h file
+			}
+		}
+	end
+)
 

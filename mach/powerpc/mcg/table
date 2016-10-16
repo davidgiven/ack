@@ -423,6 +423,10 @@ PATTERNS
         emit "subf %out, %out, %left"
 		cost 12;
 
+	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
+		emit "mullw %out, %left, %right"
+		cost 4;
+
 	out:(int)reg = DIV4(left:(int)reg, right:(int)reg)
 		emit "divw %out, %left, %right"
 		cost 4;

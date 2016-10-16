@@ -441,12 +441,13 @@ static void insn_ivalue(int opcode, arith value)
         case op_rmi: simple_alu2(opcode, value, IR_MOD); break;
         case op_sli: simple_alu2(opcode, value, IR_ASL); break;
         case op_sri: simple_alu2(opcode, value, IR_ASR); break;
-        case op_slu: simple_alu2(opcode, value, IR_LSL); break;
-        case op_sru: simple_alu2(opcode, value, IR_LSR); break;
         case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
 
         case op_adu: simple_alu2(opcode, value, IR_ADD); break;
         case op_sbu: simple_alu2(opcode, value, IR_SUB); break;
+        case op_mlu: simple_alu2(opcode, value, IR_MUL); break;
+        case op_slu: simple_alu2(opcode, value, IR_LSL); break;
+        case op_sru: simple_alu2(opcode, value, IR_LSR); break;
 
         case op_and: simple_alu2(opcode, value, IR_AND); break;
         case op_ior: simple_alu2(opcode, value, IR_OR); break;

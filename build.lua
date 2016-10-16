@@ -33,7 +33,6 @@ installable {
 		"util/misc+pkg",
 		"util/opt+pkg",
 		"examples+pkg",
-		"mach/proto/mcg+pkg",
 		plat_packages
 	}
 }
