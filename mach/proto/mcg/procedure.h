@@ -21,6 +21,7 @@ struct procedure
     int fp_to_lb;
     ARRAYOF(struct basicblock) blocks;
     IMAPOF(struct local) locals;
+    ARRAYOF(struct hreg) usedregs;
 };
 
 extern void procedure_compile(struct procedure* proc);
