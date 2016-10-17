@@ -8,6 +8,8 @@
  * All preprocessor based options/constants/functions
  */
 
+#include <stdint.h>
+
 /* ========== ON/OFF options (use #define in mach0.c) ========== */
 
 /*

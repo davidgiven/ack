@@ -49,6 +49,7 @@
 %token <y_word> OP_RS_RA_NB
 %token <y_word> OP_RS_RA_RB
 %token <y_word> OP_RS_RA_RB_C
+%token <y_word> OP_RS_RA_RA_C
 %token <y_word> OP_RS_RA_RB_MB5_ME5_C
 %token <y_word> OP_RS_RA_RB_MB6_C
 %token <y_word> OP_RS_RA_RB_ME6_C
