@@ -274,14 +274,26 @@ SETS
 
 INSTRUCTIONS
 
+  /* We give time as cycles of total latency from Freescale
+   * Semiconductor, MPC7450 RISC Microprocessor Family Reference
+   * Manual, Rev. 5, section 6.6.
+   *
+   * We have only 4-byte alignment for doubles; 8-byte alignment is
+   * optimal.  We guess the misalignment penalty by adding 1 cycle to
+   * the cost of loading or storing a double:
+   *   lfd lfdu lfdx: 4 -> 5
+   *   stfd stfdu stfdx: 3 -> 4
+   */
+  cost(4, 1) /* space, time */
+
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
   addis           GPR:wo, GPR:ro, CONST:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
-  andiX  "andi."  GPR:wo, GPR:ro, CONST:ro kills :cc.
-  andisX "andis." GPR:wo, GPR:ro, CONST:ro kills :cc.
+  andiX  "andi."  GPR:wo:cc, GPR:ro, CONST:ro.
+  andisX "andis." GPR:wo:cc, GPR:ro, CONST:ro.
   b               LABEL:ro.
   bc              CONST:ro, CONST:ro, LABEL:ro.
   bcctr           CONST:ro, CONST:ro, CONST:ro.
@@ -292,77 +304,77 @@ INSTRUCTIONS
   cmpi            CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
   cmpl            CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
   cmpli           CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
-  divw            GPR:wo, GPR:ro, GPR:ro.
-  divwu           GPR:wo, GPR:ro, GPR:ro.
+  divw            GPR:wo, GPR:ro, GPR:ro cost(4, 23).
+  divwu           GPR:wo, GPR:ro, GPR:ro cost(4, 23).
   eqv             GPR:wo, GPR:ro, GPR:ro.
   extsb           GPR:wo, GPR:ro.
   extsh           GPR:wo, GPR:ro.
-  fadd            FREG:wo, FREG:ro, FREG:ro.
-  fadds           FSREG:wo, FSREG:ro, FSREG:ro.
-  fcmpo           CR:wo, FPR:ro, FPR:ro.
-  fdiv            FREG:wo, FREG:ro, FREG:ro.
-  fdivs           FSREG:wo, FSREG:ro, FSREG:ro.
-  fneg            FREG:wo, FREG:ro.
-  fneg            FSREG:wo, FSREG:ro.
-  fmul            FREG:wo, FREG:ro, FREG:ro.
-  fmuls           FSREG:wo, FSREG:ro, FSREG:ro.
-  frsp            FSREG:wo, FREG:ro.
-  fsub            FREG:wo, FREG:ro, FREG:ro.
-  fsubs           FSREG:wo, FSREG:ro, FSREG:ro.
-  fmr             FPR:wo, FPR:ro.
-  fmr             FSREG:wo, FSREG:ro.
-  lbz             GPR:wo, GPRINDIRECT:ro.
-  lbzx            GPR:wo, GPR:ro, GPR:ro.
-  lfd             FPR:wo, GPRINDIRECT:ro.
-  lfdu            FPR:wo, GPRINDIRECT:ro.
-  lfdx            FPR:wo, GPR:ro, GPR:ro.
-  lfs             FSREG:wo, GPRINDIRECT:ro.
-  lfsu            FSREG:wo, GPRINDIRECT:rw.
-  lfsx            FSREG:wo, GPR:ro, GPR:ro.
-  lha             GPR:wo, GPRINDIRECT:ro.
-  lhax            GPR:wo, GPR:ro, GPR:ro.
-  lhz             GPR:wo, GPRINDIRECT:ro.
-  lhzx            GPR:wo, GPR:ro, GPR:ro.
-  li32            GPR:wo, LABEL:ro.
-  lwzu            GPR:wo, GPRINDIRECT:ro.
-  lwzx            GPR:wo, GPR:ro, GPR:ro.
-  lwz             GPR:wo, GPRINDIRECT:ro.
+  fadd            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fadds           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
+  fcmpo           CR:wo, FPR:ro, FPR:ro cost(4, 5).
+  fdiv            FREG:wo, FREG:ro, FREG:ro cost(4, 35).
+  fdivs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 21).
+  fmr             FPR:wo, FPR:ro cost(4, 5).
+  fmr             FSREG:wo, FSREG:ro cost(4, 5).
+  fmul            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fmuls           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
+  fneg            FREG:wo, FREG:ro cost(4, 5).
+  fneg            FSREG:wo, FSREG:ro cost(4, 5).
+  frsp            FSREG:wo, FREG:ro cost(4, 5).
+  fsub            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fsubs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
+  lbz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  lfd             FPR:wo, GPRINDIRECT:ro cost(4, 5).
+  lfdu            FPR:wo, GPRINDIRECT:ro cost(4, 5).
+  lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
+  lfs             FSREG:wo, GPRINDIRECT:ro cost(4, 4).
+  lfsu            FSREG:wo, GPRINDIRECT:rw cost(4, 4).
+  lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
+  lha             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  lhz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  li32            GPR:wo, LABEL:ro cost(8, 2).
+  lwzu            GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  lwz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
-  mfcr            GPR:wo.
-  mullw           GPR:wo, GPR:ro, GPR:ro.
-  mfspr           GPR:wo, SPR:ro.
-  mtspr           SPR:wo, GPR:ro.
+  mfcr            GPR:wo cost(4,2).
+  mullw           GPR:wo, GPR:ro, GPR:ro cost(4, 4).
+  mfspr           GPR:wo, SPR:ro cost(4, 3).
+  mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
   ori             GPR:wo, GPR:ro, CONST:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
-  orX "or."       GPR:wo, GPR:ro, GPR:ro kills :cc.
+  orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
   slw             GPR:wo, GPR:ro, GPR:ro.
   subf            GPR:wo, GPR:ro, GPR:ro.
-  sraw            GPR:wo, GPR:ro, GPR:ro.
-  srawi           GPR:wo, GPR:ro, CONST:ro.
+  sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
+  srawi           GPR:wo, GPR:ro, CONST:ro cost(4, 2).
   srw             GPR:wo, GPR:ro, GPR:ro.
-  stb             GPR:ro, GPRINDIRECT:rw.
-  stbx            GPR:ro, GPR:ro, GPR:ro.
-  stfd            FPR:ro, GPRINDIRECT:rw.
-  stfdu           FPR:ro, GPRINDIRECT:rw.
-  stfdx           FPR:ro, GPR:ro, GPR:ro.
-  stfs            FSREG:ro, GPRINDIRECT:rw.
-  stfsu           FSREG:ro, GPRINDIRECT:rw.
-  stfsx           FSREG:ro, GPR:ro, GPR:ro.
-  sth             GPR:ro, GPRINDIRECT:rw.
-  sthx            GPR:ro, GPR:ro, GPR:ro.
-  stw             GPR:ro, GPRINDIRECT:rw.
-  stwx            GPR:ro, GPR:ro, GPR:ro.
-  stwu            GPR+GPRE:ro, GPRINDIRECT:rw.
+  stb             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
+  stfd            FPR:ro, GPRINDIRECT:rw cost(4, 4).
+  stfdu           FPR:ro, GPRINDIRECT:rw cost(4, 4).
+  stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
+  stfs            FSREG:ro, GPRINDIRECT:rw cost(4, 3).
+  stfsu           FSREG:ro, GPRINDIRECT:rw cost(4, 3).
+  stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
+  sth             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
+  stw             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
+  stwu            GPR+GPRE:ro, GPRINDIRECT:rw cost(4, 3).
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
 
-  comment "!" LABEL:ro.
+  comment "!" LABEL:ro cost(0, 0).
 
 
   
