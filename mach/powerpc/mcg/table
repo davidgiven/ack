@@ -269,7 +269,7 @@ PATTERNS
 /* Locals */
 
 	out:(int)reg = in:LOCAL4
-		emit "addi %out, fp, #$in"
+		emit "addi %out, fp, $in"
 		cost 4;
 
 	address = in:LOCAL4
@@ -295,17 +295,17 @@ PATTERNS
 		cost 4;
 
 	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
-        emit "bc IFTRUE, EQ, $true"
+        emit "bc 12, 2, $true" /* IFTRUE EQ */
 		emit "b $false"
 		cost 8;
 
 	CJUMPLE(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
-        emit "bc IFTRUE, LE, $true"
+        emit "bc 4, 1, $true" /* IFFALSE GT */
         emit "b $false"
 		cost 8;
 
 	CJUMPLT(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
-        emit "bc IFTRUE, LT, $true"
+        emit "bc 12, 0, $true" /* IFTRUE LT */
         emit "b $false"
 		cost 8;
 
@@ -317,7 +317,7 @@ PATTERNS
     CALL(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
-        emit "bcctrl ALWAYS, 0, 0"
+        emit "bcctrl 20, 0, 0"
         cost 8;
 
     JUMP(dest:LABEL4)
@@ -381,11 +381,13 @@ PATTERNS
 /* Conversions */
 
     out:(int)reg = CIU44(in:(int)reg)
-        emit "mr %out, %in ! ciu44"
+        with %out == %in
+        emit "! ciu44"
         cost 4;
 
     out:(int)reg = CUI44(in:(int)reg)
-        emit "mr %out, %in ! cui44"
+        with %out == %in
+        emit "! cui44"
         cost 4;
 
 
@@ -410,7 +412,7 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = SUB4(left:(int)reg, right:CONST4)
-		emit "addi %out, %left, -($right)"
+		emit "addi %out, %left, -[$right]"
 		cost 4;
 
 	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
@@ -438,6 +440,18 @@ PATTERNS
     out:(int)reg = NEG4(left:(int)reg)
         emit "neg %out, %left"
         cost 4;
+
+	out:(int)reg = AND4(left:CONST4, right:(int)reg)
+		emit "andi. %out, %right, $left"
+		cost 4;
+
+	out:(int)reg = AND4(left:(int)reg, right:CONST4)
+		emit "andi. %out, %left, $right"
+		cost 4;
+
+	out:(int)reg = AND4(left:(int)reg, right:(int)reg)
+		emit "and %out, %left, %right"
+		cost 4;
 
 	out:(int)reg = OR4(left:(int)reg, right:(int)reg)
 		emit "or %out, %right, %left"

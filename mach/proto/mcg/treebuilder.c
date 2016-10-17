@@ -528,6 +528,47 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
 
+        case op_loe:
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        new_labelir(".hol0"),
+                        new_wordir(value)
+                    )
+                )
+            );
+            break;
+
+        case op_ste:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        new_labelir(".hol0"),
+                        new_wordir(value)
+                    ),
+                    pop(EM_wordsize)
+                )
+            );
+            break;
+
+        case op_zre:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        new_labelir(".hol0"),
+                        new_wordir(value)
+                    ),
+                    new_wordir(0)
+                )
+            );
+            break;
+                
         case op_loc:
             push(
                 new_wordir(value)
@@ -577,7 +618,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_stf:
         {
             struct ir* ptr = pop(EM_pointersize);
-            struct ir* val = pop(value);
+            struct ir* val = pop(EM_wordsize);
 
             appendir(
                 new_ir2(
@@ -854,6 +895,48 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
+        case op_fef:
+        {
+            struct ir* e;
+            struct ir* f = pop(value);
+            /* fef is implemented by synthesising a call to frexp. */
+            push(
+                new_labelir(".fef_exp")
+            );
+            push(
+                f
+            );
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir((value == 4) ? "frexpf" : "frexp")
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_wordsize,
+                    new_wordir(4 + value)
+                )
+            );
+            e = appendir(
+                new_ir0(
+                    IR_GETRET, value
+                )
+            );
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize,
+                    new_labelir(".fef_exp")
+                )
+            );
+            push(
+                e
+            );
+                    
+            break;
+        }
+            
         case op_lin:
         {
             /* Set line number --- ignore. */
@@ -905,6 +988,40 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             );
             break;
                 
+        case op_ine:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    address_of_external(label, offset),
+                    new_ir2(
+                        IR_ADD, EM_wordsize,
+                        new_ir1(
+                            IR_LOAD, EM_wordsize,
+                            address_of_external(label, offset)
+                        ),
+                        new_wordir(1)
+                    )
+                )
+            );
+            break;
+
+        case op_dee:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize,
+                    address_of_external(label, offset),
+                    new_ir2(
+                        IR_ADD, EM_wordsize,
+                        new_ir1(
+                            IR_LOAD, EM_wordsize,
+                            address_of_external(label, offset)
+                        ),
+                        new_wordir(-1)
+                    )
+                )
+            );
+            break;
+
         case op_cal:
             assert(offset == 0);
             materialise_stack();

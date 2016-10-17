@@ -90,7 +90,7 @@ struct hop* platform_epilogue(void)
     hop_add_insel(hop, "lwz r0, %d(fp)", current_proc->spills_size + 4);
     hop_add_insel(hop, "addi sp, fp, %d", current_proc->fp_to_ab);
     hop_add_insel(hop, "mr fp, r0");
-    hop_add_insel(hop, "blr");
+    hop_add_insel(hop, "bclr 20, 0, 0");
 
 	return hop;
 }
