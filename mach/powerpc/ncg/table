@@ -42,6 +42,7 @@ PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
+	REG_PAIR        /* speed hack for sti 8 */
 	FPR             /* any FPR */
 	FREG            /* any allocatable FPR */
 	FSREG           /* any allocatable single-precision FPR */
@@ -96,6 +97,12 @@ REGISTERS
 	FP("fp")           : GPR, GPRFP.
 	SP("sp")           : GPR, GPRSP.
 	R0("r0")           : GPR, GPR0.
+
+	/* speed hack for sti 8 */
+	PAIR_R9_R10=R9+R10 : REG_PAIR.
+	PAIR_R7_R8=R7+R8   : REG_PAIR.
+	PAIR_R5_R6=R5+R6   : REG_PAIR.
+	PAIR_R3_R4=R3+R4   : REG_PAIR.
 
 	F31("f31")         : FPR, FREG, FPR31.
 	F30("f30")         : FPR, FREG, FPR30.
@@ -698,6 +705,12 @@ STACKINGRULES
 			COMMENT("stack REG")
 			stwu %1, {GPRINDIRECT, SP, 0-4}
 
+	from REG_PAIR to STACK
+		gen
+			COMMENT("stack REG_PAIR")
+			stwu %1.2, {GPRINDIRECT, SP, 0-4}
+			stwu %1.1, {GPRINDIRECT, SP, 0-4}
+
 	from CONST_ALL + LABEL to STACK
 		gen
 			COMMENT("stack CONST_ALL + LABEL")
@@ -718,16 +731,19 @@ STACKINGRULES
 			
 	from SUM_ALL + TRISTATE_ALL + LOGICAL_ALL to STACK
 		gen
+			COMMENT("stack SUM_ALL + TRISTATE_ALL + LOGICAL_ALL")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from IND_ALL_BHW to STACK
 		gen
+			COMMENT("stack IND_ALL_BHW")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
 			
 	from IND_ALL_D to STACK
 		gen
+			COMMENT("stack IND_ALL_D")
 			move %1, FSCRATCH
 			stfdu FSCRATCH, {GPRINDIRECT, SP, 0-8}
 			
@@ -773,7 +789,16 @@ COERCIONS
 			lwz %a, {GPRINDIRECT, SP, 0}
 			addi SP, SP, {CONST, 4}
 		yields %a
-	
+
+	from STACK
+		uses REG_PAIR
+		gen
+			COMMENT("coerce STACK->REG_PAIR")
+			lwz %a.1, {GPRINDIRECT, SP, 0}
+			lwz %a.2, {GPRINDIRECT, SP, 4}
+			addi SP, SP, {CONST, 8}
+		yields %a
+
 	from SEX_B
 		uses REG
 		gen
@@ -821,26 +846,31 @@ COERCIONS
 			lfs %a, {GPRINDIRECT, SP, 0}
 			addi SP, SP, {CONST, 4}
 		yields %a
-		
+
 	from IND_ALL_BHW
 		uses REG
 		gen
 			move %1, %a
 		yields %a
-		
+
 	from IND_ALL_W
 		uses FSREG
 		gen
 			move %1, %a
 		yields %a
-		
+
+	/*
+	 * from IND_RC_D to REG_PAIR is not possible, because
+	 * %1.off+4 might overflow a signed 16-bit integer in
+	 *   move {IND_RC_W, %1.val, %1.off+4}, %a.2
+	 */
+
 	from IND_ALL_D
 		uses FREG
 		gen
 			move %1, %a
 		yields %a
-		
-	
+
 
 
 PATTERNS
@@ -1216,7 +1246,7 @@ PATTERNS
 				move %2, {IND_RC_W, %1.reg, %1.off}
 
 	pat sti $1==INT64                  /* Store double-word indirect */
-		with GPR FREG
+		with REG FREG
 			kills MEMORY
 			gen
 				move %2, {IND_RC_D, %1, 0}
@@ -1228,16 +1258,38 @@ PATTERNS
 			kills MEMORY
 			gen
 				move %2, {IND_RC_D, %1.reg, %1.off}
-		with GPR GPR GPR
+		/*
+		 * This pattern would be too slow:
+		 *   with REG REG REG
+		 * ncg can't handle that many registers, and would
+		 * take about 2 seconds on each sti 8.  So we use
+		 * REG_PAIR as a speed hack for sti 8.
+		 */
+		with REG REG_PAIR
 			kills MEMORY
 			gen
-				stw %2, {GPRINDIRECT, %1, 0}
-				stw %3, {GPRINDIRECT, %1, 4}
-		with SUM_RC GPR GPR
+				move %2.1, {IND_RC_W, %1, 0}
+				move %2.2, {IND_RC_W, %1, 4}
+		/*
+		 * Next 2 patterns exist because there is no coercion
+		 * from IND_ALL_D to REG_PAIR.
+		 */
+		with REG IND_RC_D
 			kills MEMORY
+			uses REG={SUM_RC, %2.reg, %2.off}, REG_PAIR
 			gen
-				move %2, {IND_RC_W, %1.reg, %1.off}
-				move %3, {IND_RC_W, %1.reg, %1.off+4}
+				move {IND_RC_W, %a, 0}, %b.1
+				move {IND_RC_W, %a, 4}, %b.2
+				move %b.1, {IND_RC_W, %1, 0}
+				move %b.2, {IND_RC_W, %1, 4}
+		with REG IND_RR_D
+			kills MEMORY
+			uses REG={SUM_RR, %2.reg1, %2.reg2}, REG_PAIR
+			gen
+				move {IND_RC_W, %a, 0}, %b.1
+				move {IND_RC_W, %a, 4}, %b.2
+				move %b.1, {IND_RC_W, %1, 0}
+				move %b.2, {IND_RC_W, %1, 4}
 
 	pat sti                            /* Store arbitrary size */
 		leaving
