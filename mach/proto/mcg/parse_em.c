@@ -230,6 +230,12 @@ static void parse_pseu(void)
                     break;
                 }
 
+                case fco_ptyp:
+                {
+                    data_float(em.em_string, em.em_size, ro);
+                    break;
+                }
+
 				case str_ptyp:
                     data_block(strdup(em.em_string), em.em_size, ro);
 					break;
