@@ -40,6 +40,10 @@ static void promote(struct ir* ir)
             array_appendu(&promotable, ir);
             break;
 
+        case IR_NOP:
+            promote(ir->left);
+            break;
+
         case IR_PHI:
         {
             int i;
