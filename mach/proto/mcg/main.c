@@ -10,6 +10,8 @@ FILE* cfg_dot_file = NULL;
 
 bool tracing(char k)
 {
+    if (k == '!')
+        return true;
     if (!tracechars)
         return false;
 
@@ -23,7 +25,7 @@ void tracef(char k, const char* fmt, ...)
     if (tracing(k))
     {
         va_start(ap, fmt);
-        vprintf(fmt, ap);
+        vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
 }
