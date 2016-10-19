@@ -86,8 +86,21 @@ static void modify_promotable_irs(void)
     {
         struct ir* ir = promotable.item[i];
         
-        if (ir->opcode != IR_PHI)
-            ir->opcode++;
+        switch (ir->opcode)
+        {
+            case IR_ADDF:
+            case IR_SUBF:
+            case IR_MULF:
+            case IR_DIVF:
+            case IR_NEGF:
+            case IR_PHI:
+            case IR_NOP:
+                break;
+
+            default:
+                ir->opcode++;
+                break;
+        }
     }
 }
 
