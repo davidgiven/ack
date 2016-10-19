@@ -104,24 +104,29 @@ REGISTERS
 	PAIR_R5_R6=R5+R6   : REG_PAIR.
 	PAIR_R3_R4=R3+R4   : REG_PAIR.
 
-	F31("f31")         : FPR, FREG, FPR31.
-	F30("f30")         : FPR, FREG, FPR30.
-	F29("f29")         : FPR, FREG, FPR29.
-	F28("f28")         : FPR, FREG, FPR28.
-	F27("f27")         : FPR, FREG, FPR27.
-	F26("f26")         : FPR, FREG, FPR26.
-	F25("f25")         : FPR, FREG, FPR25.
-	F24("f24")         : FPR, FREG, FPR24.
-	F23("f23")         : FPR, FREG, FPR23.
-	F22("f22")         : FPR, FREG, FPR22.
-	F21("f21")         : FPR, FREG, FPR21.
-	F20("f20")         : FPR, FREG, FPR20.
-	F19("f19")         : FPR, FREG, FPR19.
-	F18("f18")         : FPR, FREG, FPR18.
-	F17("f17")         : FPR, FREG, FPR17.
-	F16("f16")         : FPR, FREG, FPR16.
-	F15("f15")         : FPR, FREG, FPR15.
-	F14("f14")         : FPR, FREG, FPR14.
+	/*
+	 * F14 to F31 are reserved for regvar, if we ever implement
+	 * it.  Don't add them to FREG; the register allocator would
+	 * be too slow.
+	 */
+	F31("f31")         : FPR, FPR31.
+	F30("f30")         : FPR, FPR30.
+	F29("f29")         : FPR, FPR29.
+	F28("f28")         : FPR, FPR28.
+	F27("f27")         : FPR, FPR27.
+	F26("f26")         : FPR, FPR26.
+	F25("f25")         : FPR, FPR25.
+	F24("f24")         : FPR, FPR24.
+	F23("f23")         : FPR, FPR23.
+	F22("f22")         : FPR, FPR22.
+	F21("f21")         : FPR, FPR21.
+	F20("f20")         : FPR, FPR20.
+	F19("f19")         : FPR, FPR19.
+	F18("f18")         : FPR, FPR18.
+	F17("f17")         : FPR, FPR17.
+	F16("f16")         : FPR, FPR16.
+	F15("f15")         : FPR, FPR15.
+	F14("f14")         : FPR, FPR14.
 	F13("f13")         : FPR, FREG, FPR13.
 	F12("f12")         : FPR, FREG, FPR12.
 	F11("f11")         : FPR, FREG, FPR11.
@@ -137,24 +142,6 @@ REGISTERS
 	F1("f1")           : FPR, FREG, FPR1.
 	F0("f0")           : FPR, FPR0.
 
-	FS31("f31")=F31    : FSREG.
-	FS30("f30")=F30    : FSREG.
-	FS29("f29")=F29    : FSREG.
-	FS28("f28")=F28    : FSREG.
-	FS27("f27")=F27    : FSREG.
-	FS26("f26")=F26    : FSREG.
-	FS25("f25")=F25    : FSREG.
-	FS24("f24")=F24    : FSREG.
-	FS23("f23")=F23    : FSREG.
-	FS22("f22")=F22    : FSREG.
-	FS21("f21")=F21    : FSREG.
-	FS20("f20")=F20    : FSREG.
-	FS19("f19")=F19    : FSREG.
-	FS18("f18")=F18    : FSREG.
-	FS17("f17")=F17    : FSREG.
-	FS16("f16")=F16    : FSREG.
-	FS15("f15")=F15    : FSREG.
-	FS14("f14")=F14    : FSREG.
 	FS13("f13")=F13    : FSREG.
 	FS12("f12")=F12    : FSREG.
 	FS11("f11")=F11    : FSREG.
@@ -168,7 +155,6 @@ REGISTERS
 	FS3("f3")=F3       : FSREG.
 	FS2("f2")=F2       : FSREG.
 	FS1("f1")=F1       : FSREG.
-	/* FS0("f0")=F0 */
 
 	LR("lr")           : SPR.
 	CTR("ctr")         : SPR.
