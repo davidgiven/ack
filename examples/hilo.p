@@ -8,7 +8,8 @@
 program hilo(input, output);
 
 type
-	string = array [0..255] of char;
+	string = packed array [0..255] of char;
+	charstar = packed array [0..0] of char;
 	
 var
 	playing : Boolean;
@@ -34,18 +35,18 @@ function random(range : integer) : integer;
   that conflicts with a Pascal keyword. Luckily there's a private function
   uread() in the ACK Pascal library that we can use instead. }
   
-function uread(fd : integer; var buffer : char; count : integer) : integer;
+function uread(fd : integer; var buffer : charstar; count : integer) : integer;
 	extern;
 
 function readchar : char;
 	var
-		c : char;
+		c : charstar;
 		dummy : integer;
 		
 	begin
-		c := chr(0);
+		c[0] := chr(0);
 		dummy := uread(0, c, 1);
-		readchar := c;
+		readchar := c[0];
 	end;
 	
 procedure readstring(var buffer : string; var length : integer);
