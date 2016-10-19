@@ -27,7 +27,7 @@ void burm_trace(struct burm_node* p, int ruleno, int cost, int bestcost) {
 void burm_panic_cannot_match(struct burm_node* node)
 {
 	fprintf(stderr, "could not find any patterns to match:\n");
-	ir_print(0, node->ir);
+	ir_print('!', node->ir);
 	fprintf(stderr, "aborting!\n");
 	exit(1);
 }

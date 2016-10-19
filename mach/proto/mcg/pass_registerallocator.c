@@ -16,6 +16,8 @@ static register_assignment_t* current_outs;
 static int insert_moves(struct basicblock* bb, int index,
     register_assignment_t* srcregs, register_assignment_t* destregs);
 
+static bool type_match(struct hreg* hreg, struct vreg* vreg);
+
 static void populate_hregs(void)
 {
     const struct burm_register_data* brd = burm_register_data;
@@ -65,9 +67,7 @@ static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
 
 static bool evictable(struct hreg* hreg, struct vreg* vreg)
 {
-    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    return (hreg->attrs & c->attrs) && !array_contains(&current_hop->ins, vreg);
-    /* Find an unused output register of the right class which is not also being used as an input register. */
+    return type_match(hreg, vreg) && !array_contains(&current_hop->ins, vreg);
 }
 
 static struct hreg* evict(struct vreg* vreg)
@@ -81,17 +81,26 @@ static struct hreg* evict(struct vreg* vreg)
     for (i=0; i<hregs.count; i++)
     {
         struct hreg* hreg = hregs.item[i];
-        struct vreg* candidate = pmap_findleft(current_ins, hreg);
+        struct vreg* candidatein = pmap_findleft(current_ins, hreg);
+        struct vreg* candidateout = pmap_findleft(current_outs, hreg);
 
-        if (candidate &&
-            (pmap_findleft(current_outs, hreg) == candidate) &&
-            evictable(hreg, vreg))
+        if (evictable(hreg, vreg))
         {
-            tracef('R', "R: evicting %%%d from %s\n", candidate->id, hreg->name);
-            pmap_put(&evicted, candidate, hreg);
-            pmap_remove(current_ins, hreg, candidate);
-            pmap_remove(current_outs, hreg, candidate);
-            return hreg;
+            if (!candidatein && !candidateout)
+            {
+                /* This hreg is unused, so we don't need to evict anything.
+                 * Shouldn't really happen in real life. */
+                return hreg;
+            }
+            if (candidatein == candidateout)
+            {
+                /* This is a through register. */
+                tracef('R', "R: evicting %%%d from %s\n", candidatein->id, hreg->name);
+                pmap_put(&evicted, candidatein, hreg);
+                pmap_remove(current_ins, hreg, candidatein);
+                pmap_remove(current_outs, hreg, candidatein);
+                return hreg;
+            }
         }
     }
 

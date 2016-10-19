@@ -197,6 +197,8 @@ static void insn_simple(int opcode)
         case op_cii: simple_convert(IR_CII1); break;
         case op_ciu: simple_convert(IR_CIU1); break;
         case op_cui: simple_convert(IR_CUI1); break;
+        case op_cfi: simple_convert(IR_CFI1); break;
+        case op_cif: simple_convert(IR_CIF1); break;
 
         case op_cmp:
             push(
@@ -460,10 +462,24 @@ static void insn_ivalue(int opcode, arith value)
         case op_dvf: simple_alu2(opcode, value, IR_DIVF); break;
         case op_ngf: simple_alu1(opcode, value, IR_NEGF); break;
 
+        case op_cmu: /* fall through */
+        case op_cms: push(tristate_compare(value, IR_COMPAREU)); break;
+        case op_cmi: push(tristate_compare(value, IR_COMPARES)); break;
+        case op_cmf: push(tristate_compare(value, IR_COMPAREF)); break;
+
         case op_lol:
             push(
                 new_ir1(
                     IR_LOAD, EM_wordsize,
+                    new_localir(value)
+                )
+            );
+            break;
+
+        case op_ldl:
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize*2,
                     new_localir(value)
                 )
             );
@@ -633,19 +649,6 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
         }
-
-        case op_cmi:
-            push(
-                tristate_compare(value, IR_COMPARES)
-            );
-            break;
-
-        case op_cmu:
-        case op_cms:
-            push(
-                tristate_compare(value, IR_COMPAREU)
-            );
-            break;
 
         case op_ads:
         {
@@ -953,6 +956,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
 {
     switch (opcode)
     {
+        case op_lpi:
         case op_lae:
             push(
                 address_of_external(label, offset)

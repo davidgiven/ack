@@ -63,9 +63,20 @@ S CUI2
 S CUI4
 S CUI8
 
+S CFI1
+S CFI2
+S CFI4
+S CFI8
+
+S CIF1
+S CIF2
+S CIF4
+S CIF8
+
 # Tristate comparisons
 S COMPARES
 S COMPAREU
+S COMPAREF
 
 # Boolean comparisons
 S IFEQ

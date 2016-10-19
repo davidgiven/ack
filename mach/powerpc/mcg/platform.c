@@ -99,14 +99,47 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
 {
     struct hop* hop = new_hop(bb, NULL);
 
-	if ((src->type & burm_int_ATTR) && (dest->type & burm_int_ATTR))
-	{
-		if (src->is_stacked)
-			hop_add_insel(hop, "lwz %H, %S(fp) ! %H", dest, src, src);
-		else if (dest->is_stacked)
+    if (!src->is_stacked && dest->is_stacked)
+    {
+        if (src->type & burm_int_ATTR)
 			hop_add_insel(hop, "stw %H, %S(fp) ! %H", src, dest, dest);
-		else
+        else if (src->type & burm_float_ATTR)
+            hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
+        else
+            assert(false);
+    }
+    else if (src->is_stacked && !dest->is_stacked)
+    {
+        if (src->type & burm_int_ATTR)
+			hop_add_insel(hop, "lwz %H, %S(fp) ! %H", dest, src, src);
+        else if (src->type & burm_float_ATTR)
+            hop_add_insel(hop, "lfs %H, %S(fp) ! %H", dest, src, src);
+        else
+            assert(false);
+    }
+    else if (!src->is_stacked && !dest->is_stacked)
+    {
+        if ((src->type & burm_int_ATTR) && (dest->type & burm_int_ATTR))
 			hop_add_insel(hop, "mr %H, %H", dest, src);
+        else if ((src->type & burm_float_ATTR) && (dest->type & burm_float_ATTR))
+            hop_add_insel(hop, "fmr %H, %H", dest, src);
+        else
+        {
+            if (src->type & burm_int_ATTR)
+                hop_add_insel(hop, "stwu %H, -4(sp)", src);
+            else if (src->type & burm_float_ATTR)
+                hop_add_insel(hop, "stfsu %H, -4(sp)", src);
+            else
+                assert(false);
+
+            if (dest->type & burm_int_ATTR)
+                hop_add_insel(hop, "lwz %H, 0(sp)", dest);
+            else if (dest->type & burm_float_ATTR)
+                hop_add_insel(hop, "lfs %H, 0(sp)", dest);
+            else
+                assert(false);
+            hop_add_insel(hop, "addi sp, sp, 4");
+        }
 	}
 	else
 		fatal("cannot generate move from %s to %s", src->name, dest->name);

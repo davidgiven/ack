@@ -16,7 +16,7 @@ REGISTERS
     r6  "r6"  bytes4! int! volatile;
     r5  "r5"  bytes4! int! volatile;
     r4  "r4"  bytes4! int! volatile;
-    r3  "r3"  bytes4! int! ret volatile;
+    r3  "r3"  bytes4! int! volatile ret;
 
     r31 "r31" bytes4! int!; 
     r30 "r30" bytes4! int!; 
@@ -48,7 +48,7 @@ REGISTERS
     f6  "f6"  bytes4! float! volatile;
     f5  "f5"  bytes4! float! volatile;
     f4  "f4"  bytes4! float! volatile;
-    f3  "f3"  bytes4! float! volatile;
+    f3  "f3"  bytes4! float! volatile fret;
     f2  "f2"  bytes4! float! volatile;
     f1  "f1"  bytes4! float! volatile;
     f0  "f0"  bytes4! float! volatile;
@@ -476,6 +476,10 @@ PATTERNS
 
 /* FPU operations */
 
+    out:(float)reg = LOADF4(addr:address)
+        emit "lfs %out, %addr"
+        cost 4;
+        
 	out:(float)reg = value:CONSTF4
 		emit "lfs %out, address-containing-$value"
 		cost 8;
@@ -488,6 +492,32 @@ PATTERNS
 		emit "fsubs %out, %left, %right"
 		cost 4;
 
+    out:(float)reg = MULF4(left:(float)reg, right:(float)reg)
+        emit "fmuls %out, %left, %right"
+        cost 4;
+
+    out:(float)reg = NEGF4(left:(float)reg)
+        emit "fneg %out, %left"
+        cost 4;
+
+	cr:(cr)cr = COMPAREF4(left:(float)reg, right:(float)reg)
+        emit "fcmpu %cr, %left, %right"
+		cost 4;
+
+    cr:(cr)cr = COMPARES4(COMPAREF4(left:(float)reg, right:(float)reg), result:CONST4)
+        when specific_constant(%result, 0)
+        emit "fcmpu %cr, %left, %right"
+        cost 4;
+
+    out:(ret)reg = CFI44(val:(fret)reg)
+        with corrupted(volatile)
+        emit "bl .cfi4"
+        cost 4;
+
+    out:(fret)reg = CIF44(val:(ret)reg)
+        with corrupted(volatile)
+        emit "bl .cif4"
+        cost 4;
 
 /* vim: set sw=4 ts=4 expandtab : */
 

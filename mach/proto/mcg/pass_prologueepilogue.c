@@ -14,10 +14,18 @@ void pass_add_prologue_epilogue(void)
             struct hop* hop = bb->hops.item[j];
 
             for (k=0; k<hop->regsin.count; k++)
-                array_appendu(&current_proc->usedregs, hop->regsin.item[k].left);
+            {
+                struct hreg* hreg = hop->regsin.item[k].left;
+                if (!hreg->is_stacked)
+                    array_appendu(&current_proc->usedregs, hreg);
+            }
 
             for (k=0; k<hop->regsout.count; k++)
-                array_appendu(&current_proc->usedregs, hop->regsout.item[k].left);
+            {
+                struct hreg* hreg = hop->regsout.item[k].left;
+                if (!hreg->is_stacked)
+                    array_appendu(&current_proc->usedregs, hreg);
+            }
         }
     }
 
