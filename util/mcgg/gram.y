@@ -25,6 +25,7 @@ extern int yylex(void);
     struct constraint* constraint;
 }
 
+%term ALIASES
 %term COPY
 %term CORRUPTED
 %term COST
@@ -43,6 +44,7 @@ extern int yylex(void);
 %token <string>     ID
 %token <string>     QFRAGMENT
 
+%type  <stringlist> aliases;
 %type  <constraint> constraint
 %type  <constraint> constraints
 %type  <expr>       predicate
@@ -72,8 +74,14 @@ registers
 
 register
     : ID QFRAGMENT                    { $$ = makereg($1, $2); }
+    | register ALIASES '(' aliases ')' { $$ = $1; addregaliases($$, $4); }
     | register ID                     { $$ = $1; addregattr($1, $2, false); }
     | register ID '!'                 { $$ = $1; addregattr($1, $2, true); }
+    ;
+
+aliases
+    : ID                              { $$ = calloc(1, sizeof(*$$)); stringlist_add($$, $1); }
+    | aliases ',' ID                  { $$ = $1; stringlist_add($$, $3); }
     ;
 
 declarations

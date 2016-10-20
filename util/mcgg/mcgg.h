@@ -67,6 +67,7 @@ struct burm_register_data
     const char* realname;
     uint32_t type;
     uint32_t attrs;
+    const struct burm_register_data** aliases;
 };
 
 extern const struct burm_register_data burm_register_data[];

@@ -279,6 +279,7 @@ struct reg* makereg(const char* id, const char* realname)
 	p->name = id;
 	p->realname = realname;
 	p->number = number++;
+	array_append(&p->aliases, p);
 	smap_put(&registers, id, p);
 
 	return p;
@@ -309,6 +310,34 @@ void addregattr(struct reg* reg, const char* id, bool exact)
 	reg->attrs |= 1<<(p->number);
 	if (exact)
 		reg->type |= 1<<(p->number);
+}
+
+void addregalias(struct reg* r1, struct reg* r2)
+{
+	if (!array_appendu(&r1->aliases, r2))
+	{
+		int i;
+
+		for (i=0; i<r1->aliases.count; i++)
+			addregalias(r1->aliases.item[i], r2);
+	}
+}
+
+void addregaliases(struct reg* reg, struct stringlist* aliases)
+{
+	struct stringfragment* f = aliases->first;
+
+	while (f)
+	{
+		struct reg* r = smap_get(&registers, f->data);
+		if (!r)
+			yyerror("register '%s' is not defined here", f->data);
+
+		array_appendu(&reg->aliases, r);
+		array_appendu(&r->aliases, reg);
+
+		f = f->next;
+	}
 }
 
 struct regattr* getregattr(const char* id)
@@ -588,7 +617,17 @@ static void emitregisterattrs(void)
 
 static void emitregisters(void)
 {
-	int i;
+	int i, j;
+
+	for (i=0; i<registers.count; i++)
+	{
+		struct reg* r = registers.item[i].right;
+
+		print("const struct %Pregister_data* %Pregister_aliases_%d_%s[] = {\n%1", i, r->name);
+		for (j=0; j<r->aliases.count; j++)
+			print("&%Pregister_data[%d], ", r->aliases.item[j]->number);
+		print("NULL\n};\n");
+	}
 
 	print("const struct %Pregister_data %Pregister_data[] = {\n");
 	for (i=0; i<registers.count; i++)
@@ -596,8 +635,8 @@ static void emitregisters(void)
 		struct reg* r = registers.item[i].right;
 		assert(r->number == i);
 
-		print("%1{ \"%s\", \"%s\", 0x%x, 0x%x },\n",
-			r->name, r->realname, r->type, r->attrs);
+		print("%1{ \"%s\", \"%s\", 0x%x, 0x%x, %Pregister_aliases_%d_%s },\n",
+			r->name, r->realname, r->type, r->attrs, i, r->name);
 	}
 	print("%1{ NULL }\n");
 	print("};\n\n");
