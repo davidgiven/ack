@@ -302,6 +302,7 @@ static void insn_simple(int opcode)
                     new_labelir(".trp")
                 )
             );
+            break;
         }
 
         case op_lni:
