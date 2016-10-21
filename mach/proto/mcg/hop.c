@@ -90,9 +90,25 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
     {
         if (*fmt == '%')
         {
+            int index = 0;
             fmt += 2;
+        again:
             switch (fmt[-1])
             {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    index = fmt[-1] - '0';
+                    fmt++;
+                    goto again;
+
                 case 'd':
                     hop_add_string_insel(hop, aprintf("%d", va_arg(ap, int)));
                     break;
@@ -110,11 +126,11 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
                     break;
 
                 case 'H':
-                    hop_add_hreg_insel(hop, va_arg(ap, struct hreg*), 0);
+                    hop_add_hreg_insel(hop, va_arg(ap, struct hreg*), index);
                     break;
 
                 case 'V':
-                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*), 0);
+                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*), index);
                     break;
             }
         }
@@ -220,7 +236,7 @@ char* hop_render(struct hop* hop)
                 if (hreg)
                     appendf("%s", hreg->brd->names[insel->index]);
                 else
-                    appendf("%%%d", vreg->id);
+                    appendf("%%%d.%d", vreg->id, insel->index);
 				break;
             }
 

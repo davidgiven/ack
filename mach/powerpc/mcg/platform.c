@@ -202,6 +202,11 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     hop_add_insel(hop, "mr %H, %H", dest, src);
                     break;
 
+                case burm_pair_ATTR:
+                    hop_add_insel(hop, "mr %0H, %0H", dest, src);
+                    hop_add_insel(hop, "mr %1H, %1H", dest, src);
+                    break;
+
                 case burm_float_ATTR:
                 case burm_double_ATTR:
                     hop_add_insel(hop, "fmr %H, %H", dest, src);

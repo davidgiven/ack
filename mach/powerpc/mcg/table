@@ -162,6 +162,12 @@ PATTERNS
         emit "addi sp, sp, 4"
 		cost 8;
 
+    out:(pair)reg = POP8
+        emit "lwz %out.0, 4(sp)"
+        emit "lwz %out.1, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 12;
+
 	out:(float)reg = POPF4
 		emit "lfs %out, 0(sp)"
 		emit "addi sp, sp, 4"

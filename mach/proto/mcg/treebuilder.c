@@ -516,7 +516,7 @@ static void insn_ivalue(int opcode, arith value)
                 new_ir1(
                     IR_LOAD, EM_wordsize,
                     new_ir1(
-                        IR_LOAD, EM_wordsize,
+                        IR_LOAD, EM_pointersize,
                         new_localir(value)
                     )
                 )
@@ -528,7 +528,7 @@ static void insn_ivalue(int opcode, arith value)
                 new_ir2(
                     IR_STORE, EM_wordsize,
                     new_ir1(
-                        IR_LOAD, EM_wordsize,
+                        IR_LOAD, EM_pointersize,
                         new_localir(value)
                     ),
                     pop(EM_wordsize)
@@ -912,41 +912,22 @@ static void insn_ivalue(int opcode, arith value)
         {
             struct ir* e;
             struct ir* f = pop(value);
-            /* fef is implemented by synthesising a call to frexp. */
-            push(
-                new_labelir(".fef_exp")
-            );
-            push(
-                f
-            );
+            /* fef is implemented by calling a helper function which then mutates
+             * the stack. We read the return values off the stack when retracting
+             * the stack pointer. */
+
+            push(f);
+            push(new_wordir(0));
+
             materialise_stack();
             appendir(
                 new_ir1(
                     IR_CALL, 0,
-                    new_labelir((value == 4) ? "frexpf" : "frexp")
+                    new_labelir((value == 4) ? ".fef4" : ".fef8")
                 )
-            );
-            appendir(
-                new_ir1(
-                    IR_STACKADJUST, EM_wordsize,
-                    new_wordir(4 + value)
-                )
-            );
-            e = appendir(
-                new_ir0(
-                    IR_GETRET, value
-                )
-            );
-            push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    new_labelir(".fef_exp")
-                )
-            );
-            push(
-                e
             );
                     
+            /* exit, leaving an int and then a float (or double) on the stack. */
             break;
         }
             
