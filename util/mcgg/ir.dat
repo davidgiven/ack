@@ -23,6 +23,7 @@ S POPF
 S LOAD # must be followed by float form
 S LOADF
 S STORE
+S STOREF
 
 # Arithemetic operations
 S ADD

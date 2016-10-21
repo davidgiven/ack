@@ -48,7 +48,7 @@ static void promote(struct ir* ir)
         {
             int i;
             for (i=0; i<ir->u.phivalue.count; i++)
-                array_appendu(&promotable, ir->u.phivalue.item[i].right);
+                promote(ir->u.phivalue.item[i].right);
             break;
         }
     }

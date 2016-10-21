@@ -21,7 +21,7 @@ static int braces = 0;
 <INITIAL>"\""               BEGIN(QSTRING);
 <QSTRING>"\""               BEGIN(INITIAL);
 
-<QSTRING>[%$][a-zA-Z_][a-zA_Z_0-9]+ {
+<QSTRING>[%$][a-zA-Z_][a-zA_Z_0-9]+(\.[0-9]+)? {
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
@@ -44,6 +44,7 @@ static int braces = 0;
 "cost"                      return COST;
 "emit"                      return EMIT;
 "fragment"                  return FRAGMENT;
+"named"                     return NAMED;
 "prefers"                   return PREFERS;
 "when"                      return WHEN;
 "with"                      return WITH;

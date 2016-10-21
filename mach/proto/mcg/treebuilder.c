@@ -495,6 +495,16 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
 
+        case op_sdl:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize*2,
+                    new_localir(value),
+                    pop(EM_wordsize*2)
+                )
+            );
+            break;
+
         case op_lal:
             push(
                 new_localir(value)
@@ -972,12 +982,31 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             );
             break;
 
+        case op_lde:
+            push(
+                new_ir1(
+                    IR_LOAD, EM_wordsize*2,
+                    address_of_external(label, offset)
+                )
+            );
+            break;
+
         case op_ste:
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
                     address_of_external(label, offset),
                     pop(EM_wordsize)
+                )
+            );
+            break;
+
+        case op_sde:
+            appendir(
+                new_ir2(
+                    IR_STORE, EM_wordsize*2,
+                    address_of_external(label, offset),
+                    pop(EM_wordsize*2)
                 )
             );
             break;

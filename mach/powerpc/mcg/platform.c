@@ -98,51 +98,122 @@ struct hop* platform_epilogue(void)
 struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
+    const uint32_t type_attrs =
+        burm_int_ATTR | burm_pair_ATTR | burm_float_ATTR | burm_double_ATTR;
 
-    if (!src->is_stacked && dest->is_stacked)
+    if ((src->type & type_attrs) != (dest->type & type_attrs))
     {
-        if (src->type & burm_int_ATTR)
-			hop_add_insel(hop, "stw %H, %S(fp) ! %H", src, dest, dest);
-        else if (src->type & burm_float_ATTR)
-            hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
-        else
-            assert(false);
-    }
-    else if (src->is_stacked && !dest->is_stacked)
-    {
-        if (src->type & burm_int_ATTR)
-			hop_add_insel(hop, "lwz %H, %S(fp) ! %H", dest, src, src);
-        else if (src->type & burm_float_ATTR)
-            hop_add_insel(hop, "lfs %H, %S(fp) ! %H", dest, src, src);
-        else
-            assert(false);
-    }
-    else if (!src->is_stacked && !dest->is_stacked)
-    {
-        if ((src->type & burm_int_ATTR) && (dest->type & burm_int_ATTR))
-			hop_add_insel(hop, "mr %H, %H", dest, src);
-        else if ((src->type & burm_float_ATTR) && (dest->type & burm_float_ATTR))
-            hop_add_insel(hop, "fmr %H, %H", dest, src);
-        else
+        assert(!src->is_stacked);
+        assert(!dest->is_stacked);
+
+        switch (src->type & type_attrs)
         {
-            if (src->type & burm_int_ATTR)
+            case burm_int_ATTR:
                 hop_add_insel(hop, "stwu %H, -4(sp)", src);
-            else if (src->type & burm_float_ATTR)
-                hop_add_insel(hop, "stfsu %H, -4(sp)", src);
-            else
-                assert(false);
+                break;
 
-            if (dest->type & burm_int_ATTR)
-                hop_add_insel(hop, "lwz %H, 0(sp)", dest);
-            else if (dest->type & burm_float_ATTR)
-                hop_add_insel(hop, "lfs %H, 0(sp)", dest);
-            else
+            case burm_float_ATTR:
+                hop_add_insel(hop, "stfsu %H, -4(sp)", src);
+                break;
+
+            case burm_double_ATTR:
+                hop_add_insel(hop, "stfdu %H, -8(sp)", src);
+                break;
+
+            default:
                 assert(false);
-            hop_add_insel(hop, "addi sp, sp, 4");
         }
-	}
-	else
-		fatal("cannot generate move from %s to %s", src->name, dest->name);
+
+        switch (dest->type & type_attrs)
+        {
+            case burm_int_ATTR:
+                hop_add_insel(hop, "lwz %H, 0(sp)", dest);
+                break;
+
+            case burm_float_ATTR:
+                hop_add_insel(hop, "lfs %H, 0(sp)", dest);
+                break;
+
+            case burm_double_ATTR:
+                hop_add_insel(hop, "lfd %H, 0(sp)", dest);
+                break;
+
+            default:
+                assert(false);
+        }
+
+        switch (dest->type & type_attrs)
+        {
+            case burm_int_ATTR:
+            case burm_float_ATTR:
+                hop_add_insel(hop, "addi sp, sp, 4");
+                break;
+
+            case burm_double_ATTR:
+            case burm_pair_ATTR:
+                hop_add_insel(hop, "addi sp, sp, 8");
+                break;
+
+            default:
+                assert(false);
+        }
+    }
+    else
+    {
+        uint32_t type = src->type & type_attrs;
+
+        if (!src->is_stacked && dest->is_stacked)
+        {
+            switch (type)
+            {
+                case burm_int_ATTR:
+                    hop_add_insel(hop, "stw %H, %S(fp) ! %H", src, dest, dest);
+                    break;
+
+                case burm_float_ATTR:
+                    hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
+                    break;
+
+                default:
+                    assert(false);
+            }
+        }
+        else if (src->is_stacked && !dest->is_stacked)
+        {
+            switch (type)
+            {
+                case burm_int_ATTR:
+                    hop_add_insel(hop, "lwz %H, %S(fp) ! %H", dest, src, src);
+                    break;
+
+                case burm_float_ATTR:
+                    hop_add_insel(hop, "lfs %H, %S(fp) ! %H", dest, src, src);
+                    break;
+
+                default:
+                    assert(false);
+            }
+        }
+        else if (!src->is_stacked && !dest->is_stacked)
+        {
+            switch (type)
+            {
+                case burm_int_ATTR:
+                    hop_add_insel(hop, "mr %H, %H", dest, src);
+                    break;
+
+                case burm_float_ATTR:
+                case burm_double_ATTR:
+                    hop_add_insel(hop, "fmr %H, %H", dest, src);
+                    break;
+
+                default:
+                    assert(false);
+            }
+        }
+        else
+            assert(false);
+    }
 
     return hop;
 }

@@ -13,12 +13,13 @@ struct phicongruence
 
 struct hreg
 {
-	const char* name;
-    const char* realname;
+	const char* id;
+    const struct burm_register_data* brd;
     uint32_t type;
 	uint32_t attrs;
 	bool is_stacked;
 	int offset;
+    ARRAYOF(struct hreg) aliases;
 };
 
 struct vreg

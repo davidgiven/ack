@@ -40,8 +40,8 @@ struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
     void (*emit_fragment)(int child);
-    void (*emit_return_reg)(void);
-    void (*emit_reg)(int child);
+    void (*emit_return_reg)(int index);
+    void (*emit_reg)(int child, int index);
     void (*emit_value)(int child);
     void (*emit_eoi)(void);
     void (*constrain_input_reg)(int child, uint32_t attr);
@@ -63,10 +63,10 @@ extern const struct burm_instruction_data burm_instruction_data[];
 
 struct burm_register_data
 {
-    const char* name;
-    const char* realname;
+    const char* id;
     uint32_t type;
     uint32_t attrs;
+    const char** names;
     const struct burm_register_data** aliases;
 };
 

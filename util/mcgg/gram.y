@@ -33,6 +33,7 @@ extern int yylex(void);
 %term EMIT
 %term EQUALS
 %term FRAGMENT
+%term NAMED
 %term NOTEQUALS
 %term PATTERNS
 %term PREFERS
@@ -44,7 +45,6 @@ extern int yylex(void);
 %token <string>     ID
 %token <string>     QFRAGMENT
 
-%type  <stringlist> aliases;
 %type  <constraint> constraint
 %type  <constraint> constraints
 %type  <expr>       predicate
@@ -55,6 +55,8 @@ extern int yylex(void);
 %type  <rule>       pattern
 %type  <rule>       pattern_constraints
 %type  <rule>       pattern_emit
+%type  <stringlist> aliases;
+%type  <stringlist> names;
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
 %type  <tree>       rhs
@@ -73,10 +75,16 @@ registers
     ;
 
 register
-    : ID QFRAGMENT                    { $$ = makereg($1, $2); }
+    : ID                              { $$ = makereg($1); }
+    | register NAMED '(' names ')'    { $$ = $1; setregnames($$, $4); }
     | register ALIASES '(' aliases ')' { $$ = $1; addregaliases($$, $4); }
     | register ID                     { $$ = $1; addregattr($1, $2, false); }
     | register ID '!'                 { $$ = $1; addregattr($1, $2, true); }
+    ;
+
+names
+    : QFRAGMENT                       { $$ = calloc(1, sizeof(*$$)); stringlist_add($$, $1); }
+    | names ',' QFRAGMENT             { $$ = $1; stringlist_add($$, $3); }
     ;
 
 aliases

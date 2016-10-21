@@ -268,7 +268,7 @@ static void* install(const char* name)
 	return &p->sym;
 }
 
-struct reg* makereg(const char* id, const char* realname)
+struct reg* makereg(const char* id)
 {
 	struct reg* p = smap_get(&registers, id);
 	static int number = 0;
@@ -277,12 +277,19 @@ struct reg* makereg(const char* id, const char* realname)
 		yyerror("redefinition of '%s'", id);
 	p = calloc(1, sizeof(*p));
 	p->name = id;
-	p->realname = realname;
 	p->number = number++;
 	array_append(&p->aliases, p);
 	smap_put(&registers, id, p);
 
 	return p;
+}
+
+void setregnames(struct reg* reg, struct stringlist* names)
+{
+	if (reg->names)
+		yyerror("you can only set one set of register names");
+
+	reg->names = names;
 }
 
 struct regattr* makeregattr(const char* id)
@@ -629,14 +636,33 @@ static void emitregisters(void)
 		print("NULL\n};\n");
 	}
 
+	for (i=0; i<registers.count; i++)
+	{
+		struct reg* r = registers.item[i].right;
+
+		print("const char* %Pregister_names_%d_%s[] = {\n%1", i, r->name);
+		if (r->names)
+		{
+			struct stringfragment* f = r->names->first;
+			while (f)
+			{
+				print("\"%s\", ", f->data);
+				f = f->next;
+			}
+		}
+		else
+			print("\"%s\", ", r->name);
+		print("NULL\n};\n");
+	}
+
 	print("const struct %Pregister_data %Pregister_data[] = {\n");
 	for (i=0; i<registers.count; i++)
 	{
 		struct reg* r = registers.item[i].right;
 		assert(r->number == i);
 
-		print("%1{ \"%s\", \"%s\", 0x%x, 0x%x, %Pregister_aliases_%d_%s },\n",
-			r->name, r->realname, r->type, r->attrs, i, r->name);
+		print("%1{ \"%s\", 0x%x, 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s },\n",
+			r->name, r->type, r->attrs, i, r->name, i, r->name);
 	}
 	print("%1{ NULL }\n");
 	print("};\n\n");
@@ -1215,14 +1241,18 @@ static void emitinsndata(Rule rules)
 		
 		while (f)
 		{
-			switch (f->data[0])
+			char* data = strdup(f->data);
+			int type = *data++;
+			char* label = strtok(data, ".");
+			char* nameindex_s = strtok(NULL, ".");
+			int nameindex = nameindex_s ? atoi(nameindex_s) : 0;
+
+			switch (type)
 			{
 				case '%':
 				{
-					const char* label = f->data + 1;
-
 					if (r->label && (strcmp(label, r->label) == 0))
-						print("%1data->emit_return_reg();\n", label);
+						print("%1data->emit_return_reg(%d);\n", nameindex);
 					else
 					{
 						Tree node;
@@ -1234,24 +1264,24 @@ static void emitinsndata(Rule rules)
 						if (nt->kind == NONTERM)
 						{
 							if (nt->is_fragment)
-								print("%1data->emit_fragment(");
+								print("%1data->emit_fragment(%d);\n", index);
 							else
-								print("%1data->emit_reg(");
+								print("%1data->emit_reg(%d, %d);\n", index, nameindex);
 						}
 						else
-							print("%1data->emit_reg(");
-
-						print("%d);\n", index);
+							print("%1data->emit_reg(%d, %d);\n", index, nameindex);
 					}
 					break;
 				}
 
 				case '$':
 				{
-					const char* label = f->data + 1;
 					int index = 0;
 					if (!find_child_index(r->pattern, label, &index, NULL))
 						label_not_found(r, label);
+
+					if (nameindex != 0)
+						yyerror("indices other than 0 make no sense for $-values");
 
 					print("%1data->emit_value(%d);\n", index);
 					break;

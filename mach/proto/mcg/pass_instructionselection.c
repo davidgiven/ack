@@ -32,9 +32,9 @@ void burm_panic_cannot_match(struct burm_node* node)
 	exit(1);
 }
 
-static void emit_return_reg(void)
+static void emit_return_reg(int index)
 {
-    hop_add_vreg_insel(current_hop, current_hop->output);
+    hop_add_vreg_insel(current_hop, current_hop->output, index);
 }
 
 static struct vreg* find_vreg_of_child(int child)
@@ -47,13 +47,13 @@ static struct vreg* find_vreg_of_child(int child)
         return insn->ir->result;
 }
 
-static void emit_reg(int child)
+static void emit_reg(int child, int index)
 {
     struct vreg* vreg = find_vreg_of_child(child);
 
     if (vreg)
     {
-        hop_add_vreg_insel(current_hop, vreg);
+        hop_add_vreg_insel(current_hop, vreg, index);
         array_appendu(&vreg->used, current_hop);
     }
 }
@@ -109,7 +109,7 @@ static uint32_t find_type_from_constraint(uint32_t attr)
      * this. */
 
     const struct burm_register_data* brd = burm_register_data;
-    while (brd->name)
+    while (brd->id)
     {
         if (brd->attrs & attr)
             return brd->type;

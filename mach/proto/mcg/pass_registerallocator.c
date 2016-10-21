@@ -20,13 +20,29 @@ static bool type_match(struct hreg* hreg, struct vreg* vreg);
 
 static void populate_hregs(void)
 {
+    int i;
     const struct burm_register_data* brd = burm_register_data;
 
     hregs.count = 0;
-    while (brd->name)
+    while (brd->id)
     {
         array_append(&hregs, new_hreg(brd));
         brd++;
+    }
+    
+    /* Wire up the register aliases. */
+
+    for (i=0; i<hregs.count; i++)
+    {
+        struct hreg* hreg = hregs.item[i];
+        const struct burm_register_data** alias = hreg->brd->aliases;
+
+        while (*alias)
+        {
+            int index = *alias - burm_register_data;
+            array_append(&hreg->aliases, hregs.item[index]);
+            alias++;
+        }
     }
 }
 
@@ -43,6 +59,20 @@ static void wire_up_blocks_ins_outs(void)
     }
 }
 
+static bool register_used(register_assignment_t* regs, struct hreg* hreg)
+{
+    int i;
+
+    for (i=0; i<hreg->aliases.count; i++)
+    {
+        struct hreg* alias = hreg->aliases.item[i];
+        if (pmap_findleft(regs, alias))
+            return true;
+    }
+
+    return false;
+}
+
 static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
     struct vreg* vreg, uint32_t type)
 {
@@ -54,7 +84,7 @@ static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
     for (i=0; i<hregs.count; i++)
     {
         struct hreg* hreg = hregs.item[i];
-        if (!pmap_findleft(regs, hreg) && (hreg->type == type))
+        if (!register_used(regs, hreg) && (hreg->type == type))
         {
             /* This one is unused. Use it. */
             return hreg;
@@ -86,7 +116,10 @@ static struct hreg* evict(struct vreg* vreg)
 
         if (evictable(hreg, vreg))
         {
-            if (!candidatein && !candidateout)
+            if (!candidatein &&
+                !candidateout &&
+                !register_used(current_ins, hreg) &&
+                !register_used(current_outs, hreg))
             {
                 /* This hreg is unused, so we don't need to evict anything.
                  * Shouldn't really happen in real life. */
@@ -95,7 +128,7 @@ static struct hreg* evict(struct vreg* vreg)
             if (candidatein == candidateout)
             {
                 /* This is a through register. */
-                tracef('R', "R: evicting %%%d from %s\n", candidatein->id, hreg->name);
+                tracef('R', "R: evicting %%%d from %s\n", candidatein->id, hreg->id);
                 pmap_put(&evicted, candidatein, hreg);
                 pmap_remove(current_ins, hreg, candidatein);
                 pmap_remove(current_outs, hreg, candidatein);
@@ -120,13 +153,13 @@ static bool type_match(struct hreg* hreg, struct vreg* vreg)
 
 static bool allocatable_stackable_input(struct hreg* hreg, struct vreg* vreg)
 {
-    return !pmap_findleft(current_ins, hreg) &&
+    return !register_used(current_ins, hreg) &&
         type_match(hreg, vreg);
 }
 
 static bool allocatable_stackable_output(struct hreg* hreg, struct vreg* vreg)
 {
-    return !pmap_findleft(current_outs, hreg) &&
+    return !register_used(current_outs, hreg) &&
         type_match(hreg, vreg) &&
         !(hreg->attrs & current_hop->insndata->corrupts);
 }
@@ -295,7 +328,7 @@ static void add_output_register(struct vreg* vreg)
 
         pmap_add(current_outs, hreg, vreg);
         tracef('R', "R: output equality constraint requires extra move of %%%d => %s\n",
-            c->equals_to->id, hreg->name);
+            c->equals_to->id, hreg->id);
         pmap_add(current_ins, hreg, c->equals_to);
     }
     else
@@ -332,7 +365,7 @@ static void add_through_register(struct vreg* vreg, struct hreg* hreg)
             /* Nope, can't honour the hint. Mark the register as evicted; we'll
              * put it in something later (probably a stack slot). */
 
-            tracef('R', "R: cannot place %%%d in %s, evicting\n", vreg->id, hreg->name);
+            tracef('R', "R: cannot place %%%d in %s, evicting\n", vreg->id, hreg->id);
             pmap_put(&evicted, vreg, hreg);
             pmap_remove(current_ins, hreg, vreg);
             pmap_remove(current_outs, hreg, vreg);
@@ -372,7 +405,7 @@ static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* s
     array_append(&hregs, hreg);
 
 found:
-    tracef('R', "R: evicted %%%d moving to %s\n", vreg->id, hreg->name);
+    tracef('R', "R: evicted %%%d moving to %s\n", vreg->id, hreg->id);
     pmap_add(current_ins, hreg, vreg);
     pmap_add(current_outs, hreg, vreg);
 }
@@ -452,7 +485,7 @@ static void assign_hregs_to_vregs(void)
                 if (hreg)
                 {
                     tracef('R', "R: import hreg %s for input %%%d from %s\n",
-                        hreg->name, vreg->id, prevbb->name);
+                        hreg->id, vreg->id, prevbb->name);
                     assert(!pmap_findleft(old, hreg));
                     pmap_put(old, hreg, vreg);
                     goto nextvreg;
@@ -482,7 +515,7 @@ static void assign_hregs_to_vregs(void)
                 if (hreg && !pmap_findleft(old, hreg))
                 {
                     tracef('R', "R: import hreg %s for phi input %%%d from %s\n",
-                        hreg->name, vreg->id, phi->prev->name);
+                        hreg->id, vreg->id, phi->prev->name);
                     pmap_put(old, hreg, vreg);
                 }
             }
@@ -503,7 +536,7 @@ static void assign_hregs_to_vregs(void)
                 struct hreg* hreg = allocate_phi_hreg(old, vreg, c->type);
 
                 tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",
-                    hreg->name, vreg->id, phi->prev->name);
+                    hreg->id, vreg->id, phi->prev->name);
                 pmap_add(old, hreg, vreg);
             }
         }
@@ -525,7 +558,7 @@ static void assign_hregs_to_vregs(void)
                 struct vreg* vreg = hop->regsin.item[k].right;
                 if (k != 0)
                     tracef('R', " ");
-                tracef('R', "%%%d=>%s", vreg->id, hreg->name);
+                tracef('R', "%%%d=>%s", vreg->id, hreg->id);
             }
             tracef('R', "] [");
             for (k=0; k<hop->regsout.count; k++)
@@ -534,7 +567,7 @@ static void assign_hregs_to_vregs(void)
                 struct vreg* vreg = hop->regsout.item[k].right;
                 if (k != 0)
                     tracef('R', " ");
-                tracef('R', "%%%d=>%s", vreg->id, hreg->name);
+                tracef('R', "%%%d=>%s", vreg->id, hreg->id);
             }
             tracef('R', "]\n");
 
@@ -551,9 +584,9 @@ static struct hop* create_swap(struct basicblock* bb, struct hreg* src, struct h
     struct hop* hop = new_hop(bb, NULL);
 
     hop_add_string_insel(hop, "! swap ");
-    hop_add_hreg_insel(hop, src);
+    hop_add_hreg_insel(hop, src, 0);
     hop_add_string_insel(hop, " <-> ");
-    hop_add_hreg_insel(hop, dest);
+    hop_add_hreg_insel(hop, dest, 0);
     hop_add_eoi_insel(hop);
 
     return hop;
@@ -661,7 +694,7 @@ static void insert_phi_copies(void)
 
                     tracef('R', "R: map %%%d -> %%%d (%s)\n",
                         phi->ir->result->id, 
-                        vreg->id, dest->name);
+                        vreg->id, dest->id);
 
                     pmap_put(&destregs, dest, phi->ir->result);
                 }

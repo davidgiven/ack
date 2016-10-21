@@ -59,10 +59,10 @@ struct terminfo
 struct reg
 {
 	const char* name;          /* friendly register name */
-	const char* realname;      /* name used in assembly output */
 	int number;                /* identifying number */
 	uint32_t attrs;            /* bitfield of register attributes */
 	uint32_t type;             /* register type */
+	struct stringlist* names;  /* register names */
 	ARRAYOF(struct reg) aliases; /* registers that this one aliases */
 };
 
@@ -72,7 +72,8 @@ struct regattr
 	int number;            /* identifying number */
 };
 
-extern struct reg* makereg(const char* name, const char* realname);
+extern struct reg* makereg(const char* name);
+extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr, bool exact);
 extern void addregaliases(struct reg* reg, struct stringlist* aliases);
 extern struct regattr* getregattr(const char* name);

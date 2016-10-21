@@ -31,17 +31,19 @@ void hop_add_string_insel(struct hop* hop, const char* string)
 	array_append(&hop->insels, insel);
 }
 
-void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg)
+void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index)
 {
 	struct insel* insel = new_insel(INSEL_HREG);
 	insel->u.hreg = hreg;
+    insel->index = index;
 	array_append(&hop->insels, insel);
 }
 
-void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg)
+void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg, int index)
 {
 	struct insel* insel = new_insel(INSEL_VREG);
 	insel->u.vreg = vreg;
+    insel->index = index;
 	array_append(&hop->insels, insel);
 }
 
@@ -108,11 +110,11 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
                     break;
 
                 case 'H':
-                    hop_add_hreg_insel(hop, va_arg(ap, struct hreg*));
+                    hop_add_hreg_insel(hop, va_arg(ap, struct hreg*), 0);
                     break;
 
                 case 'V':
-                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*));
+                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*), 0);
                     break;
             }
         }
@@ -205,7 +207,7 @@ char* hop_render(struct hop* hop)
             case INSEL_HREG:
             {
                 struct hreg* hreg = insel->u.hreg;
-                appendf("%s", hreg->realname);
+                appendf("%s", hreg->brd->names[insel->index]);
                 break;
             }
 
@@ -216,7 +218,7 @@ char* hop_render(struct hop* hop)
                 if (!hreg)
                     hreg = pmap_findright(&hop->regsout, vreg);
                 if (hreg)
-                    appendf("%s", hreg->realname);
+                    appendf("%s", hreg->brd->names[insel->index]);
                 else
                     appendf("%%%d", vreg->id);
 				break;
