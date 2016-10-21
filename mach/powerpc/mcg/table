@@ -408,38 +408,28 @@ PATTERNS
 
 /* Comparisons */
 
-	cr:(cr)cr = COMPARES4(left:(int)reg, right:(int)reg)
+	cr:(cr)cr = COMPARES44(left:(int)reg, right:(int)reg)
         emit "cmp %cr, 0, %left, %right"
 		cost 4;
 
-	cr:(cr)cr = COMPARES4(left:(int)reg, right:CONST4)
+	cr:(cr)cr = COMPARES44(left:(int)reg, right:CONST4)
         when signed_constant(%right, 16)
         emit "cmpi %cr, 0, %left, $right"
 		cost 4;
 
-	cr:(cr)cr = COMPAREU4(left:(int)reg, right:(int)reg)
+	cr:(cr)cr = COMPAREU44(left:(int)reg, right:(int)reg)
         emit "cmpl %cr, 0, %left, %right"
 		cost 4;
 
-	cr:(cr)cr = COMPAREU4(left:(int)reg, right:CONST4)
+	cr:(cr)cr = COMPAREU44(left:(int)reg, right:CONST4)
         when signed_constant(%right, 16)
         emit "cmpli %cr, 0, %left, $right"
 		cost 4;
 
-    cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:(int)reg), result:CONST4)
+    out:(cr)cr = COMPARES44(in:(cr)cr, result:CONST4)
         when specific_constant(%result, 0)
-        emit "cmp %cr, 0, %left, %right"
-        cost 4;
-
-    cr:(cr)cr = COMPARES4(COMPARES4(left:(int)reg, right:CONST4), result:CONST4)
-        when specific_constant(%result, 0)
-        when signed_constant(%right, 16)
-        emit "cmpi %cr, 0, %left, $right"
-        cost 4;
-
-    cr:(cr)cr = COMPARES4(COMPAREU4(left:(int)reg, right:(int)reg), result:CONST4)
-        when specific_constant(%result, 0)
-        emit "cmpl %cr, 0, %left, %right"
+        with %out == %in
+        emit "! COMPARES(cr, 0)"
         cost 4;
 
 
@@ -580,32 +570,61 @@ PATTERNS
 		emit "fsubs %out, %left, %right"
 		cost 4;
 
+	out:(double)reg = SUBF8(left:(double)reg, right:(double)reg)
+		emit "fsub %out, %left, %right"
+		cost 4;
+
     out:(float)reg = MULF4(left:(float)reg, right:(float)reg)
         emit "fmuls %out, %left, %right"
+        cost 4;
+
+    out:(double)reg = MULF8(left:(double)reg, right:(double)reg)
+        emit "fmul %out, %left, %right"
         cost 4;
 
     out:(float)reg = NEGF4(left:(float)reg)
         emit "fneg %out, %left"
         cost 4;
 
-	cr:(cr)cr = COMPAREF4(left:(float)reg, right:(float)reg)
+    out:(double)reg = NEGF8(left:(double)reg)
+        emit "fneg %out, %left"
+        cost 4;
+
+	cr:(cr)cr = COMPAREF44(left:(float)reg, right:(float)reg)
         emit "fcmpu %cr, %left, %right"
 		cost 4;
 
-    cr:(cr)cr = COMPARES4(COMPAREF4(left:(float)reg, right:(float)reg), result:CONST4)
-        when specific_constant(%result, 0)
+	cr:(cr)cr = COMPAREF84(left:(double)reg, right:(double)reg)
         emit "fcmpu %cr, %left, %right"
-        cost 4;
+		cost 4;
 
     out:(ret)reg = CFI44(val:(fret)reg)
         with corrupted(volatile)
-        emit "bl .cfi4"
+        emit "bl .cfi44"
         cost 4;
 
     out:(fret)reg = CIF44(val:(ret)reg)
         with corrupted(volatile)
-        emit "bl .cif4"
+        emit "bl .cif44"
         cost 4;
+
+    out:(ret)reg = CFI84(val:(dret)reg)
+        with corrupted(volatile)
+        emit "bl .cfi84"
+        cost 4;
+
+    out:(dret)reg = CIF48(val:(ret)reg)
+        with corrupted(volatile)
+        emit "bl .cif48"
+        cost 4;
+
+    out:(float)reg = CFF84(val:(double)reg)
+        emit "frsp %out, %val"
+        cost 4;
+
+    out:(double)reg = CFF48(val:(float)reg)
+        emit "fmr %out, %val"
+        cost 1;
 
 /* vim: set sw=4 ts=4 expandtab : */
 

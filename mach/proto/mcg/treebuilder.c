@@ -149,16 +149,32 @@ static struct ir* convert(struct ir* src, int destsize, int opcode)
         );
 }
 
-static struct ir* tristate_compare(int size, int opcode)
+static struct ir* compare(struct ir* left, struct ir* right,
+        int size, int opcode)
 {
-    struct ir* right = pop(size);
-    struct ir* left = pop(size);
+    switch (size)
+    {
+        case 1: opcode += 0; break;
+        case 2: opcode += 1; break;
+        case 4: opcode += 2; break;
+        case 8: opcode += 3; break;
+        default:
+            fatal("can't compare things of size %d", size);
+    }
 
     return
         new_ir2(
             opcode, EM_wordsize,
             left, right
         );
+}
+
+static struct ir* tristate_compare(int size, int opcode)
+{
+    struct ir* right = pop(size);
+    struct ir* left = pop(size);
+
+    return compare(left, right, size, opcode);
 }
 
 static void simple_convert(int opcode)
@@ -199,10 +215,11 @@ static void insn_simple(int opcode)
         case op_cui: simple_convert(IR_CUI1); break;
         case op_cfi: simple_convert(IR_CFI1); break;
         case op_cif: simple_convert(IR_CIF1); break;
+        case op_cff: simple_convert(IR_CFF1); break;
 
         case op_cmp:
             push(
-                tristate_compare(EM_pointersize, IR_COMPAREU)
+                tristate_compare(EM_pointersize, IR_COMPAREU1)
             );
             break;
 
@@ -276,6 +293,17 @@ static void insn_simple(int opcode)
             break;
         }
 
+        case op_trp:
+        {
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir(".trp")
+                )
+            );
+        }
+
         case op_lni:
         {
             /* Increment line number --- ignore. */
@@ -299,10 +327,7 @@ static void simple_branch2(int opcode, int size,
     appendir(
         new_ir2(
             irop, 0,
-            new_ir2(
-                IR_COMPARES,  size,
-                left, right
-            ),
+            compare(left, right, size, IR_COMPARES1),
             new_ir2(
                 IR_PAIR, 0,
                 new_bbir(truebb),
@@ -463,9 +488,9 @@ static void insn_ivalue(int opcode, arith value)
         case op_ngf: simple_alu1(opcode, value, IR_NEGF); break;
 
         case op_cmu: /* fall through */
-        case op_cms: push(tristate_compare(value, IR_COMPAREU)); break;
-        case op_cmi: push(tristate_compare(value, IR_COMPARES)); break;
-        case op_cmf: push(tristate_compare(value, IR_COMPAREF)); break;
+        case op_cms: push(tristate_compare(value, IR_COMPAREU1)); break;
+        case op_cmi: push(tristate_compare(value, IR_COMPARES1)); break;
+        case op_cmf: push(tristate_compare(value, IR_COMPAREF1)); break;
 
         case op_lol:
             push(
@@ -910,8 +935,8 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_fef:
         {
-            struct ir* e;
             struct ir* f = pop(value);
+
             /* fef is implemented by calling a helper function which then mutates
              * the stack. We read the return values off the stack when retracting
              * the stack pointer. */
@@ -928,6 +953,26 @@ static void insn_ivalue(int opcode, arith value)
             );
                     
             /* exit, leaving an int and then a float (or double) on the stack. */
+            break;
+        }
+            
+        case op_fif:
+        {
+            /* fif is implemented by calling a helper function which then mutates
+             * the stack. We read the return values off the stack when retracting
+             * the stack pointer. */
+
+            /* We start with two floats on the stack. */
+
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir((value == 4) ? ".fif4" : ".fif8")
+                )
+            );
+                    
+            /* exit, leaving two floats (or doubles) on the stack. */
             break;
         }
             

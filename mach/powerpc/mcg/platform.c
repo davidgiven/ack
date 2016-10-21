@@ -112,6 +112,11 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 hop_add_insel(hop, "stwu %H, -4(sp)", src);
                 break;
 
+            case burm_pair_ATTR:
+                hop_add_insel(hop, "stwu %0H, -4(sp)", src);
+                hop_add_insel(hop, "stwu %1H, -4(sp)", src);
+                break;
+
             case burm_float_ATTR:
                 hop_add_insel(hop, "stfsu %H, -4(sp)", src);
                 break;
@@ -128,6 +133,11 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
         {
             case burm_int_ATTR:
                 hop_add_insel(hop, "lwz %H, 0(sp)", dest);
+                break;
+
+            case burm_pair_ATTR:
+                hop_add_insel(hop, "lwz %0H, 4(sp)", dest);
+                hop_add_insel(hop, "lwz %1H, 0(sp)", dest);
                 break;
 
             case burm_float_ATTR:
@@ -174,6 +184,10 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
                     break;
 
+                case burm_double_ATTR:
+                    hop_add_insel(hop, "stfd %H, %S(fp) ! %H", src, dest, dest);
+                    break;
+
                 default:
                     assert(false);
             }
@@ -188,6 +202,10 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
 
                 case burm_float_ATTR:
                     hop_add_insel(hop, "lfs %H, %S(fp) ! %H", dest, src, src);
+                    break;
+
+                case burm_double_ATTR:
+                    hop_add_insel(hop, "lfd %H, %S(fp) ! %H", dest, src, src);
                     break;
 
                 default:

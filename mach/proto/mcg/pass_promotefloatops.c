@@ -69,6 +69,14 @@ static void search_for_promotable_irs(void)
             case IR_MULF:
             case IR_DIVF:
             case IR_NEGF:
+            case IR_COMPAREF1:
+            case IR_COMPAREF2:
+            case IR_COMPAREF4:
+            case IR_COMPAREF8:
+            case IR_CFF1:
+            case IR_CFF2:
+            case IR_CFF4:
+            case IR_CFF8:
                 if (ir->left)
                     promote(ir->left);
                 if (ir->right)

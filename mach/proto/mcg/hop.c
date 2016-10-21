@@ -223,7 +223,10 @@ char* hop_render(struct hop* hop)
             case INSEL_HREG:
             {
                 struct hreg* hreg = insel->u.hreg;
-                appendf("%s", hreg->brd->names[insel->index]);
+                if (hreg->brd)
+                    appendf("%s", hreg->brd->names[insel->index]);
+                else
+                    appendf("%s.%d", hreg->id, insel->index);
                 break;
             }
 
