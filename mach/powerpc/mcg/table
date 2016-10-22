@@ -464,12 +464,12 @@ PATTERNS
 
     out:(int)reg = IFEQ4(in:(cr)cr)
         emit "mfcr %out" /* get cr0 */
-        emit "rlwinmi %out, %out, 32-2, 2, 31" /* extract just EQ */
+        emit "rlwinm %out, %out, [32-2], 2, 31" /* extract just EQ */
         cost 8;
 
     out:(int)reg = IFEQ4(in:(int)reg)
         emit "cntlzw %out, %in" /* returns 0..32 */
-        emit "rlwinmi %out, %out, 32-5, 5, 31" /* if 32, return 1, otherwise 0 */
+        emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
         cost 8;
 
 
@@ -527,6 +527,12 @@ PATTERNS
         emit "subf %out, %out, %left"
 		cost 12;
 
+	out:(int)reg = MODU4(left:(int)reg, right:(int)reg)
+		emit "divwu %out, %left, %right"
+        emit "mullw %out, %out, %right"
+        emit "subf %out, %out, %left"
+		cost 12;
+
     ALUR(MUL4, "mullw")
     ALUCC(MUL4, "mulli")
 
@@ -535,9 +541,16 @@ PATTERNS
 
     ALUR(ASL4, "slw")
 
+    ALUR(LSL4, "slw")
+
     out:(int)reg = NEG4(left:(int)reg)
         emit "neg %out, %left"
         cost 4;
+
+    out:(int)reg = NOT4(left:(int)reg)
+        emit "cntlzw %out, %left"
+        emit "rlwinm %out, %out, 32-5, 5, 31"
+        cost 8;
 
     ALUR(AND4, "and")
     ALUCC(AND4, "andi.")

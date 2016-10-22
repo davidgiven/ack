@@ -178,6 +178,14 @@ static struct ir* tristate_compare(int size, int opcode)
     return compare(left, right, size, opcode);
 }
 
+static struct ir* tristate_compare0(int size, int opcode)
+{
+    struct ir* right = new_wordir(0);
+    struct ir* left = pop(size);
+
+    return compare(left, right, size, opcode);
+}
+
 static void simple_convert(int opcode)
 {
     struct ir* destsize = pop(EM_wordsize);
@@ -190,6 +198,60 @@ static void simple_convert(int opcode)
     value = pop(srcsize->u.ivalue);
     push(
         convert(value, destsize->u.ivalue, opcode)
+    );
+}
+
+static void simple_branch2(int opcode, int size,
+    struct basicblock* truebb, struct basicblock* falsebb,
+    int irop)
+{
+    struct ir* right = pop(size);
+    struct ir* left = pop(size);
+
+    materialise_stack();
+    appendir(
+        new_ir2(
+            irop, 0,
+            compare(left, right, size, IR_COMPARES1),
+            new_ir2(
+                IR_PAIR, 0,
+                new_bbir(truebb),
+                new_bbir(falsebb)
+            )
+        )
+    );
+}
+
+static void compare0_branch2(int opcode,
+    struct basicblock* truebb, struct basicblock* falsebb,
+    int irop)
+{
+    push(
+        new_wordir(0)
+    );
+
+    simple_branch2(opcode, EM_wordsize, truebb, falsebb, irop);
+}
+
+static void simple_test(int size, int irop)
+{
+    push(
+        new_ir1(
+            irop, EM_wordsize,
+            tristate_compare0(size, IR_COMPARES1)
+        )
+    );
+}
+
+static void simple_test_neg(int size, int irop)
+{
+    simple_test(size, irop);
+
+    push(
+        new_ir1(
+            IR_NOT, EM_wordsize,
+            pop(EM_wordsize)
+        )
     );
 }
 
@@ -224,14 +286,8 @@ static void insn_simple(int opcode)
             );
             break;
 
-        case op_teq: 
-            push(
-                new_ir1(
-                    IR_IFEQ, EM_wordsize,
-                    pop(EM_wordsize)
-                )
-            );
-            break;
+        case op_teq: simple_test(EM_wordsize, IR_IFEQ); break;
+        case op_tne: simple_test_neg(EM_wordsize, IR_IFEQ); break;
 
         case op_cai:
         {
@@ -316,38 +372,6 @@ static void insn_simple(int opcode)
             fatal("treebuilder: unknown simple instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
     }
-}
-
-static void simple_branch2(int opcode, int size,
-    struct basicblock* truebb, struct basicblock* falsebb,
-    int irop)
-{
-    struct ir* right = pop(size);
-    struct ir* left = pop(size);
-
-    materialise_stack();
-    appendir(
-        new_ir2(
-            irop, 0,
-            compare(left, right, size, IR_COMPARES1),
-            new_ir2(
-                IR_PAIR, 0,
-                new_bbir(truebb),
-                new_bbir(falsebb)
-            )
-        )
-    );
-}
-
-static void compare0_branch2(int opcode,
-    struct basicblock* truebb, struct basicblock* falsebb,
-    int irop)
-{
-    push(
-        new_wordir(0)
-    );
-
-    simple_branch2(opcode, EM_wordsize, truebb, falsebb, irop);
 }
 
 static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock* rightbb)
@@ -490,6 +514,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_mlu: simple_alu2(opcode, value, IR_MUL); break;
         case op_slu: simple_alu2(opcode, value, IR_LSL); break;
         case op_sru: simple_alu2(opcode, value, IR_LSR); break;
+        case op_rmu: simple_alu2(opcode, value, IR_MODU); break;
         case op_dvu: simple_alu2(opcode, value, IR_DIVU); break;
 
         case op_and: simple_alu2(opcode, value, IR_AND); break;
@@ -594,6 +619,14 @@ static void insn_ivalue(int opcode, arith value)
                 )
             );
             break;
+
+        case op_zrf:
+        {
+            struct ir* ir = new_constir(value, 0);
+            ir->opcode = IR_CONSTF;
+            push(ir);
+            break;
+        }
 
         case op_loe:
             push(

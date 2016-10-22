@@ -32,6 +32,7 @@ S MUL
 S DIV
 S DIVU
 S MOD
+S MODU
 S NEG
 
 S ADDF
@@ -96,7 +97,7 @@ S COMPAREF2
 S COMPAREF4
 S COMPAREF8
 
-# Boolean comparisons
+# Tristate to boolean conversion
 S IFEQ
 S IFLT
 S IFLE
