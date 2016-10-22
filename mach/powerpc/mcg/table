@@ -194,6 +194,10 @@ PATTERNS
 		emit "addi sp, sp, $delta"
 		cost 4;
 
+	STACKADJUST4(in:(int)reg)
+		emit "add sp, sp, %in"
+		cost 4;
+
     out:(int)reg = GETFP4
         emit "mr %out, fp"
         cost 4;
@@ -204,6 +208,14 @@ PATTERNS
 
     out:(int)reg = FPTOARGS4(in:(int)reg)
         emit "addi %out, %in, 8"
+        cost 4;
+
+    out:(int)reg = GETSP4
+        emit "mr %out, sp"
+        cost 4;
+
+    SETSP4(in:(int)reg)
+        emit "mr sp, %in"
         cost 4;
 
 

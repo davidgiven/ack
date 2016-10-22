@@ -817,6 +817,15 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
+        case op_ass:
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_pointersize,
+                    pop(value)
+                )
+            );
+            break;
+
         case op_ret:
         {
             if (value > 0)
@@ -1015,6 +1024,72 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
             
+        case op_lor:
+        {
+            switch (value)
+            {
+                case 1:
+                    appendir(
+                        new_ir0(
+                            IR_GETSP, EM_pointersize
+                        )
+                    );
+                    break;
+
+                default:
+                    fatal("'lor %d' not supported", value);
+            }
+
+            break;
+        }
+
+        case op_str:
+        {
+            switch (value)
+            {
+                case 1:
+                    appendir(
+                        new_ir1(
+                            IR_SETSP, EM_pointersize,
+                            pop(EM_pointersize)
+                        )
+                    );
+                    break;
+
+                default:
+                    fatal("'str %d' not supported", value);
+            }
+
+            break;
+        }
+
+        case op_blm:
+        {
+            /* Input stack: ( src dest -- ) */
+            /* Memmove stack: ( size src dest -- ) */
+            struct ir* dest = pop(EM_pointersize);
+            struct ir* src = pop(EM_pointersize);
+
+            push(new_wordir(value));
+            push(src);
+            push(dest);
+
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir("memmove")
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_pointersize,
+                    new_wordir(EM_pointersize*2 + EM_wordsize)
+                )
+            );
+            break;
+        }
+
         case op_lin:
         {
             /* Set line number --- ignore. */
