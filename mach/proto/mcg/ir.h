@@ -8,6 +8,7 @@ struct ir
 	int id;
 	enum ir_opcode opcode;
 	int size;
+    char type;
 	struct ir* left;
 	struct ir* right;
 	struct ir* root;

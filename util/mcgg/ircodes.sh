@@ -10,7 +10,7 @@ awk -f - $in >$header << "EOF"
 	}
 
 	/^ *[^# ]+/ {
-		print "\tIR_" $2 ","
+		print "\tIR_" $3 ","
 	}
 
 	END {
@@ -30,9 +30,18 @@ awk -f - $in >$source << "EOF"
 		return "0"
 	}
 
+	function char_to_type(c) {
+		if (c ~ /[A-Za-z]/) return "'"c"'"
+		if (c == "?")       return "'?'"
+		if (c == ".")       return "0"
+	}
+
 	/^ *[^# ]+/ {
-		printf("\t{ \"%s\", ", $2)
-		printf("%s", char_to_flags(substr($1, 1, 1)))
+		printf("\t{ \"%s\", ", $3)
+		printf("%s, ", char_to_flags(substr($1, 1, 1)))
+		printf("%s, ", char_to_type(substr($2, 1, 1)))
+		printf("%s, ", char_to_type(substr($2, 3, 1)))
+		printf("%s, ", char_to_type(substr($2, 4, 1)))
 		printf(" },\n")
 	}
 

@@ -184,7 +184,7 @@ void procedure_compile(struct procedure* proc)
     pass_convert_locals_to_ssa();
     print_blocks('5');
     pass_remove_dead_phis();
-    pass_promote_float_ops();
+    pass_infer_types();
     print_blocks('6');
 
     pass_instruction_selector();

@@ -1,123 +1,138 @@
 # Flags:
 #   S: has size (use in CONST1, CONST2, CONST4, CONST8 forms)
 #   V: has no size (use in JUMP, CJUMP, RET forms)
+#
+# Types:
+#
+#   I, F, L, D: int, float, long, double
+#   i, F: int, float; promoted to long, double based on size
+#   .: ignore this parameter
+#   ?: pull/push types from other ? parameters
 
 # Simple terminals
-S CONST # must be followed by float form
-S CONSTF
-V REG
-V NOP
-S LABEL
-S BLOCK
-V PAIR
-S ANY
-S LOCAL
-V PHI
+S ?=.. CONST # must be followed by float form
+S ?=.. CONSTF
+V ?=.. REG
+V ?=?. NOP
+S I=.. LABEL
+S I=.. BLOCK
+V ?=.. PAIR
+S ?=.. ANY
+S ?=.. LOCAL
+V ?=.. PHI
 
 # Magic stack operations
-S PUSH
-S POP # must be followed by float form
-S POPF
+S ?=?. PUSH
+S ?=.. POP
+S ?=.. POPF
 
-#... Memory operations
-S LOAD # must be followed by float form
-S LOADF
-S STORE
-S STOREF
+# Memory operations
+S ?=I. LOAD # must be followed by float form
+S f=I. LOADF
+S ?=I? STORE
+S ?=If STOREF
 
 # Arithemetic operations
-S ADD
-S SUB
-S MUL
-S DIV
-S DIVU
-S MOD
-S MODU
-S NEG
+S i=ii ADD
+S i=ii SUB
+S i=ii MUL
+S i=ii DIV
+S i=ii DIVU
+S i=ii MOD
+S i=ii MODU
+S i=ii NEG
 
-S ADDF
-S SUBF
-S MULF
-S DIVF
-S NEGF
+S f=ff ADDF
+S f=ff SUBF
+S f=ff MULF
+S f=ff DIVF
+S f=ff NEGF
 
-S AND
-S OR
-S EOR
-S NOT
-S ASL
-S ASR
-S LSL
-S LSR
+S i=ii AND
+S i=ii OR
+S i=ii EOR
+S i=ii NOT
+S i=ii ASL
+S i=ii ASR
+S i=ii LSL
+S i=ii LSR
 
-# Conversions
-S CII1
-S CII2
-S CII4
-S CII8
+# Bitwise conversions
+# (Remember, these don't change the value, merely move it)
+S i=f. COPYF
+S f=i. COPYI
 
-S CIU1
-S CIU2
-S CIU4
-S CIU8
+# Semantic conversions
+S F=D. D2F
+S D=F. F2D
 
-S CUI1
-S CUI2
-S CUI4
-S CUI8
+S I=I. CII1
+S I=I. CII2
+S I=I. CII4
+S L=L. CII8
 
-S CFI1
-S CFI2
-S CFI4
-S CFI8
+S I=I. CIU1
+S I=I. CIU2
+S I=I. CIU4
+S L=L. CIU8
 
-S CIF1
-S CIF2
-S CIF4
-S CIF8
+S I=I. CUI1
+S I=I. CUI2
+S I=I. CUI4
+S L=L. CUI8
 
-S CFF1
-S CFF2
-S CFF4
-S CFF8
+S I=F. CFI1
+S I=F. CFI2
+S I=F. CFI4
+S L=D. CFI8
+
+S I=F. CIF1
+S I=F. CIF2
+S I=F. CIF4
+S L=D. CIF8
+
+S F=F. CFF1
+S F=F. CFF2
+S F=F. CFF4
+S D=D. CFF8
 
 # Tristate comparisons
-S COMPARES1
-S COMPARES2
-S COMPARES4
-S COMPARES8
+S I=II COMPARES1
+S I=II COMPARES2
+S I=II COMPARES4
+S I=LL COMPARES8
 
-S COMPAREU1
-S COMPAREU2
-S COMPAREU4
-S COMPAREU8
+S I=II COMPAREU1
+S I=II COMPAREU2
+S I=II COMPAREU4
+S I=LL COMPAREU8
 
-S COMPAREF1
-S COMPAREF2
-S COMPAREF4
-S COMPAREF8
+S I=FF COMPAREF1
+S I=FF COMPAREF2
+S I=FF COMPAREF4
+S I=DD COMPAREF8
 
 # Tristate to boolean conversion
-S IFEQ
-S IFLT
-S IFLE
+S I=I. IFEQ
+S I=I. IFLT
+S I=I. IFLE
 
 # Procedures
-S CALL
+S i=.. CALL
 
 # Flow control --- these never return
-V JUMP
-V CJUMPEQ
-V CJUMPLT
-V CJUMPLE
-V RET
+V .=i. JUMP
+V .=i. CJUMPEQ
+V .=i. CJUMPLT
+V .=i. CJUMPLE
+V .=.. RET
  
 # Special
-S STACKADJUST
-S SETRET
-S GETFP
-S GETSP
-S SETSP
-S CHAINFP
-S FPTOARGS
+S ?=i. STACKADJUST
+S ?=i. SETRET
+S i=.. GETFP
+S i=.. GETSP
+S ?=i. SETSP
+S i=i. CHAINFP
+S i=i. FPTOARGS
 

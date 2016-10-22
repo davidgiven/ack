@@ -105,7 +105,9 @@ struct ir* ir_find(struct ir* ir, int opcode)
 static void print_expr(char k, const struct ir* ir)
 {
     tracef(k, "%s", ir_data[ir->opcode].name);
-    if (ir->size)
+    if (ir->type)
+        tracef(k, ".%c", ir->type);
+    else if (ir->size)
         tracef(k, "%d", ir->size);
     tracef(k, "(");
 
