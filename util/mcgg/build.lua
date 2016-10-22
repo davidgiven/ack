@@ -65,6 +65,12 @@ definerule("mcgg",
 			error("you must supply exactly one input file")
 		end
 
+		local cpptable = cppfile {
+			name = e.name.."/cpptable",
+			outleaf = "cpptable",
+			srcs = e.srcs
+		}
+
 		return normalrule {
 			name = e.name,
 			cwd = e.cwd,
@@ -74,7 +80,7 @@ definerule("mcgg",
 			},
 			ins = {
 				"util/mcgg+mcgg",
-				e.srcs[1]
+				cpptable
 			},
 			commands = {
 				"%{ins[1]} -i %{ins[2]} -o %{outs[1]} -h %{outs[2]}",

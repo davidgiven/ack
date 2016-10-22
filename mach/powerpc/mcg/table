@@ -463,19 +463,29 @@ PATTERNS
 
 /* ALU operations */
 
-	out:(int)reg = ADD4(left:(int)reg, right:(int)reg)
-		emit "add %out, %left, %right"
-		cost 4;
+    #define ALUR(name, instr) \
+        out:(int)reg = name(left:(int)reg, right:(int)reg) \
+            emit instr " %out, %left, %right"              \
+            cost 4;                                        \
 
-	out:(int)reg = ADD4(left:(int)reg, right:CONST4)
-        when signed_constant(%right, 16)
-		emit "addi %out, %left, $right"
-		cost 4;
+    #define ALUC(name, instr) \
+        out:(int)reg = name(left:(int)reg, right:CONST4)   \
+            when signed_constant(%right, 16)               \
+            emit instr " %out, %left, $right"              \
+            cost 4;                                        \
 
-	out:(int)reg = ADD4(left:CONST4, right:(int)reg)
-        when signed_constant(%left, 16)
-		emit "addi %out, %right, $left"
-		cost 4;
+    #define ALUC_reversed(name, instr) \
+        out:(int)reg = name(left:CONST4, right:(int)reg)   \
+            when signed_constant(%left, 16)                \
+            emit instr " %out, %right, $left"              \
+            cost 4;                                        \
+
+    #define ALUCC(name, instr) \
+        ALUC(name, instr) \
+        ALUC_reversed(name, instr)
+
+    ALUR(ADD4, "add")
+    ALUCC(ADD4, "addi")
 
 	out:(int)reg = SUB4(left:(int)reg, right:(int)reg)
 		emit "subf %out, %left, %right"
@@ -485,51 +495,32 @@ PATTERNS
 		emit "addi %out, %left, -[$right]"
 		cost 4;
 
-	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
-		emit "mullw %out, %right, %left"
-		cost 4;
-
 	out:(int)reg = MOD4(left:(int)reg, right:(int)reg)
 		emit "divw %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
 		cost 12;
 
-	out:(int)reg = MUL4(left:(int)reg, right:(int)reg)
-		emit "mullw %out, %left, %right"
-		cost 4;
+    ALUR(MUL4, "mullw")
+    ALUCC(MUL4, "mulli")
 
-	out:(int)reg = DIV4(left:(int)reg, right:(int)reg)
-		emit "divw %out, %left, %right"
-		cost 4;
+    ALUR(DIV4, "divw")
+    ALUR(DIVU4, "divwu")
 
-    out:(int)reg = ASL4(left:(int)reg, right:(int)reg)
-        emit "slw %out, %left, %right"
-        cost 4;
+    ALUR(ASL4, "slw")
 
     out:(int)reg = NEG4(left:(int)reg)
         emit "neg %out, %left"
         cost 4;
 
-	out:(int)reg = AND4(left:CONST4, right:(int)reg)
-		emit "andi. %out, %right, $left"
-		cost 4;
+    ALUR(AND4, "and")
+    ALUCC(AND4, "andi.")
 
-	out:(int)reg = AND4(left:(int)reg, right:CONST4)
-		emit "andi. %out, %left, $right"
-		cost 4;
+    ALUR(OR4, "or")
+    ALUCC(OR4, "ori")
 
-	out:(int)reg = AND4(left:(int)reg, right:(int)reg)
-		emit "and %out, %left, %right"
-		cost 4;
-
-	out:(int)reg = OR4(left:(int)reg, right:(int)reg)
-		emit "or %out, %right, %left"
-		cost 4;
-
-	out:(int)reg = EOR4(left:(int)reg, right:(int)reg)
-		emit "xor %out, %right, %left"
-		cost 4;
+    ALUR(EOR4, "xor")
+    ALUCC(EOR4, "xori")
 
 	out:(int)reg = value:LABEL4
 		emit "la %out, $value"
@@ -546,6 +537,16 @@ PATTERNS
 
 /* FPU operations */
 
+    #define FPU4R(name, instr) \
+        out:(float)reg = name(left:(float)reg, right:(float)reg) \
+            emit instr " %out, %left, %right"                    \
+            cost 4;                                              \
+
+    #define FPU8R(name, instr) \
+        out:(double)reg = name(left:(double)reg, right:(double)reg) \
+            emit instr " %out, %left, %right"                       \
+            cost 4;                                                 \
+
     out:(float)reg = LOADF4(addr:address)
         emit "lfs %out, %addr"
         cost 4;
@@ -558,29 +559,17 @@ PATTERNS
 		emit "lfs %out, address-containing-$value"
 		cost 8;
 
-	out:(float)reg = ADDF4(left:(float)reg, right:(float)reg)
-		emit "fadds %out, %left, %right"
-		cost 4;
+    FPU4R(ADDF4, "fadds")
+    FPU8R(ADDF8, "fadd")
 
-	out:(double)reg = ADDF8(left:(double)reg, right:(double)reg)
-		emit "fadd %out, %left, %right"
-		cost 4;
+    FPU4R(SUBF4, "fsubs")
+    FPU8R(SUBF8, "fsub")
 
-	out:(float)reg = SUBF4(left:(float)reg, right:(float)reg)
-		emit "fsubs %out, %left, %right"
-		cost 4;
+    FPU4R(MULF4, "fmuls")
+    FPU8R(MULF8, "fmul")
 
-	out:(double)reg = SUBF8(left:(double)reg, right:(double)reg)
-		emit "fsub %out, %left, %right"
-		cost 4;
-
-    out:(float)reg = MULF4(left:(float)reg, right:(float)reg)
-        emit "fmuls %out, %left, %right"
-        cost 4;
-
-    out:(double)reg = MULF8(left:(double)reg, right:(double)reg)
-        emit "fmul %out, %left, %right"
-        cost 4;
+    FPU4R(DIVF4, "fdivs")
+    FPU8R(DIVF8, "fdiv")
 
     out:(float)reg = NEGF4(left:(float)reg)
         emit "fneg %out, %left"

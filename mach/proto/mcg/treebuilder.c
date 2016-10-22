@@ -458,6 +458,19 @@ static void change_by(struct ir* address, int amount)
     );
 }
 
+static struct ir* ptradd(struct ir* address, int offset)
+{
+    if (offset == 0)
+        return address;
+
+    return
+        new_ir2(
+            IR_ADD, EM_pointersize,
+            address,
+            new_wordir(offset)
+        );
+}
+
 static void insn_ivalue(int opcode, arith value)
 {
     switch (opcode)
@@ -476,6 +489,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_mlu: simple_alu2(opcode, value, IR_MUL); break;
         case op_slu: simple_alu2(opcode, value, IR_LSL); break;
         case op_sru: simple_alu2(opcode, value, IR_LSR); break;
+        case op_dvu: simple_alu2(opcode, value, IR_DIVU); break;
 
         case op_and: simple_alu2(opcode, value, IR_AND); break;
         case op_ior: simple_alu2(opcode, value, IR_OR); break;
@@ -628,13 +642,37 @@ static void insn_ivalue(int opcode, arith value)
             break;
 
         case op_loi:
-            push(
-                new_ir1(
-                    IR_LOAD, value,
-                    pop(EM_pointersize)
-                )
-            );
+        {
+            struct ir* ptr = pop(EM_pointersize);
+            int offset = 0;
+
+            /* FIXME: this is awful; need a better way of dealing with
+             * non-standard EM sizes. */
+            if (value > (EM_wordsize*2))
+                appendir(ptr);
+
+            while (value > 0)
+            {
+                int s;
+                if (value > (EM_wordsize*2))
+                    s = EM_wordsize*2;
+                else
+                    s = value;
+
+                push(
+                    new_ir1(
+                        IR_LOAD, s,
+                        ptradd(ptr, offset)
+                    )
+                );
+
+                value -= s;
+                offset += s;
+            }
+
+            assert(value == 0);
             break;
+        }
 
         case op_lof:
         {
