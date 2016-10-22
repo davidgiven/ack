@@ -102,7 +102,7 @@ S IFLT
 S IFLE
 
 # Procedures
-V CALL
+S CALL
 
 # Flow control --- these never return
 V JUMP
@@ -113,7 +113,6 @@ V RET
  
 # Special
 S STACKADJUST
-S GETRET
 S SETRET
 S GETFP
 S GETSP

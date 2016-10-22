@@ -130,9 +130,9 @@ DECLARATIONS
 
 	cr;
     ubyteX;   /* bottom 8 bits valid, the rest undefined */
-    ubyte0;  /* bottom 8 bits valid, the rest 0 */
+    ubyte0;   /* bottom 8 bits valid, the rest 0 */
     ushortX;  /* bottom 16 bits valid, the rest undefined */
-    ushort0; /* bottom 16 bits valid, the rest 0 */
+    ushort0;  /* bottom 16 bits valid, the rest 0 */
 
 	address fragment;
 
@@ -179,14 +179,6 @@ PATTERNS
 
     SETRET8(in:(pret)reg)
         emit "! setret8"
-        cost 1;
-
-    (ret)reg = GETRET4
-        emit "! getret4"
-        cost 1;
-
-    (pret)reg = GETRET8
-        emit "! getret8"
         cost 1;
 
 	STACKADJUST4(delta:CONST4)
@@ -401,12 +393,34 @@ PATTERNS
         emit "b $false"
 		cost 8;
 
-	CALL(dest:LABEL4)
+	CALL1(dest:LABEL4)
         with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
 
-    CALL(dest:(int)reg)
+	out:(ret)reg = CALL4(dest:LABEL4)
+        with corrupted(volatile)
+		emit "bl $dest"
+		cost 4;
+
+	out:(pret)reg = CALL8(dest:LABEL4)
+        with corrupted(volatile)
+		emit "bl $dest"
+		cost 4;
+
+    CALL1(dest:(int)reg)
+        with corrupted(volatile)
+        emit "mtspr ctr, %dest"
+        emit "bcctrl 20, 0, 0"
+        cost 8;
+
+    out:(ret)reg = CALL4(dest:(int)reg)
+        with corrupted(volatile)
+        emit "mtspr ctr, %dest"
+        emit "bcctrl 20, 0, 0"
+        cost 8;
+
+    out:(pret)reg = CALL8(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"

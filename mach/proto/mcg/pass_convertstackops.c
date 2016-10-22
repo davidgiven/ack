@@ -88,7 +88,8 @@ static void convert_block(struct basicblock* bb)
         for (i=0; i<pushes.count; i++)
         {
             struct ir* ir = pushes.item[i].right;
-            *ir = *ir->left;
+            ir->opcode = IR_NOP;
+            ir->size = 0;
         }
 
         for (i=0; i<pops.count; i++)

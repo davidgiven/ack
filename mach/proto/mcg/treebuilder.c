@@ -4,6 +4,7 @@ static struct basicblock* current_bb;
 
 static int stackptr;
 static struct ir* stack[64];
+static struct ir* lastcall;
 
 static struct ir* convert(struct ir* src, int destsize, int opcodebase);
 static struct ir* appendir(struct ir* ir);
@@ -237,7 +238,7 @@ static void insn_simple(int opcode)
             struct ir* dest = pop(EM_pointersize);
 
             materialise_stack();
-            appendir(
+            lastcall = appendir(
                 new_ir1(
                     IR_CALL, 0,
                     dest
@@ -867,13 +868,9 @@ static void insn_ivalue(int opcode, arith value)
                     
         case op_lfr:
         {
-            push(
-                appendir(
-                    new_ir0(
-                        IR_GETRET, value
-                    )
-                )
-            );
+            assert(lastcall != NULL);
+            lastcall->size = value;
+            push(lastcall);
             break;
         }
 
@@ -918,15 +915,12 @@ static void insn_ivalue(int opcode, arith value)
             }
 
             materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir(helper)
-                )
-            );
             push(
-                new_ir0(
-                    IR_GETRET, EM_wordsize
+                appendir(
+                    new_ir1(
+                        IR_CALL, EM_wordsize,
+                        new_labelir(helper)
+                    )
                 )
             );
             break;
@@ -1198,7 +1192,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
         case op_cal:
             assert(offset == 0);
             materialise_stack();
-            appendir(
+            lastcall = appendir(
                 new_ir1(
                     IR_CALL, 0,
                     new_labelir(label)
