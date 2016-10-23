@@ -151,14 +151,20 @@ int main(int argc, char* argv[])
 	{
 		const static struct terminfo reg = { "reg", NULL, "" };
 		const static struct terminfo REG = { "REG", NULL, NULL };
-		const static struct terminfo NOP = { "NOP", NULL, NULL };
+		const static struct terminfo NOPI = { "NOP.I", NULL, NULL };
+		const static struct terminfo NOPF = { "NOP.F", NULL, NULL };
+		const static struct terminfo NOPL = { "NOP.L", NULL, NULL };
+		const static struct terminfo NOPD = { "NOP.D", NULL, NULL };
 		const static struct terminfo RET = { "RET", NULL, NULL };
 
 		nonterm("reg", true);
 
 		rule(NULL, tree(&reg, NULL, NULL))->cost = 1;
 		rule(&reg, tree(&REG, NULL, NULL))->cost = 1;
-		rule(&reg, tree(&NOP, tree(&reg, NULL, NULL), NULL))->cost = 1;
+		rule(&reg, tree(&NOPI, tree(&reg, NULL, NULL), NULL))->cost = 1;
+		rule(&reg, tree(&NOPF, tree(&reg, NULL, NULL), NULL))->cost = 1;
+		rule(&reg, tree(&NOPL, tree(&reg, NULL, NULL), NULL))->cost = 1;
+		rule(&reg, tree(&NOPD, tree(&reg, NULL, NULL), NULL))->cost = 1;
 		rule(NULL, tree(&RET, NULL, NULL))->cost = 1;
 	}
 
@@ -195,10 +201,10 @@ int main(int argc, char* argv[])
 	return errcnt > 0;
 }
 
-static void registerterminal(const struct ir_data* data, int iropcode, int size)
+static void registerterminal(const struct ir_data* data, int iropcode, char type)
 {
-	const char* s = (size == 0) ? data->name : aprintf("%s%d", data->name, size);
-	int esn = ir_to_esn(iropcode, size);
+	const char* s = (type == 0) ? data->name : aprintf("%s.%c", data->name, type);
+	int esn = ir_to_esn(iropcode, type);
 
 	term(s, esn);
 }
@@ -209,15 +215,11 @@ static void registerterminals(void)
 
 	for (i=0; i<IR__COUNT; i++)
 	{
-		if (ir_data[i].flags & IRF_SIZED)
-		{
-			registerterminal(&ir_data[i], i, 1);
-			registerterminal(&ir_data[i], i, 2);
-			registerterminal(&ir_data[i], i, 4);
-			registerterminal(&ir_data[i], i, 8);
-		}
-		else
-			registerterminal(&ir_data[i], i, 0);
+		registerterminal(&ir_data[i], i, 'I');
+		registerterminal(&ir_data[i], i, 'F');
+		registerterminal(&ir_data[i], i, 'L');
+		registerterminal(&ir_data[i], i, 'D');
+		registerterminal(&ir_data[i], i, 0);
 	}
 }
 

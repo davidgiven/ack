@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include "iburg.h"
+#include "astring.h"
 
 #define YYDEBUG 1
 
@@ -55,8 +56,9 @@ extern int yylex(void);
 %type  <rule>       pattern
 %type  <rule>       pattern_constraints
 %type  <rule>       pattern_emit
-%type  <stringlist> aliases;
-%type  <stringlist> names;
+%type  <string>     nodename
+%type  <stringlist> aliases
+%type  <stringlist> names
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
 %type  <tree>       rhs
@@ -126,10 +128,15 @@ rhs
 	;
 
 terminfo
-    : ID                                { $$.name = $1; }
-    | '(' ID ')' ID                     { $$.attr = $2; $$.name = $4; }
-    | ID ':' ID                         { $$.label = $1; $$.name = $3; }
-    | ID ':' '(' ID ')' ID              { $$.label = $1; $$.attr = $4; $$.name = $6; }
+    : nodename                          { $$.name = $1; }
+    | '(' ID ')' nodename               { $$.attr = $2; $$.name = $4; }
+    | ID ':' nodename                   { $$.label = $1; $$.name = $3; }
+    | ID ':' '(' ID ')' nodename        { $$.label = $1; $$.attr = $4; $$.name = $6; }
+    ;
+
+nodename
+    : ID                                { $$ = $1; }
+    | ID '.' ID                         { $$ = aprintf("%s.%s", $1, $3); }
     ;
 
 pattern_emit

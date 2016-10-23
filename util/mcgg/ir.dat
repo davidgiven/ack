@@ -1,7 +1,3 @@
-# Flags:
-#   S: has size (use in CONST1, CONST2, CONST4, CONST8 forms)
-#   V: has no size (use in JUMP, CJUMP, RET forms)
-#
 # Types:
 #
 #   I, F, L, D: int, float, long, double
@@ -13,7 +9,7 @@
 S ?=.. CONST # must be followed by float form
 S ?=.. CONSTF
 V ?=.. REG
-V ?=?. NOP
+S ?=?. NOP
 S I=.. LABEL
 S I=.. BLOCK
 V ?=.. PAIR
@@ -24,13 +20,14 @@ V ?=.. PHI
 # Magic stack operations
 S ?=?. PUSH
 S ?=.. POP
-S ?=.. POPF
 
 # Memory operations
-S ?=I. LOAD # must be followed by float form
-S f=I. LOADF
+S ?=I. LOAD
+S I=I. LOADB
+S I=I. LOADH
 S ?=I? STORE
-S ?=If STOREF
+S ?=I? STOREB
+S ?=I? STOREH
 
 # Arithemetic operations
 S i=ii ADD
@@ -59,58 +56,38 @@ S i=ii LSR
 
 # Bitwise conversions
 # (Remember, these don't change the value, merely move it)
-S i=f. COPYF
-S f=i. COPYI
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S F=I. COPYI
+S I=F. COPYF
+S D=L. COPYL
+S L=D. COPYD
 
 # Semantic conversions
-S F=D. D2F
-S D=F. F2D
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S ?=I. FROMUI
+S ?=L. FROMUL
+S ?=I. FROMSI
+S ?=L. FROMSL
+S ?=F. FROMF
+S ?=D. FROMD
 
-S I=I. CII1
-S I=I. CII2
-S I=I. CII4
-S L=L. CII8
-
-S I=I. CIU1
-S I=I. CIU2
-S I=I. CIU4
-S L=L. CIU8
-
-S I=I. CUI1
-S I=I. CUI2
-S I=I. CUI4
-S L=L. CUI8
-
-S I=F. CFI1
-S I=F. CFI2
-S I=F. CFI4
-S L=D. CFI8
-
-S I=F. CIF1
-S I=F. CIF2
-S I=F. CIF4
-S L=D. CIF8
-
-S F=F. CFF1
-S F=F. CFF2
-S F=F. CFF4
-S D=D. CFF8
+# The H versions are only used if wordsize > 2
+S I=I. EXTENDB
+S I=I. EXTENDH
+S I=I. TRUNCATEB
+S I=I. TRUNCATEH
 
 # Tristate comparisons
-S I=II COMPARES1
-S I=II COMPARES2
-S I=II COMPARES4
-S I=LL COMPARES8
-
-S I=II COMPAREU1
-S I=II COMPAREU2
-S I=II COMPAREU4
-S I=LL COMPAREU8
-
-S I=FF COMPAREF1
-S I=FF COMPAREF2
-S I=FF COMPAREF4
-S I=DD COMPAREF8
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S I=II COMPARESI
+S I=LL COMPARESL
+S I=II COMPAREUI
+S I=LL COMPAREUL
+S I=FF COMPAREF
+S I=DD COMPARED
 
 # Tristate to boolean conversion
 S I=I. IFEQ

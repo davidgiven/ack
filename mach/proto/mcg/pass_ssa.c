@@ -63,11 +63,10 @@ static bool rewrite_loads_cb(struct ir* ir, void* user)
     if (ir->right && is_local(ir->right))
         ir->right = definition;
 
-    /* Otherwise, go via a IR_REG (which should, with luck, turn into no code). */
+    /* Otherwise, go via a IR_NOP (which should, with luck, turn into no code). */
     if (is_local(ir))
     {
         ir->opcode = IR_NOP;
-        ir->size = 0;
         ir->left = definition;
         ir->right = NULL;
     }
@@ -108,7 +107,6 @@ static void recursively_rewrite_tree(struct basicblock* bb)
             if (ir->opcode == IR_STORE)
             {
                 ir->opcode = IR_NOP;
-                ir->size = 0;
                 ir->left = ir->right;
                 ir->right = NULL;
             }

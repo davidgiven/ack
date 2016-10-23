@@ -210,14 +210,14 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             {
                 switch (node->label)
                 {
-                    case ir_to_esn(IR_REG, 1):
-                    case ir_to_esn(IR_REG, 2):
-                    case ir_to_esn(IR_REG, 4):
-                    case ir_to_esn(IR_REG, 8):
+                    case ir_to_esn(IR_REG, 0):
                         current_hop->output = node->ir->result;
                         break;
 
-                    case ir_to_esn(IR_NOP, 0):
+                    case ir_to_esn(IR_NOP, 'I'):
+                    case ir_to_esn(IR_NOP, 'F'):
+                    case ir_to_esn(IR_NOP, 'L'):
+                    case ir_to_esn(IR_NOP, 'D'):
                         current_hop->output = node->left->ir->result;
                         break;
                 }
@@ -241,7 +241,7 @@ static struct burm_node* build_shadow_tree(struct ir* root, struct ir* ir)
 
     if (ir->root == root)
     {
-        node->label = ir_to_esn(ir->opcode, ir->size);
+        node->label = ir_to_esn(ir->opcode, ir->type);
 
         if (ir->left)
             node->left = build_shadow_tree(root, ir->left);

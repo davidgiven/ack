@@ -6,7 +6,7 @@ static int stackptr;
 static struct ir* stack[64];
 static struct ir* lastcall;
 
-static struct ir* convert(struct ir* src, int destsize, int opcodebase);
+static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode);
 static struct ir* appendir(struct ir* ir);
 
 static void reset_stack(void)
@@ -19,17 +19,22 @@ static void push(struct ir* ir)
     if (stackptr == sizeof(stack)/sizeof(*stack))
         fatal("stack overflow");
 
+#if 0
     /* If we try to push something which is too small, convert it to a word
      * first. */
 
     if (ir->size < EM_wordsize)
-        ir = convert(ir, EM_wordsize, IR_CIU1);
+        ir = convertu(ir, EM_wordsize);
+#endif
 
     stack[stackptr++] = ir;
 }
 
 static struct ir* pop(int size)
 {
+    if (size < EM_wordsize)
+        size = EM_wordsize;
+
     if (stackptr == 0)
     {
         /* Nothing in our fake stack, so we have to read from the real stack. */
@@ -47,10 +52,12 @@ static struct ir* pop(int size)
     {
         struct ir* ir = stack[--stackptr];
 
+#if 0
         /* If we try to pop something which is smaller than a word, convert it first. */
         
         if (size < EM_wordsize)
-            ir = convert(ir, size, IR_CIU1);
+            ir = convertu(ir, size);
+#endif
 
         if (ir->size != size)
             fatal("expected an item on stack of size %d, but got %d\n", size, ir->size);
@@ -131,17 +138,38 @@ static struct ir* address_of_external(const char* label, arith offset)
             new_labelir(label);
 }
 
-static struct ir* convert(struct ir* src, int destsize, int opcode)
+static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode)
 {
-    switch (src->size)
+    if (srcsize == 1) 
     {
-        case 1: opcode += 0; break;
-        case 2: opcode += 1; break;
-        case 4: opcode += 2; break;
-        case 8: opcode += 3; break;
-        default:
-            fatal("can't convert from things of size %d", src->size);
+        if ((opcode == IR_FROMSI) || (opcode == IR_FROMSL))
+        {
+            src = new_ir1(
+                IR_EXTENDB, EM_wordsize,
+                src
+            );
+        }
+        srcsize = EM_wordsize;
     }
+
+    if ((srcsize == 2) && (srcsize != EM_wordsize))
+    {
+        if ((opcode == IR_FROMSI) || (opcode == IR_FROMSL))
+        {
+            src = new_ir1(
+                IR_EXTENDH, EM_wordsize,
+                src
+            );
+        }
+        srcsize = EM_wordsize;
+    }
+
+    if (src->size == EM_wordsize)
+    {}
+    else if (src->size == (2*EM_wordsize))
+        opcode++;
+    else
+        fatal("can't convert from %d to %d", src->size, destsize);
 
     return
         new_ir1(
@@ -153,20 +181,77 @@ static struct ir* convert(struct ir* src, int destsize, int opcode)
 static struct ir* compare(struct ir* left, struct ir* right,
         int size, int opcode)
 {
-    switch (size)
-    {
-        case 1: opcode += 0; break;
-        case 2: opcode += 1; break;
-        case 4: opcode += 2; break;
-        case 8: opcode += 3; break;
-        default:
-            fatal("can't compare things of size %d", size);
-    }
+    if (size == EM_wordsize)
+    {}
+    else if (size == (2*EM_wordsize))
+        opcode++;
+    else
+        fatal("can't compare things of size %d", size);
 
     return
         new_ir2(
             opcode, EM_wordsize,
             left, right
+        );
+}
+
+static struct ir* store(int size, struct ir* address, int offset, struct ir* value)
+{
+    int opcode;
+
+    if (size == 1)
+    {
+        opcode = IR_STOREB;
+        size = EM_wordsize;
+    }
+    else if ((size < EM_wordsize) && (size == 2))
+    {
+        opcode = IR_STOREH;
+        size = EM_wordsize;
+    }
+    else
+        opcode = IR_STORE;
+
+    if (offset > 0)
+        address = new_ir2(
+            IR_ADD, EM_pointersize,
+            address, new_wordir(offset)
+        );
+
+    return
+        new_ir2(
+            opcode, size,
+            address, value
+        );
+}
+
+static struct ir* load(int size, struct ir* address, int offset)
+{
+    int opcode;
+
+    if (size == 1)
+    {
+        opcode = IR_LOADB;
+        size = EM_wordsize;
+    }
+    else if ((size < EM_wordsize) && (size == 2))
+    {
+        opcode = IR_LOADH;
+        size = EM_wordsize;
+    }
+    else
+        opcode = IR_LOAD;
+
+    if (offset > 0)
+        address = new_ir2(
+            IR_ADD, EM_pointersize,
+            address, new_wordir(offset)
+        );
+
+    return
+        new_ir1(
+            opcode, size,
+            address
         );
 }
 
@@ -197,7 +282,7 @@ static void simple_convert(int opcode)
 
     value = pop(srcsize->u.ivalue);
     push(
-        convert(value, destsize->u.ivalue, opcode)
+        convert(value, srcsize->u.ivalue, destsize->u.ivalue, opcode)
     );
 }
 
@@ -212,7 +297,7 @@ static void simple_branch2(int opcode, int size,
     appendir(
         new_ir2(
             irop, 0,
-            compare(left, right, size, IR_COMPARES1),
+            compare(left, right, size, IR_COMPARESI),
             new_ir2(
                 IR_PAIR, 0,
                 new_bbir(truebb),
@@ -238,7 +323,7 @@ static void simple_test(int size, int irop)
     push(
         new_ir1(
             irop, EM_wordsize,
-            tristate_compare0(size, IR_COMPARES1)
+            tristate_compare0(size, IR_COMPARESI)
         )
     );
 }
@@ -273,16 +358,16 @@ static void insn_simple(int opcode)
             break;
         }
             
-        case op_cii: simple_convert(IR_CII1); break;
-        case op_ciu: simple_convert(IR_CIU1); break;
-        case op_cui: simple_convert(IR_CUI1); break;
-        case op_cfi: simple_convert(IR_CFI1); break;
-        case op_cif: simple_convert(IR_CIF1); break;
-        case op_cff: simple_convert(IR_CFF1); break;
+        case op_cii: simple_convert(IR_FROMSI); break;
+        case op_ciu: simple_convert(IR_FROMSI); break;
+        case op_cui: simple_convert(IR_FROMUI); break;
+        case op_cfi: simple_convert(IR_FROMF); break;
+        case op_cif: simple_convert(IR_FROMSI); break;
+        case op_cff: simple_convert(IR_FROMF); break;
 
         case op_cmp:
             push(
-                tristate_compare(EM_pointersize, IR_COMPAREU1)
+                tristate_compare(EM_pointersize, IR_COMPAREUI)
             );
             break;
 
@@ -468,14 +553,12 @@ static struct ir* extract_block_refs(struct basicblock* bb)
 static void change_by(struct ir* address, int amount)
 {
     appendir(
-        new_ir2(
-            IR_STORE, EM_wordsize,
-            address,
+        store(
+            EM_wordsize, address, 0,
             new_ir2(
                 IR_ADD, EM_wordsize,
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    address
+                load(
+                    EM_wordsize, address, 0
                 ),
                 new_wordir(amount)
             )
@@ -529,33 +612,33 @@ static void insn_ivalue(int opcode, arith value)
         case op_ngf: simple_alu1(opcode, value, IR_NEGF); break;
 
         case op_cmu: /* fall through */
-        case op_cms: push(tristate_compare(value, IR_COMPAREU1)); break;
-        case op_cmi: push(tristate_compare(value, IR_COMPARES1)); break;
-        case op_cmf: push(tristate_compare(value, IR_COMPAREF1)); break;
+        case op_cms: push(tristate_compare(value, IR_COMPAREUI)); break;
+        case op_cmi: push(tristate_compare(value, IR_COMPARESI)); break;
+        case op_cmf: push(tristate_compare(value, IR_COMPAREF)); break;
 
         case op_lol:
             push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    new_localir(value)
+                load(
+                    EM_wordsize,
+                    new_localir(value), 0
                 )
             );
             break;
 
         case op_ldl:
             push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize*2,
-                    new_localir(value)
+                load(
+                    EM_wordsize*2,
+                    new_localir(value), 0
                 )
             );
             break;
 
         case op_stl:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_localir(value),
+                store(
+                    EM_wordsize,
+                    new_localir(value), 0,
                     pop(EM_wordsize)
                 )
             );
@@ -563,9 +646,9 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_sdl:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize*2,
-                    new_localir(value),
+                store(
+                    EM_wordsize*2,
+                    new_localir(value), 0,
                     pop(EM_wordsize*2)
                 )
             );
@@ -579,24 +662,24 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_lil:
             push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    new_ir1(
-                        IR_LOAD, EM_pointersize,
-                        new_localir(value)
-                    )
+                load(
+                    EM_wordsize,
+                    load(
+                        EM_pointersize,
+                        new_localir(value), 0
+                    ), 0
                 )
             );
             break;
 
         case op_sil:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_ir1(
-                        IR_LOAD, EM_pointersize,
-                        new_localir(value)
-                    ),
+                store(
+                    EM_wordsize,
+                    load(
+                        EM_pointersize,
+                        new_localir(value), 0
+                    ), 0,
                     pop(EM_wordsize)
                 )
             );
@@ -612,9 +695,9 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_zrl:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_localir(value),
+                store(
+                    EM_wordsize,
+                    new_localir(value), 0,
                     new_wordir(0)
                 )
             );
@@ -630,26 +713,18 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_loe:
             push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        new_labelir(".hol0"),
-                        new_wordir(value)
-                    )
+                load(
+                    EM_wordsize,
+                    new_labelir(".hol0"), value
                 )
             );
             break;
 
         case op_ste:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        new_labelir(".hol0"),
-                        new_wordir(value)
-                    ),
+                store(
+                    EM_wordsize,
+                    new_labelir(".hol0"), value,
                     pop(EM_wordsize)
                 )
             );
@@ -657,13 +732,9 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_zre:
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        new_labelir(".hol0"),
-                        new_wordir(value)
-                    ),
+                store(
+                    EM_wordsize,
+                    new_labelir(".hol0"), value,
                     new_wordir(0)
                 )
             );
@@ -694,9 +765,9 @@ static void insn_ivalue(int opcode, arith value)
                     s = value;
 
                 push(
-                    new_ir1(
-                        IR_LOAD, s,
-                        ptradd(ptr, offset)
+                    load(
+                        s,
+                        ptr, offset
                     )
                 );
 
@@ -713,13 +784,9 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
 
             push(
-                new_ir1(
-                    IR_LOAD, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        ptr,
-                        new_wordir(value)
-                    )
+                load(
+                    EM_wordsize,
+                    ptr, value
                 )
             );
             break;
@@ -731,9 +798,10 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* val = pop(value);
 
             appendir(
-                new_ir2(
-                    IR_STORE, value,
-                    ptr, val
+                store(
+                    value,
+                    ptr, 0,
+                    val
                 )
             );
             break;
@@ -745,13 +813,9 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* val = pop(EM_wordsize);
 
             appendir(
-                new_ir2(
-                    IR_STORE, EM_wordsize,
-                    new_ir2(
-                        IR_ADD, EM_pointersize,
-                        ptr,
-                        new_wordir(value)
-                    ),
+                store(
+                    EM_wordsize,
+                    ptr, value,
                     val
                 )
             );
@@ -764,7 +828,7 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
 
             if (value != EM_pointersize)
-                off = convert(off, EM_pointersize, IR_CII1);
+                off = convert(off, value, EM_pointersize, IR_FROMUI);
 
             push(
                 new_ir2(
@@ -801,7 +865,7 @@ static void insn_ivalue(int opcode, arith value)
                 );
 
             if (value != EM_pointersize)
-                delta = convert(delta, value, IR_CII1);
+                delta = convert(delta, EM_pointersize, value, IR_FROMUI);
 
             push(delta);
             break;

@@ -38,21 +38,21 @@ REGISTERS
     r14                                           bytes4! int!;
     r13                                           bytes4! int!;
 
-    r11r12  named("r11", "r12") aliases(r11, r12) bytes8! pair! volatile;
-    r9r10   named("r9",  "r10") aliases(r9,  r10) bytes8! pair! volatile;
-    r7r8    named("r7",  "r8")  aliases(r7,  r8)  bytes8! pair! volatile;
-    r5r6    named("r5",  "r6")  aliases(r6,  r6)  bytes8! pair! volatile;
-    r3r4    named("r3",  "r4")  aliases(r3,  r4)  bytes8! pair! volatile pret;
+    r11r12  named("r11", "r12") aliases(r11, r12) bytes8! long! volatile;
+    r9r10   named("r9",  "r10") aliases(r9,  r10) bytes8! long! volatile;
+    r7r8    named("r7",  "r8")  aliases(r7,  r8)  bytes8! long! volatile;
+    r5r6    named("r5",  "r6")  aliases(r6,  r6)  bytes8! long! volatile;
+    r3r4    named("r3",  "r4")  aliases(r3,  r4)  bytes8! long! volatile pret;
 
-    r29r30  named("r29", "r30") aliases(r29, r30) bytes8! pair!;
-    r27r28  named("r27", "r28") aliases(r27, r28) bytes8! pair!;
-    r25r26  named("r25", "r26") aliases(r25, r26) bytes8! pair!;
-    r23r24  named("r23", "r24") aliases(r23, r24) bytes8! pair!;
-    r21r22  named("r21", "r22") aliases(r21, r22) bytes8! pair!;
-    r19r20  named("r19", "r20") aliases(r19, r20) bytes8! pair!;
-    r17r18  named("r17", "r18") aliases(r17, r18) bytes8! pair!;
-    r15r16  named("r15", "r16") aliases(r15, r16) bytes8! pair!;
-    r13r14  named("r13", "r14") aliases(r13, r14) bytes8! pair!;
+    r29r30  named("r29", "r30") aliases(r29, r30) bytes8! long!;
+    r27r28  named("r27", "r28") aliases(r27, r28) bytes8! long!;
+    r25r26  named("r25", "r26") aliases(r25, r26) bytes8! long!;
+    r23r24  named("r23", "r24") aliases(r23, r24) bytes8! long!;
+    r21r22  named("r21", "r22") aliases(r21, r22) bytes8! long!;
+    r19r20  named("r19", "r20") aliases(r19, r20) bytes8! long!;
+    r17r18  named("r17", "r18") aliases(r17, r18) bytes8! long!;
+    r15r16  named("r15", "r16") aliases(r15, r16) bytes8! long!;
+    r13r14  named("r13", "r14") aliases(r13, r14) bytes8! long!;
 
     f14                                           bytes4! float! volatile;
     f13                                           bytes4! float! volatile;
@@ -142,73 +142,90 @@ PATTERNS
 
 /* Special */
 
-	PAIR(BLOCK4, BLOCK4);
+	PAIR(BLOCK.I, BLOCK.I);
 
 
 
 /* Miscellaneous special things */
 
-	PUSH4(in:(int)reg)
+	PUSH.I(in:(int)reg)
 		emit "stwu %in, -4(sp)"
 		cost 4;
 
-    PUSH8(in:(pair)reg)
+    PUSH.L(in:(long)reg)
         emit "stwu %in.0, -4(sp)"
         emit "stwu %in.1, -4(sp)"
         cost 8;
 
-	out:(int)reg = POP4
+    PUSH.D(in:(double)reg)
+        emit "stfdu %in, -8(sp)"
+        cost 4;
+
+	out:(int)reg = POP.I
 		emit "lwz %out, 0(sp)"
         emit "addi sp, sp, 4"
 		cost 8;
 
-    out:(pair)reg = POP8
+    out:(long)reg = POP.L
         emit "lwz %out.0, 4(sp)"
         emit "lwz %out.1, 0(sp)"
         emit "addi sp, sp, 8"
         cost 12;
 
-	out:(float)reg = POPF4
+	out:(float)reg = POP.F
 		emit "lfs %out, 0(sp)"
 		emit "addi sp, sp, 4"
 		cost 8;
 		
-	SETRET4(in:(ret)reg)
+	SETRET.I(in:(ret)reg)
 		emit "! setret4"
 		cost 1;
 
-    SETRET8(in:(pret)reg)
+    SETRET.L(in:(pret)reg)
         emit "! setret8"
         cost 1;
 
-	STACKADJUST4(delta:CONST4)
+	STACKADJUST.I(delta:CONST.I)
         when signed_constant(%delta, 16)
 		emit "addi sp, sp, $delta"
 		cost 4;
 
-	STACKADJUST4(in:(int)reg)
+	STACKADJUST.I(in:(int)reg)
 		emit "add sp, sp, %in"
 		cost 4;
 
-    out:(int)reg = GETFP4
+    out:(int)reg = GETFP.I
         emit "mr %out, fp"
         cost 4;
 
-    out:(int)reg = FPTOARGS4(GETFP4)
+    out:(int)reg = FPTOARGS.I(GETFP.I)
         emit "addi %out, fp, 8"
         cost 4;
 
-    out:(int)reg = FPTOARGS4(in:(int)reg)
+    out:(int)reg = FPTOARGS.I(in:(int)reg)
         emit "addi %out, %in, 8"
         cost 4;
 
-    out:(int)reg = GETSP4
+    out:(int)reg = GETSP.I
         emit "mr %out, sp"
         cost 4;
 
-    SETSP4(in:(int)reg)
+    SETSP.I(in:(int)reg)
         emit "mr sp, %in"
         cost 4;
+    
+    out:(int)reg = COPYF.I(in:(float)reg)
+        emit "stfsu %in, -4(sp)"
+        emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+        cost 12;
+
+    out:(double)reg = COPYL.D(in:(long)reg)
+        emit "stwu %in.0, -4(sp)"
+        emit "stwu %in.1, -4(sp)"
+        emit "lfd %out, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
 
 
 
@@ -216,47 +233,55 @@ PATTERNS
 
     /* Stores */
 
-	STORE8(addr:address, value:(pair)reg)
+	STORE.L(addr:address, value:(long)reg)
 		emit "stw %value.0, 4+%addr"
 		emit "stw %value.1, 0+%addr"
 		cost 4;
 
-	STORE4(addr:address, value:(int)reg)
+	STORE.I(addr:address, value:(int)reg)
 		emit "stw %value, %addr"
 		cost 4;
 
-	STORE2(addr:address, value:(int)ushortX)
+	STOREH.I(addr:address, value:(int)ushortX)
 		emit "sth %value, %addr"
 		cost 4;
 
-    STORE2(ADD4(left:(int)reg, right:(int)reg), value:(int)ushortX)
+    STOREH.I(ADD.I(left:(int)reg, right:(int)reg), value:(int)ushortX)
         emit "sthx %value, %left, %right"
         cost 4;
 
-    STORE1(addr:address, value:(int)ubyteX)
+	STOREB.I(addr:address, value:(int)ushortX)
+		emit "sth %value, %addr"
+		cost 4;
+
+    STOREB.I(addr:address, value:(int)ubyteX)
 		emit "stb %value, %addr"
 		cost 4;
 
-    STORE1(ADD4(left:(int)reg, right:(int)reg), value:(int)ubyteX)
+    STOREB.I(ADD.I(left:(int)reg, right:(int)reg), value:(int)ubyteX)
         emit "stbx %value, %left, %right"
         cost 4;
 
     /* Loads */
 
-	out:(int)reg = LOAD4(addr:address)
+	out:(int)reg = LOAD.I(addr:address)
 		emit "lwz %out, %addr"
 		cost 4;
 
-    out:(pair)reg = LOAD8(addr:address)
+    out:(long)reg = LOAD.L(addr:address)
         emit "lwz %out.0, 4+%addr"
         emit "lwz %out.1, 0+%addr"
         cost 8;
 
-	out:(int)ushort0 = LOAD2(addr:address)
+    out:(double)reg = LOAD.D(addr:address)
+        emit "lfsd %out, %addr"
+        cost 4;
+
+	out:(int)ushort0 = LOADH.I(addr:address)
 		emit "lhz %out, %addr"
 		cost 4;
 
-	out:(int)ubyte0 = LOAD1(addr:address)
+	out:(int)ubyte0 = LOADB.I(addr:address)
 		emit "lbz %out, %addr"
 		cost 4;
 
@@ -302,6 +327,38 @@ PATTERNS
         emit "! reg -> ushortX"
         cost 1;
 
+
+/* Extensions and conversions */
+
+    out:(int)reg = EXTENDB.I(in:(int)reg)
+        emit "extsb %out, %in"
+        cost 4;
+
+    out:(int)reg = EXTENDH.I(in:(int)reg)
+        emit "extsh %out, %in"
+        cost 4;
+
+    out:(int)reg = FROMSI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMSI.I(int) -> int"
+        cost 1;
+
+    out:(int)reg = FROMUI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMUI.I(int) -> int"
+        cost 1;
+
+    out:(long)reg = FROMSI.L(in:(int)reg)
+        emit "mr %out.0, %in"
+        emit "srawi %out.1, %out.0, 31"
+        cost 8;
+
+    out:(int)reg = FROMD.I(in:(double)reg)
+        with corrupted(volatile)
+        emit "bl .fromd2i"
+        cost 4;
+
+#if 0
 	/* byte conversions */
 
     out:(int)ubyte0 = CIU14(in:(int)ubyte0)
@@ -348,22 +405,23 @@ PATTERNS
     out:(int)reg = CII24(in:(int)ushortX)
         emit "extsh %out, %in"
         cost 4;
+#endif
 
 
 /* Locals */
 
-	out:(int)reg = in:LOCAL4
+	out:(int)reg = in:LOCAL.I
 		emit "addi %out, fp, $in"
 		cost 4;
 
-	address = in:LOCAL4
+	address = in:LOCAL.I
 		emit "$in(fp)";
 
 
 
 /* Memory addressing modes */
 
-	address = ADD4(addr:(int)reg, offset:CONST4)
+	address = ADD.I(addr:(int)reg, offset:CONST.I)
         when signed_constant(%offset, 16)
 		emit "$offset(%addr)";
 
@@ -374,59 +432,59 @@ PATTERNS
 
 /* Branches */
 
-	JUMP(addr:BLOCK4)
+	JUMP(addr:BLOCK.I)
 		emit "b $addr"
 		cost 4;
 
-	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
         emit "bc 12, 2, $true" /* IFTRUE EQ */
 		emit "b $false"
 		cost 8;
 
-	CJUMPLE(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPLE(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
         emit "bc 4, 1, $true" /* IFFALSE GT */
         emit "b $false"
 		cost 8;
 
-	CJUMPLT(value:(cr)cr, PAIR(true:BLOCK4, false:BLOCK4))
+	CJUMPLT(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
         emit "bc 12, 0, $true" /* IFTRUE LT */
         emit "b $false"
 		cost 8;
 
-	CALL1(dest:LABEL4)
+	CALL(dest:LABEL.I)
         with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
 
-	out:(ret)reg = CALL4(dest:LABEL4)
+	out:(ret)reg = CALL.I(dest:LABEL.I)
         with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
 
-	out:(pret)reg = CALL8(dest:LABEL4)
+	out:(pret)reg = CALL.L(dest:LABEL.I)
         with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
 
-    CALL1(dest:(int)reg)
+    CALL(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"
         cost 8;
 
-    out:(ret)reg = CALL4(dest:(int)reg)
+    out:(ret)reg = CALL.I(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"
         cost 8;
 
-    out:(pret)reg = CALL8(dest:(int)reg)
+    out:(pret)reg = CALL.L(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"
         cost 8;
 
-    JUMP(dest:LABEL4)
+    JUMP(dest:LABEL.I)
         emit "b $dest"
         cost 4;
 
@@ -434,40 +492,40 @@ PATTERNS
 
 /* Comparisons */
 
-	cr:(cr)cr = COMPARES44(left:(int)reg, right:(int)reg)
+	cr:(cr)cr = COMPARESI.I(left:(int)reg, right:(int)reg)
         emit "cmp %cr, 0, %left, %right"
 		cost 4;
 
-	cr:(cr)cr = COMPARES44(left:(int)reg, right:CONST4)
+	cr:(cr)cr = COMPARESI.I(left:(int)reg, right:CONST.I)
         when signed_constant(%right, 16)
         emit "cmpi %cr, 0, %left, $right"
 		cost 4;
 
-	cr:(cr)cr = COMPAREU44(left:(int)reg, right:(int)reg)
+	cr:(cr)cr = COMPAREUI.I(left:(int)reg, right:(int)reg)
         emit "cmpl %cr, 0, %left, %right"
 		cost 4;
 
-	cr:(cr)cr = COMPAREU44(left:(int)reg, right:CONST4)
+	cr:(cr)cr = COMPAREUI.I(left:(int)reg, right:CONST.I)
         when signed_constant(%right, 16)
         emit "cmpli %cr, 0, %left, $right"
 		cost 4;
 
-    out:(cr)cr = COMPARES44(in:(cr)cr, result:CONST4)
+    out:(cr)cr = COMPARESI.I(in:(cr)cr, result:CONST.I)
         when specific_constant(%result, 0)
         with %out == %in
-        emit "! COMPARES(cr, 0)"
+        emit "! COMPARESI.I(cr, 0)"
         cost 4;
 
 
 
 /* Booleans */
 
-    out:(int)reg = IFEQ4(in:(cr)cr)
+    out:(int)reg = IFEQ.I(in:(cr)cr)
         emit "mfcr %out" /* get cr0 */
         emit "rlwinm %out, %out, [32-2], 2, 31" /* extract just EQ */
         cost 8;
 
-    out:(int)reg = IFEQ4(in:(int)reg)
+    out:(int)reg = IFEQ.I(in:(int)reg)
         emit "cntlzw %out, %in" /* returns 0..32 */
         emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
         cost 8;
@@ -476,6 +534,7 @@ PATTERNS
 
 /* Conversions */
 
+#if 0
     out:(int)reg = CIU44(in:(int)reg)
         with %out == %in
         emit "! ciu44"
@@ -485,7 +544,7 @@ PATTERNS
         with %out == %in
         emit "! cui44"
         cost 4;
-
+#endif
 
 /* ALU operations */
 
@@ -495,13 +554,13 @@ PATTERNS
             cost 4;                                        \
 
     #define ALUC(name, instr) \
-        out:(int)reg = name(left:(int)reg, right:CONST4)   \
+        out:(int)reg = name(left:(int)reg, right:CONST.I)  \
             when signed_constant(%right, 16)               \
             emit instr " %out, %left, $right"              \
             cost 4;                                        \
 
     #define ALUC_reversed(name, instr) \
-        out:(int)reg = name(left:CONST4, right:(int)reg)   \
+        out:(int)reg = name(left:CONST.I, right:(int)reg)  \
             when signed_constant(%left, 16)                \
             emit instr " %out, %right, $left"              \
             cost 4;                                        \
@@ -510,66 +569,66 @@ PATTERNS
         ALUC(name, instr) \
         ALUC_reversed(name, instr)
 
-    ALUR(ADD4, "add")
-    ALUCC(ADD4, "addi")
+    ALUR(ADD.I, "add")
+    ALUCC(ADD.I, "addi")
 
-	out:(int)reg = SUB4(left:(int)reg, right:(int)reg)
+	out:(int)reg = SUB.I(left:(int)reg, right:(int)reg)
 		emit "subf %out, %left, %right"
 		cost 4;
 
-	out:(int)reg = SUB4(left:(int)reg, right:CONST4)
+	out:(int)reg = SUB.I(left:(int)reg, right:CONST.I)
 		emit "addi %out, %left, -[$right]"
 		cost 4;
 
-	out:(int)reg = MOD4(left:(int)reg, right:(int)reg)
+	out:(int)reg = MOD.I(left:(int)reg, right:(int)reg)
 		emit "divw %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
 		cost 12;
 
-	out:(int)reg = MODU4(left:(int)reg, right:(int)reg)
+	out:(int)reg = MODU.I(left:(int)reg, right:(int)reg)
 		emit "divwu %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
 		cost 12;
 
-    ALUR(MUL4, "mullw")
-    ALUCC(MUL4, "mulli")
+    ALUR(MUL.I, "mullw")
+    ALUCC(MUL.I, "mulli")
 
-    ALUR(DIV4, "divw")
-    ALUR(DIVU4, "divwu")
+    ALUR(DIV.I, "divw")
+    ALUR(DIVU.I, "divwu")
 
-    ALUR(ASL4, "slw")
+    ALUR(ASL.I, "slw")
 
-    ALUR(LSL4, "slw")
+    ALUR(LSL.I, "slw")
 
-    out:(int)reg = NEG4(left:(int)reg)
+    out:(int)reg = NEG.I(left:(int)reg)
         emit "neg %out, %left"
         cost 4;
 
-    out:(int)reg = NOT4(left:(int)reg)
+    out:(int)reg = NOT.I(left:(int)reg)
         emit "cntlzw %out, %left"
         emit "rlwinm %out, %out, 32-5, 5, 31"
         cost 8;
 
-    ALUR(AND4, "and")
-    ALUCC(AND4, "andi.")
+    ALUR(AND.I, "and")
+    ALUCC(AND.I, "andi.")
 
-    ALUR(OR4, "or")
-    ALUCC(OR4, "ori")
+    ALUR(OR.I, "or")
+    ALUCC(OR.I, "ori")
 
-    ALUR(EOR4, "xor")
-    ALUCC(EOR4, "xori")
+    ALUR(EOR.I, "xor")
+    ALUCC(EOR.I, "xori")
 
-	out:(int)reg = value:LABEL4
+	out:(int)reg = value:LABEL.I
 		emit "la %out, $value"
 		cost 4;
 
-	out:(int)reg = value:BLOCK4
+	out:(int)reg = value:BLOCK.I
 		emit "la %out, $value"
 		cost 4;
 
-	out:(int)reg = value:CONST4
+	out:(int)reg = value:CONST.I
 		emit "li %out, $value"
 		cost 8;
 
@@ -586,46 +645,47 @@ PATTERNS
             emit instr " %out, %left, %right"                       \
             cost 4;                                                 \
 
-    out:(float)reg = LOADF4(addr:address)
+    out:(float)reg = LOAD.F(addr:address)
         emit "lfs %out, %addr"
         cost 4;
         
-    out:(double)reg = LOADF8(addr:address)
+    out:(double)reg = LOAD.D(addr:address)
         emit "lfd %out, %addr"
         cost 4;
         
-	out:(float)reg = value:CONSTF4
+	out:(float)reg = value:CONST.F
 		emit "lfs %out, address-containing-$value"
 		cost 8;
 
-    FPU4R(ADDF4, "fadds")
-    FPU8R(ADDF8, "fadd")
+    FPU4R(ADDF.F, "fadds")
+    FPU8R(ADDF.D, "fadd")
 
-    FPU4R(SUBF4, "fsubs")
-    FPU8R(SUBF8, "fsub")
+    FPU4R(SUBF.F, "fsubs")
+    FPU8R(SUBF.D, "fsub")
 
-    FPU4R(MULF4, "fmuls")
-    FPU8R(MULF8, "fmul")
+    FPU4R(MULF.F, "fmuls")
+    FPU8R(MULF.D, "fmul")
 
-    FPU4R(DIVF4, "fdivs")
-    FPU8R(DIVF8, "fdiv")
+    FPU4R(DIVF.F, "fdivs")
+    FPU8R(DIVF.D, "fdiv")
 
-    out:(float)reg = NEGF4(left:(float)reg)
+    out:(float)reg = NEGF.F(left:(float)reg)
         emit "fneg %out, %left"
         cost 4;
 
-    out:(double)reg = NEGF8(left:(double)reg)
+    out:(double)reg = NEGF.D(left:(double)reg)
         emit "fneg %out, %left"
         cost 4;
 
-	cr:(cr)cr = COMPAREF44(left:(float)reg, right:(float)reg)
+	cr:(cr)cr = COMPAREF.I(left:(float)reg, right:(float)reg)
         emit "fcmpu %cr, %left, %right"
 		cost 4;
 
-	cr:(cr)cr = COMPAREF84(left:(double)reg, right:(double)reg)
+	cr:(cr)cr = COMPARED.I(left:(double)reg, right:(double)reg)
         emit "fcmpu %cr, %left, %right"
 		cost 4;
 
+    #if 0
     out:(ret)reg = CFI44(val:(fret)reg)
         with corrupted(volatile)
         emit "bl .cfi44"
@@ -653,6 +713,7 @@ PATTERNS
     out:(double)reg = CFF48(val:(float)reg)
         emit "fmr %out, %val"
         cost 1;
+    #endif
 
 /* vim: set sw=4 ts=4 expandtab : */
 

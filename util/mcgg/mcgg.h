@@ -3,14 +3,14 @@
 
 /* Excruciating macro which packs ir opcodes and sizes into an int for iburg's benefit.
  *
- * Sizes are mapped as: 0=1, 1=1, 2=2, 4=3, 8=4.
+ * Types are mapped to: I=1, F=2, L=3, D=4
  */
-#define ir_to_esn(iropcode, size) \
-	((iropcode)*4 + \
-		(((size) == 4) ? 2 : \
-		 ((size) == 8) ? 3 : \
-		 ((size) == 0) ? 0 : \
-		  (size-1)))
+#define ir_to_esn(iropcode, type) \
+	((iropcode)*5 + \
+		(((type) == 'I') ? 1 : \
+		 ((type) == 'F') ? 2 : \
+		 ((type) == 'L') ? 3 : \
+         ((type) == 'D') ? 4 : 0))
 
 #define STATE_TYPE void*
 

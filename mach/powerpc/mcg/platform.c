@@ -99,7 +99,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
 {
     struct hop* hop = new_hop(bb, NULL);
     const uint32_t type_attrs =
-        burm_int_ATTR | burm_pair_ATTR | burm_float_ATTR | burm_double_ATTR;
+        burm_int_ATTR | burm_long_ATTR | burm_float_ATTR | burm_double_ATTR;
 
     if ((src->type & type_attrs) != (dest->type & type_attrs))
     {
@@ -112,7 +112,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 hop_add_insel(hop, "stwu %H, -4(sp)", src);
                 break;
 
-            case burm_pair_ATTR:
+            case burm_long_ATTR:
                 hop_add_insel(hop, "stwu %0H, -4(sp)", src);
                 hop_add_insel(hop, "stwu %1H, -4(sp)", src);
                 break;
@@ -135,7 +135,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 hop_add_insel(hop, "lwz %H, 0(sp)", dest);
                 break;
 
-            case burm_pair_ATTR:
+            case burm_long_ATTR:
                 hop_add_insel(hop, "lwz %0H, 4(sp)", dest);
                 hop_add_insel(hop, "lwz %1H, 0(sp)", dest);
                 break;
@@ -160,7 +160,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 break;
 
             case burm_double_ATTR:
-            case burm_pair_ATTR:
+            case burm_long_ATTR:
                 hop_add_insel(hop, "addi sp, sp, 8");
                 break;
 
@@ -220,7 +220,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     hop_add_insel(hop, "mr %H, %H", dest, src);
                     break;
 
-                case burm_pair_ATTR:
+                case burm_long_ATTR:
                     hop_add_insel(hop, "mr %0H, %0H", dest, src);
                     hop_add_insel(hop, "mr %1H, %1H", dest, src);
                     break;

@@ -212,11 +212,11 @@ static struct ir* new_copy(char wanted, char real, struct ir* ir)
 	if ((wanted == 'F') && (real == 'I'))
 		opcode = IR_COPYI;
 	else if ((wanted == 'D') && (real == 'L'))
-		opcode = IR_COPYI;
+		opcode = IR_COPYL;
 	else if ((wanted == 'I') && (real == 'F'))
 		opcode = IR_COPYF;
 	else if ((wanted == 'L') && (real == 'D'))
-		opcode = IR_COPYF;
+		opcode = IR_COPYD;
 	else
 		fatal("type mismatch: parent IR wanted %c, child IR provided %c",
 			wanted, real);
