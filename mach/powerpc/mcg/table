@@ -194,6 +194,10 @@ PATTERNS
 		emit "add sp, sp, %in"
 		cost 4;
 
+	STACKADJUST.I(NEG.I(in:(int)reg))
+		emit "subf sp, %in, sp"
+		cost 4;
+
     out:(int)reg = GETFP.I
         emit "mr %out, fp"
         cost 4;

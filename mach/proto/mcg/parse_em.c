@@ -427,6 +427,13 @@ void parse_em(void)
                     {
                         switch (em.em_argtype)
                         {
+                            case 0:
+                                /* This is an instruction which would normally
+                                 * take a size, but the size is provided on the
+                                 * stack. We hates them. */
+                                queue_insn_simple(em.em_opcode);
+                                break;
+                                
                             case ilb_ptyp:
                                 queue_insn_ilabel(em.em_opcode, em.em_ilb);
                                 break;

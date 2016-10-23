@@ -371,8 +371,12 @@ static void insn_simple(int opcode)
             );
             break;
 
-        case op_teq: simple_test(EM_wordsize, IR_IFEQ); break;
+        case op_teq: simple_test(    EM_wordsize, IR_IFEQ); break;
         case op_tne: simple_test_neg(EM_wordsize, IR_IFEQ); break;
+        case op_tlt: simple_test(    EM_wordsize, IR_IFLT); break;
+        case op_tge: simple_test_neg(EM_wordsize, IR_IFLT); break;
+        case op_tle: simple_test(    EM_wordsize, IR_IFLE); break;
+        case op_tgt: simple_test_neg(EM_wordsize, IR_IFLE); break;
 
         case op_cai:
         {
@@ -442,6 +446,20 @@ static void insn_simple(int opcode)
                 new_ir1(
                     IR_CALL, 0,
                     new_labelir(".trp")
+                )
+            );
+            break;
+        }
+
+        /* FIXME: These instructions are really complex and barely used
+         * (Modula-2 bitset support, I believe). Leave them until leter. */
+        case op_set:
+        case op_ior:
+        {
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir(".unimplemented")
                 )
             );
             break;
@@ -1176,6 +1194,83 @@ static void insn_ivalue(int opcode, arith value)
                 new_ir1(
                     IR_STACKADJUST, EM_pointersize,
                     new_wordir(EM_pointersize*2 + EM_wordsize)
+                )
+            );
+            break;
+        }
+
+        case op_los:
+        {
+            /* Copy an arbitrary amount to the stack. */
+            struct ir* bytes = pop(EM_wordsize);
+            struct ir* address = pop(EM_pointersize);
+
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_pointersize,
+                    new_ir1(
+                        IR_NEG, EM_wordsize,
+                        bytes
+                    )
+                )
+            );
+
+            push(
+                new_ir0(
+                    IR_GETSP, EM_pointersize
+                )
+            );
+            push(address);
+            push(bytes);
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir("memcpy")
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_pointersize,
+                    new_wordir(EM_pointersize*2 + EM_wordsize)
+                )
+            );
+            break;
+        }
+
+        case op_sts:
+        {
+            /* Copy an arbitrary amount from the stack. */
+            struct ir* bytes = pop(EM_wordsize);
+            struct ir* dest = pop(EM_pointersize);
+            struct ir* src;
+
+            materialise_stack();
+            src = appendir(
+                    new_ir0(
+                        IR_GETSP, EM_pointersize
+                    )
+                );
+
+            push(dest);
+            push(src);
+            push(bytes);
+            materialise_stack();
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir("memcpy")
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_STACKADJUST, EM_pointersize,
+                    new_ir2(
+                        IR_ADD, EM_wordsize,
+                        new_wordir(EM_pointersize*2 + EM_wordsize),
+                        bytes
+                    )
                 )
             );
             break;
