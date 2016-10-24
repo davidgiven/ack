@@ -237,7 +237,7 @@ PATTERNS
         cost 16;
 
     out:(long)reg = COPYD.L(in:(double)reg)
-        emit "sfdu %in, -8(sp)"
+        emit "stfdu %in, -8(sp)"
         emit "lwz %out.0, 4(sp)"
         emit "lwz %out.1, 0(sp)"
         emit "addi sp, sp, 8"
@@ -249,10 +249,14 @@ PATTERNS
 
     /* Stores */
 
+	STORE.D(addr:address, value:(double)reg)
+        emit "sfd %value, %addr"
+		cost 4;
+
 	STORE.L(addr:address, value:(long)reg)
 		emit "stw %value.0, 4+%addr"
 		emit "stw %value.1, 0+%addr"
-		cost 4;
+		cost 8;
 
 	STORE.I(addr:address, value:(int)reg)
 		emit "stw %value, %addr"
@@ -377,6 +381,11 @@ PATTERNS
     out:(long)reg = FROMF.L(in:(double)reg)
         with corrupted(volatile)
         emit "bl .fromf2l"
+        cost 4;
+
+    out:(long)reg = FROMSI.D(in:(double)reg)
+        with corrupted(volatile)
+        emit "bl .fromsi2d"
         cost 4;
 
 #if 0

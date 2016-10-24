@@ -226,7 +226,37 @@ static struct ir* new_copy(char wanted, char real, struct ir* ir)
 	return copy;
 }
 
-static void insert_copies(void)
+static void insert_copy(struct ir* ir, struct ir** child, char returntype, char childtype)
+{
+    if (*child)
+    {
+        char wanted;
+        char real;
+
+        if ((returntype == '?') && (childtype == '?'))
+        {
+            wanted = ir->type;
+            real = (*child)->type;
+        }
+        else
+        {
+            wanted = effective_type(ir, childtype);
+            real = (*child)->type;
+        }
+
+        if (wanted)
+        {
+            if (wanted != real)
+            {
+                struct ir* copy = new_copy(wanted, real, *child);
+                copy->root = ir->root;
+                *child = copy;
+            }
+        }
+    }
+}
+
+static void insert_ir_copies(void)
 {
 	int i;
 
@@ -237,32 +267,45 @@ static void insert_copies(void)
 		struct ir* ir = irs.item[i];
 		const struct ir_data* ird = &ir_data[ir->opcode];
 
-		if (ir->left)
-		{
-			char wanted = effective_type(ir, ird->lefttype);
-			char real = ir->left->type;
-
-			if (wanted && (wanted != real))
-			{
-				struct ir* copy = new_copy(wanted, real, ir->left);
-				copy->root = ir->root;
-				ir->left = copy;
-			}
-		}
-
-		if (ir->right)
-		{
-			char wanted = effective_type(ir, ird->righttype);
-			char real = ir->right->type;
-
-			if (wanted && (wanted != real))
-			{
-				struct ir* copy = new_copy(wanted, real, ir->right);
-				copy->root = ir->root;
-				ir->right = copy;
-			}
-		}
+        insert_copy(ir, &ir->left, ird->returntype, ird->lefttype);
+        insert_copy(ir, &ir->right, ird->returntype, ird->righttype);
 	}
+}
+
+static void insert_phi_copies(void)
+{
+    int i, j;
+
+    /* If the child of a phi isn't the same type as the phi itself, we need to
+     * insert the copy at the end of the block that exported the value. */
+
+    for (i=0; i<irs.count; i++)
+    {
+		struct ir* ir = irs.item[i];
+
+        for (j=0; j<ir->u.phivalue.count; j++)
+        {
+            struct ir* childir = ir->u.phivalue.item[j].right;
+            int wanted = ir->type;
+            int real = childir->type;
+            if (wanted != real)
+            {
+                struct basicblock* childbb = ir->u.phivalue.item[j].left;
+                struct ir* copy = new_copy(wanted, real, childir);
+                copy->root = copy;
+
+                /* The copy gets inserted as the second last item of the child
+                 * basic block. That way it'll happen before the final jump
+                 * that exits the block. */
+
+                array_insert(&childbb->irs, copy, childbb->irs.count-1);
+
+                /* And replace the value in the phi with our copy. */
+
+                ir->u.phivalue.item[j].right = copy;
+            }
+        }
+    }
 }
 
 void pass_infer_types(void)
@@ -270,7 +313,8 @@ void pass_infer_types(void)
 	collect_irs();
 	propagate_types();
 	assign_fallback_types();
-	insert_copies();
+	insert_ir_copies();
+    insert_phi_copies();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

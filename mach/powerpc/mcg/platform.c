@@ -184,6 +184,11 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
                     break;
 
+                case burm_long_ATTR:
+                    hop_add_insel(hop, "stw %0H, 4+%S(fp) ! %H", src, dest, dest);
+                    hop_add_insel(hop, "stw %1H, 0+%S(fp) ! %H", src, dest, dest);
+                    break;
+
                 case burm_double_ATTR:
                     hop_add_insel(hop, "stfd %H, %S(fp) ! %H", src, dest, dest);
                     break;
