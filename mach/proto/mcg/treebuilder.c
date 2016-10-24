@@ -361,6 +361,7 @@ static void insn_simple(int opcode)
         case op_cii: simple_convert(IR_FROMSI); break;
         case op_ciu: simple_convert(IR_FROMSI); break;
         case op_cui: simple_convert(IR_FROMUI); break;
+        case op_cfu: simple_convert(IR_FROMF); break; /* FIXME: technically wrong */
         case op_cfi: simple_convert(IR_FROMF); break;
         case op_cif: simple_convert(IR_FROMSI); break;
         case op_cff: simple_convert(IR_FROMF); break;
@@ -1058,12 +1059,12 @@ static void insn_ivalue(int opcode, arith value)
             }
 
             materialise_stack();
-            push(
-                appendir(
-                    new_ir1(
-                        IR_CALL, EM_wordsize,
-                        new_labelir(helper)
-                    )
+            /* No push here, because the helper function leaves the result on
+             * the physical stack (which is very dubious). */
+            appendir(
+                new_ir1(
+                    IR_CALL, EM_wordsize,
+                    new_labelir(helper)
                 )
             );
             break;
@@ -1299,6 +1300,19 @@ static void insn_ivalue(int opcode, arith value)
                         new_wordir(EM_pointersize*2 + EM_wordsize),
                         bytes
                     )
+                )
+            );
+            break;
+        }
+
+        /* FIXME: These instructions are really complex and barely used
+         * (Modula-2 bitset support, I believe). Leave them until leter. */
+        case op_inn:
+        {
+            appendir(
+                new_ir1(
+                    IR_CALL, 0,
+                    new_labelir(".unimplemented")
                 )
             );
             break;

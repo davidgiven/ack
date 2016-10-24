@@ -177,6 +177,11 @@ PATTERNS
 		emit "addi sp, sp, 4"
 		cost 8;
 		
+	out:(long)reg = POP.D
+		emit "lfd %out, 0(sp)"
+		emit "addi sp, sp, 8"
+		cost 8;
+		
 	SETRET.I(in:(ret)reg)
 		emit "! setret4"
 		cost 1;
@@ -228,6 +233,13 @@ PATTERNS
         emit "stwu %in.0, -4(sp)"
         emit "stwu %in.1, -4(sp)"
         emit "lfd %out, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
+
+    out:(long)reg = COPYD.L(in:(double)reg)
+        emit "sfdu %in, -8(sp)"
+        emit "lwz %out.0, 4(sp)"
+        emit "lwz %out.1, 0(sp)"
         emit "addi sp, sp, 8"
         cost 16;
 
@@ -360,6 +372,11 @@ PATTERNS
     out:(int)reg = FROMD.I(in:(double)reg)
         with corrupted(volatile)
         emit "bl .fromd2i"
+        cost 4;
+
+    out:(long)reg = FROMF.L(in:(double)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2l"
         cost 4;
 
 #if 0
@@ -532,6 +549,19 @@ PATTERNS
     out:(int)reg = IFEQ.I(in:(int)reg)
         emit "cntlzw %out, %in" /* returns 0..32 */
         emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
+        cost 8;
+
+    out:(int)reg = IFLT.I(in:(cr)cr)
+        emit "mfcr %out" /* get cr0 */
+        emit "andi. %out, %out, 1" /* leave just LT */
+        cost 8;
+
+    out:(int)reg = IFLE.I(in:(cr)cr)
+        emit "mfcr %out"                        /* get cr0 */
+        emit "andi. %out, %out, 5"              /* leave just LT and EQ */
+        emit "cntlzw %out, %out"                /* returns 0..32 */
+        emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
+        emit "xori %out, %out, 1"               /* negate */
         cost 8;
 
 
