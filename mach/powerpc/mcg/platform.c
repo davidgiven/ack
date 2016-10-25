@@ -59,9 +59,9 @@ struct hop* platform_prologue(void)
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
-        if (hreg->type & burm_int_ATTR)
+        if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "stw %H, %d(fp)", hreg, saved_offset);
-        else if (hreg->type & burm_float_ATTR)
+        else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "stfs %H, %d(fp)", hreg, saved_offset);
         saved_offset += 4;
     }
@@ -78,9 +78,9 @@ struct hop* platform_epilogue(void)
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
-        if (hreg->type & burm_int_ATTR)
+        if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "lwz %H, %d(fp)", hreg, saved_offset);
-        else if (hreg->type & burm_float_ATTR)
+        else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "lfs %H, %d(fp)", hreg, saved_offset);
         saved_offset += 4;
     }
@@ -98,15 +98,13 @@ struct hop* platform_epilogue(void)
 struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
-    const uint32_t type_attrs =
-        burm_int_ATTR | burm_long_ATTR | burm_float_ATTR | burm_double_ATTR;
 
-    if ((src->type & type_attrs) != (dest->type & type_attrs))
+    if ((src->attrs & TYPE_ATTRS) != (dest->attrs & TYPE_ATTRS))
     {
         assert(!src->is_stacked);
         assert(!dest->is_stacked);
 
-        switch (src->type & type_attrs)
+        switch (src->attrs & TYPE_ATTRS)
         {
             case burm_int_ATTR:
                 hop_add_insel(hop, "stwu %H, -4(sp)", src);
@@ -126,10 +124,10 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 break;
 
             default:
-                assert(false);
+                goto nomove;
         }
 
-        switch (dest->type & type_attrs)
+        switch (dest->attrs & TYPE_ATTRS)
         {
             case burm_int_ATTR:
                 hop_add_insel(hop, "lwz %H, 0(sp)", dest);
@@ -149,10 +147,10 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 break;
 
             default:
-                assert(false);
+                goto nomove;
         }
 
-        switch (dest->type & type_attrs)
+        switch (dest->attrs & TYPE_ATTRS)
         {
             case burm_int_ATTR:
             case burm_float_ATTR:
@@ -165,12 +163,12 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                 break;
 
             default:
-                assert(false);
+                goto nomove;
         }
     }
     else
     {
-        uint32_t type = src->type & type_attrs;
+        uint32_t type = src->attrs & TYPE_ATTRS;
 
         if (!src->is_stacked && dest->is_stacked)
         {
@@ -194,7 +192,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     break;
 
                 default:
-                    assert(false);
+                    goto nomove;
             }
         }
         else if (src->is_stacked && !dest->is_stacked)
@@ -214,7 +212,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     break;
 
                 default:
-                    assert(false);
+                    goto nomove;
             }
         }
         else if (!src->is_stacked && !dest->is_stacked)
@@ -236,14 +234,17 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     break;
 
                 default:
-                    assert(false);
+                    goto nomove;
             }
         }
         else
-            assert(false);
+            goto nomove;
     }
 
     return hop;
+
+nomove:
+    fatal("cannot move %s to %s", src->id, dest->id);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

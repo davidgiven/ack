@@ -141,10 +141,6 @@ int main(int argc, char* argv[])
 	registerterminals();
 
 	start = nonterm("stmt", true);
-	makeregattr("bytes1");
-	makeregattr("bytes2");
-	makeregattr("bytes4");
-	makeregattr("bytes8");
 
 	/* Define some standard terms. */
 
@@ -309,7 +305,7 @@ struct regattr* makeregattr(const char* id)
 	return p;
 }
 
-void addregattr(struct reg* reg, const char* id, bool exact)
+void addregattr(struct reg* reg, const char* id)
 {
 	struct regattr* p = smap_get(&registerattrs, id);
 
@@ -317,8 +313,6 @@ void addregattr(struct reg* reg, const char* id, bool exact)
 		p = makeregattr(id);
 
 	reg->attrs |= 1<<(p->number);
-	if (exact)
-		reg->type |= 1<<(p->number);
 }
 
 void addregalias(struct reg* r1, struct reg* r2)
@@ -663,8 +657,8 @@ static void emitregisters(void)
 		struct reg* r = registers.item[i].right;
 		assert(r->number == i);
 
-		print("%1{ \"%s\", 0x%x, 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s },\n",
-			r->name, r->type, r->attrs, i, r->name, i, r->name);
+		print("%1{ \"%s\", 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s },\n",
+			r->name, r->attrs, i, r->name, i, r->name);
 	}
 	print("%1{ NULL }\n");
 	print("};\n\n");

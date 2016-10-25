@@ -14,20 +14,18 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 	struct hreg* hreg = calloc(1, sizeof *hreg);
 	hreg->id = brd->id;
     hreg->brd = brd;
-    hreg->type = brd->type;
 	hreg->attrs = brd->attrs;
 	hreg->is_stacked = false;
     /* The aliases array needs to be initialised later. */
 	return hreg;
 }
 
-struct hreg* new_stacked_hreg(uint32_t type)
+struct hreg* new_stacked_hreg(uint32_t attrs)
 {
     static int hreg_count = 1;
 	struct hreg* hreg = calloc(1, sizeof *hreg);
-	hreg->id = aprintf("stacked_%d_id_%d", type, hreg_count++);
-    hreg->type = type;
-	hreg->attrs = type;
+	hreg->id = aprintf("stacked_%d_id_%d", attrs, hreg_count++);
+	hreg->attrs = attrs;
 	hreg->is_stacked = true;
 	hreg->offset = -1;
     array_append(&hreg->aliases, hreg);

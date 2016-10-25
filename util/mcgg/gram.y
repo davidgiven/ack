@@ -80,8 +80,7 @@ register
     : ID                              { $$ = makereg($1); }
     | register NAMED '(' names ')'    { $$ = $1; setregnames($$, $4); }
     | register ALIASES '(' aliases ')' { $$ = $1; addregaliases($$, $4); }
-    | register ID                     { $$ = $1; addregattr($1, $2, false); }
-    | register ID '!'                 { $$ = $1; addregattr($1, $2, true); }
+    | register ID                     { $$ = $1; addregattr($1, $2); }
     ;
 
 names

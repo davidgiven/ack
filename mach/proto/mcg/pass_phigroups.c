@@ -36,6 +36,7 @@ static void recursively_associate_group(struct phicongruence* c, struct vreg* vr
         struct constraint* constraint = pmap_findleft(&vreg->defined->constraints, vreg);
         if (c->type == 0)
             c->type = vreg->type;
+            
         assert(c->type == vreg->type);
 
         array_appendu(&c->definitions, vreg->defined);
@@ -62,6 +63,21 @@ static void recursively_associate_group(struct phicongruence* c, struct vreg* vr
 	}
 }
 
+static void update_vreg_types(struct phicongruence* c)
+{
+    int i;
+
+    for (i=0; i<c->vregs.count; i++)
+    {
+        struct vreg* vreg = c->vregs.item[i];
+
+        if (vreg->type == 0)
+            vreg->type = c->type;
+        assert(vreg->type == c->type);
+        assert(vreg->type != 0);
+    }
+}
+
 static void associate_groups(void)
 {
     static int number = 0;
@@ -71,6 +87,7 @@ static void associate_groups(void)
 		struct phicongruence* c = calloc(1, sizeof(*c));
         c->id = number++;
 		recursively_associate_group(c, phimap.item[0].left);
+        update_vreg_types(c);
 	}
 }
 

@@ -64,7 +64,6 @@ extern const struct burm_instruction_data burm_instruction_data[];
 struct burm_register_data
 {
     const char* id;
-    uint32_t type;
     uint32_t attrs;
     const char** names;
     const struct burm_register_data** aliases;
@@ -72,14 +71,6 @@ struct burm_register_data
 
 extern const struct burm_register_data burm_register_data[];
 extern const char* burm_register_class_names[];
-
-enum
-{
-    REGATTR_BYTES1 = 0,
-    REGATTR_BYTES2,
-    REGATTR_BYTES4,
-    REGATTR_BYTES8
-};
 
 enum
 {

@@ -3,126 +3,129 @@ REGISTERS
     /* Registers are allocated top down; the order here is odd in order to make
      * sure that non-volatile registers get allocated from r31 (or f31) down.
      *
-     * Attributes ending in an exclamation mark must match exactly when copying
-     * a register into another register (e.g. for eviction).
+     * Attributes may have at most one of: int, float, long, double. These
+     * indicate that the register is used to store a value of that type. If
+     * your register can store more than one type, create an alias. Registers
+     * with none of these cannot be copied by the code generator (and so cannot
+     * be moved from register to register or spilt).
      */
 
-    r12                                           bytes4! int! volatile; 
-    r11                                           bytes4! int! volatile; 
-    r10                                           bytes4! int! volatile; 
-    r9                                            bytes4! int! volatile;
-    r8                                            bytes4! int! volatile;
-    r7                                            bytes4! int! volatile;
-    r6                                            bytes4! int! volatile;
-    r5                                            bytes4! int! volatile;
-    r4                                            bytes4! int! volatile;
-    r3                                            bytes4! int! volatile ret;
+    r12                                           int volatile; 
+    r11                                           int volatile; 
+    r10                                           int volatile; 
+    r9                                            int volatile;
+    r8                                            int volatile;
+    r7                                            int volatile;
+    r6                                            int volatile;
+    r5                                            int volatile;
+    r4                                            int volatile;
+    r3                                            int volatile ret;
 
-    r31                                           bytes4! int!; 
-    r30                                           bytes4! int!; 
-    r29                                           bytes4! int!; 
-    r28                                           bytes4! int!; 
-    r27                                           bytes4! int!; 
-    r26                                           bytes4! int!; 
-    r25                                           bytes4! int!; 
-    r24                                           bytes4! int!; 
-    r23                                           bytes4! int!; 
-    r22                                           bytes4! int!; 
-    r21                                           bytes4! int!; 
-    r20                                           bytes4! int!; 
-    r19                                           bytes4! int!; 
-    r18                                           bytes4! int!; 
-    r17                                           bytes4! int!; 
-    r16                                           bytes4! int!;
-    r15                                           bytes4! int!;
-    r14                                           bytes4! int!;
-    r13                                           bytes4! int!;
+    r31                                           int; 
+    r30                                           int; 
+    r29                                           int; 
+    r28                                           int; 
+    r27                                           int; 
+    r26                                           int; 
+    r25                                           int; 
+    r24                                           int; 
+    r23                                           int; 
+    r22                                           int; 
+    r21                                           int; 
+    r20                                           int; 
+    r19                                           int; 
+    r18                                           int; 
+    r17                                           int; 
+    r16                                           int;
+    r15                                           int;
+    r14                                           int;
+    r13                                           int;
 
-    r11r12  named("r11", "r12") aliases(r11, r12) bytes8! long! volatile;
-    r9r10   named("r9",  "r10") aliases(r9,  r10) bytes8! long! volatile;
-    r7r8    named("r7",  "r8")  aliases(r7,  r8)  bytes8! long! volatile;
-    r5r6    named("r5",  "r6")  aliases(r6,  r6)  bytes8! long! volatile;
-    r3r4    named("r3",  "r4")  aliases(r3,  r4)  bytes8! long! volatile pret;
+    r11r12  named("r11", "r12") aliases(r11, r12) long volatile;
+    r9r10   named("r9",  "r10") aliases(r9,  r10) long volatile;
+    r7r8    named("r7",  "r8")  aliases(r7,  r8)  long volatile;
+    r5r6    named("r5",  "r6")  aliases(r6,  r6)  long volatile;
+    r3r4    named("r3",  "r4")  aliases(r3,  r4)  long volatile lret;
 
-    r29r30  named("r29", "r30") aliases(r29, r30) bytes8! long!;
-    r27r28  named("r27", "r28") aliases(r27, r28) bytes8! long!;
-    r25r26  named("r25", "r26") aliases(r25, r26) bytes8! long!;
-    r23r24  named("r23", "r24") aliases(r23, r24) bytes8! long!;
-    r21r22  named("r21", "r22") aliases(r21, r22) bytes8! long!;
-    r19r20  named("r19", "r20") aliases(r19, r20) bytes8! long!;
-    r17r18  named("r17", "r18") aliases(r17, r18) bytes8! long!;
-    r15r16  named("r15", "r16") aliases(r15, r16) bytes8! long!;
-    r13r14  named("r13", "r14") aliases(r13, r14) bytes8! long!;
+    r29r30  named("r29", "r30") aliases(r29, r30) long;
+    r27r28  named("r27", "r28") aliases(r27, r28) long;
+    r25r26  named("r25", "r26") aliases(r25, r26) long;
+    r23r24  named("r23", "r24") aliases(r23, r24) long;
+    r21r22  named("r21", "r22") aliases(r21, r22) long;
+    r19r20  named("r19", "r20") aliases(r19, r20) long;
+    r17r18  named("r17", "r18") aliases(r17, r18) long;
+    r15r16  named("r15", "r16") aliases(r15, r16) long;
+    r13r14  named("r13", "r14") aliases(r13, r14) long;
 
-    f14                                           bytes4! float! volatile;
-    f13                                           bytes4! float! volatile;
-    f12                                           bytes4! float! volatile;
-    f11                                           bytes4! float! volatile;
-    f10                                           bytes4! float! volatile;
-    f9                                            bytes4! float! volatile;
-    f8                                            bytes4! float! volatile;
-    f7                                            bytes4! float! volatile;
-    f6                                            bytes4! float! volatile;
-    f5                                            bytes4! float! volatile;
-    f4                                            bytes4! float! volatile;
-    f3                                            bytes4! float! volatile fret;
-    f2                                            bytes4! float! volatile;
-    f1                                            bytes4! float! volatile;
-    f0                                            bytes4! float! volatile;
+    f14                                           float volatile;
+    f13                                           float volatile;
+    f12                                           float volatile;
+    f11                                           float volatile;
+    f10                                           float volatile;
+    f9                                            float volatile;
+    f8                                            float volatile;
+    f7                                            float volatile;
+    f6                                            float volatile;
+    f5                                            float volatile;
+    f4                                            float volatile;
+    f3                                            float volatile fret;
+    f2                                            float volatile;
+    f1                                            float volatile;
+    f0                                            float volatile;
 
-    f31                                           bytes4! float!;
-    f30                                           bytes4! float!;
-    f29                                           bytes4! float!;
-    f28                                           bytes4! float!;
-    f27                                           bytes4! float!;
-    f26                                           bytes4! float!;
-    f25                                           bytes4! float!;
-    f24                                           bytes4! float!;
-    f23                                           bytes4! float!;
-    f22                                           bytes4! float!;
-    f21                                           bytes4! float!;
-    f20                                           bytes4! float!;
-    f19                                           bytes4! float!;
-    f18                                           bytes4! float!;
-    f17                                           bytes4! float!;
-    f16                                           bytes4! float!;
-    f15                                           bytes4! float!;
+    f31                                           float;
+    f30                                           float;
+    f29                                           float;
+    f28                                           float;
+    f27                                           float;
+    f26                                           float;
+    f25                                           float;
+    f24                                           float;
+    f23                                           float;
+    f22                                           float;
+    f21                                           float;
+    f20                                           float;
+    f19                                           float;
+    f18                                           float;
+    f17                                           float;
+    f16                                           float;
+    f15                                           float;
 
-    d14     named("f14")       aliases(f14)       bytes8! double! volatile;
-    d13     named("f13")       aliases(f13)       bytes8! double! volatile;
-    d12     named("f12")       aliases(f12)       bytes8! double! volatile;
-    d11     named("f11")       aliases(f11)       bytes8! double! volatile;
-    d10     named("f10")       aliases(f10)       bytes8! double! volatile;
-    d9      named("f9")        aliases(f9)        bytes8! double! volatile;
-    d8      named("f8")        aliases(f8)        bytes8! double! volatile;
-    d7      named("f7")        aliases(f7)        bytes8! double! volatile;
-    d6      named("f6")        aliases(f6)        bytes8! double! volatile;
-    d5      named("f5")        aliases(f5)        bytes8! double! volatile;
-    d4      named("f4")        aliases(f4)        bytes8! double! volatile;
-    d3      named("f3")        aliases(f3)        bytes8! double! volatile dret;
-    d2      named("f2")        aliases(f2)        bytes8! double! volatile;
-    d1      named("f1")        aliases(f1)        bytes8! double! volatile;
-    d0      named("f0")        aliases(f0)        bytes8! double! volatile;
+    d14     named("f14")       aliases(f14)       double volatile;
+    d13     named("f13")       aliases(f13)       double volatile;
+    d12     named("f12")       aliases(f12)       double volatile;
+    d11     named("f11")       aliases(f11)       double volatile;
+    d10     named("f10")       aliases(f10)       double volatile;
+    d9      named("f9")        aliases(f9)        double volatile;
+    d8      named("f8")        aliases(f8)        double volatile;
+    d7      named("f7")        aliases(f7)        double volatile;
+    d6      named("f6")        aliases(f6)        double volatile;
+    d5      named("f5")        aliases(f5)        double volatile;
+    d4      named("f4")        aliases(f4)        double volatile;
+    d3      named("f3")        aliases(f3)        double volatile dret;
+    d2      named("f2")        aliases(f2)        double volatile;
+    d1      named("f1")        aliases(f1)        double volatile;
+    d0      named("f0")        aliases(f0)        double volatile;
 
-    d31     named("f31")       aliases(f31)       bytes8! double!;
-    d30     named("f30")       aliases(f30)       bytes8! double!;
-    d29     named("f29")       aliases(f29)       bytes8! double!;
-    d28     named("f28")       aliases(f28)       bytes8! double!;
-    d27     named("f27")       aliases(f27)       bytes8! double!;
-    d26     named("f26")       aliases(f26)       bytes8! double!;
-    d25     named("f25")       aliases(f25)       bytes8! double!;
-    d24     named("f24")       aliases(f24)       bytes8! double!;
-    d23     named("f23")       aliases(f23)       bytes8! double!;
-    d22     named("f22")       aliases(f22)       bytes8! double!;
-    d21     named("f21")       aliases(f21)       bytes8! double!;
-    d20     named("f20")       aliases(f20)       bytes8! double!;
-    d19     named("f19")       aliases(f19)       bytes8! double!;
-    d18     named("f18")       aliases(f18)       bytes8! double!;
-    d17     named("f17")       aliases(f17)       bytes8! double!;
-    d16     named("f16")       aliases(f16)       bytes8! double!;
-    d15     named("f15")       aliases(f15)       bytes8! double!;
+    d31     named("f31")       aliases(f31)       double;
+    d30     named("f30")       aliases(f30)       double;
+    d29     named("f29")       aliases(f29)       double;
+    d28     named("f28")       aliases(f28)       double;
+    d27     named("f27")       aliases(f27)       double;
+    d26     named("f26")       aliases(f26)       double;
+    d25     named("f25")       aliases(f25)       double;
+    d24     named("f24")       aliases(f24)       double;
+    d23     named("f23")       aliases(f23)       double;
+    d22     named("f22")       aliases(f22)       double;
+    d21     named("f21")       aliases(f21)       double;
+    d20     named("f20")       aliases(f20)       double;
+    d19     named("f19")       aliases(f19)       double;
+    d18     named("f18")       aliases(f18)       double;
+    d17     named("f17")       aliases(f17)       double;
+    d16     named("f16")       aliases(f16)       double;
+    d15     named("f15")       aliases(f15)       double;
 
-	cr0                                           cr!;
+	cr0                                           cr;
 
 
 
@@ -177,7 +180,7 @@ PATTERNS
 		emit "addi sp, sp, 4"
 		cost 8;
 		
-	out:(long)reg = POP.D
+	out:(double)reg = POP.D
 		emit "lfd %out, 0(sp)"
 		emit "addi sp, sp, 8"
 		cost 8;
@@ -186,7 +189,7 @@ PATTERNS
 		emit "! setret4"
 		cost 1;
 
-    SETRET.L(in:(pret)reg)
+    SETRET.L(in:(lret)reg)
         emit "! setret8"
         cost 1;
 
@@ -250,7 +253,7 @@ PATTERNS
     /* Stores */
 
 	STORE.D(addr:address, value:(double)reg)
-        emit "sfd %value, %addr"
+        emit "stfd %value, %addr"
 		cost 4;
 
 	STORE.L(addr:address, value:(long)reg)
@@ -292,10 +295,6 @@ PATTERNS
         emit "lwz %out.0, 4+%addr"
         emit "lwz %out.1, 0+%addr"
         cost 8;
-
-    out:(double)reg = LOAD.D(addr:address)
-        emit "lfsd %out, %addr"
-        cost 4;
 
 	out:(int)ushort0 = LOADH.I(addr:address)
 		emit "lhz %out, %addr"
@@ -373,17 +372,17 @@ PATTERNS
         emit "srawi %out.1, %out.0, 31"
         cost 8;
 
-    out:(int)reg = FROMD.I(in:(double)reg)
+    out:(ret)reg = FROMD.I(in:(dret)reg)
         with corrupted(volatile)
         emit "bl .fromd2i"
         cost 4;
 
-    out:(long)reg = FROMF.L(in:(double)reg)
+    out:(lret)reg = FROMF.L(in:(fret)reg)
         with corrupted(volatile)
         emit "bl .fromf2l"
         cost 4;
 
-    out:(long)reg = FROMSI.D(in:(double)reg)
+    out:(dret)reg = FROMSI.D(in:(ret)reg)
         with corrupted(volatile)
         emit "bl .fromsi2d"
         cost 4;
@@ -491,7 +490,7 @@ PATTERNS
 		emit "bl $dest"
 		cost 4;
 
-	out:(pret)reg = CALL.L(dest:LABEL.I)
+	out:(lret)reg = CALL.L(dest:LABEL.I)
         with corrupted(volatile)
 		emit "bl $dest"
 		cost 4;
@@ -508,7 +507,7 @@ PATTERNS
         emit "bcctrl 20, 0, 0"
         cost 8;
 
-    out:(pret)reg = CALL.L(dest:(int)reg)
+    out:(lret)reg = CALL.L(dest:(int)reg)
         with corrupted(volatile)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"

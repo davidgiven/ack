@@ -94,9 +94,9 @@ static void constrain_input_reg(int child, uint32_t attr)
     struct vreg* vreg = find_vreg_of_child(child);
     struct constraint* c;
 
-    if (vreg)
-        array_appendu(&current_hop->ins, vreg);
+    assert(vreg);
 
+    array_appendu(&current_hop->ins, vreg);
     get_constraint(vreg)->attrs = attr;
 }
 
@@ -112,7 +112,15 @@ static uint32_t find_type_from_constraint(uint32_t attr)
     while (brd->id)
     {
         if (brd->attrs & attr)
-            return brd->type;
+        {
+            const uint32_t type_attrs = 
+                (burm_int_ATTR | burm_float_ATTR |
+                 burm_long_ATTR | burm_double_ATTR);
+
+            if (brd->attrs & type_attrs)
+                return brd->attrs & type_attrs;
+            return attr;
+        }
         brd++;
     }
 
