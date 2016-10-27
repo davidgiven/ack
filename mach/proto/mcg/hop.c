@@ -265,11 +265,11 @@ char* hop_render(struct hop* hop)
 				switch (ir->opcode)
 				{
 					case IR_BLOCK:
-						appendf("%s", ir->u.bvalue->name);
+						appendf("%s", platform_label(ir->u.bvalue->name));
 						break;
 
 					case IR_LABEL:
-						appendf("%s", ir->u.lvalue);
+						appendf("%s", platform_label(ir->u.lvalue));
 						break;
 
 					case IR_LOCAL:

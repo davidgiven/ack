@@ -44,7 +44,7 @@ static void emit_header(int desired_section)
 			fatal("label '%s' can't change sections", pending->name);
 
 		fprintf(outputfile, "\n.sect %s\n", section_to_str(pending->section));
-        fprintf(outputfile, "%s:\n", pending->name);
+        fprintf(outputfile, "%s:\n", platform_label(pending->name));
         pending = NULL;
     }
 }

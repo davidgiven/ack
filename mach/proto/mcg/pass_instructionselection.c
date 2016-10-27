@@ -220,6 +220,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                 {
                     case ir_to_esn(IR_REG, 0):
                         current_hop->output = node->ir->result;
+                        assert(current_hop->output != NULL);
                         break;
 
                     case ir_to_esn(IR_NOP, 'I'):
@@ -227,6 +228,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                     case ir_to_esn(IR_NOP, 'L'):
                     case ir_to_esn(IR_NOP, 'D'):
                         current_hop->output = node->left->ir->result;
+                        assert(current_hop->output != NULL);
                         break;
                 }
             }
@@ -314,9 +316,9 @@ void pass_instruction_selector(void)
 {
     int i;
 
-    for (i=0; i<cfg.preorder.count; i++)
+    for (i=0; i<dominance.preorder.count; i++)
     {
-        current_bb = cfg.preorder.item[i];
+        current_bb = dominance.preorder.item[i];
         select_instructions();
     }
 }

@@ -115,7 +115,7 @@ static void emit_procedure(struct procedure* proc)
     {
         struct basicblock* bb = dominance.preorder.item[i];
         
-        fprintf(outputfile, "%s:\n", bb->name);
+        fprintf(outputfile, "%s:\n", platform_label(bb->name));
         for (j=0; j<bb->hops.count; j++)
         {
             struct hop* hop = bb->hops.item[j];
@@ -128,12 +128,12 @@ static void write_cfg_graph(const char* name)
 {
     int i;
 
-    fprintf(cfg_dot_file, "subgraph %s {\n", name);
-    fprintf(cfg_dot_file, "\t%s [color=red];\n", cfg.entry->name);
+    fprintf(cfg_dot_file, "subgraph \"%s\" {\n", name);
+    fprintf(cfg_dot_file, "\t\"%s\" [color=red];\n", cfg.entry->name);
 
     for (i=0; i<cfg.graph.count; i++)
     {
-        fprintf(cfg_dot_file, "\t%s -> %s;\n",
+        fprintf(cfg_dot_file, "\t\"%s\" -> \"%s\";\n",
             cfg.graph.item[i].left->name,
             cfg.graph.item[i].right->name);
     }
@@ -145,12 +145,12 @@ static void write_dominance_graph(const char* name)
 {
     int i;
 
-    fprintf(dominance_dot_file, "subgraph %s {\n", name);
-    fprintf(dominance_dot_file, "\t%s [color=green];\n", cfg.entry->name);
+    fprintf(dominance_dot_file, "subgraph \"%s\" {\n", name);
+    fprintf(dominance_dot_file, "\t\"%s\" [color=green];\n", cfg.entry->name);
 
     for (i=0; i<dominance.graph.count; i++)
     {
-        fprintf(dominance_dot_file, "\t%s -> %s;\n",
+        fprintf(dominance_dot_file, "\t\"%s\" -> \"%s\";\n",
             dominance.graph.item[i].right->name,
             dominance.graph.item[i].left->name);
     }

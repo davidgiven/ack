@@ -290,5 +290,17 @@ struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* 
     return hop;
 }
 
+const char* platform_label(const char* label)
+{
+    /* Labels starting with . are internal, not exported, and don't need mangling. */
+
+    if (label[0] == '.')
+        return label;
+
+    /* Otherwise, mangle. */
+
+    return aprintf("_%s", label);
+}
+
 /* vim: set sw=4 ts=4 expandtab : */
 

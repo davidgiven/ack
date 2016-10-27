@@ -20,7 +20,7 @@ struct basicblock* bb_get(const char* name)
 	struct idf* p;
 	
 	if (!name)
-		name = aprintf("___anon_bb_%d", next_id++);
+		name = aprintf(".anon_bb_%d", next_id++);
 	p = str2idf((char*) name, 0);
 	if (!p->block)
 	{
