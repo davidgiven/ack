@@ -74,6 +74,11 @@ void data_float(const char* data, size_t size, bool is_ro)
     fprintf(outputfile, "\n");
 }
 
+static bool istext(c)
+{
+    return isprint(c) && (c != '"');
+}
+
 void data_block(const uint8_t* data, size_t size, bool is_ro)
 {
     const uint8_t* start = data;
@@ -85,7 +90,7 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
     start = p = data;
     while (p < end)
     {
-        while ((p < end) && isprint(*p))
+        while ((p < end) && istext(*p))
             p++;
 
         if (start < p)
@@ -99,7 +104,7 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
             fprintf(outputfile, "\"\n");
         }
 
-        while ((p < end) && !isprint(*p))
+        while ((p < end) && !istext(*p))
             p++;
 
         if (start < p)
