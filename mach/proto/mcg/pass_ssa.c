@@ -185,12 +185,16 @@ static void ssa_convert(void)
     for (i=0; i<defining.count; i++)
     {
         struct basicblock* bb = defining.item[i];
-        struct basicblock* dominates = pmap_findleft(&dominancefrontiers, bb);
-        if (dominates)
+        tracef('S', "S: local %d in defined in block %s\n", current_local->offset, bb->name);
+        for (j=0; j<dominancefrontiers.count; j++)
         {
-            array_appendu(&needsphis, dominates);
-            array_appendu(&defining, dominates);
-            tracef('S', "S: local %d needs phi in block %s\n", current_local->offset, dominates->name);
+            if (dominancefrontiers.item[j].left == bb)
+            {
+                struct basicblock* dominates = dominancefrontiers.item[j].right;
+                array_appendu(&needsphis, dominates);
+                array_appendu(&defining, dominates);
+                tracef('S', "S: local %d needs phi in block %s\n", current_local->offset, dominates->name);
+            }
         }
     }
 
