@@ -4,15 +4,19 @@
  *
  * |    ...params...
  * |  --------------- <- ab
- * |     saved regs
+ * |      spills
  * |  ---------------
- * |      spills 
+ * |     saved regs
+ * |         LR
+ * |         FP
  * |  --------------- <- st, fp (a.k.a. lb)
  * |      locals
  * |  --------------- <- sp
  * V  ...user area...
  *
  * st indexes up; lb indexes down.
+ *
+ * We ensure that dereferencing fp always produces the caller's fp.
  */
 
 static ARRAYOF(struct hreg) saved_regs;
@@ -51,11 +55,12 @@ struct hop* platform_prologue(void)
 	hop_add_insel(hop, "addi sp, sp, %d", -(current_proc->fp_to_ab + current_proc->locals_size));
 	hop_add_insel(hop, "mfspr r0, lr");
 
-	hop_add_insel(hop, "stw r0, %d(sp)", current_proc->locals_size + current_proc->spills_size);
-	hop_add_insel(hop, "stw fp, %d(sp)", current_proc->locals_size + current_proc->spills_size + 4);
+	hop_add_insel(hop, "stw fp, %d(sp)", current_proc->locals_size + 0);
+	hop_add_insel(hop, "stw r0, %d(sp)", current_proc->locals_size + 4);
 	hop_add_insel(hop, "addi fp, sp, %d", current_proc->locals_size);
 
-    saved_offset = current_proc->spills_size + 8;
+    /* Saved reg offsets are negative. */
+    saved_offset = current_proc->saved_size + 8;
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
@@ -74,7 +79,8 @@ struct hop* platform_epilogue(void)
     int i;
     int saved_offset;
 
-    saved_offset = current_proc->spills_size + 8;
+    /* Saved reg offsets are negative. */
+    saved_offset = current_proc->saved_size + 8;
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
@@ -85,9 +91,9 @@ struct hop* platform_epilogue(void)
         saved_offset += 4;
     }
 
-    hop_add_insel(hop, "lwz r0, %d(fp)", current_proc->spills_size);
+    hop_add_insel(hop, "lwz r0, 4(fp)");
     hop_add_insel(hop, "mtspr lr, r0");
-    hop_add_insel(hop, "lwz r0, %d(fp)", current_proc->spills_size + 4);
+    hop_add_insel(hop, "lwz r0, 0(fp)"); /* load old fp */
     hop_add_insel(hop, "addi sp, fp, %d", current_proc->fp_to_ab);
     hop_add_insel(hop, "mr fp, r0");
     hop_add_insel(hop, "bclr 20, 0, 0");
@@ -245,6 +251,43 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
 
 nomove:
     fatal("cannot move %s to %s", src->id, dest->id);
+}
+
+struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+{
+    struct hop* hop = new_hop(bb, NULL);
+
+    assert(!src->is_stacked);
+    assert(!dest->is_stacked);
+    assert((src->attrs & TYPE_ATTRS) == (dest->attrs & TYPE_ATTRS));
+    
+    switch (src->attrs & TYPE_ATTRS)
+    {
+        case burm_int_ATTR:
+            hop_add_insel(hop, "mr r0, %H", src);
+            hop_add_insel(hop, "mr %H, %H", src, dest);
+            hop_add_insel(hop, "mr %H, r0", dest);
+            break;
+
+        case burm_long_ATTR:
+            hop_add_insel(hop, "mr r0, %0H", src);
+            hop_add_insel(hop, "mr %0H, %0H", src, dest);
+            hop_add_insel(hop, "mr %0H, r0", dest);
+
+            hop_add_insel(hop, "mr r0, %1H", src);
+            hop_add_insel(hop, "mr %1H, %1H", src, dest);
+            hop_add_insel(hop, "mr %1H, r0", dest);
+            break;
+
+        case burm_float_ATTR:
+        case burm_double_ATTR:
+            hop_add_insel(hop, "fmr f0, %H", src);
+            hop_add_insel(hop, "fmr %H, %H", src, dest);
+            hop_add_insel(hop, "fmr %H, f0", dest);
+            break;
+    }
+
+    return hop;
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

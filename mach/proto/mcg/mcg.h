@@ -123,6 +123,7 @@ extern void platform_calculate_offsets(void);
 extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
 extern struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest);
+extern struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest);
 
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;

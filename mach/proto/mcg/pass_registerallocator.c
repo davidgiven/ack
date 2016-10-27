@@ -578,19 +578,6 @@ static void assign_hregs_to_vregs(void)
     }
 }
 
-static struct hop* create_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
-{
-    struct hop* hop = new_hop(bb, NULL);
-
-    hop_add_string_insel(hop, "! swap ");
-    hop_add_hreg_insel(hop, src, 0);
-    hop_add_string_insel(hop, " <-> ");
-    hop_add_hreg_insel(hop, dest, 0);
-    hop_add_eoi_insel(hop);
-
-    return hop;
-}
-
 /* returns the number of instructions inserted */
 static int insert_moves(struct basicblock* bb, int index,
     register_assignment_t* srcregs, register_assignment_t* destregs)
@@ -640,12 +627,12 @@ static int insert_moves(struct basicblock* bb, int index,
         }
         else
         {
-            /* Swap. */
+            /* There's nowhere to copy to --- the copies that are left form a cycle.
+             * So we need to swap instead. */
             
-            assert(false);
             src = copies.item[0].left;
             dest = pmap_findleft(&copies, src);
-            hop = create_swap(bb, src, dest);
+            hop = platform_swap(bb, src, dest);
             pmap_remove(&copies, src, dest);
             pmap_remove(&copies, dest, src);
         }

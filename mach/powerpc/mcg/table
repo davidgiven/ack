@@ -210,6 +210,10 @@ PATTERNS
         emit "mr %out, fp"
         cost 4;
 
+    out:(int)reg = CHAINFP.I(in:(int)reg)
+        emit "lwz %out, 0(%in)"
+        cost 4;
+
     out:(int)reg = FPTOARGS.I(GETFP.I)
         emit "addi %out, fp, 8"
         cost 4;
@@ -641,8 +645,10 @@ PATTERNS
     ALUR(DIVU.I, "divwu")
 
     ALUR(ASL.I, "slw")
+    ALUR(ASR.I, "sraw")
 
     ALUR(LSL.I, "slw")
+    ALUR(LSR.I, "srw")
 
     out:(int)reg = NEG.I(left:(int)reg)
         emit "neg %out, %left"
@@ -694,10 +700,6 @@ PATTERNS
     out:(double)reg = LOAD.D(addr:address)
         emit "lfd %out, %addr"
         cost 4;
-        
-	out:(float)reg = value:CONST.F
-		emit "lfs %out, address-containing-$value"
-		cost 8;
 
     FPU4R(ADDF.F, "fadds")
     FPU8R(ADDF.D, "fadd")
