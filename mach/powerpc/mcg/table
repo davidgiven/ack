@@ -387,6 +387,11 @@ PATTERNS
         emit "srawi %out.1, %out.0, 31"
         cost 8;
 
+    out:(long)reg = FROMUI.L(in:(int)reg)
+        emit "mr %out.0, %in"
+        emit "li %out.1, 0"
+        cost 8;
+
     out:(ret)reg = FROMF.I(in:(dret)reg)
         with corrupted(volatile)
         emit "bl .fromf2i"
