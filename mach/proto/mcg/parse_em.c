@@ -51,12 +51,12 @@ static void unknown_type(const char* s)
 static const char* ilabel_to_str(label l)
 {
     assert(current_proc != NULL);
-    return aprintf("__%s_I%d", current_proc->name, l);
+    return aprintf(".%s_I%d", current_proc->name, l);
 }
 
 static const char* dlabel_to_str(label l)
 {
-    return aprintf("__D%d", l);
+    return aprintf(".D%d", l);
 }
 
 static void terminate_block(void)

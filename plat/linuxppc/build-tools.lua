@@ -15,12 +15,18 @@ build_ncg {
 	arch = "powerpc",
 }
 
+build_top {
+	name = "top",
+	arch = "powerpc",
+}
+
 return installable {
 	name = "tools",
 	map = {
 		["$(PLATDEP)/linuxppc/as"] = "+as",
 		["$(PLATDEP)/linuxppc/ncg"] = "+ncg",
 		["$(PLATDEP)/linuxppc/mcg"] = "+mcg",
+		["$(PLATDEP)/linuxppc/top"] = "+top",
 		["$(PLATIND)/descr/linuxppc"] = "./descr",
 		"util/opt+pkg",
 	}

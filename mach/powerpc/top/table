@@ -1,7 +1,8 @@
 
-/* 68020 desciptor table for ACK target optimizer */
+/* PowerPC desciptor table for ACK target optimizer */
 
 MAXOP 3;
+LABEL_STARTER '.';
 
 %%;
 
@@ -15,6 +16,14 @@ X, Y, Z             { TRUE };
 addi  X, X, 0                -> ;
 addis X, X, 0                -> ;
 
+mr X, X                      -> ;
+fmr X, X                     -> ;
+
 or X, Y, Z : or. X, X, X     -> or. X, Y, Z ;
+
+b X : labdef X               -> labdef X ;
+
+/* IFFALSE=4, IFTRUE=12, ALWAYS=20 */
+/* LT=0, GT=1, EQ=2, OV=3 */
 
 %%;
