@@ -31,6 +31,7 @@ struct insel
 struct constraint
 {
     uint32_t attrs;
+	bool preserved;
     struct vreg* equals_to;
 };
 

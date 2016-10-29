@@ -100,6 +100,16 @@ static void constrain_input_reg(int child, uint32_t attr)
     get_constraint(vreg)->attrs = attr;
 }
 
+static void constrain_input_reg_preserved(int child)
+{
+    struct vreg* vreg = find_vreg_of_child(child);
+    struct constraint* c;
+
+    assert(vreg);
+    array_appendu(&current_hop->throughs, vreg);
+    get_constraint(vreg)->preserved = true;
+}
+
 static uint32_t find_type_from_constraint(uint32_t attr)
 {
     /* Looks through the registers and finds a concrete register implementing
@@ -158,6 +168,7 @@ static const struct burm_emitter_data emitter_data =
     &emit_value,
     &emit_eoi,
     &constrain_input_reg,
+    &constrain_input_reg_preserved,
     &constrain_output_reg,
     &constrain_output_reg_equal_to,
 };

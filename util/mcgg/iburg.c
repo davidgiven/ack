@@ -1199,6 +1199,28 @@ static void emit_output_constraints(Rule r)
 	}
 }
 
+static void emit_input_constraints(Rule r)
+{
+	int i;
+	for (i=0; i<r->constraints.count; i++)
+	{
+		int index;
+		struct constraint* c = r->constraints.item[i];
+
+		if (c->type == CONSTRAINT_PRESERVED)
+		{
+			if (strcmp(c->left, r->label) == 0)
+				yyerror("cannot preserve an output register!");
+
+			index = 0;
+			if (!find_child_index(r->pattern, c->left, &index, NULL))
+				label_not_found(r, c->left);
+
+			print("%1data->constrain_input_reg_preserved(%d);\n", index);
+		}
+	}
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -1234,6 +1256,7 @@ static void emitinsndata(Rule rules)
 		}
 		
 		emit_output_constraints(r);
+		emit_input_constraints(r);
 		
 		while (f)
 		{

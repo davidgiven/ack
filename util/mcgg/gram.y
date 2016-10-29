@@ -38,6 +38,7 @@ extern int yylex(void);
 %term NOTEQUALS
 %term PATTERNS
 %term PREFERS
+%term PRESERVED
 %term REGISTERS
 %term WHEN
 %term WITH
@@ -170,6 +171,8 @@ constraint
                                           $$->type = CONSTRAINT_EQUALS; $$->left = $2; $$->right = $5; }
     | CORRUPTED '(' ID ')'              { $$ = calloc(1, sizeof(*$$));
                                           $$->type = CONSTRAINT_CORRUPTED_ATTR; $$->left = $3; }
+    | PRESERVED '(' '%' ID ')'          { $$ = calloc(1, sizeof(*$$));
+                                          $$->type = CONSTRAINT_PRESERVED; $$->left = $4; }
     ;
 
 qfragments

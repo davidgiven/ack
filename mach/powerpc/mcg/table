@@ -617,12 +617,14 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = MOD.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
 		emit "divw %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
 		cost 12;
 
 	out:(int)reg = MODU.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
 		emit "divwu %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
