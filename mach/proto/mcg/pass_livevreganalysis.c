@@ -67,6 +67,8 @@ void pass_live_vreg_analysis(void)
 			propagate_liveness(dominance.postorder.item[i]);
 	}
 	while (!finished);
+
+    //assert(cfg.entry->liveins.count == 0);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

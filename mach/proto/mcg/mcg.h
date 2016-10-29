@@ -118,6 +118,7 @@ extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);
 extern void pass_remove_dead_phis(void);
 extern void pass_split_critical_edges(void);
+extern void pass_wire_up_return_values(void);
 
 extern void platform_calculate_offsets(void);
 extern struct hop* platform_prologue(void);

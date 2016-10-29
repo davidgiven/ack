@@ -6,8 +6,7 @@
 #   ?: pull/push types from other ? parameters
 
 # Simple terminals
-S ?=.. CONST # must be followed by float form
-S ?=.. CONSTF
+S ?=.. CONST
 V ?=.. REG
 S ?=?. NOP
 S I=.. LABEL
@@ -95,7 +94,9 @@ S I=I. IFLT
 S I=I. IFLE
 
 # Procedures
-S i=.. CALL
+S i=I. CALL
+S i=?. GETRET
+S ?=i. SETRET
 
 # Flow control --- these never return
 V .=i. JUMP
@@ -106,10 +107,11 @@ V .=.. RET
  
 # Special
 S ?=i. STACKADJUST
-S ?=i. SETRET
 S i=.. GETFP
+S ?=i. SETFP
 S i=.. GETSP
 S ?=i. SETSP
 S i=i. CHAINFP
-S i=i. FPTOARGS
+S i=i. FPTOAB
+S i=i. FPTOLB
 

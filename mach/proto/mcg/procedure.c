@@ -179,6 +179,7 @@ void procedure_compile(struct procedure* proc)
      * and nexts (and then calling update_graph_data()). */
 
     print_blocks('3');
+    pass_wire_up_return_values();
     pass_convert_stack_ops();
     print_blocks('4');
     pass_convert_locals_to_ssa();

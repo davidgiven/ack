@@ -120,7 +120,7 @@ static struct hreg* evict(struct vreg* vreg)
                  * Shouldn't really happen in real life. */
                 return hreg;
             }
-            if (candidatein == candidateout)
+            if (candidatein && candidateout && (candidatein == candidateout))
             {
                 /* This is a through register. */
                 tracef('R', "R: evicting %%%d from %s\n", candidatein->id, hreg->id);
@@ -513,8 +513,9 @@ static void assign_hregs_to_vregs(void)
                     phi->prev->regsout, phi->ir->result);
                 if (hreg && !pmap_findleft(old, hreg))
                 {
-                    tracef('R', "R: import hreg %s for phi input %%%d from %s\n",
-                        hreg->id, vreg->id, phi->prev->name);
+                    tracef('R', "R: import hreg %s for %%%d, imported from %s %%%d\n",
+                        hreg->id, vreg->id,
+                        phi->prev->name, phi->ir->id);
                     pmap_put(old, hreg, vreg);
                 }
             }
@@ -534,8 +535,9 @@ static void assign_hregs_to_vregs(void)
                 struct phicongruence* c = vreg->congruence;
                 struct hreg* hreg = allocate_phi_hreg(old, vreg, c->type);
 
-                tracef('R', "R: import fallback hreg %s for phi input %%%d from %s\n",
-                    hreg->id, vreg->id, phi->prev->name);
+                tracef('R', "R: import fallback hreg %s for %%%d, imported from %s %%%d\n",
+                    hreg->id, vreg->id,
+                    phi->prev->name, phi->ir->id);
                 pmap_add(old, hreg, vreg);
             }
         }

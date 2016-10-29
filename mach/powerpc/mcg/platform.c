@@ -4,19 +4,20 @@
  *
  * |    ...params...
  * |  --------------- <- ab
+ * |       old FR
+ * |       old FP
+ * |  --------------- <- st, fp (a.k.a. lb) 
  * |      spills
  * |  ---------------
  * |     saved regs
- * |         LR
- * |         FP
- * |  --------------- <- st, fp (a.k.a. lb)
+ * |  --------------- 
  * |      locals
  * |  --------------- <- sp
  * V  ...user area...
  *
  * st indexes up; lb indexes down.
  *
- * We ensure that dereferencing fp always produces the caller's fp.
+ * Note that [fp] == old_fp and ab == fp + 8.
  */
 
 static ARRAYOF(struct hreg) saved_regs;
@@ -39,28 +40,29 @@ void platform_calculate_offsets(void)
     }
 
 	current_proc->fp_to_st = 0;
-	current_proc->fp_to_ab = current_proc->spills_size + current_proc->saved_size + 8;
-	current_proc->fp_to_lb = 0;
+	current_proc->fp_to_ab = 8;
+	current_proc->fp_to_lb = -(current_proc->spills_size + current_proc->saved_size);
 }
 
 struct hop* platform_prologue(void)
 {
     int i;
     int saved_offset;
+    int spoffset = current_proc->saved_size + current_proc->spills_size +
+        current_proc->locals_size;
 	struct hop* hop = new_hop(current_proc->entry, NULL);
 
-	hop_add_insel(hop, "! saved_size = %d+8 bytes", current_proc->saved_size);
+	hop_add_insel(hop, "! saved_size = %d bytes", current_proc->saved_size);
 	hop_add_insel(hop, "! spills_size = %d bytes", current_proc->spills_size);
 	hop_add_insel(hop, "! locals_size = %d bytes", current_proc->locals_size);
-	hop_add_insel(hop, "addi sp, sp, %d", -(current_proc->fp_to_ab + current_proc->locals_size));
+	hop_add_insel(hop, "addi sp, sp, %d", -(spoffset + 8));
 	hop_add_insel(hop, "mfspr r0, lr");
-
-	hop_add_insel(hop, "stw fp, %d(sp)", current_proc->locals_size + 0);
-	hop_add_insel(hop, "stw r0, %d(sp)", current_proc->locals_size + 4);
-	hop_add_insel(hop, "addi fp, sp, %d", current_proc->locals_size);
+	hop_add_insel(hop, "stw fp, %d(sp)", spoffset + 0);
+	hop_add_insel(hop, "stw r0, %d(sp)", spoffset + 4);
+	hop_add_insel(hop, "addi fp, sp, %d", spoffset);
 
     /* Saved reg offsets are negative. */
-    saved_offset = current_proc->saved_size + 8;
+    saved_offset = -current_proc->spills_size;
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
@@ -80,7 +82,7 @@ struct hop* platform_epilogue(void)
     int saved_offset;
 
     /* Saved reg offsets are negative. */
-    saved_offset = current_proc->saved_size + 8;
+    saved_offset = -current_proc->spills_size;
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];

@@ -218,8 +218,8 @@ static struct ir* new_copy(char wanted, char real, struct ir* ir)
 	else if ((wanted == 'L') && (real == 'D'))
 		opcode = IR_COPYD;
 	else
-		fatal("type mismatch: parent IR wanted %c, child IR provided %c",
-			wanted, real);
+		fatal("type mismatch: parent IR $%d wanted %c, child IR provided %c",
+			ir->id, wanted, real);
 
 	copy = new_ir1(opcode, ir->size, ir);
 	copy->type = wanted;

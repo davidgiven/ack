@@ -4,7 +4,6 @@ static struct basicblock* current_bb;
 
 static int stackptr;
 static struct ir* stack[64];
-static struct ir* lastcall;
 
 static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode);
 static struct ir* appendir(struct ir* ir);
@@ -340,6 +339,20 @@ static void simple_test_neg(int size, int irop)
     );
 }
 
+static void helper_function(const char* name)
+{
+    /* Delegates to a helper function; these leave their result on the stack
+     * rather than returning values through lfr. */
+
+    materialise_stack();
+    appendir(
+        new_ir1(
+            IR_CALL, 0,
+            new_labelir(name)
+        )
+    );
+}
+
 static void insn_simple(int opcode)
 {
     switch (opcode)
@@ -364,6 +377,7 @@ static void insn_simple(int opcode)
         case op_cfu: simple_convert(IR_FROMF); break; /* FIXME: technically wrong */
         case op_cfi: simple_convert(IR_FROMF); break;
         case op_cif: simple_convert(IR_FROMSI); break;
+        case op_cuf: simple_convert(IR_FROMUI); break;
         case op_cff: simple_convert(IR_FROMF); break;
 
         case op_cmp:
@@ -384,7 +398,7 @@ static void insn_simple(int opcode)
             struct ir* dest = pop(EM_pointersize);
 
             materialise_stack();
-            lastcall = appendir(
+            appendir(
                 new_ir1(
                     IR_CALL, 0,
                     dest
@@ -421,7 +435,7 @@ static void insn_simple(int opcode)
         {
             push(
                 new_ir1(
-                    IR_LOAD, 2,
+                    (EM_wordsize == 2) ? IR_LOAD : IR_LOADH, EM_wordsize,
                     new_labelir(".ignmask")
                 )
             );
@@ -432,7 +446,7 @@ static void insn_simple(int opcode)
         {
             appendir(
                 new_ir2(
-                    IR_STORE, 2,
+                    (EM_wordsize == 2) ? IR_STORE : IR_STOREH, EM_wordsize,
                     new_labelir(".ignmask"),
                     pop(EM_wordsize)
                 )
@@ -440,31 +454,32 @@ static void insn_simple(int opcode)
             break;
         }
 
-        case op_trp:
-        {
-            materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir(".trp")
-                )
-            );
-            break;
-        }
+        case op_trp: helper_function(".trp"); break;
+        case op_sig: helper_function(".sig"); break;
+        case op_rtt: helper_function(".rtt"); break;
 
         /* FIXME: These instructions are really complex and barely used
-         * (Modula-2 bitset support, I believe). Leave them until leter. */
-        case op_set:
-        case op_ior:
-        {
-            appendir(
+         * (Modula-2 bitset support, I believe). Leave them until later. */
+        case op_set: helper_function(".unimplemented_set"); break;
+        case op_ior: helper_function(".unimplemented_ior"); break;
+
+        case op_dch:
+            push(
                 new_ir1(
-                    IR_CALL, 0,
-                    new_labelir(".unimplemented")
+                    IR_CHAINFP, EM_pointersize,
+                    pop(EM_pointersize)
                 )
             );
             break;
-        }
+            
+        case op_lpb:
+            push(
+                new_ir1(
+                    IR_FPTOAB, EM_pointersize,
+                    pop(EM_pointersize)
+                )
+            );
+            break;
 
         case op_lni:
         {
@@ -598,6 +613,28 @@ static struct ir* ptradd(struct ir* address, int offset)
         );
 }
 
+static void blockmove(struct ir* dest, struct ir* src, struct ir* size)
+{
+    /* memmove stack: ( size src dest -- ) */
+    push(size);
+    push(src);
+    push(dest);
+
+    materialise_stack();
+    appendir(
+        new_ir1(
+            IR_CALL, 0,
+            new_labelir("memmove")
+        )
+    );
+    appendir(
+        new_ir1(
+            IR_STACKADJUST, EM_pointersize,
+            new_wordir(EM_pointersize*2 + EM_wordsize)
+        )
+    );
+}
+
 static void insn_ivalue(int opcode, arith value)
 {
     switch (opcode)
@@ -725,7 +762,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_zrf:
         {
             struct ir* ir = new_constir(value, 0);
-            ir->opcode = IR_CONSTF;
+            ir->opcode = IR_CONST;
             push(ir);
             break;
         }
@@ -1012,9 +1049,13 @@ static void insn_ivalue(int opcode, arith value)
                     
         case op_lfr:
         {
-            assert(lastcall != NULL);
-            lastcall->size = value;
-            push(lastcall);
+            push(
+                appendir(
+                    new_ir0(
+                        IR_GETRET, value
+                    )
+                )
+            );
             break;
         }
 
@@ -1063,7 +1104,7 @@ static void insn_ivalue(int opcode, arith value)
              * the physical stack (which is very dubious). */
             appendir(
                 new_ir1(
-                    IR_CALL, EM_wordsize,
+                    IR_CALL, 0,
                     new_labelir(helper)
                 )
             );
@@ -1094,26 +1135,11 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_lxa:
         {
-            struct ir* ir;
-
-            /* Walk the static chain. */
-
-            ir = new_ir0(
-                IR_GETFP, EM_pointersize
-            );
-
-            while (value--)
-            {
-                ir = new_ir1(
-                    IR_CHAINFP, EM_pointersize,
-                    ir
-                );
-            }
-
-            push(
+            /* What does this actually *do*? The spec doesn't say. */
+            appendir(
                 new_ir1(
-                    IR_FPTOARGS, EM_pointersize,
-                    ir
+                    IR_CALL, 0,
+                    new_labelir(".unimplemented_lxa")
                 )
             );
             break;
@@ -1166,6 +1192,17 @@ static void insn_ivalue(int opcode, arith value)
         {
             switch (value)
             {
+                case 0:
+                    appendir(
+                        new_ir1(
+                            IR_FPTOLB, EM_pointersize,
+                            new_ir0(
+                                IR_GETFP, EM_pointersize
+                            )
+                        )
+                    );
+                    break;
+                        
                 case 1:
                     appendir(
                         new_ir0(
@@ -1185,6 +1222,15 @@ static void insn_ivalue(int opcode, arith value)
         {
             switch (value)
             {
+                case 0:
+                    appendir(
+                        new_ir1(
+                            IR_SETFP, EM_pointersize,
+                            pop(EM_pointersize)
+                        )
+                    );
+                    break;
+
                 case 1:
                     appendir(
                         new_ir1(
@@ -1204,27 +1250,19 @@ static void insn_ivalue(int opcode, arith value)
         case op_blm:
         {
             /* Input stack: ( src dest -- ) */
-            /* Memmove stack: ( size src dest -- ) */
             struct ir* dest = pop(EM_pointersize);
             struct ir* src = pop(EM_pointersize);
+            blockmove(dest, src, new_wordir(value));
+            break;
+        }
 
-            push(new_wordir(value));
-            push(src);
-            push(dest);
-
-            materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir("memmove")
-                )
-            );
-            appendir(
-                new_ir1(
-                    IR_STACKADJUST, EM_pointersize,
-                    new_wordir(EM_pointersize*2 + EM_wordsize)
-                )
-            );
+        case op_bls:
+        {
+            /* Input stack: ( src dest size -- ) */
+            struct ir* dest = pop(EM_pointersize);
+            struct ir* src = pop(EM_pointersize);
+            struct ir* size = pop(EM_wordsize);
+            blockmove(dest, src, size);
             break;
         }
 
@@ -1426,7 +1464,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
         case op_cal:
             assert(offset == 0);
             materialise_stack();
-            lastcall = appendir(
+            appendir(
                 new_ir1(
                     IR_CALL, 0,
                     new_labelir(label)
@@ -1513,8 +1551,6 @@ void tb_procedure(void)
 
     for (i=0; i<current_proc->blocks.count; i++)
         generate_tree(current_proc->blocks.item[i]);
-
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
-

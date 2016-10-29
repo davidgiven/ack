@@ -282,9 +282,15 @@ char* hop_render(struct hop* hop)
 					case IR_CONST:
 						appendf("%d", ir->u.ivalue);
 						break;
+
+                    default:
+                        assert(false);
 				}
 				break;
 			}
+
+            default:
+                assert(false);
 		}
 	}
 

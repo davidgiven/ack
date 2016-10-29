@@ -210,18 +210,26 @@ PATTERNS
         emit "mr %out, fp"
         cost 4;
 
+    SETFP.I(in:(int)reg)
+        emit "mr fp, %in"
+        cost 4;
+
     out:(int)reg = CHAINFP.I(in:(int)reg)
         emit "lwz %out, 0(%in)"
         cost 4;
 
-    out:(int)reg = FPTOARGS.I(GETFP.I)
+    out:(int)reg = FPTOAB.I(GETFP.I)
         emit "addi %out, fp, 8"
         cost 4;
 
-    out:(int)reg = FPTOARGS.I(in:(int)reg)
+    out:(int)reg = FPTOAB.I(in:(int)reg)
         emit "addi %out, %in, 8"
         cost 4;
 
+    out:(int)reg = FPTOLB.I(in:(int)reg)
+        with %out == %in
+        cost 1;
+        
     out:(int)reg = GETSP.I
         emit "mr %out, sp"
         cost 4;
@@ -230,6 +238,9 @@ PATTERNS
         emit "mr sp, %in"
         cost 4;
     
+    out:(int)reg = ANY.I
+        cost 1;
+
     out:(int)reg = COPYF.I(in:(float)reg)
         emit "stfsu %in, -4(sp)"
         emit "lwz %out, 0(sp)"
@@ -376,6 +387,11 @@ PATTERNS
         emit "srawi %out.1, %out.0, 31"
         cost 8;
 
+    out:(ret)reg = FROMF.I(in:(dret)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2i"
+        cost 4;
+
     out:(ret)reg = FROMD.I(in:(dret)reg)
         with corrupted(volatile)
         emit "bl .fromd2i"
@@ -391,54 +407,16 @@ PATTERNS
         emit "bl .fromsi2d"
         cost 4;
 
-#if 0
-	/* byte conversions */
-
-    out:(int)ubyte0 = CIU14(in:(int)ubyte0)
-        with %out == %in
-        emit "! CIU14(ubyte0) -> ubyte0"
-        cost 1;
-        
-    out:(int)ubyte0 = CIU41(in:(int)ubyte0)
-        with %out == %in
-        emit "! CIU41(ubyte0) -> ubyte0"
-        cost 1;
-        
-    out:(int)ubyteX = CIU41(in:(int)ubyteX)
-        with %out == %in
-        emit "! CIU41(ubyteX) -> ubyteX"
-        cost 1;
-        
-    out:(int)reg = CII14(in:(int)ubyteX)
-        emit "extsb %out, %in ! CII14(ubyteX) -> reg"
+    out:(fret)reg = FROMUI.F(in:(ret)reg)
+        with corrupted(volatile)
+        emit "bl .fromui2f"
         cost 4;
 
-    /* short conversions */
+    out:(dret)reg = FROMUI.D(in:(ret)reg)
+        with corrupted(volatile)
+        emit "bl .fromui2d"
+        cost 4;
 
-    out:(int)ushort0 = CIU24(in:(int)ushort0)
-        with %out == %in
-        emit "! CIU24(ushort0) -> ushort0"
-        cost 1;
-        
-    out:(int)ushort0 = CIU42(in:(int)ushort0)
-        with %out == %in
-        emit "! CIU42(ushort0) -> ushort0"
-        cost 1;
-        
-    out:(int)ushortX = CIU42(in:(int)ushortX)
-        with %out == %in
-        emit "! CIU42(ushortX) -> ushortX"
-        cost 1;
-        
-    out:(int)reg = CII24(in:(int)ushort0)
-        with %out == %in
-        emit "! CII24(ushort0) -> reg"
-        cost 4;
-        
-    out:(int)reg = CII24(in:(int)ushortX)
-        emit "extsh %out, %in"
-        cost 4;
-#endif
 
 
 /* Locals */
@@ -449,6 +427,7 @@ PATTERNS
 
 	address = in:LOCAL.I
 		emit "$in(fp)";
+
 
 
 
@@ -484,38 +463,26 @@ PATTERNS
         emit "b $false"
 		cost 8;
 
-	CALL(dest:LABEL.I)
-        with corrupted(volatile)
-		emit "bl $dest"
-		cost 4;
+    #define CALLLABEL(insn) \
+        insn (dest:LABEL.I) \
+            with corrupted(volatile) \
+            emit "bl $dest" \
+            cost 4;
 
-	out:(ret)reg = CALL.I(dest:LABEL.I)
-        with corrupted(volatile)
-		emit "bl $dest"
-		cost 4;
+    CALLLABEL(CALL)
+    out:(int)reg = CALLLABEL(CALL.I)
+    out:(long)reg = CALLLABEL(CALL.L)
 
-	out:(lret)reg = CALL.L(dest:LABEL.I)
-        with corrupted(volatile)
-		emit "bl $dest"
-		cost 4;
+    #define CALLINDIRECT(insn) \
+        insn (dest:(int)reg) \
+            with corrupted(volatile) \
+            emit "mtspr ctr, %dest" \
+            emit "bcctrl 20, 0, 0" \
+            cost 8;
 
-    CALL(dest:(int)reg)
-        with corrupted(volatile)
-        emit "mtspr ctr, %dest"
-        emit "bcctrl 20, 0, 0"
-        cost 8;
-
-    out:(ret)reg = CALL.I(dest:(int)reg)
-        with corrupted(volatile)
-        emit "mtspr ctr, %dest"
-        emit "bcctrl 20, 0, 0"
-        cost 8;
-
-    out:(lret)reg = CALL.L(dest:(int)reg)
-        with corrupted(volatile)
-        emit "mtspr ctr, %dest"
-        emit "bcctrl 20, 0, 0"
-        cost 8;
+    CALLINDIRECT(CALL)
+    out:(int)reg = CALLINDIRECT(CALL.I)
+    out:(long)reg = CALLINDIRECT(CALL.L)
 
     JUMP(dest:LABEL.I)
         emit "b $dest"
@@ -701,6 +668,12 @@ PATTERNS
         emit "lfd %out, %addr"
         cost 4;
 
+    out:(float)reg = in:CONST.F
+        when specific_constant(%in, 0)
+        emit "la r0, .fd_00000000"
+        emit "lfs %out, 0(r0)"
+        cost 12;
+
     FPU4R(ADDF.F, "fadds")
     FPU8R(ADDF.D, "fadd")
 
@@ -728,36 +701,6 @@ PATTERNS
 	cr:(cr)cr = COMPARED.I(left:(double)reg, right:(double)reg)
         emit "fcmpu %cr, %left, %right"
 		cost 4;
-
-    #if 0
-    out:(ret)reg = CFI44(val:(fret)reg)
-        with corrupted(volatile)
-        emit "bl .cfi44"
-        cost 4;
-
-    out:(fret)reg = CIF44(val:(ret)reg)
-        with corrupted(volatile)
-        emit "bl .cif44"
-        cost 4;
-
-    out:(ret)reg = CFI84(val:(dret)reg)
-        with corrupted(volatile)
-        emit "bl .cfi84"
-        cost 4;
-
-    out:(dret)reg = CIF48(val:(ret)reg)
-        with corrupted(volatile)
-        emit "bl .cif48"
-        cost 4;
-
-    out:(float)reg = CFF84(val:(double)reg)
-        emit "frsp %out, %val"
-        cost 4;
-
-    out:(double)reg = CFF48(val:(float)reg)
-        emit "fmr %out, %val"
-        cost 1;
-    #endif
 
 /* vim: set sw=4 ts=4 expandtab : */
 
