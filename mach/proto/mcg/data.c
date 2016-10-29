@@ -49,12 +49,23 @@ static void emit_header(int desired_section)
     }
 }
 
+static void writehex(arith data, int size)
+{
+    if (data < 0)
+        fprintf(outputfile, "-0x%0*lx", size*2, -data); 
+    else
+        fprintf(outputfile, "0x%0*lx", size*2, data);
+}
+
 void data_int(arith data, size_t size, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
-    fprintf(outputfile, "\t.data%d 0x%0*lld\n", size, size*2, data);
+    fprintf(outputfile, "\t.data%d ", size);
+    writehex(data, size);
+    fprintf(outputfile, "\n");
 }
+
 
 void data_float(const char* data, size_t size, bool is_ro)
 {
@@ -69,9 +80,13 @@ void data_float(const char* data, size_t size, bool is_ro)
         fatal("cannot parse floating point constant %s sz %d", data, size);
 
     fprintf(outputfile, "\t!float %s sz %d\n", data, size);
-    fprintf(outputfile, "\t.data1 0x%02x", buffer[0]);
+    fprintf(outputfile, "\t.data1 ");
+    writehex(buffer[0], 1);
     for (i=1; i<size; i++)
-        fprintf(outputfile, ", 0x%02x", buffer[i]);
+    {
+        fprintf(outputfile, ", ");
+        writehex(buffer[0], 1);
+    }
     fprintf(outputfile, "\n");
 }
 
@@ -117,7 +132,7 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
             {
                 if (!first)
                     fprintf(outputfile, ", ");
-                fprintf(outputfile, "0x%02x", *start);
+                writehex(*start, 1);
                 start++;
                 first = false;
             }
