@@ -59,7 +59,37 @@ static struct ir* pop(int size)
 #endif
 
         if (ir->size != size)
-            fatal("expected an item on stack of size %d, but got %d\n", size, ir->size);
+        {
+            if ((size == (EM_wordsize*2)) && (ir->size == EM_wordsize))
+            {
+                /* Tried to read a long, but we got an int. Assemble the long
+                 * out of two ints. Note that EM doesn't specify an order. */
+                return
+                    new_ir2(
+                        IR_FROMIPAIR, size,
+                        ir,
+                        pop(EM_wordsize)
+                    );
+            }
+            else if ((size == EM_wordsize) && (ir->size == (EM_wordsize*2)))
+            {
+                /* Tried to read an int, but we got a long. */
+                push(
+                    new_ir1(
+                        IR_FROML1, EM_wordsize,
+                        ir
+                    )
+                );
+
+                return
+                    new_ir1(
+                        IR_FROML0, EM_wordsize,
+                        ir
+                    );
+            }
+            else
+                fatal("expected an item on stack of size %d, but got %d\n", size, ir->size);
+        }
         return ir;
     }
 }
@@ -864,15 +894,34 @@ static void insn_ivalue(int opcode, arith value)
         case op_sti:
         {
             struct ir* ptr = pop(EM_pointersize);
-            struct ir* val = pop(value);
+            int offset = 0;
 
-            appendir(
-                store(
-                    value,
-                    ptr, 0,
-                    val
-                )
-            );
+            /* FIXME: this is awful; need a better way of dealing with
+             * non-standard EM sizes. */
+            if (value > (EM_wordsize*2))
+                appendir(ptr);
+
+            while (value > 0)
+            {
+                int s;
+                if (value > (EM_wordsize*2))
+                    s = EM_wordsize*2;
+                else
+                    s = value;
+
+                appendir(
+                    store(
+                        s,
+                        ptr, offset,
+                        pop(s)
+                    )
+                );
+
+                value -= s;
+                offset += s;
+            }
+
+            assert(value == 0);
             break;
         }
 
@@ -1482,6 +1531,31 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
                 )
             );
             break;
+
+        case op_gto:
+        {
+            struct ir* descriptor = pop(EM_pointersize);
+
+            appendir(
+                new_ir1(
+                    IR_SETSP, EM_pointersize,
+                    load(EM_pointersize, descriptor, EM_pointersize*2)
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_SETFP, EM_pointersize,
+                    load(EM_pointersize, descriptor, EM_pointersize*1)
+                )
+            );
+            appendir(
+                new_ir1(
+                    IR_JUMP, 0,
+                    load(EM_pointersize, descriptor, EM_pointersize*0)
+                )
+            );
+            break;
+        }
 
         case op_fil:
         {

@@ -229,7 +229,7 @@ PATTERNS
     out:(int)reg = FPTOLB.I(in:(int)reg)
         with %out == %in
         cost 1;
-        
+
     out:(int)reg = GETSP.I
         emit "mr %out, sp"
         cost 4;
@@ -417,6 +417,19 @@ PATTERNS
         emit "bl .fromui2d"
         cost 4;
 
+    out:(lret)reg = FROMIPAIR.L(in1:(int)reg, in2:(int)reg)
+        emit "mr %out.0, %in1"
+        emit "mr %out.1, %in2"
+        cost 8;
+    
+    out:(int)reg = FROML0.I(in:(long)reg)
+        emit "mr %out, %in.0"
+        cost 4;
+
+    out:(int)reg = FROML1.I(in:(long)reg)
+        emit "mr %out, %in.1"
+        cost 4;
+
 
 
 /* Locals */
@@ -447,6 +460,11 @@ PATTERNS
 	JUMP(addr:BLOCK.I)
 		emit "b $addr"
 		cost 4;
+
+    JUMP(dest:(int)reg)
+        emit "mtspr ctr, %dest"
+        emit "bcctrl 20, 0, 0"
+        cost 8;
 
 	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
         emit "bc 12, 2, $true" /* IFTRUE EQ */

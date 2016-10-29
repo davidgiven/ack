@@ -71,6 +71,9 @@ S ?=I. FROMSI
 S ?=L. FROMSL
 S ?=F. FROMF
 S ?=D. FROMD
+S L=II FROMIPAIR
+S I=L. FROML0
+S I=L. FROML1
 
 # The H versions are only used if wordsize > 2
 S I=I. EXTENDB
