@@ -7,11 +7,11 @@
  * |       old FR
  * |       old FP
  * |  --------------- <- st, fp (a.k.a. lb) 
+ * |      locals
+ * |  --------------- 
  * |      spills
  * |  ---------------
  * |     saved regs
- * |  --------------- 
- * |      locals
  * |  --------------- <- sp
  * V  ...user area...
  *
@@ -39,9 +39,9 @@ void platform_calculate_offsets(void)
         }
     }
 
-	current_proc->fp_to_st = 0;
+	current_proc->fp_to_st = -current_proc->locals_size;
 	current_proc->fp_to_ab = 8;
-	current_proc->fp_to_lb = -(current_proc->spills_size + current_proc->saved_size);
+	current_proc->fp_to_lb = 0;
 }
 
 struct hop* platform_prologue(void)
@@ -62,7 +62,7 @@ struct hop* platform_prologue(void)
 	hop_add_insel(hop, "addi fp, sp, %d", spoffset);
 
     /* Saved reg offsets are negative. */
-    saved_offset = -current_proc->spills_size;
+    saved_offset = -(current_proc->locals_size + current_proc->spills_size);
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
@@ -82,7 +82,7 @@ struct hop* platform_epilogue(void)
     int saved_offset;
 
     /* Saved reg offsets are negative. */
-    saved_offset = -current_proc->spills_size;
+    saved_offset = -(current_proc->locals_size + current_proc->spills_size);
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
