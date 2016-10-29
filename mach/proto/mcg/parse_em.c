@@ -249,6 +249,7 @@ static void parse_pseu(void)
                     break;
 
                 case sof_ptyp:
+                case pro_ptyp:
                     data_offset(strdup(em.em_dnam), em.em_off, ro);
                     break;
 

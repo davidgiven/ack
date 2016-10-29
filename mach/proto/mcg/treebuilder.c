@@ -806,6 +806,16 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
 
+        case op_lae:
+            push(
+                new_ir2(
+                    IR_ADD, EM_pointersize,
+                    new_labelir(".hol0"),
+                    new_wordir(value)
+                )
+            );
+            break;
+
         case op_ste:
             appendir(
                 store(
@@ -1010,6 +1020,15 @@ static void insn_ivalue(int opcode, arith value)
             appendir(v);
             push(v);
             push(v);
+            break;
+        }
+
+        case op_exg:
+        {
+            struct ir* v1 = pop(value);
+            struct ir* v2 = pop(value);
+            push(v1);
+            push(v2);
             break;
         }
 
@@ -1260,6 +1279,10 @@ static void insn_ivalue(int opcode, arith value)
                     );
                     break;
 
+                case 2:
+                    helper_function(".unimplemented_lor_2");
+                    break;
+
                 default:
                     fatal("'lor %d' not supported", value);
             }
@@ -1287,6 +1310,10 @@ static void insn_ivalue(int opcode, arith value)
                             pop(EM_pointersize)
                         )
                     );
+                    break;
+
+                case 2:
+                    helper_function(".unimplemented_str_2");
                     break;
 
                 default:
