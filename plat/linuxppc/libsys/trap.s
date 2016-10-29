@@ -65,13 +65,13 @@ EUNIMPL = 63		! unimplemented em-instruction called
 	
 	addi r4, r0, 1
 	rlwnm r4, r4, r3, 0, 31  ! calculate trap bit
-	la r5, .ignmask
+	li32 r5, .ignmask
 	lwz r5, 0(r5)            ! load ignore mask
 	and. r4, r4, r5          ! compare
 	bclr IFFALSE, EQ, 0      ! return if non-zero
 	
 1:
-	la r4, .trppc
+	li32 r4, .trppc
 	lwz r5, 0(r4)            ! load user trap routine
 	or. r5, r5, r5           ! test
 	bc IFTRUE, EQ, fatal     ! if no user trap routine, bail out
@@ -92,7 +92,7 @@ EUNIMPL = 63		! unimplemented em-instruction called
 
 fatal:
 	addi r3, r0, 1
-	la r4, message
+	li32 r4, message
 	addi r5, r0, 6
 	addi r0, r0, 4           ! write()
 	sc 0

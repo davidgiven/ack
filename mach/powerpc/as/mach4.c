@@ -59,7 +59,7 @@ operation
 	| OP_LEV               u7                         { emit4($1 | ($2<<5)); }
 	| OP_LIA               lia                        { emit4($1 | $2); }
 	| OP_LIL               lil                        { emit4($1 | $2); }
-	| OP_LA                la                         /* emitted in subrule */
+	| OP_LI32              li32                       /* emitted in subrule */
 	;
 
 c
@@ -194,7 +194,7 @@ bda
 	}
 	;
 	
-la
+li32
 	: GPR ',' expr
 	{
 		quad type = $3.typ & S_TYP;

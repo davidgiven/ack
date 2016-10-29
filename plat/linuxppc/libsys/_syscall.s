@@ -42,7 +42,7 @@ __syscall:
 	bc IFTRUE, GT, 2f
 	
 3:
-	la r4, _errno
+	li32 r4, _errno
 	stw r3, 0(r4)
 	addi r3, r0, -1
 	bclr ALWAYS, 0, 0

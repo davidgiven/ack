@@ -82,6 +82,7 @@
 %token <y_word> OP_TO_RA_SI
 
 %token <y_word> OP_LA
+%token <y_word> OP_LI32
 
 /* Other token types */
 
