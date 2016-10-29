@@ -37,6 +37,9 @@ void symbol_declare(const char* name, bool is_exported, bool is_proc)
 		else if (s->section != SECTION_TEXT)
 			fatal("section mismatch for '%s'", name);
 	}
+
+	if (is_exported)
+		fprintf(outputfile, ".extern %s\n", platform_label(name));
 }
 
 struct symbol* symbol_walk(symbol_walker_t* cb, void* user)
