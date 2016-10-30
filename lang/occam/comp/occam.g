@@ -6,6 +6,7 @@
 /*	OCCAM		*/
 {
 #include <stdlib.h>
+#include <string.h>
 #include "token.h"
 #include "symtab.h"
 #include "expr.h"
@@ -18,7 +19,6 @@
 
 static void nonconst(), nonpositive(), rep_cleanup(), check_assoc();
 void init_builtins();
-char *strcpy();
 
 extern int lineno, LLsymb;
 union type_info info, none;

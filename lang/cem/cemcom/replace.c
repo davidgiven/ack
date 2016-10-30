@@ -25,7 +25,6 @@
 #include	"interface.h"
 #include	"static.h"
 
-char *strcpy(), *strcat();
 char *long2str();
 extern int InputLevel;
 

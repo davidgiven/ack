@@ -184,8 +184,6 @@ char *
 Salloc(str)
 	char *str;
 {
-	char *strcpy();
-
 	if (str == 0)
 		str = "";
 

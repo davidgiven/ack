@@ -12,7 +12,6 @@ sys_lock(path)
 {
 	char buf[1024];
 	char *tmpf = ".lockXXXXXX";
-	char *strrchr(), *strcpy(), *mktemp();
 	char *p;
 	int ok, fd;
 

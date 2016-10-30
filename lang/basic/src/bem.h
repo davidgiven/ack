@@ -71,13 +71,9 @@ extern int 	dataused;
 extern Linerecord *currline;
 
 
-extern char *itoa();
 extern char *salloc();
 
-extern char *strcpy();
-extern char *strcat();
 #if __STDC__
 #include <stdlib.h>
 #else
-extern char *malloc();
 #endif

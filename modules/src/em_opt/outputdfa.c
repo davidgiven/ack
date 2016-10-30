@@ -40,7 +40,6 @@ PRIVATE
 openofile(filename)
 	char *filename;
 {
-	char *strcpy(), *strcat();
 	strcpy(ofilename,filename);
 	strcpy(ofiletemp,filename);
 	strcat(ofiletemp,".new");

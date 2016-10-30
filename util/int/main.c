@@ -20,10 +20,6 @@
 #include	"opcode.h"
 #include	"rsb.h"
 
-extern int atoi();
-extern long atol();
-extern char *strcpy();
-
 char mess_file[64] = "int.mess";	/* name of message file */
 
 jmp_buf trapbuf;

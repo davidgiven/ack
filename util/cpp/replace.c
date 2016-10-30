@@ -20,7 +20,6 @@
 #include	"class.h"
 #include	"interface.h"
 
-char *strcpy(), *strcat();
 char *long2str();
 extern int InputLevel;
 

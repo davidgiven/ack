@@ -134,8 +134,6 @@ C_findpart(part)
 	return p;
 }
 
-extern char	*strcpy(), *strcat(), *mktemp();
-
 static
 swttmp()
 {

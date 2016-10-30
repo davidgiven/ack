@@ -205,8 +205,6 @@ rd_name(names, count)
   }
 }
 
-extern char	*strcpy();
-
 rd_string(strings, count)
   register char	*strings;
   long	count;

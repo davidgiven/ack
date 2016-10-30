@@ -30,8 +30,6 @@ PRIVATE struct mkey	{
 	{0,		K_UNKNOWN}
 };
 
-char *strcpy();
-
 EXPORT
 init_pp()
 {

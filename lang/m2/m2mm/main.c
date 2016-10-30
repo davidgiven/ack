@@ -27,8 +27,6 @@ int		nDEF, mDEF;
 struct file_list *CurrentArg;
 extern int 	err_occurred;
 extern int 	Roption;
-extern char	*strrchr();
-extern char	*strcpy(), *strcat();
 
 char *
 basename(s)

@@ -19,8 +19,6 @@
 #include	"misc.h"
 
 extern char	*Salloc();
-extern char	*strchr();
-extern char	*strcpy();
 extern void	signal_child();
 extern FILE	*db_in;
 extern int	disable_intr;

@@ -26,7 +26,6 @@ int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 
 char *string_token();
-char *strcpy();
 
 PushLex()
 {

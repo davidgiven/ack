@@ -30,7 +30,6 @@ int LexSave = 0;                /* last character read by GetChar       */
 extern int InputLevel;		/* # of current macro expansions	*/
 
 extern char	*string_token();
-extern char	*strcpy();
 extern arith	char_constant();
 #define		FLG_ESEEN	0x01	/* possibly a floating point number */
 #define		FLG_DOTSEEN	0x02	/* certainly a floating point number */

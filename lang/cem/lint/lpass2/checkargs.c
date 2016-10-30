@@ -9,8 +9,6 @@
 #include	"private.h"
 #include	"inpdef.h"
 
-extern char *strcpy();
-
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 
 /* a format is developed into a normal parameter definition */

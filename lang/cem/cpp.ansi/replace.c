@@ -21,8 +21,6 @@
 #include	"replace.h"
 
 extern char *GetIdentifier();
-extern char *strcpy();
-extern char *strcat();
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
 

@@ -198,8 +198,6 @@ USTRING tmp_file;
 
 int noexec = 0;
 
-extern char *strcat(), *strcpy(), *mktemp(), *strchr();
-
 trapcc(sig)
 	int sig;
 {

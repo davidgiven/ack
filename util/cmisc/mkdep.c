@@ -64,7 +64,6 @@ add_name(nm)
 	char *nm;
 {
 	struct namelist *nlp = nl, *lnlp = 0, *nnlp;
-	char *strcpy();
 
 	while (nlp) {
 		register i = strcmp(nm, nlp->name);

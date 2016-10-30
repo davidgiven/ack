@@ -5,8 +5,6 @@
 
 #define DEV "/dev/"
 
-extern char *strcpy(), *strcat();
-
 char *
 ttyname(filedes)
 {

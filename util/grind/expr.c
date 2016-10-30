@@ -56,7 +56,6 @@
 
 extern FILE	*db_out;
 extern int	stack_offset;
-extern char	*strcpy();
 extern t_addr	*get_EM_regs();
 extern char	*memcpy();
 extern char	*malloc(), *realloc();

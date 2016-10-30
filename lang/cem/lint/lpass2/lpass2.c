@@ -12,8 +12,6 @@
 #include	"class.h"
 #include	"inpdef.h"
 
-extern char *strcpy();
-
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 
 PRIVATE char cur_name[NAMESIZE];

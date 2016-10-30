@@ -17,9 +17,6 @@
 
 #ifdef	LOGGING
 
-extern int strlen();
-extern char *strcpy();
-
 extern long mess_id;			/* from io.c */
 extern FILE *fcreat_high();		/* from io.c */
 

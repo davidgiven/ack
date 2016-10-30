@@ -150,16 +150,4 @@ extern  relc_t  *text_reloc();
 extern  relc_t  *data_reloc();
 extern  area_t  getarea();
 
-/*
- * all used library routines
- */
-extern  char    *malloc();
-extern  int     open();
-extern  int     creat();
-extern  int     getpid();
-extern  int     unlink();
-extern  int     close();
-extern  int     strcmp();
-extern  char    *strcpy();
-
 #define void    int
