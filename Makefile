@@ -30,7 +30,7 @@ LDFLAGS =
 # Various commands.
 
 AR = ar
-CC = gcc
+CC = cc -Wno-return-type
 
 # Which build system to use; use 'ninja' or 'make' (in lower case). Leave
 # blank to autodetect.
@@ -96,7 +96,7 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 		PLATIND=$(PLATIND) \
 		PLATDEP=$(PLATDEP) \
 		AR=$(AR) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		> $(BUILDDIR)/build.$(BUILDSYSTEM)
 
 install:

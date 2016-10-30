@@ -61,7 +61,8 @@ string holstr(n) word n; {
 full lbytes;
 #endif
 
-prolog(nlocals) full nlocals; {
+void prolog(full nlocals)
+{
 
 	fputs("\tpush\tbp\n\tmov\tbp,sp\n", codefile);
 #ifdef REGVARS

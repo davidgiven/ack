@@ -32,6 +32,9 @@ extern  int     n_error;
 # define STDOUT stderr
 #endif
 
+void fuerror(const char *fmt, ...);
+void werror(const char *fmt, ...);
+
 char *basename(string) char *string ; {
 	static char retval[256] ;
 	char *last_dot, *last_start ;

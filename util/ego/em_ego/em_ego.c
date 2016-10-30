@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>

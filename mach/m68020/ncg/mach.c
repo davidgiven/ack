@@ -187,7 +187,8 @@ regsave(s,off,size)
 	fprintf(codefile, "!Local %ld into %s\n",off,s);
 }
 
-prolog(n) full n; {
+void prolog(full n)
+{
 
 	nlocals = n;
 }

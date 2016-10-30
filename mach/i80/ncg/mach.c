@@ -54,7 +54,8 @@ con_float() {
 }
 
 
-prolog(nlocals) full nlocals; {
+void prolog(full nlocals)
+{
 
 	fprintf(codefile,"\tpush\tb\n\tlxi\th,0\n\tdad\tsp\n\tmov\tb,h\n\tmov\tc,l\n");
 	switch (nlocals) {
