@@ -1,6 +1,16 @@
-before_install:
-    - sudo apt-get install ed lua5.1 liblua5.1-posix1 ninja-build
+matrix:
+    include:
+        - os: linux
+        - os: osx
+
+addons:
+    apt:
+        packages:
+        - ed
+
+git:
+    depth: 10
 language: c
 script:
-    - make PREFIX=/tmp/acki -j4
+    - make PREFIX=/tmp/acki
 
