@@ -1,0 +1,8 @@
+This is a slightly modified version of Lua 5.1.5, used by the build system.
+Version 'start' of LuaPosix has been added.
+
+https://www.lua.org/versions.html
+https://github.com/luaposix/luaposix
+
+Both are MIT licensed (see the COPYRIGHT file).
+
