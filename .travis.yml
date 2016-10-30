@@ -12,5 +12,5 @@ git:
     depth: 10
 language: c
 script:
-    - make PREFIX=/tmp/acki -j4
+    - make PREFIX=/tmp/acki
 

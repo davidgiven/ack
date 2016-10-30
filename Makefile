@@ -61,6 +61,8 @@ INSDIR = $(abspath $(BUILDDIR)/staging)
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
 
+.NOTPARALLEL:
+
 MAKECMDGOALS ?= +ack
 BUILD_FILES = $(shell find * -name '*.lua')
 
