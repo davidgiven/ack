@@ -43,7 +43,7 @@ NINJAFLAGS =
 
 # Build flags for make.
 
-MAKEFLAGS = -r
+MAKEFLAGS = 
 
 # ======================================================================= #
 #                         END OF CONFIGURATION                            #
