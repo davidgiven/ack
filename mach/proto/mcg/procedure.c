@@ -7,7 +7,7 @@ static void print_blocks(char k)
 	int i;
 
 	tracef(k, "%c: procedure %s\n", k, current_proc->name);
-	for (int i=0; i<current_proc->blocks.count; i++)
+	for (i=0; i<current_proc->blocks.count; i++)
 	{
 		struct basicblock* bb = current_proc->blocks.item[i];
 		int j;
@@ -43,7 +43,7 @@ static void print_hops(char k)
     int i;
 
     tracef(k, "%c: procedure %s\n", k, current_proc->name);
-    for (int i=0; i<dominance.preorder.count; i++)
+    for (i=0; i<dominance.preorder.count; i++)
     {
 		struct basicblock* bb = dominance.preorder.item[i];
 		int j;
