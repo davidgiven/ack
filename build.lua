@@ -8,6 +8,7 @@ vars.plats = {
 	"cpm",
 	"linux386",
 	"linux68k",
+	"linuxppc",
 	"pc86",
 	"rpi",
 }

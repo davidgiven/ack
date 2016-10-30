@@ -13,11 +13,14 @@
 !    r3 = ptr to descriptor
 !    r4 = index
 !    r5 = address of array
+! Yields:
+!    r3 = address of element
+!    r0 = size of element (used by .lar4, .sar4)
+! Preserves r10 for .lar4, .sar4
 
 .define .aar4
 .aar4:
-	addis r0, r0, <.trap_earray
-	ori r0, r0, >.trap_earray
+	li32 r0, .trap_earray
 	mtspr ctr, r0            ! load CTR with trap address
 
 	lwz r0, 0(r3)

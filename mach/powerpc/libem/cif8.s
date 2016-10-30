@@ -24,7 +24,7 @@
 	
 	lfd f0, 0(sp)            ! load value
 
-	la (r3, pivot)
+	li32 r3, pivot
 	lfd f1, 0(r3)            ! load pivot value
 	fsub f0, f0, f1          ! adjust
 	                         
