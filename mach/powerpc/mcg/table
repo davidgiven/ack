@@ -719,6 +719,14 @@ PATTERNS
         emit "fmadd %out, %m1, %m2, %m3"
         cost 4;
 
+    out:(float)reg = ADDF.F(MULF.D(m1:(float)reg, m2:(float)reg), m3:(float)reg)
+        emit "fmadds %out, %m1, %m2, %m3"
+        cost 4;
+
+    out:(float)reg = ADDF.F(m3:(float)reg, MULF.D(m1:(float)reg, m2:(float)reg))
+        emit "fmadds %out, %m1, %m2, %m3"
+        cost 4;
+
     out:(float)reg = NEGF.F(left:(float)reg)
         emit "fneg %out, %left"
         cost 4;
