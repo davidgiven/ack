@@ -712,14 +712,14 @@ PATTERNS
     FPU8R(DIVF.D, "fdiv")
 
     #define FMALEFT(type, insn, add, mul) \
-        out:(type)reg = add(mul(m1:(double)reg, m2:(double)reg), m3:(double)reg) \
-        emit insn " %out, %m1, %m2, %m3"                                         \
-        cost 4;                                                                  \
+        out:(type)reg = add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg) \
+        emit insn " %out, %m1, %m2, %m3"                                   \
+        cost 4;                                                            \
                                                                                  
     #define FMARIGHT(type, insn, add, mul) \
-        out:(type)reg = add(m3:(double)reg, mul(m1:(double)reg, m2:(double)reg)) \
-        emit insn " %out, %m1, %m2, %m3"                                         \
-        cost 4;                                                                  \
+        out:(type)reg = add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg)) \
+        emit insn " %out, %m1, %m2, %m3"                                   \
+        cost 4;                                                            \
 
     FMALEFT( double, "fmadd",   ADDF.D, MULF.D)
     FMARIGHT(double, "fmadd",   ADDF.D, MULF.D)
@@ -730,17 +730,17 @@ PATTERNS
     FMALEFT( float,  "fmsubs",  SUBF.F, MULF.F)
 
     FMARIGHT(double, "fnmadd",  SUBF.D, MULF.D)
-    FMARIGHT(float,  "fnmadds", SUBF.D, MULF.D)
+    FMARIGHT(float,  "fnmadds", SUBF.F, MULF.F)
 
     #define FMANEGLEFT(type, insn, neg, add, mul) \
-        out:(type)reg = neg(add(mul(m1:(double)reg, m2:(double)reg), m3:(double)reg)) \
-        emit insn " %out, %m1, %m2, %m3"                                              \
-        cost 4;                                                                       \
+        out:(type)reg = neg(add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg)) \
+        emit insn " %out, %m1, %m2, %m3"                                        \
+        cost 4;                                                                 \
                                                                                  
     #define FMANEGRIGHT(type, insn, neg, add, mul) \
-        out:(type)reg = neg(add(m3:(double)reg, mul(m1:(double)reg, m2:(double)reg))) \
-        emit insn " %out, %m1, %m2, %m3"                                              \
-        cost 4;                                                                       \
+        out:(type)reg = neg(add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg))) \
+        emit insn " %out, %m1, %m2, %m3"                                        \
+        cost 4;                                                                 \
 
     FMANEGLEFT( double, "fnmsub", NEGF.D, ADDF.D, MULF.D)
     FMANEGRIGHT(double, "fnmsub", NEGF.D, ADDF.D, MULF.D)
