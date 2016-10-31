@@ -144,7 +144,8 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
 void data_offset(const char* label, arith offset, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    fprintf(outputfile, "\t.data%d %s+%lld\n", EM_pointersize, label, offset);
+    fprintf(outputfile, "\t.data%d %s+%lld\n",
+        EM_pointersize, platform_label(label), offset);
 }
 
 void data_bss(arith size, int init)
