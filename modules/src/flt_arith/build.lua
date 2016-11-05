@@ -19,7 +19,8 @@ clibrary {
 	},
 	hdrs = { "./flt_arith.h" },
 	deps = {
-		"modules+headers"
+		"modules+headers",
+		"./*.h",
 	}
 }
 

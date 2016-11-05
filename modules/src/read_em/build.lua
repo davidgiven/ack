@@ -54,6 +54,7 @@ local function variant(name, cflags)
 			"modules/src/em_code+headers",
 			"modules/src/em_data+lib",
 			"modules/src/system+lib",
+			"./*.h",
 		}
 	}
 end

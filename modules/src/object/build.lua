@@ -5,6 +5,7 @@ clibrary {
 		"modules+headers",
 		"h+local",
 		"h+emheaders",
+		"./*.h",
 	},
 }
 
