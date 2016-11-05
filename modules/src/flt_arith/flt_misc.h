@@ -21,8 +21,8 @@
 #define flt_b64_add	_flt_64add
 #define flt_split	_flt_split
 
-_PROTOTYPE(int ucmp, (long, long));
-_PROTOTYPE(void flt_nrm, (flt_arith *));
-_PROTOTYPE(void flt_chk, (flt_arith *));
-_PROTOTYPE(int flt_b64_add, (struct flt_mantissa *, struct flt_mantissa *));
-_PROTOTYPE(void flt_split, (flt_arith *, unsigned short *));
+int ucmp(long, long);
+void flt_nrm(flt_arith *);
+void flt_chk(flt_arith *);
+int flt_b64_add(struct flt_mantissa *, struct flt_mantissa *);
+void flt_split(flt_arith *, unsigned short *);
