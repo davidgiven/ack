@@ -7,13 +7,15 @@
 #ifndef __FLT_INCLUDED__
 #define __FLT_INCLUDED__
 
+#include <stdint.h>
+
 #ifndef arith
 #define arith long
 #endif
 
 struct flt_mantissa {
-	long	flt_h_32;	/* high order 32 bits of mantissa */
-	long	flt_l_32;	/* low order 32 bits of mantissa */
+	uint32_t flt_h_32;	/* high order 32 bits of mantissa */
+	uint32_t flt_l_32;	/* low order 32 bits of mantissa */
 };
 
 typedef struct flt_arith {
