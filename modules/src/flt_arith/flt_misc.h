@@ -15,13 +15,11 @@
 #define EXT_MIN		(-16384)	/* min exponent */
 
 /* hiding of names: */
-#define ucmp		_flt_ucmp
 #define flt_nrm		_flt_nrm
 #define flt_chk		_flt_chk
 #define flt_b64_add	_flt_64add
 #define flt_split	_flt_split
 
-int ucmp(long, long);
 void flt_nrm(flt_arith *);
 void flt_chk(flt_arith *);
 int flt_b64_add(struct flt_mantissa *, struct flt_mantissa *);
