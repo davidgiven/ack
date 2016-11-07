@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 #include "flt_arith.h"
 
 struct tests {
@@ -22,6 +24,7 @@ struct tests {
 	{ 0, 0, 0, 0}
 };
 
+int
 main()
 {
 	register struct tests *p = tests;
@@ -31,7 +34,7 @@ main()
 		if (! dotest(p)) exit_status = 1;
 		p++;
 	}
-	exit(exit_status);
+	return exit_status;
 }
 
 int

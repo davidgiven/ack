@@ -5,14 +5,15 @@
 
 /* $Id$ */
 
+#include <stdint.h>
 #include "flt_misc.h"
 
 void
 flt_div(e1,e2,e3)
 	register flt_arith *e1,*e2,*e3;
 {
-	long	result[2];
-	register long	*lp;
+	uint32_t result[2];
+	register uint32_t *rp;
 	unsigned short u[9], v[5];
 	register int j;
 	register unsigned short *u_p = u;
@@ -44,7 +45,7 @@ flt_div(e1,e2,e3)
 	while (! v[maxv]) maxv--;
 	result[0] = 0;
 	result[1] = 0;
-	lp = result;
+	rp = result;
 
 	/*
 	 * Use an algorithm of Knuth (The art of programming, Seminumerical
@@ -52,35 +53,25 @@ flt_div(e1,e2,e3)
 	 * with base 65536. 
 	 */
 	for (j = 0; j <= 3; j++, u_p++) {
-		long q_est, temp;
-		long v1 = v[1];
+		uint32_t q_est, temp;
 
-		if (j == 2) lp++;
+		if (j == 2) rp++;
 		if (u_p[0] == 0 && u_p[1] < v[1]) continue;
-		temp = ((long)u_p[0] << 16) + u_p[1];
+		temp = ((uint32_t)u_p[0] << 16) + u_p[1];
 		if (u_p[0] >= v[1]) {
-			q_est = 0x0000FFFFL;
+			q_est = 0x0000FFFFUL;
 		}
 		else if (v[1] == 1) {
 			q_est = temp;
 		}
-		else if (temp >= 0) {
-			q_est = temp / v1;
-		}
 		else {
-			long rem;
-			q_est = (0x7FFFFFFF/v1)+((temp&0x7FFFFFFF)/v1);
-			rem = (0x7FFFFFFF%v1)+((temp&0x7FFFFFFF)%v1)+1;
-			while (rem >= v1) {
-				q_est++;
-				rem -= v1;
-			}
+			q_est = temp / v[1];
 		}
-		temp -= q_est * v1;
+		temp -= q_est * v[1];
 		while (!(temp&0xFFFF0000) &&
-		       ucmp((long)v[2]*q_est,(temp<<16)+(long)u_p[2]) > 0) {
+		       v[2]*q_est > (temp<<16)+u_p[2]) {
 			q_est--;
-			temp += v1;
+			temp += v[1];
 		}
 		/*	Now, according to Knuth, we have an estimate of the
 			quotient, that is either correct or one too big, but
@@ -88,11 +79,11 @@ flt_div(e1,e2,e3)
 		*/
 		if (q_est != 0)  {
 			int i;
-			long k = 0;
+			uint32_t k = 0;
 			int borrow = 0;
 
 			for (i = maxv; i > 0; i--) {
-				long tmp = q_est * (long)v[i] + k + borrow;
+				uint32_t tmp = q_est * v[i] + k + borrow;
 				unsigned short md = tmp & 0xFFFF;
 
 				borrow = (md > u_p[i]);
@@ -100,7 +91,7 @@ flt_div(e1,e2,e3)
 				k = (tmp >> 16) & 0xFFFF;
 			}
 			k += borrow;
-			borrow = (long)u_p[0] < k;
+			borrow = u_p[0] < k;
 			u_p[0] -= k;
 
 			if (borrow) {
@@ -110,15 +101,15 @@ flt_div(e1,e2,e3)
 				q_est--;
 				borrow = 0;
 				for (i = maxv; i > 0; i--) {
-					long tmp 
-					    = v[i]+(long)u_p[i]+borrow;
-					
+					uint32_t tmp
+					    = v[i]+(uint32_t)u_p[i]+borrow;
+
 					u_p[i] = tmp & 0xFFFF;
 					borrow = (tmp >> 16) & 0xFFFF;
 				}
 				u_p[0] += borrow;
 			}
-			*lp |= (j & 1) ? q_est : (q_est<<16);
+			*rp |= (j & 1) ? q_est : (q_est<<16);
 		}
 	}
 	e3->m1 = result[0];

@@ -15,7 +15,6 @@ clibrary {
 		"./flt_umin.c",
 		"./flt_chk.c",
 		"./split.c",
-		"./ucmp.c",
 	},
 	hdrs = { "./flt_arith.h" },
 	deps = {
@@ -24,4 +23,18 @@ clibrary {
 	}
 }
 
+-- The test program isn't built by default.  Here is a target
+-- modules/src/flt_arith+pkg to install it as flt_test
 
+cprogram {
+	name = "test",
+	srcs = { "./test.c" },
+	deps = { "+lib" },
+}
+
+installable {
+	name = "pkg",
+	map = {
+		["$(INSDIR)/bin/flt_test"] = "+test",
+	},
+}

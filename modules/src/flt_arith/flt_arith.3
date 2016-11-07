@@ -9,8 +9,8 @@ flt_arith \- high precision floating point arithmetic
 .if t .ta 3m 13m 22m
 .if n .ta 5m 25m 40m
 struct flt_mantissa {
-	long	flt_h_32;	/* high order 32 bits of mantissa */
-	long	flt_l_32;	/* low order 32 bits of mantissa */
+	uint32_t flt_h_32;	/* high order 32 bits of mantissa */
+	uint32_t flt_l_32;	/* low order 32 bits of mantissa */
 };
 
 typedef struct {

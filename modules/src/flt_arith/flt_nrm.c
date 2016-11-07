@@ -5,6 +5,7 @@
 
 /* $Id$ */
 
+#include <stdint.h>
 #include "flt_misc.h"
 
 void
@@ -24,8 +25,8 @@ flt_nrm(e)
 		e->m2 = 0L;
 		e->flt_exp -= 32;
 	}
-	if ((e->m1 & 0x80000000) == 0) {
-		long l = 0x40000000;
+	if ((e->m1 & 0x80000000UL) == 0) {
+		uint32_t l = 0x40000000UL;
 		int cnt = -1;
 
 		while (! (l & e->m1)) {

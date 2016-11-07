@@ -28,9 +28,9 @@ normalrule {
 }
 
 for _, plat in ipairs(vars.plats) do
-    acklibrary {
-        name = "lib_"..plat,
-        srcs = {
+	acklibrary {
+		name = "lib_"..plat,
+		srcs = {
 			"+ctype_files",
 			"+ctype_tab",
 			"./ctype/*.c",
@@ -43,20 +43,24 @@ for _, plat in ipairs(vars.plats) do
 			"./setjmp/*.c",
 			"./setjmp/*.e",
 			"./signal/*.c",
-            "./assert/*.c",
+			"./assert/*.c",
 			"./stdio/*.c",
 			"./stdlib/*.c",
 			"./string/*.c",
 			"./time/*.c",
-			
-        },
+		},
 		hdrs = {}, -- must be empty
 		deps = {
 			"lang/cem/libcc.ansi/headers+headers",
 			"plat/"..plat.."/include+headers",
+			"./malloc/malloc.h",
+			"./math/localmath.h",
+			"./stdio/loc_incl.h",
+			"./stdlib/ext_fmt.h",
+			"./time/loc_time.h",
 		},
-        vars = { plat = plat }
-    }
+		vars = { plat = plat }
+	}
 
 	ackfile {
 		name = "crt_"..plat,
