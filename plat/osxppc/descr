@@ -30,7 +30,7 @@ var MACHOPT_F=-m10
 # Override the setting in fe so that files compiled for osxppc can see
 # the platform-specific headers.
 
-var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+var C_INCLUDES=-I{EM}/share/ack/osx/include -I{EM}/share/ack/include/ansi
 
 name be
 	from .m.g

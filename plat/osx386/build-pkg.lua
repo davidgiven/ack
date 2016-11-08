@@ -17,7 +17,7 @@ installable {
 	map = {
 		"+tools",
 		"+libs",
-		"./include+pkg",
+		"plat/osx/include+pkg",
 		["$(PLATIND)/osx386/boot.o"] = "+boot",
 		["$(PLATIND)/osx386/libsys.a"] = "./libsys+lib",
 	}

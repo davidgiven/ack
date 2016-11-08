@@ -1,24 +1,7 @@
-include("plat/build.lua")
-
-headermap = {}
-packagemap = {}
-
-local function addheader(h)
-	headermap[h] = "plat/osx/include/"..h
-	packagemap["$(PLATIND)/osxppc/include/"..h] = "plat/osx/include/"..h
-end
-
-addheader("ack/config.h")
-addheader("sys/mman.h")
-addheader("sys/types.h")
-addheader("unistd.h")
-
-acklibrary {
+simplerule {
 	name = "headers",
-	hdrs = headermap
-}
-
-installable {
-	name = "pkg",
-	map = packagemap
+	deps = { "plat/osx/include+headers" },
+	ins = {},
+	outs = {},
+	commands = {},
 }
