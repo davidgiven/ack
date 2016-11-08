@@ -4,7 +4,8 @@ clibrary {
 	hdrs = { "./alloc.h" },
 	deps = {
 		"modules+headers",
-		"modules/src/system+lib"
+		"modules/src/system+lib",
+		"./*.h"
 	},
 }
 

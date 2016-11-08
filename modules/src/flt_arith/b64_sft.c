@@ -23,12 +23,10 @@ flt_b64_sft(e,n)
 		n -= 32;
 	}
 	if (n > 0) {
-		e->flt_l_32 = (e->flt_l_32 >> 1) & 0x7FFFFFFF;
-		e->flt_l_32 >>= (n - 1);
+		e->flt_l_32 >>= n;
 		if (e->flt_h_32 != 0) {
-			e->flt_l_32 |= (e->flt_h_32 << (32 - n)) & 0xFFFFFFFF;
-			e->flt_h_32 = (e->flt_h_32 >> 1) & 0x7FFFFFFF;
-			e->flt_h_32 >>= (n - 1);
+			e->flt_l_32 |= (e->flt_h_32 << (32 - n));
+			e->flt_h_32 >>= n;
 		}
 	}
 	n = -n;
@@ -38,11 +36,10 @@ flt_b64_sft(e,n)
 		n -= 32;
 	}
 	if (n > 0) {
-		e->flt_h_32 = (e->flt_h_32 << n) & 0xFFFFFFFF;
+		e->flt_h_32 <<= n;
 		if (e->flt_l_32 != 0) {
-			long l = (e->flt_l_32 >> 1) & 0x7FFFFFFF;
-			e->flt_h_32 |= (l >> (31 - n));
-			e->flt_l_32 = (e->flt_l_32 << n) & 0xFFFFFFFF;
+			e->flt_h_32 |= (e->flt_l_32 >> (32 - n));
+			e->flt_l_32 <<= n;
 		}
 	}
 }

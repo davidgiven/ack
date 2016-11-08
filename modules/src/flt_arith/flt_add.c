@@ -44,11 +44,10 @@ flt_add(e1,e2,e3)
 	}
 	if (e1->flt_sign != e2->flt_sign) {
 		/* e2 + e1 = e2 - (-e1) */
-		int tmp = ucmp(e1->m1, e2->m1);
-		int tmp2 = ucmp(e1->m2, e2->m2);
-		if (tmp > 0 || (tmp == 0 && tmp2 > 0)) {
+		if (e1->m1 > e2->m1 ||
+		    (e1->m1 == e2->m1 && e1->m2 > e2->m2)) {
                 	/*      abs(e1) > abs(e2) */
-                	if (tmp2 < 0) {
+			if (e1->m2 < e2->m2) {
                         	e1->m1 -= 1;    /* carry in */
                 	}
                 	e1->m1 -= e2->m1;
@@ -56,7 +55,7 @@ flt_add(e1,e2,e3)
                 	*e3 = *e1;
         	}
         	else {
-                	if (tmp2 > 0)
+			if (e1->m2 > e2->m2)
                         	e2->m1 -= 1;    /* carry in */
                 	e2->m1 -= e1->m1;
                 	e2->m2 -= e1->m2;

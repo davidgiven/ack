@@ -1,5 +1,3 @@
-local posix = require("posix")
-
 -- Targets:
 --
 -- {
