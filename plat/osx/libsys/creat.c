@@ -2,5 +2,5 @@
 
 int creat(const char *path, mode_t mode)
 {
-	open(path, O_CREAT | O_TRUNC | O_WRONLY, mode);
+	return open(path, O_CREAT | O_TRUNC | O_WRONLY, mode);
 }
