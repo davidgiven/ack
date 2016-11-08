@@ -1,4 +1,4 @@
-! boot.s for osx386
+! boot.s for osxppc
 
 ! Declare segments (the order is important).
 
@@ -30,13 +30,13 @@ begtext:
 	lwz r3, 0(sp)            ! r3 = argc
 	addi r4, sp, 4           ! r4 = argv
 	rlwinm r5, r3, 32-2, 2, 31 ! shift left 2 bits
-	add r5, r5, r4 
+	add r5, r5, r4
 	addi r5, r5, 8           ! r5 = env
-	
+
 	stwu r5, -4(sp)
 	stwu r4, -4(sp)
 	stwu r3, -4(sp)
-	
+
 	b __m_a_i_n
 
 .sect rom
@@ -57,4 +57,4 @@ begbss:
 
 .define .trppc, .ignmask
 .comm .trppc, 4              ! ptr to user trap handler
-.comm .ignmask, 4            ! user trap ignore mask 
+.comm .ignmask, 4            ! user trap ignore mask

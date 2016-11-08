@@ -26,28 +26,28 @@ begtext:
 	! sp+8            argc
 	! sp+4            argv
 	! sp              env
-	
+
 	mov eax, (esp)    ! eax = argc
 	lea ebx, 4(esp)   ! ebx = argv
 	lea ecx, (esp)(eax*4)
 	add ecx, 12       ! environ
-	
+
 	push ecx         ! environ
 	push ebx         ! argc
 	push eax         ! argv
 	push eax         ! dummy, representing the return argument
 	xor ebp, ebp
-	
+
 	jmp __m_a_i_n
-	
+
 	! This provides an emergency exit routine used by EM.
-	
+
 .define EXIT
 .extern EXIT
 EXIT:
 	push 1
 	jmp __exit
-	
+
 .sect rom
 begrom:
 
@@ -66,4 +66,4 @@ begbss:
 
 .define .trppc, .ignmask
 .comm .trppc, 4              ! ptr to user trap handler
-.comm .ignmask, 4            ! user trap ignore mask 
+.comm .ignmask, 4            ! user trap ignore mask

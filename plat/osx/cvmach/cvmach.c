@@ -115,13 +115,13 @@ uint32_t align(uint32_t a, uint32_t b)
 	a += b - 1;
 	return a & ~(b-1);
 }
- 
+
 
 /* Writes out a 32-bit value in the appropriate endianness. */
 void emit32(uint32_t value)
 {
 	unsigned char buffer[4];
-	
+
 	if (bigendian)
 	{
 		buffer[0] = (value >> 24) & 0xFF;
@@ -136,7 +136,7 @@ void emit32(uint32_t value)
 		buffer[1] = (value >>  8) & 0xFF;
 		buffer[0] = (value >>  0) & 0xFF;
 	}
-	
+
 	writef(buffer, 1, sizeof(buffer));
 }
 
@@ -177,7 +177,7 @@ void emit_lc_segment(char *name, uint32_t vm_ad, uint32_t vm_sz,
 {
 	char namebuf[16];
 	int flags, maxprot;
-	
+
 	if (prot == VM_PROT_NONE) {
 		/* special values for __PAGEZERO */
 		maxprot = VM_PROT_NONE;
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
 	/* General housecleaning and setup. */
 	output = stdout;
 	program = argv[0];
-	
+
 	/* Read in and process any flags. */
 	while ((argc > 1) && (argv[1][0] == '-')) {
 		switch (argv[1][1]) {
