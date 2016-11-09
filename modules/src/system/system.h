@@ -50,7 +50,6 @@ _PROTOTYPE(int sys_unlock, (char *));
 #endif
 _PROTOTYPE(char *sys_break, (int));
 _PROTOTYPE(void sys_stop, (int));
-_PROTOTYPE(long sys_time, (void));
 _PROTOTYPE(long sys_modtime, (char *));
 
 /* standard file decsriptors */
