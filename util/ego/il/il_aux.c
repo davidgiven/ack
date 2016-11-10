@@ -149,6 +149,7 @@ STATIC short remlines(l)
 
 
 
+void
 remunit(kind,p,l)
 	short    kind;
 	proc_p   p;

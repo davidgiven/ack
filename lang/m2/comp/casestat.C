@@ -54,6 +54,9 @@ struct case_entry	{
 	arith ce_low, ce_up;		/* lower and upper bound of range */
 };
 
+void AddCases();
+void AddOneCase();
+
 /* STATICALLOCDEF "case_entry" 20 */
 
 /* The constant DENSITY determines when CSA and when CSB instructions
@@ -237,6 +240,7 @@ FreeSh(sh)
 	free_switch_hdr(sh);
 }
 
+void
 AddCases(sh, node, lbl)
 	struct switch_hdr *sh;
 	register t_node *node;
@@ -264,6 +268,7 @@ AddCases(sh, node, lbl)
 	AddOneCase(sh, node, node, lbl);
 }
 
+void
 AddOneCase(sh, lnode, rnode, lbl)
 	register struct switch_hdr *sh;
 	t_node *lnode, *rnode;

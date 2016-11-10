@@ -103,6 +103,7 @@ STATIC inc_use(f,b)
 
 
 
+void
 formal(p,b,off,type,usage)
 	proc_p    p;
 	bblock_p  b;

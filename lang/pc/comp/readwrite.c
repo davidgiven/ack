@@ -19,6 +19,12 @@
 
 extern char	*sprint();
 
+void CodeRead();
+void CodeReadln();
+void CodeWrite();
+void CodeWriteln();
+
+void
 ChkRead(arg)
 	register struct node *arg;
 {
@@ -86,6 +92,7 @@ ChkRead(arg)
 	}
 }
 
+void
 ChkReadln(arg)
 	register struct node *arg;
 {
@@ -142,6 +149,7 @@ ChkReadln(arg)
 	CodeReadln(file);
 }
 
+void
 ChkWrite(arg)
 	register struct node *arg;
 {
@@ -183,6 +191,7 @@ ChkWrite(arg)
 	}
 }
 
+void
 ChkWriteln(arg)
 	register struct node *arg;
 {
@@ -318,6 +327,7 @@ ChkStdInOut(name, st_out)
 	return nd;
 }
 
+void
 CodeRead(file, arg)
 	register struct node *file, *arg;
 {
@@ -376,6 +386,7 @@ CodeRead(file, arg)
 	}
 }
 
+void
 CodeReadln(file)
 	struct node *file;
 {
@@ -386,6 +397,7 @@ CodeReadln(file)
 	C_asp(pointer_size);
 }
 
+void
 CodeWrite(file, arg)
 	register struct node *file, *arg;
 {
@@ -472,6 +484,7 @@ CodeWrite(file, arg)
 	}
 }
 
+void
 CodeWriteln(file)
 	register struct node *file;
 {

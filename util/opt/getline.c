@@ -188,6 +188,7 @@ int table2() {
 	return(table3(n));
 }
 
+void
 getlines() {
 	register line_p lnp;
 	register instr;

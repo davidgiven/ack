@@ -533,6 +533,7 @@ CodeFieldDesig(df, ds)
 	}
 }
 
+void
 CodeVarDesig(df, ds)
 	register t_def *df;
 	register t_desig *ds;

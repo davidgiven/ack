@@ -68,6 +68,7 @@ tes_pseudos()
 	}
 }
 
+void
 tes_instr(lnp, x, y)
 line_p lnp, x, y;
 {

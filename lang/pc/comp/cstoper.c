@@ -66,6 +66,7 @@ cstunary(expp)
 	expp->nd_right = NULLNODE;
 }
 
+void
 cstbin(expp)
 	register struct node *expp;
 {
@@ -195,6 +196,7 @@ cstbin(expp)
 	expp->nd_left = expp->nd_right = NULLNODE;
 }
 
+void
 cstset(expp)
 	register struct node *expp;
 {

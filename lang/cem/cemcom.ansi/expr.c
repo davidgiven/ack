@@ -369,6 +369,7 @@ new_oper(tp, e1, oper, e2)
 	return expr;
 }
 
+void
 chk_cst_expr(expp)
 	struct expr **expp;
 {

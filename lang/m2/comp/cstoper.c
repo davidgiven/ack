@@ -45,6 +45,8 @@ arith min_int[] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 
 extern char options[];
 
+void CutSize();
+
 overflow(expp)
 	t_node *expp;
 {
@@ -160,6 +162,7 @@ divide(pdiv, prem)
 #endif
 }
 
+void
 cstibin(expp)
 	t_node **expp;
 {
@@ -351,6 +354,7 @@ cstfbin(expp)
 	CutSize(exp);
 }
 
+void
 cstubin(expp)
 	t_node **expp;
 {
@@ -457,6 +461,7 @@ cstubin(expp)
 	CutSize(exp);
 }
 
+void
 cstset(expp)
 	t_node **expp;
 {
@@ -648,6 +653,7 @@ cstcall(expp, call)
 	}
 }
 
+void
 CutSize(expr)
 	register t_node *expr;
 {

@@ -116,6 +116,7 @@ define(id, scope, kind)
 	return MkDef(id, scope, kind);
 }
 
+void
 DoDirective(directive, nd, tp, scl, function)
 	struct idf *directive;
 	struct node *nd;

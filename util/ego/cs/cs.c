@@ -34,7 +34,7 @@ STATIC cs_clear()
 	start_valnum();
 }
 
-STATIC cs_optimize(p)
+STATIC void cs_optimize(p)
 	proc_p p;
 {
 	/* Optimize all basic blocks of one procedure. */

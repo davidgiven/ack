@@ -54,6 +54,7 @@ con_float() {
 }
 
 
+void
 prolog(nlocals) full nlocals; {
 
 	fprintf(codefile,"\tpush\tb\n\tlxi\th,0\n\tdad\tsp\n\tmov\tb,h\n\tmov\tc,l\n");
@@ -67,6 +68,7 @@ prolog(nlocals) full nlocals; {
 	}
 }
 
+void
 mes(type) word type ; {
 	int argt ;
 

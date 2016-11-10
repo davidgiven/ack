@@ -24,6 +24,7 @@ int nmoves;
 move_t l_moves[MAXMOVES];
 short posmoves[MAXREGS+MAXTOKENS][SETSIZE];
 
+void
 n_move(s1,e1,s2,e2,vi) struct varinfo *vi; {
 	register move_p mp;
 	register i,j;
@@ -81,6 +82,7 @@ int ntests;
 test_t l_tests[MAXTESTS];
 short postests[SETSIZE];
 
+void
 n_test(s,e,vi) struct varinfo *vi; {
 	register test_p tp;
 	register i;
@@ -162,6 +164,7 @@ n_stack(s,e,p,vi) struct varinfo *vi; {
 		sp[i] |= l_sets[s].set_val[i];
 }
 
+void
 checkstacking(sp) register short *sp; {
 	register i;
 	register short *chkset;
@@ -186,6 +189,7 @@ set_t unstackset;
 
 /*VARARGS5*/
 
+void
 n_coerc(ti,be,al,ge,rp,in) struct varinfo *al,*ge,*rp; iocc_t in; {
 	register c3_p c3p;
 	register i;

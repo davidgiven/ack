@@ -349,6 +349,7 @@ ra_initialize()
 }
 
 
+void
 ra_optimize(p)
 	proc_p p;
 {

@@ -175,6 +175,7 @@ n_prop(name,size) char *name; int size; {
 	l_props[propno].pr_size = size;
 }
 
+void
 prophall(n) {
 	register i;
 	short hallset[SETSIZE];
@@ -279,6 +280,7 @@ setallreg(vi) struct varinfo *vi; {
 	}
 }
 
+void
 freevi(vip) register struct varinfo *vip; {
 	register i;
 

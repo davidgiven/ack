@@ -201,7 +201,7 @@ line_p make_label(l,p)
 
 /* modify */
 
-STATIC act_info(off,acts,ab_off,act_out,off_out)
+STATIC void act_info(off,acts,ab_off,act_out,off_out)
 	offset off, ab_off, *off_out;
 	actual_p acts, *act_out;
 {
@@ -499,6 +499,7 @@ STATIC line_p first_nonpseudo(l)
 
 
 
+void
 insert(text,l,firstline)
 	line_p text,l,firstline;
 {

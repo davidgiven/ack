@@ -35,7 +35,7 @@ extern mod_actuals();		/* (call_p nc,c; line_p lab;
 				 * call nc the same way as the text of
 				 * call c would be modified.
 				 */
-extern insert();		/* (line_p text,l,firstline)
+extern void insert();		/* (line_p text,l,firstline)
 				 * Insert the modified EM text.
 				 * Pseudos are put after the pseudos
 				 * of the caller.

@@ -131,7 +131,7 @@ bool affected(use,v,l)
 
 
 
-STATIC search_backwards(use,v,found,def)
+STATIC void search_backwards(use,v,found,def)
 	line_p use, *def;
 	short v;
 	bool *found;

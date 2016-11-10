@@ -247,6 +247,7 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 
 STATIC t_def *DoImport();
 
+void
 ImportEffects(idef, scope, flag)
 	register t_def *idef;
 	t_scope *scope;
@@ -481,6 +482,7 @@ CheckForImports(df)
 	}
 }
 
+void
 EnterFromImportList(idlist, FromDef, FromId)
 	register t_node *idlist;
 	register t_def *FromDef;

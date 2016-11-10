@@ -193,6 +193,7 @@ STATIC mark_unsave_blocks(p)
 }
 
 
+void
 sp_optimize(p)
 	proc_p p;
 {

@@ -12,6 +12,10 @@
 #include	"comm1.h"
 #include	"y.tab.h"
 
+void switchsect();
+void newsymb();
+void newident();
+
 newequate(ip, typ)
 register item_t *ip;
 register int typ;
@@ -34,6 +38,7 @@ register int typ;
 	newident(ip, typ);
 }
 
+void
 newident(ip, typ)
 register item_t *ip;
 {
@@ -74,6 +79,7 @@ register item_t *ip;
 		);
 }
 
+void
 newlabel(ip)
 register item_t *ip;
 {
@@ -183,6 +189,7 @@ valu_t val;
 	}
 }
 
+void
 switchsect(newtyp)
 int newtyp;
 {
@@ -242,6 +249,7 @@ valu_t bytes;
 }
 
 #ifdef RELOCATION
+void
 newrelo(s, n)
 {
 	int	iscomm;
@@ -326,6 +334,7 @@ new_string(s)
 	return r;
 }
 
+void
 newsymb(name, type, desc, valu)
 register char *name;
 valu_t valu;

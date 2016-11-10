@@ -64,6 +64,8 @@ extern char options[];
 extern char *symbol2str();
 extern char *source;
 
+void loc_init();
+
 #ifndef	LINT
 init_code(dst_file)
 	char *dst_file;
@@ -415,6 +417,7 @@ do_return_expr(expr)
 	return_expr_occurred = 1;
 }
 
+void
 code_declaration(idf, expr, lvl, sc)
 	register struct idf *idf;	/* idf to be declared	*/
 	struct expr *expr;	/* initialisation; NULL if absent	*/
@@ -527,6 +530,7 @@ code_declaration(idf, expr, lvl, sc)
 	}
 }
 
+void
 loc_init(expr, id)
 	struct expr *expr;
 	struct idf *id;
@@ -721,6 +725,7 @@ code_break()
 	it generates a branch instruction to the continue label of the
 	innermost statement in which continue has a meaning.
 */
+void
 code_continue()
 {
 	register struct stmt_block *stmt_block = stmt_stack;

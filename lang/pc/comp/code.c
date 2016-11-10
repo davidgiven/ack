@@ -24,6 +24,11 @@
 
 int	fp_used;
 
+void Long2Int();
+void Int2Long();
+void genrck();
+void CodeCall();
+
 CodeFil()
 {
 	if ( !options['L'] )
@@ -791,6 +796,7 @@ CodePString(nd, tp)
 	C_loi(tp->tp_size);
 }
 
+void
 CodeCall(nd)
 	register struct node *nd;
 {
@@ -1095,6 +1101,7 @@ CodeStd(nd)
 	}
 }
 
+void
 Long2Int()
 {
 	/* convert a long to integer */
@@ -1106,6 +1113,7 @@ Long2Int()
 	C_cii();
 }
 
+void
 Int2Long()
 {
 	/* convert integer to long */
@@ -1160,6 +1168,7 @@ RangeCheck(tpl, tpr)
 	}
 }
 
+void
 genrck(tp)
 	register struct type *tp;
 {

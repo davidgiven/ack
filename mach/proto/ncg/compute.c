@@ -120,6 +120,7 @@ string tostring(n) register word n; {
 	return(mystrcpy(buf));
 }
 
+void
 compute(node, presult) register node_p node; register result_t *presult; {
 	result_t leaf1,leaf2;
 	register token_p tp;

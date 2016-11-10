@@ -42,6 +42,7 @@ MkLeaf(class, token)
 	return nd;
 }
 
+void
 FreeNode(nd)
 	register struct node *nd;
 {

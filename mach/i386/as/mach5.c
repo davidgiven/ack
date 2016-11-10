@@ -38,6 +38,7 @@ ea_1_16(param)
         }
 }
 
+void
 ea_1(param) {
 	if (! address_long) {
 		ea_1_16(param);
@@ -134,6 +135,7 @@ regsize(sz)
 	}
 }
 
+void
 indexed() {
 	if (address_long) {
 		mod_2 = 0;

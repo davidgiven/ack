@@ -42,7 +42,7 @@ short nrcopies;		/* number of copies in the current procedure
 #define COUNT 0
 #define MAP 1
 
-STATIC traverse_defs(p,action)
+STATIC void traverse_defs(p,action)
 	proc_p p;
 	int action;
 {
@@ -121,7 +121,7 @@ STATIC bool is_changed(varl,start,stop)
 
 
 
-STATIC gen_kill_copies(p)
+STATIC void gen_kill_copies(p)
 	proc_p p;
 {
 	/* Compute C_GEN and C_KILL for every basic block

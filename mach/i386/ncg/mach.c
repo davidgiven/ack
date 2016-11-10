@@ -61,6 +61,7 @@ string holstr(n) word n; {
 full lbytes;
 #endif
 
+void
 prolog(nlocals) full nlocals; {
 
 	fputs("push ebp\nmov ebp,esp\n", codefile);
@@ -179,6 +180,7 @@ mach_option(s)
 }
 #endif /* MACH_OPTIONS */
 
+void
 mes(type) word type ; {
 	int argt, a1, a2 ;
 

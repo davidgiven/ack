@@ -37,6 +37,10 @@ extern char	options[];
 extern t_desig	null_desig;
 int		fp_used;
 
+void RangeCheck();
+void CodeParameters();
+void CodeCall();
+
 CodeConst(cst, size)
 	arith cst;
 	int size;
@@ -55,6 +59,7 @@ CodeConst(cst, size)
 	}
 }
 
+void
 CodeString(nd)
 	register t_node *nd;
 {
@@ -288,6 +293,7 @@ CodeCoercion(t1, t2)
 	}
 }
 
+void
 CodeCall(nd)
 	register t_node *nd;
 {
@@ -355,6 +361,7 @@ CodeCall(nd)
 	DoLineno(nd);
 }
 
+void
 CodeParameters(param, arg)
 	t_param *param;
 	register t_node *arg;
@@ -672,6 +679,7 @@ needs_rangecheck(tpl, tpr)
 	return 0;
 }
 
+void
 RangeCheck(tpl, tpr)
 	register t_type *tpl, *tpr;
 {

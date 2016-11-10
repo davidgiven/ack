@@ -260,7 +260,7 @@ STATIC init_item(a,b)
 
 
 
-STATIC add_item(item,t,items)
+STATIC void add_item(item,t,items)
 	item_p item;
 	time_p t;
 	item_p items[];

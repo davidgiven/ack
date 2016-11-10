@@ -52,6 +52,8 @@ extern int lint_skip_comment;
 static struct token LexStack[MAX_LL_DEPTH];
 static LexSP = 0;
 
+void skipcomment();
+
 /*	In PushLex() the actions are taken in order to initialise or
 	re-initialise the lexical scanner.
 	E.g. at the invocation of a sub-parser that uses LLlex(), the
@@ -442,6 +444,7 @@ garbage:
 }
 
 #ifndef	NOPP
+void
 skipcomment()
 {
 	/*	The last character read has been the '*' of '/_*'.  The

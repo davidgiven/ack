@@ -22,6 +22,8 @@ FILE *dmach ;
 
 int offset ;
 
+void readm();
+
 main(argc,argv) char **argv ; {
 	register i ;
 
@@ -70,6 +72,7 @@ FILE *do_open(file) char *file ; {
 	return fopen(dname,"r");
 }
 
+void
 readm() {
 	register int i ;
 	register int token ;

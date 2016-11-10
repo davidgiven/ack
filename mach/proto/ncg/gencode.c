@@ -108,6 +108,7 @@ gennl() {
 	putc('\n',codefile);
 }
 
+void
 prtoken(tp,leadingchar) token_p tp; {
 	register c;
 	register char *code;
