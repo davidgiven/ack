@@ -40,9 +40,9 @@ STATIC prline();
 STATIC printset();
 STATIC int check();
 STATIC moreverbose();
-STATIC prrule();
+STATIC void prrule(p_gram p);
 STATIC cfcheck();
-STATIC resolve();
+STATIC void resolve(p_gram p);
 STATIC propagate();
 STATIC spaces();
 
@@ -283,7 +283,7 @@ moreverbose(t) register p_set t; {
 }
 
 STATIC
-prrule(p) register p_gram p; {
+void prrule(p_gram p) {
 	/*
 	 * Create a verbose printout of grammar rule p
 	 */
@@ -420,7 +420,7 @@ cfcheck(s1,s2,flag) p_set s1,s2; {
 }
 
 STATIC
-resolve(p) register p_gram p; {
+void resolve(p_gram p) {
 	/*
 	 * resolve conflicts, as specified by the user
 	 */

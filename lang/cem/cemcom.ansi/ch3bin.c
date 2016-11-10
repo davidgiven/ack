@@ -19,6 +19,8 @@
 extern char options[];
 extern char *symbol2str();
 
+void pntminuspnt();
+
 /*	This chapter asks for the repeated application of code to handle
 	an operation that may be executed at compile time or at run time,
 	depending on the constancy of the operands.
@@ -32,6 +34,7 @@ extern char *symbol2str();
 #define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 #define non_commutative_relop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 
+void
 ch3bin(expp, oper, expr)
 	register struct expr **expp;
 	struct expr *expr;
@@ -292,6 +295,7 @@ ch3bin(expp, oper, expr)
 	}
 }
 
+void
 pntminuspnt(expp, oper, expr)
 	register struct expr **expp, *expr;
 {

@@ -138,6 +138,7 @@ STATIC adjust_jump(newtarg,oldtarg,c)
 }
 
 
+void
 make_header(lp)
 	loop_p lp;
 {

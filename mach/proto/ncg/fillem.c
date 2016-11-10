@@ -83,6 +83,13 @@ extern short em_ptyp[];
 extern double atof();
 
 void prolog(full nlocals);
+void mes();
+void bss();
+void savelab();
+void dumplab();
+void part_flush();
+void xdumplab();
+void switchseg();
 
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
@@ -136,6 +143,7 @@ in_start() {
 in_finish() {
 }
 
+void
 fillemlines() {
 	register int t,i;
 	register struct emline *lp;
@@ -226,6 +234,7 @@ fillemlines() {
 	}
 }
 
+void
 dopseudo() {
 	register b,t;
 	register full n;
@@ -605,6 +614,7 @@ char *strarg(t) {
 	return(mystrcpy(argstr));
 }
 
+void
 bss(n,t,b) full n; {
 	register long s = 0;
 
@@ -677,6 +687,7 @@ swtxt() {
 	switchseg(SEGTXT);
 }
 
+void
 switchseg(s) {
 
 	if (s == curseg)
@@ -686,6 +697,7 @@ switchseg(s) {
 		fprintf(codefile,"%s\n",segname[s]);
 }
 
+void
 savelab() {
 	register char *p,*q;
 
@@ -700,6 +712,7 @@ savelab() {
 		;
 }
 
+void
 dumplab() {
 
 	if (labstr[0] == 0)
@@ -709,6 +722,7 @@ dumplab() {
 	labstr[0] = 0;
 }
 
+void
 xdumplab() {
 
 	if (labstr[0] == 0)
@@ -717,6 +731,7 @@ xdumplab() {
 	newdlb(labstr);
 }
 
+void
 part_flush() {
 
 	/*

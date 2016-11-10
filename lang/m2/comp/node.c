@@ -81,6 +81,7 @@ dot2leaf(class)
 	return nd;
 }
 
+void
 FreeNode(nd)
 	register t_node *nd;
 {

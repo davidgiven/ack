@@ -64,13 +64,15 @@ static int		WalkDef();
 static int		stabdef();
 #endif
 static int		MkCalls();
-static int		UseWarnings();
+static void	UseWarnings();
 
 #define	NO_EXIT_LABEL	((label) 0)
 #define RETURN_LABEL	((label) 1)
 
 #define REACH_FLAG	1
 #define EXIT_FLAG	2
+
+void DoAssign();
 
 int
 LblWalkNode(lbl, nd, exit, reach)
@@ -995,6 +997,7 @@ node_warning(nd, W_OLDFASHIONED, "compatibility required in FOR statement");
 	return 1;
 }
 
+void
 DoAssign(nd)
 	register t_node *nd;
 {
@@ -1057,7 +1060,7 @@ RegisterMessage(df)
 	}
 }
 
-static
+static void
 df_warning(nd, df, warning)
 	t_node	*nd;
 	t_def	*df;
@@ -1080,7 +1083,7 @@ df_warning(nd, df, warning)
 	}
 }
 
-static
+static void
 UseWarnings(df)
 	register t_def *df;
 {

@@ -56,7 +56,7 @@
 
 STATIC int Scj;  /* number of optimizations found */
 
-STATIC showinstr();
+STATIC void showinstr();
 
 
 
@@ -289,6 +289,7 @@ STATIC bool try_pred(b)
 
 
 
+void
 cj_optimize(p)
 	proc_p p;
 {
@@ -334,7 +335,7 @@ main(argc,argv)
 
 extern char em_mnem[]; /* The mnemonics of the EM instructions. */
 
-STATIC showinstr(lnp) line_p lnp; {
+STATIC void showinstr(lnp) line_p lnp; {
 
     /* Makes the instruction in `lnp' human readable. Only lines that
      * can occur in expressions that are going to be eliminated are

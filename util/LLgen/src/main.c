@@ -36,7 +36,7 @@ extern		error();
 extern		fatal();
 extern		comfatal();
 extern		copyfile();
-extern		install();
+extern void install();
 extern char	*mktemp();
 extern char	*sbrk();
 
@@ -279,6 +279,7 @@ error(lineno,s,t,u) string	s,t,u; {
 }
 
 /* VARARGS1 */
+void
 warning(lineno,s,t,u) string	s,t,u; {
 	/*
 	 * Just a warning
@@ -327,6 +328,7 @@ copyfile(file) string file; {
 	fclose(f);
 }
 
+void
 install(target, source) string target, source; {
 	/*
 	 * Copy the temporary file generated from source to target

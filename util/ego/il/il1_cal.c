@@ -60,7 +60,7 @@ STATIC bool chck_asp(p,l)
 
 
 
-STATIC inc_count(caller,callee)
+STATIC void inc_count(caller,callee)
 	proc_p caller, callee;
 {
 	/* Update the call-count information.

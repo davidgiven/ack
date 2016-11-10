@@ -18,6 +18,9 @@
 
 extern YYSTYPE	yylval;
 
+void setupoutput();
+void commfinish();
+
 /* ========== Machine independent C routines ========== */
 
 void stop() {
@@ -458,6 +461,7 @@ char *s;
 #endif
 }
 
+void
 setupoutput()
 {
 	register sect_t *sp;
@@ -493,6 +497,7 @@ setupoutput()
 	outhead.oh_nchar = off;	/* see newsymb() */
 }
 
+void
 commfinish()
 {
 #ifndef ASLD

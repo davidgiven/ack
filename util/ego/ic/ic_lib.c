@@ -33,7 +33,7 @@ STATIC skip_string(n)
 	}
 }
 
-STATIC skip_arguments()
+STATIC void skip_arguments()
 {
 	/* Skip the arguments of a MES pseudo. The argument
 	 * list is terminated by a sp_cend byte.

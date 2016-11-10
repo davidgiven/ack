@@ -130,7 +130,7 @@ STATIC int makedmap(dbl)
 	return cnt;
 }
 
-STATIC getdnames(dumpd)
+STATIC void getdnames(dumpd)
     FILE* dumpd;
 {
 	/* Read the names of the datalabels from
@@ -151,7 +151,7 @@ STATIC getdnames(dumpd)
 	}
 }
 
-STATIC getpnames(dumpp)
+STATIC void getpnames(dumpp)
     FILE* dumpp;
 {
 	/* Read the names of the procedures from

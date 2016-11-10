@@ -163,6 +163,7 @@ LocalFinish()
 #endif
 }
 
+void
 RegisterAccount(offset, size, regtype, sc)
 	arith offset, size;
 {

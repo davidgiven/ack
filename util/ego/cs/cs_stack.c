@@ -39,6 +39,7 @@ Push(tkp)
 
 #define WORD_MULTIPLE(n)	((n / ws) * ws + ( n % ws ? ws : 0 ))
 
+void
 Pop(tkp, size)
 	token_p tkp;
 	offset size;

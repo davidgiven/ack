@@ -11,6 +11,8 @@
 
 extern YYSTYPE	yylval;
 
+void putval();
+
 yylex()
 {
 	register c;
@@ -68,6 +70,7 @@ yylex()
 	return(c);
 }
 
+void
 putval(c)
 {
 	register valu_t v;

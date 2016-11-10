@@ -89,6 +89,7 @@ remov_formals(p)
 
 
 
+void
 rem_indir_acc(p)
 	proc_p p;
 {

@@ -26,6 +26,7 @@
 
 extern char options[];
 
+void
 check_for_void(pl)
 	register struct proto *pl;
 {
@@ -261,6 +262,7 @@ declare_protos(dc)
 }
 
 
+void
 update_proto(tp, otp)
 	register struct type *tp, *otp;
 {
@@ -312,6 +314,7 @@ update_proto(tp, otp)
 /* struct/union and enum tags can be declared inside prototypes
  * remove them from the symbol-table
  */
+void
 remove_proto_tag(tp)
 struct type *tp;
 {
@@ -380,6 +383,7 @@ remove_proto_idfs(pl)
 	}
 }
 
+void
 call_proto(expp)
 	register struct expr **expp;
 {

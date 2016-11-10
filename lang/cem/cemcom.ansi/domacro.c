@@ -34,6 +34,9 @@ char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 
 int	nestlevel = -1;
 
+void macro_def();
+void do_define();
+
 struct idf *
 GetIdentifier(skiponerr)
 	int skiponerr;		/* skip the rest of the line on error */
@@ -145,6 +148,7 @@ domacro()
 int lint_skip_comment;
 #endif
 
+void
 skip_block(to_endif)
 int to_endif;
 {
@@ -347,6 +351,7 @@ do_include()
 	}
 }
 
+void
 do_define()
 {
 	/*	do_define() interprets a #define control line.
@@ -574,6 +579,7 @@ getparams(buf, parbuf)
 	/*NOTREACHED*/
 }
 
+void
 macro_def(id, text, nformals, length, flags)
 	register struct idf *id;
 	char *text;

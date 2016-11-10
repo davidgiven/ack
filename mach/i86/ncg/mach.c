@@ -61,6 +61,7 @@ string holstr(n) word n; {
 full lbytes;
 #endif
 
+void
 prolog(nlocals) full nlocals; {
 
 	fputs("\tpush\tbp\n\tmov\tbp,sp\n", codefile);
@@ -157,6 +158,7 @@ regreturn()
 }
 #endif /* REGVARS */
 
+void
 mes(type) word type ; {
 	int argt ;
 

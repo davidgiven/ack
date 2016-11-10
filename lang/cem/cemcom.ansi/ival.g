@@ -46,6 +46,11 @@ static int pack_level;
 struct type **gen_tphead(), **gen_tpmiddle();
 struct sdef *gen_align_to_next();
 struct e_stack *p_stack;
+
+void pad();
+void gen_simple_exp();
+void gen_tpcheck();
+
 }
 
 /* initial_value recursively guides the initialisation expression.
@@ -122,6 +127,7 @@ initial_value_list(register struct type **tpp; struct expr **expp;)
 ;
 
 {
+void
 gen_tpcheck(tpp)
 	struct type **tpp;
 {
@@ -147,6 +153,7 @@ gen_tpcheck(tpp)
 	}
 }
 
+void
 gen_simple_exp(tpp, expp)
 	struct type **tpp;
 	struct expr **expp;
@@ -465,6 +472,7 @@ check_and_pad(expp, tpp)
 /*	pad() fills an element of type tp with zeroes.
 	If the element is an aggregate, pad() is called recursively.
 */
+void
 pad(tpx)
 	struct type *tpx;
 {

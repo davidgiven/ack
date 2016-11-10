@@ -22,6 +22,7 @@ static char rcsid[] = "$Id$";
 extern bool	incore;
 extern char	*core_alloc();
 
+void
 savemagic()
 {
 	register char	*p;
@@ -35,6 +36,7 @@ savemagic()
 	}
 }
 
+void
 savehdr(hdr)
 	struct ar_hdr	*hdr;
 {
@@ -91,6 +93,7 @@ savechar(piece, off)
  * allocation, but the string of which name->on_foff is the offset may be
  * destroyed, so we save that first.
  */
+void
 savelocal(name)
 	struct outname	*name;
 {

@@ -39,6 +39,8 @@ int err_occurred;
 
 extern char *symbol2str();
 
+void _error();
+
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
 		error()		syntactic and pre-processor messagese
@@ -304,6 +306,7 @@ crash(va_alist)
 }
 #endif
 
+void
 _error(class, node, fmt, ap)
 	int class;
 	struct node *node;

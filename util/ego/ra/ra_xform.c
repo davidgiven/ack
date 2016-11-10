@@ -551,6 +551,8 @@ rem_locals(p,allocs)
 	}
 	p->p_localbytes = nrlocals;
 }
+
+void
 rem_formals(p,allocs)
 	proc_p p;
 	alloc_p allocs;

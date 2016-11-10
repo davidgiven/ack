@@ -15,6 +15,8 @@
 static char rcs_id[] = "$Id$" ;
 #endif
 
+void try();
+
 enum f_path getpath(first) register trf **first ; {
 	/* Try to find a transformation path */
 
@@ -61,6 +63,7 @@ start_scan() {
 	last_ocount= 0 ;
 }
 
+void
 try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 	register list_elem *scan ;
 	register trf  *trafo ;

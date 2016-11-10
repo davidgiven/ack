@@ -30,6 +30,7 @@ extern char options[];
 extern arith flt_flt2arith();
 extern label code_string();
 
+void
 arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	register struct expr **e1p, **e2p;
 	int oper;
@@ -523,6 +524,7 @@ opnd2logical(expp, oper)
 	}
 }
 
+void
 opnd2test(expp, oper)
 	register struct expr **expp;
 {
@@ -548,6 +550,7 @@ opnd2test(expp, oper)
 	ch3bin(expp, NOTEQUAL, intexpr((arith)0, INT));
 }
 
+void
 any2opnd(expp, oper)
 	register struct expr **expp;
 {

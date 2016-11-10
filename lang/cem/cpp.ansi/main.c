@@ -32,6 +32,8 @@ char *prog_name;
 extern char **inctable;
 extern int inc_max, inc_total;
 
+void dependency();
+
 main(argc, argv)
 	char *argv[];
 {
@@ -140,6 +142,7 @@ add_dependency(s)
 	}
 }
 
+void
 dependency(s, source)
 	char *s, *source;
 {

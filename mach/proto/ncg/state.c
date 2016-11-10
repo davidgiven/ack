@@ -23,6 +23,8 @@ static char rcsid[] = "$Id$";
 
 extern int nstab;	/* salloc.c */
 
+void bmove();
+
 savestatus(sp) register state_p sp; {
 
 	sp->st_sh = stackheight;
@@ -57,6 +59,7 @@ restorestatus(sp) register state_p sp; {
 	popstr(sp->st_ns);
 }
 
+void
 bmove(from,to,nbytes) register short *from,*to; register nbytes; {
 
 	if (nbytes<=0)

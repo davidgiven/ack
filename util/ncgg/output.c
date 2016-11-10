@@ -662,6 +662,7 @@ finishio() {
 	outars();
 }
 
+void
 codecoco(cocono) {
 
 	if (cocono== -1)

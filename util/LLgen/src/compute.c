@@ -41,7 +41,7 @@ typedef struct lngth {
 /* Defined in this file : */
 extern do_compute();
 STATIC createsets();
-STATIC walk();
+STATIC void walk();
 STATIC co_trans();
 STATIC int nempty();
 extern empty();
@@ -49,15 +49,15 @@ STATIC int nfirst();
 STATIC first();
 STATIC int nfollow();
 STATIC follow();
-STATIC co_dirsymb();
+STATIC void co_dirsymb();
 STATIC co_others();
 STATIC do_lengthcomp();
-STATIC complength();
-STATIC add();
+STATIC void complength();
+STATIC void add();
 STATIC int compare();
-STATIC setdefaults();
+STATIC void setdefaults();
 STATIC do_contains();
-STATIC contains();
+STATIC void contains();
 STATIC int nsafes();
 STATIC int do_safes();
 #ifdef NON_CORRECTING
@@ -208,7 +208,7 @@ createsets() {
 	}
 }
 
-STATIC
+STATIC void
 walk(u, p) p_set u; register p_gram p; {
 	/*
 	 * Walk through the grammar rule p, allocating sets
@@ -658,7 +658,7 @@ nc_follow(setp,p) p_set setp; register p_gram p; {
 
 #endif
 
-STATIC
+STATIC void
 co_dirsymb(setp,p) p_set setp; register p_gram p; {
 	/*
 	 * Walk the rule p, doing the work for alternations
@@ -777,7 +777,7 @@ do_lengthcomp() {
 	free ((p_mem) length);
 }
 
-STATIC
+STATIC void
 complength(p,le) register p_gram p; p_length le; {
 	/*
 	 * Walk grammar rule p, computing minimum lengths
@@ -862,7 +862,7 @@ complength(p,le) register p_gram p; p_length le; {
 	}
 }
 
-STATIC
+STATIC void
 add(a, c, v) register p_length a; {
 
 	if (a->cnt == INFINITY || c == INFINITY) {
@@ -879,7 +879,7 @@ compare(a, b) register p_length a, b; {
 	return a->val - b->val;
 }
 
-STATIC
+STATIC void
 setdefaults(p) register p_gram p; {
 	for (;;) {
 		switch(g_gettype(p)) {
@@ -949,7 +949,7 @@ do_contains(n) register p_nont n; {
 	}
 }
 
-STATIC
+STATIC void
 contains(p,set) register p_gram p; register p_set set; {
 	/*
 	 * Does the real computation of the contains-sets
