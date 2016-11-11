@@ -6,13 +6,13 @@
  * |  --------------- <- ab
  * |       old FR
  * |       old FP
- * |  --------------- <- st, fp (a.k.a. lb) 
+ * |  --------------- <- fp (a.k.a. lb) 
  * |      locals
- * |  --------------- 
- * |      spills
  * |  ---------------
+ * |      spills
+ * |  --------------- <- sb
  * |     saved regs
- * |  --------------- <- sp
+ * |  --------------- <- sp, rb
  * V  ...user area...
  *
  * st indexes up; lb indexes down.
@@ -32,16 +32,30 @@ void platform_calculate_offsets(void)
         struct hreg* hreg = current_proc->usedregs.item[i];
 
         if (!(hreg->attrs & burm_volatile_ATTR) &&
+            ((hreg->attrs & burm_long_ATTR) || (hreg->attrs & burm_double_ATTR)))
+        {
+            hreg->offset = current_proc->saved_size;
+            current_proc->saved_size += 8;
+            array_append(&saved_regs, hreg);
+        }
+    }
+    for (i=0; i<current_proc->usedregs.count; i++)
+    {
+        struct hreg* hreg = current_proc->usedregs.item[i];
+
+        if (!(hreg->attrs & burm_volatile_ATTR) &&
             ((hreg->attrs & burm_int_ATTR) || (hreg->attrs & burm_float_ATTR)))
         {
+            hreg->offset = current_proc->saved_size;
             current_proc->saved_size += 4;
             array_append(&saved_regs, hreg);
         }
     }
 
-	current_proc->fp_to_st = -current_proc->locals_size;
 	current_proc->fp_to_ab = 8;
 	current_proc->fp_to_lb = 0;
+	current_proc->fp_to_sb = -(current_proc->locals_size + current_proc->spills_size);
+    current_proc->fp_to_rb = current_proc->fp_to_sb - current_proc->saved_size;
 }
 
 struct hop* platform_prologue(void)
@@ -52,9 +66,20 @@ struct hop* platform_prologue(void)
         current_proc->locals_size;
 	struct hop* hop = new_hop(current_proc->entry, NULL);
 
-	hop_add_insel(hop, "! saved_size = %d bytes", current_proc->saved_size);
-	hop_add_insel(hop, "! spills_size = %d bytes", current_proc->spills_size);
-	hop_add_insel(hop, "! locals_size = %d bytes", current_proc->locals_size);
+    hop_add_insel(hop, "! params @ fp+%d", current_proc->fp_to_ab);
+    hop_add_insel(hop, "! lr @ fp+4");  
+    hop_add_insel(hop, "! fp @ fp+0");  
+    hop_add_insel(hop, "! locals @ fp-%d to fp+0",
+        current_proc->locals_size);
+    hop_add_insel(hop, "! spills @ fp-%d to fp-%d",
+        -current_proc->fp_to_sb, current_proc->locals_size);
+    for (i=0; i<saved_regs.count; i++)
+    {
+        struct hreg* hreg = saved_regs.item[i];
+        hop_add_insel(hop, "! %s @ fp-%d",
+            hreg->id, -(current_proc->fp_to_rb + hreg->offset));
+    }
+
 	hop_add_insel(hop, "addi sp, sp, %d", -(spoffset + 8));
 	hop_add_insel(hop, "mfspr r0, lr");
 	hop_add_insel(hop, "stw fp, %d(sp)", spoffset + 0);
@@ -67,10 +92,11 @@ struct hop* platform_prologue(void)
     {
         struct hreg* hreg = saved_regs.item[i];
         if (hreg->attrs & burm_int_ATTR)
-            hop_add_insel(hop, "stw %H, %d(fp)", hreg, saved_offset);
+            hop_add_insel(hop, "stw %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + saved_offset);
         else if (hreg->attrs & burm_float_ATTR)
-            hop_add_insel(hop, "stfs %H, %d(fp)", hreg, saved_offset);
-        saved_offset += 4;
+            hop_add_insel(hop, "stfs %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + saved_offset);
     }
 	return hop;
 }
@@ -81,16 +107,15 @@ struct hop* platform_epilogue(void)
     int i;
     int saved_offset;
 
-    /* Saved reg offsets are negative. */
-    saved_offset = -(current_proc->locals_size + current_proc->spills_size);
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
         if (hreg->attrs & burm_int_ATTR)
-            hop_add_insel(hop, "lwz %H, %d(fp)", hreg, saved_offset);
+            hop_add_insel(hop, "lwz %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + saved_offset);
         else if (hreg->attrs & burm_float_ATTR)
-            hop_add_insel(hop, "lfs %H, %d(fp)", hreg, saved_offset);
-        saved_offset += 4;
+            hop_add_insel(hop, "lfs %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + saved_offset);
     }
 
     hop_add_insel(hop, "lwz r0, 4(fp)");

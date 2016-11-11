@@ -16,9 +16,10 @@ struct procedure
     int locals_size;
     int spills_size;
     int saved_size;
-    int fp_to_st;
-    int fp_to_ab;
-    int fp_to_lb;
+    int fp_to_ab; /* argument base (indexes up) */
+    int fp_to_lb; /* locals base (indexes down) */
+    int fp_to_sb; /* spill base (indexes up) */
+    int fp_to_rb; /* saved registers base (indexes up) */
     ARRAYOF(struct basicblock) blocks;
     IMAPOF(struct local) locals;
     ARRAYOF(struct hreg) usedregs;

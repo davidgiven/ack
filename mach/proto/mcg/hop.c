@@ -113,6 +113,10 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
                     hop_add_string_insel(hop, aprintf("%d", va_arg(ap, int)));
                     break;
 
+                case 's':
+                    hop_add_string_insel(hop, va_arg(ap, const char*));
+                    break;
+
                 case 'S':
                     hop_add_st_offset_insel(hop, va_arg(ap, struct hreg*));
                     break;
@@ -248,7 +252,7 @@ char* hop_render(struct hop* hop)
 				break;
 
             case INSEL_ST_OFFSET:
-                appendf("%d", current_proc->fp_to_st + insel->u.hreg->offset);
+                appendf("%d", current_proc->fp_to_sb + insel->u.hreg->offset);
                 break;
 
             case INSEL_AB_OFFSET:
