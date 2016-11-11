@@ -25,10 +25,9 @@ flt_arith2flt(n, e, uns)
 		e->m1 = 0; e->m2 = n;
 	}
 	else {
-		e->m2 = n & 0xffffffffL;
-		n >>= 1;
-		n &= ~((arith) 1 << (8*sizeof(arith)-1));
-		e->m1 = (n >> 31);
+		/* assuming sizeof(arith) >= 8 */
+		e->m1 = n >> 32;
+		e->m2 = n;
 	}
 	if (n == 0) {
 		e->flt_exp = 0;

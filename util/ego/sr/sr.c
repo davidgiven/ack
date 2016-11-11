@@ -218,6 +218,7 @@ STATIC sr_cleanproc(p)
 }
 
 
+void
 sr_optimize(p)
 	proc_p p;
 {

@@ -143,6 +143,7 @@ rmfile(file) path *file ; {
 	}
 }
 
+void
 rmtemps() {
 	/* Called in case of disaster, always remove the current output file!
 	*/

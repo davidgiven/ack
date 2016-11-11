@@ -16,6 +16,7 @@ int	errorcnt;
 
 
 
+void
 warning(str)
 char *str;
 {

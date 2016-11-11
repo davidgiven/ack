@@ -56,6 +56,7 @@ con_mult(word sz)
 #define FL_MSB_AT_LOW_ADDRESS	1
 #include <con_float>
 
+void
 prolog(full nlocals)
 {
 	int ss = nlocals + 8;
@@ -68,6 +69,7 @@ prolog(full nlocals)
 	framesize = nlocals;
 }
 
+void
 mes(word type)
 {
 	int argt ;

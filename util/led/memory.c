@@ -519,6 +519,7 @@ core_free(piece, p)
  * Reset index into piece of memory for modules and
  * take care that the allocated pieces will not be moved.
  */
+void
 freeze_core()
 {
 	register int	i;

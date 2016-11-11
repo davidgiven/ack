@@ -29,7 +29,7 @@ static string rcsid8 = "$Id$";
 /* In this file the following routines are defined: */
 extern co_reach();
 STATIC reachable();
-STATIC reachwalk();
+STATIC void reachwalk();
 
 co_reach() {
 	/*
@@ -94,7 +94,7 @@ reachable(p) register p_nont p; {
 	}
 }
 
-STATIC
+STATIC void
 reachwalk(p) register p_gram p; {
 	/*
 	 * Walk through rule p, looking for nonterminals.

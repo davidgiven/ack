@@ -23,11 +23,14 @@ extern char options[];
 extern char *symbol2str();
 extern struct type *qualifier_type();
 
+void ch3cast();
+
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer
 	gets updated in the process.
 */
 
+void
 ch3sel(expp, oper, idf)
 	struct expr **expp;
 	struct idf *idf;
@@ -169,6 +172,7 @@ ch3incr(expp, oper)
 	ch3asgn(expp, oper, intexpr((arith)1, INT));
 }
 
+void
 ch3cast(expp, oper, tp)
 	register struct expr **expp;
 	register struct type *tp;

@@ -51,6 +51,8 @@ struct type
 	*void_type,
 	*error_type;
 
+void ArraySizes();
+
 CheckTypeSizes()
 {
 	/* first, do some checking
@@ -442,6 +444,7 @@ ArrayElSize(tp, packed)
 	return algn;
 }
 
+void
 ArraySizes(tp)
 	register struct type *tp;
 {
@@ -489,6 +492,7 @@ ArraySizes(tp)
 	C_rom_cst(tp->arr_elsize);
 }
 
+void
 FreeForward(for_type)
 	register struct forwtype *for_type;
 {

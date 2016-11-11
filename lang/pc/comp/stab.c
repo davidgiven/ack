@@ -71,7 +71,7 @@ adds_db_str(s)
 	while (*s) addc_db_str(*s++);
 }
 
-static
+static void
 stb_type(tp, assign_num)
 	register struct type	*tp;
 {
@@ -247,6 +247,7 @@ stb_addtp(s, tp)
 		     (arith) 0);
 }
 
+void
 stb_string(df, kind)
 	register struct def *df;
 	long kind;

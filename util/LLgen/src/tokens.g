@@ -33,13 +33,13 @@ extern int	scanner();
 extern		LLmessage();
 extern int	input();
 extern		unput();
-extern		skipcomment();
+extern void skipcomment();
 # ifdef LINE_DIRECTIVE
 STATIC		linedirective();
 # endif
 STATIC string	cpy();
 STATIC string	vallookup();
-STATIC		copyact();
+STATIC void copyact();
 
 static int	nparams;
 }
@@ -114,7 +114,7 @@ static t_token	savedtok;	/* to save lextoken in case of an insertion */
 static	int	nostartline;	/* = 0 if at the start of a line */
 # endif
 
-STATIC
+STATIC void
 copyact(ch1,ch2,flag,level) char ch1,ch2; {
 	/*
 	 * Copy an action to file f. Opening bracket is ch1, closing bracket
@@ -389,6 +389,7 @@ unput(c) {
 	backupc = c;
 }
 
+void
 skipcomment(flag) {
 	/*
 	 * Skip comment. If flag != 0, the comment is inside a fragment

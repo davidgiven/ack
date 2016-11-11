@@ -35,6 +35,8 @@ extern arith	char_constant();
 #define		FLG_ESEEN	0x01	/* possibly a floating point number */
 #define		FLG_DOTSEEN	0x02	/* certainly a floating point number */
 
+void skipcomment();
+
 int
 LLlex()
 {
@@ -325,6 +327,7 @@ garbage:
 	/*NOTREACHED*/
 }
 
+void
 skipcomment()
 {
 	/*	The last character read has been the '*' of '/_*'.  The

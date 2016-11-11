@@ -5,6 +5,7 @@
 
 /* $Id$ */
 
+#include <stdint.h>
 #include "flt_misc.h"
 
 int
@@ -15,16 +16,15 @@ flt_b64_add(e1,e2)
 	int	carry;
 
 	/* add higher pair of 32 bits */
-	overflow = ucmp((long)0xFFFFFFFF - e1->flt_h_32, e2->flt_h_32) < 0;
+	overflow = (0xFFFFFFFFUL - e1->flt_h_32 < e2->flt_h_32);
 	e1->flt_h_32 += e2->flt_h_32;
 
 	/* add lower pair of 32 bits */
-	carry = ucmp((long)0xFFFFFFFF - e1->flt_l_32, e2->flt_l_32) < 0;
+	carry = (0xFFFFFFFFUL - e1->flt_l_32 < e2->flt_l_32);
 	e1->flt_l_32 += e2->flt_l_32;
 
-	if ((carry) && ((++e1->flt_h_32 &~0xFFFFFFFF) || e1->flt_h_32 == 0)) {
-		e1->flt_h_32 = 0;
+	if ((carry) && (++e1->flt_h_32 == 0))
 		return(1);		/* had a 64 bit overflow */
-	}
+
 	return(overflow);	/* return status from higher add */
 }

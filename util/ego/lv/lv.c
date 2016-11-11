@@ -591,6 +591,7 @@ lv_flags(p)
 }
 
 
+void
 lv_optimize(p)
 	proc_p p;
 {

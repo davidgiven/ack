@@ -18,18 +18,5 @@
 #define	POLYNOM12(x, a)	(POLYNOM11((x),(a)+1)*(x)+(a)[0])
 #define	POLYNOM13(x, a)	(POLYNOM12((x),(a)+1)*(x)+(a)[0])
 
-/* These are set up for 64-bit doubles. */
-
-#ifndef M_MAX_D
-#define M_MAX_D          1.7976931348623157e+308
-#define M_MIN_D		 2.2250738585072014e-308
-#define M_DEXPLEN	 11
-#endif
-#define M_DMAXEXP	 ((1 << (M_DEXPLEN - 1)) - 1)
-#define M_DMINEXP	 (-M_DMAXEXP)
-#define M_LN_MAX_D	 (M_LN2 * M_DMAXEXP)
-#define M_LN_MIN_D	 (M_LN2 * (M_DMINEXP - 1))
-
-#define HUGE		M_MAX_D
-#define MAXDOUBLE	M_MAX_D
-
+#define	M_LN_MAX_D	(M_LN2 * DBL_MAX_EXP)
+#define	M_LN_MIN_D	(M_LN2 * (DBL_MIN_EXP - 1))

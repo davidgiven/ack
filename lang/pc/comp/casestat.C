@@ -40,6 +40,7 @@ struct case_entry	{
 */
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
 
+void
 CaseExpr(nd)
 	struct node *nd;
 {
@@ -62,6 +63,7 @@ CaseExpr(nd)
 	}
 }
 
+void
 CaseEnd(nd, exit_label)
 	struct node *nd;
 	label exit_label;

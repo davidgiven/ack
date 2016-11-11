@@ -23,6 +23,9 @@ static		redefine();
 static		transfer();
 
 extern ind_t savechar();
+
+void namerelocate();
+
 /*
  * Get section sizes and symboltable information from present module.
  */
@@ -149,6 +152,7 @@ process(head)
  * Otherwise we just add the accumulated size of all normal parts in preceding
  * sections with the same size.
  */
+void
 namerelocate(name)
 	register struct outname	*name;
 {

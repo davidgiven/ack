@@ -20,6 +20,7 @@ static char rcsid[] = "$Id$";
  */
 
 
+void
 cleanup() {
 	FILE *infile;
 	register c;

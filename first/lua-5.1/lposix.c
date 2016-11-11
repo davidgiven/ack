@@ -702,6 +702,7 @@ static int Pgetpid(lua_State *L)		/** getpid([options]) */
 }
 
 
+#if 0
 static int Phostid(lua_State *L)		/** hostid() */
 {
 	char b[32];
@@ -709,6 +710,7 @@ static int Phostid(lua_State *L)		/** hostid() */
 	lua_pushstring(L, b);
 	return 1;
 }
+#endif
 
 
 static int Pttyname(lua_State *L)		/** ttyname([fd]) */
@@ -1060,7 +1062,7 @@ static const luaL_reg R[] =
 	{"getpasswd",		Pgetpasswd},
 	{"getpid",		Pgetpid},
 	{"glob",		Pglob},
-	{"hostid",		Phostid},
+	//{"hostid",		Phostid},
 	{"kill",		Pkill},
 	{"link",		Plink},
 	{"mkdir",		Pmkdir},

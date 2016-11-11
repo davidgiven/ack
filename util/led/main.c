@@ -35,15 +35,17 @@ static			setbase();
 static struct outname	*makename();
 static			pass1();
 static			evaluate();
-static			norm_commons();
+static void norm_commons();
 static			complete_sections();
-static			change_names();
+static void change_names();
 static bool		tstbit();
 static			second_pass();
 static			pass2();
 #ifndef NOSTATISTICS
 static			do_statistics();
 #endif
+
+void addbase();
 
 main(argc, argv)
 	int	argc;
@@ -395,7 +397,7 @@ long	sect_comm[MAXSECT];
  * just like "normal" names. We also count the total size of common names
  * within each section to be able to compute the final size in the machine.
  */
-static
+static void
 norm_commons()
 {
 	register struct outname	*name;
@@ -492,7 +494,7 @@ complete_sections()
  * For each name we add the base of its section to its value, unless
  * the output has to be able to be linked again, as indicated by RFLAG.
  */
-static
+static void
 change_names()
 {
 	register int		cnt;
@@ -565,6 +567,7 @@ tstbit(indx, string)
 /*
  * Add the base of the section of a name to its value.
  */
+void
 addbase(name)
 	struct outname	*name;
 {

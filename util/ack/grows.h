@@ -20,7 +20,7 @@ typedef struct {
 
 /* Routines used */
 
-extern  int     gr_throw() ;    /* To free the core */
+extern  void    gr_throw() ;    /* To free the core */
 extern  int     gr_add() ;      /* To add one character */
 extern  int     gr_cat() ;      /* concatenate the contents and the string */
 extern  int     gr_init() ;     /* Initialize the bookkeeping */

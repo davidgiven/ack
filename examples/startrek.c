@@ -107,7 +107,7 @@ void phaser_control(void);
 void photon_torpedoes(void);
 void torpedo_hit(void);
 void damage_control(void);
-void sheild_control(void);
+void shield_control(void);
 void library_computer(void);
 void galactic_record(void);
 void status_report(void);
@@ -137,7 +137,7 @@ void sub2(void);
 void showfile(char *filename);
 int openfile(char * sFilename, char * sMode);
 void closefile(void);
-int getline(char *s);
+int get_line(char *s);
 void randomize(void);
 int get_rand(int iSpread);
 double rnd(void);
@@ -203,7 +203,7 @@ void
 reads(char* buffer)
 {
   fflush(stdout);
-  gets(buffer);
+  fgets(buffer, sizeof(string), stdin);
 }
 
 /* Main Program */
@@ -292,7 +292,7 @@ new_game(void)
       else if (! strncmp(sTemp, "tor", 3))
         photon_torpedoes();
       else if (! strncmp(sTemp, "she", 3))
-        sheild_control();
+        shield_control();
       else if (! strncmp(sTemp, "dam", 3))
         damage_control();
       else if (! strncmp(sTemp, "com", 3))
@@ -307,7 +307,7 @@ new_game(void)
       printf("  lrs - Long Range Sensors\n");
       printf("  pha - Phasers\n");
       printf("  tor - Photon Torpedoes\n");
-      printf("  she - Sheild Control\n");
+      printf("  she - Shield Control\n");
       printf("  dam - Damage Control\n");
       printf("  com - Library Computer\n");
       printf("  xxx - Resign Command\n");
@@ -1206,14 +1206,14 @@ damage_control(void)
 } 
 
 void
-sheild_control(void)
+shield_control(void)
 {
   int i;
   string sTemp;
 
   if (d[7] < 0.0)
     {
-      printf("Sheild Control inoperable\n");
+      printf("Shield Control inoperable\n");
       return;
     }
 
@@ -1229,15 +1229,15 @@ sheild_control(void)
 
   if (i < 0 || s == i)
     {
-      printf("<Sheilds Unchanged>\n\n");
+      printf("<Shields Unchanged>\n\n");
       return;
     }
 
   if (i >= e + s)
     {
-      printf("Sheild Control Reports:\n");
+      printf("Shield Control Reports:\n");
       printf("  'This is not the Federation Treasury.'\n");
-      printf("<Sheilds Unchanged>\n\n");
+      printf("<Shields Unchanged>\n\n");
       return;
     }
 
@@ -1776,7 +1776,7 @@ get_device_name(void)
 {
   static char * device_name[] = {
     "", "Warp Engines","Short Range Sensors","Long Range Sensors",
-    "Phaser Control","Photon Tubes","Damage Control","Sheild Control",
+    "Phaser Control","Photon Tubes","Damage Control","Shield Control",
     "Library-Computer"};
 
   if (r1 < 0 || r1 > 8)
@@ -1888,7 +1888,7 @@ showfile(char *filename)
   if (openfile(filename, "r") != 0)
     return;
 
-  while (getline(lBuffer) != 0)
+  while (get_line(lBuffer) != 0)
     {
       printf(lBuffer);
       
@@ -1926,7 +1926,7 @@ closefile(void)
 }
 
 int
-getline(char *s)
+get_line(char *s)
 {
   fflush(stdout);
   if (fgets(s, MAXCOL, stream) == NULL)

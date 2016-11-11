@@ -131,7 +131,7 @@ STATIC bool not_dismissed(lnp)
 }
 
 
-STATIC try_cand(lnp,b)
+STATIC void try_cand(lnp,b)
 	line_p lnp;
 	bblock_p b;
 {

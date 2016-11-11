@@ -50,6 +50,7 @@ gr_cat(id,string) growstring *id ; char *string ; {
 	}
 }
 
+void
 gr_throw(id) register growstring *id ; {
 	/* Throw the string away */
 	if ( id->gr_max==0 ) return ;

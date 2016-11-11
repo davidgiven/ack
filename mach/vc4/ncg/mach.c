@@ -54,7 +54,7 @@ void prolog(full nlocals)
 	framesize = nlocals;
 }
 
-mes(word type)
+void mes(word type)
 {
 	int argt ;
 

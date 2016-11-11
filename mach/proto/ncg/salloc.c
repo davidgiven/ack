@@ -32,6 +32,8 @@ static char rcsid[] = "$Id$";
 char *stab[MAXSTAB];
 int nstab=0;
 
+void chkstr();
+
 string myalloc(size) {
 	register string p;
 
@@ -72,6 +74,7 @@ compar(p1,p2) char **p1,**p2; {
 	return(1);
 }
 
+void
 garbage_collect() {
 	register i;
 	struct emline *emlp;
@@ -116,6 +119,7 @@ garbage_collect() {
 	nstab = fillp-stab;
 }
 
+void
 chkstr(str,used) string str; char used[]; {
 	register low,middle,high;
 

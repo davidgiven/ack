@@ -72,7 +72,7 @@ genstr(stringno) {
 	fputs(codestrings[stringno],codefile);
 }
 
-string ad2str(ad) addr_t ad; {
+string ad2str(ad) address_t ad; {
 	static char buf[100];
 
 	if (ad.ea_str==0)
@@ -87,7 +87,7 @@ string ad2str(ad) addr_t ad; {
 	return(mystrcpy(buf));
 }
 
-praddr(ad) addr_t ad; {
+praddr(ad) address_t ad; {
 
 	if (ad.ea_str==0 || *(ad.ea_str) == '\0')
 		fprintf(codefile,WRD_FMT,ad.ea_off);
@@ -108,6 +108,7 @@ gennl() {
 	putc('\n',codefile);
 }
 
+void
 prtoken(tp,leadingchar) token_p tp; {
 	register c;
 	register char *code;

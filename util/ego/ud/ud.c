@@ -531,6 +531,7 @@ STATIC ud_cleanup(p)
 }
 
 
+void
 ud_optimize(p)
 	proc_p p;
 {

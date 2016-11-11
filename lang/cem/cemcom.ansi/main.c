@@ -46,6 +46,8 @@ struct sp_id special_ids[] =	{
 	{0, 0}
 };
 
+void dependency();
+
 #ifndef NOCROSS
 arith
 	short_size = SZ_SHORT,
@@ -181,6 +183,7 @@ char *s;
     }
 }
 
+void
 dependency(s, source)
 char *s, *source;
 {

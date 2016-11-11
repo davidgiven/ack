@@ -10,7 +10,7 @@ static char rcsid[] = "$Id$";
 #include "const.h"
 #include "memory.h"
 
-static			generate_section_names();
+static void generate_section_names();
 
 extern struct outhead	outhead;
 extern bool		incore;
@@ -51,7 +51,7 @@ beginoutput()
  * Generate names for all sections and put them after the global names.
  * Section names are used for relocation.
  */
-static
+static void
 generate_section_names()
 {
 	register struct outname	*name;

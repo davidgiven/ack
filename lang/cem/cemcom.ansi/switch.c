@@ -159,6 +159,7 @@ code_endswitch()
 	unstack_stmt();
 }
 
+void
 code_case(expr)
 	struct expr *expr;
 {
@@ -227,6 +228,7 @@ code_case(expr)
 	}
 }
 
+void
 code_default()
 {
 	register struct switch_hdr *sh = switch_stack;

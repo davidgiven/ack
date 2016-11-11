@@ -12,6 +12,8 @@
 #include	"scope.h"
 #include	"type.h"
 
+void CodeLabel();
+
 
 DeclLabel(nd)
 	struct node *nd;
@@ -103,6 +105,7 @@ TstLabel(nd, Slevel)
 		CodeLabel(df, 1);
 }
 
+void
 DefLabel(nd, Slevel)
 	register struct node *nd;
 {
@@ -139,6 +142,7 @@ DefLabel(nd, Slevel)
 	}
 }
 
+void
 CodeLabel(df, local)
 	register struct def *df;
 {

@@ -31,6 +31,7 @@ int	ltype,rtype;
 
 
 
+void
 conversion(oldtype,newtype)
 int oldtype,newtype;
 {
@@ -71,6 +72,7 @@ int oldtype,newtype;
 
 
 
+void
 extraconvert(oldtype,newtype,topstack)
 int oldtype,newtype,topstack;
 {
@@ -509,6 +511,7 @@ endarrayload()
 
 
 
+void
 loadarray(type)
 int	type;
 {

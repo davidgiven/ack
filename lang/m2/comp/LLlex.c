@@ -180,6 +180,7 @@ getch()
 	return ch;
 }
 
+void
 CheckForLineDirective()
 {
 	register int ch = getch();

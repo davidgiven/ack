@@ -26,6 +26,10 @@ extern char *strcat();
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
 
+void expand_defined();
+void getactuals();
+void macro2buffer();
+
 int
 replace(idf)
 	register struct idf *idf;
@@ -165,6 +169,7 @@ expand_macro(repl, idf)
 	return 1;
 }
 
+void
 expand_defined(repl)
 	register struct repl *repl;
 {
@@ -208,6 +213,7 @@ newarg(args)
 	args->a_rawptr = args->a_rawbuf = Malloc((unsigned)(args->a_rawsize = ARGBUF));
 }
 
+void
 getactuals(repl, idf)
 	struct repl *repl;
 	register struct idf *idf;
@@ -522,6 +528,7 @@ macro_func(idef)
 	}
 }
 
+void
 macro2buffer(repl, idf, args)
 	register struct repl *repl;
 	register struct idf *idf;

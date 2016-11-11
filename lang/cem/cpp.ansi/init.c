@@ -7,6 +7,7 @@
 
 #include    <stdlib.h>
 #include    <string.h>
+#include    <time.h>
 #include	"system.h"
 #include	"alloc.h"
 #include	"time.h"
@@ -42,7 +43,7 @@ init_pp()
 		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
-	long clock, sys_time();
+	time_t clock;
 	static char dbuf[30];
 	static char tbuf[30];
 	struct tm  *tp;
@@ -68,7 +69,7 @@ init_pp()
 	/*	Initialize __LINE__, __FILE__, __DATE__, __TIME__,
 		and __STDC__ macro definitions.
 	*/
-	clock = sys_time();
+	clock = time(NULL);
 	tp = localtime(&clock);
 
 	/* __DATE__ */

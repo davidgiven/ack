@@ -120,7 +120,7 @@ CommentOptions()
 }
 
 
-STATIC
+STATIC void
 SkipComment()
 {
 	/*	Skip ISO-Pascal comments (* ... *) or { ... }.
@@ -216,6 +216,7 @@ register int delim;
 
 static char *s_error = "illegal line directive";
 
+void
 CheckForLineDirective()
 {
 	register int	ch;

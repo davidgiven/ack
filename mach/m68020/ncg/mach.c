@@ -187,6 +187,7 @@ regsave(s,off,size)
 	fprintf(codefile, "!Local %ld into %s\n",off,s);
 }
 
+void
 prolog(n) full n; {
 
 	nlocals = n;
@@ -207,6 +208,7 @@ mach_option(s)
 }
 #endif /* MACH_OPTIONS */
 
+void
 mes(type) word type ; {
 	int argt, a1, a2 ;
 

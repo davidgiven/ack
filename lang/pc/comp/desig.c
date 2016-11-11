@@ -26,6 +26,7 @@
 struct desig	InitDesig = {DSG_INIT, 0, 0, NULLDEF, 0};
 struct withdesig *WithDesigs;
 
+void CodeValue();
 
 STATIC int
 properly(ds, size, al)
@@ -71,6 +72,7 @@ CodeCopy(lhs, rhs, sz, psize)
 	C_sti(sz);
 }
 
+void
 CodeMove(rhs, left, rtp)
 	register struct desig *rhs;
 	register struct node *left;
@@ -150,6 +152,7 @@ CodeMove(rhs, left, rtp)
 	}
 }
 
+void
 CodeValue(ds, tp)
 	register struct desig *ds;
 	register struct type *tp;
@@ -366,6 +369,7 @@ CodeFieldDesig(df, ds)
 	ds->dsg_packed = df->fld_flags & F_PACKED;
 }
 
+void
 CodeVarDesig(df, ds)
 	register struct def *df;
 	register struct desig *ds;

@@ -21,6 +21,7 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
+void
 regvar(ap) register arg_p ap; {
 	register reg_p rp;
 	register i;
@@ -96,6 +97,7 @@ outtes() {
 	}
 }
 
+void
 incregusage(off) offset off; {
 	register reg_p rp;
 

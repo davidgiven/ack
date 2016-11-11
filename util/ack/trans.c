@@ -28,6 +28,10 @@ static int        touch_tail= NO ;
 
 char *headvar(),*tailvar() ;
 
+void condit();
+void doassign();
+void set_Rflag();
+
 int transform(phase) register trf *phase ; {
 	int ok ;
 
@@ -153,6 +157,7 @@ transini() {
 	setpvar(keeps(TAIL),tailvar) ;
 }
 
+void
 set_Rflag(argp) register char *argp ; {
 	register char *eos ;
 	register list_elem *prog ;
@@ -413,6 +418,7 @@ growstring scanexpr(line) char *line ; {
 	return result ;
 }
 
+void
 condit(line,fsuff,lsuff,tailval) growstring *line ;
 	list_head *fsuff, *lsuff;
 	char *tailval ;
@@ -504,6 +510,7 @@ int mapexpand(mapentry,cflag)
 	return 1 ;
 }
 
+void
 doassign(line,star,length) char *line, *star ; {
 	growstring varval, name, temp ;
 	register char *ptr ;
@@ -598,6 +605,7 @@ char *c_rep(string,place,rep) char *string, *place, *rep ; {
 static list_head *curargs ;
 static list_head *comb_args ;
 
+void
 addargs(string) char *string ; {
 	register char *temp, *repc ;
 	register list_elem *elem ;

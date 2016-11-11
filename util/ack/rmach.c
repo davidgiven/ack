@@ -55,6 +55,7 @@ int getinchar() ;
 static char *ty_name ;
 static char *bol ;
 
+void open_in();
 
 static char *inname ;
 
@@ -263,6 +264,7 @@ static  FILE            *infile ;
 static  char            *inptr ;
 char			*em_dir = EM_DIR;
 
+void
 open_in(name) register char *name ; {
 	register dmach *cmac ;
 

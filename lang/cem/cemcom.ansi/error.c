@@ -57,7 +57,7 @@ extern char loptions[];
 	expression, whereas other errors use the information in the token.
 */
 
-static _error();
+static void _error();
 
 #if __STDC__
 /*VARARGS*/
@@ -521,7 +521,7 @@ fatal(va_alist)				/* fmt, args */
 }
 #endif
 
-static
+static void
 _error(class, fn, ln, fmt, ap)
 	int class;
 	char *fn;

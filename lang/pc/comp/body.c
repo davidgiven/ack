@@ -47,6 +47,7 @@ MarkDef(nd, flags, on)
 	}
 }
 
+void
 AssertStat(expp, line)
 	register struct node *expp;
 	unsigned short line;
@@ -69,6 +70,7 @@ AssertStat(expp, line)
 	}
 }
 
+void
 AssignStat(left, right)
 	register struct node *left, *right;
 {
@@ -131,6 +133,7 @@ AssignStat(left, right)
 	FreeNode(right);
 }
 
+void
 ProcStat(nd)
 	register struct node *nd;
 {
@@ -142,6 +145,7 @@ ProcStat(nd)
 	}
 }
 
+void
 ChkForStat(nd)
 	register struct node *nd;
 {
@@ -202,6 +206,7 @@ ChkForStat(nd)
 	return;
 }
 
+void
 EndForStat(nd)
 	register struct node *nd;
 {
@@ -283,6 +288,7 @@ CodeEndFor(nd, stepsize, l1, l2, tmp2)
 	C_asp(int_size);
 }
 
+void
 WithStat(nd)
 	struct node *nd;
 {

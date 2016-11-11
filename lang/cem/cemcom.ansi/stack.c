@@ -57,6 +57,7 @@ stack_level()	{
 #endif	/* LINT */
 }
 
+void
 stack_idf(idf, stl)
 	struct idf *idf;
 	register struct stack_level *stl;

@@ -17,7 +17,7 @@
 
 extern char em_mnem[]; /* The mnemonics of the EM instructions. */
 
-STATIC showinstr(lnp)
+STATIC void showinstr(lnp)
 	line_p lnp;
 {
 	/* Makes the instruction in `lnp' human readable. Only lines that

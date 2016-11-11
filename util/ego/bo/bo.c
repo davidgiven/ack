@@ -150,7 +150,7 @@ STATIC bo_optloop(p,b,x,bra,bcc)
 
 			
 
-STATIC bo_tryloop(p,loop)
+STATIC void bo_tryloop(p,loop)
 	proc_p p;
 	lset loop;
 {
@@ -207,6 +207,7 @@ STATIC mv_code(b1,b2)
 	}
 }
 
+void
 bo_switch(b)
 	bblock_p b;
 {
@@ -303,6 +304,7 @@ STATIC bo_cleanproc(p)
 	}
 }
 
+void
 bo_optimize(p)
 	proc_p p;
 {

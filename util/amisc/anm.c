@@ -35,6 +35,8 @@ long	s_base[S_MAX];	/* for specially encoded bases */
 char	*filename;
 int	narg;
 
+void do_file();
+
 main(argc, argv)
 char **argv;
 {
@@ -134,6 +136,7 @@ process(fd)
 	}
 }
 
+void
 do_file(fd)
 	int	fd;
 {
