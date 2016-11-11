@@ -153,8 +153,7 @@ static bool allocatable_stackable_input(struct hreg* hreg, struct vreg* vreg)
 static bool allocatable_stackable_output(struct hreg* hreg, struct vreg* vreg)
 {
     return !register_used(current_outs, hreg) &&
-        (hreg->attrs & vreg->type) &&
-        !(hreg->attrs & current_hop->insndata->corrupts);
+        (hreg->attrs & vreg->type);
 }
 
 static bool allocatable_input(struct hreg* hreg, struct vreg* vreg)
@@ -174,7 +173,8 @@ static bool allocatable_output(struct hreg* hreg, struct vreg* vreg)
 static bool allocatable_through(struct hreg* hreg, struct vreg* vreg)
 {
     return allocatable_stackable_input(hreg, vreg) &&
-        allocatable_stackable_output(hreg, vreg);
+        allocatable_stackable_output(hreg, vreg) &&
+        !(hreg->attrs & current_hop->insndata->corrupts);
 }
 
 static struct hreg* find_input_reg(struct vreg* vreg)
@@ -203,9 +203,7 @@ static struct hreg* find_output_reg(struct vreg* vreg)
     {
         hreg = hregs.item[i];
         if (allocatable_output(hreg, vreg))
-        {
             return hreg;
-        }
     }
 
     return NULL;
