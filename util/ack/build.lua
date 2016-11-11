@@ -18,12 +18,28 @@ normalrule {
 cprogram {
 	name = "ack",
 	srcs = {
-		"./*.c",
+		"./data.c",
+		"./files.c",
+		"./grows.c",
+		"./list.c",
+		"./main.c",
+		"./rmach.c",
+		"./run.c",
+		"./scan.c",
+		"./svars.c",
+		"./trans.c",
+		"./util.c",
 		"+tables",
 	},
 	deps = {
 		"h+emheaders",
 		"h+local",
+		"./ack.h",
+		"./data.h",
+		"./dmach.h",
+		"./grows.h",
+		"./list.h",
+		"./trans.h",
 	}
 }
 
