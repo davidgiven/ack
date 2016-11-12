@@ -30,6 +30,9 @@ begtext:
 	! sp+4            ptr to argv
 	! sp              ptr to env
 
+	li32 r3, __openfirmware_ptr
+	stw r5, 0(r3)
+
 	li32 r3, envp
 	stwu r3, -4(sp)
 
@@ -39,6 +42,7 @@ begtext:
 	li32 r3, 1 ! argc
 	stwu r3, -4(sp)
 	
+	bl _openfirmware_init
 	bl __m_a_i_n
 	! falls through
 
@@ -49,6 +53,15 @@ begtext:
 __exit:
 EXIT:
 	b EXIT
+
+.define _openfirmware_call
+.extern _openfirmware_call
+_openfirmware_call:
+	lwz r3, 0(sp)
+	li32 r4, __openfirmware_ptr
+	lwz r4, 0(r4)
+	mtspr ctr, r4
+	bcctr 20, 0, 0
 
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
@@ -72,3 +85,4 @@ exename: .asciz 'qemuppc.img'
 .define .trppc, .ignmask
 .comm .trppc, 4              ! ptr to user trap handler
 .comm .ignmask, 4            ! user trap ignore mask 
+.comm __openfirmware_ptr, 4      ! OpenFirmware entry point
