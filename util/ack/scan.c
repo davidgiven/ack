@@ -15,9 +15,14 @@
 static char rcs_id[] = "$Id$" ;
 #endif
 
-void try();
+static void start_scan(void);
+static void try(list_elem *, const char *);
+static void scan_found(void);
+static int satisfy(trf *, const char *);
+static enum f_path scan_end(trf **);
+static void find_cpp(void);
 
-enum f_path getpath(first) register trf **first ; {
+enum f_path getpath(trf **first) {
 	/* Try to find a transformation path */
 
 	start_scan();
@@ -49,7 +54,7 @@ static  int     suf_found;      /* Was the suffix at least recognized ? */
 
 /********************       The hard work          ********************/
 
-start_scan() {
+static void start_scan(void) {
 	register list_elem *scan ;
 
 	scanlist(l_first(tr_list),scan) {
@@ -63,8 +68,7 @@ start_scan() {
 	last_ocount= 0 ;
 }
 
-void
-try(f_scan,suffix) list_elem *f_scan; char *suffix; {
+static void try(list_elem *f_scan, const char *suffix) {
 	register list_elem *scan ;
 	register trf  *trafo ;
 	/* Try to find a transformation path starting at f_scan for a
@@ -134,7 +138,7 @@ try(f_scan,suffix) list_elem *f_scan; char *suffix; {
 	}
 }
 
-scan_found() {
+static void scan_found(void) {
 	register list_elem *scan;
 	int ncount, ocount, pcount ;
 
@@ -182,7 +186,7 @@ scan_found() {
 	}
 }
 
-int satisfy(trafo,suffix) register trf *trafo; char *suffix ; {
+static int satisfy(trf *trafo, const char *suffix) {
 	register char *f_char, *l_char ;
 	/* Check whether this transformation is present for
 	   the current machine and the parameter suffix is among
@@ -207,7 +211,7 @@ int satisfy(trafo,suffix) register trf *trafo; char *suffix ; {
 	return 0 ;
 }
 
-enum f_path scan_end(first) trf **first ; {    /* Finalization */
+static enum f_path scan_end(trf **first) {    /* Finalization */
 	/* Return value indicating whether a transformation was found */
 	/* Set the flags for the transformation up to, but not including,
 	   the combiner
@@ -248,7 +252,7 @@ enum f_path scan_end(first) trf **first ; {    /* Finalization */
 	return F_OK ;
 }
 
-find_cpp() {
+static void find_cpp(void) {
 	register list_elem *elem ;
 	scanlist( l_first(tr_list), elem ) {
 		if ( t_cont(*elem)->t_isprep ) {

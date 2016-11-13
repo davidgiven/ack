@@ -5,6 +5,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "ack.h"
 #include "list.h"
@@ -19,13 +20,17 @@ static char rcs_id[] = "$Id$" ;
 
 #define ARG_MORE  40            /* The size of args chunks to allocate */
 
-extern growstring scanvars();
+/* trans.c */
+growstring scanvars(const char *);
+
+static int run_exec(trf *, const char *);
+static void x_arg(char *);
 
 static char      **arglist ;    /* The first argument */
 static unsigned  argcount ;     /* The current number of arguments */
 static unsigned  argmax;        /* The maximum number of arguments so far */
 
-int runphase(phase) register trf *phase ; {
+int runphase(trf *phase) {
 	register list_elem *elem ;
       char *prog ; int result ;
       growstring bline ;
@@ -70,10 +75,11 @@ int runphase(phase) register trf *phase ; {
       return result ;
 }
 
-int run_exec(phase,prog) trf *phase ; char *prog ; {
+static int run_exec(trf *phase, const char *prog) {
 	int status, child, waitchild ;
 
-	do_flush();
+	fflush(stdout) ;
+	fflush(stderr) ;
 	while ( (child=fork())== -1 ) ;
 	if ( child ) {
 		/* The parent */
@@ -136,7 +142,7 @@ int run_exec(phase,prog) trf *phase ; char *prog ; {
 	/*NOTREACHED*/
 }
 
-x_arg(string) char *string ; {
+static void x_arg(char *string) {
 	/* Add one execute argument to the argument vector */
 	if ( argcount==argmax ) {
 		if ( argmax==0 ) {

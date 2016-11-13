@@ -6,6 +6,8 @@
 #define RCS_ACK "$Id$"
 #endif
 
+#include <stdlib.h> /* size_t, free() */
+
 /****************************************************************************/
 /*                      User settable options                               */
 /****************************************************************************/
@@ -61,20 +63,33 @@ typedef struct {
 
 #define p_cont(elem) ((path *)l_content(elem))
 
-/* Return values of setpath() */
-enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
-
 /* Own routines */
-enum f_path getpath();
-enum f_path scan_end();
-extern void noodstop();
-extern char *getvar();
-extern char *keeps();
-extern char *basename();
-extern char *skipblank();
-extern char *firstblank();
-extern char *getcore();
-extern char *changecore();
+
+/* rmach.c */
+void setlist(char *);
+
+/* svars.c */
+void setsvar(char *, char *);
+void setpvar(char *, char *(*)(void));
+char *getvar(const char *);
+
+/* util.c */
+char *ack_basename(const char *);
+void clr_noscan(char *);
+char *skipblank(char *);
+char *firstblank(char *);
+void fatal(const char *, ...);
+void vprint(const char *, ...);
+#ifdef DEBUG
+void prns(const char *);
+#endif
+void fuerror(const char *, ...);
+void werror(const char *, ...);
+void quit(int);
+char *keeps(const char *);
+#define throws(str)  free(str)
+void *getcore(size_t);
+void *changecore(void *, size_t);
 #define freecore(area)  free(area)
 
 #define DEBUG	1	/* Allow debugging of Ack */

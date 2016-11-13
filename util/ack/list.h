@@ -29,3 +29,7 @@ typedef struct ca_elem list_elem ;         /* The decl. for elements */
 /* To be used for scanning lists, ptr is the running variable */
 #define scanlist(elem,ptr) \
 	for ( ptr= elem ; ptr; ptr= l_next(*ptr) )
+
+void l_add(list_head *, char *);
+void l_clear(list_head *);
+void l_throw(list_head *);

@@ -47,19 +47,21 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define CALL	"callname"
 #define END     "end"
 
-extern growstring scanb();
-extern growstring scanvars();
+/* trans.c */
+growstring scanb(const char *) ;
+growstring scanvars(const char *) ;
 
-int getln() ;
-int getinchar() ;
+static void intrf(void) ;
+static void open_in(char *) ;
+static void close_in(void) ;
+static int getinchar(void) ;
+static int getln(void) ;
+
 static char *ty_name ;
 static char *bol ;
-
-void open_in();
-
 static char *inname ;
 
-setlist(name) char *name ; {
+void setlist(char *name) {
 	/* Name is sought in the internal tables,
 	   if not present, the a file of that name is sought
 	   in first the current and then the EM Lib directory
@@ -92,9 +94,7 @@ setlist(name) char *name ; {
 #endif
 }
 
-static int inoptlist(nm)
-	char *nm ;
-{
+static int inoptlist(char *nm) {
 	register char *p=Optlist ;
 
 	while ( p && *p ) {
@@ -107,7 +107,7 @@ static int inoptlist(nm)
 	return 0;
 }
 
-intrf() {
+static void intrf(void) {
 	register trf *new ;
 	growstring bline ;
 	int twice ;
@@ -234,7 +234,8 @@ intrf() {
 				rts, new->t_rts) ;
 		}
 		rts= new->t_rts ;
-		keephead(rts) ; keeptail(rts) ;
+		l_add(&head_list, rts) ;
+		l_add(&tail_list, rts) ;
 	}
 #ifdef DEBUG
 	if ( debug>=3 ) {
@@ -264,8 +265,7 @@ static  FILE            *infile ;
 static  char            *inptr ;
 char			*em_dir = EM_DIR;
 
-void
-open_in(name) register char *name ; {
+static void open_in(char *name) {
 	register dmach *cmac ;
 
 	gr_init(&rline) ;
@@ -298,12 +298,12 @@ open_in(name) register char *name ; {
 	}
 }
 
-close_in() {
+static void close_in(void) {
 	if ( !incore ) fclose(infile) ;
 	gr_throw(&rline) ;
 }
 
-char *readline() {
+static char *readline(void) {
 	/* Get a line from the input,
 	   return 0 if at end,
 	   The line is stored in a volatile buffer,
@@ -355,7 +355,7 @@ char *readline() {
 	}
 }
 
-int getinchar() {
+static int getinchar(void) {
 	register int token ;
 
 	if ( incore ) {
@@ -369,7 +369,7 @@ int getinchar() {
 	return token ;
 }
 
-int getln() {
+static int getln(void) {
 	register char *c_ptr ;
 
 	do {

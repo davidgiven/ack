@@ -44,9 +44,6 @@ static char rcs_id[] = "$Id$" ;
 
 */
 
-extern  char    *getcore();
-extern          fatal();
-
 struct vars {
 	char                            *v_name;
 	enum { routine, string }        v_type;
@@ -60,7 +57,7 @@ struct vars {
 
 static struct vars *v_first ;
 
-static struct vars *newvar(name) char *name; {
+static struct vars *newvar(char *name) {
 	register struct vars *new ;
 
 	for ( new=v_first ; new ; new= new->v_next ) {
@@ -72,14 +69,14 @@ static struct vars *newvar(name) char *name; {
 			return new ;
 		}
 	}
-	new= (struct vars *)getcore( (unsigned)sizeof (struct vars));
+	new= (struct vars *)getcore(sizeof (struct vars));
 	new->v_name= name ;
 	new->v_next= v_first ;
 	v_first= new ;
 	return new ;
 }
 
-setsvar(name,str) char *name, *str ; {
+void setsvar(char *name, char *str) {
 	register struct vars *new ;
 
 	new= newvar(name);
@@ -90,7 +87,7 @@ setsvar(name,str) char *name, *str ; {
 	new->v_value.v_string= str;
 }
 
-setpvar(name,rout) char *name, *(*rout)() ; {
+void setpvar(char *name, char *(*rout)(void)) {
 	register struct vars *new ;
 
 	new= newvar(name);
@@ -101,7 +98,7 @@ setpvar(name,rout) char *name, *(*rout)() ; {
 	new->v_value.v_routine= rout;
 }
 
-char *getvar(name) char *name ; {
+char *getvar(const char *name) {
 	register struct vars *scan ;
 
 	for ( scan=v_first ; scan ; scan= scan->v_next ) {

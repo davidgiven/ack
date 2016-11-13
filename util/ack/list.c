@@ -33,7 +33,7 @@ Routines:
 */
 
 
-l_add(header,string) list_head *header ; char *string ; {
+void l_add(list_head *header, char *string) {
 	register list_elem *new;
 
 	/* NOSTRICT */
@@ -49,7 +49,7 @@ l_add(header,string) list_head *header ; char *string ; {
 	header->ca_last= new ;
 }
 
-l_clear(header) list_head *header ; {
+void l_clear(list_head *header) {
 	register list_elem *old, *next;
 	for ( old=header->ca_first ; old ; old= next ) {
 		next= old->ca_next ;
@@ -59,7 +59,7 @@ l_clear(header) list_head *header ; {
 	header->ca_last = (list_elem *) 0 ;
 }
 
-l_throw(header) list_head *header ; {
+void l_throw(list_head *header) {
 	register list_elem *old, *next;
 	for ( old=header->ca_first ; old ; old= next ) {
 		throws(l_content(*old)) ;

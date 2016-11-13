@@ -48,4 +48,4 @@ EXTERN  path            in;             /* The current single input pathname */
 EXTERN  path            out;            /* The current output pathname */
 EXTERN  path            orig;           /* The original input path */
 EXTERN  char            *p_basename;    /* The current basename */
-EXTERN  char            *p_suffix;      /* The current input suffix */
+EXTERN  const char      *p_suffix;      /* The current input suffix */

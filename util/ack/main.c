@@ -22,11 +22,20 @@ static char rcs_ack[] = RCS_ACK ;
 static int sigs[] = { SIGINT, SIGHUP, SIGTERM, 0 } ;
 static int arg_count;
 
-extern  char    *getenv();
+static char *srcvar(void);
+static char *getsuffix(void);
+static void varinit(void);
+static void vieuwargs(int, char **);
+static void firstarg(char *);
+static int process(char *);
+static int startrf(trf *);
+static void block(trf *);
+static int mayprep(void);
+static void scanneeds(void);
+static void setneeds(const char *, int);
+static void noodstop(int);
 
-void vieuwargs();
-
-main(argc,argv) char **argv ; {
+int main(int argc, char **argv) {
 	register list_elem *elem ;
 	register char *frontend ;
 	register int *n_sig ;
@@ -102,7 +111,7 @@ main(argc,argv) char **argv ; {
 			orig.p_path=phase->t_origname ;
 			if ( p_basename ) throws(p_basename) ;
 			if ( orig.p_path ) {
-				p_basename= keeps(basename(orig.p_path)) ;
+				p_basename= keeps(ack_basename(orig.p_path)) ;
 			} else {
 				p_basename=0 ;
 			}
@@ -115,15 +124,15 @@ main(argc,argv) char **argv ; {
 	exit(0) ;
 }
 
-char *srcvar() {
+static char *srcvar(void) {
 	return orig.p_path ;
 }
 
-char *getsuffix() {
+static char *getsuffix(void) {
 	return strrchr(orig.p_path, SUFCHAR) ;
 }
 
-varinit() {
+static void varinit(void) {
 	/* initialize the string variables */
 	register char *envstr ;
 	extern char *em_dir;
@@ -138,8 +147,7 @@ varinit() {
 
 /************************* flag processing ***********************/
 
-void
-vieuwargs(argc,argv) char **argv ; {
+void vieuwargs(int argc, char **argv) {
 	register char *argp;
 	register int nextarg ;
 	register int eaten ;
@@ -206,14 +214,16 @@ vieuwargs(argc,argv) char **argv ; {
 	   case 'r':    if ( argp[2]!=SUFCHAR ) {
 				error("-r must be followed by %c",SUFCHAR) ;
 			}
-			keeptail(&argp[2]); eaten=1 ;
+			l_add(&tail_list, &argp[2]) ;
+			eaten=1 ;
 			break ;
 	   case '.':    if ( rts ) {
 	   			if ( strcmp(rts,&argp[1])!=0 )
 					fuerror("Two run-time systems?") ;
 			} else {
 				rts= &argp[1] ;
-				keephead(rts) ; keeptail(rts) ;
+				l_add(&head_list, rts) ;
+				l_add(&tail_list, rts) ;
 			}
 			eaten=1 ;
 			break ;
@@ -238,7 +248,7 @@ vieuwargs(argc,argv) char **argv ; {
 			register char *tokeep ;
 			tokeep=keeps(argp) ;
 			if ( argp[1]=='R' ) {
-				do_Rflag(tokeep); 
+				l_add(&R_list, tokeep) ;
 			} else {
 				*tokeep |= NO_SCAN ;
 			}
@@ -251,7 +261,7 @@ vieuwargs(argc,argv) char **argv ; {
 	return ;
 }
 
-firstarg(argp) register char *argp ; {
+static void firstarg(char *argp) {
 	register char *name ;
 
 	name=strrchr(argp,'/') ;
@@ -265,7 +275,7 @@ firstarg(argp) register char *argp ; {
 
 /************************* argument processing ***********************/
 
-process(arg) char *arg ; {
+static int process(char *arg) {
 	/* Process files & library arguments */
 	trf *phase ;
 	register trf *tmp ;
@@ -282,7 +292,7 @@ process(arg) char *arg ; {
 		return 1 ;
 	}
 	if ( p_basename ) throws(p_basename) ;
-	p_basename= keeps(basename(arg)) ;
+	p_basename= keeps(ack_basename(arg)) ;
 	/* Try to find a path through the transformations */
 	switch( getpath(&phase) ) {
 	case F_NOPATH :
@@ -325,7 +335,7 @@ process(arg) char *arg ; {
 	return startrf(phase) ;
 }
 
-int startrf(first) trf *first ; {
+static int startrf(trf *first) {
 	/* Start the transformations at the indicated phase */
 	register trf *phase ;
 
@@ -397,7 +407,7 @@ if ( debug ) vprint("Transformation sequence complete for %s\n",
 	return 1 ;
 }
 
-block(first) trf *first ; {
+static void block(trf *first) {
 	/* One of the input files of this phase could not be produced,
 	   block all combiners taking their input from this one.
 	*/
@@ -406,7 +416,8 @@ block(first) trf *first ; {
 		if ( phase->t_combine ) phase->t_blocked=YES ;
 	}
 }
-mayprep() {
+
+static int mayprep(void) {
 	int file ;
 	char fc ;
 	file=open(in.p_path,0);
@@ -416,15 +427,7 @@ mayprep() {
 	return fc=='#' ;
 }
 
-keephead(suffix) char *suffix ; {
-	l_add(&head_list, suffix) ;
-}
-
-keeptail(suffix) char *suffix ; {
-	l_add(&tail_list, suffix) ;
-}
-
-scanneeds() {
+static void scanneeds(void) {
 	register list_elem *elem ;
 	scanlist(l_first(head_list), elem) { setneeds(l_content(*elem),0) ; }
 	l_clear(&head_list) ;
@@ -432,7 +435,7 @@ scanneeds() {
 	l_clear(&tail_list) ;
 }
 
-setneeds(suffix,tail) char *suffix ; {
+static void setneeds(const char *suffix, int tail) {
 	trf *phase ;
 
 	p_suffix= suffix ;
@@ -455,4 +458,8 @@ setneeds(suffix,tail) char *suffix ; {
 			suffix) ;
 		break ;
 	}
+}
+
+static void noodstop(int sig) {
+	quit(-3) ;
 }
