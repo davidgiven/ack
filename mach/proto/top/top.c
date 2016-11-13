@@ -330,7 +330,7 @@ labeldef(ip)
 	int oplen;
 
 	p = ip->rest_line;
-	while( *p != LABEL_TERMINATOR) p++;
+	while(*p && (*p != LABEL_TERMINATOR)) p++;
 	oplen = p - ip->rest_line;
 	if (oplen == 0 || oplen > MAXOPLEN) return;
 	strncpy(ip->op[0],ip->rest_line,oplen);
