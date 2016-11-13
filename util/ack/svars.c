@@ -4,6 +4,7 @@
  *
  */
 
+#include <string.h>
 #include "ack.h"
 
 #ifndef NORCSID
@@ -81,7 +82,7 @@ void setsvar(char *name, char *str) {
 
 	new= newvar(name);
 #ifdef DEBUG
-	if ( debug>=2 ) vprint("%s=%s\n", name, str) ;
+	if ( debug>=2 ) vprint("%s=%s\n", new->v_name, str) ;
 #endif
 	new->v_type= string;
 	new->v_value.v_string= str;
@@ -92,7 +93,7 @@ void setpvar(char *name, char *(*rout)(void)) {
 
 	new= newvar(name);
 #ifdef DEBUG
-	if ( debug>=2 ) vprint("%s= (*%o)()\n",name,rout) ;
+	if ( debug>=2 ) vprint("%s= (*%o)()\n", new->v_name, rout) ;
 #endif
 	new->v_type= routine;
 	new->v_value.v_routine= rout;
