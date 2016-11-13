@@ -1,7 +1,4 @@
 /*
- * $Source$
- * $State$
- *
  * Simple tool to produce an utterly basic ELF executable
  * from an absolute ack.out file. Suitable for operating
  * systems like Linux.
@@ -24,6 +21,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
 #include "out.h"
@@ -67,6 +65,8 @@ const char elf_le_ident_string[] = {
 #define HDR_LENGTH	32
 
 char hdr[HDR_LENGTH] ;
+
+bool verbose = false;
 
 /* Segment numbers understood by aelflod. */
 
@@ -299,6 +299,10 @@ int main(int argc, char* argv[])
 				elfmachine = atoi(&argv[1][2]);
 				break;
 
+			case 'v':
+				verbose = true;
+				break;
+
 			default:
 			syntaxerror:
 				fatal("syntax error --- try -h for help");
@@ -451,8 +455,9 @@ int main(int argc, char* argv[])
 
 	/* Summarise what we've done. */
 	
+	if (verbose)
 	{
-		long ss = 0;
+		uint32_t ss = 0;
 		printf("        address  length\n");
 		printf(" ehdr : %08"PRIx32" %08"PRIx32"\n", outsect[TEXT].os_base & ~0x1FFF, codeoffset);
 		printf(" text : %08"PRIx32" %08"PRIx32"\n", outsect[TEXT].os_base, outsect[TEXT].os_size);
@@ -463,7 +468,7 @@ int main(int argc, char* argv[])
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;
 		ss += outsect[BSS].os_size;
-		printf("TOTAL :          %08lX\n", ss);
+		printf("TOTAL :          %08"PRIx32"\n", ss);
 	}
 	
 	return 0;
