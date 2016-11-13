@@ -7,7 +7,7 @@ addons:
     apt:
         packages:
         - ed
-	- qemu-system-ppc
+        - qemu-system-ppc
 
 git:
     depth: 10
