@@ -80,7 +80,10 @@ static int run_exec(trf *phase, const char *prog) {
 
 	fflush(stdout) ;
 	fflush(stderr) ;
-	while ( (child=fork())== -1 ) ;
+	child= fork() ;
+	if ( child== - 1) {
+		fatal("Cannot fork %s", prog) ;
+	}
 	if ( child ) {
 		/* The parent */
 		do {
