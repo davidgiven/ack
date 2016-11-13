@@ -18,6 +18,7 @@ installable {
 		"+tools",
 		"+libs",
 		"./include+pkg",
+		"util/amisc+aslod-pkg",
 		["$(PLATIND)/qemuppc/boot.o"] = "+boot",
         ["$(PLATIND)/qemuppc/libsys.a"] = "./libsys+lib",
 	}
