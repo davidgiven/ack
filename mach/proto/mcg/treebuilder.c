@@ -1643,7 +1643,8 @@ static void generate_tree(struct basicblock* bb)
             print_stack();
     }
 
-    assert(stackptr == 0);
+    /* Yes, we are allowed to leave stuff on the stack at the end of the procedure.
+     * It's discarded as part of the function return. */
 }
 
 void tb_procedure(void)
