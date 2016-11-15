@@ -347,13 +347,11 @@ static void add_through_register(struct vreg* vreg, struct hreg* hreg)
 
     if (hreg)
     {
-        bool unusedin = allocatable_stackable_input(hreg, vreg);
-        bool unusedout = allocatable_stackable_output(hreg, vreg);
+        bool unused = allocatable_through(hreg, vreg);
         struct vreg* inuse = pmap_findleft(current_ins, hreg);
         struct vreg* outuse = pmap_findleft(current_outs, hreg);
 
-        if ((unusedin || (inuse == vreg)) &&
-            (unusedout || (outuse == vreg)))
+        if (unused || ((inuse == vreg) && (outuse == vreg)))
         {
             /* Input and output are either free or already assigned to this
              * vreg. */
@@ -594,15 +592,14 @@ static int insert_moves(struct basicblock* bb, int index,
         struct hreg* src = pmap_findright(srcregs, vreg);
         assert(src != NULL);
 
-        if (src != dest)
-            pmap_add(&copies, src, dest);
+        pmap_add(&copies, src, dest);
     }
 
     while (copies.count > 0)
     {
         struct hreg* src;
         struct hreg* dest;
-        struct hreg* temp;
+        struct hreg* other;
         struct hop* hop;
 
         /* Try and find a destination which isn't a source. */
@@ -627,14 +624,38 @@ static int insert_moves(struct basicblock* bb, int index,
         }
         else
         {
-            /* There's nowhere to copy to --- the copies that are left form a cycle.
-             * So we need to swap instead. */
+            /* Okay, so there's nowhere to free to move src to. This could be
+             * because it's already in the right place. */
             
             src = copies.item[0].left;
             dest = pmap_findleft(&copies, src);
-            hop = platform_swap(bb, src, dest);
-            pmap_remove(&copies, src, dest);
-            pmap_remove(&copies, dest, src);
+
+            if (src == dest)
+            {
+                /* This register is already in the right place! */
+
+                pmap_remove(&copies, src, dest);
+                continue;
+            }
+            else
+            {
+                /* It's not in the right place. That means we have a cycle, and need to do
+                 * a swap. */
+
+                /* (src->dest, other->src) */
+                hop = platform_swap(bb, src, dest);
+                pmap_remove(&copies, src, dest);
+
+                /* Now src and dest are swapped. We know that the old src is in the right place
+                * and now contains dest. Any copies from the old dest (now containing src) must
+                * be patched to point at the old src. */
+
+                for (i=0; i<copies.count; i++)
+                {
+                    if (copies.item[i].right == src)
+                        copies.item[i].right = dest;
+                }
+            }
         }
 
         array_insert(&bb->hops, hop, index + inserted);
