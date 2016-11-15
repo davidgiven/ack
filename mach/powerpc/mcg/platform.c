@@ -34,8 +34,8 @@ void platform_calculate_offsets(void)
         if (!(hreg->attrs & burm_volatile_ATTR) &&
             ((hreg->attrs & burm_long_ATTR) || (hreg->attrs & burm_double_ATTR)))
         {
-            hreg->offset = current_proc->saved_size;
             current_proc->saved_size += 8;
+            hreg->offset = current_proc->saved_size;
             array_append(&saved_regs, hreg);
         }
     }
@@ -46,8 +46,8 @@ void platform_calculate_offsets(void)
         if (!(hreg->attrs & burm_volatile_ATTR) &&
             ((hreg->attrs & burm_int_ATTR) || (hreg->attrs & burm_float_ATTR)))
         {
-            hreg->offset = current_proc->saved_size;
             current_proc->saved_size += 4;
+            hreg->offset = current_proc->saved_size;
             array_append(&saved_regs, hreg);
         }
     }
@@ -61,7 +61,6 @@ void platform_calculate_offsets(void)
 struct hop* platform_prologue(void)
 {
     int i;
-    int saved_offset;
     int spoffset = current_proc->saved_size + current_proc->spills_size +
         current_proc->locals_size;
 	struct hop* hop = new_hop(current_proc->entry, NULL);
@@ -73,7 +72,7 @@ struct hop* platform_prologue(void)
         current_proc->locals_size);
     hop_add_insel(hop, "! spills @ fp-%d to fp-%d",
         -current_proc->fp_to_sb, current_proc->locals_size);
-    for (i=0; i<saved_regs.count; i++)
+    for (i=saved_regs.count-1; i>=0; i--)
     {
         struct hreg* hreg = saved_regs.item[i];
         hop_add_insel(hop, "! %s @ fp-%d",
@@ -87,16 +86,15 @@ struct hop* platform_prologue(void)
 	hop_add_insel(hop, "addi fp, sp, %d", spoffset);
 
     /* Saved reg offsets are negative. */
-    saved_offset = -(current_proc->locals_size + current_proc->spills_size);
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
         if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "stw %H, %d(fp)",
-                hreg, current_proc->fp_to_rb + saved_offset);
+                hreg, current_proc->fp_to_rb + hreg->offset);
         else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "stfs %H, %d(fp)",
-                hreg, current_proc->fp_to_rb + saved_offset);
+                hreg, current_proc->fp_to_rb + hreg->offset);
     }
 	return hop;
 }
@@ -105,17 +103,16 @@ struct hop* platform_epilogue(void)
 {
 	struct hop* hop = new_hop(current_proc->exit, NULL);
     int i;
-    int saved_offset;
 
     for (i=0; i<saved_regs.count; i++)
     {
         struct hreg* hreg = saved_regs.item[i];
         if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "lwz %H, %d(fp)",
-                hreg, current_proc->fp_to_rb + saved_offset);
+                hreg, current_proc->fp_to_rb + hreg->offset);
         else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "lfs %H, %d(fp)",
-                hreg, current_proc->fp_to_rb + saved_offset);
+                hreg, current_proc->fp_to_rb + hreg->offset);
     }
 
     hop_add_insel(hop, "lwz r0, 4(fp)");
