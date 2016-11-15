@@ -47,10 +47,6 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define CALL	"callname"
 #define END     "end"
 
-/* trans.c */
-growstring scanb(const char *) ;
-growstring scanvars(const char *) ;
-
 static void intrf(void) ;
 static void open_in(char *) ;
 static void close_in(void) ;
@@ -108,8 +104,8 @@ static int inoptlist(char *nm) {
 }
 
 static void intrf(void) {
+	/* Read in trf (transformation) */
 	register trf *new ;
-	growstring bline ;
 	int twice ;
 	int name_seen=0 ;
 
@@ -130,20 +126,14 @@ static void intrf(void) {
 		} else
 		if ( strcmp(ty_name,PROG)==0 ) {
 			if ( new->t_prog ) twice=YES ;
-			bline= scanb(bol);                /* Scan for \ */
-                      new->t_prog= gr_final(&bline);
+			new->t_prog= keeps(bol);
 		} else
 		if ( strcmp(ty_name,MAPF)==0 ) {
-			/* First read the mapflags line
-				and scan for backslashes */
-			bline= scanb(bol) ;
-			l_add(&new->t_mapf,gr_final(&bline)) ;
+			l_add(&new->t_mapf,keeps(bol)) ;
 		} else
 		if ( strcmp(ty_name,ARGS)==0 ) {
 			if ( new->t_argd ) twice=YES ;
-			bline= scanb(bol) ;
-			new->t_argd= keeps(gr_start(bline)) ;
-			gr_throw(&bline) ;
+			new->t_argd= keeps(bol) ;
 		} else
 		if ( strcmp(ty_name,STD_IN)==0 ) {
 			if ( new->t_stdin ) twice=YES ;
@@ -242,7 +232,7 @@ static void intrf(void) {
 		register list_elem *elem ;
 		vprint("%s: from %s to %s '%s'\n",
 			new->t_name,new->t_in ? new->t_in : "(null)",new->t_out,new->t_prog) ;
-		vprint("\targs: ") ; prns(new->t_argd) ;
+		vprint("\targs: %s",new->t_argd) ;
 		scanlist( l_first(new->t_mapf), elem ) {
 			vprint("\t%s\n",l_content(*elem)) ;
 		}

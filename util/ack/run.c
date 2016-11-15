@@ -20,9 +20,6 @@ static char rcs_id[] = "$Id$" ;
 
 #define ARG_MORE  40            /* The size of args chunks to allocate */
 
-/* trans.c */
-growstring scanvars(const char *);
-
 static int run_exec(trf *, const char *);
 static void x_arg(char *);
 
@@ -32,11 +29,9 @@ static unsigned  argmax;        /* The maximum number of arguments so far */
 
 int runphase(trf *phase) {
 	register list_elem *elem ;
-      char *prog ; int result ;
-      growstring bline ;
+	char *prog ; int result ;
 
-      bline=scanvars(phase->t_prog) ;
-      prog=gr_final(&bline) ;
+	prog=phase->t_prog ;
 	if ( v_flag || debug ) {
 		if ( v_flag==1 && !debug ) {
 			vprint("%s",phase->t_name) ;
@@ -70,9 +65,8 @@ int runphase(trf *phase) {
 		x_arg(l_content(*elem)) ;
 	}
 	x_arg( (char *)0 ) ;
-      result=run_exec(phase,prog) ;
-      throws(prog) ;
-      return result ;
+	result=run_exec(phase,prog) ;
+	return result ;
 }
 
 static int run_exec(trf *phase, const char *prog) {

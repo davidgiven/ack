@@ -75,14 +75,10 @@ char *getvar(const char *);
 
 /* util.c */
 char *ack_basename(const char *);
-void clr_noscan(char *);
 char *skipblank(char *);
 char *firstblank(char *);
 void fatal(const char *, ...);
 void vprint(const char *, ...);
-#ifdef DEBUG
-void prns(const char *);
-#endif
 void fuerror(const char *, ...);
 void werror(const char *, ...);
 void quit(int);

@@ -46,9 +46,6 @@ char *ack_basename(const char *string) {
 		case '/'     : last_start=fetch+1 ; break ;
 		case  0      : goto out ;
 		}
-		if ( !isascii(ctoken) || !isprint(ctoken) ) {
-			werror("non-ascii characters in argument %s",string) ;
-		}
 	}
 out:
 	if ( ! *last_start ) fuerror("empty filename \"%s\"",string) ;
@@ -59,13 +56,6 @@ out:
 	}
 	*store= 0 ;
 	return retval ;
-}
-
-void clr_noscan(char *str) {
-	register char *ptr ;
-	for ( ptr=str ; *ptr ; ptr++ ) {
-		*ptr&= ~NO_SCAN ;
-	}
 }
 
 char *skipblank(char *str) {
@@ -104,15 +94,6 @@ void vprint(const char* fmt, ...)
 	vfprintf(STDOUT, fmt, ap);
 	va_end(ap);
 }
-
-#ifdef DEBUG
-void prns(const char *s) {
-	for ( ; *s ; s++ ) {
-		putc((*s&0377)&~NO_SCAN,STDOUT) ;
-	}
-	putc('\n',STDOUT) ;
-}
-#endif
 
 /* VARARGS1 */
 void fuerror(const char *fmt, ...) {
