@@ -87,8 +87,6 @@ static int run_exec(trf *phase, const char *prog) {
 			}
 		} while ( waitchild!=child) ;
 		if ( status ) {
-			if ( status&0200 && (status&0177)!=SIGQUIT &&
-				t_flag<=1 ) unlink("core") ;
 			switch ( status&0177 ) {
 			case 0 :
 				break ;
