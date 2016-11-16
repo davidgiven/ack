@@ -1,5 +1,7 @@
 #include "test.h"
 
+/* No CRT in this file (this includes stdio and stdlib!). */
+
 void finished(void)
 {
     static const char s[] = "@@FINISHED\n";
@@ -9,7 +11,7 @@ void finished(void)
 void writehex(uint32_t code)
 {
     char buf[8];
-    char* p = &buf[8];
+    char* p = &buf[sizeof(buf)];
 
     do
     {
@@ -18,7 +20,7 @@ void writehex(uint32_t code)
     }
     while (code > 0);
 
-    write(1, p, buf+8-p);
+    write(1, p, buf + sizeof(buf) - p);
 }
 
 void fail(uint32_t code)

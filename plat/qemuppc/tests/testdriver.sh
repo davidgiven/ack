@@ -3,25 +3,18 @@ qemu=$1
 img=$2
 timeout=$3
 
-pipe=/tmp/testdriver.$$.pipe
+pipe=/tmp/$$.testdriver.pipe
 mknod $pipe p
-trap "rm $pipe" EXIT
+trap "rm -f $pipe" EXIT
 
-timeout $timeout $qemu -nographic -kernel $img >$pipe 2>&1 &
-pid=$!
+result=/tmp/$$.testdriver.result
+trap "rm -f $result" EXIT
 
-status=0
-while read line < $pipe; do
-    case "$line" in
-        *@@FAIL*)
-            echo $line
-            status=1
-            ;;
+pidfile=/tmp/$$.testdriver.pid
+trap "rm -f $pidfile" EXIT
 
-        *@@FINISHED*)
-            kill $pid
-            ;;
-    esac
-done
+($qemu -nographic -kernel $img 2>&1 & echo $! > $pidfile ) | tee $result | \
+    grep -l @@FINISHED | (read dummy && kill $(cat $pidfile))
 
-exit $status
+grep @@FAIL $result && cat $result && exit 1
+exit 0
