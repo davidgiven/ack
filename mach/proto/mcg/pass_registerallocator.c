@@ -54,7 +54,6 @@ static void wire_up_blocks_ins_outs(void)
     {
         struct basicblock* bb = dominance.preorder.item[i];
         assert(bb->hops.count >= 1);
-        bb->regsin = &bb->hops.item[0]->regsin;
         bb->regsout = &bb->hops.item[bb->hops.count-1]->regsout;
     }
 }
@@ -462,7 +461,7 @@ static void assign_hregs_to_vregs(void)
     for (i=0; i<dominance.preorder.count; i++)
     {
         struct basicblock* bb = dominance.preorder.item[i];
-        register_assignment_t* old = bb->regsin;
+        register_assignment_t* old = &bb->regsin;
         
         tracef('R', "R: considering block %s\n", bb->name);
 
@@ -568,8 +567,7 @@ static void assign_hregs_to_vregs(void)
             }
             tracef('R', "]\n");
 
-            if (j > 0)
-                j += insert_moves(bb, j, old, in);
+            j += insert_moves(bb, j, old, in);
 
             old = out;
         }
@@ -692,15 +690,16 @@ static void insert_phi_copies(void)
             {
                 struct vreg* vreg = bb->phis.item[k].left;
                 struct phi* phi = bb->phis.item[k].right;
-                struct hreg* dest = pmap_findright(bb->regsin, vreg);
+                struct hreg* src = pmap_findright(prevbb->regsout, phi->ir->result);
+                struct hreg* dest = pmap_findright(&bb->regsin, vreg);
 
                 if ((phi->prev == prevbb) && dest)
                 {
                     /* We inserted critical edges to guarantee this. */
                     assert(prevbb->nexts.count == 1);
 
-                    tracef('R', "R: map %%%d -> %%%d (%s)\n",
-                        phi->ir->result->id, 
+                    tracef('R', "R: phi map %%%d (%s) -> %%%d (%s)\n",
+                        phi->ir->result->id, src->id,
                         vreg->id, dest->id);
 
                     pmap_put(&destregs, dest, phi->ir->result);
@@ -709,12 +708,18 @@ static void insert_phi_copies(void)
 
             /* Add any non-phi inputs. */
 
-            for (k=0; k<bb->regsin->count; k++)
+            for (k=0; k<bb->regsin.count; k++)
             {
-                struct hreg* hreg = bb->regsin->item[k].left;
-                struct vreg* vreg = bb->regsin->item[k].right;
+                struct hreg*hreg = bb->regsin.item[k].left;
+                struct vreg* vreg = bb->regsin.item[k].right;
+                struct hreg* src = pmap_findright(prevbb->regsout, vreg);
                 if (!pmap_findleft(&bb->phis, vreg))
+                {
+                    tracef('R', "R: input map %%%d (%s) -> (%s)\n",
+                        vreg->id, src->id, hreg->id);
+
                     pmap_add(&destregs, hreg, vreg);
+                }
             }
 
             /* The last instruction of a block should be the jump that sends us
