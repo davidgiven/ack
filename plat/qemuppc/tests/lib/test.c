@@ -25,7 +25,7 @@ void writehex(uint32_t code)
 
 void fail(uint32_t code)
 {
-    write(1, "@@FAIL ", 7);
+    write(1, "@@FAIL on line 0x", 7);
     writehex(code);
     write(1, "\n", 1);
 }

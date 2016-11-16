@@ -10,6 +10,10 @@ else
 
 	for _, f in ipairs(testcases) do
 		local fs = replace(basename(f), "%..$", "")
+		local _, _, lang = fs:find("_(.)$")
+		if not lang then
+			lang = "e"
+		end
 
 		local bin = ackprogram {
 			name = fs.."_bin",
@@ -17,7 +21,8 @@ else
 			deps = { "plat/qemuppc/tests/lib+lib" },
 			vars = {
 				plat = "qemuppc",
-				lang = "e",
+				lang = lang,
+				ackcflags = "-O0"
 			}
 		}
 
