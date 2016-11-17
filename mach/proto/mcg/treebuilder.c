@@ -1261,20 +1261,24 @@ static void insn_ivalue(int opcode, arith value)
             switch (value)
             {
                 case 0:
-                    appendir(
-                        new_ir1(
-                            IR_FPTOLB, EM_pointersize,
-                            new_ir0(
-                                IR_GETFP, EM_pointersize
+                    push(
+                        appendir(
+                            new_ir1(
+                                IR_FPTOLB, EM_pointersize,
+                                new_ir0(
+                                    IR_GETFP, EM_pointersize
+                                )
                             )
                         )
                     );
                     break;
                         
                 case 1:
-                    appendir(
-                        new_ir0(
-                            IR_GETSP, EM_pointersize
+                    push(
+                        appendir(
+                            new_ir0(
+                                IR_GETSP, EM_pointersize
+                            )
                         )
                     );
                     break;
