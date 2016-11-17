@@ -13,8 +13,10 @@ trap "rm -f $result" EXIT
 pidfile=/tmp/$$.testdriver.pid
 trap "rm -f $pidfile" EXIT
 
-($qemu -nographic -kernel $img 2>&1 & echo $! > $pidfile ) | tee $result | \
-    grep -l @@FINISHED | (read dummy && kill $(cat $pidfile))
+( $qemu -nographic -kernel $img 2>&1 & echo $! > $pidfile ) \
+    | tee $result \
+    | ( timeout $timeout grep -l -q @@FINISHED ; echo ) \
+    | ( read dummy && kill $(cat $pidfile) )
 
-grep @@FAIL $result && cat $result && exit 1
+( grep -q @@FAIL $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
 exit 0
