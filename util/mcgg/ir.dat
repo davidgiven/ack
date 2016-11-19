@@ -103,6 +103,7 @@ S ?=i. SETRET
 
 # Flow control --- these never return
 V .=i. JUMP
+V .=i. FARJUMP
 V .=i. CJUMPEQ
 V .=i. CJUMPLT
 V .=i. CJUMPLE

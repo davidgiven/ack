@@ -466,6 +466,11 @@ PATTERNS
 		emit "b $addr"
 		cost 4;
 
+	FARJUMP(addr:LABEL.I)
+        with corrupted(volatile)
+		emit "b $addr"
+		cost 4;
+
     JUMP(dest:(int)reg)
         emit "mtspr ctr, %dest"
         emit "bcctrl 20, 0, 0"

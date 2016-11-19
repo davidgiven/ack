@@ -1130,9 +1130,8 @@ static void insn_ivalue(int opcode, arith value)
         case op_csa:
         case op_csb:
         {
-            const char* helper = aprintf(".%s%d",
-                (opcode == op_csa) ? "csa" : "csb",
-                value);
+            const char* helper = aprintf(".%s",
+                (opcode == op_csa) ? "csa" : "csb");
             struct ir* descriptor = pop(EM_pointersize);
 
             if (descriptor->opcode != IR_LABEL)
@@ -1143,7 +1142,7 @@ static void insn_ivalue(int opcode, arith value)
             materialise_stack();
             appendir(
                 new_ir2(
-                    IR_JUMP, 0,
+                    IR_FARJUMP, 0,
                     new_labelir(helper),
                     extract_block_refs(bb_get(descriptor->u.lvalue))
                 )
