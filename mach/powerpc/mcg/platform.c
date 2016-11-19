@@ -34,8 +34,8 @@ void platform_calculate_offsets(void)
         if (!(hreg->attrs & burm_volatile_ATTR) &&
             ((hreg->attrs & burm_long_ATTR) || (hreg->attrs & burm_double_ATTR)))
         {
-            current_proc->saved_size += 8;
             hreg->offset = current_proc->saved_size;
+            current_proc->saved_size += 8;
             array_append(&saved_regs, hreg);
         }
     }
@@ -46,8 +46,8 @@ void platform_calculate_offsets(void)
         if (!(hreg->attrs & burm_volatile_ATTR) &&
             ((hreg->attrs & burm_int_ATTR) || (hreg->attrs & burm_float_ATTR)))
         {
-            current_proc->saved_size += 4;
             hreg->offset = current_proc->saved_size;
+            current_proc->saved_size += 4;
             array_append(&saved_regs, hreg);
         }
     }
@@ -65,6 +65,9 @@ struct hop* platform_prologue(void)
         current_proc->locals_size;
 	struct hop* hop = new_hop(current_proc->entry, NULL);
 
+    hop_add_insel(hop, "! locals_size = %d", current_proc->locals_size);
+    hop_add_insel(hop, "! spills_size = %d", current_proc->spills_size);
+    hop_add_insel(hop, "! saved_size = %d", current_proc->saved_size);
     hop_add_insel(hop, "! params @ fp+%d", current_proc->fp_to_ab);
     hop_add_insel(hop, "! lr @ fp+4");  
     hop_add_insel(hop, "! fp @ fp+0");  
