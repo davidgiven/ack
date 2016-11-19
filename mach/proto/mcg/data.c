@@ -85,7 +85,7 @@ void data_float(const char* data, size_t size, bool is_ro)
     for (i=1; i<size; i++)
     {
         fprintf(outputfile, ", ");
-        writehex(buffer[0], 1);
+        writehex(buffer[i], 1);
     }
     fprintf(outputfile, "\n");
 }
