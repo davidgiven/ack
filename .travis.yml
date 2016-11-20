@@ -12,7 +12,6 @@ addons:
 
 git:
     depth: 10
-sudo: required
 language: c
 script:
     - make PREFIX=/tmp/acki
