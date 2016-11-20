@@ -392,17 +392,33 @@ PATTERNS
         emit "li32 %out.1, 0"
         cost 8;
 
-    out:(iret)reg = FROMF.I(in:(dret)reg)
+    out:(iret)reg = FROMSF.I(in:(dret)reg)
         with corrupted(volatile)
         emit "bl .fromf2i"
         cost 4;
 
-    out:(iret)reg = FROMD.I(in:(dret)reg)
+    out:(int)reg = FROMSD.I(in:(double)reg)
+        with preserved(%in)
+        emit "fctiwz %in, %in"
+        emit "stfdu %in, -8(sp)"
+        emit "lwz %out, 4(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
+
+    out:(int)reg = FROMUD.I(in:(double)reg)
         with corrupted(volatile)
-        emit "bl .fromd2i"
+        emit "stfdu %in, -8(sp)"
+        emit "bl .cfu8"
+        emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+        cost 16;
+
+    out:(lret)reg = FROMSF.L(in:(fret)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2l"
         cost 4;
 
-    out:(lret)reg = FROMF.L(in:(fret)reg)
+    out:(lret)reg = FROMUF.I(in:(fret)reg)
         with corrupted(volatile)
         emit "bl .fromf2l"
         cost 4;

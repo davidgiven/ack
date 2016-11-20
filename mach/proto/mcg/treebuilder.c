@@ -404,11 +404,11 @@ static void insn_simple(int opcode)
         case op_cii: simple_convert(IR_FROMSI); break;
         case op_ciu: simple_convert(IR_FROMSI); break;
         case op_cui: simple_convert(IR_FROMUI); break;
-        case op_cfu: simple_convert(IR_FROMF); break; /* FIXME: technically wrong */
-        case op_cfi: simple_convert(IR_FROMF); break;
+        case op_cfu: simple_convert(IR_FROMUF); break;
+        case op_cfi: simple_convert(IR_FROMSF); break;
         case op_cif: simple_convert(IR_FROMSI); break;
         case op_cuf: simple_convert(IR_FROMUI); break;
-        case op_cff: simple_convert(IR_FROMF); break;
+        case op_cff: simple_convert(IR_FROMSF); break;
 
         case op_cmp:
             push(
