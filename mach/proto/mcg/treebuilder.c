@@ -7,6 +7,7 @@ static struct ir* stack[64];
 
 static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode);
 static struct ir* appendir(struct ir* ir);
+static void insn_ivalue(int opcode, arith value);
 
 static void reset_stack(void)
 {
@@ -486,7 +487,12 @@ static void insn_simple(int opcode)
 
         case op_trp: helper_function(".trp"); break;
         case op_sig: helper_function(".sig"); break;
-        case op_rtt: helper_function(".rtt"); break;
+
+        case op_rtt:
+        {
+            insn_ivalue(op_ret, 0);
+            break;
+        }
 
         /* FIXME: These instructions are really complex and barely used
          * (Modula-2 bitset support, I believe). Leave them until later. */
@@ -1202,11 +1208,26 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_lxa:
         {
-            /* What does this actually *do*? The spec doesn't say. */
-            appendir(
+            struct ir* ir;
+
+            /* Walk the static chain. */
+
+            ir = new_ir0(
+                IR_GETFP, EM_pointersize
+            );
+
+            while (value--)
+            {
+                ir = new_ir1(
+                    IR_CHAINFP, EM_pointersize,
+                    ir
+                );
+            }
+
+            push(
                 new_ir1(
-                    IR_CALL, 0,
-                    new_labelir(".unimplemented_lxa")
+                    IR_FPTOAB, EM_pointersize,
+                    ir
                 )
             );
             break;
