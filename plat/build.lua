@@ -62,11 +62,23 @@ definerule("ackprogram",
 		deps = { type="targets", default={} },
 	},
 	function (e)
+		-- This bit is a hack. We *don't* want to link the language libraries here,
+		-- because the ack driver is going to pick the appropriate library itself and
+		-- we don't want more than one. But we still need to depend on them, so we use
+		-- a nasty hack.
+
+		local platstamp = normalrule {
+			name = e.name.."/platstamp",
+			ins = { "plat/"..e.vars.plat.."+pkg" },
+			outleaves = { "stamp" },
+			commands = { "touch %{outs}" }
+		}
+
 		return cprogram {
 			name = e.name,
 			srcs = e.srcs,
 			deps = {
-				"plat/"..e.vars.plat.."+pkg",
+				platstamp,
 				"util/ack+pkg",
 				"util/led+pkg",
 				e.deps
