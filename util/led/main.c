@@ -11,6 +11,7 @@ static char rcsid[] = "$Id$";
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <out.h>
 #include "const.h"
 #include "debug.h"
@@ -29,15 +30,16 @@ int		Verbose = 0;
 
 static			initializations();
 static			first_pass();
-static long		number();
-static			setlign();
-static			setbase();
+static uint32_t		number(const char *);
+static void		setlign(int, uint32_t);
+static void		setbase(int, uint32_t);
 static struct outname	*makename();
 static			pass1();
 static			evaluate();
 static			norm_commons();
 static			complete_sections();
 static			change_names();
+static bool		setbit();
 static bool		tstbit();
 static			second_pass();
 static			pass2();
@@ -249,12 +251,11 @@ first_pass(argv)
  * else if it starts with 0, it's octal,
  * else it's decimal.
  */
-static long
-number(s)
-	register char	*s;
+static uint32_t
+number(const char *s)
 {
 	register int	digit;
-	register long	value = 0;
+	register uint32_t value = 0;
 	register int	radix = 10;
 
 	if (*s == '0') {
@@ -289,22 +290,17 @@ number(s)
  * not. Only one base may be given. The same applies for alignments.
  */
 static char	basemap[MAXSECT / WIDTH];
-static long	sect_base[MAXSECT];
+static uint32_t	sect_base[MAXSECT];
 static char	lignmap[MAXSECT / WIDTH];
-static long	sect_lign[MAXSECT];
+static uint32_t	sect_lign[MAXSECT];
 
-/*
 /*
  * Set the alignment of section `sectno' to `lign', if this doesn't
  * conflict with earlier alignment.
  */
-static
-setlign(sectno, lign)
-	register int	sectno;
-	register long	lign;
+static void
+setlign(int sectno, uint32_t lign)
 {
-	extern bool	setbit();
-
 	if (setbit(sectno, lignmap) && sect_lign[sectno] != lign)
 		fatal("section has different alignments");
 	if (lign == (long)0)
@@ -316,13 +312,9 @@ setlign(sectno, lign)
  * Set the base of section `sectno' to `base', if no other base has been
  * given yet.
  */
-static
-setbase(sectno, base)
-	register int	sectno;
-	register long	base;
+static void
+setbase(int sectno, uint32_t base)
 {
-	extern bool	setbit();
-
 	if (setbit(sectno, basemap) && sect_base[sectno] != base)
 		fatal("section has different bases");
 	sect_base[sectno] = base;
@@ -457,8 +449,8 @@ struct orig	relorig[MAXSECT];
 static
 complete_sections()
 {
-	register long	base = 0;
-	register long	foff;
+	register uint32_t base = 0;
+	register uint32_t foff;
 	register struct outsect *sc;
 	register int	sectindex;
 
