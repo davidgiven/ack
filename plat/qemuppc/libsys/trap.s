@@ -55,7 +55,9 @@ EUNIMPL = 63		! unimplemented em-instruction called
 	b .trp
 
 .define .trp
+.define .trap
 .trp:
+.trap:
 	b .trp					! spin forever
 
 .define .sig
