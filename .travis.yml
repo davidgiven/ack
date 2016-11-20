@@ -8,6 +8,7 @@ addons:
         packages:
         - ed
         - qemu-system
+        - openbios-ppc
 
 git:
     depth: 10
