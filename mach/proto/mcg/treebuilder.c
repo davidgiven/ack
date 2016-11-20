@@ -1447,12 +1447,11 @@ static void insn_ivalue(int opcode, arith value)
          * (Modula-2 bitset support, I believe). Leave them until leter. */
         case op_inn:
         {
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir(".unimplemented")
-                )
+            push(
+                new_wordir(value)
             );
+
+            helper_function(".inn");
             break;
         }
 

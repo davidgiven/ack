@@ -8,6 +8,7 @@ for _, plat in ipairs(vars.plats) do
 		name = "lib_"..plat,
 		srcs = {
 			"./*.s",
+			"./*.e",
 		},
 		vars = { plat = plat },
 		deps = {
