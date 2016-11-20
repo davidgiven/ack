@@ -9,9 +9,20 @@ int zero = 0;
 /* Bypasses the CRT, so there's no stdio or BSS initialisation. */
 void _m_a_i_n(void)
 {
-    ASSERT((three/two) == 1);
-    ASSERT((-three/two) == -1);
-    ASSERT((-three/-two) == 1);
-    ASSERT((three/-two) == -1);
+    ASSERT((three / two) == 1);
+    ASSERT((-three / two) == -1);
+    ASSERT((-three / -two) == 1);
+    ASSERT((three / -two) == -1);
+
+    ASSERT((three / 2) == 1);
+    ASSERT((-three / 2) == -1);
+    ASSERT((-three / -2) == 1);
+    ASSERT((three / -2) == -1);
+
+    ASSERT((3 / two) == 1);
+    ASSERT((-3 / two) == -1);
+    ASSERT((-3 / -two) == 1);
+    ASSERT((3 / -two) == -1);
+
     finished();
 }
