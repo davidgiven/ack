@@ -39,7 +39,7 @@ begtext:
 
 	b __m_a_i_n
 
-.sect rom
+.sect .rom
 begrom:
 
 .sect .data

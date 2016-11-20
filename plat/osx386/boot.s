@@ -48,7 +48,7 @@ EXIT:
 	push 1
 	jmp __exit
 
-.sect rom
+.sect .rom
 begrom:
 
 .sect .data
