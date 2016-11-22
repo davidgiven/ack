@@ -4,12 +4,12 @@
  */
 
 /*
- * cvmach.c - convert ack.out to mach-o
+ * cvmach.c - convert ack.out to Mach-o
  *
  * Mostly pinched from aelflod (util/amisc/aelflod.c), which pinched
  * from the ARM cv (mach/arm/cv/cv.c), which pinched from the m68k2 cv
  * (mach/m68k2/cv/cv.c).  The code to read ack.out format using
- * liboject is pinched from the Xenix i386 cv (mach/i386/cv/cv.c).
+ * libobject is pinched from the Xenix i386 cv (mach/i386/cv/cv.c).
  */
 
 #include <stdarg.h>
@@ -19,11 +19,12 @@
 #include <string.h>
 
 #include <out.h>
-/* Can't find #include <object.h>*/
+#include <object.h>
 
 /* Header and section table of ack.out */
 struct outhead	outhead;
 struct outsect	outsect[S_MAX];
+uint32_t ack_off_char;		/* Offset of string table in ack.out */
 
 int bigendian;			/* Emit big-endian Mach-o? */
 int cpu_type;
@@ -48,6 +49,7 @@ enum {
 #define MH_MAGIC			0xfeedface
 #define MH_EXECUTE			2
 #define LC_SEGMENT			1
+#define LC_SYMTAB			2
 #define LC_UNIXTHREAD			5
 
 #define CPU_TYPE_X86			7
@@ -68,7 +70,10 @@ enum {
 /* sizes of Mach structs */
 #define SZ_MACH_HEADER			28
 #define SZ_SEGMENT_COMMAND		56
+#define SZ_SECTION_HEADER		68
+#define SZ_SYMTAB_COMMAND		24
 #define SZ_THREAD_COMMAND_BF_STATE	16
+#define SZ_NLIST			12
 
 /* the page size for x86 and PowerPC */
 #define CV_PGSZ				4096
@@ -76,9 +81,33 @@ enum {
 #define pg_mod(u) ((u) & (CV_PGSZ - 1))
 /* u rounded down to whole pages */
 #define pg_trunc(u) ((u) & ~(CV_PGSZ - 1))
+/* u rounded up to whole pages */
+#define pg_round(u) pg_trunc((u) + (CV_PGSZ - 1))
+
+const char zero_pg[CV_PGSZ] = { 0 };
+
+/*
+ * machseg[0]: __PAGEZERO with address 0, size CV_PGSZ
+ * machseg[1]: __TEXT for ack TEXT, ROM
+ * machseg[2]: __DATA for ack DATA, BSS
+ */
+struct {
+	const char	*ms_name;
+	uint32_t	 ms_vmaddr;
+	uint32_t	 ms_vmsize;
+	uint32_t	 ms_fileoff;
+	uint32_t	 ms_filesize;
+	uint32_t	 ms_prot;
+	uint32_t	 ms_nsects;
+} machseg[3] = {
+	"__PAGEZERO", 0, CV_PGSZ, 0, 0, VM_PROT_NONE, 0,
+	"__TEXT", 0, 0, 0, 0, VM_PROT_READ | VM_PROT_EXECUTE, 2,
+	"__DATA", 0, 0, 0, 0, VM_PROT_READ | VM_PROT_WRITE, 2,
+};
 
 
-void usage(void)
+static void
+usage(void)
 {
 	fprintf(stderr, "Usage: %s -m<num> <inputfile> <outputfile>\n",
 	    program);
@@ -86,7 +115,8 @@ void usage(void)
 }
 
 /* Produce an error message and exit. */
-void fatal(const char* s, ...)
+static void
+fatal(const char* s, ...)
 {
 	va_list ap;
 
@@ -103,22 +133,54 @@ void fatal(const char* s, ...)
 	exit(1);
 }
 
-void rd_fatal(void)
+void
+rd_fatal(void)
 {
 	fatal("read error");
 }
 
-/* Calculate the result of a aligned to b (rounding up if necessary).
- * b must be a power of two. */
-uint32_t align(uint32_t a, uint32_t b)
+/* Returns n such that 2**n == a. */
+static uint32_t
+log2u(uint32_t a)
 {
-	a += b - 1;
-	return a & ~(b-1);
+	uint32_t n = 0;
+	while (a) {
+		a >>= 1;
+		n++;
+	}
+	return n - 1;
 }
 
+/* Writes a byte. */
+static void
+emit8(uint8_t value)
+{
+	writef(&value, 1, 1);
+}
+
+/* Writes out a 16-bit value in the appropriate endianness. */
+static void
+emit16(uint16_t value)
+{
+	unsigned char buffer[2];
+
+	if (bigendian)
+	{
+		buffer[0] = (value >> 8) & 0xFF;
+		buffer[1] = (value >> 0) & 0xFF;
+	}
+	else
+	{
+		buffer[1] = (value >> 8) & 0xFF;
+		buffer[0] = (value >> 0) & 0xFF;
+	}
+
+	writef(buffer, 1, sizeof(buffer));
+}
 
 /* Writes out a 32-bit value in the appropriate endianness. */
-void emit32(uint32_t value)
+static void
+emit32(uint32_t value)
 {
 	unsigned char buffer[4];
 
@@ -142,7 +204,8 @@ void emit32(uint32_t value)
 
 /* Copies the contents of a section from the input stream
  * to the output stream. */
-void emit_section(int section_nr)
+static void
+emit_section(int section_nr)
 {
 	struct outsect *section = &outsect[section_nr];
 	size_t blocksize;
@@ -160,50 +223,114 @@ void emit_section(int section_nr)
 
 	/* Zero fill any remaining space. */
 	n = section->os_size - section->os_flen;
-	if (n > 0)
+	while (n > 0)
 	{
-		memset(buffer, 0, BUFSIZ);
-		while (n > 0)
-		{
-			blocksize = (n > BUFSIZ) ? BUFSIZ : n;
-			writef(buffer, 1, blocksize);
-			n -= blocksize;
-		}
+		blocksize = (n > sizeof(zero_pg)) ? sizeof(zero_pg) : n;
+		writef(zero_pg, 1, blocksize);
+		n -= blocksize;
 	}
 }
 
-void emit_lc_segment(char *name, uint32_t vm_ad, uint32_t vm_sz,
-    uint32_t f_off, uint32_t f_sz, int prot)
+static void
+emit_lc_segment(int i)
 {
-	char namebuf[16];
+	uint32_t sz;
 	int flags, maxprot;
+	char namebuf[16];
 
-	if (prot == VM_PROT_NONE) {
+	if (i == 0) {
 		/* special values for __PAGEZERO */
 		maxprot = VM_PROT_NONE;
-		flags = 4; /* NORELOC */
+		flags = 4; /* SG_NORELOC */
 	} else {
 		maxprot = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
 		flags = 0;
 	}
 
+	/*
+	 * The size of this command includes the size of its section
+	 * headers, see emit_section_header().
+	 */
+	sz = SZ_SEGMENT_COMMAND + machseg[i].ms_nsects * SZ_SECTION_HEADER;
+
 	/* Use strncpy() to pad namebuf with '\0' bytes. */
-	strncpy(namebuf, name, sizeof(namebuf));
+	strncpy(namebuf, machseg[i].ms_name, sizeof(namebuf));
 
 	emit32(LC_SEGMENT);		/* command */
-	emit32(SZ_SEGMENT_COMMAND);	/* size of command */
+	emit32(sz);			/* size of command */
 	writef(namebuf, 1, sizeof(namebuf));
-	emit32(vm_ad);			/* vm address */
-	emit32(vm_sz);			/* vm size */
-	emit32(f_off);			/* file offset */
-	emit32(f_sz);			/* file size */
+	emit32(machseg[i].ms_vmaddr);	/* vm address */
+	emit32(machseg[i].ms_vmsize);	/* vm size */
+	emit32(machseg[i].ms_fileoff);	/* file offset */
+	emit32(machseg[i].ms_filesize);	/* file size */
 	emit32(maxprot);		/* max protection */
-	emit32(prot);			/* initial protection */
-	emit32(0);			/* number of Mach sections */
+	emit32(machseg[i].ms_prot);	/* initial protection */
+	emit32(machseg[i].ms_nsects);	/* number of Mach sections */
 	emit32(flags);			/* flags */
 }
 
-void emit_lc_unixthread(void)
+static void
+emit_section_header(int ms, const char *name, int os)
+{
+	uint32_t fileoff, flags;
+	char namebuf[16];
+
+	switch (os) {
+	case TEXT:
+		/* S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS */
+		flags = 0x80000400;
+		break;
+	case BSS:
+		flags = 0x1; /* S_ZEROFILL */
+		break;
+	default:
+		flags = 0x0; /* S_REGULAR */
+		break;
+	}
+
+	if (os == BSS)
+		fileoff = 0;
+	else
+		fileoff = machseg[ms].ms_fileoff +
+		    (outsect[os].os_base - machseg[ms].ms_vmaddr);
+
+	/* name of Mach section */
+	strncpy(namebuf, name, sizeof(namebuf));
+	writef(namebuf, 1, sizeof(namebuf));
+	/* name of Mach segment */
+	strncpy(namebuf, machseg[ms].ms_name, sizeof(namebuf));
+	writef(namebuf, 1, sizeof(namebuf));
+	emit32(outsect[os].os_base);	/* vm address */
+	emit32(outsect[os].os_size);	/* vm size */
+	emit32(fileoff);		/* file offset */
+	emit32(log2u(outsect[os].os_lign)); /* alignment */
+	emit32(0);			/* offset of relocations */
+	emit32(0);			/* number of relocations */
+	emit32(flags);			/* flags */
+	emit32(0);			/* reserved */
+	emit32(0);			/* reserved */
+}
+
+static void
+emit_lc_symtab(void)
+{
+	uint32_t off1, off2;
+
+	/* Symbol table will be at next page after machseg[2]. */
+	off1 = pg_round(machseg[2].ms_fileoff + machseg[2].ms_filesize);
+	/* String table will be after symbol table. */
+	off2 = off1 + 12 * outhead.oh_nname;
+
+	emit32(LC_SYMTAB);		/* command */
+	emit32(SZ_SYMTAB_COMMAND);	/* size of command */
+	emit32(off1);			/* offset of symbol table */
+	emit32(outhead.oh_nname);	/* number of symbols */
+	emit32(off2);			/* offset of string table */
+	emit32(1 + outhead.oh_nchar);	/* size of string table */
+}
+
+static void
+emit_lc_unixthread(void)
 {
 	int i, ireg, ts, ts_count;
 
@@ -238,10 +365,111 @@ void emit_lc_unixthread(void)
 	}
 }
 
-
-int main(int argc, char *argv[])
+static void
+emit_symbol(struct outname *np)
 {
-	uint32_t len2, len3, mach_base, pad, sz_bf_entry, sz_load_cmds;
+	uint32_t soff;
+	uint8_t type;
+	uint8_t sect;
+	uint16_t desc;
+
+	if (np->on_type & S_STB) {
+		/* stab for debugger */
+		type = np->on_type >> 8;
+		desc = np->on_desc;
+	} else {
+		desc = 0;
+
+		switch (np->on_type & S_TYP) {
+		case S_UND:
+			type = 0x0; /* N_UNDF */
+			break;
+		case S_ABS:
+			type = 0x2; /* N_ABS */
+			break;
+		default:
+			type = 0xe; /* N_SECT */
+			break;
+		}
+
+		if (np->on_type & S_EXT)
+			type |= 0x1; /* N_EXT */
+	}
+
+	switch (np->on_type & S_TYP) {
+	case S_MIN + TEXT:
+		sect = 1;
+		break;
+	case S_MIN + ROM:
+		sect = 2;
+		break;
+	case S_MIN + DATA:
+		sect = 3;
+		break;
+	case S_MIN + BSS:
+	case S_MIN + NUM_SEGMENTS:
+		sect = 4;
+		break;
+	default:
+		sect = 0; /* NO_SECT */
+		break;
+	}
+
+	/*
+	 * To find the symbol's name, ack.out uses an offset from the
+	 * beginning of the file, but Mach-o uses an offset into the
+	 * string table.  Both formats use offset 0 for a symbol with
+	 * no name.  We will prepend a '\0' at offset 0, so every
+	 * named symbol needs + 1.
+	 */
+	if (np->on_foff)
+		soff = np->on_foff - ack_off_char + 1;
+	else
+		soff = 0;
+
+	emit32(soff);
+	emit8(type);
+	emit8(sect);
+	emit16(desc);
+	emit32(np->on_valu);
+}
+
+static void
+emit_symtab(void)
+{
+	struct outname *names, *np;
+	int i;
+	char *chars;
+
+	/* Using calloc(a, b) to check if a * b would overflow. */
+	names = calloc(outhead.oh_nname, sizeof(struct outname));
+	if (!names)
+		fatal("out of memory");
+	chars = malloc(outhead.oh_nchar);
+	if (!names || !chars)
+		fatal("out of memory");
+	rd_name(names, outhead.oh_nname);
+	rd_string(chars, outhead.oh_nchar);
+
+	ack_off_char = OFF_CHAR(outhead);
+
+	/* Emit each symbol entry. */
+	for (i = 0, np = names; i < outhead.oh_nname; i++, np++)
+		emit_symbol(np);
+
+	/*
+	 * Emit the string table.  The first character of a Mach-o
+	 * string table must be '\0', so we prepend a '\0'.
+	 */
+	emit8(0);
+	writef(chars, 1, outhead.oh_nchar);
+}
+
+
+int
+main(int argc, char *argv[])
+{
+	uint32_t end, pad[3], sz, sz_load_cmds;
 	int cpu_subtype, mflag = 0;
 
 	/* General housecleaning and setup. */
@@ -323,54 +551,62 @@ int main(int argc, char *argv[])
 	rd_sect(outsect, outhead.oh_nsect);
 
 	/*
-	 * 1st Mach segment: __PAGEZERO
-	 * 2nd Mach segment: __TEXT
-	 *   Mach headers and load commands
-	 *   ack TEXT
-	 *   ack ROM
-	 * 3rd Mach segment: __DATA
-	 *   ack DATA
-	 *   ack BSS
+	 * machseg[1] will start at a page boundary and include the
+	 * Mach header and load commands before ack TEXT and ROM.
+	 *
+	 * Find our entry point (immediately after the load commands)
+	 * and check that TEXT begins there.
 	 */
-
-	/* Find entry point and check that TEXT begins there. */
-	mach_base = pg_trunc(outsect[TEXT].os_base);
-	sz_load_cmds = 3 * SZ_SEGMENT_COMMAND + sz_thread_command;
-	sz_bf_entry = SZ_MACH_HEADER + sz_load_cmds;
-	entry = mach_base + sz_bf_entry;
+	machseg[1].ms_vmaddr = pg_trunc(outsect[TEXT].os_base);
+	sz_load_cmds = 3 * SZ_SEGMENT_COMMAND + 4 * SZ_SECTION_HEADER +
+	    SZ_SYMTAB_COMMAND + sz_thread_command;
+	entry = machseg[1].ms_vmaddr + SZ_MACH_HEADER + sz_load_cmds;
 	if (entry != outsect[TEXT].os_base) {
-		fatal("text segment must have base 0x%lx, not 0x%lx\n",
-		    entry, outsect[TEXT].os_base);
+		fatal("text segment must have base 0x%lx, not 0x%lx"
+		    "\n\t(suggest em_led -b0:0x%lx)",
+		    (unsigned long)entry,
+		    (unsigned long)outsect[TEXT].os_base,
+		    (unsigned long)entry);
 	}
 
-	/* Check that ROM can follow TEXT in 2nd Mach segment. */
-	outsect[TEXT].os_size =
-	    align(outsect[TEXT].os_size, outsect[ROM].os_lign);
-	if (outsect[ROM].os_base !=
-	    outsect[TEXT].os_base + outsect[TEXT].os_size)
+	/* Pad for alignment between TEXT and ROM. */
+	sz = outsect[ROM].os_base - outsect[TEXT].os_base;
+	pad[0] = sz - outsect[TEXT].os_size;
+	if (sz < outsect[TEXT].os_size || pad[0] >= outsect[ROM].os_lign)
 		fatal("the rom segment must follow the text segment.");
 
 	/*
-	 * Insert padding between ROM and DATA, such that
-	 *   pg_mod(len2) == pg_mod(outsect[DATA].os_base)
+	 * Pad between ROM and DATA such that we can map machseg[2] at
+	 * a page boundary with DATA at its correct base address.
 	 *
-	 * This will allow us to map the 3rd Mach segment at the
-	 * beginning of a page, such that DATA is at its base.
+	 * For example, if ROM ends at 0x2bed and DATA begins at
+	 * 0x3000, then we pad to the page boundary.  If ROM ends at
+	 * 0x2bed and DATA begins at 0x3bf0, then pad = 3 and we map
+	 * the page twice, at both 0x2000 and 0x3000.
 	 */
-	len2 = sz_bf_entry + outsect[TEXT].os_size + outsect[ROM].os_size;
-	pad = pg_mod(outsect[DATA].os_base - len2);
-	outsect[ROM].os_size += pad;
-	len2 = pg_trunc(len2 + pad);
+	end = outsect[ROM].os_base + outsect[ROM].os_size;
+	pad[1] = pg_mod(outsect[DATA].os_base - end);
 
-	/* Check that BSS can follow DATA in 3rd Mach segment. */
+	sz = end - machseg[1].ms_vmaddr;
+	machseg[1].ms_vmsize = machseg[1].ms_filesize = sz;
+	machseg[2].ms_vmaddr = pg_trunc(outsect[DATA].os_base);
+	machseg[2].ms_fileoff = pg_trunc(sz + pad[1]);
+	if (machseg[2].ms_vmaddr < end &&
+	    machseg[2].ms_vmaddr >= machseg[1].ms_vmaddr)
+		fatal("the data and rom segments are too close."
+		    "\n\t(suggest em_led -a2:%d)", (int)CV_PGSZ);
+
 	if (outsect[BSS].os_flen != 0)
 		fatal("the bss space contains initialized data.");
-	if (outsect[BSS].os_base <
-	    outsect[DATA].os_base + outsect[DATA].os_size)
+	sz = outsect[BSS].os_base - outsect[DATA].os_base;
+	if (sz < outsect[DATA].os_size ||
+	    sz - outsect[DATA].os_size >= outsect[BSS].os_lign)
 		fatal("the bss segment must follow the data segment.");
 
-	len3 = outsect[BSS].os_base - pg_trunc(outsect[DATA].os_base) +
-	    outsect[BSS].os_size;
+	end = outsect[DATA].os_base + outsect[DATA].os_size;
+	machseg[2].ms_filesize = end - machseg[2].ms_vmaddr;
+	end = outsect[BSS].os_base + outsect[BSS].os_size;
+	machseg[2].ms_vmsize = end - machseg[2].ms_vmaddr;
 
 	if (outhead.oh_nsect == NUM_SEGMENTS + 1) {
 		if (outsect[NUM_SEGMENTS].os_base !=
@@ -380,36 +616,42 @@ int main(int argc, char *argv[])
 			fatal("end segment must be empty");
 	}
 
+	/*
+	 * Pad to page boundary between BSS and symbol table.
+	 *
+	 * Also, some versions of Mac OS X refuse to load any
+	 * executable smaller than 4096 bytes (1 page).
+	 */
+	pad[2] = pg_mod(-(uint32_t)machseg[2].ms_filesize);
+
 	/* Emit the Mach header. */
 	emit32(MH_MAGIC);	/* magic */
 	emit32(cpu_type);	/* cpu type */
 	emit32(cpu_subtype);	/* cpu subtype */
 	emit32(MH_EXECUTE);	/* file type */
-	emit32(4);		/* number of load commands */
+	emit32(5);		/* number of load commands */
 	emit32(sz_load_cmds);	/* size of load commands */
 	emit32(0);		/* flags */
 
-	/*			vm address:	vm size:
-	 * 1st Mach segment:	NULL		CV_PGSZ
-	 * 2nd Mach segment:	mach_base	len2
-	 * 3rd Mach segment:	mach_base+len2	len3
-	 *
-	 *			file offset:	file size:
-	 * 2nd Mach segment:	0		len2
-	 * 3rd Mach segment:	len2		DATA os_size
-	 */
-	emit_lc_segment("__PAGEZERO", 0 /* NULL */, CV_PGSZ,
-	    0, 0, VM_PROT_NONE);
-	emit_lc_segment("__TEXT", mach_base, len2,
-	    0, len2, VM_PROT_READ | VM_PROT_EXECUTE);
-	emit_lc_segment("__DATA", mach_base + len2, len3,
-	    len2, outsect[DATA].os_size, VM_PROT_READ | VM_PROT_WRITE);
+	emit_lc_segment(0);
+	emit_lc_segment(1);
+	emit_section_header(1, "__text", TEXT);
+	emit_section_header(1, "__rom", ROM);
+	emit_lc_segment(2);
+	emit_section_header(2, "__data", DATA);
+	emit_section_header(2, "__bss", BSS);
+	emit_lc_symtab();
 	emit_lc_unixthread();
 
 	/* Emit non-empty sections. */
 	emit_section(TEXT);
+	writef(zero_pg, 1, pad[0]);
 	emit_section(ROM);
+	writef(zero_pg, 1, pad[1]);
 	emit_section(DATA);
+
+	writef(zero_pg, 1, pad[2]);
+	emit_symtab();
 
 	if (ferror(output))
 		fatal("write error");

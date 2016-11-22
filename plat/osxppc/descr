@@ -18,7 +18,7 @@ var ARCH=powerpc
 var PLATFORM=osxppc
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
-var ALIGN=-a0:4 -a1:4 -a2:4096 -a3:4 -b0:0x1174
+var ALIGN=-a0:4 -a1:4 -a2:4096 -a3:4 -b0:0x129c
 var C_LIB={PLATFORMDIR}/libc-ansi.a
 # bitfields reversed for compatibility with (g)cc.
 # XXX this is from linux386, might be wrong for osxppc
