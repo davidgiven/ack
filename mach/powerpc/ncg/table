@@ -328,6 +328,7 @@ INSTRUCTIONS
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lhz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  li32            GPR:wo, CONST:ro cost(8, 2).
   li32            GPR:wo, LABEL:ro cost(8, 2).
   lwzu            GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
@@ -1637,14 +1638,13 @@ PATTERNS
 			gen
 				bl {LABEL, ".set"}
 			
-	pat inn defined($1)                /* Test for set bit */
-		leaving
-			set INT32
-			and INT32
-			
-	pat inn !defined($1)               /* Test for set bit (variable) */
-		with GPR3 STACK
+	pat inn                            /* Test for set bit */
+		with STACK
+			kills ALL
+			uses REG
 			gen
+				li32 %a, {CONST, $1}
+				stwu %a, {GPRINDIRECT, SP, 0-4}
 				bl {LABEL, ".inn"}
 			
 			
@@ -1898,12 +1898,12 @@ PATTERNS
 				addi SP, SP, {CONST, 12}
 				
 	pat csa                            /* Array-lookup switch */
-		with GPR3 GPR4 STACK
+		with STACK
 			gen
 				b {LABEL, ".csa"}
 				
 	pat csb                            /* Table-lookup switch */
-		with GPR3 GPR4 STACK
+		with STACK
 			gen
 				b {LABEL, ".csb"}
 

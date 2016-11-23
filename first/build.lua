@@ -226,6 +226,7 @@ definerule("cprogram",
 	},
 	function (e)
 		local libs = matching(filenamesof(e.deps), "%.a$")
+		local srcs = {}
 		if (#e.srcs > 0) then
 			for _, f in pairs(
 				matching(
@@ -240,7 +241,7 @@ definerule("cprogram",
 					"%.a$"
 				)
 			) do
-				libs[#libs+1] = f
+				srcs[#srcs+1] = f
 			end
 		end
 
@@ -248,7 +249,7 @@ definerule("cprogram",
 			name = e.name,
 			cwd = e.cwd,
 			deps = e.deps,
-			ins = libs,
+			ins = { srcs, libs },
 			outleaves = { e.name },
 			commands = e.commands,
 		}

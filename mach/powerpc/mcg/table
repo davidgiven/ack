@@ -1,0 +1,794 @@
+REGISTERS
+
+    /* Registers are allocated top down; the order here is odd in order to make
+     * sure that non-volatile registers get allocated from r31 (or f31) down.
+     *
+     * Attributes may have at most one of: int, float, long, double. These
+     * indicate that the register is used to store a value of that type. If
+     * your register can store more than one type, create an alias. Registers
+     * with none of these cannot be copied by the code generator (and so cannot
+     * be moved from register to register or spilt).
+     */
+
+    r12                                           int volatile; 
+    r11                                           int volatile; 
+    r10                                           int volatile; 
+    r9                                            int volatile;
+    r8                                            int volatile;
+    r7                                            int volatile;
+    r6                                            int volatile;
+    r5                                            int volatile;
+    r4                                            int volatile;
+    r3                                            int volatile iret;
+
+    r31                                           int; 
+    r30                                           int; 
+    r29                                           int; 
+    r28                                           int; 
+    r27                                           int; 
+    r26                                           int; 
+    r25                                           int; 
+    r24                                           int; 
+    r23                                           int; 
+    r22                                           int; 
+    r21                                           int; 
+    r20                                           int; 
+    r19                                           int; 
+    r18                                           int; 
+    r17                                           int; 
+    r16                                           int;
+    r15                                           int;
+    r14                                           int;
+    r13                                           int;
+
+    r11r12  named("r11", "r12") aliases(r11, r12) long volatile;
+    r9r10   named("r9",  "r10") aliases(r9,  r10) long volatile;
+    r7r8    named("r7",  "r8")  aliases(r7,  r8)  long volatile;
+    r5r6    named("r5",  "r6")  aliases(r6,  r6)  long volatile;
+    r3r4    named("r3",  "r4")  aliases(r3,  r4)  long volatile lret;
+
+    r29r30  named("r29", "r30") aliases(r29, r30) long;
+    r27r28  named("r27", "r28") aliases(r27, r28) long;
+    r25r26  named("r25", "r26") aliases(r25, r26) long;
+    r23r24  named("r23", "r24") aliases(r23, r24) long;
+    r21r22  named("r21", "r22") aliases(r21, r22) long;
+    r19r20  named("r19", "r20") aliases(r19, r20) long;
+    r17r18  named("r17", "r18") aliases(r17, r18) long;
+    r15r16  named("r15", "r16") aliases(r15, r16) long;
+    r13r14  named("r13", "r14") aliases(r13, r14) long;
+
+    f14                                           float volatile;
+    f13                                           float volatile;
+    f12                                           float volatile;
+    f11                                           float volatile;
+    f10                                           float volatile;
+    f9                                            float volatile;
+    f8                                            float volatile;
+    f7                                            float volatile;
+    f6                                            float volatile;
+    f5                                            float volatile;
+    f4                                            float volatile;
+    f3                                            float volatile fret;
+    f2                                            float volatile;
+    f1                                            float volatile;
+    f0                                            float volatile;
+
+    f31                                           float;
+    f30                                           float;
+    f29                                           float;
+    f28                                           float;
+    f27                                           float;
+    f26                                           float;
+    f25                                           float;
+    f24                                           float;
+    f23                                           float;
+    f22                                           float;
+    f21                                           float;
+    f20                                           float;
+    f19                                           float;
+    f18                                           float;
+    f17                                           float;
+    f16                                           float;
+    f15                                           float;
+
+    d14     named("f14")       aliases(f14)       double volatile;
+    d13     named("f13")       aliases(f13)       double volatile;
+    d12     named("f12")       aliases(f12)       double volatile;
+    d11     named("f11")       aliases(f11)       double volatile;
+    d10     named("f10")       aliases(f10)       double volatile;
+    d9      named("f9")        aliases(f9)        double volatile;
+    d8      named("f8")        aliases(f8)        double volatile;
+    d7      named("f7")        aliases(f7)        double volatile;
+    d6      named("f6")        aliases(f6)        double volatile;
+    d5      named("f5")        aliases(f5)        double volatile;
+    d4      named("f4")        aliases(f4)        double volatile;
+    d3      named("f3")        aliases(f3)        double volatile dret;
+    d2      named("f2")        aliases(f2)        double volatile;
+    d1      named("f1")        aliases(f1)        double volatile;
+    d0      named("f0")        aliases(f0)        double volatile;
+
+    d31     named("f31")       aliases(f31)       double;
+    d30     named("f30")       aliases(f30)       double;
+    d29     named("f29")       aliases(f29)       double;
+    d28     named("f28")       aliases(f28)       double;
+    d27     named("f27")       aliases(f27)       double;
+    d26     named("f26")       aliases(f26)       double;
+    d25     named("f25")       aliases(f25)       double;
+    d24     named("f24")       aliases(f24)       double;
+    d23     named("f23")       aliases(f23)       double;
+    d22     named("f22")       aliases(f22)       double;
+    d21     named("f21")       aliases(f21)       double;
+    d20     named("f20")       aliases(f20)       double;
+    d19     named("f19")       aliases(f19)       double;
+    d18     named("f18")       aliases(f18)       double;
+    d17     named("f17")       aliases(f17)       double;
+    d16     named("f16")       aliases(f16)       double;
+    d15     named("f15")       aliases(f15)       double;
+
+	cr0                                           cr;
+
+
+
+DECLARATIONS
+
+	cr;
+    ubyteX;   /* bottom 8 bits valid, the rest undefined */
+    ubyte0;   /* bottom 8 bits valid, the rest 0 */
+    ushortX;  /* bottom 16 bits valid, the rest undefined */
+    ushort0;  /* bottom 16 bits valid, the rest 0 */
+
+	address fragment;
+
+
+
+PATTERNS
+
+/* Special */
+
+	PAIR(BLOCK.I, BLOCK.I);
+
+
+
+/* Miscellaneous special things */
+
+	PUSH.I(in:(int)reg)
+		emit "stwu %in, -4(sp)"
+		cost 4;
+
+    PUSH.L(in:(long)reg)
+        emit "stwu %in.0, -4(sp)"
+        emit "stwu %in.1, -4(sp)"
+        cost 8;
+
+    PUSH.D(in:(double)reg)
+        emit "stfdu %in, -8(sp)"
+        cost 4;
+
+	out:(int)reg = POP.I
+		emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+		cost 8;
+
+    out:(long)reg = POP.L
+        emit "lwz %out.0, 4(sp)"
+        emit "lwz %out.1, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 12;
+
+	out:(float)reg = POP.F
+		emit "lfs %out, 0(sp)"
+		emit "addi sp, sp, 4"
+		cost 8;
+		
+	out:(double)reg = POP.D
+		emit "lfd %out, 0(sp)"
+		emit "addi sp, sp, 8"
+		cost 8;
+		
+	SETRET.I(in:(iret)reg)
+		emit "! setret4"
+		cost 1;
+
+    SETRET.L(in:(lret)reg)
+        emit "! setret8"
+        cost 1;
+
+	STACKADJUST.I(delta:CONST.I)
+        when signed_constant(%delta, 16)
+		emit "addi sp, sp, $delta"
+		cost 4;
+
+	STACKADJUST.I(in:(int)reg)
+		emit "add sp, sp, %in"
+		cost 4;
+
+	STACKADJUST.I(NEG.I(in:(int)reg))
+		emit "subf sp, %in, sp"
+		cost 4;
+
+    out:(int)reg = GETFP.I
+        emit "mr %out, fp"
+        cost 4;
+
+    SETFP.I(in:(int)reg)
+        emit "mr fp, %in"
+        cost 4;
+
+    out:(int)reg = CHAINFP.I(in:(int)reg)
+        emit "lwz %out, 0(%in)"
+        cost 4;
+
+    out:(int)reg = FPTOAB.I(GETFP.I)
+        emit "addi %out, fp, 8"
+        cost 4;
+
+    out:(int)reg = FPTOAB.I(in:(int)reg)
+        emit "addi %out, %in, 8"
+        cost 4;
+
+    out:(int)reg = FPTOLB.I(in:(int)reg)
+        with %out == %in
+        cost 1;
+
+    out:(int)reg = GETSP.I
+        emit "mr %out, sp"
+        cost 4;
+
+    SETSP.I(in:(int)reg)
+        emit "mr sp, %in"
+        cost 4;
+    
+    out:(int)reg = ANY.I
+        cost 1;
+
+    out:(int)reg = COPYF.I(in:(float)reg)
+        emit "stfsu %in, -4(sp)"
+        emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+        cost 12;
+
+    out:(double)reg = COPYL.D(in:(long)reg)
+        emit "stwu %in.0, -4(sp)"
+        emit "stwu %in.1, -4(sp)"
+        emit "lfd %out, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
+
+    out:(long)reg = COPYD.L(in:(double)reg)
+        emit "stfdu %in, -8(sp)"
+        emit "lwz %out.0, 4(sp)"
+        emit "lwz %out.1, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
+
+
+
+/* Memory operations */
+
+    /* Stores */
+
+	STORE.D(addr:address, value:(double)reg)
+        emit "stfd %value, %addr"
+		cost 4;
+
+	STORE.L(addr:address, value:(long)reg)
+		emit "stw %value.0, 4+%addr"
+		emit "stw %value.1, 0+%addr"
+		cost 8;
+
+	STORE.I(addr:address, value:(int)reg)
+		emit "stw %value, %addr"
+		cost 4;
+
+	STOREH.I(addr:address, value:(int)ushortX)
+		emit "sth %value, %addr"
+		cost 4;
+
+    STOREH.I(ADD.I(left:(int)reg, right:(int)reg), value:(int)ushortX)
+        emit "sthx %value, %left, %right"
+        cost 4;
+
+	STOREB.I(addr:address, value:(int)ushortX)
+		emit "sth %value, %addr"
+		cost 4;
+
+    STOREB.I(addr:address, value:(int)ubyteX)
+		emit "stb %value, %addr"
+		cost 4;
+
+    STOREB.I(ADD.I(left:(int)reg, right:(int)reg), value:(int)ubyteX)
+        emit "stbx %value, %left, %right"
+        cost 4;
+
+    /* Loads */
+
+	out:(int)reg = LOAD.I(addr:address)
+		emit "lwz %out, %addr"
+		cost 4;
+
+    out:(long)reg = LOAD.L(addr:address)
+        emit "lwz %out.0, 4+%addr"
+        emit "lwz %out.1, 0+%addr"
+        cost 8;
+
+	out:(int)ushort0 = LOADH.I(addr:address)
+		emit "lhz %out, %addr"
+		cost 4;
+
+	out:(int)ubyte0 = LOADB.I(addr:address)
+		emit "lbz %out, %addr"
+		cost 4;
+
+    /* ubyte intrinsics */
+
+    out:(int)ubyteX = in:(int)ubyte0
+        with %out == %in
+        emit "! ubyte0 -> ubyteX"
+        cost 1;
+
+    out:(int)ubyte0 = in:(int)ubyteX
+        emit "andi %out, %in, 0xff ! ubyteX -> ubyte0"
+        cost 4;
+
+    out:(int)reg = in:(int)ubyte0
+        with %out == %in
+        emit "! ubyte0 -> reg"
+        cost 4;
+
+    out:(int)ubyteX = in:(int)reg
+        with %out == %in
+        emit "! reg -> ubyteX"
+        cost 1;
+
+    /* ushort intrinsics */
+
+    out:(int)ushortX = in:(int)ushort0
+        with %out == %in
+        emit "! ushort0 -> ushortX"
+        cost 1;
+
+    out:(int)ushort0 = in:(int)ushortX
+        emit "andi %out, %in, 0xff ! ushortX -> ushort0"
+        cost 4;
+
+    out:(int)reg = in:(int)ushort0
+        with %out == %in
+        emit "! ushort0 -> reg"
+        cost 4;
+
+    out:(int)ushortX = in:(int)reg
+        with %out == %in
+        emit "! reg -> ushortX"
+        cost 1;
+
+
+/* Extensions and conversions */
+
+    out:(int)reg = EXTENDB.I(in:(int)reg)
+        emit "extsb %out, %in"
+        cost 4;
+
+    out:(int)reg = EXTENDH.I(in:(int)reg)
+        emit "extsh %out, %in"
+        cost 4;
+
+    out:(int)reg = FROMSI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMSI.I(int) -> int"
+        cost 1;
+
+    out:(int)reg = FROMUI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMUI.I(int) -> int"
+        cost 1;
+
+    out:(long)reg = FROMSI.L(in:(int)reg)
+        emit "mr %out.0, %in"
+        emit "srawi %out.1, %out.0, 31"
+        cost 8;
+
+    out:(long)reg = FROMUI.L(in:(int)reg)
+        emit "mr %out.0, %in"
+        emit "li32 %out.1, 0"
+        cost 8;
+
+    out:(iret)reg = FROMSF.I(in:(dret)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2i"
+        cost 4;
+
+    out:(int)reg = FROMSD.I(in:(double)reg)
+        with preserved(%in)
+        emit "fctiwz %in, %in"
+        emit "stfdu %in, -8(sp)"
+        emit "lwz %out, 4(sp)"
+        emit "addi sp, sp, 8"
+        cost 16;
+
+    out:(int)reg = FROMUD.I(in:(double)reg)
+        with corrupted(volatile)
+        emit "stfdu %in, -8(sp)"
+        emit "bl .cfu8"
+        emit "lwz %out, 0(sp)"
+        emit "addi sp, sp, 4"
+        cost 16;
+
+    out:(lret)reg = FROMSF.L(in:(fret)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2l"
+        cost 4;
+
+    out:(lret)reg = FROMUF.I(in:(fret)reg)
+        with corrupted(volatile)
+        emit "bl .fromf2l"
+        cost 4;
+
+    out:(double)reg = FROMSI.D(in:(int)reg)
+        with corrupted(volatile)
+        emit "stwu %in, -4(sp)"
+        emit "bl .cif8"
+        emit "lfd %out, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 4;
+
+    out:(fret)reg = FROMUI.F(in:(iret)reg)
+        with corrupted(volatile)
+        emit "bl .fromui2f"
+        cost 4;
+
+    out:(double)reg = FROMUI.D(in:(int)reg)
+        with corrupted(volatile)
+        emit "stwu %in, -4(sp)"
+        emit "bl .cuf8"
+        emit "lfd %out, 0(sp)"
+        emit "addi sp, sp, 8"
+        cost 4;
+
+    out:(lret)reg = FROMIPAIR.L(in1:(int)reg, in2:(int)reg)
+        emit "mr %out.0, %in1"
+        emit "mr %out.1, %in2"
+        cost 8;
+    
+    out:(int)reg = FROML0.I(in:(long)reg)
+        emit "mr %out, %in.0"
+        cost 4;
+
+    out:(int)reg = FROML1.I(in:(long)reg)
+        emit "mr %out, %in.1"
+        cost 4;
+
+
+
+/* Locals */
+
+	out:(int)reg = in:LOCAL.I
+		emit "addi %out, fp, $in"
+		cost 4;
+
+	address = in:LOCAL.I
+		emit "$in(fp)";
+
+
+
+
+/* Memory addressing modes */
+
+	address = ADD.I(addr:(int)reg, offset:CONST.I)
+        when signed_constant(%offset, 16)
+		emit "$offset(%addr)";
+
+	address = addr:(int)reg
+		emit "0(%addr)";
+
+
+
+/* Branches */
+
+	JUMP(addr:BLOCK.I)
+		emit "b $addr"
+		cost 4;
+
+	FARJUMP(addr:LABEL.I)
+        with corrupted(volatile)
+		emit "b $addr"
+		cost 4;
+
+    JUMP(dest:(int)reg)
+        emit "mtspr ctr, %dest"
+        emit "bcctrl 20, 0, 0"
+        cost 8;
+
+	CJUMPEQ(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "bc 12, 2, $true" /* IFTRUE EQ */
+		emit "b $false"
+		cost 8;
+
+	CJUMPLE(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "bc 4, 1, $true" /* IFFALSE GT */
+        emit "b $false"
+		cost 8;
+
+	CJUMPLT(value:(cr)cr, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "bc 12, 0, $true" /* IFTRUE LT */
+        emit "b $false"
+		cost 8;
+
+    #define CALLLABEL(insn) \
+        insn (dest:LABEL.I) \
+            with corrupted(volatile) \
+            emit "bl $dest" \
+            cost 4;
+
+    CALLLABEL(CALL)
+    out:(iret)reg = CALLLABEL(CALL.I)
+    out:(lret)reg = CALLLABEL(CALL.L)
+
+    #define CALLINDIRECT(insn) \
+        insn (dest:(int)reg) \
+            with corrupted(volatile) \
+            emit "mtspr ctr, %dest" \
+            emit "bcctrl 20, 0, 0" \
+            cost 8;
+
+    CALLINDIRECT(CALL)
+    out:(iret)reg = CALLINDIRECT(CALL.I)
+    out:(lret)reg = CALLINDIRECT(CALL.L)
+
+    JUMP(dest:LABEL.I)
+        emit "b $dest"
+        cost 4;
+
+
+
+/* Comparisons */
+
+	cr:(cr)cr = COMPARESI.I(left:(int)reg, right:(int)reg)
+        emit "cmp %cr, 0, %left, %right"
+		cost 4;
+
+	cr:(cr)cr = COMPARESI.I(left:(int)reg, right:CONST.I)
+        when signed_constant(%right, 16)
+        emit "cmpi %cr, 0, %left, $right"
+		cost 4;
+
+	cr:(cr)cr = COMPAREUI.I(left:(int)reg, right:(int)reg)
+        emit "cmpl %cr, 0, %left, %right"
+		cost 4;
+
+	cr:(cr)cr = COMPAREUI.I(left:(int)reg, right:CONST.I)
+        when signed_constant(%right, 16)
+        emit "cmpli %cr, 0, %left, $right"
+		cost 4;
+
+    out:(cr)cr = COMPARESI.I(in:(cr)cr, result:CONST.I)
+        when specific_constant(%result, 0)
+        with %out == %in
+        emit "! COMPARESI.I(cr, 0)"
+        cost 4;
+
+
+
+/* Booleans */
+
+    out:(int)reg = IFEQ.I(in:(cr)cr)
+        emit "mfcr %out" /* get cr0 */
+        emit "rlwinm %out, %out, [32-2], 2, 31" /* extract just EQ */
+        cost 8;
+
+    out:(int)reg = IFEQ.I(in:(int)reg)
+        emit "cntlzw %out, %in" /* returns 0..32 */
+        emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
+        cost 8;
+
+    out:(int)reg = IFLT.I(in:(cr)cr)
+        emit "mfcr %out" /* get cr0 */
+        emit "andi. %out, %out, 1" /* leave just LT */
+        cost 8;
+
+    out:(int)reg = IFLE.I(in:(cr)cr)
+        emit "mfcr %out"                        /* get cr0 */
+        emit "andi. %out, %out, 5"              /* leave just LT and EQ */
+        emit "cntlzw %out, %out"                /* returns 0..32 */
+        emit "rlwinm %out, %out, [32-5], 5, 31" /* if 32, return 1, otherwise 0 */
+        emit "xori %out, %out, 1"               /* negate */
+        cost 8;
+
+
+
+/* Conversions */
+
+#if 0
+    out:(int)reg = CIU44(in:(int)reg)
+        with %out == %in
+        emit "! ciu44"
+        cost 4;
+
+    out:(int)reg = CUI44(in:(int)reg)
+        with %out == %in
+        emit "! cui44"
+        cost 4;
+#endif
+
+/* ALU operations */
+
+    #define ALUR(name, instr) \
+        out:(int)reg = name(left:(int)reg, right:(int)reg) \
+            emit instr " %out, %left, %right"              \
+            cost 4;                                        \
+
+    #define ALUC(name, instr) \
+        out:(int)reg = name(left:(int)reg, right:CONST.I)  \
+            when signed_constant(%right, 16)               \
+            emit instr " %out, %left, $right"              \
+            cost 4;                                        \
+
+    #define ALUC_reversed(name, instr) \
+        out:(int)reg = name(left:CONST.I, right:(int)reg)  \
+            when signed_constant(%left, 16)                \
+            emit instr " %out, %right, $left"              \
+            cost 4;                                        \
+
+    #define ALUCC(name, instr) \
+        ALUC(name, instr) \
+        ALUC_reversed(name, instr)
+
+    ALUR(ADD.I, "add")
+    ALUCC(ADD.I, "addi")
+
+	out:(int)reg = SUB.I(left:(int)reg, right:(int)reg)
+		emit "subf %out, %right, %left"
+		cost 4;
+
+	out:(int)reg = SUB.I(left:(int)reg, right:CONST.I)
+		emit "addi %out, %left, -[$right]"
+		cost 4;
+
+	out:(int)reg = MOD.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
+		emit "divw %out, %left, %right"
+        emit "mullw %out, %out, %right"
+        emit "subf %out, %out, %left"
+		cost 12;
+
+	out:(int)reg = MODU.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
+		emit "divwu %out, %left, %right"
+        emit "mullw %out, %out, %right"
+        emit "subf %out, %out, %left"
+		cost 12;
+
+    ALUR(MUL.I, "mullw")
+    ALUCC(MUL.I, "mulli")
+
+    ALUR(DIV.I, "divw")
+    ALUR(DIVU.I, "divwu")
+
+    ALUR(ASL.I, "slw")
+    ALUR(ASR.I, "sraw")
+
+    ALUR(LSL.I, "slw")
+    ALUR(LSR.I, "srw")
+
+    out:(int)reg = NEG.I(left:(int)reg)
+        emit "neg %out, %left"
+        cost 4;
+
+    out:(int)reg = NOT.I(left:(int)reg)
+        emit "cntlzw %out, %left"
+        emit "rlwinm %out, %out, 32-5, 5, 31"
+        cost 8;
+
+    ALUR(AND.I, "and")
+    ALUCC(AND.I, "andi.")
+
+    ALUR(OR.I, "or")
+    ALUCC(OR.I, "ori")
+
+    ALUR(EOR.I, "xor")
+    ALUCC(EOR.I, "xori")
+
+	out:(int)reg = value:LABEL.I
+		emit "li32 %out, $value"
+		cost 4;
+
+	out:(int)reg = value:BLOCK.I
+		emit "li32 %out, $value"
+		cost 4;
+
+	out:(int)reg = value:CONST.I
+		emit "li32 %out, $value"
+		cost 8;
+
+
+/* FPU operations */
+
+    #define FPU4R(name, instr) \
+        out:(float)reg = name(left:(float)reg, right:(float)reg) \
+            emit instr " %out, %left, %right"                    \
+            cost 4;                                              \
+
+    #define FPU8R(name, instr) \
+        out:(double)reg = name(left:(double)reg, right:(double)reg) \
+            emit instr " %out, %left, %right"                       \
+            cost 4;                                                 \
+
+    out:(float)reg = LOAD.F(addr:address)
+        emit "lfs %out, %addr"
+        cost 4;
+        
+    out:(double)reg = LOAD.D(addr:address)
+        emit "lfd %out, %addr"
+        cost 4;
+
+    out:(float)reg = in:CONST.F
+        when specific_constant(%in, 0)
+        emit "li32 r0, .fd_00000000"
+        emit "lfs %out, 0(r0)"
+        cost 12;
+
+    FPU4R(ADDF.F, "fadds")
+    FPU8R(ADDF.D, "fadd")
+
+    FPU4R(SUBF.F, "fsubs")
+    FPU8R(SUBF.D, "fsub")
+
+    FPU4R(MULF.F, "fmuls")
+    FPU8R(MULF.D, "fmul")
+
+    FPU4R(DIVF.F, "fdivs")
+    FPU8R(DIVF.D, "fdiv")
+
+    #define FMALEFT(type, insn, add, mul) \
+        out:(type)reg = add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg) \
+        emit insn " %out, %m1, %m2, %m3"                                   \
+        cost 4;                                                            \
+                                                                                 
+    #define FMARIGHT(type, insn, add, mul) \
+        out:(type)reg = add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg)) \
+        emit insn " %out, %m1, %m2, %m3"                                   \
+        cost 4;                                                            \
+
+    FMALEFT( double, "fmadd",   ADDF.D, MULF.D)
+    FMARIGHT(double, "fmadd",   ADDF.D, MULF.D)
+    FMALEFT( float,  "fmadds",  ADDF.F, MULF.F)
+    FMARIGHT(float,  "fmadds",  ADDF.F, MULF.F)
+
+    FMALEFT( double, "fmsub",   SUBF.D, MULF.D)
+    FMALEFT( float,  "fmsubs",  SUBF.F, MULF.F)
+
+    FMARIGHT(double, "fnmadd",  SUBF.D, MULF.D)
+    FMARIGHT(float,  "fnmadds", SUBF.F, MULF.F)
+
+    #define FMANEGLEFT(type, insn, neg, add, mul) \
+        out:(type)reg = neg(add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg)) \
+        emit insn " %out, %m1, %m2, %m3"                                        \
+        cost 4;                                                                 \
+                                                                                 
+    #define FMANEGRIGHT(type, insn, neg, add, mul) \
+        out:(type)reg = neg(add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg))) \
+        emit insn " %out, %m1, %m2, %m3"                                        \
+        cost 4;                                                                 \
+
+    FMANEGLEFT( double, "fnmsub", NEGF.D, ADDF.D, MULF.D)
+    FMANEGRIGHT(double, "fnmsub", NEGF.D, ADDF.D, MULF.D)
+    FMANEGLEFT( float,  "fnmsub", NEGF.F, ADDF.F, MULF.F)
+    FMANEGRIGHT(float,  "fnmsub", NEGF.F, ADDF.F, MULF.F)
+
+    out:(float)reg = NEGF.F(left:(float)reg)
+        emit "fneg %out, %left"
+        cost 4;
+
+    out:(double)reg = NEGF.D(left:(double)reg)
+        emit "fneg %out, %left"
+        cost 4;
+
+	cr:(cr)cr = COMPAREF.I(left:(float)reg, right:(float)reg)
+        emit "fcmpu %cr, %left, %right"
+		cost 4;
+
+	cr:(cr)cr = COMPARED.I(left:(double)reg, right:(double)reg)
+        emit "fcmpu %cr, %left, %right"
+		cost 4;
+
+/* vim: set sw=4 ts=4 expandtab : */
+

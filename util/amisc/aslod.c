@@ -14,14 +14,12 @@
  * CVS...)
  * 
  * dtrg, 2006-10-17
- * 
- * $Source$
- * $State$
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -52,6 +50,8 @@ FILE* output;                           /* Output stream */
 #define HDR_LENGTH	32
 
 char hdr[HDR_LENGTH] ;
+
+bool verbose = false;
 
 /* Segment numbers understood by aslod. */
 
@@ -206,6 +206,10 @@ int main(int argc, char* argv[])
 					program);
 				exit(0);
 				
+			case 'v':
+				verbose = true;
+				break;
+
 			default:
 			syntaxerror:
 				fatal("syntax error --- try -h for help");
@@ -301,8 +305,9 @@ int main(int argc, char* argv[])
 
 	/* Summarise what we've done. */
 	
+	if (verbose)
 	{
-		long ss = 0;
+		uint32_t ss = 0;
 		printf(" base : %08"PRIx32"\n", outsect[TEXT].os_base) ;
 		printf(" text = %08"PRIx32"\n", outsect[TEXT].os_size);
 		printf(" rom  = %08"PRIx32"\n", outsect[ROM].os_size);
@@ -312,7 +317,7 @@ int main(int argc, char* argv[])
 		ss += outsect[ROM].os_size;
 		ss += outsect[DATA].os_size;
 		ss += outsect[BSS].os_size;
-		printf("TOTAL = %08lX\n", ss);
+		printf("TOTAL = %08"PRIx32"\n", ss);
 	}
 	
 	return 0;

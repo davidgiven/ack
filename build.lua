@@ -9,13 +9,21 @@ vars.plats = {
 	"linux386",
 	"linux68k",
 	"linuxppc",
+	"qemuppc",
 	"pc86",
 	"rpi",
 }
+vars.plats_with_tests = {
+	"qemuppc",
+}
 
 local plat_packages = {}
+local test_packages = {}
 for _, p in ipairs(vars.plats) do
 	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
+end
+for _, p in ipairs(vars.plats_with_tests) do
+	test_packages[#test_packages+1] = "plat/"..p.."/tests+tests"
 end
 
 installable {
@@ -34,6 +42,9 @@ installable {
 		"util/opt+pkg",
 		"examples+pkg",
 		plat_packages
+	},
+	deps = {
+		test_packages
 	}
 }
 

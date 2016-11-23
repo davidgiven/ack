@@ -19,6 +19,8 @@
 #undef word_t
 #define word_t long
 
+typedef uint32_t quad;
+
 #undef ALIGNWORD
 #define ALIGNWORD	4
 
