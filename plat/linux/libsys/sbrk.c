@@ -12,7 +12,17 @@
 
 static char* current = NULL;
  
-void* sbrk(intptr_t increment)
+int brk(void* end)
+{
+	int e = _syscall(__NR_brk, (quad) end, 0, 0);
+	if (e == -1)
+		errno = ENOMEM;
+	else
+		current = end;
+	return e;
+}
+
+void* sbrk(int increment)
 {
 	char* old;
 	char* new;

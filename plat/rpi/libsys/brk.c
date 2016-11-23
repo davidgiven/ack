@@ -30,7 +30,7 @@ int brk(void* newend)
 	return 0;
 }
 
-void* sbrk(intptr_t increment)
+void* sbrk(int increment)
 {
 	char* old;
 	

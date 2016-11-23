@@ -67,7 +67,7 @@ extern char** environ;
 extern void _exit(int);
 extern pid_t getpid(void);
 extern int brk(void* ptr);
-extern void* sbrk(intptr_t increment);
+extern void* sbrk(int increment);
 extern int isatty(int d);
 
 /* Signal handling */
