@@ -22,7 +22,7 @@ int brk(void* end)
 	return e;
 }
 
-void* sbrk(intptr_t increment)
+void* sbrk(int increment)
 {
 	char* old;
 	char* new;
