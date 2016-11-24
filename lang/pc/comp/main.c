@@ -189,10 +189,6 @@ AddRequired()
 	/* DYNAMIC ALLOCATION PROCEDURES */
 	(void) Enter("new", D_PROCEDURE, std_type, R_NEW);
 	(void) Enter("dispose", D_PROCEDURE, std_type, R_DISPOSE);
-	if( !options['s'] ) {
-		(void) Enter("mark", D_PROCEDURE, std_type, R_MARK);
-		(void) Enter("release", D_PROCEDURE, std_type, R_RELEASE);
-	}
 
 	/* MISCELLANEOUS PROCEDURE(S) */
 	if( !options['s'] )
