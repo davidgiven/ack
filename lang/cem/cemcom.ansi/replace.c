@@ -24,7 +24,6 @@
 extern struct idf *GetIdentifier();
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
-extern char *strcat(), *strcpy();
 
 void macro2buffer();
 void getactuals();

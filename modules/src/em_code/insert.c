@@ -10,6 +10,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include <em_path.h>
 #include <alloc.h>
 #include "insert.h"
@@ -133,8 +134,6 @@ C_findpart(part)
 	}
 	return p;
 }
-
-extern char	*strcpy(), *strcat(), *mktemp();
 
 static
 swttmp()

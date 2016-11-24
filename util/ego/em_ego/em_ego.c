@@ -58,10 +58,6 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-extern char* mktemp();
-extern char* strcpy(), *strcat();
-extern char* strrchr();
-
 static char ddump[128] = TMP_DIR; /* data label dump file */
 static char pdump[128] = TMP_DIR; /* procedure name dump file */
 static char tmpbufs[NTEMPS * 2][128] = {

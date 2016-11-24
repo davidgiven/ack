@@ -10,7 +10,9 @@ static char rcsid[] = "$Id$";
  * led - linkage editor for ACK assemblers output format
  */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <out.h>
 #include "const.h"
 #include "debug.h"
@@ -124,8 +126,6 @@ first_pass(argv)
 	register char		*argp;
 	int			sectno;
 	int			h;
-	extern int		atoi();
-	extern char		*strchr();
 	extern int		hash();
 	extern struct outname	*searchname();
 
