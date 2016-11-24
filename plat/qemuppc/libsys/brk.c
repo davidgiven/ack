@@ -22,7 +22,10 @@ int brk(void* newend)
 	
 	if ((p > (&dummy - STACK_BUFFER)) ||
 	    (p < _end))	
+	{
+		errno = ENOMEM;
 		return -1;
+	}
 		
 	current = p;
 	return 0;
