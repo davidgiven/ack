@@ -6,7 +6,7 @@ local tests = {}
 if os.execute("which "..qemu.." > /dev/null") ~= 0 then
 	print("warning: skipping tests which require ", qemu)
 else
-	local testcases = filenamesof("./*.c", "./*.s", "./*.e")
+	local testcases = filenamesof("./*.c", "./*.s", "./*.e", "./*.p")
 
 	for _, f in ipairs(testcases) do
 		local fs = replace(basename(f), "%..$", "")

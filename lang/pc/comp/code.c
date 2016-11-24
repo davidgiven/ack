@@ -1076,16 +1076,6 @@ CodeStd(nd)
 			C_asp(pointer_size + word_size);
 			break;
 
-		case R_MARK:
-		case R_RELEASE:
-			CodeDAddress(left);
-			if( req == R_MARK )
-				C_cal("_sav");
-			else
-				C_cal("_rst");
-			C_asp(pointer_size);
-			break;
-
 		case R_HALT:
 			if( left )
 				CodePExpr(left);
