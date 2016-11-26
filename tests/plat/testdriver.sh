@@ -15,7 +15,7 @@ trap "rm -f $pidfile" EXIT
 
 case $method in
     qemu-system-*)
-        if ! hash $method 2>/dev/null; then
+        if ! command -v $method 2>/dev/null; then
             echo "Warning: $method not installed, skipping test"
             exit 0
         fi
@@ -33,7 +33,7 @@ case $method in
         ;;
 
     qemu-*)
-        if ! hash $method 2>/dev/null; then
+        if ! command -v $method 2>/dev/null; then
             echo "Warning: $method not installed, skipping test"
             exit 0
         fi
