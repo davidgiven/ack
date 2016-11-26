@@ -4,7 +4,7 @@ static int next_id = 0;
 
 struct ir* new_ir0(int opcode, int size)
 {
-	struct ir* ir = calloc(sizeof(struct ir), 1);
+	struct ir* ir = calloc(1,  sizeof(struct ir));
 	ir->id = next_id++;
 	ir->opcode = opcode;
 	ir->size = size;

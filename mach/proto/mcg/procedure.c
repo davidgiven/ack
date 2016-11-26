@@ -1,6 +1,7 @@
 #include "mcg.h"
 
 struct procedure* current_proc;
+struct heap proc_heap;
 
 static void print_blocks(char k)
 {
@@ -203,6 +204,8 @@ void procedure_compile(struct procedure* proc)
         write_cfg_graph(proc->name);
     if (dominance_dot_file)
         write_dominance_graph(proc->name);
+
+    heap_free(&proc_heap);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -20,6 +20,7 @@
 #include "array.h"
 #include "imap.h"
 #include "pmap.h"
+#include "heap.h"
 #include "diagnostics.h"
 #include "astring.h"
 #include "ir.h"

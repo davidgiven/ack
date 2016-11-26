@@ -10,7 +10,7 @@ static const struct burm_emitter_data emitter_data;
 
 struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 {
-	struct hop* hop = calloc(1, sizeof *hop);
+	struct hop* hop = heap_alloc(&proc_heap, 1, sizeof(*hop));
 	hop->id = hop_count++;
     hop->bb = bb;
 	hop->ir = ir;
@@ -19,7 +19,7 @@ struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 
 static struct insel* new_insel(enum insel_type type)
 {
-	struct insel* insel = calloc(1, sizeof(*insel));
+	struct insel* insel = heap_alloc(&proc_heap, 1, sizeof(*insel));
 	insel->type = type;
 	return insel;
 }

@@ -84,7 +84,7 @@ static void associate_groups(void)
 
 	while (phimap.count > 0)
 	{
-		struct phicongruence* c = calloc(1, sizeof(*c));
+		struct phicongruence* c = heap_alloc(&proc_heap, 1, sizeof(*c));
         c->id = number++;
 		recursively_associate_group(c, phimap.item[0].left);
         update_vreg_types(c);

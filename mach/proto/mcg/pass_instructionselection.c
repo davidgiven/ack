@@ -83,7 +83,7 @@ static struct constraint* get_constraint(struct vreg* vreg)
     struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
     if (!c)
     {
-        c = calloc(1, sizeof(*c));
+        c = heap_alloc(&proc_heap, 1, sizeof(*c));
         pmap_put(&current_hop->constraints, vreg, c);
     }
     return c;
@@ -185,7 +185,7 @@ static void emit(struct insn* insn)
 
 static struct insn* walk_instructions(struct burm_node* node, int goal)
 {
-    struct insn* insn = calloc(1, sizeof(*insn));
+    struct insn* insn = heap_alloc(&proc_heap, 1, sizeof(*insn));
     int i;
 
     insn->ir = node->ir;
@@ -257,7 +257,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 
 static struct burm_node* build_shadow_tree(struct ir* root, struct ir* ir)
 {
-    struct burm_node* node = calloc(1, sizeof(*node));
+    struct burm_node* node = heap_alloc(&proc_heap, 1, sizeof(*node));
     node->ir = ir;
 
     if (ir->root == root)

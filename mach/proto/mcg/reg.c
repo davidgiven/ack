@@ -4,14 +4,14 @@ static int vreg_count = 1;
 
 struct vreg* new_vreg(void)
 {
-	struct vreg* vreg = calloc(1, sizeof *vreg);
+	struct vreg* vreg = heap_alloc(&proc_heap, 1, sizeof *vreg);
 	vreg->id = vreg_count++;
 	return vreg;
 }
 
 struct hreg* new_hreg(const struct burm_register_data* brd)
 {
-	struct hreg* hreg = calloc(1, sizeof *hreg);
+	struct hreg* hreg = heap_alloc(&proc_heap, 1, sizeof *hreg);
 	hreg->id = brd->id;
     hreg->brd = brd;
 	hreg->attrs = brd->attrs;
@@ -23,7 +23,7 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 struct hreg* new_stacked_hreg(uint32_t attrs)
 {
     static int hreg_count = 1;
-	struct hreg* hreg = calloc(1, sizeof *hreg);
+	struct hreg* hreg = heap_alloc(&proc_heap, 1, sizeof *hreg);
 	hreg->id = aprintf("stacked_%d_id_%d", attrs, hreg_count++);
 	hreg->attrs = attrs;
 	hreg->is_stacked = true;
