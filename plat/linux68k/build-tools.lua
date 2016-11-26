@@ -16,6 +16,7 @@ return installable {
 		["$(PLATDEP)/linux68k/as"] = "+as",
 		["$(PLATDEP)/linux68k/ncg"] = "+ncg",
 		["$(PLATIND)/descr/linux68k"] = "./descr",
+		"util/amisc+aelflod-pkg",
 		"util/opt+pkg",
 	}
 }

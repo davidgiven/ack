@@ -28,6 +28,7 @@ return installable {
 		["$(PLATDEP)/linuxppc/mcg"] = "+mcg",
 		["$(PLATDEP)/linuxppc/top"] = "+top",
 		["$(PLATIND)/descr/linuxppc"] = "./descr",
+		"util/amisc+aelflod-pkg",
 		"util/opt+pkg",
 	}
 }
