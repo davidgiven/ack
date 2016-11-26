@@ -15,6 +15,7 @@ vars.plats = {
 }
 vars.plats_with_tests = {
 	"qemuppc",
+	"pc86",
 }
 
 local plat_packages = {}

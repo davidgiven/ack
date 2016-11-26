@@ -7,9 +7,11 @@
 
 int main(int argc, const char* argv[])
 {
-    void* p;
+    char* o;
+    char* p;
 
-    ASSERT(-1 == (intptr_t)brk((void*)0xffffffff));
+    errno = 0;
+    ASSERT(-1 == brk((void*)-1));
     ASSERT(ENOMEM == errno);
 
     p = sbrk(0);
@@ -19,9 +21,29 @@ int main(int argc, const char* argv[])
     ASSERT(p != sbrk(-8));
     ASSERT(p == sbrk(0));
 
-    /* We assume the test environment has less than 2GB of RAM. */
-    ASSERT(-1 == (intptr_t)sbrk(INT_MAX));
-    ASSERT(-1 == (intptr_t)sbrk(INT_MIN));
+    errno = 0;
+    o = sbrk(INT_MAX);
+    if (o == (char*)-1)
+        ASSERT(ENOMEM == errno);
+    else
+    {
+        ASSERT(0 == errno);
+        p = sbrk(0);
+        ASSERT(p > o);
+        brk(o);
+    }
+
+    errno = 0;
+    o = sbrk(INT_MIN);
+    if (o == (char*)-1)
+        ASSERT(ENOMEM == errno);
+    else
+    {
+        ASSERT(0 == errno);
+        p = sbrk(0);
+        ASSERT(p < o);
+        brk(o);
+    }
 
     finished();
 }

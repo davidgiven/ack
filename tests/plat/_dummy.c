@@ -6,3 +6,4 @@ void _m_a_i_n(void)
     ASSERT(0 == 0);
     finished();
 }
+

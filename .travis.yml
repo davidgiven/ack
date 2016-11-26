@@ -8,6 +8,7 @@ addons:
         packages:
         - ed
         - openbios-ppc
+        - qemu-system-i386
 
 git:
     depth: 10

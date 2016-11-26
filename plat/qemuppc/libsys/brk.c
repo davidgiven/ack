@@ -34,13 +34,26 @@ int brk(void* newend)
 void* sbrk(int increment)
 {
 	char* old;
+	char* new;
 	
 	if (increment == 0)
 		return current;
 		
 	old = current;
-	if (brk(old + increment) < 0)
-		return OUT_OF_MEMORY;
+
+	new = old + increment;
+
+	if ((increment > 0) && (new <= old))
+		goto out_of_memory;
+	else if ((increment < 0) && (new >= old))
+		goto out_of_memory;
+
+	if (brk(new) < 0)
+		goto out_of_memory;
 		
 	return old;
+
+out_of_memory:
+	errno = ENOMEM;
+	return OUT_OF_MEMORY;
 }

@@ -9,6 +9,6 @@ extern void writehex(uint32_t code);
 extern void fail(uint32_t code);
 
 #define ASSERT(condition) \
-    if (!(condition)) fail(__LINE__)
+    do { if (!(condition)) fail(__LINE__); } while(0)
 
 #endif

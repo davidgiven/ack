@@ -14,6 +14,13 @@ definerule("plat_testsuite",
 			"tests/plat/*.p"
 		)
 
+		acklibrary {
+			name = "lib",
+			srcs = { "tests/plat/lib/test.c" },
+			hdrs = { "tests/plat/lib/test.h" },
+			vars = { plat = e.plat },
+		}
+
 		local tests = {}
 		for _, f in ipairs(testfiles) do
 			local fs = replace(basename(f), "%..$", "")
@@ -25,7 +32,7 @@ definerule("plat_testsuite",
 			local bin = ackprogram {
 				name = fs.."_bin",
 				srcs = { f },
-				deps = { "tests/plat/lib+lib" },
+				deps = { "+lib" },
 				vars = {
 					plat = e.plat,
 					lang = lang,

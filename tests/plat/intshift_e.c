@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "test.h"
 
 /* Constants in globals to defeat constant folding. */
@@ -25,8 +26,8 @@ void _m_a_i_n(void)
 
     ASSERT(((unsigned int)one     >>(unsigned int)zero) == 1);
     ASSERT(((unsigned int)one     >>(unsigned int)one)  == 0);
-    ASSERT(((unsigned int)minusone>>(unsigned int)zero) == 0xffffffff);
-    ASSERT(((unsigned int)minusone>>(unsigned int)one)  == 0x7fffffff);
+    ASSERT(((unsigned int)minusone>>(unsigned int)zero) == UINT_MAX);
+    ASSERT(((unsigned int)minusone>>(unsigned int)one)  == (UINT_MAX>>1));
 
     ASSERT((one     <<0) == 1);
     ASSERT((one     <<1)  == 2);
@@ -45,8 +46,8 @@ void _m_a_i_n(void)
 
     ASSERT(((unsigned int)one     >>(unsigned int)0) == 1);
     ASSERT(((unsigned int)one     >>(unsigned int)1)  == 0);
-    ASSERT(((unsigned int)minusone>>(unsigned int)0) == 0xffffffff);
-    ASSERT(((unsigned int)minusone>>(unsigned int)1)  == 0x7fffffff);
+    ASSERT(((unsigned int)minusone>>(unsigned int)0) == UINT_MAX);
+    ASSERT(((unsigned int)minusone>>(unsigned int)1)  == (UINT_MAX>>1));
 
     finished();
 }
