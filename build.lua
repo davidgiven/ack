@@ -14,6 +14,7 @@ vars.plats = {
 	"rpi",
 }
 vars.plats_with_tests = {
+	"linuxppc",
 	"qemuppc",
 	"pc86",
 }

@@ -10,10 +10,6 @@ int main(int argc, const char* argv[])
     char* o;
     char* p;
 
-    errno = 0;
-    ASSERT(-1 == brk((void*)-1));
-    ASSERT(ENOMEM == errno);
-
     p = sbrk(0);
     ASSERT(p == sbrk(0));
     ASSERT(p == sbrk(8));

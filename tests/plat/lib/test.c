@@ -6,6 +6,7 @@ void finished(void)
 {
     static const char s[] = "@@FINISHED\n";
     write(1, s, sizeof(s));
+    _exit(0);
 }
 
 void writehex(uint32_t code)

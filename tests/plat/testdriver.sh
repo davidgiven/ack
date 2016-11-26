@@ -31,6 +31,20 @@ case $method in
             | ( read dummy && kill $(cat $pidfile) )
         
         ;;
+
+    qemu-*)
+        if ! hash $method 2>/dev/null; then
+            echo "Warning: $method not installed, skipping test"
+            exit 0
+        fi
+
+        $method $img > $result
+        ;;
+
+    *)
+        echo "Error: $method not known by testdriver"
+        exit 1
+        ;;
 esac
 
 ( grep -q @@FAIL $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
