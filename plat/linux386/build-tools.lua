@@ -16,6 +16,7 @@ return installable {
 		["$(PLATDEP)/linux386/as"] = "+as",
 		["$(PLATDEP)/linux386/ncg"] = "+ncg",
 		["$(PLATIND)/descr/linux386"] = "./descr",
+		"util/amisc+aelflod-pkg",
 		"util/opt+pkg",
 	}
 }

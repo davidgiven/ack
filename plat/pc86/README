@@ -23,6 +23,9 @@ are stubs required to make the demo apps link. File descriptors 0, 1 and 2
 represent the console. All reads block. There's enough TTY emulation to allow
 \n conversion and local echo (but it can't be turned off).
 
+Console output is echoed to the serial port (without any setup). This is used
+by qemu for running tests.
+
 
 Example command line
 ====================

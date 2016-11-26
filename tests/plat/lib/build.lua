@@ -4,5 +4,4 @@ acklibrary {
 	name = "lib",
 	srcs = { "./test.c" },
 	hdrs = { "./test.h" },
-	vars = { plat = "qemuppc" }
 }
