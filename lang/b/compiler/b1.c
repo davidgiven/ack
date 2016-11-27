@@ -1,26 +1,51 @@
 #include "b.h"
 
 /*
- * Code generation (x86 assembly)
+ * Code generation (EM)
  */
 
-void
-push(void)
+static int
+shiftsize(void)
 {
-	printf("\tpush\t%%eax\n");
+	switch (wordsize) {
+		case 1: return 0;
+		case 2: return 1;
+		case 4: return 2;
+		case 8: return 3;
+		default:
+			error("unsupported word size");
+			exit(1);
+	}
 }
 
 void
-pop(char *s)
+tonativeaddr(void)
 {
-	printf("\tpop\t%%%s\n", s);
+	C_loc(shiftsize());
+	C_slu(wordsize);
+}
+
+void
+fromnativeaddr(void)
+{
+	C_loc(shiftsize());
+	C_sru(wordsize);
+}
+
+char*
+manglename(char* name, char prefix)
+{
+	static char buffer[NCPS+3];
+	buffer[0] = prefix;
+	buffer[1] = '_';
+	strcpy(buffer+2, name);
+	return buffer;
 }
 
 void
 binary(struct tnode *tr)
 {
 	rcexpr(tr->tr1);
-	push();
 	rcexpr(tr->tr2);
 }
 
@@ -33,13 +58,11 @@ pushargs(struct tnode *tr)
 		return 0;
 	if (tr->op == COMMA) {
 		rcexpr(tr->tr2);
-		push();
 		stk = pushargs(tr->tr1);
-		return stk+NCPW;
+		return stk+wordsize;
 	}
 	rcexpr(tr);
-	push();
-	return NCPW;
+	return wordsize;
 }
 
 void
@@ -56,42 +79,50 @@ lvalexp(struct tnode *tr)
 	case INCAFT:
 		if (tr->tr1->op == STAR) {
 			rcexpr(tr->tr1->tr1);
-			printf("\tmov\t%%eax,%%ebx\n");
-			sprintf(memloc,"(,%%ebx,4)");
+			tonativeaddr();
 		} else {	/* NAME, checked in "build" */
 			bs = (struct hshtab *) tr->tr1->tr1;
 			if (bs->class == EXTERN)
-				sprintf(memloc,"_%s", bs->name);
+				C_lae_dnam(manglename(bs->name, 'b'), 0);
 			else if (bs->class == AUTO)
-				sprintf(memloc,"%d(%%ebp)", bs->offset);
+				C_lal(bs->offset);
 			else
 				goto classerror;
 		}
 		if (tr->op == DECBEF || tr->op == INCBEF) {
-			printf("\t%s\t%s\n", tr->op == DECBEF ? "decl" : "incl",
-			       memloc);
-			printf("\tmov\t%s,%%eax\n", memloc);
+			C_dup(wordsize); /* ( addr addr -- ) */
+			C_loi(wordsize); /* ( addr val -- ) */
+			C_adp((tr->op == DECBEF) ? -1 : 1); /* ( addr newval -- ) */
+			C_exg(wordsize); /* ( newval addr -- ) */
+			C_dup(wordsize*2); /* ( newval addr newval addr -- ) */
+			C_sti(wordsize); /* ( newval addr -- ) */
+			C_asp(wordsize); /* ( newval -- ) */
 		} else {
-			printf("\tmov\t%s,%%eax\n", memloc);
-			printf("\t%s\t%s\n", tr->op == DECAFT ? "decl" : "incl",
-			       memloc);
+			C_dup(wordsize); /* ( addr addr -- ) */
+			C_loi(wordsize); /* ( addr val -- ) */
+			C_exg(wordsize); /* ( val addr -- ) */
+			C_dup(wordsize*2); /* ( val addr val addr -- ) */
+			C_asp(wordsize); /* ( val addr val -- ) */
+			C_adp((tr->op == DECAFT) ? -1 : 1); /* ( val addr newval -- ) */
+			C_exg(wordsize); /* ( val newval addr -- ) */
+			C_sti(wordsize); /* ( val -- ) */
 		}
 		return;
 
 	case ASSIGN:
 		rcexpr(tr->tr2);
+		C_dup(wordsize);
 		if (tr->tr1->op == STAR) {
-			push();
 			rcexpr(tr->tr1->tr1);
-			pop("ebx");
-			printf("\tmov\t%%ebx,(,%%eax,4)\n");
+			tonativeaddr();
+			C_sti(wordsize);
 		} else {	/* NAME */
 			bs = (struct hshtab *) tr->tr1->tr1;
-			if (bs->class == EXTERN)
-				printf("\tmov\t%%eax,_%s\n", bs->name);
-			else if (bs->class == AUTO)
-				printf("\tmov\t%%eax,%d(%%ebp)\n", bs->offset);
-			else
+			if (bs->class == EXTERN) {
+				C_ste_dnam(bs->name, 0);
+			} else if (bs->class == AUTO) {
+				C_stl(bs->offset);
+			} else
 				goto classerror;
 		}
 		return;
@@ -138,20 +169,20 @@ rcexpr(struct tnode *tr)
 	switch (tr->op) {
 
 	case CON:
-		printf("\tmov\t$%d,%%eax\n", tr->value);
+		C_loc(tr->value);
 		return;
 
 	case STRING:
-		printf("\tmov\t$L%d,%%eax\n", tr->value);
-		printf("\tshr\t$2,%%eax\n");
+		C_lae_dlb(tr->value, 0);
+		fromnativeaddr();
 		return;
 
 	case NAME:	/* only rvalue */
 		bs = (struct hshtab *) tr->tr1;
 		if (bs->class == EXTERN)
-			printf("\tmov\t_%s,%%eax\n", bs->name);
+			C_loe_dnam(manglename(bs->name, 'b'), 0);
 		else if (bs->class == AUTO)
-			printf("\tmov\t%d(%%ebp),%%eax\n", bs->offset);
+			C_lol(bs->offset);
 		else
 			goto classerror;
 		return;
@@ -159,89 +190,73 @@ rcexpr(struct tnode *tr)
 	case CALL:
 		stk = pushargs(tr->tr2);
 		rcexpr(tr->tr1);
-		printf("\tshl\t$2,%%eax\n");
-		printf("\tcall\t*%%eax\n");
+		tonativeaddr();
+		C_cai();
 		if (stk)
-			printf("\tadd\t$%d,%%esp\n",stk);
+			C_asp(stk);
+		C_lfr(wordsize);
 		return;
 
 	case AMPER:
 		bs = (struct hshtab *) tr->tr1->tr1;
 		if (bs->class == EXTERN) {
-			printf("\tmov\t$_%s,%%eax\n", bs->name);
-			printf("\tshr\t$2,%%eax\n");
+			C_lae_dnam(manglename(bs->name, 'b'), 0);
 		} else if (bs->class == AUTO) {
-			printf("\tlea\t%d(%%ebp),%%eax\n", bs->offset);
-			printf("\tshr\t$2,%%eax\n");
+			C_lal(bs->offset);
 		} else
 			goto classerror;
+		fromnativeaddr();
 		return;
 
 	case STAR:	/* only rvalue */
 		rcexpr(tr->tr1);
-		printf("\tmov\t(,%%eax,4),%%eax\n");
+		tonativeaddr();
+		C_loi(wordsize);
 		return;
 
 	case PLUS:
 		binary(tr);
-		pop("ebx");
-		printf("\tadd\t%%ebx,%%eax\n");
+		C_adi(wordsize);
 		return;
 
 	case MINUS:
 		binary(tr);
-		printf("\tmov\t%%eax,%%ebx\n");
-		pop("eax");
-		printf("\tsub\t%%ebx,%%eax\n");
+		C_sbi(wordsize);
 		return;
 
 	case TIMES:
 		binary(tr);
-		pop("ebx");
-		printf("\tmul\t%%ebx\n");
+		C_mli(wordsize);
 		return;
 
 	case DIVIDE:
 		binary(tr);
-		printf("\tmov\t%%eax,%%ebx\n");
-		pop("eax");
-		printf("\txor\t%%edx,%%edx\n");
-		printf("\tdiv\t%%ebx\n");
+		C_dvi(wordsize);
 		return;
 
 	case MOD:
 		binary(tr);
-		printf("\tmov\t%%eax,%%ebx\n");
-		pop("eax");
-		printf("\txor\t%%edx,%%edx\n");
-		printf("\tdiv\t%%ebx\n");
-		printf("\tmov\t%%edx,%%eax\n");
+		C_rmi(wordsize);
 		return;
 
 	case AND:
 		binary(tr);
-		pop("ebx");
-		printf("\tand\t%%ebx,%%eax\n");
+		C_and(wordsize);
 		return;
 
 	case OR:
 		binary(tr);
-		pop("ebx");
-		printf("\tor\t%%ebx,%%eax\n");
+		C_ior(wordsize);
 		return;
 
 	case LSHIFT:
 		binary(tr);
-		printf("\tmov\t%%eax,%%ecx\n");
-		pop("eax");
-		printf("\tshl\t%%cl,%%eax\n");
+		C_sli(wordsize);
 		return;
 
 	case RSHIFT:
 		binary(tr);
-		printf("\tmov\t%%eax,%%ecx\n");
-		pop("eax");
-		printf("\tshr\t%%cl,%%eax\n");
+		C_sri(wordsize);
 		return;
 
 	case EQUAL:
@@ -251,50 +266,46 @@ rcexpr(struct tnode *tr)
 	case GREAT:
 	case GREATEQ:
 		binary(tr);
-		pop("ebx");
-		printf("\tcmp\t%%eax,%%ebx\n");
+		C_cmi(wordsize);
 		switch (tr->op) {
 		case EQUAL:
-			printf("\tsete\t%%al\n");
+			C_teq();
 			break;
 		case NEQUAL:
-			printf("\tsetne\t%%al\n");
+			C_tne();
 			break;
 		case LESS:
-			printf("\tsetl\t%%al\n");
+			C_tlt();
 			break;
 		case LESSEQ:
-			printf("\tsetle\t%%al\n");
+			C_tle();
 			break;
 		case GREAT:
-			printf("\tsetg\t%%al\n");
+			C_tgt();
 			break;
 		case GREATEQ:
-			printf("\tsetge\t%%al\n");
+			C_tge();
 			break;
 		}
-		printf("\tmovzb\t%%al,%%eax\n");
 		return;
 
 	case EXCLA:
 		rcexpr(tr->tr1);
-		printf("\ttest\t%%eax,%%eax\n");
-		printf("\tsete\t%%al\n");
-		printf("\tmovzb\t%%al,%%eax\n");
+		C_tne();
 		return;
 
 	case NEG:
 		rcexpr(tr->tr1);
-		printf("\tneg\t%%eax\n");
+		C_ngi(wordsize);
 		return;
 
 	case QUEST:
-		cbranch(tr->tr1, o1=isn++, 0);
+		cbranch(tr->tr1, o1=isn++);
 		rcexpr(tr->tr2->tr1);
 		jump(o2 = isn++);
-		label(o1);
+		fnlabel(o1);
 		rcexpr(tr->tr2->tr2);
-		label(o2);
+		fnlabel(o2);
 		return;
 
 	default:

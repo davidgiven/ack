@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <unistd.h>
+#include <em.h>
 
 #define	NCPS	8	/* chars per symbol */
-#define	NCPW	4	/* chars per word */
-#define	ALIGN	4	/* Passed directly to the assembler's .align */
 #define	HSHSIZ	400	/* hash table size */
 #define	SWSIZ	230	/* switch table size */
 #define	CMSIZ	40	/* symbol stack size */
@@ -40,6 +40,7 @@ struct	swtab {
 };
 
 extern int wordsize;
+int paramsize;
 struct	hshtab hshtab[HSHSIZ];
 int	hshused;
 int	eof;
@@ -71,9 +72,12 @@ void error(char *s, ...);
 void printtoken(int tok, FILE *out);
 struct tnode * block(int op, int value, struct tnode *tr1, struct tnode *tr2);
 void rcexpr(struct tnode *tr);
-void cbranch(struct tnode *t, int lab, int val);
+void cbranch(struct tnode *t, int lab);
 void jump(int lab);
-void label(int l);
+void fnlabel(int l);
+void tonativeaddr(void);
+void fromnativeaddr(void);
+char* manglename(char* name, char prefix);
 
 #define	EOFC	0
 #define	SEMI	1

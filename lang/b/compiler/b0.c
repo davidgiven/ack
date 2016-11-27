@@ -4,7 +4,6 @@ void extdef(void);
 struct hshtab * lookup(void);
 void blkhed(void);
 void blkend(void);
-void retseq(void);
 void statement(int d);
 struct tnode * tree(void);
 void errflush(int o);
@@ -15,6 +14,9 @@ int	contlab = -1;
 int	brklab = -1;
 
 int wordsize = 4;
+int bsymb_part;
+int code_part;
+int string_part;
 
 void
 init(char *s, int val)
@@ -76,10 +78,33 @@ main(int argc, char *argv[])
 	init("return", RETURN);
 	init("default", DEFAULT);
 	init("break", BREAK);
+
+	C_init(wordsize, wordsize);
+	C_open(NULL);
+	C_magic();
+	C_ms_emx(wordsize, wordsize);
+	bsymb_part = 0;
+	string_part = 0;
+	code_part = C_getid();
+	C_beginpart(code_part);
 	while (!eof) {
 		extdef();
 		blkend();
 	}
+	C_endpart(code_part);
+	C_insertpart(code_part);
+
+	if (string_part)
+		C_insertpart(string_part);
+
+	C_exp("bsymb_start");
+	C_exp("bsymb_end");
+	if (bsymb_part)
+		C_insertpart(bsymb_part);
+	C_df_dnam("bsymb_end");
+
+	C_close();
+
 	return nerror != 0;
 }
 
@@ -192,9 +217,9 @@ getcc(void)
 	cc = 0;
 	cp = (char*) &cval;
 	while ((c = mapch('\'')) >= 0)
-		if (cc++ < NCPW)
+		if (cc++ < wordsize)
 			*cp++ = c;
-	if (cc > NCPW)
+	if (cc > wordsize)
 		error("Long character constant");
 	return CON;
 }
@@ -204,17 +229,31 @@ getstr(void)
 {
 	int c;
 	int i;
+	char b;
+	int partid;
 
-	printf("\t.align %d\n", wordsize);
-	printf("L%d:", cval = isn++);
-	if ((c = mapch('"')) >= 0)
-		printf("\t.byte %04o", c);
-	for (i = 2; (c = mapch('"')) >= 0; i++)
-		printf(",%04o", c);
-	printf(",04");
+	partid = C_getid();
+	C_beginpart(partid);
+	if (string_part)
+		C_insertpart(string_part);
+
+	cval = isn++;
+	C_df_dlb(cval);
+	for (i = 1; (c = mapch('"')) >= 0; i++) {
+		b = c;
+		C_con_scon(&b, 1);
+	}
+
+	b = 04;
+	C_con_scon(&b, 1);
+
+	b = 0;
 	while ((i++%4) != 0)
-		printf(",00");
-	printf("\n");
+		C_con_scon(&b, 1);
+
+	C_endpart(partid);
+	string_part = partid;
+
 	return STRING;
 }
 
@@ -447,26 +486,30 @@ declist(void)
 void
 function(void)
 {
-	printf("\tpush\t%%ebp\n");
-	printf("\tmov\t%%esp,%%ebp\n");
-
 	declare(ARG);
 	statement(1);
-	retseq();
+	C_ret(0);
+	C_end(paramsize);
 }
 
 void
 global(char *s)
 {
-	printf("\t.globl\t_%s\n", s);
-	printf("\t.data\n");
-	printf("\t.align %d\n", ALIGN);
+	C_exa_dnam(manglename(s, 'b'));
 }
 
 void
-bsymb(char *s, int und)
+bsymb(char *s)
 {
-	printf("\t.section .bsymb; .long %s%s; .data\n", und?"_":"", s);
+	int newpart = C_getid();
+	C_beginpart(newpart);
+	if (bsymb_part != 0)
+		C_insertpart(bsymb_part);
+	C_rom_dlb(isn, 0);
+	C_endpart(newpart);
+
+	bsymb_part = newpart;
+	C_df_dlb(isn++);
 }
 
 void
@@ -474,6 +517,7 @@ extdef(void)
 {
 	int o, dim, i;
 	char *bs;
+	char *ms;
 
 	if ((o = symbol()) == EOFC || o == SEMI)
 		return;
@@ -484,7 +528,9 @@ extdef(void)
 	switch(o = symbol()) {
 
 	case SEMI:
-		printf("\t.comm\t_%s,%d,%d\n", bs, NCPW, ALIGN);
+		global(bs);
+		C_df_dnam(manglename(bs, 'b'));
+		C_bss_cst(wordsize, 0, 1);
 		goto done;
 
 	/* init */
@@ -492,8 +538,8 @@ extdef(void)
 	case STRING:
 		global(bs);
 		if (o == STRING)
-			bsymb(bs,1);
-		printf("_%s:", bs);
+			bsymb(bs);
+		C_df_dnam(manglename(bs, 'b'));
 		pushsym(o);
 		goto init;
 
@@ -507,13 +553,17 @@ extdef(void)
 			goto syntax;
 		global(bs);
 		if ((o=symbol()) == SEMI) {
-			printf("\t.comm\tL%d,%d,%d\n", isn, dim*NCPW, ALIGN);
-			bsymb(bs,1);
-			printf("_%s:\t.long L%d\n", bs, isn++);
+			bsymb(bs);
+			C_df_dnam(manglename(bs, 'b'));
+			C_con_dlb(isn, 0);
+			C_df_dlb(isn++);
+			C_bss_cst(wordsize*dim, 0, 1); 
 			goto done;
 		}
-		bsymb(bs,1);
-		printf("_%s:\t.long 1f\n1:", bs);
+		bsymb(bs);
+		C_df_dnam(manglename(bs, 'b'));
+		C_con_dlb(isn, 0);
+		C_df_dlb(isn++);
 		pushsym(o);
 
 	init:
@@ -521,15 +571,26 @@ extdef(void)
 			if ((o=symbol()) != CON && o != STRING && o != NAME)
 				goto syntax;
 			if (o == NAME) {
-				bsymb("1f",0);
-				printf("1:\t.long _%s\n", bsym->name);
-			} else
-				printf("\t.long %s%d\n", o==STRING?"L":"",cval);
+				bsymb(NULL);
+				C_con_dnam(manglename(bsym->name, 'b'), 0);
+			} else {
+				if (o == STRING) {
+					bsymb(NULL);
+					C_con_dlb(cval, 0);
+				} else
+					C_con_cst(cval);
+			}
 			i++;
 		} while ((o=symbol()) == COMMA);
 		dim = (i > dim) ? i : dim;
-		if (dim - i)
-			printf("\t.zero %d\n", (dim-i)*NCPW);
+		if (i == 0)
+			C_bss_cst((dim-i)*wordsize, 0, 1);
+		else {
+			while (dim -i) {
+				C_con_cst(0);
+				i++;
+			}
+		}
 		if (o == SEMI)
 			goto done;
 		goto syntax;
@@ -537,12 +598,15 @@ extdef(void)
 	/* function */
 	case LPARN:
 		global(bs);
-		bsymb(bs,1);
-		printf("_%s:\t.long 1f\n", bs);
-		printf("\t.text\n\t.align %s\n1:", wordsize);
+		ms = manglename(bs, 'b');
+		bsymb(ms);
+		C_df_dnam(ms);
+		ms = manglename(bs, 'i');
+		C_con_pnam(ms);
+		C_inp(ms);
+		C_pro_narg(ms);
 		function();
 	done:
-		printf("\n");
 		return;
 
 	case EOFC:
@@ -556,26 +620,6 @@ syntax:
 }
 
 void
-setstk(int a)
-{
-	int dif;
-
-	dif = stack-a;
-	stack = a;
-	if (dif)
-		printf("\tsub\t$%d, %%esp\n", dif);
-}
-
-void
-defvec(void)
-{
-	stack -= NCPW;
-	printf("\tmov\t%%esp,%%eax\n");
-	printf("\tshr\t$2,%%eax\n");
-	printf("\tpush\t%%eax\n");
-}
-
-void
 blkhed(void)
 {
 	int al, pl;
@@ -583,27 +627,29 @@ blkhed(void)
 
 	declist();
 	stack = al = -wordsize;
-	pl = wordsize*2;
+	pl = 0; /* EM parameters start at offset 0. */
 	while (paraml) {
 		paraml = (bs = paraml)->next;
 		bs->offset = pl;
-		pl += NCPW;
+		pl += wordsize;
 	}
 	for (bs = hshtab; bs < &hshtab[HSHSIZ]; bs++)
 		if (bs->name[0]) {
 			if (bs->class == AUTO) {
 				bs->offset = al;
 				if (bs->dim) {
-					al -= bs->dim*NCPW;
-					setstk(al);
-					defvec();
+					al -= bs->dim*wordsize;
+					C_lal(al);
+					al -= wordsize;
+					fromnativeaddr();
+					C_stl(al);
 					bs->offset = al;
 				}
-				al -= NCPW;
+				al -= wordsize;
 			} else if (bs->class == ARG)
 				bs->class = AUTO;
 		}
-	setstk(al);
+	paramsize = -al - wordsize;
 }
 
 void
@@ -641,33 +687,23 @@ syntax:
 }
 
 void
-label(int l)
+fnlabel(int l)
 {
-	printf("L%d:\n", l);
+	C_ilb(l);
 }
 
+/* Jump to "lab", if the expression "t" evaluated to 0. */
 void
-retseq(void)
-{
-	printf("\tjmp\tretrn\n");
-}
-
-/* Jump to "lab", if the expression "t" evaluated to "val". */
-void
-cbranch(struct tnode *t, int lab, int val)
+cbranch(struct tnode *t, int lab)
 {
 	rcexpr(t);
-	if (val == 0)
-		printf("\ttest\t%%eax,%%eax\n");
-	else
-		printf("\tcmp\t%%eax,$%d\n", val);
-	printf("\tje\tL%d\n", lab);
+	C_zeq(lab);
 }
 
 void
 jump(int lab)
 {
-	printf("\tjmp\tL%d\n", lab);
+	C_bra(lab);
 }
 
 void
@@ -676,26 +712,31 @@ pswitch(void)
 	struct swtab *sswp;
 	int dl, swlab;
 
-	sswp = swp;
 	if (swp == NULL)
 		swp = swtab;
+	sswp = swp;
 	swlab = isn++;
-	printf("\tmov\t$L%d,%%ebx\n", swlab);
-	printf("\tjmp\tbswitch\n");
+	C_lae_dlb(swlab, 0);
+	C_csb(wordsize);
+
 	dl = deflab;
 	deflab = 0;
 	statement(0);
-	if (!deflab) {
-		deflab = isn++;
-		label(deflab);
-	}
-	printf("L%d:\n\t.data\nL%d:", brklab, swlab);
+	if (!deflab)
+		deflab = brklab;
+
+	C_df_dlb(swlab);
+	C_con_ilb(deflab);
+	C_con_cst(swp - sswp);
+
 	while (swp > sswp && swp > swtab) {
 		--swp;
-		printf("\t.long %d,L%d\n", swp->swval, swp->swlab);
+		C_con_cst(swp->swval);
+		C_con_ilb(swp->swlab);
 	}
-	printf("\t.long L%d,0\n", deflab);
-	printf("\t.text\n");
+
+	C_df_dlb(brklab);
+
 	deflab = dl;
 	swp = sswp;
 }
@@ -742,33 +783,36 @@ stmt:
 			goto semi;
 
 		case RETURN:
-			if (pushsym(symbol()) == LPARN)
+			if (pushsym(symbol()) == LPARN) {
 				rcexpr(pexpr());
-			retseq();
+				C_ret(wordsize);
+			} else {
+				C_ret(0);
+			}
 			goto semi;
 
 		case IF:
-			cbranch(pexpr(), o1=isn++, 0);
+			cbranch(pexpr(), o1=isn++);
 			statement(0);
 			if ((o = symbol()) == KEYW && cval == ELSE) {
 				jump(o2 = isn++);
-				label(o1);
+				fnlabel(o1);
 				statement(0);
-				label(o2);
+				fnlabel(o2);
 				return;
 			}
 			pushsym(o);
-			label(o1);
+			fnlabel(o1);
 			return;
 
 		case WHILE:
 			o1 = contlab;
 			o2 = brklab;
-			label(contlab = isn++);
-			cbranch(pexpr(), brklab=isn++, 0);
+			fnlabel(contlab = isn++);
+			cbranch(pexpr(), brklab=isn++);
 			statement(0);
 			jump(contlab);
-			label(brklab);
+			fnlabel(brklab);
 			contlab = o1;
 			brklab = o2;
 			return;
@@ -811,7 +855,7 @@ stmt:
 			else {
 				swp->swlab = isn;
 				(swp++)->swval = cval;
-				label(isn++);
+				fnlabel(isn++);
 			}
 			goto stmt;
 
@@ -821,7 +865,7 @@ stmt:
 			if ((o = symbol()) != COLON)
 				goto syntax;
 			deflab = isn++;
-			label(deflab);
+			fnlabel(deflab);
 			goto stmt;
 		}
 
@@ -837,12 +881,13 @@ stmt:
 			}
 			bsym->class = INTERN;
 			bsym->offset = isn++;
-			label(bsym->offset);
+			fnlabel(bsym->offset);
 			goto stmt;
 		}
 	}
 	pushsym(o);
 	rcexpr(tree());
+	C_asp(wordsize);
 	goto semi;
 
 semi:
@@ -948,7 +993,8 @@ advanc:
 	switch (o=symbol()) {
 	case NAME:
 		if (pushsym(symbol()) == LPARN) {	/* function */
-			bsym->class = EXTERN;
+			if (bsym->class == 0)
+				bsym->class = EXTERN;
 		} else if (bsym->class == 0) {
 			error("%s undefined", bsym->name);
 			bsym->class = EXTERN;
