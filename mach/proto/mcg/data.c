@@ -12,14 +12,19 @@ static struct symbol* pending;
 
 void data_label(const char* label)
 {
-	if (pending)
-		fatal("two consecutive data labels ('%s' and '%s')",
-            pending->name, label);
+    struct symbol* sym = symbol_get(label);
+    if (sym->is_defined)
+        fatal("label '%s' defined twice", sym->name);
 
-	pending = symbol_get(label);
-    if (pending->is_defined)
-        fatal("label '%s' defined twice", pending->name);
-    pending->is_defined = true;
+	if (pending)
+        fprintf(outputfile, "%s = %s\n",
+            platform_label(label), platform_label(pending->name));
+    else
+    {
+        pending = sym;
+        pending = symbol_get(label);
+        pending->is_defined = true;
+    }
 }
 
 static const char* section_to_str(int section)
