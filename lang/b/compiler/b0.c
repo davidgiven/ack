@@ -97,11 +97,11 @@ main(int argc, char *argv[])
 	if (string_part)
 		C_insertpart(string_part);
 
-	C_exp("bsymb_start");
-	C_exp("bsymb_end");
+	C_exa_dnam("bsymb_patch_table");
+	C_df_dnam("bsymb_patch_table");
 	if (bsymb_part)
 		C_insertpart(bsymb_part);
-	C_df_dnam("bsymb_end");
+	C_rom_cst(0);
 
 	C_close();
 
@@ -735,7 +735,7 @@ pswitch(void)
 		C_con_ilb(swp->swlab);
 	}
 
-	C_df_dlb(brklab);
+	C_df_ilb(brklab);
 
 	deflab = dl;
 	swp = sswp;
