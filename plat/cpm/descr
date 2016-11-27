@@ -61,16 +61,17 @@ name led
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID?} \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
-		({RTS}:.ocm.bas={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
 		({RTS}:.p={PLATFORMDIR}/pascal.o) \
 		-o > < \
 		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libb.a) \
 		(.bas:{TAIL}={PLATFORMDIR}/libbasic.a) \
 		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
-		(.ocm.bas.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		(.ocm.bas.mod.b.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
 		{FLOATS?} \
 		(.e:{TAIL}={PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libsys.a \

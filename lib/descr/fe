@@ -180,6 +180,16 @@ name a68s
         need .8
         callname a68s
 end
+name b
+        from .b
+        to .k
+        program {EM}/lib/ack/em_b
+        args -i < -o > -w {p}
+        prep cond
+        rts .b
+        need .b
+        callname abc
+end
 name encode
 	from .e
 	to .k
