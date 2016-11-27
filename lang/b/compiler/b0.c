@@ -14,6 +14,8 @@ int	peeksym = -1, peeksym2 = -1;;
 int	contlab = -1;
 int	brklab = -1;
 
+int wordsize = 4;
+
 void
 init(char *s, int val)
 {
@@ -32,24 +34,37 @@ init(char *s, int val)
 int
 main(int argc, char *argv[])
 {
-	if (argc < 3) {
-		error("Arg count");
-		exit(1);
-	}
-	if (freopen(argv[1], "r", stdin) == NULL) {
-		error("Can't find %s", argv[1]);
-		exit(1);
-	}
-	if ((sbufp=fopen(argv[2], "w")) == NULL) {
-		error("Can't create %s", argv[2]);
-		exit(1);
-	}
-	if (argc > 3) {
-		if (freopen(argv[3], "w", stdout) == NULL) {
-			error("Can't create %s", argv[2]);
-			exit(1);
+
+	for (;;) {
+		int opt = getopt(argc, argv, "-w:i:o:");
+		if (opt == -1)
+			break;
+
+		switch (opt) {
+			case 'w':
+				wordsize = atoi(optarg);
+				break;
+
+			case 'i':
+				if (freopen(optarg, "r", stdin) == NULL) {
+					error("Can't find %s", optarg);
+					exit(1);
+				}
+				break;
+
+			case 'o':
+				if (freopen(optarg, "w", stdout) == NULL) {
+					error("Can't create %s", optarg);
+					exit(1);
+				}
+				break;
+
+			derfault:
+				error("Usage: em_b [-w wordsize] [-i inputfile] [-o outputfile]");
+				exit(1);
 		}
 	}
+
 	init("auto", AUTO);
 	init("extrn", EXTERN);
 	init("case", CASE);
@@ -61,7 +76,6 @@ main(int argc, char *argv[])
 	init("return", RETURN);
 	init("default", DEFAULT);
 	init("break", BREAK);
-	fprintf(sbufp, "\t.data\n");
 	while (!eof) {
 		extdef();
 		blkend();
@@ -191,16 +205,16 @@ getstr(void)
 	int c;
 	int i;
 
-	fprintf(sbufp, "\t.align 4\n");
-	fprintf(sbufp, "L%d:", cval = isn++);
+	printf("\t.align %d\n", wordsize);
+	printf("L%d:", cval = isn++);
 	if ((c = mapch('"')) >= 0)
-		fprintf(sbufp, "\t.byte %04o", c);
+		printf("\t.byte %04o", c);
 	for (i = 2; (c = mapch('"')) >= 0; i++)
-		fprintf(sbufp, ",%04o", c);
-	fprintf(sbufp, ",04");
+		printf(",%04o", c);
+	printf(",04");
 	while ((i++%4) != 0)
-		fprintf(sbufp, ",00");
-	fprintf(sbufp, "\n");
+		printf(",00");
+	printf("\n");
 	return STRING;
 }
 
@@ -525,7 +539,7 @@ extdef(void)
 		global(bs);
 		bsymb(bs,1);
 		printf("_%s:\t.long 1f\n", bs);
-		printf("\t.text\n\t.align 4\n1:");
+		printf("\t.text\n\t.align %s\n1:", wordsize);
 		function();
 	done:
 		printf("\n");
@@ -568,8 +582,8 @@ blkhed(void)
 	struct hshtab *bs;
 
 	declist();
-	stack = al = -4;
-	pl = 8;
+	stack = al = -wordsize;
+	pl = wordsize*2;
 	while (paraml) {
 		paraml = (bs = paraml)->next;
 		bs->offset = pl;

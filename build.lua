@@ -36,6 +36,7 @@ installable {
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
+		"lang/b/compiler+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",

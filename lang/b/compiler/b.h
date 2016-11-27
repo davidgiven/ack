@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #define	NCPS	8	/* chars per symbol */
 #define	NCPW	4	/* chars per word */
@@ -38,6 +39,7 @@ struct	swtab {
 	int	swval;
 };
 
+extern int wordsize;
 struct	hshtab hshtab[HSHSIZ];
 int	hshused;
 int	eof;
