@@ -5,7 +5,7 @@ local conly = {
 }
 
 local sourcefiles = filenamesof(
-	"./hilo.b",
+	"./hilo.bas",
 	"./hilo.c",
 	"./hilo.mod",
 	"./hilo.p",

@@ -28,7 +28,7 @@ name asld
 	args {IFILE?} (.e:{HEAD}={EM}/{RT}em) \
 		({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
-		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.bas:{TAIL}={EM}/{LIB}bc) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.b.c.p.e:{TAIL}={EM}/{LIB}alo) (.b.c.p:{TAIL}={EM}/{LIB}mon) \
 		(.e:{TAIL}={EM}/{LIB}em)

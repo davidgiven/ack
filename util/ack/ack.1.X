@@ -50,7 +50,7 @@ but the following are recognized by most machines:
 Pascal program.
 .IP .c
 C module.
-.IP .b
+.IP .bas
 Basic program.
 .IP .ocm
 Occam program.
@@ -354,7 +354,7 @@ input:name:output:description
 \&.f:f77:.c:Fortran-to-C front end
 \&.c:cem:.k:C front end [4,5,6]
 \&.p:pc:.k:Pascal front end [2,3,6]
-\&.b:abc:.k:Basic front end [6,8]
+\&.b:basic:.k:Basic front end [6,8]
 \&.ocm:ocm:.k:Occam front end [9]
 \&.mod:m2:.k:Modula-2 front end [11]
 \&.e:encode:.k:Compactify EM assembly language [1]
