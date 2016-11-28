@@ -9,7 +9,9 @@ local function addheader(h)
 end
 
 addheader("ack/config.h")
+addheader("sys/dirent.h")
 addheader("sys/mman.h")
+addheader("sys/stat.h")
 addheader("sys/types.h")
 addheader("unistd.h")
 

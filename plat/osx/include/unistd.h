@@ -22,6 +22,11 @@ int ioctl(int, unsigned long, ...);
 typedef long _libsys_time_t;
 typedef int suseconds_t;
 
+struct timespec {
+	_libsys_time_t tv_sec;
+	long tv_nsec;
+};
+
 struct timeval {
 	_libsys_time_t tv_sec;
 	suseconds_t tv_usec;
@@ -47,8 +52,6 @@ int gettimeofday(struct timeval *, struct timezone *);
 #define O_CREAT		0x0200
 #define O_TRUNC		0x0400
 #define O_EXCL		0x0800
-
-typedef int mode_t;
 
 int creat(const char *, mode_t);
 int open(const char *, int, ...);
