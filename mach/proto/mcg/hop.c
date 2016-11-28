@@ -162,6 +162,22 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
     va_end(ap);
 }
 
+void hop_walk(hop_walker_t* callback, void* user)
+{
+    int i, j, k;
+
+    for (i=0; i<cfg.preorder.count; i++)
+    {
+        struct basicblock* bb = cfg.preorder.item[i];
+
+        for (j=0; j<bb->hops.count; j++)
+        {
+            struct hop* hop = bb->hops.item[j];
+            callback(hop, user);
+        }
+    }
+}
+
 static void print_header(char k, struct hop* hop)
 {
     int i;

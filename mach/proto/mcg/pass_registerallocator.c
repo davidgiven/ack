@@ -1,5 +1,28 @@
 #include "mcg.h"
 
+/* This is based around the elegant graph colouring algorithm here:
+ * 
+ * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.32.5924
+ *
+struct anode
+{
+    int id;
+    int degree;
+    struct vref* vref;
+};
+
+struct vref
+{
+    struct vref* next;
+    struct vreg* vreg;
+};
+
+static struct heap anode_heap;
+static bool interference_graph_valid;
+static PMAPOF(struct anode, struct anode) interference;
+static ARRAYOF(struct anode) vertices;
+static ARRAYOF(struct anode) simplified;
+#if 0
 struct assignment
 {
     struct vreg* in;
@@ -756,15 +779,227 @@ static void layout_stack_frame(void)
     stacksize = pack_stackframe(stacksize, EM_wordsize*1, burm_int_ATTR);
     current_proc->spills_size = stacksize;
 }
+#endif
+
+static void walk_vregs(void (*callback)(struct vreg* vreg))
+{
+    int i, j, k;
+
+    interference.count = 0;
+    for (i=0; i<cfg.preorder.count; i++)
+    {
+        struct basicblock* bb = cfg.preorder.item[i];
+
+        for (j=0; j<bb->hops.count; j++)
+        {
+            struct hop* hop = bb->hops.item[j];
+
+            for (k=0; k<hop->ins.count; k++)
+                callback(hop->ins.item[k]);
+            for (k=0; k<hop->outs.count; k++)
+                callback(hop->outs.item[k]);
+            for (k=0; k<hop->throughs.count; k++)
+                callback(hop->throughs.item[k]);
+        }
+    }
+}
+
+static void clear_anode_cb(struct vreg* vreg)
+{
+    vreg->anode = NULL;
+}
+
+static void assign_anode_cb(struct vreg* vreg)
+{
+    static int id = 1;
+    struct anode* anode = heap_alloc(&anode_heap, 1, sizeof(*anode));
+    struct vref* vref = heap_alloc(&anode_heap, 1, sizeof(*vref));
+    anode->id = id++;
+    anode->vref = vref;
+    vref->vreg = vreg;
+    vreg->anode = anode;
+}
+
+/* Calling this makes the interference graph invalid */
+static void coalesce_anodes(struct anode* left, struct anode* right)
+{
+    struct vref* vref;
+    int i;
+
+    if (left == right)
+        return;
+
+    vref = left->vref;
+    if (vref)
+    {
+        while (vref->next)
+            vref = vref->next;
+        vref = vref->next = right->vref;
+    }
+    else
+        vref = left->vref = right->vref;
+
+    while (vref)
+    {
+        vref->vreg->anode = left;
+        vref = vref->next;
+    }
+
+    interference_graph_valid = false;
+}
+
+static void coalesce_phis(void)
+{
+    int i, j;
+
+    interference.count = 0;
+    for (i=0; i<cfg.preorder.count; i++)
+    {
+        struct basicblock* bb = cfg.preorder.item[i];
+
+        for (j=0; j<bb->phis.count; j++)
+        {
+            struct vreg* dest = bb->phis.item[j].left;
+            struct phi* phi = bb->phis.item[j].right;
+            struct vreg* src = phi->ir->result;
+
+            coalesce_anodes(src->anode, dest->anode);
+        }
+    }
+}
+
+static void interferes_with(struct vreg** regs1, int count1, struct vreg** regs2, int count2)
+{
+    int i, j;
+
+    for (i=0; i<count1; i++)
+    {
+        struct anode* left = regs1[i]->anode;
+
+        for (j=0; j<count2; j++)
+        {
+            struct anode* right = regs2[j]->anode;
+
+            if (left != right)
+                pmap_add_bi(&interference, left, right);
+        }
+    }
+}
+
+static void dump_anode(struct anode* anode)
+{
+    struct vref* vref;
+
+    fprintf(regalloc_dot_file, "%s.%d deg %d\n",
+        current_proc->name, anode->id, anode->degree);
+    vref = anode->vref;
+    while (vref)
+    {
+        fprintf(regalloc_dot_file, "%%%d ", vref->vreg->id);
+        vref = vref->next;
+    }
+}
+
+static void dump_interference_graph(void)
+{
+    int i;
+
+    fprintf(regalloc_dot_file, "subgraph \"%s\" {\n", current_proc->name);
+
+    for (i=0; i<interference.count; i++)
+    {
+        fprintf(regalloc_dot_file, "\t\"");
+        dump_anode(interference.item[i].left);
+        fprintf(regalloc_dot_file, "\" -> \"");
+        dump_anode(interference.item[i].right);
+        fprintf(regalloc_dot_file, "\";\n");
+    }
+
+    fprintf(regalloc_dot_file, "}\n");
+}
+
+static void build_interference_graph_cb(struct hop* hop, void* user)
+{
+    int i;
+
+    interferes_with(hop->ins.item, hop->ins.count, hop->ins.item, hop->ins.count);
+    interferes_with(hop->outs.item, hop->outs.count, hop->outs.item, hop->outs.count);
+    interferes_with(hop->throughs.item, hop->throughs.count, hop->throughs.item, hop->throughs.count);
+    interferes_with(hop->throughs.item, hop->throughs.count, hop->ins.item, hop->ins.count);
+    interferes_with(hop->throughs.item, hop->throughs.count, hop->outs.item, hop->outs.count);
+
+    for (i=0; i<hop->constraints.count; i++)
+    {
+        struct vreg* vreg = hop->constraints.item[i].left;
+        struct constraint* c = hop->constraints.item[i].right;
+
+        if (c->preserved)
+            interferes_with(&vreg, 1, hop->outs.item, hop->outs.count);
+        if (c->equals_to)
+            coalesce_anodes(vreg->anode, c->equals_to->anode);
+    }
+}
+
+void collect_vertices(void)
+{
+    int i;
+
+    vertices.count = 0;
+    for (i=0; i<interference.count; i++)
+    {
+        array_appendu(&vertices, interference.item[i].left);
+        array_appendu(&vertices, interference.item[i].right);
+    }
+}
+
+void update_degrees(void)
+{
+    int i, j;
+
+    for (i=0; i<vertices.count; i++)
+    {
+        struct anode* candidate = vertices.item[i];
+
+        candidate->degree = 0;
+        for (j=0; j<interference.count; j++)
+        {
+            if (interference.item[j].left == candidate)
+                candidate->degree++;
+            if (interference.item[j].right == candidate)
+                candidate->degree++;
+        }
+    }
+}
 
 void pass_register_allocator(void)
 {
+    simplified.count = 0;
+    walk_vregs(clear_anode_cb);
+    walk_vregs(assign_anode_cb);
+    coalesce_phis();
+
+    do
+    {
+        interference_graph_valid = true;
+        hop_walk(build_interference_graph_cb, NULL);
+    }
+    while (!interference_graph_valid);
+
+    collect_vertices();
+    update_degrees();
+
+    dump_interference_graph();
+    heap_free(&anode_heap);
+
+    exit(1);
+    #if 0
     populate_hregs();
     wire_up_blocks_ins_outs();
 
     assign_hregs_to_vregs();
     insert_phi_copies();
     layout_stack_frame();
+    #endif
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

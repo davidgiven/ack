@@ -66,6 +66,9 @@ extern void hop_add_eoi_insel(struct hop* hop);
 
 extern void hop_add_insel(struct hop* hop, const char* fmt, ...);
 
+typedef void hop_walker_t(struct hop* hop, void* user);
+extern void hop_walk(hop_walker_t* callback, void* user);
+
 extern char* hop_render(struct hop* hop);
 extern void hop_print(char k, struct hop* hop);
 

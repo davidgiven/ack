@@ -131,6 +131,7 @@ extern const char* platform_label(const char* label);
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;
 extern FILE* cfg_dot_file;
+extern FILE* regalloc_dot_file;
 
 #endif
 

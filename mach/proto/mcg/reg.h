@@ -27,6 +27,7 @@ struct vreg
     uint32_t type;
     struct phicongruence* congruence;
     struct hop* defined;
+    struct anode* anode;
     ARRAYOF(struct hop) used;
 };
 
