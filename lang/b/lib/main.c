@@ -22,9 +22,10 @@ static intptr_t i_getchar(void)
     return fgetc(output_unit);
 }
 
-static void i_putchar(intptr_t c)
+static intptr_t i_putchar(intptr_t c)
 {
     fputc(c, output_unit);
+    return c;
 }
 
 uintptr_t b_char = (uintptr_t)i_char;
