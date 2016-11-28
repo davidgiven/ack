@@ -57,6 +57,22 @@ void pmap_add(void* mapp, void* left, void* right)
     append(map, left, right);
 }
 
+void pmap_add_bi(void* mapp, void* left, void* right)
+{
+    struct pmap* map = mapp;
+    int i;
+
+    for (i=0; i<map->count; i++)
+    {
+        struct pmap_node* node = &map->item[i];
+        if (((node->left == left) && (node->right == right)) ||
+            ((node->left == right) && (node->right == left)))
+            return;
+    }
+
+    append(map, left, right);
+}
+
 void pmap_remove(void* mapp, void* left, void* right)
 {
     struct pmap* map = mapp;
