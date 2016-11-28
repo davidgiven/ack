@@ -33,7 +33,7 @@ var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/ack/{PLATFORM}/mcg
+	program {EM}/lib/ack/{PLATFORM}/ncg
 	mapflag -gdb GF=-gdb
 	args {GF?} <
 	stdout
