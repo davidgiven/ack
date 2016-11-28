@@ -37,6 +37,8 @@ extern char *symbol2str();
 
 #include <idf_pkg.body>
 
+void global_redecl();
+
 struct idf *
 gen_idf()
 {
@@ -248,6 +250,7 @@ declare_idf(ds, dc, lvl)
 	}
 }
 
+int
 actual_declaration(sc, tp)
 	int sc;
 	struct type *tp;
@@ -269,6 +272,7 @@ actual_declaration(sc, tp)
 	return 1;
 }
 
+void
 global_redecl(idf, new_sc, tp)
 	register struct idf *idf;
 	struct type *tp;
@@ -393,6 +397,7 @@ declare_params(dc)
 	}
 }
 
+void
 idf_initialized(idf)
 	register struct idf *idf;
 {
@@ -429,6 +434,7 @@ declare_enum(tp, idf, l)
 	idf->id_def->df_address = l;
 }
 
+void
 check_formals(idf, dc)
 	struct idf *idf;
 	struct declarator *dc;

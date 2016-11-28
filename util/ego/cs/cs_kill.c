@@ -234,7 +234,7 @@ STATIC kill_local(enp, indir)
 	}
 }
 
-STATIC kill_sim()
+STATIC void kill_sim()
 {
 	/* A store is done into the ENIGNMASK. */
 

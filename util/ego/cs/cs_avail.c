@@ -75,7 +75,7 @@ STATIC bool same_avail(kind, avp1, avp2)
 	/* NOTREACHED */
 }
 
-STATIC check_local(avp)
+STATIC void check_local(avp)
 	avail_p avp;
 {
 	/* Check if the local in which the result of avp was stored,

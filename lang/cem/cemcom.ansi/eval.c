@@ -37,6 +37,9 @@ arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 extern int	err_occurred; /* error.c */
 
+void store_val();
+void load_val();
+
 /*	EVAL() is the main expression-tree evaluator, which turns
 	any legal expression tree into EM code. parameters.h:
 
@@ -63,6 +66,7 @@ extern int	err_occurred; /* error.c */
 		labels, in case they are specified (i.e. are non-zero)
 */
 
+void
 EVAL(expr, val, code, true_label, false_label)
 	register struct expr *expr;
 	int val, code;
@@ -836,6 +840,7 @@ ptr_add(size)
 	- into a local static variable
 	- absolute addressing
 */
+void
 store_val(vl, tp)
 	register struct value *vl;
 	register struct type *tp;
@@ -907,6 +912,7 @@ store_val(vl, tp)
 	- static variable
 	- local variable
 */
+void
 load_val(expr, rlval)
 	register struct expr *expr; /* expression containing the value	*/
 	int rlval;		/* generate either LVAL or RVAL		*/

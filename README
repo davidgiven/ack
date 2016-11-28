@@ -2,7 +2,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2016-08-02
+                                2016-11-26
 
 
 INTRODUCTION
@@ -19,6 +19,7 @@ probably broken. However, what's there should be sufficient to get things
 done and to evaluate how the full 6.1 release should work. 
 
 
+
 SUPPORT
 =======
 
@@ -31,8 +32,10 @@ Platforms:
 pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
+linuxppc      produces ELF executables for PowerPC Linux systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
+
 
 
 INSTALLATION
@@ -54,6 +57,11 @@ Requirements:
 
 - (optionally) ninja; if you've got this, this will be autodetected and give
   you faster builds.
+
+- (optionally) the qemu suite: if you have this installed, the build system
+  will detect it automatically and run the test suites for the supported
+  architectures. Get both the qemu-system-* platform emulators and the qemu-*
+  userland emulators (only works on Linux).
 
 - about 40MB free in /tmp (or some other temporary directory).
 
@@ -87,6 +95,7 @@ Instructions:
   directory (by default, /usr/local).
 
 The ACK should now be ready to use.
+
 
 
 USAGE
@@ -155,6 +164,8 @@ There are some things you should be aware of.
   interpreter and the assembler-linkers. Only some of it builds. Look for
   build.lua files.
 
+
+
 DISCLAIMER
 ==========
 
@@ -177,6 +188,6 @@ You can find the mailing list on the project's web site:
 	
 Please enjoy.
 
-David Given (dtrg on Sourceforge)
+David Given (davidgiven on Github)
 dg@cowlark.com
-2016-08-02
+2016-11-26

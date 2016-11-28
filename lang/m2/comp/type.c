@@ -74,6 +74,8 @@ t_type
 	*std_type,
 	*error_type;
 
+void ArraySizes();
+
 t_type *
 construct_type(fund, tp)
 	int fund;
@@ -576,6 +578,7 @@ ArrayElSize(tp)
 	}
 }
 
+void
 ArraySizes(tp)
 	register t_type *tp;
 {

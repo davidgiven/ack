@@ -12,11 +12,14 @@
 ! address and jumps to it.
 ! traps if resulting address is zero
 !
-! On entry: r3 = address of CSB table
-!           r4 = value
+! Stack: ( value tableaddr -- )
 
 .define .csb
 .csb:
+	lwz r3, 0(sp)
+	lwz r4, 4(sp)
+	addi sp, sp, 8
+
 	lwz r5, 0(r3)            ! load default
 	mtspr ctr, r5
 	

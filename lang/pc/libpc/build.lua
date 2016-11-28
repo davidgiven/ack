@@ -11,7 +11,6 @@ for _, plat in ipairs(vars.plats) do
 			"./fif.e",
 			"./gto.e",
 			"./hol0.e",
-			"./sav.e",
 			"./sig.e",
 			"./trap.e",
 			"./trp.e",

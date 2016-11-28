@@ -32,6 +32,9 @@ int	svnestlevel[30] = {-1};
 int	nestcount;
 extern int do_preprocess;
 
+void macro_def();
+void do_define();
+
 char *
 GetIdentifier(skiponerr)
 	int skiponerr;		/* skip the rest of the line on error */
@@ -148,6 +151,7 @@ domacro()
 	}
 }
 
+void
 skip_block(to_endif)
 int to_endif;
 {
@@ -327,6 +331,7 @@ do_include()
 	}
 }
 
+void
 do_define()
 {
 	/*	do_define() interprets a #define control line.
@@ -566,6 +571,7 @@ getparams(buf, parbuf)
 	/*NOTREACHED*/
 }
 
+void
 macro_def(id, text, nformals, length, flags)
 	register struct idf *id;
 	char *text;

@@ -1,0 +1,123 @@
+# Types:
+#
+#   I, F, L, D: int, float, long, double
+#   i, F: int, float; promoted to long, double based on size
+#   .: ignore this parameter
+#   ?: pull/push types from other ? parameters
+
+# Simple terminals
+S ?=.. CONST
+V ?=.. REG
+S ?=?. NOP
+S I=.. LABEL
+S I=.. BLOCK
+V ?=.. PAIR
+S ?=.. ANY
+S ?=.. LOCAL
+V ?=.. PHI
+
+# Magic stack operations
+S ?=?. PUSH
+S ?=.. POP
+
+# Memory operations
+S ?=I. LOAD
+S I=I. LOADB
+S I=I. LOADH
+S ?=I? STORE
+S ?=I? STOREB
+S ?=I? STOREH
+
+# Arithemetic operations
+S i=ii ADD
+S i=ii SUB
+S i=ii MUL
+S i=ii DIV
+S i=ii DIVU
+S i=ii MOD
+S i=ii MODU
+S i=ii NEG
+
+S f=ff ADDF
+S f=ff SUBF
+S f=ff MULF
+S f=ff DIVF
+S f=ff NEGF
+
+S i=ii AND
+S i=ii OR
+S i=ii EOR
+S i=ii NOT
+S i=ii ASL
+S i=ii ASR
+S i=ii LSL
+S i=ii LSR
+
+# Bitwise conversions
+# (Remember, these don't change the value, merely move it)
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S F=I. COPYI
+S I=F. COPYF
+S D=L. COPYL
+S L=D. COPYD
+
+# Semantic conversions
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S ?=I. FROMUI
+S ?=L. FROMUL
+S ?=I. FROMSI
+S ?=L. FROMSL
+S ?=F. FROMUF
+S ?=D. FROMUD
+S ?=F. FROMSF
+S ?=D. FROMSD
+S L=II FROMIPAIR
+S I=L. FROML0
+S I=L. FROML1
+
+# The H versions are only used if wordsize > 2
+S I=I. EXTENDB
+S I=I. EXTENDH
+S I=I. TRUNCATEB
+S I=I. TRUNCATEH
+
+# Tristate comparisons
+# (order is important here; the 8-byte version of each must immediate succeed
+# the 4-byte version)
+S I=II COMPARESI
+S I=LL COMPARESL
+S I=II COMPAREUI
+S I=LL COMPAREUL
+S I=FF COMPAREF
+S I=DD COMPARED
+
+# Tristate to boolean conversion
+S I=I. IFEQ
+S I=I. IFLT
+S I=I. IFLE
+
+# Procedures
+S i=I. CALL
+S i=?. GETRET
+S ?=i. SETRET
+
+# Flow control --- these never return
+V .=i. JUMP
+V .=i. FARJUMP
+V .=i. CJUMPEQ
+V .=i. CJUMPLT
+V .=i. CJUMPLE
+V .=.. RET
+ 
+# Special
+S ?=i. STACKADJUST
+S i=.. GETFP
+S ?=i. SETFP
+S i=.. GETSP
+S ?=i. SETSP
+S i=i. CHAINFP
+S i=i. FPTOAB
+S i=i. FPTOLB
+

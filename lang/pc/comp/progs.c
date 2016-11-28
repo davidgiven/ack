@@ -15,6 +15,8 @@ static int inpflag = 0;			/* input mentioned in heading ? */
 static int outpflag = 0;		/* output mentioned in heading ? */
 static label extfl_label;		/* label of array of file pointers */
 
+void make_extfl_args();
+
 set_inp()
 {
 	inpflag = 1;
@@ -25,6 +27,7 @@ set_outp()
 	outpflag = 1;
 }
 
+void
 make_extfl()
 {
 	if( err_occurred ) return; 
@@ -54,6 +57,7 @@ make_extfl()
 	make_extfl_args( GlobalScope->sc_def );
 }
 
+void
 make_extfl_args(df)
 	register struct def *df;
 {

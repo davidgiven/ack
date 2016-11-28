@@ -53,6 +53,7 @@ df_error(nd, mess, edf)
 	else node_error(nd, mess);
 }
 
+void
 MkCoercion(pnd, tp)
 	t_node		**pnd;
 	register t_type	*tp;

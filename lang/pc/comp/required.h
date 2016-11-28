@@ -1,48 +1,51 @@
 /* REQUIRED PROCEDURES AND FUNCTIONS */
 
-/* PROCEDURES */
-/* FILE HANDLING */
-#define R_REWRITE	1
-#define R_PUT		2
-#define R_RESET		3
-#define R_GET		4
-#define R_PAGE		5
+enum
+{
+    R__UNUSED = 0,
 
-/* DYNAMIC ALLOCATION */
-#define R_NEW		6
-#define R_DISPOSE	7
-#define R_MARK		8
-#define R_RELEASE	9
+    /* PROCEDURES */
+    /* FILE HANDLING */
+    R_REWRITE,
+    R_PUT,
+    R_RESET,
+    R_GET,
+    R_PAGE,
 
-/* MISCELLANEOUS PROCEDURE(S) */
-#define R_HALT		10
+    /* DYNAMIC ALLOCATION */
+    R_NEW,
+    R_DISPOSE,
 
-/* TRANSFER */
-#define R_PACK		11
-#define R_UNPACK	12
+    /* MISCELLANEOUS PROCEDURE(S) */
+    R_HALT,
 
-/* FUNCTIONS */
-/* ARITHMETIC */
-#define R_ABS		13
-#define R_SQR		14
-#define R_SIN		15
-#define R_COS		16
-#define R_EXP		17
-#define R_LN		18
-#define R_SQRT		19
-#define R_ARCTAN	20
+    /* TRANSFER */
+    R_PACK,
+    R_UNPACK,
 
-/* TRANSFER */
-#define R_TRUNC		21
-#define R_ROUND		22
+    /* FUNCTIONS */
+    /* ARITHMETIC */
+    R_ABS,
+    R_SQR,
+    R_SIN,
+    R_COS,
+    R_EXP,
+    R_LN,
+    R_SQRT,
+    R_ARCTAN,
 
-/* ORDINAL */
-#define R_ORD		23
-#define R_CHR		24
-#define R_SUCC		25
-#define R_PRED		26
+    /* TRANSFER */
+    R_TRUNC,
+    R_ROUND,
 
-/* BOOLEAN */
-#define R_ODD		27
-#define R_EOF		28
-#define R_EOLN		29
+    /* ORDINAL */
+    R_ORD,
+    R_CHR,
+    R_SUCC,
+    R_PRED,
+
+    /* BOOLEAN */
+    R_ODD,
+    R_EOF,
+    R_EOLN,
+};

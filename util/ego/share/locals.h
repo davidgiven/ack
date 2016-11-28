@@ -17,11 +17,11 @@ extern make_localtab();		/* (proc_p p)
 				 * these variables ('locals') and count them
 				 * ('nrlocals'). Also collect register messages.
 				 */
-extern var_nr();		/* (line_p l; short *nr_out;bool *found_out)
+extern void var_nr();		/* (line_p l; short *nr_out;bool *found_out)
 				 * Compute the 'variable number' of the
 				 * variable referenced by EM instruction l.
 				 */
-extern find_local();		/* (offset off; short *nr_out; bool *found_out)
+extern void find_local();		/* (offset off; short *nr_out; bool *found_out)
 				 * Try to find the local variable at the given
 	 			 * offset. Return its local-number.
 	 			 */

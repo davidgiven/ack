@@ -18,7 +18,7 @@ extern rem_actuals();		/* (actual_p atcs)
 extern remov_formals();		/* (proc_p p)
 				 * Remove the formals-list of p from core.
 				 */
-extern rem_indir_acc();		/* (proc_p p)
+extern void rem_indir_acc();		/* (proc_p p)
 				 * Remove formal that may be accessed
 				 * indirectly from formal lists of p
 				 */

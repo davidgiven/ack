@@ -42,6 +42,7 @@ linkreg(of,sz,tp,sc) long of; {
 	return(rvlp);
 }
 
+void
 tryreg(rvlp,typ) register struct regvar *rvlp; {
 	int score;
 	register i;

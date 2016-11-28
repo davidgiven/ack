@@ -1,3 +1,8 @@
+clibrary {
+	name = "headers",
+	hdrs = { "./src/*.h" }
+}
+
 cprogram {
 	name = "llgen",
 
@@ -6,6 +11,7 @@ cprogram {
 	-- do this.
 
 	srcs = { "./src/*.c" },
+	deps = { "+headers" },
 	vars = {
 		["+cflags"] = {
 			"-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"",

@@ -99,6 +99,9 @@
 /* Special instructions */
 
 0,     OP_LI32,               0,                                       "li32",
+0,     OP_LA,                 0,                                       "la",
+0,     OP_LA,                 0,                                       "li",
+0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,                         "mr",
 
 /* Branch processor instructions (page 20) */
 

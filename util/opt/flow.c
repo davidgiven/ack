@@ -21,6 +21,8 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
+void reach();
+
 flow() {
 
 	findreach();	/* determine reachable labels */
@@ -51,6 +53,7 @@ findreach() {
 			}
 }
 
+void
 reach(lnp) register line_p lnp; {
 	register num_p np;
 

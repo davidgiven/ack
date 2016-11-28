@@ -12,13 +12,13 @@ typedef struct cost {
 typedef struct {
 	string ea_str;
 	word ea_off;
-} addr_t;
+} address_t;
 
 typedef struct {
 	int     t_token;        /* kind of token, -1 for register */
 	union {
 		word aw;	/* integer type */
-		addr_t aa;	/* address type */
+		address_t aa;	/* address type */
 		int ar;		/* register type */
 	} t_att[TOKENSIZE];
 } token_t,*token_p;

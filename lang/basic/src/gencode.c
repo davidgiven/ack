@@ -617,11 +617,7 @@ prologcode()
         C_df_dnam("_iomode");
         C_rom_scon("O",(arith)2); 
 	C_exa_dnam("_errsym");
-	C_df_dnam("_errsym");
-	C_bss_cst((arith)BEMINTSIZE,(arith)0,1);
 	C_exa_dnam("_erlsym");
-	C_df_dnam("_erlsym");
-	C_bss_cst((arith)BEMINTSIZE,(arith)0,1);
 }
 
 

@@ -57,24 +57,24 @@ STATIC		genncrecovery();
 #endif
 STATIC string	genname();
 STATIC		generate();
-STATIC		prset();
-STATIC		macro();
+STATIC void prset();
+STATIC void macro();
 STATIC		controlline();
 STATIC		getparams();
 STATIC		getansiparams();
 STATIC		genprototypes();
 STATIC		gettok();
-STATIC		rulecode();
+STATIC void rulecode();
 STATIC int *	dopush();
 STATIC int *	mk_tokenlist();
-STATIC		getaction();
-STATIC		alternation();
+STATIC void getaction();
+STATIC void alternation();
 STATIC		codeforterm();
 STATIC		genswhead();
 STATIC		gencases();
 STATIC		genpush();
 STATIC		genpop();
-STATIC		genincrdecr();
+STATIC void genincrdecr();
 STATIC		add_cases();
 STATIC int	analyze_switch();
 STATIC		out_list();
@@ -414,7 +414,7 @@ generate(f) p_file f; {
 	}
 }
 
-STATIC
+STATIC void
 prset(p) p_set p; {
 	register int k;
 	register unsigned i;
@@ -435,7 +435,7 @@ prset(p) p_set p; {
 	/* NOTREACHED */
 }
 
-STATIC
+STATIC void
 macro(s,n) string s; p_nont n; {
 	int i;
 
@@ -625,7 +625,7 @@ gettok() {
 	}
 }
 
-STATIC
+STATIC void
 rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 	/*
 	 * Code for a production rule.
@@ -735,7 +735,7 @@ rulecode(p,safety,mustscan,mustpop) register p_gram p; {
 	}
 }
 
-STATIC
+STATIC void
 alternation(pp, safety, mustscan, mustpop, lb)
 	p_gram pp;
 {
@@ -956,7 +956,7 @@ dopush(p,safety,toplevel,pp) register p_gram p; int **pp; {
 
 # define max(a,b) ((a) < (b) ? (b) : (a))
 
-STATIC
+STATIC void
 getaction(flag) {
 	/* Read an action from the action file.
 	 * flag = 1 if it is an action,
@@ -1252,7 +1252,7 @@ genpush(d) {
 	genincrdecr("incr", d);
 }
 
-STATIC
+STATIC void
 genincrdecr(s, d) string s; {
 	if (d == NOPOP) return;
 	if (d >= 0) {

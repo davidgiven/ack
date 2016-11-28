@@ -71,7 +71,7 @@ adds_db_str(s)
 	while (*s) addc_db_str(*s++);
 }
 
-static
+static void
 stb_type(tp, assign_num)
 	register t_type	*tp;
 {

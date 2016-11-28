@@ -85,7 +85,7 @@ set_t ident_to_set(name) char *name; {
 	return(result);
 }
 
-static
+static void
 checksize(s)
 	register set_p s;
 {

@@ -109,6 +109,10 @@ char *temp_arch = &temp_buf[0];
 extern char *mktemp();
 extern char *ctime();
 
+void do_object();
+void write_symdef();
+void add();
+
 usage()
 {
 	error(TRUE, "usage: %s [qdprtxl][vlc] archive [file] ...\n",
@@ -437,6 +441,7 @@ register char *argv[];
   close(ar_fd);
 }
 
+void
 add(name, fd, mess)
 char *name;
 int fd;
@@ -630,6 +635,7 @@ char *s, *name;
  * then 4 bytes giving the size of the string table, followed by the string
  * table itself.
  */
+void
 write_symdef()
 {
 	register struct ranlib	*ran;
@@ -683,6 +689,7 @@ is_outhead(headp)
 	return !BADMAGIC(*headp) && headp->oh_nname != 0;
 }
 
+void
 do_object(f, size)
 	long size;
 {

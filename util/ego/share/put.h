@@ -28,7 +28,7 @@ extern	putptable();		/* (proc_p head, FILE *pf, bool all)
 				 * the fields computed by CF will not be
 				 * written (used by the IC phase).
 				 */
-extern	putunit();		/* (short kind; proc_p p; line_p l;
+extern void putunit();		/* (short kind; proc_p p; line_p l;
 				 * FILE *gf, *lf)
 				 * If kind = LTEXT, then write
 				 * the control flow graph to file gf,

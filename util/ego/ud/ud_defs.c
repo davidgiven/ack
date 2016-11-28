@@ -249,7 +249,7 @@ STATIC impl_globl_defs(p,gen_p)
 
 
 
-STATIC impl_gen_defs(l,gen_p)
+STATIC void impl_gen_defs(l,gen_p)
 	line_p l;
 	cset   *gen_p;
 {

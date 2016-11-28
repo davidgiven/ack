@@ -61,6 +61,8 @@ extern char *symbol2str();
 	node, whereas other errors use the information in the token.
 */
 
+void _error();
+
 #if __STDC__
 #ifdef DEBUG
 /*VARARGS*/
@@ -318,6 +320,7 @@ crash(va_alist)
 }
 #endif
 
+void
 _error(class, node, fmt, ap, warn_class)
 	int class;
 	t_node *node;

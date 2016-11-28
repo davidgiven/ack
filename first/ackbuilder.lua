@@ -451,7 +451,7 @@ loadtarget = function(targetname)
 		target = targets[targetname]
 		if not target then
 			error(string.format("build file '%s' contains no target '%s'",
-				filename, targetpart))
+				filepart, targetpart))
 		end
 	end
 
@@ -729,9 +729,10 @@ definerule("simplerule",
 definerule("installable",
 	{
 		map = { type="targets", default={} },
+		deps = { type="targets", default={} },
 	},
 	function (e)
-		local deps = {}
+		local deps = filenamesof(e.deps)
 		local commands = {}
 		local srcs = {}
 		local outs = {}

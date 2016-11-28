@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int _errsym;
+int _erlsym;
+
 /* error takes an error value in the range of 0-255 */
 /* and generates a trap */
 
@@ -52,9 +55,6 @@ char *errortable[255]={
 error(index)
 int	index;
 {
-	extern int _errsym;
-	extern int _erlsym;
-
 	_setline();
 	if( index<0 || index >40 )
 		printf("LINE %d:ERROR %d: Unprintable error\n",_erlsym,index);

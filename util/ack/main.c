@@ -24,6 +24,8 @@ static int arg_count;
 
 extern  char    *getenv();
 
+void vieuwargs();
+
 main(argc,argv) char **argv ; {
 	register list_elem *elem ;
 	register char *frontend ;
@@ -136,6 +138,7 @@ varinit() {
 
 /************************* flag processing ***********************/
 
+void
 vieuwargs(argc,argv) char **argv ; {
 	register char *argp;
 	register int nextarg ;

@@ -23,6 +23,9 @@ struct variable ANY;  /* ANY symbol matching any instruction */
 
 char *REST;  /* Opcode of first instruction not matched by current pattern */
 
+void labeldef();
+void set_opcode();
+
 #include "gen.c"
 
 
@@ -170,6 +173,7 @@ write_first(w)
 
 /* Try to recognize the opcode part of an instruction */
 
+void
 set_opcode(ip)
 	register instr_p ip;
 {
@@ -318,6 +322,7 @@ bool split_operands(ip)
 
 
 
+void
 labeldef(ip)
 	register instr_p ip;
 {
@@ -325,7 +330,7 @@ labeldef(ip)
 	int oplen;
 
 	p = ip->rest_line;
-	while( *p != LABEL_TERMINATOR) p++;
+	while(*p && (*p != LABEL_TERMINATOR)) p++;
 	oplen = p - ip->rest_line;
 	if (oplen == 0 || oplen > MAXOPLEN) return;
 	strncpy(ip->op[0],ip->rest_line,oplen);

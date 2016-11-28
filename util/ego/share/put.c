@@ -377,6 +377,7 @@ STATIC outlset(s,p)
 
 
 
+void
 putunit(kind,p,l,gf,lf)
 	short	 kind;
 	proc_p   p;

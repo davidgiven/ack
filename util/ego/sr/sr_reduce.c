@@ -544,7 +544,7 @@ STATIC reduce(code,vars)
 
 
 
-STATIC try_multiply(lp,ivs,vars,b,mul)
+STATIC void try_multiply(lp,ivs,vars,b,mul)
 	loop_p   lp;
 	lset	 ivs,vars;
 	bblock_p b;
@@ -606,7 +606,7 @@ STATIC try_multiply(lp,ivs,vars,b,mul)
 
 
 
-STATIC try_leftshift(lp,ivs,vars,b,shft)
+STATIC void try_leftshift(lp,ivs,vars,b,shft)
 	loop_p   lp;
 	lset	 ivs,vars;
 	bblock_p b;
@@ -657,7 +657,7 @@ STATIC try_leftshift(lp,ivs,vars,b,shft)
 }
 
 
-STATIC try_array(lp,ivs,vars,b,arr)
+STATIC void try_array(lp,ivs,vars,b,arr)
 	loop_p   lp;
 	lset	 ivs,vars;
 	bblock_p b;

@@ -298,7 +298,7 @@ STATIC mark_succ(b,lp)
 }
 
 
-STATIC mark_blocks(lp)
+STATIC void mark_blocks(lp)
 	loop_p lp;
 {
 	/* Mark the strong and firm blocks of a loop.

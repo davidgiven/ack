@@ -1183,13 +1183,6 @@ ChkStandard(expp,left)
 		expp->nd_type = NULLTYPE;
 		break;
 
-	    case R_MARK:
-	    case R_RELEASE:
-		if( !(left = getarg(&arg, T_POINTER, 1, name, NULLTYPE)) )
-			return 0;
-		expp->nd_type = NULLTYPE;
-		break;
-
 	    case R_HALT:
 		if( !arg->nd_right ) 		/* insert 0 parameter */
 			arg->nd_right = ZeroParam();

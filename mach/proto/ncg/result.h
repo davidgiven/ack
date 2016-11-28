@@ -9,7 +9,7 @@ struct result {
 	union {
 		word e_con;
 		int e_reg;
-		addr_t e_addr;
+		address_t e_addr;
 	} e_v;			/* value */
 };
 

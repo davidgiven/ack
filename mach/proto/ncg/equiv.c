@@ -29,6 +29,8 @@ int maxindex;
 int regclass[NREGS];
 struct perm *perms;
 
+void permute();
+
 struct perm *
 tuples(regls,nregneeded) rl_p *regls; {
 	int class=0;
@@ -64,6 +66,7 @@ tuples(regls,nregneeded) rl_p *regls; {
 	return(perms);
 }
 
+void
 permute(index) {
 	register struct perm *pp;
 	register rl_p rlp;

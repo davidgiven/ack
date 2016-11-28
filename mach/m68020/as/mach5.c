@@ -21,6 +21,8 @@
  * then emitted in one go, by emit_instr().
  */
 
+void move_special();
+
 emit_instr()
 {
 	register instr_t *ip;
@@ -70,6 +72,7 @@ long words;
 	T_EMIT2((short)(words), 0, 0, 0);
 }
 
+void
 ea_1(sz, bits)
 {
 		/* Because displacements come in three sizes (null displacement,
@@ -242,6 +245,7 @@ badoperand()
 	serror("bad operand(s)");
 }
 
+void
 shift_op(opc, sz)
 {
 	if (mrg_1 < 010 && mrg_2 < 010) {
@@ -263,6 +267,7 @@ shift_op(opc, sz)
 	ea_2(SIZE_W, MEM|ALT);
 }
 
+void
 bitop(opc)
 {
 	register bits;
@@ -291,6 +296,7 @@ bitfield(opc, extension)
 	ea_2(SIZE_L, (mrg_2 < 010) ? 0 : (CTR | ALT));
 }
 
+void
 add(opc, sz)
 {
 	if ((mrg_2 & 070) == 010)
@@ -326,6 +332,7 @@ add(opc, sz)
 	badoperand();
 }
 
+void
 and(opc, sz)
 {
 	if (mrg_1 == 074 && mrg_2 >= 076) {	/* ccr or sr */
@@ -370,6 +377,7 @@ from_dreg(opc, sz, bits)
 	return(1);
 }
 
+void
 cmp(sz)
 {
 	register opc;
@@ -416,6 +424,7 @@ link_instr(sz, areg)
 	ea_2(sz, 0);
 }
 
+void
 move(sz)
 {
 	register opc;
@@ -448,6 +457,7 @@ move(sz)
 	ea_2(sz, ALT);
 }
 
+void
 move_special(sz)
 {
 	if (mrg_2 >= 076) {
@@ -514,6 +524,7 @@ reverse(regs, max)
 	return regs;
 }
 
+void
 movep(sz)
 {
 	checksize(sz, 2|4);
@@ -530,6 +541,7 @@ movep(sz)
 	badoperand();
 }
 
+void
 branch(opc, exp)
 expr_t exp;
 {
@@ -566,6 +578,7 @@ expr_t exp;
 	T_EMIT4(exp.val, exp.typ, RELPC|RELO4, relonami);
 }
 
+void
 cpbcc(opc, exp)
 expr_t exp;
 {
@@ -593,6 +606,7 @@ expr_t exp;
 	T_EMIT4(exp.val, exp.typ, RELPC|RELO4, relonami);
 }
 
+void
 ea7071(sz)
 {
 	mrg_2 = 071;
@@ -671,6 +685,7 @@ ea7071(sz)
 			mrg_2 = 070;
 }
 
+void
 fbranch(opc, exp)
 expr_t exp;
 {

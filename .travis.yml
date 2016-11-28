@@ -1,12 +1,13 @@
 matrix:
     include:
         - os: linux
-        - os: osx
 
 addons:
     apt:
         packages:
         - ed
+        - openbios-ppc
+        - qemu-user
 
 git:
     depth: 10

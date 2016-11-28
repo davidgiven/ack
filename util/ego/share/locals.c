@@ -29,7 +29,7 @@ short nrglobals;
 short nrlocals;
 local_p *locals;  /* dynamic array */
 
-STATIC localvar(off,size,locs,reg,score)
+STATIC void localvar(off,size,locs,reg,score)
 	offset off;
 	short  size;
 	local_p *locs;
@@ -90,7 +90,7 @@ STATIC check_message(l,locs)
 
 
 
-STATIC check_local_use(l,locs)
+STATIC void check_local_use(l,locs)
 	line_p l;
 	local_p *locs;
 {
@@ -186,7 +186,7 @@ make_localtab(p)
 
 
 
-find_local(off,nr_out,found_out)
+void find_local(off,nr_out,found_out)
 	offset off;
 	short  *nr_out;
 	bool   *found_out;
@@ -211,7 +211,7 @@ find_local(off,nr_out,found_out)
 
 
 
-var_nr(l,nr_out,found_out)
+void var_nr(l,nr_out,found_out)
 	line_p l;
 	short  *nr_out;
 	bool   *found_out;

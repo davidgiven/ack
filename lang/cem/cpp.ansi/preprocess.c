@@ -102,6 +102,7 @@ do_pragma()
 
 char Xbuf[256];
 
+void
 preprocess(fn)
 	char *fn;
 {

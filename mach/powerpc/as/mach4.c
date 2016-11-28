@@ -44,6 +44,7 @@ operation
 	| OP_RS_RA_UI_CC       C GPR ',' GPR ',' e16      { emit4($1 | ($5<<21) | ($3<<16) | $7); } 
 	| OP_RS_RA_RB          GPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RS_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
+	| OP_RS_RA_RA_C        c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($5<<11)); }
 	| OP_RS_RA_RB_MB5_ME5_C c GPR ',' GPR ',' GPR ',' u5 ',' u5 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | ($9<<6) | ($11<<1)); }  
 	| OP_RS_RA_RB_MB6_C    c GPR ',' GPR ',' GPR ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | (($9&0x1F)<<6) | (($9&0x20)>>0)); }
 	| OP_RS_RA_RB_ME6_C    c GPR ',' GPR ',' GPR ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | (($9&0x1F)<<6) | (($9&0x20)>>0)); }
@@ -196,9 +197,16 @@ bda
 li32
 	: GPR ',' expr
 	{
-		newrelo($3.typ, RELOPPC | FIXUPFLAGS);
-		emit4((15<<26) | ($1<<21) | (0<<16)  | ($3.val >> 16)); /* addis */
-		emit4((24<<26) | ($1<<21) | ($1<<16) | ($3.val & 0xffff)); /* ori */
+		quad type = $3.typ & S_TYP;
+		quad val = $3.val;
+		if ((type == S_ABS) && (val <= 0xffff))
+			emit4((14<<26) | ($1<<21) | (0<<16)  | val); /* addi */
+		else
+		{
+			newrelo($3.typ, RELOPPC | FIXUPFLAGS);
+			emit4((15<<26) | ($1<<21) | (0<<16)  | (val >> 16)); /* addis */
+			emit4((24<<26) | ($1<<21) | ($1<<16) | (val & 0xffff)); /* ori */
+		}
 	}
 	;
 

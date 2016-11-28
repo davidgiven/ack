@@ -49,6 +49,7 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 	return(result.e_v.e_con);
 }
 
+void
 instance(instno,token) register token_p token; {
 	register inst_p inp;
 	int i;
@@ -145,6 +146,7 @@ instance(instno,token) register token_p token; {
 	}
 }
 
+void
 cinstance(instno,token,tp,regno) register token_p token,tp; {
 	register inst_p inp;
 	int i;

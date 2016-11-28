@@ -68,6 +68,7 @@ char *str;
 
 
 
+void
 dcltype(s)
 Symbol *s;
 {

@@ -37,7 +37,8 @@ extern char** environ;
 
 extern void _exit(int);
 extern pid_t getpid(void);
-extern void* sbrk(intptr_t increment);
+extern int brk(void* addr);
+extern void* sbrk(int increment);
 extern int isatty(int d);
 extern off_t lseek(int fildes, off_t offset, int whence);
 extern int close(int d);

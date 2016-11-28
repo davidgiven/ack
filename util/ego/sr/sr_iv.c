@@ -116,7 +116,7 @@ STATIC int sign(lnp)
 }
 
 
-STATIC try_patterns(lnp)
+STATIC void try_patterns(lnp)
 	line_p lnp;
 {
 	/* lnp is a STL x; try to recognize

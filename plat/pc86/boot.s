@@ -23,7 +23,7 @@
 ! If you ever need to change the boot code, this needs adjusting. I recommend
 ! a hex editor.
 
-PADDING = 0xB7
+PADDING = 0xB3
 
 ! Some definitions.
 
@@ -271,9 +271,12 @@ finished:
 	
 	! Push standard parameters onto the stack and go.
 	
-	push envp               ! envp
-	push argv               ! argv
-	push 1                  ! argc
+	mov ax, envp
+	push ax
+	mov ax, argv
+	push ax
+	mov ax, 1
+	push ax
 	call __m_a_i_n
 	! fall through into the exit routine.
 	
