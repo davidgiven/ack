@@ -2,50 +2,49 @@
 method=$1
 img=$2
 timeout=$3
+timeoutprog=$4
 
-pipe=/tmp/$$.testdriver.pipe
-mknod $pipe p
-trap "rm -f $pipe" EXIT
+set -e
 
 result=/tmp/$$.testdriver.result
 trap "rm -f $result" EXIT
 
-pidfile=/tmp/$$.testdriver.pid
-trap "rm -f $pidfile" EXIT
+errcho() {
+    >&2 echo "$*"
+}
 
-case $method in
-    qemu-system-*)
-        if ! command -v $method >/dev/null 2>&1 ; then
-            echo "Warning: $method not installed, skipping test"
-            exit 0
-        fi
+get_test_output() {
+    case $method in
+        qemu-system-*)
+            if ! command -v $method >/dev/null 2>&1 ; then
+                errcho "Warning: $method not installed, skipping test"
+                exit 0
+            fi
 
-        case $method in
-            qemu-system-i386) img="-drive file=$img,if=floppy,format=raw" ;;
-            qemu-system-ppc)  img="-kernel $img" ;;
-        esac
+            case $method in
+                qemu-system-i386) img="-drive file=$img,if=floppy,format=raw" ;;
+                qemu-system-ppc)  img="-kernel $img" ;;
+            esac
 
-        ( $method -nographic $img 2>&1 & echo $! > $pidfile ) \
-            | tee $result \
-            | ( timeout $timeout grep -l -q @@FINISHED ; echo ) \
-            | ( read dummy && kill $(cat $pidfile) )
-        
-        ;;
+            $timeoutprog -t $timeout -- $method -nographic $img > $result
+            ;;
 
-    qemu-*)
-        if ! command -v $method >/dev/null 2>&1 ; then
-            echo "Warning: $method not installed, skipping test"
-            exit 0
-        fi
+        qemu-*)
+            if ! command -v $method >/dev/null 2>&1 ; then
+                errcho "Warning: $method not installed, skipping test"
+                exit 0
+            fi
 
-        $method $img > $result
-        ;;
+            $method $img > $result
+            ;;
 
-    *)
-        echo "Error: $method not known by testdriver"
-        exit 1
-        ;;
-esac
+        *)
+            errcho "Error: $method not known by testdriver"
+            exit 1
+            ;;
+    esac
+}
 
+get_test_output > $result
 ( grep -q @@FAIL $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
 exit 0
