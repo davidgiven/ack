@@ -20,7 +20,7 @@ var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
 var ALIGN=-a0:4 -a1:4 -a2:4096 -a3:4 -b0:0x129c
 var MACHOPT_F=-m3
-# var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
 
 # Override the setting in fe so that files compiled for osxppc can see
 # the platform-specific headers.

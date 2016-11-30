@@ -22,6 +22,7 @@ end
 build_descr("i386")
 build_descr("i86")
 build_descr("m68020")
+build_descr("powerpc")
 
 installable {
 	name = "pkg",
