@@ -120,6 +120,8 @@ int kill(pid_t, int);
 int sigaction(int, const struct sigaction *, struct sigaction *);
 sig_t signal(int, sig_t);
 
+int raise(int); /* in libc */
+
 /* XXX - end signal.h */
 
 void _exit(int);
