@@ -20,8 +20,8 @@ typedef struct {
 
 /* Routines used */
 
-extern  void    gr_throw() ;    /* To free the core */
-extern  int     gr_add() ;      /* To add one character */
-extern  int     gr_cat() ;      /* concatenate the contents and the string */
-extern  int     gr_init() ;     /* Initialize the bookkeeping */
-extern  char    *gr_final() ;   /* Transform to a stable storage string */
+void     gr_throw(growstring *) ;               /* To free the core */
+int      gr_add(growstring *, int) ;            /* To add one character */
+int      gr_cat(growstring *, const char *) ;   /* To append a string */
+void     gr_init(growstring *) ;        /* Initialize the bookkeeping */
+char    *gr_final(growstring *) ;       /* Move to a stable storage string */

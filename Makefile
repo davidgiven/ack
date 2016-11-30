@@ -88,6 +88,7 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 	@$(LUA) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
+		DEFAULT_PLATFORM=$(DEFAULT_PLATFORM) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
 		LIBDIR=$(LIBDIR) \

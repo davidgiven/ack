@@ -26,13 +26,17 @@ static int        touch_head= NO ;
 static growstring tail ;
 static int        touch_tail= NO ;
 
-char *headvar(),*tailvar() ;
+static char *headvar(void);
+static char *tailvar(void);
+static void set_Rflag(char *);
+static void condit(growstring *, list_head *, list_head *, char *);
+static int mapflag(list_head *, const char *);
+static int mapexpand(char *, const char *);
+static void getcallargs(trf *);
+static growstring without_bslash(const char *);
+static void getprogram(trf *);
 
-void condit();
-void doassign();
-void set_Rflag();
-
-int transform(phase) register trf *phase ; {
+int transform(trf *phase) {
 	int ok ;
 
 	if ( !setfiles(phase) ) {
@@ -40,17 +44,19 @@ int transform(phase) register trf *phase ; {
 		return 0 ;
 	}
 	getcallargs(phase) ;
+	getprogram(phase) ;
 	ok= runphase(phase) ;
 	if ( !ok ) rmfile(&out) ;
 	/* Free the space occupied by the arguments,
 	   except for the linker, since we are bound to exit soon
 	   and do not foresee further need of memory space */
-	if ( !phase->t_linker ) discardargs(phase) ;
+	if ( !phase->t_linker )
+		l_throw(&phase->t_args) ;
 	disc_files(phase) ;
 	return ok ;
 }
 
-getmapflags(phase) register trf *phase ; {
+void getmapflags(trf *phase) {
 	register path *l_in ;
 	register list_elem *elem ;
 	int scanned ;
@@ -75,8 +81,9 @@ getmapflags(phase) register trf *phase ; {
 		scanlist(l_first(phase->t_inputs),elem) {
 			l_in = p_cont(*elem) ;
 			if ( mapflag(&(phase->t_mapf),l_in->p_path) ) {
-				ptr= keeps(getvar(LIBVAR)) ;
-				clr_noscan(ptr) ;
+				growstring temp;
+				temp= without_bslash(getvar(LIBVAR)) ;
+				ptr= gr_final(&temp);
 #ifdef DEBUG
 				if ( debug >=4 ) {
 					vprint("phase %s, library %s(%s)\n",
@@ -110,16 +117,12 @@ getmapflags(phase) register trf *phase ; {
 }
 
 
-do_Rflag(argp) char *argp ; {
-	l_add(&R_list,argp) ;
-}
-
-char *headvar() {
+static char *headvar(void) {
 	if ( !touch_head) return "" ;
 	return gr_start(head) ;
 }
 
-add_head(str) char *str; {
+void add_head(const char *str) {
 	if ( !touch_head) {
 		gr_init(&head) ;
 		touch_head=YES ;
@@ -127,12 +130,12 @@ add_head(str) char *str; {
 	gr_cat(&head,str) ;
 }
 
-char *tailvar() {
+static char *tailvar(void) {
 	if ( !touch_tail ) return "" ;
 	return gr_start(tail) ;
 }
 
-add_tail(str) char *str ; {
+void add_tail(const char *str) {
 	if ( !touch_tail ) {
 		gr_init(&tail) ;
 		touch_tail=YES ;
@@ -141,7 +144,7 @@ add_tail(str) char *str ; {
 }
 
 
-transini() {
+void transini(void) {
 	register list_elem *elem ;
 	register trf *phase ;
 
@@ -157,8 +160,7 @@ transini() {
 	setpvar(keeps(TAIL),tailvar) ;
 }
 
-void
-set_Rflag(argp) register char *argp ; {
+static void set_Rflag(char *argp) {
 	register char *eos ;
 	register list_elem *prog ;
 	register int length ;
@@ -206,72 +208,47 @@ set_Rflag(argp) register char *argp ; {
 /*                                                                        */
 /**************************************************************************/
 
-growstring scanb(line) char *line ; {
-	/* Scan a line for backslashes, setting the NO_SCAN bit in characters
-	   preceded by a backslash.
-	*/
-	register char *in_c ;
-	register int  token ;
-	growstring result ;
-	enum { TEXT, ESCAPED } state = TEXT ;
-
-	gr_init(&result) ;
-	for ( in_c= line ; *in_c ; in_c++ ) {
-		token= *in_c&0377 ;
-		switch( state ) {
-		case TEXT :
-			if ( token==BSLASH ) {
-				state= ESCAPED ;
-			} else {
-				gr_add(&result,token) ;
-			}
-			break ;
-		case ESCAPED :
-			gr_add(&result,token|NO_SCAN) ;
-			state=TEXT ;
-			break ;
-		}
-	}
-	gr_add(&result,0) ;
-	if ( state!=TEXT ) werror("flag line ends with %c",BSLASH) ;
-	return result ;
-}
-
-growstring scanvars(line) char *line ; {
+static growstring scanvars(const char *line) {
 	/* Scan a line variable replacements started by S_VAR.
-	   Two sequences exist: S_VAR name E_VAR, S_VAR name A_VAR text E_VAR.
+	   Two sequences exist: S_VAR name C_VAR, S_VAR name A_VAR text C_VAR.
 	   neither name nor text may contain further replacements.
 	   In the first form an error message is issued if the name is not
 	   present in the variables, the second form produces text
 	   in that case.
-	   The sequence S_VAR S_VAR is transformed into S_VAR.
-	   This to allow later recognition in mapflags, where B_SLASH
-	   would be preventing any recognition.
 	*/
-	register char *in_c ;
-	register int  token ;
-	growstring result ;
-	growstring name ;
-	register char *tr ;
+	const char *in_c ;
+	int token, token_r ;
+	growstring result, name ;
+	char *tr ;
 	enum { TEXT, FIRST, NAME, SKIP, COPY } state = TEXT ;
+	int escaped = NO;
 
 	gr_init(&result) ; gr_init(&name) ;
 	for ( in_c= line ; *in_c ; in_c++ ) {
 		token= *in_c&0377 ;
+		token_r= (escaped ? 0 : token);
+
+		/* A backslash escapes the next character. */
+		if ( token_r==BSLASH ) {
+			if ( state==TEXT || state==COPY ) {
+				/* Keep BSLASH for later scans. */
+				gr_add(&result,token) ;
+			}
+			escaped= YES;
+			continue;
+		}
+		escaped= NO;
+
 		switch( state ) {
 		case TEXT :
-			if ( token==S_VAR ) {
+			if ( token_r==S_VAR ) {
 				state= FIRST ;
 			} else {
 				gr_add(&result,token) ;
 			}
 			break ;
 		case FIRST :
-			switch ( token ) {
-			case S_VAR :
-				state= TEXT ;
-				gr_add(&result,token) ;
-				break ;
+			switch ( token_r ) {
 			case A_VAR :
 			case C_VAR :
 				fatal("empty string variable name") ;
@@ -282,7 +259,7 @@ growstring scanvars(line) char *line ; {
 			}
 			break ;
 		case NAME:
-			switch ( token ) {
+			switch ( token_r ) {
 			case A_VAR :
 				gr_add(&name,0) ;
 				if ( tr=getvar(gr_start(name)) ) {
@@ -314,16 +291,17 @@ growstring scanvars(line) char *line ; {
 			}
 			break ;
 		case SKIP :
-			if ( token==C_VAR ) state= TEXT ;
+			if ( token_r==C_VAR ) state= TEXT ;
 			break ;
 		case COPY :
-			if ( token==C_VAR ) state= TEXT ; else {
+			if ( token_r==C_VAR ) state= TEXT ; else {
 				gr_add(&result,token) ;
 			}
 			break ;
 		}
 	}
 	gr_add(&result,0) ;
+	if ( escaped ) werror("flag line ends with %c",BSLASH) ;
 	if ( state!=TEXT ) {
 		werror("flag line misses %c",C_VAR) ;
 		gr_throw(&name) ;
@@ -331,74 +309,84 @@ growstring scanvars(line) char *line ; {
 	return result ;
 }
 
-growstring scanexpr(line) char *line ; {
+static growstring scanexpr(const char *line) {
 	/* Scan a line for conditional or flag expressions,
 	   dependent on the type. The format is
 	   S_EXPR suflist M_EXPR suflist T_EXPR tail C_EXPR
-	   the head and tail are passed to treat, together with the
+	   the head and tail are passed to condit(), together with the
 	   growstring for futher treatment.
 	   Nesting is not allowed.
 	*/
-	register char *in_c ;
-	char *heads ;
-	register int  token ;
-	growstring sufs, tailval ;
-	growstring result ;
+	const char *in_c, *heads ;
+	int token, token_r ;
+	growstring sufs, tailval, result ;
 	static list_head fsuff, lsuff ;
 	enum { TEXT, FDOT, FSUF, LDOT, LSUF, FTAIL } state = TEXT ;
+	int escaped = NO;
 
 	gr_init(&result) ; gr_init(&sufs) ; gr_init(&tailval) ;
 	for ( in_c= line ; *in_c ; in_c++ ) {
 		token= *in_c&0377 ;
+		token_r= (escaped ? 0 : token);
+
+		/* A backslash escapes the next character. */
+		if ( token_r==BSLASH ) {
+			if ( state==TEXT || state==FTAIL ) {
+				/* Keep BSLASH for later scans. */
+				gr_add(&result,token) ;
+			}
+			escaped= YES;
+			continue;
+		}
+		escaped= NO;
+
 		switch( state ) {
 		case TEXT :
-			if ( token==S_EXPR ) {
+			if ( token_r==S_EXPR ) {
 				state= FDOT ;
 				heads=in_c ;
 			} else gr_add(&result,token) ;
 			break ;
 		case FDOT :
-			if ( token==M_EXPR ) {
+			if ( token_r==M_EXPR ) {
 				state=LDOT ;
 				break ;
 			}
-			token &= ~NO_SCAN ;
 			if ( token!=SUFCHAR ) {
 				error("Missing %c in expression",SUFCHAR) ;
 			}
 			gr_add(&sufs,token) ; state=FSUF ;
 			break ;
 		case FSUF :
-			if ( token==M_EXPR || (token&~NO_SCAN)==SUFCHAR) {
+			if ( token_r==M_EXPR || token==SUFCHAR ) {
 				gr_add(&sufs,0) ;
 				l_add(&fsuff,gr_final(&sufs)) ;
 			}
-			if ( token==M_EXPR ) {
+			if ( token_r==M_EXPR ) {
 				state=LDOT ;
-			} else gr_add(&sufs,token&~NO_SCAN) ;
+			} else gr_add(&sufs,token) ;
 			break ;
 		case LDOT :
-			if ( token==T_EXPR ) {
+			if ( token_r==T_EXPR ) {
 				state=FTAIL ;
 				break ;
 			}
-			token &= ~NO_SCAN ;
 			if ( token!=SUFCHAR ) {
 				error("Missing %c in expression",SUFCHAR) ;
 			}
 			gr_add(&sufs,token) ; state=LSUF ;
 			break ;
 		case LSUF :
-			if ( token==T_EXPR || (token&~NO_SCAN)==SUFCHAR) {
+			if ( token_r==T_EXPR || token==SUFCHAR) {
 				gr_add(&sufs,0) ;
 				l_add(&lsuff,gr_final(&sufs)) ;
 			}
-			if ( token==T_EXPR ) {
+			if ( token_r==T_EXPR ) {
 				state=FTAIL ;
-			} else gr_add(&sufs,token&~NO_SCAN) ;
+			} else gr_add(&sufs,token) ;
 			break ;
 		case FTAIL :
-			if ( token==C_EXPR ) {
+			if ( token_r==C_EXPR ) {
 				/* Found one !! */
 				gr_add(&tailval,0) ;
 				condit(&result,&fsuff,&lsuff,gr_start(tailval)) ;
@@ -418,10 +406,8 @@ growstring scanexpr(line) char *line ; {
 	return result ;
 }
 
-void
-condit(line,fsuff,lsuff,tailval) growstring *line ;
-	list_head *fsuff, *lsuff;
-	char *tailval ;
+static void condit(growstring *line, list_head *fsuff, list_head *lsuff,
+		   char *tailval)
 {
 	register list_elem *first ;
 	register list_elem *last ;
@@ -446,7 +432,7 @@ condit(line,fsuff,lsuff,tailval) growstring *line ;
 #endif
 }
 
-int mapflag(maplist,cflag) list_head *maplist ; char *cflag ; {
+static int mapflag(list_head *maplist, const char *cflag) {
 	/* Expand a flag expression */
 	/* The flag "cflag" is checked for each of the mapflags.
 	   A mapflag entry has the form
@@ -468,12 +454,9 @@ int mapflag(maplist,cflag) list_head *maplist ; char *cflag ; {
 	return 0 ;
 }
 
-int mapexpand(mapentry,cflag)
-	char *mapentry, *cflag ;
-{
-	register char *star ;
-	register char *ptr ;
-	register char *space ;
+static int mapexpand(char *mapentry, const char *cflag) {
+	const char *star ;
+	char *ptr, *space ;
 	int length ;
 
 	star=strchr(mapentry,STAR) ;
@@ -510,10 +493,10 @@ int mapexpand(mapentry,cflag)
 	return 1 ;
 }
 
-void
-doassign(line,star,length) char *line, *star ; {
+void doassign(const char *line, const char *star, int length) {
 	growstring varval, name, temp ;
-	register char *ptr ;
+	const char *ptr ;
+	int escaped = NO ;
 
 	gr_init(&varval) ;
 	gr_init(&name) ;
@@ -528,12 +511,21 @@ doassign(line,star,length) char *line, *star ; {
 	}
 	temp= scanvars(ptr+1) ;
 	for ( ptr=gr_start(temp); *ptr; ptr++ ) switch ( *ptr ) {
+	case BSLASH :
+		escaped= YES ;
+		gr_add(&varval,*ptr) ;
+		break ;
 	case STAR :
-		if ( star ) {
-			while ( length-- ) gr_add(&varval,*star++|NO_SCAN) ;
+		if ( star && !escaped ) {
+			while ( length-- ) {
+				gr_add(&varval,BSLASH) ;
+				gr_add(&varval,*star++) ;
+			}
 			break ;
 		}
+		/* FALLTHROUGH */
 	default :
+		escaped= NO ;
 		gr_add(&varval,*ptr) ;
 		break ;
 	}
@@ -544,15 +536,16 @@ doassign(line,star,length) char *line, *star ; {
 
 #define ISBLANK(c) ( (c)==SPACE || (c)==TAB )
 
-unravel(line,action) char *line ; int (*action)() ; {
+static void unravel(const char *line, void (*action)(char *)) {
 	/* Unravel the line, get arguments a la shell */
 	/* each argument is handled to action */
 	/* The input string is left intact */
-	register char *in_c ;
-	register int  token ;
-	enum { BLANK, ARG } state = BLANK ;
+	const char *in_c ;
+	int token ;
+	enum { BLANK, ARG, ESCAPED } state = BLANK ;
 	growstring argum ;
 
+	/* Loop for each character of line, including final '\0' */
 	in_c=line ;
 	for (;;) {
 		token= *in_c&0377 ;
@@ -560,9 +553,13 @@ unravel(line,action) char *line ; int (*action)() ; {
 		case BLANK :
 			if ( token==0 ) break ;
 			if ( !ISBLANK(token) ) {
-				state= ARG ;
 				gr_init(&argum) ;
-				gr_add(&argum,token&~NO_SCAN) ;
+				gr_add(&argum,token) ;
+				if ( token == BSLASH ) {
+					state= ESCAPED ;
+				} else {
+					state= ARG ;
+				}
 			}
 			break ;
 		case ARG :
@@ -572,8 +569,13 @@ unravel(line,action) char *line ; int (*action)() ; {
 				gr_throw(&argum) ;
 				state=BLANK ;
 			} else {
-				gr_add(&argum,token&~NO_SCAN) ;
+				gr_add(&argum,token) ;
+				if ( token == BSLASH ) state= ESCAPED ;
 			}
+			break ;
+		case ESCAPED :
+			gr_add(&argum,token) ;
+			state= ARG ;
 			break ;
 		}
 		if ( token == 0 ) break ;
@@ -581,88 +583,92 @@ unravel(line,action) char *line ; int (*action)() ; {
 	}
 }
 
-char *c_rep(string,place,rep) char *string, *place, *rep ; {
-	/* Produce a string in stable storage produced from 'string'
-	   with the character at place replaced by rep
-	*/
-	growstring name ;
-	register char *nc ;
-	register char *xc ;
-
-	gr_init(&name) ;
-	for ( nc=string ; *nc && nc<place ; nc++ ) {
-		gr_add(&name,*nc) ;
-	}
-#ifdef DEBUG
-	if ( *nc==0 ) fatal("Place is not in string") ;
-#endif
-	for ( xc=rep ; *xc ; xc++ ) gr_add(&name,*xc|NO_SCAN) ;
-	gr_add(&name,0) ;
-	gr_cat(&name,nc+1) ;
-	return gr_final(&name) ;
-}
-
 static list_head *curargs ;
 static list_head *comb_args ;
 
-void
-addargs(string) char *string ; {
-	register char *temp, *repc ;
-	register list_elem *elem ;
+static void addargs3(const char *prefix1, const char *prefix2,
+		     const char *string)
+{
+	/* Prepend prefix1 and prefix2 to string, then add it to
+	   curargs.  string is scanned to strip backslashes and
+	   substitute files for C_IN and C_OUT.  prefixes are not
+	   scanned.
+	*/
+	const char *in_c ;
+	int token ;
+	char *tr ;
+	list_elem *elem ;
+	growstring argum ;
+	int escaped = NO ;
 
-	repc=strchr(string,C_IN) ;
-	if ( repc ) {
-		/* INPUT FILE TOKEN seen, replace it and scan further */
-		if ( repc==string && string[1]==0 ) {
-			if ( in.p_path ) { /* All but combiner */
-				l_add(curargs,keeps(in.p_path)) ;
-			} else {
-				scanlist( l_first(*comb_args), elem ) {
-					l_add(curargs,
-					      keeps(p_cont(*elem)->p_path)) ;
+	gr_init(&argum);
+	for ( in_c= prefix1 ; *in_c ; in_c++ ) {
+		gr_add(&argum,*in_c) ;
+	}
+	for ( in_c= prefix2 ; *in_c ; in_c++ ) {
+		gr_add(&argum,*in_c) ;
+	}
+	for ( in_c= string ; *in_c ; in_c++ ) {
+		token= *in_c&0377 ;
+		if ( escaped ) {
+			/* Strip BSLASH, keep escaped character. */
+			gr_add(&argum,token) ;
+			escaped= NO ;
+			continue;
+		}
+		switch ( token ) {
+		case BSLASH:
+			escaped= YES ;
+			break;
+		case C_IN:  /* Input file */
+			if ( in.p_path ) { /* Not for the combiners */
+				for ( tr= in.p_path ; *tr; tr++ ) {
+					gr_add(&argum,*tr);
 				}
+			} else {           /* For the combiners */
+				gr_add(&argum,0);
+				tr= gr_final(&argum);
+				in_c++;
+				scanlist( l_first(*comb_args), elem ) {
+					char *p = p_cont(*elem)->p_path ;
+					addargs3(tr,p,in_c) ;
+				}
+				throws(tr);
+				return;
 			}
-			return ;
-		}
-		if ( in.p_path ) { /* Not for the combiners */
-			temp=c_rep(string,repc,in.p_path) ;
-			addargs(temp) ;
-			throws(temp) ;
-		} else {           /* For the combiners */
-			scanlist( l_first(*comb_args), elem ) {
-				temp=c_rep(string,repc,p_cont(*elem)->p_path);
-				addargs(temp) ;
-				throws(temp) ;
-			}
-		}
-		return ;
-	}
-	repc=strchr(string,C_OUT) ;
-	if ( repc ) {
-		/* replace the outfile token as with the infile token */
+			break;
+		case C_OUT: /* Output file */
 #ifdef DEBUG
-		if ( !out.p_path ) fatal("missing output filename") ;
+			if ( !out.p_path ) fatal("missing output filename") ;
 #endif
-		temp=c_rep(string,repc,out.p_path) ;
-		addargs(temp) ;
-		throws(temp) ;
-		return ;
+			for ( tr= out.p_path ; *tr ; tr++ ) {
+				gr_add(&argum,*tr) ;
+			}
+			break;
+		default:
+			gr_add(&argum,token) ;
+			break;
+		}
 	}
-	temp= keeps(string) ;
-	clr_noscan(temp) ;
-	l_add(curargs,temp) ;
+	gr_add(&argum,0) ;
+	tr= gr_final(&argum) ;
+	l_add(curargs,tr) ;
 }
 
-getcallargs(phase) register trf *phase ; {
+static void addargs(char *string) {
+	addargs3("", "", string) ;
+}
+
+static void getcallargs(trf *phase) {
 	growstring arg1, arg2 ;
 
 	arg1= scanvars(phase->t_argd) ;
 #ifdef DEBUG
-	if ( debug>=3 ) { vprint("\tvars: ") ; prns(gr_start(arg1)) ; }
+	if ( debug>=3 ) vprint("\tvars: %s", gr_start(arg1)) ;
 #endif
 	arg2= scanexpr(gr_start(arg1)) ;
 #ifdef DEBUG
-	if ( debug>=3 ) { vprint("\texpr: ") ; prns(gr_start(arg2)) ; }
+	if ( debug>=3 ) vprint("\texpr: %s", gr_start(arg2)) ;
 #endif
 	gr_throw(&arg1) ;
 	curargs= &phase->t_args ;
@@ -671,6 +677,39 @@ getcallargs(phase) register trf *phase ; {
 	gr_throw(&arg2) ;
 }
 
-discardargs(phase) register trf *phase ; {
-	l_throw(&phase->t_args) ;
+static growstring without_bslash(const char *string) {
+	/* Strip backslashes from a copy of the string. */
+	growstring result;
+	const char *in_c ;
+	int token ;
+	int escaped = NO ;
+
+	gr_init(&result) ;
+	for ( in_c= string ; *in_c ; in_c++ ) {
+		token= *in_c&0377 ;
+		if ( token==BSLASH && !escaped ) {
+			escaped= YES ;
+		} else {
+			gr_add(&result,token);
+			escaped= NO ;
+		}
+	}
+	gr_add(&result,0);
+	return result;
+}
+
+static void getprogram(trf *phase) {
+	growstring prog1, prog2 ;
+	const char *in_c ;
+	int token ;
+	int escaped = NO ;
+
+	/* Expand string variables in program name. */
+	prog1= scanvars(phase->t_prog) ;
+	throws(phase->t_prog) ;
+
+	/* Strip backslashes. */
+	prog2= without_bslash(gr_start(prog1));
+	gr_throw(&prog1);
+	phase->t_prog= gr_final(&prog2);
 }
