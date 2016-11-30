@@ -5,6 +5,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "ack.h"
 #include "list.h"
@@ -19,19 +20,18 @@ static char rcs_id[] = "$Id$" ;
 
 #define ARG_MORE  40            /* The size of args chunks to allocate */
 
-extern growstring scanvars();
+static int run_exec(trf *, const char *);
+static void x_arg(char *);
 
 static char      **arglist ;    /* The first argument */
 static unsigned  argcount ;     /* The current number of arguments */
 static unsigned  argmax;        /* The maximum number of arguments so far */
 
-int runphase(phase) register trf *phase ; {
+int runphase(trf *phase) {
 	register list_elem *elem ;
-      char *prog ; int result ;
-      growstring bline ;
+	char *prog ; int result ;
 
-      bline=scanvars(phase->t_prog) ;
-      prog=gr_final(&bline) ;
+	prog=phase->t_prog ;
 	if ( v_flag || debug ) {
 		if ( v_flag==1 && !debug ) {
 			vprint("%s",phase->t_name) ;
@@ -65,16 +65,19 @@ int runphase(phase) register trf *phase ; {
 		x_arg(l_content(*elem)) ;
 	}
 	x_arg( (char *)0 ) ;
-      result=run_exec(phase,prog) ;
-      throws(prog) ;
-      return result ;
+	result=run_exec(phase,prog) ;
+	return result ;
 }
 
-int run_exec(phase,prog) trf *phase ; char *prog ; {
+static int run_exec(trf *phase, const char *prog) {
 	int status, child, waitchild ;
 
-	do_flush();
-	while ( (child=fork())== -1 ) ;
+	fflush(stdout) ;
+	fflush(stderr) ;
+	child= fork() ;
+	if ( child== - 1) {
+		fatal("Cannot fork %s", prog) ;
+	}
 	if ( child ) {
 		/* The parent */
 		do {
@@ -84,8 +87,6 @@ int run_exec(phase,prog) trf *phase ; char *prog ; {
 			}
 		} while ( waitchild!=child) ;
 		if ( status ) {
-			if ( status&0200 && (status&0177)!=SIGQUIT &&
-				t_flag<=1 ) unlink("core") ;
 			switch ( status&0177 ) {
 			case 0 :
 				break ;
@@ -136,7 +137,7 @@ int run_exec(phase,prog) trf *phase ; char *prog ; {
 	/*NOTREACHED*/
 }
 
-x_arg(string) char *string ; {
+static void x_arg(char *string) {
 	/* Add one execute argument to the argument vector */
 	if ( argcount==argmax ) {
 		if ( argmax==0 ) {
