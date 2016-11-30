@@ -100,7 +100,7 @@ Note: \fIack\fP refuses to overwrite argument \fI.e\fP files.
 .IP \-t
 Preserve all intermediate files.
 If two \fB\-t\fP are used,
-\fIack\fP also preserves core dumps and output of failed transformations.
+\fIack\fP also preserves output of failed transformations.
 
 .IP \-w
 Suppress all warning messages.

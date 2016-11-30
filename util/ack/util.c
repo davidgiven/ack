@@ -32,15 +32,11 @@ extern  int     n_error;
 # define STDOUT stderr
 #endif
 
-void fuerror(const char* fmt, ...);
-void werror(const char* fmt, ...);
-
-char *basename(string) char *string ; {
+char *ack_basename(const char *string) {
 	static char retval[256] ;
-	char *last_dot, *last_start ;
-	register char *store;
-	register char *fetch ;
-	register int ctoken ;
+	const char *last_dot, *last_start, *fetch ;
+	char *store ;
+	int ctoken ;
 
 	last_dot= (char *)0 ;
 	last_start= string ;
@@ -49,9 +45,6 @@ char *basename(string) char *string ; {
 		case SUFCHAR : last_dot=fetch ; break ;
 		case '/'     : last_start=fetch+1 ; break ;
 		case  0      : goto out ;
-		}
-		if ( !isascii(ctoken) || !isprint(ctoken) ) {
-			werror("non-ascii characters in argument %s",string) ;
 		}
 	}
 out:
@@ -65,21 +58,14 @@ out:
 	return retval ;
 }
 
-clr_noscan(str) char *str ; {
-	register char *ptr ;
-	for ( ptr=str ; *ptr ; ptr++ ) {
-		*ptr&= ~NO_SCAN ;
-	}
-}
-
-char *skipblank(str) char *str ; {
+char *skipblank(char *str) {
 	register char *ptr ;
 
 	for ( ptr=str ; *ptr==SPACE || *ptr==TAB ; ptr++ ) ;
 	return ptr ;
 }
 
-char *firstblank(str) char *str ; {
+char *firstblank(char *str) {
 	register char *ptr ;
 
 	for ( ptr=str ; *ptr && *ptr!=SPACE && *ptr!=TAB ; ptr++ ) ;
@@ -108,15 +94,6 @@ void vprint(const char* fmt, ...)
 	vfprintf(STDOUT, fmt, ap);
 	va_end(ap);
 }
-
-#ifdef DEBUG
-prns(s) register char *s ; {
-	for ( ; *s ; s++ ) {
-		putc((*s&0377)&~NO_SCAN,STDOUT) ;
-	}
-	putc('\n',STDOUT) ;
-}
-#endif
 
 /* VARARGS1 */
 void fuerror(const char *fmt, ...) {
@@ -153,48 +130,36 @@ void error(const char *fmt, ...) {
 	va_end(ap);
 }
 
-do_flush() {
-	fflush(stdout) ;
-	fflush(stderr) ;
-}
-
-void
-noodstop() {
-	quit(-3) ;
-}
-
-quit(code) {
+void quit(int code) {
 	rmtemps();
 	exit(code);
 }
+
 /******
 	char *keeps(string)
 		Keep the string in stable storage.
 	throws(string)
 		Remove the string stored by keep from stable storage.
+		throws() is now a macro in ack.h.
 ***********/
 
-char *keeps(str) char *str ; {
+char *keeps(const char *str) {
 	register char *result ;
 	result= getcore( (unsigned)(strlen(str)+1) ) ;
 	if ( !result ) fatal("Out of core") ;
 	return strcpy(result,str) ;
 }
 
-throws(str) char *str ; {
-	freecore(str) ;
-}
-
-char *getcore(size) unsigned size ; {
-	register char *retptr ;
+void *getcore(size_t size) {
+	void *retptr ;
 
 	retptr= calloc(1,size) ;
 	if ( !retptr ) fatal("Out of memory") ;
 	return retptr ;
 }
 
-char *changecore(ptr,size) char *ptr ; unsigned size ; {
-	register char *retptr ;
+void *changecore(void *ptr, size_t size) {
+	void *retptr ;
 
 	retptr= realloc(ptr,size) ;
 	if ( !retptr ) fatal("Out of memory") ;

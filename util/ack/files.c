@@ -16,7 +16,7 @@
 static char rcs_id[] = "$Id$" ;
 #endif
 
-char *add_u(part,ptr) char *ptr ; {
+static char *add_u(int part, char *ptr) {
 	if ( part>=26 ) {
 		ptr=add_u(part/26-1,ptr) ;
 	}
@@ -24,7 +24,7 @@ char *add_u(part,ptr) char *ptr ; {
 	return ptr+1 ;
 }
 
-char *unique() {
+static char *unique(void) {
 	/* Get the next unique part of the internal filename */
 	static int u_next = 0 ;
 	static char buf[10] ;
@@ -36,7 +36,7 @@ char *unique() {
 	return buf ;
 }
 
-setfiles(phase) register trf *phase ; {
+int setfiles(trf *phase) {
 	/* Set the out structure according to the in structure,
 	   the transformation and some global data */
 	growstring pathname ;
@@ -94,18 +94,7 @@ setfiles(phase) register trf *phase ; {
 	return 1 ;
 }
 
-disc_files(phase) trf *phase ; {
-	path temp ;
-
-	if ( !phase->t_combine ) {
-		file_final(&in) ;
-	} else {
-		disc_inputs(phase) ;
-	}
-	temp=in ; in=out ; out=temp ;
-}
-
-file_final(file) path *file ; {
+static void file_final(path *file) {
 	if ( file->p_path ) {
 		if ( !file->p_keep && t_flag<=1 ) {
 			if ( unlink(file->p_path)!=0 ) {
@@ -119,7 +108,18 @@ file_final(file) path *file ; {
 	file->p_keep=NO ;
 }
 
-disc_inputs(phase) trf *phase ; {
+void disc_files(trf *phase) {
+	path temp ;
+
+	if ( !phase->t_combine ) {
+		file_final(&in) ;
+	} else {
+		disc_inputs(phase) ;
+	}
+	temp=in ; in=out ; out=temp ;
+}
+
+void disc_inputs(trf *phase) {
 	/* Remove all the input files of this phase */
 	/* Only for combiners */
 	register path *l_in ;
@@ -132,7 +132,7 @@ disc_inputs(phase) trf *phase ; {
 	l_clear(&phase->t_inputs) ;
 }
 
-rmfile(file) path *file ; {
+void rmfile(path *file) {
 	/* Remove a file, do not complain when is does not exist */
 	if ( file->p_path ) {
 		if ( t_flag<=1 ) unlink(file->p_path) ;
@@ -143,8 +143,7 @@ rmfile(file) path *file ; {
 	}
 }
 
-void
-rmtemps() {
+void rmtemps(void) {
 	/* Called in case of disaster, always remove the current output file!
 	*/
 	register list_elem *elem ;
@@ -159,7 +158,7 @@ rmtemps() {
 	}
 }
 
-add_input(file,phase) path *file ; trf *phase ; {
+void add_input(path *file, trf *phase) {
 	register path *store ;
 #ifdef DEBUG
 	if ( debug ) {

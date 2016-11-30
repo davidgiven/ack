@@ -44,3 +44,26 @@ struct transform {
 } ;
 
 #define t_cont(elem) ((trf *)l_content(elem))
+
+/* files.c */
+int setfiles(trf *);
+void disc_files(trf *);
+void disc_inputs(trf *);
+void rmfile(path *);
+void rmtemps(void);
+void add_input(path *, trf *);
+
+/* run.c */
+int runphase(trf *);
+
+/* scan.c */
+enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
+enum f_path getpath(trf **);
+
+/* trans.c */
+int transform(trf *);
+void getmapflags(trf *);
+void add_head(const char *);
+void add_tail(const char *);
+void transini(void);
+void doassign(const char *, const char *, int);
