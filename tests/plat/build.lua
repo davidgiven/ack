@@ -45,10 +45,11 @@ definerule("plat_testsuite",
 				outleaves = { "stamp" },
 				ins = {
 					bin,
-					"tests/plat/testdriver.sh"
+					"tests/plat/testdriver.sh",
+					"util/build+testrunner"
 				},
 				commands = {
-					"%{ins[2]} "..e.method.." %{ins[1]} 5",
+					"%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]}",
 					"touch %{outs}"
 				}
 			}
