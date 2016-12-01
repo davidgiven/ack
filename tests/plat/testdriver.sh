@@ -18,7 +18,7 @@ get_test_output() {
         qemu-system-*)
             if ! command -v $method >/dev/null 2>&1 ; then
                 errcho "Warning: $method not installed, skipping test"
-                echo "@@SKIPPED" > $result
+                echo "@@SKIPPED"
                 exit 0
             fi
 
@@ -33,7 +33,7 @@ get_test_output() {
         qemu-*)
             if ! command -v $method >/dev/null 2>&1 ; then
                 errcho "Warning: $method not installed, skipping test"
-                echo "@@SKIPPED" > $result
+                echo "@@SKIPPED"
                 exit 0
             fi
 
