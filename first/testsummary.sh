@@ -26,7 +26,11 @@ if [ "$failed" != "" -o "$timedout" != "" ]; then
 fi
 if [ "$succeeding" = "" ]; then
 	echo "Test status: PUZZLED FACE (all tests were skipped)"
-	exit 1
+	exit 0
+fi
+if [ "$skipped" != "" ]; then
+	echo "Test status: MILDLY PLEASED FACE (some tests were skipped, but the rest pass)"
+	echo 0
 fi
 echo "Test status: HAPPY FACE (all tests are passing)"
 exit 0
