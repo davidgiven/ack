@@ -30,7 +30,7 @@ if [ "$succeeding" = "" ]; then
 fi
 if [ "$skipped" != "" ]; then
 	echo "Test status: MILDLY PLEASED FACE (some tests were skipped, but the rest pass)"
-	echo 0
+	exit 0
 fi
 echo "Test status: HAPPY FACE (all tests are passing)"
 exit 0
