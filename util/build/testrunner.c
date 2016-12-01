@@ -10,9 +10,9 @@
 
 static bool timed_out = false;
 static bool child_exited = false;
-static char** command = NULL;
+static char* const* command = NULL;
 static int timeout = 0;
-static jmp_buf exit_jmp;
+static int pid = 0;
 
 static void parse_arguments(int argc, char* const argv[])
 {
@@ -44,7 +44,8 @@ static void parse_arguments(int argc, char* const argv[])
 static void sigalrm_cb(int sigraised)
 {
     timed_out = true;
-    longjmp(exit_jmp, 1);
+    if (pid)
+        kill(pid, SIGKILL);
 }
 
 int main(int argc, char* const argv[])
@@ -53,48 +54,51 @@ int main(int argc, char* const argv[])
     const int WRITE = 1;
 
     int fds[2];
-    int pid;
     FILE* childin;
     int wstatus;
     char buffer[4096];
 
     parse_arguments(argc, argv);
 
-    if (setjmp(exit_jmp) == 0)
+    pipe(fds);
+    pid = fork();
+    if (pid == 0)
     {
-        /* First time through. */
-
+        /* Child */
+        close(fds[READ]);
+        close(0);
+        dup2(fds[WRITE], 1);
+        dup2(fds[WRITE], 2);
+        execvp(command[0], command);
+        _exit(1);
+    }
+    else
+    {
+        /* Parent */
+        close(fds[WRITE]);
         signal(SIGALRM, sigalrm_cb);
         alarm(timeout);
-
-        pipe(fds);
-        pid = fork();
-        if (pid == 0)
-        {
-            /* Child */
-            close(fds[READ]);
-            close(0);
-            dup2(fds[WRITE], 1);
-            dup2(fds[WRITE], 2);
-            execvp(command[0], command);
-            _exit(1);
-        }
-
-        childin = fdopen(fds[READ], "r");
-        while (!timed_out)
-        {
-            if (!fgets(buffer, sizeof(buffer), childin))
-                break;
-            fputs(buffer, stdout);
-
-            if (strcmp(buffer, "@@FINISHED\n") == 0)
-                break;
-            if (strcmp(buffer, "@@FINISHED\r\n") == 0)
-                break;
-        }
     }
 
-    /* Reached via longjmp, EOF, or seeing a @@FINISHED. */
+    childin = fdopen(fds[READ], "r");
+    if (!childin)
+        fatal("cannot open pipe");
+
+    while (!timed_out)
+    {
+        if (!fgets(buffer, sizeof(buffer), childin))
+            break;
+        fputs(buffer, stdout);
+
+        if (strcmp(buffer, "@@FINISHED\n") == 0)
+            break;
+        if (strcmp(buffer, "@@FINISHED\r\n") == 0)
+            break;
+    }
+
+    /* Reached via EOF or seeing a @@FINISHED. */
+
+    alarm(0);
 
     kill(pid, SIGKILL);
     waitpid(pid, &wstatus, 0);
