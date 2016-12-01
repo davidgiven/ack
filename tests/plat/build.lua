@@ -42,23 +42,21 @@ definerule("plat_testsuite",
 
 			tests[#tests+1] = normalrule {
 				name = fs,
-				outleaves = { "stamp" },
+				outleaves = { e.plat.."-"..fs.."-testlog.txt" },
 				ins = {
 					bin,
-					"tests/plat/testdriver.sh"
+					"tests/plat/testdriver.sh",
+					"util/build+testrunner"
 				},
 				commands = {
-					"%{ins[2]} "..e.method.." %{ins[1]} 5",
-					"touch %{outs}"
+					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo FAILED) 2>&1 > %{outs}",
 				}
 			}
 		end
 
-		return normalrule {
+		return bundle {
 			name = e.name,
-			outleaves = { "stamp" },
-			ins = tests,
-			commands = { "touch %{outs}" }
+			srcs = tests,
 		}
 	end
 )

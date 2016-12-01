@@ -47,19 +47,17 @@ static char rcs_dmach[] = RCS_DMACH ;
 #define CALL	"callname"
 #define END     "end"
 
-extern growstring scanb();
-extern growstring scanvars();
+static void intrf(void) ;
+static void open_in(char *) ;
+static void close_in(void) ;
+static int getinchar(void) ;
+static int getln(void) ;
 
-int getln() ;
-int getinchar() ;
 static char *ty_name ;
 static char *bol ;
-
-void open_in();
-
 static char *inname ;
 
-setlist(name) char *name ; {
+void setlist(char *name) {
 	/* Name is sought in the internal tables,
 	   if not present, the a file of that name is sought
 	   in first the current and then the EM Lib directory
@@ -92,9 +90,7 @@ setlist(name) char *name ; {
 #endif
 }
 
-static int inoptlist(nm)
-	char *nm ;
-{
+static int inoptlist(char *nm) {
 	register char *p=Optlist ;
 
 	while ( p && *p ) {
@@ -107,9 +103,9 @@ static int inoptlist(nm)
 	return 0;
 }
 
-intrf() {
+static void intrf(void) {
+	/* Read in trf (transformation) */
 	register trf *new ;
-	growstring bline ;
 	int twice ;
 	int name_seen=0 ;
 
@@ -130,20 +126,14 @@ intrf() {
 		} else
 		if ( strcmp(ty_name,PROG)==0 ) {
 			if ( new->t_prog ) twice=YES ;
-			bline= scanb(bol);                /* Scan for \ */
-                      new->t_prog= gr_final(&bline);
+			new->t_prog= keeps(bol);
 		} else
 		if ( strcmp(ty_name,MAPF)==0 ) {
-			/* First read the mapflags line
-				and scan for backslashes */
-			bline= scanb(bol) ;
-			l_add(&new->t_mapf,gr_final(&bline)) ;
+			l_add(&new->t_mapf,keeps(bol)) ;
 		} else
 		if ( strcmp(ty_name,ARGS)==0 ) {
 			if ( new->t_argd ) twice=YES ;
-			bline= scanb(bol) ;
-			new->t_argd= keeps(gr_start(bline)) ;
-			gr_throw(&bline) ;
+			new->t_argd= keeps(bol) ;
 		} else
 		if ( strcmp(ty_name,STD_IN)==0 ) {
 			if ( new->t_stdin ) twice=YES ;
@@ -234,14 +224,15 @@ intrf() {
 				rts, new->t_rts) ;
 		}
 		rts= new->t_rts ;
-		keephead(rts) ; keeptail(rts) ;
+		l_add(&head_list, rts) ;
+		l_add(&tail_list, rts) ;
 	}
 #ifdef DEBUG
 	if ( debug>=3 ) {
 		register list_elem *elem ;
 		vprint("%s: from %s to %s '%s'\n",
 			new->t_name,new->t_in ? new->t_in : "(null)",new->t_out,new->t_prog) ;
-		vprint("\targs: ") ; prns(new->t_argd) ;
+		vprint("\targs: %s",new->t_argd) ;
 		scanlist( l_first(new->t_mapf), elem ) {
 			vprint("\t%s\n",l_content(*elem)) ;
 		}
@@ -264,8 +255,7 @@ static  FILE            *infile ;
 static  char            *inptr ;
 char			*em_dir = EM_DIR;
 
-void
-open_in(name) register char *name ; {
+static void open_in(char *name) {
 	register dmach *cmac ;
 
 	gr_init(&rline) ;
@@ -298,12 +288,12 @@ open_in(name) register char *name ; {
 	}
 }
 
-close_in() {
+static void close_in(void) {
 	if ( !incore ) fclose(infile) ;
 	gr_throw(&rline) ;
 }
 
-char *readline() {
+static char *readline(void) {
 	/* Get a line from the input,
 	   return 0 if at end,
 	   The line is stored in a volatile buffer,
@@ -355,7 +345,7 @@ char *readline() {
 	}
 }
 
-int getinchar() {
+static int getinchar(void) {
 	register int token ;
 
 	if ( incore ) {
@@ -369,7 +359,7 @@ int getinchar() {
 	return token ;
 }
 
-int getln() {
+static int getln(void) {
 	register char *c_ptr ;
 
 	do {
