@@ -18,6 +18,7 @@ get_test_output() {
         qemu-system-*)
             if ! command -v $method >/dev/null 2>&1 ; then
                 errcho "Warning: $method not installed, skipping test"
+                echo "@@SKIPPED"
                 exit 0
             fi
 
@@ -26,16 +27,17 @@ get_test_output() {
                 qemu-system-ppc)  img="-kernel $img" ;;
             esac
 
-            $timeoutprog -t $timeout -- $method -nographic $img > $result
+            $timeoutprog -t $timeout -- $method -nographic $img 2>&1 > $result
             ;;
 
         qemu-*)
             if ! command -v $method >/dev/null 2>&1 ; then
                 errcho "Warning: $method not installed, skipping test"
+                echo "@@SKIPPED"
                 exit 0
             fi
 
-            $method $img > $result
+            $method $img 2>&1 > $result
             ;;
 
         *)
@@ -45,6 +47,6 @@ get_test_output() {
     esac
 }
 
-get_test_output > $result
-( grep -q @@FAIL $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
+get_test_output
+( grep -q '@@FAIL\|@@SKIPPED' $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
 exit 0

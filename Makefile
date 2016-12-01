@@ -63,7 +63,7 @@ PLATDEP = $(INSDIR)/lib/ack
 
 .NOTPARALLEL:
 
-MAKECMDGOALS ?= +ack
+MAKECMDGOALS ?= +ack +tests
 BUILD_FILES = $(shell find * -name '*.lua')
 
 ifneq ($(shell which ninja),)

@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <setjmp.h>
+#include <ctype.h>
 #include "diagnostics.h"
 
 static bool timed_out = false;
@@ -57,6 +58,7 @@ int main(int argc, char* const argv[])
     FILE* childin;
     int wstatus;
     char buffer[4096];
+    char* p;
 
     parse_arguments(argc, argv);
 
@@ -90,9 +92,13 @@ int main(int argc, char* const argv[])
             break;
         fputs(buffer, stdout);
 
-        if (strcmp(buffer, "@@FINISHED\n") == 0)
+        p = buffer;
+        while (isspace(*p))
+            p++;
+
+        if (strcmp(p, "@@FINISHED\n") == 0)
             break;
-        if (strcmp(buffer, "@@FINISHED\r\n") == 0)
+        if (strcmp(p, "@@FINISHED\r\n") == 0)
             break;
     }
 
@@ -103,6 +109,9 @@ int main(int argc, char* const argv[])
     kill(pid, SIGKILL);
     waitpid(pid, &wstatus, 0);
     if (timed_out)
+    {
+        fprintf(stderr, "@@TIMEDOUT\n");
         exit(1);
+    }
     exit(WEXITSTATUS(wstatus));
 }

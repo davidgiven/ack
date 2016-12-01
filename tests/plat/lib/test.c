@@ -26,7 +26,10 @@ void writehex(uint32_t code)
 
 void fail(uint32_t code)
 {
-    write(1, "@@FAIL 0x", 10);
+    static const char fail_msg[] = "@@FAIL 0x";
+    static const char nl_msg[] = "\n";
+
+    write(1, fail_msg, sizeof(fail_msg)-1);
     writehex(code);
-    write(1, "\n", 1);
+    write(1, nl_msg, sizeof(nl_msg)-1);
 }
