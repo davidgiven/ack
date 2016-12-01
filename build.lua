@@ -47,8 +47,18 @@ installable {
 		"examples+pkg",
 		plat_packages
 	},
-	deps = {
-		test_packages
-	}
 }
 
+normalrule {
+	name = "tests",
+	ins = {
+		"first/testsummary.sh",
+		test_packages
+	},
+	outleaves = {
+		"stamp"
+	},
+	commands = {
+		"%{ins}"
+	}
+}
