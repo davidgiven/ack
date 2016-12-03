@@ -12,6 +12,7 @@
  * libobject is pinched from the Xenix i386 cv (mach/i386/cv/cv.c).
  */
 
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -470,7 +471,7 @@ int
 main(int argc, char *argv[])
 {
 	uint32_t end, pad[3], sz, sz_load_cmds;
-	int cpu_subtype, mflag = 0;
+	int cpu_subtype, fd, mflag = 0;
 
 	/* General housecleaning and setup. */
 	output = stdout;
@@ -520,7 +521,11 @@ main(int argc, char *argv[])
 		break;
 
 	case 3: /* Both input and output files specified. */
-		output = fopen(argv[2], "w");
+		/* Use mode 0777 to allow executing the output file. */
+		fd = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, 0777);
+		if (fd < 0)
+			fatal("unable to open output file.");
+		output = fdopen(fd, "w");
 		if (!output)
 			fatal("unable to open output file.");
 		outputfile = argv[2];
