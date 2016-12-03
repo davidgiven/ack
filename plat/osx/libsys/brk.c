@@ -76,20 +76,11 @@ int brk(void *addr)
 
 void *sbrk(int incr)
 {
-	char *base, *nbreak;
+	char *base;
 
 	brk_init();
 	base = cbreak;
-	nbreak = base + incr;
-
-	/* Did base + incr overflow? */
-	if ((incr < 0 && nbreak > base) ||
-	    (incr > 0 && nbreak < base)) {
-		errno = ENOMEM;
-		return (void*)-1;
-	}
-
-	if (brk1(nbreak) < 0)
+	if (brk1(base + incr) < 0)
 		return (void*)-1;
 	return base;
 }
