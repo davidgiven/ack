@@ -27,7 +27,7 @@ acklibrary {
 	},
 	deps = {
 		"lang/cem/libcc.ansi/headers+headers",
-		"plat/osxppc/include+headers",
+		"plat/osxppc/include+pkg",
 	},
 	vars = {
 		plat = "osxppc"
