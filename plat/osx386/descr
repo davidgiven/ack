@@ -1,0 +1,80 @@
+# plat/osx386/descr
+
+var w=4
+var wa=4
+var p={w}
+var pa={w}
+var s=2
+var sa={s}
+var l={w}
+var la={w}
+var f={w}
+var fa={w}
+var d=8
+var da={d}
+var x=8
+var xa={x}
+var ARCH=i386
+var PLATFORM=osx386
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
+var CPP_F=-D__unix
+var ALIGN=-a0:4 -a1:4 -a2:4096 -a3:4 -b0:0x123c
+var C_LIB={PLATFORMDIR}/libc-ansi.a
+# bitfields reversed for compatibility with (g)cc.
+var CC_ALIGN=-Vr
+var OLD_C_LIB={C_LIB}
+var MACHOPT_F=-m10
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
+
+# Override the setting in fe so that files compiled for osx386 can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{EM}/share/ack/osx/include -I{EM}/share/ack/include/ansi
+
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/ack/linux386/ncg
+	mapflag -gdb GF=-gdb
+	args {GF?} <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/ack/linux386/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/ack/em_led
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	mapflag -fp FLOATS={EM}/{LIB}fp
+	args {ALIGN} {SEPID?} \
+	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
+		({RTS}:.ocm.b={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
+		({RTS}:.p={PLATFORMDIR}/pascal.o) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
+		(.ocm.b.mod.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		{FLOATS?} \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libsys.a \
+		           {PLATFORMDIR}/libend.a)
+	linker
+end
+name cv
+	from .out
+	to .exe
+	program {EM}/lib/ack/cvmach
+	args -m7 < >
+	outfile osx386.exe
+end

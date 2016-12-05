@@ -1,0 +1,25 @@
+The osx386 platform
+===================
+
+    ack -mosx386 ...
+
+This platform produces Mach-o executables for Intel Mac OS X.  These
+are 32-bit executables using our i386 code generator.
+
+See ../osxppc/README, because our osx386 platform has many of the same
+limitations and bugs as our osxppc platform.
+
+
+Bugs
+----
+
+Some programs can't read the tty after using job control to suspend
+and resume the program (with ^Z and "fg" in bash).  The read(2) system
+call fails with EINTR.  In ACK's stdio (in libc), the error is sticky,
+so all reads fail.  In Apple's stdio, the error is not sticky, and
+only the next read fails.  The EINTR seems to happen only on Intel Mac
+OS X, and not on other platforms.
+
+
+George Koehler <xkernigh@netscape.net>
+2016-12-03
