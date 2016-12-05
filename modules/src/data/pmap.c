@@ -90,6 +90,22 @@ void pmap_remove(void* mapp, void* left, void* right)
     }
 }
 
+void pmap_remove_either(void* mapp, void* either)
+{
+    struct pmap* map = mapp;
+    int i;
+
+    for (i=map->count-1; i>=0; i--)
+    {
+        struct pmap_node* node = &map->item[i];
+        if ((node->left == either) || (node->right == either))
+        {
+            memmove(node, node+1, sizeof(*node) * (map->count - i - 1));
+            map->count--;
+        }
+    }
+}
+
 void* pmap_findleft(void* mapp, void* left)
 {
     struct pmap* map = mapp;
