@@ -1,7 +1,4 @@
-simplerule {
+installable {
 	name = "headers",
-	deps = { "plat/osx/include+headers" },
-	ins = {},
-	outs = {},
-	commands = {},
+	map = { "plat/osx/include+pkg" }
 }
