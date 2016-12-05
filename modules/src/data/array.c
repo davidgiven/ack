@@ -82,6 +82,18 @@ void array_remove(void* arrayp, void* value)
     }
 }
 
+void array_replace(void* arrayp, void* from, void* to)
+{
+    struct array* array = arrayp;
+    int i;
+
+    for (i=0; i<array->count; i++)
+    {
+        if (array->item[i] == from)
+            array->item[i] = to;
+    }
+}
+
 void* array_pop(void* arrayp)
 {
     struct array* array = arrayp;
