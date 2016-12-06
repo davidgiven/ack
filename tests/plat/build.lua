@@ -11,7 +11,8 @@ definerule("plat_testsuite",
 		local testfiles = filenamesof(
 			"tests/plat/*.c",
 			"tests/plat/*.e",
-			"tests/plat/*.p"
+			"tests/plat/*.p",
+			"tests/plat/bugs/*.mod"
 		)
 
 		acklibrary {
@@ -23,8 +24,8 @@ definerule("plat_testsuite",
 
 		local tests = {}
 		for _, f in ipairs(testfiles) do
-			local fs = replace(basename(f), "%..$", "")
-			local _, _, lang = fs:find("_(.)$")
+			local fs = replace(basename(f), "%.[^.]+$", "")
+			local _, _, lang = fs:find("_([^_]+)$")
 			if not lang then
 				lang = "e"
 			end
@@ -49,7 +50,7 @@ definerule("plat_testsuite",
 					"util/build+testrunner"
 				},
 				commands = {
-					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo FAILED) 2>&1 > %{outs}",
+					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo FAILED) > %{outs}",
 				}
 			}
 		end

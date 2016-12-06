@@ -13,10 +13,10 @@
     lwz r4, 4(sp)       /* r4 = bit number */
     addi r5, sp, 8      /* r5 = base address of bit set */
 
-    srawi r6, r4, 3     /* r6 = byte address into set */
-    andi. r7, r4, 7     /* r7 = bit within byte */
+    rlwinm r6, r4, 29, 3, 29 /* r6 = byte index of word in set */
+    andi. r7, r4, 31    /* r7 = bit within word */
 
-    lbzx r8, r5, r6     /* r8 = individual byte from set */
+    lwzx r8, r5, r6     /* r8 = individual byte from set */
     sraw r8, r8, r7
     rlwinm r8, r8, 0, 31, 31
 
