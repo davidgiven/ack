@@ -34,7 +34,7 @@ var C_INCLUDES=-I{EM}/share/ack/osx/include -I{EM}/share/ack/include/ansi
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/ack/linux386/ncg
+	program {EM}/lib/ack/{PLATFORM}/ncg
 	mapflag -gdb GF=-gdb
 	args {GF?} <
 	stdout
@@ -43,7 +43,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/ack/linux386/as
+	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
 end

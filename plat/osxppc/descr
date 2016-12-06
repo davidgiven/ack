@@ -30,7 +30,7 @@ var C_INCLUDES=-I{EM}/share/ack/osx/include -I{EM}/share/ack/include/ansi
 name be
 	from .m.g
 	to .s
-	program {EM}/lib/ack/linuxppc/ncg
+	program {EM}/lib/ack/{PLATFORM}/ncg
 	mapflag -gdb GF=-gdb
 	args {GF?} <
 	stdout
@@ -39,7 +39,7 @@ end
 name asopt
 	from .s
 	to .so
-	program {EM}/lib/ack/linuxppc/top
+	program {EM}/lib/ack/{PLATFORM}/top
 	args
 	optimizer
 	stdin
@@ -48,7 +48,7 @@ end
 name as
 	from .s.so
 	to .o
-	program {EM}/lib/ack/linuxppc/as
+	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
 end
