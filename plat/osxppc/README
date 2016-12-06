@@ -1,0 +1,110 @@
+The osxppc platform
+===================
+
+    ack -mosxppc ...
+
+This platform produces Mach-o executables for PowerPC Mac OS X.  You
+can run them from the command line in the Terminal.
+
+You *can't* link to libraries from other compilers.  These static
+executables don't use the dynamic linker.  They don't load Apple's
+libraries, so they can't call Carbon or Cocoa.
+
+The executables use BSD system calls to interact with your Mac.  Our
+libsys provides only a few system calls, enough to run a few demo
+programs, but not much else.  Check the header files in ../osx/include
+for the available system calls.
+
+
+Bugs
+----
+
+ACK didn't run on Mac OS X when this platform was added.  The only way
+to run ack -mosxppc was as a cross compiler from another operating
+system.
+
+ACK doesn't have 64-bit integers, but Mac OS X uses 64-bit integers in
+its system calls.  Our libsys converts between 32-bit and 64-bit
+integers by setting the high bits to zero, or discarding the high
+bits.  This affects lseek() and stat().  They report the wrong values
+for file sizes and offsets beyond 4 gigabytes.
+
+Our PowerPC code generator is new and probably has bugs.  Its stack
+layout and calling conventions are not compatible with other
+compilers.  It passes all function arguments on the stack, which is
+slower than passing them in registers.
+
+
+Example
+-------
+Compile something:
+
+    ack -mosxppc -O6 -o paranoia examples/paranoia.c
+
+The executable has a symbol table.  If you have Apple's Xcode, try
+
+    nm -g paranoia      # to list the global symbols
+    otool -hl paranoia  # to check the Mach header and load commands
+    gdb paranoia        # to debug it
+
+Within gdb, commands like "gdb main" and "gdb '.ret'" can disassemble
+functions.  Backtraces don't work, because our stack layout is not the
+same as Apple's.
+
+
+Other hints
+-----------
+
+PowerPC Macs became obsolete after Apple's transition to Intel.  Mac
+OS X 10.5 Leopard was the last version to run on PowerPC.  The older
+Mac OS X 10.4 Tiger was the last version to include Classic for
+running Mac OS 9 programs.  Our ack -mosxppc began to produce
+executables in 2016, about 7 years after Apple released Mac OS X 10.6
+Snow Leopard for Intel only.
+
+Apple's Xcode included tools like gcc and gdb.  It also had manual
+pages for some system calls, like getdirentries(2).  Some system calls
+are like FreeBSD, some are unique to OS X.  If you want to learn how
+to call write(2) or sigaction(2), then a manual page from another BSD
+or Linux might be enough.
+
+Xcode 2.5 was the last version to run on Tiger.  The "Xcode 2.5
+Developer Tools" were a 902.9 MB download from Apple.  As of 2016, the
+download required an Apple ID and was available at:
+
+    https://developer.apple.com/download/more/
+
+Older versions of Xcode came with Mac OS X.  If your version of OS X
+came with your Mac, /Applications/Installers might contain an Xcode
+installer.  If you upgraded OS X, your install DVD might have Xcode.
+
+The source code at https://opensource.apple.com/ might reveal more
+about system calls.  For 10.4.11.ppc, the kernel is in xnu-792.24.17,
+and Libc is in Libc-391.2.10.  These files might help:
+
+    xnu*/bsd/kern/syscalls.master
+      master list of BSD system calls
+    xnu*/osfmk/kern/syscall_sw.c
+      master list of Mach traps
+    xnu*/bsd/kern/mach_loader.c
+      details about loading Mach-o executables
+    xnu*/bsd/dev/ppc/unix_signal.c
+      details about sending signals to processes
+    xnu*/bsd/sys/*.h
+      headers that Xcode installs as /usr/include/sys/*.h
+    xnu*/bsd/man/man2/*.2
+      manual pages that Xcode installs as /usr/share/man/man2/*.2
+    Libc*/ppc/sys/SYS.h
+    Libc*/ppc/sys/*.s
+      assembly code (in gas syntax) for making system calls
+
+The 10.4.11.ppc sources are wrong for Intel; use 10.4.11.x86 or 10.5
+or newer.  10.5 moved SYS.h to xnu*/libsyscall/custom/SYS.h
+
+The kernel maps a common page into every process, and Apple's Libc
+uses the common page to speed up system calls like gettimeofday(2).
+Our libsys does not use the common page.
+
+
+George Koehler <xkernigh@netscape.net>
+2016-12-03

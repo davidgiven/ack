@@ -1,0 +1,96 @@
+.Dd December 2, 2016
+.Dt CVMACH 6
+.Os
+.Sh NAME
+.Nm cvmach
+.Nd convert an executable file from ack.out to Mach-o
+.Sh SYNOPSIS
+.Cm ~em/lib/ack/cvmach
+.Fl m Ns Ar number
+.Oo
+.Ar infile
+.Op Ar outfile
+.Oc
+.Sh DESCRIPTION
+The
+.Nm
+utility converts an executable file from
+.Xr ack.out 5
+format to Mach-object format.
+It can produce Mach-o executables for Mac OS X.
+If the
+.Ar infile
+or
+.Ar outfile
+are not given, then
+.Nm
+reads from standard input or writes to standard output.
+.Pp
+The option is required:
+.Bl -tag -width Ds
+.It Fl m Ns Ar number
+Sets the CPU type in the Mach header.
+This must be
+.Fl m Ns Cm 7
+for Intel i386 or
+.Fl m Ns Cm 18
+for PowerPC.
+.Nm
+doesn't know how to make Mach-o files for other CPU types.
+.El
+.Pp
+The input file must have four segments:
+TEXT, ROM, DATA and BSS, in that order.
+.Nm
+converts them into four Mach sections in two Mach segments.
+TEXT and ROM go in the RX segment (Read and eXecute).
+DATA and BSS go in the RW segment (Read and Write).
+.Nm
+sets the page protection so programs can't write the RX segment,
+and can't execute the RW segment.
+The program will begin execution at the beginning of TEXT.
+.Pp
+.Nm
+also converts the symbol table.
+.Sh DIAGNOSTICS
+.Bl -diag
+.It text segment must have base 0x%lx, not 0x%lx
+TEXT must begin immediately after the Mach header and load commands.
+The message gives the correct
+.Ar base .
+Relinking the program with
+.Cm em_led Fl b Ns 0: Ns Ar base
+would fix it.
+.It the %s segment must follow the %s segment.
+TEXT and ROM must be continuous in memory, because
+.Nm
+maps them in the same Mach segment.
+Likewise, DATA and BSS must be contiguous.
+There may be a small gap between TEXT and ROM, or between DATA and
+BSS, only if the gap is necessary to align ROM or BSS.
+.It the data and rom segments are too close.
+DATA and ROM must not share a page in memory, because
+.Nm
+maps them in different Mach segments, with different page protections.
+The page size for i386 and PowerPC is 4096 or 0x1000 bytes.
+For example, if ROM ends at address 0x2bed,
+then DATA may not begin at 0x2bf0, because
+.Nm
+can't put the page from 0x2000 to 0x2fff in both Mach segments.
+Relinking the program with
+.Cm em_led Fl a Ns 2:4096
+would fix it.
+.It the bss space contains initialized data.
+BSS must not contain initialized data, because
+.Nm
+converts it to a zero-fill section.
+.El
+.Sh CAVEATS
+Mac OS X 10.4 for PowerPC does not protect pages against execution.
+All mapped pages are executable, whether or not the execute bit is set
+in the page protection.
+.Nm
+can't prevent the execution of the RW segment.
+.Sh BUGS
+The symbol conversion preserves the name and value of each symbol, but
+may lose other information, such as the symbol type.

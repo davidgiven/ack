@@ -3,9 +3,15 @@ echo ""
 
 succeeding="$(find "$@" -size 0)"
 notsucceeding="$(find "$@" ! -size 0)"
-skipped="$(grep -l @@SKIPPED $notsucceeding)"
-timedout="$(grep -l @@TIMEDOUT $notsucceeding)"
-failed="$(grep -l @@FAIL $notsucceeding)"
+if [ "$notsucceeding" != "" ]; then
+	skipped="$(grep -l @@SKIPPED $notsucceeding)"
+	timedout="$(grep -l @@TIMEDOUT $notsucceeding)"
+	failed="$(grep -l @@FAIL $notsucceeding)"
+else
+	skipped=
+	timedout=
+	failed=
+fi
 
 for a in $failed $timedout; do
     echo "**** $a"
@@ -13,11 +19,11 @@ for a in $failed $timedout; do
     echo ""
 done
 
-echo "$(echo $succeeding | wc -w) tests passed"
-echo "$(echo $notsucceeding | wc -w) tests failed to pass"
-echo "$(echo $skipped | wc -w) were skipped (see build log for details)"
-echo "$(echo $timedout | wc -w) timed out"
-echo "$(echo $failed | wc -w) failed"
+echo "$(echo "$succeeding" | wc -w) tests passed"
+echo "$(echo "$notsucceeding" | wc -w) tests failed to pass"
+echo "$(echo "$skipped" | wc -w) were skipped (see build log for details)"
+echo "$(echo "$timedout" | wc -w) timed out"
+echo "$(echo "$failed" | wc -w) failed"
 echo ""
 
 if [ "$failed" != "" -o "$timedout" != "" ]; then

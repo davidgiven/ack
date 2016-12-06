@@ -1,0 +1,118 @@
+wordsize: 4
+pointersize: 4
+%%RA
+general registers: 19
+address registers: 0
+floating point registers: 0
+use general as pointer: yes
+
+register score parameters:
+	local variable:
+		(2 cases)
+		pointer,general
+			(1 size)
+			default ->	(3,4)
+		general,general
+			(1 size)
+			default ->	(3,4)
+	address of local variable:
+		(2 cases)
+		pointer,general
+			(1 size)
+			default ->	(0,0)
+		general,general
+			(1 size)
+			default ->	(0,0)
+	constant:
+		(2 sizes)
+		fitbyte ->	(-1,-1)
+		default ->	(-1,-1)
+	double constant:
+		(1 size)
+		default ->	(-1,-1)
+	address of global variable:
+		(1 size)
+		default ->	(2,8)
+	address of procedure:
+		(1 size)
+		default ->	(-1,-1)
+
+opening cost parameters:
+	local variable:
+		(2 cases)
+		pointer
+			(1 size)
+			default ->	(3,4)
+		general
+			(1 size)
+			default ->	(3,4)
+	address of local variable:
+		(2 cases)
+		pointer
+			(1 size)
+			default ->	(1,4)
+		general
+			(1 size)
+			general ->	(1,4)
+	constant:
+		(2 sizes)
+		fitbyte ->	(1000,1000)
+		default ->	(1000,1000)
+	double constant:
+		(1 size)
+		default ->	(1000,1000)
+	address of global variable:
+		(1 size)
+		default ->	(2,8)
+	address of procedure:
+		(1 size)
+		default ->	(1000,1000)
+
+register save costs:
+	(21 cases)
+	0 -> (0,0)
+	1 -> (6,8)
+	2 -> (12,16)
+	3 -> (18,24)
+	4 -> (24,32)
+	5 -> (30,40)
+	6 -> (36,48)
+	7 -> (42,56)
+	8 -> (48,64)
+	9 -> (54,72)
+	10 -> (60,80)
+	11 -> (66,88)
+	12 -> (72,96)
+	13 -> (78,104)
+	14 -> (84,112)
+	15 -> (90,120)
+	16 -> (96,128)
+	17 -> (102,136)
+	18 -> (108,144)
+	19 -> (114,152)
+	0 -> (0,0)
+%%UD
+access costs of global variables:
+	(1 size)
+	default ->	(5,12)
+access costs of local variables:
+	(1 size)
+	default ->	(3,4)
+%%SR
+overflow harmful?:  no
+array bound harmful?:  yes
+reduce sli if shift count larger than:  0
+%%CS
+#include "em_mnem.h"
+first time then space:
+addressing modes: op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
+		  op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
+cheap operations: op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1 
+		  op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
+lexical tresholds: 1 1
+indirection limit: 8
+do not eliminate sli if index on shiftcounts:	-1
+						-1
+forbidden operators: -1 -1
+%%SP
+global stack pollution allowed?: yes
