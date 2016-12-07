@@ -88,4 +88,4 @@
 
 %type <y_word> c
 %type <y_word> e16 u8 u7 u6 u5 u4 u2 u1
-%type <y_word> nb ds bda bdl lia lil
+%type <y_word> nb ds bda bdl lia lil spr_num
