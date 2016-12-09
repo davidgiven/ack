@@ -10,7 +10,7 @@ INT64 = 8
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 
-#define COMMENT(n) /* noop */
+#define COMMENT(n) /* comment {LABEL, n} */
 
 
 #define nicesize(x) ((x)==INT8 || (x)==INT16 || (x)==INT32 || (x)==INT64)
