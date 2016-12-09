@@ -52,7 +52,7 @@ EXIT:
 	mtspr hid0, r3			!   in hid0
 	.data4 mfmsr(3)
 	oris r3, r3, 0x0004		! set POW
-	.data4 mtmsr(3)			!   in msr0
+	.data4 mtmsr(3)			!   in msr
 	b EXIT		! If we failed to halt, then spin.
 
 .define _openfirmware_call
