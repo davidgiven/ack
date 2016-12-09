@@ -2003,14 +2003,14 @@ PATTERNS
 			gen
 				move %1, SP
 
-	pat loc ass $1==4                  /* Drop 4 bytes from stack */
+	pat loc ass $1==4 && $2==4         /* Drop 4 bytes from stack */
 		with exact GPR
 			/* nop */
 		with STACK
 			gen
 				addi SP, SP, {CONST, 4}
 
-	pat ass                            /* Adjust stack by variable amount */
+	pat ass $1==4                      /* Adjust stack by variable amount */
 		with CONST2 STACK
 			gen
 				move {SUM_RC, SP, %1.val}, SP
@@ -2028,7 +2028,7 @@ PATTERNS
 	pat asp                            /* Adjust stack by constant amount */
 		leaving
 			loc $1
-			ass
+			ass 4
 
 
 
