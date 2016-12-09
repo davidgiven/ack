@@ -389,7 +389,7 @@ MOVES
 
 /* Constants */
 
-	from CONST_ALL smalls(%val) to GPR
+	from CONST_ALL + CONST smalls(%val) to GPR
 		gen
 			COMMENT("move CONST_ALL->GPR smalls")
 			addi %2, R0, {CONST, %1.val}
