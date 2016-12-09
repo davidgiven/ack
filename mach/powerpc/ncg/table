@@ -1993,10 +1993,6 @@ PATTERNS
 			move SP, %a
 		yields %a
 
-	pat lor $1==2                      /* Load HP */
-		leaving
-			loe ".reghp"
-
 	pat str $1==0                      /* Store FP */
 		with GPR
 			gen
@@ -2006,10 +2002,6 @@ PATTERNS
 		with GPR
 			gen
 				move %1, SP
-
-	pat str $1==2                      /* Store HP */
-		leaving
-			ste ".reghp"
 
 	pat loc ass $1==4                  /* Drop 4 bytes from stack */
 		with exact GPR
