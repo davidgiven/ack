@@ -1463,9 +1463,11 @@ PATTERNS
 				andisX %a, %2, {CONST, hi(%1.val)}
 			yields %a
 
-	pat and !defined($1)               /* AND set */
+	pat and defined($1)                /* AND set */
 		with STACK
+			kills ALL
 			gen
+				move {CONST, $1}, R3
 				bl {LABEL, ".and"}
 
 	pat ior $1==4                      /* OR word */
@@ -1498,8 +1500,17 @@ PATTERNS
 			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
 			yields {OR_RC, %2, lo(%1.val)}
 
-	pat ior !defined($1)               /* OR set */
+	pat ior defined($1)                /* OR set */
 		with STACK
+			kills ALL
+			gen
+				move {CONST, $1}, R3
+				bl {LABEL, ".ior"}
+
+	/* OR set (variable), used in lang/m2/libm2/LtoUset.e */
+	pat ior !defined($1)
+		with GPR3 STACK
+			kills ALL
 			gen
 				bl {LABEL, ".ior"}
 
@@ -1523,9 +1534,11 @@ PATTERNS
 			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
 			yields {XOR_RC, %2, lo(%1.val)}
 
-	pat xor !defined($1)               /* XOR set */
+	pat xor defined($1)                /* XOR set */
 		with STACK
+			kills ALL
 			gen
+				move {CONST, $1}, R3
 				bl {LABEL, ".xor"}
 
 	pat com $1==INT32                  /* NOT word */
@@ -1547,10 +1560,22 @@ PATTERNS
 		with GPR
 			yields {NOT_R, %1}
 
-	pat com !defined($1)               /* NOT set */
+	pat com defined($1)                /* NOT set */
 		with STACK
 			gen
+				move {CONST, $1}, R3
 				bl {LABEL, ".com"}
+
+	pat zer $1==4                      /* Push zero */
+		leaving
+			loc 0
+
+	pat zer defined($1)	   	   /* Create empty set */
+		with STACK
+			kills ALL
+			gen
+				move {CONST, $1}, R3
+				bl {LABEL, ".zer"}
 
 	pat sli $1==4                      /* Shift left (second << top) */
 		with CONST_ALL GPR
@@ -1625,17 +1650,19 @@ PATTERNS
 
 
 
-
 /* Sets */
 
-	pat set defined($1)                /* Create word with set bit */
-		leaving
-			loc 1
-			exg INT32
-			sli INT32
+	pat set defined($1)                /* Create singleton set */
+		with GPR4 STACK
+			kills ALL
+			gen
+				move {CONST, $1}, R3
+				bl {LABEL, ".set"}
 
-	pat set !defined($1)               /* Create structure with set bit (variable) */
+	/* Create set (variable), used in lang/m2/libm2/LtoUset.e */
+	pat set !defined($1)
 		with GPR3 GPR4 STACK
+			kills ALL
 			gen
 				bl {LABEL, ".set"}
 
@@ -1647,7 +1674,6 @@ PATTERNS
 				li32 %a, {CONST, $1}
 				stwu %a, {GPRINDIRECT, SP, 0-4}
 				bl {LABEL, ".inn"}
-
 
 
 /* Boolean resolutions */
@@ -1806,6 +1832,13 @@ PATTERNS
 		leaving
 			cmi INT32
 
+	pat cms defined($1)
+		with STACK
+			kills ALL
+			gen
+				move {CONST, $1}, R3
+				bl {LABEL, ".cms"}
+			yields R3
 
 
 
