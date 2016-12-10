@@ -1160,7 +1160,7 @@ PATTERNS
 			loc $1
 			los INT32
 
-	pat los                            /* Load arbitrary size */
+	pat los $1==INT32                  /* Load arbitrary size */
 		with GPR3 GPR4 STACK
 			kills ALL
 			gen
@@ -1283,7 +1283,7 @@ PATTERNS
 			loc $1
 			sts INT32
 
-	pat sts                            /* Store arbitrary size */
+	pat sts $1==INT32                  /* Store arbitrary size */
 		with GPR3 GPR4 STACK
 			kills ALL
 			gen
@@ -1594,6 +1594,7 @@ PATTERNS
 
 	pat aar $1==INT32                  /* Index array */
 		with GPR3 GPR4 GPR5
+			kills ALL
 			gen
 				bl {LABEL, ".aar4"}
 			yields R3
@@ -1638,7 +1639,7 @@ PATTERNS
 			gen
 				bl {LABEL, ".set"}
 
-	pat inn                            /* Test for set bit */
+	pat inn defined($1)                /* Test for set bit */
 		with STACK
 			kills ALL
 			uses REG
@@ -1785,13 +1786,13 @@ PATTERNS
 
 /* Compare and jump */
 
-	pat cmi                            /* Signed tristate compare */
+	pat cmi $1==INT32                  /* Signed tristate compare */
 		with CONST_ALL GPR
 			yields {TRISTATE_RC_S, %2, %1.val}
 		with GPR GPR
 			yields {TRISTATE_RR_S, %2, %1}
 
-	pat cmu                            /* Unsigned tristate compare */
+	pat cmu $1==INT32                  /* Unsigned tristate compare */
 		with CONST_ALL GPR
 			yields {TRISTATE_RC_U, %2, %1.val}
 		with GPR GPR
