@@ -1,5 +1,5 @@
 MODULE test;
-FROM InOut IMPORT WriteLn, WriteString;
+FROM Test IMPORT fail, finished;
 
 TYPE charset = SET OF CHAR;
 
@@ -10,17 +10,13 @@ END Space;
 
 BEGIN
   IF Space('a') THEN
-    WriteString("@@FAIL 1");
-    WriteLn;
+    fail(1);
   END;
   IF NOT Space(' ') THEN
-    WriteString("@@FAIL 2");
-    WriteLn;
+    fail(2);
   END;
   IF NOT Space(12C) THEN
-    WriteString("@@FAIL 3");
-    WriteLn;
+    fail(3);
   END;
-  WriteString("@@FINISHED");
-  WriteLn;
+  finished;
 END test.

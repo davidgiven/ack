@@ -18,7 +18,10 @@ definerule("plat_testsuite",
 		acklibrary {
 			name = "lib",
 			srcs = { "tests/plat/lib/test.c" },
-			hdrs = { "tests/plat/lib/test.h" },
+			hdrs = {
+				"tests/plat/lib/test.h",
+				"tests/plat/lib/Test.def"
+			},
 			vars = { plat = e.plat },
 		}
 

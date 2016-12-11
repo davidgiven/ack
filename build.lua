@@ -18,7 +18,7 @@ vars.plats = {
 vars.plats_with_tests = {
 	"linux386",
 	"linuxppc",
-	-- "qemuppc", FIXME: disable until we figure out why qemu won't run binaries bigger than 4kB
+	"qemuppc",
 	"pc86",
 }
 
