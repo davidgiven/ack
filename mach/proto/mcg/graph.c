@@ -155,6 +155,42 @@ static void calculate_dominance_graph(void)
     }
 }
 
+void calculate_dominance_frontier_graph(void)
+{
+    /* This is the algorithm described here:
+     *
+     * Cooper, Keith D., Timothy J. Harvey, and Ken Kennedy.
+     * "A simple, fast dominance algorithm."
+     * Software Practice & Experience 4.1-10 (2001): 1-8.
+     *
+     * https://www.cs.rice.edu/~keith/EMBED/dom.pdf
+     */
+
+    int i, j;
+
+    dominance.frontiers.count = 0;
+
+    for (i=0; i<cfg.postorder.count; i++)
+    {
+        struct basicblock* b = cfg.postorder.item[i];
+        struct basicblock* dominator = pmap_findleft(&dominance.graph, b);
+        if (b->prevs.count >= 2)
+        {
+            for (j=0; j<b->prevs.count; j++)
+            {
+                struct basicblock* runner = b->prevs.item[j];
+                while (runner != dominator)
+                {
+                    tracef('G', "G: %s is in %s's dominance frontier\n",
+                        b->name, runner->name);
+                    pmap_add(&dominance.frontiers, runner, b);
+                    runner = pmap_findleft(&dominance.graph, runner);
+                }
+            }
+        }
+    }
+}
+
 static void recursively_walk_dominance_graph(struct basicblock* bb)
 {
     int i;
@@ -204,6 +240,8 @@ void update_graph_data(void)
     walk_dominance_graph();
     assert(dominance.postorder.count == dominance.graph.count);
     assert(dominance.preorder.count == dominance.graph.count);
+
+    calculate_dominance_frontier_graph();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -14,6 +14,7 @@ struct dominance_data
     PMAPOF(struct basicblock, struct basicblock) graph;
     ARRAYOF(struct basicblock) preorder;
     ARRAYOF(struct basicblock) postorder;
+    PMAPOF(struct basicblock, struct basicblock) frontiers;
 };
 
 extern struct graph_data cfg;
