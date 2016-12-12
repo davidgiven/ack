@@ -41,6 +41,7 @@ static void split_edge(struct basicblock* source, struct basicblock* sink)
 		);
 
     jump->root = jump->left->root = jump;
+	jump->bb = jump->left->bb = bb;
 	array_append(&bb->irs, jump);
 
 	rwp.find = sink;

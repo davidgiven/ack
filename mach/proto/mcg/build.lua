@@ -44,7 +44,7 @@ definerule("build_mcg",
 				"util/mcgg+lib",
 				headers,
 				tables, -- for .h file
-			}
+			},
 		}
 	end
 )

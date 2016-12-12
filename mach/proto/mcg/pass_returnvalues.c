@@ -74,6 +74,7 @@ static void find_call(struct basicblock* bb, int index, struct ir* lfr,
         struct ir* phi = new_ir0(IR_PHI, lfr->size);
 
         phi->root = phi;
+        phi->bb = bb;
         array_insert(&bb->irs, phi, 0);
 
         for (i=0; i<bb->prevs.count; i++)

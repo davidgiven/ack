@@ -28,6 +28,7 @@ static void collect_irs(void)
 		{
 			struct ir* ir = bb->irs.item[j];
             addall(ir);
+			ir->bb = bb;
 			array_append(&rootirs, ir);
 		}
     }
@@ -63,6 +64,7 @@ static void recursively_mark_root(struct ir* node, struct ir* root)
 		if (node->root)
 			return;
 		node->root = root;
+		node->bb = root->bb;
 	}
 
 	if (node->left)
