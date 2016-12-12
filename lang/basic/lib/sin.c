@@ -13,4 +13,3 @@
 double _sin(double x) { return sin(x); }
 double _cos(double x) { return cos(x); }
 double _tan(double x) { return tan(x); }
-

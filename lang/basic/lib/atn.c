@@ -10,4 +10,3 @@
 #include <math.h>
 
 double _atn(double x) { return atan(x); }
-

@@ -5,31 +5,34 @@
 
 /* assume that the channel has been set */
 
-_wrnl()
+void _wrnl(void)
 {
-	if( fputc('\n',_chanwr) == EOF) error(29);
+	if (fputc('\n', _chanwr) == EOF)
+		error(29);
 }
-_wrcomma()
+void _wrcomma(void)
 {
-	if( fputc(',',_chanwr) == EOF) error(29);
+	if (fputc(',', _chanwr) == EOF)
+		error(29);
 }
-_wrint(i)
-int i;
+void _wrint(int i)
 {
-	if(i>0) 
-		if( fputc(' ',_chanwr)==EOF) error(29);
-	fprintf(_chanwr,"%d",i);
-	if( ferror(_chanwr) ) error(29);
+	if (i > 0)
+		if (fputc(' ', _chanwr) == EOF)
+			error(29);
+	fprintf(_chanwr, "%d", i);
+	if (ferror(_chanwr))
+		error(29);
 }
-_wrflt(f)
-double f;
+void _wrflt(double f)
 {
-	fprintf(_chanwr,"%f",f);
-	if( ferror(_chanwr) ) error(29);
+	fprintf(_chanwr, "%f", f);
+	if (ferror(_chanwr))
+		error(29);
 }
-_wrstr(s)
-String *s;
+void _wrstr(String* s)
 {
-	fprintf(_chanwr,"\"%s\"",s->strval);
-	if( ferror(_chanwr) ) error(29);
+	fprintf(_chanwr, "\"%s\"", s->strval);
+	if (ferror(_chanwr))
+		error(29);
 }
