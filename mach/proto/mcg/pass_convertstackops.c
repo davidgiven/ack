@@ -97,29 +97,17 @@ static void convert_block(struct basicblock* bb)
             struct ir* ir = pops.item[i].right;
 
             assert(pushes.count > 0);
-            if (pushes.count == 1)
-            {
-                /* The push happened in exactly one place; that means we don't need a phi and can
-                 * just import the value directly. */
 
-                struct ir* src = pushes.item[0].right;
-                ir->opcode = IR_NOP;
-                ir->left = src;
-            }
-            else
+            struct ir* phi = new_ir0(IR_PHI, ir->size);
+            for (j=0; j<pushes.count; j++)
             {
-                /* The push could have happened in one of several places; we need a phi. */
-
-                struct ir* phi = new_ir0(IR_PHI, ir->size);
-                for (j=0; j<pushes.count; j++)
-                {
-                    pmap_add(&phi->u.phivalue,
-                        pushes.item[j].left,
-                        pushes.item[j].right);
-                }
-                phi->root = phi;
-                *ir = *phi;
+                pmap_add(&phi->u.phivalue,
+                    pushes.item[j].left,
+                    pushes.item[j].right);
             }
+            phi->root = phi;
+            phi->bb = ir->bb;
+            *ir = *phi;
         }
     }
 }
