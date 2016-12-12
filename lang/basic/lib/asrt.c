@@ -3,7 +3,8 @@
 
 void asrt(int b)
 {
-	if(!b){
+	if (!b)
+	{
 		printf("ASSERTION ERROR\n");
 		abort();
 	}

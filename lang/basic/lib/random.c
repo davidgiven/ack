@@ -20,12 +20,13 @@ void _setrand(int i)
 }
 double _rnd(double d)
 {
-	double f; f= (int) rand();
-	return(f/
+	double f;
+	f = (int)rand();
+	return (f /
 #if EM_WSIZE == 4
-		2147483647.0
+	    2147483647.0
 #else
-		32767.0
+	    32767.0
 #endif
-	);
+	    );
 }
