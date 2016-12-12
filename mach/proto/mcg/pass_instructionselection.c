@@ -54,7 +54,6 @@ static void emit_reg(int child, int index)
     if (vreg)
     {
         hop_add_vreg_insel(current_hop, vreg, index);
-        array_appendu(&vreg->used, current_hop);
     }
 }
 
@@ -146,7 +145,6 @@ static void constrain_output_reg(uint32_t attr)
         current_hop->output = vreg = new_vreg();
 
     array_appendu(&current_hop->outs, vreg);
-    vreg->defined = current_hop;
     vreg->type = find_type_from_constraint(attr);
 
     get_constraint(vreg)->attrs = attr;
