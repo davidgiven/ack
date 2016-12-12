@@ -90,6 +90,12 @@ void pmap_remove(void* mapp, void* left, void* right)
     }
 }
 
+void pmap_remove_bi(void* mapp, void* left, void* right)
+{
+    pmap_remove(mapp, left, right);
+    pmap_remove(mapp, right, left);
+}
+
 void pmap_remove_either(void* mapp, void* either)
 {
     struct pmap* map = mapp;
@@ -104,6 +110,22 @@ void pmap_remove_either(void* mapp, void* either)
             map->count--;
         }
     }
+}
+
+bool pmap_contains_bi(void* mapp, void* left, void* right)
+{
+    struct pmap* map = mapp;
+    int i;
+
+    for (i=0; i<map->count; i++)
+    {
+        struct pmap_node* node = &map->item[i];
+		if (((node->left == left) && (node->right == right))
+            || ((node->left == right) && (node->right == left)))
+			return true;
+    }
+
+	return NULL;
 }
 
 void* pmap_findleft(void* mapp, void* left)
