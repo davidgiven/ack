@@ -11,4 +11,3 @@
 #include <math.h>
 
 double _sqt(double x) { return sqrt(x); }
-

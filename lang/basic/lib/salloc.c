@@ -1,18 +1,19 @@
 #include <stdlib.h>
 
-char * salloc(length)
-unsigned length;
+char* salloc(unsigned length)
 {
-	char *c, *s;
-	c= malloc(length);
-	if( !c ) error(5);
-	for(s=c;s<c+length;s++) *s = 0;
-	return(c);
+	char* c, *s;
+	c = malloc(length);
+	if (!c)
+		error(5);
+	for (s = c; s < c + length; s++)
+		*s = 0;
+	return (c);
 }
 
-sfree(c)
-char *c;
+void sfree(char* c)
 {
-	if( !c ) return;
+	if (!c)
+		return;
 	free(c);
 }

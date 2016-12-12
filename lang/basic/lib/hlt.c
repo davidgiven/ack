@@ -1,12 +1,11 @@
 #include <stdlib.h>
 
-_hlt(nr)
-int nr;
+void _hlt(int nr)
 {
 	exit(nr);
 }
 
-_goto_err()
+void _goto_err(void)
 {
 	error(3);
 }
