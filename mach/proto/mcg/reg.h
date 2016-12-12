@@ -3,14 +3,6 @@
 
 #define WITH_ATTR(a) (1<<(a))
 
-struct phicongruence
-{
-    int id;
-    ARRAYOF(struct vreg) vregs;
-    ARRAYOF(struct hop) definitions;
-    uint32_t type;
-};
-
 struct hreg
 {
 	const char* id;
@@ -25,10 +17,11 @@ struct vreg
 {
 	int id;
     uint32_t type;
-    struct phicongruence* congruence;
-    struct hop* defined;
     struct anode* anode;
-    ARRAYOF(struct hop) used;
+    bool is_spillable;
+    struct hop* defined;
+    ARRAYOF(struct hop) usedhops;
+    ARRAYOF(struct basicblock) usedphis;
 };
 
 typedef PMAPOF(struct hreg, struct vreg) register_assignment_t;
