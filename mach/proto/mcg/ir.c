@@ -169,4 +169,89 @@ void ir_print(char k, const struct ir* ir)
     tracef(k, "\n");
 }
 
+struct replacement_data
+{
+    struct ir* src;
+    struct ir* dest;
+    struct basicblock* source_bb;
+};
+
+static bool replace_irs_cb(struct ir* ir, void* user)
+{
+    struct replacement_data* rd = user;
+
+    if (ir->left == rd->src)
+        ir->left = rd->dest;
+    if (ir->right == rd->src)
+        ir->right = rd->dest;
+
+    return false;
+}
+
+static bool replace_phis_cb(struct ir* ir, void* user)
+{
+    int i;
+    struct replacement_data* rd = user;
+
+    if (ir->opcode != IR_PHI)
+        return true;
+
+    for (i=0; i<ir->u.phivalue.count; i++)
+    {
+        if (ir->u.phivalue.item[i].right == rd->src)
+        {
+            ir->u.phivalue.item[i].right = rd->dest;
+            ir->u.phivalue.item[i].left = rd->source_bb;
+        }
+    }
+
+    return false;
+}
+
+/* Replaces IR references in this block, and any phis referring to the source IR in
+ * the block's successors --- but no further. */
+void ir_rewrite_single_block(struct basicblock* bb, struct ir* src, struct ir* dest)
+{
+    int i, j;
+    struct replacement_data rd;
+
+    rd.src = src;
+    rd.dest = dest;
+    rd.source_bb = bb;
+
+    for (i=0; i<bb->irs.count; i++)
+    {
+        struct ir* ir = bb->irs.item[i];
+        ir_walk(ir, replace_irs_cb, &rd);
+    }
+
+    for (i=0; i<bb->nexts.count; i++)
+    {
+        struct basicblock* nextbb = bb->nexts.item[i];
+
+        for (j=0; j<nextbb->irs.count; j++)
+        {
+            struct ir* ir = nextbb->irs.item[j];
+            ir_walk(ir, replace_phis_cb, &rd);
+        }
+    }
+}
+
+/* Rewrites IR references in all blocks downstream in the dominance graph, and all phis
+ * in all nexts (which may be backreferences). */
+void ir_rewrite(struct basicblock* bb, struct ir* src, struct ir* dest)
+{
+    int i;
+
+    ir_rewrite_single_block(bb, src, dest);
+
+    for (i=0; i<dominance.graph.count; i++)
+    {
+        struct basicblock* left = dominance.graph.item[i].left;
+        struct basicblock* right = dominance.graph.item[i].right;
+        if ((right == bb) && (left != right))
+            ir_rewrite(left, src, dest);
+    }
+}
+
 /* vim: set sw=4 ts=4 expandtab : */

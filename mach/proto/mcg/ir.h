@@ -12,6 +12,7 @@ struct ir
 	struct ir* left;
 	struct ir* right;
 	struct ir* root;
+	struct basicblock* bb;
 	union
 	{
 		arith ivalue;
@@ -20,8 +21,6 @@ struct ir
 		struct basicblock* bvalue;
         PMAPOF(struct basicblock, struct ir) phivalue;
 	} u;
-
-    ARRAYOF(struct ir) uses; /* all places this IR is used */
 
 	struct vreg* result;     /* vreg containing IR result */
 };
@@ -46,6 +45,9 @@ extern struct ir* ir_walk(struct ir* ir, ir_walker_t* callback, void* user);
 extern struct ir* ir_find(struct ir* ir, int opcode);
 
 extern void ir_print(char k, const struct ir* ir);
+
+extern void ir_rewrite_single_block(struct basicblock* bb, struct ir* src, struct ir* dest);
+extern void ir_rewrite(struct basicblock* bb, struct ir* src, struct ir* dest);
 
 #endif
 
