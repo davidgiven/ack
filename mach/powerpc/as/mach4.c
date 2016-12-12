@@ -34,7 +34,7 @@ operation
     | OP_RT_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<11)); }
 	| OP_RT_RA_SI          GPR ',' GPR ',' e16        { emit4($1 | ($2<<21) | ($4<<16) | $6); }
 	| OP_RT_RA_SI_addic    c GPR ',' GPR ',' e16      { emit4($1 | ($2<<26) | ($3<<21) | ($5<<16) | $7); }
-	| OP_RT_SPR            GPR ',' SPR                { emit4($1 | ($2<<21) | ($4<<11)); }
+	| OP_RT_SPR            GPR ',' spr_num            { emit4($1 | ($2<<21) | ($4<<11)); }
 	| OP_RS_FXM            u7 ',' GPR                 { emit4($1 | ($4<<21) | ($2<<12)); }
 	| OP_RS_RA_C           c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16)); }
 	| OP_RS_RA_D           GPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
@@ -53,7 +53,7 @@ operation
 	| OP_RS_RA_SH_ME6_SH_C  c GPR ',' GPR ',' u6 ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | (($7&0x1F)<<11) | ($9<<6) | (($7&0x20)>>4)); }
 	| OP_RS_RA_SH5_C       c GPR ',' GPR ',' u5       { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
 	| OP_RS_RA_SH6_C       c GPR ',' GPR ',' u6       { emit4($1 | $2 | ($5<<21) | ($3<<16) | (($7&0x1F)<<11) | (($7&0x20)>>4)); }
-	| OP_RS_SPR            SPR ',' GPR                { emit4($1 | ($4<<21) | ($2<<11)); }
+	| OP_RS_SPR            spr_num ',' GPR            { emit4($1 | ($4<<21) | ($2<<11)); }
 	| OP_TO_RA_RB          u5 ',' GPR ',' GPR         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_TO_RA_SI          u5 ',' GPR ',' e16         { emit4($1 | ($2<<21) | ($4<<16) | $6); }
 	| OP_LEV               u7                         { emit4($1 | ($2<<5)); }
@@ -237,4 +237,14 @@ lia
 		$$ = target & 0x03FFFFFD;
 	}
 	;
-	
+
+spr_num
+	: SPR { $$ = $1; }
+	| absexp
+	{
+		if (($1 < 0) || ($1 > 0x3ff))
+			serror("spr number out of range");
+		/* mfspr, mtspr swap the low and high 5 bits */
+		$$ = ($1 >> 5) | (($1 & 0x1f) << 5);
+	}
+	;
