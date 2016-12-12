@@ -5,8 +5,7 @@
 int _gotable[MAXNESTING];
 int topstk=0;
 
-_gosub(x)
-int x;
+void _gosub(int x)
 {
 	/* administer gosub */
 #ifdef DEBUG
@@ -16,7 +15,7 @@ int x;
 	_gotable[topstk]= x;
 	topstk++;
 }
-_retstmt()
+int _retstmt(void)
 {
 	/* make sure that a return label index is on top
 	  of the stack */

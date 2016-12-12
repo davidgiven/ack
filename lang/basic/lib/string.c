@@ -9,14 +9,12 @@
 
 extern char *salloc() ;
 
-_length(str)
-String *str;
+int _length(String* str)
 {
 	okr(str);
 	return(str->strlength);
 }
-String *_newstr(str)
-char *str;
+String *_newstr(char* str)
 {
 	String *s;
 	okr(str);
@@ -27,15 +25,13 @@ char *str;
 	strcpy(s->strval,str);
 	return(s);
 }
-_incstr(src)
-String *src;
+void _incstr(String* src)
 {
 	/* one more variable uses the string */
 	ok(src);
 	src->strcount++;
 }
-_decstr(str)
-String *str;
+void _decstr(String* str)
 {
 	ok(str);
 	/* Strings in ROM are initialized with this count */
@@ -43,8 +39,7 @@ String *str;
 	str->strcount--;
 	if(str->strcount<=0) _delstr(str);
 }
-_strcpy(dst,src)
-String *src,*dst;
+void _strcpy(String* dst, String* src)
 {
 	ok(src);
 	ok(dst);
@@ -52,15 +47,13 @@ String *src,*dst;
 	*dst = *src;
 	_incstr(src);
 }
-_delstr(src)
-String *src;
+void _delstr(String* src)
 {
 	ok(src);
 	sfree(src->strval);
 	sfree((char *)src);
 }
-String *_concat(s1,s2)
-String *s1,*s2;
+String *_concat(String* s1,String* s2)
 {
 	String *s;
 	int length;
@@ -73,16 +66,13 @@ String *s1,*s2;
 	strcat(s->strval,s1->strval);
 	return(s);
 }
-_strcomp(s1,s2)
-String *s1,*s2;
+int _strcomp(String* s1,String* s2)
 {
 	okr(s1);okr(s2);
 	return(strcmp(s2->strval,s1->strval));
 }
 
-String *_left(size,s)
-String *s;
-int	size;
+String *_left(int size, String* s)
 {
 	String *ns;
 	int i;
@@ -99,8 +89,7 @@ int	size;
 	return(ns);
 }
 
-String *_space(d)
-int d;
+String *_space(int d)
 {
 	String *s;
 	int i,len;
@@ -116,11 +105,10 @@ int d;
 	return(s);
 }
 
-String *_strascii()
+String *_strascii(void)
 {
 }
-String *_string(f, d)
-double	d,f;
+String *_string(double f, double d)
 {
 	int i,j;
 	String *s;
@@ -136,9 +124,7 @@ double	d,f;
 		s->strval[i]= j;
 	return(s);
 }
-_midstmt(s2,i1,i2,s)
-int i1,i2;
-String *s, *s2;
+void _midstmt(String* s2, int i1, int i2, String* s)
 {
 	int l;
 
@@ -150,9 +136,7 @@ String *s, *s2;
 	if( i1>l ) i1=l;
 	strncpy(s->strval+i2-1,s2->strval,i1);
 }
-String *_mid(i1,i2,s)
-int i1,i2;
-String *s;
+String *_mid(int i1, int i2, String* s)
 {
 	int l;
 	String *s2;
@@ -170,9 +154,7 @@ String *s;
 	return(s2);
 }
 
-String *_right(length,str)
-String *str;
-int length;
+String *_right(int length, String* str)
 {
 	String *s;
 	int i;

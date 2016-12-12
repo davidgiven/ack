@@ -1,6 +1,7 @@
-/* $Id$ */
+#include <stdio.h>
+#include <stdlib.h>
 
-asrt(b)
+void asrt(int b)
 {
 	if(!b){
 		printf("ASSERTION ERROR\n");

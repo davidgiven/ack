@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
-char * salloc(length)
-unsigned length;
+char * salloc(unsigned length)
 {
 	char *c, *s;
 	c= malloc(length);
@@ -10,8 +9,7 @@ unsigned length;
 	return(c);
 }
 
-sfree(c)
-char *c;
+void sfree(char* c)
 {
 	if( !c ) return;
 	free(c);

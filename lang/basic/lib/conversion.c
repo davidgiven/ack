@@ -1,6 +1,6 @@
 /* $Id$ */
 
-int _cint(f) double f;
+int _cint(double f)
 {
 	int r;
 	if( f<-32768 || f>32767) error(4);
@@ -10,8 +10,7 @@ int _cint(f) double f;
 	return(r);
 }
 
-double _trunc(f)
-double f;
+double _trunc(double f)
 {
 	long d;
 	d=f;
@@ -19,7 +18,7 @@ double f;
 	return( f );
 }
 
-double _fcint(f) double f;
+double _fcint(double f)
 {
 	long r;
 	if(f<0){
@@ -29,8 +28,7 @@ double _fcint(f) double f;
 	f=r;
 	return(f);
 }
-int _fix(f)
-double f;
+int _fix(double f)
 {
 	int r;
 

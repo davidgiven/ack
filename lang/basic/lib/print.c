@@ -7,19 +7,18 @@
 
 /* Here all routine to generate terminal oriented output is located */
 
-_qstmark()
+void _qstmark(void)
 {
 	/* prompt for terminal input */
 	putchar('?');
 }
 
-_nl()
+void _nl(void)
 {
 	_asschn();
 	_outnl();
 }
-_prinum(i)
-int i;
+void _prinum(int i)
 {
 	char	buffer[40];
 
@@ -29,9 +28,7 @@ int i;
 	else	sprintf(buffer,"-%d ",-i);
 	_out(buffer);
 }
-_str(f,buffer)
-double f;
-char *buffer;
+void _str(double f, char* buffer)
 {
 	register char *c = buffer;
 	int eformat = 0;
@@ -59,8 +56,7 @@ char *buffer;
 		if( *c=='.') *c=0;
 	}
 }
-_prfnum(f)
-double f;
+void _prfnum(double f)
 {
 	/* BASIC strings trailing zeroes */
 	char	buffer[100];
@@ -72,8 +68,7 @@ double f;
 	strcat(buffer," ");
 	_out(buffer);
 }
-_prstr(str)
-String *str;
+void _prstr(String* str)
 {
 	_asschn();
 	if( str==0)	_out("<null>");

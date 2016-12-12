@@ -10,8 +10,7 @@
 
 int	_width = 75, _pos=0, _zonewidth=15;
 
-_out(str)
-char *str;
+void _out(char* str)
 {
 	int pos;
 
@@ -27,7 +26,7 @@ char *str;
 	else _fdtable[_chann].pos= pos;
 }
 
-_outnl()
+void _outnl(void)
 {
 	fputc('\n',_chanwr);
 	if( _chann == -1)
@@ -35,7 +34,7 @@ _outnl()
 	else
 		_fdtable[_chann].pos=0;
 }
-_zone()
+void _zone(void)
 {
 	/* go to next zone */
 	int pos;
@@ -55,8 +54,7 @@ _zone()
 	if( _chann== -1) _pos=pos;
 	else _fdtable[_chann].pos= pos;
 }
-_in(buf)
-char *buf;
+void _in(char* buf)
 {
 	register int holder ;
 	char *c;
@@ -77,15 +75,13 @@ char *buf;
 		_pos=pos;
 	} else _fdtable[_chann].pos= pos;
 }
-_tab(x)
-int x;
+void _tab(int x)
 {
 	if( x> _width) error(3);
 	if( x< _pos) _outnl();
 	_spc(x-_pos);
 }
-_spc(x)
-int x;
+void _spc(int x)
 {
 	while(x-->0) _out(" ");
 }

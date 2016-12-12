@@ -13,15 +13,12 @@
 int	_trpline;	/* BASIC return label */
 jmp_buf	trpbuf;
 
-_trpset(nr)
-int nr;
+void _trpset(int nr)
 {
 	/*debug  printf("trap set to %d\n",nr);*/
 	_trpline=nr;
 }
-void
-_trpfatal(i)
-int i;
+void _trpfatal(int i)
 {
 	extern int _errsym,_erlsym;
 
@@ -35,7 +32,7 @@ int i;
 	_trap();
 }
 
-_ini_trp()
+void _ini_trp(void)
 {
 	/* initialize trap routines */
 	int i;
@@ -45,12 +42,11 @@ _ini_trp()
 }
 
 
-_settrap(nr)
-int nr;
+void _settrap(int nr)
 {
 	_trpline=nr;
 }
-_trap()
+void _trap(void)
 {
 	int line;
 

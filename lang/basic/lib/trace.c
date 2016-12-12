@@ -1,7 +1,6 @@
 /* $Id$ */
 
-_trace(i)
-int i;
+void _trace(int i)
 {	
 printf("[%d]",i);
 }

@@ -52,8 +52,7 @@ char *errortable[255]={
 0
 };
 
-error(index)
-int	index;
+void error(int index)
 {
 	_setline();
 	if( index<0 || index >40 )

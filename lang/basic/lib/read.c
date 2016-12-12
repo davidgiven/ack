@@ -4,14 +4,14 @@
 
 /* $Id$ */
 
-_readln()
+void _readln(void)
 {
 	register int c;
 	while( (c=fgetc(_chanrd)) != EOF && c!= '\n')
 		;
 }
 
-readskip()
+void readskip(void)
 {
 	register int c;
 #ifdef DEBUG
@@ -20,8 +20,7 @@ readskip()
 	while( (c=fgetc(_chanrd)) != EOF && c!= ',' && c!= '\n')
 		;
 }
-_readint(addr)
-int *addr;
+void _readint(int* addr)
 {
 	int i;
 	char	buf[1024];
@@ -45,8 +44,7 @@ int *addr;
 		error(40);
 	}else  { readskip(); *addr=i;}
 }
-_readflt(addr)
-double *addr;
+void _readflt(double* addr)
 {
 	double f;
 	char buf[1024];
@@ -69,8 +67,7 @@ double *addr;
 		error(40);
 	}else  { readskip(); *addr=f;}
 }
-_readstr(s)
-String **s;
+void _readstr(String** s)
 {
 	char buffer[1024];
 	register int kar ;
@@ -130,8 +127,7 @@ String **s;
 
 extern int _seektab[];
 
-_restore(line)
-int line;
+void _restore(int line)
 {
 	int nr;
 	char buffer[1024];
@@ -155,8 +151,7 @@ int line;
 		while(nr-- >0 ) fgets(buffer,1024,_chanrd);
 	}
 }
-_rdline(s)
-String **s;
+void _rdline(String** s)
 {
 	char buffer[1024];
 	if( fgets(buffer,1024,_chanrd) == 0)

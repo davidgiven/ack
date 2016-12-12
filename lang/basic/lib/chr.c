@@ -2,8 +2,7 @@
 
 /* $Id$ */
 
-String *_chr(i)
-int i;
+String *_chr(int i)
 {
 	String	*s;
 	char	buf[2];

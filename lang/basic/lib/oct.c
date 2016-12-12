@@ -4,16 +4,14 @@
 
 /* $Id$ */
 
-String *_oct(i)
-int i;
+String *_oct(int i)
 {
 	char buffer[30];
 	sprintf(buffer,"%o",i);
 	return( (String *)_newstr(buffer));
 }
 
-String *_hex(i)
-int i;
+String *_hex(int i)
 {
 	char buffer[30];
 
@@ -21,8 +19,7 @@ int i;
 	return( (String *)_newstr(buffer));
 }
 
-String *_nstr(f)
-	double f;
+String *_nstr(double f)
 {
 	char buffer[80];
 

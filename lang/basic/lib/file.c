@@ -18,8 +18,7 @@ int	_chann		= -1;
 FILE	*_chanrd	= stdin;
 FILE	*_chanwr	= stdout;
 
-_setchan(index)
-int index;
+void _setchan(int index)
 {
 #ifdef DEBUG
 	printf("setchannel %d\n",index);
@@ -38,7 +37,7 @@ int index;
 	_chanrd= _chanwr= _fdtable[index].fd;
 }
 
-_asschn()
+void _asschn(void)
 {
 #ifdef DEBUG
 	printf("_asschn %d\n",_chann);
@@ -55,17 +54,14 @@ _asschn()
 		error(2);
 }
 
-_clochn(nr)
-int nr;
+void _clochn(int nr)
 {
 	if( nr<1 || nr >15 || _fdtable[nr].fd==0) error(3);
 	fclose(_fdtable[nr].fd);
 	_fdtable[nr].fd=0; _fdtable[nr].fname=0;
 }
 
-_opnchn(reclen,fname,mode)
-String *mode,*fname;
-int	reclen;
+void _opnchn(int reclen, String* fname, String* mode)
 {
 	/* channel has been set */
 	FILE *f;
@@ -110,8 +106,7 @@ int	reclen;
 #endif
 }
 
-_ioeof(channel)
-int channel;
+int _ioeof(int channel)
 {
 	FILE *fd;
 	char c;
@@ -125,7 +120,7 @@ int channel;
 	return(0);
 }
 
-_close()
+void _close(void)
 {
 	/* close all open files */
 	int i;
