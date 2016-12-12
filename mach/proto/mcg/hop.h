@@ -43,6 +43,7 @@ struct hop
     const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
+	bool is_move;
 
     PMAPOF(struct vreg, struct constraint) constraints;
 
@@ -54,6 +55,7 @@ struct hop
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
+extern struct hop* new_copy_hop(struct basicblock* bb, struct vreg* src, struct vreg* dest);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index);

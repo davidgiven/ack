@@ -17,6 +17,17 @@ struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 	return hop;
 }
 
+struct hop* new_copy_hop(struct basicblock* bb, struct vreg* src, struct vreg* dest)
+{
+	struct hop* hop = heap_alloc(&proc_heap, 1, sizeof(*hop));
+	hop->id = hop_count++;
+    hop->bb = bb;
+    hop->is_move = true;
+    array_append(&hop->ins, src);
+    array_append(&hop->outs, dest);
+	return hop;
+}
+
 static struct insel* new_insel(enum insel_type type)
 {
 	struct insel* insel = heap_alloc(&proc_heap, 1, sizeof(*insel));
@@ -229,6 +240,9 @@ char* hop_render(struct hop* hop)
     appendf(""); /* ensure the buffer has been allocated */
     bufferlen = 0;
 	buffer[0] = '\0';
+
+    if (hop->is_move && (hop->insels.count == 0))
+        appendf("(move %%%d -> %%%d)\n", hop->ins.item[0]->id, hop->outs.item[0]->id);
 
 	for (i=0; i<hop->insels.count; i++)
 	{
