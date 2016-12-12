@@ -278,6 +278,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
 
 nomove:
     fatal("cannot move %s to %s", src->id, dest->id);
+    return NULL;
 }
 
 struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
