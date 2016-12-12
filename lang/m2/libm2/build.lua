@@ -29,8 +29,8 @@ for _, plat in ipairs(vars.plats) do
         },
 		hdrs = {}, -- must be empty
 		deps = {
-			"lang/cem/libcc.ansi/headers+headers",
-			"plat/"..plat.."/include+headers",
+			"lang/cem/libcc.ansi/headers+pkg",
+			"plat/"..plat.."/include+pkg",
 			"h+emheaders",
 		},
         vars = { plat = plat }

@@ -27,7 +27,7 @@ get_test_output() {
                 qemu-system-ppc)  img="-kernel $img" ;;
             esac
 
-            $timeoutprog -t $timeout -- $method -nographic $img 2>&1 > $result
+            $timeoutprog -t $timeout -- $method -nographic $img > $result 2>&1
             ;;
 
         qemu-*)
@@ -37,7 +37,7 @@ get_test_output() {
                 exit 0
             fi
 
-            $method $img 2>&1 > $result
+            $method $img > $result 2>&1
             ;;
 
         *)
