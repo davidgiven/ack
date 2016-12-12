@@ -1,49 +1,10 @@
 #include "mcg.h"
 
-static PMAPOF(struct basicblock, struct basicblock) dominancefrontiers;
-
 static struct local* current_local;
 static ARRAYOF(struct basicblock) defining;
 static ARRAYOF(struct basicblock) needsphis;
 static ARRAYOF(struct ir) definitions;
 static ARRAYOF(struct basicblock) rewritten;
-
-static void calculate_dominance_frontier_graph(void)
-{
-    /* This is the algorithm described here:
-     *
-     * Cooper, Keith D., Timothy J. Harvey, and Ken Kennedy.
-     * "A simple, fast dominance algorithm."
-     * Software Practice & Experience 4.1-10 (2001): 1-8.
-     *
-     * https://www.cs.rice.edu/~keith/EMBED/dom.pdf
-     */
-
-    int i, j;
-
-    dominancefrontiers.count = 0;
-
-    for (i=0; i<cfg.postorder.count; i++)
-    {
-        struct basicblock* b = cfg.postorder.item[i];
-        struct basicblock* dominator = pmap_findleft(&dominance.graph, b);
-        if (b->prevs.count >= 2)
-        {
-            for (j=0; j<b->prevs.count; j++)
-            {
-                struct basicblock* runner = b->prevs.item[j];
-                while (runner != dominator)
-                {
-                    tracef('S', "S: %s is in %s's dominance frontier\n",
-                        b->name, runner->name);
-                    pmap_add(&dominancefrontiers, runner, b);
-                    runner = pmap_findleft(&dominance.graph, runner);
-                }
-            }
-        }
-    }
-
-}
 
 static bool is_local(struct ir* ir)
 {
@@ -153,9 +114,9 @@ static void ssa_convert(void)
         );
 
         ir->root = ir;
-        ir->left->root = ir;
-        ir->right->root = ir;
-        ir->right->left->root = ir;
+        ir->bb = cfg.entry;
+        ir->left->root = ir->right->root = ir->right->left->root = ir;
+        ir->left->bb = ir->right->bb = ir->right->left->bb = cfg.entry;
         array_insert(&cfg.entry->irs, ir, 0);
     }
 
@@ -186,11 +147,11 @@ static void ssa_convert(void)
     {
         struct basicblock* bb = defining.item[i];
         tracef('S', "S: local %d in defined in block %s\n", current_local->offset, bb->name);
-        for (j=0; j<dominancefrontiers.count; j++)
+        for (j=0; j<dominance.frontiers.count; j++)
         {
-            if (dominancefrontiers.item[j].left == bb)
+            if (dominance.frontiers.item[j].left == bb)
             {
-                struct basicblock* dominates = dominancefrontiers.item[j].right;
+                struct basicblock* dominates = dominance.frontiers.item[j].right;
                 array_appendu(&needsphis, dominates);
                 array_appendu(&defining, dominates);
                 tracef('S', "S: local %d needs phi in block %s\n", current_local->offset, dominates->name);
@@ -205,6 +166,7 @@ static void ssa_convert(void)
         struct basicblock* bb = needsphis.item[i];
         struct ir* ir = new_ir0(IR_PHI, current_local->size);
         ir->root = ir;
+        ir->bb = bb;
         array_insert(&bb->irs, ir, 0);
     }
 
@@ -218,8 +180,6 @@ static void ssa_convert(void)
 void pass_convert_locals_to_ssa(void)
 {
     int i;
-
-    calculate_dominance_frontier_graph();
 
     for (i=0; i<current_proc->locals.count; i++)
     {
