@@ -176,34 +176,37 @@ void procedure_compile(struct procedure* proc)
     pass_split_critical_edges();
     update_graph_data();
 
+    if (cfg_dot_file)
+        write_cfg_graph(proc->name);
+    if (dominance_dot_file)
+        write_dominance_graph(proc->name);
+
     /* Passes from here on can't alter the BB graph without also updating prevs
      * and nexts (and then calling update_graph_data()). */
 
     print_blocks('3');
     pass_wire_up_return_values();
     pass_convert_stack_ops();
-    print_blocks('4');
     pass_convert_locals_to_ssa();
-    print_blocks('5');
+    print_blocks('4');
+    pass_convert_inputs_to_phis();
+    pass_convert_nonlocal_phis();
     pass_remove_dead_phis();
+    print_blocks('5');
     pass_infer_types();
     print_blocks('6');
-
     pass_instruction_selector();
     print_hops('7');
-    pass_find_phi_congruence_groups();
-    pass_live_vreg_analysis();
+    pass_split_live_ranges();
+    pass_determine_vreg_usage();
     print_hops('8');
+
+    pass_live_vreg_analysis();
     pass_register_allocator();
     pass_add_prologue_epilogue();
     print_hops('9');
 
     emit_procedure(proc);
-
-    if (cfg_dot_file)
-        write_cfg_graph(proc->name);
-    if (dominance_dot_file)
-        write_dominance_graph(proc->name);
 
     heap_free(&proc_heap);
 }
