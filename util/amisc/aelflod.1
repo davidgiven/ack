@@ -3,13 +3,39 @@
 aelflod \- ACK ELF loader
 .SH SYNOPSIS
 .B aelflod
-[-h] [-v] inputfile outputfile
+[-a\fInumber\fP] [-b] [-h] [-l] [-m\fInumber\fP] [-v] inputfile outputfile
 .SH DESCRIPTION
 .I aelflod
 converts an absolute ack.out file into a simple binary memory
 dump wrapped up in an ELF executable.
 It is suitable for producing executables for operating systems
 such as Linux.
+.PP
+.I aelflod
+accepts the following flags:
+.TP
+.BI \-a number
+Set the ABI in the ELF header to \fInumber\fP.
+The default value is \fI3\fP for Linux.
+.TP
+.B \-b
+Write a big-endian ELF file.
+.TP
+.B \-h
+Print a help message and exit.
+.TP
+.B \-l
+Write a little-endian ELF file.
+This is the default.
+.TP
+.BI \-m number
+Set the machine type in the ELF header to \fInumber\fP.
+The default value is \fI3\fP for Intel 386 (i386).
+Other values are \fI4\fP for Motorola 68000 (m68k)
+and \fI20\fP for PowerPC.
+.TP
+.B \-v
+Be verbose.
 .PP
 The input file must contain exactly four segments: TEXT, ROM,
 DATA and BSS, in that order, all occupying contiguous memory.
@@ -18,10 +44,15 @@ fixed address.
 The fixed address must be at least 0x54 bytes greater than a
 page boundary, in order to make room for the ELF header itself.
 .PP
-aelflod will write out an ELF header followed by each segment, in
-order, ensuring that enough padding is inserted between each segment
+.I aelflod
+will write out an ELF header followed by each segment, in order,
+ensuring that enough padding is inserted between each segment
 to keep the offsets correct.
-The created executable will contain just one rwx segment, and no
-sections.
+The created executable will contain just one ELF segment mapped rwx.
+.PP
+If the input file has symbols, then
+.I aelflod
+will convert the symbol table to ELF.
+The output file has ELF section headers if and only if it has symbols.
 .SH "SEE ALSO"
 ack.out(5)
