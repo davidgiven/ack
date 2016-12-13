@@ -1134,19 +1134,24 @@ static bool attempt_to_simplify(void)
     if (candidate->degree > 5)
         return false;
 
-    tracef('R', "R: simplifying @%d\n", candidate->id);
+    tracef('R', "R: simplifying @%d with degree %d\n", candidate->id, candidate->degree);
+        
     remove_anode_from_graphs(candidate);
     return true;
 }
 
-static bool attempt_to_spill(void)
+static bool attempt_to_spill_or_simplify(void)
 {
     int i;
     struct anode* candidate = find_lowest_degree(true);
     if (!candidate)
         return false;
 
-    tracef('R', "R: spilling @%d with degree %d\n", candidate->id, candidate->degree);
+    if (candidate->degree > 5)
+        tracef('R', "R: spilling @%d with degree %d\n", candidate->id, candidate->degree);
+    else
+        tracef('R', "R: simplifying @%d with degree %d\n", candidate->id, candidate->degree);
+
     remove_anode_from_graphs(candidate);
     return true;
 }
@@ -1164,7 +1169,7 @@ static void iterate(void)
         if (attempt_to_simplify())
             continue;
 
-        if (attempt_to_spill())
+        if (attempt_to_spill_or_simplify())
             continue;
 
         break;
