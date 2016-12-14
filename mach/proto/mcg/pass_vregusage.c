@@ -48,6 +48,7 @@ void pass_determine_vreg_usage(void)
             struct phi* phi = bb->phis.item[j].right;
             struct vreg* src = phi->ir->result;
             array_appendu(&src->usedphis, bb);
+            array_appendu(&vregs, src);
             array_appendu(&vregs, dest);
         }
     }
@@ -60,5 +61,3 @@ void pass_determine_vreg_usage(void)
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
-
-
