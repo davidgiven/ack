@@ -94,12 +94,6 @@ void pass_split_live_ranges(void)
     {
         current_bb = dominance.preorder.item[i];
 
-        for (j=0; j<current_bb->phis.count; j++)
-        {
-            struct vreg* vreg = current_bb->phis.item[j].left;
-            insert_move_after(0, vreg);
-        }
-
         for (j=0; j<current_bb->hops.count; j++)
         {
             struct hop* hop = current_bb->hops.item[j];
