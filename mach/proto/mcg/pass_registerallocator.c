@@ -1,4 +1,6 @@
 #include "mcg.h"
+#include "bigraph.h"
+#include <limits.h>
 
 /* This is based around the elegant graph colouring algorithm here:
  * 
@@ -23,6 +25,8 @@ struct vref
 };
 
 static struct heap anode_heap;
+static struct graph interferenceg;
+static struct graph preferenceg;
 static PMAPOF(struct anode, struct anode) interference;
 static PMAPOF(struct anode, struct anode) preference;
 static ARRAYOF(struct anode) vertices;
@@ -873,7 +877,6 @@ static void coalesce_phis(void)
 {
     int i, j;
 
-    interference.count = 0;
     for (i=0; i<cfg.preorder.count; i++)
     {
         struct basicblock* bb = cfg.preorder.item[i];
@@ -902,7 +905,10 @@ static void interferes_with(struct vreg** regs1, int count1, struct vreg** regs2
             struct anode* right = regs2[j]->anode;
 
             if (left != right)
+            {
+                graph_add_edge(&interferenceg, left, right);
                 pmap_add_bi(&interference, left, right);
+            }
         }
     }
 }
@@ -928,26 +934,33 @@ static void dump_interference_graph(void)
 {
     int i;
 
+    if (!regalloc_dot_file)
+        return;
+
     fprintf(regalloc_dot_file, "subgraph \"%s\" {\n", current_proc->name);
 
-    for (i=0; i<interference.count; i++)
     {
-        fprintf(regalloc_dot_file, "\t\"");
-        dump_anode(interference.item[i].left);
-        fprintf(regalloc_dot_file, "\" -> \"");
-        dump_anode(interference.item[i].right);
-        fprintf(regalloc_dot_file, "\";\n");
-
+        struct edge_iterator eit = {};
+        while (graph_next_edge(&interferenceg, &eit))
+        {
+            fprintf(regalloc_dot_file, "\t\"");
+            dump_anode(eit.left);
+            fprintf(regalloc_dot_file, "\" -> \"");
+            dump_anode(eit.right);
+            fprintf(regalloc_dot_file, "\";\n");
+        }
     }
 
-    for (i=0; i<preference.count; i++)
     {
-        fprintf(regalloc_dot_file, "\t\"");
-        dump_anode(preference.item[i].left);
-        fprintf(regalloc_dot_file, "\" -> \"");
-        dump_anode(preference.item[i].right);
-        fprintf(regalloc_dot_file, "\" [style=dotted];\n");
-
+        struct edge_iterator eit = {};
+        while (graph_next_edge(&preferenceg, &eit))
+        {
+            fprintf(regalloc_dot_file, "\t\"");
+            dump_anode(eit.left);
+            fprintf(regalloc_dot_file, "\" -> \"");
+            dump_anode(eit.right);
+            fprintf(regalloc_dot_file, "\" [style=dotted];\n");
+        }
     }
 
     for (i=0; i<vertices.count; i++)
@@ -973,7 +986,10 @@ static void build_interference_graph_cb(struct hop* hop, void* user)
         assert(hop->outs.count == 1);
 
         if (src != dest)
+        {
+            graph_add_edge(&preferenceg, src, dest);
             pmap_add_bi(&preference, src, dest);
+        }
     }
     else
     {
@@ -1005,6 +1021,7 @@ static void purge_interference_where_preference(void)
         struct anode* src = preference.item[i].left;
         struct anode* dest = preference.item[i].right;
         pmap_remove_bi(&interference, src, dest);
+        graph_remove_edge(&interferenceg, src, dest);
     }
 }
 
@@ -1042,6 +1059,8 @@ static void purge_replaced_anodes(void)
         struct anode* r = replaced.item[i];
         pmap_remove_either(&interference, r);
         pmap_remove_either(&preference, r);
+        graph_remove_vertex(&interferenceg, r);
+        graph_remove_vertex(&preferenceg, r);
     }
 }
 
@@ -1050,37 +1069,17 @@ static void collect_vertices(void)
     int i;
 
     vertices.count = 0;
-    for (i=0; i<interference.count; i++)
+
     {
-        array_appendu(&vertices, interference.item[i].left);
-        array_appendu(&vertices, interference.item[i].right);
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interferenceg, &vit))
+            array_appendu(&vertices, vit.data);
     }
-    for (i=0; i<preference.count; i++)
+
     {
-        array_appendu(&vertices, preference.item[i].left);
-        array_appendu(&vertices, preference.item[i].right);
-    }
-}
-
-static void update_degrees(void)
-{
-    int i, j;
-
-    for (i=0; i<vertices.count; i++)
-    {
-        struct anode* candidate = vertices.item[i];
-
-        candidate->degree = 0;
-        for (j=0; j<interference.count; j++)
-        {
-            struct anode* left = interference.item[j].left;
-            struct anode* right = interference.item[j].right;
-
-            if (left == candidate)
-                candidate->degree++;
-            if (right == candidate)
-                candidate->degree++;
-        }
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&preferenceg, &vit))
+            array_appendu(&vertices, vit.data);
     }
 }
 
@@ -1088,16 +1087,25 @@ static struct anode* find_lowest_degree(bool is_spillable)
 {
     int i, j;
     struct anode* lowest = NULL;
+    int lowestdeg = INT_MAX;
 
-    for (i=0; i<vertices.count; i++)
     {
-        struct anode* candidate = vertices.item[i];
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interferenceg, &vit))
+        {
+            struct anode* candidate = vit.data;
+            int candidatedeg = graph_get_vertex_degree(&interferenceg, candidate);
 
-        if ((candidate->is_spillable == is_spillable) &&
-                (!lowest || (lowest->degree > candidate->degree)))
-            lowest = candidate;
+            if ((candidate->is_spillable == is_spillable) && (lowestdeg > candidatedeg))
+            {
+                lowest = candidate;
+                lowestdeg = candidatedeg;
+            }
+        }
     }
 
+    if (lowest)
+        lowest->degree = lowestdeg;
     return lowest;
 }
 
@@ -1105,23 +1113,33 @@ static void remove_anode_from_graphs(struct anode* anode)
 {
     pmap_remove_either(&interference, anode);
     pmap_remove_either(&preference, anode);
+    graph_remove_vertex(&interferenceg, anode);
+    graph_remove_vertex(&preferenceg, anode);
 }
 
 static struct anode* find_highest_degree(bool is_spillable)
 {
     int i, j;
-    struct anode* lowest = NULL;
+    struct anode* highest = NULL;
+    int highestdeg = INT_MIN;
 
-    for (i=0; i<vertices.count; i++)
     {
-        struct anode* candidate = vertices.item[i];
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interferenceg, &vit))
+        {
+            struct anode* candidate = vit.data;
+            int candidatedeg = graph_get_vertex_degree(&interferenceg, candidate);
 
-        if ((candidate->is_spillable == is_spillable) &&
-                (!lowest || (lowest->degree < candidate->degree)))
-            lowest = candidate;
+            if ((candidate->is_spillable == is_spillable) && (highestdeg < candidatedeg))
+            {
+                highest = candidate;
+                highestdeg = candidatedeg;
+            }
+        }
     }
 
-    return lowest;
+    highest->degree = highestdeg;
+    return highest;
 }
 
 static bool attempt_to_simplify(void)
@@ -1164,7 +1182,6 @@ static void iterate(void)
     {
         tracef('R', "R: iterating\n"); 
         collect_vertices();
-        update_degrees();
 
         if (attempt_to_simplify())
             continue;
@@ -1194,6 +1211,7 @@ void pass_register_allocator(void)
 
     tracef('R', "R: generating interference and preference graphs\n");
     interference.count = 0;
+    graph_reset(&interferenceg);
     preference.count = 0;
     coalesce_phis();
     hop_walk(build_interference_graph_cb, NULL);
