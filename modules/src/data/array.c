@@ -9,10 +9,10 @@ static void extend(struct array* array)
 	if (array->count == array->max)
 	{
 		int newmax = (array->max == 0) ? 8 : (array->max * 2);
-		struct array* newarray = realloc(array->item, newmax * sizeof(*newarray));
+		void** newarray = realloc(array->item, newmax * sizeof(void*));
 
 		array->max = newmax;
-		array->item = newarray;
+        array->item = newarray;
 	}
 }
 
@@ -57,7 +57,7 @@ void array_insert(void* arrayp, void* value, int before)
 
     extend(array);
     memmove(&array->item[before+1], &array->item[before],
-        (array->count-before) * sizeof(*array));
+        (array->count-before) * sizeof(void*));
     array->item[before] = value;
     array->count++;
 }
