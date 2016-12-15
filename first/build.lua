@@ -220,7 +220,7 @@ definerule("cprogram",
 		commands = {
 			type="strings",
 			default={
-				"$(CC) -o %{outs[1]} -Wl,--start-group %{ins} -Wl,--end-group"
+				"$(CC) %{cflags} -o %{outs[1]} -Wl,--start-group %{ins} -Wl,--end-group"
 			},
 		}
 	},
