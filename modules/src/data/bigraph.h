@@ -35,6 +35,7 @@ extern void graph_reset(struct graph* g);
 extern bool graph_contains_vertex(struct graph* g, void* data);
 extern void graph_add_vertex(struct graph* g, void* data);
 extern void graph_remove_vertex(struct graph* g, void* data);
+extern bool graph_contains_edge(struct graph* g, void* data1, void* data2);
 extern void graph_add_edge(struct graph* g, void* data1, void* data2);
 extern void graph_remove_edge(struct graph* g, void* data1, void* data2);
 extern int graph_get_vertex_degree(struct graph* g, void* data);

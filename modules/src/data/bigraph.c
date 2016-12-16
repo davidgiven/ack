@@ -99,6 +99,17 @@ static struct edgenode** find_edgep(struct vertex* v1, struct vertex* v2)
     return ep;
 }
 
+bool graph_contains_edge(struct graph* g, void* data1, void* data2)
+{
+    struct vertex* v1 = find_or_add_vertex(g, data1);
+    struct vertex* v2 = find_or_add_vertex(g, data2);
+
+	if (!v1 || !v2)
+		return false;
+
+	return *find_edgep(v1, v2) || *find_edgep(v2, v1);
+}
+
 static struct edgenode* add_edge(struct vertex* v1, struct vertex* v2)
 {
     struct edgenode** ep = find_edgep(v1, v2);

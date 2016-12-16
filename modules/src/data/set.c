@@ -8,9 +8,9 @@ void set_reset(struct set* s)
 	hashtable_reset(&s->table);
 }
 
-void set_add(struct set* s, void* item)
+bool set_add(struct set* s, void* item)
 {
-	hashtable_put(&s->table, item, item);
+	return hashtable_put(&s->table, item, item);
 }
 
 bool set_remove(struct set* s, void* item)
