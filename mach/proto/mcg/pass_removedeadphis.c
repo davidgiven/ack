@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static ARRAYOF(struct ir) phis;
+static struct set phis;
 static bool changed;
 
 static void collect_phis(struct basicblock* bb)
@@ -11,16 +11,16 @@ static void collect_phis(struct basicblock* bb)
     {
         struct ir* ir = bb->irs.item[i];
         if (ir->opcode == IR_PHI)
-            array_append(&phis, ir);
+            set_add(&phis, ir);
     }
 }
 
 static bool ir_walker_cb(struct ir* ir, void* user)
 {
     if (ir->left)
-        array_remove(&phis, ir->left);
+        set_remove(&phis, ir->left);
     if (ir->right)
-        array_remove(&phis, ir->right);
+        set_remove(&phis, ir->right);
 
     return false;
 }
@@ -36,7 +36,7 @@ static void remove_referenced_phis(struct basicblock* bb)
         {
             case IR_PHI:
                 for (j=0; j<ir->u.phivalue.count; j++)
-                    array_remove(&phis, ir->u.phivalue.item[j].right);
+                    set_remove(&phis, ir->u.phivalue.item[j].right);
                 break;
 
             default:
@@ -53,7 +53,7 @@ static void purge_unused_phis(struct basicblock* bb)
     for (i=0; i<bb->irs.count; i++)
     {
         struct ir* ir = bb->irs.item[i];
-        if ((ir->opcode == IR_PHI) && (array_contains(&phis, ir)))
+        if ((ir->opcode == IR_PHI) && (set_contains(&phis, ir)))
         {
             array_remove(&bb->irs, ir);
             i--;
@@ -70,7 +70,7 @@ void pass_remove_dead_phis(void)
     {
         changed = false;
 
-        phis.count = 0;
+        set_reset(&phis);
         for (i=0; i<cfg.preorder.count; i++)
             collect_phis(cfg.preorder.item[i]);
 
