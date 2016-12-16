@@ -29,6 +29,7 @@ struct hashtable_iterator
     struct hashnode* node;
 };
 
+extern void hashtable_empty(struct hashtable* ht);
 extern void hashtable_reset(struct hashtable* ht);
 extern void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets);
 

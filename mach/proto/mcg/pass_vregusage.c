@@ -36,7 +36,7 @@ void pass_determine_vreg_usage(void)
 {
     int i, j;
 
-    set_reset(&vregs);
+    set_empty(&vregs);
     hop_walk(assign_uses_cb, NULL);
 
     for (i=0; i<dominance.preorder.count; i++)

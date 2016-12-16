@@ -18,7 +18,7 @@ static void collect_irs(void)
 {
     int i;
     
-    set_reset(&irs);
+    set_empty(&irs);
 	for (i=0; i<cfg.preorder.count; i++)
     {
         struct basicblock* bb = cfg.preorder.item[i];

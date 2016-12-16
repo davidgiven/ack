@@ -37,11 +37,15 @@ static void lazy_init(struct hashtable* ht)
         ht->buckets = calloc(ht->num_buckets, sizeof(struct hashnode*));
 }
 
-void hashtable_reset(struct hashtable* ht)
+void hashtable_empty(struct hashtable* ht)
 {
     while (ht->size)
         hashtable_pop(ht);
+}
 
+void hashtable_reset(struct hashtable* ht)
+{
+	hashtable_empty(ht);
     free(ht->buckets);
     ht->buckets = NULL;
 }

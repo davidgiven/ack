@@ -121,8 +121,8 @@ static void import_ir(struct ir* phi)
 {
     int i;
 
-    set_reset(&confirmed);
-    set_reset(&pending);
+    set_empty(&confirmed);
+    set_empty(&pending);
 
     recursively_add_children_to_pending(current_dest);
     set_add(&confirmed, current_dest);

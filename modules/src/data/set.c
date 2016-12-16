@@ -3,6 +3,11 @@
 #include <stdbool.h>
 #include "set.h"
 
+void set_empty(struct set* s)
+{
+	hashtable_empty(&s->table);
+}
+
 void set_reset(struct set* s)
 {
 	hashtable_reset(&s->table);

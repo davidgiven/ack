@@ -70,7 +70,7 @@ void pass_remove_dead_phis(void)
     {
         changed = false;
 
-        set_reset(&phis);
+        set_empty(&phis);
         for (i=0; i<cfg.preorder.count; i++)
             collect_phis(cfg.preorder.item[i]);
 

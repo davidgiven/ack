@@ -10,6 +10,7 @@ struct set
 	struct hashtable table;
 };
 
+extern void set_empty(struct set* s);
 extern void set_reset(struct set* s);
 
 extern bool set_add(struct set* s, void* item);
