@@ -6,9 +6,9 @@
  * so ensuring that all IR references are to either the current bb, or via
  * a phi to a parent bb. */
 
-static ARRAYOF(struct basicblock) confirmed;
-static ARRAYOF(struct basicblock) pending;
-static PMAPOF(struct ir, struct ir) added;
+static struct set confirmed;
+static struct set pending;
+static struct graph added;
 
 static struct basicblock* current_src;
 static struct basicblock* current_dest;
@@ -35,7 +35,7 @@ static void recursively_add_children_to_pending(struct basicblock* bb)
 
         if ((candidate != current_src)
                 && (candidate != current_dest)
-                && !array_appendu(&pending, candidate))
+                && !set_add(&pending, candidate))
             recursively_add_children_to_pending(candidate);
     }
 }
@@ -48,11 +48,11 @@ static void recursively_move_children_to_confirmed(struct basicblock* bb)
     {
         struct basicblock* candidate = bb->nexts.item[i];
 
-        if (array_contains(&pending, candidate))
+        if (set_contains(&pending, candidate))
         {
             tracef('I', "I: encompassing %s\n", candidate->name);
-            array_remove(&pending, candidate);
-            array_appendu(&confirmed, candidate);
+            set_remove(&pending, candidate);
+            set_add(&confirmed, candidate);
             recursively_move_children_to_confirmed(candidate);
         }
     }
@@ -92,7 +92,7 @@ static bool replace_irs_cb(struct ir* ir, void* user)
          
     for (i=0; i<ir->u.phivalue.count; i++)
     {
-        if (pmap_contains_bi(&added, current_ir, ir->u.phivalue.item[i].right))
+        if (graph_contains_edge(&added, current_ir, ir->u.phivalue.item[i].right))
         {
             *found = true;
             return true;
@@ -121,11 +121,11 @@ static void import_ir(struct ir* phi)
 {
     int i;
 
-    confirmed.count = 0;
-    pending.count = 0;
+    set_reset(&confirmed);
+    set_reset(&pending);
 
     recursively_add_children_to_pending(current_dest);
-    array_appendu(&confirmed, current_dest);
+    set_add(&confirmed, current_dest);
     recursively_move_children_to_confirmed(current_src);
 
     /* Remove the original source from the phi. */
@@ -142,12 +142,12 @@ static void import_ir(struct ir* phi)
 
         if (bb == current_src)
             pmap_add(&phi->u.phivalue, bb, current_ir);
-        else if (array_contains(&confirmed, bb) && !already_importing(bb))
+        else if (set_contains(&confirmed, bb) && !already_importing(bb))
         {
             struct ir* newphi = insert_phi_to_prev(bb, current_ir->size, current_ir);
             pmap_add(&phi->u.phivalue, bb, newphi);
-            pmap_add(&added, current_ir, newphi);
-            array_remove(&confirmed, bb);
+            graph_add_edge(&added, current_ir, newphi);
+            set_remove(&confirmed, bb);
         }
     }
     ir_print('I', phi);
@@ -157,7 +157,7 @@ void pass_convert_nonlocal_phis(void)
 {
     int i, j, k;
 
-    added.count = 0;
+    graph_reset(&added);
 
     /* If a phi refers to an IR defined in a node which isn't a direct parent,
      * insert phis upstream for it. */
