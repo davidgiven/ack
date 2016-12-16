@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static ARRAYOF(struct vreg) vregs;
+static struct set vregs;
 
 static void assign_uses_cb(struct hop* hop, void* user)
 {
@@ -14,7 +14,7 @@ static void assign_uses_cb(struct hop* hop, void* user)
         struct vreg* vreg = hop->outs.item[i];
         assert(vreg->defined == NULL);
         vreg->defined = hop;
-        array_appendu(&vregs, vreg);
+        set_add(&vregs, vreg);
     }
 }
 
@@ -36,7 +36,7 @@ void pass_determine_vreg_usage(void)
 {
     int i, j;
 
-    vregs.count = 0;
+    set_reset(&vregs);
     hop_walk(assign_uses_cb, NULL);
 
     for (i=0; i<dominance.preorder.count; i++)
@@ -48,15 +48,18 @@ void pass_determine_vreg_usage(void)
             struct phi* phi = bb->phis.item[j].right;
             struct vreg* src = phi->ir->result;
             array_appendu(&src->usedphis, bb);
-            array_appendu(&vregs, src);
-            array_appendu(&vregs, dest);
+            set_add(&vregs, src);
+            set_add(&vregs, dest);
         }
     }
 
-    for (i=0; i<vregs.count; i++)
     {
-        struct vreg* vreg = vregs.item[i];
-        vreg->is_spillable = is_spillable_vreg(vreg);
+        struct set_iterator sit = {};
+        while (set_next(&vregs, &sit))
+        {
+            struct vreg* vreg = sit.item;
+            vreg->is_spillable = is_spillable_vreg(vreg);
+        }
     }
 }
 
