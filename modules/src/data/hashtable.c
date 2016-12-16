@@ -7,7 +7,7 @@ struct hashnode
 {
     struct hashnode* next;
     void* key;
-    void* data;
+    void* value;
 };
 
 uint32_t standard_pointer_hash_function(void* key)
@@ -46,6 +46,31 @@ void hashtable_reset(struct hashtable* ht)
     ht->buckets = NULL;
 }
 
+void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets)
+{
+    struct hashnode** old_buckets = ht->buckets;
+	int old_num_buckets = ht->num_buckets;
+	int i;
+	
+	ht->num_buckets = num_buckets;
+	ht->buckets = calloc(num_buckets, sizeof(struct hashnode*));
+
+	for (i=0; i<old_num_buckets; i++)
+	{
+		while (old_buckets[i])
+		{
+			struct hashnode* hn = old_buckets[i];
+			uint32_t hash = ht->hashfunction(hn->key) % num_buckets;
+
+			old_buckets[i] = hn->next;
+			hn->next = ht->buckets[hash];
+			ht->buckets[hash] = hn;
+		}
+	}
+
+	free(old_buckets);
+}
+
 static struct hashnode** findnodep(struct hashtable* ht, void* key)
 {
     uint32_t hash;
@@ -61,27 +86,33 @@ static struct hashnode** findnodep(struct hashtable* ht, void* key)
     return hnp;
 }
 
-void* hashtable_put(struct hashtable* ht, void* key, void* data)
+void* hashtable_put(struct hashtable* ht, void* key, void* value)
 {
-    void* olddata;
+    void* oldvalue;
     struct hashnode** hnp = findnodep(ht, key);
     if (!*hnp)
     {
+		if (ht->size == (ht->num_buckets*2))
+		{
+			hashtable_rebucket(ht, ht->num_buckets*3 + 1);
+			return hashtable_put(ht, key, value);
+		}
+
         *hnp = calloc(1, sizeof(struct hashnode));
         ht->size++;
     }
 
-    olddata = (*hnp)->data;
+    oldvalue = (*hnp)->value;
     (*hnp)->key = key;
-    (*hnp)->data = data;
-    return olddata;
+    (*hnp)->value = value;
+    return oldvalue;
 }
 
 void* hashtable_get(struct hashtable* ht, void* key)
 {
     struct hashnode** hnp = findnodep(ht, key);
     if (*hnp)
-        return (*hnp)->data;
+        return (*hnp)->value;
     return NULL;
 }
 
@@ -119,11 +150,11 @@ void* hashtable_pop(struct hashtable* ht)
         if (*hnp)
         {
             struct hashnode* hn = *hnp;
-            void* data = hn->data;
+            void* value = hn->value;
             *hnp = hn->next;
             free(hn);
             ht->size--;
-            return data;
+            return value;
         }
     }
 
@@ -136,7 +167,7 @@ void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
     {
         if (it->bucket == ht->num_buckets)
         {
-            it->data = NULL;
+            it->key = it->value = NULL;
             it->bucket = 0;
             it->node = NULL;
             return NULL;
@@ -149,10 +180,11 @@ void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
         it->bucket++;
     }
 
-    it->data = it->node->data;
+    it->key = it->node->key;
+	it->value = it->node->value;
     it->node = it->node->next;
     if (!it->node)
         it->bucket++;
 
-    return it->data;
+    return it->value;
 }

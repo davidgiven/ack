@@ -120,6 +120,9 @@ void graph_add_edge(struct graph* g, void* data1, void* data2)
     struct vertex* v2 = find_or_add_vertex(g, data2);
     struct edgenode* e;
 
+	if (v1 == v2)
+		return;
+
     add_edge(v1, v2);
     e = add_edge(v2, v1);
 

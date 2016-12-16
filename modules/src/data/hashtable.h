@@ -21,7 +21,8 @@ struct hashtable
 struct hashtable_iterator
 {
     /* Public */
-    void* data;
+    void* key;
+	void* value;
 
     /* Private */
     int bucket;
@@ -29,6 +30,7 @@ struct hashtable_iterator
 };
 
 extern void hashtable_reset(struct hashtable* ht);
+extern void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets);
 
 extern void* hashtable_put(struct hashtable* ht, void* key, void* data);
 extern void* hashtable_get(struct hashtable* ht, void* key);
