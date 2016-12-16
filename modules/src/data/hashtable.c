@@ -163,15 +163,12 @@ void* hashtable_pop(struct hashtable* ht)
 
 void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
 {
+	lazy_init(ht);
+
     while (!it->node)
     {
         if (it->bucket == ht->num_buckets)
-        {
-            it->key = it->value = NULL;
-            it->bucket = 0;
-            it->node = NULL;
-            return NULL;
-        }
+			goto eof;
 
         it->node = ht->buckets[it->bucket];
         if (it->node)
@@ -187,4 +184,10 @@ void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
         it->bucket++;
 
     return it->value;
+
+eof:
+	it->key = it->value = NULL;
+	it->bucket = 0;
+	it->node = NULL;
+	return NULL;
 }
