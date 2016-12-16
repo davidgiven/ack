@@ -1,11 +1,11 @@
 #include "mcg.h"
 
 static bool changed;
-static ARRAYOF(struct ir) irs;
+static struct set irs;
 
 static void addall(struct ir* ir)
 {
-    if (array_appendu(&irs, ir))
+    if (set_add(&irs, ir))
         return;
 
     if (ir->left)
@@ -18,7 +18,7 @@ static void collect_irs(void)
 {
     int i;
     
-    irs.count = 0;
+    set_reset(&irs);
 	for (i=0; i<cfg.preorder.count; i++)
     {
         struct basicblock* bb = cfg.preorder.item[i];
@@ -59,11 +59,11 @@ static char effective_type(struct ir* ir, char type)
 
 static void scan_irs(void)
 {
-	int i;
+    struct set_iterator sit = {};
 
-	for (i=0; i<irs.count; i++)
-	{
-		struct ir* ir = irs.item[i];
+    while (set_next(&irs, &sit))
+    {
+		struct ir* ir = sit.item;
 
 		if (ir->opcode == IR_PHI)
 		{
@@ -192,11 +192,11 @@ static void propagate_types(void)
 
 static void assign_fallback_types(void)
 {
-	int i;
+    struct set_iterator sit = {};
 
-	for (i=0; i<irs.count; i++)
-	{
-		struct ir* ir = irs.item[i];
+    while (set_next(&irs, &sit))
+    {
+		struct ir* ir = sit.item;
 		const struct ir_data* ird = &ir_data[ir->opcode];
 
 		if (!ir->type && (ird->returntype == '?'))
@@ -258,13 +258,13 @@ static void insert_copy(struct ir* ir, struct ir** child, char returntype, char 
 
 static void insert_ir_copies(void)
 {
-	int i;
+    struct set_iterator sit = {};
 
 	/* Insert copies for normal IR nodes. */
 
-	for (i=0; i<irs.count; i++)
+    while (set_next(&irs, &sit))
 	{
-		struct ir* ir = irs.item[i];
+		struct ir* ir = sit.item;
 		const struct ir_data* ird = &ir_data[ir->opcode];
 
         insert_copy(ir, &ir->left, ird->returntype, ird->lefttype);
@@ -274,14 +274,15 @@ static void insert_ir_copies(void)
 
 static void insert_phi_copies(void)
 {
-    int i, j;
+    struct set_iterator sit = {};
+    int j;
 
     /* If the child of a phi isn't the same type as the phi itself, we need to
      * insert the copy at the end of the block that exported the value. */
 
-    for (i=0; i<irs.count; i++)
+    while (set_next(&irs, &sit))
     {
-		struct ir* ir = irs.item[i];
+		struct ir* ir = sit.item;
 
         for (j=0; j<ir->u.phivalue.count; j++)
         {
