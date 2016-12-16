@@ -130,8 +130,14 @@ void graph_add_edge(struct graph* g, void* data1, void* data2)
     struct vertex* v1 = find_or_add_vertex(g, data1);
     struct vertex* v2 = find_or_add_vertex(g, data2);
     struct edgenode* e;
+	struct edgenode template;
 
 	if (v1 == v2)
+		return;
+
+	template.this = v1;
+	template.other = v2;
+	if (hashtable_contains(&g->edges, &template))
 		return;
 
     add_edge(v1, v2);
