@@ -27,8 +27,6 @@ struct vref
 static struct heap anode_heap;
 static struct graph interferenceg;
 static struct graph preferenceg;
-static PMAPOF(struct anode, struct anode) interference;
-static PMAPOF(struct anode, struct anode) preference;
 static ARRAYOF(struct anode) vertices;
 static ARRAYOF(struct anode) simplified;
 #if 0
@@ -905,10 +903,7 @@ static void interferes_with(struct vreg** regs1, int count1, struct vreg** regs2
             struct anode* right = regs2[j]->anode;
 
             if (left != right)
-            {
                 graph_add_edge(&interferenceg, left, right);
-                pmap_add_bi(&interference, left, right);
-            }
         }
     }
 }
@@ -988,7 +983,6 @@ static void build_interference_graph_cb(struct hop* hop, void* user)
         if (src != dest)
         {
             graph_add_edge(&preferenceg, src, dest);
-            pmap_add_bi(&preference, src, dest);
         }
     }
     else
@@ -1016,12 +1010,14 @@ static void purge_interference_where_preference(void)
 {
     int i;
 
-    for (i=0; i<preference.count; i++)
     {
-        struct anode* src = preference.item[i].left;
-        struct anode* dest = preference.item[i].right;
-        pmap_remove_bi(&interference, src, dest);
-        graph_remove_edge(&interferenceg, src, dest);
+        struct edge_iterator eit = {};
+        while (graph_next_edge(&preferenceg, &eit))
+        {
+            struct anode* src = eit.left;
+            struct anode* dest = eit.right;
+            graph_remove_edge(&interferenceg, src, dest);
+        }
     }
 }
 
@@ -1031,34 +1027,30 @@ static void purge_replaced_anodes(void)
     int i;
 
     replaced.count = 0;
-    for (i=0; i<interference.count; i++)
     {
-        struct anode* left = interference.item[i].left;
-        struct anode* right = interference.item[i].right;
-        
-        if (left->replaced_by)
-            array_appendu(&replaced, left);
-        if (right->replaced_by)
-            array_appendu(&replaced, right);
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interferenceg, &vit))
+        {
+            struct anode* anode = vit.data;
+            if (anode->replaced_by)
+                array_appendu(&replaced, anode);
+        }
     }
 
-    for (i=0; i<preference.count; i++)
     {
-        struct anode* src = preference.item[i].left;
-        struct anode* dest = preference.item[i].right;
-        
-        if (src->replaced_by)
-            array_appendu(&replaced, src);
-        if (dest->replaced_by)
-            array_appendu(&replaced, dest);
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&preferenceg, &vit))
+        {
+            struct anode* anode = vit.data;
+            if (anode->replaced_by)
+                array_appendu(&replaced, anode);
+        }
     }
 
     tracef('R', "R: found %d replaced anodes\n", replaced.count);
     for (i=0; i<replaced.count; i++)
     {
         struct anode* r = replaced.item[i];
-        pmap_remove_either(&interference, r);
-        pmap_remove_either(&preference, r);
         graph_remove_vertex(&interferenceg, r);
         graph_remove_vertex(&preferenceg, r);
     }
@@ -1111,8 +1103,6 @@ static struct anode* find_lowest_degree(bool is_spillable)
 
 static void remove_anode_from_graphs(struct anode* anode)
 {
-    pmap_remove_either(&interference, anode);
-    pmap_remove_either(&preference, anode);
     graph_remove_vertex(&interferenceg, anode);
     graph_remove_vertex(&preferenceg, anode);
 }
@@ -1210,18 +1200,17 @@ void pass_register_allocator(void)
     walk_vregs(assign_anode_cb);
 
     tracef('R', "R: generating interference and preference graphs\n");
-    interference.count = 0;
     graph_reset(&interferenceg);
-    preference.count = 0;
+    graph_reset(&preferenceg);
     coalesce_phis();
     hop_walk(build_interference_graph_cb, NULL);
 
     tracef('R', "R: before purge, interference=%d nodes, preference=%d nodes\n",
-        interference.count, preference.count);
+        interferenceg.vertices.size, preferenceg.vertices.size);
     purge_replaced_anodes();
     purge_interference_where_preference();
     tracef('R', "R: after purge, interference=%d nodes, preference=%d nodes\n",
-        interference.count, preference.count);
+        interferenceg.vertices.size, preferenceg.vertices.size);
 
     iterate();
 
