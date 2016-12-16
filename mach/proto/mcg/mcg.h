@@ -31,6 +31,9 @@
 #include "procedure.h"
 #include "graph.h"
 #include "tables.h"
+#include "hashtable.h"
+#include "set.h"
+#include "bigraph.h"
 
 extern char em_pseu[][4];
 extern char em_mnem[][4];

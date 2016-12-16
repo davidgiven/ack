@@ -28,7 +28,6 @@ struct vref
 static struct heap anode_heap;
 static struct graph interferenceg;
 static struct graph preferenceg;
-static struct set vertices;
 static ARRAYOF(struct anode) simplified;
 #if 0
 struct assignment
@@ -837,7 +836,7 @@ static void assign_anode_cb(struct vreg* vreg)
 static void coalesce_anodes(struct anode* left, struct anode* right)
 {
     struct vref* vref;
-    int i;
+    int i = 1;
 
     if (left == right)
         return;
@@ -847,7 +846,10 @@ static void coalesce_anodes(struct anode* left, struct anode* right)
     if (vref)
     {
         while (vref->next)
+        {
             vref = vref->next;
+            i++;
+        }
         vref = vref->next = right->vref;
     }
     else
@@ -858,10 +860,11 @@ static void coalesce_anodes(struct anode* left, struct anode* right)
     {
         vref->vreg->anode = left;
         vref = vref->next;
+        i++;
     }
 
-    tracef('R', "R: coalescing anodes %d (type %d) and %d (type %d)\n",
-        left->id, left->type, right->id, right->type);
+    tracef('R', "R: coalescing anodes %d (type %d) and %d (type %d) used in %d places\n",
+        left->id, left->type, right->id, right->type, i);
 
     if (!left->type)
         left->type = right->type;
@@ -959,9 +962,10 @@ static void dump_interference_graph(void)
         }
     }
 
+    #if 0
     {
-        struct set_iterator sit = {};
-        while (set_next(&vertices, &sit))
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&vertices, &vit))
         {
             struct anode* anode = sit.item;
             fprintf(regalloc_dot_file, "\t\"");
@@ -969,6 +973,7 @@ static void dump_interference_graph(void)
             fprintf(regalloc_dot_file, "\" [color=green];\n");
         }
     }
+    #endif
 
     fprintf(regalloc_dot_file, "}\n");
 }
@@ -984,10 +989,7 @@ static void build_interference_graph_cb(struct hop* hop, void* user)
         assert(hop->ins.count == 1);
         assert(hop->outs.count == 1);
 
-        if (src != dest)
-        {
-            graph_add_edge(&preferenceg, src, dest);
-        }
+        graph_add_edge(&preferenceg, src, dest);
     }
     else
     {
@@ -1027,17 +1029,19 @@ static void purge_interference_where_preference(void)
 
 static void purge_replaced_anodes(void)
 {
-    static ARRAYOF(struct anode) replaced;
+    static struct set replaced;
+    struct anode* anode;
     int i;
 
-    replaced.count = 0;
+    assert(replaced.table.size == 0);
+
     {
         struct vertex_iterator vit = {};
         while (graph_next_vertex(&interferenceg, &vit))
         {
-            struct anode* anode = vit.data;
+            anode = vit.data;
             if (anode->replaced_by)
-                array_appendu(&replaced, anode);
+                set_add(&replaced, anode);
         }
     }
 
@@ -1045,37 +1049,18 @@ static void purge_replaced_anodes(void)
         struct vertex_iterator vit = {};
         while (graph_next_vertex(&preferenceg, &vit))
         {
-            struct anode* anode = vit.data;
+            anode = vit.data;
             if (anode->replaced_by)
-                array_appendu(&replaced, anode);
+                set_add(&replaced, anode);
         }
     }
 
-    tracef('R', "R: found %d replaced anodes\n", replaced.count);
-    for (i=0; i<replaced.count; i++)
+    tracef('R', "R: found %d replaced anodes\n", replaced.table.size);
+
+    while ((anode = set_pop(&replaced)))
     {
-        struct anode* r = replaced.item[i];
-        graph_remove_vertex(&interferenceg, r);
-        graph_remove_vertex(&preferenceg, r);
-    }
-}
-
-static void collect_vertices(void)
-{
-    int i;
-
-    set_reset(&vertices);
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&interferenceg, &vit))
-            set_add(&vertices, vit.data);
-    }
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&preferenceg, &vit))
-            set_add(&vertices, vit.data);
+        graph_remove_vertex(&interferenceg, anode);
+        graph_remove_vertex(&preferenceg, anode);
     }
 }
 
@@ -1175,7 +1160,6 @@ static void iterate(void)
     while (true)
     {
         tracef('R', "R: iterating\n"); 
-        collect_vertices();
 
         if (attempt_to_simplify())
             continue;
@@ -1198,10 +1182,12 @@ void pass_register_allocator(void)
     walk_vregs(clear_anode_cb);
     walk_vregs(assign_anode_cb);
 
-    tracef('R', "R: generating interference and preference graphs\n");
     graph_reset(&interferenceg);
     graph_reset(&preferenceg);
+    tracef('R', "R: coalescing phis\n");
     coalesce_phis();
+
+    tracef('R', "R: generating interference and preference graphs\n");
     hop_walk(build_interference_graph_cb, NULL);
 
     tracef('R', "R: before purge, interference=%d nodes, preference=%d nodes\n",
@@ -1212,6 +1198,9 @@ void pass_register_allocator(void)
         interferenceg.vertices.size, preferenceg.vertices.size);
 
     iterate();
+
+    if (interferenceg.vertices.size != 0)
+        fatal("register allocation failed");
 
     //assign_registers();
     dump_interference_graph();
