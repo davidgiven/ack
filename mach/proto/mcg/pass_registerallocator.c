@@ -1,5 +1,6 @@
 #include "mcg.h"
 #include "bigraph.h"
+#include "set.h"
 #include <limits.h>
 
 /* This is based around the elegant graph colouring algorithm here:
@@ -27,7 +28,7 @@ struct vref
 static struct heap anode_heap;
 static struct graph interferenceg;
 static struct graph preferenceg;
-static ARRAYOF(struct anode) vertices;
+static struct set vertices;
 static ARRAYOF(struct anode) simplified;
 #if 0
 struct assignment
@@ -958,12 +959,15 @@ static void dump_interference_graph(void)
         }
     }
 
-    for (i=0; i<vertices.count; i++)
     {
-        struct anode* anode = vertices.item[i];
-        fprintf(regalloc_dot_file, "\t\"");
-        dump_anode(anode);
-        fprintf(regalloc_dot_file, "\" [color=green];\n");
+        struct set_iterator sit = {};
+        while (set_next(&vertices, &sit))
+        {
+            struct anode* anode = sit.item;
+            fprintf(regalloc_dot_file, "\t\"");
+            dump_anode(anode);
+            fprintf(regalloc_dot_file, "\" [color=green];\n");
+        }
     }
 
     fprintf(regalloc_dot_file, "}\n");
@@ -1060,18 +1064,18 @@ static void collect_vertices(void)
 {
     int i;
 
-    vertices.count = 0;
+    set_reset(&vertices);
 
     {
         struct vertex_iterator vit = {};
         while (graph_next_vertex(&interferenceg, &vit))
-            array_appendu(&vertices, vit.data);
+            set_add(&vertices, vit.data);
     }
 
     {
         struct vertex_iterator vit = {};
         while (graph_next_vertex(&preferenceg, &vit))
-            array_appendu(&vertices, vit.data);
+            set_add(&vertices, vit.data);
     }
 }
 
@@ -1185,11 +1189,6 @@ static void iterate(void)
 
 static void assign_registers(void)
 {
-    int i;
-    for (i=0; i<vertices.count; i++)
-    {
-        struct anode* anode = vertices.item[i];
-    }
 }
 
 void pass_register_allocator(void)
