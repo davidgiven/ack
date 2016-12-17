@@ -48,7 +48,7 @@ static void recursively_move_children_to_confirmed(struct basicblock* bb)
     {
         struct basicblock* candidate = bb->nexts.item[i];
 
-        if (set_contains(&pending, candidate))
+        if (set_get(&pending, candidate))
         {
             tracef('I', "I: encompassing %s\n", candidate->name);
             set_remove(&pending, candidate);
@@ -142,7 +142,7 @@ static void import_ir(struct ir* phi)
 
         if (bb == current_src)
             pmap_add(&phi->u.phivalue, bb, current_ir);
-        else if (set_contains(&confirmed, bb) && !already_importing(bb))
+        else if (set_get(&confirmed, bb) && !already_importing(bb))
         {
             struct ir* newphi = insert_phi_to_prev(bb, current_ir->size, current_ir);
             pmap_add(&phi->u.phivalue, bb, newphi);

@@ -1189,6 +1189,7 @@ void pass_register_allocator(void)
 
     tracef('R', "R: generating interference and preference graphs\n");
     hop_walk(build_interference_graph_cb, NULL);
+exit(0);
 
     tracef('R', "R: before purge, interference=%d nodes, preference=%d nodes\n",
         interferenceg.vertices.size, preferenceg.vertices.size);

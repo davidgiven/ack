@@ -25,7 +25,7 @@ bool standard_pointer_comparison_function(void* key1, void* key2)
 static void lazy_init(struct hashtable* ht)
 {
     if (!ht->num_buckets)
-        ht->num_buckets = 37;
+        ht->num_buckets = 7;
 
     if (!ht->hashfunction)
         ht->hashfunction = standard_pointer_hash_function;
@@ -120,24 +120,20 @@ void* hashtable_get(struct hashtable* ht, void* key)
     return NULL;
 }
 
-bool hashtable_contains(struct hashtable* ht, void* key)
-{
-    return *findnodep(ht, key);
-}
-
-bool hashtable_remove(struct hashtable* ht, void* key)
+void* hashtable_remove(struct hashtable* ht, void* key)
 {
     struct hashnode** hnp = findnodep(ht, key);
     if (*hnp)
     {
         struct hashnode* hn = *hnp;
+		void* value = hn->value;
         *hnp = hn->next;
         free(hn);
         ht->size--;
-        return true;
+        return value;
     }
 
-    return false;
+    return NULL;
 }
 
 void* hashtable_pop(struct hashtable* ht)

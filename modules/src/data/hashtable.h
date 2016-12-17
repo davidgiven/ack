@@ -35,8 +35,7 @@ extern void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets);
 
 extern void* hashtable_put(struct hashtable* ht, void* key, void* data);
 extern void* hashtable_get(struct hashtable* ht, void* key);
-extern bool hashtable_contains(struct hashtable* ht, void* key);
-extern bool hashtable_remove(struct hashtable* ht, void* key);
+extern void* hashtable_remove(struct hashtable* ht, void* key);
 extern void* hashtable_pop(struct hashtable* ht);
 extern void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it);
 

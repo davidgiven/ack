@@ -14,8 +14,8 @@ extern void set_empty(struct set* s);
 extern void set_reset(struct set* s);
 
 extern bool set_add(struct set* s, void* item);
-extern bool set_remove(struct set* s, void* item);
-extern bool set_contains(struct set* s, void* item);
+extern void* set_remove(struct set* s, void* item);
+extern void* set_get(struct set* s, void* item);
 extern void* set_pop(struct set* s);
 
 struct set_iterator

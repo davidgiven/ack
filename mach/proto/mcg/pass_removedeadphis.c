@@ -53,7 +53,7 @@ static void purge_unused_phis(struct basicblock* bb)
     for (i=0; i<bb->irs.count; i++)
     {
         struct ir* ir = bb->irs.item[i];
-        if ((ir->opcode == IR_PHI) && (set_contains(&phis, ir)))
+        if ((ir->opcode == IR_PHI) && set_get(&phis, ir))
         {
             array_remove(&bb->irs, ir);
             i--;

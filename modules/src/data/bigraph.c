@@ -3,41 +3,41 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "bigraph.h"
+#include "set.h"
 
-struct edgenode
+struct edge
 {
-    struct edgenode* next;
-    struct vertex* this;
-    struct vertex* other;
+    struct vertex* v1;
+    struct vertex* v2;
 };
 
 struct vertex
 {
     void* data;
-    struct edgenode* connections;
     int degree;
+	struct set edges;
 };
 
 static uint32_t edge_hash_function(void* key)
 {
-    struct edgenode* en = key;
+    struct edge* edge = key;
     /* This will always return the same value, even if the two endpoints are swapped. */
-    return standard_pointer_hash_function(en->this) ^ standard_pointer_hash_function(en->other);
+    return standard_pointer_hash_function(edge->v1) ^ standard_pointer_hash_function(edge->v2);
 }
 
 static bool edge_comparison_function(void* key1, void* key2)
 {
-    struct edgenode* en1 = key1;
-    struct edgenode* en2 = key2;
+    struct edge* edge1 = key1;
+    struct edge* edge2 = key2;
 
-    return ((en1->this == en2->this) && (en1->other == en2->other))
-        || ((en1->this == en2->other) && (en1->other == en2->this));
+    return ((edge1->v1 == edge2->v1) && (edge1->v2 == edge2->v2))
+        || ((edge1->v1 == edge2->v2) && (edge1->v2 == edge2->v1));
 }
 
 static void lazy_init(struct graph* g)
 {
-    g->edges.hashfunction = edge_hash_function;
-    g->edges.cmpfunction = edge_comparison_function;
+    g->edges.table.hashfunction = edge_hash_function;
+    g->edges.table.cmpfunction = edge_comparison_function;
 }
 
 void graph_reset(struct graph* g)
@@ -50,22 +50,22 @@ void graph_reset(struct graph* g)
         if (!vertex)
             return;
 
-        while (vertex->connections)
-        {
-            struct edgenode* next = vertex->connections->next;
-            free(vertex->connections);
-            vertex->connections = next;
-        }
-
+		set_reset(&vertex->edges);
         free(vertex);
     }
+
+	for (;;)
+	{
+		struct edge* edge = set_pop(&g->edges);
+		free(edge);
+	}
 }
 
 bool graph_contains_vertex(struct graph* g, void* data)
 {
     lazy_init(g);
 
-    return hashtable_contains(&g->vertices, data);
+    return !!hashtable_get(&g->vertices, data);
 }
 
 static struct vertex* find_or_add_vertex(struct graph* g, void* data)
@@ -85,101 +85,58 @@ static struct vertex* find_or_add_vertex(struct graph* g, void* data)
     return vertex;
 }
 
-static struct edgenode** find_edgep(struct vertex* v1, struct vertex* v2)
-{
-    struct edgenode** ep = &v1->connections;
-
-    while (*ep)
-    {
-        if ((*ep)->other == v2)
-            return ep;
-        ep = &(*ep)->next;
-    }
-
-    return ep;
-}
-
 bool graph_contains_edge(struct graph* g, void* data1, void* data2)
 {
-    struct vertex* v1 = find_or_add_vertex(g, data1);
-    struct vertex* v2 = find_or_add_vertex(g, data2);
+	struct edge template;
 
-	if (!v1 || !v2)
+
+    template.v1 = find_or_add_vertex(g, data1);
+    template.v2 = find_or_add_vertex(g, data2);
+	if (!template.v1 || !template.v2)
 		return false;
 
-	return *find_edgep(v1, v2) || *find_edgep(v2, v1);
-}
-
-static struct edgenode* add_edge(struct vertex* v1, struct vertex* v2)
-{
-    struct edgenode** ep = find_edgep(v1, v2);
-
-    if (!*ep)
-    {
-        *ep = calloc(1, sizeof(struct edgenode));
-        (*ep)->this = v1;
-        (*ep)->other = v2;
-        v1->degree++;
-    }
-
-    return *ep;
+	return !!set_get(&g->edges, &template);
 }
 
 void graph_add_edge(struct graph* g, void* data1, void* data2)
 {
-    struct vertex* v1 = find_or_add_vertex(g, data1);
-    struct vertex* v2 = find_or_add_vertex(g, data2);
-    struct edgenode* e;
-	struct edgenode template;
+	struct edge template;
+	struct edge* e;
 
-	if (v1 == v2)
+    template.v1 = find_or_add_vertex(g, data1);
+    template.v2 = find_or_add_vertex(g, data2);
+	if (template.v1 == template.v2)
 		return;
 
-	template.this = v1;
-	template.other = v2;
-	if (hashtable_contains(&g->edges, &template))
+	if (set_get(&g->edges, &template))
 		return;
 
-    add_edge(v1, v2);
-    e = add_edge(v2, v1);
+	e = calloc(1, sizeof(struct edge));
+	*e = template;
 
-    hashtable_put(&g->edges, e, e);
-}
-
-static struct edgenode* remove_edge(struct vertex* v1, struct vertex* v2)
-{
-    struct edgenode** ep = find_edgep(v1, v2);
-
-    if (*ep)
-    {
-        struct edgenode* old = *ep;
-        *ep = (*ep)->next;
-        v1->degree--;
-        return old;
-    }
-
-    return NULL;
+	set_add(&g->edges, e);
+	set_add(&template.v1->edges, e);
+	set_add(&template.v2->edges, e);
+	template.v1->degree++;
+	template.v2->degree++;
 }
 
 void graph_remove_edge(struct graph* g, void* data1, void* data2)
 {
+	struct edge template;
     struct vertex* v1 = find_or_add_vertex(g, data1);
     struct vertex* v2 = find_or_add_vertex(g, data2);
-    struct edgenode* e1 = remove_edge(v1, v2);
-    struct edgenode* e2 = remove_edge(v2, v1);
 
-    assert(!e1 == !e2);
+    template.v1 = find_or_add_vertex(g, data1);
+    template.v2 = find_or_add_vertex(g, data2);
+	if (template.v1 == template.v2)
+		return;
 
-    if (e1)
-    {
-        /* e1 is a template; the actual object in the hashtable might actually
-         * be e2 (as they compare the same). So, remove from the hashtable
-         * before freeing anything. */
-        hashtable_remove(&g->edges, e1);
-        free(e1);
-    }
-    if (e2)
-        free(e2);
+	set_remove(&template.v1->edges, &template);
+	set_remove(&template.v2->edges, &template);
+	free(set_remove(&g->edges, &template));
+	template.v1->degree--;
+	template.v2->degree--;
 }
 
 void graph_add_vertex(struct graph* g, void* data)
@@ -196,17 +153,25 @@ void graph_remove_vertex(struct graph* g, void* data)
     if (!vertex)
         return;
     
-    while (vertex->connections)
-    {
-        struct edgenode* next = vertex->connections->next;
-        struct edgenode* e = remove_edge(vertex->connections->other, vertex);
-        hashtable_remove(&g->edges, vertex->connections);
-        free(e);
-        free(vertex->connections);
-        vertex->connections = next;
-    }
+	for (;;)
+	{
+		struct vertex* other;
+		struct edge* e = set_pop(&vertex->edges);
+		if (!e)
+			break;
 
+		other = e->v1;
+		if (other == vertex)
+			other = e->v2;
+
+		set_remove(&other->edges, e);
+		other->degree--;
+		free(set_remove(&g->edges, e));
+	}
+
+	set_reset(&vertex->edges);
     hashtable_remove(&g->vertices, data);
+	free(vertex);
 }
 
 int graph_get_vertex_degree(struct graph* g, void* data)
@@ -233,11 +198,11 @@ void* graph_next_vertex(struct graph* g, struct vertex_iterator* it)
 
 bool graph_next_edge(struct graph* g, struct edge_iterator* it)
 {
-    struct edgenode* e = hashtable_next(&g->edges, &it->hit);
+    struct edge* e = set_next(&g->edges, &it->sit);
     if (e)
     {
-        it->left = e->this->data;
-        it->right = e->other->data;
+        it->left = e->v1->data;
+        it->right = e->v2->data;
         return true;
     }
     else

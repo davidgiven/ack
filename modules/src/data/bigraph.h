@@ -2,13 +2,14 @@
 #define BIGRAPH_H
 
 #include "hashtable.h"
+#include "set.h"
 
 /* A bidirectional graph with node addition and removal capabilities. */
 
 struct graph
 {
     struct hashtable vertices;
-    struct hashtable edges;
+    struct set edges;
 };
 
 struct vertex_iterator
@@ -27,7 +28,7 @@ struct edge_iterator
     void* right;
 
     /* Private */
-    struct hashtable_iterator hit;
+    struct set_iterator sit;
 };
 
 extern void graph_reset(struct graph* g);

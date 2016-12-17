@@ -18,14 +18,14 @@ bool set_add(struct set* s, void* item)
 	return hashtable_put(&s->table, item, item);
 }
 
-bool set_remove(struct set* s, void* item)
+void* set_remove(struct set* s, void* item)
 {
 	return hashtable_remove(&s->table, item);
 }
 
-bool set_contains(struct set* s, void* item)
+void* set_get(struct set* s, void* item)
 {
-	return hashtable_contains(&s->table, item);
+	return hashtable_get(&s->table, item);
 }
 
 void* set_pop(struct set* s)
