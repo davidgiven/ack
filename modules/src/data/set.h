@@ -10,6 +10,9 @@ struct set
 	struct hashtable table;
 };
 
+#define SET_OF_STRINGS \
+	{ HASHTABLE_OF_STRINGS }
+
 extern void set_empty(struct set* s);
 extern void set_reset(struct set* s);
 

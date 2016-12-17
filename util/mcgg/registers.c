@@ -10,13 +10,14 @@
 #include "stringlist.h"
 #include "iburg.h"
 #include "registers.h"
+#include "hashtable.h"
 
-static SMAPOF(struct reg) registers;
-static SMAPOF(struct regattr) registerattrs;
+static struct hashtable registers = HASHTABLE_OF_STRINGS;
+static struct hashtable registerattrs = HASHTABLE_OF_STRINGS;
 
 struct reg* makereg(const char* id)
 {
-	struct reg* p = smap_get(&registers, id);
+	struct reg* p = hashtable_get(&registers, (void*)id);
 	static int number = 0;
 
 	if (p)
@@ -25,7 +26,7 @@ struct reg* makereg(const char* id)
 	p->name = id;
 	p->number = number++;
 	array_append(&p->aliases, p);
-	smap_put(&registers, id, p);
+	hashtable_put(&registers, (void*)id, p);
 
 	return p;
 }
@@ -40,12 +41,12 @@ void setregnames(struct reg* reg, struct stringlist* names)
 
 struct regattr* findregattr(const char* id)
 {
-	return smap_get(&registerattrs, id);
+	return hashtable_get(&registerattrs, (void*)id);
 }
 
 struct regattr* makeregattr(const char* id)
 {
-	struct regattr* p = smap_get(&registerattrs, id);
+	struct regattr* p = hashtable_get(&registerattrs, (void*)id);
 	static int number = 0;
 
 	if (p)
@@ -53,14 +54,14 @@ struct regattr* makeregattr(const char* id)
 	p = calloc(1, sizeof(*p));
 	p->name = id;
 	p->number = number++;
-	smap_put(&registerattrs, id, p);
+	hashtable_put(&registerattrs, (void*)id, p);
 
 	return p;
 }
 
 void addregattr(struct reg* reg, const char* id)
 {
-	struct regattr* p = smap_get(&registerattrs, id);
+	struct regattr* p = hashtable_get(&registerattrs, (void*) id);
 
 	if (!p)
 		p = makeregattr(id);
@@ -85,7 +86,7 @@ void addregaliases(struct reg* reg, struct stringlist* aliases)
 
 	while (f)
 	{
-		struct reg* r = smap_get(&registers, f->data);
+		struct reg* r = hashtable_get(&registers, (void*)f->data);
 		if (!r)
 			yyerror("register '%s' is not defined here", f->data);
 
@@ -98,7 +99,7 @@ void addregaliases(struct reg* reg, struct stringlist* aliases)
 
 struct regattr* getregattr(const char* id)
 {
-	struct regattr* p = smap_get(&registerattrs, id);
+	struct regattr* p = hashtable_get(&registerattrs, (void*)id);
 	if (!p)
 		yyerror("'%s' is not the name of a register class", id);
 	return p;
@@ -107,11 +108,20 @@ struct regattr* getregattr(const char* id)
 void emitregisterattrs(void)
 {
 	int i;
+	struct regattr* regattrs[registerattrs.size];
+	struct hashtable_iterator hit = {};
+
+	while (hashtable_next(&registerattrs, &hit))
+	{
+		struct regattr* rc = hit.value;
+		assert((rc->number >= 0) && (rc->number < registerattrs.size));
+		regattrs[rc->number] = rc;
+	}
 
 	print("const char* %Pregister_class_names[] = {\n");
-	for (i=0; i<registerattrs.count; i++)
+	for (i=0; i<registerattrs.size; i++)
 	{
-		struct regattr* rc = registerattrs.item[i].right;
+		struct regattr* rc = regattrs[i];
 		assert(rc->number == i);
 
 		print("%1\"%s\",\n", rc->name);
@@ -124,10 +134,19 @@ void emitregisterattrs(void)
 void emitregisters(void)
 {
 	int i, j;
+	struct reg* regs[registers.size];
+	struct hashtable_iterator hit = {};
 
-	for (i=0; i<registers.count; i++)
+	while (hashtable_next(&registers, &hit))
 	{
-		struct reg* r = registers.item[i].right;
+		struct reg* r = hit.value;
+		assert((r->number >= 0) && (r->number < registers.size));
+		regs[r->number] = r;
+	}
+
+	for (i=0; i<registers.size; i++)
+	{
+		struct reg* r = regs[i];
 
 		print("const struct %Pregister_data* %Pregister_aliases_%d_%s[] = {\n%1", i, r->name);
 		for (j=0; j<r->aliases.count; j++)
@@ -135,9 +154,9 @@ void emitregisters(void)
 		print("NULL\n};\n");
 	}
 
-	for (i=0; i<registers.count; i++)
+	for (i=0; i<registers.size; i++)
 	{
-		struct reg* r = registers.item[i].right;
+		struct reg* r = regs[i];
 
 		print("const char* %Pregister_names_%d_%s[] = {\n%1", i, r->name);
 		if (r->names)
@@ -155,14 +174,16 @@ void emitregisters(void)
 	}
 
 	print("const struct %Pregister_data %Pregister_data[] = {\n");
-	for (i=0; i<registers.count; i++)
+	for (i=0; i<registers.size; i++)
 	{
-		struct reg* r = registers.item[i].right;
+		struct reg* r = regs[i];
+
 		assert(r->number == i);
 
 		print("%1{ \"%s\", 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s },\n",
 			r->name, r->attrs, i, r->name, i, r->name);
 	}
+
 	print("%1{ NULL }\n");
 	print("};\n\n");
 }

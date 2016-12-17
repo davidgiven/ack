@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include "hashtable.h"
 
 struct hashnode
@@ -20,6 +21,25 @@ uint32_t standard_pointer_hash_function(void* key)
 bool standard_pointer_comparison_function(void* key1, void* key2)
 {
     return (key1 == key2);
+}
+
+uint32_t standard_string_hash_function(void* key)
+{
+	char* s = key;
+	uint32_t hash = 0;
+
+	while (*s)
+	{
+		hash = ((hash << 5) + hash) ^ *s;
+		s++;
+	}
+
+	return hash;
+}
+
+bool standard_string_comparison_function(void* key1, void* key2)
+{
+	return strcmp(key1, key2) == 0;
 }
 
 static void lazy_init(struct hashtable* ht)

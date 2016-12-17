@@ -9,14 +9,20 @@ typedef bool cmpfunction_t(void* key1, void* key2);
 extern uint32_t standard_pointer_hash_function(void* key);
 extern bool standard_pointer_comparison_function(void* key1, void* key2);
 
+extern uint32_t standard_string_hash_function(void* key);
+extern bool standard_string_comparison_function(void* key1, void* key2);
+
 struct hashtable
 {
-    unsigned int num_buckets;  /* power of 2 */
     hashfunction_t* hashfunction;
     cmpfunction_t* cmpfunction;
+    unsigned int num_buckets;  /* power of 2 */
     struct hashnode** buckets;
     int size;
 };
+
+#define HASHTABLE_OF_STRINGS \
+	{ standard_string_hash_function, standard_string_comparison_function }
 
 struct hashtable_iterator
 {
