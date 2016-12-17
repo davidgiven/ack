@@ -64,7 +64,7 @@ void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets)
 		while (old_buckets[i])
 		{
 			struct hashnode* hn = old_buckets[i];
-			uint32_t hash = ht->hashfunction(hn->key) % num_buckets;
+			uint32_t hash = ht->hashfunction(hn->key) & (num_buckets-1);
 
 			old_buckets[i] = hn->next;
 			hn->next = ht->buckets[hash];
@@ -81,11 +81,21 @@ static struct hashnode** findnodep(struct hashtable* ht, void* key)
     struct hashnode** hnp;
 
     lazy_init(ht);
-    hash = ht->hashfunction(key) % ht->num_buckets;
+    hash = ht->hashfunction(key) & (ht->num_buckets-1);
     hnp = &ht->buckets[hash];
 
-    while (*hnp && !ht->cmpfunction((*hnp)->key, key))
+	for (;;)
+	{
+		void* k;
+
+		if (!*hnp)
+			break;
+		k = (*hnp)->key;
+		if ((k == key) || ht->cmpfunction(k, key))
+			break;
+
         hnp = &(*hnp)->next;
+	}
 
     return hnp;
 }
@@ -98,7 +108,7 @@ void* hashtable_put(struct hashtable* ht, void* key, void* value)
     {
 		if (ht->size == (ht->num_buckets*2))
 		{
-			hashtable_rebucket(ht, ht->num_buckets*3 + 1);
+			hashtable_rebucket(ht, ht->num_buckets*4);
 			return hashtable_put(ht, key, value);
 		}
 

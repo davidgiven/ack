@@ -11,7 +11,7 @@ extern bool standard_pointer_comparison_function(void* key1, void* key2);
 
 struct hashtable
 {
-    unsigned int num_buckets;
+    unsigned int num_buckets;  /* power of 2 */
     hashfunction_t* hashfunction;
     cmpfunction_t* cmpfunction;
     struct hashnode** buckets;
