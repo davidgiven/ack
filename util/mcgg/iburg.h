@@ -4,6 +4,7 @@
 #include "em_arith.h"
 #include "stringlist.h"
 #include "array.h"
+#include "mcgg_common.h"
 
 extern char* stringf(char* fmt, ...);
 
@@ -135,7 +136,5 @@ extern int yylineno;
 extern void print(const char* fmt, ...);
 extern void printh(const char* fmt, ...);
 extern void printlineno(void);
-
-#include "mcgg.h"
 
 #endif

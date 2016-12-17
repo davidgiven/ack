@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "mcgg.h"
 #include "registers.h"
 #include "smap.h"
 #include "array.h"
@@ -11,9 +10,16 @@
 #include "iburg.h"
 #include "registers.h"
 #include "hashtable.h"
+#include "bitmap.h"
 
 static struct hashtable registers = HASHTABLE_OF_STRINGS;
 static struct hashtable registerattrs = HASHTABLE_OF_STRINGS;
+
+static struct reg** real_registers;
+static int real_register_count;
+
+static struct reg** fake_registers;
+static int fake_register_count;
 
 struct reg* makereg(const char* id)
 {
@@ -25,7 +31,6 @@ struct reg* makereg(const char* id)
 	p = calloc(1, sizeof(*p));
 	p->name = id;
 	p->number = number++;
-	array_append(&p->aliases, p);
 	hashtable_put(&registers, (void*)id, p);
 
 	return p;
@@ -89,9 +94,11 @@ void addregaliases(struct reg* reg, struct stringlist* aliases)
 		struct reg* r = hashtable_get(&registers, (void*)f->data);
 		if (!r)
 			yyerror("register '%s' is not defined here", f->data);
+		if (r->aliases.count > 0)
+			yyerror("can't alias '%s' to '%s' because the latter isn't a true hardware register",
+				reg->name, r->name);
 
 		array_appendu(&reg->aliases, r);
-		array_appendu(&r->aliases, reg);
 
 		f = f->next;
 	}
@@ -103,6 +110,56 @@ struct regattr* getregattr(const char* id)
 	if (!p)
 		yyerror("'%s' is not the name of a register class", id);
 	return p;
+}
+
+void analyse_registers(void)
+{
+	struct reg* regs[registers.size];
+	struct hashtable_iterator hit = {};
+	int i, j;
+
+	while (hashtable_next(&registers, &hit))
+	{
+		struct reg* r = hit.value;
+		assert((r->number >= 0) && (r->number < registers.size));
+		regs[r->number] = r;
+	}
+
+	real_registers = calloc(registers.size, sizeof(struct reg*));
+	fake_registers = calloc(registers.size, sizeof(struct reg*));
+	real_register_count = 0;
+	fake_register_count = 0;
+
+	for (i=0; i<registers.size; i++)
+	{
+		struct reg* r = regs[i];
+		if (r->aliases.count > 0)
+			fake_registers[fake_register_count++] = r;
+		else
+			real_registers[real_register_count++] = r;
+	}
+
+	for (i=0; i<real_register_count; i++)
+	{
+		struct reg* r = real_registers[i];
+		r->bitmap = bitmap_alloc(real_register_count);
+		bitmap_set(r->bitmap, real_register_count, i);
+	}
+
+	for (i=0; i<fake_register_count; i++)
+	{
+		struct reg* r = fake_registers[i];
+		r->bitmap = bitmap_alloc(real_register_count);
+
+		for (j=0; j<r->aliases.count; j++)
+		{
+			struct reg* alias = r->aliases.item[j];
+			bitmap_or(r->bitmap, real_register_count, alias->bitmap);
+		}
+	}
+
+	printh("typedef unsigned int %Pregister_bitmap_t[%d];\n",
+		WORDS_FOR_BITMAP_SIZE(real_register_count));
 }
 
 void emitregisterattrs(void)
@@ -180,8 +237,15 @@ void emitregisters(void)
 
 		assert(r->number == i);
 
-		print("%1{ \"%s\", 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s },\n",
+		print("%1{\n%2\"%s\", 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s,\n",
 			r->name, r->attrs, i, r->name, i, r->name);
+		print("%2{ ");
+		for (j=0; j<WORDS_FOR_BITMAP_SIZE(real_register_count); j++)
+		{
+			print("0x%x, ", r->bitmap[j]);
+		}
+		print("},\n");
+		print("%1},\n");
 	}
 
 	print("%1{ NULL }\n");

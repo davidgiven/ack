@@ -9,6 +9,7 @@ struct reg
 	int number;                /* identifying number */
 	uint32_t attrs;            /* bitfield of register attributes */
 	struct stringlist* names;  /* register names */
+	unsigned int* bitmap;      /* hardware register bitmap */
 	ARRAYOF(struct reg) aliases; /* registers that this one aliases */
 };
 
@@ -24,6 +25,8 @@ extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr);
 extern void addregaliases(struct reg* reg, struct stringlist* aliases);
 extern struct regattr* getregattr(const char* name);
+
+extern void analyse_registers(void);
 
 extern void emitregisterattrs(void);
 extern void emitregisters(void);

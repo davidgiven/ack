@@ -34,7 +34,8 @@ clibrary {
 	hdrs = {
 		matching(filenamesof("+ircodes"), "%.h$"),
 		"./ircodes.h",
-		"./mcgg.h"
+		"./mcgg.h",
+		"./mcgg_common.h",
 	},
 }
 

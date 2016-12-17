@@ -14,7 +14,6 @@
 #include "ircodes.h"
 #include "astring.h"
 #include "smap.h"
-#include "mcgg.h"
 #include "registers.h"
 
 static char rcsid[] = "$Id$";
@@ -160,6 +159,7 @@ int main(int argc, char* argv[])
 	yyin = infp;
 	yyparse();
 
+	analyse_registers();
 	emitregisterattrs();
 	emitregisters();
 	emitdefs(nts, ntnumber);

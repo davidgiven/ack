@@ -1,16 +1,7 @@
 #ifndef MCGG_H
 #define MCGG_H
 
-/* Excruciating macro which packs ir opcodes and sizes into an int for iburg's benefit.
- *
- * Types are mapped to: I=1, F=2, L=3, D=4
- */
-#define ir_to_esn(iropcode, type) \
-	((iropcode)*5 + \
-		(((type) == 'I') ? 1 : \
-		 ((type) == 'F') ? 2 : \
-		 ((type) == 'L') ? 3 : \
-         ((type) == 'D') ? 4 : 0))
+#include "mcgg_common.h"
 
 #define STATE_TYPE void*
 
@@ -35,8 +26,6 @@ extern int burm_rule(void* state, int goalnt);
 extern const short *burm_nts[];
 extern NODEPTR_TYPE* burm_kids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]);
 extern void burm_trace(NODEPTR_TYPE p, int ruleno, int cost, int bestcost);
-
-extern void yyerror(char *fmt, ...);
 
 struct burm_emitter_data
 {
@@ -70,15 +59,11 @@ struct burm_register_data
     uint32_t attrs;
     const char** names;
     const struct burm_register_data** aliases;
+    burm_register_bitmap_t bitmap;
 };
 
 extern const struct burm_register_data burm_register_data[];
 extern const char* burm_register_class_names[];
-
-enum
-{
-    NONTERM_STMT = 1
-};
 
 #endif
 
