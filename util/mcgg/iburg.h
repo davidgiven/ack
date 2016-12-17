@@ -57,27 +57,6 @@ struct terminfo
 	const char* attr;
 };
 
-struct reg
-{
-	const char* name;          /* friendly register name */
-	int number;                /* identifying number */
-	uint32_t attrs;            /* bitfield of register attributes */
-	struct stringlist* names;  /* register names */
-	ARRAYOF(struct reg) aliases; /* registers that this one aliases */
-};
-
-struct regattr
-{
-	const char* name;      /* class name */
-	int number;            /* identifying number */
-};
-
-extern struct reg* makereg(const char* name);
-extern void setregnames(struct reg* reg, struct stringlist* names);
-extern void addregattr(struct reg* reg, const char* regattr);
-extern void addregaliases(struct reg* reg, struct stringlist* aliases);
-extern struct regattr* getregattr(const char* name);
-
 struct term
 { /* terminals: */
 	char* name; /* terminal name */
@@ -153,6 +132,8 @@ extern FILE* hdrfp;
 extern FILE* yyin;
 extern int yylineno;
 
+extern void print(const char* fmt, ...);
+extern void printh(const char* fmt, ...);
 extern void printlineno(void);
 
 #include "mcgg.h"

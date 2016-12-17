@@ -7,6 +7,7 @@
 #include <limits.h>
 #include "iburg.h"
 #include "astring.h"
+#include "registers.h"
 
 #define YYDEBUG 1
 

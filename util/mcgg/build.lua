@@ -35,7 +35,7 @@ clibrary {
 		matching(filenamesof("+ircodes"), "%.h$"),
 		"./ircodes.h",
 		"./mcgg.h"
-	}
+	},
 }
 
 cprogram {
@@ -51,7 +51,7 @@ cprogram {
 		"+yacc",
 		"modules/src/data+lib",
 		"modules+headers",
-	}
+	},
 }
 	
 definerule("mcgg",

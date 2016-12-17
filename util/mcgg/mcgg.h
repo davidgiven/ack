@@ -36,6 +36,8 @@ extern const short *burm_nts[];
 extern NODEPTR_TYPE* burm_kids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]);
 extern void burm_trace(NODEPTR_TYPE p, int ruleno, int cost, int bestcost);
 
+extern void yyerror(char *fmt, ...);
+
 struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
