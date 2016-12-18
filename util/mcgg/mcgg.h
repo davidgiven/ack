@@ -58,12 +58,18 @@ struct burm_register_data
     const char* id;
     uint32_t attrs;
     const char** names;
-    const struct burm_register_data** aliases;
+    burm_register_bitmap_t bitmap;
+};
+
+struct burm_regclass_data
+{
+    const char* name;
+    const struct burm_register_data** registers;
     burm_register_bitmap_t bitmap;
 };
 
 extern const struct burm_register_data burm_register_data[];
-extern const char* burm_register_class_names[];
+extern const struct burm_regclass_data burm_regclass_data[];
 
 #endif
 

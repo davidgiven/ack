@@ -2,12 +2,14 @@
 #define REGISTERS_H
 
 #include "array.h"
+#include "set.h"
 
 struct reg
 {
 	const char* name;          /* friendly register name */
 	int number;                /* identifying number */
 	uint32_t attrs;            /* bitfield of register attributes */
+	struct set classes;        /* register classes this register belongs to */
 	struct stringlist* names;  /* register names */
 	unsigned int* bitmap;      /* hardware register bitmap */
 	ARRAYOF(struct reg) aliases; /* registers that this one aliases */

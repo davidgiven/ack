@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
 	yyparse();
 
 	analyse_registers();
-	emitregisterattrs();
 	emitregisters();
+	emitregisterattrs();
 	emitdefs(nts, ntnumber);
 	emitstruct(nts, ntnumber);
 	emitnts(rules, nrules);

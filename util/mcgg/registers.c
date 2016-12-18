@@ -72,6 +72,7 @@ void addregattr(struct reg* reg, const char* id)
 		p = makeregattr(id);
 
 	reg->attrs |= 1<<(p->number);
+	set_add(&reg->classes, p);
 }
 
 void addregalias(struct reg* r1, struct reg* r2)
@@ -118,6 +119,8 @@ void analyse_registers(void)
 	struct hashtable_iterator hit = {};
 	int i, j;
 
+	/* Collect registers in declaration order. */
+
 	while (hashtable_next(&registers, &hit))
 	{
 		struct reg* r = hit.value;
@@ -130,6 +133,8 @@ void analyse_registers(void)
 	real_register_count = 0;
 	fake_register_count = 0;
 
+	/* Count which registers are real vs fake. */
+
 	for (i=0; i<registers.size; i++)
 	{
 		struct reg* r = regs[i];
@@ -138,6 +143,8 @@ void analyse_registers(void)
 		else
 			real_registers[real_register_count++] = r;
 	}
+
+	/* Set the register bitmaps. */
 
 	for (i=0; i<real_register_count; i++)
 	{
@@ -158,30 +165,89 @@ void analyse_registers(void)
 		}
 	}
 
+	/* Set the register class bitmaps. */
+
+	{
+		struct hashtable_iterator hit = {};
+		while (hashtable_next(&registerattrs, &hit))
+		{
+			struct regattr* rc = hit.value;
+			rc->bitmap = bitmap_alloc(real_register_count);
+		}
+	}
+
+	{
+		struct hashtable_iterator hit = {};
+		while (hashtable_next(&registers, &hit))
+		{
+			struct reg* r = hit.value;
+			struct set_iterator sit = {};
+			while (set_next(&r->classes, &sit))
+			{
+				struct regattr* rc = sit.item;
+				bitmap_or(rc->bitmap, real_register_count, r->bitmap);
+			}
+		}
+	}
+
 	printh("typedef unsigned int %Pregister_bitmap_t[%d];\n",
 		WORDS_FOR_BITMAP_SIZE(real_register_count));
 }
 
 void emitregisterattrs(void)
 {
-	int i;
+	int i, j;
 	struct regattr* regattrs[registerattrs.size];
-	struct hashtable_iterator hit = {};
+	struct reg* regs[registers.size];
 
-	while (hashtable_next(&registerattrs, &hit))
 	{
-		struct regattr* rc = hit.value;
-		assert((rc->number >= 0) && (rc->number < registerattrs.size));
-		regattrs[rc->number] = rc;
+		struct hashtable_iterator hit = {};
+		while (hashtable_next(&registers, &hit))
+		{
+			struct reg* r = hit.value;
+			assert((r->number >= 0) && (r->number < registers.size));
+			regs[r->number] = r;
+		}
 	}
 
-	print("const char* %Pregister_class_names[] = {\n");
+	{
+		struct hashtable_iterator hit = {};
+		while (hashtable_next(&registerattrs, &hit))
+		{
+			struct regattr* rc = hit.value;
+			assert((rc->number >= 0) && (rc->number < registerattrs.size));
+			regattrs[rc->number] = rc;
+		}
+	}
+
+	for (i=0; i<registerattrs.size; i++)
+	{
+		struct regattr* rc = regattrs[i];
+		print("static const struct %Pregister_data* %Pregisters_in_class_%s[] = {\n",
+			rc->name);
+
+		for (j=0; j<registers.size; j++)
+		{
+			struct reg* r = regs[j];
+			if (set_get(&r->classes, rc))
+				print("&%Pregister_data[%d], ", r->number);
+		}
+
+		print("NULL };\n");
+	}
+
+	print("\nconst struct %Pregclass_data %Pregclass_data[] = {\n");
 	for (i=0; i<registerattrs.size; i++)
 	{
 		struct regattr* rc = regattrs[i];
 		assert(rc->number == i);
 
-		print("%1\"%s\",\n", rc->name);
+		print("%1{ \"%s\", %Pregisters_in_class_%s, { ", rc->name, rc->name);
+		for (j=0; j<WORDS_FOR_BITMAP_SIZE(real_register_count); j++)
+		{
+			print("0x%x, ", rc->bitmap[j]);
+		}
+		print("}},\n");
 		printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
 	}
 	print("};\n\n");
@@ -192,30 +258,22 @@ void emitregisters(void)
 {
 	int i, j;
 	struct reg* regs[registers.size];
-	struct hashtable_iterator hit = {};
 
-	while (hashtable_next(&registers, &hit))
 	{
-		struct reg* r = hit.value;
-		assert((r->number >= 0) && (r->number < registers.size));
-		regs[r->number] = r;
+		struct hashtable_iterator hit = {};
+		while (hashtable_next(&registers, &hit))
+		{
+			struct reg* r = hit.value;
+			assert((r->number >= 0) && (r->number < registers.size));
+			regs[r->number] = r;
+		}
 	}
 
 	for (i=0; i<registers.size; i++)
 	{
 		struct reg* r = regs[i];
 
-		print("const struct %Pregister_data* %Pregister_aliases_%d_%s[] = {\n%1", i, r->name);
-		for (j=0; j<r->aliases.count; j++)
-			print("&%Pregister_data[%d], ", r->aliases.item[j]->number);
-		print("NULL\n};\n");
-	}
-
-	for (i=0; i<registers.size; i++)
-	{
-		struct reg* r = regs[i];
-
-		print("const char* %Pregister_names_%d_%s[] = {\n%1", i, r->name);
+		print("static const char* %Pregister_names_%s[] = { ", r->name);
 		if (r->names)
 		{
 			struct stringfragment* f = r->names->first;
@@ -227,28 +285,24 @@ void emitregisters(void)
 		}
 		else
 			print("\"%s\", ", r->name);
-		print("NULL\n};\n");
+		print("NULL };\n");
 	}
 
-	print("const struct %Pregister_data %Pregister_data[] = {\n");
+	print("\nconst struct %Pregister_data %Pregister_data[] = {\n");
 	for (i=0; i<registers.size; i++)
 	{
 		struct reg* r = regs[i];
 
 		assert(r->number == i);
-
-		print("%1{\n%2\"%s\", 0x%x, %Pregister_names_%d_%s, %Pregister_aliases_%d_%s,\n",
-			r->name, r->attrs, i, r->name, i, r->name);
-		print("%2{ ");
+		print("%1{ \"%s\", 0x%x, %Pregister_names_%s, ",
+			r->name, r->attrs, r->name, r->name);
+		print("{ ");
 		for (j=0; j<WORDS_FOR_BITMAP_SIZE(real_register_count); j++)
 		{
 			print("0x%x, ", r->bitmap[j]);
 		}
-		print("},\n");
-		print("%1},\n");
+		print("}},\n");
 	}
-
-	print("%1{ NULL }\n");
 	print("};\n\n");
 }
 
