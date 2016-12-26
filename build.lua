@@ -9,6 +9,8 @@ vars.plats = {
 	"linux386",
 	"linux68k",
 	"linuxppc",
+	"osx386",
+	"osxppc",
 	"qemuppc",
 	"pc86",
 	"rpi",

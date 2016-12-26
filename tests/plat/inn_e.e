@@ -7,10 +7,10 @@
     /* Test non-existent bit */
 
 .1
-    rom 0I1, 0I1, 0I1, 0I1
+    rom 0I4
     loe .1
     loc 1       /* bit number */
-    inn EM_WSIZE
+    inn 4
     zeq *1
 
     loc __LINE__
@@ -21,9 +21,12 @@
     /* Test existent bit */
 
 .2
-    rom 2I1, 0I1, 0I1, 0I1
+    rom 16384
+.21
+    rom 14      /* to defeat constant folding */
+
     loe .2
-    loc 1       /* bit number */
+    loe .21      /* bit number */
     inn EM_WSIZE
     zne *2
 
@@ -35,10 +38,9 @@
     /* Test non-existent high bit */
 
 .3
-    rom 0I1, 0I1, 0I1, 0I1
-    rom 0I1, 0I1, 0I1, 0I1
+    rom 0, 0
 .31
-    rom (EM_WSIZE*8)+1      /* to defeat constant folding */
+    rom 8       /* to defeat constant folding */
 
     lae .3
     loi EM_WSIZE*2
@@ -54,16 +56,7 @@
     /* Test existent high bit */
 
 .4
-#if EM_WSIZE == 2
-    rom 0I1, 0I1
-    rom 2I1, 0I1
-#elif EM_WSIZE == 4
-    rom 0I1, 0I1, 0I1, 0I1
-    rom 2I1, 0I1, 0I1, 0I1
-#else
-    #error Unknown word size
-#endif
-
+    rom 0, 2
 .41
     rom (EM_WSIZE*8)+1      /* to defeat constant folding */
 
