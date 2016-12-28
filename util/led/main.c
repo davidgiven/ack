@@ -328,7 +328,7 @@ makename(string)
 {
 	static struct outname	namebuf;
 
-	namebuf.on_mptr = string;
+	namebuf.on_foff = string - core_position - mems[ALLOMODL].mem_base;
 	namebuf.on_type = S_UND + S_EXT;
 	namebuf.on_valu = (long)0;
 
