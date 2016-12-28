@@ -96,6 +96,7 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 		INSDIR=$(INSDIR) \
 		PLATIND=$(PLATIND) \
 		PLATDEP=$(PLATDEP) \
+		PREFIX=$(PREFIX) \
 		AR=$(AR) \
 		CC=$(CC) \
 		> $(BUILDDIR)/build.$(BUILDSYSTEM)
