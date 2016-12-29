@@ -60,6 +60,7 @@ name led
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID?} \
+		({RTS}:.b=-u _i_main) \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
 		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \

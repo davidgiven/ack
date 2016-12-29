@@ -54,6 +54,7 @@ name led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -fp FLOATS={EM}/{LIB}fp
 	args {ALIGN} {SEPID?} \
+		({RTS}:.b=-u _i_main) \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
 		({RTS}:.ocm.bas.b.c={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
