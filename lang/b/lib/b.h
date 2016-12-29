@@ -14,6 +14,9 @@
 #error Unsupported EM_PSIZE
 #endif
 
+extern FILE* input_unit;
 extern FILE* output_unit;
+
+#define END 4
 
 #endif

@@ -1,8 +1,12 @@
 #include "b.h"
+#include <stdarg.h>
+#include <string.h>
+#include <limits.h>
 
-extern uintptr_t* bsymb_patch_table[];
+extern uintptr_t* b_module_main[];
 extern intptr_t i_main(intptr_t argc, const char* argv[]);
 
+FILE* input_unit;
 FILE* output_unit;
 
 static intptr_t i_char(intptr_t s, intptr_t n)
@@ -19,7 +23,7 @@ static void i_lchar(intptr_t s, intptr_t n, intptr_t c)
 
 static intptr_t i_getchar(void)
 {
-    return fgetc(output_unit);
+    return fgetc(input_unit);
 }
 
 static intptr_t i_putchar(intptr_t c)
@@ -28,17 +32,139 @@ static intptr_t i_putchar(intptr_t c)
     return c;
 }
 
+static intptr_t i_putstr(intptr_t s)
+{
+	char* p = (char*)(s<<SHIFT);
+	char c;
+
+	while ((c = *p++) != END)
+		fputc(c, output_unit);
+
+	return s;
+}
+
+static intptr_t i_getstr(intptr_t s)
+{
+	char* p = (char*)(s<<SHIFT);
+
+	for (;;)
+	{
+		int c = fgetc(input_unit);
+		if ((c == -1) || (c == '\n'))
+			break;
+		*p++ = c;
+	}
+
+	*p++ = END;
+	return s;
+}
+	
+static void i_flush(void)
+{
+	fflush(output_unit);
+}
+
+static int tochar(int n)
+{
+	if (n <= 9)
+		return n + '0';
+	return n - 10 + 'a';
+}
+
+static void putnum(intptr_t value, int base)
+{
+	int i;
+	char s[32];
+
+	if (value < 0)
+	{
+		fputc('-', output_unit);
+		value = -value;
+	}
+
+	i = 0;
+	do
+		s[i++] = tochar(value % base);
+	while ((value /= base) > 0);
+
+	do
+		fputc(s[--i], output_unit);
+	while (i > 0);
+}
+
+static void i_printf(intptr_t s, ...)
+{
+	char* p = (char*)(s<<SHIFT);
+	char c;
+
+	va_list ap;
+	va_start(ap, s);
+
+	while ((c = *p++) != END)
+	{
+		switch (c)
+		{
+			case '%':
+			{
+				intptr_t ss = va_arg(ap, intptr_t);
+
+				switch ((c = *p++))
+				{
+					case 's':
+						i_putstr(ss);
+						break;
+
+					case 'd':
+						putnum(ss, 10);
+						break;
+
+					case 'o':
+						putnum(ss, 8);
+						break;
+
+					case 'x':
+						putnum(ss, 16);
+						break;
+
+					case 'c':
+						fputc(ss, output_unit);
+						break;
+
+					default:
+						fputc('?', output_unit);
+						break;
+				}
+				break;
+			}
+				
+			default:
+				fputc(c, output_unit);
+				break;
+		}
+	}
+
+	va_end(ap);
+}
+
 uintptr_t b_char = (uintptr_t)i_char;
 uintptr_t b_lchar = (uintptr_t)i_lchar;
 uintptr_t b_getchar = (uintptr_t)i_getchar;
 uintptr_t b_putchar = (uintptr_t)i_putchar;
+uintptr_t b_putstr = (uintptr_t)i_putstr;
+uintptr_t b_getstr = (uintptr_t)i_getstr;
+uintptr_t b_flush = (uintptr_t)i_flush;
+uintptr_t b_printf = (uintptr_t)i_printf;
 
-static uintptr_t* lib_patch_table[] =
+static uintptr_t* b_module_stdlib[] =
 {
     &b_char,
     &b_lchar,
     &b_getchar,
     &b_putchar,
+	&b_putstr,
+	&b_getstr,
+	&b_flush,
+	&b_printf,
     0
 };
 
@@ -53,8 +179,9 @@ static void patch_addresses(uintptr_t** p)
 
 int main(int argc, const char* argv[])
 {
-    patch_addresses(bsymb_patch_table);
-    patch_addresses(lib_patch_table);
+    patch_addresses(b_module_main);
+    patch_addresses(b_module_stdlib);
+    input_unit = stdin;
     output_unit = stdout;
     return i_main(argc, NULL);
 }

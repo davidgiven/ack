@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <em.h>
+#include "astring.h"
 
 #define	NCPS	8	/* chars per symbol */
 #define	HSHSIZ	400	/* hash table size */
@@ -40,6 +41,7 @@ struct	swtab {
 };
 
 extern int wordsize;
+extern const char* modulename;
 int paramsize;
 struct	hshtab hshtab[HSHSIZ];
 int	hshused;
@@ -89,6 +91,7 @@ char* manglename(char* name, char prefix);
 #define	RPARN	7
 #define	COLON	8
 #define	COMMA	9
+#define HASH	10
 
 #define	MCALL	15
 #define	CALL	16

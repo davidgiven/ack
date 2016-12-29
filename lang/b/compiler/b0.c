@@ -14,6 +14,7 @@ int	contlab = -1;
 int	brklab = -1;
 
 int wordsize = 4;
+const char* modulename = "b_module_main";
 int bsymb_part;
 int code_part;
 int string_part;
@@ -38,13 +39,17 @@ main(int argc, char *argv[])
 {
 
 	for (;;) {
-		int opt = getopt(argc, argv, "-w:i:o:");
+		int opt = getopt(argc, argv, "-w:B:i:o:");
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'w':
 				wordsize = atoi(optarg);
+				break;
+
+			case 'B':
+				modulename = aprintf("b_module_%s", optarg);
 				break;
 
 			case 'i':
@@ -62,7 +67,7 @@ main(int argc, char *argv[])
 				break;
 
 			derfault:
-				error("Usage: em_b [-w wordsize] [-i inputfile] [-o outputfile]");
+				error("Usage: em_b [-w wordsize] [-B modulename] [-i inputfile] [-o outputfile]");
 				exit(1);
 		}
 	}
@@ -97,8 +102,8 @@ main(int argc, char *argv[])
 	if (string_part)
 		C_insertpart(string_part);
 
-	C_exa_dnam("bsymb_patch_table");
-	C_df_dnam("bsymb_patch_table");
+	C_exa_dnam((char*) modulename);
+	C_df_dnam((char*) modulename);
 	if (bsymb_part)
 		C_insertpart(bsymb_part);
 	C_rom_cst(0);
@@ -340,9 +345,28 @@ loop:
 
 	case NEWLN:
 		line++;
-
+		/* fall through */
 	case SPACE:
 		c = getchar();
+		goto loop;
+
+	case HASH:
+		/* # is invalid in B; but we handle it out of convenience so that we can read
+		 * in input files that have been run through the C preprocessor. Ideally we
+		 * should only recognise it when it's the first character in a line, but as
+		 * it's not used anywhere else we can get away with recognising it anywhere.
+		 */
+
+		while ((c = getchar()) == ' ')
+			;
+
+		peekc = c;
+		getnum();
+		line = cval;
+
+		while ((c = getchar()) != '\n')
+			;
+
 		goto loop;
 
 	case PLUS:
@@ -1242,7 +1266,7 @@ char ctab[128] = {
 	LETTER,	SPACE,	NEWLN,	SPACE,	SPACE,	UNKN,	UNKN,	UNKN,
 	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
 	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
-	SPACE,	EXCLA,	DQUOTE,	UNKN,	UNKN,	MOD,	AND,	SQUOTE,
+	SPACE,	EXCLA,	DQUOTE,	HASH,	UNKN,	MOD,	AND,	SQUOTE,
 	LPARN,	RPARN,	TIMES,	PLUS,	COMMA,	MINUS,	UNKN,	DIVIDE,
 	DIGIT,	DIGIT,	DIGIT,	DIGIT,	DIGIT,	DIGIT,	DIGIT,	DIGIT,
 	DIGIT,	DIGIT,	COLON,	SEMI,	LESS,	ASSIGN,	GREAT,	QUEST,
