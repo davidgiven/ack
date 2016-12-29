@@ -6,7 +6,6 @@ addons:
     apt:
         packages:
         - ed
-        - openbios-ppc
         - qemu-user
 
 git:
