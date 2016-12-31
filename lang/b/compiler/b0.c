@@ -14,7 +14,7 @@ int	contlab = -1;
 int	brklab = -1;
 
 int wordsize = 4;
-const char* modulename = "b_module_main";
+const char* modulename = "bmodule_main";
 int bsymb_part;
 int code_part;
 int string_part;
@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 				break;
 
 			case 'B':
-				modulename = aprintf("b_module_%s", optarg);
+				modulename = aprintf("bmodule_%s", optarg);
 				break;
 
 			case 'i':
