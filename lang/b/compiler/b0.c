@@ -373,7 +373,15 @@ loop:
 		return subseq(c,PLUS,INCBEF);
 
 	case MINUS:
-		return subseq(c,MINUS,DECBEF);
+		/* avoid peeking a name, which could overwrite
+		 * an already set bsym. */
+		if (ctab[peekc = spnextchar()] == DIGIT) {
+			getnum();
+			cval = -cval;
+			return CON;
+		} else {
+			return subseq(c,MINUS,DECBEF);
+		}
 
 	case LESS:
 		if (subseq(c,0,1))
