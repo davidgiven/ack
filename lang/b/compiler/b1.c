@@ -291,7 +291,7 @@ rcexpr(struct tnode *tr)
 
 	case EXCLA:
 		rcexpr(tr->tr1);
-		C_tne();
+		C_teq();
 		return;
 
 	case NEG:
