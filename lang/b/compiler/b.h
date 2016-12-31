@@ -120,6 +120,7 @@ char* manglename(char* name, char prefix);
 #define	LESS	42
 #define	GREATEQ	43
 #define	GREAT	44
+#define EOR     45
 
 #define	ASSIGN	49
 #define	ASPLUS	50
@@ -137,11 +138,12 @@ char* manglename(char* name, char prefix);
 #define	ASLESS	62
 #define	ASGTQ	63
 #define	ASGREAT	64
+#define ASEOR   65
 
-#define	CON	65
-#define	STRING	66
-#define	NAME	67
-#define	KEYW	68
+#define	CON	70
+#define	STRING	71
+#define	NAME	72
+#define	KEYW	73
 
 #define	SQUOTE	121
 #define	DQUOTE	122

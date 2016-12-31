@@ -142,6 +142,7 @@ lvalexp(struct tnode *tr)
 	case ASLESS:
 	case ASGTQ:
 	case ASGREAT:
+	case ASEOR:
 		tr->op -= ASPLUS-PLUS;
 		rcexpr(block(ASSIGN,0,tr->tr1,tr));
 		return;
@@ -247,6 +248,11 @@ rcexpr(struct tnode *tr)
 	case OR:
 		binary(tr);
 		C_ior(wordsize);
+		return;
+
+	case EOR:
+		binary(tr);
+		C_xor(wordsize);
 		return;
 
 	case LSHIFT:

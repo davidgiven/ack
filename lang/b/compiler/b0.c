@@ -393,7 +393,7 @@ loop:
 		if (ctab[peekc = spnextchar()] == LETTER)
 			return ASSIGN;
 		c = symbol();
-		if (PLUS <= c && c <= GREAT)
+		if (PLUS <= c && c <= EOR)
 			return c + ASPLUS-PLUS;
 		if (c == ASSIGN)
 			return EQUAL;
@@ -1236,7 +1236,7 @@ int opdope[] = {
 	024005,	/* < */
 	024005,	/* >= */
 	024005,	/* > */
-	000000,	/* 45 */
+	017005,	/* ^ */
 	000000,	/* 46 */
 	000000,	/* 47 */
 	000000,	/* 48 */
@@ -1256,6 +1256,11 @@ int opdope[] = {
 	012213,	/* =< */
 	012213,	/* =>= */
 	012213,	/* => */
+	012213,	/* =^ */
+	000000, /* 66 */
+	000000, /* 67 */
+	000000, /* 68 */
+	000000, /* 69 */
 	000000,	/* CON */
 	000000,	/* STRING */
 	000000	/* NAME */
@@ -1273,7 +1278,7 @@ char ctab[128] = {
 	UNKN,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
-	LETTER,	LETTER,	LETTER,	LBRACK,	UNKN,	RBRACK,	UNKN,	LETTER,
+	LETTER,	LETTER,	LETTER,	LBRACK,	UNKN,	RBRACK,	EOR,	LETTER,
 	UNKN,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
@@ -1294,6 +1299,7 @@ void printtoken(int tok, FILE *out)
 	strtab[7] = "RPARN";
 	strtab[8] = "COLON";
 	strtab[9] = "COMMA";
+	strtab[10] = "HASH";
 
 	strtab[15] = "MCALL";
 	strtab[16] = "CALL";
@@ -1322,6 +1328,7 @@ void printtoken(int tok, FILE *out)
 	strtab[42] = "LESS";
 	strtab[43] = "GREATEQ";
 	strtab[44] = "GREAT";
+	strtab[45] = "EOR";
 
 	strtab[49] = "ASSIGN";
 	strtab[50] = "ASPLUS";
@@ -1339,11 +1346,12 @@ void printtoken(int tok, FILE *out)
 	strtab[62] = "ASLESS";
 	strtab[63] = "ASGTQ";
 	strtab[64] = "ASGREAT";
+	strtab[65] = "ASEOR";
 
-	strtab[65] = "CON";
-	strtab[66] = "STRING";
-	strtab[67] = "NAME";
-	strtab[68] = "KEYW";
+	strtab[70] = "CON";
+	strtab[71] = "STRING";
+	strtab[72] = "NAME";
+	strtab[73] = "KEYW";
 
 	strtab[127] = "UNKN";
 
