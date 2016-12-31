@@ -3,7 +3,6 @@
 #include <string.h>
 #include <limits.h>
 
-extern uintptr_t* b_module_main[];
 extern intptr_t i_main(intptr_t argc, const char* argv[]);
 
 FILE* input_unit;
@@ -155,7 +154,7 @@ uintptr_t b_getstr = (uintptr_t)i_getstr;
 uintptr_t b_flush = (uintptr_t)i_flush;
 uintptr_t b_printf = (uintptr_t)i_printf;
 
-static uintptr_t* b_module_stdlib[] =
+static uintptr_t* bmodule_stdlib[] =
 {
     &b_char,
     &b_lchar,
@@ -168,7 +167,7 @@ static uintptr_t* b_module_stdlib[] =
     0
 };
 
-static void patch_addresses(uintptr_t** p)
+void patch_addresses(uintptr_t** p)
 {
     while (*p)
     {
@@ -179,8 +178,8 @@ static void patch_addresses(uintptr_t** p)
 
 int main(int argc, const char* argv[])
 {
-    patch_addresses(b_module_main);
-    patch_addresses(b_module_stdlib);
+    patch_addresses(bmodule_stdlib);
+	binit();
     input_unit = stdin;
     output_unit = stdout;
     return i_main(argc, NULL);

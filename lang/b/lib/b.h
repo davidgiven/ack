@@ -19,4 +19,10 @@ extern FILE* output_unit;
 
 #define END 4
 
+extern uintptr_t* bmodule_main[];
+
+extern void patch_addresses(uintptr_t** p);
+
+extern void binit(void);
+
 #endif
