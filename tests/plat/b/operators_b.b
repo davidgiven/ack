@@ -79,5 +79,6 @@ main()
 	if (!(i == 0)) fail(__LINE__);
 
 	finished();
+	return(0);
 }
 
