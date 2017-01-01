@@ -1,12 +1,19 @@
 #
+minusone -1;
 zero 0;
 one 1;
 two 2;
 
 main()
 {
-	extrn zero, one, two;
-	auto i;
+	extrn minusone, zero, one, two;
+	auto i, j;
+
+	if (!(-one == -1)) fail(__LINE__);
+	if (!(!one == 0)) fail(__LINE__);
+	if (!(!zero == 1)) fail(__LINE__);
+	if (!(~zero == -1)) fail(__LINE__);
+	if (!(~minusone == 0)) fail(__LINE__);
 
 	if (!((two + two) == 4)) fail(__LINE__);
 	if (!((two - two) == 0)) fail(__LINE__);
@@ -51,6 +58,25 @@ main()
 	i = two; i =& 1; if (!(i == 0)) fail(__LINE__);
 	i = two; i =| 1; if (!(i == 3)) fail(__LINE__);
 	i = two; i =^ 2; if (!(i == 0)) fail(__LINE__);
+
+	if (!(one ? 1 : 0)) fail(__LINE__);
+	if (!(zero ? 0 : 1)) fail(__LINE__);
+
+	i = 0;
+	if (!(i++ == 0)) fail(__LINE__);
+	if (!(i == 1)) fail(__LINE__);
+
+	i == 1;
+	if (!(i-- == 1)) fail(__LINE__);
+	if (!(i == 0)) fail(__LINE__);
+
+	i = 0;
+	if (!(++i == 1)) fail(__LINE__);
+	if (!(i == 1)) fail(__LINE__);
+
+	i == 1;
+	if (!(--i == 0)) fail(__LINE__);
+	if (!(i == 0)) fail(__LINE__);
 
 	finished();
 }
