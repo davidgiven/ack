@@ -759,13 +759,13 @@ pswitch(void)
 		deflab = brklab;
 
 	C_df_dlb(swlab);
-	C_con_ilb(deflab);
-	C_con_cst(swp - sswp);
+	C_rom_ilb(deflab);
+	C_rom_cst(swp - sswp);
 
 	while (swp > sswp && swp > swtab) {
 		--swp;
-		C_con_cst(swp->swval);
-		C_con_ilb(swp->swlab);
+		C_rom_cst(swp->swval);
+		C_rom_ilb(swp->swlab);
 	}
 
 	C_df_ilb(brklab);
@@ -812,6 +812,8 @@ stmt:
 		case GOTO:
 			if ((o = symbol()) != NAME)
 				goto syntax;
+			if (bsym->offset == 0)
+				bsym->offset = isn++;
 			jump(bsym->offset);
 			goto semi;
 
@@ -913,7 +915,8 @@ stmt:
 				goto stmt;
 			}
 			bsym->class = INTERN;
-			bsym->offset = isn++;
+			if (bsym->offset == 0)
+				bsym->offset = isn++;
 			fnlabel(bsym->offset);
 			goto stmt;
 		}
