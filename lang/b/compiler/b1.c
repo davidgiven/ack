@@ -305,6 +305,11 @@ rcexpr(struct tnode *tr)
 		C_ngi(wordsize);
 		return;
 
+	case NOT:
+		rcexpr(tr->tr1);
+		C_com(wordsize);
+		return;
+
 	case QUEST:
 		cbranch(tr->tr1, o1=isn++);
 		rcexpr(tr->tr2->tr1);

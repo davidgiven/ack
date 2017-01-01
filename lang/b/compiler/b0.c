@@ -1060,6 +1060,7 @@ tand:
 		goto oponst;
 
 	case EXCLA:
+	case NOT:
 		if (andflg)
 			goto syntax;
 		goto oponst;
@@ -1225,7 +1226,7 @@ int opdope[] = {
 	034200,	/* &un */
 	034200,	/* *un */
 	014201,	/* ? */
-	000000,	/* 26 */
+	034200, /* ~un */
 	000000,	/* 27 */
 	000000,	/* 28 */
 	000000,	/* 29 */
@@ -1290,7 +1291,7 @@ char ctab[128] = {
 	UNKN,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
-	LETTER,	LETTER,	LETTER,	LBRACE,	OR,	RBRACE,	UNKN,	UNKN
+	LETTER,	LETTER,	LETTER,	LBRACE,	OR,	RBRACE,	NOT,	UNKN
 };
 
 /* debug function */
@@ -1320,6 +1321,7 @@ void printtoken(int tok, FILE *out)
 	strtab[23] = "AMPER";
 	strtab[24] = "STAR";
 	strtab[25] = "QUEST";
+	strtab[26] = "NOT";
 
 	strtab[30] = "PLUS";
 	strtab[31] = "MINUS";

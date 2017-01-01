@@ -104,6 +104,7 @@ char* manglename(char* name, char prefix);
 #define	AMPER	23
 #define	STAR	24
 #define	QUEST	25
+#define	NOT     26
 
 #define	PLUS	30
 #define	MINUS	31
