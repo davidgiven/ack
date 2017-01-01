@@ -542,6 +542,7 @@ extdef(void)
 	int o, dim, i;
 	char *bs;
 	char *ms;
+	int neg;
 
 	if ((o = symbol()) == EOFC || o == SEMI)
 		return;
@@ -549,6 +550,7 @@ extdef(void)
 		goto syntax;
 	bs = bsym->name;
 	i = dim = 0;
+	neg = 0;
 	switch(o = symbol()) {
 
 	case SEMI:
@@ -560,9 +562,16 @@ extdef(void)
 	/* init */
 	case CON:
 	case STRING:
+	case MINUS:
 		global(bs);
 		if (o == STRING)
 			bsymb(bs);
+		else if (o == MINUS) {
+			o = symbol();
+			if (o != CON)
+				goto syntax;
+			cval = -cval;
+		}
 		C_df_dnam(manglename(bs, 'b'));
 		pushsym(o);
 		goto init;
