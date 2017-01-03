@@ -1,0 +1,27 @@
+.TH ABMODULES 1
+.SH NAME
+abmodules  \-  find B modules
+
+.SH SYNOPSIS
+abmodules [ \-o outputfile.c ] [ file ... ]
+
+.SH DESCRIPTION
+.I abmodules
+finds B modules in a set of ack.out(5) format object files, and either lists
+them or generates a C file which initialises the modules.
+.PP
+This tool is used for multiple compilation of B programs; B modules must be
+initiaised before use, and this tool generates the initialisation code for
+programs containing an abitrary number of modules. See em_b(6) for details.
+.PP
+Options are:
+.TP
+.B  \-o filename
+Write C source to
+.I filename
+containing a definition of a binit() function which will initalise all modules
+found. If not present, a simple list of module names is written to stdout
+instead.
+
+.SH SEE ALSO
+ack.out(5), em_b(6)

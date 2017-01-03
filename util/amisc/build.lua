@@ -4,7 +4,10 @@ local function simpleprogram(name)
 		srcs = { "./"..name..".c" },
 		deps = {
 			"h+emheaders",
+			"modules/src/alloc+lib",
+			"modules/src/data+lib",
 			"modules/src/object+lib",
+			"modules/src/system+lib",
 		}
 	}
 
@@ -17,6 +20,7 @@ local function simpleprogram(name)
 	}
 end
 
+simpleprogram("abmodules")
 simpleprogram("aelflod")
 simpleprogram("anm")
 simpleprogram("ashow")
@@ -27,6 +31,7 @@ simpleprogram("astrip")
 installable {
 	name = "pkg",
 	map = {
+		"+abmodules-pkg",
 		"+aelflod-pkg",
 		"+anm-pkg",
 		"+ashow-pkg",
