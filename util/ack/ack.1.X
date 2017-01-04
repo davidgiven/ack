@@ -11,10 +11,13 @@
 ..
 .TH ACK 1 "$Revision$"
 .ad
+
 .SH NAME
 ack \- Amsterdam Compiler Kit
+
 .SH SYNOPSIS
 \fBack\fP arguments
+
 .SH DESCRIPTION
 This program transforms sources in several
 languages to load files for a variety of machines,
@@ -50,6 +53,8 @@ but the following are recognized by most machines:
 Pascal program.
 .IP .c
 C module.
+.IP .b
+B module.
 .IP .bas
 Basic program.
 .IP .ocm
@@ -139,6 +144,12 @@ Each time a routine is entered the routine \fBprocentry\fP
 is called and just before each return \fBprocexit\fP is called.
 These routines are supplied with one parameter, a pointer
 to a string containing the name of the routine.
+
+.IP \-B\fIname\fP
+Tells the B front end what the name of the module being compiled is, for use
+with separate compilation. Defaults to
+.I main
+if not specified. See the section below on compiling B.
 
 .IP \-O
 .IP \-O\fInum\fP
@@ -309,6 +320,7 @@ Sparc, Vax, Intel 80386.
 .PP
 All arguments without a suffix or with an unrecognized suffix
 are passed to the loaders, as for flags.
+
 .SH PREPROCESSOR
 All C source programs are run through the preprocessor
 before they are fed to the compiler proper.
@@ -336,6 +348,43 @@ As the ANSI C rules forbid this, in ANSI C, underscores are prepended to
 these names.
 .PP
 The default directories searched for include files differ for each machine.
+
+.SH COMPILING B
+
+B programs have special needs when compiled with the ACK. B modules have to be
+initialised before use, to convert pointer addresses to word addresses; this is
+done automatically when compiling a single B source file to an executable, but
+must be done manually when using separate compilation.
+
+.PP
+To do this, compile your B modules with the \fI-B\fP option as usual, and then
+use the
+.B abmodules
+program to scan the object files and emit a C file which performs the
+initialisation. Then compile this as well into an object file, and link the
+whole lot together. The result will be a runnable executable.
+
+.PP
+Beware --- referring to an uninitialised module will cause your program to
+crash!
+
+.PP
+The default initialiser in the B standard library looks for a module called
+\fBmain\fP.
+
+.PP
+For example:
+
+.nf
+.sp
+ack -c -mpc86 thismodule.b -Bthismodule
+ack -c -mpc86 thatmodule.b -Bthatmodule
+ack -c -mpc86 theothermodule.b -Btheothermodule
+abmodules -o binit.c thismodule.o thatmodule.o theothermodule.o
+ack -c -mpc86 binit.c
+ack -mpc86 -o pc86.exe thismodule.o thatmodule.o theothermodule.o binit.o
+.fi
+
 .SH PROGRAMS
 \fIAck\fP uses one or more programs in each phase of the
 transformation.
@@ -372,6 +421,7 @@ input:name:output:description
 \&.o:cv:a.out:Conversion from Ack object to machine object
 .TE
 .in -2
+
 .SH "ENVIRONMENT VARIABLES"
 .IP ACKDIR
 If set, this environment variable overrides ack's idea of its home
