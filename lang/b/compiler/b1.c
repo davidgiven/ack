@@ -119,7 +119,7 @@ lvalexp(struct tnode *tr)
 		} else {	/* NAME */
 			bs = (struct hshtab *) tr->tr1->tr1;
 			if (bs->class == EXTERN) {
-				C_ste_dnam(bs->name, 0);
+				C_ste_dnam(manglename(bs->name, 'b'), 0);
 			} else if (bs->class == AUTO) {
 				C_stl(bs->offset);
 			} else
