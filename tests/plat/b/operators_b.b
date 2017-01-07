@@ -9,17 +9,13 @@ main()
 	extrn minusone, zero, one, two;
 	auto i, j;
 
+	if (!(zero == 0)) fail(__LINE__);
+	if (!(one == 1)) fail(__LINE__);
 	if (!(-one == -1)) fail(__LINE__);
 	if (!(!one == 0)) fail(__LINE__);
 	if (!(!zero == 1)) fail(__LINE__);
 	if (!(~zero == -1)) fail(__LINE__);
 	if (!(~minusone == 0)) fail(__LINE__);
-
-	if (!((two + two) == 4)) fail(__LINE__);
-	if (!((two - two) == 0)) fail(__LINE__);
-	if (!((two * two) == 4)) fail(__LINE__);
-	if (!((two / two) == 1)) fail(__LINE__);
-	if (!((two % two) == 0)) fail(__LINE__);
 
 	if (!(zero == zero)) fail(__LINE__);
 	if (!(zero != one))  fail(__LINE__);
@@ -29,6 +25,12 @@ main()
 	if (!(one >  zero))  fail(__LINE__);
 	if (!(one >= zero))  fail(__LINE__);
 	if (!(one >= one))   fail(__LINE__);
+
+	if (!((two + two) == 4)) fail(__LINE__);
+	if (!((two - two) == 0)) fail(__LINE__);
+	if (!((two * two) == 4)) fail(__LINE__);
+	if (!((two / two) == 1)) fail(__LINE__);
+	if (!((two % two) == 0)) fail(__LINE__);
 
 	if (!((one << 1) == 2)) fail(__LINE__);
 	if (!((two >> 1) == 1)) fail(__LINE__);
@@ -62,23 +64,6 @@ main()
 	if (!(one ? 1 : 0)) fail(__LINE__);
 	if (!(zero ? 0 : 1)) fail(__LINE__);
 
-	i = 0;
-	if (!(i++ == 0)) fail(__LINE__);
-	if (!(i == 1)) fail(__LINE__);
-
-	i == 1;
-	if (!(i-- == 1)) fail(__LINE__);
-	if (!(i == 0)) fail(__LINE__);
-
-	i = 0;
-	if (!(++i == 1)) fail(__LINE__);
-	if (!(i == 1)) fail(__LINE__);
-
-	i == 1;
-	if (!(--i == 0)) fail(__LINE__);
-	if (!(i == 0)) fail(__LINE__);
-
 	finished();
 	return(0);
 }
-
