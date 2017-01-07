@@ -417,10 +417,6 @@ static int process(char* arg)
 		return 1;
 	}
 	in = orig;
-	if (!nill_flag && arg_count > 1)
-	{
-		printf("%s\n", arg);
-	}
 	return startrf(phase);
 }
 
