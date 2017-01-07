@@ -17,6 +17,7 @@
 #include <em_arith.h>
 #include <em_label.h>
 #include <stdlib.h>
+#include <astring.h>
 
 #include "LLlex.h"
 #include "Lpars.h"
@@ -64,12 +65,7 @@ GetFile(name) char* name;
 	/*	Try to find a file with basename "name" and extension ".def",
 		in the directories mentioned in "DEFPATH".
 	*/
-	char buf[15];
-	char *strncpy(), *strcat();
-
-	strncpy(buf, name, 10);
-	buf[10] = '\0'; /* maximum length */
-	strcat(buf, ".def");
+	char* buf = aprintf("%s.def", name);
 	DEFPATH[0] = WorkingDir;
 	if (!InsertFile(buf, DEFPATH, &(FileName)))
 	{
