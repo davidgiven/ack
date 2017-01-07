@@ -15,7 +15,7 @@ local function simpleprogram(name)
 		name = name.."-pkg",
 		map = {
 			["$(INSDIR)/bin/"..name] = "+"..name,
-			["$(PLATIND)/man/man1/"..name..".1"] = "./"..name..".1",
+			["$(INSDIR)/share/man/man1/"..name..".1"] = "./"..name..".1",
 		}
 	}
 end
