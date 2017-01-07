@@ -119,6 +119,25 @@ static struct ir* appendir(struct ir* ir)
     return ir;
 }
 
+static void sequence_point(void)
+{
+    int i;
+
+    /* Ensures that any partially-evaluated expressions on the stack are executed right
+     * now. This typically needs to happen before store operations, to prevents loads of
+     * the same address being delayed until after the store (at which point they'll
+     * return incorrect values).
+     */
+
+    assert(current_bb != NULL);
+
+    for (i=0; i<stackptr; i++)
+    {
+        struct ir* ir = stack[i];
+        array_appendu(&current_bb->irs, ir);
+    }
+}
+
 static void materialise_stack(void)
 {
     int i;
@@ -228,6 +247,8 @@ static struct ir* compare(struct ir* left, struct ir* right,
 static struct ir* store(int size, struct ir* address, int offset, struct ir* value)
 {
     int opcode;
+
+    sequence_point();
 
     if (size == 1)
     {
@@ -475,6 +496,7 @@ static void insn_simple(int opcode)
 
         case op_sim:
         {
+            sequence_point();
             appendir(
                 new_ir2(
                     (EM_wordsize == 2) ? IR_STORE : IR_STOREH, EM_wordsize,
@@ -1497,6 +1519,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_ste:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1507,6 +1530,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_sde:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize*2,
@@ -1517,6 +1541,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_zre:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1527,6 +1552,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
                 
         case op_ine:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1544,6 +1570,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_dee:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
