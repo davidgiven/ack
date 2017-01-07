@@ -80,32 +80,79 @@ lvalexp(struct tnode *tr)
 		if (tr->tr1->op == STAR) {
 			rcexpr(tr->tr1->tr1);
 			tonativeaddr();
+
+			if ((tr->op == DECBEF) || (tr->op == INCBEF)) {
+				C_dup(wordsize); /* ( addr addr -- ) */
+				C_loi(wordsize); /* ( addr val -- ) */
+				if (tr->op == DECBEF)
+					C_dec(); /* ( addr newval -- ) */
+				else
+					C_inc(); /* ( addr newval -- ) */
+				C_exg(wordsize); /* ( newval addr -- ) */
+				C_dup(wordsize*2); /* ( newval addr newval addr -- ) */
+				C_sti(wordsize); /* ( newval addr -- ) */
+				C_asp(wordsize); /* ( newval -- ) */
+			} else {
+				C_dup(wordsize); /* ( addr addr -- ) */
+				C_loi(wordsize); /* ( addr val -- ) */
+				C_dup(wordsize*2); /* ( addr val addr val -- ) */
+				if (tr->op == DECAFT)
+					C_dec(); /* ( addr val addr newval -- ) */
+				else
+					C_inc(); /* ( addr val addr newval -- ) */
+				C_exg(wordsize); /* ( addr val newval addr -- ) */
+				C_sti(wordsize); /* ( addr val -- ) */
+				C_exg(wordsize); /* ( val addr -- ) */
+				C_asp(wordsize); /* ( val -- ) */
+			}
 		} else {	/* NAME, checked in "build" */
 			bs = (struct hshtab *) tr->tr1->tr1;
-			if (bs->class == EXTERN)
-				C_lae_dnam(manglename(bs->name, 'b'), 0);
-			else if (bs->class == AUTO)
-				C_lal(bs->offset);
-			else
+			if (bs->class == EXTERN) {
+				switch (tr->op) {
+					case INCBEF:
+						C_ine_dnam(manglename(bs->name, 'b'), 0);
+						C_loe_dnam(manglename(bs->name, 'b'), 0);
+						break;
+
+					case DECBEF:
+						C_dee_dnam(manglename(bs->name, 'b'), 0);
+						C_loe_dnam(manglename(bs->name, 'b'), 0);
+						break;
+
+					case INCAFT:
+						C_loe_dnam(manglename(bs->name, 'b'), 0);
+						C_ine_dnam(manglename(bs->name, 'b'), 0);
+						break;
+
+					case DECAFT:
+						C_loe_dnam(manglename(bs->name, 'b'), 0);
+						C_dee_dnam(manglename(bs->name, 'b'), 0);
+						break;
+				}
+			} else if (bs->class == AUTO) {
+				switch (tr->op) {
+					case INCBEF:
+						C_inl(bs->offset);
+						C_lol(bs->offset);
+						break;
+
+					case DECBEF:
+						C_del(bs->offset);
+						C_lol(bs->offset);
+						break;
+
+					case INCAFT:
+						C_lol(bs->offset);
+						C_inl(bs->offset);
+						break;
+
+					case DECAFT:
+						C_lol(bs->offset);
+						C_del(bs->offset);
+						break;
+				}
+			} else
 				goto classerror;
-		}
-		if (tr->op == DECBEF || tr->op == INCBEF) {
-			C_dup(wordsize); /* ( addr addr -- ) */
-			C_loi(wordsize); /* ( addr val -- ) */
-			C_adp((tr->op == DECBEF) ? -1 : 1); /* ( addr newval -- ) */
-			C_exg(wordsize); /* ( newval addr -- ) */
-			C_dup(wordsize*2); /* ( newval addr newval addr -- ) */
-			C_sti(wordsize); /* ( newval addr -- ) */
-			C_asp(wordsize); /* ( newval -- ) */
-		} else {
-			C_dup(wordsize); /* ( addr addr -- ) */
-			C_loi(wordsize); /* ( addr val -- ) */
-			C_exg(wordsize); /* ( val addr -- ) */
-			C_dup(wordsize*2); /* ( val addr val addr -- ) */
-			C_asp(wordsize); /* ( val addr val -- ) */
-			C_adp((tr->op == DECAFT) ? -1 : 1); /* ( val addr newval -- ) */
-			C_exg(wordsize); /* ( val newval addr -- ) */
-			C_sti(wordsize); /* ( val -- ) */
 		}
 		return;
 
