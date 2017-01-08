@@ -69,6 +69,7 @@ extern pid_t getpid(void);
 extern int brk(void* ptr);
 extern void* sbrk(int increment);
 extern int isatty(int d);
+extern int execve(const char *path, char *const argv[], char *const envp[]);
 
 /* Signal handling */
 

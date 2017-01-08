@@ -38,17 +38,17 @@ name led
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args {ALIGN} {SEPID?} (.e:{HEAD}={EM}/{RT}em) \
-		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}:.ocm.bas={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.mod={EM}/{RT}m2) \
 		({RTS}:.p={EM}/{RT}pc) \
 		-o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
-		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.bas:{TAIL}={EM}/{LIB}bc) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
-		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.ocm.bas:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{FLOATS?} \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon {EM}/lib/{M}/end_em)

@@ -48,7 +48,7 @@ name led
 	mapflag -ansi C_LIB={EM}/{LIB}ac
 	args \
 		(.e:{HEAD}= {EM}/{RT}em) \
-		({RTS}:.ocm.b={EM}/{RT}cc) \
+		({RTS}:.ocm.bas={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.c={EM}/{RT}cc) \
 		({RTS}{ANSI?}:.cansi={EM}/{RT}ac) \
 		({RTS}:.f={EM}/{RT}ac) \
@@ -59,11 +59,11 @@ name led
 		(.8:{TAIL}={EM}/{LIB}a68s) \
 		(.p:{TAIL}={EM}/{LIB}pc) \
 		(.cp.8:{TAIL}={EM}/{LIB}cpc) \
-		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.bas:{TAIL}={EM}/{LIB}bc) \
 		(.ocm:{TAIL}={EM}/{LIB}ocm) \
 		(.mod:{TAIL}={EM}/{LIB}m2) \
 		(.f:{TAIL}={EM}/{LIB}f77 {EM}/{LIB}ac) \
-		(.ocm.b:{TAIL}={OLD_C_LIB}) \
+		(.ocm.bas:{TAIL}={OLD_C_LIB}) \
 		(.c:{TAIL}={C_LIB}) \
 		{LIBDB?} \
 		(.e:{TAIL}={EM}/{LIB}em {EM}/{LIB}mon -lc {EM}/lib/{M}/end_em)

@@ -30,6 +30,18 @@ static void push(struct ir* ir)
     stack[stackptr++] = ir;
 }
 
+/* Returns the size of the top item on the stack. */
+static int peek(int delta)
+{
+    if (stackptr <= delta)
+        return EM_wordsize;
+    else
+    {
+        struct ir* ir = stack[stackptr-1-delta];
+        return ir->size;
+    }
+}
+
 static struct ir* pop(int size)
 {
     if (size < EM_wordsize)
@@ -58,7 +70,6 @@ static struct ir* pop(int size)
         if (size < EM_wordsize)
             ir = convertu(ir, size);
 #endif
-
         if (ir->size != size)
         {
             if ((size == (EM_wordsize*2)) && (ir->size == EM_wordsize))
@@ -117,6 +128,25 @@ static struct ir* appendir(struct ir* ir)
 
     ir_print('0', ir);
     return ir;
+}
+
+static void sequence_point(void)
+{
+    int i;
+
+    /* Ensures that any partially-evaluated expressions on the stack are executed right
+     * now. This typically needs to happen before store operations, to prevents loads of
+     * the same address being delayed until after the store (at which point they'll
+     * return incorrect values).
+     */
+
+    assert(current_bb != NULL);
+
+    for (i=0; i<stackptr; i++)
+    {
+        struct ir* ir = stack[i];
+        array_appendu(&current_bb->irs, ir);
+    }
 }
 
 static void materialise_stack(void)
@@ -228,6 +258,8 @@ static struct ir* compare(struct ir* left, struct ir* right,
 static struct ir* store(int size, struct ir* address, int offset, struct ir* value)
 {
     int opcode;
+
+    sequence_point();
 
     if (size == 1)
     {
@@ -475,6 +507,7 @@ static void insn_simple(int opcode)
 
         case op_sim:
         {
+            sequence_point();
             appendir(
                 new_ir2(
                     (EM_wordsize == 2) ? IR_STORE : IR_STOREH, EM_wordsize,
@@ -853,17 +886,17 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
             int offset = 0;
 
-            /* FIXME: this is awful; need a better way of dealing with
-             * non-standard EM sizes. */
             if (value > (EM_wordsize*2))
+            {
+                /* We're going to need to do multiple stores; fix the address
+                 * so it'll go into a register and we can do maths on it. */
                 appendir(ptr);
+            }
 
             while (value > 0)
             {
-                int s;
-                if (value > (EM_wordsize*2))
-                    s = EM_wordsize*2;
-                else
+                int s = EM_wordsize*2;
+                if (value < s)
                     s = value;
 
                 push(
@@ -912,24 +945,25 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
             int offset = 0;
 
-            /* FIXME: this is awful; need a better way of dealing with
-             * non-standard EM sizes. */
-            if (value > (EM_wordsize*2))
+            if (value > peek(0))
+            {
+                /* We're going to need to do multiple stores; fix the address
+                 * so it'll go into a register and we can do maths on it. */
                 appendir(ptr);
+            }
 
             while (value > 0)
             {
-                int s;
-                if (value > (EM_wordsize*2))
-                    s = EM_wordsize*2;
-                else
+                struct ir* v = pop(peek(0));
+                int s = v->size;
+                if (value < s)
                     s = value;
 
                 appendir(
                     store(
                         s,
                         ptr, offset,
-                        pop(s)
+                        v
                     )
                 );
 
@@ -1022,10 +1056,22 @@ static void insn_ivalue(int opcode, arith value)
             
         case op_dup:
         {
-            struct ir* v = pop(value);
-            appendir(v);
-            push(v);
-            push(v);
+            sequence_point();
+            if ((value == (EM_wordsize*2)) && (peek(0) == EM_wordsize) && (peek(1) == EM_wordsize))
+            {
+                struct ir* v1 = pop(EM_wordsize);
+                struct ir* v2 = pop(EM_wordsize);
+                push(v2);
+                push(v1);
+                push(v2);
+                push(v1);
+            }
+            else
+            {
+                struct ir* v = pop(value);
+                push(v);
+                push(v);
+            }
             break;
         }
 
@@ -1055,8 +1101,11 @@ static void insn_ivalue(int opcode, arith value)
                 default:
                     while ((value > 0) && (stackptr > 0))
                     {
-                        struct ir* ir = pop(stack[stackptr-1]->size);
-                        value -= ir->size;
+                        int s = peek(0);
+                        if (s > value)
+                            s = value;
+                        pop(s);
+                        value -= s;
                     }
 
                     if (value != 0)
@@ -1497,6 +1546,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_ste:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1507,6 +1557,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_sde:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize*2,
@@ -1517,6 +1568,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_zre:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1527,6 +1579,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
                 
         case op_ine:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1544,6 +1597,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_dee:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,

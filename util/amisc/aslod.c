@@ -45,12 +45,6 @@ FILE* output;                           /* Output stream */
 #define readf(a, b, c)	fread((a), (b), (int)(c), input)
 #define writef(a, b, c)	fwrite((a), (b), (int)(c), output)
 
-/* Output file definitions and such */
-
-#define HDR_LENGTH	32
-
-char hdr[HDR_LENGTH] ;
-
 bool verbose = false;
 
 /* Segment numbers understood by aslod. */
@@ -62,14 +56,6 @@ enum {
 	BSS,
 	NUM_SEGMENTS
 };
-
-#define N_EXT	040
-#define N_UNDEF	00
-#define N_ABS	01
-#define N_TEXT	02
-#define N_DATA	03
-#define N_BSS	04
-#define N_FN	037
 
 /* Produce an error message and exit. */
 

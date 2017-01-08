@@ -9,3 +9,5 @@
  */
 #define	LISTING
 #define RELOCATION
+#define THREE_PASS
+

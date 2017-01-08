@@ -12,12 +12,16 @@ definerule("plat_testsuite",
 			"tests/plat/*.c",
 			"tests/plat/*.e",
 			"tests/plat/*.p",
+			"tests/plat/b/*.b",
 			"tests/plat/bugs/*.mod"
 		)
 
 		acklibrary {
 			name = "lib",
-			srcs = { "tests/plat/lib/test.c" },
+			srcs = {
+				"tests/plat/lib/test.c",
+				"tests/plat/lib/test_b.c",
+			},
 			hdrs = {
 				"tests/plat/lib/test.h",
 				"tests/plat/lib/Test.def"
@@ -40,7 +44,7 @@ definerule("plat_testsuite",
 				vars = {
 					plat = e.plat,
 					lang = lang,
-					ackcflags = "-O0"
+					ackcflags = "-O0 -Bmain"
 				}
 			}
 
@@ -53,7 +57,7 @@ definerule("plat_testsuite",
 					"util/build+testrunner"
 				},
 				commands = {
-					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo FAILED) > %{outs}",
+					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo @@FAIL) > %{outs}",
 				}
 			}
 		end

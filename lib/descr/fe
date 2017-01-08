@@ -153,20 +153,20 @@ name ocm
 	prep cond
 	callname ocm
 end
-name abc
-	from .b
+name basic
+	from .bas
 	to .k
 	program {EM}/lib/ack/em_bem
-	mapflag -h ABC_F={ABC_F?} -h
-	mapflag -w ABC_F={ABC_F?} -w
-	mapflag -L ABC_F={ABC_F?} -L
-	mapflag -E ABC_F={ABC_F?} -E
-#	mapflag -d ABC_F={ABC_F?} -d
-	args -Vw{w}p{p}f{d} {ABC_F?} < > {SOURCE}
+	mapflag -h BASIC_F={BASIC_F?} -h
+	mapflag -w BASIC_F={BASIC_F?} -w
+	mapflag -L BASIC_F={BASIC_F?} -L
+	mapflag -E BASIC_F={BASIC_F?} -E
+#	mapflag -d BASIC_F={BASIC_F?} -d
+	args -Vw{w}p{p}f{d} {BASIC_F?} < > {SOURCE}
 	prep cond
-	rts .b
-	need .b
-	callname abc
+	rts .bas
+	need .bas
+	callname basic
 end
 var A68INIT={EM}/lib/ack/em_a68s_init
 name a68s
@@ -179,6 +179,17 @@ name a68s
         rts .8
         need .8
         callname a68s
+end
+name b
+        from .b
+        to .k
+        program {EM}/lib/ack/em_b
+		mapflag -B* ABC_F={ABC_F?} -B*
+        args -i < -o > -w {p} {ABC_F}
+        prep cond
+        rts .b
+        need .b
+        callname abc
 end
 name encode
 	from .e

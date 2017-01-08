@@ -1073,6 +1073,7 @@ PATTERNS
 			ste $1
 
 	pat ine                             /* Increment external */
+		kills MEMORY
 		uses REG={LABEL, $1}, REG
 			gen
 				lwz %b, {GPRINDIRECT, %a, 0}
@@ -1080,6 +1081,7 @@ PATTERNS
 				stw %b, {GPRINDIRECT, %a, 0}
 
 	pat dee                             /* Decrement external */
+		kills MEMORY
 		uses REG={LABEL, $1}, REG
 			gen
 				lwz %b, {GPRINDIRECT, %a, 0}
