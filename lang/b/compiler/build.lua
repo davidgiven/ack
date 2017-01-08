@@ -22,7 +22,7 @@ installable {
 	name = "pkg",
 	map = {
 		["$(PLATDEP)/em_b"] = "+em_b",
-		["$(INSDIR)/share/man/man6/em_m2.6"] = "./em_b.6"
+		["$(INSDIR)/share/man/man6/em_b.6"] = "./em_b.6"
 	}
 }
 
