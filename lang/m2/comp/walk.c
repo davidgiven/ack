@@ -676,7 +676,8 @@ label exit_label;
 				assert(nd == nd1);
 				if (nd->nd_type != 0)
 				{
-					node_error(nd, "procedure call expected instead of function call");
+					node_error(nd, "only proper procedures can be called from top-level "
+						"statement; this is a function procedure");
 					break;
 				}
 				CodeCall(nd);
