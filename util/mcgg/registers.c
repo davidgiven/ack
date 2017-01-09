@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "registers.h"
-#include "smap.h"
 #include "array.h"
 #include "stringlist.h"
 #include "iburg.h"

@@ -13,7 +13,6 @@
 #include "iburg.h"
 #include "ircodes.h"
 #include "astring.h"
-#include "smap.h"
 #include "registers.h"
 
 static char rcsid[] = "$Id$";
