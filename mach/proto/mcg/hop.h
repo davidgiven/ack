@@ -43,6 +43,8 @@ struct hop
 	ARRAYOF(struct value) inputs;
 	ARRAYOF(struct value) outputs;
 	ARRAYOF(struct value) throughs;
+
+	struct hashtable* vregmapping;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);

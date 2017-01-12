@@ -45,6 +45,9 @@ definerule("build_mcg",
 				headers,
 				tables, -- for .h file
 			},
+			vars = {
+				["+cflags"] = "-Werror"
+			}
 		}
 	end
 )

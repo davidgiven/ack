@@ -13,6 +13,12 @@ struct hreg
     ARRAYOF(struct hreg) aliases;
 };
 
+struct vreg
+{
+    int id;
+    struct value* value;
+};
+
 extern struct hreg* new_hreg(const struct burm_register_data* brd);
 extern struct hreg* new_stacked_hreg(uint32_t type);
 

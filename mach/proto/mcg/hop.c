@@ -187,36 +187,6 @@ void hop_walk(hop_walker_t* callback, void* user)
     }
 }
 
-static void print_header(char k, struct hop* hop)
-{
-    int i;
-
-    tracef(k, "%c: %d", k, hop->id);
-    if (hop->ir)
-        tracef(k, " from $%d", hop->ir->id);
-    tracef(k, ":");
-
-    for (i=0; i<hop->inputs.count; i++)
-    {
-        struct value* value = hop->inputs.item[i];
-        tracef(k, " r$%d:%d", value->ir->id, value->subid);
-    }
-
-    for (i=0; i<hop->outputs.count; i++)
-    {
-        struct value* value = hop->outputs.item[i];
-        tracef(k, " w$%d:%d", value->ir->id, value->subid);
-    }
-
-    for (i=0; i<hop->throughs.count; i++)
-    {
-        struct value* value = hop->throughs.item[i];
-        tracef(k, " =$%d:%d", value->ir->id, value->subid);
-    }
-
-    tracef(k, " ");
-}
-
 static char* appendf(const char* fmt, ...)
 {
     int n;
@@ -241,6 +211,49 @@ static char* appendf(const char* fmt, ...)
 
     bufferlen = n - 1; /* remember the \0 at the end */
     return p;
+}
+
+void appendvalue(struct hop* hop, struct value* value)
+{
+    struct vreg* vreg;
+
+    if (hop->vregmapping && ((vreg = hashtable_get(hop->vregmapping, value))))
+        appendf("%%%d", vreg->id);
+    else
+        appendf("$%d:%d", value->ir->id, value->subid);
+}
+
+static void appendheader(struct hop* hop)
+{
+    int i;
+
+    appendf("%d", hop->id);
+    if (hop->ir)
+        appendf(" from $%d", hop->ir->id);
+    appendf(":");
+
+    for (i=0; i<hop->inputs.count; i++)
+    {
+        struct value* value = hop->inputs.item[i];
+        appendf(" r");
+        appendvalue(hop, value);
+    }
+
+    for (i=0; i<hop->outputs.count; i++)
+    {
+        struct value* value = hop->outputs.item[i];
+        appendf(" w");
+        appendvalue(hop, value);
+    }
+
+    for (i=0; i<hop->throughs.count; i++)
+    {
+        struct value* value = hop->throughs.item[i];
+        appendf(" =");
+        appendvalue(hop, value);
+    }
+
+    appendf(" ");
 }
 
 char* hop_render(struct hop* hop)
@@ -279,17 +292,7 @@ char* hop_render(struct hop* hop)
 
 			case INSEL_VREG:
             {
-                struct value* value = insel->u.value;
-                #if 0
-                struct hreg* hreg = pmap_findright(&hop->regsin, vreg);
-                if (!hreg)
-                    hreg = pmap_findright(&hop->regsout, vreg);
-                if (hreg)
-                    appendf("%s", hreg->brd->names[insel->index]);
-                else
-                    appendf("%%%d.%d", vreg->id, insel->index);
-                #endif
-                appendf("$%d:%d", value->ir->id, value->subid);
+                appendvalue(hop, insel->u.value);
                 if (insel->index)
                     appendf(".%d", insel->index);
 				break;
@@ -357,11 +360,19 @@ void hop_print(char k, struct hop* hop)
 	int i;
 	bool soi = false;
     char* p;
+    char* header;
+
+    appendf(""); /* ensure the buffer has been allocated */
+    bufferlen = 0;
+	buffer[0] = '\0';
+
+    appendheader(hop);
+    header = strdup(buffer);
 
     hop_render(hop);
 
     p = strtok(buffer, "\n");
-    print_header(k, hop);
+    tracef(k, "%c: %s", k, header);
     while (p)
     {
         tracef(k, "%s", p);
@@ -369,7 +380,7 @@ void hop_print(char k, struct hop* hop)
         if (p)
         {
             tracef(k, "\n");
-            print_header(k, hop);
+            tracef(k, "%c: %s", k, header);
         }
     }
     tracef(k, "\n");

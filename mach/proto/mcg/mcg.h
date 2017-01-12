@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include "hashtable.h"
 #include "flt_arith.h"
 #include "em_arith.h"
 #include "em_label.h"
@@ -30,7 +31,6 @@
 #include "graph.h"
 #include "tables.h"
 #include "mcgg.h"
-#include "hashtable.h"
 #include "set.h"
 #include "bigraph.h"
 
@@ -107,6 +107,7 @@ extern void tb_fileend(void);
 extern void tb_procedure(void);
 extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, int priority);
 
+extern void pass_assign_vregs(void);
 extern void pass_convert_inputs_to_phis(void);
 extern void pass_convert_locals_to_ssa(void);
 extern void pass_convert_nonlocal_phis(void);

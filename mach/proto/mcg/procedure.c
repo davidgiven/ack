@@ -185,6 +185,8 @@ void procedure_compile(struct procedure* proc)
     print_hops('7');
     pass_live_value_analysis();
     print_hops('8');
+    pass_assign_vregs();
+    print_hops('9');
 #if 0
     pass_split_live_ranges();
     pass_determine_vreg_usage();
