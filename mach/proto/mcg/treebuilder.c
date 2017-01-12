@@ -181,7 +181,8 @@ void tb_regvar(struct procedure* procedure, arith offset, int size, int type, in
     local->size = size;
     local->offset = offset;
     local->is_register = true;
-    imap_put(&procedure->locals, offset, local);
+
+    pmap_put(&procedure->locals, (void*)(intptr_t)offset, local);
 }
 
 static struct ir* address_of_external(const char* label, arith offset)

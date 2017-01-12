@@ -21,18 +21,11 @@ struct insel
 	{
 		const char* string;
         struct hreg* hreg;
-		struct vreg* vreg;
-		struct ir* value;
+		struct value* value;
+		struct ir* ir;
         int offset;
 	}
 	u;
-};
-
-struct constraint
-{
-    uint32_t attrs;
-	bool preserved;
-    struct vreg* equals_to;
 };
 
 struct hop
@@ -42,24 +35,22 @@ struct hop
 	struct ir* ir;
     const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
-	struct vreg* output;
+	struct value* value;
 	bool is_move;
+	const char* pseudo;
+	PMAPOF(struct value, struct value) equals_constraint;
 
-    PMAPOF(struct vreg, struct constraint) constraints;
-
-	ARRAYOF(struct vreg) ins;
-	ARRAYOF(struct vreg) outs;
-    ARRAYOF(struct vreg) throughs;
-    register_assignment_t regsin;
-    register_assignment_t regsout;
+	ARRAYOF(struct value) inputs;
+	ARRAYOF(struct value) outputs;
+	ARRAYOF(struct value) throughs;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
-extern struct hop* new_copy_hop(struct basicblock* bb, struct vreg* src, struct vreg* dest);
+extern struct hop* new_move_hop(struct basicblock* bb);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index);
-extern void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg, int index);
+extern void hop_add_vreg_insel(struct hop* hop, struct value* value, int index);
 extern void hop_add_value_insel(struct hop* hop, struct ir* ir);
 extern void hop_add_st_offset_insel(struct hop* hop, struct hreg* hreg);
 extern void hop_add_ab_offset_insel(struct hop* hop, int offset);

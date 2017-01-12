@@ -18,7 +18,6 @@
 #include "em_flag.h"
 #include "em_ptyp.h"
 #include "array.h"
-#include "imap.h"
 #include "pmap.h"
 #include "heap.h"
 #include "diagnostics.h"
@@ -81,7 +80,7 @@ struct em
         } bvalue;
     } u;
 };
-    
+
 extern const char* aprintf(const char* fmt, ...);
 extern void tracef(char k, const char* fmt, ...);
 extern bool tracing(char k);
@@ -119,7 +118,7 @@ extern void pass_group_irs(void);
 extern void pass_infer_types(void);
 extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
-extern void pass_live_vreg_analysis(void);
+extern void pass_live_value_analysis(void);
 extern void pass_add_prologue_epilogue(void);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);

@@ -18,15 +18,8 @@ struct basicblock
     ARRAYOF(struct basicblock) nexts;
     int order; /* used by dominance graph code */
 
-    PMAPOF(struct vreg, struct phi) phis;
-
-    /* Used by liveness calculation. */
-    ARRAYOF(struct vreg) liveins;
-    ARRAYOF(struct vreg) liveouts;
-
-    /* Register assignments on entry and exit. */
-    register_assignment_t regsin;
-    register_assignment_t* regsout; /* points at regsout of the last insn. */
+    PMAPOF(struct ir, struct ir) imports;
+    PMAPOF(struct ir, struct ir) exports;
 
     bool is_fake : 1;
     bool is_root : 1;

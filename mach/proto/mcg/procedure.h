@@ -21,7 +21,7 @@ struct procedure
     int fp_to_sb; /* spill base (indexes up) */
     int fp_to_rb; /* saved registers base (indexes up) */
     ARRAYOF(struct basicblock) blocks;
-    IMAPOF(struct local) locals;
+    PMAPOF(void, struct local) locals;
     ARRAYOF(struct hreg) usedregs;
 };
 

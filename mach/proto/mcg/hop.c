@@ -17,14 +17,12 @@ struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 	return hop;
 }
 
-struct hop* new_copy_hop(struct basicblock* bb, struct vreg* src, struct vreg* dest)
+struct hop* new_move_hop(struct basicblock* bb)
 {
 	struct hop* hop = heap_alloc(&proc_heap, 1, sizeof(*hop));
 	hop->id = hop_count++;
     hop->bb = bb;
     hop->is_move = true;
-    array_append(&hop->ins, src);
-    array_append(&hop->outs, dest);
 	return hop;
 }
 
@@ -37,9 +35,9 @@ static struct insel* new_insel(enum insel_type type)
 
 void hop_add_string_insel(struct hop* hop, const char* string)
 {
-	struct insel* insel = new_insel(INSEL_STRING);
-	insel->u.string = string;
-	array_append(&hop->insels, insel);
+    struct insel* insel = new_insel(INSEL_STRING);
+    insel->u.string = string;
+    array_append(&hop->insels, insel);
 }
 
 void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index)
@@ -50,10 +48,10 @@ void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index)
 	array_append(&hop->insels, insel);
 }
 
-void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg, int index)
+void hop_add_vreg_insel(struct hop* hop, struct value* value, int index)
 {
 	struct insel* insel = new_insel(INSEL_VREG);
-	insel->u.vreg = vreg;
+	insel->u.value = value;
     insel->index = index;
 	array_append(&hop->insels, insel);
 }
@@ -61,7 +59,7 @@ void hop_add_vreg_insel(struct hop* hop, struct vreg* vreg, int index)
 void hop_add_value_insel(struct hop* hop, struct ir* ir)
 {
 	struct insel* insel = new_insel(INSEL_VALUE);
-	insel->u.value = ir;
+	insel->u.ir = ir;
 	array_append(&hop->insels, insel);
 }
 
@@ -88,8 +86,8 @@ void hop_add_lb_offset_insel(struct hop* hop, int offset)
 
 void hop_add_eoi_insel(struct hop* hop)
 {
-	struct insel* insel = new_insel(INSEL_EOI);
-	array_append(&hop->insels, insel);
+    struct insel* insel = new_insel(INSEL_EOI);
+    array_append(&hop->insels, insel);
 }
 
 void hop_add_insel(struct hop* hop, const char* fmt, ...)
@@ -145,7 +143,7 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
                     break;
 
                 case 'V':
-                    hop_add_vreg_insel(hop, va_arg(ap, struct vreg*), index);
+                    hop_add_vreg_insel(hop, va_arg(ap, struct value*), index);
                     break;
             }
         }
@@ -198,12 +196,24 @@ static void print_header(char k, struct hop* hop)
         tracef(k, " from $%d", hop->ir->id);
     tracef(k, ":");
 
-    for (i=0; i<hop->ins.count; i++)
-        tracef(k, " r%%%d", hop->ins.item[i]->id);
+    for (i=0; i<hop->inputs.count; i++)
+    {
+        struct value* value = hop->inputs.item[i];
+        tracef(k, " r$%d:%d", value->ir->id, value->subid);
+    }
+
+    for (i=0; i<hop->outputs.count; i++)
+    {
+        struct value* value = hop->outputs.item[i];
+        tracef(k, " w$%d:%d", value->ir->id, value->subid);
+    }
+
     for (i=0; i<hop->throughs.count; i++)
-        tracef(k, " =%%%d", hop->throughs.item[i]->id);
-    for (i=0; i<hop->outs.count; i++)
-        tracef(k, " w%%%d", hop->outs.item[i]->id);
+    {
+        struct value* value = hop->throughs.item[i];
+        tracef(k, " =$%d:%d", value->ir->id, value->subid);
+    }
+
     tracef(k, " ");
 }
 
@@ -241,8 +251,11 @@ char* hop_render(struct hop* hop)
     bufferlen = 0;
 	buffer[0] = '\0';
 
+    if (hop->pseudo)
+        appendf("@");
+
     if (hop->is_move && (hop->insels.count == 0))
-        appendf("(move %%%d -> %%%d)\n", hop->ins.item[0]->id, hop->outs.item[0]->id);
+        appendf("(move)\n");
 
 	for (i=0; i<hop->insels.count; i++)
 	{
@@ -266,7 +279,8 @@ char* hop_render(struct hop* hop)
 
 			case INSEL_VREG:
             {
-                struct vreg* vreg = insel->u.vreg;
+                struct value* value = insel->u.value;
+                #if 0
                 struct hreg* hreg = pmap_findright(&hop->regsin, vreg);
                 if (!hreg)
                     hreg = pmap_findright(&hop->regsout, vreg);
@@ -274,6 +288,10 @@ char* hop_render(struct hop* hop)
                     appendf("%s", hreg->brd->names[insel->index]);
                 else
                     appendf("%%%d.%d", vreg->id, insel->index);
+                #endif
+                appendf("$%d:%d", value->ir->id, value->subid);
+                if (insel->index)
+                    appendf(".%d", insel->index);
 				break;
             }
 
@@ -295,7 +313,7 @@ char* hop_render(struct hop* hop)
 
 			case INSEL_VALUE:
 			{
-				struct ir* ir = insel->u.value;
+				struct ir* ir = insel->u.ir;
 				switch (ir->opcode)
 				{
 					case IR_BLOCK:
@@ -326,6 +344,9 @@ char* hop_render(struct hop* hop)
             default:
                 assert(false);
 		}
+
+        if (hop->pseudo)
+            appendf(" ");
 	}
 
     return buffer;

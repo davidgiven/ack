@@ -1,14 +1,5 @@
 #include "mcg.h"
 
-static int vreg_count = 1;
-
-struct vreg* new_vreg(void)
-{
-	struct vreg* vreg = heap_alloc(&proc_heap, 1, sizeof *vreg);
-	vreg->id = vreg_count++;
-	return vreg;
-}
-
 struct hreg* new_hreg(const struct burm_register_data* brd)
 {
 	struct hreg* hreg = heap_alloc(&proc_heap, 1, sizeof *hreg);

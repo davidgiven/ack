@@ -70,35 +70,21 @@ static void print_hops(char k)
             tracef(k, "\n");
         }
 
-        if (bb->liveins.count > 0)
+        if (bb->imports.count > 0)
         {
             tracef(k, "%c:  INS:", k);
-            for (j=0; j<bb->liveins.count; j++)
-                tracef(k, " %%%d", bb->liveins.item[j]->id);
+            for (j=0; j<bb->imports.count; j++)
+                tracef(k, " $%d->$%d",
+                    bb->imports.item[j].left->id, bb->imports.item[j].right->id);
             tracef(k, "\n");
         }
 
-        if (bb->liveouts.count > 0)
+        if (bb->exports.count > 0)
         {
             tracef(k, "%c: OUTS:", k);
-            for (j=0; j<bb->liveouts.count; j++)
-                tracef(k, " %%%d", bb->liveouts.item[j]->id);
-            tracef(k, "\n");
-        }
-
-        if (bb->phis.count > 0)
-        {
-            tracef(k, "%c: PHIS:", k);
-            for (j=0; j<bb->phis.count; j++)
-            {
-                struct vreg* vreg = bb->phis.item[j].left;
-                struct phi* phi = bb->phis.item[j].right;
-
-                tracef(k, " %%%d(via %s)=>%%%d",
-                    phi->ir->result->id,
-                    phi->prev->name,
-                    vreg->id);
-            }
+            for (j=0; j<bb->exports.count; j++)
+                tracef(k, " $%d->$%d",
+                    bb->exports.item[j].left->id, bb->exports.item[j].right->id);
             tracef(k, "\n");
         }
 
@@ -115,7 +101,7 @@ static void emit_procedure(struct procedure* proc)
     for (i=0; i<dominance.preorder.count; i++)
     {
         struct basicblock* bb = dominance.preorder.item[i];
-        
+
         fprintf(outputfile, "%s:\n", platform_label(bb->name));
         for (j=0; j<bb->hops.count; j++)
         {
@@ -197,11 +183,12 @@ void procedure_compile(struct procedure* proc)
     print_blocks('6');
     pass_instruction_selector();
     print_hops('7');
+    pass_live_value_analysis();
+    print_hops('8');
+#if 0
     pass_split_live_ranges();
     pass_determine_vreg_usage();
-    print_hops('8');
 
-    pass_live_vreg_analysis();
     pass_register_allocator();
     pass_add_prologue_epilogue();
     print_hops('9');
@@ -209,6 +196,7 @@ void procedure_compile(struct procedure* proc)
     emit_procedure(proc);
 
     heap_free(&proc_heap);
+#endif
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -2,9 +2,24 @@
 
 static int next_id = 0;
 
+uint32_t value_hash_function(void* key)
+{
+    struct value* value = key;
+    /* This is the standard C++ std::hash_combine. */
+    return value->ir->id + 0x9e3779b9 + (value->subid << 6) + (value->subid >> 2);
+}
+
+bool value_comparison_function(void* key1, void* key2)
+{
+    struct value* val1 = key1;
+    struct value* val2 = key2;
+    return (val1->ir->id == val2->ir->id) && (val1->subid == val2->subid);
+}
+
 struct ir* new_ir0(int opcode, int size)
 {
 	struct ir* ir = calloc(1,  sizeof(struct ir));
+    ir->value.ir = ir;
 	ir->id = next_id++;
 	ir->opcode = opcode;
 	ir->size = size;

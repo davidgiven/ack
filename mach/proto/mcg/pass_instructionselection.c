@@ -4,6 +4,9 @@
 
 struct insn
 {
+    /* struct insn must be castable to a struct value */
+    struct value value;
+
     struct ir* ir;
     struct hop* hop;
     const struct burm_instruction_data* insndata;
@@ -12,6 +15,8 @@ struct insn
 };
 
 static struct basicblock* current_bb;
+static struct ir* root_ir;
+static int hop_id;
 static struct hop* current_hop;
 static struct ir* current_ir;
 static struct insn* current_insn;
@@ -34,27 +39,25 @@ void burm_panic_cannot_match(struct burm_node* node)
 
 static void emit_return_reg(int index)
 {
-    hop_add_vreg_insel(current_hop, current_hop->output, index);
+    hop_add_vreg_insel(current_hop, &current_insn->value, index);
 }
 
-static struct vreg* find_vreg_of_child(int child)
+static struct value* find_value_of_child(int child)
 {
     struct insn* insn = current_insn->children[child];
 
     if (insn->hop)
-        return insn->hop->output;
+        return insn->hop->value;
     else
-        return insn->ir->result;
+        return &insn->ir->value;
 }
 
 static void emit_reg(int child, int index)
 {
-    struct vreg* vreg = find_vreg_of_child(child);
+    struct value* value = find_value_of_child(child);
 
-    if (vreg)
-    {
-        hop_add_vreg_insel(current_hop, vreg, index);
-    }
+    assert(value);
+    hop_add_vreg_insel(current_hop, value, index);
 }
 
 static void emit_string(const char* data)
@@ -77,36 +80,21 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
-static struct constraint* get_constraint(struct vreg* vreg)
-{
-    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    if (!c)
-    {
-        c = heap_alloc(&proc_heap, 1, sizeof(*c));
-        pmap_put(&current_hop->constraints, vreg, c);
-    }
-    return c;
-}
-
 static void constrain_input_reg(int child, uint32_t attr)
 {
-    struct vreg* vreg = find_vreg_of_child(child);
+    struct value* value = find_value_of_child(child);
     struct constraint* c;
 
-    assert(vreg);
-
-    array_appendu(&current_hop->ins, vreg);
-    get_constraint(vreg)->attrs = attr;
+    array_appendu(&current_hop->inputs, value);
+    value->attrs = attr;
 }
 
 static void constrain_input_reg_preserved(int child)
 {
-    struct vreg* vreg = find_vreg_of_child(child);
+    struct value* value = find_value_of_child(child);
     struct constraint* c;
 
-    assert(vreg);
-    array_appendu(&current_hop->throughs, vreg);
-    get_constraint(vreg)->preserved = true;
+    array_appendu(&current_hop->throughs, value);
 }
 
 static uint32_t find_type_from_constraint(uint32_t attr)
@@ -122,7 +110,7 @@ static uint32_t find_type_from_constraint(uint32_t attr)
     {
         if (brd->attrs & attr)
         {
-            const uint32_t type_attrs = 
+            const uint32_t type_attrs =
                 (burm_int_ATTR | burm_float_ATTR |
                  burm_long_ATTR | burm_double_ATTR);
 
@@ -139,22 +127,16 @@ static uint32_t find_type_from_constraint(uint32_t attr)
 
 static void constrain_output_reg(uint32_t attr)
 {
-    struct vreg* vreg = current_hop->output;
+    struct value* value = &current_insn->value;
 
-    if (!vreg)
-        current_hop->output = vreg = new_vreg();
-
-    array_appendu(&current_hop->outs, vreg);
-    vreg->type = find_type_from_constraint(attr);
-
-    get_constraint(vreg)->attrs = attr;
+    array_appendu(&current_hop->outputs, value);
+    value->attrs = find_type_from_constraint(attr);
 }
 
 static void constrain_output_reg_equal_to(int child)
 {
-    struct vreg* vreg = find_vreg_of_child(child);
-
-    get_constraint(current_hop->output)->equals_to = vreg;
+    struct value* value = find_value_of_child(child);
+    pmap_add(&current_hop->equals_constraint, &current_hop->value, value);
 }
 
 static const struct burm_emitter_data emitter_data =
@@ -186,6 +168,10 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
     struct insn* insn = heap_alloc(&proc_heap, 1, sizeof(*insn));
     int i;
 
+    insn->value.ir = current_ir;
+    /* hop IDs count in preorder, so the result is always in $thing:0. */
+    insn->value.subid = hop_id++;
+
     insn->ir = node->ir;
     insn->num_children = 0;
 
@@ -210,7 +196,8 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             i++;
         }
 
-        tracef('I', "I: $%d goal %d %s selected %d: %s\n",
+        tracef('I', "I: $%d:%d for node $%d goal %d %s selected %d: %s\n",
+            insn->value.ir->id, insn->value.subid,
             node->ir->id,
             goal,
             insn->insndata->is_fragment ? "fragment" : "instruction",
@@ -223,30 +210,25 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             current_hop->insndata = insn->insndata;
             emit(insn);
 
-            if (!current_hop->output)
+            current_hop->value = &insn->value;
+            switch (node->label)
             {
-                switch (node->label)
-                {
-                    case ir_to_esn(IR_REG, 0):
-                        current_hop->output = node->ir->result;
-                        assert(current_hop->output != NULL);
-                        break;
+                case ir_to_esn(IR_REG, 0):
+                    current_hop->value = &node->ir->value;
+                    break;
 
-                    case ir_to_esn(IR_NOP, 'I'):
-                    case ir_to_esn(IR_NOP, 'F'):
-                    case ir_to_esn(IR_NOP, 'L'):
-                    case ir_to_esn(IR_NOP, 'D'):
-                        current_hop->output = node->left->ir->result;
-                        assert(current_hop->output != NULL);
-                        break;
-                }
+                case ir_to_esn(IR_NOP, 'I'):
+                case ir_to_esn(IR_NOP, 'F'):
+                case ir_to_esn(IR_NOP, 'L'):
+                case ir_to_esn(IR_NOP, 'D'):
+                    array_appendu(&current_hop->inputs, &insn->children[0]->value);
+                    array_appendu(&current_hop->outputs, current_hop->value);
+                    hop_add_insel(current_hop, "@copy %V %V", &insn->children[0]->value, current_hop->value);
+                    break;
             }
 
             hop_print('I', current_hop);
             array_append(&current_bb->hops, current_hop);
-
-            if ((goal != burm_stmt_NT) && !insn->ir->result)
-                insn->ir->result = insn->hop->output;
         }
     }
 
@@ -276,48 +258,47 @@ static struct burm_node* build_shadow_tree(struct ir* root, struct ir* ir)
 
 static void select_instructions(void)
 {
-	int i;
+	int i, j;
 
 	tracef('I', "I: BLOCK: %s\n", current_bb->name);
 
-	for (i=0; i<current_bb->irs.count; i++)
+    for (i=0; i<current_bb->irs.count; i++)
+    {
+		current_ir = current_bb->irs.item[i];
+        if (current_ir->opcode != IR_PHI)
+            break;
+
+        tracef('I', "I: $%d is phi:", current_ir->id);
+        for (j=0; j<current_ir->u.phivalue.count; j++)
+        {
+            struct basicblock* parentbb = current_ir->u.phivalue.item[j].left;
+            struct ir* parentir = current_ir->u.phivalue.item[j].right;
+            tracef('I', " %s=>$%d", parentbb->name, parentir->id);
+
+            pmap_add(&current_bb->imports, parentir, current_ir);
+            pmap_add(&parentbb->exports, parentir, current_ir);
+        }
+        tracef('I', "\n");
+    }
+
+	for (; i<current_bb->irs.count; i++)
 	{
         struct burm_node* shadow;
-		int insnno;
+        int insnno;
 
 		current_ir = current_bb->irs.item[i];
+        assert(current_ir->opcode != IR_PHI);
 
-        if (current_ir->opcode == IR_PHI)
-        {
-            int j;
+        ir_print('I', current_ir);
+        shadow = build_shadow_tree(current_ir, current_ir);
+        burm_label(shadow);
 
-            current_ir->result = new_vreg();
-            tracef('I', "I: $%d is phi:", current_ir->result->id);
-            for (j=0; j<current_ir->u.phivalue.count; j++)
-            {
-                struct basicblock* parentbb = current_ir->u.phivalue.item[j].left;
-                struct ir* parentir = current_ir->u.phivalue.item[j].right;
-                struct phi* phi = calloc(1, sizeof(*phi));
-                tracef('I', " %s=>$%d", parentbb->name, parentir->id);
+        insnno = burm_rule(shadow->state_label, 1);
+        if (!insnno)
+            burm_panic_cannot_match(shadow);
 
-                phi->prev = parentbb;
-                phi->ir = parentir;
-                pmap_add(&current_bb->phis, current_ir->result, phi);
-            }
-            tracef('I', "\n");
-        }
-        else
-        {
-            ir_print('I', current_ir);
-            shadow = build_shadow_tree(current_ir, current_ir);
-            burm_label(shadow);
-
-            insnno = burm_rule(shadow->state_label, 1);
-            if (!insnno)
-                burm_panic_cannot_match(shadow);
-
-            walk_instructions(shadow, burm_stmt_NT);
-        }
+        hop_id = 0;
+        walk_instructions(shadow, burm_stmt_NT);
 	}
 }
 

@@ -3,8 +3,23 @@
 
 #include "ircodes.h"
 
+struct value
+{
+	struct ir* ir;
+	int subid;
+	uint32_t attrs;
+};
+
+extern uint32_t value_hash_function(void* key);
+extern bool value_comparison_function(void* key1, void* key2);
+#define HASHTABLE_OF_VALUES \
+	{ value_hash_function, value_comparison_function }
+
 struct ir
 {
+	/* A struct ir must be castable to a struct value */
+	struct value value;
+
 	int id;
 	enum ir_opcode opcode;
 	int size;
@@ -21,8 +36,6 @@ struct ir
 		struct basicblock* bvalue;
         PMAPOF(struct basicblock, struct ir) phivalue;
 	} u;
-
-	struct vreg* result;     /* vreg containing IR result */
 };
 
 extern const char* ir_names[];
