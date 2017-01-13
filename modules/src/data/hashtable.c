@@ -75,7 +75,7 @@ void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets)
     struct hashnode** old_buckets = ht->buckets;
 	int old_num_buckets = ht->num_buckets;
 	int i;
-	
+
 	ht->num_buckets = num_buckets;
 	ht->buckets = calloc(num_buckets, sizeof(struct hashnode*));
 
@@ -144,9 +144,12 @@ void* hashtable_put(struct hashtable* ht, void* key, void* value)
 
 void* hashtable_get(struct hashtable* ht, void* key)
 {
-    struct hashnode** hnp = findnodep(ht, key);
-    if (*hnp)
-        return (*hnp)->value;
+    if (ht)
+    {
+        struct hashnode** hnp = findnodep(ht, key);
+        if (*hnp)
+            return (*hnp)->value;
+    }
     return NULL;
 }
 
@@ -156,7 +159,7 @@ void* hashtable_remove(struct hashtable* ht, void* key)
     if (*hnp)
     {
         struct hashnode* hn = *hnp;
-		void* value = hn->value;
+        void* value = hn->value;
         *hnp = hn->next;
         free(hn);
         ht->size--;
@@ -170,9 +173,9 @@ void* hashtable_pop(struct hashtable* ht)
 {
     int i;
 
-    if (ht->size == 0)
+    if (!ht || (ht->size == 0))
         return NULL;
-    
+
     lazy_init(ht);
     for (i=0; i<ht->num_buckets; i++)
     {
@@ -193,6 +196,9 @@ void* hashtable_pop(struct hashtable* ht)
 
 void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
 {
+    if (!ht)
+        return NULL;
+
 	lazy_init(ht);
 
     while (!it->node)
