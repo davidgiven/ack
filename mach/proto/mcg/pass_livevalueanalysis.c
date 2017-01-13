@@ -53,7 +53,7 @@ static void propagate_liveness(struct basicblock* bb)
                 struct valueusage* usage = hit.value;
 
                 if (usage->input)
-                    set_remove(&known_live, value);
+                    set_add(&known_live, value);
             }
         }
 	}
@@ -65,6 +65,7 @@ void pass_live_value_analysis(void)
 
     for (i=0; i<dominance.postorder.count; i++)
         propagate_liveness(dominance.postorder.item[i]);
+    set_reset(&known_live);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
