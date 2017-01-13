@@ -85,7 +85,7 @@ static void constrain_input_reg(int child, uint32_t attr)
     struct value* value = find_value_of_child(child);
     struct constraint* c;
 
-    array_appendu(&current_hop->inputs, value);
+    hop_get_value_usage(current_hop, value)->input = true;
     value->attrs = attr;
 }
 
@@ -94,7 +94,7 @@ static void constrain_input_reg_corrupted(int child)
     struct value* value = find_value_of_child(child);
     struct constraint* c;
 
-    array_appendu(&current_hop->corrupted, value);
+    hop_get_value_usage(current_hop, value)->corrupted = true;
 }
 
 static uint32_t find_type_from_constraint(uint32_t attr)
@@ -129,7 +129,7 @@ static void constrain_output_reg(uint32_t attr)
 {
     struct value* value = &current_insn->value;
 
-    array_appendu(&current_hop->outputs, value);
+    hop_get_value_usage(current_hop, value)->output = true;
     value->attrs = find_type_from_constraint(attr);
 }
 
@@ -221,8 +221,8 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                 case ir_to_esn(IR_NOP, 'F'):
                 case ir_to_esn(IR_NOP, 'L'):
                 case ir_to_esn(IR_NOP, 'D'):
-                    array_appendu(&current_hop->inputs, &insn->children[0]->value);
-                    array_appendu(&current_hop->outputs, current_hop->value);
+                    hop_get_value_usage(current_hop, &insn->children[0]->value)->input = true;
+                    hop_get_value_usage(current_hop, current_hop->value)->output = true;
                     hop_add_insel(current_hop, "@copy %V %V", &insn->children[0]->value, current_hop->value);
                     break;
             }

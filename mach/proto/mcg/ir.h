@@ -14,6 +14,7 @@ extern uint32_t value_hash_function(void* key);
 extern bool value_comparison_function(void* key1, void* key2);
 #define HASHTABLE_OF_VALUES \
 	{ value_hash_function, value_comparison_function }
+extern const struct hashtable empty_hashtable_of_values;
 
 struct ir
 {

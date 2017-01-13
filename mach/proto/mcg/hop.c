@@ -26,6 +26,26 @@ struct hop* new_move_hop(struct basicblock* bb)
 	return hop;
 }
 
+struct valueusage* hop_get_value_usage(struct hop* hop, struct value* value)
+{
+    struct valueusage* usage;
+
+    if (!hop->valueusage)
+    {
+        hop->valueusage = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));
+        *hop->valueusage = empty_hashtable_of_values;
+    }
+
+    usage = hashtable_get(hop->valueusage, value);
+    if (!usage)
+    {
+        usage = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));
+        hashtable_put(hop->valueusage, value, usage);
+    }
+
+    return usage;
+}
+
 static struct insel* new_insel(enum insel_type type)
 {
 	struct insel* insel = heap_alloc(&proc_heap, 1, sizeof(*insel));
@@ -232,25 +252,24 @@ static void appendheader(struct hop* hop)
         appendf(" from $%d", hop->ir->id);
     appendf(":");
 
-    for (i=0; i<hop->inputs.count; i++)
     {
-        struct value* value = hop->inputs.item[i];
-        appendf(" r");
-        appendvalue(hop, value);
-    }
+        struct hashtable_iterator hit = {};
+        while (hashtable_next(hop->valueusage, &hit))
+        {
+            struct value* value = hit.key;
+            struct valueusage* usage = hit.value;
 
-    for (i=0; i<hop->outputs.count; i++)
-    {
-        struct value* value = hop->outputs.item[i];
-        appendf(" w");
-        appendvalue(hop, value);
-    }
-
-    for (i=0; i<hop->throughs.count; i++)
-    {
-        struct value* value = hop->throughs.item[i];
-        appendf(" =");
-        appendvalue(hop, value);
+            appendf(" ");
+            if (usage->input)
+                appendf("r");
+            if (usage->output)
+                appendf("w");
+            if (usage->through)
+                appendf("=");
+            if (usage->corrupted)
+                appendf("!");
+            appendvalue(hop, value);
+        }
     }
 
     appendf(" ");

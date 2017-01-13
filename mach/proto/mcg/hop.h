@@ -28,6 +28,15 @@ struct insel
 	u;
 };
 
+struct valueusage
+{
+	struct vreg* vreg;
+	bool input : 1;
+	bool output : 1;
+	bool through : 1;
+	bool corrupted : 1;
+};
+
 struct hop
 {
 	int id;
@@ -40,17 +49,16 @@ struct hop
 	const char* pseudo;
 	PMAPOF(struct value, struct value) equals_constraint;
 
-	ARRAYOF(struct value) inputs;
-	ARRAYOF(struct value) outputs;
-	ARRAYOF(struct value) throughs;
-	ARRAYOF(struct value) corrupted;
+	struct hashtable* valueusage;
 
-	struct hashtable* vregmapping;
+	struct hashtable* vregmapping; /* value -> vreg */
 	PMAPOF(struct vreg, struct vreg) copies;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
 extern struct hop* new_move_hop(struct basicblock* bb);
+
+extern struct valueusage* hop_get_value_usage(struct hop* hop, struct value* value);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index);

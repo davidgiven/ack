@@ -2,6 +2,8 @@
 
 static int next_id = 0;
 
+const struct hashtable empty_hashtable_of_values = HASHTABLE_OF_VALUES;
+
 uint32_t value_hash_function(void* key)
 {
     struct value* value = key;

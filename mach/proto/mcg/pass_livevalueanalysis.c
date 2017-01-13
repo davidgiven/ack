@@ -19,10 +19,16 @@ static void propagate_liveness(struct basicblock* bb)
         /* Values are only ever written once, so if we see a write then we
          * know the value was not live before this. */
 
-        for (j=0; j<hop->outputs.count; j++)
         {
-            struct value* value = hop->outputs.item[j];
-            set_remove(&known_live, value);
+            struct hashtable_iterator hit = {};
+            while (hashtable_next(hop->valueusage, &hit))
+            {
+                struct value* value = hit.key;
+                struct valueusage* usage = hit.value;
+
+                if (usage->output)
+                    set_remove(&known_live, value);
+            }
         }
 
         /* Propagate the set of live values across this hop. */
@@ -32,17 +38,23 @@ static void propagate_liveness(struct basicblock* bb)
             while (set_next(&known_live, &si))
             {
                 struct value* value = si.item;
-                array_appendu(&hop->throughs, value);
+                hop_get_value_usage(hop, value)->through = true;
             }
         }
 
         /* Values which are read from must have come from somewhere, and so
          * become live. */
 
-        for (j=0; j<hop->inputs.count; j++)
         {
-            struct value* value = hop->inputs.item[j];
-            set_add(&known_live, value);
+            struct hashtable_iterator hit = {};
+            while (hashtable_next(hop->valueusage, &hit))
+            {
+                struct value* value = hit.key;
+                struct valueusage* usage = hit.value;
+
+                if (usage->input)
+                    set_remove(&known_live, value);
+            }
         }
 	}
 }

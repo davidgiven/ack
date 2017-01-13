@@ -1,7 +1,5 @@
 #include "mcg.h"
 
-static const struct hashtable empty_hashtable_of_values = HASHTABLE_OF_VALUES;
-
 static struct basicblock* current_bb;
 
 static int vregcount = 0;
@@ -43,17 +41,8 @@ static struct hop* create_move(struct hashtable* previous_mapping)
 
 static bool hop_reads_value(struct hop* hop, struct value* value)
 {
-    int i;
-
-    for (i=0; i<hop->inputs.count; i++)
-        if (value_comparison_function(hop->inputs.item[i], value))
-            return true;
-
-    for (i=0; i<hop->throughs.count; i++)
-        if (value_comparison_function(hop->throughs.item[i], value))
-            return true;
-
-    return false;
+    struct valueusage* usage = hop_get_value_usage(hop, value);
+    return usage->input || usage->through;
 }
 
 static void assign_vregs(void)
@@ -70,10 +59,18 @@ static void assign_vregs(void)
     current_bb->inputmapping = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));
     *current_bb->inputmapping = empty_hashtable_of_values;
     hashtable_empty(current_bb->inputmapping);
-    for (i=0; i<hop->inputs.count; i++)
-        create_and_map_vreg(current_bb->inputmapping, hop->inputs.item[i]);
-    for (i=0; i<hop->throughs.count; i++)
-        create_and_map_vreg(current_bb->inputmapping, hop->throughs.item[i]);
+
+    {
+        struct hashtable_iterator hit = {};
+        while (hashtable_next(hop->valueusage, &hit))
+        {
+            struct value* value = hit.key;
+            struct valueusage* usage = hit.value;
+
+            if (usage->input || usage->through)
+            create_and_map_vreg(current_bb->inputmapping, value);
+        }
+    }
 
     previous_mapping = current_bb->inputmapping;
     for (i=0; i<current_bb->hops.count; i++)
@@ -102,8 +99,17 @@ static void assign_vregs(void)
 
         /* Create vregs for any new outputs. */
 
-        for (j=0; j<hop->outputs.count; j++)
-            create_and_map_vreg(current_mapping, hop->outputs.item[j]);
+        {
+            struct hashtable_iterator hit = {};
+            while (hashtable_next(hop->valueusage, &hit))
+            {
+                struct value* value = hit.key;
+                struct valueusage* usage = hit.value;
+
+                if (usage->output)
+                    create_and_map_vreg(current_mapping, value);
+            }
+        }
 
         /* And move on to the next one. */
 
