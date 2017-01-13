@@ -89,12 +89,12 @@ static void constrain_input_reg(int child, uint32_t attr)
     value->attrs = attr;
 }
 
-static void constrain_input_reg_preserved(int child)
+static void constrain_input_reg_corrupted(int child)
 {
     struct value* value = find_value_of_child(child);
     struct constraint* c;
 
-    array_appendu(&current_hop->throughs, value);
+    array_appendu(&current_hop->corrupted, value);
 }
 
 static uint32_t find_type_from_constraint(uint32_t attr)
@@ -148,7 +148,7 @@ static const struct burm_emitter_data emitter_data =
     &emit_value,
     &emit_eoi,
     &constrain_input_reg,
-    &constrain_input_reg_preserved,
+    &constrain_input_reg_corrupted,
     &constrain_output_reg,
     &constrain_output_reg_equal_to,
 };

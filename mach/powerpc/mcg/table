@@ -10,9 +10,9 @@ REGISTERS
      * be moved from register to register or spilt).
      */
 
-    r12                                           int volatile; 
-    r11                                           int volatile; 
-    r10                                           int volatile; 
+    r12                                           int volatile;
+    r11                                           int volatile;
+    r10                                           int volatile;
     r9                                            int volatile;
     r8                                            int volatile;
     r7                                            int volatile;
@@ -21,21 +21,21 @@ REGISTERS
     r4                                            int volatile;
     r3                                            int volatile iret;
 
-    r31                                           int; 
-    r30                                           int; 
-    r29                                           int; 
-    r28                                           int; 
-    r27                                           int; 
-    r26                                           int; 
-    r25                                           int; 
-    r24                                           int; 
-    r23                                           int; 
-    r22                                           int; 
-    r21                                           int; 
-    r20                                           int; 
-    r19                                           int; 
-    r18                                           int; 
-    r17                                           int; 
+    r31                                           int;
+    r30                                           int;
+    r29                                           int;
+    r28                                           int;
+    r27                                           int;
+    r26                                           int;
+    r25                                           int;
+    r24                                           int;
+    r23                                           int;
+    r22                                           int;
+    r21                                           int;
+    r20                                           int;
+    r19                                           int;
+    r18                                           int;
+    r17                                           int;
     r16                                           int;
     r15                                           int;
     r14                                           int;
@@ -179,12 +179,12 @@ PATTERNS
 		emit "lfs %out, 0(sp)"
 		emit "addi sp, sp, 4"
 		cost 8;
-		
+
 	out:(double)reg = POP.D
 		emit "lfd %out, 0(sp)"
 		emit "addi sp, sp, 8"
 		cost 8;
-		
+
 	SETRET.I(in:(iret)reg)
 		emit "! setret4"
 		cost 1;
@@ -237,7 +237,7 @@ PATTERNS
     SETSP.I(in:(int)reg)
         emit "mr sp, %in"
         cost 4;
-    
+
     out:(int)reg = ANY.I
         cost 1;
 
@@ -398,7 +398,7 @@ PATTERNS
         cost 4;
 
     out:(int)reg = FROMSD.I(in:(double)reg)
-        with preserved(%in)
+        with corrupted(%in)
         emit "fctiwz %in, %in"
         emit "stfdu %in, -8(sp)"
         emit "lwz %out, 4(sp)"
@@ -448,7 +448,7 @@ PATTERNS
         emit "mr %out.0, %in1"
         emit "mr %out.1, %in2"
         cost 8;
-    
+
     out:(int)reg = FROML0.I(in:(long)reg)
         emit "mr %out, %in.0"
         cost 4;
@@ -644,14 +644,14 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = MOD.I(left:(int)reg, right:(int)reg)
-        with preserved(%left), preserved(%right)
+        with corrupted(%left), corrupted(%right)
 		emit "divw %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
 		cost 12;
 
 	out:(int)reg = MODU.I(left:(int)reg, right:(int)reg)
-        with preserved(%left), preserved(%right)
+        with corrupted(%left), corrupted(%right)
 		emit "divwu %out, %left, %right"
         emit "mullw %out, %out, %right"
         emit "subf %out, %out, %left"
@@ -714,7 +714,7 @@ PATTERNS
     out:(float)reg = LOAD.F(addr:address)
         emit "lfs %out, %addr"
         cost 4;
-        
+
     out:(double)reg = LOAD.D(addr:address)
         emit "lfd %out, %addr"
         cost 4;
@@ -741,7 +741,7 @@ PATTERNS
         out:(type)reg = add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg) \
         emit insn " %out, %m1, %m2, %m3"                                   \
         cost 4;                                                            \
-                                                                                 
+
     #define FMARIGHT(type, insn, add, mul) \
         out:(type)reg = add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg)) \
         emit insn " %out, %m1, %m2, %m3"                                   \
@@ -762,7 +762,7 @@ PATTERNS
         out:(type)reg = neg(add(mul(m1:(type)reg, m2:(type)reg), m3:(type)reg)) \
         emit insn " %out, %m1, %m2, %m3"                                        \
         cost 4;                                                                 \
-                                                                                 
+
     #define FMANEGRIGHT(type, insn, neg, add, mul) \
         out:(type)reg = neg(add(m3:(type)reg, mul(m1:(type)reg, m2:(type)reg))) \
         emit insn " %out, %m1, %m2, %m3"                                        \

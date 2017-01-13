@@ -46,7 +46,6 @@ static int braces = 0;
 "fragment"                  return FRAGMENT;
 "named"                     return NAMED;
 "prefers"                   return PREFERS;
-"preserved"                 return PRESERVED;
 "when"                      return WHEN;
 "with"                      return WITH;
 "=="                        return EQUALS;

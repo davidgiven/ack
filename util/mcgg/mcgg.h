@@ -36,7 +36,7 @@ struct burm_emitter_data
     void (*emit_value)(int child);
     void (*emit_eoi)(void);
     void (*constrain_input_reg)(int child, uint32_t attr);
-    void (*constrain_input_reg_preserved)(int child);
+    void (*constrain_input_reg_corrupted)(int child);
     void (*constrain_output_reg)(uint32_t attr);
     void (*constrain_output_reg_equal_to)(int child);
 };

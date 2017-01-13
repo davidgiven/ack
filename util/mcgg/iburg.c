@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 				exit(1);
 		}
 	}
-				
+
 	emitheader();
 	registerterminals();
 
@@ -918,7 +918,7 @@ static bool find_child_index(Tree node, const char* name, int* index, Tree* foun
 		return true;
 	return false;
 }
-	
+
 static void emit_predicate_expr(Rule r, struct expr* p)
 {
 	bool first = true;
@@ -1051,16 +1051,16 @@ static void emit_input_constraints(Rule r)
 		int index;
 		struct constraint* c = r->constraints.item[i];
 
-		if (c->type == CONSTRAINT_PRESERVED)
+		if (c->type == CONSTRAINT_CORRUPTED_REG)
 		{
 			if (strcmp(c->left, r->label) == 0)
-				yyerror("cannot preserve an output register!");
+				yyerror("only input registers can be corrupted!");
 
 			index = 0;
 			if (!find_child_index(r->pattern, c->left, &index, NULL))
 				label_not_found(r, c->left);
 
-			print("%1data->constrain_input_reg_preserved(%d);\n", index);
+			print("%1data->constrain_input_reg_corrupted(%d);\n", index);
 		}
 	}
 }
@@ -1098,10 +1098,10 @@ static void emitinsndata(Rule rules)
 			int index = 0;
 			emit_input_regs(r->pattern, &index);
 		}
-		
+
 		emit_output_constraints(r);
 		emit_input_constraints(r);
-		
+
 		while (f)
 		{
 			char* data = strdup(f->data);
@@ -1154,7 +1154,7 @@ static void emitinsndata(Rule rules)
 					assert(f->data[1] == 0);
 					print("%1data->emit_eoi();\n");
 					break;
-				
+
 				default:
 					print("%1data->emit_string(\"%s\");\n", f->data);
 			}

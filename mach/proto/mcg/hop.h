@@ -43,6 +43,7 @@ struct hop
 	ARRAYOF(struct value) inputs;
 	ARRAYOF(struct value) outputs;
 	ARRAYOF(struct value) throughs;
+	ARRAYOF(struct value) corrupted;
 
 	struct hashtable* vregmapping;
 };
