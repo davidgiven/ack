@@ -46,6 +46,7 @@ struct hop
 	ARRAYOF(struct value) corrupted;
 
 	struct hashtable* vregmapping;
+	PMAPOF(struct vreg, struct vreg) copies;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
