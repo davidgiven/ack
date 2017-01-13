@@ -5,6 +5,8 @@
 
 typedef uint32_t hashfunction_t(void* key);
 typedef bool cmpfunction_t(void* key1, void* key2);
+typedef void* allocfunction_t(size_t nmemb, size_t size);
+typedef void freefunction_t(void* ptr);
 
 extern uint32_t standard_pointer_hash_function(void* key);
 extern bool standard_pointer_comparison_function(void* key1, void* key2);
@@ -16,6 +18,8 @@ struct hashtable
 {
     hashfunction_t* hashfunction;
     cmpfunction_t* cmpfunction;
+    allocfunction_t* allocfunction;
+    freefunction_t* freefunction;
     unsigned int num_buckets;  /* power of 2 */
     struct hashnode** buckets;
     int size;

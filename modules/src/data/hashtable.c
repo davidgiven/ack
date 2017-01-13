@@ -53,8 +53,14 @@ static void lazy_init(struct hashtable* ht)
     if (!ht->cmpfunction)
         ht->cmpfunction = standard_pointer_comparison_function;
 
+    if (!ht->allocfunction)
+        ht->allocfunction = calloc;
+
+    if (!ht->freefunction)
+        ht->freefunction = free;
+
     if (!ht->buckets)
-        ht->buckets = calloc(ht->num_buckets, sizeof(struct hashnode*));
+        ht->buckets = ht->allocfunction(ht->num_buckets, sizeof(struct hashnode*));
 }
 
 void hashtable_empty(struct hashtable* ht)
@@ -65,8 +71,9 @@ void hashtable_empty(struct hashtable* ht)
 
 void hashtable_reset(struct hashtable* ht)
 {
+    lazy_init(ht);
 	hashtable_empty(ht);
-    free(ht->buckets);
+    ht->freefunction(ht->buckets);
     ht->buckets = NULL;
 }
 
@@ -77,7 +84,7 @@ void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets)
 	int i;
 
 	ht->num_buckets = num_buckets;
-	ht->buckets = calloc(num_buckets, sizeof(struct hashnode*));
+	ht->buckets = ht->allocfunction(num_buckets, sizeof(struct hashnode*));
 
 	for (i=0; i<old_num_buckets; i++)
 	{
@@ -92,7 +99,7 @@ void hashtable_rebucket(struct hashtable* ht, unsigned int num_buckets)
 		}
 	}
 
-	free(old_buckets);
+	ht->freefunction(old_buckets);
 }
 
 static struct hashnode** findnodep(struct hashtable* ht, void* key)
@@ -132,7 +139,7 @@ void* hashtable_put(struct hashtable* ht, void* key, void* value)
 			return hashtable_put(ht, key, value);
 		}
 
-        *hnp = calloc(1, sizeof(struct hashnode));
+        *hnp = ht->allocfunction(1, sizeof(struct hashnode));
         ht->size++;
     }
 
@@ -161,7 +168,7 @@ void* hashtable_remove(struct hashtable* ht, void* key)
         struct hashnode* hn = *hnp;
         void* value = hn->value;
         *hnp = hn->next;
-        free(hn);
+        ht->freefunction(hn);
         ht->size--;
         return value;
     }
@@ -185,7 +192,7 @@ void* hashtable_pop(struct hashtable* ht)
             struct hashnode* hn = *hnp;
             void* value = hn->value;
             *hnp = hn->next;
-            free(hn);
+            ht->freefunction(hn);
             ht->size--;
             return value;
         }

@@ -25,11 +25,14 @@ struct procedure
     ARRAYOF(struct hreg) usedregs;
 };
 
+extern struct heap proc_heap;
+extern void* proc_alloc(size_t nmemb, size_t size);
+extern void proc_free(void* ptr);
+
 extern void procedure_compile(struct procedure* proc);
 extern void procedure_update_bb_graph(struct procedure* proc);
 
 extern struct procedure* current_proc;
-extern struct heap proc_heap;
 
 #endif
 

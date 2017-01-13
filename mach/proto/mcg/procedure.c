@@ -3,6 +3,16 @@
 struct procedure* current_proc;
 struct heap proc_heap;
 
+void* proc_alloc(size_t nmemb, size_t size)
+{
+    return heap_alloc(&proc_heap, nmemb, size);
+}
+
+void proc_free(void* ptr)
+{
+    /* do nothing; objects will leak until the heap is freed */
+}
+
 static void print_blocks(char k)
 {
 	int i;
@@ -197,8 +207,8 @@ void procedure_compile(struct procedure* proc)
 
     emit_procedure(proc);
 
-    heap_free(&proc_heap);
 #endif
+    heap_free(&proc_heap);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
