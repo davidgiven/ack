@@ -21,8 +21,8 @@ struct basicblock
     PMAPOF(struct ir, struct ir) imports;
     PMAPOF(struct ir, struct ir) exports;
 
-    struct hashtable* inputmapping;
-    struct hashtable* outputmapping;
+    struct hashtable inputmapping;
+    struct hashtable outputmapping;
 
     bool is_fake : 1;
     bool is_root : 1;

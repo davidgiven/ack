@@ -235,9 +235,26 @@ static char* appendf(const char* fmt, ...)
 
 void appendvalue(struct hop* hop, struct value* value)
 {
-    struct vreg* vreg;
+    struct valueusage* usage = hop_get_value_usage(hop, value);
+    struct vreg* vreg = NULL;
 
-    if (hop->vregmapping && ((vreg = hashtable_get(hop->vregmapping, value))))
+    if (usage->input && usage->output && usage->invreg && usage->outvreg)
+    {
+        appendf("%%%d->%%%d", usage->invreg->id, usage->outvreg->id);
+        return;
+    }
+
+    if (usage->input)
+        vreg = usage->invreg;
+    if (usage->output)
+        vreg = usage->outvreg;
+    if (usage->through)
+    {
+        assert(usage->invreg == usage->outvreg);
+        vreg = usage->invreg;
+    }
+
+    if (vreg)
         appendf("%%%d", vreg->id);
     else
         appendf("$%d:%d", value->ir->id, value->subid);
@@ -259,16 +276,19 @@ static void appendheader(struct hop* hop)
             struct value* value = hit.key;
             struct valueusage* usage = hit.value;
 
-            appendf(" ");
-            if (usage->input)
-                appendf("r");
-            if (usage->output)
-                appendf("w");
-            if (usage->through)
-                appendf("=");
-            if (usage->corrupted)
-                appendf("!");
-            appendvalue(hop, value);
+            if (usage->input || usage->output || usage->through || usage->corrupted)
+            {
+                appendf(" ");
+                if (usage->input)
+                    appendf("r");
+                if (usage->output)
+                    appendf("w");
+                if (usage->through)
+                    appendf("=");
+                if (usage->corrupted)
+                    appendf("!");
+                appendvalue(hop, value);
+            }
         }
     }
 
@@ -387,6 +407,9 @@ void hop_print(char k, struct hop* hop)
 	bool soi = false;
     char* p;
     char* header;
+
+    if (!tracing(k))
+        return;
 
     appendf(""); /* ensure the buffer has been allocated */
     bufferlen = 0;

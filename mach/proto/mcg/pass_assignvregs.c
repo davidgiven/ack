@@ -3,6 +3,7 @@
 static struct basicblock* current_bb;
 
 static int vregcount = 0;
+static struct hashtable mapping = HASHTABLE_OF_VALUES;
 
 static struct vreg* create_vreg(struct value* value)
 {
@@ -12,28 +13,32 @@ static struct vreg* create_vreg(struct value* value)
     return vreg;
 }
 
-static void create_and_map_vreg(struct hashtable* mapping, struct value* value)
+static struct vreg* create_and_map_vreg(struct value* value)
 {
     struct vreg* vreg = create_vreg(value);
-    assert(!hashtable_get(mapping, value));
-    hashtable_put(mapping, value, vreg);
+    assert(!hashtable_get(&mapping, value));
+    hashtable_put(&mapping, value, vreg);
+    return vreg;
 }
 
-static struct hop* create_move(struct hashtable* previous_mapping)
+static struct hop* clone_vregs(void)
 {
     struct hop* hop = new_hop(current_bb, NULL);
-    hop->vregmapping = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));;
-    *hop->vregmapping = empty_hashtable_of_values;
     hop->is_move = true;
 
     struct hashtable_iterator hit = {};
-    while (hashtable_next(previous_mapping, &hit))
+    while (hashtable_next(&mapping, &hit))
     {
         struct value* value = hit.key;
         struct vreg* oldvreg = hit.value;
         struct vreg* newvreg = create_vreg(value);
-        hashtable_put(hop->vregmapping, value, newvreg);
-        pmap_add(&hop->copies, oldvreg, newvreg);
+        struct valueusage* usage = hop_get_value_usage(hop, value);
+
+        hashtable_put(&mapping, value, newvreg);
+        usage->input = true;
+        usage->invreg = oldvreg;
+        usage->output = true;
+        usage->outvreg = newvreg;
     }
 
     return hop;
@@ -48,17 +53,16 @@ static bool hop_reads_value(struct hop* hop, struct value* value)
 static void assign_vregs(void)
 {
     int i, j;
-    struct hashtable* previous_mapping;
-    struct hashtable* current_mapping;
     struct hop* hop;
 
     /* Preload the mapping from the first hop. It might be a move, but that
      * does no harm. */
 
     hop = current_bb->hops.item[0];
-    current_bb->inputmapping = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));
-    *current_bb->inputmapping = empty_hashtable_of_values;
-    hashtable_empty(current_bb->inputmapping);
+    assert(current_bb->inputmapping.size == 0);
+    assert(current_bb->outputmapping.size == 0);
+    assert(mapping.size == 0);
+    current_bb->outputmapping = empty_hashtable_of_values;
 
     {
         struct hashtable_iterator hit = {};
@@ -68,36 +72,48 @@ static void assign_vregs(void)
             struct valueusage* usage = hit.value;
 
             if (usage->input || usage->through)
-            create_and_map_vreg(current_bb->inputmapping, value);
+            {
+                struct vreg* vreg = create_and_map_vreg(value);
+                hashtable_put(&current_bb->inputmapping, value, vreg);
+            }
         }
     }
 
-    previous_mapping = current_bb->inputmapping;
     for (i=0; i<current_bb->hops.count; i++)
     {
         /* Insert a parallel-move hop to copy all the vregs. */
 
-        struct hop* move = create_move(previous_mapping);
+        struct hop* move = clone_vregs();
         array_insert(&current_bb->hops, move, i);
         i++;
-        previous_mapping = move->vregmapping;
 
-        /* Copy the previous mapping to this hop, pruning out any unused values. */
+        /* Copy the previous mapping to this hop. */
 
         hop = current_bb->hops.item[i];
-        current_mapping = hop->vregmapping = heap_alloc(&proc_heap, 1, sizeof(struct hashtable));;
-        *current_mapping = empty_hashtable_of_values;
         {
             struct hashtable_iterator hit = {};
-            while (hashtable_next(previous_mapping, &hit))
+            while (hashtable_next(&mapping, &hit))
             {
                 struct value* value = hit.key;
-                if (hop_reads_value(hop, value))
-                    hashtable_put(current_mapping, value, hit.value);
+                struct vreg* vreg = hit.value;
+                hop_get_value_usage(hop, value)->invreg = vreg;
             }
         }
 
-        /* Create vregs for any new outputs. */
+        /* Prune any unused values from the mapping. */
+
+        {
+            struct hashtable_iterator hit = {};
+            while (hashtable_next(hop->valueusage, &hit))
+            {
+                struct value* value = hit.key;
+                struct valueusage* usage = hit.value;
+                if (!usage->through)
+                    hashtable_remove(&mapping, value);
+            }
+        }
+
+        /* Handle new output vregs, and propagated through vregs. */
 
         {
             struct hashtable_iterator hit = {};
@@ -106,21 +122,21 @@ static void assign_vregs(void)
                 struct value* value = hit.key;
                 struct valueusage* usage = hit.value;
 
+                assert(!(usage->through && usage->output));
+                if (usage->through)
+                    usage->outvreg = usage->invreg;
                 if (usage->output)
-                    create_and_map_vreg(current_mapping, value);
+                    usage->outvreg = create_and_map_vreg(value);
             }
         }
-
-        /* And move on to the next one. */
-
-        previous_mapping = current_mapping;
     }
 
     /* Insert one final move at the end of the block. */
 
-    hop = create_move(previous_mapping);
+    hop = clone_vregs();
     array_append(&current_bb->hops, hop);
-    current_bb->outputmapping = hop->vregmapping;
+
+    hashtable_copy_all(&mapping, &current_bb->outputmapping);
 }
 
 void pass_assign_vregs(void)
@@ -133,8 +149,10 @@ void pass_assign_vregs(void)
     {
         current_bb = dominance.preorder.item[i];
         assign_vregs();
+        hashtable_empty(&mapping);
     }
 
+    hashtable_reset(&mapping);
     tracef('V', "V: finished vreg assignment with %d vregs\n", vregcount);
 }
 

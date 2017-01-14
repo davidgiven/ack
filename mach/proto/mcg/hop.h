@@ -30,6 +30,8 @@ struct insel
 
 struct valueusage
 {
+	struct vreg* invreg;
+	struct vreg* outvreg;
 	bool input : 1;
 	bool output : 1;
 	bool through : 1;
@@ -49,7 +51,6 @@ struct hop
 	PMAPOF(struct value, struct value) equals_constraint;
 
 	struct hashtable* valueusage;
-	struct hashtable* vregmapping; /* value -> vreg */
 	PMAPOF(struct vreg, struct vreg) copies;
 };
 
