@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include "hashtable.h"
 
 struct hashnode
@@ -208,29 +209,81 @@ void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it)
 
 	lazy_init(ht);
 
-    while (!it->node)
+    if (!it->running)
     {
-        if (it->bucket == ht->num_buckets)
-			goto eof;
+        /* Find the first node and return it; the stored state in the iterator
+         * is invalid. */
 
-        it->node = ht->buckets[it->bucket];
+         while (it->bucket < ht->num_buckets)
+         {
+             it->node = ht->buckets[it->bucket];
+             if (it->node)
+                goto found;
+            it->bucket++;
+         }
+
+         /* hashtable is empty! */
+    }
+    else
+    {
+        /* The iterator is running; the stored state in the iterator points at
+         * the current node, so find the next one. */
+
+        if (!it->advanced)
+            it->node = it->node->next;
         if (it->node)
-            break;
+            goto found;
 
-        it->bucket++;
+        for (;;)
+        {
+            it->bucket++;
+            if (it->bucket == ht->num_buckets)
+                break;
+
+            it->node = ht->buckets[it->bucket];
+            if (it->node)
+                goto found;
+        }
+
+        /* nothing left found! */
     }
 
-    it->key = it->node->key;
-	it->value = it->node->value;
-    it->node = it->node->next;
-    if (!it->node)
-        it->bucket++;
+    /* EOF: reset the iterator. */
 
-    return it->value;
-
-eof:
+    it->running = false;
+    it->advanced = false;
 	it->key = it->value = NULL;
 	it->bucket = 0;
 	it->node = NULL;
 	return NULL;
+
+found:
+    it->running = true;
+    it->advanced = false;
+    it->key = it->node->key;
+	it->value = it->node->value;
+    return it->value;
+}
+
+void hashtable_delete_current(struct hashtable* ht, struct hashtable_iterator* it)
+{
+    struct hashnode** hnp;
+
+    assert(ht);
+    assert(it->running);
+
+    hnp = findnodep(ht, it->node->key);
+    it->node = it->node->next;
+    ht->freefunction(*hnp);
+    ht->size--;
+    *hnp = it->node;
+
+    it->advanced = true;
+}
+
+void hashtable_copy_all(struct hashtable* src, struct hashtable* dest)
+{
+    struct hashtable_iterator hit = {};
+    while (hashtable_next(src, &hit))
+        hashtable_put(dest, hit.key, hit.value);
 }

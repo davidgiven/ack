@@ -35,6 +35,8 @@ struct hashtable_iterator
 	void* value;
 
     /* Private */
+    bool running;
+    bool advanced;
     int bucket;
     struct hashnode* node;
 };
@@ -48,5 +50,8 @@ extern void* hashtable_get(struct hashtable* ht, void* key);
 extern void* hashtable_remove(struct hashtable* ht, void* key);
 extern void* hashtable_pop(struct hashtable* ht);
 extern void* hashtable_next(struct hashtable* ht, struct hashtable_iterator* it);
+extern void* hashtable_delete_and_next(struct hashtable* ht, struct hashtable_iterator* it);
+
+extern void hashtable_copy_all(struct hashtable* src, struct hashtable* dest);
 
 #endif
