@@ -169,11 +169,14 @@ TOKENS
 /* Used only in instruction descriptions (to generate the correct syntax). */
 
 	GPRINDIRECT        = { GPR reg; INT off; }    4    off "(" reg ")".
+	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo [" adr "](" reg ")".
 	CONST              = { INT val; }             4    val.
 
 /* Primitives */
 
 	LABEL              = { ADDR adr; }            4    adr.
+	LABEL_OFFSET_HI    = { ADDR adr; }            4    "hi " adr.
+	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo " adr.
 	LOCAL              = { INT off; }             4.
 
 /* Allows us to use regvar() to refer to registers */
@@ -282,7 +285,7 @@ INSTRUCTIONS
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
-  addis           GPR:wo, GPR:ro, CONST:ro.
+  addis           GPR:wo, GPR:ro, CONST+LABEL_OFFSET_HI:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
   andiX  "andi."  GPR:wo:cc, GPR:ro, CONST:ro.
@@ -329,10 +332,9 @@ INSTRUCTIONS
   lhz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   li32            GPR:wo, CONST:ro cost(8, 2).
-  li32            GPR:wo, LABEL:ro cost(8, 2).
   lwzu            GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lwz             GPR:wo, GPRINDIRECT+GPRINDIRECT_OFFSET_LO:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -342,7 +344,7 @@ INSTRUCTIONS
   mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
-  ori             GPR:wo, GPR:ro, CONST:ro.
+  ori             GPR:wo, GPR:ro, CONST+LABEL_OFFSET_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
@@ -368,7 +370,8 @@ INSTRUCTIONS
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
 
-  comment "!" LABEL:ro cost(0, 0).
+  fixup   ".powerpcfixup" LABEL:ro.
+  comment "!"             LABEL:ro cost(0, 0).
 
 
 
@@ -405,7 +408,9 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			li32 %2, {LABEL, %1.adr}
+			fixup {LABEL, %1.adr}
+			addis %2, R0, {LABEL_OFFSET_HI, %1.adr}
+			ori %2, %2, {LABEL_OFFSET_LO, %1.adr}
 
 /* Sign extension */
 
@@ -1142,6 +1147,13 @@ PATTERNS
 			yields {IND_RC_H, %1.reg, %1.off}
 
 	pat loi $1==INT32                  /* Load word indirect */
+		with LABEL
+			uses REG
+			gen
+				fixup {LABEL, %1.adr}
+				addis %a, R0, {LABEL_OFFSET_HI, %1.adr}
+				lwz %a, {GPRINDIRECT_OFFSET_LO, %a, %1.adr}
+			yields %a
 		with GPR
 			yields {IND_RC_W, %1, 0}
 		with SUM_RC

@@ -84,6 +84,9 @@
 %token <y_word> OP_LA
 %token <y_word> OP_LI32
 
+%token <y_word> OP_POWERPC_FIXUP
+%token <y_word> OP_HI OP_LO
+
 /* Other token types */
 
 %type <y_word> c
