@@ -102,8 +102,8 @@
 0,     OP_LA,                 0,                                       "la",
 0,     OP_LA,                 0,                                       "li",
 0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,                         "mr",
-0,     OP_HA,                 0,                                       "ha16",
-0,     OP_HAS,                0,                                       "has16",
+0,     OP_HI,                 0,                                       "hi16",
+0,     OP_HA,                0,                                        "ha16",
 0,     OP_LO,                 0,                                       "lo16",
 
 /* Branch processor instructions (page 20) */

@@ -297,6 +297,7 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
 	         ((opcode2 & 0xfc000000) == 0x60000000))
 	{
+		/* addis / ori instruction pair */
 		uint16_t hi = value >> 16;
 		uint16_t lo = value & 0xffff;
 

@@ -175,8 +175,8 @@ TOKENS
 /* Primitives */
 
 	LABEL              = { ADDR adr; }            4    adr.
+	LABEL_OFFSET_HI    = { ADDR adr; }            4    "hi16[" adr "]".
 	LABEL_OFFSET_HA    = { ADDR adr; }            4    "ha16[" adr "]".
-	LABEL_OFFSET_HAS   = { ADDR adr; }            4    "has16[" adr "]".
 	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo16[" adr "]".
 	LOCAL              = { INT off; }             4.
 
@@ -286,7 +286,7 @@ INSTRUCTIONS
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
-  addis           GPR:wo, GPR:ro, CONST+LABEL_OFFSET_HA+LABEL_OFFSET_HAS:ro.
+  addis           GPR:wo, GPR:ro, CONST+LABEL_OFFSET_HI+LABEL_OFFSET_HA:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
   andiX  "andi."  GPR:wo:cc, GPR:ro, CONST:ro.
@@ -408,7 +408,7 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			addis %2, R0, {LABEL_OFFSET_HA, %1.adr}
+			addis %2, R0, {LABEL_OFFSET_HI, %1.adr}
 			ori %2, %2, {LABEL_OFFSET_LO, %1.adr}
 
 /* Sign extension */
@@ -1149,7 +1149,7 @@ PATTERNS
 		with LABEL
 			uses REG
 			gen
-				addis %a, R0, {LABEL_OFFSET_HAS, %1.adr}
+				addis %a, R0, {LABEL_OFFSET_HA, %1.adr}
 				lwz %a, {GPRINDIRECT_OFFSET_LO, %a, %1.adr}
 			yields %a
 		with GPR

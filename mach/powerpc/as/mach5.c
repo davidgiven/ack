@@ -1,5 +1,5 @@
 
-quad emit_ha(struct expr_t* expr, bool is_signed)
+quad emit_hi(struct expr_t* expr, bool is_signed)
 {
     /* If this is a symbol reference, discard the symbol and keep only the
         * offset part. */
