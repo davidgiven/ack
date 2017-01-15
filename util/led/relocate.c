@@ -119,13 +119,14 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 		/* branch instruction */
 		return opcode1 & 0x03fffffd;
 	}
-	else
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         ((opcode2 & 0xfc000000) == 0x60000000))
 	{
-		/* If it's not a branch, we're just going to assume that the user
-		 * knows what they're doing and this is a addis/ori pair (or
-		 * compatible). */
+		/* addis / ori instruction pair */
 		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
 	}
+
+	assert(0 && "unrecognised PowerPC instruction");
 }
 
 /*
@@ -259,17 +260,17 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 		i |= value & 0x03fffffd;
 		write4(i, addr, type);
 	}
-	else
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         ((opcode2 & 0xfc000000) == 0x60000000))
 	{
-		/* If it's not a branch, we're just going to assume that the user
-		 * knows what they're doing and this is a addis/ori pair (or
-		 * compatible). */
 		uint16_t hi = value >> 16;
 		uint16_t lo = value & 0xffff;
 
 		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
 		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
 	}
+	else
+		assert(0 && "unrecognised PowerPC instruction");
 }
 
 /*
