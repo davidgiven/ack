@@ -60,7 +60,6 @@ operation
 	| OP_LIA               lia                        { emit4($1 | $2); }
 	| OP_LIL               lil                        { emit4($1 | $2); }
 	| OP_LI32              li32                       /* emitted in subrule */
-	| OP_POWERPC_FIXUP     powerpcfixup               /* emitted in subrule */
 	;
 
 c
@@ -76,32 +75,9 @@ e16
 			serror("16-bit value out of range");
 		$$ = (uint16_t) $1;
 	}
-	| OP_HI ASC_LPAR expr ASC_RPAR
-	{
-		/* If this is a symbol reference, discard the symbol and keep only the
-		 * offset part. */
-		quad type = $3.typ & S_TYP;
-		quad val = $3.val;
-
-		/* If the assembler stored a symbol for relocation later, we need to
-		 * abandon it (because we're not going to generate a relocation). */
-		if (type != S_ABS)
-			relonami = 0;
-
-		$$ = ((quad)val) >> 16;
-	}
-	| OP_LO ASC_LPAR expr ASC_RPAR
-	{
-		quad type = $3.typ & S_TYP;
-		quad val = $3.val;
-
-		/* If the assembler stored a symbol for relocation later, we need to
-		 * abandon it (because we're not going to generate a relocation). */
-		if (type != S_ABS)
-			relonami = 0;
-
-		$$ = val & 0xffff;
-	}
+	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = emit_ha(&$3, false); }
+	| OP_HAS ASC_LPAR expr ASC_RPAR          { $$ = emit_ha(&$3, true); }
+	| OP_LO ASC_LPAR expr ASC_RPAR           { $$ = emit_lo(&$3); }
 	;
 
 u8

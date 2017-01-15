@@ -9,6 +9,7 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include "out.h"
 #include "const.h"
@@ -104,6 +105,24 @@ static uint32_t get_vc4_valu(char* addr)
 	assert(0 && "unrecognised VC4 instruction");
 }
 
+static bool is_powerpc_memory_op(uint32_t opcode)
+{
+	/* Tests for any PowerPC memory indirection instruction where the payload
+	 * is a *signed* 16-bit value. */
+	switch ((opcode & 0xfc000000) >> 26)
+	{
+		case 34: /* lbz */
+		case 40: /* lhz */
+		case 32: /* lwz */
+		case 38: /* stb */
+		case 44: /* sth */
+		case 36: /* stw */
+			return true;
+	}
+
+	return false;
+}
+
 /* PowerPC fixups are complex as we need to patch up to the next two
  * instructions in one of several different ways, depending on what the
  * instructions area.
@@ -125,8 +144,23 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 		/* addis / ori instruction pair */
 		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
 	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         is_powerpc_memory_op(opcode2))
+	{
+		/* addis / memoryop instruction pair */
+		uint16_t hi = opcode1 & 0xffff;
+		uint16_t lo = opcode2 & 0xffff;
 
-	assert(0 && "unrecognised PowerPC instruction");
+		/* Undo the sign adjustment (see mach/powerpc/as/mach5.c). */
+
+		if (lo > 0x7fff)
+			hi--;
+
+		return ((hi << 16) | lo);
+	}
+
+	fatal("Don't know how to read from PowerPC fixup on instructions 0x%08x+0x%08x",
+		opcode1, opcode2);
 }
 
 /*
@@ -269,8 +303,25 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
 		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
 	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         is_powerpc_memory_op(opcode2))
+	{
+		/* addis / memoryop instruction pair */
+		uint16_t hi = value >> 16;
+		uint16_t lo = value & 0xffff;
+
+		/* Apply the sign adjustment (see mach/powerpc/as/mach5.c). */
+
+		if (lo > 0x7fff)
+			hi++;
+
+		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
+		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
+	}
+
 	else
-		assert(0 && "unrecognised PowerPC instruction");
+		fatal("Don't know how to write a PowerPC fixup to instructions 0x%08x+0x%08x",
+			opcode1, opcode2);
 }
 
 /*

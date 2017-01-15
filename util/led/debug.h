@@ -17,3 +17,5 @@ extern int DEB;
 
 extern int Verbose;
 #define verbose(s, a1, a2, a3, a4)	(Verbose && do_verbose(s, a1, a2, a3, a4))
+
+extern void fatal(char* format, ...);
