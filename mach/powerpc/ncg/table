@@ -169,14 +169,14 @@ TOKENS
 /* Used only in instruction descriptions (to generate the correct syntax). */
 
 	GPRINDIRECT        = { GPR reg; INT off; }    4    off "(" reg ")".
-	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo [" adr "](" reg ")".
+	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo16[" adr "](" reg ")".
 	CONST              = { INT val; }             4    val.
 
 /* Primitives */
 
 	LABEL              = { ADDR adr; }            4    adr.
-	LABEL_OFFSET_HI    = { ADDR adr; }            4    "hi " adr.
-	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo " adr.
+	LABEL_OFFSET_HI    = { ADDR adr; }            4    "ha16[" adr "]".
+	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo16[" adr "]".
 	LOCAL              = { INT off; }             4.
 
 /* Allows us to use regvar() to refer to registers */

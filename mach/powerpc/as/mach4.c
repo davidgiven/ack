@@ -76,12 +76,12 @@ e16
 			serror("16-bit value out of range");
 		$$ = (uint16_t) $1;
 	}
-	| OP_HI expr
+	| OP_HI ASC_LPAR expr ASC_RPAR
 	{
 		/* If this is a symbol reference, discard the symbol and keep only the
 		 * offset part. */
-		quad type = $2.typ & S_TYP;
-		quad val = $2.val;
+		quad type = $3.typ & S_TYP;
+		quad val = $3.val;
 
 		/* If the assembler stored a symbol for relocation later, we need to
 		 * abandon it (because we're not going to generate a relocation). */
@@ -90,10 +90,10 @@ e16
 
 		$$ = ((quad)val) >> 16;
 	}
-	| OP_LO expr
+	| OP_LO ASC_LPAR expr ASC_RPAR
 	{
-		quad type = $2.typ & S_TYP;
-		quad val = $2.val;
+		quad type = $3.typ & S_TYP;
+		quad val = $3.val;
 
 		/* If the assembler stored a symbol for relocation later, we need to
 		 * abandon it (because we're not going to generate a relocation). */

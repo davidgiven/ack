@@ -103,8 +103,8 @@
 0,     OP_LA,                 0,                                       "li",
 0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,                         "mr",
 0,     OP_POWERPC_FIXUP,      0,                                       ".powerpcfixup",
-0,     OP_HI,                 0,                                       "hi",
-0,     OP_LO,                 0,                                       "lo",
+0,     OP_HI,                 0,                                       "ha16",
+0,     OP_LO,                 0,                                       "lo16",
 
 /* Branch processor instructions (page 20) */
 
