@@ -164,14 +164,10 @@ register int delim;
 				Malloc((unsigned) sizeof(struct string));
 	register char *p;
 	register int len = ISTRSIZE;
-	
+
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	for( ; ; )	{
 		LoadChar(ch);
-		if( ch & 0200 ) {
-			fatal("non-ascii '\\%03o' read", ch & 0377);
-			/*NOTREACHED*/
-		}
 		if( class(ch) == STNL )	{
 			lexerror("newline in string");
 			LineNumber++;
@@ -310,11 +306,6 @@ again:
 		LoadChar(ch);
 		if( !options['C'] )		/* -C : cases are different */
 			TO_LOWER(ch);
-
-		if( (ch & 0200) && ch != EOI ) {
-			fatal("non-ascii '\\%03o' read", ch & 0377);
-			/*NOTREACHED*/
-		}
 	}
 
 	switch( class(ch) )	{
@@ -420,7 +411,7 @@ again:
 		/* dtrg: removed to allow Pascal programs to access system routines
 		 * (necessary to make them do anything useful). What's this for,
 		 * anyway? */
-		 
+
 #if 0
 		if( buf[0] == '_' ) lexerror("underscore starts identifier");
 #endif
@@ -492,7 +483,7 @@ again:
 				PushBack();
 				goto end;
 			}
-				
+
 		}
 		if( ch == 'e' || ch == 'E' )	{
 			char *tp = np;		/* save position in string */

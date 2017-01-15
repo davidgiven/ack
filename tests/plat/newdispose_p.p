@@ -9,13 +9,13 @@ type
 var
     ptr1 : iptr;
     ptr2 : iptr;
-    
+
 procedure finished;
     extern;
 
 procedure fail(line: integer);
     extern;
-    
+
 #define ASSERT(cond) \
     if (not (cond)) then fail(__LINE__)
 
