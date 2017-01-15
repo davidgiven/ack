@@ -1503,18 +1503,14 @@ PATTERNS
 			yields {OR_RC, %2, lo(%1.val)}
 
 	pat ior defined($1)                /* OR set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".ior"}
+		leaving
+			loc $1
+			cal ".ior"
 
 	/* OR set (variable), used in lang/m2/libm2/LtoUset.e */
 	pat ior !defined($1)
-		with GPR3 STACK
-			kills ALL
-			gen
-				bl {LABEL, ".ior"}
+		leaving
+			cal ".ior"
 
 	pat xor $1==4                      /* XOR word */
 		with REG REG
@@ -1572,12 +1568,10 @@ PATTERNS
 		leaving
 			loc 0
 
-	pat zer defined($1)	   	   /* Create empty set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".zer"}
+	pat zer defined($1)	   	           /* Create empty set */
+		leaving
+			loc $1
+			cal ".zer"
 
 	pat sli $1==4                      /* Shift left (second << top) */
 		with CONST_ALL GPR
@@ -1655,27 +1649,19 @@ PATTERNS
 /* Sets */
 
 	pat set defined($1)                /* Create singleton set */
-		with GPR4 STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".set"}
+		leaving
+			loc $1
+			cal ".set"
 
 	/* Create set (variable), used in lang/m2/libm2/LtoUset.e */
 	pat set !defined($1)
-		with GPR3 GPR4 STACK
-			kills ALL
-			gen
-				bl {LABEL, ".set"}
+		leaving
+			cal ".set"
 
 	pat inn defined($1)                /* Test for set bit */
-		with STACK
-			kills ALL
-			uses REG
-			gen
-				li32 %a, {CONST, $1}
-				stwu %a, {GPRINDIRECT, SP, 0-4}
-				bl {LABEL, ".inn"}
+		leaving
+			loc $1
+			cal ".inn"
 
 
 /* Boolean resolutions */
@@ -2065,6 +2051,16 @@ PATTERNS
 		leaving
 			loc $1
 			ass 4
+
+	pat lae rck $2==4                  /* Range check */
+		with GPR
+			uses CR0
+			gen
+				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 1)}
+				bc IFTRUE, LT, {LABEL, ".trap_erange"}
+				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 2)}
+				bc IFTRUE, GT, {LABEL, ".trap_erange"}
+
 
 
 

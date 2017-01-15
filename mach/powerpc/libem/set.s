@@ -3,11 +3,14 @@
 .sect .text
 
 ! Create singleton set.
-!  Stack: ( -- set )
-!  With r3 = size of set, r4 = bit number
+!  Stack: ( size bitnumber -- set )
 
 .define .set
 .set:
+	lwz     r3, 0 (sp)
+	lwz     r4, 4 (sp)
+	addi    sp, sp, 8
+
 	rlwinm	r7, r3, 30, 2, 31
 	neg	r5, r3
 	add	sp, sp, r5		! allocate set
