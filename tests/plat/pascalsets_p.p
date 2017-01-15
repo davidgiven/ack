@@ -1,7 +1,7 @@
 #
 (*$U+ -- enables underscores in identifiers *)
 
-program markrelease;
+program pascalsets;
 
 type
     charset = set of char;
