@@ -66,8 +66,7 @@ short* set_val;
 char* set_flag;
 #endif
 
-unsigned codegen(codep, ply, toplevel, costlimit, forced) byte* codep;
-unsigned costlimit;
+unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int forced)
 {
 #ifndef NDEBUG
 	byte* origcp = codep;
@@ -75,7 +74,7 @@ unsigned costlimit;
 #endif
 	unsigned totalcost = 0;
 	int inscoerc = 0;
-	int procarg[MAXPROCARG + 1];
+	int procarg[MAXPROCARG + 1] = {};
 #ifdef ALLOW_NEXTEM
 	static int paniced;
 	char* savebp = 0;
@@ -328,7 +327,6 @@ unsigned costlimit;
 				tokpatlen = (codep[-1] >> 5) & 07;
 				for (i = 0; i < tokpatlen; i++)
 					getint(tokexp[i], codep);
-				tokexp[i] = 0;
 				tp = &fakestack[stackheight - 1];
 				i = 0;
 				while (i < tokpatlen && tp >= fakestack)
@@ -860,7 +858,7 @@ unsigned costlimit;
 					swtxt();
 					if (stringno > 10000)
 					{
-						assert(stringno < 100001 + MAXPROCARG);
+						assert(stringno < 10001 + MAXPROCARG);
 						genstr(procarg[stringno - 10001]);
 					}
 					else
