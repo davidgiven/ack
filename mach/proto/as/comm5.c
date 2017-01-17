@@ -11,9 +11,16 @@
 
 extern YYSTYPE	yylval;
 
-void putval();
+static void	readcode(int);
+static int	induo(int);
+static int	inident(int);
+static int	innumber(int);
+static int	instring(int);
+static int	inescape(void);
+static int	infbsym(char *);
 
-yylex()
+int
+yylex(void)
 {
 	register c;
 
@@ -71,7 +78,7 @@ yylex()
 }
 
 void
-putval(c)
+putval(int c)
 {
 	register valu_t v;
 	register n = 0;
@@ -144,7 +151,8 @@ putval(c)
 		putc(*p++, tempfile);
 }
 
-getval(c)
+int
+getval(int c)
 {
 	register n = 0;
 	register valu_t v;
@@ -209,7 +217,8 @@ getval(c)
 
 /* ---------- lexical scan in pass 1 ---------- */
 
-nextchar()
+int
+nextchar(void)
 {
 	register c;
 
@@ -233,7 +242,8 @@ nextchar()
 	return(c);
 }
 
-readcode(n)
+static void
+readcode(int n)
 {
 	register c;
 
@@ -252,8 +262,8 @@ readcode(n)
 	} while (--n);
 }
 
-induo(c)
-register c;
+static int
+induo(int c)
 {
 	static short duo[] = {
 		('='<<8) | '=', OP_EQ,
@@ -277,8 +287,8 @@ register c;
 
 static char name[NAMEMAX+1];
 
-inident(c)
-register  c;
+static int
+inident(int c)
 {
 	register char *p = name;
 	register item_t *ip;
@@ -309,8 +319,7 @@ register  c;
 
 #ifdef ASLD
 char *
-readident(c)
-register c;
+readident(int c)
 {
 	register n = NAMEMAX;
 	register char *p = name;
@@ -326,8 +335,8 @@ register c;
 }
 #endif
 
-innumber(c)
-register c;
+static int
+innumber(int c)
 {
 	register char *p;
 	register radix;
@@ -373,7 +382,8 @@ register c;
 	return(NUMBER);
 }
 
-instring(termc)
+static int
+instring(int termc)
 {
 	register char *p;
 	register c;
@@ -412,7 +422,8 @@ instring(termc)
 	return(STRING);
 }
 
-inescape()
+static int
+inescape(void)
 {
 	register c, j, r;
 
@@ -442,8 +453,8 @@ inescape()
 	return(c);
 }
 
-infbsym(p)
-register char *p;
+static int
+infbsym(char *p)
 {
 	register lab;
 	register item_t *ip;
@@ -469,8 +480,8 @@ ok:
 	return(FBSYM);
 }
 
-hash(p)
-register char *p;
+int
+hash(char *p)
 {
 	register unsigned short h;
 	register c;
@@ -484,8 +495,7 @@ register char *p;
 }
 
 item_t *
-item_search(p)
-char *p;
+item_search(char *p)
 {
 	register h;
 	register item_t *ip;
@@ -503,15 +513,15 @@ done:
 	return(ip);
 }
 
-item_insert(ip, h)
-item_t *ip;
+void
+item_insert(item_t *ip, int h)
 {
 	ip->i_next = hashtab[h];
 	hashtab[h] = ip;
 }
 
 item_t *
-item_alloc(typ)
+item_alloc(int typ)
 {
 	register item_t *ip;
 	static nleft = 0;
@@ -532,8 +542,7 @@ item_alloc(typ)
 }
 
 item_t *
-fb_alloc(lab)
-register lab;
+fb_alloc(int lab)
 {
 	register item_t *ip, *p;
 
@@ -548,8 +557,7 @@ register lab;
 }
 
 item_t *
-fb_shift(lab)
-register lab;
+fb_shift(int lab)
 {
 	register item_t *ip;
 
