@@ -37,7 +37,7 @@ void chkstr();
 string myalloc(size) {
 	register string p;
 
-	p = (string) malloc((unsigned)size);
+	p = (string) calloc((unsigned)size, 1);
 	if (p==0)
 		fatal("Out of memory");
 	return(p);

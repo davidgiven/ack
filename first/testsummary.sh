@@ -26,6 +26,13 @@ echo "$(echo "$timedout" | wc -w) timed out"
 echo "$(echo "$failed" | wc -w) failed"
 echo ""
 
+if [ "$failed" != "" ]; then
+	echo "Failing test logs:"
+	for t in $failed; do
+		echo $t
+	done
+	exit 1
+fi
 if [ "$failed" != "" -o "$timedout" != "" ]; then
 	echo "Test status: SAD FACE (tests are failing)"
 	exit 1
