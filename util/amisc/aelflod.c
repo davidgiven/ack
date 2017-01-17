@@ -43,6 +43,7 @@ char* stringarea;
 uint32_t ack_off_char;
 int nstab = 0;                          /* S_STB symbol count */
 int nsym = 0;                           /* other symbol count */
+int nlocal = 0;                         /* local symbols */
 
 char* outputfile = NULL;                /* Name of output file, or NULL */
 char* program;                          /* Name of current program: argv[0] */
@@ -347,17 +348,29 @@ void emit_stab(void)
 void emit_symtab(void)
 {
 	struct outname* n;
-	int i;
+	int i, pass;
+	bool global;
 
-	for (i = 0; i < outhead.oh_nname; i++) {
-		n = &outname[i];
-		if (!(n->on_type & S_STB)) {
-			emit32(cvname(n));          /* name index */
-			emit32(n->on_valu);         /* value */
-			emit32(0);                  /* size = unknown */
-			emit8(cvinfo(n));           /* info */
-			emit8(0);                   /* other */
-			emit16(cvsect(n));          /* section */
+	/* ELF .symtab must have local symbols before other symbols.
+	 * We emit locals in pass 0, globals in pass 1. */
+	for (pass = 0; pass < 2; pass++) {
+		for (i = 0; i < outhead.oh_nname; i++) {
+			n = &outname[i];
+
+			/* Don't emit .stab symbol in .symtab. */
+			if (n->on_type & S_STB)
+				continue;
+
+			global = (n->on_type & S_EXT);
+			if ((pass == 0 && !global) ||
+			    (pass == 1 && global)) {
+				emit32(cvname(n));    /* name index */
+				emit32(n->on_valu);   /* value */
+				emit32(0);            /* size = unknown */
+				emit8(cvinfo(n));     /* info */
+				emit8(0);             /* other */
+				emit16(cvsect(n));    /* section */
+			}
 		}
 	}
 }
@@ -386,8 +399,8 @@ void emit_shstrtab(void)
 
 void emit_sh(int i)
 {
-	uint32_t name, type, flags, addr, offset, size, addralign,
-		 link, entsize;
+	uint32_t name, type, flags, addr, offset, size, link, info,
+		 addralign, entsize;
 
 	/* If no debugger symbols, skip .stab and .stabstr */
 	if (nstab == 0 && (i == N_STAB || i == N_STABSTR))
@@ -412,6 +425,7 @@ void emit_sh(int i)
 			break;
 		case N_STABSTR:
 		case N_STRTAB:
+		case N_SHSTRTAB:
 			type = 3;  /* SHT_STRTAB */
 			break;
 		default:
@@ -495,6 +509,15 @@ void emit_sh(int i)
 			break;
 	}
 
+	switch (i) {
+		case N_SYMTAB:
+			info = nlocal;
+			break;
+		default:
+			info = 0;
+			break;
+	}
+
 	emit32(name);
 	emit32(type);
 	emit32(flags);
@@ -502,7 +525,7 @@ void emit_sh(int i)
 	emit32(offset);
 	emit32(size);
 	emit32(link);
-	emit32(0);          /* info */
+	emit32(info);
 	emit32(addralign);
 	emit32(entsize);
 }
@@ -585,10 +608,13 @@ int rnames(FILE* f)
 		outname[i].on_type = uget2(c); c += 2;
 		outname[i].on_desc = uget2(c); c += 2;
 		outname[i].on_valu = get4(c);
-		if (outname[i].on_type & S_STB)
+		if (outname[i].on_type & S_STB) {
 			nstab++;
-		else
+		} else {
 			nsym++;
+			if (!(outname[i].on_type & S_EXT))
+				nlocal++;
+		}
 	}
 
 	stringarea = malloc(outhead.oh_nchar);
