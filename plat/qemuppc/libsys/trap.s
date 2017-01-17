@@ -63,10 +63,3 @@ EUNIMPL = 63		! unimplemented em-instruction called
 .trp:
 .trap:
 	b .trp					! spin forever
-
-.define .sig
-.sig:
-	lwz r3, 0(sp)
-	li32 r4, .trppc
-	stw r3, 0(r4)
-	bclr ALWAYS, 0, 0		! return

@@ -3,7 +3,7 @@
 .sect .text
 
 ! Create singleton set.
-!  Stack: ( size bitnumber -- set )
+!  Stack: ( bitnumber size -- set )
 
 .define .set
 .set:

@@ -1466,11 +1466,13 @@ PATTERNS
 			yields %a
 
 	pat and defined($1)                /* AND set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".and"}
+		leaving
+			loc $1
+			cal ".and"
+
+	pat and !defined($1)
+		leaving
+			cal ".and"
 
 	pat ior $1==4                      /* OR word */
 		with REG NOT_R
@@ -1559,10 +1561,13 @@ PATTERNS
 			yields {NOT_R, %1}
 
 	pat com defined($1)                /* NOT set */
-		with STACK
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".com"}
+		leaving
+			loc $1
+			cal ".com"
+
+	pat com !defined($1)
+		leaving
+			cal ".com"
 
 	pat zer $1==4                      /* Push zero */
 		leaving
@@ -1661,6 +1666,10 @@ PATTERNS
 	pat inn defined($1)                /* Test for set bit */
 		leaving
 			loc $1
+			cal ".inn"
+
+	pat inn !defined($1)
+		leaving
 			cal ".inn"
 
 
@@ -2053,13 +2062,14 @@ PATTERNS
 			ass 4
 
 	pat lae rck $2==4                  /* Range check */
-		with GPR
+		with REG
 			uses CR0
 			gen
 				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 1)}
 				bc IFTRUE, LT, {LABEL, ".trap_erange"}
 				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 2)}
 				bc IFTRUE, GT, {LABEL, ".trap_erange"}
+			yields %1
 
 
 

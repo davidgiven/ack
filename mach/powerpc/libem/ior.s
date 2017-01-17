@@ -3,7 +3,7 @@
 .sect .text
 
 ! Set union.
-!  Stack: ( size b a -- a+b )
+!  Stack: ( b a size -- a+b )
 
 .define .ior
 .ior:

@@ -3,13 +3,13 @@
 .sect .text
 
 ! Bounds check. Traps if the value is out of range.
-!  Stack: ( descriptor value -- )
+!  Stack: ( value descriptor -- value )
 
 .define .rck
 .rck:
     lwz r3, 0 (sp)
     lwz r4, 4 (sp)
-    addi sp, sp, 8
+    addi sp, sp, 4 ! leave value on stack
 
     lwz r5, 0 (r3)
     cmp cr0, 0, r4, r5

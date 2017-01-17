@@ -519,7 +519,19 @@ static void insn_simple(int opcode)
         }
 
         case op_trp: helper_function(".trp"); break;
-        case op_sig: helper_function(".sig"); break;
+
+        case op_sig:
+        {
+            struct ir* value = pop(EM_pointersize);
+            appendir(
+                store(
+                    EM_pointersize,
+                    new_labelir(".trppc"), 0,
+                    value
+                )
+            );
+            break;
+        }
 
         case op_rtt:
         {
@@ -614,7 +626,7 @@ static void simple_alu1(int opcode, int size, int irop, const char* fallback)
     if (size > (2*EM_wordsize))
     {
         if (!fallback)
-            fatal("treebuilder: can't do opcode %d with size %d", opcode, size);
+            fatal("treebuilder: can't do opcode %s with size %d", em_mnem[opcode - sp_fmnem], size);
         push(
             new_wordir(size)
         );
@@ -638,7 +650,7 @@ static void simple_alu2(int opcode, int size, int irop, const char* fallback)
     if (size > (2*EM_wordsize))
     {
         if (!fallback)
-            fatal("treebuilder: can't do opcode %d with size %d", opcode, size);
+            fatal("treebuilder: can't do opcode %s with size %d", em_mnem[opcode - sp_fmnem], size);
         push(
             new_wordir(size)
         );
@@ -751,10 +763,10 @@ static void insn_ivalue(int opcode, arith value)
         case op_rmu: simple_alu2(opcode, value, IR_MODU, NULL); break;
         case op_dvu: simple_alu2(opcode, value, IR_DIVU, NULL); break;
 
-        case op_and: simple_alu2(opcode, value, IR_AND, NULL); break;
+        case op_and: simple_alu2(opcode, value, IR_AND, ".and"); break;
         case op_ior: simple_alu2(opcode, value, IR_OR, ".ior"); break;
         case op_xor: simple_alu2(opcode, value, IR_EOR, NULL); break;
-        case op_com: simple_alu1(opcode, value, IR_NOT, NULL); break;
+        case op_com: simple_alu1(opcode, value, IR_NOT, ".com"); break;
 
         case op_adf: simple_alu2(opcode, value, IR_ADDF, NULL); break;
         case op_sbf: simple_alu2(opcode, value, IR_SUBF, NULL); break;

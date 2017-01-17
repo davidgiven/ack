@@ -63,7 +63,9 @@ EUNIMPL = 63		! unimplemented em-instruction called
 	addi r3, r0, ERANGE
 	b .trap
 
+.define .trp
 .define .trap
+.trp:
 .trap:
 	cmpi cr0, 0, r3, 15      ! traps >15 can't be ignored
 	bc IFTRUE, LT, 1f
