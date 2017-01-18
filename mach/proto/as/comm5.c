@@ -22,7 +22,7 @@ static int	infbsym(char *);
 int
 yylex(void)
 {
-	register c;
+	int c, c0, c1;
 
 	if (pass == PASS_1) {
 		/* scan the input file */
@@ -59,19 +59,24 @@ yylex(void)
 		/* produce the intermediate token file */
 		if (c <= 0)
 			return(0);
-		if (c <= 127)
+		if (c < 256) {
 			putc(c, tempfile);
-		else
+			putc(0, tempfile);
+		} else {
 			putval(c);
+		}
 	} else {
 		/* read from intermediate token file */
-		c = getc(tempfile);
-		if (c == EOF)
+		c0 = getc(tempfile);
+		if (c0 == EOF)
 			return(0);
-		if (c > 127) {
-			c += 128;
+		c1 = getc(tempfile);
+		if (c1 == EOF)
+			return(0);
+
+		c = c0 + (c1 << 8);
+		if (c >= 256)
 			c = getval(c);
-		}
 	}
 	curr_token = c;
 	return(c);
@@ -84,7 +89,7 @@ putval(int c)
 	register n = 0;
 	register char *p = 0;
 
-	assert(c >= 256 && c < 256+128);
+	assert(c == (c & 0xffff));
 	switch (c) {
 	case CODE1:
 		n = 1; goto putnum;
@@ -99,9 +104,11 @@ putval(int c)
 				break;
 			v >>= 8;
 		}
+		assert(n <= 4);
 		c = NUMBER0 + n;
 	putnum:
-		putc(c-128, tempfile);
+		putc(c, tempfile);
+		putc(c >> 8, tempfile);
 		v = yylval.y_valu;
 		while (--n >= 0)
 			putc((int) (v >> (n*8)), tempfile);
@@ -117,14 +124,15 @@ putval(int c)
 #endif
 	case STRING:
 		v = stringlen;
-		putc(c-128, tempfile);
+		putc(c, tempfile);
+		putc(c >> 8, tempfile);
 		for (n = 0; n < sizeof(v); n++) {
 			if (v == 0)
 				break;
 			v >>= 8;
 		}
-		c = NUMBER0 + n;
-		putc(c-128, tempfile);
+		assert(n <= 4);
+		putc(n, tempfile);
 		v = stringlen;
 		while (--n >= 0)
 			putc((int) (v >> (n*8)), tempfile);
@@ -146,7 +154,8 @@ putval(int c)
 		n = sizeof(word_t);
 		p = (char *) &yylval.y_word; break;
 	}
-	putc(c-128, tempfile);
+	putc(c, tempfile);
+	putc(c >> 8, tempfile);
 	while (--n >= 0)
 		putc(*p++, tempfile);
 }
@@ -193,7 +202,7 @@ getval(int c)
 		p = (char *) &yylval.y_strp; break;
 #endif
 	case STRING:
-		getval(getc(tempfile)+128);
+		getval(getc(tempfile)+NUMBER0);
 		stringlen = n = yylval.y_valu;
 		p = stringbuf;
 		p[n] = '\0'; break;
