@@ -11,7 +11,9 @@ static char rcsid[] = "$Id$";
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <out.h>
 #include "const.h"
 #include "debug.h"
@@ -168,7 +170,7 @@ first_pass(argv)
 		case 'c':
 			/*
 			 * Leave relocation information in the output, so that
-			 * a next pass can see where relocation was done. The 
+			 * a next pass can see where relocation was done. The
 			 * resulting output however is no longer relocatable.
 			 */
 			flagword &= ~RFLAG;
