@@ -11,11 +11,18 @@
 
 extern YYSTYPE	yylval;
 
-void putval();
+static void	readcode(int);
+static int	induo(int);
+static int	inident(int);
+static int	innumber(int);
+static int	instring(int);
+static int	inescape(void);
+static int	infbsym(char *);
 
-yylex()
+int
+yylex(void)
 {
-	register c;
+	int c, c0, c1;
 
 	if (pass == PASS_1) {
 		/* scan the input file */
@@ -52,32 +59,37 @@ yylex()
 		/* produce the intermediate token file */
 		if (c <= 0)
 			return(0);
-		if (c <= 127)
+		if (c < 256) {
 			putc(c, tempfile);
-		else
+			putc(0, tempfile);
+		} else {
 			putval(c);
+		}
 	} else {
 		/* read from intermediate token file */
-		c = getc(tempfile);
-		if (c == EOF)
+		c0 = getc(tempfile);
+		if (c0 == EOF)
 			return(0);
-		if (c > 127) {
-			c += 128;
+		c1 = getc(tempfile);
+		if (c1 == EOF)
+			return(0);
+
+		c = c0 + (c1 << 8);
+		if (c >= 256)
 			c = getval(c);
-		}
 	}
 	curr_token = c;
 	return(c);
 }
 
 void
-putval(c)
+putval(int c)
 {
 	register valu_t v;
 	register n = 0;
 	register char *p = 0;
 
-	assert(c >= 256 && c < 256+128);
+	assert(c == (c & 0xffff));
 	switch (c) {
 	case CODE1:
 		n = 1; goto putnum;
@@ -92,9 +104,11 @@ putval(c)
 				break;
 			v >>= 8;
 		}
+		assert(n <= 4);
 		c = NUMBER0 + n;
 	putnum:
-		putc(c-128, tempfile);
+		putc(c, tempfile);
+		putc(c >> 8, tempfile);
 		v = yylval.y_valu;
 		while (--n >= 0)
 			putc((int) (v >> (n*8)), tempfile);
@@ -110,14 +124,15 @@ putval(c)
 #endif
 	case STRING:
 		v = stringlen;
-		putc(c-128, tempfile);
+		putc(c, tempfile);
+		putc(c >> 8, tempfile);
 		for (n = 0; n < sizeof(v); n++) {
 			if (v == 0)
 				break;
 			v >>= 8;
 		}
-		c = NUMBER0 + n;
-		putc(c-128, tempfile);
+		assert(n <= 4);
+		putc(n, tempfile);
 		v = stringlen;
 		while (--n >= 0)
 			putc((int) (v >> (n*8)), tempfile);
@@ -139,12 +154,14 @@ putval(c)
 		n = sizeof(word_t);
 		p = (char *) &yylval.y_word; break;
 	}
-	putc(c-128, tempfile);
+	putc(c, tempfile);
+	putc(c >> 8, tempfile);
 	while (--n >= 0)
 		putc(*p++, tempfile);
 }
 
-getval(c)
+int
+getval(int c)
 {
 	register n = 0;
 	register valu_t v;
@@ -185,7 +202,7 @@ getval(c)
 		p = (char *) &yylval.y_strp; break;
 #endif
 	case STRING:
-		getval(getc(tempfile)+128);
+		getval(getc(tempfile)+NUMBER0);
 		stringlen = n = yylval.y_valu;
 		p = stringbuf;
 		p[n] = '\0'; break;
@@ -209,7 +226,8 @@ getval(c)
 
 /* ---------- lexical scan in pass 1 ---------- */
 
-nextchar()
+int
+nextchar(void)
 {
 	register c;
 
@@ -233,7 +251,8 @@ nextchar()
 	return(c);
 }
 
-readcode(n)
+static void
+readcode(int n)
 {
 	register c;
 
@@ -252,8 +271,8 @@ readcode(n)
 	} while (--n);
 }
 
-induo(c)
-register c;
+static int
+induo(int c)
 {
 	static short duo[] = {
 		('='<<8) | '=', OP_EQ,
@@ -277,8 +296,8 @@ register c;
 
 static char name[NAMEMAX+1];
 
-inident(c)
-register  c;
+static int
+inident(int c)
 {
 	register char *p = name;
 	register item_t *ip;
@@ -309,8 +328,7 @@ register  c;
 
 #ifdef ASLD
 char *
-readident(c)
-register c;
+readident(int c)
 {
 	register n = NAMEMAX;
 	register char *p = name;
@@ -326,8 +344,8 @@ register c;
 }
 #endif
 
-innumber(c)
-register c;
+static int
+innumber(int c)
 {
 	register char *p;
 	register radix;
@@ -373,7 +391,8 @@ register c;
 	return(NUMBER);
 }
 
-instring(termc)
+static int
+instring(int termc)
 {
 	register char *p;
 	register c;
@@ -412,7 +431,8 @@ instring(termc)
 	return(STRING);
 }
 
-inescape()
+static int
+inescape(void)
 {
 	register c, j, r;
 
@@ -442,8 +462,8 @@ inescape()
 	return(c);
 }
 
-infbsym(p)
-register char *p;
+static int
+infbsym(char *p)
 {
 	register lab;
 	register item_t *ip;
@@ -469,8 +489,8 @@ ok:
 	return(FBSYM);
 }
 
-hash(p)
-register char *p;
+int
+hash(char *p)
 {
 	register unsigned short h;
 	register c;
@@ -484,8 +504,7 @@ register char *p;
 }
 
 item_t *
-item_search(p)
-char *p;
+item_search(char *p)
 {
 	register h;
 	register item_t *ip;
@@ -503,15 +522,15 @@ done:
 	return(ip);
 }
 
-item_insert(ip, h)
-item_t *ip;
+void
+item_insert(item_t *ip, int h)
 {
 	ip->i_next = hashtab[h];
 	hashtab[h] = ip;
 }
 
 item_t *
-item_alloc(typ)
+item_alloc(int typ)
 {
 	register item_t *ip;
 	static nleft = 0;
@@ -532,8 +551,7 @@ item_alloc(typ)
 }
 
 item_t *
-fb_alloc(lab)
-register lab;
+fb_alloc(int lab)
 {
 	register item_t *ip, *p;
 
@@ -548,8 +566,7 @@ register lab;
 }
 
 item_t *
-fb_shift(lab)
-register lab;
+fb_shift(int lab)
 {
 	register item_t *ip;
 
