@@ -6,8 +6,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "out.h"
 #include "const.h"
@@ -75,7 +77,7 @@ end_write()
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++)
 		wrt_name(sectname(sectindex), 1);
 }
-	
+
 wrt_emit(emit, sectindex, cnt)
 	char		*emit;
 	int		sectindex;

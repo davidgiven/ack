@@ -102,6 +102,9 @@
 0,     OP_LA,                 0,                                       "la",
 0,     OP_LA,                 0,                                       "li",
 0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,                         "mr",
+0,     OP_HI,                 0,                                       "hi16",
+0,     OP_HA,                0,                                        "ha16",
+0,     OP_LO,                 0,                                       "lo16",
 
 /* Branch processor instructions (page 20) */
 
@@ -270,7 +273,7 @@
 0,     OP_RS_RA_SH_ME6_SH_C,  30<<26 | 1<<2,                           "rldicr",
 0,     OP_RS_RA_SH_MB6_SH_C,  30<<26 | 2<<2,                           "rldic",
 0,     OP_RS_RA_SH_MB5_ME5_C, 21<<26,                                  "rlwinm",
-0,     OP_RS_RA_RB_MB6_C,     30<<26 | 8<<1,                           "rldcl", 
+0,     OP_RS_RA_RB_MB6_C,     30<<26 | 8<<1,                           "rldcl",
 0,     OP_RS_RA_RB_ME6_C,     30<<26 | 9<<1,                           "rldcr",
 0,     OP_RS_RA_RB_MB5_ME5_C, 23<<26,                                  "rlwnm",
 0,     OP_RS_RA_SH_MB6_SH_C,  30<<26 | 3<<2,                           "rldimi",

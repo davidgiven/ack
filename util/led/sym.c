@@ -10,8 +10,10 @@ static char rcsid[] = "$Id$";
  * Symbol table management.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "out.h"
 #include "const.h"
 #include "memory.h"
@@ -49,7 +51,7 @@ init_symboltable()
  * in the hash table is followed. If the names match, a pointer to the outname
  * in this element of the list is returned. When a match cannot be found,
  * NIL is returned.
- */ 
+ */
 struct outname *
 searchname(string, hashval)
 	char			*string;
@@ -74,7 +76,7 @@ searchname(string, hashval)
 				debug("found %x, %x, %lx\n",
 					name->on_type, name->on_desc, name->on_valu, 0);
 				return name;
-			}	
+			}
 		symindex = sym->sy_next;
 	}
 	/* Not found. */

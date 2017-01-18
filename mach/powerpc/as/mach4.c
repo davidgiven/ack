@@ -19,9 +19,9 @@ operation
 	| OP_FRS_RA_D          FPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_FRS_RA_RB         FPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_FRT_FRA_FRB_C     c FPR ',' FPR ',' FPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<11)); }
-	| OP_FRT_FRA_FRC_FRB_C c FPR ',' FPR ',' FPR ',' FPR { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($9<<11) | ($7<<6)); } 
+	| OP_FRT_FRA_FRC_FRB_C c FPR ',' FPR ',' FPR ',' FPR { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($9<<11) | ($7<<6)); }
 	| OP_FRT_FRA_FRC_C     c FPR ',' FPR ',' FPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<6)); }
-	| OP_FRT_FRB_C         c FPR ',' FPR              { emit4($1 | $2 | ($3<<21) | ($5<<11)); } 
+	| OP_FRT_FRB_C         c FPR ',' FPR              { emit4($1 | $2 | ($3<<21) | ($5<<11)); }
 	| OP_FRT_RA_D          FPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_FRT_RA_RB         FPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_FRT_C             c FPR                      { emit4($1 | $2 | ($3<<21)); }
@@ -40,15 +40,15 @@ operation
 	| OP_RS_RA_D           GPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RS_RA_DS          GPR ',' ds '(' GPR ')'     { emit4($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RS_RA_NB          GPR ',' GPR ',' nb         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
-	| OP_RS_RA_UI          GPR ',' GPR ',' e16        { emit4($1 | ($4<<21) | ($2<<16) | $6); } 
-	| OP_RS_RA_UI_CC       C GPR ',' GPR ',' e16      { emit4($1 | ($5<<21) | ($3<<16) | $7); } 
+	| OP_RS_RA_UI          GPR ',' GPR ',' e16        { emit4($1 | ($4<<21) | ($2<<16) | $6); }
+	| OP_RS_RA_UI_CC       C GPR ',' GPR ',' e16      { emit4($1 | ($5<<21) | ($3<<16) | $7); }
 	| OP_RS_RA_RB          GPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RS_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
 	| OP_RS_RA_RA_C        c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($5<<11)); }
-	| OP_RS_RA_RB_MB5_ME5_C c GPR ',' GPR ',' GPR ',' u5 ',' u5 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | ($9<<6) | ($11<<1)); }  
+	| OP_RS_RA_RB_MB5_ME5_C c GPR ',' GPR ',' GPR ',' u5 ',' u5 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | ($9<<6) | ($11<<1)); }
 	| OP_RS_RA_RB_MB6_C    c GPR ',' GPR ',' GPR ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | (($9&0x1F)<<6) | (($9&0x20)>>0)); }
 	| OP_RS_RA_RB_ME6_C    c GPR ',' GPR ',' GPR ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | (($9&0x1F)<<6) | (($9&0x20)>>0)); }
-	| OP_RS_RA_SH_MB5_ME5_C c GPR ',' GPR ',' u5 ',' u5 ',' u5 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | ($9<<6) | ($11<<1)); }  
+	| OP_RS_RA_SH_MB5_ME5_C c GPR ',' GPR ',' u5 ',' u5 ',' u5 { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11) | ($9<<6) | ($11<<1)); }
 	| OP_RS_RA_SH_MB6_SH_C  c GPR ',' GPR ',' u6 ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | (($7&0x1F)<<11) | ($9<<6) | (($7&0x20)>>4)); }
 	| OP_RS_RA_SH_ME6_SH_C  c GPR ',' GPR ',' u6 ',' u6 { emit4($1 | $2 | ($5<<21) | ($3<<16) | (($7&0x1F)<<11) | ($9<<6) | (($7&0x20)>>4)); }
 	| OP_RS_RA_SH5_C       c GPR ',' GPR ',' u5       { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
@@ -66,7 +66,7 @@ c
 	: /* nothing */                          { $$ = 0; }
 	| C                                      { $$ = 1; }
 	;
-	
+
 e16
 	: absexp
 	{
@@ -75,8 +75,11 @@ e16
 			serror("16-bit value out of range");
 		$$ = (uint16_t) $1;
 	}
+	| OP_HI ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, false); }
+	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, true); }
+	| OP_LO ASC_LPAR expr ASC_RPAR           { $$ = emit_lo(&$3); }
 	;
-		
+
 u8
 	: absexp
 	{
@@ -85,7 +88,7 @@ u8
 		$$ = $1;
 	}
 	;
-	
+
 u7
 	: absexp
 	{
@@ -94,7 +97,7 @@ u7
 		$$ = $1;
 	}
 	;
-	
+
 u6
 	: absexp
 	{
@@ -103,7 +106,7 @@ u6
 		$$ = $1;
 	}
 	;
-	
+
 u5
 	: absexp
 	{
@@ -112,7 +115,7 @@ u5
 		$$ = $1;
 	}
 	;
-	
+
 u4
 	: absexp
 	{
@@ -121,7 +124,7 @@ u4
 		$$ = $1;
 	}
 	;
-	
+
 u1
 	: absexp
 	{
@@ -130,7 +133,7 @@ u1
 		$$ = $1;
 	}
 	;
-	
+
 u2
 	: absexp
 	{
@@ -139,7 +142,7 @@ u2
 		$$ = $1;
 	}
 	;
-	
+
 ds
 	: e16
 	{
@@ -148,26 +151,26 @@ ds
 		$$ = $1;
 	}
 	;
-	
+
 nb
 	: absexp
 	{
 		if (($1 < 1) || ($1 > 32))
 			serror("register count must be in the range 1..32");
-	
+
 		if ($1 == 32)
 			$$ = 0;
 		else
-			$$ = $1;	
+			$$ = $1;
 	}
 	;
-	
+
 bdl
 	: expr
 	{
 		int dist = $1.val - DOTVAL;
 		fit(fitx(dist, 25));
-		
+
 		if (dist & 0x3)
 			serror("jump targets must be 4-aligned");
 
@@ -183,7 +186,7 @@ bda
 	{
 		int target = $1.val;
 		fit(fitx(target, 16));
-		
+
 		if (target & 0x3)
 			serror("jump targets must be 4-aligned");
 
@@ -193,7 +196,7 @@ bda
 		$$ = target & 0xFFFD;
 	}
 	;
-	
+
 li32
 	: GPR ',' expr
 	{
@@ -215,7 +218,7 @@ lil
 	{
 		int dist = $1.val - DOTVAL;
 		fit(fitx(dist, 26));
-		
+
 		if (dist & 0x3)
 			serror("jump targets must be 4-aligned");
 
@@ -223,13 +226,13 @@ lil
 		$$ = dist & 0x03FFFFFD;
 	}
 	;
-	
+
 lia
 	: expr
 	{
 		int target = $1.val;
 		fit(fitx(target, 26));
-		
+
 		if (target & 0x3)
 			serror("jump targets must be 4-aligned");
 
@@ -246,5 +249,16 @@ spr_num
 			serror("spr number out of range");
 		/* mfspr, mtspr swap the low and high 5 bits */
 		$$ = ($1 >> 5) | (($1 & 0x1f) << 5);
+	}
+	;
+
+powerpcfixup
+	: expr
+	{
+		quad type = $1.typ & S_TYP;
+		quad val = $1.val;
+		if (type == S_ABS)
+			serror(".powerpcfixup is useless on absolute values");
+		newrelo($1.typ, RELOPPC | FIXUPFLAGS);
 	}
 	;

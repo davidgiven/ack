@@ -6,6 +6,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <out.h>
 #include "const.h"
 #include "memory.h"
@@ -60,7 +64,7 @@ generate_section_names()
 	extern struct outsect	outsect[];
 	extern char		*core_alloc();
 
-	size = (long)outhead.oh_nsect * sizeof(struct outname); 
+	size = (long)outhead.oh_nsect * sizeof(struct outname);
 	name = (struct outname *)core_alloc(ALLOGLOB, size);
 	if (name == (struct outname *)0)
 		return;

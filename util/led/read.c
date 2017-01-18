@@ -6,6 +6,11 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 int	infile;	/* The current input file. */
 
 rd_fatal()
