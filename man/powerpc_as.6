@@ -1,0 +1,33 @@
+.TH POWERPC_AS 1
+.ad
+.SH NAME
+powerpc_as \- assembler for PowerPC
+
+.SH SYNOPSIS
+as [options] argument ...
+
+.SH DESCRIPTION
+This assembler is made with the general framework
+described in \fIuni_ass\fP(6).
+
+.SH SYNTAX
+Most 32-bit integer and floating point instructions are supported, but not many
+short form instructions. Instructions which take 16-bit operands can additionally
+use the following special functions:
+
+.IP hi16[value], ha16[value]
+Returns the high half of the value of the expression; if the value is not absolute,
+also generates the appropriate fixup. Use of either of these \fImust\fR be followed,
+in the next instruction, by the corresponding use of \fBlo16[]\fR. Use \fBhi16[]\fR
+if the low half is going to interpret its payload as an unsigned value, and
+\fBha16[]\fR if it will be interpreted as a signed value (so that the high half can
+be adjusted to match).
+
+.IP lo16[]
+Returns the low half of the value of the expression. No fixup is generated. Use of
+\fBlo16[]\fR must come in the instruction immediately after a use of \fBhi16[]\fR or
+\fBha16[]\fR.
+
+.SH "SEE ALSO"
+uni_ass(6),
+ack(1)
