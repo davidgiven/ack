@@ -94,8 +94,8 @@ InitTypes()
 	/* character type
 	*/
 	char_type = standard_type(T_CHAR, 1, (arith) 1);
-	char_type->enm_ncst = 128;	/* only 7 bits ASCII characters */
-	
+	char_type->enm_ncst = 256; /* all bytes */
+
 	/* boolean type
 	*/
 	bool_type = standard_type(T_ENUMERATION, 1, (arith) 1);

@@ -3,11 +3,13 @@
 .sect .text
 
 ! Create empty set.
-!  Stack: ( -- set )
-!  With r3 = size of set
+!  Stack: ( size -- set )
 
 .define .zer
 .zer:
+	lwz     r3, 0(sp)
+	addi    sp, sp, 4
+
 	rlwinm	r7, r3, 30, 2, 31
 	addi	r4, r0, 0		! r4 = zero
 	neg	r5, r3

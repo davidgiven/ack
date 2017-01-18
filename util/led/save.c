@@ -10,8 +10,10 @@ static char rcsid[] = "$Id$";
  * If everything is kept in core, we must save some things for the second pass.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "arch.h"
 #include "out.h"

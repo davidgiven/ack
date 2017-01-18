@@ -3,11 +3,13 @@
 .sect .text
 
 ! Set union.
-!  Stack: ( b a -- a+b )
-!  With r3 = size of set
+!  Stack: ( b a size -- a+b )
 
 .define .ior
 .ior:
+	lwz r3, 0 (sp)
+	addi sp, sp, 4
+
 	mr	r4, sp			! r4 = ptr to set a
 	add	r5, sp, r3		! r5 = ptr to set b
 	rlwinm	r6, r3, 30, 2, 31

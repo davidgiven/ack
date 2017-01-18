@@ -169,11 +169,15 @@ TOKENS
 /* Used only in instruction descriptions (to generate the correct syntax). */
 
 	GPRINDIRECT        = { GPR reg; INT off; }    4    off "(" reg ")".
+	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo16[" adr "](" reg ")".
 	CONST              = { INT val; }             4    val.
 
 /* Primitives */
 
 	LABEL              = { ADDR adr; }            4    adr.
+	LABEL_OFFSET_HI    = { ADDR adr; }            4    "hi16[" adr "]".
+	LABEL_OFFSET_HA    = { ADDR adr; }            4    "ha16[" adr "]".
+	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo16[" adr "]".
 	LOCAL              = { INT off; }             4.
 
 /* Allows us to use regvar() to refer to registers */
@@ -282,7 +286,7 @@ INSTRUCTIONS
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
-  addis           GPR:wo, GPR:ro, CONST:ro.
+  addis           GPR:wo, GPR:ro, CONST+LABEL_OFFSET_HI+LABEL_OFFSET_HA:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
   andiX  "andi."  GPR:wo:cc, GPR:ro, CONST:ro.
@@ -329,10 +333,9 @@ INSTRUCTIONS
   lhz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   li32            GPR:wo, CONST:ro cost(8, 2).
-  li32            GPR:wo, LABEL:ro cost(8, 2).
   lwzu            GPR:wo, GPRINDIRECT:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lwz             GPR:wo, GPRINDIRECT+GPRINDIRECT_OFFSET_LO:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -342,7 +345,7 @@ INSTRUCTIONS
   mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
-  ori             GPR:wo, GPR:ro, CONST:ro.
+  ori             GPR:wo, GPR:ro, CONST+LABEL_OFFSET_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
@@ -368,7 +371,7 @@ INSTRUCTIONS
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
 
-  comment "!" LABEL:ro cost(0, 0).
+  comment "!"             LABEL:ro cost(0, 0).
 
 
 
@@ -405,7 +408,8 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			li32 %2, {LABEL, %1.adr}
+			addis %2, R0, {LABEL_OFFSET_HI, %1.adr}
+			ori %2, %2, {LABEL_OFFSET_LO, %1.adr}
 
 /* Sign extension */
 
@@ -1142,6 +1146,12 @@ PATTERNS
 			yields {IND_RC_H, %1.reg, %1.off}
 
 	pat loi $1==INT32                  /* Load word indirect */
+		with LABEL
+			uses REG
+			gen
+				addis %a, R0, {LABEL_OFFSET_HA, %1.adr}
+				lwz %a, {GPRINDIRECT_OFFSET_LO, %a, %1.adr}
+			yields %a
 		with GPR
 			yields {IND_RC_W, %1, 0}
 		with SUM_RC
@@ -1466,11 +1476,13 @@ PATTERNS
 			yields %a
 
 	pat and defined($1)                /* AND set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".and"}
+		leaving
+			loc $1
+			cal ".and"
+
+	pat and !defined($1)
+		leaving
+			cal ".and"
 
 	pat ior $1==4                      /* OR word */
 		with REG NOT_R
@@ -1503,18 +1515,14 @@ PATTERNS
 			yields {OR_RC, %2, lo(%1.val)}
 
 	pat ior defined($1)                /* OR set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".ior"}
+		leaving
+			loc $1
+			cal ".ior"
 
 	/* OR set (variable), used in lang/m2/libm2/LtoUset.e */
 	pat ior !defined($1)
-		with GPR3 STACK
-			kills ALL
-			gen
-				bl {LABEL, ".ior"}
+		leaving
+			cal ".ior"
 
 	pat xor $1==4                      /* XOR word */
 		with REG REG
@@ -1563,21 +1571,22 @@ PATTERNS
 			yields {NOT_R, %1}
 
 	pat com defined($1)                /* NOT set */
-		with STACK
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".com"}
+		leaving
+			loc $1
+			cal ".com"
+
+	pat com !defined($1)
+		leaving
+			cal ".com"
 
 	pat zer $1==4                      /* Push zero */
 		leaving
 			loc 0
 
-	pat zer defined($1)	   	   /* Create empty set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".zer"}
+	pat zer defined($1)	   	           /* Create empty set */
+		leaving
+			loc $1
+			cal ".zer"
 
 	pat sli $1==4                      /* Shift left (second << top) */
 		with CONST_ALL GPR
@@ -1655,27 +1664,23 @@ PATTERNS
 /* Sets */
 
 	pat set defined($1)                /* Create singleton set */
-		with GPR4 STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".set"}
+		leaving
+			loc $1
+			cal ".set"
 
 	/* Create set (variable), used in lang/m2/libm2/LtoUset.e */
 	pat set !defined($1)
-		with GPR3 GPR4 STACK
-			kills ALL
-			gen
-				bl {LABEL, ".set"}
+		leaving
+			cal ".set"
 
 	pat inn defined($1)                /* Test for set bit */
-		with STACK
-			kills ALL
-			uses REG
-			gen
-				li32 %a, {CONST, $1}
-				stwu %a, {GPRINDIRECT, SP, 0-4}
-				bl {LABEL, ".inn"}
+		leaving
+			loc $1
+			cal ".inn"
+
+	pat inn !defined($1)
+		leaving
+			cal ".inn"
 
 
 /* Boolean resolutions */
@@ -2065,6 +2070,17 @@ PATTERNS
 		leaving
 			loc $1
 			ass 4
+
+	pat lae rck $2==4                  /* Range check */
+		with REG
+			uses CR0
+			gen
+				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 1)}
+				bc IFTRUE, LT, {LABEL, ".trap_erange"}
+				cmpli %a, {CONST, 0}, %1, {CONST, rom($1, 2)}
+				bc IFTRUE, GT, {LABEL, ".trap_erange"}
+			yields %1
+
 
 
 

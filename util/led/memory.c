@@ -22,6 +22,9 @@ static char rcsid[] = "$Id$";
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <out.h>
 #include "const.h"
 #include "assert.h"
@@ -112,7 +115,7 @@ init_core()
 		incore = FALSE;	/* In core strategy failed. */
 		if (sbreak(AT_LEAST) == -1)
 			fatal("no core at all");
-		
+
 		base = BASE;
 		for (mem = mems; mem < &mems[NMEMS]; mem++) {
 			mem->mem_base = base;
@@ -198,15 +201,15 @@ compact(piece, incr, flag)
 		gain = (mem->mem_full + incr) >> SHIFT_COUNT;
 		if (incr < gain) incr = gain;
 	}
-	
+
 	/*
 	 * First, check that moving will result in enough space
 	 */
 	if (flag != FREEZE) {
 		gain = mem->mem_left;
 		for (mem = &mems[piece-1]; mem >= &mems[0]; mem--) {
-			/* 
-			 * Don't give it all away! 
+			/*
+			 * Don't give it all away!
 			 * If this does not give us enough, bad luck
 			 */
 			if (flag == FORCED)
@@ -224,8 +227,8 @@ compact(piece, incr, flag)
 		}
 		if (min == piece)
 		    for (mem = &mems[piece+1]; mem <= &mems[NMEMS - 1]; mem++) {
-			/* 
-			 * Don't give it all away! 
+			/*
+			 * Don't give it all away!
 			 * If this does not give us enough, bad luck
 			 */
 			if (flag == FORCED)

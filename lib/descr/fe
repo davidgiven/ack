@@ -185,7 +185,7 @@ name b
         to .k
         program {EM}/lib/ack/em_b
 		mapflag -B* ABC_F={ABC_F?} -B*
-        args -i < -o > -w {p} {ABC_F}
+        args -i < -o > -w {p} {ABC_F?}
         prep cond
         rts .b
         need .b

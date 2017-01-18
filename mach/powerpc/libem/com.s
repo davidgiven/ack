@@ -3,11 +3,13 @@
 .sect .text
 
 ! Set complement.
-!  Stack: ( a -- ~a )
-!  With r3 = size of set
+!  Stack: ( a size -- ~a )
 
 .define .com
 .com:
+	lwz r3, 0 (sp)       ! size
+	addi sp, sp, 4
+
 	mr	r4, sp			! r4 = pointer to set a
 	rlwinm	r5, r3, 30, 2, 31
 	mtspr	ctr, r5			! ctr = r3 / 4

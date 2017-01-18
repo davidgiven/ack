@@ -6,9 +6,11 @@
 static char rcsid[] = "$Id$";
 #endif
 
-#include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdarg.h>
 #include <out.h>
 #include "const.h"
 
@@ -73,7 +75,7 @@ do_verbose(char *format, ...)
 static void
 diag(char *tail, char *format, va_list ap)
 {
-	extern char	*progname, *archname, *modulname; 
+	extern char	*progname, *archname, *modulname;
 
 	fprintf(stderr, "%s: ", progname);
 	if (archname && modulname)
