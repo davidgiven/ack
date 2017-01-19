@@ -1,11 +1,10 @@
-.\" $Id$
-.TH EM_OPT 6 "$Revision$"
+.TH EM_OPT 6 2017-01-18
 .ad
 .SH NAME
 em_opt \- EM peephole optimizer
 .SH SYNOPSIS
 .B ~em/lib.bin/em_opt
-[-Ln] [-m[l]<num>] [ argument ]
+[\-Ln] [\-m[l]<num>] [ argument ]
 .SH DESCRIPTION
 Em_opt reads a compact EM-program, argument or standard input,
 and produces another compact EM program on standard output
@@ -15,22 +14,22 @@ Some other functions are here that make this program mandatory
 before running a codegenerator,
 it may be left out when interpretation is wanted.
 Flags recognized are:
-.IP -L
+.IP \-L
 Make a library module.
 This means that the output will start with a message giving
 the names of all exported entities in this module.
-.IP -n
+.IP \-n
 Do not optimize.
 No peephole optimizations will be performed,
 other functions will be carried out.
-.IP -m<num>
+.IP \-m<num>
 Try to replace multiplies with constants by combinations of shifts and adds,
-but no more than <num> of them. Integer overflow detection is lost with this
-option.
-.IP -ml<num>
-Like -m<num>, but also for long multiplies.
+but no more than <num> of them.
+Integer overflow detection is lost with this option.
+.IP \-ml<num>
+Like \-m<num>, but also for long multiplies.
 .SH "FILES"
-/tmp/emopt??????, is used when the -L flag is given only.
+/tmp/emopt??????, is used when the \-L flag is given only.
 .SH "SEE ALSO"
 ack(1)
 .PD 0

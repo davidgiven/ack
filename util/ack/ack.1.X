@@ -1,23 +1,12 @@
-.\" $Id$
-.de SB
-.\" SuBheader
-.sp 1
-.PP
-.nr Sf \\n(.f
-.ft B
-\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.ft \\n(Sf
-.sp 1
-..
-.TH ACK 1 "$Revision$"
+.TH ACK 1 2017-01-18
 .ad
-
+.
 .SH NAME
 ack \- Amsterdam Compiler Kit
-
+.
 .SH SYNOPSIS
 \fBack\fP arguments
-
+.
 .SH DESCRIPTION
 This program transforms sources in several
 languages to load files for a variety of machines,
@@ -73,10 +62,8 @@ Optimized compact EM assembly code.
 Machine assembly language code.
 .IP .o
 Object file.
-.PP
-
+.
 .SH OPTIONS
-
 \fIAck\fP accepts the following flags:
 .IP \-m\fImachine\fP
 This flag tells \fIack\fP to generate a load file for \fImachine\fP.
@@ -106,7 +93,8 @@ Note: \fIack\fP refuses to overwrite argument \fI.e\fP files.
 Preserve all intermediate files.
 If two \fB\-t\fP are used,
 \fIack\fP also preserves output of failed transformations.
-
+.
+.sp 1
 .IP \-w
 Suppress all warning messages.
 .IP \-v
@@ -118,7 +106,8 @@ Tell the C-compiler to conform to "Kernighan & Ritchie" C.
 Tell \fIack\fP to use the ANSI C compiler instead of the old one.
 .IP \-fp
 Use the software floating point package, if present.
-
+.
+.sp 1
 .IP \-I\fIdir\fP
 \&\`#include\' files whose names do not begin with \`/\' are
 always sought first in the directory of the \fIfile\fP argument,
@@ -136,7 +125,8 @@ preprocessing.
 Don't generate line directives.
 .IP \-C
 Leave C-comments in.
-
+.
+.sp 1
 .IP \-p
 This flag tells both the Pascal and C front ends to include
 code enabling the user to do some monitoring/debugging.
@@ -144,13 +134,16 @@ Each time a routine is entered the routine \fBprocentry\fP
 is called and just before each return \fBprocexit\fP is called.
 These routines are supplied with one parameter, a pointer
 to a string containing the name of the routine.
-
+.
+.sp 1
 .IP \-B\fIname\fP
 Tells the B front end what the name of the module being compiled is, for use
-with separate compilation. Defaults to
+with separate compilation.
+Defaults to
 .I main
 if not specified. See the section below on compiling B.
-
+.
+.sp 1
 .IP \-O
 .IP \-O\fInum\fP
 .IP \-O\fIopt1,opt2,...\fP
@@ -239,7 +232,8 @@ for higher levels: as for \-O4.
 Disable the generation of code by the front ends to
 record line number and source file name at run-time.
 (This is the default for C and Fortran).
-
+.
+.sp 1
 .IP \-l\fIname\fP
 Tells \fIack\fP to insert a library module at this point.
 For example: the library \fImon\fP contains the
@@ -259,13 +253,14 @@ These flags tell \fIack\fP to include the libraries needed when
 a file with \fIsuffix\fP would be included in the arguments.
 .IP \-LIB
 This flag tells the peephole optimizer
-.RF em_opt 6
+em_opt(6)
 to add information about the visibility of the names used
 to each output module.
 This is needed by
 assembler/linkers when these modules are to be inserted
 in libraries.
-
+.
+.sp 1
 .IP \-{xxx}
 The string starting after \`{\' and terminated by a \`}\' is passed
 as an option string to the Pascal compiler and supersedes corresponding
@@ -293,7 +288,8 @@ the defaults per program.
 The changed options are recorded in the "e.out" header.
 These flags \-\- and \-+ are passed to the assembler for this purpose.
 So, \-\-t and \-+pfce invert the defaults.
-
+.
+.sp 1
 .IP \-R\fIprogram=xxx\fP
 Replace the \fIprogram\fP by the pathname \fIxxx\fP.
 The program names referred to later in this manual are allowed here.
@@ -320,7 +316,7 @@ Sparc, Vax, Intel 80386.
 .PP
 All arguments without a suffix or with an unrecognized suffix
 are passed to the loaders, as for flags.
-
+.
 .SH PREPROCESSOR
 All C source programs are run through the preprocessor
 before they are fed to the compiler proper.
@@ -341,40 +337,37 @@ EM_WSIZE:wordsize:EM_PSIZE:pointer size
 EM_SSIZE:size of shorts (C):EM_LSIZE:size of longs (C+Pascal)
 EM_FSIZE:size of floats (C):EM_DSIZE:size of doubles (C+Pascal)
 .TE
-.sp 1
+.PP
 The name of the \fImachine\fP or something like it when
 the machine name is numeric is also defined (as 1).
 As the ANSI C rules forbid this, in ANSI C, underscores are prepended to
 these names.
 .PP
 The default directories searched for include files differ for each machine.
-
+.
 .SH COMPILING B
-
-B programs have special needs when compiled with the ACK. B modules have to be
+B programs have special needs when compiled with the ACK.
+B modules have to be
 initialised before use, to convert pointer addresses to word addresses; this is
 done automatically when compiling a single B source file to an executable, but
 must be done manually when using separate compilation.
-
 .PP
 To do this, compile your B modules with the \fI-B\fP option as usual, and then
 use the
 .B abmodules
 program to scan the object files and emit a C file which performs the
-initialisation. Then compile this as well into an object file, and link the
-whole lot together. The result will be a runnable executable.
-
+initialisation.
+Then compile this as well into an object file, and link the
+whole lot together.
+The result will be a runnable executable.
 .PP
-Beware --- referring to an uninitialised module will cause your program to
+Beware \(em referring to an uninitialised module will cause your program to
 crash!
-
 .PP
 The default initialiser in the B standard library looks for a module called
 \fBmain\fP.
-
 .PP
 For example:
-
 .nf
 .sp
 ack -c -mpc86 thismodule.b -Bthismodule
@@ -384,7 +377,7 @@ abmodules -o binit.c thismodule.o thatmodule.o theothermodule.o
 ack -c -mpc86 binit.c
 ack -mpc86 -o pc86.exe thismodule.o thatmodule.o theothermodule.o binit.o
 .fi
-
+.
 .SH PROGRAMS
 \fIAck\fP uses one or more programs in each phase of the
 transformation.
@@ -421,7 +414,7 @@ input:name:output:description
 \&.o:cv:a.out:Conversion from Ack object to machine object
 .TE
 .in -2
-
+.
 .SH "ENVIRONMENT VARIABLES"
 .IP ACKDIR
 If set, this environment variable overrides ack's idea of its home
@@ -432,13 +425,14 @@ machine it compiles for.
 .IP ACKFE
 If set, this environment variable tells ack where to get the front-end
 description file.
+.
 .SH "SEE ALSO"
-.PD 0
 em_opt(6), em_ass(6), em_cg(6), ack.out(5)
 .IP [1]
 A.S. Tanenbaum, Hans van Staveren, Ed Keizer and Johan
 Stevenson, \fIDescription of a machine architecture for use with
 block structured languages\fP, Informatica rapport IR-81.
+.PD 0
 .IP [2]
 K. Jensen and N. Wirth,
 \fIPASCAL, User manual and report\fP Springer Verlag.
@@ -463,12 +457,13 @@ Informatica rapport IR-99.
 .IP [11]
 C.J.H. Jacobs, \fIThe ACK Modula-2 Compiler\fP.
 .PD
+.
 .SH DIAGNOSTICS
-.PD
 The diagnostics are intended to be self\-explanatory.
+.
 .SH BUGS
 Not all warning messages are superseded by \fB\-w\fP.
-.br
+.PP
 Argument assembly files are not preprocessed when fed into the
 universal assembler/loader.
 .SH AUTHOR

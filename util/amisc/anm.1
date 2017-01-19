@@ -1,4 +1,4 @@
-.TH ANM 1 "$Revision$"
+.TH ANM 1 2017-01-18
 .SH NAME
 anm  \-  print name list
 .SH SYNOPSIS
@@ -7,7 +7,8 @@ anm [ \-gnoprus ] [ file ... ]
 .I Anm
 prints the name list (symbol table) of each ack.out(5) format object
 .I file
-in the argument list. If an argument is an aal(1) or arch(1) archive,
+in the argument list.
+If an argument is an aal(1) or arch(1) archive,
 a listing of each object file in the archive will be produced.
 If no
 .I file
@@ -18,32 +19,24 @@ are listed.
 Each symbol name is preceded by its value, a section indicator
 and a type indicator.
 A section indicator can be
-.SM
-.B U
+.SB U
 (undefined symbol),
-.SM
-.B A
+.SB A
 (absolute symbol),
-.SM
-.B C
+.SB C
 (common symbol), a section number (section related symbol),
 or
-.SM
-.B -
+.SB \-
 (other symbol).
 A type indicator can be
-.SM
-.B F
+.SB F
 (filename),
-.SM
-.B M
+.SB M
 (module name),
-.SM
-.B E
+.SB E
 (external (global) symbol),
 or
-.SM
-.B -
+.SB \-
 (local symbol).
 The output is sorted alphabetically.
 .PP
@@ -69,6 +62,5 @@ Print only undefined symbols.
 .TP
 .B  \-s
 Sort in section order.
-.sh FILES
 .SH SEE ALSO
 ack.out(5)
