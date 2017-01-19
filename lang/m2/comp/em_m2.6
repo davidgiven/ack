@@ -1,10 +1,10 @@
-.TH EM_M2 6 "$Revision$"
+.TH EM_M2 6 2017-01-18
 .ad
 .SH NAME
 em_m2 \- ACK Modula\-2 compiler
 .SH SYNOPSIS
 .B ~em/lib.bin/em_m2
-.RI [ option ] 
+.RI [ option ]
 .I source
 .I destination
 .SH DESCRIPTION
@@ -15,9 +15,9 @@ into EM code.
 The input is taken from
 .IR source ,
 while the
-EM code is written on 
+EM code is written on
 .IR destination .
-.br
+.PP
 .I Option
 is a, possibly empty, sequence of the following combinations:
 .IP \fB\-I\fIdirname\fR
@@ -65,7 +65,8 @@ make all procedure names global, so that \fIadb\fR(1) understands them.
 .IP \fB\-g\fR
 produce a DBX-style symbol table.
 .IP \fB\-l\fR
-enable local extensions. Currently, there are two local extensions:
+enable local extensions.
+Currently, there are two local extensions:
 procedure constants, and the type LONGCARD.
 .IP \fB\-s\fR
 make INTEGER ranges symmetric, t.i., MIN(INTEGER) = - MAX(INTEGER).
@@ -77,11 +78,11 @@ disable all range checks.
 enable extra array bound checks, for machines that do not implement the
 EM ones.
 .IP \fB-U\fR
-allow for underscores within identifiers. Identifiers may not start with
+allow for underscores within identifiers.
+Identifiers may not start with
 an underscore, even if this flag is given.
 .IP \fB-3\fR
 only accept Modula-2 programs that strictly conform to [1].
-.LP
 .SH SEE ALSO
 \fIack\fR(1), \fImodula-2\fR(1)
 .IP [1]
