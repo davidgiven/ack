@@ -28,6 +28,12 @@ void* set_get(struct set* s, void* item)
 	return hashtable_get(&s->table, item);
 }
 
+void* set_get_any(struct set* s)
+{
+	struct hashtable_iterator hit = {};
+	return hashtable_next(&s->table, &hit);
+}
+
 void* set_pop(struct set* s)
 {
 	return hashtable_pop(&s->table);
