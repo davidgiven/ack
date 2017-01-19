@@ -98,6 +98,32 @@ static void print_hops(char k)
             tracef(k, "\n");
         }
 
+        if (bb->inputmapping.size > 0)
+        {
+            struct hashtable_iterator hit = {};
+            tracef(k, "%c: INPUTMAPPING:", k);
+            while (hashtable_next(&bb->inputmapping, &hit))
+            {
+                struct value* value = hit.key;
+                struct vreg* vreg = hit.value;
+                tracef(k, " $%d.%d->%%%d", value->ir->id, value->subid, vreg->id);
+            }
+            tracef(k, "\n");
+        }
+
+        if (bb->outputmapping.size > 0)
+        {
+            struct hashtable_iterator hit = {};
+            tracef(k, "%c: OUTPUTMAPPING:", k);
+            while (hashtable_next(&bb->inputmapping, &hit))
+            {
+                struct value* value = hit.key;
+                struct vreg* vreg = hit.value;
+                tracef(k, " $%d.%d->%%%d", value->ir->id, value->subid, vreg->id);
+            }
+            tracef(k, "\n");
+        }
+
 		for (j=0; j<bb->hops.count; j++)
 			hop_print(k, bb->hops.item[j]);
     }
@@ -197,11 +223,11 @@ void procedure_compile(struct procedure* proc)
     print_hops('8');
     pass_assign_vregs();
     print_hops('9');
+    pass_register_allocator();
 #if 0
     pass_split_live_ranges();
     pass_determine_vreg_usage();
 
-    pass_register_allocator();
     pass_add_prologue_epilogue();
     print_hops('9');
 

@@ -4,791 +4,51 @@
 #include <limits.h>
 
 /* This is based around the elegant graph colouring algorithm here:
- * 
+ *
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.32.5924
  */
 
-struct anode
+static const int DEGREE = 10;
+
+static struct graph interference;
+static struct graph affinity;
+
+static struct vreg* actual(struct vreg* vreg)
 {
-    int id;
-    struct vref* vref;
-    int degree;
-    int cost;
-    int type;
-    bool is_spillable;
-    struct anode* replaced_by;
-};
-
-struct vref
-{
-    struct vref* next;
-    struct vreg* vreg;
-};
-
-static struct heap anode_heap;
-static struct graph interferenceg;
-static struct graph preferenceg;
-static ARRAYOF(struct anode) simplified;
-#if 0
-struct assignment
-{
-    struct vreg* in;
-    struct vreg* out;
-};
-
-static ARRAYOF(struct hreg) hregs;
-
-static PMAPOF(struct vreg, struct hreg) evicted;
-static struct hop* current_hop;
-static register_assignment_t* current_ins;
-static register_assignment_t* current_outs;
-
-static int insert_moves(struct basicblock* bb, int index,
-    register_assignment_t* srcregs, register_assignment_t* destregs);
-
-static bool type_match(struct hreg* hreg, struct vreg* vreg);
-
-static void populate_hregs(void)
-{
-    int i;
-    const struct burm_register_data* brd = burm_register_data;
-
-    hregs.count = 0;
-    while (brd->id)
-    {
-        array_append(&hregs, new_hreg(brd));
-        brd++;
-    }
-    
-    /* Wire up the register aliases. */
-
-    for (i=0; i<hregs.count; i++)
-    {
-        struct hreg* hreg = hregs.item[i];
-        const struct burm_register_data** alias = hreg->brd->aliases;
-
-        while (*alias)
-        {
-            int index = *alias - burm_register_data;
-            array_append(&hreg->aliases, hregs.item[index]);
-            alias++;
-        }
-    }
+    while (vreg->coalesced_with)
+        vreg = vreg->coalesced_with;
+    return vreg;
 }
 
-static void wire_up_blocks_ins_outs(void)
+static void coalesce(struct vreg* v1, struct vreg* v2)
+{
+    tracef('R', "R: coalescing %%%d into %%%d\n", v1->id, v2->id);
+    v1 = actual(v1);
+    v2 = actual(v2);
+    v1->coalesced_with = v2;
+}
+
+static void wire_together_bbs(void)
 {
     int i, j;
-
-    for (i=0; i<dominance.preorder.count; i++)
-    {
-        struct basicblock* bb = dominance.preorder.item[i];
-        assert(bb->hops.count >= 1);
-        bb->regsout = &bb->hops.item[bb->hops.count-1]->regsout;
-    }
-}
-
-static bool register_used(register_assignment_t* regs, struct hreg* hreg)
-{
-    int i;
-
-    for (i=0; i<hreg->aliases.count; i++)
-    {
-        struct hreg* alias = hreg->aliases.item[i];
-        if (pmap_findleft(regs, alias))
-            return true;
-    }
-
-    return false;
-}
-
-static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
-    struct vreg* vreg, uint32_t type)
-{
-    int i;
-
-    /* We need a new register at the beginning of the block to put a phi value
-     * into. */
-
-    for (i=0; i<hregs.count; i++)
-    {
-        struct hreg* hreg = hregs.item[i];
-        if (!register_used(regs, hreg) && (hreg->attrs & type))
-        {
-            /* This one is unused. Use it. */
-            return hreg;
-        }
-    }
-
-    /* We'll need to allocate a new stack slot for it. */
-    assert(false);
-}
-
-static struct hreg* evict(struct vreg* vreg)
-{
-    int i;
-
-    /* Look for a through register which matches our requirements. We should be
-     * doing some calculation here to figure out the cheapest register to
-     * evict, but for now we're picking the first one. FIXME. */
-
-    for (i=0; i<hregs.count; i++)
-    {
-        struct hreg* hreg = hregs.item[i];
-        struct vreg* candidatein = pmap_findleft(current_ins, hreg);
-        struct vreg* candidateout = pmap_findleft(current_outs, hreg);
-
-        if (hreg->attrs & vreg->type)
-        {
-            if (!candidatein &&
-                !candidateout &&
-                !register_used(current_ins, hreg) &&
-                !register_used(current_outs, hreg))
-            {
-                /* This hreg is unused, so we don't need to evict anything.
-                 * Shouldn't really happen in real life. */
-                return hreg;
-            }
-            if (candidatein && candidateout && (candidatein == candidateout))
-            {
-                /* This is a through register. */
-                tracef('R', "R: evicting %%%d from %s\n", candidatein->id, hreg->id);
-                pmap_put(&evicted, candidatein, hreg);
-                pmap_remove(current_ins, hreg, candidatein);
-                pmap_remove(current_outs, hreg, candidatein);
-                return hreg;
-            }
-        }
-    }
-
-    /* Couldn't find anything to evict */
-    assert(false);
-}
-
-static bool constraints_match(struct hreg* hreg, struct vreg* vreg)
-{
-    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    if (c)
-        return (hreg->attrs & c->attrs);
-    return true;
-}
-
-static bool allocatable_stackable_input(struct hreg* hreg, struct vreg* vreg)
-{
-    return !register_used(current_ins, hreg) &&
-        (hreg->attrs & vreg->type);
-}
-
-static bool allocatable_stackable_output(struct hreg* hreg, struct vreg* vreg)
-{
-    return !register_used(current_outs, hreg) &&
-        (hreg->attrs & vreg->type);
-}
-
-static bool allocatable_input(struct hreg* hreg, struct vreg* vreg)
-{
-    return allocatable_stackable_input(hreg, vreg) &&
-        constraints_match(hreg, vreg) &&
-        !hreg->is_stacked;
-}
-
-static bool allocatable_output(struct hreg* hreg, struct vreg* vreg)
-{
-    return allocatable_stackable_output(hreg, vreg) &&
-        constraints_match(hreg, vreg) &&
-        !hreg->is_stacked;
-}
-
-static bool allocatable_through(struct hreg* hreg, struct vreg* vreg)
-{
-    return allocatable_stackable_input(hreg, vreg) &&
-        allocatable_stackable_output(hreg, vreg) &&
-        !(hreg->attrs & current_hop->insndata->corrupts);
-}
-
-static struct hreg* find_input_reg(struct vreg* vreg)
-{
-    int i;
-    struct hreg* hreg = NULL;
-
-    for (i=0; i<hregs.count; i++)
-    {
-        hreg = hregs.item[i];
-        if (allocatable_input(hreg, vreg))
-        {
-            return hreg;
-        }
-    }
-
-    return NULL;
-}
-
-static struct hreg* find_output_reg(struct vreg* vreg)
-{
-    int i;
-    struct hreg* hreg = NULL;
-
-    for (i=0; i<hregs.count; i++)
-    {
-        hreg = hregs.item[i];
-        if (allocatable_output(hreg, vreg))
-            return hreg;
-    }
-
-    return NULL;
-}
-
-static struct hreg* find_through_reg(struct vreg* vreg)
-{
-    int i;
-    struct hreg* hreg = NULL;
-
-    for (i=0; i<hregs.count; i++)
-    {
-        hreg = hregs.item[i];
-        if (allocatable_through(hreg, vreg))
-        {
-            return hreg;
-        }
-    }
-
-    return NULL;
-}
-
-static void add_input_register(struct vreg* vreg, struct hreg* hreg)
-{
-    int i;
-
-    /* Register hint for an input? */
-
-    if (hreg)
-    {
-        if (hreg->is_stacked)
-        {
-            /* This vreg is stacked; we need to put it in a register. That's
-             * slightly exciting because the vreg might be a through, which
-             * means we need an output register too... which we might not be
-             * able to allocate. */
-
-            if (array_contains(&current_hop->throughs, vreg))
-            {
-                struct hreg* src = hreg;
-                hreg = find_through_reg(vreg);
-                assert(hreg);
-                pmap_remove(current_ins, src, vreg);
-                pmap_remove(current_outs, src, vreg);
-                pmap_add(current_ins, hreg, vreg);
-                pmap_add(current_outs, hreg, vreg);
-                return;
-            }
-            else
-            {
-                /* Not a through. */
-                pmap_remove(current_ins, hreg, vreg);
-                hreg = NULL;
-            }
-        }
-        else if (pmap_findleft(current_ins, hreg) == vreg)
-        {
-            /* Yup, already there. */
-        }
-        else if (allocatable_input(hreg, vreg))
-        {
-            /* The register is free. */
-        }
-        else
-        {
-            /* Can't honour the hint. */
-            hreg = NULL;
-        }
-    }
-
-    if (!hreg)
-    {
-        /* Find an unused input register of the right class. */
-
-        hreg = find_input_reg(vreg);
-        if (!hreg)
-            hreg = evict(vreg);
-    }
-
-    pmap_add(current_ins, hreg, vreg);
-}
-
-static void add_output_register(struct vreg* vreg)
-{
-    struct hreg* hreg;
-    int i;
-    struct constraint* c;
-
-    /* Is this register supposed to be the same as one of the input registers?
-     * */
-
-    c = pmap_findleft(&current_hop->constraints, vreg);
-    if (c->equals_to)
-    {
-        tracef('R', "R: output equality constraint of %%%d to %%%d\n",
-            vreg->id, c->equals_to->id);
-
-        /* This output register is constrained to be in the same hreg as an
-         * input register (most likely for a 2op instruction). */
-
-        hreg = pmap_findright(current_ins, c->equals_to);
-
-        /* If this register is currently unused as an output, use it. */
-
-        if (allocatable_output(hreg, c->equals_to))
-        {
-            pmap_add(current_outs, hreg, vreg);
-            return;
-        }
-
-        /* Okay, something's in it. Most likely it's a through being used as an
-         * input register.  Trying to evict it would be pointless as that would
-         * also evict the input. So, we're going to have to do this the hard
-         * way: we try to allocate a matched set of input and output registers.
-         * */
-
-        hreg = find_through_reg(vreg);
-        if (!hreg)
-            hreg = evict(vreg);
-
-        pmap_add(current_outs, hreg, vreg);
-        tracef('R', "R: output equality constraint requires extra move of %%%d => %s\n",
-            c->equals_to->id, hreg->id);
-        pmap_add(current_ins, hreg, c->equals_to);
-    }
-    else
-    {
-        /* This is an ordinary new register. */
-
-        hreg = find_output_reg(vreg);
-        if (!hreg)
-            hreg = evict(vreg);
-
-        pmap_add(current_outs, hreg, vreg);
-    }
-}
-
-static void add_through_register(struct vreg* vreg, struct hreg* hreg)
-{
-    /* Register hint for an input? */
-
-    if (hreg)
-    {
-        bool unused = allocatable_through(hreg, vreg);
-        struct vreg* inuse = pmap_findleft(current_ins, hreg);
-        struct vreg* outuse = pmap_findleft(current_outs, hreg);
-
-        if (unused || ((inuse == vreg) && (outuse == vreg)))
-        {
-            /* Input and output are either free or already assigned to this
-             * vreg. */
-        }
-        else
-        {
-            /* Nope, can't honour the hint. Mark the register as evicted; we'll
-             * put it in something later (probably a stack slot). */
-
-            tracef('R', "R: cannot place %%%d in %s, evicting\n", vreg->id, hreg->id);
-            pmap_put(&evicted, vreg, hreg);
-            pmap_remove(current_ins, hreg, vreg);
-            pmap_remove(current_outs, hreg, vreg);
-            return;
-        }
-    }
-    
-    assert(hreg);
-    pmap_put(current_ins, hreg, vreg);
-    pmap_put(current_outs, hreg, vreg);
-}
-
-static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* src)
-{
-    uint32_t srctype = vreg->type;
-    struct hreg* hreg;
-    int i;
-
-    /* Find an unused output register of the right class which is not also
-     * being used as an input register. */
-
-    hreg = NULL;
-    for (i=0; i<hregs.count; i++)
-    {
-        hreg = hregs.item[i];
-        if ((hreg->attrs & srctype) &&
-            allocatable_through(hreg, vreg))
-        {
-            goto found;
-        }
-    }
-
-    /* No more registers --- allocate a stack slot. */
-
-    hreg = new_stacked_hreg(srctype);
-    array_append(&hregs, hreg);
-
-found:
-    tracef('R', "R: evicted %%%d moving to %s\n", vreg->id, hreg->id);
-    pmap_add(current_ins, hreg, vreg);
-    pmap_add(current_outs, hreg, vreg);
-}
-
-static void select_registers(struct hop* hop,
-    register_assignment_t* old, register_assignment_t* in, register_assignment_t* out)
-{
-    int i;
-
-    current_hop = hop;
-    current_ins = in;
-    current_outs = out;
-    evicted.count = 0;
-
-    /* First, any vregs passing through the instruction stay in the same
-     * registers they are currently in. */
-
-    for (i=0; i<hop->throughs.count; i++)
-    {
-        struct vreg* vreg = hop->throughs.item[i];
-        struct hreg* hreg = pmap_findright(old, vreg);
-        add_through_register(vreg, hreg);
-    }
-
-    /* Any registers being *read* by the instruction should also stay where
-     * they are. (This is likely to duplicate some throughs.) */
-
-    for (i=0; i<hop->ins.count; i++)
-    {
-        struct vreg* vreg = hop->ins.item[i];
-        struct hreg* hreg = pmap_findright(old, vreg);
-        add_input_register(vreg, hreg);
-    }
-
-    /* Any output registers will be *new* vregs (because SSA). So, allocate
-     * new hregs for them. */
-
-    for (i=0; i<hop->outs.count; i++)
-    {
-        struct vreg* vreg = hop->outs.item[i];
-        add_output_register(vreg);
-    }
-
-    /* Any evicted registers now need to go somewhere (potentially, the stack).
-     * */
-
-    for (i=0; i<evicted.count; i++)
-    {
-        struct vreg* vreg = evicted.item[i].left;
-        struct hreg* src = evicted.item[i].right;
-        find_new_home_for_evicted_register(vreg, src);
-    }
-}
-
-static void assign_hregs_to_vregs(void)
-{
-    int i, j, k;
-
-    for (i=0; i<dominance.preorder.count; i++)
-    {
-        struct basicblock* bb = dominance.preorder.item[i];
-        register_assignment_t* old = &bb->regsin;
-        
-        tracef('R', "R: considering block %s\n", bb->name);
-
-        /* Attempt to import any block input registers from a predecessor. At
-         * least one predecessor should export it; our graph traversal order
-         * guarantees it. */
-
-        for (j=0; j<bb->liveins.count; j++)
-        {
-            struct vreg* vreg = bb->liveins.item[j];
-            for (k=0; k<bb->prevs.count; k++)
-            {
-                struct basicblock* prevbb = bb->prevs.item[k];
-                struct hreg* hreg = pmap_findright(prevbb->regsout, vreg);
-                if (hreg)
-                {
-                    tracef('R', "R: import hreg %s for input %%%d from %s\n",
-                        hreg->id, vreg->id, prevbb->name);
-                    assert(!pmap_findleft(old, hreg));
-                    pmap_put(old, hreg, vreg);
-                    goto nextvreg;
-                }
-            }
-
-            fatal("couldn't find a register assignment for $%d", vreg->id);
-            nextvreg:;
-        }
-
-        /* And now do the same for the phis. Unlike input vregs, a phi can
-         * import a vreg from multiple locations. However, we don't care which
-         * one we find, as this is just a hint. Picking the same register as a
-         * predecessor helps reduce the number of copies the SSA deconstruction
-         * pass will need to insert. */
-
-        for (j=0; j<bb->phis.count; j++)
-        {
-            struct vreg* vreg = bb->phis.item[j].left;
-            struct phi* phi = bb->phis.item[j].right;
-            if (!pmap_findright(old, vreg))
-            {
-                /* This variable isn't allocated yet. */
-
-                struct hreg* hreg = pmap_findright(
-                    phi->prev->regsout, phi->ir->result);
-                if (hreg && !pmap_findleft(old, hreg))
-                {
-                    tracef('R', "R: import hreg %s for %%%d, imported from %s %%%d\n",
-                        hreg->id, vreg->id,
-                        phi->prev->name, phi->ir->id);
-                    pmap_put(old, hreg, vreg);
-                }
-            }
-        }
-
-        /* It's possible for the previous stage to fail because in in has
-         * clobbered the physical register we were wanting. So we need to
-         * allocate a new register for that phi value.
-         */
-
-        for (j=0; j<bb->phis.count; j++)
-        {
-            struct vreg* vreg = bb->phis.item[j].left;
-            struct phi* phi = bb->phis.item[j].right;
-            if (!pmap_findright(old, vreg))
-            {
-                struct phicongruence* c = vreg->congruence;
-                struct hreg* hreg = allocate_phi_hreg(old, vreg, c->type);
-
-                tracef('R', "R: import fallback hreg %s for %%%d, imported from %s %%%d\n",
-                    hreg->id, vreg->id,
-                    phi->prev->name, phi->ir->id);
-                pmap_add(old, hreg, vreg);
-            }
-        }
-            
-        for (j=0; j<bb->hops.count; j++)
-        {
-            struct hop* hop = bb->hops.item[j];
-            register_assignment_t* in = &hop->regsin;
-            register_assignment_t* out = &hop->regsout;;
-
-            hop_print('R', hop);
-
-            select_registers(hop, old, in, out);
-
-            tracef('R', "R: %d from $%d: [", hop->id, hop->ir->id);
-            for (k=0; k<hop->regsin.count; k++)
-            {
-                struct hreg* hreg = hop->regsin.item[k].left;
-                struct vreg* vreg = hop->regsin.item[k].right;
-                if (k != 0)
-                    tracef('R', " ");
-                tracef('R', "%%%d=>%s", vreg->id, hreg->id);
-            }
-            tracef('R', "] [");
-            for (k=0; k<hop->regsout.count; k++)
-            {
-                struct hreg* hreg = hop->regsout.item[k].left;
-                struct vreg* vreg = hop->regsout.item[k].right;
-                if (k != 0)
-                    tracef('R', " ");
-                tracef('R', "%%%d=>%s", vreg->id, hreg->id);
-            }
-            tracef('R', "]\n");
-
-            j += insert_moves(bb, j, old, in);
-
-            old = out;
-        }
-    }
-}
-
-/* returns the number of instructions inserted */
-static int insert_moves(struct basicblock* bb, int index,
-    register_assignment_t* srcregs, register_assignment_t* destregs)
-{
-    int i;
-    int inserted = 0;
-    static PMAPOF(struct hreg, struct hreg) copies;
-
-    copies.count = 0;
-    for (i=0; i<destregs->count; i++)
-    {
-        struct hreg* dest = destregs->item[i].left;
-        struct vreg* vreg = destregs->item[i].right;
-        struct hreg* src = pmap_findright(srcregs, vreg);
-        assert(src != NULL);
-
-        pmap_add(&copies, src, dest);
-    }
-
-    while (copies.count > 0)
-    {
-        struct hreg* src;
-        struct hreg* dest;
-        struct hreg* other;
-        struct hop* hop;
-
-        /* Try and find a destination which isn't a source. */
-
-        src = NULL;
-        for (i=0; i<copies.count; i++)
-        {
-            dest = copies.item[i].right;
-            if (!pmap_findleft(&copies, dest))
-            {
-                src = copies.item[i].left;
-                break;
-            }
-        }
-
-        if (src)
-        {
-            /* Copy. */
-
-            hop = platform_move(bb, src, dest);
-            pmap_remove(&copies, src, dest);
-        }
-        else
-        {
-            /* Okay, so there's nowhere to free to move src to. This could be
-             * because it's already in the right place. */
-            
-            src = copies.item[0].left;
-            dest = pmap_findleft(&copies, src);
-
-            if (src == dest)
-            {
-                /* This register is already in the right place! */
-
-                pmap_remove(&copies, src, dest);
-                continue;
-            }
-            else
-            {
-                /* It's not in the right place. That means we have a cycle, and need to do
-                 * a swap. */
-
-                /* (src->dest, other->src) */
-                hop = platform_swap(bb, src, dest);
-                pmap_remove(&copies, src, dest);
-
-                /* Now src and dest are swapped. We know that the old src is in the right place
-                * and now contains dest. Any copies from the old dest (now containing src) must
-                * be patched to point at the old src. */
-
-                for (i=0; i<copies.count; i++)
-                {
-                    if (copies.item[i].right == src)
-                        copies.item[i].right = dest;
-                }
-            }
-        }
-
-        array_insert(&bb->hops, hop, index + inserted);
-        inserted++;
-    }
-
-    return inserted;
-}
-
-static void insert_phi_copies(void)
-{
-    int i, j, k;
-
-    /* If we're importing an hreg from a parent block via a phi, insert a move
-     * at the end of the parent block to put the result into the right
-     * register. */
 
     for (i=0; i<cfg.preorder.count; i++)
     {
         struct basicblock* bb = cfg.preorder.item[i];
 
-        /* Group together copies from each predecessor, so we can generate the
-         * appropriate parallel move. */
-
-        for (j=0; j<bb->prevs.count; j++)
+        for (j=0; j<bb->imports.count; j++)
         {
-            struct basicblock* prevbb = bb->prevs.item[j];
-            static register_assignment_t destregs;
-
-            tracef('R', "R: inserting phis for %s -> %s\n",
-                prevbb->name, bb->name);
-            destregs.count = 0;
-            for (k=0; k<bb->phis.count; k++)
-            {
-                struct vreg* vreg = bb->phis.item[k].left;
-                struct phi* phi = bb->phis.item[k].right;
-                struct hreg* src = pmap_findright(prevbb->regsout, phi->ir->result);
-                struct hreg* dest = pmap_findright(&bb->regsin, vreg);
-
-                if ((phi->prev == prevbb) && dest)
-                {
-                    /* We inserted critical edges to guarantee this. */
-                    assert(prevbb->nexts.count == 1);
-
-                    tracef('R', "R: phi map %%%d (%s) -> %%%d (%s)\n",
-                        phi->ir->result->id, src->id,
-                        vreg->id, dest->id);
-
-                    pmap_put(&destregs, dest, phi->ir->result);
-                }
-            }
-
-            /* Add any non-phi inputs. */
-
-            for (k=0; k<bb->regsin.count; k++)
-            {
-                struct hreg*hreg = bb->regsin.item[k].left;
-                struct vreg* vreg = bb->regsin.item[k].right;
-                struct hreg* src = pmap_findright(prevbb->regsout, vreg);
-                if (!pmap_findleft(&bb->phis, vreg))
-                {
-                    tracef('R', "R: input map %%%d (%s) -> (%s)\n",
-                        vreg->id, src->id, hreg->id);
-
-                    pmap_add(&destregs, hreg, vreg);
-                }
-            }
-
-            /* The last instruction of a block should be the jump that sends us
-             * to the next block. Insert the moves before then. */
-
-            insert_moves(prevbb, prevbb->hops.count-1, prevbb->regsout, &destregs);
+            struct ir* src = bb->imports.item[j].left;
+            struct ir* dest = bb->imports.item[j].right;
+            struct vreg* srcvreg = hashtable_get(&src->bb->outputmapping, src);
+            struct vreg* destvreg = hashtable_get(&bb->inputmapping, dest);
+            if (srcvreg != destvreg)
+                coalesce(srcvreg, destvreg);
         }
     }
 }
 
-static int pack_stackframe(int stacksize, int size, uint32_t attr)
-{
-    int i;
-
-    for (i=0; i<hregs.count; i++)
-    {
-        struct hreg* hreg = hregs.item[i];
-        if (hreg->is_stacked && (hreg->attrs & attr))
-        {
-            hreg->offset = stacksize;
-            stacksize += size;
-        }
-    }
-
-    return stacksize;
-}
-
-static void layout_stack_frame(void)
-{
-    int stacksize = 0;
-    stacksize = pack_stackframe(stacksize, EM_wordsize*2, burm_double_ATTR);
-    stacksize = pack_stackframe(stacksize, EM_wordsize*2, burm_long_ATTR);
-    stacksize = pack_stackframe(stacksize, EM_wordsize*1, burm_float_ATTR);
-    stacksize = pack_stackframe(stacksize, EM_wordsize*1, burm_int_ATTR);
-    current_proc->spills_size = stacksize;
-}
-#endif
-
-static void walk_vregs(void (*callback)(struct vreg* vreg))
+static void generate_graph(void)
 {
     int i, j, k;
 
@@ -799,134 +59,36 @@ static void walk_vregs(void (*callback)(struct vreg* vreg))
         for (j=0; j<bb->hops.count; j++)
         {
             struct hop* hop = bb->hops.item[j];
+            struct hashtable_iterator hit1 = {};
+            while (hashtable_next(hop->valueusage, &hit1))
+            {
+                struct valueusage* usage1 = hit1.value;
+                struct hashtable_iterator hit2 = {};
+                while (hashtable_next(hop->valueusage, &hit2))
+                {
+                    struct valueusage* usage2 = hit2.value;
+                    if (usage1 == usage2)
+                        continue;
 
-            for (k=0; k<hop->ins.count; k++)
-                callback(hop->ins.item[k]);
-            for (k=0; k<hop->outs.count; k++)
-                callback(hop->outs.item[k]);
-            for (k=0; k<hop->throughs.count; k++)
-                callback(hop->throughs.item[k]);
+                    if (usage1->invreg && usage2->invreg)
+                        graph_add_edge(&interference, actual(usage1->invreg), actual(usage2->invreg));
+                    if (usage1->outvreg && usage2->outvreg)
+                        graph_add_edge(&interference, actual(usage1->outvreg), actual(usage2->outvreg));
+
+                    if (usage1->corrupted && usage1->invreg && usage2->outvreg)
+                        graph_add_edge(&interference, actual(usage1->invreg), actual(usage2->outvreg));
+                }
+
+                if (hop->is_move && usage1->invreg && usage1->outvreg)
+                    graph_add_edge(&affinity, actual(usage1->invreg), actual(usage1->outvreg));
+            }
         }
     }
 }
 
-static void clear_anode_cb(struct vreg* vreg)
+static void dump_vreg(struct vreg* vreg)
 {
-    vreg->anode = NULL;
-}
-
-static void assign_anode_cb(struct vreg* vreg)
-{
-    static int id = 1;
-    if (!vreg->anode)
-    {
-        struct anode* anode = heap_alloc(&anode_heap, 1, sizeof(*anode));
-        struct vref* vref = heap_alloc(&anode_heap, 1, sizeof(*vref));
-        anode->id = id++;
-        anode->vref = vref;
-        anode->cost = vreg->usedhops.count + vreg->usedphis.count;
-        anode->type = vreg->type;
-        anode->is_spillable = vreg->is_spillable;
-        vref->vreg = vreg;
-        vreg->anode = anode;
-    }
-}
-
-/* Calling this makes the interference graph invalid */
-static void coalesce_anodes(struct anode* left, struct anode* right)
-{
-    struct vref* vref;
-    int i = 1;
-
-    if (left == right)
-        return;
-
-    /* Paste right's vref list onto the end of left's vref list. */
-    vref = left->vref;
-    if (vref)
-    {
-        while (vref->next)
-        {
-            vref = vref->next;
-            i++;
-        }
-        vref = vref->next = right->vref;
-    }
-    else
-        vref = left->vref = right->vref;
-
-    /* Walk down right's vref list and reassign each vreg's anode to left. */
-    while (vref)
-    {
-        vref->vreg->anode = left;
-        vref = vref->next;
-        i++;
-    }
-
-    tracef('R', "R: coalescing anodes %d (type %d) and %d (type %d) used in %d places\n",
-        left->id, left->type, right->id, right->type, i);
-
-    if (!left->type)
-        left->type = right->type;
-
-    assert(!left->type || !right->type || (left->type == right->type));
-    left->cost += right->cost;
-    left->is_spillable &= right->is_spillable;
-    right->replaced_by = left;
-}
-
-static void coalesce_phis(void)
-{
-    int i, j;
-
-    for (i=0; i<cfg.preorder.count; i++)
-    {
-        struct basicblock* bb = cfg.preorder.item[i];
-
-        for (j=0; j<bb->phis.count; j++)
-        {
-            struct vreg* dest = bb->phis.item[j].left;
-            struct phi* phi = bb->phis.item[j].right;
-            struct vreg* src = phi->ir->result;
-
-            coalesce_anodes(src->anode, dest->anode);
-        }
-    }
-}
-
-static void interferes_with(struct vreg** regs1, int count1, struct vreg** regs2, int count2)
-{
-    int i, j;
-
-    for (i=0; i<count1; i++)
-    {
-        struct anode* left = regs1[i]->anode;
-
-        for (j=0; j<count2; j++)
-        {
-            struct anode* right = regs2[j]->anode;
-
-            if (left != right)
-                graph_add_edge(&interferenceg, left, right);
-        }
-    }
-}
-
-static void dump_anode(struct anode* anode)
-{
-    struct vref* vref;
-
-    fprintf(regalloc_dot_file, "%s.%d deg %d cost %d %s\\n",
-        current_proc->name, anode->id, anode->degree, anode->cost,
-        anode->is_spillable ? "SPILLABLE" : "");
-    vref = anode->vref;
-    while (vref)
-    {
-        fprintf(regalloc_dot_file, "%%%d%s ",
-            vref->vreg->id,
-            vref->vreg->is_spillable ? "S" : "");
-        vref = vref->next;
-    }
+    fprintf(regalloc_dot_file, "[%%%d]", vreg->id);
 }
 
 static void dump_interference_graph(void)
@@ -940,24 +102,24 @@ static void dump_interference_graph(void)
 
     {
         struct edge_iterator eit = {};
-        while (graph_next_edge(&interferenceg, &eit))
+        while (graph_next_edge(&interference, &eit))
         {
             fprintf(regalloc_dot_file, "\t\"");
-            dump_anode(eit.left);
+            dump_vreg(eit.left);
             fprintf(regalloc_dot_file, "\" -> \"");
-            dump_anode(eit.right);
+            dump_vreg(eit.right);
             fprintf(regalloc_dot_file, "\";\n");
         }
     }
 
     {
         struct edge_iterator eit = {};
-        while (graph_next_edge(&preferenceg, &eit))
+        while (graph_next_edge(&affinity, &eit))
         {
             fprintf(regalloc_dot_file, "\t\"");
-            dump_anode(eit.left);
+            dump_vreg(eit.left);
             fprintf(regalloc_dot_file, "\" -> \"");
-            dump_anode(eit.right);
+            dump_vreg(eit.right);
             fprintf(regalloc_dot_file, "\" [style=dotted];\n");
         }
     }
@@ -978,178 +140,52 @@ static void dump_interference_graph(void)
     fprintf(regalloc_dot_file, "}\n");
 }
 
-static void build_interference_graph_cb(struct hop* hop, void* user)
+static bool attempt_to_coalesce(void)
 {
-    int i;
+    struct vreg* v1 = NULL;
+    struct vreg* v2 = NULL;
+    int degree = INT_MAX;
 
-    if (hop->is_move)
-    {
-        struct anode* src = hop->ins.item[0]->anode;
-        struct anode* dest = hop->outs.item[0]->anode;
-        assert(hop->ins.count == 1);
-        assert(hop->outs.count == 1);
-
-        graph_add_edge(&preferenceg, src, dest);
-    }
-    else
-    {
-        interferes_with(hop->ins.item, hop->ins.count, hop->ins.item, hop->ins.count);
-        interferes_with(hop->outs.item, hop->outs.count, hop->outs.item, hop->outs.count);
-        interferes_with(hop->throughs.item, hop->throughs.count, hop->throughs.item, hop->throughs.count);
-        interferes_with(hop->throughs.item, hop->throughs.count, hop->ins.item, hop->ins.count);
-        interferes_with(hop->throughs.item, hop->throughs.count, hop->outs.item, hop->outs.count);
-
-        for (i=0; i<hop->constraints.count; i++)
-        {
-            struct vreg* vreg = hop->constraints.item[i].left;
-            struct constraint* c = hop->constraints.item[i].right;
-
-            if (c->preserved)
-                interferes_with(&vreg, 1, hop->outs.item, hop->outs.count);
-            if (c->equals_to)
-                coalesce_anodes(vreg->anode, c->equals_to->anode);
-        }
-    }
-}
-
-static void purge_interference_where_preference(void)
-{
-    int i;
-
+    /* Find the affinity edge with the lowest interference degree. */
     {
         struct edge_iterator eit = {};
-        while (graph_next_edge(&preferenceg, &eit))
+        while (graph_next_edge(&affinity, &eit))
         {
-            struct anode* src = eit.left;
-            struct anode* dest = eit.right;
-            graph_remove_edge(&interferenceg, src, dest);
-        }
-    }
-}
+            struct vreg* left = eit.left;
+            struct vreg* right = eit.right;
+            struct neighbour_iterator nit = {};
+            static ARRAYOF(struct vreg) combined;
 
-static void purge_replaced_anodes(void)
-{
-    static struct set replaced;
-    struct anode* anode;
-    int i;
+            combined.count = 0;
+            while (graph_next_neighbour(&interference, left, &nit))
+                array_appendu(&combined, nit.data);
+            while (graph_next_neighbour(&interference, right, &nit))
+                array_appendu(&combined, nit.data);
 
-    assert(replaced.table.size == 0);
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&interferenceg, &vit))
-        {
-            anode = vit.data;
-            if (anode->replaced_by)
-                set_add(&replaced, anode);
-        }
-    }
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&preferenceg, &vit))
-        {
-            anode = vit.data;
-            if (anode->replaced_by)
-                set_add(&replaced, anode);
-        }
-    }
-
-    tracef('R', "R: found %d replaced anodes\n", replaced.table.size);
-
-    while ((anode = set_pop(&replaced)))
-    {
-        graph_remove_vertex(&interferenceg, anode);
-        graph_remove_vertex(&preferenceg, anode);
-    }
-}
-
-static struct anode* find_lowest_degree(bool is_spillable)
-{
-    int i, j;
-    struct anode* lowest = NULL;
-    int lowestdeg = INT_MAX;
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&interferenceg, &vit))
-        {
-            struct anode* candidate = vit.data;
-            int candidatedeg = graph_get_vertex_degree(&interferenceg, candidate);
-
-            if ((candidate->is_spillable == is_spillable) && (lowestdeg > candidatedeg))
+            if (combined.count < degree)
             {
-                lowest = candidate;
-                lowestdeg = candidatedeg;
+                v1 = left;
+                v2 = right;
+                degree = combined.count;
             }
         }
     }
 
-    if (lowest)
-        lowest->degree = lowestdeg;
-    return lowest;
-}
-
-static void remove_anode_from_graphs(struct anode* anode)
-{
-    graph_remove_vertex(&interferenceg, anode);
-    graph_remove_vertex(&preferenceg, anode);
-}
-
-static struct anode* find_highest_degree(bool is_spillable)
-{
-    int i, j;
-    struct anode* highest = NULL;
-    int highestdeg = INT_MIN;
-
-    {
-        struct vertex_iterator vit = {};
-        while (graph_next_vertex(&interferenceg, &vit))
-        {
-            struct anode* candidate = vit.data;
-            int candidatedeg = graph_get_vertex_degree(&interferenceg, candidate);
-
-            if ((candidate->is_spillable == is_spillable) && (highestdeg < candidatedeg))
-            {
-                highest = candidate;
-                highestdeg = candidatedeg;
-            }
-        }
-    }
-
-    highest->degree = highestdeg;
-    return highest;
-}
-
-static bool attempt_to_simplify(void)
-{
-    int i;
-
-    struct anode* candidate = find_lowest_degree(false);
-    if (!candidate)
+    if (!v1)
         return false;
-    if (candidate->degree > 5)
+    if (degree > DEGREE)
         return false;
 
-    tracef('R', "R: simplifying @%d with degree %d\n", candidate->id, candidate->degree);
-        
-    remove_anode_from_graphs(candidate);
-    return true;
-}
+    tracef('R', "R: lowest degree affinity edge: %%%d->%%%d, degree %d\n",
+        v1->id, v2->id, degree);
+    coalesce(v1, v2);
 
-static bool attempt_to_spill_or_simplify(void)
-{
-    int i;
-    struct anode* candidate = find_lowest_degree(true);
-    if (!candidate)
-        return false;
+    graph_merge_vertices(&affinity, v1, v2);
+    if (graph_get_vertex_degree(&affinity, v1) == 0)
+        graph_remove_vertex(&affinity, v1);
 
-    if (candidate->degree > 5)
-        tracef('R', "R: spilling @%d with degree %d\n", candidate->id, candidate->degree);
-    else
-        tracef('R', "R: simplifying @%d with degree %d\n", candidate->id, candidate->degree);
+    graph_merge_vertices(&interference, v1, v2);
 
-    remove_anode_from_graphs(candidate);
     return true;
 }
 
@@ -1159,64 +195,33 @@ static void iterate(void)
 
     while (true)
     {
-        tracef('R', "R: iterating\n"); 
+        tracef('R', "R: iterating; interference graph: %d, affinity graph: %d\n",
+            interference.edges.table.size, affinity.edges.table.size);
 
-        if (attempt_to_simplify())
+        if (attempt_to_coalesce())
             continue;
 
-        if (attempt_to_spill_or_simplify())
-            continue;
+        // if (attempt_to_simplify())
+        //     continue;
+
+        // if (attempt_to_spill_or_simplify())
+        //     continue;
 
         break;
     }
 }
 
-static void assign_registers(void)
-{
-}
-
 void pass_register_allocator(void)
 {
-    simplified.count = 0;
-    tracef('R', "R: assigning anodes\n");
-    walk_vregs(clear_anode_cb);
-    walk_vregs(assign_anode_cb);
-
-    graph_reset(&interferenceg);
-    graph_reset(&preferenceg);
-    tracef('R', "R: coalescing phis\n");
-    coalesce_phis();
-
-    tracef('R', "R: generating interference and preference graphs\n");
-    hop_walk(build_interference_graph_cb, NULL);
-exit(0);
-
-    tracef('R', "R: before purge, interference=%d nodes, preference=%d nodes\n",
-        interferenceg.vertices.size, preferenceg.vertices.size);
-    purge_replaced_anodes();
-    purge_interference_where_preference();
-    tracef('R', "R: after purge, interference=%d nodes, preference=%d nodes\n",
-        interferenceg.vertices.size, preferenceg.vertices.size);
+    wire_together_bbs();
+    generate_graph();
 
     iterate();
 
-    if (interferenceg.vertices.size != 0)
-        fatal("register allocation failed");
-
-    //assign_registers();
     dump_interference_graph();
 
-    heap_free(&anode_heap);
-
-    exit(1);
-    #if 0
-    populate_hregs();
-    wire_up_blocks_ins_outs();
-
-    assign_hregs_to_vregs();
-    insert_phi_copies();
-    layout_stack_frame();
-    #endif
+    graph_reset(&interference);
+    graph_reset(&affinity);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -306,16 +306,6 @@ char* hop_render(struct hop* hop)
     if (hop->pseudo)
         appendf("@");
 
-    if (hop->is_move && (hop->insels.count == 0))
-    {
-        appendf("(move");
-        for (i=0; i<hop->copies.count; i++)
-            appendf(" %%%d->%%%d",
-                hop->copies.item[i].left->id,
-                hop->copies.item[i].right->id);
-        appendf(")");
-    }
-
 	for (i=0; i<hop->insels.count; i++)
 	{
 		struct insel* insel = hop->insels.item[i];

@@ -62,6 +62,7 @@ static void assign_vregs(void)
     assert(current_bb->inputmapping.size == 0);
     assert(current_bb->outputmapping.size == 0);
     assert(mapping.size == 0);
+    current_bb->inputmapping = empty_hashtable_of_values;
     current_bb->outputmapping = empty_hashtable_of_values;
 
     {
@@ -131,10 +132,9 @@ static void assign_vregs(void)
         }
     }
 
-    /* Insert one final move at the end of the block. */
-
-    hop = clone_vregs();
-    array_append(&current_bb->hops, hop);
+    /* The last hop in the block is always an exit: either a branch or a ret
+     * or something like that. So the output mapping we want is the state of
+     * the registers on exit from this instruction. */
 
     hashtable_copy_all(&mapping, &current_bb->outputmapping);
 }
@@ -142,8 +142,6 @@ static void assign_vregs(void)
 void pass_assign_vregs(void)
 {
     int i;
-
-    vregcount = 0;
 
     for (i=0; i<dominance.preorder.count; i++)
     {

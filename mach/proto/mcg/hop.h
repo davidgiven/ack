@@ -51,7 +51,6 @@ struct hop
 	PMAPOF(struct value, struct value) equals_constraint;
 
 	struct hashtable* valueusage;
-	PMAPOF(struct vreg, struct vreg) copies;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);

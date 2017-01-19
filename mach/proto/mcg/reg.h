@@ -17,6 +17,7 @@ struct vreg
 {
     int id;
     struct value* value;
+    struct vreg* coalesced_with;
 };
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);
