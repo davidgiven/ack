@@ -8,7 +8,7 @@
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.32.5924
  */
 
-static const int DEGREE = 10;
+static const int DEGREE = 5;
 
 static struct graph interference;
 static struct graph affinity;
@@ -89,6 +89,8 @@ static void generate_graph(void)
 static void dump_vreg(struct vreg* vreg)
 {
     fprintf(regalloc_dot_file, "[%%%d]", vreg->id);
+    if (!vreg->needs_register)
+        fprintf(regalloc_dot_file, "S");
 }
 
 static void dump_interference_graph(void)
@@ -176,7 +178,7 @@ static bool attempt_to_coalesce(void)
     if (degree > DEGREE)
         return false;
 
-    tracef('R', "R: lowest degree affinity edge: %%%d->%%%d, degree %d\n",
+    tracef('R', "R: coalescing affinity edge: %%%d->%%%d, degree %d\n",
         v1->id, v2->id, degree);
     coalesce(v1, v2);
 
@@ -187,6 +189,11 @@ static bool attempt_to_coalesce(void)
     graph_merge_vertices(&interference, v1, v2);
 
     return true;
+}
+
+static bool attempt_to_simplify(void)
+{
+    return false;
 }
 
 static void iterate(void)
@@ -201,8 +208,8 @@ static void iterate(void)
         if (attempt_to_coalesce())
             continue;
 
-        // if (attempt_to_simplify())
-        //     continue;
+        if (attempt_to_simplify())
+            continue;
 
         // if (attempt_to_spill_or_simplify())
         //     continue;
@@ -216,7 +223,7 @@ void pass_register_allocator(void)
     wire_together_bbs();
     generate_graph();
 
-    iterate();
+    //iterate();
 
     dump_interference_graph();
 

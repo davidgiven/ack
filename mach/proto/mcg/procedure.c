@@ -222,12 +222,10 @@ void procedure_compile(struct procedure* proc)
     pass_live_value_analysis();
     print_hops('8');
     pass_assign_vregs();
+    pass_calculate_vreg_spillibility();
     print_hops('9');
     pass_register_allocator();
 #if 0
-    pass_split_live_ranges();
-    pass_determine_vreg_usage();
-
     pass_add_prologue_epilogue();
     print_hops('9');
 
