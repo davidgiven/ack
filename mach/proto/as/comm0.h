@@ -8,7 +8,21 @@
  * All preprocessor based options/constants/functions
  */
 
-#include <stdint.h>
+#ifdef _include
+_include	<ctype.h>
+_include	<signal.h>
+_include	<stdint.h>
+_include	<stdio.h>
+_include	<stdlib.h>
+_include	<string.h>
+#else
+#include	<ctype.h>
+#include	<signal.h>
+#include	<stdint.h>
+#include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
+#endif
 
 /* ========== ON/OFF options (use #define in mach0.c) ========== */
 
@@ -80,23 +94,16 @@ separate linker only possible if relocation info produced
 /* ========== Machine independent type declarations ========== */
 
 #ifdef _include
-_include    <stdlib.h>
-_include	<stdio.h>
-_include    <string.h>
-_include	<ctype.h>
-_include	<signal.h>
-#else
-#include    <stdlib.h>
-#include	<stdio.h>
-#include    <string.h>
-#include	<ctype.h>
-#include	<signal.h>
+#ifdef ASLD
+_include	"arch.h"
 #endif
-
+_include	"out.h"
+#else
 #ifdef ASLD
 #include	"arch.h"
 #endif
 #include	"out.h"
+#endif
 
 #if DEBUG == 0
 #define	assert(ex)	/* nothing */
@@ -265,6 +272,3 @@ typedef	struct sect_t	sect_t;
 #define	MACHREL_BWR	(0)
 #endif
 #endif
-
-extern FILE *fopen();   /* some systems don't have this in stdio.h */
-

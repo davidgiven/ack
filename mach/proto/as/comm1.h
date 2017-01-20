@@ -104,21 +104,28 @@ extern struct outhead	outhead;
 extern int	curr_token;
 
 /* forward function declarations */
+/* comm5.c */
+int	 yylex(void);
+void	 putval(int);
+int	 getval(int);
+int	 nextchar(void);
 #ifdef ASLD
-extern char	*readident();
+char	*readident(int);
 #endif
-extern char	*remember();
-extern item_t	*fb_shift();
-extern item_t	*fb_alloc();
-extern item_t	*item_alloc();
-extern item_t	*item_search();
-extern valu_t	load();
-extern FILE	*ffcreat();
-extern FILE	*fftemp();
-
-extern void fatal(const char* s, ...);
-extern void serror(const char* s, ...);
-extern void warning(const char* s, ...);
+int	 hash(char *);
+item_t	*item_search(char *);
+void	 item_insert(item_t *, int);
+item_t	*item_alloc(int);
+item_t	*fb_alloc(int);
+item_t	*fb_shift(int);
+/* comm7.c */
+valu_t	 load();
+char	*remember();
+FILE	*ffcreat();
+FILE	*fftemp();
+void	 fatal(const char *, ...);
+void	 serror(const char *, ...);
+void	 warning(const char *, ...);
 
 /* ========== Machine dependent C declarations ========== */
 

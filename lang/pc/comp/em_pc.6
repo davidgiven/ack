@@ -1,4 +1,4 @@
-.TH EM_PC 6 "$Revision$"
+.TH EM_PC 6 2017-01-18
 .ad
 .SH NAME
 em_pc \- Pascal compiler
@@ -45,9 +45,9 @@ and the \fIn\fR parameter for the alignment of that type.
 Absence of \fIm\fR or \fIn\fR causes a default value to be retained.
 .IP \fB\-w\fR
 suppress warning messages.
-.IP
 .IP \fB\-R\fR
-disable range checks. Additionally, the run-time tests to see if
+disable range checks.
+Additionally, the run-time tests to see if
 a function is assigned, are skipped.
 .IP \fB\-A\fR
 enable extra array bound checks, for machines that do not implement the
@@ -55,26 +55,28 @@ EM ones.
 .IP \fB\-C\fR
 the lower case and upper case letters are treated differently.
 .IP "\fB\-u\fR, \fB\-U\fR"
-allow underscores in identifiers. It is not allowed to start an identifier
+allow underscores in identifiers.
+It is not allowed to start an identifier
 with an underscore.
 .IP \fB\-a\fR
 don't generate code for assertions.
 .IP \fB\-c\fR
-allow C-like strings. This option is mainly intended for usage with
-C-functions. This option will cause the type 'string' to be known.
+allow C-like strings.
+This option is mainly intended for usage with C-functions.
+This option will cause the type 'string' to be known.
 .IP \fB\-d\fR
 allow the type 'long'.
 .IP \fB\-i\fR\fIn\fR
 set the size of integer sets to \fIn\fR. When not used, a default value is
 retained.
 .IP \fB\-s\fR
-allow only standard Pascal. This disables the \fB\-c\fR, \fB\-d\fR, \fB\-u\fR,
-\fB\-U\fR and \fB\-C\fR
-options. Furthermore, assertions are not recognized at all (instead of just
+allow only standard Pascal.
+This disables the \fB\-c\fR, \fB\-d\fR, \fB\-u\fR,
+\fB\-U\fR and \fB\-C\fR options.
+Furthermore, assertions are not recognized at all (instead of just
 being skipped).
 .IP \fB\-t\fR
 trace calls and exits of procedures and functions.
-.PP
 .SH FILES
 .IR ~em/lib/em_pc :
 binary of the Pascal compiler.

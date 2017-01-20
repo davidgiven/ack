@@ -1,4 +1,4 @@
-.TH LED 6 "$Revision$"
+.TH LED 6 2017-01-18
 .ad
 .SH NAME
 led \- link editor
@@ -78,7 +78,7 @@ The previous remarks about
 and
 .I nnnn
 apply.
-.TP 
+.TP
 .B \-o
 The
 .I name
@@ -88,7 +88,7 @@ is used as the name of the
 .I led
 output file, instead of
 .BR a.out .
-.TP 
+.TP
 .B  \-r
 Generate relocation information in the output file
 so that it can be the subject of another
@@ -104,7 +104,8 @@ at load time. This flag disables the \fB\-r\fP flag.
 .TP
 .B \-n
 Usually, after linking, a value in the namelist represents an absolute
-address. Sometimes, particularly when using the \fB\-c\fR flag, it may be
+address.
+Sometimes, particularly when using the \fB\-c\fR flag, it may be
 useful to have as value the offset with respect to the beginning of the
 corresponding section. The \fB\-n\fR flag enables this.
 .TP
@@ -112,7 +113,7 @@ corresponding section. The \fB\-n\fR flag enables this.
 `Strip' the output, that is, remove the name table
 and relocation information to save space (but impair the
 usefulness of the debuggers).
-.TP 
+.TP
 .B  \-u
 Take the following argument as a symbol and enter
 it as undefined in the name table.
@@ -129,9 +130,12 @@ chose to link it (which unresolved reference it resolves).
 This option is useful in resolving 'multiply defined' problems.
 .SH FILES
 ~em/lib.bin/em_led
-a.out	output file
+.PD 0
+.IP a.out 24n
+output file
+.PD
 .SH "SEE ALSO"
-ack(1)
-arch(1)
-ack.out.h(5)
+ack(1),
+arch(1),
+ack.out.h(5),
 uni_ass(6)

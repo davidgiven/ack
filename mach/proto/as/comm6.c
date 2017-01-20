@@ -354,8 +354,6 @@ valu_t valu;
 	outname.on_type = type;
 	outname.on_desc = desc;
 	outname.on_valu = valu;
-	if (sizeof(valu) != sizeof(long))
-		outname.on_valu &= ~(((0xFFFFFFFF)<<(4*sizeof(valu_t)))<<(4*sizeof(valu_t)));
 	wr_name(&outname, 1);
 }
 
