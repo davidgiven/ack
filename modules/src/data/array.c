@@ -21,8 +21,7 @@ void array_append(void* arrayp, void* value)
     struct array* array = arrayp;
 
     extend(array);
-    array->item[array->count] = value;
-    array->count++;
+    array->item[array->count++] = value;
 }
 
 int array_indexof(void* arrayp, void* value)
@@ -99,7 +98,7 @@ void* array_pop(void* arrayp)
     struct array* array = arrayp;
 
     assert(array->count > 0);
-    return array->item[array->count--];
+    return array->item[--array->count];
 }
 
 void array_appendall(void* arrayp, void* srcp)
