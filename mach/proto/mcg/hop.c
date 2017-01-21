@@ -233,6 +233,20 @@ static char* appendf(const char* fmt, ...)
     return p;
 }
 
+static struct vreg* actual(struct vreg* vreg)
+{
+    while (vreg->coalesced_with)
+        vreg = vreg->coalesced_with;
+    return vreg;
+}
+
+void appendvreg(struct vreg* vreg)
+{
+    appendf("%%%d=%d", vreg->id, vreg->hreg);
+    if (vreg->is_spilt)
+        appendf("S");
+}
+
 void appendvalue(struct hop* hop, struct value* value)
 {
     struct valueusage* usage = hop_get_value_usage(hop, value);
@@ -255,7 +269,7 @@ void appendvalue(struct hop* hop, struct value* value)
     }
 
     if (vreg)
-        appendf("%%%d", vreg->id);
+        appendvreg(actual(vreg));
     else
         appendf("$%d:%d", value->ir->id, value->subid);
 }
@@ -302,6 +316,26 @@ char* hop_render(struct hop* hop)
     appendf(""); /* ensure the buffer has been allocated */
     bufferlen = 0;
 	buffer[0] = '\0';
+
+    if (hop->is_move)
+    {
+        struct hashtable_iterator hit = {};
+        appendf("@move:");
+        while (hashtable_next(hop->valueusage, &hit))
+        {
+            struct valueusage* usage = hit.value;
+            struct vreg* left = actual(usage->invreg);
+            struct vreg* right = actual(usage->outvreg);
+            if (left != right)
+            {
+                appendf(" ");
+                appendvreg(usage->invreg);
+                appendf("->");
+                appendvreg(usage->outvreg);
+            }
+        }
+        appendf("\n");
+    }
 
     if (hop->pseudo)
         appendf("@");

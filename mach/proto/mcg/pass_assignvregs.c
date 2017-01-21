@@ -10,6 +10,7 @@ static struct vreg* create_vreg(struct value* value)
     struct vreg* vreg = heap_alloc(&proc_heap, 1, sizeof(*vreg));
     vreg->id = vregcount++;
     vreg->value = value;
+    vreg->hreg = -1;
     return vreg;
 }
 

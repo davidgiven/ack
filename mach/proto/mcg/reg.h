@@ -18,7 +18,10 @@ struct vreg
     int id;
     struct value* value;
     struct vreg* coalesced_with;
+    int hreg;
+    unsigned int bitmap;
     bool needs_register;
+    bool is_spilt;
 };
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);

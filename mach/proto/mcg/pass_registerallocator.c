@@ -1,6 +1,7 @@
 #include "mcg.h"
 #include "bigraph.h"
 #include "set.h"
+#include "bitmap.h"
 #include <limits.h>
 
 /* This is based around the elegant graph colouring algorithm here:
@@ -20,12 +21,13 @@ static struct vreg* actual(struct vreg* vreg)
     return vreg;
 }
 
-static void coalesce(struct vreg* v1, struct vreg* v2)
+static void coalesce(struct vreg* vmaster, struct vreg* vslave)
 {
-    tracef('R', "R: coalescing %%%d into %%%d\n", v1->id, v2->id);
-    v1 = actual(v1);
-    v2 = actual(v2);
-    v1->coalesced_with = v2;
+    vmaster = actual(vmaster);
+    vslave = actual(vslave);
+    bitmap_or(&vmaster->bitmap, 32, &vslave->bitmap);
+    vmaster->needs_register |= vslave->needs_register;
+    vslave->coalesced_with = vmaster;
 }
 
 static void wire_together_bbs(void)
@@ -144,8 +146,8 @@ static void dump_interference_graph(void)
 
 static bool attempt_to_coalesce(void)
 {
-    struct vreg* v1 = NULL;
-    struct vreg* v2 = NULL;
+    struct vreg* vmaster = NULL;
+    struct vreg* vslave = NULL;
     int degree = INT_MAX;
 
     /* Find the affinity edge with the lowest interference degree. */
@@ -166,41 +168,124 @@ static bool attempt_to_coalesce(void)
 
             if (combined.count < degree)
             {
-                v1 = left;
-                v2 = right;
+                vmaster = left;
+                vslave = right;
                 degree = combined.count;
             }
         }
     }
 
-    if (!v1)
-        return false;
-    if (degree > DEGREE)
+    if (!vmaster || (degree > DEGREE))
         return false;
 
     tracef('R', "R: coalescing affinity edge: %%%d->%%%d, degree %d\n",
-        v1->id, v2->id, degree);
-    coalesce(v1, v2);
+        vmaster->id, vslave->id, degree);
+    coalesce(vmaster, vslave);
 
-    graph_merge_vertices(&affinity, v1, v2);
-    if (graph_get_vertex_degree(&affinity, v1) == 0)
-        graph_remove_vertex(&affinity, v1);
+    graph_merge_vertices(&affinity, vmaster, vslave);
+    if (graph_get_vertex_degree(&affinity, vslave) == 0)
+        graph_remove_vertex(&affinity, vslave);
 
-    graph_merge_vertices(&interference, v1, v2);
+    graph_merge_vertices(&interference, vmaster, vslave);
 
     return true;
 }
 
 static bool attempt_to_simplify(void)
 {
-    return false;
+    struct vreg* vreg = NULL;
+    int degree = INT_MAX;
+
+    /* Find the vreg with the lowest degree that's not move-related (i.e.
+     * has no affinity edges). */
+
+    {
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interference, &vit))
+        {
+            struct vreg* v = vit.data;
+            if (graph_get_vertex_degree(&affinity, v) == 0)
+            {
+                int d = graph_get_vertex_degree(&interference, v);
+                if (d < degree)
+                {
+                    vreg = v;
+                    degree = d;
+                }
+            }
+        }
+    }
+
+    if (!vreg || (degree > DEGREE))
+        return false;
+
+    /* Allocate a register. */
+
+    vreg->hreg = bitmap_find_unset_bit(&vreg->bitmap, 32);
+    tracef('R', "R: simplifying vreg %%%d with degree %d and bitmap 0x%x to hreg %d\n",
+        vreg->id, degree, vreg->bitmap, vreg->hreg);
+    {
+        struct neighbour_iterator nit = {};
+        while (graph_next_neighbour(&interference, vreg, &nit))
+        {
+            struct vreg* neighbour = nit.data;
+            bitmap_set(&neighbour->bitmap, 32, vreg->hreg);
+        }
+    }
+
+    /* ...and remove it from the graph. */
+
+    graph_remove_vertex(&interference, vreg);
+    graph_remove_vertex(&affinity, vreg);
+
+    return true;
 }
+
+static bool attempt_to_spill(void)
+{
+    struct vreg* vreg = NULL;
+    int degree = INT_MIN;
+
+    /* Find the spillable vreg with the *highest* degree. */
+
+    {
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&interference, &vit))
+        {
+            struct vreg* v = vit.data;
+            if (!v->needs_register)
+            {
+                int d = graph_get_vertex_degree(&interference, v);
+                if (d > degree)
+                {
+                    vreg = v;
+                    degree = d;
+                }
+            }
+        }
+    }
+
+    if (!vreg)
+        return false;
+
+    tracef('R', "R: spilling vreg %%%d with degree %d\n",
+        vreg->id, degree);
+    vreg->is_spilt = true;
+
+    /* ...and remove it from the graph. */
+
+    graph_remove_vertex(&interference, vreg);
+    graph_remove_vertex(&affinity, vreg);
+
+    return true;
+}
+
 
 static void iterate(void)
 {
     struct anode* spill;
 
-    while (true)
+    while (interference.vertices.size > 0)
     {
         tracef('R', "R: iterating; interference graph: %d, affinity graph: %d\n",
             interference.edges.table.size, affinity.edges.table.size);
@@ -211,10 +296,10 @@ static void iterate(void)
         if (attempt_to_simplify())
             continue;
 
-        // if (attempt_to_spill_or_simplify())
-        //     continue;
+        if (attempt_to_spill())
+             continue;
 
-        break;
+        fatal("unable to allocate registers!");
     }
 }
 
@@ -223,9 +308,8 @@ void pass_register_allocator(void)
     wire_together_bbs();
     generate_graph();
 
-    //iterate();
-
     dump_interference_graph();
+    iterate();
 
     graph_reset(&interference);
     graph_reset(&affinity);

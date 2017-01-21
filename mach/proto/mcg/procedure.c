@@ -228,10 +228,10 @@ void procedure_compile(struct procedure* proc)
 #if 0
     pass_add_prologue_epilogue();
     print_hops('9');
+#endif
 
     emit_procedure(proc);
 
-#endif
     heap_free(&proc_heap);
 }
 
