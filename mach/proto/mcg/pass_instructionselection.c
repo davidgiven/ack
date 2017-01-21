@@ -221,10 +221,19 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                 case ir_to_esn(IR_NOP, 'F'):
                 case ir_to_esn(IR_NOP, 'L'):
                 case ir_to_esn(IR_NOP, 'D'):
-                    hop_get_value_usage(current_hop, &insn->children[0]->value)->input = true;
+                {
+                    struct insn* child = insn->children[0];
+                    struct value* value;
+                    if (child->hop)
+                        value = child->hop->value;
+                    else
+                        value = &child->ir->value;
+
+                    hop_get_value_usage(current_hop, value)->input = true;
                     hop_get_value_usage(current_hop, current_hop->value)->output = true;
-                    hop_add_insel(current_hop, "@copy %V %V", &insn->children[0]->value, current_hop->value);
+                    hop_add_insel(current_hop, "@copy %V %V", value, current_hop->value);
                     break;
+                }
             }
 
             hop_print('I', current_hop);
