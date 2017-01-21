@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <limits.h>
 #include <assert.h>
 #include "bitmap.h"
 
@@ -35,7 +36,7 @@ int bitmap_findfirst(unsigned int* bitmap, int size)
 	{
 		unsigned int w = bitmap[word];
 		if (w)
-			return ffs(w) + word*BITS_PER_WORD;
+			return (ffs(w)-1) + word*BITS_PER_WORD;
 	}
 
 	return -1;
@@ -59,3 +60,28 @@ void bitmap_or(unsigned int* dest, int size, unsigned int* src)
 		dest[word] |= src[word];
 }
 
+int bitmap_find_unset_bit(unsigned int* bitmap, int size)
+{
+	int word;
+	int words = ((size-1) / BITS_PER_WORD) + 1;
+
+	for (word=0; word<words; word++)
+	{
+		unsigned int w = bitmap[word];
+		if (w != UINT_MAX)
+		{
+			int mask = 1;
+			int pos = 0;
+
+			while (w & mask)
+			{
+				mask <<= 1;
+				pos++;
+			}
+
+			return (word*BITS_PER_WORD) + pos;
+		}
+	}
+
+	return -1;
+}
