@@ -307,6 +307,7 @@ PATTERNS
 		cost 4;
 
     out:(long)reg = LOAD.L(addr:address)
+        with corrupted(%addr)
         emit "lwz %out.0, 4+%addr"
         emit "lwz %out.1, 0+%addr"
         cost 8;
