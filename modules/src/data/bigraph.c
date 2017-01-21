@@ -227,7 +227,8 @@ int graph_get_vertex_degree(struct graph* g, void* data)
 
     lazy_init(g);
     vertex = hashtable_get(&g->vertices, data);
-    assert(vertex);
+    if (!vertex)
+        return 0;
     return vertex->degree;
 }
 
