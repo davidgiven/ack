@@ -242,7 +242,9 @@ static struct vreg* actual(struct vreg* vreg)
 
 void appendvreg(struct vreg* vreg)
 {
-    appendf("%%%d=%d", vreg->id, vreg->hreg);
+    appendf("%%%d", vreg->id);
+    if (vreg->hreg != -1)
+        appendf("=%d", vreg->hreg);
     if (vreg->is_spilt)
         appendf("S");
 }

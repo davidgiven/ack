@@ -13,6 +13,7 @@ static const int DEGREE = 5;
 
 static struct graph interference;
 static struct graph affinity;
+static ARRAYOF(struct vreg) simplified;
 
 static struct vreg* actual(struct vreg* vreg)
 {
@@ -25,7 +26,6 @@ static void coalesce(struct vreg* vmaster, struct vreg* vslave)
 {
     vmaster = actual(vmaster);
     vslave = actual(vslave);
-    bitmap_or(&vmaster->bitmap, 32, &vslave->bitmap);
     vmaster->needs_register |= vslave->needs_register;
     vslave->coalesced_with = vmaster;
 }
@@ -69,9 +69,11 @@ static void generate_graph(void)
                 while (hashtable_next(hop->valueusage, &hit2))
                 {
                     struct valueusage* usage2 = hit2.value;
-                    if (usage1 == usage2)
-                        continue;
 
+                    if (usage1->invreg)
+                        graph_add_vertex(&interference, actual(usage1->invreg));
+                    if (usage2->invreg)
+                        graph_add_vertex(&interference, actual(usage2->invreg));
                     if (usage1->invreg && usage2->invreg)
                         graph_add_edge(&interference, actual(usage1->invreg), actual(usage2->invreg));
                     if (usage1->outvreg && usage2->outvreg)
@@ -219,23 +221,57 @@ static bool attempt_to_simplify(void)
     if (!vreg || (degree > DEGREE))
         return false;
 
-    /* Allocate a register. */
+    /* Push first the neighbours, and then the node itself annotated with the number
+     * of neighbours, to the simplification stack. */
 
-    vreg->hreg = bitmap_find_unset_bit(&vreg->bitmap, 32);
-    tracef('R', "R: simplifying vreg %%%d with degree %d and bitmap 0x%x to hreg %d\n",
-        vreg->id, degree, vreg->bitmap, vreg->hreg);
+    tracef('R', "R: simplifying vreg %%%d with degree %d\n", vreg->id, degree);
+    assert(vreg->neighbours == 0);
     {
         struct neighbour_iterator nit = {};
         while (graph_next_neighbour(&interference, vreg, &nit))
         {
             struct vreg* neighbour = nit.data;
-            bitmap_set(&neighbour->bitmap, 32, vreg->hreg);
+            array_push(&simplified, neighbour);
+            vreg->neighbours++;
         }
     }
+    array_push(&simplified, vreg);
 
     /* ...and remove it from the graph. */
 
     graph_remove_vertex(&interference, vreg);
+    graph_remove_vertex(&affinity, vreg);
+
+    return true;
+}
+
+static bool attempt_to_freeze(void)
+{
+    struct vreg* vreg = NULL;
+    int degree = INT_MAX;
+
+    /* Find the affinity node with the lowest interference degree. */
+
+    {
+        struct vertex_iterator vit = {};
+        while (graph_next_vertex(&affinity, &vit))
+        {
+            struct vreg* v = vit.data;
+            int d = graph_get_vertex_degree(&interference, v);
+            if (d < degree)
+            {
+                vreg = v;
+                degree = d;
+            }
+        }
+    }
+
+    if (!vreg)
+        return false;
+
+    tracef('R', "R: freezing vreg %%%d with degree %d\n",
+        vreg->id, degree);
+
     graph_remove_vertex(&affinity, vreg);
 
     return true;
@@ -280,7 +316,6 @@ static bool attempt_to_spill(void)
     return true;
 }
 
-
 static void iterate(void)
 {
     struct anode* spill;
@@ -296,10 +331,33 @@ static void iterate(void)
         if (attempt_to_simplify())
             continue;
 
-        if (attempt_to_spill())
-             continue;
+        if (attempt_to_freeze())
+            continue;
+
+        // if (attempt_to_spill())
+        //      continue;
 
         fatal("unable to allocate registers!");
+    }
+}
+
+static void assign_hard_registers(void)
+{
+    while (simplified.count > 0)
+    {
+        struct vreg* vreg = array_pop(&simplified);
+        int neighbours = vreg->neighbours;
+        unsigned int bitmap = 0;
+
+        while (neighbours > 0)
+        {
+            struct vreg* neighbour = actual(array_pop(&simplified));
+            if (neighbour->hreg != -1)
+                bitmap_set(&bitmap, 32, neighbour->hreg);
+            neighbours--;
+        }
+
+        vreg->hreg = bitmap_find_unset_bit(&bitmap, 32);
     }
 }
 
@@ -309,7 +367,9 @@ void pass_register_allocator(void)
     generate_graph();
 
     dump_interference_graph();
+    simplified.count = 0;
     iterate();
+    assign_hard_registers();
 
     graph_reset(&interference);
     graph_reset(&affinity);

@@ -19,7 +19,7 @@ struct vreg
     struct value* value;
     struct vreg* coalesced_with;
     int hreg;
-    unsigned int bitmap;
+    int neighbours;
     bool needs_register;
     bool is_spilt;
 };
