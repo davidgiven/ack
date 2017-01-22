@@ -17,5 +17,10 @@ enum
     NONTERM_STMT = 1
 };
 
+enum
+{
+	INSN_STMT = 1
+};
+
 #endif
 

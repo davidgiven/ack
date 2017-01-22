@@ -206,33 +206,46 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 
         if (!insn->insndata->is_fragment)
         {
+            struct value* firstchild = NULL;
             insn->hop = current_hop = new_hop(current_bb, insn->ir);
             current_hop->insndata = insn->insndata;
             emit(insn);
 
-            current_hop->value = &insn->value;
-            switch (node->label)
+            if (insn->children[0])
             {
-                case ir_to_esn(IR_REG, 0):
-                    current_hop->value = &node->ir->value;
-                    break;
+                if (insn->children[0]->hop)
+                    firstchild = insn->children[0]->hop->value;
+                else
+                    firstchild = &insn->children[0]->ir->value;
+            }
 
-                case ir_to_esn(IR_NOP, 'I'):
-                case ir_to_esn(IR_NOP, 'F'):
-                case ir_to_esn(IR_NOP, 'L'):
-                case ir_to_esn(IR_NOP, 'D'):
+            current_hop->value = &insn->value;
+
+            if (insn_no == INSN_STMT)
+            {
+                tracef('I', "I: label=%d\n", node->label);
+                hop_get_value_usage(current_hop, firstchild)->input = true;
+                hop_get_value_usage(current_hop, current_hop->value)->output = true;
+                hop_add_insel(current_hop, "@copy %V %V", firstchild, current_hop->value);
+            }
+            else
+            {
+                switch (node->label)
                 {
-                    struct insn* child = insn->children[0];
-                    struct value* value;
-                    if (child->hop)
-                        value = child->hop->value;
-                    else
-                        value = &child->ir->value;
+                    case ir_to_esn(IR_REG, 0):
+                        hop_get_value_usage(current_hop, &node->ir->value)->input = true;
+                        hop_get_value_usage(current_hop, current_hop->value)->output = true;
+                        hop_add_insel(current_hop, "@copy %V %V", &node->ir->value, current_hop->value);
+                        break;
 
-                    hop_get_value_usage(current_hop, value)->input = true;
-                    hop_get_value_usage(current_hop, current_hop->value)->output = true;
-                    hop_add_insel(current_hop, "@copy %V %V", value, current_hop->value);
-                    break;
+                    case ir_to_esn(IR_NOP, 'I'):
+                    case ir_to_esn(IR_NOP, 'F'):
+                    case ir_to_esn(IR_NOP, 'L'):
+                    case ir_to_esn(IR_NOP, 'D'):
+                        hop_get_value_usage(current_hop, firstchild)->input = true;
+                        hop_get_value_usage(current_hop, current_hop->value)->output = true;
+                        hop_add_insel(current_hop, "@copy %V %V", firstchild, current_hop->value);
+                        break;
                 }
             }
 

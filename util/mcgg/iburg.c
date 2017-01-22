@@ -143,10 +143,14 @@ int main(int argc, char* argv[])
 		const static struct terminfo NOPL = { "NOP.L", NULL, NULL };
 		const static struct terminfo NOPD = { "NOP.D", NULL, NULL };
 		const static struct terminfo RET = { "RET", NULL, NULL };
+		Rule r;
 
 		nonterm("reg", true);
 
-		rule(NULL, tree(&reg, NULL, NULL))->cost = 1;
+		r = rule(NULL, tree(&reg, NULL, NULL));
+		r->cost = 1;
+		assert(r->ern == INSN_STMT);
+
 		rule(&reg, tree(&REG, NULL, NULL))->cost = 1;
 		rule(&reg, tree(&NOPI, tree(&reg, NULL, NULL), NULL))->cost = 1;
 		rule(&reg, tree(&NOPF, tree(&reg, NULL, NULL), NULL))->cost = 1;
