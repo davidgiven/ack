@@ -223,6 +223,7 @@ void procedure_compile(struct procedure* proc)
     print_hops('8');
     pass_assign_vregs();
     pass_calculate_vreg_spillibility();
+    pass_convert_copies_to_moves();
     print_hops('9');
     pass_register_allocator();
 #if 0

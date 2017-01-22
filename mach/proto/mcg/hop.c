@@ -55,9 +55,21 @@ static struct insel* new_insel(enum insel_type type)
 
 void hop_add_string_insel(struct hop* hop, const char* string)
 {
-    struct insel* insel = new_insel(INSEL_STRING);
-    insel->u.string = string;
-    array_append(&hop->insels, insel);
+    if ((hop->insels.count == 0) && (string[0] == '@'))
+    {
+        char* pseudo = strdup(string+1);
+        char* end = strchr(pseudo, ' ');
+        if (end)
+            *end = '\0';
+
+        hop->pseudo = pseudo;
+    }
+    else if (!hop->pseudo)
+    {
+        struct insel* insel = new_insel(INSEL_STRING);
+        insel->u.string = string;
+        array_append(&hop->insels, insel);
+    }
 }
 
 void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index)
@@ -326,21 +338,25 @@ char* hop_render(struct hop* hop)
         while (hashtable_next(hop->valueusage, &hit))
         {
             struct valueusage* usage = hit.value;
-            struct vreg* left = actual(usage->invreg);
-            struct vreg* right = actual(usage->outvreg);
-            if (left != right)
+            if (usage->input && usage->output)
             {
-                appendf(" ");
-                appendvreg(usage->invreg);
-                appendf("->");
-                appendvreg(usage->outvreg);
+                struct vreg* left = actual(usage->invreg);
+                struct vreg* right = actual(usage->outvreg);
+                if (left != right)
+                {
+                    appendf(" ");
+                    appendvreg(usage->invreg);
+                    appendf("->");
+                    appendvreg(usage->outvreg);
+                }
             }
         }
         appendf("\n");
+        return buffer;
     }
 
     if (hop->pseudo)
-        appendf("@");
+        appendf("@%s ", hop->pseudo);
 
 	for (i=0; i<hop->insels.count; i++)
 	{
