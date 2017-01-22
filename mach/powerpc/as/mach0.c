@@ -31,3 +31,9 @@ typedef uint32_t quad;
 #define VALWIDTH	8
 
 #define FIXUPFLAGS (RELBR | RELWR)
+
+/* 6-bit mb (mask begin) or me (mask end) field */
+#define MB6(v) (((v) & 0x1F)<<6 | ((v) & 0x20)>>0)
+
+/* 6-bit sh (shift) field */
+#define SH6(v) (((v) & 0x1F)<<11 | ((v) & 0x20)>>4)
