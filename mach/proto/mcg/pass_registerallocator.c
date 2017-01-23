@@ -9,7 +9,7 @@
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.32.5924
  */
 
-static const int DEGREE = 5;
+static const int DEGREE = 20;
 
 static struct graph interference;
 static struct graph affinity;
@@ -160,19 +160,24 @@ static bool attempt_to_coalesce(void)
             struct vreg* left = eit.left;
             struct vreg* right = eit.right;
             struct neighbour_iterator nit = {};
-            static ARRAYOF(struct vreg) combined;
+            int thisdegree = 0;
 
-            combined.count = 0;
             while (graph_next_neighbour(&interference, left, &nit))
-                array_appendu(&combined, nit.data);
+            {
+                if (graph_get_vertex_degree(&interference, nit.data) >= DEGREE)
+                    thisdegree++;
+            }
             while (graph_next_neighbour(&interference, right, &nit))
-                array_appendu(&combined, nit.data);
+            {
+                if (graph_get_vertex_degree(&interference, nit.data) >= DEGREE)
+                    thisdegree++;
+            }
 
-            if (combined.count < degree)
+            if (thisdegree < degree)
             {
                 vmaster = left;
                 vslave = right;
-                degree = combined.count;
+                degree = thisdegree;
             }
         }
     }
@@ -325,10 +330,10 @@ static void iterate(void)
         tracef('R', "R: iterating; interference graph: %d, affinity graph: %d\n",
             interference.edges.table.size, affinity.edges.table.size);
 
-        if (attempt_to_coalesce())
+        if (attempt_to_simplify())
             continue;
 
-        if (attempt_to_simplify())
+        if (attempt_to_coalesce())
             continue;
 
         if (attempt_to_freeze())
