@@ -245,8 +245,11 @@ static char* appendf(const char* fmt, ...)
 
 static struct vreg* actual(struct vreg* vreg)
 {
-    while (vreg->coalesced_with)
-        vreg = vreg->coalesced_with;
+    if (vreg)
+    {
+        while (vreg->coalesced_with)
+            vreg = vreg->coalesced_with;
+    }
     return vreg;
 }
 
@@ -336,12 +339,17 @@ char* hop_render(struct hop* hop)
         while (hashtable_next(hop->valueusage, &hit))
         {
             struct valueusage* usage = hit.value;
+            struct vreg* invreg = actual(usage->invreg);
+            struct vreg* outvreg = actual(usage->outvreg);
+            if (usage->input && usage->output && (invreg == outvreg))
+                continue;
+
             appendf(" ");
-            if (usage->input && usage->invreg)
-                appendvreg(actual(usage->invreg));
+            if (usage->input && invreg)
+                appendvreg(invreg);
             appendf("->");
-            if (usage->output && usage->outvreg)
-                appendvreg(actual(usage->outvreg));
+            if (usage->output && outvreg)
+                appendvreg(outvreg);
         }
         appendf("\n");
         return buffer;
