@@ -1,10 +1,3 @@
-#
-! $Source$
-! $State$
-! $Revision$
-
-#include "powerpc.h"
-	
 .sect .text
 
 ! Converts a 32-bit unsigned integer into a 64-bit double.
@@ -14,18 +7,18 @@
 .define .cuf8
 .cuf8:
 	addi sp, sp, -4          ! make space for the double
-	
-	addis r3, r0, 0x4330
+
+	lis r3, 0x4330
 	stw r3, 0(sp)            ! set high word to construct a double
-	
+
 	lfd f0, 0(sp)            ! load value
-	
-	li32 r3, pivot
-	lfd f1, 0(r3)            ! load pivot value
+
+	lis r3, ha16[pivot]
+	lfd f1, lo16[pivot](r3)  ! load pivot value
 	fsub f0, f0, f1          ! adjust
-	                         
+
 	stfd f0, 0(sp)           ! save value again...
-	bclr ALWAYS, 0, 0        ! ...and return 
+	blr                      ! ...and return
 
 .sect .rom
 pivot:

@@ -1,10 +1,3 @@
-#
-! $Source$
-! $State$
-! $Revision$
-
-#include "powerpc.h"
-	
 .sect .text
 
 ! this is not a subroutine, but just a
@@ -25,23 +18,17 @@
 	
 	lwz r5, 4(r3)            ! fetch lower bound
 	subf. r4, r5, r4         ! adjust value
-	bcctr IFTRUE, LT, 0      ! jump to default if out of range
-	
+	bltctr                   ! jump to default if out of range
+
 	lwz r5, 8(r3)            ! fetch range
-	cmp cr0, 0, r4, r5
-	bcctr IFTRUE, GT, 0      ! jump to default if out of range
-	
+	cmplw r4, r5
+	bgtctr                   ! jump to default if out of range
+
 	addi r3, r3, 12          ! skip header
-	rlwinm r4, r4, 2, 0, 31-2 ! scale value (<<2)
-	b 1f
-1:
+	slwi r4, r4, 2           ! scale value (<<2)
 	lwzx r5, r3, r4          ! load target
-	b 1f
-1:
 	mtspr ctr, r5
-	 
+
 	or. r5, r5, r5           ! test it
-	b 1f
-1:
-	bcctr IFFALSE, EQ, 0     ! jump to target if non-zero
+	bnectr                   ! jump to target if non-zero
 	b .trap_ecase            ! otherwise trap

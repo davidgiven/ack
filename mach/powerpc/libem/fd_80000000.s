@@ -1,10 +1,5 @@
-#
-! $Source$
-! $State$
-! $Revision$
+.sect .text; .sect .rom; .sect .data; .sect .bss
 
-#include "powerpc.h"
-	
 .sect .rom
 
 ! Contains a handy double-precision 0x80000000.
