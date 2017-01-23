@@ -10,7 +10,7 @@ void pass_convert_copies_to_moves(void)
         for (j=0; j<bb->hops.count; j++)
         {
             struct hop* hop = bb->hops.item[j];
-            if (hop->pseudo && (strcmp(hop->pseudo, "copy") == 0))
+            if (hop->is_move)
             {
                 struct valueusage* usage;
                 struct hashtable_iterator hit = {};
@@ -19,25 +19,25 @@ void pass_convert_copies_to_moves(void)
                 while (hashtable_next(hop->valueusage, &hit))
                 {
                     usage = hit.value;
-                    if (usage->input)
+                    if (usage->input && !usage->output)
                     {
                         assert(!invreg);
                         invreg = usage->invreg;
                     }
-                    if (usage->output)
+                    if (!usage->input && usage->output)
                     {
                         assert(!outvreg);
                         outvreg = usage->outvreg;
                     }
                 }
-                assert(invreg && outvreg);
 
-                usage = hop_get_value_usage(hop, outvreg->value);
-                assert(!usage->invreg);
-                assert(!usage->input);
-                usage->input = true;
-                usage->invreg = invreg;
-                hop->is_move = true;
+                if (invreg && outvreg)
+                {
+                    usage = hop_get_value_usage(hop, outvreg->value);
+                    assert(!usage->input);
+                    usage->input = true;
+                    usage->invreg = invreg;
+                }
             }
         }
     }

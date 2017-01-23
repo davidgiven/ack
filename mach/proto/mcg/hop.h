@@ -47,7 +47,6 @@ struct hop
 	ARRAYOF(struct insel) insels;
 	struct value* value;
 	bool is_move;
-	const char* pseudo;
 	PMAPOF(struct value, struct value) equals_constraint;
 
 	struct hashtable* valueusage;
@@ -57,6 +56,7 @@ extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
 extern struct hop* new_move_hop(struct basicblock* bb);
 
 extern struct valueusage* hop_get_value_usage(struct hop* hop, struct value* value);
+extern void hop_add_move(struct hop* hop, struct value* src, struct value* dest);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);
 extern void hop_add_hreg_insel(struct hop* hop, struct hreg* hreg, int index);
