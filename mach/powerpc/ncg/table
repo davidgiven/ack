@@ -2238,14 +2238,14 @@ PATTERNS
 
 	pat fef $1==INT64                  /* Split exponent, fraction */
 		with GPR3 GPR4
-			kills FPR0, FPR1, GPR6, GPR7
+			kills ALL
 			gen
 				bl {LABEL, ".fef8"}
 			yields R4 R3 R5
 
 	pat fif $1==INT64                  /* Multiply then split integer, fraction */
 		with FPR1 FPR2
-			kills FPR1, FPR2, GPR3, GPR4, GPR5, GPR6
+			kills ALL
 			gen
 				bl {LABEL, ".fif8"}
 			yields F1 F2
