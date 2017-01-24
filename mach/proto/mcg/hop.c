@@ -293,7 +293,9 @@ static void appendheader(struct hop* hop)
 {
     int i;
 
-    appendf("$%d.%d", hop->value->ir->id, hop->value->subid);
+    appendf("%d: ", hop->id);
+    if (hop->value)
+        appendf("$%d.%d", hop->value->ir->id, hop->value->subid);
     if (hop->ir)
         appendf(" from $%d", hop->ir->id);
     appendf(":");
