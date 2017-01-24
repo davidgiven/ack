@@ -1852,12 +1852,14 @@ PATTERNS
 /* Other branching and labelling */
 
 	pat lab topeltsize($1)==4 && !fallthrough($1)
+		kills ALL
 		gen
 			labeldef $1
 			yields R3
 
 	pat lab topeltsize($1)==4 && fallthrough($1)
-		with GPR3
+		with GPR3 STACK
+		kills ALL
 		gen
 			labeldef $1
 		yields %1
