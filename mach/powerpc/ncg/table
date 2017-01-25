@@ -42,9 +42,9 @@ PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
-	REG_PAIR        /* speed hack for sti 8 */
-	FPR             /* any FPR */
-	FREG            /* any allocatable FPR */
+	REG_PAIR(8)     /* speed hack for sti 8 */
+	FPR(8)          /* any FPR */
+	FREG(8)         /* any allocatable FPR */
 	FSREG           /* any allocatable single-precision FPR */
 	SPR             /* any SPR */
 	CR              /* any CR */
@@ -56,10 +56,10 @@ PROPERTIES
 
 	CR0   CR1
 
-	FPR0  FPR1  FPR2  FPR3  FPR4  FPR5  FPR6  FPR7
-	FPR8  FPR9  FPR10 FPR11 FPR12 FPR13 FPR14 FPR15
-	FPR16 FPR17 FPR18 FPR19 FPR20 FPR21 FPR22 FPR23
-	FPR24 FPR25 FPR26 FPR27 FPR28 FPR29 FPR30 FPR31
+	FPR0(8)  FPR1(8)  FPR2(8)  FPR3(8)  FPR4(8)  FPR5(8)  FPR6(8)  FPR7(8)
+	FPR8(8)  FPR9(8)  FPR10(8) FPR11(8) FPR12(8) FPR13(8) FPR14(8) FPR15(8)
+	FPR16(8) FPR17(8) FPR18(8) FPR19(8) FPR20(8) FPR21(8) FPR22(8) FPR23(8)
+	FPR24(8) FPR25(8) FPR26(8) FPR27(8) FPR28(8) FPR29(8) FPR30(8) FPR31(8)
 
 REGISTERS
 
