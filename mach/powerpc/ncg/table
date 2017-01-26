@@ -10,7 +10,7 @@ INT64 = 8
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 
-#define COMMENT(n) /* comment {LABEL, n} */
+#define COMMENT(n) comment {LABEL, n}
 
 
 #define nicesize(x) ((x)==INT8 || (x)==INT16 || (x)==INT32 || (x)==INT64)
@@ -74,7 +74,7 @@ REGISTERS
 	R14("r14")         : GPR, REG, GPR14 regvar.
 	R13("r13")         : GPR, REG, GPR13 regvar.
 	R12("r12")         : GPR, REG, GPR12.
-	R11("r11")         : GPR, GPR11.
+	R11("r11")         : GPR, REG, GPR11.
 	R10("r10")         : GPR, REG, GPR10.
 	R9("r9")           : GPR, REG, GPR9.
 	R8("r8")           : GPR, REG, GPR8.
@@ -149,7 +149,7 @@ REGISTERS
 	CTR("ctr")         : SPR.
 	CR0("cr0")         : CR.
 
-#define RSCRATCH R11
+#define RSCRATCH R0
 #define FSCRATCH F0
 
 
