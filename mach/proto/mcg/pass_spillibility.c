@@ -4,26 +4,25 @@ static struct basicblock* current_bb;
 
 static void calculate_spillibility(void)
 {
-    int i;
+    int i, j;
 
     for (i=0; i<current_bb->hops.count; i++)
     {
         struct hop* hop = current_bb->hops.item[i];
         if (!hop->is_move)
         {
-            struct hashtable_iterator hit = {};
-            while (hashtable_next(hop->valueusage, &hit))
+            for (j=0; j<hop->vregusage.count; j++)
             {
-                struct value* value = hit.key;
-                struct valueusage* usage = hit.value;
+                struct vreg* invreg = hop->vregusage.item[j].left;
+                struct vreg* outvreg = hop->vregusage.item[j].right;
+                struct valueusage* usage = invreg ? hop_get_value_usage(hop, invreg->value) : NULL;
 
-                if (!usage->through)
-                {
-                    if (usage->invreg)
-                        usage->invreg->needs_register = true;
-                    if (usage->outvreg)
-                        usage->outvreg->needs_register = true;
-                }
+                if (invreg && !outvreg)
+                    invreg->needs_register = true;
+                if (!invreg && outvreg)
+                    outvreg->needs_register = true;
+                if (invreg && outvreg && !usage->through)
+                    invreg->needs_register = outvreg->needs_register = true;
             }
         }
     }

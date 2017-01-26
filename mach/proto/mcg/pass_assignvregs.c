@@ -36,10 +36,8 @@ static struct hop* clone_vregs(void)
         struct valueusage* usage = hop_get_value_usage(hop, value);
 
         hashtable_put(&mapping, value, newvreg);
-        usage->input = true;
-        usage->invreg = oldvreg;
-        usage->output = true;
-        usage->outvreg = newvreg;
+        usage->input = usage->output = true;
+        hop_add_through_vreg(hop, oldvreg, newvreg);
     }
 
     return hop;
@@ -83,11 +81,27 @@ static void assign_vregs(void)
 
     for (i=0; i<current_bb->hops.count; i++)
     {
+        /* Remove completely unused vregs from the mapping. */
+
+        hop = current_bb->hops.item[i];
+        {
+            struct hashtable_iterator hit = {};
+            while (hashtable_next(&mapping, &hit))
+            {
+                struct value* value = hit.key;
+                struct valueusage* usage = hop_get_value_usage(hop, value);
+                if (!usage->input && !usage->output && !usage->through)
+                    hashtable_delete_current(&mapping, &hit);
+            }
+        }
+
         /* Insert a parallel-move hop to copy all the vregs. */
 
-        struct hop* move = clone_vregs();
-        array_insert(&current_bb->hops, move, i);
-        i++;
+        {
+            struct hop* move = clone_vregs();
+            array_insert(&current_bb->hops, move, i);
+            i++;
+        }
 
         /* Copy the previous mapping to this hop. */
 
@@ -98,7 +112,7 @@ static void assign_vregs(void)
             {
                 struct value* value = hit.key;
                 struct vreg* vreg = hit.value;
-                hop_get_value_usage(hop, value)->invreg = vreg;
+                hop_add_input_vreg(hop, vreg);
             }
         }
 
@@ -126,9 +140,15 @@ static void assign_vregs(void)
 
                 assert(!(usage->through && usage->output));
                 if (usage->through)
-                    usage->outvreg = usage->invreg;
+                {
+                    struct vreg* invreg = hop_find_input_vreg(hop, value);
+                    hop_add_through_vreg(hop, invreg, invreg);
+                }
                 if (usage->output)
-                    usage->outvreg = create_and_map_vreg(value);
+                {
+                    struct vreg* outvreg = create_and_map_vreg(value);
+                    hop_add_output_vreg(hop, outvreg);
+                }
             }
         }
     }

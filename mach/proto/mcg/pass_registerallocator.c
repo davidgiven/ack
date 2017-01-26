@@ -17,6 +17,8 @@ static ARRAYOF(struct vreg) simplified;
 
 static struct vreg* actual(struct vreg* vreg)
 {
+    if (!vreg)
+        return NULL;
     while (vreg->coalesced_with)
         vreg = vreg->coalesced_with;
     return vreg;
@@ -52,7 +54,7 @@ static void wire_together_bbs(void)
 
 static void generate_graph(void)
 {
-    int i, j, k;
+    int i, j, k, m;
 
     for (i=0; i<cfg.preorder.count; i++)
     {
@@ -61,30 +63,33 @@ static void generate_graph(void)
         for (j=0; j<bb->hops.count; j++)
         {
             struct hop* hop = bb->hops.item[j];
-            struct hashtable_iterator hit1 = {};
-            while (hashtable_next(hop->valueusage, &hit1))
+            for (k=0; k<hop->vregusage.count; k++)
             {
-                struct valueusage* usage1 = hit1.value;
-                struct hashtable_iterator hit2 = {};
-                while (hashtable_next(hop->valueusage, &hit2))
+                struct vreg* invreg1 = actual(hop->vregusage.item[k].left);
+                struct vreg* outvreg1 = actual(hop->vregusage.item[k].right);
+
+                for (m=k; m<hop->vregusage.count; m++)
                 {
-                    struct valueusage* usage2 = hit2.value;
+                    struct vreg* invreg2 = actual(hop->vregusage.item[m].left);
+                    struct vreg* outvreg2 = actual(hop->vregusage.item[m].right);
 
-                    if (usage1->invreg)
-                        graph_add_vertex(&interference, actual(usage1->invreg));
-                    if (usage2->invreg)
-                        graph_add_vertex(&interference, actual(usage2->invreg));
-                    if (usage1->invreg && usage2->invreg)
-                        graph_add_edge(&interference, actual(usage1->invreg), actual(usage2->invreg));
-                    if (usage1->outvreg && usage2->outvreg)
-                        graph_add_edge(&interference, actual(usage1->outvreg), actual(usage2->outvreg));
+                    if (invreg1)
+                        graph_add_vertex(&interference, invreg1);
+                    if (invreg2)
+                        graph_add_vertex(&interference, invreg2);
+                    if (outvreg1)
+                        graph_add_vertex(&interference, outvreg1);
+                    if (outvreg2)
+                        graph_add_vertex(&interference, outvreg2);
 
-                    if (usage1->corrupted && usage1->invreg && usage2->outvreg)
-                        graph_add_edge(&interference, actual(usage1->invreg), actual(usage2->outvreg));
+                    if (invreg1 && invreg2)
+                        graph_add_edge(&interference, invreg1, invreg2);
+                    if (outvreg1 && outvreg2)
+                        graph_add_edge(&interference, outvreg1, outvreg2);
                 }
 
-                if (hop->is_move && usage1->invreg && usage1->outvreg)
-                    graph_add_edge(&affinity, actual(usage1->invreg), actual(usage1->outvreg));
+                if (hop->is_move && invreg1 && outvreg1)
+                    graph_add_edge(&affinity, invreg1, outvreg1);
             }
         }
     }
@@ -352,17 +357,17 @@ static void assign_hard_registers(void)
     {
         struct vreg* vreg = array_pop(&simplified);
         int neighbours = vreg->neighbours;
-        unsigned int bitmap = 0;
+        burm_register_bitmap_t bitmap = {};
 
         while (neighbours > 0)
         {
             struct vreg* neighbour = actual(array_pop(&simplified));
             if (neighbour->hreg != -1)
-                bitmap_set(&bitmap, 32, neighbour->hreg);
+                bitmap_set(bitmap, burm_register_count, neighbour->hreg);
             neighbours--;
         }
 
-        vreg->hreg = bitmap_find_unset_bit(&bitmap, 32);
+        vreg->hreg = bitmap_find_unset_bit(bitmap, burm_register_count);
     }
 }
 

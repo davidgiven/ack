@@ -30,8 +30,6 @@ struct insel
 
 struct valueusage
 {
-	struct vreg* invreg;
-	struct vreg* outvreg;
 	bool input : 1;
 	bool output : 1;
 	bool through : 1;
@@ -50,12 +48,18 @@ struct hop
 	PMAPOF(struct value, struct value) equals_constraint;
 
 	struct hashtable* valueusage;
+	PMAPOF(struct vreg, struct vreg) vregusage;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
 extern struct hop* new_move_hop(struct basicblock* bb);
 
 extern struct valueusage* hop_get_value_usage(struct hop* hop, struct value* value);
+extern void hop_add_input_vreg(struct hop* hop, struct vreg* vreg);
+extern void hop_add_output_vreg(struct hop* hop, struct vreg* vreg);
+extern void hop_add_through_vreg(struct hop* hop, struct vreg* src, struct vreg* dest);
+extern struct vreg* hop_find_input_vreg(struct hop* hop, struct value* value);
+extern struct vreg* hop_find_output_vreg(struct hop* hop, struct value* value);
 extern void hop_add_move(struct hop* hop, struct value* src, struct value* dest);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);

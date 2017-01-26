@@ -2,7 +2,7 @@
 
 void pass_convert_copies_to_moves(void)
 {
-    int i, j;
+    int i, j, k;
 
     for (i=0; i<cfg.preorder.count; i++)
     {
@@ -12,31 +12,32 @@ void pass_convert_copies_to_moves(void)
             struct hop* hop = bb->hops.item[j];
             if (hop->is_move)
             {
-                struct valueusage* usage;
-                struct hashtable_iterator hit = {};
                 struct vreg* invreg = NULL;
                 struct vreg* outvreg = NULL;
-                while (hashtable_next(hop->valueusage, &hit))
+
+                for (k=0; k<hop->vregusage.count; k++)
                 {
-                    usage = hit.value;
-                    if (usage->input && !usage->output)
+                    struct vreg* in = hop->vregusage.item[k].left;
+                    struct vreg* out = hop->vregusage.item[k].right;
+
+                    if (in && !out)
                     {
                         assert(!invreg);
-                        invreg = usage->invreg;
+                        invreg = in;
                     }
-                    if (!usage->input && usage->output)
+                    if (!in && out)
                     {
                         assert(!outvreg);
-                        outvreg = usage->outvreg;
+                        outvreg = out;
                     }
                 }
 
                 if (invreg && outvreg)
                 {
-                    usage = hop_get_value_usage(hop, outvreg->value);
+                    struct valueusage* usage = hop_get_value_usage(hop, outvreg->value);
                     assert(!usage->input);
                     usage->input = true;
-                    usage->invreg = invreg;
+                    hop_add_through_vreg(hop, invreg, outvreg);
                 }
             }
         }

@@ -46,6 +46,69 @@ struct valueusage* hop_get_value_usage(struct hop* hop, struct value* value)
     return usage;
 }
 
+void hop_add_input_vreg(struct hop* hop, struct vreg* vreg)
+{
+    if (!pmap_findleft(&hop->vregusage, vreg))
+        pmap_add(&hop->vregusage, vreg, NULL);
+}
+
+void hop_add_output_vreg(struct hop* hop, struct vreg* vreg)
+{
+    assert(!pmap_findright(&hop->vregusage, vreg));
+    pmap_add(&hop->vregusage, NULL, vreg);
+}
+
+void hop_add_through_vreg(struct hop* hop, struct vreg* src, struct vreg* dest)
+{
+    int i;
+
+    for (i=0; i<hop->vregusage.count; i++)
+    {
+        struct vreg* candidatesrc = hop->vregusage.item[i].left;
+        struct vreg* candidatedest = hop->vregusage.item[i].right;
+        if ((candidatesrc == src) && !candidatedest)
+        {
+            hop->vregusage.item[i].right = dest;
+            return;
+        }
+        if (!candidatesrc && (candidatedest == dest))
+        {
+            hop->vregusage.item[i].left = src;
+            return;
+        }
+    }
+
+    pmap_add(&hop->vregusage, src, dest);
+}
+
+struct vreg* hop_find_input_vreg(struct hop* hop, struct value* value)
+{
+    int i;
+
+    for (i=0; i<hop->vregusage.count; i++)
+    {
+        struct vreg* vreg = hop->vregusage.item[i].left;
+        if (vreg && value_comparison_function(vreg->value, value))
+            return vreg;
+    }
+
+    return NULL;
+}
+
+struct vreg* hop_find_output_vreg(struct hop* hop, struct value* value)
+{
+    int i;
+
+    for (i=0; i<hop->vregusage.count; i++)
+    {
+        struct vreg* vreg = hop->vregusage.item[i].right;
+        if (vreg && value_comparison_function(vreg->value, value))
+            return vreg;
+    }
+
+    return NULL;
+}
+
 void hop_add_move(struct hop* hop, struct value* src, struct value* dest)
 {
     struct valueusage* usage;
@@ -255,38 +318,12 @@ static struct vreg* actual(struct vreg* vreg)
 
 void appendvreg(struct vreg* vreg)
 {
-    appendf("%%%d", vreg->id);
+    appendf("($%d:%d=%%%d", vreg->value->ir->id, vreg->value->subid, vreg->id);
     if (vreg->hreg != -1)
-        appendf("=%d", vreg->hreg);
+        appendf("=R%d", vreg->hreg);
     if (vreg->is_spilt)
         appendf("S");
-}
-
-void appendvalue(struct hop* hop, struct value* value)
-{
-    struct valueusage* usage = hop_get_value_usage(hop, value);
-    struct vreg* vreg = NULL;
-
-    if (usage->input && usage->output && usage->invreg && usage->outvreg)
-    {
-        appendf("%%%d->%%%d", usage->invreg->id, usage->outvreg->id);
-        return;
-    }
-
-    if (usage->input)
-        vreg = usage->invreg;
-    if (usage->output)
-        vreg = usage->outvreg;
-    if (usage->through)
-    {
-        assert(usage->invreg == usage->outvreg);
-        vreg = usage->invreg;
-    }
-
-    if (vreg)
-        appendvreg(actual(vreg));
-    else
-        appendf("$%d:%d", value->ir->id, value->subid);
+    appendf(")");
 }
 
 static void appendheader(struct hop* hop)
@@ -300,6 +337,7 @@ static void appendheader(struct hop* hop)
         appendf(" from $%d", hop->ir->id);
     appendf(":");
 
+    appendf(" VALUES:");
     {
         struct hashtable_iterator hit = {};
         while (hashtable_next(hop->valueusage, &hit))
@@ -318,12 +356,26 @@ static void appendheader(struct hop* hop)
                     appendf("=");
                 if (usage->corrupted)
                     appendf("!");
-                appendvalue(hop, value);
+                appendf("$%d:%d", value->ir->id, value->subid);
             }
         }
     }
 
-    appendf(" ");
+    appendf(" VREGS:");
+    for (i=0; i<hop->vregusage.count; i++)
+    {
+        struct vreg* src = hop->vregusage.item[i].left;
+        struct vreg* dest = hop->vregusage.item[i].right;
+
+        appendf(" ");
+        if (src)
+            appendvreg(src);
+        appendf("->");
+        if (dest)
+            appendvreg(dest);
+    }
+
+    appendf(" INSN: ");
 }
 
 char* hop_render(struct hop* hop)
@@ -336,21 +388,20 @@ char* hop_render(struct hop* hop)
 
     if (hop->is_move)
     {
-        struct hashtable_iterator hit = {};
         appendf("@move:");
-        while (hashtable_next(hop->valueusage, &hit))
+
+        for (i=0; i<hop->vregusage.count; i++)
         {
-            struct valueusage* usage = hit.value;
-            struct vreg* invreg = actual(usage->invreg);
-            struct vreg* outvreg = actual(usage->outvreg);
-            if (usage->input && usage->output && (invreg == outvreg))
+            struct vreg* invreg = actual(hop->vregusage.item[i].left);
+            struct vreg* outvreg = actual(hop->vregusage.item[i].right);
+            if ((invreg == outvreg) || !invreg || !outvreg)
                 continue;
 
             appendf(" ");
-            if (usage->input && invreg)
+            if (invreg)
                 appendvreg(invreg);
             appendf("->");
-            if (usage->output && outvreg)
+            if (outvreg)
                 appendvreg(outvreg);
         }
         appendf("\n");
@@ -379,9 +430,22 @@ char* hop_render(struct hop* hop)
 
 			case INSEL_VREG:
             {
-                appendvalue(hop, insel->u.value);
-                if (insel->index)
-                    appendf(".%d", insel->index);
+                struct value* value = insel->u.value;
+                struct valueusage* usage = hop_get_value_usage(hop, value);
+                struct vreg* vreg = NULL;
+                if (usage->input)
+                    vreg = hop_find_input_vreg(hop, value);
+                else if (usage->output)
+                    vreg = hop_find_output_vreg(hop, value);
+
+                if (vreg)
+                    appendvreg(actual(vreg));
+                else
+                {
+                    appendf("$%d:%d", value->ir->id, value->subid);
+                    if (insel->index)
+                        appendf(".%d", insel->index);
+                }
 				break;
             }
 
