@@ -107,14 +107,20 @@ static uint32_t get_vc4_valu(char* addr)
 
 static bool is_powerpc_memory_op(uint32_t opcode)
 {
-	/* Tests for any PowerPC memory indirection instruction where the payload
-	 * is a *signed* 16-bit value. */
+	/* Tests for any PowerPC memory indirection instruction (or
+	 * addi) where the payload is a *signed* 16-bit value. */
 	switch ((opcode & 0xfc000000) >> 26)
 	{
+		case 14: /* addi */
 		case 34: /* lbz */
+		case 48: /* lfs */
+		case 50: /* lfd */
+		case 42: /* lha */
 		case 40: /* lhz */
 		case 32: /* lwz */
 		case 38: /* stb */
+		case 52: /* stfs */
+		case 54: /* stfd */
 		case 44: /* sth */
 		case 36: /* stw */
 			return true;

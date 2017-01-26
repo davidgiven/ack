@@ -1,5 +1,3 @@
-#include "powerpc.h"
-
 .sect .text
 
 ! Bounds check. Traps if the value is out of range.
@@ -12,11 +10,11 @@
     addi sp, sp, 4 ! leave value on stack
 
     lwz r5, 0 (r3)
-    cmp cr0, 0, r4, r5
-    bc IFTRUE, LT, .trap_erange
+    cmpw r4, r5
+    blt .trap_erange
 
     lwz r5, 4 (r3)
-    cmp cr0, 0, r4, r5
-    bc IFTRUE, GT, .trap_erange
+    cmpw r4, r5
+    bgt .trap_erange
 
-	bclr ALWAYS, 0, 0
+    blr
