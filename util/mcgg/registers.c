@@ -189,8 +189,10 @@ void analyse_registers(void)
 		}
 	}
 
+	printh("#define %Pregister_count %d\n", real_register_count);
 	printh("typedef unsigned int %Pregister_bitmap_t[%d];\n",
 		WORDS_FOR_BITMAP_SIZE(real_register_count));
+	printh("\n");
 }
 
 void emitregisterattrs(void)
