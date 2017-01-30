@@ -218,8 +218,8 @@ e16
 			serror("16-bit value out of range");
 		$$ = (uint16_t) $1;
 	}
-	| OP_HI ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, false); }
-	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, true); }
+	| OP_HI ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, 0); }
+	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, 1); }
 	| OP_LO ASC_LPAR expr ASC_RPAR           { $$ = emit_lo(&$3); }
 	;
 
