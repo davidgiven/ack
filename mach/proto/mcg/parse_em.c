@@ -237,8 +237,12 @@ static void parse_pseu(void)
                 }
 
 				case str_ptyp:
-                    data_block((const uint8_t*) strdup(em.em_string), em.em_size, ro);
+                {
+                    uint8_t* copy = malloc(em.em_size);
+                    memcpy(copy, em.em_string, em.em_size);
+                    data_block(copy, em.em_size, ro);
 					break;
+                }
 
                 case cst_ptyp:
                     data_int(em.em_cst, EM_wordsize, ro);
