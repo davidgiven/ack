@@ -94,7 +94,7 @@ operation
 	| OP_LI32              li32                       /* emitted in subrule */
 	| OP_clrlsldi          c GPR ',' GPR ',' u6 ',' u6
 	{
-		quad mb = ($7 - $9) & 0x3f;
+		word_t mb = ($7 - $9) & 0x3f;
 		fit($9 <= $7);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6($9) | MB6(mb));
 	}
@@ -104,41 +104,41 @@ operation
 	}
 	| OP_clrrdi            c GPR ',' GPR ',' u6
 	{
-		quad me = 63 - $7;
+		word_t me = 63 - $7;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6(0) | MB6(me));
 	}
 	| OP_extldi            c GPR ',' GPR ',' u6 ',' u6
 	{
-		quad me = ($7 - 1) & 0x3f;
+		word_t me = ($7 - 1) & 0x3f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6($9) | MB6(me));
 	}
 	| OP_extrdi            c GPR ',' GPR ',' u6 ',' u6
 	{
-		quad sh = ($9 + $7) & 0x3f;
-		quad mb = (64 - $7) & 0x3f;
+		word_t sh = ($9 + $7) & 0x3f;
+		word_t mb = (64 - $7) & 0x3f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6(sh) | MB6(mb));
 	}
 	| OP_rotrdi            c GPR ',' GPR ',' u6
 	{
-		quad sh = (64 - $7) & 0x3f;
+		word_t sh = (64 - $7) & 0x3f;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6(sh) | MB6(0));
 	}
 	| OP_sldi              c GPR ',' GPR ',' u6
 	{
-		quad me = 63 - $7;
+		word_t me = 63 - $7;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6($7) | MB6(me));
 	}
 	| OP_srdi              c GPR ',' GPR ',' u6
 	{
-		quad sh = (64 - $7) & 0x3f;
+		word_t sh = (64 - $7) & 0x3f;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6(sh) | MB6($7));
 	}
 	| OP_clrlslwi          c GPR ',' GPR ',' u5 ',' u5
 	{
-		quad mb = ($7 - $9) & 0x1f;
-		quad me = 31 - $9;
+		word_t mb = ($7 - $9) & 0x1f;
+		word_t me = 31 - $9;
 		fit($9 <= $7);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      ($9<<11) | (mb<<6) | (me<<1));
@@ -150,56 +150,56 @@ operation
 	}
 	| OP_clrrwi            c GPR ',' GPR ',' u5
 	{
-		quad me = 31 - $7;
+		word_t me = 31 - $7;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (0<<11) | (0<<6) | (me<<1));
 	}
 	| OP_extlwi            c GPR ',' GPR ',' u5 ',' u5
 	{
-		quad me = ($7 - 1) & 0x1f;
+		word_t me = ($7 - 1) & 0x1f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      ($9<<11) | (0<<6) | (me<<1));
 	}
 	| OP_extrwi            c GPR ',' GPR ',' u5 ',' u5
 	{
-		quad sh = ($9 + $7) & 0x1f;
-		quad mb = (32 - $7) & 0x1f;
+		word_t sh = ($9 + $7) & 0x1f;
+		word_t mb = (32 - $7) & 0x1f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (sh<<11) | (mb<<6) | (31<<1));
 	}
 	| OP_inslwi            c GPR ',' GPR ',' u5 ',' u5
 	{
-		quad sh = (32 - $9) & 0x1f;
-		quad me = ($9 + $7 - 1) & 0x1f;
+		word_t sh = (32 - $9) & 0x1f;
+		word_t me = ($9 + $7 - 1) & 0x1f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (sh<<11) | ($9<<6) | (me<<1));
 	}
 	| OP_insrwi            c GPR ',' GPR ',' u5 ',' u5
 	{
-		quad sh = (32 - $9 - $7) & 0x1f;
-		quad me = ($9 + $7 - 1) & 0x1f;
+		word_t sh = (32 - $9 - $7) & 0x1f;
+		word_t me = ($9 + $7 - 1) & 0x1f;
 		fit($7 > 0);
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (sh<<11) | ($9<<6) | (me<<1));
 	}
 	| OP_rotrwi      c GPR ',' GPR ',' u5
 	{
-		quad sh = (32 - $7) & 0x1f;
+		word_t sh = (32 - $7) & 0x1f;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (sh<<11) | (0<<6) | (31<<1));
 	}
 	| OP_slwi              c GPR ',' GPR ',' u5
 	{
-		quad me = 31 - $7;
+		word_t me = 31 - $7;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      ($7<<11) | (0<<6) | (me<<1));
 	}
 	| OP_srwi              c GPR ',' GPR ',' u5
 	{
-		quad sh = (32 - $7) & 0x1f;
+		word_t sh = (32 - $7) & 0x1f;
 		emit4($1 | $2 | ($5<<21) | ($3<<16) |
 		      (sh<<11) | ($7<<6) | (31<<1));
 	}
@@ -367,8 +367,8 @@ bda
 li32
 	: GPR ',' expr
 	{
-		quad type = $3.typ & S_TYP;
-		quad val = $3.val;
+		word_t type = $3.typ & S_TYP;
+		word_t val = $3.val;
 		if ((type == S_ABS) && (val <= 0xffff))
 			emit4((14<<26) | ($1<<21) | (0<<16)  | val); /* addi */
 		else
