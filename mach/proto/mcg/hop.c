@@ -364,8 +364,8 @@ static void appendheader(struct hop* hop)
     appendf(" VREGS:");
     for (i=0; i<hop->vregusage.count; i++)
     {
-        struct vreg* src = hop->vregusage.item[i].left;
-        struct vreg* dest = hop->vregusage.item[i].right;
+        struct vreg* src = actual(hop->vregusage.item[i].left);
+        struct vreg* dest = actual(hop->vregusage.item[i].right);
 
         appendf(" ");
         if (src)
