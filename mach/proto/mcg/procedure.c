@@ -226,6 +226,7 @@ void procedure_compile(struct procedure* proc)
     pass_convert_copies_to_moves();
     print_hops('9');
     pass_register_allocator();
+    print_hops('a');
 #if 0
     pass_add_prologue_epilogue();
     print_hops('9');

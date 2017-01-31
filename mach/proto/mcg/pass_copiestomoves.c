@@ -19,13 +19,16 @@ void pass_convert_copies_to_moves(void)
                 {
                     struct vreg* in = hop->vregusage.item[k].left;
                     struct vreg* out = hop->vregusage.item[k].right;
+                    static struct valueusage dummyusage = {};
+                    struct valueusage* inusage = in ? hop_get_value_usage(hop, in->value) : &dummyusage;
+                    struct valueusage* outusage = out ? hop_get_value_usage(hop, out->value) : &dummyusage;
 
-                    if (in && !out)
+                    if (inusage->input && !inusage->output)
                     {
                         assert(!invreg);
                         invreg = in;
                     }
-                    if (!in && out)
+                    if (!inusage->input && outusage->output)
                     {
                         assert(!outvreg);
                         outvreg = out;
@@ -33,12 +36,7 @@ void pass_convert_copies_to_moves(void)
                 }
 
                 if (invreg && outvreg)
-                {
-                    struct valueusage* usage = hop_get_value_usage(hop, outvreg->value);
-                    assert(!usage->input);
-                    usage->input = true;
                     hop_add_through_vreg(hop, invreg, outvreg);
-                }
             }
         }
     }
