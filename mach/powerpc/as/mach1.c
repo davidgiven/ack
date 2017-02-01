@@ -10,3 +10,4 @@
 void no_hl(void);
 word_t eval_hl(struct expr_t* expr, int token);
 void emit_hl(word_t in);
+void machfinish(int n);
