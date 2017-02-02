@@ -155,17 +155,14 @@ REGISTERS
 
 TOKENS
 
-/* Used only in instruction descriptions (to generate the correct syntax). */
-
-	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo16[" adr "](" reg ")".
-	CONST              = { INT val; }             4    val.
-
 /* Primitives */
 
+	CONST              = { INT val; }             4    val.
 	LABEL              = { ADDR adr; }            4    adr.
 	LABEL_HI           = { ADDR adr; }            4    "hi16[" adr "]".
 	LABEL_HA           = { ADDR adr; }            4    "ha16[" adr "]".
 	LABEL_LO           = { ADDR adr; }            4    "lo16[" adr "]".
+	LABEL_STACK        = { GPR reg; ADDR adr; }   4.
 	LOCAL              = { INT off; }             4    ">>> BUG IN LOCAL".
 
 /* Allows us to use regvar() to refer to registers */
@@ -191,16 +188,17 @@ TOKENS
 	SEX_B              = { GPR reg; }             4.
 	SEX_H              = { GPR reg; }             4.
 
-	IND_RC_B           = { GPR reg; INT off; }    4    off "(" reg ")".
-	IND_RR_B           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_H           = { GPR reg; INT off; }    4    off "(" reg ")".
-	IND_RR_H           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_H_S         = { GPR reg; INT off; }    4    off "(" reg ")".
-	IND_RR_H_S         = { GPR reg1; GPR reg2; }  4.
-	IND_RC_W           = { GPR reg; INT off; }    4    off "(" reg ")".
-	IND_RR_W           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_D           = { GPR reg; INT off; }    8    off "(" reg ")".
-	IND_RR_D           = { GPR reg1; GPR reg2; }  8.
+	IND_RC_B    = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RR_B    = { GPR reg1; GPR reg2; }  4.
+	IND_RC_H    = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RR_H    = { GPR reg1; GPR reg2; }  4.
+	IND_RC_H_S  = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RR_H_S  = { GPR reg1; GPR reg2; }  4.
+	IND_RC_W    = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RL_W    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
+	IND_RR_W    = { GPR reg1; GPR reg2; }  4.
+	IND_RC_D    = { GPR reg; INT off; }    8    off "(" reg ")".
+	IND_RR_D    = { GPR reg1; GPR reg2; }  8.
 
 	NOT_R              = { GPR reg; }             4.
 
@@ -249,7 +247,7 @@ SETS
 	/* indirect values */
 	IND_ALL_B          = IND_RC_B + IND_RR_B.
 	IND_ALL_H          = IND_RC_H + IND_RR_H + IND_RC_H_S + IND_RR_H_S.
-	IND_ALL_W          = IND_RC_W + IND_RR_W.
+	IND_ALL_W          = IND_RC_W + IND_RL_W + IND_RR_W.
 	IND_ALL_D          = IND_RC_D + IND_RR_D.
 	IND_ALL_BHW        = IND_ALL_B + IND_ALL_H + IND_ALL_W.
 
@@ -277,7 +275,7 @@ INSTRUCTIONS
 
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
-  addi            GPR:wo, GPR:ro, CONST:ro.
+  addi            GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
     li            GPR:wo, CONST:ro.
   addis           GPR:wo, GPR:ro, CONST+LABEL_HI+LABEL_HA:ro.
     lis           GPR:wo, CONST+LABEL_HI+LABEL_HA:ro.
@@ -333,7 +331,7 @@ INSTRUCTIONS
   lfd             FPR:wo, IND_RC_D:ro cost(4, 5).
   lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
   lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
-  lfs             FSREG:wo, IND_RC_W:ro cost(4, 4).
+  lfs             FSREG:wo, IND_RC_W+IND_RL_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
   lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
   lha             GPR:wo, IND_RC_H_S:ro cost(4, 3).
@@ -343,7 +341,7 @@ INSTRUCTIONS
   li32            GPR:wo, CONST:ro cost(8, 2).
   lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR:wo, IND_RC_W+GPRINDIRECT_OFFSET_LO:ro cost(4, 3).
+  lwz             GPR:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -369,12 +367,12 @@ INSTRUCTIONS
   stfd            FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
-  stfs            FSREG:ro, IND_RC_W:rw cost(4, 3).
+  stfs            FSREG:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
   stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
   sth             GPR:ro, IND_RC_H:rw cost(4, 3).
   sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stw             GPR:ro, IND_RC_W:rw cost(4, 3).
+  stw             GPR:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stwu            GPR+LOCAL:ro, IND_RC_W:rw cost(4, 3).
   xor             GPR:wo, GPR:ro, GPR:ro.
@@ -417,6 +415,16 @@ MOVES
 			COMMENT("move LABEL->GPR")
 			lis %2, {LABEL_HI, %1.adr}
 			ori %2, %2, {LABEL_LO, %1.adr}
+
+	from LABEL_HA to GPR
+		gen
+			lis %2, %1
+
+	from LABEL_STACK to GPR
+		gen
+			move {LABEL_HA, %1.adr}, %1.reg
+			addi %2, %1.reg, {LABEL_LO, %1.adr}
+
 
 /* Sign extension */
 
@@ -512,6 +520,11 @@ MOVES
 			COMMENT("move IND_RC_W->GPR")
 			lwz %2, %1
 
+	from IND_RL_W to GPR
+		gen
+			move {LABEL_HA, %1.adr}, %1.reg
+			lwz %2, %1
+
 	from IND_RR_W to GPR
 		gen
 			COMMENT("move IND_RR_W->GPR")
@@ -520,6 +533,11 @@ MOVES
 	from IND_RC_W to FSREG
 		gen
 			COMMENT("move IND_RC_W->FSREG")
+			lfs %2, %1
+
+	from IND_RL_W to FSREG
+		gen
+			move {LABEL_HA, %1.adr}, %1.reg
 			lfs %2, %1
 
 	from IND_RR_W to FSREG
@@ -714,9 +732,15 @@ STACKINGRULES
 			stwu %1.2, {IND_RC_W, SP, 0-4}
 			stwu %1.1, {IND_RC_W, SP, 0-4}
 
-	from CONST_STACK + LABEL to STACK
+	from CONST_STACK to STACK
 		gen
-			COMMENT("stack CONST_STACK + LABEL")
+			COMMENT("stack CONST_STACK")
+			move %1, RSCRATCH
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
+
+	from LABEL_STACK to STACK
+		gen
+			COMMENT("stack LABEL_STACK")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
@@ -1058,7 +1082,8 @@ PATTERNS
 			lae $1
 
 	pat lae                            /* Load address of external */
-		yields {LABEL, $1}
+		uses REG
+		yields {LABEL_STACK, %a, $1}
 
 	pat loe                            /* Load word external */
 		leaving
@@ -1155,17 +1180,13 @@ PATTERNS
 			yields {IND_RC_H, %1.reg, %1.off}
 
 	pat loi $1==INT32                  /* Load word indirect */
-		with LABEL
-			uses REG
-			gen
-				lis %a, {LABEL_HA, %1.adr}
-				lwz %a, {GPRINDIRECT_OFFSET_LO, %a, %1.adr}
-			yields %a
 		with GPR
 			yields {IND_RC_W, %1, 0}
-		with SUM_RC
+		with exact LABEL_STACK
+			yields {IND_RL_W, %1.reg, %1.adr}
+		with exact SUM_RC
 			yields {IND_RC_W, %1.reg, %1.off}
-		with SUM_RR
+		with exact SUM_RR
 			yields {IND_RR_W, %1.reg1, %1.reg2}
 
 	pat loi $1==INT64                  /* Load double-word indirect */
@@ -1240,15 +1261,25 @@ PATTERNS
 				move %2.reg, {IND_RC_H, %1.reg, %1.off}
 
 	pat sti $1==INT32                  /* Store word indirect */
-		with GPR GPR+FSREG
+		with REG REG+FSREG
 			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1, 0}
-		with SUM_RR GPR+FSREG
+		with LABEL_STACK REG
+			kills MEMORY
+			gen
+				move {LABEL_HA, %1.adr}, %1.reg
+				stw %2, {IND_RL_W, %1.reg, %1.adr}
+		with LABEL_STACK FSREG
+			kills MEMORY
+			gen
+				move {LABEL_HA, %1.adr}, %1.reg
+				stfs %2, {IND_RL_W, %1.reg, %1.adr}
+		with SUM_RR REG+FSREG
 			kills MEMORY
 			gen
 				move %2, {IND_RR_W, %1.reg1, %1.reg2}
-		with SUM_RC GPR+FSREG
+		with SUM_RC REG+FSREG
 			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1.reg, %1.off}
@@ -1384,8 +1415,12 @@ PATTERNS
 		with REG CONST_STACK-CONST2-CONST_HZ
 			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
 			yields {SUM_RC, %a, los(%2.val)}
-		with CONST_STACK LABEL
-			yields {LABEL, %2.adr+%1.val}
+		with exact CONST_STACK LABEL_STACK
+			uses reusing %2.reg, REG
+			yields {LABEL_STACK, %a, %2.adr+%1.val}
+		with exact LABEL_STACK CONST_STACK
+			uses reusing %1.reg, REG
+			yields {LABEL_STACK, %a, %1.adr+%2.val}
 
 	pat sbi $1==4                      /* Subtract word (second - top) */
 		with REG REG
@@ -1401,8 +1436,9 @@ PATTERNS
 		with CONST_STACK-CONST2_WHEN_NEG-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields {SUM_RC, %a, los(0-%1.val)}
-		with CONST_STACK LABEL
-			yields {LABEL, %2.adr+(0-%1.val)}
+		with exact CONST_STACK LABEL_STACK
+			uses reusing %2.reg, REG
+			yields {LABEL_STACK, %a, %2.adr+(0-%1.val)}
 
 	pat ngi $1==4                      /* Negate word */
 		with REG
