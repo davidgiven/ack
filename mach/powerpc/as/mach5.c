@@ -169,7 +169,10 @@ void emit_hl(word_t in)
                  */
                 relonami = 0;
             } else {
-                serror("lo16 without hi16 or ha16");
+                /* This is a lonely lo16 without hi16 or ha16. */
+                DOTVAL += 2;
+                newrelo(hl_expr.typ, RELO2 | FIXUPFLAGS);
+                DOTVAL -= 2;
             }
         }
         break;
