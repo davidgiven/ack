@@ -68,17 +68,18 @@ static void generate_graph(void)
                 struct vreg* invreg1 = actual(hop->vregusage.item[k].left);
                 struct vreg* outvreg1 = actual(hop->vregusage.item[k].right);
 
+                if (invreg1)
+                    graph_add_vertex(&interference, invreg1);
+                if (outvreg1)
+                    graph_add_vertex(&interference, outvreg1);
+
                 for (m=k; m<hop->vregusage.count; m++)
                 {
                     struct vreg* invreg2 = actual(hop->vregusage.item[m].left);
                     struct vreg* outvreg2 = actual(hop->vregusage.item[m].right);
 
-                    if (invreg1)
-                        graph_add_vertex(&interference, invreg1);
                     if (invreg2)
                         graph_add_vertex(&interference, invreg2);
-                    if (outvreg1)
-                        graph_add_vertex(&interference, outvreg1);
                     if (outvreg2)
                         graph_add_vertex(&interference, outvreg2);
 
@@ -93,6 +94,16 @@ static void generate_graph(void)
             }
         }
     }
+}
+
+static void check_graph(void)
+{
+    struct edge_iterator eit = {};
+    while (graph_next_edge(&interference, &eit))
+        assert(!graph_contains_edge(&affinity, eit.left, eit.right));
+
+    while (graph_next_edge(&affinity, &eit))
+        assert(!graph_contains_edge(&interference, eit.left, eit.right));
 }
 
 static void dump_vreg(struct vreg* vreg)
@@ -178,7 +189,7 @@ static bool attempt_to_coalesce(void)
                     thisdegree++;
             }
 
-            if (thisdegree < degree)
+            if ((thisdegree < degree) && !graph_contains_edge(&interference, left, right))
             {
                 vmaster = left;
                 vslave = right;
@@ -375,6 +386,7 @@ void pass_register_allocator(void)
 {
     wire_together_bbs();
     generate_graph();
+    check_graph();
 
     dump_interference_graph();
     simplified.count = 0;

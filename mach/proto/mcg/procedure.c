@@ -186,16 +186,18 @@ void procedure_compile(struct procedure* proc)
     current_proc = proc;
 
     pass_group_irs();
-	print_blocks('1');
+	print_blocks('a');
 
     /* Passes from here on must preserve IR grouping */
 
     pass_eliminate_trivial_blocks();
     pass_remove_dead_blocks();
 
-    print_blocks('2');
+    print_blocks('b');
     update_graph_data();
+    print_blocks('c');
     pass_split_critical_edges();
+    print_blocks('d');
     update_graph_data();
 
     if (cfg_dot_file)
@@ -206,27 +208,37 @@ void procedure_compile(struct procedure* proc)
     /* Passes from here on can't alter the BB graph without also updating prevs
      * and nexts (and then calling update_graph_data()). */
 
-    print_blocks('3');
+    print_blocks('e');
     pass_wire_up_return_values();
+    print_blocks('f');
     pass_convert_stack_ops();
+    print_blocks('g');
     pass_convert_locals_to_ssa();
-    print_blocks('4');
+    print_blocks('h');
     pass_convert_inputs_to_phis();
+    print_blocks('i');
     pass_convert_nonlocal_phis();
+    print_blocks('j');
     pass_remove_dead_phis();
-    print_blocks('5');
+    print_blocks('k');
     pass_infer_types();
-    print_blocks('6');
+    print_blocks('l');
     pass_instruction_selector();
-    print_hops('7');
+    print_hops('m');
     pass_live_value_analysis();
-    print_hops('8');
+    print_hops('n');
     pass_assign_vregs();
-    pass_calculate_vreg_spillibility();
+    print_hops('o');
     pass_convert_copies_to_moves();
-    print_hops('9');
+    print_hops('p');
+    pass_collapse_adjacent_moves();
+    print_hops('q');
+    pass_prune_stray_moves();
+    print_hops('r');
+    pass_calculate_vreg_spillibility();
+    print_hops('s');
     pass_register_allocator();
-    print_hops('a');
+    print_hops('t');
 #if 0
     pass_add_prologue_epilogue();
     print_hops('9');

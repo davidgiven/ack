@@ -109,6 +109,7 @@ extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, 
 
 extern void pass_assign_vregs(void);
 extern void pass_calculate_vreg_spillibility(void);
+extern void pass_collapse_adjacent_moves(void);
 extern void pass_convert_copies_to_moves(void);
 extern void pass_convert_inputs_to_phis(void);
 extern void pass_convert_locals_to_ssa(void);
@@ -122,6 +123,7 @@ extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_value_analysis(void);
 extern void pass_add_prologue_epilogue(void);
+extern void pass_prune_stray_moves(void);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);
 extern void pass_remove_dead_phis(void);
