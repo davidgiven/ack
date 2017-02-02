@@ -26,6 +26,7 @@ struct pmap
 extern void pmap_put(void* map, void* left, void* right);
 extern void pmap_add(void* map, void* left, void* right);
 extern void pmap_add_bi(void* map, void* left, void* right);
+extern void pmap_remove_index(void* map, int index);
 extern void pmap_remove(void* map, void* left, void* right);
 extern void pmap_remove_bi(void* map, void* left, void* right);
 extern void pmap_remove_either(void* map, void* either);

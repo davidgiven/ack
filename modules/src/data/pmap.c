@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include "pmap.h"
 
 static void append(void* mapp, void* left, void* right)
@@ -73,6 +74,16 @@ void pmap_add_bi(void* mapp, void* left, void* right)
     append(map, left, right);
 }
 
+void pmap_remove_index(void* mapp, int index)
+{
+    struct pmap* map = mapp;
+    struct pmap_node* node = &map->item[index];
+
+    assert((index >= 0) && (index < map->count));
+    memmove(node, node+1, sizeof(*node) * (map->count - index - 1));
+    map->count--;
+}
+
 void pmap_remove(void* mapp, void* left, void* right)
 {
     struct pmap* map = mapp;
@@ -83,8 +94,7 @@ void pmap_remove(void* mapp, void* left, void* right)
 		struct pmap_node* node = &map->item[i];
 		if ((node->left == left) && (node->right == right))
 		{
-			memmove(node, node+1, sizeof(*node) * (map->count - i - 1));
-			map->count--;
+            pmap_remove_index(map, i);
 			return;
 		}
     }
