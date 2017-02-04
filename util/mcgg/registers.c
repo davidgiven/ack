@@ -132,19 +132,21 @@ void analyse_registers(void)
 			real_registers[real_register_count++] = r;
 	}
 
-	/* Set the register bitmaps. */
+	/* Set the register bitmaps and weight. */
 
 	for (i=0; i<real_register_count; i++)
 	{
 		struct reg* r = real_registers[i];
 		r->bitmap = bitmap_alloc(real_register_count);
 		bitmap_set(r->bitmap, real_register_count, i);
+		r->weight = 1;
 	}
 
 	for (i=0; i<fake_register_count; i++)
 	{
 		struct reg* r = fake_registers[i];
 		r->bitmap = bitmap_alloc(real_register_count);
+		r->weight = r->uses.count;
 
 		for (j=0; j<r->uses.count; j++)
 		{
@@ -174,6 +176,9 @@ void analyse_registers(void)
 			{
 				struct regattr* rc = sit.item;
 				bitmap_or(rc->bitmap, real_register_count, r->bitmap);
+
+				if (r->weight > rc->weight)
+					rc->weight = r->weight;
 			}
 		}
 	}
@@ -237,7 +242,9 @@ void emitregisterattrs(void)
 		{
 			print("0x%x, ", rc->bitmap[j]);
 		}
-		print("}},\n");
+		print("}, ");
+		print("%d,", rc->weight);
+		print("},\n");
 		printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
 	}
 	print("};\n\n");

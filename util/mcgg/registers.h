@@ -13,6 +13,7 @@ struct reg
 	struct stringlist* names;  /* register names */
 	unsigned int* bitmap;      /* hardware register bitmap */
 	ARRAYOF(struct reg) uses;  /* registers that this one uses */
+	int weight;                /* weight of this register */
 };
 
 struct regattr
@@ -20,6 +21,7 @@ struct regattr
 	const char* name;      /* class name */
 	int number;            /* identifying number */
 	unsigned int* bitmap;  /* hardware register bitmap */
+	int weight;            /* maximum weight of all registers in this class */
 };
 
 extern struct reg* makereg(const char* name);

@@ -66,6 +66,7 @@ struct burm_regclass_data
     const char* name;
     const struct burm_register_data** registers;
     burm_register_bitmap_t bitmap;
+    int weight;
 };
 
 extern const struct burm_register_data burm_register_data[];
