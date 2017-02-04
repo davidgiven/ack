@@ -9,13 +9,27 @@
 static int hl_token;
 static expr_t hl_expr;
 
-/* Info about the last hi16 or ha16 */
-static int hi_token = 0;
-static expr_t hi_expr;
-static valu_t hi_relonami;
-static long hi_lineno;
-static ADDR_T hi_dotval;
-static short hi_dottyp;
+/* Info about each hi16 or ha16 relocation */
+struct hirel {
+    struct hirel*   hr_next;        /* next hirel in source order */
+    struct hirel*   hr_inext;       /* next incomplete hirel */
+    expr_t          hr_expr;
+    valu_t          hr_relonami;
+    short           hr_token;       /* OP_HI or OP_HA */
+    short           hr_dottyp;      /* section */
+    ADDR_T          hr_hidot;       /* address of hi16/ha16 */
+    ADDR_T          hr_lodot;       /* address of matching lo16 */
+    long            hr_lineno;
+};
+static struct hirel* hr_head = NULL;
+static struct hirel* hr_tail = NULL;
+static struct hirel* hr_ihead = NULL;
+
+/* Bitset to remember if each lo16 relocation is lonely */
+static uint16_t* lo_set = NULL;
+static int lo_count2 = 0;           /* pass 2 */
+static int lo_count3 = 0;           /* pass 3 */
+
 
 void no_hl(void) {
     hl_token = 0;
@@ -23,6 +37,7 @@ void no_hl(void) {
 
 word_t eval_hl(expr_t* expr, int token)
 {
+    struct hirel* hr;
     word_t val = expr->val;
     uint16_t hi = val >> 16;
     uint16_t lo = val & 0xffff;
@@ -31,27 +46,34 @@ word_t eval_hl(expr_t* expr, int token)
     hl_expr = *expr;
 
     switch (token) {
-    case OP_HI:
-        /* hi16[expr] */
-        return hi;
-    case OP_HA:
-        /* ha16[expr]: If the low half will be treated as a signed
-         * value, then values greater than 0x7fff will cause the high
-         * half to have 1 subtracted from it; so we apply an
-         * adjustment here.
+    case OP_HA:  /* ha16[expr] */
+        /*
+         * If the low half will be treated as a signed value, then
+         * values greater than 0x7fff will cause the high half to have
+         * 1 subtracted from it; so we apply an adjustment here.
          */
         if (lo > 0x7fff)
             hi++;
+        /* FALLTHROUGH */
+    case OP_HI:  /* hi16[expr] */
+        if (pass == PASS_3) {
+            /* Get the hirel from emit_hl() PASS_2. */
+            hr = hr_head;
+            if (DOTVAL != hr->hr_hidot)
+                abort();
+
+            /* For now, the lo16 must be in the next instruction. */
+            if (DOTVAL + 4 != hr->hr_lodot)
+                serror("%s needs lo16 in next instruction",
+                       token == OP_HI ? "hi16" : "ha16");
+
+            hr_head = hr->hr_next;
+            free(hr);
+        }
         return hi;
-    case OP_LO:
-        /* lo16[expr] */
+    case OP_LO:  /* lo16[expr] */
         return lo;
     }
-}
-
-static const char *hi_name(void)
-{
-    return hi_token == OP_HI ? "hi16" : "ha16";
 }
 
 static void cant_use_hl(const char *what)
@@ -59,120 +81,159 @@ static void cant_use_hl(const char *what)
     serror("can't use %s in this instruction", what);
 }
 
-static void check_hl_expr(void)
+static int hr_match(const struct hirel* hr, int und)
 {
-    int und = ((hi_expr.typ & S_TYP) == S_UND);
-    int com = (hi_expr.typ & S_COM);
-
-    if (hi_expr.typ != hl_expr.typ ||
-        hi_expr.val != hl_expr.val ||
-        ((und || com) && hi_relonami != relonami)) {
-
-        long old = lineno;
-        lineno = hi_lineno;
-        serror("%s and lo16 must use same expression", hi_name());
-        lineno = old;
-    }
+    /*
+     * Compares hr (hi16 or ha16) with hl_expr (lo16).  They match,
+     * completing a pair, if they share the same expression and
+     * symbol, and they are in the same section.
+     */
+    return (hr->hr_expr.typ == hl_expr.typ &&
+            hr->hr_expr.val == hl_expr.val &&
+            (!und || hr->hr_relonami == relonami) &&
+            hr->hr_dottyp == DOTTYP);
 }
 
-static void hi_missing_lo(void)
+static void need_hi(const struct hirel* hr, const char* needed,
+                    const char* got)
 {
     long old = lineno;
-    lineno = hi_lineno;
-    serror("%s needs lo16 in next instruction", hi_name());
-    lineno = old;
-}
-
-static void need_hi(const char *needed, const char *got)
-{
-    long old = lineno;
-    lineno = hi_lineno;
+    lineno = hr->hr_lineno;
     serror("need %s, not %s, here", needed, got);
     lineno = old;
 }
 
 void emit_hl(word_t in)
 {
+    struct hirel *hr, **hrlink;
+    struct lorel *lr;
     word_t opcode;
-    int type;
+    int needrelo, und;
+    uint16_t bit, *rset;
 
     switch (hl_token) {
-    case OP_HI:
-    case OP_HA:
-        /* hi16[...] or ha16[...] */
-        type = hl_expr.typ & S_TYP;
-        if (type != S_ABS && PASS_RELO) {
-            if (hi_token)
-                hi_missing_lo();
+    case OP_HI:  /* hi16[...] */
+    case OP_HA:  /* ha16[...] */
+        if ((hl_expr.typ & S_TYP) != S_ABS && PASS_RELO) {
+            if (pass == PASS_2) {
+                opcode = in >> 26;
+                if (opcode != 15 /* addis */)
+                    cant_use_hl(hl_token == OP_HI ? "hi16" : "ha16");
 
-            opcode = in >> 26;
-            if (opcode != 15 /* addis */)
-                cant_use_hl(hi_name());
+                /* Make a new incomplete hirel. */
+                hr = malloc(sizeof(*hr));
+                if (!hr)
+                    fatal("out of memory");
+                hr->hr_next = NULL;
+                hr->hr_inext = hr_ihead;
+                hr->hr_expr = hl_expr;
+                hr->hr_relonami = relonami;
+                hr->hr_token = hl_token;
+                hr->hr_dottyp = DOTTYP;
+                hr->hr_hidot = DOTVAL;
+                hr->hr_lodot = 0;
+                hr->hr_lineno = lineno;
 
-            /* This hi16 or ha16 needs a lo16 in the next instruction.
-             * Save this info until we find the lo16.
-             */
-            hi_token = hl_token;
-            hi_expr = hl_expr;
-            hi_relonami = relonami;
-            hi_lineno = lineno;
-            hi_dotval = DOTVAL;
-            hi_dottyp = DOTTYP;
+                /* Add it to end of main list. */
+                if (hr_tail) {
+                    hr_tail->hr_next = hr;
+                    hr_tail = hr;
+                } else
+                    hr_head = hr_tail = hr;
+                /* Add it to list of incompletes. */
+                hr_ihead = hr;
+            }
 
-            /* Relocate this hi16 or ha16 and the next lo16. */
             newrelo(hl_expr.typ, RELOPPC | FIXUPFLAGS);
         }
         break;
-    case OP_LO:
-        /* lo16[...] */
-        type = hl_expr.typ & S_TYP;
-        if (type != S_ABS && PASS_RELO) {
-            if (hi_token) {
-                /* The last hi16 or ha16 needs this lo16 in the next
-                 * instruction, to complete the pair for RELOPPC.
-                 */
-                if (DOTVAL != hi_dotval + 4 || DOTTYP != hi_dottyp)
-                    hi_missing_lo();
-
-                check_hl_expr();
-
-                opcode = in >> 26;
-                switch (opcode) {
-                case 14: /* addi */
-                case 34: /* lbz */
-                case 48: /* lfs */
-                case 50: /* lfd */
-                case 42: /* lha */
-                case 40: /* lhz */
-                case 32: /* lwz */
-                case 38: /* stb */
-                case 52: /* stfs */
-                case 54: /* stfd */
-                case 44: /* sth */
-                case 36: /* stw */
-                    if (hi_token == OP_HI)
-                        need_hi("ha16", "hi16");
-                    break;
-                case 24: /* ori */
-                    if (hi_token == OP_HA)
-                        need_hi("hi16", "ha16");
-                    break;
-                default:
-                    cant_use_hl("lo16");
+    case OP_LO:  /* lo16[...] */
+        if ((hl_expr.typ & S_TYP) != S_ABS && PASS_RELO) {
+            switch (pass) {
+            case PASS_2:
+                /* Search for hi16 or ha16 to complete. */
+                und = ((hl_expr.typ & S_TYP) == S_UND ||
+                       (hl_expr.typ & S_COM));
+                hrlink = &hr_ihead;
+                while (hr = *hrlink) {
+                    if (hr_match(hr, und)) {
+                        /* Found hr, remove it from list. */
+                        *hrlink = hr->hr_inext;
+                        break;
+                    }
+                    hrlink = &(hr->hr_inext);
                 }
 
-                hi_token = 0;
+                if (hr) {
+                    hr->hr_lodot = DOTVAL;
 
-                /* If we have a symbol for relocation, we need to
-                 * abandon it (because the relocation was generated by
-                 * hi16 or ha16).
-                 */
-                relonami = 0;
-            } else {
+                    opcode = in >> 26;
+                    switch (opcode) {
+                    case 14: /* addi */
+                    case 34: /* lbz */
+                    case 48: /* lfs */
+                    case 50: /* lfd */
+                    case 42: /* lha */
+                    case 40: /* lhz */
+                    case 32: /* lwz */
+                    case 38: /* stb */
+                    case 52: /* stfs */
+                    case 54: /* stfd */
+                    case 44: /* sth */
+                    case 36: /* stw */
+                        if (hr->hr_token == OP_HI)
+                            need_hi(hr, "ha16", "hi16");
+                        break;
+                    case 24: /* ori */
+                        if (hr->hr_token == OP_HA)
+                            need_hi(hr, "hi16", "ha16");
+                        break;
+                    default:
+                        cant_use_hl("lo16");
+                    }
+                }
+
+                if ((lo_count2 % 128) == 0) {
+                    /* Grow the bitset by 128 bits. */
+                    rset = realloc(lo_set, (lo_count2 + 128) / 8);
+                    if (!rset)
+                        fatal("out of memory");
+                    lo_set = rset;
+                }
+
+                bit = (1 << (lo_count2 & 0xf));
+                if (hr) {
+                    /* Completing RELOPPC, don't need RELO2. */
+                    needrelo = 0;
+                    lo_set[lo_count2 >> 4] &= ~bit;
+                } else {
+                    /* Lonely lo16, need RELO2. */
+                    needrelo = 1;
+                    lo_set[lo_count2 >> 4] |= bit;
+                }
+                lo_count2++;
+                break;
+
+            case PASS_3:
+                /* Remember from PASS_2 if we need RELO2. */
+                bit = (1 << (lo_count3 & 0xf));
+                needrelo = (lo_set[lo_count3 >> 4] & bit);
+                lo_count3++;
+                break;
+            }
+
+            if (needrelo) {
                 /* This is a lonely lo16 without hi16 or ha16. */
                 DOTVAL += 2;
                 newrelo(hl_expr.typ, RELO2 | FIXUPFLAGS);
                 DOTVAL -= 2;
+            } else {
+                /*
+                 * This lo16 completes a RELOPPC (generated by hi16 or
+                 * ha16).  If we have a symbol for relocation, we need
+                 * to abandon it.
+                 */
+                relonami = 0;
             }
         }
         break;
@@ -182,8 +243,14 @@ void emit_hl(word_t in)
 }
 
 void machfinish(int n) {
-    if (hi_token) {
-        hi_missing_lo();
-        hi_token = 0;
+    long old;
+
+    /* At end of pass 2, can't have any incomplete hirel. */
+    if (n == PASS_2 && hr_ihead) {
+        old = lineno;
+        lineno = hr_ihead->hr_lineno;
+        serror("%s without matching lo16",
+               hr_ihead->hr_token == OP_HI ? "hi16" : "ha16");
+        lineno = old;
     }
 }
