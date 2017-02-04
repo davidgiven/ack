@@ -12,7 +12,7 @@ struct reg
 	struct set classes;        /* register classes this register belongs to */
 	struct stringlist* names;  /* register names */
 	unsigned int* bitmap;      /* hardware register bitmap */
-	ARRAYOF(struct reg) aliases; /* registers that this one aliases */
+	ARRAYOF(struct reg) uses;  /* registers that this one uses */
 };
 
 struct regattr
@@ -25,7 +25,7 @@ struct regattr
 extern struct reg* makereg(const char* name);
 extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr);
-extern void addregaliases(struct reg* reg, struct stringlist* aliases);
+extern void addregusage(struct reg* reg, struct stringlist* uses);
 extern struct regattr* getregattr(const char* name);
 
 extern void analyse_registers(void);

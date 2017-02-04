@@ -74,31 +74,20 @@ void addregattr(struct reg* reg, const char* id)
 	set_add(&reg->classes, p);
 }
 
-void addregalias(struct reg* r1, struct reg* r2)
+void addregusage(struct reg* reg, struct stringlist* usage)
 {
-	if (!array_appendu(&r1->aliases, r2))
-	{
-		int i;
-
-		for (i=0; i<r1->aliases.count; i++)
-			addregalias(r1->aliases.item[i], r2);
-	}
-}
-
-void addregaliases(struct reg* reg, struct stringlist* aliases)
-{
-	struct stringfragment* f = aliases->first;
+	struct stringfragment* f = usage->first;
 
 	while (f)
 	{
 		struct reg* r = hashtable_get(&registers, (void*)f->data);
 		if (!r)
 			yyerror("register '%s' is not defined here", f->data);
-		if (r->aliases.count > 0)
-			yyerror("can't alias '%s' to '%s' because the latter isn't a true hardware register",
+		if (r->uses.count > 0)
+			yyerror("'%s' can't use '%s' because the latter isn't a true hardware register",
 				reg->name, r->name);
 
-		array_appendu(&reg->aliases, r);
+		array_appendu(&reg->uses, r);
 
 		f = f->next;
 	}
@@ -137,7 +126,7 @@ void analyse_registers(void)
 	for (i=0; i<registers.size; i++)
 	{
 		struct reg* r = regs[i];
-		if (r->aliases.count > 0)
+		if (r->uses.count > 0)
 			fake_registers[fake_register_count++] = r;
 		else
 			real_registers[real_register_count++] = r;
@@ -157,10 +146,10 @@ void analyse_registers(void)
 		struct reg* r = fake_registers[i];
 		r->bitmap = bitmap_alloc(real_register_count);
 
-		for (j=0; j<r->aliases.count; j++)
+		for (j=0; j<r->uses.count; j++)
 		{
-			struct reg* alias = r->aliases.item[j];
-			bitmap_or(r->bitmap, real_register_count, alias->bitmap);
+			struct reg* uses = r->uses.item[j];
+			bitmap_or(r->bitmap, real_register_count, uses->bitmap);
 		}
 	}
 

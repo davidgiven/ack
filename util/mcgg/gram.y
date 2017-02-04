@@ -27,7 +27,7 @@ extern int yylex(void);
     struct constraint* constraint;
 }
 
-%term ALIASES
+%term USES
 %term COPY
 %term CORRUPTED
 %term COST
@@ -58,7 +58,7 @@ extern int yylex(void);
 %type  <rule>       pattern_constraints
 %type  <rule>       pattern_emit
 %type  <string>     nodename
-%type  <stringlist> aliases
+%type  <stringlist> uses
 %type  <stringlist> names
 %type  <stringlist> qfragments
 %type  <terminfo>   terminfo
@@ -80,7 +80,7 @@ registers
 register
     : ID                              { $$ = makereg($1); }
     | register NAMED '(' names ')'    { $$ = $1; setregnames($$, $4); }
-    | register ALIASES '(' aliases ')' { $$ = $1; addregaliases($$, $4); }
+    | register USES '(' uses ')'      { $$ = $1; addregusage($$, $4); }
     | register ID                     { $$ = $1; addregattr($1, $2); }
     ;
 
@@ -89,9 +89,9 @@ names
     | names ',' QFRAGMENT             { $$ = $1; stringlist_add($$, $3); }
     ;
 
-aliases
+uses
     : ID                              { $$ = calloc(1, sizeof(*$$)); stringlist_add($$, $1); }
-    | aliases ',' ID                  { $$ = $1; stringlist_add($$, $3); }
+    | uses ',' ID                     { $$ = $1; stringlist_add($$, $3); }
     ;
 
 declarations
