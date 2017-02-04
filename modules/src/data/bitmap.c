@@ -85,3 +85,30 @@ int bitmap_find_unset_bit(unsigned int* bitmap, int size)
 
 	return -1;
 }
+
+static int count_bits_in_word(unsigned int word)
+{
+	int i = 0;
+	while (word)
+	{
+		if (word & 1)
+			i++;
+		word >>= 1;
+	}
+	return i;
+}
+
+int bitmap_count_set_bits(unsigned int* bitmap, int size)
+{
+	int word;
+	int words = ((size-1) / BITS_PER_WORD) + 1;
+	int count = 0;
+
+	for (word=0; word<words; word++)
+	{
+		unsigned int w = bitmap[word];
+		count += count_bits_in_word(w);
+	}
+
+	return count;
+}
