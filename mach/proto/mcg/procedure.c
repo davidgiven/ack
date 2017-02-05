@@ -184,6 +184,7 @@ static void write_dominance_graph(const char* name)
 void procedure_compile(struct procedure* proc)
 {
     current_proc = proc;
+    tracef('P', "P: compiling %s\n", proc->name);
 
     pass_group_irs();
 	print_blocks('a');

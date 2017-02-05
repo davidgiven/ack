@@ -136,7 +136,7 @@ static void constrain_output_reg(uint32_t attr)
 static void constrain_output_reg_equal_to(int child)
 {
     struct value* value = find_value_of_child(child);
-    pmap_add(&current_hop->equals_constraint, &current_hop->value, value);
+    pmap_add(&current_hop->equals_constraint, &current_insn->value, value);
 }
 
 static const struct burm_emitter_data emitter_data =
@@ -228,7 +228,8 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                 switch (node->label)
                 {
                     case ir_to_esn(IR_REG, 0):
-                        hop_add_move(current_hop, &node->ir->value, current_hop->value);
+                        if (current_hop->insels.count == 0)
+                            hop_add_move(current_hop, &node->ir->value, current_hop->value);
                         break;
 
                     case ir_to_esn(IR_NOP, 'I'):

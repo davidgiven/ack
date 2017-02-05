@@ -92,6 +92,18 @@ static void generate_graph(void)
                 if (hop->is_move && invreg1 && outvreg1)
                     graph_add_edge(&affinity, invreg1, outvreg1);
             }
+
+            /* Ensure that registers which are constrained to be in the same hreg for input
+             * and output are coalesced. */
+
+            for (k=0; k<hop->equals_constraint.count; k++)
+            {
+                struct value* left = hop->equals_constraint.item[k].left;
+                struct value* right = hop->equals_constraint.item[k].right;
+                struct vreg* leftvreg = actual(hop_find_output_vreg(hop, left));
+                struct vreg* rightvreg = actual(hop_find_input_vreg(hop, right));
+                coalesce(leftvreg, rightvreg);
+            }
         }
     }
 }

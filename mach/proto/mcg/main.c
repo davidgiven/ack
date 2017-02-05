@@ -119,7 +119,7 @@ int main(int argc, char* const argv[])
 	if (!EM_open((char*) inputfilename))
 		fatal("couldn't open input '%s': %s",
             inputfilename ? inputfilename : "<stdin>", EM_error);
-	
+
     if (outputfilename)
     {
         outputfile = fopen(outputfilename, "w");
