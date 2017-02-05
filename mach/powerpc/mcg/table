@@ -522,7 +522,9 @@ PATTERNS
 
     CALLLABEL(CALL)
     out:(iret)reg = CALLLABEL(CALL.I)
+    out:(fret)reg = CALLLABEL(CALL.F)
     out:(lret)reg = CALLLABEL(CALL.L)
+    out:(dret)reg = CALLLABEL(CALL.D)
 
     #define CALLINDIRECT(insn) \
         insn (dest:(int)reg) \
@@ -533,7 +535,9 @@ PATTERNS
 
     CALLINDIRECT(CALL)
     out:(iret)reg = CALLINDIRECT(CALL.I)
+    out:(fret)reg = CALLINDIRECT(CALL.F)
     out:(lret)reg = CALLINDIRECT(CALL.L)
+    out:(dret)reg = CALLINDIRECT(CALL.D)
 
     JUMP(dest:LABEL.I)
         emit "b $dest"
