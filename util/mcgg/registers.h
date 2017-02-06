@@ -24,6 +24,8 @@ struct regattr
 	int weight;            /* maximum weight of all registers in this class */
 };
 
+extern int real_register_count;
+
 extern struct reg* makereg(const char* name);
 extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr);

@@ -22,6 +22,8 @@ struct vreg
     int neighbours;
     bool needs_register;
     bool is_spilt;
+    struct burm_regclass_data* regclass;
+    burm_register_bitmap_t registers;
 };
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);

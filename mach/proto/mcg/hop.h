@@ -30,6 +30,7 @@ struct insel
 
 struct valueusage
 {
+	struct burm_regclass_data* regclass;
 	bool input : 1;
 	bool output : 1;
 	bool through : 1;
@@ -46,6 +47,7 @@ struct hop
 	struct value* value;
 	bool is_move;
 	PMAPOF(struct value, struct value) equals_constraint;
+	burm_register_bitmap_t corrupts;
 
 	struct hashtable* valueusage;
 	PMAPOF(struct vreg, struct vreg) vregusage;

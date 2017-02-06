@@ -15,7 +15,7 @@ static struct hashtable registers = HASHTABLE_OF_STRINGS;
 static struct hashtable registerattrs = HASHTABLE_OF_STRINGS;
 
 static struct reg** real_registers;
-static int real_register_count;
+int real_register_count;
 
 static struct reg** fake_registers;
 static int fake_register_count;
@@ -225,30 +225,37 @@ void emitregisterattrs(void)
 		{
 			struct reg* r = regs[j];
 			if (set_get(&r->classes, rc))
-				print("&%Pregister_data[%d], ", r->number);
+				print("%1&%Pregister_data[%d],\n", r->number);
 		}
 
-		print("NULL };\n");
+		print("%1NULL\n");
+		print("};\n");
 	}
 
 	print("\nconst struct %Pregclass_data %Pregclass_data[] = {\n");
+	printh("enum {\n");
 	for (i=0; i<registerattrs.size; i++)
 	{
 		struct regattr* rc = regattrs[i];
 		assert(rc->number == i);
 
-		print("%1{ \"%s\", %Pregisters_in_class_%s, { ", rc->name, rc->name);
+		print("%1{\n");
+		print("%2\"%s\",\n", rc->name);
+		print("%2%Pregisters_in_class_%s,\n", rc->name);
+		print("%2{ ");
 		for (j=0; j<WORDS_FOR_BITMAP_SIZE(real_register_count); j++)
 		{
 			print("0x%x, ", rc->bitmap[j]);
 		}
-		print("}, ");
-		print("%d,", rc->weight);
 		print("},\n");
-		printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
+		print("%2%d /* weight */,\n", rc->weight);
+		print("%1},\n");
+
+		printh("\t%P%s_RC = %d,\n", rc->name, rc->number);
 	}
 	print("};\n\n");
-	printh("\n");
+	printh("\t%Pmax_rc\n");
+	printh("};\n\n");
 }
 
 void emitregisters(void)
@@ -291,14 +298,17 @@ void emitregisters(void)
 		struct reg* r = regs[i];
 
 		assert(r->number == i);
-		print("%1{ \"%s\", 0x%x, %Pregister_names_%s, ",
-			r->name, r->attrs, r->name, r->name);
-		print("{ ");
+		print("%1{\n");
+		print("%2\"%s\" /* name */,\n", r->name);
+		print("%20x%x /* classes */,\n", r->attrs);
+		print("%2%Pregister_names_%s,\n", r->name);
+		print("%2{ ");
 		for (j=0; j<WORDS_FOR_BITMAP_SIZE(real_register_count); j++)
 		{
 			print("0x%x, ", r->bitmap[j]);
 		}
-		print("}},\n");
+		print("},\n");
+		print("%1},\n");
 	}
 	print("};\n\n");
 }

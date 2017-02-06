@@ -17,9 +17,6 @@ struct ir_data
 
 extern const struct ir_data ir_data[];
 
-#define TYPE_ATTRS \
-    (burm_int_ATTR | burm_long_ATTR | burm_float_ATTR | burm_double_ATTR)
-
 #include "ircodes-dyn.h"
 
 #endif

@@ -80,13 +80,13 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
-static void constrain_input_reg(int child, uint32_t attr)
+static void constrain_input_reg(int child, int regclass)
 {
     struct value* value = find_value_of_child(child);
     struct constraint* c;
 
     hop_get_value_usage(current_hop, value)->input = true;
-    value->attrs = attr;
+    value->regclass = regclass;
 }
 
 static void constrain_input_reg_corrupted(int child)
@@ -97,40 +97,12 @@ static void constrain_input_reg_corrupted(int child)
     hop_get_value_usage(current_hop, value)->corrupted = true;
 }
 
-static uint32_t find_type_from_constraint(uint32_t attr)
-{
-    /* Looks through the registers and finds a concrete register implementing
-     * that attribute, and returns the type. We assume that all registers
-     * implementing an attribute (which anyone is going to ask for, 'volatile'
-     * doesn't count) will have the same type. TODO: mcgg should check for
-     * this. */
-
-    const struct burm_register_data* brd = burm_register_data;
-    while (brd->id)
-    {
-        if (brd->attrs & attr)
-        {
-            const uint32_t type_attrs =
-                (burm_int_ATTR | burm_float_ATTR |
-                 burm_long_ATTR | burm_double_ATTR);
-
-            if (brd->attrs & type_attrs)
-                return brd->attrs & type_attrs;
-            return attr;
-        }
-        brd++;
-    }
-
-    fatal("unable to find a register matching attribute 0x%x", attr);
-    return 0;
-}
-
-static void constrain_output_reg(uint32_t attr)
+static void constrain_output_reg(int regclass)
 {
     struct value* value = &current_insn->value;
 
     hop_get_value_usage(current_hop, value)->output = true;
-    value->attrs = find_type_from_constraint(attr);
+    value->regclass = regclass;
 }
 
 static void constrain_output_reg_equal_to(int child)

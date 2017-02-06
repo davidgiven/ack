@@ -7,7 +7,7 @@ struct value
 {
 	struct ir* ir;
 	int subid;
-	uint32_t attrs;
+	int regclass;
 };
 
 extern uint32_t value_hash_function(void* key);

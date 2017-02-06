@@ -14,6 +14,7 @@
 #include "ircodes.h"
 #include "astring.h"
 #include "registers.h"
+#include "bitmap.h"
 
 static char rcsid[] = "$Id$";
 
@@ -1003,8 +1004,8 @@ static void emit_input_regs(Tree node, int* index)
 		if (node->attr)
 		{
 			uint32_t attr = 1<<node->attr->number;
-			print("%1data->constrain_input_reg(%d, 0x%x /* %s */);\n",
-				*index, attr, node->attr->name);
+			print("%1data->constrain_input_reg(%d, %P%s_RC);\n",
+				*index, node->attr->name);
 		}
 	}
 
@@ -1095,8 +1096,7 @@ static void emitinsndata(Rule rules)
 		print("static void %Pemitter_%d(const struct %Pemitter_data* data) {\n", r->ern);
 
 		if (r->attr)
-			print("%1data->constrain_output_reg(0x%x /* %s */);\n",
-				1<<r->attr->number, r->attr->name);
+			print("%1data->constrain_output_reg(%P%s_RC);\n", r->attr->name);
 
 		{
 			int index = 0;
@@ -1185,11 +1185,11 @@ static void emitinsndata(Rule rules)
 
 		print("%2&%Pemitter_%d,\n", r->ern);
 
-		print("%2%s,\n", r->lhs->is_fragment ? "true" : "false");
+		print("%2%s /* is_fragment */,\n", r->lhs->is_fragment ? "true" : "false");
 
 		{
 			int i;
-			uint32_t attrs = 0;
+			unsigned int* bitmap = bitmap_alloc(real_register_count);
 
 			for (i=0; i<r->constraints.count; i++)
 			{
@@ -1201,11 +1201,14 @@ static void emitinsndata(Rule rules)
 					if (!p)
 						yyerror("no such register attribute '%s'", c->left);
 
-					attrs |= 1<<(p->number);
+					bitmap_or(bitmap, real_register_count, p->bitmap);
 				}
 			}
 
-			print("%2%d, /* corruption attrs */\n", attrs);
+			print("%2{ ");
+			for (i=0; i<WORDS_FOR_BITMAP_SIZE(real_register_count); i++)
+				print("0x%x, ", bitmap[i]);
+			print("} /* corrupted registers */,\n");
 		}
 
 		print("%1},\n");

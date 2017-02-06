@@ -35,9 +35,9 @@ struct burm_emitter_data
     void (*emit_reg)(int child, int index);
     void (*emit_value)(int child);
     void (*emit_eoi)(void);
-    void (*constrain_input_reg)(int child, uint32_t attr);
+    void (*constrain_input_reg)(int child, int regclass);
     void (*constrain_input_reg_corrupted)(int child);
-    void (*constrain_output_reg)(uint32_t attr);
+    void (*constrain_output_reg)(int regclass);
     void (*constrain_output_reg_equal_to)(int child);
 };
 
@@ -48,7 +48,7 @@ struct burm_instruction_data
     const char* name;
     burm_emitter_t* emitter;
     bool is_fragment;
-    uint32_t corrupts;
+    burm_register_bitmap_t corrupts;
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];
