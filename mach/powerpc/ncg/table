@@ -162,7 +162,6 @@ TOKENS
 	LABEL_HI           = { ADDR adr; }            4    "hi16[" adr "]".
 	LABEL_HA           = { ADDR adr; }            4    "ha16[" adr "]".
 	LABEL_LO           = { ADDR adr; }            4    "lo16[" adr "]".
-	LABEL_STACK        = { GPR reg; ADDR adr; }   4.
 	LOCAL              = { INT off; }             4    ">>> BUG IN LOCAL".
 
 /* Allows us to use regvar() to refer to registers */
@@ -181,9 +180,10 @@ TOKENS
 
 /* Expression partial results */
 
-	SUM_RIS            = { GPR reg; INT offhi; }  4.
-	SUM_RC             = { GPR reg; INT off; }    4.
-	SUM_RR             = { GPR reg1; GPR reg2; }  4.
+	SUM_RIS     = { GPR reg; INT offhi; }  4.   /* reg + (offhi << 16) */
+	SUM_RC      = { GPR reg; INT off; }    4.   /* reg + off */
+	SUM_RL      = { GPR reg; ADDR adr; }   4.   /* reg + lo16[adr] */
+	SUM_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 + reg2 */
 
 	SEX_B              = { GPR reg; }             4.
 	SEX_H              = { GPR reg; }             4.
@@ -237,7 +237,7 @@ SETS
 	CONST_STACK     = CONST_N8000 + CONST_N7FFF_N0001 + CONST_0000_7FFF +
 	                  CONST_8000 + CONST_8001_FFFF + CONST_HZ + CONST_HL.
 
-	SUM_ALL            = SUM_RC + SUM_RR.
+	SUM_ALL            = SUM_RC + SUM_RL + SUM_RR.
 
 	SEX_ALL            = SEX_B + SEX_H.
 
@@ -420,12 +420,6 @@ MOVES
 		gen
 			lis %2, %1
 
-	from LABEL_STACK to GPR
-		gen
-			move {LABEL_HA, %1.adr}, %1.reg
-			addi %2, %1.reg, {LABEL_LO, %1.adr}
-
-
 /* Sign extension */
 
 	from SEX_B to GPR
@@ -449,6 +443,11 @@ MOVES
 		gen
 			COMMENT("move SUM_RC->GPR")
 			addi %2, %1.reg, {CONST, %1.off}
+
+	from SUM_RL to GPR
+		gen
+			COMMENT("move SUM_RL->GPR")
+			addi %2, %1.reg, {LABEL_LO, %1.adr}
 
 	from SUM_RR to GPR
 		gen
@@ -522,7 +521,6 @@ MOVES
 
 	from IND_RL_W to GPR
 		gen
-			move {LABEL_HA, %1.adr}, %1.reg
 			lwz %2, %1
 
 	from IND_RR_W to GPR
@@ -537,7 +535,6 @@ MOVES
 
 	from IND_RL_W to FSREG
 		gen
-			move {LABEL_HA, %1.adr}, %1.reg
 			lfs %2, %1
 
 	from IND_RR_W to FSREG
@@ -552,6 +549,10 @@ MOVES
 			COMMENT("move GPR->IND_RC_W")
 			stw %1, %2
 
+	from GPR to IND_RL_W
+		gen
+			stw %1, %2
+
 	from GPR to IND_RR_W
 		gen
 			COMMENT("move GPR->IND_RR_W")
@@ -560,6 +561,10 @@ MOVES
 	from FSREG to IND_RC_W
 		gen
 			COMMENT("move FSREG->IND_RC_W")
+			stfs %1, %2
+
+	from FSREG to IND_RL_W
+		gen
 			stfs %1, %2
 
 	from FSREG to IND_RR_W
@@ -735,12 +740,6 @@ STACKINGRULES
 	from CONST_STACK to STACK
 		gen
 			COMMENT("stack CONST_STACK")
-			move %1, RSCRATCH
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
-
-	from LABEL_STACK to STACK
-		gen
-			COMMENT("stack LABEL_STACK")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
@@ -1082,8 +1081,8 @@ PATTERNS
 			lae $1
 
 	pat lae                            /* Load address of external */
-		uses REG
-		yields {LABEL_STACK, %a, $1}
+		uses REG={LABEL_HA, $1}
+		yields {SUM_RL, %a, $1}
 
 	pat loe                            /* Load word external */
 		leaving
@@ -1111,20 +1110,16 @@ PATTERNS
 			ste $1
 
 	pat ine                             /* Increment external */
-		kills MEMORY
-		uses REG={LABEL, $1}, REG
-			gen
-				lwz %b, {IND_RC_W, %a, 0}
-				addi %b, %b, {CONST, 1}
-				stw %b, {IND_RC_W, %a, 0}
+		leaving
+			loe $1
+			inc
+			ste $1
 
 	pat dee                             /* Decrement external */
-		kills MEMORY
-		uses REG={LABEL, $1}, REG
-			gen
-				lwz %b, {IND_RC_W, %a, 0}
-				addi %b, %b, {CONST, 0-1}
-				stw %b, {IND_RC_W, %a, 0}
+		leaving
+			loe $1
+			dec
+			ste $1
 
 
 
@@ -1182,10 +1177,10 @@ PATTERNS
 	pat loi $1==INT32                  /* Load word indirect */
 		with GPR
 			yields {IND_RC_W, %1, 0}
-		with exact LABEL_STACK
-			yields {IND_RL_W, %1.reg, %1.adr}
 		with exact SUM_RC
 			yields {IND_RC_W, %1.reg, %1.off}
+		with exact SUM_RL
+			yields {IND_RL_W, %1.reg, %1.adr}
 		with exact SUM_RR
 			yields {IND_RR_W, %1.reg1, %1.reg2}
 
@@ -1265,20 +1260,14 @@ PATTERNS
 			kills MEMORY
 			gen
 				move %2, {IND_RC_W, %1, 0}
-		with LABEL_STACK REG
-			kills MEMORY
-			gen
-				move {LABEL_HA, %1.adr}, %1.reg
-				stw %2, {IND_RL_W, %1.reg, %1.adr}
-		with LABEL_STACK FSREG
-			kills MEMORY
-			gen
-				move {LABEL_HA, %1.adr}, %1.reg
-				stfs %2, {IND_RL_W, %1.reg, %1.adr}
 		with SUM_RR REG+FSREG
 			kills MEMORY
 			gen
 				move %2, {IND_RR_W, %1.reg1, %1.reg2}
+		with SUM_RL REG+FSREG
+			kills MEMORY
+			gen
+				move %2, {IND_RL_W, %1.reg, %1.adr}
 		with SUM_RC REG+FSREG
 			kills MEMORY
 			gen
@@ -1415,12 +1404,6 @@ PATTERNS
 		with REG CONST_STACK-CONST2-CONST_HZ
 			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
 			yields {SUM_RC, %a, los(%2.val)}
-		with exact CONST_STACK LABEL_STACK
-			uses reusing %2.reg, REG
-			yields {LABEL_STACK, %a, %2.adr+%1.val}
-		with exact LABEL_STACK CONST_STACK
-			uses reusing %1.reg, REG
-			yields {LABEL_STACK, %a, %1.adr+%2.val}
 
 	pat sbi $1==4                      /* Subtract word (second - top) */
 		with REG REG
@@ -1436,9 +1419,6 @@ PATTERNS
 		with CONST_STACK-CONST2_WHEN_NEG-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields {SUM_RC, %a, los(0-%1.val)}
-		with exact CONST_STACK LABEL_STACK
-			uses reusing %2.reg, REG
-			yields {LABEL_STACK, %a, %2.adr+(0-%1.val)}
 
 	pat ngi $1==4                      /* Negate word */
 		with REG
