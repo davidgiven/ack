@@ -7,6 +7,7 @@
  * Do not #include anything here.  Do it in mach/proto/as/comm0.h
  */
 
+void machload(item_t* item);
 void no_hl(void);
 word_t eval_hl(struct expr_t* expr, int token);
 void emit_hl(word_t in);

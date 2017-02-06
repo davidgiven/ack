@@ -20,11 +20,13 @@ register item_t *ip;
 #ifdef ASLD
 	register typ;
 
+	machload(ip);
 	typ = ip->i_type & S_TYP;
 	if ((typ -= S_MIN) < 0)		/* S_UND or S_ABS */
 		return(ip->i_valu);
 	return(ip->i_valu + sect[typ].s_base);
 #else
+	machload(ip);
 	if ((ip->i_type & S_TYP) == S_UND || (ip->i_type & S_COM)) {
 		if (pass == PASS_3) {
 			if (relonami != 0)

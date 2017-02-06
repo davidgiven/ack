@@ -5,21 +5,24 @@
  * certain specific opcodes.
  */
 
+static item_t *last_und_item;
+
 /* Info about the current hi16, ha16, or lo16 */
 static int hl_token;
 static expr_t hl_expr;
+static item_t* hl_item;             /* undefined symbol or NULL */
 
 /* Info about each hi16 or ha16 relocation */
 struct hirel {
+    expr_t          hr_expr;
     struct hirel*   hr_next;        /* next hirel in source order */
     struct hirel*   hr_inext;       /* next incomplete hirel */
-    expr_t          hr_expr;
-    valu_t          hr_relonami;
-    short           hr_token;       /* OP_HI or OP_HA */
-    short           hr_dottyp;      /* section */
+    item_t*         hr_item;        /* undefined symbol or NULL */
+    long            hr_lineno;
     ADDR_T          hr_hidot;       /* address of hi16/ha16 */
     ADDR_T          hr_lodot;       /* address of matching lo16 */
-    long            hr_lineno;
+    short           hr_dottyp;      /* section */
+    short           hr_token;       /* OP_HI or OP_HA */
 };
 static struct hirel* hr_head = NULL;
 static struct hirel* hr_tail = NULL;
@@ -30,6 +33,18 @@ static uint16_t* lo_set = NULL;
 static int lo_count2 = 0;           /* pass 2 */
 static int lo_count3 = 0;           /* pass 3 */
 
+
+static int is_und(int typ)
+{
+    return (typ & S_TYP) == S_UND || typ & S_COM;
+}
+
+void machload(item_t* item)
+{
+    if (is_und(item->i_type)) {
+        last_und_item = item;
+    }
+}
 
 void no_hl(void) {
     hl_token = 0;
@@ -44,6 +59,10 @@ word_t eval_hl(expr_t* expr, int token)
 
     hl_token = token;
     hl_expr = *expr;
+    if (is_und(expr->typ))
+        hl_item = last_und_item;
+    else
+        hl_item = NULL;
 
     switch (token) {
     case OP_HA:  /* ha16[expr] */
@@ -59,16 +78,15 @@ word_t eval_hl(expr_t* expr, int token)
         if (pass == PASS_3) {
             /* Get the hirel from emit_hl() PASS_2. */
             hr = hr_head;
-            if (DOTVAL != hr->hr_hidot)
-                abort();
+            if (hr && hr->hr_hidot == DOTVAL && hr->hr_dottyp == DOTTYP) {
+                /* For now, the lo16 must be in the next instruction. */
+                if (DOTVAL + 4 != hr->hr_lodot)
+                    serror("%s needs lo16 in next instruction",
+                           token == OP_HI ? "hi16" : "ha16");
 
-            /* For now, the lo16 must be in the next instruction. */
-            if (DOTVAL + 4 != hr->hr_lodot)
-                serror("%s needs lo16 in next instruction",
-                       token == OP_HI ? "hi16" : "ha16");
-
-            hr_head = hr->hr_next;
-            free(hr);
+                hr_head = hr->hr_next;
+                free(hr);
+            }
         }
         return hi;
     case OP_LO:  /* lo16[expr] */
@@ -90,7 +108,7 @@ static int hr_match(const struct hirel* hr, int und)
      */
     return (hr->hr_expr.typ == hl_expr.typ &&
             hr->hr_expr.val == hl_expr.val &&
-            (!und || hr->hr_relonami == relonami) &&
+            (!und || hr->hr_item == hl_item) &&
             hr->hr_dottyp == DOTTYP);
 }
 
@@ -124,15 +142,15 @@ void emit_hl(word_t in)
                 hr = malloc(sizeof(*hr));
                 if (!hr)
                     fatal("out of memory");
+                hr->hr_expr = hl_expr;
                 hr->hr_next = NULL;
                 hr->hr_inext = hr_ihead;
-                hr->hr_expr = hl_expr;
-                hr->hr_relonami = relonami;
-                hr->hr_token = hl_token;
-                hr->hr_dottyp = DOTTYP;
+                hr->hr_item = hl_item;
+                hr->hr_lineno = lineno;
                 hr->hr_hidot = DOTVAL;
                 hr->hr_lodot = 0;
-                hr->hr_lineno = lineno;
+                hr->hr_dottyp = DOTTYP;
+                hr->hr_token = hl_token;
 
                 /* Add it to end of main list. */
                 if (hr_tail) {
@@ -152,8 +170,7 @@ void emit_hl(word_t in)
             switch (pass) {
             case PASS_2:
                 /* Search for hi16 or ha16 to complete. */
-                und = ((hl_expr.typ & S_TYP) == S_UND ||
-                       (hl_expr.typ & S_COM));
+                und = is_und(hl_expr.typ);
                 hrlink = &hr_ihead;
                 while (hr = *hrlink) {
                     if (hr_match(hr, und)) {

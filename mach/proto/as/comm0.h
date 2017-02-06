@@ -70,6 +70,7 @@ _include	<string.h>
 
 #define	machstart(x)	/* nothing */
 #define	machfinish(x)	/* nothing */
+#define machload(x)     /* nothing */
 
 #define	SETBASE(sp)	((long)(sp)->s_base)
 

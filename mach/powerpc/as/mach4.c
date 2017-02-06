@@ -374,9 +374,12 @@ li32
 			emit4((14<<26) | ($1<<21) | (0<<16)  | val); /* addi */
 		else
 		{
-			newrelo($3.typ, RELOPPC | FIXUPFLAGS);
-			emit4((15<<26) | ($1<<21) | (0<<16)  | (val >> 16)); /* addis */
-			emit4((24<<26) | ($1<<21) | ($1<<16) | (val & 0xffff)); /* ori */
+			/* addis, ori */
+			word_t hi, lo;
+			hi = eval_hl(&$3, OP_HI);
+			emit_hl((15<<26) | ($1<<21) | (0<<16)  | hi);
+			lo = eval_hl(&$3, OP_LO);
+			emit_hl((24<<26) | ($1<<21) | ($1<<16) | lo);
 		}
 	}
 	;

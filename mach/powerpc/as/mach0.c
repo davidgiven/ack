@@ -26,7 +26,8 @@
 #define ALIGNSECT	4
 
 #undef machfinish
-/* machfinish() in mach5.c */
+#undef machload
+/* defined in mach5.c */
 
 #undef VALWIDTH
 #define VALWIDTH	8
