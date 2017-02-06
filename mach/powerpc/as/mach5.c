@@ -1,8 +1,8 @@
 /*
- * We use RELOPPC to relocate hi16[expr] or ha16[expr].  This requires
- * a matching lo16[expr] in the next instruction, because RELOPPC
- * handles a hi16/lo16 or ha16/lo16 pair.  RELOPPC only works with
- * certain specific opcodes.
+ * To relocate hi16[expr] or ha16[expr], we must find a matching
+ * lo16[expr] in a later instruction.  This is because RELOPPC needs a
+ * hi16/lo16 or ha16/lo16 pair.  Also, RELOPPC only works with certain
+ * specific opcodes.
  */
 
 static item_t *last_und_item;
@@ -53,6 +53,7 @@ void no_hl(void) {
 word_t eval_hl(expr_t* expr, int token)
 {
     struct hirel* hr;
+    ADDR_T distance;
     word_t val = expr->val;
     uint16_t hi = val >> 16;
     uint16_t lo = val & 0xffff;
@@ -63,6 +64,30 @@ word_t eval_hl(expr_t* expr, int token)
         hl_item = last_und_item;
     else
         hl_item = NULL;
+
+    if (pass == PASS_3) {
+        hr = hr_head;
+        if (hr && hr->hr_hidot == DOTVAL && hr->hr_dottyp == DOTTYP) {
+            /*
+             * We have a hirel from emit_hl() PASS_2.  Encode distance
+             * to the matching lo16 in top 6 bits of hi.
+             */
+            distance = hr->hr_lodot - DOTVAL;
+            if (distance & 0x0003)
+                serror("matching lo16 is misaligned");
+            if (distance & ~0x00fc)
+                serror("matching lo16 is too far away");
+            fit(fitx((int16_t)hi, 10));
+            hi = (distance << 8) | (hi & 0x03ff);
+
+            /* Remove hirel from list. */
+            hr_head = hr->hr_next;
+            free(hr);
+
+            /* No sign adjustment; linker will do it later. */
+            return hi;
+        }
+    }
 
     switch (token) {
     case OP_HA:  /* ha16[expr] */
@@ -75,19 +100,6 @@ word_t eval_hl(expr_t* expr, int token)
             hi++;
         /* FALLTHROUGH */
     case OP_HI:  /* hi16[expr] */
-        if (pass == PASS_3) {
-            /* Get the hirel from emit_hl() PASS_2. */
-            hr = hr_head;
-            if (hr && hr->hr_hidot == DOTVAL && hr->hr_dottyp == DOTTYP) {
-                /* For now, the lo16 must be in the next instruction. */
-                if (DOTVAL + 4 != hr->hr_lodot)
-                    serror("%s needs lo16 in next instruction",
-                           token == OP_HI ? "hi16" : "ha16");
-
-                hr_head = hr->hr_next;
-                free(hr);
-            }
-        }
         return hi;
     case OP_LO:  /* lo16[expr] */
         return lo;
@@ -176,6 +188,7 @@ void emit_hl(word_t in)
                     if (hr_match(hr, und)) {
                         /* Found hr, remove it from list. */
                         *hrlink = hr->hr_inext;
+                        hr->hr_inext = NULL;
                         break;
                     }
                     hrlink = &(hr->hr_inext);

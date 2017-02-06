@@ -129,44 +129,46 @@ static bool is_powerpc_memory_op(uint32_t opcode)
 	return false;
 }
 
-/* PowerPC fixups are complex as we need to patch up to the next two
- * instructions in one of several different ways, depending on what the
- * instructions area.
+static bool is_powerpc_ori(uint32_t opcode)
+{
+	return (opcode & 0xfc000000) == 0x60000000;
+}
+
+/* PowerPC fixups are complex as we need to patch one or two
+ * instructions in one of several different ways.
  */
 
 static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 {
-	uint32_t opcode1 = read4(addr+0, type);
-	uint32_t opcode2 = read4(addr+4, type);
+	uint32_t opcode1 = read4(addr, type);
+	uint32_t opcode2 = 0;
 
 	if ((opcode1 & 0xfc000000) == 0x48000000)
 	{
 		/* branch instruction */
 		return opcode1 & 0x03fffffd;
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
-	         ((opcode2 & 0xfc000000) == 0x60000000))
+	else if ((opcode1 & 0xfc1f0000) == 0x3c000000)
 	{
-		/* addis / ori instruction pair */
-		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
-	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
-	         is_powerpc_memory_op(opcode2))
-	{
-		/* addis / memoryop instruction pair */
-		uint16_t hi = opcode1 & 0xffff;
-		uint16_t lo = opcode2 & 0xffff;
+		/* addis, paired with a later instruction */
+		uint16_t distance, hi, lo;
 
-		/* Undo the sign adjustment (see mach/powerpc/as/mach5.c). */
+		distance = (opcode1 & 0xfc00) >> 8;
+		/* XXX addr + distance might be too big */
+		if (distance)
+			opcode2 = read4(addr + distance, type);
 
-		if (lo > 0x7fff)
-			hi--;
+		hi = opcode1 & 0x03ff;
+		lo = opcode2 & 0xffff;
+		if (hi & 0x0200)
+			hi |= 0xfc00;  /* sign extension */
 
-		return ((hi << 16) | lo);
+		if (is_powerpc_memory_op(opcode2) || is_powerpc_ori(opcode2))
+			return (hi << 16) | lo;
 	}
 
-	fatal("Don't know how to read from PowerPC fixup on instructions 0x%08x+0x%08x",
-		opcode1, opcode2);
+	fatal("Don't know how to read from PowerPC fixup on instructions 0x%08lx+0x%08lx",
+		(unsigned long)opcode1, (unsigned long)opcode2);
 }
 
 /*
@@ -283,15 +285,14 @@ static void put_vc4_valu(char* addr, uint32_t value)
 		assert(0 && "unrecognised VC4 instruction");
 }
 
-/* PowerPC fixups are complex as we need to patch up to the next two
- * instructions in one of several different ways, depending on what the
- * instructions area.
+/* PowerPC fixups are complex as we need to patch one or two
+ * instructions in one of several different ways.
  */
 
 static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 {
-	uint32_t opcode1 = read4(addr+0, type);
-	uint32_t opcode2 = read4(addr+4, type);
+	uint32_t opcode1 = read4(addr, type);
+	uint32_t opcode2 = 0;
 
 	if ((opcode1 & 0xfc000000) == 0x48000000)
 	{
@@ -299,36 +300,38 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 		uint32_t i = opcode1 & ~0x03fffffd;
 		i |= value & 0x03fffffd;
 		write4(i, addr, type);
+		return;
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
-	         ((opcode2 & 0xfc000000) == 0x60000000))
+	else if ((opcode1 & 0xfc1f0000) == 0x3c000000)
 	{
-		/* addis / ori instruction pair */
-		uint16_t hi = value >> 16;
-		uint16_t lo = value & 0xffff;
+		/* addis, paired with a later instruction */
+		uint16_t distance, hi, lo;
+		bool adj;
 
-		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
-		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
-	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
-	         is_powerpc_memory_op(opcode2))
-	{
-		/* addis / memoryop instruction pair */
-		uint16_t hi = value >> 16;
-		uint16_t lo = value & 0xffff;
+		distance = (opcode1 & 0xfc00) >> 8;
+		/* XXX addr + distance might be too big */
+		if (distance)
+			opcode2 = read4(addr + distance, type);
+
+		hi = value >> 16;
+		lo = value & 0xffff;
 
 		/* Apply the sign adjustment (see mach/powerpc/as/mach5.c). */
-
-		if (lo > 0x7fff)
+		adj = is_powerpc_memory_op(opcode2);
+		if (adj && lo > 0x7fff)
 			hi++;
 
-		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
-		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
+		if (adj || is_powerpc_ori(opcode2)) {
+			opcode1 = (opcode1 & 0xffff0000) | hi;
+			opcode2 = (opcode2 & 0xffff0000) | lo;
+			write4(opcode1, addr, type);
+			write4(opcode2, addr + distance, type);
+			return;
+		}
 	}
 
-	else
-		fatal("Don't know how to write a PowerPC fixup to instructions 0x%08x+0x%08x",
-			opcode1, opcode2);
+	fatal("Don't know how to write a PowerPC fixup to instructions 0x%08lx+0x%08lx",
+		(unsigned long)opcode1, (unsigned long)opcode2);
 }
 
 /*
