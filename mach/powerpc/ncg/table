@@ -189,15 +189,19 @@ TOKENS
 	SEX_H              = { GPR reg; }             4.
 
 	IND_RC_B    = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RL_B    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
 	IND_RR_B    = { GPR reg1; GPR reg2; }  4.
 	IND_RC_H    = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RL_H    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
 	IND_RR_H    = { GPR reg1; GPR reg2; }  4.
 	IND_RC_H_S  = { GPR reg; INT off; }    4    off "(" reg ")".
+	IND_RL_H_S  = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
 	IND_RR_H_S  = { GPR reg1; GPR reg2; }  4.
 	IND_RC_W    = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RL_W    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
 	IND_RR_W    = { GPR reg1; GPR reg2; }  4.
 	IND_RC_D    = { GPR reg; INT off; }    8    off "(" reg ")".
+	IND_RL_D    = { GPR reg; ADDR adr; }   8    "lo16[" adr "](" reg ")".
 	IND_RR_D    = { GPR reg1; GPR reg2; }  8.
 
 	NOT_R              = { GPR reg; }             4.
@@ -244,11 +248,11 @@ SETS
 	LOGICAL_ALL        = NOT_R + AND_RR + OR_RR + OR_RC + XOR_RR +
 	                     XOR_RC.
 
-	/* indirect values */
-	IND_ALL_B          = IND_RC_B + IND_RR_B.
-	IND_ALL_H          = IND_RC_H + IND_RR_H + IND_RC_H_S + IND_RR_H_S.
+	IND_ALL_B          = IND_RC_B + IND_RL_B + IND_RR_B.
+	IND_ALL_H          = IND_RC_H + IND_RL_H + IND_RR_H +
+	                     IND_RC_H_S + IND_RL_H_S + IND_RR_H_S.
 	IND_ALL_W          = IND_RC_W + IND_RL_W + IND_RR_W.
-	IND_ALL_D          = IND_RC_D + IND_RR_D.
+	IND_ALL_D          = IND_RC_D + IND_RL_D + IND_RR_D.
 	IND_ALL_BHW        = IND_ALL_B + IND_ALL_H + IND_ALL_W.
 
 	/* anything killed by sti (store indirect) */
@@ -326,17 +330,17 @@ INSTRUCTIONS
   frsp            FSREG:wo, FREG:ro cost(4, 5).
   fsub            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
-  lbz             GPR:wo, IND_RC_B:ro cost(4, 3).
+  lbz             GPR:wo, IND_RC_B+IND_RL_B:ro cost(4, 3).
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lfd             FPR:wo, IND_RC_D:ro cost(4, 5).
+  lfd             FPR:wo, IND_RC_D+IND_RL_D:ro cost(4, 5).
   lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
   lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
   lfs             FSREG:wo, IND_RC_W+IND_RL_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
   lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
-  lha             GPR:wo, IND_RC_H_S:ro cost(4, 3).
+  lha             GPR:wo, IND_RC_H_S+IND_RL_H_S:ro cost(4, 3).
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lhz             GPR:wo, IND_RC_H:ro cost(4, 3).
+  lhz             GPR:wo, IND_RC_H+IND_RL_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
@@ -362,15 +366,15 @@ INSTRUCTIONS
   sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
   srawi           GPR:wo, GPR:ro, CONST:ro cost(4, 2).
   srw             GPR:wo, GPR:ro, GPR:ro.
-  stb             GPR:ro, IND_RC_B:rw cost(4, 3).
+  stb             GPR:ro, IND_RC_B+IND_RL_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stfd            FPR:ro, IND_RC_D:rw cost(4, 4).
+  stfd            FPR:ro, IND_RC_D+IND_RL_D:rw cost(4, 4).
   stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
   stfs            FSREG:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
   stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
-  sth             GPR:ro, IND_RC_H:rw cost(4, 3).
+  sth             GPR:ro, IND_RC_H+IND_RL_H:rw cost(4, 3).
   sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stw             GPR:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
@@ -440,7 +444,7 @@ MOVES
 
 /* Read byte */
 
-	from IND_RC_B to GPR
+	from IND_RC_B+IND_RL_B to GPR
 		gen lbz %2, %1
 
 	from IND_RR_B to GPR
@@ -448,7 +452,7 @@ MOVES
 
 /* Write byte */
 
-	from GPR to IND_RC_B
+	from GPR to IND_RC_B+IND_RL_B
 		gen stb %1, %2
 
 	from GPR to IND_RR_B
@@ -456,13 +460,13 @@ MOVES
 
 /* Read halfword (short) */
 
-	from IND_RC_H to GPR
+	from IND_RC_H+IND_RL_H to GPR
 		gen lhz %2, %1
 
 	from IND_RR_H to GPR
 		gen lhzx %2, %1.reg1, %1.reg2
 
-	from IND_RC_H_S to GPR
+	from IND_RC_H_S+IND_RL_H_S to GPR
 		gen lha %2, %1
 
 	from IND_RR_H_S to GPR
@@ -470,7 +474,7 @@ MOVES
 
 /* Write halfword */
 
-	from GPR to IND_RC_H
+	from GPR to IND_RC_H+IND_RL_H
 		gen sth %1, %2
 
 	from GPR to IND_RR_H
@@ -478,19 +482,13 @@ MOVES
 
 /* Read word */
 
-	from IND_RC_W to GPR
-		gen lwz %2, %1
-
-	from IND_RL_W to GPR
+	from IND_RC_W+IND_RL_W to GPR
 		gen lwz %2, %1
 
 	from IND_RR_W to GPR
 		gen lwzx %2, %1.reg1, %1.reg2
 
-	from IND_RC_W to FSREG
-		gen lfs %2, %1
-
-	from IND_RL_W to FSREG
+	from IND_RC_W+IND_RL_W to FSREG
 		gen lfs %2, %1
 
 	from IND_RR_W to FSREG
@@ -498,19 +496,13 @@ MOVES
 
 /* Write word */
 
-	from GPR to IND_RC_W
-		gen stw %1, %2
-
-	from GPR to IND_RL_W
+	from GPR to IND_RC_W+IND_RL_W
 		gen stw %1, %2
 
 	from GPR to IND_RR_W
 		gen stwx %1, %2.reg1, %2.reg2
 
-	from FSREG to IND_RC_W
-		gen stfs %1, %2
-
-	from FSREG to IND_RL_W
+	from FSREG to IND_RC_W+IND_RL_W
 		gen stfs %1, %2
 
 	from FSREG to IND_RR_W
@@ -518,16 +510,16 @@ MOVES
 
 /* Read double */
 
-	from IND_RC_D to FPR
-		gen lfd %2, {IND_RC_D, %1.reg, %1.off}
+	from IND_RC_D+IND_RL_D to FPR
+		gen lfd %2, %1
 
 	from IND_RR_D to FPR
 		gen lfdx %2, %1.reg1, %1.reg2
 
 /* Write double */
 
-	from FPR to IND_RC_D
-		gen stfd %1, {IND_RC_D, %2.reg, %2.off}
+	from FPR to IND_RC_D+IND_RL_D
+		gen stfd %1, %2
 
 	from FPR to IND_RR_D
 		gen stfdx %1, %2.reg1, %2.reg2
@@ -1018,6 +1010,8 @@ PATTERNS
 			yields {IND_RC_B, %1, 0}
 		with exact SUM_RC
 			yields {IND_RC_B, %1.reg, %1.off}
+		with exact SUM_RL
+			yields {IND_RL_B, %1.reg, %1.adr}
 		with exact SUM_RR
 			yields {IND_RR_B, %1.reg1, %1.reg2}
 
@@ -1027,6 +1021,8 @@ PATTERNS
 			yields {IND_RC_H_S, %1, 0}
 		with exact SUM_RC
 			yields {IND_RC_H_S, %1.reg, %1.off}
+		with exact SUM_RL
+			yields {IND_RL_H_S, %1.reg, %1.adr}
 		with exact SUM_RR
 			yields {IND_RR_H_S, %1.reg1, %1.reg2}
 
@@ -1035,6 +1031,8 @@ PATTERNS
 			yields {IND_RC_H, %1, 0}
 		with exact SUM_RC
 			yields {IND_RC_H, %1.reg, %1.off}
+		with exact SUM_RL
+			yields {IND_RL_H, %1.reg, %1.adr}
 		with exact SUM_RR
 			yields {IND_RR_H, %1.reg1, %1.reg2}
 
@@ -1053,6 +1051,8 @@ PATTERNS
 			yields {IND_RC_D, %1, 0}
 		with exact SUM_RC
 			yields {IND_RC_D, %1.reg, %1.off}
+		with exact SUM_RL
+			yields {IND_RL_D, %1.reg, %1.adr}
 		with exact SUM_RR
 			yields {IND_RR_D, %1.reg1, %1.reg2}
 
@@ -1074,6 +1074,9 @@ PATTERNS
 		with SUM_RC REG
 			kills MEMORY
 			gen move %2, {IND_RC_B, %1.reg, %1.off}
+		with SUM_RL REG
+			kills MEMORY
+			gen move %2, {IND_RL_B, %1.reg, %1.adr}
 		with SUM_RR REG
 			kills MEMORY
 			gen move %2, {IND_RR_B, %1.reg1, %1.reg2}
@@ -1085,6 +1088,9 @@ PATTERNS
 		with SUM_RC REG
 			kills MEMORY
 			gen move %2, {IND_RC_H, %1.reg, %1.off}
+		with SUM_RL REG
+			kills MEMORY
+			gen move %2, {IND_RL_H, %1.reg, %1.adr}
 		with SUM_RR REG
 			kills MEMORY
 			gen move %2, {IND_RR_H, %1.reg1, %1.reg2}
@@ -1110,6 +1116,9 @@ PATTERNS
 		with SUM_RC FREG
 			kills MEMORY
 			gen move %2, {IND_RC_D, %1.reg, %1.off}
+		with SUM_RL FREG
+			kills MEMORY
+			gen move %2, {IND_RL_D, %1.reg, %1.adr}
 		with SUM_RR FREG
 			kills MEMORY
 			gen move %2, {IND_RR_D, %1.reg1, %1.reg2}
