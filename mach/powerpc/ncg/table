@@ -28,7 +28,6 @@ PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 #define his(n) ((hi(n) + (lo(n)>>15)) & 0xFFFF)
 
 
-
 PROPERTIES
 
 	GPR             /* any GPR */
@@ -49,6 +48,7 @@ PROPERTIES
 	FPR8(8)  FPR9(8)  FPR10(8) FPR11(8) FPR12(8) FPR13(8) FPR14(8) FPR15(8)
 	FPR16(8) FPR17(8) FPR18(8) FPR19(8) FPR20(8) FPR21(8) FPR22(8) FPR23(8)
 	FPR24(8) FPR25(8) FPR26(8) FPR27(8) FPR28(8) FPR29(8) FPR30(8) FPR31(8)
+
 
 REGISTERS
 
@@ -255,7 +255,7 @@ SETS
 	MEMORY             = IND_ALL_BHW + IND_ALL_D.
 
 	/* any stack token that we can easily move to GPR */
-	ANY_BHW            = REG + CONST_STACK + LABEL + SEX_ALL +
+	ANY_BHW            = REG + CONST_STACK + SEX_ALL +
 	                     SUM_ALL + IND_ALL_BHW + LOGICAL_ALL.
 
 
@@ -338,7 +338,6 @@ INSTRUCTIONS
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lhz             GPR:wo, IND_RC_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  li32            GPR:wo, CONST:ro cost(8, 2).
   lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwz             GPR:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
@@ -354,6 +353,7 @@ INSTRUCTIONS
   ori             GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
+    orX_readonly "or." GPR:ro:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
     extlwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
@@ -382,13 +382,10 @@ INSTRUCTIONS
   comment "!"             LABEL:ro cost(0, 0).
 
 
-
 MOVES
 
 	from GPR to GPR
-		gen
-			COMMENT("move GPR->GPR")
-			or %2, %1, %1
+		gen or %2, %1, %1
 
 /* Constants */
 
@@ -417,226 +414,149 @@ MOVES
 			ori %2, %2, {LABEL_LO, %1.adr}
 
 	from LABEL_HA to GPR
-		gen
-			lis %2, %1
+		gen lis %2, %1
 
 /* Sign extension */
 
 	from SEX_B to GPR
-		gen
-			COMMENT("move SEX_B->GPR")
-			extsb %2, %1.reg
+		gen extsb %2, %1.reg
 
 	from SEX_H to GPR
-		gen
-			COMMENT("move SEX_H->GPR")
-			extsh %2, %1.reg
+		gen extsh %2, %1.reg
 
 /* Register + something */
 
 	from SUM_RIS to GPR
-		gen
-			COMMENT("move SUM_RIS->GPR")
-			addis %2, %1.reg, {CONST, %1.offhi}
+		gen addis %2, %1.reg, {CONST, %1.offhi}
 
 	from SUM_RC to GPR
-		gen
-			COMMENT("move SUM_RC->GPR")
-			addi %2, %1.reg, {CONST, %1.off}
+		gen addi %2, %1.reg, {CONST, %1.off}
 
 	from SUM_RL to GPR
-		gen
-			COMMENT("move SUM_RL->GPR")
-			addi %2, %1.reg, {LABEL_LO, %1.adr}
+		gen addi %2, %1.reg, {LABEL_LO, %1.adr}
 
 	from SUM_RR to GPR
-		gen
-			COMMENT("move SUM_RR->GPR")
-			add %2, %1.reg1, %1.reg2
+		gen add %2, %1.reg1, %1.reg2
 
 /* Read byte */
 
 	from IND_RC_B to GPR
-		gen
-			COMMENT("move IND_RC_B->GPR")
-			lbz %2, %1
+		gen lbz %2, %1
 
 	from IND_RR_B to GPR
-		gen
-			COMMENT("move IND_RR_B->GPR")
-			lbzx %2, %1.reg1, %1.reg2
+		gen lbzx %2, %1.reg1, %1.reg2
 
 /* Write byte */
 
 	from GPR to IND_RC_B
-		gen
-			COMMENT("move GPR->IND_RC_B")
-			stb %1, %2
+		gen stb %1, %2
 
 	from GPR to IND_RR_B
-		gen
-			COMMENT("move GPR->IND_RR_B")
-			stbx %1, %2.reg1, %2.reg2
+		gen stbx %1, %2.reg1, %2.reg2
 
 /* Read halfword (short) */
 
 	from IND_RC_H to GPR
-		gen
-			COMMENT("move IND_RC_H->GPR")
-			lhz %2, %1
+		gen lhz %2, %1
 
 	from IND_RR_H to GPR
-		gen
-			COMMENT("move IND_RR_H->GPR")
-			lhzx %2, %1.reg1, %1.reg2
+		gen lhzx %2, %1.reg1, %1.reg2
 
 	from IND_RC_H_S to GPR
-		gen
-			COMMENT("move IND_RC_H_S->GPR")
-			lha %2, %1
+		gen lha %2, %1
 
 	from IND_RR_H_S to GPR
-		gen
-			COMMENT("move IND_RR_H_S->GPR")
-			lhax %2, %1.reg1, %1.reg2
+		gen lhax %2, %1.reg1, %1.reg2
 
 /* Write halfword */
 
 	from GPR to IND_RC_H
-		gen
-			COMMENT("move GPR->IND_RC_H")
-			sth %1, %2
+		gen sth %1, %2
 
 	from GPR to IND_RR_H
-		gen
-			COMMENT("move GPR->IND_RR_H")
-			sthx %1, %2.reg1, %2.reg2
+		gen sthx %1, %2.reg1, %2.reg2
 
 /* Read word */
 
 	from IND_RC_W to GPR
-		gen
-			COMMENT("move IND_RC_W->GPR")
-			lwz %2, %1
+		gen lwz %2, %1
 
 	from IND_RL_W to GPR
-		gen
-			lwz %2, %1
+		gen lwz %2, %1
 
 	from IND_RR_W to GPR
-		gen
-			COMMENT("move IND_RR_W->GPR")
-			lwzx %2, %1.reg1, %1.reg2
+		gen lwzx %2, %1.reg1, %1.reg2
 
 	from IND_RC_W to FSREG
-		gen
-			COMMENT("move IND_RC_W->FSREG")
-			lfs %2, %1
+		gen lfs %2, %1
 
 	from IND_RL_W to FSREG
-		gen
-			lfs %2, %1
+		gen lfs %2, %1
 
 	from IND_RR_W to FSREG
-		gen
-			COMMENT("move IND_RR_W->FSREG")
-			lfsx %2, %1.reg1, %1.reg2
+		gen lfsx %2, %1.reg1, %1.reg2
 
 /* Write word */
 
 	from GPR to IND_RC_W
-		gen
-			COMMENT("move GPR->IND_RC_W")
-			stw %1, %2
+		gen stw %1, %2
 
 	from GPR to IND_RL_W
-		gen
-			stw %1, %2
+		gen stw %1, %2
 
 	from GPR to IND_RR_W
-		gen
-			COMMENT("move GPR->IND_RR_W")
-			stwx %1, %2.reg1, %2.reg2
+		gen stwx %1, %2.reg1, %2.reg2
 
 	from FSREG to IND_RC_W
-		gen
-			COMMENT("move FSREG->IND_RC_W")
-			stfs %1, %2
+		gen stfs %1, %2
 
 	from FSREG to IND_RL_W
-		gen
-			stfs %1, %2
+		gen stfs %1, %2
 
 	from FSREG to IND_RR_W
-		gen
-			COMMENT("move FSREG->IND_RR_W")
-			stfsx %1, %2.reg1, %2.reg2
+		gen stfsx %1, %2.reg1, %2.reg2
 
 /* Read double */
 
 	from IND_RC_D to FPR
-		gen
-			COMMENT("move IND_RC_D->FPR")
-			lfd %2, {IND_RC_D, %1.reg, %1.off}
+		gen lfd %2, {IND_RC_D, %1.reg, %1.off}
 
 	from IND_RR_D to FPR
-		gen
-			COMMENT("move IND_RR_D->FPR")
-			lfdx %2, %1.reg1, %1.reg2
+		gen lfdx %2, %1.reg1, %1.reg2
 
 /* Write double */
 
 	from FPR to IND_RC_D
-		gen
-			COMMENT("move FPR->IND_RC_D")
-			stfd %1, {IND_RC_D, %2.reg, %2.off}
+		gen stfd %1, {IND_RC_D, %2.reg, %2.off}
 
 	from FPR to IND_RR_D
-		gen
-			COMMENT("move FPR->IND_RR_W")
-			stfdx %1, %2.reg1, %2.reg2
+		gen stfdx %1, %2.reg1, %2.reg2
 
 /* Logicals */
 
 	from NOT_R to GPR
-		gen
-			COMMENT("move NOT_R->GPR")
-			nor %2, %1.reg, %1.reg
+		gen nor %2, %1.reg, %1.reg
 
 	from AND_RR to GPR
-		gen
-			COMMENT("move AND_RR->GPR")
-			and %2, %1.reg1, %1.reg2
+		gen and %2, %1.reg1, %1.reg2
 
 	from OR_RR to GPR
-		gen
-			COMMENT("move OR_RR->GPR")
-			or %2, %1.reg1, %1.reg2
+		gen or %2, %1.reg1, %1.reg2
 
 	from OR_RIS to GPR
-		gen
-			COMMENT("move OR_RIS->GPR")
-			oris %2, %1.reg, {CONST, %1.valhi}
+		gen oris %2, %1.reg, {CONST, %1.valhi}
 
 	from OR_RC to GPR
-		gen
-			COMMENT("move OR_RC->GPR")
-			ori %2, %1.reg, {CONST, %1.val}
+		gen ori %2, %1.reg, {CONST, %1.val}
 
 	from XOR_RR to GPR
-		gen
-			COMMENT("move XOR_RR->GPR")
-			xor %2, %1.reg1, %1.reg2
+		gen xor %2, %1.reg1, %1.reg2
 
 	from XOR_RIS to GPR
-		gen
-			COMMENT("move XOR_RIS->GPR")
-			xoris %2, %1.reg, {CONST, %1.valhi}
+		gen xoris %2, %1.reg, {CONST, %1.valhi}
 
 	from XOR_RC to GPR
-		gen
-			COMMENT("move XOR_RC->GPR")
-			xori %2, %1.reg, {CONST, %1.val}
+		gen xori %2, %1.reg, {CONST, %1.val}
 
 /* Conditions */
 
@@ -707,16 +627,17 @@ MOVES
    an expression) as a register constant. */
 
 	from ANY_BHW to GPRE
-		gen
-			move %1, %2.reg
+		gen move %1, %2.reg
 
 
 TESTS
 
+	/* Given orX %1, %1, %1, ncgg says, "Instruction destroys %1,
+	 * not allowed here".  We use orX_readonly to trick ncgg.
+	 */
 	to test GPR
 		gen
-			orX RSCRATCH, %1, %1
-
+			orX_readonly %1, %1, %1
 
 
 STACKINGRULES
@@ -787,24 +708,10 @@ STACKINGRULES
 
 COERCIONS
 
-	from REG
+	from ANY_BHW
 		uses REG
 		gen
-			COMMENT("coerce REG->REG")
-			move %1, %a
-		yields %a
-
-	from CONST + CONST_STACK
-		uses REG
-		gen
-			COMMENT("coerce CONST->REG")
-			move %1, %a
-		yields %a
-
-	from LABEL
-		uses REG
-		gen
-			COMMENT("coerce LABEL->REG")
+			COMMENT("coerce ANY_BHW->REG")
 			move %1, %a
 		yields %a
 
@@ -823,26 +730,6 @@ COERCIONS
 			lwz %a.1, {IND_RC_W, SP, 0}
 			lwz %a.2, {IND_RC_W, SP, 4}
 			addi SP, SP, {CONST, 8}
-		yields %a
-
-	from SEX_B
-		uses REG
-		gen
-			COMMENT("coerce SEX_B->REG")
-			extsb %a, %1.reg
-		yields %a
-
-	from SEX_H
-		uses REG
-		gen
-			COMMENT("coerce SEX_H->REG")
-			extsh %a, %1.reg
-		yields %a
-
-	from SUM_ALL + LOGICAL_ALL
-		uses REG
-		gen
-			move %1, %a
 		yields %a
 
 	from FSREG
@@ -871,12 +758,6 @@ COERCIONS
 			COMMENT("coerce STACK->FSREG")
 			lfs %a, {IND_RC_W, SP, 0}
 			addi SP, SP, {CONST, 4}
-		yields %a
-
-	from IND_ALL_BHW
-		uses REG
-		gen
-			move %1, %a
 		yields %a
 
 	from IND_ALL_W
@@ -958,18 +839,6 @@ PATTERNS
 
 /* Type conversions */
 
-	pat loc loc cii loc loc cii $1==$4 && $2==$5 /* madness, generated by the C compiler */
-		leaving
-			loc $1
-			loc $2
-			cii
-
-	pat loc loc cii loc loc cii $2==INT32 && $5==INT32 && $4<$2 /* madness, generated by the C compiler */
-		leaving
-			loc $4
-			loc $5
-			cii
-
 	pat loc loc ciu                    /* signed X -> unsigned X */
 		leaving
 			loc $1
@@ -992,15 +861,12 @@ PATTERNS
 		/* nop */
 
 	pat loc loc cii $1==INT8 && $2==INT32 /* signed char -> signed int */
-		with GPR
+		with REG
 			yields {SEX_B, %1}
 
 	pat loc loc cii $1==2 && $2==4     /* signed char -> signed short */
-		with GPR
+		with REG
 			yields {SEX_H, %1}
-
-
-
 
 
 /* Local variables */
@@ -1122,7 +988,6 @@ PATTERNS
 			ste $1
 
 
-
 /* Structures */
 
 	pat lof                            /* Load word offsetted */
@@ -1146,36 +1011,35 @@ PATTERNS
 			sti INT64
 
 
-
 /* Loads and stores */
 
 	pat loi $1==INT8                   /* Load byte indirect */
-		with GPR
+		with REG
 			yields {IND_RC_B, %1, 0}
-		with SUM_RR
-			yields {IND_RR_B, %1.reg1, %1.reg2}
-		with SUM_RC
+		with exact SUM_RC
 			yields {IND_RC_B, %1.reg, %1.off}
+		with exact SUM_RR
+			yields {IND_RR_B, %1.reg1, %1.reg2}
 
 	pat loi loc loc cii $1==INT16 && $2==INT16 && $3==INT32
 	/* Load half-word indirect and sign extend */
-		with GPR
+		with REG
 			yields {IND_RC_H_S, %1, 0}
-		with SUM_RR
-			yields {IND_RR_H_S, %1.reg1, %1.reg2}
-		with SUM_RC
+		with exact SUM_RC
 			yields {IND_RC_H_S, %1.reg, %1.off}
+		with exact SUM_RR
+			yields {IND_RR_H_S, %1.reg1, %1.reg2}
 
 	pat loi $1==INT16                  /* Load half-word indirect */
-		with GPR
+		with REG
 			yields {IND_RC_H, %1, 0}
-		with SUM_RR
-			yields {IND_RR_H, %1.reg1, %1.reg2}
-		with SUM_RC
+		with exact SUM_RC
 			yields {IND_RC_H, %1.reg, %1.off}
+		with exact SUM_RR
+			yields {IND_RR_H, %1.reg1, %1.reg2}
 
 	pat loi $1==INT32                  /* Load word indirect */
-		with GPR
+		with REG
 			yields {IND_RC_W, %1, 0}
 		with exact SUM_RC
 			yields {IND_RC_W, %1.reg, %1.off}
@@ -1185,11 +1049,11 @@ PATTERNS
 			yields {IND_RR_W, %1.reg1, %1.reg2}
 
 	pat loi $1==INT64                  /* Load double-word indirect */
-		with GPR
+		with REG
 			yields {IND_RC_D, %1, 0}
-		with SUM_RC
+		with exact SUM_RC
 			yields {IND_RC_D, %1.reg, %1.off}
-		with SUM_RR
+		with exact SUM_RR
 			yields {IND_RR_D, %1.reg1, %1.reg2}
 
 	pat loi                            /* Load arbitrary size */
@@ -1204,88 +1068,51 @@ PATTERNS
 				bl {LABEL, ".los"}
 
 	pat sti $1==INT8                   /* Store byte indirect */
-		with GPR GPR
+		with REG REG
 			kills MEMORY
-			gen
-				stb %2, {IND_RC_B, %1, 0}
-		with SUM_RR GPR
+			gen move %2, {IND_RC_B, %1, 0}
+		with SUM_RC REG
 			kills MEMORY
-			gen
-				stbx %2, %1.reg1, %1.reg2
-		with SUM_RC GPR
+			gen move %2, {IND_RC_B, %1.reg, %1.off}
+		with SUM_RR REG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_B, %1.reg, %1.off}
-		with GPR SEX_B
-			kills MEMORY
-			gen
-				stb %2.reg, {IND_RC_B, %1, 0}
-		with SUM_RR SEX_B
-			kills MEMORY
-			gen
-				stbx %2.reg, %1.reg1, %1.reg2
-		with SUM_RC SEX_B
-			kills MEMORY
-			gen
-				move %2.reg, {IND_RC_B, %1.reg, %1.off}
+			gen move %2, {IND_RR_B, %1.reg1, %1.reg2}
 
 	pat sti $1==INT16                  /* Store half-word indirect */
-		with GPR GPR
+		with REG REG
 			kills MEMORY
-			gen
-				sth %2, {IND_RC_H, %1, 0}
-		with SUM_RR GPR
+			gen move %2, {IND_RC_H, %1, 0}
+		with SUM_RC REG
 			kills MEMORY
-			gen
-				sthx %2, %1.reg1, %1.reg2
-		with SUM_RC GPR
+			gen move %2, {IND_RC_H, %1.reg, %1.off}
+		with SUM_RR REG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_H, %1.reg, %1.off}
-		with GPR SEX_H
-			kills MEMORY
-			gen
-				sth %2.reg, {IND_RC_H, %1, 0}
-		with SUM_RR SEX_H
-			kills MEMORY
-			gen
-				sthx %2.reg, %1.reg1, %1.reg2
-		with SUM_RC SEX_H
-			kills MEMORY
-			gen
-				move %2.reg, {IND_RC_H, %1.reg, %1.off}
+			gen move %2, {IND_RR_H, %1.reg1, %1.reg2}
 
 	pat sti $1==INT32                  /* Store word indirect */
 		with REG REG+FSREG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_W, %1, 0}
-		with SUM_RR REG+FSREG
-			kills MEMORY
-			gen
-				move %2, {IND_RR_W, %1.reg1, %1.reg2}
-		with SUM_RL REG+FSREG
-			kills MEMORY
-			gen
-				move %2, {IND_RL_W, %1.reg, %1.adr}
+			gen move %2, {IND_RC_W, %1, 0}
 		with SUM_RC REG+FSREG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_W, %1.reg, %1.off}
+			gen move %2, {IND_RC_W, %1.reg, %1.off}
+		with SUM_RL REG+FSREG
+			kills MEMORY
+			gen move %2, {IND_RL_W, %1.reg, %1.adr}
+		with SUM_RR REG+FSREG
+			kills MEMORY
+			gen move %2, {IND_RR_W, %1.reg1, %1.reg2}
 
 	pat sti $1==INT64                  /* Store double-word indirect */
 		with REG FREG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_D, %1, 0}
-		with SUM_RR FREG
-			kills MEMORY
-			gen
-				move %2, {IND_RR_D, %1.reg1, %1.reg2}
+			gen move %2, {IND_RC_D, %1, 0}
 		with SUM_RC FREG
 			kills MEMORY
-			gen
-				move %2, {IND_RC_D, %1.reg, %1.off}
+			gen move %2, {IND_RC_D, %1.reg, %1.off}
+		with SUM_RR FREG
+			kills MEMORY
+			gen move %2, {IND_RR_D, %1.reg1, %1.reg2}
 		/*
 		 * This pattern would be too slow:
 		 *   with REG REG REG
@@ -1329,7 +1156,6 @@ PATTERNS
 			kills ALL
 			gen
 				bl {LABEL, ".sts"}
-
 
 
 /* Arithmetic wrappers */
@@ -1380,7 +1206,6 @@ PATTERNS
 	pat slu                            /* Shift left unsigned by variable amount */
 		leaving
 			sli $1
-
 
 
 /* Word arithmetic */
@@ -1467,34 +1292,34 @@ PATTERNS
 			yields %a
 
 	pat and $1==4                      /* AND word */
-		with GPR NOT_R
+		with REG NOT_R
 			uses reusing %1, REG
 			gen
 				andc %a, %1, %2.reg
 			yields %a
-		with NOT_R GPR
+		with NOT_R REG
 			uses reusing %1, REG
 			gen
 				andc %a, %2, %1.reg
 			yields %a
-		with GPR GPR
+		with REG REG
 			yields {AND_RR, %1, %2}
-		with GPR UCONST2
+		with REG UCONST2
 			uses reusing %1, REG
 			gen
 				andiX %a, %1, {CONST, %2.val}
 			yields %a
-		with UCONST2 GPR
+		with UCONST2 REG
 			uses reusing %2, REG
 			gen
 				andiX %a, %2, {CONST, %1.val}
 			yields %a
-		with GPR CONST_HZ
+		with REG CONST_HZ
 			uses reusing %1, REG
 			gen
 				andisX %a, %1, {CONST, hi(%2.val)}
 			yields %a
-		with CONST_HZ GPR
+		with CONST_HZ REG
 			uses reusing %2, REG
 			gen
 				andisX %a, %2, {CONST, hi(%1.val)}
@@ -1592,7 +1417,7 @@ PATTERNS
 			gen
 				eqv %a, %1.reg1, %1.reg2
 			yields %a
-		with GPR
+		with REG
 			yields {NOT_R, %1}
 
 	pat com defined($1)                /* NOT set */
@@ -1614,36 +1439,36 @@ PATTERNS
 			cal ".zer"
 
 	pat sli $1==4                      /* Shift left (second << top) */
-		with CONST_STACK GPR
+		with CONST_STACK REG
 			uses reusing %2, REG
 			gen
 				rlwinm %a, %2, {CONST, (%1.val & 0x1F)}, {CONST, 0}, {CONST, 31-(%1.val & 0x1F)}
 			yields %a
-		with GPR GPR
+		with REG REG
 			uses reusing %2, REG
 			gen
 				slw %a, %2, %1
 			yields %a
 
 	pat sri $1==4                      /* Shift right signed (second >> top) */
-		with CONST_STACK GPR
+		with CONST_STACK REG
 			uses reusing %2, REG
 			gen
 				srawi %a, %2, {CONST, %1.val & 0x1F}
 			yields %a
-		with GPR GPR
+		with REG REG
 			uses reusing %2, REG
 			gen
 				sraw %a, %2, %1
 			yields %a
 
 	pat sru $1==4                      /* Shift right unsigned (second >> top) */
-		with CONST_STACK GPR
+		with CONST_STACK REG
 			uses reusing %2, REG
 			gen
 				rlwinm %a, %2, {CONST, 32-(%1.val & 0x1F)}, {CONST, (%1.val & 0x1F)}, {CONST, 31}
 			yields %a
-		with GPR GPR
+		with REG REG
 			uses reusing %2, REG
 			gen
 				srw %a, %2, %1
@@ -1685,7 +1510,6 @@ PATTERNS
 				bl {LABEL, ".sar4"}
 
 
-
 /* Sets */
 
 	pat set defined($1)                /* Create singleton set */
@@ -1706,7 +1530,6 @@ PATTERNS
 	pat inn !defined($1)
 		leaving
 			cal ".inn"
-
 
 
 /* Boolean resolutions */
@@ -1934,7 +1757,6 @@ PATTERNS
 			yields %a
 
 
-
 /* Simple branches */
 
 	proc zxx example zeq
@@ -2001,7 +1823,6 @@ PATTERNS
 	pat cmu zle $1==4    call cmu4zxx("ble", "bge")
 
 
-
 /* Comparisons */
 
 	/* Each comparison extracts the lt and gt bits from cr0.
@@ -2057,7 +1878,6 @@ PATTERNS
 			yields R3
 
 
-
 /* Other branching and labelling */
 
 	pat lab topeltsize($1)==4 && !fallthrough($1)
@@ -2090,7 +1910,6 @@ PATTERNS
 			b {LABEL, $1}
 
 
-
 /* Miscellaneous */
 
 	pat cal                            /* Call procedure */
@@ -2100,7 +1919,7 @@ PATTERNS
 				bl {LABEL, $1}
 
 	pat cai                            /* Call procedure indirect */
-		with GPR STACK
+		with REG STACK
 			kills ALL
 			gen
 				mtspr CTR, %1
@@ -2130,7 +1949,7 @@ PATTERNS
 			b {LABEL, ".ret"}
 
 	pat blm                            /* Block move constant length */
-		with GPR GPR STACK
+		with REG REG STACK
 			uses REG
 			gen
 				move {CONST, $1}, %a
@@ -2141,7 +1960,7 @@ PATTERNS
 				addi SP, SP, {CONST, 12}
 
 	pat bls                            /* Block move variable length */
-		with GPR GPR GPR STACK
+		with REG REG REG STACK
 			gen
 				stwu %1, {IND_RC_W, SP, 0-4}
 				stwu %3, {IND_RC_W, SP, 0-4}
@@ -2158,7 +1977,6 @@ PATTERNS
 		with STACK
 			gen
 				b {LABEL, ".csb"}
-
 
 
 /* EM specials */
@@ -2208,7 +2026,7 @@ PATTERNS
 			dch
 
 	pat dch                            /* FP -> caller FP */
-		with GPR
+		with REG
 			uses reusing %1, REG
 			gen
 				lwz %a, {IND_RC_W, %1, FP_OFFSET}
@@ -2246,17 +2064,17 @@ PATTERNS
 		yields %a
 
 	pat str $1==0                      /* Store FP */
-		with GPR
+		with REG
 			gen
 				move %1, FP
 
 	pat str $1==1                      /* Store SP */
-		with GPR
+		with REG
 			gen
 				move %1, SP
 
 	pat loc ass $1==4 && $2==4         /* Drop 4 bytes from stack */
-		with exact GPR
+		with exact REG
 			/* nop */
 		with STACK
 			gen
@@ -2273,7 +2091,7 @@ PATTERNS
 			gen
 				move {SUM_RC, SP, his(%1.val)}, SP
 				move {SUM_RC, SP, los(%1.val)}, SP
-		with GPR STACK
+		with REG STACK
 			gen
 				move {SUM_RR, SP, %1}, SP
 
@@ -2290,8 +2108,6 @@ PATTERNS
 				cmpwi %1, {CONST, rom($1, 2)}
 				bgt {LABEL, ".trap_erange"}
 			yields %1
-
-
 
 
 /* Floating point support */
