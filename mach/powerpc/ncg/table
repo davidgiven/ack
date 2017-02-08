@@ -157,17 +157,16 @@ TOKENS
 
 /* Used only in instruction descriptions (to generate the correct syntax). */
 
-	GPRINDIRECT        = { GPR reg; INT off; }    4    off "(" reg ")".
 	GPRINDIRECT_OFFSET_LO = { GPR reg; ADDR adr; } 4   "lo16[" adr "](" reg ")".
 	CONST              = { INT val; }             4    val.
 
 /* Primitives */
 
 	LABEL              = { ADDR adr; }            4    adr.
-	LABEL_OFFSET_HI    = { ADDR adr; }            4    "hi16[" adr "]".
-	LABEL_OFFSET_HA    = { ADDR adr; }            4    "ha16[" adr "]".
-	LABEL_OFFSET_LO    = { ADDR adr; }            4    "lo16[" adr "]".
-	LOCAL              = { INT off; }             4.
+	LABEL_HI           = { ADDR adr; }            4    "hi16[" adr "]".
+	LABEL_HA           = { ADDR adr; }            4    "ha16[" adr "]".
+	LABEL_LO           = { ADDR adr; }            4    "lo16[" adr "]".
+	LOCAL              = { INT off; }             4    ">>> BUG IN LOCAL".
 
 /* Allows us to use regvar() to refer to registers */
 
@@ -192,15 +191,15 @@ TOKENS
 	SEX_B              = { GPR reg; }             4.
 	SEX_H              = { GPR reg; }             4.
 
-	IND_RC_B           = { GPR reg; INT off; }    4.
+	IND_RC_B           = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RR_B           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_H           = { GPR reg; INT off; }    4.
+	IND_RC_H           = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RR_H           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_H_S         = { GPR reg; INT off; }    4.
+	IND_RC_H_S         = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RR_H_S         = { GPR reg1; GPR reg2; }  4.
-	IND_RC_W           = { GPR reg; INT off; }    4.
+	IND_RC_W           = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RR_W           = { GPR reg1; GPR reg2; }  4.
-	IND_RC_D           = { GPR reg; INT off; }    8.
+	IND_RC_D           = { GPR reg; INT off; }    8    off "(" reg ")".
 	IND_RR_D           = { GPR reg1; GPR reg2; }  8.
 
 	NOT_R              = { GPR reg; }             4.
@@ -237,7 +236,7 @@ SETS
 	/* unsigned 16-bit integer */
 	UCONST2         = CONST_0000_7FFF + CONST_8000 + CONST_8001_FFFF.
 	/* any constant on stack */
-	CONST_ALL       = CONST_N8000 + CONST_N7FFF_N0001 + CONST_0000_7FFF +
+	CONST_STACK     = CONST_N8000 + CONST_N7FFF_N0001 + CONST_0000_7FFF +
 	                  CONST_8000 + CONST_8001_FFFF + CONST_HZ + CONST_HL.
 
 	SUM_ALL            = SUM_RC + SUM_RR.
@@ -247,18 +246,19 @@ SETS
 	LOGICAL_ALL        = NOT_R + AND_RR + OR_RR + OR_RC + XOR_RR +
 	                     XOR_RC.
 
-	/* indirect 4-byte value */
+	/* indirect values */
+	IND_ALL_B          = IND_RC_B + IND_RR_B.
+	IND_ALL_H          = IND_RC_H + IND_RR_H + IND_RC_H_S + IND_RR_H_S.
 	IND_ALL_W          = IND_RC_W + IND_RR_W.
-	/* indirect 8-byte value */
 	IND_ALL_D          = IND_RC_D + IND_RR_D.
-	/* any indirect value that fits in a GPR */
-	IND_ALL_BHW        = IND_RC_B + IND_RR_B + IND_RC_H + IND_RR_H +
-	                     IND_RC_H_S + IND_RR_H_S + IND_ALL_W.
+	IND_ALL_BHW        = IND_ALL_B + IND_ALL_H + IND_ALL_W.
 
 	/* anything killed by sti (store indirect) */
 	MEMORY             = IND_ALL_BHW + IND_ALL_D.
 
-	OP_ALL_W           = SUM_ALL + SEX_ALL + LOGICAL_ALL + IND_ALL_W.
+	/* any stack token that we can easily move to GPR */
+	ANY_BHW            = REG + CONST_STACK + LABEL + SEX_ALL +
+	                     SUM_ALL + IND_ALL_BHW + LOGICAL_ALL.
 
 
 INSTRUCTIONS
@@ -278,7 +278,9 @@ INSTRUCTIONS
   add             GPR:wo, GPR:ro, GPR:ro.
   addX "add."     GPR:wo, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST:ro.
-  addis           GPR:wo, GPR:ro, CONST+LABEL_OFFSET_HI+LABEL_OFFSET_HA:ro.
+    li            GPR:wo, CONST:ro.
+  addis           GPR:wo, GPR:ro, CONST+LABEL_HI+LABEL_HA:ro.
+    lis           GPR:wo, CONST+LABEL_HI+LABEL_HA:ro.
   and             GPR:wo, GPR:ro, GPR:ro.
   andc            GPR:wo, GPR:ro, GPR:ro.
   andiX  "andi."  GPR:wo:cc, GPR:ro, CONST:ro.
@@ -326,22 +328,22 @@ INSTRUCTIONS
   frsp            FSREG:wo, FREG:ro cost(4, 5).
   fsub            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
-  lbz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lbz             GPR:wo, IND_RC_B:ro cost(4, 3).
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lfd             FPR:wo, GPRINDIRECT:ro cost(4, 5).
-  lfdu            FPR:wo, GPRINDIRECT:ro cost(4, 5).
+  lfd             FPR:wo, IND_RC_D:ro cost(4, 5).
+  lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
   lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
-  lfs             FSREG:wo, GPRINDIRECT:ro cost(4, 4).
-  lfsu            FSREG:wo, GPRINDIRECT:rw cost(4, 4).
+  lfs             FSREG:wo, IND_RC_W:ro cost(4, 4).
+  lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
   lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
-  lha             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lha             GPR:wo, IND_RC_H_S:ro cost(4, 3).
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lhz             GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lhz             GPR:wo, IND_RC_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   li32            GPR:wo, CONST:ro cost(8, 2).
-  lwzu            GPR:wo, GPRINDIRECT:ro cost(4, 3).
+  lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR:wo, GPRINDIRECT+GPRINDIRECT_OFFSET_LO:ro cost(4, 3).
+  lwz             GPR:wo, IND_RC_W+GPRINDIRECT_OFFSET_LO:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -351,7 +353,7 @@ INSTRUCTIONS
   mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
-  ori             GPR:wo, GPR:ro, CONST+LABEL_OFFSET_LO:ro.
+  ori             GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
@@ -362,19 +364,19 @@ INSTRUCTIONS
   sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
   srawi           GPR:wo, GPR:ro, CONST:ro cost(4, 2).
   srw             GPR:wo, GPR:ro, GPR:ro.
-  stb             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  stb             GPR:ro, IND_RC_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stfd            FPR:ro, GPRINDIRECT:rw cost(4, 4).
-  stfdu           FPR:ro, GPRINDIRECT:rw cost(4, 4).
+  stfd            FPR:ro, IND_RC_D:rw cost(4, 4).
+  stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
-  stfs            FSREG:ro, GPRINDIRECT:rw cost(4, 3).
-  stfsu           FSREG:ro, GPRINDIRECT:rw cost(4, 3).
+  stfs            FSREG:ro, IND_RC_W:rw cost(4, 3).
+  stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
   stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
-  sth             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  sth             GPR:ro, IND_RC_H:rw cost(4, 3).
   sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stw             GPR:ro, GPRINDIRECT:rw cost(4, 3).
+  stw             GPR:ro, IND_RC_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stwu            GPR+GPRE:ro, GPRINDIRECT:rw cost(4, 3).
+  stwu            GPR+LOCAL:ro, IND_RC_W:rw cost(4, 3).
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
@@ -390,25 +392,22 @@ MOVES
 			COMMENT("move GPR->GPR")
 			or %2, %1, %1
 
-/* GPRE exists solely to allow us to use regvar() (which can only be used in
-   an expression) as a register constant. */
-
-	from GPR to GPRE
-		gen
-			COMMENT("move GPR->GPRE")
-			or %2.reg, %1, %1
-
 /* Constants */
 
-	from CONST_ALL + CONST smalls(%val) to GPR
+	from CONST + CONST_STACK smalls(%val) to GPR
 		gen
-			COMMENT("move CONST_ALL->GPR smalls")
-			addi %2, R0, {CONST, %1.val}
+			COMMENT("move CONST->GPR smalls")
+			li %2, {CONST, %1.val}
 
-	from CONST_ALL + CONST to GPR
+	from CONST + CONST_STACK lo(%val)==0 to GPR
 		gen
-			COMMENT("move CONST_ALL->GPR")
-			addis %2, R0, {CONST, hi(%1.val)}
+			COMMENT("move CONST->GPR shifted")
+			lis %2, {CONST, hi(%1.val)}
+
+	from CONST + CONST_STACK to GPR
+		gen
+			COMMENT("move CONST->GPR")
+			lis %2, {CONST, hi(%1.val)}
 			ori %2, %2, {CONST, lo(%1.val)}
 			/* Can't use addi %2, %2, {CONST, los(%1.val)}
 			 * because %2 might be R0. */
@@ -416,8 +415,8 @@ MOVES
 	from LABEL to GPR
 		gen
 			COMMENT("move LABEL->GPR")
-			addis %2, R0, {LABEL_OFFSET_HI, %1.adr}
-			ori %2, %2, {LABEL_OFFSET_LO, %1.adr}
+			lis %2, {LABEL_HI, %1.adr}
+			ori %2, %2, {LABEL_LO, %1.adr}
 
 /* Sign extension */
 
@@ -453,7 +452,7 @@ MOVES
 	from IND_RC_B to GPR
 		gen
 			COMMENT("move IND_RC_B->GPR")
-			lbz %2, {GPRINDIRECT, %1.reg, %1.off}
+			lbz %2, %1
 
 	from IND_RR_B to GPR
 		gen
@@ -465,7 +464,7 @@ MOVES
 	from GPR to IND_RC_B
 		gen
 			COMMENT("move GPR->IND_RC_B")
-			stb %1, {GPRINDIRECT, %2.reg, %2.off}
+			stb %1, %2
 
 	from GPR to IND_RR_B
 		gen
@@ -477,7 +476,7 @@ MOVES
 	from IND_RC_H to GPR
 		gen
 			COMMENT("move IND_RC_H->GPR")
-			lhz %2, {GPRINDIRECT, %1.reg, %1.off}
+			lhz %2, %1
 
 	from IND_RR_H to GPR
 		gen
@@ -487,7 +486,7 @@ MOVES
 	from IND_RC_H_S to GPR
 		gen
 			COMMENT("move IND_RC_H_S->GPR")
-			lha %2, {GPRINDIRECT, %1.reg, %1.off}
+			lha %2, %1
 
 	from IND_RR_H_S to GPR
 		gen
@@ -499,7 +498,7 @@ MOVES
 	from GPR to IND_RC_H
 		gen
 			COMMENT("move GPR->IND_RC_H")
-			sth %1, {GPRINDIRECT, %2.reg, %2.off}
+			sth %1, %2
 
 	from GPR to IND_RR_H
 		gen
@@ -511,7 +510,7 @@ MOVES
 	from IND_RC_W to GPR
 		gen
 			COMMENT("move IND_RC_W->GPR")
-			lwz %2, {GPRINDIRECT, %1.reg, %1.off}
+			lwz %2, %1
 
 	from IND_RR_W to GPR
 		gen
@@ -521,7 +520,7 @@ MOVES
 	from IND_RC_W to FSREG
 		gen
 			COMMENT("move IND_RC_W->FSREG")
-			lfs %2, {GPRINDIRECT, %1.reg, %1.off}
+			lfs %2, %1
 
 	from IND_RR_W to FSREG
 		gen
@@ -533,7 +532,7 @@ MOVES
 	from GPR to IND_RC_W
 		gen
 			COMMENT("move GPR->IND_RC_W")
-			stw %1, {GPRINDIRECT, %2.reg, %2.off}
+			stw %1, %2
 
 	from GPR to IND_RR_W
 		gen
@@ -543,7 +542,7 @@ MOVES
 	from FSREG to IND_RC_W
 		gen
 			COMMENT("move FSREG->IND_RC_W")
-			stfs %1, {GPRINDIRECT, %2.reg, %2.off}
+			stfs %1, %2
 
 	from FSREG to IND_RR_W
 		gen
@@ -555,7 +554,7 @@ MOVES
 	from IND_RC_D to FPR
 		gen
 			COMMENT("move IND_RC_D->FPR")
-			lfd %2, {GPRINDIRECT, %1.reg, %1.off}
+			lfd %2, {IND_RC_D, %1.reg, %1.off}
 
 	from IND_RR_D to FPR
 		gen
@@ -567,7 +566,7 @@ MOVES
 	from FPR to IND_RC_D
 		gen
 			COMMENT("move FPR->IND_RC_D")
-			stfd %1, {GPRINDIRECT, %2.reg, %2.off}
+			stfd %1, {IND_RC_D, %2.reg, %2.off}
 
 	from FPR to IND_RR_D
 		gen
@@ -681,9 +680,10 @@ MOVES
 			extrwi %2, %1.reg, {CONST, 1}, {CONST, 1}
 			xori %2, %2, {CONST, 1}
 
-/* Miscellaneous */
+/* GPRE exists solely to allow us to use regvar() (which can only be used in
+   an expression) as a register constant. */
 
-	from OP_ALL_W + LABEL + CONST_ALL to GPRE
+	from ANY_BHW to GPRE
 		gen
 			move %1, %2.reg
 
@@ -701,64 +701,64 @@ STACKINGRULES
 	from LOCAL to STACK
 		gen
 			COMMENT("stack LOCAL")
-			stwu {GPRE, regvar(%1.off)}, {GPRINDIRECT, SP, 0-4}
+			stwu %1, {IND_RC_W, SP, 0-4}
 
 	from REG to STACK
 		gen
 			COMMENT("stack REG")
-			stwu %1, {GPRINDIRECT, SP, 0-4}
+			stwu %1, {IND_RC_W, SP, 0-4}
 
 	from REG_PAIR to STACK
 		gen
 			COMMENT("stack REG_PAIR")
-			stwu %1.2, {GPRINDIRECT, SP, 0-4}
-			stwu %1.1, {GPRINDIRECT, SP, 0-4}
+			stwu %1.2, {IND_RC_W, SP, 0-4}
+			stwu %1.1, {IND_RC_W, SP, 0-4}
 
-	from CONST_ALL + LABEL to STACK
+	from CONST_STACK + LABEL to STACK
 		gen
-			COMMENT("stack CONST_ALL + LABEL")
+			COMMENT("stack CONST_STACK + LABEL")
 			move %1, RSCRATCH
-			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
 	from SEX_B to STACK
 		gen
 			COMMENT("stack SEX_B")
 			extsb RSCRATCH, %1.reg
-			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
 	from SEX_H to STACK
 		gen
 			COMMENT("stack SEX_H")
 			extsh RSCRATCH, %1.reg
-			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
 	from SUM_ALL + LOGICAL_ALL to STACK
 		gen
 			COMMENT("stack SUM_ALL + LOGICAL_ALL")
 			move %1, RSCRATCH
-			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
 	from IND_ALL_BHW to STACK
 		gen
 			COMMENT("stack IND_ALL_BHW")
 			move %1, RSCRATCH
-			stwu RSCRATCH, {GPRINDIRECT, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
 	from IND_ALL_D to STACK
 		gen
 			COMMENT("stack IND_ALL_D")
 			move %1, FSCRATCH
-			stfdu FSCRATCH, {GPRINDIRECT, SP, 0-8}
+			stfdu FSCRATCH, {IND_RC_D, SP, 0-8}
 
 	from FREG to STACK
 		gen
 			COMMENT("stack FPR")
-			stfdu %1, {GPRINDIRECT, SP, 0-8}
+			stfdu %1, {IND_RC_D, SP, 0-8}
 
 	from FSREG to STACK
 		gen
 			COMMENT("stack FSREG")
-			stfsu %1, {GPRINDIRECT, SP, 0-4}
+			stfsu %1, {IND_RC_W, SP, 0-4}
 
 
 
@@ -771,10 +771,10 @@ COERCIONS
 			move %1, %a
 		yields %a
 
-	from CONST_ALL
+	from CONST + CONST_STACK
 		uses REG
 		gen
-			COMMENT("coerce CONST_ALL->REG")
+			COMMENT("coerce CONST->REG")
 			move %1, %a
 		yields %a
 
@@ -789,7 +789,7 @@ COERCIONS
 		uses REG
 		gen
 			COMMENT("coerce STACK->REG")
-			lwz %a, {GPRINDIRECT, SP, 0}
+			lwz %a, {IND_RC_W, SP, 0}
 			addi SP, SP, {CONST, 4}
 		yields %a
 
@@ -797,8 +797,8 @@ COERCIONS
 		uses REG_PAIR
 		gen
 			COMMENT("coerce STACK->REG_PAIR")
-			lwz %a.1, {GPRINDIRECT, SP, 0}
-			lwz %a.2, {GPRINDIRECT, SP, 4}
+			lwz %a.1, {IND_RC_W, SP, 0}
+			lwz %a.2, {IND_RC_W, SP, 4}
 			addi SP, SP, {CONST, 8}
 		yields %a
 
@@ -838,7 +838,7 @@ COERCIONS
 		uses FREG
 		gen
 			COMMENT("coerce STACK->FREG")
-			lfd %a, {GPRINDIRECT, SP, 0}
+			lfd %a, {IND_RC_D, SP, 0}
 			addi SP, SP, {CONST, 8}
 		yields %a
 
@@ -846,7 +846,7 @@ COERCIONS
 		uses FSREG
 		gen
 			COMMENT("coerce STACK->FSREG")
-			lfs %a, {GPRINDIRECT, SP, 0}
+			lfs %a, {IND_RC_W, SP, 0}
 			addi SP, SP, {CONST, 4}
 		yields %a
 
@@ -1003,7 +1003,7 @@ PATTERNS
 			loi INT32*2
 
 	pat stl inreg($1)>0                /* Store to local */
-		with CONST_ALL + LABEL + GPR + OP_ALL_W
+		with ANY_BHW
 			kills regvar($1), LOCAL %off==$1
 			gen
 				move %1, {GPRE, regvar($1)}
@@ -1019,10 +1019,7 @@ PATTERNS
 			sti INT32*2
 
 	pat lil inreg($1)>0                /* Load from indirected local */
-		uses REG
-		gen
-			lwz %a, {GPRINDIRECT, regvar($1), 0}
-		yields %a
+		yields {IND_RC_W, regvar($1), 0}
 
 	pat lil                            /* Load from indirected local */
 		leaving
@@ -1092,17 +1089,17 @@ PATTERNS
 		kills MEMORY
 		uses REG={LABEL, $1}, REG
 			gen
-				lwz %b, {GPRINDIRECT, %a, 0}
+				lwz %b, {IND_RC_W, %a, 0}
 				addi %b, %b, {CONST, 1}
-				stw %b, {GPRINDIRECT, %a, 0}
+				stw %b, {IND_RC_W, %a, 0}
 
 	pat dee                             /* Decrement external */
 		kills MEMORY
 		uses REG={LABEL, $1}, REG
 			gen
-				lwz %b, {GPRINDIRECT, %a, 0}
+				lwz %b, {IND_RC_W, %a, 0}
 				addi %b, %b, {CONST, 0-1}
-				stw %b, {GPRINDIRECT, %a, 0}
+				stw %b, {IND_RC_W, %a, 0}
 
 
 
@@ -1161,7 +1158,7 @@ PATTERNS
 		with LABEL
 			uses REG
 			gen
-				addis %a, R0, {LABEL_OFFSET_HA, %1.adr}
+				lis %a, {LABEL_HA, %1.adr}
 				lwz %a, {GPRINDIRECT_OFFSET_LO, %a, %1.adr}
 			yields %a
 		with GPR
@@ -1194,7 +1191,7 @@ PATTERNS
 		with GPR GPR
 			kills MEMORY
 			gen
-				stb %2, {GPRINDIRECT, %1, 0}
+				stb %2, {IND_RC_B, %1, 0}
 		with SUM_RR GPR
 			kills MEMORY
 			gen
@@ -1206,7 +1203,7 @@ PATTERNS
 		with GPR SEX_B
 			kills MEMORY
 			gen
-				stb %2.reg, {GPRINDIRECT, %1, 0}
+				stb %2.reg, {IND_RC_B, %1, 0}
 		with SUM_RR SEX_B
 			kills MEMORY
 			gen
@@ -1220,7 +1217,7 @@ PATTERNS
 		with GPR GPR
 			kills MEMORY
 			gen
-				sth %2, {GPRINDIRECT, %1, 0}
+				sth %2, {IND_RC_H, %1, 0}
 		with SUM_RR GPR
 			kills MEMORY
 			gen
@@ -1232,7 +1229,7 @@ PATTERNS
 		with GPR SEX_H
 			kills MEMORY
 			gen
-				sth %2.reg, {GPRINDIRECT, %1, 0}
+				sth %2.reg, {IND_RC_H, %1, 0}
 		with SUM_RR SEX_H
 			kills MEMORY
 			gen
@@ -1381,13 +1378,13 @@ PATTERNS
 		with REG CONST_HZ
 			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
 			yields %a
-		with CONST_ALL-CONST2-CONST_HZ REG
+		with CONST_STACK-CONST2-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(%1.val)}
 			yields {SUM_RC, %a, los(%1.val)}
-		with REG CONST_ALL-CONST2-CONST_HZ
+		with REG CONST_STACK-CONST2-CONST_HZ
 			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
 			yields {SUM_RC, %a, los(%2.val)}
-		with CONST_ALL LABEL
+		with CONST_STACK LABEL
 			yields {LABEL, %2.adr+%1.val}
 
 	pat sbi $1==4                      /* Subtract word (second - top) */
@@ -1401,10 +1398,10 @@ PATTERNS
 		with CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields %a
-		with CONST_ALL-CONST2_WHEN_NEG-CONST_HZ REG
+		with CONST_STACK-CONST2_WHEN_NEG-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields {SUM_RC, %a, los(0-%1.val)}
-		with CONST_ALL LABEL
+		with CONST_STACK LABEL
 			yields {LABEL, %2.adr+(0-%1.val)}
 
 	pat ngi $1==4                      /* Negate word */
@@ -1519,10 +1516,10 @@ PATTERNS
 		with CONST_HZ REG
 			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
 			yields %a
-		with REG CONST_ALL-UCONST2-CONST_HZ
+		with REG CONST_STACK-UCONST2-CONST_HZ
 			uses reusing %1, REG={OR_RIS, %1, hi(%2.val)}
 			yields {OR_RC, %1, lo(%2.val)}
-		with CONST_ALL-UCONST2-CONST_HZ REG
+		with CONST_STACK-UCONST2-CONST_HZ REG
 			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
 			yields {OR_RC, %2, lo(%1.val)}
 
@@ -1549,10 +1546,10 @@ PATTERNS
 		with CONST_HZ REG
 			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
 			yields %a
-		with REG CONST_ALL-UCONST2-CONST_HZ
+		with REG CONST_STACK-UCONST2-CONST_HZ
 			uses reusing %1, REG={XOR_RIS, %1, hi(%2.val)}
 			yields {XOR_RC, %1, lo(%2.val)}
-		with CONST_ALL-UCONST2-CONST_HZ REG
+		with CONST_STACK-UCONST2-CONST_HZ REG
 			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
 			yields {XOR_RC, %2, lo(%1.val)}
 
@@ -1601,7 +1598,7 @@ PATTERNS
 			cal ".zer"
 
 	pat sli $1==4                      /* Shift left (second << top) */
-		with CONST_ALL GPR
+		with CONST_STACK GPR
 			uses reusing %2, REG
 			gen
 				rlwinm %a, %2, {CONST, (%1.val & 0x1F)}, {CONST, 0}, {CONST, 31-(%1.val & 0x1F)}
@@ -1613,7 +1610,7 @@ PATTERNS
 			yields %a
 
 	pat sri $1==4                      /* Shift right signed (second >> top) */
-		with CONST_ALL GPR
+		with CONST_STACK GPR
 			uses reusing %2, REG
 			gen
 				srawi %a, %2, {CONST, %1.val & 0x1F}
@@ -1625,7 +1622,7 @@ PATTERNS
 			yields %a
 
 	pat sru $1==4                      /* Shift right unsigned (second >> top) */
-		with CONST_ALL GPR
+		with CONST_STACK GPR
 			uses reusing %2, REG
 			gen
 				rlwinm %a, %2, {CONST, 32-(%1.val & 0x1F)}, {CONST, (%1.val & 0x1F)}, {CONST, 31}
@@ -2121,18 +2118,18 @@ PATTERNS
 			uses REG
 			gen
 				move {CONST, $1}, %a
-				stwu %a, {GPRINDIRECT, SP, 0-4}
-				stwu %2, {GPRINDIRECT, SP, 0-4}
-				stwu %1, {GPRINDIRECT, SP, 0-4}
+				stwu %a, {IND_RC_W, SP, 0-4}
+				stwu %2, {IND_RC_W, SP, 0-4}
+				stwu %1, {IND_RC_W, SP, 0-4}
 				bl {LABEL, "_memmove"}
 				addi SP, SP, {CONST, 12}
 
 	pat bls                            /* Block move variable length */
 		with GPR GPR GPR STACK
 			gen
-				stwu %1, {GPRINDIRECT, SP, 0-4}
-				stwu %3, {GPRINDIRECT, SP, 0-4}
-				stwu %2, {GPRINDIRECT, SP, 0-4}
+				stwu %1, {IND_RC_W, SP, 0-4}
+				stwu %3, {IND_RC_W, SP, 0-4}
+				stwu %2, {IND_RC_W, SP, 0-4}
 				bl {LABEL, "_memmove"}
 				addi SP, SP, {CONST, 12}
 
@@ -2198,7 +2195,7 @@ PATTERNS
 		with GPR
 			uses reusing %1, REG
 			gen
-				lwz %a, {GPRINDIRECT, %1, FP_OFFSET}
+				lwz %a, {IND_RC_W, %1, FP_OFFSET}
 			yields %a
 
 	pat lpb                            /* Convert FP to argument address */
@@ -2256,7 +2253,7 @@ PATTERNS
 		with CONST_HZ STACK
 			gen
 				move {SUM_RC, SP, his(%1.val)}, SP
-		with CONST_ALL-CONST2-CONST_HZ STACK
+		with CONST_STACK-CONST2-CONST_HZ STACK
 			gen
 				move {SUM_RC, SP, his(%1.val)}, SP
 				move {SUM_RC, SP, los(%1.val)}, SP
