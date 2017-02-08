@@ -10,11 +10,11 @@ operation
 	| OP_BF_BFA            CR ',' CR                  { emit4($1 | ($2<<23) | ($4<<18)); }
 	| OP_BF_FRA_FRB        CR ',' FPR ',' FPR         { emit4($1 | ($2<<23) | ($4<<16) | ($6<<11)); }
 	| OP_BF_L_RA_RB        CR ',' u1 ',' GPR ',' GPR  { emit4($1 | ($2<<23) | ($4<<21) | ($6<<16) | ($8<<11)); }
-	| OP_BF_L_RA_SI        CR ',' u1 ',' GPR ',' e16  { emit4($1 | ($2<<23) | ($4<<21) | ($6<<16) | $8); }
-	| OP_BF_L_RA_UI        CR ',' u1 ',' GPR ',' e16  { emit4($1 | ($2<<23) | ($4<<21) | ($6<<16) | $8); }
+	| OP_BF_L_RA_SI        CR ',' u1 ',' GPR ',' e16  { emit_hl($1 | ($2<<23) | ($4<<21) | ($6<<16) | $8); }
+	| OP_BF_L_RA_UI        CR ',' u1 ',' GPR ',' e16  { emit_hl($1 | ($2<<23) | ($4<<21) | ($6<<16) | $8); }
 	| OP_BF_RA_RB          cr_opt GPR ',' GPR         { emit4($1 | ($2<<23) | ($3<<16) | ($5<<11)); }
-	| OP_BF_RA_SI          cr_opt GPR ',' e16         { emit4($1 | ($2<<23) | ($3<<16) | $5); }
-	| OP_BF_RA_UI          cr_opt GPR ',' e16         { emit4($1 | ($2<<23) | ($3<<16) | $5); }
+	| OP_BF_RA_SI          cr_opt GPR ',' e16         { emit_hl($1 | ($2<<23) | ($3<<16) | $5); }
+	| OP_BF_RA_UI          cr_opt GPR ',' e16         { emit_hl($1 | ($2<<23) | ($3<<16) | $5); }
 	| OP_BF_U_C            c CR ',' u4                { emit4($1 | $2 | ($3<<23) | ($5<<12)); }
 	| OP_BH                                           { emit4($1); }
 	| OP_BH                u2                         { emit4($1 | ($2<<11)); }
@@ -33,13 +33,13 @@ operation
 	| OP_BT_BT_BT          u5                         { emit4($1 | ($2<<21) | ($2<<16) | ($2<<11)); }
 	| OP_BT_C              c u5                       { emit4($1 | $2 | ($3<<21)); }
 	| OP_FLM_FRB_C         c u8 ',' FPR               { emit4($1 | $2 | ($3<<17) | ($5<<11)); }
-	| OP_FRS_RA_D          FPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_FRS_RA_D          FPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_FRS_RA_RB         FPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_FRT_FRA_FRB_C     c FPR ',' FPR ',' FPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<11)); }
 	| OP_FRT_FRA_FRC_FRB_C c FPR ',' FPR ',' FPR ',' FPR { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($9<<11) | ($7<<6)); }
 	| OP_FRT_FRA_FRC_C     c FPR ',' FPR ',' FPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<6)); }
 	| OP_FRT_FRB_C         c FPR ',' FPR              { emit4($1 | $2 | ($3<<21) | ($5<<11)); }
-	| OP_FRT_RA_D          FPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_FRT_RA_D          FPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_FRT_RA_RB         FPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_FRT_C             c FPR                      { emit4($1 | $2 | ($3<<21)); }
 	| OP_RA_RS_C           c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16)); }
@@ -59,34 +59,34 @@ operation
 	{ emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6($7)); }
 	| OP_RA_RS_SH6_MB6_C   c GPR ',' GPR ',' u6 ',' u6
 	{ emit4($1 | $2 | ($5<<21) | ($3<<16) | SH6($7) | MB6($9)); }
-	| OP_RA_RS_UI          GPR ',' GPR ',' e16        { emit4($1 | ($4<<21) | ($2<<16) | $6); }
-	| OP_RA_RS_UI_CC       C GPR ',' GPR ',' e16      { emit4($1 | ($5<<21) | ($3<<16) | $7); }
+	| OP_RA_RS_UI          GPR ',' GPR ',' e16        { emit_hl($1 | ($4<<21) | ($2<<16) | $6); }
+	| OP_RA_RS_UI_CC       C GPR ',' GPR ',' e16      { emit_hl($1 | ($5<<21) | ($3<<16) | $7); }
 	| OP_RT                GPR                        { emit4($1 | ($2<<21)); }
 	| OP_RT_RA_C           c GPR ',' GPR              { emit4($1 | $2 | ($3<<21) | ($5<<16)); }
-	| OP_RT_RA_D           GPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
-	| OP_RT_RA_DS          GPR ',' ds '(' GPR ')'     { emit4($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_RT_RA_D           GPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_RT_RA_DS          GPR ',' ds '(' GPR ')'     { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RT_RA_NB          GPR ',' GPR ',' nb         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RT_RA_RB          GPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RT_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($3<<21) | ($5<<16) | ($7<<11)); }
-	| OP_RT_RA_SI          GPR ',' GPR ',' e16        { emit4($1 | ($2<<21) | ($4<<16) | $6); }
-	| OP_RT_RA_SI_addic    c GPR ',' GPR ',' e16      { emit4($1 | ($2<<26) | ($3<<21) | ($5<<16) | $7); }
+	| OP_RT_RA_SI          GPR ',' GPR ',' e16        { emit_hl($1 | ($2<<21) | ($4<<16) | $6); }
+	| OP_RT_RA_SI_addic    c GPR ',' GPR ',' e16      { emit_hl($1 | ($2<<26) | ($3<<21) | ($5<<16) | $7); }
 	| OP_RT_RA_SI_subi     GPR ',' GPR ',' negate16   { emit4($1 | ($2<<21) | ($4<<16) | $6); }
 	| OP_RT_RA_SI_subic    c GPR ',' GPR ',' negate16 { emit4($1 | ($2<<26) | ($3<<21) | ($5<<16) | $7); }
 	| OP_RT_RB_RA_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($3<<21) | ($7<<16) | ($5<<11)); }
-	| OP_RT_SI             GPR ',' e16                { emit4($1 | ($2<<21) | $4); }
+	| OP_RT_SI             GPR ',' e16                { emit_hl($1 | ($2<<21) | $4); }
 	| OP_RT_SPR            GPR ',' spr_num            { emit4($1 | ($2<<21) | ($4<<11)); }
 	| OP_RS_FXM            u7 ',' GPR                 { emit4($1 | ($4<<21) | ($2<<12)); }
-	| OP_RS_RA_D           GPR ',' e16 '(' GPR ')'    { emit4($1 | ($2<<21) | ($6<<16) | $4); }
-	| OP_RS_RA_DS          GPR ',' ds '(' GPR ')'     { emit4($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_RS_RA_D           GPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
+	| OP_RS_RA_DS          GPR ',' ds '(' GPR ')'     { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RS_RA_NB          GPR ',' GPR ',' nb         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RS_RA_RB          GPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RS_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
 	| OP_RS_RA_RA_C        c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($5<<11)); }
 	| OP_RS_SPR            spr_num ',' GPR            { emit4($1 | ($4<<21) | ($2<<11)); }
 	| OP_TO_RA_RB          u5 ',' GPR ',' GPR         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
-	| OP_TO_RA_SI          u5 ',' GPR ',' e16         { emit4($1 | ($2<<21) | ($4<<16) | $6); }
+	| OP_TO_RA_SI          u5 ',' GPR ',' e16         { emit_hl($1 | ($2<<21) | ($4<<16) | $6); }
 	| OP_TOX_RA_RB         GPR ',' GPR                { emit4($1 | ($2<<16) | ($4<<11)); }
-	| OP_TOX_RA_SI         GPR ',' e16                { emit4($1 | ($2<<16) | $4); }
+	| OP_TOX_RA_SI         GPR ',' e16                { emit_hl($1 | ($2<<16) | $4); }
 	| OP_LEV                                          { emit4($1); }
 	| OP_LEV               u7                         { emit4($1 | ($2<<5)); }
 	| OP_LIA               lia                        { emit4($1 | $2); }
@@ -217,10 +217,11 @@ e16
 		if (($1 < -0x8000) || ($1 > 0xffff))
 			serror("16-bit value out of range");
 		$$ = (uint16_t) $1;
+		no_hl();
 	}
-	| OP_HI ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, 0); }
-	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = emit_hi(&$3, 1); }
-	| OP_LO ASC_LPAR expr ASC_RPAR           { $$ = emit_lo(&$3); }
+	| OP_HI ASC_LPAR expr ASC_RPAR           { $$ = eval_hl(&$3, OP_HI); }
+	| OP_HA ASC_LPAR expr ASC_RPAR           { $$ = eval_hl(&$3, OP_HA); }
+	| OP_LO ASC_LPAR expr ASC_RPAR           { $$ = eval_hl(&$3, OP_LO); }
 	;
 
 negate16
