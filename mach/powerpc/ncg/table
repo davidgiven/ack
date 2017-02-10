@@ -353,11 +353,12 @@ INSTRUCTIONS
   mfspr           GPR:wo, SPR:ro cost(4, 3).
   mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
+    mr            GPR:wo, GPR:ro.
+  orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
+    orX_readonly "or." GPR:ro:cc, GPR:ro, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
   ori             GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
-  orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
-    orX_readonly "or." GPR:ro:cc, GPR:ro, GPR:ro.
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
     extlwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
@@ -389,7 +390,7 @@ INSTRUCTIONS
 MOVES
 
 	from GPR to GPR
-		gen or %2, %1, %1
+		gen mr %2, %1
 
 /* Constants */
 
@@ -626,6 +627,9 @@ TESTS
 
 	/* Given orX %1, %1, %1, ncgg says, "Instruction destroys %1,
 	 * not allowed here".  We use orX_readonly to trick ncgg.
+	 *
+	 * Using "or." and not "mr." because mach/powerpc/top/table
+	 * was optimizing "or." and not "mr.".
 	 */
 	to test GPR
 		gen
@@ -650,33 +654,9 @@ STACKINGRULES
 			stwu %1.2, {IND_RC_W, SP, 0-4}
 			stwu %1.1, {IND_RC_W, SP, 0-4}
 
-	from CONST_STACK to STACK
+	from ANY_BHW-REG to STACK
 		gen
-			COMMENT("stack CONST_STACK")
-			move %1, RSCRATCH
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
-
-	from SEX_B to STACK
-		gen
-			COMMENT("stack SEX_B")
-			extsb RSCRATCH, %1.reg
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
-
-	from SEX_H to STACK
-		gen
-			COMMENT("stack SEX_H")
-			extsh RSCRATCH, %1.reg
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
-
-	from SUM_ALL + LOGICAL_ALL to STACK
-		gen
-			COMMENT("stack SUM_ALL + LOGICAL_ALL")
-			move %1, RSCRATCH
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
-
-	from IND_ALL_BHW to STACK
-		gen
-			COMMENT("stack IND_ALL_BHW")
+			COMMENT("stack ANY_BHW-REG")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
 
@@ -1198,21 +1178,11 @@ PATTERNS
 			loc 1
 			sbi 4
 
-	pat loc mlu $2==2                  /* Unsigned multiply by constant */
-		leaving
-			loc $1
-			mli 4
-
-	pat mlu                            /* Unsigned multiply by var */
+	pat mlu                            /* Multiply unsigned */
 		leaving
 			mli $1
 
-	pat loc slu                        /* Shift left unsigned by constant amount */
-		leaving
-			loc $1
-			sli $2
-
-	pat slu                            /* Shift left unsigned by variable amount */
+	pat slu                            /* Shift left unsigned */
 		leaving
 			sli $1
 
