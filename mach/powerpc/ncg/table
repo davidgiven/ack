@@ -1374,11 +1374,13 @@ PATTERNS
 			yields {XOR_RC, %2, lo(%1.val)}
 
 	pat xor defined($1)                /* XOR set */
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".xor"}
+		leaving
+			loc $1
+			cal ".xor"
+
+	pat xor !defined($1)
+		leaving
+			cal ".xor"
 
 	pat com $1==INT32                  /* NOT word */
 		with AND_RR
