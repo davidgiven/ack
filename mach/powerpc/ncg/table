@@ -2402,16 +2402,11 @@ PATTERNS
 				addi SP, SP, {CONST, 8}
 			yields %c
 
-	pat fef $1==INT64                  /* Split exponent, fraction */
-		with GPR3 GPR4
-			kills ALL
-			gen
-				bl {LABEL, ".fef8"}
-			yields R4 R3 R5
+	pat fef $1==8                      /* Split fraction, exponent */
+		leaving
+			cal ".fef8"
 
-	pat fif $1==INT64                  /* Multiply then split integer, fraction */
-		with FPR1 FPR2
-			kills ALL
-			gen
-				bl {LABEL, ".fif8"}
-			yields F1 F2
+	/* Multiply two doubles, then split fraction, integer */
+	pat fif $1==8
+		leaving
+			cal ".fif8"
