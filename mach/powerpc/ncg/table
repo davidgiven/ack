@@ -289,6 +289,7 @@ INSTRUCTIONS
   andisX "andis." GPR:wo:cc, GPR:ro, CONST:ro.
   b               LABEL:ro.
   bc              CONST:ro, CONST:ro, LABEL:ro.
+    bdnz          LABEL:ro.
     beq           LABEL:ro.
     bne           LABEL:ro.
     bgt           LABEL:ro.
@@ -362,6 +363,7 @@ INSTRUCTIONS
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
     extlwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
+    srwi          GPR:wo, GPR:ro, CONST:ro.
   slw             GPR:wo, GPR:ro, GPR:ro.
   subf            GPR:wo, GPR:ro, GPR:ro.
   sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
@@ -1930,24 +1932,22 @@ PATTERNS
 			b {LABEL, ".ret"}
 
 	pat blm                            /* Block move constant length */
-		with REG REG STACK
-			uses REG
-			gen
-				move {CONST, $1}, %a
-				stwu %a, {IND_RC_W, SP, 0-4}
-				stwu %2, {IND_RC_W, SP, 0-4}
-				stwu %1, {IND_RC_W, SP, 0-4}
-				bl {LABEL, "_memmove"}
-				addi SP, SP, {CONST, 12}
+		leaving
+			loc $1
+			bls
 
 	pat bls                            /* Block move variable length */
-		with REG REG REG STACK
+		with REG REG REG
+			uses reusing %1, REG, REG={CONST_0000_7FFF, 0}
 			gen
-				stwu %1, {IND_RC_W, SP, 0-4}
-				stwu %3, {IND_RC_W, SP, 0-4}
-				stwu %2, {IND_RC_W, SP, 0-4}
-				bl {LABEL, "_memmove"}
-				addi SP, SP, {CONST, 12}
+				/* Wrong if size is zero */
+				srwi %1, %1, {CONST, 2}
+				mtspr CTR, %1
+				1:
+				lwzx %a, %3, %b
+				stwx %a, %2, %b
+				addi %b, %b, {CONST, 4}
+				bdnz {LABEL, "1b"}
 
 	pat csa                            /* Array-lookup switch */
 		with STACK
