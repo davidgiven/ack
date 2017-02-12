@@ -320,6 +320,7 @@ INSTRUCTIONS
   fadds           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fcmpo           CR:wo, FREG:ro, FREG:ro cost(4, 5).
   fcmpo           CR:wo, FSREG:ro, FSREG:ro cost(4, 5).
+  fctiwz          FREG:wo, FREG:ro.
   fdiv            FREG:wo, FREG:ro, FREG:ro cost(4, 35).
   fdivs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 21).
   fmr             FPR:wo, FPR:ro cost(4, 5).
@@ -2198,30 +2199,45 @@ PATTERNS
 		with FSREG
 			yields %1.1
 
-	pat loc loc cfu $1==INT32 && $2==INT32 /* Convert single to unsigned int */
-		with STACK
-			gen
-				bl {LABEL, ".cfu4"}
+	/* Convert single to signed int */
+	pat loc loc cfi $1==4 && $2==4
+		leaving
+			loc 4
+			loc 8
+			cff
+			loc 8
+			loc 4
+			cfi
 
-	pat loc loc cfi $1==INT32 && $2==INT32 /* Convert single to signed int */
-		with STACK
-			gen
-				bl {LABEL, ".cfi4"}
+	/* Convert single to unsigned int */
+	pat loc loc cfu $1==4 && $2==4
+		leaving
+			loc 4
+			loc 8
+			cff
+			loc 8
+			loc 4
+			cfu
 
-	pat loc loc cif $1==INT32 && $2==INT32 /* Convert integer to single */
-		with STACK
-			gen
-				bl {LABEL, ".cif4"}
+	/* Convert signed int to single */
+	pat loc loc cif $1==4 && $2==4
+		leaving
+			loc 4
+			loc 8
+			cif
+			loc 8
+			loc 4
+			cff
 
-	pat loc loc cuf $1==INT32 && $2==INT32 /* Convert unsigned int to single */
-		with STACK
-			gen
-				bl {LABEL, ".cuf4"}
-
-	pat fef $1==INT32                  /* Split single */
-		with STACK
-			gen
-				bl {LABEL, ".fef4"}
+	/* Convert unsigned int to single */
+	pat loc loc cuf $1==4 && $2==4
+		leaving
+			loc 4
+			loc 8
+			cuf
+			loc 8
+			loc 4
+			cff
 
 	/* Double-precision */
 
@@ -2328,26 +2344,63 @@ PATTERNS
 				frsp %a, %1
 			yields %a
 
-	pat loc loc cfu $1==INT64 && $2==INT32 /* Convert double to unsigned int */
+	/* Convert double to signed int */
+	pat loc loc cfi $1==8 && $2==4
+		with FREG STACK
+			uses reusing %1, FREG
+			gen
+				fctiwz %a, %1
+				stfdu %a, {IND_RC_D, SP, 0-8}
+				addi SP, SP, {CONST, 4}
+
+	/* Convert double to unsigned int */
+	pat loc loc cfu $1==8 && $2==4
 		with STACK
 			gen
 				bl {LABEL, ".cfu8"}
 
-	pat loc loc cfi $1==INT64 && $2==INT32 /* Convert double to signed int */
-		with STACK
+	/*
+	 * To convert integer to IEEE double, we pack the integer in
+	 * the low bits of the magic double
+	 *   1 << 52 == 0x 4330 0000 0000 0000
+	 *
+	 * For signed integer i, we flip its sign bit, then compute
+	 *   ((1 << 52) + i) - ((1 << 52) + (1 << 31))
+	 */
+	pat loc loc cif $1==4 && $2==8
+		with REG
+			uses reusing %1, REG={XOR_RIS, %1, 0x8000},
+			  REG={CONST_HZ, 0x43300000},
+			  REG={CONST_HZ, 0x80000000},
+			  FREG, FREG
 			gen
-				bl {LABEL, ".cfi8"}
+				stwu %b, {IND_RC_W, SP, 0-8}
+				stw %a, {IND_RC_W, SP, 4}
+				lfd %d, {IND_RC_D, SP, 0}
+				stw %c, {IND_RC_W, SP, 4}
+				lfd %e, {IND_RC_D, SP, 0}
+				fsub %d, %d, %e
+				addi SP, SP, {CONST, 8}
+			yields %d
 
-	pat loc loc cif $1==INT32 && $2==INT64 /* Convert integer to double */
-		with STACK
-			kills ALL
+	/*
+	 * To convert unsigned integer u to IEEE double, we compute
+	 *   ((1 << 52) + u) - (1 << 52)
+	 */
+	pat loc loc cuf $1==4 && $2==8
+		with REG
+			uses REG={CONST_HZ, 0x43300000},
+			  REG={CONST_0000_7FFF, 0},
+			  FREG, FREG
 			gen
-				bl {LABEL, ".cif8"}
-
-	pat loc loc cuf $1==INT32 && $2==INT64 /* Convert unsigned int to double */
-		with STACK
-			gen
-				bl {LABEL, ".cuf8"}
+				stwu %a, {IND_RC_W, SP, 0-8}
+				stw %1, {IND_RC_W, SP, 4}
+				lfd %c, {IND_RC_D, SP, 0}
+				stw %b, {IND_RC_W, SP, 4}
+				lfd %d, {IND_RC_D, SP, 0}
+				fsub %c, %c, %d
+				addi SP, SP, {CONST, 8}
+			yields %c
 
 	pat fef $1==INT64                  /* Split exponent, fraction */
 		with GPR3 GPR4
