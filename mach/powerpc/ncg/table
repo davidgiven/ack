@@ -1952,11 +1952,13 @@ PATTERNS
 
 	pat csa                            /* Array-lookup switch */
 		with STACK
+			kills ALL
 			gen
 				b {LABEL, ".csa"}
 
 	pat csb                            /* Table-lookup switch */
 		with STACK
+			kills ALL
 			gen
 				b {LABEL, ".csb"}
 
@@ -1987,6 +1989,7 @@ PATTERNS
 
 	pat trp                            /* Raise EM trap */
 		with GPR3
+			kills ALL
 			gen
 				bl {LABEL, ".trap"}
 
@@ -2024,14 +2027,15 @@ PATTERNS
 			lpb
 
 	pat gto                            /* longjmp */
-		uses REG
-		gen
-			move {LABEL, $1}, %a
-			move {IND_RC_W, %a, 8}, FP
-			move {IND_RC_W, %a, 4}, SP
-			move {IND_RC_W, %a, 0}, %a
-			mtspr CTR, %a
-			bctr.
+		with STACK
+			uses REG
+			gen
+				move {LABEL, $1}, %a
+				move {IND_RC_W, %a, 8}, FP
+				move {IND_RC_W, %a, 4}, SP
+				move {IND_RC_W, %a, 0}, %a
+				mtspr CTR, %a
+				bctr.
 
 	pat lor $1==0                      /* Load FP */
 		uses REG
@@ -2084,6 +2088,7 @@ PATTERNS
 
 	pat lae rck $2==4                  /* Range check */
 		with REG
+			kills ALL
 			gen
 				cmpwi %1, {CONST, rom($1, 1)}
 				blt {LABEL, ".trap_erange"}
@@ -2355,9 +2360,8 @@ PATTERNS
 
 	/* Convert double to unsigned int */
 	pat loc loc cfu $1==8 && $2==4
-		with STACK
-			gen
-				bl {LABEL, ".cfu8"}
+		leaving
+			cal ".cfu8"
 
 	/*
 	 * To convert integer to IEEE double, we pack the integer in
