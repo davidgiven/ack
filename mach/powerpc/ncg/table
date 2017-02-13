@@ -39,118 +39,47 @@ PROPERTIES
 	SPR             /* any SPR */
 	CR              /* any CR */
 
-	GPR0  GPRSP GPRFP GPR3  GPR4  GPR5  GPR6  GPR7
-	GPR8  GPR9  GPR10 GPR11 GPR12 GPR13 GPR14 GPR15
-	GPR16 GPR17 GPR18 GPR19 GPR20 GPR21 GPR22 GPR23
-	GPR24 GPR25 GPR26 GPR27 GPR28 GPR29 GPR30 GPR31
-
-	FPR0(8)  FPR1(8)  FPR2(8)  FPR3(8)  FPR4(8)  FPR5(8)  FPR6(8)  FPR7(8)
-	FPR8(8)  FPR9(8)  FPR10(8) FPR11(8) FPR12(8) FPR13(8) FPR14(8) FPR15(8)
-	FPR16(8) FPR17(8) FPR18(8) FPR19(8) FPR20(8) FPR21(8) FPR22(8) FPR23(8)
-	FPR24(8) FPR25(8) FPR26(8) FPR27(8) FPR28(8) FPR29(8) FPR30(8) FPR31(8)
-
 
 REGISTERS
 
 	/* Reverse order to encourage ncg to allocate them from r31 down */
 
-	R31("r31")         : GPR, REG, GPR31 regvar.
-	R30("r30")         : GPR, REG, GPR30 regvar.
-	R29("r29")         : GPR, REG, GPR29 regvar.
-	R28("r28")         : GPR, REG, GPR28 regvar.
-	R27("r27")         : GPR, REG, GPR27 regvar.
-	R26("r26")         : GPR, REG, GPR26 regvar.
-	R25("r25")         : GPR, REG, GPR25 regvar.
-	R24("r24")         : GPR, REG, GPR24 regvar.
-	R23("r23")         : GPR, REG, GPR23 regvar.
-	R22("r22")         : GPR, REG, GPR22 regvar.
-	R21("r21")         : GPR, REG, GPR21 regvar.
-	R20("r20")         : GPR, REG, GPR20 regvar.
-	R19("r19")         : GPR, REG, GPR19 regvar.
-	R18("r18")         : GPR, REG, GPR18 regvar.
-	R17("r17")         : GPR, REG, GPR17 regvar.
-	R16("r16")         : GPR, REG, GPR16 regvar.
-	R15("r15")         : GPR, REG, GPR15 regvar.
-	R14("r14")         : GPR, REG, GPR14 regvar.
-	R13("r13")         : GPR, REG, GPR13 regvar.
-	R12("r12")         : GPR, REG, GPR12.
-	R11("r11")         : GPR, REG, GPR11.
-	R10("r10")         : GPR, REG, GPR10.
-	R9("r9")           : GPR, REG, GPR9.
-	R8("r8")           : GPR, REG, GPR8.
-	R7("r7")           : GPR, REG, GPR7.
-	R6("r6")           : GPR, REG, GPR6.
-	R5("r5")           : GPR, REG, GPR5.
-	R4("r4")           : GPR, REG, GPR4.
-	R3("r3")           : GPR, REG, GPR3.
-	FP("fp")           : GPR, GPRFP.
-	SP("sp")           : GPR, GPRSP.
-	R0("r0")           : GPR, GPR0.
+	r31, r30, r29, r28, r27, r26,
+	r25, r24, r23, r22, r21, r20,
+	r19, r18, r17, r16, r15, r14,
+	r13                             : GPR, REG regvar.
+
+	r12, r11, r10, r9, r8, r7,
+	r6, r5, r4, r3                  : GPR, REG.
+
+	fp, sp, r0                      : GPR.
 
 	/* speed hack for sti 8 */
-	PAIR_R9_R10=R9+R10 : REG_PAIR.
-	PAIR_R7_R8=R7+R8   : REG_PAIR.
-	PAIR_R5_R6=R5+R6   : REG_PAIR.
-	PAIR_R3_R4=R3+R4   : REG_PAIR.
+	PAIR_R9_R10=r9+r10 : REG_PAIR.
+	PAIR_R7_R8=r7+r8   : REG_PAIR.
+	PAIR_R5_R6=r5+r6   : REG_PAIR.
+	PAIR_R3_R4=r3+r4   : REG_PAIR.
 
-	/*
-	 * F14 to F31 are reserved for regvar, if we ever implement
-	 * it.  Don't add them to FREG; the register allocator would
-	 * be too slow.
-	 */
-	F31("f31")         : FPR, FPR31.
-	F30("f30")         : FPR, FPR30.
-	F29("f29")         : FPR, FPR29.
-	F28("f28")         : FPR, FPR28.
-	F27("f27")         : FPR, FPR27.
-	F26("f26")         : FPR, FPR26.
-	F25("f25")         : FPR, FPR25.
-	F24("f24")         : FPR, FPR24.
-	F23("f23")         : FPR, FPR23.
-	F22("f22")         : FPR, FPR22.
-	F21("f21")         : FPR, FPR21.
-	F20("f20")         : FPR, FPR20.
-	F19("f19")         : FPR, FPR19.
-	F18("f18")         : FPR, FPR18.
-	F17("f17")         : FPR, FPR17.
-	F16("f16")         : FPR, FPR16.
-	F15("f15")         : FPR, FPR15.
-	F14("f14")         : FPR, FPR14.
-	F13("f13")         : FPR, FREG, FPR13.
-	F12("f12")         : FPR, FREG, FPR12.
-	F11("f11")         : FPR, FREG, FPR11.
-	F10("f10")         : FPR, FREG, FPR10.
-	F9("f9")           : FPR, FREG, FPR9.
-	F8("f8")           : FPR, FREG, FPR8.
-	F7("f7")           : FPR, FREG, FPR7.
-	F6("f6")           : FPR, FREG, FPR6.
-	F5("f5")           : FPR, FREG, FPR5.
-	F4("f4")           : FPR, FREG, FPR4.
-	F3("f3")           : FPR, FREG, FPR3.
-	F2("f2")           : FPR, FREG, FPR2.
-	F1("f1")           : FPR, FREG, FPR1.
-	F0("f0")           : FPR, FPR0.
+	/* f31 to f14 are reserved for regvar. */
 
-	FS13("f13")=F13    : FSREG.
-	FS12("f12")=F12    : FSREG.
-	FS11("f11")=F11    : FSREG.
-	FS10("f10")=F10    : FSREG.
-	FS9("f9")=F9       : FSREG.
-	FS8("f8")=F8       : FSREG.
-	FS7("f7")=F7       : FSREG.
-	FS6("f6")=F6       : FSREG.
-	FS5("f5")=F5       : FSREG.
-	FS4("f4")=F4       : FSREG.
-	FS3("f3")=F3       : FSREG.
-	FS2("f2")=F2       : FSREG.
-	FS1("f1")=F1       : FSREG.
+	f13, f12, f11, f10, f9, f8
+	f7, f6, f5, f4, f3, f2, f1      : FPR, FREG.
 
-	LR("lr")           : SPR.
-	CTR("ctr")         : SPR.
-	CR0("cr0")         : CR.
+	f0                              : FPR.
 
-#define RSCRATCH R0
-#define FSCRATCH F0
+	fs13("f13")=f13, fs12("f12")=f12,
+	fs11("f11")=f11, fs10("f10")=f10,
+	fs9("f9")=f9, fs8("f8")=f8,
+	fs7("f7")=f7, fs6("f6")=f6,
+	fs5("f5")=f5, fs4("f4")=f4,
+	fs3("f3")=f3, fs2("f2")=f2,
+	fs1("f1")=f1                    : FSREG.
+
+	lr, ctr     : SPR.
+	cr0         : CR.
+
+#define RSCRATCH r0
+#define FSCRATCH f0
 
 
 TOKENS
@@ -580,12 +509,12 @@ MOVES
 
 	from COND_FS to GPR
 		gen
-			fcmpo CR0, %1.reg1, %1.reg2
+			fcmpo cr0, %1.reg1, %1.reg2
 			mfcr %2
 
 	from COND_FD to GPR
 		gen
-			fcmpo CR0, %1.reg1, %1.reg2
+			fcmpo cr0, %1.reg1, %1.reg2
 			mfcr %2
 
 	/* Given a copy of cr0 in %1.reg, extract a condition bit
@@ -644,40 +573,40 @@ STACKINGRULES
 	from LOCAL to STACK
 		gen
 			COMMENT("stack LOCAL")
-			stwu %1, {IND_RC_W, SP, 0-4}
+			stwu %1, {IND_RC_W, sp, 0-4}
 
 	from REG to STACK
 		gen
 			COMMENT("stack REG")
-			stwu %1, {IND_RC_W, SP, 0-4}
+			stwu %1, {IND_RC_W, sp, 0-4}
 
 	from REG_PAIR to STACK
 		gen
 			COMMENT("stack REG_PAIR")
-			stwu %1.2, {IND_RC_W, SP, 0-4}
-			stwu %1.1, {IND_RC_W, SP, 0-4}
+			stwu %1.2, {IND_RC_W, sp, 0-4}
+			stwu %1.1, {IND_RC_W, sp, 0-4}
 
 	from ANY_BHW-REG to STACK
 		gen
 			COMMENT("stack ANY_BHW-REG")
 			move %1, RSCRATCH
-			stwu RSCRATCH, {IND_RC_W, SP, 0-4}
+			stwu RSCRATCH, {IND_RC_W, sp, 0-4}
 
 	from IND_ALL_D to STACK
 		gen
 			COMMENT("stack IND_ALL_D")
 			move %1, FSCRATCH
-			stfdu FSCRATCH, {IND_RC_D, SP, 0-8}
+			stfdu FSCRATCH, {IND_RC_D, sp, 0-8}
 
 	from FREG to STACK
 		gen
 			COMMENT("stack FPR")
-			stfdu %1, {IND_RC_D, SP, 0-8}
+			stfdu %1, {IND_RC_D, sp, 0-8}
 
 	from FSREG to STACK
 		gen
 			COMMENT("stack FSREG")
-			stfsu %1, {IND_RC_W, SP, 0-4}
+			stfsu %1, {IND_RC_W, sp, 0-4}
 
 
 
@@ -694,17 +623,17 @@ COERCIONS
 		uses REG
 		gen
 			COMMENT("coerce STACK->REG")
-			lwz %a, {IND_RC_W, SP, 0}
-			addi SP, SP, {CONST, 4}
+			lwz %a, {IND_RC_W, sp, 0}
+			addi sp, sp, {CONST, 4}
 		yields %a
 
 	from STACK
 		uses REG_PAIR
 		gen
 			COMMENT("coerce STACK->REG_PAIR")
-			lwz %a.1, {IND_RC_W, SP, 0}
-			lwz %a.2, {IND_RC_W, SP, 4}
-			addi SP, SP, {CONST, 8}
+			lwz %a.1, {IND_RC_W, sp, 0}
+			lwz %a.2, {IND_RC_W, sp, 4}
+			addi sp, sp, {CONST, 8}
 		yields %a
 
 	from FSREG
@@ -723,16 +652,16 @@ COERCIONS
 		uses FREG
 		gen
 			COMMENT("coerce STACK->FREG")
-			lfd %a, {IND_RC_D, SP, 0}
-			addi SP, SP, {CONST, 8}
+			lfd %a, {IND_RC_D, sp, 0}
+			addi sp, sp, {CONST, 8}
 		yields %a
 
 	from STACK
 		uses FSREG
 		gen
 			COMMENT("coerce STACK->FSREG")
-			lfs %a, {IND_RC_W, SP, 0}
-			addi SP, SP, {CONST, 4}
+			lfs %a, {IND_RC_W, sp, 0}
+			addi sp, sp, {CONST, 4}
 		yields %a
 
 	from IND_ALL_W
@@ -847,10 +776,10 @@ PATTERNS
 /* Local variables */
 
 	pat lal smalls($1)                 /* Load address of local */
-		yields {SUM_RC, FP, $1}
+		yields {SUM_RC, fp, $1}
 
 	pat lal                            /* Load address of local */
-		uses REG={SUM_RIS, FP, his($1)}
+		uses REG={SUM_RIS, fp, his($1)}
 		yields {SUM_RC, %a, los($1)}
 
 	pat lol inreg($1)>0                /* Load from local */
@@ -1045,9 +974,10 @@ PATTERNS
 			los 4
 
 	pat los $1==4                      /* Load arbitrary size */
-		with GPR3 STACK
+		with REG STACK
 			kills ALL
 			gen
+				move %1, r3
 				bl {LABEL, ".los4"}
 
 	pat sti $1==INT8                   /* Store byte indirect */
@@ -1144,9 +1074,10 @@ PATTERNS
 			sts 4
 
 	pat sts $1==4                      /* Store arbitrary size */
-		with GPR3 STACK
+		with REG STACK
 			kills ALL
 			gen
+				move %1, r3
 				bl {LABEL, ".sts4"}
 
 
@@ -1869,14 +1800,15 @@ PATTERNS
 		kills ALL
 		gen
 			labeldef $1
-			yields R3
+			yields r3
 
 	pat lab topeltsize($1)==4 && fallthrough($1)
-		with GPR3 STACK
+		with REG STACK
 		kills ALL
 		gen
+			move %1, r3
 			labeldef $1
-		yields %1
+		yields r3
 
 	pat lab topeltsize($1)!=4
 		with STACK
@@ -1885,8 +1817,9 @@ PATTERNS
 			labeldef $1
 
 	pat bra topeltsize($1)==4          /* Unconditional jump with TOS GPRister */
-		with GPR3 STACK
+		with REG STACK
 		gen
+			move %1, r3
 			b {LABEL, $1}
 
 	pat bra topeltsize($1)!=4          /* Unconditional jump without TOS GPRister */
@@ -1907,14 +1840,14 @@ PATTERNS
 		with REG STACK
 			kills ALL
 			gen
-				mtspr CTR, %1
+				mtspr ctr, %1
 				bctrl.
 
 	pat lfr $1==INT32                  /* Load function result, word */
-		yields R3
+		yields r3
 
 	pat lfr $1==INT64                  /* Load function result, double-word */
-		yields R4 R3
+		yields r4 r3
 
 	pat ret $1==0                      /* Return from procedure */
 		gen
@@ -1922,14 +1855,17 @@ PATTERNS
 			b {LABEL, ".ret"}
 
 	pat ret $1==INT32                  /* Return from procedure, word */
-		with GPR3
+		with REG
 		gen
+			move %1, r3
 			return
 			b {LABEL, ".ret"}
 
 	pat ret $1==INT64                  /* Return from procedure, double-word */
-		with GPR3 GPR4
+		with REG REG
 		gen
+			move %1, r3
+			move %2, r4
 			return
 			b {LABEL, ".ret"}
 
@@ -1944,7 +1880,7 @@ PATTERNS
 			gen
 				/* Wrong if size is zero */
 				srwi %1, %1, {CONST, 2}
-				mtspr CTR, %1
+				mtspr ctr, %1
 				1:
 				lwzx %a, %3, %b
 				stwx %a, %2, %b
@@ -1989,9 +1925,10 @@ PATTERNS
 			ste ".ignmask"
 
 	pat trp                            /* Raise EM trap */
-		with GPR3
+		with REG
 			kills ALL
 			gen
+				move %1, r3
 				bl {LABEL, ".trap"}
 
 	pat sig                            /* Set trap handler */
@@ -2032,55 +1969,55 @@ PATTERNS
 			uses REG
 			gen
 				move {LABEL, $1}, %a
-				move {IND_RC_W, %a, 8}, FP
-				move {IND_RC_W, %a, 4}, SP
+				move {IND_RC_W, %a, 8}, fp
+				move {IND_RC_W, %a, 4}, sp
 				move {IND_RC_W, %a, 0}, %a
-				mtspr CTR, %a
+				mtspr ctr, %a
 				bctr.
 
 	pat lor $1==0                      /* Load FP */
 		uses REG
 		gen
-			move FP, %a
+			move fp, %a
 		yields %a
 
 	pat lor $1==1                      /* Load SP */
 		uses REG
 		gen
-			move SP, %a
+			move sp, %a
 		yields %a
 
 	pat str $1==0                      /* Store FP */
 		with REG
 			gen
-				move %1, FP
+				move %1, fp
 
 	pat str $1==1                      /* Store SP */
 		with REG
 			gen
-				move %1, SP
+				move %1, sp
 
 	pat loc ass $1==4 && $2==4         /* Drop 4 bytes from stack */
 		with exact REG
 			/* nop */
 		with STACK
 			gen
-				addi SP, SP, {CONST, 4}
+				addi sp, sp, {CONST, 4}
 
 	pat ass $1==4                      /* Adjust stack by variable amount */
 		with CONST2 STACK
 			gen
-				move {SUM_RC, SP, %1.val}, SP
+				move {SUM_RC, sp, %1.val}, sp
 		with CONST_HZ STACK
 			gen
-				move {SUM_RC, SP, his(%1.val)}, SP
+				move {SUM_RC, sp, his(%1.val)}, sp
 		with CONST_STACK-CONST2-CONST_HZ STACK
 			gen
-				move {SUM_RC, SP, his(%1.val)}, SP
-				move {SUM_RC, SP, los(%1.val)}, SP
+				move {SUM_RC, sp, his(%1.val)}, sp
+				move {SUM_RC, sp, los(%1.val)}, sp
 		with REG STACK
 			gen
-				move {SUM_RR, SP, %1}, SP
+				move {SUM_RR, sp, %1}, sp
 
 	pat asp                            /* Adjust stack by constant amount */
 		leaving
@@ -2190,7 +2127,7 @@ PATTERNS
 		with FREG FREG STACK
 			uses REG
 			gen
-				fcmpo CR0, %2, %1
+				fcmpo cr0, %2, %1
 				bxx* {LABEL, $2}
 
 	/* Pop 2 singles, branch if... */
@@ -2332,7 +2269,7 @@ PATTERNS
 		with FREG FREG STACK
 			uses REG
 			gen
-				fcmpo CR0, %2, %1
+				fcmpo cr0, %2, %1
 				bxx* {LABEL, $2}
 
 	/* Pop 2 doubles, branch if... */
@@ -2356,8 +2293,8 @@ PATTERNS
 			uses reusing %1, FREG
 			gen
 				fctiwz %a, %1
-				stfdu %a, {IND_RC_D, SP, 0-8}
-				addi SP, SP, {CONST, 4}
+				stfdu %a, {IND_RC_D, sp, 0-8}
+				addi sp, sp, {CONST, 4}
 
 	/* Convert double to unsigned int */
 	pat loc loc cfu $1==8 && $2==4
@@ -2379,13 +2316,13 @@ PATTERNS
 			  REG={CONST_HZ, 0x80000000},
 			  FREG, FREG
 			gen
-				stwu %b, {IND_RC_W, SP, 0-8}
-				stw %a, {IND_RC_W, SP, 4}
-				lfd %d, {IND_RC_D, SP, 0}
-				stw %c, {IND_RC_W, SP, 4}
-				lfd %e, {IND_RC_D, SP, 0}
+				stwu %b, {IND_RC_W, sp, 0-8}
+				stw %a, {IND_RC_W, sp, 4}
+				lfd %d, {IND_RC_D, sp, 0}
+				stw %c, {IND_RC_W, sp, 4}
+				lfd %e, {IND_RC_D, sp, 0}
 				fsub %d, %d, %e
-				addi SP, SP, {CONST, 8}
+				addi sp, sp, {CONST, 8}
 			yields %d
 
 	/*
@@ -2398,13 +2335,13 @@ PATTERNS
 			  REG={CONST_0000_7FFF, 0},
 			  FREG, FREG
 			gen
-				stwu %a, {IND_RC_W, SP, 0-8}
-				stw %1, {IND_RC_W, SP, 4}
-				lfd %c, {IND_RC_D, SP, 0}
-				stw %b, {IND_RC_W, SP, 4}
-				lfd %d, {IND_RC_D, SP, 0}
+				stwu %a, {IND_RC_W, sp, 0-8}
+				stw %1, {IND_RC_W, sp, 4}
+				lfd %c, {IND_RC_D, sp, 0}
+				stw %b, {IND_RC_W, sp, 4}
+				lfd %d, {IND_RC_D, sp, 0}
 				fsub %c, %c, %d
-				addi SP, SP, {CONST, 8}
+				addi sp, sp, {CONST, 8}
 			yields %c
 
 	pat fef $1==8                      /* Split fraction, exponent */
