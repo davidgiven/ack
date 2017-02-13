@@ -32,7 +32,6 @@ PROPERTIES
 
 	GPR             /* any GPR */
 	REG             /* any allocatable GPR */
-	REG_PAIR(8)     /* speed hack for sti 8 */
 	FPR(8)          /* any FPR */
 	FREG(8)         /* any allocatable FPR */
 	FSREG           /* any allocatable single-precision FPR */
@@ -53,12 +52,6 @@ REGISTERS
 	r6, r5, r4, r3                  : GPR, REG.
 
 	fp, sp, r0                      : GPR.
-
-	/* speed hack for sti 8 */
-	PAIR_R9_R10=r9+r10 : REG_PAIR.
-	PAIR_R7_R8=r7+r8   : REG_PAIR.
-	PAIR_R5_R6=r5+r6   : REG_PAIR.
-	PAIR_R3_R4=r3+r4   : REG_PAIR.
 
 	/* f31 to f14 are reserved for regvar. */
 
@@ -580,12 +573,6 @@ STACKINGRULES
 			COMMENT("stack REG")
 			stwu %1, {IND_RC_W, sp, 0-4}
 
-	from REG_PAIR to STACK
-		gen
-			COMMENT("stack REG_PAIR")
-			stwu %1.2, {IND_RC_W, sp, 0-4}
-			stwu %1.1, {IND_RC_W, sp, 0-4}
-
 	from ANY_BHW-REG to STACK
 		gen
 			COMMENT("stack ANY_BHW-REG")
@@ -627,15 +614,6 @@ COERCIONS
 			addi sp, sp, {CONST, 4}
 		yields %a
 
-	from STACK
-		uses REG_PAIR
-		gen
-			COMMENT("coerce STACK->REG_PAIR")
-			lwz %a.1, {IND_RC_W, sp, 0}
-			lwz %a.2, {IND_RC_W, sp, 4}
-			addi sp, sp, {CONST, 8}
-		yields %a
-
 	from FSREG
 		uses FSREG
 		gen
@@ -671,9 +649,9 @@ COERCIONS
 		yields %a
 
 	/*
-	 * from IND_RC_D to REG_PAIR is not possible, because
+	 * from IND_RC_D to REG REG is not possible, because
 	 * %1.off+4 might overflow a signed 16-bit integer in
-	 *   move {IND_RC_W, %1.val, %1.off+4}, %a.2
+	 *   move {IND_RC_W, %1.val, %1.off+4}, %a
 	 */
 
 	from IND_ALL_D
@@ -1035,38 +1013,31 @@ PATTERNS
 		with SUM_RR FREG
 			kills MEMORY
 			gen move %2, {IND_RR_D, %1.reg1, %1.reg2}
-		/*
-		 * This pattern would be too slow:
-		 *   with REG REG REG
-		 * ncg can't handle that many registers, and would
-		 * take about 2 seconds on each sti 8.  So we use
-		 * REG_PAIR as a speed hack for sti 8.
-		 */
-		with REG REG_PAIR
+		with REG REG REG
 			kills MEMORY
 			gen
-				move %2.1, {IND_RC_W, %1, 0}
-				move %2.2, {IND_RC_W, %1, 4}
+				move %2, {IND_RC_W, %1, 0}
+				move %3, {IND_RC_W, %1, 4}
 		/*
 		 * Next 2 patterns exist because there is no coercion
-		 * from IND_ALL_D to REG_PAIR.
+		 * from IND_ALL_D to REG REG.
 		 */
 		with REG IND_RC_D
 			kills MEMORY
-			uses REG={SUM_RC, %2.reg, %2.off}, REG_PAIR
+			uses REG={SUM_RC, %2.reg, %2.off}, REG, REG
 			gen
-				move {IND_RC_W, %a, 0}, %b.1
-				move {IND_RC_W, %a, 4}, %b.2
-				move %b.1, {IND_RC_W, %1, 0}
-				move %b.2, {IND_RC_W, %1, 4}
+				move {IND_RC_W, %a, 0}, %b
+				move {IND_RC_W, %a, 4}, %c
+				move %b, {IND_RC_W, %1, 0}
+				move %c, {IND_RC_W, %1, 4}
 		with REG IND_RR_D
 			kills MEMORY
-			uses REG={SUM_RR, %2.reg1, %2.reg2}, REG_PAIR
+			uses REG={SUM_RR, %2.reg1, %2.reg2}, REG, REG
 			gen
-				move {IND_RC_W, %a, 0}, %b.1
-				move {IND_RC_W, %a, 4}, %b.2
-				move %b.1, {IND_RC_W, %1, 0}
-				move %b.2, {IND_RC_W, %1, 4}
+				move {IND_RC_W, %a, 0}, %b
+				move {IND_RC_W, %a, 4}, %c
+				move %b, {IND_RC_W, %1, 0}
+				move %c, {IND_RC_W, %1, 4}
 
 	pat sti                            /* Store arbitrary size */
 		leaving
