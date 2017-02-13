@@ -6,7 +6,7 @@ for _, plat in ipairs(vars.plats) do
 	acklibrary {
 		name = "lib_"..plat,
 		srcs = {
-			"./*.s",
+			"./*.s", -- los4.s, sts4.s
 		},
 		vars = { plat = plat },
 		deps = {

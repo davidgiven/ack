@@ -1042,13 +1042,13 @@ PATTERNS
 	pat loi                            /* Load arbitrary size */
 		leaving
 			loc $1
-			los INT32
+			los 4
 
-	pat los $1==INT32                  /* Load arbitrary size */
-		with GPR3 GPR4 STACK
+	pat los $1==4                      /* Load arbitrary size */
+		with GPR3 STACK
 			kills ALL
 			gen
-				bl {LABEL, ".los"}
+				bl {LABEL, ".los4"}
 
 	pat sti $1==INT8                   /* Store byte indirect */
 		with REG REG
@@ -1141,13 +1141,13 @@ PATTERNS
 	pat sti                            /* Store arbitrary size */
 		leaving
 			loc $1
-			sts INT32
+			sts 4
 
-	pat sts $1==INT32                  /* Store arbitrary size */
-		with GPR3 GPR4 STACK
+	pat sts $1==4                      /* Store arbitrary size */
+		with GPR3 STACK
 			kills ALL
 			gen
-				bl {LABEL, ".sts"}
+				bl {LABEL, ".sts4"}
 
 
 /* Arithmetic wrappers */
@@ -1459,39 +1459,39 @@ PATTERNS
 			yields %a
 
 
-
 /* Arrays */
 
-	pat aar $1==INT32                  /* Index array */
-		with GPR3 GPR4 GPR5
+	pat aar $1==4                      /* Address of array element */
+		leaving
+			cal ".aar4"
+
+	pat lar $1==4                      /* Load from array */
+		with STACK
 			kills ALL
 			gen
 				bl {LABEL, ".aar4"}
-			yields R3
+				/* pass r3 = size from .aar4 to .los4 */
+				bl {LABEL, ".los4"}
 
-	pat lae lar $2==INT32 && nicesize(rom($1, 3)) /* Load array */
+	pat lae lar $2==4 && nicesize(rom($1, 3))
 		leaving
 			lae $1
-			aar INT32
+			aar 4
 			loi rom($1, 3)
 
-	pat lar $1==INT32                  /* Load array */
-		with GPR3 GPR4 GPR5 STACK
+	pat sar $1==4                      /* Store to array */
+		with STACK
 			kills ALL
 			gen
-				bl {LABEL, ".lar4"}
+				bl {LABEL, ".aar4"}
+				/* pass r3 = size from .aar4 to .sts4 */
+				bl {LABEL, ".sts4"}
 
-	pat lae sar $2==INT32 && nicesize(rom($1, 3)) /* Store array */
+	pat lae sar $2==4 && nicesize(rom($1, 3))
 		leaving
 			lae $1
-			aar INT32
+			aar 4
 			sti rom($1, 3)
-
-	pat sar $1==INT32                  /* Store array */
-		with GPR3 GPR4 GPR5 STACK
-			kills ALL
-			gen
-				bl {LABEL, ".sar4"}
 
 
 /* Sets */
