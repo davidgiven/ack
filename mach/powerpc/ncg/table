@@ -1854,12 +1854,13 @@ PATTERNS
 			cmi INT32
 
 	pat cms defined($1)
-		with STACK
-			kills ALL
-			gen
-				move {CONST, $1}, R3
-				bl {LABEL, ".cms"}
-			yields R3
+		leaving
+			loc $1
+			cal ".cms"
+
+	pat cms !defined($1)
+		leaving
+			cal ".cms"
 
 
 /* Other branching and labelling */
