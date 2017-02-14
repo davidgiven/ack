@@ -9,6 +9,7 @@ INT64 = 8
 
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
+SL_OFFSET = 8   /* Offset of static link */
 
 #define COMMENT(n) /* comment {LABEL, n} */
 
@@ -1910,27 +1911,41 @@ PATTERNS
 		leaving
 			ret 0
 
-	pat lxl $1==0                      /* Load FP */
+	/*
+	 * Lexical local base: lxl 0 yields our fp, lxl n yields the
+	 * fp of the nth statically enclosing procedure.
+	 */
+	pat lxl $1==0
 		leaving
 			lor 0
+	pat lxl $1==1
+		yields {IND_RC_W, fp, SL_OFFSET}
+	pat lxl $1==2
+		uses REG={IND_RC_W, fp, SL_OFFSET}
+		yields {IND_RC_W, %a, SL_OFFSET}
+	pat lxl $1==3
+		uses REG={IND_RC_W, fp, SL_OFFSET}, reusing %a, REG
+		gen move {IND_RC_W, %a, SL_OFFSET}, %b
+		yields {IND_RC_W, %b, SL_OFFSET}
+	pat lxl $1>=4 && $1<=0x8000
+		uses REG={IND_RC_W, fp, SL_OFFSET},
+		     REG={CONST_0000_7FFF, $1-1}
+		gen
+			mtspr ctr, %b
+			1:
+			lwz %a, {IND_RC_W, %a, SL_OFFSET}
+			bdnz {LABEL, "1b"}
+		yields %a
 
-	pat lxl $1==1                      /* Load caller's FP */
-		leaving
-			lxl 0
-			dch
-
-	pat dch                            /* FP -> caller FP */
+	pat dch               /* Dynamic chain: LB -> caller's LB */
 		with REG
-			uses reusing %1, REG
-			gen
-				lwz %a, {IND_RC_W, %1, FP_OFFSET}
-			yields %a
+			yields {IND_RC_W, %1, FP_OFFSET}
 
-	pat lpb                            /* Convert FP to argument address */
+	pat lpb                            /* LB -> argument base */
 		leaving
 			adp EM_BSIZE
 
-	pat lxa                            /* Load caller's SP */
+	pat lxa                            /* Lexical argument base */
 		leaving
 			lxl $1
 			lpb
@@ -1946,24 +1961,24 @@ PATTERNS
 				mtspr ctr, %a
 				bctr.
 
-	pat lor $1==0                      /* Load FP */
+	pat lor $1==0                      /* Load local base */
 		uses REG
 		gen
 			move fp, %a
 		yields %a
 
-	pat lor $1==1                      /* Load SP */
+	pat lor $1==1                      /* Load stack pointer */
 		uses REG
 		gen
 			move sp, %a
 		yields %a
 
-	pat str $1==0                      /* Store FP */
+	pat str $1==0                      /* Store local base */
 		with REG
 			gen
 				move %1, fp
 
-	pat str $1==1                      /* Store SP */
+	pat str $1==1                      /* Store stack pointer */
 		with REG
 			gen
 				move %1, sp
