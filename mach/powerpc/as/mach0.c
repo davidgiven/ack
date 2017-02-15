@@ -11,15 +11,13 @@
 #define DEBUG 0
 
 #undef valu_t
-#define valu_t long
+#define valu_t int32_t
 
 #undef ADDR_T
-#define ADDR_T long
+#define ADDR_T uint32_t
 
 #undef word_t
-#define word_t long
-
-typedef uint32_t quad;
+#define word_t uint32_t
 
 #undef ALIGNWORD
 #define ALIGNWORD	4

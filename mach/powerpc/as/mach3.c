@@ -498,25 +498,25 @@
 0,     OP_TOX_RA_SI,          3<<26 | 31<<21,               "twui",
 
 /* page 62 */
-0,     OP_RS_RA_UI_CC,        28<<26,                                  "andi", /* C compulsory */
-0,     OP_RS_RA_UI_CC,        29<<26,                                  "andis", /* C compulsory */
-0,     OP_RS_RA_UI,           24<<26,                                  "ori",
-0,     OP_RS_RA_UI,           25<<26,                                  "oris",
-0,     OP_RS_RA_UI,           26<<26,                                  "xori",
-0,     OP_RS_RA_UI,           27<<26,                                  "xoris",
-0,     OP_RS_RA_RB_C,         31<<26 | 28<<1,                          "and",
-0,     OP_RS_RA_RB_C,         31<<26 | 444<<1,                         "or",
-0,     OP_RS_RA_RB_C,         31<<26 | 316<<1,                         "xor",
-0,     OP_RS_RA_RB_C,         31<<26 | 476<<1,                         "nand",
-0,     OP_RS_RA_RB_C,         31<<26 | 124<<1,                         "nor",
-0,     OP_RS_RA_RB_C,         31<<26 | 284<<1,                         "eqv",
-0,     OP_RS_RA_RB_C,         31<<26 | 60<<1,                          "andc",
-0,     OP_RS_RA_RB_C,         31<<26 | 412<<1,                         "orc",
-0,     OP_RS_RA_C,            31<<26 | 954<<1,                         "extsb",
-0,     OP_RS_RA_C,            31<<26 | 922<<1,                         "extsh",
-0,     OP_RS_RA_C,            31<<26 | 986<<1,                         "extsw",
-0,     OP_RS_RA_C,            31<<26 | 58<<1,                          "cntlzd",
-0,     OP_RS_RA_C,            31<<26 | 26<<1,                          "cntlzw",
+0,     OP_RA_RS_UI_CC,        28<<26,                                  "andi", /* C compulsory */
+0,     OP_RA_RS_UI_CC,        29<<26,                                  "andis", /* C compulsory */
+0,     OP_RA_RS_UI,           24<<26,                                  "ori",
+0,     OP_RA_RS_UI,           25<<26,                                  "oris",
+0,     OP_RA_RS_UI,           26<<26,                                  "xori",
+0,     OP_RA_RS_UI,           27<<26,                                  "xoris",
+0,     OP_RA_RS_RB_C,         31<<26 | 28<<1,                          "and",
+0,     OP_RA_RS_RB_C,         31<<26 | 444<<1,                         "or",
+0,     OP_RA_RS_RB_C,         31<<26 | 316<<1,                         "xor",
+0,     OP_RA_RS_RB_C,         31<<26 | 476<<1,                         "nand",
+0,     OP_RA_RS_RB_C,         31<<26 | 124<<1,                         "nor",
+0,     OP_RA_RS_RB_C,         31<<26 | 284<<1,                         "eqv",
+0,     OP_RA_RS_RB_C,         31<<26 | 60<<1,                          "andc",
+0,     OP_RA_RS_RB_C,         31<<26 | 412<<1,                         "orc",
+0,     OP_RA_RS_C,            31<<26 | 954<<1,                         "extsb",
+0,     OP_RA_RS_C,            31<<26 | 922<<1,                         "extsh",
+0,     OP_RA_RS_C,            31<<26 | 986<<1,                         "extsw",
+0,     OP_RA_RS_C,            31<<26 | 58<<1,                          "cntlzd",
+0,     OP_RA_RS_C,            31<<26 | 26<<1,                          "cntlzw",
 
 /* extended m using logic */
 0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,              "mr",
