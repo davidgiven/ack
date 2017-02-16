@@ -47,14 +47,16 @@ REGISTERS
 	r31, r30, r29, r28, r27, r26,
 	r25, r24, r23, r22, r21, r20,
 	r19, r18, r17, r16, r15, r14,
-	r13                             : GPR, REG regvar.
+	r13                             : GPR, REG regvar(reg_any).
 
 	r12, r11, r10, r9, r8, r7,
 	r6, r5, r4, r3                  : GPR, REG.
 
 	fp, sp, r0                      : GPR.
 
-	/* f31 to f14 are reserved for regvar. */
+	f31, f30, f29, f28, f27, f26,
+	f25, f24, f23, f22, f21, f20,
+	f19, f18, f17, f16, f15, f14    : FPR, FREG regvar(reg_float).
 
 	f13, f12, f11, f10, f9, f8
 	f7, f6, f5, f4, f3, f2, f1      : FPR, FREG.
@@ -86,6 +88,7 @@ TOKENS
 	LABEL_HA           = { ADDR adr; }            4    "ha16[" adr "]".
 	LABEL_LO           = { ADDR adr; }            4    "lo16[" adr "]".
 	LOCAL              = { INT off; }             4    ">>> BUG IN LOCAL".
+	DLOCAL             = { INT off; }             8    ">>> BUG IN DLOCAL".
 
 /* Allows us to use regvar() to refer to registers */
 
@@ -239,27 +242,27 @@ INSTRUCTIONS
   eqv             GPR:wo, GPR:ro, GPR:ro.
   extsb           GPR:wo, GPR:ro.
   extsh           GPR:wo, GPR:ro.
-  fadd            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fadd            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fadds           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fcmpo           CR:wo, FREG:ro, FREG:ro cost(4, 5).
   fcmpo           CR:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fctiwz          FREG:wo, FREG:ro.
-  fdiv            FREG:wo, FREG:ro, FREG:ro cost(4, 35).
+  fdiv            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 35).
   fdivs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 21).
-  fmr             FPR:wo, FPR:ro cost(4, 5).
+  fmr             FPR+DLOCAL:wo, FPR:ro cost(4, 5).
   fmr             FSREG:wo, FSREG:ro cost(4, 5).
-  fmul            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fmul            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fmuls           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
-  fneg            FREG:wo, FREG:ro cost(4, 5).
+  fneg            FREG+DLOCAL:wo, FREG:ro cost(4, 5).
   fneg            FSREG:wo, FSREG:ro cost(4, 5).
   frsp            FSREG:wo, FREG:ro cost(4, 5).
-  fsub            FREG:wo, FREG:ro, FREG:ro cost(4, 5).
+  fsub            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fsubs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
   lbz             GPR:wo, IND_RC_B+IND_RL_B:ro cost(4, 3).
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lfd             FPR:wo, IND_RC_D+IND_RL_D:ro cost(4, 5).
+  lfd             FPR+DLOCAL:wo, IND_RC_D+IND_RL_D:ro cost(4, 5).
   lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
-  lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
+  lfdx            FPR+DLOCAL:wo, GPR:ro, GPR:ro cost(4, 5).
   lfs             FSREG:wo, IND_RC_W+IND_RL_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
   lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
@@ -296,7 +299,7 @@ INSTRUCTIONS
   stb             GPR:ro, IND_RC_B+IND_RL_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stfd            FPR:ro, IND_RC_D+IND_RL_D:rw cost(4, 4).
-  stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
+  stfdu           FPR+DLOCAL:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
   stfs            FSREG:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
@@ -317,6 +320,9 @@ MOVES
 
 	from GPR to GPR
 		gen mr %2, %1
+
+	from FPR to FPR+DLOCAL
+		gen fmr %2, %1
 
 /* Constants */
 
@@ -437,10 +443,10 @@ MOVES
 
 /* Read double */
 
-	from IND_RC_D+IND_RL_D to FPR
+	from IND_RC_D+IND_RL_D to FPR+DLOCAL
 		gen lfd %2, %1
 
-	from IND_RR_D to FPR
+	from IND_RR_D to FPR+DLOCAL
 		gen lfdx %2, %1.reg1, %1.reg2
 
 /* Write double */
@@ -586,9 +592,9 @@ STACKINGRULES
 			move %1, FSCRATCH
 			stfdu FSCRATCH, {IND_RC_D, sp, 0-8}
 
-	from FREG to STACK
+	from FREG+DLOCAL to STACK
 		gen
-			COMMENT("stack FPR")
+			COMMENT("stack FREG+DLOCAL")
 			stfdu %1, {IND_RC_D, sp, 0-8}
 
 	from FSREG to STACK
@@ -761,47 +767,57 @@ PATTERNS
 		uses REG={SUM_RIS, fp, his($1)}
 		yields {SUM_RC, %a, los($1)}
 
-	pat lol inreg($1)>0                /* Load from local */
+	/* Load word from local */
+	pat lol inreg($1)==reg_any
 		yields {LOCAL, $1}
-
-	pat lol                            /* Load from local */
+	pat lol
 		leaving
 			lal $1
-			loi INT32
+			loi 4
 
-	pat ldl                            /* Load double-word from local */
+	/* Load double-word from local */
+	pat ldl inreg($1)==reg_float
+		yields {DLOCAL, $1}
+	pat ldl
 		leaving
 			lal $1
-			loi INT32*2
+			loi 8
 
-	pat stl inreg($1)>0                /* Store to local */
+	/* Store word to local */
+	pat stl inreg($1)==reg_any
 		with ANY_BHW
 			kills regvar($1), LOCAL %off==$1
+			gen move %1, {GPRE, regvar($1)}
+	pat stl
+		leaving
+			lal $1
+			sti 4
+
+	/* Store double-word to local */
+	pat sdl inreg($1)==reg_float
+		with exact FREG+IND_ALL_D
+			gen move %1, {DLOCAL, $1}
+		with STACK
 			gen
-				move %1, {GPRE, regvar($1)}
-
-	pat stl                            /* Store to local */
+				lfd {DLOCAL, $1}, {IND_RC_D, sp, 0}
+				addi sp, sp, {CONST, 8}
+	pat sdl
 		leaving
 			lal $1
-			sti INT32
+			sti 8
 
-	pat sdl                            /* Store double-word to local */
-		leaving
-			lal $1
-			sti INT32*2
-
-	pat lil inreg($1)>0                /* Load from indirected local */
+	/* Load indirect from local */
+	pat lil inreg($1)==reg_any
 		yields {IND_RC_W, regvar($1), 0}
-
-	pat lil                            /* Load from indirected local */
+	pat lil
 		leaving
 			lol $1
-			loi INT32
+			loi 4
 
 	pat sil                            /* Save to indirected local */
 		leaving
 			lol $1
-			sti INT32
+			sti 4
 
 	pat zrl                             /* Zero local */
 		leaving
@@ -2021,12 +2037,7 @@ PATTERNS
 			yields %1
 
 
-/* Floating point support */
-
-	/* All very cheap and nasty --- this needs to be properly integrated into
-	 * the code generator. ncg doesn't like having separate FPU registers. */
-
-	/* Single-precision */
+/* Single-precision floating-point */
 
 	pat zrf $1==INT32                  /* Push zero */
 		leaving
@@ -2168,46 +2179,62 @@ PATTERNS
 			loc 4
 			cff
 
-	/* Double-precision */
+
+/* Double-precision floating-point */
 
 	pat zrf $1==INT64                  /* Push zero */
 		leaving
 			lde ".fd_00000000"
 
-	pat adf $1==INT64                  /* Add double */
+	pat adf $1==8                      /* Add double */
 		with FREG FREG
-			uses FREG
+			uses reusing %1, FREG
 			gen
 				fadd %a, %2, %1
 			yields %a
-
-	pat sbf $1==INT64                  /* Subtract double */
+	pat adf sdl $1==8 && inreg($2)==reg_float
 		with FREG FREG
-			uses FREG
+			gen fadd {DLOCAL, $2}, %2, %1
+
+	pat sbf $1==8                      /* Subtract double */
+		with FREG FREG
+			uses reusing %1, FREG
 			gen
 				fsub %a, %2, %1
 			yields %a
+	pat sbf sdl $1==8 && inreg($2)==reg_float
+		with FREG FREG
+			gen fsub {DLOCAL, $2}, %2, %1
 
-	pat mlf $1==INT64                  /* Multiply double */
+	pat mlf $1==8                      /* Multiply double */
 		with FREG FREG
 			uses reusing %1, FREG
 			gen
 				fmul %a, %2, %1
 			yields %a
+	pat mlf sdl $1==8 && inreg($2)==reg_float
+		with FREG FREG
+			gen fmul {DLOCAL, $2}, %2, %1
 
-	pat dvf $1==INT64                  /* Divide double */
+	pat dvf $1==8                      /* Divide double */
 		with FREG FREG
 			uses reusing %1, FREG
 			gen
 				fdiv %a, %2, %1
 			yields %a
+	pat dvf sdl $1==8 && inreg($2)==reg_float
+		with FREG FREG
+			gen fdiv {DLOCAL, $2}, %2, %1
 
-	pat ngf $1==INT64                  /* Negate double */
+	pat ngf $1==8                      /* Negate double */
 		with FREG
 			uses reusing %1, FREG
 			gen
 				fneg %a, %1
 			yields %a
+	pat ngf sdl $1==8 && inreg($2)==reg_float
+		with FREG
+			gen fneg {DLOCAL, $2}, %1
 
 	pat cmf $1==INT64                  /* Compare double */
 		with FREG FREG
