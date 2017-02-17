@@ -228,6 +228,7 @@ INSTRUCTIONS
   bcctrl          CONST:ro, CONST:ro, CONST:ro.
     bctrl.
   bclr            CONST:ro, CONST:ro, CONST:ro.
+    blr.
   bl              LABEL:ro.
   cmp             CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
     cmpw          GPR:ro, GPR:ro kills :cc.
@@ -1839,23 +1840,29 @@ PATTERNS
 
 	pat ret $1==0                      /* Return from procedure */
 		gen
+			/* Restore saved registers. */
 			return
-			b {LABEL, ".ret"}
+			/* Epilog: restore lr and fp. */
+			lwz r0, {IND_RC_W, fp, 4}
+			mtspr lr, r0
+			lwz r0, {IND_RC_W, fp, 0}
+			/* Free our stack frame. */
+			addi sp, fp, {CONST, 8}
+			mr fp, r0
+			blr.
 
-	pat ret $1==INT32                  /* Return from procedure, word */
+	pat ret $1==4                      /* Return from procedure, word */
 		with REG
-		gen
-			move %1, r3
-			return
-			b {LABEL, ".ret"}
+			gen move %1, r3
+			leaving ret 0
 
-	pat ret $1==INT64                  /* Return from procedure, double-word */
+	pat ret $1==8                      /* Return from proc, double-word */
 		with REG REG
-		gen
-			move %1, r3
-			move %2, r4
-			return
-			b {LABEL, ".ret"}
+			gen
+				move %1, r3
+				move %2, r4
+			leaving
+				ret 0
 
 	pat blm                            /* Block move constant length */
 		leaving
