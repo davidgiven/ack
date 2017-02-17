@@ -115,16 +115,13 @@ regscore(long offset, int size, int type, int frequency, int totype)
 
 	switch (type) {
 		case reg_float:
-			if (size != 8) {
-				fprintf(codefile, "! local %ld float size %d reject\n", offset, size);
+			/* Don't put reg_float in reg_any. */
+			if (totype != reg_float)
 				return -1;
-			}
+			assert(size == 8);
 			break;
 		default:
-			if (size != 4) {
-				fprintf(codefile, "! local %ld int size %d reject\n", offset, size);
-				return -1;
-			}
+			assert(size == 4);
 			break;
 	}
 
@@ -139,7 +136,9 @@ regscore(long offset, int size, int type, int frequency, int totype)
 	 * 4 bytes if the local is a parameter.
 	 */
 	score = 4 * frequency - 8 - ((offset >= 0) ? 4 : 0);
+#if 0
 	fprintf(codefile, "! local %ld score %d\n", offset, score);
+#endif
 	return score;
 }
 
