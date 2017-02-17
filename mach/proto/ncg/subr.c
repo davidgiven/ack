@@ -2,8 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
-#include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -657,11 +658,12 @@ itokcost() {
 		tdp->t_cost.ct_space = costcalc(tdp->t_cost);
 }
 
-/*VARARGS1*/
-error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
+void error(const char *s, ...) {
+	va_list ap;
 
+	va_start(ap,s);
 	fprintf(stderr,"Error: ");
-	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
 #ifdef TABLEDEBUG
 	ruletrace();
@@ -670,11 +672,12 @@ error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 	exit(-1);
 }
 
-/*VARARGS1*/
-fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
+void fatal(const char *s, ...) {
+	va_list ap;
 
+	va_start(ap,s);
 	fprintf(stderr,"Fatal: ");
-	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
 #ifdef TABLEDEBUG
 	ruletrace();
