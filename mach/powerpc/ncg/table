@@ -31,45 +31,51 @@ SL_OFFSET = 8   /* Offset of static link */
 
 PROPERTIES
 
-	GPR             /* any GPR */
-	REG             /* any allocatable GPR */
-	FPR(8)          /* any FPR */
-	FREG(8)         /* any allocatable FPR */
-	FSREG           /* any allocatable single-precision FPR */
-	SPR             /* any SPR */
-	CR              /* any CR */
+	GPR             /* general-purpose register */
+	REG             /* allocatable GPR */
+	REG3            /* coercion to r3 */
+
+	FPR(8)          /* floating-point register */
+	FREG(8)         /* allocatable FPR */
+	FSREG           /* allocatable single-precision FPR */
+
+	SPR             /* special-purpose register */
+	CR              /* condition register */
 
 
 REGISTERS
 
-	/* Reverse order to encourage ncg to allocate them from r31 down */
+	/*
+	 * When ncg allocates regvars, it seems to start with the last
+	 * register in the first class.  To encourage ncg to allocate
+	 * them from r31 down, we list them in one class as
+	 *   r13, r14, ..., r31: GPR, REG regvar(reg_any).
+	 */
 
-	r31, r30, r29, r28, r27, r26,
-	r25, r24, r23, r22, r21, r20,
-	r19, r18, r17, r16, r15, r14,
-	r13                             : GPR, REG regvar(reg_any).
+	r0, sp, fp  : GPR.
+	r3          : GPR, REG, REG3.
 
-	r12, r11, r10, r9, r8, r7,
-	r6, r5, r4, r3                  : GPR, REG.
+	r4, r5, r6, r7, r8, r9, r10, r11, r12
+	  : GPR, REG.
 
-	fp, sp, r0                      : GPR.
+	r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24,
+	r25, r26, r27, r28, r29, r30, r31
+	  : GPR, REG regvar(reg_any).
 
-	f31, f30, f29, f28, f27, f26,
-	f25, f24, f23, f22, f21, f20,
-	f19, f18, f17, f16, f15, f14    : FPR, FREG regvar(reg_float).
+	f0          : FPR.
 
-	f13, f12, f11, f10, f9, f8
-	f7, f6, f5, f4, f3, f2, f1      : FPR, FREG.
+	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13
+          : FPR, FREG.
 
-	f0                              : FPR.
+	f14, f15, f16, f17, f18, f19, f20, f21, f22, f23, f24, f25,
+	f26, f27, f28, f29, f30, f31
+	  : FPR, FREG regvar(reg_float).
 
-	fs13("f13")=f13, fs12("f12")=f12,
-	fs11("f11")=f11, fs10("f10")=f10,
-	fs9("f9")=f9, fs8("f8")=f8,
-	fs7("f7")=f7, fs6("f6")=f6,
-	fs5("f5")=f5, fs4("f4")=f4,
-	fs3("f3")=f3, fs2("f2")=f2,
-	fs1("f1")=f1                    : FSREG.
+	fs1("f1")=f1, fs2("f2")=f2, fs3("f3")=f3, fs4("f4")=f4,
+	fs5("f5")=f5, fs6("f6")=f6, fs7("f7")=f7, fs8("f8")=f8,
+	fs9("f9")=f9, fs10("f10")=f10, fs11("f11")=f11, fs12("f12")=f12,
+	fs13("f13")=f13
+	  : FSREG.
 
 	lr, ctr     : SPR.
 	cr0         : CR.
@@ -970,10 +976,9 @@ PATTERNS
 			los 4
 
 	pat los $1==4                      /* Load arbitrary size */
-		with REG STACK
+		with REG3 STACK
 			kills ALL
 			gen
-				move %1, r3
 				bl {LABEL, ".los4"}
 
 	pat sti $1==INT8                   /* Store byte indirect */
@@ -1063,10 +1068,9 @@ PATTERNS
 			sts 4
 
 	pat sts $1==4                      /* Store arbitrary size */
-		with REG STACK
+		with REG3 STACK
 			kills ALL
 			gen
-				move %1, r3
 				bl {LABEL, ".sts4"}
 
 
@@ -1792,10 +1796,9 @@ PATTERNS
 			yields r3
 
 	pat lab topeltsize($1)==4 && fallthrough($1)
-		with REG STACK
+		with REG3 STACK
 		kills ALL
 		gen
-			move %1, r3
 			labeldef $1
 		yields r3
 
@@ -1806,9 +1809,8 @@ PATTERNS
 			labeldef $1
 
 	pat bra topeltsize($1)==4          /* Unconditional jump with TOS GPRister */
-		with REG STACK
+		with REG3 STACK
 		gen
-			move %1, r3
 			b {LABEL, $1}
 
 	pat bra topeltsize($1)!=4          /* Unconditional jump without TOS GPRister */
@@ -1852,17 +1854,13 @@ PATTERNS
 			blr.
 
 	pat ret $1==4                      /* Return from procedure, word */
-		with REG
-			gen move %1, r3
+		with REG3
 			leaving ret 0
 
 	pat ret $1==8                      /* Return from proc, double-word */
-		with REG REG
-			gen
-				move %1, r3
-				move %2, r4
-			leaving
-				ret 0
+		with REG3 REG
+			gen move %2, r4
+			leaving ret 0
 
 	pat blm                            /* Block move constant length */
 		leaving
@@ -1920,10 +1918,9 @@ PATTERNS
 			ste ".ignmask"
 
 	pat trp                            /* Raise EM trap */
-		with REG
+		with REG3
 			kills ALL
 			gen
-				move %1, r3
 				bl {LABEL, ".trap"}
 
 	pat sig                            /* Set trap handler */

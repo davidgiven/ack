@@ -226,7 +226,7 @@ f_regsave(void)
 
 	for (reg = 31; reg >= 0; reg--)
 		if (savedf[reg] >= 0)
-			fprintf(codefile, "lfd f%rd, %ld(fp)\n",
+			fprintf(codefile, "lfd f%d, %ld(fp)\n",
 				reg, savedf[reg]);
 
 	for (reg = 31; reg >= 0; reg--)
