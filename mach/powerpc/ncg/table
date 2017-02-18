@@ -2128,7 +2128,7 @@ PATTERNS
 			yields %a
 
 	proc cmf4zxx example cmf zeq
-		with FREG FREG STACK
+		with FSREG FSREG STACK
 			uses REG
 			gen
 				fcmpo cr0, %2, %1
