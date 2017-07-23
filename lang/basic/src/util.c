@@ -69,7 +69,7 @@ illegalcmd()
 
 
 
-char *itoa(i)
+char *myitoa(i)
 int i;
 {
 	static char buf[30];

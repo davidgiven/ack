@@ -355,7 +355,7 @@ void zgt(lab) int lab;		{	C_zgt((label) lab); }
 void zlt(lab) int lab;		{	C_zlt((label) lab); }
 void zne(lab) int lab;		{	C_zne((label) lab); }
 
-char *itoa(i) long i;
+char *myitoa(i) long i;
 {
 	static char a[sizeof(long)*3];
 	sprint(a, "%ld", i);
@@ -364,7 +364,7 @@ char *itoa(i) long i;
 
 void rom(size, c) int size; long c;
 {
-	C_rom_icon(itoa(c), (arith) size);
+	C_rom_icon(myitoa(c), (arith) size);
 }
 
 void lin()
