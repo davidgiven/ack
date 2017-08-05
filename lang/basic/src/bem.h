@@ -71,7 +71,7 @@ extern int 	dataused;
 extern Linerecord *currline;
 
 
-extern char *itoa();
+extern char *myitoa();
 extern char *salloc();
 
 extern char *strcpy();
