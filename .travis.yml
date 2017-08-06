@@ -1,11 +1,17 @@
+language: c
+
 matrix:
     include:
         -
             os: linux
+            sudo: false
+            dist: trusty
             compiler: gcc
     include:
         -
             os: linux
+            sudo: false
+            dist: trusty
             compiler: clang
     include:
         -
@@ -21,7 +27,6 @@ addons:
 
 git:
     depth: 10
-language: c
 script:
     - make PREFIX=/tmp/acki
 
