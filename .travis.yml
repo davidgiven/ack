@@ -7,13 +7,11 @@ matrix:
             sudo: false
             dist: trusty
             compiler: gcc
-    include:
         -
             os: linux
             sudo: false
             dist: trusty
             compiler: clang
-#    include:
 #        -
 #            os: osx
 #            env: HOMEBREW_NO_AUTO_UPDATE=1
