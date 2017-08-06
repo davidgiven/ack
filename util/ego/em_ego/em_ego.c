@@ -280,7 +280,7 @@ static void
 				phargs[argc++] = "-M";
 				phargs[argc++] = descr_file;
 			}
-			
+
 			for (i=0; i<nphase_args; i++)
 				phargs[argc++] = phase_args[i];
 
@@ -410,12 +410,12 @@ int main(int argc, char* argv[])
 		(void)strcpy(tmpbufs[0], ".");
 	}
 	(void)strcat(ddump, "/ego.dd.XXXXXX");
-	(void)mktemp(ddump);
+	close(mkstemp(ddump));
 	(void)strcat(pdump, "/ego.pd.XXXXXX");
-	(void)mktemp(pdump);
+	close(mkstemp(pdump));
 
 	(void)strcat(tmpbufs[0], "/ego.XXXXXX");
-	(void)mktemp(tmpbufs[0]);
+	close(mkstemp(tmpbufs[0]));
 	(void)strcat(tmpbufs[0], ".A.BB");
 	for (i = 2 * NTEMPS - 1; i >= 1; i--)
 	{

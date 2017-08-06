@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <signal.h>
 #include "defs.h"
 
@@ -55,10 +56,6 @@ short *rprec;
 char  *rassoc;
 short **derives;
 char *nullable;
-
-extern char *mktemp();
-extern char *getenv();
-
 
 done(k)
 int k;
@@ -253,9 +250,9 @@ create_file_names()
     text_file_name[len + 5] = 't';
     union_file_name[len + 5] = 'u';
 
-    mktemp(action_file_name);
-    mktemp(text_file_name);
-    mktemp(union_file_name);
+    close(mkstemp(action_file_name));
+    close(mkstemp(text_file_name));
+    close(mkstemp(union_file_name));
 
     len = strlen(file_prefix);
 

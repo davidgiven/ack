@@ -145,7 +145,8 @@ swttmp()
 
 		strcpy(p, C_tmpdir);
 		strcat(p, "/CodeXXXXXX");
-		C_tmpfile = mktemp(p);
+		close(mkstemp(p));
+		C_tmpfile = p;
 		if (! sys_open(p, OP_WRITE, &C_old_ofp)) {
 			C_failed();
 		}
@@ -250,7 +251,7 @@ mkpart(part)
 	*/
 	register Part *p = C_findpart(part);
 	register int index = part % TABSIZ;
-	
+
 	if (p != 0) {
 		/* multiple defined part ... */
 		C_internal_error();

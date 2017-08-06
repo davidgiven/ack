@@ -106,7 +106,6 @@ char *progname;
 
 char temp_buf[32];
 char *temp_arch = &temp_buf[0];
-extern char *mktemp();
 extern char *ctime();
 
 void do_object(int f, long size);
@@ -277,7 +276,7 @@ char *argv[];
 	|| app_fl
 #endif
      ) {
-	mktemp(temp_arch);
+	close(mkstemp(temp_arch));
   }
 #ifdef AAL
   tab = (struct ranlib *) malloc(512 * sizeof(struct ranlib));
