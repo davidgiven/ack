@@ -109,7 +109,7 @@ char *temp_arch = &temp_buf[0];
 extern char *mktemp();
 extern char *ctime();
 
-void do_object();
+void do_object(int f, long size);
 void write_symdef();
 void add();
 
@@ -184,7 +184,7 @@ register int mode;
   magic = rd_unsigned2(fd);
   if (magic != AALMAG && magic != ARMAG)
 	error(TRUE, "%s is not in ar format\n", name);
-  
+
   return fd;
 }
 
@@ -206,7 +206,7 @@ char *argv[];
 
   if (argc < 3)
 	usage();
-  
+
   for (ptr = argv[1]; *ptr; ptr++) {
 	switch (*ptr) {
 		case 't' :
@@ -268,7 +268,7 @@ char *argv[];
 
   if (app_fl + ex_fl + del_fl + rep_fl + show_fl + pr_fl != 1)
 	usage();
-  
+
   if (u_fl && ! rep_fl)
 	usage();
 
@@ -289,7 +289,7 @@ char *argv[];
 
   signal(SIGINT, catch);
   get(argc, argv);
-  
+
   return 0;
 }
 
@@ -678,7 +678,7 @@ write_symdef()
 }
 
 /*
- * Return whether the bytes in `buf' form a good object header. 
+ * Return whether the bytes in `buf' form a good object header.
  * The header is put in `headp'.
  */
 int
@@ -689,9 +689,7 @@ is_outhead(headp)
 	return !BADMAGIC(*headp) && headp->oh_nname != 0;
 }
 
-void
-do_object(f, size)
-	long size;
+void do_object(int f, long size)
 {
 	struct outhead	headbuf;
 
