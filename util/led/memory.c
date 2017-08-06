@@ -473,8 +473,8 @@ free_saved_moduls()
  * The piece of memory with index `piece' is no longer needed.
  * We take care that it can be used by compact() later, if needed.
  */
-dealloc(piece)
-	register int		piece;
+void
+dealloc(int piece)
 {
 	/*
 	 * Some pieces need their memory throughout the program.
@@ -499,9 +499,7 @@ core_alloc(piece, size)
 	return address(piece, off);
 }
 
-core_free(piece, p)
-	int	piece;
-	char	*p;
+void core_free(int piece, char* p)
 {
 	char	*q = address(piece, mems[piece].mem_full);
 

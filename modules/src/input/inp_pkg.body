@@ -20,7 +20,7 @@
 			A default one is provided, which does nothing.
 	AtEoIF() :	this routine is called at the end of an inserted file.
 			A default one is provided, which does nothing.
-	
+
 	Imported objects are:
 	INP_NPUSHBACK, INP_READ_IN_ONE, INP_TYPE, INP_VAR,
 	routines from the "alloc" package, routines from the "storage"
@@ -110,7 +110,7 @@ INP_rdfile(fd, fn, size, pbuf)
 	int rsize;
 
 	if (
-	     (*size = sys_filesize(fn)) < 0
+	     ((*size = sys_filesize(fn))) < 0
 	   ||
 	     ((unsigned) (*size + 1) != (*size + 1))
 	   ||
@@ -140,7 +140,7 @@ _PROTOTYPE(INP_PRIVATE char * INP_pbuf, (void));
 INP_PRIVATE char *
 INP_pbuf()
 {
-	register struct INP_i_buf *ib = 
+	register struct INP_i_buf *ib =
 		(struct INP_i_buf *) malloc(sizeof(struct INP_i_buf));
 
 	if (!ib) return 0;
@@ -164,7 +164,7 @@ INP_push_bh()
 {
 	register struct INP_buffer_header *bh;
 
-	if (bh = INP_head) {
+	if ((bh = INP_head)) {
 		bh->bh_ipp = _ipp;
 #ifdef INP_TYPE
 		bh->bh_i = INP_VAR;
@@ -247,10 +247,10 @@ INP_mk_filename(dir, file, newname)
 	if (!dst) return 0;
 	*newname = dst;
 	if (*dir) {
-		while (*dst++ = *dir++) ;
+		while ((*dst++ = *dir++)) ;
 		*(dst-1) = '/';
 	}
-	while (*dst++ = *file++);
+	while ((*dst++ = *file++));
 	return 1;
 }
 
@@ -278,13 +278,13 @@ InsertFile(filnam, table, result)
 			if (!sys_open(filnam, OP_READ, &fd)) return 0;
 		}
 		else {
-			while (*table) {	
+			while (*table) {
 				/* look in the directory table */
 				if (!INP_mk_filename(*table++, filnam, &newfn)) {
 					return 0;
 				}
 				if (sys_open(newfn, OP_READ, &fd)) {
-					/* free filnam ??? NO we don't know 
+					/* free filnam ??? NO we don't know
 					   where it comes from!
 					*/
 					filnam = newfn;
@@ -378,7 +378,7 @@ loadbuf()
 				*--de = *--so;
 			}
 #endif
-			if ( INP_rdblock(bh->bh_fd, bh->bh_text, &(bh->bh_size)) 
+			if ( INP_rdblock(bh->bh_fd, bh->bh_text, &(bh->bh_size))
 		   	   &&
 			     bh->bh_size > 0
 			   ) {

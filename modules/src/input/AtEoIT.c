@@ -8,7 +8,7 @@
 	inserted text.
 */
 int
-AtEoIT()
+AtEoIT(void)
 {
 	return 0;
 }

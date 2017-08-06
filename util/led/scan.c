@@ -10,13 +10,17 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#ifdef SYMDBUG
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#ifdef SYMDBUG
 #endif /* SYMDBUG */
 #include "arch.h"
 #include "out.h"
 #include "ranlib.h"
+#include "object.h"
 #include "const.h"
 #include "assert.h"
 #include "memory.h"
@@ -42,20 +46,21 @@ char		*modulname;	/* Name of object module. */
 long		objectsize;
 #endif /* SYMDBUG */
 
-static long	align();
+static long	align(long size);
 static char	*modulbase;
-static long	modulsize();
-static		scan_modul();
-static bool	all_alloc();
-static bool	direct_alloc();
-static bool	indirect_alloc();
-static bool	putemitindex();
-static bool	putreloindex();
+static long	modulsize(struct outhead* head);
+static void can_modul(void);
+static bool	all_alloc(void);
+static bool	direct_alloc(struct outhead* head);
+static bool	indirect_alloc(struct outhead* head);
+static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece);
+static bool	putreloindex(ind_t relooff, long nrelobytes);
 #ifdef SYMDBUG
-static bool	putdbugindex();
+static bool	putdbugindex(ind_t dbugoff, long ndbugbytes);
 #endif /* SYMDBUG */
-static		get_indirect();
-static		read_modul();
+static void get_indirect(struct outhead* head, struct outsect* sect);
+static void read_modul(void);
+static void scan_modul(void);
 
 /*
  * Open the file with name `filename' (if necessary) and examine the first
@@ -117,16 +122,13 @@ getfile(filename)
 	/* NOTREACHED */
 }
 
-/* ARGSUSED */
-closefile(filename)
-	char	*filename;
+void closefile(char* filename)
 {
 	if (passnumber == FIRST || !incore)
 		close(infile);
 }
 
-get_archive_header(archive_header)
-	register struct ar_hdr	*archive_header;
+void get_archive_header(struct ar_hdr* archive_header)
 {
 	if (passnumber == FIRST || !incore) {
 		rd_arhdr(infile, archive_header);
@@ -141,7 +143,7 @@ get_archive_header(archive_header)
 #endif /* SYMDBUG */
 }
 
-get_modul()
+void get_modul(void)
 {
 	if (passnumber == FIRST) {
 		rd_fdopen(infile);
@@ -157,8 +159,8 @@ get_modul()
  * to keep everything in core is abandoned, but we will always put the header,
  * the section table, and the name and string table into core.
  */
-static
-scan_modul()
+static void
+scan_modul(void)
 {
 	bool		space;
 	struct outhead	*head;
@@ -190,7 +192,7 @@ scan_modul()
  * this was possible.
  */
 static bool
-all_alloc()
+all_alloc(void)
 {
 	struct outhead	head;
 	extern ind_t	hard_alloc();
@@ -287,10 +289,7 @@ indirect_alloc(head)
  * `emitoff'.
  */
 static bool
-putemitindex(sectindex, emitoff, allopiece)
-	ind_t		sectindex;
-	ind_t		emitoff;
-	int		allopiece;
+putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 {
 	long		flen;
 	ind_t		emitindex;
@@ -330,9 +329,7 @@ putemitindex(sectindex, emitoff, allopiece)
  * offset at `relooff'.
  */
 static bool
-putreloindex(relooff, nrelobytes)
-	ind_t		relooff;
-	long		nrelobytes;
+putreloindex(ind_t relooff, long nrelobytes)
 {
 	ind_t		reloindex;
 	extern ind_t	alloc();
@@ -348,9 +345,7 @@ putreloindex(relooff, nrelobytes)
  * Allocate space for debugging information and put the offset at `dbugoff'.
  */
 static bool
-putdbugindex(dbugoff, ndbugbytes)
-	ind_t		relooff;
-	long		ndbugbytes;
+putdbugindex(ind_t dbugoff, long ndbugbytes)
 {
 	ind_t		dbugindex;
 	extern ind_t	alloc();
@@ -367,12 +362,8 @@ putdbugindex(dbugoff, ndbugbytes)
  * Compute addresses and read in. Remember that the contents of the sections
  * and also the relocation table are accessed indirectly.
  */
-static
-get_indirect(head, sect)
-	struct outhead	*head;		/* not register! Won't compile on
-					   SCO Xenix 386 if it is!
-					*/
-	register struct outsect	*sect;
+static void
+get_indirect(struct outhead* head, struct outsect* sect)
 {
 	register ind_t		*emitindex;
 	register int		nsect;
@@ -395,8 +386,7 @@ get_indirect(head, sect)
 /*
  * Set the file pointer at `pos'.
  */
-seek(pos)
-	long		pos;
+void seek(long pos)
 {
 	if (passnumber == FIRST || !incore)
 		lseek(infile, pos, 0);
@@ -407,8 +397,7 @@ seek(pos)
  * is not. That's why we do it here. If we don't keep everything in core,
  * we give the space allocated for a module back.
  */
-skip_modul(head)
-	struct outhead	*head;
+void skip_modul(struct outhead* head)
 {
 	register ind_t	skip = modulsize(head);
 
@@ -425,8 +414,8 @@ skip_modul(head)
 /*
  * Read in what we need in pass 2, because we couldn't keep it in core.
  */
-static
-read_modul()
+static void
+read_modul(void)
 {
 	struct outhead	*head;
 	register struct outsect	*sects;
@@ -524,8 +513,7 @@ static unsigned short cnt_relos;
 static unsigned short relind;
 #define _RELSIZ	64
 
-startrelo(head)
-	register struct outhead	*head;
+void startrelo(struct outhead* head)
 {
 	ind_t		reloindex;
 
@@ -540,8 +528,7 @@ startrelo(head)
 	}
 }
 
-struct outrelo *
-nextrelo()
+struct outrelo* nextrelo(void)
 {
 	static struct outrelo	relobuf[_RELSIZ];
 
@@ -615,8 +602,7 @@ getblk(totalsz, pblksz, sectindex)
 	return (char *) 0;
 }
 
-endemit(emit)
-	char	*emit;
+void endemit(char* emit)
 {
 	core_free(ALLOMODL, emit);
 }

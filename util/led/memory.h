@@ -40,3 +40,5 @@ extern struct memory	mems[];
 extern ind_t		core_position;
 extern ind_t		hard_alloc();
 extern ind_t		alloc();
+extern void         dealloc(int piece);
+extern void         core_free(int piece, char* p);

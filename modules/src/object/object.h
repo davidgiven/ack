@@ -36,7 +36,7 @@ void rd_sect(struct outsect *s, unsigned int c);
 void rd_outsect(int sectno);
 void rd_emit(char *b, long c);
 void rd_relo(struct outrelo *r, unsigned int c);
-void rd_rew_relo(struct outhead *head);
+void rd_rew_relos(struct outhead *head);
 void rd_name(struct outname *n, unsigned int c);
 void rd_string(char *s, long c);
 int rd_arhdr(int fd, struct ar_hdr *a);
