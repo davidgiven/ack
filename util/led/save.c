@@ -68,8 +68,6 @@ savechar(piece, off)
 {
 	register long	len;
 	register ind_t	newoff;
-	extern ind_t	alloc();
-	extern ind_t	hard_alloc();
 
 	if (off == (ind_t)0)
 		return 0;

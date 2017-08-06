@@ -195,7 +195,6 @@ static bool
 all_alloc(void)
 {
 	struct outhead	head;
-	extern ind_t	hard_alloc();
 
 	if (hard_alloc(ALLOMODL, (long)sizeof(struct outhead)) == BADOFF)
 		fatal("no space for module header");
@@ -220,8 +219,6 @@ direct_alloc(head)
 	register struct outsect *sects;
 	unsigned short	nsect = head->oh_nsect;
 	long		size, rest;
-	extern ind_t	hard_alloc();
-	extern ind_t	alloc();
 
 #ifdef SYMDBUG
 	rest = nsect * sizeof(ind_t) + sizeof(ind_t) + sizeof(ind_t);
@@ -293,7 +290,6 @@ putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 {
 	long		flen;
 	ind_t		emitindex;
-	extern ind_t	alloc();
 	static long	zeros[MAXSECT];
 	register long	 zero  = zeros[allopiece - ALLOEMIT];
 
@@ -332,7 +328,6 @@ static bool
 putreloindex(ind_t relooff, long nrelobytes)
 {
 	ind_t		reloindex;
-	extern ind_t	alloc();
 
 	if ((reloindex = alloc(ALLORELO, nrelobytes)) != BADOFF) {
 		*(ind_t *)modulptr(relooff) = reloindex;
@@ -348,7 +343,6 @@ static bool
 putdbugindex(ind_t dbugoff, long ndbugbytes)
 {
 	ind_t		dbugindex;
-	extern ind_t	alloc();
 
 	if ((dbugindex = alloc(ALLODBUG, ndbugbytes)) != BADOFF) {
 		*(ind_t *)modulptr(dbugoff) = dbugindex;
@@ -425,7 +419,6 @@ read_modul(void)
 	unsigned short	nsect, nname;
 	long		size;
 	long		nchar;
-	extern ind_t	hard_alloc();
 
 	assert(passnumber == SECOND);
 	assert(!incore);

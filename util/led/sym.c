@@ -100,7 +100,6 @@ entername(name, hashval)
 	register struct symbol	*sym;
 	struct outname	*newname;
 	extern ind_t	savechar();
-	extern ind_t	hard_alloc();
 
 	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
