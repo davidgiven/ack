@@ -21,10 +21,9 @@ addons:
     apt:
         packages:
         - ed
-        - qemu-user
 
 git:
     depth: 10
 script:
-    - make PREFIX=/tmp/acki
+    - make PREFIX=/tmp/acki +ack
 
