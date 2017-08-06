@@ -30,6 +30,18 @@ static void push(struct ir* ir)
     stack[stackptr++] = ir;
 }
 
+/* Returns the size of the top item on the stack. */
+static int peek(int delta)
+{
+    if (stackptr <= delta)
+        return EM_wordsize;
+    else
+    {
+        struct ir* ir = stack[stackptr-1-delta];
+        return ir->size;
+    }
+}
+
 static struct ir* pop(int size)
 {
     if (size < EM_wordsize)
@@ -54,11 +66,10 @@ static struct ir* pop(int size)
 
 #if 0
         /* If we try to pop something which is smaller than a word, convert it first. */
-        
+
         if (size < EM_wordsize)
             ir = convertu(ir, size);
 #endif
-
         if (ir->size != size)
         {
             if ((size == (EM_wordsize*2)) && (ir->size == EM_wordsize))
@@ -119,6 +130,25 @@ static struct ir* appendir(struct ir* ir)
     return ir;
 }
 
+static void sequence_point(void)
+{
+    int i;
+
+    /* Ensures that any partially-evaluated expressions on the stack are executed right
+     * now. This typically needs to happen before store operations, to prevents loads of
+     * the same address being delayed until after the store (at which point they'll
+     * return incorrect values).
+     */
+
+    assert(current_bb != NULL);
+
+    for (i=0; i<stackptr; i++)
+    {
+        struct ir* ir = stack[i];
+        array_appendu(&current_bb->irs, ir);
+    }
+}
+
 static void materialise_stack(void)
 {
     int i;
@@ -170,7 +200,7 @@ static struct ir* address_of_external(const char* label, arith offset)
 
 static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode)
 {
-    if (srcsize == 1) 
+    if (srcsize == 1)
     {
         if ((opcode == IR_FROMSI) || (opcode == IR_FROMSL))
         {
@@ -228,6 +258,8 @@ static struct ir* compare(struct ir* left, struct ir* right,
 static struct ir* store(int size, struct ir* address, int offset, struct ir* value)
 {
     int opcode;
+
+    sequence_point();
 
     if (size == 1)
     {
@@ -401,7 +433,7 @@ static void insn_simple(int opcode)
             );
             break;
         }
-            
+
         case op_cii: simple_convert(IR_FROMSI); break;
         case op_ciu: simple_convert(IR_FROMSI); break;
         case op_cui: simple_convert(IR_FROMUI); break;
@@ -475,6 +507,7 @@ static void insn_simple(int opcode)
 
         case op_sim:
         {
+            sequence_point();
             appendir(
                 new_ir2(
                     (EM_wordsize == 2) ? IR_STORE : IR_STOREH, EM_wordsize,
@@ -486,7 +519,19 @@ static void insn_simple(int opcode)
         }
 
         case op_trp: helper_function(".trp"); break;
-        case op_sig: helper_function(".sig"); break;
+
+        case op_sig:
+        {
+            struct ir* value = pop(EM_pointersize);
+            appendir(
+                store(
+                    EM_pointersize,
+                    new_labelir(".trppc"), 0,
+                    value
+                )
+            );
+            break;
+        }
 
         case op_rtt:
         {
@@ -495,9 +540,11 @@ static void insn_simple(int opcode)
         }
 
         /* FIXME: These instructions are really complex and barely used
-         * (Modula-2 bitset support, I believe). Leave them until later. */
+         * (Modula-2 and Pascal set support, I believe). Leave them until
+         * later. */
         case op_set: helper_function(".unimplemented_set"); break;
         case op_ior: helper_function(".unimplemented_ior"); break;
+
 
         case op_dch:
             push(
@@ -507,7 +554,7 @@ static void insn_simple(int opcode)
                 )
             );
             break;
-            
+
         case op_lpb:
             push(
                 new_ir1(
@@ -574,29 +621,53 @@ static void insn_bvalue(int opcode, struct basicblock* leftbb, struct basicblock
     }
 }
 
-static void simple_alu1(int opcode, int size, int irop)
+static void simple_alu1(int opcode, int size, int irop, const char* fallback)
 {
-    struct ir* val = pop(size);
+    if (size > (2*EM_wordsize))
+    {
+        if (!fallback)
+            fatal("treebuilder: can't do opcode %s with size %d", em_mnem[opcode - sp_fmnem], size);
+        push(
+            new_wordir(size)
+        );
+        helper_function(fallback);
+    }
+    else
+    {
+        struct ir* val = pop(size);
 
-    push(
-        new_ir1(
-            irop, size,
-            val
-        )
-    );
+        push(
+            new_ir1(
+                irop, size,
+                val
+            )
+        );
+    }
 }
 
-static void simple_alu2(int opcode, int size, int irop)
+static void simple_alu2(int opcode, int size, int irop, const char* fallback)
 {
-    struct ir* right = pop(size);
-    struct ir* left = pop(size);
+    if (size > (2*EM_wordsize))
+    {
+        if (!fallback)
+            fatal("treebuilder: can't do opcode %s with size %d", em_mnem[opcode - sp_fmnem], size);
+        push(
+            new_wordir(size)
+        );
+        helper_function(fallback);
+    }
+    else
+    {
+        struct ir* right = pop(size);
+        struct ir* left = pop(size);
 
-    push(
-        new_ir2(
-            irop, size,
-            left, right
-        )
-    );
+        push(
+            new_ir2(
+                irop, size,
+                left, right
+            )
+        );
+    }
 }
 
 static struct ir* extract_block_refs(struct basicblock* bb)
@@ -675,38 +746,42 @@ static void insn_ivalue(int opcode, arith value)
 {
     switch (opcode)
     {
-        case op_adi: simple_alu2(opcode, value, IR_ADD); break;
-        case op_sbi: simple_alu2(opcode, value, IR_SUB); break;
-        case op_mli: simple_alu2(opcode, value, IR_MUL); break;
-        case op_dvi: simple_alu2(opcode, value, IR_DIV); break;
-        case op_rmi: simple_alu2(opcode, value, IR_MOD); break;
-        case op_sli: simple_alu2(opcode, value, IR_ASL); break;
-        case op_sri: simple_alu2(opcode, value, IR_ASR); break;
-        case op_ngi: simple_alu1(opcode, value, IR_NEG); break;
+        case op_adi: simple_alu2(opcode, value, IR_ADD, NULL); break;
+        case op_sbi: simple_alu2(opcode, value, IR_SUB, NULL); break;
+        case op_mli: simple_alu2(opcode, value, IR_MUL, NULL); break;
+        case op_dvi: simple_alu2(opcode, value, IR_DIV, NULL); break;
+        case op_rmi: simple_alu2(opcode, value, IR_MOD, NULL); break;
+        case op_sli: simple_alu2(opcode, value, IR_ASL, NULL); break;
+        case op_sri: simple_alu2(opcode, value, IR_ASR, NULL); break;
+        case op_ngi: simple_alu1(opcode, value, IR_NEG, NULL); break;
 
-        case op_adu: simple_alu2(opcode, value, IR_ADD); break;
-        case op_sbu: simple_alu2(opcode, value, IR_SUB); break;
-        case op_mlu: simple_alu2(opcode, value, IR_MUL); break;
-        case op_slu: simple_alu2(opcode, value, IR_LSL); break;
-        case op_sru: simple_alu2(opcode, value, IR_LSR); break;
-        case op_rmu: simple_alu2(opcode, value, IR_MODU); break;
-        case op_dvu: simple_alu2(opcode, value, IR_DIVU); break;
+        case op_adu: simple_alu2(opcode, value, IR_ADD, NULL); break;
+        case op_sbu: simple_alu2(opcode, value, IR_SUB, NULL); break;
+        case op_mlu: simple_alu2(opcode, value, IR_MUL, NULL); break;
+        case op_slu: simple_alu2(opcode, value, IR_LSL, NULL); break;
+        case op_sru: simple_alu2(opcode, value, IR_LSR, NULL); break;
+        case op_rmu: simple_alu2(opcode, value, IR_MODU, NULL); break;
+        case op_dvu: simple_alu2(opcode, value, IR_DIVU, NULL); break;
 
-        case op_and: simple_alu2(opcode, value, IR_AND); break;
-        case op_ior: simple_alu2(opcode, value, IR_OR); break;
-        case op_xor: simple_alu2(opcode, value, IR_EOR); break;
-        case op_com: simple_alu1(opcode, value, IR_NOT); break;
+        case op_and: simple_alu2(opcode, value, IR_AND, ".and"); break;
+        case op_ior: simple_alu2(opcode, value, IR_OR, ".ior"); break;
+        case op_xor: simple_alu2(opcode, value, IR_EOR, NULL); break;
+        case op_com: simple_alu1(opcode, value, IR_NOT, ".com"); break;
 
-        case op_adf: simple_alu2(opcode, value, IR_ADDF); break;
-        case op_sbf: simple_alu2(opcode, value, IR_SUBF); break;
-        case op_mlf: simple_alu2(opcode, value, IR_MULF); break;
-        case op_dvf: simple_alu2(opcode, value, IR_DIVF); break;
-        case op_ngf: simple_alu1(opcode, value, IR_NEGF); break;
+        case op_adf: simple_alu2(opcode, value, IR_ADDF, NULL); break;
+        case op_sbf: simple_alu2(opcode, value, IR_SUBF, NULL); break;
+        case op_mlf: simple_alu2(opcode, value, IR_MULF, NULL); break;
+        case op_dvf: simple_alu2(opcode, value, IR_DIVF, NULL); break;
+        case op_ngf: simple_alu1(opcode, value, IR_NEGF, NULL); break;
 
         case op_cmu: /* fall through */
         case op_cms: push(tristate_compare(value, IR_COMPAREUI)); break;
         case op_cmi: push(tristate_compare(value, IR_COMPARESI)); break;
         case op_cmf: push(tristate_compare(value, IR_COMPAREF)); break;
+
+        case op_rck: helper_function(".rck"); break;
+        case op_set: push(new_wordir(value)); helper_function(".set"); break;
+        case op_inn: push(new_wordir(value)); helper_function(".inn"); break;
 
         case op_lol:
             push(
@@ -841,7 +916,7 @@ static void insn_ivalue(int opcode, arith value)
                 )
             );
             break;
-                
+
         case op_loc:
             push(
                 new_wordir(value)
@@ -853,17 +928,17 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
             int offset = 0;
 
-            /* FIXME: this is awful; need a better way of dealing with
-             * non-standard EM sizes. */
             if (value > (EM_wordsize*2))
+            {
+                /* We're going to need to do multiple stores; fix the address
+                 * so it'll go into a register and we can do maths on it. */
                 appendir(ptr);
+            }
 
             while (value > 0)
             {
-                int s;
-                if (value > (EM_wordsize*2))
-                    s = EM_wordsize*2;
-                else
+                int s = EM_wordsize*2;
+                if (value < s)
                     s = value;
 
                 push(
@@ -912,24 +987,25 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* ptr = pop(EM_pointersize);
             int offset = 0;
 
-            /* FIXME: this is awful; need a better way of dealing with
-             * non-standard EM sizes. */
-            if (value > (EM_wordsize*2))
+            if (value > peek(0))
+            {
+                /* We're going to need to do multiple stores; fix the address
+                 * so it'll go into a register and we can do maths on it. */
                 appendir(ptr);
+            }
 
             while (value > 0)
             {
-                int s;
-                if (value > (EM_wordsize*2))
-                    s = EM_wordsize*2;
-                else
+                struct ir* v = pop(peek(0));
+                int s = v->size;
+                if (value < s)
                     s = value;
 
                 appendir(
                     store(
                         s,
                         ptr, offset,
-                        pop(s)
+                        v
                     )
                 );
 
@@ -1007,7 +1083,7 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* right = pop(EM_pointersize);
             struct ir* left = pop(EM_pointersize);
 
-            struct ir* delta = 
+            struct ir* delta =
                 new_ir2(
                     IR_SUB, EM_pointersize,
                     left, right
@@ -1019,13 +1095,25 @@ static void insn_ivalue(int opcode, arith value)
             push(delta);
             break;
         }
-            
+
         case op_dup:
         {
-            struct ir* v = pop(value);
-            appendir(v);
-            push(v);
-            push(v);
+            sequence_point();
+            if ((value == (EM_wordsize*2)) && (peek(0) == EM_wordsize) && (peek(1) == EM_wordsize))
+            {
+                struct ir* v1 = pop(EM_wordsize);
+                struct ir* v2 = pop(EM_wordsize);
+                push(v2);
+                push(v1);
+                push(v2);
+                push(v1);
+            }
+            else
+            {
+                struct ir* v = pop(value);
+                push(v);
+                push(v);
+            }
             break;
         }
 
@@ -1035,6 +1123,18 @@ static void insn_ivalue(int opcode, arith value)
             struct ir* v2 = pop(value);
             push(v1);
             push(v2);
+            break;
+        }
+
+        case op_zer:
+        {
+            if (value <= EM_wordsize)
+                push(new_constir(value, 0));
+            else
+            {
+                push(new_wordir(value));
+                helper_function(".zer");
+            }
             break;
         }
 
@@ -1055,19 +1155,19 @@ static void insn_ivalue(int opcode, arith value)
                 default:
                     while ((value > 0) && (stackptr > 0))
                     {
-                        struct ir* ir = pop(stack[stackptr-1]->size);
-                        value -= ir->size;
+                        int s = peek(0);
+                        if (s > value)
+                            s = value;
+                        pop(s);
+                        value -= s;
                     }
 
-                    if (value != 0)
-                    {
-                        appendir(
-                            new_ir1(
-                                IR_STACKADJUST, EM_pointersize,
-                                new_wordir(value)
-                            )
-                        );
-                    }
+                    appendir(
+                        new_ir1(
+                            IR_STACKADJUST, EM_pointersize,
+                            new_wordir(value)
+                        )
+                    );
                     break;
             }
             break;
@@ -1120,7 +1220,7 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
         }
-                    
+
         case op_lfr:
         {
             push(
@@ -1251,11 +1351,11 @@ static void insn_ivalue(int opcode, arith value)
                     new_labelir((value == 4) ? ".fef4" : ".fef8")
                 )
             );
-                    
+
             /* exit, leaving an int and then a float (or double) on the stack. */
             break;
         }
-            
+
         case op_fif:
         {
             /* fif is implemented by calling a helper function which then mutates
@@ -1271,11 +1371,11 @@ static void insn_ivalue(int opcode, arith value)
                     new_labelir((value == 4) ? ".fif4" : ".fif8")
                 )
             );
-                    
+
             /* exit, leaving two floats (or doubles) on the stack. */
             break;
         }
-            
+
         case op_lor:
         {
             switch (value)
@@ -1292,7 +1392,7 @@ static void insn_ivalue(int opcode, arith value)
                         )
                     );
                     break;
-                        
+
                 case 1:
                     push(
                         appendir(
@@ -1443,18 +1543,6 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
-        /* FIXME: These instructions are really complex and barely used
-         * (Modula-2 bitset support, I believe). Leave them until leter. */
-        case op_inn:
-        {
-            push(
-                new_wordir(value)
-            );
-
-            helper_function(".inn");
-            break;
-        }
-
         case op_lin:
         {
             /* Set line number --- ignore. */
@@ -1497,6 +1585,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_ste:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1507,6 +1596,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_sde:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize*2,
@@ -1517,6 +1607,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_zre:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1525,8 +1616,9 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
                 )
             );
             break;
-                
+
         case op_ine:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1544,6 +1636,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             break;
 
         case op_dee:
+            sequence_point();
             appendir(
                 new_ir2(
                     IR_STORE, EM_wordsize,
@@ -1612,7 +1705,7 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
             /* Set filename --- ignore. */
             break;
         }
-                    
+
         default:
             fatal("treebuilder: unknown lvalue instruction '%s'",
                 em_mnem[opcode - sp_fmnem]);
@@ -1645,7 +1738,7 @@ static void generate_tree(struct basicblock* bb)
                 break;
 
             case PARAM_LVALUE:
-                tracef('E', "label=%s offset=%d\n", 
+                tracef('E', "label=%s offset=%d\n",
                     em->u.lvalue.label, em->u.lvalue.offset);
                 insn_lvalue(em->opcode, em->u.lvalue.label, em->u.lvalue.offset);
                 break;

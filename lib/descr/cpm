@@ -22,7 +22,7 @@ name asld
 	mapflag -s* SIZE_F=-s*
 	args {ASS_F?} ({RTS}:.b.c={EM}/{RT}cc) ({RTS}:.p={EM}/{RT}pc) -o > < \
 		(.p:{TAIL}={EM}/{LIB}pc) \
-		(.b:{TAIL}={EM}/{LIB}bc) \
+		(.bas:{TAIL}={EM}/{LIB}bc) \
 		(.b.c:{TAIL}={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g) \
 		(.b.c.p:{TAIL}={EM}/{LIB}mon)
 	linker

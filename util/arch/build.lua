@@ -17,6 +17,6 @@ installable {
 	name = "pkg",
 	map = {
 		["$(INSDIR)/bin/aal"] = "+aal",
-		["$(PLATIND)/man/man1/aal.1"] = "./aal.1"
+		["$(INSDIR)/share/man/man1/aal.1"] = "./aal.1"
 	}
 }

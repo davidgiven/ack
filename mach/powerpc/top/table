@@ -6,15 +6,15 @@ LABEL_STARTER '.';
 
 %%;
 
-P, Q, R             { TRUE };
+RNZ                 { strcmp(VAL, "r0") };  /* not r0 */
 X, Y, Z             { TRUE };
 
 %%;
 
 /* Whitespace is significant here! */
 
-addi  X, X, 0                -> ;
-addis X, X, 0                -> ;
+addi  RNZ, RNZ, 0            -> ;
+addis RNZ, RNZ, 0            -> ;
 
 mr X, X                      -> ;
 fmr X, X                     -> ;

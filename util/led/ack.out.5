@@ -1,4 +1,4 @@
-.TH "ACK.OUT" 5 "$Revision$"
+.TH "ACK.OUT" 5 2017-01-18
 .ad
 .SH NAME
 ack.out\ \-\ ACK-assembler and link editor output
@@ -14,7 +14,7 @@ further processed on another.
 .ta \w'#define x'u +\w'XXXXXXXX'u +\w'XXXXXXXXXXX'u
 .PP
 In the following discussion, some structures are defined using
-\fBlong\fR and \fBshort\fR as type indicators. 
+\fBlong\fR and \fBshort\fR as type indicators.
 It is assumed that the size of a short is 2 bytes (chars) and that the
 size of a long is 4 bytes.
 However, these types
@@ -55,7 +55,9 @@ struct outhead {
 };
 .fi
 .PP
+.nf
 #define HF_LINK	0x0004	/* unresolved references left */
+.fi
 .PP
 The fields of this structure have the following purpose:
 .nr x \w'oh_magic\ \ \ 'u
@@ -131,9 +133,10 @@ in tact.
 .br
 The next part of an object file contains the sections themselves.
 Usually, the LED program places the sections right behind one another in the
-target machine, taking the
-alignment requirements into account. However, the user is allowed to give
-the start addresses of each section. But if the user gave a start address for
+target machine, taking the alignment requirements into account.
+However, the user is allowed to give
+the start addresses of each section.
+But if the user gave a start address for
 say section 2, but not for section 3, section 3 will be put
 right behind section 2.
 .PP
@@ -158,12 +161,13 @@ struct outrelo {
 /*
  * relocation type bits
  */
-#define RELSZ	0x0fff      /* relocation length */
+#define RELSZ	0x0fff		/* relocation length */
 #define RELO1	0x01		/* 1 byte */
 #define RELO2	0x02		/* 2 bytes */
 #define RELO4	0x03		/* 4 bytes */
 #define RELOPPC	0x04		/* 26-bit PowerPC address */
-#define RELOVC4 0x06        /* VideoCore IV address in 32-bit insruction */
+#define RELOLIS	0x05		/* PowerPC lis */
+#define RELOVC4	0x06 /* VideoCore IV address in 32-bit insruction */
 #define RELPC	0x2000		/* pc relative */
 #define RELBR	0x4000		/* High order byte lowest address. */
 #define RELWR	0x8000		/* High order word lowest address. */
@@ -194,13 +198,16 @@ The fields of this structure have the following purpose:
 Contains several flags: One of RELO1, RELO2 and RELO4 is set, indicating the
 size of the relocatable datum, RELPC is set when the datum is
 relocated pc relative, RELBR and RELWR indicate byte and word order of
-the relocatable datum. RELBR and RELWR are needed here. It is not sufficient
+the relocatable datum.
+RELBR and RELWR are needed here.
+It is not sufficient
 to have flags for them in the header of the object file, because some
 machines (NS 32016) use several of the possible combinations in their
 instruction encoding.
 .IP or_sect \nxu
-Contains the section number of the referenc\fIing\fR section. This is a number
-that lies between S_MIN and S_MAX. The section indicated with number S_MIN
+Contains the section number of the referenc\fIing\fR section.
+This is a number that lies between S_MIN and S_MAX.
+The section indicated with number S_MIN
 is the first section in the sections-section, etc.
 .IP or_addr \nxu
 Contains the address of the relocatable datum, in the form of an
@@ -209,18 +216,33 @@ offset from the base of the section indicated in the \fIor_sect\fR field.
 Usually contains the index of the referenced symbol in the symbol table,
 starting at 0.
 In this case, the reference is to an undefined external symbol, a common
-symbol, or a section name. The relocatable datum then contains
+symbol, or a section name.
+The relocatable datum then contains
 an offset from the indicated symbol or the start of the indicated section.
 It may, however, also have the same value as
-the \fIoh_nname\fR field of the header. In this case the relocatable datum
+the \fIoh_nname\fR field of the header.
+In this case the relocatable datum
 is an absolute number, and the datum is relocated pc relative.
 The relocatable datum must then be relocated with respect to the
 base address of its section.
 .PP
+For RELOPPC and RELOVC4, the relocatable datum is a PowerPC or
+VideoCore IV instruction.
+The relocation depends on the instruction, and uses an offset encoded
+in the instruction.
+.PP
+RELOLIS assembles a PowerPC \fBlis\fR instruction.
+The relocatable datum is a 4-byte integer.
+The high bit is set for ha16 or clear for hi16.
+The next 5 bits are the register \fIRT\fR.
+The low 26 bits are a signed offset.
+The relocation replaces the datum with the PowerPC instruction
+\(oq\fBlis\fR\ \fIRT\fR,\ ha16[\fIsymbol\fR\ +\ \fIoffset\fR]\(cq.
+.PP
 .B The symbol table.
 .br
-This table contains definitions of symbols. It is referred to by
-outrelo-structures, and can be used by debuggers.
+This table contains definitions of symbols.
+It is referred to by outrelo-structures, and can be used by debuggers.
 Entries in this table have the following structure:
 .PP
 .nf
@@ -250,12 +272,13 @@ struct outname {
 .PP
 The members of this structure have the following purpose:
 .IP on_foff \nxu
-Contains the offset of the name from the beginning of the file. The name
-extends from the offset to the next null byte.
+Contains the offset of the name from the beginning of the file.
+The name extends from the offset to the next null byte.
 .IP on_type \nxu
 The S_TYP field of this member contains the section number of the symbol.
 Here, this number may be S_ABS for an absolute item, or S_UND, for an
-undefined item. The S_EXT flag is set in this member if the symbol is external.
+undefined item.
+The S_EXT flag is set in this member if the symbol is external.
 The S_ETC field has the following flags:
 S_SCT is set if the symbol represents a section name,
 S_COM is set if the symbol represents a common name,
@@ -265,15 +288,16 @@ and S_MOD is set if the symbol refers to an assembler source file item.
 .IP on_desc \nxu
 Currently not used.
 .IP on_valu \nxu
-Is not used if the symbol refers to an undefined item. For absolute items
+Is not used if the symbol refers to an undefined item.
+For absolute items
 it contains the value, for common names it contains the size, and
 for anything else it contains the offset from the beginning of the section.
 In a fully linked binary, the beginning of the section is added.
 .PP
 .B The string area.
 .br
-The last part of an object file contains the name list. This is just a
-sequence of null-terminated strings.
+The last part of an object file contains the name list.
+This is just a sequence of null-terminated strings.
 .PP
 The relocation information, the symbol table, and the name list do not
 have to be present, but then of course we do not have a relocatable
@@ -283,7 +307,6 @@ object file.
 .br
 The following miscellaneous defines might come in handy when reading
 object files:
-.fi
 .PP
 .nf
 /*

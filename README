@@ -2,7 +2,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2016-08-02
+                                2017-01-07
 
 
 INTRODUCTION
@@ -19,20 +19,23 @@ probably broken. However, what's there should be sufficient to get things
 done and to evaluate how the full 6.1 release should work. 
 
 
+
 SUPPORT
 =======
 
 Languages:
 
-ANSI C, Pascal, Modula 2, Basic. K&R is supported via the ANSI C compiler.
+ANSI C, B, Pascal, Modula 2, Basic. K&R is supported via the ANSI C compiler.
 
 Platforms:
 
 pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
+linuxppc      produces ELF executables for PowerPC Linux systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
+
 
 
 INSTALLATION
@@ -54,6 +57,11 @@ Requirements:
 
 - (optionally) ninja; if you've got this, this will be autodetected and give
   you faster builds.
+
+- (optionally) the qemu suite: if you have this installed, the build system
+  will detect it automatically and run the test suites for the supported
+  architectures. Get both the qemu-system-* platform emulators and the qemu-*
+  userland emulators (only works on Linux).
 
 - about 40MB free in /tmp (or some other temporary directory).
 
@@ -89,6 +97,7 @@ Instructions:
 The ACK should now be ready to use.
 
 
+
 USAGE
 =====
 
@@ -111,7 +120,8 @@ Some useful options include:
 ack figures out which language to use from the file extension:
 
   .c               C (ANSI or K&R)
-  .b               Basic
+  .b               the PDP-11 dialect of B
+  .bas             Basic
   .mod             Modula-2
   .ocm             Occam 1
   .p               Pascal
@@ -150,10 +160,16 @@ There are some things you should be aware of.
 - The ACK uses its own .o format. You won't be able to mix the ACK's object
   files and another compiler's.
 
+- When compiling together multiple B source files, you need to do some extra
+  work to initialise them properly otherwise your program will crash on
+  startup; see the ack(1) and abmodules(1) man pages.
+
 - The distribution contains *everything*, including the weird, ancient,
   archaic stuff that doesn't work any more and never will, such as the int EM
   interpreter and the assembler-linkers. Only some of it builds. Look for
   build.lua files.
+
+
 
 DISCLAIMER
 ==========
@@ -177,6 +193,6 @@ You can find the mailing list on the project's web site:
 	
 Please enjoy.
 
-David Given (dtrg on Sourceforge)
+David Given (davidgiven on Github)
 dg@cowlark.com
-2016-08-02
+2016-11-26

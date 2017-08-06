@@ -55,6 +55,7 @@ extern int read(int fd, void* buffer, size_t count);
 extern int write(int fd, void* buffer, size_t count);
 extern off_t lseek(int fildes, off_t offset, int whence);
 extern int fcntl(int fd, int op, ...);
+extern int unlink(const char* path);
 
 /* Special variables */
 
@@ -67,6 +68,7 @@ extern pid_t getpid(void);
 extern int brk(void* ptr);
 extern void* sbrk(int increment);
 extern int isatty(int d);
+extern int execve(const char *path, char *const argv[], char *const envp[]);
 
 /* Signal handling */
 
@@ -114,8 +116,34 @@ typedef int sig_atomic_t;
 
 #define _NSIG           32      /* Biggest signal number + 1
                                    (not including real-time signals).  */
+
+/* sigprocmask */
+#define SIG_BLOCK       0
+#define SIG_UNBLOCK     1
+#define SIG_SETMASK     2
+typedef unsigned long sigset_t;
+
+/* sa_flags */
+#define SA_NODEFER      0x40000000UL
+#define SA_RESETHAND    0x80000000UL
+
+struct __siginfo;
+struct sigaction {
+	union {
+		void (*__sa_handler)(int);
+		void (*__sa_sigaction)(int, struct __siginfo *, void *);
+	} __sigaction_u;
+	sigset_t sa_mask;
+	unsigned long sa_flags;
+	void (*sa_restorer)(void);
+};
+#define sa_handler __sigaction_u.__sa_handler
+#define sa_sigaction __sigaction_u.__sa_sigaction
+
 typedef void (*sighandler_t)(int);
+extern int sigaction(int, const struct sigaction *, struct sigaction *);
 extern sighandler_t signal(int signum, sighandler_t handler);
+extern int sigprocmask(int, const sigset_t *, sigset_t *);
 extern int raise(int signum);
 
 

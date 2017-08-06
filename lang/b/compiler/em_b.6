@@ -1,0 +1,53 @@
+.TH EM_B 6 2017-01-18
+.ad
+.SH NAME
+em_b \- ACK B compiler
+.SH SYNOPSIS
+.B ~em/lib/ack/em_b
+.RI [ options ]
+.SH DESCRIPTION
+.I em_b
+is a port of the ABC B compiler to the ACK.
+Interested parties will be
+interested in the upstream distribution here:
+.nf
+.sp
+https://github.com/aap/abc
+.fi
+.PP
+However, the version here has been heavily modified \(em bug reports should be
+filed with the ACK, not with the upstream compiler.
+.PP
+Since B was designed for machines with word addressing, some hacking is
+required to make it work on modern, byte addressed machines.
+The generated
+code expects B variables to contain word addresses, and then generates
+code to transform these into native addresses before use (which,
+unfortunately, impacts performance).
+However, the ACK's linker doesn't know
+how to emit word addresses into the program's data sections, and so a
+separate fixup stage has to happen at runtime, just before \fBmain()\fP,
+to convert the byte addresses into word addresses.
+.PP
+The end result is that using multiple source files with B is somewhat
+unwieldy, requiring each module to be explicitly named and then an extra
+stage to generate the fixup code.
+See the \fBack\fP(1) and \fBabmodules\fP(1) for details.
+.SH OPTIONS
+.I em_b
+accepts the following flags:
+.IP \-w\ \fIsize\fP
+Sets the word size, used for scaling addresses.
+Usually either 2 or 4.
+.IP \-B\ \fIname\fP
+Sets the name of the module currently being compiled (used to generate the
+fixup table symbol name).
+Defaults to \fImain\fP if not specified.
+.IP \-i\ \fIfilename\fP
+The source B file.
+.IP \-o\ \fIfilename\fP
+The output compact EM bytecode file.
+.SH SEE ALSO
+\fIack\fR(1), \fIabmodules\fR(1)
+.SH REMARKS
+It is very unlikely the \fIem_b\fP will ever be useful for anything.

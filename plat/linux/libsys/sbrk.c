@@ -26,7 +26,6 @@ void* sbrk(int increment)
 {
 	char* old;
 	char* new;
-	char* actual;
 	
 	if (!current)
 		current = (char*) _syscall(__NR_brk, 0, 0, 0);
@@ -35,15 +34,21 @@ void* sbrk(int increment)
 		return current;
 		
 	old = current;
+
 	new = old + increment;
 
-	actual = (char*) _syscall(__NR_brk, (quad) new, 0, 0);
-	if (actual < new)
-	{
-		errno = ENOMEM;
-		return OUT_OF_MEMORY;
-	}
+	if ((increment > 0) && (new <= old))
+		goto out_of_memory;
+	else if ((increment < 0) && (new >= old))
+		goto out_of_memory;
+
+	if (brk(new) < 0)
+		goto out_of_memory;
 		
-	current = actual;
 	return old;
+
+out_of_memory:
+	errno = ENOMEM;
+	return OUT_OF_MEMORY;
 }
+

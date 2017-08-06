@@ -9,6 +9,7 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include "out.h"
 #include "const.h"
@@ -104,6 +105,30 @@ static uint32_t get_vc4_valu(char* addr)
 	assert(0 && "unrecognised VC4 instruction");
 }
 
+static bool is_powerpc_memory_op(uint32_t opcode)
+{
+	/* Tests for any PowerPC memory indirection instruction (or
+	 * addi) where the payload is a *signed* 16-bit value. */
+	switch ((opcode & 0xfc000000) >> 26)
+	{
+		case 14: /* addi */
+		case 34: /* lbz */
+		case 48: /* lfs */
+		case 50: /* lfd */
+		case 42: /* lha */
+		case 40: /* lhz */
+		case 32: /* lwz */
+		case 38: /* stb */
+		case 52: /* stfs */
+		case 54: /* stfd */
+		case 44: /* sth */
+		case 36: /* stw */
+			return true;
+	}
+
+	return false;
+}
+
 /* PowerPC fixups are complex as we need to patch up to the next two
  * instructions in one of several different ways, depending on what the
  * instructions area.
@@ -125,8 +150,32 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 		/* addis / ori instruction pair */
 		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
 	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         is_powerpc_memory_op(opcode2))
+	{
+		/* addis / memoryop instruction pair */
+		uint16_t hi = opcode1 & 0xffff;
+		uint16_t lo = opcode2 & 0xffff;
 
-	assert(0 && "unrecognised PowerPC instruction");
+		/* Undo the sign adjustment (see mach/powerpc/as/mach5.c). */
+
+		if (lo > 0x7fff)
+			hi--;
+
+		return ((hi << 16) | lo);
+	}
+
+	fatal("Don't know how to read from PowerPC fixup on instructions 0x%08lx+0x%08lx",
+		(unsigned long)opcode1, (unsigned long)opcode2);
+}
+
+/* RELOLIS stores a signed 26-bit offset in the low bits. */
+static uint32_t get_lis_valu(char *addr, uint16_t type)
+{
+	uint32_t valu = read4(addr, type) & 0x03ffffff;
+	if (valu & 0x02000000)
+		valu |= 0xfc000000; /* sign extension */
+	return valu;
 }
 
 /*
@@ -144,6 +193,8 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		return read4(addr, type);
 	case RELOPPC:
 		return get_powerpc_valu(addr, type);
+	case RELOLIS:
+		return get_lis_valu(addr, type);
 	case RELOVC4:
 		return get_vc4_valu(addr);
 	default:
@@ -263,14 +314,58 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
 	         ((opcode2 & 0xfc000000) == 0x60000000))
 	{
+		/* addis / ori instruction pair */
 		uint16_t hi = value >> 16;
 		uint16_t lo = value & 0xffff;
 
 		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
 		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
 	}
+	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) &&
+	         is_powerpc_memory_op(opcode2))
+	{
+		/* addis / memoryop instruction pair */
+		uint16_t hi = value >> 16;
+		uint16_t lo = value & 0xffff;
+
+		/* Apply the sign adjustment (see mach/powerpc/as/mach5.c). */
+
+		if (lo > 0x7fff)
+			hi++;
+
+		write4((opcode1 & 0xffff0000) | hi, addr+0, type);
+		write4((opcode2 & 0xffff0000) | lo, addr+4, type);
+	}
+
 	else
-		assert(0 && "unrecognised PowerPC instruction");
+		fatal("Don't know how to write a PowerPC fixup to instructions 0x%08lx+0x%08lx",
+			(unsigned long)opcode1, (unsigned long)opcode2);
+}
+
+/* Writes a PowerPC lis instruction. */
+static void put_lis_valu(char* addr, uint32_t value, uint16_t type)
+{
+	uint32_t opcode, reg;
+	uint16_t hi, lo;
+	bool ha16;
+
+	/* ha16 flag in high bit, register in next 5 bits */
+	opcode = read4(addr, type);
+	ha16 = opcode >> 31;
+	reg = (opcode >> 26) & 0x1f;
+
+	/*
+	 * Apply the sign adjustment if the ha16 flag is set and the
+	 * low half is a negative signed 16-bit integer.
+	 */
+	hi = value >> 16;
+	lo = value & 0xffff;
+	if (ha16 && lo > 0x7fff)
+		hi++;
+
+	/* Assemble lis reg, hi == addis reg, r0, hi. */
+	opcode = (15 << 26) | (reg << 21) | (0 << 16) | hi;
+	write4(opcode, addr, type);
 }
 
 /*
@@ -293,6 +388,9 @@ static putvalu(uint32_t valu, char* addr, uint16_t type)
 		break;
 	case RELOPPC:
 		put_powerpc_valu(addr, valu, type);
+		break;
+	case RELOLIS:
+		put_lis_valu(addr, valu, type);
 		break;
 	case RELOVC4:
 		put_vc4_valu(addr, valu);
@@ -339,7 +437,7 @@ addrelo(relo, names, valu_out)
 		extern int		hash();
 		extern struct outname	*searchname();
 		extern unsigned 	indexof();
-		extern struct outhead	outhead; 
+		extern struct outhead	outhead;
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));
 		if (name == (struct outname *)0)

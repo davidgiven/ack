@@ -1,39 +1,108 @@
-1 ' $Source$
-2 ' $State$
-3 ' $Revision$
+#
 
-10 print "Hi there! I'm written in Basic. Before we start, what is your name?"
-20 input "> ", PlayerName$
-30 print
-40 print "Hello, "; PlayerName$; "!"
+buffer[6];
+PlayerName[6];
 
-100 gosub 1000
-110 print
-120 print "Would you like another go?"
-130 input "> ", s$
-140 s$ = left$(s$, 1)
-150 if s$ = "n" or s$ = "N" then goto 200
-160 print
-170 print "Excellent! ";
-180 goto 100
-200 print
-210 print "Thanks for playing --- goodbye!"
-220 end
+/* Taken intact from the B reference manual. */
+strcopy(sl ,s2)
+{
+	auto i;
 
-1000 print "See if you can guess my number."
-1010 Number% = rnd(1) mod 100
-1020 Attempts% = 1
+	i = 0;
+	while (lchar(sl, i, char(s2, i)) != '*e')
+		i++;
+}
 
-1030 print
-1040 input "> ", guess%
-1050 if guess% < Number% then print: print "Try a bit higher."
-1060 if guess% > Number% then print: print "Try a bit lower."
-1070 if guess% = Number% then goto 1100
-1080 Attempts% = Attempts% + 1
-1090 goto 1030
-1100 print
-1110 print "You got it right in only"; Attempts%;
-1120 if Attempts% = 1 then print "go"; else print "goes";
-1130 print "!"
-1140 return
+reads()
+{
+	extrn buffer;
+
+	putstr("> ");
+	flush();
+	getstr(buffer);
+}
+
+atoi(s)
+{
+	auto value, sign, i, c;
+
+	i = 0;
+	if (char(s, i) == '-')
+	{
+		sign = -1;
+		i++;
+	}
+	else
+		sign = 1;
+
+	value = 0;
+	while ((c = char(s, i++)) != '*e')
+		value = value*10 + (c - '0');
+
+	return(value * sign);
+}
+
+rand()
+{
+	/* Genuinely random; retrieved from random.org */
+	return(57);
+}
+
+game()
+{
+	extrn buffer;
+	auto Number, Attempts;
+	auto guess;
+
+	printf("See if you can guess my number.*n");
+
+	Number = rand() % 100;
+	Attempts = 1;
+	
+	while (1)
+	{
+		reads();
+		guess = atoi(buffer);
+		
+		if (guess == Number)
+		{
+			printf("*nYou got it right in only %d %s!*n", Attempts,
+				(Attempts == 1) ? "go" : "goes");
+			return;
+		}
+		
+		if (guess < Number)
+			printf("*nTry a bit higher.*n");
+		if (guess > Number)
+			printf("*nTry a bit lower.*n");
+		Attempts++;
+	}
+}
+
+main()
+{
+	extrn buffer, PlayerName;
+
+	printf("*nHi there! I'm written in B. Before we start, what is your name?*n");
+	reads();
+	strcopy(PlayerName, buffer);
+	printf("*nHello, %s! ", PlayerName);
+	
+	while (1)
+	{
+		game();
+		printf("*nWould you like another go?*n");
+		reads();
+		
+		if ((char(buffer, 0) == 'n') | (char(buffer, 0) == 'N'))
+		{
+			printf("*nThanks for playing --- goodbye!*n");
+			break;
+		}
+		
+		printf("*nExcellent! ");
+	}
+	
+	return(0);
+}
 

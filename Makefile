@@ -63,7 +63,7 @@ PLATDEP = $(INSDIR)/lib/ack
 
 .NOTPARALLEL:
 
-MAKECMDGOALS ?= +ack
+MAKECMDGOALS ?= +ack +tests
 BUILD_FILES = $(shell find * -name '*.lua')
 
 ifneq ($(shell which ninja),)
@@ -88,6 +88,7 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 	@$(LUA) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
+		DEFAULT_PLATFORM=$(DEFAULT_PLATFORM) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
 		LIBDIR=$(LIBDIR) \
@@ -95,6 +96,7 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 		INSDIR=$(INSDIR) \
 		PLATIND=$(PLATIND) \
 		PLATDEP=$(PLATDEP) \
+		PREFIX=$(PREFIX) \
 		AR=$(AR) \
 		CC=$(CC) \
 		> $(BUILDDIR)/build.$(BUILDSYSTEM)

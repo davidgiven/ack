@@ -1,5 +1,4 @@
-.\" $Id$
-.TH AAL 1 "$Revision$"
+.TH AAL 1 2017-01-18
 .ad
 .SH NAME
 aal \- archive and library maintainer
@@ -18,10 +17,10 @@ only understands archives made with
 .PP
 .I Key
 is one character from the set
-.B qdrtx,
+.BR qdrtx ,
 optionally concatenated with
 one or more of
-.B vlc.
+.BR vlc .
 .I Afile
 is the archive file.
 The
@@ -82,9 +81,10 @@ The create option supresses the normal message that is produced when
 .I afile
 is created.
 .SH FILES
-/tmp/ar.* temporaries
+.IP /tmp/ar.* 16
+temporaries
 .SH "SEE ALSO"
-led(6), arch(5),
+led(6), arch(5)
 .SH BUGS
 If the same file is mentioned twice in an argument list,
 it may be put in the archive twice.

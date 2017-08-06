@@ -1,0 +1,6 @@
+(*$Foreign*)
+DEFINITION MODULE Test;
+  PROCEDURE finished();
+  PROCEDURE writehex(code: LONGINT);
+  PROCEDURE fail(code: LONGINT);
+END Test.

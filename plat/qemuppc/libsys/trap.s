@@ -49,21 +49,17 @@ EUNIMPL = 63		! unimplemented em-instruction called
 .define .trap_ecase
 .trap_ecase:
 	b .trp
-	
+
 .define .trap_earray
 .trap_earray:
 	b .trp
+
+.define .trap_erange
+.trap_erange:
+	b .trap
 
 .define .trp
 .define .trap
 .trp:
 .trap:
 	b .trp					! spin forever
-
-.define .sig
-.sig:
-	lwz r3, 0(sp)
-	li32 r4, .trppc
-	stw r3, 0(r4)
-	bclr ALWAYS, 0, 0		! return
-	

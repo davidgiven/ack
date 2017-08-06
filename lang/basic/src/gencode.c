@@ -670,7 +670,7 @@ gendata()
 	C_df_dnam("datfdes");
 	C_rom_dnam("datfname",(arith)0);
 	C_rom_cst((arith)1);
-	C_rom_cst((arith)(itoa(strlen(datfname))));
+	C_rom_cst((arith)(myitoa(strlen(datfname))));
 	C_df_dnam("dattdes");
 	C_rom_dnam("dattyp",(arith)0);
 	C_rom_cst((arith)1);

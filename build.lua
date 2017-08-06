@@ -9,12 +9,17 @@ vars.plats = {
 	"linux386",
 	"linux68k",
 	"linuxppc",
+	"osx386",
+	"osxppc",
 	"qemuppc",
 	"pc86",
 	"rpi",
 }
 vars.plats_with_tests = {
+	"linux386",
+	"linuxppc",
 	"qemuppc",
+	"pc86",
 }
 
 local plat_packages = {}
@@ -33,6 +38,7 @@ installable {
 		"lang/cem/cemcom.ansi+pkg",
 		"lang/m2/comp+pkg",
 		"lang/pc/comp+pkg",
+		"lang/b/compiler+pkg",
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
@@ -43,8 +49,18 @@ installable {
 		"examples+pkg",
 		plat_packages
 	},
-	deps = {
-		test_packages
-	}
 }
 
+normalrule {
+	name = "tests",
+	ins = {
+		"first/testsummary.sh",
+		test_packages
+	},
+	outleaves = {
+		"stamp"
+	},
+	commands = {
+		"%{ins}"
+	}
+}
