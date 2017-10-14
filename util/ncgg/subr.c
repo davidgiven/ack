@@ -19,6 +19,7 @@ static char rcsid[]= "$Id$";
 #include "token.h"
 #include "regvar.h"
 #include <cgg_cg.h>
+#include <em_reg.h>
 #include "extern.h"
 
 n_proc(name) char *name; {
@@ -228,6 +229,70 @@ n_sconst(ident,val) char *ident,*val; {
 	sy_p->sy_value.syv_stringno = strlookup(val);
 }
 
+static void
+add_regvar(int rvnum, reginfo *regp, int rv)
+{
+	int overlap, wrong;
+
+	overlap = wrong = 0;
+	if (regp->ri_memb[0]!=0) {
+		/* reglap: float may overlap with one subregister */
+		if (rv==reg_float && regp->ri_memb[1]==0)
+			overlap = 1;
+		else
+			wrong = 1;
+	}
+	if (wrong)
+		error("Register variables may not have subregisters");
+
+	rvused |= ANY_REGVAR;
+	if (regp->ri_size == wordsize)
+		rvused |= SL_REGVAR;
+	else if (regp->ri_size == 2*wordsize)
+		rvused |= DL_REGVAR;
+
+	wrong = 0;
+	if (overlap) {
+		/* reglap = size of overlap float */
+		if (reglap==0)
+			reglap = regp->ri_size;
+		else if (reglap!=regp->ri_size)
+			wrong = 1;
+	} else {
+		if (nregvar[rv]==0)
+			rvsize[rv] = regp->ri_size;
+		else if (rvsize[rv]!=regp->ri_size)
+			wrong = 1;
+	}
+	if (wrong)
+		error("All register variables of one type must have the same size");
+
+	if (overlap) {
+		reginfo *member_p = &l_regs[regp->ri_memb[0]];
+		int i;
+
+		/*
+		 * reglap: Remove member_p from rvnumbers.
+		 *   Add reg_p in its place.
+		 */
+		wrong = 1;
+		for (i = 0; i < nregvar[rv]; i++) {
+			if (rvnumbers[rv][i] == regp->ri_memb[0]) {
+				rvnumbers[rv][i] = rvnum;
+				wrong = 0;
+				break;
+			}
+		}
+		if (wrong)
+			error("Register variable %s can't overlap %s",
+			    regp->ri_name, member_p->ri_name);
+	} else {
+		NEXT(nregvar[rv],MAXREGVAR,"Register variable");
+		rvnumbers[rv][nregvar[rv]-1] = rvnum;
+	}
+}
+
+void
 regline(rl,pl,rv) varinfo *rl,*pl; {
 	register varinfo *rrl,*rpl;
 	register short *sp;
@@ -251,21 +316,8 @@ regline(rl,pl,rv) varinfo *rl,*pl; {
 		regp->ri_size = thissize;
 		regp->ri_class = regclass;
 		regp->ri_rregvar = rv;
-		if (rv>=0) {
-			if (regp->ri_memb[0]!=0)
-				error("Register variables may not have subregisters");
-			rvused |= ANY_REGVAR;
-			if (regp->ri_size == wordsize)
-				rvused |= SL_REGVAR;
-			else if (regp->ri_size == 2*wordsize)
-				rvused |= DL_REGVAR;
-			if (nregvar[rv]==0)
-				rvsize[rv] = regp->ri_size;
-			else if (rvsize[rv]!=regp->ri_size)
-				error("All register variables of one type must have the same size");
-			NEXT(nregvar[rv],MAXREGVAR,"Register variable");
-			rvnumbers[rv][nregvar[rv]-1] = rrl->vi_int[0];
-		}
+		if (rv>=0)
+			add_regvar(rrl->vi_int[0], regp, rv);
 	}
 	regclass++;
 }

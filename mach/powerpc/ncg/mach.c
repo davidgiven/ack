@@ -106,6 +106,7 @@ char *segname[] = {
 static long savedf[32];
 static long savedi[32];
 static int savedtop;
+static unsigned long lfs_set;
 
 /* Calculate the register score of a local variable. */
 int
@@ -118,7 +119,7 @@ regscore(long offset, int size, int type, int frequency, int totype)
 			/* Don't put reg_float in reg_any. */
 			if (totype != reg_float)
 				return -1;
-			assert(size == 8);
+			assert(size == 4 || size == 8);
 			break;
 		default:
 			assert(size == 4);
@@ -155,6 +156,8 @@ i_regsave(void)
 
 	/* Set top of register save area, relative to fp. */
 	savedtop = -framesize;
+
+	lfs_set = 0;  /* empty set */
 }
 
 /* Mark a register as being saved. */
@@ -168,6 +171,8 @@ regsave(const char* regname, long offset, int size)
 		case 'f':
 			savedf[regnum] = offset;
 			framesize += 8;
+			if (size == 4)
+				lfs_set |= (1U << regnum);
 			break;
 		case 'r':
 			savedi[regnum] = offset;
@@ -224,9 +229,14 @@ f_regsave(void)
 	emit_prolog();
 	saveloadregs("stw", "stmw", "stfd");
 
+	/*
+	 * Register variables with offset >= 0 must load an argument
+	 * from that offset.
+	 */
 	for (reg = 31; reg >= 0; reg--)
 		if (savedf[reg] >= 0)
-			fprintf(codefile, "lfd f%d, %ld(fp)\n",
+			fprintf(codefile, "%s f%d, %ld(fp)\n",
+				(lfs_set & (1U << reg)) ? "lfs" : "lfd",
 				reg, savedf[reg]);
 
 	for (reg = 31; reg >= 0; reg--)

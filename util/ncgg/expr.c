@@ -18,6 +18,7 @@ static char rcsid[]= "$Id$";
 #include "expr.h"
 #include "regvar.h"
 #include <cgg_cg.h>
+#include <em_reg.h>
 #include "extern.h"
 
 extern set_t l_sets[];
@@ -276,12 +277,21 @@ expr_t iextoaddr(e) expr_t e; {
 expr_t regvar_expr(e,regtyp) expr_t e; {
 	expr_t result;
 	register i;
-	
+
 	result = make_expr(TYPREG,EX_REGVAR,i_expr(e),0);
 	for(i=0;i<SZOFSET(MAXREGS);i++)
 		result.ex_regset[i]=0;
 	for(i=0;i<nregvar[regtyp];i++)
 		BIS(result.ex_regset,rvnumbers[regtyp][i]);
+	/* reglap: float may overlap with one subregister */
+	if (reglap!=0 && regtyp==reg_float) {
+		for(i=0;i<nregvar[regtyp];i++) {
+			/* reg = first subregister */
+			int reg = l_regs[rvnumbers[regtyp][i]].ri_memb[0];
+			if (reg!=0)
+				BIS(result.ex_regset,reg);
+		}
+	}
 	return(result);
 }
 		

@@ -50,7 +50,19 @@ tryreg(rvlp,typ) register struct regvar *rvlp; {
 	struct regvar *save;
 
 	if (typ != reg_any && nregvar[typ]!=0) {
-		if (machregs[rvnumbers[typ][0]].r_size!=rvlp->rv_size)
+		struct reginfo *ri = &machregs[rvnumbers[typ][0]];
+		int size, wrong;
+
+		size = ri->r_size;
+		wrong = (size!=rvlp->rv_size);
+#ifdef REGLAP
+		/* reg_float may have one subregister */
+		if (wrong && ri->r_members[0]!=0) {
+			size = machregs[ri->r_members[0]].r_size;
+			wrong = (size!=rvlp->rv_size);
+		}
+#endif /* REGLAP */
+		if (wrong)
 			score = -1;
 		else
 			score = regscore(rvlp->rv_off,
@@ -99,11 +111,29 @@ fixregvars(saveall) {
 		if (saveall) {
 			struct reginfo *rp;
 			rp= &machregs[rvnumbers[rvtyp][i]];
-			regsave(codestrings[rp->r_repr],(long)-TEM_WSIZE,rp->r_size);
+			regsave(codestrings[rp->r_repr],
+				    (long)-TEM_WSIZE,rp->r_size);
+#ifdef REGLAP
+			/* reg_float may have one subregister */
+			if (rp->r_members[0]!=0) {
+				rp= &machregs[rp->r_members[0]];
+				regsave(codestrings[rp->r_repr],
+					    (long)-TEM_WSIZE,rp->r_size);
+			}
+#endif
 		} else if(regassigned[rvtyp][i].ra_score>0) {
 			rv=regassigned[rvtyp][i].ra_rv;
 			rv->rv_reg=rvnumbers[rvtyp][i];
 			rv->rv_type = rvtyp;
+#ifdef REGLAP
+			/* reg_float may have alternate size */
+			if (machregs[rv->rv_reg].r_size != rv->rv_size) {
+				rv->rv_reg = machregs[rv->rv_reg].r_members[0];
+				assert(rv->rv_reg != 0);
+				assert(machregs[rv->rv_reg].r_size ==
+					   rv->rv_size);
+			}
+#endif
 			regsave(codestrings[machregs[rv->rv_reg].r_repr],
 				    rv->rv_off,rv->rv_size);
 		}
