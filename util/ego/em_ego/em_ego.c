@@ -58,10 +58,7 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-extern char* mktemp();
-extern char* strcpy(), *strcat();
-extern char* strrchr();
-
+static char tmpbase[] = TMP_DIR "/ego.XXXXXX";
 static char ddump[128] = TMP_DIR; /* data label dump file */
 static char pdump[128] = TMP_DIR; /* procedure name dump file */
 static char tmpbufs[NTEMPS * 2][128] = {
@@ -119,6 +116,8 @@ cleanup()
 		if (pdump[0] != '\0')
 			(void)unlink(pdump);
 	}
+
+	(void)unlink(tmpbase);
 }
 
 /*VARARGS1*/
@@ -204,9 +203,8 @@ new_outfiles()
 	char** dst = &phargs[NTEMPS + 1];
 
 	if (!Bindex)
-	{
-		Bindex = strrchr(tmpbufs[0], 'B') - tmpbufs[0];
-	}
+		Bindex = strlen(tmpbufs[0]) - 2;
+
 	for (i = 1; i <= NTEMPS; i++)
 	{
 		*dst = tmpbufs[tmpindex];
@@ -284,7 +282,7 @@ static void
 				phargs[argc++] = "-M";
 				phargs[argc++] = descr_file;
 			}
-			
+
 			for (i=0; i<nphase_args; i++)
 				phargs[argc++] = phase_args[i];
 
@@ -407,25 +405,25 @@ int main(int argc, char* argv[])
 		fatal("no correct -P flag given");
 	}
 
+	close(mkstemp(tmpbase));
+	strcpy(ddump, tmpbase);
+	strcpy(pdump, tmpbase);
+	strcpy(tmpbufs[0], tmpbase);
+
 	if (keeptemps)
 	{
 		(void)strcpy(ddump, ".");
 		(void)strcpy(pdump, ".");
 		(void)strcpy(tmpbufs[0], ".");
 	}
-	(void)strcat(ddump, "/ego.dd.XXXXXX");
-	(void)mktemp(ddump);
-	(void)strcat(pdump, "/ego.pd.XXXXXX");
-	(void)mktemp(pdump);
+	(void)strcat(ddump, "dd");
+	(void)strcat(pdump, "pd");
 
-	(void)strcat(tmpbufs[0], "/ego.XXXXXX");
-	(void)mktemp(tmpbufs[0]);
-	(void)strcat(tmpbufs[0], ".A.BB");
-	for (i = 2 * NTEMPS - 1; i >= 1; i--)
-	{
+	(void)strcat(tmpbufs[0], "A.BB");
+	for (i=1; i<(2 * NTEMPS); i++)
 		(void)strcpy(tmpbufs[i], tmpbufs[0]);
-	}
-	i = strrchr(tmpbufs[0], 'A') - tmpbufs[0];
+
+	i = strlen(tmpbufs[0]) - 4;
 	tmpbufs[0][i] = 'p';
 	tmpbufs[NTEMPS + 0][i] = 'p';
 	tmpbufs[1][i] = 'd';
@@ -434,6 +432,7 @@ int main(int argc, char* argv[])
 	tmpbufs[NTEMPS + 2][i] = 'l';
 	tmpbufs[3][i] = 'b';
 	tmpbufs[NTEMPS + 3][i] = 'b';
+
 	run_phase(IC);
 	run_phase(CF);
 	while (*Ophase)

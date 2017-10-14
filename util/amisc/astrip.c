@@ -17,8 +17,6 @@
 
 char	temp_name[] = "/tmp/sXXXXXX";
 char	*tname;
-char	*mktemp();
-FILE	*fopen();
 FILE	*tf;
 struct outhead buf;
 int	readerror, writeerror;
@@ -31,12 +29,12 @@ char **argv;
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
-	tname = mktemp(temp_name);
+	close(mkstemp(temp_name));
 	while(--argc) {
 		if ((status = strip(argv[argc])) > 1)
 			break;
 	}
-	unlink(tname);
+	unlink(temp_name);
 	exit(status);
 }
 

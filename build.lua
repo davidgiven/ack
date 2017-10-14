@@ -11,14 +11,14 @@ vars.plats = {
 	"linuxppc",
 	"osx386",
 	"osxppc",
-	"qemuppc",
+	--"qemuppc",
 	"pc86",
 	"rpi",
 }
 vars.plats_with_tests = {
 	"linux386",
 	"linuxppc",
-	"qemuppc",
+	--"qemuppc",
 	"pc86",
 }
 

@@ -10,6 +10,7 @@ static char rcsid[] = "$Id$";
  * led - linkage editor for ACK assemblers output format
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -299,12 +300,15 @@ static char	lignmap[MAXSECT / WIDTH];
 static uint32_t	sect_lign[MAXSECT];
 
 /*
+/*
  * Set the alignment of section `sectno' to `lign', if this doesn't
  * conflict with earlier alignment.
  */
 static void
 setlign(int sectno, uint32_t lign)
 {
+	extern bool	setbit();
+
 	if (setbit(sectno, lignmap) && sect_lign[sectno] != lign)
 		fatal("section has different alignments");
 	if (lign == (long)0)
@@ -319,6 +323,8 @@ setlign(int sectno, uint32_t lign)
 static void
 setbase(int sectno, uint32_t base)
 {
+	extern bool	setbit();
+
 	if (setbit(sectno, basemap) && sect_base[sectno] != base)
 		fatal("section has different bases");
 	sect_base[sectno] = base;

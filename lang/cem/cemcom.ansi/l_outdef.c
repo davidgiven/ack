@@ -37,7 +37,6 @@
 
 extern char *bts2str();
 extern char *symbol2str();
-extern char *strchr();
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;

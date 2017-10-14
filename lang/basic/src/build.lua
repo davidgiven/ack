@@ -24,6 +24,7 @@ cprogram {
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
+		"./*.h",
 		"+llgen",
 		"+tokentab_h",
 		"h+emheaders",

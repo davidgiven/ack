@@ -26,8 +26,6 @@ prc_p prochash[NPROCHASH];
 num_p numhash[NNUMHASH];
 char *lastname;
 
-extern char	*strcpy();
-
 #define newsym()	(sym_p) newstruct(sym)
 #define newprc()	(prc_p) newstruct(prc)
 #define newnum()	(num_p) newstruct(num)

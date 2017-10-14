@@ -38,5 +38,10 @@ extern struct memory	mems[];
 #define int_align(sz)		(((sz)+(sizeof(int)-1))&~(int)(sizeof(int)-1))
 
 extern ind_t		core_position;
-extern ind_t		hard_alloc();
-extern ind_t		alloc();
+extern void         init_core(void);
+extern ind_t        hard_alloc(int piece, long size);
+extern ind_t        alloc(int piece, long size);
+extern void         dealloc(int piece);
+extern void         core_free(int piece, char* p);
+extern void         write_bytes(void);
+extern void         namecpy(struct outname* name, unsigned nname, long offchar);

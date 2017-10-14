@@ -334,10 +334,10 @@ char* argv[];
 	strcat(ccname, "/ego.i2.XXXXXX");
 	strcat(sname, "/ego.i3.XXXXXX");
 	strcat(cname2, "/ego.i4.XXXXXX");
-	mktemp(cname);
-	mktemp(ccname);
-	mktemp(sname);
-	mktemp(cname2);
+	close(mkstemp(cname));
+	close(mkstemp(ccname));
+	close(mkstemp(sname));
+	close(mkstemp(cname2));
 	pass1(files->lname_in, files->bname_in, cname); /* grep calls, analyse procedures */
 	space = total_size * space / 100;
 	pass2(cname, space); /* select calls to be expanded */

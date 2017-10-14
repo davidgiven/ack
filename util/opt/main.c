@@ -57,13 +57,12 @@ flags(s) register char *s; {
 }
 
 fileinit() {
-	char *mktemp();
 	short readshort();
 
 	if (readshort() != (short) sp_magic)
 		error("wrong input file");
 	if (Lflag) {
-		outfile = fopen(mktemp(template),"w");
+		outfile = fdopen(mkstemp(template),"w");
 		if (outfile == NULL)
 			error("can't create %s",template);
 	} else {

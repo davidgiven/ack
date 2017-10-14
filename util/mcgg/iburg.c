@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 				exit(1);
 		}
 	}
-				
+
 	emitheader();
 	registerterminals();
 
@@ -1074,7 +1074,7 @@ static bool find_child_index(Tree node, const char* name, int* index, Tree* foun
 		return true;
 	return false;
 }
-	
+
 static void emit_predicate_expr(Rule r, struct expr* p)
 {
 	bool first = true;
@@ -1254,10 +1254,10 @@ static void emitinsndata(Rule rules)
 			int index = 0;
 			emit_input_regs(r->pattern, &index);
 		}
-		
+
 		emit_output_constraints(r);
 		emit_input_constraints(r);
-		
+
 		while (f)
 		{
 			char* data = strdup(f->data);
@@ -1276,10 +1276,10 @@ static void emitinsndata(Rule rules)
 					{
 						Tree node;
 						int index = 0;
+						Nonterm nt;
+
 						if (!find_child_index(r->pattern, label, &index, &node))
 							label_not_found(r, label);
-						Nonterm nt = node->op;
-
 						if (nt->kind == NONTERM)
 						{
 							if (nt->is_fragment)
@@ -1310,7 +1310,7 @@ static void emitinsndata(Rule rules)
 					assert(f->data[1] == 0);
 					print("%1data->emit_eoi();\n");
 					break;
-				
+
 				default:
 					print("%1data->emit_string(\"%s\");\n", f->data);
 			}

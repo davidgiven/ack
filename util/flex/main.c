@@ -6,7 +6,7 @@
  *
  * This code is derived from software contributed to Berkeley by
  * Vern Paxson.
- * 
+ *
  * The United States Government has rights in this work pursuant
  * to contract no. DE-AC03-76SF00098 between the United States
  * Department of Energy and the University of California.
@@ -38,6 +38,7 @@ static char rcsid[] =
 #endif
 
 
+#include <stdlib.h>
 #include "flexdef.h"
 
 static char flex_version[] = "2.3";
@@ -394,7 +395,7 @@ char **argv;
 
     {
     int i, sawcmpflag;
-    char *arg, *flex_gettime(), *mktemp();
+    char *arg, *flex_gettime();
 
     printstats = syntaxerror = trace = spprdflt = interactive = caseins = false;
     backtrack_report = performance_report = ddebug = fulltbl = fullspd = false;
@@ -611,7 +612,7 @@ get_next_arg: /* used by -C and -S flags in lieu of a "continue 2" control */
 #else
 	(void) strcpy( temp_action_file_name, "flexXXXXXX.tmp" );
 #endif
-	(void) mktemp( temp_action_file_name );
+	close(mkstemp(temp_action_file_name));
 
 	action_file_name = temp_action_file_name;
 	}

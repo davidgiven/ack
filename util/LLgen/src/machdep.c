@@ -57,7 +57,6 @@ libpath(s) string s; {
 	register string p;
 	register length;
 	p_mem alloc();
-	string strcpy(), strcat();
 
 	char* libdir = getenv("LLGEN_LIB_DIR");
 	if (!libdir)

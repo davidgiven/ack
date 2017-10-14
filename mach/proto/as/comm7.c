@@ -363,7 +363,8 @@ char *path, *tail;
 	if ((dir = getenv("TMPDIR")) == NULL)
 		dir = tmp_dir;
 	sprintf(path, "%s/%s", dir, tail);
-	return(ffcreat(mktemp(path)));
+	close(mkstemp(path));
+	return(ffcreat(path));
 }
 
 /* ---------- Error handling ---------- */
