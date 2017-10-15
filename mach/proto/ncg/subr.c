@@ -121,7 +121,9 @@ instance(instno,token) register token_p token; {
 	case IN_D_DESCR:
 		compute(&enodes[inp->in_info[1]], &result);
 		assert(result.e_typ==EV_INT);
-		if ((regno=isregvar(result.e_v.e_con)) > 0) {
+		regno = isregvar_size(result.e_v.e_con,
+				      tokens[inp->in_info[0]].t_size);
+		if (regno > 0) {
 			token->t_token = -1;
 			token->t_att[0].ar = regno;
 			for (i=TOKENSIZE-1;i>0;i--)

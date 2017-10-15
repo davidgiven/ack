@@ -102,40 +102,44 @@ tryreg(struct regvar *rvlp, int typ) {
 
 void
 fixregvars(int saveall) {
-	register struct regvar *rv;
-	register rvtyp,i;
+	struct reginfo *rp, *rp2;
+	struct regvar *rv;
+	int i, regno, rvtyp;
 	
 	swtxt();
 	i_regsave();	/* machine dependent initialization */
 	for (rvtyp=reg_any;rvtyp<=reg_float;rvtyp++) {
 	    for(i=0;i<nregvar[rvtyp];i++)
 		if (saveall) {
-			struct reginfo *rp;
 			rp= &machregs[rvnumbers[rvtyp][i]];
+#ifdef REGLAP
+			/*
+			 * A reg_float may have two sizes.  If so,
+			 * only save the larger size.
+			 */
+			if ((regno = rp->r_members[0]) != 0 &&
+			    machregs[regno].r_size > rp->r_size)
+				rp= &machregs[regno];
+#endif
 			regsave(codestrings[rp->r_repr],
 				    (long)-TEM_WSIZE,rp->r_size);
-#ifdef REGLAP
-			/* reg_float may have one subregister */
-			if (rp->r_members[0]!=0) {
-				rp= &machregs[rp->r_members[0]];
-				regsave(codestrings[rp->r_repr],
-					    (long)-TEM_WSIZE,rp->r_size);
-			}
-#endif
 		} else if(regassigned[rvtyp][i].ra_score>0) {
 			rv=regassigned[rvtyp][i].ra_rv;
-			rv->rv_reg=rvnumbers[rvtyp][i];
+			rv->rv_reg = regno = rvnumbers[rvtyp][i];
 			rv->rv_type = rvtyp;
 #ifdef REGLAP
-			/* reg_float may have alternate size */
-			if (machregs[rv->rv_reg].r_size != rv->rv_size) {
-				rv->rv_reg = machregs[rv->rv_reg].r_members[0];
-				assert(rv->rv_reg != 0);
-				assert(machregs[rv->rv_reg].r_size ==
-					   rv->rv_size);
+			/*
+			 * Change regno to match rv->rv_size, but
+			 * leave old regno in rv->rv_reg so that
+			 * isregvar_size() can handle both sizes.
+			 */
+			if (machregs[regno].r_size != rv->rv_size) {
+				regno = machregs[regno].r_members[0];
+				assert(regno != 0);
+				assert(machregs[regno].r_size == rv->rv_size);
 			}
 #endif
-			regsave(codestrings[machregs[rv->rv_reg].r_repr],
+			regsave(codestrings[machregs[regno].r_repr],
 				    rv->rv_off,rv->rv_size);
 		}
 	}
@@ -151,6 +155,26 @@ isregvar(long off) {
 			return(rvlp->rv_reg);
 	return(-1);
 }
+
+#ifdef REGLAP
+int
+isregvar_size(long off, int size) {
+	int regno = isregvar(off);
+	/*
+	 * A reg_float may have two sizes.  If this register has the
+	 * wrong size, then use the overlapping register.  A register
+	 * may switch sizes in the middle of a procedure.
+	 */
+	if (regno > 0 && machregs[regno].r_size != size) {
+		if (machregs[regno].r_size != size) {
+			regno = machregs[regno].r_members[0];
+			assert(regno != 0);
+			assert(machregs[regno].r_size == size);
+		}
+	}
+	return regno;
+}
+#endif /* REGLAP */
 
 int
 isregtyp(long off) {
