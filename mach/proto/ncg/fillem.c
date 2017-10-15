@@ -365,7 +365,6 @@ dopseudo() {
 		} else if (argval == ms_reg) {
 			long r_off;
 			int r_size,r_type,r_score;
-			struct regvar *linkreg();
 
 			if (!regallowed)
 				error("mes 3 not allowed here");

@@ -28,7 +28,7 @@ extern string myalloc();
 struct regvar *rvlist;
 
 struct regvar *
-linkreg(of,sz,tp,sc) long of; {
+linkreg(long of, int sz, int tp, int sc) {
 	register struct regvar *rvlp;
 
 	rvlp= (struct regvar *) myalloc(sizeof *rvlp);
@@ -43,7 +43,7 @@ linkreg(of,sz,tp,sc) long of; {
 }
 
 void
-tryreg(rvlp,typ) register struct regvar *rvlp; {
+tryreg(struct regvar *rvlp, int typ) {
 	int score;
 	register i;
 	register struct regassigned *ra;
@@ -100,7 +100,8 @@ tryreg(rvlp,typ) register struct regvar *rvlp; {
 	}
 }
 
-fixregvars(saveall) {
+void
+fixregvars(int saveall) {
 	register struct regvar *rv;
 	register rvtyp,i;
 	
@@ -141,7 +142,8 @@ fixregvars(saveall) {
 	f_regsave();
 }
 
-isregvar(off) long off; {
+int
+isregvar(long off) {
 	register struct regvar *rvlp;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
@@ -150,7 +152,8 @@ isregvar(off) long off; {
 	return(-1);
 }
 
-isregtyp(off) long off; {
+int
+isregtyp(long off) {
 	register struct regvar *rvlp;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
@@ -159,7 +162,8 @@ isregtyp(off) long off; {
 	return(-1);
 }
 
-unlinkregs() {
+void
+unlinkregs(void) {
 	register struct regvar *rvlp,*t;
 	register struct regassigned *ra;
 	int rvtyp,i;

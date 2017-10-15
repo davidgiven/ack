@@ -21,3 +21,10 @@ struct regassigned {
 extern struct regvar *rvlist;
 extern int nregvar[];
 extern struct regassigned *regassigned[];
+
+struct regvar *linkreg(long, int, int, int);
+void tryreg(struct regvar *, int);
+void fixregvars(int);
+int isregvar(long);
+int isregtyp(long);
+void unlinkregs(void);

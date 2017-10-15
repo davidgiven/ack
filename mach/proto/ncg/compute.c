@@ -14,6 +14,9 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h"
+#endif
 #ifdef USE_TES
 #include "label.h"
 #endif
