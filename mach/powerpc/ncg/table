@@ -328,6 +328,7 @@ INSTRUCTIONS
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
 
+  bug ">>> BUG"           LABEL:ro cost(0, 0).
   comment "!"             LABEL:ro cost(0, 0).
 
 
@@ -588,16 +589,6 @@ TESTS
 
 STACKINGRULES
 
-	from LOCAL inreg(%off)==reg_float to STACK
-		gen
-			COMMENT("stack LOCAL")
-			stfsu %1, {IND_RC_W, sp, 0-4}
-
-	from LOCAL to STACK
-		gen
-			COMMENT("stack LOCAL")
-			stwu %1, {IND_RC_W, sp, 0-4}
-
 	from REG to STACK
 		gen
 			COMMENT("stack REG")
@@ -615,7 +606,7 @@ STACKINGRULES
 			move %1, FSCRATCH
 			stfdu FSCRATCH, {IND_RC_D, sp, 0-8}
 
-	from FREG+DLOCAL to STACK
+	from FREG to STACK
 		gen
 			COMMENT("stack FREG+DLOCAL")
 			stfdu %1, {IND_RC_D, sp, 0-8}
@@ -624,6 +615,16 @@ STACKINGRULES
 		gen
 			COMMENT("stack FSREG")
 			stfsu %1, {IND_RC_W, sp, 0-4}
+
+	/*
+	 * We never stack LOCAL or DLOCAL tokens, because we only use
+	 * them for register variables, so ncg pushes the register,
+	 * not the token.  These rules only prevent an error in ncgg.
+	 */
+	from LOCAL to STACK
+		gen bug {LABEL, "STACKING LOCAL"}
+	from DLOCAL to STACK
+		gen bug {LABEL, "STACKING DLOCAL"}
 
 
 
