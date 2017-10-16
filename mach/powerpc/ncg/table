@@ -630,31 +630,12 @@ STACKINGRULES
 
 COERCIONS
 
-	from ANY_BHW
-		uses REG
-		gen
-			COMMENT("coerce ANY_BHW->REG")
-			move %1, %a
-		yields %a
-
 	from STACK
 		uses REG
 		gen
 			COMMENT("coerce STACK->REG")
 			lwz %a, {IND_RC_W, sp, 0}
 			addi sp, sp, {CONST, 4}
-		yields %a
-
-	from FSREG
-		uses FSREG
-		gen
-			fmr %a, %1
-		yields %a
-
-	from FREG
-		uses FREG
-		gen
-			fmr %a, %1
 		yields %a
 
 	from STACK
@@ -673,21 +654,34 @@ COERCIONS
 			addi sp, sp, {CONST, 4}
 		yields %a
 
-	from IND_ALL_W
-		uses FSREG
+	from ANY_BHW
+		uses REG
 		gen
+			COMMENT("coerce ANY_BHW->REG")
 			move %1, %a
 		yields %a
 
 	/*
-	 * from IND_RC_D to REG REG is not possible, because
-	 * %1.off+4 might overflow a signed 16-bit integer in
-	 *   move {IND_RC_W, %1.val, %1.off+4}, %a
+	 * There is no coercion from IND_ALL_D to REG REG, because
+	 * coercions can't allocate registers for intermediate values.
+	 *
+	 * A coercion to split IND_RC_D into two IND_RC_W, without
+	 * allocating an intermediate register, would yield
+	 *   {IND_RC_W, %1.val, %1.off+4}
+	 * but %1.off+4 might overflow a signed 16-bit integer.
 	 */
 
-	from IND_ALL_D
+	from FREG+IND_ALL_D
 		uses FREG
 		gen
+			COMMENT("coerce FREG+IND_ALL_D->FREG")
+			move %1, %a
+		yields %a
+
+	from FSREG+IND_ALL_W
+		uses FSREG
+		gen
+			COMMENT("coerce FSREG+IND_ALL_W->FREG")
 			move %1, %a
 		yields %a
 
