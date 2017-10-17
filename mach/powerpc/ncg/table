@@ -106,7 +106,9 @@ TOKENS
 
 /* Allows us to use regvar() to refer to registers */
 
-	GPRE               = { GPR reg; }             4    reg.
+	GPR_EXPR           = { GPR reg; }             4    reg.
+	FPR_EXPR           = { FPR reg; }             8    reg.
+	FSREG_EXPR         = { FSREG reg; }           4    reg.
 
 /* Constants on the stack */
 
@@ -264,8 +266,8 @@ INSTRUCTIONS
   fctiwz          FREG:wo, FREG:ro.
   fdiv            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 35).
   fdivs           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 21).
-  fmr             FPR+DLOCAL:wo, FPR:ro cost(4, 5).
-  fmr             FSREG+LOCAL:wo, FSREG:ro cost(4, 5).
+  fmr             FPR:wo, FPR:ro cost(4, 5).
+  fmr             FSREG:wo, FSREG:ro cost(4, 5).
   fmul            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fmuls           FSREG:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fneg            FREG+DLOCAL:wo, FREG:ro cost(4, 5).
@@ -277,17 +279,17 @@ INSTRUCTIONS
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lfd             FPR+DLOCAL:wo, IND_RC_D+IND_RL_D:ro cost(4, 5).
   lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
-  lfdx            FPR+DLOCAL:wo, GPR:ro, GPR:ro cost(4, 5).
+  lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
   lfs             FSREG+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
-  lfsx            FSREG+LOCAL:wo, GPR:ro, GPR:ro cost(4, 4).
+  lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
   lha             GPR:wo, IND_RC_H_S+IND_RL_H_S:ro cost(4, 3).
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lhz             GPR:wo, IND_RC_H+IND_RL_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
+  lwz             GPR+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
@@ -314,16 +316,16 @@ INSTRUCTIONS
   stb             GPR:ro, IND_RC_B+IND_RL_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stfd            FPR:ro, IND_RC_D+IND_RL_D:rw cost(4, 4).
-  stfdu           FPR+DLOCAL:ro, IND_RC_D:rw cost(4, 4).
+  stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
   stfs            FSREG:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
-  stfsu           FSREG+LOCAL:ro, IND_RC_W:rw cost(4, 3).
+  stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
   stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
   sth             GPR:ro, IND_RC_H+IND_RL_H:rw cost(4, 3).
   sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stw             GPR:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stwu            GPR+LOCAL:ro, IND_RC_W:rw cost(4, 3).
+  stwu            GPR:ro, IND_RC_W:rw cost(4, 3).
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
@@ -340,7 +342,7 @@ MOVES
 	from FSREG to FSREG
 		gen fmr %2, %1
 
-	from FPR to FPR+DLOCAL
+	from FPR to FPR
 		gen fmr %2, %1
 
 /* Constants */
@@ -462,10 +464,10 @@ MOVES
 
 /* Read double */
 
-	from IND_RC_D+IND_RL_D to FPR+DLOCAL
+	from IND_RC_D+IND_RL_D to FPR
 		gen lfd %2, %1
 
-	from IND_RR_D to FPR+DLOCAL
+	from IND_RR_D to FPR
 		gen lfdx %2, %1.reg1, %1.reg2
 
 /* Write double */
@@ -567,10 +569,18 @@ MOVES
 			extrwi %2, %1.reg, {CONST, 1}, {CONST, 1}
 			xori %2, %2, {CONST, 1}
 
-/* GPRE exists solely to allow us to use regvar() (which can only be used in
-   an expression) as a register constant. */
+/* GPR_EXPR exists solely to allow us to use regvar() (which can only
+   be used in an expression) as a register constant.  We can then use
+   our moves to GPR to set register variables.  We define no moves to
+   LOCAL, so we avoid confusion between GPR and FSREG in LOCAL. */
 
-	from ANY_BHW to GPRE
+	from ANY_BHW to GPR_EXPR
+		gen move %1, %2.reg
+
+	from FPR+IND_ALL_D to FPR_EXPR
+		gen move %1, %2.reg
+
+	from FSREG+IND_ALL_W to FSREG_EXPR
 		gen move %1, %2.reg
 
 
@@ -608,7 +618,7 @@ STACKINGRULES
 
 	from FREG to STACK
 		gen
-			COMMENT("stack FREG+DLOCAL")
+			COMMENT("stack FREG")
 			stfdu %1, {IND_RC_D, sp, 0-8}
 
 	from FSREG to STACK
@@ -803,12 +813,18 @@ PATTERNS
 
 	/* Store word to local */
 	pat stl inreg($1)==reg_any
-		with ANY_BHW
-			kills regvar($1), LOCAL %off==$1
-			gen move %1, {GPRE, regvar($1)}
+		with exact ANY_BHW
+			/* ncg fails to infer that regvar($1) is dead! */
+			kills regvar($1)
+			gen move %1, {GPR_EXPR, regvar($1)}
+		with STACK
+			gen
+				lwz {LOCAL, $1}, {IND_RC_W, sp, 0}
+				addi sp, sp, {CONST, 4}
 	pat stl inreg($1)==reg_float
-		with exact FSREG
-			gen fmr {LOCAL, $1}, %1
+		with exact FSREG+IND_ALL_W
+			kills regvar_w($1, reg_float)
+			gen move %1, {FSREG_EXPR, regvar_w($1, reg_float)}
 		with STACK
 			gen
 				lfs {LOCAL, $1}, {IND_RC_W, sp, 0}
@@ -821,7 +837,8 @@ PATTERNS
 	/* Store double-word to local */
 	pat sdl inreg($1)==reg_float
 		with exact FREG+IND_ALL_D
-			gen move %1, {DLOCAL, $1}
+			kills regvar_d($1, reg_float)
+			gen move %1, {FPR_EXPR, regvar_d($1, reg_float)}
 		with STACK
 			gen
 				lfd {DLOCAL, $1}, {IND_RC_D, sp, 0}
