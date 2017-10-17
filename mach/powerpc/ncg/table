@@ -2353,48 +2353,15 @@ PATTERNS
 		leaving
 			cal ".cfu8"
 
-	/*
-	 * To convert integer to IEEE double, we pack the integer in
-	 * the low bits of the magic double
-	 *   1 << 52 == 0x 4330 0000 0000 0000
-	 *
-	 * For signed integer i, we flip its sign bit, then compute
-	 *   ((1 << 52) + i) - ((1 << 52) + (1 << 31))
-	 */
+	/* Convert signed int to double */
 	pat loc loc cif $1==4 && $2==8
-		with REG
-			uses reusing %1, REG={XOR_RIS, %1, 0x8000},
-			  REG={CONST_HZ, 0x43300000},
-			  REG={CONST_HZ, 0x80000000},
-			  FREG, FREG
-			gen
-				stwu %b, {IND_RC_W, sp, 0-8}
-				stw %a, {IND_RC_W, sp, 4}
-				lfd %d, {IND_RC_D, sp, 0}
-				stw %c, {IND_RC_W, sp, 4}
-				lfd %e, {IND_RC_D, sp, 0}
-				fsub %d, %d, %e
-				addi sp, sp, {CONST, 8}
-			yields %d
+		leaving
+			cal ".cif8"
 
-	/*
-	 * To convert unsigned integer u to IEEE double, we compute
-	 *   ((1 << 52) + u) - (1 << 52)
-	 */
+	/* Convert unsigned int to double */
 	pat loc loc cuf $1==4 && $2==8
-		with REG
-			uses REG={CONST_HZ, 0x43300000},
-			  REG={CONST_0000_7FFF, 0},
-			  FREG, FREG
-			gen
-				stwu %a, {IND_RC_W, sp, 0-8}
-				stw %1, {IND_RC_W, sp, 4}
-				lfd %c, {IND_RC_D, sp, 0}
-				stw %b, {IND_RC_W, sp, 4}
-				lfd %d, {IND_RC_D, sp, 0}
-				fsub %c, %c, %d
-				addi sp, sp, {CONST, 8}
-			yields %c
+		leaving
+			cal ".cuf8"
 
 	pat fef $1==8                      /* Split fraction, exponent */
 		leaving

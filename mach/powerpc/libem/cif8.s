@@ -8,25 +8,24 @@
 
 .define .cif8
 .cif8:
-	addi sp, sp, -4          ! make space for the double
+	! Conversion uses the pivot value
+	!   1 << 52 = 0x4330 0000 0000 0000
+	!
+	! From signed integer i, we compute
+	!   ((1 << 52) + (1 << 31) + i) - ((1 << 52) + (1 << 31))
+
+	lis r3, 0x4330
+	stwu r3, -4(sp)          ! make space for the double
 
 	lwz r3, 4(sp)
 	xoris r3, r3, 0x8000
-	stw r3, 4(sp)            ! flip sign of integer value
+	stw r3, 4(sp)            ! flip sign bit to get (1 << 31) + i
 
-	addis r3, r0, 0x4330
-	stw r3, 0(sp)            ! set high word to construct a double
-
-	lfd f0, 0(sp)            ! load value
-
-	lis r3, ha16[pivot]
-	lfd f1, lo16[pivot](r3)  ! load pivot value
-	fsub f0, f0, f1          ! adjust
+	lfd f0, 0(sp)            ! f0 = (1 << 52) + (1 << 31) + i
+	lis r3, 0x8000
+	stw r3, 4(sp)
+	lfd f1, 0(sp)            ! f1 = (1 << 52) + (1 << 31)
+	fsub f0, f0, f1          ! finish conversion
 
 	stfd f0, 0(sp)           ! save value again...
 	blr                      ! ...and return 
-
-.sect .rom
-pivot:
-	.data4 0x43300000
-	.data4 0x80000000
