@@ -175,7 +175,11 @@ found:
 		case IN_D_DESCR:
 			{ int temp;
 
-			temp=ex_lookup(EX_REGVAR,insta->in_info[1],0);
+			if (insta->in_which == IN_S_DESCR)
+				temp = wordsize;
+			else
+				temp = 2 * wordsize;
+			temp=ex_lookup(EX_REGVAR,insta->in_info[1],temp);
 			vi->vi_next = generase(temp);
 			vi = vi->vi_next;
 			vi->vi_next = genremove(temp);
