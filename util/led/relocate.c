@@ -169,7 +169,7 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 		(unsigned long)opcode1, (unsigned long)opcode2);
 }
 
-/* RELOLIS stores a signed 26-bit offset in the low bits. */
+/* RELOPPC_LIS stores a signed 26-bit offset in the low bits. */
 static uint32_t get_lis_valu(char *addr, uint16_t type)
 {
 	uint32_t valu = read4(addr, type) & 0x03ffffff;
@@ -193,7 +193,7 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		return read4(addr, type);
 	case RELOPPC:
 		return get_powerpc_valu(addr, type);
-	case RELOLIS:
+	case RELOPPC_LIS:
 		return get_lis_valu(addr, type);
 	case RELOVC4:
 		return get_vc4_valu(addr);
@@ -389,7 +389,7 @@ static putvalu(uint32_t valu, char* addr, uint16_t type)
 	case RELOPPC:
 		put_powerpc_valu(addr, valu, type);
 		break;
-	case RELOLIS:
+	case RELOPPC_LIS:
 		put_lis_valu(addr, valu, type);
 		break;
 	case RELOVC4:
