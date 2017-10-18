@@ -6,14 +6,11 @@
 .define .zer
 .zer:
 	lwz	r3, 0(sp)		! r3 = size
-	srwi	r5, r3, 2
-	mtspr	ctr, r5			! ctr = word size - 4
-	li	r4, 0			! r4 = 0
-	addi	sp, sp, 4
-	subf	sp, r3, sp		! sp = ptr to new set
-	li	r6, 0			! r6 = index
-1:
-	stwx	r4, sp, r6		! store zero in set
-	addi	r6, r6, 4
+	srwi	r7, r3, 2
+	mtspr	ctr, r7			! ctr = size / 4
+	addi	sp, sp, 4		! drop size from stack
+	li	r4, 0
+
+1:	stwu	r4, -4(sp)		! push zero
 	bdnz	1b			! loop ctr times
 	blr

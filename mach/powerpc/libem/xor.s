@@ -1,22 +1,20 @@
 .sect .text
 
 ! Set symmetric difference.
-!  Stack: ( b a size -- a/b )
+!  Stack: ( a b size -- a/b )
 
 .define .xor
 .xor:
 	lwz	r3, 0(sp)		! r3 = size
 	srwi	r7, r3, 2
 	mtspr	ctr, r7			! ctr = size / 4
-	addi	r4, sp, 4		! r4 = ptr to set a
-	add	r5, r4, r3		! r5 = ptr to set b
-	li	r6, 0			! r6 = index
-1:
-	lwzx	r7, r4, r6
-	lwzx	r8, r5, r6
-	xor	r8, r7, r8		! symmetric difference of words
-	stwx	r8, r5, r6
-	addi	r6, r6, 4
+	add	r4, sp, r3		! r4 = pointer before set a
+
+	! Loop with r4 in set a and sp in set b.
+1:	lwzu	r5, 4(r4)
+	lwzu	r6, 4(sp)
+	xor	r7, r5, r6		! symmetric difference of words
+	stw	r7, 0(r4)
 	bdnz	1b			! loop ctr times
-	mr	sp, r5
+	addi	sp, sp, 4		! drop last word of set b
 	blr

@@ -1897,6 +1897,11 @@ PATTERNS
 			gen move %2, r4
 			leaving ret 0
 
+	/*
+	 * These rules for blm/bls are wrong if length is zero.
+	 * So are several procedures in libem.
+	 */
+
 	pat blm                            /* Block move constant length */
 		leaving
 			loc $1
@@ -1904,15 +1909,15 @@ PATTERNS
 
 	pat bls                            /* Block move variable length */
 		with REG REG REG
-			uses reusing %1, REG, REG={CONST_0000_7FFF, 0}
+			/* ( src%3 dst%2 len%1 -- ) */
+			uses reusing %1, REG, REG, REG
 			gen
-				/* Wrong if size is zero */
-				srwi %1, %1, {CONST, 2}
-				mtspr ctr, %1
-				1:
-				lwzx %a, %3, %b
-				stwx %a, %2, %b
-				addi %b, %b, {CONST, 4}
+				srwi %a, %1, {CONST, 2}
+				mtspr ctr, %a
+				addi %b, %3, {CONST, 0-4}
+				addi %c, %2, {CONST, 0-4}
+			1:	lwzu %a, {IND_RC_W, %b, 4}
+				stwu %a, {IND_RC_W, %c, 4}
 				bdnz {LABEL, "1b"}
 
 	pat csa                            /* Array-lookup switch */
@@ -1987,8 +1992,7 @@ PATTERNS
 		     REG={CONST_0000_7FFF, $1-1}
 		gen
 			mtspr ctr, %b
-			1:
-			lwz %a, {IND_RC_W, %a, SL_OFFSET}
+		1:	lwz %a, {IND_RC_W, %a, SL_OFFSET}
 			bdnz {LABEL, "1b"}
 		yields %a
 
