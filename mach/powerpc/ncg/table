@@ -287,7 +287,7 @@ INSTRUCTIONS
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lhz             GPR:wo, IND_RC_H+IND_RL_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwzu            GPR:wo, IND_RC_W:ro cost(4, 3).
+  lwzu            GPR:wo, IND_RC_W:rw cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwz             GPR+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
   nand            GPR:wo, GPR:ro, GPR:ro.
