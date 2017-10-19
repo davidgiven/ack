@@ -130,8 +130,9 @@ machtable
 	: constants
 	  properties
 	  registers
+		{ check_reglap(); }
 	  tokens
-	  	{ make_std_sets(); }
+		{ make_std_sets(); }
 	  sets
 	  instructions
 	  moves

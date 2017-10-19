@@ -121,8 +121,8 @@ instance(instno,token) register token_p token; {
 	case IN_D_DESCR:
 		compute(&enodes[inp->in_info[1]], &result);
 		assert(result.e_typ==EV_INT);
-		regno = isregvar_size(result.e_v.e_con,
-				      tokens[inp->in_info[0]].t_size);
+		regno = PICK_REGVAR(result.e_v.e_con,
+				    tokens[inp->in_info[0]].t_size);
 		if (regno > 0) {
 			token->t_token = -1;
 			token->t_att[0].ar = regno;
@@ -211,8 +211,8 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 			compute(&enodes[inp->in_info[1]], &result);
 			curtoken = ct;
 			assert(result.e_typ==EV_INT);
-			regno = isregvar_size(result.e_v.e_con,
-					      tokens[inp->in_info[0]].t_size);
+			regno = PICK_REGVAR(result.e_v.e_con,
+					    tokens[inp->in_info[0]].t_size);
 			if (regno > 0) {
 				token->t_token = -1;
 				token->t_att[0].ar = regno;

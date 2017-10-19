@@ -9,6 +9,7 @@
  */
 
 #include <limits.h>
+#include <stdint.h>
 
 static long framesize;
 
@@ -106,7 +107,7 @@ char *segname[] = {
 static long savedf[32];
 static long savedi[32];
 static int savedtop;
-static unsigned long lfs_set;
+static uint32_t lfs_set;
 
 /* Calculate the register score of a local variable. */
 int
@@ -172,7 +173,7 @@ regsave(const char* regname, long offset, int size)
 			savedf[regnum] = offset;
 			framesize += 8;
 			if (size == 4)
-				lfs_set |= (1U << regnum);
+				lfs_set |= ((uint32_t)1<<regnum);
 			break;
 		case 'r':
 			savedi[regnum] = offset;
@@ -236,7 +237,7 @@ f_regsave(void)
 	for (reg = 31; reg >= 0; reg--)
 		if (savedf[reg] >= 0)
 			fprintf(codefile, "%s f%d, %ld(fp)\n",
-				(lfs_set & (1U << reg)) ? "lfs" : "lfd",
+				(lfs_set & ((uint32_t)1<<reg)) ? "lfs" : "lfd",
 				reg, savedf[reg]);
 
 	for (reg = 31; reg >= 0; reg--)

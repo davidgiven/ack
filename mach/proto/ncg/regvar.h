@@ -28,8 +28,12 @@ void fixregvars(int);
 int isregvar(long);
 #ifdef REGLAP
 int isregvar_size(long, int);
-#else
-#define isregvar_size(off, size) isregvar(off)
 #endif
 int isregtyp(long);
 void unlinkregs(void);
+
+#ifdef REGLAP
+#define PICK_REGVAR(off, size) isregvar_size(off, size)
+#else
+#define PICK_REGVAR(off, size) isregvar(off)
+#endif

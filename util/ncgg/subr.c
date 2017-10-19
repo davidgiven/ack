@@ -254,9 +254,11 @@ add_regvar(int rvnum, reginfo *regp, int rv)
 	wrong = 0;
 	if (overlap) {
 		/* reglap = size of overlap float */
-		if (reglap==0)
+		if (reglap==0) {
 			reglap = regp->ri_size;
-		else if (reglap!=regp->ri_size)
+			if (reglap == rvsize[reg_float])
+				error("Two sizes of reg_float can't be same size");
+		} else if (reglap!=regp->ri_size)
 			wrong = 1;
 	} else {
 		if (nregvar[rv]==0)
@@ -320,6 +322,23 @@ regline(rl,pl,rv) varinfo *rl,*pl; {
 			add_regvar(rrl->vi_int[0], regp, rv);
 	}
 	regclass++;
+}
+
+void
+check_reglap() {
+	reginfo *regp;
+	int i;
+
+	if (reglap == 0)
+		return;
+
+	/* reglap: Check that every reg_float has size == reglap. */
+	for (i = 0; i < nregvar[reg_float]; i++) {
+		regp = &l_regs[rvnumbers[reg_float][i]];
+		if (regp->ri_size != reglap)
+			error("Missing reg_float of size %d to contain %s",
+			      reglap, regp->ri_name);
+	}
 }
 
 setallreg(vi) struct varinfo *vi; {

@@ -385,7 +385,7 @@ compute(node, presult) register node_p node; register result_t *presult; {
 		return;
 	case EX_REGVAR:
 	assert(leaf1.e_typ == EV_INT);
-		i = isregvar_size((long) leaf1.e_v.e_con, node->ex_rnode);
+		i = PICK_REGVAR((long) leaf1.e_v.e_con, node->ex_rnode);
 		if (i<=0)  {
 			presult->e_typ = EV_UNDEF;
 			return;
