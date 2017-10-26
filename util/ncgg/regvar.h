@@ -9,6 +9,7 @@
 #define DL_REGVAR	0x4
 
 extern int rvused;
+extern int reglap;
 extern int nregvar[4];
 extern int rvsize[4];
 extern int rvnumbers[4][MAXREGVAR];

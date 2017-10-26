@@ -21,3 +21,19 @@ struct regassigned {
 extern struct regvar *rvlist;
 extern int nregvar[];
 extern struct regassigned *regassigned[];
+
+struct regvar *linkreg(long, int, int, int);
+void tryreg(struct regvar *, int);
+void fixregvars(int);
+int isregvar(long);
+#ifdef REGLAP
+int isregvar_size(long, int);
+#endif
+int isregtyp(long);
+void unlinkregs(void);
+
+#ifdef REGLAP
+#define PICK_REGVAR(off, size) isregvar_size(off, size)
+#else
+#define PICK_REGVAR(off, size) isregvar(off)
+#endif

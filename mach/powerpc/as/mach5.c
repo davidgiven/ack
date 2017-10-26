@@ -42,8 +42,8 @@ void emit_hl(word_t in)
 	case OP_HA:  /* ha16[expr] */
 		if (PASS_RELO && (hl_expr.typ & S_TYP) != S_ABS) {
 			/*
-			 * RELOLIS only works with lis _, _ (same as
-			 * addis _, r0, _).  Check if instruction
+			 * RELOPPC_LIS only works with lis _, _ (same
+			 * as addis _, r0, _).  Check if instruction
 			 * isn't addis or register RA isn't r0.
 			 */
 			if ((in & 0xfc1f0000) != (0x3c000000))
@@ -55,7 +55,7 @@ void emit_hl(word_t in)
 			 * Low 26 bits: signed offset
 			 */
 			fit(fitx(hl_expr.val, 26));
-			newrelo(hl_expr.typ, RELOLIS | FIXUPFLAGS);
+			newrelo(hl_expr.typ, RELOPPC_LIS | FIXUPFLAGS);
 			reg = (in >> 21) & 0x1f;
 			in = (hl_token == OP_HA) << 31;
 			in |= reg << 26;

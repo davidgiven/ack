@@ -14,6 +14,9 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h"
+#endif
 #ifdef USE_TES
 #include "label.h"
 #endif
@@ -382,7 +385,7 @@ compute(node, presult) register node_p node; register result_t *presult; {
 		return;
 	case EX_REGVAR:
 	assert(leaf1.e_typ == EV_INT);
-		i = isregvar((long) leaf1.e_v.e_con);
+		i = PICK_REGVAR((long) leaf1.e_v.e_con, node->ex_rnode);
 		if (i<=0)  {
 			presult->e_typ = EV_UNDEF;
 			return;
@@ -390,7 +393,7 @@ compute(node, presult) register node_p node; register result_t *presult; {
 		presult->e_typ = EV_REG;
 		presult->e_v.e_reg=i;
 		return;
-#endif
+#endif /* REGVARS */
 	case EX_UMINUS:
 	assert(leaf1.e_typ == EV_INT);
 		presult->e_v.e_con = -leaf1.e_v.e_con;

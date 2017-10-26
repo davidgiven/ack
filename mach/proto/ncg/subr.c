@@ -2,8 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
-#include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -12,6 +13,9 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h"
+#endif
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -117,7 +121,9 @@ instance(instno,token) register token_p token; {
 	case IN_D_DESCR:
 		compute(&enodes[inp->in_info[1]], &result);
 		assert(result.e_typ==EV_INT);
-		if ((regno=isregvar(result.e_v.e_con)) > 0) {
+		regno = PICK_REGVAR(result.e_v.e_con,
+				    tokens[inp->in_info[0]].t_size);
+		if (regno > 0) {
 			token->t_token = -1;
 			token->t_att[0].ar = regno;
 			for (i=TOKENSIZE-1;i>0;i--)
@@ -205,7 +211,9 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 			compute(&enodes[inp->in_info[1]], &result);
 			curtoken = ct;
 			assert(result.e_typ==EV_INT);
-			if ((regno=isregvar(result.e_v.e_con)) > 0) {
+			regno = PICK_REGVAR(result.e_v.e_con,
+					    tokens[inp->in_info[0]].t_size);
+			if (regno > 0) {
 				token->t_token = -1;
 				token->t_att[0].ar = regno;
 				for (i=TOKENSIZE-1;i>0;i--)
@@ -657,11 +665,12 @@ itokcost() {
 		tdp->t_cost.ct_space = costcalc(tdp->t_cost);
 }
 
-/*VARARGS1*/
-error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
+void error(const char *s, ...) {
+	va_list ap;
 
+	va_start(ap,s);
 	fprintf(stderr,"Error: ");
-	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
 #ifdef TABLEDEBUG
 	ruletrace();
@@ -670,11 +679,12 @@ error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
 	exit(-1);
 }
 
-/*VARARGS1*/
-fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
+void fatal(const char *s, ...) {
+	va_list ap;
 
+	va_start(ap,s);
 	fprintf(stderr,"Fatal: ");
-	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
 #ifdef TABLEDEBUG
 	ruletrace();
