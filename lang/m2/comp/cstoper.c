@@ -117,49 +117,8 @@ divide(pdiv, prem)
 	register arith o1 = *pdiv;
 	register arith o2 = *prem;
 
-#ifndef UNSIGNED_ARITH
-	/*	this is more of a problem than you might
-		think on C compilers which do not have
-		unsigned long.
-	*/
-	if (o2 & arith_sign)	{/* o2 > max_arith */
-		if (! (o1 >= 0 || o1 < o2)) {
-			/*	this is the unsigned test
-				o1 < o2 for o2 > max_arith
-			*/
-			*prem = o2 - o1;
-			*pdiv = 1;
-		}
-		else {
-			*pdiv = 0;
-		}
-	}
-	else	{		/* o2 <= max_arith */
-		arith half, bit, hdiv, hrem, rem;
-
-		half = (o1 >> 1) & ~arith_sign;
-		bit = o1 & 01;
-		/*	now o1 == 2 * half + bit
-			and half <= max_arith
-			and bit <= max_arith
-		*/
-		hdiv = half / o2;
-		hrem = half % o2;
-		rem = 2 * hrem + bit;
-		*pdiv = 2*hdiv;
-		*prem = rem;
-		if (rem < 0 || rem >= o2) {
-			/*	that is the unsigned compare
-				rem >= o2 for o2 <= max_arith
-			*/
-			*pdiv += 1;
-			*prem -= o2;
-		}
-	}
-#else
-	*pdiv = (UNSIGNED_ARITH) o1 / (UNSIGNED_ARITH) o2;
-	*prem = (UNSIGNED_ARITH) o1 % (UNSIGNED_ARITH) o2;
-#endif
+	*pdiv = (unsigned arith) o1 / (unsigned arith) o2;
+	*prem = (unsigned arith) o1 % (unsigned arith) o2;
 }
 
 void

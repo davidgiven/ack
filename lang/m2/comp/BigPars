@@ -94,7 +94,3 @@
 #define USE_INSERT	1	/* use C_insertpart mechanism */
 
 
-!File: uns_arith.h
-/*#define UNSIGNED_ARITH	unsigned arith	/* when it is supported */
-
-
