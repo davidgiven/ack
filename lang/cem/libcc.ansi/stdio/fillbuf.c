@@ -16,7 +16,7 @@ __fillbuf(register FILE *stream)
 
 	stream->_count = 0;
 	if (fileno(stream) < 0) return EOF;
-	if (io_testflag(stream, (_IOEOF | _IOERR ))) return EOF; 
+	if (io_testflag(stream, _IOEOF)) return EOF;
 	if (!io_testflag(stream, _IOREAD)) {
 		stream->_flags |= _IOERR;
 		return EOF;
