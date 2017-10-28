@@ -159,22 +159,29 @@ cstibin(expp)
 		break;
 
 	case DIV:
-	case MOD:
 		if (o2 == 0)	{
-			node_error(exp, exp->nd_symb == DIV ?
-					"division by 0" :
-					"modulo by 0");
+			node_error(exp, "division by 0");
 			return;
 		}
 		if ((o1 < 0) != (o2 < 0)) {
 			if (o1 < 0) o1 = -o1;
 			else o2 = -o2;
-			if (exp->nd_symb == DIV) o1 = -((o1+o2-1)/o2);
-			else o1 = ((o1+o2-1)/o2) * o2 - o1;
+			o1 = -((o1+o2-1)/o2);
 		}
-		else {
-			if (exp->nd_symb == DIV) o1 /= o2;
-			else o1 %= o2;
+		else o1 /= o2;
+		break;
+
+	case MOD:
+		if (o2 == 0)	{
+			node_error(exp, "modulo by 0");
+			return;
+		}
+		{
+			arith m = o1 % o2;
+			if (m != 0 && (o1 < 0) != (o2 < 0))
+				o1 = m + o2;
+			else
+				o1 = m;
 		}
 		break;
 
