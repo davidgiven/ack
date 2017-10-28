@@ -91,7 +91,7 @@ name cem
 	callname cc
 end
 name pc
-	from .p
+	from .p.pas
 	to .k
 	program {EM}/lib/ack/em_pc
 	mapflag -L PC_F={PC_F?} -L

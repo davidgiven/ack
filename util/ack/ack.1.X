@@ -38,7 +38,7 @@ finally combining the results into a single file.
 .PP
 Different machines can use different suffices,
 but the following are recognized by most machines:
-.IP .p
+.IP ".p .pas"
 Pascal program.
 .IP .c
 C module.
@@ -395,7 +395,7 @@ l l l l.
 input:name:output:description
 \&.f:f77:.c:Fortran-to-C front end
 \&.c:cem:.k:C front end [4,5,6]
-\&.p:pc:.k:Pascal front end [2,3,6]
+\&.p .pas:pc:.k:Pascal front end [2,3,6]
 \&.b:basic:.k:Basic front end [6,8]
 \&.ocm:ocm:.k:Occam front end [9]
 \&.mod:m2:.k:Modula-2 front end [11]
