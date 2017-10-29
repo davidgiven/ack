@@ -47,39 +47,8 @@ cstbin(expp, oper, expr)
 				expr_warning(expr, "division by 0");
 			break;
 		}
-		if (uns)	{
-#ifdef UNSIGNED_ARITH
-			o1 /= (UNSIGNED_ARITH) o2;
-#else
-			/*	this is more of a problem than you might
-				think on C compilers which do not have
-				unsigned arith (== long (probably)).
-			*/
-			if (o2 & arith_sign)	{/* o2 > max_arith */
-				o1 = ! (o1 >= 0 || o1 < o2);
-				/*	this is the unsigned test
-					o1 < o2 for o2 > max_arith
-				*/
-			}
-			else	{		/* o2 <= max_arith */
-				arith half, bit, hdiv, hrem, rem;
-
-				half = (o1 >> 1) & ~arith_sign;
-				bit = o1 & 01;
-				/*	now o1 == 2 * half + bit
-					and half <= max_arith
-					and bit <= max_arith
-				*/
-				hdiv = half / o2;
-				hrem = half % o2;
-				rem = 2 * hrem + bit;
-				o1 = 2 * hdiv + (rem < 0 || rem >= o2);
-				/*	that is the unsigned compare
-					rem >= o2 for o2 <= max_arith
-				*/
-			}
-#endif
-		}
+		if (uns)
+			o1 /= (unsigned arith) o2;
 		else
 			o1 /= o2;
 		break;
@@ -91,31 +60,8 @@ cstbin(expp, oper, expr)
 				expr_warning(expr, "modulo by 0");
 			break;
 		}
-		if (uns)	{
-#ifdef UNSIGNED_ARITH
-			o1 %= (UNSIGNED_ARITH) o2;
-#else
-			if (o2 & arith_sign)	{/* o2 > max_arith */
-				o1 = (o1 >= 0 || o1 < o2) ? o1 : o1 - o2;
-				/*	this is the unsigned test
-					o1 < o2 for o2 > max_arith
-				*/
-			}
-			else	{		/* o2 <= max_arith */
-				arith half, bit, hrem, rem;
-
-				half = (o1 >> 1) & ~arith_sign;
-				bit = o1 & 01;
-				/*	now o1 == 2 * half + bit
-					and half <= max_arith
-					and bit <= max_arith
-				*/
-				hrem = half % o2;
-				rem = 2 * hrem + bit;
-				o1 = (rem < 0 || rem >= o2) ? rem - o2 : rem;
-			}
-#endif
-		}
+		if (uns)
+			o1 %= (unsigned arith) o2;
 		else
 			o1 %= o2;
 		break;
@@ -146,16 +92,8 @@ cstbin(expp, oper, expr)
 		}
 		/* Fall through */
 	case '>':
-		if (uns)	{
-#ifdef UNSIGNED_ARITH
-			o1 = (UNSIGNED_ARITH) o1 > (UNSIGNED_ARITH) o2;
-#else
-			o1 = (o1 & arith_sign ?
-				(o2 & arith_sign ? o1 > o2 : 1) :
-				(o2 & arith_sign ? 0 : o1 > o2)
-			);
-#endif
-		}
+		if (uns)
+			o1 = (unsigned arith) o1 > (unsigned arith) o2;
 		else
 			o1 = o1 > o2;
 		break;
@@ -168,16 +106,8 @@ cstbin(expp, oper, expr)
 		}
 		/* Fall through */
 	case GREATEREQ:
-		if (uns)	{
-#ifdef UNSIGNED_ARITH
-			o1 = (UNSIGNED_ARITH) o1 >= (UNSIGNED_ARITH) o2;
-#else
-			o1 = (o1 & arith_sign ?
-				(o2 & arith_sign ? o1 >= o2 : 1) :
-				(o2 & arith_sign ? 0 : o1 >= o2)
-			);
-#endif
-		}
+		if (uns)
+			o1 = (unsigned arith) o1 >= (unsigned arith) o2;
 		else
 			o1 = o1 >= o2;
 		break;
