@@ -641,13 +641,13 @@ lol lol bne $1==$2 :
 loe loe bne $1==$2 :
 lil lil bne $1==$2 :
 
-lol lol teq $1==$2 : loc 1
-loe loe teq $1==$2 : loc 1
-lil lil teq $1==$2 : loc 1
+lol lol cms teq $1==$2 && $3==w : loc 1
+loe loe cms teq $1==$2 && $3==w : loc 1
+lil lil cms teq $1==$2 && $3==w : loc 1
 
-lol lol tne $1==$2 : loc 0
-loe loe tne $1==$2 : loc 0
-lil lil tne $1==$2 : loc 0
+lol lol cms tne $1==$2 && $3==w : loc 0
+loe loe cms tne $1==$2 && $3==w : loc 0
+lil lil cms tne $1==$2 && $3==w : loc 0
 
 lol loc CBO stl $3==w && $1==$4 : loc $2 lol $1 CBO w stl $4
 lol loe CBO stl $3==w && $1==$4 : loe $2 lol $1 CBO w stl $4
