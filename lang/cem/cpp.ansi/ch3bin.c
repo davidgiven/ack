@@ -8,8 +8,6 @@
 #include	"Lpars.h"
 #include	"arith.h"
 
-#define arith_sign (1L << (sizeof(arith)*8-1))
-
 ch3bin(pval, pis_uns, oper, val, is_uns)
 	register arith *pval, val;
 	int oper, is_uns, *pis_uns;

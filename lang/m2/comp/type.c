@@ -51,8 +51,6 @@ arith
 	pointer_size = SZ_POINTER;
 #endif
 
-#define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
-
 arith	ret_area_size;
 
 t_type

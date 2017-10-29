@@ -28,7 +28,7 @@
 
 extern char	*symbol2str();
 
-#define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
+#define arith_sign	((arith) 1 << (sizeof(arith) * 8 - 1))
 
 #ifndef NOCROSS
 arith full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
