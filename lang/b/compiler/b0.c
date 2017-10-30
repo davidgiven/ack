@@ -34,12 +34,19 @@ init(char *s, int val)
 	np->offset = val;
 }
 
+static void
+usage(void)
+{
+	error("Usage: em_b [-w wordsize] [-B modulename] [-i inputfile] [-o outputfile]");
+	exit(1);
+}
+
 int
 main(int argc, char *argv[])
 {
 
 	for (;;) {
-		int opt = getopt(argc, argv, "-w:B:i:o:");
+		int opt = getopt(argc, argv, "w:B:i:o:");
 		if (opt == -1)
 			break;
 
@@ -66,11 +73,12 @@ main(int argc, char *argv[])
 				}
 				break;
 
-			derfault:
-				error("Usage: em_b [-w wordsize] [-B modulename] [-i inputfile] [-o outputfile]");
-				exit(1);
+			default:
+				usage();
 		}
 	}
+	if (optind < argc)
+		usage();
 
 	init("auto", AUTO);
 	init("extrn", EXTERN);

@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
 	opterr = 0;
 	for (;;)
 	{
-		int opt = getopt(argc, argv, "-M:P:O:vt");
+		int opt = getopt(argc, argv, "M:P:O:vt");
 		if (opt == -1)
 			break;
 
@@ -364,16 +364,13 @@ int main(int argc, char* argv[])
 			{
 				int o = atoi(optarg);
 				if (o <= 2)
-					break;
-				if (o <= 3)
+					Ophase = &O2phases[0];
+				else if (o == 3)
 					Ophase = &O3phases[0];
-				Ophase = &O4phases[0];
+				else
+					Ophase = &O4phases[0];
 				break;
 			}
-
-			case 1:
-				add_file(optarg);
-				break;
 
 			case 't':
 				keeptemps = 1;
@@ -389,6 +386,9 @@ int main(int argc, char* argv[])
 				break;
 		}
 	}
+
+	for (i = optind; i < argc; i++)
+		add_file(argv[i]);
 
 	phase_args[nphase_args] = 0;
 	if (nuphases)
