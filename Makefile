@@ -63,29 +63,50 @@ PLATDEP = $(INSDIR)/lib/ack
 
 .NOTPARALLEL:
 
-MAKECMDGOALS ?= +ack +tests
-BUILD_FILES = $(shell find * -name '*.lua')
-
-ifneq ($(shell which ninja),)
+ifeq ($(BUILDSYSTEM),)
+  ifneq ($(shell which ninja),)
 BUILDSYSTEM = ninja
-BUILDFLAGS = $(NINJAFLAGS)
-else
+  else
 BUILDSYSTEM = make
-BUILDFLAGS = $(MAKEFLAGS)
+  endif
 endif
 
-LUA = $(BUILDDIR)/lua
+build-file = $(BUILDDIR)/build.$(BUILDSYSTEM)
+lua-files = $(shell find * -name '*.lua')
+our-lua = $(BUILDDIR)/lua
 
-ifneq ($(findstring +, $(MAKECMDGOALS)),)
+# GNU make sets MAKECMDGOALS to the list of targets from the command
+# line.  We look for targets with '+' and forward them to BUILDSYSTEM.
+# This handles commands like
+#     $ make util/opt+pkg util/ego+pkg
 
-$(MAKECMDGOALS): $(BUILDDIR)/build.$(BUILDSYSTEM)
-	@$(BUILDSYSTEM) $(BUILDFLAGS) -f $^ $(MAKECMDGOALS)
+all-goals = +ack +tests
+plus-goals := $(patsubst all,$(all-goals),$(or $(MAKECMDGOALS),all))
+plus-goals := $(foreach g,$(plus-goals),$(if $(findstring +,$(g)),$(g),))
 
+# @true silences extra message, "make: Nothing to be done..."
+
+all: build-plus-goals
+	@true
+
+ifneq ($(plus-goals),)
+$(plus-goals): build-plus-goals
+	@true
 endif
 
-$(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $(LUA)
+build-plus-goals: $(build-file)
+ifeq ($(BUILDSYSTEM),ninja)
+	@ninja $(NINJAFLAGS) -f $(build-file) $(plus-goals)
+else ifeq ($(BUILDSYSTEM),make)
+# GNU make passes MAKEFLAGS in environment.
+	@$(MAKE) -f $(build-file) $(plus-goals)
+else
+$(error unknown BUILDSYSTEM = $(BUILDSYSTEM))
+endif
+
+$(build-file): first/ackbuilder.lua Makefile $(lua-files) $(our-lua)
 	@mkdir -p $(BUILDDIR)
-	@$(LUA) first/ackbuilder.lua \
+	@$(our-lua) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
 		DEFAULT_PLATFORM=$(DEFAULT_PLATFORM) \
@@ -99,17 +120,16 @@ $(BUILDDIR)/build.$(BUILDSYSTEM): first/ackbuilder.lua Makefile $(BUILD_FILES) $
 		PREFIX=$(PREFIX) \
 		AR=$(AR) \
 		CC=$(CC) \
-		> $(BUILDDIR)/build.$(BUILDSYSTEM)
+		> $(build-file)
 
 install:
 	mkdir -p $(PREFIX)
 	tar cf - -C $(INSDIR) . | tar xvf - -C $(PREFIX)
 
 clean:
-	@rm -rf $(BUILDDIR)
+	rm -rf $(BUILDDIR)
 
-$(LUA): first/lua-5.1/*.c first/lua-5.1/*.h
+$(our-lua): first/lua-5.1/*.c first/lua-5.1/*.h
 	@echo Bootstrapping build
 	@mkdir -p $(BUILDDIR)
-	@$(CC) -o $(LUA) -O first/lua-5.1/*.c -lm
-
+	@$(CC) -o $(our-lua) -O first/lua-5.1/*.c -lm
