@@ -23,4 +23,3 @@ installable {
 	name = "pkg",
 	map = installmap
 }
-	

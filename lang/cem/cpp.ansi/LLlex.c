@@ -261,7 +261,7 @@ garbage:
 		register int base = 10, vch;
 		register arith val = 0;
 		int ovfl = 0;
-		arith ubound = ~(1<<(sizeof(arith)*8-1))/(base/2);
+		arith ubound = max_arith/(base/2);
 
 		/* Since the preprocessor only knows integers and has
 		 * nothing to do with ellipsis we just return when the

@@ -17,6 +17,7 @@ cprogram {
 		matching(filenamesof("+flex"), "%.c$"),
 	},
 	deps = {
+		"./*.h",
 		"+flex",
 		"+yacc",
 		"modules/src/em_data+lib",

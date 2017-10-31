@@ -19,7 +19,7 @@ IMPLEMENTATION MODULE Terminal;
 #else
   FROM	Unix IMPORT	read, write, open, ioctl;
 #endif
-  VAR fildes: INTEGER;
+  VAR fildes, fdout: INTEGER;
       unreadch: CHAR;
       unread: BOOLEAN;
       tty: ARRAY[0..8] OF CHAR;
@@ -87,7 +87,7 @@ IMPLEMENTATION MODULE Terminal;
 
   PROCEDURE Write(ch: CHAR);
   BEGIN
-	IF write(fildes, ADR(ch), 1) < 0 THEN
+	IF write(fdout, ADR(ch), 1) < 0 THEN
 		;
 	END;
   END Write;
@@ -114,7 +114,9 @@ BEGIN
 	unread := FALSE;
 *)
 (* dtrg: changed so that instead of opening /dev/tty, fd 0 is always used. *)
+(* kernigh: sent output to fd 1 *)
     tty := "stdio";
     fildes := 0;
+    fdout := 1;
     unread := FALSE;
 END Terminal.

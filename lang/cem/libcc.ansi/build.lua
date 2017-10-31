@@ -37,7 +37,7 @@ for _, plat in ipairs(vars.plats) do
 			"./errno/*.c",
 			"./locale/*.c",
 			"./malloc/*.c",
-			"./math/*.c",
+			"./math/*.c", -- hypot.c
 			"./math/*.e",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
 			"./setjmp/*.c",

@@ -43,26 +43,28 @@ int
 rmi(j,i)
 	int j,i;
 {
+	int m;
+
 	if (j == 0) TRP(EIDIVZ);
 	if (i == 0) return 0;
-	if ((i < 0) != (j < 0)) {
-		if (i < 0) i = -i;
-		else j = -j;
-		return j*((i+j-1)/j)-i;
-	}
-	else return i%j;
+
+	m = i % j;
+	if (m != 0 && (i < 0) != (j < 0))
+		m += j;
+	return m;
 }
 
 long
 rmil(j,i)
 	long j,i;
 {
+	long m;
+
 	if (j == 0) TRP(EIDIVZ);
 	if (i == 0) return 0L;
-	if ((i < 0) != (j < 0)) {
-		if (i < 0) i = -i;
-		else j = -j;
-		return j*((i+j-1)/j)-i;
-	}
-	else return i%j;
+
+	m = i % j;
+	if (m != 0 && (i < 0) != (j < 0))
+		m += j;
+	return m;
 }

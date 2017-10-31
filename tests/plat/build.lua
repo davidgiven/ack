@@ -13,7 +13,8 @@ definerule("plat_testsuite",
 			"tests/plat/*.e",
 			"tests/plat/*.p",
 			"tests/plat/b/*.b",
-			"tests/plat/bugs/*.mod"
+			"tests/plat/bugs/bug-22-inn_mod.mod",
+			"tests/plat/bugs/bug-62-notvar_var_e.c"
 		)
 
 		acklibrary {

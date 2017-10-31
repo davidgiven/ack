@@ -8,8 +8,6 @@
 #include	"Lpars.h"
 #include	"arith.h"
 
-#define arith_sign (1L << (sizeof(arith)*8-1))
-
 ch3bin(pval, pis_uns, oper, val, is_uns)
 	register arith *pval, val;
 	int oper, is_uns, *pis_uns;
@@ -22,37 +20,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 			break;
 		}
 		if (*pis_uns) {
-#ifdef UNSIGNED_ARITH
-			*pval /= (UNSIGNED_ARITH) val;
-#else
-			/*	this is more of a problem than you might
-				think on C compilers which do not have
-				unsigned arith (== long (probably)).
-			*/
-			if (val & arith_sign)	{/* val > max_arith */
-				*pval = ! (*pval >= 0 || *pval < val);
-				/*	this is the unsigned test
-					*pval < val for val > max_arith
-				*/
-			}
-			else	{		/* val <= max_arith */
-				arith half, bit, hdiv, hrem, rem;
-
-				half = (*pval >> 1) & ~arith_sign;
-				bit = *pval & 01;
-				/*	now *pval == 2 * half + bit
-					and half <= max_arith
-					and bit <= max_arith
-				*/
-				hdiv = half / val;
-				hrem = half % val;
-				rem = 2 * hrem + bit;
-				*pval = 2 * hdiv + (rem < 0 || rem >= val);
-				/*	that is the unsigned compare
-					rem >= val for val <= max_arith
-				*/
-			}
-#endif
+			*pval /= (unsigned arith) val;
 		}
 		else {
 			*pval = *pval / val;
@@ -64,29 +32,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 			break;
 		}
 		if (*pis_uns) {
-#ifdef UNSIGNED_ARITH
-			*pval %= (UNSIGNED_ARITH) val;
-#else
-			if (val & arith_sign)	{/* val > max_arith */
-				*pval = (*pval >= 0 || *pval < val) ? *pval : *pval - val;
-				/*	this is the unsigned test
-					*pval < val for val > max_arith
-				*/
-			}
-			else	{		/* val <= max_arith */
-				arith half, bit, hrem, rem;
-
-				half = (*pval >> 1) & ~arith_sign;
-				bit = *pval & 01;
-				/*	now *pval == 2 * half + bit
-					and half <= max_arith
-					and bit <= max_arith
-				*/
-				hrem = half % val;
-				rem = 2 * hrem + bit;
-				*pval = (rem < 0 || rem >= val) ? rem - val : rem;
-			}
-#endif
+			*pval %= (unsigned arith) val;
 		}
 		else {
 			*pval = *pval % val;
@@ -117,14 +63,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 		/* fall through */
 	case '>':
 		if (*pis_uns) {
-#ifdef UNSIGNED_ARITH
-			*pval = (UNSIGNED_ARITH) *pval > (UNSIGNED_ARITH) val;
-#else
-			*pval = (*pval & arith_sign ?
-				(val & arith_sign ? *pval > val : 1) :
-				(val & arith_sign ? 0 : *pval > val)
-			);
-#endif
+			*pval = (unsigned arith) *pval > (unsigned arith) val;
 		}
 		else	*pval = (*pval > val);
 		break;
@@ -133,14 +72,7 @@ ch3bin(pval, pis_uns, oper, val, is_uns)
 		/* fall through */
 	case GREATEREQ:
 		if (*pis_uns) {
-#ifdef UNSIGNED_ARITH
-			*pval = (UNSIGNED_ARITH) *pval >= (UNSIGNED_ARITH) val;
-#else
-			*pval = (*pval & arith_sign ?
-				(val & arith_sign ? *pval >= val : 1) :
-				(val & arith_sign ? 0 : *pval >= val)
-			);
-#endif
+			*pval = (unsigned arith) *pval >= (unsigned arith) val;
 		}
 		else	*pval = (*pval >= val);
 		break;
