@@ -114,6 +114,7 @@ BEGIN
 	unread := FALSE;
 *)
 (* dtrg: changed so that instead of opening /dev/tty, fd 0 is always used. *)
+(* kernigh: sent output to fd 1 *)
     tty := "stdio";
     fildes := 0;
     fdout := 1;
