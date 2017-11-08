@@ -58,7 +58,7 @@ definerule("plat_testsuite",
 					"util/build+testrunner"
 				},
 				commands = {
-					"(%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} || echo @@FAIL) > %{outs}",
+					"%{ins[2]} "..e.method.." %{ins[1]} 5 %{ins[3]} > %{outs}; true",
 				}
 			}
 		end

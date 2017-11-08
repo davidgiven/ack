@@ -31,7 +31,12 @@ if [ "$failed" != "" ]; then
 	for t in $failed; do
 		echo $t
 	done
-	exit 1
+fi
+if [ "$timedout" != "" ]; then
+	echo "Timed-out test logs:"
+	for t in $timedout; do
+		echo $t
+	done
 fi
 if [ "$failed" != "" -o "$timedout" != "" ]; then
 	echo "Test status: SAD FACE (tests are failing)"
