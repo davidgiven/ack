@@ -12,6 +12,7 @@
 
 #ifndef NOPP
 
+#include	<ack_string.h>
 #include	<alloc.h>
 #include    "idf.h"
 #include	"input.h"
@@ -514,7 +515,6 @@ macro_func(idef)
 	*/
 	register struct macro *mac = idef->id_macro;
 	static char FilNamBuf[PATHLENGTH];
-	char *long2str();
 
 	switch (idef->id_text[2]) {
 	case 'F':			/* __FILE__	*/

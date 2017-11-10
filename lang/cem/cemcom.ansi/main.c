@@ -6,6 +6,7 @@
 /* MAIN PROGRAM */
 
 #include	"parameters.h"
+#include	<ack_string.h>
 #include	<system.h>
 #include    "idf.h"
 #include	"input.h"
@@ -442,7 +443,6 @@ preprocess()
 		case STRING:
 		{
 			char sbuf[1024];	/* a transient buffer */
-			char *bts2str();
 
 			print("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len -
 			1, sbuf));

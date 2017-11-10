@@ -12,6 +12,7 @@
 #else
 #include	"l_em.h"
 #endif	/* LINT */
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	"Lpars.h"
 #include	"label.h"
@@ -83,8 +84,6 @@ code_startswitch(expp)
 	switch_stack = sh;
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
-
-extern char *long2str();
 
 code_endswitch()
 {

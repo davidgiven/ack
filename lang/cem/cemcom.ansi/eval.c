@@ -9,6 +9,7 @@
 #ifndef	LINT
 
 #include	<assert.h>
+#include	<ack_string.h>
 #include	<em.h>
 #include	<em_reg.h>
 #include	<alloc.h>
@@ -32,7 +33,6 @@
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 
 char *symbol2str();
-char *long2str();
 arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 extern int	err_occurred; /* error.c */

@@ -1,4 +1,3 @@
-
 normalrule {
 	name = "c_mnem_narg_h",
 	ins = {
@@ -53,6 +52,7 @@ local function variant(name, cflags)
 			"modules/src/alloc+lib",
 			"modules/src/em_code+headers",
 			"modules/src/em_data+lib",
+			"modules/src/string+lib",
 			"modules/src/system+lib",
 			"./*.h",
 		}
@@ -61,4 +61,3 @@ end
 
 variant("lib_ev", {})
 variant("lib_kv", { "-DCOMPACT" })
-

@@ -10,6 +10,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <ack_string.h>
 
 /* #define XXX_YYY	/* only for early debugging */
 
@@ -283,7 +284,6 @@ getnumber(c, ap)
 	register char *p = str;
 	int n;
 	int expsign;
-	long str2long();
 
 	ap->ema_argtype = cst_ptyp;
 	expsign = 0;

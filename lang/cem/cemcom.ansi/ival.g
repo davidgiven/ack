@@ -15,6 +15,7 @@
 #include	"l_em.h"
 #include	"l_lint.h"
 #endif	/* LINT */
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<flt_arith.h>
@@ -38,7 +39,6 @@
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
 
-char *long2str();
 char *strncpy();
 extern char options[];
 static int gen_error;

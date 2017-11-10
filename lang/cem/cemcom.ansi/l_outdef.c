@@ -10,6 +10,7 @@
 #ifdef	LINT
 
 #include	<assert.h>
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	"interface.h"
 #ifdef ANSI
@@ -35,7 +36,6 @@
 #include	"l_outdef.h"
 #include	"l_class.h"
 
-extern char *bts2str();
 extern char *symbol2str();
 
 int stat_number = 9999;			/* static scope number */
