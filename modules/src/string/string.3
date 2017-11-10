@@ -1,35 +1,13 @@
 .TH STRING 3 "$Revision$"
 .ad
 .SH NAME
-strcpy, strncpy, strcat, strncat, strcmp, strncmp,
-strlen, strindex, strrindex, strzero, str2bts,
+strindex, strrindex, strzero, str2bts,
 long2str, str2long,
 btscpy, btscat, btscmp, btszero, bts2str \- operations on and
 conversions between strings and row of bytes
 .SH SYNOPSIS
 .nf
 .B #include <ack_string.h>
-.PP
-.B char *strcpy(s1, s2)
-.B char *s1, *s2;
-.PP
-.B char *strncpy(s1, s2, n)
-.B char *s1, *s2;
-.PP
-.B char *strcat(s1, s2)
-.B char *s1, *s2;
-.PP
-.B char *strncat(s1, s2, n)
-.B char *s1, *s2;
-.PP
-.B int strcmp(s1, s2)
-.B char *s1, *s2;
-.PP
-.B int strncmp(s1, s2, n)
-.B char *s1, *s2;
-.PP
-.B int strlen(s)
-.B char *s;
 .PP
 .B char *strindex(s, c)
 .B char *s, c;
@@ -81,56 +59,6 @@ The
 functions operate on variable-length rows of bytes,
 regardless of null bytes.
 Neither of these functions check for overflow of any receiving area.
-.PP
-.I Strcpy
-copies string
-.I s2
-to
-.I s1,
-stopping after the null character has been moved.
-.I Strncpy
-copies exactly
-.I n
-characters,
-truncating or null-padding
-.I s2;
-the target may not be null-terminated if the length
-of
-.I s2
-is
-.I n
-or more.
-Both return
-.IR s1 .
-.PP
-.I Strcat
-appends a copy of string
-.I s2
-to the end of string
-.IR s1 .
-.I Strncat
-copies at most
-.I n
-characters.
-Both return a pointer to the null-terminated result
-.IR s1 .
-.PP
-.I Strcmp
-compares its arguments and returns an integer
-greater than, equal to, or less than 0, if
-.I s1
-is lexicographically greater than, equal to, or
-less than
-.IR s2 ,
-respectively.
-.I Strncmp
-makes the same comparison but checks at most
-.I n
-characters.
-.PP
-.I Strlen
-returns the number of characters before the null-character.
-.IR s .
 .PP
 .I Strindex
 .RI ( strrindex )
