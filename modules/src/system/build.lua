@@ -1,11 +1,13 @@
 clibrary {
 	name = "lib",
-	srcs = { "./*.c" },
-	hdrs = { "./system.h" },
-	deps = {
-		"modules+headers",
-		"./*.h"
+	srcs = {
+		"./access.c", "./break.c", "./chmode.c", "./close.c",
+		"./create.c", "./filesize.c",
+		--"./lock.c",
+		"./modtime.c", "./open.c", "./read.c", "./remove.c",
+		"./rename.c", "./seek.c", "./stop.c", "./system.c",
+		--"./unlock.c",
+		"./write.c",
 	},
+	hdrs = { "./system.h" },
 }
-
-

@@ -6,8 +6,5 @@ clibrary {
 		"./str2bts.c", "./str2long.c", "./strindex.c",
 		"./strrindex.c", "./strzero.c",
 	},
-	deps = {
-		"./ack_string.h",
-		"modules+headers",
-	},
+	hdrs = { "./ack_string.h", },
 }
