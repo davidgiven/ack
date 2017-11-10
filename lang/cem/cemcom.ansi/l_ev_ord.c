@@ -11,7 +11,6 @@
 
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
-#include	"assert.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */

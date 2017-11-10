@@ -22,7 +22,6 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"macro.h"
-#include	"assert.h"
 
 extern struct tokenname tkidf[];
 extern char *symbol2str();

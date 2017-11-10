@@ -20,9 +20,9 @@ char	*cd_file=	"code";
 static char rcsid[]= "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "assert.h"
 #include "varinfo.h"
 #include "param.h"
 #include "reg.h"

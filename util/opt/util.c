@@ -7,7 +7,6 @@ static char rcsid[] = "$Id$";
 #include "param.h"
 #include "types.h"
 #include "tes.h"
-#include "assert.h"
 #include "lookup.h"
 #include "proinf.h"
 #include "optim.h"
@@ -35,14 +34,6 @@ error(s,a) char *s,*a; {
 #endif
 	exit(-1);
 }
-
-#ifndef NDEBUG
-badassertion(file,line) char *file; unsigned line; {
-
-	fprintf(stderr,"assertion failed file %s, line %u\n",file,line);
-	error("assertion");
-}
-#endif
 
 #ifdef DIAGOPT
 optim(n) {

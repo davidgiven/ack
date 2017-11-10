@@ -9,13 +9,13 @@
 
 #ifdef	LINT
 
+#include	<assert.h>
 #include	<alloc.h>
 #include	"interface.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */
 #include	"arith.h"
-#include	"assert.h"
 #include	"type.h"
 #include	"proto.h"
 #include	"declar.h"
@@ -384,7 +384,7 @@ outargs(arg, n)
 	register struct argument *tmp;
 
 	while (n--) {
-		ASSERT(arg);
+		assert(arg);
 		outarg(arg);
 		tmp = arg;
 		arg = arg->next;

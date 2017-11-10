@@ -6,3 +6,11 @@
 #define PRIVATE	static		/* or not */
 #define IMPORT	extern
 #define EXPORT
+
+/* Here to avoid creating another header "notreached.h" */
+#ifndef NDEBUG
+#define	NOTREACHED()	crash("in %s, %u: unreachable statement reached", \
+				__FILE__, __LINE__)
+#else
+#define NOTREACHED()
+#endif	/* NDEBUG */

@@ -5,6 +5,7 @@
 /* $Id$ */
 /*  M A C R O   R E P L A C E M E N T */
 
+#include	<assert.h>
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<string.h>
@@ -17,7 +18,6 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
-#include	"assert.h"
 #include	"replace.h"
 
 extern char *GetIdentifier();

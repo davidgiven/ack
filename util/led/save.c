@@ -10,6 +10,7 @@ static char rcsid[] = "$Id$";
  * If everything is kept in core, we must save some things for the second pass.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -18,7 +19,6 @@ static char rcsid[] = "$Id$";
 #include "arch.h"
 #include "out.h"
 #include "const.h"
-#include "assert.h"
 #include "memory.h"
 
 extern bool	incore;

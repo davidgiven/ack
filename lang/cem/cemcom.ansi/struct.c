@@ -19,7 +19,6 @@
 #include	"Lpars.h"
 #include	"align.h"
 #include	"level.h"
-#include	"assert.h"
 #include	"sizes.h"
 
 /*	Type of previous selector declared with a field width specified,

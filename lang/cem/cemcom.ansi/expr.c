@@ -5,9 +5,9 @@
 /* $Id$ */
 /* EXPRESSION TREE HANDLING */
 
+#include	<assert.h>
 #include    <stdlib.h>
 #include	"parameters.h"
-#include	"assert.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include    "idf.h"
@@ -251,7 +251,7 @@ float2expr(expr)
 	expr->ex_class = Float;
 	flt_str2flt(dot.tk_fval, &(expr->FL_ARITH));
 	free(dot.tk_fval);
-	ASSERT(flt_status != FLT_NOFLT);
+	assert(flt_status != FLT_NOFLT);
 	if (flt_status == FLT_OVFL)
 		expr_warning(expr,"internal floating point overflow");
 }

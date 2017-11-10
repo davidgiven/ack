@@ -5,7 +5,7 @@
 /* $Id$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
-#include	"assert.h"
+#include	<assert.h>
 #include	"Lpars.h"
 #include	"decspecs.h"
 #include	"arith.h"
@@ -28,7 +28,7 @@ do_decspecs(ds)
 	*/
 	register struct type *tp = ds->ds_type;
 	
-	ASSERT(level != L_FORMAL1);
+	assert(level != L_FORMAL1);
 	
 	if (	level == L_GLOBAL &&
 		(ds->ds_sc == AUTO || ds->ds_sc == REGISTER)

@@ -6,6 +6,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -22,7 +23,6 @@ static char rcsid[] = "$Id$";
 #include "ranlib.h"
 #include "object.h"
 #include "const.h"
-#include "assert.h"
 #include "memory.h"
 #include "scan.h"
 #include "debug.h"

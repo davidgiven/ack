@@ -2,10 +2,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include "param.h"
 #include "types.h"
 #include "tes.h"
-#include "assert.h"
 #include "line.h"
 #include "lookup.h"
 #include "proinf.h"

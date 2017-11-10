@@ -5,6 +5,7 @@
 /* $Id$ */
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 
+#include	<assert.h>
 #include    "parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -13,7 +14,6 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"Lpars.h"
-#include	"assert.h"
 
 /* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
 arith full_mask[MAXSIZE + 1];
@@ -34,7 +34,7 @@ cstbin(expp, oper, expr)
 	register arith o2 = expr->VL_VALUE;
 	int uns = (*expp)->ex_type->tp_unsigned;
 
-	ASSERT(is_ld_cst(*expp) && is_cp_cst(expr));
+	assert(is_ld_cst(*expp) && is_cp_cst(expr));
 	switch (oper)	{
 	case '*':
 		o1 *= o2;
@@ -144,7 +144,7 @@ cut_size(expr)
 	int uns = expr->ex_type->tp_unsigned;
 	int size = (int) expr->ex_type->tp_size;
 
-	ASSERT(expr->ex_class == Value);
+	assert(expr->ex_class == Value);
 	if (expr->ex_type->tp_fund == POINTER) {
 		/* why warn on "ptr-3" ?
 		   This quick hack fixes it

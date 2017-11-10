@@ -138,7 +138,12 @@ cprogram {
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
-		"./*.h",
+		"./LLlex.h", "./align.h", "./arith.h", "./atw.h",
+		"./class.h", "./decspecs.h", "./file_info.h",
+		"./input.h", "./interface.h", "./l_class.h",
+		"./l_comment.h", "./l_em.h", "./l_lint.h",
+		"./label.h", "./level.h", "./mes.h", "./sizes.h",
+		"./specials.h", "./tokenname.h",
 		"+llgen",
 		"+nextlib",
 		"+parameters",

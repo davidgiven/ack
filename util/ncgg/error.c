@@ -60,15 +60,6 @@ void error(const char* s, ...)
 	va_end(ap);
 }
 
-#ifndef NDEBUG
-badassertion(string,file,line) char *string,*file; {
-
-	fprintf(stderr,"\"%s\", line %d: Assertion failed \"%s\"\n",
-		file,line,string);
-	goodbye();
-}
-#endif
-
 tabovf(string) char *string; {
 
 	fatal("%s overflow",string);

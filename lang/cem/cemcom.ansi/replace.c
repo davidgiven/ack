@@ -5,6 +5,7 @@
 /* $Id$ */
 /*  M A C R O   R E P L A C E M E N T */
 
+#include	<assert.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	"parameters.h"
@@ -18,7 +19,6 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
-#include	"assert.h"
 #include	"replace.h"
 
 extern struct idf *GetIdentifier();
@@ -85,7 +85,7 @@ EnableMacros()
 {
 	register struct repl *r = ReplaceList, *prev = 0;
 
-	ASSERT(Unstacked > 0);
+	assert(Unstacked > 0);
 	while(r) {
 		struct repl *nxt = r->next;
 
@@ -131,7 +131,7 @@ expand_macro(repl, idf)
 	if (mac->mc_nps != -1) {	/* with parameter list	*/
 		if (mac->mc_flag & FUNC) {
 			/* the following assertion won't compile:
-			ASSERT(!strcmp("defined", idf->id_text));
+			assert(!strcmp("defined", idf->id_text));
 			expand the assert macro by hand (??? dirty, temporary)
 			*/
 #ifdef	DEBUG
@@ -199,7 +199,7 @@ expand_defined(repl)
 	}
 	ChPushBack(ch);
 	id = GetIdentifier(0);
-	ASSERT(id || class(ch) == STELL);
+	assert(id || class(ch) == STELL);
 	ch = GetChar();
 	ch = skipspaces(ch, 0);
 	if (parens && ch != ')') error(") missing");
@@ -571,7 +571,7 @@ macro2buffer(repl, idf, args)
 	int func = idf->id_macro->mc_nps != -1;
 	char *stringify();
 
-	ASSERT(ptr[idf->id_macro->mc_length] == '\0');
+	assert(ptr[idf->id_macro->mc_length] == '\0');
 	while (*ptr) {
 	    if (*ptr == '\'' || *ptr == '"') {
 		register int delim = *ptr;
@@ -624,7 +624,7 @@ macro2buffer(repl, idf, args)
 			register int n = *ptr++ & 0177;
 			register char *p;
 
-			ASSERT(n > 0);
+			assert(n > 0);
 			p = args->a_rawvec[n-1];
 			if (p) {	/* else macro argument missing */
 			    while (is_wsp(*p)) p++;
@@ -660,7 +660,7 @@ macro2buffer(repl, idf, args)
 		register int n = *ptr++ & 0177;
 		register char *p, *q;
 
-		ASSERT(n > 0);
+		assert(n > 0);
 
 		/*	This is VERY dirty, we look ahead for the
 			## operator. If it's found we use the raw
@@ -718,7 +718,7 @@ stringify(repl, ptr, args)
 		register int n = *ptr++ & 0177;
 		register char *p;
 
-		ASSERT(n != 0);
+		assert(n != 0);
 		p = args->a_rawvec[n-1];
 		add2repl(repl, '"');
 		while (*p) {
@@ -761,7 +761,7 @@ add2repl(repl, ch)
 {
 	register int index = repl->r_ptr - repl->r_text;
 
-	ASSERT(index < repl->r_size);
+	assert(index < repl->r_size);
 	if (index + 2 >= repl->r_size) {
 		repl->r_text = Realloc(repl->r_text, (unsigned) (repl->r_size <<= 1));
 		repl->r_ptr = repl->r_text + index;
@@ -785,7 +785,7 @@ stash(repl, ch, stashraw)
 	register int index = args->a_expptr - args->a_expbuf;
 
 	if (stashraw >= 0) {
-		ASSERT(index < args->a_expsize);
+		assert(index < args->a_expsize);
 		if (index + 1 >= args->a_expsize) {
 			args->a_expbuf = Realloc(args->a_expbuf,
 						    (unsigned) (args->a_expsize <<= 1));
@@ -796,7 +796,7 @@ stash(repl, ch, stashraw)
 
 	if (stashraw) {
 		index = args->a_rawptr - args->a_rawbuf;
-		ASSERT(index < args->a_rawsize);
+		assert(index < args->a_rawsize);
 		if (index + 1 >= args->a_rawsize) {
 			args->a_rawbuf = Realloc(args->a_rawbuf,
 						    (unsigned)(args->a_rawsize <<= 1));
