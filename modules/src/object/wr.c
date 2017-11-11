@@ -11,6 +11,7 @@
  *	part. In this case #define OUTSEEK.
  */
 
+#include <fcntl.h>
 #include "obj.h"
 
 /*
@@ -28,8 +29,7 @@ int			__sectionnr;
 static int		offcnt;
 
 void
-__wr_flush(ptr)
-	register struct fil *ptr;
+__wr_flush(struct fil *ptr)
 {
 #ifdef OUTSEEK
 	/* seek to correct position even if we aren't going to write now */
@@ -53,14 +53,12 @@ __wr_flush(ptr)
 }
 
 static void
-OUTWRITE(p, b, n)
-	int		p;	/* part number */
-	register char	*b;	/* buffer pointer */
-	long		n;	/* write count */
+OUTWRITE(int p, const char *b, long n)
+	/* p = part number, b = buffer pointer, n = write count */
 {
-	register struct fil *ptr = &__parts[p];
-	register char *pn = ptr->pnow;
-	register int i;
+	struct fil *ptr = &__parts[p];
+	char *pn = ptr->pnow;
+	int i;
 	long m;
 
 	i = ptr->cnt;
@@ -119,11 +117,10 @@ OUTWRITE(p, b, n)
 }
 
 static void
-BEGINSEEK(p, o)
-	int		p;	/* part number */
-	long		o;	/* offset in file */
+BEGINSEEK(int p, long o)
+	/* p = part number, o = offset in file */
 {
-	register struct fil *ptr = &__parts[p];
+	struct fil *ptr = &__parts[p];
 
 #ifdef OUTSEEK
 	ptr->fd = outfile;
@@ -143,10 +140,9 @@ BEGINSEEK(p, o)
  * Open the output file according to the chosen strategy.
  */
 int
-wr_open(f)
-	char *f;
+wr_open(const char *f)
 {
-	register struct fil	*fdp;
+	struct fil	*fdp;
 
 	close(creat(f, 0666));
 #ifdef OUTSEEK
@@ -165,7 +161,7 @@ wr_open(f)
 void
 wr_close()
 {
-	register struct fil *ptr;
+	struct fil *ptr;
 
 	for (ptr = &__parts[PARTEMIT]; ptr < &__parts[NPARTS]; ptr++) {
 		__wr_flush(ptr);
@@ -181,11 +177,10 @@ wr_close()
 }
 
 void
-wr_ohead(head)
-	register struct outhead	*head;
+wr_ohead(const struct outhead *head)
 {
 	{
-		register long off = OFF_RELO(*head);
+		long off = OFF_RELO(*head);
 
 		BEGINSEEK(PARTEMIT, 0L);
 		BEGINSEEK(PARTRELO, off);
@@ -202,7 +197,7 @@ wr_ohead(head)
 	{
 		char buf[SZ_HEAD];
 
-		register char *c = &buf[0];
+		char *c = &buf[0];
 
 		put2(head->oh_magic, c);	c += 2;
 		put2(head->oh_stamp, c);	c += 2;
@@ -217,11 +212,9 @@ wr_ohead(head)
 }
 
 void
-wr_sect(sect, cnt)
-	register struct outsect	*sect;
-	register unsigned int	cnt;
+wr_sect(const struct outsect *sect, unsigned int cnt)
 {
-	{	register unsigned int i = cnt;
+	{	unsigned int i = cnt;
 
 		while (i--) {
 			if (offcnt >= 1 && offcnt < SECTCNT) {
@@ -234,8 +227,8 @@ wr_sect(sect, cnt)
 	}
 	while (cnt)
 	{
-		register char *c;
-		register unsigned int i;
+		char *c;
+		unsigned int i;
 
 		i = __parts[PARTEMIT].cnt/SZ_SECT;
 		c = __parts[PARTEMIT].pnow;
@@ -258,10 +251,10 @@ wr_sect(sect, cnt)
 }
 
 void
-wr_outsect(s)
-	int		s;	/* section number */
+wr_outsect(int s)
+	/* s = section number */
 {
-	register struct fil *ptr = &__parts[PARTEMIT + getsect(sectionnr)];
+	struct fil *ptr = &__parts[PARTEMIT + getsect(sectionnr)];
 
 	if (s != sectionnr && s >= (SECTCNT-1) && sectionnr >= (SECTCNT-1)) {
 #ifdef OUTSEEK
@@ -291,23 +284,19 @@ wr_outsect(s)
  * We don't have to worry about byte order here.
  */
 void
-wr_emit(emit, cnt)
-	char		*emit;
-	long		cnt;
+wr_emit(const char *emit, long cnt)
 {
 	OUTWRITE(PARTEMIT + getsect(sectionnr) , emit, cnt);
 }
 
 void
-wr_relo(relo, cnt)
-	register struct outrelo	*relo;
-	unsigned int cnt;
+wr_relo(const struct outrelo *relo, unsigned int cnt)
 {
 
 	while (cnt)
 	{
-		register char *c;
-		register unsigned int i;
+		char *c;
+		unsigned int i;
 
 		i = __parts[PARTRELO].cnt/SZ_RELO;
 		c = __parts[PARTRELO].pnow;
@@ -329,14 +318,12 @@ wr_relo(relo, cnt)
 }
 
 void
-wr_name(name, cnt)
-	register struct outname	*name;
-	unsigned int cnt;
+wr_name(const struct outname *name, unsigned int cnt)
 {
 	while (cnt)
 	{
-		register char *c;
-		register unsigned int i;
+		char *c;
+		unsigned int i;
 
 		i = __parts[PARTNAME].cnt/SZ_NAME;
 		c = __parts[PARTNAME].pnow;
@@ -356,11 +343,8 @@ wr_name(name, cnt)
 }
 
 void
-wr_string(addr, len)
-	char *addr;
-	long len;
+wr_string(const char *addr, long len)
 {
-	
 	OUTWRITE(PARTCHAR, addr, len);
 }
 

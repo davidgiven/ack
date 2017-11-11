@@ -6,11 +6,12 @@
 #include "obj.h"
 
 extern int __sectionnr;
+void __wr_flush(struct fil *);
 
 void
-wr_putc(ch)
+wr_putc(int ch)
 {
-	register struct fil *ptr = &__parts[PARTEMIT+getsect(__sectionnr)];
+	struct fil *ptr = &__parts[PARTEMIT+getsect(__sectionnr)];
 
 	if (ptr->cnt == 0) __wr_flush(ptr);
 	ptr->cnt--; *ptr->pnow++ = ch;
