@@ -104,6 +104,11 @@ extern struct outhead	outhead;
 extern int	curr_token;
 
 /* forward function declarations */
+/* comm2.y */
+void	 yyparse(void);
+/* comm4.c */
+void	 stop(void);
+void	 newmodule(const char *);
 /* comm5.c */
 int	 yylex(void);
 void	 putval(int);
@@ -112,20 +117,52 @@ int	 nextchar(void);
 #ifdef ASLD
 char	*readident(int);
 #endif
-int	 hash(char *);
-item_t	*item_search(char *);
+int	 hash(const char *);
+item_t	*item_search(const char *);
 void	 item_insert(item_t *, int);
 item_t	*item_alloc(int);
 item_t	*fb_alloc(int);
 item_t	*fb_shift(int);
+/* comm6.c */
+void	 newequate(item_t *, int);
+void	 newident(item_t *, int);
+void	 newlabel(item_t *);
+void	 newsect(item_t *);
+void	 newbase(valu_t);
+void	 newcomm(item_t *, valu_t);
+void	 switchsect(int);
+void	 align(valu_t);
+#ifdef RELOCATION
+void	 newrelo(int, int);
+#endif
+long	 new_string(const char *);
+void	 newsymb(const char *, int, int, valu_t);
 /* comm7.c */
-valu_t	 load();
-char	*remember();
-FILE	*ffcreat();
-FILE	*fftemp();
+valu_t	 load(const item_t *);
+int	 store(item_t *, valu_t);
+char	*remember(char *);
+int	 combine(int, int, int);
+#ifdef LISTING
+int	 printx(int, valu_t);
+void	 listline(int);
+#endif
+#ifdef THREE_PASS
+int	 small(int, int);
+#endif
+void	 emit1(int);
+void	 emit2(int);
+void	 emit4(long);
+void	 emitx(valu_t, int);
+void	 emitstr(int);
+void	 ffreopen(char *, FILE *);
+FILE	*ffcreat(char *);
+FILE	*fftemp(char *, char *);
+void	 yyerror(const char *);
+void	 nosect(void);
 void	 fatal(const char *, ...);
 void	 serror(const char *, ...);
 void	 warning(const char *, ...);
+void	 nofit(void);
 
 /* ========== Machine dependent C declarations ========== */
 

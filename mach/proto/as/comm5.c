@@ -17,7 +17,7 @@ static int	inident(int);
 static int	innumber(int);
 static int	instring(int);
 static int	inescape(void);
-static int	infbsym(char *);
+static int	infbsym(const char *);
 
 int
 yylex(void)
@@ -85,9 +85,9 @@ yylex(void)
 void
 putval(int c)
 {
-	register valu_t v;
-	register n = 0;
-	register char *p = 0;
+	valu_t v;
+	int n = 0;
+	char *p = 0;
 
 	assert(c == (c & 0xffff));
 	switch (c) {
@@ -163,9 +163,9 @@ putval(int c)
 int
 getval(int c)
 {
-	register n = 0;
-	register valu_t v;
-	register char *p = 0;
+	int n = 0;
+	valu_t v;
+	char *p = 0;
 
 	switch (c) {
 	case CODE1:
@@ -229,7 +229,7 @@ getval(int c)
 int
 nextchar(void)
 {
-	register c;
+	int c;
 
 	if (peekc != -1) {
 		c = peekc;
@@ -254,7 +254,7 @@ nextchar(void)
 static void
 readcode(int n)
 {
-	register c;
+	int c;
 
 	yylval.y_valu = 0;
 	do {
@@ -284,7 +284,7 @@ induo(int c)
 		('|'<<8) | '|', OP_OO,
 		('&'<<8) | '&', OP_AA,
 	};
-	register short *p;
+	short *p;
 
 	c = (c<<8) | nextchar();
 	for (p = duo; *p; p++)
@@ -299,9 +299,9 @@ static char name[NAMEMAX+1];
 static int
 inident(int c)
 {
-	register char *p = name;
-	register item_t *ip;
-	register n = NAMEMAX;
+	char *p = name;
+	item_t *ip;
+	int n = NAMEMAX;
 
 	do {
 		if (--n >= 0)
@@ -330,8 +330,8 @@ inident(int c)
 char *
 readident(int c)
 {
-	register n = NAMEMAX;
-	register char *p = name;
+	int n = NAMEMAX;
+	char *p = name;
 
 	do {
 		if (--n >= 0)
@@ -347,8 +347,8 @@ readident(int c)
 static int
 innumber(int c)
 {
-	register char *p;
-	register radix;
+	char *p;
+	int radix;
 	static char num[20+1];
 
 	p = num;
@@ -394,8 +394,8 @@ innumber(int c)
 static int
 instring(int termc)
 {
-	register char *p;
-	register c;
+	char *p;
+	int c;
 	static int maxstring = 0;
 
 	if (! maxstring) {
@@ -434,7 +434,7 @@ instring(int termc)
 static int
 inescape(void)
 {
-	register c, j, r;
+	int c, j, r;
 
 	c = nextchar();
 	if (c >= '0' && c <= '7') {
@@ -463,10 +463,10 @@ inescape(void)
 }
 
 static int
-infbsym(char *p)
+infbsym(const char *p)
 {
-	register lab;
-	register item_t *ip;
+	int lab;
+	item_t *ip;
 
 	lab = *p++ - '0';
 	if ((unsigned)lab < 10) {
@@ -490,10 +490,10 @@ ok:
 }
 
 int
-hash(char *p)
+hash(const char *p)
 {
-	register unsigned short h;
-	register c;
+	unsigned short h;
+	int c;
 
 	h = 0;
 	while (c = *p++) {
@@ -504,10 +504,10 @@ hash(char *p)
 }
 
 item_t *
-item_search(char *p)
+item_search(const char *p)
 {
-	register h;
-	register item_t *ip;
+	int h;
+	item_t *ip;
 
 	for (h = hash(p); h < H_TOTAL; h += H_SIZE) {
 		ip = hashtab[h];
@@ -532,8 +532,8 @@ item_insert(item_t *ip, int h)
 item_t *
 item_alloc(int typ)
 {
-	register item_t *ip;
-	static nleft = 0;
+	item_t *ip;
+	static int nleft = 0;
 	static item_t *next;
 
 	if (--nleft < 0) {
@@ -553,7 +553,7 @@ item_alloc(int typ)
 item_t *
 fb_alloc(int lab)
 {
-	register item_t *ip, *p;
+	item_t *ip, *p;
 
 	ip = item_alloc(S_UND);
 	p = fb_ptr[FB_TAIL+lab];
@@ -568,7 +568,7 @@ fb_alloc(int lab)
 item_t *
 fb_shift(int lab)
 {
-	register item_t *ip;
+	item_t *ip;
 
 	ip = fb_ptr[FB_FORW+lab];
 	if (ip == 0)

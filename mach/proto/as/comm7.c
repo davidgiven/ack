@@ -11,14 +11,14 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
-#include <stdarg.h>
+#include	<stdarg.h>
+#include	<object.h>
 
 valu_t
-load(ip)
-register item_t *ip;
+load(const item_t *ip)
 {
 #ifdef ASLD
-	register typ;
+	int typ;
 
 	typ = ip->i_type & S_TYP;
 	if ((typ -= S_MIN) < 0)		/* S_UND or S_ABS */
@@ -37,12 +37,11 @@ register item_t *ip;
 #endif
 }
 
-store(ip, val)
-register item_t *ip;
-valu_t val;
+int
+store(item_t *ip, valu_t val)
 {
 #ifdef ASLD
-	register typ;
+	int typ;
 
 	typ = ip->i_type & S_TYP;
 	if ((typ -= S_MIN) >= 0)
@@ -57,12 +56,11 @@ valu_t val;
 }
 
 char *
-remember(s)
-register char *s;
+remember(char *s)
 {
-	register char *p;
-	register n;
-	static nleft = 0;
+	char *p;
+	int n;
+	static int nleft = 0;
 	static char *next;
 
 	p = s;
@@ -85,8 +83,8 @@ register char *s;
 	return(s);
 }
 
-combine(typ1, typ2, op)
-register typ1, typ2;
+int
+combine(int typ1, int typ2, int op)
 {
 	switch (op) {
 	case '+':
@@ -122,12 +120,12 @@ register typ1, typ2;
 }
 
 #ifdef LISTING
-printx(ndig, val)
-valu_t val;
+int
+printx(int ndig, valu_t val)
 {
 	static char buf[8];
-	register char *p;
-	register c, n;
+	char *p;
+	int c, n;
 
 	p = buf; n = ndig;
 	do {
@@ -140,12 +138,11 @@ valu_t val;
 	} while (p > buf);
 	return(ndig);
 }
-#endif
 
-#ifdef LISTING
-listline(textline)
+void
+listline(int textline)
 {
-	register c;
+	int c;
 
 	if ((listflag & 4) && (c = getc(listfile)) != '\n' && textline) {
 		if (listcolm >= 24)
@@ -176,10 +173,11 @@ listline(textline)
 #define PBITTABSZ	128
 static char *pbittab[PBITTABSZ];
 
-small(fitsmall, gain)
+int
+small(int fitsmall, int gain)
 {
-	register bit;
-	register char *p;
+	int bit;
+	char *p;
 
 	if (DOTSCT == NULL)
 		nosect();
@@ -231,7 +229,8 @@ small(fitsmall, gain)
 
 /* ---------- output ---------- */
 
-emit1(arg)
+void
+emit1(int arg)
 {
 	static int olddottyp = -1;
 #ifdef LISTING
@@ -269,8 +268,8 @@ emit1(arg)
 	DOTVAL++;
 }
 
-emit2(arg)
-int arg;
+void
+emit2(int arg)
 {
 #ifdef BYTES_REVERSED
 	emit1((arg>>8)); emit1(arg);
@@ -279,8 +278,8 @@ int arg;
 #endif
 }
 
-emit4(arg)
-long arg;
+void
+emit4(long arg)
 {
 #ifdef WORDS_REVERSED
 	emit2((int)(arg>>16)); emit2((int)(arg));
@@ -289,9 +288,8 @@ long arg;
 #endif
 }
 
-emitx(val, n)
-valu_t val;
-int n;
+void
+emitx(valu_t val, int n)
 {
 	switch (n) {
 	case RELO1:
@@ -315,10 +313,11 @@ int n;
 	}
 }
 
-emitstr(zero)
+void
+emitstr(int zero)
 {
-	register i;
-	register char *p;
+	int i;
+	char *p;
 
 	p = stringbuf;
 	i = stringlen;
@@ -330,17 +329,15 @@ emitstr(zero)
 
 /* ---------- Error checked file I/O  ---------- */
 
-ffreopen(s, f)
-char *s;
-FILE *f;
+void
+ffreopen(char *s, FILE *f)
 {
 	if (freopen(s, "r", f) == NULL)
 		fatal("can't reopen %s", s);
 }
 
 FILE *
-ffcreat(s)
-char *s;
+ffcreat(char *s)
 {
 	FILE *f;
 
@@ -355,10 +352,9 @@ char *s;
 char *tmp_dir = TMPDIR;
 
 FILE *
-fftemp(path, tail)
-char *path, *tail;
+fftemp(char *path, char *tail)
 {
-	register char *dir;
+	char *dir;
 
 	if ((dir = getenv("TMPDIR")) == NULL)
 		dir = tmp_dir;
@@ -369,20 +365,24 @@ char *path, *tail;
 
 /* ---------- Error handling ---------- */
 
-/*VARARGS*/
-yyerror(){}		/* we will do our own error printing */
+/* ARGSUSED */
+void
+yyerror(const char *message)
+{}		/* we will do our own error printing */
 
-nosect()
+void
+nosect(void)
 {
 	fatal("no sections");
 }
 
-wr_fatal()
+void
+wr_fatal(void)
 {
 	fatal("write error");
 }
 
-void diag(const char* tail, const char* s, va_list ap)
+static void diag(const char* tail, const char* s, va_list ap)
 {
 	fflush(stdout);
 	if (modulename)
@@ -422,6 +422,7 @@ assert1()
 }
 #endif
 
+/* VARARGS1 */
 void serror(const char* s, ...)
 {
 	va_list ap;
@@ -447,7 +448,8 @@ void warning(const char* s, ...)
 	va_end(ap);
 }
 
-nofit()
+void
+nofit(void)
 {
 	if (pass == PASS_3)
 		warning("too big");
