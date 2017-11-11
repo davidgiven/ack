@@ -105,16 +105,16 @@ _include	"out.h"
 #include	"out.h"
 #endif
 
-#if DEBUG == 0
-#define	assert(ex)	/* nothing */
+/*
+ * Define assert().  Disable assertions if DEBUG == 0.
+ */
+#if DEBUG == 0 && !defined(NDEBUG)
+#define NDEBUG
 #endif
-
-#if DEBUG == 1
-#define	assert(ex)	{if (!(ex)) assert1();}
-#endif
-
-#if DEBUG == 2
-#define	assert(ex)	{if (!(ex)) assert2(__FILE__, __LINE__);}
+#ifdef _include
+_include <assert.h>
+#else
+#include <assert.h>
 #endif
 
 #define	CTRL(x) 	((x) & 037)

@@ -283,6 +283,7 @@ induo(int c)
 		('>'<<8) | '>', OP_RR,
 		('|'<<8) | '|', OP_OO,
 		('&'<<8) | '&', OP_AA,
+		0  /* terminates array */
 	};
 	short *p;
 

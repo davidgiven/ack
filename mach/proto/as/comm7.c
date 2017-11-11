@@ -406,22 +406,6 @@ void fatal(const char* s, ...)
 	va_end(ap);
 }
 
-#if DEBUG == 2
-assert2(file, line)
-char *file;
-{
-	fatal("assertion failed (%s, %d)", file, line);
-}
-#endif
-
-#if DEBUG == 1
-assert1()
-{
-	fatal("assertion failed");
-	abort();
-}
-#endif
-
 /* VARARGS1 */
 void serror(const char* s, ...)
 {

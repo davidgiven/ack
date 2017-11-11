@@ -79,10 +79,8 @@ newident(item_t *ip, int typ)
 void
 newlabel(item_t *ip)
 {
-#if DEBUG != 0
-#ifdef THREE_PASS
+#if defined(THREE_PASS) && !defined(NDEBUG)
 	ADDR_T oldval = ip->i_valu;
-#endif
 #endif
 
 	if (DOTSCT == NULL)

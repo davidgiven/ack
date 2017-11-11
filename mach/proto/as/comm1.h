@@ -105,7 +105,7 @@ extern int	curr_token;
 
 /* forward function declarations */
 /* comm2.y */
-void	 yyparse(void);
+int	 yyparse(void);
 /* comm4.c */
 void	 stop(void);
 void	 newmodule(const char *);

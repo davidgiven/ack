@@ -92,7 +92,9 @@ definerule("cppfile",
 
 		local hdrpaths = {}
 		for _, t in pairs(e.deps) do
-			hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			if t.dir then
+				hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			end
 		end
 		hdrpaths = uniquify(hdrpaths)
 
