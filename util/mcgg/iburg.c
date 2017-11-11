@@ -1280,6 +1280,7 @@ static void emitinsndata(Rule rules)
 
 						if (!find_child_index(r->pattern, label, &index, &node))
 							label_not_found(r, label);
+						nt = node->op;
 						if (nt->kind == NONTERM)
 						{
 							if (nt->is_fragment)
