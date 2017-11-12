@@ -2,10 +2,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -712,11 +712,4 @@ ruletrace() {
 		i--;
 	}
 }
-#endif
-
-#ifndef NDEBUG
-badassertion(asstr,file,line) char *asstr, *file; {
-
-	fatal("\"%s\", line %d:Assertion \"%s\" failed",file,line,asstr);
-}
-#endif
+#endif /* TABLEDEBUG */

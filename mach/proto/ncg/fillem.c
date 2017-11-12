@@ -2,10 +2,10 @@
 static char rcsid2[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "assert.h"
 #include <em_spec.h>
 #include <em_pseu.h>
 #include <em_flag.h>

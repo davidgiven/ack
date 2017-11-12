@@ -2,11 +2,11 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_flag.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
