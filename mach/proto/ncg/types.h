@@ -29,6 +29,8 @@ typedef char * string;
 #define WRD_FMT "%ld"
 #endif /* WRD_FMT */
 
+/* codegen.c */
+unsigned codegen(byte *, int, int, unsigned, int);
 /* compute.c */
 string mystrcpy(string);
 string tostring(word);

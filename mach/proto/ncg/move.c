@@ -26,7 +26,6 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 	register struct reginfo *rp;
 	register byte *tdpb;
 	int i;
-	unsigned codegen();
 
 	if (eqtoken(tp1,tp2))
 		return(0);
@@ -105,7 +104,6 @@ setcc(tp) token_p tp; {
 test(tp,ply,toplevel,maxcost) token_p tp; unsigned maxcost; {
 	register test_p mp;
 	unsigned t;
-	unsigned codegen();
 
 	if (cocoreg.t_token!=0) {
 		if (eqtoken(tp,&cocoreg))

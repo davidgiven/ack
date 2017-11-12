@@ -4,6 +4,7 @@ static char rcsid[] = "$Id$";
 
 #include "param.h"
 #include "tables.h"
+#include "types.h" /* byte, codegen */
 #include "mach.h"
 
 /*
@@ -14,8 +15,7 @@ static char rcsid[] = "$Id$";
  */
 
 char *progname;
-extern char startupcode[];
-extern unsigned codegen();
+extern byte startupcode[]; /* codegen.c */
 int maxply=1;
 #ifndef NDEBUG
 int Debug=0;
@@ -25,6 +25,8 @@ char *strtdebug="";
 /* fillem.c */
 void in_init(char *);
 void in_start(void);
+/* subr.c */
+void itokcost(void);
 
 main(argc,argv) char **argv; {
 	register unsigned n;
