@@ -1114,7 +1114,6 @@ readcodebytes()
 #ifdef TABLEDEBUG
 initlset(f) char* f;
 {
-	extern char* myalloc();
 
 	set_flag = f;
 	if ((set_fd = open(f + 1, 2)) < 0)

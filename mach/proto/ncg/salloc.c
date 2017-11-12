@@ -32,7 +32,7 @@ static char rcsid[] = "$Id$";
 char *stab[MAXSTAB];
 int nstab=0;
 
-void chkstr();
+static void chkstr(string, char *);
 
 string myalloc(size) {
 	register string p;
@@ -43,21 +43,21 @@ string myalloc(size) {
 	return(p);
 }
 
-myfree(p) string p; {
+void myfree(string p) {
 
 	free(p);
 }
 
-popstr(nnstab) {
-	register i;
+void popstr(int nnstab) {
+	int i;
 
 	for (i=nnstab;i<nstab;i++)
 		myfree(stab[i]);
 	nstab = nnstab;
 }
 
-char *salloc(size) {
-	register char *p;
+char *salloc(int size) {
+	char *p;
 
 	if (nstab==MAXSTAB)
 		fatal("String table overflow");
@@ -66,7 +66,7 @@ char *salloc(size) {
 	return(p);
 }
 
-compar(p1,p2) char **p1,**p2; {
+static int compar(char **p1, char **p2) {
 
 	assert(*p1 != *p2);
 	if (*p1 < *p2)
@@ -74,14 +74,13 @@ compar(p1,p2) char **p1,**p2; {
 	return(1);
 }
 
-void
-garbage_collect() {
-	register i;
+void garbage_collect(void) {
+	int i;
 	struct emline *emlp;
 	token_p tp;
 	tkdef_p tdp;
 	struct reginfo *rp;
-	register char **fillp,**scanp;
+	char **fillp,**scanp;
 	char used[MAXSTAB];     /* could be bitarray */
 
 	if (nstab<THRESHOLD)
@@ -119,9 +118,9 @@ garbage_collect() {
 	nstab = fillp-stab;
 }
 
-void
-chkstr(str,used) string str; char used[]; {
-	register low,middle,high;
+static void
+chkstr(string str, char *used) {
+	int low,middle,high;
 
 	low=0; high=nstab-1;
 	while (high>low) {

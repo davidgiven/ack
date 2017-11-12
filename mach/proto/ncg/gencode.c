@@ -22,10 +22,7 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-string mystrcpy();
-
 FILE *codefile;
-extern FILE *freopen();
 
 out_init(filename) char *filename; {
 

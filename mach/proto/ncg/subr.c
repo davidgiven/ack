@@ -24,7 +24,6 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-string myalloc();
 unsigned codegen();
 
 match(tp,tep,optexp) register token_p tp; register set_p tep; {

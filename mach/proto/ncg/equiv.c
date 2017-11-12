@@ -21,15 +21,13 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-extern string myalloc();
+static int rar[MAXCREG];
+static rl_p *lar;
+static int maxindex;
+static int regclass[NREGS];
+static struct perm *perms;
 
-int rar[MAXCREG];
-rl_p *lar;
-int maxindex;
-int regclass[NREGS];
-struct perm *perms;
-
-void permute();
+static void permute(int);
 
 struct perm *
 tuples(regls,nregneeded) rl_p *regls; {
@@ -66,11 +64,10 @@ tuples(regls,nregneeded) rl_p *regls; {
 	return(perms);
 }
 
-void
-permute(index) {
-	register struct perm *pp;
-	register rl_p rlp;
-	register i,j;
+static void permute(int index) {
+	struct perm *pp;
+	rl_p rlp;
+	int i,j;
 
 	if (index == maxindex) {
 		for (pp=perms; pp != 0; pp=pp->p_next) {

@@ -24,8 +24,7 @@ static char rcsid[] = "$Id$";
  *
  * Author: Hans van Staveren
  */
-extern string myalloc();
-struct regvar *rvlist;
+static struct regvar *rvlist;
 
 struct regvar *
 linkreg(long of, int sz, int tp, int sc) {

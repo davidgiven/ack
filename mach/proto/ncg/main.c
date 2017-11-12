@@ -22,6 +22,10 @@ int Debug=0;
 char *strtdebug="";
 #endif
 
+/* fillem.c */
+void in_init(char *);
+void in_start(void);
+
 main(argc,argv) char **argv; {
 	register unsigned n;
 	extern unsigned cc1,cc2,cc3,cc4;

@@ -55,50 +55,57 @@ Read the documentation.
 #define SEGROM          2
 #define SEGBSS          3
 
-long con();
-
 #define get8()  getc(emfile)
 
-FILE *emfile;
+static FILE *emfile;
 
-int nextispseu,savetab1;
-int opcode;
-int offtyp;
-long argval;
-int dlbval;
-char *str,argstr[128],labstr[128];
-unsigned int maxstrsiz;
-int strsiz;
-int holno=0;
-int procno=0;
-int curseg= -1;
-int part_size=0;
-word part_word=0;
+static int nextispseu,savetab1;
+static int opcode;
+static int offtyp;
+static long argval;
+static int dlbval;
+static char *str,argstr[128],labstr[128];
+static unsigned int maxstrsiz;
+static int strsiz;
+static int holno=0;
+static int procno=0;
+static int curseg= -1;
+static int part_size=0;
+static word part_word=0;
 #ifdef REGVARS
-int regallowed=0;
+static int regallowed=0;
 #endif
 
 extern char em_flag[];
 extern short em_ptyp[];
-extern double atof();
 
+/* machine dependent */
 void prolog(full nlocals);
-void mes();
-void bss();
-void savelab();
-void dumplab();
-void part_flush();
-void xdumplab();
-void switchseg();
+void mes(word);
+
+static int getarg(int);
+static int table1(void);
+static int table2(void);
+static int table3(int);
+static int get16(void);
+static long get32(void);
+static void getstring(void);
+static string strarg(int);
+static void bss(full, int, int);
+static long con(int);
+static void switchseg(int);
+static void savelab(void);
+static void dumplab(void);
+static void xdumplab(void);
+static void part_flush(void);
+static string holstr(word);
 
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
 */
-long our_atol(s)
-register char *s;
-{
-  register long total = 0;
-  register unsigned digit;
+long our_atol(char *s) {
+  long total = 0;
+  unsigned digit;
   int minus = 0;
 
   while (*s == ' ' || *s == '\t') s++;
@@ -117,14 +124,7 @@ register char *s;
 
 #define sp_cstx sp_cst2
 
-string tostring();
-string holstr();
-string strarg();
-string mystrcpy();
-string myalloc();
-long get32();
-
-in_init(filename) char *filename; {
+void in_init(char *filename) {
 
 	emfile = stdin;
 	if (filename && (emfile=freopen(filename,"r",stdin))==NULL)
@@ -134,19 +134,18 @@ in_init(filename) char *filename; {
 	str = myalloc(maxstrsiz=256);
 }
 
-in_start() {
+void in_start(void) {
 #ifdef modhead
 	fprintf(codefile,"%s",modhead) ;
 #endif
 }
 
-in_finish() {
+static void in_finish(void) {
 }
 
-void
-fillemlines() {
-	register int t,i;
-	register struct emline *lp;
+void fillemlines(void) {
+	int t,i;
+	struct emline *lp;
 
 	while ((emlines+nemlines)-emp<MAXEMLINES-5) {
 		assert(nemlines<MAXEMLINES);
@@ -439,8 +438,8 @@ dopseudo() {
 
 /* ----- input ----- */
 
-int getarg(typset) {
-	register t,argtyp;
+static int getarg(int typset) {
+	int t,argtyp;
 
 	argtyp = t = table2();
 	if (t == EOF)
@@ -452,8 +451,8 @@ int getarg(typset) {
 	return(argtyp);
 }
 
-int table1() {
-	register i;
+static int table1(void) {
+	int i;
 
 	i = get8();
 	if (i < sp_fmnem+sp_nmnem && i >= sp_fmnem) {
@@ -471,8 +470,8 @@ int table1() {
 	return(table3(i));
 }
 
-int table2() {
-	register i;
+static int table2(void) {
+	int i;
 
 	i = get8();
 	if (i < sp_fcst0+sp_ncst0 && i >= sp_fcst0) {
@@ -482,7 +481,7 @@ int table2() {
 	return(table3(i));
 }
 
-int table3(i) {
+static int table3(int i) {
 	word consiz;
 
 	switch(i) {
@@ -525,8 +524,8 @@ int table3(i) {
 	return(i);
 }
 
-int get16() {
-	register int l_byte, h_byte;
+static int get16(void) {
+	int l_byte, h_byte;
 
 	l_byte = get8();
 	h_byte = get8();
@@ -534,9 +533,9 @@ int get16() {
 	return l_byte | (h_byte*256) ;
 }
 
-long get32() {
-	register long l;
-	register int h_byte;
+static long get32(void) {
+	long l;
+	int h_byte;
 
 	l = get8();
 	l |= ((unsigned) get8())*256 ;
@@ -546,9 +545,9 @@ long get32() {
 	return l | (h_byte*256L*256*256L) ;
 }
 
-getstring() {
-	register char *p;
-	register n;
+static void getstring(void) {
+	char *p;
+	int n;
 
 	getarg(cst_ptyp);
 	if (argval < 0)
@@ -565,8 +564,8 @@ getstring() {
 	*p++ = '\0';
 }
 
-char *strarg(t) {
-	register char *p;
+static string strarg(int t) {
+	char *p;
 
 	switch (t) {
 	case sp_ilb1:
@@ -613,9 +612,8 @@ char *strarg(t) {
 	return(mystrcpy(argstr));
 }
 
-void
-bss(n,t,b) full n; {
-	register long s = 0;
+static void bss(full n, int t, int b) {
+	long s = 0;
 
 	if (n % TEM_WSIZE)
 		fatal("bad BSS size");
@@ -637,8 +635,8 @@ bss(n,t,b) full n; {
 		fatal("bad BSS initializer");
 }
 
-long con(t) {
-	register i;
+static long con(int t) {
+	int i;
 
 	strarg(t);
 	switch (t) {
@@ -686,8 +684,7 @@ swtxt() {
 	switchseg(SEGTXT);
 }
 
-void
-switchseg(s) {
+static void switchseg(int s) {
 
 	if (s == curseg)
 		return;
@@ -696,8 +693,7 @@ switchseg(s) {
 		fprintf(codefile,"%s\n",segname[s]);
 }
 
-void
-savelab() {
+static void savelab(void) {
 	register char *p,*q;
 
 	part_flush();
@@ -711,8 +707,7 @@ savelab() {
 		;
 }
 
-void
-dumplab() {
+static void dumplab(void) {
 
 	if (labstr[0] == 0)
 		return;
@@ -721,8 +716,7 @@ dumplab() {
 	labstr[0] = 0;
 }
 
-void
-xdumplab() {
+static void xdumplab(void) {
 
 	if (labstr[0] == 0)
 		return;
@@ -730,8 +724,7 @@ xdumplab() {
 	newdlb(labstr);
 }
 
-void
-part_flush() {
+static void part_flush(void) {
 
 	/*
 	 * Each new data fragment and each data label starts at
@@ -744,7 +737,7 @@ part_flush() {
 	part_word = 0;
 }
 
-string holstr(n) word n; {
+static string holstr(word n) {
 
 	sprintf(str,hol_off,n,holno);
 	return(mystrcpy(str));

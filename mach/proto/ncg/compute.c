@@ -87,10 +87,8 @@ char opdesc[] = {
 #endif
 };
 
-string salloc(),strcpy(),strcat();
-
-string mycat(s1,s2) register string s1,s2; {
-	register string s;
+static string mycat(string s1, string s2) {
+	string s;
 
 	if (s1==0 || *s1=='\0') return(s2);
 	if (s2==0 || *s2=='\0') return(s1);
@@ -101,7 +99,7 @@ string mycat(s1,s2) register string s1,s2; {
 	return(s);
 }
 
-string mystrcpy(s) register string s; {
+string mystrcpy(string s) {
 	register string r;
 
 	r=salloc(strlen(s));
@@ -109,9 +107,9 @@ string mystrcpy(s) register string s; {
 	return(r);
 }
 
-char digstr[21][15];
+static char digstr[21][15];
 
-string tostring(n) register word n; {
+string tostring(word n) {
 	char buf[25];
 
 	if (n>=-20 && n<=20 && (n&1)==0) {

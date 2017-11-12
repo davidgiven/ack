@@ -27,6 +27,9 @@ static char rcsid[] = "$Id$";
 extern char em_mnem[][4];
 #endif
 
+/* fillem.c */
+void fillemlines(void);
+
 byte *trypat(bp,len) register byte *bp; {
 	register patlen,i;
 	result_t result;

@@ -16,9 +16,7 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-extern string myalloc();
-
-glosym_p glolist= (glosym_p) 0;
+static glosym_p glolist= (glosym_p) 0;
 
 enterglo(name,romp) string name; word *romp; {
 	register glosym_p gp;

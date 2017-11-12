@@ -18,7 +18,6 @@ struct regassigned {
 	int		ra_score;
 };
 
-extern struct regvar *rvlist;
 extern int nregvar[];
 extern struct regassigned *regassigned[];
 

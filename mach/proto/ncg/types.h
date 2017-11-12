@@ -28,3 +28,13 @@ typedef char * string;
 #ifndef WRD_FMT
 #define WRD_FMT "%ld"
 #endif /* WRD_FMT */
+
+/* compute.c */
+string mystrcpy(string);
+string tostring(word);
+/* salloc.c */
+string myalloc(int);
+void myfree(string);
+void popstr(int);
+char *salloc(int);
+void garbage_collect(void);
