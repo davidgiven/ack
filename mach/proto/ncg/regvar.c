@@ -26,9 +26,8 @@ static char rcsid[] = "$Id$";
  */
 static struct regvar *rvlist;
 
-struct regvar *
-linkreg(long of, int sz, int tp, int sc) {
-	register struct regvar *rvlp;
+struct regvar *linkreg(long of, int sz, int tp, int sc) {
+	struct regvar *rvlp;
 
 	rvlp= (struct regvar *) myalloc(sizeof *rvlp);
 	rvlp->rv_next = rvlist;
@@ -41,11 +40,10 @@ linkreg(long of, int sz, int tp, int sc) {
 	return(rvlp);
 }
 
-void
-tryreg(struct regvar *rvlp, int typ) {
+void tryreg(struct regvar *rvlp, int typ) {
 	int score;
-	register i;
-	register struct regassigned *ra;
+	int i;
+	struct regassigned *ra;
 	struct regvar *save;
 
 	if (typ != reg_any && nregvar[typ]!=0) {
@@ -99,8 +97,7 @@ tryreg(struct regvar *rvlp, int typ) {
 	}
 }
 
-void
-fixregvars(int saveall) {
+void fixregvars(int saveall) {
 	struct reginfo *rp, *rp2;
 	struct regvar *rv;
 	int i, regno, rvtyp;
@@ -145,9 +142,8 @@ fixregvars(int saveall) {
 	f_regsave();
 }
 
-int
-isregvar(long off) {
-	register struct regvar *rvlp;
+int isregvar(long off) {
+	struct regvar *rvlp;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
 		if(rvlp->rv_off == off)
@@ -156,8 +152,7 @@ isregvar(long off) {
 }
 
 #ifdef REGLAP
-int
-isregvar_size(long off, int size) {
+int isregvar_size(long off, int size) {
 	int regno = isregvar(off);
 	/*
 	 * A reg_float may have two sizes.  If this register has the
@@ -175,29 +170,27 @@ isregvar_size(long off, int size) {
 }
 #endif /* REGLAP */
 
-int
-isregtyp(long off) {
-	register struct regvar *rvlp;
+int isregtyp(long off) {
+	struct regvar *rvlp;
 
-	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
-		if(rvlp->rv_off == off)
+	for (rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
+		if (rvlp->rv_off == off)
 			return(rvlp->rv_reg ? rvlp->rv_type+1 : 0);
 	return(-1);
 }
 
-void
-unlinkregs(void) {
-	register struct regvar *rvlp,*t;
-	register struct regassigned *ra;
+void unlinkregs(void) {
+	struct regvar *rvlp,*t;
+	struct regassigned *ra;
 	int rvtyp,i;
 
-	for(rvlp=rvlist;rvlp!=0;rvlp=t) {
+	for (rvlp=rvlist;rvlp!=0;rvlp=t) {
 		t=rvlp->rv_next;
 		myfree((string)rvlp);
 	}
 	rvlist=0;
 	for (rvtyp=reg_any;rvtyp<=reg_float;rvtyp++) {
-	    for(i=0;i<nregvar[rvtyp];i++) {
+	    for (i=0;i<nregvar[rvtyp];i++) {
 		ra= &regassigned[rvtyp][i];
 		ra->ra_rv = 0;
 		ra->ra_score = 0;

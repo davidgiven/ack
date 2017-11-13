@@ -72,6 +72,18 @@ typedef struct {
 	int rl_list[NREGS];
 } rl_t,*rl_p;
 
+/* gencode.c */
+void genstr(int);
+string ad2str(address_t);
+void gennl(void);
+void prtoken(token_p, int);
+#ifdef USE_TES
+void printlabel(int);
+#endif
+/* move.c */
+int move(token_p, token_p, int, int, unsigned);
+void setcc(token_p);
+int test(token_p, int, int, unsigned);
 /* subr.c */
 int match(token_p, set_p, int);
 void instance(int, token_p);

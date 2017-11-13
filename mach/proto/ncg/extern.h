@@ -54,6 +54,3 @@ extern int *rvnumbers[];		/* lists of numbers */
 #endif
 
 extern FILE *codefile;
-
-extern void error(const char *s, ...);
-extern void fatal(const char *s, ...);

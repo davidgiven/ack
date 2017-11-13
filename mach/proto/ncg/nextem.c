@@ -27,11 +27,10 @@ static char rcsid[] = "$Id$";
 extern char em_mnem[][4];
 #endif
 
-/* fillem.c */
-void fillemlines(void);
+static int argtyp(int);
 
-byte *trypat(bp,len) register byte *bp; {
-	register patlen,i;
+static byte *trypat(byte *bp, int len) {
+	int patlen,i;
 	result_t result;
 
 	getint(patlen,bp);
@@ -42,7 +41,7 @@ byte *trypat(bp,len) register byte *bp; {
 		if (patlen != len)
 			return(0);
 	}
-	for(i=0;i<patlen;i++)
+	for (i=0;i<patlen;i++)
 		if (emp[i].em_instr != (*bp++&BMASK))
 			return(0);
 	for (i=0;i<patlen;i++)
@@ -88,7 +87,7 @@ byte *trypat(bp,len) register byte *bp; {
 
 extern char em_flag[];
 
-argtyp(mn) {
+static int argtyp(int mn) {
 
 	/* op_lab is a special opcode which represents a label definition. It's
 	 * not actually a real EM instruction. Therefore if we try to look it
@@ -97,7 +96,7 @@ argtyp(mn) {
 	if (mn == op_lab)
 		return EV_UNDEF;
 
-	switch(em_flag[mn-sp_fmnem]&EM_PAR) {
+	switch (em_flag[mn-sp_fmnem]&EM_PAR) {
 	case PAR_W:
 	case PAR_S:
 	case PAR_Z:
@@ -113,13 +112,13 @@ argtyp(mn) {
 	}
 }
 
-byte *nextem(toplevel) {
-	register i;
+byte *nextem(int toplevel) {
+	int i;
 	short hash[3];
-	register byte *bp;
+	byte *bp;
 	byte *cp;
 	int index;
-	register struct emline *ep;
+	struct emline *ep;
 
 	if (toplevel) {
 		if (nemlines && emp>emlines) {

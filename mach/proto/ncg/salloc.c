@@ -35,7 +35,7 @@ int nstab=0;
 static void chkstr(string, char *);
 
 string myalloc(size) {
-	register string p;
+	string p;
 
 	p = (string) calloc((unsigned)size, 1);
 	if (p==0)
@@ -66,7 +66,9 @@ char *salloc(int size) {
 	return(p);
 }
 
-static int compar(char **p1, char **p2) {
+static int compar(const void *v1, const void *v2) {
+	char *const *p1 = v1;
+	char *const *p2 = v2;
 
 	assert(*p1 != *p2);
 	if (*p1 < *p2)
@@ -88,7 +90,7 @@ void garbage_collect(void) {
 	qsort((char *)stab,nstab,sizeof (char *),compar);
 	for (i=0;i<nstab;i++)
 		used[i]= FALSE;
-	for(emlp=emlines;emlp<emlines+nemlines;emlp++)
+	for (emlp=emlines;emlp<emlines+nemlines;emlp++)
 		chkstr(emlp->em_soper,used);
 	for (tp= fakestack;tp<&fakestack[stackheight];tp++) {
 		if (tp->t_token== -1)

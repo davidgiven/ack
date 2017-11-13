@@ -20,3 +20,7 @@ typedef struct state {
 	int st_tl;				/* tokpatlen */
 	int st_ns;				/* nstab */
 } state_t,*state_p;
+
+/* state.c */
+void savestatus(state_p);
+void restorestatus(state_p);

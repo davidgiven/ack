@@ -35,7 +35,7 @@ static char rcsid[] = "$Id$";
 #define LLDEF LLEAF|LDEF
 #define RLDEF RLEAF|RDEF
 
-char opdesc[] = {
+static const char opdesc[] = {
 	0,                      /* EX_TOKFIELD */
 	0,                      /* EX_ARG */
 	0,                      /* EX_CON */
@@ -121,10 +121,9 @@ string tostring(word n) {
 	return(mystrcpy(buf));
 }
 
-void
-compute(node, presult) register node_p node; register result_t *presult; {
+void compute(node_p node, result_t *presult) {
 	result_t leaf1,leaf2;
-	register token_p tp;
+	token_p tp;
 	int desc;
 	long mask,tmp;
 	int i,tmpreg;

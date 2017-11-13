@@ -4,6 +4,7 @@ static char rcsid[] = "$Id$";
 
 #include <assert.h>
 #include <stdio.h>
+#include <unistd.h> /* isatty */
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -24,7 +25,7 @@ static char rcsid[] = "$Id$";
 
 FILE *codefile;
 
-out_init(filename) char *filename; {
+void out_init(char *filename) {
 
 #ifndef NDEBUG
 	static char stderrbuff[BUFSIZ];
@@ -45,7 +46,7 @@ out_init(filename) char *filename; {
 #endif
 }
 
-out_finish() {
+void out_finish(void) {
 
 #ifndef NDEBUG
 	if (Debug)
@@ -58,18 +59,18 @@ out_finish() {
 #endif
 }
 
-tstoutput() {
+void tstoutput(void) {
 
 	if (ferror(codefile))
 		error("Write error on output");
 }
 
-genstr(stringno) {
+void genstr(int stringno) {
 
 	fputs(codestrings[stringno],codefile);
 }
 
-string ad2str(ad) address_t ad; {
+string ad2str(address_t ad) {
 	static char buf[100];
 
 	if (ad.ea_str==0)
@@ -84,7 +85,7 @@ string ad2str(ad) address_t ad; {
 	return(mystrcpy(buf));
 }
 
-praddr(ad) address_t ad; {
+static void praddr(address_t ad) {
 
 	if (ad.ea_str==0 || *(ad.ea_str) == '\0')
 		fprintf(codefile,WRD_FMT,ad.ea_off);
@@ -101,15 +102,14 @@ praddr(ad) address_t ad; {
 	}
 }
 
-gennl() {
+void gennl(void) {
 	putc('\n',codefile);
 }
 
-void
-prtoken(tp,leadingchar) token_p tp; {
-	register c;
-	register char *code;
-	register tkdef_p tdp;
+void prtoken(token_p tp, int leadingchar) {
+	int c;
+	char *code;
+	tkdef_p tdp;
 
 	putc(leadingchar,codefile);
 	if (tp->t_token == -1) {
@@ -142,9 +142,7 @@ prtoken(tp,leadingchar) token_p tp; {
 }
 
 #ifdef USE_TES
-printlabel(labnum)
-int labnum;
-{
+void printlabel(int labnum) {
 	newilb(dollar[labnum].e_v.e_addr.ea_str);
 }
 #endif

@@ -6,6 +6,7 @@ static char rcsid[] = "$Id$";
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> /* strcmp */
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -562,8 +563,8 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 	int tpl;        /* saved tokpatlen */
 	int nareg;	/* saved nareg */
 	int areg[MAXALLREG];
-	register c1_p cp;
-	register token_p tp;
+	c1_p cp;
+	token_p tp;
 	unsigned totalcost=0;
 	struct reginfo *rp,**rpp;
 
@@ -620,10 +621,10 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 }
 
 c3_p findcoerc(token_p tp, set_p tep) {
-	register c3_p cp;
+	c3_p cp;
 	token_t rtoken;
-	register i;
-	register struct reginfo **rpp;
+	int i;
+	struct reginfo **rpp;
 
 	for (cp=c3coercs;cp->c3_texpno>=0; cp++) {
 		if (tp!=(token_p) 0) {

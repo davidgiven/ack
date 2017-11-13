@@ -5,12 +5,12 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "equiv.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
 #include <cgg_cg.h>
 #include "data.h"
+#include "equiv.h"
 #include "result.h"
 #include "extern.h"
 
@@ -29,11 +29,10 @@ static struct perm *perms;
 
 static void permute(int);
 
-struct perm *
-tuples(regls,nregneeded) rl_p *regls; {
+struct perm *tuples(rl_p *regls, int nregneeded) {
 	int class=0;
-	register i,j;
-	register struct reginfo *rp;
+	int i,j;
+	struct reginfo *rp;
 
 	/*
 	 * First compute equivalence classes of registers.

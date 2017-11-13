@@ -17,6 +17,7 @@ static char rcsid2[] = "$Id$";
 #include "types.h"
 #include <cgg_cg.h>
 #include "data.h"
+#include "glosym.h"
 #include "result.h"
 #ifdef REGVARS
 #include "regvar.h"
@@ -103,7 +104,7 @@ static string holstr(word);
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
 */
-long our_atol(char *s) {
+static long our_atol(char *s) {
   long total = 0;
   unsigned digit;
   int minus = 0;
@@ -235,18 +236,17 @@ void fillemlines(void) {
 
 void
 dopseudo() {
-	register b,t;
-	register full n;
-	register long save;
+	int b,t;
+	full n;
+	long save;
 	word romcont[MAXROM+1];
 	int nromwords;
 	int rombit,rommask;
-	unsigned stackupto();
 
 	if (nextispseu==0 || nemlines>0)
 		error("No table entry for %d",emlines[0].em_instr);
 	nextispseu=0;
-	switch(savetab1) {
+	switch (savetab1) {
 #ifndef USE_TES
 	case sp_ilb1:
 	case sp_ilb2:
@@ -680,7 +680,7 @@ static long con(int t) {
 
 extern char *segname[];
 
-swtxt() {
+void swtxt(void) {
 	switchseg(SEGTXT);
 }
 
