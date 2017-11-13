@@ -12,7 +12,7 @@ int framesize;
 
 /* Write out a constant data section. */
 
-con_part(int sz, word w)
+void con_part(int sz, word w)
 {
 	while (part_size % sz)
 		part_size++;
@@ -29,7 +29,7 @@ con_part(int sz, word w)
 	part_size += sz;
 }
 
-con_mult(word sz)
+void con_mult(word sz)
 {
 	if (argval != 4)
 		fatal("bad icon/ucon size");
@@ -49,7 +49,7 @@ void prolog(full nlocals)
 	fprintf(codefile, "push fp, lr\n");
 	fprintf(codefile, "mov fp, sp\n");
 	if (nlocals > 0)
-		fprintf(codefile, "sub sp, #%d\n", nlocals);
+		fprintf(codefile, "sub sp, #%ld\n", nlocals);
 
 	framesize = nlocals;
 }

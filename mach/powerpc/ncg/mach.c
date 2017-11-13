@@ -13,6 +13,7 @@
 
 static long framesize;
 
+void
 con_part(int sz, word w)
 {
 	while (part_size % sz)
@@ -34,6 +35,7 @@ con_part(int sz, word w)
 	part_size += sz;
 }
 
+void
 con_mult(word sz)
 {
 
@@ -146,6 +148,7 @@ regscore(long offset, int size, int type, int frequency, int totype)
 
 /* Initialise regvar system for one function. */
 
+void
 i_regsave(void)
 {
 	int i;
@@ -163,6 +166,7 @@ i_regsave(void)
 
 /* Mark a register as being saved. */
 
+void
 regsave(const char* regname, long offset, int size)
 {
 	int regnum = atoi(regname + 1);
@@ -223,6 +227,7 @@ saveloadregs(const char* ops, const char* opm, const char *opf)
 	}
 }
 
+void
 f_regsave(void)
 {
 	int reg;
@@ -248,6 +253,7 @@ f_regsave(void)
 
 /* Restore all saved registers. */
 
+void
 regreturn(void)
 {
 	saveloadregs("lwz", "lmw", "lfd");

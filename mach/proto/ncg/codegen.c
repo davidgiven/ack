@@ -14,6 +14,9 @@ static char rcsid[] = "$Id$";
 #include "state.h"
 #include "equiv.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h" /* regreturn */
+#endif
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.

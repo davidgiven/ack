@@ -81,6 +81,9 @@ extern char em_flag[];
 extern short em_ptyp[];
 
 /* machine dependent */
+void con_part(int, word);
+void con_mult(word);
+void con_float(void);
 void prolog(full nlocals);
 void mes(word);
 

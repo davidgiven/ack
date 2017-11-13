@@ -13,6 +13,7 @@ static char rcs_mh[]= ID_MH ;
  * machine dependent back end routines for the Intel 8086
  */
 
+void
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -31,6 +32,7 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
+void
 con_mult(sz) word sz; {
 	long l;
 
@@ -83,6 +85,7 @@ long si_off;
 long di_off;
 int firstreg;
 
+int
 regscore(off, size, typ, score, totyp)
 	long off;
 {
@@ -95,6 +98,7 @@ regscore(off, size, typ, score, totyp)
 	return score;
 }
 
+void
 i_regsave()
 {
 	si_off = -1;
@@ -102,6 +106,7 @@ i_regsave()
 	firstreg = 0;
 }
 
+void
 f_regsave()
 {
 	if (si_off != di_off) {
@@ -130,6 +135,7 @@ f_regsave()
 		fprintf(codefile, "mov si,%ld(bp)\n", si_off);
 }
 
+void
 regsave(regstr, off, size)
 	char *regstr;
 	long off;
@@ -144,6 +150,7 @@ regsave(regstr, off, size)
 	}
 }
 
+void
 regreturn()
 {
 	if (firstreg == 1) {

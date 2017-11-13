@@ -237,6 +237,7 @@ float_cst(str, sz, buf)
 #endif /* USE_FLT */
 
 #ifdef CODE_GENERATOR
+void
 con_float()
 {
 	char buf[8];
