@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "ack.h"
 #include <em_path.h>
 #include "list.h"

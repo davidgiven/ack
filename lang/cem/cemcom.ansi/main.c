@@ -5,6 +5,7 @@
 /* $Id$ */
 /* MAIN PROGRAM */
 
+#include	<string.h>
 #include	"parameters.h"
 #include	<ack_string.h>
 #include	<system.h>

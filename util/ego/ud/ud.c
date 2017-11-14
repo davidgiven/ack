@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_spec.h>
 #include "../share/types.h"
 #include "ud.h"

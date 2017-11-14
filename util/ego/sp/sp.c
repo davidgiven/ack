@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_mnem.h>
 #include <em_spec.h>
 #include "../share/types.h"

@@ -6,7 +6,8 @@
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
 #include	<assert.h>
-#include    <stdlib.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	"parameters.h"
 #include    "idf.h"
 #include	"arith.h"

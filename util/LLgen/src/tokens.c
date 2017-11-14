@@ -77,6 +77,7 @@ extern LLnc_recover();
 
 # line 20 "tokens.g"
 
+#include <string.h>
 # include "types.h"
 # include "io.h"
 # include "extern.h"
@@ -101,7 +102,7 @@ STATIC string	vallookup();
 STATIC void copyact();
 
 static int	nparams;
-# line 75 "tokens.g"
+# line 76 "tokens.g"
 
 
 /*
@@ -419,7 +420,8 @@ unput(c) {
 	backupc = c;
 }
 
-void skipcomment(flag) {
+void
+skipcomment(flag) {
 	/*
 	 * Skip comment. If flag != 0, the comment is inside a fragment
 	 * of C-code, so keep it.

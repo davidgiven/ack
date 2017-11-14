@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "../share/types.h"
 #include "sr.h"
 #include "../share/debug.h"
