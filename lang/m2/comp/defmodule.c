@@ -17,7 +17,7 @@
 #include <em_arith.h>
 #include <em_label.h>
 #include <stdlib.h>
-#include <astring.h>
+#include <string.h>
 
 #include "LLlex.h"
 #include "Lpars.h"
@@ -59,15 +59,24 @@ char*
 	return "";
 }
 
-STATIC
+STATIC int
 GetFile(name) char* name;
 {
 	/*	Try to find a file with basename "name" and extension ".def",
 		in the directories mentioned in "DEFPATH".
 	*/
-	char* buf = aprintf("%s.def", name);
+	size_t len;
+	int found;
+	char *buf;
+
+	len = strlen(name);
+	buf = Malloc(len + 5);
+	memcpy(buf, name, len);
+	memcpy(buf + len, ".def", 5);
 	DEFPATH[0] = WorkingDir;
-	if (!InsertFile(buf, DEFPATH, &(FileName)))
+	found = InsertFile(buf, DEFPATH, &(FileName));
+	free(buf);
+	if (!found)
 	{
 		error("could not find a DEFINITION MODULE for \"%s\"", name);
 		return 0;
