@@ -9,8 +9,9 @@
 	Many mods by Ceriel Jacobs
 */
 
-#include <stdlib.h>
+#include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef NORCSID
@@ -30,8 +31,18 @@ char *ProgCall;		/* callname of this program */
 int TabSize = 128;	/* default size of generated table */
 char *InitialValue;	/* initial value of all table entries */
 
-main(argc, argv)
-	char *argv[];
+void option(char *);
+void option_F(char *);
+void InitTable(char *);
+void PrintTable(void);
+int process(char *, int);
+int c_proc(char *, char *);
+int setval(int, char *);
+int quoted(char **);
+void DoFile(char *);
+
+int
+main(int argc, char *argv[])
 {
 
 	ProgCall = *argv++;
@@ -51,23 +62,19 @@ main(argc, argv)
 }
 
 char *
-Salloc(s)
-	char *s;
+Salloc(char *s)
 {
-	char *ns = malloc((unsigned)strlen(s) + 1);
+	char *ns = strdup(s);
 
-	if (ns) {
-		strcpy(ns, s);
-	}
-	else {
+	if (!ns) {
 		fprintf(stderr, "%s: out of memory\n", ProgCall);
 		exit(1);
 	}
 	return ns;
 }
 
-option(str)
-	char *str;
+void
+option(char *str)
 {
 	/*	note that *str indicates the source of the option:
 		either COMCOM (from command line) or FILECOM (from a file).
@@ -89,7 +96,7 @@ option(str)
 		DoFile(str);
 		break;
 	case 'F':	/* new output format string */
-		sprintf(OutputForm, "%s\n", ++str);
+		option_F(++str);
 		break;
 	case 'T':	/* insert text literally */
 		printf("%s\n", ++str);
@@ -124,8 +131,31 @@ option(str)
 	}
 }
 
-InitTable(ival)
-	char *ival;
+void
+option_F(char *form)
+{
+	int len;
+	char *cp;
+
+	/*
+	 * The format string must have one '%s' and no other '%'.
+	 * Don't allow '%99$s', '%ls', '%n'.
+	 */
+	cp = strchr(form, '%');
+	if (!cp || cp[1] != 's' || strchr(cp + 1, '%'))
+		goto bad;
+	len = snprintf(OutputForm, sizeof(OutputForm), "%s\n", form);
+	if (len < 0 && len >= sizeof(OutputForm))
+		goto bad;
+	return;
+
+bad:
+	fprintf(stderr, "%s: -F: bad format %s\n", ProgCall, form);
+	exit(1);
+}
+
+void
+InitTable(char *ival)
 {
 	int i;
 
@@ -138,7 +168,8 @@ InitTable(ival)
 	}
 }
 
-PrintTable()
+void
+PrintTable(void)
 {
 	int i;
 
@@ -156,8 +187,7 @@ PrintTable()
 }
 
 int
-process(str, format)
-	char *str;
+process(char *str, int format)
 {
 	char *cstr = str;
 	char *Name = cstr;	/* overwrite original string!	*/
@@ -189,12 +219,10 @@ process(str, format)
 	return 0;
 }
 
-c_proc(str, Name)
-	char *str;
-	char *Name;
+int
+c_proc(char *str, char *Name)
 {
 	int ch, ch2;
-	int quoted();
 	char *name = Salloc(Name);
 
 	while (*str)	{
@@ -209,8 +237,8 @@ c_proc(str, Name)
 				ch2 = quoted(&str);
 			}
 			else	{
-				if (ch2 = (*str++ & 0377));
-				else str--;
+				ch2 = (*str++ & 0377);
+				if (!ch2) str--;
 			}
 			if (ch > ch2) {
 				fprintf(stderr, "%s: bad range\n", ProgCall);
@@ -229,8 +257,7 @@ c_proc(str, Name)
 }
 
 int
-setval(ch, nm)
-	char *nm;
+setval(int ch, char *nm)
 {
 	char **p = &Table[ch];
 
@@ -246,8 +273,7 @@ setval(ch, nm)
 }
 
 int
-quoted(pstr)
-	char **pstr;
+quoted(char **pstr)
 {
 	int ch;
 	int i;
@@ -291,9 +317,7 @@ quoted(pstr)
 }
 
 char *
-getln(s, n, fp)
-	char *s;
-	FILE *fp;
+getln(char *s, int n, FILE *fp)
 {
 	int c = getc(fp);
 	char *str = s;
@@ -316,8 +340,8 @@ getln(s, n, fp)
 
 #define BUFSIZE 1024
 
-DoFile(name)
-	char *name;
+void
+DoFile(char *name)
 {
 	char text[BUFSIZE];
 	FILE *fp;
