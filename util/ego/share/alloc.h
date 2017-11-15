@@ -8,36 +8,39 @@
  *  C O R E   A L L O C A T I O N   A N D   D E A L L O C A T I O N
  */
 
+#include <stdlib.h>
+
 #ifdef DEBUG
-extern char *newcore();
-extern oldcore();
+void *newcore(size_t);
+void  oldcore(void *, size_t);
+void  coreusage(void);
 #else
-extern char *myalloc();
+void *myalloc(size_t);
 #define newcore(size) myalloc(size)
-#define oldcore(p,size) free((char *)p)
+#define oldcore(p,size) free(p)
 #endif
 
-#define newstruct(t)	((struct t *) newcore (sizeof (struct t)))
-#define oldstruct(t,p)	oldcore((char *) p,sizeof (struct t))
+#define newstruct(t)	((struct t *) newcore(sizeof (struct t)))
+#define oldstruct(t,p)	oldcore(p, sizeof (struct t))
 
-extern line_p	newline();		/* (byte optype) */
-extern arg_p	newarg();		/* (byte argtype) */
-extern short    **newmap();		/* (short length)	*/
-extern cset	newbitvect();		/* (short nrbytes)	*/
-extern cond_p 	newcondtab();
+line_p	  newline(byte optype);
+arg_p	  newarg(byte argtyp);
+short	**newmap(short length);
+cset	  newbitvect(short nrbytes);
+cond_p 	  newcondtab(int length);
 
 
-extern oldline() ;
-extern oldargs() ;
-extern oldargb() ;
-extern oldobjects() ;
-extern olddblock() ;
-extern oldmap();
-extern oldbitvect();			/* (cset s, short nrbytes)	*/
-extern oldcondtab();
+void oldline(line_p);
+void oldargs(arg_p);
+void oldargb(argb_p);
+void oldobjects(obj_p);
+void olddblock(dblock_p);
+void oldmap(short **mp, short length);
+void oldbitvect(cset s, short nrbytes);
+void oldcondtab(cond_p);
 
-extern short *newtable();
-extern oldtable();
+short	*newtable(short length);
+void	 oldtable(short **mp, short length);
 
 #define newdblock()	(dblock_p) newstruct(dblock)
 #define newobject()	(obj_p) newstruct(obj)
