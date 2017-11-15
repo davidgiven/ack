@@ -42,7 +42,7 @@ definerule("llgen",
 				e.srcs,
 			},
 			commands = {
-				"cd %{dir} && %{abspath(ins)}"
+				"cd %{dir} && rm -f %{outs} && %{abspath(ins)}"
 			}
 		}
 	end
