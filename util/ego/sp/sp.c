@@ -52,10 +52,10 @@ STATIC int globl_sp_allowed;
 #define IS_ASP(l)	(INSTR(l) == op_asp && TYPE(l) == OPSHORT && SHORT(l) > 0)
 
 
-STATIC sp_machinit(f)
-	FILE *f;
+STATIC void sp_machinit(void *vp)
 {
 	/* Read target machine dependent information for this phase */
+	FILE *f = vp;
 	char s[100];
 
 	for (;;) {
@@ -194,10 +194,9 @@ STATIC mark_unsave_blocks(p)
 }
 
 
-void
-sp_optimize(p)
-	proc_p p;
+void sp_optimize(void *vp)
 {
+	proc_p p = vp;
 	register bblock_p b;
 
 	if (IS_ENTERED_WITH_GTO(p)) return;

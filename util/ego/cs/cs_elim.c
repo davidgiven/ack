@@ -191,7 +191,7 @@ STATIC set_replace(avp, tmp)
 	register lset s = avp->av_occurs;
 
 	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i, s)) {
-		OUTVERBOSE("eliminate duplicate", 0);
+		OUTVERBOSE("eliminate duplicate", 0, 0);
 		SHOWOCCUR(occ_elem(i));
 		Scs++;
 		delete(occ_elem(i), avp->av_before);
@@ -275,7 +275,7 @@ eliminate(pp)
 			if (ravp->av_saveloc != (entity_p) 0) {
 				tmp = ravp->av_saveloc->en_loc;
 				mes = find_mesreg(tmp);
-				OUTVERBOSE("re-using %ld(LB)", tmp);
+				OUTVERBOSE("re-using %ld(LB)", tmp, 0);
 			} else {
 				tmp = tmplocal(pp,  ravp->av_size);
 				mes = gen_mesreg(tmp, ravp, pp);

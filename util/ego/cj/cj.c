@@ -289,9 +289,7 @@ STATIC bool try_pred(b)
 
 
 
-void
-cj_optimize(p)
-	proc_p p;
+void cj_optimize(void *vp)
 {
 	/* Perform cross jumping for procedure p.
 	 * In case cases a cross-jumping optimization which give
@@ -300,6 +298,7 @@ cj_optimize(p)
 	 * untill we find no further optimizations.
 	 */
 
+	proc_p p = vp;
 	bblock_p b;
 	bool changes = TRUE;
 

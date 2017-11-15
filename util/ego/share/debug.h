@@ -12,16 +12,16 @@ extern int		linecount;	/* # lines in this file */
 extern bool		verbose_flag;  /* generate verbose output ? */
 
 /* VARARGS 1 */
-extern error();
+void error(const char *, ...);
 
 
 #ifdef TRACE
-extern OUTTRACE();
+void OUTTRACE(const char *, int);
 #else
 #define OUTTRACE(s,n)
 #endif
 #ifdef VERBOSE
-extern OUTVERBOSE();
+void OUTVERBOSE(const char *, int, int);
 #else
 #define OUTVERBOSE(s,n1,n2)
 #endif
@@ -36,12 +36,12 @@ extern OUTVERBOSE();
 
 #define assert(x) if(!(x)) badassertion(__FILE__,__LINE__)
 
-extern VI();
-extern VL();
-extern VD();
-extern VA();
-extern VO();
-extern VP();
+void VI(short);
+void VL(line_p);
+void VD(dblock_p);
+void VA(short *);
+void VO(obj_p);
+void VP(proc_p);
 
 
 

@@ -34,11 +34,11 @@ STATIC cs_clear()
 	start_valnum();
 }
 
-STATIC void cs_optimize(p)
-	proc_p p;
+STATIC void cs_optimize(void *vp)
 {
 	/* Optimize all basic blocks of one procedure. */
 
+	proc_p p = vp;
 	register bblock_p rbp, bdone;
 
 	if (IS_ENTERED_WITH_GTO(p)) return;

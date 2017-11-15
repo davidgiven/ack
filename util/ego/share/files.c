@@ -47,7 +47,7 @@ struct files* findfiles(int argc, const char** argv)
 	return &files;
 }
 
-FILE *openfile(char* name, char* mode)
+FILE *openfile(const char *name, const char *mode)
 {
 	FILE *f;
 

@@ -37,9 +37,10 @@ struct files
 	int argc;
 };
 
-extern struct files* findfiles(int argc, const char** argv);
+struct files* findfiles(int argc, const char** argv);
 
-extern FILE *openfile();	/* (char *name, *mode)
+FILE *openfile(const char *name, const char *mode);
+				/*
 				 * Open a file with the given name
 				 * and mode; aborts if the file
 				 * cannot be opened.

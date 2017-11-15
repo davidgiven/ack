@@ -52,10 +52,10 @@ int sli_threshold;
 
 int Ssr;  /* #optimizations found */
 
-sr_machinit(f)
-	FILE *f;
+void sr_machinit(void *vp)
 {
 	/* Read target machine dependent information */
+	FILE *f = vp;
 	char s[100];
 
 
@@ -219,10 +219,10 @@ STATIC sr_cleanproc(p)
 }
 
 
-void
-sr_optimize(p)
-	proc_p p;
+void sr_optimize(void *vp)
 {
+	proc_p p = vp;
+
 	if (IS_ENTERED_WITH_GTO(p)) return;
 	sr_extproc(p);
 	loopblocks(p);

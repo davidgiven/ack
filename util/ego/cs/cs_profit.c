@@ -65,9 +65,9 @@ STATIC choose_cset(f, s_p, max)
 	Cdeleteset(cs1); Cdeleteset(cs2);
 }
 
-cs_machinit(f)
-	FILE *f;
+void cs_machinit(void *vp)
 {
+	FILE *f = vp;
 	char s[100];
 	int time, space;
 
@@ -194,8 +194,7 @@ STATIC bool okay_lines(avp, ocp)
 	return TRUE;
 }
 
-bool desirable(avp)
-	avail_p avp;
+bool desirable(avail_p avp)
 {
 	register Lindex i, next;
 

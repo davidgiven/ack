@@ -6,7 +6,8 @@
 
 /* S T A C K _ C H A N G E . H */
 
-extern line_change();	/* ( line_p l; bool *ok_out; int *pop_out,*push_out)
+void line_change(line_p l, bool *ok_out, int *pop_out, int *push_out);
+			/*
 			 * Try to determine how the stack-height will be
 			 * affected by the EM instruction l. 'ok_out' is set
 			 * to false if we fail to do so. pop_out and
