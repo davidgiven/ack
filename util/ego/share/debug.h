@@ -34,8 +34,6 @@ void OUTVERBOSE(const char *, int, int);
 
 #define STATIC
 
-#define assert(x) if(!(x)) badassertion(__FILE__,__LINE__)
-
 void VI(short);
 void VL(line_p);
 void VD(dblock_p);
@@ -43,11 +41,10 @@ void VA(short *);
 void VO(obj_p);
 void VP(proc_p);
 
-
-
 #else /*DEBUG*/
 
-#define assert(b)
+#define STATIC static
+#define NDEBUG /* disable assert() */
 
 #define VI(i)
 #define VL(l)
@@ -56,6 +53,6 @@ void VP(proc_p);
 #define VO(o)
 #define VP(p)
 
-
-#define STATIC static
 #endif
+
+#include <assert.h>

@@ -65,11 +65,6 @@ void OUTVERBOSE(const char *s, int n1, int n2)
 
 
 #ifdef DEBUG
-badassertion(file,line) char *file; unsigned line; {
-
-	fprintf(stderr,"assertion failed file %s, line %u\n",file,line);
-	error("assertion");
-}
 /* Valid Address */
 
 void VA(short *a) {
