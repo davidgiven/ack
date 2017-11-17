@@ -140,7 +140,7 @@ f_regsave()
 
 void
 regsave(regstr, off, size)
-	char *regstr;
+	const char *regstr;
 	long off;
 {
 	if (strcmp(regstr, "esi") == 0) {

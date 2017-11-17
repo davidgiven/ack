@@ -184,7 +184,7 @@ f_regsave()
 
 void
 regsave(s,off,size)
-	char *s;
+	const char *s;
 	long off;
 {
 	assert (regnr < 9);
