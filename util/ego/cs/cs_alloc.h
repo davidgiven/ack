@@ -25,6 +25,6 @@ entity_p newentity(void);	/*
 				 * Return a pointer to a new struct entity.
 				 */
 
-void ldentity(entity_p enp);	/*
+void oldentity(entity_p enp);	/*
 				 * Release the struct entity enp points to.
 				 */
