@@ -5,6 +5,7 @@
 /* $Id$ */
 /*  P R O T O T Y P E   F I D D L I N G  */
 
+#include	<assert.h>
 #include	"parameters.h"
 #include	<alloc.h>
 #include    "idf.h"
@@ -22,7 +23,6 @@
 #include	"declar.h"
 #include	"decspecs.h"
 #include	"proto.h"
-#include	"assert.h"
 
 extern char options[];
 
@@ -65,7 +65,7 @@ add_proto(pl, ds, dc, lvl)
 	register struct type *type;
 	char formal_array = 0;
 
-	ASSERT(ds->ds_type != (struct type *)0);
+	assert(ds->ds_type != (struct type *)0);
 
 	pl->pl_flag = PL_FORMAL;
 	type = declare_type(ds->ds_type, dc);

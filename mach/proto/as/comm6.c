@@ -11,14 +11,12 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
+#include	<object.h>
 
-void switchsect();
-void newsymb();
-void newident();
+static void new_common(item_t *);
 
-newequate(ip, typ)
-register item_t *ip;
-register int typ;
+void
+newequate(item_t *ip, int typ)
 {
 	typ &= ~S_EXT;
 	if (typ & S_COM)
@@ -39,10 +37,9 @@ register int typ;
 }
 
 void
-newident(ip, typ)
-register item_t *ip;
+newident(item_t *ip, int typ)
 {
-	register flag;
+	int flag;
 #ifdef GENLAB
 	static char genlab[] = GENLAB;
 #endif /* GENLAB */
@@ -80,13 +77,10 @@ register item_t *ip;
 }
 
 void
-newlabel(ip)
-register item_t *ip;
+newlabel(item_t *ip)
 {
-#if DEBUG != 0
-#ifdef THREE_PASS
-	register ADDR_T oldval = ip->i_valu;
-#endif
+#if defined(THREE_PASS) && !defined(NDEBUG)
+	ADDR_T oldval = ip->i_valu;
 #endif
 
 	if (DOTSCT == NULL)
@@ -100,11 +94,11 @@ register item_t *ip;
 #endif
 }
 
-newsect(ip)
-register item_t *ip;
+void
+newsect(item_t *ip)
 {
-	register int typ;
-	register sect_t *sp = NULL;
+	int typ;
+	sect_t *sp = NULL;
 
 	typ = ip->i_type & S_TYP;
 	if (typ == S_UND) {
@@ -138,11 +132,11 @@ register item_t *ip;
 }
 
 /*ARGSUSED*/
-newbase(base)
-valu_t base;
+void
+newbase(valu_t base)
 {
 #ifdef ASLD
-	register sect_t *sp;
+	sect_t *sp;
 	
 	if ((sp = DOTSCT) == NULL)
 		nosect();
@@ -166,9 +160,8 @@ valu_t base;
  *   -	maximum length of .comm is recorded in i_valu during PASS_1
  *   -	i_valu is used for relocation info during PASS_3
  */
-newcomm(ip, val)
-register item_t *ip;
-valu_t val;
+void
+newcomm(item_t *ip, valu_t val)
 {
 	if (pass == PASS_1) {
 		if (DOTSCT == NULL)
@@ -190,10 +183,9 @@ valu_t val;
 }
 
 void
-switchsect(newtyp)
-int newtyp;
+switchsect(int newtyp)
 {
-	register sect_t *sp;
+	sect_t *sp;
 	
 	if (sp = DOTSCT)
 		sp->s_size = DOTVAL - sp->s_base;
@@ -209,11 +201,11 @@ int newtyp;
 	DOTTYP = newtyp;
 }
 
-align(bytes)
-valu_t bytes;
+void
+align(valu_t bytes)
 {
-	register valu_t gap;
-	register sect_t *sp;
+	valu_t gap;
+	sect_t *sp;
 
 	if ((sp = DOTSCT) == NULL)
 		nosect();
@@ -250,7 +242,7 @@ valu_t bytes;
 
 #ifdef RELOCATION
 void
-newrelo(s, n)
+newrelo(int s, int n)
 {
 	int	iscomm;
 	struct outrelo	outrelo;
@@ -319,8 +311,7 @@ newrelo(s, n)
 #endif
 
 long
-new_string(s)
-	char	*s;
+new_string(const char *s)
 {
 	long	r = 0;
 
@@ -335,9 +326,7 @@ new_string(s)
 }
 
 void
-newsymb(name, type, desc, valu)
-register char *name;
-valu_t valu;
+newsymb(const char *name, int type, int desc, valu_t valu)
 {
 	struct outname outname;
 
@@ -357,11 +346,11 @@ valu_t valu;
 	wr_name(&outname, 1);
 }
 
-new_common(ip)
-	item_t *ip;
+static void
+new_common(item_t *ip)
 {
-	register struct common_t *cp;
-	static nleft = 0;
+	struct common_t *cp;
+	static int nleft = 0;
 	static struct common_t *next;
 
 	if (--nleft < 0) {

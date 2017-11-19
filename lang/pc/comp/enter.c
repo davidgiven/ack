@@ -1,5 +1,6 @@
 /* H I G H   L E V E L   S Y M B O L   E N T R Y */
 
+#include	<string.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>

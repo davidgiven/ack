@@ -17,6 +17,7 @@
 
 #include <stb.h>
 
+void
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -43,6 +44,7 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
+void
 con_mult(sz) word sz; {
 
 	if (sz != 4)
@@ -57,6 +59,7 @@ con_mult(sz) word sz; {
 #define FL_MSB_AT_LOW_ADDRESS	1
 #include <con_float>
 
+int
 regscore(off,size,typ,score,totyp)
 	long off;
 {
@@ -93,6 +96,7 @@ struct regsav_t {
 
 int regnr;
 
+void
 i_regsave()
 {
 	regnr = 0;
@@ -100,6 +104,7 @@ i_regsave()
 
 full nlocals;
 
+void
 regreturn()
 {
 	register struct regsav_t *p;
@@ -127,6 +132,7 @@ regreturn()
 	fputs("unlk a6\nrts\n", codefile);
 }
 
+void
 f_regsave()
 {
 	register struct regsav_t *p;
@@ -176,8 +182,9 @@ f_regsave()
 	}
 }
 
+void
 regsave(s,off,size)
-	char *s;
+	const char *s;
 	long off;
 {
 	assert (regnr < 9);
@@ -196,6 +203,7 @@ prolog(n) full n; {
 #ifdef MACH_OPTIONS
 static int gdb_flag = 0;
 
+void
 mach_option(s)
 	char *s;
 {

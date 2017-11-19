@@ -7,6 +7,7 @@
 
 #include	"parameters.h"
 
+#include	<string.h>
 #include	<alloc.h>
 #include	"input.h"
 #include	"arith.h"

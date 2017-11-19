@@ -8,6 +8,8 @@
 #include	"parameters.h"
 #ifndef	LINT
 
+#include	<assert.h>
+#include	<ack_string.h>
 #include	<em.h>
 #include	<em_reg.h>
 #include	<alloc.h>
@@ -17,7 +19,6 @@
 #include	"type.h"
 #include	"label.h"
 #include	"code.h"
-#include	"assert.h"
 #include	"def.h"
 #include	"expr.h"
 #include	"sizes.h"
@@ -32,7 +33,6 @@
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 
 char *symbol2str();
-char *long2str();
 arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 extern int	err_occurred; /* error.c */
@@ -83,7 +83,7 @@ EVAL(expr, val, code, true_label, false_label)
 				/* can only result from ','-expressions with
 				   constant right-hand sides ???
 				*/
-				ASSERT(is_cp_cst(expr));
+				assert(is_cp_cst(expr));
 				C_bra(expr->VL_VALUE == 0 ? false_label : true_label);
 			}
 			else load_val(expr, val);
@@ -254,7 +254,7 @@ EVAL(expr, val, code, true_label, false_label)
 			break;
 		case '%':
 			operands(expr, gencode);
-			ASSERT(tp->tp_fund==INT || tp->tp_fund==LONG);
+			assert(tp->tp_fund==INT || tp->tp_fund==LONG);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_rmu(tp->tp_size);
@@ -554,7 +554,7 @@ EVAL(expr, val, code, true_label, false_label)
 				fp_used = 1;
 			EVAL(left, oper == '.' ? LVAL : RVAL, gencode,
 				NO_LABEL, NO_LABEL);
-			ASSERT(is_cp_cst(right));
+			assert(is_cp_cst(right));
 			if (gencode) {
 				C_adp(right->VL_VALUE);
 			}
@@ -877,7 +877,7 @@ store_val(vl, tp)
 			}
 		}
 		else {
-			ASSERT(df->df_sc != STATIC);
+			assert(df->df_sc != STATIC);
 			if (inword || indword)
 				StoreLocal(df->df_address + val, tp->tp_size);
 			else {
@@ -889,7 +889,7 @@ store_val(vl, tp)
 	else {	
 		label dlb = vl->vl_data.vl_lbl;
 
-		ASSERT(vl->vl_class == Label);
+		assert(vl->vl_class == Label);
 		if (inword)
 			C_ste_dlb(dlb, val);
 		else
@@ -964,12 +964,12 @@ load_val(expr, rlval)
 		register struct def *df = id->id_def;
 		int fund = df->df_type->tp_fund;
 
-		ASSERT(ISNAME(expr));
+		assert(ISNAME(expr));
 		if (fund == FUNCTION) {
 			/*	the previous statement tried to catch a function
 				identifier, which may be cast to a pointer to a
 				function.
-				ASSERT(!(rvalue)); ???
+				assert(!(rvalue)); ???
 			*/
 			C_lpi(id->id_text);
 		}
@@ -995,7 +995,7 @@ load_val(expr, rlval)
 			}
 		}
 		else {
-			/* ASSERT(df->df_sc != STATIC); */
+			/* assert(df->df_sc != STATIC); */
 			if (rvalue) {
 				if (inword || indword)
 					LoadLocal(df->df_address + val, tp->tp_size);

@@ -5,6 +5,7 @@
 /* $Id$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	<assert.h>
 #include	<alloc.h>
 #include    "parameters.h"
 #include	"input.h"
@@ -15,7 +16,6 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"class.h"
-#include	"assert.h"
 #include	"sizes.h"
 #include	"specials.h"	/* registration of special identifiers */
 
@@ -61,15 +61,15 @@ void skipcomment();
 */
 PushLex()
 {
-	ASSERT(LexSP < MAX_LL_DEPTH);
-	ASSERT(ASIDE == 0);	/* ASIDE = 0;	*/
+	assert(LexSP < MAX_LL_DEPTH);
+	assert(ASIDE == 0);	/* ASIDE = 0;	*/
 	GetToken(&ahead);
 	LexStack[LexSP++] = dot;
 }
 
 PopLex()
 {
-	ASSERT(LexSP > 0);
+	assert(LexSP > 0);
 	dot = LexStack[--LexSP];
 }
 #endif	/* NOPP */
@@ -765,7 +765,7 @@ struct token *ptok;
 	int uns_flg = 0, lng_flg = 0, malformed = 0, ovfl = 0;
 	int fund;
 
-	ASSERT(*cp != '-');
+	assert(*cp != '-');
 	if (*cp == '0') {
 		cp++;
 		if (*cp == 'x' || *cp == 'X') {
@@ -828,7 +828,7 @@ struct token *ptok;
 		if (val >= 0) fund = LONG;
 		else fund = ULONG;
 	} else {	/* sizeof(arith) is greater than long_size */
-		ASSERT(arith_size > long_size);
+		assert(arith_size > long_size);
 		lexwarning("constant too large for target machine");
 		/* cut the size to prevent further complaints */
 		val &= full_mask[(int)long_size];

@@ -18,7 +18,6 @@ struct regassigned {
 	int		ra_score;
 };
 
-extern struct regvar *rvlist;
 extern int nregvar[];
 extern struct regassigned *regassigned[];
 
@@ -37,3 +36,10 @@ void unlinkregs(void);
 #else
 #define PICK_REGVAR(off, size) isregvar(off)
 #endif
+
+/* machine dependent */
+int regscore(long, int, int, int, int);
+void i_regsave(void);
+void regsave(const char *, long, int);
+void f_regsave(void);
+void regreturn(void);

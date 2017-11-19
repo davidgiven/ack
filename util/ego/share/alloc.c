@@ -17,28 +17,25 @@
 #include "alloc.h"
 
 
-char * myalloc();
+void *myalloc(size_t);
 
 #ifdef DEBUG
 
-STATIC unsigned maxuse, curruse;
+STATIC size_t maxuse, curruse;
 
-char *newcore(size)
-	int size;
+void *newcore(size_t size)
 {
-	if ((curruse += (unsigned)  (size+2)) > maxuse) maxuse = curruse;
+	if ((curruse += (size+2)) > maxuse) maxuse = curruse;
 	return myalloc(size);
 }
 
-oldcore(p,size)
-	char *p;
-	int size;
+void oldcore(void *p, size_t size)
 {
 	curruse -= (size+2);
 	free(p);
 }
 
-coreusage()
+void coreusage(void)
 {
 	fprintf(stderr,"Maximal core usage (excl. buffers):%u\n",maxuse);
 }
@@ -115,33 +112,33 @@ int asizetab[] = {
  * PART 1
  */
 
-line_p	newline(optyp) int optyp; {
-	register line_p lnp;
-	register kind=optyp;
+line_p newline(byte optyp) {
+	line_p lnp;
+	int kind=optyp;
 
 	lnp = (line_p) newcore(lsizetab[kind]);
 	TYPE(lnp) = optyp;
 	return(lnp);
 }
 
-oldline(lnp) register line_p lnp; {
-	register kind=TYPE(lnp)&BMASK;
+void oldline(line_p lnp) {
+	int kind=TYPE(lnp)&BMASK;
 
 	if (kind == OPLIST)
 		oldargs(ARG(lnp));
-	oldcore((char *) lnp,lsizetab[kind]);
+	oldcore(lnp, lsizetab[kind]);
 }
 
-arg_p newarg(kind) int kind; {
-	register arg_p ap;
+arg_p newarg(byte kind) {
+	arg_p ap;
 
 	ap = (arg_p) newcore(asizetab[kind]);
 	ap->a_type = kind;
 	return(ap);
 }
 
-oldargs(ap) register arg_p ap; {
-	register arg_p	next;
+void oldargs(arg_p ap) {
+	arg_p next;
 
 	while (ap != (arg_p) 0) {
 		next = ap->a_next;
@@ -155,49 +152,49 @@ oldargs(ap) register arg_p ap; {
 			oldargb(ap->a_a.a_con.ac_con.ab_next);
 			break;
 		}
-		oldcore((char *) ap,asizetab[ap->a_type]);
+		oldcore(ap, asizetab[ap->a_type]);
 		ap = next;
 	}
 }
 
-oldargb(abp) register argb_p abp; {
-	register argb_p next;
+void oldargb(argb_p abp) {
+	argb_p next;
 
 	while (abp != (argb_p) 0) {
 		next = abp->ab_next;
-		oldcore((char *) abp,sizeof (argb_t));
+		oldcore(abp, sizeof (argb_t));
 		abp = next;
 	}
 }
 
-oldobjects(op) register obj_p op; {
-	register obj_p next;
+void oldobjects(obj_p op) {
+	obj_p next;
 
 	while (op != (obj_p) 0) {
 		next = op->o_next;
-		oldcore((char *) op, sizeof(struct obj));
+		oldcore(op, sizeof(struct obj));
 		op = next;
 	}
 }
 
-olddblock(dbl) dblock_p dbl; {
+void olddblock(dblock_p dbl) {
 	oldobjects(dbl->d_objlist);
 	oldargs(dbl->d_values);
-	oldcore((char *) dbl, sizeof(struct dblock));
+	oldcore(dbl, sizeof(struct dblock));
 }
 
 
-short **newmap(length) short length; {
+short **newmap(short length) {
 	return((short **) newcore((length+1) * sizeof(short *)));
 }
 
 /*ARGSUSED1*/
-oldmap(mp,length) short **mp, length; {
-	oldcore((char *) mp, (length+1) * sizeof(short *));
+void oldmap(short **mp, short length) {
+	oldcore(mp, (length+1) * sizeof(short *));
 }
 
 
-cset newbitvect(n) short n; {
+cset newbitvect(short n) {
 	return((cset) newcore((n-1)*sizeof(int) + sizeof(struct bitvector)));
 	/* sizeof(struct bitvector) equals to the size of a struct with
 	 * one short, followed by one ALLIGNED int. So the above statement
@@ -206,38 +203,39 @@ cset newbitvect(n) short n; {
 }
 
 /*ARGSUSED1*/
-oldbitvect(s,n) cset s; short n; {
-	oldcore((char *) s, (n-1)*sizeof(int) + sizeof(struct bitvector));
+void oldbitvect(cset s, short n) {
+	oldcore(s, (n-1)*sizeof(int) + sizeof(struct bitvector));
 }
 
 
-short *newtable(length) short length; {
+short *newtable(short length) {
 	return((short *) newcore((length+1) * sizeof(short)));
 }
 
 /*ARGSUSED1*/
-oldtable(mp,length) short **mp, length; {
-	oldcore((char *) mp, (length+1) * sizeof(short));
+void oldtable(short **mp, short length) {
+	oldcore(mp, (length+1) * sizeof(short));
 }
 
-cond_p newcondtab(l) int l;
+cond_p newcondtab(int l)
 {
 	return (cond_p) newcore(l * (sizeof (struct cond_tab)));
 }
 
-oldcondtab(tab) cond_p tab;
+void oldcondtab(cond_p tab)
 {
 	int i;
-	for (i = 0; tab[i].mc_cond != DEFAULT; i++);
-	oldcore((char *) tab,((i+1) * sizeof (struct cond_tab)));
+	for (i = 0; tab[i].mc_cond != DEFAULT; i++)
+		continue;
+	oldcore(tab, ((i+1) * sizeof (struct cond_tab)));
 }
 
 
-char *myalloc(size) register size; {
-	register char *p;
+void *myalloc(size_t size) {
+	void *p;
 
 	p = calloc((unsigned) size, 1);
-	if (p == 0)
+	if (p == NULL)
 		error("out of memory");
 	return(p);
 }

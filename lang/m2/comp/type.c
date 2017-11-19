@@ -13,6 +13,7 @@
 #include	"debug.h"
 
 #include	<assert.h>
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -455,7 +456,6 @@ genrck(tp)
 	arith lb, ub;
 	register label ol;
 	arith size = tp->tp_size;
-	extern char *long2str();
 	register t_type *btp = BaseType(tp);
 
 	if (size < word_size) size = word_size;

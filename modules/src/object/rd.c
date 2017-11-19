@@ -3,6 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include <fcntl.h>
 #include "obj.h"
 
 /*
@@ -57,7 +58,7 @@ OUTREAD(int p, char* b, long n)
  * Open the output file according to the chosen strategy.
  */
 int
-rd_open(char* f)
+rd_open(const char* f)
 {
 
 	if ((outfile = open(f, 0)) < 0)

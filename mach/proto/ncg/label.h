@@ -14,4 +14,6 @@ struct label {
 	short	lb_fallthrough;
 };
 
-extern label_p get_label();
+void add_label(int, int, int);
+label_p get_label(word);
+void kill_labels(void);

@@ -17,6 +17,7 @@
  * initialising routine.
  */
 
+#include <string.h>
 # include "types.h"
 # include "extern.h"
 # include "assert.h"

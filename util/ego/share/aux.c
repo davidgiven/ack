@@ -19,8 +19,7 @@
 #include "map.h"
 #include "lset.h"
 
-offset off_set(lnp)
-	line_p lnp;
+offset off_set(line_p lnp)
 {
 	switch(lnp->l_optype) {
 		case OPSHORT:
@@ -36,8 +35,7 @@ offset off_set(lnp)
 
 
 
-offset aoff(ap,n)
-	register arg_p ap;
+offset aoff(arg_p ap, int n)
 {
 	while (n>0) {
 		if (ap != (arg_p) 0)
@@ -52,9 +50,7 @@ offset aoff(ap,n)
 }
 
 
-offset tmplocal(p,size)
-	proc_p p;
-	offset   size;
+offset tmplocal(proc_p p, offset size)
 {
 	/* Allocate a new local variable in the stack frame of p */
 
@@ -65,8 +61,7 @@ offset tmplocal(p,size)
 
 
 
-line_p int_line(off)
-	offset off;
+line_p int_line(offset off)
 {
 	/* Allocate a line struct of type OPSHORT or OPOFFSET,
 	 * whichever one fits best.
@@ -87,10 +82,7 @@ line_p int_line(off)
 
 
 
-line_p reg_mes(tmp,size,typ,score)
-	offset tmp;
-	short  size;
-	int    typ,score;
+line_p reg_mes(offset tmp, short size, int typ, int score)
 {
 	/* Generate a register message */
 
@@ -111,8 +103,7 @@ line_p reg_mes(tmp,size,typ,score)
 }
 
 
-bool dom(b1,b2)
-	bblock_p b1,b2;
+bool dom(bblock_p b1, bblock_p b2)
 {
 	/* See if b1 dominates b2. Note that a block always
 	 * dominates itself.
@@ -130,8 +121,7 @@ bool dom(b1,b2)
 }
 
 
-bblock_p common_dom(a,b)
-	bblock_p a,b;
+bblock_p common_dom(bblock_p a, bblock_p b)
 {
 	/* find a basic block that dominates a as well as b;
 	 * note that a basic block also dominates itself.
@@ -152,8 +142,7 @@ bblock_p common_dom(a,b)
 
 #define R	time_space_ratio
 
-short add_timespace(time,space)
-	short time,space;
+short add_timespace(short time, short space)
 {
 	/* Add together a time and space, using the time_space_ratio
 	 * parameter that may be set by the user, indicating the need
@@ -165,9 +154,7 @@ short add_timespace(time,space)
 
 
 
-rm_line(l,b)
-	line_p l;
-	bblock_p b;
+void rm_line(line_p l, bblock_p b)
 {
 	if (b->b_start == l) {
 		b->b_start = l->l_next;
@@ -183,8 +170,7 @@ rm_line(l,b)
 
 
 
-appnd_line(l1,l2)
-	line_p l1,l2;
+void appnd_line(line_p l1, line_p l2)
 {
 	/* Put l1 after l2 */
 
@@ -198,8 +184,7 @@ appnd_line(l1,l2)
 
 
 
-line_p last_instr(b)
-	bblock_p b;
+line_p last_instr(bblock_p b)
 {
 	/* Determine the last line of a list */
 
@@ -213,8 +198,7 @@ line_p last_instr(b)
 
 
 
-line_p find_mesreg(off)
-	offset off;
+line_p find_mesreg(offset off)
 {
 	/* Find the register message for the local with the given offset */
 
@@ -229,17 +213,14 @@ line_p find_mesreg(off)
 }
 
 
-bool is_regvar(off)
-	offset off;
+bool is_regvar(offset off)
 {
 	return find_mesreg(off) != (line_p) 0;
 }
 
 
 
-offset regv_arg(off,n)
-	offset off;
-	int n;
+offset regv_arg(offset off, int n)
 {
 	/* fetch the n'th argument of the register message of the
 	 * local variable at offset off;

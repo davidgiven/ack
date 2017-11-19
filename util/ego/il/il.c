@@ -299,8 +299,10 @@ Sdiagnostics()
 }
 #endif
 
-il_flags(p) char* p;
+void il_flags(void *vp)
 {
+	char *p = vp;
+
 	switch (*p++)
 	{
 		case 's':

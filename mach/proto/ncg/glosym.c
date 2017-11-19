@@ -16,13 +16,11 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-extern string myalloc();
+static glosym_p glolist= (glosym_p) 0;
 
-glosym_p glolist= (glosym_p) 0;
-
-enterglo(name,romp) string name; word *romp; {
-	register glosym_p gp;
-	register i;
+void enterglo(string name, word *romp) {
+	glosym_p gp;
+	int i;
 
 	gp = (glosym_p) myalloc(sizeof *gp);
 	gp->gl_next = glolist;
@@ -33,8 +31,8 @@ enterglo(name,romp) string name; word *romp; {
 	glolist = gp;
 }
 
-glosym_p lookglo(name) string name; {
-	register glosym_p gp;
+glosym_p lookglo(string name) {
+	glosym_p gp;
 
 	for (gp=glolist;gp != (glosym_p) 0; gp=gp->gl_next)
 		if (strcmp(gp->gl_name,name)==0)

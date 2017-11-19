@@ -6,6 +6,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,7 +14,6 @@ static char rcsid[] = "$Id$";
 #include <string.h>
 #include "out.h"
 #include "const.h"
-#include "assert.h"
 #include "memory.h"
 
 extern struct outhead	outhead;

@@ -222,7 +222,7 @@ call_p getcall(cf)
 		m = getshort();
 		act->ac_size = getoff();
 		act->ac_inl = getbyte();
-		act->ac_exp = getlines(cf,m,&voided);
+		act->ac_exp = getlines(cf,m,&voided,FALSE);
 		*app = act;
 		app = &act->ac_next;
 	}

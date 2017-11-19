@@ -19,3 +19,6 @@ struct result {
 #define EV_ADDR	3
 
 typedef struct result result_t;
+
+/* compute.c */
+void compute(node_p, result_t *);

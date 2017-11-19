@@ -5,11 +5,12 @@
 /* $Id$ */
 /* MAIN PROGRAM */
 
-#include    <stdlib.h>
+#include	<assert.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	"parameters.h"
 
 #include	<alloc.h>
-#include	<assert.h>
 #include	<system.h>
 #include 	"arith.h"
 #include	"file_info.h"

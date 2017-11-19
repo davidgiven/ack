@@ -17,9 +17,7 @@
 
 #define IS_LOC(l)	(l!=(line_p) 0 && INSTR(l)==op_loc && TYPE(l)==OPSHORT)
 
-int stack_change(l,sign)
-	line_p l;
-	char sign;
+STATIC int stack_change(line_p l, char sign)
 {
 	/* Interpret the string in the third column of the em_table file */
 
@@ -91,10 +89,7 @@ int stack_change(l,sign)
 
 
 
-line_change(l,ok_out,pop_out,push_out)
-	line_p l;
-	bool *ok_out;
-	int *pop_out,*push_out;
+void line_change(line_p l, bool *ok_out, int *pop_out, int *push_out)
 {
 	short pop,push;
 

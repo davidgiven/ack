@@ -5,6 +5,7 @@
 /* $Id$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
+#include	<assert.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	"parameters.h"
@@ -25,7 +26,6 @@
 #include	"decspecs.h"
 #include	"sizes.h"
 #include	"Lpars.h"
-#include	"assert.h"
 
 extern char options[];
 extern arith NewLocal();
@@ -88,7 +88,7 @@ declare_idf(ds, dc, lvl)
 	if (ds->ds_type == 0)	{
 		/*	at the L_FORMAL1 level there is no type specified yet
 		*/
-		ASSERT(lvl == L_FORMAL1);
+		assert(lvl == L_FORMAL1);
 		type = int_type;	/* may change at L_FORMAL2 */
 	}
 	else	{
@@ -224,7 +224,7 @@ declare_idf(ds, dc, lvl)
 			So here we hand out local addresses only.
 		*/
 		if (lvl >= L_LOCAL)	{
-			ASSERT(sc);
+			assert(sc);
 			switch (sc)	{
 			case REGISTER:
 			case AUTO:
@@ -380,7 +380,7 @@ good_formal(def, idf)
 			error("%s not in parameter list", idf->id_text);
 		return 0;
 	}
-	ASSERT(def->df_sc == FORMAL);	/* CJ */
+	assert(def->df_sc == FORMAL);	/* CJ */
 	return 1;
 }
 

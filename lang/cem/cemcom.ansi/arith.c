@@ -11,6 +11,7 @@
 	semantics of C is a mess.
 */
 
+#include	<assert.h>
 #include    "parameters.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
@@ -23,7 +24,6 @@
 #include	"Lpars.h"
 #include	"field.h"
 #include	"mes.h"
-#include	"assert.h"
 
 extern char *symbol2str();
 extern char options[];
@@ -250,7 +250,7 @@ any2arith(expp, oper)
 	switch (fund = (*expp)->ex_type->tp_fund)	{
 	case CHAR:
 	case SHORT:
-		ASSERT((*expp)->ex_type->tp_size <= int_type->tp_size);
+		assert((*expp)->ex_type->tp_size <= int_type->tp_size);
 
 		if ((*expp)->ex_type->tp_unsigned
 		    && (*expp)->ex_type->tp_size == int_type->tp_size) {

@@ -12,6 +12,9 @@ static char rcsid[]=	"$Id$" ;
  * machine dependent back end routines for the Intel 8080.
  */
 
+#include <stdlib.h> /* atol */
+
+void
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -30,8 +33,7 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-long atol();
-
+void
 con_mult(sz) word sz; {
 
 	if (argval != 4)
@@ -39,6 +41,7 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4\t%ld\n",atol(str));
 }
 
+void
 con_float() {
 	static int warning_given;
 	int i = argval;

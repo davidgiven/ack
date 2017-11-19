@@ -8,6 +8,7 @@
 
 #ifdef	DEBUG
 #include	"parameters.h"
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -455,8 +456,6 @@ p1_expr(lvl, expr)
 		break;
 	case String:
 	{
-		char *bts2str();
-
 		print(
 			"\"%s\"\n",
 			bts2str(expr->SG_VALUE, expr->SG_LEN-1,

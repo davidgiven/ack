@@ -5,7 +5,9 @@
 /* $Id$ */
 /* MAIN PROGRAM */
 
+#include	<string.h>
 #include	"parameters.h"
+#include	<ack_string.h>
 #include	<system.h>
 #include    "idf.h"
 #include	"input.h"
@@ -22,7 +24,6 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"macro.h"
-#include	"assert.h"
 
 extern struct tokenname tkidf[];
 extern char *symbol2str();
@@ -443,7 +444,6 @@ preprocess()
 		case STRING:
 		{
 			char sbuf[1024];	/* a transient buffer */
-			char *bts2str();
 
 			print("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len -
 			1, sbuf));

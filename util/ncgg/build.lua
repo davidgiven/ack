@@ -32,6 +32,10 @@ cprogram {
 		"+keywords"
 	),
 	deps = {
+		"./cost.h", "./expr.h", "./extern.h", "./instruct.h",
+		"./iocc.h", "./lookup.h", "./param.h", "./property.h",
+		"./pseudo.h", "./reg.h", "./regvar.h", "./set.h",
+		"./token.h", "./varinfo.h",
 		"+cggparser", -- for .h file
 		"+cgglexer", -- for .h file
 		"h+emheaders",

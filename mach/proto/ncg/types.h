@@ -28,3 +28,45 @@ typedef char * string;
 #ifndef WRD_FMT
 #define WRD_FMT "%ld"
 #endif /* WRD_FMT */
+
+/* codegen.c */
+unsigned codegen(byte *, int, int, unsigned, int);
+void readcodebytes(void);
+#ifdef TABLEDEBUG
+void initlset(char *);
+void termlset(void);
+#endif
+/* compute.c */
+string mystrcpy(string);
+string tostring(word);
+/* fillem.c */
+void in_init(char *);
+void in_start(void);
+void fillemlines(void);
+void swtxt(void);
+/* gencode.c */
+void out_init(char *);
+void out_finish(void);
+void tstoutput(void);
+/* nextem.c */
+byte *nextem(int);
+/* reg.c */
+void chrefcount(int, int, int);
+int getrefcount(int, int);
+void erasereg(int);
+void cleanregs(void);
+void chkregs(void);
+/* salloc.c */
+string myalloc(int);
+void myfree(string);
+void popstr(int);
+char *salloc(int);
+void garbage_collect(void);
+/* subr.c */
+void itokcost(void);
+void error(const char *s, ...);
+void fatal(const char *s, ...);
+
+#ifdef MACH_OPTIONS
+void mach_option(char *); /* machine dependent */
+#endif

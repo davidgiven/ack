@@ -5,6 +5,7 @@
 #include    "parameters.h"
 #include	"debug.h"
 
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>
@@ -475,7 +476,7 @@ CutSize(expr)
 
 InitCst()
 {
-	extern char *long2str(), *Salloc();
+	extern char *Salloc();
 	register int i = 0;
 	register arith bt = (arith)0;
 

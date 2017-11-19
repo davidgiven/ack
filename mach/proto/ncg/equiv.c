@@ -2,15 +2,15 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "assert.h"
-#include "equiv.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
 #include <cgg_cg.h>
 #include "data.h"
+#include "equiv.h"
 #include "result.h"
 #include "extern.h"
 
@@ -21,21 +21,18 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-extern string myalloc();
+static int rar[MAXCREG];
+static rl_p *lar;
+static int maxindex;
+static int regclass[NREGS];
+static struct perm *perms;
 
-int rar[MAXCREG];
-rl_p *lar;
-int maxindex;
-int regclass[NREGS];
-struct perm *perms;
+static void permute(int);
 
-void permute();
-
-struct perm *
-tuples(regls,nregneeded) rl_p *regls; {
+struct perm *tuples(rl_p *regls, int nregneeded) {
 	int class=0;
-	register i,j;
-	register struct reginfo *rp;
+	int i,j;
+	struct reginfo *rp;
 
 	/*
 	 * First compute equivalence classes of registers.
@@ -66,11 +63,10 @@ tuples(regls,nregneeded) rl_p *regls; {
 	return(perms);
 }
 
-void
-permute(index) {
-	register struct perm *pp;
-	register rl_p rlp;
-	register i,j;
+static void permute(int index) {
+	struct perm *pp;
+	rl_p rlp;
+	int i,j;
 
 	if (index == maxindex) {
 		for (pp=perms; pp != 0; pp=pp->p_next) {

@@ -21,6 +21,8 @@ definerule("build_as",
 			srcs = { "mach/proto/as/comm2.y" },
 			outleaf = "comm2.y",
 			deps = {
+				"mach/proto/as/comm0.h",
+				"mach/proto/as/comm1.h",
 				"h+emheaders",
 				archlib,
 			},

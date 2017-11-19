@@ -6,8 +6,6 @@
 #ifndef __SYSTEM_INCLUDED__
 #define __SYSTEM_INCLUDED__
 
-#include <ansi.h>
-
 struct _sys_fildes {
 	int o_fd;	/* UNIX filedescriptor */
 	int o_flags;	/* flags for open; 0 if not used */
@@ -33,24 +31,24 @@ extern File _sys_ftab[];
 #define S_EXIT	1
 #define S_ABORT	2
 
-_PROTOTYPE(int sys_open, (char *, int, File **));
-_PROTOTYPE(void sys_close, (File *));
-_PROTOTYPE(int sys_read, (File *, char *, int, int *));
-_PROTOTYPE(int sys_write, (File *, char *, int));
-_PROTOTYPE(int sys_seek, (File *, long, int, long *));
-_PROTOTYPE(int sys_reset, (File *));
-_PROTOTYPE(int sys_access, (char *, int));
-_PROTOTYPE(int sys_remove, (char *));
-_PROTOTYPE(int sys_rename, (char *, char *));
-_PROTOTYPE(long sys_filesize, (char *));
-_PROTOTYPE(int sys_chmode, (char *, int));
+int sys_open(char *, int, File **);
+void sys_close(File *);
+int sys_read(File *, char *, int, int *);
+int sys_write(File *, char *, int);
+int sys_seek(File *, long, int, long *);
+int sys_reset(File *);
+int sys_access(char *, int);
+int sys_remove(char *);
+int sys_rename(char *, char *);
+long sys_filesize(char *);
+int sys_chmode(char *, int);
 #if 0
-_PROTOTYPE(int sys_lock, (char *));
-_PROTOTYPE(int sys_unlock, (char *));
+int sys_lock(char *);
+int sys_unlock(char *);
 #endif
-_PROTOTYPE(char *sys_break, (int));
-_PROTOTYPE(void sys_stop, (int));
-_PROTOTYPE(long sys_modtime, (char *));
+char *sys_break(int);
+void sys_stop(int);
+long sys_modtime(char *);
 
 /* standard file decsriptors */
 #define STDIN	&_sys_ftab[0]

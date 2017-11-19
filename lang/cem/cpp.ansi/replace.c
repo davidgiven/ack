@@ -5,10 +5,12 @@
 /* $Id$ */
 /*  M A C R O   R E P L A C E M E N T */
 
+#include	<assert.h>
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<string.h>
 
+#include	<ack_string.h>
 #include	"parameters.h"
 #include	"alloc.h"
 #include	"idf.h"
@@ -17,7 +19,6 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
-#include	"assert.h"
 #include	"replace.h"
 
 extern char *GetIdentifier();
@@ -506,7 +507,6 @@ macro_func(idef)
 	*/
 	register struct macro *mac = idef->id_macro;
 	static char FilNamBuf[PATHLENGTH];
-	char *long2str();
 
 	switch (idef->id_text[2]) {
 	case 'F':			/* __FILE__	*/

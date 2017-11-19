@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_spec.h>
 #include "../share/types.h"
 #include "ud.h"
@@ -56,9 +57,9 @@ STATIC cond_p getcondtab(f)
 }
 
 
-STATIC ud_machinit(f)
-	FILE *f;
+STATIC void ud_machinit(void *vp)
 {
+	FILE *f = vp;
 	char s[100];
 
 	for (;;) {
@@ -531,10 +532,10 @@ STATIC ud_cleanup(p)
 }
 
 
-void
-ud_optimize(p)
-	proc_p p;
+void ud_optimize(void *vp)
 {
+	proc_p p = vp;
+
 	if (IS_ENTERED_WITH_GTO(p)) return;
 	ud_extend(p);
 	locals = (local_p *) 0;

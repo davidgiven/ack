@@ -7,17 +7,12 @@
 #ifndef __PRINT_INCLUDED__
 #define __PRINT_INCLUDED__
 
-#include <ansi.h>
-#if __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
-_PROTOTYPE(void print, (char *fmt, ...));
-_PROTOTYPE(void fprint, (File *f, char *fmt, ...));
-_PROTOTYPE(void doprnt, (File *f, char *fmt, va_list ap));
-_PROTOTYPE(int _format, (char *buf, char *fmt, va_list ap));
-_PROTOTYPE(char *sprint, (char *buf, char *fmt, ...));
+void print(char *fmt, ...);
+void fprint(File *f, char *fmt, ...);
+void doprnt(File *f, char *fmt, va_list ap);
+int _format(char *buf, char *fmt, va_list ap);
+char *sprint(char *buf, char *fmt, ...);
 
 #endif /* __PRINT_INCLUDED__ */

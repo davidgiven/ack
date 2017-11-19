@@ -15,15 +15,23 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
+#include	<object.h>
 
 extern YYSTYPE	yylval;
 
-void setupoutput();
-void commfinish();
+static void pass_1(int, char **);
+#ifdef ASLD
+static void archive(void);
+static int needed(void);
+#endif
+static void parse(char *);
+static void pass_23(int);
+static void setupoutput(void);
+static void commfinish(void);
 
 /* ========== Machine independent C routines ========== */
 
-void stop() {
+void stop(void) {
 #if DEBUG < 2
 	unlink(temppath);
 #ifdef LISTING
@@ -33,11 +41,11 @@ void stop() {
 	exit(nerrors != 0);
 }
 
-main(argc, argv)
-char **argv;
+int
+main(int argc, char **argv)
 {
-	register char *p;
-	register i;
+	char *p;
+	int i;
 	static char sigs[] = {
 		SIGHUP, SIGINT, SIGQUIT, SIGTERM, 0
 	};
@@ -130,15 +138,15 @@ char **argv;
 
 /* ---------- pass 1: arguments, modules, archives ---------- */
 
-pass_1(argc, argv)
-char **argv;
+static void
+pass_1(int argc, char **argv)
 {
-	register char *p;
-	register item_t *ip;
+	char *p;
+	item_t *ip;
 #ifdef ASLD
 	char armagic[2];
 #else
-	register nfile = 0;
+	int nfile = 0;
 #endif
 
 #ifdef THREE_PASS
@@ -198,7 +206,7 @@ char **argv;
 	machfinish(PASS_1);
 #ifdef ASLD
 	if (unresolved) {
-		register int i;
+		int i;
 
 		nerrors++;
 		fflush(stdout);
@@ -224,8 +232,9 @@ char **argv;
 
 #ifdef ASLD
 
-archive() {
-	register long offset;
+static void
+archive(void) {
+	long offset;
 	struct ar_hdr header;
 	char getsize[AR_TOTAL];
 
@@ -257,14 +266,15 @@ archive() {
 	archmode = 0;
 }
 
-needed()
+static int
+needed(void)
 {
-	register c, first;
-	register item_t *ip;
-	register need;
+	int c, first;
+	item_t *ip;
+	int need;
 
 #ifdef LISTING
-	register save;
+	int save;
 
 	save = listflag; listflag = 0;
 #endif
@@ -309,12 +319,12 @@ needed()
 }
 #endif /* ASLD */
 
-parse(s)
-char *s;
+static void
+parse(char *s)
 {
-	register i;
-	register item_t *ip;
-	register char *p;
+	int i;
+	item_t *ip;
+	char *p;
 
 	for (p = s; *p; )
 		if (*p++ == '/')
@@ -374,13 +384,14 @@ char *s;
 	}
 }
 
-pass_23(n)
+static void
+pass_23(int n)
 {
-	register i;
+	int i;
 #ifdef ASLD
-	register ADDR_T base = 0;
+	ADDR_T base = 0;
 #endif
-	register sect_t *sp;
+	sect_t *sp;
 
 	if (nerrors)
 		stop();
@@ -433,8 +444,8 @@ pass_23(n)
 	machfinish(n);
 }
 
-newmodule(s)
-char *s;
+void
+newmodule(const char *s)
 {
 	static char nmbuf[STRINGMAX];
 
@@ -461,13 +472,13 @@ char *s;
 #endif
 }
 
-void
-setupoutput()
+static void
+setupoutput(void)
 {
-	register sect_t *sp;
-	register long off;
+	sect_t *sp;
+	long off;
 	struct outsect outsect;
-	register struct outsect *pos = &outsect;
+	struct outsect *pos = &outsect;
 
 	if (! wr_open(aoutpath)) {
 		fatal("can't create %s", aoutpath);
@@ -497,16 +508,16 @@ setupoutput()
 	outhead.oh_nchar = off;	/* see newsymb() */
 }
 
-void
-commfinish()
+static void
+commfinish(void)
 {
 #ifndef ASLD
-	register int i;
+	int i;
 #endif
-	register struct common_t *cp;
-	register item_t *ip;
-	register sect_t *sp;
-	register valu_t addr;
+	struct common_t *cp;
+	item_t *ip;
+	sect_t *sp;
+	valu_t addr;
 
 	switchsect(S_UND);
 	/*

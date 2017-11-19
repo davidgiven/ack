@@ -5,7 +5,9 @@
 /* $Id$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
-#include    <stdlib.h>
+#include	<assert.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	"parameters.h"
 #include    "idf.h"
 #include	"arith.h"
@@ -15,7 +17,6 @@
 #include    "replace.h"
 
 #ifndef NOPP
-#include	"assert.h"
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"
@@ -263,7 +264,7 @@ int to_endif;
 			else SkipToNewLine();
 			break;
 		case K_ENDIF:
-			ASSERT(nestlevel > nestlow);
+			assert(nestlevel > nestlow);
 			if (nestlevel == skiplevel) {
 				if (SkipToNewLine()) {
 					if (!options['o'])
@@ -383,7 +384,7 @@ do_define()
 	}
 	/* read the replacement text if there is any			*/
 	ch = skipspaces(ch,0);	/* find first character of the text	*/
-	ASSERT(ch != EOI);
+	assert(ch != EOI);
 	/* UnGetChar() is not right when replacement starts with a '/' */
 	ChPushBack(ch);
 	repl_text = get_text((nformals > 0) ? formals : 0, &length);

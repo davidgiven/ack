@@ -21,6 +21,7 @@ static char rcsid[] = "$Id$";
  * (70000 - 65536).
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -28,7 +29,6 @@ static char rcsid[] = "$Id$";
 #include <unistd.h>
 #include <out.h>
 #include "const.h"
-#include "assert.h"
 #include "debug.h"
 #include "memory.h"
 #include "object.h"
