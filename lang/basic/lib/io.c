@@ -8,84 +8,102 @@
 
 #define MAXWIDTH 255
 
-int	_width = 75, _pos=0, _zonewidth=15;
+int _width = 75, _pos = 0, _zonewidth = 15;
 
-_out(str)
-char *str;
+void _out(char* str)
 {
 	int pos;
 
-	if( _chann== -1) pos= _pos;
-	else pos= _fdtable[_chann].pos;
-	while( *str) 
+	if (_chann == -1)
+		pos = _pos;
+	else
+		pos = _fdtable[_chann].pos;
+	while (*str)
 	{
-		if( pos>= _width){ _outnl(); pos=0;}
+		if (pos >= _width)
+		{
+			_outnl();
+			pos = 0;
+		}
 		fputc(*str++, _chanwr);
 		pos++;
 	}
-	if( _chann== -1) _pos=pos;
-	else _fdtable[_chann].pos= pos;
+	if (_chann == -1)
+		_pos = pos;
+	else
+		_fdtable[_chann].pos = pos;
 }
 
-_outnl()
+void _outnl(void)
 {
-	fputc('\n',_chanwr);
-	if( _chann == -1)
-		_pos=0;
+	fputc('\n', _chanwr);
+	if (_chann == -1)
+		_pos = 0;
 	else
-		_fdtable[_chann].pos=0;
+		_fdtable[_chann].pos = 0;
 }
-_zone()
+void _zone(void)
 {
 	/* go to next zone */
 	int pos;
-	if( _chann == -1)
-		pos= _pos;
-	else pos= _fdtable[_chann].pos;
-	do{
-		fputc(' ',_chanwr);
+	if (_chann == -1)
+		pos = _pos;
+	else
+		pos = _fdtable[_chann].pos;
+	do
+	{
+		fputc(' ', _chanwr);
 		pos++;
-		if( pos==_width)
+		if (pos == _width)
 		{
 			_outnl();
-			pos=0;
+			pos = 0;
 			break;
 		}
-	} while( pos % _zonewidth != 0);
-	if( _chann== -1) _pos=pos;
-	else _fdtable[_chann].pos= pos;
+	} while (pos % _zonewidth != 0);
+	if (_chann == -1)
+		_pos = pos;
+	else
+		_fdtable[_chann].pos = pos;
 }
-_in(buf)
-char *buf;
+void _in(char* buf)
 {
-	register int holder ;
-	char *c;
+	register int holder;
+	char* c;
 	int pos;
-	if( _chann == -1)
+	if (_chann == -1)
 	{
-		pos= _pos;
-	}else pos= _fdtable[_chann].pos;
-	c= buf;
-	while( (holder = fgetc(_chanrd)) != EOF && holder != '\n'){
-		*c= holder ;
-		if( _chann == -1) putchar(holder);
-		c++; pos++;
+		pos = _pos;
 	}
-	*c= 0;
-	if( _chann== -1) 
+	else
+		pos = _fdtable[_chann].pos;
+	c = buf;
+	while ((holder = fgetc(_chanrd)) != EOF && holder != '\n')
 	{
-		_pos=pos;
-	} else _fdtable[_chann].pos= pos;
+		*c = holder;
+		if (_chann == -1)
+			putchar(holder);
+		c++;
+		pos++;
+	}
+	*c = 0;
+	if (_chann == -1)
+	{
+		_pos = pos;
+	}
+	else
+		_fdtable[_chann].pos = pos;
 }
-_tab(x)
-int x;
+void _tab(int x)
 {
-	if( x> _width) error(3);
-	if( x< _pos) _outnl();
-	_spc(x-_pos);
+	if (x > _width)
+		error(3);
+	if (x < _pos)
+		_outnl();
+	_spc(x - _pos);
 }
-_spc(x)
-int x;
+void _spc(int x)
 {
-	while(x-->0) _out(" ");
+	while (x-- > 0)
+		_out(" ");
 }

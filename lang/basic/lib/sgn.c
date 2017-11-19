@@ -1,16 +1,17 @@
 /* $Id$ */
 
-_sgn(v)
-double v;
+int _sgn(double v)
 {
-	if( v>0) return(1);
-	if( v<0) return(-1);
-	return(0);
+	if (v > 0)
+		return (1);
+	if (v < 0)
+		return (-1);
+	return (0);
 }
 
-_forsgn(v)
-double v;
+int _forsgn(double v)
 {
-	if (v >= 0) return 1;
+	if (v >= 0)
+		return 1;
 	return -1;
 }

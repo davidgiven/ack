@@ -2,10 +2,9 @@
 
 /* $Id$ */
 
-int _asc(str)
-String *str;
+int _asc(String* str)
 {
-	if(str==0 || str->strval==0)
+	if (str == 0 || str->strval == 0)
 		error(3);
-	return( *str->strval);
+	return (*str->strval);
 }

@@ -123,7 +123,7 @@ struct idf* str2idf(char tg[], int cpy)
 	int size;
 
 	IDF_STARTHASH(hash);
-	while (c = *cp++)
+	while ((c = *cp++))
 	{
 		IDF_ENHASH(hash, c);
 	}

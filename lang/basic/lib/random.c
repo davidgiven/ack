@@ -5,7 +5,7 @@
 #define EM_WSIZE _EM_WSIZE
 #endif
 
-_randomi()
+void _randomi(void)
 {
 	int i;
 	_setchan(-1);
@@ -14,19 +14,19 @@ _randomi()
 	_setrand(i);
 }
 
-_setrand(i)
-	int i;
+void _setrand(int i)
 {
 	srand(i);
 }
-double _rnd(d) double d;
+double _rnd(double d)
 {
-	double f; f= (int) rand();
-	return(f/
+	double f;
+	f = (int)rand();
+	return (f /
 #if EM_WSIZE == 4
-		2147483647.0
+	    2147483647.0
 #else
-		32767.0
+	    32767.0
 #endif
-	);
+	    );
 }
