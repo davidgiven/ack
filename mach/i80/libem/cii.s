@@ -65,19 +65,19 @@
 	jmp 3f		! done
 
 !if destination size < source size only:
-shrink:	mov l,c		! load source size in hl
+shrink:	mov l,b		! load destination size in hl
 	mvi h,0
 	dad sp
 	mov d,h
-	mov e,l		! de points just above source
-	mov l,b		! load destination size in hl
+	mov e,l		! de points just above lowest bytes of source
+	mov l,c		! load source size in hl
 	mvi h,0
 	dad sp		! hl points just above "destination"
 
 1:	dcx d		! move upwards
 	dcx h
-	mov a,m
-	stax d
+	ldax d
+	mov m,a
 	dcr b
 	jnz 1b
 	sphl
