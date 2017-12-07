@@ -25,8 +25,8 @@
 	mov e,a
 
 	mov a,b
-	ral
-1:	mov a,l
+1:	ral
+	mov a,l
 	ral
 	mov l,a
 	mov a,h

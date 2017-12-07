@@ -2292,7 +2292,7 @@ with CXREG REG REG
       rcl %3,{ANYCON,1}
       adc %2,{ANYCON,0}
       loop {label, 2b}
-      1:
+      1:				yields %3 %2
 
 pat loc ror $1==1 && $2==2
 with REG
@@ -2311,7 +2311,7 @@ with CXREG REG REG
       rcl %3,{ANYCON,1}
       adc %2,{ANYCON,0}
       loop {label, 2b}
-      1:
+      1:				yields %3 %2
 
 /*******************************************************************
  *  Group 10 : Set Instructions                                    *

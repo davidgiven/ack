@@ -25,8 +25,8 @@
 	mov e,a
 
 	mov a,l
-	rar
-1:	mov a,b
+1:	rar
+	mov a,b
 	rar
 	mov b,a
 	mov a,c

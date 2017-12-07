@@ -307,7 +307,11 @@ INSTRUCTIONS
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
     extlwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
+    rotlwi        GPR:wo, GPR:ro, CONST:ro.
+    rotrwi        GPR:wo, GPR:ro, CONST:ro.
     srwi          GPR:wo, GPR:ro, CONST:ro.
+  rlwnm           GPR:wo, GPR:ro, GPR:ro, CONST:ro, CONST:ro.
+    rotlw         GPR:wo, GPR:ro, GPR:ro.
   slw             GPR:wo, GPR:ro, GPR:ro.
   subf            GPR:wo, GPR:ro, GPR:ro.
   sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
@@ -1232,6 +1236,9 @@ PATTERNS
 				subf %a, %a, %2
 			yields %a
 
+
+/* Bitwise logic */
+
 	pat and $1==4                      /* AND word */
 		with REG NOT_R
 			uses reusing %1, REG
@@ -1381,6 +1388,9 @@ PATTERNS
 			loc $1
 			cal ".zer"
 
+
+/* Shifts and rotations */
+
 	pat sli $1==4                      /* Shift left (second << top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
@@ -1416,6 +1426,33 @@ PATTERNS
 			gen
 				srw %a, %2, %1
 			yields %a
+
+	pat rol $1==4                      /* Rotate left word */
+		with CONST_STACK REG
+			uses reusing %2, REG
+			gen rotlwi %a, %2, {CONST, %1.val & 0x1F}
+			yields %a
+		with REG REG
+			uses reusing %2, REG
+			gen rotlw %a, %2, %1
+			yields %a
+
+	/*
+	 * ror 4 -> ngi 4, rol 4
+	 *   because to rotate right by n bits is to rotate left by
+	 *   (32 - n), which is to rotate left by -n.  PowerPC rotlw
+	 *   handles -n as (-n & 0x1F).
+	 */
+
+	pat ror $1==4                      /* Rotate right word */
+		with CONST_STACK REG
+			uses reusing %2, REG
+			gen rotrwi %a, %2, {CONST, %1.val & 0x1F}
+			yields %a
+		with /* anything */
+			leaving
+				ngi 4
+				rol 4
 
 
 /* Arrays */
