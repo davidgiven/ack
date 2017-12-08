@@ -96,7 +96,7 @@ TOKENS
 
 /* Primitives */
 
-	CONST              = { INT val; }             4    val.
+	C /* constant */   = { INT val; }             4    val.
 	LABEL              = { ADDR adr; }            4    adr.
 	LABEL_HI           = { ADDR adr; }            4    "hi16[" adr "]".
 	LABEL_HA           = { ADDR adr; }            4    "ha16[" adr "]".
@@ -112,13 +112,13 @@ TOKENS
 
 /* Constants on the stack */
 
-	CONST_N8000        = { INT val; }             4.
-	CONST_N7FFF_N0001  = { INT val; }             4.
-	CONST_0000_7FFF    = { INT val; }             4.
-	CONST_8000         = { INT val; }             4.
-	CONST_8001_FFFF    = { INT val; }             4.
-	CONST_HZ           = { INT val; }             4.
-	CONST_HL           = { INT val; }             4.
+	CONST_N8000        = { INT val; }             4    val.
+	CONST_N7FFF_N0001  = { INT val; }             4    val.
+	CONST_0000_7FFF    = { INT val; }             4    val.
+	CONST_8000         = { INT val; }             4    val.
+	CONST_8001_FFFF    = { INT val; }             4    val.
+	CONST_HZ           = { INT val; }             4    val.
+	CONST_HL           = { INT val; }             4    val.
 
 /* Expression partial results */
 
@@ -182,6 +182,8 @@ SETS
 	/* any constant on stack */
 	CONST_STACK     = CONST_N8000 + CONST_N7FFF_N0001 + CONST_0000_7FFF +
 	                  CONST_8000 + CONST_8001_FFFF + CONST_HZ + CONST_HL.
+
+	CONST           = C + CONST_STACK.
 
 	SUM_ALL            = SUM_RC + SUM_RL + SUM_RR.
 
@@ -309,6 +311,7 @@ INSTRUCTIONS
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     rotlwi        GPR:wo, GPR:ro, CONST:ro.
     rotrwi        GPR:wo, GPR:ro, CONST:ro.
+    slwi          GPR:wo, GPR:ro, CONST:ro.
     srwi          GPR:wo, GPR:ro, CONST:ro.
   rlwnm           GPR:wo, GPR:ro, GPR:ro, CONST:ro, CONST:ro.
     rotlw         GPR:wo, GPR:ro, GPR:ro.
@@ -351,22 +354,22 @@ MOVES
 
 /* Constants */
 
-	from CONST + CONST_STACK smalls(%val) to GPR
+	from CONST smalls(%val) to GPR
 		gen
 			COMMENT("move CONST->GPR smalls")
-			li %2, {CONST, %1.val}
+			li %2, %1
 
-	from CONST + CONST_STACK lo(%val)==0 to GPR
+	from CONST lo(%val)==0 to GPR
 		gen
 			COMMENT("move CONST->GPR shifted")
-			lis %2, {CONST, hi(%1.val)}
+			lis %2, {C, hi(%1.val)}
 
-	from CONST + CONST_STACK to GPR
+	from CONST to GPR
 		gen
 			COMMENT("move CONST->GPR")
-			lis %2, {CONST, hi(%1.val)}
-			ori %2, %2, {CONST, lo(%1.val)}
-			/* Can't use addi %2, %2, {CONST, los(%1.val)}
+			lis %2, {C, hi(%1.val)}
+			ori %2, %2, {C, lo(%1.val)}
+			/* Can't use addi %2, %2, {C, los(%1.val)}
 			 * because %2 might be R0. */
 
 	from LABEL to GPR
@@ -389,10 +392,10 @@ MOVES
 /* Register + something */
 
 	from SUM_RIS to GPR
-		gen addis %2, %1.reg, {CONST, %1.offhi}
+		gen addis %2, %1.reg, {C, %1.offhi}
 
 	from SUM_RC to GPR
-		gen addi %2, %1.reg, {CONST, %1.off}
+		gen addi %2, %1.reg, {C, %1.off}
 
 	from SUM_RL to GPR
 		gen addi %2, %1.reg, {LABEL_LO, %1.adr}
@@ -494,19 +497,19 @@ MOVES
 		gen or %2, %1.reg1, %1.reg2
 
 	from OR_RIS to GPR
-		gen oris %2, %1.reg, {CONST, %1.valhi}
+		gen oris %2, %1.reg, {C, %1.valhi}
 
 	from OR_RC to GPR
-		gen ori %2, %1.reg, {CONST, %1.val}
+		gen ori %2, %1.reg, {C, %1.val}
 
 	from XOR_RR to GPR
 		gen xor %2, %1.reg1, %1.reg2
 
 	from XOR_RIS to GPR
-		gen xoris %2, %1.reg, {CONST, %1.valhi}
+		gen xoris %2, %1.reg, {C, %1.valhi}
 
 	from XOR_RC to GPR
-		gen xori %2, %1.reg, {CONST, %1.val}
+		gen xori %2, %1.reg, {C, %1.val}
 
 /* Conditions */
 
@@ -514,7 +517,7 @@ MOVES
 
 	from COND_RC to GPR
 		gen
-			cmpwi %1.reg, {CONST, %1.val}
+			cmpwi %1.reg, {C, %1.val}
 			mfcr %2
 
 	from COND_RR to GPR
@@ -524,7 +527,7 @@ MOVES
 
 	from CONDL_RC to GPR
 		gen
-			cmplwi %1.reg, {CONST, %1.val}
+			cmplwi %1.reg, {C, %1.val}
 			mfcr %2
 
 	from CONDL_RR to GPR
@@ -548,30 +551,30 @@ MOVES
 
 	from XEQ to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 2}
+			extrwi %2, %1.reg, {C, 1}, {C, 2}
 
 	from XNE to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 2}
-			xori %2, %2, {CONST, 1}
+			extrwi %2, %1.reg, {C, 1}, {C, 2}
+			xori %2, %2, {C, 1}
 
 	from XGT to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 1}
+			extrwi %2, %1.reg, {C, 1}, {C, 1}
 
 	from XGE to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 0}
-			xori %2, %2, {CONST, 1}
+			extrwi %2, %1.reg, {C, 1}, {C, 0}
+			xori %2, %2, {C, 1}
 
 	from XLT to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 0}
+			extrwi %2, %1.reg, {C, 1}, {C, 0}
 
 	from XLE to GPR
 		gen
-			extrwi %2, %1.reg, {CONST, 1}, {CONST, 1}
-			xori %2, %2, {CONST, 1}
+			extrwi %2, %1.reg, {C, 1}, {C, 1}
+			xori %2, %2, {C, 1}
 
 /* GPR_EXPR exists solely to allow us to use regvar() (which can only
    be used in an expression) as a register constant.  We can then use
@@ -649,7 +652,7 @@ COERCIONS
 		gen
 			COMMENT("coerce STACK->REG")
 			lwz %a, {IND_RC_W, sp, 0}
-			addi sp, sp, {CONST, 4}
+			addi sp, sp, {C, 4}
 		yields %a
 
 	from STACK
@@ -657,7 +660,7 @@ COERCIONS
 		gen
 			COMMENT("coerce STACK->FREG")
 			lfd %a, {IND_RC_D, sp, 0}
-			addi sp, sp, {CONST, 8}
+			addi sp, sp, {C, 8}
 		yields %a
 
 	from STACK
@@ -665,7 +668,7 @@ COERCIONS
 		gen
 			COMMENT("coerce STACK->FSREG")
 			lfs %a, {IND_RC_W, sp, 0}
-			addi sp, sp, {CONST, 4}
+			addi sp, sp, {C, 4}
 		yields %a
 
 	from ANY_BHW
@@ -824,7 +827,7 @@ PATTERNS
 		with STACK
 			gen
 				lwz {LOCAL, $1}, {IND_RC_W, sp, 0}
-				addi sp, sp, {CONST, 4}
+				addi sp, sp, {C, 4}
 	pat stl inreg($1)==reg_float
 		with exact FSREG+IND_ALL_W
 			kills regvar_w($1, reg_float)
@@ -832,7 +835,7 @@ PATTERNS
 		with STACK
 			gen
 				lfs {LOCAL, $1}, {IND_RC_W, sp, 0}
-				addi sp, sp, {CONST, 4}
+				addi sp, sp, {C, 4}
 	pat stl
 		leaving
 			lal $1
@@ -846,7 +849,7 @@ PATTERNS
 		with STACK
 			gen
 				lfd {DLOCAL, $1}, {IND_RC_D, sp, 0}
-				addi sp, sp, {CONST, 8}
+				addi sp, sp, {C, 8}
 	pat sdl
 		leaving
 			lal $1
@@ -1255,22 +1258,22 @@ PATTERNS
 		with REG UCONST2
 			uses reusing %1, REG
 			gen
-				andiX %a, %1, {CONST, %2.val}
+				andiX %a, %1, %2
 			yields %a
 		with UCONST2 REG
 			uses reusing %2, REG
 			gen
-				andiX %a, %2, {CONST, %1.val}
+				andiX %a, %2, %1
 			yields %a
 		with REG CONST_HZ
 			uses reusing %1, REG
 			gen
-				andisX %a, %1, {CONST, hi(%2.val)}
+				andisX %a, %1, {C, hi(%2.val)}
 			yields %a
 		with CONST_HZ REG
 			uses reusing %2, REG
 			gen
-				andisX %a, %2, {CONST, hi(%1.val)}
+				andisX %a, %2, {C, hi(%1.val)}
 			yields %a
 
 	pat and defined($1)                /* AND set */
@@ -1394,43 +1397,37 @@ PATTERNS
 	pat sli $1==4                      /* Shift left (second << top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
-			gen
-				rlwinm %a, %2, {CONST, (%1.val & 0x1F)}, {CONST, 0}, {CONST, 31-(%1.val & 0x1F)}
+			gen slwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
 			uses reusing %2, REG
-			gen
-				slw %a, %2, %1
+			gen slw %a, %2, %1
 			yields %a
 
 	pat sri $1==4                      /* Shift right signed (second >> top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
-			gen
-				srawi %a, %2, {CONST, %1.val & 0x1F}
+			gen srawi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
 			uses reusing %2, REG
-			gen
-				sraw %a, %2, %1
+			gen sraw %a, %2, %1
 			yields %a
 
 	pat sru $1==4                      /* Shift right unsigned (second >> top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
-			gen
-				rlwinm %a, %2, {CONST, 32-(%1.val & 0x1F)}, {CONST, (%1.val & 0x1F)}, {CONST, 31}
+			gen srwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
 			uses reusing %2, REG
-			gen
-				srw %a, %2, %1
+			gen srw %a, %2, %1
 			yields %a
 
 	pat rol $1==4                      /* Rotate left word */
 		with CONST_STACK REG
 			uses reusing %2, REG
-			gen rotlwi %a, %2, {CONST, %1.val & 0x1F}
+			gen rotlwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
 			uses reusing %2, REG
@@ -1447,7 +1444,7 @@ PATTERNS
 	pat ror $1==4                      /* Rotate right word */
 		with CONST_STACK REG
 			uses reusing %2, REG
-			gen rotrwi %a, %2, {CONST, %1.val & 0x1F}
+			gen rotrwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with /* anything */
 			leaving
@@ -1761,11 +1758,11 @@ PATTERNS
 	proc bxx example beq
 		with REG CONST2 STACK
 			gen
-				cmpwi %1, {CONST, %2.val}
+				cmpwi %1, %2
 				bxx[2] {LABEL, $1}
 		with CONST2 REG STACK
 			gen
-				cmpwi %2, {CONST, %1.val}
+				cmpwi %2, %1
 				bxx[1] {LABEL, $1}
 		with REG REG STACK
 			gen
@@ -1783,11 +1780,11 @@ PATTERNS
 	proc cmu4zxx example cmu zeq
 		with REG CONST2 STACK
 			gen
-				cmplwi %1, {CONST, %2.val}
+				cmplwi %1, %2
 				bxx[2] {LABEL, $2}
 		with CONST2 REG STACK
 			gen
-				cmplwi %2, {CONST, %1.val}
+				cmplwi %2, %1
 				bxx[1] {LABEL, $2}
 		with REG REG STACK
 			gen
@@ -1816,29 +1813,29 @@ PATTERNS
 	pat cmi $1==INT32                  /* Signed tristate compare */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen rlwinm %a, %a, {CONST, 1}, {CONST, 31}, {CONST, 0}
+			gen rlwinm %a, %a, {C, 1}, {C, 31}, {C, 0}
 			yields %a
 		with CONST2 REG
 			uses reusing %2, REG={COND_RC, %2, %1.val}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
 	pat cmu $1==INT32                  /* Unsigned tristate compare */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen rlwinm %a, %a, {CONST, 1}, {CONST, 31}, {CONST, 0}
+			gen rlwinm %a, %a, {C, 1}, {C, 31}, {C, 0}
 			yields %a
 		with UCONST2 REG
 			uses reusing %2, REG={CONDL_RC, %2, %1.val}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
 	pat cmp                            /* Compare pointers */
@@ -1921,7 +1918,7 @@ PATTERNS
 			mtspr lr, r0
 			lwz r0, {IND_RC_W, fp, 0}
 			/* Free our stack frame. */
-			addi sp, fp, {CONST, 8}
+			addi sp, fp, {C, 8}
 			mr fp, r0
 			blr.
 
@@ -1949,10 +1946,10 @@ PATTERNS
 			/* ( src%3 dst%2 len%1 -- ) */
 			uses reusing %1, REG, REG, REG
 			gen
-				srwi %a, %1, {CONST, 2}
+				srwi %a, %1, {C, 2}
 				mtspr ctr, %a
-				addi %b, %3, {CONST, 0-4}
-				addi %c, %2, {CONST, 0-4}
+				addi %b, %3, {C, 0-4}
+				addi %c, %2, {C, 0-4}
 			1:	lwzu %a, {IND_RC_W, %b, 4}
 				stwu %a, {IND_RC_W, %c, 4}
 				bdnz {LABEL, "1b"}
@@ -2084,7 +2081,7 @@ PATTERNS
 			/* nop */
 		with STACK
 			gen
-				addi sp, sp, {CONST, 4}
+				addi sp, sp, {C, 4}
 
 	pat ass $1==4                      /* Adjust stack by variable amount */
 		with CONST2 STACK
@@ -2110,9 +2107,9 @@ PATTERNS
 		with REG
 			kills ALL
 			gen
-				cmpwi %1, {CONST, rom($1, 1)}
+				cmpwi %1, {C, rom($1, 1)}
 				blt {LABEL, ".trap_erange"}
-				cmpwi %1, {CONST, rom($1, 2)}
+				cmpwi %1, {C, rom($1, 2)}
 				bgt {LABEL, ".trap_erange"}
 			yields %1
 
@@ -2176,7 +2173,7 @@ PATTERNS
 	pat cmf $1==INT32                  /* Compare single */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
 	pat cmf teq $1==4                  /* Single second == top */
@@ -2334,7 +2331,7 @@ PATTERNS
 	pat cmf $1==INT64                  /* Compare double */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen extlwi %a, %a, {CONST, 2}, {CONST, 0}
+			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
 	pat cmf teq $1==8                  /* Double second == top */
@@ -2402,7 +2399,7 @@ PATTERNS
 			gen
 				fctiwz %a, %1
 				stfdu %a, {IND_RC_D, sp, 0-8}
-				addi sp, sp, {CONST, 4}
+				addi sp, sp, {C, 4}
 
 	/* Convert double to unsigned int */
 	pat loc loc cfu $1==8 && $2==4
