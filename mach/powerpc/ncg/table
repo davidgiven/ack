@@ -122,13 +122,19 @@ TOKENS
 
 /* Expression partial results */
 
+	SEX_B       = { GPR reg; }             4.   /* sign extension */
+	SEX_H       = { GPR reg; }             4.
+
 	SUM_RIS     = { GPR reg; INT offhi; }  4.   /* reg + (offhi << 16) */
 	SUM_RC      = { GPR reg; INT off; }    4.   /* reg + off */
 	SUM_RL      = { GPR reg; ADDR adr; }   4.   /* reg + lo16[adr] */
 	SUM_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 + reg2 */
 
-	SEX_B              = { GPR reg; }             4.
-	SEX_H              = { GPR reg; }             4.
+	SUB_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 - reg2 */
+	NEG_R       = { GPR reg; }             4.   /* -reg */
+	MUL_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 * reg2 */
+	DIV_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 signed */
+	DIV_RR_U    = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 unsigned */
 
 	IND_RC_B    = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RL_B    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
@@ -146,15 +152,21 @@ TOKENS
 	IND_RL_D    = { GPR reg; ADDR adr; }   8    "lo16[" adr "](" reg ")".
 	IND_RR_D    = { GPR reg1; GPR reg2; }  8.
 
-	NOT_R              = { GPR reg; }             4.
-
-	AND_RR             = { GPR reg1; GPR reg2; }  4.
-	OR_RR              = { GPR reg1; GPR reg2; }  4.
-	OR_RIS             = { GPR reg; INT valhi; }  4.
-	OR_RC              = { GPR reg; INT val; }    4.
-	XOR_RR             = { GPR reg1; GPR reg2; }  4.
-	XOR_RIS            = { GPR reg; INT valhi; }  4.
-	XOR_RC             = { GPR reg; INT val; }    4.
+	NOT_R       = { GPR reg; }             4.   /* ~reg */
+	AND_RIS     = { GPR reg; INT valhi; }  4.
+	AND_RC      = { GPR reg; INT val; }    4.
+	AND_RR      = { GPR reg1; GPR reg2; }  4.
+	ANDC_RR     = { GPR reg1; GPR reg2; }  4.   /* reg1 & ~reg2 */
+	OR_RIS      = { GPR reg; INT valhi; }  4.
+	OR_RC       = { GPR reg; INT val; }    4.
+	OR_RR       = { GPR reg1; GPR reg2; }  4.
+	ORC_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 | ~reg2 */
+	XOR_RIS     = { GPR reg; INT valhi; }  4.
+	XOR_RC      = { GPR reg; INT val; }    4.
+	XOR_RR      = { GPR reg1; GPR reg2; }  4.
+	NAND_RR     = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 & reg2) */
+	NOR_RR      = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 | reg2) */
+	EQV_RR      = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 ^ reg2) */
 
 	COND_RC            = { GPR reg; INT val; }    4.
 	COND_RR            = { GPR reg1; GPR reg2; }  4.
@@ -185,13 +197,6 @@ SETS
 
 	CONST           = C + CONST_STACK.
 
-	SUM_ALL            = SUM_RC + SUM_RL + SUM_RR.
-
-	SEX_ALL            = SEX_B + SEX_H.
-
-	LOGICAL_ALL        = NOT_R + AND_RR + OR_RR + OR_RC + XOR_RR +
-	                     XOR_RC.
-
 	IND_ALL_B          = IND_RC_B + IND_RL_B + IND_RR_B.
 	IND_ALL_H          = IND_RC_H + IND_RL_H + IND_RR_H +
 	                     IND_RC_H_S + IND_RL_H_S + IND_RR_H_S.
@@ -203,8 +208,14 @@ SETS
 	MEMORY             = IND_ALL_BHW + IND_ALL_D.
 
 	/* any stack token that we can easily move to GPR */
-	ANY_BHW            = REG + CONST_STACK + SEX_ALL +
-	                     SUM_ALL + IND_ALL_BHW + LOGICAL_ALL.
+	ANY_BHW = REG + CONST_STACK + SEX_B + SEX_H +
+	          SUM_RIS + SUM_RC + SUM_RL + SUM_RR +
+	          SUB_RR + NEG_R + MUL_RR + DIV_RR + DIV_RR_U +
+	          IND_ALL_BHW +
+	          NOT_R + AND_RIS + AND_RC + AND_RR + ANDC_RR +
+	          OR_RIS + OR_RC + OR_RR + ORC_RR +
+	          XOR_RIS + XOR_RC + XOR_RR + NAND_RR + NOR_RR + EQV_RR +
+	          XEQ + XNE + XGT + XGE + XLT + XLE.
 
 
 INSTRUCTIONS
@@ -274,7 +285,7 @@ INSTRUCTIONS
   fmuls           FSREG+LOCAL:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fneg            FREG+DLOCAL:wo, FREG:ro cost(4, 5).
   fneg            FSREG+LOCAL:wo, FSREG:ro cost(4, 5).
-  frsp            FSREG:wo, FREG:ro cost(4, 5).
+  frsp            FSREG+LOCAL:wo, FREG:ro cost(4, 5).
   fsub            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fsubs           FSREG+LOCAL:wo, FSREG:ro, FSREG:ro cost(4, 5).
   lbz             GPR:wo, IND_RC_B+IND_RL_B:ro cost(4, 3).
@@ -292,13 +303,13 @@ INSTRUCTIONS
   lwzu            GPR:wo, IND_RC_W:rw cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwz             GPR+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
+  mfcr            GPR:wo cost(4,2).
+  mfspr           GPR:wo, SPR:ro cost(4, 3).
+  mtspr           SPR:wo, GPR:ro cost(4, 2).
+  mullw           GPR:wo, GPR:ro, GPR:ro cost(4, 4).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
   nor             GPR:wo, GPR:ro, GPR:ro.
-  mfcr            GPR:wo cost(4,2).
-  mullw           GPR:wo, GPR:ro, GPR:ro cost(4, 4).
-  mfspr           GPR:wo, SPR:ro cost(4, 3).
-  mtspr           SPR:wo, GPR:ro cost(4, 2).
   or              GPR:wo, GPR:ro, GPR:ro.
     mr            GPR:wo, GPR:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
@@ -309,17 +320,17 @@ INSTRUCTIONS
   rlwinm          GPR:wo, GPR:ro, CONST:ro, CONST:ro, CONST:ro.
     extlwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
     extrwi        GPR:wo, GPR:ro, CONST:ro, CONST:ro.
-    rotlwi        GPR:wo, GPR:ro, CONST:ro.
-    rotrwi        GPR:wo, GPR:ro, CONST:ro.
-    slwi          GPR:wo, GPR:ro, CONST:ro.
-    srwi          GPR:wo, GPR:ro, CONST:ro.
+    rotlwi        GPR+LOCAL:wo, GPR:ro, CONST:ro.
+    rotrwi        GPR+LOCAL:wo, GPR:ro, CONST:ro.
+    slwi          GPR+LOCAL:wo, GPR:ro, CONST:ro.
+    srwi          GPR+LOCAL:wo, GPR:ro, CONST:ro.
   rlwnm           GPR:wo, GPR:ro, GPR:ro, CONST:ro, CONST:ro.
-    rotlw         GPR:wo, GPR:ro, GPR:ro.
-  slw             GPR:wo, GPR:ro, GPR:ro.
+    rotlw         GPR+LOCAL:wo, GPR:ro, GPR:ro.
+  slw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
   subf            GPR:wo, GPR:ro, GPR:ro.
-  sraw            GPR:wo, GPR:ro, GPR:ro cost(4, 2).
-  srawi           GPR:wo, GPR:ro, CONST:ro cost(4, 2).
-  srw             GPR:wo, GPR:ro, GPR:ro.
+  sraw            GPR+LOCAL:wo, GPR:ro, GPR:ro cost(4, 2).
+  srawi           GPR+LOCAL:wo, GPR:ro, CONST:ro cost(4, 2).
+  srw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
   stb             GPR:ro, IND_RC_B+IND_RL_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stfd            FPR:ro, IND_RC_D+IND_RL_D:rw cost(4, 4).
@@ -402,6 +413,24 @@ MOVES
 
 	from SUM_RR to GPR
 		gen add %2, %1.reg1, %1.reg2
+
+/* Other arithmetic */
+
+	from SUB_RR to GPR
+		/* reg1 - reg2 -> subtract reg2 from reg1 */
+		gen subf %2, %1.reg2, %1.reg1
+
+	from NEG_R to GPR
+		gen neg %2, %1.reg
+
+	from MUL_RR to GPR
+		gen mullw %2, %1.reg1, %1.reg2
+
+	from DIV_RR to GPR
+		gen divw %2, %1.reg1, %1.reg2
+
+	from DIV_RR_U to GPR
+		gen divwu %2, %1.reg1, %1.reg2
 
 /* Read byte */
 
@@ -490,11 +519,17 @@ MOVES
 	from NOT_R to GPR
 		gen nor %2, %1.reg, %1.reg
 
+	from AND_RIS to GPR
+		gen andisX %2, %1.reg, {C, %1.valhi}
+
+	from AND_RC to GPR
+		gen andiX %2, %1.reg, {C, %1.val}
+
 	from AND_RR to GPR
 		gen and %2, %1.reg1, %1.reg2
 
-	from OR_RR to GPR
-		gen or %2, %1.reg1, %1.reg2
+	from ANDC_RR to GPR
+		gen andc %2, %1.reg1, %1.reg2
 
 	from OR_RIS to GPR
 		gen oris %2, %1.reg, {C, %1.valhi}
@@ -502,14 +537,29 @@ MOVES
 	from OR_RC to GPR
 		gen ori %2, %1.reg, {C, %1.val}
 
-	from XOR_RR to GPR
-		gen xor %2, %1.reg1, %1.reg2
+	from OR_RR to GPR
+		gen or %2, %1.reg1, %1.reg2
+
+	from ORC_RR to GPR
+		gen orc %2, %1.reg1, %1.reg2
 
 	from XOR_RIS to GPR
 		gen xoris %2, %1.reg, {C, %1.valhi}
 
 	from XOR_RC to GPR
 		gen xori %2, %1.reg, {C, %1.val}
+
+	from XOR_RR to GPR
+		gen xor %2, %1.reg1, %1.reg2
+
+	from NAND_RR to GPR
+		gen nand %2, %1.reg1, %1.reg2
+
+	from NOR_RR to GPR
+		gen nor %2, %1.reg1, %1.reg2
+
+	from EQV_RR to GPR
+		gen eqv %2, %1.reg1, %1.reg2
 
 /* Conditions */
 
@@ -738,22 +788,6 @@ PATTERNS
 	pat exg $1==INT32                  /* Exchange top two words on stack */
 		with REG REG
 			yields %1 %2
-
-	pat stl lol $1==$2                 /* Store then load local */
-		leaving
-			dup 4
-			stl $1
-
-	pat sdl ldl $1==$2                 /* Store then load double local */
-		leaving
-			dup 8
-			sdl $1
-
-	pat lal sti lal loi $1==$3 && $2==$4 /* Store then load local, of a different size */
-		leaving
-			dup INT32
-			lal $1
-			sti $2
 
 	pat ste loe $1==$2                 /* Store then load external */
 		leaving
@@ -1166,11 +1200,9 @@ PATTERNS
 		with REG CONST2
 			yields {SUM_RC, %1, %2.val}
 		with CONST_HZ REG
-			uses reusing %2, REG={SUM_RIS, %2, his(%1.val)}
-			yields %a
+			yields {SUM_RIS, %2, his(%1.val)}
 		with REG CONST_HZ
-			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
-			yields %a
+			yields {SUM_RIS, %1, his(%2.val)}
 		with CONST_STACK-CONST2-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(%1.val)}
 			yields {SUM_RC, %a, los(%1.val)}
@@ -1181,100 +1213,63 @@ PATTERNS
 	pat sbi $1==4                      /* Subtract word (second - top) */
 		with REG REG
 			uses reusing %2, REG
-			gen
-				subf %a, %1, %2
-			yields %a
+			yields {SUB_RR, %2, %1}
 		with CONST2_WHEN_NEG REG
 			yields {SUM_RC, %2, 0-%1.val}
 		with CONST_HZ REG
-			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
-			yields %a
+			yields {SUM_RIS, %2, his(0-%1.val)}
 		with CONST_STACK-CONST2_WHEN_NEG-CONST_HZ REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields {SUM_RC, %a, los(0-%1.val)}
 
 	pat ngi $1==4                      /* Negate word */
 		with REG
-			uses reusing %1, REG
-			gen
-				neg %a, %1
-			yields %a
+			yields {NEG_R, %1}
 
 	pat mli $1==4                      /* Multiply word (second * top) */
 		with REG REG
-			uses reusing %2, REG
-			gen
-				mullw %a, %2, %1
-			yields %a
+			yields {MUL_RR, %2, %1}
 
 	pat dvi $1==4                      /* Divide word (second / top) */
 		with REG REG
-			uses reusing %2, REG
-			gen
-				divw %a, %2, %1
-			yields %a
+			yields {DIV_RR, %2, %1}
 
-	pat dvu $1==4                      /* Divide unsigned word (second / top) */
+	pat dvu $1==4             /* Divide unsigned word (second / top) */
 		with REG REG
-			uses reusing %2, REG
-			gen
-				divwu %a, %2, %1
-			yields %a
+			yields {DIV_RR_U, %2, %1}
+
+	/* To calculate a remainder:  a % b = a - (a / b * b) */
 
 	pat rmi $1==4                      /* Remainder word (second % top) */
 		with REG REG
-			uses REG
-			gen
-				divw %a, %2, %1
-				mullw %a, %a, %1
-				subf %a, %a, %2
-			yields %a
+			uses REG={DIV_RR, %2, %1}, REG
+			gen move {MUL_RR, %a, %1}, %b
+			yields {SUB_RR, %2, %b}
 
-	pat rmu $1==4                      /* Remainder unsigned word (second % top) */
+	pat rmu $1==4             /* Remainder unsigned word (second % top) */
 		with REG REG
-			uses REG
-			gen
-				divwu %a, %2, %1
-				mullw %a, %a, %1
-				subf %a, %a, %2
-			yields %a
+			uses REG={DIV_RR_U, %2, %1}, REG
+			gen move {MUL_RR, %a, %1}, %b
+			yields {SUB_RR, %2, %b}
 
 
 /* Bitwise logic */
 
 	pat and $1==4                      /* AND word */
 		with REG NOT_R
-			uses reusing %1, REG
-			gen
-				andc %a, %1, %2.reg
-			yields %a
+			yields {ANDC_RR, %1, %2.reg}
 		with NOT_R REG
-			uses reusing %1, REG
-			gen
-				andc %a, %2, %1.reg
-			yields %a
+			yields {ANDC_RR, %2, %1.reg}
 		with REG REG
 			yields {AND_RR, %1, %2}
 		with REG UCONST2
-			uses reusing %1, REG
-			gen
-				andiX %a, %1, %2
-			yields %a
+			yields {AND_RC, %1, %2.val}
 		with UCONST2 REG
-			uses reusing %2, REG
-			gen
-				andiX %a, %2, %1
-			yields %a
+			yields {AND_RC, %2, %1.val}
 		with REG CONST_HZ
-			uses reusing %1, REG
-			gen
-				andisX %a, %1, {C, hi(%2.val)}
-			yields %a
+			yields {AND_RIS, %1, hi(%2.val)}
 		with CONST_HZ REG
-			uses reusing %2, REG
-			gen
-				andisX %a, %2, {C, hi(%1.val)}
-			yields %a
+			yields {AND_RIS, %2, hi(%1.val)}
 
 	pat and defined($1)                /* AND set */
 		leaving
@@ -1287,15 +1282,9 @@ PATTERNS
 
 	pat ior $1==4                      /* OR word */
 		with REG NOT_R
-			uses reusing %1, REG
-			gen
-				orc %a, %1, %2.reg
-			yields %a
+			yields {ORC_RR, %1, %2.reg}
 		with NOT_R REG
-			uses reusing %2, REG
-			gen
-				orc %a, %2, %1.reg
-			yields %a
+			yields {ORC_RR, %2, %1.reg}
 		with REG REG
 			yields {OR_RR, %1, %2}
 		with REG UCONST2
@@ -1303,11 +1292,9 @@ PATTERNS
 		with UCONST2 REG
 			yields {OR_RC, %2, %1.val}
 		with REG CONST_HZ
-			uses reusing %1, REG={OR_RIS, %1, hi(%2.val)}
-			yields %a
+			yields {OR_RIS, %1, hi(%2.val)}
 		with CONST_HZ REG
-			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
-			yields %a
+			yields {OR_RIS, %2, hi(%1.val)}
 		with REG CONST_STACK-UCONST2-CONST_HZ
 			uses reusing %1, REG={OR_RIS, %1, hi(%2.val)}
 			yields {OR_RC, %1, lo(%2.val)}
@@ -1333,11 +1320,9 @@ PATTERNS
 		with UCONST2 REG
 			yields {XOR_RC, %2, %1.val}
 		with REG CONST_HZ
-			uses reusing %1, REG={XOR_RIS, %1, hi(%2.val)}
-			yields %a
+			yields {XOR_RIS, %1, hi(%2.val)}
 		with CONST_HZ REG
-			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
-			yields %a
+			yields {XOR_RIS, %2, hi(%1.val)}
 		with REG CONST_STACK-UCONST2-CONST_HZ
 			uses reusing %1, REG={XOR_RIS, %1, hi(%2.val)}
 			yields {XOR_RC, %1, lo(%2.val)}
@@ -1355,21 +1340,12 @@ PATTERNS
 			cal ".xor"
 
 	pat com $1==INT32                  /* NOT word */
-		with AND_RR
-			uses REG
-			gen
-				nand %a, %1.reg1, %1.reg2
-			yields %a
-		with OR_RR
-			uses REG
-			gen
-				nor %a, %1.reg1, %1.reg2
-			yields %a
-		with XOR_RR
-			uses REG
-			gen
-				eqv %a, %1.reg1, %1.reg2
-			yields %a
+		with exact AND_RR
+			yields {NAND_RR, %1.reg1, %1.reg2}
+		with exact OR_RR
+			yields {NOR_RR, %1.reg1, %1.reg2}
+		with exact XOR_RR
+			yields {EQV_RR, %1.reg1, %1.reg2}
 		with REG
 			yields {NOT_R, %1}
 
@@ -1403,8 +1379,13 @@ PATTERNS
 			uses reusing %2, REG
 			gen slw %a, %2, %1
 			yields %a
+	pat sli stl $1==4 && inreg($2)==reg_any
+		with CONST_STACK REG
+			gen slwi {LOCAL, $2}, %2, {C, %1.val & 0x1F}
+		with REG REG
+			gen slw {LOCAL, $2}, %2, %1
 
-	pat sri $1==4                      /* Shift right signed (second >> top) */
+	pat sri $1==4               /* Shift right signed (second >> top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
 			gen srawi %a, %2, {C, %1.val & 0x1F}
@@ -1413,8 +1394,13 @@ PATTERNS
 			uses reusing %2, REG
 			gen sraw %a, %2, %1
 			yields %a
+	pat sri stl $1==4 && inreg($2)==reg_any
+		with CONST_STACK REG
+			gen srawi {LOCAL, $2}, %2, {C, %1.val & 0x1F}
+		with REG REG
+			gen sraw {LOCAL, $2}, %2, %1
 
-	pat sru $1==4                      /* Shift right unsigned (second >> top) */
+	pat sru $1==4               /* Shift right unsigned (second >> top) */
 		with CONST_STACK REG
 			uses reusing %2, REG
 			gen srwi %a, %2, {C, %1.val & 0x1F}
@@ -1423,6 +1409,11 @@ PATTERNS
 			uses reusing %2, REG
 			gen srw %a, %2, %1
 			yields %a
+	pat sru stl $1==4 && inreg($2)==reg_any
+		with CONST_STACK REG
+			gen srwi {LOCAL, $2}, %2, {C, %1.val & 0x1F}
+		with REG REG
+			gen srw {LOCAL, $2}, %2, %1
 
 	pat rol $1==4                      /* Rotate left word */
 		with CONST_STACK REG
@@ -1433,6 +1424,11 @@ PATTERNS
 			uses reusing %2, REG
 			gen rotlw %a, %2, %1
 			yields %a
+	pat rol stl $1==4 && inreg($2)==reg_any
+		with CONST_STACK REG
+			gen rotlwi {LOCAL, $2}, %2, {C, %1.val & 0x1F}
+		with REG REG
+			gen rotlw {LOCAL, $2}, %2, %1
 
 	/*
 	 * ror 4 -> ngi 4, rol 4
@@ -1450,6 +1446,14 @@ PATTERNS
 			leaving
 				ngi 4
 				rol 4
+	pat ror stl $1==4 && inreg($2)==reg_any
+		with CONST_STACK REG
+			gen rotrwi {LOCAL, $2}, %2, {C, %1.val & 0x1F}
+		with /* anything */
+			leaving
+				ngi 4
+				rol 4
+				stl $2
 
 
 /* Arrays */
@@ -1517,8 +1521,7 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 
 	pat tne                            /* top = (top != 0) */
 		with REG
@@ -1526,8 +1529,7 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 
 	pat tlt                            /* top = (top < 0) */
 		with REG
@@ -1535,8 +1537,7 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 
 	pat tle                            /* top = (top <= 0) */
 		with REG
@@ -1544,8 +1545,7 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 
 	pat tgt                            /* top = (top > 0) */
 		with REG
@@ -1553,8 +1553,7 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 
 	pat tge                            /* top = (top >= 0) */
 		with REG
@@ -1562,176 +1561,139 @@ PATTERNS
 			gen
 				test %1
 				mfcr %a
-				move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 
 	pat cmi teq $1==4                  /* Signed second == top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 
 	pat cmi tne $1==4                  /* Signed second != top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 
 	pat cmi tgt $1==4                  /* Signed second > top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 
 	pat cmi tge $1==4                  /* Signed second >= top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 
 	pat cmi tlt $1==4                  /* Signed second < top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 
 	pat cmi tle $1==4                  /* Signed second <= top */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 		with CONST2 REG
 			uses reusing %1, REG={COND_RC, %2, %1.val}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 		with REG REG
 			uses reusing %1, REG={COND_RR, %2, %1}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 
 	pat cmu teq $1==4                  /* Unsigned second == top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 
 	pat cmu tne $1==4                  /* Unsigned second != top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 
 	pat cmu tgt $1==4                  /* Unsigned second > top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 
 	pat cmu tge $1==4                  /* Unsigned second >= top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 
 	pat cmu tlt $1==4                  /* Unsigned second < top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 
 	pat cmu tle $1==4                  /* Unsigned second <= top */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 		with UCONST2 REG
 			uses reusing %1, REG={CONDL_RC, %2, %1.val}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 		with REG REG
 			uses reusing %1, REG={CONDL_RR, %2, %1}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 
 
 /* Simple branches */
@@ -2179,38 +2141,32 @@ PATTERNS
 	pat cmf teq $1==4                  /* Single second == top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 
 	pat cmf tne $1==4                  /* Single second == top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 
 	pat cmf tgt $1==4                  /* Single second > top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 
 	pat cmf tge $1==4                  /* Single second >= top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 
 	pat cmf tlt $1==4                  /* Single second < top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 
 	pat cmf tle $1==4                  /* Single second <= top */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 
 	proc cmf4zxx example cmf zeq
 		with FSREG FSREG STACK
@@ -2337,38 +2293,32 @@ PATTERNS
 	pat cmf teq $1==8                  /* Double second == top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XEQ, %a}, %a
-			yields %a
+			yields {XEQ, %a}
 
 	pat cmf tne $1==8                  /* Single second == top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XNE, %a}, %a
-			yields %a
+			yields {XNE, %a}
 
 	pat cmf tgt $1==8                  /* Double second > top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XGT, %a}, %a
-			yields %a
+			yields {XGT, %a}
 
 	pat cmf tge $1==8                  /* Double second >= top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XGE, %a}, %a
-			yields %a
+			yields {XGE, %a}
 
 	pat cmf tlt $1==8                  /* Double second < top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XLT, %a}, %a
-			yields %a
+			yields {XLT, %a}
 
 	pat cmf tle $1==8                  /* Double second <= top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen move {XLE, %a}, %a
-			yields %a
+			yields {XLE, %a}
 
 	proc cmf8zxx example cmf zeq
 		with FREG FREG STACK
@@ -2385,11 +2335,15 @@ PATTERNS
 	pat cmf zlt $1==8    call cmf8zxx("blt")
 	pat cmf zle $1==8    call cmf8zxx("ble")
 
-	pat loc loc cff $1==INT64 && $2==INT32 /* Convert double to single */
+	/* Convert double to single */
+	/*   reg_float pattern must be first, or it goes unused! */
+	pat loc loc cff stl $1==8 && $2==4 && inreg($4)==reg_float
+		with FREG
+			gen frsp {LOCAL, $4}, %1
+	pat loc loc cff $1==8 && $2==4
 		with FREG
 			uses reusing %1, FSREG
-			gen
-				frsp %a, %1
+			gen frsp %a, %1
 			yields %a
 
 	/* Convert double to signed int */
