@@ -10,6 +10,8 @@ definerule("plat_testsuite",
 		-- target names will resolve there.
 		local testfiles = filenamesof(
 			"tests/plat/*.c",
+			"tests/plat/dup_e.e",
+			"tests/plat/exg_e.e",
 			"tests/plat/inn_e.e",
 			"tests/plat/rotate_e.e",
 			"tests/plat/*.p",

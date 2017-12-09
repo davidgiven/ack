@@ -217,6 +217,9 @@ SETS
 	          XOR_RIS + XOR_RC + XOR_RR + NAND_RR + NOR_RR + EQV_RR +
 	          XEQ + XNE + XGT + XGE + XLT + XLE.
 
+	/* any register or token of each size */
+	ANY4 = ANY_BHW + FSREG.
+	ANY8 = IND_ALL_D + FREG.
 
 INSTRUCTIONS
 
@@ -756,7 +759,7 @@ COERCIONS
 
 PATTERNS
 
-/* Intrinsics */
+/* Constants */
 
 	pat loc $1==(0-0x8000)             /* Load constant */
 		yields {CONST_N8000, $1}
@@ -773,21 +776,77 @@ PATTERNS
 	pat loc
 		yields {CONST_HL, $1}
 
-	pat dup $1==INT32                  /* Duplicate word on top of stack */
-		with REG
-			yields %1 %1
-		with FSREG
+
+/* Stack shuffles */
+
+	/* The peephole optimizer does:  loc $1 ass 4 -> asp $1
+	 * To optimize multiplication, it uses:  dup 8 asp 4
+	 */
+
+	pat asp $1==4                      /* Adjust stack by constant */
+		with exact ANY4
+			/* drop %1 */
+		with STACK
+			gen addi sp, sp, {C, 4}
+	pat asp smalls($1)
+		with STACK
+			gen addi sp, sp, {C, $1}
+	pat asp lo($1)==0
+		with STACK
+			gen addi sp, sp, {C, hi($1)}
+	pat asp
+		with STACK
+			gen
+				addis sp, sp, {C, his($1)}
+				addi sp, sp, {C, los($1)}
+
+	pat ass $1==4                      /* Adjust stack by variable */
+		with REG STACK
+			gen add sp, sp, %1
+
+	/* To duplicate a token, we coerce the token into a register,
+	 * then duplicate the register.  This decreases code size.
+	 */
+
+	pat dup $1==4                      /* Duplicate word on top of stack */
+		with REG+FSREG
 			yields %1 %1
 
-	pat dup $1==INT64                  /* Duplicate double-word on top of stack */
-		with REG REG
+	pat dup $1==8                      /* Duplicate double-word */
+		with REG+FSREG REG+FSREG
 			yields %2 %1 %2 %1
 		with FREG
 			yields %1 %1
 
-	pat exg $1==INT32                  /* Exchange top two words on stack */
-		with REG REG
+	pat dup                            /* Duplicate other size */
+		leaving
+			loc $1
+			dus 4
+
+	pat dus $1==4                      /* Duplicate variable size */
+		with REG STACK
+			/* ( a size%1 -- a a ) */
+			uses REG, REG
+			gen
+				srwi %a, %1, {C, 2}
+				mtspr ctr, %a
+				add %b, sp, %1
+			1:	lwzu %a, {IND_RC_W, %b, 0-4}
+				stwu %a, {IND_RC_W, sp, 0-4}
+				bdnz {LABEL, "1b"}
+
+	pat exg $1==4                      /* Exchange top two words */
+		with ANY4 ANY4
 			yields %1 %2
+
+	pat exg defined($1)                /* Exchange other size */
+		leaving
+			loc $1
+			cal ".exg"
+
+	pat exg !defined($1)
+		leaving
+			cal ".exg"
 
 	pat ste loe $1==$2                 /* Store then load external */
 		leaving
@@ -797,32 +856,30 @@ PATTERNS
 
 /* Type conversions */
 
-	pat loc loc ciu                    /* signed X -> unsigned X */
+	pat loc loc ciu                    /* signed -> unsigned */
 		leaving
 			loc $1
 			loc $2
 			cuu
 
-	pat loc loc cuu $1==$2             /* unsigned X -> unsigned X */
+	pat loc loc cui                    /* unsigned -> signed */
+		leaving
+			loc $1
+			loc $2
+			cuu
+
+	pat loc loc cuu $1<=4 && $2<=4     /* unsigned -> unsigned */
 		/* nop */
 
-	pat loc loc cii $1==$2             /* signed X -> signed X */
-		/* nop */
+	pat loc loc cii $1<=4 && $2<=$1
+		/* signed -> signed of smaller or same size,
+		 * no sign extension */
 
-	pat loc loc cui $1==$2             /* unsigned X -> signed X */
-		/* nop */
-
-	pat loc loc cui $1==INT8 && $2==INT32 /* unsigned char -> signed int */
-		/* nop */
-
-	pat loc loc cui $1==INT16 && $2==INT32 /* unsigned short -> signed int */
-		/* nop */
-
-	pat loc loc cii $1==INT8 && $2==INT32 /* signed char -> signed int */
+	pat loc loc cii $1==1 && $2<=4     /* sign-extend char */
 		with REG
 			yields {SEX_B, %1}
 
-	pat loc loc cii $1==2 && $2==4     /* signed char -> signed short */
+	pat loc loc cii $1==2 && $2<=4     /* sign-extend short */
 		with REG
 			yields {SEX_H, %1}
 
@@ -1362,7 +1419,7 @@ PATTERNS
 		leaving
 			loc 0
 
-	pat zer defined($1)	   	           /* Create empty set */
+	pat zer defined($1)                /* Create empty set */
 		leaving
 			loc $1
 			cal ".zer"
@@ -2037,33 +2094,6 @@ PATTERNS
 		with REG
 			gen
 				move %1, sp
-
-	pat loc ass $1==4 && $2==4         /* Drop 4 bytes from stack */
-		with exact REG
-			/* nop */
-		with STACK
-			gen
-				addi sp, sp, {C, 4}
-
-	pat ass $1==4                      /* Adjust stack by variable amount */
-		with CONST2 STACK
-			gen
-				move {SUM_RC, sp, %1.val}, sp
-		with CONST_HZ STACK
-			gen
-				move {SUM_RC, sp, his(%1.val)}, sp
-		with CONST_STACK-CONST2-CONST_HZ STACK
-			gen
-				move {SUM_RC, sp, his(%1.val)}, sp
-				move {SUM_RC, sp, los(%1.val)}, sp
-		with REG STACK
-			gen
-				move {SUM_RR, sp, %1}, sp
-
-	pat asp                            /* Adjust stack by constant amount */
-		leaving
-			loc $1
-			ass 4
 
 	pat lae rck $2==4                  /* Range check */
 		with REG
