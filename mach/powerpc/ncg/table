@@ -262,13 +262,13 @@ INSTRUCTIONS
   bclr            CONST:ro, CONST:ro, CONST:ro.
     blr.
   bl              LABEL:ro.
-  cmp             CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
+  cmp             CR:wo, CONST:ro, GPR:ro, GPR:ro kills :cc.
     cmpw          GPR:ro, GPR:ro kills :cc.
-  cmpi            CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
+  cmpi            CR:wo, CONST:ro, GPR:ro, CONST:ro kills :cc.
     cmpwi         GPR:ro, CONST:ro kills :cc.
-  cmpl            CR:ro, CONST:ro, GPR:ro, GPR:ro kills :cc.
+  cmpl            CR:wo, CONST:ro, GPR:ro, GPR:ro kills :cc.
     cmplw         GPR:ro, GPR:ro kills :cc.
-  cmpli           CR:ro, CONST:ro, GPR:ro, CONST:ro kills :cc.
+  cmpli           CR:wo, CONST:ro, GPR:ro, CONST:ro kills :cc.
     cmplwi        GPR:ro, CONST:ro kills :cc.
   divw            GPR:wo, GPR:ro, GPR:ro cost(4, 23).
   divwu           GPR:wo, GPR:ro, GPR:ro cost(4, 23).
