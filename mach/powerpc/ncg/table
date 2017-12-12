@@ -1174,26 +1174,6 @@ PATTERNS
 			gen
 				move %2, {IND_RC_W, %1, 0}
 				move %3, {IND_RC_W, %1, 4}
-		/*
-		 * Next 2 patterns exist because there is no coercion
-		 * from IND_ALL_D to REG REG.
-		 */
-		with REG IND_RC_D
-			kills MEMORY
-			uses REG={SUM_RC, %2.reg, %2.off}, REG, REG
-			gen
-				move {IND_RC_W, %a, 0}, %b
-				move {IND_RC_W, %a, 4}, %c
-				move %b, {IND_RC_W, %1, 0}
-				move %c, {IND_RC_W, %1, 4}
-		with REG IND_RR_D
-			kills MEMORY
-			uses REG={SUM_RR, %2.reg1, %2.reg2}, REG, REG
-			gen
-				move {IND_RC_W, %a, 0}, %b
-				move {IND_RC_W, %a, 4}, %c
-				move %b, {IND_RC_W, %1, 0}
-				move %c, {IND_RC_W, %1, 4}
 
 	pat sti                            /* Store arbitrary size */
 		leaving
