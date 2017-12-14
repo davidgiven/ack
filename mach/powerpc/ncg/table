@@ -65,7 +65,7 @@ REGISTERS
 	f0          : FPR.
 
 	f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13
-          : FPR, FREG.
+	  : FPR, FREG.
 
 	f14, f15, f16, f17, f18, f19, f20, f21, f22, f23, f24, f25,
 	f26, f27, f28, f29, f30, f31
@@ -202,24 +202,23 @@ SETS
 	                     IND_RC_H_S + IND_RL_H_S + IND_RR_H_S.
 	IND_ALL_W          = IND_RC_W + IND_RL_W + IND_RR_W.
 	IND_ALL_D          = IND_RC_D + IND_RL_D + IND_RR_D.
-	IND_ALL_BHW        = IND_ALL_B + IND_ALL_H + IND_ALL_W.
 
 	/* anything killed by sti (store indirect) */
-	MEMORY             = IND_ALL_BHW + IND_ALL_D.
+	MEMORY  = IND_ALL_B + IND_ALL_H + IND_ALL_W + IND_ALL_D.
 
-	/* any stack token that we can easily move to GPR */
-	ANY_BHW = REG + CONST_STACK + SEX_B + SEX_H +
+	/* any integer from stack that we can easily move to GPR */
+	INT_W   = REG + CONST_STACK + SEX_B + SEX_H +
 	          SUM_RIS + SUM_RC + SUM_RL + SUM_RR +
 	          SUB_RR + NEG_R + MUL_RR + DIV_RR + DIV_RR_U +
-	          IND_ALL_BHW +
+	          IND_ALL_B + IND_ALL_H + IND_ALL_W +
 	          NOT_R + AND_RIS + AND_RC + AND_RR + ANDC_RR +
 	          OR_RIS + OR_RC + OR_RR + ORC_RR +
 	          XOR_RIS + XOR_RC + XOR_RR + NAND_RR + NOR_RR + EQV_RR +
 	          XEQ + XNE + XGT + XGE + XLT + XLE.
 
-	/* any register or token of each size */
-	ANY4 = ANY_BHW + FSREG.
-	ANY8 = IND_ALL_D + FREG.
+	FLOAT_D = FREG + IND_ALL_D.
+	FLOAT_W = FSREG + IND_ALL_W.
+
 
 INSTRUCTIONS
 
@@ -634,13 +633,13 @@ MOVES
    our moves to GPR to set register variables.  We define no moves to
    LOCAL, so we avoid confusion between GPR and FSREG in LOCAL. */
 
-	from ANY_BHW to GPR_EXPR
+	from INT_W to GPR_EXPR
 		gen move %1, %2.reg
 
-	from FPR+IND_ALL_D to FPR_EXPR
+	from FLOAT_D to FPR_EXPR
 		gen move %1, %2.reg
 
-	from FSREG+IND_ALL_W to FSREG_EXPR
+	from FLOAT_W to FSREG_EXPR
 		gen move %1, %2.reg
 
 
@@ -664,15 +663,15 @@ STACKINGRULES
 			COMMENT("stack REG")
 			stwu %1, {IND_RC_W, sp, 0-4}
 
-	from ANY_BHW-REG to STACK
+	from INT_W-REG to STACK
 		gen
-			COMMENT("stack ANY_BHW-REG")
+			COMMENT("stack INT_W-REG")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {IND_RC_W, sp, 0-4}
 
-	from IND_ALL_D to STACK
+	from FLOAT_D-FREG to STACK
 		gen
-			COMMENT("stack IND_ALL_D")
+			COMMENT("stack FLOAT_D-FREG")
 			move %1, FSCRATCH
 			stfdu FSCRATCH, {IND_RC_D, sp, 0-8}
 
@@ -724,10 +723,10 @@ COERCIONS
 			addi sp, sp, {C, 4}
 		yields %a
 
-	from ANY_BHW
+	from INT_W
 		uses REG
 		gen
-			COMMENT("coerce ANY_BHW->REG")
+			COMMENT("coerce INT_W->REG")
 			move %1, %a
 		yields %a
 
@@ -741,17 +740,17 @@ COERCIONS
 	 * but %1.off+4 might overflow a signed 16-bit integer.
 	 */
 
-	from FREG+IND_ALL_D
+	from FLOAT_D
 		uses FREG
 		gen
-			COMMENT("coerce FREG+IND_ALL_D->FREG")
+			COMMENT("coerce FLOAT_D->FREG")
 			move %1, %a
 		yields %a
 
-	from FSREG+IND_ALL_W
+	from FLOAT_W
 		uses FSREG
 		gen
-			COMMENT("coerce FSREG+IND_ALL_W->FREG")
+			COMMENT("coerce FLOAT_W->FREG")
 			move %1, %a
 		yields %a
 
@@ -784,7 +783,7 @@ PATTERNS
 	 */
 
 	pat asp $1==4                      /* Adjust stack by constant */
-		with exact ANY4
+		with exact INT_W+FLOAT_W
 			/* drop %1 */
 		with STACK
 			gen addi sp, sp, {C, 4}
@@ -836,7 +835,7 @@ PATTERNS
 				bdnz {LABEL, "1b"}
 
 	pat exg $1==4                      /* Exchange top two words */
-		with ANY4 ANY4
+		with INT_W+FLOAT_W INT_W+FLOAT_W
 			yields %1 %2
 
 	pat exg defined($1)                /* Exchange other size */
@@ -911,7 +910,7 @@ PATTERNS
 
 	/* Store word to local */
 	pat stl inreg($1)==reg_any
-		with exact ANY_BHW
+		with exact INT_W
 			/* ncg fails to infer that regvar($1) is dead! */
 			kills regvar($1)
 			gen move %1, {GPR_EXPR, regvar($1)}
