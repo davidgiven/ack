@@ -723,11 +723,13 @@ COERCIONS
 			addi sp, sp, {C, 4}
 		yields %a
 
+	/* "uses REG=%1" may find and reuse a register containing the
+	 * same token.  For contrast, "uses REG gen move %1, %a" would
+	 * pick a different register before doing the move.
+         */
+
 	from INT_W
-		uses REG
-		gen
-			COMMENT("coerce INT_W->REG")
-			move %1, %a
+		uses REG=%1
 		yields %a
 
 	/*
@@ -741,17 +743,11 @@ COERCIONS
 	 */
 
 	from FLOAT_D
-		uses FREG
-		gen
-			COMMENT("coerce FLOAT_D->FREG")
-			move %1, %a
+		uses FREG=%1
 		yields %a
 
 	from FLOAT_W
-		uses FSREG
-		gen
-			COMMENT("coerce FLOAT_W->FREG")
-			move %1, %a
+		uses FSREG=%1
 		yields %a
 
 
