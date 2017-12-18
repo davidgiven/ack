@@ -117,8 +117,8 @@ TOKENS
 	CONST_0000_7FFF    = { INT val; }             4    val.
 	CONST_8000         = { INT val; }             4    val.
 	CONST_8001_FFFF    = { INT val; }             4    val.
-	CONST_HZ           = { INT val; }             4    val.
-	CONST_HL           = { INT val; }             4    val.
+	CONST_HI_ZR        = { INT val; }             4    val.
+	CONST_HI_LO        = { INT val; }             4    val.
 
 /* Expression partial results */
 
@@ -193,7 +193,8 @@ SETS
 	UCONST2         = CONST_0000_7FFF + CONST_8000 + CONST_8001_FFFF.
 	/* any constant on stack */
 	CONST_STACK     = CONST_N8000 + CONST_N7FFF_N0001 + CONST_0000_7FFF +
-	                  CONST_8000 + CONST_8001_FFFF + CONST_HZ + CONST_HL.
+	                  CONST_8000 + CONST_8001_FFFF +
+			  CONST_HI_ZR + CONST_HI_LO.
 
 	CONST           = C + CONST_STACK.
 
@@ -767,9 +768,9 @@ PATTERNS
 	pat loc $1>=0x8001 && $1<=0xFFFF
 		yields {CONST_8001_FFFF, $1}
 	pat loc lo($1)==0
-		yields {CONST_HZ, $1}
+		yields {CONST_HI_ZR, $1}
 	pat loc
-		yields {CONST_HL, $1}
+		yields {CONST_HI_LO, $1}
 
 
 /* Stack shuffles */
@@ -1231,14 +1232,14 @@ PATTERNS
 			yields {SUM_RC, %2, %1.val}
 		with REG CONST2
 			yields {SUM_RC, %1, %2.val}
-		with CONST_HZ REG
+		with CONST_HI_ZR REG
 			yields {SUM_RIS, %2, his(%1.val)}
-		with REG CONST_HZ
+		with REG CONST_HI_ZR
 			yields {SUM_RIS, %1, his(%2.val)}
-		with CONST_STACK-CONST2-CONST_HZ REG
+		with CONST_STACK-CONST2-CONST_HI_ZR REG
 			uses reusing %2, REG={SUM_RIS, %2, his(%1.val)}
 			yields {SUM_RC, %a, los(%1.val)}
-		with REG CONST_STACK-CONST2-CONST_HZ
+		with REG CONST_STACK-CONST2-CONST_HI_ZR
 			uses reusing %1, REG={SUM_RIS, %1, his(%2.val)}
 			yields {SUM_RC, %a, los(%2.val)}
 
@@ -1248,9 +1249,9 @@ PATTERNS
 			yields {SUB_RR, %2, %1}
 		with CONST2_WHEN_NEG REG
 			yields {SUM_RC, %2, 0-%1.val}
-		with CONST_HZ REG
+		with CONST_HI_ZR REG
 			yields {SUM_RIS, %2, his(0-%1.val)}
-		with CONST_STACK-CONST2_WHEN_NEG-CONST_HZ REG
+		with CONST_STACK-CONST2_WHEN_NEG-CONST_HI_ZR REG
 			uses reusing %2, REG={SUM_RIS, %2, his(0-%1.val)}
 			yields {SUM_RC, %a, los(0-%1.val)}
 
@@ -1298,9 +1299,9 @@ PATTERNS
 			yields {AND_RC, %1, %2.val}
 		with UCONST2 REG
 			yields {AND_RC, %2, %1.val}
-		with REG CONST_HZ
+		with REG CONST_HI_ZR
 			yields {AND_RIS, %1, hi(%2.val)}
-		with CONST_HZ REG
+		with CONST_HI_ZR REG
 			yields {AND_RIS, %2, hi(%1.val)}
 
 	pat and defined($1)                /* AND set */
@@ -1323,14 +1324,14 @@ PATTERNS
 			yields {OR_RC, %1, %2.val}
 		with UCONST2 REG
 			yields {OR_RC, %2, %1.val}
-		with REG CONST_HZ
+		with REG CONST_HI_ZR
 			yields {OR_RIS, %1, hi(%2.val)}
-		with CONST_HZ REG
+		with CONST_HI_ZR REG
 			yields {OR_RIS, %2, hi(%1.val)}
-		with REG CONST_STACK-UCONST2-CONST_HZ
+		with REG CONST_STACK-UCONST2-CONST_HI_ZR
 			uses reusing %1, REG={OR_RIS, %1, hi(%2.val)}
 			yields {OR_RC, %1, lo(%2.val)}
-		with CONST_STACK-UCONST2-CONST_HZ REG
+		with CONST_STACK-UCONST2-CONST_HI_ZR REG
 			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
 			yields {OR_RC, %2, lo(%1.val)}
 
@@ -1351,14 +1352,14 @@ PATTERNS
 			yields {XOR_RC, %1, %2.val}
 		with UCONST2 REG
 			yields {XOR_RC, %2, %1.val}
-		with REG CONST_HZ
+		with REG CONST_HI_ZR
 			yields {XOR_RIS, %1, hi(%2.val)}
-		with CONST_HZ REG
+		with CONST_HI_ZR REG
 			yields {XOR_RIS, %2, hi(%1.val)}
-		with REG CONST_STACK-UCONST2-CONST_HZ
+		with REG CONST_STACK-UCONST2-CONST_HI_ZR
 			uses reusing %1, REG={XOR_RIS, %1, hi(%2.val)}
 			yields {XOR_RC, %1, lo(%2.val)}
-		with CONST_STACK-UCONST2-CONST_HZ REG
+		with CONST_STACK-UCONST2-CONST_HI_ZR REG
 			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
 			yields {XOR_RC, %2, lo(%1.val)}
 
