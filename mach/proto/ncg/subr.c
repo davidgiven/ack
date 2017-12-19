@@ -518,7 +518,7 @@ int split(token_p tp, int *ip, int ply, int toplevel) {
 	int tpl;
 
 	for (cp=c2coercs;cp->c2_texpno>=0; cp++) {
-		if (!match(tp,&machsets[cp->c2_texpno],0))
+		if (!match(tp,&machsets[cp->c2_texpno],cp->c2_expr))
 			continue;
 		ok=1;
 		for (i=0; ok && i<cp->c2_nsplit;i++) {
