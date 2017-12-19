@@ -42,16 +42,11 @@ src
     lal p2
     loi EM_PSIZE
     loi 1         /* byte from src */
-    loc 1
-    loc EM_WSIZE
-    cii
     lal p1
     loi EM_PSIZE
     loi 1         /* byte from exchanged copy */
-    loc 1
-    loc EM_WSIZE
-    cii
-    beq *2
+    cms EM_WSIZE
+    zeq *2
     lol i
     loc EM_WSIZE
     loc 4

@@ -32,13 +32,12 @@ size
     cal $finished
     end /* $_m_a_i_n */
 
-    pro $check, 4 * EM_PSIZE + 2 * EM_WSIZE
+    pro $check, 4 * EM_PSIZE + EM_WSIZE
 #define p1    (-1 * EM_PSIZE)
 #define p2    (-2 * EM_PSIZE)
 #define p3    (-3 * EM_PSIZE)
 #define p4    (-4 * EM_PSIZE)
-#define b     (p4 - 1 * EM_WSIZE)
-#define i     (p4 - 2 * EM_WSIZE)
+#define i     (p4 - EM_WSIZE)
 
     /* Set pointers to all 4 copies. */
     lae src
@@ -60,56 +59,49 @@ size
 4
     lal p4
     loi EM_PSIZE
-    loi 1
-    loc 1
-    loc EM_WSIZE
-    cii
-    stl b         /* b = byte from src */
-    lol b
+    loi 1         /* byte from src */
     lal p3
     loi EM_PSIZE
     loi 1         /* byte from 3rd copy */
-    loc 1
-    loc EM_WSIZE
-    cii
-    beq *3
+    cms EM_WSIZE
+    zeq *3
     loc (3 * 256)
     lol i
-    adi EM_WSIZE
+    adi EM_WSIZE  /* 0x300 + i */
     loc EM_WSIZE
     loc 4
     cuu
     cal $fail
     asp 4
 3
-    lol b
+    lal p4
+    loi EM_PSIZE
+    loi 1         /* byte from src */
     lal p2
     loi EM_PSIZE
     loi 1         /* byte from 2nd copy */
-    loc 1
-    loc EM_WSIZE
-    cii
-    beq *2
+    cms EM_WSIZE
+    zeq *2
     loc (2 * 256)
     lol i
-    adi EM_WSIZE
+    adi EM_WSIZE  /* 0x200 + i */
     loc EM_WSIZE
     loc 4
     cuu
     cal $fail
     asp 4
 2
-    lol b
+    lal p4
+    loi EM_PSIZE
+    loi 1         /* byte from src */
     lal p1
     loi EM_PSIZE
     loi 1         /* byte from 1st copy */
-    loc 1
-    loc EM_WSIZE
-    cii
-    beq *1
+    cms EM_WSIZE
+    zeq *1
     loc (1 * 256)
     lol i
-    adi EM_WSIZE
+    adi EM_WSIZE  /* 0x100 + i */
     loc EM_WSIZE
     loc 4
     cuu
