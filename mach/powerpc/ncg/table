@@ -52,11 +52,9 @@ REGISTERS
 	 *   r13, r14, ..., r31: GPR, REG regvar(reg_any).
 	 */
 
-	r0, sp, fp  : GPR.
-	r3          : GPR, REG, REG3.
-
-	r4, r5, r6, r7, r8, r9, r10, r11, r12
-	  : GPR, REG.
+	r0, sp, fp, r12                   : GPR.
+	r3                                : GPR, REG, REG3.
+	r4, r5, r6, r7, r8, r9, r10, r11  : GPR, REG.
 
 	r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24,
 	r25, r26, r27, r28, r29, r30, r31
@@ -88,6 +86,10 @@ REGISTERS
 	lr, ctr     : SPR.
 	cr0         : CR.
 
+	/* The stacking rules and the splitting coercions can't
+	 * allocate registers.  We use r12 in the splitting coercions,
+	 * and these scratch registers in the stacking rules.
+	 */
 #define RSCRATCH r0
 #define FSCRATCH f0
 
@@ -697,7 +699,6 @@ STACKINGRULES
 		gen bug {LABEL, "STACKING DLOCAL"}
 
 
-
 COERCIONS
 
 	from STACK
@@ -733,16 +734,6 @@ COERCIONS
 		uses REG=%1
 		yields %a
 
-	/*
-	 * There is no coercion from IND_ALL_D to REG REG, because
-	 * coercions can't allocate registers for intermediate values.
-	 *
-	 * A coercion to split IND_RC_D into two IND_RC_W, without
-	 * allocating an intermediate register, would yield
-	 *   {IND_RC_W, %1.val, %1.off+4}
-	 * but %1.off+4 might overflow a signed 16-bit integer.
-	 */
-
 	from FLOAT_D
 		uses FREG=%1
 		yields %a
@@ -751,6 +742,23 @@ COERCIONS
 		uses FSREG=%1
 		yields %a
 
+	/* Splitting coercions can't allocate registers.
+	 * PowerPC can't add r0 + constant.  Use r12.
+	 */
+
+	from IND_RC_D %off<=0x7FFA
+		yields
+			{IND_RC_W, %1.reg, %1.off+4}
+			{IND_RC_W, %1.reg, %1.off}
+
+	from IND_RC_D
+		/* Don't move to %1.reg; it might be a regvar. */
+		gen move {SUM_RC, %1.reg, %1.off}, r12
+		yields {IND_RC_W, r12, 4} {IND_RC_W, r12, 0}
+
+	from IND_RR_D
+		gen move {SUM_RR, %1.reg1, %1.reg2}, r12
+		yields {IND_RC_W, r12, 4} {IND_RC_W, r12, 0}
 
 
 PATTERNS
