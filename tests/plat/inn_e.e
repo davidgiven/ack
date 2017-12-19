@@ -14,6 +14,9 @@
     zeq *1
 
     loc __LINE__
+    loc EM_WSIZE
+    loc 4
+    cuu
     cal $fail
     ass EM_WSIZE
 1
@@ -31,6 +34,9 @@
     zne *2
 
     loc __LINE__
+    loc EM_WSIZE
+    loc 4
+    cuu
     cal $fail
     ass EM_WSIZE
 2
@@ -49,6 +55,9 @@
     zeq *3
 
     loc __LINE__
+    loc EM_WSIZE
+    loc 4
+    cuu
     cal $fail
     ass EM_WSIZE
 3
@@ -67,11 +76,12 @@
     zne *4
 
     loc __LINE__
+    loc EM_WSIZE
+    loc 4
+    cuu
     cal $fail
     ass EM_WSIZE
 4
 
     cal $finished
-    ret 0
-    
     end
