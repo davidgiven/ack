@@ -2,12 +2,16 @@
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
- * Test _rol_ (rotate left) and _ror_ (rotate right).
+ * Tests _rol_ (rotate left) and _ror_ (rotate right).  Several back
+ * ends provide _rol_ and _ror_, but as of year 2017, the compilers
+ * and optimizers had never emit _rol_ nor _ror_.
  *
  * By tradition, _rol_ and _ror_ can't rotate values shorter than the
  * word size, or longer than 4 bytes.
  *  - If word size is 2, then try rotating 2-byte and 4-byte values.
  *  - If word size is 4, then try rotating 4-byte values.
+ *
+ * You can cheat this test if _cmu_ always pushes zero.
  */
 
 #if EM_WSIZE == 2

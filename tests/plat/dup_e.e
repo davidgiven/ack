@@ -2,8 +2,10 @@
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
- * Test _dup_ and _dus_ by loading 20 bytes from _src_, then making
- * and checking some duplicates.
+ * Tests _dup_ and _dus_ by loading 20 bytes from _src_, then making
+ * and checking some duplicates.  The compilers might never _dup_ or
+ * _dus_ with large sizes, so the compilers might work even if this
+ * test fails.  You can cheat this test if _cms_ always pushes zero.
  */
 
     exa src

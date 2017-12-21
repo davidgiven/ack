@@ -2,8 +2,10 @@
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
- * Test _exg_ by loading 40 bytes from _src_, then exchanging 20 and
- * 20 bytes, and checking the result.
+ * Tests _exg_ by loading 40 bytes from _src_, then exchanging 20 and
+ * 20 bytes, and checking the result.  The compilers might never _exg_
+ * large sizes, so the compilers might work even if this test fails.
+ * You can cheat this test if _cms_ always pushes zero.
  */
 
     exa src
