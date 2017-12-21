@@ -17,7 +17,12 @@ definerule("plat_testsuite",
 			"tests/plat/*.p",
 			"tests/plat/b/*.b",
 			"tests/plat/bugs/bug-22-inn_mod.mod",
-			"tests/plat/bugs/bug-62-notvar_var_e.c"
+			"tests/plat/bugs/bug-62-notvar_var_e.c",
+			"tests/plat/m2/ConvTest_mod.mod",
+			"tests/plat/m2/NestProc_mod.mod",
+			"tests/plat/m2/OpenArray_mod.mod",
+			"tests/plat/m2/Set100_mod.mod",
+			"tests/plat/m2/StringTest_mod.mod"
 		)
 
 		acklibrary {
