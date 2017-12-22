@@ -9,7 +9,6 @@ INT64 = 8
 
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
-SL_OFFSET = 8   /* Offset of static link */
 
 #define COMMENT(n) /* comment {LABEL, n} */
 
@@ -18,6 +17,12 @@ SL_OFFSET = 8   /* Offset of static link */
 
 #define smalls(n) sfit(n, 16)
 #define smallu(n) ufit(n, 16)
+
+/* Finds FRAME_V tokens that overlap myoff, mysize. */
+#define fover(myoff, mysize) (%off+%size>(myoff) && %off<((myoff)+(mysize)))
+
+/* Checks if we can use {LXFRAME, x}. */
+#define nicelx(x) ((x)>=1 && (x)<=0x8000)
 
 #define lo(n) ((n) & 0xFFFF)
 #define hi(n) (((n)>>16) & 0xFFFF)
@@ -138,6 +143,8 @@ TOKENS
 	DIV_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 signed */
 	DIV_RR_U    = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 unsigned */
 
+/* Indirect loads and stores */
+
 	IND_RC_B    = { GPR reg; INT off; }    4    off "(" reg ")".
 	IND_RL_B    = { GPR reg; ADDR adr; }   4    "lo16[" adr "](" reg ")".
 	IND_RR_B    = { GPR reg1; GPR reg2; }  4.
@@ -154,6 +161,23 @@ TOKENS
 	IND_RL_D    = { GPR reg; ADDR adr; }   8    "lo16[" adr "](" reg ")".
 	IND_RR_D    = { GPR reg1; GPR reg2; }  8.
 
+/* Local variables in frame */
+
+	FRAME_B     = { INT level; GPR reg; INT off; INT size; }
+	                                       4    off "(" reg ")".
+	FRAME_H     = { INT level; GPR reg; INT off; INT size; }
+	                                       4    off "(" reg ")".
+	FRAME_H_S   = { INT level; GPR reg; INT off; INT size; }
+	                                       4    off "(" reg ")".
+	FRAME_W     = { INT level; GPR reg; INT off; INT size; }
+	                                       4    off "(" reg ")".
+	FRAME_D     = { INT level; GPR reg; INT off; INT size; }
+	                                       8    off "(" reg ")".
+
+	LXFRAME     = { INT level; }           4.
+
+/* Bitwise logic */
+
 	NOT_R       = { GPR reg; }             4.   /* ~reg */
 	AND_RIS     = { GPR reg; INT valhi; }  4.
 	AND_RC      = { GPR reg; INT val; }    4.
@@ -169,6 +193,8 @@ TOKENS
 	NAND_RR     = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 & reg2) */
 	NOR_RR      = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 | reg2) */
 	EQV_RR      = { GPR reg1; GPR reg2; }  4.   /* ~(reg1 ^ reg2) */
+
+/* Comparisons */
 
 	COND_RC            = { GPR reg; INT val; }    4.
 	COND_RR            = { GPR reg1; GPR reg2; }  4.
@@ -200,27 +226,37 @@ SETS
 
 	CONST           = C + CONST_STACK.
 
-	IND_ALL_B          = IND_RC_B + IND_RL_B + IND_RR_B.
-	IND_ALL_H          = IND_RC_H + IND_RL_H + IND_RR_H +
-	                     IND_RC_H_S + IND_RL_H_S + IND_RR_H_S.
-	IND_ALL_W          = IND_RC_W + IND_RL_W + IND_RR_W.
-	IND_ALL_D          = IND_RC_D + IND_RL_D + IND_RR_D.
+	SET_RC_B        = IND_RC_B + IND_RL_B + FRAME_B.
+	SET_RC_H        = IND_RC_H + IND_RL_H + FRAME_H.
+	SET_RC_H_S      = IND_RC_H_S + IND_RL_H_S + FRAME_H_S.
+	SET_RC_W        = IND_RC_W + IND_RL_W + FRAME_W.
+	SET_RC_D        = IND_RC_D + IND_RL_D + FRAME_D.
+
+	IND_ALL_B       = IND_RC_B + IND_RL_B + IND_RR_B.
+	IND_ALL_H       = IND_RC_H + IND_RL_H + IND_RR_H +
+	                  IND_RC_H_S + IND_RL_H_S + IND_RR_H_S.
+	IND_ALL_W       = IND_RC_W + IND_RL_W + IND_RR_W.
+	IND_ALL_D       = IND_RC_D + IND_RL_D + IND_RR_D.
+	IND_V           = IND_ALL_B + IND_ALL_H + IND_ALL_W + IND_ALL_D.
+
+	FRAME_V         = FRAME_B + FRAME_H + FRAME_H_S + FRAME_W + FRAME_D.
 
 	/* anything killed by sti (store indirect) */
-	MEMORY  = IND_ALL_B + IND_ALL_H + IND_ALL_W + IND_ALL_D.
+	MEMORY          = IND_V + FRAME_V.
 
 	/* any integer from stack that we can easily move to GPR */
 	INT_W   = REG + CONST_STACK + SEX_B + SEX_H +
 	          SUM_RIS + SUM_RC + SUM_RL + SUM_RR +
 	          SUB_RR + NEG_R + MUL_RR + DIV_RR + DIV_RR_U +
 	          IND_ALL_B + IND_ALL_H + IND_ALL_W +
+		  FRAME_B + FRAME_H + FRAME_H_S + FRAME_W +
 	          NOT_R + AND_RIS + AND_RC + AND_RR + ANDC_RR +
 	          OR_RIS + OR_RC + OR_RR + ORC_RR +
 	          XOR_RIS + XOR_RC + XOR_RR + NAND_RR + NOR_RR + EQV_RR +
 	          XEQ + XNE + XGT + XGE + XLT + XLE.
 
-	FLOAT_D = FREG + IND_ALL_D.
-	FLOAT_W = FSREG + IND_ALL_W.
+	FLOAT_D = FREG + IND_ALL_D + FRAME_D.
+	FLOAT_W = FSREG + IND_ALL_W + FRAME_W.
 
 
 INSTRUCTIONS
@@ -293,21 +329,21 @@ INSTRUCTIONS
   frsp            FSREG+LOCAL:wo, FREG:ro cost(4, 5).
   fsub            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 5).
   fsubs           FSREG+LOCAL:wo, FSREG:ro, FSREG:ro cost(4, 5).
-  lbz             GPR:wo, IND_RC_B+IND_RL_B:ro cost(4, 3).
+  lbz             GPR:wo, SET_RC_B:ro cost(4, 3).
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lfd             FPR+DLOCAL:wo, IND_RC_D+IND_RL_D:ro cost(4, 5).
+  lfd             FPR+DLOCAL:wo, SET_RC_D:ro cost(4, 5).
   lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
   lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
-  lfs             FSREG+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 4).
+  lfs             FSREG+LOCAL:wo, SET_RC_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
   lfsx            FSREG:wo, GPR:ro, GPR:ro cost(4, 4).
-  lha             GPR:wo, IND_RC_H_S+IND_RL_H_S:ro cost(4, 3).
+  lha             GPR:wo, SET_RC_H_S:ro cost(4, 3).
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lhz             GPR:wo, IND_RC_H+IND_RL_H:ro cost(4, 3).
+  lhz             GPR:wo, SET_RC_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lwzu            GPR:wo, IND_RC_W:rw cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR+LOCAL:wo, IND_RC_W+IND_RL_W:ro cost(4, 3).
+  lwz             GPR+LOCAL:wo, SET_RC_W:ro cost(4, 3).
   mfcr            GPR:wo cost(4,2).
   mfspr           GPR:wo, SPR:ro cost(4, 3).
   mtspr           SPR:wo, GPR:ro cost(4, 2).
@@ -336,17 +372,17 @@ INSTRUCTIONS
   sraw            GPR+LOCAL:wo, GPR:ro, GPR:ro cost(4, 2).
   srawi           GPR+LOCAL:wo, GPR:ro, CONST:ro cost(4, 2).
   srw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
-  stb             GPR:ro, IND_RC_B+IND_RL_B:rw cost(4, 3).
+  stb             GPR:ro, SET_RC_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stfd            FPR:ro, IND_RC_D+IND_RL_D:rw cost(4, 4).
+  stfd            FPR:ro, SET_RC_D:rw cost(4, 4).
   stfdu           FPR:ro, IND_RC_D:rw cost(4, 4).
   stfdx           FPR:ro, GPR:ro, GPR:ro cost(4, 4).
-  stfs            FSREG:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
+  stfs            FSREG:ro, SET_RC_W:rw cost(4, 3).
   stfsu           FSREG:ro, IND_RC_W:rw cost(4, 3).
   stfsx           FSREG:ro, GPR:ro, GPR:ro cost(4, 3).
-  sth             GPR:ro, IND_RC_H+IND_RL_H:rw cost(4, 3).
+  sth             GPR:ro, SET_RC_H:rw cost(4, 3).
   sthx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
-  stw             GPR:ro, IND_RC_W+IND_RL_W:rw cost(4, 3).
+  stw             GPR:ro, SET_RC_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stwu            GPR:ro, IND_RC_W:rw cost(4, 3).
   xor             GPR:wo, GPR:ro, GPR:ro.
@@ -439,7 +475,7 @@ MOVES
 
 /* Read byte */
 
-	from IND_RC_B+IND_RL_B to GPR
+	from SET_RC_B to GPR
 		gen lbz %2, %1
 
 	from IND_RR_B to GPR
@@ -447,7 +483,7 @@ MOVES
 
 /* Write byte */
 
-	from GPR to IND_RC_B+IND_RL_B
+	from GPR to SET_RC_B
 		gen stb %1, %2
 
 	from GPR to IND_RR_B
@@ -455,13 +491,13 @@ MOVES
 
 /* Read halfword (short) */
 
-	from IND_RC_H+IND_RL_H to GPR
+	from SET_RC_H to GPR
 		gen lhz %2, %1
 
 	from IND_RR_H to GPR
 		gen lhzx %2, %1.reg1, %1.reg2
 
-	from IND_RC_H_S+IND_RL_H_S to GPR
+	from SET_RC_H_S to GPR
 		gen lha %2, %1
 
 	from IND_RR_H_S to GPR
@@ -469,7 +505,7 @@ MOVES
 
 /* Write halfword */
 
-	from GPR to IND_RC_H+IND_RL_H
+	from GPR to SET_RC_H
 		gen sth %1, %2
 
 	from GPR to IND_RR_H
@@ -477,13 +513,13 @@ MOVES
 
 /* Read word */
 
-	from IND_RC_W+IND_RL_W to GPR
+	from SET_RC_W to GPR
 		gen lwz %2, %1
 
 	from IND_RR_W to GPR
 		gen lwzx %2, %1.reg1, %1.reg2
 
-	from IND_RC_W+IND_RL_W to FSREG
+	from SET_RC_W to FSREG
 		gen lfs %2, %1
 
 	from IND_RR_W to FSREG
@@ -491,13 +527,13 @@ MOVES
 
 /* Write word */
 
-	from GPR to IND_RC_W+IND_RL_W
+	from GPR to SET_RC_W
 		gen stw %1, %2
 
 	from GPR to IND_RR_W
 		gen stwx %1, %2.reg1, %2.reg2
 
-	from FSREG to IND_RC_W+IND_RL_W
+	from FSREG to SET_RC_W
 		gen stfs %1, %2
 
 	from FSREG to IND_RR_W
@@ -505,7 +541,7 @@ MOVES
 
 /* Read double */
 
-	from IND_RC_D+IND_RL_D to FPR
+	from SET_RC_D to FPR
 		gen lfd %2, %1
 
 	from IND_RR_D to FPR
@@ -513,11 +549,40 @@ MOVES
 
 /* Write double */
 
-	from FPR to IND_RC_D+IND_RL_D
+	from FPR to SET_RC_D
 		gen stfd %1, %2
 
 	from FPR to IND_RR_D
 		gen stfdx %1, %2.reg1, %2.reg2
+
+/* LXFRAME is a lexical frame from the static chain.  We define a move
+   so "uses REG={LXFRAME, $1}" may find a register with the same
+   frame, and not repeat the move.  This move can't search for a REG
+   with {LXFRAME, $1-1}, but must always start from fp.  The static
+   chain, if it exists, is the argument at fp + EM_BSIZE. */
+
+	from LXFRAME %level==1 to REG
+		gen	lwz %2, {IND_RC_W, fp, EM_BSIZE}
+	from LXFRAME %level==2 to REG
+		gen	lwz %2, {IND_RC_W, fp, EM_BSIZE}
+			/* PowerPC can't add r0 + EM_BSIZE,
+			 * so %2 must not be r0. */
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+	from LXFRAME %level==3 to REG
+		gen	lwz %2, {IND_RC_W, fp, EM_BSIZE}
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+	from LXFRAME %level==4 to REG
+		gen	lwz %2, {IND_RC_W, fp, EM_BSIZE}
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+			lwz %2, {IND_RC_W, %2, EM_BSIZE}
+	from LXFRAME to REG  /* assuming %level in 2 to 0x8000 */
+		gen	li %2, {C, %1.level-1}
+			mtspr ctr, %2
+			lwz %2, {IND_RC_W, fp, EM_BSIZE}
+		1:	lwz %2, {IND_RC_W, %2, EM_BSIZE}
+			bdnz {LABEL, "1b"}
 
 /* Logicals */
 
@@ -661,6 +726,11 @@ TESTS
 
 STACKINGRULES
 
+	/* We don't allow GPR-REG on the stack.  The intent is to ban
+	 * r0 from the stack, but this also bans fp from the stack.
+	 * This is odd because most other tables for ncg allow the
+	 * frame pointer on the stack.
+	 */
 	from REG to STACK
 		gen
 			COMMENT("stack REG")
@@ -759,6 +829,11 @@ COERCIONS
 	from IND_RR_D
 		gen move {SUM_RR, %1.reg1, %1.reg2}, r12
 		yields {IND_RC_W, r12, 4} {IND_RC_W, r12, 0}
+
+	from FRAME_D %off<=0x7FFA
+		yields
+			{FRAME_W, %1.level, %1.reg, %1.off+4, 4}
+			{FRAME_W, %1.level, %1.reg, %1.off, 4}
 
 
 PATTERNS
@@ -897,24 +972,47 @@ PATTERNS
 		uses REG={SUM_RIS, fp, his($1)}
 		yields {SUM_RC, %a, los($1)}
 
+	pat lal loi smalls($1) && $2==1    /* Load byte from local */
+		yields {FRAME_B, 0, fp, $1, 1}
+
+	/* Load half-word from local and sign-extend */
+	pat lal loi loc loc cii smalls($1) && $2==2 && $3==2 && $4==4
+		yields {FRAME_H_S, 0, fp, $1, 1}
+
+	pat lal loi smalls($1) && $2==2    /* Load half-word from local */
+		yields {FRAME_H, 0, fp, $1, 1}
+
 	/* Load word from local */
 	pat lol inreg($1)==reg_any || inreg($1)==reg_float
 		yields {LOCAL, $1}
+	pat lol smalls($1)
+		yields {FRAME_W, 0, fp, $1, 4}
 	pat lol
 		leaving
 			lal $1
 			loi 4
 
-	/* Load double-word from local */
-	pat ldl inreg($1)==reg_float
+	pat ldl inreg($1)==reg_float       /* Load double-word from local */
 		yields {DLOCAL, $1}
+	pat ldl smalls($1) && smalls($1+4)
+		/* smalls($1+4) implies FRAME_D %off<=0xFFFA */
+		yields {FRAME_D, 0, fp, $1, 8}
 	pat ldl
 		leaving
 			lal $1
 			loi 8
 
-	/* Store word to local */
-	pat stl inreg($1)==reg_any
+	pat lal sti smalls($1) && $2==1    /* Store byte to local */
+		with REG
+			kills IND_V, FRAME_V %level==0 && fover($1, 1)
+			gen move %1, {FRAME_B, 0, fp, $1, 1}
+
+	pat lal sti smalls($1) && $2==2    /* Store half-word to local */
+		with REG
+			kills IND_V, FRAME_V %level==0 && fover($1, 2)
+			gen move %1, {FRAME_H, 0, fp, $1, 2}
+
+	pat stl inreg($1)==reg_any         /* Store word to local */
 		with exact INT_W
 			/* ncg fails to infer that regvar($1) is dead! */
 			kills regvar($1)
@@ -924,58 +1022,69 @@ PATTERNS
 				lwz {LOCAL, $1}, {IND_RC_W, sp, 0}
 				addi sp, sp, {C, 4}
 	pat stl inreg($1)==reg_float
-		with exact FSREG+IND_ALL_W
+		with exact FLOAT_W
 			kills regvar_w($1, reg_float)
 			gen move %1, {FSREG_EXPR, regvar_w($1, reg_float)}
 		with STACK
 			gen
 				lfs {LOCAL, $1}, {IND_RC_W, sp, 0}
 				addi sp, sp, {C, 4}
+	pat stl smalls($1)
+		with REG+FSREG
+			kills IND_V, FRAME_V %level==0 && fover($1, 4)
+			gen move %1, {FRAME_W, 0, fp, $1, 4}
 	pat stl
 		leaving
 			lal $1
 			sti 4
 
-	/* Store double-word to local */
-	pat sdl inreg($1)==reg_float
-		with exact FREG+IND_ALL_D
+	pat sdl inreg($1)==reg_float       /* Store double-word to local */
+		with exact FLOAT_D
 			kills regvar_d($1, reg_float)
 			gen move %1, {FPR_EXPR, regvar_d($1, reg_float)}
 		with STACK
 			gen
 				lfd {DLOCAL, $1}, {IND_RC_D, sp, 0}
 				addi sp, sp, {C, 8}
+	pat sdl smalls($1) && smalls($1+4)
+		with REG REG
+			kills IND_V, FRAME_V %level==0 && fover($1, 8)
+			gen
+				move %1, {FRAME_W, 0, fp, $1, 4}
+				move %2, {FRAME_W, 0, fp, $1+4, 4}
+		with FREG
+			kills IND_V, FRAME_V %level==0 && fover($1, 4)
+			gen move %1, {FRAME_D, 0, fp, $1, 8}
 	pat sdl
 		leaving
 			lal $1
 			sti 8
 
-	/* Load indirect from local */
-	pat lil inreg($1)==reg_any
+	pat lil inreg($1)==reg_any         /* Load indirect from local */
 		yields {IND_RC_W, regvar($1), 0}
 	pat lil
 		leaving
 			lol $1
 			loi 4
 
-	pat sil                            /* Save to indirected local */
+	pat sil                            /* Store indirect to local */
 		leaving
 			lol $1
 			sti 4
 
-	pat zrl                             /* Zero local */
+	pat zrl                            /* Zero local */
 		leaving
 			loc 0
 			stl $1
 
-	pat inl                             /* Increment local */
+	pat inl                            /* Increment local */
 		leaving
 			lol $1
 			loc 1
 			adi 4
 			stl $1
 
-	pat del                             /* Decrement local */
+	pat del                            /* Decrement local */
 		leaving
 			lol $1
 			loc 1
@@ -983,9 +1092,87 @@ PATTERNS
 			stl $1
 
 
+/* Local variables of procedures on static chain */
+
+	/* lxa (lexical argument base) -> lxl (lexical local base) */
+	pat lxa adp nicelx($1)
+		leaving lxl $1 adp $2+EM_BSIZE
+	pat lxa lof nicelx($1)
+		leaving lxl $1 lof $2+EM_BSIZE
+	pat lxa ldf nicelx($1)
+		leaving lxl $1 ldf $2+EM_BSIZE
+	pat lxa stf nicelx($1)
+		leaving lxl $1 stf $2+EM_BSIZE
+	pat lxa sdf nicelx($1)
+		leaving lxl $1 stf $2+EM_BSIZE
+	pat lxa $1==0 || nicelx($1)
+		leaving lxl $1 adp EM_BSIZE
+
+	/* Load locals in statically enclosing procedures */
+	pat lxl adp loi nicelx($1) && smalls($2) && $3==1
+		uses REG={LXFRAME, $1}
+		yields {FRAME_B, $1, %a, $2, 1}
+	pat lxl adp loi loc loc cii nicelx($1) && smalls($2) &&
+	                            $3==2 && $4==2 && $5==4
+		uses REG={LXFRAME, $1}
+		yields {FRAME_H_S, $1, %a, $2, 2}
+	pat lxl adp loi nicelx($1) && smalls($2) && $3==2
+		uses REG={LXFRAME, $1}
+		yields {FRAME_H, $1, %a, $2, 2}
+	pat lxl lof nicelx($1) && smalls($2)
+		uses REG={LXFRAME, $1}
+		yields {FRAME_W, $1, %a, $2, 4}
+	pat lxl ldf nicelx($1) && smalls($2) && smalls($2+4)
+		uses REG={LXFRAME, $1}
+		/* smalls($2+4) implies FRAME_D %off<=0xFFFA */
+		yields {FRAME_D, $1, %a, $2, 8}
+
+	/* Store locals in statically enclosing procedures */
+	pat lxl adp sti nicelx($1) && smalls($2) && $3==1
+		with REG
+			kills IND_V, FRAME_V %level==$1 && fover($2, 1)
+			uses REG={LXFRAME, $1}
+			gen move %1, {FRAME_B, $1, %a, $2, 1}
+	pat lxl adp sti nicelx($1) && smalls($2) && $3==2
+		with REG
+			kills IND_V, FRAME_V %level==$1 && fover($2, 2)
+			uses REG={LXFRAME, $1}
+			gen move %1, {FRAME_H, $1, %a, $2, 2}
+	pat lxl stf nicelx($1) && smalls($2)
+		with REG+FSREG
+			kills IND_V, FRAME_V %level==$1 && fover($2, 4)
+			uses REG={LXFRAME, $1}
+			gen move %1, {FRAME_W, $1, %a, $2, 4}
+	pat lxl sdf nicelx($1) && smalls($2) && smalls($2+4)
+		with REG REG
+			kills IND_V, FRAME_V %level==$1 && fover($2, 8)
+			uses REG={LXFRAME, $1}
+			gen
+				move %1, {FRAME_W, $1, %a, $2, 4}
+				move %2, {FRAME_W, $1, %a, $2+4, 4}
+		with FREG
+			kills IND_V, FRAME_V %level==$1 && fover($2, 8)
+			uses REG={LXFRAME, $1}
+			gen move %1, {FRAME_D, $1, %a, $2, 8}
+
+	/* Programs use "lxl cal" to pass the static chain and call a
+	 * nested procedure.  This must push a token LXFRAME or the
+	 * register fp to the real stack. */
+
+	/* Local base of procedure on static chain */
+	pat lxl nicelx($1)
+		uses REG={LXFRAME, $1}
+		yields %a  /* Can't yield LXFRAME. */
+
+	pat lxl $1==0                      /* Our local base */
+		with STACK
+			gen stwu fp, {IND_RC_W, sp, 0-4}
+			/* Can't yield fp. */
+
+
 /* Global variables */
 
-	pat lpi                            /* Load address of external function */
+	pat lpi                            /* Load address of function */
 		leaving
 			lae $1
 
@@ -2008,30 +2195,11 @@ PATTERNS
 		leaving
 			ret 0
 
-	/*
-	 * Lexical local base: lxl 0 yields our fp, lxl n yields the
-	 * fp of the nth statically enclosing procedure.
+	/* Our caller's local base, "lxl 0 dch", appears in
+	 * lang/cem/libcc.ansi/setjmp/setjmp.e, lang/m2/libm2/par_misc.e
 	 */
-	pat lxl $1==0
-		leaving
-			lor 0
-	pat lxl $1==1
-		yields {IND_RC_W, fp, SL_OFFSET}
-	pat lxl $1==2
-		uses REG={IND_RC_W, fp, SL_OFFSET}
-		yields {IND_RC_W, %a, SL_OFFSET}
-	pat lxl $1==3
-		uses REG={IND_RC_W, fp, SL_OFFSET}, reusing %a, REG
-		gen move {IND_RC_W, %a, SL_OFFSET}, %b
-		yields {IND_RC_W, %b, SL_OFFSET}
-	pat lxl $1>=4 && $1<=0x8000
-		uses REG={IND_RC_W, fp, SL_OFFSET},
-		     REG={CONST_0000_7FFF, $1-1}
-		gen
-			mtspr ctr, %b
-		1:	lwz %a, {IND_RC_W, %a, SL_OFFSET}
-			bdnz {LABEL, "1b"}
-		yields %a
+	pat lxl dch $1==0
+		yields {IND_RC_W, fp, FP_OFFSET}
 
 	pat dch               /* Dynamic chain: LB -> caller's LB */
 		with REG
@@ -2040,11 +2208,6 @@ PATTERNS
 	pat lpb                            /* LB -> argument base */
 		leaving
 			adp EM_BSIZE
-
-	pat lxa                            /* Lexical argument base */
-		leaving
-			lxl $1
-			lpb
 
 	pat gto                            /* longjmp */
 		with STACK
@@ -2058,26 +2221,20 @@ PATTERNS
 				bctr.
 
 	pat lor $1==0                      /* Load local base */
-		uses REG
-		gen
-			move fp, %a
-		yields %a
+		leaving lxl 0
 
 	pat lor $1==1                      /* Load stack pointer */
-		uses REG
-		gen
-			move sp, %a
-		yields %a
+		with STACK
+			uses REG=sp
+			yields %a  /* Can't yield sp. */
 
 	pat str $1==0                      /* Store local base */
 		with REG
-			gen
-				move %1, fp
+			gen move %1, fp
 
 	pat str $1==1                      /* Store stack pointer */
 		with REG
-			gen
-				move %1, sp
+			gen move %1, sp
 
 	pat lae rck $2==4                  /* Range check */
 		with REG
