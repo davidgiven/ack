@@ -927,11 +927,6 @@ PATTERNS
 		leaving
 			cal ".exg"
 
-	pat ste loe $1==$2                 /* Store then load external */
-		leaving
-			dup 4
-			ste $1
-
 
 /* Type conversions */
 
@@ -1060,9 +1055,7 @@ PATTERNS
 			lal $1
 			sti 8
 
-	pat lil inreg($1)==reg_any         /* Load indirect from local */
-		yields {IND_RC_W, regvar($1), 0}
-	pat lil
+	pat lil                            /* Load indirect from local */
 		leaving
 			lol $1
 			loi 4
