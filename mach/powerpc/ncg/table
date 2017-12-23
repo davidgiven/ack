@@ -2089,7 +2089,7 @@ PATTERNS
 	pat lfr $1==INT32                  /* Load function result, word */
 		yields r3
 
-	pat lfr $1==INT64                  /* Load function result, double-word */
+	pat lfr $1==INT64           /* Load function result, double-word */
 		yields r4 r3
 
 	pat ret $1==0                      /* Return from procedure */
@@ -2108,10 +2108,21 @@ PATTERNS
 	pat ret $1==4                      /* Return from procedure, word */
 		with REG3
 			leaving ret 0
+		with STACK
+			gen lwz r3, {IND_RC_W, sp, 0}
+			leaving ret 0
 
 	pat ret $1==8                      /* Return from proc, double-word */
-		with REG3 REG
+		with REG3 INT_W
 			gen move %2, r4
+			leaving ret 0
+		with REG3 STACK
+			gen lwz r4, {IND_RC_W, sp, 0}
+			leaving ret 0
+		with STACK
+			gen
+				lwz r3, {IND_RC_W, sp, 0}
+				lwz r4, {IND_RC_W, sp, 4}
 			leaving ret 0
 
 	/*
