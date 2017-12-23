@@ -1,5 +1,5 @@
 
-/* PowerPC desciptor table for ACK target optimizer */
+/* PowerPC table for ACK target optimizer */
 
 MAXOP 3;
 LABEL_STARTER '.';
@@ -16,10 +16,33 @@ X, Y, Z             { TRUE };
 addi  RNZ, RNZ, 0            -> ;
 addis RNZ, RNZ, 0            -> ;
 
+or X, Y, Y                   -> mr X, Y ;
+or. X, Y, Y                  -> mr. X, Y ;
+
 mr X, X                      -> ;
 fmr X, X                     -> ;
 
-or X, Y, Z : or. X, X, X     -> or. X, Y, Z ;
+add X, Y, Z   : mr. X, X     -> add. X, Y, Z ;
+and X, Y, Z   : mr. X, X     -> and. X, Y, Z ;
+andc X, Y, Z  : mr. X, X     -> andc. X, Y, Z ;
+divw X, Y, Z  : mr. X, X     -> divw. X, Y, Z ;
+divwu X, Y, Z : mr. X, X     -> divwu. X, Y, Z ;
+extsb X, Y, Z : mr. X, X     -> extsb. X, Y, Z ;
+extsh X, Y, Z : mr. X, X     -> extsh. X, Y, Z ;
+eqv X, Y, Z   : mr. X, X     -> eqv. X, Y, Z ;
+mullw X, Y, Z : mr. X, X     -> mullw. X, Y, Z ;
+nand X, Y, Z  : mr. X, X     -> nand. X, Y, Z ;
+nor X, Y, Z   : mr. X, X     -> nor. X, Y, Z ;
+or X, Y, Z    : mr. X, X     -> or. X, Y, Z ;
+orc X, Y, Z   : mr. X, X     -> orc. X, Y, Z ;
+slw X, Y, Z   : mr. X, X     -> slw. X, Y, Z ;
+slwi X, Y, Z  : mr. X, X     -> slwi. X, Y, Z ;
+subf X, Y, Z  : mr. X, X     -> subf. X, Y, Z ;
+sraw X, Y, Z  : mr. X, X     -> sraw. X, Y, Z ;
+srawi X, Y, Z : mr. X, X     -> srawi. X, Y, Z ;
+srw X, Y, Z   : mr. X, X     -> srw. X, Y, Z ;
+srwi X, Y, Z  : mr. X, X     -> srwi. X, Y, Z ;
+xor X, Y, Z   : mr. X, X     -> xor. X, Y, Z ;
 
 b X : labdef X               -> labdef X ;
 

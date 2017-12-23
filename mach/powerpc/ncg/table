@@ -348,7 +348,7 @@ INSTRUCTIONS
   or              GPR:wo, GPR:ro, GPR:ro.
     mr            GPR:wo, GPR:ro.
   orX "or."       GPR:wo:cc, GPR:ro, GPR:ro.
-    orX_readonly "or." GPR:ro:cc, GPR:ro, GPR:ro.
+    mrX_readonly "mr." GPR:ro:cc, GPR:ro.
   orc             GPR:wo, GPR:ro, GPR:ro.
   ori             GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
   oris            GPR:wo, GPR:ro, CONST:ro.
@@ -707,15 +707,12 @@ MOVES
 
 TESTS
 
-	/* Given orX %1, %1, %1, ncgg says, "Instruction destroys %1,
-	 * not allowed here".  We use orX_readonly to trick ncgg.
-	 *
-	 * Using "or." and not "mr." because mach/powerpc/top/table
-	 * was optimizing "or." and not "mr.".
+	/* Given "mrX %1, %1", ncgg would say, "Instruction destroys
+	 * %1, not allowed here".  We use mrX_readonly to trick ncgg.
 	 */
 	to test GPR
 		gen
-			orX_readonly %1, %1, %1
+			mrX_readonly %1, %1
 
 
 STACKINGRULES
