@@ -2,18 +2,12 @@ EM_WSIZE = 4
 EM_PSIZE = 4
 EM_BSIZE = 8    /* two words saved in call frame */
 
-INT8 = 1        /* Size of values */
-INT16 = 2
-INT32 = 4
-INT64 = 8
-
 FP_OFFSET = 0   /* Offset of saved FP relative to our FP */
 PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 
 #define COMMENT(n) /* comment {LABEL, n} */
 
-
-#define nicesize(x) ((x)==INT8 || (x)==INT16 || (x)==INT32 || (x)==INT64)
+#define nicesize(x) ((x)==1 || (x)==2 || (x)==4 || (x)==8)
 
 #define smalls(n) sfit(n, 16)
 #define smallu(n) ufit(n, 16)
@@ -1176,35 +1170,35 @@ PATTERNS
 	pat loe                            /* Load word external */
 		leaving
 			lae $1
-			loi INT32
+			loi 4
 
 	pat ste                            /* Store word external */
 		leaving
 			lae $1
-			sti INT32
+			sti 4
 
 	pat lde                            /* Load double-word external */
 		leaving
 			lae $1
-			loi INT64
+			loi 8
 
 	pat sde                            /* Store double-word external */
 		leaving
 			lae $1
-			sti INT64
+			sti 8
 
-	pat zre                             /* Zero external */
+	pat zre                            /* Zero external */
 		leaving
 			loc 0
 			ste $1
 
-	pat ine                             /* Increment external */
+	pat ine                            /* Increment external */
 		leaving
 			loe $1
 			inc
 			ste $1
 
-	pat dee                             /* Decrement external */
+	pat dee                            /* Decrement external */
 		leaving
 			loe $1
 			dec
@@ -1216,27 +1210,27 @@ PATTERNS
 	pat lof                            /* Load word offsetted */
 		leaving
 			adp $1
-			loi INT32
+			loi 4
 
 	pat ldf                            /* Load double-word offsetted */
 		leaving
 			adp $1
-			loi INT64
+			loi 8
 
 	pat stf                            /* Store word offsetted */
 		leaving
 			adp $1
-			sti INT32
+			sti 4
 
 	pat sdf                            /* Store double-word offsetted */
 		leaving
 			adp $1
-			sti INT64
+			sti 8
 
 
 /* Loads and stores */
 
-	pat loi $1==INT8                   /* Load byte indirect */
+	pat loi $1==1                      /* Load byte indirect */
 		with REG
 			yields {IND_RC_B, %1, 0}
 		with exact SUM_RC
@@ -1246,8 +1240,8 @@ PATTERNS
 		with exact SUM_RR
 			yields {IND_RR_B, %1.reg1, %1.reg2}
 
-	pat loi loc loc cii $1==INT16 && $2==INT16 && $3==INT32
-	/* Load half-word indirect and sign extend */
+	/* Load half-word indirect and sign-extend */
+	pat loi loc loc cii $1==2 && $2==2 && $3==4
 		with REG
 			yields {IND_RC_H_S, %1, 0}
 		with exact SUM_RC
@@ -1257,7 +1251,7 @@ PATTERNS
 		with exact SUM_RR
 			yields {IND_RR_H_S, %1.reg1, %1.reg2}
 
-	pat loi $1==INT16                  /* Load half-word indirect */
+	pat loi $1==2                      /* Load half-word indirect */
 		with REG
 			yields {IND_RC_H, %1, 0}
 		with exact SUM_RC
@@ -1267,7 +1261,7 @@ PATTERNS
 		with exact SUM_RR
 			yields {IND_RR_H, %1.reg1, %1.reg2}
 
-	pat loi $1==INT32                  /* Load word indirect */
+	pat loi $1==4                      /* Load word indirect */
 		with REG
 			yields {IND_RC_W, %1, 0}
 		with exact SUM_RC
@@ -1277,7 +1271,7 @@ PATTERNS
 		with exact SUM_RR
 			yields {IND_RR_W, %1.reg1, %1.reg2}
 
-	pat loi $1==INT64                  /* Load double-word indirect */
+	pat loi $1==8                      /* Load double-word indirect */
 		with REG
 			yields {IND_RC_D, %1, 0}
 		with exact SUM_RC
@@ -1295,10 +1289,9 @@ PATTERNS
 	pat los $1==4                      /* Load arbitrary size */
 		with REG3 STACK
 			kills ALL
-			gen
-				bl {LABEL, ".los4"}
+			gen bl {LABEL, ".los4"}
 
-	pat sti $1==INT8                   /* Store byte indirect */
+	pat sti $1==1                      /* Store byte indirect */
 		with REG REG
 			kills MEMORY
 			gen move %2, {IND_RC_B, %1, 0}
@@ -1312,7 +1305,7 @@ PATTERNS
 			kills MEMORY
 			gen move %2, {IND_RR_B, %1.reg1, %1.reg2}
 
-	pat sti $1==INT16                  /* Store half-word indirect */
+	pat sti $1==2                      /* Store half-word indirect */
 		with REG REG
 			kills MEMORY
 			gen move %2, {IND_RC_H, %1, 0}
@@ -1326,7 +1319,7 @@ PATTERNS
 			kills MEMORY
 			gen move %2, {IND_RR_H, %1.reg1, %1.reg2}
 
-	pat sti $1==INT32                  /* Store word indirect */
+	pat sti $1==4                      /* Store word indirect */
 		with REG REG+FSREG
 			kills MEMORY
 			gen move %2, {IND_RC_W, %1, 0}
@@ -1340,7 +1333,7 @@ PATTERNS
 			kills MEMORY
 			gen move %2, {IND_RR_W, %1.reg1, %1.reg2}
 
-	pat sti $1==INT64                  /* Store double-word indirect */
+	pat sti $1==8                      /* Store double-word indirect */
 		with REG FREG
 			kills MEMORY
 			gen move %2, {IND_RC_D, %1, 0}
@@ -1367,8 +1360,7 @@ PATTERNS
 	pat sts $1==4                      /* Store arbitrary size */
 		with REG3 STACK
 			kills ALL
-			gen
-				bl {LABEL, ".sts4"}
+			gen bl {LABEL, ".sts4"}
 
 
 /* Arithmetic wrappers */
@@ -1560,7 +1552,7 @@ PATTERNS
 		leaving
 			cal ".xor"
 
-	pat com $1==INT32                  /* NOT word */
+	pat com $1==4                      /* NOT word */
 		with exact AND_RR
 			yields {NAND_RR, %1.reg1, %1.reg2}
 		with exact OR_RR
@@ -1680,8 +1672,7 @@ PATTERNS
 /* Arrays */
 
 	pat aar $1==4                      /* Address of array element */
-		leaving
-			cal ".aar4"
+		leaving cal ".aar4"
 
 	pat lar $1==4                      /* Load from array */
 		with STACK
@@ -1993,7 +1984,7 @@ PATTERNS
 	 * puts gt in the sign bit, to reverse the comparison.
 	 */
 
-	pat cmi $1==INT32                  /* Signed tristate compare */
+	pat cmi $1==4                      /* Signed tristate compare */
 		with REG CONST2
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			gen rlwinm %a, %a, {C, 1}, {C, 31}, {C, 0}
@@ -2007,7 +1998,7 @@ PATTERNS
 			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
-	pat cmu $1==INT32                  /* Unsigned tristate compare */
+	pat cmu $1==4                      /* Unsigned tristate compare */
 		with REG UCONST2
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			gen rlwinm %a, %a, {C, 1}, {C, 31}, {C, 0}
@@ -2023,11 +2014,11 @@ PATTERNS
 
 	pat cmp                            /* Compare pointers */
 		leaving
-			cmu INT32
+			cmu 4
 
-	pat cms $1==INT32                  /* Compare blocks (word sized) */
+	pat cms $1==4                      /* Compare blocks (word sized) */
 		leaving
-			cmi INT32
+			cmi 4
 
 	pat cms defined($1)
 		leaving
@@ -2041,34 +2032,32 @@ PATTERNS
 
 /* Other branching and labelling */
 
+	/* During an unconditional jump, if the top element on the
+	 * stack has 4 bytes, then we hold it in register r3.
+	 */
 	pat lab topeltsize($1)==4 && !fallthrough($1)
 		kills ALL
-		gen
-			labeldef $1
-			yields r3
+		gen labeldef $1
+		yields r3
 
 	pat lab topeltsize($1)==4 && fallthrough($1)
 		with REG3 STACK
-		kills ALL
-		gen
-			labeldef $1
-		yields r3
+			kills ALL
+			gen labeldef $1
+			yields r3
 
-	pat lab topeltsize($1)!=4
+	pat lab topeltsize($1)!=4          /* Label without r3 */
 		with STACK
-		kills ALL
-		gen
-			labeldef $1
+			kills ALL
+			gen labeldef $1
 
-	pat bra topeltsize($1)==4          /* Unconditional jump with TOS GPRister */
+	pat bra topeltsize($1)==4          /* Branch with r3 */
 		with REG3 STACK
-		gen
-			b {LABEL, $1}
+			gen b {LABEL, $1}
 
-	pat bra topeltsize($1)!=4          /* Unconditional jump without TOS GPRister */
+	pat bra topeltsize($1)!=4          /* Branch without r3 */
 		with STACK
-		gen
-			b {LABEL, $1}
+			gen b {LABEL, $1}
 
 
 /* Miscellaneous */
@@ -2076,8 +2065,7 @@ PATTERNS
 	pat cal                            /* Call procedure */
 		with STACK
 			kills ALL
-			gen
-				bl {LABEL, $1}
+			gen bl {LABEL, $1}
 
 	pat cai                            /* Call procedure indirect */
 		with REG STACK
@@ -2086,10 +2074,10 @@ PATTERNS
 				mtspr ctr, %1
 				bctrl.
 
-	pat lfr $1==INT32                  /* Load function result, word */
+	pat lfr $1==4                      /* Load function result, word */
 		yields r3
 
-	pat lfr $1==INT64           /* Load function result, double-word */
+	pat lfr $1==8               /* Load function result, double-word */
 		yields r4 r3
 
 	pat ret $1==0                      /* Return from procedure */
@@ -2151,14 +2139,12 @@ PATTERNS
 	pat csa                            /* Array-lookup switch */
 		with STACK
 			kills ALL
-			gen
-				b {LABEL, ".csa"}
+			gen b {LABEL, ".csa"}
 
 	pat csb                            /* Table-lookup switch */
 		with STACK
 			kills ALL
-			gen
-				b {LABEL, ".csb"}
+			gen b {LABEL, ".csb"}
 
 
 /* EM specials */
@@ -2174,30 +2160,24 @@ PATTERNS
 			ste "hol0"
 
 	pat lni                            /* Increment line number */
-		leaving
-			ine "hol0"
+		leaving ine "hol0"
 
 	pat lim                            /* Load EM trap ignore mask */
-		leaving
-			lde ".ignmask"
+		leaving lde ".ignmask"
 
 	pat sim                            /* Store EM trap ignore mask */
-		leaving
-			ste ".ignmask"
+		leaving ste ".ignmask"
 
 	pat trp                            /* Raise EM trap */
 		with REG3
 			kills ALL
-			gen
-				bl {LABEL, ".trap"}
+			gen bl {LABEL, ".trap"}
 
 	pat sig                            /* Set trap handler */
-		leaving
-			ste ".trppc"
+		leaving ste ".trppc"
 
 	pat rtt                            /* Return from trap */
-		leaving
-			ret 0
+		leaving ret 0
 
 	/* Our caller's local base, "lxl 0 dch", appears in
 	 * lang/cem/libcc.ansi/setjmp/setjmp.e, lang/m2/libm2/par_misc.e
@@ -2210,8 +2190,7 @@ PATTERNS
 			yields {IND_RC_W, %1, FP_OFFSET}
 
 	pat lpb                            /* LB -> argument base */
-		leaving
-			adp EM_BSIZE
+		leaving adp EM_BSIZE
 
 	pat gto                            /* longjmp */
 		with STACK
@@ -2253,15 +2232,14 @@ PATTERNS
 
 /* Single-precision floating-point */
 
-	pat zrf $1==INT32                  /* Push zero */
+	pat zrf $1==4                      /* Push zero */
 		leaving
 			loe ".fs_00000000"
 
 	pat adf $1==4                      /* Add single */
 		with FSREG FSREG
 			uses reusing %1, FSREG
-			gen
-				fadds %a, %2, %1
+			gen fadds %a, %2, %1
 			yields %a
 	pat adf stl $1==4 && inreg($2)==reg_float
 		with FSREG FSREG
@@ -2270,8 +2248,7 @@ PATTERNS
 	pat sbf $1==4                      /* Subtract single */
 		with FSREG FSREG
 			uses reusing %1, FSREG
-			gen
-				fsubs %a, %2, %1
+			gen fsubs %a, %2, %1
 			yields %a
 	pat sbf stl $1==4 && inreg($2)==reg_float
 		with FSREG FSREG
@@ -2280,34 +2257,31 @@ PATTERNS
 	pat mlf $1==4                      /* Multiply single */
 		with FSREG FSREG
 			uses reusing %1, FSREG
-			gen
-				fmuls %a, %2, %1
+			gen fmuls %a, %2, %1
 			yields %a
 	pat mlf stl $1==4 && inreg($2)==reg_float
 		with FSREG FSREG
 			gen fmuls {LOCAL, $2}, %2, %1
 
-	pat dvf $1==INT32                  /* Divide single */
+	pat dvf $1==4                      /* Divide single */
 		with FSREG FSREG
 			uses reusing %1, FSREG
-			gen
-				fdivs %a, %2, %1
+			gen fdivs %a, %2, %1
 			yields %a
 	pat dvf stl $1==4 && inreg($2)==reg_float
 		with FSREG FSREG
 			gen fdivs {LOCAL, $2}, %2, %1
 
-	pat ngf $1==INT32                  /* Negate single */
+	pat ngf $1==4                      /* Negate single */
 		with FSREG
 			uses reusing %1, FSREG
-			gen
-				fneg %a, %1
+			gen fneg %a, %1
 			yields %a
 	pat ngf stl $1==4 && inreg($2)==reg_float
 		with FSREG
 			gen fneg {LOCAL, $2}, %1
 
-	pat cmf $1==INT32                  /* Compare single */
+	pat cmf $1==4                      /* Compare single */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
 			gen extlwi %a, %a, {C, 2}, {C, 0}
@@ -2358,12 +2332,11 @@ PATTERNS
 	pat cmf zlt $1==4    call cmf4zxx("blt")
 	pat cmf zle $1==4    call cmf4zxx("ble")
 
-	pat loc loc cff $1==INT32 && $2==INT64 /* Convert single to double */
+	pat loc loc cff $1==4 && $2==8     /* Convert single to double */
 		with FSREG
 			yields %1.1
 
-	/* Convert single to signed int */
-	pat loc loc cfi $1==4 && $2==4
+	pat loc loc cfi $1==4 && $2==4     /* Single to signed int */
 		leaving
 			loc 4
 			loc 8
@@ -2372,8 +2345,7 @@ PATTERNS
 			loc 4
 			cfi
 
-	/* Convert single to unsigned int */
-	pat loc loc cfu $1==4 && $2==4
+	pat loc loc cfu $1==4 && $2==4     /* Single to unsigned int */
 		leaving
 			loc 4
 			loc 8
@@ -2382,8 +2354,7 @@ PATTERNS
 			loc 4
 			cfu
 
-	/* Convert signed int to single */
-	pat loc loc cif $1==4 && $2==4
+	pat loc loc cif $1==4 && $2==4     /* Signed int to single */
 		leaving
 			loc 4
 			loc 8
@@ -2392,8 +2363,7 @@ PATTERNS
 			loc 4
 			cff
 
-	/* Convert unsigned int to single */
-	pat loc loc cuf $1==4 && $2==4
+	pat loc loc cuf $1==4 && $2==4     /* Unsigned int to single */
 		leaving
 			loc 4
 			loc 8
@@ -2405,15 +2375,13 @@ PATTERNS
 
 /* Double-precision floating-point */
 
-	pat zrf $1==INT64                  /* Push zero */
-		leaving
-			lde ".fd_00000000"
+	pat zrf $1==8                      /* Push zero */
+		leaving lde ".fd_00000000"
 
 	pat adf $1==8                      /* Add double */
 		with FREG FREG
 			uses reusing %1, FREG
-			gen
-				fadd %a, %2, %1
+			gen fadd %a, %2, %1
 			yields %a
 	pat adf sdl $1==8 && inreg($2)==reg_float
 		with FREG FREG
@@ -2422,8 +2390,7 @@ PATTERNS
 	pat sbf $1==8                      /* Subtract double */
 		with FREG FREG
 			uses reusing %1, FREG
-			gen
-				fsub %a, %2, %1
+			gen fsub %a, %2, %1
 			yields %a
 	pat sbf sdl $1==8 && inreg($2)==reg_float
 		with FREG FREG
@@ -2432,8 +2399,7 @@ PATTERNS
 	pat mlf $1==8                      /* Multiply double */
 		with FREG FREG
 			uses reusing %1, FREG
-			gen
-				fmul %a, %2, %1
+			gen fmul %a, %2, %1
 			yields %a
 	pat mlf sdl $1==8 && inreg($2)==reg_float
 		with FREG FREG
@@ -2442,8 +2408,7 @@ PATTERNS
 	pat dvf $1==8                      /* Divide double */
 		with FREG FREG
 			uses reusing %1, FREG
-			gen
-				fdiv %a, %2, %1
+			gen fdiv %a, %2, %1
 			yields %a
 	pat dvf sdl $1==8 && inreg($2)==reg_float
 		with FREG FREG
@@ -2452,14 +2417,13 @@ PATTERNS
 	pat ngf $1==8                      /* Negate double */
 		with FREG
 			uses reusing %1, FREG
-			gen
-				fneg %a, %1
+			gen fneg %a, %1
 			yields %a
 	pat ngf sdl $1==8 && inreg($2)==reg_float
 		with FREG
 			gen fneg {DLOCAL, $2}, %1
 
-	pat cmf $1==INT64                  /* Compare double */
+	pat cmf $1==8                      /* Compare double */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
 			gen extlwi %a, %a, {C, 2}, {C, 0}
@@ -2521,8 +2485,7 @@ PATTERNS
 			gen frsp %a, %1
 			yields %a
 
-	/* Convert double to signed int */
-	pat loc loc cfi $1==8 && $2==4
+	pat loc loc cfi $1==8 && $2==4     /* Double to signed int */
 		with FREG STACK
 			uses reusing %1, FREG
 			gen
@@ -2530,26 +2493,18 @@ PATTERNS
 				stfdu %a, {IND_RC_D, sp, 0-8}
 				addi sp, sp, {C, 4}
 
-	/* Convert double to unsigned int */
-	pat loc loc cfu $1==8 && $2==4
-		leaving
-			cal ".cfu8"
+	pat loc loc cfu $1==8 && $2==4     /* Double to unsigned int */
+		leaving cal ".cfu8"
 
-	/* Convert signed int to double */
-	pat loc loc cif $1==4 && $2==8
-		leaving
-			cal ".cif8"
+	pat loc loc cif $1==4 && $2==8     /* Signed int to double */
+		leaving cal ".cif8"
 
-	/* Convert unsigned int to double */
-	pat loc loc cuf $1==4 && $2==8
-		leaving
-			cal ".cuf8"
+	pat loc loc cuf $1==4 && $2==8     /* Unsigned int to double */
+		leaving cal ".cuf8"
 
 	pat fef $1==8                      /* Split fraction, exponent */
-		leaving
-			cal ".fef8"
+		leaving cal ".fef8"
 
 	/* Multiply two doubles, then split fraction, integer */
 	pat fif $1==8
-		leaving
-			cal ".fif8"
+		leaving cal ".fif8"
