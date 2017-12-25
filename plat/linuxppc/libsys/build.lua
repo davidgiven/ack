@@ -4,7 +4,6 @@ acklibrary {
 		"./_syscall.s",
 		"./sigaction.s",
 		"./signal.c",
-		"./trap.s",
 		"plat/linux/libsys/_exit.c",
 		"plat/linux/libsys/_hol0.s",
 		"plat/linux/libsys/close.c",

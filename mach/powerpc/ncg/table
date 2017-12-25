@@ -2168,10 +2168,13 @@ PATTERNS
 	pat trp                            /* Raise EM trap */
 		with REG3
 			kills ALL
-			gen bl {LABEL, ".trap"}
+			gen bl {LABEL, ".trp"}
 
-	pat sig                            /* Set trap handler */
-		leaving ste ".trppc"
+	pat sig                            /* Set trap handler, yield old */
+		leaving
+			loe ".trppc"
+			exg 4
+			ste ".trppc"
 
 	pat rtt                            /* Return from trap */
 		leaving ret 0
@@ -2216,22 +2219,14 @@ PATTERNS
 		with REG
 			gen move %1, sp
 
-	pat lae rck $2==4                  /* Range check */
-		with REG
-			kills ALL
-			gen
-				cmpwi %1, {C, rom($1, 1)}
-				blt {LABEL, ".trap_erange"}
-				cmpwi %1, {C, rom($1, 2)}
-				bgt {LABEL, ".trap_erange"}
-			yields %1
+	pat rck $1==4                      /* Range check */
+		leaving cal ".rck"
 
 
 /* Single-precision floating-point */
 
 	pat zrf $1==4                      /* Push zero */
-		leaving
-			loe ".fs_00000000"
+		leaving loe ".fs_00000000"
 
 	pat adf $1==4                      /* Add single */
 		with FSREG FSREG

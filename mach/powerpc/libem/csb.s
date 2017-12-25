@@ -13,23 +13,20 @@
 	lwz r4, 4(sp)
 	addi sp, sp, 8
 
-	lwz r5, 0(r3)            ! load default
-	mtspr ctr, r5
+	lwz r5, 0(r3)            ! r5 = default target
 
 	lwz r6, 4(r3)            ! fetch count
-
-1:
-	or. r6, r6, r6           ! test count
-	beqctr                   ! exit if zero
-	addi r6, r6, -1          ! otherwise decrement
-
-	lwzu r7, 8(r3)           ! fetch target index, increment pointer
+	mr. r6, r6               ! skip loop if count is zero
+	beq 3f                   !   (needed by Modula-2 "CASE i OF END")
+	mtspr ctr, r6
+1:	lwzu r7, 8(r3)           ! fetch target index, increment pointer
 	cmpw r4, r7              ! compare with value
-	bne 1b                   ! if not equal, go again
+	beq 2f
+	bdnz 1b                  ! if not equal, go again
+	b 3f
 
-	lwz r7, 4(r3)            ! fetch target address
-	mtspr ctr, r7
-
-	or. r7, r7, r7           ! test it
+2:	lwz r5, 4(r3)            ! r5 = new target
+3:	mtspr ctr, r5
+	mr. r5, r5               ! test target
 	bnectr                   ! jump to target if non-zero
 	b .trap_ecase            ! otherwise trap

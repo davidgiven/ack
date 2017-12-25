@@ -18,3 +18,7 @@
     bgt .trap_erange
 
     blr
+
+.trap_erange:
+    li r3, 1       ! ERANGE = 1 in h/em_abs.h
+    b .trp
