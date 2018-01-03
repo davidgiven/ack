@@ -85,9 +85,8 @@ REGISTERS
 	lr, ctr     : SPR.
 	cr0         : CR.
 
-	/* The stacking rules and the splitting coercions can't
-	 * allocate registers.  We use r12 in the splitting coercions,
-	 * and these scratch registers in the stacking rules.
+	/* The stacking rules can't allocate registers.  We use these
+	 * scratch registers to stack tokens.
 	 */
 #define RSCRATCH r0
 #define FSCRATCH f0
@@ -2192,15 +2191,21 @@ PATTERNS
 	pat lpb                            /* LB -> argument base */
 		leaving adp EM_BSIZE
 
+	/* "gto" must preserve the function result for "lfr", so
+	 * longjmp() can pass the return value to setjmp().
+	 *  - See lang/cem/libcc.ansi/setjmp/setjmp.e
+	 *
+	 * Must preserve r3 and r4, so no "uses REG".
+	 * PowerPC can't add r0 + constant.  Use r12.
+	 */
 	pat gto                            /* longjmp */
 		with STACK
-			uses REG
 			gen
-				move {LABEL, $1}, %a
-				move {IND_RC_W, %a, 8}, fp
-				move {IND_RC_W, %a, 4}, sp
-				move {IND_RC_W, %a, 0}, %a
-				mtspr ctr, %a
+				move {LABEL, $1}, r12
+				move {IND_RC_W, r12, 8}, fp
+				move {IND_RC_W, r12, 4}, sp
+				move {IND_RC_W, r12, 0}, r12
+				mtspr ctr, r12
 				bctr.
 
 	pat lor $1==0                      /* Load local base */

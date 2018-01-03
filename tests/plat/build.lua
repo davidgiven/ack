@@ -22,6 +22,7 @@ definerule("plat_testsuite",
 			"tests/plat/m2/ConvTest_mod.mod",
 			"tests/plat/m2/NestProc_mod.mod",
 			"tests/plat/m2/OpenArray_mod.mod",
+			"tests/plat/m2/SemaTest_mod.mod",
 			"tests/plat/m2/Set100_mod.mod",
 			"tests/plat/m2/StringTest_mod.mod"
 		)
