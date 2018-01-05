@@ -203,7 +203,7 @@ saveloadregs(const char* ops, const char* opm, const char *opf)
 	for (reg = 31; reg >= 0; reg--) {
 		if (savedf[reg] != LONG_MIN) {
 			offset -= 8;
-			fprintf(codefile, "%s f%d, %ld(fp)\n",
+			fprintf(codefile, "%s f%d,%ld(fp)\n",
 				opf, reg, offset);
 		}
 	}
@@ -220,7 +220,7 @@ saveloadregs(const char* ops, const char* opm, const char *opf)
 		while (reg > 0 && savedi[reg - 1] != LONG_MIN)
 			reg--;
 		offset -= (32 - reg) * 4;
-		fprintf(codefile, "%s r%d, %ld(fp)\n", opm, reg, offset);
+		fprintf(codefile, "%s r%d,%ld(fp)\n", opm, reg, offset);
 	} else
 		reg = 32;
 
@@ -228,7 +228,7 @@ saveloadregs(const char* ops, const char* opm, const char *opf)
 	for (reg--; reg >= 0; reg--) {
 		if (savedi[reg] != LONG_MIN) {
 			offset -= 4;
-			fprintf(codefile, "%s r%d, %ld(fp)\n",
+			fprintf(codefile, "%s r%d,%ld(fp)\n",
 				ops, reg, offset);
 		}
 	}

@@ -1,11 +1,12 @@
 
 /* PowerPC table for ACK target optimizer */
 
-MAXOP 3;
+MAXOP 5;
 LABEL_STARTER '.';
 
 %%;
 
+L1, L2, L3, L4, L5  { not_using_sp(VAL) };
 RNZ                 { strcmp(VAL, "r0") };  /* not r0 */
 X, Y, Z             { TRUE };
 
@@ -15,6 +16,47 @@ X, Y, Z             { TRUE };
 
 addi  RNZ, RNZ, 0            -> ;
 addis RNZ, RNZ, 0            -> ;
+
+addi RNZ, RNZ, X : addi RNZ, RNZ, Y { plus(X, Y, Z) }
+                             -> addi RNZ, RNZ, Z ;
+
+/* Lower "addi sp, sp, X" by lifting other instructions, looking for
+ * chances to merge or delete _addi_ instructions, and assuming that
+ * the code generator uses "sp" not "r1".
+ */
+addi sp, sp, X : ANY L1                 { lift(ANY) }
+                             -> ANY L1                 : addi sp, sp, X ;
+addi sp, sp, X : ANY L1, L2             { lift(ANY) }
+                             -> ANY L1, L2             : addi sp, sp, X ;
+addi sp, sp, X : ANY L1, L2, L3         { lift(ANY) }
+                             -> ANY L1, L2, L3         : addi sp, sp, X ;
+addi sp, sp, X : ANY L1, L2, L3, L4     { lift(ANY) }
+ -> ANY L1, L2, L3, L4     : addi sp, sp, X ;
+addi sp, sp, X : ANY L1, L2, L3, L4, L5 { lift(ANY) }
+                             -> ANY L1, L2, L3, L4, L5 : addi sp, sp, X ;
+addi sp, sp, X : lmw Y, L1 { Y[0]=='r' && atoi(Y+1)>1 }
+                             -> lmw Y, L1 : addi sp, sp, X ;
+
+/* Merge _addi_ when popping from the stack. */
+addi sp, sp, X : lwz L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> lwz L1, Z(sp) : addi sp, sp, X ;
+addi sp, sp, X : lfs L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> lfs L1, Z(sp) : addi sp, sp, X ;
+addi sp, sp, X : lfd L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> lfd L1, Z(sp) : addi sp, sp, X ;
+
+/* Lower or delete _addi_ when pushing to the stack. */
+addi sp, sp, X : stwu  L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> stw  L1, Z(sp) : addi sp, sp, Z ;
+addi sp, sp, X : stfsu L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> stfs L1, Z(sp) : addi sp, sp, Z ;
+addi sp, sp, X : stfdu L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
+                             -> stfd L1, Z(sp) : addi sp, sp, Z ;
+addi sp, sp, 4 : stfdu L1, -8(sp) -> stfdu L1, -4(sp) ;
+
+/* Delete _addi_ when setting the stack pointer. */
+addi sp, sp, X : addi sp, L1, Y   -> addi sp, L1, Y ;
+addi sp, sp, X : lwz sp, L1       -> lwz sp, L1 ;
 
 or X, Y, Y                   -> mr X, Y ;
 or. X, Y, Y                  -> mr. X, Y ;
@@ -50,3 +92,89 @@ b X : labdef X               -> labdef X ;
 /* LT=0, GT=1, EQ=2, OV=3 */
 
 %%;
+
+/* Is it a word character? 0-9A-Za-z_ */
+static int isword(char c) {
+	return
+	    (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') ||
+	    (c >= 'a' && c <= 'z') || (c == '_');
+}
+
+/* Does operand _s_ not use the stack pointer? */
+int not_using_sp(const char *s) {
+	int boundary;
+
+	boundary = 1;
+	while (*s) {
+		if (boundary &&
+		    ((s[0]=='s' && s[1]=='p') || (s[0]=='r' && s[1]=='1')) &&
+		    !isword(s[2]))
+			return 0;
+		boundary = !isword(*s);
+		s++;
+	}
+	return 1;
+}
+
+
+/* Instructions to lift(), sorted in strcmp() order.  These are from
+ * ../ncg/table, minus branch instructions.
+ */
+const char *liftables[] = {
+	"add", "add.", "addi",
+	"and", "andc", "andi.", "andis.",
+	"cmp", "cmpi", "cmpl", "cmpli",
+	"cmplw", "cmplwi", "cmpw", "cmpwi",
+	"divw", "divwu", "eqv", "extlwi", "extrwi", "extsb", "extsh",
+	"fadd", "fadds", "fcmpo", "fctiwz", "fdiv", "fdivs",
+	"fmr", "fmul", "fmuls", "fneg", "frsp", "fsub", "fsubs",
+	"lbz", "lbzx",
+	"lfd", "lfdu", "lfdx", "lfs", "lfsu", "lfsx",
+	"lha", "lhax", "lhz", "lhzx",
+	"li", "lis", "lwz", "lwzu", "lwzx",
+	"mfcr", "mfspr", "mr", "mr.", "mtspr", "mullw",
+	"nand", "neg", "nor", "or", "or.", "ori", "oris",
+	"rlwinm", "rlwnm", "rotlwi", "rotrwi",
+	"slw", "slwi", "sraw", "srawi", "srw", "srwi",
+	"stb", "stbx",
+	"stfd", "stfdu", "stfdx", "stfs", "stfsu", "stfsx",
+	"sth", "sthx", "stw", "stwx", "stwu",
+	"subf", "xor", "xori", "xoris",
+};
+
+static int liftcmp(const void *a, const void *b) {
+	return strcmp(*(const char **)a, *(const char **)b);
+}
+
+/* May we lift instruction _s_ above "addi SP, SP, X"? */
+int lift(const char *s) {
+	return bsearch(&s, liftables,
+	    sizeof(liftables) / sizeof(liftables[0]),
+	    sizeof(liftables[0]), liftcmp);
+}
+
+
+/* Does it fit a signed 16-bit integer? */
+static int fits16(long l) {
+	return l >= -32768 && l <= 32767;
+}
+
+/* Tries sum = a + b with signed 16-bit integers. */
+int plus(const char *a, const char *b, const char *sum)
+{
+	long la, lb, lsum;
+	char *end;
+
+	la = strtol(a, &end, 10);
+	if (*a == '\0' || *end != '\0' || !fits16(la))
+		return 0;
+	lb = strtol(b, &end, 10);
+	if (*b == '\0' || *end != '\0' || !fits16(lb))
+		return 0;
+
+	lsum = la + lb;
+	if (!fits16(lsum))
+		return 0;
+	snprintf(sum, 7, "%ld", lsum);
+	return 1;
+}

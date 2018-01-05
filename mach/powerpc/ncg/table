@@ -334,9 +334,9 @@ INSTRUCTIONS
   lhax            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lhz             GPR:wo, SET_RC_H:ro cost(4, 3).
   lhzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
+  lwz             GPR+LOCAL:wo, SET_RC_W:ro cost(4, 3).
   lwzu            GPR:wo, IND_RC_W:rw cost(4, 3).
   lwzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
-  lwz             GPR+LOCAL:wo, SET_RC_W:ro cost(4, 3).
   mfcr            GPR:wo cost(4,2).
   mfspr           GPR:wo, SPR:ro cost(4, 3).
   mtspr           SPR:wo, GPR:ro cost(4, 2).
@@ -361,7 +361,6 @@ INSTRUCTIONS
   rlwnm           GPR:wo, GPR:ro, GPR:ro, CONST:ro, CONST:ro.
     rotlw         GPR+LOCAL:wo, GPR:ro, GPR:ro.
   slw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
-  subf            GPR:wo, GPR:ro, GPR:ro.
   sraw            GPR+LOCAL:wo, GPR:ro, GPR:ro cost(4, 2).
   srawi           GPR+LOCAL:wo, GPR:ro, CONST:ro cost(4, 2).
   srw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
@@ -378,6 +377,7 @@ INSTRUCTIONS
   stw             GPR:ro, SET_RC_W:rw cost(4, 3).
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stwu            GPR:ro, IND_RC_W:rw cost(4, 3).
+  subf            GPR:wo, GPR:ro, GPR:ro.
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
@@ -761,6 +761,10 @@ STACKINGRULES
 
 
 COERCIONS
+
+	/* The unstacking coercions emit many "addi sp, sp, X"
+	 * instructions; the target optimizer (top) will merge them.
+	 */
 
 	from STACK
 		uses REG
@@ -2103,11 +2107,12 @@ PATTERNS
 			mr fp, r0
 			blr.
 
+	/* If "ret" coerces STACK to REG3, then top will delete the
+	 * extra "addi sp, sp, 4".
+	 */
+
 	pat ret $1==4                      /* Return from procedure, word */
 		with REG3
-			leaving ret 0
-		with STACK
-			gen lwz r3, {IND_RC_W, sp, 0}
 			leaving ret 0
 
 	pat ret $1==8                      /* Return from proc, double-word */
@@ -2116,11 +2121,6 @@ PATTERNS
 			leaving ret 0
 		with REG3 STACK
 			gen lwz r4, {IND_RC_W, sp, 0}
-			leaving ret 0
-		with STACK
-			gen
-				lwz r3, {IND_RC_W, sp, 0}
-				lwz r4, {IND_RC_W, sp, 4}
 			leaving ret 0
 
 	/*
