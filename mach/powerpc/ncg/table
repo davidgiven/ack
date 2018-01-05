@@ -106,8 +106,8 @@ TOKENS
 
 /* Allows us to use regvar() to refer to registers */
 
-	GPR_EXPR           = { GPR reg; }             4    reg.
-	FPR_EXPR           = { FPR reg; }             8    reg.
+	REG_EXPR           = { REG reg; }             4    reg.
+	FREG_EXPR          = { FREG reg; }            8    reg.
 	FSREG_EXPR         = { FSREG reg; }           4    reg.
 
 /* Constants on the stack */
@@ -689,15 +689,16 @@ MOVES
 			extrwi %2, %1.reg, {C, 1}, {C, 1}
 			xori %2, %2, {C, 1}
 
-/* GPR_EXPR exists solely to allow us to use regvar() (which can only
+/* REG_EXPR exists solely to allow us to use regvar() (which can only
    be used in an expression) as a register constant.  We can then use
-   our moves to GPR to set register variables.  We define no moves to
-   LOCAL, so we avoid confusion between GPR and FSREG in LOCAL. */
+   our moves to GPR or REG to set register variables.  This is easier
+   than defining moves to LOCAL, and avoids confusion between GPR and
+   FSREG in LOCAL. */
 
-	from INT_W to GPR_EXPR
+	from INT_W + LXFRAME to REG_EXPR
 		gen move %1, %2.reg
 
-	from FLOAT_D to FPR_EXPR
+	from FLOAT_D to FREG_EXPR
 		gen move %1, %2.reg
 
 	from FLOAT_W to FSREG_EXPR
@@ -788,18 +789,21 @@ COERCIONS
 	/* "uses REG=%1" may find and reuse a register containing the
 	 * same token.  For contrast, "uses REG gen move %1, %a" would
 	 * pick a different register before doing the move.
-         */
+	 *
+	 * "reusing %1" helps when coercing an INT_W token like
+	 * {SUM_RC, r3, 0-4} to REG3, by not stacking the token.
+	 */
 
 	from INT_W
-		uses REG=%1
+		uses reusing %1, REG=%1
 		yields %a
 
 	from FLOAT_D
-		uses FREG=%1
+		uses reusing %1, FREG=%1
 		yields %a
 
 	from FLOAT_W
-		uses FSREG=%1
+		uses reusing %1, FSREG=%1
 		yields %a
 
 	/* Splitting coercions can't allocate registers.
@@ -1001,7 +1005,7 @@ PATTERNS
 		with exact INT_W
 			/* ncg fails to infer that regvar($1) is dead! */
 			kills regvar($1)
-			gen move %1, {GPR_EXPR, regvar($1)}
+			gen move %1, {REG_EXPR, regvar($1)}
 		with STACK
 			gen
 				lwz {LOCAL, $1}, {IND_RC_W, sp, 0}
@@ -1026,7 +1030,7 @@ PATTERNS
 	pat sdl inreg($1)==reg_float       /* Store double-word to local */
 		with exact FLOAT_D
 			kills regvar_d($1, reg_float)
-			gen move %1, {FPR_EXPR, regvar_d($1, reg_float)}
+			gen move %1, {FREG_EXPR, regvar_d($1, reg_float)}
 		with STACK
 			gen
 				lfd {DLOCAL, $1}, {IND_RC_D, sp, 0}
@@ -1088,7 +1092,7 @@ PATTERNS
 		leaving lxl $1 stf $2+EM_BSIZE
 	pat lxa sdf nicelx($1)
 		leaving lxl $1 stf $2+EM_BSIZE
-	pat lxa $1==0 || nicelx($1)
+	pat lxa nicelx($1)
 		leaving lxl $1 adp EM_BSIZE
 
 	/* Load locals in statically enclosing procedures */
@@ -1146,11 +1150,21 @@ PATTERNS
 	pat lxl nicelx($1)
 		uses REG={LXFRAME, $1}
 		yields %a  /* Can't yield LXFRAME. */
+	pat lxl stl nicelx($1) && inreg($2)==reg_any
+		kills regvar($2)
+		gen move {LXFRAME, $1}, {REG_EXPR, regvar($2)}
 
-	pat lxl $1==0                      /* Our local base */
+	pat lxl cal $1==0  /* Pass our local base to procedure */
 		with STACK
 			gen stwu fp, {IND_RC_W, sp, 0-4}
-			/* Can't yield fp. */
+			leaving cal $2
+
+	pat lxl $1==0                      /* Our local base */
+		uses REG=fp
+		yields %a  /* Can't yield fp. */
+
+	pat lxa $1==0                      /* Our argument base */
+		yields {SUM_RC, fp, EM_BSIZE}
 
 
 /* Global variables */
@@ -1421,7 +1435,7 @@ PATTERNS
 
 	pat sbi $1==4                      /* Subtract word (second - top) */
 		with REG REG
-			uses reusing %2, REG
+			uses reusing %1, reusing %2, REG
 			yields {SUB_RR, %2, %1}
 		with CONST2_WHEN_NEG REG
 			yields {SUM_RC, %2, 0-%1.val}
@@ -1585,7 +1599,7 @@ PATTERNS
 			gen slwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
-			uses reusing %2, REG
+			uses reusing %1, reusing %2, REG
 			gen slw %a, %2, %1
 			yields %a
 	pat sli stl $1==4 && inreg($2)==reg_any
@@ -1600,7 +1614,7 @@ PATTERNS
 			gen srawi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
-			uses reusing %2, REG
+			uses reusing %1, reusing %2, REG
 			gen sraw %a, %2, %1
 			yields %a
 	pat sri stl $1==4 && inreg($2)==reg_any
@@ -1615,7 +1629,7 @@ PATTERNS
 			gen srwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
-			uses reusing %2, REG
+			uses reusing %1, reusing %2, REG
 			gen srw %a, %2, %1
 			yields %a
 	pat sru stl $1==4 && inreg($2)==reg_any
@@ -1630,7 +1644,7 @@ PATTERNS
 			gen rotlwi %a, %2, {C, %1.val & 0x1F}
 			yields %a
 		with REG REG
-			uses reusing %2, REG
+			uses reusing %1, reusing %2, REG
 			gen rotlw %a, %2, %1
 			yields %a
 	pat rol stl $1==4 && inreg($2)==reg_any
@@ -1776,10 +1790,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XEQ, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XEQ, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XEQ, %a}
 
 	pat cmi tne $1==4                  /* Signed second != top */
@@ -1787,10 +1801,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XNE, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XNE, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XNE, %a}
 
 	pat cmi tgt $1==4                  /* Signed second > top */
@@ -1798,10 +1812,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XLT, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XGT, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XGT, %a}
 
 	pat cmi tge $1==4                  /* Signed second >= top */
@@ -1809,10 +1823,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XLE, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XGE, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XGE, %a}
 
 	pat cmi tlt $1==4                  /* Signed second < top */
@@ -1820,10 +1834,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XGT, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XLT, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XLT, %a}
 
 	pat cmi tle $1==4                  /* Signed second <= top */
@@ -1831,10 +1845,10 @@ PATTERNS
 			uses reusing %1, REG={COND_RC, %1, %2.val}
 			yields {XGE, %a}
 		with CONST2 REG
-			uses reusing %1, REG={COND_RC, %2, %1.val}
+			uses reusing %2, REG={COND_RC, %2, %1.val}
 			yields {XLE, %a}
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			yields {XLE, %a}
 
 	pat cmu teq $1==4                  /* Unsigned second == top */
@@ -1842,10 +1856,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XEQ, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XEQ, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XEQ, %a}
 
 	pat cmu tne $1==4                  /* Unsigned second != top */
@@ -1853,10 +1867,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XNE, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XNE, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XNE, %a}
 
 	pat cmu tgt $1==4                  /* Unsigned second > top */
@@ -1864,10 +1878,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XLT, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XGT, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XGT, %a}
 
 	pat cmu tge $1==4                  /* Unsigned second >= top */
@@ -1875,10 +1889,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XLE, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XGE, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XGE, %a}
 
 	pat cmu tlt $1==4                  /* Unsigned second < top */
@@ -1886,10 +1900,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XGT, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XLT, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XLT, %a}
 
 	pat cmu tle $1==4                  /* Unsigned second <= top */
@@ -1897,10 +1911,10 @@ PATTERNS
 			uses reusing %1, REG={CONDL_RC, %1, %2.val}
 			yields {XGE, %a}
 		with UCONST2 REG
-			uses reusing %1, REG={CONDL_RC, %2, %1.val}
+			uses reusing %2, REG={CONDL_RC, %2, %1.val}
 			yields {XLE, %a}
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			yields {XLE, %a}
 
 
@@ -1990,7 +2004,7 @@ PATTERNS
 			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 		with REG REG
-			uses reusing %1, REG={COND_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={COND_RR, %2, %1}
 			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
@@ -2004,7 +2018,7 @@ PATTERNS
 			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 		with REG REG
-			uses reusing %1, REG={CONDL_RR, %2, %1}
+			uses reusing %1, reusing %2, REG={CONDL_RR, %2, %1}
 			gen extlwi %a, %a, {C, 2}, {C, 0}
 			yields %a
 
@@ -2159,15 +2173,10 @@ PATTERNS
 		leaving ine "hol0"
 
 	pat lim                            /* Load EM trap ignore mask */
-		leaving lde ".ignmask"
+		leaving loe ".ignmask"
 
 	pat sim                            /* Store EM trap ignore mask */
 		leaving ste ".ignmask"
-
-	pat trp                            /* Raise EM trap */
-		with REG3
-			kills ALL
-			gen bl {LABEL, ".trp"}
 
 	pat sig                            /* Set trap handler, yield old */
 		leaving
@@ -2175,8 +2184,16 @@ PATTERNS
 			exg 4
 			ste ".trppc"
 
+	pat trp                            /* Raise EM trap */
+		with REG3
+			kills ALL
+			gen bl {LABEL, ".trp"}
+
 	pat rtt                            /* Return from trap */
 		leaving ret 0
+
+	pat rck $1==4                      /* Range check */
+		leaving cal ".rck"
 
 	/* Our caller's local base, "lxl 0 dch", appears in
 	 * lang/cem/libcc.ansi/setjmp/setjmp.e, lang/m2/libm2/par_misc.e
@@ -2216,16 +2233,50 @@ PATTERNS
 			uses REG=sp
 			yields %a  /* Can't yield sp. */
 
+	/* Next few patterns for "lor 1" appear in
+	 * lang/m2/libm2/par_misc.e
+	 */
+	pat lor lor $1==1 && $2==1         /* Load sp twice */
+		with STACK
+			gen stwu sp, {IND_RC_W, sp, 0-4}
+			leaving lor 1
+
+	pat lor adp $1==1 && smalls($2)    /* sp + constant */
+		with STACK
+			uses REG
+			gen addi %a, sp, {C, $2}
+			yields %a
+
+	/* Subtract stack pointer by doing %1 - (sp - 4)
+	 * because sp - 4 would point to %1.
+	 */
+	pat lor sbs loc adu $1==1 && $2==4 && $4==4
+		with REG STACK
+			uses reusing %1, REG
+			gen subf %a, sp, %1
+			yields %a
+			leaving loc $3+4 adu 4
+	pat lor sbs $1==1 && $2==4
+		with REG STACK
+			uses reusing %1, REG
+			gen subf %a, sp, %1
+			yields {SUM_RC, %a, 4}
+
 	pat str $1==0                      /* Store local base */
-		with REG
+		with INT_W
 			gen move %1, fp
+		with STACK
+			gen
+				lwz fp, {IND_RC_W, sp, 0}
+				addi sp, sp, {C, 4}
 
 	pat str $1==1                      /* Store stack pointer */
-		with REG
+		with INT_W
+			kills ALL
 			gen move %1, sp
-
-	pat rck $1==4                      /* Range check */
-		leaving cal ".rck"
+		with STACK
+			kills ALL
+			gen lwz sp, {IND_RC_W, sp, 0}
 
 
 /* Single-precision floating-point */
@@ -2235,7 +2286,7 @@ PATTERNS
 
 	pat adf $1==4                      /* Add single */
 		with FSREG FSREG
-			uses reusing %1, FSREG
+			uses reusing %1, reusing %2, FSREG
 			gen fadds %a, %2, %1
 			yields %a
 	pat adf stl $1==4 && inreg($2)==reg_float
@@ -2244,7 +2295,7 @@ PATTERNS
 
 	pat sbf $1==4                      /* Subtract single */
 		with FSREG FSREG
-			uses reusing %1, FSREG
+			uses reusing %1, reusing %2, FSREG
 			gen fsubs %a, %2, %1
 			yields %a
 	pat sbf stl $1==4 && inreg($2)==reg_float
@@ -2253,7 +2304,7 @@ PATTERNS
 
 	pat mlf $1==4                      /* Multiply single */
 		with FSREG FSREG
-			uses reusing %1, FSREG
+			uses reusing %1, reusing %2, FSREG
 			gen fmuls %a, %2, %1
 			yields %a
 	pat mlf stl $1==4 && inreg($2)==reg_float
@@ -2262,7 +2313,7 @@ PATTERNS
 
 	pat dvf $1==4                      /* Divide single */
 		with FSREG FSREG
-			uses reusing %1, FSREG
+			uses reusing %1, reusing %2, FSREG
 			gen fdivs %a, %2, %1
 			yields %a
 	pat dvf stl $1==4 && inreg($2)==reg_float
@@ -2377,7 +2428,7 @@ PATTERNS
 
 	pat adf $1==8                      /* Add double */
 		with FREG FREG
-			uses reusing %1, FREG
+			uses reusing %1, reusing %2, FREG
 			gen fadd %a, %2, %1
 			yields %a
 	pat adf sdl $1==8 && inreg($2)==reg_float
@@ -2386,7 +2437,7 @@ PATTERNS
 
 	pat sbf $1==8                      /* Subtract double */
 		with FREG FREG
-			uses reusing %1, FREG
+			uses reusing %1, reusing %2, FREG
 			gen fsub %a, %2, %1
 			yields %a
 	pat sbf sdl $1==8 && inreg($2)==reg_float
@@ -2395,7 +2446,7 @@ PATTERNS
 
 	pat mlf $1==8                      /* Multiply double */
 		with FREG FREG
-			uses reusing %1, FREG
+			uses reusing %1, reusing %2, FREG
 			gen fmul %a, %2, %1
 			yields %a
 	pat mlf sdl $1==8 && inreg($2)==reg_float
@@ -2404,7 +2455,7 @@ PATTERNS
 
 	pat dvf $1==8                      /* Divide double */
 		with FREG FREG
-			uses reusing %1, FREG
+			uses reusing %1, reusing %2, FREG
 			gen fdiv %a, %2, %1
 			yields %a
 	pat dvf sdl $1==8 && inreg($2)==reg_float

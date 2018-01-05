@@ -55,10 +55,17 @@ static void
 emit_prolog(void)
 {
 	fprintf(codefile, "mfspr r0, lr\n");
-	fprintf(codefile, "addi sp, sp, %ld\n", -framesize - 8);
-	fprintf(codefile, "stw fp, %ld(sp)\n", framesize);
-	fprintf(codefile, "stw r0, %ld(sp)\n", framesize + 4);
-	fprintf(codefile, "addi fp, sp, %ld\n", framesize);
+	if (framesize) {
+		fprintf(codefile, "addi sp, sp, %ld\n", -framesize - 8);
+		fprintf(codefile, "stw fp, %ld(sp)\n", framesize);
+		fprintf(codefile, "stw r0, %ld(sp)\n", framesize + 4);
+		fprintf(codefile, "addi fp, sp, %ld\n", framesize);
+	} else {
+		/* optimize for framesize == 0 */
+		fprintf(codefile, "stwu fp, -8(sp)\n");
+		fprintf(codefile, "stw r0, 4(sp)\n");
+		fprintf(codefile, "mr fp, sp\n");
+	}
 }
 
 void
