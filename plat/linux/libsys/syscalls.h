@@ -174,6 +174,12 @@
 #define __NR_mremap 163
 #define __NR_setresuid 164
 #define __NR_getresuid 165
+
+/*
+ * i386, m68020, powerpc use different numbers after 165.
+ * This file only has the numbers for i386.
+ */
+#if defined(__i386)
 #define __NR_vm86 166
 #define __NR_query_module 167
 #define __NR_poll 168
@@ -324,5 +330,6 @@
 
 #define concat(x, y) x##y
 #define MAPPED_SYSCALL(p, n) .define concat(p,n); concat(p,n): xor eax, eax; movb al, concat(__NR_,n); jmp __mapped_syscall
+#endif /* __i386 */
 
 #endif

@@ -19,7 +19,7 @@ acklibrary {
 		"./sigaction.s",
 		"./stat.s",
 		"./write.s",
-		"plat/linux/libsys/errno.s",
+		"plat/linux386/libsys/trapno.s",
 		"plat/osx/libsys/brk.c",
 		"plat/osx/libsys/creat.c",
 		"plat/osx/libsys/isatty.c",
