@@ -1,156 +1,194 @@
 #define __NR_sigaction		67
-#define SIG_BLOCK		0
+#define __NR_sigprocmask	126
 #define SIG_SETMASK		2
-#define MAXSIG			32
 
-/* offsets into our stack frame */
-#define mynew	16	/* new sigaction */
-#define mynset	32	/* new signal set */
-#define myoset	36	/* old signal set */
-#define mysave	40
-#define mysize	56
+/* offsets into struct sigaction */
+#define sa_handler	0	/* in union with sa_sigaction */
+#define sa_mask		4
+#define sa_flags	8
+#define sa_restorer	12
+
+/* offsets from stack pointer */
+#define mynewact	16	/* struct sigaction */
+#define myoldact	32
+#define newmask		64	/* signal set */
+#define oldmask		68
+#define oldhandler	72
+#define myret		76
+#define savelr		80
+#define signum		84	/* first argument */
+#define newact		88
+#define oldact		92
 
 .sect .text; .sect .rodata; .sect .data; .sect .bss
 
 /*
  * Linux calls signal handlers with arguments in registers, but the
  * ACK expects arguments on the stack.  This sigaction() uses a
- * "bridge" to move the arguments.
+ * "bridge" to move the arguments, but
+ *
+ *  - If the caller passes a bad pointer, this sigaction() causes
+ *    SIGBUS or SIGSEGV instead of setting errno = EFAULT.
+ *
+ *  - This sigaction() only works with signals 1 to 31, not with
+ *    real-time signals 32 to 64.
+ *
+ *  - This sigaction() is not safe for multiple threads.
+ *
+ * int sigaction(int signum, const struct sigaction *newact,
+ *		 struct sigaction *oldact);
  */
 .sect .text
 .define _sigaction
 _sigaction:
 	mflr	r0
-	subi	r1, r1, mysize
-	stw	r31, mysave+8(r1)
-	stw	r30, mysave+4(r1)
-	stw	r29, mysave(r1)
-	stw	r0, mysave+12(r1)
-	li	r3, 0
-	stw	r3, mynset(r1)	   	! mynset = 0
-	lwz	r29, mysize(r1)		! r29 = signal number
-	lwz	r30, mysize+4(r1)	! r30 = new action
-	lwz	r31, mysize+8(r1)	! r31 = old action
+	li	r3, __NR_sigprocmask
+	stwu	r3, -signum(sp)		/* keep 0(sp) = __NR_sigprocmask */
+	stw	r0, savelr(sp)
+
+	/* Copy newact to stack (before blocking SIGBUS, SIGSEGV). */
+	lwz	r3, newact(sp)
+	mr.	r3, r3
+	beq	1f			/* skip if newact == NULL */
+	lwz	r4, sa_handler(r3)
+	lwz	r5, sa_mask(r3)
+	lwz	r6, sa_flags(r3)
+	lwz	r7, sa_restorer(r3)
+	stw	r4, mynewact+sa_handler(sp)
+	stw	r5, mynewact+sa_mask(sp)
+	stw	r6, mynewact+sa_flags(sp)
+	stw	r7, mynewact+sa_restorer(sp)
+
 	/*
-	 * If the new action is non-NULL, the signal number is in
-	 * range 1 to MAXSIG, and the new handler is not SIG_DFL 0
-	 * or SIG_IGN 1, then we interpose our bridge.
+	 * Block all signals to prevent a race.  After we set sharray,
+	 * we must call the kernel's sigaction before the next signal
+	 * handler runs.  This prevents two problems:
+	 *
+	 *  - The bridge might call the new handler while the kernel
+	 *    uses the mask and flags of the old handler.
+	 *
+	 *  - The signal handler might call sigaction() and destroy
+	 *    sharray.  We must block all signals because any signal
+	 *    handler might call sigaction() for our signal.
 	 */
-	cmpwi	cr0, r30, 0
-	subi	r7, r29, 1		! r7 = index in handlers
-	cmplwi	cr7, r7, MAXSIG		! unsigned comparison
-	beq	cr0, kernel
-	bge	cr7, kernel
-	lwz	r3, 0(r30)		! r3 = new handler
-	clrrwi.	r3, r3, 1
-	beq	cr0, kernel
-	/*
-	 * Block the signal while we build the bridge.  Prevents a
-	 * race if a signal arrives after we change the bridge but
-	 * before we change the action in the kernel.
-	 */
-	li	r4, 1
-	slw	r4, r4, r7
-	stw	r4, mynset(r1)		! mynmask = 1 << (signal - 1)
-	li	r3, SIG_BLOCK
-	la	r4, mynset(r1)
-	la	r5, myoset(r1)
-	stw	r3, 0(r1)
-	stw	r4, 4(r1)
-	stw	r5, 8(r1)
-	bl	_sigprocmask
-	/*
-	 * Point our bridge to the new signal handler.  Then copy the
-	 * new sigaction but point it to our bridge.
-	 */
-	lis	r6, hi16[handlers]
-	ori	r6, r6, lo16[handlers]
-	subi	r7, r29, 1
-	slwi	r7, r7, 2
-	lwz	r3, 0(r30)		! r3 = new handler
-	stwx	r3, r6, r7		! put it in array of handlers
-	lis	r3, hi16[bridge]
-	ori	r3, r3, lo16[bridge]
-	lwz	r4, 4(r30)
-	lwz	r5, 8(r30)
-	lwz	r6, 12(r30)
-	stw	r3, mynew(r1)		! sa_handler or sa_sigaction
-	stw	r4, mynew+4(r1)		! sa_mask
-	stw	r5, mynew+8(r1)		! sa_flags
-	stw	r6, mynew+12(r1)	! sa_restorer
-	la	r30, mynew(r1)
-kernel:
-	li	r3, __NR_sigaction
-	stw	r3, 0(r1)
-	stw	r29, 4(r1)
-	stw	r30, 8(r1)
-	stw	r31, 12(r1)
+1:	li	r4, SIG_SETMASK
+	li	r5, -1			/* mask signals 1 to 32 */
+	stw	r5, newmask(sp)
+	la	r5, newmask(sp)
+	la	r6, oldmask(sp)
+	stw	r4, 4(sp)		/* kept 0(sp) = __NR_sigprocmask */
+	stw	r5, 8(sp)
+	stw	r6, 12(sp)
 	bl	__syscall
+
 	/*
-	 * If we blocked the signal, then restore the old signal mask.
+	 * If the signal number is in range 1 to 31, and the new
+	 * handler is not SIG_DFL 0 or SIG_IGN 1, then we interpose
+	 * our bridge.
 	 */
-	lwz	r3, mynset(r1)
-	cmpwi	cr0, r3, 0
-	beq	cr0, fixold
-	li	r3, SIG_SETMASK
-	la	r4, myoset(r1)
-	li	r5, 0
-	stw	r3, 0(r1)
-	stw	r4, 4(r1)
-	stw	r5, 8(r1)
-	bl	_sigprocmask
-	/*
-	 * If the old sigaction is non-NULL and points to our bridge,
-	 * then point it to the signal handler.
-	 */
-fixold:
-	cmpwi	cr0, r31, 0
-	beq	cr0, leave
-	lis	r3, hi16[bridge]
-	ori	r3, r3, lo16[bridge]
-	lwz	r4, 0(r31)
-	cmpw	cr0, r3, r4
-	bne	cr0, leave
-	lis	r6, hi16[handlers]
-	ori	r6, r6, lo16[handlers]
-	subi	r7, r29, 1
-	slwi	r7, r7, 2
-	lwzx	r3, r6, r7	! get it from array of handlers
-	stw	r3, 0(r31)	! put it in old sigaction
-leave:
-	lwz	r0, mysave+12(r1)
-	lwz	r29, mysave(r1)
-	lwz	r30, mysave+4(r1)
-	lwz	r31, mysave+8(r1)
-	addi	r1, r1, mysize
+	lwz	r4, signum(sp)		/* keep r4 = signum */
+	addi	r5, r4, -1
+	cmplwi	r5, 30
+	bgt	2f			/* skip if out of range */
+
+	slwi	r5, r5, 2		/* r5 = sharray index */
+	lis	r6, ha16[sharray]
+	la	r6, lo16[sharray](r6)	/* r6 = sharray */
+	lwzx	r0, r6, r5
+	stw	r0, oldhandler(sp)	/* remember old handler */
+	lwz	r0, newact(sp)
+	mr.	r0, r0
+	beq	2f			/* skip if newact == NULL */
+
+	lwz	r3, mynewact+sa_handler(sp)
+	cmplwi	r3, 2			/* r3 = new handler */
+	blt	2f			/* skip if SIG_DFL or SIG_IGN */
+
+	stwx	r3, r6, r5		/* put new handler in sharray */
+	lis	r3, ha16[sigbridge]
+	la	r3, lo16[sigbridge](r3)
+	stw	r3, mynewact+sa_handler(sp)
+
+	/* Call the kernel's sigaction. */
+	/* sigaction(signum, &mynewact or NULL, &myoldact or NULL) */
+2:	li	r3, __NR_sigaction
+	lwz	r0, newact(sp)
+	mr.	r0, r0
+	beq	3f
+	la	r5, mynewact(sp)
+	b	4f
+3:	li	r5, 0
+4:	lwz	r0, oldact(sp)
+	mr.	r0, r0
+	beq	5f
+	la	r6, myoldact(sp)
+	b	6f
+5:	li	r6, 0
+6:	stw	r3, 0(sp)
+	stw	r4, 4(sp)		/* kept r4 = signum */
+	stw	r5, 8(sp)
+	stw	r6, 12(sp)
+	bl	__syscall
+	stw	r3, myret(sp)
+
+	/* Unblock signals by restoring old signal mask. */
+	li	r3, __NR_sigprocmask
+	li	r4, SIG_SETMASK
+	la	r5, oldmask(sp)
+	li	r6, 0
+	stw	r3, 0(sp)
+	stw	r4, 4(sp)
+	stw	r5, 8(sp)
+	stw	r6, 12(sp)
+	bl	__syscall
+
+	/* Copy oldact from stack (after unblocking BUS, SEGV). */
+	lwz	r3, oldact(sp)
+	mr.	r3, r3
+	beq	8f			/* skip if oldact == NULL */
+	lwz	r4, myoldact+sa_handler(sp)
+	lis	r5, ha16[sigbridge]
+	la	r5, lo16[sigbridge](r5)
+	cmpw	r4, r5
+	bne	7f
+	lwz	r4, oldhandler(sp)
+7:	lwz	r5, myoldact+sa_mask(sp)
+	lwz	r6, myoldact+sa_flags(sp)
+	lwz	r7, myoldact+sa_restorer(sp)
+	stw	r4, sa_handler(r3)
+	stw	r5, sa_mask(r3)
+	stw	r6, sa_flags(r3)
+	stw	r7, sa_restorer(r3)
+
+8:	lwz	r0, savelr(sp)
+	lwz	r3, myret(sp)
+	addi	sp, sp, signum
 	mtlr	r0
-	blr			! return from sigaction
+	blr
 
 /*
- * Linux calls bridge(signum) or bridge(signum, info, context) with
- * arguments in registers r3, r4, r5.
+ * Linux calls sigbridge(signum) or sigbridge(signum, info, context)
+ * with arguments in registers r3, r4, r5.
  */
-bridge:
+sigbridge:
 	mflr	r0
-	subi	r1, r1, 16
+	stwu	r3, -16(sp)	/* signal number */
+	stw	r4, 4(sp)	/* info */
+	stw	r5, 8(sp)	/* context */
 	stw	r0, 12(r1)
-	stw	r3, 0(r1)	! signal number
-	stw	r4, 4(r1)	! info
-	stw	r5, 8(r1)	! context
 
-	lis	r6, hi16[handlers]
-	ori	r6, r6, lo16[handlers]
-	subi	r7, r3, 1
-	slwi	r7, r7, 2
+	lis	r6, hi16[sharray - 4]
+	la	r6, lo16[sharray - 4](r6)
+	slwi	r7, r3, 2
 	lwzx	r6, r6, r7
 	mtctr	r6
-	bctrl			! call our signal handler
+	bctrl			/* call our signal handler */
 
-	lwz	r0, 12(r1)
+	lwz	r0, 12(sp)
 	addi	r1, r1, 16
 	mtlr	r0
-	blr			! return from bridge
+	blr			/* sigreturn(2) */
 
 .sect .bss
-handlers:
-	.space 4 * MAXSIG	! array of signal handlers
+sharray:
+	.space 4 * 31		/* handlers for signals 1 to 31 */
