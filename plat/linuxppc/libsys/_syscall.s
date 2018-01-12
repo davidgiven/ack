@@ -12,17 +12,8 @@
 
 .sect .text
 
-EINVAL = 22
+#define EINVAL 22
 
-#define IFFALSE 4
-#define IFTRUE 12
-#define ALWAYS 20
-
-#define LT 0
-#define GT 1
-#define EQ 2
-#define OV 3
-	
 ! Perform a Linux system call.
 
 .define __syscall
@@ -32,21 +23,21 @@ __syscall:
 	lwz r4, 8(sp)
 	lwz r5, 12(sp)
 	sc 0
-	bclr IFFALSE, OV, 0
-	
+	bnslr
+
 	! On error, r3 contains the errno.	
 	! It just so happens that errnos 1-34 are the same in Linux as in ACK.
-	cmpi cr0, 0, r3, 1
-	bc IFTRUE, LT, 2f
-	cmpi cr0, 0, r3, 34
-	bc IFTRUE, GT, 2f
-	
+	cmpwi r3, 1
+	blt 2f
+	cmpwi r3, 34
+	bgt 2f
+
 3:
-	li32 r4, _errno
-	stw r3, 0(r4)
-	addi r3, r0, -1
-	bclr ALWAYS, 0, 0
-	
+	lis r4, ha16[_errno]
+	stw r3, lo16[_errno](r4)
+	li r3, -1
+	blr
+
 2:
-	addi r3, r0, EINVAL
+	li r3, EINVAL
 	b 3b

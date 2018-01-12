@@ -32,7 +32,7 @@ begtext:
 
 	lwz r3, 0(sp)            ! r3 = argc
 	addi r4, sp, 4           ! r4 = argv
-	rlwinm r5, r3, 32-2, 2, 31 ! shift left 2 bits
+	srwi r5, r3, 2
 	add r5, r5, r4 
 	addi r5, r5, 8           ! r5 = env
 	
