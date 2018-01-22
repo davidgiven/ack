@@ -310,7 +310,7 @@ INSTRUCTIONS
   fadds           FSREG+LOCAL:wo, FSREG:ro, FSREG:ro cost(4, 5).
   fcmpo           CR:wo, FREG:ro, FREG:ro cost(4, 5).
   fcmpo           CR:wo, FSREG:ro, FSREG:ro cost(4, 5).
-  fctiwz          FREG:wo, FREG:ro.
+  fctiwz          FREG:wo, FREG:ro cost(4, 5).
   fdiv            FREG+DLOCAL:wo, FREG:ro, FREG:ro cost(4, 35).
   fdivs           FSREG+LOCAL:wo, FSREG:ro, FSREG:ro cost(4, 21).
   fmr             FPR:wo, FPR:ro cost(4, 5).
@@ -2329,10 +2329,20 @@ PATTERNS
 		with FSREG
 			gen fneg {LOCAL, $2}, %1
 
+	/* When a or b is NaN, then a < b, a <= b, a > b, a >= b
+	 * should all be false.  We can't make them false, because
+	 *  - EM's _cmf_ is only for ordered comparisons.
+	 *  - The peephole optimizer assumes (a < b) == !(a >= b).
+	 *
+	 * We do make a == b false and a != b true, by checking the
+	 * eq (equal) bit or un (unordered) bit in cr0.
+	 */
+
 	pat cmf $1==4                      /* Compare single */
 		with FSREG FSREG
 			uses REG={COND_FS, %2, %1}
-			gen extlwi %a, %a, {C, 2}, {C, 0}
+			/* Extract lt, gt, un; put lt in sign bit. */
+			gen andisX %a, %a, {C, 0xd000}
 			yields %a
 
 	pat cmf teq $1==4                  /* Single second == top */
@@ -2367,7 +2377,6 @@ PATTERNS
 
 	proc cmf4zxx example cmf zeq
 		with FSREG FSREG STACK
-			uses REG
 			gen
 				fcmpo cr0, %2, %1
 				bxx* {LABEL, $2}
@@ -2420,6 +2429,13 @@ PATTERNS
 			loc 4
 			cff
 
+	pat fef $1==4                      /* Split fraction, exponent */
+		leaving cal ".fef4"
+
+	/* Multiply two singles, then split fraction, integer */
+	pat fif $1==4
+		leaving cal ".fif4"
+
 
 /* Double-precision floating-point */
 
@@ -2471,10 +2487,13 @@ PATTERNS
 		with FREG
 			gen fneg {DLOCAL, $2}, %1
 
+	/* To compare NaN, see comment above pat cmf $1==4 */
+
 	pat cmf $1==8                      /* Compare double */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
-			gen extlwi %a, %a, {C, 2}, {C, 0}
+			/* Extract lt, gt, un; put lt in sign bit. */
+			gen andisX %a, %a, {C, 0xd000}
 			yields %a
 
 	pat cmf teq $1==8                  /* Double second == top */
@@ -2482,7 +2501,7 @@ PATTERNS
 			uses REG={COND_FD, %2, %1}
 			yields {XEQ, %a}
 
-	pat cmf tne $1==8                  /* Single second == top */
+	pat cmf tne $1==8                  /* Double second == top */
 		with FREG FREG
 			uses REG={COND_FD, %2, %1}
 			yields {XNE, %a}
@@ -2509,7 +2528,6 @@ PATTERNS
 
 	proc cmf8zxx example cmf zeq
 		with FREG FREG STACK
-			uses REG
 			gen
 				fcmpo cr0, %2, %1
 				bxx* {LABEL, $2}

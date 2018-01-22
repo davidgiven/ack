@@ -42,6 +42,8 @@
 ! 1: yields r3 = the converted value.
 !
 ! Debian's clang 3.5.0-10 and gcc 4.9.2-10 don't clamp the value
-! before conversion.  They avoid fsel and put the conditional branch
-! before fctwiz.  PowerPC 601 lacks fsel (but kernel might trap and
-! emulate fsel).  PowerPC 603, 604, G3, G4, G5 have fsel.
+! before conversion.  They avoid fsel and use the conditional branch
+! to pick between 2 fctwiz instructions.
+!
+! PowerPC 601 lacks fsel (but kernel might trap and emulate fsel).
+! PowerPC 603, 604, G3, G4, G5 have fsel.
