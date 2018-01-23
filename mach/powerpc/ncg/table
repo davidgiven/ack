@@ -31,6 +31,7 @@ PC_OFFSET = 4   /* Offset of saved PC relative to our FP */
 PROPERTIES
 
 	GPR             /* general-purpose register */
+	SPFP            /* sp or fp */
 	REG             /* allocatable GPR */
 	REG3            /* coercion to r3 */
 
@@ -51,7 +52,8 @@ REGISTERS
 	 *   r13, r14, ..., r31: GPR, REG regvar(reg_any).
 	 */
 
-	r0, sp, fp, r12                   : GPR.
+	r0, r12                           : GPR.
+	sp, fp                            : GPR, SPFP.
 	r3                                : GPR, REG, REG3.
 	r4, r5, r6, r7, r8, r9, r10, r11  : GPR, REG.
 
@@ -238,7 +240,7 @@ SETS
 	MEMORY          = IND_V + FRAME_V.
 
 	/* any integer from stack that we can easily move to GPR */
-	INT_W   = REG + CONST_STACK + SEX_B + SEX_H +
+	INT_W   = SPFP + REG + CONST_STACK + SEX_B + SEX_H +
 	          SUM_RIS + SUM_RC + SUM_RL + SUM_RR +
 	          SUB_RR + NEG_R + MUL_RR + DIV_RR + DIV_RR_U +
 	          IND_ALL_B + IND_ALL_H + IND_ALL_W +
@@ -717,19 +719,14 @@ TESTS
 
 STACKINGRULES
 
-	/* We don't allow GPR-REG on the stack.  The intent is to ban
-	 * r0 from the stack, but this also bans fp from the stack.
-	 * This is odd because most other tables for ncg allow the
-	 * frame pointer on the stack.
-	 */
-	from REG to STACK
+	from SPFP+REG to STACK
 		gen
-			COMMENT("stack REG")
+			COMMENT("stack SPFP+REG")
 			stwu %1, {IND_RC_W, sp, 0-4}
 
-	from INT_W-REG to STACK
+	from INT_W-SPFP-REG to STACK
 		gen
-			COMMENT("stack INT_W-REG")
+			COMMENT("stack INT_W-SPFP-REG")
 			move %1, RSCRATCH
 			stwu RSCRATCH, {IND_RC_W, sp, 0-4}
 
@@ -1146,26 +1143,15 @@ PATTERNS
 			uses REG={LXFRAME, $1}
 			gen move %1, {FRAME_D, $1, %a, $2, 8}
 
-	/* Programs use "lxl cal" to pass the static chain and call a
-	 * nested procedure.  This must push a token LXFRAME or the
-	 * register fp to the real stack. */
-
-	/* Local base of procedure on static chain */
-	pat lxl nicelx($1)
+	pat lxl nicelx($1)                 /* Local base on static chain */
 		uses REG={LXFRAME, $1}
 		yields %a  /* Can't yield LXFRAME. */
 	pat lxl stl nicelx($1) && inreg($2)==reg_any
 		kills regvar($2)
 		gen move {LXFRAME, $1}, {REG_EXPR, regvar($2)}
 
-	pat lxl cal $1==0  /* Pass our local base to procedure */
-		with STACK
-			gen stwu fp, {IND_RC_W, sp, 0-4}
-			leaving cal $2
-
 	pat lxl $1==0                      /* Our local base */
-		uses REG=fp
-		yields %a  /* Can't yield fp. */
+		yields fp
 
 	pat lxa $1==0                      /* Our argument base */
 		yields {SUM_RC, fp, EM_BSIZE}
@@ -2134,7 +2120,8 @@ PATTERNS
 			bls
 
 	pat bls                            /* Block move variable length */
-		with REG REG REG
+		with REG SPFP+REG SPFP+REG
+			/* allows sp as %2, %3 */
 			/* ( src%3 dst%2 len%1 -- ) */
 			uses reusing %1, REG, REG, REG
 			gen
@@ -2230,22 +2217,14 @@ PATTERNS
 
 	pat lor $1==1                      /* Load stack pointer */
 		with STACK
-			uses REG=sp
-			yields %a  /* Can't yield sp. */
+			yields sp
 
 	/* Next few patterns for "lor 1" appear in
 	 * lang/m2/libm2/par_misc.e
 	 */
-	pat lor lor $1==1 && $2==1         /* Load sp twice */
-		with STACK
-			gen stwu sp, {IND_RC_W, sp, 0-4}
-			leaving lor 1
-
 	pat lor adp $1==1 && smalls($2)    /* sp + constant */
 		with STACK
-			uses REG
-			gen addi %a, sp, {C, $2}
-			yields %a
+			yields {SUM_RC, sp, $2}
 
 	/* Subtract stack pointer by doing %1 - (sp - 4)
 	 * because sp - 4 would point to %1.
