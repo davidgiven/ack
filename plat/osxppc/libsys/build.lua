@@ -19,6 +19,7 @@ acklibrary {
 		"./sigaction.s",
 		"./stat.s",
 		"./write.s",
+		"plat/linux/libsys/_hol0.s",
 		"plat/osx/libsys/brk.c",
 		"plat/osx/libsys/creat.c",
 		"plat/osx/libsys/isatty.c",
