@@ -1,3 +1,32 @@
+/*
+ * PowerPC table for ncg
+ *
+ * David Given created this table.
+ * George Koehler made many changes in years 2016 to 2018.
+ *
+ * This back end provides 4-byte integers, 4-byte floats, and 8-byte
+ * floats.  It should provide enough of EM for the ACK's compilers.
+ *  - It doesn't provide "mon" (monitor call) nor "lor 2", "str 2"
+ *    (heap pointer).  Programs should call procedures in libsys to
+ *    make system calls or allocate heap memory.
+ *  - It generates only a few EM traps:
+ *     - EARRAY from aar, lar, sar
+ *     - ERANGE from rck
+ *     - ECASE from csa, csb
+ *  - It uses floating-point registers to move 8-byte values that
+ *    aren't floats.  This might cause extra FPU context switches in
+ *    programs that don't use floating point.
+ *
+ * The EM stack is less than optimal for PowerPC, and incompatible
+ * with the calling conventions of other compilers (like gcc).
+ *  - EM and ncg use the stack to pass parameters to procedures.  For
+ *    PowerPC, this is probably slower than passing them in registers.
+ *  - This back end misaligns some 8-byte floats, because EM's stack
+ *    has only 4-byte alignment.  (This kind of misalignment also
+ *    happened in IBM's AIX and Apple's Mac OS, where data structures
+ *    had 8-byte floats with only 4-byte alignment.)
+ */
+
 EM_WSIZE = 4
 EM_PSIZE = 4
 EM_BSIZE = 8    /* two words saved in call frame */
@@ -46,6 +75,15 @@ PROPERTIES
 REGISTERS
 
 	/*
+	 * We use r1 as stack pointer and r2 as frame pointer.
+	 * Our assembler has aliases sp -> r1 and fp -> r2.
+	 *
+	 * We preserve r13 to r31 and f14 to f31 across function
+	 * calls to mimic other compilers (like gcc).  See
+	 *  - http://refspecs.linuxbase.org/elf/elfspec_ppc.pdf
+	 *  - https://github.com/ryanarn/powerabi -> chap3-elf32abi.sgml
+	 *  - Apple's "32-bit PowerPC Function Calling Conventions"
+	 *
 	 * When ncg allocates regvars, it seems to start with the last
 	 * register in the first class.  To encourage ncg to allocate
 	 * them from r31 down, we list them in one class as
@@ -85,7 +123,7 @@ REGISTERS
 	  : FSREG regvar(reg_float).
 
 	lr, ctr     : SPR.
-	cr0         : CR.
+	cr0         : CR.   /* We use cr0, ignore cr1 to cr7. */
 
 	/* The stacking rules can't allocate registers.  We use these
 	 * scratch registers to stack tokens.
@@ -1405,6 +1443,10 @@ PATTERNS
 
 /* Word arithmetic */
 
+	/* Like most back ends, this one doesn't trap EIOVFL, so it
+	 * ignores overflow in signed integers.
+	 */
+
 	pat adi $1==4                      /* Add word (second + top) */
 		with REG REG
 			yields {SUM_RR, %1, %2}
@@ -1467,6 +1509,10 @@ PATTERNS
 
 
 /* Bitwise logic */
+
+	/* This back end doesn't know how to combine shifts and
+	 * bitwise ops to emit rlwinm, rlwnm, or rlwimi instructions.
+	 */
 
 	pat and $1==4                      /* AND word */
 		with REG NOT_R

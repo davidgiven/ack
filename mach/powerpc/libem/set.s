@@ -2,6 +2,9 @@
 
 ! Create singleton set.
 !  Stack: ( bitnumber size -- set )
+!
+! Some back ends trap ESET if bitnumber is out of range.  We don't
+! because the compilers tend to pass a valid bitnumber.
 
 .define .set
 .set:
