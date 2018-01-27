@@ -10,8 +10,13 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stb.h>
 
+static int writing_stabs = 0;
+
+#ifdef REGVARS
 static long framesize;
+#endif
 
 void
 con_part(int sz, word w)
@@ -51,39 +56,42 @@ con_mult(word sz)
 #define FL_MSB_AT_LOW_ADDRESS	1
 #include <con_float>
 
-static void
-emit_prolog(void)
-{
-	fprintf(codefile, "mfspr r0, lr\n");
-	if (framesize) {
-		fprintf(codefile, "addi sp, sp, %ld\n", -framesize - 8);
-		fprintf(codefile, "stw fp, %ld(sp)\n", framesize);
-		fprintf(codefile, "stw r0, %ld(sp)\n", framesize + 4);
-		fprintf(codefile, "addi fp, sp, %ld\n", framesize);
-	} else {
-		/* optimize for framesize == 0 */
-		fprintf(codefile, "stwu fp, -8(sp)\n");
-		fprintf(codefile, "stw r0, 4(sp)\n");
-		fprintf(codefile, "mr fp, sp\n");
-	}
-}
-
 void
 prolog(full nlocals)
 {
-	framesize = nlocals;
+	/*
+	 * For N_LSYM and N_PSYM stabs, we want gdb to use fp, not sp.
+	 * The trick is to use "stwu sp, _(sp)" then "addi fp, sp, 0"
+	 * before we save lr with "stw r0, _(sp)".
+	 *
+	 * Tried with Apple's gdb-696.  Refer to
+	 *  - gdb-696/src/gdb/rs6000-tdep.c, skip_prologue(), line 1101
+	 *  - gdb-696/src/gdb/macosx/ppc-macosx-frameinfo.c,
+	 *    ppc_parse_instructions(), line 717
+	 * https://opensource.apple.com/release/developer-tools-25.html
+	 */
+	fprintf(codefile, "mfspr r0, lr\n");
+	if (writing_stabs) {
+		fprintf(codefile, "stwu sp, -8(sp)\n");  /* for gdb */
+		fprintf(codefile, "stw fp, 0(sp)\n");
+	} else
+		fprintf(codefile, "stwu fp, -8(sp)\n");
+	fprintf(codefile, "addi fp, sp, 0\n");           /* for gdb */
+	fprintf(codefile, "stw r0, 4(sp)\n");
 
 #ifdef REGVARS
-	/* f_regsave() will call emit_prolog() */
+	framesize = nlocals;
+	/* regsave() increases framesize; f_regsave() adjusts sp. */
 #else
-	emit_prolog();
+	if (nlocals)
+		fprintf(codefile, "addi sp, sp, %ld\n", -nlocals);
 #endif
 }
 
 void
 mes(word type)
 {
-	int argt ;
+	int argt, a1, a2 ;
 
 	switch ( (int)type ) {
 	case ms_ext :
@@ -98,6 +106,41 @@ mes(word type)
 				break ;
 			}
 		}
+	case ms_stb:
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			fputs(".symb \"\", ", codefile);
+		else {
+			fprintf(codefile, ".symb \"%s\", ", str);
+			argt = getarg(cst_ptyp);
+		}
+		a1 = argval;
+		argt = getarg(cst_ptyp);
+		a2 = argval;
+		argt = getarg(cst_ptyp|nof_ptyp|sof_ptyp|ilb_ptyp|pro_ptyp);
+		if (a1 == N_PSYM) {
+			/* Change offset from AB into offset from
+			   the frame pointer.
+			*/
+			argval += 8;
+		}
+		fprintf(codefile, "%s, 0x%x, %d\n", strarg(argt), a1, a2);
+		argt = getarg(end_ptyp);
+		break;
+	case ms_std:
+		writing_stabs = 1;  /* set by first "mes 13,...,100,0" */
+		argt = getarg(str_ptyp | cst_ptyp);
+		if (argt == sp_cstx)
+			str[0] = '\0';
+		else {
+			argt = getarg(cst_ptyp);
+		}
+		swtxt();
+		fprintf(codefile, ".symd \"%s\", 0x%x,", str, (int) argval);
+		argt = getarg(cst_ptyp);
+		fprintf(codefile, "%d\n", (int) argval);
+		argt = getarg(end_ptyp);
+		break;
 	default :
 		while ( getarg(any_ptyp) != sp_cend ) ;
 		break ;
@@ -239,7 +282,8 @@ f_regsave(void)
 {
 	int reg;
 
-	emit_prolog();
+	if (framesize)
+		fprintf(codefile, "addi sp, sp, %ld\n", -framesize);
 	saveloadregs("stw", "stmw", "stfd");
 
 	/*
