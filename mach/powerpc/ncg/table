@@ -170,8 +170,10 @@ TOKENS
 	SUM_RL      = { GPR reg; ADDR adr; }   4.   /* reg + lo16[adr] */
 	SUM_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 + reg2 */
 
+	SUB_CR      = { INT val; GPR reg; }    4.   /* val - reg */
 	SUB_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 - reg2 */
 	NEG_R       = { GPR reg; }             4.   /* -reg */
+	MUL_RC      = { GPR reg; INT val; }    4.   /* reg * val */
 	MUL_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 * reg2 */
 	DIV_RR      = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 signed */
 	DIV_RR_U    = { GPR reg1; GPR reg2; }  4.   /* reg1 / reg2 unsigned */
@@ -280,9 +282,10 @@ SETS
 	/* any integer from stack that we can easily move to GPR */
 	INT_W   = SPFP + REG + CONST_STACK + SEX_B + SEX_H +
 	          SUM_RIS + SUM_RC + SUM_RL + SUM_RR +
-	          SUB_RR + NEG_R + MUL_RR + DIV_RR + DIV_RR_U +
+	          SUB_CR + SUB_RR + NEG_R +
+	          MUL_RC + MUL_RR + DIV_RR + DIV_RR_U +
 	          IND_ALL_B + IND_ALL_H + IND_ALL_W +
-		  FRAME_B + FRAME_H + FRAME_H_S + FRAME_W +
+	          FRAME_B + FRAME_H + FRAME_H_S + FRAME_W +
 	          NOT_R + AND_RIS + AND_RC + AND_RR + ANDC_RR +
 	          OR_RIS + OR_RC + OR_RR + ORC_RR +
 	          XOR_RIS + XOR_RC + XOR_RR + NAND_RR + NOR_RR + EQV_RR +
@@ -307,7 +310,7 @@ INSTRUCTIONS
   cost(4, 1) /* space, time */
 
   add             GPR:wo, GPR:ro, GPR:ro.
-  addX "add."     GPR:wo, GPR:ro, GPR:ro.
+  addX "add."     GPR:wo:cc, GPR:ro, GPR:ro.
   addi            GPR:wo, GPR:ro, CONST+LABEL_LO:ro.
     li            GPR:wo, CONST:ro.
   addis           GPR:wo, GPR:ro, CONST+LABEL_HI+LABEL_HA:ro.
@@ -365,7 +368,7 @@ INSTRUCTIONS
   lbz             GPR:wo, SET_RC_B:ro cost(4, 3).
   lbzx            GPR:wo, GPR:ro, GPR:ro cost(4, 3).
   lfd             FPR+DLOCAL:wo, SET_RC_D:ro cost(4, 5).
-  lfdu            FPR:wo, IND_RC_D:ro cost(4, 5).
+  lfdu            FPR:wo, IND_RC_D:rw cost(4, 5).
   lfdx            FPR:wo, GPR:ro, GPR:ro cost(4, 5).
   lfs             FSREG+LOCAL:wo, SET_RC_W:ro cost(4, 4).
   lfsu            FSREG:wo, IND_RC_W:rw cost(4, 4).
@@ -380,6 +383,7 @@ INSTRUCTIONS
   mfcr            GPR:wo cost(4,2).
   mfspr           GPR:wo, SPR:ro cost(4, 3).
   mtspr           SPR:wo, GPR:ro cost(4, 2).
+  mulli           GPR:wo, GPR:ro, CONST:ro cost(4, 3).
   mullw           GPR:wo, GPR:ro, GPR:ro cost(4, 4).
   nand            GPR:wo, GPR:ro, GPR:ro.
   neg             GPR:wo, GPR:ro.
@@ -401,8 +405,8 @@ INSTRUCTIONS
   rlwnm           GPR:wo, GPR:ro, GPR:ro, CONST:ro, CONST:ro.
     rotlw         GPR+LOCAL:wo, GPR:ro, GPR:ro.
   slw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
-  sraw            GPR+LOCAL:wo, GPR:ro, GPR:ro cost(4, 2).
-  srawi           GPR+LOCAL:wo, GPR:ro, CONST:ro cost(4, 2).
+  sraw            GPR+LOCAL:wo, GPR:ro, GPR:ro /* kills xer */ cost(4, 2).
+  srawi           GPR+LOCAL:wo, GPR:ro, CONST:ro /* kills xer */ cost(4, 2).
   srw             GPR+LOCAL:wo, GPR:ro, GPR:ro.
   stb             GPR:ro, SET_RC_B:rw cost(4, 3).
   stbx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
@@ -418,6 +422,7 @@ INSTRUCTIONS
   stwx            GPR:ro, GPR:ro, GPR:ro cost(4, 3).
   stwu            GPR:ro, IND_RC_W:rw cost(4, 3).
   subf            GPR:wo, GPR:ro, GPR:ro.
+  subfic          GPR:wo, GPR:ro, CONST:ro /* kills xer */.
   xor             GPR:wo, GPR:ro, GPR:ro.
   xori            GPR:wo, GPR:ro, CONST:ro.
   xoris           GPR:wo, GPR:ro, CONST:ro.
@@ -490,12 +495,19 @@ MOVES
 
 /* Other arithmetic */
 
+	from SUB_CR to GPR
+		/* val - reg -> subtract reg from val */
+		gen subfic %2, %1.reg, {C, %1.val}
+
 	from SUB_RR to GPR
 		/* reg1 - reg2 -> subtract reg2 from reg1 */
 		gen subf %2, %1.reg2, %1.reg1
 
 	from NEG_R to GPR
 		gen neg %2, %1.reg
+
+	from MUL_RC to GPR
+		gen mulli %2, %1.reg, {C, %1.val}
 
 	from MUL_RR to GPR
 		gen mullw %2, %1.reg1, %1.reg2
@@ -1471,6 +1483,8 @@ PATTERNS
 			yields {SUB_RR, %2, %1}
 		with CONST2_WHEN_NEG REG
 			yields {SUM_RC, %2, 0-%1.val}
+		with REG CONST2
+			yields {SUB_CR, %2.val, %1}
 		with CONST_HI_ZR REG
 			yields {SUM_RIS, %2, his(0-%1.val)}
 		with CONST_STACK-CONST2_WHEN_NEG-CONST_HI_ZR REG
@@ -1482,6 +1496,10 @@ PATTERNS
 			yields {NEG_R, %1}
 
 	pat mli $1==4                      /* Multiply word (second * top) */
+		with CONST2 REG
+			yields {MUL_RC, %2, %1.val}
+		with REG CONST2
+			yields {MUL_RC, %1, %2.val}
 		with REG REG
 			yields {MUL_RR, %2, %1}
 
