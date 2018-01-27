@@ -10,10 +10,11 @@ var l={w}
 var la={w}
 var f={w}
 var fa={w}
+# Size 8 has alignment 4 in Mac OS, 8 in Linux.
 var d=8
-var da={d}
+var da=4
 var x=8
-var xa={x}
+var xa=4
 var ARCH=powerpc
 var PLATFORM=osxppc
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
