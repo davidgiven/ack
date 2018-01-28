@@ -129,7 +129,21 @@ install:
 clean:
 	rm -rf $(BUILDDIR)
 
+uname := $(shell uname)
+ifeq (Linux,$(uname))
+# Turn on LUA_USE_POSIX so that Lua is not compiled with the dangerous
+# tmpnam(.) function.  But, do not use LUA_USE_LINUX here, since that will
+# also turn on LUA_USE_READLINE, and I do not want to force everyone to
+# install libreadline-dev.  -- tkchia
+$(our-lua): CFLAGS += -DLUA_USE_POSIX -DLUA_USE_DLOPEN
+$(our-lua): LDFLAGS += -ldl
+else
+ifeq (Darwin,$(uname))
+$(our-lua): CFLAGS += -DLUA_USE_MACOSX
+endif
+endif
+
 $(our-lua): first/lua-5.1/*.c first/lua-5.1/*.h
 	@echo Bootstrapping build
 	@mkdir -p $(BUILDDIR)
-	@$(CC) -o $(our-lua) -O first/lua-5.1/*.c -lm
+	@$(CC) $(CFLAGS) -o $(our-lua) -O first/lua-5.1/*.c $(LDFLAGS) -lm
