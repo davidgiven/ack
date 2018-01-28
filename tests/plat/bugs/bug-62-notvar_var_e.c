@@ -40,7 +40,7 @@ void c(int i, int tru, int fal) {
   ASSERT((i != i) == fal);
 }
 
-/* Bypasses the CRT. */
+/* Bypasses the CRT, so there's no stdio. */
 void _m_a_i_n(void) {
   a();
   b();
