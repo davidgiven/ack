@@ -8,6 +8,7 @@ LABEL_STARTER '.';
 
 L1, L2, L3, L4, L5  { not_using_sp(VAL) };
 RNZ                 { strcmp(VAL, "r0") };  /* not r0 */
+UP                  { positive(VAL) };
 X, Y, Z             { TRUE };
 
 %%;
@@ -20,22 +21,22 @@ addis RNZ, RNZ, 0            -> ;
 addi RNZ, RNZ, X : addi RNZ, RNZ, Y { plus(X, Y, Z) }
                              -> addi RNZ, RNZ, Z ;
 
-/* Lower "addi sp, sp, X" by lifting other instructions, looking for
+/* Lower "addi sp, sp, UP" by lifting other instructions, looking for
  * chances to merge or delete _addi_ instructions, and assuming that
  * the code generator uses "sp" not "r1".
  */
-addi sp, sp, X : ANY L1                 { lift(ANY) }
-                             -> ANY L1                 : addi sp, sp, X ;
-addi sp, sp, X : ANY L1, L2             { lift(ANY) }
-                             -> ANY L1, L2             : addi sp, sp, X ;
-addi sp, sp, X : ANY L1, L2, L3         { lift(ANY) }
-                             -> ANY L1, L2, L3         : addi sp, sp, X ;
-addi sp, sp, X : ANY L1, L2, L3, L4     { lift(ANY) }
- -> ANY L1, L2, L3, L4     : addi sp, sp, X ;
-addi sp, sp, X : ANY L1, L2, L3, L4, L5 { lift(ANY) }
-                             -> ANY L1, L2, L3, L4, L5 : addi sp, sp, X ;
-addi sp, sp, X : lmw Y, L1 { Y[0]=='r' && atoi(Y+1)>1 }
-                             -> lmw Y, L1 : addi sp, sp, X ;
+addi sp, sp, UP : ANY L1                 { lift(ANY) }
+                             -> ANY L1                 : addi sp, sp, UP ;
+addi sp, sp, UP : ANY L1, L2             { lift(ANY) }
+                             -> ANY L1, L2             : addi sp, sp, UP ;
+addi sp, sp, UP : ANY L1, L2, L3         { lift(ANY) }
+                             -> ANY L1, L2, L3         : addi sp, sp, UP ;
+addi sp, sp, UP : ANY L1, L2, L3, L4     { lift(ANY) }
+                             -> ANY L1, L2, L3, L4     : addi sp, sp, UP ;
+addi sp, sp, UP : ANY L1, L2, L3, L4, L5 { lift(ANY) }
+                             -> ANY L1, L2, L3, L4, L5 : addi sp, sp, UP ;
+addi sp, sp, UP : lmw Y, L1 { Y[0]=='r' && atoi(Y+1)>1 }
+                             -> lmw Y, L1 : addi sp, sp, UP ;
 
 /* Merge _addi_ when popping from the stack. */
 addi sp, sp, X : lwz L1, Y(sp) { plus(X, Y, Z) && Z[0]!='-' }
@@ -114,6 +115,15 @@ int not_using_sp(const char *s) {
 		s++;
 	}
 	return 1;
+}
+
+
+int positive(const char *s) {
+	long n;
+	char *end;
+
+	n = strtol(s, &end, 10);
+	return *s != '\0' && *end == '\0' && n > 0;
 }
 
 
