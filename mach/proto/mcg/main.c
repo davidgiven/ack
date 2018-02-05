@@ -42,13 +42,14 @@ int main(int argc, char* const argv[])
     const char* inputfilename = NULL;
     const char* outputfilename = NULL;
     FILE* output;
+    int i;
 
     program_name = argv[0];
 
     opterr = 1;
     for (;;)
     {
-        int c = getopt(argc, argv, "-d:D:C:o:");
+        int c = getopt(argc, argv, "d:D:C:o:");
         if (c == -1)
             break;
 
@@ -79,20 +80,22 @@ int main(int argc, char* const argv[])
                     fatal("already specified an output file");
                 outputfilename = optarg;
                 break;
-
-            case 1:
-                if (inputfilename)
-                    fatal("unexpected argument '%s'", optarg);
-                inputfilename = optarg;
         }
+    }
+
+    for (i = optind; i < argc; i++)
+    {
+        if (inputfilename)
+            fatal("unexpected argument '%s'", argv[i]);
+        inputfilename = argv[i];
     }
 
     symbol_init();
 
-	if (!EM_open((char*) inputfilename))
-		fatal("couldn't open input '%s': %s",
+    if (!EM_open((char*) inputfilename))
+        fatal("couldn't open input '%s': %s",
             inputfilename ? inputfilename : "<stdin>", EM_error);
-	
+
     if (outputfilename)
     {
         outputfile = fopen(outputfilename, "w");
