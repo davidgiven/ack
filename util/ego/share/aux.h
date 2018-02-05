@@ -36,7 +36,7 @@ line_p reg_mes(offset tmp, short size, int typ, int score);
 bool dom(bblock_p b1, bblock_p b2);
 				/*
 				 * See if b1 dominates b2. Note that a
-				 * block always * dominates itself.
+				 * block always dominates itself.
 				 */
 bblock_p common_dom(bblock_p a, bblock_p b);
 				/*

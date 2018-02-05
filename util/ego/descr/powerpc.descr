@@ -102,7 +102,7 @@ register save costs:
 	17 -> (102,136)
 	18 -> (108,144)
 	19 -> (114,152)
-        20 -> (120,160)
+	20 -> (120,160)
 	21 -> (126,168)
 	22 -> (132,176)
 	23 -> (138,184)
@@ -137,7 +137,7 @@ reduce sli if shift count larger than:  0
 first time then space:
 addressing modes: op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
 		  op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1 
+cheap operations: op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
 		  op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
 lexical tresholds: 1 1
 indirection limit: 8

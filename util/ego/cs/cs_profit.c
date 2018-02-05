@@ -26,9 +26,7 @@ STATIC cset	sli_counts;
 STATIC short	LX_threshold;
 STATIC short	AR_limit;
 
-STATIC get_instrs(f, s_p)
-	FILE *f;
-	cset *s_p;
+STATIC void get_instrs(FILE *f, cset *s_p)
 {
 	/* Read a set of integers from inputfile f into *s_p.
 	 * Such a set must be delimited by a negative number.
@@ -42,9 +40,7 @@ STATIC get_instrs(f, s_p)
 	}
 }
 
-STATIC choose_cset(f, s_p, max)
-	FILE *f;
-	cset *s_p;
+STATIC void choose_cset(FILE *f, cset *s_p, int max)
 {
 	/* Read two compact sets of integers from inputfile f.
 	 * Choose the first if we optimize with respect to time,
@@ -115,8 +111,7 @@ void cs_machinit(void *vp)
 	choose_cset(f, &forbidden, sp_lmnem);
 }
 
-STATIC bool sli_no_eliminate(lnp)
-	line_p lnp;
+STATIC bool sli_no_eliminate(line_p lnp)
 {
 	/* Return whether the SLI-instruction in lnp is part of
 	 * an array-index computation, and should not be eliminated.
@@ -130,8 +125,7 @@ STATIC bool sli_no_eliminate(lnp)
 		;
 }
 
-STATIC bool gains(avp)
-	avail_p avp;
+STATIC bool gains(avail_p avp)
 {
 	/* Return whether we can gain something, when we eliminate
 	 * an expression such as in avp. We just glue together some
@@ -161,9 +155,7 @@ STATIC bool gains(avp)
 	return TRUE;
 }
 
-STATIC bool okay_lines(avp, ocp)
-	avail_p avp;
-	occur_p ocp;
+STATIC bool okay_lines(avail_p avp, occur_p ocp)
 {
 	register line_p lnp, next;
 	offset sz;

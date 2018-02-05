@@ -21,9 +21,7 @@
 #include "cs_partit.h"
 #include "cs_getent.h"
 
-STATIC push_entity(enp, lfirst)
-	entity_p enp;
-	line_p lfirst;
+STATIC void push_entity(entity_p enp, line_p lfirst)
 {
 	/* Build token and Push it. */
 
@@ -35,10 +33,8 @@ STATIC push_entity(enp, lfirst)
 	Push(&tk);
 }
 
-STATIC put_expensive_load(bp, lnp, lfirst, enp)
-	bblock_p bp;
-	line_p lnp, lfirst;
-	entity_p enp;
+STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst,
+			       entity_p enp)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -52,10 +48,7 @@ STATIC put_expensive_load(bp, lnp, lfirst, enp)
 	av_enter(&av, ocp, EXPENSIVE_LOAD);
 }
 
-STATIC put_aar(bp, lnp, lfirst, enp)
-	bblock_p bp;
-	line_p lnp, lfirst;
-	entity_p enp;
+STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
 	/* Enp points to an ENARRELEM. We do as if its address was computed. */
 
@@ -74,9 +67,7 @@ STATIC put_aar(bp, lnp, lfirst, enp)
 	av_enter(&av, ocp, TERNAIR_OP);
 }
 
-STATIC push_avail(avp, lfirst)
-	avail_p avp;
-	line_p lfirst;
+STATIC void push_avail(avail_p avp, line_p lfirst)
 {
 	struct token tk;
 
@@ -86,10 +77,7 @@ STATIC push_avail(avp, lfirst)
 	Push(&tk);
 }
 
-STATIC push_unair_op(bp, lnp, tkp1)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1;
+STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -103,10 +91,7 @@ STATIC push_unair_op(bp, lnp, tkp1)
 	push_avail(av_enter(&av, ocp, UNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC push_binair_op(bp, lnp, tkp1, tkp2)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1, tkp2;
+STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -121,10 +106,8 @@ STATIC push_binair_op(bp, lnp, tkp1, tkp2)
 	push_avail(av_enter(&av, ocp, BINAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC push_ternair_op(bp, lnp, tkp1, tkp2, tkp3)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1, tkp2, tkp3;
+STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1,
+			    token_p tkp2, token_p tkp3)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -140,8 +123,7 @@ STATIC push_ternair_op(bp, lnp, tkp1, tkp2, tkp3)
 	push_avail(av_enter(&av, ocp, TERNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC fiddle_stack(lnp)
-	line_p lnp;
+STATIC void fiddle_stack(line_p lnp)
 {
 	/* The instruction in lnp does something to the valuenumber-stack. */
 
@@ -232,8 +214,7 @@ STATIC proc_p find_proc(vn)
 	return (proc_p) 0;
 }
 
-STATIC side_effects(lnp)
-	line_p lnp;
+STATIC void side_effects(line_p lnp)
 {
 	/* Lnp contains a cai or cal instruction. We try to find the callee
 	 * and see what side-effects it has.
@@ -255,8 +236,7 @@ STATIC side_effects(lnp)
 	}
 }
 
-hopeless(instr)
-	int instr;
+STATIC void hopeless(int instr)
 {
 	/* The effect of `instr' is too difficult to
 	 * compute. We assume worst case behaviour.
@@ -281,8 +261,7 @@ hopeless(instr)
 	}
 }
 
-vnm(bp)
-	bblock_p bp;
+void vnm(bblock_p bp)
 {
 	register line_p lnp;
 	register entity_p rep;

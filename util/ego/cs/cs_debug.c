@@ -17,8 +17,7 @@
 
 extern char em_mnem[]; /* The mnemonics of the EM instructions. */
 
-STATIC void showinstr(lnp)
-	line_p lnp;
+STATIC void showinstr(line_p lnp)
 {
 	/* Makes the instruction in `lnp' human readable. Only lines that
 	 * can occur in expressions that are going to be eliminated are
@@ -49,8 +48,7 @@ STATIC void showinstr(lnp)
 	fprintf(stderr,"\n");
 }
 
-SHOWOCCUR(ocp)
-	occur_p ocp;
+SHOWOCCUR(occur_p ocp)
 {
 	/* Shows all instructions in an occurrence. */
 
@@ -69,8 +67,7 @@ SHOWOCCUR(ocp)
 
 #ifdef TRACE
 
-SHOWAVAIL(avp)
-	avail_p avp;
+void SHOWAVAIL(avail_p avp)
 {
 	/* Shows an available expression. */
 	showinstr(avp->av_found);
@@ -79,7 +76,7 @@ SHOWAVAIL(avp)
 
 }
 
-OUTAVAILS()
+void OUTAVAILS(void)
 {
 	register avail_p ravp;
 
@@ -110,7 +107,7 @@ STATIC char *enkinds[] = {
 	"ignore mask"
 };
 
-OUTENTITIES()
+void OUTENTITIES(void)
 {
 	register Lindex i;
 

@@ -65,9 +65,8 @@ STATIC void sp_machinit(void *vp)
 	}
 	fscanf(f,"%d",&globl_sp_allowed);
 }
-comb_asps(l1,l2,b)
-	line_p l1,l2;
-	bblock_p b;
+
+STATIC void comb_asps(line_p l1, line_p l2, bblock_p b)
 {
 	assert(INSTR(l1) == op_asp);
 	assert(INSTR(l2) == op_asp);
@@ -78,11 +77,7 @@ comb_asps(l1,l2,b)
 	rm_line(l1,b);
 }
 	
-
-
-
-stack_pollution(b)
-	bblock_p b;
+STATIC void stack_pollution(bblock_p b)
 {
 	/* For every pair of successive ASP instructions in basic
 	 * block b, try to combine the two into one ASP.
@@ -134,8 +129,7 @@ stack_pollution(b)
 	} while (asp != (line_p) 0);
 }
 
-STATIC bool block_save(b)
-	bblock_p b;
+STATIC bool block_save(bblock_p b)
 {
 
 	register line_p l;
@@ -159,10 +153,7 @@ STATIC bool block_save(b)
 	return stack_diff >= 0;
 }
 
-
-
-STATIC mark_pred(b)
-	bblock_p b;
+STATIC void mark_pred(bblock_p b)
 {
 	Lindex i;
 	bblock_p x;
@@ -176,12 +167,7 @@ STATIC mark_pred(b)
 	}
 }
 
-
-
-
-
-STATIC mark_unsave_blocks(p)
-	proc_p p;
+STATIC void mark_unsave_blocks(proc_p p)
 {
 	register bblock_p b;
 
@@ -193,8 +179,7 @@ STATIC mark_unsave_blocks(p)
 	}
 }
 
-
-void sp_optimize(void *vp)
+STATIC void sp_optimize(void *vp)
 {
 	proc_p p = vp;
 	register bblock_p b;
@@ -206,20 +191,12 @@ void sp_optimize(void *vp)
 	}
 }
 
-
-
-
-main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc, char *argv[])
 {
 	go(argc,argv,no_action,sp_optimize,sp_machinit,no_action);
 	report("stack adjustments deleted",Ssp);
 	exit(0);
 }
-
-
-
 
 /***** DEBUGGING:
 

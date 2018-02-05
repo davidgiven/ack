@@ -16,9 +16,9 @@
 #include "cs_debug.h"
 #include "cs_avail.h"
 #include "cs_entity.h"
+#include "cs_kill.h"
 
-STATIC base_valno(enp)
-	entity_p enp;
+STATIC valnum base_valno(entity_p enp)
 {
 	/* Return the value number of the (base) address of an indirectly
 	 * accessed entity.
@@ -37,8 +37,7 @@ STATIC base_valno(enp)
 	/* NOTREACHED */
 }
 
-STATIC entity_p find_base(vn)
-	valnum vn;
+STATIC entity_p find_base(valnum vn)
 {
 	/* Vn is the valuenumber of the (base) address of an indirectly
 	 * accessed entity. Return the entity that holds this address
@@ -79,8 +78,7 @@ STATIC entity_p find_base(vn)
 	return (entity_p) 0;
 }
 
-STATIC bool obj_overlap(op1, op2)
-	obj_p op1, op2;
+STATIC bool obj_overlap(obj_p op1, obj_p op2)
 {
 	/* Op1 and op2 point to two objects in the same datablock.
 	 * Obj_overlap returns whether these objects might overlap.
@@ -97,8 +95,7 @@ STATIC bool obj_overlap(op1, op2)
 
 #define same_datablock(o1, o2)	((o1)->o_dblock == (o2)->o_dblock)
 
-STATIC bool addr_local(enp)
-	entity_p enp;
+STATIC bool addr_local(entity_p enp)
 {
 	/* Is enp the address of a stack item. */
 
@@ -108,17 +105,14 @@ STATIC bool addr_local(enp)
 		enp->en_kind == ENAARGBASE;
 }
 
-STATIC bool addr_external(enp)
-	entity_p enp;
+STATIC bool addr_external(entity_p enp)
 {
 	/* Is enp the address of an external. */
 
 	return enp != (entity_p) 0 && enp->en_kind == ENAEXTERNAL;
 }
 
-STATIC kill_external(obp, indir)
-	obj_p obp;
-	int indir;
+STATIC void kill_external(obj_p obp, int indir)
 {
 	/* A store is done via the object in obp. If this store is direct
 	 * we kill directly accessed entities in the same data block only
@@ -164,8 +158,7 @@ STATIC kill_external(obp, indir)
 	}
 }
 
-STATIC bool loc_overlap(enp1, enp2)
-	entity_p enp1, enp2;
+STATIC bool loc_overlap(entity_p enp1, entity_p enp2)
 {
 	/* Enp1 and enp2 point to two locals. Loc_overlap returns whether
 	 * they overlap.
@@ -184,9 +177,7 @@ STATIC bool loc_overlap(enp1, enp2)
 			enp1->en_loc + enp1->en_size > enp2->en_loc;
 }
 
-STATIC kill_local(enp, indir)
-	entity_p enp;
-	bool indir;
+STATIC void kill_local(entity_p enp, bool indir)
 {
 	/* This time a store is done into an ENLOCAL. */
 
@@ -234,7 +225,7 @@ STATIC kill_local(enp, indir)
 	}
 }
 
-STATIC void kill_sim()
+STATIC void kill_sim(void)
 {
 	/* A store is done into the ENIGNMASK. */
 
@@ -252,8 +243,7 @@ STATIC void kill_sim()
 	}
 }
 
-kill_direct(enp)
-	entity_p enp;
+void kill_direct(entity_p enp)
 {
 	/* A store will be done into enp. We must forget the values of all the
 	 * entities this one may overlap with.
@@ -274,8 +264,7 @@ kill_direct(enp)
 	}
 }
 
-kill_indir(enp)
-	entity_p enp;
+void kill_indir(entity_p enp)
 {
 	/* An indirect store is done, in an ENINDIR,
 	 * an ENOFFSETTED or an ENARRELEM.
@@ -306,7 +295,7 @@ kill_indir(enp)
 	}
 }
 
-kill_much()
+extern void kill_much(void)
 {
 	/* Kills all killable entities,
 	 * except the locals for which a registermessage was generated.
@@ -324,8 +313,7 @@ kill_much()
 	}
 }
 
-STATIC bool bad_procflags(pp)
-	proc_p pp;
+STATIC bool bad_procflags(proc_p pp)
 {
 	/* Return whether the flags about the procedure in pp indicate
 	 * that we have little information about it. It might be that
@@ -335,8 +323,7 @@ STATIC bool bad_procflags(pp)
 	return !(pp->p_flags1 & PF_BODYSEEN) || (pp->p_flags1 & PF_CALUNKNOWN);
 }
 
-STATIC kill_globset(s)
-	cset s;
+STATIC void kill_globset(cset s)
 {
 	/* S is a set of global variables that might be changed.
 	 * We act as if a direct store is done into each of them.
@@ -349,8 +336,7 @@ STATIC kill_globset(s)
 	}
 }
 
-kill_call(pp)
-	proc_p pp;
+void kill_call(proc_p pp)
 {
 	/* Kill everything that might be destroyed by calling
 	 * the procedure in pp.
@@ -367,7 +353,7 @@ kill_call(pp)
 	}
 }
 
-kill_all()
+void kill_all(void)
 {
 	/* Kills all entities. */
 

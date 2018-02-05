@@ -20,8 +20,7 @@
 #include "cs_partit.h"
 #include "cs_debug.h"
 
-STATIC dlink(l1, l2)
-	line_p l1, l2;
+STATIC void dlink(line_p l1, line_p l2)
 {
 	/* Doubly link the lines in l1 and l2. */
 
@@ -31,11 +30,10 @@ STATIC dlink(l1, l2)
 		l2->l_prev = l1;
 }
 
-STATIC remove_lines(first, last)
-	line_p first, last;
+STATIC void remove_lines(line_p first, line_p last)
 {
 	/* Throw away the lines between and including first and last.
-	 * Don't worry about any pointers; the (must) have been taken care of.
+	 * Don't worry about any pointers; they (must) have been taken care of.
 	 */
 	register line_p lnp, next;
 
@@ -46,8 +44,7 @@ STATIC remove_lines(first, last)
 	}
 }
 
-STATIC bool contained(ocp1, ocp2)
-	occur_p ocp1, ocp2;
+STATIC bool contained(occur_p ocp1, occur_p ocp2)
 {
 	/* Determine whether ocp1 is contained within ocp2. */
 
@@ -61,9 +58,7 @@ STATIC bool contained(ocp1, ocp2)
 	return FALSE;
 }
 
-STATIC delete(ocp, start)
-	occur_p ocp;
-	avail_p start;
+STATIC void delete(occur_p ocp, avail_p start)
 {
 	/* Delete all occurrences that are contained within ocp.
 	 * They must have been entered in the list before start:
@@ -90,10 +85,7 @@ STATIC delete(ocp, start)
 	}
 }
 
-STATIC complete_aar(lnp, instr, descr_vn)
-	line_p lnp;
-	int instr;
-	valnum descr_vn;
+STATIC void complete_aar(line_p lnp, int instr, valnum descr_vn)
 {
 	/* Lnp is an instruction that loads the address of an array-element.
 	 * Instr tells us what effect we should achieve; load (instr is op_lar)
@@ -109,10 +101,7 @@ STATIC complete_aar(lnp, instr, descr_vn)
 	dlink(lnp, lindir);
 }
 
-STATIC replace(ocp, tmp, avp)
-	occur_p ocp;
-	offset tmp;
-	avail_p avp;
+STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 {
 	/* Replace the lines in the occurrence in ocp by a load of the
 	 * temporary with offset tmp.
@@ -143,9 +132,7 @@ STATIC replace(ocp, tmp, avp)
 	remove_lines(first, last);
 }
 
-STATIC append(avp, tmp)
-	avail_p avp;
-	offset tmp;
+STATIC void append(avail_p avp, offset tmp)
 {
 	/* Avp->av_found points to a line with an operator in it. This 
 	 * routine emits a sequence of instructions that saves the result
@@ -177,9 +164,7 @@ STATIC append(avp, tmp)
 	}
 }
 
-STATIC set_replace(avp, tmp)
-	avail_p avp;
-	offset tmp;
+STATIC void set_replace(avail_p avp, offset tmp)
 {
 	/* Avp->av_occurs is now a set of occurrences, each of which will be
 	 * replaced by a reference to a local.
@@ -199,8 +184,7 @@ STATIC set_replace(avp, tmp)
 	}
 }
 
-STATIC int reg_score(enp)
-	entity_p enp;
+STATIC int reg_score(entity_p enp)
 {
 	/* Enp is a local that will go into a register.
 	 * We return its score upto now.
@@ -209,10 +193,7 @@ STATIC int reg_score(enp)
 	return regv_arg(enp->en_loc, 4);
 }
 
-STATIC line_p gen_mesreg(off, avp, pp)
-	offset off;
-	avail_p avp;
-	proc_p pp;
+STATIC line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
 {
 	/* Generate a register message for the local that will hold the
 	 * result of the expression in avp, at the appropriate place in
@@ -226,9 +207,7 @@ STATIC line_p gen_mesreg(off, avp, pp)
 	return reg;
 }
 
-STATIC change_score(mes, score)
-	line_p mes;
-	int score;
+STATIC void change_score(line_p mes, int score)
 {
 	/* Change the score in the register message in mes to score. */
 
@@ -242,8 +221,7 @@ STATIC change_score(mes, score)
 	ap->a_a.a_offset = score;
 }
 
-eliminate(pp)
-	proc_p pp;
+void eliminate(proc_p pp)
 {
 	/* Eliminate costly common subexpressions within procedure pp.
 	 * We scan the available expressions in - with respect to time found -

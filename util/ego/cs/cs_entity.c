@@ -18,8 +18,7 @@
 
 lset entities; /* Our pseudo symbol-table. */
 
-entity_p find_entity(vn)
-	valnum vn;
+entity_p find_entity(valnum vn)
 {
 	/* Try to find the entity with valuenumber vn. */
 
@@ -33,8 +32,7 @@ entity_p find_entity(vn)
 	return (entity_p) 0;
 }
 
-STATIC bool same_entity(enp1, enp2)
-	entity_p enp1, enp2;
+STATIC bool same_entity(entity_p enp1, entity_p enp2)
 {
 	if (enp1->en_kind != enp2->en_kind) return FALSE;
 	if (enp1->en_size != enp2->en_size) return FALSE;
@@ -69,8 +67,7 @@ STATIC bool same_entity(enp1, enp2)
 	}
 }
 
-STATIC copy_entity(src, dst)
-	entity_p src, dst;
+STATIC void copy_entity(entity_p src, entity_p dst)
 {
 	dst->en_static = src->en_static;
 	dst->en_kind = src->en_kind;
@@ -111,8 +108,7 @@ STATIC copy_entity(src, dst)
 	}
 }
 
-entity_p en_enter(enp)
-	register entity_p enp;
+entity_p en_enter(entity_p enp)
 {
 	/* Put the entity in enp in the entity set, if it is not already there.
 	 * Return pointer to stored entity.
@@ -133,7 +129,7 @@ entity_p en_enter(enp)
 	return new;
 }
 
-clr_entities()
+void clr_entities(void)
 {
 	/* Throw away all pseudo-symboltable information. */
 
