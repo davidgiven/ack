@@ -30,20 +30,16 @@ name be
 	stdout
 	need .e
 end
-
-# There's an ack driver bug where if the .s file needs preprocessing, the path
-# isn't set correctly in stages other than the first; this affects the PDP/11
-# libsys assembler files. Work around this for now by disabling asopt.
-#name asopt
-#	from .s
-#	to .so
-#	program {EM}/lib/ack/{PLATFORM}/top
-#	args
-#	optimizer
-#	stdin
-#	stdout
-#end
-
+name asopt
+	from .s
+	to .so
+	program {EM}/lib/ack/{PLATFORM}/top
+	args
+	optimizer
+	stdin
+	stdout
+	prep cond
+end
 name as
 	from .s.so
 	to .o
