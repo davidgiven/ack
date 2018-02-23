@@ -25,7 +25,8 @@ clean:
 	rm -f *.$(SUF) Out cv
 
 lint:
-	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c $(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)
+	$(LINT) $(LINTOPTIONS) -I$(TARGET_HOME)/h $(SRC_DIR)/cv.c
+$(UTIL_HOME)/modules/lib/$(LINTPREF)object.$(LINTSUF)
 
 pr:
 	@pr $(SRC_DIR)/proto.make $(SRC_DIR)/cv.c

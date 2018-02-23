@@ -14,6 +14,7 @@ vars.plats = {
 	--"qemuppc",
 	"pc86",
 	"rpi",
+	"pdpv7",
 }
 vars.plats_with_tests = {
 	"linux386",
