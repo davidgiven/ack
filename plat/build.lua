@@ -1,4 +1,5 @@
 include("mach/proto/as/build.lua")
+include("mach/proto/cg/build.lua")
 include("mach/proto/ncg/build.lua")
 include("mach/proto/mcg/build.lua")
 include("mach/proto/top/build.lua")

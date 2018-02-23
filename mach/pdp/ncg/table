@@ -8,7 +8,7 @@ EM_BSIZE=4
 
 SL=4
 
-FORMAT = "0%lo"
+FORMAT = "%d"
 TIMEFACTOR = 1/300
 
 illins = "Illegal"
