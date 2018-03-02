@@ -50,11 +50,13 @@ STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst,
 
 STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
-	/* Enp points to an ENARRELEM. We do as if its address was computed. */
-
+	/* Enter the implicit AAR in a LAR or SAR, where enp points to
+	 * the ENARRELEM, and AAR computes its address.
+	 */
 	struct avail av;
 	occur_p	ocp;
 
+	assert(INSTR(lnp) == op_lar || INSTR(lnp) == op_sar);
 	assert(enp->en_kind == ENARRELEM);
 	av.av_instr = op_aar;
 	av.av_size = ps;
@@ -62,9 +64,14 @@ STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 	av.av_osecond = enp->en_index;
 	av.av_othird = enp->en_adesc;
 
-	ocp = newoccur(lfirst, lnp, bp);
-
-	av_enter(&av, ocp, TERNAIR_OP);
+	/* Before we enter an available AAR, we must check whether we
+	 * may convert this LAR/SAR to AAR LOI/STI.  This is so we
+	 * don't LOI/STI a large or unknown size.
+	 */
+	if (may_become_aar(&av)) {
+		ocp = newoccur(lfirst, lnp, bp);
+		av_enter(&av, ocp, TERNAIR_OP);
+	}
 }
 
 STATIC void push_avail(avail_p avp, line_p lfirst)

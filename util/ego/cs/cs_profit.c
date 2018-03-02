@@ -111,6 +111,21 @@ void cs_machinit(void *vp)
 	choose_cset(f, &forbidden, sp_lmnem);
 }
 
+bool may_become_aar(avail_p avp)
+{
+	/* Check whether it is desirable to treat a LAR or SAR as an
+	 * AAR LOI/STI. This depends on the size of the array-elements.
+	 */
+	offset sz;
+
+	sz = array_elemsize(avp->av_othird);
+	if (sz == UNKNOWN_SIZE)
+		return FALSE;
+	if (time_space_ratio < 50)
+		return sz <= AR_limit;
+	return TRUE;
+}
+
 STATIC bool sli_no_eliminate(line_p lnp)
 {
 	/* Return whether the SLI-instruction in lnp is part of
@@ -157,8 +172,10 @@ STATIC bool gains(avail_p avp)
 
 STATIC bool okay_lines(avail_p avp, occur_p ocp)
 {
+	/* Check whether all lines in this occurrence can in
+	 * principle be eliminated; no stores, messages, calls etc.
+	 */
 	register line_p lnp, next;
-	offset sz;
 
 	for (lnp = ocp->oc_lfirst; lnp != (line_p) 0; lnp = next) {
 		next = lnp != ocp->oc_llast ? lnp->l_next : (line_p) 0;
@@ -169,18 +186,6 @@ STATIC bool okay_lines(avail_p avp, occur_p ocp)
 			/* Check for SAR-instruction. */
 			if (INSTR(lnp) != op_sar || next != (line_p) 0)
 				return FALSE;
-		}
-	}
-	/* All lines in this occurrence can in principle be eliminated;
-	 * no stores, messages, calls etc.
-	 * We now check whether it is desirable to treat a LAR or a SAR
-	 * as an AAR LOI/STI. This depends on the size of the array-elements.
-	 */
-	if (INSTR(ocp->oc_llast) == op_lar || INSTR(ocp->oc_llast) == op_sar) {
-		sz = array_elemsize(avp->av_othird);
-		if (sz == UNKNOWN_SIZE) return FALSE;
-		if (avp->av_instr == (byte) op_aar && time_space_ratio < 50) {
-			return sz <= AR_limit;
 		}
 	}
 	return TRUE;

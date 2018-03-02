@@ -7,6 +7,12 @@ void cs_machinit(void *vp);	/* (FILE *f)
 				 * Read phase-specific information from f.
 				 */
 
+bool may_become_aar(avail_p avp);
+				/*
+				 * Return whether a LAR/SAR may become
+				 * an AAR LOI/STI.
+				 */
+
 bool desirable(avail_p avp);	/*
 				 * Return whether it is desirable to eliminate
 				 * the recurrences of the expression in avp.
