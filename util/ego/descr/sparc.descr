@@ -100,6 +100,7 @@ cheap operations: op_cuu op_ciu op_cui op_cii -1
                   op_cuu op_ciu op_cui op_cii -1
 lexical tresholds: 1 1
 indirection limit: 8
+convert remainder to division?: no no
 do not eliminate sli if index on shiftcounts:   -1
                                                 -1
 forbidden operators: -1 -1

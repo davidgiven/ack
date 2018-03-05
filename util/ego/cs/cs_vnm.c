@@ -20,6 +20,7 @@
 #include "cs_kill.h"
 #include "cs_partit.h"
 #include "cs_getent.h"
+#include "cs_profit.h"
 
 STATIC void push_entity(entity_p enp, line_p lfirst)
 {
@@ -128,6 +129,37 @@ STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1,
 	ocp = newoccur(tkp1->tk_lfirst, lnp, bp);
 
 	push_avail(av_enter(&av, ocp, TERNAIR_OP), tkp1->tk_lfirst);
+}
+
+STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
+{
+	/* Enter the implicit division tkp1 / tkp2,
+	 * then push the remainder tkp1 % tkp2.
+	 */
+	struct avail av;
+	occur_p	ocp;
+
+	assert(INSTR(lnp) == op_rmi || INSTR(lnp) == op_rmu);
+	av.av_size = avsize(lnp);
+	av.av_oleft = tkp1->tk_vn;
+	av.av_oright = tkp2->tk_vn;
+
+	/* Check whether we may convert RMI/RMU to DVI/DVU. */
+	if (may_become_dv()) {
+		/* The division is DVI in RMI, or DVU in RMU. */
+		av.av_instr = (INSTR(lnp) == op_rmi ? op_dvi : op_dvu);
+
+		/* In postfix, a b % becomes a b a b / * -.  We must
+		 * keep a and b on the stack, so the first instruction
+		 * to eliminate is lnp, not tkp1->l_first.
+		 */
+		ocp = newoccur(lnp, lnp, bp);
+		av_enter(&av, ocp, BINAIR_OP);
+	}
+
+	av.av_instr = INSTR(lnp);
+	ocp = newoccur(tkp1->tk_lfirst, lnp, bp);
+	push_avail(av_enter(&av, ocp, REMAINDER), tkp1->tk_lfirst);
 }
 
 STATIC void fiddle_stack(line_p lnp)
@@ -316,6 +348,11 @@ void vnm(bblock_p bp)
 				Pop(&tk2, op23size(lnp));
 				Pop(&tk1, op13size(lnp));
 				push_ternair_op(bp, lnp, &tk1, &tk2, &tk3);
+				break;
+			case REMAINDER:
+				Pop(&tk2, op22size(lnp));
+				Pop(&tk1, op12size(lnp));
+				push_remainder(bp, lnp, &tk1, &tk2);
 				break;
 			case KILL_ENTITY:
 				kill_direct(rep);

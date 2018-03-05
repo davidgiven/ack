@@ -25,6 +25,7 @@ STATIC cset	forbidden;
 STATIC cset	sli_counts;
 STATIC short	LX_threshold;
 STATIC short	AR_limit;
+STATIC bool	RM_to_DV;
 
 STATIC void get_instrs(FILE *f, cset *s_p)
 {
@@ -97,6 +98,12 @@ void cs_machinit(void *vp)
 	fscanf(f, "%d", &space);
 	AR_limit = space;
 
+	/* Read whether to convert a remainder RMI/RMU to a division
+	 * DVI/DVU using the formula a % b = a - b * (a / b).
+	 */
+	fscanf(f, "%d %d", &time, &space);
+	RM_to_DV = time_space_ratio >= 50 ? time : space;
+
 	/* Read for what counts we must not eliminate an SLI instruction
 	 * when it is part of an array-index computation.
 	 */
@@ -124,6 +131,11 @@ bool may_become_aar(avail_p avp)
 	if (time_space_ratio < 50)
 		return sz <= AR_limit;
 	return TRUE;
+}
+
+bool may_become_dv(void)
+{
+	return RM_to_DV;
 }
 
 STATIC bool sli_no_eliminate(line_p lnp)

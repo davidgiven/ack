@@ -125,8 +125,8 @@ STATIC struct {
 /* nop */	HOPELESS,	XXX,	XXX,	XXX,	XXX,
 /* rck */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
 /* ret */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
-/* rmi */	BINAIR_OP,	ARGW,	ARGW,	ARGW,	ANY,
-/* rmu */	BINAIR_OP,	ARGW,	ARGW,	ARGW,	ANY,
+/* rmi */	REMAINDER,	ARGW,	ARGW,	ARGW,	ANY,
+/* rmu */	REMAINDER,	ARGW,	ARGW,	ARGW,	ANY,
 /* rol */	BINAIR_OP,	ARGW,	WS,	ARGW,	ANY,
 /* ror */	BINAIR_OP,	ARGW,	WS,	ARGW,	ANY,
 /* rtt */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
@@ -203,6 +203,7 @@ bool stack_group(int instr)
 		case UNAIR_OP:
 		case BINAIR_OP:
 		case TERNAIR_OP:
+		case REMAINDER:
 			return TRUE;
 		default:
 			return FALSE;

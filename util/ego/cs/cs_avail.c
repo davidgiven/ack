@@ -54,6 +54,7 @@ STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 		case UNAIR_OP:
 			return	avp1->av_operand == avp2->av_operand;
 		case BINAIR_OP:
+		case REMAINDER:
 			if (commutative(avp1->av_instr & BMASK))
 				return	avp1->av_oleft == avp2->av_oleft &&
 					avp1->av_oright == avp2->av_oright
@@ -124,6 +125,7 @@ STATIC void copy_avail(int kind, avail_p src, avail_p dst)
 			dst->av_operand = src->av_operand;
 			break;
 		case BINAIR_OP:
+		case REMAINDER:
 			dst->av_oleft = src->av_oleft;
 			dst->av_oright = src->av_oright;
 			break;
@@ -160,7 +162,8 @@ avail_p av_enter(avail_p avp, occur_p ocp, int kind)
 	/* Remember local, if any, that holds result. */
 	if (avp->av_instr != (byte) INSTR(last)) {
 		/* Only possible when instr is the implicit AAR in 
-		 * a LAR or SAR.
+		 * a LAR or SAR, or the implicit DVI in an RMI, or
+		 * DVU in RMU.
 		 */
 		ravp->av_saveloc = (entity_p) 0;
 	} else {

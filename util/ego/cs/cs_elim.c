@@ -101,12 +101,49 @@ STATIC void complete_aar(line_p lnp, int instr, valnum descr_vn)
 	dlink(lnp, lindir);
 }
 
+STATIC void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
+{
+	/* Complete a / b as a % b = a - b * (a / b). For the first
+	 * occurrence, lnp must stack q, where q = a / b. We prepend a
+	 * DUP to change postfix a b / into a b a b /, then append a
+	 * MLI/MLU and SBI/SBU to make a b a b / * -.
+	 *
+	 * For later occurences, lnp must stack a b q.  We append the
+	 * MLI/MLU and SBI/SBU.
+	 */
+	line_p dv, dup, ml, sb;
+	offset size;
+	bool s;
+
+	size = avp->av_size;
+	s = (avp->av_instr == (byte) op_dvi);
+	assert(s || avp->av_instr == (byte) op_dvu);
+	if (first) {
+		/* Prepend our DUP to avp->av_found, to get before the
+		 * DVI if lnp points to the LOL in DVI STL LOL.
+		 */
+		dup = int_line(2 * size);
+		dup->l_instr = op_dup;
+		dv = avp->av_found;
+		dlink(dv->l_prev, dup);
+		dlink(dup, dv);
+	}
+	ml = int_line(size);
+	sb = int_line(size);
+	ml->l_instr = (s ? op_mli : op_mlu);
+	sb->l_instr = (s ? op_sbi : op_sbu);
+	dlink(sb, lnp->l_next);
+	dlink(ml, sb);
+	dlink(lnp, ml);
+}
+
 STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 {
 	/* Replace the lines in the occurrence in ocp by a load of the
 	 * temporary with offset tmp.
 	 */
 	register line_p lol, first, last;
+	register int instr;
 
 	assert(avp->av_size == ws || avp->av_size == 2*ws);
 
@@ -119,13 +156,24 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 	if (first->l_prev == (line_p) 0) ocp->oc_belongs->b_start = lol;
 	dlink(first->l_prev, lol);
 
-	if (avp->av_instr == (byte) op_aar) {
-		/* There may actually be a LAR or a SAR instruction; in that
-		 * case we have to complete the array-instruction.
-		 */
-		register int instr = INSTR(last);
-
-		if (instr != op_aar) complete_aar(lol, instr, avp->av_othird);
+	instr = INSTR(last);
+	switch (avp->av_instr & 0377) {
+		case op_aar:
+			/* There may actually be a LAR or a SAR
+			 * instruction; in that case we have to
+			 * complete the array-instruction.
+			 */
+			if (instr != op_aar)
+				complete_aar(lol, instr, avp->av_othird);
+			break;
+		case op_dvi:
+			if (instr == op_rmi)
+				complete_dv_as_rm(lol, avp, FALSE);
+			break;
+		case op_dvu:
+			if (instr == op_rmu)
+				complete_dv_as_rm(lol, avp, FALSE);
+			break;
 	}
 
 	/* Throw away the by now useless lines. */
@@ -142,6 +190,7 @@ STATIC void append(avail_p avp, offset tmp)
 	 * within a lar or sar, we must first generate the aar.
 	 */
 	register line_p stl, lol;
+	register int instr;
 
 	assert(avp->av_size == ws || avp->av_size == 2*ws);
 
@@ -154,13 +203,26 @@ STATIC void append(avail_p avp, offset tmp)
 	dlink(stl, lol);
 	dlink(avp->av_found, stl);
 
-	if (avp->av_instr == (byte) op_aar) {
-		register int instr = INSTR(avp->av_found);
-
-		if (instr != op_aar) {
-			complete_aar(lol, instr, avp->av_othird);
-			avp->av_found->l_instr = op_aar;
-		}
+	instr = INSTR(avp->av_found);
+	switch (avp->av_instr & 0377) {
+		case op_aar:
+			if (instr != op_aar) {
+				complete_aar(lol, instr, avp->av_othird);
+				avp->av_found->l_instr = op_aar;
+			}
+			break;
+		case op_dvi:
+			if (instr == op_rmi) {
+				complete_dv_as_rm(lol, avp, TRUE);
+				avp->av_found->l_instr = op_dvi;
+			}
+			break;
+		case op_dvu:
+			if (instr == op_rmu) {
+				complete_dv_as_rm(lol, avp, TRUE);
+				avp->av_found->l_instr = op_dvu;
+			}
+			break;
 	}
 }
 

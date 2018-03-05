@@ -99,6 +99,7 @@ addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
 cheap operations: -1 -1
 lexical tresholds: 1 1
 indirection limit: 8
+convert remainder to division?: no no
 do not eliminate sli if index on shiftcounts:	-1
 						-1
 forbidden operators: -1 -1
