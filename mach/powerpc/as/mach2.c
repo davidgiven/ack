@@ -47,11 +47,15 @@
 %token <y_word> OP_FRT_FRB_C
 %token <y_word> OP_FRT_RA_D
 %token <y_word> OP_FRT_RA_RB
+%token <y_word> OP_L
 %token <y_word> OP_LEV
 %token <y_word> OP_LIA
 %token <y_word> OP_LIL
 %token <y_word> OP_LI32
+%token <y_word> OP_RA_RB
+%token <y_word> OP_RA_RB_TH
 %token <y_word> OP_RA_RS_C
+%token <y_word> OP_RA_RS_RA_C
 %token <y_word> OP_RA_RS_RB_C
 %token <y_word> OP_RA_RS_RB_MB5_ME5_C
 %token <y_word> OP_RA_RS_RB_MB6_C
@@ -61,14 +65,14 @@
 %token <y_word> OP_RA_RS_SH6_MB6_C
 %token <y_word> OP_RA_RS_UI
 %token <y_word> OP_RA_RS_UI_CC
+%token <y_word> OP_RS
 %token <y_word> OP_RS_FXM
 %token <y_word> OP_RS_RA
 %token <y_word> OP_RS_RA_D
 %token <y_word> OP_RS_RA_DS
 %token <y_word> OP_RS_RA_NB
 %token <y_word> OP_RS_RA_RB
-%token <y_word> OP_RS_RA_RB_C
-%token <y_word> OP_RS_RA_RA_C
+%token <y_word> OP_RS_RA_RB_CC
 %token <y_word> OP_RS_RB
 %token <y_word> OP_RS_SPR
 %token <y_word> OP_RS_SR
@@ -104,4 +108,5 @@
 
 %type <y_word> c
 %type <y_word> e16 negate16 u8 u7 u6 u5 u4 u2 u1
-%type <y_word> opt_bh cr_opt nb ds bda bdl lia lil spr_num
+%type <y_word> opt_bh cr_opt nb ds bda bdl lia lil
+%type <y_word> spr_num tbr_num opt_tbr

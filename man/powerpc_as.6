@@ -1,33 +1,136 @@
-.TH POWERPC_AS 1
+.TH POWERPC_AS 1 2018-03-07
 .ad
 .SH NAME
 powerpc_as \- assembler for PowerPC
-
 .SH SYNOPSIS
 as [options] argument ...
-
 .SH DESCRIPTION
 This assembler is made with the general framework
 described in \fIuni_ass\fP(6).
-
+.PP
+It can assemble the instructions from Book I and Book II of PowerPC
+version 2.01.
+This includes the branch, integer, and floating point instructions
+from Book I; and the cache, synchronization, and time base
+instructions from Book II.
+.PP
+There is no support for other instructions, such as supervisor-mode
+instructions or vector instructions.
+There is some support for 64-bit integer instructions, but the
+assembler only has 32-bit symbols.
 .SH SYNTAX
-Most 32-bit integer and floating point instructions are supported, but not many
-short form instructions. Instructions which take 16-bit operands can additionally
-use the following special functions:
-
-.IP hi16[value], ha16[value]
-Returns the high half of the value of the expression; if the value is not absolute,
-also generates the appropriate fixup. Use of either of these \fImust\fR be followed,
-in the next instruction, by the corresponding use of \fBlo16[]\fR. Use \fBhi16[]\fR
-if the low half is going to interpret its payload as an unsigned value, and
-\fBha16[]\fR if it will be interpreted as a signed value (so that the high half can
-be adjusted to match).
-
-.IP lo16[]
-Returns the low half of the value of the expression. No fixup is generated. Use of
-\fBlo16[]\fR must come in the instruction immediately after a use of \fBhi16[]\fR or
-\fBha16[]\fR.
-
+.SS general purpose registers
+There are 32 GPRs from \fBr0\fP to \fBr31\fP.
+In this assembler, \fBsp\fP is an alias for \fBr1\fP, and \fBfp\fP is
+an alias for \fBr2\fP, because \fIack\fP uses r1 as the stack pointer
+and r2 as the frame pointer.
+Other compilers don't use r2 as the frame pointer.
+.PP
+GPR syntax requires a register name, not a number.
+For example, \(oqaddi\ r5,\ r4,\ 1\(cq works, but
+\(oqaddi\ 5,\ 4,\ 1\(cq is a syntax error.
+.PP
+Certain instructions ignore the contents of \fBr0\fP and use zero.
+This happens when using r0 as the second operand of \fIaddi\fP or
+\fIaddis\fP, or when addressing \(oqexpr(r0)\(cq or
+\(oqr0,\ gpr\(cq.
+The syntax is still the name r0, not the number 0.
+.SS floating point registers
+There are 32 FPRs from \fBf0\fP to \fBf31\fP.
+Each FPR has 64 bits and can hold a single-precision or
+double-precision number.
+FPR syntax requires a register name, not a number.
+.SS special purpose registers
+The three named SPRs are \fBctr\fP (count register), \fBlr\fP (link
+register), and \fBxer\fP (exception register).
+\(oqmfspr\(cq and \(oqmtspr\(cq allow these names or a number.
+.SS condition register
+There is a 32-bit condition register, where bit 0 is most significant,
+and bit 31 is least significant.
+This gets split into 8 registers of 4 bits each, from \fBcr0\fP (with
+bits 0 to 3) to \fBcr7\fP (with bits 28 to 31).
+Some instructions use the names cr0 to cr7, others use a bit numbered
+0 to 31, and others use all 32 bits.
+.SS addressing modes
+\(oqexpr(gpr)\(cq addresses \fIexpr\fP + the contents of \fIgpr\fP,
+except that \(oqexpr(r0)\(cq addresses \fIexpr\fP\ +\ 0.
+A few instructions, like \(oqstwu\(cq, also update \fIgpr\fP by
+setting it to the address.
+.PP
+\(oqgprA,\ gprB\(cq in certain instructions addresses the contents of
+\fIgprA\fP + the contents of \fIgprB\fP, except that \(oqr0,\ gprB\(cq
+addresses 0\ +\ the contents of \fIgprB\fP.
+.SS 16-bit operands
+Some instructions have a 16-bit operand.
+This can be a bare \fIexpr\fP (which must fit signed or unsigned
+16 bits), or it can be one of these special functions:
+.IP "hi16[expr], ha16[expr]"
+Returns the high half of the 32-bit value of the expression.
+If the low half is negative (from 0x8000 to 0xffff),
+then \fBha16[]\fP adjusts the high half by adding 1.
+Use \fBhi16[]\fP if the instruction with \fBlo16[]\fP is going to
+interpret its operand as an unsigned value, or \fBha16[]\fP if it will
+interpret it as signed.
+.IP
+If \fIexpr\fP is not absolute, then the assembler must generate a
+fixup for the linker.
+The fixup only works if the instruction is
+\(oqaddis gpr, r0, hx16[expr]\(cq or \(oqlis gpr, hx16[expr]\(cq.
+.IP lo16[expr]
+Returns the low half of the 32-bit value of the expression.
+.SS short forms
+Some instructions have short forms using extended mnemonics (or
+simplified mnemonics) like \fIli\fP, \fIsrwi\fP, and many others.
+.IP "li r6, 789"
+is short for: addi r6, r0, 789
+.IP "srwi r3, r4, 2"
+is short for: rlwinm r3, r4, 30, 2, 31
+.PP
+This assembler doesn't support extended mnemonics with branch
+prediction, such as \fIblt+\fP or \fIbne-\fP.
+It always parses \(oq+\(cq and \(oq-\(cq as operators,
+never as part of a mnemonic.
+.SH EXAMPLES
+There are two ways to load r3 with _symbol\ =\ 0x1234abcd.
+One way is
+.PP
+.nf
+   lis  r3, hi16[_symbol]
+   ori  r3, r3, lo16[_symbol]  ! r3 = 0x12340000 | 0x0000abcd
+.fi
+.PP
+The other way is
+.PP
+.nf
+   lis  r3, ha16[_symbol]
+   addi r3, r3, lo16[_symbol]  ! r3 = 0x12350000 + 0xffffabcd
+.fi
+.PP
+The next code adds 1 to a global variable.
+.PP
+.nf
+   lis  r3, ha16[_var]
+   lwz  r4, lo16[_var](r3)
+   addi r4, r4, 1
+   stw  r4, lo16[_var](r3)
+.fi
 .SH "SEE ALSO"
 uni_ass(6),
 ack(1)
+.PP
+Freescale Semiconductor, \fIProgramming Environments Manual for 32-Bit
+Implementations of the PowerPC Architecture\fP, Rev. 3, September 2005.
+.PP
+IBM, \fIPowerPC User Instruction Set Architecture, Book I\fP, Version
+2.01, September 2003.
+.PP
+IBM, \fIPowerPC Virtual Environment Architecture, Book II\fP, Version
+2.01, December 2003.
+.SH CAVEATS
+Beware that not every processor can run every instruction.
+The 32-bit processors can't run 64-bit instructions like \fIlwa\fP,
+\fIstd\fP, and \fIfctid\fP.
+The PowerPC 601 can't run \fIstfiwx\fP, nor \fIfres\fP, \fIfrsqrte\fP,
+\fIfsel\fP.
+Many models, like the PowerPC G4, can't run \fIfsqrt\fP nor
+\fIfsqrts\fP.
