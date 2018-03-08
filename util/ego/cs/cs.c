@@ -25,7 +25,7 @@
 
 int Scs; /* Number of optimizations found. */
 
-STATIC cs_clear()
+STATIC void cs_clear()
 {
 	clr_avails();
 	clr_entities();
@@ -74,9 +74,7 @@ STATIC void cs_optimize(void *vp)
 	}
 }
 
-main(argc, argv)
-	int	argc;
-	char	*argv[];
+int main(int argc, char *argv[])
 {
 	Scs = 0;
 	go(argc, argv, no_action, cs_optimize, cs_machinit, no_action);

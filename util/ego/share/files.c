@@ -9,9 +9,11 @@
  */
 
 #include <stdio.h>
+#include "types.h"
+#include "debug.h"
 #include "files.h"
 
-struct files* findfiles(int argc, const char** argv)
+struct files* findfiles(int argc, char * const *argv)
 {
 	static struct files files;
 

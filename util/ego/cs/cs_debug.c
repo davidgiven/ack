@@ -11,6 +11,7 @@
 #include "cs.h"
 #include "cs_aux.h"
 #include "cs_avail.h"
+#include "cs_debug.h"
 #include "cs_entity.h"
 
 #ifdef VERBOSE
@@ -48,7 +49,7 @@ STATIC void showinstr(line_p lnp)
 	fprintf(stderr,"\n");
 }
 
-SHOWOCCUR(occur_p ocp)
+void SHOWOCCUR(occur_p ocp)
 {
 	/* Shows all instructions in an occurrence. */
 

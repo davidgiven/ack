@@ -22,7 +22,7 @@
  * and 'optimize' is called with the current procedure
  * as parameter.
  */
-void go(int argc, const char** argv,
+void go(int argc, char * const *argv,
 	void (*initialize)(void *null),
 	void (*optimize)(void *),	/* (proc_p *p) */
 	void (*phase_machinit)(void *),	/* (FILE *f) */
