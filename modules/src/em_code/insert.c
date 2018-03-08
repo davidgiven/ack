@@ -99,20 +99,19 @@ C_out_parts(pp)
 		}
 		else {
 			/* copy the chunk to output */
-#ifdef INCORE
-			register char *s = C_BASE + pp->pp_begin;
-			char *se = C_BASE + pp->pp_end;
-
-			while (s < se) {
-				put(*s++);
-			}
-#else
 			register long b = pp->pp_begin;
 
 			while (b < pp->pp_end) {
+#ifdef INCORE
+				/* C_BASE is not constant, put() may
+				   move C_BASE, so each iteration of
+				   this loop must read C_BASE again.
+				*/
+				put(C_BASE[b++]);
+#else
 				put(getbyte(b++));
-			}
 #endif
+			}
 		}
 		prev = pp;
 		pp = pp->pp_next;
