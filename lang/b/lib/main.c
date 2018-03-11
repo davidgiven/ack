@@ -14,10 +14,11 @@ static intptr_t i_char(intptr_t s, intptr_t n)
     return p[n];
 }
 
-static void i_lchar(intptr_t s, intptr_t n, intptr_t c)
+static intptr_t i_lchar(intptr_t s, intptr_t n, intptr_t c)
 {
     char* p = (char*)(s<<SHIFT);
     p[n] = c;
+	return c;
 }
 
 static intptr_t i_getchar(void)
