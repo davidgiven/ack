@@ -21,6 +21,7 @@ static char rcsid[] = "$Id$";
 #include "defs.h"
 #include "memory.h"
 #include "orig.h"
+#include "sym.h"
 
 extern bool	incore;
 #ifndef NOSTATISTICS
@@ -380,8 +381,6 @@ evaluate()
 	if (!(flagword&(RFLAG|NFLAG)))
 		change_names();
 }
-
-extern unsigned short	NGlobals, NLocals;
 
 /*
  * Sect_comm[N] is the number of common bytes in section N.

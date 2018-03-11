@@ -32,6 +32,7 @@ static char rcsid[] = "$Id$";
 #include "debug.h"
 #include "memory.h"
 #include "object.h"
+#include "sym.h"
 
 static void copy_down(struct memory* mem, ind_t dist);
 static void copy_up(struct memory* mem, ind_t dist);
@@ -544,7 +545,6 @@ void write_bytes(void)
 	unsigned short		nsect;
 	long			offchar;
 	register struct memory	*mem;
-	extern unsigned short	NLocals, NGlobals;
 	extern long		NLChars, NGChars;
 	extern int		flagword;
 	extern struct outhead	outhead;

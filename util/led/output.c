@@ -13,6 +13,7 @@ static char rcsid[] = "$Id$";
 #include <out.h>
 #include "const.h"
 #include "memory.h"
+#include "sym.h"
 
 static void generate_section_names();
 
@@ -28,7 +29,6 @@ extern int		flagword;
  */
 beginoutput()
 {
-	extern unsigned short	NLocals, NGlobals;
 	extern long	NLChars, NGChars;
 	extern char	*outputname;
 

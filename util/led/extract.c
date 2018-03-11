@@ -17,6 +17,7 @@ static char rcsid[] = "$Id$";
 #include "memory.h"
 #include "orig.h"
 #include "scan.h"
+#include "sym.h"
 
 static		get_names();
 static		process();
@@ -45,9 +46,6 @@ extract()
 	process(&head);
 	skip_modul(&head);
 }
-
-unsigned short	NLocals = 0;	/* Number of local names to be saved. */
-unsigned short	NGlobals = 0;	/* Number of global names. */
 
 /*
  * Walk through the nametable of this module, counting the locals that must
@@ -190,7 +188,6 @@ getexternal(name)
 	h = hash(string);
 	old = searchname(string, h);
 	if (old == (struct outname *)0) {
-		NGlobals++;
 		entername(name, h);
 		if (ISUNDEFINED(name)) {
 			verbose("requires %s", string, 0, 0, 0);

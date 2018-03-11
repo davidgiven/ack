@@ -16,6 +16,7 @@ static char rcsid[] = "$Id$";
 #include "debug.h"
 #include "defs.h"
 #include "orig.h"
+#include "sym.h"
 
 #define UBYTE(x)	((x) & BYTEMASK)
 
@@ -400,7 +401,6 @@ static putvalu(uint32_t valu, char* addr, uint16_t type)
 	}
 }
 
-extern unsigned short	NLocals, NGlobals;
 extern struct outsect	outsect[];
 extern struct orig	relorig[];
 
