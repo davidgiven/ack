@@ -72,6 +72,7 @@ proc_p* p_out;
 			{
 				/* register message without arguments */
 				oldline(l);
+				continue;
 			}
 			else
 			{
