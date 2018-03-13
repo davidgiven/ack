@@ -142,8 +142,9 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 	/* Replace the lines in the occurrence in ocp by a load of the
 	 * temporary with offset tmp.
 	 */
-	register line_p lol, first, last;
-	register int instr;
+	avail_p ravp;
+	line_p lol, first, last;
+	int instr;
 
 	assert(avp->av_size == ws || avp->av_size == 2*ws);
 
@@ -174,6 +175,33 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 			if (instr == op_rmu)
 				complete_dv_as_rm(lol, avp, FALSE);
 			break;
+	}
+
+	/* Some occurrence rocp of an expression before avp might have
+	 * rocp->oc_lfirst == first.  If so, then we must set
+	 * rocp->oc_lfirst = lol before we throw away first.
+	 *
+	 * This is almost not possible, but it can happen in code with
+	 * expr1 LOI expr2 STI expr2 LOI, where the STI causes both
+	 * LOIs to have the same value number.  Then the first LOI
+	 * might come before the first expr2, so we might replace
+	 * expr2 before we replace expr2 LOI.  Then the occurrence of
+	 * expr2 LOI must not point to the eliminated lines of expr2.
+	 */
+	for (ravp = avp->av_before; ravp != (avail_p) 0;
+	     ravp = ravp->av_before) {
+		/* We only check LOI expressions. */
+		if (ravp->av_instr == op_loi) {
+			occur_p rocp;
+			Lindex i;
+
+			for (i = Lfirst(ravp->av_occurs); i != (Lindex) 0;
+			     i = Lnext(i, ravp->av_occurs)) {
+				rocp = occ_elem(i);
+				if (rocp->oc_lfirst == first)
+					rocp->oc_lfirst = lol;
+			}
+		}
 	}
 
 	/* Throw away the by now useless lines. */
