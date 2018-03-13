@@ -6,7 +6,7 @@ double one = 1.0;
 double zero = 0.0;
 double big = (double)UINT_MAX;
 
-/* Bypasses the CRT, so there's no stdio or BSS initialisation. */
+/* Bypasses the CRT, so there's no stdio. */
 void _m_a_i_n(void)
 {
     ASSERT((unsigned int)zero == 0);

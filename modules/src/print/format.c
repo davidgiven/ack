@@ -35,7 +35,7 @@ integral(int c)
 	%d = int
 $ */
 int
-_format(char *buf, char *fmt, va_list argp)
+_format(char *buf, const char *fmt, va_list argp)
 {
 	register char *pf = fmt;
 	register char *pb = buf;

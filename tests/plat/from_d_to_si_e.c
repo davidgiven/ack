@@ -8,7 +8,7 @@ double minusone = -1.0;
 double big = (double)INT_MAX;
 double minusbig = (double)INT_MIN;
 
-/* Bypasses the CRT, so there's no stdio or BSS initialisation. */
+/* Bypasses the CRT, so there's no stdio. */
 void _m_a_i_n(void)
 {
     ASSERT((int)zero == 0);

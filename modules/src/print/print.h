@@ -9,10 +9,10 @@
 
 #include <stdarg.h>
 
-void print(char *fmt, ...);
-void fprint(File *f, char *fmt, ...);
-void doprnt(File *f, char *fmt, va_list ap);
-int _format(char *buf, char *fmt, va_list ap);
-char *sprint(char *buf, char *fmt, ...);
+void print(const char *fmt, ...);
+void fprint(File *f, const char *fmt, ...);
+void doprnt(File *f, const char *fmt, va_list ap);
+int _format(char *buf, const char *fmt, va_list ap);
+char *sprint(char *buf, const char *fmt, ...);
 
 #endif /* __PRINT_INCLUDED__ */

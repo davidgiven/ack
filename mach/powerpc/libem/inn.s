@@ -5,6 +5,9 @@
 /* Tests a bit in a bitset on the stack.
  *
  * Stack: ( bitset bitnum setsize -- bool )
+ *
+ * Some back ends push false if bitnum is too large.  We don't because
+ * the compilers tend to pass a small enough bitnum.
  */
 
 .define .inn

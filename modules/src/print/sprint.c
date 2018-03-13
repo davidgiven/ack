@@ -17,7 +17,7 @@
 $ */
 /*VARARGS*/
 char *
-sprint(char *buf, char *fmt, ...)
+sprint(char *buf, const char *fmt, ...)
 {
 	va_list args;
 

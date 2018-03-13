@@ -16,7 +16,7 @@
 	%d = int
 $ */
 void
-doprnt(File *fp, char *fmt, va_list argp)
+doprnt(File *fp, const char *fmt, va_list argp)
 {
 	char buf[SSIZE];
 

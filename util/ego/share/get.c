@@ -285,7 +285,7 @@ dblock_p getdtable(const char *dname)
 
 /* getbblocks */
 
-STATIC argstring(short length, argb_p abp)
+STATIC void argstring(short length, argb_p abp)
 {
 
 	while (length--) {

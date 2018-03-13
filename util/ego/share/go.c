@@ -42,7 +42,7 @@ STATIC void mach_init(char* machfile, void (*phase_machinit)(void *))
 	fclose(f);
 }
 
-void go(int argc, const char** argv,
+void go(int argc, char * const *argv,
 	void (*initialize)(void *), void (*optimize)(void *),
 	void (*phase_machinit)(void *), void (*proc_flag)(void *))
 {

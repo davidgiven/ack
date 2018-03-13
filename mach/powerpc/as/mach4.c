@@ -42,7 +42,23 @@ operation
 	| OP_FRT_RA_D          FPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_FRT_RA_RB         FPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_FRT_C             c FPR                      { emit4($1 | $2 | ($3<<21)); }
-	| OP_RA_RS_C           c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16)); }
+	| OP_L                              { emit4($1); }
+	| OP_L                 u2           { emit4($1 | ($2<<21)); }
+	| OP_LEV                            { emit4($1); }
+	| OP_LEV               u7           { emit4($1 | ($2<<5)); }
+	| OP_RA_RB             GPR ',' GPR
+	{ emit4($1 | ($2<<16) | ($4<<11)); }
+	| OP_RA_RB_TH          GPR ',' GPR opt_bh
+	{ emit4($1 | $5 | ($2<<16) | ($4<<11)); }
+	/*
+	 * For instructions with "mnemonic RS, RA, ..."
+	 * OP_RA_RS_... swaps RS and RA to (RA<<21) || (RS<<16)
+	 * OP_RS_RA_... keeps RS and RA as (RS<<21) || (RA<<16)
+	 */
+	| OP_RA_RS_C           c GPR ',' GPR
+	{ emit4($1 | $2 | ($5<<21) | ($3<<16)); }
+	| OP_RA_RS_RA_C        c GPR ',' GPR
+	{ emit4($1 | $2 | ($5<<21) | ($3<<16) | ($5<<11)); }
 	| OP_RA_RS_RB_C        c GPR ',' GPR ',' GPR
 	{ emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
 	| OP_RA_RS_RB_MB5_ME5_C c GPR ',' GPR ',' GPR ',' u5 ',' u5
@@ -75,20 +91,19 @@ operation
 	| OP_RT_RB_RA_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($3<<21) | ($7<<16) | ($5<<11)); }
 	| OP_RT_SI             GPR ',' e16                { emit_hl($1 | ($2<<21) | $4); }
 	| OP_RT_SPR            GPR ',' spr_num            { emit4($1 | ($2<<21) | ($4<<11)); }
+	| OP_RT_TBR            GPR opt_tbr                { emit4($1 | ($2<<21) | ($3<<11)); }
+	| OP_RS                GPR                        { emit4($1 | ($2<<21)); }
 	| OP_RS_FXM            u7 ',' GPR                 { emit4($1 | ($4<<21) | ($2<<12)); }
 	| OP_RS_RA_D           GPR ',' e16 '(' GPR ')'    { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RS_RA_DS          GPR ',' ds '(' GPR ')'     { emit_hl($1 | ($2<<21) | ($6<<16) | $4); }
 	| OP_RS_RA_NB          GPR ',' GPR ',' nb         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_RS_RA_RB          GPR ',' GPR ',' GPR        { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
-	| OP_RS_RA_RB_C        c GPR ',' GPR ',' GPR      { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($7<<11)); }
-	| OP_RS_RA_RA_C        c GPR ',' GPR              { emit4($1 | $2 | ($5<<21) | ($3<<16) | ($5<<11)); }
+	| OP_RS_RA_RB_CC       C GPR ',' GPR ',' GPR      { emit4($1 | ($3<<21) | ($5<<16) | ($7<<11)); }
 	| OP_RS_SPR            spr_num ',' GPR            { emit4($1 | ($4<<21) | ($2<<11)); }
 	| OP_TO_RA_RB          u5 ',' GPR ',' GPR         { emit4($1 | ($2<<21) | ($4<<16) | ($6<<11)); }
 	| OP_TO_RA_SI          u5 ',' GPR ',' e16         { emit_hl($1 | ($2<<21) | ($4<<16) | $6); }
 	| OP_TOX_RA_RB         GPR ',' GPR                { emit4($1 | ($2<<16) | ($4<<11)); }
 	| OP_TOX_RA_SI         GPR ',' e16                { emit_hl($1 | ($2<<16) | $4); }
-	| OP_LEV                                          { emit4($1); }
-	| OP_LEV               u7                         { emit4($1 | ($2<<5)); }
 	| OP_LIA               lia                        { emit4($1 | $2); }
 	| OP_LIL               lil                        { emit4($1 | $2); }
 	| OP_LI32              li32                       /* emitted in subrule */
@@ -298,7 +313,7 @@ u2
 	}
 	;
 
-/* Optional comma, branch hint. */
+/* Optional comma, branch hint (or touch hint). */
 opt_bh
 	: /* nothing */         { $$ = 0; }
 	| ',' u2                { $$ = ($2<<11); }
@@ -409,13 +424,28 @@ lia
 	}
 	;
 
+/*
+ * Instructions "mfspr", "mtspr", and "mftb" encode the 10-bit special
+ * purpose register (spr) or time base register (tbr) by swapping the
+ * low 5 bits with the high 5 bits.  The value from an SPR token has
+ * already been swapped.
+ */
+
 spr_num
-	: SPR { $$ = $1; }
-	| absexp
+	: SPR     { $$ = $1; }
+	| tbr_num { $$ = $1; }
+	;
+
+opt_tbr
+	: /* nothing */         { $$ = 8 | (12<<5); }
+	| ',' tbr_num           { $$ = $2; }
+	;
+
+tbr_num
+	: absexp
 	{
 		if (($1 < 0) || ($1 > 0x3ff))
-			serror("spr number out of range");
-		/* mfspr, mtspr swap the low and high 5 bits */
+			serror("10-bit unsigned value out of range");
 		$$ = ($1 >> 5) | (($1 & 0x1f) << 5);
 	}
 	;

@@ -23,8 +23,7 @@ STATIC token_p		free_token;
 #define Stack_empty()	(free_token == &Stack[0])
 #define Top		(free_token - 1)
 
-Push(tkp)
-	token_p tkp;
+void Push(token_p tkp)
 {
 	if (tkp->tk_size == UNKNOWN_SIZE) {
 		Empty_stack(); /* The contents of the Stack is useless. */
@@ -39,10 +38,7 @@ Push(tkp)
 
 #define WORD_MULTIPLE(n)	((n / ws) * ws + ( n % ws ? ws : 0 ))
 
-void
-Pop(tkp, size)
-	token_p tkp;
-	offset size;
+void Pop(token_p tkp, offset size)
 {
 	/* Pop a token with given size from the valuenumber stack into tkp. */
 
@@ -85,8 +81,7 @@ Pop(tkp, size)
 	}
 }
 
-Dup(lnp)
-	line_p lnp;
+void Dup(line_p lnp)
 {
 	/* Duplicate top bytes on the Stack. */
 
@@ -132,7 +127,7 @@ Dup(lnp)
 	}
 }
 
-clr_stack()
+void clr_stack(void)
 {
 	free_token = &Stack[0];
 }

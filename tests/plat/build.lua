@@ -9,12 +9,14 @@ definerule("plat_testsuite",
 		-- Remember this is executed from the caller's directory; local
 		-- target names will resolve there.
 		local testfiles = filenamesof(
+			-- added structcopy_e.c
 			"tests/plat/*.c",
 			"tests/plat/*.e",
 			"tests/plat/*.p",
 			"tests/plat/b/*.b",
-			"tests/plat/bugs/bug-22-inn_mod.mod",
-			"tests/plat/bugs/bug-62-notvar_var_e.c"
+			"tests/plat/bugs/*.c",
+			"tests/plat/bugs/*.mod",
+			"tests/plat/m2/*.mod"
 		)
 
 		acklibrary {

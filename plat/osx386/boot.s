@@ -58,8 +58,6 @@ begdata:
 
 .sect .bss
 begbss:
-.define hol0
-.comm hol0, 8                ! line number and filename (for debugging)
 
 .define _errno
 .comm _errno, 4              ! Posix errno storage

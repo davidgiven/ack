@@ -67,8 +67,7 @@ STATIC struct inf_entity {
 #define ENKIND(ip)	ip->inf_used
 #define SIZEINF(ip)	ip->inf_size
 
-STATIC struct inf_entity *getinf(n)
-	int n;
+STATIC struct inf_entity *getinf(int n)
 {
 	struct inf_entity *ip;
 
@@ -78,8 +77,7 @@ STATIC struct inf_entity *getinf(n)
 	return (struct inf_entity *) 0;
 }
 
-entity_p getentity(lnp, l_out)
-	line_p lnp, *l_out;
+entity_p getentity(line_p lnp, line_p *l_out)
 {
 	/* Build the entities where lnp refers to, and enter them.
 	 * If a token needs to be popped, the first line that pushed

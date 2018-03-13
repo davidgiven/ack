@@ -45,7 +45,7 @@ void error(const char *s, ...)
 void OUTTRACE(const char *s, int n)
 {
 	fprintf(stderr,"> ");
-	vfprintf(stderr,s,n);
+	fprintf(stderr,s,n);
 	fprintf(stderr,"\n");
 }
 #endif

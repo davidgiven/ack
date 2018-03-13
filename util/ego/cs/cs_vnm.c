@@ -20,10 +20,9 @@
 #include "cs_kill.h"
 #include "cs_partit.h"
 #include "cs_getent.h"
+#include "cs_profit.h"
 
-STATIC push_entity(enp, lfirst)
-	entity_p enp;
-	line_p lfirst;
+STATIC void push_entity(entity_p enp, line_p lfirst)
 {
 	/* Build token and Push it. */
 
@@ -35,10 +34,8 @@ STATIC push_entity(enp, lfirst)
 	Push(&tk);
 }
 
-STATIC put_expensive_load(bp, lnp, lfirst, enp)
-	bblock_p bp;
-	line_p lnp, lfirst;
-	entity_p enp;
+STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst,
+			       entity_p enp)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -52,16 +49,15 @@ STATIC put_expensive_load(bp, lnp, lfirst, enp)
 	av_enter(&av, ocp, EXPENSIVE_LOAD);
 }
 
-STATIC put_aar(bp, lnp, lfirst, enp)
-	bblock_p bp;
-	line_p lnp, lfirst;
-	entity_p enp;
+STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
-	/* Enp points to an ENARRELEM. We do as if its address was computed. */
-
+	/* Enter the implicit AAR in a LAR or SAR, where enp points to
+	 * the ENARRELEM, and AAR computes its address.
+	 */
 	struct avail av;
 	occur_p	ocp;
 
+	assert(INSTR(lnp) == op_lar || INSTR(lnp) == op_sar);
 	assert(enp->en_kind == ENARRELEM);
 	av.av_instr = op_aar;
 	av.av_size = ps;
@@ -69,14 +65,17 @@ STATIC put_aar(bp, lnp, lfirst, enp)
 	av.av_osecond = enp->en_index;
 	av.av_othird = enp->en_adesc;
 
-	ocp = newoccur(lfirst, lnp, bp);
-
-	av_enter(&av, ocp, TERNAIR_OP);
+	/* Before we enter an available AAR, we must check whether we
+	 * may convert this LAR/SAR to AAR LOI/STI.  This is so we
+	 * don't LOI/STI a large or unknown size.
+	 */
+	if (may_become_aar(&av)) {
+		ocp = newoccur(lfirst, lnp, bp);
+		av_enter(&av, ocp, TERNAIR_OP);
+	}
 }
 
-STATIC push_avail(avp, lfirst)
-	avail_p avp;
-	line_p lfirst;
+STATIC void push_avail(avail_p avp, line_p lfirst)
 {
 	struct token tk;
 
@@ -86,10 +85,7 @@ STATIC push_avail(avp, lfirst)
 	Push(&tk);
 }
 
-STATIC push_unair_op(bp, lnp, tkp1)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1;
+STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -103,10 +99,7 @@ STATIC push_unair_op(bp, lnp, tkp1)
 	push_avail(av_enter(&av, ocp, UNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC push_binair_op(bp, lnp, tkp1, tkp2)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1, tkp2;
+STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -121,10 +114,8 @@ STATIC push_binair_op(bp, lnp, tkp1, tkp2)
 	push_avail(av_enter(&av, ocp, BINAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC push_ternair_op(bp, lnp, tkp1, tkp2, tkp3)
-	bblock_p bp;
-	line_p lnp;
-	token_p tkp1, tkp2, tkp3;
+STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1,
+			    token_p tkp2, token_p tkp3)
 {
 	struct avail av;
 	occur_p	ocp;
@@ -140,8 +131,38 @@ STATIC push_ternair_op(bp, lnp, tkp1, tkp2, tkp3)
 	push_avail(av_enter(&av, ocp, TERNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC fiddle_stack(lnp)
-	line_p lnp;
+STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
+{
+	/* Enter the implicit division tkp1 / tkp2,
+	 * then push the remainder tkp1 % tkp2.
+	 */
+	struct avail av;
+	occur_p	ocp;
+
+	assert(INSTR(lnp) == op_rmi || INSTR(lnp) == op_rmu);
+	av.av_size = avsize(lnp);
+	av.av_oleft = tkp1->tk_vn;
+	av.av_oright = tkp2->tk_vn;
+
+	/* Check whether we may convert RMI/RMU to DVI/DVU. */
+	if (may_become_dv()) {
+		/* The division is DVI in RMI, or DVU in RMU. */
+		av.av_instr = (INSTR(lnp) == op_rmi ? op_dvi : op_dvu);
+
+		/* In postfix, a b % becomes a b a b / * -.  We must
+		 * keep a and b on the stack, so the first instruction
+		 * to eliminate is lnp, not tkp1->l_first.
+		 */
+		ocp = newoccur(lnp, lnp, bp);
+		av_enter(&av, ocp, BINAIR_OP);
+	}
+
+	av.av_instr = INSTR(lnp);
+	ocp = newoccur(tkp1->tk_lfirst, lnp, bp);
+	push_avail(av_enter(&av, ocp, REMAINDER), tkp1->tk_lfirst);
+}
+
+STATIC void fiddle_stack(line_p lnp)
 {
 	/* The instruction in lnp does something to the valuenumber-stack. */
 
@@ -232,8 +253,7 @@ STATIC proc_p find_proc(vn)
 	return (proc_p) 0;
 }
 
-STATIC side_effects(lnp)
-	line_p lnp;
+STATIC void side_effects(line_p lnp)
 {
 	/* Lnp contains a cai or cal instruction. We try to find the callee
 	 * and see what side-effects it has.
@@ -255,8 +275,7 @@ STATIC side_effects(lnp)
 	}
 }
 
-hopeless(instr)
-	int instr;
+STATIC void hopeless(int instr)
 {
 	/* The effect of `instr' is too difficult to
 	 * compute. We assume worst case behaviour.
@@ -281,8 +300,7 @@ hopeless(instr)
 	}
 }
 
-vnm(bp)
-	bblock_p bp;
+void vnm(bblock_p bp)
 {
 	register line_p lnp;
 	register entity_p rep;
@@ -330,6 +348,11 @@ vnm(bp)
 				Pop(&tk2, op23size(lnp));
 				Pop(&tk1, op13size(lnp));
 				push_ternair_op(bp, lnp, &tk1, &tk2, &tk3);
+				break;
+			case REMAINDER:
+				Pop(&tk2, op22size(lnp));
+				Pop(&tk1, op12size(lnp));
+				push_remainder(bp, lnp, &tk1, &tk2);
 				break;
 			case KILL_ENTITY:
 				kill_direct(rep);

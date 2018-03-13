@@ -269,13 +269,13 @@ pr_localtab() {
 	short i;
 	local_p lc;
 
-	printf("LOCAL-TABLE (%d)\n\n",nrlocals);
+	fprintf(stderr,"LOCAL-TABLE (%d)\n\n",nrlocals);
 	for (i = 1; i <= nrlocals; i++) {
 		lc = locals[i];
-		printf("LOCAL %d\n",i);
-		printf("	offset= %ld\n",lc->lc_off);
-		printf("	size=   %d\n",lc->lc_size);
-		printf("	flags=  %d\n",lc->lc_flags);
+		fprintf(stderr,"LOCAL %d\n",i);
+		fprintf(stderr,"\toffset= %ld\n",lc->lc_off);
+		fprintf(stderr,"\tsize=   %d\n",lc->lc_size);
+		fprintf(stderr,"\tflags=  %d\n",lc->lc_flags);
 	}
 }
 
@@ -284,12 +284,13 @@ pr_globals()
 	dblock_p d;
 	obj_p obj;
 
-	printf("GLOBALS (%d)\n\n",nrglobals);
-	printf("ID	GLOBNR\n");
+	fprintf(stderr,"GLOBALS (%d)\n\n",nrglobals);
+	fprintf(stderr,"ID\tGLOBNR\n");
 	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
 		for (obj = d->d_objlist; obj != (obj_p) 0; obj = obj->o_next) {
 			if (obj->o_globnr != 0) {
-			   printf("%d	%d\n", obj->o_id,obj->o_globnr);
+				fprintf(stderr,"%d\t%d\n",
+				    obj->o_id,obj->o_globnr);
 			}
 		}
 	}
@@ -302,20 +303,20 @@ pr_defs()
 	short i;
 	line_p l;
 
-	printf("DEF TABLE\n\n");
+	fprintf(stderr,"DEF TABLE\n\n");
 	for (i = 1; i <= nrexpldefs; i++) {
 		l = defs[i];
-		printf("%d	%s ",EXPL_TO_DEFNR(i),
+		fprintf(stderr,"%d\t%s ",EXPL_TO_DEFNR(i),
 			&em_mnem[(INSTR(l)-sp_fmnem)*4]);
 		switch(TYPE(l)) {
 			case OPSHORT:
-				printf("%d\n",SHORT(l));
+				fprintf(stderr,"%d\n",SHORT(l));
 				break;
 			case OPOFFSET:
-				printf("%ld\n",OFFSET(l));
+				fprintf(stderr,"%ld\n",OFFSET(l));
 				break;
 			case OPOBJECT:
-				printf("%d\n",OBJ(l)->o_id);
+				fprintf(stderr,"%d\n",OBJ(l)->o_id);
 				break;
 			default:
 				assert(FALSE);
@@ -331,13 +332,13 @@ pr_set(name,k,s,n)
 {
 	short i;
 
-	printf("%s(%d) =	{",name,k);
+	fprintf(stderr,"%s(%d) =\t{",name,k);
 	for (i = 1; i <= n; i++) {
 		if (Cis_elem(i,s)) {
-			printf("%d ",i);
+			fprintf(stderr,"%d ",i);
 		}
 	}
-	printf ("}\n");
+	fprintf(stderr,"}\n");
 }
 
 pr_blocks(p)
@@ -347,7 +348,7 @@ pr_blocks(p)
 	short n;
 
 	for (b = p->p_start; b != 0; b = b->b_next) {
-		printf ("\n");
+		fprintf(stderr,"\n");
 		n = b->b_id;
 		pr_set("GEN",n,GEN(b),nrdefs);
 		pr_set("KILL",n,KILL(b),nrdefs);
@@ -361,10 +362,10 @@ pr_copies()
 {
 	short i;
 
-	printf("\nCOPY TABLE\n\n");
+	fprintf(stderr,"\nCOPY TABLE\n\n");
 	for (i = 1; i <= nrdefs; i++) {
 		if (def_to_copynr[i] != 0) {
-			printf("%d	%d\n",i,def_to_copynr[i]);
+			fprintf(stderr,"%d\t%d\n",i,def_to_copynr[i]);
 		}
 	}
 }
@@ -376,7 +377,7 @@ pr_cblocks(p)
 	short n;
 
 	for (b = p->p_start; b != 0; b = b->b_next) {
-		printf ("\n");
+		fprintf(stderr,"\n");
 		n = b->b_id;
 		pr_set("CGEN",n,C_GEN(b),nrcopies);
 		pr_set("CKILL",n,C_KILL(b),nrcopies);

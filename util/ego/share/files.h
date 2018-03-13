@@ -33,11 +33,11 @@ struct files
 
 	/* The rest of the arguments. */
 
-	const char** argv;
+	char * const *argv;
 	int argc;
 };
 
-struct files* findfiles(int argc, const char** argv);
+struct files* findfiles(int argc, char * const *argv);
 
 FILE *openfile(const char *name, const char *mode);
 				/*

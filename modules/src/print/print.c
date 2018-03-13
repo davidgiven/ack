@@ -17,7 +17,7 @@
 $ */
 /*VARARGS*/
 void
-print(char *fmt, ...)
+print(const char *fmt, ...)
 {
 	va_list args;
 	char buf[SSIZE];

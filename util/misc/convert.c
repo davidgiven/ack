@@ -16,8 +16,10 @@ static char rcsid[] = "$Id$";
 	linked.
 */
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include "system.h"
+#include "print.h"
 #include "em_pseu.h"
 #include "em_mnem.h"
 #include "em_spec.h"
@@ -30,8 +32,11 @@ char *filename;			/* Name of input file */
 int errors;			/* Number of errors */
 extern char *C_error;
 
-main(argc,argv)
-	char **argv;
+void error(const char *, ...);
+void fatal(const char *, ...);
+
+int
+main(int argc, char **argv)
 {
 	struct e_instr buf;
 	register struct e_instr *p = &buf;
@@ -66,27 +71,32 @@ main(argc,argv)
 	}
 	C_close();
 	EM_close();
-	exit(errors);
+	exit(errors ? 1 : 0);
 }
 
 /* VARARGS */
-error(s,a1,a2,a3,a4)
-	char *s;
+void
+error(const char *s, ...)
 {
+	va_list ap;
+	va_start(ap, s);
 	fprint(STDERR,
 		"%s, line %d: ",
 		filename ? filename : "standard input",
 		EM_lineno);
-	fprint(STDERR,s,a1,a2,a3,a4);
+	doprnt(STDERR, s, ap);
 	fprint(STDERR, "\n");
 	errors++;
+	va_end(ap);
 }
 
 /* VARARGS */
-fatal(s,a1,a2,a3,a4)
-	char *s;
+void
+fatal(const char *s, ...)
 {
+	va_list ap;
+	va_start(ap, s);
 	if (C_busy()) C_close();
-	error(s,a1,a2,a3,a4);
+	error(s, ap);
 	exit(1);
 }

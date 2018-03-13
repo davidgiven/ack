@@ -237,8 +237,11 @@ PATTERNS
     SETSP.I(in:(int)reg)
         emit "mr sp, %in"
         cost 4;
-    
+
     out:(int)reg = ANY.I
+        cost 1;
+
+    out:(long)reg = ANY.L
         cost 1;
 
     out:(int)reg = COPYF.I(in:(float)reg)
@@ -306,10 +309,21 @@ PATTERNS
 		emit "lwz %out, %addr"
 		cost 4;
 
+#if 0
+    /* FIXME: Doesn't work because %out.0 and %addr might share a
+     * register, so it corrupts %addr before it loads %out.1. */
     out:(long)reg = LOAD.L(addr:address)
         emit "lwz %out.0, 4+%addr"
         emit "lwz %out.1, 0+%addr"
         cost 8;
+#else
+    /* Works, but costs an extra instruction. */
+    out:(long)reg = LOAD.L(addr:address)
+        emit "la %out.1, %addr"
+        emit "lwz %out.0, 4(%out.1)"
+        emit "lwz %out.1, 0(%out.1)"
+        cost 12;
+#endif
 
 	out:(int)ushort0 = LOADH.I(addr:address)
 		emit "lhz %out, %addr"
@@ -565,6 +579,13 @@ PATTERNS
         with %out == %in
         emit "! COMPARESI.I(cr, 0)"
         cost 4;
+
+    cr:(cr)cr = COMPAREUL.I(left:(long)reg, right:(long)reg)
+        emit "cmpl %cr, 0, %left.1, %right.1"
+        emit "bne 1f"
+        emit "cmpl %cr, 0, %left.0, %right.0"
+        emit "1:"
+        cost 12;
 
 
 

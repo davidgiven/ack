@@ -2,6 +2,9 @@
 
 ! Bounds check. Traps if the value is out of range.
 !  Stack: ( value descriptor -- value )
+!
+! This ".rck" only works with 4-byte integers.  The name is ".rck" and
+! not ".rck4" because many back ends only do rck with the word size.
 
 .define .rck
 .rck:
@@ -18,3 +21,7 @@
     bgt .trap_erange
 
     blr
+
+.trap_erange:
+    li r3, 1       ! ERANGE = 1 in h/em_abs.h
+    b .trp

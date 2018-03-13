@@ -11,8 +11,7 @@
 #include "cs.h"
 #include "cs_entity.h"
 
-offset array_elemsize(vn)
-	valnum vn;
+offset array_elemsize(valnum vn)
 {
 	/* Vn is the valuenumber of an entity that points to
 	 * an array-descriptor. The third element of this descriptor holds
@@ -36,14 +35,12 @@ offset array_elemsize(vn)
 	return aoff(enp->en_ext->o_dblock->d_values, 2);
 }
 
-occur_p occ_elem(i)
-	Lindex i;
+occur_p occ_elem(Lindex i)
 {
 	return (occur_p) Lelem(i);
 }
 
-entity_p en_elem(i)
-	Lindex i;
+entity_p en_elem(Lindex i)
 {
 	return (entity_p) Lelem(i);
 }
@@ -54,14 +51,14 @@ entity_p en_elem(i)
 
 STATIC valnum val_no;
 
-valnum newvalnum()
+valnum newvalnum(void)
 {
 	/* Return a completely new value number. */
 
 	return ++val_no;
 }
 
-start_valnum()
+void start_valnum(void)
 {
 	/* Restart value numbering. */
 

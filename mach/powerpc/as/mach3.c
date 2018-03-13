@@ -103,6 +103,10 @@
 0,     OP_HA,                0,                                        "ha16",
 0,     OP_LO,                 0,                                       "lo16",
 
+/* The next page numbers are from PowerPC User Instruction Set
+ * Architecture, Book I, Version 2.01.
+ */
+
 /* Branch processor instructions (page 20) */
 
 0,     OP_LIL,                18<<26 | 0<<1 | 0<<0,                    "b",
@@ -128,7 +132,7 @@
 0,     OP_BT_BA_BB,           19<<26 | 417<<1,                         "crorc",
 0,     OP_BF_BFA,             19<<26 | 0<<1,                           "mcrf",
 
-/* extended mnemonics for bc, bcctr, bclr */
+/* extended mnemonics for bc, bcctr, bclr (page 144) */
 0,     OP_BH,       19<<26 | 20<<21 | 528<<1 | 0<<0,            "bctr",
 0,     OP_BH,       19<<26 | 20<<21 | 528<<1 | 1<<0,            "bctrl",
 0,     OP_BDL,      16<<26 | 16<<21 | 0<<1 | 0<<0,              "bdnz",
@@ -186,7 +190,7 @@
 0,     OP_BI_BH,    19<<26 | 12<<21 | 16<<1 | 0<<0,             "btlr",
 0,     OP_BI_BH,    19<<26 | 12<<21 | 16<<1 | 1<<0,             "btlrl",
 
-/* extended m with condition in BI */
+/* extended m with condition in BI (page 146) */
 0,     OP_BICR_BDL,  16<<26 | 12<<21 | 2<<16 | 0<<1 | 0<<0,     "beq",
 0,     OP_BICR_BDA,  16<<26 | 12<<21 | 2<<16 | 1<<1 | 0<<0,     "beqa",
 0,     OP_BICR_BH,   19<<26 | 12<<21 | 2<<16 | 528<<1 | 0<<0,   "beqctr",
@@ -284,7 +288,7 @@
 0,     OP_BICR_BH,   19<<26 | 12<<21 | 3<<16 | 16<<1 | 0<<0,    "bunlr",
 0,     OP_BICR_BH,   19<<26 | 12<<21 | 3<<16 | 16<<1 | 1<<0,    "bunlrl",
 
-/* extended m for cr logic */
+/* extended m for cr logic (page 147) */
 0,     OP_BT_BT_BT,  19<<26 | 289<<1,                           "crset",
 0,     OP_BT_BT_BT,  19<<26 | 193<<1,                           "crclr",
 0,     OP_BT_BA_BA,  19<<26 | 449<<1,                           "crmove",
@@ -377,12 +381,12 @@
 0,     OP_RT_RA_C,            31<<26 | 0<<10 | 104<<1,                 "neg",
 0,     OP_RT_RA_C,            31<<26 | 1<<10 | 104<<1,                 "nego",
 
-/* extended m for addition */
+/* extended m for addition (pages 153, 154) */
 0,     OP_RT_RA_D,            14<<26,                       "la",
 0,     OP_RT_SI,              14<<26 | 0<<16,               "li",
 0,     OP_RT_SI,              15<<26 | 0<<16,               "lis",
 
-/* extended m for subtraction */
+/* extended m for subtraction (pages 147, 148) */
 0,     OP_RT_RB_RA_C,         31<<26 | 0<<10 | 40<<1,       "sub",
 0,     OP_RT_RB_RA_C,         31<<26 | 1<<10 | 40<<1,       "subo",
 0,     OP_RT_RB_RA_C,         31<<26 | 0<<10 | 8<<1,        "subc",
@@ -418,7 +422,7 @@
 0,     OP_BF_L_RA_UI,         10<<26,                                  "cmpli",
 0,     OP_BF_L_RA_RB,         31<<26 | 32<<1,                          "cmpl",
 
-/* extended m for comparison */
+/* extended m for comparison (page 149) */
 0,     OP_BF_RA_SI,           11<<26 | 1<<21,               "cmpdi",
 0,     OP_BF_RA_RB,           31<<26 | 1<<21 | 0<<1,        "cmpd",
 0,     OP_BF_RA_UI,           10<<26 | 1<<21,               "cmpldi",
@@ -434,7 +438,7 @@
 0,     OP_TO_RA_RB,           31<<26 | 68<<1,                          "td",
 0,     OP_TO_RA_RB,           31<<26 | 4<<1,                           "tw",
 
-/* extended m for traps */
+/* extended m for traps (page 150) */
 0,     OP_TOX_RA_RB,          31<<26 | 4<<21 | 68<<1,       "tdeq",
 0,     OP_TOX_RA_SI,          2<<26 | 4<<21,                "tdeqi",
 0,     OP_TOX_RA_RB,          31<<26 | 12<<21 | 68<<1,      "tdge",
@@ -518,11 +522,10 @@
 0,     OP_RA_RS_C,            31<<26 | 58<<1,                          "cntlzd",
 0,     OP_RA_RS_C,            31<<26 | 26<<1,                          "cntlzw",
 
-/* extended m using logic */
-0,     OP_RS_RA_RA_C,         31<<26 | 444<<1,              "mr",
+/* extended m using logic (pages 153, 154) */
+0,     OP_RA_RS_RA_C,         31<<26 | 444<<1,              "mr",
 0,     OP,                    24<<26,                       "nop",
-0,     OP_RS_RA_RA_C,         31<<26 | 124<<1,              "not",
-0,     OP,                    26<<26,                       "xnop",
+0,     OP_RA_RS_RA_C,         31<<26 | 124<<1,              "not",
 
 /* page 69 */
 0,     OP_RA_RS_SH6_MB6_C,     30<<26 | 0<<2,               "rldicl",
@@ -535,7 +538,7 @@
 0,     OP_RA_RS_SH6_MB6_C,     30<<26 | 3<<2,               "rldimi",
 0,     OP_RA_RS_SH5_MB5_ME5_C, 20<<26,                      "rlwimi",
 
-/* extended m for doubleword rotation */
+/* extended m for doubleword rotation (page 151) */
 0,     OP_clrlsldi,           30<<26 | 2<<2,                "clrlsldi",
 0,     OP_clrldi,             30<<26 | 0<<2,                "clrldi",
 0,     OP_clrrdi,             30<<26 | 1<<2,                "clrrdi",
@@ -548,7 +551,7 @@
 0,     OP_sldi,               30<<26 | 1<<2,                "sldi",
 0,     OP_srdi,               30<<26 | 0<<2,                "srdi",
 
-/* extended m for word rotation */
+/* extended m for word rotation (page 152) */
 0,     OP_clrlslwi,           21<<26,                       "clrlslwi",
 0,     OP_clrlwi,             21<<26,                       "clrlwi",
 0,     OP_clrrwi,             21<<26,                       "clrrwi",
@@ -573,21 +576,25 @@
 0,     OP_RA_RS_RB_C,         31<<26 | 792<<1,              "sraw",
 
 /* page 78 */
-0,     OP_RS_SPR,             31<<26 | 467<<1,                         "mtspr",
-0,     OP_RT_SPR,             31<<26 | 339<<1,                         "mfspr",
-0,     OP_RS_FXM,             31<<26 | 0<<21 | 144<<1,                 "mtcrf",
-0,     OP_RT,                 31<<26 | 0<<21 | 19<<1,                  "mfcr",
+0,     OP_RS_SPR,             31<<26 | 467<<1,              "mtspr",
+0,     OP_RT_SPR,             31<<26 | 339<<1,              "mfspr",
+0,     OP_RS_FXM,             31<<26 | 0<<20 | 144<<1,      "mtcrf",
+0,     OP_RT,                 31<<26 | 0<<20 | 19<<1,       "mfcr",
 
-/* extended m for special purpose registers */
+/* extended m for special purpose registers (page 153) */
 0,     OP_RT,       31<<26 | 9<<16 | 0<<11 | 339<<1,        "mfctr",
 0,     OP_RT,       31<<26 | 8<<16 | 0<<11 | 339<<1,        "mflr",
 0,     OP_RT,       31<<26 | 1<<16 | 0<<11 | 339<<1,        "mfxer",
-0,     OP_RT,       31<<26 | 9<<16 | 0<<11 | 467<<1,        "mtctr",
-0,     OP_RT,       31<<26 | 8<<16 | 0<<11 | 467<<1,        "mtlr",
-0,     OP_RT,       31<<26 | 1<<16 | 0<<11 | 467<<1,        "mtxer",
+0,     OP_RS,       31<<26 | 9<<16 | 0<<11 | 467<<1,        "mtctr",
+0,     OP_RS,       31<<26 | 8<<16 | 0<<11 | 467<<1,        "mtlr",
+0,     OP_RS,       31<<26 | 1<<16 | 0<<11 | 467<<1,        "mtxer",
+
+/* extended m for condition register (page 154) */
+0,     OP_RS,       31<<26 | 0<<20 | 255<<12 | 144<<1,      "mtcr",
 
 /* Floating point instructions (page 83) */
 
+/* page 98 */
 0,     OP_FRT_RA_D,           48<<26,                                  "lfs",
 0,     OP_FRT_RA_RB,          31<<26 | 535<<1,                         "lfsx",
 0,     OP_FRT_RA_D,           49<<26,                                  "lfsu",
@@ -606,6 +613,7 @@
 0,     OP_FRS_RA_RB,          31<<26 | 759<<1,                         "stfdux",
 0,     OP_FRS_RA_RB,          31<<26 | 983<<1,                         "stfiwx",
 
+/* page 104 */
 0,     OP_FRT_FRB_C,          63<<26 | 72<<1,                          "fmr",
 0,     OP_FRT_FRB_C,          63<<26 | 40<<1,                          "fneg",
 0,     OP_FRT_FRB_C,          63<<26 | 264<<1,                         "fabs",
@@ -629,6 +637,7 @@
 0,     OP_FRT_FRA_FRC_FRB_C,  63<<26 | 30<<1,                          "fnmsub",
 0,     OP_FRT_FRA_FRC_FRB_C,  59<<26 | 30<<1,                          "fnmsubs",
 
+/* page 109 */
 0,     OP_FRT_FRB_C,          63<<26 | 12<<1,                          "frsp",
 0,     OP_FRT_FRB_C,          63<<26 | 814<<1,                         "fctid",
 0,     OP_FRT_FRB_C,          63<<26 | 815<<1,                         "fctidz",
@@ -652,4 +661,31 @@
 0,     OP_FRT_FRB_C,          63<<26 | 26<<1,                          "frsqrte",
 0,     OP_FRT_FRA_FRC_FRB_C,  63<<26 | 23<<1,                          "fsel",
 
-/* page 98 */
+/* Storage control instructions (Book II, page 15) */
+
+/* Book II, page 17 */
+0,     OP_RA_RB,              31<<26 | 982<<1,              "icbi",
+0,     OP_RA_RB_TH /* page 35 */,          31<<26 | 278<<1, "dcbt",
+0,     OP_RA_RB,              31<<26 | 246<<1,              "dcbtst",
+0,     OP_RA_RB,              31<<26 | 1014<<1,             "dcbz",
+0,     OP_RA_RB,              31<<26 | 54<<1,               "dcbst",
+0,     OP_RA_RB,              31<<26 | 86<<1,               "dcbf",
+0,     OP,                    19<<26 | 150<<1,              "isync",
+0,     OP_RT_RA_RB,           31<<26 | 20<<1,               "lwarx",
+0,     OP_RT_RA_RB,           31<<26 | 84<<1,               "ldarx",
+0,     OP_RS_RA_RB_CC,        31<<26 | 150<<1 | 1<<0,       "stwcx",
+0,     OP_RS_RA_RB_CC,        31<<26 | 150<<1 | 1<<0,       "stdcx",
+0,     OP_L,                  31<<26 | 598<<1,              "sync",
+0,     OP,                    31<<26 | 1<<21 | 598<<1,      "lwsync",
+0,     OP,                    31<<26 | 2<<21 | 598<<1,      "ptesync",
+0,     OP,                    31<<26 | 854<<1,              "eieio",
+
+/* Time base (Book II, page 30) */
+
+0,     OP_RT_TBR,   31<<26 | 371<<1,                        "mftb",
+0,     OP_RT,       31<<26 | 8<<11 | 13<<16 | 371<<1,       "mftbu",
+
+/* External control (Book II, page 33) */
+
+0,     OP_RT_RA_RB,           31<<26 | 310<<1,              "eciwx",
+0,     OP_RS_RA_RB,           31<<26 | 438<<1,              "ecowx",
