@@ -40,6 +40,7 @@ definerule("cfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
+		suffix = { type="string", default=".o" },
 		commands = {
 			type="strings",
 			default={
@@ -56,7 +57,7 @@ definerule("cfile",
 		end
 		hdrpaths = uniquify(hdrpaths)
 
-		local outleaf = basename(e.name)..".o"
+		local outleaf = basename(e.name)..e.suffix
 
 		return normalrule {
 			name = e.name,
