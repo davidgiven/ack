@@ -58,7 +58,7 @@ name led
 	program {EM}/lib/ack/em_led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -i SEPID=-b1:0
-	mapflag -fp FLOATS={EM}/{ILIB}fp
+	mapflag -fp FLOATS={PLATFORMDIR}/libfp.a
 	args {ALIGN} {SEPID?} \
 		({RTS}:.b=-u _i_main) \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
