@@ -19,7 +19,7 @@ for _, plat in ipairs({"cpm"}) do
 			},
 			suffix = ".s",
 			vars = {
-				ackcflags = "-I"..dirname(byte_order),
+				["+ackcflags"] = { "-I"..dirname(byte_order) },
 				plat = plat
 			}
 		}
