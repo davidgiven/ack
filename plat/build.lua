@@ -91,7 +91,7 @@ definerule("ackprogram",
 			},
 			_clibrary = acklibrary,
 			commands = {
-				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -.%{lang} -o %{outs} %{ins}"
+				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -.%{lang} -o %{outs} %{ins} %{ackldflags}"
 			}
 		}
 	end
