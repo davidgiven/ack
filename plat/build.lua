@@ -8,8 +8,10 @@ definerule("ackfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
+		suffix = { type="string", default=".o" },
 	},
 	function (e)
+		local c = (e.suffix == ".o" and "-c" or "-c"..e.suffix)
 		local plat = e.vars.plat
 
 		return cfile {
@@ -28,8 +30,9 @@ definerule("ackfile",
 				"util/misc+pkg",
 				e.deps
 			},
+			suffix = e.suffix,
 			commands = {
-				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -c -o %{outs} %{ins} %{hdrpaths} %{ackcflags}"
+				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} "..c.." -o %{outs} %{ins} %{hdrpaths} %{ackcflags}"
 			}
 		}
 	end
@@ -88,7 +91,7 @@ definerule("ackprogram",
 			},
 			_clibrary = acklibrary,
 			commands = {
-				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -.%{lang} -o %{outs} %{ins}"
+				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} -.%{lang} -o %{outs} %{ins} %{ackldflags}"
 			}
 		}
 	end
@@ -100,18 +103,25 @@ definerule("build_plat_libs",
 		plat = { type="string" },
 	},
 	function(e)
+		local installmap = {
+			"lang/b/lib+pkg_"..e.plat,
+			"lang/basic/lib+pkg_"..e.plat,
+			"lang/cem/libcc.ansi+pkg_"..e.plat,
+			"lang/m2/libm2+pkg_"..e.plat,
+			"lang/pc/libpc+pkg_"..e.plat,
+			"lang/b/lib+pkg_"..e.plat,
+			["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
+			["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
+		}
+
+		-- For now, only cpm uses software floating-point.
+		if e.plat == "cpm" then
+			installmap[#installmap+1] = "mach/proto/fp+pkg_"..e.plat
+		end
+
 		return installable {
 			name = e.name,
-			map = {
-				"lang/b/lib+pkg_"..e.plat,
-				"lang/basic/lib+pkg_"..e.plat,
-				"lang/cem/libcc.ansi+pkg_"..e.plat,
-				"lang/m2/libm2+pkg_"..e.plat,
-				"lang/pc/libpc+pkg_"..e.plat,
-				"lang/b/lib+pkg_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
-				["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
-			}
+			map = installmap,
 		}
 	end
 )

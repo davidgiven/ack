@@ -9,7 +9,6 @@ program hilo(input, output);
 
 type
 	string = packed array [0..255] of char;
-	charstar = packed array [0..0] of char;
 	
 var
 	playing : Boolean;
@@ -30,47 +29,25 @@ function random(range : integer) : integer;
 		random := seed mod range;
 	end;
 
-{ Pascal doesn't provide string input, so we interface to the read() syscall
-  and do it manually. But... we can't interface to read() directly because
-  that conflicts with a Pascal keyword. Luckily there's a private function
-  uread() in the ACK Pascal library that we can use instead. }
-  
-function uread(fd : integer; var buffer : charstar; count : integer) : integer;
-	extern;
+{ Pascal doesn't provide string input, so we read characters until the
+  end of line and put them in a string. }
 
-function readchar : char;
-	var
-		c : charstar;
-		dummy : integer;
-		
-	begin
-		c[0] := chr(0);
-		dummy := uread(0, c, 1);
-		readchar := c[0];
-	end;
-	
 procedure readstring(var buffer : string; var length : integer);
 	var
-		finished : Boolean;
 		c : char;
 		
 	begin
 		write('> ');
 		
 		length := 0;
-		finished := FALSE;
-		seed := 0;
-		while not finished do
+		repeat
 			begin
-				c := readchar;
-				if (ord(c) = 10) then
-					finished := true
-				else
-					begin
-						buffer[length] := c;
-						length := length + 1;
-					end
-			end;
+				read(c);
+				buffer[length] := c;
+				length := length + 1;
+			end
+		until eoln;
+		readln; { discard end of line }
 	end;
 
 procedure getname;

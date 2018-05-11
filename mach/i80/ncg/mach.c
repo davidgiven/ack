@@ -41,21 +41,12 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4\t%ld\n",atol(str));
 }
 
-void
-con_float() {
-	static int warning_given;
-	int i = argval;
-
-	if (!warning_given) {
-		fprintf(stderr, "warning: dummy floating point constant\n");
-		warning_given = 1;
-	}
-	while (i > 0) {
-		fputs(".data4 0	!dummy float\n", codefile);
-		i -= 4;
-	}
-}
-
+#define CODE_GENERATOR
+#define IEEEFLOAT
+#define FL_MSL_AT_LOW_ADDRESS   0
+#define FL_MSW_AT_LOW_ADDRESS   0
+#define FL_MSB_AT_LOW_ADDRESS   0
+#include <con_float>
 
 void
 prolog(nlocals) full nlocals; {

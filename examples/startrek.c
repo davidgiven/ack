@@ -58,7 +58,18 @@
  *
  */
 
+/* For `ack -mcpm -fp`, the i80 code was too big.  Make it smaller by
+ * removing the game's intro and replacing part of libc. */
+#ifdef __i80
+#define SMALL
+#endif
+
+#ifdef SMALL
+#include <stdarg.h>
+#include <unistd.h>
+#else
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -134,13 +145,26 @@ int cint(double d);
 void compute_vector(void);
 void sub1(void);
 void sub2(void);
+#ifndef SMALL
 void showfile(char *filename);
 int openfile(char * sFilename, char * sMode);
 void closefile(void);
 int get_line(char *s);
+#endif
 void randomize(void);
 int get_rand(int iSpread);
 double rnd(void);
+#ifdef SMALL
+#undef atof
+#define atof    trek_atof
+#define getchar trek_getchar
+#define putchar trek_putchar
+#define printf  trek_printf
+double atof(const char *);
+static int getchar(void);
+static void putchar(int c);
+void printf(const char *fmt, ...);
+#endif
 
 /* Global Variables */
 
@@ -196,14 +220,20 @@ char sQ[194];                /* Visual Display of Quadrant */
 
 string sG2;                 /* Used to pass string results */
 
+#ifndef SMALL
 FILE *stream;
 bool bFlag = FALSE;         /* Prevent multiple file opens */
+#endif
 
 void
 reads(char* buffer)
 {
+#ifdef SMALL
+  read(0, buffer, sizeof(string));
+#else
   fflush(stdout);
   fgets(buffer, sizeof(string), stdin);
+#endif
 }
 
 /* Main Program */
@@ -224,6 +254,7 @@ intro(void)
 {
   string sTemp;
 
+#ifndef SMALL
   printf ("\n\n");
   printf (" *************************************\n");
   printf (" *                                   *\n");
@@ -239,6 +270,7 @@ intro(void)
 
   if (sTemp[0] == 'y' || sTemp[0] == 'Y')
     showfile("startrek.doc");
+#endif /* !SMALL */
 
   printf ("\n\n\n\n\n\n\n");
   printf("                         ------*------\n");
@@ -1879,6 +1911,7 @@ cint (double d)
   return(i);
 }
 
+#ifndef SMALL
 void
 showfile(char *filename)
 {
@@ -1934,6 +1967,7 @@ get_line(char *s)
   else
     return(strlen(s));
 }
+#endif /* !SMALL */
 
 /* Seed the randomizer with the timer */
 void
@@ -1960,3 +1994,164 @@ rnd(void)
   
   return(d);
 }
+
+#ifdef SMALL
+/* These are small but incomplete replacements for functions in libc.
+ * Local variables are static for smaller i80 code. */
+
+double
+atof(const char *str)
+{
+  static double d;
+  static char n, prec;
+
+  d = 0.0;
+  n = prec = 0; /* Forget to skip whitespace before number */
+  if (*str == '-') { n = 1; str++; }
+  for (;;)
+    {
+      if (*str >= '0' && *str <= '9')
+        {
+          d = 10.0 * d + (double)(*str - '0');
+          if (prec != 0) prec++;
+        }
+      else if (*str == '.')
+        prec++;
+      else
+        break; /* Forget to parse exponent like "e10" */
+      str++;
+    }
+  while (prec > 1) { d /= 10.0; prec--; }
+  return n ? -d : d;
+}
+
+static int
+getchar(void)
+{
+  static unsigned char c[2]; /* CP/M read() needs 2 bytes */
+
+  if (read(0, c, 2) > 0)
+    return c[0];
+  else
+    return -1;
+}
+
+static void
+putchar(int c)
+{
+  write(1, &c, 1);
+}
+
+struct printf_buf {
+  char  p_buf[13];
+  char  p_len;
+  char *p_str;
+};
+
+static struct printf_buf pfb;
+
+static void
+pfb_put(int c)
+{
+  if (pfb.p_str != pfb.p_buf)
+    {
+      pfb.p_str--;
+      *pfb.p_str = c; /* Prepend character to buffer */
+      pfb.p_len++;
+    }
+  else
+    pfb.p_len = 0; /* No room in buffer; force empty string */
+}
+
+void
+printf(const char *fmt, ...)
+{
+  static va_list ap;
+  static const char *s;
+
+  va_start(ap, fmt);
+  while (*fmt != '\0')
+    {
+      if (*fmt != '%')
+        {
+          s = fmt;
+          do { s++; } while ( *s != '\0' && *s != '%');
+          write(1, fmt, s - fmt);
+          fmt = s;
+        }
+      if (*fmt == '%')
+        {
+          static char prec, width;
+
+          fmt++; /* Pass '%' */
+          /* Read optional width.prec, as 4.2 in "%4.2f" */
+          prec = width = 0;
+          if (*fmt >= '0' && *fmt <= '9')
+            {
+              width = *fmt - '0';
+              fmt++;
+            }
+          if (*fmt == '.')
+            {
+              fmt++;
+              if (*fmt >= '0' && *fmt <= '9')
+                {
+                  prec = *fmt - '0';
+                  fmt++;
+                }
+            }
+          if (*fmt == 's') /* Format "%s" */
+            {
+              static const char *s;
+
+              s = va_arg(ap, const char *);
+              write(1, s, strlen(s));
+            }
+          else /* Format "%d" or "%f" */
+            {
+              static double d;
+              static char n, pad;
+
+              if (*fmt == 'd')
+                {
+                  d = (double)va_arg(ap, int);
+                  prec = 0; /* No digits after point */
+                  pad = '0';
+                }
+              else
+                {
+                  d = va_arg(ap, double);
+                  /* Move digits before point */
+                  for (n = prec; n != 0; n--) d *= 10.0;
+                  pad = ' ';
+                }
+              /* Set up buffer */
+              pfb.p_len = 0;
+              pfb.p_str = pfb.p_buf + sizeof(pfb.p_buf);
+              /* Change negative number to positive */
+              n = 0;
+              if (d < 0) { n = 1; d = -d; }
+              modf(d + 0.5, &d); /* Round last digit */
+              for (;;)
+                {
+                  d /= 10.0;  /* Extract next digit */
+                  /* Use 10.5 instead of 10.0 to decrease error */
+                  pfb_put('0' + (int)(10.5 * modf(d, &d)));
+                  if (prec != 0)
+                    {
+                      prec--;
+                      if (prec == 0) pfb_put('.');
+                    }
+                  else if (d < 1.0)
+                    break; /* No more digits */
+                }
+              if (n) pfb_put('-');
+              while(pfb.p_len < width) pfb_put(pad);
+              write(1, pfb.p_str, pfb.p_len);
+            }
+          fmt++; /* Pass 's' in "%s" */
+        }
+    }
+  va_end(ap);
+}
+#endif /* SMALL */

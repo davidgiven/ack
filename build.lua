@@ -4,6 +4,7 @@ vars.cflags = {
 vars.ackcflags = {
 	"-O6"
 }
+vars.ackldflags = {}
 vars.plats = {
 	"cpm",
 	"linux386",

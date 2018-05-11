@@ -11,14 +11,15 @@ CP/M-compliant machine.
 
 This port only implements a very limited set of syscalls --- and most of those
 are stubs required to make the demo apps link. File descriptors 0, 1 and 2
-represent the console. All reads block. There's enough TTY emulation to allow
-\n conversion and local echo (but it can't be turned off).
+represent the console. Each read() blocks and reads an entire line (it can't
+read part of a line) from the CP/M line editor, then appends \n. Each write()
+converts \n to \r\n. The line editor and \n conversion can't be turned off.
 
 There's a special, if rather minimilist, interface to give applications access
 to CP/M. See include/cpm.h for details.
 
-IEEE floating point is not available. Attempts to use floating-point numbers 
-will cause the program to terminate.
+Link with `ack -fp` to enable software floating point. Otherwise, attempts to
+use floating-point numbers will cause the program to terminate.
 
 
 Example command line
