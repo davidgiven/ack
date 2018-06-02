@@ -58,6 +58,7 @@ int tgetent(char* bp, const char* name)
 	}
 	else
 		file = "/etc/termcap";
+
 	if ((fp = fopen(file, "r")) == (FILE*)NULL)
 		return (-1);
 	while (fgets(buf, 1024, fp) != NULL)
@@ -66,7 +67,7 @@ int tgetent(char* bp, const char* name)
 			continue;
 		while (*(cp = &buf[strlen(buf) - 2]) == '\\')
 			if (fgets(cp, 1024, fp) == NULL)
-				return (0);
+				goto exit;
 		if (match_name(buf, name))
 		{
 			strcpy(bp, buf);
@@ -74,6 +75,7 @@ int tgetent(char* bp, const char* name)
 			return (check_for_tc());
 		}
 	}
+exit:
 	fclose(fp);
 	return (0);
 }
