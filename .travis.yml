@@ -17,11 +17,6 @@ matrix:
 #            env: HOMEBREW_NO_AUTO_UPDATE=1
 #            compiler: clang
 
-addons:
-    apt:
-        packages:
-        - ed
-
 git:
     depth: 10
 script:
