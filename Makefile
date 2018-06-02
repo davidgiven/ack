@@ -22,9 +22,9 @@ PREFIX = $(INSDIR)
 
 BUILDDIR = $(ACK_TEMP_DIR)/ack-build
 
-# What build flags do you want to use?
+# What build flags do you want to use for native code?
 
-CFLAGS = -g
+CFLAGS = -g -O -Wno-return-type
 LDFLAGS = 
 
 # Various commands.
@@ -120,6 +120,7 @@ $(build-file): first/ackbuilder.lua Makefile $(lua-files) $(our-lua)
 		PREFIX=$(PREFIX) \
 		AR=$(AR) \
 		CC=$(CC) \
+		CFLAGS="$(CFLAGS)" \
 		> $(build-file)
 
 install:
