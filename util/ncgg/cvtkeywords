@@ -1,8 +1,8 @@
 #!/bin/sh
 : '$Id$'
 
-grep '^#' $2 >tokendefs
-ed -s $1 > $3 <<'!Funky!Stuff!'
+grep '^#' $3 >tokendefs
+$1 -s $2 > $4 <<'!Funky!Stuff!'
 g/^#/d
 1,$s/\([^ 	]*\)[ 	][ 	]*\(.*\)/	sy_p=lookup("\1",symkeyw,newsymbol);sy_p->sy_value.syv_keywno=\2;/
 1i
@@ -18,8 +18,7 @@ enterkeyw() {
 $a
 }
 .
-,p
-q
+1,$p
 !Funky!Stuff!
 rm tokendefs
 

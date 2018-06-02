@@ -1,6 +1,6 @@
 #!/bin/sh
-echo "/* this part is generated from $1 at: " `date` "*/"
-ed -s $1 <<'EOI' 
+echo "/* this part is generated from $2 at: " `date` "*/"
+$1 -s $2 <<'EOI' 
 1,/^$/d
 1,/^$/d
 1,$s/^\(...\)	\(.\).*/\1:\2/

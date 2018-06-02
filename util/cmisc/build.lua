@@ -23,3 +23,9 @@ definerule("tabgen",
 		}
 	end
 )
+
+cprogram {
+	name = "ed",
+	srcs = { "./ed.c" }
+}
+

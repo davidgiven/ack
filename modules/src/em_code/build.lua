@@ -2,13 +2,14 @@ normalrule {
 	name = "em_code_ek_h",
 	ins = {
 		"./make.em.gen",
+		"util/cmisc+ed",
 		"./em.nogen",
 		"h/em_table"
 	},
 	outleaves = { "em_codeEK.h" },
 	commands = {
-		"%{ins[1]} %{ins[3]} > %{outs}",
-		"cat %{ins[2]} >> %{outs}"
+		"%{ins[1]} %{ins[2]} %{ins[4]} > %{outs}",
+		"cat %{ins[3]} >> %{outs}"
 	}
 }
 

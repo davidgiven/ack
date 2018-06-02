@@ -2,6 +2,7 @@ normalrule {
 	name = "c_mnem_narg_h",
 	ins = {
 		"./m_C_mnem_na",
+		"util/cmisc+ed",
 		"h/em_table",
 		"./argtype"
 	},
@@ -15,6 +16,7 @@ normalrule {
 	name = "c_mnem_h",
 	ins = {
 		"./m_C_mnem",
+		"util/cmisc+ed",
 		"h/em_table",
 		"./argtype"
 	},

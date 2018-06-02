@@ -1,25 +1,26 @@
 #!/bin/sh
 set -e
 
-em_table=$1
-h=${2-.}
-d=${3-.}
+ed=$1
+em_table=$2
+h=${3-.}
+d=${4-.}
 
 set `grep fpseu $em_table`
 p=$2
 set `grep fmnem $em_table`
 m=$2
 
-ed - $em_table <<'A' > X
+$ed - $em_table <<'A' > X
 1,/^$/g/	/s// /gp
 A
 
-ed - $em_table <<'A' | awk '{$2=$2+'$p'; print}' > Y
+$ed - $em_table <<'A' | awk '{$2=$2+'$p'; print}' > Y
 1,/^$/d
 1,/^$/g/	/s// /gp
 A
 
-ed - $em_table <<'A' | awk '{print $0,'$m'+i++}' > Z
+$ed - $em_table <<'A' | awk '{print $0,'$m'+i++}' > Z
 1,/^$/d
 1,/^$/d
 1,/^$/g/	/s// /gp
@@ -30,23 +31,23 @@ echo 'lpseu' `expr $i + $p - 1` >>X
 i=`wc -l <Z`
 echo 'lmnem' `expr $i + $m - 1` >>X
 
-ed - X <<'A' > $h/em_spec.h
+$ed - X <<'A' > $h/em_spec.h
 g/^/s//#define sp_/p
 A
 
-ed - Y <<'A' > $h/em_pseu.h
+$ed - Y <<'A' > $h/em_pseu.h
 g/ \(.*\) .*/s// \1/
 g/\(.*\) \(.*\)/s//#define ps_\1 \2/p
 A
 
-ed - Z <<'A' > $h/em_mnem.h
+$ed - Z <<'A' > $h/em_mnem.h
 g/ .* /s// /
 g/\(.*\) \(.*\)/s//#define op_\1 \2/p
 A
 
 (
 echo 'char em_pseu[][4] = {'
-ed - Y <<'A'
+$ed - Y <<'A'
 g/\(...\).*/s//	"\1",/p
 A
 echo '};'
@@ -54,7 +55,7 @@ echo '};'
 
 (
 echo 'char em_mnem[][4] = {'
-ed - Z <<'A'
+$ed - Z <<'A'
 g/\(...\).*/s//	"\1",/p
 A
 echo '};'
@@ -63,7 +64,7 @@ echo '};'
 (
 echo '#include	<em_flag.h>
 char em_flag[] = {'
-ed - Z <<'A' | tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+$ed - Z <<'A' | tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
 g/^... /s///
 g/ .*/s///
 g/\(.\)\(.\)/s//PAR_\1 | FLO_\2/

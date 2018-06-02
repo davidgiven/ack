@@ -14,12 +14,13 @@ normalrule {
 	name = "keywords",
 	ins = {
 		"./cvtkeywords",
+		"util/cmisc+ed",
 		"./keywords",
 		matching(filenamesof(cggparser), "%.h$")
 	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
-		"%{ins[1]} %{ins[2]} %{ins[3]} %{outs[1]}"
+		"%{ins[1]} %{ins[2]} %{ins[3]} %{ins[4]} %{outs[1]}"
 	}
 }
 
