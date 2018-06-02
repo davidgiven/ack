@@ -112,7 +112,7 @@ STATIC void ra_machinit(void *vp)
 
 	for (;;) {
 		while(getc(f) != '\n');
-		fscanf(f,"%s",s);
+		fscanf(f,"%99s",s);
 		if (strcmp(s,"%%RA") == 0)break;
 	}
 	fscanf(f,"%hd",&regs_available[reg_any]);

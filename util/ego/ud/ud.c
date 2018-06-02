@@ -64,7 +64,7 @@ STATIC void ud_machinit(void *vp)
 
 	for (;;) {
 		while(getc(f) != '\n');
-		fscanf(f,"%s",s);
+		fscanf(f,"%99s",s);
 		if (strcmp(s,"%%UD") == 0)break;
 	}
 	globl_cond_tab = getcondtab(f);

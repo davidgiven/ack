@@ -72,7 +72,7 @@ void cs_machinit(void *vp)
 	/* Find piece that is relevant for this phase. */
 	do {
 		while (getc(f) != '\n');
-		fscanf(f, "%s", s);
+		fscanf(f, "%99s", s);
 	} while (strcmp(s, "%%CS"));
 
 	/* Choose a set of instructions which must only be eliminated

@@ -32,14 +32,14 @@ convert(mnemfile,itemfile)
 	newcl = TRUE;
 	printf("struct item_descr itemtab[] = {\n");
 	for (;;) {
-		fscanf(mnemfile,"%s%s%d",def,mnem1,&opc);
+		fscanf(mnemfile,"%19s%19s%d",def,mnem1,&opc);
 		/* read a line like "#define op_aar 1" */
 		if (feof(mnemfile)) break;
 		if (strcmp(def,"#define") != 0) {
 			error("bad mnemonic file, #define expected");
 		}
 		if (newcl) {
-			fscanf(itemfile,"%s%s%d",mnem2,itemtype,&index);
+			fscanf(itemfile,"%19s%19s%d",mnem2,itemtype,&index);
 			/* read a line like "op_loc CONST 4" */
 		}
 		if (feof(itemfile) || strcmp(mnem1,mnem2) != 0) {

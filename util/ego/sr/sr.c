@@ -61,7 +61,7 @@ void sr_machinit(void *vp)
 
 	for (;;) {
 		while(getc(f) != '\n');
-		fscanf(f,"%s",s);
+		fscanf(f,"%99s",s);
 		if (strcmp(s,"%%SR") == 0)break;
 	}
 	fscanf(f,"%d",&ovfl_harmful);

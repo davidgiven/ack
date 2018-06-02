@@ -60,7 +60,7 @@ STATIC void sp_machinit(void *vp)
 
 	for (;;) {
 		while(getc(f) != '\n');
-		fscanf(f,"%s",s);
+		fscanf(f,"%99s",s);
 		if (strcmp(s,"%%SP") == 0)break;
 	}
 	fscanf(f,"%d",&globl_sp_allowed);
