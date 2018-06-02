@@ -20,5 +20,5 @@ matrix:
 git:
     depth: 10
 script:
-    - make PREFIX=/tmp/acki +ack
+    - make CC=$CC PREFIX=/tmp/acki +ack
 
