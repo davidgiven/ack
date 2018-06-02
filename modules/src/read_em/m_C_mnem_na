@@ -1,5 +1,7 @@
-EM_TABLE=$1
-ARGTYPE=$2
+#!/bin/sh
+export ED=$1
+EM_TABLE=$2
+ARGTYPE=$3
 list=`$ARGTYPE w $EM_TABLE`
 echo "switch(p->em_opcode) {"
 for i in $list

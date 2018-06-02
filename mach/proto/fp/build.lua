@@ -29,11 +29,12 @@ for _, plat in ipairs({"cpm"}) do
 			name = "ed_"..plat.."/"..n,
 			ins = {
 				"./FP.script",
+				"util/cmisc+ed",
 				assembly,
 			},
 			outleaves = { n..".s" },
 			commands = {
-				"ed -s %{ins[2]} <%{ins[1]} >%{outs}"
+				"%{ins[2]} -s %{ins[3]} <%{ins[1]} >%{outs}"
 			}
 		}
 	end
