@@ -51,16 +51,23 @@ definerule("plat_testsuite",
 				}
 			}
 
+			local methoddep = nil
+			local methodpath = e.method
+			if e.method:find("%+") then
+				methoddep = e.method
+				methodpath = "%{ins[4]}"
+			end
 			tests[#tests+1] = normalrule {
 				name = fs,
 				outleaves = { e.plat.."-"..fs.."-testlog.txt" },
 				ins = {
 					bin,
 					"tests/plat/testdriver.sh",
-					"util/build+testrunner"
+					"util/build+testrunner",
+					methoddep,
 				},
 				commands = {
-					"%{ins[2]} "..e.method.." %{ins[1]} 15 %{ins[3]} > %{outs}; true",
+					"%{ins[2]} "..methodpath.." %{ins[1]} 15 %{ins[3]} > %{outs}; true",
 				}
 			}
 		end
