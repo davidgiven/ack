@@ -5,14 +5,18 @@
 //
 // This work is licensed under the MIT License. See included LICENSE.TXT.
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 #include <sys/timeb.h>
 #include <memory.h>
-#include <stdint.h>
 
 #ifndef _WIN32
 #include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <termios.h>
 #endif
 
 #ifndef NO_GRAPHICS
@@ -259,9 +263,33 @@ void audio_callback(void *data, unsigned char *stream, int len)
 }
 #endif
 
+static struct termios old_terminal_state;
+
+static void reset_terminal(void)
+{
+	tcsetattr(0, TCSAFLUSH, &old_terminal_state);
+}
+
+static void set_raw_mode(void)
+{
+	struct termios state;
+	tcgetattr(0, &state);
+	old_terminal_state = state;
+
+	state.c_lflag &= ~(ECHO | ICANON);
+	state.c_oflag &= ~(OPOST);
+	state.c_cc[VMIN] = 0;
+	state.c_cc[VTIME] = 0;
+
+	tcsetattr(0, TCSAFLUSH, &state);
+	atexit(reset_terminal);
+}
+
 // Emulator entry point
 int main(int argc, char **argv)
 {
+	set_raw_mode();
+
 #ifndef NO_GRAPHICS
 	// Initialise SDL
 	SDL_Init(SDL_INIT_AUDIO);
