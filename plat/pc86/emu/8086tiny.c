@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sys/timeb.h>
 #include <memory.h>
+#include <stdint.h>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -17,6 +18,9 @@
 #ifndef NO_GRAPHICS
 #include "SDL.h"
 #endif
+
+extern uint8_t bios[];
+extern uint32_t bios_size;
 
 // Emulator system constants
 #define IO_PORT_COUNT 0x10000
@@ -158,7 +162,7 @@
 unsigned char mem[RAM_SIZE], io_ports[IO_PORT_COUNT], *opcode_stream, *regs8, i_rm, i_w, i_reg, i_mod, i_mod_size, i_d, i_reg4bit, raw_opcode_id, xlat_opcode_id, extra, rep_mode, seg_override_en, rep_override_en, trap_flag, int8_asap, scratch_uchar, io_hi_lo, *vid_mem_base, spkr_en, bios_table_lookup[20][256];
 unsigned short *regs16, reg_ip, seg_override, file_index, wave_counter;
 unsigned int op_source, op_dest, rm_addr, op_to_addr, op_from_addr, i_data0, i_data1, i_data2, scratch_uint, scratch2_uint, inst_counter, set_flags_type, GRAPHICS_X, GRAPHICS_Y, pixel_colors[16], vmem_ctr;
-int op_result, disk[3], scratch_int;
+int op_result, disk[2], scratch_int;
 time_t clock_buf;
 struct timeb ms_clock;
 
@@ -279,15 +283,16 @@ int main(int argc, char **argv)
 	// But, if the HD image file is prefixed with @, then boot from the HD
 	regs8[REG_DL] = ((argc > 3) && (*argv[3] == '@')) ? argv[3]++, 0x80 : 0;
 
-	// Open BIOS (file id disk[2]), floppy disk image (disk[1]), and hard disk image (disk[0]) if specified
-	for (file_index = 3; file_index;)
+	// Open floppy disk image (disk[1]), and hard disk image (disk[0]) if specified
+	for (file_index = 2; file_index;)
 		disk[--file_index] = *++argv ? open(*argv, 32898) : 0;
 
 	// Set CX:AX equal to the hard disk image size, if present
 	CAST(unsigned)regs16[REG_AX] = *disk ? lseek(*disk, 0, 2) >> 9 : 0;
 
 	// Load BIOS image into F000:0100, and set IP to 0100
-	read(disk[2], regs8 + (reg_ip = 0x100), 0xFF00);
+	reg_ip = 0x100;
+	memcpy(regs8+reg_ip, bios, bios_size);
 
 	// Load instruction decoding helper table
 	for (int i = 0; i < 20; i++)

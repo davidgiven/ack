@@ -29,3 +29,8 @@ cprogram {
 	srcs = { "./ed.c" }
 }
 
+cprogram {
+	name = "bin2c",
+	srcs = { "./bin2c.c" }
+}
+
