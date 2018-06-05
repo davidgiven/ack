@@ -79,7 +79,7 @@
  * If off, all interrupts will be autovectored and all interrupt requests will
  * auto-clear when the interrupt is serviced.
  */
-#define M68K_EMULATE_INT_ACK        OPT_SPECIFY_HANDLER
+#define M68K_EMULATE_INT_ACK        OPT_OFF
 #define M68K_INT_ACK_CALLBACK(A)    cpu_irq_ack(A)
 
 
@@ -98,7 +98,7 @@
 /* If ON, CPU will call the output reset callback when it encounters a reset
  * instruction.
  */
-#define M68K_EMULATE_RESET          OPT_SPECIFY_HANDLER
+#define M68K_EMULATE_RESET          OPT_OFF
 #define M68K_RESET_CALLBACK()       cpu_pulse_reset()
 
 
@@ -108,7 +108,7 @@
  * want to properly emulate the m68010 or higher. (moves uses function codes
  * to read/write data from different address spaces)
  */
-#define M68K_EMULATE_FC             OPT_SPECIFY_HANDLER
+#define M68K_EMULATE_FC             OPT_OFF
 #define M68K_SET_FC_CALLBACK(A)     cpu_set_fc(A)
 
 
@@ -144,7 +144,7 @@
  */
 #define M68K_LOG_ENABLE             OPT_OFF
 #define M68K_LOG_1010_1111          OPT_OFF
-#define M68K_LOG_FILEHANDLE         some_file_handle
+#define M68K_LOG_FILEHANDLE         stderr
 
 
 /* ----------------------------- COMPATIBILITY ---------------------------- */
@@ -166,7 +166,8 @@
  * NOTE: not enabling inline functions will SEVERELY slow down emulation.
  */
 #ifndef INLINE
-#define INLINE static __inline__
+//#define INLINE static __inline__
+#define INLINE static
 #endif /* INLINE */
 
 #endif /* M68K_COMPILE_FOR_MAME */
