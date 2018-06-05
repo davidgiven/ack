@@ -595,7 +595,7 @@ int glob;
   char *fptr;
 
   pflag = FALSE;
-  while (*inptr == SP && *inptr == HT) inptr++;
+  while (*inptr == SP || *inptr == HT) inptr++;
 
   c = *inptr++;
 
