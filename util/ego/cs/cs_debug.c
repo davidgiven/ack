@@ -24,7 +24,7 @@ STATIC void showinstr(line_p lnp)
 	 * can occur in expressions that are going to be eliminated are
 	 * properly handled.
 	 */
-	if (INSTR(lnp) < sp_fmnem && INSTR(lnp) > sp_lmnem) {
+	if (INSTR(lnp) < sp_fmnem || INSTR(lnp) > sp_lmnem) {
 		fprintf(stderr,"*** ?\n");
 		return;
 	}
