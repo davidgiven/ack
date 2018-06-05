@@ -18,6 +18,7 @@ vars.plats = {
 	"pdpv7",
 }
 vars.plats_with_tests = {
+	"linux68k",
 	"linux386",
 	"linuxppc",
 	--"qemuppc",
