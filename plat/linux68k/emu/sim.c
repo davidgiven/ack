@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
+#include <unistd.h>
+#include <errno.h>
 #include "sim.h"
 #include "m68k.h"
 
@@ -13,6 +15,9 @@ void disassemble_program();
 
 #define INIT_SP RAM_TOP
 #define INIT_PC 0x08000054
+
+#define BRK_BOTTOM (RAM_BASE + 0x20000)
+#define BRK_TOP (RAM_TOP - 0x1000)
 
 /* Read/write macros */
 #define READ_BYTE(BASE, ADDR) (BASE)[ADDR]
@@ -33,7 +38,7 @@ void disassemble_program();
 
 
 static void exit_error(char* fmt, ...);
-static void syscall(void);
+static void emulated_syscall(void);
 
 unsigned int cpu_read_byte(unsigned int address);
 unsigned int cpu_read_word(unsigned int address);
@@ -43,6 +48,7 @@ void cpu_write_word(unsigned int address, unsigned int value);
 void cpu_write_long(unsigned int address, unsigned int value);
 
 unsigned char g_ram[RAM_TOP - RAM_BASE];
+unsigned int brkpos = BRK_BOTTOM;
 
 
 /* Exit with an error message.  Use printf syntax. */
@@ -63,7 +69,7 @@ void exit_error(char* fmt, ...)
 	va_end(args);
 	fprintf(stderr, "\n");
 	pc = m68k_get_reg(NULL, M68K_REG_PPC);
-	m68k_disassemble(buff, pc, M68K_CPU_TYPE_68000);
+	m68k_disassemble(buff, pc, M68K_CPU_TYPE_68020);
 	fprintf(stderr, "At %04x: %s\n", pc, buff);
 
 	exit(EXIT_FAILURE);
@@ -73,7 +79,7 @@ static inline unsigned int transform_address(unsigned int address)
 {
 	unsigned int i = (address & ADDRESS_MASK) - RAM_BASE;
 	if (i >= (unsigned int)(RAM_TOP - RAM_BASE))
-		exit_error("Attempted to read from RAM address %08x %08x", address, i);
+		exit_error("Attempted to read from RAM address %08x", address);
 	return i;
 }
 
@@ -83,7 +89,7 @@ unsigned int cpu_read_long(unsigned int address)
 	{
 		case 0x00: return INIT_SP;
 		case 0x04: return INIT_PC;
-		case 0x80: syscall(); return 0x10000;
+		case 0x80: emulated_syscall(); return 0x10000;
 		case 0x10000: return 0x4e734e73; /* rte; rte */
 		case 0x10004: return 0;
 		default: return READ_LONG(g_ram, transform_address(address));
@@ -168,29 +174,76 @@ void disassemble_program()
 
 void cpu_instr_callback()
 {
+	unsigned int pc = m68k_get_reg(NULL, M68K_REG_PC);
+	if (pc == 0xc)
+		exit_error("address exception");
+
 	/* The following code would print out instructions as they are executed */
 
-#if 1
+#if 0
 	static char buff[100];
 	static char buff2[100];
-	static unsigned int pc;
 	static unsigned int instr_size;
 
-	pc = m68k_get_reg(NULL, M68K_REG_PC);
 	instr_size = m68k_disassemble(buff, pc, M68K_CPU_TYPE_68020);
 	make_hex(buff2, pc, instr_size);
 	printf("E %03x: %-20s: %s\n", pc, buff2, buff);
+	printf("  d0: %08x d1: %08x d2: %08x d3: %08x d4: %08x d5: %08x d6: %08x d7: %08x\n",
+		m68k_get_reg(NULL, M68K_REG_D0),
+		m68k_get_reg(NULL, M68K_REG_D1),
+		m68k_get_reg(NULL, M68K_REG_D2),
+		m68k_get_reg(NULL, M68K_REG_D3),
+		m68k_get_reg(NULL, M68K_REG_D4),
+		m68k_get_reg(NULL, M68K_REG_D5),
+		m68k_get_reg(NULL, M68K_REG_D6),
+		m68k_get_reg(NULL, M68K_REG_D7));
+	printf("  a0: %08x a1: %08x a2: %08x a3: %08x a4: %08x a5: %08x a6: %08x a7: %08x\n",
+		m68k_get_reg(NULL, M68K_REG_A0),
+		m68k_get_reg(NULL, M68K_REG_A1),
+		m68k_get_reg(NULL, M68K_REG_A2),
+		m68k_get_reg(NULL, M68K_REG_A3),
+		m68k_get_reg(NULL, M68K_REG_A4),
+		m68k_get_reg(NULL, M68K_REG_A5),
+		m68k_get_reg(NULL, M68K_REG_A6),
+		m68k_get_reg(NULL, M68K_REG_A7));
 	fflush(stdout);
 #endif
 }
 
-static void syscall(void)
+static void emulated_syscall(void)
 {
 	int s = m68k_get_reg(NULL, M68K_REG_D0);
 	switch (s)
 	{
+		case 1: /* exit */
+			exit(m68k_get_reg(NULL, M68K_REG_D1));
+			
+		case 4: /* write */
+		{
+			unsigned int fd = m68k_get_reg(NULL, M68K_REG_D1);
+			unsigned int ptr = m68k_get_reg(NULL, M68K_REG_D2);
+			unsigned int len = m68k_get_reg(NULL, M68K_REG_D3);
+			m68k_set_reg(M68K_REG_D0, write(fd, g_ram + transform_address(ptr), len));
+			break;
+		}
+
 		case 45: /* brk */
-			m68k_set_reg(M68K_REG_D0, RAM_TOP-0x1000);
+		{
+			unsigned int newpos = m68k_get_reg(NULL, M68K_REG_D1);
+			if (newpos == 0)
+				m68k_set_reg(M68K_REG_D0, brkpos);
+			else if ((newpos < BRK_BOTTOM) || (newpos >= BRK_TOP))
+				m68k_set_reg(M68K_REG_D0, -ENOMEM);
+			else
+			{
+				brkpos = newpos;
+				m68k_set_reg(M68K_REG_D0, 0);
+			}
+			break;
+		}
+
+		case 54: /* ioctl */
+			m68k_set_reg(M68K_REG_D0, 0);
 			break;
 
 		default:
@@ -217,8 +270,8 @@ int main(int argc, char* argv[])
 
 //	disassemble_program();
 
-	m68k_init();
 	m68k_set_cpu_type(M68K_CPU_TYPE_68020);
+	m68k_init();
 	m68k_pulse_reset();
 
 	/* On entry, the Linux stack looks like this.

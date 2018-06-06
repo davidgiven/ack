@@ -14,6 +14,7 @@ normalrule {
 		"./m68kconf.h",
 		"./musashi/m68kcpu.c",
 		"./musashi/m68kdasm.c",
+		"./musashi/m68k.h",
 	},
 	outleaves = {
 		"m68kopac.c",
@@ -25,9 +26,10 @@ normalrule {
 		"m68kconf.h",
 		"m68kcpu.c",
 		"m68kdasm.c",
+		"m68k.h",
 	},
 	commands = {
-		"cp %{ins[2]} %{ins[3]} %{ins[4]} %{ins[5]} %{ins[6]} %{dir}",
+		"cp %{ins[2]} %{ins[3]} %{ins[4]} %{ins[5]} %{ins[6]} %{ins[7]} %{dir}",
 		"cd %{dir} && %{ins[1]}"
 	}
 }
