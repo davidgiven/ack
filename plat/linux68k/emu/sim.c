@@ -84,7 +84,7 @@ unsigned int cpu_read_long(unsigned int address)
 		case 0x00: return INIT_SP;
 		case 0x04: return INIT_PC;
 		case 0x80: syscall(); return 0x10000;
-		case 0x10000: return 0x4e73; /* rte */
+		case 0x10000: return 0x4e734e73; /* rte; rte */
 		case 0x10004: return 0;
 		default: return READ_LONG(g_ram, transform_address(address));
 	}
@@ -94,14 +94,14 @@ unsigned int cpu_read_long(unsigned int address)
 unsigned int cpu_read_word(unsigned int address)
 {
 	unsigned int l = cpu_read_long(address & ~3);
-	l >>= (address & 2) * 8;
+	l >>= 16 - (address & 2)*8;
 	return l & 0xffff;
 }
 
 unsigned int cpu_read_byte(unsigned int address)
 {
 	unsigned int l = cpu_read_long(address & ~3);
-	l >>= (address & 3) * 8;
+	l >>= 24 - (address & 3)*8;
 	return l & 0xff;
 }
 
