@@ -4,6 +4,8 @@ img=$2
 timeout=$3
 timeoutprog=$4
 
+set -e
+
 errcho() {
     >&2 echo "$*"
 }
@@ -36,8 +38,7 @@ get_test_output() {
             ;;
 
         *)
-            errcho "Error: $method not known by testdriver"
-            exit 1
+			$timeoutprog -t $timeout -- $method $img 2>&1
             ;;
     esac
 }
