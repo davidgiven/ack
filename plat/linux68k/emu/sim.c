@@ -251,7 +251,10 @@ static void emulated_syscall(void)
 			break;
 		}
 
+		case 20: /* getpid */
+		case 48: /* signal */
 		case 54: /* ioctl */
+		case 78: /* gettimeofday */
 			m68k_set_reg(M68K_REG_D0, 0);
 			break;
 
