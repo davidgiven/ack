@@ -4,20 +4,25 @@ definerule("plat_testsuite",
 	{
 		plat = { type="string" },
 		method = { type="string" },
+		sets = { type="table", default={"core", "b", "bugs", "m2", "floats"}},
+		skipsets = { type="table", default={}},
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
 		-- target names will resolve there.
-		local testfiles = filenamesof(
-			-- added structcopy_e.c
-			"tests/plat/*.c",
-			"tests/plat/*.e",
-			"tests/plat/*.p",
-			"tests/plat/b/*.b",
-			"tests/plat/bugs/*.c",
-			"tests/plat/bugs/*.mod",
-			"tests/plat/m2/*.mod"
-		)
+		local testfiles = {}
+		local skipsets = {}
+		for _, set in ipairs(e.skipsets) do
+			skipsets[set] = true
+		end
+		for _, set in ipairs(e.sets) do
+			if not skipsets[set] then
+				local fs = filenamesof("tests/plat/"..set.."/*")
+				for _, f in ipairs(fs) do
+					testfiles[#testfiles+1] = f
+				end
+			end
+		end
 
 		acklibrary {
 			name = "lib",
