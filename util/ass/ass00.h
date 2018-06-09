@@ -21,7 +21,7 @@
  */
 
 #define DUMP            1       /* dump between passes */
-/*  #define TIMING          1       /* some timing measurements */
+/*  #define TIMING          1 */      /* some timing measurements */
 #define JOHAN           1       /* dump the loaded instructions */
 #define MEMUSE          1       /* print memory usage statistics */
 

@@ -154,7 +154,7 @@ copyout() {
 	if ( fclose(ifile)==EOF ) ;
 }
 
-dataprocess(f1,f2) FILE *f1,*f2; {
+void dataprocess(f1,f2) FILE *f1,*f2; {
 	relc_t datareloc;
 	FOFFSET i;
 	register ieof ;
@@ -200,7 +200,7 @@ dataprocess(f1,f2) FILE *f1,*f2; {
 		fatal("data relocation botch") ;
 }
 
-textprocess(f1,f2) FILE *f1,*f2; {
+void textprocess(f1,f2) FILE *f1,*f2; {
 	relc_t textreloc;
 	cons_t n;
 	FOFFSET i;
