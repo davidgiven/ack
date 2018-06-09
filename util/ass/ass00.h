@@ -2,7 +2,12 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <em_spec.h>
 #include <as_spec.h>
 #include <em_flag.h>
