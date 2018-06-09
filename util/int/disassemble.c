@@ -1758,7 +1758,7 @@ PRIVATE do_pr_instr(opcode)
 	unsigned int opcode;
 {
 	switch (opcode) {
-#include	"switch/PrCases"	/* for the muscle */
+#include	"PrCases"	/* for the muscle */
 		case SECONDARY:
 			do_pr_instr(SEC_BASE + nextTCbyte());
 			break;

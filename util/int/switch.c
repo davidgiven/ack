@@ -15,7 +15,7 @@ do_instr(opcode)
 	unsigned int opcode;
 {
 	switch (opcode) {
-#include	"switch/DoCases"	/* for the muscle */
+#include	"DoCases"	/* for the muscle */
 		case SECONDARY:
 			do_instr(SEC_BASE + nextPCbyte());
 			break;

@@ -47,7 +47,7 @@ installable {
 		"util/arch+pkg",
 		"util/ass+pkg",
 		"util/ego+pkg",
-		"util/ass+pkg",
+		"util/int+pkg",
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
