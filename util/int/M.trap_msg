@@ -1,21 +1,11 @@
 #!/bin/sh
 # $Id$
 
-(
-	echo '/* This file is generated from '$1'; do not edit */'
+echo '/* This file is generated from '$1'; do not edit */'
 
-	cat $1 |
-	sed '
-		s/..//
-		s/.*/	"&",/
-	'
-) >\#trap_msg
-
-if	# the new one unchanged
-	cmp -s \#trap_msg trap_msg
-then	# throw it away
-	rm \#trap_msg
-else	# overwrite old version
-	mv \#trap_msg trap_msg
-fi
+cat $1 |
+sed '
+	s/..//
+	s/.*/	"&",/
+'
 

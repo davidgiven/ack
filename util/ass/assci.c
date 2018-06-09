@@ -850,7 +850,7 @@ extxcon(header) {
 }
 
 /* Added atol() that ignores overflow. --Ceriel */
-long atol(s)
+long myatol(s)
     register char *s;
 {
     register long total = 0;
@@ -879,6 +879,6 @@ extvcon(header) {
 	if ( consiz>4 ) {
 		error("Size of initializer exceeds loader capability") ;
 	}
-	extarb((int)consiz,atol(string)) ;
+	extarb((int)consiz,myatol(string)) ;
 	return ;
 }

@@ -4,9 +4,6 @@
 #include	"global.h"
 #include	"alloc.h"
 
-extern char *malloc();
-extern char *realloc();
-
 char *Malloc(sz, descr)
 	size sz;
 	char *descr;
