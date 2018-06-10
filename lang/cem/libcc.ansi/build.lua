@@ -71,11 +71,12 @@ for _, plat in ipairs(vars.plats) do
 		}
 	}
 
+	local suffix = plat:find("^em") and "m" or "o"
 	installable {
 		name = "pkg_"..plat,
 		map = {
 			"lang/cem/libcc.ansi/headers+pkg",
-			["$(PLATIND)/"..plat.."/c-ansi.o"] = "+crt_"..plat,
+			["$(PLATIND)/"..plat.."/c-ansi."..suffix] = "+crt_"..plat,
 			["$(PLATIND)/"..plat.."/libc.a"] = "+lib_"..plat,
 		}
 	}
