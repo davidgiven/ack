@@ -25,3 +25,8 @@
  * seems to be the standard that won. --- dtrg */
  
 //#define WANT_SGTTY
+
+/* FIXME: Uncomment to enable these calls in moncalls.c */
+
+//#define WANT_MOUNT_UMOUNT
+//#define WANT_STIME
