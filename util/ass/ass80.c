@@ -280,7 +280,7 @@ int icount(size) {
 	return amount ;
 }
 
-setmode(mode) {
+set_mode(mode) {
 
 	if (datamode==mode) {   /* in right mode already */
 		switch ( datamode ) {
@@ -302,8 +302,8 @@ setmode(mode) {
 		default:
 			return ;
 		}
-		setmode(DATA_NUL) ; /* flush current descriptor */
-		setmode(mode) ;
+		set_mode(DATA_NUL) ; /* flush current descriptor */
+		set_mode(mode) ;
 		return;
 	}
 	switch(datamode) {              /* terminate current mode */
@@ -376,7 +376,7 @@ setmode(mode) {
 		ext8(HEADBSS) ;
 		break;
 	default:
-		fatal("Unknown mode in setmode") ;
+		fatal("Unknown mode in set_mode") ;
 	}
 }
 

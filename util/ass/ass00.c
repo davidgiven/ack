@@ -369,7 +369,7 @@ end_module() {
 	 */
 
 	align(wordsize) ;
-	setmode(DATA_NUL);
+	set_mode(DATA_NUL);
 	dump(100);
 	enmd_pro();
 	enmd_glo();
