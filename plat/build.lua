@@ -8,10 +8,12 @@ definerule("ackfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
-		suffix = { type="string", default=".o" },
+		suffix = { type="string", optional=true },
 	},
 	function (e)
-		local c = (e.suffix == ".o" and "-c" or "-c"..e.suffix)
+		local em = e.vars.plat:find("^em")
+		local suffix = e.suffix or (em and ".m" or ".o")
+		local c = "-c"..suffix
 		local plat = e.vars.plat
 
 		return cfile {
@@ -30,7 +32,7 @@ definerule("ackfile",
 				"util/misc+pkg",
 				e.deps
 			},
-			suffix = e.suffix,
+			suffix = suffix,
 			commands = {
 				"ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m%{plat} "..c.." -o %{outs} %{ins} %{hdrpaths} %{ackcflags}"
 			}
@@ -45,6 +47,7 @@ definerule("acklibrary",
 		deps = { type="targets", default={} },
 	},
 	function (e)
+		local em = e.vars.plat:find("^em")
 		return clibrary {
 			name = e.name,
 			srcs = e.srcs,
@@ -54,6 +57,7 @@ definerule("acklibrary",
 				e.deps
 			},
 			_cfile = ackfile,
+			suffix = em and ".m" or ".o",
 			commands = {
 				"rm -f %{outs[1]}",
 				"ACKDIR=$(INSDIR) $(INSDIR)/bin/aal qc %{outs[1]} %{ins}"
@@ -101,6 +105,7 @@ definerule("build_plat_libs",
 	{
 		arch = { type="string" },
 		plat = { type="string" },
+		em = { type="boolean", default=false },
 	},
 	function(e)
 		local installmap = {

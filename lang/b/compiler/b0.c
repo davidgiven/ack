@@ -1287,7 +1287,8 @@ int opdope[] = {
 	000000	/* NAME */
 };
 
-char ctab[128] = {
+const char ctaba[129] = {
+	EOFC, /* -1 */
 	EOFC,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
 	LETTER,	SPACE,	NEWLN,	SPACE,	SPACE,	UNKN,	UNKN,	UNKN,
 	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
@@ -1305,6 +1306,7 @@ char ctab[128] = {
 	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,	LETTER,
 	LETTER,	LETTER,	LETTER,	LBRACE,	OR,	RBRACE,	NOT,	UNKN
 };
+const char* ctab = &ctaba[1]; /* allows indexing with -1 */
 
 /* debug function */
 void printtoken(int tok, FILE *out)

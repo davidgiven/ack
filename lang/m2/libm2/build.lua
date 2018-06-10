@@ -45,10 +45,11 @@ for _, plat in ipairs(vars.plats) do
 		}
 	}
 
+	local suffix = plat:find("^em") and "m" or "o"
 	installable {
 		name = "pkg_"..plat,
 		map = {
-			["$(PLATIND)/"..plat.."/modula2.o"] = "+mrt_"..plat,
+			["$(PLATIND)/"..plat.."/modula2."..suffix] = "+mrt_"..plat,
 			["$(PLATIND)/"..plat.."/libmodula2.a"] = "+lib_"..plat,
 			"+headers",
 		}
