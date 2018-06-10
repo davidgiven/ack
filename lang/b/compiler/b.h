@@ -47,7 +47,7 @@ struct	hshtab hshtab[HSHSIZ];
 int	hshused;
 int	eof;
 int	peekc;
-char	ctab[128];
+const char* ctab;
 struct	hshtab *bsym;
 struct	hshtab *paraml, *parame;
 int	cval;
