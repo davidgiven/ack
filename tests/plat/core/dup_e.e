@@ -25,9 +25,6 @@ size
     dup 20        /* 2nd copy */
     lae size
     loi 2
-    loc 2
-    loc EM_WSIZE
-    cuu
     dus EM_WSIZE  /* 3rd copy */
 
     cal $check
