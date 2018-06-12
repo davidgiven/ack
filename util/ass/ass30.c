@@ -148,7 +148,6 @@ char *findfit(instr,val) int instr ; cons_t val ; {
 	int found, flags, number ;
 	char *opc ;
 
-fprintf(stderr, "findfit(%d)\n", instr);
 	endc = opindex[instr+1] ;
 	for ( currc=opindex[instr], found=0 ;
 		!found && currc<endc ; currc++ ) {
@@ -170,7 +169,6 @@ fprintf(stderr, "findfit(%d)\n", instr);
 char *findnop(instr) int instr ; {
 	register char *currc,*endc ;
 
-fprintf(stderr, "findnop(%d)\n", instr);
 	endc = opindex[instr+1] ;
 	for ( currc=opindex[instr] ; currc<endc ; currc++ ) {
 		switch ( ctrunc(*currc)&OPTYPE ) {

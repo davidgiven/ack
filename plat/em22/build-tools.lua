@@ -5,5 +5,6 @@ return installable {
 	map = {
 		["$(PLATIND)/descr/em22"] = "./descr",
 		"util/opt+pkg",
+		"util/ass+pkg",
 	}
 }
