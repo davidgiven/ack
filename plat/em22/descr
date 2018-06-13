@@ -49,7 +49,7 @@ name asld
 		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
 		(.ocm.bas.mod.b.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
 		{FLOATS?} \
-		(.e:{TAIL}={PLATFORMDIR}/libmon.a \
-		           {PLATFORMDIR}/libend.a)
+		{PLATFORMDIR}/libsys.a \
+	    {PLATFORMDIR}/libend.a
 	linker
 end
