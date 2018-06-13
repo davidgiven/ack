@@ -123,7 +123,7 @@ int _ioeof(int channel)
 	return (0);
 }
 
-void _close(void)
+void _closeall(void)
 {
 	/* close all open files */
 	int i;
