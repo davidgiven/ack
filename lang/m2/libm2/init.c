@@ -93,6 +93,6 @@ killbss()
 extern int catch();
 
 int (*handler)() = catch;
-char **argv = 0, **environ = 0;
+char **argv = 0;
 int argc = 0;
 char *MainLB = 0;

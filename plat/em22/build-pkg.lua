@@ -12,6 +12,7 @@ installable {
 	map = {
 		"+libs",
         "./include+pkg",
+        ["$(PLATIND)/em22/libsys.a"] = "./libsys+lib",
 	}
 }
 

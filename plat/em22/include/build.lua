@@ -9,7 +9,10 @@ local function addheader(h)
 end
 
 addheader("ack/config.h")
+addheader("sys/types.h")
+addheader("sys/timeb.h")
 addheader("unistd.h")
+addheader("sgtty.h")
 
 acklibrary {
 	name = "headers",
