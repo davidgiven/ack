@@ -72,7 +72,7 @@ BUILDSYSTEM = make
 endif
 
 build-file = $(BUILDDIR)/build.$(BUILDSYSTEM)
-lua-files = $(shell find * -name '*.lua')
+lua-files = $(shell find * -name 'build*.lua')
 our-lua = $(BUILDDIR)/lua
 
 # GNU make sets MAKECMDGOALS to the list of targets from the command
@@ -109,6 +109,7 @@ $(build-file): first/ackbuilder.lua Makefile $(lua-files) $(our-lua)
 	@$(our-lua) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
+		LUA=$(our-lua) \
 		DEFAULT_PLATFORM=$(DEFAULT_PLATFORM) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
