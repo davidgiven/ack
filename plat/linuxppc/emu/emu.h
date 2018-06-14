@@ -28,5 +28,8 @@ extern void write_long(uint32_t address, uint32_t value);
 
 extern void system_call(uint8_t trapno);
 
+extern void dump_state(FILE* stream);
+extern void single_step(void);
+
 #endif
 

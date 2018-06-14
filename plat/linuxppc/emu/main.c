@@ -166,7 +166,11 @@ int main(int argc, char* argv[])
 		cpu.cia = entrypoint;
 	}
 
-	fatal("execution unimplemented");
+	for (;;)
+	{
+		dump_state(stderr);
+		single_step();
+	}
 
 	return 0;
 }

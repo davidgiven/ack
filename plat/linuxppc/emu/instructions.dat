@@ -5,8 +5,8 @@
 
 # Branch processor instructions.
 
-<18--><LI-------------------->AL branch(0x1f, 0x00, LI,      A, L);
-<16--><BO-><BI-><BD---------->AL branch(BO,   BI,   BD,      A, L);
+<18--><LI-------------------->AL branch(0x1f, 0x00, LI<<2,   A, L);
+<16--><BO-><BI-><BD---------->AL branch(BO,   BI,   BD<<2,   A, L);
 <19--><BO-><BI-><BH-><16------>L branch(BO,   BI,   cpu.lr,  1, L);
 <19--><BO-><BI-><BH-><528----->L branch(BO,   BI,   cpu.ctr, 1, L);
 <17-->..............<LEV-->...1. system_call(LEV);

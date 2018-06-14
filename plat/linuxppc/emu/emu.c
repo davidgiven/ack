@@ -1,9 +1,16 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <strings.h>
 #include <byteswap.h>
 #include "emu.h"
+
+#define BO4 (1<<0)
+#define BO3 (1<<1)
+#define BO2 (1<<2)
+#define BO1 (1<<3)
+#define BO0 (1<<4)
 
 cpu_t cpu;
 
@@ -62,17 +69,46 @@ static void mcrf(uint8_t destfield, uint8_t srcfield)
 
 static void branch(uint8_t bo, uint8_t bi, uint32_t dest, bool a_bit, bool l_bit)
 {
-	fatal("branch not supported yet");
+	bool bo0 = bo & BO0;
+	bool bo1 = bo & BO1;
+	bool bo2 = bo & BO2;
+	bool bo3 = bo & BO3;
+	bool ctr_ok;
+	bool cond_ok;
+
+	if (!bo2)
+		cpu.ctr--;
+	ctr_ok = bo2 || (!!cpu.ctr ^ bo3);
+	cond_ok = bo0 || (!!(cpu.cr & (1<<(31-bi))) == bo1);
+	if (ctr_ok && cond_ok)
+	{
+		if (a_bit)
+			cpu.nia = dest;
+		else
+			cpu.nia = dest + cpu.cia;
+	}
+	if (l_bit)
+		cpu.lr = cpu.cia + 4;
 }
 
 static void read_multiple(uint32_t address, uint8_t reg)
 {
-	fatal("read_multiple not supported yet");
+	while (reg != 32)
+	{
+		cpu.gpr[reg] = read_long(address);
+		reg++;
+		address += 4;
+	}
 }
 
 static void write_multiple(uint32_t address, uint8_t reg)
 {
-	fatal("write_multiple not supported yet");
+	while (reg != 32)
+	{
+		write_long(address, cpu.gpr[reg]);
+		reg++;
+		address += 4;
+	}
 }
 
 static void read_string(uint32_t address, uint8_t reg, uint8_t bytes)
@@ -137,9 +173,16 @@ static uint32_t popcntb(uint32_t source)
 	fatal("popcntb not supported");
 }
 
+static uint32_t rotate(uint32_t i, uint32_t shift)
+{
+	return (i << shift) | (i >> (32-shift));
+}
+
 static uint32_t rlwnm(uint32_t source, uint8_t shift, uint8_t mb, uint8_t me)
 {
-	fatal("rlwnm not supported");
+	uint8_t masksize = 1 + me - mb; /* me and mb are inclusive */
+	uint32_t mask = ((1<<masksize)-1) << (31 - me);
+	return rotate(source, shift) & mask;
 }
 
 static uint32_t rlwmi(uint32_t source, uint8_t shift, uint8_t mb, uint8_t me)
@@ -158,7 +201,22 @@ static void dispatch(uint32_t value)
 	fatal("unimplemented instruction 0x%0x", value);
 }
 
-static void single_step(void)
+void dump_state(FILE* stream)
+{
+	int i;
+
+	fprintf(stream, "pc=0x%08x lr=0x%08x ctr=0x%08x xer=0x%08x cr=0x%08x\n",
+		cpu.cia, cpu.lr, cpu.ctr, cpu.xer, cpu.cr);
+	for (i=0; i<32; i++)
+	{
+		if ((i % 8) == 7)
+			fprintf(stream, "\n");
+		fprintf(stream, "gpr%d=0x%08x ", i, cpu.gpr[i]);
+	}
+	fprintf(stream, "\n");
+}
+
+void single_step(void)
 {
 	uint32_t value = read_long(cpu.cia);
 	cpu.nia = cpu.cia + 4;
