@@ -44,6 +44,11 @@ static inline uint32_t ext16(int16_t n)
 	return (n << 16) >> 16;
 }
 
+static inline uint32_t ext26(int32_t n)
+{
+	return (n << 6) >> 6;
+}
+
 static bool getcr(uint8_t bit)
 {
 	bit = 31 - bit; /* note PowerPC bit numbering */
@@ -59,7 +64,12 @@ static void setcr(uint8_t bit, bool value)
 static void setcr0(bool setcr0, uint32_t value)
 {
 	if (setcr0)
-		fatal("setcr0 not supported yet");
+	{
+		setcr(0, (int32_t)value < 0);
+		setcr(1, (int32_t)value > 0);
+		setcr(2, value == 0);
+		setcr(3, cpu.xer & (1<<31));
+	}
 }
 
 static void mcrf(uint8_t destfield, uint8_t srcfield)
@@ -142,6 +152,8 @@ static int32_t divo(int32_t a, int32_t b, bool set_o)
 	if (set_o)
 		fatal("can't use O bit in div yet");
 	
+	if (b == 0)
+		return 0;
 	return a / b;
 }
 
@@ -150,17 +162,27 @@ static uint32_t divuo(uint32_t a, uint32_t b, bool set_o)
 	if (set_o)
 		fatal("can't use O bit in divu yet");
 	
+	if (b == 0)
+		return 0;
 	return a / b;
 }
 
 static void compares(int32_t a, int32_t b, uint8_t field)
 {
-	fatal("compares not supported yet");
+	uint8_t bit = field*4;
+	setcr(bit+0, a<b);
+	setcr(bit+1, a>b);
+	setcr(bit+2, a==b);
+	setcr(bit+3, cpu.xer & (1<<31));
 }
 
 static void compareu(uint32_t a, uint32_t b, uint8_t field)
 {
-	fatal("compareu not supported yet");
+	uint8_t bit = field*4;
+	setcr(bit+0, a<b);
+	setcr(bit+1, a>b);
+	setcr(bit+2, a==b);
+	setcr(bit+3, cpu.xer & (1<<31));
 }
 
 static uint32_t cntlzw(uint32_t source)
@@ -207,11 +229,12 @@ void dump_state(FILE* stream)
 
 	fprintf(stream, "pc=0x%08x lr=0x%08x ctr=0x%08x xer=0x%08x cr=0x%08x\n",
 		cpu.cia, cpu.lr, cpu.ctr, cpu.xer, cpu.cr);
+	fprintf(stream, "insn=0x%08x", read_long(cpu.cia));
 	for (i=0; i<32; i++)
 	{
-		if ((i % 8) == 7)
+		if ((i % 4) == 0)
 			fprintf(stream, "\n");
-		fprintf(stream, "gpr%d=0x%08x ", i, cpu.gpr[i]);
+		fprintf(stream, "gpr%02d=0x%08x ", i, cpu.gpr[i]);
 	}
 	fprintf(stream, "\n");
 }

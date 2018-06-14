@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -43,6 +44,8 @@ uint32_t entrypoint = RAM_BASE;
 
 void fatal(char* fmt, ...)
 {
+	static bool guard = false;
+
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -51,13 +54,19 @@ void fatal(char* fmt, ...)
 	fprintf(stderr, "\n");
 	va_end(ap);
 
+	if (!guard)
+	{
+		guard = true;
+		dump_state(stderr);
+	}
+
 	exit(EXIT_FAILURE);
 }
 
 static uint32_t transform_address(uint32_t address)
 {
 	uint32_t a = address - RAM_BASE;
-	if (a >= RAM_TOP)
+	if (a >= (RAM_TOP-RAM_BASE))
 		fatal("address 0x%x out of bounds", address);
 	return a;
 }
@@ -168,7 +177,7 @@ int main(int argc, char* argv[])
 
 	for (;;)
 	{
-		dump_state(stderr);
+		//dump_state(stderr);
 		single_step();
 	}
 
