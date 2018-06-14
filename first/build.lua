@@ -150,6 +150,7 @@ definerule("clibrary",
 		hdrs = { type="targets", default={} },
 		deps = { type="targets", default={} },
 		_cfile = { type="object", default=cfile },
+		suffix = { type="string", default=".o" },
 		commands = {
 			type="strings",
 			default={
@@ -167,6 +168,7 @@ definerule("clibrary",
 				cwd = e.cwd,
 				srcs = {src},
 				deps = e.deps,
+				suffix = e.suffix,
 				vars = {
 					["+cflags"] = { "-I"..e.cwd, },
 				},

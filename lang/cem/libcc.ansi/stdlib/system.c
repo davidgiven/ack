@@ -18,7 +18,7 @@ extern void _close(int);
 
 #define	FAIL	127
 
-extern const char **_penvp;
+extern const char **environ;
 static const char *exec_tab[] = {
 	"sh",			/* argv[0] */
 	"-c",			/* argument to the shell */
@@ -39,7 +39,7 @@ system(const char *str)
 			_close(i);
 		if (!str) str = "cd .";		/* just testing for a shell */
 		exec_tab[2] = str;		/* fill in command */
-		_execve("/bin/sh", exec_tab, _penvp);
+		_execve("/bin/sh", exec_tab, environ);
 		/* get here if execve fails ... */
 		_exit(FAIL);	/* see manual page */
 	}
