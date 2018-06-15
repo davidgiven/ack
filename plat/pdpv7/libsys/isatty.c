@@ -1,8 +1,8 @@
 int isatty(int fd)
 {
-    char* p;
+    unsigned u;
 
-    if (gtty(fd, &p) < 0)
+    if (ioctl(fd, /*TIOCGETD*/(('t'<<8)|0), &u) < 0)
         return 0;
     return 1;
 }
