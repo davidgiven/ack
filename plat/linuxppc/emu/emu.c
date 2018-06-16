@@ -58,7 +58,7 @@ static bool getcr(uint8_t bit)
 static void setcr(uint8_t bit, bool value)
 {
 	bit = 31 - bit; /* note PowerPC bit numbering */
-	cpu.cr = cpu.cr & (1<<bit) | (value<<bit);
+	cpu.cr = cpu.cr & ~(1<<bit) | (value<<bit);
 }
 
 static void setcr0(bool setcr0, uint32_t value)
@@ -227,9 +227,9 @@ void dump_state(FILE* stream)
 {
 	int i;
 
+	fprintf(stream, "\n");
 	fprintf(stream, "pc=0x%08x lr=0x%08x ctr=0x%08x xer=0x%08x cr=0x%08x\n",
 		cpu.cia, cpu.lr, cpu.ctr, cpu.xer, cpu.cr);
-	fprintf(stream, "insn=0x%08x", read_long(cpu.cia));
 	for (i=0; i<32; i++)
 	{
 		if ((i % 4) == 0)
@@ -237,6 +237,10 @@ void dump_state(FILE* stream)
 		fprintf(stream, "gpr%02d=0x%08x ", i, cpu.gpr[i]);
 	}
 	fprintf(stream, "\n");
+
+	/* This might fail and cause a reentrant trap if cia is invalid, so
+	 * do it last. */
+	fprintf(stream, "insn=0x%08x", read_long(cpu.cia));
 }
 
 void single_step(void)

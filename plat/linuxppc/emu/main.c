@@ -73,7 +73,11 @@ static uint32_t transform_address(uint32_t address)
 
 uint32_t read_long(uint32_t address)
 {
-	return READ_LONG(ram, transform_address(address));
+	uint32_t v = READ_LONG(ram, transform_address(address));
+	#if 0
+	fprintf(stderr, "read 0x%08x: 0x%08x\n", address, v);
+	#endif
+	return v;
 }
 
 
@@ -99,12 +103,45 @@ void write_word(uint32_t address, uint32_t value)
 
 void write_long(uint32_t address, uint32_t value)
 {
+	#if 0
+	fprintf(stderr, "write 0x%08x: 0x%08x\n", address, value);
+	#endif
 	WRITE_LONG(ram, transform_address(address), value);
 }
 
 void system_call(uint8_t trapno)
 {
-	fatal("syscalls unimplemented");
+	cpu.cr &= ~(1<<28); /* reset summary overflow (for success) */
+	switch (cpu.gpr[0])
+	{
+		case 1: /* exit */
+			exit(cpu.gpr[3]);
+
+		case 4: /* write */
+		{
+			int fd = cpu.gpr[3];
+			uint32_t address = cpu.gpr[4];
+			uint32_t len = cpu.gpr[5];
+			void* ptr = ram + transform_address(address);
+			transform_address(address+len); /* bounds check */
+			cpu.gpr[4] = write(fd, ptr, len);
+			if (cpu.gpr[4] == -1)
+				goto error;
+			break;
+		}
+
+		case 126: /* sigprocmask */
+			cpu.gpr[4] = 0;
+			break;
+
+		error:
+			cpu.gpr[3] = errno;
+			cpu.cr |= (1<<28); /* set summary overflow (for failure) */
+			return;
+
+		default:
+			fatal("unimplemented system call %d", cpu.gpr[0]);
+	}
 }
 
 static void load_program(FILE* fd)
@@ -177,7 +214,9 @@ int main(int argc, char* argv[])
 
 	for (;;)
 	{
-		//dump_state(stderr);
+		#if 0
+		dump_state(stderr);
+		#endif
 		single_step();
 	}
 
