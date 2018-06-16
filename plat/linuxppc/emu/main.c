@@ -17,6 +17,8 @@
 #define INIT_SP RAM_TOP
 #define INIT_PC 0x08000054
 
+#define EXIT_PC 0xdeaddead
+
 /* Read/write macros */
 #define READ_BYTE(BASE, ADDR) (BASE)[ADDR]
 #define READ_WORD(BASE, ADDR) (((BASE)[ADDR]<<8) |			\
@@ -71,6 +73,11 @@ static uint32_t transform_address(uint32_t address)
 	return a;
 }
 
+uint64_t read_double(uint32_t address)
+{
+	return ((uint64_t)read_long(address+0) << 32) | read_long(address+4);
+}
+
 uint32_t read_long(uint32_t address)
 {
 	uint32_t v = READ_LONG(ram, transform_address(address));
@@ -79,7 +86,6 @@ uint32_t read_long(uint32_t address)
 	#endif
 	return v;
 }
-
 
 uint32_t read_word(uint32_t address)
 {
@@ -109,6 +115,12 @@ void write_long(uint32_t address, uint32_t value)
 	WRITE_LONG(ram, transform_address(address), value);
 }
 
+void write_double(uint32_t address, uint64_t value)
+{
+	write_long(address+0, value>>32);
+	write_long(address+4, value);
+}
+
 void system_call(uint8_t trapno)
 {
 	cpu.cr &= ~(1<<28); /* reset summary overflow (for success) */
@@ -127,6 +139,21 @@ void system_call(uint8_t trapno)
 			cpu.gpr[4] = write(fd, ptr, len);
 			if (cpu.gpr[4] == -1)
 				goto error;
+			break;
+		}
+
+		case 45: /* brk */
+		{
+			uint32_t newpos = cpu.gpr[3];
+			if (newpos == 0)
+				cpu.gpr[4] = brkpos;
+			else if ((newpos < brkbase) || (newpos >= BRK_TOP))
+				cpu.gpr[4] = -ENOMEM;
+			else
+			{
+				brkpos = newpos;
+				cpu.gpr[4] = 0;
+			}
 			break;
 		}
 
@@ -212,7 +239,8 @@ int main(int argc, char* argv[])
 		cpu.cia = entrypoint;
 	}
 
-	for (;;)
+	cpu.lr = EXIT_PC;
+	while (cpu.cia != EXIT_PC)
 	{
 		#if 0
 		dump_state(stderr);

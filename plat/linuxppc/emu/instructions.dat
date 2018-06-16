@@ -47,16 +47,16 @@
 
 # Fixed point stores
 
-<38--><RS-><RA-><D-------------> write_byte(reg0(RA) + ext16(D), RS);
-<31--><RS-><RA-><RB-><215----->. write_byte(reg0(RA) + reg(RB), RS);
+<38--><RS-><RA-><D-------------> write_byte(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><215----->. write_byte(reg0(RA) + reg(RB), reg(RS));
 <39--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_byte(ea, reg(RS)); cpu.gpr[RA] = ea;
 <31--><RS-><RA-><RB-><247----->. uint32_t ea = reg(RA) + reg(RB); write_byte(ea, reg(RS)); cpu.gpr[RA] = ea;
-<44--><RS-><RA-><D-------------> write_word(reg0(RA) + ext16(D), RS);
-<31--><RS-><RA-><RB-><407----->. write_word(reg0(RA) + reg(RB), RS);
+<44--><RS-><RA-><D-------------> write_word(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><407----->. write_word(reg0(RA) + reg(RB), reg(RS));
 <45--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_word(ea, reg(RS)); cpu.gpr[RA] = ea;
 <31--><RS-><RA-><RB-><439----->. uint32_t ea = reg(RA) + reg(RB); write_word(ea, reg(RS)); cpu.gpr[RA] = ea;
-<36--><RS-><RA-><D-------------> write_long(reg0(RA) + ext16(D), RS);
-<31--><RS-><RA-><RB-><151----->. write_long(reg0(RA) + reg(RB), RS);
+<36--><RS-><RA-><D-------------> write_long(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><151----->. write_long(reg0(RA) + reg(RB), reg(RS));
 <37--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_long(ea, reg(RS)); cpu.gpr[RA] = ea;
 <31--><RS-><RA-><RB-><183----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, reg(RS)); cpu.gpr[RA] = ea;
 
@@ -147,3 +147,21 @@
 <31--><RS->0<FXM--->.<144----->. mtcrf(FXM, reg(RS));
 <31--><RT->0.........<19------>. cpu.gpr[RT] = cpu.cr;
 
+# Floating point loads
+
+<50--><FRT><RA-><D------------>. cpu.fpr[FRT] = read_double(reg0(RA) + ext16(D));
+<31--><FRT><RA-><RB-><599----->. cpu.gpr[FRT] = read_double(reg0(RA) + reg(RB));
+<51--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = read_byte(ea); cpu.gpr[RA] = ea;
+<31--><FRT><RA-><RB-><631----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = read_long(ea); cpu.gpr[RA] = ea;
+
+# Floating point stores
+
+<54--><FRS><RA-><D------------>. write_double(read_double(reg0(RA) + ext16(D)), cpu.fpr[FRS]);
+<31--><FRS><RA-><RB-><727----->. write_double(reg0(RA) + reg(RB), cpu.fpr[FRS]);
+<55--><FRS><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_double(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+<31--><FRS><RA-><RB-><759----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+
+# Floating point arithmetic
+
+<63--><FRT>.....<FRB><72------>R setcr1(R, cpu.fpr[FRT] = cpu.fpr[FRB]);
+<63--><FRT><FRA><FRB><20------>R setcr1(R, cpu.fpr[FRT] = tobytes(fpr(FRA) - fpr(FRB)));

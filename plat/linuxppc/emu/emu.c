@@ -34,6 +34,16 @@ static inline uint32_t reg0(uint8_t n)
 	return cpu.gpr[n];
 }
 
+static inline uint64_t tobytes(double n)
+{
+	return *(uint64_t*)&n;
+}
+
+static inline double fpr(uint8_t n)
+{
+	return *(double*)&cpu.fpr[n];
+}
+
 static inline uint32_t ext8(int8_t n)
 {
 	return (n << 24) >> 24;
@@ -70,6 +80,12 @@ static void setcr0(bool setcr0, uint32_t value)
 		setcr(2, value == 0);
 		setcr(3, cpu.xer & (1<<31));
 	}
+}
+
+static void setcr1(bool setcr1, uint64_t value)
+{
+	if (setcr1)
+		fatal("setcr1 not implemented yet");
 }
 
 static void mcrf(uint8_t destfield, uint8_t srcfield)
@@ -220,7 +236,7 @@ static void mtcrf(uint8_t fxm, uint32_t value)
 static void dispatch(uint32_t value)
 {
 	#include "dispatcher.h"
-	fatal("unimplemented instruction 0x%0x", value);
+	fatal("unimplemented instruction 0x%0x (major opcode %d)", value, value>>26);
 }
 
 void dump_state(FILE* stream)

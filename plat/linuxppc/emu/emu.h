@@ -22,9 +22,11 @@ extern cpu_t cpu;
 extern uint32_t read_byte(uint32_t address);
 extern uint32_t read_word(uint32_t address);
 extern uint32_t read_long(uint32_t address);
+extern uint64_t read_double(uint32_t address);
 extern void write_byte(uint32_t address, uint32_t value);
 extern void write_word(uint32_t address, uint32_t value);
 extern void write_long(uint32_t address, uint32_t value);
+extern void write_double(uint32_t address, uint64_t value);
 
 extern void system_call(uint8_t trapno);
 
