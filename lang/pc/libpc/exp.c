@@ -8,12 +8,10 @@
 /* $Id$ */
 #define __NO_DEFS
 #include <math.h>
-#include <pc_err.h>
-extern _trp();
+#include "pc.h"
 
 #if __STDC__
 #include <float.h>
-#include <pc_math.h>
 #define M_MIN_D DBL_MIN
 #define M_MAX_D DBL_MAX
 #define M_DMINEXP DBL_MIN_EXP
@@ -21,11 +19,8 @@ extern _trp();
 #undef HUGE
 #define HUGE 1e1000
 
-static double
-    Ldexp(fl, exp) double fl;
-int exp;
+static double Ldexp(double fl, int exp)
 {
-	extern double _fef();
 	int sign = 1;
 	int currexp;
 
@@ -57,8 +52,7 @@ int exp;
 	return sign * fl;
 }
 
-double
-    _exp(x) double x;
+double _exp(double x)
 {
 	/*	Algorithm and coefficients from:
 			"Software manual for the elementary functions"

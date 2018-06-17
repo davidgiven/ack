@@ -20,11 +20,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <em_abs.h>
-#include <pc_err.h>
-#include <pc_file.h>
-
-/* to make it easier to patch ... */
-extern struct file* _curfil;
+#include "pc.h"
 
 static struct errm
 {
@@ -83,14 +79,8 @@ static struct errm
 	{ -1, 0 }
 };
 
-extern int _pargc;
-extern char** _pargv;
-extern char** _penvp;
 
-extern char* _hol0();
-extern _trp();
-
-_catch(erno) unsigned erno;
+void _catch(unsigned int erno)
 {
 	register struct errm* ep = &errors[0];
 	char *p, *q, *s, **qq;

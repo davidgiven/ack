@@ -18,19 +18,13 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-#include <pc_err.h>
-
-extern _cls();
-extern _trp();
-extern int _open();
+#include "fcntl.h"
+#include "pc.h"
 
 /* procedure popen(var f:text; s:string); */
 
-popen(f, s) struct file* f;
-char* s;
+void popen(struct file* f, char* s)
 {
-
 	_cls(f); /* initializes _curfil */
 	f->ptr = f->bufadr;
 	f->flags = TXTBIT | MAGIC;
@@ -38,6 +32,6 @@ char* s;
 	f->size = 1;
 	f->count = 0;
 	f->buflen = PC_BUFLEN;
-	if ((f->ufd = _open(s, 0)) < 0)
+	if ((f->ufd = open(s, 0)) < 0)
 		_trp(ERESET);
 }

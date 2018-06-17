@@ -18,15 +18,9 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
+#include "pc.h"
 
-extern _rf();
-extern _skipsp();
-extern int _getsig();
-extern int _fstdig();
-extern int _nxtdig();
-
-long _rdl(f) struct file* f;
+long _rdl(struct file* f)
 {
 	int is_signed, ch;
 	long l;

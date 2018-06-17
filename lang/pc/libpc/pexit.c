@@ -16,14 +16,9 @@
  *
  */
 
-#include <pc_file.h>
+#include "pc.h"
 
-extern struct file** _extfl;
-extern _wrs();
-extern _wrz();
-extern _wln();
-
-procexit(name) char* name;
+void procexit(char* name)
 {
 	struct file* f;
 

@@ -20,14 +20,9 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern struct file* _curfil;
-extern _trp();
-extern _incpt();
-
-int _efl(f) struct file* f;
+int _efl(struct file* f)
 {
 
 	_curfil = f;

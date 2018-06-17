@@ -19,12 +19,9 @@
 /* Author: J.W. Stevenson */
 
 #include <em_abs.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern char* _hol0();
-extern _trp();
-
-_ass(line, bool) int line, bool;
+void _ass(int line, int bool)
 {
 
 	if (bool == 0)

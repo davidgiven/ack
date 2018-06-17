@@ -16,12 +16,9 @@
  *
  */
 
-#include <pc_file.h>
+#include "pc.h"
 
-extern _rf();
-extern _incpt();
-
-_rln(f) struct file* f;
+void _rln(struct file* f)
 {
 
 	_rf(f);

@@ -17,8 +17,9 @@
  */
 
 /* Author: J.W. Stevenson */
+#include "pc.h"
 
-double _abr(r) double r;
+double _abr(double r)
 {
 	return (r >= 0 ? r : -r);
 }

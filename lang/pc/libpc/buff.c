@@ -18,13 +18,11 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-
-extern _flush();
+#include "pc.h"
 
 /* procedure buff(var f:file of ?); */
 
-buff(f) struct file* f;
+void buff(struct file* f)
 {
 	int sz;
 

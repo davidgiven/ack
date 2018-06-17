@@ -18,14 +18,9 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
+#include "pc.h"
 
-extern struct file** _extfl;
-extern _wrs();
-extern _wrz();
-extern _wln();
-
-procentry(name) char* name;
+void procentry(char* name)
 {
 	struct file* f;
 

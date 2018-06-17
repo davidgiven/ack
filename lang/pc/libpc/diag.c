@@ -18,13 +18,12 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
+#include "pc.h"
 
 /* procedure diag(var f:text); */
 
-diag(f) struct file* f;
+void diag(struct file* f)
 {
-
 	f->ptr = f->bufadr;
 	f->flags = WRBIT | EOFBIT | ELNBIT | TXTBIT | MAGIC;
 	f->fname = "DIAG";

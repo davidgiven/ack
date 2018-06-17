@@ -17,9 +17,9 @@
  */
 
 /* Author: J.W. Stevenson */
+#include "pc.h"
 
-int _bcp(sz, y, x) int sz;
-unsigned char *y, *x;
+int _bcp(int sz, unsigned char* y, unsigned char* x)
 {
 
 	while (--sz >= 0)

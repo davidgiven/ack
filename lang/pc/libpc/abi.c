@@ -17,8 +17,9 @@
  */
 
 /* Author: J.W. Stevenson */
+#include "pc.h"
 
-int _abi(i) int i;
+int _abi(int i)
 {
 	return (i >= 0 ? i : -i);
 }

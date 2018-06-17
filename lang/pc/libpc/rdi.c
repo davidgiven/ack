@@ -18,20 +18,15 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern _trp();
-extern _rf();
-extern _incpt();
-
-_skipsp(f) struct file* f;
+void _skipsp(struct file* f)
 {
 	while ((*f->ptr == ' ') || (*f->ptr == '\t'))
 		_incpt(f);
 }
 
-int _getsig(f) struct file* f;
+int _getsig(struct file* f)
 {
 	int sign;
 
@@ -40,7 +35,7 @@ int _getsig(f) struct file* f;
 	return (sign);
 }
 
-int _fstdig(f) struct file* f;
+int _fstdig(struct file* f)
 {
 	int ch;
 
@@ -53,7 +48,7 @@ int _fstdig(f) struct file* f;
 	return (ch);
 }
 
-int _nxtdig(f) struct file* f;
+int _nxtdig(struct file* f)
 {
 	int ch;
 
@@ -64,7 +59,7 @@ int _nxtdig(f) struct file* f;
 	return (ch);
 }
 
-int _getint(f) struct file* f;
+int _getint(struct file* f)
 {
 	int is_signed, i, ch;
 
@@ -77,7 +72,7 @@ int _getint(f) struct file* f;
 	return (is_signed ? i : -i);
 }
 
-int _rdi(f) struct file* f;
+int _rdi(struct file* f)
 {
 	_rf(f);
 	_skipsp(f);

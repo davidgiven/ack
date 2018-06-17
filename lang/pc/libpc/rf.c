@@ -16,14 +16,9 @@
  *
  */
 
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern struct file* _curfil;
-extern _trp();
-extern _incpt();
-
-_rf(f) struct file* f;
+void _rf(struct file* f)
 {
 
 	_curfil = f;

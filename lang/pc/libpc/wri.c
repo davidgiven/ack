@@ -16,10 +16,7 @@
  *
  */
 
-#include <pc_err.h>
-#include <pc_file.h>
-
-extern _wstrin();
+#include "pc.h"
 
 #ifndef EM_WSIZE
 #ifdef _EM_WSIZE
@@ -47,9 +44,7 @@ extern _wstrin();
 Something wrong here !
 #endif
 
-    _wsi(w, i, f) int w,
-    i;
-struct file* f;
+void _wsi(int w, int i, struct file* f)
 {
 	char* p;
 	int j;
@@ -75,8 +70,7 @@ struct file* f;
 	_wstrin(w, (int)(&buf[SZ] - p), p, f);
 }
 
-_wri(i, f) int i;
-struct file* f;
+void _wri(int i, struct file* f)
 {
 	_wsi(SZ, i, f);
 }

@@ -8,16 +8,12 @@
 /* $Id$ */
 #define __NO_DEFS
 #include <math.h>
-#include <pc_err.h>
-extern _trp();
+#include "pc.h"
 
 #define NITER 5
 
-static double
-    Ldexp(fl, exp) double fl;
-int exp;
+static double Ldexp(double fl, int exp)
 {
-	extern double _fef();
 	int sign = 1;
 	int currexp;
 
@@ -49,10 +45,8 @@ int exp;
 	return sign * fl;
 }
 
-double
-    _sqt(x) double x;
+double _sqt(double x)
 {
-	extern double _fef();
 	int exponent;
 	double val;
 

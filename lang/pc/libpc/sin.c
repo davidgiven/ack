@@ -9,13 +9,9 @@
 
 #define __NO_DEFS
 #include <math.h>
+#include "pc.h"
 
-#if __STDC__
-#include <pc_math.h>
-#endif
-
-static double
-    sinus(x, cos_flag) double x;
+static double sinus(double x, int cos_flag)
 {
 	/*	Algorithm and coefficients from:
 			"Software manual for the elementary functions"
@@ -62,7 +58,6 @@ static double
 #define A2 -8.908910206761537356617e-6
 	{
 		double x1, x2;
-		extern double _fif();
 
 		_fif(y, 1.0, &y);
 		if (_fif(y, 0.5, &x1))
@@ -90,14 +85,12 @@ static double
 	return neg ? -x : x;
 }
 
-double
-    _sin(x) double x;
+double _sin(double x)
 {
 	return sinus(x, 0);
 }
 
-double
-    _cos(x) double x;
+double _cos(double x)
 {
 	if (x < 0)
 		x = -x;

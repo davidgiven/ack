@@ -18,17 +18,11 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_err.h>
-#include <pc_file.h>
-
-extern _wstrin();
-extern char* _ecvt();
+#include "pc.h"
 
 #define PREC_DIG 80 /* maximum digits produced by _ecvt() */
 
-_wsr(w, r, f) int w;
-double r;
-struct file* f;
+void _wsr(int w, double r, struct file* f)
 {
 	char *p, *b;
 	int s, d, i;
@@ -72,8 +66,7 @@ struct file* f;
 	_wstrin(w, (int)(p - buf), buf, f);
 }
 
-_wrr(r, f) double r;
-struct file* f;
+void _wrr(double r, struct file* f)
 {
 	_wsr(13, r, f);
 }

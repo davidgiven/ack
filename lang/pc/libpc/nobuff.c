@@ -18,13 +18,11 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-
-extern _flush();
+#include "pc.h"
 
 /* procedure nobuff(var f:file of ?); */
 
-nobuff(f) struct file* f;
+void nobuff(struct file* f)
 {
 
 	if ((f->flags & (0377 | WRBIT)) != (MAGIC | WRBIT))

@@ -18,24 +18,21 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern (*_sig())();
-extern _catch();
-
-struct file** _extfl;
-int _extflc; /* number of external files */
-char* _m_lb; /* LB of _m_a_i_n */
-struct file* _curfil; /* points to file struct in case of errors */
 int _pargc;
 char** _pargv;
 char** _penvp;
+
+char* _m_lb; /* LB of _m_a_i_n */
+struct file* _curfil; /* points to file struct in case of errors */
+
+int _extflc;
+struct file** _extfl;
+
 int _fp_hook = 1; /* This is for Minix, but does not harm others */
 
-_ini(args, c, p, mainlb) char* args, *mainlb;
-int c;
-struct file** p;
+void _ini(char *args, int c, struct file **p, char *mainlb)
 {
 	struct file* f;
 

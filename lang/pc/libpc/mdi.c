@@ -18,11 +18,9 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_err.h>
+#include "pc.h"
 
-extern _trp();
-
-int _mdi(j, i) int j, i;
+int _mdi(int j, int i)
 {
 
 	if (j <= 0)
@@ -33,7 +31,7 @@ int _mdi(j, i) int j, i;
 	return (i);
 }
 
-long _mdil(j, i) long j, i;
+long _mdil(long j, long i)
 {
 
 	if (j <= 0)
@@ -44,7 +42,7 @@ long _mdil(j, i) long j, i;
 	return (i);
 }
 
-int _dvi(j, i) unsigned int j, i;
+int _dvi(unsigned int j, unsigned int i)
 {
 	int neg = 0;
 
@@ -64,7 +62,7 @@ int _dvi(j, i) unsigned int j, i;
 	return i;
 }
 
-long _dvil(j, i) unsigned long j, i;
+long _dvil(unsigned long j, unsigned long i)
 {
 	int neg = 0;
 

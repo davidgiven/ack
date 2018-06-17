@@ -18,13 +18,9 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern _trp();
-extern _rf();
-
-int _eln(f) struct file* f;
+int _eln(struct file* f)
 {
 
 	_rf(f);

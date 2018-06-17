@@ -1,3 +1,5 @@
+#include "pc.h"
+
 /* $Id$ */
 #ifndef NOFLOAT
 
@@ -8,19 +10,16 @@
 #define DBL_MAX M_MAX_D
 #endif
 
-static char* cvt();
+static char* cvt(double value, int ndigit, int* decpt, int* sign, int ecvtflag);
+
 #define NDIGITS 128
 
-char*
-    _ecvt(value, ndigit, decpt, sign) double value;
-int ndigit, *decpt, *sign;
+char *_ecvt(double value, int ndigit, int *decpt, int *sign)
 {
 	return cvt(value, ndigit, decpt, sign, 1);
 }
 
-char*
-    _fcvt(value, ndigit, decpt, sign) double value;
-int ndigit, *decpt, *sign;
+char *_fcvt(double value, int ndigit, int *decpt, int *sign)
 {
 	return cvt(value, ndigit, decpt, sign, 0);
 }
@@ -40,9 +39,7 @@ static struct powers_of_10
 	1.0e0, 1.0e0, 0
 };
 
-static char*
-    cvt(value, ndigit, decpt, sign, ecvtflag) double value;
-int ndigit, *decpt, *sign;
+static char* cvt(double value, int ndigit, int* decpt, int* sign, int ecvtflag)
 {
 	static char buf[NDIGITS + 1];
 	register char* p = buf;

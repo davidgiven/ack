@@ -18,11 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_err.h>
-#include <pc_file.h>
-
-extern _wstrin();
-extern char* _fcvt();
+#include "pc.h"
 
 #define assert(x) /* nothing */
 
@@ -36,9 +32,7 @@ extern char* _fcvt();
 #define FILL_CHAR '0' /* char printed if all of _fcvt() used */
 #define BUFSIZE HUGE_DIG + PREC_DIG + 3
 
-_wrf(n, w, r, f) int n, w;
-double r;
-struct file* f;
+void _wrf(int n, int w, double r, struct file* f)
 {
 	char *p, *b;
 	int s, d;

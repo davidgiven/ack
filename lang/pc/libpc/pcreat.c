@@ -19,16 +19,11 @@
 /* Author: J.W. Stevenson */
 
 #include <unistd.h>
-#include <pc_file.h>
-#include <pc_err.h>
-
-extern _cls();
-extern _trp();
+#include "pc.h"
 
 /* procedure pcreat(var f:text; s:string); */
 
-pcreat(f, s) struct file* f;
-char* s;
+void pcreat(struct file* f, char* s)
 {
 
 	_cls(f); /* initializes _curfil */

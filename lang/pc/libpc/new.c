@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <em_abs.h>
-#include <pc_err.h>
-
-extern void _trp(int); /* called on error */
+#include "pc.h"
 
 void _new(int n, void** ptr)
 {

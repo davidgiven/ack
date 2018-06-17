@@ -9,17 +9,15 @@
 
 #define __NO_DEFS
 #include <math.h>
-#include <pc_err.h>
+#include "pc.h"
 
 #if __STDC__
-#include <pc_math.h>
 #include <float.h>
 #endif
 #undef HUGE
 #define HUGE 1e1000
 
-double
-    _log(x) double x;
+double _log(double x)
 {
 	/*	Algorithm and coefficients from:
 			"Software manual for the elementary functions"
@@ -37,7 +35,6 @@ double
 		1.0
 	};
 
-	extern double _fef();
 	double znum, zden, z, w;
 	int exponent;
 

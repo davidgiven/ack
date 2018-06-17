@@ -18,14 +18,10 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
+#include <unistd.h>
+#include "pc.h"
 
-extern struct file** _extfl;
-extern int _extflc;
-extern _cls();
-extern _exit();
-
-_hlt(ecode) int ecode;
+void _hlt(int ecode)
 {
 	int i;
 

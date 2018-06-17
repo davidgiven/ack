@@ -17,8 +17,9 @@
  */
 
 /* Author: J.W. Stevenson */
+#include "pc.h"
 
-long _abl(i) long i;
+long _abl(long i)
 {
 	return (i >= 0 ? i : -i);
 }

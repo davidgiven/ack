@@ -19,22 +19,11 @@
 /* Author: J.W. Stevenson */
 
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern struct file** _extfl;
-extern int _extflc;
-extern struct file* _curfil;
-extern int _pargc;
-extern char** _pargv;
-extern char** _penvp;
-
-extern _cls();
-extern _xcls();
-extern _trp();
-
-static int tmpfil()
+static int tmpfil(void)
 {
 	static char namebuf[] = "/tmp/plf.xxxxx";
 	int i;
@@ -55,15 +44,13 @@ static int tmpfil()
 		goto error;
 	if ((i = open(p, 2)) < 0)
 		goto error;
-	if (remove(p) != 0)
+	if (unlink(p) != 0)
 	error:
 		_trp(EREWR);
 	return (i);
 }
 
-static int initfl(descr, sz, f) int descr;
-int sz;
-struct file* f;
+static int initfl(int descr, int sz, struct file* f)
 {
 	int i;
 
@@ -117,16 +104,14 @@ struct file* f;
 	return (1);
 }
 
-_opn(sz, f) int sz;
-struct file* f;
+void _opn(int sz, struct file* f)
 {
 
 	if (initfl(MAGIC, sz, f))
 		f->count = 0;
 }
 
-_cre(sz, f) int sz;
-struct file* f;
+void _cre(int sz, struct file* f)
 {
 
 	if (initfl(WRBIT | EOFBIT | ELNBIT | MAGIC, sz, f))

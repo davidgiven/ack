@@ -20,15 +20,9 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern struct file* _curfil;
-extern _trp();
-extern _flush();
-extern _outcpt();
-
-_xcls(f) struct file* f;
+void _xcls(struct file* f)
 {
 
 	if ((f->flags & WRBIT) == 0)
@@ -45,7 +39,7 @@ _xcls(f) struct file* f;
 	_flush(f);
 }
 
-_cls(f) struct file* f;
+void _cls(struct file* f)
 {
 #ifdef MAYBE
 	char* p;

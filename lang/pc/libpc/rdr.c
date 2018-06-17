@@ -18,22 +18,14 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_file.h>
+#include "pc.h"
 
 #define BIG 1e17
-
-extern _rf();
-extern _incpt();
-extern _skipsp();
-extern int _getsig();
-extern int _getint();
-extern int _fstdig();
-extern int _nxtdig();
 
 static double r;
 static int pow10;
 
-static dig(ch) int ch;
+static void dig(int ch)
 {
 
 	if (r > BIG)
@@ -42,7 +34,7 @@ static dig(ch) int ch;
 		r = r * 10.0 + ch;
 }
 
-double _rdr(f) struct file* f;
+double _rdr(struct file* f)
 {
 	int i;
 	double e;

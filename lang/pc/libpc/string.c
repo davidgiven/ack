@@ -16,16 +16,18 @@
  *
  */
 
+#include "pc.h"
+
 /* function strbuf(var b:charbuf):string; */
 
-char* strbuf(s) char* s;
+char* strbuf(char* s)
 {
 	return (s);
 }
 
 /* function strtobuf(s:string; var b:charbuf; blen:integer):integer; */
 
-int strtobuf(s, b, l) char *s, *b;
+int strtobuf(char* s, char* b, int l)
 {
 	int i;
 
@@ -41,7 +43,7 @@ int strtobuf(s, b, l) char *s, *b;
 
 /* function strlen(s:string):integer; */
 
-int strlen(s) char* s;
+int strlen(char* s)
 {
 	int i;
 
@@ -53,14 +55,14 @@ int strlen(s) char* s;
 
 /* function strfetch(s:string; i:integer):char; */
 
-int strfetch(s, i) char* s;
+int strfetch(char* s, int i)
 {
 	return (s[i - 1]);
 }
 
 /* procedure strstore(s:string; i:integer; c:char); */
 
-strstore(s, i, c) char* s;
+void strstore(char* s, int i, int c)
 {
 	s[i - 1] = c;
 }

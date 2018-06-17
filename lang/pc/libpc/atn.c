@@ -10,12 +10,9 @@
 #define __NO_DEFS
 #include <math.h>
 
-#if __STDC__
-#include <pc_math.h>
-#endif
+#include "pc.h"
 
-double
-    _atn(x) double x;
+double _atn(double x)
 {
 	/*	Algorithm and coefficients from:
 			"Software manual for the elementary functions"

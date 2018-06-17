@@ -21,12 +21,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern _trp();
-
-_flush(f) struct file* f;
+void _flush(struct file* f)
 {
 	int i, n;
 
@@ -41,7 +38,7 @@ _flush(f) struct file* f;
 		_trp(EWRITE);
 }
 
-_outcpt(f) struct file* f;
+void _outcpt(struct file* f)
 {
 
 	f->flags &= ~ELNBIT;

@@ -18,9 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
-#include <pc_err.h>
-
-extern _trp();
+#include "pc.h"
 
 #define assert(x) /* nothing */
 
@@ -28,16 +26,7 @@ extern _trp();
 #define EM_WSIZE _EM_WSIZE
 #endif
 
-struct descr
-{
-	int low;
-	int diff;
-	int size;
-};
-
-_pac(ad, zd, zp, i, ap) int i;
-struct descr *ad, *zd;
-char *zp, *ap;
+void _pac(struct descr *ad, struct descr *zd, char *zp, int i, char *ap)
 {
 
 	if (zd->diff > ad->diff || (i -= ad->low) < 0 || (i + zd->diff) > ad->diff)

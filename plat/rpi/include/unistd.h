@@ -67,6 +67,7 @@ extern int open(const char* path, int access, ...);
 extern int creat(const char* path, mode_t mode);
 extern int read(int fd, void* buffer, size_t count);
 extern int write(int fd, void* buffer, size_t count);
+extern int unlink(const char* path);
 
 /* Unimplemented system calls (these are just prototypes to let the library
  * compile). */
