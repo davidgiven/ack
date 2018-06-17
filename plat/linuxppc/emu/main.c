@@ -136,8 +136,8 @@ void system_call(uint8_t trapno)
 			uint32_t len = cpu.gpr[5];
 			void* ptr = ram + transform_address(address);
 			transform_address(address+len); /* bounds check */
-			cpu.gpr[4] = write(fd, ptr, len);
-			if (cpu.gpr[4] == -1)
+			cpu.gpr[3] = write(fd, ptr, len);
+			if (cpu.gpr[3] == -1)
 				goto error;
 			break;
 		}
@@ -146,13 +146,13 @@ void system_call(uint8_t trapno)
 		{
 			uint32_t newpos = cpu.gpr[3];
 			if (newpos == 0)
-				cpu.gpr[4] = brkpos;
+				cpu.gpr[3] = brkpos;
 			else if ((newpos < brkbase) || (newpos >= BRK_TOP))
-				cpu.gpr[4] = -ENOMEM;
+				cpu.gpr[3] = -ENOMEM;
 			else
 			{
 				brkpos = newpos;
-				cpu.gpr[4] = 0;
+				cpu.gpr[3] = 0;
 			}
 			break;
 		}
@@ -163,7 +163,7 @@ void system_call(uint8_t trapno)
 		case 67: /* sigaction */
 		case 78: /* gettimeofday */
 		case 126: /* sigprocmask */
-			cpu.gpr[4] = 0;
+			cpu.gpr[3] = 0;
 			break;
 
 		error:
