@@ -107,8 +107,8 @@
 
 # Logical instructions
 
-<28--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) & UI;
-<29--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) & (UI<<16);
+<28--><RS-><RA-><UI------------> setcr0(1, cpu.gpr[RA] = reg(RS) & UI);
+<29--><RS-><RA-><UI------------> setcr0(1, cpu.gpr[RA] = reg(RS) & (UI<<16));
 <24--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) | UI;
 <25--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) | (UI<<16);
 <26--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) ^ UI;
