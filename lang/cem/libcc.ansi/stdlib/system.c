@@ -5,10 +5,12 @@
 /* $Id$ */
 
 #if	defined(_POSIX_SOURCE)
-#include	<sys/types.h>
+#include <sys/types.h>
 #endif
-#include	<stdlib.h>
-#include	<signal.h>
+#include <stdlib.h>
+#include <signal.h>
+
+extern char** environ;
 
 extern int _fork(void);
 extern int _wait(int *);
@@ -18,7 +20,6 @@ extern void _close(int);
 
 #define	FAIL	127
 
-extern const char **environ;
 static const char *exec_tab[] = {
 	"sh",			/* argv[0] */
 	"-c",			/* argument to the shell */
@@ -39,7 +40,7 @@ system(const char *str)
 			_close(i);
 		if (!str) str = "cd .";		/* just testing for a shell */
 		exec_tab[2] = str;		/* fill in command */
-		_execve("/bin/sh", exec_tab, environ);
+		_execve("/bin/sh", exec_tab, (char const**) environ);
 		/* get here if execve fails ... */
 		_exit(FAIL);	/* see manual page */
 	}

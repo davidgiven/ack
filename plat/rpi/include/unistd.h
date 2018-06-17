@@ -89,6 +89,7 @@ typedef int sig_atomic_t;
 typedef void (*sighandler_t)(int);
 extern sighandler_t signal(int signum, sighandler_t handler);
 extern int raise(int signum);
+extern int kill(pid_t pid, int sig);
 
 /* Select */
 
