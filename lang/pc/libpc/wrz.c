@@ -16,23 +16,24 @@
  *
  */
 
-#include	<pc_err.h>
-#include	<pc_file.h>
+#include "pc.h"
 
-extern		_wss();
-extern		_wrs();
+void _wsz(int w, char* s, struct file* f)
+{
+	char* p;
 
-_wsz(w,s,f) int w; char *s; struct file *f; {
-	char *p;
-
-	if (w < 0) _trp(EWIDTH);
-	for (p=s; *p; p++);
-	_wss(w,(int)(p-s),s,f);
+	if (w < 0)
+		_trp(EWIDTH);
+	for (p = s; *p; p++)
+		;
+	_wss(w, (int)(p - s), s, f);
 }
 
-_wrz(s,f) char *s; struct file *f; {
-	char *p;
+void _wrz(char* s, struct file* f)
+{
+	char* p;
 
-	for (p=s; *p; p++);
-	_wrs((int)(p-s),s,f);
+	for (p = s; *p; p++)
+		;
+	_wrs((int)(p - s), s, f);
 }
