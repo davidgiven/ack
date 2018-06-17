@@ -18,15 +18,17 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<em_abs.h>
-#include	<pc_err.h>
+#include <em_abs.h>
+#include <pc_err.h>
 
-extern char	*_hol0();
-extern		_trp();
+extern char* _hol0();
+extern _trp();
 
-_ass(line,bool) int line,bool; {
+_ass(line, bool) int line, bool;
+{
 
-	if (bool==0) {
+	if (bool == 0)
+	{
 		LINO = line;
 		_trp(EASS);
 	}

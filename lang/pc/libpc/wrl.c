@@ -18,34 +18,45 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_err.h>
-#include	<pc_file.h>
+#include <pc_err.h>
+#include <pc_file.h>
 
-extern		_wstrin();
+extern _wstrin();
 
-#define	MAXNEGLONG	-2147483648
+#define MAXNEGLONG -2147483648
 
-_wsl(w,l,f) int w; long l; struct file *f; {
-	char *p,c; long j; char buf[11];
+_wsl(w, l, f) int w;
+long l;
+struct file* f;
+{
+	char *p, c;
+	long j;
+	char buf[11];
 
-	if (w < 0) _trp(EWIDTH);
+	if (w < 0)
+		_trp(EWIDTH);
 	p = &buf[11];
-	if ((j=l) < 0) {
-		if (l == MAXNEGLONG) {
-			_wstrin(w,11,"-2147483648",f);
+	if ((j = l) < 0)
+	{
+		if (l == MAXNEGLONG)
+		{
+			_wstrin(w, 11, "-2147483648", f);
 			return;
 		}
 		j = -j;
 	}
-	do {
-		c = j%10;
+	do
+	{
+		c = j % 10;
 		*--p = c + '0';
 	} while (j /= 10);
-	if (l<0)
+	if (l < 0)
 		*--p = '-';
-	_wstrin(w,(int)(&buf[11]-p),p,f);
+	_wstrin(w, (int)(&buf[11] - p), p, f);
 }
 
-_wrl(l,f) long l; struct file *f; {
-	_wsl(11,l,f);
+_wrl(l, f) long l;
+struct file* f;
+{
+	_wsl(11, l, f);
 }

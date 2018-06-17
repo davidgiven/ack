@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int uread(fd,b,n) char *b; int fd,n; {
-	return(read(fd,b,n));
+int uread(fd, b, n) char* b;
+int fd, n;
+{
+	return (read(fd, b, n));
 }

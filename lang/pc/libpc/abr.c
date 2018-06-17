@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
-double _abr(r) double r; {
-	return(r>=0 ? r : -r);
+double _abr(r) double r;
+{
+	return (r >= 0 ? r : -r);
 }

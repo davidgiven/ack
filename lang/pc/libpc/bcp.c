@@ -18,13 +18,16 @@
 
 /* Author: J.W. Stevenson */
 
-int _bcp(sz,y,x) int sz; unsigned char *y,*x; {
+int _bcp(sz, y, x) int sz;
+unsigned char *y, *x;
+{
 
-	while (--sz >= 0) {
+	while (--sz >= 0)
+	{
 		if (*x < *y)
-			return(-1);
+			return (-1);
 		if (*x++ > *y++)
-			return(1);
+			return (1);
 	}
-	return(0);
+	return (0);
 }

@@ -18,15 +18,16 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
+#include <pc_file.h>
 
-extern		_flush();
+extern _flush();
 
 /* procedure nobuff(var f:file of ?); */
 
-nobuff(f) struct file *f; {
+nobuff(f) struct file* f;
+{
 
-	if ((f->flags & (0377|WRBIT)) != (MAGIC|WRBIT))
+	if ((f->flags & (0377 | WRBIT)) != (MAGIC | WRBIT))
 		return;
 	_flush(f);
 	f->count = f->buflen = f->size;

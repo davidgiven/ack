@@ -6,11 +6,12 @@
 
 /* Author: Hans van Eck */
 
-#include	<pc_err.h>
+#include <pc_err.h>
 
 extern _trp();
 
 _nfa(bool)
 {
-	if (! bool) _trp(EFUNASS);
+	if (!bool)
+		_trp(EFUNASS);
 }

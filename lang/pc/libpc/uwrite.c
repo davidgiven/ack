@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int uwrite(fd,b,n) char *b; int fd,n; {
-	return(write(fd,b,n));
+int uwrite(fd, b, n) char* b;
+int fd, n;
+{
+	return (write(fd, b, n));
 }

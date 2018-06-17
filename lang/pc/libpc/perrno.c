@@ -20,6 +20,7 @@
 
 #include <errno.h>
 
-int perrno() {
-	return(errno);
+int perrno()
+{
+	return (errno);
 }

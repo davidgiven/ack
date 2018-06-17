@@ -23,16 +23,17 @@
 #include <pc_file.h>
 #include <pc_err.h>
 
-extern struct file	*_curfil;
-extern			_trp();
-extern			_incpt();
+extern struct file* _curfil;
+extern _trp();
+extern _incpt();
 
-int _efl(f) struct file *f; {
+int _efl(f) struct file* f;
+{
 
 	_curfil = f;
 	if ((f->flags & 0377) != MAGIC)
 		_trp(EBADF);
-	if ((f->flags & (WINDOW|WRBIT|EOFBIT)) == 0)
+	if ((f->flags & (WINDOW | WRBIT | EOFBIT)) == 0)
 		_incpt(f);
-	return((f->flags & EOFBIT) != 0);
+	return ((f->flags & EOFBIT) != 0);
 }

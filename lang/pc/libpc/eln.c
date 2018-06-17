@@ -18,16 +18,17 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
-extern		_trp();
-extern		_rf();
+extern _trp();
+extern _rf();
 
-int _eln(f) struct file *f; {
+int _eln(f) struct file* f;
+{
 
 	_rf(f);
 	if (f->flags & EOFBIT)
 		_trp(EEOF);
-	return((f->flags & ELNBIT) != 0);
+	return ((f->flags & ELNBIT) != 0);
 }

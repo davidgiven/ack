@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
-int _abi(i) int i; {
-	return(i>=0 ? i : -i);
+int _abi(i) int i;
+{
+	return (i >= 0 ? i : -i);
 }

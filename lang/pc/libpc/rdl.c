@@ -18,16 +18,18 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
+#include <pc_file.h>
 
-extern		_rf();
-extern		_skipsp();
-extern int	_getsig();
-extern int	_fstdig();
-extern int	_nxtdig();
+extern _rf();
+extern _skipsp();
+extern int _getsig();
+extern int _fstdig();
+extern int _nxtdig();
 
-long _rdl(f) struct file *f; {
-	int is_signed,ch; long l;
+long _rdl(f) struct file* f;
+{
+	int is_signed, ch;
+	long l;
 
 	_rf(f);
 	_skipsp(f);
@@ -35,7 +37,7 @@ long _rdl(f) struct file *f; {
 	ch = _fstdig(f);
 	l = 0;
 	do
-		l = l*10 - ch;
+		l = l * 10 - ch;
 	while ((ch = _nxtdig(f)) >= 0);
-	return(is_signed ? l : -l);
+	return (is_signed ? l : -l);
 }

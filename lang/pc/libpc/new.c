@@ -2,7 +2,7 @@
 #include <em_abs.h>
 #include <pc_err.h>
 
-extern void _trp(int);			/* called on error */
+extern void _trp(int); /* called on error */
 
 void _new(int n, void** ptr)
 {

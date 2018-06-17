@@ -23,34 +23,40 @@
 /* procedure argshift; extern; */
 /* function environ(i:integer):string; extern; */
 
-extern int	_pargc;
-extern char	**_pargv;
-extern char	**_penvp;
+extern int _pargc;
+extern char** _pargv;
+extern char** _penvp;
 
-int argc() {
-	return(_pargc);
+int argc()
+{
+	return (_pargc);
 }
 
-char *argv(i) {
+char* argv(i)
+{
 	if (i >= _pargc)
-		return(0);
-	return(_pargv[i]);
+		return (0);
+	return (_pargv[i]);
 }
 
-argshift() {
+argshift()
+{
 
-	if (_pargc > 1) {
+	if (_pargc > 1)
+	{
 		--_pargc;
 		_pargv++;
 	}
 }
 
-char *environ(i) {
-	char **p; char *q;
+char* environ(i)
+{
+	char** p;
+	char* q;
 
 	if (p = _penvp)
 		while (q = *p++)
 			if (i-- < 0)
-				return(q);
-	return(0);
+				return (q);
+	return (0);
 }

@@ -20,28 +20,30 @@
 
 /* function clock:integer; extern; */
 
-extern int	_times();
+extern int _times();
 
-struct tbuf {
-	long	utime;
-	long	stime;
-	long	cutime;
-	long	cstime;
+struct tbuf
+{
+	long utime;
+	long stime;
+	long cutime;
+	long cstime;
 };
 
 #ifndef EM_WSIZE
 #define EM_WSIZE _EM_WSIZE
 #endif
 
-int clock() {
+int clock()
+{
 	struct tbuf t;
 
 	_times(&t);
-	return( (int)(t.utime + t.stime) &
+	return ((int)(t.utime + t.stime) &
 #if EM_WSIZE <= 2
-	077777
+	    077777
 #else
-	0x7fffffffL
+	    0x7fffffffL
 #endif
-	);
+	    );
 }

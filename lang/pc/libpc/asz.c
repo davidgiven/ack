@@ -18,12 +18,14 @@
 
 /* Author: J.W. Stevenson */
 
-struct descr {
-	int	low;
-	int	diff;
-	int	size;
+struct descr
+{
+	int low;
+	int diff;
+	int size;
 };
 
-int _asz(dp) struct descr *dp; {
-	return(dp->size * (dp->diff + 1));
+int _asz(dp) struct descr* dp;
+{
+	return (dp->size * (dp->diff + 1));
 }

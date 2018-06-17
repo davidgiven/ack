@@ -18,24 +18,26 @@
 
 /* Author: J.W. Stevenson */
 
-#include    <unistd.h>
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include <unistd.h>
+#include <pc_file.h>
+#include <pc_err.h>
 
-extern		_cls();
-extern		_trp();
+extern _cls();
+extern _trp();
 
 /* procedure pcreat(var f:text; s:string); */
 
-pcreat(f,s) struct file *f; char *s; {
+pcreat(f, s) struct file* f;
+char* s;
+{
 
-	_cls(f);	/* initializes _curfil */
+	_cls(f); /* initializes _curfil */
 	f->ptr = f->bufadr;
-	f->flags = WRBIT|EOFBIT|ELNBIT|TXTBIT|MAGIC;
+	f->flags = WRBIT | EOFBIT | ELNBIT | TXTBIT | MAGIC;
 	f->fname = s;
 	f->size = 1;
 	f->count = PC_BUFLEN;
 	f->buflen = PC_BUFLEN;
-	if ((f->ufd = creat(s,0644)) < 0)
+	if ((f->ufd = creat(s, 0644)) < 0)
 		_trp(EREWR);
 }

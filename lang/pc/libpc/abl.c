@@ -18,6 +18,7 @@
 
 /* Author: J.W. Stevenson */
 
-long _abl(i) long i; {
-	return(i>=0 ? i : -i);
+long _abl(i) long i;
+{
+	return (i >= 0 ? i : -i);
 }
