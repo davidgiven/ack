@@ -157,6 +157,11 @@ void system_call(uint8_t trapno)
 			break;
 		}
 
+		case 20: /* getpid */
+		case 48: /* signal */
+		case 54: /* ioctl */
+		case 67: /* sigaction */
+		case 78: /* gettimeofday */
 		case 126: /* sigprocmask */
 			cpu.gpr[4] = 0;
 			break;

@@ -147,21 +147,65 @@
 <31--><RS->0<FXM--->.<144----->. mtcrf(FXM, reg(RS));
 <31--><RT->0.........<19------>. cpu.gpr[RT] = cpu.cr;
 
-# Floating point loads
+# Floating pointer operations follow.
+#
+# These are extremely crude, and just enough has been implemented to make the
+# tests pass. The FPSCR bits are all ignored completely.
 
-<50--><FRT><RA-><D------------>. cpu.fpr[FRT] = read_double(reg0(RA) + ext16(D));
-<31--><FRT><RA-><RB-><599----->. cpu.gpr[FRT] = read_double(reg0(RA) + reg(RB));
-<51--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = read_byte(ea); cpu.gpr[RA] = ea;
-<31--><FRT><RA-><RB-><631----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = read_long(ea); cpu.gpr[RA] = ea;
+# FPSCR manipulation
 
-# Floating point stores
+<63--><FRT>..........<583----->R fatal("mffs not supported");
+<63--><F>..<B>.......<64------>. fatal("mcrfs not supported");
+<63--><F>.......<U->.<134----->R fatal("mtsfsfi not supported");
+<63-->.<FLM--->.<FRB><711----->R fatal("mtfsf not supported");
+<63--><BT->..........<70------>R fatal("mtfsb0 not supported");
+<63--><BT->..........<38------>R fatal("mtfsb1 not supported");
 
-<54--><FRS><RA-><D------------>. write_double(read_double(reg0(RA) + ext16(D)), cpu.fpr[FRS]);
+# Floating point double loads (raw bits)
+
+<50--><FRT><RA-><D-------------> cpu.fpr[FRT] = read_double(reg0(RA) + ext16(D));
+<31--><FRT><RA-><RB-><599----->. cpu.fpr[FRT] = read_double(reg0(RA) + reg(RB));
+<51--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = read_double(ea); cpu.gpr[RA] = ea;
+<31--><FRT><RA-><RB-><631----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = read_double(ea); cpu.gpr[RA] = ea;
+
+# Floating point double stores (raw bits)
+
+<54--><FRS><RA-><D-------------> write_double(reg0(RA) + ext16(D), cpu.fpr[FRS]);
 <31--><FRS><RA-><RB-><727----->. write_double(reg0(RA) + reg(RB), cpu.fpr[FRS]);
 <55--><FRS><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_double(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
-<31--><FRS><RA-><RB-><759----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+<31--><FRS><RA-><RB-><759----->. uint32_t ea = reg(RA) + reg(RB); write_double(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+
+# Floating point single loads (convert from single to double)
+
+<48--><FRT><RA-><D-------------> cpu.fpr[FRT] = d2b(b2f(read_long(reg0(RA) + ext16(D))));
+<31--><FRT><RA-><RB-><535----->. cpu.fpr[FRT] = d2b(b2f(read_long(reg0(RA) + reg(RB))));
+<49--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = d2b(b2f(read_long(ea))); cpu.gpr[RA] = ea;
+<31--><FRT><RA-><RB-><567----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = d2b(b2f(read_long(ea))); cpu.gpr[RA] = ea;
+
+# Floating point single stores (convert from double to single)
+
+<52--><FRS><RA-><D-------------> write_long(reg0(RA) + ext16(D), f2b(fpr(FRS)));
+<31--><FRS><RA-><RB-><663----->. write_long(reg0(RA) + reg(RB), f2b(fpr(FRS)));
+<53--><FRS><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_long(ea, f2b(fpr(FRS))); cpu.gpr[RA] = ea;
+<31--><FRS><RA-><RB-><695----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, f2b(fpr(FRS))); cpu.gpr[RA] = ea;
 
 # Floating point arithmetic
 
 <63--><FRT>.....<FRB><72------>R setcr1(R, cpu.fpr[FRT] = cpu.fpr[FRB]);
-<63--><FRT><FRA><FRB><20------>R setcr1(R, cpu.fpr[FRT] = tobytes(fpr(FRA) - fpr(FRB)));
+<63--><FRT>.....<FRB><40------>R setcr1(R, cpu.fpr[FRT] = d2b(-fpr(FRB)));
+<63--><FRT>.....<FRB><264----->R setcr1(R, cpu.fpr[FRT] = d2b(fabs(fpr(FRB))));
+<63--><FRT>.....<FRB><136----->R setcr1(R, cpu.fpr[FRT] = d2b(-fabs(fpr(FRB))));
+<63--><FRT><FRA><FRB><21------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) + fpr(FRB)));
+<63--><FRT><FRA><FRB><20------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) - fpr(FRB)));
+<63--><FRT><FRA><FRB><25------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) * fpr(FRB)));
+<63--><FRT><FRA><FRB><18------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) / fpr(FRB)));
+
+# Floating point comparisons
+
+<63--><F>..<FRA><FRB><0------->. comparef(fpr(FRA), fpr(FRB), F);
+<63--><F>..<FRA><FRB><32------>. comparef(fpr(FRA), fpr(FRB), F);
+
+# Floating point conversions
+
+<63--><FRT>.....<FRB><14------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);
+<63--><FRT>.....<FRB><15------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);

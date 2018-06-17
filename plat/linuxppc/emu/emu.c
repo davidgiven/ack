@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <strings.h>
 #include <byteswap.h>
+#include <math.h>
 #include "emu.h"
 
 #define BO4 (1<<0)
@@ -11,6 +12,10 @@
 #define BO2 (1<<2)
 #define BO1 (1<<3)
 #define BO0 (1<<4)
+
+#define XER_SO (1<<31)
+#define XER_OV (1<<30)
+#define XER_CA (1<<29)
 
 cpu_t cpu;
 
@@ -21,6 +26,16 @@ static inline bool carry(void)
 
 #define swb16(x) bswap_16(x)
 #define swb32(x) bswap_32(x)
+
+/* Returns the state of a carry flag after a three-way add. */
+static inline bool carry_3(uint32_t a, uint32_t b, uint32_t c)
+{
+	if ((a+b) < a)
+		return true;
+	if ((a+b+c) < c)
+		return true;
+	return false;
+}
 
 static inline uint32_t reg(uint8_t n)
 {
@@ -34,14 +49,33 @@ static inline uint32_t reg0(uint8_t n)
 	return cpu.gpr[n];
 }
 
-static inline uint64_t tobytes(double n)
+/* Double to bytes */
+static inline uint64_t d2b(double n)
 {
 	return *(uint64_t*)&n;
 }
 
+/* Float to bytes */
+static inline uint32_t f2b(float n)
+{
+	return *(uint32_t*)&n;
+}
+
+/* Bytes to double */
+static inline double b2d(uint64_t n)
+{
+	return *(double*)&n;
+}
+
+/* Bytes to float */
+static inline float b2f(uint32_t n)
+{
+	return *(float*)&n;
+}
+
 static inline double fpr(uint8_t n)
 {
-	return *(double*)&cpu.fpr[n];
+	return b2d(cpu.fpr[n]);
 }
 
 static inline uint32_t ext8(int8_t n)
@@ -149,9 +183,16 @@ static void write_string(uint32_t address, uint8_t reg, uint8_t bytes)
 
 static uint32_t addo(uint32_t a, uint32_t b, uint32_t c, bool set_o, bool set_c)
 {
-	if (set_o || set_c)
-		fatal("can't use O or C bits in add yet");
+	if (set_o)
+		fatal("can't use O bit in add yet");
 	
+	if (set_c)
+	{
+		cpu.xer = cpu.xer & ~XER_CA;
+		if (carry_3(a, b, c))
+			cpu.xer = cpu.xer | XER_CA;
+	}
+
 	return a + b + c;
 }
 
@@ -199,6 +240,24 @@ static void compareu(uint32_t a, uint32_t b, uint8_t field)
 	setcr(bit+1, a>b);
 	setcr(bit+2, a==b);
 	setcr(bit+3, cpu.xer & (1<<31));
+}
+
+static void comparef(double a, double b, uint8_t field)
+{
+	uint8_t c;
+	if (isnan(a) || isnan(b))
+		c = 0x1;
+	else if (a < b)
+		c = 0x8;
+	else if (a > b)
+		c = 0x4;
+	else
+		c = 0x2;
+	
+	uint8_t bit = 28 - field*4; /* note PowerPC bit numbering */
+	cpu.cr = cpu.cr & ~(0xf<<bit) | (c<<bit);
+
+	/* TODO: ordered/unordered, FSPCR, etc. */
 }
 
 static uint32_t cntlzw(uint32_t source)
