@@ -278,7 +278,7 @@ static uint32_t rotate(uint32_t i, uint32_t shift)
 static uint32_t rlwnm(uint32_t source, uint8_t shift, uint8_t mb, uint8_t me)
 {
 	uint8_t masksize = 1 + me - mb; /* me and mb are inclusive */
-	uint32_t mask = ((1<<masksize)-1) << (31 - me);
+	uint32_t mask = (((uint64_t)1<<masksize)-1) << (31 - me);
 	return rotate(source, shift) & mask;
 }
 
