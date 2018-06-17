@@ -24,7 +24,7 @@ BUILDDIR = $(ACK_TEMP_DIR)/ack-build
 
 # What build flags do you want to use for native code?
 
-CFLAGS = -g -Wno-return-type
+CFLAGS = -Os -g -Wno-return-type
 LDFLAGS = 
 
 # Various commands.

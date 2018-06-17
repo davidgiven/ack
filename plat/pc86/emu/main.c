@@ -96,6 +96,8 @@ static void int13_cb(int num)
 
 int main(int argc, const char* argv[])
 {
+	int i;
+
 	if (argc != 2)
 	{
 		printk("syntax: pc86emu <fdimage.img>\n");
@@ -116,7 +118,7 @@ int main(int argc, const char* argv[])
 
 	/* Load the boot sector at 0x07c0:0000. */
 
-	for (int i=0; i<512; i++)
+	for (i=0; i<512; i++)
 	{
 		uint8_t b;
 		read(floppy_fd, &b, 1);
@@ -125,7 +127,7 @@ int main(int argc, const char* argv[])
 
 	/* Initialise. */
 
-	for (int i=0; i<256; i++)
+	for (i=0; i<256; i++)
 		intr_funcs[i] = unknown_interrupt_cb;
 	intr_funcs[0x10] = int10_cb;
 	intr_funcs[0x13] = int13_cb;
