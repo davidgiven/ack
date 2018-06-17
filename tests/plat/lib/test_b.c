@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include "test.h"
 
-extern void patch_addresses(uintptr_t* module);
-extern uintptr_t* bmodule_main;
+extern void patch_addresses(uintptr_t** module);
+extern uintptr_t* bmodule_main[];
 
 static void i_writehex(intptr_t code)
 {
@@ -28,7 +28,7 @@ static uintptr_t* bmodule_test[] =
 
 void binit(void)
 {
-	patch_addresses(&bmodule_test);
-	patch_addresses(&bmodule_main);
+	patch_addresses(bmodule_test);
+	patch_addresses(bmodule_main);
 }
 
