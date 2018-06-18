@@ -17,9 +17,10 @@ for _, plat in ipairs(vars.plats) do
         },
 		hdrs = {}, -- must be empty
 		deps = {
-			"lang/cem/libcc.ansi/headers+pkg",
-			"plat/"..plat.."/include+pkg",
 			"h+emheaders",
+			"lang/cem/libcc.ansi/headers+pkg",
+			"lang/pc/include+headers",
+			"plat/"..plat.."/include+pkg",
 		},
         vars = { plat = plat }
     }
@@ -29,7 +30,8 @@ for _, plat in ipairs(vars.plats) do
 		srcs = { "./head_pc.e" },
 		vars = { plat = plat },
 		deps = {
-			"h+emheaders"
+			"h+emheaders",
+			"lang/pc/include+headers",
 		}
 	}
 

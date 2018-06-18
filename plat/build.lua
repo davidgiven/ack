@@ -11,7 +11,7 @@ definerule("ackfile",
 		suffix = { type="string", optional=true },
 	},
 	function (e)
-		local em = e.vars.plat:find("^em")
+		local em = (e.vars.plat or ""):find("^em")
 		local suffix = e.suffix or (em and ".m" or ".o")
 		local c = "-c"..suffix
 		local plat = e.vars.plat
@@ -47,7 +47,7 @@ definerule("acklibrary",
 		deps = { type="targets", default={} },
 	},
 	function (e)
-		local em = e.vars.plat:find("^em")
+		local em = (e.vars.plat or ""):find("^em")
 		return clibrary {
 			name = e.name,
 			srcs = e.srcs,
