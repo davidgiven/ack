@@ -16,12 +16,10 @@
  *
  */
 
-#include	<pc_file.h>
+#include "pc.h"
 
-extern		_wf();
-extern		_outcpt();
-
-_put(f) struct file *f; {
+void _put(struct file* f)
+{
 	_wf(f);
 	_outcpt(f);
 }

@@ -18,16 +18,15 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_err.h>
+#include "pc.h"
 
-extern		_trp();
-
-long _mdl(j,i) long j,i; {
+long _mdl(long j, long i)
+{
 
 	if (j <= 0)
 		_trp(EMOD);
 	i = i % j;
 	if (i < 0)
 		i += j;
-	return(i);
+	return (i);
 }

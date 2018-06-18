@@ -111,6 +111,7 @@ cprogram {
 		"+scope_h",
 		"+type_h",
 		"h+emheaders",
+		"lang/pc/include+headers",
 		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",

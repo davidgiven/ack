@@ -18,23 +18,23 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_err.h>
-#include	<pc_file.h>
+#include "pc.h"
 
-extern		_wstrin();
-extern char	*_ecvt();
+#define PREC_DIG 80 /* maximum digits produced by _ecvt() */
 
-#define	PREC_DIG	80	/* maximum digits produced by _ecvt() */
+void _wsr(int w, double r, struct file* f)
+{
+	char *p, *b;
+	int s, d, i;
+	char buf[PREC_DIG + 7];
 
-_wsr(w,r,f) int w; double r; struct file *f; {
-	char *p,*b; int s,d,i; char buf[PREC_DIG+7];
-
-	if (w < 0) _trp(EWIDTH);
+	if (w < 0)
+		_trp(EWIDTH);
 	p = buf;
-	if ((i = w-6) < 2)
+	if ((i = w - 6) < 2)
 		i = 2;
-	b = _ecvt(r,i,&d,&s);
-	*p++ = s? '-' : ' ';
+	b = _ecvt(r, i, &d, &s);
+	*p++ = s ? '-' : ' ';
 	if (*b == '0')
 		d++;
 	*p++ = *b++;
@@ -43,25 +43,30 @@ _wsr(w,r,f) int w; double r; struct file *f; {
 		*p++ = *b++;
 	*p++ = 'e';
 	d--;
-	if (d < 0) {
+	if (d < 0)
+	{
 		d = -d;
 		*p++ = '-';
-	} else
+	}
+	else
 		*p++ = '+';
 
-	if (d >= 1000) {
+	if (d >= 1000)
+	{
 		*p++ = '*';
 		*p++ = '*';
 		*p++ = '*';
 	}
-	else {
-		*p++ = '0' + d/100;
-		*p++ = '0' + (d/10) % 10;
-		*p++ = '0' + d%10;
+	else
+	{
+		*p++ = '0' + d / 100;
+		*p++ = '0' + (d / 10) % 10;
+		*p++ = '0' + d % 10;
 	}
-	_wstrin(w,(int)(p-buf),buf,f);
+	_wstrin(w, (int)(p - buf), buf, f);
 }
 
-_wrr(r,f) double r; struct file *f; {
-	_wsr(13,r,f);
+void _wrr(double r, struct file* f)
+{
+	_wsr(13, r, f);
 }

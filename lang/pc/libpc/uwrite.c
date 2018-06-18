@@ -20,7 +20,9 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include "pc.h"
 
-int uwrite(fd,b,n) char *b; int fd,n; {
-	return(write(fd,b,n));
+int uwrite(int fd, char* b, int n)
+{
+	return (write(fd, b, n));
 }

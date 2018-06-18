@@ -18,31 +18,27 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
+#include "pc.h"
 
-#define	BIG	1e17
+#define BIG 1e17
 
-extern		_rf();
-extern		_incpt();
-extern		_skipsp();
-extern int	_getsig();
-extern int	_getint();
-extern int	_fstdig();
-extern int	_nxtdig();
+static double r;
+static int pow10;
 
-static double		r;
-static int		pow10;
+static void dig(int ch)
+{
 
-static dig(ch) int ch; {
-
-	if (r>BIG)
+	if (r > BIG)
 		pow10++;
 	else
-		r = r*10.0 + ch;
+		r = r * 10.0 + ch;
 }
 
-double _rdr(f) struct file *f; {
-	int i; double e; int is_signed,ch;
+double _rdr(struct file* f)
+{
+	int i;
+	double e;
+	int is_signed, ch;
 
 	r = 0;
 	pow10 = 0;
@@ -53,15 +49,18 @@ double _rdr(f) struct file *f; {
 	do
 		dig(ch);
 	while ((ch = _nxtdig(f)) >= 0);
-	if (*f->ptr == '.') {
+	if (*f->ptr == '.')
+	{
 		_incpt(f);
 		ch = _fstdig(f);
-		do {
+		do
+		{
 			dig(ch);
 			pow10--;
 		} while ((ch = _nxtdig(f)) >= 0);
 	}
-	if ((*f->ptr == 'e') || (*f->ptr == 'E')) {
+	if ((*f->ptr == 'e') || (*f->ptr == 'E'))
+	{
 		_incpt(f);
 		pow10 += _getint(f);
 	}
@@ -70,9 +69,9 @@ double _rdr(f) struct file *f; {
 	e = 1.0;
 	while (--i >= 0)
 		e *= 10.0;
-	if (pow10<0)
+	if (pow10 < 0)
 		r /= e;
 	else
 		r *= e;
-	return(is_signed? -r : r);
+	return (is_signed ? -r : r);
 }

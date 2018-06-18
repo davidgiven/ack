@@ -16,16 +16,13 @@
  *
  */
 
-#include	<pc_file.h>
-#include	<pc_err.h>
+#include "pc.h"
 
-extern		_rf();
-extern		_trp();
-
-_get(f) struct file *f; {
+void _get(struct file* f)
+{
 
 	_rf(f);
-	if (f->flags&EOFBIT)
+	if (f->flags & EOFBIT)
 		_trp(EEOF);
 	f->flags &= ~WINDOW;
 }

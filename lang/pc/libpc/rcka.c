@@ -6,20 +6,11 @@
 
 /* Author: Hans van Eck */
 
-#include	<em_abs.h>
+#include "pc.h"
+#include <em_abs.h>
 
-extern _trp();
-
-struct array_descr	{
-		int		lbound;
-		unsigned	n_elts_min_one;
-		unsigned	size;		/* doesn't really matter */
-	    };
-
-_rcka(descr, index)
-struct array_descr *descr;
+void _rcka(struct array_descr* descr, int index)
 {
-	if( index < descr->lbound ||
-	    index > (int) descr->n_elts_min_one + descr->lbound )
+	if (index < descr->lbound || index > (int)descr->n_elts_min_one + descr->lbound)
 		_trp(EARRAY);
 }
