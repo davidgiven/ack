@@ -33,6 +33,7 @@ for _, plat in ipairs(vars.plats) do
 		srcs = {
 			"+ctype_files",
 			"+ctype_tab",
+			"./src/core/*.c",
 			"./ctype/*.c",
 			"./errno/*.c",
 			"./locale/*.c",
