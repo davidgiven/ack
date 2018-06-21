@@ -64,7 +64,7 @@ int setenv(register const char* name, register const char* value, int rewrite)
 		environ[cnt + 1] = NULL;
 		offset = cnt;
 	}
-	for (C = name; *C && *C != '='; ++C)
+	for (C = (char*) name; *C && *C != '='; ++C)
 		; /* no `=' in name */
 	if (!(environ[offset] = /* name + `=' + value */
 	        malloc((unsigned)((int)(C - name) + l_value + 2))))
