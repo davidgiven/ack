@@ -35,6 +35,7 @@ for _, plat in ipairs(vars.plats) do
 			"+ctype_tab",
 			"./pure/string/*.c",
 			"./pure/stdlib/*.c",
+			"./pure/locale/*.c",
 			"./ctype/*.c",
 			"./errno/*.c",
 			"./locale/*.c",
