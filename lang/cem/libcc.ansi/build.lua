@@ -36,15 +36,14 @@ for _, plat in ipairs(vars.plats) do
 			"./pure/string/*.c",
 			"./pure/stdlib/*.c",
 			"./pure/locale/*.c",
+			"./pure/setjmp/*.c",
+			"./pure/setjmp/*.e",
 			"./ctype/*.c",
 			"./errno/*.c",
-			"./locale/*.c",
 			"./malloc/*.c",
 			"./math/*.c", -- hypot.c
 			"./math/*.e",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
-			"./setjmp/*.c",
-			"./setjmp/*.e",
 			"./signal/*.c",
 			"./assert/*.c",
 			"./stdio/*.c",
