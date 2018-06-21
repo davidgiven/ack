@@ -2,12 +2,12 @@ include("plat/build.lua")
 
 tabgen {
 	name = "ctype_tab",
-	srcs = { "./pure/ctype/char.tab" }
+	srcs = { "./core/ctype/char.tab" }
 }
 
 normalrule {
 	name = "ctype_files",
-	ins = { "./pure/ctype/genfiles" },
+	ins = { "./core/ctype/genfiles" },
 	outleaves = {
 		"isalnum.c",
 		"isalpha.c",
@@ -33,14 +33,14 @@ for _, plat in ipairs(vars.plats) do
 		srcs = {
 			"+ctype_files",
 			"+ctype_tab",
-			"./pure/string/*.c",
-			"./pure/stdlib/*.c",
-			"./pure/locale/*.c",
-			"./pure/setjmp/*.c",
-			"./pure/setjmp/*.e",
-			"./pure/math/*.c", -- hypot.c
-			"./pure/math/*.e",
-			"./pure/ctype/*.c",
+			"./core/string/*.c",
+			"./core/stdlib/*.c",
+			"./core/locale/*.c",
+			"./core/setjmp/*.c",
+			"./core/setjmp/*.e",
+			"./core/math/*.c", -- hypot.c
+			"./core/math/*.e",
+			"./core/ctype/*.c",
 			"./errno/*.c",
 			"./malloc/*.c",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
@@ -56,7 +56,7 @@ for _, plat in ipairs(vars.plats) do
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",
 			"./malloc/malloc.h",
-			"./pure/math/localmath.h",
+			"./core/math/localmath.h",
 			"./stdio/loc_incl.h",
 			"./stdlib/ext_fmt.h",
 			"./time/loc_time.h",
