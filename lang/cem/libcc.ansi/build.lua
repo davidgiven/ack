@@ -38,11 +38,11 @@ for _, plat in ipairs(vars.plats) do
 			"./pure/locale/*.c",
 			"./pure/setjmp/*.c",
 			"./pure/setjmp/*.e",
+			"./pure/math/*.c", -- hypot.c
+			"./pure/math/*.e",
 			"./ctype/*.c",
 			"./errno/*.c",
 			"./malloc/*.c",
-			"./math/*.c", -- hypot.c
-			"./math/*.e",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
 			"./signal/*.c",
 			"./assert/*.c",
@@ -56,7 +56,7 @@ for _, plat in ipairs(vars.plats) do
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",
 			"./malloc/malloc.h",
-			"./math/localmath.h",
+			"./pure/math/localmath.h",
 			"./stdio/loc_incl.h",
 			"./stdlib/ext_fmt.h",
 			"./time/loc_time.h",
