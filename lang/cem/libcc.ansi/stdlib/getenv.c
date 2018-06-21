@@ -15,9 +15,9 @@ extern char* _findenv(const char* name, int* offset);
  */
 char* getenv(const char* name)
 {
-    int offset;
+	int offset;
 
-    return(_findenv(name,&offset));
+	return (_findenv(name, &offset));
 }
 
 /*
@@ -31,21 +31,22 @@ char* getenv(const char* name)
  */
 char* _findenv(register const char* name, int* offset)
 {
-    extern char **environ;
-    register int    len;
-    register char **P;
-    register const char *C;
+	extern char** environ;
+	register int len;
+	register char** P;
+	register const char* C;
 
 	if (!environ)
 		return NULL;
 
-    for (C = name,len = 0;*C && *C != '=';++C,++len);
-    for (P = environ;*P;++P)
-        if (!strncmp(*P,name,len))
-            if (*(C = *P + len) == '=') {
-                *offset = P - environ;
-                return (char*)(++C);
-            }
-    return(NULL);
+	for (C = name, len = 0; *C && *C != '='; ++C, ++len)
+		;
+	for (P = environ; *P; ++P)
+		if (!strncmp(*P, name, len))
+			if (*(C = *P + len) == '=')
+			{
+				*offset = P - environ;
+				return (char*)(++C);
+			}
+	return (NULL);
 }
-

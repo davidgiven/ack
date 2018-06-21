@@ -11,13 +11,14 @@
 #ifndef ACKCONF_TIME_IS_A_SYSCALL
 
 time_t
-time(time_t *timer)
+time(time_t* timer)
 {
 	struct timeval tv;
 	struct timezone tz;
 	gettimeofday(&tv, &tz);
 
-	if (timer) *timer = tv.tv_sec;
+	if (timer)
+		*timer = tv.tv_sec;
 	return tv.tv_sec;
 }
 

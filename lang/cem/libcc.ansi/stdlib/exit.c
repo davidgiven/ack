@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define	NEXITS	32
+#define NEXITS 32
 
 void (*__functab[NEXITS])(void);
 int __funccnt = 0;
@@ -20,16 +20,16 @@ static void
 _calls(void)
 {
 	register int i = __funccnt;
-	
+
 	/* "Called in reversed order of their registration" */
 	while (--i >= 0)
 		(*__functab[i])();
 }
 
-void
-exit(int status)
+void exit(int status)
 {
 	_calls();
-	if (_clean) _clean();
-	_exit(status) ;
+	if (_clean)
+		_clean();
+	_exit(status);
 }

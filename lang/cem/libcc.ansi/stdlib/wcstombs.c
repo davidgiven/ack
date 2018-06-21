@@ -4,16 +4,17 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<locale.h>
-#include	<limits.h>
+#include <stdlib.h>
+#include <locale.h>
+#include <limits.h>
 
 size_t
-wcstombs(register char *s, register const wchar_t *pwcs, size_t n)
+wcstombs(register char* s, register const wchar_t* pwcs, size_t n)
 {
 	register int i = n;
 
-	while (--i >= 0) {
+	while (--i >= 0)
+	{
 		if (!(*s++ = *pwcs++))
 			break;
 	}

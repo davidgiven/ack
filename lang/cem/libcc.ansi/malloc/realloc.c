@@ -4,7 +4,7 @@
 #include <string.h>
 #include "malloc.h"
 
-void* realloc(void *ptr, size_t size)
+void* realloc(void* ptr, size_t size)
 {
 	block_t* h;
 	size_t nblocks;
@@ -25,7 +25,7 @@ void* realloc(void *ptr, size_t size)
 	/* Overflow check. */
 	if (nblocks < size)
 		return NULL;
-	
+
 	/* Shrinking the block? Don't bother doing anything (it's never worth it). */
 	if (nblocks <= h->size)
 		return ptr;

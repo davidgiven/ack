@@ -3,10 +3,9 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int
-(getchar)(void)
+int(getchar)(void)
 {
 	return getchar();
 }

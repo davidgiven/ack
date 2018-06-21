@@ -3,18 +3,21 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int
-puts(register const char *s)
+int puts(register const char* s)
 {
-	register FILE *file = stdout;
+	register FILE* file = stdout;
 	register int i = 0;
 
-	while (*s) {
-		if (putc(*s++, file) == EOF) return EOF;
-		else i++;
+	while (*s)
+	{
+		if (putc(*s++, file) == EOF)
+			return EOF;
+		else
+			i++;
 	}
-	if (putc('\n', file) == EOF) return EOF;
+	if (putc('\n', file) == EOF)
+		return EOF;
 	return i + 1;
 }

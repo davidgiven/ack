@@ -4,22 +4,26 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
-char *
-strncat(char *ret, register const char *s2, size_t n)
+char* strncat(char* ret, register const char* s2, size_t n)
 {
-	register char *s1 = ret;
+	register char* s1 = ret;
 
-	if (n > 0) {
+	if (n > 0)
+	{
 		while (*s1++)
-			/* EMPTY */ ;
+			/* EMPTY */;
 		s1--;
-		while (*s1++ = *s2++)  {
-			if (--n > 0) continue;
+		while (*s1++ = *s2++)
+		{
+			if (--n > 0)
+				continue;
 			*s1 = '\0';
 			break;
 		}
 		return ret;
-	} else return s1;
+	}
+	else
+		return s1;
 }

@@ -6,14 +6,14 @@
  */
 /* $Id$ */
 
-#include	<math.h>
+#include <math.h>
 
 double
 floor(double x)
 {
 	double val;
 
-	return modf(x, &val) < 0 ? val - 1.0 : val ;
+	return modf(x, &val) < 0 ? val - 1.0 : val;
 	/*	this also works if modf always returns a positive
 		fractional part
 	*/

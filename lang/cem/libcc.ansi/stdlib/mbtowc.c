@@ -4,14 +4,16 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<limits.h>
+#include <stdlib.h>
+#include <limits.h>
 
-int
-mbtowc(wchar_t *pwc, register const char *s, size_t n)
+int mbtowc(wchar_t* pwc, register const char* s, size_t n)
 {
-	if (s == (const char *)NULL) return 0;
-	if (n <= 0) return 0;
-	if (pwc) *pwc = *s;
+	if (s == (const char*)NULL)
+		return 0;
+	if (n <= 0)
+		return 0;
+	if (pwc)
+		*pwc = *s;
 	return (*s != 0);
 }

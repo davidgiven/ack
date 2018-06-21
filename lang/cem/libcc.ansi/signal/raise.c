@@ -4,13 +4,12 @@
  */
 /* $Id$ */
 
-#if	defined(_POSIX_SOURCE)
+#if defined(_POSIX_SOURCE)
 #include <sys/types.h>
 #endif
 #include <signal.h>
 
-int
-raise(int sig)
+int raise(int sig)
 {
 	if (sig < 0 || sig > _NSIG)
 		return -1;

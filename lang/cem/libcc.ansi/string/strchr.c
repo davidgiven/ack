@@ -4,15 +4,16 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
-char *
-strchr(register const char *s, register int c)
+char* strchr(register const char* s, register int c)
 {
-	c = (char) c;
+	c = (char)c;
 
-	while (c != *s) {
-		if (*s++ == '\0') return NULL;
+	while (c != *s)
+	{
+		if (*s++ == '\0')
+			return NULL;
 	}
-	return (char *)s;
+	return (char*)s;
 }

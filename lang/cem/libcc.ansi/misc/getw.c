@@ -3,17 +3,19 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int getw(register FILE *stream)
+int getw(register FILE* stream)
 {
 	register int cnt = sizeof(int);
 	int w;
-	register char *p = (char *) &w;
+	register char* p = (char*)&w;
 
-	while (cnt--) {
+	while (cnt--)
+	{
 		*p++ = getc(stream);
 	}
-	if (feof(stream) || ferror(stream)) return EOF;
+	if (feof(stream) || ferror(stream))
+		return EOF;
 	return w;
 }

@@ -7,12 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-char*
-strdup(const char *s)
+char* strdup(const char* s)
 {
 	int len = strlen(s);
-	char *p = malloc(len+1);
+	char* p = malloc(len + 1);
 	if (p)
-		memcpy(p, s, len+1);
+		memcpy(p, s, len + 1);
 	return p;
 }

@@ -6,11 +6,11 @@
  */
 /* $Id$ */
 
-#include	<math.h>
-#include	<float.h>
-#include	<errno.h>
+#include <math.h>
+#include <float.h>
+#include <errno.h>
 
-#define NITER	5
+#define NITER 5
 
 double
 sqrt(double x)
@@ -18,25 +18,31 @@ sqrt(double x)
 	int exponent;
 	double val;
 
-	if (__IsNan(x)) {
+	if (__IsNan(x))
+	{
 		errno = EDOM;
 		return x;
 	}
-	if (x <= 0) {
-		if (x < 0) errno = EDOM;
+	if (x <= 0)
+	{
+		if (x < 0)
+			errno = EDOM;
 		return 0;
 	}
 
-	if (x > DBL_MAX) return x;	/* for infinity */
+	if (x > DBL_MAX)
+		return x; /* for infinity */
 
 	val = frexp(x, &exponent);
-	if (exponent & 1) {
+	if (exponent & 1)
+	{
 		exponent--;
 		val *= 2;
 	}
-	val = ldexp(val + 1.0, exponent/2 - 1);
+	val = ldexp(val + 1.0, exponent / 2 - 1);
 	/* was: val = (val + 1.0)/2.0; val = ldexp(val, exponent/2); */
-	for (exponent = NITER - 1; exponent >= 0; exponent--) {
+	for (exponent = NITER - 1; exponent >= 0; exponent--)
+	{
 		val = (val + x / val) / 2.0;
 	}
 	return val;

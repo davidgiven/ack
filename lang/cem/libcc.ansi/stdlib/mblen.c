@@ -4,15 +4,16 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<limits.h>
+#include <stdlib.h>
+#include <limits.h>
 
-#define	CHAR_SHIFT	8
+#define CHAR_SHIFT 8
 
-int
-(mblen)(const char *s, size_t n)
+int(mblen)(const char* s, size_t n)
 {
-	if (s == (const char *)NULL) return 0;	/* no state dependent codings */
-	if (n <= 0) return 0;
+	if (s == (const char*)NULL)
+		return 0; /* no state dependent codings */
+	if (n <= 0)
+		return 0;
 	return (*s != 0);
 }

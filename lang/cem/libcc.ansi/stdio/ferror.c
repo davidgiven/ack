@@ -3,10 +3,9 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int
-(ferror)(FILE *stream)
+int(ferror)(FILE* stream)
 {
 	return ferror(stream);
 }

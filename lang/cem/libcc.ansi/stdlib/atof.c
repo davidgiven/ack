@@ -4,16 +4,15 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<errno.h>
+#include <stdlib.h>
+#include <errno.h>
 
-double
-(atof)(const char *nptr)
+double(atof)(const char* nptr)
 {
 	double d;
 	int e = errno;
 
-	d = strtod(nptr, (char **) NULL);
+	d = strtod(nptr, (char**)NULL);
 	errno = e;
 	return d;
 }

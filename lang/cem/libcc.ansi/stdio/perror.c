@@ -3,17 +3,17 @@
  */
 /* $Id$ */
 
-#include	<errno.h>
-#include	<stdio.h>
-#include	<string.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
-void
-perror(const char *s)
+void perror(const char* s)
 {
-	if (s && *s) {
-		(void) fputs(s, stderr);
-		(void) fputs(": ", stderr);
+	if (s && *s)
+	{
+		(void)fputs(s, stderr);
+		(void)fputs(": ", stderr);
 	}
-	(void) fputs(strerror(errno), stderr);
-	(void) fputs("\n", stderr);
+	(void)fputs(strerror(errno), stderr);
+	(void)fputs("\n", stderr);
 }

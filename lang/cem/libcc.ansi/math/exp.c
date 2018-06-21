@@ -6,11 +6,10 @@
  */
 /* $Id$ */
 
-#include	<math.h>
-#include	<float.h>
-#include	<errno.h>
-#include	"localmath.h"
-
+#include <math.h>
+#include <float.h>
+#include <errno.h>
+#include "localmath.h"
 
 double
 exp(double x)
@@ -32,41 +31,46 @@ exp(double x)
 		0.63121894374398503557e-3,
 		0.75104028399870046114e-6
 	};
-	double	xn, g;
-	int	n;
-	int	negative = x < 0;
+	double xn, g;
+	int n;
+	int negative = x < 0;
 
-	if (__IsNan(x)) {
+	if (__IsNan(x))
+	{
 		errno = EDOM;
 		return x;
 	}
-	if (x < M_LN_MIN_D) {
+	if (x < M_LN_MIN_D)
+	{
 		errno = ERANGE;
 		return 0.0;
 	}
-	if (x > M_LN_MAX_D) {
+	if (x > M_LN_MAX_D)
+	{
 		errno = ERANGE;
 		return HUGE_VAL;
 	}
 
-	if (negative) x = -x;
- 
+	if (negative)
+		x = -x;
+
 	/* ??? avoid underflow ??? */
 
-	n = x * M_LOG2E + 0.5;	/* 1/ln(2) = log2(e), 0.5 added for rounding */
+	n = x * M_LOG2E + 0.5; /* 1/ln(2) = log2(e), 0.5 added for rounding */
 	xn = n;
 	{
-		double	x1 = (long) x;
-		double	x2 = x - x1;
+		double x1 = (long)x;
+		double x2 = x - x1;
 
-		g = ((x1-xn*0.693359375)+x2) - xn*(-2.1219444005469058277e-4);
+		g = ((x1 - xn * 0.693359375) + x2) - xn * (-2.1219444005469058277e-4);
 	}
-	if (negative) {
+	if (negative)
+	{
 		g = -g;
 		n = -n;
 	}
 	xn = g * g;
 	x = g * POLYNOM2(xn, p);
 	n += 1;
-	return (ldexp(0.5 + x/(POLYNOM3(xn, q) - x), n));
+	return (ldexp(0.5 + x / (POLYNOM3(xn, q) - x), n));
 }

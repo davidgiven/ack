@@ -3,12 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdarg.h>
-#include	"loc_incl.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include "loc_incl.h"
 
-int
-vprintf(const char *format, va_list arg)
+int vprintf(const char* format, va_list arg)
 {
 	return _doprnt(format, arg, stdout);
 }

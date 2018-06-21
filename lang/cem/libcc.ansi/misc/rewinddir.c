@@ -8,30 +8,29 @@
 	rewinddir() to forget about buffered data.
 */
 
-#include	<errno.h>
-#include	<sys/errno.h>
-#include	<sys/types.h>
-#include	<dirent.h>
+#include <errno.h>
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <dirent.h>
 
-extern off_t	_lseek(int d, int offset, int whence);
+extern off_t _lseek(int d, int offset, int whence);
 
 #ifndef NULL
-#define	NULL	0
+#define NULL 0
 #endif
 
 #ifndef SEEK_SET
-#define	SEEK_SET	0
+#define SEEK_SET 0
 #endif
 
-void
-rewinddir(register DIR *dirp)
+void rewinddir(register DIR* dirp)
 {
-	if ( dirp == NULL || dirp->dd_buf == NULL )
-		{
+	if (dirp == NULL || dirp->dd_buf == NULL)
+	{
 		errno = EFAULT;
-		return;			/* invalid pointer */
-		}
+		return; /* invalid pointer */
+	}
 
-	dirp->dd_loc = dirp->dd_size = 0;	/* invalidate buffer */
-	(void)_lseek( dirp->dd_fd, (off_t)0, SEEK_SET );	/* may set errno */
+	dirp->dd_loc = dirp->dd_size = 0; /* invalidate buffer */
+	(void)_lseek(dirp->dd_fd, (off_t)0, SEEK_SET); /* may set errno */
 }

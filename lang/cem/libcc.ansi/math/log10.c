@@ -6,22 +6,25 @@
  */
 /* $Id$ */
 
-#include	<math.h>
-#include	<errno.h>
-#include	"localmath.h"
+#include <math.h>
+#include <errno.h>
+#include "localmath.h"
 
 double
 log10(double x)
 {
-	if (__IsNan(x)) {
+	if (__IsNan(x))
+	{
 		errno = EDOM;
 		return x;
 	}
-	if (x < 0) {
+	if (x < 0)
+	{
 		errno = EDOM;
 		return -HUGE_VAL;
 	}
-	else if (x == 0) {
+	else if (x == 0)
+	{
 		errno = ERANGE;
 		return -HUGE_VAL;
 	}

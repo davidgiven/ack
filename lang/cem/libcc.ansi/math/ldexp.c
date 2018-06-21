@@ -4,9 +4,9 @@
  */
 /* $Id$ */
 
-#include	<math.h>
-#include	<float.h>
-#include	<errno.h>
+#include <math.h>
+#include <float.h>
+#include <errno.h>
 
 double
 ldexp(double fl, int exp)
@@ -14,42 +14,52 @@ ldexp(double fl, int exp)
 	int sign = 1;
 	int currexp;
 
-	if (__IsNan(fl)) {
+	if (__IsNan(fl))
+	{
 		errno = EDOM;
 		return fl;
 	}
-	if (fl == 0.0) return 0.0;
-	if (fl<0) {
+	if (fl == 0.0)
+		return 0.0;
+	if (fl < 0)
+	{
 		fl = -fl;
 		sign = -1;
 	}
-	if (fl > DBL_MAX) {		/* for infinity */
+	if (fl > DBL_MAX)
+	{ /* for infinity */
 		errno = ERANGE;
 		return sign * fl;
 	}
-	fl = frexp(fl,&currexp);
+	fl = frexp(fl, &currexp);
 	exp += currexp;
-	if (exp > 0) {
-		if (exp > DBL_MAX_EXP) {
+	if (exp > 0)
+	{
+		if (exp > DBL_MAX_EXP)
+		{
 			errno = ERANGE;
 			return sign * HUGE_VAL;
 		}
-		while (exp>30) {
-			fl *= (double) (1L << 30);
+		while (exp > 30)
+		{
+			fl *= (double)(1L << 30);
 			exp -= 30;
 		}
-		fl *= (double) (1L << exp);
+		fl *= (double)(1L << exp);
 	}
-	else	{
+	else
+	{
 		/* number need not be normalized */
-		if (exp < DBL_MIN_EXP - DBL_MANT_DIG) {
+		if (exp < DBL_MIN_EXP - DBL_MANT_DIG)
+		{
 			return 0.0;
 		}
-		while (exp<-30) {
-			fl /= (double) (1L << 30);
+		while (exp < -30)
+		{
+			fl /= (double)(1L << 30);
 			exp += 30;
 		}
-		fl /= (double) (1L << -exp);
+		fl /= (double)(1L << -exp);
 	}
 	return sign * fl;
 }

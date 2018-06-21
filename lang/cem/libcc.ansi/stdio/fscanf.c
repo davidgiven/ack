@@ -3,12 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdarg.h>
-#include	"loc_incl.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include "loc_incl.h"
 
-int
-fscanf(FILE *stream, const char *format, ...)
+int fscanf(FILE* stream, const char* format, ...)
 {
 	va_list ap;
 	int retval;

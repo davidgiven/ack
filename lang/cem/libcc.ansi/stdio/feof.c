@@ -3,10 +3,9 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int
-(feof)(FILE *stream)
+int(feof)(FILE* stream)
 {
 	return feof(stream);
 }

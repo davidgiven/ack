@@ -3,10 +3,9 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-void
-(clearerr)(FILE *stream)
+void(clearerr)(FILE* stream)
 {
 	clearerr(stream);
 }

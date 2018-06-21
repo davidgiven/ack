@@ -9,20 +9,22 @@
 #include <string.h>
 #include "loc_incl.h"
 
-FILE *
-tmpfile(void) {
-	static char name_buffer[L_tmpnam] = "/tmp/tmp." ;
-	static char *name = NULL;
-	FILE *file;
+FILE* tmpfile(void)
+{
+	static char name_buffer[L_tmpnam] = "/tmp/tmp.";
+	static char* name = NULL;
+	FILE* file;
 
-	if (!name) {
+	if (!name)
+	{
 		name = name_buffer + strlen(name_buffer);
 		name = _i_compute(getpid(), 10, name, 5);
 		*name = '\0';
 	}
 
-	file = fopen(name_buffer,"wb+");
-	if (!file) return (FILE *)NULL;
-	(void) remove(name_buffer);
+	file = fopen(name_buffer, "wb+");
+	if (!file)
+		return (FILE*)NULL;
+	(void)remove(name_buffer);
 	return file;
 }

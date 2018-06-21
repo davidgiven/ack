@@ -3,15 +3,15 @@
  */
 /* $Id$ */
 
-#include	<limits.h>
-#include	<locale.h>
+#include <limits.h>
+#include <locale.h>
 
 extern struct lconv _lc;
 
-struct lconv *
+struct lconv*
 localeconv(void)
 {
-	register struct lconv *lcp = &_lc;
+	register struct lconv* lcp = &_lc;
 
 	lcp->decimal_point = ".";
 	lcp->thousands_sep = "";

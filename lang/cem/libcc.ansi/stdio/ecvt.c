@@ -1,15 +1,15 @@
 /* $Id$ */
 
-#include    "loc_incl.h"
+#include "loc_incl.h"
 
 #ifndef ACKCONF_NO_STDIO_FLOAT
 
-#include	"../stdlib/ext_fmt.h"
-void _dbl_ext_cvt(double value, struct EXTEND *e);
-char *_ext_str_cvt(struct EXTEND *e, int ndigit, int *decpt, int * sign, int ecvtflag);
+#include "../stdlib/ext_fmt.h"
+void _dbl_ext_cvt(double value, struct EXTEND* e);
+char* _ext_str_cvt(struct EXTEND* e, int ndigit, int* decpt, int* sign, int ecvtflag);
 
-static char *
-cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
+static char*
+cvt(long double value, int ndigit, int* decpt, int* sign, int ecvtflag)
 {
 	struct EXTEND e;
 
@@ -17,17 +17,15 @@ cvt(long double value, int ndigit, int *decpt, int *sign, int ecvtflag)
 	return _ext_str_cvt(&e, ndigit, decpt, sign, ecvtflag);
 }
 
-char *
-_ecvt(long double value, int ndigit, int *decpt, int *sign)
+char* _ecvt(long double value, int ndigit, int* decpt, int* sign)
 {
 
 	return cvt(value, ndigit, decpt, sign, 1);
 }
 
-char *
-_fcvt(long double value, int ndigit, int *decpt, int *sign)
+char* _fcvt(long double value, int ndigit, int* decpt, int* sign)
 {
 	return cvt(value, ndigit, decpt, sign, 0);
 }
 
-#endif	/* ACKCONF_NO_STDIO_FLOAT */
+#endif /* ACKCONF_NO_STDIO_FLOAT */

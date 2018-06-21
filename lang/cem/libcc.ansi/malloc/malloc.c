@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "malloc.h"
 
-block_t __mem_root = {&__mem_root, 0};
+block_t __mem_root = { &__mem_root, 0 };
 block_t* __mem_freelist = &__mem_root;
 
 /* Pulls more memory from the system. */
@@ -57,7 +57,7 @@ void* malloc(size_t size)
 			 * The size field is already set. */
 			prev->next = p->next;
 			__mem_freelist = prev;
-			return (void*) (p+1);
+			return (void*)(p + 1);
 		}
 		else if (p->size > nblocks)
 		{
@@ -67,7 +67,7 @@ void* malloc(size_t size)
 			p += p->size; /* p now points at our new block */
 			p->size = nblocks;
 			__mem_freelist = prev;
-			return (void*) (p+1);
+			return (void*)(p + 1);
 		}
 
 		if (p == __mem_freelist)
@@ -84,7 +84,7 @@ void* malloc(size_t size)
 	}
 }
 
-void free(void *ptr)
+void free(void* ptr)
 {
 	block_t* h = BLOCKOF(ptr);
 	block_t* p;
@@ -118,7 +118,7 @@ void free(void *ptr)
 
 		p = p->next;
 	}
-	
+
 	/* If we can, merge the next block onto the end of h. */
 
 	if ((h + h->size) == p->next)
@@ -148,4 +148,3 @@ void free(void *ptr)
 	/* ...and update the ring pointer. */
 	__mem_freelist = p;
 }
-

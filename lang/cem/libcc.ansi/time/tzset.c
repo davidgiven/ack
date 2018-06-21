@@ -5,11 +5,10 @@
 
 /* This function is present for System V && POSIX */
 
-#include	<time.h>
-#include	"loc_time.h"
+#include <time.h>
+#include "loc_time.h"
 
-void
-tzset(void)
+void tzset(void)
 {
-	_tzset();	/* does the job */
+	_tzset(); /* does the job */
 }

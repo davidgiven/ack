@@ -3,10 +3,9 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-int
-(putchar)(int c)
+int(putchar)(int c)
 {
 	return putchar(c);
 }

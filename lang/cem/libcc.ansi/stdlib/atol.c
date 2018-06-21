@@ -4,24 +4,27 @@
  */
 /* $Id$ */
 
-#include	<ctype.h>
+#include <ctype.h>
 
 /* We do not use strtol here for backwards compatibility in behaviour on
    overflow.
 */
-long
-atol(register const char *nptr)
+long atol(register const char* nptr)
 {
 	long total = 0;
 	int minus = 0;
 
-	while (isspace(*nptr)) nptr++;
-	if (*nptr == '+') nptr++;
-	else if (*nptr == '-') {
+	while (isspace(*nptr))
+		nptr++;
+	if (*nptr == '+')
+		nptr++;
+	else if (*nptr == '-')
+	{
 		minus = 1;
 		nptr++;
 	}
-	while (isdigit(*nptr)) {
+	while (isdigit(*nptr))
+	{
 		total *= 10;
 		total += (*nptr++ - '0');
 	}

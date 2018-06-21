@@ -4,23 +4,25 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
-char *
-strtok(register char *string, const char *separators)
+char* strtok(register char* string, const char* separators)
 {
 	register char *s1, *s2;
-	static char *savestring;
+	static char* savestring;
 
-	if (string == NULL) {
+	if (string == NULL)
+	{
 		string = savestring;
-		if (string == NULL) return (char *)NULL;
+		if (string == NULL)
+			return (char*)NULL;
 	}
 
 	s1 = string + strspn(string, separators);
-	if (*s1 == '\0') {
+	if (*s1 == '\0')
+	{
 		savestring = NULL;
-		return (char *)NULL;
+		return (char*)NULL;
 	}
 
 	s2 = strpbrk(s1, separators);

@@ -4,25 +4,27 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
+#include <stdlib.h>
 
-void *
-bsearch(register const void *key, register const void *base,
-	register size_t nmemb, register size_t size,
-	int (*compar)(const void *, const void *))
+void* bsearch(register const void* key, register const void* base,
+    register size_t nmemb, register size_t size,
+    int (*compar)(const void*, const void*))
 {
-	register const void *mid_point;
-	register int  cmp;
+	register const void* mid_point;
+	register int cmp;
 
-	while (nmemb > 0) {
-		mid_point = (char *)base + size * (nmemb >> 1);
+	while (nmemb > 0)
+	{
+		mid_point = (char*)base + size * (nmemb >> 1);
 		if ((cmp = (*compar)(key, mid_point)) == 0)
-			return (void *)mid_point;
-		if (cmp >= 0) {
-			base  = (char *)mid_point + size;
+			return (void*)mid_point;
+		if (cmp >= 0)
+		{
+			base = (char*)mid_point + size;
 			nmemb = (nmemb - 1) >> 1;
-		} else
+		}
+		else
 			nmemb >>= 1;
 	}
-	return (void *)NULL;
+	return (void*)NULL;
 }

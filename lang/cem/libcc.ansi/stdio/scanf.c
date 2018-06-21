@@ -3,12 +3,11 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<stdarg.h>
-#include	"loc_incl.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include "loc_incl.h"
 
-int
-scanf(const char *format, ...)
+int scanf(const char* format, ...)
 {
 	va_list ap;
 	int retval;
@@ -21,5 +20,3 @@ scanf(const char *format, ...)
 
 	return retval;
 }
-
-

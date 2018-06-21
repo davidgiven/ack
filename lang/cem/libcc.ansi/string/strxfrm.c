@@ -4,18 +4,21 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
 size_t
-strxfrm(register char *s1, register const char *save, register size_t n)
+strxfrm(register char* s1, register const char* save, register size_t n)
 {
-	register const char *s2 = save;
+	register const char* s2 = save;
 
-	while (*s2) {
-		if (n > 1) {
+	while (*s2)
+	{
+		if (n > 1)
+		{
 			n--;
 			*s1++ = *s2++;
-		} else
+		}
+		else
 			s2++;
 	}
 	if (n > 0)

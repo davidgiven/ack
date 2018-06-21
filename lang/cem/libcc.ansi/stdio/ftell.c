@@ -6,26 +6,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include	"loc_incl.h"
+#include "loc_incl.h"
 
-long ftell(FILE *stream)
+long ftell(FILE* stream)
 {
 	long result;
 	int adjust = 0;
 
-	if (io_testflag(stream,_IOREADING))
+	if (io_testflag(stream, _IOREADING))
 		adjust = -stream->_count;
-	else if (io_testflag(stream,_IOWRITING)
-		    && stream->_buf
-		    && !io_testflag(stream,_IONBF))
+	else if (io_testflag(stream, _IOWRITING)
+	    && stream->_buf
+	    && !io_testflag(stream, _IONBF))
 		adjust = stream->_ptr - stream->_buf;
-	else adjust = 0;
+	else
+		adjust = 0;
 
 	result = lseek(fileno(stream), 0, SEEK_CUR);
 
-	if ( result == -1 )
+	if (result == -1)
 		return result;
 
-	result += (long) adjust;
+	result += (long)adjust;
 	return result;
 }

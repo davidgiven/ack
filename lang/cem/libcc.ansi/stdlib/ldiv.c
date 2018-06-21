@@ -4,17 +4,18 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
+#include <stdlib.h>
 
 ldiv_t
 ldiv(register long numer, register long denom)
 {
 	ldiv_t r;
 
-	r.quot = numer / denom;		/* might trap if denom == 0 */
+	r.quot = numer / denom; /* might trap if denom == 0 */
 	r.rem = numer % denom;
 
-	if (r.rem != 0 && (numer > 0) != (r.rem > 0)) {
+	if (r.rem != 0 && (numer > 0) != (r.rem > 0))
+	{
 		r.quot++;
 		r.rem -= denom;
 	}

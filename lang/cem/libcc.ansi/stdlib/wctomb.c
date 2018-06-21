@@ -4,13 +4,13 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<limits.h>
+#include <stdlib.h>
+#include <limits.h>
 
-int
-wctomb(char *s, wchar_t wchar)
+int wctomb(char* s, wchar_t wchar)
 {
-	if (!s) return 0;		/* no state dependent codings */
+	if (!s)
+		return 0; /* no state dependent codings */
 
 	*s = wchar;
 	return 1;

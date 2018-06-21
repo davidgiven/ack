@@ -3,26 +3,27 @@
  */
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
 size_t
-fwrite(const void *ptr, size_t size, size_t nmemb,
-	    register FILE *stream)
+fwrite(const void* ptr, size_t size, size_t nmemb,
+    register FILE* stream)
 {
-	register const unsigned char *cp = ptr;
+	register const unsigned char* cp = ptr;
 	register size_t s;
 	size_t ndone = 0;
 
 	if (size)
-		while ( ndone < nmemb ) {
+		while (ndone < nmemb)
+		{
 			s = size;
-			do {
+			do
+			{
 				if (putc((int)*cp, stream)
-					== EOF)
+				    == EOF)
 					return ndone;
 				cp++;
-			} 
-			while (--s);
+			} while (--s);
 			ndone++;
 		}
 	return ndone;

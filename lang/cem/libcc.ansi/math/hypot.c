@@ -10,25 +10,30 @@
 /* $Id$ */
 
 double
-hypot(double x,double y)
+hypot(double x, double y)
 {
 	/*	Computes sqrt(x*x+y*y), avoiding overflow */
 
-	if (x < 0) x = -x;
-	if (y < 0) y = -y;
-	if (x > y) {
+	if (x < 0)
+		x = -x;
+	if (y < 0)
+		y = -y;
+	if (x > y)
+	{
 		double t = y;
 		y = x;
 		x = t;
 	}
 	/* sqrt(x*x+y*y) = sqrt(y*y*(x*x/(y*y)+1.0)) = y*sqrt(x*x/(y*y)+1.0) */
-	if (y == 0.0) return 0.0;
+	if (y == 0.0)
+		return 0.0;
 	x /= y;
-	return y*sqrt(x*x+1.0);
+	return y * sqrt(x * x + 1.0);
 }
 
-struct complex {
-	double r,i;
+struct complex
+{
+	double r, i;
 };
 
 double

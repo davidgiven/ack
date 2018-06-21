@@ -4,15 +4,14 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
-char *
-strcpy(char *ret, register const char *s2)
+char* strcpy(char* ret, register const char* s2)
 {
-	register char *s1 = ret;
+	register char* s1 = ret;
 
 	while (*s1++ = *s2++)
-		/* EMPTY */ ;
+		/* EMPTY */;
 
 	return ret;
 }

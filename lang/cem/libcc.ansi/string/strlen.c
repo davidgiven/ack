@@ -4,15 +4,15 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
 size_t
-strlen(const char *org)
+strlen(const char* org)
 {
-	register const char *s = org;
+	register const char* s = org;
 
 	while (*s++)
-		/* EMPTY */ ;
+		/* EMPTY */;
 
 	return --s - org;
 }

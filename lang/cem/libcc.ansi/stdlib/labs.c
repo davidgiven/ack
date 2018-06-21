@@ -4,10 +4,9 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
+#include <stdlib.h>
 
-long
-labs(register long l)
+long labs(register long l)
 {
 	return l >= 0 ? l : -l;
 }

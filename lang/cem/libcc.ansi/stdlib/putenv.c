@@ -4,39 +4,45 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<string.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define	ENTRY_INC	10
-#define	rounded(x)	(((x / ENTRY_INC) + 1) * ENTRY_INC)
+#define ENTRY_INC 10
+#define rounded(x) (((x / ENTRY_INC) + 1) * ENTRY_INC)
 
-extern char **environ;
+extern char** environ;
 
-int
-putenv(char *name)
+int putenv(char* name)
 {
-	register char **v = environ;
-	register char *r;
+	register char** v = environ;
+	register char* r;
 	static int size = 0;
 	/* When size != 0, it contains the number of entries in the
 	 * table (including the final NULL pointer). This means that the
 	 * last non-null entry  is environ[size - 2].
 	 */
 
-	if (!name) return 0;
-	if (r = strchr(name, '=')) {
+	if (!name)
+		return 0;
+	if (r = strchr(name, '='))
+	{
 		register const char *p, *q;
 
 		*r = '\0';
 
-		if (v != NULL) {
-			while ((p = *v) != NULL) {
+		if (v != NULL)
+		{
+			while ((p = *v) != NULL)
+			{
 				q = name;
 				while (*q && (*q++ == *p++))
-					/* EMPTY */ ;
-				if (*q || (*p != '=')) {
+					/* EMPTY */;
+				if (*q || (*p != '='))
+				{
 					v++;
-				} else {
+				}
+				else
+				{
 					/* The name was already in the
 					 * environment.
 					 */
@@ -50,23 +56,28 @@ putenv(char *name)
 		v = environ;
 	}
 
-	if (!size) {
-		register char **p;
+	if (!size)
+	{
+		register char** p;
 		register int i = 0;
 
 		if (v)
-			do {
+			do
+			{
 				i++;
 			} while (*v++);
-		if (!(v = malloc(rounded(i) * sizeof(char **))))
+		if (!(v = malloc(rounded(i) * sizeof(char**))))
 			return 1;
 		size = i;
 		p = environ;
 		environ = v;
-		while (*v++ = *p++);		/* copy the environment */
+		while (*v++ = *p++)
+			; /* copy the environment */
 		v = environ;
-	} else if (!(size % ENTRY_INC)) {
-		if (!(v = realloc(environ, rounded(size) * sizeof(char **))))
+	}
+	else if (!(size % ENTRY_INC))
+	{
+		if (!(v = realloc(environ, rounded(size) * sizeof(char**))))
 			return 1;
 		environ = v;
 	}

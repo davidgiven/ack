@@ -4,16 +4,17 @@
  */
 /* $Id$ */
 
-#include	<string.h>
+#include <string.h>
 
 size_t
-strspn(const char *string, const char *in)
+strspn(const char* string, const char* in)
 {
 	register const char *s1, *s2;
 
-	for (s1 = string; *s1; s1++) {
+	for (s1 = string; *s1; s1++)
+	{
 		for (s2 = in; *s2 && *s2 != *s1; s2++)
-			/* EMPTY */ ;
+			/* EMPTY */;
 		if (*s2 == '\0')
 			break;
 	}
