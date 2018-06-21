@@ -2,12 +2,12 @@ include("plat/build.lua")
 
 tabgen {
 	name = "ctype_tab",
-	srcs = { "./ctype/char.tab" }
+	srcs = { "./pure/ctype/char.tab" }
 }
 
 normalrule {
 	name = "ctype_files",
-	ins = { "./ctype/genfiles" },
+	ins = { "./pure/ctype/genfiles" },
 	outleaves = {
 		"isalnum.c",
 		"isalpha.c",
@@ -40,7 +40,7 @@ for _, plat in ipairs(vars.plats) do
 			"./pure/setjmp/*.e",
 			"./pure/math/*.c", -- hypot.c
 			"./pure/math/*.e",
-			"./ctype/*.c",
+			"./pure/ctype/*.c",
 			"./errno/*.c",
 			"./malloc/*.c",
 			"./misc/environ.c", -- don't build everything here as it's all obsolete
