@@ -16,7 +16,7 @@ vars.plats = {
 	"pc86",
 	"rpi",
 	"pdpv7",
-	"em22",
+--	"em22", temporarily disabled due to ass bugs
 }
 vars.plats_with_tests = {
 	"linux68k",

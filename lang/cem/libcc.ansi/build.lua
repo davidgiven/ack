@@ -41,9 +41,9 @@ for _, plat in ipairs(vars.plats) do
 			"./core/math/*.c", -- hypot.c
 			"./core/math/*.e",
 			"./core/ctype/*.c",
+			"./core/misc/*.c",
 			"./errno/*.c",
 			"./malloc/*.c",
-			"./misc/environ.c", -- don't build everything here as it's all obsolete
 			"./signal/*.c",
 			"./assert/*.c",
 			"./stdio/*.c",
