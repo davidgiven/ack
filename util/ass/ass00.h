@@ -256,3 +256,6 @@ struct  proctab {
 	cons_t  pr_off;         /* distance from pb */
 	cons_t  pr_loc;         /* number of bytes locals */
 };
+
+extern void error(const char* string1, ...);
+extern void werror(const char* string1, ...);
