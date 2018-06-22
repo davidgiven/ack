@@ -9,7 +9,10 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 double
 exp(double x)
@@ -74,3 +77,6 @@ exp(double x)
 	n += 1;
 	return (ldexp(0.5 + x / (POLYNOM3(xn, q) - x), n));
 }
+
+#endif
+

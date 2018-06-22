@@ -9,7 +9,10 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 static double
 sinus(double x, int cos_flag)
@@ -106,3 +109,6 @@ cos(double x)
 		x = -x;
 	return sinus(x, 1);
 }
+
+#endif
+

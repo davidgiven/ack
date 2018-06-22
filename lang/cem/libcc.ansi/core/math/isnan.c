@@ -1,3 +1,8 @@
+#include <math.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
+
 __IsNan(double d)
 {
 #if defined(__vax) || defined(__pdp)
@@ -9,3 +14,6 @@ __IsNan(double d)
 #endif
 	return 0;
 }
+
+#endif
+

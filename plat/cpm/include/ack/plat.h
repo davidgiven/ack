@@ -11,9 +11,4 @@
  
 #define ACKCONF_TIME_IS_A_SYSCALL
 
-/* Since the i80 code generator doesn't support floating point, don't include
- * it in the stdio libraries. */
- 
-#define ACKCONF_NO_STDIO_FLOAT
-
 #endif

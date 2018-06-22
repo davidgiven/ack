@@ -10,6 +10,9 @@
 #include <float.h>
 #include <errno.h>
 #include <limits.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double
 pow(double x, double y)
@@ -120,3 +123,6 @@ pow(double x, double y)
 	}
 	return ldexp(fp, newexp);
 }
+
+#endif
+

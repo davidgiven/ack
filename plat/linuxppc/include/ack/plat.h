@@ -11,8 +11,4 @@
  
 /* #define ACKCONF_TIME_IS_A_SYSCALL */
 
-/* We don't support floating point right now. */
- 
-/* #define ACKCONF_NO_STDIO_FLOAT */
-
 #endif

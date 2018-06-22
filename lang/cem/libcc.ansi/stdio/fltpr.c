@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include "loc_incl.h"
 
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 
 static char*
 _pfloat(long double r, register char* s, int n, int flags)
@@ -209,4 +209,4 @@ char* _f_print(va_list* ap, int flags, char* s, char c, int precision)
 	}
 	return s;
 }
-#endif /* ACKCONF_NO_STDIO_FLOAT */
+#endif

@@ -311,7 +311,7 @@ int _doprnt(register const char* fmt, va_list ap, FILE* stream)
 			case 'c':
 				*s++ = va_arg(ap, int);
 				break;
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 			case 'G':
 			case 'g':
 				if ((flags & FL_PRECSPEC) && (precision == 0))
@@ -328,7 +328,7 @@ int _doprnt(register const char* fmt, va_list ap, FILE* stream)
 				flags |= FL_SIGNEDCONV;
 				s = _f_print(&ap, flags, s, c, precision);
 				break;
-#endif /* ACKCONF_NO_STDIO_FLOAT */
+#endif
 			case 'r':
 				ap = va_arg(ap, va_list);
 				fmt = va_arg(ap, char*);

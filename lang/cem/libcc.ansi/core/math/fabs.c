@@ -5,9 +5,15 @@
  * Author: Ceriel J.H. Jacobs
  */
 /* $Id$ */
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double
 fabs(double x)
 {
 	return x < 0 ? -x : x;
 }
+
+#endif
+

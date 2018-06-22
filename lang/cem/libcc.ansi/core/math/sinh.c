@@ -9,7 +9,10 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 static double
 sinh_cosh(double x, int cosh_flag)
@@ -86,3 +89,6 @@ cosh(double x)
 		x = -x;
 	return sinh_cosh(x, 1);
 }
+
+#endif
+

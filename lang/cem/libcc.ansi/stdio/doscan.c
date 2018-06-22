@@ -108,7 +108,7 @@ o_collect(register int c, register FILE* stream, char type,
 	return bufp - 1;
 }
 
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 /* The function f_collect() reads a string that has the format of a
  * floating-point number. The function returns as soon as a format-error
  * is encountered, leaving the offending character in the input. This means
@@ -191,7 +191,7 @@ f_collect(register int c, register FILE* stream, register int width)
 	*bufp = '\0';
 	return bufp - 1;
 }
-#endif /* ACKCONF_NO_STDIO_FLOAT */
+#endif
 
 /*
  * the routine that does the scanning 
@@ -211,7 +211,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 	int reverse; /* reverse the checking in [...] */
 	int kind;
 	register int ic; /* the input character */
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 	long double ld_val;
 #endif
 
@@ -495,7 +495,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 					*str = '\0';
 				}
 				break;
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 			case 'e':
 			case 'E':
 			case 'f':

@@ -7,6 +7,9 @@
 /* $Id$ */
 
 #include <math.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double
 floor(double x)
@@ -18,3 +21,6 @@ floor(double x)
 		fractional part
 	*/
 }
+
+#endif
+

@@ -9,7 +9,10 @@
 #include <float.h>
 #include <math.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 double
 atan(double x)
@@ -75,3 +78,6 @@ atan(double x)
 	x += a[n];
 	return neg ? -x : x;
 }
+
+#endif
+

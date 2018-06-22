@@ -8,7 +8,10 @@
 
 #include <math.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 double
 atan2(double y, double x)
@@ -46,3 +49,6 @@ atan2(double y, double x)
 	}
 	return val + M_PI;
 }
+
+#endif
+

@@ -8,7 +8,10 @@
 
 #include <math.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 static double
 asin_acos(double x, int cosfl)
@@ -90,3 +93,5 @@ acos(double x)
 {
 	return asin_acos(x, 1);
 }
+
+#endif

@@ -9,6 +9,9 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 #define NITER 5
 
@@ -47,3 +50,6 @@ sqrt(double x)
 	}
 	return val;
 }
+
+#endif
+

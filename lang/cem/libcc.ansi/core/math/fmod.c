@@ -5,6 +5,9 @@
 
 #include <math.h>
 #include <errno.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double(fmod)(double x, double y)
 { /* compute fmod(x, y) */
@@ -37,3 +40,6 @@ double(fmod)(double x, double y)
 	}
 	return (neg ? -x : x);
 }
+
+#endif
+

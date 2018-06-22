@@ -1,9 +1,10 @@
 /* $Id$ */
 
 #include <stdlib.h>
+#include <ack/config.h>
 #include "ext_fmt.h"
 
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 
 void _str_ext_cvt(const char* s, char** ss, struct EXTEND* e);
 double _ext_dbl_cvt(struct EXTEND* e);

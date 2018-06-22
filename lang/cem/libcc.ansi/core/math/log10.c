@@ -8,7 +8,10 @@
 
 #include <math.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 double
 log10(double x)
@@ -31,3 +34,6 @@ log10(double x)
 
 	return log(x) / M_LN10;
 }
+
+#endif
+

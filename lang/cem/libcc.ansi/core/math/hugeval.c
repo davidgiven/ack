@@ -7,5 +7,11 @@
 /* $Id$ */
 
 #include <math.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double __huge_val = 1.0e+1000; /* This will generate a warning */
+
+#endif
+

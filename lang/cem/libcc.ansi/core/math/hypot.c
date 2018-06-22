@@ -6,6 +6,9 @@
  */
 
 #include <math.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 /* $Id$ */
 
@@ -41,3 +44,6 @@ cabs(struct complex p_compl)
 {
 	return hypot(p_compl.r, p_compl.i);
 }
+
+#endif
+

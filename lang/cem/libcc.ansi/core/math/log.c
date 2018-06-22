@@ -9,7 +9,10 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
 #include "localmath.h"
+
+#if ACKCONF_WANT_FLOAT
 
 double
 log(double x)
@@ -73,3 +76,6 @@ log(double x)
 	x += z * (-2.121944400546905827679e-4);
 	return x + z * 0.693359375;
 }
+
+#endif
+

@@ -7,6 +7,9 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double
 ldexp(double fl, int exp)
@@ -63,3 +66,6 @@ ldexp(double fl, int exp)
 	}
 	return sign * fl;
 }
+
+#endif
+

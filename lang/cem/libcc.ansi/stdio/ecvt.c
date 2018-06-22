@@ -2,7 +2,7 @@
 
 #include "loc_incl.h"
 
-#ifndef ACKCONF_NO_STDIO_FLOAT
+#if ACKCONF_WANT_STDIO_FLOAT
 
 #include "../stdlib/ext_fmt.h"
 void _dbl_ext_cvt(double value, struct EXTEND* e);
@@ -28,4 +28,4 @@ char* _fcvt(long double value, int ndigit, int* decpt, int* sign)
 	return cvt(value, ndigit, decpt, sign, 0);
 }
 
-#endif /* ACKCONF_NO_STDIO_FLOAT */
+#endif
