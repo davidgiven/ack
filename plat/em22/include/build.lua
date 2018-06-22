@@ -8,7 +8,7 @@ local function addheader(h)
 	packagemap["$(PLATIND)/em22/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("sys/types.h")
 addheader("sys/timeb.h")
 addheader("unistd.h")

@@ -8,7 +8,7 @@ local function addheader(h)
 	packagemap["$(PLATIND)/osx/include/"..h] = "plat/osx/include/"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("sys/dirent.h")
 addheader("sys/mman.h")
 addheader("sys/stat.h")

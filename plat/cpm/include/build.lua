@@ -8,7 +8,7 @@ local function addheader(h)
 	packagemap["$(PLATIND)/cpm/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("cpm.h")
 addheader("unistd.h")
 

@@ -13,6 +13,7 @@ end
 
 addheader("", filenamesof("./*.h"))
 addheader("sys/", filenamesof("./sys/*.h"))
+addheader("ack/", filenamesof("./ack/*.h"))
 
 acklibrary {
 	name = "headers",

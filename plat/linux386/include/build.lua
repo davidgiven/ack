@@ -8,7 +8,7 @@ local function addheader(h)
 	packagemap["$(PLATIND)/linux386/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("sys/ioctl.h")
 addheader("unistd.h")
 

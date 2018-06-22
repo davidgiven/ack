@@ -3,12 +3,16 @@
  * $Revision: 1.1 $
  */
 
-#ifndef _ACK_CONFIG_H
-#define _ACK_CONFIG_H
+#ifndef _ACK_PLAT_H
+#define _ACK_PLAT_H
 
 /* We're providing a time() system call rather than wanting a wrapper around
  * gettimeofday() in the libc. */
  
-#define ACKCONF_TIME_IS_A_SYSCALL
+/* #define ACKCONF_TIME_IS_A_SYSCALL */
+
+/* We don't support floating point right now. */
+ 
+/* #define ACKCONF_NO_STDIO_FLOAT */
 
 #endif
