@@ -79,6 +79,7 @@ extern char** environ;
 
 /* Implemented system calls */
 
+extern int access(const char* pathname, int mode);
 extern int brk(void* ptr);
 extern int close(int d);
 extern int creat(const char* path, mode_t mode);

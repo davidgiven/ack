@@ -2,8 +2,8 @@
 /* mktemp - make a name for a temporary file; only here for backwards compat */
 /* no _-protected system-calls? */
 
-unsigned int getpid(void);
-int access(char*, int);
+#include <stdlib.h>
+#include <unistd.h>
 
 char* mktemp(char* template)
 {
