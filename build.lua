@@ -15,7 +15,7 @@ vars.plats = {
 --	--"qemuppc",
 	"pc86",
 	"rpi",
---	"pdpv7",
+	"pdpv7",
 --	"em22",
 }
 vars.plats_with_tests = {
