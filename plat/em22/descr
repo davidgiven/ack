@@ -24,7 +24,7 @@ var SIZE_FLAG=-sx
 # Override the setting in fe so that files compiled for this platform can see
 # the platform-specific headers.
 
-var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+var C_INCLUDES=-I{EM}/share/ack/em/include -I{EM}/share/ack/include/ansi
 
 name asld
 	from .k.m.a.g

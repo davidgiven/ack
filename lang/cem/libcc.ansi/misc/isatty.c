@@ -3,9 +3,16 @@
  */
 /* $Id$ */
 
-int _isatty(int d);
+#include <stdlib.h>
 
-int isatty(int d)
+#if ACKCONF_WANT_TERMIOS
+
+#include <termios.h>
+int isatty(int fd)
 {
-	return _isatty(d);
+  struct termios dummy;
+
+  return(tcgetattr(fd, &dummy) == 0);
 }
+
+#endif

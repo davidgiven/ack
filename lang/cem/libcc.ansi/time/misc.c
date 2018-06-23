@@ -8,23 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(__BSD4_2)
-
-extern int _gettimeofday(struct timeval* tp, struct timezone* tzp);
-
-#elif !defined(_POSIX_SOURCE) && !defined(__USG)
-#if !defined(_MINIX) /* MINIX has no ftime() */
-struct timeb
-{
-	long time;
-	unsigned short millitm;
-	short timezone;
-	short dstflag;
-};
-void _ftime(struct timeb* bp);
-#endif
-#endif
-
 #include "loc_time.h"
 
 #define RULE_LEN 120
@@ -42,14 +25,7 @@ long _dst_off = 60 * 60;
 int _daylight = 0;
 char* _tzname[2] = { ntstr, dststr };
 
-#if defined(__USG) || defined(_POSIX_SOURCE)
 char* tzname[2] = { ntstr, dststr };
-
-#if defined(__USG)
-long timezone = 0;
-int daylight = 0;
-#endif
-#endif
 
 static struct dsttype
 {
@@ -427,37 +403,10 @@ parseTZ(const char* p)
 
 void _tzset(void)
 {
-#if defined(__BSD4_2)
-
-	struct timeval tv;
-	struct timezone tz;
-
-	_gettimeofday(&tv, &tz);
-	_daylight = tz.tz_dsttime;
-	_timezone = tz.tz_minuteswest * 60L;
-
-#elif !defined(_POSIX_SOURCE) && !defined(__USG)
-
-#if !defined(_MINIX) /* MINIX has no ftime() */
-	struct timeb tim;
-
-	_ftime(&tim);
-	_timezone = tim.timezone * 60L;
-	_daylight = tim.dstflag;
-#endif
-
-#endif /* !_POSIX_SOURCE && !__USG */
-
 	parseTZ(getenv("TZ")); /* should go inside #if */
 
-#if defined(__USG) || defined(_POSIX_SOURCE)
 	tzname[0] = _tzname[0];
 	tzname[1] = _tzname[1];
-#if defined(__USG)
-	timezone = _timezone;
-	daylight = _daylight;
-#endif
-#endif /* __USG || _POSIX_SOURCE */
 }
 
 static int

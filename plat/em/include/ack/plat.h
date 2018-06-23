@@ -3,4 +3,6 @@
 
 #define ACKCONF_TIME_IS_A_SYSCALL
 
+#define ACKCONF_WANT_STANDARD_SIGNALS 0
+
 #endif

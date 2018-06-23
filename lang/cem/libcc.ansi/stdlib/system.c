@@ -4,19 +4,10 @@
  */
 /* $Id$ */
 
-#if defined(_POSIX_SOURCE)
 #include <sys/types.h>
-#endif
 #include <stdlib.h>
 #include <signal.h>
-
-extern char** environ;
-
-extern int _fork(void);
-extern int _wait(int*);
-extern void _exit(int);
-extern void _execve(const char* path, const char** argv, const char** envp);
-extern void _close(int);
+#include <unistd.h>
 
 #define FAIL 127
 
@@ -32,21 +23,21 @@ int system(const char* str)
 	int pid, exitstatus, waitval;
 	int i;
 
-	if ((pid = _fork()) < 0)
+	if ((pid = fork()) < 0)
 		return str ? -1 : 0;
 
 	if (pid == 0)
 	{
 		for (i = 3; i <= 20; i++)
-			_close(i);
+			close(i);
 		if (!str)
 			str = "cd ."; /* just testing for a shell */
 		exec_tab[2] = str; /* fill in command */
-		_execve("/bin/sh", exec_tab, (char const**)environ);
+		execve("/bin/sh", (char* const*)exec_tab, (char* const*)environ);
 		/* get here if execve fails ... */
 		_exit(FAIL); /* see manual page */
 	}
-	while ((waitval = _wait(&exitstatus)) != pid)
+	while ((waitval = wait(&exitstatus)) != pid)
 	{
 		if (waitval == -1)
 			break;

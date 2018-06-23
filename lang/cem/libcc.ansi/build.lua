@@ -50,6 +50,8 @@ for _, plat in ipairs(vars.plats) do
 			"./stdlib/*.c",
 			"./string/*.c",
 			"./time/*.c",
+			"./misc/getpass.c",
+			"./misc/isatty.c",
 		},
 		hdrs = {}, -- must be empty
 		deps = {

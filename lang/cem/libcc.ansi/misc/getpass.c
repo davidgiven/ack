@@ -6,41 +6,67 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#include <sgtty.h>
 #include <fcntl.h>
 
-int _open(const char* path, int flags);
-int _write(int d, const char* buf, int nbytes);
-int _read(int d, char* buf, int nbytes);
-int _close(int d);
+#if ACKCONF_WANT_TERMIOS
 
-int _stty(int, struct sgttyb*);
-int _gtty(int, struct sgttyb*);
+#include <termios.h>
+static int intr;
 
-char* getpass(const char* prompt)
+static void catch(int sig)
 {
-	int i = 0;
-	struct sgttyb tty, ttysave;
-	static char pwdbuf[9];
-	int fd;
-	void (*savesig)(int);
-
-	if ((fd = _open("/dev/tty", O_RDONLY)) < 0)
-		fd = 0;
-	savesig = signal(SIGINT, SIG_IGN);
-	_write(2, prompt, strlen(prompt));
-	_gtty(fd, &tty);
-	ttysave = tty;
-	tty.sg_flags &= ~ECHO;
-	_stty(fd, &tty);
-	i = _read(fd, pwdbuf, 9);
-	while (pwdbuf[i - 1] != '\n')
-		_read(fd, &pwdbuf[i - 1], 1);
-	pwdbuf[i - 1] = '\0';
-	_stty(fd, &ttysave);
-	_write(2, "\n", 1);
-	if (fd != 0)
-		_close(fd);
-	signal(SIGINT, savesig);
-	return (pwdbuf);
+	intr= 1;
 }
+
+char *getpass(const char *prompt)
+{
+	struct sigaction osa, sa;
+	struct termios cooked, raw;
+	static char password[32+1];
+	int fd, n= 0;
+
+	/* Try to open the controlling terminal. */
+	if ((fd= open("/dev/tty", O_RDONLY)) < 0) return NULL;
+
+	/* Trap interrupts unless ignored. */
+	intr= 0;
+	sigaction(SIGINT, NULL, &osa);
+	if (osa.sa_handler != SIG_IGN) {
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags= 0;
+		sa.sa_handler= catch;
+		sigaction(SIGINT, &sa, &osa);
+	}
+
+	/* Set the terminal to non-echo mode. */
+	tcgetattr(fd, &cooked);
+	raw= cooked;
+	raw.c_iflag|= ICRNL;
+	raw.c_lflag&= ~ECHO;
+	raw.c_lflag|= ECHONL;
+	raw.c_oflag|= OPOST | ONLCR;
+	tcsetattr(fd, TCSANOW, &raw);
+
+	/* Print the prompt.  (After setting non-echo!) */
+	write(2, prompt, strlen(prompt));
+
+	/* Read the password, 32 characters max. */
+	while (read(fd, password+n, 1) > 0) {
+		if (password[n] == '\n') break;
+		if (n < 32) n++;
+	}
+	password[n]= 0;
+
+	/* Terminal back to cooked mode. */
+	tcsetattr(fd, TCSANOW, &cooked);
+
+	close(fd);
+
+	/* Interrupt? */
+	sigaction(SIGINT, &osa, NULL);
+	if (intr) raise(SIGINT);
+
+	return password;
+}
+
+#endif
