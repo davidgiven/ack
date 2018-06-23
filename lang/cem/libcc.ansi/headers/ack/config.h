@@ -34,4 +34,8 @@
 #define ACKCONF_WANT_MALLOC 1
 #endif
 
+#ifndef ACKCONF_WANT_STDIO
+#define ACKCONF_WANT_STDIO 1
+#endif
+
 #endif

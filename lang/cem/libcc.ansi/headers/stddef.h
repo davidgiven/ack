@@ -9,6 +9,7 @@
 #ifndef _STDDEF_H
 #define	_STDDEF_H
 
+#include <ack/config.h>
 #include <stdint.h>
 
 #define	NULL 0
