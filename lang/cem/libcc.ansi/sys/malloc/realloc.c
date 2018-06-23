@@ -4,6 +4,8 @@
 #include <string.h>
 #include "malloc.h"
 
+#if ACKCONF_WANT_MALLOC
+
 void* realloc(void* ptr, size_t size)
 {
 	block_t* h;
@@ -39,3 +41,5 @@ void* realloc(void* ptr, size_t size)
 	free(ptr);
 	return newptr;
 }
+
+#endif

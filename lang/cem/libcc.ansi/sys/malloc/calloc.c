@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#if ACKCONF_WANT_MALLOC
+
 void* calloc(size_t nmemb, size_t size)
 {
 	size_t bytes = nmemb * size;
@@ -22,3 +24,5 @@ void* calloc(size_t nmemb, size_t size)
 	memset(ptr, 0, bytes);
 	return ptr;
 }
+
+#endif

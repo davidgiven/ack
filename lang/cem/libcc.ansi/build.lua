@@ -43,8 +43,7 @@ for _, plat in ipairs(vars.plats) do
 			"./core/math/*.e",
 			"./core/ctype/*.c",
 			"./core/misc/*.c",
-			"./errno/*.c",
-			"./malloc/*.c",
+			"./sys/malloc/*.c",
 			"./signal/*.c",
 			"./assert/*.c",
 			"./stdio/*.c",
@@ -58,7 +57,7 @@ for _, plat in ipairs(vars.plats) do
 		deps = {
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",
-			"./malloc/malloc.h",
+			"./sys/malloc/malloc.h",
 			"./core/math/localmath.h",
 			"./core/stdlib/ext_fmt.h",
 			"./stdio/loc_incl.h",

@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include "malloc.h"
 
+#if ACKCONF_WANT_MALLOC
+
 block_t __mem_root = { &__mem_root, 0 };
 block_t* __mem_freelist = &__mem_root;
 
@@ -148,3 +150,5 @@ void free(void* ptr)
 	/* ...and update the ring pointer. */
 	__mem_freelist = p;
 }
+
+#endif
