@@ -11,7 +11,8 @@ typedef unsigned int		ino_t;
 typedef unsigned short		mode_t;
 typedef unsigned short		nlink_t;
 typedef int			pid_t;
-typedef ptrdiff_t		ssize_t;
 typedef unsigned int		uid_t;
+typedef long time_t;
+typedef int suseconds_t;
 
 #endif

@@ -48,13 +48,13 @@
 
     #define _NSIG           16      /* Biggest signal number + 1
                                     (not including real-time signals).  */
-    typedef void (*sighandler_t)(int);
     typedef uint16_t sigset_t;
 
     struct sigaction;
 #else
     #include <ack/signal.h>
 #endif
+typedef void (*sighandler_t)(int);
 
 /* Time handling. */
 

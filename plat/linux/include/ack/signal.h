@@ -54,8 +54,6 @@ typedef int sig_atomic_t;
 #define SIG_SETMASK     2
 typedef unsigned long sigset_t;
 
-typedef void (*sighandler_t)(int);
-
 /* sa_flags */
 #define SA_NODEFER      0x40000000UL
 #define SA_RESETHAND    0x80000000UL
