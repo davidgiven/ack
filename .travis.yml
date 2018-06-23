@@ -12,10 +12,10 @@ matrix:
             sudo: false
             dist: trusty
             compiler: clang
-#        -
-#            os: osx
-#            env: HOMEBREW_NO_AUTO_UPDATE=1
-#            compiler: clang
+        -
+            os: osx
+            env: HOMEBREW_NO_AUTO_UPDATE=1
+            compiler: clang
 
 git:
     depth: 10
