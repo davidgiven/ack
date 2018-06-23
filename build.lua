@@ -14,7 +14,7 @@ vars.plats = {
 	"osxppc",
 --	--"qemuppc",
 	"pc86",
---	"rpi",
+	"rpi",
 --	"pdpv7",
 --	"em22",
 }

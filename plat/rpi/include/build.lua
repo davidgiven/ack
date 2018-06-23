@@ -11,8 +11,8 @@ end
 addheader("ack/plat.h")
 addheader("pi.h")
 addheader("sys/select.h")
+addheader("sys/types.h")
 addheader("termios.h")
-addheader("unistd.h")
 
 acklibrary {
 	name = "headers",
