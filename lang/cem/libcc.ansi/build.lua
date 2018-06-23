@@ -39,16 +39,15 @@ for _, plat in ipairs(vars.plats) do
 			"./core/locale/*.c",
 			"./core/setjmp/*.c",
 			"./core/setjmp/*.e",
-			"./core/math/*.c", -- hypot.c
+			"./core/math/*.c",
 			"./core/math/*.e",
 			"./core/ctype/*.c",
 			"./core/misc/*.c",
+			"./core/time/*.c",
 			"./sys/malloc/*.c",
 			"./sys/exit/*.c",
 			"./sys/stdio/*.c",
 			"./sys/misc/*.c",
-			"./stdio/*.c",
-			"./time/*.c",
 		},
 		hdrs = {}, -- must be empty
 		deps = {

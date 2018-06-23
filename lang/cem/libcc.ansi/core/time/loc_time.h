@@ -17,8 +17,8 @@ extern const int _ytab[2][12];
 extern const char *_days[];
 extern const char *_months[];
 
-void _tzset(void);
-unsigned _dstget(struct tm *timep);
+extern void _tzset(void);
+extern unsigned _dstget(struct tm *timep);
 
 extern long _timezone;
 extern long _dst_off;
