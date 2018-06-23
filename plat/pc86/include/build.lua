@@ -9,7 +9,7 @@ local function addheader(h)
 end
 
 addheader("ack/plat.h")
-addheader("unistd.h")
+addheader("sys/types.h")
 
 acklibrary {
 	name = "headers",

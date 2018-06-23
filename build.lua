@@ -13,7 +13,7 @@ vars.plats = {
 	"osx386",
 	"osxppc",
 --	--"qemuppc",
---	"pc86",
+	"pc86",
 --	"rpi",
 --	"pdpv7",
 --	"em22",
@@ -23,7 +23,7 @@ vars.plats_with_tests = {
 	"linux386",
 	"linuxppc",
 --	--"qemuppc",
---	"pc86",
+	"pc86",
 }
 
 local plat_packages = {}
