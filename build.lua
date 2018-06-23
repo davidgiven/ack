@@ -9,7 +9,7 @@ vars.plats = {
 	"cpm",
 	"linux386",
 	"linux68k",
---	"linuxppc",
+	"linuxppc",
 --	"osx386",
 --	"osxppc",
 --	--"qemuppc",
@@ -21,7 +21,7 @@ vars.plats = {
 vars.plats_with_tests = {
 	"linux68k",
 	"linux386",
---	"linuxppc",
+	"linuxppc",
 --	--"qemuppc",
 --	"pc86",
 }

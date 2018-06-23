@@ -50,6 +50,8 @@
                                     (not including real-time signals).  */
     typedef void (*sighandler_t)(int);
     typedef uint16_t sigset_t;
+
+    struct sigaction;
 #else
     #include <ack/signal.h>
 #endif
@@ -86,6 +88,7 @@ extern int kill(pid_t old, int sig);
 extern int open(const char* path, int access, ...);
 extern int raise(int signum);
 extern int settimeofday(const struct timeval* tv, const struct timezone* tz);
+extern int sigaction(int, const struct sigaction *, struct sigaction *);
 extern int sigprocmask(int, const sigset_t *, sigset_t *);
 extern int unlink(const char* path);
 extern off_t lseek(int fildes, off_t offset, int whence);

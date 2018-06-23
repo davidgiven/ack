@@ -56,4 +56,21 @@ typedef unsigned long sigset_t;
 
 typedef void (*sighandler_t)(int);
 
+/* sa_flags */
+#define SA_NODEFER      0x40000000UL
+#define SA_RESETHAND    0x80000000UL
+
+struct __siginfo;
+struct sigaction {
+	union {
+		void (*__sa_handler)(int);
+		void (*__sa_sigaction)(int, struct __siginfo *, void *);
+	} __sigaction_u;
+	sigset_t sa_mask;
+	unsigned long sa_flags;
+	void (*sa_restorer)(void);
+};
+#define sa_handler __sigaction_u.__sa_handler
+#define sa_sigaction __sigaction_u.__sa_sigaction
+
 #endif
