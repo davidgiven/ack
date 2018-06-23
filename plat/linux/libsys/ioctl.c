@@ -7,5 +7,5 @@
  */
 int ioctl(int fd, unsigned long request, void *argp)
 {
-	return _syscall(__NR_ioctl, fd, request, argp);
+	return _syscall(__NR_ioctl, fd, request, (quad)argp);
 }

@@ -20,7 +20,7 @@ void _sys_write_tty(char c)
 		_sys_rawwrite('\r');
 }
 
-int write(int fd, void* buffer, size_t count)
+ssize_t write(int fd, void* buffer, size_t count)
 {
 	int i;
 	char* p = buffer;

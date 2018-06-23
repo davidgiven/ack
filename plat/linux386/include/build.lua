@@ -4,13 +4,15 @@ headermap = {}
 packagemap = {}
 
 local function addheader(h)
-	headermap[h] = "./"..h
-	packagemap["$(PLATIND)/linux386/include/"..h] = "./"..h
+	headermap[h] = "plat/linux/include/"..h
+	packagemap["$(PLATIND)/linux386/include/"..h] = "plat/linux/include/"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
+addheader("ack/fcntl.h")
+addheader("ack/signal.h")
 addheader("sys/ioctl.h")
-addheader("unistd.h")
+addheader("sys/types.h")
 
 acklibrary {
 	name = "headers",

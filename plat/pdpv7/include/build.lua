@@ -8,10 +8,10 @@ local function addheader(h)
 	packagemap["$(PLATIND)/pdpv7/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("sys/select.h")
+addheader("sys/types.h")
 addheader("termios.h")
-addheader("unistd.h")
 
 acklibrary {
 	name = "headers",

@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "libsys.h"
 
-int read(int fd, void* buffer, size_t count)
+ssize_t read(int fd, void* buffer, size_t count)
 {
 	char i;
 	

@@ -51,9 +51,9 @@ EXIT:
 	jsr	pc,__exit
 	sys     1
 
-WRITE:	jmp	__write
+WRITE:	jmp	_write
 
-BRK:	jmp	__brk
+BRK:	jmp	_brk
 
 	.sect .data
 hol0:   .data2 0,0     ! line no

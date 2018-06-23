@@ -1,6 +1,11 @@
 #!/bin/sh
 echo ""
 
+if [ "$1" = "" ]; then
+	echo "No tests."
+	exit 0
+fi
+
 succeeding="$(find "$@" -size 0)"
 notsucceeding="$(find "$@" ! -size 0)"
 if [ "$notsucceeding" != "" ]; then

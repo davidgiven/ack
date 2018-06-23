@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/select.h>
 #include <time.h>
 #include <pi.h>
 #include "libsys.h"

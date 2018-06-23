@@ -8,12 +8,14 @@ local function addheader(h)
 	packagemap["$(PLATIND)/osx/include/"..h] = "plat/osx/include/"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
+addheader("ack/signal.h")
+addheader("ack/fcntl.h")
 addheader("sys/dirent.h")
 addheader("sys/mman.h")
 addheader("sys/stat.h")
 addheader("sys/types.h")
-addheader("unistd.h")
+addheader("sys/ioctl.h")
 
 acklibrary {
 	name = "headers",
