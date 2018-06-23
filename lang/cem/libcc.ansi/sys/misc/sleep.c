@@ -3,11 +3,12 @@
  */
 /* $Id$ */
 
+#include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
 #include <setjmp.h>
 
-int _alarm(int n);
-void _pause(void);
+#if ACKCONF_WANT_EMULATED_SLEEP
 
 static jmp_buf setjmpbuf;
 
@@ -28,10 +29,10 @@ void sleep(int n)
 	if (setjmp(setjmpbuf))
 	{
 		signal(SIGALRM, oldsig);
-		_alarm(oldalarm);
+		alarm(oldalarm);
 		return;
 	}
-	oldalarm = _alarm(5000); /* Who cares how long, as long
+	oldalarm = alarm(5000); /* Who cares how long, as long
 					 * as it is long enough
 					 */
 	if (oldalarm > n)
@@ -42,10 +43,12 @@ void sleep(int n)
 		oldalarm = 1;
 	}
 	oldsig = signal(SIGALRM, alfun);
-	_alarm(n);
+	alarm(n);
 	for (;;)
 	{
 		/* allow for other handlers ... */
-		_pause();
+		pause();
 	}
 }
+
+#endif

@@ -9,6 +9,8 @@
 #include <signal.h>
 #include <unistd.h>
 
+#if ACKCONF_WANT_EMULATED_SYSTEM
+
 #define FAIL 127
 
 static const char* exec_tab[] = {
@@ -56,3 +58,5 @@ int system(const char* str)
 	}
 	return exitstatus;
 }
+
+#endif

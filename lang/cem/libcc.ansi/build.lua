@@ -46,13 +46,9 @@ for _, plat in ipairs(vars.plats) do
 			"./sys/malloc/*.c",
 			"./sys/exit/*.c",
 			"./sys/stdio/*.c",
-			"./assert/*.c",
+			"./sys/misc/*.c",
 			"./stdio/*.c",
-			"./stdlib/*.c",
-			"./string/*.c",
 			"./time/*.c",
-			"./misc/getpass.c",
-			"./misc/isatty.c",
 		},
 		hdrs = {}, -- must be empty
 		deps = {

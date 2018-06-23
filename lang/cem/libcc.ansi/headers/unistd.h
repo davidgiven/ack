@@ -43,8 +43,11 @@
     #define SIG_DFL ((sighandler_t) 0)            /* Default action.  */
     #define SIG_IGN ((sighandler_t) 1)            /* Ignore signal.  */
 
+    #define SIGINT          2       /* Terminal interrupt */
+    #define SIGQUIT         3       /* Terminal quit */
     #define SIGABRT         6       /* Abort (ANSI) */
     #define SIGILL          11      /* Illegal instruction */
+    #define SIGALRM         14      /* Alarm clock */
 
     #define _NSIG           16      /* Biggest signal number + 1
                                     (not including real-time signals).  */
@@ -79,6 +82,9 @@ extern char** environ;
 extern int brk(void* ptr);
 extern int close(int d);
 extern int creat(const char* path, mode_t mode);
+extern int dup(int oldfd);
+extern int dup2(int oldfd, int newfd);
+extern int execl(const char *path, const char* arg, ...);
 extern int execve(const char *path, char *const argv[], char *const envp[]);
 extern int fcntl(int fd, int op, ...);
 extern int gettimeofday(struct timeval* tv, struct timezone* tz);
@@ -86,6 +92,8 @@ extern int isatty(int d);
 extern int isatty(int d);
 extern int kill(pid_t old, int sig);
 extern int open(const char* path, int access, ...);
+extern int pause(void);
+extern int pipe(int pipefd[2]);
 extern int raise(int signum);
 extern int settimeofday(const struct timeval* tv, const struct timezone* tz);
 extern int sigaction(int, const struct sigaction *, struct sigaction *);
@@ -94,12 +102,12 @@ extern int unlink(const char* path);
 extern off_t lseek(int fildes, off_t offset, int whence);
 extern pid_t fork(void);
 extern pid_t getpid(void);
+extern unsigned int alarm(unsigned int seconds);
 extern pid_t wait(int* wstatus);
 extern sighandler_t signal(int signum, sighandler_t handler);
 extern ssize_t read(int fd, void* buffer, size_t count);
 extern ssize_t write(int fd, void* buffer, size_t count);
 extern void _exit(int);
 extern void* sbrk(int increment);
-
 
 #endif

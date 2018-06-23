@@ -29,6 +29,26 @@
 #define ACKCONF_WANT_EMULATED_RAISE 1
 #endif
 
+#ifndef ACKCONF_WANT_EMULATED_REMOVE
+/* Implement remove() as unlink(). */
+#define ACKCONF_WANT_EMULATED_REMOVE 1
+#endif
+
+#ifndef ACKCONF_WANT_EMULATED_SYSTEM
+/* Implement system() as fork()/execve()/wait(). */
+#define ACKCONF_WANT_EMULATED_SYSTEM 1
+#endif
+
+#ifndef ACKCONF_WANT_EMULATED_SLEEP
+/* Implement sleep() with SIGALRM. */
+#define ACKCONF_WANT_EMULATED_SLEEP 1
+#endif
+
+#ifndef ACKCONF_WANT_EMULATED_POPEN
+/* Implement popen() with fork()/dup2() etc. */
+#define ACKCONF_WANT_EMULATED_POPEN 1
+#endif
+
 #ifndef ACKCONF_WANT_MALLOC
 /* Uses sbrk() to get memory from the system. */
 #define ACKCONF_WANT_MALLOC 1
