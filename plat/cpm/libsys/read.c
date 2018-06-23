@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <cpm.h>
 
-int read(int fd, void* buffer, size_t count)
+ssize_t read(int fd, void* buffer, size_t count)
 {
 	short save;
 	unsigned char before_n;
@@ -37,7 +37,7 @@ int read(int fd, void* buffer, size_t count)
 	/* Read one line from the console. */
 	((unsigned char*)buffer)[-2] = before_n;
 	cpm_bc_register = CPM_BDOS_READ_CONSOLE_BUFFER;
-	cpm_de_register = (char*)buffer - 2;
+	cpm_de_register = (uint16_t)(char*)buffer - 2;
 	cpm_bdos();
 	before_n = ((unsigned char*)buffer)[-1];
 
@@ -46,7 +46,7 @@ int read(int fd, void* buffer, size_t count)
 
 	/* Echo '\n' to console. */
 	cpm_bc_register = CPM_BDOS_PRINT_STRING;
-	cpm_de_register = "\r\n$";
+	cpm_de_register = (uint16_t)"\r\n$";
 	cpm_bdos();
 
 	return (int)before_n + 1;

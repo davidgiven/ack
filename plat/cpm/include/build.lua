@@ -9,8 +9,8 @@ local function addheader(h)
 end
 
 addheader("ack/plat.h")
+addheader("sys/types.h")
 addheader("cpm.h")
-addheader("unistd.h")
 
 acklibrary {
 	name = "headers",

@@ -7,23 +7,23 @@ vars.ackcflags = {
 vars.ackldflags = {}
 vars.plats = {
 	"cpm",
-	"linux386",
-	"linux68k",
-	"linuxppc",
-	"osx386",
-	"osxppc",
-	--"qemuppc",
-	"pc86",
-	"rpi",
-	"pdpv7",
-	"em22",
+--	"linux386",
+--	"linux68k",
+--	"linuxppc",
+--	"osx386",
+--	"osxppc",
+--	--"qemuppc",
+--	"pc86",
+--	"rpi",
+--	"pdpv7",
+--	"em22",
 }
 vars.plats_with_tests = {
-	"linux68k",
-	"linux386",
-	"linuxppc",
-	--"qemuppc",
-	"pc86",
+--	"linux68k",
+--	"linux386",
+--	"linuxppc",
+--	--"qemuppc",
+--	"pc86",
 }
 
 local plat_packages = {}
