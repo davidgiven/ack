@@ -6,6 +6,9 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <ack/config.h>
+
+#if ACKCONF_WANT_FLOAT
 
 double(atof)(const char* nptr)
 {
@@ -16,3 +19,5 @@ double(atof)(const char* nptr)
 	errno = e;
 	return d;
 }
+
+#endif

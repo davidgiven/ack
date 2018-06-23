@@ -17,6 +17,8 @@
 #include <ctype.h>
 #include <ack/config.h>
 
+#if ACKCONF_WANT_FLOAT
+
 static int b64_add(struct mantissa* e1, struct mantissa* e2);
 static b64_sft(struct mantissa* e1, int n);
 
@@ -494,7 +496,7 @@ static add_exponent(struct EXTEND* e, int exp)
 	}
 }
 
-_str_ext_cvt(const char* s, char** ss, struct EXTEND* e)
+void _str_ext_cvt(const char* s, char** ss, struct EXTEND* e)
 {
 	/*	Like strtod, but for extended precision */
 	register int c;
@@ -781,7 +783,7 @@ char* _ext_str_cvt(struct EXTEND* e, int ndigit, int* decpt, int* sign, int ecvt
 	return buf;
 }
 
-_dbl_ext_cvt(double value, struct EXTEND* e)
+void _dbl_ext_cvt(double value, struct EXTEND* e)
 {
 	/*	Convert double to extended
 	*/
@@ -833,3 +835,5 @@ _ext_dbl_cvt(struct EXTEND* e)
 	}
 	return f;
 }
+
+#endif

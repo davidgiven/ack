@@ -1,12 +1,11 @@
 /* $Id$ */
 
-#include "loc_incl.h"
+#include <math.h>
+#include <ack/config.h>
 
 #if ACKCONF_WANT_STDIO_FLOAT
 
-#include "../stdlib/ext_fmt.h"
-void _dbl_ext_cvt(double value, struct EXTEND* e);
-char* _ext_str_cvt(struct EXTEND* e, int ndigit, int* decpt, int* sign, int ecvtflag);
+#include "ext_fmt.h"
 
 static char*
 cvt(long double value, int ndigit, int* decpt, int* sign, int ecvtflag)
