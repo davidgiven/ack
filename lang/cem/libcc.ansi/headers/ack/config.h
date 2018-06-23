@@ -49,6 +49,11 @@
 #define ACKCONF_WANT_EMULATED_POPEN 1
 #endif
 
+#ifndef ACKCONF_WANT_EMULATED_TIME
+/* Implement time() with gettimeofday(). */
+#define ACKCONF_WANT_EMULATED_TIME 1
+#endif
+
 #ifndef ACKCONF_WANT_MALLOC
 /* Uses sbrk() to get memory from the system. */
 #define ACKCONF_WANT_MALLOC 1

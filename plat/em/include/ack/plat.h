@@ -1,8 +1,7 @@
 #ifndef _ACK_PLAT_H
 #define _ACK_PLAT_H
 
-#define ACKCONF_TIME_IS_A_SYSCALL
-
+#define ACKCONF_WANT_EMULATED_TIME 0
 #define ACKCONF_WANT_STANDARD_SIGNALS 0
 
 #endif

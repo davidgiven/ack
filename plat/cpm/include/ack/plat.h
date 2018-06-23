@@ -9,6 +9,6 @@
 /* We're providing a time() system call rather than wanting a wrapper around
  * gettimeofday() in the libc. */
  
-#define ACKCONF_TIME_IS_A_SYSCALL
+#define ACKCONF_WANT_EMULATED_TIME 0
 
 #endif

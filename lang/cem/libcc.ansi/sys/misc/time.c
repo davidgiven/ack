@@ -8,10 +8,9 @@
 #include <time.h>
 #include <ack/config.h>
 
-#ifndef ACKCONF_TIME_IS_A_SYSCALL
+#if ACKCONF_WANT_EMULATED_TIME
 
-time_t
-time(time_t* timer)
+time_t time(time_t* timer)
 {
 	struct timeval tv;
 	struct timezone tz;
