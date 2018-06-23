@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
 
 void* calloc(size_t nmemb, size_t size)
 {

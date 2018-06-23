@@ -4,8 +4,8 @@ headermap = {}
 packagemap = {}
 
 local function addheader(h)
-	headermap[h] = "./"..h
-	packagemap["$(PLATIND)/linux386/include/"..h] = "./"..h
+	headermap[h] = "plat/linux/include/"..h
+	packagemap["$(PLATIND)/linux386/include/"..h] = "plat/linux/include/"..h
 end
 
 addheader("ack/plat.h")

@@ -11,9 +11,9 @@ enum
 	O_WRONLY = 1,
 	O_RDWR = 2,
 	
-	O_CREAT = 0x40,
-	O_TRUNC = 0x200,
-	O_APPEND = 0x400
+	O_CREAT  = 00000100,
+	O_TRUNC  = 00001000,
+	O_APPEND = 00002000
 };
 
 #endif
