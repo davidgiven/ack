@@ -14,7 +14,8 @@ int _doprnt(const char *format, va_list ap, FILE *stream);
 int _doscan(FILE * stream, const char *format, va_list ap);
 char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
 char *_f_print(va_list *ap, int flags, char *s, char c, int precision);
-void __cleanup(void);
+
+extern void __register_stdio_cleanup(void);
 
 FILE *popen(const char *command, const char *type);
 FILE *fdopen(int fd, const char *mode);

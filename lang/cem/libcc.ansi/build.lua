@@ -44,7 +44,7 @@ for _, plat in ipairs(vars.plats) do
 			"./core/ctype/*.c",
 			"./core/misc/*.c",
 			"./sys/malloc/*.c",
-			"./signal/*.c",
+			"./sys/exit/*.c",
 			"./assert/*.c",
 			"./stdio/*.c",
 			"./stdlib/*.c",

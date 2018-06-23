@@ -7,29 +7,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
-#define NEXITS 32
+#include "atexits.h"
 
 void (*__functab[NEXITS])(void);
 int __funccnt = 0;
 
-/* only flush output buffers when necessary */
-int (*_clean)(void) = NULL;
-
-static void
-_calls(void)
-{
-	register int i = __funccnt;
-
-	/* "Called in reversed order of their registration" */
-	while (--i >= 0)
-		(*__functab[i])();
-}
-
 void exit(int status)
 {
-	_calls();
-	if (_clean)
-		_clean();
+	/* "Called in reversed order of their registration" */
+	while (__funccnt >= 0)
+		(*__functab[__funccnt])();
+
 	_exit(status);
 }

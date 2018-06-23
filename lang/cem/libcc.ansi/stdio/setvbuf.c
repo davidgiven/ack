@@ -13,7 +13,7 @@ int setvbuf(register FILE* stream, char* buf, int mode, size_t size)
 {
 	int retval = 0;
 
-	_clean = __cleanup;
+	__register_stdio_cleanup();
 	if (mode != _IOFBF && mode != _IOLBF && mode != _IONBF)
 		return EOF;
 

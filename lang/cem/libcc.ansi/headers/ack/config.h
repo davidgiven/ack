@@ -24,4 +24,14 @@
 #define ACKCONF_WANT_TERMIOS 0
 #endif
 
+#ifndef ACKCONF_WANT_EMULATED_RAISE
+/* Implement raise() in terms of kill() and getpid(). */
+#define ACKCONF_WANT_EMULATED_RAISE 1
+#endif
+
+#ifndef ACKCONF_WANT_MALLOC
+/* Uses sbrk() to get memory from the system. */
+#define ACKCONF_WANT_MALLOC 1
+#endif
+
 #endif

@@ -68,11 +68,21 @@ int fflush(FILE* stream)
 	return EOF;
 }
 
-void __cleanup(void)
+static void cleanup(void)
 {
 	register int i;
 
 	for (i = 0; i < FOPEN_MAX; i++)
 		if (__iotab[i] && io_testflag(__iotab[i], _IOWRITING))
 			(void)fflush(__iotab[i]);
+}
+
+void __register_stdio_cleanup(void)
+{
+	static char registered = 0;
+	if (!registered)
+	{
+		registered = 1;
+		atexit(cleanup);
+	}
 }

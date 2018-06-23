@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include "loc_incl.h"
 
-extern void (*_clean)(void);
-
 static int
 do_write(int d, char* buf, int nbytes)
 {
@@ -28,7 +26,7 @@ do_write(int d, char* buf, int nbytes)
 
 int __flushbuf(int c, FILE* stream)
 {
-	_clean = __cleanup;
+	__register_stdio_cleanup();
 	if (fileno(stream) < 0)
 		return EOF;
 	if (!io_testflag(stream, _IOWRITE))

@@ -4,10 +4,11 @@
  */
 /* $Id$ */
 
-#if defined(_POSIX_SOURCE)
+#include <stdlib.h>
 #include <sys/types.h>
-#endif
 #include <signal.h>
+
+#if ACKCONF_WANT_EMULATED_RAISE
 
 int raise(int sig)
 {
@@ -15,3 +16,5 @@ int raise(int sig)
 		return -1;
 	return kill(getpid(), sig);
 }
+
+#endif
