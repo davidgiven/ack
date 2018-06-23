@@ -11,4 +11,9 @@
  
 /* #define ACKCONF_TIME_IS_A_SYSCALL */
 
+/* Linux has its own O_ definitions. */
+
+#define ACKCONF_WANT_STANDARD_O 0
+#define ACKCONF_WANT_STANDARD_SIGNALS 0
+
 #endif

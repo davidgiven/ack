@@ -7,7 +7,7 @@ vars.ackcflags = {
 vars.ackldflags = {}
 vars.plats = {
 	"cpm",
---	"linux386",
+	"linux386",
 --	"linux68k",
 --	"linuxppc",
 --	"osx386",
@@ -20,7 +20,7 @@ vars.plats = {
 }
 vars.plats_with_tests = {
 --	"linux68k",
---	"linux386",
+	"linux386",
 --	"linuxppc",
 --	--"qemuppc",
 --	"pc86",

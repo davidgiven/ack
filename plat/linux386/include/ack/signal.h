@@ -1,76 +1,7 @@
-/*
- * unistd.h - standard system calls
- */
-/* $Id$ */
+#ifndef _ACK_SIGNAL_H
+#define _ACK_SIGNAL_H
 
-#ifndef _UNISTD_H
-#define _UNISTD_H
-
-#include <stddef.h>
-#include <time.h>
-
-/* Types */
-
-typedef int pid_t;
-typedef int mode_t;
-
-typedef long suseconds_t;
-
-/* Time handling. */
-
-struct timeval
-{
-	time_t tv_sec;
-	suseconds_t tv_usec;
-};
-
-struct timezone
-{
-	int tz_minuteswest;
-	int tz_dsttime;
-}; /* obsolete, unused */
-
-extern int gettimeofday(struct timeval* tv, struct timezone* tz);
-extern int settimeofday(const struct timeval* tv, const struct timezone* tz);
-
-/* File access. */
-
-enum
-{
-	O_ACCMODE = 0x3,
-	
-	O_RDONLY = 0,
-	O_WRONLY = 1,
-	O_RDWR = 2,
-	
-	O_CREAT = 0x40,
-	O_TRUNC = 0x200,
-	O_APPEND = 0x400
-};
-
-extern int open(const char* path, int access, ...);
-extern int creat(const char* path, mode_t mode);
-extern int close(int d);
-extern int read(int fd, void* buffer, size_t count);
-extern int write(int fd, void* buffer, size_t count);
-extern off_t lseek(int fildes, off_t offset, int whence);
-extern int fcntl(int fd, int op, ...);
-extern int unlink(const char* path);
-
-/* Special variables */
-
-extern char** environ;
-
-/* Implemented system calls */
-
-extern void _exit(int);
-extern pid_t getpid(void);
-extern int brk(void* ptr);
-extern void* sbrk(int increment);
-extern int isatty(int d);
-extern int execve(const char *path, char *const argv[], char *const envp[]);
-
-/* Signal handling */
+/* Signal constants. */
 
 typedef int sig_atomic_t;
 
@@ -124,10 +55,5 @@ typedef int sig_atomic_t;
 typedef unsigned long sigset_t;
 
 typedef void (*sighandler_t)(int);
-extern sighandler_t signal(int signum, sighandler_t handler);
-extern int sigprocmask(int, const sigset_t *, sigset_t *);
-extern int raise(int signum);
-
-
 
 #endif

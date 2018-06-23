@@ -3,7 +3,7 @@
 
 typedef int pid_t;
 typedef int mode_t;
-typedef long time_t;
 typedef long suseconds_t;
+typedef long time_t;
 
 #endif
