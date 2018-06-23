@@ -1,6 +1,4 @@
-#include "bc_string.h"
-
-/* $Id$ */
+#include "lib.h"
 
 void _intswap(int* i1, int* i2)
 {

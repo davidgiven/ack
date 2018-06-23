@@ -1,9 +1,107 @@
 #ifndef LIB_H
 #define LIB_H
 
+typedef struct{
+	char	*strval;
+	int	strcount;
+	int	strlength;
+	} String;
+
+#define MAXSTRING 1024
+
+extern String *_chr(int i);
+extern String *_concat(String *s1, String *s2);
+extern String *_hex(int i);
+extern String *_left(int size, String *s);
+extern String *_mid(int i1, int i2, String *s);
+extern String *_mkd(double d);
+extern String *_mki(long i);
+extern String *_newstr(char *str);
+extern String *_nstr(double f);
+extern String *_oct(int i);
+extern String *_right(int length, String *str);
+extern String *_space(int d);
+extern String *_strascii(void);
+extern String *_string(double f, double d);
+extern char *salloc(unsigned length);
+extern double _abr(double f);
+extern double _atn(double x);
+extern double _cos(double x);
+extern double _cvd(String *s);
+extern double _exp(double x);
+extern double _fcint(double f);
+extern double _log(double x);
+extern double _power(double x, double y);
+extern double _rnd(double d);
+extern double _sin(double x);
+extern double _sqt(double x);
+extern double _tan(double x);
+extern double _trunc(double f);
+extern int _asc(String *str);
+extern int _cint(double f);
+extern int _fix(double f);
+extern int _forsgn(double v);
+extern int _ioeof(int channel);
+extern int _length(String *str);
+extern int _retstmt(void);
+extern int _sgn(double v);
+extern int _stop(void);
+extern int _strcomp(String *s1, String *s2);
+extern int peek(int addr);
+extern long _abl(long i);
+extern long _cvi(String *s);
+extern void _asschn(void);
+extern void _clochn(int nr);
+extern void _closeall(void);
+extern void _decstr(String *str);
+extern void _delstr(String *src);
+extern void _fltswap(double *i1, double *i2);
+extern void _gosub(int x);
+extern void _goto_err(void);
+extern void _hlt(int nr);
+extern void _in(char *buf);
+extern void _incstr(String *src);
+extern void _ini_trp(void);
+extern void _intswap(int *i1, int *i2);
+extern void _midstmt(String *s2, int i1, int i2, String *s);
+extern void _nl(void);
+extern void _opnchn(int reclen, String *fname, String *mode);
+extern void _out(char *str);
+extern void _outnl(void);
+extern void _poke(int i, int j);
+extern void _prfnum(double f);
+extern void _prinum(int i);
+extern void _prstr(String *str);
+extern void _qstmark(void);
+extern void _randomi(void);
+extern void _rdline(String **s);
+extern void _readflt(double *addr);
+extern void _readint(int *addr);
+extern void _readln(void);
+extern void _readstr(String **s);
+extern void _restore(int line);
+extern void _setchan(int index);
+extern void _setline(void);
+extern void _setrand(int i);
+extern void _settrap(int nr);
+extern void _spc(int x);
+extern void _str(double f, char *buffer);
+extern void _strcpy(String *dst, String *src);
+extern void _strswap(String **s1, String **s2);
+extern void _tab(int x);
+extern void _trace(int i);
+extern void _trap(void);
+extern void _trpfatal(int i);
+extern void _trpset(int nr);
+extern void _wrcomma(void);
+extern void _wrflt(double f);
+extern void _wrint(int i);
+extern void _wrnl(void);
+extern void _wrstr(String *s);
+extern void _zone(void);
+extern void asrt(int b);
 extern void error(int index);
-extern char* salloc(unsigned length);
-extern void sfree(char* c);
+extern void readskip(void);
+extern void sfree(char *c);
 
 #endif
-

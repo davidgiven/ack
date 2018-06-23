@@ -1,9 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "bc_string.h"
 #include "lib.h"
-
-/* $Id$ */
 
 #define ok(X)   \
 	if (X == 0) \

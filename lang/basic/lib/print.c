@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "bc_string.h"
+#include <string.h>
 #include "bc_io.h"
-
-/* $Id$ */
+#include "lib.h"
 
 /* Here all routine to generate terminal oriented output is located */
 
