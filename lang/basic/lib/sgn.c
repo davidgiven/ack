@@ -1,4 +1,4 @@
-/* $Id$ */
+#include "lib.h"
 
 int _sgn(double v)
 {

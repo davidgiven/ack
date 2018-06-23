@@ -1,6 +1,4 @@
-#include "bc_string.h"
-
-/* $Id$ */
+#include "lib.h"
 
 int _asc(String* str)
 {

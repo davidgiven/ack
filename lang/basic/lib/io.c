@@ -1,4 +1,5 @@
 #include "bc_io.h"
+#include "lib.h"
 
 /* dtrg --- this originally used sgtty.h to do clever tty manipulation.
  * Strictly this should be converted to use termios, but for simplicity
