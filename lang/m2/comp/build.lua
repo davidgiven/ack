@@ -111,6 +111,7 @@ cprogram {
 		"+real_h",
 		"+type_h",
 		"h+emheaders",
+		"lang/m2/include+headers",
 		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/data+lib",
