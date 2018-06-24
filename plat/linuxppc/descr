@@ -25,7 +25,7 @@ var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
 # Override the setting in fe so that files compiled for linuxppc can see
 # the platform-specific headers.
 
-var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+var C_INCLUDES=-I{EM}/share/ack/linux/include -I{EM}/share/ack/include/ansi
 
 name be
 	from .m.g

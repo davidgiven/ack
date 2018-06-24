@@ -8,7 +8,7 @@ acklibrary {
 	deps = {
 		"plat/linux/libsys/*.h",
 		"lang/cem/libcc.ansi/headers+headers",
-		"plat/linux386/include+headers",
+		"plat/linux386/include+pkg",
 	},
     vars = {
         plat = "linux386"

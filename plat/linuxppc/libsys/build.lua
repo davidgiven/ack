@@ -26,7 +26,7 @@ acklibrary {
 	deps = {
 		"plat/linux/libsys/*.h",
 		"lang/cem/libcc.ansi/headers+headers",
-		"plat/linuxppc/include+headers",
+		"plat/linuxppc/include+pkg",
 	},
 	vars = {
 		plat = "linuxppc"
