@@ -8,18 +8,11 @@
  * Version:	$Id$
 */
 
+#include "libm2.h"
 #include <em_abs.h>
 
-extern TRP();
-
-struct array_descr {
-  int	lbound;
-  int	n_elts_min_one;
-  unsigned size;
-};
-
-rcka(descr, indx)
-  struct array_descr *descr;
+void rcka(struct array_descr* descr, int indx)
 {
-  if (indx < 0 || indx > descr->n_elts_min_one) TRP(EARRAY);
+	if (indx < 0 || indx > descr->n_elts_min_one)
+		TRP(EARRAY);
 }

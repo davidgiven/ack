@@ -15,14 +15,14 @@ IMPLEMENTATION MODULE Terminal;
 *)
   FROM	SYSTEM IMPORT	ADR;
 #ifdef __USG
-  FROM	Unix IMPORT	read, write, open, fcntl;
+  FROM	Unix IMPORT	read, write, fcntl;
 #else
-  FROM	Unix IMPORT	read, write, open, ioctl;
+  FROM	Unix IMPORT	read, write, ioctl;
 #endif
   VAR fildes, fdout: INTEGER;
       unreadch: CHAR;
       unread: BOOLEAN;
-      tty: ARRAY[0..8] OF CHAR;
+      (* tty: ARRAY[0..8] OF CHAR; *)
 
   PROCEDURE Read(VAR ch: CHAR);
   BEGIN
@@ -115,7 +115,7 @@ BEGIN
 *)
 (* dtrg: changed so that instead of opening /dev/tty, fd 0 is always used. *)
 (* kernigh: sent output to fd 1 *)
-    tty := "stdio";
+    (* tty := "stdio"; *)
     fildes := 0;
     fdout := 1;
     unread := FALSE;

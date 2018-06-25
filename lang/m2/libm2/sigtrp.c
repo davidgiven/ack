@@ -5,53 +5,52 @@
 
 /*
   Module:	Mapping of Unix signals to EM traps
-		(only when not using the MON instruction)
+        (only when not using the MON instruction)
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
 
 #if !defined(__em22) && !defined(__em24) && !defined(__em44)
 
-#define EM_trap(n) TRP(n)	/* define to whatever is needed to cause the trap */
+#define EM_trap(n) TRP(n) /* define to whatever is needed to cause the trap */
 
+#include "libm2.h"
 #include <signal.h>
 #include <errno.h>
 
 int __signo;
 
 static int __traps[] = {
- -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
- -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
- -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
+	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
 };
 
-static void
-__ctchsig(signo)
+static void __ctchsig(int signo)
 {
-	signal(signo,__ctchsig);
+	signal(signo, __ctchsig);
 #ifdef __BSD4_2
-	sigsetmask(sigblock(0) & ~(1<<(signo - 1)));
+	sigsetmask(sigblock(0) & ~(1 << (signo - 1)));
 #endif
 	__signo = signo;
 	EM_trap(__traps[signo]);
 }
 
-int
-sigtrp(trapno, signo)
+int sigtrp(int trapno, int signo)
 {
 	/*	Let Unix signal signo cause EM trap trapno to occur.
-		If trapno = -2, restore default,
-		If trapno = -3, ignore.
-		Return old trapnumber.
-		Careful, this could be -2 or -3; But return value of -1
-		indicates failure, with error number in errno.
+	    If trapno = -2, restore default,
+	    If trapno = -3, ignore.
+	    Return old trapnumber.
+	    Careful, this could be -2 or -3; But return value of -1
+	    indicates failure, with error number in errno.
 	*/
 	extern int errno;
-	void (*ctch)() = __ctchsig;
-	void (*oldctch)();
+	void (*ctch)(int) = __ctchsig;
+	void (*oldctch)(int);
 	int oldtrap;
 
-	if (signo <= 0 || signo >= sizeof(__traps)/sizeof(__traps[0])) {
+	if (signo <= 0 || signo >= sizeof(__traps) / sizeof(__traps[0]))
+	{
 		errno = EINVAL;
 		return -1;
 	}
@@ -62,20 +61,23 @@ sigtrp(trapno, signo)
 		ctch = SIG_DFL;
 	else if (trapno >= 0 && trapno <= 252)
 		;
-	else {
+	else
+	{
 		errno = EINVAL;
 		return -1;
 	}
 
 	oldtrap = __traps[signo];
 
-	if ((oldctch = signal(signo, ctch)) == (void (*)())-1)  /* errno set by signal */
+	if ((oldctch = signal(signo, ctch)) == (void (*)()) - 1) /* errno set by signal */
 		return -1;
-	
-	else if (oldctch == SIG_IGN) {
+
+	else if (oldctch == SIG_IGN)
+	{
 		signal(signo, SIG_IGN);
 	}
-	else __traps[signo] = trapno;
+	else
+		__traps[signo] = trapno;
 
 	return oldtrap;
 }

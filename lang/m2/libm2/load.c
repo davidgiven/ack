@@ -9,6 +9,7 @@
   Version:	$Id$
 */
 
+#include "libm2.h"
 #include <m2_traps.h>
 
 #ifndef EM_WSIZE
@@ -16,30 +17,26 @@
 #define EM_PSIZE _EM_PSIZE
 #endif
 
-#if EM_WSIZE==EM_PSIZE
-typedef unsigned pcnt;
-#else
-typedef long pcnt;
-#endif
-
-load(siz, addr, p)
-	register char *addr;
-	register pcnt siz;
+void load(size_t siz, char* addr, int p)
 {
 	/*	Make sure, that a value with a size that could have been
-		handled by the LOI instruction ends up at the same place,
-		where it would, were the LOI instruction used.
+	    handled by the LOI instruction ends up at the same place,
+	    where it would, were the LOI instruction used.
 	*/
-	register char *q = (char *) &p;
+	register char* q = (char*)&p;
 	char t[4];
 
-	if (siz < EM_WSIZE && EM_WSIZE % siz == 0) {
+	if (siz < EM_WSIZE && EM_WSIZE % siz == 0)
+	{
 		/* as long as EM_WSIZE <= 4 ... */
-		if (siz != 2) TRP(M2_INTERNAL);	/* internal error */
+		if (siz != 2)
+			TRP(M2_INTERNAL); /* internal error */
 		q = &t[0];
 	}
-	while (siz--) *q++ = *addr++;
-	if (q - t == 2) {
-		*((unsigned *)(&p)) = *((unsigned short *) (&t[0]));
+	while (siz--)
+		*q++ = *addr++;
+	if (q - t == 2)
+	{
+		*((unsigned*)(&p)) = *((unsigned short*)(&t[0]));
 	}
 }

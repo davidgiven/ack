@@ -8,9 +8,9 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
-long
-absl(i)
-	long i;
+#include "libm2.h"
+
+long absl(long i)
 {
 	return i >= 0 ? i : -i;
 }

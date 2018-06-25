@@ -8,11 +8,12 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include "libm2.h"
 
-cap(u)
-	unsigned u;
+void cap(unsigned int u)
 {
-	register unsigned *p = &u;
+	register unsigned* p = &u;
 
-	if (*p >= 'a' && *p <= 'z') *p += 'A'-'a';
+	if (*p >= 'a' && *p <= 'z')
+		*p += 'A' - 'a';
 }
