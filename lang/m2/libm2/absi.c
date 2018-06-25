@@ -8,8 +8,9 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include "libm2.h"
 
-absi(i)
+int absi(int i)
 {
 	return i >= 0 ? i : -i;
 }

@@ -8,10 +8,10 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include "libm2.h"
+
 #ifndef NOFLOAT
-double
-absd(i)
-	double i;
+double absd(double i)
 {
 	return i >= 0 ? i : -i;
 }

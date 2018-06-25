@@ -8,16 +8,11 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include <stdint.h>
+#include "libm2.h"
 
-#if _EM_WSIZE==_EM_PSIZE
-typedef unsigned pcnt;
-#else
-typedef unsigned long pcnt;
-#endif
-
-blockmove(siz, dst, src)
-	pcnt siz;
-	register char *dst, *src;
+void blockmove(size_t siz, char* dst, char* src)
 {
-	while (siz--) *dst++ = *src++;
+	while (siz--)
+		*dst++ = *src++;
 }
