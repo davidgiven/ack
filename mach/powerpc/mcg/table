@@ -1,13 +1,29 @@
+TYPES
+
+    /* These are special and must always exist. */
+
+    int;
+    long;
+    float;
+    double;
+
+    /* Any number of additional types can be defined, but they're of fairly limited use as values
+     * of these types will never be spilt or copied. */
+
+    cr;
+
 REGISTERS
 
     /* Registers are allocated top down; the order here is odd in order to make
      * sure that non-volatile registers get allocated from r31 (or f31) down.
      *
-     * Attributes may have at most one of: int, float, long, double. These
-     * indicate that the register is used to store a value of that type. If
-     * your register can store more than one type, create an alias. Registers
-     * with none of these cannot be copied by the code generator (and so cannot
-     * be moved from register to register or spilt).
+     * Each register must be declared as having at least one type (listed above).
+     * This allows the register to contain values of that type. They may also be
+     * declared as having any number of additional attributes, which can be used
+     * to constrain register selection.
+     *
+     * Register aliases may be defined with uses(reg1, reg2, ...). These work like
+     * any other register, but they share hardware resources with some real registers.
      */
 
     r12                                        int volatile;
@@ -57,73 +73,39 @@ REGISTERS
     r15r16  named("r15", "r16") uses(r15, r16) long;
     r13r14  named("r13", "r14") uses(r13, r14) long;
 
-    f14                                        float volatile;
-    f13                                        float volatile;
-    f12                                        float volatile;
-    f11                                        float volatile;
-    f10                                        float volatile;
-    f9                                         float volatile;
-    f8                                         float volatile;
-    f7                                         float volatile;
-    f6                                         float volatile;
-    f5                                         float volatile;
-    f4                                         float volatile;
-    f3                                         float volatile fret;
-    f2                                         float volatile;
-    f1                                         float volatile;
-    f0                                         float volatile;
+    f14                                        float double volatile;
+    f13                                        float double volatile;
+    f12                                        float double volatile;
+    f11                                        float double volatile;
+    f10                                        float double volatile;
+    f9                                         float double volatile;
+    f8                                         float double volatile;
+    f7                                         float double volatile;
+    f6                                         float double volatile;
+    f5                                         float double volatile;
+    f4                                         float double volatile;
+    f3                                         float double volatile fret dret;
+    f2                                         float double volatile;
+    f1                                         float double volatile;
+    f0                                         float double volatile;
 
-    f31                                        float;
-    f30                                        float;
-    f29                                        float;
-    f28                                        float;
-    f27                                        float;
-    f26                                        float;
-    f25                                        float;
-    f24                                        float;
-    f23                                        float;
-    f22                                        float;
-    f21                                        float;
-    f20                                        float;
-    f19                                        float;
-    f18                                        float;
-    f17                                        float;
-    f16                                        float;
-    f15                                        float;
-
-    d14     named("f14")       uses(f14)       double volatile;
-    d13     named("f13")       uses(f13)       double volatile;
-    d12     named("f12")       uses(f12)       double volatile;
-    d11     named("f11")       uses(f11)       double volatile;
-    d10     named("f10")       uses(f10)       double volatile;
-    d9      named("f9")        uses(f9)        double volatile;
-    d8      named("f8")        uses(f8)        double volatile;
-    d7      named("f7")        uses(f7)        double volatile;
-    d6      named("f6")        uses(f6)        double volatile;
-    d5      named("f5")        uses(f5)        double volatile;
-    d4      named("f4")        uses(f4)        double volatile;
-    d3      named("f3")        uses(f3)        double volatile dret;
-    d2      named("f2")        uses(f2)        double volatile;
-    d1      named("f1")        uses(f1)        double volatile;
-    d0      named("f0")        uses(f0)        double volatile;
-
-    d31     named("f31")       uses(f31)       double;
-    d30     named("f30")       uses(f30)       double;
-    d29     named("f29")       uses(f29)       double;
-    d28     named("f28")       uses(f28)       double;
-    d27     named("f27")       uses(f27)       double;
-    d26     named("f26")       uses(f26)       double;
-    d25     named("f25")       uses(f25)       double;
-    d24     named("f24")       uses(f24)       double;
-    d23     named("f23")       uses(f23)       double;
-    d22     named("f22")       uses(f22)       double;
-    d21     named("f21")       uses(f21)       double;
-    d20     named("f20")       uses(f20)       double;
-    d19     named("f19")       uses(f19)       double;
-    d18     named("f18")       uses(f18)       double;
-    d17     named("f17")       uses(f17)       double;
-    d16     named("f16")       uses(f16)       double;
-    d15     named("f15")       uses(f15)       double;
+    f31                                        float double;
+    f30                                        float double;
+    f29                                        float double;
+    f28                                        float double;
+    f27                                        float double;
+    f26                                        float double;
+    f25                                        float double;
+    f24                                        float double;
+    f23                                        float double;
+    f22                                        float double;
+    f21                                        float double;
+    f20                                        float double;
+    f19                                        float double;
+    f18                                        float double;
+    f17                                        float double;
+    f16                                        float double;
+    f15                                        float double;
 
 	cr0                                        cr;
 

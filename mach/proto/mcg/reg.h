@@ -22,7 +22,7 @@ struct vreg
     int neighbours;
     bool needs_register;
     bool is_spilt;
-    struct burm_regclass_data* regclass;
+    const struct burm_regclass_data* regclass;
     burm_register_bitmap_t registers;
 };
 

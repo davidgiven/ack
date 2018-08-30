@@ -1,5 +1,5 @@
 vars.cflags = {
-	"-g", "-O"
+	"-g", "-Og",
 }
 vars.ackcflags = {
 	"-O6"

@@ -49,6 +49,18 @@ static bool hop_reads_value(struct hop* hop, struct value* value)
     return usage->input || usage->through;
 }
 
+static void setup_regclass(struct vreg* vreg, struct value* value)
+{
+    const struct burm_regclass_data* regclass = &burm_regclass_data[value->regclass];
+    assert(!vreg->regclass || (vreg->regclass == regclass));
+
+    if (!vreg->regclass)
+    {
+        memcpy(vreg->registers, regclass->bitmap, sizeof(burm_register_bitmap_t));
+        vreg->regclass = regclass;
+    }
+}
+
 static void assign_vregs(void)
 {
     int i, j;
@@ -112,7 +124,9 @@ static void assign_vregs(void)
             {
                 struct value* value = hit.key;
                 struct vreg* vreg = hit.value;
+
                 hop_add_input_vreg(hop, vreg);
+                setup_regclass(vreg, value);
             }
         }
 
@@ -137,18 +151,22 @@ static void assign_vregs(void)
             {
                 struct value* value = hit.key;
                 struct valueusage* usage = hit.value;
+                struct vreg* vreg = NULL;
 
                 assert(!(usage->through && usage->output));
                 if (usage->through)
                 {
-                    struct vreg* invreg = hop_find_input_vreg(hop, value);
-                    hop_add_through_vreg(hop, invreg, invreg);
+                    vreg = hop_find_input_vreg(hop, value);
+                    hop_add_through_vreg(hop, vreg, vreg);
                 }
                 if (usage->output)
                 {
-                    struct vreg* outvreg = create_and_map_vreg(value);
-                    hop_add_output_vreg(hop, outvreg);
+                    vreg = create_and_map_vreg(value);
+                    hop_add_output_vreg(hop, vreg);
                 }
+
+                if (vreg)
+                    setup_regclass(vreg, value);
             }
         }
     }

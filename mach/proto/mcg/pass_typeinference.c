@@ -17,7 +17,7 @@ static void addall(struct ir* ir)
 static void collect_irs(void)
 {
     int i;
-    
+
     set_empty(&irs);
 	for (i=0; i<cfg.preorder.count; i++)
     {
@@ -53,7 +53,7 @@ static char effective_type(struct ir* ir, char type)
 				return 'D';
 			break;
 	}
-	
+
 	return 0;
 }
 
@@ -294,6 +294,7 @@ static void insert_phi_copies(void)
                 struct basicblock* childbb = ir->u.phivalue.item[j].left;
                 struct ir* copy = new_copy(wanted, real, childir);
                 copy->root = copy;
+				copy->bb = childbb;
 
                 /* The copy gets inserted as the second last item of the child
                  * basic block. That way it'll happen before the final jump

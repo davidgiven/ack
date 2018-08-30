@@ -28,6 +28,17 @@ static void coalesce(struct vreg* vmaster, struct vreg* vslave)
 {
     vmaster = actual(vmaster);
     vslave = actual(vslave);
+    if (vmaster->regclass && vslave->regclass)
+    {
+        bitmap_and(vmaster->registers, burm_register_count, vslave->registers);
+        assert(bitmap_count_set_bits(vmaster->registers, burm_register_count) > 0);
+    }
+    else if (!vmaster->regclass && vslave->regclass)
+    {
+        memcpy(vmaster->registers, vslave->registers, sizeof(burm_register_bitmap_t));
+        vmaster->regclass = vslave->regclass;
+    }
+
     vmaster->needs_register |= vslave->needs_register;
     vslave->coalesced_with = vmaster;
 }
@@ -120,9 +131,14 @@ static void check_graph(void)
 
 static void dump_vreg(struct vreg* vreg)
 {
+    int i;
+
     fprintf(regalloc_dot_file, "[%%%d]", vreg->id);
     if (!vreg->needs_register)
         fprintf(regalloc_dot_file, "S");
+    fprintf(regalloc_dot_file, "\n%s", vreg->regclass ? vreg->regclass->name : "ANY");
+    for (i=0; i<WORDS_FOR_BITMAP_SIZE(burm_register_count); i++)
+        fprintf(regalloc_dot_file, " 0x%x", vreg->registers[i]);
 }
 
 static void dump_interference_graph(void)
