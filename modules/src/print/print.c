@@ -17,25 +17,12 @@
 $ */
 /*VARARGS*/
 void
-print
-#if __STDC__
-	(char *fmt, ...)
+print(const char *fmt, ...)
 {
-#else
-	(va_alist)
-	va_dcl
-{
-	char *fmt;
-#endif
 	va_list args;
 	char buf[SSIZE];
 
-#if __STDC__
 	va_start(args, fmt);
-#else
-	va_start(args);
-	fmt = va_arg(args, char *);
-#endif
 	sys_write(STDOUT, buf, _format(buf, fmt, args));
 	va_end(args);
 }

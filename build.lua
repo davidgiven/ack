@@ -1,9 +1,10 @@
 vars.cflags = {
-	"-g", "-Og",
+	"$(CFLAGS)"
 }
 vars.ackcflags = {
 	"-O6"
 }
+vars.ackldflags = {}
 vars.plats = {
 	"cpm",
 	"linux386",
@@ -14,11 +15,14 @@ vars.plats = {
 	"qemuppc",
 	"pc86",
 	"rpi",
+	"pdpv7",
+	"em22",
 }
 vars.plats_with_tests = {
+	"linux68k",
 	"linux386",
 	"linuxppc",
-	"qemuppc",
+--	--"qemuppc",
 	"pc86",
 }
 
@@ -42,7 +46,9 @@ installable {
 		"util/ack+pkg",
 		"util/amisc+pkg",
 		"util/arch+pkg",
+		"util/ass+pkg",
 		"util/ego+pkg",
+		"util/int+pkg",
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",

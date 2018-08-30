@@ -20,8 +20,7 @@
 #include "cs_partit.h"
 #include "cs_debug.h"
 
-STATIC dlink(l1, l2)
-	line_p l1, l2;
+STATIC void dlink(line_p l1, line_p l2)
 {
 	/* Doubly link the lines in l1 and l2. */
 
@@ -31,11 +30,10 @@ STATIC dlink(l1, l2)
 		l2->l_prev = l1;
 }
 
-STATIC remove_lines(first, last)
-	line_p first, last;
+STATIC void remove_lines(line_p first, line_p last)
 {
 	/* Throw away the lines between and including first and last.
-	 * Don't worry about any pointers; the (must) have been taken care of.
+	 * Don't worry about any pointers; they (must) have been taken care of.
 	 */
 	register line_p lnp, next;
 
@@ -46,8 +44,7 @@ STATIC remove_lines(first, last)
 	}
 }
 
-STATIC bool contained(ocp1, ocp2)
-	occur_p ocp1, ocp2;
+STATIC bool contained(occur_p ocp1, occur_p ocp2)
 {
 	/* Determine whether ocp1 is contained within ocp2. */
 
@@ -61,9 +58,7 @@ STATIC bool contained(ocp1, ocp2)
 	return FALSE;
 }
 
-STATIC delete(ocp, start)
-	occur_p ocp;
-	avail_p start;
+STATIC void delete(occur_p ocp, avail_p start)
 {
 	/* Delete all occurrences that are contained within ocp.
 	 * They must have been entered in the list before start:
@@ -90,10 +85,7 @@ STATIC delete(ocp, start)
 	}
 }
 
-STATIC complete_aar(lnp, instr, descr_vn)
-	line_p lnp;
-	int instr;
-	valnum descr_vn;
+STATIC void complete_aar(line_p lnp, int instr, valnum descr_vn)
 {
 	/* Lnp is an instruction that loads the address of an array-element.
 	 * Instr tells us what effect we should achieve; load (instr is op_lar)
@@ -109,15 +101,50 @@ STATIC complete_aar(lnp, instr, descr_vn)
 	dlink(lnp, lindir);
 }
 
-STATIC replace(ocp, tmp, avp)
-	occur_p ocp;
-	offset tmp;
-	avail_p avp;
+STATIC void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
+{
+	/* Complete a / b as a % b = a - b * (a / b). For the first
+	 * occurrence, lnp must stack q, where q = a / b. We prepend a
+	 * DUP to change postfix a b / into a b a b /, then append a
+	 * MLI/MLU and SBI/SBU to make a b a b / * -.
+	 *
+	 * For later occurences, lnp must stack a b q.  We append the
+	 * MLI/MLU and SBI/SBU.
+	 */
+	line_p dv, dup, ml, sb;
+	offset size;
+	bool s;
+
+	size = avp->av_size;
+	s = (avp->av_instr == (byte) op_dvi);
+	assert(s || avp->av_instr == (byte) op_dvu);
+	if (first) {
+		/* Prepend our DUP to avp->av_found, to get before the
+		 * DVI if lnp points to the LOL in DVI STL LOL.
+		 */
+		dup = int_line(2 * size);
+		dup->l_instr = op_dup;
+		dv = avp->av_found;
+		dlink(dv->l_prev, dup);
+		dlink(dup, dv);
+	}
+	ml = int_line(size);
+	sb = int_line(size);
+	ml->l_instr = (s ? op_mli : op_mlu);
+	sb->l_instr = (s ? op_sbi : op_sbu);
+	dlink(sb, lnp->l_next);
+	dlink(ml, sb);
+	dlink(lnp, ml);
+}
+
+STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 {
 	/* Replace the lines in the occurrence in ocp by a load of the
 	 * temporary with offset tmp.
 	 */
-	register line_p lol, first, last;
+	avail_p ravp;
+	line_p lol, first, last;
+	int instr;
 
 	assert(avp->av_size == ws || avp->av_size == 2*ws);
 
@@ -130,22 +157,58 @@ STATIC replace(ocp, tmp, avp)
 	if (first->l_prev == (line_p) 0) ocp->oc_belongs->b_start = lol;
 	dlink(first->l_prev, lol);
 
-	if (avp->av_instr == (byte) op_aar) {
-		/* There may actually be a LAR or a SAR instruction; in that
-		 * case we have to complete the array-instruction.
-		 */
-		register int instr = INSTR(last);
+	instr = INSTR(last);
+	switch (avp->av_instr & 0377) {
+		case op_aar:
+			/* There may actually be a LAR or a SAR
+			 * instruction; in that case we have to
+			 * complete the array-instruction.
+			 */
+			if (instr != op_aar)
+				complete_aar(lol, instr, avp->av_othird);
+			break;
+		case op_dvi:
+			if (instr == op_rmi)
+				complete_dv_as_rm(lol, avp, FALSE);
+			break;
+		case op_dvu:
+			if (instr == op_rmu)
+				complete_dv_as_rm(lol, avp, FALSE);
+			break;
+	}
 
-		if (instr != op_aar) complete_aar(lol, instr, avp->av_othird);
+	/* Some occurrence rocp of an expression before avp might have
+	 * rocp->oc_lfirst == first.  If so, then we must set
+	 * rocp->oc_lfirst = lol before we throw away first.
+	 *
+	 * This is almost not possible, but it can happen in code with
+	 * expr1 LOI expr2 STI expr2 LOI, where the STI causes both
+	 * LOIs to have the same value number.  Then the first LOI
+	 * might come before the first expr2, so we might replace
+	 * expr2 before we replace expr2 LOI.  Then the occurrence of
+	 * expr2 LOI must not point to the eliminated lines of expr2.
+	 */
+	for (ravp = avp->av_before; ravp != (avail_p) 0;
+	     ravp = ravp->av_before) {
+		/* We only check LOI expressions. */
+		if (ravp->av_instr == op_loi) {
+			occur_p rocp;
+			Lindex i;
+
+			for (i = Lfirst(ravp->av_occurs); i != (Lindex) 0;
+			     i = Lnext(i, ravp->av_occurs)) {
+				rocp = occ_elem(i);
+				if (rocp->oc_lfirst == first)
+					rocp->oc_lfirst = lol;
+			}
+		}
 	}
 
 	/* Throw away the by now useless lines. */
 	remove_lines(first, last);
 }
 
-STATIC append(avp, tmp)
-	avail_p avp;
-	offset tmp;
+STATIC void append(avail_p avp, offset tmp)
 {
 	/* Avp->av_found points to a line with an operator in it. This 
 	 * routine emits a sequence of instructions that saves the result
@@ -155,6 +218,7 @@ STATIC append(avp, tmp)
 	 * within a lar or sar, we must first generate the aar.
 	 */
 	register line_p stl, lol;
+	register int instr;
 
 	assert(avp->av_size == ws || avp->av_size == 2*ws);
 
@@ -167,19 +231,30 @@ STATIC append(avp, tmp)
 	dlink(stl, lol);
 	dlink(avp->av_found, stl);
 
-	if (avp->av_instr == (byte) op_aar) {
-		register int instr = INSTR(avp->av_found);
-
-		if (instr != op_aar) {
-			complete_aar(lol, instr, avp->av_othird);
-			avp->av_found->l_instr = op_aar;
-		}
+	instr = INSTR(avp->av_found);
+	switch (avp->av_instr & 0377) {
+		case op_aar:
+			if (instr != op_aar) {
+				complete_aar(lol, instr, avp->av_othird);
+				avp->av_found->l_instr = op_aar;
+			}
+			break;
+		case op_dvi:
+			if (instr == op_rmi) {
+				complete_dv_as_rm(lol, avp, TRUE);
+				avp->av_found->l_instr = op_dvi;
+			}
+			break;
+		case op_dvu:
+			if (instr == op_rmu) {
+				complete_dv_as_rm(lol, avp, TRUE);
+				avp->av_found->l_instr = op_dvu;
+			}
+			break;
 	}
 }
 
-STATIC set_replace(avp, tmp)
-	avail_p avp;
-	offset tmp;
+STATIC void set_replace(avail_p avp, offset tmp)
 {
 	/* Avp->av_occurs is now a set of occurrences, each of which will be
 	 * replaced by a reference to a local.
@@ -191,7 +266,7 @@ STATIC set_replace(avp, tmp)
 	register lset s = avp->av_occurs;
 
 	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i, s)) {
-		OUTVERBOSE("eliminate duplicate", 0);
+		OUTVERBOSE("eliminate duplicate", 0, 0);
 		SHOWOCCUR(occ_elem(i));
 		Scs++;
 		delete(occ_elem(i), avp->av_before);
@@ -199,8 +274,7 @@ STATIC set_replace(avp, tmp)
 	}
 }
 
-STATIC int reg_score(enp)
-	entity_p enp;
+STATIC int reg_score(entity_p enp)
 {
 	/* Enp is a local that will go into a register.
 	 * We return its score upto now.
@@ -209,10 +283,7 @@ STATIC int reg_score(enp)
 	return regv_arg(enp->en_loc, 4);
 }
 
-STATIC line_p gen_mesreg(off, avp, pp)
-	offset off;
-	avail_p avp;
-	proc_p pp;
+STATIC line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
 {
 	/* Generate a register message for the local that will hold the
 	 * result of the expression in avp, at the appropriate place in
@@ -226,9 +297,7 @@ STATIC line_p gen_mesreg(off, avp, pp)
 	return reg;
 }
 
-STATIC change_score(mes, score)
-	line_p mes;
-	int score;
+STATIC void change_score(line_p mes, int score)
 {
 	/* Change the score in the register message in mes to score. */
 
@@ -242,8 +311,7 @@ STATIC change_score(mes, score)
 	ap->a_a.a_offset = score;
 }
 
-eliminate(pp)
-	proc_p pp;
+void eliminate(proc_p pp)
 {
 	/* Eliminate costly common subexpressions within procedure pp.
 	 * We scan the available expressions in - with respect to time found -
@@ -275,7 +343,7 @@ eliminate(pp)
 			if (ravp->av_saveloc != (entity_p) 0) {
 				tmp = ravp->av_saveloc->en_loc;
 				mes = find_mesreg(tmp);
-				OUTVERBOSE("re-using %ld(LB)", tmp);
+				OUTVERBOSE("re-using %ld(LB)", tmp, 0);
 			} else {
 				tmp = tmplocal(pp,  ravp->av_size);
 				mes = gen_mesreg(tmp, ravp, pp);

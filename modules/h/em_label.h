@@ -4,5 +4,9 @@
  */
 /* $Id$ */
 
+#ifndef _MODULES_H_EM_LABEL_H
+#define _MODULES_H_EM_LABEL_H
+
 typedef unsigned int label;
 
+#endif

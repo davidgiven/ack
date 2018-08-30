@@ -10,17 +10,24 @@ flex {
 	srcs = { "./scan.l" }
 }
 
+local headers = {
+	"./alloc.h", "./ext.h", "./line.h", "./lookup.h", "./optim.h",
+	"./param.h", "./pattern.h", "./pop_push.h", "./proinf.h",
+	"./tes.h", "./types.h",
+}
+
 cprogram {
 	name = "mktab",
 	srcs = {
 		matching(filenamesof("+yacc"), "%.c$"),
 		matching(filenamesof("+flex"), "%.c$"),
 	},
-	deps = {
+	deps = concat(
+		headers,
 		"+flex",
 		"+yacc",
-		"modules/src/em_data+lib",
-	}
+		"modules/src/em_data+lib"
+	)
 }
 
 normalrule {
@@ -56,15 +63,15 @@ local function variant(name, cflags)
 			"+pop_push_c",
 			"./*.c",
 		},
-		deps = {
-			"./*.h",
+		deps = concat(
+			headers,
 			"h+emheaders",
 			"modules/src/alloc+lib",
 			"modules/src/print+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
-			"modules/src/em_data+lib",
-		},
+			"modules/src/em_data+lib"
+		),
 		vars = {
 			["+cflags"] = cflags
 		}

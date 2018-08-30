@@ -1,14 +1,12 @@
 for _, plat in ipairs(vars.plats) do
 	acklibrary {
 		name = "headers_"..plat,
-		hdrs = { "./*.h" }
 	}
 
 	acklibrary {
 		name = "lib_"..plat,
 		srcs = {
-			"./*.s", -- zer.s
-			"./*.e",
+			"./*.s", -- dus4.s
 		},
 		vars = { plat = plat },
 		deps = {
@@ -17,4 +15,3 @@ for _, plat in ipairs(vars.plats) do
 		}
 	}
 end
-

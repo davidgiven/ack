@@ -37,8 +37,7 @@
 
 
 
-cset Cempty_set(n)
-	short n;
+cset Cempty_set(short n)
 {
 	cset s;
 
@@ -48,9 +47,7 @@ cset Cempty_set(n)
 }
 
 
-bool Cis_elem(x,s)
-	Celem_t x;
-	cset    s;
+bool Cis_elem(Celem_t x, cset s)
 {
 	short n;
 	int mask;
@@ -67,9 +64,7 @@ bool Cis_elem(x,s)
 
 
 
-Cadd(x,s_p)
-	Celem_t x;
-	cset    *s_p;
+void Cadd(Celem_t x, cset *s_p)
 {
 	cset s;
 	short n;
@@ -83,9 +78,7 @@ Cadd(x,s_p)
 }
 
 
-Cremove(x,s_p)
-	Celem_t x;
-	cset    *s_p;
+void Cremove(Celem_t x, cset *s_p)
 {
 	cset s;
 	short n;
@@ -117,16 +110,13 @@ Cremove(x,s_p)
  * be used very often.
  */
 
-Cindex Cfirst(s)
-	cset s;
+Cindex Cfirst(cset s)
 {
 	return Cnext((Cindex) 0,s);
 }
 
 
-Cindex Cnext(i,s)
-	Cindex i;
-	cset   s;
+Cindex Cnext(Cindex i, cset s)
 {
 	register short n;
 
@@ -139,16 +129,14 @@ Cindex Cnext(i,s)
 }
 
 
-Celem_t Celem(i)
-	Cindex i;
+Celem_t Celem(Cindex i)
 {
 	return (Celem_t) i;
 }
 
 
 
-Cjoin(s1,s2_p)
-	cset s1, *s2_p;
+void Cjoin(cset s1, cset *s2_p)
 {
 	/* Two sets are joined by or-ing their bitvectors,
 	 * word by word.
@@ -168,8 +156,7 @@ Cjoin(s1,s2_p)
 
 
 
-Cintersect(s1,s2_p)
-	cset s1, *s2_p;
+void Cintersect(cset s1, cset *s2_p)
 {
 	/* Two sets are intersected by and-ing their bitvectors,
 	 * word by word.
@@ -188,15 +175,13 @@ Cintersect(s1,s2_p)
 }
 
 
-Cdeleteset(s)
-	cset s;
+void Cdeleteset(cset s)
 {
 	oldbitvect(s,DIVWL(s->v_size - 1) + 1);
 }
 
 
-bool Cis_subset(s1,s2)
-	cset s1,s2;
+bool Cis_subset(cset s1, cset s2)
 {
 	/* See if s1 is a subset of s2 */
 
@@ -213,8 +198,7 @@ bool Cis_subset(s1,s2)
 }
 
 
-Cclear_set(s_p)
-	cset *s_p;
+void Cclear_set(cset *s_p)
 {
 	cset s;
 	register short i;
@@ -227,8 +211,7 @@ Cclear_set(s_p)
 }
 
 
-Ccopy_set(s1,s2_p)
-	cset s1, *s2_p;
+void Ccopy_set(cset s1, cset *s2_p)
 {
 	cset s2;
 	register short i;
@@ -241,8 +224,7 @@ Ccopy_set(s1,s2_p)
 }
 
 
-Csubtract(s1,s2_p)
-	cset s1, *s2_p;
+void Csubtract(cset s1, cset *s2_p)
 {
 	cset s2;
 	register short i;
@@ -255,8 +237,7 @@ Csubtract(s1,s2_p)
 }
 
 
-bool Cequal(s1,s2)
-	cset s1, s2;
+bool Cequal(cset s1, cset s2)
 {
 	register short i;
 
@@ -267,8 +248,7 @@ bool Cequal(s1,s2)
 	return TRUE;
 }
 
-short Cnrelems(s)
-	cset s;
+short Cnrelems(cset s)
 {
 	register short n, cnt;
 

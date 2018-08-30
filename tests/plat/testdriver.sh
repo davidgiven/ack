@@ -6,9 +6,6 @@ timeoutprog=$4
 
 set -e
 
-result=/tmp/$$.testdriver.result
-trap "rm -f $result" EXIT
-
 errcho() {
     >&2 echo "$*"
 }
@@ -27,7 +24,7 @@ get_test_output() {
                 qemu-system-ppc)  img="-kernel $img" ;;
             esac
 
-            $timeoutprog -t $timeout -- $method -nographic $img > $result 2>&1
+            $timeoutprog -t $timeout -- $method -nographic $img 2>&1
             ;;
 
         qemu-*)
@@ -37,16 +34,25 @@ get_test_output() {
                 exit 0
             fi
 
-            $method $img > $result 2>&1
+            $method $img 2>&1
             ;;
 
         *)
-            errcho "Error: $method not known by testdriver"
-            exit 1
+			$timeoutprog -t $timeout -- $method $img 2>&1
             ;;
     esac
 }
 
-get_test_output
-( grep -q '@@FAIL\|@@SKIPPED' $result || ! grep -q @@FINISHED $result ) && cat $result && exit 1
-exit 0
+# Hide output if the test passed.
+# Show output if it failed, skipped, or timed out.
+get_test_output | awk '
+    { lines[count++] = $0 }
+    /@@FAIL|@@SKIPPED|@@TIMEDOUT/ { bad = 1 }
+    /@@FINISHED/ { finished = 1 }
+    END {
+        if (finished && !bad) exit 0
+        for (i = 0; i < count; i++) print lines[i]
+        if (!bad) print "@@FAIL by testdriver.sh"
+        exit 1
+    }
+'

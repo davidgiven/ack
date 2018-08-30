@@ -19,7 +19,7 @@ struct f_info	file_info;
 #include	<inp_pkg.body>
 
 
-AtEoIF()
+int AtEoIF(void)
 {
 	/*	Make the unstacking of input streams noticable to the
 	   	lexical analyzer
@@ -28,7 +28,7 @@ AtEoIF()
 	return 1;
 }
 
-AtEoIT()
+int AtEoIT(void)
 {
 	/*	Make the end of the text noticable
 	*/

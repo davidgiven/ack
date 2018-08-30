@@ -33,7 +33,7 @@ lab_id	 lastlabid;	/* last label identifier */
  * appear in the input.
  */
 
-bblock_p freshblock()
+bblock_p freshblock(void)
 {
 	bblock_p b;
 	b = newbblock();
@@ -42,7 +42,7 @@ bblock_p freshblock()
 }
 
 
-lab_id freshlabel()
+lab_id freshlabel(void)
 {
 	curproc->p_nrlabels++;
 	return ++lastlabid;
@@ -51,7 +51,7 @@ lab_id freshlabel()
 
 #define getmark()	getbyte()
 
-short getshort() {
+short getshort(void) {
 	register int l_byte, h_byte;
 
 	l_byte = getbyte();
@@ -61,7 +61,7 @@ short getshort() {
 }
 
 
-offset getoff() {
+offset getoff(void) {
 	register long l;
 	register int h_byte;
 
@@ -73,7 +73,7 @@ offset getoff() {
 	return l | (h_byte*256L*256*256L) ;
 }
 
-STATIC int getint()
+STATIC int getint(void)
 {
 	/* Read an integer from the input file. This routine is
 	 * only used when reading a bitvector-set. We expect  an
@@ -90,8 +90,7 @@ STATIC int getint()
 
 /* getptable */
 
-loop_p getloop(id)
-	loop_id id;
+STATIC void *getloop(loop_id id)
 {
 	/* Map a loop identifier onto a loop struct.
 	 * If no struct was alocated yet for this identifier then
@@ -107,8 +106,7 @@ loop_p getloop(id)
 	return (lpmap[id]);
 }
 
-bblock_p getblock(id)
-	block_id id;
+STATIC void *getblock(block_id id)
 {
 	/* Map a basic block identifier onto a block struct
 	 * If no struct was alocated yet for this identifier then
@@ -126,8 +124,7 @@ bblock_p getblock(id)
 }
 
 
-lset getlset(p)
-	char *((*p) ());
+STATIC lset getlset(void *(*p)(short))
 {
 	/* Read a 'long' set. Such a set is represented externally
 	 * as a sequence of identifying numbers terminated by a 0.
@@ -146,7 +143,7 @@ lset getlset(p)
 }
 
 
-cset getcset()
+STATIC cset getcset()
 {
 	/* Read a 'compact' set. Such a set is represented externally
 	 * a row of bytes (its bitvector) preceded by its length.
@@ -163,8 +160,7 @@ cset getcset()
 }
 
 
-proc_p getptable(pname)
-	char *pname;
+proc_p getptable(const char *pname)
 {
 	short i;
 	proc_p head, p, *pp;
@@ -216,8 +212,7 @@ proc_p getptable(pname)
 
 /* getdtable */
 
-dblock_p getdtable(dname)
-	char *dname;
+dblock_p getdtable(const char *dname)
 {
 	/* Read the data block table. Every data block may
 	 * have a list of objects and a list of values (arguments),
@@ -290,9 +285,7 @@ dblock_p getdtable(dname)
 
 /* getbblocks */
 
-STATIC argstring(length,abp)
-	short  length;
-	register argb_p abp;
+STATIC void argstring(short length, argb_p abp)
 {
 
 	while (length--) {
@@ -304,7 +297,7 @@ STATIC argstring(length,abp)
 
 
 
-STATIC arg_p readargs()
+STATIC arg_p readargs(void)
 {
 	/* Read a list of arguments and allocate structures
 	 * for them. Return a pointer to the head of the list.
@@ -363,8 +356,7 @@ STATIC arg_p readargs()
 }
 
 
-line_p read_line(p_out)
-	proc_p *p_out;
+line_p read_line(proc_p *p_out)
 {
 	/* Read a line of EM code (i.e. one instruction)
 	 * and its arguments (if any).
@@ -426,8 +418,7 @@ line_p read_line(p_out)
 }
 
 
-message(lnp)
-	line_p lnp;
+void message(line_p lnp)
 {
 	/* See if  lnp is some useful message.
 	 * (e.g. a message telling that a certain local variable
@@ -456,11 +447,7 @@ message(lnp)
 
 
 
-line_p getlines(lf,n,p_out,collect_mes)
-	FILE *lf;
-	int n;
-	proc_p *p_out;
-	bool collect_mes;
+line_p getlines(FILE *lf, int n, proc_p *p_out, bool collect_mes)
 {
 	/* Read n lines of EM text and doubly link them.
 	 * Also process messages.
@@ -486,13 +473,8 @@ line_p getlines(lf,n,p_out,collect_mes)
 
 
 
-bool getunit(gf,lf,kind_out,g_out,l_out,p_out,collect_mes)
-	FILE   *gf,*lf;
-	short  *kind_out;
-	bblock_p *g_out;
-	line_p *l_out;
-	proc_p *p_out;
-	bool   collect_mes;
+bool getunit(FILE *gf, FILE *lf, short *kind_out, bblock_p *g_out,
+	     line_p *l_out, proc_p *p_out, bool collect_mes)
 {
 	/* Read control flow graph (gf) and EM text (lf) of the next procedure.
 	 * A pointer to the proctable entry of the read procedure is

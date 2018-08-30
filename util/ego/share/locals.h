@@ -11,17 +11,19 @@
 extern local_p *locals;		/* table of locals, index is local-number */
 extern short   nrlocals;	/* number of locals for which we keep ud-info */
 
-extern make_localtab();		/* (proc_p p) 
+void make_localtab(proc_p p);	/*
 				 * Analyse the text of procedure p to determine
 				 * which local variable p has. Make a table of
 				 * these variables ('locals') and count them
 				 * ('nrlocals'). Also collect register messages.
 				 */
-extern void var_nr();		/* (line_p l; short *nr_out;bool *found_out)
+void var_nr(line_p l, short *nr_out, bool *found_out);
+				/*
 				 * Compute the 'variable number' of the
 				 * variable referenced by EM instruction l.
 				 */
-extern void find_local();		/* (offset off; short *nr_out; bool *found_out)
+void find_local(offset off, short *nr_out, bool *found_out);
+				/*
 				 * Try to find the local variable at the given
 	 			 * offset. Return its local-number.
 	 			 */

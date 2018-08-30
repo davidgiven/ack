@@ -18,8 +18,14 @@ definerule("tabgen",
 			},
 			outleaves = { symname..".c" },
 			commands = {
-				"%{ins[1]} -f%{ins[2]} > %{outs} || rm %{outs}"
+				"%{ins[1]} -f%{ins[2]} > %{outs}"
 			}
 		}
 	end
 )
+
+cprogram {
+	name = "ed",
+	srcs = { "./ed.c" }
+}
+

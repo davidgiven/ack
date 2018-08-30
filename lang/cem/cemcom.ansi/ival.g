@@ -6,6 +6,7 @@
 /* CODE FOR THE INITIALISATION OF GLOBAL VARIABLES */
 
 {
+#include	<assert.h>
 #include    <stdlib.h>
 #include	"parameters.h"
 #ifndef	LINT
@@ -14,6 +15,7 @@
 #include	"l_em.h"
 #include	"l_lint.h"
 #endif	/* LINT */
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<flt_arith.h>
@@ -25,7 +27,6 @@
 #include	"proto.h"
 #include	"struct.h"
 #include	"field.h"
-#include	"assert.h"
 #include	"Lpars.h"
 #include	"sizes.h"
 #include	"align.h"
@@ -38,7 +39,6 @@
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
 
-char *long2str();
 char *strncpy();
 extern char options[];
 static int gen_error;
@@ -548,7 +548,7 @@ check_ival(expp, tp)
 				C_con_dnam(idf->id_text, expr->VL_VALUE);
 		}
 		else {
-			ASSERT(expr->VL_CLASS == Label);
+			assert(expr->VL_CLASS == Label);
 			C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
 		}
 		break;
@@ -625,7 +625,7 @@ ch_array(tpp, ex)
 	register int length = ex->SG_LEN, i;
 	register char *to, *from, *s;
 
-	ASSERT(ex->ex_class == String);
+	assert(ex->ex_class == String);
 	if (tp->tp_size == (arith)-1) {
 		/* set the dimension	*/
 		tp = *tpp = construct_type(ARRAY, tp->tp_up, 0, (arith)length, NO_PROTO);
@@ -696,7 +696,7 @@ put_bf(tp, val)
 	register struct sdef *sd =  fd->fd_sdef;
 	static struct expr exp;
 
-	ASSERT(sd);
+	assert(sd);
 	if (offset == (arith)-1) {
 		/* first bitfield in this field	*/
 		offset = sd->sd_offset;
@@ -737,7 +737,7 @@ valid_type(tp, str)
 	struct type *tp;
 	char *str;
 {
-	ASSERT(tp!=(struct type *)0);
+	assert(tp!=(struct type *)0);
 	if (tp->tp_size < 0) {
 		error("size of %s unknown", str);
 		return 0;
@@ -750,7 +750,7 @@ con_int(ex)
 {
 	register struct type *tp = ex->ex_type;
 
-	ASSERT(is_cp_cst(ex));
+	assert(is_cp_cst(ex));
 	if (tp->tp_unsigned)
 		C_con_ucon(long2str((long)ex->VL_VALUE, -10), tp->tp_size);
 	else if (tp->tp_size == word_size)

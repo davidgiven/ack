@@ -20,7 +20,9 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include "pc.h"
 
-int uread(fd,b,n) char *b; int fd,n; {
-	return(read(fd,b,n));
+int uread(int fd, char* b, int n)
+{
+	return (read(fd, b, n));
 }

@@ -12,19 +12,17 @@
    You have to put it in an int!
 */
 
-static int maxchunk = MAXCHUNK;
+static const int maxchunk = MAXCHUNK;
 
 /*
  * Just write "cnt" bytes to file-descriptor "fd".
  */
 void
-wr_bytes(fd, string, cnt)
-	register char	*string;
-	register long	cnt;
+wr_bytes(int fd, const char *string, long cnt)
 {
 
 	while (cnt) {
-		register int n = cnt >= maxchunk ? maxchunk : cnt;
+		int n = cnt >= maxchunk ? maxchunk : cnt;
 
 		if (write(fd, string, n) != n)
 			wr_fatal();

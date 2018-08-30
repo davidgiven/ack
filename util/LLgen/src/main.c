@@ -37,7 +37,6 @@ extern		fatal();
 extern		comfatal();
 extern		copyfile();
 extern void install();
-extern char	*mktemp();
 extern char	*sbrk();
 
 main(argc,argv) register string	argv[]; {
@@ -164,8 +163,8 @@ main(argc,argv) register string	argv[]; {
 	    nc_rec_file = libpath ("nc_rec");
 	}
 #endif
-	mktemp(f_temp);
-	mktemp(f_pars);
+	close(mkstemp(f_temp));
+	close(mkstemp(f_pars));
 	if ((fact = fopen(f_temp,"w")) == NULL) {
 		fputs("Cannot create temporary\n",stderr);
 		exit(1);

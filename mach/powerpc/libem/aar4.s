@@ -1,38 +1,32 @@
-#
-! $Source$
-! $State$
-! $Revision$
-
-#include "powerpc.h"
-
 .sect .text
-	
-! Index into a bounds-checked array.
+
+! Get address of element of bounds-checked array.
 !
-! On entry:
-!    r3 = ptr to descriptor
-!    r4 = index
-!    r5 = address of array
-! Yields:
-!    r3 = address of element
-!    r0 = size of element (used by .lar4, .sar4)
+! Stack: ( array-adr index descriptor-adr -- element-adr )
+! Sets r3 = size of element for .los4, .sts4
 ! Preserves r10 for .lar4, .sar4
 
 .define .aar4
 .aar4:
-	li32 r0, .trap_earray
-	mtspr ctr, r0            ! load CTR with trap address
+	lwz r4, 0(sp)            ! r4 = address of descriptor
+	lwz r5, 4(sp)            ! r5 = index
+	lwz r6, 8(sp)            ! r6 = address of array
 
-	lwz r0, 0(r3)
-	subf. r4, r0, r4         ! adjust range
-	bcctr IFTRUE, LT, 0      ! check lower bound
-	
-	lwz r0, 4(r3)
-	cmpl cr0, 0, r4, r3
-	bcctr IFFALSE, LT, 0     ! check upper bound
-	
-	lwz r0, 8(r3)
-	mullw r4, r4, r0         ! scale index
-	add r3, r4, r5           ! calculate element address
-	
-	bclr ALWAYS, 0, 0
+	lwz r0, 0(r4)
+	subf. r5, r0, r5         ! subtract lower bound from index
+	blt .trap_earray         ! check lower bound
+
+	lwz r0, 4(r4)
+	cmplw r5, r0
+	bgt .trap_earray         ! check upper bound
+
+	lwz r3, 8(r4)            ! r3 = size of element
+	mullw r5, r5, r3         ! scale index by size
+	add r6, r6, r5
+	stw r6, 8(sp)            ! push address of element
+	addi sp, sp, 8
+	blr
+
+.trap_earray:
+	li r3, 0                 ! EARRAY = 0 in h/em_abs.h
+	b .trp

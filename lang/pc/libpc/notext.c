@@ -16,8 +16,9 @@
  *
  */
 
-#include	<pc_file.h>
+#include "pc.h"
 
-notext(f) struct file *f; {
+void notext(struct file* f)
+{
 	f->flags &= ~TXTBIT;
 }

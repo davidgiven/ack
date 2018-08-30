@@ -7,6 +7,7 @@
 
 #include	"parameters.h"
 
+#include	<string.h>
 #include	<alloc.h>
 #include	"input.h"
 #include	"arith.h"
@@ -30,7 +31,6 @@ int LexSave = 0;                /* last character read by GetChar       */
 extern int InputLevel;		/* # of current macro expansions	*/
 
 extern char	*string_token();
-extern char	*strcpy();
 extern arith	char_constant();
 #define		FLG_ESEEN	0x01	/* possibly a floating point number */
 #define		FLG_DOTSEEN	0x02	/* certainly a floating point number */
@@ -262,7 +262,7 @@ garbage:
 		register int base = 10, vch;
 		register arith val = 0;
 		int ovfl = 0;
-		arith ubound = ~(1<<(sizeof(arith)*8-1))/(base/2);
+		arith ubound = max_arith/(base/2);
 
 		/* Since the preprocessor only knows integers and has
 		 * nothing to do with ellipsis we just return when the

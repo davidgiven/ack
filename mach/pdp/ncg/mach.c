@@ -40,9 +40,9 @@ con_mult(sz) word sz; {
 		fatal("bad icon/ucon size");
 	l = atol(str);
 #ifdef ACK_ASS
-	fprintf(codefile,".data2 0%o, 0%o !%s\n",(int)(l>>16),(int)l, str);
+	fprintf(codefile,".data2 %d, %d !%s\n",(int)(l>>16),(int)l, str);
 #else
-	fprintf(codefile,"\t%o;%o\n",(int)(l>>16),(int)l);
+	fprintf(codefile,"\t%d;%d\n",(int)(l>>16),(int)l);
 #endif
 }
 
@@ -96,12 +96,12 @@ f_regsave() {
 		if (lbytes == 2)
 			fprintf(codefile,"tst -(sp)\n");
 		else if (lbytes!=0)
-			fprintf(codefile,"sub $0%o,sp\n",lbytes);
+			fprintf(codefile,"sub $%d,sp\n",lbytes);
 		for (i=0;i<n_regvars;i++)
 			fprintf(codefile,"mov %s,-(sp)\n",regadm[i].ra_str);
 	} else {
 		if (lbytes>6) {
-			fprintf(codefile,"mov $0%o,r0\n",lbytes);
+			fprintf(codefile,"mov $%d,r0\n",lbytes);
 			fprintf(codefile,"jsr r5,PR%s\n",Rstring);
 		} else {
 			fprintf(codefile,"jsr r5,PR%d%s\n",lbytes,Rstring);
@@ -109,7 +109,7 @@ f_regsave() {
 	}
 	for (i=0;i<n_regvars;i++)
 		if (regadm[i].ra_off>=0)
-			fprintf(codefile,"mov 0%lo(r5),%s\n",regadm[i].ra_off,
+			fprintf(codefile,"mov %d(r5),%s\n",regadm[i].ra_off,
 						regadm[i].ra_str);
 }
 
@@ -122,7 +122,7 @@ regsave(regstr,off,size) char *regstr; long off; {
 #endif
 	strcat(Rstring,regstr);
 	if (off>=0)
-		fprintf(codefile,"mov 0%lo(r5),%s\n",off,regstr);
+		fprintf(codefile,"mov %d(r5),%s\n",off,regstr);
 end of commented away */
 
 	strcat(Rstring,regstr);
@@ -154,7 +154,7 @@ prolog(nlocals) full nlocals; {
 	if (nlocals == 2)
 		fprintf(codefile,"tst -(sp)\n");
 	else
-		fprintf(codefile,"sub $0%o,sp\n",nlocals);
+		fprintf(codefile,"sub $%d,sp\n",nlocals);
 #else
 	lbytes = nlocals;
 #endif

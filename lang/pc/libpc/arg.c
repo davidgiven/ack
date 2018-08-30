@@ -17,40 +17,31 @@
  */
 
 /* Author: J.W. Stevenson */
+#include "pc.h"
 
 /* function argc:integer; extern; */
 /* function argv(i:integer):string; extern; */
 /* procedure argshift; extern; */
 /* function environ(i:integer):string; extern; */
 
-extern int	_pargc;
-extern char	**_pargv;
-extern char	**_penvp;
-
-int argc() {
-	return(_pargc);
+int argc(void)
+{
+	return (_pargc);
 }
 
-char *argv(i) {
+char* argv(int i)
+{
 	if (i >= _pargc)
-		return(0);
-	return(_pargv[i]);
+		return (0);
+	return (_pargv[i]);
 }
 
-argshift() {
+void argshift(void)
+{
 
-	if (_pargc > 1) {
+	if (_pargc > 1)
+	{
 		--_pargc;
 		_pargv++;
 	}
-}
-
-char *environ(i) {
-	char **p; char *q;
-
-	if (p = _penvp)
-		while (q = *p++)
-			if (i-- < 0)
-				return(q);
-	return(0);
 }

@@ -326,7 +326,7 @@ STATIC bool is_dispensable(callee,ccf)
 	    (complete_program || (callee->p_flags1 & PF_EXTERNAL) == 0) &&
 	    (callee->p_flags1 & PF_LPI) == 0) {
 		DISPENSABLE(callee);
-		OUTVERBOSE("dispensable: procedure %d can be removed",callee->p_id);
+		OUTVERBOSE("dispensable: procedure %d can be removed",callee->p_id,0);
 #ifdef VERBOSE
 		Spremoved++;
 #endif
@@ -475,7 +475,7 @@ STATIC singles(cals)
 				DISPENSABLE(c->cl_proc);
 				CHANGED(c->cl_caller);
 				OUTVERBOSE("singles: procedure %d can be removed",
-				  c->cl_proc->p_id);
+				  c->cl_proc->p_id, 0);
 #ifdef VERBOSE
 				  Spremoved++;
 #endif

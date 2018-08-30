@@ -2,9 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -20,10 +20,10 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-chrefcount(regno,amount,tflag) {
-	register struct reginfo *rp;
+void chrefcount(int regno, int amount, int tflag) {
+	struct reginfo *rp;
 #if MAXMEMBERS != 0
-	register i, tmp;
+	int i, tmp;
 #endif
 
 	rp= &machregs[regno];
@@ -42,10 +42,10 @@ chrefcount(regno,amount,tflag) {
 #endif
 }
 
-getrefcount(regno, tflag) {
-	register struct reginfo *rp;
+int getrefcount(int regno, int tflag) {
+	struct reginfo *rp;
 #if MAXMEMBERS != 0
-	register i,maxcount, tmp;
+	int i,maxcount, tmp;
 #endif
 
 	rp= &machregs[regno];
@@ -66,10 +66,10 @@ getrefcount(regno, tflag) {
 #endif
 }
 
-erasereg(regno) {
-	register struct reginfo *rp = &machregs[regno];
-	register int i;
-	register byte *tdpb;
+void erasereg(int regno) {
+	struct reginfo *rp = &machregs[regno];
+	int i;
+	byte *tdpb;
 
 #if MAXMEMBERS==0
 	rp->r_contents.t_token = 0;
@@ -108,7 +108,7 @@ erasereg(regno) {
 	}
 #else
 	extern short clashlist[];
-	register short *sp = &clashlist[rp->r_iclash];
+	short *sp = &clashlist[rp->r_iclash];
 
 	rp->r_contents.t_token = 0;
 	while (*sp) {
@@ -151,9 +151,9 @@ erasereg(regno) {
 #endif
 }
 
-cleanregs() {
-	register struct reginfo *rp;
-	register i;
+void cleanregs(void) {
+	struct reginfo *rp;
+	int i;
 
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		rp->r_contents.t_token = 0;
@@ -163,9 +163,9 @@ cleanregs() {
 }
 
 #ifndef NDEBUG
-inctcount(regno) {
-	register struct reginfo *rp;
-	register i;
+static void inctcount(int regno) {
+	struct reginfo *rp;
+	int i;
 
 	rp = &machregs[regno];
 #if MAXMEMBERS!=0
@@ -181,10 +181,10 @@ inctcount(regno) {
 #endif
 }
 
-chkregs() {
-	register struct reginfo *rp;
-	register token_p tp;
-	register byte *tdpb;
+void chkregs(void) {
+	struct reginfo *rp;
+	token_p tp;
+	byte *tdpb;
 	int i;
 
 	for (rp=machregs+1;rp<machregs+NREGS;rp++) {

@@ -6,7 +6,8 @@
 static char rcsid[]= "$Id$";
 #endif
 
-#include "assert.h"
+#include <assert.h>
+#include <string.h>
 #include "param.h"
 #include "lookup.h"
 #include "extern.h"

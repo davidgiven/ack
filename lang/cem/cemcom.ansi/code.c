@@ -5,6 +5,7 @@
 /* $Id$ */
 /*	C O D E - G E N E R A T I N G   R O U T I N E S		*/
 
+#include	<assert.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	"parameters.h"
@@ -32,7 +33,6 @@
 #include	"Lpars.h"
 #include	"specials.h"
 #include	"atw.h"
-#include	"assert.h"
 #include	"LLlex.h"
 #include	"align.h"
 #ifdef	LINT
@@ -545,7 +545,7 @@ loc_init(expr, id)
 	static arith tmpoffset = 0;
 	static arith unknownsize = 0;
 	
-	ASSERT(df->df_sc != STATIC);
+	assert(df->df_sc != STATIC);
 	switch (tp->tp_fund)	{
 	case ARRAY:
 		if (tp->tp_size == (arith) -1)

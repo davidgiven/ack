@@ -1,0 +1,211 @@
+# Syntax:
+# <thing---->: a field occupying so many bits.
+# T: a field occupying one bit.
+# .: a bit we don't care about.
+
+# Branch processor instructions.
+
+<18--><LI-------------------->AL branch(0x1f, 0x00, ext26(LI<<2),   A, L);
+<16--><BO-><BI-><BD---------->AL branch(BO,   BI,   ext16(BD<<2),   A, L);
+<19--><BO-><BI-><BH-><16------>L branch(BO,   BI,   cpu.lr,         1, L);
+<19--><BO-><BI-><BH-><528----->L branch(BO,   BI,   cpu.ctr,        1, L);
+<17-->..............<LEV-->...1. system_call(LEV);
+
+# Condition register instructions.
+
+<19--><BT-><BA-><BB-><257----->. setcr(BT, getcr(BA) & getcr(BB));
+<19--><BT-><BA-><BB-><449----->. setcr(BT, getcr(BA) | getcr(BB));
+<19--><BT-><BA-><BB-><193----->. setcr(BT, getcr(BA) ^ getcr(BB));
+<19--><BT-><BA-><BB-><225----->. setcr(BT, !(getcr(BA) & getcr(BB)));
+<19--><BT-><BA-><BB-><33------>. setcr(BT, !(getcr(BA) | getcr(BB)));
+<19--><BT-><BA-><BB-><289----->. setcr(BT, getcr(BA) == getcr(BB));
+<19--><BT-><BA-><BB-><129----->. setcr(BT, getcr(BA) & !getcr(BB));
+<19--><BT-><BA-><BB-><417----->. setcr(BT, getcr(BA) | !getcr(BB));
+<19--><BF>.<BA>......<0------->. mcrf(BF, BA);
+
+# Fixed point loads
+
+<34--><RT-><RA-><D-------------> cpu.gpr[RT] = read_byte(reg0(RA) + ext16(D));
+<31--><RT-><RA-><RB-><87------>. cpu.gpr[RT] = read_byte(reg0(RA) + reg(RB));
+<35--><RT-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.gpr[RT] = read_byte(ea); cpu.gpr[RA] = ea;
+<31--><RT-><RA-><RB-><119----->. uint32_t ea = reg(RA) + reg(RB); cpu.gpr[RT] = read_byte(ea); cpu.gpr[RA] = ea;
+<40--><RT-><RA-><D-------------> cpu.gpr[RT] = read_word(reg0(RA) + ext16(D));
+<31--><RT-><RA-><RB-><279----->. cpu.gpr[RT] = read_word(reg0(RA) + reg(RB));
+<41--><RT-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.gpr[RT] = read_word(ea); cpu.gpr[RA] = ea;
+<31--><RT-><RA-><RB-><311----->. uint32_t ea = reg(RA) + reg(RB); cpu.gpr[RT] = read_word(ea); cpu.gpr[RA] = ea;
+<42--><RT-><RA-><D-------------> cpu.gpr[RT] = ext16(read_word(reg0(RA) + ext16(D)));
+<31--><RT-><RA-><RB-><343----->. cpu.gpr[RT] = ext16(read_word(reg0(RA) + reg(RB)));
+<43--><RT-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.gpr[RT] = ext16(read_word(ea)); cpu.gpr[RA] = ea;
+<31--><RT-><RA-><RB-><375----->. uint32_t ea = reg(RA) + reg(RB); cpu.gpr[RT] = ext16(read_word(ea)); cpu.gpr[RA] = ea;
+<32--><RT-><RA-><D-------------> cpu.gpr[RT] = read_long(reg0(RA) + ext16(D));
+<31--><RT-><RA-><RB-><23------>. cpu.gpr[RT] = read_long(reg0(RA) + reg(RB));
+<33--><RT-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.gpr[RT] = read_long(ea); cpu.gpr[RA] = ea;
+<31--><RT-><RA-><RB-><55------>. uint32_t ea = reg(RA) + reg(RB); cpu.gpr[RT] = read_long(ea); cpu.gpr[RA] = ea;
+<58--><RT-><RA-><DS---------->10 cpu.gpr[RT] = read_long(reg0(RA) + ext16(DS<<2));
+<31--><RT-><RA-><RB-><341----->. cpu.gpr[RT] = read_long(reg0(RA) + reg(RB));
+<31--><RT-><RA-><RB-><373----->. uint32_t ea = reg(RA) + reg(RB); cpu.gpr[RT] = read_long(ea); cpu.gpr[RA] = ea;
+
+# Fixed point stores
+
+<38--><RS-><RA-><D-------------> write_byte(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><215----->. write_byte(reg0(RA) + reg(RB), reg(RS));
+<39--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_byte(ea, reg(RS)); cpu.gpr[RA] = ea;
+<31--><RS-><RA-><RB-><247----->. uint32_t ea = reg(RA) + reg(RB); write_byte(ea, reg(RS)); cpu.gpr[RA] = ea;
+<44--><RS-><RA-><D-------------> write_word(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><407----->. write_word(reg0(RA) + reg(RB), reg(RS));
+<45--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_word(ea, reg(RS)); cpu.gpr[RA] = ea;
+<31--><RS-><RA-><RB-><439----->. uint32_t ea = reg(RA) + reg(RB); write_word(ea, reg(RS)); cpu.gpr[RA] = ea;
+<36--><RS-><RA-><D-------------> write_long(reg0(RA) + ext16(D), reg(RS));
+<31--><RS-><RA-><RB-><151----->. write_long(reg0(RA) + reg(RB), reg(RS));
+<37--><RS-><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_long(ea, reg(RS)); cpu.gpr[RA] = ea;
+<31--><RS-><RA-><RB-><183----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, reg(RS)); cpu.gpr[RA] = ea;
+
+# Fixed point load/stores with byte reversal
+
+<31--><RT-><RA-><RB-><790----->. cpu.gpr[RT] = swb16(read_word(reg0(RA) + reg(RB)));
+<31--><RT-><RA-><RB-><534----->. cpu.gpr[RT] = swb32(read_long(reg0(RA) + reg(RB)));
+<31--><RS-><RA-><RB-><918----->. write_word(reg0(RA) + reg(RB), swb16(reg(RS)));
+<31--><RS-><RA-><RB-><662----->. write_long(reg0(RA) + reg(RB), swb32(reg(RS)));
+
+# Load/store multiple
+
+<46--><RT-><RA-><D-------------> read_multiple(reg0(RA) + ext16(D), RT);
+<47--><RS-><RA-><D-------------> write_multiple(reg0(RA) + ext16(D), RS);
+<31--><RT-><RA-><NB-><597----->. read_string(reg0(RA), RT, NB ? NB : 32);
+<31--><RT-><RA-><RB-><533----->. read_string(reg0(RA) + reg(RB), RT, cpu.xer & 0x1f);
+<31--><RS-><RA-><NB-><725----->. write_string(reg0(RA), RS, NB ? NB : 32);
+<31--><RS-><RA-><RB-><661----->. write_string(reg0(RA) + reg(RB), RS, cpu.xer & 0x1f);
+
+# ALU instructions
+
+<14--><RT-><RA-><SI------------>           cpu.gpr[RT] = reg0(RA) + ext16(SI);
+<15--><RT-><RA-><SI------------>           cpu.gpr[RT] = reg0(RA) + (SI<<16);
+<31--><RT-><RA-><RB->O<266---->R setcr0(R, cpu.gpr[RT] = addo(reg(RA), reg(RB), 0, O, 0));
+<31--><RT-><RA-><RB->O<40----->R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), reg(RB), 1, O, 0));
+<6-->R<RT-><RA-><SI------------>           cpu.gpr[RT] = addo(reg(RA), ext16(SI), 0, 0, 1);
+<8---><RT-><RA-><SI------------>           cpu.gpr[RT] = addo(~reg(RA), ext16(SI), 1, 0, 1);
+<31--><RT-><RA-><RB->O<10----->R setcr0(R, cpu.gpr[RT] = addo(reg(RA), reg(RB), 0, O, 1));
+<31--><RT-><RA-><RB->O<8------>R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), reg(RB), 1, O, 1));
+<31--><RT-><RA-><RB->O<138---->R setcr0(R, cpu.gpr[RT] = addo(reg(RA), reg(RB), carry(), O, 1));
+<31--><RT-><RA-><RB->O<136---->R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), reg(RB), carry(), O, 1));
+<31--><RT-><RA->.....O<234---->R setcr0(R, cpu.gpr[RT] = addo(reg(RA), -1, carry(), O, 1));
+<31--><RT-><RA->.....O<232---->R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), -1, carry(), O, 1));
+<31--><RT-><RA->.....O<202---->R setcr0(R, cpu.gpr[RT] = addo(reg(RA), 0, carry(), O, 1));
+<31--><RT-><RA->.....O<200---->R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), 0, carry(), O, 1));
+<31--><RT-><RA->.....O<104---->R setcr0(R, cpu.gpr[RT] = addo(~reg(RA), 0, 1, O, 0));
+<7---><RT-><RA-><SI------------>           cpu.gpr[RT] = reg(RA) * ext16(SI);
+<31--><RT-><RA-><RB->O<235---->R setcr0(R, cpu.gpr[RT] = mulo(reg(RA), reg(RB), O));
+<31--><RT-><RA-><RB->O<491---->R setcr0(R, cpu.gpr[RT] = divo(reg(RA), reg(RB), O));
+<31--><RT-><RA-><RB->O<459---->R setcr0(R, cpu.gpr[RT] = divuo(reg(RA), reg(RB), O));
+
+# Comparison instructions
+
+<11--><F>.0<RA-><SI------------> compares(reg(RA), ext16(SI), F);
+<31--><F>.0<RA-><RB-><0------->. compares(reg(RA), reg(RB), F);
+<10--><F>.0<RA-><UI------------> compareu(reg(RA), UI, F);
+<31--><F>.0<RA-><RB-><32------>. compareu(reg(RA), reg(RB), F);
+
+# Logical instructions
+
+<28--><RS-><RA-><UI------------> setcr0(1, cpu.gpr[RA] = reg(RS) & UI);
+<29--><RS-><RA-><UI------------> setcr0(1, cpu.gpr[RA] = reg(RS) & (UI<<16));
+<24--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) | UI;
+<25--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) | (UI<<16);
+<26--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) ^ UI;
+<27--><RS-><RA-><UI------------>           cpu.gpr[RA] = reg(RS) ^ (UI<<16);
+<31--><RS-><RA-><RB-><28------>R setcr0(R, cpu.gpr[RA] = reg(RS) & reg(RB));
+<31--><RS-><RA-><RB-><444----->R setcr0(R, cpu.gpr[RA] = reg(RS) | reg(RB));
+<31--><RS-><RA-><RB-><316----->R setcr0(R, cpu.gpr[RA] = reg(RS) ^ reg(RB));
+<31--><RS-><RA-><RB-><476----->R setcr0(R, cpu.gpr[RA] = ~(reg(RS) & reg(RB)));
+<31--><RS-><RA-><RB-><124----->R setcr0(R, cpu.gpr[RA] = ~(reg(RS) | reg(RB)));
+<31--><RS-><RA-><RB-><284----->R setcr0(R, cpu.gpr[RA] = ~(reg(RS) ^ reg(RB)));
+<31--><RS-><RA-><RB-><60------>R setcr0(R, cpu.gpr[RA] = reg(RS) & ~reg(RB));
+<31--><RS-><RA-><RB-><412----->R setcr0(R, cpu.gpr[RA] = reg(RS) | ~reg(RB));
+<31--><RS-><RA->.....<954----->R setcr0(R, cpu.gpr[RA] = ext8(reg(RS)));
+<31--><RS-><RA->.....<922----->R setcr0(R, cpu.gpr[RA] = ext16(reg(RS)));
+<31--><RS-><RA->.....<26------>R setcr0(R, cpu.gpr[RA] = cntlzw(reg(RS)));
+<31--><RS-><RA->.....<122----->R setcr0(R, cpu.gpr[RA] = popcntb(reg(RS)));
+
+# Rotation/shift instructions
+
+<21--><RS-><RA-><SH-><MB-><ME->R setcr0(R, cpu.gpr[RA] = rlwnm(reg(RS), SH, MB, ME));
+<23--><RS-><RA-><RB-><MB-><ME->R setcr0(R, cpu.gpr[RA] = rlwnm(reg(RS), reg(RB), MB, ME));
+<20--><RS-><RA-><SH-><MB-><ME->R setcr0(R, cpu.gpr[RA] = rlwmi(reg(RS), SH, MB, ME));
+<31--><RS-><RA-><RB-><24------>R setcr0(R, cpu.gpr[RA] = reg(RS) << (reg(RB) & 0x1f));
+<31--><RS-><RA-><RB-><536----->R setcr0(R, cpu.gpr[RA] = reg(RS) >> (reg(RB) & 0x1f));
+<31--><RS-><RA-><SH-><824----->R setcr0(R, cpu.gpr[RA] = ((int32_t)reg(RS)) >> SH);
+<31--><RS-><RA-><RB-><792----->R setcr0(R, cpu.gpr[RA] = ((int32_t)reg(RS)) >> (reg(RB) & 0x1f));
+
+# Move to/from special registers
+
+<31--><RS-><1-->00000<467----->. cpu.xer = reg(RS);
+<31--><RS-><8-->00000<467----->. cpu.lr = reg(RS);
+<31--><RS-><9-->00000<467----->. cpu.ctr = reg(RS);
+<31--><RT-><1-->00000<339----->. cpu.gpr[RT] = cpu.xer;
+<31--><RT-><8-->00000<339----->. cpu.gpr[RT] = cpu.lr;
+<31--><RT-><9-->00000<339----->. cpu.gpr[RT] = cpu.ctr;
+<31--><RS->0<FXM--->.<144----->. mtcrf(FXM, reg(RS));
+<31--><RT->0.........<19------>. cpu.gpr[RT] = cpu.cr;
+
+# Floating pointer operations follow.
+#
+# These are extremely crude, and just enough has been implemented to make the
+# tests pass. The FPSCR bits are all ignored completely.
+
+# FPSCR manipulation
+
+<63--><FRT>..........<583----->R fatal("mffs not supported");
+<63--><F>..<B>.......<64------>. fatal("mcrfs not supported");
+<63--><F>.......<U->.<134----->R fatal("mtsfsfi not supported");
+<63-->.<FLM--->.<FRB><711----->R fatal("mtfsf not supported");
+<63--><BT->..........<70------>R fatal("mtfsb0 not supported");
+<63--><BT->..........<38------>R fatal("mtfsb1 not supported");
+
+# Floating point double loads (raw bits)
+
+<50--><FRT><RA-><D-------------> cpu.fpr[FRT] = read_double(reg0(RA) + ext16(D));
+<31--><FRT><RA-><RB-><599----->. cpu.fpr[FRT] = read_double(reg0(RA) + reg(RB));
+<51--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = read_double(ea); cpu.gpr[RA] = ea;
+<31--><FRT><RA-><RB-><631----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = read_double(ea); cpu.gpr[RA] = ea;
+
+# Floating point double stores (raw bits)
+
+<54--><FRS><RA-><D-------------> write_double(reg0(RA) + ext16(D), cpu.fpr[FRS]);
+<31--><FRS><RA-><RB-><727----->. write_double(reg0(RA) + reg(RB), cpu.fpr[FRS]);
+<55--><FRS><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_double(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+<31--><FRS><RA-><RB-><759----->. uint32_t ea = reg(RA) + reg(RB); write_double(ea, cpu.fpr[FRS]); cpu.gpr[RA] = ea;
+
+# Floating point single loads (convert from single to double)
+
+<48--><FRT><RA-><D-------------> cpu.fpr[FRT] = d2b(b2f(read_long(reg0(RA) + ext16(D))));
+<31--><FRT><RA-><RB-><535----->. cpu.fpr[FRT] = d2b(b2f(read_long(reg0(RA) + reg(RB))));
+<49--><FRT><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); cpu.fpr[FRT] = d2b(b2f(read_long(ea))); cpu.gpr[RA] = ea;
+<31--><FRT><RA-><RB-><567----->. uint32_t ea = reg(RA) + reg(RB); cpu.fpr[FRT] = d2b(b2f(read_long(ea))); cpu.gpr[RA] = ea;
+
+# Floating point single stores (convert from double to single)
+
+<52--><FRS><RA-><D-------------> write_long(reg0(RA) + ext16(D), f2b(fpr(FRS)));
+<31--><FRS><RA-><RB-><663----->. write_long(reg0(RA) + reg(RB), f2b(fpr(FRS)));
+<53--><FRS><RA-><D-------------> uint32_t ea = reg(RA) + ext16(D); write_long(ea, f2b(fpr(FRS))); cpu.gpr[RA] = ea;
+<31--><FRS><RA-><RB-><695----->. uint32_t ea = reg(RA) + reg(RB); write_long(ea, f2b(fpr(FRS))); cpu.gpr[RA] = ea;
+
+# Floating point arithmetic
+
+<63--><FRT>.....<FRB><72------>R setcr1(R, cpu.fpr[FRT] = cpu.fpr[FRB]);
+<63--><FRT>.....<FRB><40------>R setcr1(R, cpu.fpr[FRT] = d2b(-fpr(FRB)));
+<63--><FRT>.....<FRB><264----->R setcr1(R, cpu.fpr[FRT] = d2b(fabs(fpr(FRB))));
+<63--><FRT>.....<FRB><136----->R setcr1(R, cpu.fpr[FRT] = d2b(-fabs(fpr(FRB))));
+<63--><FRT><FRA><FRB><21------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) + fpr(FRB)));
+<63--><FRT><FRA><FRB><20------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) - fpr(FRB)));
+<63--><FRT><FRA><FRB><25------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) * fpr(FRB)));
+<63--><FRT><FRA><FRB><18------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) / fpr(FRB)));
+
+# Floating point comparisons
+
+<63--><F>..<FRA><FRB><0------->. comparef(fpr(FRA), fpr(FRB), F);
+<63--><F>..<FRA><FRB><32------>. comparef(fpr(FRA), fpr(FRB), F);
+
+# Floating point conversions
+
+<63--><FRT>.....<FRB><14------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);
+<63--><FRT>.....<FRB><15------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);

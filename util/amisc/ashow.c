@@ -140,6 +140,9 @@ showrelo()
 	case RELOPPC:
 		printf("\tPowerPC 26-bit address\n");
 		break;
+	case RELOPPC_LIS:
+		printf("\tPowerPC lis instruction\n");
+		break;
 	case RELOVC4:
 		printf("\tVideoCore IV address in 32-bit instruction\n");
 		break;

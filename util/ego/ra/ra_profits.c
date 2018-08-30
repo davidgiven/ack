@@ -69,7 +69,8 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 	cond_p m = (cond_p) 0;
 
 	if (localtyp == reg_loop) localtyp = reg_any;
-	if (size == ws || size ==ps && totyp == reg_pointer) {
+	if (size == ws || size == ps && totyp == reg_pointer ||
+	    size == 2 * ws && totyp == reg_float) {
 		switch(itemtyp) {
 		   case LOCALVAR:
 			m = alocaltab[localtyp][totyp];

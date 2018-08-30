@@ -18,6 +18,7 @@ static char rcsid[] = "$Id$";
 #include "const.h"
 #include "memory.h"
 #include "debug.h"
+#include "sym.h"
 
 /*
  * Symbol table types. Each hash table entry contains the offset of a symbol
@@ -33,6 +34,9 @@ struct symbol {
 #define NHASH	307		/* Size of hash table. Must be odd. */
 
 static ind_t	hashtable[NHASH];
+
+unsigned short	NLocals = 0;	/* Number of local names to be saved. */
+unsigned short	NGlobals = 0;	/* Number of global names. */
 
 /*
  * Initialize the symbol table. All indices should be noticeably invalid.
@@ -90,9 +94,7 @@ searchname(string, hashval)
  * destroyed by allocation. However, the string of which name->on_foff is the
  * offset can be destroyed, so we save it first.
  */
-entername(name, hashval)
-	struct outname	*name;
-	int		hashval;
+void entername(struct outname* name, int hashval)
 {
 	ind_t		savindex;
 	ind_t		symindex;
@@ -100,7 +102,6 @@ entername(name, hashval)
 	register struct symbol	*sym;
 	struct outname	*newname;
 	extern ind_t	savechar();
-	extern ind_t	hard_alloc();
 
 	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
@@ -116,6 +117,7 @@ entername(name, hashval)
 	newname->on_foff = savindex;
 	sym->sy_next = hashtable[hashval];
 	hashtable[hashval] = symindex;
+	NGlobals++;
 }
 
 /*

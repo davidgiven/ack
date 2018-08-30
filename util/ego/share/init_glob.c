@@ -19,7 +19,8 @@
 
 extern short nrglobals;
 
-init_globals()
+/* ARGSUSED */
+void init_globals(void *vp)
 {
 	/* Assign a 'global variable number (o_globnr) to
 	 * every global variable for which we want to

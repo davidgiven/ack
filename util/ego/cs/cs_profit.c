@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <stdio.h>
+#include <string.h>
 #include <em_mnem.h>
 #include <em_spec.h>
 #include "../share/types.h"
@@ -13,6 +14,7 @@
 #include "../share/cset.h"
 #include "../share/lset.h"
 #include "cs.h"
+#include "cs_alloc.h"
 #include "cs_aux.h"
 #include "cs_debug.h"
 #include "cs_avail.h"
@@ -24,10 +26,9 @@ STATIC cset	forbidden;
 STATIC cset	sli_counts;
 STATIC short	LX_threshold;
 STATIC short	AR_limit;
+STATIC bool	RM_to_DV;
 
-STATIC get_instrs(f, s_p)
-	FILE *f;
-	cset *s_p;
+STATIC void get_instrs(FILE *f, cset *s_p)
 {
 	/* Read a set of integers from inputfile f into *s_p.
 	 * Such a set must be delimited by a negative number.
@@ -41,9 +42,7 @@ STATIC get_instrs(f, s_p)
 	}
 }
 
-STATIC choose_cset(f, s_p, max)
-	FILE *f;
-	cset *s_p;
+STATIC void choose_cset(FILE *f, cset *s_p, int max)
 {
 	/* Read two compact sets of integers from inputfile f.
 	 * Choose the first if we optimize with respect to time,
@@ -64,16 +63,16 @@ STATIC choose_cset(f, s_p, max)
 	Cdeleteset(cs1); Cdeleteset(cs2);
 }
 
-cs_machinit(f)
-	FILE *f;
+void cs_machinit(void *vp)
 {
+	FILE *f = vp;
 	char s[100];
 	int time, space;
 
 	/* Find piece that is relevant for this phase. */
 	do {
 		while (getc(f) != '\n');
-		fscanf(f, "%s", s);
+		fscanf(f, "%99s", s);
 	} while (strcmp(s, "%%CS"));
 
 	/* Choose a set of instructions which must only be eliminated
@@ -100,6 +99,12 @@ cs_machinit(f)
 	fscanf(f, "%d", &space);
 	AR_limit = space;
 
+	/* Read whether to convert a remainder RMI/RMU to a division
+	 * DVI/DVU using the formula a % b = a - b * (a / b).
+	 */
+	fscanf(f, "%d %d", &time, &space);
+	RM_to_DV = time_space_ratio >= 50 ? time : space;
+
 	/* Read for what counts we must not eliminate an SLI instruction
 	 * when it is part of an array-index computation.
 	 */
@@ -114,8 +119,27 @@ cs_machinit(f)
 	choose_cset(f, &forbidden, sp_lmnem);
 }
 
-STATIC bool sli_no_eliminate(lnp)
-	line_p lnp;
+bool may_become_aar(avail_p avp)
+{
+	/* Check whether it is desirable to treat a LAR or SAR as an
+	 * AAR LOI/STI. This depends on the size of the array-elements.
+	 */
+	offset sz;
+
+	sz = array_elemsize(avp->av_othird);
+	if (sz == UNKNOWN_SIZE)
+		return FALSE;
+	if (time_space_ratio < 50)
+		return sz <= AR_limit;
+	return TRUE;
+}
+
+bool may_become_dv(void)
+{
+	return RM_to_DV;
+}
+
+STATIC bool sli_no_eliminate(line_p lnp)
 {
 	/* Return whether the SLI-instruction in lnp is part of
 	 * an array-index computation, and should not be eliminated.
@@ -129,8 +153,7 @@ STATIC bool sli_no_eliminate(lnp)
 		;
 }
 
-STATIC bool gains(avp)
-	avail_p avp;
+STATIC bool gains(avail_p avp)
 {
 	/* Return whether we can gain something, when we eliminate
 	 * an expression such as in avp. We just glue together some
@@ -160,12 +183,12 @@ STATIC bool gains(avp)
 	return TRUE;
 }
 
-STATIC bool okay_lines(avp, ocp)
-	avail_p avp;
-	occur_p ocp;
+STATIC bool okay_lines(avail_p avp, occur_p ocp)
 {
+	/* Check whether all lines in this occurrence can in
+	 * principle be eliminated; no stores, messages, calls etc.
+	 */
 	register line_p lnp, next;
-	offset sz;
 
 	for (lnp = ocp->oc_lfirst; lnp != (line_p) 0; lnp = next) {
 		next = lnp != ocp->oc_llast ? lnp->l_next : (line_p) 0;
@@ -178,23 +201,10 @@ STATIC bool okay_lines(avp, ocp)
 				return FALSE;
 		}
 	}
-	/* All lines in this occurrence can in principle be eliminated;
-	 * no stores, messages, calls etc.
-	 * We now check whether it is desirable to treat a LAR or a SAR
-	 * as an AAR LOI/STI. This depends on the size of the array-elements.
-	 */
-	if (INSTR(ocp->oc_llast) == op_lar || INSTR(ocp->oc_llast) == op_sar) {
-		sz = array_elemsize(avp->av_othird);
-		if (sz == UNKNOWN_SIZE) return FALSE;
-		if (avp->av_instr == (byte) op_aar && time_space_ratio < 50) {
-			return sz <= AR_limit;
-		}
-	}
 	return TRUE;
 }
 
-bool desirable(avp)
-	avail_p avp;
+bool desirable(avail_p avp)
 {
 	register Lindex i, next;
 

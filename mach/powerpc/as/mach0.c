@@ -11,15 +11,13 @@
 #define DEBUG 0
 
 #undef valu_t
-#define valu_t long
+#define valu_t int32_t
 
 #undef ADDR_T
-#define ADDR_T long
+#define ADDR_T uint32_t
 
 #undef word_t
-#define word_t long
-
-typedef uint32_t quad;
+#define word_t uint32_t
 
 #undef ALIGNWORD
 #define ALIGNWORD	4
@@ -31,3 +29,9 @@ typedef uint32_t quad;
 #define VALWIDTH	8
 
 #define FIXUPFLAGS (RELBR | RELWR)
+
+/* 6-bit mb (mask begin) or me (mask end) field */
+#define MB6(v) (((v) & 0x1F)<<6 | ((v) & 0x20)>>0)
+
+/* 6-bit sh (shift) field */
+#define SH6(v) (((v) & 0x1F)<<11 | ((v) & 0x20)>>4)

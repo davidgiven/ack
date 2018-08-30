@@ -5,7 +5,8 @@
  */
 extern avail_p	avails;		/* The set of available expressions. */
 
-extern avail_p	av_enter();	/* (avail_p avp, occur_p ocp, byte kind)
+extern avail_p	av_enter(avail_p avp, occur_p ocp, byte kind);
+				/*
 				 * Puts the available expression in avp
 				 * in the list of available expressions,
 				 * if it is not already there. Add ocp to set of
@@ -18,6 +19,7 @@ extern avail_p	av_enter();	/* (avail_p avp, occur_p ocp, byte kind)
 				 * Returns a pointer into the list.
 				 */
 
-extern		clr_avails();	/* Release all space occupied by the old list
+extern void	clr_avails(void);
+				/* Release all space occupied by the old list
 				 * of available expressions.
 				 */

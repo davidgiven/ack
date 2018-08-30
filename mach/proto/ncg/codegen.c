@@ -2,9 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -14,6 +14,9 @@ static char rcsid[] = "$Id$";
 #include "state.h"
 #include "equiv.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h" /* regreturn */
+#endif
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -26,13 +29,6 @@ static char rcsid[] = "$Id$";
             in exceptional cases */
 
 byte startupcode[] = { DO_NEXTEM };
-
-byte* nextem();
-unsigned costcalc();
-unsigned docoerc();
-unsigned stackupto();
-string tostring();
-string ad2str();
 
 #ifdef NDEBUG
 #define DEBUG(string)
@@ -124,7 +120,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				byte* bp;
 				int n;
 				unsigned mindistance, dist;
-				register i;
+				int i;
 				int cindex;
 				int npos, pos[MAXRULE];
 				unsigned mincost, t;
@@ -295,8 +291,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				DEBUG("XXMATCH");
 			case DO_XMATCH:
 			{
-				register i;
-				int temp;
+				int i, temp;
 
 				DEBUG("XMATCH");
 				tokpatlen = (codep[-1] >> 5) & 07;
@@ -306,8 +301,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_MATCH:
 			{
-				register i;
-				int j;
+				int i, j;
 				unsigned mincost, t;
 				token_p tp;
 				int size, lsize;
@@ -603,8 +597,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			case DO_KILLREG:
 			case DO_RREMOVE:
 			{ /* register remove */
-				register i;
-				int nodeno;
+				int i, nodeno;
 				token_p tp;
 				tkdef_p tdp;
 				result_t result;
@@ -650,7 +643,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_DEALLOCATE:
 			{
-				register i;
+				int i;
 				tkdef_p tdp;
 				int tinstno;
 				token_t token;
@@ -684,8 +677,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_ALLOCATE:
 			{
-				register i;
-				int j;
+				int i, j;
 				int tinstno;
 				int npos, npos2, pos[NREGS], pos2[NREGS];
 				unsigned mincost, t;
@@ -844,8 +836,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_INSTR:
 			{
-				register i;
-				int n;
+				int i, n;
 				int tinstno;
 				token_t token;
 				int stringno;
@@ -933,7 +924,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_TOKREPLACE:
 			{
-				register i;
+				int i;
 				int tinstno;
 				int repllen;
 				token_t reptoken[MAXREPLLEN];
@@ -969,8 +960,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 			}
 			case DO_EMREPLACE:
 			{
-				register i;
-				int j;
+				int i, j;
 				int nodeno;
 				result_t result[MAXEMREPLLEN];
 				int emrepllen, eminstr;
@@ -1093,10 +1083,10 @@ doreturn:
 	return (totalcost);
 }
 
-readcodebytes()
+void readcodebytes(void)
 {
 #ifndef CODEINC
-	register fd;
+	int fd;
 	extern int ncodebytes;
 
 	if ((fd = open("code", 0)) < 0)
@@ -1108,13 +1098,12 @@ readcodebytes()
 		error("Short read from code");
 	}
 	close(fd);
-#endif
+#endif /* CODEINC */
 }
 
 #ifdef TABLEDEBUG
-initlset(f) char* f;
+void initlset(char *f)
 {
-	extern char* myalloc();
 
 	set_flag = f;
 	if ((set_fd = open(f + 1, 2)) < 0)
@@ -1124,7 +1113,7 @@ initlset(f) char* f;
 	read(set_fd, set_val, set_size);
 }
 
-termlset()
+void termlset(void)
 {
 
 	if (set_fd)
@@ -1134,7 +1123,7 @@ termlset()
 		close(set_fd);
 		if (set_flag[0] == 'u')
 		{
-			register i;
+			int i;
 
 			fprintf(stderr, "Unused code rules:\n\n");
 			for (i = 0; i < 8 * set_size; i++)
@@ -1143,4 +1132,4 @@ termlset()
 		}
 	}
 }
-#endif
+#endif /* TABLEDEBUG */

@@ -6,6 +6,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 /*  MAKECLASSDEF
  *
@@ -36,14 +37,14 @@ convert(mnemfile,classfile)
 	printf("\tNOCLASS,\tNOCLASS,\n");
 	/* EM mnemonics start at 1, arrays in C at 0 */
 	for (;;) {
-		fscanf(mnemfile,"%s%s%d",def,mnem1,&opc);
+		fscanf(mnemfile,"%9s%9s%d",def,mnem1,&opc);
 		/* read a line like "#define op_aar 1" */
 		if (feof(mnemfile)) break;
 		if (strcmp(def,"#define") != 0) {
 			error("bad mnemonic file, #define expected");
 		}
 		if (newcl) {
-			fscanf(classfile,"%s%d%d",mnem2,&src,&res);
+			fscanf(classfile,"%9s%d%d",mnem2,&src,&res);
 			/* read a line like "op_loc 8 1" */
 		}
 		if (feof(classfile) || strcmp(mnem1,mnem2) != 0) {

@@ -9,27 +9,29 @@
 extern FILE *curoutp;	/* current output file */
 
 #define outbyte(b) putc(b,curoutp)
-extern	outshort();		/* (short i)
+void outshort(short i);		/*
 				 * Write a short to curoutp
 				 */
-extern outoff();		/* (offset off)
+void outoff(offset off);	/*
 				 * Write an offset to curoutp
 				 */
-extern	outproc();		/* (proc_p p)
+void outproc(proc_p p);		/*
 				 * Write a procid to curoutp
 				 */
-extern	putdtable();		/* (dblock_p head, FILE *df)
+void putdtable(dblock_p head, FILE *df);
+				/*
 				 * Write the data block table to file df,
 				 * preceded by its length.
 				 */
-extern	putptable();		/* (proc_p head, FILE *pf, bool all)
+void putptable(proc_p head, FILE *pf, bool all);
+				/*
 				 * Write the proc table to file pf,
 				 * preceded by its length. If all=false,
 				 * the fields computed by CF will not be
 				 * written (used by the IC phase).
 				 */
-extern void putunit();		/* (short kind; proc_p p; line_p l;
-				 * FILE *gf, *lf)
+void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf);
+				/*
 				 * If kind = LTEXT, then write
 				 * the control flow graph to file gf,
 				 * preceded by its length (#basic blocks);
@@ -40,7 +42,8 @@ extern void putunit();		/* (short kind; proc_p p; line_p l;
 				 * list of instructions (data declarations)
 				 * to lf.
 				 */
-extern short putlines();	/* (line_p l; FILE *lf)
+short putlines(line_p l, FILE *lf);
+				/*
 				 * Output the list of em instructions
 				 * headed by l. Return the number of
 				 * instructions written.

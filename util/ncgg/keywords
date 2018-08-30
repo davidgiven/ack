@@ -38,6 +38,8 @@ reg_float	REG_FLOAT
 reg_loop	REG_LOOP
 reg_pointer	REG_POINTER
 regvar	REGVAR
+regvar_d	REGVAR_D
+regvar_w	REGVAR_W
 return	RETURN
 reusing	REUSING
 rom	ROM

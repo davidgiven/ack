@@ -8,66 +8,65 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include "libm2.h"
 
 extern char **argv, **environ;
 extern int argc;
 unsigned int _Arguments__Argc;
 
-static char *
-findname(s1, s2)
-register char *s1, *s2;
+static char* findname(char* s1, char* s2)
 {
 
-	while (*s1 == *s2++) s1++;
-	if (*s1 == '\0' && *(s2-1) == '=') return s2;
+	while (*s1 == *s2++)
+		s1++;
+	if (*s1 == '\0' && *(s2 - 1) == '=')
+		return s2;
 	return 0;
 }
 
-static unsigned int
-scopy(src, dst, max)
-	register char *src, *dst;
-	unsigned int max;
+static unsigned int scopy(char* src, char* dst, unsigned int max)
 {
 	register unsigned int i = 0;
 
-	while (*src && i <= max) {
+	while (*src && i <= max)
+	{
 		i++;
 		*dst++ = *src++;
 	}
-	if (i <= max) {
+	if (i <= max)
+	{
 		*dst = '\0';
-		return i+1;
+		return i + 1;
 	}
-	while (*src++) i++;
+	while (*src++)
+		i++;
 	return i + 1;
 }
 
-_Arguments_()
+void _Arguments_(void)
 {
 	_Arguments__Argc = argc;
 }
 
-unsigned
-_Arguments__Argv(n, argument, l, u, s)
-	unsigned int u;
-	char *argument;
+unsigned int _Arguments__Argv(int n, char* argument, int l, unsigned int u, int s)
 {
 
-	if (n >= argc) return 0;
+	if (n >= argc)
+		return 0;
 	return scopy(argv[n], argument, u);
 }
 
-unsigned
-_Arguments__GetEnv(name, nn, nu, ns, value, l, u, s)
-	char *name, *value;
-	unsigned int nu, u;
+unsigned int _Arguments__GetEnv(
+    char* name, int nn, unsigned int nu, int ns, char* value, int l, unsigned int u, int s)
 {
-	register char **p = environ;
-	register char *v = 0;
+	register char** p = environ;
+	register char* v = 0;
 
-	while (*p && !(v = findname(name, *p++))) {
+	while (*p && !(v = findname(name, *p++)))
+	{
 		/* nothing */
 	}
-	if (!v) return 0;
+	if (!v)
+		return 0;
 	return scopy(v, value, u);
 }

@@ -33,6 +33,7 @@ extern double ceil(double _x);
 extern double fabs(double _x);
 extern double floor(double _x);
 
+extern double hypot(double _x, double _y);
 extern double pow(double _x, double _y);
 
 extern double frexp(double _x, int *_exp);

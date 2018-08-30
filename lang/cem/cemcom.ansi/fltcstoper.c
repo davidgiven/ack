@@ -6,8 +6,8 @@
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 /*	  F O R   F L O A T I N G   P O I N T   N U M B E R S		*/
 
+#include	<assert.h>
 #include	"parameters.h"
-#include	"assert.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -34,7 +34,7 @@ fltcstbin(expp, oper, expr)
 	o1 = (*expp)->FL_ARITH;
 	o2 = expr->FL_ARITH;
 
-	ASSERT(is_fp_cst(*expp) && is_fp_cst(expr));
+	assert(is_fp_cst(*expp) && is_fp_cst(expr));
 	switch (oper)	{
 	case '*':
 		flt_mul(&o1, &o2, &o1);

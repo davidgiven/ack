@@ -8,20 +8,20 @@
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
+#include "libm2.h"
 
 static unsigned prio = 0;
 
-stackprio(n)
-	unsigned n;
+int stackprio(unsigned int n)
 {
 	unsigned old = prio;
 
-	if (n > prio) prio = n;
+	if (n > prio)
+		prio = n;
 	return old;
 }
 
-unstackprio(n)
-	unsigned n;
+void unstackprio(unsigned int n)
 {
 	prio = n;
 }

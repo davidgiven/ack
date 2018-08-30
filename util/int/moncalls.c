@@ -11,12 +11,10 @@
 
 #include	<sys/types.h>
 #include	<sys/stat.h>
-#if __STDC__
-#include	<time.h>
-#endif
 #include	<sys/times.h>
-
-extern int errno;			/* UNIX error number */
+#include	<errno.h>
+#include	<time.h>
+#include	<unistd.h>
 
 extern int running;			/* from main.c */
 extern int fd_limit;			/* from io.c */
@@ -39,10 +37,7 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 #endif	/* BSD4_2 */
 
 #ifdef	SYS_V
-#include	<sys/errno.h>
-#undef		ERANGE			/* collision with trap.h */
 #include	<fcntl.h>
-#include	<time.h>
 #endif	/* SYS_V */
 
 #include	<em_abs.h>
@@ -56,13 +51,6 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 #define	OUTPUT		1
 
 #define	DUPMASK		0x40
-
-extern long lseek();
-#ifdef	SYS_V
-extern unsigned int alarm();
-extern long time();
-extern void sync();
-#endif	/* SYS_V */
 
 #define	INT2SIZE	max(wsize, 2L)
 #define	INT4SIZE	max(wsize, 4L)
@@ -548,6 +536,7 @@ moncall()
 		LOG(("@m9 Getpid: succeeded, pid = %d", pid));
 		break;
 
+#ifdef WANT_MOUNT_UMOUNT
 	case 21:			/* Mount */
 
 		dsp1 = pop_ptr();
@@ -587,6 +576,7 @@ moncall()
 			LOG(("@m9 Mount: succeeded, dsp1 = %lu", dsp1));
 		}
 		break;
+#endif
 
 	case 23:			/* Setuid */
 
@@ -612,6 +602,7 @@ moncall()
 		LOG(("@m9 Getuid(part 2): eff uid = %d", userid));
 		break;
 
+#ifdef WANT_STIME
 	case 25:			/* Stime */
 
 		tm = pop_int4();
@@ -632,6 +623,7 @@ moncall()
 			LOG(("@m9 Stime: succeeded, tm = %ld", tm));
 		}
 		break;
+#endif
 
 	case 26:			/* Ptrace */
 

@@ -6,11 +6,10 @@
 
 /* Author: Hans van Eck */
 
-#include	<pc_err.h>
+#include "pc.h"
 
-extern _trp();
-
-_nfa(bool)
+void _nfa(int bool)
 {
-	if (! bool) _trp(EFUNASS);
+	if (!bool)
+		_trp(EFUNASS);
 }

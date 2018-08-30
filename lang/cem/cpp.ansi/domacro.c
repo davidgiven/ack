@@ -5,7 +5,9 @@
 /* $Id$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
-#include    <stdlib.h>
+#include	<assert.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -13,7 +15,6 @@
 #include	"input.h"
 
 #include    "parameters.h"
-#include	<assert.h>
 #include	<alloc.h>
 #include	"class.h"
 #include	"macro.h"

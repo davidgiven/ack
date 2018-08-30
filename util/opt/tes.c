@@ -7,12 +7,12 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Eck. 
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include "param.h"
-#include "assert.h"
 #include "types.h"
 #include "tes.h"
 #include "alloc.h"

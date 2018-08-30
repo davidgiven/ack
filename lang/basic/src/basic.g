@@ -207,7 +207,7 @@ clearstmt { int exp; }
 	;
 
 closestmt:	filelist		
-	|	/* empty */	{ C_cal("_close"); }
+	|	/* empty */	{ C_cal("_closeall"); }
 	;
 
 filelist { int intv; }

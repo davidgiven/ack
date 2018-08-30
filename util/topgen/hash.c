@@ -11,6 +11,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "misc.h"
 
 struct hlist {			/* linear list of pattern numbers */

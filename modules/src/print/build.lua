@@ -1,12 +1,13 @@
 clibrary {
 	name = "lib",
-	srcs = { "./*.c" },
+	srcs = {
+		"./doprnt.c", "./format.c", "./fprint.c", "./print.c",
+		"./sprint.c",
+	},
 	hdrs = { "./print.h" },
 	deps = {
-		"modules+headers",
+		"./param.h",
+		"modules/src/string+lib",
 		"modules/src/system+lib",
-		"./*.h"
 	}
 }
-
-

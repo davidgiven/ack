@@ -26,9 +26,7 @@ STATIC actual_p acts, *app;
 #define INIT_ACTS()	{acts = (actual_p) 0; app = &acts;}
 #define APPEND_ACTUAL(a) {*app = a; app = &a->ac_next;}
 
-STATIC make_actual(l1,l2,size)
-	line_p l1,l2;
-	offset size;
+STATIC void make_actual(line_p l1, line_p l2, offset size)
 {
 	/* Allocate a struct for a new actual parameter
 	 * expression, the code of which extends from

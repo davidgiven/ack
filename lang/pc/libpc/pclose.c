@@ -16,12 +16,11 @@
  *
  */
 
-#include	<pc_file.h>
-
-extern		_cls();
+#include "pc.h"
 
 /* procedure pclose(var f:file of ??); */
 
-pclose(f) struct file *f; {
+void pclose(struct file* f)
+{
 	_cls(f);
 }

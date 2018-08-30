@@ -275,7 +275,7 @@ static struct ir* store(int size, struct ir* address, int offset, struct ir* val
     else
         opcode = IR_STORE;
 
-    if (offset > 0)
+    if (offset != 0)
         address = new_ir2(
             IR_ADD, EM_pointersize,
             address, new_wordir(offset)
@@ -305,7 +305,7 @@ static struct ir* load(int size, struct ir* address, int offset)
     else
         opcode = IR_LOAD;
 
-    if (offset > 0)
+    if (offset != 0)
         address = new_ir2(
             IR_ADD, EM_pointersize,
             address, new_wordir(offset)
@@ -417,6 +417,31 @@ static void helper_function(const char* name)
     );
 }
 
+static void helper_function_with_arg(const char* name, struct ir* arg)
+{
+    /* Abuses IR_SETRET to set a register to pass one argument to a
+     * helper function.
+     *
+     * FIXME:  As of January 2018, mach/powerpc/libem takes an
+     * argument in register r3 only for ".los4", ".sts4", ".trp".
+     * This is an accident.  Should the argument be on the stack, or
+     * should other helpers use a register? */
+
+    materialise_stack();
+    appendir(
+        new_ir1(
+            IR_SETRET, arg->size,
+            arg
+        )
+    );
+    appendir(
+        new_ir1(
+            IR_CALL, 0,
+            new_labelir(name)
+        )
+    );
+}
+
 static void insn_simple(int opcode)
 {
     switch (opcode)
@@ -438,6 +463,7 @@ static void insn_simple(int opcode)
         case op_cii: simple_convert(IR_FROMSI); break;
         case op_ciu: simple_convert(IR_FROMSI); break;
         case op_cui: simple_convert(IR_FROMUI); break;
+        case op_cuu: simple_convert(IR_FROMUI); break;
         case op_cfu: simple_convert(IR_FROMUF); break;
         case op_cfi: simple_convert(IR_FROMSF); break;
         case op_cif: simple_convert(IR_FROMSI); break;
@@ -519,15 +545,24 @@ static void insn_simple(int opcode)
             break;
         }
 
-        case op_trp: helper_function(".trp"); break;
+        case op_trp:
+            helper_function_with_arg(".trp", pop(EM_wordsize));
+            break;
 
         case op_sig:
         {
+            struct ir* label = new_labelir(".trppc");
             struct ir* value = pop(EM_pointersize);
+            push(
+                load(
+                    EM_pointersize,
+                    label, 0
+                )
+            );
             appendir(
                 store(
                     EM_pointersize,
-                    new_labelir(".trppc"), 0,
+                    label, 0,
                     value
                 )
             );
@@ -540,12 +575,13 @@ static void insn_simple(int opcode)
             break;
         }
 
-        /* FIXME: These instructions are really complex and barely used
-         * (Modula-2 and Pascal set support, I believe). Leave them until
-         * later. */
-        case op_set: helper_function(".unimplemented_set"); break;
-        case op_ior: helper_function(".unimplemented_ior"); break;
-
+        case op_and: helper_function(".and"); break;
+        case op_ior: helper_function(".ior"); break;
+        case op_xor: helper_function(".xor"); break;
+        case op_com: helper_function(".com"); break;
+        case op_cms: helper_function(".cms"); break;
+        case op_set: helper_function(".set"); break;
+        case op_inn: helper_function(".inn"); break;
 
         case op_dch:
             push(
@@ -671,6 +707,31 @@ static void simple_alu2(int opcode, int size, int irop, const char* fallback)
     }
 }
 
+static void rotate(int opcode, int size, int irop, int irop_reverse)
+{
+    if (size > (2*EM_wordsize))
+        fatal("treebuilder: can't do opcode %s with size %d", em_mnem[opcode - sp_fmnem], size);
+    else
+    {
+        struct ir* right = pop(size);
+        struct ir* left = pop(size);
+        struct ir* bits = new_wordir(8 * size);
+
+        /* a rol b -> (a << b) | (a >> (32 - b)) */
+        push(
+            new_ir2(
+                IR_OR, size,
+                new_ir2(irop, size, left, right),
+                new_ir2(
+                    irop_reverse, size,
+                    left,
+                    new_ir2(IR_SUB, size, bits, right)
+                )
+            )
+        );
+    }
+}
+
 static struct ir* extract_block_refs(struct basicblock* bb)
 {
     struct ir* outir = NULL;
@@ -721,26 +782,28 @@ static struct ir* ptradd(struct ir* address, int offset)
         );
 }
 
-static void blockmove(struct ir* dest, struct ir* src, struct ir* size)
+static struct ir* walk_static_chain(int level)
 {
-    /* memmove stack: ( size src dest -- ) */
-    push(size);
-    push(src);
-    push(dest);
+    struct ir* ir;
 
-    materialise_stack();
-    appendir(
-        new_ir1(
-            IR_CALL, 0,
-            new_labelir("memmove")
-        )
+    /* The static chain, when it exists, is the first argument of each
+     * procedure.  The chain begins with the current frame at level 0,
+     * and continues until we reach the outermost procedure. */
+    ir = new_ir0(
+        IR_GETFP, EM_pointersize
     );
-    appendir(
-        new_ir1(
-            IR_STACKADJUST, EM_pointersize,
-            new_wordir(EM_pointersize*2 + EM_wordsize)
-        )
-    );
+    while (level--)
+    {
+        /* Walk to the next frame pointer. */
+        ir = load(
+            EM_pointersize,
+            new_ir1(
+                IR_FPTOAB, EM_pointersize,
+                ir
+            ), 0
+        );
+    }
+    return ir;
 }
 
 static void insn_ivalue(int opcode, arith value)
@@ -766,8 +829,10 @@ static void insn_ivalue(int opcode, arith value)
 
         case op_and: simple_alu2(opcode, value, IR_AND, ".and"); break;
         case op_ior: simple_alu2(opcode, value, IR_OR, ".ior"); break;
-        case op_xor: simple_alu2(opcode, value, IR_EOR, NULL); break;
+        case op_xor: simple_alu2(opcode, value, IR_EOR, ".xor"); break;
         case op_com: simple_alu1(opcode, value, IR_NOT, ".com"); break;
+        case op_rol: rotate(opcode, value, IR_LSL, IR_LSR); break;
+        case op_ror: rotate(opcode, value, IR_LSR, IR_LSL); break;
 
         case op_adf: simple_alu2(opcode, value, IR_ADDF, NULL); break;
         case op_sbf: simple_alu2(opcode, value, IR_SUBF, NULL); break;
@@ -775,12 +840,23 @@ static void insn_ivalue(int opcode, arith value)
         case op_dvf: simple_alu2(opcode, value, IR_DIVF, NULL); break;
         case op_ngf: simple_alu1(opcode, value, IR_NEGF, NULL); break;
 
-        case op_cmu: /* fall through */
-        case op_cms: push(tristate_compare(value, IR_COMPAREUI)); break;
+        case op_cms:
+            if (value > (2*EM_wordsize))
+            {
+                push(new_wordir(value));
+                helper_function(".cms");
+                break;
+            }
+            /* fall through */
+        case op_cmu: push(tristate_compare(value, IR_COMPAREUI)); break;
         case op_cmi: push(tristate_compare(value, IR_COMPARESI)); break;
         case op_cmf: push(tristate_compare(value, IR_COMPAREF)); break;
 
-        case op_rck: helper_function(".rck"); break;
+        case op_rck:
+            if (value != EM_wordsize)
+                fatal("'rck %d' not supported", value);
+            helper_function(".rck");
+            break;
         case op_set: push(new_wordir(value)); helper_function(".set"); break;
         case op_inn: push(new_wordir(value)); helper_function(".inn"); break;
 
@@ -931,26 +1007,24 @@ static void insn_ivalue(int opcode, arith value)
 
             if (value > (EM_wordsize*2))
             {
-                /* We're going to need to do multiple stores; fix the address
+                /* We're going to need to do multiple loads; fix the address
                  * so it'll go into a register and we can do maths on it. */
                 appendir(ptr);
             }
 
+            /* Stack grows down.  Load backwards. */
             while (value > 0)
             {
                 int s = EM_wordsize*2;
                 if (value < s)
                     s = value;
-
+                value -= s;
                 push(
                     load(
                         s,
-                        ptr, offset
+                        ptr, value
                     )
                 );
-
-                value -= s;
-                offset += s;
             }
 
             assert(value == 0);
@@ -1100,7 +1174,12 @@ static void insn_ivalue(int opcode, arith value)
         case op_dup:
         {
             sequence_point();
-            if ((value == (EM_wordsize*2)) && (peek(0) == EM_wordsize) && (peek(1) == EM_wordsize))
+            if (value > (2*EM_wordsize))
+            {
+                push(new_wordir(value));
+                helper_function(".dus4");
+            }
+            else if ((value == (EM_wordsize*2)) && (peek(0) == EM_wordsize) && (peek(1) == EM_wordsize))
             {
                 struct ir* v1 = pop(EM_wordsize);
                 struct ir* v2 = pop(EM_wordsize);
@@ -1118,12 +1197,30 @@ static void insn_ivalue(int opcode, arith value)
             break;
         }
 
+        case op_dus:
+        {
+            if (value != EM_wordsize)
+                fatal("'dus %d' not supported", value);
+            helper_function(".dus4");
+            break;
+        }
+
         case op_exg:
         {
-            struct ir* v1 = pop(value);
-            struct ir* v2 = pop(value);
-            push(v1);
-            push(v2);
+            if (value > (2*EM_wordsize))
+            {
+                push(
+                    new_wordir(value)
+                );
+                helper_function(".exg");
+            }
+            else
+            {
+                struct ir* v1 = pop(value);
+                struct ir* v2 = pop(value);
+                push(v1);
+                push(v2);
+            }
             break;
         }
 
@@ -1286,53 +1383,19 @@ static void insn_ivalue(int opcode, arith value)
         }
 
         case op_lxl:
-        {
-            struct ir* ir;
-
-            /* Walk the static chain. */
-
-            ir = new_ir0(
-                IR_GETFP, EM_pointersize
+            push(
+                walk_static_chain(value)
             );
-
-            while (value--)
-            {
-                ir = new_ir1(
-                    IR_CHAINFP, EM_pointersize,
-                    ir
-                );
-            }
-
-            push(ir);
             break;
-        }
 
         case op_lxa:
-        {
-            struct ir* ir;
-
-            /* Walk the static chain. */
-
-            ir = new_ir0(
-                IR_GETFP, EM_pointersize
-            );
-
-            while (value--)
-            {
-                ir = new_ir1(
-                    IR_CHAINFP, EM_pointersize,
-                    ir
-                );
-            }
-
             push(
                 new_ir1(
                     IR_FPTOAB, EM_pointersize,
-                    ir
+                    walk_static_chain(value)
                 )
             );
             break;
-        }
 
         case op_fef:
         {
@@ -1395,6 +1458,7 @@ static void insn_ivalue(int opcode, arith value)
                     break;
 
                 case 1:
+                    materialise_stack();
                     push(
                         appendir(
                             new_ir0(
@@ -1402,10 +1466,6 @@ static void insn_ivalue(int opcode, arith value)
                             )
                         )
                     );
-                    break;
-
-                case 2:
-                    helper_function(".unimplemented_lor_2");
                     break;
 
                 default:
@@ -1437,10 +1497,6 @@ static void insn_ivalue(int opcode, arith value)
                     );
                     break;
 
-                case 2:
-                    helper_function(".unimplemented_str_2");
-                    break;
-
                 default:
                     fatal("'str %d' not supported", value);
             }
@@ -1449,100 +1505,29 @@ static void insn_ivalue(int opcode, arith value)
         }
 
         case op_blm:
-        {
-            /* Input stack: ( src dest -- ) */
-            struct ir* dest = pop(EM_pointersize);
-            struct ir* src = pop(EM_pointersize);
-            blockmove(dest, src, new_wordir(value));
+            push(new_wordir(value));
+            helper_function(".bls4");
             break;
-        }
 
         case op_bls:
-        {
-            /* Input stack: ( src dest size -- ) */
-            struct ir* dest = pop(EM_pointersize);
-            struct ir* src = pop(EM_pointersize);
-            struct ir* size = pop(EM_wordsize);
-            blockmove(dest, src, size);
+            if (value != EM_wordsize)
+                fatal("'bls %d' not supported", value);
+            helper_function(".bls4");
             break;
         }
 
         case op_los:
-        {
-            /* Copy an arbitrary amount to the stack. */
-            struct ir* bytes = pop(EM_wordsize);
-            struct ir* address = pop(EM_pointersize);
-
-            materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_STACKADJUST, EM_pointersize,
-                    new_ir1(
-                        IR_NEG, EM_wordsize,
-                        bytes
-                    )
-                )
-            );
-
-            push(
-                new_ir0(
-                    IR_GETSP, EM_pointersize
-                )
-            );
-            push(address);
-            push(bytes);
-            materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir("memcpy")
-                )
-            );
-            appendir(
-                new_ir1(
-                    IR_STACKADJUST, EM_pointersize,
-                    new_wordir(EM_pointersize*2 + EM_wordsize)
-                )
-            );
+            if (value != EM_wordsize)
+                fatal("'los %d' not supported", value);
+            helper_function_with_arg(".los4", pop(EM_wordsize));
             break;
         }
 
         case op_sts:
-        {
-            /* Copy an arbitrary amount from the stack. */
-            struct ir* bytes = pop(EM_wordsize);
-            struct ir* dest = pop(EM_pointersize);
-            struct ir* src;
-
-            materialise_stack();
-            src = appendir(
-                    new_ir0(
-                        IR_GETSP, EM_pointersize
-                    )
-                );
-
-            push(dest);
-            push(src);
-            push(bytes);
-            materialise_stack();
-            appendir(
-                new_ir1(
-                    IR_CALL, 0,
-                    new_labelir("memcpy")
-                )
-            );
-            appendir(
-                new_ir1(
-                    IR_STACKADJUST, EM_pointersize,
-                    new_ir2(
-                        IR_ADD, EM_wordsize,
-                        new_wordir(EM_pointersize*2 + EM_wordsize),
-                        bytes
-                    )
-                )
-            );
+            if (value != EM_wordsize)
+                fatal("'sts %d' not supported", value);
+            helper_function_with_arg(".sts4", pop(EM_wordsize));
             break;
-        }
 
         case op_lin:
         {
@@ -1678,17 +1663,17 @@ static void insn_lvalue(int opcode, const char* label, arith offset)
 
         case op_gto:
         {
-            struct ir* descriptor = pop(EM_pointersize);
+            struct ir* descriptor = address_of_external(label, offset);
 
             appendir(
                 new_ir1(
-                    IR_SETSP, EM_pointersize,
+                    IR_SETFP, EM_pointersize,
                     load(EM_pointersize, descriptor, EM_pointersize*2)
                 )
             );
             appendir(
                 new_ir1(
-                    IR_SETFP, EM_pointersize,
+                    IR_SETSP, EM_pointersize,
                     load(EM_pointersize, descriptor, EM_pointersize*1)
                 )
             );

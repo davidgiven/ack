@@ -21,19 +21,22 @@ static char rcsid[] = "$Id$";
  * (70000 - 65536).
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <out.h>
 #include "const.h"
-#include "assert.h"
 #include "debug.h"
 #include "memory.h"
+#include "object.h"
+#include "sym.h"
 
-static		copy_down();
-static		copy_up();
-static		free_saved_moduls();
+static void copy_down(struct memory* mem, ind_t dist);
+static void copy_up(struct memory* mem, ind_t dist);
+static void free_saved_moduls(void);
 
 struct memory	mems[NMEMS];
 
@@ -45,8 +48,7 @@ ind_t	core_position = (ind_t)0;	/* Index of current module. */
 static char *BASE;
 static ind_t refused;
 
-sbreak(incr)
-	ind_t incr;
+static int sbreak(ind_t incr)
 {
 	unsigned int	inc;
 
@@ -69,12 +71,11 @@ sbreak(incr)
  * Initialize some pieces of core. We hope that this will be our last
  * real allocation, meaning we've made the right choices.
  */
-init_core()
+void init_core(void)
 {
 	register char		*base;
 	register ind_t		total_size;
 	register struct memory	*mem;
-	extern char		*sbrk();
 
 #include "mach.h"
 #define ALIGN 8			/* minimum alignment for pieces */
@@ -175,9 +176,7 @@ extern int	passnumber;
  * enough bytes, the first or the second time.
  */
 static bool
-compact(piece, incr, flag)
-	register int		piece;
-	register ind_t		incr;
+compact(int piece, ind_t incr, int flag)
 #define NORMAL 0
 #define FREEZE 1
 #define FORCED 2
@@ -315,10 +314,8 @@ compact(piece, incr, flag)
  * overlap with the old area, but we do not want to overwrite them before they
  * are copied.
  */
-static
-copy_down(mem, dist)
-	register struct memory	*mem;
-	ind_t			dist;
+static void
+copy_down(struct memory* mem, ind_t dist)
 {
 	register char		*old;
 	register char		*new;
@@ -338,10 +335,7 @@ copy_down(mem, dist)
  * overlap with the old area, but we do not want to overwrite them before they
  * are copied.
  */
-static
-copy_up(mem, dist)
-	register struct memory	*mem;
-	ind_t			dist;
+static void copy_up(struct memory* mem, ind_t dist)
 {
 	register char		*old;
 	register char		*new;
@@ -364,10 +358,7 @@ static int alloctype = NORMAL;
  * how many times the area is moved, because of another allocate, this offset
  * remains valid.
  */
-ind_t
-alloc(piece, size)
-	int			piece;
-	register long		size;
+ind_t alloc(int piece, long size)
 {
 	register ind_t		incr = 0;
 	ind_t			left = mems[piece].mem_left;
@@ -405,9 +396,7 @@ alloc(piece, size)
  * attempt fails, release the space occupied by other pieces and try again.
  */
 ind_t
-hard_alloc(piece, size)
-	register int	piece;
-	register long	size;
+hard_alloc(int piece, long size)
 {
 	register ind_t	ret;
 	register int	i;
@@ -452,8 +441,8 @@ hard_alloc(piece, size)
  * at the start of the piece allocated for module contents, thereby
  * overwriting the saved modules, and release its space.
  */
-static
-free_saved_moduls()
+static void
+free_saved_moduls(void)
 {
 	register ind_t		size;
 	register char		*old, *new;
@@ -473,8 +462,8 @@ free_saved_moduls()
  * The piece of memory with index `piece' is no longer needed.
  * We take care that it can be used by compact() later, if needed.
  */
-dealloc(piece)
-	register int		piece;
+void
+dealloc(int piece)
 {
 	/*
 	 * Some pieces need their memory throughout the program.
@@ -499,9 +488,7 @@ core_alloc(piece, size)
 	return address(piece, off);
 }
 
-core_free(piece, p)
-	int	piece;
-	char	*p;
+void core_free(int piece, char* p)
 {
 	char	*q = address(piece, mems[piece].mem_full);
 
@@ -553,12 +540,11 @@ freeze_core()
  * To transform the various pieces of the output in core to the file format,
  * we must order the bytes in the unsigned shorts and longs as ACK prescribes.
  */
-write_bytes()
+void write_bytes(void)
 {
 	unsigned short		nsect;
 	long			offchar;
 	register struct memory	*mem;
-	extern unsigned short	NLocals, NGlobals;
 	extern long		NLChars, NGChars;
 	extern int		flagword;
 	extern struct outhead	outhead;
@@ -611,10 +597,7 @@ write_bytes()
 	}
 }
 
-namecpy(name, nname, offchar)
-	register struct outname	*name;
-	register unsigned	nname;
-	register long		offchar;
+void namecpy(struct outname* name, unsigned nname, long offchar)
 {
 	while (nname--) {
 		if (name->on_foff)

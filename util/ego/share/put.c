@@ -15,6 +15,7 @@
 #include "def.h"
 #include "map.h"
 #include "lset.h"
+#include "cset.h"
 #include "alloc.h"
 #include "put.h"
 
@@ -31,12 +32,11 @@ FILE *curoutp;
 
 /* putlines */
 
-STATIC putstr();
-STATIC outlab();
-STATIC outobject();
+STATIC void putstr(argb_p);
+STATIC void outlab(lab_id);
+STATIC void outobject(obj_p);
 
-STATIC putargs(ap)
-	register arg_p ap;
+STATIC void putargs(arg_p ap)
 {
 	while (ap != (arg_p) 0) {
 		outbyte((byte) ap->a_type & BMASK);
@@ -70,9 +70,9 @@ STATIC putargs(ap)
 
 
 
-STATIC putstr(abp) register argb_p abp; {
-	register argb_p tbp;
-	register length;
+STATIC void putstr(argb_p abp) {
+	argb_p tbp;
+	int length;
 
 	length = 0;
 	tbp = abp;
@@ -89,22 +89,21 @@ STATIC putstr(abp) register argb_p abp; {
 }
 
 
-outoff(off) offset off; {
+void outoff(offset off) {
 
 	outshort( (short) (off&0177777L) );
 	outshort( (short) (off>>16) );
 }
 
 
-outshort(i) short i; {
+void outshort(short i) {
 
 	outbyte( (byte) (i&BMASK) );
 	outbyte( (byte) (i>>8) );
 }
 
 
-STATIC outint(i)
-	int i;
+STATIC void outint(int i)
 {
 	/* Write an integer to the output file. This routine is
 	 * only used when outputting a bitvector-set. We expect  an
@@ -119,24 +118,22 @@ STATIC outint(i)
 	}
 }
 
-STATIC outlab(lid) lab_id lid; {
+STATIC void outlab(lab_id lid) {
 	outshort((short) lid);
 }
 
 
-STATIC outobject(obj) obj_p obj; {
+STATIC void outobject(obj_p obj) {
 	outshort((short) obj->o_id);
 }
 
 
-outproc(p) proc_p p; {
+void outproc(proc_p p) {
 	outshort((short) p->p_id);
 }
 
 
-short putlines(l,lf)
-	line_p l;
-	FILE *lf;
+short putlines(line_p l, FILE *lf)
 {
 	/* Output the list of em instructions headed by l.
 	 * Return the number of instruction written.
@@ -189,8 +186,7 @@ short putlines(l,lf)
 #define outmark(m)	outbyte((byte) m)
 
 
-STATIC putobjects(obj)
-	register obj_p obj;
+STATIC void putobjects(obj_p obj)
 {
 	while (obj != (obj_p) 0) {
 		outmark(MARK_OBJ);
@@ -203,8 +199,7 @@ STATIC putobjects(obj)
 
 
 
-STATIC putvalues(arg)
-	register arg_p arg;
+STATIC void putvalues(arg_p arg)
 {
 	while (arg != (arg_p) 0) {
 		assert(arg->a_type == ARGOFF);
@@ -213,9 +208,7 @@ STATIC putvalues(arg)
 		arg = arg->a_next;
 	}
 }
-putdtable(head,df)
-	dblock_p head;
-	FILE *df;
+void putdtable(dblock_p head, FILE *df)
 {
 	/* Write the datablock table to the data block file df. */
 
@@ -257,8 +250,7 @@ putdtable(head,df)
 
 
 
-STATIC outcset(s)
-	cset s;
+STATIC void outcset(cset s)
 {
 	/* A 'compact' set is represented externally as a row of words
 	 * (its bitvector) preceded by its length.
@@ -274,10 +266,7 @@ STATIC outcset(s)
 
 
 
-putptable(head,pf,all)
-	proc_p head;
-	FILE   *pf;
-	bool   all;
+void putptable(proc_p head, FILE *pf, bool all)
 {
 	register proc_p p;
 	proc_p next;
@@ -328,16 +317,18 @@ putptable(head,pf,all)
 
 /* putunit */
 
-STATIC outloop(l)
-	loop_p l;
+STATIC void outloop(void *vp)
 {
+	loop_p l = vp;
+
 	outshort((short) l->lp_id);
 }
 
 
-STATIC outblock(b)
-	bblock_p b;
+STATIC void outblock(void *vp)
 {
+	bblock_p b = vp;
+
 	if (b == (bblock_p) 0) {
 		outshort((short) 0);
 	} else {
@@ -346,20 +337,7 @@ STATIC outblock(b)
 }
 
 
-STATIC outid(e,p)
-	Lelem_t e;
-	int (*p) ();
-{
-	/* Auxiliary routine used by outlset. */
-
-	/* NOSTRICT */
-	(*p) (e);
-}
-
-
-STATIC outlset(s,p)
-	lset s;
-	int (*p) ();
+STATIC void outlset(lset s, void (*p)(void *))
 {
 	/* A 'long' set is represented externally as a
 	 * a sequence of elements terminated by a 0 word.
@@ -370,19 +348,14 @@ STATIC outlset(s,p)
 	register Lindex i;
 
 	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i,s)) {
-		outid(Lelem(i),p);
+		(*p)(Lelem(i));
 	}
 	outshort((short) 0);
 }
 
 
 
-void
-putunit(kind,p,l,gf,lf)
-	short	 kind;
-	proc_p   p;
-	line_p   l;
-	FILE     *gf, *lf;
+void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
 {
 	register bblock_p b;
 	register short n = 0;

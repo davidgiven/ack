@@ -19,11 +19,6 @@ Implementation modules and program modules must reside in files having a
 .PP
 The name of the file in which a definition module is stored must be the same as
 the module-name, apart from the extension.
-Also, in most Unix systems filenames are only 14 characters long.
-So, given an IMPORT declaration for a module called "LongModulName",
-the compiler will try to open a file called "LongModulN.def".
-The requirement does not hold for implementation or program modules,
-but is certainly recommended.
 .SH CALLING THE COMPILER
 The easiest way to do this is to let the \fIack\fR(1) program do it.
 So, to compile a program module "prog.mod", just call

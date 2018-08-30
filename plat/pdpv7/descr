@@ -1,0 +1,83 @@
+# $Revision$
+var w=2
+var wa=2
+var p=2
+var pa=2
+var s=2
+var sa=2
+var l=4
+var la=2
+var f=4
+var fa=2
+var d=8
+var da=2
+var x=8
+var xa=2
+
+var ARCH=pdp
+var PLATFORM=pdpv7
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
+var CPP_F=-D__unix
+var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
+
+var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/ack/{PLATFORM}/cg
+	args <
+	stdout
+	need .e
+end
+name asopt
+	from .s
+	to .so
+	program {EM}/lib/ack/{PLATFORM}/top
+	args
+	optimizer
+	stdin
+	stdout
+	prep cond
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/ack/{PLATFORM}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/ack/em_led
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	mapflag -i SEPID=-b1:0
+	mapflag -n ALIGN=-a0:1 -a1:0x2000 -a2:1 -a3:1
+	mapflag -nr ALIGN=-a0:1 -a1:1 -a2:0x2000 -a3:1
+	args {ALIGN} {SEPID?} \
+		({RTS}:.b=-u _i_main) \
+		(.e:{HEAD}={PLATFORMDIR}/boot.o) \
+		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
+		({RTS}:.p={PLATFORMDIR}/pascal.o) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libb.a) \
+		(.bas:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
+		(.ocm.bas.mod.b.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
+			{PLATFORMDIR}/libsys.a \
+			{PLATFORMDIR}/libend.a)
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/ack/{PLATFORM}/cv
+	args < >
+	outfile a.out
+end

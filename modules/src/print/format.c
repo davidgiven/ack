@@ -5,13 +5,12 @@
 /* $Id$ */
 
 #include <string.h>
+#include <ack_string.h>
 #include <system.h>
 #include "print.h"
 
-extern char *long2str();
-
 static int
-integral(c)
+integral(int c)
 {
 	switch (c) {
 	case 'b':
@@ -36,9 +35,7 @@ integral(c)
 	%d = int
 $ */
 int
-_format(buf, fmt, argp)
-	char *buf, *fmt;
-	register va_list argp;
+_format(char *buf, const char *fmt, va_list argp)
 {
 	register char *pf = fmt;
 	register char *pb = buf;

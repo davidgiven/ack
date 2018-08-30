@@ -6,6 +6,8 @@
 #include <local.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <out.h>
 #include <ranlib.h>
 #include <arch.h>

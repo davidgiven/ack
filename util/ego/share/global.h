@@ -40,13 +40,13 @@ extern int ws;		/* word size	*/
 
 #define UNKNOWN_SIZE (-1)
 
-extern proc_p curproc;  /* current procedure */
+extern proc_p curproc;	/* current procedure */
 
-extern char *filename; /* name of current input file */
+extern char *filename;	/* name of current input file */
 
 extern lset mesregs;	/* set of MES ms_reg pseudos */
 
-extern short time_space_ratio; /* 0   if optimizing for space only,
+extern short time_space_ratio;	/* 0   if optimizing for space only,
 				 * 100 if optimizing for time only,
 				 * else something 'in between'.
 				 */

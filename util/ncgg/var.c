@@ -39,6 +39,7 @@ int maxmembers=0;
 int regclass=1;
 int maxtokensize=0;
 int rvused=0;
+int reglap=0;
 int nregvar[4];
 int rvsize[4];
 int rvnumbers[4][MAXREGVAR];

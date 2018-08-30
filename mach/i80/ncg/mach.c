@@ -12,6 +12,9 @@ static char rcsid[]=	"$Id$" ;
  * machine dependent back end routines for the Intel 8080.
  */
 
+#include <stdlib.h> /* atol */
+
+void
 con_part(sz,w) register sz; word w; {
 
 	while (part_size % sz)
@@ -30,8 +33,7 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-long atol();
-
+void
 con_mult(sz) word sz; {
 
 	if (argval != 4)
@@ -39,20 +41,12 @@ con_mult(sz) word sz; {
 	fprintf(codefile,".data4\t%ld\n",atol(str));
 }
 
-con_float() {
-	static int warning_given;
-	int i = argval;
-
-	if (!warning_given) {
-		fprintf(stderr, "warning: dummy floating point constant\n");
-		warning_given = 1;
-	}
-	while (i > 0) {
-		fputs(".data4 0	!dummy float\n", codefile);
-		i -= 4;
-	}
-}
-
+#define CODE_GENERATOR
+#define IEEEFLOAT
+#define FL_MSL_AT_LOW_ADDRESS   0
+#define FL_MSW_AT_LOW_ADDRESS   0
+#define FL_MSB_AT_LOW_ADDRESS   0
+#include <con_float>
 
 void
 prolog(nlocals) full nlocals; {

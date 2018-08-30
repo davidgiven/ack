@@ -48,6 +48,7 @@ clibrary {
 		"./init_glob.c",
 	},
 	deps = {
+		"./*.h",
 		"+classdefs_h",
 		"+pop_push_h",
 		"h+emheaders",
@@ -57,5 +58,3 @@ clibrary {
 		["+cflags"] = {"-DVERBOSE", "-DNOTCOMPACT"}
 	}
 }
-
-

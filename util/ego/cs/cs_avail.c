@@ -22,8 +22,7 @@
 
 avail_p avails; /* The list of available expressions. */
 
-STATIC bool commutative(instr)
-	int instr;
+STATIC bool commutative(int instr)
 {
 	/* Is instr a commutative operator? */
 
@@ -37,9 +36,7 @@ STATIC bool commutative(instr)
 	}
 }
 
-STATIC bool same_avail(kind, avp1, avp2)
-	byte kind;
-	avail_p avp1, avp2;
+STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 {
 	/* Two expressions are the same if they have the same operator,
 	 * the same size, and their operand(s) have the same value. 
@@ -57,6 +54,7 @@ STATIC bool same_avail(kind, avp1, avp2)
 		case UNAIR_OP:
 			return	avp1->av_operand == avp2->av_operand;
 		case BINAIR_OP:
+		case REMAINDER:
 			if (commutative(avp1->av_instr & BMASK))
 				return	avp1->av_oleft == avp2->av_oleft &&
 					avp1->av_oright == avp2->av_oright
@@ -75,8 +73,7 @@ STATIC bool same_avail(kind, avp1, avp2)
 	/* NOTREACHED */
 }
 
-STATIC void check_local(avp)
-	avail_p avp;
+STATIC void check_local(avail_p avp)
 {
 	/* Check if the local in which the result of avp was stored,
 	 * still holds this result. Update if not.
@@ -89,9 +86,7 @@ STATIC void check_local(avp)
 	}
 }
 
-STATIC entity_p result_local(size, l)
-	offset size;
-	line_p l;
+STATIC entity_p result_local(offset size, line_p l)
 {
 	/* If the result of an expression of size bytes is stored into a
 	 * local for which a registermessage was generated, return a pointer
@@ -114,9 +109,7 @@ STATIC entity_p result_local(size, l)
 	return (entity_p) 0;
 }
 
-STATIC copy_avail(kind, src, dst)
-	int kind;
-	avail_p src, dst;
+STATIC void copy_avail(int kind, avail_p src, avail_p dst)
 {
 	/* Copy some attributes from src to dst. */
 
@@ -132,6 +125,7 @@ STATIC copy_avail(kind, src, dst)
 			dst->av_operand = src->av_operand;
 			break;
 		case BINAIR_OP:
+		case REMAINDER:
 			dst->av_oleft = src->av_oleft;
 			dst->av_oright = src->av_oright;
 			break;
@@ -143,10 +137,7 @@ STATIC copy_avail(kind, src, dst)
 	}
 }
 
-avail_p av_enter(avp, ocp, kind)
-	avail_p avp;
-	occur_p ocp;
-	int kind;
+avail_p av_enter(avail_p avp, occur_p ocp, int kind)
 {
 	/* Put the available expression avp in the list,
 	 * if it is not already there.
@@ -171,7 +162,8 @@ avail_p av_enter(avp, ocp, kind)
 	/* Remember local, if any, that holds result. */
 	if (avp->av_instr != (byte) INSTR(last)) {
 		/* Only possible when instr is the implicit AAR in 
-		 * a LAR or SAR.
+		 * a LAR or SAR, or the implicit DVI in an RMI, or
+		 * DVU in RMU.
 		 */
 		ravp->av_saveloc = (entity_p) 0;
 	} else {
@@ -186,7 +178,7 @@ avail_p av_enter(avp, ocp, kind)
 	return ravp;
 }
 
-clr_avails()
+void clr_avails(void)
 {
 	/* Throw away the information about the available expressions. */
 

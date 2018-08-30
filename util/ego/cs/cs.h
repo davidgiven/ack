@@ -88,12 +88,13 @@ struct occur {
 #define UNAIR_OP	6
 #define BINAIR_OP	7
 #define TERNAIR_OP	8
-#define KILL_ENTITY	9
-#define SIDE_EFFECTS	10
-#define FIDDLE_STACK	11
-#define IGNORE		12
-#define HOPELESS	13
-#define BBLOCK_END	14
+#define REMAINDER	9
+#define KILL_ENTITY	10
+#define SIDE_EFFECTS	11
+#define FIDDLE_STACK	12
+#define IGNORE		13
+#define HOPELESS	14
+#define BBLOCK_END	15
 
 struct avail {
 	avail_p	av_before;	/* Ptr to earlier discovered expressions. */

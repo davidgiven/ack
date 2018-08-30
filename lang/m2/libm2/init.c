@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <em_abs.h>
 #include <m2_traps.h>
+#include "libm2.h"
 
 static const char signals_list[] = {
 #ifdef SIGHUP
@@ -57,7 +58,8 @@ static const char signals_list[] = {
 void init(void)
 {
 	const char* p = signals_list;
-	do {
+	do
+	{
 		int i = *p++;
 		if (i == -1)
 			break;
@@ -70,29 +72,28 @@ void init(void)
 #endif
 }
 #if defined(__em22) || defined(__em24) || defined(__em44)
-killbss()
+void killbss(void)
 {
 }
 #else
 
-static int blablabla;		/*	We cannot use end, because then also
-					bss allocated for the systemcall lib
-					would be overwritten. Lets hope that
-					this helps ...
-				*/
+static int blablabla; /*	We cannot use end, because then also
+                    bss allocated for the systemcall lib
+                    would be overwritten. Lets hope that
+                    this helps ...
+                */
 
-killbss()
+void killbss(void)
 {
-	extern char *bkillbss;
-	register char *p = (char *) &bkillbss;
+	extern char* bkillbss;
+	register char* p = (char*)&bkillbss;
 
-	while (p < (char *) &blablabla) *p++ = 0x66;
+	while (p < (char*)&blablabla)
+		*p++ = 0x66;
 }
 #endif
 
-extern int catch();
-
-int (*handler)() = catch;
-char **argv = 0, **environ = 0;
+void (*handler)(int) = catch;
+char** argv = 0;
 int argc = 0;
-char *MainLB = 0;
+char* MainLB = 0;

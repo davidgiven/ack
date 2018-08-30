@@ -27,7 +27,7 @@ STATIC bool report_flag = FALSE; /* report #optimizations found? */
 STATIC bool core_flag = FALSE; /* report core usage? */
 #endif
 
-static mach_init(char* machfile, int (*phase_machinit)())
+STATIC void mach_init(char* machfile, void (*phase_machinit)(void *))
 {
 	/* Read target machine dependent information */
 
@@ -42,8 +42,9 @@ static mach_init(char* machfile, int (*phase_machinit)())
 	fclose(f);
 }
 
-void go(int argc, const char** argv,
-	int (*initialize)(), int (*optimize)(), int (*phase_machinit)(), int (*proc_flag)())
+void go(int argc, char * const *argv,
+	void (*initialize)(void *), void (*optimize)(void *),
+	void (*phase_machinit)(void *), void (*proc_flag)(void *))
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f, *gf, *f2, *gf2; /* The EM input and output and
@@ -100,7 +101,7 @@ void go(int argc, const char** argv,
 	time_space_ratio = (time_opt ? 100 : 0);
 	fproc = getptable(files->pname_in); /* proc table */
 	fdblock = getdtable(files->dname_in); /* data block table */
-	(*initialize)();
+	(*initialize)(NULL);
 	if (optimize == no_action)
 		return;
 	f = openfile(files->lname_in, "r");
@@ -143,7 +144,8 @@ void go(int argc, const char** argv,
 	core_usage();
 }
 
-int no_action() {}
+/* ARGSUSED */
+void no_action(void *vp) {}
 
 void core_usage(void)
 {

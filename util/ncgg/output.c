@@ -20,9 +20,9 @@ char	*cd_file=	"code";
 static char rcsid[]= "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "assert.h"
 #include "varinfo.h"
 #include "param.h"
 #include "reg.h"
@@ -317,7 +317,15 @@ outregs() {
 			}
 			clashlist[iclashlist++] = 0;
 		}
-		fprintf(ctable,",%d",l_regs[i].ri_rregvar>=0);
+		/*
+		 * Write .r_refcount = 1 for register variables or 0
+		 * for other registers.
+		 *
+		 * reglap: Write .r_refcount = 0 if the register
+		 *   variable has a subregister.
+		 */
+		fprintf(ctable,",%d",
+		    l_regs[i].ri_rregvar>=0 && l_regs[i].ri_memb[0]==0);
 		fprintf(ctable,"},\n");
 	}
 	fprintf(ctable,"};\n\n short clashlist[] = {\n\t");
@@ -332,6 +340,8 @@ outregvars() {
 	register i,j;
 
 	fprintf(htable,"#define REGVARS\n");
+	if (reglap!=0)
+		fprintf(htable,"#define REGLAP\n");
 	fprintf(ctable,"#include \"regvar.h\"\n");
 	fprintf(ctable,"int nregvar[4] = { ");
 	for (i=0;i<4;i++) {

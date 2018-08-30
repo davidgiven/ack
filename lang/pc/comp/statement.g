@@ -1,5 +1,6 @@
 /* S T A T E M E N T S */
 {
+#include	<string.h>
 #include    "parameters.h"
 #include	<alloc.h>
 #include	<em.h>

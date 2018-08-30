@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <em_reg.h>
 #include "../share/types.h"
 #include "../share/debug.h"
@@ -103,15 +104,15 @@ get_otab(f,tab)
 
 
 
-STATIC ra_machinit(f)
-	FILE *f;
+STATIC void ra_machinit(void *vp)
 {
 	/* Read target machine dependent information for this phase */
+	FILE *f = vp;
 	char s[100];
 
 	for (;;) {
 		while(getc(f) != '\n');
-		fscanf(f,"%s",s);
+		fscanf(f,"%99s",s);
 		if (strcmp(s,"%%RA") == 0)break;
 	}
 	fscanf(f,"%hd",&regs_available[reg_any]);
@@ -343,16 +344,16 @@ STATIC cleanitems(list)
 }
 
 
-ra_initialize()
+/* ARGSUSED */
+void ra_initialize(void *null)
 {
 	init_replacements(ps,ws);
 }
 
 
-void
-ra_optimize(p)
-	proc_p p;
+void ra_optimize(void *vp)
 {
+	proc_p p = vp;
 	item_p itemlist;
 	alloc_p alloclist,packed,unpacked;
 	offset locls;

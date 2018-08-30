@@ -8,31 +8,46 @@
 #include <unistd.h>
 #include <cpm.h>
 
-int read(int fd, void* buffer, size_t count)
+ssize_t read(int fd, void* buffer, size_t count)
 {
-	char i;
-	
+	short save;
+	unsigned char before_n;
+
 	/* We're only allowed to read from fd 0, 1 or 2. */
-	
 	if ((fd < 0) || (fd > 2))
 	{
 		errno = EBADF;
 		return -1;
 	}
-	
-	/* Empty buffer? */
-	
-	if (count == 0)
-		return 0;
-	
-	/* Read one byte. */
-	
-	cpm_bc_register = CPM_BDOS_CONSOLE_INPUT;
+
+	/* We need room for at least 1 char plus '\n'. */
+	if (count < 2)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Make room to append '\n' later. */
+	before_n = count > 255 ? 255 : count - 1;
+
+	/* Borrow 2 bytes of RAM before the buffer. */
+	/* This might overwrite count!!! */
+	save = ((short*)buffer)[-1];
+
+	/* Read one line from the console. */
+	((unsigned char*)buffer)[-2] = before_n;
+	cpm_bc_register = CPM_BDOS_READ_CONSOLE_BUFFER;
+	cpm_de_register = (uint16_t)(char*)buffer - 2;
+	cpm_bdos();
+	before_n = ((unsigned char*)buffer)[-1];
+
+	((char*)buffer)[before_n] = '\n'; /* Append '\n'. */
+	((short*)buffer)[-1] = save; /* Give back borrowed bytes. */
+
+	/* Echo '\n' to console. */
+	cpm_bc_register = CPM_BDOS_PRINT_STRING;
+	cpm_de_register = (uint16_t)"\r\n$";
 	cpm_bdos();
 
-	if (cpm_a_register == '\r') 
-		cpm_a_register = '\n';
-	*(char*)buffer = cpm_a_register;
-	
-	return 1;
+	return (int)before_n + 1;
 }

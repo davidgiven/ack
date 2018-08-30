@@ -699,10 +699,10 @@ chkstart() {
 
 	if ( absout ) return ;
 	if ( !oksizes ) fatal("missing size specification") ;
-	setmode(DATA_CONST) ;
+	set_mode(DATA_CONST) ;
 	extconst((cons_t)0) ;
 	databytes= wordsize ;
-	setmode(DATA_REP) ;
+	set_mode(DATA_REP) ;
 	if ( wordsize<ABSSIZE ) {
 		register factor = ABSSIZE/wordsize - 1 ;
 		extadr( (cons_t) factor ) ;
@@ -724,14 +724,14 @@ sizealign(size) cons_t size ; {
 
 align(size) int size ; {
 	while ( databytes%size ) {
-		setmode(DATA_BYTES) ;
+		set_mode(DATA_BYTES) ;
 		ext8(0) ;
 		databytes++ ;
 	}
 }
 
 extconst(n) cons_t n ; {
-	setmode(DATA_CONST);
+	set_mode(DATA_CONST);
 	extword(n);
 }
 
@@ -747,7 +747,7 @@ extbss(n) cons_t n ; {
 		}
 		return ;
 	}
-	setmode(DATA_NUL) ; /* flush descriptor */
+	set_mode(DATA_NUL) ; /* flush descriptor */
 	objsize= valsize();
 	if ( objsize==0 ) {
 		werror("Unexpected end-of-line");
@@ -765,18 +765,18 @@ extbss(n) cons_t n ; {
 		putval();
 		amount= n/objsize ;
 		if ( amount>1 ) {
-			setmode(DATA_REP);
+			set_mode(DATA_REP);
 			extadr(amount-1) ;
 		}
 	}
 	else {
 		n = (n + wordsize - 1) / wordsize;
 		while (n > MAXBYTE) {
-			setmode(DATA_BSS);
+			set_mode(DATA_BSS);
 			ext8(MAXBYTE);
 			n -= MAXBYTE;
 		}
-		setmode(DATA_BSS);
+		set_mode(DATA_BSS);
 		ext8((int) n);
 	}
 }
@@ -787,7 +787,7 @@ extloc(lbp) register locl_t *lbp; {
 	 * assemble a pointer constant from a local label.
 	 * For example  con *1
 	 */
-	setmode(DATA_IPTR);
+	set_mode(DATA_IPTR);
 	data_reloc( chp_cast lbp,dataoff,RELLOC);
 	extadr((cons_t)0);
 }
@@ -800,7 +800,7 @@ extglob(agbp,off) glob_t *agbp; cons_t off; {
 	 * Various relocation has to be prepared here in some cases
 	 */
 	gbp=agbp;
-	setmode(DATA_DPTR);
+	set_mode(DATA_DPTR);
 	if ( gbp->g_status&DEF ) {
 		extadr(gbp->g_val.g_addr+off);
 	} else {
@@ -813,7 +813,7 @@ extpro(aprp) proc_t *aprp; {
 	/*
 	 * generate a addres that is defined by a procedure descriptor.
 	 */
-	consiz= ptrsize ; setmode(DATA_UCON);
+	consiz= ptrsize ; set_mode(DATA_UCON);
 	extarb((int)ptrsize,(long)(aprp->p_num));
 }
 
@@ -825,7 +825,7 @@ extstring() {
 	 * generate data for a string.
 	 */
 	for(n=strlngth,s=string ; n--; ) {
-		setmode(DATA_BYTES) ;
+		set_mode(DATA_BYTES) ;
 		ext8(*s++);
 	}
 	return ;
@@ -839,7 +839,7 @@ extxcon(header) {
 	 * generate data for a floating constant initialized by a string.
 	 */
 
-	setmode(header);
+	set_mode(header);
 	s = string ;
 	for (n=strlngth ; n-- ;) {
 		if ( *s==0 ) error("Zero byte in initializer") ;
@@ -850,7 +850,7 @@ extxcon(header) {
 }
 
 /* Added atol() that ignores overflow. --Ceriel */
-long atol(s)
+long myatol(s)
     register char *s;
 {
     register long total = 0;
@@ -875,10 +875,10 @@ extvcon(header) {
 	 * generate data for a constant initialized by a string.
 	 */
 
-	setmode(header);
+	set_mode(header);
 	if ( consiz>4 ) {
 		error("Size of initializer exceeds loader capability") ;
 	}
-	extarb((int)consiz,atol(string)) ;
+	extarb((int)consiz,myatol(string)) ;
 	return ;
 }

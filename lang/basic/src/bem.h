@@ -3,6 +3,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <signal.h>
@@ -71,13 +72,5 @@ extern int 	dataused;
 extern Linerecord *currline;
 
 
-extern char *itoa();
+extern char *myitoa();
 extern char *salloc();
-
-extern char *strcpy();
-extern char *strcat();
-#if __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc();
-#endif

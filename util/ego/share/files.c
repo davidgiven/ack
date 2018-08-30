@@ -9,9 +9,11 @@
  */
 
 #include <stdio.h>
+#include "types.h"
+#include "debug.h"
 #include "files.h"
 
-struct files* findfiles(int argc, const char** argv)
+struct files* findfiles(int argc, char * const *argv)
 {
 	static struct files files;
 
@@ -47,7 +49,7 @@ struct files* findfiles(int argc, const char** argv)
 	return &files;
 }
 
-FILE *openfile(char* name, char* mode)
+FILE *openfile(const char *name, const char *mode)
 {
 	FILE *f;
 

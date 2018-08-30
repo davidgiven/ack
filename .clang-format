@@ -1,12 +1,17 @@
 ﻿---
-BasedOnStyle: WebKit
-AllowShortLoopsOnASingleLine: 'false'
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortFunctionsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: false
+BasedOnStyle: WebKit
+BinPackArguments: true
+BinPackParameters: false
 BreakBeforeBraces: Allman
+ColumnLimit: 100
 IndentCaseLabels: 'true'
 PointerAlignment: Left
+SortIncludes: false
 TabWidth: '4'
 UseTab: ForIndentation
-SortIncludes: false
 
 ...

@@ -2,8 +2,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <stdlib.h> /* atoi */
 #include "param.h"
 #include "tables.h"
+#include "types.h"
 #include "mach.h"
 
 /*
@@ -14,18 +16,18 @@ static char rcsid[] = "$Id$";
  */
 
 char *progname;
-extern char startupcode[];
-extern unsigned codegen();
+extern byte startupcode[]; /* codegen.c */
 int maxply=1;
 #ifndef NDEBUG
 int Debug=0;
 char *strtdebug="";
 #endif
 
-main(argc,argv) char **argv; {
-	register unsigned n;
-	extern unsigned cc1,cc2,cc3,cc4;
-	unsigned ggd();
+static unsigned ggd(unsigned, unsigned);
+
+int main(int argc, char **argv) {
+	unsigned n;
+	extern unsigned cc1,cc2,cc3,cc4; /* tables.c */
 
 	progname = argv[0];
 	while (--argc && **++argv == '-') {
@@ -84,8 +86,8 @@ main(argc,argv) char **argv; {
 	error("Bombed out of codegen");
 }
 
-unsigned ggd(a,b) register unsigned a,b; {
-	register unsigned c;
+unsigned ggd(unsigned a, unsigned b) {
+	unsigned c;
 
 	do {
 		c = a%b; a=b; b=c;

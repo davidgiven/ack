@@ -14,12 +14,13 @@ normalrule {
 	name = "keywords",
 	ins = {
 		"./cvtkeywords",
+		"util/cmisc+ed",
 		"./keywords",
 		matching(filenamesof(cggparser), "%.h$")
 	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
-		"%{ins[1]} %{ins[2]} %{ins[3]} %{outs[1]}"
+		"%{ins[1]} %{ins[2]} %{ins[3]} %{ins[4]} %{outs[1]}"
 	}
 }
 
@@ -32,6 +33,10 @@ cprogram {
 		"+keywords"
 	),
 	deps = {
+		"./cost.h", "./expr.h", "./extern.h", "./instruct.h",
+		"./iocc.h", "./lookup.h", "./param.h", "./property.h",
+		"./pseudo.h", "./reg.h", "./regvar.h", "./set.h",
+		"./token.h", "./varinfo.h",
 		"+cggparser", -- for .h file
 		"+cgglexer", -- for .h file
 		"h+emheaders",

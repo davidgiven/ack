@@ -1,16 +1,24 @@
+language: c
+
 matrix:
     include:
-        - os: linux
-
-addons:
-    apt:
-        packages:
-        - ed
-        - qemu-user
+        -
+            os: linux
+            sudo: false
+            dist: trusty
+            compiler: gcc
+        -
+            os: linux
+            sudo: false
+            dist: trusty
+            compiler: clang
+#        -
+#            os: osx
+#            env: HOMEBREW_NO_AUTO_UPDATE=1
+#            compiler: clang
 
 git:
     depth: 10
-language: c
 script:
-    - make PREFIX=/tmp/acki
+    - make CC=$CC PREFIX=/tmp/acki +ack
 

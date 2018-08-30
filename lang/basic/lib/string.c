@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "bc_string.h"
-
-/* $Id$ */
+#include "lib.h"
 
 #define ok(X)   \
 	if (X == 0) \
@@ -10,8 +8,6 @@
 #define okr(X)  \
 	if (X == 0) \
 		return (0);
-
-extern char* salloc();
 
 int _length(String* str)
 {
@@ -158,7 +154,7 @@ String* _mid(int i1, int i2, String* s)
 
 	/*	printf("mid fcn called %d %d %s\n",i1,i2,s->strval);*/
 	if (i2 < 0 || i1 < -1)
-		return (s2); /* or error? */
+		error(3);
 	if (i1 == -1)
 		i1 = s->strlength;
 	s2 = _newstr(s->strval);

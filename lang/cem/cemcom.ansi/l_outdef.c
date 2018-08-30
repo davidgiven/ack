@@ -9,13 +9,14 @@
 
 #ifdef	LINT
 
+#include	<assert.h>
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	"interface.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */
 #include	"arith.h"
-#include	"assert.h"
 #include	"type.h"
 #include	"proto.h"
 #include	"declar.h"
@@ -35,9 +36,7 @@
 #include	"l_outdef.h"
 #include	"l_class.h"
 
-extern char *bts2str();
 extern char *symbol2str();
-extern char *strchr();
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;
@@ -385,7 +384,7 @@ outargs(arg, n)
 	register struct argument *tmp;
 
 	while (n--) {
-		ASSERT(arg);
+		assert(arg);
 		outarg(arg);
 		tmp = arg;
 		arg = arg->next;

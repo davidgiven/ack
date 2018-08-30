@@ -1,6 +1,11 @@
 #!/bin/sh
 echo ""
 
+if [ "$1" = "" ]; then
+	echo "No tests."
+	exit 0
+fi
+
 succeeding="$(find "$@" -size 0)"
 notsucceeding="$(find "$@" ! -size 0)"
 if [ "$notsucceeding" != "" ]; then
@@ -31,7 +36,12 @@ if [ "$failed" != "" ]; then
 	for t in $failed; do
 		echo $t
 	done
-	exit 1
+fi
+if [ "$timedout" != "" ]; then
+	echo "Timed-out test logs:"
+	for t in $timedout; do
+		echo $t
+	done
 fi
 if [ "$failed" != "" -o "$timedout" != "" ]; then
 	echo "Test status: SAD FACE (tests are failing)"

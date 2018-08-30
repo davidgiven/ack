@@ -1,8 +1,6 @@
-#include "bc_string.h"
 #include <stdio.h>
 #include "bc_io.h"
-
-/* $Id$ */
+#include "lib.h"
 
 Filedesc _fdtable[16];
 /* BASIC file descriptor table */
@@ -123,7 +121,7 @@ int _ioeof(int channel)
 	return (0);
 }
 
-void _close(void)
+void _closeall(void)
 {
 	/* close all open files */
 	int i;

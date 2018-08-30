@@ -2,10 +2,10 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -14,6 +14,9 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
+#ifdef REGVARS
+#include "regvar.h"
+#endif
 #ifdef USE_TES
 #include "label.h"
 #endif
@@ -32,7 +35,7 @@ static char rcsid[] = "$Id$";
 #define LLDEF LLEAF|LDEF
 #define RLDEF RLEAF|RDEF
 
-char opdesc[] = {
+static const char opdesc[] = {
 	0,                      /* EX_TOKFIELD */
 	0,                      /* EX_ARG */
 	0,                      /* EX_CON */
@@ -84,10 +87,8 @@ char opdesc[] = {
 #endif
 };
 
-string salloc(),strcpy(),strcat();
-
-string mycat(s1,s2) register string s1,s2; {
-	register string s;
+static string mycat(string s1, string s2) {
+	string s;
 
 	if (s1==0 || *s1=='\0') return(s2);
 	if (s2==0 || *s2=='\0') return(s1);
@@ -98,7 +99,7 @@ string mycat(s1,s2) register string s1,s2; {
 	return(s);
 }
 
-string mystrcpy(s) register string s; {
+string mystrcpy(string s) {
 	register string r;
 
 	r=salloc(strlen(s));
@@ -106,9 +107,9 @@ string mystrcpy(s) register string s; {
 	return(r);
 }
 
-char digstr[21][15];
+static char digstr[21][15];
 
-string tostring(n) register word n; {
+string tostring(word n) {
 	char buf[25];
 
 	if (n>=-20 && n<=20 && (n&1)==0) {
@@ -120,10 +121,9 @@ string tostring(n) register word n; {
 	return(mystrcpy(buf));
 }
 
-void
-compute(node, presult) register node_p node; register result_t *presult; {
+void compute(node_p node, result_t *presult) {
 	result_t leaf1,leaf2;
-	register token_p tp;
+	token_p tp;
 	int desc;
 	long mask,tmp;
 	int i,tmpreg;
@@ -382,7 +382,7 @@ compute(node, presult) register node_p node; register result_t *presult; {
 		return;
 	case EX_REGVAR:
 	assert(leaf1.e_typ == EV_INT);
-		i = isregvar((long) leaf1.e_v.e_con);
+		i = PICK_REGVAR((long) leaf1.e_v.e_con, node->ex_rnode);
 		if (i<=0)  {
 			presult->e_typ = EV_UNDEF;
 			return;
@@ -390,7 +390,7 @@ compute(node, presult) register node_p node; register result_t *presult; {
 		presult->e_typ = EV_REG;
 		presult->e_v.e_reg=i;
 		return;
-#endif
+#endif /* REGVARS */
 	case EX_UMINUS:
 	assert(leaf1.e_typ == EV_INT);
 		presult->e_v.e_con = -leaf1.e_v.e_con;

@@ -8,7 +8,6 @@ led \- link editor
 .SH DESCRIPTION
 .I Led
 is a link editor for object modules,
-created by one of the ACK assemblers.
 It combines several
 object programs into one,
 resolves external references,
@@ -69,7 +68,7 @@ else if it starts with `0', it is octal,
 else it is decimal.
 .TP
 .BI \-b dd:nnnn
-The base addres in the machine of section
+The base address in the machine of section
 .IR dd ,
 is set to
 .IR nnnn .
@@ -128,6 +127,10 @@ error telling why
 .I led
 chose to link it (which unresolved reference it resolves).
 This option is useful in resolving 'multiply defined' problems.
+.TP
+.B  \-d
+If led was built with debugging diagnostics, then output copious amounts
+of tracing explaining what it is doing.
 .SH FILES
 ~em/lib.bin/em_led
 .PD 0

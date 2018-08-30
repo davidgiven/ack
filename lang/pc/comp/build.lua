@@ -31,8 +31,8 @@ normalrule {
 	}
 }
 
-for _, f in ipairs(filenamesof("./*.H")) do
-	local name = replace(basename(f), "%.H$", "")
+for _, f in ipairs(filenamesof("./*.xh")) do
+	local name = replace(basename(f), "%.xh$", "")
 	normalrule {
 		name = name.."_h",
 		ins = {
@@ -46,8 +46,8 @@ for _, f in ipairs(filenamesof("./*.H")) do
 	}
 end
 
-for _, f in ipairs(filenamesof("./*.C")) do
-	local name = replace(basename(f), "%.C$", "")
+for _, f in ipairs(filenamesof("./*.xc")) do
+	local name = replace(basename(f), "%.xc$", "")
 	normalrule {
 		name = name.."_c",
 		ins = {
@@ -65,8 +65,8 @@ normalrule {
 	name = "next_c",
 	ins = {
 		"./make.next",
-		"./*.H",
-		"./*.C",
+		"./*.xh",
+		"./*.xc",
 	},
 	outleaves = { "next.c" },
 	commands = {
@@ -111,6 +111,7 @@ cprogram {
 		"+scope_h",
 		"+type_h",
 		"h+emheaders",
+		"lang/pc/include+headers",
 		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/em_code+lib_k",

@@ -9,6 +9,7 @@ normalrule {
 	name = "tokentab_h",
 	ins = {
 		"./maketokentab",
+		"util/cmisc+ed",
 		matching(filenamesof("+llgen"), "/Lpars.h$"),
 	},
 	outleaves = { "tokentab.h" },
@@ -24,6 +25,7 @@ cprogram {
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
+		"./*.h",
 		"+llgen",
 		"+tokentab_h",
 		"h+emheaders",

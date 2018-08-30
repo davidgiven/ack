@@ -40,6 +40,7 @@ definerule("cfile",
 	{
 		srcs = { type="targets" },
 		deps = { type="targets", default={} },
+		suffix = { type="string", default=".o" },
 		commands = {
 			type="strings",
 			default={
@@ -56,7 +57,7 @@ definerule("cfile",
 		end
 		hdrpaths = uniquify(hdrpaths)
 
-		local outleaf = basename(e.name)..".o"
+		local outleaf = basename(e.name)..e.suffix
 
 		return normalrule {
 			name = e.name,
@@ -92,7 +93,9 @@ definerule("cppfile",
 
 		local hdrpaths = {}
 		for _, t in pairs(e.deps) do
-			hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			if t.dir then
+				hdrpaths[#hdrpaths+1] = "-I"..t.dir
+			end
 		end
 		hdrpaths = uniquify(hdrpaths)
 
@@ -147,6 +150,7 @@ definerule("clibrary",
 		hdrs = { type="targets", default={} },
 		deps = { type="targets", default={} },
 		_cfile = { type="object", default=cfile },
+		suffix = { type="string", default=".o" },
 		commands = {
 			type="strings",
 			default={
@@ -164,6 +168,7 @@ definerule("clibrary",
 				cwd = e.cwd,
 				srcs = {src},
 				deps = e.deps,
+				suffix = e.suffix,
 				vars = {
 					["+cflags"] = { "-I"..e.cwd, },
 				},
@@ -220,7 +225,7 @@ definerule("cprogram",
 		commands = {
 			type="strings",
 			default={
-				"$(CC) %{cflags} -o %{outs[1]} -Wl,--start-group %{ins} -Wl,--end-group"
+				"$(CC) -o %{outs[1]} %{ins} %{ins}"
 			},
 		}
 	},

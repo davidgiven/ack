@@ -10,3 +10,5 @@ struct perm {
 	struct perm *p_next;
 	int p_rar[MAXCREG];
 };
+
+struct perm *tuples(rl_p *, int);

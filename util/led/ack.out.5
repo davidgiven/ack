@@ -161,12 +161,14 @@ struct outrelo {
 /*
  * relocation type bits
  */
-#define RELSZ	0x0fff      /* relocation length */
-#define RELO1	0x01		/* 1 byte */
-#define RELO2	0x02		/* 2 bytes */
-#define RELO4	0x03		/* 4 bytes */
-#define RELOPPC	0x04		/* 26-bit PowerPC address */
-#define RELOVC4 0x06        /* VideoCore IV address in 32-bit insruction */
+#define RELSZ   0x0fff          /* relocation length */
+#define RELO1        1          /* 1 byte */
+#define RELO2        2          /* 2 bytes */
+#define RELO4        3          /* 4 bytes */
+#define RELOPPC      4          /* PowerPC 26-bit address */
+#define RELOPPC_LIS  5          /* PowerPC lis */
+#define RELOVC4      6  /* VideoCore IV address in 32-bit instruction */
+
 #define RELPC	0x2000		/* pc relative */
 #define RELBR	0x4000		/* High order byte lowest address. */
 #define RELWR	0x8000		/* High order word lowest address. */
@@ -225,10 +227,23 @@ is an absolute number, and the datum is relocated pc relative.
 The relocatable datum must then be relocated with respect to the
 base address of its section.
 .PP
+For RELOPPC and RELOVC4, the relocatable datum is a PowerPC or
+VideoCore IV instruction.
+The relocation depends on the instruction, and uses an offset encoded
+in the instruction.
+.PP
+RELOPPC_LIS assembles a PowerPC \fBlis\fR instruction.
+The relocatable datum is a 4-byte integer.
+The high bit is set for ha16 or clear for hi16.
+The next 5 bits are the register \fIRT\fR.
+The low 26 bits are a signed offset.
+The relocation replaces the datum with the PowerPC instruction
+\(oq\fBlis\fR\ \fIRT\fR,\ ha16[\fIsymbol\fR\ +\ \fIoffset\fR]\(cq.
+.PP
 .B The symbol table.
 .br
-This table contains definitions of symbols. It is referred to by
-outrelo-structures, and can be used by debuggers.
+This table contains definitions of symbols.
+It is referred to by outrelo-structures, and can be used by debuggers.
 Entries in this table have the following structure:
 .PP
 .nf

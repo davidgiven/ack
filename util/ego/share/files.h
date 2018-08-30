@@ -33,13 +33,14 @@ struct files
 
 	/* The rest of the arguments. */
 
-	const char** argv;
+	char * const *argv;
 	int argc;
 };
 
-extern struct files* findfiles(int argc, const char** argv);
+struct files* findfiles(int argc, char * const *argv);
 
-extern FILE *openfile();	/* (char *name, *mode)
+FILE *openfile(const char *name, const char *mode);
+				/*
 				 * Open a file with the given name
 				 * and mode; aborts if the file
 				 * cannot be opened.

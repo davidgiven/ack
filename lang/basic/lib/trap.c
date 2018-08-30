@@ -2,12 +2,11 @@
 #include <stdio.h>
 #include <signal.h>
 #include <setjmp.h>
+#include "lib.h"
 
 #ifndef NSIG
 #define NSIG _NSIG
 #endif
-
-/* $Id$ */
 
 /* Trap handling */
 int _trpline; /* BASIC return label */

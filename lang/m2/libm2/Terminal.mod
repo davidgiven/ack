@@ -15,14 +15,14 @@ IMPLEMENTATION MODULE Terminal;
 *)
   FROM	SYSTEM IMPORT	ADR;
 #ifdef __USG
-  FROM	Unix IMPORT	read, write, open, fcntl;
+  FROM	Unix IMPORT	read, write, fcntl;
 #else
-  FROM	Unix IMPORT	read, write, open, ioctl;
+  FROM	Unix IMPORT	read, write, ioctl;
 #endif
-  VAR fildes: INTEGER;
+  VAR fildes, fdout: INTEGER;
       unreadch: CHAR;
       unread: BOOLEAN;
-      tty: ARRAY[0..8] OF CHAR;
+      (* tty: ARRAY[0..8] OF CHAR; *)
 
   PROCEDURE Read(VAR ch: CHAR);
   BEGIN
@@ -87,7 +87,7 @@ IMPLEMENTATION MODULE Terminal;
 
   PROCEDURE Write(ch: CHAR);
   BEGIN
-	IF write(fildes, ADR(ch), 1) < 0 THEN
+	IF write(fdout, ADR(ch), 1) < 0 THEN
 		;
 	END;
   END Write;
@@ -114,7 +114,9 @@ BEGIN
 	unread := FALSE;
 *)
 (* dtrg: changed so that instead of opening /dev/tty, fd 0 is always used. *)
-    tty := "stdio";
+(* kernigh: sent output to fd 1 *)
+    (* tty := "stdio"; *)
     fildes := 0;
+    fdout := 1;
     unread := FALSE;
 END Terminal.

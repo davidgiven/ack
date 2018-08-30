@@ -304,10 +304,9 @@ STATIC bo_cleanproc(p)
 	}
 }
 
-void
-bo_optimize(p)
-	proc_p p;
+void bo_optimize(void *vp)
 {
+	proc_p p = vp;
 	bblock_p b;
 
 	if (IS_ENTERED_WITH_GTO(p)) return;

@@ -8,17 +8,11 @@
  * Version:	$Id$
 */
 
+#include "libm2.h"
 #include <em_abs.h>
 
-extern TRP();
-
-struct range_descr {
-  unsigned	low, high;
-};
-
-rcku(descr, val)
-  struct range_descr *descr;
-  unsigned val;
+void rcku(struct uint_range_descr* descr, unsigned int val)
 {
-  if (val < descr->low || val > descr->high) TRP(ERANGE);
+	if (val < descr->low || val > descr->high)
+		TRP(ERANGE);
 }

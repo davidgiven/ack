@@ -7,10 +7,9 @@
 #define	_TIME_H
 
 #include <stddef.h>
+#include <sys/types.h>
 
 #define CLOCKS_PER_SEC 1000000
-
-typedef	unsigned long time_t;		/* type returned by TOD clock */
 typedef	unsigned long clock_t;	/* type returned by real time clock */
 
 struct tm {
@@ -25,7 +24,9 @@ struct tm {
 	int	tm_isdst;		/* Daylight Saving Time flag */
 };
 
+/* Not a system call; this calls gettimeofday() or times() to do the work */
 extern clock_t clock(void);
+
 extern double difftime(time_t _time1, time_t _time0);
 extern time_t mktime(struct tm *_timeptr);
 extern time_t time(time_t *_timeptr);

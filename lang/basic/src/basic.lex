@@ -522,7 +522,7 @@ scanstring()
 		yylval.integer= genemlabel();
 		C_rom_dlb((label)i,(arith)0);
 		C_rom_icon("9999",(arith)BEMINTSIZE);
-		C_rom_icon(itoa(length),(arith)BEMINTSIZE);
+		C_rom_icon(myitoa(length),(arith)BEMINTSIZE);
 	}
 #ifdef YYDEBUG
 	if (yydebug) print("STRVALUE found\n");

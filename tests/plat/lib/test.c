@@ -5,7 +5,7 @@
 void finished(void)
 {
     static const char s[] = "@@FINISHED\n";
-    write(1, s, sizeof(s));
+    write(1, s, sizeof(s)-1);
     _exit(0);
 }
 
@@ -16,7 +16,7 @@ void writehex(uint32_t code)
 
     do
     {
-        *--p = "0123456789abcdef"[code & 0xf];
+        *--p = "0123456789abcdef"[(unsigned int)code & 0xf];
         code >>= 4;
     }
     while (code > 0);

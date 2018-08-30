@@ -41,9 +41,7 @@ typedef struct class *class_p;
  * generated automatically from the file classdefs.src.
  */
 
-STATIC bool classes(instr,src_out,res_out)
-	int instr;
-	int *src_out, *res_out;
+STATIC bool classes(int instr, int *src_out, int *res_out)
 {
 	/* Determine the classes of the given instruction */
 
@@ -59,8 +57,7 @@ STATIC bool classes(instr,src_out,res_out)
 
 
 
-STATIC bool uses_arg(class)
-	int class;
+STATIC bool uses_arg(int class)
 {
 	/* See if a member of the given class uses
 	 * an argument.
@@ -82,8 +79,7 @@ STATIC bool uses_arg(class)
 
 
 
-STATIC bool uses_2args(class)
-	int class;
+STATIC bool uses_2args(int class)
 {
 	/* See if a member of the given class uses
 	 * 2 arguments.
@@ -93,9 +89,7 @@ STATIC bool uses_2args(class)
 }
 
 
-STATIC bool parse_locs(l,c1_out,c2_out)
-	line_p l;
-	offset *c1_out, *c2_out;
+STATIC bool parse_locs(line_p l, offset *c1_out, offset *c2_out)
 {
 	if (INSTR(l) == op_loc && INSTR(PREV(l)) == op_loc) {
 		*c1_out = off_set(l);
@@ -107,10 +101,8 @@ STATIC bool parse_locs(l,c1_out,c2_out)
 
 
 
-STATIC bool check_args(l,src_class,res_class,arg1_out,arg2_out)
-	line_p l;
-	int    src_class,res_class;
-	offset *arg1_out, *arg2_out;
+STATIC bool check_args(line_p l, int src_class, int res_class,
+		       offset *arg1_out, offset *arg2_out)
 {
 	/* Several EM instructions have an argument
 	 * giving the size of the operand(s) of
@@ -144,9 +136,7 @@ STATIC bool check_args(l,src_class,res_class,arg1_out,arg2_out)
 
 
 
-STATIC offset nrbytes(class,arg1,arg2)
-	int class;
-	offset arg1,arg2;
+STATIC offset nrbytes(int class, offset arg1, offset arg2)
 {
 	/* Determine the number of bytes of the given
 	 * arguments and class.
@@ -185,9 +175,8 @@ STATIC offset nrbytes(class,arg1,arg2)
 
 
 
-STATIC attrib(l,expect_out,srcb_out,resb_out)
-	line_p l;
-	offset    *expect_out, *srcb_out, *resb_out;
+STATIC void attrib(line_p l, offset *expect_out, offset *srcb_out,
+		   offset *resb_out)
 {
 	/* Determine a number of attributes of an EM
 	 * instruction appearing in an expression.
@@ -215,11 +204,8 @@ STATIC attrib(l,expect_out,srcb_out,resb_out)
 
 
 
-bool parse(l,nbytes,l_out,level,action0)
-	line_p l, *l_out;
-	offset nbytes;
-	int    level;
-	int    (*action0) ();
+bool parse(line_p l, offset nbytes, line_p *l_out, int level,
+	   void (*action0)(line_p, line_p, offset))
 {
 	/* This is a recursive descent parser for
 	 * EM expressions.

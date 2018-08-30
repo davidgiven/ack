@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include <string.h>
+#include <stdlib.h>
 #include "system.h"
 
 int
@@ -12,7 +14,6 @@ sys_lock(path)
 {
 	char buf[1024];
 	char *tmpf = ".lockXXXXXX";
-	char *strrchr(), *strcpy(), *mktemp();
 	char *p;
 	int ok, fd;
 
@@ -23,8 +24,7 @@ sys_lock(path)
 	}
 	else
 		strcpy(buf, tmpf);
-	mktemp(buf);
-	if ((fd = creat(buf, 0)) < 0)
+	if ((fd = mkstemp(buf)) < 0)
 		return 0;
 	close(fd);
 	ok = (link(buf, path) == 0);

@@ -5,12 +5,14 @@
 /* $Id$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	<assert.h>
 #include	"parameters.h"
 #ifndef	LINT
 #include	<em.h>
 #else
 #include	"l_em.h"
 #endif	/* LINT */
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	"Lpars.h"
 #include	"label.h"
@@ -18,7 +20,6 @@
 #include	"arith.h"
 #include	"switch.h"
 #include	"code.h"
-#include	"assert.h"
 #include	"expr.h"
 #include	"type.h"
 #include	"sizes.h"
@@ -84,8 +85,6 @@ code_startswitch(expp)
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
 
-extern char *long2str();
-
 code_endswitch()
 {
 	register struct switch_hdr *sh = switch_stack;
@@ -123,7 +122,7 @@ code_endswitch()
 				size);
 		ce = sh->sh_entries;
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
-			ASSERT(ce);
+			assert(ce);
 			if (val == ce->ce_value) {
 				C_rom_ilb(ce->ce_label);
 				ce = ce->next;
@@ -167,7 +166,7 @@ code_case(expr)
 	register struct case_entry *ce;
 	register struct switch_hdr *sh = switch_stack;
 	
-	ASSERT(is_cp_cst(expr));
+	assert(is_cp_cst(expr));
 	if (sh == 0) {
 		error("case statement not in switch");
 		return;
@@ -220,7 +219,7 @@ code_case(expr)
 			}
 		}
 		else {
-			ASSERT(c2);
+			assert(c2);
 			ce->next = (struct case_entry *) 0;
 			c2->next = ce;
 		}

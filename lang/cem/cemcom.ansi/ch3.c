@@ -5,6 +5,7 @@
 /* $Id$ */
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  3.3		*/
 
+#include	<assert.h>
 #include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -16,7 +17,6 @@
 #include	"expr.h"
 #include	"def.h"
 #include	"Lpars.h"
-#include	"assert.h"
 #include	"file_info.h"
 
 extern char options[];
@@ -119,7 +119,7 @@ ch3sel(expp, oper, idf)
 			struct oper *op = &(exp->ex_object.ex_oper);
 			
 			if (op->op_oper == '.' || op->op_oper == ARROW)	{
-				ASSERT(is_cp_cst(op->op_right));
+				assert(is_cp_cst(op->op_right));
 				op->op_right->VL_VALUE += sd->sd_offset;
 				exp->ex_type = sd->sd_type;
 				exp->ex_lvalue = exp->ex_type->tp_fund != ARRAY;
@@ -528,7 +528,7 @@ legal_mixture(tp, otp, diag)
 	register struct proto *prot;
 	int fund;
 
-	ASSERT( (pl != 0) ^ (opl != 0));
+	assert( (pl != 0) ^ (opl != 0));
 	if (pl)  {
 		prot = pl;
 	} else  {
@@ -592,7 +592,7 @@ int qual;
 {
 	register struct sdef *sdf;
 
-	ASSERT(tp);
+	assert(tp);
 
 	if (tp->tp_typequal & qual) return 1;
 	switch(tp->tp_fund) {

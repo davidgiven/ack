@@ -8,11 +8,11 @@ local function addheader(h)
 	packagemap["$(PLATIND)/rpi/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
+addheader("ack/plat.h")
 addheader("pi.h")
 addheader("sys/select.h")
+addheader("sys/types.h")
 addheader("termios.h")
-addheader("unistd.h")
 
 acklibrary {
 	name = "headers",

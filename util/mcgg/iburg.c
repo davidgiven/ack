@@ -1124,10 +1124,11 @@ static void emitinsndata(Rule rules)
 					{
 						Tree node;
 						int index = 0;
+						Nonterm nt;
+
 						if (!find_child_index(r->pattern, label, &index, &node))
 							label_not_found(r, label);
-						Nonterm nt = node->op;
-
+						nt = node->op;
 						if (nt->kind == NONTERM)
 						{
 							if (nt->is_fragment)

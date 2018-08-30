@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include <cgg_cg.h> /* set_p, c3_p */
+
 typedef struct cost {
 	short ct_space;
 	short ct_time;
@@ -69,3 +71,32 @@ typedef struct {
 	int rl_n;       /* number in list */
 	int rl_list[NREGS];
 } rl_t,*rl_p;
+
+/* gencode.c */
+void genstr(int);
+string ad2str(address_t);
+void gennl(void);
+void prtoken(token_p, int);
+#ifdef USE_TES
+void printlabel(int);
+#endif
+/* move.c */
+int move(token_p, token_p, int, int, unsigned);
+void setcc(token_p);
+int test(token_p, int, int, unsigned);
+/* subr.c */
+int match(token_p, set_p, int);
+void instance(int, token_p);
+int eqtoken(token_p, token_p);
+int distance(int);
+unsigned costcalc(cost_t);
+int ssize(int);
+int tsize(token_p);
+void tref(token_p, int);
+int in_stack(int);
+#ifdef MAXSPLIT
+int split(token_p, int *, int, int);
+#endif
+unsigned docoerc(token_p, c3_p, int, int, int);
+unsigned stackupto(token_p, int, int);
+c3_p findcoerc(token_p, set_p);

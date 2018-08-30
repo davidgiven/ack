@@ -2,7 +2,12 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <em_spec.h>
 #include <as_spec.h>
 #include <em_flag.h>
@@ -16,7 +21,7 @@
  */
 
 #define DUMP            1       /* dump between passes */
-/*  #define TIMING          1       /* some timing measurements */
+/*  #define TIMING          1 */      /* some timing measurements */
 #define JOHAN           1       /* dump the loaded instructions */
 #define MEMUSE          1       /* print memory usage statistics */
 
@@ -251,3 +256,6 @@ struct  proctab {
 	cons_t  pr_off;         /* distance from pb */
 	cons_t  pr_loc;         /* number of bytes locals */
 };
+
+extern void error(const char* string1, ...);
+extern void werror(const char* string1, ...);

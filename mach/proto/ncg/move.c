@@ -2,9 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -20,13 +20,12 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
-	register move_p mp;
+int move(token_p tp1, token_p tp2, int ply, int toplevel, unsigned maxcost) {
+	move_p mp;
 	unsigned t;
-	register struct reginfo *rp;
-	register byte *tdpb;
+	struct reginfo *rp;
+	byte *tdpb;
 	int i;
-	unsigned codegen();
 
 	if (eqtoken(tp1,tp2))
 		return(0);
@@ -97,15 +96,14 @@ move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
 
 #define cocoreg machregs[0].r_contents
 
-setcc(tp) token_p tp; {
+void setcc(token_p tp) {
 
 	cocoreg = *tp;
 }
 
-test(tp,ply,toplevel,maxcost) token_p tp; unsigned maxcost; {
-	register test_p mp;
+int test(token_p tp, int ply, int toplevel, unsigned maxcost) {
+	test_p mp;
 	unsigned t;
-	unsigned codegen();
 
 	if (cocoreg.t_token!=0) {
 		if (eqtoken(tp,&cocoreg))

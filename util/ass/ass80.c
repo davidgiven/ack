@@ -4,9 +4,10 @@
  *
  */
 
-#include        "ass00.h"
-#include        "assex.h"
-#include        <em_path.h>
+#include "ass00.h"
+#include "assex.h"
+#include <em_path.h>
+#include <stdarg.h>
 
 #ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
@@ -29,7 +30,7 @@ zero(area,length) char *area; unsigned length ; {
 }
 
 /* VARARGS1 */
-static void pr_error(string1,a1,a2,a3,a4) char *string1 ; {
+static void pr_error(const char* string1, va_list ap) {
 	/*
 	 * diagnostic output
 	 */
@@ -44,20 +45,28 @@ static void pr_error(string1,a1,a2,a3,a4) char *string1 ; {
 		fprintf(stderr,"proc %s, ",pstate.s_curpro->p_name);
 	}
 	fprintf(stderr,"line %d: ",line_num);
-	fprintf(stderr,string1,a1,a2,a3,a4);
+	vfprintf(stderr,string1,ap);
 	fprintf(stderr,"\n");
 }
 
 /* VARARGS1 */
-void error(string1,a1,a2,a3,a4) char *string1 ; {
-	pr_error(string1,a1,a2,a3,a4) ;
+void error(const char* string1, ...)
+{
+	va_list ap;
+	va_start(ap, string1);
+	pr_error(string1, ap);
+	va_end(ap);
 	nerrors++ ;
 }
 
 /* VARARGS1 */
-void werror(string1,a1,a2,a3,a4) char *string1 ; {
+void werror(const char* string1, ...) {
+	va_list ap;
 	if ( wflag ) return ;
-	pr_error(string1,a1,a2,a3,a4) ;
+
+	va_start(ap, string1);
+	pr_error(string1, ap);
+	va_end(ap);
 }
 
 fatal(s) char *s; {
@@ -280,7 +289,7 @@ int icount(size) {
 	return amount ;
 }
 
-setmode(mode) {
+set_mode(mode) {
 
 	if (datamode==mode) {   /* in right mode already */
 		switch ( datamode ) {
@@ -302,8 +311,8 @@ setmode(mode) {
 		default:
 			return ;
 		}
-		setmode(DATA_NUL) ; /* flush current descriptor */
-		setmode(mode) ;
+		set_mode(DATA_NUL) ; /* flush current descriptor */
+		set_mode(mode) ;
 		return;
 	}
 	switch(datamode) {              /* terminate current mode */
@@ -376,7 +385,7 @@ setmode(mode) {
 		ext8(HEADBSS) ;
 		break;
 	default:
-		fatal("Unknown mode in setmode") ;
+		fatal("Unknown mode in set_mode") ;
 	}
 }
 

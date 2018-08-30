@@ -54,4 +54,3 @@ extern int *rvnumbers[];		/* lists of numbers */
 #endif
 
 extern FILE *codefile;
-extern FILE *freopen();

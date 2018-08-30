@@ -1,7 +1,8 @@
 #!/bin/sh
 
-EM_TABLE=$1
-ARGTYPE=$2
+export ED=$1
+EM_TABLE=$2
+ARGTYPE=$3
 echo "switch(p->em_opcode) {"
 for i in - cdflnorswz p b
 do

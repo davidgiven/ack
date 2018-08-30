@@ -18,18 +18,17 @@
 
 /* Author: J.W. Stevenson */
 
-#include	<pc_file.h>
-
-extern		_flush();
+#include "pc.h"
 
 /* procedure buff(var f:file of ?); */
 
-buff(f) struct file *f; {
+void buff(struct file* f)
+{
 	int sz;
 
-	if ((f->flags & (0377|WRBIT)) != (MAGIC|WRBIT))
+	if ((f->flags & (0377 | WRBIT)) != (MAGIC | WRBIT))
 		return;
 	_flush(f);
 	sz = f->size;
-	f->count = f->buflen = (sz>PC_BUFLEN ? sz : PC_BUFLEN-PC_BUFLEN%sz);
+	f->count = f->buflen = (sz > PC_BUFLEN ? sz : PC_BUFLEN - PC_BUFLEN % sz);
 }

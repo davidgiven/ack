@@ -2,12 +2,12 @@ include("plat/build.lua")
 
 tabgen {
 	name = "ctype_tab",
-	srcs = { "./ctype/char.tab" }
+	srcs = { "./core/ctype/char.tab" }
 }
 
 normalrule {
 	name = "ctype_files",
-	ins = { "./ctype/genfiles" },
+	ins = { "./core/ctype/genfiles" },
 	outleaves = {
 		"isalnum.c",
 		"isalpha.c",
@@ -33,31 +33,31 @@ for _, plat in ipairs(vars.plats) do
 		srcs = {
 			"+ctype_files",
 			"+ctype_tab",
-			"./ctype/*.c",
-			"./errno/*.c",
-			"./locale/*.c",
-			"./malloc/*.c",
-			"./math/*.c",
-			"./math/*.e",
-			"./misc/environ.c", -- don't build everything here as it's all obsolete
-			"./setjmp/*.c",
-			"./setjmp/*.e",
-			"./signal/*.c",
-			"./assert/*.c",
-			"./stdio/*.c",
-			"./stdlib/*.c",
-			"./string/*.c",
-			"./time/*.c",
+			"./core/ctype/*.c",
+			"./core/errno/*.c",
+			"./core/locale/*.c",
+			"./core/math/*.c",
+			"./core/math/*.e",
+			"./core/misc/*.c",
+			"./core/setjmp/*.c",
+			"./core/setjmp/*.e",
+			"./core/stdlib/*.c",
+			"./core/string/*.c",
+			"./core/time/*.c",
+			"./sys/exit/*.c",
+			"./sys/malloc/*.c",
+			"./sys/misc/*.c",
+			"./sys/stdio/*.c",
 		},
 		hdrs = {}, -- must be empty
 		deps = {
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",
-			"./malloc/malloc.h",
-			"./math/localmath.h",
-			"./stdio/loc_incl.h",
-			"./stdlib/ext_fmt.h",
-			"./time/loc_time.h",
+			"./core/math/localmath.h",
+			"./core/stdlib/ext_fmt.h",
+			"./core/time/loc_time.h",
+			"./sys/malloc/malloc.h",
+			"./sys/stdio/loc_incl.h",
 		},
 		vars = { plat = plat }
 	}
@@ -71,11 +71,12 @@ for _, plat in ipairs(vars.plats) do
 		}
 	}
 
+	local suffix = plat:find("^em") and "m" or "o"
 	installable {
 		name = "pkg_"..plat,
 		map = {
 			"lang/cem/libcc.ansi/headers+pkg",
-			["$(PLATIND)/"..plat.."/c-ansi.o"] = "+crt_"..plat,
+			["$(PLATIND)/"..plat.."/c-ansi."..suffix] = "+crt_"..plat,
 			["$(PLATIND)/"..plat.."/libc.a"] = "+lib_"..plat,
 		}
 	}

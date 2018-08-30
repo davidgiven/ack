@@ -9,8 +9,9 @@
  */
 
 
-#include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <em_spec.h>
 #include "types.h"
 #include "def.h"
@@ -23,14 +24,17 @@ int		linecount;	/* # lines in this file */
 bool verbose_flag = FALSE;  /* generate verbose output ? */
 
 /* VARARGS1 */
-error(s,a) char *s,*a; {
+void error(const char *s, ...)
+{
+	va_list ap;
 
+	va_start(ap, s);
 	fprintf(stderr,"error on line %u",linecount);
 	if (filename != (char *) 0) {
 		fprintf(stderr," file %s",filename);
 	}
 	fprintf(stderr,": ");
-	fprintf(stderr,s,a);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
 	abort();
 	exit(-1);
@@ -38,9 +42,7 @@ error(s,a) char *s,*a; {
 
 #ifdef TRACE
 /* VARARGS1 */
-OUTTRACE(s,n)
-	char *s;
-	int n;
+void OUTTRACE(const char *s, int n)
 {
 	fprintf(stderr,"> ");
 	fprintf(stderr,s,n);
@@ -50,9 +52,7 @@ OUTTRACE(s,n)
 
 #ifdef VERBOSE
 /* VARARGS1 */
-OUTVERBOSE(s,n1,n2)
-	char *s;
-	int n1,n2;
+void OUTVERBOSE(const char *s, int n1, int n2)
 {
 	if (verbose_flag) {
 		fprintf(stderr,"optimization: ");
@@ -65,14 +65,9 @@ OUTVERBOSE(s,n1,n2)
 
 
 #ifdef DEBUG
-badassertion(file,line) char *file; unsigned line; {
-
-	fprintf(stderr,"assertion failed file %s, line %u\n",file,line);
-	error("assertion");
-}
 /* Valid Address */
 
-VA(a)  short *a; {
+void VA(short *a) {
 	if (a == (short *) 0)  error("VA: 0 argument");
 	if ( ((unsigned) a & 01) == 01) {
 		/* MACHINE DEPENDENT TEST */
@@ -83,14 +78,14 @@ VA(a)  short *a; {
 
 /* Valid Instruction code */
 
-VI(i) short i; {
+void VI(short i) {
 	if (i > ps_last) error("VI: illegal instr: %d", i);
 }
 
 
 /* Valid Line */
 
-VL(l) line_p l; {
+void VL(line_p l) {
 	byte instr, optype;
 
 	VA((short *) l);
@@ -106,7 +101,7 @@ VL(l) line_p l; {
 
 /* Valid Data block */
 
-VD(d) dblock_p d; {
+void VD(dblock_p d) {
 	byte pseudo;
 
 	VA((short *) d);
@@ -119,7 +114,7 @@ VD(d) dblock_p d; {
 
 /* Valid Object */
 
-VO(o) obj_p o; {
+void VO(obj_p o) {
 	offset off;
 
 	VA((short *) o);
@@ -133,7 +128,7 @@ VO(o) obj_p o; {
 
 /* Valid Proc */
 
-VP(p) proc_p p; {
+void VP(proc_p p) {
 	proc_id pid;
 	int nrlabs;
 

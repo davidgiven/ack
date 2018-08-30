@@ -2,6 +2,7 @@ local generated = normalrule {
 	name = "generated",
 	ins = {
 		"./new_table",
+		"util/cmisc+ed",
 		"h/em_table", -- relative to root, which is a bit evil
 	},
 	outleaves = {
@@ -16,7 +17,7 @@ local generated = normalrule {
 		"h+emheaders"
 	},
 	commands = {
-		"%{ins[1]} %{ins[2]} %{dir} %{dir}"
+		"%{ins[1]} %{ins[2]} %{ins[3]} %{dir} %{dir}"
 	}
 }
 

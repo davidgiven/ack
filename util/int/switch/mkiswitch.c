@@ -52,7 +52,7 @@ main(argc, argv)
 	}
 
 	/* Start reading the input file */
-	while (fscanf(ifp, "%s %s", mnem, flgs) >= 0) {
+	while (fscanf(ifp, "%7s %7s", mnem, flgs) >= 0) {
 		int i;
 		char *p;
 		char *base;

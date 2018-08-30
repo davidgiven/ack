@@ -1,6 +1,4 @@
-#include "bc_string.h"
-
-/* $Id$ */
+#include "lib.h"
 
 String* _mki(long i)
 {

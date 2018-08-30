@@ -1,7 +1,7 @@
 .sect .text
 .define .set_errno
 .set_errno:
-	li32 r10, _errno
-	stw r3, 0(r10)		! set errno
-	addi r3, r0, -1		! return -1
-	bclr 20, 0, 0
+	lis r4, ha16[_errno]
+	stw r3, lo16[_errno](r4)	! set errno
+	li r3, -1			! return -1
+	blr

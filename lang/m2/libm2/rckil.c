@@ -8,17 +8,11 @@
  * Version:	$Id$
 */
 
+#include "libm2.h"
 #include <em_abs.h>
 
-extern TRP();
-
-struct range_descr {
-  long	low, high;
-};
-
-rckil(descr, val)
-  struct range_descr *descr;
-  long val;
+void rckil(struct long_range_descr* descr, long val)
 {
-  if (val < descr->low || val > descr->high) TRP(ERANGE);
+	if (val < descr->low || val > descr->high)
+		TRP(ERANGE);
 }

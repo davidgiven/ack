@@ -89,6 +89,9 @@ cprogram {
 		"+tabgen_c"
 	),
 	deps = {
+		"./LLlex.h", "./arith.h", "./bits.h", "./class.h",
+		"./file_info.h", "./idf.h", "./input.h",
+		"./parameters.h",
 		"+llgen",
 		"+macro_h",
 		"+replace_h",

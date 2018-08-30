@@ -1,0 +1,55 @@
+var w=2
+var wa=2
+var p=2
+var pa=2
+var s=2
+var sa=2
+var l=4
+var la=2
+var f=4
+var fa=2
+var d=8
+var da=2
+var x=8
+var xa=2
+var ARCH=em22
+var PLATFORM=em22
+var PLATFORMDIR={EM}/share/ack/{PLATFORM}
+var CPP_F=-D__unix
+var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
+var MACHOPT_F=-m8
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
+var SIZE_FLAG=-sx
+
+# Override the setting in fe so that files compiled for this platform can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{EM}/share/ack/em/include -I{EM}/share/ack/include/ansi
+
+name asld
+	from .k.m.a.g
+	to .out
+	outfile e.out
+	program {EM}/lib/ack/em_ass
+	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	mapflag -+* ASS_F={ASS_F?} -+*
+	mapflag --* ASS_F={ASS_F?} --*
+	mapflag -s* SIZE_FLAG=-s*
+	mapflag -ansi C_LIB={EM}/{LIB}ac
+	args {SIZE_FLAG} \
+		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.m) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.m) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.m) \
+		({RTS}:.p={PLATFORMDIR}/pascal.m) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libb.a) \
+		(.bas:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
+		(.ocm.bas.mod.b.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		{FLOATS?} \
+		{PLATFORMDIR}/libsys.a \
+	    {PLATFORMDIR}/libend.a
+	linker
+end

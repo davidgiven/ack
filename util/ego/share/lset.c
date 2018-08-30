@@ -30,15 +30,13 @@
  */
 
 
-lset Lempty_set()
+lset Lempty_set(void)
 {
 	return ((lset) 0);
 }
 
 
-bool Lis_elem(x,s)
-	register Lelem_t x;
-	register lset    s;
+bool Lis_elem(Lelem_t x, lset s)
 {
 
 	/* Search the list to see if x is an element of s */
@@ -52,9 +50,7 @@ bool Lis_elem(x,s)
 }
 
 
-Ladd(x,s_p)
-	Lelem_t x;
-	lset    *s_p;
+void Ladd(Lelem_t x, lset *s_p)
 {
 	/* add x to a set. Note that the set is given as in-out
 	 * parameter, because it may be changed.
@@ -71,9 +67,7 @@ Ladd(x,s_p)
 }
 
 
-Lremove(x,s_p)
-	Lelem_t x;
-	lset    *s_p;
+void Lremove(Lelem_t x, lset *s_p)
 {
 	/* Remove x from a set. If x was not an element of
 	 * the set, nothing happens.
@@ -109,8 +103,7 @@ Lremove(x,s_p)
  */
 
 
-Lindex Lfirst(s)
-	lset s;
+Lindex Lfirst(lset s)
 {
 	return ((Lindex) s);
 	/* Note that an index for long sets is just
@@ -120,25 +113,21 @@ Lindex Lfirst(s)
 
 
 /*ARGSUSED1*/
-Lindex Lnext(i,s)
-	Lindex i;
-	lset   s;
+Lindex Lnext(Lindex i, lset s)
 {
 	assert(i != (Lindex) 0);
 	return (i->e_next);
 }
 
 
-Lelem_t Lelem(i)
-	Lindex i;
+Lelem_t Lelem(Lindex i)
 {
 	return (i->e_elem);
 }
 
 
 
-Ljoin(s1,s2_p)
-	lset s1,*s2_p;
+void Ljoin(lset s1, lset *s2_p)
 {
 	/* Join two sets, assign the result to the second set
 	 * and delete the first set (i.e. the value of the
@@ -173,8 +162,7 @@ Ljoin(s1,s2_p)
 }
 
 
-Ldeleteset(s)
-	lset s;
+void Ldeleteset(lset s)
 {
 	register elem_p ep, next;
 
@@ -185,8 +173,7 @@ Ldeleteset(s)
 }
 
 
-bool Lis_subset(s1,s2)
-	lset s1,s2;
+bool Lis_subset(lset s1, lset s2)
 {
 	/* See if s1 is a subset of s2 */
 
@@ -199,8 +186,7 @@ bool Lis_subset(s1,s2)
 }
 
 
-short Lnrelems(s)
-	lset s;
+short Lnrelems(lset s)
 {
 	/* Compute the number of elements of a set */
 

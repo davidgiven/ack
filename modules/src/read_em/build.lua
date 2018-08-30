@@ -1,8 +1,8 @@
-
 normalrule {
 	name = "c_mnem_narg_h",
 	ins = {
 		"./m_C_mnem_na",
+		"util/cmisc+ed",
 		"h/em_table",
 		"./argtype"
 	},
@@ -16,6 +16,7 @@ normalrule {
 	name = "c_mnem_h",
 	ins = {
 		"./m_C_mnem",
+		"util/cmisc+ed",
 		"h/em_table",
 		"./argtype"
 	},
@@ -53,6 +54,7 @@ local function variant(name, cflags)
 			"modules/src/alloc+lib",
 			"modules/src/em_code+headers",
 			"modules/src/em_data+lib",
+			"modules/src/string+lib",
 			"modules/src/system+lib",
 			"./*.h",
 		}
@@ -61,4 +63,3 @@ end
 
 variant("lib_ev", {})
 variant("lib_kv", { "-DCOMPACT" })
-

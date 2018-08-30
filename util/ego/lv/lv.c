@@ -447,7 +447,9 @@ STATIC use(l,mesgflag)
 
 
 
-STATIC nothing() { }  /* No action to be undertaken at level 0 of parser */
+/* ARGSUSED */
+STATIC void nothing(line_p l1, line_p l2, offset size)
+{ }  /* No action to be undertaken at level 0 of parser */
 
 STATIC rem_code(l1,l2,b)
 	line_p l1,l2;
@@ -580,9 +582,10 @@ STATIC lv_cleanup(p)
 	}
 }
 
-lv_flags(p)
-	char *p;
+void lv_flags(void *vp)
 {
+	char *p = vp;
+
 	switch(*p) {
 		case 'N':
 			mesgflag = TRUE;
@@ -591,10 +594,10 @@ lv_flags(p)
 }
 
 
-void
-lv_optimize(p)
-	proc_p p;
+void lv_optimize(void *vp)
 {
+	proc_p p = vp;
+
 	if (IS_ENTERED_WITH_GTO(p)) return;
 	locals = (local_p *) 0;
 	lv_extend(p);

@@ -21,51 +21,57 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <pc_file.h>
-#include <pc_err.h>
+#include "pc.h"
 
-extern		_trp();
-
-_incpt(f) struct file *f; {
-
+void _incpt(struct file* f)
+{
 	if (f->flags & EOFBIT)
 		_trp(EEOF);
 	f->flags |= WINDOW;
 	f->flags &= ~ELNBIT;
 #ifdef CPM
-	do {
+	do
+	{
 #endif
-	f->ptr += f->size;
-	if (f->count == 0) {
-		f->ptr = f->bufadr;
-		for(;;) {
-			f->count=read(f->ufd,f->bufadr,f->buflen);
-			if ( f->count<0 ) {
-				if (errno != EINTR) _trp(EREAD) ;
-				continue ;
+		f->ptr += f->size;
+		if (f->count == 0)
+		{
+			f->ptr = f->bufadr;
+			for (;;)
+			{
+				f->count = read(f->ufd, f->bufadr, f->buflen);
+				if (f->count < 0)
+				{
+					if (errno != EINTR)
+						_trp(EREAD);
+					continue;
+				}
+				break;
 			}
-			break ;
+			if (f->count == 0)
+			{
+				f->flags |= EOFBIT;
+				*f->ptr = '\0';
+				return;
+			}
 		}
-		if (f->count == 0) {
-			f->flags |= EOFBIT;
-			*f->ptr = '\0';
-			return;
-		}
-	}
-	if ((f->count -= f->size) < 0)
-		_trp(EFTRUNC);
+		if ((f->count -= f->size) < 0)
+			_trp(EFTRUNC);
 #ifdef CPM
-	} while ((f->flags&TXTBIT) && *f->ptr == '\r');
+	} while ((f->flags & TXTBIT) && *f->ptr == '\r');
 #endif
-	if (f->flags & TXTBIT) {
+	if (f->flags & TXTBIT)
+	{
 		if (*f->ptr & 0200)
 			_trp(EASCII);
-		if (*f->ptr == '\n') {
+		if (*f->ptr == '\n')
+		{
 			f->flags |= ELNBIT;
 			*f->ptr = ' ';
 		}
 #ifdef CPM
-		if (*f->ptr == 26) {
+		if (*f->ptr == 26)
+		{
 			f->flags |= EOFBIT;
 			*f->ptr = 0;
 		}

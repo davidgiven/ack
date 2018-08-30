@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "bc_string.h"
-
-/* $Id$ */
+#include "lib.h"
 
 String* _oct(int i)
 {

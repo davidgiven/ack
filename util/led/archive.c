@@ -20,8 +20,6 @@ static char rcsid[] = "$Id$";
 
 #define ENDLIB		((long)0)
 
-extern ind_t		hard_alloc();
-
 static struct ar_hdr	arhdr;
 
 /*

@@ -8,8 +8,8 @@ local function addheader(h)
 	packagemap["$(PLATIND)/pc86/include/"..h] = "./"..h
 end
 
-addheader("ack/config.h")
-addheader("unistd.h")
+addheader("ack/plat.h")
+addheader("sys/types.h")
 
 acklibrary {
 	name = "headers",

@@ -3,8 +3,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-bool parse();	/* (line_p l, *l_out; offset nbytes;
-			 * int    level; int    (*action0) ())
+bool parse(line_p l, offset nbytes, line_p *l_out, int level,
+	   void (*action0)(line_p l1, line_p l2, offset size));
+			/*
 			 * This is a recursive descent parser for
 			 * EM expressions.
 			 * It tries to recognize EM code that loads exactly

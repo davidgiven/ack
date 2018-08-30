@@ -10,4 +10,5 @@ typedef struct glosym {
 	word	       gl_rom[MAXROM+1];
 } glosym_t,*glosym_p;
 
-glosym_p lookglo();
+void enterglo(string, word *);
+glosym_p lookglo(string);

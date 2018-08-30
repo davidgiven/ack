@@ -5,6 +5,7 @@
 /* next line DEBUG */
 #include	"debug.h"
 
+#include	<stddef.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>
@@ -21,7 +22,7 @@
 #include	"scope.h"
 #include	"type.h"
 
-#define	PC_BUFSIZ	(sizeof(struct file) - (int)((struct file *)0)->bufadr)
+#define	PC_BUFSIZ	(sizeof(struct file) - offsetof(struct file, bufadr))
 
 int proclevel = 0;		/* nesting level of procedures */
 int parlevel = 0;		/* nesting level of parametersections */

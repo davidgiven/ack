@@ -9,9 +9,9 @@
 
 #ifdef	LINT
 
+#include	<assert.h>
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
-#include	"assert.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */
@@ -179,7 +179,7 @@ lint_end_global(stl)
 	register struct stack_entry *se = stl->sl_entry;
 
 	dbg_lint_stack("lint_end_global");
-	ASSERT(level == L_GLOBAL);
+	assert(level == L_GLOBAL);
 	while (se) {
 		register struct idf *idf = se->se_idf;
 		register struct def *def = idf->id_def;
@@ -275,7 +275,7 @@ change_state(idf, to_state)
 	register struct def *def = idf->id_def;
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
-	ASSERT(def);
+	assert(def);
 
 	switch (to_state) {
 	case SET:
@@ -300,7 +300,7 @@ change_state(idf, to_state)
 		while (br && br->br_count > def->df_firstbrace) {
 			br = br->next;
 		}
-		ASSERT(br && def->df_minlevel >= br->br_level);
+		assert(br && def->df_minlevel >= br->br_level);
 		def->df_minlevel = br->br_level;
 	}
 
@@ -340,7 +340,7 @@ add_auto(idf)	/* to current state on top of lint_stack */
  */
 	register struct def *def = idf->id_def;
 
-	ASSERT(def);
+	assert(def);
 
 	switch (def->df_sc) {
 		register struct auto_def *a;
@@ -369,7 +369,7 @@ check_autos()
  */
 	register struct auto_def *a = top_ls->ls_current->st_auto_list;
 
-	ASSERT(!(a && a->ad_def->df_level > level));
+	assert(!(a && a->ad_def->df_level > level));
 	while (a && a->ad_def->df_level == level) {
 		struct idf *idf = a->ad_idf;
 		struct def *def = idf->id_def;
@@ -401,7 +401,7 @@ lint_end_formals()
 	register struct stack_entry *se = local_level->sl_entry;
 
 	dbg_lint_stack("lint_end_formals");
-	ASSERT(level == L_FORMAL1);
+	assert(level == L_FORMAL1);
 	while (se) {
 		register struct def *def = se->se_idf->id_def;
 
@@ -581,10 +581,10 @@ merge_autos(a1, a2, lvl, mode)
 
 	a = a2;	/* pointer to the result */
 	while (a1) {
-		ASSERT(a2);
+		assert(a2);
 
 		/* merge the auto_defs for one idf */
-		ASSERT(a1->ad_idf == a2->ad_idf);
+		assert(a1->ad_idf == a2->ad_idf);
 		if (a1->ad_used)
 			a2->ad_used = 1;
 
@@ -605,7 +605,7 @@ merge_autos(a1, a2, lvl, mode)
 		a1 = a1->next;
 		a2 = a2->next;
 	}
-	ASSERT(!a2);
+	assert(!a2);
 	return a;
 }
 
@@ -806,7 +806,7 @@ end_loop_body()
 	register struct lint_stack_entry *lse = find_wdf();
 
 	dbg_lint_stack("end_loop_body");
-	ASSERT(lse == top_ls);
+	assert(lse == top_ls);
 	if (!lse->ls_current->st_notreached)
 		cont_merge(lse);
 }
@@ -816,7 +816,7 @@ end_loop_stmt()
 	register struct lint_stack_entry *lse = find_wdf();
 
 	dbg_lint_stack("end_loop_stmt");
-	ASSERT(lse == top_ls);
+	assert(lse == top_ls);
 	if (lse->LS_TEST != TEST_TRUE)
 		break_merge(lse);
 
@@ -958,7 +958,7 @@ lint_case_stmt(dflt)
 		break;
 
 	case CASE:
-		ASSERT(top_ls->ls_previous->ls_class == SWITCH);
+		assert(top_ls->ls_previous->ls_class == SWITCH);
 		if (dflt) {
 			cs_entry->ls_previous->LS_DEFAULT_MET = 1;
 		}
@@ -1079,7 +1079,7 @@ lint_end_function()
 	 * These auto_defs must be freed and the state must be filled
 	 * with zeros.
 	 */
-	ASSERT(!top_ls->ls_previous);
+	assert(!top_ls->ls_previous);
 	free_auto_list(top_ls->ls_current->st_auto_list);
 	top_ls->ls_current->st_auto_list = 0;
 	top_ls->ls_current->st_notreached = 0;

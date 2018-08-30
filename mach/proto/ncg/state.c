@@ -2,9 +2,9 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "assert.h"
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -23,9 +23,9 @@ static char rcsid[] = "$Id$";
 
 extern int nstab;	/* salloc.c */
 
-void bmove();
+static void bmove(short *, short *, int);
 
-savestatus(sp) register state_p sp; {
+void savestatus(state_p sp) {
 
 	sp->st_sh = stackheight;
 	bmove((short *)fakestack,(short *)sp->st_fs,stackheight*sizeof(token_t));
@@ -42,7 +42,7 @@ savestatus(sp) register state_p sp; {
 	sp->st_ns = nstab;
 }
 
-restorestatus(sp) register state_p sp; {
+void restorestatus(state_p sp) {
 
 	stackheight = sp->st_sh;
 	bmove((short *)sp->st_fs,(short *)fakestack,stackheight*sizeof(token_t));
@@ -59,8 +59,7 @@ restorestatus(sp) register state_p sp; {
 	popstr(sp->st_ns);
 }
 
-void
-bmove(from,to,nbytes) register short *from,*to; register nbytes; {
+static void bmove(short *from, short *to, int nbytes) {
 
 	if (nbytes<=0)
 		return;

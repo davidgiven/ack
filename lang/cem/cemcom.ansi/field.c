@@ -10,6 +10,7 @@
 
 
 #ifndef NOBITFIELD
+#include	<assert.h>
 #include	<em.h>
 #include	<em_reg.h>
 #include	<flt_arith.h>
@@ -17,7 +18,6 @@
 #include	"type.h"
 #include	"label.h"
 #include	"code.h"
-#include	"assert.h"
 #include	"expr.h"
 #include	"sizes.h"
 #include	"align.h"
@@ -55,12 +55,12 @@ eval_field(expr, code)
 				    : word_type;
 
 	/* First some assertions to be sure that the rest is legal */
-	ASSERT(atype->tp_size == word_size);	/* make sure that C_loc() is legal */
-	ASSERT(leftop->ex_type->tp_fund == FIELD);
+	assert(atype->tp_size == word_size);	/* make sure that C_loc() is legal */
+	assert(leftop->ex_type->tp_fund == FIELD);
 	leftop->ex_type = atype;	/* this is cheating but it works... */
 	if (op == '=') {
 		/* F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f) */
-		ASSERT(tp == rightop->ex_type);
+		assert(tp == rightop->ex_type);
 		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		store_field(fd, tp->tp_unsigned, code, leftop, (arith) 0);

@@ -2,7 +2,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2017-01-07
+                                2018-02-23
 
 
 INTRODUCTION
@@ -35,6 +35,7 @@ linux68k      produces ELF executables for m68020 Linux systems
 linuxppc      produces ELF executables for PowerPC Linux systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
+pdpv7         produces PDP/11 V7 Unix binaries
 
 
 
@@ -53,8 +54,6 @@ Requirements:
 
 - GNU make.
 
-- Lua 5.1 and the luaposix library (used by the build system).
-
 - (optionally) ninja; if you've got this, this will be autodetected and give
   you faster builds.
 
@@ -63,9 +62,9 @@ Requirements:
   architectures. Get both the qemu-system-* platform emulators and the qemu-*
   userland emulators (only works on Linux).
 
-- about 40MB free in /tmp (or some other temporary directory).
+- about 115MB free in /tmp (or some other temporary directory).
 
-- about 6MB in the target directory.
+- about 15MB in the target directory.
 
 Instructions:
 
@@ -83,7 +82,7 @@ Instructions:
   install ninja and it'll use all your cores. If you don't have ninja, you
   can still use make for parallel builds with:
 
-    make MAKEFLAGS='-r -j8'   # or however many cores you have
+    make -r -j8   # or however many cores you have
 
   ...but frankly, I recommend ninja.
 

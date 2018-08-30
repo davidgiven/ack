@@ -8,7 +8,7 @@
 	inserted file.
 */
 int
-AtEoIF()
+AtEoIF(void)
 {
 	return 0;
 }

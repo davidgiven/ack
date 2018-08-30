@@ -3,6 +3,7 @@ local function build_ego(name)
 		name = name,
 		srcs = { "./"..name.."/*.c" },
 		deps = {
+			"./"..name.."/*.h",
 			"util/ego/share+lib",
 			"modules/src/em_data+lib",
 			"h+emheaders",

@@ -125,8 +125,8 @@ STATIC struct {
 /* nop */	HOPELESS,	XXX,	XXX,	XXX,	XXX,
 /* rck */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
 /* ret */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
-/* rmi */	BINAIR_OP,	ARGW,	ARGW,	ARGW,	ANY,
-/* rmu */	BINAIR_OP,	ARGW,	ARGW,	ARGW,	ANY,
+/* rmi */	REMAINDER,	ARGW,	ARGW,	ARGW,	ANY,
+/* rmu */	REMAINDER,	ARGW,	ARGW,	ARGW,	ANY,
 /* rol */	BINAIR_OP,	ARGW,	WS,	ARGW,	ANY,
 /* ror */	BINAIR_OP,	ARGW,	WS,	ARGW,	ANY,
 /* rtt */	BBLOCK_END,	XXX,	XXX,	XXX,	XXX,
@@ -178,8 +178,7 @@ STATIC struct {
 #define AVSIZE(l)	(info[INSTR(l)].i_av)
 #define REGTYPE(n)	(info[n].i_regtype)
 
-int instrgroup(lnp)
-	line_p lnp;
+int instrgroup(line_p lnp)
 {
 	if (INSTR(lnp) == op_lor && SHORT(lnp) == 1) {
 		/* We can't do anything with the stackpointer. */
@@ -192,8 +191,7 @@ int instrgroup(lnp)
 	return GROUP(INSTR(lnp));
 }
 
-bool stack_group(instr)
-	int instr;
+bool stack_group(int instr)
 {
 	/* Is this an instruction that only does something to the top of
 	 * the stack?
@@ -205,14 +203,14 @@ bool stack_group(instr)
 		case UNAIR_OP:
 		case BINAIR_OP:
 		case TERNAIR_OP:
+		case REMAINDER:
 			return TRUE;
 		default:
 			return FALSE;
 	}
 }
 
-STATIC offset argw(lnp)
-	line_p lnp;
+STATIC offset argw(line_p lnp)
 {
 	/* Some EM-instructions have their argument either on the same line,
 	 * or on top of the stack. We give up when the argument is on top of
@@ -228,8 +226,7 @@ STATIC offset argw(lnp)
 	}
 }
 
-offset op11size(lnp)
-	line_p lnp;
+offset op11size(line_p lnp)
 {
 	/* Returns the size of the first argument of
 	 * the unary operator in lnp.
@@ -248,8 +245,7 @@ offset op11size(lnp)
 	/* NOTREACHED */
 }
 
-offset op12size(lnp)
-	line_p lnp;
+offset op12size(line_p lnp)
 {
 	/* Same for first of binary. */
 
@@ -264,8 +260,7 @@ offset op12size(lnp)
 	/* NOTREACHED */
 }
 
-offset op22size(lnp)
-	line_p lnp;
+offset op22size(line_p lnp)
 {
 	switch (OP2SIZE(lnp)) {
 		case ARGW:
@@ -319,8 +314,7 @@ offset op33size(lnp)
 		return ws;
 }
 
-offset avsize(lnp)
-	line_p lnp;
+offset avsize(line_p lnp)
 {
 	/* Returns the size of the result of the instruction in lnp.
 	 * If the instruction is a conversion this size is given on the stack.
@@ -359,8 +353,7 @@ offset avsize(lnp)
 	/* NOTREACHED */
 }
 
-int regtype(instr)
-	byte instr;
+int regtype(byte instr)
 {
 	switch (REGTYPE(instr & BMASK)) {
 		case ANY:

@@ -5,7 +5,8 @@
  */
 #ifdef VERBOSE
 
-extern SHOWOCCUR();	/* (occur_p ocp)
+extern void SHOWOCCUR(occur_p ocp);
+			/*
 			 * Shows all lines in an occurrence.
 			 */
 
@@ -17,15 +18,18 @@ extern SHOWOCCUR();	/* (occur_p ocp)
 
 #ifdef TRACE
 
-extern OUTAVAILS();	/* ()
+extern void OUTAVAILS(void);
+			/*
 			 * Prints all available expressions.
 			 */
 
-extern OUTENTITIES();	/* ()
+extern void OUTENTITIES(void);
+			/*
 			 * Prints all entities.
 			 */
 
-extern SHOWAVAIL();	/* (avail_p avp)
+extern void SHOWAVAIL(avail_p avp);
+			/*
 			 * Shows an available expression.
 			 */
 

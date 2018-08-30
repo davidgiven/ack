@@ -32,6 +32,7 @@ for _, plat in ipairs(vars.plats) do
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",
 			"h+emheaders",
+			"lang/m2/include+headers",
 		},
         vars = { plat = plat }
     }
@@ -45,10 +46,11 @@ for _, plat in ipairs(vars.plats) do
 		}
 	}
 
+	local suffix = plat:find("^em") and "m" or "o"
 	installable {
 		name = "pkg_"..plat,
 		map = {
-			["$(PLATIND)/"..plat.."/modula2.o"] = "+mrt_"..plat,
+			["$(PLATIND)/"..plat.."/modula2."..suffix] = "+mrt_"..plat,
 			["$(PLATIND)/"..plat.."/libmodula2.a"] = "+lib_"..plat,
 			"+headers",
 		}

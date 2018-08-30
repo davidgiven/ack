@@ -87,7 +87,7 @@ pattern	:
 			  if (patCBO) {
 				register int i;
 
-			  	if (! rplCBO) {
+				if (! rplCBO) {
 					yyerror("No CBO in replacement");
 				}
 				for (i=0; i<sizeof(CBO_instrs)/sizeof(int); i++) {
@@ -153,8 +153,7 @@ optexpr	:	/* empty */
 			{ $$ = 0; }
 	|	expr
 	;
-expr	
-	:	'$' argno
+expr	:	'$' argno
 			{ $$ = lookup(0,EX_ARG,$2,0); }
 	|	NUMBER
 			{ $$ = lookup(0,EX_CON,(int)(short)$1,0); }
@@ -382,25 +381,26 @@ outpat(exprno, instrno)
 {
 	register int i;
 
-  	outbyte(0); outshort(prevind); prevind=curind-3;
-  	out(patlen);
-  	for (i=0;i<patlen;i++) {
+	outbyte(0); outshort(prevind); prevind=curind-3;
+	out(patlen);
+	for (i=0;i<patlen;i++) {
 		if (patmnem[i] == op_CBO) outbyte(instrno);
 		else outbyte(patmnem[i]);
 	}
-  	out(exprno);
-  	out(rpllen);
-  	for (i=0;i<rpllen;i++) {
+	out(exprno);
+	out(rpllen);
+	for (i=0;i<rpllen;i++) {
 		if (rplmnem[i] == op_CBO) outbyte(instrno);
 		else outbyte(rplmnem[i]);
 		out(rplexpr[i]);
-  	}
+	}
 #ifdef DIAGOPT
-  	outshort(patno);
+	/* outshort(patno); */
+	outshort(lino - 1);
 #endif
-  	patno++;
-  	printf("\n");
-  	if (patlen>maxpatlen) maxpatlen=patlen;
+	patno++;
+	printf("\n");
+	if (patlen>maxpatlen) maxpatlen=patlen;
 }
 
 outbyte(b) {
@@ -424,4 +424,3 @@ out(w) {
 		outshort(w);
 	}
 }
-

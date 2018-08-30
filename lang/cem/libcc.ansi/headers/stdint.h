@@ -58,6 +58,7 @@ typedef int16_t         intptr_t;
 typedef uint16_t        uintptr_t;
 typedef int16_t         ptrdiff_t;
 typedef uint16_t        size_t;
+typedef int16_t         ssize_t;
 #define INTPTR_MAX      32767
 #define INTPTR_MIN      (-32768)
 #define UINTPTR_MAX     65535
@@ -66,6 +67,7 @@ typedef int32_t         intptr_t;
 typedef uint32_t        uintptr_t;
 typedef int32_t         ptrdiff_t;
 typedef uint32_t        size_t;
+typedef int32_t         ssize_t;
 #define INTPTR_MAX      2147483647
 #define INTPTR_MIN      (-2147483647)
 #define UINTPTR_MAX     4294967295

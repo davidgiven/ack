@@ -19,11 +19,8 @@ var PLATFORM=qemuppc
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
 var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4 -b0:0x01000000
-var C_LIB={PLATFORMDIR}/libc-ansi.a
-# bitfields reversed for compatibility with (g)cc.
-var CC_ALIGN=-Vr
-var OLD_C_LIB={C_LIB}
-var MACHOPT_F=
+var MACHOPT_F=-m2
+var EGO_PLAT_FLAGS=-M{EM}/share/ack/ego/{ARCH}.descr
 
 # Override the setting in fe so that files compiled for qemuppc can see
 # the platform-specific headers.

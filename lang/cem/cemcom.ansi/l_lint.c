@@ -9,9 +9,9 @@
 
 #ifdef	LINT
 
+#include	<assert.h>
 #include	<alloc.h>	/* for st_free */
 #include	"interface.h"
-#include	"assert.h"
 #ifdef ANSI
 #include	<flt_arith.h>
 #endif /* ANSI */
@@ -365,7 +365,7 @@ add_expr_state(value, to_state, espp)
 {
 	register struct expr_state *esp = *espp;
 
-	ASSERT(value.vl_class == Name);
+	assert(value.vl_class == Name);
 
 	/* try to find the esp */
 	while (	esp

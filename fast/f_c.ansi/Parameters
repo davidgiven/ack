@@ -122,7 +122,6 @@
 !File: spec_arith.h
 /* describes internal compiler arithmetics */
 /*#define	SPECIAL_ARITHMETICS	/* something different from native long */
-#define UNSIGNED_ARITH	unsigned arith	/* when it is supported */
 
 
 !File: static.h

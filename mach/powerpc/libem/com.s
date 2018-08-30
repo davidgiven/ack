@@ -1,5 +1,3 @@
-#include "powerpc.h"
-
 .sect .text
 
 ! Set complement.
@@ -7,16 +5,15 @@
 
 .define .com
 .com:
-	lwz r3, 0 (sp)       ! size
-	addi sp, sp, 4
+	lwz	r3, 0(sp)		! r3 = size
+	srwi	r7, r3, 2
+	mtspr	ctr, r7			! ctr = size / 4
+	mr	r4, sp			! r4 = pointer before set a
 
-	mr	r4, sp			! r4 = pointer to set a
-	rlwinm	r5, r3, 30, 2, 31
-	mtspr	ctr, r5			! ctr = r3 / 4
-1:
-	lwz	r6, 0(r4)
-	nor	r6, r6, r6		! complement of word
-	stw	r6, 0(r4)
-	addi	r4, r4, 4
-	bc	DNZ, 0, 1b		! loop ctr times
-	bclr	ALWAYS, 0, 0
+	! Loop with r4 in set a.
+1:	lwzu	r5, 4(r4)
+	nor	r7, r5, r5		! complement of word
+	stw	r7, 0(r4)
+	bdnz	1b			! loop ctr times
+	addi	sp, sp, 4		! drop size from stack
+	blr

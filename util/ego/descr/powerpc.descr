@@ -3,24 +3,30 @@ pointersize: 4
 %%RA
 general registers: 19
 address registers: 0
-floating point registers: 0
+floating point registers: 18
 use general as pointer: yes
 
 register score parameters:
 	local variable:
-		(2 cases)
+		(3 cases)
 		pointer,general
 			(1 size)
 			default ->	(3,4)
 		general,general
 			(1 size)
 			default ->	(3,4)
+		float,float
+			(1 size)
+			default ->	(5,4)
 	address of local variable:
-		(2 cases)
+		(3 cases)
 		pointer,general
 			(1 size)
 			default ->	(0,0)
 		general,general
+			(1 size)
+			default ->	(0,0)
+		float,float
 			(1 size)
 			default ->	(0,0)
 	constant:
@@ -39,21 +45,27 @@ register score parameters:
 
 opening cost parameters:
 	local variable:
-		(2 cases)
+		(3 cases)
 		pointer
 			(1 size)
 			default ->	(3,4)
 		general
 			(1 size)
 			default ->	(3,4)
+		float
+			(1 size)
+			default ->	(5,4)
 	address of local variable:
-		(2 cases)
+		(3 cases)
 		pointer
 			(1 size)
 			default ->	(1,4)
 		general
 			(1 size)
-			general ->	(1,4)
+			default ->	(1,4)
+		float
+			(1 size)
+			default ->	(1,4)
 	constant:
 		(2 sizes)
 		fitbyte ->	(1000,1000)
@@ -69,7 +81,7 @@ opening cost parameters:
 		default ->	(1000,1000)
 
 register save costs:
-	(21 cases)
+	(39 cases)
 	0 -> (0,0)
 	1 -> (6,8)
 	2 -> (12,16)
@@ -90,6 +102,24 @@ register save costs:
 	17 -> (102,136)
 	18 -> (108,144)
 	19 -> (114,152)
+	20 -> (120,160)
+	21 -> (126,168)
+	22 -> (132,176)
+	23 -> (138,184)
+	24 -> (144,192)
+	25 -> (150,200)
+	26 -> (156,208)
+	27 -> (162,216)
+	28 -> (168,224)
+	29 -> (174,232)
+	30 -> (180,240)
+	31 -> (186,248)
+	32 -> (192,256)
+	33 -> (198,264)
+	34 -> (204,272)
+	35 -> (210,280)
+	36 -> (216,288)
+	37 -> (222,296)
 	0 -> (0,0)
 %%UD
 access costs of global variables:
@@ -107,10 +137,11 @@ reduce sli if shift count larger than:  0
 first time then space:
 addressing modes: op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
 		  op_ads op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1 
+cheap operations: op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
 		  op_cii op_ciu op_cui op_cuu op_cmi op_cmu op_cmp -1
 lexical tresholds: 1 1
 indirection limit: 8
+convert remainder to division?: yes yes
 do not eliminate sli if index on shiftcounts:	-1
 						-1
 forbidden operators: -1 -1

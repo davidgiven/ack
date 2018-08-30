@@ -6,6 +6,7 @@
 static char rcsid[] = "$Id$";
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,8 +14,8 @@ static char rcsid[] = "$Id$";
 #include <string.h>
 #include "out.h"
 #include "const.h"
-#include "assert.h"
 #include "memory.h"
+#include "sym.h"
 
 extern struct outhead	outhead;
 extern struct outsect	outsect[];
@@ -63,7 +64,6 @@ end_write()
 {
 	register struct outname	*name;
 	register int		sectindex;
-	extern unsigned short	NGlobals;
 	extern long		NGChars;
 
 	assert(!incore);

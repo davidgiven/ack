@@ -13,6 +13,7 @@
 #include	"debug.h"
 
 #include	<assert.h>
+#include	<ack_string.h>
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
@@ -50,8 +51,6 @@ arith
 	double_size = SZ_DOUBLE,
 	pointer_size = SZ_POINTER;
 #endif
-
-#define arith_sign	((arith) (1L << (sizeof(arith) * 8 - 1)))
 
 arith	ret_area_size;
 
@@ -306,14 +305,7 @@ chk_bounds(l1, l2, fund)
 	if (fund == T_INTEGER) {
 		return l2 >= l1;
 	}
-#ifdef UNSIGNED_ARITH
-	return (UNSIGNED_ARITH) l2 >= (UNSIGNED_ARITH) l1;
-#else
-	return (l2 & arith_sign ?
-		(l1 & arith_sign ? l2 >= l1 : 1) :
-		(l1 & arith_sign ? 0 : l2 >= l1)
-	       );
-#endif
+	return (unsigned arith) l2 >= (unsigned arith) l1;
 }
 
 int
@@ -464,7 +456,6 @@ genrck(tp)
 	arith lb, ub;
 	register label ol;
 	arith size = tp->tp_size;
-	extern char *long2str();
 	register t_type *btp = BaseType(tp);
 
 	if (size < word_size) size = word_size;

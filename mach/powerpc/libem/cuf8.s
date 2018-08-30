@@ -1,10 +1,3 @@
-#
-! $Source$
-! $State$
-! $Revision$
-
-#include "powerpc.h"
-	
 .sect .text
 
 ! Converts a 32-bit unsigned integer into a 64-bit double.
@@ -13,21 +6,20 @@
 
 .define .cuf8
 .cuf8:
-	addi sp, sp, -4          ! make space for the double
-	
-	addis r3, r0, 0x4330
-	stw r3, 0(sp)            ! set high word to construct a double
-	
-	lfd f0, 0(sp)            ! load value
-	
-	li32 r3, pivot
-	lfd f1, 0(r3)            ! load pivot value
-	fsub f0, f0, f1          ! adjust
-	                         
-	stfd f0, 0(sp)           ! save value again...
-	bclr ALWAYS, 0, 0        ! ...and return 
+	! Conversion uses the pivot value
+	!   1 << 52 = 0x4330 0000 0000 0000
+	!
+	! From unsigned integer u, we compute
+	!   ((1 << 52) + u) - (1 << 52)
 
-.sect .rom
-pivot:
-	.data4 0x43300000
-	.data4 0x00000000
+	lis r3, 0x4330
+	stwu r3, -4(sp)          ! make space for the double
+
+	lfd f0, 0(sp)            ! f0 = (1 << 52) + u
+	li r3, 0x0000
+	stw r3, 4(sp)
+	lfd f1, 0(sp)            ! f1 = (1 << 52)
+	fsub f0, f0, f1          ! finish conversion
+
+	stfd f0, 0(sp)           ! save value again...
+	blr                      ! ...and return

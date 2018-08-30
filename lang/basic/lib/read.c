@@ -1,8 +1,6 @@
-#include "bc_string.h"
 #include "bc_io.h"
 #include <ctype.h>
-
-/* $Id$ */
+#include "lib.h"
 
 void _readln(void)
 {
