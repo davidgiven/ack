@@ -1,0 +1,6 @@
+build:
+    image: teaci/msys32
+    shell: sh
+    commands:
+      - make PREFIX=/tmp/acki +ack
+
