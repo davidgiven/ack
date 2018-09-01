@@ -11,5 +11,5 @@ build:
 matrix:
     arch:
       - sh
-      - msys32
+      #- msys32
 
