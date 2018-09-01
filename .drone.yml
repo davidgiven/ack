@@ -1,6 +1,13 @@
 clone:
     depth: 10
 build:
+    linuxonwindows:
+        image: teaci/msys32
+        pull: true
+        shell: sh
+        commands:
+          - apt install build-essentials ninja
+          - make
     cygwin:
         image: teaci/cygwin32
         pull: true
@@ -10,11 +17,4 @@ build:
           - id
           - C:/cygwin-installer.exe --site http://mirrors.tea-ci.org/cygwin --local-package-dir Z:/tmp/cygwin -W -P ninja
           - make PREFIX=/tmp/acki +ack
-    linuxonwindows:
-        image: teaci/msys32
-        pull: true
-        shell: sh
-        commands:
-          - apt install build-essentials ninja
-          - make
 
