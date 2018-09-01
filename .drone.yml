@@ -1,0 +1,15 @@
+clone:
+    depth: 10
+build:
+        image: teaci/msys32
+        pull: true
+        shell: $$arch
+        commands:
+          - if [ $$arch = sh ]; then apt update; apt install build-essential bison flex; fi
+          - make PREFIX=/tmp/acki +ack
+
+matrix:
+    arch:
+      - sh
+      #- msys32
+
