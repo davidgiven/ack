@@ -1,0 +1,152 @@
+# Syntax:
+# <thing---->: a field occupying so many bits.
+# T: a field occupying one bit.
+# Undefined bits end up as 0.
+#
+# This is intended to be compatible with MIPS release 5, integer instructions
+# only. It's based on the MIPS32 Instruction Set v5.04 manual (available from
+# https://www.mips.com/products/architectures/mips32-2/).
+
+000000<RS-><RT-><RD->00000100000 "add" RD=gpr ',' RS=gpr ',' RT=gpr
+001000<RS-><RT-><IMM-----------> "addi" RT=gpr ',' RT=gpr ',' IMM=e16
+001001<RS-><RT-><IMM-----------> "addiu" RT=gpr ',' RT=gpr ',' IMM=e16
+000000<RS-><RT-><RD->00000100001 "addu" RD=gpr ',' RS=gpr ',' RT=gpr
+000000<RS-><RT-><RD->00000100100 "and" RD=gpr ',' RS=gpr ',' RT=gpr
+001100<RS-><RT-><IMM-----------> "andi" RT=gpr ',' RS=gpr ',' IMM=e16
+0001000000000000<OFF-----------> "b" OFF=offset16
+0000010000010001<OFF-----------> "bal" OFF=offset16
+000100<RS-><RT-><OFF-----------> "beq" RS=gpr ',' RT=gpr ',' OFF=offset16
+010100<RS-><RT-><OFF-----------> "beql" RS=gpr ',' RT=gpr ',' OFF=offset16
+000001<RS->00001<OFF-----------> "bgez" RS=gpr ',' OFF=offset16
+000001<RS->10001<OFF-----------> "bgezal" RS=gpr ',' OFF=offset16
+000001<RS->10011<OFF-----------> "bgezall" RS=gpr ',' OFF=offset16
+000001<RS->00011<OFF-----------> "bgezl" RS=gpr ',' OFF=offset16
+000111<RS->00000<OFF-----------> "bgtz" RS=gpr ',' OFF=offset16
+010111<RS->00000<OFF-----------> "bgtzl" RS=gpr ',' OFF=offset16
+000110<RS->00000<OFF-----------> "blez" RS=gpr ',' OFF=offset16
+010110<RS->00000<OFF-----------> "blezl" RS=gpr ',' OFF=offset16
+000001<RS->00000<OFF-----------> "bltz" RS=gpr ',' OFF=offset16
+000001<RS->10000<OFF-----------> "bltzal" RS=gpr ',' OFF=offset16
+000001<RS->10010<OFF-----------> "bltzall" RS=gpr ',' OFF=offset16
+000001<RS->00010<OFF-----------> "bltzl" RS=gpr ',' OFF=offset16
+000101<RS-><RT-><OFF-----------> "bne" RS=gpr ',' RT=gpr ',' OFF=offset16
+010101<RS-><RT-><OFF-----------> "bnel" RS=gpr ',' RT=gpr ',' OFF=offset16
+101111<RS-><OP-><OFF-----------> "cache" OP=u5 ',' OFF=e16 '(' RS=gpr ')'
+011111<RS-><OP-><OFF---->0011011 "cachee" OP=u5 ',' OFF=e9 '(' RS=gpr ')'
+011100<RS-><RT-><RD->00000100001 "clo" RD=RT=gpr ',' RS=gpr
+011100<RS-><RT-><RD->00000100000 "clz" RD=RT=gpr ',' RS=gpr
+01000010000000000000000000011111 "deret"
+01000001011<RT->0110000000000000 "di" RT=gpr
+01000001011000000110000000000000 "di"
+000000<RS-><RT->0000000000011010 "div" RS=gpr ',' RT=gpr
+000000<RS-><RT->0000000000011011 "divu" RS=gpr ',' RT=gpr
+00000000000000000000000011000000 "ehb"
+01000001011<RT->0110000000100000 "ei" RT=gpr
+01000001011000000110000000100000 "ei"
+011111<RS-><RT-><MSBLSB-->000000 "ext" RT=gpr ',' RS=gpr ',' extmsblsb
+011111<RS-><RT-><MSBLSB-->000100 "ins" RT=gpr ',' RS=gpr ',' insmsblsb
+000010<ABS---------------------> "j" ABS=abs26
+000011<ABS---------------------> "jal" ABS=abs26
+000000<RS->00000<RD->00000001001 "jalr" RD=gpr ',' RS=gpr
+000000<RS->000001111100000001001 "jalr" RS=gpr
+000000<RS->00000<RD->10000001001 "jalr.hb" RD=gpr ',' RS=gpr
+000000<RS->000001111110000001001 "jalr.hb" RS=gpr
+011101<ABS---------------------> "jalx" ABS=abs26
+000000<RS->000000000000000001000 "jr" RS=gpr
+000000<RS->000000000010000001000 "jr.hb" RS=gpr
+100000<RS-><RT-><IMM-----------> "lb" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101100 "lbe" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+100100<RS-><RT-><IMM-----------> "lbu" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101000 "lbue" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+100001<RS-><RT-><IMM-----------> "lh" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101101 "lhe" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+100101<RS-><RT-><IMM-----------> "lhu" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101001 "lhue" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+110000<RS-><RT-><IMM-----------> "ll" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101110 "lle" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+00111100000<RT-><IMM-----------> "lui" RT=gpr ',' IMM=e16
+100011<RS-><RT-><IMM-----------> "lw" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0101111 "lwe" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+100010<RS-><RT-><IMM-----------> "lwl" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011001 "lwle" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+100110<RS-><RT-><IMM-----------> "lwr" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011010 "lwre" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+011100<RS-><RT->0000000000000000 "madd" RS=gpr ',' RT=gpr
+011100<RS-><RT->0000000000000001 "maddu" RS=gpr ',' RT=gpr
+0000000000000000<RD->00000010000 "mfhi" RD=gpr
+0000000000000000<RD->00000010010 "mflo" RD=gpr
+000000<RS-><RT-><RD->00000001011 "movn" RD=gpr ',' RS=gpr ',' RT=gpr
+000000<RS-><RT-><RD->00000001010 "movz" RD=gpr ',' RS=gpr ',' RT=gpr
+011100<RS-><RT->0000000000000100 "msub" RS=gpr ',' RT=gpr
+011100<RS-><RT->0000000000000101 "msubu" RS=gpr ',' RT=gpr
+000000<RS->000000000000000010001 "mthi" RS=gpr
+000000<RS->000000000000000010011 "mtlo" RS=gpr
+011100<RS-><RT-><RD->00000000010 "mul" RD=gpr ',' RS=gpr ',' RT=gpr
+000000<RS-><RT->0000000000011000 "mult" RS=gpr ',' RT=gpr
+000000<RS-><RT->0000000000000001 "multu" RS=gpr ',' RT=gpr
+00000000000000000000000000000000 "nop"
+000000<RS-><RT-><RD->00000100111 "nor" RD=gpr ',' RS=gpr ',' RT=gpr
+000000<RS-><RT-><RD->00000100101 "or" RD=gpr ',' RS=gpr ',' RT=gpr
+001101<RS-><RT-><IMM-----------> "ori" RS=gpr ',' RT=gpr
+00000000000000000000000101000000 "pause"
+110011<RS-><H--><IMM-----------> "pref" H=u5 ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><H--><IMM---->0100011 "prefe" H=u5 ',' IMM=e9 '(' RS=gpr ')'
+010011<RS-><RT-><H-->00000001111 "prefx" H=u5 ',' RT=gpr '(' RS=gpr ')'
+01111100000<RT-><RD->00000111011 "rdhwr" RT=gpr ',' RD=gpr
+01000001010<RT-><RD->00000000000 "rdpgpr" RD=gpr ',' RT=gpr
+00000000001<RT-><RD-><SA->000010 "rotr" RD=gpr ',' RT=gpr ',' SA=u5
+000000<RS-><RT-><RD->00001000110 "rotrv" RD=gpr ',' RT=gpr ',' RS=gpr
+101000<RS-><RT-><IMM-----------> "sb" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011100 "sbe" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+111000<RS-><RT-><IMM-----------> "sc" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011110 "sce" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+011100<CODE-------------->111111 "sdbbp" CODE=u20
+01111100000<RT-><RD->10000100000 "seb" RD=gpr ',' RT=gpr
+01111100000<RT-><RD->11000100000 "seh" RD=gpr ',' RT=gpr
+101001<RS-><RT-><IMM-----------> "sh" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011101 "she" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+00000000000<RT-><RD-><SA->000000 "sll" RD=gpr ',' RT=gpr ',' SA=u5
+000000<RS-><RT-><RD->00000000100 "sllv" RD=gpr ',' RT=gpr ',' RS=gpr
+000000<RS-><RT-><RD->00000101010 "slt" RD=gpr ',' RS=gpr ',' RT=gpr
+001010<RS-><RT-><IMM-----------> "slti" RT=gpr ',' RS=gpr ',' IMM=e16
+001011<RS-><RT-><IMM-----------> "sltiu" RT=gpr ',' RS=gpr ',' IMM=e16
+000000<RS-><RT-><RD->00000101011 "sltu" RD=gpr ',' RS=gpr ',' RT=gpr
+00000000000<RT-><RD-><SA->000011 "sra" RD=gpr ',' RT=gpr ',' SA=u5
+000000<RS-><RT-><RD->00000000111 "srav" RD=gpr ',' RT=gpr ',' RS=gpr
+00000000000<RT-><RD-><SA->000010 "srl" RD=gpr ',' RT=gpr ',' SA=u5
+000000<RS-><RT-><RD->00000000110 "srlv" RD=gpr ',' RT=gpr ',' RS=gpr
+00000000000000000000000001000000 "ssnop"
+000000<RS-><RT-><RD->00000100010 "sub" RD=gpr ',' RS=gpr ',' RT=gpr
+000000<RS-><RT-><RD->00000100011 "subu" RD=gpr ',' RS=gpr ',' RT=gpr
+101011<RS-><RT-><IMM-----------> "sw" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0011111 "swe" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+101010<RS-><RT-><IMM-----------> "swl" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0010001 "swle" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+101110<RS-><RT-><IMM-----------> "swr" RT=gpr ',' IMM=e16 '(' RS=gpr ')'
+011111<RS-><RT-><IMM---->0100010 "swre" RT=gpr ',' IMM=e9 '(' RS=gpr ')'
+000001<RS->11111<IMM-----------> "synci" IMM=e16 '(' RS=gpr ')'
+000000<CODE-------------->001100 "syscall" CODE=u20
+000000<RS-><RT->0000000000110100 "teq" RS=gpr ',' RT=gpr
+000001<RS->01100<IMM-----------> "teqi" RS=gpr ',' IMM=e16
+000000<RS-><RT->0000000000110000 "tge" RS=gpr ',' RT=gpr
+000001<RS->01000<IMM-----------> "tgei" RS=gpr ',' IMM=e16
+000001<RS->01001<IMM-----------> "tgeiu" RS=gpr ',' IMM=e16
+000000<RS-><RT->0000000000110001 "tgeu" RS=gpr ',' RT=gpr
+01000010000000000000000000000011 "tlbinv"
+01000010000000000000000000000100 "tlbinvf"
+01000010000000000000000000001000 "tlbp"
+01000010000000000000000000000001 "tlbr"
+01000010000000000000000000000010 "tlbwi"
+01000010000000000000000000000110 "tlbwr"
+000000<RS-><RT->0000000000110010 "tlt" RS=gpr ',' RT=gpr
+000001<RS->01010<IMM-----------> "tlti" RS=gpr ',' IMM=e16
+000001<RS->01011<IMM-----------> "tltiu" RS=gpr ',' IMM=e16
+000000<RS-><RT->0000000000110011 "tltu" RS=gpr ',' RT=gpr
+000000<RS-><RT->0000000000110110 "tne" RS=gpr ',' RT=gpr
+000001<RS->01110<IMM-----------> "tnei" RS=gpr ',' IMM=e16
+01000010000000000000000000100000 "wait"
+01000001110<RT-><RD->00000000000 "wrpgpr" RD=gpr ',' RT=gpr
+01111100000<RT-><RD->00010100000 "wsbh" RD=gpr ',' RT=gpr
+000000<RS-><RT-><RD->00000100110 "xor" RD=gpr ',' RS=gpr ',' RT=gpr
+001110<RS-><RT-><IMM-----------> "xori" RT=gpr ',' RS=gpr ',' IMM=e16
+
