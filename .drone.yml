@@ -3,7 +3,7 @@ clone:
 build:
         image: teaci/msys32
         pull: true
-        shell: $$shell
+        shell: $$arch
         commands:
           - if [ $$arch == sh ]; then apt update; apt install build-essential bison flex; fi
           - make PREFIX=/tmp/acki +ack
