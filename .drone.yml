@@ -6,6 +6,7 @@ build:
         pull: true
         shell: sh
         commands:
+          - apt update
           - apt install build-essential ninja
           - make
     cygwin:
