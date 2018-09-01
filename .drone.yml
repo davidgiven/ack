@@ -1,8 +1,10 @@
 build:
-    image: teaci/msys32
+    image: teaci/cygwin32
     pull: true
-    shell: mingw32
+    shell: cygwin32
     commands:
-      - pacman -S --needed --noconfirm --noprogressbar ninja
+      - uname -a
+      - id
+      - C:/cygwin-installer.exe --site http://mirrors.tea-ci.org/cygwin --local-package-dir Z:/tmp/cygwin -W -P ninja
       - make PREFIX=/tmp/acki +ack
 
