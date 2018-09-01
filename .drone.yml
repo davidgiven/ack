@@ -3,5 +3,6 @@ build:
     pull: true
     shell: mingw32
     commands:
+      - pacman -S --needed --noconfirm --noprogressbar ninja
       - make PREFIX=/tmp/acki +ack
 
