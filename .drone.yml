@@ -6,7 +6,7 @@ build:
         pull: true
         shell: sh
         commands:
-          - apt install build-essentials ninja
+          - apt install build-essential ninja
           - make
     cygwin:
         image: teaci/cygwin32
