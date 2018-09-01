@@ -5,7 +5,7 @@ build:
         pull: true
         shell: $$arch
         commands:
-          - if [ $$arch == sh ]; then apt update; apt install build-essential bison flex; fi
+          - if [ $$arch = sh ]; then apt update; apt install build-essential bison flex; fi
           - make PREFIX=/tmp/acki +ack
 
 matrix:
