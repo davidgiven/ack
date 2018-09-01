@@ -7,7 +7,7 @@ build:
         shell: sh
         commands:
           - apt update
-          - apt install build-essential
+          - apt install build-essential bison flex
           - make
     cygwin:
         image: teaci/cygwin32
