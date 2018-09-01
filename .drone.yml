@@ -1,21 +1,15 @@
 clone:
     depth: 10
 build:
-    linuxonwindows:
         image: teaci/msys32
         pull: true
-        shell: sh
+        shell: $$shell
         commands:
-          - apt update
-          - apt install build-essential bison flex
-          - make
-    cygwin:
-        image: teaci/cygwin32
-        pull: true
-        shell: cygwin32
-        commands:
-          - uname -a
-          - id
-          - C:/cygwin-installer.exe --site http://mirrors.tea-ci.org/cygwin --local-package-dir Z:/tmp/cygwin -W -P ninja
+          - if [ $$arch == sh ]; then apt update; apt install build-essential bison flex; fi
           - make PREFIX=/tmp/acki +ack
+
+matrix:
+    arch:
+      - sh
+      - msys32
 
