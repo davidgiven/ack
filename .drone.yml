@@ -1,6 +1,7 @@
 build:
     image: teaci/msys32
-    shell: sh
+    pull: true
+    shell: mingw32
     commands:
       - make PREFIX=/tmp/acki +ack
 
