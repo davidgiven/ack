@@ -7,7 +7,7 @@ build:
         shell: sh
         commands:
           - apt update
-          - apt install build-essential ninja
+          - apt install build-essential
           - make
     cygwin:
         image: teaci/cygwin32
