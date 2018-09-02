@@ -6,23 +6,22 @@ build_as {
 	deps = { "mach/mips/as+astables" }
 }
 
---build_mcg {
---	name = "mcg",
---	arch = "powerpc",
---}
---
---build_top {
---	name = "top",
---	arch = "powerpc",
---}
+build_mcg {
+	name = "mcg",
+	arch = "mips",
+}
+
+build_top {
+	name = "top",
+	arch = "mips",
+}
 
 return installable {
 	name = "tools",
 	map = {
 		["$(PLATDEP)/linuxmips/as"] = "+as",
-		--["$(PLATDEP)/linuxppc/ncg"] = "+ncg",
-		--["$(PLATDEP)/linuxppc/mcg"] = "+mcg",
-		--["$(PLATDEP)/linuxppc/top"] = "+top",
+		["$(PLATDEP)/linuxmips/mcg"] = "+mcg",
+		["$(PLATDEP)/linuxmips/top"] = "+top",
 		["$(PLATIND)/descr/linuxmips"] = "./descr",
 		"util/amisc+aelflod-pkg",
 		"util/opt+pkg",

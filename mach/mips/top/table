@@ -1,0 +1,20 @@
+
+/* MIPS table for ACK target optimizer */
+
+MAXOP 5;
+LABEL_STARTER '.';
+
+%%;
+
+X, Y, Z                      { TRUE };
+
+%%;
+
+/* Whitespace is significant here! */
+
+addiu RNZ, RNZ, 0            -> ;
+
+b X : nop : labdef X         -> labdef X ;
+
+%%;
+
