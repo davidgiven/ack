@@ -156,3 +156,97 @@
 000000<RS-><RT-><RD->00000100110 "xor" RD=gpr ',' RS=gpr ',' RT=gpr
 001110<RS-><RT-><IMM-----------> "xori" RT=gpr ',' RS=gpr ',' IMM=e16
 
+# FPU instructions.
+
+010001<F-->00000<FS-><FD->000101 "abs." F=FMT FD=fpr ',' FS=fpr
+010001<F--><FT-><FS-><FD->000000 "add." F=FMT FD=fpr ',' FS=fpr ',' FT=fpr
+010011<RS-><FT-><FS-><FD->011110 "alnv.ps" FD=fpr ',' FS=fpr ',' FT=fpr ',' RS=gpr
+010001<F--><FT-><FS-><C>0011<CO> "c." CO=FCOND '.' F=FMT FS=fpr ',' FT=fpr
+010001<F-->00000<FS-><FD->001010 "ceil.l." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->001110 "ceil.w." F=FMT FD=fpr ',' FS=fpr
+01000100010<RT-><FS->00000000000 "cfc1" RT=gpr ',' FS=fpr
+01000100110<RT-><FS->00000000000 "ctc1" RT=gpr ',' FS=fpr
+010001<F-->00000<FS-><FD->100001 "cvt.d." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->100101 "cvt.l." F=FMT FD=fpr ',' FS=fpr
+01000110000<FT-><FS-><FD->100110 "cvt.ps.s" FD=fpr ',' FS=fpr ',' FT=fpr
+010001<F-->00000<FS-><FD->100000 "cvt.s." F=FMT FD=fpr ',' FS=fpr
+0100011011000000<FS-><FD->101000 "cvt.s.pl" FS=fpr ',' FD=fpr
+0100011011000000<FS-><FD->100000 "cvt.s.pu" FS=fpr ',' FD=fpr
+010001<F-->00000<FS-><FD->100100 "cvt.w." F=FMT FD=fpr ',' FS=fpr
+010001<F--><FT-><FS-><FD->000011 "div." F=FMT FD=fpr ',' FS=fpr ',' FT=fpr
+010001<F-->00000<FS-><FD->001011 "floor.l." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->001111 "floor.w." F=FMT FD=fpr ',' FS=fpr
+110101<RS-><FT-><IMM-----------> "ldc1" FT=fpr ',' IMM=e16 '(' RS=gpr ')'
+010011<RS-><RT->00000<FD->000001 "ldxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+010011<RS-><RT->00000<FD->000101 "luxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+110001<RS-><FT-><IMM-----------> "lwc1" FT=fpr ',' IMM=e16 '(' RS=gpr ')'
+010011<RS-><RT->00000<FD->000000 "lwxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+010011<FR-><FT-><FS-><FD->100<F> "madd." F=FMT3 FD=fpr ',' FR=fpr ',' FS=fpr ',' FT=fpr
+01000100000<RT-><FS->00000000000 "mfc1" RT=gpr ',' FS=fpr
+01000100011<RT-><FS->00000000000 "mfhc1" RT=gpr ',' FS=fpr
+010001<F-->00000<FS-><FD->000110 "mov." F=FMT FD=fpr ',' FS=fpr
+000000<RS-><C>00<RD->00000000001 "movf" RD=gpr ',' RS=gpr ',' C=FCOND
+010001<F--><C>00<FS-><FD->010001 "movf." F=FMT FD=fpr ',' FS=fpr ',' C=FCOND
+010001<F--><RT-><FS-><FD->010011 "movn." F=FMT FD=fpr ',' FS=fpr ',' RT=gpr
+000000<RS-><C>01<RD->00000000001 "movt" RD=gpr ',' RS=gpr ',' C=FCOND
+010001<F--><C>01<FS-><FD->010001 "movt." F=FMT FD=fpr ',' FS=fpr ',' C=FCOND
+010001<F--><RT-><FS-><FD->010010 "movz." F=FMT FD=fpr ',' FS=fpr ',' RT=gpr
+010011<FR-><FT-><FS-><FD->101<F> "msub." F=FMT3 FD=fpr ',' FR=fpr ',' FS=fpr ',' FT=fpr
+01000100100<RT-><FS->00000000000 "mtc1" RT=gpr ',' FS=fpr
+01000100111<RT-><FS->00000000000 "mthc1" RT=gpr ',' FS=fpr
+010001<F--><FT-><FS-><FD->000010 "mul." F=FMT FD=fpr ',' FS=fpr ',' FT=fpr
+010001<F-->00000<FS-><FD->000111 "neg." F=FMT FD=fpr ',' FS=fpr
+010011<FR-><FT-><FS-><FD->110<F> "nmadd." F=FMT3 FD=fpr ',' FR=fpr ',' FS=fpr ',' FT=fpr
+010011<FR-><FT-><FS-><FD->111<F> "nmsub." F=FMT3 FD=fpr ',' FR=fpr ',' FS=fpr ',' FT=fpr
+01000110110<FT-><FS-><FD->101100 "pll.ps" FD=fpr ',' FS=fpr ',' FT=fpr
+01000110110<FT-><FS-><FD->101101 "plu.ps" FD=fpr ',' FS=fpr ',' FT=fpr
+01000110110<FT-><FS-><FD->101110 "pul.ps" FD=fpr ',' FS=fpr ',' FT=fpr
+01000110110<FT-><FS-><FD->101111 "puu.ps" FD=fpr ',' FS=fpr ',' FT=fpr
+010001<F-->00000<FS-><FD->010101 "recip." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->001000 "round.l." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->001100 "round.w." F=FMT FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->010110 "rsqrt." F=FMT FD=fpr ',' FS=fpr
+111101<RS-><FT-><IMM-----------> "sdc1" FT=fpr ',' IMM=e16 '(' RS=gpr ')'
+010011<RS-><RT->00000<FD->001001 "sdxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+010001<F-->00000<FS-><FD->000100 "sqrt." F=FMT FD=fpr ',' FS=fpr
+010001<F--><FT-><FS-><FD->000001 "sub." F=FMT FD=fpr ',' FS=fpr ',' FT=fpr
+010011<RS-><RT->00000<FD->001101 "suxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+111001<RS-><FT-><IMM-----------> "swc1" FT=fpr ',' IMM=e16 '(' RS=gpr ')'
+010011<RS-><RT->00000<FD->001000 "swxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
+
+# Generic coprocessor instructions.
+
+01000101000<C>00<OFF-----------> "bc1f" C=u3 ',' OFF=offset16
+0100010100000000<OFF-----------> "bc1f" OFF=offset16
+01000101000<C>10<OFF-----------> "bc1fl" C=u3 ',' OFF=offset16
+0100010100000010<OFF-----------> "bc1fl" OFF=offset16
+01000101000<C>01<OFF-----------> "bc1t" C=u3 ',' OFF=offset16
+0100010100000001<OFF-----------> "bc1t" OFF=offset16
+01000101000<C>11<OFF-----------> "bc1tl" C=u3 ',' OFF=offset16
+0100010100000011<OFF-----------> "bc1tl" OFF=offset16
+01001001000<C>00<OFF-----------> "bc2f" C=u3 ',' OFF=offset16
+0100100100000000<OFF-----------> "bc2f" OFF=offset16
+01001001000<C>10<OFF-----------> "bc2fl" C=u3 ',' OFF=offset16
+0100100100000010<OFF-----------> "bc2fl" OFF=offset16
+01001001000<C>01<OFF-----------> "bc2t" C=u3 ',' OFF=offset16
+0100100100000001<OFF-----------> "bc2t" OFF=offset16
+01001001000<C>11<OFF-----------> "bc2tl" C=u3 ',' OFF=offset16
+0100100100000011<OFF-----------> "bc2tl" OFF=offset16
+01001000010<RT-><IMM-----------> "cfc2" RT=gpr ',' IMM=u16
+01001000110<RT-><IMM-----------> "ctc2" RT=gpr ',' IMM=u16
+0100101<FUN--------------------> "cop2" FUN=u25
+110110<RS-><RT-><IMM-----------> "ldc2" RT=u5 ',' IMM=e16 '(' RS=gpr ')'
+110010<RS-><RT-><IMM-----------> "lwc2" RT=u5 ',' IMM=e16 '(' RS=gpr ')'
+01000000000<RT-><RD->00000000<S> "mfc0" RT=gpr ',' RD=u5 ',' S=u3
+01001000000<RT-><IMM-----------> "mfc2" RT=gpr ',' IMM=u16
+01000000010<RT-><RD->00000000<S> "mfhc0" RT=gpr ',' RD=u5 ',' S=u3
+01001000011<RT-><IMM-----------> "mfhc2" RT=gpr ',' IMM=u16
+01000000100<RT-><RD->00000000<S> "mtc0" RT=gpr ',' RD=u5 ',' S=u3
+01001000100<RT-><IMM-----------> "mtc2" RT=gpr ',' IMM=u16
+01000000110<RT-><RD->00000000<S> "mthc0" RT=gpr ',' RD=u5 ',' S=u3
+01001000111<RT-><IMM-----------> "mthc2" RT=gpr ',' IMM=u16
+111110<RS-><RT-><IMM-----------> "sdc2" RT=u5 ',' IMM=e16 '(' RS=gpr ')'
+111010<RS-><RT-><IMM-----------> "swc2" RT=u5 ',' IMM=e16 '(' RS=gpr ')'
+
+
+

@@ -1,6 +1,7 @@
 #include "rules.y"
 
 gpr: GPR
+fpr: FPR
 
 e16
 	: absexp
@@ -22,6 +23,15 @@ e9
 	}
 	;
 
+u25
+	: absexp
+	{
+		if (($1 < 0) || ($1 > 0x1ffffff))
+			serror("25-bit unsigned value out of range");
+		$$ = $1;
+	}
+	;
+
 u20
 	: absexp
 	{
@@ -31,12 +41,29 @@ u20
 	}
 	;
 
+u16
+	: absexp
+	{
+		if (($1 < 0) || ($1 > 0xffff))
+			serror("16-bit unsigned value out of range");
+		$$ = $1;
+	}
+	;
 
 u5
 	: absexp
 	{
 		if (($1 < 0) || ($1 > 0x1f))
 			serror("5-bit unsigned value out of range");
+		$$ = $1;
+	}
+	;
+
+u3
+	: absexp
+	{
+		if (($1 < 0) || ($1 > 0x7))
+			serror("3-bit unsigned value out of range");
 		$$ = $1;
 	}
 	;

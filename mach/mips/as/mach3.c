@@ -74,6 +74,36 @@
 0,     FPR,        30,         "f30",
 0,     FPR,        31,         "f31",
 
-#include "tokens.y"
+/* Floating-point comparison values */
 
+0,     FCOND,      0,          "f",
+0,     FCOND,      1,          "un",
+0,     FCOND,      2,          "eq",
+0,     FCOND,      3,          "ueq",
+0,     FCOND,      4,          "olt",
+0,     FCOND,      5,          "ult",
+0,     FCOND,      6,          "ole",
+0,     FCOND,      7,          "ule",
+0,     FCOND,      8,          "sf",
+0,     FCOND,      9,          "ngle",
+0,     FCOND,      10,         "seq",
+0,     FCOND,      11,         "ngl",
+0,     FCOND,      12,         "lt",
+0,     FCOND,      13,         "nge",
+0,     FCOND,      14,         "le",
+0,     FCOND,      15,         "ngt",
+
+0,     FMT,        16,         "s",
+0,     FMT,        17,         "d",
+0,     FMT,        20,         "w",
+0,     FMT,        21,         "l",
+0,     FMT,        22,         "ps",
+
+0,     FMT3,       0,          "s",
+0,     FMT3,       1,          "d",
+0,     FMT3,       4,          "w",
+0,     FMT3,       5,          "l",
+0,     FMT3,       6,          "ps",
+
+#include "tokens.y"
 
