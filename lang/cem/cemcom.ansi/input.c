@@ -18,50 +18,10 @@ struct file_info	finfo;
 #include <inp_pkg.body>
 #include <alloc.h>
 
-#ifndef NOPP
-#ifdef DBSYMTAB
-#include <stb.h>
-#include <em.h>
-extern int      IncludeLevel;
-extern char	options[];
-#endif
-
-char *
-getwdir(fn)
-	register char *fn;
-{
-	register char *p;
-	char *strrchr();
-
-	p = strrchr(fn, '/');
-	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
-		*p = '\0';
-		p = strrchr(fn, '/');
-	}
-
-	if (fn[0] == '\0' || (fn[0] == '/' && p == &fn[0])) /* absolute path */
-		return "";
-	if (p) {
-		*p = '\0';
-		fn = Salloc(fn,(unsigned) (p - &fn[0] + 1));
-		*p = '/';
-		return fn;
-	}
-	return "";
-}
-
-int	InputLevel;
-extern int		nestlevel;
-#endif /* NOPP */
-
 int	NoUnstack;
 
 AtEoIT()
 {
-#ifndef NOPP
-	InputLevel--;
-	unstackrepl();
-#endif /* NOPP */
 	return 0;
 }
 
@@ -69,22 +29,6 @@ extern char *source;
 
 AtEoIF()
 {
-#ifndef NOPP
-	if (nestlevel != nestlow) lexwarning("missing #endif");
-	else
-#endif /* NOPP */
 	if (NoUnstack) lexerror("unexpected EOF");
-#ifndef NOPP
-	nestlevel = nestlow;
-#ifdef DBSYMTAB
-	if (options['g'] && IncludeLevel > 0) {
-		C_ms_stb_cst(FileName, N_EINCL, 0, (arith) 0);
-	}
-	IncludeLevel--;
-#endif
-	/* We don't free WorkingDir and FileName here because the rest of the
-	 * compiler may be holding pointers to them for displaying error messages.
-	 */
-#endif /* NOPP */
 	return 0;
 }

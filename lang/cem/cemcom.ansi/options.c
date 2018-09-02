@@ -16,16 +16,6 @@
 #include	"sizes.h"
 #include	"align.h"
 
-#ifndef NOPP
-extern char **inctable;
-extern int inc_pos;
-extern int inc_max;
-extern int inc_total;
-int do_dependencies = 0;
-char *dep_file = 0;
-
-#endif /* NOPP */
-
 char options[128];			/* one for every char	*/
 #ifdef	LINT
 char loptions[128];			/* one for every char	*/
@@ -60,18 +50,6 @@ next_option:			/* to allow combined one-char options */
 		goto next_option;
 
 #ifndef LINT
-#ifndef NOPP
-        case 'A' :      /* Amake dependency generation */
-                do_dependencies = 1;
-                if (*text) {
-                        dep_file = text;
-                }
-                break;
-        case 'i':
-        case 'm':
-             	options[opt] = 1;
-            	break;
-#endif /* NOPP */
 #endif /* LINT */
 #ifdef DBSYMTAB
 	case 'g':	/* symbol table for debugger */
@@ -110,64 +88,6 @@ next_option:			/* to allow combined one-char options */
 		goto next_option;
 #endif	/* LINT */
 
-#ifndef NOPP
-	case 'D' :	{	/* -Dname :	predefine name		*/
-		register char *cp = text, *name, *mactext;
-		unsigned maclen;
-
-		if (class(*cp) != STIDF && class(*cp) != STELL) {
-			error("identifier missing in -D%s", text);
-			break;
-		}
-
-		name = cp;
-
-		while (*cp && in_idf(*cp)) {
-			++cp;
-		}
-
-		if (!*cp) {			/* -Dname */
-			maclen = 1;
-			mactext = Salloc("1", 2);
-		}
-		else
-		if (*cp == '=')	{		/* -Dname=text	*/
-			*cp++ = '\0';		/* end of name	*/
-			maclen = (unsigned) strlen(cp);
-			mactext = Salloc(cp, maclen + 1);
-		}
-		else	{			/* -Dname?? */
-			error("malformed option -D%s", text);
-			break;
-		}
-
-		macro_def(str2idf(name, 0), mactext, -1, (int)maclen, NOFLAG);
-		break;
-	}
-
-	case 'I' :	/* -Ipath : insert "path" into include list	*/
-		if (*text)	{
-			int i;
-			register char *new = text;
-			
-			if (inc_total >= inc_max) {
-				inctable = (char **)
-				   Realloc((char *)inctable,
-					   (unsigned)((inc_max+=10)*sizeof(char *)));
-			}
-				
-			for (i = inc_pos++; i < inc_total ; i++) {
-				char *tmp = inctable[i];
-				
-				inctable[i] = new;
-				new = tmp;
-			}
-			inc_total++;
-		}
-		else inctable[inc_pos] = 0;
-		break;
-#endif /* NOPP */
-
 	case 'M':	/* maximum identifier length */
 		idfsize = txt2int(&text);
 		if (*text || idfsize <= 0)
@@ -197,12 +117,6 @@ next_option:			/* to allow combined one-char options */
 		break;
 	}
 		
-#ifndef NOPP
-	case 'U' :		/* -Uname :	undefine predefined	*/
-		if (*text) do_undef(str2idf(text, 0));
-		break;
-#endif /* NOPP */
-
 #ifndef	LINT
 #ifndef NOCROSS
 	case 'V' :	/* set object sizes and alignment requirements	*/
