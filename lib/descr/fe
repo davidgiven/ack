@@ -72,18 +72,8 @@ name cem
 	mapflag -V* CEM_F={CEM_F?} -V*
 	rts .c
 	need .c
+	prep always
 	args \
-		{CPP_F?} \
-		-D__{ARCH} -D__{PLATFORM} \
-		-D__ACK \
-		{SYSINCLUDES?} \
-		{C_INCLUDES} \
-		{INCLUDES?} \
-		({ANSI_C?.xx}:.xx=-D{ARCH} \
-		-DEM_WSIZE={w} -DEM_PSIZE={p} \
-		-DEM_SSIZE={s} -DEM_LSIZE={l} -DEM_FSIZE={f} -DEM_DSIZE={d}) \
-		-D_EM_WSIZE={w} -D_EM_PSIZE={p} \
-		-D_EM_SSIZE={s} -D_EM_LSIZE={l} -D_EM_FSIZE={f} -D_EM_DSIZE={d} \
 		-Vw{w}.{wa}i{w}.{wa}p{p}.{pa}f{f}.{fa}s{s}.{sa}l{l}.{la}d{d}.{da}x{x}.{xa} \
 		{CC_ALIGN?} \
 		{CEM_F?} {LFLAG?} < >

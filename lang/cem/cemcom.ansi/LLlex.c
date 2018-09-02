@@ -27,13 +27,6 @@ int tk_nmb_at_last_syn_err = -5 /*ERR_SHADOW*/;
 int idfsize = IDFSIZE;
 char sp_occurred[SP_TOTAL + 1];
 
-#ifndef NOPP
-int ReplaceMacros = 1; /* replacing macros			*/
-int AccDefined = 0; /* accept "defined(...)"		*/
-int UnknownIdIsZero = 0; /* interpret unknown id as integer 0	*/
-int Unstacked = 0; /* an unstack is done 			*/
-extern int InputLevel;
-#endif
 int AccFileSpecifier = 0; /* return filespecifier <...>		*/
 int EoiForNewline = 0; /* return EOI upon encountering newline	*/
 int File_Inserted = 0; /* a file has just been inserted	*/
@@ -47,33 +40,6 @@ extern arith full_mask[];
 #ifdef LINT
 extern int lint_skip_comment;
 #endif
-
-#ifndef NOPP
-static struct token LexStack[MAX_LL_DEPTH];
-static LexSP = 0;
-
-void skipcomment();
-void skiplinecomment();
-
-/*	In PushLex() the actions are taken in order to initialise or
-    re-initialise the lexical scanner.
-    E.g. at the invocation of a sub-parser that uses LLlex(), the
-    state of the current parser should be saved.
-*/
-PushLex()
-{
-	assert(LexSP < MAX_LL_DEPTH);
-	assert(ASIDE == 0); /* ASIDE = 0;	*/
-	GetToken(&ahead);
-	LexStack[LexSP++] = dot;
-}
-
-PopLex()
-{
-	assert(LexSP > 0);
-	dot = LexStack[--LexSP];
-}
-#endif /* NOPP */
 
 int LLlex()
 {
@@ -152,9 +118,6 @@ go_on: /* rescan, the following character has been read	*/
 				return ptok->tk_symb = EOI;
 
 			while ((ch = GetChar()), (ch == '#'
-#ifndef NOPP
-			                          || ch == '/'
-#endif
 			                          || class(ch) == STSKIP))
 			{
 				/* blanks are allowed before hashes */
@@ -162,26 +125,6 @@ go_on: /* rescan, the following character has been read	*/
 				{
 					/* a control line follows */
 					domacro();
-#ifndef NOPP
-					if (File_Inserted)
-					{
-						File_Inserted = 0;
-						goto firstline;
-					}
-				}
-				else if ((ch == '/') && !InputLevel)
-				{
-					int nch = GetChar();
-					if (nch == '*')
-						skipcomment();
-					else if (nch == '/')
-						skiplinecomment();
-					else
-					{
-						UnGetChar();
-						break;
-					}
-#endif /* NOPP */
 				}
 			}
 			/*	We have to loop here, because in
@@ -192,9 +135,6 @@ go_on: /* rescan, the following character has been read	*/
 		case STSKIP: /* just skip the skip characters	*/
 			goto again;
 		case STGARB: /* garbage character			*/
-#ifndef NOPP
-		garbage:
-#endif
 			if (040 < ch && ch < 0177)
 			{
 				return ptok->tk_symb = ch;
@@ -285,21 +225,6 @@ go_on: /* rescan, the following character has been read	*/
 						return ptok->tk_symb = XORAB;
 					break;
 				case '/':
-#ifndef NOPP
-					if (!InputLevel)
-					{
-						if (nch == '*')
-						{
-							skipcomment();
-							goto again;
-						}
-						else if (nch == '/')
-						{
-							skiplinecomment();
-							goto again;
-						}
-					}
-#endif
 					if (nch == '=')
 						return ptok->tk_symb = DIVAB;
 					break;
@@ -339,17 +264,6 @@ go_on: /* rescan, the following character has been read	*/
 			register int pos = -1;
 			register struct idf* idef;
 			extern int idfsize; /* ??? */
-#ifndef NOPP
-			int NoExpandNext = 0;
-
-			if (Unstacked)
-				EnableMacros(); /* unstack macro's when allowed. */
-			if (ch == NOEXPM)
-			{
-				NoExpandNext = 1;
-				ch = GetChar();
-			}
-#endif
 			do
 			{ /* read the identifier	*/
 				if (++pos < idfsize)
@@ -366,19 +280,6 @@ go_on: /* rescan, the following character has been read	*/
 			sp_occurred[idef->id_special] = 1;
 			idef->id_file = ptok->tk_file;
 			idef->id_line = ptok->tk_line;
-#ifndef NOPP
-			if (idef->id_macro && ReplaceMacros && !NoExpandNext)
-			{
-				if (replace(idef))
-					goto again;
-			}
-			if (UnknownIdIsZero && idef->id_reserved != SIZEOF)
-			{
-				ptok->tk_ival = (arith)0;
-				ptok->tk_fund = INT;
-				return ptok->tk_symb = INTEGER;
-			}
-#endif /* NOPP */
 			ptok->tk_symb
 			    = (idef->id_reserved
 			           ? idef->id_reserved
@@ -472,100 +373,11 @@ go_on: /* rescan, the following character has been read	*/
 		}
 		case STEOI: /* end of text on source file	*/
 			return ptok->tk_symb = EOI;
-#ifndef NOPP
-		case STMSPEC:
-			if (!InputLevel)
-				goto garbage;
-			if (ch == TOKSEP)
-				goto again;
-/* fallthrough shouldn't happen */
-#endif
 		default: /* this cannot happen	*/
 			crash("bad class for char 0%o", ch);
 	}
 	/*NOTREACHED*/
 }
-
-#ifndef NOPP
-void skipcomment()
-{
-	/*	The last character read has been the '*' of '/_*'.  The
-	    characters, except NL and EOI, between '/_*' and the first
-	    occurring '*_/' are not interpreted.
-	    NL only affects the LineNumber.  EOI is not legal.
-
-	    Important note: it is not possible to stop skipping comment
-	    beyond the end-of-file of an included file.
-	    EOI is returned by LoadChar only on encountering EOF of the
-	    top-level file...
-	*/
-	register int c, oldc = '\0';
-
-	NoUnstack++;
-	c = GetChar();
-#ifdef LINT
-	if (!lint_skip_comment)
-	{
-		lint_start_comment();
-		lint_comment_char(c);
-	}
-#endif /* LINT */
-	do
-	{
-		while (c != '*')
-		{
-			if (class(c) == STNL)
-			{
-				++LineNumber;
-			}
-			else if (c == EOI)
-			{
-				NoUnstack--;
-#ifdef LINT
-				if (!lint_skip_comment)
-					lint_end_comment();
-#endif /* LINT */
-				return;
-			}
-			oldc = c;
-			c = GetChar();
-#ifdef LINT
-			if (!lint_skip_comment)
-				lint_comment_char(c);
-#endif /* LINT */
-		} /* last Character seen was '*' */
-		c = GetChar();
-		if (c != '/' && oldc == '/')
-			lexwarning("comment inside comment ?");
-		oldc = '*';
-#ifdef LINT
-		if (!lint_skip_comment)
-			lint_comment_char(c);
-#endif /* LINT */
-	} while (c != '/');
-#ifdef LINT
-	if (!lint_skip_comment)
-		lint_end_comment();
-#endif /* LINT */
-	NoUnstack--;
-}
-
-void skiplinecomment(void)
-{
-	/*	The last character read has been the '/' of '//'. We read
-	    and discard all characters up to but not including the next
-		NL. */
-	
-	for (;;) {
-		int c = GetChar();
-		if ((class(c) == STNL) || (c == EOI))
-		{
-			UnGetChar();
-			break;
-		}
-	}
-}
-#endif /* NOPP */
 
 arith char_constant(nm) char* nm;
 {
@@ -710,77 +522,9 @@ int GetChar()
 	*/
 	register int ch;
 
-#ifndef NOPP
-again:
-#endif
 	LoadChar(ch);
-
-#ifndef NOPP
-	/* possible trigraph sequence */
-	if (ch == '?')
-		ch = trigraph();
-
-	/* \<newline> is removed from the input stream */
-	if (ch == '\\')
-	{
-		LoadChar(ch);
-		if (ch == '\n')
-		{
-			++LineNumber;
-			goto again;
-		}
-		PushBack();
-		ch = '\\';
-	}
-#endif
 	return (LexSave = ch);
 }
-
-#ifndef NOPP
-int trigraph()
-{
-	register int ch;
-
-	LoadChar(ch);
-	if (ch == '?')
-	{
-		LoadChar(ch);
-		switch (ch)
-		{ /* its a trigraph */
-			case '=':
-				ch = '#';
-				return (ch);
-			case '(':
-				ch = '[';
-				return (ch);
-			case '/':
-				ch = '\\';
-				return (ch);
-			case ')':
-				ch = ']';
-				return (ch);
-			case '\'':
-				ch = '^';
-				return (ch);
-			case '<':
-				ch = '{';
-				return (ch);
-			case '!':
-				ch = '|';
-				return (ch);
-			case '>':
-				ch = '}';
-				return (ch);
-			case '-':
-				ch = '~';
-				return (ch);
-		}
-		PushBack();
-	}
-	PushBack();
-	return ('?');
-}
-#endif
 
 /* strflt2tok only checks the syntax of the floating-point number and
  * selects the right type for the number.
