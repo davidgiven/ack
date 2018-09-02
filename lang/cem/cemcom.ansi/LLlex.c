@@ -53,6 +53,7 @@ static struct token LexStack[MAX_LL_DEPTH];
 static LexSP = 0;
 
 void skipcomment();
+void skiplinecomment();
 
 /*	In PushLex() the actions are taken in order to initialise or
     re-initialise the lexical scanner.
@@ -168,12 +169,13 @@ go_on: /* rescan, the following character has been read	*/
 						goto firstline;
 					}
 				}
-				else if (ch == '/')
+				else if ((ch == '/') && !InputLevel)
 				{
-					if ((GetChar() == '*') && !InputLevel)
-					{
+					int nch = GetChar();
+					if (nch == '*')
 						skipcomment();
-					}
+					else if (nch == '/')
+						skiplinecomment();
 					else
 					{
 						UnGetChar();
@@ -284,10 +286,18 @@ go_on: /* rescan, the following character has been read	*/
 					break;
 				case '/':
 #ifndef NOPP
-					if (nch == '*' && !InputLevel)
+					if (!InputLevel)
 					{
-						skipcomment();
-						goto again;
+						if (nch == '*')
+						{
+							skipcomment();
+							goto again;
+						}
+						else if (nch == '/')
+						{
+							skiplinecomment();
+							goto again;
+						}
 					}
 #endif
 					if (nch == '=')
@@ -538,6 +548,22 @@ void skipcomment()
 		lint_end_comment();
 #endif /* LINT */
 	NoUnstack--;
+}
+
+void skiplinecomment(void)
+{
+	/*	The last character read has been the '/' of '//'. We read
+	    and discard all characters up to but not including the next
+		NL. */
+	
+	for (;;) {
+		int c = GetChar();
+		if ((class(c) == STNL) || (c == EOI))
+		{
+			UnGetChar();
+			break;
+		}
+	}
 }
 #endif /* NOPP */
 

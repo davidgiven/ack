@@ -81,14 +81,20 @@ do_pragma()
 		}
 		else if (c == '/')
 		{
-			if ((c = GetChar()) != '*' || InputLevel)
+			if (!InputLevel)
 			{
+				c = GetChar();
+				if (c == '*')
+				{
+					skipcomment();
+					continue;
+				}
+				else if (c == '/')
+				{
+					skiplinecomment();
+					continue;
+				}
 				*c_ptr++ = '/';
-			}
-			else
-			{
-				skipcomment();
-				continue;
 			}
 		}
 		*c_ptr++ = c;
@@ -238,6 +244,12 @@ void preprocess(fn) char* fn;
 							c = GetChar();
 							continue;
 						}
+						else if (c == '/')
+						{
+							skiplinecomment();
+							c = GetChar();
+							continue;
+						}
 						UnGetChar();
 						c = '/';
 					}
@@ -287,6 +299,12 @@ void preprocess(fn) char* fn;
 					{
 						echo(' ');
 					}
+					c = GetChar();
+					continue;
+				}
+				else if (c == '/')
+				{
+					skiplinecomment();
 					c = GetChar();
 					continue;
 				}

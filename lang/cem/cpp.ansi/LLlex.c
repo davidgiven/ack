@@ -36,6 +36,7 @@ extern arith char_constant();
 #define FLG_DOTSEEN 0x02 /* certainly a floating point number */
 
 void skipcomment();
+void skiplinecomment(void);
 
 int LLlex()
 {
@@ -165,10 +166,18 @@ again: /* rescan the input after an error or replacement	*/
 					UnGetChar();
 					return ptok->tk_symb = ch;
 				case '/':
-					if (nch == '*' && !InputLevel)
+					if (!InputLevel)
 					{
-						skipcomment();
-						goto again;
+						if (nch == '*')
+						{
+							skipcomment();
+							goto again;
+						}
+						else if (nch == '/')
+						{
+							skiplinecomment();
+							goto again;
+						}
 					}
 					else if (nch == '=')
 						return ptok->tk_symb = DIVAB;
@@ -410,6 +419,22 @@ void skipcomment()
 		c = GetChar();
 	} while (c != '/');
 	NoUnstack--;
+}
+
+void skiplinecomment(void)
+{
+	/*	The last character read has been the '/' of '//'. We read
+	    and discard all characters up to but not including the next
+		NL. */
+	
+	for (;;) {
+		int c = GetChar();
+		if ((class(c) == STNL) || (c == EOI))
+		{
+			UnGetChar();
+			break;
+		}
+	}
 }
 
 arith char_constant(nm) char* nm;

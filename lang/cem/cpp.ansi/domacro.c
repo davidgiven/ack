@@ -187,13 +187,18 @@ void skip_block(to_endif) int to_endif;
 			}
 			if (ch == '/')
 			{
-				if (ch != '*')
-					UnGetChar();
-				else
+				if (ch == '*')
 				{
 					skipcomment();
 					continue;
 				}
+				else if (ch == '/')
+				{
+					skiplinecomment();
+					continue;
+				}
+				else
+					UnGetChar();
 			}
 			else
 				UnGetChar();
@@ -765,6 +770,13 @@ int* length;
 			if (c == '*')
 			{
 				skipcomment();
+				blank++;
+				c = GetChar();
+				continue;
+			}
+			else if (c == '/')
+			{
+				skiplinecomment();
 				blank++;
 				c = GetChar();
 				continue;

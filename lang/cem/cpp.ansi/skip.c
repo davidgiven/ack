@@ -46,6 +46,11 @@ int skipspaces(ch, skipnl) register int ch;
 				skipcomment();
 				ch = GetChar();
 			}
+			else if (ch == '/' && !InputLevel)
+			{
+				skiplinecomment();
+				ch = GetChar();
+			}
 			else
 			{
 				UnGetChar();
@@ -90,13 +95,22 @@ SkipToNewLine()
 		}
 		else if (ch == '/')
 		{
-			if (GetChar() == '*' && !InputLevel)
+			if (!InputLevel)
 			{
-				skipcomment();
-				continue;
+				int nch = GetChar();
+				if (nch == '*')
+				{
+					skipcomment();
+					continue;
+				}
+				else if (nch == '/')
+				{
+					skiplinecomment();
+					continue;
+				}
+				else
+					UnGetChar();
 			}
-			else
-				UnGetChar();
 		}
 		else if (ch == TOKSEP && InputLevel)
 		{
