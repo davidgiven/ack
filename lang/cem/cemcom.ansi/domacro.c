@@ -14,7 +14,6 @@
 #include "LLlex.h"
 #include "Lpars.h"
 #include "input.h"
-#include "replace.h"
 
 #ifdef DBSYMTAB
 #include <stb.h>
