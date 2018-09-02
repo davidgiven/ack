@@ -112,7 +112,7 @@
 
 
 !File: nopp.h
-/*#define NOPP		1	/* if NOT defined, use built-int preprocessor */
+#define NOPP		1	/* if NOT defined, use built-int preprocessor */
 
 
 !File: nobitfield.h

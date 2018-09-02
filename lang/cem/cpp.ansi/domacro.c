@@ -187,6 +187,7 @@ void skip_block(to_endif) int to_endif;
 			}
 			if (ch == '/')
 			{
+				ch = GetChar();
 				if (ch == '*')
 				{
 					skipcomment();

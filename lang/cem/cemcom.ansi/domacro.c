@@ -16,10 +16,6 @@
 #include "input.h"
 #include "replace.h"
 
-#ifndef NOPP
-#include <alloc.h>
-#include "class.h"
-#include "macro.h"
 #ifdef DBSYMTAB
 #include <stb.h>
 #include <em.h>
@@ -27,6 +23,12 @@ int IncludeLevel = 0;
 #endif
 
 extern char options[];
+
+#ifndef NOPP
+#include <alloc.h>
+#include "class.h"
+#include "macro.h"
+
 extern char** inctable; /* list of include directories		*/
 extern char* getwdir();
 char ifstack[IFDEPTH]; /* if-stack: the content of an entry is	*/
