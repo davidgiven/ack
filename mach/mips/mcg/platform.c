@@ -120,8 +120,9 @@ struct hop* platform_epilogue(void)
     hop_add_insel(hop, "lw ra, 4(fp)");
     hop_add_insel(hop, "lw at, 0(fp)"); /* load old fp */
     hop_add_insel(hop, "addiu sp, fp, %d", current_proc->fp_to_ab);
-    hop_add_insel(hop, "move fp, at");
+    hop_add_insel(hop, "mov fp, at");
     hop_add_insel(hop, "jr ra");
+    hop_add_insel(hop, "nop");
 
 	return hop;
 }
@@ -200,6 +201,7 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
     else
     {
         uint32_t type = src->attrs & TYPE_ATTRS;
+		tracef('R', "R: non-converting move from %s to %s of type 0x%x\n", src->id, dest->id, type);
 
         if (!src->is_stacked && dest->is_stacked)
         {
@@ -251,17 +253,20 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
             switch (type)
             {
                 case burm_int_ATTR:
-                    hop_add_insel(hop, "move %H, %H", dest, src);
+                    hop_add_insel(hop, "mov %H, %H", dest, src);
                     break;
 
                 case burm_long_ATTR:
-                    hop_add_insel(hop, "move %0H, %0H", dest, src);
-                    hop_add_insel(hop, "move %1H, %1H", dest, src);
+                    hop_add_insel(hop, "mov %0H, %0H", dest, src);
+                    hop_add_insel(hop, "mov %1H, %1H", dest, src);
                     break;
 
                 case burm_float_ATTR:
+                    hop_add_insel(hop, "mov.f %H, %H", dest, src);
+                    break;
+
                 case burm_double_ATTR:
-                    hop_add_insel(hop, "fmr %H, %H", dest, src);
+                    hop_add_insel(hop, "mov.d %H, %H", dest, src);
                     break;
 
                 default:
@@ -289,26 +294,31 @@ struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* 
     switch (src->attrs & TYPE_ATTRS)
     {
         case burm_int_ATTR:
-            hop_add_insel(hop, "mr r0, %H", src);
-            hop_add_insel(hop, "mr %H, %H", src, dest);
-            hop_add_insel(hop, "mr %H, r0", dest);
+            hop_add_insel(hop, "mov at, %H", src);
+            hop_add_insel(hop, "mov %H, %H", src, dest);
+            hop_add_insel(hop, "mov %H, at", dest);
             break;
 
         case burm_long_ATTR:
-            hop_add_insel(hop, "mr r0, %0H", src);
-            hop_add_insel(hop, "mr %0H, %0H", src, dest);
-            hop_add_insel(hop, "mr %0H, r0", dest);
+            hop_add_insel(hop, "mov at, %0H", src);
+            hop_add_insel(hop, "mov %0H, %0H", src, dest);
+            hop_add_insel(hop, "mov %0H, at", dest);
 
-            hop_add_insel(hop, "mr r0, %1H", src);
-            hop_add_insel(hop, "mr %1H, %1H", src, dest);
-            hop_add_insel(hop, "mr %1H, r0", dest);
+            hop_add_insel(hop, "mov at, %1H", src);
+            hop_add_insel(hop, "mov %1H, %1H", src, dest);
+            hop_add_insel(hop, "mov %1H, at", dest);
             break;
 
         case burm_float_ATTR:
+            hop_add_insel(hop, "mov.f f31, %H", src);
+            hop_add_insel(hop, "mov.f %H, %H", src, dest);
+            hop_add_insel(hop, "mov.f %H, f31", dest);
+            break;
+
         case burm_double_ATTR:
-            hop_add_insel(hop, "fmr f0, %H", src);
-            hop_add_insel(hop, "fmr %H, %H", src, dest);
-            hop_add_insel(hop, "fmr %H, f0", dest);
+            hop_add_insel(hop, "mov.d f31, %H", src);
+            hop_add_insel(hop, "mov.d %H, %H", src, dest);
+            hop_add_insel(hop, "mov.d %H, f31", dest);
             break;
     }
 

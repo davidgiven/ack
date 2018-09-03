@@ -9,7 +9,7 @@
 
 # Useful pseudoops.
 
-000000<RS->00000<RD->00000100000 "move" RD=gpr ',' RS=gpr
+000000<RS->00000<RD->00000100000 "mov" RD=gpr ',' RS=gpr
 
 # Core ALU instructions.
 
