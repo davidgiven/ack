@@ -105,5 +105,8 @@
 0,     FMT3,       5,          "l",
 0,     FMT3,       6,          "ps",
 
+0,     OP_LI,      0,          "li",
+0,     OP_LA,      0,          "la",
+
 #include "tokens.y"
 

@@ -9,13 +9,14 @@
 
 # Useful pseudoops.
 
-000000<RS->00000<RD->00000100000 "mov" RD=gpr ',' RS=gpr
+# or RD, RS, zero
+000000<RS->00000<RD->00000100101 "mov" RD=gpr ',' RS=gpr
 
 # Core ALU instructions.
 
 000000<RS-><RT-><RD->00000100000 "add" RD=gpr ',' RS=gpr ',' RT=gpr
-001000<RS-><RT-><IMM-----------> "addi" RT=gpr ',' RT=gpr ',' IMM=e16
-001001<RS-><RT-><IMM-----------> "addiu" RT=gpr ',' RT=gpr ',' IMM=e16
+001000<RS-><RT-><IMM-----------> "addi" RT=gpr ',' RS=gpr ',' IMM=e16
+001001<RS-><RT-><IMM-----------> "addiu" RT=gpr ',' RS=gpr ',' IMM=e16
 000000<RS-><RT-><RD->00000100001 "addu" RD=gpr ',' RS=gpr ',' RT=gpr
 000000<RS-><RT-><RD->00000100100 "and" RD=gpr ',' RS=gpr ',' RT=gpr
 001100<RS-><RT-><IMM-----------> "andi" RT=gpr ',' RS=gpr ',' IMM=e16

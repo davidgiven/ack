@@ -1,4 +1,35 @@
 #include "rules.y"
+	| OP_LI GPR ',' expr
+	{
+		word_t reg = $2;
+		word_t type = $4.typ & S_TYP;
+		word_t val = $4.val;
+		if (type != S_ABS)
+			serror("li cannot be used with values that need a fixup");
+		
+		if (val == 0)
+			emit4(0x00000025 | (reg<<11)); /* or reg, zero, zero */
+		else if ((val < -0x8000) || (val > 0xffff))
+			emit4(0x24000000 | (reg<<16) | (val & 0xffff)); /* addiu reg, zero, value */
+		else
+		{
+			emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
+			emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
+		}
+	}
+	| OP_LA GPR ',' expr
+	{
+		word_t reg = $2;
+		word_t type = $4.typ & S_TYP;
+		word_t val = $4.val;
+
+		if (type != S_ABS)
+			newrelo($4.typ, RELOMIPSHI | FIXUPFLAGS);
+		emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
+		if (type != S_ABS)
+			newrelo($4.typ, RELOMIPS | FIXUPFLAGS);
+		emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
+	}
 
 gpr: GPR
 fpr: FPR

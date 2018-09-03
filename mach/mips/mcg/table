@@ -635,15 +635,15 @@ PATTERNS
     ALUR(DIV.I, "divw")
     ALUR(DIVU.I, "divwu")
 
-    ALUR(ASL.I, "sll")
-    ALUC(ASL.I, "sllv")
-    ALUR(ASR.I, "sra")
-    ALUC(ASR.I, "srav")
+    ALUR(ASL.I, "sllv")
+    ALUC(ASL.I, "sll")
+    ALUR(ASR.I, "srav")
+    ALUC(ASR.I, "sra")
 
-    ALUR(LSL.I, "sll")
-    ALUC(LSL.I, "sllv")
-    ALUR(LSR.I, "srl")
-    ALUC(LSR.I, "srlv")
+    ALUR(LSL.I, "sllv")
+    ALUC(LSL.I, "sll")
+    ALUR(LSR.I, "srlv")
+    ALUC(LSR.I, "srl")
 
     out:(int)reg = NEG.I(left:(int)reg)
         emit "neg %out, %left"
@@ -663,11 +663,11 @@ PATTERNS
     ALUCC(EOR.I, "xori")
 
 	out:(int)reg = value:LABEL.I
-		emit "li32 %out, $value"
+		emit "la %out, $value"
 		cost 4;
 
 	out:(int)reg = value:BLOCK.I
-		emit "li32 %out, $value"
+		emit "la %out, $value"
 		cost 4;
 
 	out:(int)reg = value:CONST.I
