@@ -1,10 +1,10 @@
 include("plat/build.lua")
 
---ackfile {
---	name = "boot",
---	srcs = { "./boot.s" },
---	vars = { plat = "linuxppc" }
---}
+ackfile {
+	name = "boot",
+	srcs = { "./boot.s" },
+	vars = { plat = "linuxmips" }
+}
 --
 --build_plat_libs {
 --	name = "libs",
@@ -18,7 +18,7 @@ installable {
 		"+tools",
 --		"+libs",
 		"./include+pkg",
---		["$(PLATIND)/linuxppc/boot.o"] = "+boot",
+		["$(PLATIND)/linuxmips/boot.o"] = "+boot",
 --       ["$(PLATIND)/linuxppc/libsys.a"] = "./libsys+lib",
 	}
 }
