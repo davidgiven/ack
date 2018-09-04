@@ -208,20 +208,20 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
             switch (type)
             {
                 case burm_int_ATTR:
-                    hop_add_insel(hop, "stw %H, %S(fp) ! %H", src, dest, dest);
-                    break;
-
-                case burm_float_ATTR:
-                    hop_add_insel(hop, "stfs %H, %S(fp) ! %H", src, dest, dest);
+                    hop_add_insel(hop, "sw %H, %S(fp) ! %H", src, dest, dest);
                     break;
 
                 case burm_long_ATTR:
-                    hop_add_insel(hop, "stw %0H, 4+%S(fp) ! %H", src, dest, dest);
-                    hop_add_insel(hop, "stw %1H, 0+%S(fp) ! %H", src, dest, dest);
+                    hop_add_insel(hop, "sw %0H, 0+%S(fp) ! %H", src, dest, dest);
+                    hop_add_insel(hop, "sw %1H, 4+%S(fp) ! %H", src, dest, dest);
+                    break;
+
+                case burm_float_ATTR:
+                    hop_add_insel(hop, "swc1 %H, %S(fp) ! %H", src, dest, dest);
                     break;
 
                 case burm_double_ATTR:
-                    hop_add_insel(hop, "stfd %H, %S(fp) ! %H", src, dest, dest);
+                    hop_add_insel(hop, "sdc1 %H, %S(fp) ! %H", src, dest, dest);
                     break;
 
                 default:
@@ -233,15 +233,22 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
             switch (type)
             {
                 case burm_int_ATTR:
-                    hop_add_insel(hop, "lwz %H, %S(fp) ! %H", dest, src, src);
+                    hop_add_insel(hop, "lw %H, %S(fp) ! %H", dest, src, src);
+                    break;
+
+                case burm_long_ATTR:
+                    /* Can't load straight into dest because it might overlap with src. */
+                    hop_add_insel(hop, "lw at, 0+%S(fp) ! %H", dest, src, src);
+                    hop_add_insel(hop, "lw %1H, 4+%S(fp) ! %H", dest, src, src);
+                    hop_add_insel(hop, "mov %0H, at", dest);
                     break;
 
                 case burm_float_ATTR:
-                    hop_add_insel(hop, "lfs %H, %S(fp) ! %H", dest, src, src);
+                    hop_add_insel(hop, "lwc1 %H, %S(fp) ! %H", dest, src, src);
                     break;
 
                 case burm_double_ATTR:
-                    hop_add_insel(hop, "lfd %H, %S(fp) ! %H", dest, src, src);
+                    hop_add_insel(hop, "ldc1 %H, %S(fp) ! %H", dest, src, src);
                     break;
 
                 default:
