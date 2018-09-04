@@ -5,21 +5,21 @@ ackfile {
 	srcs = { "./boot.s" },
 	vars = { plat = "linuxmips" }
 }
---
---build_plat_libs {
---	name = "libs",
---	arch = "powerpc",
---	plat = "linuxppc",
---}
+
+build_plat_libs {
+	name = "libs",
+	arch = "mips",
+	plat = "linuxmips",
+}
 
 installable {
 	name = "pkg",
 	map = {
 		"+tools",
---		"+libs",
+		"+libs",
 		"./include+pkg",
 		["$(PLATIND)/linuxmips/boot.o"] = "+boot",
---       ["$(PLATIND)/linuxppc/libsys.a"] = "./libsys+lib",
+        ["$(PLATIND)/linuxmips/libsys.a"] = "./libsys+lib",
 	}
 }
 
