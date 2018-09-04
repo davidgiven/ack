@@ -34,6 +34,32 @@
 gpr: GPR
 fpr: FPR
 
+fmt3
+	: OP__DOT_S  { $$ = 0; }
+	| OP__DOT_D  { $$ = 1; }
+	| OP__DOT_W  { $$ = 4; }
+	| OP__DOT_L  { $$ = 5; }
+	| OP__DOT_PS { $$ = 6; }
+fmt: fmt3        { $$ = $1 + 16; }
+
+fcond
+	: OP__DOT_F    { $$ = 0; }
+	| OP__DOT_UN   { $$ = 1; }
+	| OP__DOT_EQ   { $$ = 2; }
+	| OP__DOT_UEQ  { $$ = 3; }
+	| OP__DOT_OLT  { $$ = 4; }
+	| OP__DOT_ULT  { $$ = 5; }
+	| OP__DOT_OLE  { $$ = 6; }
+	| OP__DOT_ULE  { $$ = 7; }
+	| OP__DOT_SF   { $$ = 8; }
+	| OP__DOT_NGLE { $$ = 9; }
+	| OP__DOT_SEQ  { $$ = 10; }
+	| OP__DOT_NGL  { $$ = 11; }
+	| OP__DOT_LT   { $$ = 12; }
+	| OP__DOT_NGE  { $$ = 13; }
+	| OP__DOT_LE   { $$ = 14; }
+	| OP__DOT_NGT  { $$ = 15; }
+
 e16
 	: absexp
 	{

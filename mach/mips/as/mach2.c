@@ -1,7 +1,5 @@
 %token <y_word> GPR
 %token <y_word> FPR
-%token <y_word> FMT
-%token <y_word> FMT3
 %token <y_word> FCOND
 
 %token <y_word> OP_LI
@@ -11,6 +9,9 @@
 %type <y_word> e16 e9
 %type <y_word> u25 u20 u16 u5 u3
 %type <y_word> abs26 offset16
+
+%type <y_word> fmt fmt3
+%type <y_word> fcond
 
 %type <y_word> extmsblsb insmsblsb
 

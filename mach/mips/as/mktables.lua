@@ -1,17 +1,19 @@
 local args = {...}
 
-local wordscount = 0
 local words = {}
 local insns = {}
 
 local function addword(word)
-	local n = words[word]
-	if not n then
-		words[word] = wordscount
-		wordscount = wordscount + 1
-		n = wordscount
+	local w = words[word]
+	if not w then
+		w = word:upper()
+		w = w:gsub("%.", "_DOT_")
+    	if not w:match("^[A-Z0-9_]*$") then
+			error(word.." is not a valid token")
+        end
+		words[word] = w
 	end
-	return n
+	return w
 end
 
 local function parsesyntax(line)
@@ -125,7 +127,9 @@ while true do
 	end
 	line = line:gsub("#.*$", "")
 	line = line:gsub(" *$", "")
-	if line ~= "" then
+	if line:find("^%%token ") then
+		addword(line:sub(8))
+	elseif line ~= "" then
 		local fields = parsefields(line)
 		local syntax = parsesyntax(line:sub(34, #line))
     	insns[#insns+1] = {
@@ -143,7 +147,7 @@ definitionsfp:close()
 
 local tokensfp = io.open(args[2], "w")
 for word, value in pairs(words) do
-	tokensfp:write("0, OP_", tostring(value), ", 0, \"", word, "\",\n")
+	tokensfp:write("0, OP_", value, ", 0, \"", word, "\",\n")
 end
 tokensfp:close()
 
@@ -157,7 +161,7 @@ for index, insn in ipairs(insns) do
 	end
 	for _, word in ipairs(insn.syntax) do
 		if word.word then
-			rulesfp:write(" OP_", tostring(word.word))
+			rulesfp:write(" OP_", word.word)
 		end
 		if word.punct then
 			rulesfp:write(" ", word.punct)
