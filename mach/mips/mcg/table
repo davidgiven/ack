@@ -667,6 +667,10 @@ PATTERNS
 		emit "div.d %out, %left, %right"
 		cost 4;
 
+	out:(float)reg = NEGF.D(left:(float)reg)
+		emit "neg.d %out, %left"
+		cost 4;
+
 	out:(double)reg = FROMSI.D(in:(int)reg)
 		emit "mtc1 %in, %out" /* mtc1 has reversed parameters */
 		emit "cvt.d.w %out, %out"
@@ -703,6 +707,10 @@ PATTERNS
 
 	out:(float)reg = DIVF.F(left:(float)reg, right:(float)reg)
 		emit "div.d %out, %left, %right"
+		cost 4;
+
+	out:(float)reg = NEGF.F(left:(float)reg)
+		emit "neg.f %out, %left"
 		cost 4;
 
 	out:(float)reg = FROMSI.F(in:(int)reg)
