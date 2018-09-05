@@ -617,7 +617,7 @@ PATTERNS
     ALUC(LSR.I, "srl")
 
     out:(int)reg = NEG.I(left:(int)reg)
-        emit "neg %out, %left"
+        emit "subu %out, zero, %left"
         cost 4;
 
     out:(int)reg = NOT.I(in:(int)reg)
@@ -625,7 +625,7 @@ PATTERNS
         cost 4;
 
     ALUR(AND.I, "and")
-    ALUCC(AND.I, "andi.")
+    ALUCC(AND.I, "andi")
 
     ALUR(OR.I, "or")
     ALUCC(OR.I, "ori")
@@ -667,7 +667,7 @@ PATTERNS
 		emit "div.d %out, %left, %right"
 		cost 4;
 
-	out:(float)reg = NEGF.D(left:(float)reg)
+	out:(double)reg = NEGF.D(left:(double)reg)
 		emit "neg.d %out, %left"
 		cost 4;
 
@@ -680,6 +680,12 @@ PATTERNS
         emit "trunc.w.d f31, %in"
         emit "mfc1 %out, f31"
         cost 8;
+
+	out:(iret)reg = FROMUD.I(in:(dret)reg)
+		with corrupted(dret)
+		emit "jal .fromud"
+		emit "nop"
+        cost 30;
 
     out:(double)reg = COPYL.D(in:(long)reg)
         emit "mtc1 %in.0, %out" /* mtc1 has reversed parameters */
@@ -718,16 +724,22 @@ PATTERNS
 		emit "cvt.s.w %out, %out"
 		cost 4;
 
-	out:(int)reg = FROMSF.I(in:(double)reg)
+	out:(int)reg = FROMSF.I(in:(float)reg)
         emit "trunc.w.s f31, %in"
         emit "mfc1 %out, f31"
         cost 8;
 
-    out:(double)reg = COPYI.F(in:(long)reg)
+	out:(iret)reg = FROMUD.I(in:(fret)reg)
+		with corrupted(fret)
+		emit "jal .fromuf"
+		emit "nop"
+        cost 30;
+
+    out:(float)reg = COPYI.F(in:(int)reg)
         emit "mtc1 %in, %out" /* mtc1 has reversed parameters */
         cost 8;
 
-    out:(long)reg = COPYF.I(in:(double)reg)
+    out:(int)reg = COPYF.I(in:(float)reg)
         emit "mfc1 %out, %in"
         cost 8;
 
