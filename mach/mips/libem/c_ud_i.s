@@ -6,8 +6,8 @@
 
 .data
 
-.define .fromud
-.fromud:
+.define .c_ud_i
+.c_ud_i:
 	/* Input: f0
 	 * Output: r2
 	 * Only at and f31 may be used.
@@ -30,8 +30,3 @@ toobig:
 	addiu r2, r2, 0x8000
 	jr ra
 	nop
-
-sect .rom
-.fd_80000000:
-	!float 2.147483648e+9 sz 8
-	.data4 0x41e00000, 0

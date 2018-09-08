@@ -6,8 +6,8 @@
 
 .data
 
-.define .fromuf
-.fromuf:
+.define .c_uf_i
+.c_uf_i:
 	/* Input: f0
 	 * Output: r2
 	 * Only at and f31 may be used.
@@ -31,7 +31,3 @@ toobig:
 	jr ra
 	nop
 
-sect .rom
-.fd_80000000:
-	!float 2.147483648e+9 sz 4
-	.data4 0x4f000000, 0
