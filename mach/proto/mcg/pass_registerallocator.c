@@ -386,16 +386,28 @@ static void find_new_home_for_evicted_register(struct vreg* vreg, struct hreg* s
     for (i=0; i<hregs.count; i++)
     {
         hreg = hregs.item[i];
-        if ((hreg->attrs & srctype) &&
+        if (!hreg->is_stacked && (hreg->attrs & srctype) &&
             allocatable_through(hreg, vreg))
         {
             goto found;
         }
     }
 
-    /* No more registers --- allocate a stack slot. */
+    /* No more registers --- allocate a stack slot. Ensure that we use the same stack
+     * slot for this vreg throughout the function. */
 
-    hreg = new_stacked_hreg(srctype);
+	hreg = vreg->evicted;
+	if (!hreg)
+	{
+		if (vreg->congruence)
+			hreg = vreg->evicted = vreg->congruence->evicted;
+		if (!hreg)
+		{
+			hreg = vreg->evicted = new_stacked_hreg(srctype);
+			if (vreg->congruence)
+				vreg->congruence->evicted = hreg;
+		}
+	}
     array_append(&hregs, hreg);
 
 found:
@@ -617,7 +629,8 @@ static int insert_moves(struct basicblock* bb, int index,
         {
             /* Copy. */
 
-            hop = platform_move(bb, src, dest);
+			struct vreg* vreg = pmap_findleft(srcregs, src);
+            hop = platform_move(bb, vreg, src, dest);
             pmap_remove(&copies, src, dest);
         }
         else
@@ -710,13 +723,17 @@ static void insert_phi_copies(void)
 
             for (k=0; k<bb->regsin.count; k++)
             {
-                struct hreg*hreg = bb->regsin.item[k].left;
+                struct hreg* hreg = bb->regsin.item[k].left;
                 struct vreg* vreg = bb->regsin.item[k].right;
                 struct hreg* src = pmap_findright(prevbb->regsout, vreg);
                 if (!pmap_findleft(&bb->phis, vreg))
                 {
                     tracef('R', "R: input map %%%d (%s) -> (%s)\n",
                         vreg->id, src->id, hreg->id);
+                    if ((src->id != hreg->id) && src->is_stacked && hreg->is_stacked)
+                        fatal("vreg %%%d is stacked in %s on entry to %s, but is passed in in %s from %s",
+                            vreg->id, hreg->id, bb->name,
+                            src->id, prevbb->name);
 
                     pmap_add(&destregs, hreg, vreg);
                 }

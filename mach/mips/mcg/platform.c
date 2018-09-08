@@ -127,7 +127,7 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
-struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+struct hop* platform_move(struct basicblock* bb, struct vreg* vreg, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
 
@@ -280,6 +280,8 @@ struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* 
                     goto nomove;
             }
         }
+        else if (src->is_stacked && dest->is_stacked)
+            fatal("tried to move stacked object %%%d of type 0x%x from %s to %s", vreg->id, type, src->id, dest->id);
         else
             goto nomove;
     }
@@ -294,6 +296,7 @@ struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* 
 {
     struct hop* hop = new_hop(bb, NULL);
 
+	tracef('R', "R: swap of %s to %s\n", src->id, dest->id);
     assert(!src->is_stacked);
     assert(!dest->is_stacked);
     assert((src->attrs & TYPE_ATTRS) == (dest->attrs & TYPE_ATTRS));

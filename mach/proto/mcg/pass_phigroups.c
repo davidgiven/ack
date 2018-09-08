@@ -10,7 +10,8 @@ static void make_phimap(void)
 	for (i=0; i<cfg.preorder.count; i++)
 	{
 		struct basicblock* bb = cfg.preorder.item[i];
-		
+
+		/* Registers imported through a phi can come from multiple locations. */
 		for (j=0; j<bb->phis.count; j++)
 		{
 			struct vreg* vreg = bb->phis.item[j].left;
