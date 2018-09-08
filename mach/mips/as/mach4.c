@@ -31,6 +31,20 @@
 		emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
 	}
 
+extabsexp
+	: absexp
+	| hilo ASC_LPAR expr ASC_RPAR
+	{
+		newrelo($3.typ, $1 | FIXUPFLAGS);
+		$$ = $3.val;
+	}
+	;
+
+hilo
+	: HI { $$ = $1; }
+	| LO { $$ = $1; }
+	;
+
 gpr: GPR
 fpr: FPR
 
@@ -40,7 +54,11 @@ fmt3
 	| OP__DOT_W  { $$ = 4; }
 	| OP__DOT_L  { $$ = 5; }
 	| OP__DOT_PS { $$ = 6; }
-fmt: fmt3        { $$ = $1 + 16; }
+	;
+
+fmt
+	: fmt3       { $$ = $1 + 16; }
+    ;
 
 fcond
 	: OP__DOT_F    { $$ = 0; }
@@ -59,9 +77,10 @@ fcond
 	| OP__DOT_NGE  { $$ = 13; }
 	| OP__DOT_LE   { $$ = 14; }
 	| OP__DOT_NGT  { $$ = 15; }
+	;
 
 e16
-	: absexp
+	: extabsexp
 	{
 		/* Allow signed or unsigned 16-bit values. */
 		if (($1 < -0x8000) || ($1 > 0xffff))
@@ -99,7 +118,7 @@ u20
 	;
 
 u16
-	: absexp
+	: extabsexp
 	{
 		if (($1 < 0) || ($1 > 0xffff))
 			serror("16-bit unsigned value out of range");
