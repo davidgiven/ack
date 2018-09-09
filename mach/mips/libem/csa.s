@@ -9,6 +9,7 @@
  * Stack: ( value tableaddr -- )
  */
 
+.sect .text
 .define .csa
 .csa:
 	lw r4, 0(sp)            /* r4 = table */
