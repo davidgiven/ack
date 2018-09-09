@@ -58,14 +58,6 @@ static item_t	*last_it, *o_it;
 %token <y_word> LINE
 %token FILe
 %token <y_word> LIST
-%token OP_EQ
-%token OP_NE
-%token OP_LE
-%token OP_GE
-%token OP_LL
-%token OP_RR
-%token OP_OO
-%token OP_AA
 
 %left OP_OO
 %left OP_AA
