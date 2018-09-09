@@ -1,8 +1,5 @@
 #
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
+.sect .text; .sect .rom; .sect .data; .sect .bss
 
 .sect .text
 .define .c_ud_i
@@ -30,3 +27,10 @@ toobig:
 	addiu r2, r2, 0x8000
 	jr ra
 	nop
+
+/* 2147483648 as a double. */
+.sect .rom
+.define .fd_80000000
+.fd_80000000:
+	.data4 0, 0x41e00000
+
