@@ -106,15 +106,6 @@ dumpidf(idf, opt)
 	
 	if (!idf)
 		return;
-#ifndef NOPP
-	if ((opt&1) && idf->id_macro)	{
-		if (!started++)	{
-			newline();
-			print("%s:", idf->id_text);
-		}
-		print(" macro");
-	}
-#endif /* NOPP */
 	if ((opt&2) && idf->id_reserved)	{
 		if (!started++)	{
 			newline();

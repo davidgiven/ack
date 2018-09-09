@@ -47,6 +47,14 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 #include	"warn.h"
 #include	"mem.h"
 
+/* Detect supported system calls. */
+
+#if !defined __CYGWIN__
+#define HAS_ACCT 1
+#else
+#define HAS_ACCT 0
+#endif
+
 #define	INPUT		0
 #define	OUTPUT		1
 
@@ -914,15 +922,22 @@ moncall()
 	case 51:			/* Acct */
 
 		dsp1 = pop_ptr();
-		if (!savestr(0, dsp1) || acct(buf[0]) == -1) {
+		#if HAS_ACCT
+			if (!savestr(0, dsp1) || acct(buf[0]) == -1) {
+				push_err();
+				LOG(("@m4 Acct: failed, dsp1 = %lu, errno = %d",
+					dsp1, errno));
+			}
+			else {
+				push_int(0);
+				LOG(("@m9 Acct: succeeded, dsp1 = %lu", dsp1));
+			}
+		#else
+			einval(WMPXIMP);
 			push_err();
-			LOG(("@m4 Acct: failed, dsp1 = %lu, errno = %d",
-				dsp1, errno));
-		}
-		else {
-			push_int(0);
-			LOG(("@m9 Acct: succeeded, dsp1 = %lu", dsp1));
-		}
+			LOG(("@m4 Acct: failed, request = %d, dsp1 = %lu, errno = %d",
+				request, dsp1, errno));
+		#endif
 		break;
 
 	case 54:			/* Ioctl */

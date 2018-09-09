@@ -20,7 +20,7 @@
 
 /* INPUT PRIMITIVES */
 
-#define	LoadChar(dest)	((void)((dest = *_ipp++) || (dest = loadbuf())))
+#define	LoadChar(dest)	(dest = loadchar())
 #define	PushBack()	(--_ipp)
 #define ChPushBack(ch)	(*--_ipp = (ch))
 
@@ -31,6 +31,7 @@
 
 extern char *_ipp;
 
+_PROTOTYPE(int loadchar, (void));
 _PROTOTYPE(int loadbuf, (void));
 _PROTOTYPE(int AtEoIT, (void));
 _PROTOTYPE(int AtEoIF, (void));

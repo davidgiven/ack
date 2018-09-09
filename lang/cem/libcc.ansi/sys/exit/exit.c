@@ -15,8 +15,8 @@ int __funccnt = 0;
 void exit(int status)
 {
 	/* "Called in reversed order of their registration" */
-	while (__funccnt >= 0)
-		(*__functab[__funccnt])();
+	while (__funccnt)
+		(*__functab[--__funccnt])();
 
 	_exit(status);
 }

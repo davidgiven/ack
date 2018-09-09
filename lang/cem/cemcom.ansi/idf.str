@@ -8,10 +8,6 @@
 #include	"parameters.h"
 
 struct id_u {
-#ifndef NOPP
-	struct macro *idd_macro;
-	int idd_resmac;		/* if nonzero: keyword of macroproc. 	*/
-#endif /* NOPP */
 	int idd_reserved;	/* non-zero for reserved words		*/
 	char *idd_file;		/* file containing the occurrence	*/
 	unsigned int idd_line;	/* line number of the occurrence	*/
@@ -35,15 +31,6 @@ struct id_u {
 #define id_special	id_user.idd_special
 
 #include <idf_pkg.spec>
-
-#ifndef NOPP
-struct dependency	{
-	struct dependency *next;
-	struct idf *dep_idf;
-};
-
-/* ALLOCDEF "dependency" 10 */
-#endif /* NOPP */
 
 extern int level;
 extern struct idf *gen_idf();
