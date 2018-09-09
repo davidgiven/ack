@@ -24,10 +24,10 @@
 		word_t val = $4.val;
 
 		if (type != S_ABS)
-			newrelo($4.typ, RELOMIPSHI | FIXUPFLAGS);
+			newrelo($4.typ, RELO2 | RELS2 | FIXUPFLAGS);
 		emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
 		if (type != S_ABS)
-			newrelo($4.typ, RELOMIPS | FIXUPFLAGS);
+			newrelo($4.typ, RELO2 | FIXUPFLAGS);
 		emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
 	}
 

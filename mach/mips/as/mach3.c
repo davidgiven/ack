@@ -76,8 +76,8 @@
 
 0,     OP_LI,      0,          "li",
 0,     OP_LA,      0,          "la",
-0,     HI,         RELOMIPSHI, "hi",
-0,     LO,         RELOMIPS,   "lo",
+0,     HI,         RELO2|RELS2,"hi",
+0,     LO,         RELO2,      "lo",
 
 #include "tokens.y"
 

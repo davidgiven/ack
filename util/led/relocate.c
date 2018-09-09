@@ -179,6 +179,30 @@ static uint32_t get_lis_valu(char *addr, uint16_t type)
 	return valu;
 }
 
+/* RELOMIPS is used for j and b instructions only. */
+static uint32_t get_mips_valu(char* addr)
+{
+	uint32_t value = read4(addr, 0);
+	switch (value >> 26)
+	{
+		case 2: /* j */
+		case 3: /* jal */
+		case 29: /* jalx */
+			/* Unsigned 26-bit payload. */
+			value = value & ((1<<26)-1);
+			break;
+
+		default: /* assume everything else is a b, there are lots */
+			/* Signed 16-bit payload. */
+			value = ((int32_t)value << 16) >> 16;
+			break;
+	}
+
+	/* The value has two implicit zero bits on the bottom. */
+	value <<= 2;
+	return value;
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
@@ -198,8 +222,10 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		return get_lis_valu(addr, type);
 	case RELOVC4:
 		return get_vc4_valu(addr);
+	case RELOMIPS:
+		return get_mips_valu(addr);
 	default:
-		fatal("bad relocation type %x", type & RELSZ);
+		fatal("can't read relocation type %x", type & RELSZ);
 	}
 	/* NOTREACHED */
 }
@@ -369,6 +395,36 @@ static void put_lis_valu(char* addr, uint32_t value, uint16_t type)
 	write4(opcode, addr, type);
 }
 
+/* RELOMIPS is used for j and b instructions only. */
+static void put_mips_valu(char* addr, uint32_t value)
+{
+	uint32_t opcode = read4(addr, 0);
+
+	/* The two bottom zero bits are implicit. */
+	if (value & 3)
+		fatal("invalid MIPS relocation value 0x%x", value);
+	value >>= 2;
+
+	switch (value >> 26)
+	{
+		case 2: /* j */
+		case 3: /* jal */
+		case 29: /* jalx */
+			/* Unsigned 26-bit payload. */
+			value = value & ((1<<26)-1);
+			opcode = opcode & ~((1<<26)-1);
+			break;
+
+		default: /* assume everything else is a b, there are lots */
+			/* Signed 16-bit payload. */
+			value = value & ((1<<16)-1);
+			opcode = opcode & ~((1<<16)-1);
+			break;
+	}
+
+	write4(opcode | value, addr, 0);
+}
+
 /*
  * The bits in type indicate how many bytes the value occupies and what
  * significance should be attributed to each byte.
@@ -396,8 +452,11 @@ static putvalu(uint32_t valu, char* addr, uint16_t type)
 	case RELOVC4:
 		put_vc4_valu(addr, valu);
 		break;
+	case RELOMIPS:
+		put_mips_valu(addr, valu);
+		break;
 	default:
-		fatal("bad relocation type %x", type & RELSZ);
+		fatal("can't write relocation type %x", type & RELSZ);
 	}
 }
 
@@ -505,6 +564,14 @@ relocate(head, emit, names, relo, off)
 	 */
 	if (relo->or_type & RELPC)
 		valu -=	relorig[sectindex].org_size+outsect[sectindex].os_base;
+
+	/*
+	 * If RELS2 is set, right shift the value by sixteen bits; this
+	 * allows 32-bit values to be fixed up as a high word and a low
+	 * word.
+	 */
+	if (relo->or_type & RELS2)
+		valu >>= 16;
 
 	/*
 	 * Now put the value back.
