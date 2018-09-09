@@ -320,15 +320,15 @@ struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* 
             break;
 
         case burm_float_ATTR:
-            hop_add_insel(hop, "mov.s f31, %H", src);
+            hop_add_insel(hop, "mov.s f30, %H", src);
             hop_add_insel(hop, "mov.s %H, %H", src, dest);
-            hop_add_insel(hop, "mov.s %H, f31", dest);
+            hop_add_insel(hop, "mov.s %H, f30", dest);
             break;
 
         case burm_double_ATTR:
-            hop_add_insel(hop, "mov.d f31, %H", src);
+            hop_add_insel(hop, "mov.d f30, %H", src);
             hop_add_insel(hop, "mov.d %H, %H", src, dest);
-            hop_add_insel(hop, "mov.d %H, f31", dest);
+            hop_add_insel(hop, "mov.d %H, f30", dest);
             break;
     }
 

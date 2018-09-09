@@ -75,41 +75,24 @@ REGISTERS
 	f27                                           float;
 	f28                                           float;
 	f29                                           float;
-	f30                                           float;
-    /* f31 is used by the compiler as a temporary. */
+    /* f30 and f31 is used by the compiler as a temporary. */
 
-	d0  named("f0")  aliases(f0)                  double volatile dret;
-	d1  named("f1")  aliases(f1)                  double volatile;
-	d2  named("f2")  aliases(f2)                  double volatile;
-	d3  named("f3")  aliases(f3)                  double volatile;
-	d4  named("f4")  aliases(f4)                  double volatile;
-	d5  named("f5")  aliases(f5)                  double volatile;
-	d6  named("f6")  aliases(f6)                  double volatile;
-	d7  named("f7")  aliases(f7)                  double volatile;
-	d8  named("f8")  aliases(f8)                  double volatile;
-	d9  named("f9")  aliases(f9)                  double volatile;
-	d10 named("f10") aliases(f10)                 double volatile;
-	d11 named("f11") aliases(f11)                 double volatile;
-	d12 named("f12") aliases(f12)                 double volatile;
-	d13 named("f13") aliases(f13)                 double volatile;
-	d14 named("f14") aliases(f14)                 double volatile;
-	d15 named("f15") aliases(f15)                 double volatile;
-	d16 named("f16") aliases(f16)                 double volatile;
-	d17 named("f17") aliases(f17)                 double volatile;
-	d18 named("f18") aliases(f18)                 double volatile;
-	d19 named("f19") aliases(f19)                 double volatile;
+	d0  named("f0")  aliases(f0, f1)              double volatile dret;
+	d2  named("f2")  aliases(f2, f3)              double volatile;
+	d4  named("f4")  aliases(f4, f5)              double volatile;
+	d6  named("f6")  aliases(f6, f7)              double volatile;
+	d8  named("f8")  aliases(f8, f9)              double volatile;
+	d10 named("f10") aliases(f10, f11)            double volatile;
+	d12 named("f12") aliases(f12, f13)            double volatile;
+	d14 named("f14") aliases(f14, f15)            double volatile;
+	d16 named("f16") aliases(f16, f17)            double volatile;
+	d18 named("f18") aliases(f18, f19)            double volatile;
 
-	d20 named("f20") aliases(f20)                 double;
-	d21 named("f21") aliases(f21)                 double;
-	d22 named("f22") aliases(f22)                 double;
-	d23 named("f23") aliases(f23)                 double;
-	d24 named("f24") aliases(f24)                 double;
-	d25 named("f25") aliases(f25)                 double;
-	d26 named("f26") aliases(f26)                 double;
-	d27 named("f27") aliases(f27)                 double;
-	d28 named("f28") aliases(f28)                 double;
-	d29 named("f29") aliases(f29)                 double;
-	d30 named("f30") aliases(f30)                 double;
+	d20 named("f20") aliases(f20, f21)            double;
+	d22 named("f22") aliases(f22, f23)            double;
+	d24 named("f24") aliases(f24, f25)            double;
+	d26 named("f26") aliases(f26, f27)            double;
+	d28 named("f28") aliases(f28, f29)            double;
 
 
 
@@ -425,7 +408,7 @@ PATTERNS
 
 	FARJUMP(addr:LABEL.I)
         with corrupted(volatile)
-		emit "b $addr"
+		emit "j $addr"
         emit "nop"
 		cost 8;
 
@@ -458,7 +441,7 @@ PATTERNS
     #define CALLLABEL(insn) \
         insn (dest:LABEL.I) \
             with corrupted(volatile) \
-            emit "bal $dest" \
+            emit "jal $dest" \
             emit "nop" \
             cost 8;
 
@@ -695,8 +678,8 @@ PATTERNS
 		cost 30;
 
 	out:(int)reg = FROMSD.I(in:(double)reg)
-        emit "trunc.w.d f31, %in"
-        emit "mfc1 %out, f31"
+        emit "trunc.w.d f30, %in"
+        emit "mfc1 %out, f30"
         cost 8;
 
 	out:(lret)reg = FROMSD.L(in:(dret)reg)
@@ -748,8 +731,8 @@ PATTERNS
 		cost 4;
 
 	out:(int)reg = FROMSF.I(in:(float)reg)
-        emit "trunc.w.s f31, %in"
-        emit "mfc1 %out, f31"
+        emit "trunc.w.s f30, %in"
+        emit "mfc1 %out, f30"
         cost 8;
 
 	out:(lret)reg = FROMSF.L(in:(fret)reg)
