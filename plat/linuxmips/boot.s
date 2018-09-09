@@ -34,10 +34,10 @@ begtext:
 
 	addiu sp, sp, -3 * 4
 	sw r4, 0(sp)
-	sw r5, 0(sp)
-	sw r6, 0(sp)
+	sw r5, 4(sp)
+	sw r6, 8(sp)
 
-	b __m_a_i_n
+	j __m_a_i_n
 	nop
 
 ! Define symbols at the beginning of our various segments, so that we can find
