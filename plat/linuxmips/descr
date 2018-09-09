@@ -82,6 +82,6 @@ name cv
 	from .out
 	to .exe
 	program {EM}/bin/aelflod
-	args -m20 -b < >
+	args -m8 -l -f0x70000000 < >
 	outfile linuxmips.exe
 end
