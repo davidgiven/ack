@@ -363,6 +363,7 @@ PATTERNS
         cost 8;
 
     out:(lret)reg = FROMIPAIR.L(in1:(int)reg, in2:(int)reg)
+        with preserved(%in1), preserved(%in2)
         emit "mov %out.0, %in1"
         emit "mov %out.1, %in2"
         cost 8;
@@ -472,6 +473,7 @@ PATTERNS
 	/* The COMPARE nodes return tristate integer values; -1, 0 or 1. */
 
     out:(int)reg = COMPARESI.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
         emit "slt at, %left, %right"
         emit "bne at, zero, 1f"
         emit "li %out, -1" /* delay slot */
@@ -480,6 +482,7 @@ PATTERNS
         cost 20;
 
     out:(int)reg = COMPAREUI.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
         emit "sltu at, %left, %right"
         emit "bne at, zero, 1f"
         emit "li %out, -1" /* delay slot */
@@ -488,6 +491,7 @@ PATTERNS
         cost 20;
 
     out:(int)reg = COMPAREF.I(left:(float)reg, right:(float)reg)
+        with preserved(%left), preserved(%right)
         emit "c.lt.s 0, %left, %right"
         emit "li %out, -1"
         emit "bc1t 0, 1f"
@@ -499,6 +503,7 @@ PATTERNS
         cost 28;
 
     out:(int)reg = COMPARED.I(left:(double)reg, right:(double)reg)
+        with preserved(%left), preserved(%right)
         emit "c.lt.d 0, %left, %right"
         emit "li %out, -1"
         emit "bc1t 0, 1f"
