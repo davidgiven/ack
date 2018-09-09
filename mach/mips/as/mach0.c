@@ -4,8 +4,6 @@
  */
 
 #define	THREE_PASS          /* branch and offset optimization */
-#define BYTES_REVERSED      /* high order byte has lowest address */
-#define WORDS_REVERSED      /* high order word has lowest address */
 #define LISTING             /* enable listing facilities */
 #define RELOCATION          /* generate relocatable code */
 #define DEBUG 0
@@ -28,4 +26,4 @@
 #undef VALWIDTH
 #define VALWIDTH	8
 
-#define FIXUPFLAGS (RELBR | RELWR)
+#define FIXUPFLAGS 0

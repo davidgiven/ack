@@ -213,6 +213,8 @@ static uint32_t getvalu(char* addr, uint16_t type)
 	case RELO1:
 		return UBYTE(addr[0]);
 	case RELO2:
+	case RELO2HI:
+	case RELO2HISAD:
 		return read2(addr, type);
 	case RELO4:
 		return read4(addr, type);
@@ -405,7 +407,7 @@ static void put_mips_valu(char* addr, uint32_t value)
 		fatal("invalid MIPS relocation value 0x%x", value);
 	value >>= 2;
 
-	switch (value >> 26)
+	switch (opcode >> 26)
 	{
 		case 2: /* j */
 		case 3: /* jal */
@@ -439,6 +441,12 @@ static putvalu(uint32_t valu, char* addr, uint16_t type)
 		break;
 	case RELO2:
 		write2(valu, addr, type);
+		break;
+	case RELO2HI:
+		write2(valu>>16, addr, type);
+		break;
+	case RELO2HISAD:
+		write2((valu>>16) + !!(valu&0x8000), addr, type);
 		break;
 	case RELO4:
 		write4(valu, addr, type);
@@ -564,14 +572,6 @@ relocate(head, emit, names, relo, off)
 	 */
 	if (relo->or_type & RELPC)
 		valu -=	relorig[sectindex].org_size+outsect[sectindex].os_base;
-
-	/*
-	 * If RELS2 is set, right shift the value by sixteen bits; this
-	 * allows 32-bit values to be fixed up as a high word and a low
-	 * word.
-	 */
-	if (relo->or_type & RELS2)
-		valu >>= 16;
 
 	/*
 	 * Now put the value back.

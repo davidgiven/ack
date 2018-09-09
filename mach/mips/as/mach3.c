@@ -76,8 +76,9 @@
 
 0,     OP_LI,      0,          "li",
 0,     OP_LA,      0,          "la",
-0,     HI,         RELO2|RELS2,"hi",
-0,     LO,         RELO2,      "lo",
+0,     HI16,       0,         "hi16",
+0,     HA16,       0,         "ha16",
+0,     LO16,       0,         "lo16",
 
 #include "tokens.y"
 

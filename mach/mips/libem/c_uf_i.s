@@ -12,8 +12,8 @@
 	 * Only at and f31 may be used.
 	 */
 
-	ori at, zero, hi[.ff_80000000]
-	lwc1 f31, lo[.ff_80000000] (at)
+	ori at, zero, hi16[.ff_80000000]
+	lwc1 f31, lo16[.ff_80000000] (at)
 	c.le.s 0, f31, f0
 	bc1t toobig
 	nop

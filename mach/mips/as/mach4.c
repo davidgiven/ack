@@ -24,7 +24,7 @@
 		word_t val = $4.val;
 
 		if (type != S_ABS)
-			newrelo($4.typ, RELO2 | RELS2 | FIXUPFLAGS);
+			newrelo($4.typ, RELO2HI | FIXUPFLAGS);
 		emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
 		if (type != S_ABS)
 			newrelo($4.typ, RELO2 | FIXUPFLAGS);
@@ -33,16 +33,25 @@
 
 extabsexp
 	: absexp
-	| hilo ASC_LPAR expr ASC_RPAR
+	| LO16 ASC_LPAR expr ASC_RPAR
 	{
-		newrelo($3.typ, $1 | FIXUPFLAGS);
+		newrelo($3.typ, RELO2 | FIXUPFLAGS);
 		$$ = $3.val;
 	}
-	;
-
-hilo
-	: HI { $$ = $1; }
-	| LO { $$ = $1; }
+	| HI16 ASC_LPAR expr ASC_RPAR
+	{
+		newrelo($3.typ, RELO2HI | FIXUPFLAGS);
+		if ($3.val & 0xffff0000)
+			fatal("relocation offset in hi16[] too big");
+		$$ = $3.val;
+	}
+	| HA16 ASC_LPAR expr ASC_RPAR
+	{
+		newrelo($3.typ, RELO2HISAD | FIXUPFLAGS);
+		if ($3.val & 0xffff0000)
+			fatal("relocation offset in ha16[] too big");
+		$$ = $3.val;
+	}
 	;
 
 gpr: GPR
@@ -147,7 +156,7 @@ u3
 offset16
 	: expr
 	{
-		int dist = $1.val - DOTVAL;
+		int dist = $1.val - DOTVAL - 4;
 		fit(fitx(dist, 18));
 
 		if (dist & 0x3)
