@@ -275,7 +275,7 @@ int sz;
 #endif /* USE_FLT */
 
 #ifdef CODE_GENERATOR
-con_float()
+void con_float(void)
 {
 	char buf[8];
 	int rval = float_cst(str, (int)argval, buf);
@@ -301,8 +301,7 @@ con_float()
 #endif /* CODE_GENERATOR */
 
 #ifdef CODE_EXPANDER
-con_float(str, argval) char* str;
-arith argval;
+void con_float(const char* str, arith argval)
 {
 	char buf[8];
 	int rval = float_cst(str, (int)argval, buf);

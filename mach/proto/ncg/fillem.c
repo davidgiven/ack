@@ -83,7 +83,7 @@ extern short em_ptyp[];
 /* machine dependent */
 void con_part(int, word);
 void con_mult(word);
-int con_float(void); /* actually returns void, but need K&R C compatibility */
+void con_float(void); /* actually returns void, but need K&R C compatibility */
 void prolog(full nlocals);
 void mes(word);
 
