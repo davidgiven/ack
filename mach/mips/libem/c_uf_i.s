@@ -31,8 +31,7 @@ toobig:
 	jr ra
 	nop
 
-/* 2147483648 as a float. */
 .sect .rom
 .ff_80000000:
-	.data4 0x4f000000
+	.dataf4 2147483648.0
 

@@ -43,9 +43,11 @@ static item_t	*last_it, *o_it;
 %token NUMBER2
 %token NUMBER3
 %token <y_valu> NUMBER
+%token NUMBERF
 %token DOT
 %token EXTERN
 %token <y_word> DATA
+%token <y_word> DATAF
 %token <y_word> ASCII
 %token SECTION
 %token COMMON
@@ -249,6 +251,7 @@ operation
 				DOTSCT->s_zero += $2;
 			}
 	|	DATA datalist
+	|   DATAF dataflist
 	|	ASCII STRING
 			{	emitstr($1);}
 	;
@@ -276,6 +279,18 @@ datalist
 				emitx($3.val, (int)$<y_word>0);
 			}
 	;
+
+dataflist
+	:   NUMBERF
+			{
+				emitf((int)$<y_word>0);
+			}
+	|   dataflist ',' NUMBERF
+			{
+				emitf((int)$<y_word>3);
+			}
+	;
+
 expr	:	error
 			{	serror("expr syntax err");
 				$$.val = 0; $$.typ = S_UND;

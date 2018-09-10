@@ -346,6 +346,34 @@ void emitstr(int zero)
 		emit1(0);
 }
 
+#define CODE_EXPANDER
+
+#if !defined IEEEFLOAT && !defined PDPFLOAT
+	#define IEEEFLOAT
+#endif
+
+#if defined WORDS_REVERSED
+	#define FL_MSL_AT_LOW_ADDRESS 1
+	#define FL_MSW_AT_LOW_ADDRESS 1
+#else
+	#define FL_MSL_AT_LOW_ADDRESS 0
+	#define FL_MSW_AT_LOW_ADDRESS 0
+#endif
+
+#if defined BYTES_REVERSED
+	#define FL_MSB_AT_LOW_ADDRESS 1
+#else
+	#define FL_MSB_AT_LOW_ADDRESS 0
+#endif
+
+#define gen1 emit1
+#include <con_float>
+
+void emitf(int size)
+{
+	con_float(stringbuf, size);
+}
+
 /* ---------- Error checked file I/O  ---------- */
 
 void ffreopen(char* s, FILE* f)

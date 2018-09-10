@@ -395,10 +395,12 @@ static int innumber(int c)
 {
 	char* p;
 	int radix;
-	static char num[20 + 1];
+	static char num[40 + 1];
 
 	p = num;
-	radix = 20;
+	radix = 40;
+	if (c == '.')
+		goto floatconstant;
 	do
 	{
 		if (--radix < 0)
@@ -407,6 +409,8 @@ static int innumber(int c)
 			c += ('a' - 'A');
 		*p++ = c;
 		c = nextchar();
+		if (c == '.')
+			goto floatconstant;
 	} while (isalnum(c));
 	peekc = c;
 	*p = '\0';
@@ -441,6 +445,22 @@ static int innumber(int c)
 		yylval.y_valu = yylval.y_valu * radix + c;
 	}
 	return (NUMBER);
+
+floatconstant:
+	do
+	{
+		if (--radix < 0)
+			fatal("number too long");
+		if (isupper(c))
+			c += ('a' - 'A');
+		*p++ = c;
+		c = nextchar();
+	} while (isdigit(c) || (c == '.') || (c == 'E') || (c == '+') || (c == '-'));
+
+	*p = '\0';
+	stringbuf = strdup(num);
+	stringlen = p - num;
+	return NUMBERF;
 }
 
 static int instring(int termc)

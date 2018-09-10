@@ -23,4 +23,4 @@ nonnegative:
 /* 4294967296 as a float. */
 .sect .rom
 .fs_100000000:
-	.data4 0x4f800000
+	.dataf4 4294967296.0

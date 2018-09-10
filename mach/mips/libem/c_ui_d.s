@@ -20,7 +20,6 @@ nonnegative:
 	jr ra
 	nop
 
-/* 4294967296 as a double. */
 .sect .rom
 .fd_100000000:
-	.data4 0, 0x41f00000
+	.dataf8 4294967296.0

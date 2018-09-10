@@ -44,6 +44,7 @@ definerule("build_as",
 			deps = {
 				"h+emheaders",
 				"modules/src/object+lib",
+				"modules/src/flt_arith+lib",
 				archlib,
 				yaccfiles,
 				e.deps
