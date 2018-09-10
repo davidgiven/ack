@@ -13,7 +13,7 @@
 	bgez r2, nonnegative
 	nop
 
-	ori at, zero, hi16[.fs_100000000]
+	li at, ha16[.fs_100000000]
 	ldc1 f30, lo16[.fs_100000000] (at)
 	add.d f0, f0, f30
 nonnegative:

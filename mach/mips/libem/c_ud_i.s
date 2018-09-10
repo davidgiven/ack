@@ -9,7 +9,7 @@
 	 * Only at and f30/f31 may be used.
 	 */
 
-	ori at, zero, hi16[.fd_80000000]
+	li at, ha16[.fd_80000000]
 	ldc1 f30, lo16[.fd_80000000] (at)
 	c.le.d 0, f30, f0
 	bc1t toobig
