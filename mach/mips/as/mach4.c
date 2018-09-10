@@ -1,12 +1,9 @@
 #include "rules.y"
-	| OP_LI GPR ',' expr
+	| OP_LI GPR ',' extabsexp
 	{
 		word_t reg = $2;
-		word_t type = $4.typ & S_TYP;
-		word_t val = $4.val;
-		if (type != S_ABS)
-			serror("li cannot be used with values that need a fixup");
-		
+		word_t val = $4;
+
 		if (val == 0)
 			emit4(0x00000025 | (reg<<11)); /* or reg, zero, zero */
 		else if ((val < -0x8000) || (val > 0xffff))

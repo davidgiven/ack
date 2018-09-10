@@ -182,6 +182,7 @@
 010001<F-->00000<FS-><FD->000101 "abs" F=fmt FD=fpr ',' FS=fpr
 010001<F--><FT-><FS-><FD->000000 "add" F=fmt FD=fpr ',' FS=fpr ',' FT=fpr
 010011<RS-><FT-><FS-><FD->011110 "alnv" ".ps" FD=fpr ',' FS=fpr ',' FT=fpr ',' RS=gpr
+010001<F--><FT-><FS-><C>0011<CO> "c" CO=fcond F=fmt C=u3 ',' FS=fpr ',' FT=fpr
 010001<F-->00000<FS-><FD->001010 "ceil" ".l" F=fmt FD=fpr ',' FS=fpr
 010001<F-->00000<FS-><FD->001110 "ceil" ".w" F=fmt FD=fpr ',' FS=fpr
 01000100010<RT-><FS->00000000000 "cfc1" RT=gpr ',' FS=fpr
@@ -238,7 +239,6 @@
 
 # Generic coprocessor instructions.
 
-010001<F--><FT-><FS-><C>0011<CO> "c" CO=fcond F=fmt C=u3 ',' FS=fpr ',' FT=fpr
 01000101000<C>00<OFF-----------> "bc1f" C=u3 ',' OFF=offset16
 0100010100000000<OFF-----------> "bc1f" OFF=offset16
 01000101000<C>10<OFF-----------> "bc1fl" C=u3 ',' OFF=offset16
