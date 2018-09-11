@@ -174,7 +174,7 @@ abs26
 			serror("jump targets must be 4-aligned");
 
 		newrelo($1.typ, RELOMIPS | FIXUPFLAGS);
-		$$ = (target >> 2) & 0x03fffffd;
+		$$ = (target >> 2) & 0x03ffffff;
 	}
 	;
 
