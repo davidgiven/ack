@@ -579,7 +579,7 @@ addbase(name)
 		return;
 
 	name->on_valu += outsect[sectindex].os_base;
-	debug(	"%s: type 0x%x, value %ld\n",
+	debug(	"%s: type 0x%x, value 0x%lx\n",
 		address((name->on_type & S_EXT) ? ALLOGCHR : ALLOLCHR,
 			(ind_t)name->on_foff
 		),
