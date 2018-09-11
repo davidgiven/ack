@@ -578,7 +578,7 @@ PATTERNS
     ALUCC(ADD.I, "addiu")
 
 	out:(int)reg = SUB.I(left:(int)reg, right:(int)reg)
-		emit "subu %out, %right, %left"
+		emit "subu %out, %left, %right"
 		cost 4;
 
 	out:(int)reg = SUB.I(left:(int)reg, right:CONST.I)
