@@ -16,7 +16,7 @@
 	mul.d f0, f0, f2        ! f0 = a * b
 	abs.d f2, f0            ! f2 = abs(f0)
 
-	li at, ha16[max_power_of_two]
+	lui at, ha16[max_power_of_two]
 	ldc1 f4, lo16[max_power_of_two] (at) ! f4 = max power of two
 
 	mov.d f6, f2            ! we're going to assemble the integer part in f6
@@ -31,7 +31,7 @@
 
 	! The above might round, so correct that.
 
-	li at, ha16[one]
+	lui at, ha16[one]
 	ldc1 f8, lo16[one] (at)   ! f8 = 1.0
 1:
 	c.le.d 0, f6, f2        ! if result <= absolute value, stop

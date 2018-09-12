@@ -12,7 +12,7 @@
 	 * Only at and f30/f31 may be used.
 	 */
 
-	li at, ha16[.ff_80000000]
+	lui at, ha16[.ff_80000000]
 	lwc1 f30, lo16[.ff_80000000] (at)
 	c.le.s 0, f30, f0
 	bc1t toobig

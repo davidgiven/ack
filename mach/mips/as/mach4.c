@@ -4,9 +4,7 @@
 		word_t reg = $2;
 		word_t val = $4;
 
-		if (val == 0)
-			emit4(0x00000025 | (reg<<11)); /* or reg, zero, zero */
-		else if ((val < -0x8000) || (val > 0xffff))
+		if ((val < -0x8000) || (val > 0xffff))
 			emit4(0x24000000 | (reg<<16) | (val & 0xffff)); /* addiu reg, zero, value */
 		else
 		{
