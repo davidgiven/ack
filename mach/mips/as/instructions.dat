@@ -234,8 +234,8 @@
 010011<RS-><RT->00000<FD->001101 "suxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
 111001<RS-><FT-><IMM-----------> "swc1" FT=fpr ',' IMM=e16 '(' RS=gpr ')'
 010011<RS-><RT->00000<FD->001000 "swxc1" FD=fpr ',' RT=gpr '(' RS=gpr ')'
-010001<F-->00000<FS-><FD->001001 "trunc" ".l" F=fmt FS=fpr ',' FD=fpr
-010001<F-->00000<FS-><FD->001101 "trunc" ".w" F=fmt FS=fpr ',' FD=fpr
+010001<F-->00000<FS-><FD->001001 "trunc" ".l" F=fmt FD=fpr ',' FS=fpr
+010001<F-->00000<FS-><FD->001101 "trunc" ".w" F=fmt FD=fpr ',' FS=fpr
 
 # Generic coprocessor instructions.
 

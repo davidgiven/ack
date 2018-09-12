@@ -2,10 +2,12 @@
 	| OP_LI GPR ',' extabsexp
 	{
 		word_t reg = $2;
-		word_t val = $4;
+		uint32_t val = $4;
 
-		if ((val < -0x8000) || (val > 0xffff))
+		if (((int32_t)val >= -0x8000) && ((int32_t)val <= 0x7fff))
 			emit4(0x24000000 | (reg<<16) | (val & 0xffff)); /* addiu reg, zero, value */
+		else if (val <= 0xffff)
+			emit4(0x34000000 | (reg<<16) | val); /* ori reg, zero, value */
 		else
 		{
 			emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
@@ -16,7 +18,7 @@
 	{
 		word_t reg = $2;
 		word_t type = $4.typ & S_TYP;
-		word_t val = $4.val;
+		uint32_t val = $4.val;
 
 		if (type != S_ABS)
 			newrelo($4.typ, RELO2HI | FIXUPFLAGS);
