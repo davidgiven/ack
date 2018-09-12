@@ -24,7 +24,8 @@ toobig:
 	sub.d f0, f0, f30
 	trunc.w.d f0, f0
 	mfc1 r2, f0
-	addiu r2, r2, 0x8000
+	lui at, 0x8000			! load 0x80000000
+	addu r2, r2, at
 	jr ra
 	nop
 
