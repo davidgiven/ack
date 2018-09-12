@@ -144,6 +144,7 @@ void putval(int c)
 			break;
 #endif
 		case STRING:
+		case NUMBERF:
 			v = stringlen;
 			putc(c, tempfile);
 			putc(c >> 8, tempfile);
@@ -238,6 +239,7 @@ int getval(int c)
 			break;
 #endif
 		case STRING:
+		case NUMBERF:
 			getval(getc(tempfile) + NUMBER0);
 			stringlen = n = yylval.y_valu;
 			p = stringbuf;
@@ -456,6 +458,7 @@ floatconstant:
 		*p++ = c;
 		c = nextchar();
 	} while (isdigit(c) || (c == '.') || (c == 'E') || (c == '+') || (c == '-'));
+	peekc = c;
 
 	*p = '\0';
 	stringbuf = strdup(num);
