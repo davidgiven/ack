@@ -280,15 +280,20 @@ datalist
 			}
 	;
 
+numberf
+	:	NUMBERF
+			{
+				emitf((int)$<y_word>-1, 0);
+			}
+	|	'-' NUMBERF
+			{
+				emitf((int)$<y_word>-1, 1);
+			}
+	;
+
 dataflist
-	:   NUMBERF
-			{
-				emitf((int)$<y_word>0);
-			}
-	|   dataflist ',' NUMBERF
-			{
-				emitf((int)$<y_word>3);
-			}
+	:   numberf
+	|   dataflist ',' numberf
 	;
 
 expr	:	error

@@ -369,9 +369,21 @@ void emitstr(int zero)
 #define gen1 emit1
 #include <con_float>
 
-void emitf(int size)
+void emitf(int size, int negative)
 {
-	con_float(stringbuf, size);
+	char buffer[40];
+
+	if (stringlen > sizeof(buffer)-1)
+		fatal("floating point constant too long");
+
+	if (negative)
+	{
+		buffer[0] = '-';
+		strcpy(buffer+1, stringbuf);
+		con_float(buffer, size);
+	}
+	else
+		con_float(stringbuf, size);
 }
 
 /* ---------- Error checked file I/O  ---------- */

@@ -19,6 +19,8 @@ static int instring(int);
 static int inescape(void);
 static int infbsym(const char*);
 
+static int maxstring = 0;
+
 int yylex(void)
 {
 	int c, c0, c1;
@@ -453,16 +455,21 @@ floatconstant:
 	{
 		if (--radix < 0)
 			fatal("number too long");
-		if (isupper(c))
-			c += ('a' - 'A');
 		*p++ = c;
 		c = nextchar();
-	} while (isdigit(c) || (c == '.') || (c == 'E') || (c == '+') || (c == '-'));
+		if (isupper(c))
+			c = tolower(c);
+	} while (isdigit(c) || (c == '.') || (c == 'e') || (c == '+') || (c == '-'));
 	peekc = c;
 
 	*p = '\0';
-	stringbuf = strdup(num);
 	stringlen = p - num;
+	if (stringlen > maxstring)
+	{
+		maxstring = stringlen;
+		stringbuf = realloc(stringbuf, maxstring);
+	}
+	strcpy(stringbuf, num);
 	return NUMBERF;
 }
 
@@ -470,7 +477,6 @@ static int instring(int termc)
 {
 	char* p;
 	int c;
-	static int maxstring = 0;
 
 	if (!maxstring)
 	{

@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include "flt_arith.h"
 #include "em_arith.h"
 #include "em_label.h"
 #include "em.h"

@@ -1,13 +1,6 @@
 #include "mcg.h"
 #include <ctype.h>
 
-#define IEEEFLOAT
-#define FL_MSL_AT_LOW_ADDRESS 1
-#define FL_MSW_AT_LOW_ADDRESS 1
-#define FL_MSB_AT_LOW_ADDRESS 1
-
-#include "con_float"
-
 static struct symbol* pending;
 
 void data_label(const char* label)
@@ -80,19 +73,7 @@ void data_float(const char* data, size_t size, bool is_ro)
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 4) || (size == 8));
 
-    i = float_cst(data, size, (char*) buffer);
-    if ((i != 0) && (i != 2)) /* 2 == overflow */
-        fatal("cannot parse floating point constant %s sz %d", data, size);
-
-    fprintf(outputfile, "\t!float %s sz %d\n", data, size);
-    fprintf(outputfile, "\t.data1 ");
-    writehex(buffer[0], 1);
-    for (i=1; i<size; i++)
-    {
-        fprintf(outputfile, ", ");
-        writehex(buffer[i], 1);
-    }
-    fprintf(outputfile, "\n");
+    fprintf(outputfile, "\t.dataf%d %s\n", size, data);
 }
 
 static bool istext(c)
