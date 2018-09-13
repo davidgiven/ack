@@ -13,7 +13,7 @@
 .define .csb
 .csb:
 	lw r4, 0(sp)             ! r4 = address of table
-	lw r5, 0(sp)             ! r5 = value
+	lw r5, 4(sp)             ! r5 = value
 	addiu sp, sp, 8
 
 	lw r6, 0(r4)             ! r6 = default target

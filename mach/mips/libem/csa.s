@@ -13,18 +13,18 @@
 .define .csa
 .csa:
 	lw r4, 0(sp)            /* r4 = table */
-	lw r5, 0(sp)            /* r5 = value */
+	lw r5, 4(sp)            /* r5 = value */
 	addiu sp, sp, 8
 
 	lw r6, 0(r4)            /* r6 = default target */
 	lw r7, 4(r4)            /* r7 = lower bound */
-	subu r5, r5, r6         /* adjust value */
+	subu r5, r5, r7         /* adjust value */
 	bltz r5, 1f             /* jump to default if out of range */
 	nop
 
 	lw r7, 8(r4)            /* fetch range */
-	subu r7, r5, r7         /* compute (adjusted value - range) */
-	blez r7, 1f             /* jump to default if out of range */
+	subu r7, r7, r5         /* compute difference within range */
+	bltz r7, 1f             /* jump to default if out of range */
 	nop
 
 	addiu r4, r4, 12        /* skip header */
