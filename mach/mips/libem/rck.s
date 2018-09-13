@@ -15,13 +15,15 @@
 	addiu sp, sp, 4         ! leave value on stack
 	lw r5, 0(sp)            ! r5 = value
 
-	lw at, 0(sp)            ! at = lower bound
+	lw at, 0(r4)            ! at = lower bound
 	slt at, r5, at          ! at = r5 < at
 	bne at, zero, .trap_erange
+	nop
 
-	lw at, 4(sp)            ! at = upper bound
+	lw at, 4(r4)            ! at = upper bound
 	slt at, at, r5          ! at = at < r5
 	bne at, zero, .trap_erange
+	nop
 
 	jr ra
 	nop
