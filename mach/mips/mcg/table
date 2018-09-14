@@ -233,8 +233,8 @@ PATTERNS
     /* Stores */
 
 	STORE.L(addr:address, value:(long)reg)
-		emit "sw %value.0, 4+%addr"
-		emit "sw %value.1, 0+%addr"
+		emit "sw %value.0, 0+%addr"
+		emit "sw %value.1, 4+%addr"
 		cost 8;
 
 	STORE.I(addr:address, value:(int)reg)
@@ -267,8 +267,8 @@ PATTERNS
      * a register, resulting in %addr being corrupted before %out.1 is
      * loaded. */
     out:(long)reg = LOAD.L(addr:address)
-        emit "lw at, 4+%addr"
-        emit "lw %out.1, 0+%addr"
+        emit "lw at, 0+%addr"
+        emit "lw %out.1, 4+%addr"
         emit "mov %out.0, at"
         cost 12;
 

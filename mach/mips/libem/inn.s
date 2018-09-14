@@ -13,21 +13,20 @@
 .define .inn
 .inn:
 	lw r4, 0(sp)        ! r4 = size of set (bytes)
-	lw r5, 0(sp)        ! r5 = bit number
-	addiu sp, sp, 8     ! sp now points at bitset
+	lw r5, 4(sp)        ! r5 = bit number
+	addiu sp, sp, 4     ! sp now points to word below bitset
 
-	srl r6, r5, 3       ! r6 = offset of word in set
+	andi r6, r5, ~31    ! r6 = bit offset of base of word in set
+	srl r6, r6, 3		! r6 = byte offset of base of word in set
 	addu r6, sp, r6     ! r6 = address of word in set
-	lw r6, 0(r6)        ! r6 = word
+	lw r6, 4(r6)        ! r6 = word (remember stack offset)
 
-	ext r7, r5, 0, 3    ! r7 = bit number within word
+	andi r7, r5, 31     ! r7 = bit number within word
 	srlv r6, r6, r7     ! r7 = candidate bit now at bit 0
 	andi r6, r6, 1      ! r7 = bool
 
-	addu sp, sp, r4     ! retract over bitfield
-
-	addiu sp, sp, -4
-	sw r6, 0(sp)        ! push result
+	addu sp, sp, r4     ! retract over bitfield (remember stack offset)
+	sw r6, 0(sp)        ! store result
 
 	jr ra
 	nop
