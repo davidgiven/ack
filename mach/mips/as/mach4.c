@@ -14,19 +14,6 @@
 			emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
 		}
 	}
-	| OP_LA GPR ',' expr
-	{
-		word_t reg = $2;
-		word_t type = $4.typ & S_TYP;
-		uint32_t val = $4.val;
-
-		if (type != S_ABS)
-			newrelo($4.typ, RELO2HI | FIXUPFLAGS);
-		emit4(0x3c000000 | (reg<<16) | (val>>16)); /* lui reg, value */
-		if (type != S_ABS)
-			newrelo($4.typ, RELO2 | FIXUPFLAGS);
-		emit4(0x34000000 | (reg<<16) | (reg<<21) | (val & 0xffff)); /* ori reg, reg, value */
-	}
 
 extabsexp
 	: absexp

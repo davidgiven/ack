@@ -556,11 +556,14 @@ long off;
 	long valu;
 	int sectindex = relo->or_sect - S_MIN;
 	extern struct outhead outhead;
+	uint32_t realaddress = outsect[sectindex].os_base + relo->or_addr
+		+ relorig[sectindex].org_size;
 
 	/*
 	 * Pick up previous value at location to be relocated.
 	 */
 	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
+	debug("read relocation from 0x%08x type 0x%x value 0x%08x symbol %d\n", realaddress, relo->or_type, valu, relo->or_nami);
 
 	/*
 	 * Or_nami is an index in the name table of the considered module.
@@ -595,6 +598,7 @@ long off;
 	/*
 	 * Now put the value back.
 	 */
+	debug("written fixed up relocation to 0x%08x type 0x%x value 0x%08x\n", realaddress, relo->or_type, valu, 0);
 	putvalu(valu, emit + (relo->or_addr - off), relo->or_type);
 
 	/*

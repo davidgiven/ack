@@ -3,7 +3,6 @@
 %token <y_word> FCOND
 
 %token <y_word> OP_LI
-%token <y_word> OP_LA
 
 %token <y_word> HI16
 %token <y_word> HA16

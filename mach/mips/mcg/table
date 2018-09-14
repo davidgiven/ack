@@ -635,11 +635,13 @@ PATTERNS
     ALUCC(EOR.I, "xori")
 
 	out:(int)reg = value:LABEL.I
-		emit "la %out, $value"
+		emit "lui %out, hi16[$value]"
+        emit "ori %out, %out, lo16[$value]"
 		cost 4;
 
 	out:(int)reg = value:BLOCK.I
-		emit "la %out, $value"
+		emit "lui %out, hi16[$value]"
+        emit "ori %out, %out, lo16[$value]"
 		cost 4;
 
 	out:(int)reg = value:CONST.I
