@@ -21,6 +21,7 @@
 	addiu r5, r5, 4
 	addiu r4, r4, -1
 	bne r4, zero, 1b
+	nop
 
 	jr ra
 	nop

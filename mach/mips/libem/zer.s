@@ -18,6 +18,7 @@
 	sw zero, 0(sp)
 	addiu r4, r4, -1
 	bne r4, zero, 1b
+	nop
 
 	jr ra
 	nop
