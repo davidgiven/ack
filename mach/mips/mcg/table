@@ -555,6 +555,57 @@ PATTERNS
         emit "nop"
         cost 20;
 
+    /* Unsigned integer comparisons against a constant */
+
+    CJUMPLT(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:CONST.I), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when signed_constant(%right, 16)
+        when specific_constant(%alwayszero, 0)
+        emit "sltiu at, %left, $right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLE(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:CONST.I), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when constant_within_inclusive_range(%right, -0x8000, 0x7ffe)
+        when specific_constant(%alwayszero, 0)
+        emit "sltiu at, %left, 1+$right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    /* Unsigned integer comparisons against registers */
+
+    CJUMPEQ(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "beq %left, %right, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLT(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "sltu at, %left, %right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLE(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "sltu at, %right, %left"
+        emit "beq at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+
 
 
 /* Comparisons */
