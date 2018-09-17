@@ -4,5 +4,5 @@ plat_testsuite {
     name = "tests",
     plat = "linuxmips",
     method = "qemu-mipsel",
-    skipsets = {"m2"}
+--	skipsets = {"m2"},
 }

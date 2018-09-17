@@ -17,7 +17,7 @@ array
 
 descriptor
 	con -1			; lower bound
-	con 3			; range
+	con 2			; range, *inclusive*
 	con EM_WSIZE	; size of element
 
 	exp $_m_a_i_n

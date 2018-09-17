@@ -10,7 +10,7 @@
  * An array descriptor is:
  *
  *   +0 lower bound
- *   +4 range (upper bound - lower bound)
+ *   +4 range (upper bound - lower bound); *inclusive*
  *   +8 element size
  */
 
@@ -28,8 +28,8 @@
 	subu r5, r5, r7         ! adjust index for non-zero lower bound
 
 	lw at, 4(r4)            ! at = range
-	slt at, r5, at          ! at = adjusted index < range
-	beq at, zero, .trap_earray
+	slt at, at, r5          ! at = range < adjusted index
+	bne at, zero, .trap_earray
 	nop
 
 	lw r2, 8(r4)            ! r2 = size of element
