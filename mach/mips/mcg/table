@@ -35,7 +35,7 @@ REGISTERS
 	r22 named("r22")                              int;
 	r23 named("r23")                              int;
 
-	r4r5    named("r4", "r5")   aliases(r4,  r5)  long volatile;
+	r4r5    named("r4", "r5")   aliases(r4,  r5)  long volatilei lret1;
 	r6r7    named("r6", "r7")   aliases(r6,  r7)  long volatile;
 	r8r9    named("r8", "r9")   aliases(r8,  r9)  long volatile;
 	r10r11  named("r10", "r11") aliases(r10, r11) long volatile;
@@ -489,6 +489,11 @@ PATTERNS
         emit "sltu %out, %right, %left"
         emit "1:"
         cost 20;
+
+    out:(iret)reg = COMPAREUL.I(left:(lret)reg, right:(lret1)reg)
+        emit "jal .compareul"
+        emit "nop"
+        cost 30;
 
     out:(int)reg = COMPAREF.I(left:(float)reg, right:(float)reg)
         with preserved(%left), preserved(%right)
