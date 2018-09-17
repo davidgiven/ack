@@ -273,11 +273,11 @@ PATTERNS
         cost 12;
 
 	out:(int)ushort0 = LOADH.I(addr:address)
-		emit "lh %out, %addr"
+		emit "lhu %out, %addr"
 		cost 4;
 
 	out:(int)ubyte0 = LOADB.I(addr:address)
-		emit "lb %out, %addr"
+		emit "lbu %out, %addr"
 		cost 4;
 
 	out:(float)reg = LOAD.F(addr:address)
