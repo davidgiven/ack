@@ -468,6 +468,95 @@ PATTERNS
 
 
 
+/* Conditional branches */
+
+    /* Normally COMPARE returns a condition code (in a flags register) which the CJUMP
+     * instructions can then operate on. But MIPS doesn't have a flags register, and
+     * requires you to know what condition you're testing for when you do the comparison.
+     * mcg doesn't like this much and we have to list every combination individually.
+     */
+
+    /* Signed integer comparisons against zero */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "beq %left, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "bltz %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "blez %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    /* Signed integer comparisons against a constant */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "li at, $value"
+        emit "beq %left, at, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when signed_constant(%value, 16)
+        emit "slti at, %left, $value"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when constant_within_inclusive_range(%value, -0x8000, 0x7ffe)
+        emit "slti at, %left, 1+$value"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    /* Signed integer comparisons against a register */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "beq %left, %right, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "slt at, %left, %right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "slt at, %right, %left"
+        emit "beq at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+
+
 /* Comparisons */
 
 	/* The COMPARE nodes return tristate integer values; -1, 0 or 1. */
