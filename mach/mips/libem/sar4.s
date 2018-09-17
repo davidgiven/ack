@@ -14,7 +14,7 @@
 	jal .aar4
 	nop
 
-	/* pass r2 = size from .aar4 to .sts4
+	/* pass r2 = size from .aar4 to .sts4 */
 
 	jal .sts4
 	nop
