@@ -717,6 +717,10 @@ static void rotate(int opcode, int size, int irop, int irop_reverse)
         struct ir* left = pop(size);
         struct ir* bits = new_wordir(8 * size);
 
+        /* Fix left and right so we can refer to them multiple times. */
+        appendir(right);
+        appendir(left);
+
         /* a rol b -> (a << b) | (a >> (32 - b)) */
         push(
             new_ir2(
