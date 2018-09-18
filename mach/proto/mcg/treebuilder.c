@@ -85,6 +85,8 @@ static struct ir* pop(int size)
             }
             else if ((size == EM_wordsize) && (ir->size == (EM_wordsize*2)))
             {
+                appendir(ir);
+
                 /* Tried to read an int, but we got a long. */
                 push(
                     new_ir1(
@@ -553,6 +555,7 @@ static void insn_simple(int opcode)
         {
             struct ir* label = new_labelir(".trppc");
             struct ir* value = pop(EM_pointersize);
+            appendir(label); /* because we need to use label twice */
             push(
                 load(
                     EM_pointersize,
