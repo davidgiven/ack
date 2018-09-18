@@ -94,9 +94,21 @@ struct hop* platform_prologue(void)
         if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "sw %H, %d(fp)",
                 hreg, current_proc->fp_to_rb + hreg->offset);
+        else if (hreg->attrs & burm_long_ATTR)
+        {
+            hop_add_insel(hop, "sw %0H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset + 0);
+            hop_add_insel(hop, "sw %1H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset + 4);
+        }
         else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "swc1 %H, %d(fp)",
                 hreg, current_proc->fp_to_rb + hreg->offset);
+        else if (hreg->attrs & burm_double_ATTR)
+            hop_add_insel(hop, "sdc1 %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset);
+        else
+            fatal("unsavable non-volatile register %s", hreg->id);
     }
 	return hop;
 }
@@ -112,9 +124,21 @@ struct hop* platform_epilogue(void)
         if (hreg->attrs & burm_int_ATTR)
             hop_add_insel(hop, "lw %H, %d(fp)",
                 hreg, current_proc->fp_to_rb + hreg->offset);
+        else if (hreg->attrs & burm_long_ATTR)
+        {
+            hop_add_insel(hop, "lw %0H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset + 0);
+            hop_add_insel(hop, "lw %1H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset + 4);
+        }
         else if (hreg->attrs & burm_float_ATTR)
             hop_add_insel(hop, "lwc1 %H, %d(fp)",
                 hreg, current_proc->fp_to_rb + hreg->offset);
+        else if (hreg->attrs & burm_double_ATTR)
+            hop_add_insel(hop, "ldc1 %H, %d(fp)",
+                hreg, current_proc->fp_to_rb + hreg->offset);
+        else
+            fatal("unloadable non-volatile register %s", hreg->id);
     }
 
     hop_add_insel(hop, "lw ra, 4(fp)");
