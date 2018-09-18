@@ -241,27 +241,57 @@ PATTERNS
 		emit "sw %value, %addr"
 		cost 4;
 
+    STORE.I(label:LABEL.I, value:(int)reg)
+        emit "lui at, ha16[$label]"
+        emit "sw %value, lo16[$label] (at)"
+		cost 8;
+
 	STOREH.I(addr:address, value:(int)ushortX)
 		emit "sh %value, %addr"
 		cost 4;
+
+    STOREH.I(label:LABEL.I, value:(int)reg)
+        emit "lui at, ha16[$label]"
+        emit "sh %value, lo16[$label] (at)"
+		cost 8;
 
     STOREB.I(addr:address, value:(int)ubyteX)
 		emit "sb %value, %addr"
 		cost 4;
 
+    STOREB.I(label:LABEL.I, value:(int)reg)
+        emit "lui at, ha16[$label]"
+        emit "sb %value, lo16[$label] (at)"
+		cost 8;
+
 	STORE.F(addr:address, value:(float)reg)
 		emit "swc1 %value, %addr"
 		cost 4;
 
+    STORE.F(label:LABEL.I, value:(int)reg)
+        emit "lui at, ha16[$label]"
+        emit "swc1 %value, lo16[$label] (at)"
+		cost 8;
+
 	STORE.D(addr:address, value:(double)reg)
 		emit "sdc1 %value, %addr"
 		cost 4;
+
+    STORE.D(label:LABEL.I, value:(int)reg)
+        emit "lui at, ha16[$label]"
+        emit "sdc1 %value, lo16[$label] (at)"
+		cost 8;
 
     /* Loads */
 
 	out:(int)reg = LOAD.I(addr:address)
 		emit "lw %out, %addr"
 		cost 4;
+
+	out:(int)reg = LOAD.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lw %out, lo16[$label] (at)"
+		cost 8;
 
     /* We can't just load directly because %out.0 and %addr might share
      * a register, resulting in %addr being corrupted before %out.1 is
@@ -276,17 +306,37 @@ PATTERNS
 		emit "lhu %out, %addr"
 		cost 4;
 
+	out:(int)ushort0 = LOADH.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lhu %out, lo16[$label] (at)"
+		cost 8;
+
 	out:(int)ubyte0 = LOADB.I(addr:address)
 		emit "lbu %out, %addr"
 		cost 4;
+
+	out:(int)ubyte0 = LOADB.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lbu %out, lo16[$label] (at)"
+		cost 8;
 
 	out:(float)reg = LOAD.F(addr:address)
 		emit "lwc1 %out, %addr"
 		cost 4;
 
+	out:(float)reg = LOAD.F(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lwc1 %out, lo16[$label] (at)"
+		cost 8;
+
 	out:(double)reg = LOAD.D(addr:address)
 		emit "ldc1 %out, %addr"
 		cost 4;
+
+	out:(double)reg = LOAD.D(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "ldc1 %out, lo16[$label] (at)"
+		cost 8;
 
     /* ubyte intrinsics */
 
