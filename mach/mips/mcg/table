@@ -306,18 +306,36 @@ PATTERNS
 		emit "lhu %out, %addr"
 		cost 4;
 
+	out:(int)reg = EXTENDH.I(LOADH.I(addr:address))
+		emit "lh %out, %addr"
+		cost 4;
+
 	out:(int)ushort0 = LOADH.I(label:LABEL.I)
 		emit "lui at, ha16[$label]"
         emit "lhu %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(int)reg = EXTENDH.I(LOADH.I(label:LABEL.I))
+		emit "lui at, ha16[$label]"
+        emit "lh %out, lo16[$label] (at)"
 		cost 8;
 
 	out:(int)ubyte0 = LOADB.I(addr:address)
 		emit "lbu %out, %addr"
 		cost 4;
 
+	out:(int)reg = EXTENDB.I(LOADB.I(addr:address))
+		emit "lb %out, %addr"
+		cost 4;
+
 	out:(int)ubyte0 = LOADB.I(label:LABEL.I)
 		emit "lui at, ha16[$label]"
         emit "lbu %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(int)reg = EXTENDB.I(LOADB.I(label:LABEL.I))
+		emit "lui at, ha16[$label]"
+        emit "lb %out, lo16[$label] (at)"
 		cost 8;
 
 	out:(float)reg = LOAD.F(addr:address)

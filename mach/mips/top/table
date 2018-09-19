@@ -7,14 +7,41 @@ LABEL_STARTER '.';
 %%;
 
 X, Y, Z                      { TRUE };
+R                            { TRUE };
 
 %%;
 
 /* Whitespace is significant here! */
 
-addiu RNZ, RNZ, 0            -> ;
+addiu R, R, X : addiu R, R, Y { plus(X, Y, Z) } -> addiu R, R, Z ;
+
+addiu X, X, 0                -> ;
 
 b X : nop : labdef X         -> labdef X ;
 
 %%;
 
+/* Does it fit a signed 16-bit integer? */
+static int fits16(long l) {
+        return l >= -32768 && l <= 32767;
+}
+
+/* Tries sum = a + b with signed 16-bit integers. */
+int plus(const char *a, const char *b, const char *sum)
+{
+        long la, lb, lsum;
+        char *end;
+
+        la = strtol(a, &end, 10);
+        if (*a == '\0' || *end != '\0' || !fits16(la))
+                return 0;
+        lb = strtol(b, &end, 10);
+        if (*b == '\0' || *end != '\0' || !fits16(lb))
+                return 0;
+
+        lsum = la + lb;
+        if (!fits16(lsum))
+                return 0;
+        snprintf(sum, 7, "%ld", lsum);
+        return 1;
+}
