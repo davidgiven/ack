@@ -59,7 +59,7 @@ void data_int(arith data, size_t size, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
-    fprintf(outputfile, "\t.data%d ", size);
+    fprintf(outputfile, "\t.data%ld ", size);
     writehex(data, size);
     fprintf(outputfile, "\n");
 }
@@ -73,7 +73,7 @@ void data_float(const char* data, size_t size, bool is_ro)
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 4) || (size == 8));
 
-    fprintf(outputfile, "\t.dataf%d %s\n", size, data);
+    fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
 }
 
 static bool istext(c)
@@ -130,7 +130,7 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
 void data_offset(const char* label, arith offset, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    fprintf(outputfile, "\t.data%d %s+%lld\n",
+    fprintf(outputfile, "\t.data%d %s+%ld\n",
         EM_pointersize, platform_label(label), offset);
 }
 
@@ -140,7 +140,7 @@ void data_bss(arith size, int init)
         fatal("non-zero-initialised bss not supported");
 
     emit_header(SECTION_BSS);
-    fprintf(outputfile, "\t.space %lld\n", size);
+    fprintf(outputfile, "\t.space %ld\n", size);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
