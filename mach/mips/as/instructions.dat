@@ -114,7 +114,7 @@
 00000000000000000000000000000000 "nop"
 000000<RS-><RT-><RD->00000100111 "nor" RD=gpr ',' RS=gpr ',' RT=gpr
 000000<RS-><RT-><RD->00000100101 "or" RD=gpr ',' RS=gpr ',' RT=gpr
-001101<RS-><RT-><IMM-----------> "ori" RS=gpr ',' RT=gpr ',' IMM=e16
+001101<RS-><RT-><IMM-----------> "ori" RT=gpr ',' RS=gpr ',' IMM=e16
 00000000000000000000000101000000 "pause"
 110011<RS-><H--><IMM-----------> "pref" H=u5 ',' IMM=e16 '(' RS=gpr ')'
 011111<RS-><H--><IMM---->0100011 "prefe" H=u5 ',' IMM=e9 '(' RS=gpr ')'
