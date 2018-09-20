@@ -492,7 +492,7 @@ static void assign_hregs_to_vregs(void)
                 {
                     tracef('R', "R: import hreg %s for input %%%d from %s\n",
                         hreg->id, vreg->id, prevbb->name);
-                    assert(!pmap_findleft(old, hreg));
+                    assert(!register_used(old, hreg));
                     pmap_put(old, hreg, vreg);
                     goto nextvreg;
                 }
@@ -518,7 +518,7 @@ static void assign_hregs_to_vregs(void)
 
                 struct hreg* hreg = pmap_findright(
                     phi->prev->regsout, phi->ir->result);
-                if (hreg && !pmap_findleft(old, hreg))
+                if (hreg && !register_used(old, hreg))
                 {
                     tracef('R', "R: import hreg %s for %%%d, imported from %s %%%d\n",
                         hreg->id, vreg->id,
