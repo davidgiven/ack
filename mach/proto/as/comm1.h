@@ -153,6 +153,7 @@ void	 emit1(int);
 void	 emit2(int);
 void	 emit4(long);
 void	 emitx(valu_t, int);
+void     emitf(int size, int negative);
 void	 emitstr(int);
 void	 ffreopen(char *, FILE *);
 FILE	*ffcreat(char *);

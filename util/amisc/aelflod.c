@@ -33,6 +33,7 @@
 int bigendian = 0;
 int elfabi = 3;                         /* abi = Linux */
 int elfmachine = 3;                     /* machine = EM_386 */
+uint32_t elfflags = 0;                  /* elf processor flags */
 
 /* Header and section table of an ack object file. */
 
@@ -643,7 +644,7 @@ int main(int argc, char* argv[])
 		switch (argv[1][1])
 		{
 			case 'a':
-				elfabi = atoi(&argv[1][2]);
+				elfabi = strtoul(&argv[1][2], NULL, 0);
 				break;
 
 			case 'b':
@@ -660,7 +661,11 @@ int main(int argc, char* argv[])
 				break;
 
 			case 'm':
-				elfmachine = atoi(&argv[1][2]);
+				elfmachine = strtoul(&argv[1][2], NULL, 0);
+				break;
+
+			case 'f':
+				elfflags = strtoul(&argv[1][2], NULL, 0);
 				break;
 
 			case 'v':
@@ -808,7 +813,7 @@ int main(int argc, char* argv[])
 	emit32(outsect[TEXT].os_base);     /* entry point */
 	emit32(ELF_HEADER_SIZE);           /* program header offset */
 	emit32(sh_offset);                 /* section header offset */
-	emit32(0);                         /* flags */
+	emit32(elfflags);                  /* flags */
 	emit16(ELF_HEADER_SIZE);           /* elf header size */
 	emit16(PROGRAM_HEADER_SIZE);       /* program header entry size */
 	emit16(1);                         /* number of program header entries */

@@ -2,7 +2,8 @@ include("first/yacc.lua")
 
 definerule("build_as",
 	{
-		arch = { type="string" }
+		arch = { type="string" },
+		deps = { type="targets", default={} },
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
@@ -25,6 +26,7 @@ definerule("build_as",
 				"mach/proto/as/comm1.h",
 				"h+emheaders",
 				archlib,
+				e.deps,
 			},
 		}
 
@@ -42,8 +44,10 @@ definerule("build_as",
 			deps = {
 				"h+emheaders",
 				"modules/src/object+lib",
+				"modules/src/flt_arith+lib",
 				archlib,
-				yaccfiles
+				yaccfiles,
+				e.deps
 			}
 		}
 	end

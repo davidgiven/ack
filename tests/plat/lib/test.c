@@ -9,7 +9,7 @@ void finished(void)
     _exit(0);
 }
 
-void writehex(uint32_t code)
+void writehex(unsigned int code)
 {
     char buf[8];
     char* p = &buf[sizeof(buf)];
@@ -24,7 +24,7 @@ void writehex(uint32_t code)
     write(1, p, buf + sizeof(buf) - p);
 }
 
-void fail(uint32_t code)
+void fail(unsigned int code)
 {
     static const char fail_msg[] = "@@FAIL 0x";
     static const char nl_msg[] = "\n";

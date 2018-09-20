@@ -29,6 +29,8 @@ item_t	keytab[] = {
 	0,	DATA,		RELO1,	".data1",
 	0,	DATA,		RELO2,	".data2",
 	0,	DATA,		RELO4,	".data4",
+	0,  DATAF,      4,      ".dataf4",
+	0,  DATAF,      8,      ".dataf8",
 	0,	ASCII,		0,		".ascii",
 	0,	ASCII,		1,		".asciz",
 	0,	ALIGN,		0,		".align",

@@ -27,6 +27,14 @@ bool burm_predicate_specific_constant(struct burm_node* node, arith val)
     return ir->u.ivalue == val;
 }
 
+bool burm_predicate_constant_within_inclusive_range(struct burm_node* node, arith min, arith max)
+{
+	struct ir* ir = node->ir;
+	assert(ir->opcode == IR_CONST);
+
+    return (ir->u.ivalue >= min) && (ir->u.ivalue <= max);
+}
+
 /* vim: set sw=4 ts=4 expandtab : */
 
 

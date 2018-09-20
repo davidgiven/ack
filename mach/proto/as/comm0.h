@@ -22,6 +22,7 @@ _include	<string.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include    <unistd.h>
 #endif
 
 /* ========== ON/OFF options (use #define in mach0.c) ========== */

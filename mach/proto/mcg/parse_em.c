@@ -181,6 +181,36 @@ static void queue_ilabel(arith label)
     change_basicblock(bb_get(ilabel_to_str(label)));
 }
 
+/* This is really hacky; to handle basic block flow
+ * descriptor blocks, we need to be able to identify
+ * them, read them and parse them. So we create
+ * can exit to. So we create fake bb objects for each
+ * block, purely to track this, and copy ints and labels
+ * into them.
+ */
+
+static void data_block_int(arith value)
+{
+	if (data_bb)
+	{
+		struct em* em = new_insn(op_loc);
+		em->paramtype = PARAM_IVALUE;
+		em->u.ivalue = value;
+		array_append(&data_bb->ems, em);
+	}
+}
+
+static void data_block_label(const char* label)
+{
+	if (data_bb)
+	{
+		struct em* em = new_insn(op_bra);
+		em->paramtype = PARAM_BVALUE;
+		em->u.bvalue.left = bb_get(label);
+		array_append(&data_bb->ems, em);
+	}
+}
+
 static void parse_pseu(void)
 {
 	switch (em.em_opcode)
@@ -227,6 +257,7 @@ static void parse_pseu(void)
                 {
                     arith val = atol(em.em_string);
                     data_int(val, em.em_size, ro);
+                    data_block_int(val);
                     break;
                 }
 
@@ -237,12 +268,16 @@ static void parse_pseu(void)
                 }
 
 				case str_ptyp:
-                    data_block(strdup(em.em_string), em.em_size, ro);
+                    data_block((const uint8_t*) strdup(em.em_string), em.em_size, ro);
 					break;
 
                 case cst_ptyp:
-                    data_int(em.em_cst, EM_wordsize, ro);
+                {
+                    arith value = em.em_cst;
+                    data_int(value, EM_wordsize, ro);
+                    data_block_int(value);
                     break;
+				}
                     
                 case nof_ptyp:
                     data_offset(dlabel_to_str(em.em_dlb), em.em_off, ro);
@@ -256,22 +291,8 @@ static void parse_pseu(void)
                 case ilb_ptyp:
                 {
                     const char* label = ilabel_to_str(em.em_ilb);
-
-                    /* This is really hacky; to handle basic block flow
-                     * descriptor blocks, we need to track which bbs a descriptor
-                     * can exit to. So we create fake bb objects for each
-                     * block, purely to track this.
-                     */
-
-                    if (data_bb)
-                    {
-                        struct em* em = new_insn(op_bra);
-                        em->paramtype = PARAM_BVALUE;
-                        em->u.bvalue.left = bb_get(label);
-                        array_append(&data_bb->ems, em);
-                    }
-
                     data_offset(label, 0, ro);
+                    data_block_label(label);
                     break;
                 }
 
@@ -384,9 +405,12 @@ static void create_data_label(const char* label)
     data_label(label);
     if (current_proc)
     {
+        /* Create the fake bb used to track values inside this data block
+         * (as it's a chance it's a jump table which we'll need to process
+         * later).
+         */
         data_bb = bb_get(label);
         data_bb->is_fake = true;
-        array_append(&current_proc->blocks, data_bb);
     }
 }
 
