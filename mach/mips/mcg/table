@@ -44,6 +44,10 @@ REGISTERS
 	r24r25  named("r24", "r25") aliases(r24, r25) long volatile;
 	r2r3    named("r2", "r3")   aliases(r2,  r3)  long volatile lret;
 
+	r17r18  named("r17", "r18") aliases(r17, r18) long;
+	r19r20  named("r19", "r20") aliases(r19, r20) long;
+	r21r22  named("r21", "r22") aliases(r21, r22) long;
+
 	f0                                            float volatile fret;
 	f1                                            float volatile;
 	f2                                            float volatile;

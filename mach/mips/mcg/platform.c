@@ -156,72 +156,7 @@ struct hop* platform_move(struct basicblock* bb, struct vreg* vreg, struct hreg*
     struct hop* hop = new_hop(bb, NULL);
 
     if ((src->attrs & TYPE_ATTRS) != (dest->attrs & TYPE_ATTRS))
-    {
-        assert(!src->is_stacked);
-        assert(!dest->is_stacked);
-
-        switch (src->attrs & TYPE_ATTRS)
-        {
-            case burm_int_ATTR:
-                hop_add_insel(hop, "stwu %H, -4(sp)", src);
-                break;
-
-            case burm_long_ATTR:
-                hop_add_insel(hop, "stwu %0H, -4(sp)", src);
-                hop_add_insel(hop, "stwu %1H, -4(sp)", src);
-                break;
-
-            case burm_float_ATTR:
-                hop_add_insel(hop, "stfsu %H, -4(sp)", src);
-                break;
-
-            case burm_double_ATTR:
-                hop_add_insel(hop, "stfdu %H, -8(sp)", src);
-                break;
-
-            default:
-                goto nomove;
-        }
-
-        switch (dest->attrs & TYPE_ATTRS)
-        {
-            case burm_int_ATTR:
-                hop_add_insel(hop, "lwz %H, 0(sp)", dest);
-                break;
-
-            case burm_long_ATTR:
-                hop_add_insel(hop, "lwz %0H, 4(sp)", dest);
-                hop_add_insel(hop, "lwz %1H, 0(sp)", dest);
-                break;
-
-            case burm_float_ATTR:
-                hop_add_insel(hop, "lfs %H, 0(sp)", dest);
-                break;
-
-            case burm_double_ATTR:
-                hop_add_insel(hop, "lfd %H, 0(sp)", dest);
-                break;
-
-            default:
-                goto nomove;
-        }
-
-        switch (dest->attrs & TYPE_ATTRS)
-        {
-            case burm_int_ATTR:
-            case burm_float_ATTR:
-                hop_add_insel(hop, "addi sp, sp, 4");
-                break;
-
-            case burm_double_ATTR:
-            case burm_long_ATTR:
-                hop_add_insel(hop, "addi sp, sp, 8");
-                break;
-
-            default:
-                goto nomove;
-        }
-    }
+            fatal("hreg move of %%%d from %s to %s with mismatched types", vreg->id, src->id, dest->id);
     else
     {
         uint32_t type = src->attrs & TYPE_ATTRS;
