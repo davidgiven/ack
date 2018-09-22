@@ -144,9 +144,8 @@ struct hop* platform_epilogue(void)
     hop_add_insel(hop, "lw ra, 4(fp)");
     hop_add_insel(hop, "lw at, 0(fp)"); /* load old fp */
     hop_add_insel(hop, "addiu sp, fp, %d", current_proc->fp_to_ab);
-    hop_add_insel(hop, "mov fp, at");
     hop_add_insel(hop, "jr ra");
-    hop_add_insel(hop, "nop");
+    hop_add_insel(hop, "mov fp, at"); /* delay slot */
 
 	return hop;
 }

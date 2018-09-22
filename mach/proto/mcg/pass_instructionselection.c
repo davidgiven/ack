@@ -105,7 +105,9 @@ static void constrain_input_reg_preserved(int child)
     struct vreg* vreg = find_vreg_of_child(child);
     struct constraint* c;
 
-    assert(vreg);
+	if (!vreg)
+		fatal("child %d of instruction is not a register and cannot be constrained", child);
+
     array_appendu(&current_hop->throughs, vreg);
     get_constraint(vreg)->preserved = true;
 }
