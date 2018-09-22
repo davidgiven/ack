@@ -836,6 +836,11 @@ static void emitheader(void)
 	printh("#define MCG_DEFS_H\n\n");
 }
 
+void option(const char* o)
+{
+	printh("#define MCGG_OPTION_%s\n", o);
+}
+
 /* computekids - compute paths to kids in tree t */
 static char* computekids(Tree node, const char* v, char* bp, int* ip)
 {

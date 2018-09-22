@@ -40,6 +40,7 @@ static int braces = 0;
 "DECLARATIONS"              return DECLARATIONS;
 "PATTERNS"                  return PATTERNS;
 "REGISTERS"                 return REGISTERS;
+"OPTIONS"                   return OPTIONS;
 "aliases"                   return ALIASES;
 "corrupted"                 return CORRUPTED;
 "cost"                      return COST;

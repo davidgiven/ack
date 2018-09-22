@@ -72,6 +72,7 @@ struct regattr
 	int number;            /* identifying number */
 };
 
+extern void option(const char* name);
 extern struct reg* makereg(const char* name);
 extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr);

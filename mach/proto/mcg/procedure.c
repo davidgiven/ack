@@ -199,6 +199,9 @@ void procedure_compile(struct procedure* proc)
     print_blocks('3');
     pass_wire_up_return_values();
     pass_convert_stack_ops();
+    #if defined MCGG_OPTION_LOWER_PUSHES_TO_LOADS_AND_STORES
+        pass_lower_pushes();
+    #endif
     print_blocks('4');
     pass_convert_locals_to_ssa();
     print_blocks('5');

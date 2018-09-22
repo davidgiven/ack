@@ -1,7 +1,7 @@
-# Types:
+# The second column indicates the type inference rules:
 #
 #   I, F, L, D: int, float, long, double
-#   i, F: int, float; promoted to long, double based on size
+#   i, f: int, float; promoted to long, double based on size
 #   .: ignore this parameter
 #   ?: pull/push types from other ? parameters
 

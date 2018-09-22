@@ -112,6 +112,7 @@ extern void pass_infer_types(void);
 extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
+extern void pass_lower_pushes(void);
 extern void pass_add_prologue_epilogue(void);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);
