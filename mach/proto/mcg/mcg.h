@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "em_arith.h"
 #include "em_label.h"
 #include "em.h"
