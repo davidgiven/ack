@@ -211,6 +211,19 @@ static void data_block_label(const char* label)
 	}
 }
 
+static arith safe_atol(const char* s)
+{
+	arith result;
+
+	errno = 0;
+	result = strtoul(s, NULL, 0);
+	if (errno == ERANGE)
+		result = strtol(s, NULL, 0);
+	if (errno == ERANGE)
+		fatal("constant '%s' not parseable", s);
+	return result;
+}
+
 static void parse_pseu(void)
 {
 	switch (em.em_opcode)
@@ -255,7 +268,7 @@ static void parse_pseu(void)
 				case ico_ptyp:
 				case uco_ptyp:
                 {
-                    arith val = atol(em.em_string);
+                    arith val = safe_atol(em.em_string);
                     data_int(val, em.em_size, ro);
                     data_block_int(val);
                     break;
@@ -313,7 +326,7 @@ static void parse_pseu(void)
 				case ico_ptyp:
 				case uco_ptyp:
                 {
-                    arith val = atol(em.em_string);
+                    arith val = safe_atol(em.em_string);
                     data_int(val, em.em_size, false);
                     break;
                 }
