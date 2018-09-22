@@ -1,3 +1,7 @@
+OPTIONS
+
+	LOWER_PUSHES_TO_LOADS_AND_STORES;
+
 REGISTERS
 
     /* Registers are allocated top down. The odd order below is to make sure
@@ -35,7 +39,7 @@ REGISTERS
 	r22 named("r22")                              int;
 	r23 named("r23")                              int;
 
-	r4r5    named("r4", "r5")   aliases(r4,  r5)  long volatilei lret1;
+	r4r5    named("r4", "r5")   aliases(r4,  r5)  long volatile lret1;
 	r6r7    named("r6", "r7")   aliases(r6,  r7)  long volatile;
 	r8r9    named("r8", "r9")   aliases(r8,  r9)  long volatile;
 	r10r11  named("r10", "r11") aliases(r10, r11) long volatile;
@@ -108,6 +112,9 @@ DECLARATIONS
     ushort0;  /* bottom 16 bits valid, the rest 0 */
 
 	address fragment;
+	intregorzero fragment;
+	byteregorzero fragment;
+	shortregorzero fragment;
 
 
 
@@ -120,27 +127,6 @@ PATTERNS
 
 
 /* Miscellaneous special things */
-
-	PUSH.I(in:(int)reg)
-		emit "addiu sp, sp, -4"
-		emit "sw %in, 0(sp)"
-		cost 8;
-
-    PUSH.L(in:(long)reg)
-        emit "addiu sp, sp, -8"
-        emit "sw %in.0, 0(sp)"
-        emit "sw %in.1, 4(sp)"
-        cost 12;
-
-	PUSH.F(in:(float)reg)
-		emit "addiu sp, sp, -4"
-		emit "swc1 %in, 0(sp)"
-		cost 8;
-
-	PUSH.D(in:(double)reg)
-		emit "addiu sp, sp, -8"
-		emit "sdc1 %in, 0(sp)"
-		cost 8;
 
 	out:(int)reg = POP.I
 		emit "lw %out, 0(sp)"
@@ -184,11 +170,11 @@ PATTERNS
 		emit "addiu sp, sp, $delta"
 		cost 4;
 
-	STACKADJUST.I(in:(int)reg)
+	STACKADJUST.I(in:intregorzero)
 		emit "addu sp, sp, %in"
 		cost 4;
 
-	STACKADJUST.I(NEG.I(in:(int)reg))
+	STACKADJUST.I(NEG.I(in:intregorzero))
 		emit "subu sp, sp, %in"
 		cost 4;
 
@@ -241,29 +227,29 @@ PATTERNS
 		emit "sw %value.1, 4+%addr"
 		cost 8;
 
-	STORE.I(addr:address, value:(int)reg)
+	STORE.I(addr:address, value:intregorzero)
 		emit "sw %value, %addr"
 		cost 4;
 
-    STORE.I(label:LABEL.I, value:(int)reg)
+    STORE.I(label:LABEL.I, value:intregorzero)
         emit "lui at, ha16[$label]"
         emit "sw %value, lo16[$label] (at)"
 		cost 8;
 
-	STOREH.I(addr:address, value:(int)ushortX)
+	STOREH.I(addr:address, value:shortregorzero)
 		emit "sh %value, %addr"
 		cost 4;
 
-    STOREH.I(label:LABEL.I, value:(int)reg)
+    STOREH.I(label:LABEL.I, value:shortregorzero)
         emit "lui at, ha16[$label]"
         emit "sh %value, lo16[$label] (at)"
 		cost 8;
 
-    STOREB.I(addr:address, value:(int)ubyteX)
+    STOREB.I(addr:address, value:byteregorzero)
 		emit "sb %value, %addr"
 		cost 4;
 
-    STOREB.I(label:LABEL.I, value:(int)reg)
+    STOREB.I(label:LABEL.I, value:byteregorzero)
         emit "lui at, ha16[$label]"
         emit "sb %value, lo16[$label] (at)"
 		cost 8;
@@ -272,7 +258,7 @@ PATTERNS
 		emit "swc1 %value, %addr"
 		cost 4;
 
-    STORE.F(label:LABEL.I, value:(int)reg)
+    STORE.F(label:LABEL.I, value:(float)reg)
         emit "lui at, ha16[$label]"
         emit "swc1 %value, lo16[$label] (at)"
 		cost 8;
@@ -281,7 +267,7 @@ PATTERNS
 		emit "sdc1 %value, %addr"
 		cost 4;
 
-    STORE.D(label:LABEL.I, value:(int)reg)
+    STORE.D(label:LABEL.I, value:(double)reg)
         emit "lui at, ha16[$label]"
         emit "sdc1 %value, lo16[$label] (at)"
 		cost 8;
@@ -406,11 +392,11 @@ PATTERNS
 
 /* Extensions and conversions */
 
-    out:(int)reg = EXTENDB.I(in:(int)reg)
+    out:(int)reg = EXTENDB.I(in:intregorzero)
         emit "seb %out, %in"
         cost 4;
 
-    out:(int)reg = EXTENDH.I(in:(int)reg)
+    out:(int)reg = EXTENDH.I(in:intregorzero)
         emit "seh %out, %in"
         cost 4;
 
@@ -448,9 +434,45 @@ PATTERNS
         emit "mov %out, %in.1"
         cost 4;
 
+	intregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	intregorzero = value:(int)reg
+		emit "%value";
+
+	intregorzero = value:(int)ubyte0
+		emit "%value";
+
+	intregorzero = value:(int)ushort0
+		emit "%value";
+
+	shortregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	shortregorzero = value:(int)ushort0
+		emit "%value";
+
+	shortregorzero = value:(int)ushortX
+		emit "%value";
+
+	shortregorzero = value:(int)ubyte0
+		emit "%value";
+
+	byteregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	byteregorzero = value:(int)ubyte0
+		emit "%value";
+
+	byteregorzero = value:(int)ubyteX
+		emit "%value";
 
 
-/* Locals */
+
+/* Locals and stack-relatives */
 
 	out:(int)reg = in:LOCAL.I
 		emit "addiu %out, fp, $in"
@@ -458,6 +480,10 @@ PATTERNS
 
 	address = in:LOCAL.I
 		emit "$in(fp)";
+
+	address = ADD.I(GETSP.I, offset:CONST.I)
+        when signed_constant(%offset, 16)
+		emit "$offset(sp)";
 
 
 
@@ -734,17 +760,17 @@ PATTERNS
 /* Booleans */
 
 	/* If 0 then 1, else 0 */
-	out:(int)reg = IFEQ.I(in:(int)reg)
+	out:(int)reg = IFEQ.I(in:intregorzero)
 		emit "sltiu %out, %in, 1"
 		cost 4;
 
 	/* If -1 then 1, else 0 */
-	out:(int)reg = IFLT.I(in:(int)reg)
+	out:(int)reg = IFLT.I(in:intregorzero)
 		emit "srl %out, %in, 31"
 		cost 4;
 
 	/* If 1 or 0 then 1, else 0 */
-	out:(int)reg = IFLE.I(in:(int)reg)
+	out:(int)reg = IFLE.I(in:intregorzero)
 		emit "slti %out, %in, 1"
 		cost 4;
 
@@ -768,20 +794,20 @@ PATTERNS
 
 	/* reg + reg */
     #define ALUR(name, instr) \
-        out:(int)reg = name(left:(int)reg, right:(int)reg) \
+        out:(int)reg = name(left:intregorzero, right:intregorzero) \
             emit instr " %out, %left, %right"              \
             cost 4;                                        \
 
 	/* reg + const */
     #define ALUC(name, instr) \
-        out:(int)reg = name(left:(int)reg, right:CONST.I)  \
+        out:(int)reg = name(left:intregorzero, right:CONST.I)  \
             when signed_constant(%right, 16)               \
             emit instr " %out, %left, $right"              \
             cost 4;                                        \
 
 	/* const + reg */
     #define ALUC_reversed(name, instr) \
-        out:(int)reg = name(left:CONST.I, right:(int)reg)  \
+        out:(int)reg = name(left:CONST.I, right:intregorzero)  \
             when signed_constant(%left, 16)                \
             emit instr " %out, %right, $left"              \
             cost 4;                                        \
@@ -794,30 +820,30 @@ PATTERNS
     ALUR(ADD.I, "addu")
     ALUCC(ADD.I, "addiu")
 
-	out:(int)reg = SUB.I(left:(int)reg, right:(int)reg)
+	out:(int)reg = SUB.I(left:intregorzero, right:intregorzero)
 		emit "subu %out, %left, %right"
 		cost 4;
 
-	out:(int)reg = SUB.I(left:(int)reg, right:CONST.I)
+	out:(int)reg = SUB.I(left:intregorzero, right:CONST.I)
 		emit "addiu %out, %left, -[$right]"
 		cost 4;
 
-	out:(int)reg = DIV.I(left:(int)reg, right:(int)reg)
+	out:(int)reg = DIV.I(left:intregorzero, right:intregorzero)
 		emit "div %left, %right"
 		emit "mflo %out"
 		cost 8;
 
-	out:(int)reg = DIVU.I(left:(int)reg, right:(int)reg)
+	out:(int)reg = DIVU.I(left:intregorzero, right:intregorzero)
 		emit "divu %left, %right"
 		emit "mflo %out"
 		cost 8;
 
-	out:(int)reg = MOD.I(left:(int)reg, right:(int)reg)
+	out:(int)reg = MOD.I(left:intregorzero, right:intregorzero)
 		emit "div %left, %right"
 		emit "mfhi %out"
 		cost 8;
 
-	out:(int)reg = MODU.I(left:(int)reg, right:(int)reg)
+	out:(int)reg = MODU.I(left:intregorzero, right:intregorzero)
 		emit "divu %left, %right"
 		emit "mfhi %out"
 		cost 8;
@@ -834,11 +860,11 @@ PATTERNS
     ALUR(LSR.I, "srlv")
     ALUC(LSR.I, "srl")
 
-    out:(int)reg = NEG.I(left:(int)reg)
+    out:(int)reg = NEG.I(left:intregorzero)
         emit "subu %out, zero, %left"
         cost 4;
 
-    out:(int)reg = NOT.I(in:(int)reg)
+    out:(int)reg = NOT.I(in:intregorzero)
         emit "nor %out, %in, %in"
         cost 4;
 
@@ -949,7 +975,7 @@ PATTERNS
 		emit "neg.s %out, %left"
 		cost 4;
 
-	out:(float)reg = FROMSI.F(in:(int)reg)
+	out:(float)reg = FROMSI.F(in:intregorzero)
 		emit "mtc1 %in, %out" /* mtc1 has reversed parameters */
 		emit "cvt.s.w %out, %out"
 		cost 4;
@@ -975,7 +1001,7 @@ PATTERNS
 		emit "nop"
         cost 30;
 
-    out:(float)reg = COPYI.F(in:(int)reg)
+    out:(float)reg = COPYI.F(in:intregorzero)
         emit "mtc1 %in, %out" /* mtc1 has reversed parameters */
         cost 4;
 
