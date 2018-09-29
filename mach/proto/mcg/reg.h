@@ -24,6 +24,7 @@ struct vreg
     bool is_spilt;
     const struct burm_regclass_data* regclass;
     burm_register_bitmap_t registers;
+    struct hreg* evicted; /* stack slot to evict to */
 };
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);

@@ -206,6 +206,16 @@ This is not followed by automatic alignment.
 .Pu ".data4 \fIexpression [, expression]*\fP"
 Initialize a sequence of longs (4-byte values).
 This is not followed by automatic alignment.
+.Pu ".dataf4 \fIliteralfloat [, literalfloat]*\fP"
+Initialize a sequence of floats (4-byte values).
+The values must be literal floating point constants containing
+a dot character.
+This is not followed by automatic alignment.
+.Pu ".dataf8 \fIliteralfloat [, literalfloat]*\fP"
+Initialize a sequence of doubles (8-byte values).
+The values must be literal floating point constants containing
+a dot character.
+This is not followed by automatic alignment.
 .Pu ".ascii \fIstring\fP"
 Initialize a sequence of bytes with the value of the bytes in
 the string.

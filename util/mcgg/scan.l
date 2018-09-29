@@ -30,6 +30,7 @@ static int braces = 0;
                                 yylval.string = strdup(yytext);
                                 return QFRAGMENT;
                             }
+<QSTRING>.                  yyerror("bad string input '%s' at line %d\n", yytext, yylineno);
 
 <INITIAL>"/*"               BEGIN(COMMENT);
 <COMMENT>"*/"               BEGIN(INITIAL);
@@ -39,6 +40,7 @@ static int braces = 0;
 "DECLARATIONS"              return DECLARATIONS;
 "PATTERNS"                  return PATTERNS;
 "REGISTERS"                 return REGISTERS;
+"OPTIONS"                   return OPTIONS;
 "uses"                      return USES;
 "corrupted"                 return CORRUPTED;
 "cost"                      return COST;

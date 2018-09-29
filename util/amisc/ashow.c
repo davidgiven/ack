@@ -134,6 +134,12 @@ showrelo()
 	case RELO2:
 		printf("\t2 bytes\n");
 		break;
+	case RELO2HI:
+		printf("\ttop 2 bytes of result\n");
+		break;
+	case RELO2HISAD:
+		printf("\ttop 2 bytes of result, sign adjusted\n");
+		break;
 	case RELO4:
 		printf("\t4 bytes\n");
 		break;
@@ -145,6 +151,9 @@ showrelo()
 		break;
 	case RELOVC4:
 		printf("\tVideoCore IV address in 32-bit instruction\n");
+		break;
+	case RELOMIPS:
+		printf("\tMIPS b or j instruction\n");
 		break;
 	default:
 		printf("\tunknown relocation type %d\n", relrec.or_type & RELSZ);

@@ -37,6 +37,7 @@ extern int yylex(void);
 %term FRAGMENT
 %term NAMED
 %term NOTEQUALS
+%term OPTIONS
 %term PATTERNS
 %term PREFERS
 %term REGISTERS
@@ -66,9 +67,25 @@ extern int yylex(void);
 %%
 
 spec
-    : REGISTERS registers
+    : optionaloptions
+      REGISTERS registers
       DECLARATIONS declarations
       PATTERNS patterns
+	;
+
+optionaloptions
+	: /* nothing */
+	| OPTIONS options
+	;
+
+options
+	: /* nothing */
+	| options option ';'
+	| option ';'
+	;
+
+option
+	: ID                              { option($1); }
 	;
 
 registers

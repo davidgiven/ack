@@ -29,19 +29,6 @@ extern struct tokenname tkidf[];
 extern char *symbol2str();
 extern char options[128];
 
-#ifndef NOPP
-int inc_pos = 1;			/* place where next -I goes */
-int inc_total = 0;
-int inc_max;
-char **inctable;
-
-extern int do_dependencies;
-extern char *dep_file;
-static File *dep_fd = STDOUT;
-
-extern char *getwdir();
-#endif /* NOPP */
-
 struct sp_id special_ids[] =	{
 	{"__setjmp", SP_SETJMP},	/* non-local goto's are registered */
 	{0, 0}
@@ -74,10 +61,6 @@ int
 	union_align = AL_UNION;
 #endif /* NOCROSS */
 
-#ifndef NOPP
-arith ifval;	/* ifval will contain the result of the #if expression	*/
-#endif /* NOPP */
-
 char *prog_name;
 
 main(argc, argv)
@@ -85,17 +68,6 @@ main(argc, argv)
 {
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
-
-#ifndef NOPP
-	inctable = (char **) Malloc(10 * sizeof(char *));
-	inctable[0] = "";
-	inctable[1] = 0;
-	inctable[2] = 0;
-	inc_total = 3;
-	inc_max = 10;
-
-	init_pp();	/* initialise the preprocessor macros	*/
-#endif /* NOPP */
 
 	/*	Note: source file "-" indicates that the source is supplied
 		as standard input.  This is only allowed if INP_READ_IN_ONE is
@@ -122,82 +94,9 @@ main(argc, argv)
 	if (options['m']) Info();
 #endif	/* DEBUG */
 
-#ifndef NOPP
-	if (do_dependencies) {
-	    extern char *source;
-
-	    list_dependencies(source);
-	}
-#endif
 	sys_stop(err_occurred ? S_EXIT : S_END);
 	/*NOTREACHED*/
 }
-
-#ifndef NOPP
-
-struct dependency    *file_head;
-extern char *strrchr();
-
-list_dependencies(source)
-char *source;
-{
-    register struct dependency *p = file_head;
-
-    if (source) {
-	register char *s = strrchr(source, '.');
-
-	if (s && *(s+1)) {
-	    s++;
-	    *s++ = 'o';
-	    *s = '\0';
-	    /* the source may be in another directory than the
-	     * object generated, so don't include the pathname
-	     * leading to it.
-             */
-            if (s = strrchr(source, '/')) {
-		source = s + 1;
-	    }
-	}
-	else source = 0;
-    }
-    if (dep_file && !sys_open(dep_file, OP_WRITE, &dep_fd)) {
-	fatal("could not open %s", dep_file);
-    }
-    while (p) {
-	dependency(p->dep_idf->id_text, source);
-	p = p->next;
-    }
-}
-
-add_dependency(s)
-char *s;
-{
-    register struct idf *p = str2idf(s, 1);
-
-    if (! p->id_resmac) {
-	register struct dependency *q = new_dependency();
-
-	p->id_resmac = K_FILE;
-	q->dep_idf = p;
-	q->next = file_head;
-	file_head = q;
-    }
-}
-
-void
-dependency(s, source)
-char *s, *source;
-{
-    if (options['i'] && !strncmp(s, "/usr/include/", 13)) {
-	return;
-    }
-    if (options['m'] && source) {
-	fprint(dep_fd, "%s: %s\n", source, s);
-    }
-    else    fprint(dep_fd, "%s\n", s);
-}
-
-#endif /* NOPP */
 
 char *source = 0;
 
@@ -213,19 +112,10 @@ compile(argc, argv)
 	register char *destination = 0;
 #endif	/* LINT */
 
-#ifdef DEBUG
-#ifndef NOPP
-	int pp_only = options['E'] || options['P'] || options['C'];
-#endif /* NOPP */
-#endif
-
 	switch (argc) {
 	case 1:
 #ifndef	LINT
 #ifdef DEBUG
-#ifndef NOPP
-		if (!pp_only)
-#endif /* NOPP */
 #endif
 			fatal("%s: destination file not specified", prog_name);
 #endif	/* LINT */
@@ -277,20 +167,7 @@ compile(argc, argv)
 			: 0);
 #endif	/* LINT */
 
-#ifndef NOPP
-	WorkingDir = getwdir(source);
-	PushLex();			/* initialize lex machine */
-#else /* NOPP */
 	GetToken(&ahead);
-#endif /* NOPP */
-
-#ifdef DEBUG
-#ifndef NOPP
-	if (pp_only) /* run the preprocessor as if it is stand-alone	*/
-		preprocess();
-	else
-#endif /* NOPP */
-#endif /* DEBUG */
 	{
 		/* compile the source text			*/
 		C_program();
@@ -311,9 +188,6 @@ compile(argc, argv)
 			dumpidftab("end of main", options['f'] ? 7 : 0);
 #endif	/* DEBUG */
 	}
-#ifndef	NOPP
-	PopLex();
-#endif	/* NOPP */
 }
 
 init()
@@ -395,76 +269,6 @@ init_specials(si)
 }
 
 #ifdef DEBUG
-#ifndef NOPP
-preprocess()
-{
-	/*	preprocess() is the "stand-alone" preprocessor which
-		consecutively calls the lexical analyzer LLlex() to get
-		the tokens and prints them in a suitable way.
-	*/
-	static unsigned int lastlineno = 0;
-	static char *lastfilenm = "";
-
-	while (LLlex() !=  EOI)	{
-		if (lastlineno != dot.tk_line)	{
-			if (strcmp(lastfilenm, dot.tk_file) == 0)	{
-				if (dot.tk_line - lastlineno <= 1)	{
-					lastlineno++;
-					print("\n");
-				}
-				else	{
-					lastlineno = dot.tk_line;
-					if (!options['P'])
-						print("\n#line %ld \"%s\"\n",
-							lastlineno,
-							lastfilenm
-						);
-				}
-			}
-			else	{
-				lastfilenm = dot.tk_file;
-				lastlineno = dot.tk_line;
-				if (!options['P'])
-					print("\n#line %ld \"%s\"\n",
-						lastlineno, lastfilenm);
-			}
-		}
-		else
-		if (strcmp(lastfilenm, dot.tk_file) != 0)	{
-			lastfilenm = dot.tk_file;
-			if (!options['P'])
-				print("\n#line %ld \"%s\"\n",
-					lastlineno, lastfilenm);
-		}
-		switch (DOT)	{
-		case IDENTIFIER:
-		case TYPE_IDENTIFIER:
-			print("%s ", dot.tk_idf->id_text);
-			break;
-		case STRING:
-		{
-			char sbuf[1024];	/* a transient buffer */
-
-			print("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len -
-			1, sbuf));
-			break;
-		}
-		case INTEGER:
-			print("%ld ", dot.tk_ival);
-			break;
-		case FLOATING:
-			print("%s ", dot.tk_fval);
-			break;
-		case EOI:
-		case EOF:
-			return;
-		default:	/* very expensive...	*/
-			print("%s ", symbol2str(DOT));
-		}
-	}
-}
-#endif /* NOPP */
-
 Info()
 {
 	extern int cnt_string_cst, cnt_formal,

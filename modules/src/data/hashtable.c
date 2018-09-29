@@ -12,6 +12,20 @@ struct hashnode
     void* value;
 };
 
+uint32_t standard_int_hash_function(void* key)
+{
+	uint32_t x = (uint32_t) key;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+	return x;
+}
+
+bool standard_int_comparison_function(void* key1, void* key2)
+{
+    return (key1 == key2);
+}
+
 uint32_t standard_pointer_hash_function(void* key)
 {
     /* Basile-Starynkevitch pointer hash */
@@ -150,6 +164,11 @@ void* hashtable_put(struct hashtable* ht, void* key, void* value)
     return oldvalue;
 }
 
+void* hashtable_puti(struct hashtable* ht, int key, void* value)
+{
+	return hashtable_put(ht, (void*)key, value);
+}
+
 void* hashtable_get(struct hashtable* ht, void* key)
 {
     if (ht)
@@ -159,6 +178,11 @@ void* hashtable_get(struct hashtable* ht, void* key)
             return (*hnp)->value;
     }
     return NULL;
+}
+
+void* hashtable_geti(struct hashtable* ht, int key)
+{
+	return hashtable_get(ht, (void*)key);
 }
 
 void* hashtable_remove(struct hashtable* ht, void* key)

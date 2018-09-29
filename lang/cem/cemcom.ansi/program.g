@@ -61,10 +61,6 @@
 #include	"l_lint.h"
 #endif	/* LINT */
 
-#ifndef NOPP
-extern arith ifval;
-#endif /* NOPP */
-
 extern error();
 }
 
@@ -75,14 +71,6 @@ control_if_expression
 :
 	constant_expression(&exprX)
 		{
-#ifndef NOPP
-			register struct expr *expr = exprX;
-			if (expr->ex_flags & EX_SIZEOF)
-				expr_error(expr,
-					"sizeof not allowed in preprocessor");
-			ifval = expr->VL_VALUE;
-			free_expression(expr);
-#endif /* NOPP */
 		}
 ;
 

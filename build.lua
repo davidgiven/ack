@@ -10,9 +10,9 @@ vars.plats = {
 	"linux386",
 	"linux68k",
 	"linuxppc",
+	"linuxmips",
 	"osx386",
 	"osxppc",
-	"qemuppc",
 	"pc86",
 	"rpi",
 	"pdpv7",
@@ -22,7 +22,7 @@ vars.plats_with_tests = {
 	"linux68k",
 	"linux386",
 	"linuxppc",
---	--"qemuppc",
+	"linuxmips",
 	"pc86",
 }
 

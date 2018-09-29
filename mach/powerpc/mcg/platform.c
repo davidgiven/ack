@@ -128,7 +128,7 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
-struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+struct hop* platform_move(struct basicblock* bb, struct vreg* vreg, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
 

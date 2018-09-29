@@ -5,9 +5,19 @@ static struct basicblock* current_bb;
 static int stackptr;
 static struct ir* stack[64];
 
+struct jumptable
+{
+    struct hashtable targets;
+	struct basicblock* defaulttarget;
+};
+
 static struct ir* convert(struct ir* src, int srcsize, int destsize, int opcode);
 static struct ir* appendir(struct ir* ir);
 static void insn_ivalue(int opcode, arith value);
+
+static void parse_csa(struct basicblock* data_bb, struct jumptable* table);
+static void parse_csb(struct basicblock* data_bb, struct jumptable* table);
+static void emit_jumptable(struct ir* targetvalue, struct jumptable* table);
 
 static void reset_stack(void)
 {
@@ -85,6 +95,8 @@ static struct ir* pop(int size)
             }
             else if ((size == EM_wordsize) && (ir->size == (EM_wordsize*2)))
             {
+                appendir(ir);
+
                 /* Tried to read an int, but we got a long. */
                 push(
                     new_ir1(
@@ -553,6 +565,7 @@ static void insn_simple(int opcode)
         {
             struct ir* label = new_labelir(".trppc");
             struct ir* value = pop(EM_pointersize);
+            appendir(label); /* because we need to use label twice */
             push(
                 load(
                     EM_pointersize,
@@ -717,6 +730,10 @@ static void rotate(int opcode, int size, int irop, int irop_reverse)
         struct ir* left = pop(size);
         struct ir* bits = new_wordir(8 * size);
 
+        /* Fix left and right so we can refer to them multiple times. */
+        appendir(right);
+        appendir(left);
+
         /* a rol b -> (a << b) | (a >> (32 - b)) */
         push(
             new_ir2(
@@ -730,27 +747,6 @@ static void rotate(int opcode, int size, int irop, int irop_reverse)
             )
         );
     }
-}
-
-static struct ir* extract_block_refs(struct basicblock* bb)
-{
-    struct ir* outir = NULL;
-    int i;
-
-    for (i=0; i<bb->ems.count; i++)
-    {
-        struct em* em = bb->ems.item[i];
-        assert(em->opcode == op_bra);
-        assert(em->paramtype == PARAM_BVALUE);
-
-        outir = new_ir2(
-            IR_PAIR, 0,
-            new_bbir(em->u.bvalue.left),
-            outir
-        );
-    }
-
-    return outir;
 }
 
 static void change_by(struct ir* address, int amount)
@@ -1332,25 +1328,36 @@ static void insn_ivalue(int opcode, arith value)
         }
 
         case op_csa:
-        case op_csb:
         {
-            const char* helper = aprintf(".%s",
-                (opcode == op_csa) ? "csa" : "csb");
             struct ir* descriptor = pop(EM_pointersize);
+            struct ir* targetvalue = appendir(pop(EM_pointersize));
+            struct jumptable jumptable = { HASHTABLE_OF_INTS };
+            int i;
 
             if (descriptor->opcode != IR_LABEL)
-                fatal("csa/csb are only supported if they refer "
+                fatal("csa is only supported if it refers "
                     "directly to a descriptor block");
 
-            push(descriptor);
-            materialise_stack();
-            appendir(
-                new_ir2(
-                    IR_FARJUMP, 0,
-                    new_labelir(helper),
-                    extract_block_refs(bb_get(descriptor->u.lvalue))
-                )
-            );
+			parse_csa(bb_get(descriptor->u.lvalue), &jumptable);
+			emit_jumptable(targetvalue, &jumptable);
+            hashtable_reset(&jumptable.targets);
+            break;
+        }
+
+        case op_csb:
+        {
+            struct ir* descriptor = pop(EM_pointersize);
+            struct ir* targetvalue = appendir(pop(EM_pointersize));
+            struct jumptable jumptable = { HASHTABLE_OF_INTS };
+            int i;
+
+            if (descriptor->opcode != IR_LABEL)
+                fatal("csb is only supported if it refers "
+                    "directly to a descriptor block");
+
+			parse_csb(bb_get(descriptor->u.lvalue), &jumptable);
+			emit_jumptable(targetvalue, &jumptable);
+            hashtable_reset(&jumptable.targets);
             break;
         }
 
@@ -1514,14 +1521,12 @@ static void insn_ivalue(int opcode, arith value)
                 fatal("'bls %d' not supported", value);
             helper_function(".bls4");
             break;
-        }
 
         case op_los:
             if (value != EM_wordsize)
                 fatal("'los %d' not supported", value);
             helper_function_with_arg(".los4", pop(EM_wordsize));
             break;
-        }
 
         case op_sts:
             if (value != EM_wordsize)
@@ -1755,6 +1760,135 @@ void tb_procedure(void)
 
     for (i=0; i<current_proc->blocks.count; i++)
         generate_tree(current_proc->blocks.item[i]);
+}
+
+static void parse_csa(struct basicblock* data_bb, struct jumptable* table)
+{
+	struct em* em;
+	int lowerbound;
+	int count;
+	int i;
+
+	assert(data_bb->ems.count >= 3);
+
+	/* Default target */
+
+	em = data_bb->ems.item[0];
+	assert(em->opcode == op_bra);
+	assert(em->paramtype == PARAM_BVALUE);
+	table->defaulttarget = em->u.bvalue.left;
+
+	/* Lower bound */
+
+	em = data_bb->ems.item[1];
+	assert(em->opcode == op_loc);
+	assert(em->paramtype == PARAM_IVALUE);
+	lowerbound = em->u.ivalue;
+
+	/* Count */
+
+	em = data_bb->ems.item[2];
+	assert(em->opcode == op_loc);
+	assert(em->paramtype == PARAM_IVALUE);
+	count = em->u.ivalue + 1; /* value in descriptor is inclusive */
+	assert(data_bb->ems.count >= (count + 3));
+
+	/* Now, each target in turn. */
+
+	for (i=0; i<count; i++)
+	{
+		struct basicblock* target;
+
+		em = data_bb->ems.item[3 + i];
+		assert(em->opcode == op_bra);
+		assert(em->paramtype == PARAM_BVALUE);
+		target = em->u.bvalue.left;
+
+		hashtable_puti(&table->targets, lowerbound+i, target);
+	}
+}
+
+static void parse_csb(struct basicblock* data_bb, struct jumptable* table)
+{
+	struct em* em;
+	int count;
+	int i;
+
+	assert(data_bb->ems.count >= 2);
+
+	/* Default target */
+
+	em = data_bb->ems.item[0];
+	assert(em->opcode == op_bra);
+	assert(em->paramtype == PARAM_BVALUE);
+	table->defaulttarget = em->u.bvalue.left;
+
+	/* Number of targets */
+
+	em = data_bb->ems.item[1];
+	assert(em->opcode == op_loc);
+	assert(em->paramtype == PARAM_IVALUE);
+	count = em->u.ivalue;
+	assert(data_bb->ems.count >= (count*2 + 2));
+
+	/* Now, each target in turn. */
+
+	for (i=0; i<count; i++)
+	{
+		int value;
+		struct basicblock* target;
+
+		em = data_bb->ems.item[2 + i*2];
+		assert(em->opcode == op_loc);
+		assert(em->paramtype == PARAM_IVALUE);
+		value = em->u.ivalue;
+
+		em = data_bb->ems.item[3 + i*2];
+		assert(em->opcode == op_bra);
+		assert(em->paramtype == PARAM_BVALUE);
+		target = em->u.bvalue.left;
+
+        hashtable_puti(&table->targets, value, target);
+	}
+}
+
+static void emit_jumptable(struct ir* targetvalue, struct jumptable* jumptable)
+{
+    struct hashtable_iterator hit = {};
+
+	materialise_stack();
+    while (hashtable_next(&jumptable->targets, &hit))
+	{
+		int value = (int) hit.key;
+		struct basicblock* target = hit.value;
+		struct basicblock* nextblock = bb_get(NULL);
+
+		array_append(&current_proc->blocks, nextblock);
+		appendir(
+			new_ir2(
+				IR_CJUMPEQ, 0,
+				new_ir2(
+					IR_COMPARESI, EM_wordsize,
+					targetvalue,
+					new_wordir(value)
+				),
+				new_ir2(
+					IR_PAIR, 0,
+					new_bbir(target),
+					new_bbir(nextblock)
+				)
+			)
+		);
+
+		current_bb = nextblock;
+	}
+
+	appendir(
+		new_ir1(
+			IR_JUMP, 0,
+			new_bbir(jumptable->defaulttarget)
+		)
+	);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

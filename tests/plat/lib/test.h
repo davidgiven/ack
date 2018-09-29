@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 extern void finished(void);
-extern void writehex(uint32_t code);
-extern void fail(uint32_t code);
+extern void writehex(unsigned int code);
+extern void fail(unsigned int code);
 
 #define ASSERT(condition) \
     do { if (!(condition)) fail(__LINE__); } while(0)

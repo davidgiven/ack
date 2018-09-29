@@ -7,6 +7,7 @@ static const char* tracechars = NULL;
 FILE* outputfile = NULL;
 FILE* dominance_dot_file = NULL;
 FILE* cfg_dot_file = NULL;
+FILE* regalloc_dot_file = NULL;
 
 bool tracing(char k)
 {
@@ -37,38 +38,62 @@ static bool find_procedures_cb(struct symbol* symbol, void* user)
     return false;
 }
 
+static FILE* open_dot_file(const char* filename)
+{
+    FILE* fp = fopen(filename, "w");
+    if (!fp)
+        fatal("couldn't open output file '%s': %s",
+            filename, strerror(errno));
+    fprintf(fp, "digraph {\n");
+    return fp;
+}
+
+static void close_dot_files(void)
+{
+    if (cfg_dot_file)
+    {
+        fprintf(cfg_dot_file, "}\n");
+        fclose(cfg_dot_file);
+    }
+    if (dominance_dot_file)
+    {
+        fprintf(dominance_dot_file, "}\n");
+        fclose(dominance_dot_file);
+    }
+    if (regalloc_dot_file)
+    {
+        fprintf(regalloc_dot_file, "}\n");
+        fclose(regalloc_dot_file);
+    }
+}
+
 int main(int argc, char* const argv[])
 {
     const char* inputfilename = NULL;
     const char* outputfilename = NULL;
     FILE* output;
-    int i;
 
     program_name = argv[0];
 
     opterr = 1;
     for (;;)
     {
-        int c = getopt(argc, argv, "d:D:C:o:");
+        int c = getopt(argc, argv, "-d:D:C:R:o:");
         if (c == -1)
             break;
 
         switch (c)
         {
             case 'C':
-                cfg_dot_file = fopen(optarg, "w");
-                if (!cfg_dot_file)
-                    fatal("couldn't open output file '%s': %s",
-                        optarg, strerror(errno));
-                fprintf(cfg_dot_file, "digraph {\n");
+                cfg_dot_file = open_dot_file(optarg);
                 break;
 
             case 'D':
-                dominance_dot_file = fopen(optarg, "w");
-                if (!dominance_dot_file)
-                    fatal("couldn't open output file '%s': %s",
-                        optarg, strerror(errno));
-                fprintf(dominance_dot_file, "digraph {\n");
+                dominance_dot_file = open_dot_file(optarg);
+                break;
+
+            case 'R':
+                regalloc_dot_file = open_dot_file(optarg);
                 break;
 
             case 'd':
@@ -80,20 +105,19 @@ int main(int argc, char* const argv[])
                     fatal("already specified an output file");
                 outputfilename = optarg;
                 break;
+
+            case 1:
+                if (inputfilename)
+                    fatal("unexpected argument '%s'", optarg);
+                inputfilename = optarg;
         }
     }
-
-    for (i = optind; i < argc; i++)
-    {
-        if (inputfilename)
-            fatal("unexpected argument '%s'", argv[i]);
-        inputfilename = argv[i];
-    }
+    atexit(close_dot_files);
 
     symbol_init();
 
-    if (!EM_open((char*) inputfilename))
-        fatal("couldn't open input '%s': %s",
+	if (!EM_open((char*) inputfilename))
+		fatal("couldn't open input '%s': %s",
             inputfilename ? inputfilename : "<stdin>", EM_error);
 
     if (outputfilename)
@@ -122,17 +146,6 @@ int main(int argc, char* const argv[])
     if (outputfilename)
         fclose(outputfile);
 	EM_close();
-
-    if (cfg_dot_file)
-    {
-        fprintf(cfg_dot_file, "}\n");
-        fclose(cfg_dot_file);
-    }
-    if (dominance_dot_file)
-    {
-        fprintf(dominance_dot_file, "}\n");
-        fclose(dominance_dot_file);
-    }
 
 	return 0;
 }

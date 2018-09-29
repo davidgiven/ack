@@ -85,6 +85,7 @@ int regallowed=0;
 extern char em_flag[];
 extern short em_ptyp[];
 extern double atof();
+extern void con_float(void);
 
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.

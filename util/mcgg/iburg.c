@@ -16,7 +16,10 @@
 #include "registers.h"
 #include "bitmap.h"
 
-static char rcsid[] = "$Id$";
+#define REGATTR_INT 0
+#define REGATTR_LONG 1
+#define REGATTR_FLOAT 2
+#define REGATTR_DOUBLE 3
 
 int maxcost = SHRT_MAX / 2;
 
@@ -158,6 +161,18 @@ int main(int argc, char* argv[])
 		rule(&reg, tree(&NOPL, tree(&reg, NULL, NULL), NULL))->cost = 1;
 		rule(&reg, tree(&NOPD, tree(&reg, NULL, NULL), NULL))->cost = 1;
 		rule(NULL, tree(&RET, NULL, NULL))->cost = 1;
+
+	}
+
+	{
+		struct regattr* attr = makeregattr("int");
+		assert(attr->number == REGATTR_INT);
+		attr = makeregattr("long");
+		assert(attr->number == REGATTR_LONG);
+		attr = makeregattr("float");
+		assert(attr->number == REGATTR_FLOAT);
+		attr = makeregattr("double");
+		assert(attr->number == REGATTR_DOUBLE);
 	}
 
 	yyin = infp;
@@ -664,6 +679,11 @@ static void emitheader(void)
 
 	printh("#ifndef MCG_DEFS_H\n");
 	printh("#define MCG_DEFS_H\n\n");
+}
+
+void option(const char* o)
+{
+	printh("#define MCGG_OPTION_%s\n", o);
 }
 
 /* computekids - compute paths to kids in tree t */
