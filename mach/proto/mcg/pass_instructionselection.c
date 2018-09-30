@@ -141,6 +141,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
     int i;
 
     insn->value.ir = current_ir;
+    insn->value.regclass = UNASSIGNED_REGCLASS;
     /* hop IDs count in preorder, so the result is always in $thing:0. */
     insn->value.subid = hop_id++;
 

@@ -22,6 +22,7 @@ struct ir* new_ir0(int opcode, int size)
 {
 	struct ir* ir = calloc(1,  sizeof(struct ir));
     ir->value.ir = ir;
+    ir->value.regclass = UNASSIGNED_REGCLASS;
 	ir->id = next_id++;
 	ir->opcode = opcode;
 	ir->size = size;

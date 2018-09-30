@@ -15,6 +15,16 @@ static struct graph interference;
 static struct graph affinity;
 static ARRAYOF(struct vreg) simplified;
 
+static void bitmap_trace(void* bitmap, int size)
+{
+	uint8_t* p = bitmap;
+	int bytes = ((size-1) / 8) + 1;
+	int i;
+
+	for (i=0; i<bytes; i++)
+		tracef('R', "%02x ", p[i]);
+}
+
 static struct vreg* actual(struct vreg* vreg)
 {
     if (!vreg)
@@ -28,6 +38,22 @@ static void coalesce(struct vreg* vmaster, struct vreg* vslave)
 {
     vmaster = actual(vmaster);
     vslave = actual(vslave);
+    if (tracing('R'))
+    {
+        if (vmaster->regclass)
+        {
+			tracef('R', "R: master is %10s ", vmaster->regclass->name);
+			bitmap_trace(vmaster->registers, burm_register_count);
+			tracef('R', "\n");
+		}
+		if (vslave->regclass)
+		{
+			tracef('R', "R:  slave is %10s ", vslave->regclass->name);
+			bitmap_trace(vslave->registers, burm_register_count);
+			tracef('R', "\n");
+		}
+    }
+
     if (vmaster->regclass && vslave->regclass)
     {
         bitmap_and(vmaster->registers, burm_register_count, vslave->registers);
@@ -101,7 +127,12 @@ static void generate_graph(void)
                 }
 
                 if (hop->is_move && invreg1 && outvreg1)
+                {
+                    tracef('R', "R: adding affinity edge between %%%d and %%%d:\n",
+                        invreg1->id, outvreg1->id);
+                    hop_print('R', hop);
                     graph_add_edge(&affinity, invreg1, outvreg1);
+				}
             }
 
             /* Ensure that registers which are constrained to be in the same hreg for input

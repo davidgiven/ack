@@ -30,7 +30,6 @@ extern struct reg* makereg(const char* name);
 extern void setregnames(struct reg* reg, struct stringlist* names);
 extern void addregattr(struct reg* reg, const char* regattr);
 extern void addregusage(struct reg* reg, struct stringlist* uses);
-extern struct regattr* getregattr(const char* name);
 
 extern void analyse_registers(void);
 
@@ -38,6 +37,7 @@ extern void emitregisterattrs(void);
 extern void emitregisters(void);
 
 extern struct regattr* findregattr(const char* name);
+extern struct regattr* makeregattr(const char* name);
 
 #endif
 

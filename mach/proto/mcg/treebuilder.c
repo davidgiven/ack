@@ -1859,7 +1859,7 @@ static void emit_jumptable(struct ir* targetvalue, struct jumptable* jumptable)
 	materialise_stack();
     while (hashtable_next(&jumptable->targets, &hit))
 	{
-		int value = (int) hit.key;
+		int value = (int)(intptr_t) hit.key;
 		struct basicblock* target = hit.value;
 		struct basicblock* nextblock = bb_get(NULL);
 

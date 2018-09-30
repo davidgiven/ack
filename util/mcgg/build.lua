@@ -47,6 +47,7 @@ cprogram {
 		matching(filenamesof("+yacc"), "%.c$")
 	},
 	deps = {
+		"./registers.h",
 		"./iburg.h",
 		"+lib",
 		"+yacc",

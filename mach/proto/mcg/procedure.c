@@ -106,7 +106,9 @@ static void print_hops(char k)
             {
                 struct value* value = hit.key;
                 struct vreg* vreg = hit.value;
-                tracef(k, " $%d.%d->%%%d", value->ir->id, value->subid, vreg->id);
+                tracef(k, " $%d.%d->%%%d(%s)",
+                    value->ir->id, value->subid, vreg->id,
+                    vreg->regclass ? vreg->regclass->name : "?");
             }
             tracef(k, "\n");
         }
@@ -119,7 +121,9 @@ static void print_hops(char k)
             {
                 struct value* value = hit.key;
                 struct vreg* vreg = hit.value;
-                tracef(k, " $%d.%d->%%%d", value->ir->id, value->subid, vreg->id);
+                tracef(k, " $%d.%d->%%%d(%s)",
+					value->ir->id, value->subid, vreg->id,
+					vreg->regclass ? vreg->regclass->name : "?");
             }
             tracef(k, "\n");
         }

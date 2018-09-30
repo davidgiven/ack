@@ -51,11 +51,22 @@ static bool hop_reads_value(struct hop* hop, struct value* value)
 
 static void setup_regclass(struct vreg* vreg, struct value* value)
 {
-    const struct burm_regclass_data* regclass = &burm_regclass_data[value->regclass];
-    assert(!vreg->regclass || (vreg->regclass == regclass));
+    const struct burm_regclass_data* regclass =
+        (value->regclass == UNASSIGNED_REGCLASS)
+        ? NULL
+        : &burm_regclass_data[value->regclass];
+    assert(!vreg->regclass || !regclass || (vreg->regclass == regclass));
 
-    if (!vreg->regclass)
+	tracef('V', "V: %%%d has class %s; value $%d has class %s\n",
+		vreg->id,
+		vreg->regclass ? vreg->regclass->name : "?",
+		value->ir->id,
+		regclass ? regclass->name : "?");
+
+    if (!vreg->regclass && regclass)
     {
+        tracef('V', "V: assigning register class %s to %%%d from $%d\n",
+            regclass->name, vreg->id, value->ir->id);
         memcpy(vreg->registers, regclass->bitmap, sizeof(burm_register_bitmap_t));
         vreg->regclass = regclass;
     }

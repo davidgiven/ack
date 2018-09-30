@@ -318,7 +318,9 @@ static struct vreg* actual(struct vreg* vreg)
 
 void appendvreg(struct vreg* vreg)
 {
-    appendf("($%d:%d=%%%d", vreg->value->ir->id, vreg->value->subid, vreg->id);
+    appendf("($%d:%d=%%%d:%s",
+		vreg->value->ir->id, vreg->value->subid, vreg->id,
+		vreg->regclass ? vreg->regclass->name : "?");
     if (vreg->hreg != -1)
         appendf("=R%d", vreg->hreg);
     if (vreg->is_spilt)
@@ -357,6 +359,8 @@ static void appendheader(struct hop* hop)
                 if (usage->corrupted)
                     appendf("!");
                 appendf("$%d:%d", value->ir->id, value->subid);
+                if (value->regclass != UNASSIGNED_REGCLASS)
+                    appendf(",%d", value->regclass);
             }
         }
     }

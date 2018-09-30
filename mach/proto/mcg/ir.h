@@ -3,6 +3,8 @@
 
 #include "ircodes.h"
 
+#define UNASSIGNED_REGCLASS (-1)
+
 struct value
 {
 	struct ir* ir;

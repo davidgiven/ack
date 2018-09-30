@@ -108,6 +108,7 @@ static void consider_push(struct ir* ir)
 			new_wordir(delta)
 		);
 		ir->left->root = ir->left->left->root = ir->left->right->root = ir->root;
+		ir->left->bb = ir->left->left->bb = ir->left->right->bb = current_bb;
 		ir->right = value_ir;
 
 		delta += ir->size;
@@ -119,6 +120,7 @@ static void consider_push(struct ir* ir)
 
 	ir = new_ir1(IR_STACKADJUST, EM_pointersize, new_wordir(-delta));
 	ir->left->root = ir->root = ir;
+	ir->left->bb = ir->bb = current_bb;
 	array_insert(&current_bb->irs, ir, runstart);
 	cursor++;
 }
