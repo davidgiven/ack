@@ -156,33 +156,38 @@ static void import_ir(struct ir* phi)
 void pass_convert_nonlocal_phis(void)
 {
     int i, j, k;
+    bool need_restart;
 
     graph_reset(&added);
 
     /* If a phi refers to an IR defined in a node which isn't a direct parent,
      * insert phis upstream for it. */
 
-restart:
-    for (i=0; i<dominance.preorder.count; i++)
+    while (!need_restart)
     {
-        current_dest = dominance.preorder.item[i];
+        need_restart = false;
 
-        for (j=0; j<current_dest->irs.count; j++)
+        for (i=0; i<dominance.preorder.count; i++)
         {
-            struct ir* phi = current_dest->irs.item[j];
-            if (phi->opcode == IR_PHI)
-            {
-                for (k=0; k<phi->u.phivalue.count; k++)
-                {
-                    current_ir = phi->u.phivalue.item[k].right;
-                    current_src = current_ir->bb;
+            current_dest = dominance.preorder.item[i];
 
-                    if (!array_contains(&current_dest->prevs, current_src))
+            for (j=0; j<current_dest->irs.count; j++)
+            {
+                struct ir* phi = current_dest->irs.item[j];
+                if (phi->opcode == IR_PHI)
+                {
+                    for (k=0; k<phi->u.phivalue.count; k++)
                     {
-                        tracef('I', "I: import of non-local IR $%d into %s from %s\n",
-                            current_ir->id, current_dest->name, current_src->name);
-                        import_ir(phi);
-                        goto restart;
+                        current_ir = phi->u.phivalue.item[k].right;
+                        current_src = current_ir->bb;
+
+                        if (!array_contains(&current_dest->prevs, current_src))
+                        {
+                            tracef('I', "I: import of non-local IR $%d into %s from %s\n",
+                                current_ir->id, current_dest->name, current_src->name);
+                            import_ir(phi);
+                            need_restart = true;
+                        }
                     }
                 }
             }
