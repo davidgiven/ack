@@ -102,7 +102,7 @@ cprogram {
 installable {
 	name = "pkg",
 	map = {
-		["$(PLATDEP)/int"] = "+int",
+		["$(INSDIR)/bin/int"] = "+int",
 		["$(INSDIR)/share/man/man1/int.1"] = "./int.1",
 	}
 }
