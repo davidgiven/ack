@@ -50,14 +50,10 @@ static ind_t refused;
 
 static int sbreak(ind_t incr)
 {
-	unsigned int	inc;
-
 	incr = (incr + (GRANULE - 1)) & ~(GRANULE - 1);
 
-	inc = incr;
 	if ((refused && refused < incr) ||
-	    (sizeof(char *) < sizeof(long) &&
-	     (inc != incr || BASE + inc < BASE)) ||
+	    BASE + incr < BASE ||
 	    brk(BASE + incr) == -1) {
 		if (!refused || refused > incr)
 			refused = incr;
@@ -150,12 +146,10 @@ move_up(piece, incr)
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
 	while (incr > 0 && sbreak(incr) == -1)
-		incr -= INCRSIZE;
+		incr -= INCRSIZE < incr ? INCRSIZE : incr;
 
-	if (incr <= 0) {
-		incr = 0;
+	if (incr == 0)
 		return (ind_t) 0;
-	}
 #ifndef NOSTATISTICS
 	if (statistics) fprintf(stderr,"moving up %lx\n", (long) incr);
 #endif
@@ -358,14 +352,14 @@ static int alloctype = NORMAL;
  * how many times the area is moved, because of another allocate, this offset
  * remains valid.
  */
-ind_t alloc(int piece, long size)
+ind_t alloc(int piece, size_t size)
 {
 	register ind_t		incr = 0;
 	ind_t			left = mems[piece].mem_left;
 	register ind_t		full = mems[piece].mem_full;
 
 	assert(passnumber == FIRST || (!incore && piece == ALLOMODL));
-	if (size == (long)0)
+	if (size == 0)
 		return full;
 	if (size != (ind_t)size)
 		return BADOFF;
@@ -373,13 +367,18 @@ ind_t alloc(int piece, long size)
 	case ALLOMODL:
 	case ALLORANL:
 		size = int_align(size);
+		if (size == 0)
+			return BADOFF;
 	}
 
-	if (size - left > 0)
+	if (size > left) {
 		incr = ((size - left + (INCRSIZE - 1)) / INCRSIZE) * INCRSIZE;
+		if (incr == 0)
+			return BADOFF;
+	}
 
 	if (incr == 0 ||
-	    (incr < left + full && (incr -= move_up(piece, left + full)) <= 0) ||
+	    (incr < left + full && move_up(piece, left + full) >= incr) ||
 	    move_up(piece, incr) == incr ||
 	    compact(piece, size, alloctype)) {
 		mems[piece].mem_full += size;
@@ -396,7 +395,7 @@ ind_t alloc(int piece, long size)
  * attempt fails, release the space occupied by other pieces and try again.
  */
 ind_t
-hard_alloc(int piece, long size)
+hard_alloc(int piece, size_t size)
 {
 	register ind_t	ret;
 	register int	i;
@@ -477,9 +476,7 @@ dealloc(int piece)
 }
 
 char *
-core_alloc(piece, size)
-	register int	piece;
-	register long	size;
+core_alloc(int piece, size_t size)
 {
 	register ind_t	off;
 
@@ -493,16 +490,8 @@ void core_free(int piece, char* p)
 	char	*q = address(piece, mems[piece].mem_full);
 
 	assert(p < q);
-	switch(sizeof(unsigned) == sizeof(char *)) {
-	case 1:
-		mems[piece].mem_full -= (unsigned) (q - p);
-		mems[piece].mem_left += (unsigned) (q - p);
-		break;
-	default:
-		mems[piece].mem_full -= (ind_t) q - (ind_t) p;
-		mems[piece].mem_left += (ind_t) q - (ind_t) p;
-		break;
-	}
+	mems[piece].mem_full -= (ind_t) q - (ind_t) p;
+	mems[piece].mem_left += (ind_t) q - (ind_t) p;
 }
 
 /*

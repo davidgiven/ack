@@ -23,7 +23,6 @@ static char rcsid[] = "$Id$";
 #include "orig.h"
 #include "sym.h"
 
-extern bool	incore;
 #ifndef NOSTATISTICS
 int		statistics;
 #endif

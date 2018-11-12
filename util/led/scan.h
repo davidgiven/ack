@@ -23,4 +23,6 @@ extern void get_modul(void);
 extern void skip_modul(struct outhead* head);
 extern void startrelo(struct outhead* head);
 extern struct outrelo* nextrelo(void);
+extern char* getemit(struct outhead* head, struct outsect* sects, int sectindex);
+extern char* getblk(long totalsz, long* pblksz, int sectindex);
 extern void endemit(char* emit);
