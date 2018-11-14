@@ -11,16 +11,12 @@ static char rcsid[]= "$Id$";
 #include "extern.h"
 
 char *filename;
-char *beg_sbrk;
-extern char *sbrk();
 
 main(argc,argv) char **argv; {
 	extern int nerrors;
 	extern int code_in_c;
 	extern int tabledebug;
 	extern int verbose;
-
-	beg_sbrk = sbrk(0);
 
 	while (argc >1 && argv[1][0]=='-') {
 		switch(argv[1][1]) {
