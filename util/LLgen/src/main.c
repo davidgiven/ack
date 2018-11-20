@@ -37,12 +37,10 @@ extern		fatal();
 extern		comfatal();
 extern		copyfile();
 extern void install();
-extern char	*sbrk();
 
 main(argc,argv) register string	argv[]; {
 	register string arg;
 	string libpath();
-	char	*beg_sbrk = 0;
 
 	/* Initialize */
 
@@ -129,8 +127,6 @@ main(argc,argv) register string	argv[]; {
 		argc--;
 	}
 
-	if (verbose) beg_sbrk = sbrk(0);
-
 #ifdef NON_CORRECTING
 	if ((subpars_sim) && (!non_corr)) {
 	    fprintf(stderr,"option -s illegal without -n, turned off\n");
@@ -206,7 +202,6 @@ main(argc,argv) register string	argv[]; {
 		fprintf(stderr, "number of tokens: %d\n", ntokens);
 		fprintf(stderr, "number of term structures: %d\n", nterms);
 		fprintf(stderr, "number of alternation structures: %d\n", nalts);
-		fprintf(stderr, "total memory used: %ld\n", (long)(sbrk(0) - beg_sbrk));
 	}
 	exit(0);
 }

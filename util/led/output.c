@@ -18,7 +18,6 @@ static char rcsid[] = "$Id$";
 static void generate_section_names();
 
 extern struct outhead	outhead;
-extern bool		incore;
 extern int		flagword;
 
 /*
@@ -60,11 +59,10 @@ generate_section_names()
 {
 	register struct outname	*name;
 	register int		sectindex;
-	register long		size;
+	register size_t		size;
 	extern struct outsect	outsect[];
-	extern char		*core_alloc();
 
-	size = (long)outhead.oh_nsect * sizeof(struct outname);
+	size = outhead.oh_nsect * sizeof(struct outname);
 	name = (struct outname *)core_alloc(ALLOGLOB, size);
 	if (name == (struct outname *)0)
 		return;

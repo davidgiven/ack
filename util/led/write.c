@@ -20,7 +20,6 @@ static char rcsid[] = "$Id$";
 extern struct outhead	outhead;
 extern struct outsect	outsect[];
 extern int		flagword;
-extern bool		incore;
 
 wr_fatal()
 {

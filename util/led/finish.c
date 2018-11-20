@@ -17,7 +17,6 @@ static char rcsid[] = "$Id$";
 #include "orig.h"
 #include "scan.h"
 
-extern bool	incore;
 extern unsigned short	NLocals;
 extern int	flagword;
 extern struct outname	*searchname();
@@ -127,8 +126,6 @@ handle_relos(head, sects, names)
 	register int		sectindex;
 	register int		nrelo;
 	register char		*emit;
-	extern char		*getemit();
-	extern struct outrelo	*nextrelo();
 	static long zeros[MAXSECT];
 
 	if (incore) {
@@ -169,7 +166,6 @@ handle_relos(head, sects, names)
 				    long sz = sects[sectindex].os_flen;
 				    long sf = 0;
 				    long blksz;
-				    char *getblk();
 
 				    emit = getblk(sz, &blksz, sectindex);
 				    while (sz) {

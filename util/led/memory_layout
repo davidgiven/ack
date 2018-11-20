@@ -21,10 +21,10 @@
 		-----------------------------------------------
 			Strings of global names *
 		-----------------------------------------------
-#ifdef SYMDEBUG
+#ifdef SYMDBUG
 			Symbolic debugging information
 		-----------------------------------------------
-#endif /* SYMDEBUG */
+#endif /* SYMDBUG */
 			Symbol table *
 		-----------------------------------------------
 			Archive positions *

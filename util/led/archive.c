@@ -41,14 +41,18 @@ getsymdeftable()
 
 	count = nran = rd_long(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
-	off = hard_alloc(ALLORANL, nran * sizeof(struct ranlib));
+	if (nran > SIZE_MAX / sizeof(struct ranlib))
+		off = BADOFF;	/* nran * size would overflow. */
+	else
+		off = hard_alloc(ALLORANL, nran * sizeof(struct ranlib));
 	if (off == BADOFF)
 		fatal("no space for ranlib structs");
 	ran = (struct ranlib *)address(ALLORANL, off);
 	rd_ranlib(infile, ran, count);
 	nchar = rd_long(infile);
 	debug("%ld ranlib chars\n", nchar, 0, 0, 0);
-	if ((off = hard_alloc(ALLORANL, nchar)) == BADOFF)
+	if (nchar != (size_t)nchar ||
+	    (off = hard_alloc(ALLORANL, nchar)) == BADOFF)
 		fatal("no space for ranlib strings");
 	rd_bytes(infile, address(ALLORANL, off), nchar);
 	ran = (struct ranlib *)address(ALLORANL, (ind_t)0);
@@ -144,7 +148,7 @@ notelib(pos)
 {
 	register ind_t	off;
 
-	if ((off = hard_alloc(ALLOARCH, (long)sizeof(long))) == BADOFF)
+	if ((off = hard_alloc(ALLOARCH, sizeof(long))) == BADOFF)
 		fatal("no space for archive position");
 	*(long *)address(ALLOARCH, off) = pos;
 }
