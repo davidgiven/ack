@@ -52,22 +52,18 @@ void con_mult(sz) word sz;
 #define FL_MSB_AT_LOW_ADDRESS 0
 #include <con_float>
 
-void prolog(nlocals) full nlocals;
+void prolog(full nlocals)
 {
-
-	fprintf(codefile, "\tpush\tb\n\tlxi\th,0\n\tdad\tsp\n\tmov\tb,h\n\tmov\tc,l\n");
-	switch (nlocals)
-	{
-		case 4:
-			fprintf(codefile, "\tpush\th\n");
-		case 2:
-			fprintf(codefile, "\tpush\th\n");
-		case 0:
-			break;
-		default:
-			fprintf(codefile, "\tlxi\th,%d\n\tdad\tsp\n\tsphl\n", -nlocals);
-			break;
-	}
+	if (nlocals == 0)
+		fprintf(codefile, "\tcall .pro0\n");
+	else if (nlocals == 2)
+		fprintf(codefile, "\tcall .pro2\n");
+	else if (nlocals == 4)
+		fprintf(codefile, "\tcall .pro4\n");
+	else if (nlocals < 0x100)
+		fprintf(codefile, "\tcall .probyte\n\t.data1 %d\n", -nlocals);
+	else
+		fprintf(codefile, "\tcall .proword\n\t.data2 %d\n", -nlocals);
 }
 
 void mes(type) word type;
