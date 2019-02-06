@@ -8,6 +8,9 @@ build_as {
 build_ncg {
 	name = "ncg",
 	arch = "i80",
+	vars = {
+		["+cflags"] = "-DUSE_I80_RSTS"
+	}
 }
 
 build_top {
