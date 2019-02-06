@@ -1844,18 +1844,12 @@ pat lfr ret $1==$2				leaving ret 0
 pat ret $1==0
 with STACK
 uses hlreg
-gen move lb,hl
-    sphl.
-    pop lb
-    ret.
+gen jmp {label, ".ret"}
 
 pat ret $1==2
 with dereg STACK
 uses hlreg
-gen move lb,hl
-    sphl.
-    pop lb
-    ret.
+gen jmp {label, ".ret"}
 
 pat ret $1<=8
 with STACK
@@ -1868,10 +1862,7 @@ gen 1:
     inx hl
     dcr a
     jnz {label,1b}
-    move lb,hl
-    sphl.
-    pop lb
-    ret.
+	jmp {label, ".ret"}
 
 /******************************************/
 /* Group 15: Miscellaneous		  */
