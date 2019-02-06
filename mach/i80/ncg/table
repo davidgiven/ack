@@ -1819,11 +1819,7 @@ gen Call {label,$1}
 pat cai
 with hlreg
 kills ALL
-uses dereg
-gen lxi de,{label,1f}
-    push de
-    pchl.
-    1:
+gen Call {label, ".pchl"}
 
 pat lfr $1==2				yields de
 
