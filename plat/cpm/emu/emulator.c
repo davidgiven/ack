@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <string.h>
 #include "intel_8080_emulator.h"
+#include "dis8080.h"
 #include "globals.h"
 
 uint8_t ram[0x10000];
@@ -63,8 +64,7 @@ void showregs(void)
 	char buffer[80];
 	int tstates;
 	uint16_t pc = i8080_read_reg16(PC);
-	//z80ex_dasm(buffer, sizeof(buffer), 0, &tstates, &tstates, dasm_read_cb, pc, NULL);
-	strcpy(buffer, "<not implemented>");
+	i8080_disassemble(buffer, sizeof(buffer), pc);
 	printf("%04x : %s\n", pc, buffer);
 }
 
@@ -289,7 +289,7 @@ static void debug(void)
 		if (!fgets(cmdline, sizeof(cmdline), stdin))
 			exit(0);
 
-		char* token = strtok(cmdline, " ");
+		char* token = strtok(cmdline, " \n\r\t");
 		if (token != NULL)
 		{
 			if (strcmp(token, "?") == 0)

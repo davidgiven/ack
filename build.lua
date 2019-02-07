@@ -20,11 +20,11 @@ vars.plats = {
 }
 vars.plats_with_tests = {
 	"cpm",
---	"linux386",
---	"linux68k",
---	"linuxmips",
---	"linuxppc",
---	"pc86",
+	"linux68k",
+	"linux386",
+	"linuxppc",
+	"linuxmips",
+	"pc86",
 }
 
 local plat_packages = {}
