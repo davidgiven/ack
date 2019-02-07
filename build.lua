@@ -19,11 +19,12 @@ vars.plats = {
 	"em22",
 }
 vars.plats_with_tests = {
-	"linux68k",
-	"linux386",
-	"linuxppc",
-	"linuxmips",
-	"pc86",
+	"cpm",
+--	"linux386",
+--	"linux68k",
+--	"linuxmips",
+--	"linuxppc",
+--	"pc86",
 }
 
 local plat_packages = {}
