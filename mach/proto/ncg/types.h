@@ -44,6 +44,7 @@ void in_init(char *);
 void in_start(void);
 void fillemlines(void);
 void swtxt(void);
+void dopseudo(void);
 /* gencode.c */
 void out_init(char *);
 void out_finish(void);
