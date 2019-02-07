@@ -13,16 +13,19 @@
     shld 0x09
     ret
 
-    ! de = [bc+const2] (remember bc is the frame pointer)
+    ! de = [bc+const1] (remember bc is the frame pointer)
 rst1:
     pop h
-    mov e, m
-    inx h
-    mov d, m
+    mov a, m
     inx h
     push h
-    xchg        ! hl = offset
-    dad b
+
+	mov l, a
+	ral
+	sbb a
+	mov h, a
+
+	dad b
     mov e, m
     inx h
     mov d, m

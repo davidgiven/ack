@@ -131,7 +131,7 @@ INSTRUCTIONS
 /* rpe					cost(1, 8).	*/
 /* rpo					cost(1, 8).	*/
    rrc			kills a:cc	cost(1, 4).
-   rst	const1:ro kills a:cc cost(1,11).	
+   rst	const1:ro cost(1,11).	
 /* rz					cost(1, 8).	*/
    sbb	reg1:ro 	kills a:cc	cost(1, 4).
 /* sbi	const1:ro 	kills a:cc	cost(2, 7).	*/
@@ -244,23 +244,23 @@ pat ldc					yields {const2,highw($1)}
 					       {const2,loww($1)}
 
 #ifdef USE_I80_RSTS
-   pat lol
+   pat lol sfit($1, 8)
       kills hlreg
       uses hlreg, dereg
       gen
          rst {const1, 1}
-         data2 {const2, $1}
-      yields de
-#else
-   pat lol
-      uses hlreg={const2, $1}, dereg
-      gen
-         dad lb
-         mov e,{m}
-         inx hl
-         mov d,{m}
+         data1 {const1, $1}
       yields de
 #endif
+
+pat lol
+  uses hlreg={const2, $1}, dereg
+  gen
+	 dad lb
+	 mov e,{m}
+	 inx hl
+	 mov d,{m}
+  yields de
 
 pat loe
 uses hlreg
