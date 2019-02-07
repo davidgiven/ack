@@ -19,6 +19,7 @@ vars.plats = {
 	"em22",
 }
 vars.plats_with_tests = {
+	"cpm",
 	"linux68k",
 	"linux386",
 	"linuxppc",
