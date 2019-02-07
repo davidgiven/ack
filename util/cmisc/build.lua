@@ -29,3 +29,8 @@ cprogram {
 	srcs = { "./ed.c" }
 }
 
+cprogram {
+	name = "objectify",
+	srcs = { "./objectify.c" }
+}
+
