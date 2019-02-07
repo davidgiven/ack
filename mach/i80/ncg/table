@@ -460,13 +460,23 @@ uses hl_or_de={label,$1}		yields %a
 pat stl lol $1==$2
 with dereg				yields de de leaving stl $1
 
+#ifdef USE_I80_RSTS
+   pat stl sfit($1, 8)
+	  with dereg
+      kills hlreg, areg
+      gen
+         rst {const1, 2}
+         data1 {const1, $1}
+#endif
+
 pat stl
-with dereg
-uses hlreg={const2,$1}
-gen dad lb
-    mov {m},e
-    inx hl
-    mov {m},d
+	with dereg
+	uses hlreg={const2, $1}
+	gen
+		dad lb
+		mov {m}, e
+		inx hl
+		mov {m}, d
 
 pat ste loe $1==$2
 with hlreg				yields hl hl leaving ste $1
