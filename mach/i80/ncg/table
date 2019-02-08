@@ -245,8 +245,7 @@ pat ldc					yields {const2,highw($1)}
 
 #ifdef USE_I80_RSTS
    pat lol sfit($1, 8)
-      kills hlreg
-      uses hlreg, dereg
+      uses hlreg, areg, dereg
       gen
          rst {const1, 1}
          data1 {const1, $1}
@@ -462,8 +461,8 @@ with dereg				yields de de leaving stl $1
 
 #ifdef USE_I80_RSTS
    pat stl sfit($1, 8)
-	  with dereg
-      kills hlreg, areg
+	   with dereg
+      uses hlreg, areg
       gen
          rst {const1, 2}
          data1 {const1, $1}
