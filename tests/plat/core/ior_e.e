@@ -4,15 +4,16 @@
     exp $_m_a_i_n
     pro $_m_a_i_n, 0
 
-	/* Or word-sized set */
+zero
+	rom 0
+one
+	rom 1
 
-four
-	rom EM_WSIZE
+	/* Or var with var */
 
-	loc 0
-	loc 1
-	loe four		/* to defeat constant folding */
-	ior
+	loe zero
+	loe one
+	ior EM_WSIZE
 	loc 1
 	cmu EM_WSIZE
 	zeq *1
@@ -22,33 +23,61 @@ four
     asp 4
 1
 
-	/* Or triple-word-sized set */
+	/* Or var with const */
 
-four_by_three
-	rom EM_WSIZE*3
-
-	loc 16
-	loc 32
-	loc 64
+	loe zero
 	loc 1
-	loc 2
-	loc 3
-	loe four_by_three
-	ior
-	loc 67
+	ior EM_WSIZE
+	loc 1
 	cmu EM_WSIZE
-	zne *2
-	loc 34
-	cmu EM_WSIZE
-	zne *2
-	loc 17
+	zeq *2
+
+    loc __LINE__
+    cal $fail
+    asp 4
+2
+
+	/* Or const with var */
+
+	loc 0
+	loe one
+	ior EM_WSIZE
+	loc 1
 	cmu EM_WSIZE
 	zeq *3
-2
-	loc __LINE__
-	cal $fail
-	asp 4
+
+    loc __LINE__
+    cal $fail
+    asp 4
 3
+
+	/* Or var with big const */
+
+	loe zero
+	loc 1000
+	ior EM_WSIZE
+	loc 1000
+	cmu EM_WSIZE
+	zeq *4
+
+    loc __LINE__
+    cal $fail
+    asp 4
+4
+
+	/* Or big const with var */
+
+	loc 1000
+	loe one
+	ior EM_WSIZE
+	loc 1001
+	cmu EM_WSIZE
+	zeq *5
+
+    loc __LINE__
+    cal $fail
+    asp 4
+5
 
     cal $finished
     end
