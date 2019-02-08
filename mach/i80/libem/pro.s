@@ -21,8 +21,8 @@
 .probyte:
 	pop h
 	push b
-	mvi e, 0xff
-	mov d, m
+	mvi d, 0xff
+	mov e, m
 	inx h
 	jmp .pron
 

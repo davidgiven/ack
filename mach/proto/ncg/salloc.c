@@ -34,7 +34,7 @@ int nstab=0;
 
 static void chkstr(string, char *);
 
-string myalloc(size) {
+string myalloc(int size) {
 	string p;
 
 	p = (string) calloc((unsigned)size, 1);

@@ -23,6 +23,8 @@ static bool tracing = false;
 static bool singlestepping = true;
 static bool bdosbreak = false;
 
+static const char* delimiters = " \t\n\r";
+
 uint8_t i8080_read(uint16_t addr)
 {
 	return ram[addr];
@@ -65,13 +67,13 @@ void showregs(void)
 	int tstates;
 	uint16_t pc = i8080_read_reg16(PC);
 	i8080_disassemble(buffer, sizeof(buffer), pc);
-	printf("%04x : %s\n", pc, buffer);
+	puts(buffer);
 }
 
 static void cmd_register(void)
 {
-	char* w1 = strtok(NULL, " ");
-	char* w2 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
+	char* w2 = strtok(NULL, delimiters);
 
 	if (w1 && w2)
 	{
@@ -102,7 +104,7 @@ static void cmd_register(void)
 
 static void cmd_break(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t breakpc = strtoul(w1, NULL, 16);
@@ -128,7 +130,7 @@ static void cmd_break(void)
 
 static void cmd_watch(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t watchaddr = strtoul(w1, NULL, 16);
@@ -158,7 +160,7 @@ static void cmd_watch(void)
 
 static void cmd_delete_breakpoint(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t breakpc = strtoul(w1, NULL, 16);
@@ -176,7 +178,7 @@ static void cmd_delete_breakpoint(void)
 
 static void cmd_delete_watchpoint(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t address = strtoul(w1, NULL, 16);
@@ -195,8 +197,8 @@ static void cmd_delete_watchpoint(void)
 
 static void cmd_memory(void)
 {
-	char* w1 = strtok(NULL, " ");
-	char* w2 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
+	char* w2 = strtok(NULL, delimiters);
 
 	if (!w2)
 		w2 = "100";
@@ -241,9 +243,30 @@ static void cmd_memory(void)
 	}
 }
 
+static void cmd_unassemble(void)
+{
+	char* w1 = strtok(NULL, delimiters);
+	char* w2 = strtok(NULL, delimiters);
+	uint16_t startaddr = i8080_read_reg16(PC);
+	uint16_t endaddr;
+
+	if (w1)
+		startaddr = strtoul(w1, NULL, 16);
+	endaddr = startaddr + 0x20;
+	if (w2)
+		endaddr = startaddr + strtoul(w2, NULL, 16);
+
+	while (startaddr < endaddr)
+	{
+		char buffer[80];
+		startaddr = i8080_disassemble(buffer, sizeof(buffer), startaddr);
+		puts(buffer);
+	}
+}
+
 static void cmd_bdos(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 		bdosbreak = !!strtoul(w1, NULL, 16);
 	else
@@ -252,7 +275,7 @@ static void cmd_bdos(void)
 
 static void cmd_tracing(void)
 {
-	char* w1 = strtok(NULL, " ");
+	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 		tracing = !!strtoul(w1, NULL, 16);
 	else
@@ -270,10 +293,11 @@ static void cmd_help(void)
 		   "  w <addr>        set watchpoint\n"
 		   "  dw <addr>       delete watchpoint\n"
 		   "  m <addr> <len>  show memory\n"
+		   "  u <addr> <len>  unassemble memory\n"
 		   "  s               single step\n"
 		   "  g               continue\n"
 		   "  bdos 0|1        enable break on bdos entry\n"
-		   "  trace 0|1       enable tracing\n"
+		   "  tracing 0|1     enable tracing\n"
 	);
 }
 
@@ -289,7 +313,7 @@ static void debug(void)
 		if (!fgets(cmdline, sizeof(cmdline), stdin))
 			exit(0);
 
-		char* token = strtok(cmdline, " \n\r\t");
+		char* token = strtok(cmdline, delimiters);
 		if (token != NULL)
 		{
 			if (strcmp(token, "?") == 0)
@@ -306,6 +330,8 @@ static void debug(void)
 				cmd_delete_watchpoint();
 			else if (strcmp(token, "m") == 0)
 				cmd_memory();
+			else if (strcmp(token, "u") == 0)
+				cmd_unassemble();
 			else if (strcmp(token, "s") == 0)
 			{
 				singlestepping = true;

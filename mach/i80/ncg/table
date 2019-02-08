@@ -82,6 +82,8 @@ INSTRUCTIONS
 /* cpo	label:ro			cost(3,14).	*/
 /* cz	label:ro			cost(3,14).	*/
 /* daa			kills a:cc	cost(1, 4).	*/
+   data1 ".data1" const1:ro.
+   data2 ".data2" const2:ro.
    dad	b_d_h_sp:ro 	kills hl:cc	cost(1,10).
    dcr	reg+lbreg:rw:cc			cost(1, 5).
    dcr	m:rw:cc				cost(1, 7).
@@ -129,7 +131,7 @@ INSTRUCTIONS
 /* rpe					cost(1, 8).	*/
 /* rpo					cost(1, 8).	*/
    rrc			kills a:cc	cost(1, 4).
-/* rst	const1:ro			cost(1,11).	*/
+   rst	const1:ro cost(1,11).	
 /* rz					cost(1, 8).	*/
    sbb	reg1:ro 	kills a:cc	cost(1, 4).
 /* sbi	const1:ro 	kills a:cc	cost(2, 7).	*/
@@ -241,12 +243,23 @@ pat loc					yields {const2,$1}
 pat ldc					yields {const2,highw($1)}
 					       {const2,loww($1)}
 
+#ifdef USE_I80_RSTS
+   pat lol sfit($1, 8)
+      uses hlreg, areg, dereg
+      gen
+         rst {const1, 1}
+         data1 {const1, $1}
+      yields de
+#endif
+
 pat lol
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de
+  uses hlreg={const2, $1}, dereg
+  gen
+	 dad lb
+	 mov e,{m}
+	 inx hl
+	 mov d,{m}
+  yields de
 
 pat loe
 uses hlreg
@@ -446,13 +459,23 @@ uses hl_or_de={label,$1}		yields %a
 pat stl lol $1==$2
 with dereg				yields de de leaving stl $1
 
+#ifdef USE_I80_RSTS
+   pat stl sfit($1, 8)
+	   with dereg
+      uses hlreg, areg
+      gen
+         rst {const1, 2}
+         data1 {const1, $1}
+#endif
+
 pat stl
-with dereg
-uses hlreg={const2,$1}
-gen dad lb
-    mov {m},e
-    inx hl
-    mov {m},d
+	with dereg
+	uses hlreg={const2, $1}
+	gen
+		dad lb
+		mov {m}, e
+		inx hl
+		mov {m}, d
 
 pat ste loe $1==$2
 with hlreg				yields hl hl leaving ste $1

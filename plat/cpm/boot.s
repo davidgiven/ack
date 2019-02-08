@@ -48,6 +48,12 @@ begtext:
 
 	lxi sp, stack + STACKSIZE
 
+	! Initialise the rsts (if desired).
+
+	#ifdef USE_I80_RSTS
+		call .rst_init
+	#endif
+
 	! C-ify the command line at 0x0080.
 	
 	lxi h, 0x0080

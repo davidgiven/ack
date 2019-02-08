@@ -4,18 +4,13 @@
  *
  */
 
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
 /*
  * machine dependent back end routines for the Intel 8080.
  */
 
 #include <stdlib.h> /* atol */
 
-void con_part(sz, w) register sz;
-word w;
+void con_part(int sz, word w)
 {
 
 	while (part_size % sz)
