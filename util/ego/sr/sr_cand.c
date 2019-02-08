@@ -17,7 +17,7 @@
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/map.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr.h"
 #include "sr_aux.h"
 #include "sr_cand.h"

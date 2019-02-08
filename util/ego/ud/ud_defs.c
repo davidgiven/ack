@@ -20,7 +20,7 @@
 #include "../share/locals.h"
 #include "ud_defs.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 
 short nrdefs;		/* total number of definitions */
 short nrexpldefs;	/* number of explicit definitions */

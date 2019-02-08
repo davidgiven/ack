@@ -19,7 +19,7 @@
 #include "../share/def.h"
 #include "../share/global.h"
 #include "../share/lset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/alloc.h"
 #include "ra.h"
 #include "ra_aux.h"

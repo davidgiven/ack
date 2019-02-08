@@ -14,7 +14,7 @@
 #include "../share/debug.h"
 #include "../share/lset.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "cf.h"
 
 #define MARK_STRONG(b)	b->b_flags |= BF_STRONG

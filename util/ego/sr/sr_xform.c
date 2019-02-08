@@ -24,7 +24,7 @@
 #include "../share/get.h"
 #include "sr_aux.h"
 #include "../share/lset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr_xform.h"
 
 /* Transformations on EM texts */

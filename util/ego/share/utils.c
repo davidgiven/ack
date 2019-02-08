@@ -15,7 +15,7 @@
 #include "debug.h"
 #include "global.h"
 #include "alloc.h"
-#include "aux.h"
+#include "utils.h"
 #include "map.h"
 #include "lset.h"
 

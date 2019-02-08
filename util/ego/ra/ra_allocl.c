@@ -18,7 +18,7 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/cset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/alloc.h"
 #include "../share/map.h"
 #include "ra.h"

@@ -36,7 +36,7 @@ clibrary {
 		"./files.c",
 		"./go.c",
 		"./map.c",
-		"./aux.c",
+		"./utils.c",
 		"./get.c",
 		"./put.c",
 		"./alloc.c",
