@@ -343,24 +343,36 @@ static struct insn insns[0x100] =
 
 uint16_t i8080_disassemble(char* buffer, size_t bufsiz, uint16_t pc)
 {
-    uint8_t opcode = i8080_read(pc++);
+    uint8_t opcode = i8080_read(pc);
+	uint8_t p1 = i8080_read(pc+1);
+	uint8_t p2 = i8080_read(pc+2);
     struct insn* insn = &insns[opcode];
     uint16_t value = 0;
+	const char* left = "";
+
+	snprintf(buffer, bufsiz, "%04x : ", pc);
+	pc++;
+
     switch (insn->operand)
     {
         case NOTHING:
+			left = "%02x       : ";
             break;
 
         case CONST8:
-            value = i8080_read(pc++);
+			left = "%02x %02x    : ";
+            value = p1;
+			pc++;
             break;
 
         case CONST16:
-            value = i8080_read(pc++);
-            value |= i8080_read(pc++) << 8;
+			left = "%02x %02x %02x : ";
+            value = p1 | (p2<<8);
+			pc += 2;
             break;
     }
 
-    snprintf(buffer, bufsiz, insn->name, value);
+	snprintf(buffer + 7, bufsiz - 7, left, opcode, p1, p2);
+    snprintf(buffer + 18, bufsiz - 18, insn->name, value);
     return pc;
 }
