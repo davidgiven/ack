@@ -999,49 +999,58 @@ gen xra a
 pat loc loc cii $1==$2
 
 pat loc loc cii $1==2 && $2==4
-with hl_or_de
-uses hl_or_de={const2,0}, areg
-gen mov a,%1.1
-    ora a
-    jp {label,1f}
-    lxi %a,{const2,0-1}
-    1:					yields %a %1
+   with hl_or_de
+      uses hl_or_de, areg
+      gen
+         mov a, %1.1
+         ral.
+         sbb a
+         mov %a.1, a
+         mov %a.2, a
+      yields %a %1
 
 pat loc loc cii $1==4 && $2==2
-with hl_or_de hl_or_de			yields %1
+   with hl_or_de hl_or_de
+      yields %1
 
 pat loc loc cii $1==1 && $2==2
-with reg
-uses reusing %1, areg=%1, hl_or_de
-gen move {const1,0},%b.1
-    move a,%b.2
-    ora a
-    jp {label,1f}
-    mvi %b.1,{const1,255}
-    1:					yields %b
-with hl_or_de
-uses areg=%1.2
-gen move {const1,0},%1.1
-    ora a
-    jp {label,1f}
-    mvi %1.1,{const1,255}
-    1:					yields %1
+   with reg
+      uses reusing %1, areg=%1, hl_or_de
+      gen
+         mov %b.2, a
+         ral.
+         sbb a
+         mov %b.1, a
+      yields %b
+   with hl_or_de
+      uses areg=%1.2
+      gen
+         ral.
+         sbb a
+         mov %1.1, a
+      yields %1
 
 pat loc loc cii $1==1 && $2==4
-with reg
-   uses hlreg
-   gen move %1,l			yields hl
-						leaving loc $1 loc $2 cii
-with hlreg
-   uses dereg, areg
-   gen move {const1,0},%1.1
-       move l,a
-       ora a
-       jp {label,1f}
-       mvi h,{const1,255}
-       1:
-       mov e,h
-       mov d,h				yields de hl
+   with areg
+      uses hl_or_de, hl_or_de
+      gen
+         mov %b.2, a
+         ral.
+         sbb a
+         mov %b.1, a
+         mov %a.2, a
+         mov %a.1, a
+      yields %a %b
+   with hlreg
+      uses dereg, areg
+      gen
+         mov a, l
+         ral.
+         sbb a
+         mov h, a
+         mov e, a
+         mov d, a
+      yields de hl
 
 pat cii
 kills ALL
