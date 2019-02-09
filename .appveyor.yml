@@ -1,8 +1,17 @@
 environment:
   matrix:
-  - TARGET: cygwin-gcc
-    BUILD_ENVIRONMENT: cygwin
+  - CYG_BASH: C:\cygwin64\bin\bash
+    CC: gcc
+
+clone_depth: 1
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
 
 build_script:
-  - sh: make
+  - 'echo building...'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; exec 0</dev/null; make"'
 
