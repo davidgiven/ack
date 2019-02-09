@@ -17,7 +17,7 @@
 #include "../share/lset.h"
 #include "../share/cset.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_interv.h"

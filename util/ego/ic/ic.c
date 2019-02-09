@@ -27,7 +27,7 @@
 #include "../share/global.h"
 #include "../share/files.h"
 #include "../share/put.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 
 /* Global variables */
 

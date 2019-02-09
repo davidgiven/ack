@@ -77,7 +77,7 @@ static void cmd_register(void)
 
 	if (w1 && w2)
 	{
-		Z80_REG_T reg = -1;
+		int reg = -1;
 		if (strcmp(w1, "sp") == 0)
 			reg = SP;
 		else if (strcmp(w1, "pc") == 0)

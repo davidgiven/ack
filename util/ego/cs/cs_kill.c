@@ -9,7 +9,7 @@
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/cset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/map.h"
 #include "cs.h"
 #include "cs_aux.h"

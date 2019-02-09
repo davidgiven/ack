@@ -10,7 +10,7 @@
 #include <em_reg.h>
 #include <em_spec.h>
 #include "../share/types.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "cs.h"

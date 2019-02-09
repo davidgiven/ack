@@ -21,7 +21,7 @@
 #include "../share/cset.h"
 #include "../share/def.h"
 #include "../share/locals.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "ud_defs.h"
 
 repl_line(old,new,b)

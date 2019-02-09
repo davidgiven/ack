@@ -22,7 +22,7 @@
 #include "get.h"
 #include "alloc.h"
 #include "map.h"
-#include "aux.h"
+#include "utils.h"
 
 FILE *curinp;
 block_id lastbid;	/* block identifying number */

@@ -16,7 +16,7 @@
 #include "sr.h"
 #include "../share/debug.h"
 #include "../share/global.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr_aux.h"
 #include "../share/lset.h"
 #include "sr_iv.h"

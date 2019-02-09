@@ -22,7 +22,7 @@
 #include "../share/alloc.h"
 #include "../share/def.h"
 #include "../share/global.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr_aux.h"
 #include "../share/lset.h"
 #include "sr_xform.h"

@@ -2,9 +2,7 @@
 #define GLOBALS_H
 
 #include <stdbool.h>
-#include <z80ex/z80ex.h>
 
-extern Z80EX_CONTEXT* z80;
 extern uint8_t ram[0x10000];
 
 extern void emulator_init(void);
