@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-extern Z80EX_CONTEXT* z80;
 extern uint8_t ram[0x10000];
 
 extern void emulator_init(void);
