@@ -8,9 +8,7 @@
 
 #include "ack_string.h"
 
-static
-is_oct(c)
-	char c;
+static unsigned int is_oct(char c)
 {
 	return ((unsigned int)(c-'0') <= ('7'-'0'));
 }
@@ -20,11 +18,7 @@ is_oct(c)
 	The ascii length of the resulting string is returned, including the
 	terminating null-character.
 */
-char *
-str2bts(str, bts, pn)
-	register char *str;
-	char *bts;
-	int *pn;
+char *str2bts(register char *str, char *bts, int *pn)
 {
 	register char *t = bts;
 
@@ -53,7 +47,7 @@ str2bts(str, bts, pn)
 				break;
 			default:
 				if (is_oct(*str)) {
-					register cnt = 0, oct = 0;
+					register int cnt = 0, oct = 0;
 
 					do
 						oct = oct * 8 + *str - '0';

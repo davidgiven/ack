@@ -8,14 +8,15 @@
 
 #include "ack_string.h"
 
-char *
-btscpy(b1, b2, n)
-	register char *b1, *b2;
-	register int n;
+
+
+
+char *btscpy(register char *s1, register char *s2, register int n)
+
 {
-	char *b1s = b1;
+	char *b1s = s1;
 
 	while (n-- > 0)
-		*b1++ = *b2++;
+		*s1++ = *s2++;
 	return b1s;
 }

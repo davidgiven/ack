@@ -6,10 +6,10 @@
 
 #include "ack_string.h"
 
-char *
-strrindex(str, chr)
-	register char *str;
-	int chr;
+
+
+
+char *strrindex(register char *str, int chr)
 {
 	register char *retptr = 0;
 

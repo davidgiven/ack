@@ -12,10 +12,10 @@
 
 #define is_print(c)	((unsigned)((c) - ' ') <= '~' - ' ')
 
-char *
-bts2str(b, n, s)
-	char *b, *s;
-	register int n;
+
+
+
+char *bts2str(char *b, register int n, char *s)
 {
 	register char *f = b, *t = s;
 

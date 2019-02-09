@@ -8,16 +8,13 @@
 
 #include "ack_string.h"
 
-char *
-btscat(b1, n1, b2, n2)
-	char *b1;
-	int n1;
-	register char *b2;
-	register int n2;
+
+
+char *btscat(char *s1, int n1, register char *s2, register int n2)
 {
-	register char *b = b1 + n1;
+	register char *b = s1 + n1;
 
 	while (n2-- > 0)
-		*b++ = *b2++;
-	return b1;
+		*b++ = *s2++;
+	return s1;
 }
