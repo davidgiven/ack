@@ -1,119 +1,121 @@
 /*
- *	Read in makefile
+ *  Read in makefile
  *
- *	$Header$
+ *  $Header$
  */
 
 
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
-#include	<ctype.h>
+#include <ctype.h>
 #include "h.h"
 
 
-int			lineno;
+int lineno;
 
 
 /*
- *	Syntax error handler.  Print message, with line number, and exits.
+ *  Syntax error handler.  Print message, with line number, and exits.
  */
 /*VARARGS1*/
-void
-error(msg, a1, a2, a3)
-char *			msg;
+void error(char *msg, char* a1)
 {
-	fprintf(stderr, "%s: ", myname);
-	fprintf(stderr, msg, a1, a2, a3);
-	if (lineno)
-		fprintf(stderr, " near line %d", lineno);
-	fputc('\n', stderr);
-	exit(1);
+    fprintf(stderr, "%s: ", myname);
+    if (a1 != NULL)
+    {
+    	fprintf(stderr, msg, a1);
+    } else
+    {
+    	fprintf(stderr, msg);
+    }
+
+    if (lineno)
+        fprintf(stderr, " near line %d", lineno);
+    fputc('\n', stderr);
+    exit(1);
 }
 
 
 /*
- *	Read a line into the supplied string of length LZ.  Remove
- *	comments, ignore blank lines. Deal with	quoted (\) #, and
- *	quoted newlines.  If EOF return TRUE.
+ *  Read a line into the supplied string of length LZ.  Remove
+ *  comments, ignore blank lines. Deal with quoted (\) #, and
+ *  quoted newlines.  If EOF return TRUE.
  */
-bool
-getline(str, fd)
-char *		str;
-FILE *		fd;
+bool mgetline(char* str, FILE* fd)
 {
-	register char *		p;
-	char *			q;
-	int			pos = 0;
+    register char *     p;
+    char *          q;
+    int         pos = 0;
 
 
-	for (;;)
-	{
-		if (fgets(str+pos, LZ-pos, fd) == (char *)0)
-			return TRUE;		/*  EOF  */
+    for (;;)
+    {
+        if (fgets(str+pos, LZ-pos, fd) == (char *)0)
+            return TRUE;        /*  EOF  */
 
-		lineno++;
+        lineno++;
 
-		if ((p = index(str+pos, '\n')) == (char *)0)
-			error("Line too long");
+        if ((p = strchr(str+pos, '\n')) == (char *)0)
+            error("Line too long", NULL);
 
-		if (p[-1] == '\\')
-		{
-			p[-1] = '\n';
-			pos = p - str;
-			continue;
-		}
+        if (p[-1] == '\\')
+        {
+            p[-1] = '\n';
+            pos = p - str;
+            continue;
+        }
 
-		p = str;
-		while (((q = index(p, '#')) != (char *)0) &&
-		    (p != q) && (q[-1] == '\\'))
-		{
-			char	*a;
+        p = str;
+        while (((q = strchr(p, '#')) != (char *)0) &&
+            (p != q) && (q[-1] == '\\'))
+        {
+            char    *a;
 
-			a = q - 1;	/*  Del \ chr; move rest back  */
-			p = q;
-			while (*a++ = *q++)
-				;
-		}
-		if (q != (char *)0)
-		{
-			q[0] = '\n';
-			q[1] = '\0';
-		}
+            a = q - 1;  /*  Del \ chr; move rest back  */
+            p = q;
+            while (*a++ = *q++)
+                ;
+        }
+        if (q != (char *)0)
+        {
+            q[0] = '\n';
+            q[1] = '\0';
+        }
 
-		p = str;
-		while (isspace(*p))	/*  Checking for blank  */
-			p++;
+        p = str;
+        while (isspace(*p)) /*  Checking for blank  */
+            p++;
 
-		if (*p != '\0')
-			return FALSE;
-		pos = 0;
-	}
+        if (*p != '\0')
+            return FALSE;
+        pos = 0;
+    }
 }
 
 
 /*
- *	Get a word from the current line, surounded by white space.
- *	return a pointer to it. String returned has no white spaces
- *	in it.
+ *  Get a word from the current line, surounded by white space.
+ *  return a pointer to it. String returned has no white spaces
+ *  in it.
  */
-char *
-gettok(ptr)
-char	**ptr;
+char *gettok(char **ptr)
 {
-	register char *		p;
+    register char *     p;
 
 
-	while (isspace(**ptr))	/*  Skip spaces  */
-		(*ptr)++;
+    while (isspace(**ptr))  /*  Skip spaces  */
+        (*ptr)++;
 
-	if (**ptr == '\0')	/*  Nothing after spaces  */
-		return NULL;
+    if (**ptr == '\0')  /*  Nothing after spaces  */
+        return NULL;
 
-	p = *ptr;		/*  word starts here  */
+    p = *ptr;       /*  word starts here  */
 
-	while ((**ptr != '\0') && (!isspace(**ptr)))
-		(*ptr)++;	/*  Find end of word  */
+    while ((**ptr != '\0') && (!isspace(**ptr)))
+        (*ptr)++;   /*  Find end of word  */
 
-	*(*ptr)++ = '\0';	/*  Terminate it  */
+    *(*ptr)++ = '\0';   /*  Terminate it  */
 
-	return(p);
+    return(p);
 }
