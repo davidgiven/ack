@@ -9,7 +9,7 @@ init:
 
 install:
   - '%CYGWIN%\bin\bash -lc "cygcheck -dc cygwin"'
-  - '%CYGWIN%\bin\setup-x86_64 -q -P bison,flex,ninja'
+  - '%CYGWIN%\setup-x86_64 -q -P bison,flex,ninja'
 
 build_script:
   - 'echo building...'
