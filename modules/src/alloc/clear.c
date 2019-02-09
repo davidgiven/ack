@@ -10,10 +10,7 @@
 
 /* instead of Calloc: */
 
-void
-clear(ptr, n)
-	register char *ptr;
-	register unsigned int n;
+void clear(register char *ptr, register unsigned int n)
 {
 	register long *q = (long *) ptr;
 

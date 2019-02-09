@@ -6,7 +6,7 @@ L_ACK_MODULES_ALLOC = {
 	$PWD/botch.c,
 	$PWD/clear.c,
 	$PWD/st_alloc.c,
-	$PWD/std_alloc.c,
+	$PWD/stdalloc.c,
 	$PWD/No_Mem.c,
 	$PWD/alloc.h
 };

@@ -5,44 +5,19 @@ Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory alloc
 .SH SYNOPSIS
 .B #include <alloc.h>
 .PP
-.B char *Malloc(size)
-.br
-.B unsigned int size;
+.B char *Malloc(unsigned int size)
 .PP
-.B char *Salloc(str, size)
-.br
-.B char *str;
-.B unsigned int size;
+.B char *Salloc(char *str, unsigned int size)
 .PP
-.B char *Realloc(ptr, size)
-.B char *buf;
-.B unsigned int size;
+.B char *Realloc(char *buf, unsigned int size)
 .PP
-.B char *Srealloc(str, size)
-.br
-.B char *str;
-.br
-.B unsigned int size;
+.B char *Srealloc(char *str, unsigned int size)
 .PP
-.B char *st_alloc(phead, size, count)
-.br
-.B char **phead;
-.br
-.B unsigned int size;
+.B char *st_alloc(char **phead, unsigned int size, int count)
 .PP
-.B st_free(ptr, phead, size)
-.br
-.B char *ptr;
-.br
-.B char **phead;
-.br
-.B unsigned int size;
+.B st_free(char *ptr, char **phead, unsigned int size)
 .PP
-.B void clear(ptr, size)
-.br
-.B char *ptr;
-.br
-.B unsigned int size;
+.B void clear(char *ptr, unsigned int size)
 .PP
 .void No_Mem()
 .PP
