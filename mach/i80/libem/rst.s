@@ -10,10 +10,13 @@
     mvi a, 0xc3     ! jmp <a16>
     sta 0x08
     sta 0x10
+    sta 0x18
     lxi h, rst1
     shld 0x09
     lxi h, rst2
     shld 0x11
+    lxi h, rst3
+    shld 0x19
     ret
 
     ! de = [bc+const1] (remember bc is the frame pointer)
@@ -52,3 +55,18 @@ rst2:
     mov m, d
     ret
 
+    ! hl = bc+const1
+rst3:
+    pop h
+    mov a, m
+    inx h
+    push h
+
+    mov l, a
+    ral
+    sbb a
+    mov h, a
+
+    dad b
+    ret
+    

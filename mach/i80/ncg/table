@@ -249,8 +249,8 @@ pat loc sfit($1, 8)
 pat loc
    yields {const2, $1}
    
-pat ldc					yields {const2,highw($1)}
-					       {const2,loww($1)}
+pat ldc
+   yields {const2, highw($1)} {const2, loww($1)}
 
 #ifdef USE_I80_RSTS
    pat lol sfit($1, 8)
@@ -271,44 +271,46 @@ pat lol
   yields de
 
 pat loe
-uses hlreg
-gen lhld {label,$1}			yields hl
+   uses hlreg
+      gen
+         lhld {label,$1}
+		yields hl
 
 pat lil
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov h,{m}
-    mov l,e
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de
+   leaving
+      lol $1
+      loi 2
 
 pat lof
-with hl_or_de
-kills hl_or_de
-uses hl_or_de={const2,$1}
-gen dad de
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de
+   leaving
+      adp $1
+      loi 2
+
+#ifdef USE_I80_RSTS
+   pat lal sfit($1, 8)
+      uses dereg, hlreg, areg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+      yields hl
+#endif
 
 pat lal
-uses hlreg={const2,$1}
-gen dad lb				yields hl
+   uses hlreg={const2,$1}
+      gen
+         dad lb
+      yields hl
 
-pat lae					yields {label,$1}
+pat lae
+   yields {label,$1}
 
-pat lxl $1==0				yields lb
+pat lxl $1==0
+   yields lb
 
 pat lxl $1==1
-uses dereg, hlreg
-gen move {const2,SL},hl
-    dad lb
-    mov e,{m}
-    inx hl
-    mov d,{m}				yields de
+   leaving
+      lxa 0
+      loi 2
 
 pat lxl $1>1 && $1<256
 uses dereg, areg={const1,$1}, hlreg
@@ -323,9 +325,11 @@ gen move lb,de
     jnz {label,1b}			yields de
 
 pat lxa $1==0
-uses hlreg
-gen move {const2,SL},hl
-    dad lb				yields hl
+   uses hlreg
+   gen
+      move {const2,SL},hl
+      dad lb
+   yields hl
 
 pat lxa $1==1
 uses dereg, hlreg
@@ -417,17 +421,9 @@ kills ALL
 gen Call {label,".loi"}
 
 pat ldl
-with STACK
-uses dereg, hlreg={const2,$1+3}
-gen dad lb
-    mov d,{m}
-    dcx hl
-    mov e,{m}
-    dcx hl
-    push de
-    mov d,{m}
-    dcx hl
-    mov e,{m}				yields de
+   leaving
+      lal $1
+      loi 4
 
 pat lde
 with STACK
@@ -446,17 +442,9 @@ gen lhld {label,$1+2}
     lhld {label,$1}			yields de hl
 
 pat ldf
-with hl_or_de STACK
-uses hl_or_de={const2,$1+3}
-gen dad de
-    mov d,{m}
-    dcx hl
-    mov e,{m}
-    dcx hl
-    push de
-    mov d,{m}
-    dcx hl
-    mov e,{m}				yields de
+   leaving
+      adp $1
+      loi 4
 
 pat lpi
 uses hl_or_de={label,$1}		yields %a
@@ -494,85 +482,43 @@ with hlreg
 gen shld {label,$1}
 
 pat sil
-   with dereg
-   uses hlreg={const2,$1}, areg
-   gen
-      dad lb
-      mov a, {m}
-      inx hl
-      mov h, {m}
-      mov l, a
-      mov {m}, e
-      inx hl
-      mov {m}, d
+   leaving
+      lol $1
+      sti 2
 
 pat sil lil $1==$2
-with dereg
-uses hlreg={const2,$1}, areg
-gen dad lb
-    mov a,{m}
-    inx hl
-    mov h,{m}
-    mov l,a
-    mov {m},e
-    inx hl
-    mov {m},d				yields de
-
-pat lil loc adi sil $1==$4 && $3==2
-uses hlreg={const2,$1}, dereg, areg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov h,{m}
-    mov l,e
-    mov e,{m}
-    inx hl
-    mov d,{m}
-    push hl
-    lxi hl,{const2,$2}
-    dad de
-    xchg.
-    pop hl
-    mov {m},d
-    dcx hl
-    mov {m},e
+   leaving
+      dup 2
+      lol $1
+      sti 2
 
 pat lil inc sil $1==$3
-uses hlreg={const2,$1}, areg
-gen dad lb
-    mov a,{m}
-    inx hl
-    mov h,{m}
-    mov l,a
-    inr {m}
-    jnz {label,1f}
-    inx hl
-    inr {m}
-    1:
+   leaving
+      lol $1
+      dup 2
+      loi 2
+      inc 2
+      exg 2
+      sti 2
 
-pat lil dec sil $1==$3
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov h,{m}
-    mov l,e
-    mov e,{m}
-    inx hl
-    mov d,{m}
-    dcx de
-    mov {m},d
-    dcx hl
-    mov {m},e
+pat lil inc sil $1==$3
+   leaving
+      lol $1
+      dup 2
+      loi 2
+      dec 2
+      exg 2
+      sti 2
 
 pat stf
-with hl_or_de STACK
-uses hl_or_de={const2,$1}
-gen dad de
-    pop de
-    mov {m},e
-    inx hl
-    mov {m},d
+   with hl_or_de STACK
+      uses hl_or_de={const2,$1}
+      gen
+         dad de
+         pop de
+         mov {m},e
+         inx hl
+         mov {m},d
 
 pat sti $1==1
 with label areg
@@ -584,17 +530,20 @@ with hlreg reg
 
 
 pat sti $1==2
-with label hlreg
-   gen shld %1
-with hlreg dereg
-   gen mov {m},e
-       inx %1
-       mov {m},d
-with dereg hlreg
-   gen xchg.
-       mov {m},e
-       inx %2
-       mov {m},d
+   with label hlreg
+      gen
+         shld %1
+   with hlreg dereg
+      gen
+         mov {m},e
+         inx %1
+         mov {m},d
+   with dereg hlreg
+      gen
+         xchg.
+         mov {m},e
+         inx %2
+         mov {m},d
 
 pat sti $1==4
 with label hlreg dereg
@@ -640,50 +589,34 @@ kills ALL
 gen Call {label,".sti"}
 
 pat sdl
-with dereg
-kills ALL
-uses hlreg={const2,$1}
-gen dad lb
-    mov {m},e
-    inx hl
-    mov {m},d
-    inx hl
-    pop de
-    mov {m},e
-    inx hl
-    mov {m},d
-
-pat sde
-with hlreg
-kills ALL
-gen shld {label,$1}
-    pop hl
-    shld {label,$1+2}
-with hlreg dereg
-kills ALL
-gen shld {label,$1}
-    xchg.
-    shld {label,$1+2}
-with dereg hlreg
-kills ALL
-gen shld {label,$1+2}
-    xchg.
-    shld {label,$1}
+   leaving
+      lal $1
+      sti 4
 
 pat sdf
-with hl_or_de
-kills ALL
-uses hl_or_de={const2,$1}
-gen dad de
-    pop de
-    mov {m},e
-    inx hl
-    mov {m},d
-    inx hl
-    pop de
-    mov {m},e
-    inx hl
-    mov {m},d
+   leaving
+      adp $1
+      sti 4
+
+pat sde
+   with hlreg
+      kills ALL
+      gen
+         shld {label,$1}
+         pop hl
+         shld {label,$1+2}
+   with hlreg dereg
+      kills ALL
+      gen
+         shld {label,$1}
+         xchg.
+         shld {label,$1+2}
+   with dereg hlreg
+      kills ALL
+      gen
+         shld {label,$1+2}
+         xchg.
+         shld {label,$1}
 
 /****************************************/
 /* Group 3: Integer arithmetic          */
@@ -911,17 +844,33 @@ pat sbs $1==2					leaving sbi 2
 /********************************************/
 
 pat inc
-with hl_or_de
-gen inx %1				yields %1
+   with hl_or_de
+      gen
+         inx %1
+      yields %1
+
+#ifdef USE_I80_RSTS
+   pat inl sfit($1, 8)
+      uses hlreg, areg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+         inr {m}
+         jnz {label, 1f}
+         inx hl
+         inr {m}
+         1:
+#endif
 
 pat inl
-uses hlreg={const2,$1}
-gen dad lb
-    inr {m}
-    jnz {label,1f}
-    inx hl
-    inr {m}
-    1:
+   uses hlreg={const2,$1}
+      gen
+         dad lb
+         inr {m}
+         jnz {label,1f}
+         inx hl
+         inr {m}
+         1:
 
 pat ine
 uses hlreg={label,$1}
@@ -935,16 +884,31 @@ pat dec
 with hl_or_de
 gen dcx %1				yields %1
 
+#ifdef USE_I80_RSTS
+   pat del sfit($1, 8)
+      uses hlreg, areg, dereg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+         mov e, {m}
+         inx hl
+         mov d, {m}
+         dcx de
+         mov {m}, d
+         dcx hl
+         mov {m}, e
+#endif
+
 pat del
-uses hlreg={const2,$1}, dereg
-gen dad lb
-    mov e,{m}
-    inx hl
-    mov d,{m}
-    dcx de
-    mov {m},d
-    dcx hl
-    mov {m},e
+   uses hlreg={const2,$1}, dereg
+   gen dad lb
+      mov e,{m}
+      inx hl
+      mov d,{m}
+      dcx de
+      mov {m},d
+      dcx hl
+      mov {m},e
 
 pat dee
 uses hlreg
@@ -952,13 +916,26 @@ gen lhld {label,$1}
     dcx hl
     shld {label,$1}
 
+#ifdef USE_I80_RSTS
+   pat zrl sfit($1, 8)
+      uses hlreg, areg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+         xra a
+         mov {m}, a
+         inx hl
+         mov {m}, a
+#endif
+
 pat zrl
-uses hlreg={const2,$1}, areg
-gen dad lb
-    xra a
-    mov {m},a
-    inx hl
-    mov {m},a
+   uses hlreg={const2,$1}, areg
+      gen
+         dad lb
+         xra a
+         mov {m},a
+         inx hl
+         mov {m},a
 
 pat zre
 uses hlreg={const2,0}
@@ -1200,14 +1177,16 @@ pat and $1==2
       yields %1
 
 pat and defined($1)
-kills ALL
-gen lxi de,{const2,$1}
-    Call {label,".and"}
+   kills ALL
+   gen
+      lxi de,{const2,$1}
+      Call {label,".and"}
 
 pat and !defined($1)
-with dereg
-kills ALL
-gen Call {label,".and"}
+   with dereg
+      kills ALL
+      gen
+         Call {label,".and"}
 
 pat ior $1==2
    with hl_or_de smallconst2
@@ -1930,23 +1909,49 @@ gen xra a
     jnz {label,$1}
     1:
 
+#ifdef USE_I80_RSTS
+   pat lol zeq sfit($1, 8)
+      uses hlreg, areg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+         mov a, {m}
+         inx hl
+         ora {m}
+         jz {label, $2}
+#endif
+
 pat lol zeq
-with STACK
-uses hlreg={const2,$1}, areg
-gen dad lb
-    mov a,{m}
-    inx hl
-    ora {m}
-    jz {label,$2}
+   with STACK
+      uses hlreg={const2,$1}, areg
+      gen
+         dad lb
+         mov a,{m}
+         inx hl
+         ora {m}
+         jz {label,$2}
+
+#ifdef USE_I80_RSTS
+   pat lol zne sfit($1, 8)
+      uses hlreg, areg
+      gen
+         rst {const1, 3}
+         data1 {const1, $1}
+         mov a, {m}
+         inx hl
+         ora {m}
+         jnz {label, $2}
+#endif
 
 pat lol zne
-with STACK
-uses hlreg={const2,$1}, areg
-gen dad lb
-    mov a,{m}
-    inx hl
-    ora {m}
-    jnz {label,$2}
+   with STACK
+   uses hlreg={const2,$1}, areg
+   gen
+      dad lb
+      mov a,{m}
+      inx hl
+      ora {m}
+      jnz {label,$2}
 
 pat ior zeq $1==2
 with hl_or_de hl_or_de STACK
