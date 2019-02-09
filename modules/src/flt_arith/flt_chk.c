@@ -9,9 +9,7 @@
 
 int	flt_status = 0;
 
-void
-flt_chk(e)
-	register flt_arith *e;
+void flt_chk(register flt_arith *e)
 {
 	if (e->flt_exp >= EXT_MAX) {
 		flt_status = FLT_OVFL;

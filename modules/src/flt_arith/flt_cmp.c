@@ -7,9 +7,7 @@
 
 #include "flt_misc.h"
 
-int
-flt_cmp(e1, e2)
-	register flt_arith *e1, *e2;
+int flt_cmp(register flt_arith *e1,register flt_arith *e2)
 {
 	flt_arith x;
 

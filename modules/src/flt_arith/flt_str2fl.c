@@ -193,9 +193,7 @@ static flt_arith r_big_10pow[] = { /* representation of 10 ** -(28*i) */
 #define BIGSZ	(sizeof(big_10pow)/sizeof(big_10pow[0]))
 #define SMALLSZ	(sizeof(s10pow)/sizeof(s10pow[0]))
 
-static
-add_exponent(e, exp)
-	register flt_arith *e;
+static void add_exponent(register flt_arith *e, int exp)
 {
 	int neg = exp < 0;
 	int divsz, modsz;
@@ -218,10 +216,9 @@ add_exponent(e, exp)
 	flt_status = status;
 }
 
-void
-flt_str2flt(s, e)
-	register char		*s;
-	register flt_arith	*e;
+void flt_str2flt(
+	register char *s,
+	register flt_arith *e)
 {
 	register int	c;
 	int		dotseen = 0;
@@ -291,10 +288,7 @@ flt_str2flt(s, e)
 
 #define NDIG 18
 
-static char *
-flt_ecvt(e, decpt, sign)
-	register flt_arith *e;
-	int *decpt, *sign;
+static char *flt_ecvt(register flt_arith *e, int *decpt, int *sign)
 {
 	/*	Like ecvt(), but for extended precision */
 
@@ -421,9 +415,10 @@ flt_ecvt(e, decpt, sign)
 }
 
 void
-flt_flt2str(e, buf, bufsize)
-	flt_arith *e;
-	char *buf;
+flt_flt2str(
+	flt_arith *e,
+	char *buf,
+	int bufsize)
 {
 
 	int sign, dp;

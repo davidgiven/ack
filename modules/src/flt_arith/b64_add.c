@@ -5,12 +5,9 @@
 
 /* $Id$ */
 
-#include <stdint.h>
 #include "flt_misc.h"
 
-int
-flt_b64_add(e1,e2)
-	register struct flt_mantissa *e1,*e2;
+int flt_b64_add(register struct flt_mantissa *e1,register struct flt_mantissa *e2)
 {
 	int	overflow;
 	int	carry;

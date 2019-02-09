@@ -8,9 +8,7 @@
 #include <stdint.h>
 #include "flt_misc.h"
 
-void
-flt_div(e1,e2,e3)
-	register flt_arith *e1,*e2,*e3;
+void flt_div(register flt_arith *e1,register flt_arith *e2,register flt_arith *e3)
 {
 	uint32_t result[2];
 	register uint32_t *rp;

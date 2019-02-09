@@ -8,10 +8,7 @@
 #include "flt_misc.h"
 #include <em_arith.h>
 
-void
-flt_arith2flt(n, e, uns)
-	register arith n;
-	register flt_arith *e;
+void flt_arith2flt(register arith n,flt_arith *e, int uns)
 {
 	/*	Convert the arith "n" to a flt_arith "e".
 	*/

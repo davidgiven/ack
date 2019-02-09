@@ -7,9 +7,7 @@
 
 #include "flt_misc.h"
 
-void
-flt_add(e1,e2,e3)
-	register flt_arith *e1,*e2,*e3;
+void flt_add(register flt_arith *e1,register flt_arith *e2,register flt_arith *e3)
 {
 	/*	Add two extended numbers e1 and e2, and put the result
 		in e3
@@ -74,9 +72,7 @@ flt_add(e1,e2,e3)
 	flt_chk(e3);
 }
 
-void
-flt_sub(e1,e2,e3)
-	flt_arith *e1,*e2,*e3;
+void flt_sub(flt_arith *e1,flt_arith *e2,flt_arith  *e3)
 {
 	e2->flt_sign = ! e2->flt_sign;
 	flt_add(e1,e2,e3);

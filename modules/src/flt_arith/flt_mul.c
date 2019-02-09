@@ -8,9 +8,7 @@
 #include <stdint.h>
 #include "flt_misc.h"
 
-void
-flt_mul(e1,e2,e3)
-	register flt_arith *e1,*e2,*e3;
+void flt_mul(flt_arith *e1,flt_arith *e2,flt_arith *e3)
 {
 	/*	Multiply the extended numbers e1 and e2, and put the
 		result in e3.

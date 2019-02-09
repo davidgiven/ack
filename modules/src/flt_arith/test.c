@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "flt_arith.h"
 
 struct tests {
@@ -24,14 +25,16 @@ struct tests {
 	{ 0, 0, 0, 0}
 };
 
+int dotest(register struct tests *p);
+
 int
 main()
 {
 	register struct tests *p = tests;
-	int exit_status = 0;
+	int exit_status = EXIT_SUCCESS;
 
 	while (p->op1) {
-		if (! dotest(p)) exit_status = 1;
+		if (! dotest(p)) exit_status = EXIT_FAILURE;
 		p++;
 	}
 	return exit_status;
@@ -83,8 +86,8 @@ dotest(p)
 	}
 	flt_flt2str(&e, buf, 128);
 
-	if (! strcmp(buf, p->result)) return 1;
+	if (! strcmp(buf, p->result)) return EXIT_FAILURE;
 
 	printf("Test number %d failed: result = %s, should be %s\n", testno, buf, p->result);
-	return 0;
+	return EXIT_SUCCESS;
 }

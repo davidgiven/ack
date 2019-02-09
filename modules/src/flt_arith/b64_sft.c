@@ -7,10 +7,7 @@
 
 #include "flt_misc.h"
 
-void
-flt_b64_sft(e,n)
-	register struct flt_mantissa *e;
-	register int n;
+void flt_b64_sft(register struct flt_mantissa *e,register int n)
 {
 	if (n > 63 || n < -63) {
 		e->flt_l_32 = 0;
