@@ -11,6 +11,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
+#include "Lpars.h"
 
 extern int lineno, newline;
 
@@ -19,8 +20,10 @@ static int nerrors;
 char *linedir = "#line %d \"%s\"\n";	/* format of line directive */
 char *inpfile;
 
-main(argc,argv) char *argv[]; {
+extern void LLparse(void);
 
+int main(int argc,char* argv[])
+{
     newline = 1;
     if (argc != 3) {
 	fprintf(stderr,"Usage : %s targetoptimizerdescription outputdir\n",argv[0]);
@@ -48,15 +51,16 @@ main(argc,argv) char *argv[]; {
 }
 
 /* VARARGS1 */
-error(s, s1) char *s, *s1; {
-    
+void error(char *s, char* s1)
+{
     nerrors++;
     fprintf(stderr,"\"%s\", line %d: ",inpfile,lineno);
     fprintf(stderr,s,s1);
     putc('\n',stderr);
 }
 
-onlyspace(s) register char *s; {
+int onlyspace(register char* s)
+{
     
     while (*s) {
 	if (*s != ' ' && *s != '\t' && *s != '\n') return 0;

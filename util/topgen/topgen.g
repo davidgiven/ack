@@ -21,6 +21,8 @@
 #include "token.h"
 #include "symtab.h"
 #include "misc.h"
+#include "hash.h"
+#include "pattern.h"
 
 char	idbuf[BUFSIZ], buf[BUFSIZ];
 int	countid;		/* # of variables */
@@ -28,6 +30,13 @@ int	countpat;		/* # of patterns */
 static int patlen;		/* Maximum number of instructions in pattern */
 static int maxoperand;		/* Maximum number of operands of instruction */
 extern FILE *input;		/* file descriptor of inputfile */
+
+
+
+extern int onlyspace(char* s);
+extern void error(char *s, char* s1);
+
+
 }
 
 optim_description
@@ -218,7 +227,7 @@ instruction(int opt;)
 	    	operand(',')
 	    ]*
 	    		{   if (count > maxoperand) {
-			        error("Too many operands");
+			        error("Too many operands","");
 			    }
 			}
 	]?
@@ -269,7 +278,7 @@ operand(int c;)
 ;
 
 replacement (int *n;)
-	{register i;} :
+	{register int i;} :
 	SPACE*
 			{   *n = 0;}
 	[

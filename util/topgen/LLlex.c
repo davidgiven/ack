@@ -21,8 +21,11 @@ static struct token aside;	/* to put currrent token aside, when a token
 int	newline, lineno;	/* To keep track of linenumbers */
 extern FILE *input;		/* file descriptor of machine table */
 
-LLlex() {
-	register c;
+extern void error(char *s, char* s1);
+
+
+int LLlex(void) {
+	register int c;
 
 	if (aside.t_tokno) {	/* A token was pushed aside, return it now */
 		dot = aside;
@@ -52,7 +55,7 @@ LLlex() {
 			if (c == EOF) {
 			    c = lineno;
 			    lineno = l;
-			    error("Unterminated comment");
+			    error("Unterminated comment", "");
 			    lineno = c;
 			    c = EOF;
 			}
@@ -116,13 +119,14 @@ LLlex() {
 	}
 }
 
-LLmessage(d) {
+void LLmessage(int d)
+{
     static int savlineno;
     
     if (savlineno != lineno) {
 	/* Only an error message if on another line number */
 	savlineno = lineno;
-	error("Syntax error");
+	error("Syntax error","");
     }
     if (d > 0) {
 	/* "d" is the token to be inserted.
