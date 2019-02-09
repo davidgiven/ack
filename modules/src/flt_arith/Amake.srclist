@@ -13,7 +13,6 @@ L_ACK_MODULES_FLT_ARITH = {
 	$PWD/flt_str2fl.c,
 	$PWD/flt_umin.c,
 	$PWD/split.c,
-	$PWD/ucmp.c,
 
 	$PWD/flt_arith.h,
 	$PWD/misc.h,
