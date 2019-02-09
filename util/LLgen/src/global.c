@@ -16,6 +16,7 @@
  * Contains declarations visible in several other source files
  */
 
+#include <stdio.h>
 # include "types.h"
 # include "extern.h"
 # include "io.h"
@@ -44,8 +45,8 @@ FILE	*fout;
 FILE	*fpars;
 FILE	*finput;
 FILE	*fact;
-char	f_pars[] = PARSERFILE;
-char	f_temp[] = ACTFILE;
+char f_pars[L_tmpnam];
+char f_temp[L_tmpnam];
 #ifdef NON_CORRECTING
 char	f_nc[20];
 #endif
@@ -77,7 +78,6 @@ string	nc_rec_file, nc_incl_file;
 int	low_percentage = 10, high_percentage = 30;
 int	min_cases_for_jmptable = 8;
 int	jmptable_option;
-int	ansi_c = 0;
 #ifdef NON_CORRECTING
 int	non_corr = 0;
 int	subpars_sim = 0;

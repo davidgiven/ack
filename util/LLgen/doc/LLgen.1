@@ -8,7 +8,7 @@ LLgen [ \-vxwans ] [ \-j[\fInum\fP] ] [ \-l\fInum\fP ] [ \-h\fInum\fP ] file ...
 .SH DESCRIPTION
 \fILLgen\fP
 converts a context-free grammar into a set of
-functions which form a recursive descent parser with no backtrack.
+ANSI C functions which form a recursive descent parser with no backtrack.
 The grammar may be ambiguous;
 ambiguities can be broken by user specifications.
 .PP
@@ -83,8 +83,6 @@ symbols and these extended sets are also included in the
 file.
 .IP \fB\-w\fP
 no warnings are given.
-.IP \fB\-a\fP
-Produce ANSI C function headers and prototypes.
 .IP \fB\-n\fP
 Produce a parser with non-correcting error recovery.
 .IP \fB\-s\fP

@@ -18,6 +18,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 # include "types.h"
 # include "extern.h"
 # include "assert.h"
@@ -37,16 +38,18 @@ static p_entry	entries, maxentries;
 static t_info	token_info, nont_info;
 
 /* Defined in this file are: */
-extern string	store();
-extern		name_init();
-STATIC int	hash();
-STATIC p_entry	newentry();
-extern p_gram	search();
+string store(string s);
+void name_init(void);
+p_gram search(int type,register string str,int option);
+STATIC int hash(string str);
+STATIC p_entry newentry(string str, p_entry next);
 
 p_mem alloc();
 p_mem new_mem();
 
-name_init() {
+
+void name_init(void)
+{
 	token_info.i_esize = sizeof (t_token);
 	token_info.i_incr = 50;
 	nont_info.i_esize = sizeof (t_nont);
@@ -57,8 +60,8 @@ name_init() {
 #endif
 }
 
-STATIC p_entry
-newentry(str, next) string str; p_entry next; {
+STATIC p_entry newentry(string str, p_entry next)
+{
 	register p_entry p;
 
 	if ((p = entries) == maxentries) {
@@ -75,11 +78,11 @@ newentry(str, next) string str; p_entry next; {
 	return p;
 }
 
-string
-store(s) string s; {
-	/*
-	 * Store a string s in the name table
-	 */
+/*
+ * Store a string s in the name table
+ */
+string store(string s)
+{
 	register string	s1, t ,u;
 
 	u = name;
@@ -98,11 +101,11 @@ store(s) string s; {
 	return s1;
 }
 
-STATIC int
-hash(str) string str; {
-	/*
-	 * Compute the hash for string str
-	 */
+/*
+ * Compute the hash for string str
+ */
+STATIC int hash(string str)
+{
 	register int	i;
 	register string l;
 
@@ -113,13 +116,13 @@ hash(str) string str; {
 	return i % HASHSIZE;
 }
 
-p_gram
-search(type,str,option) register string str; {
-	/*
-	 * Search for object str.
-	 * It has type UNKNOWN, LITERAL, TERMINAL or NONTERM.
-	 * option can be ENTERING or BOTH (also looking).
-	 */
+/*
+ * Search for object str.
+ * It has type UNKNOWN, LITERAL, TERMINAL or NONTERM.
+ * option can be ENTERING or BOTH (also looking).
+ */
+p_gram search(int type,register string str,int option)
+{
 	register int		val = 0;
 	register p_entry	p;
 	register int		i;
@@ -194,7 +197,7 @@ search(type,str,option) register string str; {
 						val = '\\';
 						break;
 					  default  :
-						error(linecount,e_literal);
+						error(linecount,e_literal,NULL);
 					}
 				} else {
 					/*
@@ -203,7 +206,7 @@ search(type,str,option) register string str; {
 					if (str[1] > '3' || str[1] < '0' ||
 					    str[2] > '7' || str[2] < '0' ||
 					    str[3] > '7' || str[3] < '0' ||
-					    str[4] != '\0') error(linecount,e_literal);
+					    str[4] != '\0') error(linecount,e_literal, NULL);
 					val = 64*str[1] - 73*'0' +
 					      8*str[2] + str[3];
 				}
@@ -212,7 +215,7 @@ search(type,str,option) register string str; {
 				 * No escape in literal
 				 */
 				if (str[1] == '\0') val = str[0];
-				else error(linecount,e_literal);
+				else error(linecount,e_literal, NULL);
 			}
 			pt->t_tokno = val;
 			g_settype(&(p->h_type), LITERAL);

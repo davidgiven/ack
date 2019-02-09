@@ -84,7 +84,6 @@ extern string	nc_rec_file, nc_incl_file;
 extern int	low_percentage, high_percentage;
 extern int	min_cases_for_jmptable;
 extern int	jmptable_option;
-extern int	ansi_c;
 #ifdef NON_CORRECTING
 extern int	non_corr;
 extern int	subpars_sim;
@@ -92,3 +91,29 @@ extern p_gram	illegal_gram;
 #endif
 extern int	strip_grammar;
 extern int	in_production;
+
+void error(int lineno,string s,string t);
+void warning(int lineno,string s,string t);
+void fatal(int lineno,string s,string t);
+
+void conflchecks(void);
+void do_compute(void);
+int empty(register p_gram p);
+int t_safety(int rep, int count, int persistent, int safety);
+int t_after(int rep, int count, int outsafety);
+void doclose(FILE *f);
+void gencode(int argc);
+string store(string s);
+void name_init(void);
+p_gram search(int type,register string str,int option);
+void co_reach(void);
+void install(string target, string source);
+void copyfile(string file);
+
+
+
+
+void UNLINK(string x);
+void RENAME(string x,string y);
+string libpath(string s);
+

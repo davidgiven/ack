@@ -17,6 +17,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 # include "types.h"
 # include "extern.h"
@@ -35,25 +36,26 @@ p_set		setalloc();
 static int	level;
 
 /* In this file are defined : */
-extern conflchecks();
-STATIC prline();
-STATIC printset();
-STATIC int check();
-STATIC moreverbose();
+void conflchecks(void);
+STATIC void prline(char *s);
+STATIC void printset(register p_set p,string s);
+STATIC int check(register p_gram p);
+STATIC void moreverbose(register p_set t);
 STATIC void prrule(p_gram p);
-STATIC cfcheck();
+STATIC void cfcheck(p_set s1,p_set s2,int flag);
 STATIC void resolve(p_gram p);
-STATIC propagate();
-STATIC spaces();
+STATIC void propagate(p_set set,register p_gram p);
+STATIC void spaces(void);
 
-conflchecks() {
-	/*
-	 * Check for conflicts, that is,
-	 * in a repeating term, the FIRST and FOLLOW must be disjunct,
-	 * unless there is a disambiguating condition.
-	 * in an alternation, the sets that determine the direction to take,
-	 * must be disjunct.
-	 */
+/*
+ * Check for conflicts, that is,
+ * in a repeating term, the FIRST and FOLLOW must be disjunct,
+ * unless there is a disambiguating condition.
+ * in an alternation, the sets that determine the direction to take,
+ * must be disjunct.
+ */
+void conflchecks(void)
+{
 	register p_nont	p;
 	register int s;
 	p_file		x = files;
@@ -110,14 +112,14 @@ conflchecks() {
 	if (verbose) fclose(fout);
 }
 
-STATIC
-prline(s) char *s; {
+STATIC void prline(char *s)
+{
 	fputs(s, fout);
 	spaces();
 }
 
-STATIC
-printset(p,s) register p_set p; string s; {
+STATIC void printset(register p_set p,string s)
+{
 	/*
 	 * Print the elements of a set
 	 */
@@ -170,8 +172,8 @@ printset(p,s) register p_set p; string s; {
 	prline("}\n");
 }
 
-STATIC int
-check(p) register p_gram p; {
+STATIC int check(register p_gram p)
+{
 	/*
 	 * Search for conflicts in a grammar rule.
 	 */
@@ -202,12 +204,12 @@ check(p) register p_gram p; {
 			if (setempty(q->t_first)) {
 				q->t_flags |= EMPTYFIRST;
 				retval = 1;
-				error(p->g_lineno, "No symbols in term");
+				error(p->g_lineno, "No symbols in term", NULL);
 			}
 			if (empty(q->t_rule)) {
 				q->t_flags |= EMPTYTERM;
 				retval = 1;
-				error(p->g_lineno, "Term with variable repetition count produces empty");
+				error(p->g_lineno, "Term with variable repetition count produces empty", NULL);
 			}
 			temp = setalloc();
 			setunion(temp,q->t_first);
@@ -220,7 +222,7 @@ check(p) register p_gram p; {
 					 * No conflict resolver
 					 */
 					error(p->g_lineno,
-						"Repetition conflict");
+						"Repetition conflict", NULL);
 					retval = 1;
 					moreverbose(temp);
 				}
@@ -229,7 +231,7 @@ check(p) register p_gram p; {
 				if (q->t_flags & RESOLVER) {
 					q->t_flags |= NOCONF;
 					warning(p->g_lineno,
-						"%%while without conflict");
+						"%%while without conflict", NULL);
 				}
 			}
 			free((p_mem) temp);
@@ -247,7 +249,7 @@ check(p) register p_gram p; {
 				 */
 				if (!(l->l_flag & (COND|PREFERING|AVOIDING))) {
 					error(p->g_lineno,
-"Alternation conflict");
+"Alternation conflict", NULL);
 					retval = 1;
 					moreverbose(temp);
 				}
@@ -255,7 +257,7 @@ check(p) register p_gram p; {
 				if (l->l_flag & (COND|PREFERING|AVOIDING)) {
 					l->l_flag |= NOCONF;
 					warning(p->g_lineno,
-"Conflict resolver without conflict");
+"Conflict resolver without conflict", NULL);
 				}
 			}
 			free( (p_mem) temp);
@@ -267,8 +269,8 @@ check(p) register p_gram p; {
 	}
 }
 
-STATIC
-moreverbose(t) register p_set t; {
+STATIC void moreverbose(register p_set t)
+{
 	/*
 	 * t points to a set containing conflicting symbols and pssibly
 	 * also containing nonterminals.
@@ -282,8 +284,8 @@ moreverbose(t) register p_set t; {
 	}
 }
 
-STATIC
-void prrule(p_gram p) {
+STATIC void prrule(p_gram p)
+{
 	/*
 	 * Create a verbose printout of grammar rule p
 	 */
@@ -394,8 +396,8 @@ void prrule(p_gram p) {
 	}
 }
 
-STATIC
-cfcheck(s1,s2,flag) p_set s1,s2; {
+STATIC void cfcheck(p_set s1,p_set s2,int flag)
+{
 	/*
 	 * Check if s1 and s2 have elements in common.
 	 * If so, flag must be non-zero, indicating that there is a
@@ -419,8 +421,8 @@ cfcheck(s1,s2,flag) p_set s1,s2; {
 	free((p_mem) temp);
 }
 
-STATIC
-void resolve(p_gram p) {
+STATIC void resolve(p_gram p)
+{
 	/*
 	 * resolve conflicts, as specified by the user
 	 */
@@ -446,7 +448,7 @@ void resolve(p_gram p) {
 				/*
 				 * This may be caused by the statement above
 				 */
-				error(p->g_lineno,"Alternative never chosen");
+				error(p->g_lineno,"Alternative never chosen",NULL);
 			}
 			resolve(l->l_rule);
 			break; }
@@ -455,8 +457,8 @@ void resolve(p_gram p) {
 	}
 }
 
-STATIC
-propagate(set,p) p_set set; register p_gram p; {
+STATIC void propagate(p_set set,register p_gram p)
+{
 	/*
 	 * Propagate the fact that on the elements of set the grammar rule
 	 * p will not be chosen.
@@ -467,8 +469,7 @@ propagate(set,p) p_set set; register p_gram p; {
 	}
 }
 
-STATIC
-spaces() {
-
+STATIC void spaces(void)
+{
 	if (level > 0) fprintf(fout,"%*c",level,' ');
 }

@@ -17,6 +17,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 # include "types.h"
 # include "extern.h"
 
@@ -26,39 +27,39 @@ static string rcsid = "$Id$";
 
 static string e_nomem = "Out of memory";
 
-p_mem
-alloc(size) unsigned size; {
-	/*
-	   Allocate "size" bytes. Panic if it fails
-	 */
+/*
+   Allocate "size" bytes. Panic if it fails
+ */
+p_mem alloc(unsigned int size)
+{
 	p_mem	p;
 
-	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem);
+	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem, NULL);
 	return p;
 }
 
-p_mem
-ralloc(p,size) p_mem p; unsigned size; {
-	/*
-	   Re-allocate the chunk of memory indicated by "p", to
-	   occupy "size" bytes
-	 */
-	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem);
+/*
+   Re-allocate the chunk of memory indicated by "p", to
+   occupy "size" bytes
+ */
+p_mem ralloc(p_mem p,unsigned int size)
+{
+	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem, NULL);
 	return p;
 }
 
-p_mem
-new_mem(p) register p_info p; {
-	/*
-	   This routine implements arrays that can grow.
-	   It must be called every time a new element is added to it.
-	   Also, the array has associated with it a "info_alloc" structure,
-	   which contains info on the element size, total allocated size,
-	   a pointer to the array, a pointer to the first free element,
-	   and a pointer to the top.
-	   If the base of the array is remembered elsewhere, it should
-	   be updated each time this routine is called
-	 */
+/*
+   This routine implements arrays that can grow.
+   It must be called every time a new element is added to it.
+   Also, the array has associated with it a "info_alloc" structure,
+   which contains info on the element size, total allocated size,
+   a pointer to the array, a pointer to the first free element,
+   and a pointer to the top.
+   If the base of the array is remembered elsewhere, it should
+   be updated each time this routine is called
+ */
+p_mem new_mem(register p_info p)
+{
 	p_mem	rp;
 	unsigned sz;
 

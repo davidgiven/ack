@@ -34,12 +34,7 @@ static int	LLuserhook();
 #endif
 
 #ifndef LL_FASTER
-#if LL_ANSI_C
 void LLscan(int t)
-#else
-LLscan(t)
-	int	t;
-#endif
 {
 	/*
 	 * Check if the next symbol is equal to the parameter
@@ -85,11 +80,7 @@ LLscan(t)
 }
 #endif
 
-#if LL_ANSI_C
 void LLread(void) {
-#else
-LLread() {
-#endif
 
 #if LL_NON_CORR
 	/* Again, check if another parser has crashed,
@@ -122,12 +113,7 @@ LLread() {
 	/* NOTREACHED */
 }
 
-#if LL_ANSI_C
 void LLerror(int t)
-#else
-LLerror(t)
-	int	t;
-#endif
 {
 	register int i;
 
@@ -189,12 +175,7 @@ LLerror(t)
 	}
 }
 
-#if LL_ANSI_C
 void LLsafeerror(int t)
-#else
-LLsafeerror(t)
-	int	t;
-#endif
 {
 	if (t == EOFILE && LLsymb <= 0) return;
 #ifdef LL_NEWMESS
@@ -249,12 +230,7 @@ int LLfirst(x, d) {
 }
 #endif
 
-#if LL_ANSI_C
 int LLnext(int n)
-#else
-int LLnext(n)
-	int	n;
-#endif
 {
 	/*	returns: 0 if the current symbol is'nt skipped, and it
 			 is'nt a member of "n",
@@ -275,11 +251,7 @@ int LLnext(n)
 	return retval;
 }
 
-#if LL_ANSI_C
 int LLskip(void) {
-#else
-int LLskip() {
-#endif
 	/*	returns 0 if the current symbol is'nt skipped, and
 		1 if it is, t.i., we have a new symbol
 	*/
@@ -287,14 +259,8 @@ int LLskip() {
 	return LLdoskip(0);
 }
 
-#if LL_ANSI_C
 extern void LL_USERHOOK(int, int *);
 static int LLuserhook(int e, int *list)
-#else
-static int LLuserhook(e, list)
-	int e;
-	int *list;
-#endif
 {
 	int old = LLsymb;
 	LL_USERHOOK(e, list);
@@ -302,12 +268,7 @@ static int LLuserhook(e, list)
 	return LLsymb != old;
 }
 
-#if LL_ANSI_C
 static void LLmklist(register int *list)
-#else
-static LLmklist(list)
-	register int *list;
-#endif
 {
 	char Xset[LL_SSIZE];
 	register char *p;
@@ -331,12 +292,7 @@ static LLmklist(list)
 	*list = 0;
 }
 
-#if LL_ANSI_C
 static int LLdoskip(int e)
-#else
-static int LLdoskip(e)
-	int	e;
-#endif
 {
 	int LLx;
 	int list[LL_NTERMINALS+1];
@@ -395,11 +351,7 @@ static int LLdoskip(e)
 	/* NOTREACHED */
 }
 
-#if LL_ANSI_C
 void LLnewlevel(unsigned int *LLsinfo) {
-#else
-LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
-#endif
 	register int i;
 
 	if (LLlevel++) {
@@ -417,11 +369,7 @@ LLnewlevel(LLsinfo) unsigned int *LLsinfo; {
 	LLtincr(0);
 }
 
-#if LL_ANSI_C
 void LLoldlevel(unsigned int *LLsinfo) {
-#else
-LLoldlevel(LLsinfo) unsigned int *LLsinfo; {
-#endif
 	register int i;
 
 	LLtdecr(0);

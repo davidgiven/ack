@@ -30,7 +30,6 @@ extern int LLstartsymb;
 #define LLsincr(d)	LLscnt[d]++
 #define LLtincr(d)	LLtcnt[d]++
 
-#if LL_ANSI_C
 extern int LL_LEXI(void);
 extern void LLread(void);
 extern int LLskip(void);
@@ -48,21 +47,3 @@ extern int LLfirst(int, int);
 #if LL_NON_CORR
 extern void LLnc_recover(void);
 #endif
-#else /* not LL_ANSI_C */
-extern LLread();
-extern int LLskip();
-extern int LLnext();
-extern LLerror();
-extern LLsafeerror();
-extern LLnewlevel();
-extern LLoldlevel();
-#ifndef LL_FASTER
-extern LLscan();
-#endif
-#ifndef LLNOFIRSTS
-extern int LLfirst();
-#endif
-#if LL_NON_CORR
-extern LLnc_recover();
-#endif
-#endif /* not LL_ANSI_C */
