@@ -17,9 +17,7 @@ extern char *malloc();
 #endif
 #include	"alloc.h"
 
-char *
-Malloc(sz)
-	unsigned int sz;
+char *Malloc(unsigned int sz)
 {
 	register char *res = malloc(sz);
 	

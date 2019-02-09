@@ -12,10 +12,7 @@
 
 #include	"alloc.h"
 
-char *
-Srealloc(str, sz)
-	char str[];
-	unsigned int sz;
+char *Srealloc(char str[], unsigned int sz)
 {
 	return Realloc(str, sz);
 }

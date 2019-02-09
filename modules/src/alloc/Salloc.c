@@ -19,10 +19,7 @@ extern char *malloc();
 
 #include	"alloc.h"
 
-char *
-Salloc(str, sz)
-	register char *str;
-	register unsigned int sz;
+char *Salloc(register char *str, register unsigned int sz)
 {
 	/*	Salloc() is not a primitive function: it just allocates a
 		piece of storage and copies a given string into it.
