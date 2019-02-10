@@ -18,7 +18,7 @@ matrix:
             compiler: clang
 
 git:
-    depth: 10
+    depth: 1
 script:
     - make CC=$CC PREFIX=/tmp/acki +ack
 
