@@ -8,6 +8,7 @@
  * miscellaneous
  */
 
+#include <errno.h>
 #include "comm0.h"
 #include "comm1.h"
 #include "y.tab.h"
@@ -391,7 +392,7 @@ void emitf(int size, int negative)
 void ffreopen(char* s, FILE* f)
 {
 	if (freopen(s, "r", f) == NULL)
-		fatal("can't reopen %s", s);
+		fatal("can't reopen %s: %s", s, strerror(errno));
 }
 
 FILE* ffcreat(char* s)
