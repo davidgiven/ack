@@ -5,6 +5,7 @@
 /* $Id$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	<string.h>
 #include	"idfsize.h"
 #include	"numsize.h"
 #include	"strsize.h"
@@ -26,7 +27,6 @@ int AccDefined = 0;		/* accept "defined(...)"		*/
 int UnknownIdIsZero = 0;	/* interpret unknown id as integer 0	*/
 
 char *string_token();
-char *strcpy();
 
 PushLex()
 {
