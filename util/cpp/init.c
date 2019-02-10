@@ -5,6 +5,7 @@
  */
 /* PREPROCESSOR: INITIALIZATION ROUTINES */
 
+#include	<string.h>
 #include	<system.h>
 #include	<alloc.h>
 #include	"class.h"
@@ -29,8 +30,6 @@ PRIVATE struct mkey	{
 	{"pragma",	K_PRAGMA},
 	{0,		K_UNKNOWN}
 };
-
-char *strcpy();
 
 EXPORT
 init_pp()

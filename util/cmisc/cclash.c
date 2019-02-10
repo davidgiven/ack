@@ -30,6 +30,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 #define DEF_LENGTH	8
 
@@ -184,8 +185,6 @@ char *
 Salloc(str)
 	char *str;
 {
-	char *strcpy();
-
 	if (str == 0)
 		str = "";
 

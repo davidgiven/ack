@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 extern uint8_t ram[0x10000];
 

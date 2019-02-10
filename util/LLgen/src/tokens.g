@@ -549,8 +549,6 @@ cpy(s,p,inserted) register string p; {
 	return p;
 }
 
-string strcpy();
-
 LLmessage(d) {
 	/*
 	 * d is either 0, in which case the current token has been deleted,
