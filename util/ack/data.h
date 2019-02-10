@@ -3,48 +3,51 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
-/* WARNING: don't put guards around this file (there are reasons). See data.c. */
+#ifndef DATA_H
+#define DATA_H
 
-EXTERN  char            *stopsuffix;    /* Suffix to stop at */
-EXTERN  char            *machine;       /* The machine id */
-EXTERN	char		*callname;	/* argv[0] */
-EXTERN  char            *rts;           /* The runtime-system */
-EXTERN  char            *rtsuf;         /* The runtime-system module suffix */
-EXTERN	char		*Optlist;	/* Which optimizers */
+extern char* stopsuffix; /* Suffix to stop at */
+extern char* machine; /* The machine id */
+extern char* callname; /* argv[0] */
+extern char* rts; /* The runtime-system */
+extern char* rtsuf; /* The runtime-system module suffix */
+extern char* Optlist; /* Which optimizers */
 
-EXTERN  list_head       arguments;      /* List of arguments */
-EXTERN  list_head       flags;          /* List of flags */
+extern list_head arguments; /* List of arguments */
+extern list_head flags; /* List of flags */
 
-EXTERN  list_head       tr_list;        /* List of transformations */
+extern list_head tr_list; /* List of transformations */
 
-EXTERN  list_head       R_list;         /* List of -R flags */
-EXTERN  list_head       head_list;      /* List of suffices for headers */
-EXTERN  list_head       tail_list;      /* List of suffices for tails */
+extern list_head R_list; /* List of -R flags */
+extern list_head head_list; /* List of suffices for headers */
+extern list_head tail_list; /* List of suffices for tails */
 
-EXTERN  int             k_flag;         /* Like -k of lint */
-EXTERN  int             t_flag;         /* Preserve intermediate files */
-EXTERN  int             v_flag;         /* Verbose */
-EXTERN  int             w_flag;         /* Don't print warnings */
-EXTERN  int             nill_flag;      /* Don't print file names */
-EXTERN  int             Optlevel;       /* Optimizing */
+extern int k_flag; /* Like -k of lint */
+extern int t_flag; /* Preserve intermediate files */
+extern int v_flag; /* Verbose */
+extern int w_flag; /* Don't print warnings */
+extern int nill_flag; /* Don't print file names */
+extern int Optlevel; /* Optimizing */
 
 #ifdef DEBUG
-EXTERN  int             debug;          /* Debugging control */
+extern int debug; /* Debugging control */
 #endif
 
-EXTERN  int             n_error;        /* Number of errors encountered */
+extern int n_error; /* Number of errors encountered */
 
-EXTERN  char            *progname;      /* The program call name */
+extern char* progname; /* The program call name */
 
-EXTERN  char            *outfile;       /* The result file e.g. a.out */
-EXTERN  char            template[20];   /* The template for temporary file
-						names */
+extern char* outfile; /* The result file e.g. a.out */
+extern char template[20]; /* The template for temporary file
+          names */
 
-EXTERN  trf             *linker;	/* Pointer to the Loader/Linker */
-EXTERN  trf             *cpp_trafo;     /* Pointer to C-preprocessor */
+extern trf* linker; /* Pointer to the Loader/Linker */
+extern trf* cpp_trafo; /* Pointer to C-preprocessor */
 
-EXTERN  path            in;             /* The current single input pathname */
-EXTERN  path            out;            /* The current output pathname */
-EXTERN  path            orig;           /* The original input path */
-EXTERN  char            *p_basename;    /* The current basename */
-EXTERN  const char      *p_suffix;      /* The current input suffix */
+extern path in; /* The current single input pathname */
+extern path out; /* The current output pathname */
+extern path orig; /* The original input path */
+extern char* p_basename; /* The current basename */
+extern const char* p_suffix; /* The current input suffix */
+
+#endif
