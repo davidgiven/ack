@@ -5,22 +5,23 @@
  */
 /* M A P . C */
 
+#include <stdlib.h>
 #include "types.h"
 #include "map.h"
 
-short	plength;
-short	olength;
-short	llength;
-short	blength;
-short	lplength;
-line_p	*lmap;
-bblock_p *lbmap;
-proc_p	*pmap	;	/* dynamically allocated array that maps
-			 * every proc_id to a proc_p.
-			 */
-obj_p	*omap;		/* maps obj_id to obj_p */
-loop_p	*lpmap;		/* maps loop_id to loop_p */
-bblock_p *bmap;		/* maps block_id to bblock_p */
+short plength = 0;
+short olength = 0;
+short llength = 0;
+short blength = 0;
+short lplength = 0;
+line_p* lmap = NULL;
+bblock_p* lbmap = NULL;
+proc_p* pmap = NULL; /* dynamically allocated array that maps
+                      * every proc_id to a proc_p.
+                      */
+obj_p* omap = NULL; /* maps obj_id to obj_p */
+loop_p* lpmap = NULL; /* maps loop_id to loop_p */
+bblock_p* bmap = NULL; /* maps block_id to bblock_p */
 
-dblock_p	fdblock;	/* first dblock */
-proc_p		fproc;		/* first proc   */
+dblock_p fdblock = NULL; /* first dblock */
+proc_p fproc = NULL; /* first proc   */
