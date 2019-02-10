@@ -111,10 +111,6 @@
 #define INP_READ_IN_ONE	1	/* read input file in one	*/
 
 
-!File: nopp.h
-/*#define NOPP		1	/* if NOT defined, use built-int preprocessor */
-
-
 !File: nobitfield.h
 /*#define NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
 

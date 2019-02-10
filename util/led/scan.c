@@ -13,11 +13,11 @@ static char rcsid[] = "$Id$";
 #include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
+#ifdef SYMDBUG
 #include <sys/stat.h>
+#endif /* SYMDBUG */
 #include <fcntl.h>
 #include <unistd.h>
-#ifdef SYMDBUG
-#endif /* SYMDBUG */
 #include "arch.h"
 #include "out.h"
 #include "ranlib.h"
@@ -35,8 +35,6 @@ static char rcsid[] = "$Id$";
 #define IND_DBUG(x)	(IND_RELO(x) + sizeof(ind_t))
 #endif /* SYMDBUG */
 
-extern char 	*core_alloc();
-extern bool	incore;
 extern int	infile;
 extern int	passnumber;
 
@@ -46,17 +44,17 @@ char		*modulname;	/* Name of object module. */
 long		objectsize;
 #endif /* SYMDBUG */
 
-static long	align(long size);
+static size_t	align(size_t size);
 static char	*modulbase;
-static long	modulsize(struct outhead* head);
+static size_t	modulsize(struct outhead* head);
 static void can_modul(void);
 static bool	all_alloc(void);
 static bool	direct_alloc(struct outhead* head);
 static bool	indirect_alloc(struct outhead* head);
 static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece);
-static bool	putreloindex(ind_t relooff, long nrelobytes);
+static bool	putreloindex(ind_t relooff, size_t nrelobytes);
 #ifdef SYMDBUG
-static bool	putdbugindex(ind_t dbugoff, long ndbugbytes);
+static bool	putdbugindex(ind_t dbugoff, size_t ndbugbytes);
 #endif /* SYMDBUG */
 static void get_indirect(struct outhead* head, struct outsect* sect);
 static void read_modul(void);
@@ -77,7 +75,6 @@ getfile(filename)
 	unsigned short	magic_number;
 #ifdef SYMDBUG
 	struct stat	statbuf;
-	extern int	fstat();
 #endif /* SYMDBUG */
 
 	archname = (char *)0;
@@ -196,7 +193,7 @@ all_alloc(void)
 {
 	struct outhead	head;
 
-	if (hard_alloc(ALLOMODL, (long)sizeof(struct outhead)) == BADOFF)
+	if (hard_alloc(ALLOMODL, sizeof(struct outhead)) == BADOFF)
 		fatal("no space for module header");
 	rd_ohead((struct outhead *)modulptr(IND_HEAD));
 	/*
@@ -218,7 +215,7 @@ direct_alloc(head)
 	ind_t		sectindex = IND_SECT(*head);
 	register struct outsect *sects;
 	unsigned short	nsect = head->oh_nsect;
-	long		size, rest;
+	size_t		size, rest;
 
 #ifdef SYMDBUG
 	rest = nsect * sizeof(ind_t) + sizeof(ind_t) + sizeof(ind_t);
@@ -260,8 +257,7 @@ indirect_alloc(head)
 	ind_t		relooff = IND_RELO(*head);
 #ifdef SYMDBUG
 	ind_t		dbugoff = IND_DBUG(*head);
-	extern long	objectsize;
-	long		dbugsize = objectsize - OFF_DBUG(*head);
+	size_t		dbugsize = objectsize - OFF_DBUG(*head);
 #endif /* SYMDBUG */
 
 	assert(incore);
@@ -271,12 +267,14 @@ indirect_alloc(head)
 		sectindex += sizeof(struct outsect);
 		emitoff += sizeof(ind_t);
 	}
+	if (nrelo > SIZE_MAX / sizeof(struct outrelo))
+		return FALSE;	/* nrelo * size would overflow */
 #ifdef SYMDBUG
-	return	putreloindex(relooff, (long)nrelo * sizeof(struct outrelo))
+	return	putreloindex(relooff, nrelo * sizeof(struct outrelo))
 		&&
 		putdbugindex(dbugoff, dbugsize);
 #else /* SYMDBUG */
-	return putreloindex(relooff, (long)nrelo * sizeof(struct outrelo));
+	return putreloindex(relooff, nrelo * sizeof(struct outrelo));
 #endif /* SYMDBUG */
 }
 
@@ -302,6 +300,8 @@ putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 
 	flen = ((struct outsect *)modulptr(sectindex))->os_flen;
 	if (flen && zero) {
+		if (zero != (size_t)zero)
+			return FALSE;
 		if ((emitindex = alloc(allopiece, zero)) != BADOFF){
 			register char *p = address(allopiece, emitindex);
 
@@ -313,6 +313,8 @@ putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 	}
 	zeros[allopiece - ALLOEMIT] =
 	 zero + ((struct outsect *) modulptr(sectindex))->os_size - flen;
+	if (flen != (size_t)flen)
+		return FALSE;
 	if ((emitindex = alloc(allopiece, flen)) != BADOFF) {
 		*(ind_t *)modulptr(emitoff) = emitindex;
 		return TRUE;
@@ -325,7 +327,7 @@ putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
  * offset at `relooff'.
  */
 static bool
-putreloindex(ind_t relooff, long nrelobytes)
+putreloindex(ind_t relooff, size_t nrelobytes)
 {
 	ind_t		reloindex;
 
@@ -340,7 +342,7 @@ putreloindex(ind_t relooff, long nrelobytes)
  * Allocate space for debugging information and put the offset at `dbugoff'.
  */
 static bool
-putdbugindex(ind_t dbugoff, long ndbugbytes)
+putdbugindex(ind_t dbugoff, size_t ndbugbytes)
 {
 	ind_t		dbugindex;
 
@@ -417,12 +419,12 @@ read_modul(void)
 	char		*chars;
 	ind_t		sectindex, nameindex, charindex;
 	unsigned short	nsect, nname;
-	long		size;
+	size_t		size;
 	long		nchar;
 
 	assert(passnumber == SECOND);
 	assert(!incore);
-	if (hard_alloc(ALLOMODL, (long)sizeof(struct outhead)) == BADOFF)
+	if (hard_alloc(ALLOMODL, sizeof(struct outhead)) == BADOFF)
 		fatal("no space for module header");
 	head = (struct outhead *)modulptr(IND_HEAD);
 	rd_ohead(head);
@@ -457,11 +459,10 @@ read_modul(void)
  * Align `size' to a multiple of the size of a double.
  * This is assumed to be a power of 2.
  */
-static long
-align(size)
-	register long	size;
+static size_t
+align(size_t size)
 {
-	return (size + (sizeof(double) - 1)) & ~(int)(sizeof(double) - 1);
+	return (size + (sizeof(double) - 1)) & ~(sizeof(double) - 1);
 }
 
 /*
@@ -477,9 +478,8 @@ align(size)
  *	6. the offset of the debugging information.
 #endif
  */
-static long
-modulsize(head)
-	register struct outhead	*head;
+static size_t
+modulsize(struct outhead *head)
 {
 	return	sizeof(struct outhead) +			/* 0 */
 		head->oh_nsect * sizeof(struct outsect) +	/* 1 */
@@ -552,10 +552,13 @@ getemit(head, sects, sectindex)
 {
 	char		*ret;
 	ind_t		off;
-	extern char	*core_alloc();
+	long		flen;
 
 	if (!incore) {
-		ret = core_alloc(ALLOMODL, sects[sectindex].os_flen);
+		flen = sects[sectindex].os_flen;
+		if (flen != (size_t)flen)
+			return 0;
+		ret = core_alloc(ALLOMODL, flen);
 		if (ret == (char *)0)
 			return 0;
 		rd_outsect(sectindex);
@@ -581,6 +584,7 @@ getblk(totalsz, pblksz, sectindex)
 
 	assert(!incore);
 
+	while (sz != (size_t)sz) sz >>= 1;
 	while (sz >= totalsz) sz >>= 1;
 	while (sz) {
 		ret = core_alloc(ALLOMODL, sz);

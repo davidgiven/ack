@@ -17,7 +17,7 @@
 #include "../share/alloc.h"
 #include "../share/global.h"
 #include "../share/lset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "il1_aux.h"
 #include "il1_formal.h"
 #include "il1_cal.h"

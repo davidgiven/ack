@@ -5,19 +5,22 @@
 
 /*
   Module:	assign string to character array, with possible 0-byte
-		extension
+        extension
   Author:	Ceriel J.H. Jacobs
   Version:	$Id$
 */
-StringAssign(dstsiz, srcsiz, dstaddr, srcaddr)
-	register char *dstaddr, *srcaddr;
+#include "libm2.h"
+
+void StringAssign(int dstsiz, int srcsiz, char* dstaddr, char* srcaddr)
 {
-	while (srcsiz > 0) {
+	while (srcsiz > 0)
+	{
 		*dstaddr++ = *srcaddr++;
 		srcsiz--;
 		dstsiz--;
 	}
-	if (dstsiz > 0) {
+	if (dstsiz > 0)
+	{
 		*dstaddr = 0;
 	}
 }

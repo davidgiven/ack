@@ -21,7 +21,7 @@
 #include "il_aux.h"
 #include "il2_aux.h"
 #include "../share/get.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 
 #define USE_INDIR(p)	(p->p_use->u_flags & UF_INDIR)
 

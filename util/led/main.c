@@ -15,6 +15,7 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <out.h>
 #include "const.h"
 #include "debug.h"
@@ -23,7 +24,6 @@ static char rcsid[] = "$Id$";
 #include "orig.h"
 #include "sym.h"
 
-extern bool	incore;
 #ifndef NOSTATISTICS
 int		statistics;
 #endif
@@ -37,7 +37,7 @@ static			first_pass();
 static uint32_t		number(const char *);
 static void		setlign(int, uint32_t);
 static void		setbase(int, uint32_t);
-static struct outname	*makename();
+static void		enterundef(const char *, int);
 static			pass1();
 static			evaluate();
 static void		norm_commons();
@@ -130,8 +130,6 @@ first_pass(argv)
 	register char		*argp;
 	int			sectno;
 	int			h;
-	extern int		atoi();
-	extern char		*strchr();
 	extern int		hash();
 	extern struct outname	*searchname();
 
@@ -236,7 +234,7 @@ first_pass(argv)
 				fatal("-u needs symbol name");
 			h = hash(*argv);
 			if (searchname(*argv, h) == (struct outname *)0)
-				entername(makename(*argv), h);
+				enterundef(*argv, h);
 			break;
 		case 'v':
 			Verbose = 1;
@@ -331,17 +329,34 @@ setbase(int sectno, uint32_t base)
 	sect_base[sectno] = base;
 }
 
-static struct outname *
-makename(string)
-	char	*string;
+/*
+ * Do -u name by entering the undefined name in the symbol table.
+ */
+static void
+enterundef(const char *string, int hashval)
 {
-	static struct outname	namebuf;
+	struct outname	namebuf;
+	size_t		len;
+	char		*buf;
 
-	namebuf.on_foff = string - core_position - mems[ALLOMODL].mem_base;
+	/*
+	 * Copy string to ALLOMODL, because entername() uses
+	 * modulptr(namebuf.on_foff) but may move ALLOMODL to make
+	 * room in ALLOGCHR.  It also needs namebuf.on_foff != 0.
+	 */
+	len = strlen(string) + 1;
+	buf = core_alloc(ALLOMODL, 1 + len);
+	if (buf == NULL)
+		fatal("no space for -u %s", string);
+	memcpy(buf + 1, string, len);
+
+	namebuf.on_foff = buf + 1 - modulptr(0);
 	namebuf.on_type = S_UND + S_EXT;
 	namebuf.on_valu = (long)0;
+	entername(&namebuf, hashval);
 
-	return &namebuf;
+	/* buf might have moved; find it again and free it. */
+	core_free(ALLOMODL, modulptr(namebuf.on_foff) - 1);
 }
 
 /*
@@ -579,7 +594,7 @@ addbase(name)
 		return;
 
 	name->on_valu += outsect[sectindex].os_base;
-	debug(	"%s: type 0x%x, value %ld\n",
+	debug(	"%s: type 0x%x, value 0x%lx\n",
 		address((name->on_type & S_EXT) ? ALLOGCHR : ALLOLCHR,
 			(ind_t)name->on_foff
 		),

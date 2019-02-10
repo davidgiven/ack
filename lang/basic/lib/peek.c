@@ -1,4 +1,4 @@
-/* $Id$ */
+#include "lib.h"
 
 int peek(int addr)
 {

@@ -11,7 +11,7 @@
 #include <em_mnem.h>
 #include "../share/types.h"
 #include "../share/debug.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/lset.h"
 #include "../share/global.h"
 #include "cs.h"

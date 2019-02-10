@@ -43,9 +43,11 @@ static item_t	*last_it, *o_it;
 %token NUMBER2
 %token NUMBER3
 %token <y_valu> NUMBER
+%token NUMBERF
 %token DOT
 %token EXTERN
 %token <y_word> DATA
+%token <y_word> DATAF
 %token <y_word> ASCII
 %token SECTION
 %token COMMON
@@ -58,14 +60,6 @@ static item_t	*last_it, *o_it;
 %token <y_word> LINE
 %token FILe
 %token <y_word> LIST
-%token OP_EQ
-%token OP_NE
-%token OP_LE
-%token OP_GE
-%token OP_LL
-%token OP_RR
-%token OP_OO
-%token OP_AA
 
 %left OP_OO
 %left OP_AA
@@ -257,6 +251,7 @@ operation
 				DOTSCT->s_zero += $2;
 			}
 	|	DATA datalist
+	|   DATAF dataflist
 	|	ASCII STRING
 			{	emitstr($1);}
 	;
@@ -284,6 +279,23 @@ datalist
 				emitx($3.val, (int)$<y_word>0);
 			}
 	;
+
+numberf
+	:	NUMBERF
+			{
+				emitf((int)$<y_word>-1, 0);
+			}
+	|	'-' NUMBERF
+			{
+				emitf((int)$<y_word>-1, 1);
+			}
+	;
+
+dataflist
+	:   numberf
+	|   dataflist ',' numberf
+	;
+
 expr	:	error
 			{	serror("expr syntax err");
 				$$.val = 0; $$.typ = S_UND;

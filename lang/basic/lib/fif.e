@@ -1,8 +1,6 @@
 #
  mes 2,EM_WSIZE,EM_PSIZE
 
-; $Id$
-
 #define ARG1    0
 #define ARG2    EM_DSIZE
 #define IRES    2*EM_DSIZE

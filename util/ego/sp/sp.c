@@ -23,7 +23,7 @@
 #include "../share/lset.h"
 #include "../share/map.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/go.h"
 #include "../share/stack_chg.h"
 

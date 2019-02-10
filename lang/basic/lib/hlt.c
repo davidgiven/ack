@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "lib.h"
 
 void _hlt(int nr)
 {

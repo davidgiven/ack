@@ -67,7 +67,10 @@ struct outname {
 #define RELO4        3          /* 4 bytes */
 #define RELOPPC      4          /* PowerPC 26-bit address */
 #define RELOPPC_LIS  5          /* PowerPC lis */
-#define RELOVC4      6  /* VideoCore IV address in 32-bit instruction */
+#define RELOVC4      6          /* VideoCore IV address in 32-bit instruction */
+#define RELOMIPS     7          /* MIPS */
+#define RELO2HI      8          /* high 2 bytes of word */
+#define RELO2HISAD   9          /* high 2 bytes of word, sign adjusted */
 
 #define RELPC	0x2000			/* pc relative */
 #define RELBR	0x4000			/* High order byte lowest address. */

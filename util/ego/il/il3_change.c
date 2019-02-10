@@ -22,7 +22,7 @@
 #include "../share/global.h"
 #include "../share/def.h"
 #include "../share/lset.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/get.h"
 #include "../share/put.h"
 #include "il_aux.h"

@@ -20,7 +20,7 @@
 #include "cset.h"
 #include "def.h"
 #include "get.h"
-#include "aux.h"
+#include "utils.h"
 #include "alloc.h"
 #include "locals.h"
 

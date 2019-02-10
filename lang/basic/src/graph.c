@@ -199,19 +199,26 @@ int lab;
 
 genreturns()
 {
+	int count;
 	int nr;
 
 	nr= genlabel();
         C_df_dnam("returns");
         C_rom_ilb((label) nr);
         C_rom_cst((arith)1);
-        C_rom_cst((arith) (gosubcnt-1));
+        C_rom_cst((arith) (gosubcnt-2));
 
+	count = 0;
 	while ( gosubhead)
 	{
                 C_rom_ilb((label) gosubhead->emlabel);
 		gosubhead= gosubhead->nextlist;
+		count++;
 	}
+
+	if (count != (gosubcnt-1))
+		error("gosub count table mismatch");
+
         C_df_ilb((label) nr);
         C_loc((arith) 1);
         C_cal("error");

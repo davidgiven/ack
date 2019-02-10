@@ -340,6 +340,28 @@ InsertText(text, length)
 	return 1;
 }
 
+#define RAWLOAD(dest) \
+	((void)((dest = *_ipp++) || (dest = loadbuf())))
+
+/*  Reads the next character, converting CRLF into LF. */
+int
+loadchar(void)
+{
+	int ch;
+	RAWLOAD(ch);
+	if (ch == '\r')
+	{
+		RAWLOAD(ch);
+		if (ch != '\n')
+		{
+			/* Oops, this isn't a CRLF; put back the char we just read. */
+			ChPushBack(ch);
+		}
+		ch = '\n';
+	}
+	return ch;
+}
+
 /*	loadbuf() is called if LoadChar meets a '\0' character
 	which may be the end-of-buffer mark of the current input
 	buffer.  The '\0' could be genuine although not likely.

@@ -4,7 +4,10 @@ include("lang/build.lua")
 ackfile {
 	name = "boot",
 	srcs = { "./boot.s" },
-	vars = { plat = "cpm" }
+	vars = {
+		plat = "cpm",
+		["+ackcflags"] = "-DUSE_I80_RSTS",
+	}
 }
 
 build_plat_libs {

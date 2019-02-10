@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <strings.h>
-#include <byteswap.h>
 #include <math.h>
 #include "emu.h"
 
@@ -24,8 +23,23 @@ static inline bool carry(void)
 	fatal("carry() not supported yet");
 }
 
-#define swb16(x) bswap_16(x)
-#define swb32(x) bswap_32(x)
+/* Byte-swaps a 16-bit value. */
+static inline uint16_t swb16(uint16_t n)
+{
+	return
+		(((n >> 8) & 0xff) |
+		((n & 0xff) << 8));
+}
+
+/* Byte-swaps a 32-bit value. */
+static inline uint32_t swb32(uint32_t n)
+{
+	return 
+		(((n & 0xff000000) >> 24) |
+		((n & 0x00ff0000) >> 8) |
+		((n & 0x0000ff00) << 8) |
+		((n & 0x000000ff) << 24));
+}
 
 /* Returns the state of a carry flag after a three-way add. */
 static inline bool carry_3(uint32_t a, uint32_t b, uint32_t c)

@@ -19,7 +19,7 @@
 #include "../share/debug.h"
 #include "../share/global.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr_aux.h"
 #include "sr_cand.h"
 #include "sr_iv.h"

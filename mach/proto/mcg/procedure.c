@@ -38,6 +38,18 @@ static void print_blocks(char k)
 	}
 }
 
+static void print_vreg(char k, register_assignment_t* assignments, struct vreg* vreg)
+{
+	struct hreg* hreg;
+	tracef(k, "%%%d", vreg->id);
+	if (assignments)
+	{
+		hreg = pmap_findright(assignments, vreg);
+		if (hreg)
+			tracef(k, "(%s)", hreg->id);
+	}
+}
+
 static void print_hops(char k)
 {
     int i;
@@ -73,7 +85,10 @@ static void print_hops(char k)
         {
             tracef(k, "%c:  INS:", k);
             for (j=0; j<bb->liveins.count; j++)
-                tracef(k, " %%%d", bb->liveins.item[j]->id);
+            {
+                tracef(k, " ");
+                print_vreg(k, &bb->regsin, bb->liveins.item[j]);
+			}
             tracef(k, "\n");
         }
 
@@ -81,7 +96,10 @@ static void print_hops(char k)
         {
             tracef(k, "%c: OUTS:", k);
             for (j=0; j<bb->liveouts.count; j++)
-                tracef(k, " %%%d", bb->liveouts.item[j]->id);
+            {
+                tracef(k, " ");
+                print_vreg(k, bb->regsout, bb->liveouts.item[j]);
+			}
             tracef(k, "\n");
         }
 
@@ -93,10 +111,10 @@ static void print_hops(char k)
                 struct vreg* vreg = bb->phis.item[j].left;
                 struct phi* phi = bb->phis.item[j].right;
 
-                tracef(k, " %%%d(via %s)=>%%%d",
+                tracef(k, " %%%d(via %s)=>",
                     phi->ir->result->id,
-                    phi->prev->name,
-                    vreg->id);
+                    phi->prev->name);
+                print_vreg(k, &bb->regsin, vreg);
             }
             tracef(k, "\n");
         }
@@ -181,6 +199,9 @@ void procedure_compile(struct procedure* proc)
     print_blocks('3');
     pass_wire_up_return_values();
     pass_convert_stack_ops();
+    #if defined MCGG_OPTION_LOWER_PUSHES_TO_LOADS_AND_STORES
+        pass_lower_pushes();
+    #endif
     print_blocks('4');
     pass_convert_locals_to_ssa();
     print_blocks('5');

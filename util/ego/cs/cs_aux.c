@@ -5,7 +5,7 @@
  */
 #include "../share/types.h"
 #include "../share/debug.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "cs.h"

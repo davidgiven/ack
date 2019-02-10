@@ -105,9 +105,9 @@ void entername(struct outname* name, int hashval)
 
 	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
-	symindex = hard_alloc(ALLOSYMB, (long)sizeof(struct symbol));
+	symindex = hard_alloc(ALLOSYMB, sizeof(struct symbol));
 	debug("; %ld\n", symindex, 0, 0, 0);
-	namindex = hard_alloc(ALLOGLOB, (long)sizeof(struct outname));
+	namindex = hard_alloc(ALLOGLOB, sizeof(struct outname));
 	if (savindex == BADOFF || symindex == BADOFF || namindex == BADOFF)
 		fatal("symbol table overflow");
 	sym = (struct symbol *)address(ALLOSYMB, symindex);

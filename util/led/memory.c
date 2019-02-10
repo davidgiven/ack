@@ -21,6 +21,13 @@ static char rcsid[] = "$Id$";
  * (70000 - 65536).
  */
 
+/*
+ * USEMALLOC tells the allocator to use malloc() and realloc(), not brk().
+ * This might help systems where brk() doesn't work, or where malloc() can
+ * allocate outside the brk area.
+ */
+#define USEMALLOC
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,8 +41,10 @@ static char rcsid[] = "$Id$";
 #include "object.h"
 #include "sym.h"
 
+#ifndef USEMALLOC
 static void copy_down(struct memory* mem, ind_t dist);
 static void copy_up(struct memory* mem, ind_t dist);
+#endif
 static void free_saved_moduls(void);
 
 struct memory	mems[NMEMS];
@@ -43,6 +52,11 @@ struct memory	mems[NMEMS];
 bool	incore = TRUE;	/* TRUE while everything can be kept in core. */
 ind_t	core_position = (ind_t)0;	/* Index of current module. */
 
+#ifdef USEMALLOC
+static size_t modl_initial_size;
+static bool frozen = FALSE;		/* TRUE after freeze_core(). */
+
+#else /* ifndef USEMALLOC */
 #define GRANULE		64	/* power of 2 */
 
 static char *BASE;
@@ -50,14 +64,10 @@ static ind_t refused;
 
 static int sbreak(ind_t incr)
 {
-	unsigned int	inc;
-
 	incr = (incr + (GRANULE - 1)) & ~(GRANULE - 1);
 
-	inc = incr;
 	if ((refused && refused < incr) ||
-	    (sizeof(char *) < sizeof(long) &&
-	     (inc != incr || BASE + inc < BASE)) ||
+	    BASE + incr < BASE ||
 	    brk(BASE + incr) == -1) {
 		if (!refused || refused > incr)
 			refused = incr;
@@ -66,6 +76,7 @@ static int sbreak(ind_t incr)
 	BASE += incr;
 	return 0;
 }
+#endif /* ndef USEMALLOC */
 
 /*
  * Initialize some pieces of core. We hope that this will be our last
@@ -73,6 +84,53 @@ static int sbreak(ind_t incr)
  */
 void init_core(void)
 {
+#ifdef USEMALLOC
+	struct memory *failed_mem = NULL;
+	struct memory *mem;
+	bool string_area;
+
+#include "mach.h"
+	modl_initial_size = mems[ALLOMODL].mem_left;
+
+	for (mem = mems; mem < &mems[NMEMS]; mem++) {
+		string_area = mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR];
+		/* String areas need at least one byte. */
+		if (string_area && mem->mem_left == 0)
+			mem->mem_left++;
+		/* Don't malloc() size zero. */
+		if (mem->mem_left > 0) {
+			mem->mem_base = malloc(mem->mem_left);
+			if (mem->mem_base == NULL) {
+				failed_mem = mem;
+				break;
+			}
+		}
+		mem->mem_full = 0;
+		if (string_area) {
+			mem->mem_left--;
+			mem->mem_full++;
+		}
+	}
+	if (failed_mem != NULL) {
+		incore = FALSE;	/* In core strategy failed. */
+		/* Undo allocations. */
+		for (mem = mems; mem != failed_mem; mem++)
+			free(mem->mem_base);
+		/* Allocate only the string areas. */
+		for (mem = mems; mem < &mems[NMEMS]; mem++) {
+			if (mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR]) {
+				mem->mem_base = malloc(1);
+				if (mem->mem_base == NULL)
+					fatal("no core at all");
+				mem->mem_left = 0;
+				mem->mem_full = 1;
+			} else {
+				mem->mem_base = NULL;
+				mem->mem_left = mem->mem_full = 0;
+			}
+		}
+	}
+#else /* ifndef USEMALLOC */
 	register char		*base;
 	register ind_t		total_size;
 	register struct memory	*mem;
@@ -131,6 +189,7 @@ void init_core(void)
 			}
 		}
 	}
+#endif /* ndef USEMALLOC */
 }
 
 /*
@@ -143,6 +202,29 @@ move_up(piece, incr)
 	register int		piece;
 	register ind_t		incr;
 {
+#ifdef USEMALLOC
+	size_t oldsize = mems[piece].mem_full + mems[piece].mem_left;
+	size_t newsize;
+	char *newbase;
+
+	if (frozen)
+		return 0;	/* Can't realloc() frozen core. */
+
+	/* We realloc() this piece without moving the other pieces. */
+	while (incr > 0) {
+		newsize = oldsize + incr;
+		if (newsize > oldsize) {
+			newbase = realloc(mems[piece].mem_base, newsize);
+			if (newbase != NULL) {
+				mems[piece].mem_base = newbase;
+				mems[piece].mem_left += incr;
+				return incr;
+			}
+		}
+		incr -= INCRSIZE < incr ? INCRSIZE : incr;
+	}
+	return 0;
+#else /* ifndef USEMALLOC */
 	register struct memory	*mem;
 #ifndef NOSTATISTICS
 	extern int statistics;
@@ -150,12 +232,10 @@ move_up(piece, incr)
 
 	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
 	while (incr > 0 && sbreak(incr) == -1)
-		incr -= INCRSIZE;
+		incr -= INCRSIZE < incr ? INCRSIZE : incr;
 
-	if (incr <= 0) {
-		incr = 0;
+	if (incr == 0)
 		return (ind_t) 0;
-	}
 #ifndef NOSTATISTICS
 	if (statistics) fprintf(stderr,"moving up %lx\n", (long) incr);
 #endif
@@ -164,6 +244,7 @@ move_up(piece, incr)
 
 	mems[piece].mem_left += incr;
 	return incr;
+#endif /* ndef USEMALLOC */
 }
 
 extern int	passnumber;
@@ -181,6 +262,73 @@ compact(int piece, ind_t incr, int flag)
 #define FREEZE 1
 #define FORCED 2
 {
+#ifdef USEMALLOC
+	struct memory	*mem;
+	size_t		newsize, oldsize;
+	char		*newbase;
+
+	if (frozen)
+		return incr == 0; /* Can't realloc() frozen core. */
+	/*
+	 * We realloc() to shrink most pieces.
+	 * We can't control how realloc() moves the pieces.
+	 */
+	for (mem = mems; mem < &mems[NMEMS]; mem++) {
+		if (mem == &mems[piece])
+			continue;
+		if (flag == FREEZE && mem == &mems[ALLOMODL])
+			continue;
+		if (mem->mem_full == 0) {
+			/* Don't try to realloc() to size zero. */
+			free(mem->mem_base);
+			mem->mem_base = NULL;
+			mem->mem_left = 0;
+		} else {
+			newbase = realloc(mem->mem_base, mem->mem_full);
+			if (newbase != NULL) {
+				mem->mem_base = newbase;
+				mem->mem_left = 0;
+			}
+		}
+	}
+	/*
+	 * After FREEZE, we must be able to grow ALLOMODL without
+	 * moving it.  The old allocator allowed ALLOMODL to grow in
+	 * the brk area, but we can't call realloc() later, so we must
+	 * leave some extra space in ALLOMODL now.
+	 */
+	if (flag == FREEZE) {
+		mem = &mems[ALLOMODL];
+		oldsize = mem->mem_full + mem->mem_left;
+		newsize = mem->mem_full + modl_initial_size / 2;
+		/* Don't shrink ALLOMODL. */
+		while (newsize > oldsize) {
+			newbase = realloc(mem->mem_base, newsize);
+			if (newbase != NULL) {
+				mem->mem_base = newbase;
+				mem->mem_left = newsize - mem->mem_full;
+				break;
+			}
+			newsize -= INCRSIZE < newsize ? INCRSIZE : newsize;
+		}
+		frozen = TRUE;	/* Prevent later realloc(). */
+	}
+	/* Now grow our piece. */
+	if (incr == 0)
+		return TRUE;
+	mem = &mems[piece];
+	oldsize = mem->mem_full + mem->mem_left;
+	newsize = oldsize + incr;
+	if (newsize < mem->mem_full)
+		return FALSE;	/* The size overflowed. */
+	newbase = realloc(mem->mem_base, newsize);
+	if (newbase == NULL)
+		return FALSE;
+	mem->mem_base = newbase;
+	mem->mem_left += incr;
+	return TRUE;
+
+#else /* ifndef USEMALLOC */
 	register ind_t		gain, size;
 	register struct memory	*mem;
 	int min = piece, max = piece;
@@ -306,8 +454,10 @@ compact(int piece, ind_t incr, int flag)
 		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem+1)->mem_base);
 	}
 	return gain >= incr;
+#endif /* ndef USEMALLOC */
 }
 
+#ifndef USEMALLOC
 /*
  * The bytes of `mem' must be moved `dist' down in the address space.
  * We copy the bytes from low to high, because the tail of the new area may
@@ -348,6 +498,7 @@ static void copy_up(struct memory* mem, ind_t dist)
 		*--new = *--old;
 	mem->mem_base = new;
 }
+#endif /* ndef USEMALLOC */
 
 static int alloctype = NORMAL;
 
@@ -358,14 +509,14 @@ static int alloctype = NORMAL;
  * how many times the area is moved, because of another allocate, this offset
  * remains valid.
  */
-ind_t alloc(int piece, long size)
+ind_t alloc(int piece, size_t size)
 {
 	register ind_t		incr = 0;
 	ind_t			left = mems[piece].mem_left;
 	register ind_t		full = mems[piece].mem_full;
 
 	assert(passnumber == FIRST || (!incore && piece == ALLOMODL));
-	if (size == (long)0)
+	if (size == 0)
 		return full;
 	if (size != (ind_t)size)
 		return BADOFF;
@@ -373,13 +524,18 @@ ind_t alloc(int piece, long size)
 	case ALLOMODL:
 	case ALLORANL:
 		size = int_align(size);
+		if (size == 0)
+			return BADOFF;
 	}
 
-	if (size - left > 0)
+	if (size > left) {
 		incr = ((size - left + (INCRSIZE - 1)) / INCRSIZE) * INCRSIZE;
+		if (incr == 0)
+			return BADOFF;
+	}
 
 	if (incr == 0 ||
-	    (incr < left + full && (incr -= move_up(piece, left + full)) <= 0) ||
+	    (incr < left + full && move_up(piece, left + full) >= incr) ||
 	    move_up(piece, incr) == incr ||
 	    compact(piece, size, alloctype)) {
 		mems[piece].mem_full += size;
@@ -396,7 +552,7 @@ ind_t alloc(int piece, long size)
  * attempt fails, release the space occupied by other pieces and try again.
  */
 ind_t
-hard_alloc(int piece, long size)
+hard_alloc(int piece, size_t size)
 {
 	register ind_t	ret;
 	register int	i;
@@ -477,9 +633,7 @@ dealloc(int piece)
 }
 
 char *
-core_alloc(piece, size)
-	register int	piece;
-	register long	size;
+core_alloc(int piece, size_t size)
 {
 	register ind_t	off;
 
@@ -493,16 +647,8 @@ void core_free(int piece, char* p)
 	char	*q = address(piece, mems[piece].mem_full);
 
 	assert(p < q);
-	switch(sizeof(unsigned) == sizeof(char *)) {
-	case 1:
-		mems[piece].mem_full -= (unsigned) (q - p);
-		mems[piece].mem_left += (unsigned) (q - p);
-		break;
-	default:
-		mems[piece].mem_full -= (ind_t) q - (ind_t) p;
-		mems[piece].mem_left += (ind_t) q - (ind_t) p;
-		break;
-	}
+	mems[piece].mem_full -= (ind_t) q - (ind_t) p;
+	mems[piece].mem_left += (ind_t) q - (ind_t) p;
 }
 
 /*

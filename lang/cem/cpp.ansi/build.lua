@@ -108,7 +108,8 @@ cprogram {
 installable {
 	name = "pkg",
 	map = {
-		["$(PLATDEP)/cpp.ansi"] = "+cpp"
+		["$(PLATDEP)/cpp.ansi"] = "+cpp",
+		["$(INSDIR)/share/man/man6/cpp.ansi.6"] = "./ncpp.6",
 	}
 }
 

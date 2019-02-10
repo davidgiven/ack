@@ -1,8 +1,6 @@
-#include "bc_string.h"
 #include <stdio.h>
 #include "bc_io.h"
-
-/* $Id$ */
+#include "lib.h"
 
 Filedesc _fdtable[16];
 /* BASIC file descriptor table */

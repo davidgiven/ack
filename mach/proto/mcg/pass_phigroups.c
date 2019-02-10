@@ -10,7 +10,8 @@ static void make_phimap(void)
 	for (i=0; i<cfg.preorder.count; i++)
 	{
 		struct basicblock* bb = cfg.preorder.item[i];
-		
+
+		/* Registers imported through a phi can come from multiple locations. */
 		for (j=0; j<bb->phis.count; j++)
 		{
 			struct vreg* vreg = bb->phis.item[j].left;
@@ -36,8 +37,10 @@ static void recursively_associate_group(struct phicongruence* c, struct vreg* vr
         struct constraint* constraint = pmap_findleft(&vreg->defined->constraints, vreg);
         if (c->type == 0)
             c->type = vreg->type;
-            
-        assert(c->type == vreg->type);
+
+        if (c->type != vreg->type)
+            fatal("tried to add register %%%d of type 0x%x to a phi congruence group of type 0x%x",
+                vreg->id, vreg->type, c->type);
 
         array_appendu(&c->definitions, vreg->defined);
     }

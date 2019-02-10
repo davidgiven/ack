@@ -12,7 +12,7 @@
 #include "alloc.h"
 #include "global.h"
 #include "lset.h"
-#include "aux.h"
+#include "utils.h"
 
 struct class {
 	byte	src_class;

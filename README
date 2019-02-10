@@ -33,6 +33,7 @@ pc86          produces bootable floppy disk images for 8086 PCs
 linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
 linuxppc      produces ELF executables for PowerPC Linux systems
+linuxmips     produces ELF executables for little-endian MIPS32r2 Linux systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
 pdpv7         produces PDP/11 V7 Unix binaries
@@ -194,4 +195,4 @@ Please enjoy.
 
 David Given (davidgiven on Github)
 dg@cowlark.com
-2016-11-26
+2018-09-18

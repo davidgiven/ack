@@ -21,7 +21,7 @@
 #include "../share/get.h"
 #include "../share/put.h"
 #include "../share/alloc.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "../share/init_glob.h"
 #include "../share/locals.h"
 #include "../share/go.h"

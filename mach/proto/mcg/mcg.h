@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include "flt_arith.h"
+#include <errno.h>
 #include "em_arith.h"
 #include "em_label.h"
 #include "em.h"
@@ -113,6 +113,7 @@ extern void pass_infer_types(void);
 extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
+extern void pass_lower_pushes(void);
 extern void pass_add_prologue_epilogue(void);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);
@@ -123,7 +124,7 @@ extern void pass_wire_up_return_values(void);
 extern void platform_calculate_offsets(void);
 extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
-extern struct hop* platform_move(struct basicblock* bb, struct hreg* src, struct hreg* dest);
+extern struct hop* platform_move(struct basicblock* bb, struct vreg* vreg, struct hreg* src, struct hreg* dest);
 extern struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest);
 extern const char* platform_label(const char* label);
 

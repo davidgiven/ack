@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "lib.h"
 
 int _errsym;
 int _erlsym;

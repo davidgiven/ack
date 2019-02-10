@@ -5,6 +5,7 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -375,7 +376,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						cp = findcoerc(tp, &machsets[tokexp[i]]);
 #ifndef NDEBUG
 						if (Debug > 1)
-							fprintf(stderr, "findcoerc returns 0x%x at position %d\n", (unsigned)cp, i);
+							fprintf(stderr, "findcoerc returns %p at position %d\n", cp, i);
 #endif
 						if (cp == 0)
 						{

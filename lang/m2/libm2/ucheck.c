@@ -15,51 +15,52 @@
 #define EM_LSIZE _EM_LSIZE
 #endif
 
+#include "libm2.h"
 #include <m2_traps.h>
 
-#define MAXCARD	((unsigned)-1)
+#define MAXCARD ((unsigned)-1)
 #if EM_WSIZE < EM_LSIZE
-#define MAXLONGCARD	((unsigned long) -1L)
+#define MAXLONGCARD ((unsigned long)-1L)
 #endif
 
-adduchk(a,b)
-  unsigned	a,b;
+void adduchk(unsigned int a, unsigned int b)
 {
-  if (MAXCARD - a < b) TRP(M2_UOVFL);
+	if (MAXCARD - a < b)
+		TRP(M2_UOVFL);
 }
 
 #if EM_WSIZE < EM_LSIZE
-addulchk(a,b)
-  unsigned long	a,b;
+void addulchk(unsigned long a, unsigned long b)
 {
-  if (MAXLONGCARD - a < b) TRP(M2_UOVFL);
-}
-#endif
-
-muluchk(a,b)
-  unsigned	a,b;
-{
-  if (a != 0 && MAXCARD/a < b) TRP(M2_UOVFL);
-}
-
-#if EM_WSIZE < EM_LSIZE
-mululchk(a,b)
-  unsigned long	a,b;
-{
-  if (a != 0 && MAXLONGCARD/a < b) TRP(M2_UOVFL);
+	if (MAXLONGCARD - a < b)
+		TRP(M2_UOVFL);
 }
 #endif
 
-subuchk(a,b)
-  unsigned	a,b;
+void muluchk(unsigned int a, unsigned int b)
 {
-  if (b < a) TRP(M2_UUVFL);
+	if (a != 0 && MAXCARD / a < b)
+		TRP(M2_UOVFL);
 }
 
 #if EM_WSIZE < EM_LSIZE
-subulchk(a,b)
-  unsigned long	a,b;
+void mululchk(unsigned long a, unsigned long b)
 {
-  if (b < a) TRP(M2_UUVFL);
+	if (a != 0 && MAXLONGCARD / a < b)
+		TRP(M2_UOVFL);
+}
+#endif
+
+void subuchk(unsigned int a, unsigned int b)
+{
+	if (b < a)
+		TRP(M2_UUVFL);
+}
+
+#if EM_WSIZE < EM_LSIZE
+void subulchk(unsigned long a, unsigned long b)
+{
+	if (b < a)
+		TRP(M2_UUVFL);
 }
 #endif

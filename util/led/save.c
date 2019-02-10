@@ -21,9 +21,6 @@ static char rcsid[] = "$Id$";
 #include "const.h"
 #include "memory.h"
 
-extern bool	incore;
-extern char	*core_alloc();
-
 void
 savemagic()
 {
@@ -32,7 +29,7 @@ savemagic()
 	if (!incore)
 		return;
 
-	if ((p = core_alloc(ALLOMODL, (long)sizeof(int))) != (char *)0) {
+	if ((p = core_alloc(ALLOMODL, sizeof(int))) != (char *)0) {
 		*(unsigned short *)p = AALMAG;
 		core_position += sizeof(int);
 	}
@@ -47,7 +44,7 @@ savehdr(hdr)
 	if (!incore)
 		return;
 
-	if ((p=core_alloc(ALLOMODL,(long)sizeof(struct ar_hdr)))!=(char *)0) {
+	if ((p=core_alloc(ALLOMODL, sizeof(struct ar_hdr)))!=(char *)0) {
 		*(struct ar_hdr *)p = *hdr;
 		core_position += int_align(sizeof(struct ar_hdr));
 	}
@@ -66,7 +63,7 @@ savechar(piece, off)
 	register int	piece;
 	register ind_t	off;
 {
-	register long	len;
+	register size_t	len;
 	register ind_t	newoff;
 
 	if (off == (ind_t)0)
@@ -104,7 +101,7 @@ savelocal(name)
 		return;
 
 	new = (struct outname *)
-			core_alloc(ALLOLOCL, (long)sizeof(struct outname));
+			core_alloc(ALLOLOCL, sizeof(struct outname));
 	if (new != (struct outname *)0) {
 		*new = *name;
 		new->on_foff = savindex;

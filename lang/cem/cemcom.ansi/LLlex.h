@@ -43,12 +43,6 @@ extern struct token dot, ahead, aside;
 extern int token_nmb;			/* number of the ahead token */
 extern int tk_nmb_at_last_syn_err;	/* token number at last syntax error */
 
-#ifndef NOPP
-extern int ReplaceMacros;	/* "LLlex.c"	*/
-extern int AccDefined;		/* "LLlex.c"	*/
-extern int Unstacked;		/* "LLlex.c"	*/
-extern int UnknownIdIsZero;	/* "LLlex.c"	*/
-#endif /* NOPP */
 extern int EoiForNewline;	/* "LLlex.c"	*/
 extern int AccFileSpecifier;	/* "LLlex.c"	*/
 extern int File_Inserted;	/* "LLlex.c"	*/

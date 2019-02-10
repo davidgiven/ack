@@ -9,6 +9,7 @@ struct phicongruence
     ARRAYOF(struct vreg) vregs;
     ARRAYOF(struct hop) definitions;
     uint32_t type;
+    struct hreg* evicted; /* stack slot to evict to */
 };
 
 struct hreg
@@ -28,6 +29,7 @@ struct vreg
     struct phicongruence* congruence;
     struct hop* defined;
     ARRAYOF(struct hop) used;
+    struct hreg* evicted; /* stack slot to evict to */
 };
 
 typedef PMAPOF(struct hreg, struct vreg) register_assignment_t;

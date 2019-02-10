@@ -20,7 +20,7 @@
 #include "../share/map.h"
 #include "../share/alloc.h"
 #include "../share/go.h"
-#include "../share/aux.h"
+#include "../share/utils.h"
 #include "sr_aux.h"
 #include "sr_iv.h"
 
