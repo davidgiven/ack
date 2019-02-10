@@ -2053,46 +2053,29 @@ gen 1:
 /* Group 15: Miscellaneous		  */
 /******************************************/
 
-pat asp $1<=0-6
-with STACK
-uses hlreg={const2,$1}
-gen dad sp
-    sphl.
+pat asp ($1<=0-12) || ($1>=12)
+   with STACK
+      uses hlreg={const2,$1}
+      gen
+         dad sp
+         sphl.
 
-pat asp $1==0-4
-with STACK
-gen dcx sp
-    dcx sp
-    dcx sp
-    dcx sp
+pat asp ($1<0) && ($1>0-12)
+   with STACK
+      gen
+         push hl
+      leaving
+         asp $1+2
 
-pat asp $1==0-2
-with STACK
-gen dcx sp
-    dcx sp
+pat asp $1==0 /* do nothing */
 
-pat asp $1==0			/* do nothing */
-
-pat asp $1==2
-with exact src1or2
-with STACK
-   gen inx sp
-       inx sp
-
-pat asp $1==4
-with exact src1or2				leaving asp 2
-with STACK
-   gen inx sp
-       inx sp
-       inx sp
-       inx sp
-
-pat asp $1>=6
-with exact src1or2				leaving asp $1-2
-with STACK
-  uses hlreg={const2,$1}
-  gen dad sp
-      sphl.
+pat asp ($1>0) && ($1<12)
+   with STACK
+      uses hlreg
+      gen
+         pop hl
+      leaving
+         asp $1-2
 
 pat ass $1==2
 with hlreg STACK
