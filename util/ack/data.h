@@ -2,9 +2,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#ifndef NORCSID
-#define RCS_DATA "$Id$"
-#endif
+
+/* WARNING: don't put guards around this file (there are reasons). See data.c. */
 
 EXTERN  char            *stopsuffix;    /* Suffix to stop at */
 EXTERN  char            *machine;       /* The machine id */

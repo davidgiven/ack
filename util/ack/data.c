@@ -6,15 +6,11 @@
 #include "list.h"
 #include "trans.h"
 
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
-
-#undef EXTERN
-#define EXTERN
-
+/* Include once without redefining EXTERN, to declare all the symbols as extern. */
 #include "data.h"
 
-#ifndef NORCSID
-static char rcs_data[] = RCS_DATA ;
-#endif
+/* And again without EXTERN, to define them here. Without the extern versions above
+ * then these symbols will all end up as COMMON, which is poorly supported on OSX. */
+#undef EXTERN
+#define EXTERN
+#include "data.h"
