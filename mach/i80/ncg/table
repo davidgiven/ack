@@ -135,7 +135,7 @@ INSTRUCTIONS
    rst	const1:ro cost(1,11).	
 /* rz					cost(1, 8).	*/
    sbb	reg1:ro 	kills a:cc	cost(1, 4).
-/* sbi	const1:ro 	kills a:cc	cost(2, 7).	*/
+   sbi	const1:ro 	kills a:cc	cost(2, 7).
    shld	label:ro			cost(3,16).
    sphl					cost(1, 5).
    sta	label:ro			cost(3,13).
@@ -1817,65 +1817,121 @@ with					yields {const2,$1}
 						leaving bne $2
  
 pat bra
-with STACK
-gen jmp {label,$1}
+   with STACK
+      gen
+         jmp {label,$1}
 
 pat blt
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov a,%2.1
-    sbb %1.1
-    jm {label,$1}
-
-pat ble
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.2
-    sub %2.2
-    mov a,%1.1
-    sbb %2.1
-    jp {label,$1}
-
-pat beq
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    cmp %1.2
-    jnz {label,1f}
-    mov a,%2.1
-    cmp %1.1
-    jz {label,$1}
-    1:
-
-pat bne
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    cmp %1.2
-    jnz {label,$1}
-    mov a,%2.1
-    cmp %1.1
-    jnz {label,$1}
-
-pat bge
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov a,%2.1
-    sbb %1.1
-    jp {label,$1}
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sui {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jm {label, $1}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jm {label, $1}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov a,%2.1
+         sbb %1.1
+         jm {label,$1}
 
 pat bgt
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.2
-    sub %2.2
-    mov a,%1.1
-    sbb %2.1
-    jm {label,$1}
+   leaving
+      exg 2
+      blt $1
+      
+pat bge
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sui {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jp {label, $1}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jp {label, $1}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov a,%2.1
+         sbb %1.1
+         jp {label,$1}
+
+pat ble
+   leaving
+      exg 2
+      bge $1
+
+pat beq
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         cpi {const1, %1.num & 0xff}
+         jnz {label, 1f}
+         mov a, %2.1
+         cpi {const1, %1.num >> 8}
+         jz {label, $1}
+         1:
+   with hl_or_de const2 STACK
+      leaving
+         exg 2
+         beq $1
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         cmp %1.2
+         jnz {label,1f}
+         mov a,%2.1
+         cmp %1.1
+         jz {label,$1}
+         1:
+
+pat bne
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         cpi {const1, %1.num & 0xff}
+         jnz {label, $1}
+         mov a, %2.1
+         cpi {const1, %1.num >> 8}
+         jnz {label, $1}
+   with hl_or_de const2 STACK
+      leaving
+         exg 2
+         beq $1
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         cmp %1.2
+         jnz {label,$1}
+         mov a,%2.1
+         cmp %1.1
+         jnz {label,$1}
 
 pat zlt
 with STACK
