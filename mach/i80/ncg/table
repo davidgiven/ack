@@ -623,37 +623,68 @@ pat sde
 /****************************************/
 
 pat adi $1==2
-with hlreg dereg
-   gen dad de				yields hl
-with dereg hlreg
-   gen dad de				yields hl
-with hlreg hlreg
-   gen dad hl				yields hl
-with dereg dereg
-   gen xchg.
-       dad hl				yields hl
+   with hlreg dereg
+      gen
+         dad de
+      yields hl
+   with dereg hlreg
+      gen
+         dad de
+      yields hl
+   with hlreg hlreg
+      gen
+         dad hl
+      yields hl
+   with dereg dereg
+      gen
+         xchg.
+         dad hl
+      yields hl
 
 pat adi $1==4
-kills ALL
-gen Call {label,".adi4"}
+   kills ALL
+      gen
+         Call {label,".adi4"}
 
 pat sbi $1==2
-with hl_or_de hl_or_de
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov %1.2,a
-    mov a,%2.1
-    sbb %1.1
-    mov %1.1,a				yields %1
-with hl_or_de hl_or_de
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov %2.2,a
-    mov a,%2.1
-    sbb %1.1
-    mov %2.1,a				yields %2
+   with const2 hl_or_de
+      yields %2 {const2, 0-%1.num}
+      leaving
+         adi 2
+   with smallconst2 hl_or_de
+      yields %2 {smallconst2, 0-%1.num}
+      leaving
+         adi 2
+   with hl_or_de const2
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mov %1.2, a
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         mov %1.1, a
+      yields %1
+   with hl_or_de hl_or_de
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov %1.2,a
+         mov a,%2.1
+         sbb %1.1
+         mov %1.1,a
+      yields %1
+   with hl_or_de hl_or_de
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov %2.2,a
+         mov a,%2.1
+         sbb %1.1
+         mov %2.1,a
+      yields %2
 
 pat sbi $1==4
 kills ALL
@@ -1851,7 +1882,7 @@ pat bgt
    leaving
       exg 2
       blt $1
-      
+
 pat bge
    with const2 hl_or_de STACK
       uses areg
