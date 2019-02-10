@@ -135,7 +135,7 @@ INSTRUCTIONS
    rst	const1:ro cost(1,11).	
 /* rz					cost(1, 8).	*/
    sbb	reg1:ro 	kills a:cc	cost(1, 4).
-/* sbi	const1:ro 	kills a:cc	cost(2, 7).	*/
+   sbi	const1:ro 	kills a:cc	cost(2, 7).
    shld	label:ro			cost(3,16).
    sphl					cost(1, 5).
    sta	label:ro			cost(3,13).
@@ -623,37 +623,68 @@ pat sde
 /****************************************/
 
 pat adi $1==2
-with hlreg dereg
-   gen dad de				yields hl
-with dereg hlreg
-   gen dad de				yields hl
-with hlreg hlreg
-   gen dad hl				yields hl
-with dereg dereg
-   gen xchg.
-       dad hl				yields hl
+   with hlreg dereg
+      gen
+         dad de
+      yields hl
+   with dereg hlreg
+      gen
+         dad de
+      yields hl
+   with hlreg hlreg
+      gen
+         dad hl
+      yields hl
+   with dereg dereg
+      gen
+         xchg.
+         dad hl
+      yields hl
 
 pat adi $1==4
-kills ALL
-gen Call {label,".adi4"}
+   kills ALL
+      gen
+         Call {label,".adi4"}
 
 pat sbi $1==2
-with hl_or_de hl_or_de
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov %1.2,a
-    mov a,%2.1
-    sbb %1.1
-    mov %1.1,a				yields %1
-with hl_or_de hl_or_de
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov %2.2,a
-    mov a,%2.1
-    sbb %1.1
-    mov %2.1,a				yields %2
+   with const2 hl_or_de
+      yields %2 {const2, 0-%1.num}
+      leaving
+         adi 2
+   with smallconst2 hl_or_de
+      yields %2 {smallconst2, 0-%1.num}
+      leaving
+         adi 2
+   with hl_or_de const2
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mov %1.2, a
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         mov %1.1, a
+      yields %1
+   with hl_or_de hl_or_de
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov %1.2,a
+         mov a,%2.1
+         sbb %1.1
+         mov %1.1,a
+      yields %1
+   with hl_or_de hl_or_de
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov %2.2,a
+         mov a,%2.1
+         sbb %1.1
+         mov %2.1,a
+      yields %2
 
 pat sbi $1==4
 kills ALL
@@ -702,14 +733,33 @@ pat ngi $1==4
 kills ALL
 gen Call {label,".ngi4"}
 
-pat loc sli ($1 == 8) && ($2 == 2)
-with hl_or_de
-gen move %1.2, %1.1
-    mvi %1.2, {const1,0}        yields %1
+pat loc sli ($1==1) && ($2==2)
+   with hlreg
+      gen
+         dad hl
+      yields hl
+   
+pat loc sli ($1>=2) && ($1<=7) && ($2==2)
+   with hlreg
+      gen
+         dad hl
+      yields hl
+      leaving
+         loc $1-1
+         sli 2
+   
+pat loc sli ($1==8) && ($2==2)
+   with hl_or_de
+      gen
+         mov %1.1, %1.2
+         mvi %1.2, {const1, 0}
+      yields %1
 
 pat sli $1==2
-kills ALL
-gen Call {label,".sli2"}		yields de
+   kills ALL
+      gen
+         Call {label,".sli2"}
+	yields de
 
 pat sli $1==4
 kills ALL
@@ -761,7 +811,14 @@ kills ALL
 gen mvi a,{const1,0}
     Call {label,".dvi4"}
 
-pat slu						leaving sli $1
+pat loc slu ($2==2)
+   leaving
+      loc $1
+      sli $2
+   
+pat slu
+   leaving
+      sli $1
 
 pat loc sru ($1 == 8) && ($2 == 2)
 with hl_or_de
@@ -1791,65 +1848,121 @@ with					yields {const2,$1}
 						leaving bne $2
  
 pat bra
-with STACK
-gen jmp {label,$1}
+   with STACK
+      gen
+         jmp {label,$1}
 
 pat blt
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov a,%2.1
-    sbb %1.1
-    jm {label,$1}
-
-pat ble
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.2
-    sub %2.2
-    mov a,%1.1
-    sbb %2.1
-    jp {label,$1}
-
-pat beq
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    cmp %1.2
-    jnz {label,1f}
-    mov a,%2.1
-    cmp %1.1
-    jz {label,$1}
-    1:
-
-pat bne
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    cmp %1.2
-    jnz {label,$1}
-    mov a,%2.1
-    cmp %1.1
-    jnz {label,$1}
-
-pat bge
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%2.2
-    sub %1.2
-    mov a,%2.1
-    sbb %1.1
-    jp {label,$1}
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sui {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jm {label, $1}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jm {label, $1}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov a,%2.1
+         sbb %1.1
+         jm {label,$1}
 
 pat bgt
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.2
-    sub %2.2
-    mov a,%1.1
-    sbb %2.1
-    jm {label,$1}
+   leaving
+      exg 2
+      blt $1
+
+pat bge
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sui {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jp {label, $1}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jp {label, $1}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         sub %1.2
+         mov a,%2.1
+         sbb %1.1
+         jp {label,$1}
+
+pat ble
+   leaving
+      exg 2
+      bge $1
+
+pat beq
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         cpi {const1, %1.num & 0xff}
+         jnz {label, 1f}
+         mov a, %2.1
+         cpi {const1, %1.num >> 8}
+         jz {label, $1}
+         1:
+   with hl_or_de const2 STACK
+      leaving
+         exg 2
+         beq $1
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         cmp %1.2
+         jnz {label,1f}
+         mov a,%2.1
+         cmp %1.1
+         jz {label,$1}
+         1:
+
+pat bne
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         cpi {const1, %1.num & 0xff}
+         jnz {label, $1}
+         mov a, %2.1
+         cpi {const1, %1.num >> 8}
+         jnz {label, $1}
+   with hl_or_de const2 STACK
+      leaving
+         exg 2
+         beq $1
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%2.2
+         cmp %1.2
+         jnz {label,$1}
+         mov a,%2.1
+         cmp %1.1
+         jnz {label,$1}
 
 pat zlt
 with STACK
@@ -2027,46 +2140,29 @@ gen 1:
 /* Group 15: Miscellaneous		  */
 /******************************************/
 
-pat asp $1<=0-6
-with STACK
-uses hlreg={const2,$1}
-gen dad sp
-    sphl.
+pat asp ($1<=0-12) || ($1>=12)
+   with STACK
+      uses hlreg={const2,$1}
+      gen
+         dad sp
+         sphl.
 
-pat asp $1==0-4
-with STACK
-gen dcx sp
-    dcx sp
-    dcx sp
-    dcx sp
+pat asp ($1<0) && ($1>0-12)
+   with STACK
+      gen
+         push hl
+      leaving
+         asp $1+2
 
-pat asp $1==0-2
-with STACK
-gen dcx sp
-    dcx sp
+pat asp $1==0 /* do nothing */
 
-pat asp $1==0			/* do nothing */
-
-pat asp $1==2
-with exact src1or2
-with STACK
-   gen inx sp
-       inx sp
-
-pat asp $1==4
-with exact src1or2				leaving asp 2
-with STACK
-   gen inx sp
-       inx sp
-       inx sp
-       inx sp
-
-pat asp $1>=6
-with exact src1or2				leaving asp $1-2
-with STACK
-  uses hlreg={const2,$1}
-  gen dad sp
-      sphl.
+pat asp ($1>0) && ($1<12)
+   with STACK
+      uses hlreg
+      gen
+         pop hl
+      leaving
+         asp $1-2
 
 pat ass $1==2
 with hlreg STACK

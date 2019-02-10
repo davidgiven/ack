@@ -13,4 +13,6 @@ mvi X, Y : mov X, Z          -> mov X, Z ;
 xchg : inx h : xchg          -> inx d ;
 xchg : inx d : xchg          -> inx h ;
 
+cpi 0                        -> ora a ;
+
 %%;
