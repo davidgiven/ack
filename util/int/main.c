@@ -5,6 +5,8 @@
 /* $Id$ */
 
 #include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	<setjmp.h>
 
 #include	<em_abs.h>
@@ -19,10 +21,6 @@
 #include	"read.h"
 #include	"opcode.h"
 #include	"rsb.h"
-
-extern int atoi();
-extern long atol();
-extern char *strcpy();
 
 char mess_file[64] = "int.mess";	/* name of message file */
 

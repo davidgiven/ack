@@ -2,6 +2,7 @@
 static char rcsidp5[] = "$Id$";
 #endif
 
+#include <string.h>
 #include "parser.h"
 #include "Lpars.h"
 
@@ -40,7 +41,6 @@ PRIVATE
 openofile(filename)
 	char *filename;
 {
-	char *strcpy(), *strcat();
 	strcpy(ofilename,filename);
 	strcpy(ofiletemp,filename);
 	strcat(ofiletemp,".new");

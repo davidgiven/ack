@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 extern uint8_t ram[0x10000];
 

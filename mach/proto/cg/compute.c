@@ -73,7 +73,7 @@ char opdesc[] = {
 	LLDEF,			/* EX_REGVAR */
 };
 
-string salloc(),strcpy(),strcat();
+string salloc();
 
 string mycat(s1,s2) string s1,s2; {
 	register string s;

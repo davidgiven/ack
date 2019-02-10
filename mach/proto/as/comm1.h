@@ -53,7 +53,6 @@ extern short	bflag;		/* -b option (no optimizations) */
 #endif
 
 extern char	*aoutpath INIT("a.out");
-extern char	temppath[50];
 
 extern FILE	*input;
 extern FILE	*tempfile;
@@ -93,7 +92,6 @@ extern short	listcolm;	/* column on output */
 extern short	listeoln INIT(1);
 				/* set by endline, tested by emit1 */
 extern FILE	*listfile;	/* copy of source text */
-extern char	listpath[50];
 #endif
 
 #ifndef extern
@@ -155,9 +153,6 @@ void	 emit4(long);
 void	 emitx(valu_t, int);
 void     emitf(int size, int negative);
 void	 emitstr(int);
-void	 ffreopen(char *, FILE *);
-FILE	*ffcreat(char *);
-FILE	*fftemp(char *, char *);
 void	 yyerror(const char *);
 void	 nosect(void);
 void	 fatal(const char *, ...);
