@@ -32,12 +32,6 @@ static void commfinish(void);
 /* ========== Machine independent C routines ========== */
 
 void stop(void) {
-#if DEBUG < 2
-	unlink(temppath);
-#ifdef LISTING
-	unlink(listpath);
-#endif
-#endif
 	exit(nerrors != 0);
 }
 
@@ -77,13 +71,6 @@ main(int argc, char **argv)
 			if (++i >= argc)
 				fatal("-o needs filename");
 			aoutpath = argv[i];
-			break;
-		case 'T':
-			if (*p != '\0') {
-				extern char *tmp_dir;
-
-				tmp_dir = p;
-			}
 			break;
 		case 'd':
 #ifdef LISTING
@@ -154,11 +141,11 @@ pass_1(int argc, char **argv)
 	nbits = BITCHUNK;
 #endif
 
-	tempfile = fftemp(temppath, "asTXXXXXX");
+	tempfile = tmpfile();
 #ifdef LISTING
 	listmode = dflag;
 	if (listmode & 0440)
-		listfile = fftemp(listpath, "asLXXXXXX");
+		listfile = tmpfile();
 #endif
 	for (ip = keytab; ip->i_type; ip++)
 		item_insert(ip, H_KEY+hash(ip->i_name));

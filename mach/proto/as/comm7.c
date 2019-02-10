@@ -387,33 +387,6 @@ void emitf(int size, int negative)
 		con_float(stringbuf, size);
 }
 
-/* ---------- Error checked file I/O  ---------- */
-
-FILE* ffcreat(char* s)
-{
-	FILE* f;
-
-	if ((f = fopen(s, "w+")) == NULL)
-		fatal("can't create %s", s);
-	return (f);
-}
-
-#ifndef TMPDIR
-#define TMPDIR "/tmp"
-#endif
-char* tmp_dir = TMPDIR;
-
-FILE* fftemp(char* path, char* tail)
-{
-	char* dir;
-
-	if ((dir = getenv("TMPDIR")) == NULL)
-		dir = tmp_dir;
-	sprintf(path, "%s/%s", dir, tail);
-	close(mkstemp(path));
-	return (ffcreat(path));
-}
-
 /* ---------- Error handling ---------- */
 
 /* ARGSUSED */
