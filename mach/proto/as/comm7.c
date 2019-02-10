@@ -389,17 +389,11 @@ void emitf(int size, int negative)
 
 /* ---------- Error checked file I/O  ---------- */
 
-void ffreopen(char* s, FILE* f)
-{
-	if (freopen(s, "r", f) == NULL)
-		fatal("can't reopen %s: %s", s, strerror(errno));
-}
-
 FILE* ffcreat(char* s)
 {
 	FILE* f;
 
-	if ((f = fopen(s, "w")) == NULL)
+	if ((f = fopen(s, "w+")) == NULL)
 		fatal("can't create %s", s);
 	return (f);
 }

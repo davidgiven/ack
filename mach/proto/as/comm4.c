@@ -399,7 +399,7 @@ pass_23(int n)
 #ifdef LISTING
 	listmode >>= 3;
 	if (listmode & 4)
-		ffreopen(listpath, listfile);
+		rewind(listfile);
 	listeoln = 1;
 #endif
 #ifdef THREE_PASS
@@ -438,7 +438,7 @@ pass_23(int n)
 #ifndef ASLD
 	newmodule(modulename);
 #endif /* ASLD */
-	ffreopen(temppath, tempfile);
+	rewind(tempfile);
 	yyparse();
 	commfinish();
 	machfinish(n);

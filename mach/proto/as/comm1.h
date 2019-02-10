@@ -155,7 +155,6 @@ void	 emit4(long);
 void	 emitx(valu_t, int);
 void     emitf(int size, int negative);
 void	 emitstr(int);
-void	 ffreopen(char *, FILE *);
 FILE	*ffcreat(char *);
 FILE	*fftemp(char *, char *);
 void	 yyerror(const char *);
