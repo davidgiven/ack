@@ -1,5 +1,5 @@
 
-/* 68020 desciptor table for ACK target optimizer */
+/* 8080 desciptor table for ACK target optimizer */
 
 MAXOP 2;
 
@@ -14,5 +14,6 @@ xchg : inx h : xchg          -> inx d ;
 xchg : inx d : xchg          -> inx h ;
 
 cpi 0                        -> ora a ;
+call X : ret                 -> jmp X ;
 
 %%;
