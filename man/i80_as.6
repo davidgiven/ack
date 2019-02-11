@@ -9,6 +9,10 @@
 This assembler is made with the general framework
 described in \fIuni_ass\fP(6). It is an assembler generating relocatable
 object code in \fIack.out\fP(5) format.
+.P
+In addition to the standard 8080 mnemonics, both the documented 8085 extensions
+(rim, sim) and the undocumented ones (dsub, arhl, rld, ldhi, ldsi, rstv, shlx,
+lhlx, jnk, jk) are supported.
 .SH SYNTAX
 .IP registers
 The 8080 has seven one-byte registers: a, b, c, d, e, h, l;

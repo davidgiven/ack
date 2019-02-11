@@ -97,3 +97,25 @@
 0,	NOOPOP,		0000,		"nop",
 0,	NOOPOP,		0040,		"rim",		/* 8085 */
 0,	NOOPOP,		0060,		"sim",		/* 8085 */
+/*
+ *	The Intel 8085 has a set of instructions for high level language
+ *	support that were not originally documented.
+ *
+ *	V = signed overflow (carry out ^ carry in)
+ *	K = signed compare (v ^ sign)
+ *
+ *	K is mostly useful for oveflowing INX and DEX to avoid the usual
+ *	check via A. RSTV is useful for runtimes where signed overflow is a
+ *	fault.
+ */
+0,	NOOPOP,		0010,		"dsub",		/* 8085 undoc HL = HL - BC */
+0,	NOOPOP,		0020,		"arhl",		/* 8085 undoc HL arith right shift */
+0,	NOOPOP,		0030,		"rld",		/* 8085 undoc rotate DE left thru carry */
+                                                        /* in effect ADC DE,DE */
+0,	D8OP,		0050,		"ldhi",		/* DE = HL + imm8 */
+0,	D8OP,		0070,		"ldsi",		/* DE = SP + imm8 */
+0,	NOOPOP,		0313,		"rstv",		/* RST8 if V set */
+0,	NOOPOP,		0331,		"shlx",		/* (DE) = HL */
+0,	NOOPOP,		0355,		"lhlx",		/* HL = (DE) */
+0,	D16OP,		0335,		"jnk",		/* Jump K clear */
+0,	D16OP,		0375,		"jk",		/* Jump K set */
