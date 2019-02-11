@@ -104,11 +104,12 @@ static void cmd_register(void)
 
 static void cmd_break(void)
 {
+	int i;
 	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t breakpc = strtoul(w1, NULL, 16);
-		for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+		for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 		{
 			if (breakpoints[i] == 0xffff)
 			{
@@ -120,7 +121,7 @@ static void cmd_break(void)
 	}
 	else
 	{
-		for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+		for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 		{
 			if (breakpoints[i] != 0xffff)
 				printf("%04x\n", breakpoints[i]);
@@ -130,11 +131,12 @@ static void cmd_break(void)
 
 static void cmd_watch(void)
 {
+	int i;
 	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t watchaddr = strtoul(w1, NULL, 16);
-		for (int i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
+		for (i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
 		{
 			struct watchpoint* w = &watchpoints[i];
 			if (!w->enabled)
@@ -149,7 +151,7 @@ static void cmd_watch(void)
 	}
 	else
 	{
-		for (int i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
+		for (i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
 		{
 			struct watchpoint* w = &watchpoints[i];
 			if (w->enabled)
@@ -160,11 +162,12 @@ static void cmd_watch(void)
 
 static void cmd_delete_breakpoint(void)
 {
+	int i;
 	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t breakpc = strtoul(w1, NULL, 16);
-		for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+		for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 		{
 			if (breakpoints[i] == breakpc)
 			{
@@ -178,11 +181,12 @@ static void cmd_delete_breakpoint(void)
 
 static void cmd_delete_watchpoint(void)
 {
+	int i;
 	char* w1 = strtok(NULL, delimiters);
 	if (w1)
 	{
 		uint16_t address = strtoul(w1, NULL, 16);
-		for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+		for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 		{
 			struct watchpoint* w = &watchpoints[i];
 			if (w->enabled && (w->address == address))
@@ -197,6 +201,7 @@ static void cmd_delete_watchpoint(void)
 
 static void cmd_memory(void)
 {
+	int i;
 	char* w1 = strtok(NULL, delimiters);
 	char* w2 = strtok(NULL, delimiters);
 
@@ -215,7 +220,7 @@ static void cmd_memory(void)
 		while (p < endrounded)
 		{
 			printf("%04x : ", p);
-			for (int i = 0; i < 16; i++)
+			for (i = 0; i < 16; i++)
 			{
 				uint16_t pp = p + i;
 				if ((pp >= startaddr) && (pp < endaddr))
@@ -224,7 +229,7 @@ static void cmd_memory(void)
 					printf("   ");
 			}
 			printf(": ");
-			for (int i = 0; i < 16; i++)
+			for (i = 0; i < 16; i++)
 			{
 				uint16_t pp = p + i;
 				if ((pp >= startaddr) && (pp < endaddr))
@@ -359,7 +364,8 @@ static void sigusr1_cb(int number)
 
 void emulator_init(void)
 {
-	for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+	int i;
+	for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 		breakpoints[i] = 0xffff;
 
 	singlestepping = flag_enter_debugger;
@@ -372,16 +378,17 @@ void emulator_init(void)
 
 void emulator_run(void)
 {
+	int i;
 	for (;;)
 	{
 		uint16_t pc = i8080_read_reg16(PC);
 		if (!singlestepping)
 		{
-			for (int i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
+			for (i=0; i<sizeof(breakpoints)/sizeof(*breakpoints); i++)
 				if (pc == breakpoints[i])
 					singlestepping = true;
 		}
-		for (int i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
+		for (i=0; i<sizeof(watchpoints)/sizeof(*watchpoints); i++)
 		{
 			struct watchpoint* w = &watchpoints[i];
 			if (w->enabled && (ram[w->address] != w->value))

@@ -114,7 +114,8 @@ static void bios_warmboot(void)
 	close(fd);
 
 	int offset = 1;
-	for (int word = 1; user_command_line[word]; word++)
+	int word;
+	for (word = 1; user_command_line[word]; word++)
 	{
 		if (word > 1)
 		{
