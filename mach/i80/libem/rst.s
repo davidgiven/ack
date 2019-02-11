@@ -17,6 +17,11 @@
     shld 0x11
     lxi h, rst3
     shld 0x19
+
+    lhld rst4
+    shld 0x20
+    lhld rst4+2
+    shld 0x22
     ret
 
     ! de = [bc+const1] (remember bc is the frame pointer)
@@ -70,3 +75,8 @@ rst3:
     dad b
     ret
     
+    ! Adjust flags for signed comparison
+rst4:
+    rpo
+    xri 0x80
+    ret

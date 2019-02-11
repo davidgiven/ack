@@ -13,6 +13,12 @@ EM_WSIZE = 2
 EM_PSIZE = 2
 EM_BSIZE = 4
 
+#ifdef USE_I80_RSTS
+   #define SIGN_ADJUST rst {const1, 4}
+#else
+   #define SIGN_ADJUST jpo {label, 1f} xri {const1, 0x80} 1:
+#endif
+
 SL=4
 
 PROPERTIES
@@ -103,7 +109,7 @@ INSTRUCTIONS
    jnz	label:ro			cost(3,10).
    jp	label:ro			cost(3,10).
 /* jpe	label:ro			cost(3,10).	*/
-/* jpo	label:ro			cost(3,10).	*/
+   jpo	label:ro			cost(3,10).
    jz	label:ro			cost(3,10).
    lda	label:ro 	kills a		cost(3,13).
    ldax	regind:ro 	kills a		cost(1, 7).
@@ -1860,6 +1866,7 @@ pat blt
          sui {const1, %1.num & 0xff}
          mov a, %2.1
          sbi {const1, %1.num >> 8}
+         SIGN_ADJUST
          jm {label, $1}
    with hl_or_de const2 STACK
       uses areg
@@ -1868,14 +1875,16 @@ pat blt
          sub %1.2
          mvi a, {const1, %2.num >> 8}
          sbb %1.1
+         SIGN_ADJUST
          jm {label, $1}
    with hl_or_de hl_or_de STACK
       uses areg
       gen
-         mov a,%2.2
+         mov a, %2.2
          sub %1.2
-         mov a,%2.1
+         mov a, %2.1
          sbb %1.1
+         SIGN_ADJUST
          jm {label,$1}
 
 pat bgt
@@ -1891,6 +1900,7 @@ pat bge
          sui {const1, %1.num & 0xff}
          mov a, %2.1
          sbi {const1, %1.num >> 8}
+         SIGN_ADJUST
          jp {label, $1}
    with hl_or_de const2 STACK
       uses areg
@@ -1899,6 +1909,7 @@ pat bge
          sub %1.2
          mvi a, {const1, %2.num >> 8}
          sbb %1.1
+         SIGN_ADJUST
          jp {label, $1}
    with hl_or_de hl_or_de STACK
       uses areg
@@ -1907,6 +1918,7 @@ pat bge
          sub %1.2
          mov a,%2.1
          sbb %1.1
+         SIGN_ADJUST
          jp {label,$1}
 
 pat ble
