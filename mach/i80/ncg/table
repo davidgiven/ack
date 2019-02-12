@@ -2048,14 +2048,15 @@ gen xra a
 
 #ifdef USE_I80_RSTS
    pat lol zeq sfit($1, 8)
-      uses hlreg, areg
-      gen
-         rst {const1, 3}
-         data1 {const1, $1}
-         mov a, {m}
-         inx hl
-         ora {m}
-         jz {label, $2}
+      with STACK
+         uses hlreg, areg
+         gen
+            rst {const1, 3}
+            data1 {const1, $1}
+            mov a, {m}
+            inx hl
+            ora {m}
+            jz {label, $2}
 #endif
 
 pat lol zeq
@@ -2070,25 +2071,26 @@ pat lol zeq
 
 #ifdef USE_I80_RSTS
    pat lol zne sfit($1, 8)
-      uses hlreg, areg
-      gen
-         rst {const1, 3}
-         data1 {const1, $1}
-         mov a, {m}
-         inx hl
-         ora {m}
-         jnz {label, $2}
+      with STACK
+         uses hlreg, areg
+         gen
+            rst {const1, 3}
+            data1 {const1, $1}
+            mov a, {m}
+            inx hl
+            ora {m}
+            jnz {label, $2}
 #endif
 
 pat lol zne
    with STACK
-   uses hlreg={const2,$1}, areg
-   gen
-      dad lb
-      mov a,{m}
-      inx hl
-      ora {m}
-      jnz {label,$2}
+      uses hlreg={const2,$1}, areg
+      gen
+         dad lb
+         mov a,{m}
+         inx hl
+         ora {m}
+         jnz {label,$2}
 
 pat ior zeq $1==2
 with hl_or_de hl_or_de STACK
