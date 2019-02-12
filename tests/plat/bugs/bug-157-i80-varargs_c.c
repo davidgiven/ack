@@ -56,7 +56,7 @@ void demo2(int lval, va_list ap)
     ASSERT(strcmp(ptmp, "35") == 0);
 }
 
-void doit1(char *x, ...)
+void doit1a(char *x, ...)
 {
     va_list ptr;
     va_start(ptr, x);
@@ -64,7 +64,15 @@ void doit1(char *x, ...)
     va_end(ptr);
 }
 
-void doit2(char *x, ...)
+void doit1b(char *x, ...)
+{
+    va_list ptr;
+    va_start(ptr, x);
+    demo(1,ptr);
+    va_end(ptr);
+}
+
+void doit2a(char *x, ...)
 {
     va_list ptr;
     va_start(ptr, x);
@@ -72,10 +80,20 @@ void doit2(char *x, ...)
     va_end(ptr);
 }
 
+void doit2b(char *x, ...)
+{
+    va_list ptr;
+    va_start(ptr, x);
+    demo2(1,ptr);
+    va_end(ptr);
+}
+
 int main(int argc, char *argv[])
 {
-    doit1("", 35);
-    doit2("", 35);
+    doit1a("", 35);
+    doit1b("", 35L);
+    doit2a("", 35);
+    doit2b("", 35L);
     finished();
     return 0;
 }
