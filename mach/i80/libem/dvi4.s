@@ -18,9 +18,6 @@
 
 .dvi4:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	sta .areg
 	pop h			! store divisor
@@ -129,9 +126,7 @@ dv0:	lxi h,block1		! left shift: block2 <- block1 <- 0
 	lhld block2
 	push h
 
-5:	lhld .bcreg
-	mov b,h
-	mov c,l
+5:	
 	lhld .retadr
 	pchl
 

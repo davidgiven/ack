@@ -13,9 +13,6 @@
 .sli4:
 	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop b		!number of shifts
 	pop d		!low-order bytes of number to be shifted
@@ -42,9 +39,6 @@
 3:	push h
 	push d
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl
 

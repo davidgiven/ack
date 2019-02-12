@@ -14,9 +14,6 @@
 .mlu2:
 	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop b		! bc = multiplier
 	pop d		! de = multiplicand
@@ -44,8 +41,5 @@
 
 3:	xchg		! de becomes product
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

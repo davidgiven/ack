@@ -14,9 +14,6 @@
 
 .inn:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop h
 	xchg		!hl = size, de = bit number
@@ -58,9 +55,6 @@
 	dad sp
 	sphl
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl
 

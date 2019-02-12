@@ -14,9 +14,6 @@
 
 	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	mov h,d
 	mov l,e
@@ -32,8 +29,5 @@
 	ora e
 	jnz 1b
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

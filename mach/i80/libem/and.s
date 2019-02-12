@@ -12,9 +12,6 @@
 
 .and:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	lxi h,0
 	dad sp
@@ -35,8 +32,5 @@
 	pop h
 	sphl
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

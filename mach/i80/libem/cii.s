@@ -15,9 +15,6 @@
 
 .cii:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	sta .areg	! save a-register
 	pop b
@@ -82,8 +79,6 @@ shrink:	mov l,b		! load destination size in hl
 	jnz 1b
 	sphl
 
-3:	lhld .bcreg
-	mov b,h
-	mov c,l
+3:	
 	lhld .retadr
 	pchl

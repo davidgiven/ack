@@ -10,8 +10,8 @@
 ! BC is used as the frame pointer, but HL and DE can be corrupted.
 
 .proword:
-	pop h
-	push b
+	lhld .fp
+	xthl
 	mov e, m
 	inx h
 	mov d, m
@@ -19,40 +19,41 @@
 	jmp .pron
 
 .probyte:
-	pop h
-	push b
+	lhld .fp
+	xthl
 	mvi d, 0xff
 	mov e, m
 	inx h
 	jmp .pron
 
 .pro4:
-	pop h
-	push b
+	lhld .fp
+	xthl
 	lxi d, -4
 	jmp .pron
 
 .pro2:
-	pop h
-	push b
+	lhld .fp
+	xthl
 	lxi d, -2
 	jmp .pron
 
 .pro0:
-	pop h
-	push b
+	lhld .fp
+	xthl
 	lxi d, 0
 	! fall through
 .pron:
-	shld .retadr
-	! Copy the current stack pointer to BC.
-	lxi h, 0
-	dad sp
 	mov b, h
 	mov c, l
+	! Copy the current stack pointer to the frame pointer.
+	lxi h, 0
+	dad sp
+	shld .fp
 	! Calculate the new stack pointer.
 	dad d
 	sphl
-	lhld .retadr
+	mov h, b
+	mov l, c
 	pchl
 

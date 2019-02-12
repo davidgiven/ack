@@ -12,9 +12,6 @@
 
 .set:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	mov a,e
 	rar
@@ -63,8 +60,5 @@
 
 2:	mov m,a
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

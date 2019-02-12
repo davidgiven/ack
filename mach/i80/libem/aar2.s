@@ -14,9 +14,6 @@
 .aar2:
 	pop h
 	shld .retadr1
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop h		! hl = pointer to descriptor
         pop d           ! de = index
@@ -40,8 +37,5 @@
 	dad d		! hl = address of array[index]
 	push h
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr1
 	pchl

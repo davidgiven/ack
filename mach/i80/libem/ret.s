@@ -6,9 +6,9 @@
 
 .define .ret
 .ret:
-	mov h, b
-	mov l, c
+	lhld .fp
 	sphl
-	pop b
+	pop h
+	shld .fp
 	ret
 

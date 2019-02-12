@@ -15,9 +15,6 @@
 .lar2:
 	pop h
 	shld .retadr1
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop h		! hl = pointer to descriptor
         pop d           ! de = index
@@ -69,8 +66,6 @@
 	ora c
 	jnz 1b
 
-2:	lhld .bcreg
-	mov b,h
-	mov c,l
+2:	
 	lhld .retadr1
 	pchl

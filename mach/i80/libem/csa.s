@@ -14,7 +14,6 @@
 
 .csa:	pop h		!hl = address of case descriptor
 	pop d		!de = index
-	push b		!save localbase
 	mov c,m
 	inx h
 	mov b,m
@@ -45,13 +44,11 @@
 	ora h
 	jz 1f		!get default pointer if pointer = 0
 	pop b		!remove default pointer
-	pop b		!localbase
 	pchl		!jump!!!!
 
 1:	pop h		!get default pointer
 	mov a,l
 	ora h
 	cz ecase	!trap
-	pop b		!restore localbase
 	pchl		!jump!!!!
 

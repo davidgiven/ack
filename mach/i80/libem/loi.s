@@ -13,9 +13,6 @@
 
 .loi:	pop h
 	shld .retadr
-	mov l,c		! free bc for scratch
-	mov h,b
-	shld .bcreg
 
 	pop h		! hl = base address
 	dad d		! hl = load pointer
@@ -48,8 +45,6 @@
 	ora e
 	jnz 1b
 
-2:	lhld .bcreg
-	mov c,l
-	mov b,h
+2:	
 	lhld .retadr
 	pchl

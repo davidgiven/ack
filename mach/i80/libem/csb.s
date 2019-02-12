@@ -14,7 +14,6 @@
 
 .csb:	pop h		!hl = pointer to descriptor
 	pop d		!de = case index
-	push b		!save localbase
 	mov c,m		!bc = default pointer
 	inx h
 	mov b,m
@@ -50,7 +49,7 @@
 	jmp 1b
 
 4:	pop h		!take default exit
-5:	pop b		!restore localbase
+5:	
 	mov a,l		!jump address is zero?
 	ora h
 	cz ecase	!trap

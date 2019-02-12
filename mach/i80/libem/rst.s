@@ -19,8 +19,11 @@
     shld 0x19
     ret
 
-    ! de = [bc+const1] (remember bc is the frame pointer)
+    ! de = [fp+const1]
 rst1:
+    lhld .fp
+    xchg
+
     pop h
     mov a, m
     inx h
@@ -31,14 +34,17 @@ rst1:
 	sbb a
 	mov h, a
 
-	dad b
+	dad d
     mov e, m
     inx h
     mov d, m
     ret
 
-    ! [bc+const1] = de (remember bc is the frame pointer)
+    ! [fp+const1] = bc
 rst2:
+    lhld .fp
+    xchg
+    
     pop h
     mov a, m
     inx h
@@ -49,14 +55,17 @@ rst2:
 	sbb a
 	mov h, a
 
-	dad b
-    mov m, e
+	dad d
+    mov m, c
     inx h
-    mov m, d
+    mov m, b
     ret
 
-    ! hl = bc+const1
+    ! hl = fp+const1
 rst3:
+    lhld .fp
+    xchg
+
     pop h
     mov a, m
     inx h
@@ -67,6 +76,6 @@ rst3:
     sbb a
     mov h, a
 
-    dad b
+    dad d
     ret
 

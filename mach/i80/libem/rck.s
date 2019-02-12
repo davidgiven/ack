@@ -13,9 +13,6 @@
 
 .rck:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop h			! hl = return address
 	pop d			! de = index
@@ -50,8 +47,5 @@
 1:	xra d			! now a = b
 2:	cm erange		! trap if index is too large
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

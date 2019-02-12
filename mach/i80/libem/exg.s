@@ -13,9 +13,6 @@
 	cc eoddz		!trap if numer of bytes is odd
 	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	lxi h,0
 	dad sp
@@ -38,8 +35,5 @@
 	jnz 1b
 
 	pop d
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

@@ -156,6 +156,7 @@ envp: .space 2          ! envp array (always empty, must be after argv)
 .define .trapproc, .retadr, .retadr1
 .define .bcreg, .areg
 .define .tmp1, .fra, block1, block2, block3
+.define .fp
 
 .comm .trapproc, 2
 .comm .retadr, 2        ! used to save return address
@@ -167,6 +168,7 @@ envp: .space 2          ! envp array (always empty, must be after argv)
 block1: .space 4        ! used by 32 bits divide and
 block2: .space 4        ! multiply routines
 block3: .space 4        ! must be contiguous (.comm doesn't guarantee this)
+.comm .fp, 2
 
 .sect .rom
 progname: .asciz 'ACKCPM'

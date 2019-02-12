@@ -11,9 +11,6 @@
 
 .mli4:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	pop h			! store multiplier
 	shld block1
@@ -70,8 +67,5 @@ lp2:	rar
 	lhld block3
 	push h
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

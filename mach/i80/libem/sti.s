@@ -11,9 +11,6 @@
 	
 .sti:	pop h
 	shld .retadr
-	mov l,c
-	mov h,b
-	shld .bcreg	! save bc
 
 	pop h
 	xra a
@@ -43,9 +40,7 @@
 	ora e
 	jnz 1b
 
-2:	lhld .bcreg
-	mov c,l
-	mov b,h
+2:	
 	lhld .retadr
 	pchl
 

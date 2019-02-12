@@ -15,9 +15,6 @@
 
 .cmi4:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	lxi b,4
 	lxi h,0
@@ -64,8 +61,5 @@
 	dad sp
 	sphl
 
-	lhld .bcreg
-	mov b,h
-	mov c,l
 	lhld .retadr
 	pchl

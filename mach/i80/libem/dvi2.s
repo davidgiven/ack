@@ -19,9 +19,6 @@
 
 .dvi2:	pop h
 	shld .retadr
-	mov h,b
-	mov l,c
-	shld .bcreg
 
 	sta .areg
 	pop b		! bc = divisor
@@ -112,8 +109,5 @@
 7:	mov d,h		! return remainder
 	mov e,l
 
-8:	lhld .bcreg
-	mov b,h
-	mov c,l
-	lhld .retadr
+8:	lhld .retadr
 	pchl
