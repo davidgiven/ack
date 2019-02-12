@@ -37,11 +37,12 @@ static DIR* currentdir;
 
 void files_init(void)
 {
-	for (int i=0; i<NUM_DRIVES; i++)
+	int i;
+	for (i=0; i<NUM_DRIVES; i++)
 		drives[i] = -1;
 	file_set_drive(0, ".");
 
-	for (int i=0; i<NUM_FILES; i++)
+	for (i=0; i<NUM_FILES; i++)
 	{
 		struct file* f = &files[i];
 		if (i == 0)
@@ -113,17 +114,18 @@ static void bump(struct file* f)
 
 static void cpm_filename_to_unix(cpm_filename_t* cpmfilename, char* unixfilename)
 {
+	int i;
 	char* pin = cpmfilename->bytes;
 	char* pout = unixfilename;
 
-	for (int i=0; i<8; i++)
+	for (i=0; i<8; i++)
 	{
 		char c = *pin++;
 		if (c != ' ')
 			*pout++ = tolower(c);
 	}
 	*pout++ = '.';
-	for (int i=0; i<3; i++)
+	for (i=0; i<3; i++)
 	{
 		char c = *pin++;
 		if (c != ' ')
@@ -169,10 +171,11 @@ static bool unix_filename_to_cpm(const char* unixfilename, cpm_filename_t* cpmfi
 
 static bool match_filenames(cpm_filename_t* pattern, cpm_filename_t* filename)
 {
+	int i;
 	if (pattern->drive != filename->drive)
 		return false;
 
-	for (int i=0; i<sizeof(pattern->bytes); i++)
+	for (i=0; i<sizeof(pattern->bytes); i++)
 	{
 		char p = pattern->bytes[i];
 		if (p == '?')

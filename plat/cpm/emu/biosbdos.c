@@ -88,6 +88,8 @@ void bios_coldboot(void)
 
 static void bios_warmboot(void)
 {
+	int word;	
+	int offset = 1;
 	dma = 0x0080;
 
 	if (!user_command_line[0])
@@ -113,8 +115,7 @@ static void bios_warmboot(void)
 	read(fd, &ram[0x0100], 0xFE00);
 	close(fd);
 
-	int offset = 1;
-	for (int word = 1; user_command_line[word]; word++)
+	for (word = 1; user_command_line[word]; word++)
 	{
 		if (word > 1)
 		{
