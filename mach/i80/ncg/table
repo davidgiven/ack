@@ -13,12 +13,6 @@ EM_WSIZE = 2
 EM_PSIZE = 2
 EM_BSIZE = 4
 
-#ifdef USE_I80_RSTS
-   #define SIGN_ADJUST rst {const1, 4}
-#else
-   #define SIGN_ADJUST jpo {label, 1f} xri {const1, 0x80} 1:
-#endif
-
 SL=4
 
 PROPERTIES
@@ -1862,30 +1856,39 @@ pat blt
    with const2 hl_or_de STACK
       uses areg
       gen
+         mov a, %2.1
+         xri {const1, 0x80}
+         mov %2.1, a
          mov a, %2.2
          sui {const1, %1.num & 0xff}
          mov a, %2.1
-         sbi {const1, %1.num >> 8}
-         SIGN_ADJUST
-         jm {label, $1}
+         sbi {const1, (%1.num >> 8) ^ 0x80}
+         jc {label, $1}
    with hl_or_de const2 STACK
       uses areg
       gen
+         mov a, %1.1
+         xri {const1, 0x80}
+         mov %1.1, a
          mvi a, {const1, %2.num & 0xff}
          sub %1.2
-         mvi a, {const1, %2.num >> 8}
+         mvi a, {const1, (%2.num >> 8) ^ 0x80}
          sbb %1.1
-         SIGN_ADJUST
-         jm {label, $1}
+         jc {label, $1}
    with hl_or_de hl_or_de STACK
       uses areg
       gen
+         mov a, %2.1
+         xri {const1, 0x80}
+         mov %2.1, a
+         mov a, %1.1
+         xri {const1, 0x80}
+         mov %1.1, a
          mov a, %2.2
          sub %1.2
          mov a, %2.1
          sbb %1.1
-         SIGN_ADJUST
-         jm {label,$1}
+         jc {label,$1}
 
 pat bgt
    leaving
@@ -1896,30 +1899,39 @@ pat bge
    with const2 hl_or_de STACK
       uses areg
       gen
+         mov a, %2.1
+         xri {const1, 0x80}
+         mov %2.1, a
          mov a, %2.2
          sui {const1, %1.num & 0xff}
          mov a, %2.1
-         sbi {const1, %1.num >> 8}
-         SIGN_ADJUST
-         jp {label, $1}
+         sbi {const1, (%1.num >> 8) ^ 0x80}
+         jnc {label, $1}
    with hl_or_de const2 STACK
       uses areg
       gen
+         mov a, %1.1
+         xri {const1, 0x80}
+         mov %1.1, a
          mvi a, {const1, %2.num & 0xff}
          sub %1.2
-         mvi a, {const1, %2.num >> 8}
+         mvi a, {const1, (%2.num >> 8) ^ 0x80}
          sbb %1.1
-         SIGN_ADJUST
-         jp {label, $1}
+         jnc {label, $1}
    with hl_or_de hl_or_de STACK
       uses areg
       gen
+         mov a, %2.1
+         xri {const1, 0x80}
+         mov %2.1, a
+         mov a, %1.1
+         xri {const1, 0x80}
+         mov %1.1, a
          mov a,%2.2
          sub %1.2
          mov a,%2.1
          sbb %1.1
-         SIGN_ADJUST
-         jp {label,$1}
+         jnc {label,$1}
 
 pat ble
    leaving
