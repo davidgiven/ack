@@ -15,6 +15,8 @@ EM_BSIZE = 4
 
 SL=4
 
+STACKHELPERS=128
+
 PROPERTIES
 
 areg			/* the a-register */
@@ -49,6 +51,7 @@ const2			= { INT num; } 2 num.
 smallpconst2   = { INT num; } 2 num. /* Byte-sized positive constant */
 smallnconst2   = { INT num; } 2 num. /* Byte-sized negative constant */
 label			= { ADDR off; } 2 off.
+plabel      = { ADDR off; INT param; } 2 off param.
 m			= { } 2 cost(0,3) "m".
 
 SETS
@@ -70,6 +73,7 @@ INSTRUCTIONS
    ana	reg1:ro 	kills a:cc	cost(1, 4).
    ani	const1:ro 	kills a:cc	cost(2, 7).
    Call	"call" label:ro			cost(3,17).
+   Call	"call" plabel:ro			cost(3,17).
 			   /* 'call' is a reserved word */
 /* cc	label:ro			cost(3,14). 	*/
 /* cm	label:ro			cost(3,14).	*/
@@ -260,22 +264,44 @@ pat ldc
    yields {const2, highw($1)} {const2, loww($1)}
 
 #ifdef USE_I80_RSTS
-   pat lol sfit($1, 8)
-      uses hlreg, areg, dereg
+   pat lol $1==0-2
+      uses dereg, hlreg
       gen
          rst {const1, 1}
-         data1 {const1, $1}
+      yields de
+      
+   pat lol $1==0-4
+      uses dereg, hlreg
+      gen
+         rst {const1, 2}
+      yields de
+      
+   pat lol $1==4
+      uses dereg, hlreg
+      gen
+         rst {const1, 3}
       yields de
 #endif
 
+pat lol ($1>0) && ($1<=STACKHELPERS)
+   uses dereg, hlreg
+   gen
+      Call {plabel, ".fload", $1}
+   yields de
+
+pat lol ($1<0) && ($1>=0-STACKHELPERS)
+   uses dereg, hlreg
+   gen
+      Call {plabel, ".floadn", 0-$1}
+   yields de
+
 pat lol
-  uses hlreg={const2, $1}, dereg
-  gen
-	 dad lb
-	 mov e,{m}
-	 inx hl
-	 mov d,{m}
-  yields de
+   uses dereg
+   gen
+      dad lb
+      mov e, {m}
+      inx hl
+      mov d, {m}
 
 pat loe
    uses hlreg
@@ -293,14 +319,17 @@ pat lof
       adp $1
       loi 2
 
-#ifdef USE_I80_RSTS
-   pat lal sfit($1, 8)
-      uses dereg, hlreg, areg
-      gen
-         rst {const1, 3}
-         data1 {const1, $1}
-      yields hl
-#endif
+pat lal ($1>0) && ($1<=STACKHELPERS)
+   uses hlreg
+   gen
+      Call {plabel, ".faddr", $1}
+   yields hl
+
+pat lal ($1<0) && ($1>=0-STACKHELPERS)
+   uses hlreg
+   gen
+      Call {plabel, ".faddrn", 0-$1}
+   yields hl
 
 pat lal
    uses hlreg={const2,$1}
@@ -464,22 +493,33 @@ pat stl lol $1==$2
 with dereg				yields de de leaving stl $1
 
 #ifdef USE_I80_RSTS
-   pat stl sfit($1, 8)
-	   with dereg
-      uses hlreg, areg
-      gen
-         rst {const1, 2}
-         data1 {const1, $1}
+   pat stl $1==0-2
+      with dereg
+         uses hlreg
+         gen
+            rst {const1, 4}
 #endif
+
+pat stl ($1>0) && ($1<=STACKHELPERS)
+   with dereg
+      uses hlreg
+      gen
+         Call {plabel, ".fstore", $1}
+
+pat stl ($1<0) && ($1>=0-STACKHELPERS)
+   with dereg
+      uses hlreg
+      gen
+         Call {plabel, ".fstoren", 0-$1}
 
 pat stl
 	with dereg
-	uses hlreg={const2, $1}
-	gen
-		dad lb
-		mov {m}, e
-		inx hl
-		mov {m}, d
+      uses hlreg={const2, $1}
+      gen
+         dad lb
+         mov {m}, e
+         inx hl
+         mov {m}, d
 
 pat ste loe $1==$2
 with hlreg				yields hl hl leaving ste $1
@@ -913,18 +953,25 @@ pat inc
          inx %1
       yields %1
 
-#ifdef USE_I80_RSTS
-   pat inl sfit($1, 8)
-      uses hlreg, areg
+pat inl ($1>0) && ($1<STACKHELPERS)
+   uses hlreg
       gen
-         rst {const1, 3}
-         data1 {const1, $1}
+         Call {plabel, ".faddr", $1}
          inr {m}
-         jnz {label, 1f}
+         jnz {label,1f}
          inx hl
          inr {m}
          1:
-#endif
+
+pat inl ($1<0) && ($1<0-STACKHELPERS)
+   uses hlreg
+      gen
+         Call {plabel, ".faddrn", $1}
+         inr {m}
+         jnz {label,1f}
+         inx hl
+         inr {m}
+         1:
 
 pat inl
    uses hlreg={const2,$1}
@@ -948,12 +995,10 @@ pat dec
 with hl_or_de
 gen dcx %1				yields %1
 
-#ifdef USE_I80_RSTS
-   pat del sfit($1, 8)
-      uses hlreg, areg, dereg
+pat del
+   uses hlreg={const2,$1}
       gen
-         rst {const1, 3}
-         data1 {const1, $1}
+         dad lb
          mov e, {m}
          inx hl
          mov d, {m}
@@ -961,36 +1006,12 @@ gen dcx %1				yields %1
          mov {m}, d
          dcx hl
          mov {m}, e
-#endif
-
-pat del
-   uses hlreg={const2,$1}, dereg
-   gen dad lb
-      mov e,{m}
-      inx hl
-      mov d,{m}
-      dcx de
-      mov {m},d
-      dcx hl
-      mov {m},e
 
 pat dee
 uses hlreg
 gen lhld {label,$1}
     dcx hl
     shld {label,$1}
-
-#ifdef USE_I80_RSTS
-   pat zrl sfit($1, 8)
-      uses hlreg, areg
-      gen
-         rst {const1, 3}
-         data1 {const1, $1}
-         xra a
-         mov {m}, a
-         inx hl
-         mov {m}, a
-#endif
 
 pat zrl
    uses hlreg={const2,$1}, areg
@@ -2046,19 +2067,6 @@ gen xra a
     jnz {label,$1}
     1:
 
-#ifdef USE_I80_RSTS
-   pat lol zeq sfit($1, 8)
-      with STACK
-         uses hlreg, areg
-         gen
-            rst {const1, 3}
-            data1 {const1, $1}
-            mov a, {m}
-            inx hl
-            ora {m}
-            jz {label, $2}
-#endif
-
 pat lol zeq
    with STACK
       uses hlreg={const2,$1}, areg
@@ -2068,19 +2076,6 @@ pat lol zeq
          inx hl
          ora {m}
          jz {label,$2}
-
-#ifdef USE_I80_RSTS
-   pat lol zne sfit($1, 8)
-      with STACK
-         uses hlreg, areg
-         gen
-            rst {const1, 3}
-            data1 {const1, $1}
-            mov a, {m}
-            inx hl
-            ora {m}
-            jnz {label, $2}
-#endif
 
 pat lol zne
    with STACK
