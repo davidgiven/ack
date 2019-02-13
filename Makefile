@@ -72,7 +72,7 @@ BUILDSYSTEM = make
 endif
 
 build-file = $(BUILDDIR)/build.$(BUILDSYSTEM)
-lua-files = $(shell find * -name 'build*.lua')
+lua-files = $(shell find . -name 'build*.lua')
 our-lua = $(BUILDDIR)/lua
 
 # GNU make sets MAKECMDGOALS to the list of targets from the command
