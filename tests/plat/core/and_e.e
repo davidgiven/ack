@@ -8,6 +8,8 @@ three
 	rom 3
 one
 	rom 1
+mone
+	rom -1
 big
 	rom 256
 
@@ -80,6 +82,34 @@ big
     cal $fail
     asp 4
 5
+
+	/* And big const with negative var */
+
+	loc 257
+	loe mone
+	and EM_WSIZE
+	loc 257
+	cmu EM_WSIZE
+	zeq *6
+
+    loc __LINE__
+    cal $fail
+    asp 4
+6
+
+	/* And big var with negative const */
+
+	loe big
+	loc -1
+	and EM_WSIZE
+	loe big
+	cmu EM_WSIZE
+	zeq *7
+
+    loc __LINE__
+    cal $fail
+    asp 4
+7
 
     cal $finished
     end

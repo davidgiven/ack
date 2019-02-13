@@ -8,6 +8,10 @@ zero
 	rom 0
 one
 	rom 1
+mone
+	rom -1
+big
+	rom 258
 
 	/* Or var with var */
 
@@ -23,12 +27,12 @@ one
     asp 4
 1
 
-	/* Or var with const */
+	/* Or big var with const */
 
-	loe zero
+	loe big
 	loc 1
 	ior EM_WSIZE
-	loc 1
+	loc 259
 	cmu EM_WSIZE
 	zeq *2
 
@@ -78,6 +82,34 @@ one
     cal $fail
     asp 4
 5
+
+	/* Or big const with negative var */
+
+	loc 1000
+	loe mone
+	ior EM_WSIZE
+	loc -1
+	cmu EM_WSIZE
+	zeq *6
+
+    loc __LINE__
+    cal $fail
+    asp 4
+6
+
+	/* Or big var with negative const */
+
+	loe big
+	loc -1
+	ior EM_WSIZE
+	loc -1
+	cmu EM_WSIZE
+	zeq *7
+
+    loc __LINE__
+    cal $fail
+    asp 4
+7
 
     cal $finished
     end

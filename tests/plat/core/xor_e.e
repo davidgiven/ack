@@ -8,6 +8,10 @@ three
 	rom 3
 one
 	rom 1
+mone
+	rom -1
+big
+	rom 1001
 
 	/* Xor var with var */
 
@@ -78,6 +82,35 @@ one
     cal $fail
     asp 4
 5
+
+	/* Xor big const with negative var */
+
+	loc 1001
+	loe mone
+	xor EM_WSIZE
+	loc -1002
+	cmu EM_WSIZE
+	zeq *6
+
+    loc __LINE__
+    cal $fail
+    asp 4
+6
+
+	/* Xor big var with negative const */
+
+	loe big
+	loc -1
+	xor EM_WSIZE
+	loc -1002
+	cmu EM_WSIZE
+	zeq *7
+
+    loc __LINE__
+    cal $fail
+    asp 4
+7
+
 
     cal $finished
     end
