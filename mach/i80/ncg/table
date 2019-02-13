@@ -46,7 +46,8 @@ TOKENS
 
 const1			= { INT num; } 1 num.
 const2			= { INT num; } 2 num.
-smallconst2    = { INT num; } 2 num.
+smallpconst2   = { INT num; } 2 num. /* Byte-sized positive constant */
+smallnconst2   = { INT num; } 2 num. /* Byte-sized negative constant */
 label			= { ADDR off; } 2 off.
 m			= { } 2 cost(0,3) "m".
 
@@ -55,7 +56,7 @@ SETS
 reg1			= reg + lbreg + m.
 b_d_h_sp		= regpair + stackpointer.
 b_d_h_psw		= regpair + psword.
-immediate		= smallconst2 + const2 + label.
+immediate		= smallpconst2 + smallnconst2 + const2 + label.
 src1			= reg.
 src2			= hl_or_de + const2 + label.
 src1or2			= src1 + src2.
@@ -226,7 +227,10 @@ gen move %1,%a.2
 
 from hl_or_de				yields %1.2
 
-from smallconst2
+from smallpconst2
+   yields {const2, %1.num}
+
+from smallnconst2
    yields {const2, %1.num}
 
 from const2
@@ -243,8 +247,11 @@ PATTERNS
 /* Group 1: Load instructions                */
 /*********************************************/
 
-pat loc sfit($1, 8)
-   yields {smallconst2, $1}
+pat loc ufit($1, 8)
+   yields {smallpconst2, $1}
+
+pat loc sfit($1, 8) && ($1<0)
+   yields {smallnconst2, $1}
 
 pat loc
    yields {const2, $1}
@@ -651,8 +658,8 @@ pat sbi $1==2
       yields %2 {const2, 0-%1.num}
       leaving
          adi 2
-   with smallconst2 hl_or_de
-      yields %2 {smallconst2, 0-%1.num}
+   with smallnconst2 hl_or_de
+      yields %2 {smallpconst2, 0-%1.num}
       leaving
          adi 2
    with hl_or_de const2
@@ -1176,14 +1183,27 @@ leaving loc $1 loc $2 cal ".cfu" asp 4+$1 lfr 4
 /*****************************************/
 
 pat and $1==2
-   with hl_or_de smallconst2
+   with hl_or_de smallpconst2
+      uses areg
+      gen
+         mov a, %1.2
+         ani {const1, %2.num & 0xff}
+      yields a
+   with smallpconst2 hl_or_de
+      yields %1 %2
+      leaving
+         and 2
+   with hl_or_de smallnconst2
       uses areg
       gen
          mov a, %1.2
          ani {const1, %2.num & 0xff}
          mov %1.2, a
-         mvi %1.1, {const1, 0}
       yields %1
+   with smallnconst2 hl_or_de
+      yields %1 %2
+      leaving
+         and 2
    with hl_or_de const2
       uses areg
       gen
@@ -1195,23 +1215,9 @@ pat and $1==2
          mov %1.1, a
       yields %1
    with const2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         ani {const1, %1.num & 0xff}
-         mov %2.2, a
-         mov a, %2.1
-         ani {const1, %1.num >> 8}
-         mov %2.1, a
-      yields %2
-   with smallconst2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         ani {const1, %1.num & 0xff}
-         mov %2.2, a
-         mvi %2.1, {const1, 0}
-      yields %2
+      yields %1 %2
+      leaving
+         and 2
    with hl_or_de hl_or_de
       uses areg
       gen
@@ -1246,13 +1252,29 @@ pat and !defined($1)
          Call {label,".and"}
 
 pat ior $1==2
-   with hl_or_de smallconst2
+   with hl_or_de smallpconst2
       uses areg
       gen
          mov a, %1.2
          ori {const1, %2.num & 0xff}
          mov %1.2, a
       yields %1
+   with smallpconst2 hl_or_de
+      yields %1 %2
+      leaving
+         ior 2
+   with hl_or_de smallnconst2
+      uses areg
+      gen
+         mov a, %1.2
+         ori {const1, %2.num & 0xff}
+         mov %1.2, a
+         move {const1, 0xff}, %1.1
+      yields %1
+   with smallnconst2 hl_or_de
+      yields %1 %2
+      leaving
+         ior 2
    with hl_or_de const2
       uses areg
       gen
@@ -1264,22 +1286,9 @@ pat ior $1==2
          mov %1.1, a
       yields %1
    with const2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         ori {const1, %1.num & 0xff}
-         mov %2.2, a
-         mov a, %2.1
-         ori {const1, %1.num >> 8}
-         mov %2.1, a
-      yields %2
-   with smallconst2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         ori {const1, %1.num & 0xff}
-         mov %2.2, a
-      yields %2
+      yields %1 %2
+      leaving
+         ior 2
    with hl_or_de hl_or_de
       uses areg
       gen
@@ -1312,13 +1321,17 @@ kills ALL
 gen Call {label,".ior"}
 
 pat xor $1==2
-   with hl_or_de smallconst2
+   with hl_or_de smallpconst2
       uses areg
       gen
          mov a, %1.2
          xri {const1, %2.num & 0xff}
          mov %1.2, a
       yields %1
+   with smallpconst2 hl_or_de
+      yields %1 %2
+      leaving
+         xor 2
    with hl_or_de const2
       uses areg
       gen
@@ -1330,22 +1343,9 @@ pat xor $1==2
          mov %1.1, a
       yields %1
    with const2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         xri {const1, %1.num & 0xff}
-         mov %2.2, a
-         mov a, %2.1
-         xri {const1, %1.num >> 8}
-         mov %2.1, a
-      yields %2
-   with smallconst2 hl_or_de
-      uses areg
-      gen
-         mov a, %2.2
-         xri {const1, %1.num & 0xff}
-         mov %2.2, a
-      yields %2
+      yields %1 %2
+      leaving
+         xor 2
    with hl_or_de hl_or_de
       uses areg
       gen

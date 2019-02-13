@@ -11,7 +11,7 @@ one
 mone
 	rom -1
 big
-	rom 257
+	rom 258
 
 	/* Or var with var */
 
@@ -27,12 +27,12 @@ big
     asp 4
 1
 
-	/* Or var with const */
+	/* Or big var with const */
 
-	loe zero
+	loe big
 	loc 1
 	ior EM_WSIZE
-	loc 1
+	loc 259
 	cmu EM_WSIZE
 	zeq *2
 
@@ -102,7 +102,7 @@ big
 	loe big
 	loc -1
 	ior EM_WSIZE
-	loe big
+	loc -1
 	cmu EM_WSIZE
 	zeq *7
 

@@ -1574,10 +1574,10 @@ PATTERNS
 			yields {OR_RIS, %2, hi(%1.val)}
 		with REG CONST_STACK-UCONST2-CONST_HI_ZR
 			uses reusing %1, REG={OR_RIS, %1, hi(%2.val)}
-			yields {OR_RC, %1, lo(%2.val)}
+			yields {OR_RC, %a, lo(%2.val)}
 		with CONST_STACK-UCONST2-CONST_HI_ZR REG
 			uses reusing %2, REG={OR_RIS, %2, hi(%1.val)}
-			yields {OR_RC, %2, lo(%1.val)}
+			yields {OR_RC, %a, lo(%1.val)}
 
 	pat ior defined($1)                /* OR set */
 		leaving
@@ -1602,10 +1602,10 @@ PATTERNS
 			yields {XOR_RIS, %2, hi(%1.val)}
 		with REG CONST_STACK-UCONST2-CONST_HI_ZR
 			uses reusing %1, REG={XOR_RIS, %1, hi(%2.val)}
-			yields {XOR_RC, %1, lo(%2.val)}
+			yields {XOR_RC, %a, lo(%2.val)}
 		with CONST_STACK-UCONST2-CONST_HI_ZR REG
 			uses reusing %2, REG={XOR_RIS, %2, hi(%1.val)}
-			yields {XOR_RC, %2, lo(%1.val)}
+			yields {XOR_RC, %a, lo(%1.val)}
 
 	pat xor defined($1)                /* XOR set */
 		leaving
