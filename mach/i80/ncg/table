@@ -954,7 +954,7 @@ pat inc
          inx %1
       yields %1
 
-pat inl ($1>0) && ($1<STACKHELPERS)
+pat inl ($1>0) && ($1<=STACKHELPERS)
    uses hlreg
       gen
          Call {plabel, ".faddr", $1}
@@ -964,10 +964,10 @@ pat inl ($1>0) && ($1<STACKHELPERS)
          inr {m}
          1:
 
-pat inl ($1<0) && ($1<0-STACKHELPERS)
+pat inl ($1<0) && ($1>=0-STACKHELPERS)
    uses hlreg
       gen
-         Call {plabel, ".faddrn", $1}
+         Call {plabel, ".faddrn", 0-$1}
          inr {m}
          jnz {label,1f}
          inx hl
