@@ -1878,7 +1878,11 @@ pat blt
    with hlreg dereg STACK
       uses areg
       gen
-         Call {label, ".cmps_mag"}
+         #ifdef USE_I80_RSTS
+            rst {const1, 5}
+         #else
+            Call {label, ".cmps_mag"}
+         #endif
          jm {label, $1}
 
 pat bgt
@@ -1890,7 +1894,11 @@ pat bge
    with hlreg dereg STACK
       uses areg
       gen
-         Call {label, ".cmpu_mag"}
+         #ifdef USE_I80_RSTS
+            rst {const1, 5}
+         #else
+            Call {label, ".cmps_mag"}
+         #endif
          jp {label, $1}
 
 pat ble
@@ -1949,62 +1957,68 @@ pat bne
          jnz {label,$1}
 
 pat zlt
-with STACK
-gen pop psw
-    ora a
-    jm {label,$1}
-with hl_or_de STACK
-gen mov a,%1.1
-    ora a
-    jm {label,$1}
+   with STACK
+      gen
+         pop psw
+         ora a
+         jm {label,$1}
+   with regpair STACK
+      gen
+         mov a,%1.1
+         ora a
+         jm {label,$1}
 
 pat zle
-with hl_or_de STACK
-uses areg
-gen xra a
-    add %1.1
-    jm {label,$1}
-    jnz {label,1f}
-    xra a
-    add %1.2
-    jz {label,$1}
-    1:
+   with regpair STACK
+      uses areg
+      gen
+         mov a, %1.1
+         ora a
+         jm {label, $1}
+         jnz {label, 1f}
+         ora %1.2
+         jz {label, $1}
+         1:
 
 pat zeq
-with hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    jz {label,$1}
+   with regpair STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         jz {label,$1}
 
 pat zne
-with hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    jnz {label,$1}
+   with regpair STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         jnz {label,$1}
 
 pat zge
-with STACK
-gen pop psw
-    ral.
-    jnc {label,$1}
-with hl_or_de STACK
-gen mov a,%1.1
-    ora a
-    jp {label,$1}
+   with STACK
+      gen
+         pop psw
+         ral.
+         jnc {label,$1}
+   with regpair STACK
+      gen
+         mov a,%1.1
+         ora a
+         jp {label,$1}
 
 pat zgt
-with hl_or_de STACK
-uses areg
-gen xra a
-    add %1.1
-    jm {label,1f}
-    jnz {label,$1}
-    xra a
-    add %1.2
-    jnz {label,$1}
-    1:
+   with regpair STACK
+      uses areg
+      gen
+         mov a, %1.1
+         ora a
+         jm {label, 1f}
+         jnz {label, $1}
+         ora %1.2
+         jnz {label, $1}
+         1:
 
 pat lol zeq
    with STACK
@@ -2027,22 +2041,24 @@ pat lol zne
          jnz {label,$2}
 
 pat ior zeq $1==2
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    ora %2.1
-    ora %2.2
-    jz {label,$2}
+   with regpair regpair STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         ora %2.1
+         ora %2.2
+         jz {label,$2}
 
 pat ior zne $1==2
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    ora %2.1
-    ora %2.2
-    jnz {label,$2}
+   with regpair regpair STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         ora %2.1
+         ora %2.2
+         jnz {label,$2}
 
 /*********************************************/
 /* Group 14: Procedure call instructions     */
