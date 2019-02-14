@@ -1875,42 +1875,11 @@ pat bra
          jmp {label,$1}
 
 pat blt
-   with const2 hl_or_de STACK
+   with hlreg dereg STACK
       uses areg
       gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %2.2
-         sui {const1, %1.num & 0xff}
-         mov a, %2.1
-         sbi {const1, (%1.num >> 8) ^ 0x80}
-         jc {label, $1}
-   with hl_or_de const2 STACK
-      uses areg
-      gen
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mvi a, {const1, %2.num & 0xff}
-         sub %1.2
-         mvi a, {const1, (%2.num >> 8) ^ 0x80}
-         sbb %1.1
-         jc {label, $1}
-   with hl_or_de hl_or_de STACK
-      uses areg
-      gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mov a, %2.2
-         sub %1.2
-         mov a, %2.1
-         sbb %1.1
-         jc {label,$1}
+         Call {label, ".cmps_mag"}
+         jm {label, $1}
 
 pat bgt
    leaving
@@ -1918,42 +1887,11 @@ pat bgt
       blt $1
 
 pat bge
-   with const2 hl_or_de STACK
+   with hlreg dereg STACK
       uses areg
       gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %2.2
-         sui {const1, %1.num & 0xff}
-         mov a, %2.1
-         sbi {const1, (%1.num >> 8) ^ 0x80}
-         jnc {label, $1}
-   with hl_or_de const2 STACK
-      uses areg
-      gen
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mvi a, {const1, %2.num & 0xff}
-         sub %1.2
-         mvi a, {const1, (%2.num >> 8) ^ 0x80}
-         sbb %1.1
-         jnc {label, $1}
-   with hl_or_de hl_or_de STACK
-      uses areg
-      gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mov a,%2.2
-         sub %1.2
-         mov a,%2.1
-         sbb %1.1
-         jnc {label,$1}
+         Call {label, ".cmpu_mag"}
+         jp {label, $1}
 
 pat ble
    leaving
