@@ -49,16 +49,18 @@ void con_mult(sz) word sz;
 
 void prolog(full nlocals)
 {
-	if (nlocals == 0)
+	int16_t adjustment = -nlocals;
+
+	if (adjustment == 0)
 		fprintf(codefile, "\tcall .pro0\n");
-	else if (nlocals == 2)
+	else if (adjustment == -2)
 		fprintf(codefile, "\tcall .pro2\n");
-	else if (nlocals == 4)
+	else if (adjustment == -4)
 		fprintf(codefile, "\tcall .pro4\n");
-	else if (nlocals < 0x100)
-		fprintf(codefile, "\tcall .probyte\n\t.data1 %d\n", -nlocals);
+	else if ((adjustment >= -128) && (adjustment <= 127))
+		fprintf(codefile, "\tcall .probyte\n\t.data1 %d\n", adjustment);
 	else
-		fprintf(codefile, "\tcall .proword\n\t.data2 %d\n", -nlocals);
+		fprintf(codefile, "\tcall .proword\n\t.data2 %d\n", adjustment);
 }
 
 void mes(type) word type;
