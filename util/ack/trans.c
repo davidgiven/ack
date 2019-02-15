@@ -223,7 +223,7 @@ static void set_Rflag(char* argp)
 			}
 			else if (*eos == '=')
 			{
-				t_cont(*prog)->t_prog = eos + 1;
+				t_cont(*prog)->t_prog = keeps(eos + 1);
 			}
 			else
 			{
