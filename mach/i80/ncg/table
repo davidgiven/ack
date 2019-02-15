@@ -173,7 +173,6 @@ MOVES
       gen
          lxi %2,%1
 
-#if 0
    from const1 to reg
       gen
          mvi %2, %1
@@ -182,7 +181,6 @@ MOVES
       gen
          mvi %2.2, %1
          mvi %2.1, {const1, 0}
-#endif
 
    from reg to regpair
       gen
