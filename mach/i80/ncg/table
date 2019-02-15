@@ -350,12 +350,13 @@ pat lol ($1<0) && ($1>=0-STACKHELPERS)
    yields de
 
 pat lol
-   uses dereg
+   uses dereg, hlreg={const2, $1}
    gen
       dad lb
       mov e, {m}
       inx hl
       mov d, {m}
+   yields de
 
 pat loe
    uses hlreg
