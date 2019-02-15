@@ -157,94 +157,149 @@ INSTRUCTIONS
 
 MOVES
 
-from reg to reg
-gen mov %2,%1
+   from reg to reg
+      gen
+         mov %2,%1
 
-from const1 %num==0 to areg
-gen xra a
+   from const1 %num==0 to areg
+      gen
+         xra a
 
-from const1 to reg
-gen mvi %2,%1
+   from const1 to reg
+      gen
+         mvi %2,%1
 
-from immediate to b_d_h_sp
-gen lxi %2,%1
+   from immediate to b_d_h_sp
+      gen
+         lxi %2,%1
 
-from reg to regpair
-gen mov %2.2,%1
-    mvi %2.1,{const1,0}
+#if 0
+   from const1 to reg
+      gen
+         mvi %2, %1
+         
+   from const1 to regpair
+      gen
+         mvi %2.2, %1
+         mvi %2.1, {const1, 0}
+#endif
 
-from regpair to regpair
-gen mov %2.1,%1.1
-    mov %2.2,%1.2
+   from reg to regpair
+      gen
+         mov %2.2, %1
+         mvi %2.1, {const1,0}
+
+   from regpair to regpair
+      gen
+         mov %2.1, %1.1
+         mov %2.2, %1.2
 
 TESTS
 
-to test areg		/* dummy test, never used */
-gen ora a
+   to test areg		/* dummy test, never used */
+      gen
+         ora a
 
 STACKINGRULES
 
-from regpair to STACK
-gen push %1
+   from regpair to STACK
+      gen
+         push %1
 
-from immediate + reg to STACK
-uses hl_or_de
-gen move %1,%a
-    push %a
+   from immediate + reg to STACK
+      uses hl_or_de
+      gen
+         move %1, %a
+         push %a
 
-from immediate + reg to STACK
-gen push hl
-    move %1,hl
-    xthl.
+   from immediate + reg to STACK
+      gen
+         push hl
+         move %1, hl
+         xthl.
 
 COERCIONS
 
-from STACK
-uses regpair
-gen pop %a				yields %a
+   from STACK
+      uses regpair
+      gen
+         pop %a
+      yields %a
 
-from STACK
-uses hl_or_de
-gen pop %a				yields %a.2
+   from STACK
+      uses hl_or_de
+      gen
+         pop %a
+      yields %a.2
 
-from STACK
-uses areg
-gen dcx sp
-    pop psw
-    inx sp				yields a
+   from STACK
+      uses areg
+      gen
+         dcx sp
+         pop psw
+         inx sp
+      yields %a
 
-from immediate
-uses regpair
-gen move %1,%a				yields %a
+   from immediate
+      uses regpair=%1
+      yields %a
 
-from hl_or_de
-uses hl_or_de
-gen xchg.				yields %a
+   from hl_or_de
+      uses hl_or_de
+      gen
+         xchg.
+      yields %a
 
-from regpair
-uses regpair
-gen move %1,%a				yields %a
+   from regpair
+      uses regpair=%1
+      yields %a
 
-from reg
-uses reusing %1, hl_or_de
-gen move %1,%a.2
-    move {const1,0},%a.1		yields %a
+   from reg
+      uses reusing %1, hl_or_de
+      gen
+         move %1,%a.2
+         move {const1,0},%a.1
+      yields %a
 
-from hl_or_de				yields %1.2
+   from hl_or_de				yields %1.2
 
-from smallpconst2
-   yields {const2, %1.num}
+   from smallpconst2
+      yields {const2, %1.num}
 
-from smallnconst2
-   yields {const2, %1.num}
+   from smallnconst2
+      yields {const2, %1.num}
 
-from const2
-uses hl_or_de
-gen move %1,%a				yields %a.2
+   from const2
+      uses hl_or_de=%1
+      yields %a
 
-from hl_or_de
-uses areg
-gen move %1.2,a				yields a
+   from smallpconst2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from smallnconst2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from smallpconst2 %1.num == 1
+      uses reg={const1, 0}
+      gen
+         inr %a
+      yields %a
+
+   from smallnconst2 %1.num == 0-1
+      uses reg={const1, 0}
+      gen
+         dcr %a
+      yields %a
+
+   from const2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from hl_or_de
+      uses reg=%1.2
+      yields %a
 
 PATTERNS
 
@@ -569,13 +624,15 @@ pat stf
          mov {m},d
 
 pat sti $1==1
-with label areg
-   gen sta %1
-with dereg areg
-   gen stax de
-with hlreg reg
-   gen mov {m},%2
-
+   with label areg
+      gen
+         sta %1
+   with dereg areg
+      gen
+         stax %1
+   with hlreg reg
+      gen
+         mov {m}, %2
 
 pat sti $1==2
    with label hlreg
