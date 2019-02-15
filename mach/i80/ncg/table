@@ -157,94 +157,147 @@ INSTRUCTIONS
 
 MOVES
 
-from reg to reg
-gen mov %2,%1
+   from reg to reg
+      gen
+         mov %2,%1
 
-from const1 %num==0 to areg
-gen xra a
+   from const1 %num==0 to areg
+      gen
+         xra a
 
-from const1 to reg
-gen mvi %2,%1
+   from const1 to reg
+      gen
+         mvi %2,%1
 
-from immediate to b_d_h_sp
-gen lxi %2,%1
+   from immediate to b_d_h_sp
+      gen
+         lxi %2,%1
 
-from reg to regpair
-gen mov %2.2,%1
-    mvi %2.1,{const1,0}
+   from const1 to reg
+      gen
+         mvi %2, %1
+         
+   from const1 to regpair
+      gen
+         mvi %2.2, %1
+         mvi %2.1, {const1, 0}
 
-from regpair to regpair
-gen mov %2.1,%1.1
-    mov %2.2,%1.2
+   from reg to regpair
+      gen
+         mov %2.2, %1
+         mvi %2.1, {const1,0}
+
+   from regpair to regpair
+      gen
+         mov %2.1, %1.1
+         mov %2.2, %1.2
 
 TESTS
 
-to test areg		/* dummy test, never used */
-gen ora a
+   to test areg		/* dummy test, never used */
+      gen
+         ora a
 
 STACKINGRULES
 
-from regpair to STACK
-gen push %1
+   from regpair to STACK
+      gen
+         push %1
 
-from immediate + reg to STACK
-uses hl_or_de
-gen move %1,%a
-    push %a
+   from immediate + reg to STACK
+      uses hl_or_de
+      gen
+         move %1, %a
+         push %a
 
-from immediate + reg to STACK
-gen push hl
-    move %1,hl
-    xthl.
+   from immediate + reg to STACK
+      gen
+         push hl
+         move %1, hl
+         xthl.
 
 COERCIONS
 
-from STACK
-uses regpair
-gen pop %a				yields %a
+   from STACK
+      uses regpair
+      gen
+         pop %a
+      yields %a
 
-from STACK
-uses hl_or_de
-gen pop %a				yields %a.2
+   from STACK
+      uses hl_or_de
+      gen
+         pop %a
+      yields %a.2
 
-from STACK
-uses areg
-gen dcx sp
-    pop psw
-    inx sp				yields a
+   from STACK
+      uses areg
+      gen
+         dcx sp
+         pop psw
+         inx sp
+      yields %a
 
-from immediate
-uses regpair
-gen move %1,%a				yields %a
+   from immediate
+      uses regpair=%1
+      yields %a
 
-from hl_or_de
-uses hl_or_de
-gen xchg.				yields %a
+   from hl_or_de
+      uses hl_or_de
+      gen
+         xchg.
+      yields %a
 
-from regpair
-uses regpair
-gen move %1,%a				yields %a
+   from regpair
+      uses regpair=%1
+      yields %a
 
-from reg
-uses reusing %1, hl_or_de
-gen move %1,%a.2
-    move {const1,0},%a.1		yields %a
+   from reg
+      uses reusing %1, hl_or_de
+      gen
+         move %1,%a.2
+         move {const1,0},%a.1
+      yields %a
 
-from hl_or_de				yields %1.2
+   from hl_or_de				yields %1.2
 
-from smallpconst2
-   yields {const2, %1.num}
+   from smallpconst2
+      yields {const2, %1.num}
 
-from smallnconst2
-   yields {const2, %1.num}
+   from smallnconst2
+      yields {const2, %1.num}
 
-from const2
-uses hl_or_de
-gen move %1,%a				yields %a.2
+   from const2
+      uses hl_or_de=%1
+      yields %a
 
-from hl_or_de
-uses areg
-gen move %1.2,a				yields a
+   from smallpconst2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from smallnconst2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from smallpconst2 %1.num == 1
+      uses reg={const1, 0}
+      gen
+         inr %a
+      yields %a
+
+   from smallnconst2 %1.num == 0-1
+      uses reg={const1, 0}
+      gen
+         dcr %a
+      yields %a
+
+   from const2
+      uses reg={const1, %1.num & 0xff}
+      yields %a
+
+   from hl_or_de
+      uses reg=%1.2
+      yields %a
 
 PATTERNS
 
@@ -569,13 +622,15 @@ pat stf
          mov {m},d
 
 pat sti $1==1
-with label areg
-   gen sta %1
-with dereg areg
-   gen stax de
-with hlreg reg
-   gen mov {m},%2
-
+   with label areg
+      gen
+         sta %1
+   with dereg areg
+      gen
+         stax %1
+   with hlreg reg
+      gen
+         mov {m}, %2
 
 pat sti $1==2
    with label hlreg
@@ -1618,6 +1673,70 @@ leaving cal ".cmf4" asp 8 lfr 2
 pat cmf $1==8
 leaving cal ".cmf8" asp 16 lfr 2
 
+pat cmu zlt $1==2
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sub %1.2
+         mov a, %2.1
+         sbb %1.1
+         jc {label, $2}
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sbi {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jc {label, $2}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jc {label, $2}
+
+pat cmu zgt $1==2
+   leaving
+      exg 2
+      cmu 2
+      zlt $2
+
+pat cmu zge $1==2
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sub %1.2
+         mov a, %2.1
+         sbb %1.1
+         jnc {label, $2}
+   with const2 hl_or_de STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sbi {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jnc {label, $2}
+   with hl_or_de const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jnc {label, $2}
+
+pat cmu zle $1==2
+   leaving
+      exg 2
+      cmu 2
+      zge $2
+
 pat cmu $1==2
 with hl_or_de hl_or_de
 uses areg
@@ -1875,42 +1994,15 @@ pat bra
          jmp {label,$1}
 
 pat blt
-   with const2 hl_or_de STACK
+   with hlreg dereg STACK
       uses areg
       gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %2.2
-         sui {const1, %1.num & 0xff}
-         mov a, %2.1
-         sbi {const1, (%1.num >> 8) ^ 0x80}
+         #ifdef USE_I80_RSTS
+            rst {const1, 5}
+         #else
+            Call {label, ".cmps_mag"}
+         #endif
          jc {label, $1}
-   with hl_or_de const2 STACK
-      uses areg
-      gen
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mvi a, {const1, %2.num & 0xff}
-         sub %1.2
-         mvi a, {const1, (%2.num >> 8) ^ 0x80}
-         sbb %1.1
-         jc {label, $1}
-   with hl_or_de hl_or_de STACK
-      uses areg
-      gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mov a, %2.2
-         sub %1.2
-         mov a, %2.1
-         sbb %1.1
-         jc {label,$1}
 
 pat bgt
    leaving
@@ -1918,42 +2010,15 @@ pat bgt
       blt $1
 
 pat bge
-   with const2 hl_or_de STACK
+   with hlreg dereg STACK
       uses areg
       gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %2.2
-         sui {const1, %1.num & 0xff}
-         mov a, %2.1
-         sbi {const1, (%1.num >> 8) ^ 0x80}
+         #ifdef USE_I80_RSTS
+            rst {const1, 5}
+         #else
+            Call {label, ".cmps_mag"}
+         #endif
          jnc {label, $1}
-   with hl_or_de const2 STACK
-      uses areg
-      gen
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mvi a, {const1, %2.num & 0xff}
-         sub %1.2
-         mvi a, {const1, (%2.num >> 8) ^ 0x80}
-         sbb %1.1
-         jnc {label, $1}
-   with hl_or_de hl_or_de STACK
-      uses areg
-      gen
-         mov a, %2.1
-         xri {const1, 0x80}
-         mov %2.1, a
-         mov a, %1.1
-         xri {const1, 0x80}
-         mov %1.1, a
-         mov a,%2.2
-         sub %1.2
-         mov a,%2.1
-         sbb %1.1
-         jnc {label,$1}
 
 pat ble
    leaving
@@ -2011,62 +2076,68 @@ pat bne
          jnz {label,$1}
 
 pat zlt
-with STACK
-gen pop psw
-    ora a
-    jm {label,$1}
-with hl_or_de STACK
-gen mov a,%1.1
-    ora a
-    jm {label,$1}
+   with STACK
+      gen
+         pop psw
+         ora a
+         jm {label,$1}
+   with hl_or_de STACK
+      gen
+         mov a,%1.1
+         ora a
+         jm {label,$1}
 
 pat zle
-with hl_or_de STACK
-uses areg
-gen xra a
-    add %1.1
-    jm {label,$1}
-    jnz {label,1f}
-    xra a
-    add %1.2
-    jz {label,$1}
-    1:
+   with hl_or_de STACK
+      uses areg
+      gen
+         mov a, %1.1
+         ora a
+         jm {label, $1}
+         jnz {label, 1f}
+         ora %1.2
+         jz {label, $1}
+         1:
 
 pat zeq
-with hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    jz {label,$1}
+   with hl_or_de STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         jz {label,$1}
 
 pat zne
-with hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    jnz {label,$1}
+   with hl_or_de STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         jnz {label,$1}
 
 pat zge
-with STACK
-gen pop psw
-    ral.
-    jnc {label,$1}
-with hl_or_de STACK
-gen mov a,%1.1
-    ora a
-    jp {label,$1}
+   with STACK
+      gen
+         pop psw
+         ral.
+         jnc {label,$1}
+   with hl_or_de STACK
+      gen
+         mov a,%1.1
+         ora a
+         jp {label,$1}
 
 pat zgt
-with hl_or_de STACK
-uses areg
-gen xra a
-    add %1.1
-    jm {label,1f}
-    jnz {label,$1}
-    xra a
-    add %1.2
-    jnz {label,$1}
-    1:
+   with hl_or_de STACK
+      uses areg
+      gen
+         mov a, %1.1
+         ora a
+         jm {label, 1f}
+         jnz {label, $1}
+         ora %1.2
+         jnz {label, $1}
+         1:
 
 pat lol zeq
    with STACK
@@ -2089,22 +2160,24 @@ pat lol zne
          jnz {label,$2}
 
 pat ior zeq $1==2
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    ora %2.1
-    ora %2.2
-    jz {label,$2}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         ora %2.1
+         ora %2.2
+         jz {label,$2}
 
 pat ior zne $1==2
-with hl_or_de hl_or_de STACK
-uses areg
-gen mov a,%1.1
-    ora %1.2
-    ora %2.1
-    ora %2.2
-    jnz {label,$2}
+   with hl_or_de hl_or_de STACK
+      uses areg
+      gen
+         mov a,%1.1
+         ora %1.2
+         ora %2.1
+         ora %2.2
+         jnz {label,$2}
 
 /*********************************************/
 /* Group 14: Procedure call instructions     */
@@ -2165,14 +2238,14 @@ gen 1:
 pat asp $1==0 /* do nothing */
 
 pat asp ($1==2)
-   with regpair
+   with hl_or_de
    with STACK
       uses hlreg
       gen
          pop hl
 
 pat asp ($1==4)
-   with regpair regpair
+   with hl_or_de hl_or_de
    with STACK
       uses hlreg
       gen
