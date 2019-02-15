@@ -1619,7 +1619,7 @@ pat cmf $1==8
 leaving cal ".cmf8" asp 16 lfr 2
 
 pat cmu zlt $1==2
-   with regpair regpair STACK
+   with hl_or_de hl_or_de STACK
       uses areg
       gen
          mov a, %2.2
@@ -1627,7 +1627,7 @@ pat cmu zlt $1==2
          mov a, %2.1
          sbb %1.1
          jc {label, $2}
-   with const2 regpair STACK
+   with const2 hl_or_de STACK
       uses areg
       gen
          mov a, %2.2
@@ -1635,7 +1635,7 @@ pat cmu zlt $1==2
          mov a, %2.1
          sbi {const1, %1.num >> 8}
          jc {label, $2}
-   with regpair const2 STACK
+   with hl_or_de const2 STACK
       uses areg
       gen
          mvi a, {const1, %2.num & 0xff}
@@ -1651,7 +1651,7 @@ pat cmu zgt $1==2
       zlt $2
 
 pat cmu zge $1==2
-   with regpair regpair STACK
+   with hl_or_de hl_or_de STACK
       uses areg
       gen
          mov a, %2.2
@@ -1659,7 +1659,7 @@ pat cmu zge $1==2
          mov a, %2.1
          sbb %1.1
          jnc {label, $2}
-   with const2 regpair STACK
+   with const2 hl_or_de STACK
       uses areg
       gen
          mov a, %2.2
@@ -1667,7 +1667,7 @@ pat cmu zge $1==2
          mov a, %2.1
          sbi {const1, %1.num >> 8}
          jnc {label, $2}
-   with regpair const2 STACK
+   with hl_or_de const2 STACK
       uses areg
       gen
          mvi a, {const1, %2.num & 0xff}
@@ -2026,14 +2026,14 @@ pat zlt
          pop psw
          ora a
          jm {label,$1}
-   with regpair STACK
+   with hl_or_de STACK
       gen
          mov a,%1.1
          ora a
          jm {label,$1}
 
 pat zle
-   with regpair STACK
+   with hl_or_de STACK
       uses areg
       gen
          mov a, %1.1
@@ -2045,7 +2045,7 @@ pat zle
          1:
 
 pat zeq
-   with regpair STACK
+   with hl_or_de STACK
       uses areg
       gen
          mov a,%1.1
@@ -2053,7 +2053,7 @@ pat zeq
          jz {label,$1}
 
 pat zne
-   with regpair STACK
+   with hl_or_de STACK
       uses areg
       gen
          mov a,%1.1
@@ -2066,14 +2066,14 @@ pat zge
          pop psw
          ral.
          jnc {label,$1}
-   with regpair STACK
+   with hl_or_de STACK
       gen
          mov a,%1.1
          ora a
          jp {label,$1}
 
 pat zgt
-   with regpair STACK
+   with hl_or_de STACK
       uses areg
       gen
          mov a, %1.1
@@ -2105,7 +2105,7 @@ pat lol zne
          jnz {label,$2}
 
 pat ior zeq $1==2
-   with regpair regpair STACK
+   with hl_or_de hl_or_de STACK
       uses areg
       gen
          mov a,%1.1
@@ -2115,7 +2115,7 @@ pat ior zeq $1==2
          jz {label,$2}
 
 pat ior zne $1==2
-   with regpair regpair STACK
+   with hl_or_de hl_or_de STACK
       uses areg
       gen
          mov a,%1.1
@@ -2183,14 +2183,14 @@ gen 1:
 pat asp $1==0 /* do nothing */
 
 pat asp ($1==2)
-   with regpair
+   with hl_or_de
    with STACK
       uses hlreg
       gen
          pop hl
 
 pat asp ($1==4)
-   with regpair regpair
+   with hl_or_de hl_or_de
    with STACK
       uses hlreg
       gen
