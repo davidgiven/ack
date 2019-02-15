@@ -5,77 +5,38 @@
 .sect .bss
 .sect .text
 
+! Which resets we install are determined by statistical analysis of Star
+! Trek. When changing these, make sure to update the i80 table to match.
+!     97 call .floadn2
+!     41 call .floadn4
+!     34 call .fload4
+!     28 call .fstoren2
+!
+! Also:
+!     48 call .cmps_mag
+
 .define .rst_init
 .rst_init:
-    mvi a, 0xc3     ! jmp <a16>
-    sta 0x08
-    sta 0x10
-    sta 0x18
-    lxi h, rst1
-    shld 0x09
-    lxi h, rst2
-    shld 0x11
-    lxi h, rst3
-    shld 0x19
-    ret
+    lxi h, .floadn2
+    lxi d, 0x0008
+    call copy
+    lxi h, .floadn4
+    call copy
+    lxi h, .fload4
+    call copy
+    lxi h, .fstoren2
+    call copy
+    lxi h, .cmps_mag
+    jmp copy
 
-    ! de = [fp+const1]
-rst1:
-    lhld .fp
-    xchg
-
-    pop h
+! Copies eight bytes from HL to DE.
+copy:
+    mvi c, 8
+.1:
     mov a, m
+    stax d
     inx h
-    push h
-
-	mov l, a
-	ral
-	sbb a
-	mov h, a
-
-	dad d
-    mov e, m
-    inx h
-    mov d, m
+    inr e
+    dcr c
+    jnz .1
     ret
-
-    ! [fp+const1] = bc
-rst2:
-    lhld .fp
-    xchg
-    
-    pop h
-    mov a, m
-    inx h
-    push h
-
-	mov l, a
-	ral
-	sbb a
-	mov h, a
-
-	dad d
-    mov m, c
-    inx h
-    mov m, b
-    ret
-
-    ! hl = fp+const1
-rst3:
-    lhld .fp
-    xchg
-
-    pop h
-    mov a, m
-    inx h
-    push h
-
-    mov l, a
-    ral
-    sbb a
-    mov h, a
-
-    dad d
-    ret
-

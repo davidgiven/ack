@@ -16,4 +16,9 @@ xchg : inx d : xchg          -> inx h ;
 cpi 0                        -> ora a ;
 call X : ret                 -> jmp X ;
 
+push h : lxi h, X : pop d    -> lxi d, X : xchg ;
+push d : lxi d, X : pop h    -> lxi h, X : xchg ;
+
+push h : lhld h, X : pop d    -> xchg : lhld X ;
+
 %%;

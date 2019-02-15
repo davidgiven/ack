@@ -799,26 +799,26 @@ PATTERNS
             cost 4;                                        \
 
 	/* reg + const */
-    #define ALUC(name, instr) \
+    #define ALUC(name, instr, predicate) \
         out:(int)reg = name(left:intregorzero, right:CONST.I)  \
-            when signed_constant(%right, 16)               \
+            when predicate(%right, 16)                     \
             emit instr " %out, %left, $right"              \
             cost 4;                                        \
 
 	/* const + reg */
-    #define ALUC_reversed(name, instr) \
+    #define ALUC_reversed(name, instr, predicate) \
         out:(int)reg = name(left:CONST.I, right:intregorzero)  \
-            when signed_constant(%left, 16)                \
+            when predicate(%left, 16)                      \
             emit instr " %out, %right, $left"              \
             cost 4;                                        \
 
 	/* reg + const AND const + reg */
-    #define ALUCC(name, instr) \
-        ALUC(name, instr) \
-        ALUC_reversed(name, instr)
+    #define ALUCC(name, instr, predicate)                  \
+        ALUC(name, instr, predicate)                       \
+        ALUC_reversed(name, instr, predicate)
 
     ALUR(ADD.I, "addu")
-    ALUCC(ADD.I, "addiu")
+    ALUCC(ADD.I, "addiu", signed_constant)
 
 	out:(int)reg = SUB.I(left:intregorzero, right:intregorzero)
 		emit "subu %out, %left, %right"
@@ -851,14 +851,14 @@ PATTERNS
     ALUR(MUL.I, "mul")
 
     ALUR(ASL.I, "sllv")
-    ALUC(ASL.I, "sll")
+    ALUC(ASL.I, "sll", signed_constant)
     ALUR(ASR.I, "srav")
-    ALUC(ASR.I, "sra")
+    ALUC(ASR.I, "sra", signed_constant)
 
     ALUR(LSL.I, "sllv")
-    ALUC(LSL.I, "sll")
+    ALUC(LSL.I, "sll", signed_constant)
     ALUR(LSR.I, "srlv")
-    ALUC(LSR.I, "srl")
+    ALUC(LSR.I, "srl", signed_constant)
 
     out:(int)reg = NEG.I(left:intregorzero)
         emit "subu %out, zero, %left"
@@ -869,13 +869,13 @@ PATTERNS
         cost 4;
 
     ALUR(AND.I, "and")
-    ALUCC(AND.I, "andi")
+    ALUCC(AND.I, "andi", signed_constant)
 
     ALUR(OR.I, "or")
-    ALUCC(OR.I, "ori")
+    ALUCC(OR.I, "ori", unsigned_constant)
 
     ALUR(EOR.I, "xor")
-    ALUCC(EOR.I, "xori")
+    ALUCC(EOR.I, "xori", unsigned_constant)
 
 	out:(int)reg = value:LABEL.I
 		emit "lui %out, hi16[$value]"
