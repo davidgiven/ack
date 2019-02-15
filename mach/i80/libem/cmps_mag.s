@@ -15,4 +15,5 @@
     xra h
     jp .cmpu_mag ! signs are the same, so an unsigned comparison will do
     xra h        ! set A=H and set the sign flag
+    ral          ! move sign flag into carry
     ret

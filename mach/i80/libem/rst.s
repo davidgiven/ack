@@ -14,7 +14,6 @@
 !
 ! Also:
 !     48 call .cmps_mag
-!     25 call .cmpu_mag
 
 .define .rst_init
 .rst_init:
@@ -28,8 +27,6 @@
     lxi h, .fstoren2
     call copy
     lxi h, .cmps_mag
-    call copy
-    lxi h, .cmpu_mag
     jmp copy
 
 ! Copies eight bytes from HL to DE.
@@ -39,7 +36,7 @@ copy:
     mov a, m
     stax d
     inx h
-    inx d
+    inr e
     dcr c
     jnz .1
     ret

@@ -15,5 +15,4 @@
     sub l
     mov a, d
     sbb h
-    rar
     ret

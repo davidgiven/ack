@@ -1618,6 +1618,70 @@ leaving cal ".cmf4" asp 8 lfr 2
 pat cmf $1==8
 leaving cal ".cmf8" asp 16 lfr 2
 
+pat cmu zlt $1==2
+   with regpair regpair STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sub %1.2
+         mov a, %2.1
+         sbb %1.1
+         jc {label, $2}
+   with const2 regpair STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sbi {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jc {label, $2}
+   with regpair const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jc {label, $2}
+
+pat cmu zgt $1==2
+   leaving
+      exg 2
+      cmu 2
+      zlt $2
+
+pat cmu zge $1==2
+   with regpair regpair STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sub %1.2
+         mov a, %2.1
+         sbb %1.1
+         jnc {label, $2}
+   with const2 regpair STACK
+      uses areg
+      gen
+         mov a, %2.2
+         sbi {const1, %1.num & 0xff}
+         mov a, %2.1
+         sbi {const1, %1.num >> 8}
+         jnc {label, $2}
+   with regpair const2 STACK
+      uses areg
+      gen
+         mvi a, {const1, %2.num & 0xff}
+         sub %1.2
+         mvi a, {const1, %2.num >> 8}
+         sbb %1.1
+         jnc {label, $2}
+
+pat cmu zle $1==2
+   leaving
+      exg 2
+      cmu 2
+      zge $2
+
 pat cmu $1==2
 with hl_or_de hl_or_de
 uses areg
@@ -1883,7 +1947,7 @@ pat blt
          #else
             Call {label, ".cmps_mag"}
          #endif
-         jm {label, $1}
+         jc {label, $1}
 
 pat bgt
    leaving
@@ -1899,7 +1963,7 @@ pat bge
          #else
             Call {label, ".cmps_mag"}
          #endif
-         jp {label, $1}
+         jnc {label, $1}
 
 pat ble
    leaving
