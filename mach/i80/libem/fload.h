@@ -11,21 +11,7 @@
 
 .define LABEL(.fload, OFFSET)
 LABEL(.fload, OFFSET):
-    #if OFFSET == 0
-        #error "0 shouldn't happen"
-    #elif OFFSET == 1
-        mov l, c
-        mov h, b
-        inx h
-    #elif OFFSET == 2
-        mov l, c
-        mov h, b
-        inx h
-        inx h
-    #else
-        lxi h, OFFSET
-        dad b
-    #endif
+    call LABEL(.faddr, OFFSET)
     mov e, m
     inx h
     mov d, m

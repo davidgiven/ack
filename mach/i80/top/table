@@ -19,6 +19,6 @@ call X : ret                 -> jmp X ;
 push h : lxi h, X : pop d    -> lxi d, X : xchg ;
 push d : lxi d, X : pop h    -> lxi h, X : xchg ;
 
-push h : lhld h, X : pop d    -> xchg : lhld X ;
+push h : lhld X : pop d      -> xchg : lhld X ;
 
 %%;

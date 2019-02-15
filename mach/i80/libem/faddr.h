@@ -11,20 +11,15 @@
 
 .define LABEL(.faddr, OFFSET)
 LABEL(.faddr, OFFSET):
+    lhld .fp
     #if OFFSET == 0
-        mov l, c
-        mov h, b
     #elif OFFSET == 1
-        mov l, c
-        mov h, b
         inx h
     #elif OFFSET == 2
-        mov l, c
-        mov h, b
         inx h
         inx h
     #else
-        lxi h, OFFSET
+        lxi b, OFFSET
         dad b
     #endif
     ret

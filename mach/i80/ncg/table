@@ -48,8 +48,10 @@ TOKENS
 
 const1			= { INT num; } 1 num.
 const2			= { INT num; } 2 num.
-smallconst2    = { INT num; } 2 num.
-label			= { ADDR off; } 2 off.
+smallpconst2    = { INT num; } 2 num. /* Byte-sized positive constant */
+smallnconst2    = { INT num; } 2 num. /* Byte-sized negative constant */
+label	          = { ADDR off; } 2 off.
+plabel          = { ADDR off; INT param; } 2 off param.
 m			= { } 2 cost(0,3) "m".
 fp       = { } 2.
 
@@ -58,7 +60,7 @@ SETS
 reg1			= reg + m.
 b_d_h_sp		= regpair + stackpointer.
 b_d_h_psw	= regpair + psword.
-immediate	= smallconst2 + const2 + label.
+immediate	= smallnconst2 + smallpconst2 + const2 + label.
 src1			= reg.
 src2			= regpair + const2 + label.
 src1or2		= src1 + src2.
@@ -72,6 +74,7 @@ INSTRUCTIONS
    ana	reg1:ro 	kills a:cc	cost(1, 4).
    ani	const1:ro 	kills a:cc	cost(2, 7).
    Call	"call" label:ro			cost(3,17).
+   Call	"call" plabel:ro			cost(3,17).
 			   /* 'call' is a reserved word */
 /* cc	label:ro			cost(3,14). 	*/
 /* cm	label:ro			cost(3,14).	*/
@@ -189,6 +192,10 @@ MOVES
          mov %2.1, %1.1
          mov %2.2, %1.2
 
+   from fp to hlreg
+      gen
+         lhld {label, ".fp"}
+
 TESTS
 
    to test areg		/* dummy test, never used */
@@ -254,11 +261,8 @@ from hl_or_de
          move {const1,0},%a.1
       yields %a
 
-from regpair
-   yields %1.2
-
-from smallconst2
-   yields {const2, %1.num}
+   from regpair
+      yields %1.2
 
    from const2
       uses regpair=%1
@@ -312,44 +316,44 @@ pat ldc
 
 #ifdef USE_I80_RSTS
    pat lol $1==0-2
-      uses dereg, hlreg
+      uses dereg, hlreg, bcreg
       gen
          rst {const1, 1}
       yields de
       
    pat lol $1==0-4
-      uses dereg, hlreg
+      uses dereg, hlreg, bcreg
       gen
          rst {const1, 2}
       yields de
       
    pat lol $1==4
-      uses dereg, hlreg
+      uses dereg, hlreg, bcreg
       gen
          rst {const1, 3}
       yields de
 #endif
 
 pat lol ($1>0) && ($1<=STACKHELPERS)
-   uses dereg, hlreg
+   uses dereg, hlreg, bcreg
    gen
       Call {plabel, ".fload", $1}
    yields de
 
 pat lol ($1<0) && ($1>=0-STACKHELPERS)
-   uses dereg, hlreg
+   uses dereg, hlreg, bcreg
    gen
       Call {plabel, ".floadn", 0-$1}
    yields de
 
 pat lol
-   uses dereg, hlreg={const2, $1}
+   uses hlreg={fp}, regpair={const2, $1}
    gen
-      dad lb
-      mov e, {m}
+      dad %b
+      mov %b.2, {m}
       inx hl
-      mov d, {m}
-   yields de
+      mov %b.1, {m}
+   yields %b
 
 pat loe
    uses hlreg
@@ -368,13 +372,13 @@ pat lof
       loi 2
 
 pat lal ($1>0) && ($1<=STACKHELPERS)
-   uses hlreg
+   uses hlreg, bcreg
    gen
       Call {plabel, ".faddr", $1}
    yields hl
 
 pat lal ($1<0) && ($1>=0-STACKHELPERS)
-   uses hlreg
+   uses hlreg, bcreg
    gen
       Call {plabel, ".faddrn", 0-$1}
    yields hl
@@ -569,20 +573,20 @@ pat stl lol $1==$2
 #ifdef USE_I80_RSTS
    pat stl $1==0-2
       with dereg
-         uses hlreg
+         uses hlreg, bcreg
          gen
             rst {const1, 4}
 #endif
 
 pat stl ($1>0) && ($1<=STACKHELPERS)
    with dereg
-      uses hlreg
+      uses hlreg, bcreg
       gen
          Call {plabel, ".fstore", $1}
 
 pat stl ($1<0) && ($1>=0-STACKHELPERS)
    with dereg
-      uses hlreg
+      uses hlreg, bcreg
       gen
          Call {plabel, ".fstoren", 0-$1}
 
@@ -775,10 +779,6 @@ pat adi $1==4
 pat sbi $1==2
    with const2 regpair
       yields %2 {const2, 0-%1.num}
-      leaving
-         adi 2
-   with smallconst2 regpair
-      yields %2 {smallconst2, 0-%1.num}
       leaving
          adi 2
    with regpair const2
@@ -1368,7 +1368,7 @@ pat and !defined($1)
          Call {label,".and"}
 
 pat ior $1==2
-   with regpair smallconst2
+   with regpair smallpconst2
       uses areg
       gen
          mov a, %1.2
@@ -1437,7 +1437,7 @@ kills ALL
 gen Call {label,".ior"}
 
 pat xor $1==2
-   with regpair smallconst2
+   with regpair smallpconst2
       uses areg
       gen
          mov a, %1.2
