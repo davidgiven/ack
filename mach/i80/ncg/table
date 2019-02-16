@@ -1687,7 +1687,7 @@ pat cmu zlt $1==2
       uses areg
       gen
          mov a, %2.2
-         sbi {const1, %1.num & 0xff}
+         sui {const1, %1.num & 0xff}
          mov a, %2.1
          sbi {const1, %1.num >> 8}
          jc {label, $2}
@@ -1719,7 +1719,7 @@ pat cmu zge $1==2
       uses areg
       gen
          mov a, %2.2
-         sbi {const1, %1.num & 0xff}
+         sui {const1, %1.num & 0xff}
          mov a, %2.1
          sbi {const1, %1.num >> 8}
          jnc {label, $2}
