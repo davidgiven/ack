@@ -13,12 +13,17 @@ mvi X, Y : mov X, Z          -> mov X, Z ;
 xchg : inx h : xchg          -> inx d ;
 xchg : inx d : xchg          -> inx h ;
 
+adi 0                        -> xra a ;
+ori 0                        -> ora a ;
+xri 0                        -> ora a ;
+adi 0                        -> ora a ;
+sui 0                        -> ora a ;
 cpi 0                        -> ora a ;
 call X : ret                 -> jmp X ;
 
 push h : lxi h, X : pop d    -> lxi d, X : xchg ;
 push d : lxi d, X : pop h    -> lxi h, X : xchg ;
 
-push h : lhld h, X : pop d    -> xchg : lhld X ;
+push h : lhld X : pop d      -> xchg : lhld X ;
 
 %%;
