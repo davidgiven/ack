@@ -16,6 +16,8 @@ zero
     rom 0
 one
     rom 1
+twofivesix
+    rom 256
 big
     #if EM_WSIZE == 2
         rom 32767
@@ -106,6 +108,19 @@ big
     cal $fail
     asp EM_WSIZE
 7
+
+    /* Test case: twofixsix < 256 */
+
+    loe twofivesix
+    loc 256
+    cmu EM_WSIZE
+    zlt *8
+    bra *9
+8
+    loc __LINE__
+    cal $fail
+    asp EM_WSIZE
+9
 
     cal $finished
     end
