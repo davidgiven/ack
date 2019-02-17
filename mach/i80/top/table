@@ -13,6 +13,11 @@ mvi X, Y : mov X, Z          -> mov X, Z ;
 xchg : inx h : xchg          -> inx d ;
 xchg : inx d : xchg          -> inx h ;
 
+adi 0                        -> xra a ;
+ori 0                        -> ora a ;
+xri 0                        -> ora a ;
+adi 0                        -> ora a ;
+sui 0                        -> ora a ;
 cpi 0                        -> ora a ;
 call X : ret                 -> jmp X ;
 

@@ -54,6 +54,7 @@ label	          = { ADDR off; } 2 off.
 plabel          = { ADDR off; INT param; } 2 off param.
 m			= { } 2 cost(0,3) "m".
 fp       = { } 2.
+comment        = { ADDR str; } 2 "! " str.
 
 SETS
 
@@ -1192,6 +1193,16 @@ pat loc loc cii $1==1 && $2==4
          mov %a.2, a
          mov %a.1, a
       yields %a %b
+   with hlreg
+      uses dereg, areg
+      gen
+         mov a, l
+         ral.
+         sbb a
+         mov h, a
+         mov e, a
+         mov d, a
+      yields de hl
 
 pat cii
 kills ALL
@@ -1214,26 +1225,18 @@ pat loc loc cuu $1==4 && $1==2
 with src1or2 src1or2			yields %1
 
 pat loc loc cuu $1==1 && $2==2
-   with reg
-      uses reusing %1, regpair
-      gen
-         move %1,%a
-		yields %a
-   with regpair
-      gen
-         move {const1,0},%1.1
-      yields %1
+with reg
+   uses reusing %1, hl_or_de
+   gen move %1,%a			yields %a
+with hl_or_de
+   gen move {const1,0},%1.1		yields %1
 
 pat loc loc cuu $1==1 && $2==4
-   with reg
-      uses reusing %1, regpair
-      gen
-         move %1,%a
-		yields {const2,0} %a
-   with regpair
-      gen
-         move {const1,0},%1.1
-      yields {const2,0} %1
+with reg
+   uses reusing %1, hl_or_de
+   gen move %1,%a			yields {const2,0} %a
+with hl_or_de
+   gen move {const1,0},%1.1		yields {const2,0} %1
 
 pat cuu
 kills ALL
