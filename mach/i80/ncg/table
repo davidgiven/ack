@@ -1186,24 +1186,23 @@ pat ciu						leaving cuu $1
 pat loc loc cuu $1==$2
 
 pat loc loc cuu $1==2 && $2==4
-with src1or2				yields {const2,0} %1
+   with src1or2
+      yields {const2,0} %1
 
 pat loc loc cuu $1==4 && $1==2
-with src1or2 src1or2			yields %1
+   with src1or2 src1or2
+		yields %1
 
 pat loc loc cuu $1==1 && $2==2
-with reg
-   uses reusing %1, hl_or_de
-   gen move %1,%a			yields %a
-with hl_or_de
-   gen move {const1,0},%1.1		yields %1
+   with reg
+      yields %1
 
 pat loc loc cuu $1==1 && $2==4
-with reg
-   uses reusing %1, hl_or_de
-   gen move %1,%a			yields {const2,0} %a
-with hl_or_de
-   gen move {const1,0},%1.1		yields {const2,0} %1
+   with reg
+      uses reusing %1
+      yields {const2,0} %1
+   with hl_or_de
+      yields {const2,0} %1
 
 pat cuu
 kills ALL
@@ -1259,6 +1258,12 @@ leaving loc $1 loc $2 cal ".cfu" asp 4+$1 lfr 4
 /*****************************************/
 /* Group 9: Logical instructions         */
 /*****************************************/
+
+pat loc and ($1==0xff) && ($2==2)
+   with hl_or_de
+      yields %1.2
+
+pat loc and ($1==0xffff) && ($2==2)
 
 pat and $1==2
    with hl_or_de smallpconst2
@@ -1329,6 +1334,8 @@ pat and !defined($1)
       gen
          Call {label,".and"}
 
+pat loc ior ($1==0)
+
 pat ior $1==2
    with hl_or_de smallpconst2
       uses areg
@@ -1397,6 +1404,8 @@ pat ior !defined($1)
 with dereg
 kills ALL
 gen Call {label,".ior"}
+
+pat loc xor ($1==0)
 
 pat xor $1==2
    with hl_or_de smallpconst2
