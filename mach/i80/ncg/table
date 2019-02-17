@@ -15,6 +15,8 @@ EM_BSIZE = 4
 
 SL=4
 
+#define WANT_I80_8085
+
 STACKHELPERS=128
 
 PROPERTIES
@@ -38,9 +40,9 @@ REGISTERS
 
 a:             areg,reg.
 b,c,d,e,h,l:   reg.
-bc("b")=b+c:   regpair, regind, bcreg, bc_or_de.
 de("d")=d+e:   regpair, regind, dereg, bc_or_de, hl_or_de.
 hl("h")=h+l:   regpair, hlreg, hl_or_de.
+bc("b")=b+c:   regpair, regind, bcreg, bc_or_de.
 sp:            stackpointer.
 psw=a:         psword. /* in fact psw also includes condition codes */
 
@@ -96,6 +98,7 @@ INSTRUCTIONS
    dcr	reg:rw:cc			cost(1, 5).
    dcr	m:rw:cc				cost(1, 7).
    dcx	b_d_h_sp:rw			cost(1, 5).
+   dsub  kills hl cost(1, 10).
 /* di					cost(1, 4).	*/
 /* ei					cost(1, 4).	*/
 /* hlt					cost(1, 4).	*/
@@ -104,9 +107,11 @@ INSTRUCTIONS
    inr	m:rw:cc				cost(1, 7).
    inx	b_d_h_sp:rw			cost(1, 5).
    jc	label:ro			cost(3,10).
+   jk label:ro       cost(3,10).
    jm	label:ro			cost(3,10).
    jmp	label:ro			cost(3,10).
    jnc	label:ro			cost(3,10).
+   jnk	label:ro			cost(3,10).
    jnz	label:ro			cost(3,10).
    jp	label:ro			cost(3,10).
 /* jpe	label:ro			cost(3,10).	*/
@@ -114,6 +119,8 @@ INSTRUCTIONS
    jz	label:ro			cost(3,10).
    lda	label:ro 	kills a		cost(3,13).
    ldax	regind:ro 	kills a		cost(1, 7).
+   ldhl  const1:ro cost(2, 10).
+   lhlx  cost(1, 10).
    lhld	label:ro 	kills hl	cost(3,16).
    lxi	b_d_h_sp:wo,immediate:ro	cost(3,10).
    mov	reg:wo,reg:ro	cost(1, 5).
@@ -144,6 +151,7 @@ INSTRUCTIONS
    sbb	reg1:ro 	kills a:cc	cost(1, 4).
    sbi	const1:ro 	kills a:cc	cost(2, 7).
    shld	label:ro			cost(3,16).
+   shlx  kills hl:cc cost(1, 10).
    sphl					cost(1, 5).
    sta	label:ro			cost(3,13).
    stax	regind:ro			cost(1, 7).
@@ -195,7 +203,7 @@ MOVES
 
    from fp to hlreg
       gen
-         lhld {label, ".fp"}
+         rst {const1, 6}
 
 TESTS
 
@@ -245,11 +253,11 @@ gen dcx sp
       uses regpair=%1
       yields %a
 
-from hl_or_de
-   uses hl_or_de
-      gen
-         xchg.
-      yields %a
+   from hl_or_de
+      uses hl_or_de
+         gen
+            xchg.
+         yields %a
 
    from regpair
       uses regpair=%1
@@ -267,6 +275,12 @@ from hl_or_de
 
    from const2
       uses regpair=%1
+      yields %a
+
+   from smallpconst2
+      uses hlreg
+         gen
+            ldhl {const1, %1.num}
       yields %a
 
    from smallpconst2
@@ -471,6 +485,13 @@ pat loi $1==2
       gen
          lhld %1
       yields hl
+#ifdef WANT_I80_8085
+   with dereg
+      uses hlreg
+      gen
+         lhlx.
+      yields %a
+#else
    with hlreg
       uses regpair
          gen
@@ -478,6 +499,7 @@ pat loi $1==2
             inx %1
             mov %a.1, {m}
 		yields %a
+#endif
 
 pat loi $1==4
    with exact label
@@ -665,6 +687,11 @@ pat sti $1==2
    with label hlreg
       gen
          shld %1
+#ifdef WANT_I80_8085
+   with hlreg dereg
+      gen
+         shlx.
+#else
    with hlreg regpair
       gen
          mov {m}, %2.2
@@ -676,6 +703,7 @@ pat sti $1==2
          mov {m}, e
          inx %2
          mov {m}, d
+#endif
 
 pat sti $1==4
    with label hlreg dereg
@@ -782,6 +810,12 @@ pat sbi $1==2
       yields %2 {const2, 0-%1.num}
       leaving
          adi 2
+#ifdef WANT_I80_8085
+   with hlreg bcreg
+      gen
+         dsub.
+      yields hl
+#else
    with regpair const2
       uses areg
       gen
@@ -812,6 +846,7 @@ pat sbi $1==2
          sbb %1.1
          mov %2.1,a
       yields %2
+#endif
 
 pat sbi $1==4
 kills ALL
@@ -2071,6 +2106,12 @@ pat bra
          jmp {label,$1}
 
 pat blt
+#ifdef WANT_I80_8085
+   with hlreg bcreg STACK
+      gen
+         dsub.
+         jk {label, $1}
+#else
    with hlreg dereg STACK
       uses areg
       gen
@@ -2080,6 +2121,7 @@ pat blt
             Call {label, ".cmps_mag"}
          #endif
          jc {label, $1}
+#endif
 
 pat bgt
    leaving
@@ -2087,6 +2129,12 @@ pat bgt
       blt $1
 
 pat bge
+   with hlreg bcreg STACK
+#ifdef WANT_I80_8085
+      gen
+         dsub.
+         jnk {label, $1}
+#else
    with hlreg dereg STACK
       uses areg
       gen
@@ -2096,6 +2144,7 @@ pat bge
             Call {label, ".cmps_mag"}
          #endif
          jnc {label, $1}
+#endif
 
 pat ble
    leaving

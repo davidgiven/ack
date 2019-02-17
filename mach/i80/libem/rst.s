@@ -28,6 +28,12 @@
     call copy
     lxi h, .cmps_mag
     jmp copy
+    lxi h, loadfp
+    jmp copy
+
+loadfp:
+    lhld .fp
+    ret
 
 ! Copies eight bytes from HL to DE.
 copy:
