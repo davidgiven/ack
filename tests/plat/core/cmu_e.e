@@ -109,7 +109,7 @@ big
     asp EM_WSIZE
 7
 
-    /* Test case: twofixsix < 256 */
+    /* Test case: twofivesix < 256 */
 
     loe twofivesix
     loc 256
