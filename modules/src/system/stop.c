@@ -7,15 +7,13 @@
 #include <stdlib.h>
 #include "system.h"
 
-void
-sys_stop(how)
-	int how;
+void sys_stop(int how)
 {
 	switch(how) {
 	case S_END:
-		exit(0);
+		exit(EXIT_SUCCESS);
 	case S_EXIT:
-		exit(1);
+		exit(EXIT_FAILURE);
 	case S_ABORT:
 	default:
 		abort();
