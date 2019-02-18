@@ -17,6 +17,7 @@
 #include <em_arith.h>
 #include <em_label.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "LLlex.h"
@@ -32,7 +33,7 @@
 #include "type.h"
 
 #ifdef DEBUG
-long sys_filesize();
+size_t sys_filesize();
 #endif
 
 t_idf* DefId;
