@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_dfdnam(s)
-	char *s;
+void CC_dfdnam(char* s)
 {
 	/*	Define data label
 	*/

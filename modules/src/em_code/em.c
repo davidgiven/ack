@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "system.h"
 #include "alloc.h"
+#include "print.h"
 #include "em_arith.h"
 #include "insert.h"
 #include "em_private.h"
@@ -49,8 +51,9 @@ char		*C_current_out = obuf;
 char		*C_opp = obuf;
 #endif
 
-void
-C_flush() {
+void C_flush(void)
+{
+	int count;
 #ifdef INCORE
 	static unsigned int bufsiz;
 
@@ -69,6 +72,7 @@ C_flush() {
 		return;
 	}
 #endif
+	count = (int)(C_opp - obuf);
 	if (C_opp != obuf && sys_write(C_ofp, obuf, (int)(C_opp - obuf)) == 0) {
 		C_ofp = 0;
 		C_failed();
@@ -82,9 +86,7 @@ C_flush() {
 #define Xputbyte(c) put(c)
 #endif
 
-void
-C_putbyte(c)
-	int c;
+void C_putbyte(int c)
 {
 	Xputbyte(c);
 }
@@ -94,15 +96,11 @@ C_putbyte(c)
 #endif
 
 /*ARGSUSED*/
-void
-C_init(w, p)
-	arith w, p;
+void C_init(arith w, arith p)
 {
 }
 
-int
-C_open(nm)
-	char *nm;
+int C_open(char* nm)
 {
 	/*	Open file "nm" for output
 	*/
@@ -110,13 +108,15 @@ C_open(nm)
 	if (nm == 0)
 		C_ofp = STDOUT;	/* standard output	*/
 	else
-	if (sys_open(nm, OP_WRITE, &C_ofp) == 0)
+	{
+
+	  if (sys_open(nm, OP_WRITE, &C_ofp) == 0)
 		return 0;
+	}
 	return 1;
 }
 
-void
-C_close()
+void C_close(void)
 {
 	/*	Finish the code-generation.
 	*/
@@ -150,8 +150,7 @@ C_close()
 	C_ofp = 0;
 }
 
-int
-C_busy()
+int C_busy(void)
 {
 	return C_ofp != 0; /* true if code is being generated */
 }
@@ -165,32 +164,27 @@ C_busy()
 	names.
 */
 
-void
-C_magic()
+void C_magic(void)
 {
 }
 
 /***    the readable code generating routines	***/
 
-static
-wrs(s)
-	register char *s;
+static int wrs(register char *s)
 {
-	while (*s) {
+	while (*s)
+	{
 		C_putbyte(*s++);
 	}
+	return 0;
 }
 
-void
-C_pt_dnam(s)
-	char *s;
+void C_pt_dnam(char* s)
 {
 	wrs(s);
 }
 
-void
-C_pt_ilb(l)
-	label l;
+void C_pt_ilb(label l)
 {
 	char buf[16];
 
@@ -201,17 +195,14 @@ C_pt_ilb(l)
 extern char em_mnem[][4];
 extern char em_pseu[][4];
 
-void
-C_pt_op(x)
+void C_pt_op(int x)
 {
 	C_putbyte(' ');
 	wrs(em_mnem[x - sp_fmnem]);
 	C_putbyte(' ');
 }
 
-void
-C_pt_cst(l)
-	arith l;
+void C_pt_cst(arith l)
 {
 	char buf[16];
 
@@ -219,10 +210,7 @@ C_pt_cst(l)
 	wrs(buf);
 }
 
-void
-C_pt_scon(x, y)
-	char *x;
-	arith y;
+void C_pt_scon(char *x, arith y)
 {
 	char xbuf[1024];
 	register char *p;
@@ -239,17 +227,14 @@ C_pt_scon(x, y)
 	C_putbyte('\'');
 }
 
-void
-C_pt_ps(x)
+void C_pt_ps(int x)
 {
 	C_putbyte(' ');
 	wrs(em_pseu[x - sp_fpseu]);
 	C_putbyte(' ');
 }
 
-void
-C_pt_dlb(l)
-	label l;
+void C_pt_dlb(label l)
 {
 	char buf[16];
 
@@ -257,10 +242,7 @@ C_pt_dlb(l)
 	wrs(buf);
 }
 
-void
-C_pt_doff(l, v)
-	label l;
-	arith v;
+void C_pt_doff(label l, arith v)
 {
 	char buf[16];
 
@@ -271,10 +253,7 @@ C_pt_doff(l, v)
 	}
 }
 
-void
-C_pt_noff(s, v)
-	char *s;
-	arith v;
+void C_pt_noff(char *s, arith v)
 {
 	char buf[16];
 
@@ -285,17 +264,13 @@ C_pt_noff(s, v)
 	}
 }
 
-void
-C_pt_pnam(s)
-	char *s;
+void C_pt_pnam(char *s)
 {
 	C_putbyte('$');
 	wrs(s);
 }
 
-void
-C_pt_dfilb(l)
-	label l;
+void C_pt_dfilb(label l)
 {
 	char buf[16];
 
@@ -303,11 +278,7 @@ C_pt_dfilb(l)
 	wrs(buf);
 }
 
-void
-C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
-	int sp;
-	char *v;
-	arith sz;
+void C_pt_wcon(int sp, char *v, arith sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 {
 	int ch = sp == sp_icon ? 'I' : sp == sp_ucon ? 'U' : 'F';
 
@@ -316,18 +287,18 @@ C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 	C_pt_cst(sz);
 }
 
-void
-C_pt_nl() {
+void C_pt_nl(void)
+{
 	C_putbyte('\n');
 }
 
-void
-C_pt_comma() {
+void C_pt_comma(void)
+{
 	C_putbyte(',');
 }
 
-void
-C_pt_ccend() { 
+void C_pt_ccend(void)
+{
 	C_putbyte('?');
 }
 
@@ -345,8 +316,7 @@ C_pt_ccend() {
 	names.
 */
 
-void
-C_magic()
+void C_magic(void)
 {
 	put16(sp_magic);
 }
@@ -355,9 +325,7 @@ C_magic()
 #define	fit16i(x)	((x) >= (long)(-0x8000) && (x) <= (long)0x7FFF)
 #define	fit8u(x)	((x) <= 0xFF)		/* x is already unsigned */
 
-void
-C_pt_ilb(l)
-	register label l;
+void C_pt_ilb(register label l)
 {
 	if (fit8u(l))	{
 		put8(sp_ilb1);
@@ -369,9 +337,7 @@ C_pt_ilb(l)
 	}
 }
 
-void
-C_pt_dlb(l)
-	register label l;
+void C_pt_dlb(register label l)
 {
 	if (fit8u(l))	{
 		put8(sp_dlb1);
@@ -383,9 +349,7 @@ C_pt_dlb(l)
 	}
 }
 
-void
-C_pt_cst(l)
-	register arith l;
+void C_pt_cst(register arith l)
 {
 	if (l >= (arith) -sp_zcst0 && l < (arith) (sp_ncst0 - sp_zcst0)) {
 		/*	we can convert 'l' to an int because its value
@@ -404,10 +368,7 @@ C_pt_cst(l)
 	}
 }
 
-void
-C_pt_doff(l, v)
-	label l;
-	arith v;
+void C_pt_doff(label l, arith v)
 {
 	if (v == 0) {
 		C_pt_dlb(l);
@@ -419,9 +380,7 @@ C_pt_doff(l, v)
 	}
 }
 
-void
-C_pt_str(s)
-	register char *s;
+void C_pt_str(register char *s)
 {
 	register int len;
 
@@ -431,18 +390,13 @@ C_pt_str(s)
 	}
 }
 
-void
-C_pt_dnam(s)
-	char *s;
+void C_pt_dnam(char* s)
 {
 	put8(sp_dnam);
 	C_pt_str(s);
 }
 
-void
-C_pt_noff(s, v)
-	char *s;
-	arith v;
+void C_pt_noff(char* s, arith v)
 {
 	if (v == 0) {
 		C_pt_dnam(s);
@@ -454,19 +408,13 @@ C_pt_noff(s, v)
 	}
 }
 
-void
-C_pt_pnam(s)
-	char *s;
+void C_pt_pnam(char* s)
 {
 	put8(sp_pnam);
 	C_pt_str(s);
 }
 
-void
-C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
-	int sp;
-	char *v;
-	arith sz;
+void C_pt_wcon(int sp, char* v, arith sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 {
 	/* how 'bout signextension int --> long ???	*/
 	put8(sp);
@@ -474,10 +422,7 @@ C_pt_wcon(sp, v, sz)	/* sp_icon, sp_ucon or sp_fcon with int repr	*/
 	C_pt_str(v);
 }
 
-void
-C_pt_scon(b, n)
-	register char *b;
-	register arith n;
+void C_pt_scon(register char *b, register arith n)
 {
 	put8(sp_scon);
 	C_pt_cst(n);

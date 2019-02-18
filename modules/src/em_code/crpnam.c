@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_crpnam(op, p)
-	char *p;
+void CC_crpnam(int op, char* p)
 {
 	/*	CON or ROM with argument PNAM(p)
 	*/

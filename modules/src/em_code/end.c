@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_end(l)
-	arith l;
+void CC_end(arith l)
 {
 	/*	END pseudo of procedure with l locals
 	*/

@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_crilb(op, l)
-	label l;
+void CC_crilb(int op, label l)
 {
 	/*	CON or ROM with argument ILB(l)
 	*/

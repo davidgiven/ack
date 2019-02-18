@@ -2,10 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_pro(pnam, l)
-	char *pnam;
-	arith l;
+void CC_pro(char* pnam, arith l)
 {
 	/*	PRO pseudo with procedure name pnam and # of locals l
 	*/

@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_ilb(l)
-	label l;
+void CC_ilb(label l)
 {
 	COMMA();
 	ILB(l);

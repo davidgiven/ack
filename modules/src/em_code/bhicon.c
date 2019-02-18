@@ -2,12 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_bhicon(op, n, s, sz, i)
-	arith n;
-	char *s;
-	arith sz;
-	int i;
+void CC_bhicon(int op, arith n, char *s, arith sz, int i)
 {
 	/*	BSS or HOL with size n, initial value an ICON (s, sz),
 		and flag i

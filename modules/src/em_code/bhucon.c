@@ -2,12 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_bhucon(op, n, s, sz, i)
-	arith n;
-	char *s;
-	arith sz;
-	int i;
+void CC_bhucon(int op, arith n, char *s, arith sz, int i)
 {
 	/*	BSS or HOL with size n, initial value an UCON (s, sz),
 		and flag i

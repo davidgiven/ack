@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_pnam(str)
-	char *str;
+void CC_pnam(char* str)
 {
 	COMMA();
 	PNAM(str);

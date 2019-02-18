@@ -11,11 +11,18 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <em_path.h>
-#include <alloc.h>
+#include <stdio.h>
+#include <assert.h>
+#include "em_private.h"
+#include "system.h"
+/*#include "em_path.h"*/
+#include "alloc.h"
 #include "insert.h"
 
-char		*C_tmpdir = TMP_DIR;
+/* To make this portable, the initial value here is NULL
+ * and system is used to retrieve the correct directory
+ */
+char		*C_tmpdir = NULL;
 static Part	*C_stable[TABSIZ];
 
 static char	*C_old_top;
@@ -58,12 +65,10 @@ getbyte(b)
 }
 #endif
 
-static C_out_parts();
-static Part *C_findpart();
+static void C_out_parts(register PartOfPart *pp);
+static Part *C_findpart(int part);
 
-static
-outpart(id)
-	int id;
+static int outpart(int id)
 {
 	/*	Output part "id", if present.
 	*/
@@ -73,11 +78,10 @@ outpart(id)
 		C_out_parts(p->p_parts);
 		p->p_parts = 0;
 	}
+	return 0;
 }
 
-static
-C_out_parts(pp)
-	register PartOfPart *pp;
+static void C_out_parts(register PartOfPart *pp)
 {
 	/*	Output the list of chunks started by "pp".
 		The list is build in reverse order, so this routine is
@@ -119,9 +123,7 @@ C_out_parts(pp)
 	}
 }
 
-static Part *
-C_findpart(part)
-	int part;
+static Part *C_findpart(int part)
 {
 	/*	Look for part "part" in the table.
 		Return 0 if not present,
@@ -134,14 +136,22 @@ C_findpart(part)
 	return p;
 }
 
-static
-swttmp()
+
+
+
+static int swttmp(void)
 {
 #ifndef INCORE
-	if (C_tmpfile == 0) {
-		static char tmpbuf[64];
+	if (C_tmpfile == NULL) {
+
+		static char tmpbuf[FILENAME_MAX];
 		register char *p = tmpbuf;
 
+		if (C_tmpdir == NULL)
+		{
+			C_tmpdir = sys_gettmpdir();
+			assert(C_tmpdir != NULL);
+		}
 		strcpy(p, C_tmpdir);
 		strcat(p, "/CodeXXXXXX");
 		close(mkstemp(p));
@@ -175,10 +185,10 @@ swttmp()
 		C_ontmpfile = 1;
 	}
 #endif
+	return 0;
 }
 
-static
-swtout()
+static int swtout(void)
 {
 #ifndef INCORE
 	if (C_ontmpfile) {
@@ -203,11 +213,10 @@ swtout()
 		C_ontmpfile = 0;
 	}
 #endif
+	return 0;
 }
 
-static int
-available(part)
-	int part;
+static int available(int part)
 {
 	/*	See if part "part", and all the parts it consists of,
 		are available. Return 1 if they are, 0 otherwize
@@ -240,9 +249,7 @@ available(part)
 	return retval;
 }
 
-static Part *
-mkpart(part)
-	int part;
+static Part *mkpart(int part)
 {
 	/*	Create a Part structure with id "part", and return a
 		pointer to it, after checking that is does not exist
@@ -266,9 +273,7 @@ mkpart(part)
 	return p;
 }
 
-static
-end_partofpart(p)
-	register Part *p;
+static void end_partofpart(register Part *p)
 {
 	/*	End the current chunk of part *p.
 	*/
@@ -285,9 +290,7 @@ end_partofpart(p)
 	}
 }
 
-static
-resume(p)
-	register Part *p;
+static void resume(register Part *p)
 {
 	/*	Resume part "p", by creating a new PartOfPart structure
 		for it.
@@ -302,9 +305,7 @@ resume(p)
 	pp->pp_begin = C_current_out - C_BASE;
 }
 
-void
-C_insertpart(part)
-	int part;
+void C_insertpart(int part)
 {
 	/*	Insert part "part" in the current part. If C_sequential is
 		still set and the part to be inserted is available now,
@@ -341,9 +342,7 @@ C_insertpart(part)
 	resume(p);
 }
 
-void
-C_beginpart(part)
-	int part;
+void C_beginpart(int part)
 {
 	/*	Now follows the definition for part "part".
 		Suspend the current part, and add part "part" to the
@@ -361,9 +360,7 @@ C_beginpart(part)
 	resume(p);
 }
 
-void
-C_endpart(part)
-	int part;
+void C_endpart(int part)
 {
 	/*	End the current part. The parameter "part" is just there
 		for the checking. Do we really need it ???

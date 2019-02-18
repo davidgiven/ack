@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_pspnam(op, pnam)
-	char *pnam;
+void CC_pspnam(int op, char* pnam)
 {
 	/*	Pseudo with procedure name
 	*/

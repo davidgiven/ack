@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_msstart(cst)
-	int cst;
+void CC_msstart(int cst)
 {
 	/*	start of message
 	*/

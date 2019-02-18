@@ -2,8 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_op(opcode)
+void CC_op(int opcode)
 {
 	/*	Instruction that never has an argument
 		Argument types: -

@@ -2,10 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_fcon(val, siz)
-	char *val;
-	arith siz;
+void CC_fcon(char* val, arith siz)
 {
 	COMMA();
 	WCON(sp_fcon, val, siz);
