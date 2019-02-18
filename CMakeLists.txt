@@ -35,7 +35,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/make)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/cmisc)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/LLgen)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/misc)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/topgen)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/topgen)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/util/cpp)
 
 # Compilers and runtime libraries
