@@ -40,7 +40,8 @@
 extern char *malloc();
 #endif
 
-#include <system.h>
+#include "system.h"
+#include <stdio.h>
 
 #ifndef INP_NPUSHBACK
 #define INP_NPUSHBACK 1
@@ -106,8 +107,7 @@ INP_rdfile(fd, fn, size, pbuf)
 	register long *size;
 	char **pbuf;		/* output parameter */
 {
-	extern long sys_filesize();
-	int rsize;
+	long rsize;
 
 	if (
 	     ((*size = sys_filesize(fn))) < 0
@@ -137,8 +137,8 @@ INP_rdfile(fd, fn, size, pbuf)
 INP_PRIVATE struct INP_i_buf *i_ptr;
 
 _PROTOTYPE(INP_PRIVATE char * INP_pbuf, (void));
-INP_PRIVATE char *
-INP_pbuf()
+
+INP_PRIVATE char *INP_pbuf(void)
 {
 	register struct INP_i_buf *ib =
 		(struct INP_i_buf *) malloc(sizeof(struct INP_i_buf));
@@ -159,8 +159,7 @@ INP_pbuf()
 _PROTOTYPE(INP_PRIVATE struct INP_buffer_header *INP_push_bh, (void));
 _PROTOTYPE(INP_PRIVATE int INP_pop_bh, (void));
 
-INP_PRIVATE struct INP_buffer_header *
-INP_push_bh()
+INP_PRIVATE struct INP_buffer_header *INP_push_bh(void)
 {
 	register struct INP_buffer_header *bh;
 
@@ -183,8 +182,7 @@ INP_push_bh()
 	of headers.  0 is returned if there are no more
 	inputbuffers on the stack, 1 is returned in the other case.
 */
-INP_PRIVATE int
-INP_pop_bh()
+INP_PRIVATE int INP_pop_bh(void)
 {
 	register struct INP_buffer_header *bh = INP_head;
 
@@ -219,10 +217,13 @@ INP_rdblock(fd, buf, n)
 	char *buf;
 	int *n;
 {
+	long readSize;
+	readSize = (size_t)*n;
 
-	if (!sys_read(fd, buf, INP_BUFSIZE, n)) {
+	if (!sys_read(fd, buf, INP_BUFSIZE, &readSize)) {
 		return 0;
 	}
+	*n = (int)readSize;
 	buf[*n] = '\0';
 	return 1;
 }
@@ -235,10 +236,7 @@ _PROTOTYPE(INP_PRIVATE int INP_mk_filename, (char *, char *, char **));
 
 /*	INP_mk_filename() concatenates a dir and filename.
 */
-INP_PRIVATE int
-INP_mk_filename(dir, file, newname)
-	register char *dir, *file;
-	char **newname;
+INP_PRIVATE int INP_mk_filename(register char *dir, register char *file, char **newname)
 {
 
 	register char *dst;
@@ -257,11 +255,7 @@ INP_mk_filename(dir, file, newname)
 /*	Interface routines : InsertFile, InsertText, and loadbuf
 */
 
-int
-InsertFile(filnam, table, result)
-	char *filnam;
-	char *table[];
-	char **result;
+int InsertFile(char *filnam, char *table[], char **result)
 {
 	char *newfn = 0;
 
@@ -327,9 +321,7 @@ InsertFile(filnam, table, result)
 	return 0;
 }
 
-int
-InsertText(text, length)
-	char *text;
+int InsertText(char *text, int length)
 {
 	register struct INP_buffer_header *bh = INP_push_bh();
 
@@ -344,8 +336,7 @@ InsertText(text, length)
 	((void)((dest = *_ipp++) || (dest = loadbuf())))
 
 /*  Reads the next character, converting CRLF into LF. */
-int
-loadchar(void)
+int loadchar(void)
 {
 	int ch;
 	RAWLOAD(ch);
@@ -368,8 +359,7 @@ loadchar(void)
 	Note: this routine is exported due to its occurence in the definition
 	of LoadChar [input.h], that is defined as a macro.
 */
-int
-loadbuf()
+int loadbuf(void)
 {
 	register struct INP_buffer_header *bh = INP_head;
 	static char buf[INP_NPUSHBACK + 1];
