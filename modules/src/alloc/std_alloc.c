@@ -17,11 +17,7 @@ extern char *malloc();
 
 #include	"alloc.h"
 
-char *
-std_alloc(phead, size, count, pcnt)
-	char **phead;
-	register unsigned int size;
-	int *pcnt;
+char *std_alloc(char **phead, register unsigned int size, int count, int *pcnt)
 {
 	register char *p;
 	register long *q;

@@ -12,16 +12,16 @@
 #include <stdlib.h>
 #else
 extern char *malloc();
+#ifndef NULL
+#define NULL 0
+#endif
 #endif
 
 #include	"alloc.h"
 
-char *
-st_alloc(phead, size, count)
-	char **phead;
-	register unsigned int size;
+char *st_alloc(char **phead, register unsigned int size, int count)
 {
-	register char *p;
+	register char *p = NULL;
 	register long *q;
 	char *retval;
 
@@ -29,7 +29,7 @@ st_alloc(phead, size, count)
 		while (count >= 1 && (p = malloc(size * count)) == 0) {
 			count >>= 1;
 		}
-		if (p == 0) {
+		if (p == NULL) {
 			No_Mem();
 		}
 		((_PALLOC_) p)->_A_next = 0;
