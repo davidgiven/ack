@@ -40,3 +40,6 @@ xi)	$? added.  (see UNIX manual)
 Hacked further by Ceriel Jacobs to make it work better. Use this "make" to
 install ACK under Microsoft Xenix V3.2. Some of the makefiles are just too
 big for the Xenix "make". Strange, they work on a PDP-11 ...
+
+Made it almost ISO C90 and POSIX portable by Carl Eric Codere, and 
+also made it safer by using correct datatypes on some library calls.
