@@ -6,14 +6,10 @@
  
 #include <stdlib.h>
 #include <string.h>
-#include <em.h>
-#include <em_mes.h>
+#include "em.h"
+#include "em_mes.h"
 
-void
-C_ms_std(s, e1, l)
-	char *s;
-	int e1;
-	int l;
+void C_ms_std(char* s, int e1, int l)
 {
 	C_mes_begin(ms_std);
 	if (s) C_scon(s, (arith) (strlen(s)+1));

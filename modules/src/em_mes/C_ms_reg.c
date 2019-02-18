@@ -3,13 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#include <em.h>
-#include <em_mes.h>
+#include "em.h"
+#include "em_mes.h"
 
-void
-C_ms_reg(offs, siz, class, prior)
-	arith offs, siz;
-	int class, prior;
+void C_ms_reg(arith offs, arith siz, int class, int prior)
 {
 	C_mes_begin(ms_reg);
 	C_cst(offs);

@@ -6,13 +6,10 @@
  
 #include <stdlib.h>
 #include <string.h>
-#include <em.h>
-#include <em_mes.h>
+#include "em.h"
+#include "em_mes.h"
 
-void
-C_ms_src(nlines, filnam)
-	int nlines;
-	char *filnam;
+void C_ms_src(int nlines, char* filnam)
 {
 	C_mes_begin(ms_src);
 	C_cst((arith)nlines);
