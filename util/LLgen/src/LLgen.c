@@ -2,9 +2,6 @@
 #include "Lpars.h"
 #define LL_LEXI scanner
 #define LLNOFIRSTS
-#if __STDC__ || __cplusplus
-#define LL_ANSI_C 1
-#endif
 #define LL_LEXI scanner
 /* $Id$ */
 #ifdef LL_DEBUG
@@ -38,7 +35,6 @@ extern int LLstartsymb;
 #define LLsincr(d)	LLscnt[d]++
 #define LLtincr(d)	LLtcnt[d]++
 
-#if LL_ANSI_C
 extern int LL_LEXI(void);
 extern void LLread(void);
 extern int LLskip(void);
@@ -56,33 +52,15 @@ extern int LLfirst(int, int);
 #if LL_NON_CORR
 extern void LLnc_recover(void);
 #endif
-#else /* not LL_ANSI_C */
-extern LLread();
-extern int LLskip();
-extern int LLnext();
-extern LLerror();
-extern LLsafeerror();
-extern LLnewlevel();
-extern LLoldlevel();
-#ifndef LL_FASTER
-extern LLscan();
-#endif
-#ifndef LLNOFIRSTS
-extern int LLfirst();
-#endif
-#if LL_NON_CORR
-extern LLnc_recover();
-#endif
-#endif /* not LL_ANSI_C */
 # line 20 "LLgen.g"
 
-# include <stdlib.h>
-# include <string.h>
-# include "types.h"
-# include "io.h"
-# include "extern.h"
-# include "assert.h"
-# include "cclass.h"
+#include <stdlib.h>
+#include <string.h>
+#include "types.h"
+#include "io.h"
+#include "extern.h"
+#include "assert.h"
+#include "cclass.h"
 
 # ifndef NORCSID
 static string	rcsid = "$Id$";
@@ -106,15 +84,14 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC		newnorder();
-STATIC		newtorder();
-STATIC		mkalt();
-STATIC		mkterm();
-STATIC p_gram	copyrule();
+STATIC void newnorder(int index);
+STATIC void newtorder(int index);
+STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
+STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
+STATIC p_gram copyrule(register p_gram p,int length);
 /* and of course LLparse() */
 
-STATIC
-newnorder(index) {
+STATIC void newnorder(int index) {
 	static int porder;
 
 	if (norder != -1) {
@@ -125,8 +102,7 @@ newnorder(index) {
 	nonterms[porder].n_next = -1;
 }
 
-STATIC
-newtorder(index) {
+STATIC void newtorder(int index) {
 	static int porder;
 
 	if (torder != -1) {
@@ -137,7 +113,7 @@ newtorder(index) {
 	tokens[porder].t_next = -1;
 }
 
-p_init()
+void p_init(void)
 {
 	alt_table = (p_gram )alloc(ALTINCR*sizeof(t_gram));
 	n_alts = 0;
@@ -147,47 +123,31 @@ p_init()
 	max_rules = RULEINCR;
 }
 
-#if LL_ANSI_C
 static void LL1_def(void);
 static void LL2_rule(void);
 static void LL3_listel(void);
 static void LL4_firsts(void);
 static void LL5_productions(
-# line 246 "LLgen.g"
+# line 244 "LLgen.g"
 p_gram *p) ;
 static void LL6_simpleproduction(
-# line 332 "LLgen.g"
+# line 330 "LLgen.g"
 p_gram *p ,register int *conflres) ;
 static void LL7_elem(
-# line 480 "LLgen.g"
+# line 478 "LLgen.g"
 register p_gram pres) ;
 static void LL8_repeats(
-# line 602 "LLgen.g"
+# line 600 "LLgen.g"
 int *kind ,int *cnt) ;
 static void LL9_number(
-# line 619 "LLgen.g"
+# line 617 "LLgen.g"
 int *t) ;
-#else
-static LL1_def();
-static LL2_rule();
-static LL3_listel();
-static LL4_firsts();
-static LL5_productions();
-static LL6_simpleproduction();
-static LL7_elem();
-static LL8_repeats();
-static LL9_number();
-#endif
-#if LL_ANSI_C
 void
-#endif
 LL0_spec(
-#if LL_ANSI_C
 void
-#endif
 ) {
 LLsincr(0);
-# line 96 "LLgen.g"
+# line 94 "LLgen.g"
 {	acount = 0; p_init(); }
 for (;;) {
 goto L_1;
@@ -215,7 +175,7 @@ continue;
 LLsdecr(0);
 break;
 }
-# line 98 "LLgen.g"
+# line 96 "LLgen.g"
 {	/*
 				 * Put an endmarker in temporary file
 				 */
@@ -226,15 +186,11 @@ break;
 			}
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL1_def(
-#if LL_ANSI_C
 void
-#endif
 ) {
-# line 108 "LLgen.g"
+# line 106 "LLgen.g"
 	register string p; 
 switch(LLcsymb) {
 case /*  C_IDENT  */ 2 : ;
@@ -275,13 +231,13 @@ LLtincr(2);
 LLtincr(24);
 LL_SAFE(C_START);
 LL_NOSCANDONE(C_IDENT);
-# line 118 "LLgen.g"
+# line 116 "LLgen.g"
 {	p = store(lextoken.t_string); }
 LLtdecr(23);
 LL_NOSCANDONE(',');
 LLtdecr(2);
 LL_NOSCANDONE(C_IDENT);
-# line 123 "LLgen.g"
+# line 121 "LLgen.g"
 {	/*
 				 * Put the declaration in the list
 				 * of start symbols
@@ -309,11 +265,11 @@ case /*  C_LEXICAL  */ 14 : ;
 LLtincr(24);
 LL_SAFE(C_LEXICAL);
 LL_NOSCANDONE(C_IDENT);
-# line 149 "LLgen.g"
+# line 147 "LLgen.g"
 {	if (!lexical) {
 					lexical = store(lextoken.t_string);
 				}
-				else	error(linecount,"Duplicate %%lexical");
+				else	error(linecount,"Duplicate %%lexical", NULL);
 			}
 LLtdecr(24);
 LL_NOSCANDONE(';');
@@ -322,16 +278,16 @@ case /*  C_PREFIX  */ 15 : ;
 LLtincr(24);
 LL_SAFE(C_PREFIX);
 LL_NOSCANDONE(C_IDENT);
-# line 159 "LLgen.g"
+# line 157 "LLgen.g"
 {	if (!prefix) {
 					prefix = store(lextoken.t_string);
 					if (strlen(prefix) > 6) {
 						error(linecount,
-							"%%prefix too long");
+							"%%prefix too long",NULL);
 						prefix[6] = 0;
 					}
 				}
-				else	error(linecount,"Duplicate %%prefix");
+				else	error(linecount,"Duplicate %%prefix", NULL);
 			}
 LLtdecr(24);
 LL_NOSCANDONE(';');
@@ -340,25 +296,25 @@ case /*  C_ONERROR  */ 16 : ;
 LLtincr(24);
 LL_SAFE(C_ONERROR);
 LL_NOSCANDONE(C_IDENT);
-# line 171 "LLgen.g"
+# line 169 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 				if (non_corr) {
-					warning(linecount, "%%onerror conflicts with -n option");
+					warning(linecount, "%%onerror conflicts with -n option", NULL);
 				}
 				else
 #endif
 				  if (! onerror) {
 					onerror = store(lextoken.t_string);
 				}
-				else	error(linecount,"Duplicate %%onerror");
+				else	error(linecount,"Duplicate %%onerror", NULL);
 			}
 LLtdecr(24);
 LL_NOSCANDONE(';');
 break;
 default:
 LL_SSCANDONE(C_ACTION);
-# line 184 "LLgen.g"
+# line 182 "LLgen.g"
 {	acount++; }
 break;
 case /*  C_FIRST  */ 13 : ;
@@ -367,31 +323,23 @@ break;
 }
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL3_listel(
-#if LL_ANSI_C
 void
-#endif
 ) {
 LL_NOSCANDONE(C_IDENT);
-# line 194 "LLgen.g"
+# line 192 "LLgen.g"
 {	p_gram temp = search(TERMINAL,lextoken.t_string,ENTERING);
 				newtorder(g_getcont(temp));
 				tokens[g_getcont(temp)].t_lineno = linecount;
 			}
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL2_rule(
-#if LL_ANSI_C
 void
-#endif
 ) {
-# line 200 "LLgen.g"
+# line 198 "LLgen.g"
 	register p_nont p;
 				p_gram rr;
 				register p_gram temp;
@@ -402,7 +350,7 @@ LLtincr(25);
 LLsincr(1);
 LLtincr(24);
 LL_SAFE(C_IDENT);
-# line 207 "LLgen.g"
+# line 205 "LLgen.g"
 {	temp = search(NONTERM,lextoken.t_string,BOTH);
 				p = &nonterms[g_getcont(temp)];
 				if (p->n_rule) {
@@ -437,11 +385,11 @@ else if (LL_3 & 1) goto L_1;}
 case /*  C_PARAMS  */ 6 : ;
 LLtdecr(6);
 LL_SAFE(C_PARAMS);
-# line 225 "LLgen.g"
+# line 223 "LLgen.g"
 {	if (lextoken.t_num > 0) {
 					p->n_flags |= PARAMS;
 					if (lextoken.t_num > 15) {
-						error(linecount,"Too many parameters");
+						error(linecount,"Too many parameters", NULL);
 					}
 					else	setntparams(p,lextoken.t_num);
 				}
@@ -463,41 +411,34 @@ else if (LL_4 & 1) goto L_2;}
 case /*  C_ACTION  */ 7 : ;
 LLtdecr(7);
 LL_SAFE(C_ACTION);
-# line 234 "LLgen.g"
+# line 232 "LLgen.g"
 {	p->n_flags |= LOCALS; }
 LLread();
 }
 }
 LLtdecr(25);
 LL_SCANDONE(':');
-# line 236 "LLgen.g"
+# line 234 "LLgen.g"
 { 	in_production = 1; }
 LLread();
 LLsdecr(1);
 LL5_productions(
-# line 237 "LLgen.g"
+# line 235 "LLgen.g"
 &rr);
 LLtdecr(24);
 LL_SCANDONE(';');
-# line 238 "LLgen.g"
+# line 236 "LLgen.g"
 {	in_production = 0; }
-# line 243 "LLgen.g"
+# line 241 "LLgen.g"
 {	nonterms[g_getcont(temp)].n_rule = rr;}
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL5_productions(
-#if LL_ANSI_C
-# line 246 "LLgen.g"
+# line 244 "LLgen.g"
 p_gram *p)  
-#else
-# line 246 "LLgen.g"
- p) p_gram *p; 
-#endif
 {
-# line 250 "LLgen.g"
+# line 248 "LLgen.g"
 	p_gram		prod;
 		int		conflres = 0;
 		int		t = 0;
@@ -506,12 +447,12 @@ p_gram *p)
 		int		o_lc, n_lc;
 	
 LLtincr(26);
-# line 257 "LLgen.g"
+# line 255 "LLgen.g"
 {	o_lc = linecount; }
 LL6_simpleproduction(
-# line 258 "LLgen.g"
+# line 256 "LLgen.g"
 p,&conflres);
-# line 259 "LLgen.g"
+# line 257 "LLgen.g"
 {	if (conflres & DEF) haddefault = 1; }
 goto L_2; /* so that the label is used for certain */
 L_2: ;
@@ -523,13 +464,13 @@ LLsdecr(1);
 LLtincr(26);
 for (;;) {
 LL_SAFE('|');
-# line 261 "LLgen.g"
+# line 259 "LLgen.g"
 {	n_lc = linecount; }
 LLread();
 LL6_simpleproduction(
-# line 262 "LLgen.g"
+# line 260 "LLgen.g"
 &prod,&t);
-# line 263 "LLgen.g"
+# line 261 "LLgen.g"
 {	if (n_alts >= max_alts-2) {
 					alt_table = (p_gram ) ralloc(
 						(p_mem) alt_table,
@@ -538,7 +479,7 @@ LL6_simpleproduction(
 				if (t & DEF) {
 					if (haddefault) {
 						error(n_lc,
-		"More than one %%default in alternation");
+		"More than one %%default in alternation", NULL);
 					}
 					haddefault = 1;
 				}
@@ -566,10 +507,10 @@ continue;
 LLtdecr(26);
 break;
 }
-# line 282 "LLgen.g"
+# line 280 "LLgen.g"
 {	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(n_lc,
-		"Resolver on last alternative not allowed");
+		"Resolver on last alternative not allowed", NULL);
 				}
 				mkalt(*p,conflres,n_lc,&alt_table[n_alts++]);
 				altcnt++;
@@ -582,15 +523,15 @@ case /* ']' */ 28 : ;
 goto L_3;
 L_3: ;
 LLtdecr(26);
-# line 292 "LLgen.g"
+# line 290 "LLgen.g"
 {	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(o_lc,
-		"No alternation conflict resolver allowed here");
+		"No alternation conflict resolver allowed here", NULL);
 				}
 				/*
 				if (conflres & DEF) {
 					error(o_lc,
-		"No %%default allowed here");
+		"No %%default allowed here", NULL);
 				}
 				*/
 			}
@@ -598,14 +539,14 @@ break;
 default: if (LLskip()) goto L_2;
 goto L_3;
 }
-# line 304 "LLgen.g"
+# line 302 "LLgen.g"
 {	n_alts -= altcnt; }
 }
-# line 306 "LLgen.g"
+# line 304 "LLgen.g"
 
 
-STATIC
-mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
+STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
+{
 	/*
 	 * Create an alternation and initialise it.
 	 */
@@ -627,19 +568,12 @@ mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
 	nalts++;
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL6_simpleproduction(
-#if LL_ANSI_C
-# line 332 "LLgen.g"
+# line 330 "LLgen.g"
 p_gram *p ,register int *conflres)  
-#else
-# line 332 "LLgen.g"
- p,conflres) p_gram *p; register int *conflres; 
-#endif
 {
-# line 333 "LLgen.g"
+# line 331 "LLgen.g"
 	t_gram		elem;
 		int		elmcnt = 0;
 		int		cnt, kind;
@@ -675,7 +609,7 @@ else if (LL_6 & 1) goto L_1;}
 case /*  C_DEFAULT  */ 19 : ;
 LLtdecr(19);
 LL_SAFE(C_DEFAULT);
-# line 338 "LLgen.g"
+# line 336 "LLgen.g"
 {	*conflres |= DEF; }
 LLread();
 }
@@ -708,17 +642,17 @@ switch(LLcsymb) {
 case /*  C_IF  */ 10 : ;
 LL_SAFE(C_IF);
 LL_NOSCANDONE(C_EXPR);
-# line 344 "LLgen.g"
+# line 342 "LLgen.g"
 {	*conflres |= COND; }
 break;
 default:
 LL_SAFE(C_PREFER);
-# line 345 "LLgen.g"
+# line 343 "LLgen.g"
 {	*conflres |= PREFERING; }
 break;
 case /*  C_AVOID  */ 17 : ;
 LL_SAFE(C_AVOID);
-# line 346 "LLgen.g"
+# line 344 "LLgen.g"
 {	*conflres |= AVOIDING; }
 break;
 }
@@ -747,7 +681,7 @@ else if (LL_8 & 1) goto L_6;}
 case /*  C_ILLEGAL  */ 22 : ;
 LLtdecr(22);
 LL_SAFE(C_ILLEGAL);
-# line 348 "LLgen.g"
+# line 346 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 				if (n_rules >= max_rules-2) {
@@ -759,7 +693,7 @@ LL_SAFE(C_ILLEGAL);
 				rule_table[n_rules++] =
 				    *search(TERMINAL, "LLILLEGAL", BOTH);
 				if (*conflres & DEF) {
-					error(linecount, "%%illegal not allowed in %%default rule");
+					error(linecount, "%%illegal not allowed in %%default rule", NULL);
 				}
 #endif
 			}
@@ -790,9 +724,9 @@ case /* '*' */ 30 : ;
 case /* '+' */ 31 : ;
 LLsincr(4);
 LL7_elem(
-# line 364 "LLgen.g"
+# line 362 "LLgen.g"
 &elem);
-# line 365 "LLgen.g"
+# line 363 "LLgen.g"
 {	if (n_rules >= max_rules-2) {
 					rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
@@ -810,9 +744,9 @@ case /* '*' */ 30 : ;
 case /* '+' */ 31 : ;
 LLsdecr(4);
 LL8_repeats(
-# line 373 "LLgen.g"
+# line 371 "LLgen.g"
 &kind, &cnt);
-# line 374 "LLgen.g"
+# line 372 "LLgen.g"
 {	if (g_gettype(&elem) != TERM) {
 					rule_table[n_rules] = elem;
 					g_settype((&rule_table[n_rules+1]),EORULE);
@@ -835,7 +769,7 @@ case /* ']' */ 28 : ;
 goto L_10;
 L_10: ;
 LLsdecr(4);
-# line 384 "LLgen.g"
+# line 382 "LLgen.g"
 { if (g_gettype(&elem) == TERM) {
 				register p_term q = g_getterm(&elem);
 
@@ -867,7 +801,7 @@ break;
 default: if (LLskip()) goto L_9;
 goto L_10;
 }
-# line 411 "LLgen.g"
+# line 409 "LLgen.g"
 {	if (!termdeleted && g_gettype(&elem) == TERM) {
 					register p_term q;
 
@@ -877,7 +811,7 @@ goto L_10;
 					if ((q->t_flags & RESOLVER) &&
 					    (kind == PLUS || kind == FIXED)) {
 						error(linecount,
-		"%%while not allowed in this term");
+		"%%while not allowed in this term", NULL);
 					}
 					/*
 					 * A persistent fixed term is the same
@@ -886,7 +820,7 @@ goto L_10;
 					if ((q->t_flags & PERSISTENT) &&
 					    kind == FIXED) {
 						error(linecount,
-							"Illegal %%persistent");
+							"Illegal %%persistent", NULL);
 					}
 					*/
 				}
@@ -900,7 +834,7 @@ continue;
 LLsdecr(3);
 break;
 }
-# line 437 "LLgen.g"
+# line 435 "LLgen.g"
 {	register p_term q;
 
 				g_settype((&rule_table[n_rules]),EORULE);
@@ -918,11 +852,11 @@ break;
 						elmcnt+1);
 			}
 }
-# line 454 "LLgen.g"
+# line 452 "LLgen.g"
 
 
-STATIC
-mkterm(prod,flags,lc,result) p_gram prod; register p_gram result; {
+STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
+{
 	/*
 	 * Create a term, initialise it and return
 	 * a grammar element containing it
@@ -944,19 +878,12 @@ mkterm(prod,flags,lc,result) p_gram prod; register p_gram result; {
 	nterms++;
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL7_elem(
-#if LL_ANSI_C
-# line 480 "LLgen.g"
+# line 478 "LLgen.g"
 register p_gram pres)  
-#else
-# line 480 "LLgen.g"
- pres) register p_gram pres; 
-#endif
 {
-# line 481 "LLgen.g"
+# line 479 "LLgen.g"
 	register int	t = 0;
 		p_gram		p1;
 		int		ln;
@@ -972,7 +899,7 @@ LLtincr(12);
 LLsincr(1);
 LLtincr(28);
 LL_SAFE('[');
-# line 489 "LLgen.g"
+# line 487 "LLgen.g"
 {	ln = linecount; }
 LLread();
 goto L_4;
@@ -1003,7 +930,7 @@ case /*  C_WHILE  */ 11 : ;
 LLtdecr(11);
 LL_SAFE(C_WHILE);
 LL_NOSCANDONE(C_EXPR);
-# line 490 "LLgen.g"
+# line 488 "LLgen.g"
 {	t |= RESOLVER; }
 LLread();
 }
@@ -1034,18 +961,18 @@ else if (LL_11 & 1) goto L_5;}
 case /*  C_PERSISTENT  */ 12 : ;
 LLtdecr(12);
 LL_SAFE(C_PERSISTENT);
-# line 492 "LLgen.g"
+# line 490 "LLgen.g"
 {	t |= PERSISTENT; }
 LLread();
 }
 }
 LLsdecr(1);
 LL5_productions(
-# line 494 "LLgen.g"
+# line 492 "LLgen.g"
 &p1);
 LLtdecr(28);
 LL_SCANDONE(']');
-# line 495 "LLgen.g"
+# line 493 "LLgen.g"
 {
 				mkterm(p1,t,ln,pres);
 			}
@@ -1061,7 +988,7 @@ default:
 break;
 case /*  C_ERRONEOUS  */ 21 : ;
 LL_SAFE(C_ERRONEOUS);
-# line 499 "LLgen.g"
+# line 497 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 					erroneous = 1;
@@ -1079,14 +1006,14 @@ L_9: ;
 LLsdecr(5);
 LLtincr(6);
 LL_SSCANDONE(C_IDENT);
-# line 507 "LLgen.g"
+# line 505 "LLgen.g"
 {	pe = search(UNKNOWN,lextoken.t_string,BOTH);
 				*pres = *pe;
 #ifdef NON_CORRECTING
 				if (erroneous) {
 					if (g_gettype(pres) != TERMINAL){
 						warning(linecount,
-							"Erroneous only allowed on terminal");
+							"Erroneous only allowed on terminal", NULL);
 						erroneous = 0;
 					}
 					else
@@ -1122,13 +1049,13 @@ else if (LL_12 & 1) goto L_10;}
 case /*  C_PARAMS  */ 6 : ;
 LLtdecr(6);
 LL_SAFE(C_PARAMS);
-# line 522 "LLgen.g"
+# line 520 "LLgen.g"
 {	if (lextoken.t_num > 15) {
-					error(linecount,"Too many parameters");
+					error(linecount,"Too many parameters", NULL);
 				} else	g_setnpar(pres,lextoken.t_num);
 				if (g_gettype(pres) == TERMINAL) {
 					error(linecount,
-						"Terminal with parameters");
+						"Terminal with parameters", NULL);
 				}
 			}
 LLread();
@@ -1140,7 +1067,7 @@ goto L_9;
 case /*  C_LITERAL  */ 4 : ;
 LLsdecr(5);
 LL_SAFE(C_LITERAL);
-# line 531 "LLgen.g"
+# line 529 "LLgen.g"
 {	pe = search(LITERAL,lextoken.t_string,BOTH);
 				*pres = *pe;
 #ifdef NON_CORRECTING
@@ -1154,7 +1081,7 @@ break;
 break;
 default:
 LLtincr(7);
-# line 539 "LLgen.g"
+# line 537 "LLgen.g"
 {	g_settype(pres,ACTION);
 				pres->g_lineno = linecount;
 #ifdef NON_CORRECTING
@@ -1169,14 +1096,14 @@ case /*  C_SUBSTART  */ 20 : ;
 LLtincr(23);
 LLtincr(24);
 LL_SAFE(C_SUBSTART);
-# line 548 "LLgen.g"
+# line 546 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 				nsubstarts++;
 #endif
 			}
 LL_NOSCANDONE(C_IDENT);
-# line 555 "LLgen.g"
+# line 553 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 				register p_gram temp;
@@ -1205,7 +1132,7 @@ else if (LL_13 & 1) goto L_12;}
 case /* ',' */ 23 : ;
 LL_SAFE(',');
 LL_NOSCANDONE(C_IDENT);
-# line 571 "LLgen.g"
+# line 569 "LLgen.g"
 {
 #ifdef NON_CORRECTING
 				register p_gram temp;
@@ -1249,24 +1176,17 @@ break;
 }
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL8_repeats(
-#if LL_ANSI_C
-# line 602 "LLgen.g"
+# line 600 "LLgen.g"
 int *kind ,int *cnt)  
-#else
-# line 602 "LLgen.g"
- kind,cnt) int *kind; int *cnt; 
-#endif
 {
-# line 602 "LLgen.g"
+# line 600 "LLgen.g"
 	int t1 = 0; 
 switch(LLcsymb) {
 default:
 LL_SAFE('?');
-# line 604 "LLgen.g"
+# line 602 "LLgen.g"
 {	*kind = OPT; }
 LLread();
 break;
@@ -1276,12 +1196,12 @@ LLtincr(3);
 switch(LLcsymb) {
 default:
 LL_SAFE('*');
-# line 605 "LLgen.g"
+# line 603 "LLgen.g"
 {	*kind = STAR; }
 break;
 case /* '+' */ 31 : ;
 LL_SAFE('+');
-# line 606 "LLgen.g"
+# line 604 "LLgen.g"
 {	*kind = PLUS; }
 break;
 }
@@ -1308,12 +1228,12 @@ else if (LL_14 & 1) goto L_7;}
 case /*  C_NUMBER  */ 3 : ;
 LLtdecr(3);
 LL9_number(
-# line 608 "LLgen.g"
+# line 606 "LLgen.g"
 &t1);
 LLread();
 }
 }
-# line 609 "LLgen.g"
+# line 607 "LLgen.g"
 {	if (t1 == 1) {
 					t1 = 0;
 					if (*kind == STAR) *kind = OPT;
@@ -1323,52 +1243,41 @@ LLread();
 break;
 case /*  C_NUMBER  */ 3 : ;
 LL9_number(
-# line 615 "LLgen.g"
+# line 613 "LLgen.g"
 &t1);
 LLread();
 break;
 }
-# line 616 "LLgen.g"
+# line 614 "LLgen.g"
 {	*cnt = t1; }
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL9_number(
-#if LL_ANSI_C
-# line 619 "LLgen.g"
+# line 617 "LLgen.g"
 int *t)  
-#else
-# line 619 "LLgen.g"
- t) int *t; 
-#endif
 {
 LL_SAFE(C_NUMBER);
-# line 621 "LLgen.g"
+# line 619 "LLgen.g"
 {	*t = lextoken.t_num;
 				if (*t <= 0 || *t >= 8192) {
-					error(linecount,"Illegal number");
+					error(linecount,"Illegal number", NULL);
 				}
 			}
 }
 static
-#if LL_ANSI_C
 void
-#endif
 LL4_firsts(
-#if LL_ANSI_C
 void
-#endif
 ) {
-# line 628 "LLgen.g"
+# line 626 "LLgen.g"
 	register string p; 
 LLtincr(23);
 LLtincr(2);
 LLtincr(24);
 LL_SAFE(C_FIRST);
 LL_NOSCANDONE(C_IDENT);
-# line 630 "LLgen.g"
+# line 628 "LLgen.g"
 {	p = store(lextoken.t_string); }
 LLtdecr(23);
 LL_NOSCANDONE(',');
@@ -1376,7 +1285,7 @@ LLtdecr(2);
 LL_NOSCANDONE(C_IDENT);
 LLtdecr(24);
 LL_NOSCANDONE(';');
-# line 632 "LLgen.g"
+# line 630 "LLgen.g"
 {	/*
 				 * Store this %first in the list belonging
 				 * to this input file
@@ -1393,11 +1302,11 @@ LL_NOSCANDONE(';');
 			}
 }
 
-# line 647 "LLgen.g"
+# line 645 "LLgen.g"
 
 
-STATIC p_gram
-copyrule(p,length) register p_gram p; {
+STATIC p_gram copyrule(register p_gram p,int length)
+{
 	/*
 	 * Returns a pointer to a grammar rule that was created in
 	 * p. The space pointed to by p can now be reused

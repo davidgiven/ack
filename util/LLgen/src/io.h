@@ -21,8 +21,6 @@
 /* FILES */
 
 # define OUTFILE	"%s.output"	/* -v option */
-# define PARSERFILE	"xxxXXXXXX"	/* This is what we want */
-# define ACTFILE	"tempXXXXXX"	/* temporary file to save actions */
 # define HFILE		"%spars.h"	/* file for "#define's " */
 # define RFILE		"%spars.c"	/* Error recovery */
 #ifdef NON_CORRECTING

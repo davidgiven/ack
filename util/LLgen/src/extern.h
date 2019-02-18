@@ -2,6 +2,8 @@
  * For full copyright and restrictions on use see the file COPYING in the top
  * level of the LLgen tree.
  */
+#ifndef EXTERN_H_
+#define EXTERN_H_
 
 /*
  *  L L G E N
@@ -84,7 +86,6 @@ extern string	nc_rec_file, nc_incl_file;
 extern int	low_percentage, high_percentage;
 extern int	min_cases_for_jmptable;
 extern int	jmptable_option;
-extern int	ansi_c;
 #ifdef NON_CORRECTING
 extern int	non_corr;
 extern int	subpars_sim;
@@ -92,3 +93,23 @@ extern p_gram	illegal_gram;
 #endif
 extern int	strip_grammar;
 extern int	in_production;
+
+void error(int lineno,string s,string t);
+void warning(int lineno,string s,string t);
+void fatal(int lineno,string s,string t);
+
+
+int empty(register p_gram);
+int t_safety(int, int, int, int);
+int t_after(int, int, int);
+string store(string);
+void name_init(void);
+p_gram search(int, register string, int);
+void co_reach(void);
+void install(string, string);
+void copyfile(string);
+
+
+
+
+#endif /* EXTERN_H_ */
