@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*
 	compile with -DNOFIRST to disable firstset optimization
@@ -12,9 +13,7 @@
 extern int	LLsymb;
 extern int	LLstartsymb;
 
-#if LL_ANSI_C
 void		LLmessage(int);
-#endif
 
 
 struct stacks {
@@ -119,37 +118,21 @@ static struct nonterminal *nonterminals;
 /* These functions must be called instead of the original functions in
  * 'malloc.h'. They offer a checking allocation mechanism.
 */
-#if LL_ANSI_C
 static char *Malloc(unsigned);
 static char *Realloc(char*, unsigned);
 
-#else
-
-static char *Malloc();
-static char *Realloc();
-#endif
 
 
 /* These functions build the grammar */
-#if LL_ANSI_C
 static void init_grammar(void);
 static void build_grammar(void);
 static struct lhs *build_rule(void);
 static struct symbol *build_rhs(struct lhs*);
 static struct symbol *make_link(struct symbol*);
 
-#else
-
-static init_grammar();
-static build_grammar();
-static struct lhs *build_rule();
-static struct symbol *build_rhs();
-static struct symbol *make_link();
-#endif
 
 
 /* These functions operate on the stacks */
-#if LL_ANSI_C
 static int optimize(struct stacks*, struct symbol*, int);
 static void read_token(void);
 static void start_stack(struct stacks*, int, int);
@@ -179,43 +162,9 @@ static void calculate(struct stacks*, int);
 static void kill_stack(struct stacks *stack);
 void LLnc_recover(void);
 
-#else
-
-static int optimize();
-static read_token();
-static start_stack();
-static continuation();
-static struct stack_elt *push_rule();
-static new_head();
-static to_delete();
-static substitute();
-static int join();
-static int path();
-static int part_of_loop();
-static generate_heads();
-static delete();
-static hyp_run();
-static check_run();
-static struct stack_elt *split();
-static test();
-static dump_stack();
-static clear_flags();
-static clear_gen_flags();
-static match_heads();
-static cleanup();
-static initialize();
-static calculate();
-static kill_stack();
-LLnc_recover();
-#endif
 
 
-#if LL_ANSI_C
 static char *Malloc(unsigned size)
-#else
-static char *Malloc(size)
-unsigned size;
-#endif
 {
 	char *p;
 
@@ -227,13 +176,7 @@ unsigned size;
 }
 
 
-#if LL_ANSI_C
 static char *Realloc(char *ptr, unsigned size)
-#else
-static char *Realloc(ptr, size)
-char *ptr;
-unsigned size;
-#endif
 {
 	char *p;
 
@@ -245,11 +188,7 @@ unsigned size;
 }
 
 
-#if LL_ANSI_C
 static void init_grammar(void)
-#else
-static init_grammar()
-#endif
 {
 /* Allocate and initialize an array for terminals and nonterminals */
 
@@ -270,11 +209,7 @@ static init_grammar()
 }
 
 
-#if LL_ANSI_C
 static void build_grammar(void)
-#else
-static build_grammar()
-#endif
 {
 /* Build a rule for every nonterminal. The LHS must be saved first because
  * of the fact that the right side of an assignment statement (in C) will
@@ -290,11 +225,7 @@ static build_grammar()
 }
 
 
-#if LL_ANSI_C
 static struct lhs *build_rule(void)
-#else
-static struct lhs *build_rule()
-#endif
 {
 /* Build LHS and call a funcion to create RHS */
 
@@ -322,12 +253,7 @@ static struct lhs *build_rule()
 }
 
 
-#if LL_ANSI_C
 static struct symbol *build_rhs(struct lhs *l)
-#else
-static struct symbol *build_rhs(l)
-struct lhs *l;
-#endif
 {
 /* Build RHS by creating structs for all symbols including ALT and
  * EORULE. Also call a function for linking same terminals and
@@ -371,12 +297,7 @@ struct lhs *l;
 }
 
 
-#if LL_ANSI_C
 static struct symbol *make_link(struct symbol *r)
-#else
-static struct symbol *make_link(r)
-struct symbol *r;
-#endif
 {
 /* Link same terminals and nonterminals. Every new symbol is appended
  * in front of the corresponding list for efficiency.
@@ -400,15 +321,7 @@ struct symbol *r;
 /*****************************************************************************/
 
 
-#if LL_ANSI_C
 static int optimize(struct stacks* stack, struct symbol *symb_ptr, int l_ahead)
-#else
-static int optimize(stack, symb_ptr, l_ahead)
-struct stacks *stack;
-struct symbol *symb_ptr;
-int l_ahead;
-#endif
-
 /* Return 1 if rule symb_ptr can start with terminal l_ahead, else return 0.
  * The array with expected terminals will also be filled in.
  */
@@ -463,12 +376,7 @@ int l_ahead;
 }
 
 
-#if LL_ANSI_C
 static void read_token(void)
-#else
-static read_token()
-#endif
-
 /* Read token and put it in global variable LLsymb, skipping
  * invalid tokens
  */
@@ -482,16 +390,8 @@ static read_token()
 }
 
 
-#if LL_ANSI_C
 static void start_stack(struct stacks *stack, int base, int l_ahead)
-#else
-static start_stack(stack, base, l_ahead)
-struct stacks *stack;
-int base, l_ahead;
-#endif
-
 /* Start stack on base symbol base with lookahead l_ahead */
-
 {
 	struct stack_elt *bottom, *top;
 	struct symbol *symb_ptr;
@@ -587,14 +487,7 @@ int base, l_ahead;
 }
 
 
-#if LL_ANSI_C
 static void continuation(struct stacks *stack, int nt, int l_ahead)
-#else
-static continuation(stack, nt, l_ahead)
-struct stacks *stack;
-int nt, l_ahead;
-#endif
-
 /* We have 'eaten' a whole stack, and think we recognized nt. Now
 look for rules that we can proceed with, ie containing nt in the RHS.
 Each rule found will be developed untill a terminal is at the top
@@ -680,15 +573,8 @@ of the stack.*/
 }
 
 
-#if LL_ANSI_C
 static struct stack_elt *push_rule(struct stack_elt *element,
 					struct symbol *symb_ptr)
-#else
-static struct stack_elt *push_rule(element, symb_ptr)
-struct stack_elt *element;
-struct symbol *symb_ptr;
-#endif
-
 /* Append the rule symb_ptr to stack element 'element'. Return a
  * pointer to the new top of the stack
  */
@@ -735,14 +621,7 @@ struct symbol *symb_ptr;
 }
 
 
-#if LL_ANSI_C
 static void new_head(struct stacks *stack, struct stack_elt *ptr)
-#else
-static new_head(stack, ptr)
-struct stacks *stack;
-struct stack_elt *ptr;
-#endif
-
 /* Make ptr a head of stack */
 {
 
@@ -773,14 +652,7 @@ struct stack_elt *ptr;
 }
 
 
-#if LL_ANSI_C
 static void to_delete(struct stacks *stack, struct stack_elt *ptr)
-#else
-static to_delete(stack, ptr)
-struct stacks *stack;
-struct stack_elt *ptr;
-#endif
-
 /* Remember that ptr has to be deleted */
 {
 
@@ -814,15 +686,7 @@ struct stack_elt *ptr;
 }
 
 
-#if LL_ANSI_C
 static void substitute(struct stacks *stack, struct stack_elt *top, int l_ahead)
-#else
-static substitute(stack, top, l_ahead)
-struct stacks *stack;
-struct stack_elt *top;
-int l_ahead;
-#endif
-
 /* This function substitutes the NT pointed to by 'top'. 'top' should be a top
  * of a stack
  */
@@ -900,15 +764,7 @@ int l_ahead;
 }
 
 
-#if LL_ANSI_C
 static int join(struct stacks *stack, struct stack_elt *top, int l_ahead)
-#else
-static int join(stack, top, l_ahead)
-struct stacks *stack;
-struct stack_elt *top;
-int l_ahead;
-#endif
-
 /* This function tries to connect a NT on top of a stack with another stack,
  * which has already substituted this NT
  */
@@ -977,13 +833,7 @@ int l_ahead;
 
 #ifndef NOLOOPS
 
-#if LL_ANSI_C
 static int path(struct stack_elt *se1, struct stack_elt *se2)
-#else
-static int path(se1, se2)
-struct stack_elt *se1, *se2;
-#endif /* LL_ANSI_C */
-
 /* If there is a path from se1 to se2 it returns 1 and marks all the paths
  * betweeen these two points, otherwise it returns 0. The flags LLYES and
  * LLNO are used for optimization. */
@@ -1014,13 +864,7 @@ struct stack_elt *se1, *se2;
 }
 
 
-#if LL_ANSI_C
 static int part_of_loop(struct stack_elt *se)
-#else
-static int part_of_loop(se)
-struct stack_elt *se;
-#endif /* LL_ANSI_C */
-
 /* Checks if 'se' belongs to a loop */
 {
 	int i;
@@ -1034,16 +878,8 @@ struct stack_elt *se;
 #endif /* NOLOOPS */
 
 
-#if LL_ANSI_C
 static void generate_heads(struct stacks *stack, struct stack_elt *se,
 				int l_ahead)
-#else
-static generate_heads(stack, se, l_ahead)
-struct stacks *stack;
-struct stack_elt *se;
-int l_ahead;
-#endif
-
 /* This funcion finds all heads starting at 'se'. */
 {
 	int i;
@@ -1104,14 +940,7 @@ int l_ahead;
 }
 
 
-#if LL_ANSI_C
 static void delete(struct stacks *stack, struct stack_elt *se)
-#else
-static delete(stack, se)
-struct stacks *stack;
-struct stack_elt *se;
-#endif
-
 /* This function runs down the stack(s) deleting every element which cannot be
  * reached anymore. */
 {
@@ -1172,13 +1001,7 @@ struct stack_elt *se;
 
 #ifndef NOLOOPS
 
-#if LL_ANSI_C
 static void hyp_run(struct stack_elt *se)
-#else
-static hyp_run(se)
-struct stack_elt *se;
-#endif /* LL_ANSI_C */
-
 /* This function sets the 'hyp_ref_counts' of all elements of the loop that
  * 'se' belongs to to the value that 'ref_count' will get when 'se' is
  * deleted
@@ -1212,14 +1035,7 @@ struct stack_elt *se;
 }
 
 
-#if LL_ANSI_C
 static void check_run(struct stacks *stack, struct stack_elt *se)
-#else
-static check_run(stack, se)
-struct stacks *stack;
-struct stack_elt *se;
-#endif /* LL_ANSI_C */
-
 /* This function checks all 'hyp_ref_counts' that 'hyp_run()' has set.
  * If one of them is not 0, 'check_run_ok' will be set to 0 indicating
  * that 'se' cannot be deleted. 'check_run()' also resets all 'hyp_ref_counts'
@@ -1244,13 +1060,7 @@ struct stack_elt *se;
 #endif /* NOLOOPS */
 
 
-#if LL_ANSI_C
 static struct stack_elt *split(struct stack_elt *se)
-#else
-static struct stack_elt *split(se)
-struct stack_elt *se;
-#endif
-
 /* This function splits of a NT in de stack, and returns a pointer to it */
 {
 	struct stack_elt *new_stack;
@@ -1296,12 +1106,7 @@ struct stack_elt *se;
 
 
 #ifdef DEBUG
-#if LL_ANSI_C
 static void test(struct stacks *stack)
-#else
-static test(stack)
-struct stacks *stack;
-#endif
 {
 	struct stack_elt *se;
 	int i;
@@ -1320,13 +1125,7 @@ struct stacks *stack;
 }
 
 
-#if LL_ANSI_C
 static void dump_stack(struct stack_elt *se, int level)
-#else
-static dump_stack(se, level)
-struct stack_elt *se;
-int level;
-#endif
 {
 	int i, j;
 
@@ -1385,14 +1184,7 @@ int level;
 #endif
 
 
-#if LL_ANSI_C
 static void clear_flags(struct stack_elt *se, char flag)
-#else
-static clear_flags(se, flag)
-struct stack_elt *se;
-char flag;
-#endif
-
 /* Clears edge flag 'flag' */
 {
 	int i;
@@ -1405,13 +1197,7 @@ char flag;
 	}
 }
 
-#if LL_ANSI_C
 static void clear_gen_flags(struct stacks *stack)
-#else
-static clear_gen_flags(stack)
-struct stacks *stack;
-#endif
-
 {
 	int i;
 
@@ -1423,14 +1209,7 @@ struct stacks *stack;
 }
 
 
-#if LL_ANSI_C
 static void match_heads(struct stacks *stack, int symb)
-#else
-static match_heads(stack, symb)
-struct stacks *stack;
-int symb;
-#endif
-
 /* Match heads_buf against symb, leaving only matching heads,
  * whilst deallocating the non-matching stacks
  */
@@ -1482,13 +1261,7 @@ int symb;
 }
 
 
-#if LL_ANSI_C
 static void cleanup(struct stacks *stack)
-#else
-static cleanup(stack)
-struct stacks *stack;
-#endif
-
 /* Deletes all elements in 'cleanup_buf()' */
 {
 	int i;
@@ -1502,13 +1275,7 @@ struct stacks *stack;
 }
 
 
-#if LL_ANSI_C
 static void initialize(struct stacks *stack)
-#else
-static initialize(stack)
-struct stacks *stack;
-#endif
-
 /* Initializes some variables and arrays */
 {
 	int j;
@@ -1541,14 +1308,7 @@ struct stacks *stack;
 }
 
 
-#if LL_ANSI_C
 static void calculate(struct stacks *stack, int l_ahead)
-#else
-static calculate(stack, l_ahead)
-struct stacks *stack;
-int l_ahead;
-#endif
-
 /* This function finds all new heads and deletes the old heads */
 {
 	int i;
@@ -1592,12 +1352,7 @@ int l_ahead;
 	}
 }
 
-#if LL_ANSI_C
 static void kill_stack(struct stacks *stack)
-#else
-static kill_stack(stack)
-struct stacks *stack;
-#endif
 {
 	int i;
 
@@ -1609,12 +1364,7 @@ struct stacks *stack;
 
 
 
-#if LL_ANSI_C
 void LLnc_recover(void)
-#else
-LLnc_recover()
-#endif
-
 /* This function contains the main loop for non correcting syntax error
  * recovery
  */
