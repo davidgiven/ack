@@ -4,6 +4,7 @@
  */
 
 #include "bem.h"
+#include "system.h"
 
 #ifndef NORSCID
 static char rcs_id[] = "$Id$" ;
@@ -59,7 +60,7 @@ List	*datalist=0;
 datastmt()
 {
 	List *l,*l1;
-	extern long sys_filesize();
+
 
 	/* NOSTRICT */ l= (List *) salloc(sizeof(List));
 	l->linenr= currline->linenr;
