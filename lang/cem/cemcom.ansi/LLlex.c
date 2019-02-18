@@ -17,6 +17,8 @@
 #include "Lpars.h"
 #include "class.h"
 #include "sizes.h"
+#include "error.h"
+#include "domacro.h"
 #include "specials.h" /* registration of special identifiers */
 
 /* Data about the token yielded */
@@ -41,7 +43,16 @@ extern arith full_mask[];
 extern int lint_skip_comment;
 #endif
 
-int LLlex()
+
+/* Internal function declarations */
+static arith char_constant(char*);
+static char* string_token(char *, int , int *);
+static int quoted(register int);
+static int hex_val(register int);
+static void strflt2tok(char [], struct token *);
+static void strint2tok(char [], struct token *);
+
+int LLlex(void)
 {
 	/*	LLlex() plays the role of Lexical Analyzer for the C parser.
 	    The look-ahead and putting aside of tokens are taken into
@@ -72,10 +83,8 @@ int LLlex()
 	return DOT;
 }
 
-char* string_token();
-arith char_constant();
 
-int GetToken(ptok) register struct token* ptok;
+int GetToken(register struct token* ptok)
 {
 	/*	GetToken() is the actual token recognizer. It calls the
 	    control line interpreter if it encounters a "\n{w}*#"
@@ -379,7 +388,7 @@ go_on: /* rescan, the following character has been read	*/
 	/*NOTREACHED*/
 }
 
-arith char_constant(nm) char* nm;
+static arith char_constant(char* nm)
 {
 	register arith val = 0;
 	register int ch;
@@ -413,8 +422,7 @@ arith char_constant(nm) char* nm;
 	return val;
 }
 
-char* string_token(nm, stop_char, plen) char* nm;
-int* plen;
+static char* string_token(char *nm, int stop_char, int *plen)
 {
 	register int ch;
 	register int str_size;
@@ -447,7 +455,7 @@ int* plen;
 	return str;
 }
 
-int quoted(ch) register int ch;
+static int quoted(register int ch)
 {
 	/*	quoted() replaces an escaped character sequence by the
 	    character meant.
@@ -510,12 +518,12 @@ int quoted(ch) register int ch;
 	return ch & 0377;
 }
 
-int hex_val(ch) register int ch;
+static int hex_val(register int ch)
 {
 	return is_dig(ch) ? ch - '0' : is_hex(ch) ? (ch - 'a' + 10) & 017 : -1;
 }
 
-int GetChar()
+int GetChar(void)
 {
 	/*	The routines GetChar and trigraph parses the trigraph
 	    sequences and removes occurences of \\\n.
@@ -529,8 +537,7 @@ int GetChar()
 /* strflt2tok only checks the syntax of the floating-point number and
  * selects the right type for the number.
  */
-strflt2tok(fltbuf, ptok) char fltbuf[];
-struct token* ptok;
+static void strflt2tok(char fltbuf[], struct token* ptok)
 {
 	register char* cp = fltbuf;
 	int malformed = 0;
@@ -584,8 +591,7 @@ struct token* ptok;
 	}
 }
 
-strint2tok(intbuf, ptok) char intbuf[];
-struct token* ptok;
+static void strint2tok(char intbuf[], struct token* ptok)
 {
 	register char* cp = intbuf;
 	int base = 10;

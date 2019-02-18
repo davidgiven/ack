@@ -23,8 +23,11 @@
 #include	"align.h"
 #include	"Lpars.h"
 #include	"field.h"
+#include    "util.h"
+#include    "conversion.h"
+#include    "eval.h"
 
-arith NewLocal();		/* util.c	*/
+
 extern arith full_mask[];	/* cstoper.c	*/
 
 /*	Eval_field() evaluates expressions involving bit fields.
@@ -39,9 +42,9 @@ extern arith full_mask[];	/* cstoper.c	*/
 	[3]	atype: the type in which the bitfield arithmetic is done;
 		and in which bitfields are stored!
 */
-eval_field(expr, code)
-	struct expr *expr;
-	int code;
+void eval_field(
+	struct expr *expr,
+	int code)
 {
 	int op = expr->OP_OPER;
 	register struct expr *leftop = expr->OP_LEFT;
@@ -126,12 +129,12 @@ eval_field(expr, code)
 	}
 }
 
-store_field(fd, uns, code, leftop, tmpvar)
-	register struct field *fd;
-	int uns;
-	int code;
-	register struct expr *leftop;
-	arith tmpvar;
+void store_field(
+	register struct field *fd,
+	int uns,
+	int code,
+	register struct expr *leftop,
+	arith tmpvar)
 {
 	C_loc(fd->fd_mask);
 	C_and(word_size);

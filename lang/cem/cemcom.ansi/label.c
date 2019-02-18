@@ -14,11 +14,12 @@
 #include	"def.h"
 #include	"type.h"
 #include	"stack.h"
+#include    "error.h"
+
 
 extern char options[];
 
-enter_label(idf, defining)
-	register struct idf *idf;
+void enter_label(register struct idf *idf, int defining)
 {
 	/*	The identifier idf is entered as a label. If it is new,
 		it is entered into the idf list with the largest possible
@@ -45,8 +46,7 @@ enter_label(idf, defining)
 		def->df_initialized = 1;
 }
 
-unstack_label(idf)
-	register struct idf *idf;
+void unstack_label(register struct idf *idf)
 {
 	/*	The scope in which the label idf occurred is left.
 	*/

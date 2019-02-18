@@ -2,6 +2,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+ #ifndef DECLAR_H_
+ #define DECLAR_H_
+ 
 /* $Id$ */
 /* DEFINITION OF DECLARATOR DESCRIPTORS */
 
@@ -39,3 +42,5 @@ struct decl_unary	{
 
 extern struct type *declare_type();
 extern struct declarator null_declarator;
+
+#endif

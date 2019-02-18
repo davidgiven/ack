@@ -6,37 +6,43 @@
 /* PREPROCESSOR: PRAGMA INTERPRETER */
 
 #include	"parameters.h"
+#include    "pragma.h"
+#include    "skip.h"
 
 #define P_UNKNOWN	0
 #define NR_PRAGMAS	0
 
-struct pkey {
+struct pkey
+{
 	char *pk_name;
 	int pk_key;
-} pragmas[NR_PRAGMAS + 1] = {
-	{0,		P_UNKNOWN}
-};
+} pragmas[NR_PRAGMAS + 1] =
+{
+{ 0, P_UNKNOWN } };
 
 extern struct idf *GetIdentifier();
 
-do_pragma()
+void do_pragma(void)
 {
 #if	NR_PRAGMAS
 	register struct pkey *pkp = &pragmas[0];
 #endif
 	register struct idf *id = GetIdentifier(1);
 
-	if (id != (struct idf *)0) {
+	if (id != (struct idf *) 0)
+	{
 #if	NR_PRAGMAS
-		while(pkp->pk_name) {
+		while(pkp->pk_name)
+		{
 			if (strcmp(pkp->pk_name, id->id_text) == 0)
-				break;
+			break;
 			pkp++;
 		}
 
-		switch (pkp->pk_key) {
-		case P_UNKNOWN:
-		default:
+		switch (pkp->pk_key)
+		{
+			case P_UNKNOWN:
+			default:
 			break;
 		}
 #endif

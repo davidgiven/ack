@@ -6,6 +6,7 @@
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 
 #include	<assert.h>
+#include    "cstoper.h"
 #include    "parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -14,6 +15,7 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"Lpars.h"
+#include    "error.h"
 
 /* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
 arith full_mask[MAXSIZE + 1];
@@ -23,8 +25,7 @@ arith max_unsigned;	/* maximum unsigned on target machine	*/
 #endif /* NOCROSS */
 extern int ResultKnown;
 
-cstbin(expp, oper, expr)
-	register struct expr **expp, *expr;
+void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in
@@ -134,8 +135,7 @@ cstbin(expp, oper, expr)
 	free_expression(expr);
 }
 
-cut_size(expr)
-	register struct expr *expr;
+void cut_size(register struct expr *expr)
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
@@ -170,7 +170,7 @@ cut_size(expr)
 	expr->VL_VALUE = o1;
 }
 
-init_cst()
+void init_cst(void)
 {
 	register int i = 0;
 	register arith bt = (arith)0;

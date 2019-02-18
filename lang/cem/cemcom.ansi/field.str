@@ -2,6 +2,11 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef FIELD_H_
+#define FIELD_H_
+
+#include "arith.h"
+
 /* $Id$ */
 /* FIELD DESCRIPTOR */
 
@@ -13,3 +18,20 @@ struct field	{	/* for field specifiers	*/
 };
 
 /* ALLOCDEF "field" 10 */
+
+#ifndef	LINT
+
+
+#ifndef NOBITFIELD
+
+struct expr;
+
+void store_field(register struct field *fd, int uns, int code,
+		register struct expr *leftop, arith tmpvar);
+void eval_field(struct expr *expr, int code);
+
+#endif /* NOBITFIELD */
+
+#endif	/* LINT */
+
+#endif /* FIELD_H_ */

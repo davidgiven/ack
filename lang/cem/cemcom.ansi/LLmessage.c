@@ -10,21 +10,28 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
+#include    "error.h"
 
 extern char *symbol2str();
 
-LLmessage(tk)	{
+static void insert_token(int );
+
+void LLmessage(int tk)
+{
 	err_occurred = 1;
-	if (tk < 0)	{
+	if (tk < 0)
+	{
 		error("end of file expected");
 	}
-	else if (tk)	{
+	else if (tk)
+	{
 #ifndef LLNONCORR
 		error("%s missing before %s", symbol2str(tk), symbol2str(DOT));
 #endif
 		insert_token(tk);
 	}
-	else	{
+	else
+	{
 #ifndef LLNONCORR
 		error("%s deleted", symbol2str(DOT));
 #else
@@ -34,14 +41,14 @@ LLmessage(tk)	{
 	tk_nmb_at_last_syn_err = token_nmb;
 }
 
-insert_token(tk)
-	int tk;
+static void insert_token(int tk)
 {
 	aside = dot;
 
 	DOT = tk;
 
-	switch (tk)	{
+	switch (tk)
+	{
 	/* The operands need some body */
 	case IDENTIFIER:
 		dot.tk_idf = gen_idf();

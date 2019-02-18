@@ -23,13 +23,16 @@
 #include	"expr.h"
 #include	"type.h"
 #include	"sizes.h"
+#include    "switch.h"
+#include    "eval.h"
+#include    "ch3.h"
+#include    "error.h"
 
 extern char options[];
 
 int	density = DENSITY;
 
-compact(nr, low, up)
-	arith low, up;
+static int compact(int nr, arith low, arith up)
 {
 	/*	Careful! up - low might not fit in an arith. And then,
 		the test "up-low < 0" might also not work to detect this
@@ -49,8 +52,7 @@ static struct switch_hdr *switch_stack = 0;
 	For simplicity, we suppose int_size == word_size.
 */
 
-code_startswitch(expp)
-	struct expr **expp;
+void code_startswitch(struct expr **expp)
 {
 	/*	Check the expression, stack a new case header and
 		fill in the necessary fields.
@@ -85,7 +87,7 @@ code_startswitch(expp)
 	C_bra(l_table);			/* goto start of switch_table	*/
 }
 
-code_endswitch()
+void code_endswitch(void)
 {
 	register struct switch_hdr *sh = switch_stack;
 	register label tablabel;
@@ -158,9 +160,7 @@ code_endswitch()
 	unstack_stmt();
 }
 
-void
-code_case(expr)
-	struct expr *expr;
+void code_case(struct expr *expr)
 {
 	register arith val;
 	register struct case_entry *ce;
@@ -227,8 +227,7 @@ code_case(expr)
 	}
 }
 
-void
-code_default()
+void code_default(void)
 {
 	register struct switch_hdr *sh = switch_stack;
 

@@ -9,6 +9,7 @@
 #include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
+#include    "ch3.h"
 #include    "idf.h"
 #include	"proto.h"
 #include	"type.h"
@@ -17,23 +18,22 @@
 #include	"expr.h"
 #include	"def.h"
 #include	"Lpars.h"
+#include    "error.h"
+#include    "ch3bin.h"
 #include	"file_info.h"
 
 extern char options[];
 extern char *symbol2str();
 extern struct type *qualifier_type();
 
-void ch3cast();
+
 
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer
 	gets updated in the process.
 */
 
-void
-ch3sel(expp, oper, idf)
-	struct expr **expp;
-	struct idf *idf;
+void ch3sel(struct expr **expp, int oper, struct idf *idf)
 {
 	/*	The selector idf is applied to *expp; oper may be '.' or
 		ARROW.
@@ -163,8 +163,7 @@ ch3sel(expp, oper, idf)
 	*expp = exp;
 }
 
-ch3incr(expp, oper)
-	struct expr **expp;
+void ch3incr(struct expr **expp, int oper)
 {
 	/*	The monadic prefix/postfix incr/decr operator oper is
 		applied to *expp.
@@ -172,10 +171,7 @@ ch3incr(expp, oper)
 	ch3asgn(expp, oper, intexpr((arith)1, INT));
 }
 
-void
-ch3cast(expp, oper, tp)
-	register struct expr **expp;
-	register struct type *tp;
+void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 {
 	/*	The expression *expp is cast to type tp; the cast is
 		caused by the operator oper.  If the cast has
@@ -412,9 +408,7 @@ ch3cast(expp, oper, tp)
 
 /*	Determine whether two types are equal.
 */
-equal_type(tp, otp, qual_lev, diag)
-	register struct type *tp, *otp;
-	int qual_lev, diag;
+int equal_type(register struct type *tp,register struct type *otp, int qual_lev, int diag)
 {
 	 if (tp == otp)
 		return 1;
@@ -475,8 +469,7 @@ equal_type(tp, otp, qual_lev, diag)
 	}
 }
 
-check_pseudoproto(pl, opl, diag)
-	register struct proto *pl, *opl;
+int check_pseudoproto(register struct proto *pl,register struct proto *opl, int diag)
 {
 	int retval = 1;
 
@@ -519,9 +512,7 @@ check_pseudoproto(pl, opl, diag)
 	return retval;
 }
 
-legal_mixture(tp, otp, diag)
-	struct type *tp, *otp;
-	int diag;
+int legal_mixture(struct type *tp, struct type *otp, int diag)
 {
 	struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
 	int retval = 1;
@@ -562,9 +553,7 @@ legal_mixture(tp, otp, diag)
 	return retval;
 }
 
-equal_proto(pl, opl, diag)
-	register struct proto *pl, *opl;
-	int diag;
+int equal_proto(register struct proto *pl, register struct proto *opl, int diag)
 {
 	if (pl == opl)
 		return 1;
@@ -586,9 +575,7 @@ equal_proto(pl, opl, diag)
 }
 
 /* check if a type has a consqualified member */
-recurqual(tp, qual)
-struct type *tp;
-int qual;
+int recurqual(struct type *tp, int qual)
 {
 	register struct sdef *sdf;
 
@@ -610,9 +597,7 @@ int qual;
 	return 0;
 }
 
-ch3asgn(expp, oper, expr)
-	struct expr **expp;
-	struct expr *expr;
+void ch3asgn(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	The assignment operators.
 		"f op= e" should be interpreted as
@@ -687,9 +672,7 @@ ch3asgn(expp, oper, expr)
 
 /*	Some interesting (?) questions answered.
 */
-int
-is_integral_type(tp)
-	register struct type *tp;
+int is_integral_type(register struct type *tp)
 {
 	switch (tp->tp_fund)	{
 	case CHAR:
@@ -707,9 +690,7 @@ is_integral_type(tp)
 	}
 }
 
-int
-is_arith_type(tp)
-	register struct type *tp;
+int is_arith_type(register struct type *tp)
 {
 	switch (tp->tp_fund)	{
 	case CHAR:

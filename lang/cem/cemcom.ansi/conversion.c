@@ -8,11 +8,15 @@
 #include	"parameters.h"
 #ifndef	LINT
 
+#include    "conversion.h"
 #include	<em.h>
+#include    "interface.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"sizes.h"
 #include	"Lpars.h"
+#include    "error.h"
+
 
 #define	T_SIGNED		1
 #define	T_UNSIGNED		2
@@ -27,10 +31,9 @@
 		C??
 */
 
-static int convtype();
+static int convtype(register struct type *);
 
-conversion(from_type, to_type)
-	register struct type *from_type, *to_type;
+void conversion(register struct type *from_type, register struct type *to_type)
 {
 	register arith from_size = from_type->tp_size;
 	register arith to_size = to_type->tp_size;
@@ -126,9 +129,7 @@ conversion(from_type, to_type)
 /*	convtype() returns in which category a given type falls:
 	signed, unsigned or floating
 */
-static int
-convtype(tp)
-	register struct type *tp;
+static int convtype(register struct type *tp)
 {
 	switch (tp->tp_fund)	{
 	case CHAR:

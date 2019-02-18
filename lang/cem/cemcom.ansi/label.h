@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 /*		L A B E L   D E F I N I T I O N				*/
+#ifndef LABEL_H_
+#define LABEL_H_
 
 #include <em_label.h>		/* obtain definition of "label" */
 
@@ -26,3 +28,10 @@ extern label datlab_count;
 		not be there, and if it is there, it may be from a
 		declaration or another application.
 	*/
+
+struct idf;
+
+void enter_label(register struct idf *idf, int defining);
+void unstack_label(register struct idf *idf);
+
+#endif /* LABEL_H_ */

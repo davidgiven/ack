@@ -1,3 +1,8 @@
+#ifndef UTIL_H_
+#define UTIL_H_
+
+#include "arith.h"
+
 struct localvar {
 	struct localvar	*next;
 	arith		t_offset;	/* offset from LocalBase */
@@ -9,3 +14,18 @@ struct localvar {
 };
 
 /* ALLOCDEF "localvar" 10 */
+
+void LocalInit(void);
+arith LocalSpace(arith sz, int al);
+arith NewLocal(arith sz, int al, int regtype, int sc);
+void FreeLocal(arith off);
+void LocalFinish(void);
+void RegisterAccount(arith offset, arith size, int regtype, int sc);
+void LoadLocal(arith off, arith sz);
+void StoreLocal(arith off, arith sz);
+
+#ifndef	LINT
+void AddrLocal(arith off);
+#endif
+
+#endif

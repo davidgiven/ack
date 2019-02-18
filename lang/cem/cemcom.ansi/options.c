@@ -9,12 +9,14 @@
 #include	<stdlib.h>
 #include	<string.h>
 #include	<alloc.h>
+#include    "options.h"
 #include	"class.h"
 #include	"macro.h"
 #include	"idf.h"
 #include	"arith.h"
 #include	"sizes.h"
 #include	"align.h"
+#include    "error.h"
 
 char options[128];			/* one for every char	*/
 #ifdef	LINT
@@ -24,10 +26,11 @@ char loptions[128];			/* one for every char	*/
 extern int idfsize;
 extern int density;
 
-static int txt2int();
 
-do_option(text)
-	char *text;
+
+static int txt2int(register char **);
+
+void do_option(char *text)
 {
 	register char opt;
 
@@ -209,9 +212,7 @@ next_option:			/* to allow combined one-char options */
 	}
 }
 
-static int
-txt2int(tp)
-	register char **tp;
+static int txt2int(register char **tp)
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.

@@ -2,10 +2,15 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef IDF_H_
+#define IDF_H_
+
+ 
 /* $Id$ */
 /* IDENTIFIER DESCRIPTOR */
 
 #include	"parameters.h"
+#include    "arith.h"
 
 struct id_u {
 	int idd_reserved;	/* non-zero for reserved words		*/
@@ -33,4 +38,28 @@ struct id_u {
 #include <idf_pkg.spec>
 
 extern int level;
-extern struct idf *gen_idf();
+
+struct decspecs;
+struct declarator;
+struct type;
+struct formal;
+
+
+struct idf *gen_idf(void);
+int is_anon_idf(struct idf *idf);
+void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl);
+int actual_declaration(int sc, struct type *tp);
+void global_redecl(register struct idf *idf, int new_sc, struct type *tp);
+int good_formal(register struct def *def, register struct idf *idf);
+void declare_params(struct declarator *dc);
+void idf_initialized(register struct idf *idf);
+void declare_parameter(struct idf *idf);
+void declare_enum(struct type *tp, struct idf *idf, arith l);
+void check_formals(struct idf *idf, struct declarator *dc);
+void declare_formals(struct idf *idf, arith *fp);
+int regtype(struct type *tp);
+void add_def(struct idf *idf, int sc, struct type *tp, int lvl);
+void update_ahead(register struct idf *idf);
+void free_formals(register struct formal *fm);
+
+#endif

@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 /* TOKENNAME DEFINITION */
+#ifndef TOKENNAME_H_
+#define TOKENNAME_H_
 
 struct tokenname	{	/*	Used for defining the name of a
 					token as identified by its symbol
@@ -11,3 +13,7 @@ struct tokenname	{	/*	Used for defining the name of a
 	int tn_symbol;
 	char *tn_name;
 };
+
+void reserve(register struct tokenname resv[]);
+
+#endif /* TOKENNAME_H_ */

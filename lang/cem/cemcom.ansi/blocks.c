@@ -18,7 +18,10 @@
 #include "label.h"
 #include "stack.h"
 #include "Lpars.h"
-extern arith NewLocal();
+#include "blocks.h"
+#include "macro.h"
+#include "util.h"
+
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 #define LocalIntVar()	NewLocal(int_size, int_align, reg_any, REGISTER)
 #endif /* STB */
@@ -52,9 +55,7 @@ extern arith NewLocal();
 	while we need a loop to store the stack block into a memory object.
 */
 
-suitable_sz(sz, al)
-	arith sz;
-	int al;
+int suitable_sz(arith sz, int al)
 {
 	return	((int)sz % (int)word_size == 0 && al % word_align == 0) ||
 		(
@@ -64,9 +65,7 @@ suitable_sz(sz, al)
 		);
 }
 
-store_block(sz, al)
-	arith sz;
-	int al;
+void store_block(arith sz, int al)
 {
 	if (suitable_sz(sz, al))
 		C_sti(sz);
@@ -102,9 +101,7 @@ store_block(sz, al)
 	}
 }
 
-load_block(sz, al)
-	arith sz;
-	int al;
+void load_block(arith sz, int al)
 {
 
 	if (suitable_sz(sz, al))
@@ -138,9 +135,7 @@ load_block(sz, al)
 	}
 }
 
-copy_block(sz, al)
-	arith sz;
-	int al;
+void copy_block(arith sz, int al)
 {
 
 	if (suitable_sz(sz, al))
@@ -167,8 +162,7 @@ copy_block(sz, al)
 }
 
 #ifndef STB
-copy_loop(sz, src, dst)
-	arith sz, src, dst;
+void copy_loop(arith sz, arith src, arith dst)
 {
 	/* generate inline byte-copy loop */
 	label l_cont = text_label(), l_stop = text_label();
