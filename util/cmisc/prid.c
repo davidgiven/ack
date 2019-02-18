@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 extern char *ProgName;
 
@@ -24,10 +25,21 @@ extern char *ProgName;
 
 int maxlen = DEF_LENGTH;
 
-BeginOfProgram() {}
 
-DoOption(str)
-	char *str;
+void InsertId(char *);
+char *Malloc(unsigned int);
+char *Salloc(char *);
+int EnHash(char*);
+void EndOfProgram(void);
+void DoOption(char*);
+void CheckId(char *, int);
+
+
+
+
+void BeginOfProgram(void) {}
+
+void DoOption(char* str)
 {
 	switch (str[1]) {
 
@@ -45,8 +57,7 @@ DoOption(str)
 	}
 }
 
-CheckId(id, len)
-	char *id;
+void CheckId(char *id, int len)
 {
 	if (len >= maxlen) {
 		InsertId(id);
@@ -62,10 +73,7 @@ struct idf {
 
 struct idf *hash_tab[HASHSIZE];
 
-char *Malloc(), *Salloc();
-
-InsertId(id)
-	char *id;
+void InsertId(char *id)
 {
 	int hash_val = EnHash(id);
 	register struct idf *idp = hash_tab[hash_val];
@@ -85,11 +93,9 @@ InsertId(id)
 	}
 }
 
-char *
-Malloc(n)
-	unsigned n;
+char *Malloc(unsigned int n)
 {
-	char *mem, *malloc();
+	char *mem;
 
 	if ((mem = malloc(n)) == 0) {
 		fprintf(stderr, "%s: out of memory\n", ProgName);
@@ -98,21 +104,19 @@ Malloc(n)
 	return mem;
 }
 
-char *
-Salloc(str)
-	char *str;
+char *Salloc(char *str)
 {
+
 	if (str == 0)
 		str = "";
 
 	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
-EnHash(id)
-	char *id;
+int EnHash(char *id)
 {
 	register unsigned hash_val = 0;
-	register n = maxlen;
+	register int n = maxlen;
 
 	while (n-- && *id)
 		hash_val = 31 * hash_val + *id++;
@@ -120,7 +124,7 @@ EnHash(id)
 	return hash_val % (unsigned) HASHSIZE;
 }
 
-EndOfProgram()
+void EndOfProgram(void)
 {
 	register struct idf *idp;
 	register int i;
