@@ -32,7 +32,8 @@ static struct pattern *pattable,	/* ptr to pattern array */
 					 * be allocated
 					 */
 
-addpattern(str,l,np,nr) char *str; {
+void addpattern(char* str,int l,int np,int nr)
+{
     /*
      * Just add a pattern to the list.
      * "str" is the constraint, "l" is the line number,
@@ -62,8 +63,8 @@ addpattern(str,l,np,nr) char *str; {
     p->p_nrepl = nr;
 }
 
-static
-prconstraint(str) char *str; {
+static void prconstraint(char* str)
+{
     /*
      * prints a constraint, with variable names replaced
      */
@@ -104,13 +105,13 @@ prconstraint(str) char *str; {
     }
 }
 
-printpatterns() {
+void printpatterns(void) {
     /*
      * Prints the pattern_descr table and generates the routine
      * "check_constraint"
      */
     register struct pattern *p;
-    register i;
+    register int i;
 
     p = pattable;
     i = 1;
@@ -127,7 +128,7 @@ printpatterns() {
     while (p < current) {
 	if (p->p_constraint) {
 	    /* The pattern has a constraint */	
-	    fprintf(genc,"\tcase %d :\n",p - pattable);
+	    fprintf(genc,"\tcase %d :\n",(int)(p - pattable));
 	    fprintf(genc,linedir,p->p_lineno,inpfile);	/* linedirective */
 	    fputs("\tr = (",genc);
 	    prconstraint(p->p_constraint);
