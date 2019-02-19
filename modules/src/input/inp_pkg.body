@@ -107,7 +107,7 @@ INP_rdfile(fd, fn, size, pbuf)
 	register long *size;
 	char **pbuf;		/* output parameter */
 {
-	long rsize;
+	int rsize;
 
 	if (
 	     ((*size = sys_filesize(fn))) < 0
@@ -217,13 +217,12 @@ INP_rdblock(fd, buf, n)
 	char *buf;
 	int *n;
 {
-	long readSize;
-	readSize = (size_t)*n;
 
-	if (!sys_read(fd, buf, INP_BUFSIZE, &readSize)) {
+
+	if (!sys_read(fd, buf, INP_BUFSIZE, n)) {
 		return 0;
 	}
-	*n = (int)readSize;
+
 	buf[*n] = '\0';
 	return 1;
 }
