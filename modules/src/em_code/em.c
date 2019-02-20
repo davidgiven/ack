@@ -53,7 +53,6 @@ char		*C_opp = obuf;
 
 void C_flush(void)
 {
-	int count;
 #ifdef INCORE
 	static unsigned int bufsiz;
 
@@ -72,7 +71,6 @@ void C_flush(void)
 		return;
 	}
 #endif
-	count = (int)(C_opp - obuf);
 	if (C_opp != obuf && sys_write(C_ofp, obuf, (int)(C_opp - obuf)) == 0) {
 		C_ofp = 0;
 		C_failed();
