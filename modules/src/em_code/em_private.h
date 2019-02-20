@@ -5,16 +5,16 @@
  */
 /* private inclusion file */
 
-#include <em_arith.h>
-#include <em_label.h>
+#include "em_arith.h"
+#include  "em_label.h"
 
 /* include the EM description files */
-#include	<em_spec.h>
-#include	<em_pseu.h>
-#include	<em_mnem.h>
-#include	<em_reg.h>
+#include	"em_spec.h"
+#include	"em_pseu.h"
+#include	"em_mnem.h"
+#include	"em_reg.h"
 
-#include	<ansi.h>
+#include	"ansi.h"
 
 #include	"em_codeEK.h"
 
@@ -79,6 +79,10 @@ _PROTOTYPE(void C_pt_noff, (char *, arith));
 _PROTOTYPE(void C_pt_pnam, (char *));
 _PROTOTYPE(void C_pt_dfilb, (label));
 _PROTOTYPE(void C_pt_wcon, (int, char *, arith));
+_PROTOTYPE(void C_failed, (void));
+_PROTOTYPE(void C_flush, (void));
+_PROTOTYPE(void C_internal_error, (void));
+_PROTOTYPE(void C_putbyte, (int));
 #ifdef READABLE_EM
 _PROTOTYPE(void C_pt_ps, (int));
 _PROTOTYPE(void C_pt_op, (int));

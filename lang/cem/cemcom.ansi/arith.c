@@ -24,16 +24,19 @@
 #include	"Lpars.h"
 #include	"field.h"
 #include	"mes.h"
+#include    "cstoper.h"
+#include    "ch3bin.h"
+#include    "ch3.h"
+#include    "error.h"
+
 
 extern char *symbol2str();
 extern char options[];
 extern arith flt_flt2arith();
 extern label code_string();
 
-void
-arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
-	register struct expr **e1p, **e2p;
-	int oper;
+/* 3.1.2.5 */
+void arithbalance(register struct expr **e1p, int oper, register struct expr **e2p)
 {
 	/*	The expressions *e1p and *e2p are balanced to be operands
 		of the arithmetic operator oper.
@@ -171,8 +174,7 @@ arithbalance(e1p, oper, e2p)	/* 3.1.2.5 */
 	}
 }
 
-relbalance(e1p, oper, e2p)
-	register struct expr **e1p, **e2p;
+void relbalance(register struct expr **e1p, int oper, register struct expr **e2p)
 {
 	/*	The expressions *e1p and *e2p are balanced to be operands
 		of the relational operator oper, or the ':'.
@@ -204,9 +206,7 @@ relbalance(e1p, oper, e2p)
 		arithbalance(e1p, oper, e2p);
 }
 
-ch3pointer(expp, oper, tp)
-	struct expr **expp;
-	register struct type *tp;
+void ch3pointer(struct expr **expp, int oper, register struct type *tp)
 {
 	/*	Checks whether *expp may be compared to tp using oper,
 		as described in chapter 3.3.8 and 3.3.9.
@@ -238,9 +238,7 @@ ch3pointer(expp, oper, tp)
 }
 
 int
-any2arith(expp, oper)
-	register struct expr **expp;
-	register int oper;
+any2arith(register struct expr **expp, register int oper)
 {
 	/*	Turns any expression into int_type, long_type,
 		float_type, double_type or lngdbl_type.
@@ -295,8 +293,7 @@ any2arith(expp, oper)
 	return (*expp)->ex_type->tp_fund;
 }
 
-erroneous2int(expp)
-	struct expr **expp;
+void erroneous2int(struct expr **expp)
 {
 	/*	the (erroneous) expression *expp is replaced by an
 		int expression
@@ -310,11 +307,7 @@ erroneous2int(expp)
 	*expp = exp;
 }
 
-struct expr *
-arith2arith(tp, oper, expr)
-	struct type *tp;
-	int oper;
-	register struct expr *expr;
+struct expr *arith2arith(struct type *tp, int oper, register struct expr *expr)
 {
 	/*	arith2arith constructs a new expression containing a
 		run-time conversion between some arithmetic types.
@@ -328,10 +321,7 @@ arith2arith(tp, oper, expr)
 	return new_oper(tp, new, oper, expr);
 }
 
-int
-int2int(expp, tp)
-	struct expr **expp;
-	register struct type *tp;
+int int2int(struct expr **expp, register struct type *tp)
 {
 	/*	The expression *expp, which is of some integral type, is
 		converted to the integral type tp.
@@ -369,9 +359,7 @@ int2int(expp, tp)
 /* With compile-time constants, we don't set fp_used, since this is done
  * only when necessary in eval.c.
  */
-int2float(expp, tp)
-	register struct expr **expp;
-	struct type *tp;
+void int2float(register struct expr **expp, struct type *tp)
 {
 	/*	The expression *expp, which is of some integral type, is
 		converted to the floating type tp.
@@ -390,9 +378,7 @@ int2float(expp, tp)
 	}
 }
 
-float2int(expp, tp)
-	struct expr **expp;
-	struct type *tp;
+void float2int(struct expr **expp, struct type *tp)
 {
 	/*	The expression *expp, which is of some floating type, is
 		converted to the integral type tp.
@@ -418,9 +404,7 @@ float2int(expp, tp)
 	}
 }
 
-float2float(expp, tp)
-	register struct expr **expp;
-	struct type *tp;
+void float2float(register struct expr **expp, struct type *tp)
 {
 	/*	The expression *expp, which is of some floating type, is
 		converted to the floating type tp.
@@ -436,8 +420,7 @@ float2float(expp, tp)
 	}
 }
 
-array2pointer(exp)
-	register struct expr *exp;
+void array2pointer(register struct expr *exp)
 {
 	/*	The expression, which must be an array, is converted
 		to a pointer.
@@ -447,8 +430,7 @@ array2pointer(exp)
 				    , (arith)0, NO_PROTO);
 }
 
-function2pointer(exp)
-	register struct expr *exp;
+void function2pointer(register struct expr *exp)
 {
 	/*	The expression, which must be a function, is converted
 		to a pointer to the function.
@@ -457,8 +439,7 @@ function2pointer(exp)
 				     (arith)0, NO_PROTO);
 }
 
-string2pointer(ex)
-	register struct expr *ex;
+void string2pointer(register struct expr *ex)
 {
 	/*	The expression, which must be a string constant, is converted
 		to a pointer to the string-containing area.
@@ -472,9 +453,7 @@ string2pointer(ex)
 	ex->VL_VALUE = (arith)0;
 }
 
-opnd2integral(expp, oper)
-	register struct expr **expp;
-	int oper;
+void opnd2integral(register struct expr **expp, int oper)
 {
 	register int fund = (*expp)->ex_type->tp_fund;
 
@@ -486,9 +465,7 @@ opnd2integral(expp, oper)
 	}
 }
 
-opnd2logical(expp, oper)
-	register struct expr **expp;
-	int oper;
+void opnd2logical(register struct expr **expp, int oper)
 {
 	int fund = (*expp)->ex_type->tp_fund;
 
@@ -525,8 +502,7 @@ opnd2logical(expp, oper)
 }
 
 void
-opnd2test(expp, oper)
-	register struct expr **expp;
+opnd2test(register struct expr **expp, int oper)
 {
 	opnd2logical(expp, oper);
 	if ((*expp)->ex_class == Oper) {
@@ -550,9 +526,7 @@ opnd2test(expp, oper)
 	ch3bin(expp, NOTEQUAL, intexpr((arith)0, INT));
 }
 
-void
-any2opnd(expp, oper)
-	register struct expr **expp;
+void any2opnd(register struct expr **expp, int oper)
 {
 	if (!*expp)
 		return;
@@ -584,8 +558,7 @@ any2opnd(expp, oper)
 	}
 }
 
-any2parameter(expp)
-	register struct expr **expp;
+void any2parameter(register struct expr **expp)
 {
 	/*	To handle default argument promotions
 	*/
@@ -598,8 +571,7 @@ any2parameter(expp)
 }
 
 #ifndef NOBITFIELD
-field2arith(expp)
-	register struct expr **expp;
+void field2arith(register struct expr **expp)
 {
 	/*	The expression to extract the bitfield value from the
 		memory word is put in the tree.
@@ -630,8 +602,7 @@ field2arith(expp)
 /*	switch_sign_fp() negates the given floating constant expression,
  *	and frees the string representing the old value.
  */
-switch_sign_fp(expr)
-	register struct expr *expr;
+void switch_sign_fp(register struct expr *expr)
 {
 	flt_umin(&(expr->FL_ARITH));
 }

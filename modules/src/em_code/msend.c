@@ -2,8 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_msend()
+void CC_msend(void)
 {
 	CEND();
 	NL();

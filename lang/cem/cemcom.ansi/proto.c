@@ -23,20 +23,24 @@
 #include	"declar.h"
 #include	"decspecs.h"
 #include	"proto.h"
+#include    "error.h"
+#include    "ch3.h"
 
 extern char options[];
 
-void
-check_for_void(pl)
-	register struct proto *pl;
+void check_for_void(register struct proto *pl)
 {
 	register int errcnt = 0;
 
-	if (!pl) return;
-	if ((pl->pl_flag & PL_VOID) && !(pl->next)) return;
+	if (!pl)
+		return;
+	if ((pl->pl_flag & PL_VOID) && !(pl->next))
+		return;
 
-	while (pl) {
-		if (pl->pl_flag & PL_VOID) {
+	while (pl)
+	{
+		if (pl->pl_flag & PL_VOID)
+		{
 			if (!errcnt && !(pl->pl_flag & PL_ERRGIVEN))
 				error("illegal use of void in argument list");
 			pl->pl_flag |= PL_ERRGIVEN;
@@ -46,37 +50,35 @@ check_for_void(pl)
 	}
 }
 
-add_proto(pl, ds, dc, lvl)
-	struct proto *pl;
-	struct decspecs *ds;
-	struct declarator *dc;
-	int lvl;
+void add_proto(struct proto *pl, struct decspecs *ds, struct declarator *dc,
+		int lvl)
 {
 	/*	The full typed identifier or abstract type, described
-		by the structures decspecs and declarator are turned
-		a into parameter type list structure.
-		The parameters will be declared at level L_FORMAL2,
-		later on it's decided whether they were prototypes
-		or actual declarations.
-	*/
+	 by the structures decspecs and declarator are turned
+	 a into parameter type list structure.
+	 The parameters will be declared at level L_FORMAL2,
+	 later on it's decided whether they were prototypes
+	 or actual declarations.
+	 */
 	register struct idf *idf = dc->dc_idf;
-	register struct def *def = idf ? idf->id_def : (struct def *)0;
+	register struct def *def = idf ? idf->id_def : (struct def *) 0;
 	register int sc = ds->ds_sc;
 	register struct type *type;
 	char formal_array = 0;
 
-	assert(ds->ds_type != (struct type *)0);
+	assert(ds->ds_type != (struct type * )0);
 
 	pl->pl_flag = PL_FORMAL;
 	type = declare_type(ds->ds_type, dc);
-	if (type->tp_size < (arith)0 && actual_declaration(sc, type)) {
+	if (type->tp_size < (arith) 0 && actual_declaration(sc, type))
+	{
 		extern char *symbol2str();
 		if (type->tp_fund != VOID)
 			error("unknown %s-type", symbol2str(type->tp_fund));
-		else {
-			if (idf != (struct idf *)0
-			    || ds->ds_sc_given
-			    || ds->ds_typequal) {
+		else
+		{
+			if (idf != (struct idf *) 0 || ds->ds_sc_given || ds->ds_typequal)
+			{
 				error("illegal use of void in argument list");
 				pl->pl_flag |= PL_ERRGIVEN;
 			}
@@ -84,43 +86,54 @@ add_proto(pl, ds, dc, lvl)
 			pl->pl_flag |= PL_VOID;
 		}
 	}
-	if (ds->ds_sc_given && ds->ds_sc != REGISTER) {
-		if (!(pl->pl_flag & PL_ERRGIVEN)) {
-		    if (ds->ds_sc != AUTO) {
-			error("illegal storage class in parameter declaration");
-		    } else {
-			warning("illegal storage class in parameter declaration");
-		    }
+	if (ds->ds_sc_given && ds->ds_sc != REGISTER)
+	{
+		if (!(pl->pl_flag & PL_ERRGIVEN))
+		{
+			if (ds->ds_sc != AUTO)
+			{
+				error("illegal storage class in parameter declaration");
+			}
+			else
+			{
+				warning("illegal storage class in parameter declaration");
+			}
 		}
 	}
 
 	/*	Perform some special conversions for parameters.
-	*/
-	if (type->tp_fund == FUNCTION) {
+	 */
+	if (type->tp_fund == FUNCTION)
+	{
 		type = construct_type(POINTER, type, 0, (arith) 0, NO_PROTO);
-	} else if (type->tp_fund == ARRAY) {
+	}
+	else if (type->tp_fund == ARRAY)
+	{
 		type = construct_type(POINTER, type->tp_up, 0, (arith) 0, NO_PROTO);
 		formal_array = 1;
 	}
 
 	/*	According to the standard we should ignore the storage
-		class of a parameter, unless it's part of a function
-		definition.
-		However, in the routine declare_protos we don't know decspecs,
-		and therefore we can't complain up there. So we build up the
-		storage class, and keep quiet until we reach declare_protos.
-	*/
-	sc = (ds->ds_sc_given && ds->ds_sc != REGISTER) ?
-				0 : sc == 0 ? FORMAL : REGISTER;
+	 class of a parameter, unless it's part of a function
+	 definition.
+	 However, in the routine declare_protos we don't know decspecs,
+	 and therefore we can't complain up there. So we build up the
+	 storage class, and keep quiet until we reach declare_protos.
+	 */
+	sc = (ds->ds_sc_given && ds->ds_sc != REGISTER) ? 0 :
+			sc == 0 ? FORMAL : REGISTER;
 
-	if (def && (def->df_level == lvl /* || def->df_level < L_PROTO */ )) {
+	if (def && (def->df_level == lvl /* || def->df_level < L_PROTO */))
+	{
 		/* redeclaration at the same level */
 		error("parameter %s redeclared", idf->id_text);
-	} else if (idf != (struct idf *)0) {
+	}
+	else if (idf != (struct idf *) 0)
+	{
 		/*	New definition, redefinition hides earlier one
-		*/
+		 */
 		register struct def *newdef = new_def();
-		
+
 		newdef->next = def;
 		newdef->df_level = lvl;
 		newdef->df_sc = sc;
@@ -133,28 +146,28 @@ add_proto(pl, ds, dc, lvl)
 		/* newdef->df_firstbrace = 0; */
 #endif
 		/*	We can't put the idf onto the stack, since these kinds
-			of declaration may occurs at any level, and the idf
-			does not necessarily go at this level. E.g.
+		 of declaration may occurs at any level, and the idf
+		 does not necessarily go at this level. E.g.
 
-			f() {
-			...
-				{ int func(int a, int b);
-				...
-				}
-			}
+		 f() {
+		 ...
+		 { int func(int a, int b);
+		 ...
+		 }
+		 }
 
-			The idf's a and b declared in the prototype declaration
-			do not go at any level, they are simply ignored.
-			However, in
+		 The idf's a and b declared in the prototype declaration
+		 do not go at any level, they are simply ignored.
+		 However, in
 
-			f(int a, int b) {
-			...
-			}
+		 f(int a, int b) {
+		 ...
+		 }
 
-			They should go at level L_FORMAL2. But at this stage
-			we don't know whether we have a prototype or function
-			definition. So, this process is postponed.
-		*/
+		 They should go at level L_FORMAL2. But at this stage
+		 we don't know whether we have a prototype or function
+		 definition. So, this process is postponed.
+		 */
 		idf->id_def = newdef;
 		update_ahead(idf);
 	}
@@ -163,35 +176,33 @@ add_proto(pl, ds, dc, lvl)
 	pl->pl_type = type;
 }
 
-struct tag *
-gettag(tp, idpp)
-struct type *tp;
-struct idf **idpp;
+static struct tag * gettag(struct type *tp, struct idf **idpp)
 {
-	struct tag *tg = (struct tag *)0;
+	struct tag *tg = (struct tag *) 0;
 	register int fund = tp->tp_fund;
 
-        while (fund == FIELD || fund == POINTER
-                || fund == ARRAY || fund == FUNCTION) {
-                tp = tp->tp_up;
-                fund = tp->tp_fund;
-        }
+	while (fund == FIELD || fund == POINTER || fund == ARRAY || fund == FUNCTION)
+	{
+		tp = tp->tp_up;
+		fund = tp->tp_fund;
+	}
 	*idpp = tp->tp_idf;
-	switch(tp->tp_fund) {
+	switch (tp->tp_fund)
+	{
 	case ENUM:
 	case UNION:
-	case STRUCT: tg = tp->tp_idf->id_tag; break;
+	case STRUCT:
+		tg = tp->tp_idf->id_tag;
+		break;
 	}
 	return tg;
 }
 
-
-declare_protos(dc)
-	register struct declarator *dc;
+void declare_protos(register struct declarator *dc)
 {
 	/*	At this points we know that the idf's in protolist are formal
-		parameters. So it's time to declare them at level L_FORMAL2.
-	*/
+	 parameters. So it's time to declare them at level L_FORMAL2.
+	 */
 	struct stack_level *stl = stack_level_of(L_FORMAL1);
 	register struct decl_unary *du;
 	register struct type *type;
@@ -200,31 +211,39 @@ declare_protos(dc)
 
 #ifdef	DEBUG
 	if (options['t'])
-		dumpidftab("start declare_protos", 0);
+	dumpidftab("start declare_protos", 0);
 #endif	/* DEBUG */
 	du = dc->dc_decl_unary;
-	while (du) {
-		if (du->du_fund == FUNCTION) {
-			if (du->next != (struct decl_unary *) 0) {
+	while (du)
+	{
+		if (du->du_fund == FUNCTION)
+		{
+			if (du->next != (struct decl_unary *) 0)
+			{
 				remove_proto_idfs(du->du_proto);
 				du->du_proto = 0;
-			} else break;
+			}
+			else
+				break;
 		}
 		du = du->next;
 	}
 	pl = du ? du->du_proto : NO_PROTO;
-	if (pl) {
+	if (pl)
+	{
 #if	0 /* the id_proto member is deleted (???) */
 		idf->id_proto = 0;
 #endif	/* 0 */
-		do {
+		do
+		{
 			struct tag *tg;
 			struct idf *idp = 0;
 
 			type = pl->pl_type;
 
 			/* `...' only for type checking */
-			if (pl->pl_flag & PL_ELLIPSIS) {
+			if (pl->pl_flag & PL_ELLIPSIS)
+			{
 				pl = pl->next;
 				continue;
 			}
@@ -233,14 +252,15 @@ declare_protos(dc)
 			if (type->tp_fund == VOID)
 				break;
 
-			if (!pl->pl_idf || !(def = pl->pl_idf->id_def)) {
+			if (!pl->pl_idf || !(def = pl->pl_idf->id_def))
+			{
 				error("no parameter identifier supplied");
 				pl = pl->next;
 				continue;
 			}
 
 			/*	Postponed storage class checking.
-			*/
+			 */
 			if (def->df_sc == 0)
 				error("illegal storage class in parameter declaration");
 
@@ -249,7 +269,8 @@ declare_protos(dc)
 			pl = pl->next;
 
 			tg = gettag(type, &idp);
-			if (tg && tg->tg_level <= L_PROTO) {
+			if (tg && tg->tg_level <= L_PROTO)
+			{
 				tg->tg_level = L_FORMAL2;
 				stack_idf(idp, stl);
 			}
@@ -257,43 +278,47 @@ declare_protos(dc)
 	}
 #ifdef	DEBUG
 	if (options['t'])
-		dumpidftab("end declare_protos", 0);
+	dumpidftab("end declare_protos", 0);
 #endif	/* DEBUG */
 }
 
-
-void
-update_proto(tp, otp)
-	register struct type *tp, *otp;
+void update_proto(register struct type *tp, register struct type *otp)
 {
 	/*	This routine performs the proto type updates.
-		Consider the following code:
+	 Consider the following code:
 
-		int f(double g());
-		int f(double g(int f(), int));
-		int f(double g(int f(long double), int));
+	 int f(double g());
+	 int f(double g(int f(), int));
+	 int f(double g(int f(long double), int));
 
-		The most accurate definition is the third line.
-		This routine will silently update all lists,
-		and removes the redundant occupied space.
-	*/
+	 The most accurate definition is the third line.
+	 This routine will silently update all lists,
+	 and removes the redundant occupied space.
+	 */
 	register struct proto *pl, *opl;
 
-	if (tp == otp) return;
-	if (!tp || !otp) return;
+	if (tp == otp)
+		return;
+	if (!tp || !otp)
+		return;
 
-	while (tp->tp_fund != FUNCTION) {
-		if (tp->tp_fund != POINTER && tp->tp_fund != ARRAY) return;
+	while (tp->tp_fund != FUNCTION)
+	{
+		if (tp->tp_fund != POINTER && tp->tp_fund != ARRAY)
+			return;
 		tp = tp->tp_up;
 		otp = otp->tp_up;
-		if (!tp) return;
+		if (!tp)
+			return;
 	}
 
 	pl = tp->tp_proto;
 	opl = otp->tp_proto;
-	if (pl && opl) {
+	if (pl && opl)
+	{
 		/* both have prototypes */
-		while (pl && opl) {
+		while (pl && opl)
+		{
 			update_proto(pl->pl_type, opl->pl_type);
 			pl = pl->next;
 			opl = opl->next;
@@ -302,9 +327,13 @@ update_proto(tp, otp)
 		 * a typedef.
 		 */
 		otp->tp_proto = tp->tp_proto;
-	} else if (opl) {
+	}
+	else if (opl)
+	{
 		/* old decl has type */
-	} else if (pl) {
+	}
+	else if (pl)
+	{
 		otp->tp_proto = pl;
 	}
 
@@ -314,39 +343,44 @@ update_proto(tp, otp)
 /* struct/union and enum tags can be declared inside prototypes
  * remove them from the symbol-table
  */
-void
-remove_proto_tag(tp)
-struct type *tp;
+static void remove_proto_tag(struct type *tp)
 {
 	register struct idf *ident;
 	register struct tag *tgp, **tgpp;
 	register int fund = tp->tp_fund;
 
-	while (fund == FIELD || fund == POINTER
-		|| fund == ARRAY || fund == FUNCTION) {
+	while (fund == FIELD || fund == POINTER || fund == ARRAY || fund == FUNCTION)
+	{
 		tp = tp->tp_up;
 		fund = tp->tp_fund;
 	}
 
 	ident = tp->tp_idf;
-	switch (tp->tp_fund) {
+	switch (tp->tp_fund)
+	{
 	case ENUM:
 	case STRUCT:
-	case UNION: tgpp = &(ident->id_tag); break;
-	default: return;
+	case UNION:
+		tgpp = &(ident->id_tag);
+		break;
+	default:
+		return;
 	}
 
-	while((*tgpp) && (*tgpp)->tg_type != tp) {
+	while ((*tgpp) && (*tgpp)->tg_type != tp)
+	{
 		tgpp = &((*tgpp)->next);
 	}
-	if (!*tgpp) return;
+	if (!*tgpp)
+		return;
 
 	tgp = *tgpp;
-	if (tgp->tg_level > L_PROTO) return;
+	if (tgp->tg_level > L_PROTO)
+		return;
 
 #ifdef DEBUG
 	if (options['t'])
-		print("Removing idf %s from list\n",
+	print("Removing idf %s from list\n",
 			ident->id_text);
 #endif
 
@@ -354,52 +388,55 @@ struct type *tp;
 	free_tag(tgp);
 }
 
-remove_proto_idfs(pl)
-	register struct proto *pl;
+/*	Remove all the identifier definitions from the
+	 prototype list. */
+void remove_proto_idfs(register struct proto *pl)
 {
-	/*	Remove all the identifier definitions from the
-		prototype list.
-	*/
+
 	register struct def *def;
 
-	while (pl) {
-		if (pl->pl_idf) {
+	while (pl)
+	{
+		if (pl->pl_idf)
+		{
 #ifdef DEBUG
 			if (options['t'])
-				print("Removing idf %s from list\n",
+			print("Removing idf %s from list\n",
 					pl->pl_idf->id_text);
 #endif
 			def = pl->pl_idf->id_def;
-			if (def && def->df_level <= L_PROTO) {
+			if (def && def->df_level <= L_PROTO)
+			{
 				pl->pl_idf->id_def = def->next;
 				free_def(def);
 			}
 			pl->pl_idf = (struct idf *) 0;
 		}
-		if (pl->pl_type) {
+		if (pl->pl_type)
+		{
 			remove_proto_tag(pl->pl_type);
 		}
 		pl = pl->next;
 	}
 }
 
-void
-call_proto(expp)
-	register struct expr **expp;
+void call_proto(register struct expr **expp)
 {
 	/*	If the function specified by (*expp)->OP_LEFT has a prototype,
-		the parameters are converted according the rules specified in
-		par. 3.3.2.2. E.i. the parameters are converted to the prototype
-		counter parts as if by assignment. For the parameters falling
-		under ellipsis clause the old parameters conversion stuff
-		applies.
-	*/
+	 the parameters are converted according the rules specified in
+	 par. 3.3.2.2. E.i. the parameters are converted to the prototype
+	 counter parts as if by assignment. For the parameters falling
+	 under ellipsis clause the old parameters conversion stuff
+	 applies.
+	 */
 	register struct expr *left = (*expp)->OP_LEFT;
 	register struct expr *right = (*expp)->OP_RIGHT;
 	register struct proto *pl = NO_PROTO;
-	static struct proto ellipsis = { 0, 0, 0, PL_ELLIPSIS };
+	static struct proto ellipsis =
+	{ 0, 0, 0, PL_ELLIPSIS };
 
-	if (left != NILEXPR) {		/* in case of an error */
+	if (left != NILEXPR)
+	{ /* in case of an error */
 		register struct type *tp = left->ex_type;
 
 		while (tp && tp->tp_fund != FUNCTION && tp != error_type)
@@ -408,17 +445,20 @@ call_proto(expp)
 			pl = tp->tp_proto;
 	}
 
-	if (right != NILEXPR) {		/* function call with parameters */
+	if (right != NILEXPR)
+	{ /* function call with parameters */
 		register struct expr **ep = &((*expp)->OP_RIGHT);
 		register int ecnt = 0, pcnt = 0;
 		struct expr **estack[NPARAMS];
 		struct proto *pstack[NPARAMS];
 
 		/* stack up the parameter expressions */
-		while (right->ex_class == Oper && right->OP_OPER == PARCOMMA) {
+		while (right->ex_class == Oper && right->OP_OPER == PARCOMMA)
+		{
 			if (ecnt == STDC_NPARAMS)
 				expr_strict(right, "number of parameters exceeds ANSI limit");
-			if (ecnt >= NPARAMS-1) {
+			if (ecnt >= NPARAMS - 1)
+			{
 				expr_error(right, "too many parameters");
 				return;
 			}
@@ -429,45 +469,56 @@ call_proto(expp)
 		estack[ecnt] = ep;
 
 		/*	Declarations like int f(void) do not expect any
-			parameters.
-		*/
-		if (pl && pl->pl_flag & PL_VOID) {
+		 parameters.
+		 */
+		if (pl && pl->pl_flag & PL_VOID)
+		{
 			expr_strict(*expp, "no parameters expected");
 			pl = NO_PROTO;
 		}
 
 		/* stack up the prototypes */
-		if (pl) {
+		if (pl)
+		{
 			pcnt--;
-			do {
+			do
+			{
 				/* stack prototypes */
 				pstack[++pcnt] = pl;
 				pl = pl->next;
 			} while (pl);
 		}
-		else {
+		else
+		{
 			pstack[0] = &ellipsis;
 		}
 
-		for (ecnt; ecnt >= 0; ecnt--) {
+		for (ecnt; ecnt >= 0; ecnt--)
+		{
 			/*	Only the parameters specified in the prototype
-				are checked and converted. The parameters that
-				fall under the ellipsis clause are neither
-				checked nor converted !
-			*/
-			if (pcnt < 0) {
-				expr_error(*expp, "more parameters than specified in prototype");
+			 are checked and converted. The parameters that
+			 fall under the ellipsis clause are neither
+			 checked nor converted !
+			 */
+			if (pcnt < 0)
+			{
+				expr_error(*expp,
+						"more parameters than specified in prototype");
 				break;
 			}
-			else if (!(pstack[pcnt]->pl_flag & PL_ELLIPSIS)) {
-				ch3cast(estack[ecnt],CASTAB,pstack[pcnt]->pl_type);
+			else if (!(pstack[pcnt]->pl_flag & PL_ELLIPSIS))
+			{
+				ch3cast(estack[ecnt], CASTAB, pstack[pcnt]->pl_type);
 				pcnt--;
-			} else
+			}
+			else
 				any2parameter(estack[ecnt]);
 		}
 		if (pcnt > 0 || (pcnt == 0 && !(pstack[0]->pl_flag & PL_ELLIPSIS)))
 			expr_error(*expp, "fewer parameters than specified in prototype");
-	} else {
+	}
+	else
+	{
 		if (pl && !(pl->pl_flag & PL_VOID))
 			expr_error(*expp, "fewer parameters than specified in prototype");
 	}

@@ -4,11 +4,10 @@
  */
 /* $Id$ */
 
+#include <stdio.h>
 #include "system.h"
 
-int
-sys_remove(path)
-	char *path;
+int sys_remove(char* path)
 {
-	return unlink(path) == 0;
+	return remove(path) == 0;
 }

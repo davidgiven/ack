@@ -22,6 +22,9 @@
 #include	"struct.h"
 #include	"level.h"
 #include	"mes.h"
+#include    "code.h"
+#include    "util.h"
+#include    "error.h"
 
 /* #include	<em_reg.h> */
 
@@ -41,7 +44,7 @@ struct stack_level *local_level = &UniversalLevel;
 
 int level;	/* Always equal to local_level->sl_level. */
 
-stack_level()	{
+void stack_level(void)	{
 	/*	A new level is added on top of the identifier stack.
 	*/
 	register struct stack_level *stl = new_stack_level();
@@ -57,10 +60,9 @@ stack_level()	{
 #endif	/* LINT */
 }
 
-void
-stack_idf(idf, stl)
-	struct idf *idf;
-	register struct stack_level *stl;
+void stack_idf(
+	struct idf *idf,
+	register struct stack_level *stl)
 {
 	/*	The identifier idf is inserted in the stack on level stl,
 		but only if it is not already present at this level.
@@ -81,8 +83,7 @@ stack_idf(idf, stl)
 	stl->sl_entry = se;
 }
 
-struct stack_level *
-stack_level_of(lvl)
+struct stack_level *stack_level_of(int lvl)
 {
 	/*	The stack_level corresponding to level lvl is returned.
 		The stack should probably be an array, to be extended with
@@ -100,7 +101,7 @@ stack_level_of(lvl)
 	return stl;
 }
 
-unstack_level()
+void unstack_level(void)
 {
 	/*	The top level of the identifier stack is removed.
 	*/
@@ -174,7 +175,7 @@ unstack_level()
 #endif	/* DEBUG */
 }
 
-unstack_world()
+void unstack_world(void)
 {
 	/*	The global level of identifiers is scanned, and final
 		decisions are taken about such issues as
@@ -263,14 +264,13 @@ unstack_world()
 extern char *nmlist;	/* BAH! -- main.c	*/
 static File *nfp = 0;
 
-open_name_list()
+void open_name_list(void)
 {
 	if (nmlist && sys_open(nmlist, OP_WRITE, &nfp) == 0)
 		fatal("cannot create namelist %s", nmlist);
 }
 
-namelist(nm)
-	char *nm;
+void namelist(char *nm)
 {
 	if (nmlist)	{
 		sys_write(nfp, nm, strlen(nm));

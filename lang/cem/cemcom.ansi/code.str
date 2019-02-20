@@ -2,8 +2,14 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef CODE_H_
+#define CODE_H_
 /* $Id$ */
 /*	C O D E - G E N E R A T O R   D E F I N I T I O N S	*/
+
+#include "arith.h"
+#include "label.h"
+
 
 struct string_cst	{	/* storing string constants */
 	struct string_cst *next;
@@ -20,3 +26,44 @@ extern struct string_cst *str_list;
 #define	RVAL	1
 #define	FALSE	0
 #define	TRUE	1
+
+
+#ifndef	LINT
+void init_code(char *dst_file);
+void end_code(void);
+#endif
+
+struct expr;
+struct def;
+struct idf;
+
+label code_string(char* val, int len);
+void def_strings(register struct string_cst *sc);
+void flush_strings(void);
+void code_scope(char* text, register struct def *def);
+void begin_proc(struct decspecs *ds, struct idf *idf);
+void end_proc(arith fbytes);
+void do_return(void);
+void do_return_expr(struct expr *expr);
+void code_declaration(register struct idf *idf, struct expr *expr, 
+		int lvl, int sc);
+void loc_init(struct expr *expr, struct idf *id);
+void bss(register struct idf *idf);
+void formal_cvt(int hasproto, register struct def *df);
+void code_expr(struct expr *expr, int val, int code, label tlbl, label flbl);
+void code_break(void);
+void code_continue(void);
+void stack_stmt(label break_label, label cont_label);
+void unstack_stmt(void);
+void prc_entry(char* name);
+void prc_exit(void);
+
+#ifdef	PREPEND_SCOPES
+void prepend_scopes(void);
+#endif
+
+#ifdef DBSYMTAB
+void db_line(char *file, unsigned int line);
+#endif
+
+#endif

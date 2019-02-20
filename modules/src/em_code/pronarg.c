@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_pronarg(pnam)
-	char *pnam;
+void CC_pronarg(char* pnam)
 {
 	/*	PRO pseudo with procedure name pnam and unknown # of locals
 	*/

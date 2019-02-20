@@ -26,6 +26,7 @@
 
 
 #include <stdlib.h>
+#include  <stdio.h>
 # include "types.h"
 # include "extern.h"
 # include "io.h"
@@ -69,7 +70,8 @@ static FILE *fgram;
    used when LLgen called with -n -s options */
 int act_nt;
 
-save_grammar(f) FILE *f; {
+void save_grammar(FILE *f)
+{
 	/*
 	 * Save the grammar
 	 */
@@ -267,8 +269,8 @@ save_grammar(f) FILE *f; {
 	fprintf(fgram, "#define LLNNONTERMINALS %d\n", nt_highest - assval + 1);
 }
 
-STATIC void
-save_rule(p, tail) register p_gram p; int tail; {
+STATIC void save_rule(register p_gram p, int tail)
+{
 /*
  Walk through rule p, saving it. The non-terminal tail is
  appended to the rule. It needs to be appended in this function
@@ -363,8 +365,8 @@ save_rule(p, tail) register p_gram p; int tail; {
 	}
 }
 
-STATIC void
-save_set(p) p_set p; {
+STATIC void save_set(p_set p)
+{
 	register int k;
 	register unsigned i;
 	int j;

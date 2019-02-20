@@ -6,14 +6,10 @@
  
 #include <stdlib.h>
 #include <string.h>
-#include <em.h>
-#include <em_mes.h>
+#include "em.h"
+#include "em_mes.h"
 
-void
-C_ms_stb_cst(s, e1, e2, e3)
-	char	*s;
-	int	e1, e2;
-	arith	e3;
+void C_ms_stb_cst(char* s, int e1, int e2, arith e3)
 {
 	C_mes_begin(ms_stb);
 	if (s) C_scon(s, (arith) (strlen(s)+1));

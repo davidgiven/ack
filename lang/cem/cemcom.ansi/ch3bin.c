@@ -15,6 +15,12 @@
 #include	"expr.h"
 #include	"Lpars.h"
 #include	"sizes.h"
+#include    "ch3bin.h"
+#include    "ch3mon.h"
+#include    "ch3.h"
+#include    "error.h"
+#include    "cstoper.h"
+#include    "fltcstoper.h"
 
 extern char options[];
 extern char *symbol2str();
@@ -34,10 +40,7 @@ void pntminuspnt();
 #define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 #define non_commutative_relop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 
-void
-ch3bin(expp, oper, expr)
-	register struct expr **expp;
-	struct expr *expr;
+void ch3bin(register struct expr **expp, int oper, struct expr *expr)
 {
 	/*	apply binary operator oper between *expp and expr.
 		NB: don't swap operands if op is one of the op= operators!!!
@@ -295,9 +298,7 @@ ch3bin(expp, oper, expr)
 	}
 }
 
-void
-pntminuspnt(expp, oper, expr)
-	register struct expr **expp, *expr;
+void pntminuspnt(register struct expr **expp, int oper, register struct expr *expr)
 {
 	/*	Subtracting two pointers is so complicated it merits a
 		routine of its own.
@@ -328,8 +329,7 @@ pntminuspnt(expp, oper, expr)
  * when the arguments are switched.  This is special for some relational
  * operators.
  */
-int
-arg_switched(oper)
+int arg_switched(int oper)
 {
 	switch (oper) {
 	case '<':	return '>';
@@ -340,9 +340,7 @@ arg_switched(oper)
 	}
 }
 
-mk_binop(expp, oper, expr, commutative)
-	struct expr **expp;
-	register struct expr *expr;
+void mk_binop(struct expr **expp, int oper, register struct expr *expr, int commutative)
 {
 	/*	Constructs in *expp the operation indicated by the operands.
 		"commutative" indicates whether "oper" is a commutative
@@ -366,8 +364,7 @@ mk_binop(expp, oper, expr, commutative)
 	}
 }
 
-pointer_arithmetic(expp1, oper, expp2)
-	register struct expr **expp1, **expp2;
+void pointer_arithmetic(register struct expr **expp1, int oper, register struct expr **expp2)
 {
 	int typ;
 	/*	prepares the integral expression expp2 in order to
@@ -387,8 +384,7 @@ pointer_arithmetic(expp1, oper, expp2)
 	);
 }
 
-pointer_binary(expp, oper, expr)
-	register struct expr **expp, *expr;
+void pointer_binary(register struct expr **expp, int oper, register struct expr *expr)
 {
 	/*	constructs the pointer arithmetic expression out of
 		a pointer expression, a binary operator and an integral

@@ -18,6 +18,7 @@
 #include	<ack_string.h>
 #include	<alloc.h>
 #include	<assert.h>
+#include    <string.h> 
 #include	<flt_arith.h>
 #include    "idf.h"
 #include	"arith.h"
@@ -31,25 +32,43 @@
 #include	"sizes.h"
 #include	"align.h"
 #include	"level.h"
+#include    "error.h"
 #include	"def.h"
 #include	"LLlex.h"
 #include	"estack.h"
 #include    "stack.h"
+#include    "ch3.h"
 
 #define con_nullbyte()	C_con_ucon("0", (arith)1)
 #define aggregate_type(tp) ((tp)->tp_fund == ARRAY || (tp)->tp_fund == STRUCT)
 
-char *strncpy();
 extern char options[];
 static int gen_error;
 static int pack_level;
-struct type **gen_tphead(), **gen_tpmiddle();
-struct sdef *gen_align_to_next();
 struct e_stack *p_stack;
 
-void pad();
-void gen_simple_exp();
-void gen_tpcheck();
+void gen_tpcheck(struct type **);
+void gen_simple_exp(struct type **, struct expr **);
+struct type **arr_elem(struct type **, struct e_stack *);
+struct sdef *next_field(register struct sdef *,register struct e_stack *);
+struct type **gen_tphead(struct type **, int);
+struct type **gen_tpmiddle(void);
+struct sdef *gen_align_to_next(register struct e_stack *);
+void gen_tpend(void);
+void check_and_pad(struct expr **, struct type **);
+void pad(struct type *);
+void check_ival(struct expr **, register struct type *);
+void ch_array(struct type **,	/* type tp = array of characters	*/
+	struct expr *);
+void str_cst(register char *, register int, int);
+#ifndef NOBITFIELD
+void put_bf(struct type *, arith );
+#endif /* NOBITFIELD */
+int zero_bytes(register struct sdef *);
+int valid_type(struct type *, char *);
+void con_int(register struct expr *);
+void illegal_init_cst(struct expr *);
+void too_many_initialisers(void);
 
 }
 
@@ -127,9 +146,7 @@ initial_value_list(register struct type **tpp; struct expr **expp;)
 ;
 
 {
-void
-gen_tpcheck(tpp)
-	struct type **tpp;
+void gen_tpcheck(struct type **tpp)
 {
 	register struct type *tp;
 
@@ -153,10 +170,7 @@ gen_tpcheck(tpp)
 	}
 }
 
-void
-gen_simple_exp(tpp, expp)
-	struct type **tpp;
-	struct expr **expp;
+void gen_simple_exp(struct type **tpp, struct expr **expp)
 {
 	register struct type *tp;
 
@@ -184,10 +198,7 @@ gen_simple_exp(tpp, expp)
 	}
 }
 
-struct type **
-arr_elem(tpp, p)
-	struct type **tpp;
-	struct e_stack *p;
+struct type **arr_elem(struct type **tpp, struct e_stack *p)
 {
 	register struct type *tp = *tpp;
 
@@ -200,10 +211,8 @@ arr_elem(tpp, p)
 	return gen_tphead(&(tp->tp_up), 1);
 }
 
-struct sdef *
-next_field(sd, p)
-	register struct sdef *sd;
-	register struct e_stack *p;
+struct sdef *next_field(register struct sdef *sd,
+	register struct e_stack *p)
 {
 	if (sd->sd_sdef)
 		p->bytes_upto_here += zero_bytes(sd);
@@ -213,9 +222,7 @@ next_field(sd, p)
 	return sd->sd_sdef;
 }
 
-struct type **
-gen_tphead(tpp, nest)
-	struct type **tpp;
+struct type **gen_tphead(struct type **tpp, int nest)
 {
 	register struct type *tp = *tpp;
 	register struct e_stack *p;
@@ -290,8 +297,7 @@ gen_tphead(tpp, nest)
 	}
 }
 
-struct type **
-gen_tpmiddle()
+struct type **gen_tpmiddle(void)
 {
 	register struct type *tp;
 	register struct sdef *sd;
@@ -349,9 +355,7 @@ again:
 	}
 }
 
-struct sdef *
-gen_align_to_next(p)
-	register struct e_stack *p;
+struct sdef *gen_align_to_next(register struct e_stack *p)
 {
 	register struct sdef *sd = p->s_def;
 
@@ -368,7 +372,7 @@ gen_align_to_next(p)
 	return sd;
 }
 
-gen_tpend()
+void gen_tpend(void)
 {
 	register struct e_stack *p = p_stack;
 	register struct type *tp;
@@ -424,9 +428,7 @@ gen_tpend()
 	In the latter case, only the first member is initialised and
 	the rest is zeroed.
 */
-check_and_pad(expp, tpp)
-	struct type **tpp;
-	struct expr **expp;
+void check_and_pad(struct expr **expp, struct type **tpp)
 {
 	register struct type *tp = *tpp;
 
@@ -472,9 +474,7 @@ check_and_pad(expp, tpp)
 /*	pad() fills an element of type tp with zeroes.
 	If the element is an aggregate, pad() is called recursively.
 */
-void
-pad(tpx)
-	struct type *tpx;
+void pad(struct type *tpx)
 {
 	register struct type *tp = tpx;
 	register arith sz = tp->tp_size;
@@ -504,9 +504,7 @@ pad(tpx)
 	No further comment is needed to explain the internal structure
 	of this straightforward function.
 */
-check_ival(expp, tp)
-	register struct type *tp;
-	struct expr **expp;
+void check_ival(struct expr **expp, register struct type *tp)
 {
 	/*	The philosophy here is that ch3cast puts an explicit
 		conversion node in front of the expression if the types
@@ -617,9 +615,8 @@ and also to prevent runtime coercions for compile-time constants.
 	a string constant.
 	Alignment is taken care of.
 */
-ch_array(tpp, ex)
-	struct type **tpp;	/* type tp = array of characters	*/
-	struct expr *ex;
+void ch_array(struct type **tpp,	/* type tp = array of characters	*/
+	struct expr *ex)
 {
 	register struct type *tp = *tpp;
 	register int length = ex->SG_LEN, i;
@@ -659,10 +656,7 @@ ch_array(tpp, ex)
 /*	As long as some parts of the pipeline cannot handle very long string
 	constants, string constants are written out in chunks
 */
-str_cst(str, len, inrom)
-	register char *str;
-	register int len;
-	int inrom;
+void str_cst(register char *str, register int len, int inrom)
 {
 	int chunksize = ((127 + (int) word_size) / (int) word_size) * (int) word_size;
 
@@ -686,9 +680,7 @@ str_cst(str, len, inrom)
 	"throws" the result of "field" out if the current selector
 	is the last of this number of fields stored at the same address.
 */
-put_bf(tp, val)
-	struct type *tp;
-	arith val;
+void put_bf(struct type *tp, arith val)
 {
 	static long field = (arith)0;
 	static arith offset = (arith)-1;
@@ -716,9 +708,7 @@ put_bf(tp, val)
 }
 #endif /* NOBITFIELD */
 
-int
-zero_bytes(sd)
-	register struct sdef *sd;
+int zero_bytes(register struct sdef *sd)
 {
 	/*	fills the space between a selector of a struct
 		and the next selector of that struct with zero-bytes.
@@ -732,10 +722,7 @@ zero_bytes(sd)
 	return count;
 }
 
-int
-valid_type(tp, str)
-	struct type *tp;
-	char *str;
+int valid_type(struct type *tp, char *str)
 {
 	assert(tp!=(struct type *)0);
 	if (tp->tp_size < 0) {
@@ -745,8 +732,7 @@ valid_type(tp, str)
 	return 1;
 }
 
-con_int(ex)
-	register struct expr *ex;
+void con_int(register struct expr *ex)
 {
 	register struct type *tp = ex->ex_type;
 
@@ -759,14 +745,13 @@ con_int(ex)
 		C_con_icon(long2str((long)ex->VL_VALUE, 10), tp->tp_size);
 }
 
-illegal_init_cst(ex)
-	struct expr *ex;
+void illegal_init_cst(struct expr *ex)
 {
 	expr_error(ex, "illegal initialization constant");
 	gen_error = pack_level;
 }
 
-too_many_initialisers()
+void too_many_initialisers(void)
 {
 	error("too many initializers");
 	gen_error = pack_level;

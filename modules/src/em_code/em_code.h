@@ -5,6 +5,7 @@
  */
 
 #include "em_mesX.h"
+#include "em_arith.h"
 #include "ansi.h"
 
 _PROTOTYPE(void C_ms_com, (char *));
@@ -23,6 +24,8 @@ _PROTOTYPE(void C_ms_stb_dnam, (char *, int, int, char *, arith));
 _PROTOTYPE(void C_ms_stb_ilb, (char *, int, int, label));
 _PROTOTYPE(void C_ms_stb_pnam, (char *, int, int, char *));
 _PROTOTYPE(void C_ms_std, (char *, int, int));
+
+
 
 #ifdef PEEPHOLE
 #include "em_codeO.h"

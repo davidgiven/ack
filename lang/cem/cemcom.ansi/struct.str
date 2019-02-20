@@ -2,7 +2,17 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef STRUCT_H_
+#define STRUCT_H_
+
 /* $Id$ */
+
+#include "arith.h"
+
+struct type;
+struct idf;
+struct field;
+
 /* SELECTOR DESCRIPTOR */
 
 struct sdef	{		/* for selectors */
@@ -27,4 +37,26 @@ struct tag	{		/* for struct-, union- and enum tags */
 
 /* ALLOCDEF "tag" 10 */
 
-struct sdef *idf2sdef();
+struct sdef *idf2sdef(register struct idf *idf, struct type *tp);
+void add_sel(
+	register struct type *stp,	/* type of the structure */
+	struct type *tp,		/* type of the selector */
+	register struct idf *idf,	/* idf of the selector */
+	struct sdef ***sdefpp,	/* address of hook to selector definition */
+	arith *szp,		/* pointer to struct size upto here */
+	struct field *fd);
+void declare_struct(int fund, register struct idf *idf, struct type **tpp);
+void apply_struct(int fund, register struct idf *idf, struct type **tpp);
+int is_struct_or_union(register int fund);
+
+#ifndef NOBITFIELD
+arith
+add_field(
+	arith *szp,			/* size of struct upto here	*/
+	register struct field *fd,	/* bitfield, containing width	*/
+	register struct type **fdtpp,	/* type of selector		*/
+	struct idf *idf,		/* name of selector		*/
+	register struct type *stp);	/* current struct descriptor	*/
+#endif	
+
+#endif

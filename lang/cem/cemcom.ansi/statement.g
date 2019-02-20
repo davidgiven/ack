@@ -24,6 +24,7 @@
 #include	"code.h"
 #include	"stack.h"
 #include	"def.h"
+#include    "switch.h"
 #ifdef DBSYMTAB
 #include	<stb.h>
 #endif /* DBSYMTAB */

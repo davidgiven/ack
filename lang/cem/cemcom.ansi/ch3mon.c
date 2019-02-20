@@ -5,6 +5,7 @@
 /* $Id$ */
 /* SEMANTIC ANALYSIS (CHAPTER 3.3) -- MONADIC OPERATORS */
 
+#include    "ch3mon.h"
 #include	"parameters.h"
 #include	<alloc.h>
 #include	"Lpars.h"
@@ -16,13 +17,15 @@
 #include	"expr.h"
 #include	"def.h"
 #include	"sizes.h"
+#include    "ch3.h"
+#include    "error.h"
+
 
 extern char options[];
 extern arith full_mask[/*MAXSIZE + 1*/];	/* cstoper.c */
 char *symbol2str();
 
-ch3mon(oper, expp)
-	register struct expr **expp;
+void ch3mon(int oper, register struct expr **expp)
 {
 	/*	The monadic prefix operator oper is applied to *expp.
 	*/

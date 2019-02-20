@@ -9,10 +9,7 @@
 
 #include "alloc.h"
 
-void
-botch(ptr, n)
-	register char *ptr;
-	register unsigned int n;
+void botch(register char *ptr, register unsigned int n)
 {
 	while (n >= sizeof (long))	{	
 			/* high-speed botch loop */

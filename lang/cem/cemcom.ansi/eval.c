@@ -14,6 +14,8 @@
 #include	<em_reg.h>
 #include	<alloc.h>
 #include	<flt_arith.h>
+#include    "interface.h"
+#include    "eval.h"
 #include    "idf.h"
 #include	"arith.h"
 #include	"type.h"
@@ -22,13 +24,21 @@
 #include	"def.h"
 #include	"expr.h"
 #include	"sizes.h"
+#include    "field.h"
 #include	"Lpars.h"
 #include	"level.h"
+#include    "conversion.h"
 #include	"stack.h"
+#include    "struct.h"
 #include	"align.h"
 #include	"mes.h"
 #include	"atw.h"
+#include    "ch3.h"
+#include    "util.h"
+#include    "blocks.h"
+#include    "dataflow.h"
 #include	"specials.h"
+#include    "error.h"
 
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 
@@ -37,8 +47,12 @@ arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 extern int	err_occurred; /* error.c */
 
-void store_val();
-void load_val();
+
+/* Forward internal declarations */
+static void operands(register struct expr *, int);
+static void ptr_add(arith size);
+static void truthvalue(int relop);
+static void compare(int relop, label lbl);
 
 /*	EVAL() is the main expression-tree evaluator, which turns
 	any legal expression tree into EM code. parameters.h:
@@ -66,11 +80,7 @@ void load_val();
 		labels, in case they are specified (i.e. are non-zero)
 */
 
-void
-EVAL(expr, val, code, true_label, false_label)
-	register struct expr *expr;
-	int val, code;
-	label true_label, false_label;
+void EVAL(register struct expr *expr, int val, int code, label true_label, label false_label)
 {
 	int vol = (code != TRUE && recurqual(expr->ex_type, TQ_VOLATILE));
 	register int gencode = code == TRUE;
@@ -659,9 +669,7 @@ EVAL(expr, val, code, true_label, false_label)
 }
 
 /*	compare() serves as an auxiliary function of EVAL	*/
-compare(relop, lbl)
-	int relop;
-	label lbl;
+static void compare(int relop, label lbl)
 {
 	switch (relop) {
 	case '<':
@@ -688,8 +696,7 @@ compare(relop, lbl)
 }
 
 /*	truthvalue() serves as an auxiliary function of EVAL	*/
-truthvalue(relop)
-	int relop;
+static void truthvalue(int relop)
 {
 	switch (relop)	{
 	case '<':
@@ -717,12 +724,10 @@ truthvalue(relop)
 
 
 /*	assop() generates the opcode of an assignment operators op=	*/
-assop(type, oper)
-	register struct type *type;
-	int oper;
+void assop(register struct type *type, int oper)
 {
 	register arith size;
-	register uns = type->tp_unsigned;
+	register int uns = type->tp_unsigned;
 
 	if ((int)(size = type->tp_size) < (int)word_size)
 		size = word_size;
@@ -822,8 +827,7 @@ assop(type, oper)
 	}
 }
 
-ptr_add(size)
-	arith size;
+static void ptr_add(arith size)
 {
 	if (size != pointer_size) {
 		C_loc(size);
@@ -840,10 +844,7 @@ ptr_add(size)
 	- into a local static variable
 	- absolute addressing
 */
-void
-store_val(vl, tp)
-	register struct value *vl;
-	register struct type *tp;
+void store_val(register struct value *vl, register struct type *tp)
 {
 	register int inword = 0;
 	register int indword = 0;
@@ -911,11 +912,10 @@ store_val(vl, tp)
 	- global variable
 	- static variable
 	- local variable
+
+	rlval generate rlval or lval
 */
-void
-load_val(expr, rlval)
-	register struct expr *expr; /* expression containing the value	*/
-	int rlval;		/* generate either LVAL or RVAL		*/
+void load_val(register struct expr *expr, int rlval)
 {
 	register struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
@@ -1012,8 +1012,7 @@ load_val(expr, rlval)
 	}
 }
 
-load_cst(val, siz)
-	arith val, siz;
+void load_cst(arith val, arith siz)
 {
 	if ((int)siz <= (int)word_size)
 		C_loc(val);
@@ -1030,8 +1029,7 @@ load_cst(val, siz)
 	}
 }
 
-operands(expr, gencode)
-	register struct expr *expr;
+static void operands(register struct expr *expr, int gencode)
 {
 	EVAL(expr->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
 	EVAL(expr->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);

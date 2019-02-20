@@ -15,48 +15,51 @@
  * machdep.c
  * Machine dependant things
  */
-
+#include <stdio.h>
+#ifdef USE_SYS
+#include <system.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
+# include "alloc.h"
+# include "extern.h"
 # include "types.h"
 
 # ifndef NORCSID
 static string rcsid5 = "$Id$";
 # endif
 
-/* In this file the following routines are defined: */
-extern	UNLINK();
-extern	RENAME();
-extern string	libpath();
+#ifndef LIBDIR
+#define LIBDIR "lib"
+#endif
 
-UNLINK(x) string x; {
+void UNLINK(string x)
+{
 	/* Must remove the file "x" */
-
 #ifdef USE_SYS
 	sys_remove(x);	/* systemcall to remove file */
 #else
-	unlink(x);
+	remove(x);
 #endif
 }
 
-RENAME(x,y) string x,y; {
+void RENAME(string x,string y)
+{
 	/* Must move the file "x" to the file "y" */
 
 #ifdef USE_SYS
-	if(! sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
+	if(!sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
 #else
 	if (rename(x, y) == -1)
 		fatal(1, "Cannot rename to %s", y);
 #endif
 }
 
-string
-libpath(s) string s; {
+string libpath(string s)
+{
 	/* Must deliver a full pathname to the library file "s" */
-
 	register string p;
-	register length;
-	p_mem alloc();
+	register int length;
 
 	char* libdir = getenv("LLGEN_LIB_DIR");
 	if (!libdir)
@@ -67,4 +70,12 @@ libpath(s) string s; {
 	strcat(p,"/");
 	strcat(p,s);
 	return p;
+}
+
+void TMPNAM(string result)
+{
+   if (tmpnam(result)==NULL)
+   {
+	   fatal(1, "Cannot create temporary file.", NULL);
+   }
 }

@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_cst(l)
-	arith l;
+void CC_cst(arith l)
 {
 	COMMA();
 	CST(l);

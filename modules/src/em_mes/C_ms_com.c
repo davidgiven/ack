@@ -6,12 +6,10 @@
  
 #include <stdlib.h>
 #include <string.h>
-#include <em.h>
-#include <em_mes.h>
+#include "em.h"
+#include "em_mes.h"
 
-void
-C_ms_com(str)
-	char *str;
+void C_ms_com(char* str)
 {
 	C_mes_begin(ms_com);
 	C_scon(str, (arith) (strlen(str) + 1));

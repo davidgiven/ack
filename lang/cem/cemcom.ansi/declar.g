@@ -19,12 +19,16 @@
 #include	"struct.h"
 #include	"field.h"
 #include	"decspecs.h"
+#include    "declarator.h"
 #include	"def.h"
 #include	"declar.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
 #include	"level.h"
+#include    "error.h"
+#include    "stab.h"
+
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	/* LINT */

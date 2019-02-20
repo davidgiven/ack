@@ -4,6 +4,13 @@
  */
 /* $Id$ */
 /* EXPRESSION DESCRIPTOR */
+#ifndef EXPR_H_
+#define EXPR_H_
+
+#include "parameters.h"
+#include "arith.h"
+#include "label.h"
+#include "flt_arith.h"
 
 /*	What we want to define is the struct expr, but since it contains
 	a union of various goodies, we define them first; so be patient.
@@ -97,3 +104,24 @@ extern struct expr *intexpr(), *new_oper();
 
 /* ALLOCDEF "expr" 20 */
 
+
+
+int rank_of(int oper);
+void dot2expr(struct expr **expp);
+void idf2expr(register struct expr *expr);
+void string2expr(register struct expr **expp, char *str, int len);
+void int2expr(struct expr *expr);
+void float2expr(register struct expr *expr);
+struct expr* intexpr(arith ivalue, int fund);
+void fill_int_expr(register struct expr *ex,arith ivalue, int fund);
+struct expr *new_oper(struct type *tp, register struct expr *e1, int oper,
+		register struct expr *e2);
+void chk_cst_expr(struct expr **expp);
+void init_expression(register struct expr ***eppp, struct expr *expr);
+int is_ld_cst(register struct expr *expr);
+int is_cp_cst(struct expr *expr);
+int is_fp_cst(struct expr *expr);
+int is_zero_cst(register struct expr *expr);
+void free_expression(register struct expr *expr);
+
+#endif

@@ -19,10 +19,7 @@ extern char *realloc();
 
 #include	"alloc.h"
 
-char *
-Realloc(ptr, sz)
-	char ptr[];
-	unsigned int sz;
+char *Realloc(char ptr[], unsigned int sz)
 {
 	register char *mptr;
 

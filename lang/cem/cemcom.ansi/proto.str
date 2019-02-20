@@ -2,6 +2,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef PROTO_H
+#define PROTO_H
+
 /* $Id$ */
 /* PARAMETER TYPE LIST DEFINITION */
 
@@ -20,3 +23,20 @@ struct proto {
 #define	PL_ERRGIVEN	0x08
 
 /* ALLOCDEF "proto" 20 */
+
+/* Forward structure declarations */
+struct expr;
+struct type;
+struct declarator;
+struct decspecs;
+
+
+void remove_proto_idfs(register struct proto *pl);
+void call_proto(register struct expr **expp);
+void update_proto(register struct type *tp, register struct type *otp);
+void declare_protos(register struct declarator *dc);
+void add_proto(struct proto *pl, struct decspecs *ds, struct declarator *dc,
+		int lvl);
+void check_for_void(register struct proto *pl);
+
+#endif

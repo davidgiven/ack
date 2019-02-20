@@ -6,7 +6,7 @@ clibrary {
 		--"./lock.c",
 		"./modtime.c", "./open.c", "./read.c", "./remove.c",
 		"./rename.c", "./seek.c", "./stop.c", "./system.c",
-		--"./unlock.c",
+		--"./unlock.c”,”./tmpdir.c”,
 		"./write.c",
 	},
 	hdrs = { "./system.h" },

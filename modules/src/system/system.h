@@ -6,6 +6,10 @@
 #ifndef __SYSTEM_INCLUDED__
 #define __SYSTEM_INCLUDED__
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+
 struct _sys_fildes {
 	int o_fd;	/* UNIX filedescriptor */
 	int o_flags;	/* flags for open; 0 if not used */
@@ -40,15 +44,17 @@ int sys_reset(File *);
 int sys_access(char *, int);
 int sys_remove(char *);
 int sys_rename(char *, char *);
-long sys_filesize(char *);
+off_t sys_filesize(char *);
 int sys_chmode(char *, int);
+/* Return the temporary directory location */
+char* sys_gettmpdir(void);
 #if 0
 int sys_lock(char *);
 int sys_unlock(char *);
 #endif
 char *sys_break(int);
 void sys_stop(int);
-long sys_modtime(char *);
+time_t sys_modtime(char *);
 
 /* standard file decsriptors */
 #define STDIN	&_sys_ftab[0]

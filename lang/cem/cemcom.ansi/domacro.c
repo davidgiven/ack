@@ -8,12 +8,17 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "domacro.h"
 #include "parameters.h"
 #include "idf.h"
+#include "interface.h"
 #include "arith.h"
 #include "LLlex.h"
 #include "Lpars.h"
 #include "input.h"
+#include "pragma.h"
+#include "skip.h"
+#include "error.h"
 
 #ifdef DBSYMTAB
 #include <stb.h>
@@ -23,7 +28,9 @@ int IncludeLevel = 0;
 
 extern char options[];
 
-struct idf* GetIdentifier(skiponerr) int skiponerr; /* skip the rest of the line on error */
+static void do_line(unsigned int);
+
+struct idf* GetIdentifier(int skiponerr) /* skip the rest of the line on error */
 {
 	/*	returns a pointer to the descriptor of the identifier that is
 	    read from the input stream. When the input does not contain
@@ -44,7 +51,7 @@ struct idf* GetIdentifier(skiponerr) int skiponerr; /* skip the rest of the line
 	return tk.tk_idf;
 }
 
-domacro()
+void domacro(void)
 {
 	int tok;
 	struct token tk;
@@ -70,7 +77,7 @@ domacro()
 	SkipToNewLine();
 }
 
-do_line(l) unsigned int l;
+static void do_line(unsigned int l)
 {
 	struct token tk;
 	int t = GetToken(&tk);

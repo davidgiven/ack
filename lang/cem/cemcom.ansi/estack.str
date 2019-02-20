@@ -2,6 +2,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+ #ifndef ESTACK_H_
+ #define ESTACK_H_
+ 
 /* $Id$ */
 /* EXPRESSION STACK */
 /* Used for global initializations */
@@ -19,3 +22,5 @@ struct e_stack {
 #define last_offset	s_cnt2
 #define elem_count	s_cnt1
 #define nelem		s_cnt2
+
+#endif

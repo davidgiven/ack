@@ -8,6 +8,7 @@
 #define __PRINT_INCLUDED__
 
 #include <stdarg.h>
+#include <system.h>
 
 void print(const char *fmt, ...);
 void fprint(File *f, const char *fmt, ...);

@@ -15,6 +15,8 @@
 
 struct symtab *idtable, *deftable;
 
+extern void error(char *s, char* s1);
+
 struct symtab *
 findident(s, mode, table) char *s; struct symtab **table; {
     /*
@@ -24,7 +26,7 @@ findident(s, mode, table) char *s; struct symtab **table; {
      * table yet, otherwise an error results
      */
     register struct symtab *p;
-    register n;
+    register int n;
 
     if (!*table) {	/* No entry for this symbol */
 	if (mode == LOOKING) return (struct symtab *) 0;

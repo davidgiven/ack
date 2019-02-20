@@ -10,6 +10,7 @@
 #include <string.h>
 #include "file_info.h"
 #include "input.h"
+#include "error.h"
 
 #define INP_PUSHBACK	3
 #define INP_TYPE	struct file_info
@@ -20,14 +21,14 @@ struct file_info	finfo;
 
 int	NoUnstack;
 
-AtEoIT()
+int AtEoIT(void)
 {
 	return 0;
 }
 
 extern char *source;
 
-AtEoIF()
+int AtEoIF(void)
 {
 	if (NoUnstack) lexerror("unexpected EOF");
 	return 0;

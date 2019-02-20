@@ -8,13 +8,11 @@
 #include <sys/stat.h>
 #include "system.h"
 
-long
-sys_filesize(path)
-	char *path;
+off_t sys_filesize(char* path)
 {
 	struct stat st_buf;
 
 	if (stat(path, &st_buf) != 0)
 		return -1L;
-	return (long) st_buf.st_size;
+	return st_buf.st_size;
 }

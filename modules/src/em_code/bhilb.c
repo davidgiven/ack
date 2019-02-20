@@ -2,11 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_bhilb(op, n, l, i)
-	arith n;
-	label l;
-	int i;
+void CC_bhilb(int op, arith n, label l, int i)
 {
 	/*	BSS or HOL with size n, initial value a ILB(l),
 		and flag i

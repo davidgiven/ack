@@ -10,18 +10,19 @@
 #include	"parameters.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
+#include    "fltcstoper.h"
 #include	"arith.h"
 #include	"type.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
 #include	"Lpars.h"
+#include    "error.h"
 
 extern int ResultKnown;
 extern char *symbol2str();
 
-fltcstbin(expp, oper, expr)
-	register struct expr **expp, *expr;
+void fltcstbin(register struct expr **expp, int oper, register struct expr *expr)
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in

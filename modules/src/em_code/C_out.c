@@ -9,25 +9,22 @@
 
 /* $Id$ */
 
-static arg();
-static pseudo();
+static void arg(struct e_instr *p, int comma);
+static void pseudo(struct e_instr *p);
 
 extern char em_flag[];
 char *C_error;
 
 #define flags(pp)	(em_flag[(pp)->em_opcode - sp_fmnem] & EM_PAR)
 
-struct e_instr *
-C_alloc()
+struct e_instr *C_alloc(void)
 {
 	static struct e_instr b;
 
 	return &b;
 }
 
-int
-C_out(p)
-	register struct e_instr *p;
+int C_out(register struct e_instr *p)
 {
 	/*	Generate EM-code from the e_instr structure "p"
 	*/
@@ -82,9 +79,7 @@ C_out(p)
 	return 1;
 }
 
-static
-arg(p, comma)
-	register struct e_instr *p;
+static void arg(register struct e_instr *p, int comma)
 {
 	/*	Output the argument of "p".
 	*/
@@ -145,9 +140,7 @@ arg(p, comma)
 	}
 }
 
-static
-pseudo(p)
-	register struct e_instr *p;
+static void pseudo(register struct e_instr *p)
 {
 
 	PS(p->em_opcode);

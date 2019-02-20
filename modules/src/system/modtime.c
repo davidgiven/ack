@@ -8,13 +8,11 @@
 #include <sys/stat.h>
 #include "system.h"
 
-long
-sys_modtime(path)
-	char *path;
+time_t sys_modtime(char* path)
 {
 	struct stat st_buf;
 
 	if (stat(path, &st_buf) != 0)
 		return -1L;
-	return (long) st_buf.st_mtime;
+	return st_buf.st_mtime;
 }

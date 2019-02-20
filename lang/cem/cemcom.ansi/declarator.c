@@ -6,6 +6,7 @@
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
 #include	"parameters.h"
+#include    "declarator.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -14,18 +15,20 @@
 #include	"Lpars.h"
 #include	"declar.h"
 #include	"def.h"
+#include    "idf.h"
 #include	"label.h"
 #include	"expr.h"
 #include	"sizes.h"
 #include	"level.h"
+#include    "error.h"
 
 extern char options[];
 struct declarator null_declarator;
 
 struct type *
-declare_type(tp, dc)
-	struct type *tp;
-	struct declarator *dc;
+declare_type(
+	struct type *tp,
+	struct declarator *dc)
 {
 	/*	Applies the decl_unary list starting at dc->dc_decl_unary
 		to the type tp and returns the result.
@@ -43,12 +46,7 @@ declare_type(tp, dc)
 	return tp;
 }
 
-add_decl_unary(dc, fund, qual,  count, fm, pl)
-	register struct declarator *dc;
-	int qual;
-	arith count;
-	struct formal *fm;
-	struct proto *pl;
+void add_decl_unary(register struct declarator *dc, int fund, int qual,  arith count, struct formal *fm, struct proto *pl)
 {
 	/*	A decl_unary describing a constructor with fundamental
 		type fund and with size count is inserted in front of the
@@ -75,8 +73,7 @@ add_decl_unary(dc, fund, qual,  count, fm, pl)
 	dc->dc_decl_unary = new;
 }
 
-remove_declarator(dc)
-	struct declarator *dc;
+void remove_declarator(struct declarator *dc)
 {
 	/*	The decl_unary list starting at dc->dc_decl_unary is
 		removed.
@@ -91,8 +88,7 @@ remove_declarator(dc)
 	}
 }
 
-reject_params(dc)
-	register struct declarator *dc;
+void reject_params(register struct declarator *dc)
 {
 	/*	The declarator is checked to have no parameters, if it
 		is an old-style function.  If it is a new-style function,
@@ -120,8 +116,7 @@ reject_params(dc)
 	}
 }
 
-check_array_subscript(expr)
-	register struct expr *expr;
+void check_array_subscript(register struct expr *expr)
 {
 	arith size = expr->VL_VALUE;
 

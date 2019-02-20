@@ -17,6 +17,7 @@
  */
 
 #include <stdlib.h>
+# include "alloc.h"
 # include "types.h"
 # include "extern.h"
 
@@ -26,29 +27,29 @@ static string rcsid = "$Id$";
 
 static string e_nomem = "Out of memory";
 
-p_mem
-alloc(size) unsigned size; {
+p_mem alloc(unsigned int size)
+{
 	/*
 	   Allocate "size" bytes. Panic if it fails
 	 */
 	p_mem	p;
 
-	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem);
+	if ((p = malloc(size)) == 0) fatal(linecount,e_nomem, NULL);
 	return p;
 }
 
-p_mem
-ralloc(p,size) p_mem p; unsigned size; {
+p_mem ralloc(p_mem p,unsigned int size)
+{
 	/*
 	   Re-allocate the chunk of memory indicated by "p", to
 	   occupy "size" bytes
 	 */
-	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem);
+	if ((p = realloc(p,size)) == 0) fatal(linecount,e_nomem, NULL);
 	return p;
 }
 
-p_mem
-new_mem(p) register p_info p; {
+p_mem new_mem(register p_info p)
+{
 	/*
 	   This routine implements arrays that can grow.
 	   It must be called every time a new element is added to it.

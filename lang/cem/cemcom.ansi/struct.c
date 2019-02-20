@@ -19,16 +19,23 @@
 #include	"Lpars.h"
 #include	"align.h"
 #include	"level.h"
+#include    "ch3.h"
 #include	"sizes.h"
+#include    "error.h"
 
 /*	Type of previous selector declared with a field width specified,
 	if any.  If a selector is declared with no field with it is set to 0.
 */
-static field_busy = 0;
+static int field_busy = 0;
 
 extern char options[];
 char *symbol2str();
-int lcm();
+
+static void check_selector(register struct idf *, struct type *);
+/*	Greatest Common Divisor */
+static int gcd(register int , register int );
+/*	Least Common Multiple */
+static int lcm(register int, register int);
 
 /*	The semantics of the identification of structure/union tags is
 	obscure.  Some highly regarded compilers are found out to accept,
@@ -51,13 +58,13 @@ int lcm();
 	as well).
 */
 
-add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
-	register struct type *stp;	/* type of the structure */
-	struct type *tp;		/* type of the selector */
-	register struct idf *idf;	/* idf of the selector */
-	struct sdef ***sdefpp;	/* address of hook to selector definition */
-	arith *szp;		/* pointer to struct size upto here */
-	struct field *fd;
+void add_sel( /* this is horrible */
+	register struct type *stp,	/* type of the structure */
+	struct type *tp,		/* type of the selector */
+	register struct idf *idf,	/* idf of the selector */
+	struct sdef ***sdefpp,	/* address of hook to selector definition */
+	arith *szp,		/* pointer to struct size upto here */
+	struct field *fd)
 {
 	/*	The selector idf with type tp is added to two chains: the
 		selector identification chain starting at idf->id_sdef,
@@ -147,12 +154,11 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 	}
 }
 
-check_selector(idf, stp)
-	register struct idf *idf;
-	struct type *stp;	/* the type of the struct */
+static void check_selector(register struct idf *idf, struct type *stp)
 {
 	/*	checks if idf occurs already as a selector in
-		struct or union *stp.
+		struct or union *stp. "stp" indicates the type
+		of the struct.
 	*/
 	register struct sdef *sdef = stp->tp_sdef;
 	
@@ -163,9 +169,7 @@ check_selector(idf, stp)
 	}
 }
 
-declare_struct(fund, idf, tpp)
-	register struct idf *idf;
-	struct type **tpp;
+void declare_struct(int fund, register struct idf *idf, struct type **tpp)
 {
 	/*	A struct, union or enum (depending on fund) with tag (!)
 		idf is declared, and its type (incomplete as it may be) is
@@ -232,9 +236,9 @@ declare_struct(fund, idf, tpp)
 	}
 }
 
-apply_struct(fund, idf, tpp)
-	register struct idf *idf;
-	struct type **tpp;
+void apply_struct(int fund,
+	register struct idf *idf,
+	struct type **tpp)
 {
 	/*	The occurrence of a struct, union or enum (depending on
 		fund) with tag idf is noted. It may or may not have been
@@ -258,10 +262,9 @@ apply_struct(fund, idf, tpp)
 		declare_struct(fund, idf, tpp);
 }
 
-struct sdef *
-idf2sdef(idf, tp)
-	register struct idf *idf;
-	struct type *tp;
+struct sdef *idf2sdef(
+	register struct idf *idf,
+	struct type *tp)
 {
 	/*	The identifier idf is identified as a selector
 		in the struct tp.
@@ -296,9 +299,7 @@ idf2sdef(idf, tp)
 }
 
 #if	0
-int
-uniq_selector(idf_sdef)
-	register struct sdef *idf_sdef;
+int uniq_selector(register struct sdef *idf_sdef)
 {
 	/*	Returns true if idf_sdef (which is guaranteed to exist)
 		is unique for this level, i.e there is no other selector
@@ -324,12 +325,12 @@ uniq_selector(idf_sdef)
 
 #ifndef NOBITFIELD
 arith
-add_field(szp, fd, fdtpp, idf, stp)
-	arith *szp;			/* size of struct upto here	*/
-	register struct field *fd;	/* bitfield, containing width	*/
-	register struct type **fdtpp;	/* type of selector		*/
-	struct idf *idf;		/* name of selector		*/
-	register struct type *stp;	/* current struct descriptor	*/
+add_field(
+	arith *szp,			/* size of struct upto here	*/
+	register struct field *fd,	/* bitfield, containing width	*/
+	register struct type **fdtpp,	/* type of selector		*/
+	struct idf *idf,		/* name of selector		*/
+	register struct type *stp)	/* current struct descriptor	*/
 {
 	/*	The address where this selector is put is returned. If the
 		selector with specified width does not fit in the word, or
@@ -438,18 +439,12 @@ add_field(szp, fd, fdtpp, idf, stp)
 #endif /* NOBITFIELD */
 
 /* some utilities */
-int
-is_struct_or_union(fund)
-	register int fund;
+int is_struct_or_union(register int fund)
 {
 	return fund == STRUCT || fund == UNION;
 }
 
-/*	Greatest Common Divisor
- */
-int
-gcd(m, n)
-	register int m, n;
+static int gcd(register int m, register int n)
 {
 	register int r;
 
@@ -461,11 +456,8 @@ gcd(m, n)
 	return m;
 }
 
-/*	Least Common Multiple
- */
-int
-lcm(m, n)
-	register int m, n;
+
+static int lcm(register int m, register int n)
 {
 	return m * (n / gcd(m, n));
 }

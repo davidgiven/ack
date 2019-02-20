@@ -2,9 +2,7 @@
 
 /* $Id$ */
 
-void
-CC_oppnam(opcode, pnam)
-	char *pnam;
+void CC_oppnam(int opcode, char* pnam)
 {
 	/*	Instruction that has a procedure name as argument
 		Argument types: p

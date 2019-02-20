@@ -18,13 +18,13 @@
  */
 
 {
-# include <stdlib.h>
-# include <string.h>
-# include "types.h"
-# include "io.h"
-# include "extern.h"
-# include "assert.h"
-# include "cclass.h"
+#include <stdlib.h>
+#include <string.h>
+#include "types.h"
+#include "io.h"
+#include "extern.h"
+#include "assert.h"
+#include "cclass.h"
 
 # ifndef NORCSID
 static string	rcsid = "$Id$";
@@ -48,15 +48,14 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC		newnorder();
-STATIC		newtorder();
-STATIC		mkalt();
-STATIC		mkterm();
-STATIC p_gram	copyrule();
+STATIC void newnorder(int index);
+STATIC void newtorder(int index);
+STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
+STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
+STATIC p_gram copyrule(register p_gram p,int length);
 /* and of course LLparse() */
 
-STATIC
-newnorder(index) {
+STATIC void newnorder(int index) {
 	static int porder;
 
 	if (norder != -1) {
@@ -67,8 +66,7 @@ newnorder(index) {
 	nonterms[porder].n_next = -1;
 }
 
-STATIC
-newtorder(index) {
+STATIC void newtorder(int index) {
 	static int porder;
 
 	if (torder != -1) {
@@ -79,7 +77,7 @@ newtorder(index) {
 	tokens[porder].t_next = -1;
 }
 
-p_init()
+void p_init(void)
 {
 	alt_table = (p_gram )alloc(ALTINCR*sizeof(t_gram));
 	n_alts = 0;
@@ -149,7 +147,7 @@ def			{	register string p; }
 			{	if (!lexical) {
 					lexical = store(lextoken.t_string);
 				}
-				else	error(linecount,"Duplicate %%lexical");
+				else	error(linecount,"Duplicate %%lexical", NULL);
 			}
 	  ';'
 	| C_PREFIX C_IDENT
@@ -160,25 +158,25 @@ def			{	register string p; }
 					prefix = store(lextoken.t_string);
 					if (strlen(prefix) > 6) {
 						error(linecount,
-							"%%prefix too long");
+							"%%prefix too long",NULL);
 						prefix[6] = 0;
 					}
 				}
-				else	error(linecount,"Duplicate %%prefix");
+				else	error(linecount,"Duplicate %%prefix", NULL);
 			}
 	  ';'
 	| C_ONERROR C_IDENT
 			{
 #ifdef NON_CORRECTING
 				if (non_corr) {
-					warning(linecount, "%%onerror conflicts with -n option");
+					warning(linecount, "%%onerror conflicts with -n option", NULL);
 				}
 				else
 #endif
 				  if (! onerror) {
 					onerror = store(lextoken.t_string);
 				}
-				else	error(linecount,"Duplicate %%onerror");
+				else	error(linecount,"Duplicate %%onerror", NULL);
 			}
 	  ';'
 	| C_ACTION	{	acount++; }
@@ -225,7 +223,7 @@ rule			{	register p_nont p;
 	  [ C_PARAMS	{	if (lextoken.t_num > 0) {
 					p->n_flags |= PARAMS;
 					if (lextoken.t_num > 15) {
-						error(linecount,"Too many parameters");
+						error(linecount,"Too many parameters", NULL);
 					}
 					else	setntparams(p,lextoken.t_num);
 				}
@@ -268,7 +266,7 @@ productions(p_gram *p;)
 				if (t & DEF) {
 					if (haddefault) {
 						error(n_lc,
-		"More than one %%default in alternation");
+		"More than one %%default in alternation", NULL);
 					}
 					haddefault = 1;
 				}
@@ -281,7 +279,7 @@ productions(p_gram *p;)
 			}
 	    ]+		{	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(n_lc,
-		"Resolver on last alternative not allowed");
+		"Resolver on last alternative not allowed", NULL);
 				}
 				mkalt(*p,conflres,n_lc,&alt_table[n_alts++]);
 				altcnt++;
@@ -291,12 +289,12 @@ productions(p_gram *p;)
 	  |
 			{	if (conflres & (COND|PREFERING|AVOIDING)) {
 					error(o_lc,
-		"No alternation conflict resolver allowed here");
+		"No alternation conflict resolver allowed here", NULL);
 				}
 				/*
 				if (conflres & DEF) {
 					error(o_lc,
-		"No %%default allowed here");
+		"No %%default allowed here", NULL);
 				}
 				*/
 			}
@@ -305,8 +303,8 @@ productions(p_gram *p;)
 	;
 {
 
-STATIC
-mkalt(prod,condition,lc,res) p_gram prod; register p_gram res; {
+STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
+{
 	/*
 	 * Create an alternation and initialise it.
 	 */
@@ -356,7 +354,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 				rule_table[n_rules++] =
 				    *search(TERMINAL, "LLILLEGAL", BOTH);
 				if (*conflres & DEF) {
-					error(linecount, "%%illegal not allowed in %%default rule");
+					error(linecount, "%%illegal not allowed in %%default rule", NULL);
 				}
 #endif
 			}
@@ -417,7 +415,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 					if ((q->t_flags & RESOLVER) &&
 					    (kind == PLUS || kind == FIXED)) {
 						error(linecount,
-		"%%while not allowed in this term");
+		"%%while not allowed in this term", NULL);
 					}
 					/*
 					 * A persistent fixed term is the same
@@ -426,7 +424,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 					if ((q->t_flags & PERSISTENT) &&
 					    kind == FIXED) {
 						error(linecount,
-							"Illegal %%persistent");
+							"Illegal %%persistent", NULL);
 					}
 					*/
 				}
@@ -453,8 +451,8 @@ simpleproduction(p_gram *p; register int *conflres;)
 	;
 {
 
-STATIC
-mkterm(prod,flags,lc,result) p_gram prod; register p_gram result; {
+STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
+{
 	/*
 	 * Create a term, initialise it and return
 	 * a grammar element containing it
@@ -510,7 +508,7 @@ elem (register p_gram pres;)
 				if (erroneous) {
 					if (g_gettype(pres) != TERMINAL){
 						warning(linecount,
-							"Erroneous only allowed on terminal");
+							"Erroneous only allowed on terminal", NULL);
 						erroneous = 0;
 					}
 					else
@@ -520,11 +518,11 @@ elem (register p_gram pres;)
 
 			}
 	  [ C_PARAMS	{	if (lextoken.t_num > 15) {
-					error(linecount,"Too many parameters");
+					error(linecount,"Too many parameters", NULL);
 				} else	g_setnpar(pres,lextoken.t_num);
 				if (g_gettype(pres) == TERMINAL) {
 					error(linecount,
-						"Terminal with parameters");
+						"Terminal with parameters", NULL);
 				}
 			}
 	  ]?
@@ -620,7 +618,7 @@ number(int *t;)
 	: C_NUMBER
 			{	*t = lextoken.t_num;
 				if (*t <= 0 || *t >= 8192) {
-					error(linecount,"Illegal number");
+					error(linecount,"Illegal number", NULL);
 				}
 			}
 	;
@@ -646,8 +644,8 @@ firsts	{	register string p; }
 	;
 {
 
-STATIC p_gram
-copyrule(p,length) register p_gram p; {
+STATIC p_gram copyrule(register p_gram p,int length)
+{
 	/*
 	 * Returns a pointer to a grammar rule that was created in
 	 * p. The space pointed to by p can now be reused

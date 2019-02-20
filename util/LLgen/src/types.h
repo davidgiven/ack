@@ -2,6 +2,8 @@
  * For full copyright and restrictions on use see the file COPYING in the top
  * level of the LLgen tree.
  */
+#ifndef TYPES_H_
+#define TYPES_H_
 
 /*
  *  L L G E N
@@ -270,3 +272,5 @@ typedef struct info_alloc {
 # else /* not NDEBUG */
 # define STATIC extern
 # endif /* not NDEBUG */
+
+#endif /* TYPES_H_ */

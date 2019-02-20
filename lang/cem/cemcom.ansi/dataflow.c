@@ -10,26 +10,26 @@
 */
 
 #include	"parameters.h"	/* UF */
+#include    "dataflow.h"
+#include    "print.h"
 
 #ifdef	DATAFLOW
 char *CurrentFunction = 0;
 int NumberOfCalls;
 
-DfaStartFunction(nm)
-	char *nm;
+void DfaStartFunction(char* nm)
 {
 	CurrentFunction = nm;
 	NumberOfCalls = 0;
 }
 
-DfaEndFunction()
+void DfaEndFunction(void)
 {
 	if (NumberOfCalls == 0)
 		print("DFA: %s: --none--\n", CurrentFunction);
 }
 
-DfaCallFunction(s)
-	char *s;
+void DfaCallFunction(char* s)
 {
 	print("DFA: %s: %s\n", CurrentFunction, s);
 	++NumberOfCalls;

@@ -2,7 +2,16 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#ifndef SWITCH_H_
+#define SWITCH_H_
+
 /* $Id$ */
+
+#include "arith.h"
+
+struct type;
+struct expr;
+
 /*		S W I T C H - T A B L E - S T R U C T U R E		*/
 
 struct switch_hdr	{
@@ -27,3 +36,12 @@ struct case_entry	{
 };
 
 /* ALLOCDEF "case_entry" 20 */
+
+void code_startswitch(struct expr **expp);
+void code_endswitch(void);
+void code_case(struct expr *expr);
+void code_default(void);
+
+
+
+#endif

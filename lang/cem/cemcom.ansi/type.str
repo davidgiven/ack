@@ -4,8 +4,13 @@
  */
 /* $Id$ */
 /* TYPE DESCRIPTOR */
+#ifndef TYPE_H_
+#define TYPE_H_
 
 #include	"parameters.h"
+#include    "arith.h"
+
+
 
 struct type	{
 	struct type *next;	/* used for ARRAY and for qualifiers */
@@ -59,13 +64,6 @@ struct type	{
 #define	TQ_VOLATILE	0x01
 #define	TQ_CONST	0x02
 
-extern struct type
-	*create_type(), *standard_type(), *construct_type(), *pointer_to(),
-	*array_of(), *function_of(), *promoted_type();
-
-#ifndef NOBITFIELD
-extern struct type *field_of();
-#endif /* NOBITFIELD */
 
 extern struct type
 	*schar_type, *uchar_type,
@@ -79,6 +77,24 @@ extern struct type
 
 extern struct type *pa_type;	/* type.c	*/
 
-extern arith size_of_type(), align();
+struct type *create_type(int fund);
+struct type *promoted_type(struct type *tp);
+struct type *construct_type(int fund, register struct type *tp, int qual,
+arith count, /* for fund == ARRAY only */
+   register struct proto *pl);
+struct type *function_of(register struct type *tp, struct proto *pl, int qual);
+struct type *pointer_to(register struct type *tp, int qual);
+struct type * array_of(register struct type *tp, arith count, int qual);
+#ifndef NOBITFIELD
+struct type * field_of(register struct type *tp, int qual);
+#endif /* NOBITFIELD */
+arith size_of_type(struct type *tp, char nm[]);
+void idf2type(struct idf *idf, struct type **tpp);
+arith align(arith pos, int al);
+struct type * standard_type(int fund, int sgn, int algn, arith sz);
+void completed(struct type *tp);
+
 
 /* ALLOCDEF "type" 50 */
+
+#endif

@@ -41,16 +41,14 @@ static int	loc_id;
 
 extern char options[];
 
-LocalInit()
+void LocalInit(void)
 {
 #ifdef USE_TMP
 	C_insertpart(loc_id = C_getid());
 #endif /* USE_TMP */
 }
 
-arith
-LocalSpace(sz, al)
-	arith sz;
+arith LocalSpace(arith sz, int al)
 {
 	register struct stack_level *stl = local_level;
 
@@ -61,9 +59,7 @@ LocalSpace(sz, al)
 #define TABSIZ 32
 static struct localvar *regs[TABSIZ];
 
-arith
-NewLocal(sz, al, regtype, sc)
-	arith sz;
+arith NewLocal(arith sz, int al, int regtype, int sc)
 {
 	register struct localvar *tmp = FreeTmps;
 	struct localvar *prev = 0;
@@ -98,8 +94,7 @@ NewLocal(sz, al, regtype, sc)
 	return tmp->t_offset;
 }
 
-FreeLocal(off)
-	arith off;
+void FreeLocal(arith off)
 {
 	int index = (int) (off >> 2) & (TABSIZ - 1);
 	register struct localvar *tmp = regs[index];
@@ -117,7 +112,7 @@ FreeLocal(off)
 	}
 }
 
-LocalFinish()
+void LocalFinish(void)
 {
 	register struct localvar *tmp, *tmp1;
 	register int i;
@@ -163,9 +158,7 @@ LocalFinish()
 #endif
 }
 
-void
-RegisterAccount(offset, size, regtype, sc)
-	arith offset, size;
+void RegisterAccount(arith offset, arith size, int regtype, int sc)
 {
 	register struct localvar *p;
 	int index;
@@ -183,9 +176,7 @@ RegisterAccount(offset, size, regtype, sc)
 	regs[index] = p;
 }
 
-static struct localvar *
-find_reg(off)
-	arith off;
+static struct localvar *find_reg(arith off)
 {
 	register struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
 
@@ -193,8 +184,7 @@ find_reg(off)
 	return p;
 }
 
-LoadLocal(off, sz)
-	arith off, sz;
+void LoadLocal(arith off, arith sz)
 {
 	register struct localvar *p = find_reg(off);
 
@@ -213,8 +203,7 @@ LoadLocal(off, sz)
 	}
 }
 
-StoreLocal(off, sz)
-	arith off, sz;
+void StoreLocal(arith off, arith sz)
 {
 	register struct localvar *p = find_reg(off);
 
@@ -234,8 +223,7 @@ StoreLocal(off, sz)
 }
 
 #ifndef	LINT
-AddrLocal(off)
-	arith off;
+void AddrLocal(arith off)
 {
 	register struct localvar *p = find_reg(off);
 

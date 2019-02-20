@@ -10,9 +10,10 @@
 #include "LLlex.h"
 #include "class.h"
 #include "input.h"
+#include "skip.h"
 
 
-SkipToNewLine()
+int SkipToNewLine(void)
 {
 	register int ch;
 	register int garbage = 0;

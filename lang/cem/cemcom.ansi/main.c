@@ -23,7 +23,13 @@
 #include	"specials.h"
 #include	"sizes.h"
 #include	"align.h"
+#include    "stack.h"
 #include	"macro.h"
+#include    "options.h"
+#include    "error.h"
+#include    "code.h"
+#include    "cstoper.h"
+#include    "tokenname.h"
 
 extern struct tokenname tkidf[];
 extern char *symbol2str();
@@ -34,7 +40,15 @@ struct sp_id special_ids[] =	{
 	{0, 0}
 };
 
-void dependency();
+void compile(int argc, char *argv[]);
+static void init(void);
+static void init_specials(register struct sp_id *si);
+#ifdef DEBUG
+void Info(void);
+#endif
+
+extern void C_program(void); /* program.c */
+
 
 #ifndef NOCROSS
 arith
@@ -63,8 +77,7 @@ int
 
 char *prog_name;
 
-main(argc, argv)
-	char *argv[];
+int main(int argc, char *argv[])
 {
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
@@ -104,8 +117,7 @@ char *source = 0;
 char *nmlist = 0;
 #endif /* GEN_NM_LIST */
 
-compile(argc, argv)
-	char *argv[];
+void compile(int argc, char *argv[])
 {
 	char *result;
 #ifndef	LINT
@@ -190,7 +202,7 @@ compile(argc, argv)
 	}
 }
 
-init()
+static void init(void)
 {
 	init_cst();	/* initialize variables of "cstoper.c"		*/
 	reserve(tkidf);		/* mark the C reserved words as such	*/
@@ -255,8 +267,7 @@ init()
 	stack_level();
 }
 
-init_specials(si)
-	register struct sp_id *si;
+static void init_specials(register struct sp_id *si)
 {
 	while (si->si_identifier)	{
 		struct idf *idf = str2idf(si->si_identifier, 0);
@@ -269,7 +280,7 @@ init_specials(si)
 }
 
 #ifdef DEBUG
-Info()
+void Info(void)
 {
 	extern int cnt_string_cst, cnt_formal,
 		    cnt_decl_unary, cnt_def, cnt_expr, cnt_field,
@@ -301,14 +312,12 @@ Info()
 }
 #endif /* DEBUG */
 
-void
-No_Mem()				/* called by alloc package */
+void No_Mem(void)				/* called by alloc package */
 {
 	fatal("out of memory");
 }
 
-void
-C_failed()				/* called by EM_code module */
+void C_failed(void)				/* called by EM_code module */
 {
 	fatal("write failed");
 }

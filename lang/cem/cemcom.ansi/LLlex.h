@@ -9,6 +9,8 @@
 	called a "symbol", but it may have other information associated
 	to it.
 */
+#ifndef LLLEX_H_
+#define LLLEX_H_
 
 #include "file_info.h"
 
@@ -56,3 +58,9 @@ extern int err_occurred;	/* "error.c"	*/
 #define	ASIDE	aside.tk_symb
 
 #define EOF	(-1)
+
+int GetChar(void);
+int LLlex(void);
+int GetToken(register struct token* ptok);
+
+#endif /* LLLEX_H_ */

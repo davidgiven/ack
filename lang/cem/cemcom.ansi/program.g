@@ -56,12 +56,15 @@
 #include	"code.h"
 #include	"expr.h"
 #include	"def.h"
+#include    "idf.h"
+#include    "declarator.h"
 #include    "stack.h"
+#include    "proto.h"
+#include    "error.h"
 #ifdef	LINT
 #include	"l_lint.h"
 #endif	/* LINT */
 
-extern error();
 }
 
 control_if_expression

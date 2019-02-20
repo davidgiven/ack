@@ -15,6 +15,11 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"code.h"
+#include    "error.h"
+#include    "ch3.h"
+#include    "ch3bin.h"
+#include    "ch3mon.h"
+#include    "proto.h"
 #include	"sizes.h"
 
 extern struct expr *intexpr();
