@@ -49,7 +49,7 @@ next_option:			/* to allow combined one-char options */
 		break;
 
 	case '-':
-		options[*text++] = 1;	/* flags, debug options etc.	*/
+		options[(int)*text++] = 1;	/* flags, debug options etc.	*/
 		goto next_option;
 
 #ifndef LINT
@@ -127,7 +127,7 @@ next_option:			/* to allow combined one-char options */
 		register arith sz, algn;
 		char c;
 
-		while (c = *text++)	{
+		while ( (c = *text++) !=0)	{
 			sz = txt2int(&text);
 			algn = 0;
 			if (*text == '.')	{

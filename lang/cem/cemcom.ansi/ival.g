@@ -455,7 +455,7 @@ void check_and_pad(struct expr **expp, struct type **tpp)
 		/* next selector is aligned by adding extra zeroes */
 		if (sd->sd_sdef)
 			zero_bytes(sd);
-		while (sd = sd->sd_sdef) { /* pad remaining selectors	*/
+		while ( (sd = sd->sd_sdef)!=0) { /* pad remaining selectors	*/
 			pad(sd->sd_type);
 			if (sd->sd_sdef)
 				zero_bytes(sd);

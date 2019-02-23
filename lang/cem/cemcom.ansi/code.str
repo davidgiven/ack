@@ -36,6 +36,7 @@ void end_code(void);
 struct expr;
 struct def;
 struct idf;
+struct decspecs;
 
 label code_string(char* val, int len);
 void def_strings(register struct string_cst *sc);
