@@ -1,4 +1,8 @@
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
+#ifndef TYPE_H_
+#define TYPE_H_
+
+
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *next;
@@ -160,16 +164,6 @@ extern arith
 	real_size;		/* All from type.c */
 #endif /* NOCROSS */
 
-extern arith
-	align();
-
-struct type
-	*construct_type(),
-	*standard_type(),
-	*proc_type(),
-	*func_type(),
-	*set_type(),
-	*subr_type();		/* All from type.c */
 
 #define NULLTYPE ((struct type *) 0)
 
@@ -192,3 +186,45 @@ struct type
 extern long full_mask[];
 
 #define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)
+
+struct node;
+
+/* Initialize internal types */
+void InitTypes(void);
+/* Construct a standard type with specified size in bytes
+   and specified alignment. */
+struct type *standard_type(int fund, int algn, arith size);
+/* Construct a user defined type. */
+struct type *construct_type(int fund, register struct type *tp);
+/* Constructs a new procedure type with the specified parameters. */
+struct type *proc_type(struct paramlist *parameters, arith n_bytes_params);
+/* Constructs a new function type with the specified parameters and result type. */
+struct type *func_type(struct paramlist * parameters, arith n_bytes_params, struct type *resulttype);
+void chk_type_id(register struct type **ptp, register struct node *nd);
+/* Construct a new subrange type from a lower bound "lb" to an upper bound "ub" */
+struct type *subr_type(register struct node *lb, register struct node *ub);
+/* Return the bounds of the specified type "tp", assert if this is not a bounded type. */
+void getbounds(register struct type *tp, arith *plo, arith *phi);
+/* Construct a new set type. */
+struct type *set_type(register struct type *tp, unsigned short packed);
+/* Assign sizes to an array type, and check index type and generate array descriptor */
+void ArraySizes(register struct type *tp);
+/* Check all forward declaration */
+void chk_forw_types(void);
+/* Insert selector of nested variant (sel1) in tagvalue-table of
+   current selector (sel).
+*/
+void TstCaseConstants(register struct node *nd, register struct selector *sel,
+		register struct selector *sel1);
+/* Return the "pos" aligned to "al". */
+arith align(arith pos, int al);
+/* Print type information for "tp". */
+void DumpType(register struct type *tp);
+/* Least Common Multiple */
+int lcm(int m, int n);
+
+
+
+
+
+#endif

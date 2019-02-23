@@ -1,4 +1,9 @@
 /* T O K E N   D E S C R I P T O R   D E F I N I T I O N */
+#ifndef LLLEX_H_
+#define LLLEX_H_
+
+#include "em_label.h"
+#include "em_arith.h"
 
 /* Structure to store a string constant
 */
@@ -46,3 +51,8 @@ extern struct type *toktype, *asidetype;
 extern int tokenseen;
 
 #define	ASIDE	aside.tk_symb
+
+void CheckForLineDirective(void);
+int LLlex(void);
+
+#endif

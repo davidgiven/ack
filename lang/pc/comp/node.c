@@ -6,16 +6,14 @@
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include	<system.h>
+#include    "print.h"
 
 #include	"LLlex.h"
 #include	"node.h"
 #include	"type.h"
+#include    "error.h"
 
-struct node *
-MkNode(class, left, right, token)
-	struct node *left, *right;
-	struct token *token;
+struct node *MkNode(int class, struct node *left, struct node *right, struct token *token)
 {
 	/*	Create a node and initialize it with the given parameters
 	*/
@@ -29,9 +27,7 @@ MkNode(class, left, right, token)
 	return nd;
 }
 
-struct node *
-MkLeaf(class, token)
-	struct token *token;
+struct node *MkLeaf(int class, struct token *token)
 {
 	register struct node *nd = new_node();
 
@@ -42,9 +38,7 @@ MkLeaf(class, token)
 	return nd;
 }
 
-void
-FreeNode(nd)
-	register struct node *nd;
+void FreeNode(register struct node *nd)
 {
 	/*	Put nodes that are no longer needed back onto the free list
 	*/
@@ -54,8 +48,7 @@ FreeNode(nd)
 	free_node(nd);
 }
 
-NodeCrash(expp)
-	struct node *expp;
+int NodeCrash(struct node *expp)
 {
 	crash("Illegal node %d", expp->nd_class);
 }
@@ -64,14 +57,13 @@ NodeCrash(expp)
 
 extern char *symbol2str();
 
-indnt(lvl)
+void indnt(int lvl)
 {
 	while( lvl-- )
 		print("  ");
 }
 
-printnode(nd, lvl)
-	register struct node *nd;
+void printnode(register struct node *nd, int lvl)
 {
 	indnt(lvl);
 	print("Class: %d; Symbol: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
@@ -83,8 +75,7 @@ printnode(nd, lvl)
 	}
 }
 
-PrNode(nd, lvl)
-	register struct node *nd;
+void PrNode(register struct node *nd, int lvl)
 {
 	if( !nd )	{
 		indnt(lvl); print("<nilnode>\n");

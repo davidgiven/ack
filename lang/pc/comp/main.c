@@ -10,6 +10,7 @@
 #include	<system.h>
 #include	<stb.h>
 
+#include	"print.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"class.h"
@@ -24,6 +25,10 @@
 #include	"tokenname.h"
 #include	"type.h"
 #include	"scope.h"
+#include    "cstoper.h"
+#include    "stab.h"
+#include    "options.h"
+#include    "error.h"
 
 char		options[128];
 char		*ProgName;
@@ -36,9 +41,16 @@ label		text_label;
 struct def	*program;
 extern int	fp_used;	/* set if floating point used */
 
+extern void LLparse(void);
 
-main(argc, argv)
-	register char **argv;
+int Compile(char *src, char *dst);
+void AddRequired(void);
+#ifdef DEBUG
+void LexScan(void);
+void Info(void);
+#endif
+
+int main(int argc, register char **argv)
 {
 	register int Nargc = 1;
 	register char **Nargv = &argv[0];
@@ -54,14 +66,14 @@ main(argc, argv)
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if( Nargc < 2 )	{
 		fprint(STDERR, "%s: Use a file argument\n", ProgName);
-		sys_stop(S_EXIT);
+		return EXIT_FAILURE;
 	}
-	if(!Compile(Nargv[1], Nargv[2])) sys_stop(S_EXIT);
-	sys_stop(S_END);
+	if(!Compile(Nargv[1], Nargv[2]))
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 
-Compile(src, dst)
-	char *src, *dst;
+int Compile(char *src, char *dst)
 {
 	extern struct tokenname tkidf[];
 	extern struct tokenname tkstandard[];
@@ -128,10 +140,10 @@ Compile(src, dst)
 }
 
 #ifdef DEBUG
-LexScan()
+void LexScan(void)
 {
 	register struct token *tkp = &dot;
-	extern char *symbol2str();
+
 
 	while( LLlex() > 0 )	{
 		print(">>> %s ", symbol2str(tkp->tk_symb));
@@ -159,7 +171,7 @@ LexScan()
 }
 #endif
 
-AddRequired()
+void AddRequired(void)
 {
 	register struct def *df;
 	extern struct def *Enter();
@@ -259,7 +271,7 @@ AddRequired()
 #ifdef DEBUG
 	int cntlines;
 
-Info()
+void Info(void)
 {
 	extern int cnt_def, cnt_node, cnt_paramlist, cnt_type, cnt_scope,
 			cnt_scopelist, cnt_tmpvar, cnt_withdesig,

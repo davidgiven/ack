@@ -1,5 +1,7 @@
 /* M I S C E L L A N E O U S */
 
+struct node;
+
 #define is_anon_idf(x)		((x)->id_text[0] == '#')
 #define id_not_declared(x)	(not_declared("identifier", (x), ""))
 
@@ -9,11 +11,7 @@ extern struct idf
 extern char 
 	*gen_proc_name();
 
+void not_declared(char *what, register struct node *id, char *where);
+
 extern char *symbol2str();
-extern arith NewInt();
-extern arith NewPtr();
-extern arith CodeBeginBlock();
-extern arith EnterParamList();
-extern arith EnterParTypes();
-extern arith CodeInitFor();
-extern arith IsString();
+

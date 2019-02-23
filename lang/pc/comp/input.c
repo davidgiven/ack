@@ -12,10 +12,16 @@ struct f_info	file_info;
 #include	<inp_pkg.body>
 
 
-AtEoIF()
+int AtEoIF(void)
 {
 	/*	Make the unstacking of input streams noticable to the
 	   	lexical analyzer
 	*/
 	return 1;
+}
+
+int
+AtEoIT(void)
+{
+	return 0;
 }

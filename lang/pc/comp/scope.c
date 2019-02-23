@@ -15,13 +15,15 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include    "lookup.h"
+#include    "error.h"
 
 struct scope *GlobalScope, *PervasiveScope, *BlockScope;
 struct scopelist *CurrVis;
 extern int proclevel;			/* declared in declar.g */
 static int sccount;
 
-InitScope()
+void InitScope(void)
 {
 	register struct scope *sc = new_scope();
 	register struct scopelist *ls = new_scopelist();
@@ -33,7 +35,7 @@ InitScope()
 	CurrVis = ls;
 }
 
-open_scope()
+void open_scope(void)
 {
 	register struct scope *sc = new_scope();
 	register struct scopelist *ls = new_scopelist();
@@ -45,7 +47,7 @@ open_scope()
 	CurrVis = ls;
 }
 
-close_scope(doclean)
+void close_scope(int doclean)
 {
 	/* When this procedure is called, the next visible scope is equal to
 	   the statically enclosing scope
@@ -62,9 +64,7 @@ close_scope(doclean)
 	CurrVis = CurrVis->next;
 }
 
-Forward(nd, tp)
-	register struct node *nd;
-	register struct type *tp;
+void Forward(register struct node *nd, register struct type *tp)
 {
 	/* Enter a forward reference into the current scope. This is
 	 * used in pointertypes.
@@ -79,7 +79,7 @@ Forward(nd, tp)
 	fw_type->f_type = tp;
 }
 
-chk_prog_params()
+void chk_prog_params(void)
 {
 	/* the program parameters must be global variables of some file type */
 	register struct def *df = CurrentScope->sc_def;
@@ -102,7 +102,7 @@ chk_prog_params()
 	}
 }
 
-chk_directives()
+void chk_directives(void)
 {
 	/* check if all forward declarations are defined */
 	register struct def *df = CurrentScope->sc_def;

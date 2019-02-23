@@ -12,6 +12,10 @@
 #include	"main.h"
 #include	"node.h"
 #include	"type.h"
+#include    "code.h"
+#include    "error.h"
+#include    "typequiv.h"
+#include    "casestat.h"
 
 struct case_hdr	{
 	struct case_hdr *ch_next;		/* in the free list */
@@ -40,9 +44,14 @@ struct case_entry	{
 */
 #define	compact(nr, low, up)	(nr != 0 && (up - low) / nr <= DENSITY)
 
+static void FreeCh(register struct case_hdr *);
+static int AddCases(register struct case_hdr *, register struct node *, label);
+static int AddOneCase(register struct case_hdr *, register struct node *, label);
+static void CaseCode(label, struct case_hdr *, label);
+
+
 void
-CaseExpr(nd)
-	struct node *nd;
+CaseExpr(struct node *nd)
 {
 	/* Check the expression and generate code for it
 	*/
@@ -64,9 +73,9 @@ CaseExpr(nd)
 }
 
 void
-CaseEnd(nd, exit_label)
-	struct node *nd;
-	label exit_label;
+CaseEnd(
+	struct node *nd,
+	label exit_label)
 {
 	/*	Stack a new case header and fill in the necessary fields.
 	*/
@@ -98,8 +107,7 @@ CaseEnd(nd, exit_label)
 	FreeNode(nd);
 }
 
-FreeCh(ch)
-	register struct case_hdr *ch;
+static void FreeCh(register struct case_hdr *ch)
 {
 	/*	 free the allocated case structure	
 	*/
@@ -116,10 +124,10 @@ FreeCh(ch)
 	free_case_hdr(ch);
 }
 
-AddCases(ch, nd, CaseLabel)
-	register struct case_hdr *ch;
-	register struct node *nd;
-	label CaseLabel;
+static int AddCases(
+	register struct case_hdr *ch,
+	register struct node *nd,
+	label CaseLabel)
 {
 	while( nd )	{
 		if( !AddOneCase(ch, nd, CaseLabel) )
@@ -129,10 +137,10 @@ AddCases(ch, nd, CaseLabel)
 	return 1;
 }
 
-AddOneCase(ch, nd, lbl)
-	register struct case_hdr *ch;
-	register struct node *nd;
-	label lbl;
+static int AddOneCase(
+	register struct case_hdr *ch,
+	register struct node *nd,
+	label lbl)
 {
 	register struct case_entry *ce = new_case_entry();
 	register struct case_entry *c1 = ch->ch_entries, *c2 = 0;
@@ -211,10 +219,10 @@ AddOneCase(ch, nd, lbl)
 	return 1;
 }
 
-CaseCode(lbl, ch, exit_label)
-	label lbl;
-	struct case_hdr *ch;
-	label exit_label;
+static void CaseCode(
+	label lbl,
+	struct case_hdr *ch,
+	label exit_label)
 {
 	label CaseDescrLab = ++data_label;	/* rom must have a label */
 

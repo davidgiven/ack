@@ -11,12 +11,19 @@
 
 #include	"LLlex.h"
 #include	"const.h"
+#include    "chk_expr.h"
 #include	"def.h"
 #include	"idf.h"
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
+#include    "lookup.h"
 #include	"type.h"
+#include    "typequiv.h"
+#include    "error.h"
+#ifdef DBSYMTAB
+#include	"stab.h"
+#endif
 
 #ifndef NOCROSS
 int
@@ -51,9 +58,15 @@ struct type
 	*void_type,
 	*error_type;
 
-void ArraySizes();
 
-CheckTypeSizes()
+/* Local forward declarations */
+static arith ArrayElSize(register struct type *, int);
+static void FreeForward(register struct forwtype *);
+static int gcd(int, int);
+
+
+
+static void CheckTypeSizes(void)
 {
 	/* first, do some checking
 	*/
@@ -75,7 +88,7 @@ CheckTypeSizes()
 		fatal("illegal realsize");
 }
 
-InitTypes()
+void InitTypes(void)
 {
 	/* First check the sizes of some basic EM-types
 	*/
@@ -144,16 +157,12 @@ InitTypes()
 	emptyset_type->tp_align = word_align;
 }
 
-int
-fit(sz, nbytes)
-        arith sz;
+static int fit(arith sz, int nbytes)
 {
 	return ((sz) + ((arith)0x80<<(((nbytes)-1)*8)) & ~full_mask[(nbytes)]) == 0;
 }
 
-struct type *
-standard_type(fund, algn, size)
-	arith size;
+struct type *standard_type(int fund, int algn, arith size)
 {
 	register struct type *tp = new_type();
 
@@ -166,9 +175,7 @@ standard_type(fund, algn, size)
 	return tp;
 }
 
-struct type *
-construct_type(fund, tp)
-	register struct type *tp;
+struct type *construct_type(int fund, register struct type *tp)
 {
 	/*	fund must be a type constructor.
 	 *	The pointer to the constructed type is returned.
@@ -212,10 +219,7 @@ construct_type(fund, tp)
 	return dtp;
 }
 
-struct type *
-proc_type(parameters, n_bytes_params)
-	struct paramlist *parameters;
-	arith n_bytes_params;
+struct type *proc_type(struct paramlist *parameters, arith n_bytes_params)
 {
 	register struct type *tp = construct_type(T_PROCEDURE, NULLTYPE);
 
@@ -224,11 +228,7 @@ proc_type(parameters, n_bytes_params)
 	return tp;
 }
 
-struct type *
-func_type(parameters, n_bytes_params, resulttype)
-	struct paramlist *parameters;
-	arith n_bytes_params;
-	struct type *resulttype;
+struct type *func_type(struct paramlist * parameters, arith n_bytes_params, struct type *resulttype)
 {
 	register struct type *tp = construct_type(T_FUNCTION, resulttype);
 
@@ -237,9 +237,7 @@ func_type(parameters, n_bytes_params, resulttype)
 	return tp;
 }
 
-chk_type_id(ptp, nd)
-	register struct type **ptp;
-	register struct node *nd;
+void chk_type_id(register struct type **ptp, register struct node *nd)
 {
 	register struct def *df;
 
@@ -266,9 +264,7 @@ chk_type_id(ptp, nd)
 	}
 }
 
-struct type *
-subr_type(lb, ub)
-	register struct node *lb, *ub;
+struct type *subr_type(register struct node *lb, register struct node *ub)
 {
 	/*	Construct a subrange type from the constant expressions
 		indicated by "lb" and "ub", but first perform some checks
@@ -322,9 +318,7 @@ subr_type(lb, ub)
 	return res;
 }
 
-getbounds(tp, plo, phi)
-	register struct type *tp;
-	arith *plo, *phi;
+void getbounds(register struct type *tp, arith *plo, arith *phi)
 {
 	/*	Get the bounds of a bounded type
 	*/
@@ -345,10 +339,7 @@ getbounds(tp, plo, phi)
 	}
 }
 
-struct type *
-set_type(tp, packed)
-	register struct type *tp;
-	unsigned short packed;
+struct type *set_type(register struct type *tp, unsigned short packed)
 {
 	/*	Construct a set type with base type "tp", but first
 		perform some checks
@@ -415,9 +406,7 @@ set_type(tp, packed)
 	return tp;
 }
 
-arith
-ArrayElSize(tp, packed)
-	register struct type *tp;
+static arith ArrayElSize(register struct type *tp, int packed)
 {
 	/* Align element size to alignment requirement of element type.
 	   Also make sure that its size is either a dividor of the word_size,
@@ -444,9 +433,7 @@ ArrayElSize(tp, packed)
 	return algn;
 }
 
-void
-ArraySizes(tp)
-	register struct type *tp;
+void ArraySizes(register struct type *tp)
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
@@ -492,9 +479,7 @@ ArraySizes(tp)
 	C_rom_cst(tp->arr_elsize);
 }
 
-void
-FreeForward(for_type)
-	register struct forwtype *for_type;
+static void FreeForward(register struct forwtype *for_type)
 {
 	if( !for_type ) return;
 
@@ -503,7 +488,7 @@ FreeForward(for_type)
 	free_forwtype(for_type);
 }
 
-chk_forw_types()
+void chk_forw_types(void)
 {
 	/* check all forward references (in pointer types) */
 
@@ -574,9 +559,8 @@ chk_forw_types()
 	}
 }
 
-TstCaseConstants(nd, sel, sel1)
-	register struct node *nd;
-	register struct selector *sel, *sel1;
+void TstCaseConstants(register struct node *nd, register struct selector *sel,
+		register struct selector *sel1)
 {
 	/* Insert selector of nested variant (sel1) in tagvalue-table of
 	   current selector (sel).
@@ -599,19 +583,14 @@ TstCaseConstants(nd, sel, sel1)
 	}
 }
 
-arith
-align(pos, al)
-	arith pos;
-	int al;
+arith align(arith pos, int al)
 {
 	arith i;
 
 	return pos + ((i = pos % al) ? al - i : 0);
 }
 
-int
-gcd(m, n)
-	register int m, n;
+static int gcd(int m, int n)
 {
 	/*	Greatest Common Divisor
  	*/
@@ -625,9 +604,7 @@ gcd(m, n)
 	return m;
 }
 
-int
-lcm(m, n)
-	int m, n;
+int lcm(int m, int n)
 {
 	/*	Least Common Multiple
  	*/
@@ -635,8 +612,7 @@ lcm(m, n)
 }
 
 #ifdef DEBUG
-DumpType(tp)
-	register struct type *tp;
+void DumpType(register struct type *tp)
 {
 	if( !tp ) return;
 

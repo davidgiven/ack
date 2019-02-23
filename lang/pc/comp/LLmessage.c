@@ -14,15 +14,14 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"idf.h"
+#include    "node.h"
 #include	"type.h"
+#include    "misc.h"
+#include    "error.h"
 
-extern char		*symbol2str();
-extern char		*Malloc(), *Salloc();
-extern struct idf	*gen_anon_idf();
 extern int expect_label;
 
-LLmessage(tk)
-	register int tk;
+void LLmessage(register int tk)
 {
 	if( tk > 0 )	{
 		/* if( tk > 0 ), it represents the token to be inserted.

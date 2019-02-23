@@ -2,8 +2,10 @@
 
 #include    "parameters.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include	"idf.h"
 #include	"tokenname.h"
+#include    "error.h"
 
 /*	To centralize the declaration of %tokens, their presence in this
 	file is taken as their declaration. The Makefile will produce
@@ -84,8 +86,7 @@ struct tokenname tkstandard[] =	{	/* standard identifiers */
 
 /* Some routines to handle tokennames */
 
-reserve(resv)
-	register struct tokenname *resv;
+void reserve(register struct tokenname *resv)
 {
 	/*	The names of the tokens described in resv are entered
 		as reserved words.

@@ -16,7 +16,10 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<em_code.h>
-#include	<system.h>
+#include    <stdlib.h>
+#include    <stdio.h>
+#include    "print.h"
+#include	"system.h"
 
 #include	"LLlex.h"
 #include	"f_info.h"
@@ -37,9 +40,7 @@
 
 int err_occurred;
 
-extern char *symbol2str();
-
-void _error();
+static void _error(int, struct node *, char *, register va_list);
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -55,7 +56,7 @@ void _error();
 #if __STDC__
 #ifdef DEBUG
 /*VARARGS*/
-debug(char *fmt, ...)
+void debug(char *fmt, ...)
 {
 	va_list ap;
 
@@ -68,7 +69,7 @@ debug(char *fmt, ...)
 #endif /* DEBUG */
 
 /*VARARGS*/
-error(char *fmt, ...)
+void error(char *fmt, ...)
 {
 	va_list ap;
 
@@ -80,7 +81,7 @@ error(char *fmt, ...)
 }
 
 /*VARARGS*/
-node_error(struct node *node, char *fmt, ...)
+void node_error(struct node *node, char *fmt, ...)
 {
 	va_list ap;
 
@@ -92,7 +93,7 @@ node_error(struct node *node, char *fmt, ...)
 }
 
 /*VARARGS*/
-warning(char *fmt, ...)
+void warning(char *fmt, ...)
 {
 	va_list ap;
 
@@ -104,7 +105,7 @@ warning(char *fmt, ...)
 }
 
 /*VARARGS*/
-node_warning(struct node *node, char *fmt, ...)
+void node_warning(struct node *node, char *fmt, ...)
 {
 	va_list ap;
 
@@ -116,7 +117,7 @@ node_warning(struct node *node, char *fmt, ...)
 }
 
 /*VARARGS*/
-lexerror(char *fmt, ...)
+void lexerror(char *fmt, ...)
 {
 	va_list ap;
 
@@ -128,7 +129,7 @@ lexerror(char *fmt, ...)
 }
 
 /*VARARGS*/
-lexwarning(char *fmt, ...)
+void lexwarning(char *fmt, ...)
 {
 	va_list ap;
 
@@ -140,7 +141,7 @@ lexwarning(char *fmt, ...)
 }
 
 /*VARARGS*/
-fatal(char *fmt, ...)
+void fatal(char *fmt, ...)
 {
 	va_list ap;
 
@@ -149,11 +150,11 @@ fatal(char *fmt, ...)
 		_error(FATAL, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(EXIT_FAILURE);
 }
 
 /*VARARGS*/
-crash(char *fmt, ...)
+void crash(char *fmt, ...)
 {
 	va_list ap;
 
@@ -163,15 +164,15 @@ crash(char *fmt, ...)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(EXIT_FAILURE);
 #endif
 }
 #else
 #ifdef DEBUG
 /*VARARGS*/
-debug(va_alist)
+void debug(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -186,7 +187,7 @@ debug(va_alist)
 #endif /* DEBUG */
 
 /*VARARGS*/
-error(va_alist)
+void error(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -200,7 +201,7 @@ error(va_alist)
 }
 
 /*VARARGS*/
-node_error(va_alist)
+void node_error(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -215,7 +216,7 @@ node_error(va_alist)
 }
 
 /*VARARGS*/
-warning(va_alist)
+void warning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -229,7 +230,7 @@ warning(va_alist)
 }
 
 /*VARARGS*/
-node_warning(va_alist)
+void node_warning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -244,7 +245,7 @@ node_warning(va_alist)
 }
 
 /*VARARGS*/
-lexerror(va_alist)
+void lexerror(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -258,7 +259,7 @@ lexerror(va_alist)
 }
 
 /*VARARGS*/
-lexwarning(va_alist)
+void lexwarning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -272,7 +273,7 @@ lexwarning(va_alist)
 }
 
 /*VARARGS*/
-fatal(va_alist)
+void fatal(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -283,11 +284,11 @@ fatal(va_alist)
 		_error(FATAL, NULLNODE, fmt, ap);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(EXIT_FAILURE);
 }
 
 /*VARARGS*/
-crash(va_alist)
+void crash(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -299,19 +300,14 @@ crash(va_alist)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(EXIT_FAILURE);
 #endif
 }
 #endif
 
-void
-_error(class, node, fmt, ap)
-	int class;
-	struct node *node;
-	char *fmt;
-	register va_list ap;
+static void _error(int class, struct node *node, char *fmt, register va_list ap)
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.

@@ -11,12 +11,13 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include    "label.h"
+#include    "error.h"
 
-void CodeLabel();
+static void CodeLabel(register struct def *df, int local);
 
 
-DeclLabel(nd)
-	struct node *nd;
+void DeclLabel(struct node *nd)
 {
 	struct def *df;
 
@@ -29,7 +30,7 @@ DeclLabel(nd)
 	}
 }
 
-chk_labels(Slevel)
+void chk_labels(int Slevel)
 {
 	register struct node *labnd = BlockScope->sc_lablist;
 	register struct def *df;
@@ -62,8 +63,7 @@ chk_labels(Slevel)
 	}
 }
 
-TstLabel(nd, Slevel)
-	register struct node *nd;
+void TstLabel(register struct node *nd, int Slevel)
 {
 	register struct def *df;
 
@@ -105,9 +105,7 @@ TstLabel(nd, Slevel)
 		CodeLabel(df, 1);
 }
 
-void
-DefLabel(nd, Slevel)
-	register struct node *nd;
+void DefLabel(register struct node *nd, int Slevel)
 {
 	register struct def *df;
 
@@ -142,9 +140,7 @@ DefLabel(nd, Slevel)
 	}
 }
 
-void
-CodeLabel(df, local)
-	register struct def *df;
+static void CodeLabel(register struct def *df, int local)
 {
 	if( err_occurred ) return;
 

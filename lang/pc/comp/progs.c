@@ -4,6 +4,7 @@
 #include	<em.h>
 #include	<assert.h>
 
+#include    "progs.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"
@@ -15,20 +16,19 @@ static int inpflag = 0;			/* input mentioned in heading ? */
 static int outpflag = 0;		/* output mentioned in heading ? */
 static label extfl_label;		/* label of array of file pointers */
 
-void make_extfl_args();
+static void make_extfl_args();
 
-set_inp()
+void set_inp(void)
 {
 	inpflag = 1;
 }
 
-set_outp()
+void set_outp(void)
 {
 	outpflag = 1;
 }
 
-void
-make_extfl()
+void make_extfl(void)
 {
 	if( err_occurred ) return; 
 
@@ -57,9 +57,7 @@ make_extfl()
 	make_extfl_args( GlobalScope->sc_def );
 }
 
-void
-make_extfl_args(df)
-	register struct def *df;
+static void make_extfl_args(register struct def *df)
 {
 	if( !df ) return;
 	make_extfl_args(df->df_nextinscope);
@@ -71,7 +69,7 @@ make_extfl_args(df)
 	}
 }
 
-call_ini()
+void call_ini(void)
 {
 	C_lxl((arith) 0);
 	if( extflc )

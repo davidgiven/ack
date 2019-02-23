@@ -21,6 +21,14 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include    "code.h"
+#include    "error.h"
+#include    "label.h"
+#include    "enter.h"
+#ifdef DBSYMTAB
+#include	"stab.h"
+#endif
+
 
 #define	PC_BUFSIZ	(sizeof(struct file) - offsetof(struct file, bufadr))
 
@@ -177,7 +185,7 @@ ConstantDefinition
 } :
 	IDENT			{ id = dot.TOK_IDF; }
 	'=' Constant(&nd)
-			{ if( df = define(id,CurrentScope,D_CONST) )	{
+			{ if (( df = define(id,CurrentScope,D_CONST)))	{
 			  	df->con_const = nd;
 				df->df_type = nd->nd_type;
 				df->df_flags |= D_SET;
@@ -197,7 +205,7 @@ TypeDefinition
 } :
 	IDENT			{ id = dot.TOK_IDF; }
 	'=' TypeDenoter(&tp)
-			{ if( df = define(id, CurrentScope, D_TYPE) ) {
+			{ if ((df = define(id, CurrentScope, D_TYPE)) ) {
 			  	df->df_type = tp;
 				df->df_flags |= D_SET;
 #ifdef DBSYMTAB
@@ -371,7 +379,7 @@ FunctionDeclaration
 				  else DoDirective(dot.TOK_IDF, nd, tp, scl, 1);
 				}
 	|
-				{ if( df = DeclFunc(nd, tp, scl) ) {
+				{ if ((df = DeclFunc(nd, tp, scl) )) {
 					df->prc_res =
 					     - ResultType(df->df_type)->tp_size;
 					df->prc_bool =
@@ -705,7 +713,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 			{ max = tcnt; }
 	VariantTail(scope, &tcnt, &max, cnt, palign, packed, *sel)
 			{ *cnt = max;
-			  if( sp = (*sel)->sel_ptrs )	{
+			  if ( (sp = (*sel)->sel_ptrs) )	{
 				int errflag = 0;
 
 				ncst = (*sel)->sel_ncst;
@@ -987,16 +995,16 @@ Index_TypeSpecification(register struct type **ptp; register struct type *tp;)
 	register struct def *df1, *df2;
 } :
 	IDENT
-			{ if( df1 =
-			    define(dot.TOK_IDF, CurrentScope, D_LBOUND)) {
+			{ if( (df1 =
+			    define(dot.TOK_IDF, CurrentScope, D_LBOUND)) ) {
 				df1->bnd_type = tp;	/* type conf. array */
 				df1->df_flags |= D_SET;
 			  }
 			}
 	UPTO
 	IDENT
-			{ if( df2 =
-			    define(dot.TOK_IDF, CurrentScope, D_UBOUND)) {
+			{ if( (df2 =
+			    define(dot.TOK_IDF, CurrentScope, D_UBOUND)) ) {
 				df2->bnd_type = tp;	/* type conf. array */
 				df2->df_flags |= D_SET;
 			  }

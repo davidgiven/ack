@@ -17,6 +17,8 @@
 #include	"node.h"
 #include	"required.h"
 #include	"type.h"
+#include    "cstoper.h"
+#include    "error.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
 long full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
@@ -26,18 +28,15 @@ char *maxint_str;	/* string representation of maximum integer */
 arith wrd_bits;		/* number of bits in a word */
 arith max_intset;	/* largest value of set of integer */
 
-overflow(expp)
-	struct node *expp;
+void CutSize(register struct node *expr);
+
+void overflow(struct node *expp)
 {
 	node_warning(expp, "overflow in constant expression");
 }
 
-cstunary(expp)
-	register struct node *expp;
+void cstunary(register struct node *expp)
 {
-	/*	The unary operation in "expp" is performed on the constant
-		expression below it, and the result restored in expp.
-	*/
 	register arith o1 = expp->nd_right->nd_INT;
 
 	switch( expp->nd_symb )	{
@@ -67,9 +66,7 @@ cstunary(expp)
 	expp->nd_right = NULLNODE;
 }
 
-void
-cstbin(expp)
-	register struct node *expp;
+void cstbin(register struct node *expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
@@ -197,9 +194,7 @@ cstbin(expp)
 	expp->nd_left = expp->nd_right = NULLNODE;
 }
 
-void
-cstset(expp)
-	register struct node *expp;
+void cstset(register struct node *expp)
 {
 	register arith *set1, *set2;
 	arith *resultset = (arith *) 0;
@@ -353,8 +348,7 @@ cstset(expp)
 	expp->nd_left = expp->nd_right = NULLNODE;
 }
 
-cstcall(expp, req)
-	register struct node *expp;
+void cstcall(register struct node *expp, int req)
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
@@ -441,8 +435,7 @@ cstcall(expp, req)
 	expp->nd_right = expp->nd_left = NULLNODE;
 }
 
-CutSize(expr)
-	register struct node *expr;
+void CutSize(register struct node *expr)
 {
 	/* The constant value of the expression expr is made to conform
 	 * to the size of the type of the expression
@@ -460,8 +453,8 @@ CutSize(expr)
 			o1 &= 0177;
 		}
 	}
-	else if( remainder != 0 && remainder != ~full_mask[size] ||
-	    		(o1 & full_mask[size]) == 1 << (size * 8 - 1) )	{
+	else if( (remainder != 0 && remainder != ~full_mask[size]) ||
+	    		((o1 & full_mask[size]) == 1 << (size * 8 - 1)) )	{
 		/* integers in [-maxint .. maxint] */
 		int nbits = (int) (sizeof(long) - size) * 8;
 
@@ -474,9 +467,8 @@ CutSize(expr)
 	expr->nd_INT = o1;
 }
 
-InitCst()
+void InitCst(void)
 {
-	extern char *Salloc();
 	register int i = 0;
 	register arith bt = (arith)0;
 

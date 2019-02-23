@@ -6,3 +6,6 @@ struct tokenname	{	/*	Used for defining the name of a
 	int tn_symbol;
 	char *tn_name;
 };
+
+
+void reserve(register struct tokenname *resv);
