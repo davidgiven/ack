@@ -7,11 +7,11 @@
 #include	"class.h"
 #include	"const.h"
 #include	"main.h"
-#include    "LLlex.h"
-#include    "node.h"
+#include	"LLlex.h"
+#include	"node.h"
 #include	"type.h"
-#include    "options.h"
-#include    "error.h"
+#include	"options.h"
+#include	"error.h"
 
 
 #define	MINIDFSIZE	9

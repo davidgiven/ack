@@ -13,7 +13,7 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "lookup.h"
+#include	"lookup.h"
 
 void remove_def(register struct def *df)
 {

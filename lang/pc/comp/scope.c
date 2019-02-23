@@ -15,8 +15,8 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "lookup.h"
-#include    "error.h"
+#include	"lookup.h"
+#include	"error.h"
 
 struct scope *GlobalScope, *PervasiveScope, *BlockScope;
 struct scopelist *CurrVis;

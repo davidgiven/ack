@@ -25,10 +25,10 @@
 #include	"tokenname.h"
 #include	"type.h"
 #include	"scope.h"
-#include    "cstoper.h"
-#include    "stab.h"
-#include    "options.h"
-#include    "error.h"
+#include	"cstoper.h"
+#include	"stab.h"
+#include	"options.h"
+#include	"error.h"
 
 char		options[128];
 char		*ProgName;

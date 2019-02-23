@@ -15,8 +15,8 @@
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
-#include    "enter.h"
-#include    "progs.h"
+#include	"enter.h"
+#include	"progs.h"
 #ifdef DBSYMTAB
 #include	"stab.h"
 #endif

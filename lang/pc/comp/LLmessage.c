@@ -14,10 +14,10 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"idf.h"
-#include    "node.h"
+#include	"node.h"
 #include	"type.h"
-#include    "misc.h"
-#include    "error.h"
+#include	"misc.h"
+#include	"error.h"
 
 extern int expect_label;
 

@@ -14,8 +14,8 @@
 #include	"def.h"
 #include	"node.h"
 #include	"type.h"
-#include    "error.h"
-#include    "typequiv.h"
+#include	"error.h"
+#include	"typequiv.h"
 
 int TstTypeEquiv(register struct type *tp1, register struct type *tp2)
 {

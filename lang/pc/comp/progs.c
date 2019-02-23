@@ -4,7 +4,7 @@
 #include	<em.h>
 #include	<assert.h>
 
-#include    "progs.h"
+#include	"progs.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"

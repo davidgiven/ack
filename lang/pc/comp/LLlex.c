@@ -19,8 +19,8 @@
 #include	"input.h"
 #include	"main.h"
 #include	"type.h"
-#include    "error.h"
-#include    "ack_string.h"
+#include	"error.h"
+#include	"ack_string.h"
 
 
 

@@ -14,8 +14,8 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "progs.h"
-#include    "enter.h"
+#include	"progs.h"
+#include	"enter.h"
 #ifdef DBSYMTAB
 #include	"stab.h"
 #endif

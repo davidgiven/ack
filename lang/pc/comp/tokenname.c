@@ -1,11 +1,11 @@
 /* T O K E N   D E F I N I T I O N S */
 
-#include    "parameters.h"
+#include	"parameters.h"
 #include	"Lpars.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"tokenname.h"
-#include    "error.h"
+#include	"error.h"
 
 /*	To centralize the declaration of %tokens, their presence in this
 	file is taken as their declaration. The Makefile will produce

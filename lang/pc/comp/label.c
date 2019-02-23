@@ -11,8 +11,8 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "label.h"
-#include    "error.h"
+#include	"label.h"
+#include	"error.h"
 
 static void CodeLabel(register struct def *df, int local);
 

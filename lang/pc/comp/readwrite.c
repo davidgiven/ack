@@ -6,7 +6,7 @@
 #include	<assert.h>
 #include	<em.h>
 
-#include    "print.h"
+#include	"print.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"
@@ -14,11 +14,11 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "code.h"
-#include    "chk_expr.h"
-#include    "typequiv.h"
-#include    "error.h"
-#include    "readwrite.h"
+#include	"code.h"
+#include	"chk_expr.h"
+#include	"typequiv.h"
+#include	"error.h"
+#include	"readwrite.h"
 
 
 /* DEBUG */

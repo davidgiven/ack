@@ -11,16 +11,16 @@
 
 #include	"LLlex.h"
 #include	"const.h"
-#include    "chk_expr.h"
+#include	"chk_expr.h"
 #include	"def.h"
 #include	"idf.h"
 #include	"main.h"
 #include	"node.h"
 #include	"scope.h"
-#include    "lookup.h"
+#include	"lookup.h"
 #include	"type.h"
-#include    "typequiv.h"
-#include    "error.h"
+#include	"typequiv.h"
+#include	"error.h"
 #ifdef DBSYMTAB
 #include	"stab.h"
 #endif

@@ -6,12 +6,12 @@
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include    "print.h"
+#include	"print.h"
 
 #include	"LLlex.h"
 #include	"node.h"
 #include	"type.h"
-#include    "error.h"
+#include	"error.h"
 
 struct node *MkNode(int class, struct node *left, struct node *right, struct token *token)
 {

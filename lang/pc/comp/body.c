@@ -15,11 +15,11 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "code.h"
-#include    "chk_expr.h"
-#include    "tmpvar.h"
-#include    "typequiv.h"
-#include    "error.h"
+#include	"code.h"
+#include	"chk_expr.h"
+#include	"tmpvar.h"
+#include	"typequiv.h"
+#include	"error.h"
 
 void MarkDef(register struct node *nd, unsigned short flags, int on)
 {

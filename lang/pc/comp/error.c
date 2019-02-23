@@ -16,9 +16,9 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<em_code.h>
-#include    <stdlib.h>
-#include    <stdio.h>
-#include    "print.h"
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	"print.h"
 #include	"system.h"
 
 #include	"LLlex.h"

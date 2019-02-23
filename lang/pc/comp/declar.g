@@ -21,10 +21,10 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "code.h"
-#include    "error.h"
-#include    "label.h"
-#include    "enter.h"
+#include	"code.h"
+#include	"error.h"
+#include	"label.h"
+#include	"enter.h"
 #ifdef DBSYMTAB
 #include	"stab.h"
 #endif

@@ -12,8 +12,8 @@
 #include	"main.h"
 #include	"misc.h"
 #include	"node.h"
-#include    "print.h"
-#include    "error.h"
+#include	"print.h"
+#include	"error.h"
 
 struct idf *gen_anon_idf(void)
 {

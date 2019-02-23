@@ -15,10 +15,10 @@
 #include	"misc.h"
 #include	"node.h"
 #include	"scope.h"
-#include    "code.h"
+#include	"code.h"
 #include	"type.h"
-#include    "lookup.h"
-#include    "error.h"
+#include	"lookup.h"
+#include	"error.h"
 
 struct def *MkDef(register struct idf *id, register struct scope *scope,
 		long kind)

@@ -16,8 +16,8 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "code.h"
-#include    "error.h"
+#include	"code.h"
+#include	"error.h"
 }
 
 Constant(register struct node **pnd;)

@@ -25,11 +25,11 @@
 #include	"required.h"
 #include	"scope.h"
 #include	"type.h"
-#include    "typequiv.h"
-#include    "readwrite.h"
-#include    "body.h"
-#include    "cstoper.h"
-#include    "error.h"
+#include	"typequiv.h"
+#include	"readwrite.h"
+#include	"body.h"
+#include	"cstoper.h"
+#include	"error.h"
 
 static int ChkValue(register struct node *);
 static int ChkUnOper(register struct node *);

@@ -12,10 +12,10 @@
 #include	"main.h"
 #include	"node.h"
 #include	"type.h"
-#include    "code.h"
-#include    "error.h"
-#include    "typequiv.h"
-#include    "casestat.h"
+#include	"code.h"
+#include	"error.h"
+#include	"typequiv.h"
+#include	"casestat.h"
 
 struct case_hdr	{
 	struct case_hdr *ch_next;		/* in the free list */
