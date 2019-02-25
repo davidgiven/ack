@@ -7,7 +7,12 @@
 #include	"class.h"
 #include	"const.h"
 #include	"main.h"
+#include	"LLlex.h"
+#include	"node.h"
 #include	"type.h"
+#include	"options.h"
+#include	"error.h"
+
 
 #define	MINIDFSIZE	9
 
@@ -18,13 +23,28 @@ recognize some keywords!
 
 extern int	idfsize;
 
-DoOption(text)
-	register char *text;
+
+static int txt2int(register char **tp)
+{
+	/*	the integer pointed to by *tp is read, while increasing
+		*tp; the resulting value is yielded.
+	*/
+	register int val = 0;
+	register int ch;
+
+	while( ch = **tp, ch >= '0' && ch <= '9' )	{
+		val = val * 10 + ch - '0';
+		(*tp)++;
+	}
+	return val;
+}
+
+void DoOption(register char *text)
 {
 	switch( *text++ )	{
 
 	default:
-		options[text[-1]]++;	/* flags, debug options etc.	*/
+		options[(int)text[-1]]++;	/* flags, debug options etc.	*/
 		break;
 				/* recognized flags:
 					-i: largest value of set of integer
@@ -74,11 +94,11 @@ DoOption(text)
 		break;
 	}
 
-	/* case 'u':			/* underscore allowed in identifiers */
-		/* class('_') = STIDF;
-		/* inidf['_'] = 1;
-		/* break;
-		*/
+	/* case 'u':			*//* underscore allowed in identifiers */
+		/* class('_') = STIDF;*/
+		/* inidf['_'] = 1;*/
+		/* break;*/
+
 
 	case 'V' :	{ /* set object sizes and alignment requirements */
 			  /* syntax : -V[ [w|i|l|f|p] size? [.alignment]? ]* */
@@ -87,7 +107,7 @@ DoOption(text)
 		register int align;
 		char c, *t;
 
-		while( c = *text++ )	{
+		while( (c = *text++) !=0 )	{
 			char *strchr();
 
 			t = text;
@@ -150,19 +170,4 @@ DoOption(text)
 	}
 }
 
-int
-txt2int(tp)
-	register char **tp;
-{
-	/*	the integer pointed to by *tp is read, while increasing
-		*tp; the resulting value is yielded.
-	*/
-	register int val = 0;
-	register int ch;
-	
-	while( ch = **tp, ch >= '0' && ch <= '9' )	{
-		val = val * 10 + ch - '0';
-		(*tp)++;
-	}
-	return val;
-}
+

@@ -283,7 +283,7 @@ struct sdef *idf2sdef(
 	}
 	
 	/* Tp not met; take an identification. */
-	if (sdef = idf->id_sdef)	{
+	if ( (sdef = idf->id_sdef) )	{
 		/* There is an identification */
 		error("illegal use of selector %s", idf->id_text);
 		return sdef;

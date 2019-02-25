@@ -1,5 +1,8 @@
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
 
+#ifndef DEF_H_
+#define DEF_H_
+
 struct constant	{
 	struct node *co_const;	/* result of a constant expression */
 #define con_const	df_value.df_constant.co_const
@@ -153,3 +156,20 @@ extern struct def
 	*lookfor();
 
 #define NULLDEF ((struct def *) 0)
+
+
+struct def *MkDef(register struct idf *id, register struct scope *scope,
+		long kind);
+struct def *define(register struct idf *id, register struct scope *scope,
+		long kind);
+void DoDirective(struct idf *directive, struct node *nd, struct type *tp,
+		struct scopelist *scl, int function);
+struct def *DeclProc(register struct node *nd, struct type *tp,
+		register struct scopelist *scl);
+struct def *
+DeclFunc(register struct node *nd, struct type *tp,
+		register struct scopelist *scl);
+void EndFunc(register struct def *df);
+void EndBlock(register struct def *block_df);
+
+#endif

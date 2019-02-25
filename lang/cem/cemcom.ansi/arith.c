@@ -537,7 +537,7 @@ void any2opnd(register struct expr **expp, int oper)
 	case CHAR:
 	case SHORT:
 	case ENUM:
-	/* case FLOAT:	/* not necessary anymore */
+	/* case FLOAT:	*//* not necessary anymore */
 		any2arith(expp, oper);
 		break;
 	case ARRAY:

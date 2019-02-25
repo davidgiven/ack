@@ -1,4 +1,6 @@
 /* S C O P E   M E C H A N I S M */
+#ifndef SCOPE_H_
+#define SCOPE_H_
 
 struct scope {
 	struct scope *next;
@@ -30,3 +32,14 @@ extern struct scopelist
 
 #define	CurrentScope	(CurrVis->sc_scope)
 #define	nextvisible(x)	((x)->next)		/* use with scopelists */
+
+
+void InitScope(void);
+void open_scope(void);
+void close_scope(int doclean);
+void Forward(register struct node *nd, register struct type *tp);
+void chk_prog_params(void);
+void chk_directives(void);
+
+
+#endif

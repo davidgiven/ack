@@ -1,4 +1,7 @@
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
+#ifndef NODE_H_
+#define NODE_H_
+
 
 struct node {
 	struct node *nd_left;
@@ -37,12 +40,22 @@ struct node {
 #define nd_REL		nd_token.TOK_REL
 #define nd_RLA		nd_token.TOK_RLA
 #define nd_RIV		nd_token.TOK_RIV
+
+
+
 };
 
 /* ALLOCDEF "node" 50 */
 
-extern struct node *MkNode(), *MkLeaf(), *ChkStdInOut();
+struct node *MkNode(int class, struct node *left, struct node *right, struct token *token);
+struct node *MkLeaf(int class, struct token *token);
+void FreeNode(register struct node *nd);
+int NodeCrash(struct node *expp);
+
+
 
 #define IsProcCall(lnd)	((lnd)->nd_type->tp_fund & T_ROUTINE)
 
 #define	NULLNODE ((struct node *) 0)
+
+#endif

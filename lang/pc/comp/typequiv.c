@@ -14,20 +14,17 @@
 #include	"def.h"
 #include	"node.h"
 #include	"type.h"
+#include	"error.h"
+#include	"typequiv.h"
 
-
-int
-TstTypeEquiv(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstTypeEquiv(register struct type *tp1, register struct type *tp2)
 {
 	/*	test if two types are equivalent.
 	*/
 	return tp1 == tp2 || tp1 == error_type || tp2 == error_type;
 }
 
-arith
-IsString(tp)
-	register struct type *tp;
+arith IsString(register struct type *tp)
 {
 	/* string = packed array[1..ub] of char and ub > 1 */
 	if( tp->tp_fund & T_STRINGCONST ) return tp->tp_psize;
@@ -45,9 +42,7 @@ IsString(tp)
 	return (arith) 0;
 }
 
-int
-TstStrCompat(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstStrCompat(register struct type *tp1, register struct type *tp2)
 {
 	/*	test if two types are compatible string-types.
 	*/
@@ -62,9 +57,7 @@ TstStrCompat(tp1, tp2)
 		return ub1 == ub2;
 }
 
-int
-TstCompat(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstCompat(register struct type *tp1,register struct type *tp2)
 {
 	/*	test if two types are compatible. ISO 6.4.5
 	*/
@@ -110,9 +103,7 @@ TstCompat(tp1, tp2)
 	return tp1 == tp2;
 }
 
-int
-TstAssCompat(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstAssCompat(register struct type *tp1,register struct type *tp2)
 {
 	/*	test if two types are assignment compatible. ISO 6.4.6
 	*/
@@ -128,9 +119,7 @@ TstAssCompat(tp1, tp2)
 	return 0;
 }
 
-int
-TstParEquiv(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstParEquiv(register struct type *tp1, register struct type *tp2)
 {
 	/*	Test if two parameter types are equivalent.  ISO 6.6.3.6
 	*/
@@ -150,18 +139,16 @@ TstParEquiv(tp1, tp2)
 		||
 		   (
 		     (
-		      tp1->tp_fund == T_PROCEDURE && tp2->tp_fund == T_PROCEDURE
+		      (tp1->tp_fund == T_PROCEDURE && tp2->tp_fund == T_PROCEDURE)
 		     ||
-		      tp1->tp_fund == T_FUNCTION && tp2->tp_fund == T_FUNCTION
+		      (tp1->tp_fund == T_FUNCTION && tp2->tp_fund == T_FUNCTION)
 		     )
 		   &&
 		     TstProcEquiv(tp1, tp2)
 		   );
 }
 
-int
-TstProcEquiv(tp1, tp2)
-	register struct type *tp1, *tp2;
+int TstProcEquiv(register struct type *tp1, register struct type *tp2)
 {
 	/*	Test if two procedure types are equivalent. ISO 6.6.3.6
 	*/
@@ -190,10 +177,8 @@ TstProcEquiv(tp1, tp2)
 	return p1 == p2;
 }
 
-int
-TstParCompat(formaltype, actualtype, VARflag, nd, new_par_section)
-	register struct type *formaltype, *actualtype;
-	struct node *nd;
+int TstParCompat(register struct type *formaltype, register struct type *actualtype,
+	int VARflag, struct node *nd, int new_par_section)
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 	*/
@@ -231,9 +216,7 @@ TstParCompat(formaltype, actualtype, VARflag, nd, new_par_section)
 	else return 0;
 }
 
-int
-TstConform(formaltype, actualtype, new_par_section)
-	register struct type *formaltype, *actualtype;
+int TstConform(register struct type *formaltype, register struct type * actualtype, int new_par_section)
 {
 	/*	Check conformability.
 		

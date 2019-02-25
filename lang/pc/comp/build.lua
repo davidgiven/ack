@@ -124,9 +124,6 @@ cprogram {
 		"modules/src/string+lib",
 		"modules/src/system+lib",
 	},
-	vars = {
-		["+cflags"] = "-DSTATIC=static"
-	}
 }
 
 installable {

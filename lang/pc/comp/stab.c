@@ -40,8 +40,7 @@ static struct db_str {
 	char		*currpos;
 } db_str;
 
-static
-create_db_str()
+static void create_db_str(void)
 {
 	if (! db_str.base) {
 		db_str.base = Malloc(INCR_SIZE);
@@ -50,9 +49,7 @@ create_db_str()
 	db_str.currpos = db_str.base;
 }
 
-static
-addc_db_str(c)
-	int	c;
+static void addc_db_str(int c)
 {
 	int df = db_str.currpos - db_str.base;
 	if (df >= db_str.sz-1) {
@@ -64,16 +61,12 @@ addc_db_str(c)
 	*db_str.currpos = '\0';
 }
 
-static
-adds_db_str(s)
-	char	*s;
+static void adds_db_str(char *s)
 {
 	while (*s) addc_db_str(*s++);
 }
 
-static void
-stb_type(tp, assign_num)
-	register struct type	*tp;
+static void stb_type(register struct type *tp, int assign_num)
 {
 	char buf[128];
 	static int	stb_count;
@@ -229,9 +222,7 @@ stb_type(tp, assign_num)
 	}
 }
 
-stb_addtp(s, tp)
-	char    *s;
-	struct type  *tp;
+void stb_addtp(char *s, struct type *tp)
 {
 	create_db_str();
 	adds_db_str(s);
@@ -247,10 +238,7 @@ stb_addtp(s, tp)
 		     (arith) 0);
 }
 
-void
-stb_string(df, kind)
-	register struct def *df;
-	long kind;
+void stb_string(register struct def *df, long kind)
 {
 	register struct type	*tp = df->df_type;
 	char buf[64];

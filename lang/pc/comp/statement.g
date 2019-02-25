@@ -17,6 +17,13 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"body.h"
+#include	"code.h"
+#include	"error.h"
+#include	"readwrite.h"
+#include	"casestat.h"
+#include	"tmpvar.h"
+#include	"label.h"
 
 int slevel = 0;		/* nesting level of statements */
 }

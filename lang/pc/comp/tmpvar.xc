@@ -13,6 +13,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<em_reg.h>
+#include	<em_code.h>
 
 #include	"def.h"
 #include	"main.h"
@@ -32,17 +33,14 @@ static struct scope	*ProcScope;	/* scope of procedure in which the
 					   temporaries are allocated
 					*/
 
-TmpOpen(sc)
-	struct scope *sc;
+void TmpOpen(struct scope *sc)
 {
 	/*	Initialize for temporaries in scope "sc".
 	*/
 	ProcScope = sc;
 }
 
-arith
-TmpSpace(sz, al)
-	arith sz;
+arith TmpSpace(arith sz, int al)
 {
 	register struct scope *sc = ProcScope;
 
@@ -50,10 +48,7 @@ TmpSpace(sz, al)
 	return sc->sc_off;
 }
 
-STATIC arith
-NewTmp(plist, sz, al, regtype, priority)
-	struct tmpvar **plist;
-	arith sz;
+static arith NewTmp(struct tmpvar **plist, arith sz, int al, int regtype, int priority)
 {
 	register arith offset;
 	register struct tmpvar *tmp;
@@ -71,22 +66,17 @@ NewTmp(plist, sz, al, regtype, priority)
 	return offset;
 }
 
-arith
-NewInt(reg_prior)
+arith NewInt(int reg_prior)
 {
 	return NewTmp(&TmpInts, int_size, int_align, reg_any, reg_prior);
 }
 
-arith
-NewPtr(reg_prior)
+arith NewPtr(int reg_prior)
 {
    return NewTmp(&TmpPtrs, pointer_size, pointer_align, reg_pointer, reg_prior);
 }
 
-STATIC
-FreeTmp(plist, off)
-	struct tmpvar **plist;
-	arith off;
+static void FreeTmp(struct tmpvar **plist, arith off)
 {
 	register struct tmpvar *tmp = new_tmpvar();
 
@@ -95,19 +85,17 @@ FreeTmp(plist, off)
 	*plist = tmp;
 }
 
-FreeInt(off)
-	arith off;
+void FreeInt(arith off)
 {
 	FreeTmp(&TmpInts, off);
 }
 
-FreePtr(off)
-	arith off;
+void FreePtr(arith off)
 {
 	FreeTmp(&TmpPtrs, off);
 }
 
-TmpClose()
+void TmpClose(void)
 {
 	register struct tmpvar *tmp, *tmp1;
 

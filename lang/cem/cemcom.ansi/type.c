@@ -273,7 +273,7 @@ void completed(struct type *tp)
 	case STRUCT:
 	case UNION:
 	case ENUM:
-		while (etp = etp->next)
+		while ( (etp = etp->next) !=0)
 		{
 			if (!etp->tp_sdef)
 				etp->tp_sdef = tp->tp_sdef;

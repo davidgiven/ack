@@ -19,9 +19,10 @@
 #include	"input.h"
 #include	"main.h"
 #include	"type.h"
+#include	"error.h"
+#include	"ack_string.h"
 
-extern long	str2long();
-extern char	*Malloc();
+
 
 #define	TO_LOWER(ch)	(ch |= ( ch>='A' && ch<='Z' ) ? 0x0020 : 0)
 
@@ -43,7 +44,7 @@ int tokenseen = 0;	/* Some comment-options must precede any program text */
 /* Warning: The options specified inside comments take precedence over
  * the ones on the command line.
  */
-CommentOptions()
+void CommentOptions(void)
 {
 	register int ch, ci;
 	int	on_on_minus = 0;
@@ -120,8 +121,7 @@ CommentOptions()
 }
 
 
-STATIC void
-SkipComment()
+static void SkipComment(void)
 {
 	/*	Skip ISO-Pascal comments (* ... *) or { ... }.
 		Note :
@@ -153,9 +153,7 @@ SkipComment()
 	}
 }
 
-STATIC struct string *
-GetString( delim )
-register int delim;
+static struct string *GetString(register int delim)
 {
 	/*	Read a Pascal string, delimited by the character ' or ".
 	*/
@@ -212,8 +210,7 @@ register int delim;
 
 static char *s_error = "illegal line directive";
 
-void
-CheckForLineDirective()
+void CheckForLineDirective(void)
 {
 	register int	ch;
 	register int	i = 0;
@@ -276,8 +273,7 @@ CheckForLineDirective()
 	LineNumber = i;
 }
 
-int
-LLlex()
+int LLlex(void)
 {
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
@@ -531,10 +527,10 @@ again:
 				while (*np == '0')	/* skip leading zeros */
 					np++;
 				tk->TOK_INT = str2long(np, 10);
-				if( tk->TOK_INT < 0 ||
-				    strlen(np) > strlen(maxint_str) ||
-					strlen(np) == strlen(maxint_str) &&
-					strcmp(np, maxint_str) > 0 )
+				if( (tk->TOK_INT < 0) ||
+				    (strlen(np) > strlen(maxint_str)) ||
+					(strlen(np) == strlen(maxint_str) &&
+					strcmp(np, maxint_str) > 0) )
 					     lexwarning("overflow in constant");
 			}
 			toktype = int_type;

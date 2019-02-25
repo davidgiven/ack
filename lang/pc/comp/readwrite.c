@@ -6,6 +6,7 @@
 #include	<assert.h>
 #include	<em.h>
 
+#include	"print.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"
@@ -13,25 +14,33 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"code.h"
+#include	"chk_expr.h"
+#include	"typequiv.h"
+#include	"error.h"
+#include	"readwrite.h"
+
 
 /* DEBUG */
 #include	"idf.h"
 
-extern char	*sprint();
 
-void CodeRead();
-void CodeReadln();
-void CodeWrite();
-void CodeWriteln();
 
-void
-ChkRead(arg)
-	register struct node *arg;
+
+/* Internal function prototypes */
+static int ChkWriteParameter(struct type *, struct node *, char *);
+static void CodeRead(register struct node *, register struct node *);
+static void CodeRead(register struct node *, register struct node *);
+static void CodeReadln(struct node *);
+static void CodeWrite(register struct node *, register struct node *);
+static void CodeWriteln(register struct node *);
+
+void ChkRead(register struct node *arg)
 {
 	struct node *file;
 	char *name = "read";
 	char *message, buff[80];
-	extern char *ChkAllowedVar();
+
 
 	assert(arg);
 	assert(arg->nd_symb == ',');
@@ -92,14 +101,12 @@ ChkRead(arg)
 	}
 }
 
-void
-ChkReadln(arg)
-	register struct node *arg;
+void ChkReadln(register struct node *arg)
 {
 	struct node *file;
 	char *name = "readln";
 	char *message, buff[80];
-	extern char *ChkAllowedVar();
+
 
 	if( !arg )	{
 		if( !(file = ChkStdInOut(name, 0)) )
@@ -149,9 +156,7 @@ ChkReadln(arg)
 	CodeReadln(file);
 }
 
-void
-ChkWrite(arg)
-	register struct node *arg;
+void ChkWrite(register struct node *arg)
 {
 	struct node *left, *expp, *file;
 	char *name = "write";
@@ -191,9 +196,7 @@ ChkWrite(arg)
 	}
 }
 
-void
-ChkWriteln(arg)
-	register struct node *arg;
+void ChkWriteln(register struct node *arg)
 {
 	struct node *left, *expp, *file;
 	char *name = "writeln";
@@ -242,10 +245,7 @@ ChkWriteln(arg)
 	CodeWriteln(file);
 }
 
-ChkWriteParameter(filetype, arg, name)
-	struct type *filetype;
-	struct node *arg;
-	char *name;
+static int ChkWriteParameter(struct type *filetype, struct node *arg, char *name)
 {
 	struct type *tp;
 	char *mess = "illegal write parameter";
@@ -277,7 +277,7 @@ ChkWriteParameter(filetype, arg, name)
 
 	/* Here we have a text-file */
 
-	if( arg = arg->nd_right )	{
+	if( (arg = arg->nd_right) !=0 )	{
 		/* Total width */
 
 		assert(arg->nd_symb == ':');
@@ -289,7 +289,7 @@ ChkWriteParameter(filetype, arg, name)
 	else
 		return 1;
 
-	if( arg = arg->nd_right )	{
+	if( (arg = arg->nd_right)!=0 )	{
 		/* Fractional Part */
 
 		assert(arg->nd_symb == ':');
@@ -305,9 +305,7 @@ ChkWriteParameter(filetype, arg, name)
 	return 1;
 }
 
-struct node *
-ChkStdInOut(name, st_out)
-	char *name;
+struct node *ChkStdInOut(char *name, int st_out)
 {
 	register struct def *df;
 	register struct node *nd;
@@ -327,9 +325,7 @@ ChkStdInOut(name, st_out)
 	return nd;
 }
 
-void
-CodeRead(file, arg)
-	register struct node *file, *arg;
+static void CodeRead(register struct node *file, register struct node *arg)
 {
 	struct type *tp = BaseType(arg->nd_type);
 
@@ -386,9 +382,7 @@ CodeRead(file, arg)
 	}
 }
 
-void
-CodeReadln(file)
-	struct node *file;
+static void CodeReadln(struct node *file)
 {
 	if( err_occurred ) return;
 
@@ -397,9 +391,7 @@ CodeReadln(file)
 	C_asp(pointer_size);
 }
 
-void
-CodeWrite(file, arg)
-	register struct node *file, *arg;
+static void CodeWrite(register struct node *file, register struct node *arg)
 {
 	int width = 0;
 	register arith nbpars = pointer_size;
@@ -484,9 +476,7 @@ CodeWrite(file, arg)
 	}
 }
 
-void
-CodeWriteln(file)
-	register struct node *file;
+static void CodeWriteln(register struct node *file)
 {
 	if( err_occurred ) return;
 

@@ -1,5 +1,5 @@
 !File: debugcst.h
-/*#define DEBUG		1	/* perform various self-tests	*/
+/*#define DEBUG		1	*//* perform various self-tests	*/
 #define NDEBUG		1	/* disable assertions			*/
 
 
@@ -55,7 +55,7 @@
 
 
 !File: nocross.h
-/*#define NOCROSS		1	/* define when cross compiler not needed */
+/*#define NOCROSS		1	*//* define when cross compiler not needed */
 
 
 !File: dbsymtab.h

@@ -1,3 +1,6 @@
+#ifndef DESIG_H_
+#define DESIG_H_
+
 /* D E S I G N A T O R   D E S C R I P T I O N S */
 
 /* Generating code for designators is not particularly easy, especially if
@@ -57,3 +60,32 @@ extern struct withdesig	*WithDesigs;
 extern struct desig	InitDesig;
 
 #define NO_LABEL	((label) 0)
+
+
+
+/* Copies psize bytes from "rhs" to "lhs" */
+void CodeCopy(register struct desig *lhs, register struct desig *rhs, arith sz, arith *psize);
+/* Generate code for an assignment. */
+void CodeMove(register struct desig *rhs, register struct node *left, struct type *rtp);
+/*	Generate code to load the value of the designator described
+	in "ds" onto the operand stack. */
+void CodeValue(register struct desig *ds, register struct type *tp);
+/*	Generate code to store the value on the stack in the designator
+	described in "ds" */
+void CodeStore(register struct desig *ds, register struct type *tp);
+/*	Generate code to load the address of the designator described
+	in "ds" unto the operand stack */
+void CodeAddress(register struct desig *ds);
+/* Generate code for a field designator. */
+void CodeFieldDesig(register struct def *df, register struct desig *ds);
+/*	Generate code for a variable represented by a "def" structure.*/
+void CodeVarDesig(register struct def *df, register struct desig *ds);
+/* Generate code for the lower- and upperbound of a conformant array */
+void CodeBoundDesig(register struct def *df, register struct desig *ds);
+/* generate code to store the function result */
+void CodeFuncDesig(register struct def *df, register struct desig *ds);
+/*	Generate code for a designator. Use divide and conquer
+	principle */
+void CodeDesig(register struct node *nd, register struct desig *ds);
+
+#endif

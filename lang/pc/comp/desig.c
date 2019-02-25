@@ -22,16 +22,15 @@
 #include	"node.h"
 #include	"scope.h"
 #include	"type.h"
+#include	"code.h"
+#include	"error.h"
 
 struct desig	InitDesig = {DSG_INIT, 0, 0, NULLDEF, 0};
 struct withdesig *WithDesigs;
 
-void CodeValue();
 
-STATIC int
-properly(ds, size, al)
-	register struct desig *ds;
-	arith size;
+
+static int properly(register struct desig *ds, arith size, int al)
 {
 	/*	Check if it is allowed to load or store the value indicated
 		by "ds" with LOI/STI.
@@ -55,9 +54,7 @@ properly(ds, size, al)
 		(! wordmodsz && ds->dsg_offset % size == 0));
 }
 
-CodeCopy(lhs, rhs, sz, psize)
-	register struct desig *lhs, *rhs;
-	arith sz, *psize;
+void CodeCopy(register struct desig *lhs, register struct desig *rhs, arith sz, arith *psize)
 {
 	struct desig l, r;
 
@@ -72,11 +69,7 @@ CodeCopy(lhs, rhs, sz, psize)
 	C_sti(sz);
 }
 
-void
-CodeMove(rhs, left, rtp)
-	register struct desig *rhs;
-	register struct node *left;
-	struct type *rtp;
+void CodeMove(register struct desig *rhs, register struct node *left, struct type *rtp)
 {
 	struct desig dsl;
 	register struct desig *lhs = &dsl;
@@ -152,10 +145,7 @@ CodeMove(rhs, left, rtp)
 	}
 }
 
-void
-CodeValue(ds, tp)
-	register struct desig *ds;
-	register struct type *tp;
+void CodeValue(register struct desig *ds, register struct type *tp)
 {
 	/*	Generate code to load the value of the designator described
 		in "ds"
@@ -212,9 +202,7 @@ CodeValue(ds, tp)
 	ds->dsg_kind = DSG_LOADED;
 }
 
-CodeStore(ds, tp)
-	register struct desig *ds;
-	register struct type *tp;
+void CodeStore(register struct desig *ds, register struct type *tp)
 {
 	/*	Generate code to store the value on the stack in the designator
 		described in "ds"
@@ -265,8 +253,7 @@ CodeStore(ds, tp)
 	ds->dsg_kind = DSG_INIT;
 }
 
-CodeAddress(ds)
-	register struct desig *ds;
+void CodeAddress(register struct desig *ds)
 {
 	/*	Generate code to load the address of the designator described
 	   	in "ds"
@@ -316,9 +303,7 @@ CodeAddress(ds)
 	ds->dsg_kind = DSG_PLOADED;
 }
 
-CodeFieldDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+void CodeFieldDesig(register struct def *df, register struct desig *ds)
 {
 	/* Generate code for a field designator. Only the code common for
 	   address as well as value computation is generated, and the
@@ -369,10 +354,7 @@ CodeFieldDesig(df, ds)
 	ds->dsg_packed = df->fld_flags & F_PACKED;
 }
 
-void
-CodeVarDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+void CodeVarDesig(register struct def *df, register struct desig *ds)
 {
 	/*	Generate code for a variable represented by a "def" structure.
 		Of course, there are numerous cases: the variable is local,
@@ -436,9 +418,7 @@ CodeVarDesig(df, ds)
 	ds->dsg_def = df;
 }
 
-CodeBoundDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+void CodeBoundDesig(register struct def *df, register struct desig *ds)
 {
 	/* Generate code for the lower- and upperbound of a conformant array */
 
@@ -464,9 +444,7 @@ CodeBoundDesig(df, ds)
 	ds->dsg_kind = DSG_LOADED;
 }
 
-CodeFuncDesig(df, ds)
-	register struct def *df;
-	register struct desig *ds;
+void CodeFuncDesig(register struct def *df, register struct desig *ds)
 {
 	/* generate code to store the function result */
 
@@ -500,9 +478,7 @@ CodeFuncDesig(df, ds)
 	ds->dsg_offset = df->prc_res;
 }
 
-CodeDesig(nd, ds)
-	register struct node *nd;
-	register struct desig *ds;
+void CodeDesig(register struct node *nd, register struct desig *ds)
 {
 	/*	Generate code for a designator. Use divide and conquer
 		principle
