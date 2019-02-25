@@ -17,8 +17,8 @@
 #include	"node.h"
 #include	"required.h"
 #include	"type.h"
-#include    "cstoper.h"
-#include    "error.h"
+#include	"cstoper.h"
+#include	"error.h"
 
 long mach_long_sign;	/* sign bit of the machine long */
 long full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
