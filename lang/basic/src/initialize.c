@@ -3,9 +3,11 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include <stdio.h>
 #include "bem.h"
+#include "util.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$";
 #endif
 
@@ -13,9 +15,9 @@ static char rcs_id[] = "$Id$";
 
 File	*datfile;
 
+extern void fillkex(void);
 
-
-initialize()
+void initialize(void)
 {
 	register char *cindex, *cptr;
         int result1, result2;
@@ -33,7 +35,7 @@ initialize()
 		}
 	}
 	cptr=datfname;
-	while ( *cptr++ = *cindex++ );
+	while ( (*cptr++ = *cindex++) !=0 );
 	/* Strip trailing suffix */
 	if ( cptr>datfname+3 && cptr[-3]=='.' ) cptr[-3]=0;
 	strcat(datfname,".d");

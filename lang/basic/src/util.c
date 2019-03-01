@@ -3,9 +3,12 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include "system.h"
+#include "util.h"
 #include "bem.h"
 
-#ifndef NORSCID
+
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -16,25 +19,8 @@ int	errorcnt;
 
 
 
-void
-warning(str)
-char *str;
-{
-	 if (wflag) return;
-	 Xerror("WARNING", str);
-}
 
-
-error(str)
-char *str;
-{
-	Xerror("ERROR", str);
-	errorcnt++;
-}
-
-Xerror(type, str)
-char *str;
-char *type;
+static void Xerror(char *type, char *str)
 {
 	extern int listing;
 	extern int basicline;
@@ -45,8 +31,23 @@ char *type;
 
 
 
-fatal(str)
-char *str;
+
+void warning(char* str)
+{
+	 if (wflag) return;
+	 Xerror("WARNING", str);
+}
+
+
+void error(char* str)
+{
+	Xerror("ERROR", str);
+	errorcnt++;
+}
+
+
+
+void fatal(char* str)
 {
 	Xerror("FATAL",str);
 	C_close();
@@ -55,22 +56,21 @@ char *str;
 
 
 
-notyetimpl()
+void notyetimpl(void)
 {
 	warning("not yet implemented");
 }
 
 
 
-illegalcmd()
+void illegalcmd(void)
 {
 	warning("illegal command");
 }
 
 
 
-char *myitoa(i)
-int i;
+char *myitoa(int i)
 {
 	static char buf[30];
 
@@ -79,12 +79,7 @@ int i;
 }
 
 
-
-
-
-
-char *salloc(length)
-unsigned length;
+char *salloc(unsigned int length)
 {		
 	char *s,*c;
 

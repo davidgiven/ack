@@ -3,9 +3,15 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include "parsepar.h"
 #include "bem.h"
+#include <stdio.h>
+#include "print.h"
+#include "system.h"
+#include "util.h"
 
-#ifndef NORSCID
+
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -18,9 +24,7 @@ int	nolins=0;		/* generate no LIN statements */
 
 
 
-parseparams(argc,argv)
-int argc;
-char **argv;
+void parseparams(int argc,char **argv)
 {
 	int files=0 ;
 	int i;

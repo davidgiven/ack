@@ -3,9 +3,18 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include "symbols.h"
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "bem.h"
+#include "eval.h"
+#include "gencode.h"
+#include "util.h"
 
-#ifndef NORSCID
+
+
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -15,7 +24,11 @@ int	deftype[128];		/* default type declarer */
 				/* which may be set by OPTION BASE */
 
 
-initdeftype()
+/* Local declarations */
+static void get_space(int type,int size);
+
+
+void initdeftype(void)
 {
 	int i;
 
@@ -31,8 +44,7 @@ Symbol *alternate = NIL;
 
 
 
-Symbol *srchsymbol(str)
-char *str;
+Symbol *srchsymbol(char* str)
 {
 	Symbol *s;
 
@@ -68,9 +80,7 @@ char *str;
 
 
 
-void
-dcltype(s)
-Symbol *s;
+void dcltype(Symbol *s)
 {
 	/* type declarer */
 	int type;
@@ -79,7 +89,7 @@ Symbol *s;
 	type=s->symtype;
 	if (type==DEFAULTTYPE)
 		/* use the default rule */
-		type= deftype[*s->symname];
+		type= deftype[(int)(*s->symname)];
 	/* generate the emlabel too */
 	if ( s->symalias==0)
 		s->symalias= dclspace(type);
@@ -89,8 +99,7 @@ Symbol *s;
 
 
 
-dclarray(s)
-Symbol *s;
+void dclarray(Symbol *s)
 {
 	int i; int size;
 
@@ -122,8 +131,7 @@ Symbol *s;
 
 
 
-get_space(type,size)
-int type,size;
+static void get_space(int type,int size)
 {
 
 	switch ( type ) {
@@ -153,8 +161,7 @@ int type,size;
 
 
 
-defarray(s)
-Symbol *s;
+void defarray(Symbol *s)
 {
 	/* array is used without dim statement, set default limits */
 	int i;
@@ -164,7 +171,7 @@ Symbol *s;
 
 
 
-dclspace(type)
+int dclspace(int type)
 {
 	int nr;
 
@@ -189,8 +196,7 @@ dclspace(type)
 
 
 /* SOME COMPILE TIME OPTIONS */
-optionbase(ival)
-int	ival;
+void optionbase(int ival)
 {
 	if ( ival<0 || ival>1)
 		error("illegal option base value");
@@ -199,8 +205,7 @@ int	ival;
 
 
 
-setdefaulttype(type)
-int	type;
+void setdefaulttype(int type)
 {
 	extern char *cptr;
 	char	first,last,i;
@@ -233,8 +238,7 @@ Symbol *fcn;
 
 
 
-newscope(s)
-Symbol *s;
+void newscope(Symbol *s)
 {
 	if (debug) print("new scope for %s\n",s->symname);
 	alternate= firstsym;
@@ -253,7 +257,7 @@ Symbol *s;
 
 
 
-heading( )
+void heading(void)
 {
 	char procname[50];
 
@@ -265,7 +269,7 @@ heading( )
 
 
 
-int fcnsize()
+static int fcnsize(void)
 {
 	/* generate portable function size */
 	int	i,sum;  /* sum is NEW */
@@ -278,8 +282,7 @@ int fcnsize()
 
 
 
-endscope(type)
-int type;
+void endscope(int type)
 {
 	Symbol *s;
 
@@ -304,8 +307,7 @@ int type;
 
 
 
-dclparm(s)
-Symbol	*s;
+void dclparm(Symbol *s)
 {
 	int size=0;
 
@@ -327,8 +329,7 @@ int	fcnindex= -1;
 
 
 
-fcncall(s)
-Symbol *s;
+int fcncall(Symbol *s)
 {
 	if ( !s->isfunction)
 		error("Function not declared");
@@ -342,8 +343,7 @@ Symbol *s;
 
 
 
-fcnend(parmcount)
-int parmcount;
+int fcnend(int parmcount)
 {
 	int type;
 	static char concatbuf[50]; /* NEW */
@@ -366,8 +366,7 @@ int parmcount;
 
 
 
-callparm(ind,type)
-int ind,type;
+void callparm(int ind,int type)
 {
 	if ( fcnindex<0) error("unexpected parameter");
 	if ( ind >= fcn->dimensions)

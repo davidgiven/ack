@@ -5,7 +5,9 @@
 
 int toknum;
 
-yylexp() 
+extern int yylex(void);
+
+int yylexp(void)
 {
 /* als toknum != 0 dan bevat toknum een door LLmessage back-ge-pushed token */
 

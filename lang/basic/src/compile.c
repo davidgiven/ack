@@ -3,19 +3,25 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+/*#include "bem.h"*/
+#include <stdio.h>
+#include "system.h"
+#include "gencode.h"
 #include "bem.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
+extern int getinputline(void);
+extern void LLparse(void);
 
 /* compile the next program in the list */
 /* Here we should open the input file. (for the future) */
 
 File *yyin;
 
-compileprogram()
+void compileprogram(void)
 {
 	extern int basicline;
 
@@ -24,7 +30,9 @@ compileprogram()
                       epilogcode in the new version of the compiler */
 
 	while( basicline = 0, getinputline())
-		(void) LLparse();
+	{
+		LLparse();
+	}
 	epilogcode(); 	
 	sys_close(yyin);
 }

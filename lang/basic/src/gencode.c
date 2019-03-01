@@ -4,9 +4,12 @@
  */
 
 #include "bem.h"
-#include "system.h"
+#include "graph.h"
+#include "eval.h"
+#include "util.h"
+#include "gencode.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -18,14 +21,14 @@ label	err_goto_label;
 
 
 
-genlabel()
+int genlabel(void)
 {
 	 return(emlabel++);
 }
 
 
 
-genemlabel()
+int genemlabel(void)
 {
 	int l;
 
@@ -39,8 +42,7 @@ genemlabel()
 
 
 int tronoff=0;
-newemblock(nr)
-int nr;
+void newemblock(int nr)
 {
 	C_df_ilb((label)currline->emlabel);
 	C_lin((arith)nr);
@@ -57,7 +59,7 @@ int nr;
 
 /* Handle data statements */
 List	*datalist=0;
-datastmt()
+void datastmt(void)
 {
 	List *l,*l1;
 
@@ -78,7 +80,7 @@ datastmt()
 
 
 
-datatable()
+void datatable(void)
 {
 	List *l;
 	int line=0;
@@ -100,8 +102,7 @@ datatable()
 
 
 /* ERROR and exception handling */
-exceptstmt(lab)
-int lab;
+void exceptstmt(int lab)
 {
 	/* exceptions to subroutines are supported only */
 	extern int gosubcnt;
@@ -116,8 +117,7 @@ int lab;
 
 
 
-errorstmt(exprtype)
-int	exprtype;
+void errorstmt(int exprtype)
 {
 	/* convert expression to a valid error number */
 	/* obtain the message and print it */
@@ -128,8 +128,7 @@ int	exprtype;
 
 
 /* BASIC IO */
-openstmt(recsize)
-int recsize;
+void openstmt(int recsize)
 {
 	C_loc((arith)recsize);
 	C_cal("_opnchn");
@@ -138,8 +137,7 @@ int recsize;
 
 
 
-printstmt(exprtype)
-int	exprtype;
+void printstmt(int exprtype)
 {
 	switch(exprtype)
 	{
@@ -165,16 +163,14 @@ int	exprtype;
 
 
 
-zone(i)
-int i;
+void zone(int i)
 {
 	if ( i) C_cal("_zone");
 }
 
 
 
-writestmt(exprtype,comma)
-int	exprtype,comma;
+void writestmt(int exprtype, int comma)
 {
 	if ( comma) C_cal("_wrcomma");
 
@@ -198,8 +194,7 @@ int	exprtype,comma;
 
 
 
-restore(lab)
-int lab;
+void restore(int lab)
 {
 	/* save this information too */
 
@@ -213,8 +208,7 @@ int lab;
 
 
 
-prompt(qst)
-int qst;
+void prompt(int qst)
 {
 	setchannel(-1);
 	C_cal("_prstr");
@@ -224,8 +218,7 @@ int qst;
 
 
 
-linestmt(type)
-int type;
+void linestmt(int type)
 {
 	if ( type!= STRINGTYPE)
 		error("String variable expected");
@@ -235,8 +228,7 @@ int type;
 
 
 
-readelm(type)
-int type;
+void readelm(int type)
 {
 	switch(type)
 	{
@@ -259,8 +251,7 @@ int type;
 
 
 /* Swap exchanges the variable values */
-swapstmt(ltype,rtype)
-int	ltype, rtype;
+void swapstmt(int ltype,int rtype)
 {
 	if ( ltype!= rtype)
 		error("Type mismatch");
@@ -287,9 +278,9 @@ int	ltype, rtype;
 
 
 /* input/output handling */
-setchannel(val)
-int val;
-{	/* obtain file descroption */
+void setchannel(int val)
+{
+	/* obtain file descroption */
 	C_loc((arith)val);
 	C_cal("_setchan");
 	C_asp((arith)BEMINTSIZE);
@@ -298,8 +289,7 @@ int val;
 
 
 /* The if-then-else statements */
-ifstmt(type)
-int type;
+int ifstmt(int type)
 {
 	/* This BASIC follows the True= -1 rule */
 	int nr;
@@ -322,8 +312,7 @@ int type;
 
 
 
-thenpart( elselab)
-int elselab;
+int thenpart(int elselab)
 {
 	int nr;
 
@@ -335,7 +324,7 @@ int elselab;
 
 
 
-elsepart(lab)int lab;
+void elsepart(int lab)
 {
 	C_df_ilb((label)lab);
 }
@@ -359,8 +348,7 @@ int	forcnt= -1;
 
 
 
-forinit(s)
-Symbol *s;
+void forinit(Symbol *s)
 {
 	int type;
 	struct FORSTRUCT *f;
@@ -388,8 +376,7 @@ Symbol *s;
 
 
 
-forexpr(type)
-int type;
+void forexpr(int type)
 {
 	/* save start value of loop variable in a save place*/
 	/* to avoid clashing with final value and step expression */
@@ -402,8 +389,7 @@ int type;
 
 
 
-forlimit(type)
-int type;
+void forlimit(int type)
 {
 	/* save the limit value too*/
 	int result;
@@ -415,8 +401,7 @@ int type;
 
 
 
-forskipped(f)
-struct FORSTRUCT *f;
+void forskipped(struct FORSTRUCT *f)
 {
 	int type;
 
@@ -452,8 +437,7 @@ struct FORSTRUCT *f;
 
 
 
-forstep(type)
-int type;
+void forstep(int type)
 {
 	int result;
 	int varaddress;
@@ -522,8 +506,7 @@ int type;
 
 
 
-nextstmt(s)
-Symbol *s;
+void nextstmt(Symbol *s)
 {
 	if (forcnt>MAXFORDEPTH || forcnt<0 || 
 	    (s && s!= fortable[forcnt].loopvar))
@@ -538,8 +521,7 @@ Symbol *s;
 
 
 
-pokestmt(type1,type2)
-int	type1,type2;
+void pokestmt(int type1,int type2)
 {
 	conversion(type1,INTTYPE);
 	conversion(type2,INTTYPE);
@@ -553,7 +535,7 @@ int	type1,type2;
 
 int	whilecnt, whilelabels[MAXDEPTH][2]; /*0=head,1=out */
 
-whilestart()
+void whilestart(void)
 {
 	whilecnt++;
 	if ( whilecnt==MAXDEPTH)
@@ -567,8 +549,7 @@ whilestart()
 
 
 
-whiletst(exprtype)
-int exprtype;
+void whiletst(int exprtype)
 {
 	/* test expression type */
 	conversion(exprtype,INTTYPE);
@@ -577,7 +558,7 @@ int exprtype;
 
 
 
-wend()
+void wend(void)
 {
 	if ( whilecnt<1)
 		error("not part of while statement");
@@ -591,7 +572,7 @@ wend()
 
 
 /* generate code for the final version */
-prologcode()
+void prologcode(void)
 {
 	/* generate the EM prolog code */
 	C_df_dnam("fltnull");
@@ -623,7 +604,7 @@ prologcode()
 
 
 
-prolog2()
+void prolog2(void)
 {
 	int result;
 	label l = genlabel(), l2;
@@ -659,7 +640,7 @@ prolog2()
 
 
 /* NEW */
-gendata() 
+void gendata(void)
 {
 	C_loc((arith)0);
 	C_cal("_setchan");
@@ -685,7 +666,7 @@ gendata()
 
 
 
-epilogcode()
+void epilogcode(void)
 {
 	/* finalization code */
 	int nr;

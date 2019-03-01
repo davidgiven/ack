@@ -4,8 +4,11 @@
  */
 
 #include "bem.h"
+#include "util.h"
+#include "eval.h"
+#include "gencode.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -18,7 +21,7 @@ Linerecord	*firstline,
 
 
 
-List *newlist()
+List *newlist(void)
 {
 	List *l;
 
@@ -29,8 +32,7 @@ List *newlist()
 
 /* Line management is handled here */
 
-Linerecord *srchline(nr)
-int nr;
+Linerecord *srchline(int nr)
 {
 	Linerecord *l;
 
@@ -41,8 +43,7 @@ int nr;
 
 
 
-List *srchforward(nr)
-int nr;
+List *srchforward(int nr)
 {
 	List *l;
 
@@ -53,7 +54,7 @@ int nr;
 
 
 
-linewarnings()
+void linewarnings(void)
 {
 	List *l;
 	extern int errorcnt;
@@ -72,8 +73,7 @@ linewarnings()
 
 
 
-newblock(nr)
-int	nr;
+void newblock(int nr)
 {
 	Linerecord	*l;
 	List		*frwrd;
@@ -111,8 +111,7 @@ int	nr;
 
 
 
-gotolabel(nr)
-int nr;
+int gotolabel(int nr)
 {
 	/* simulate a goto statement in the line record table */
 	Linerecord *l1;
@@ -146,8 +145,7 @@ int nr;
 
 
 
-gotostmt(nr)
-int nr;
+void gotostmt(int nr)
 {
            C_bra((label) gotolabel(nr));
 }
@@ -160,7 +158,7 @@ int	gosubcnt=1;
 
 
 
-List *gosublabel()
+List *gosublabel(void)
 {
 	List *l;
 
@@ -177,8 +175,7 @@ List *gosublabel()
 
 
 
-gosubstmt(lab)
-int lab;
+void gosubstmt(int lab)
 {
 	List *l;
 	int nr,n;
@@ -197,7 +194,7 @@ int lab;
 
 
 
-genreturns()
+void genreturns(void)
 {
 	int count;
 	int nr;
@@ -227,7 +224,7 @@ genreturns()
 
 
 
-returnstmt()
+void returnstmt(void)
 {
         C_cal("_retstmt");
         C_lfr((arith) BEMINTSIZE);
@@ -242,8 +239,7 @@ List	*jumphead,*jumptail;
 int	jumpcnt;
 
 
-jumpelm(nr)
-int nr;
+void jumpelm(int nr)
 {
 	List *l;
 
@@ -260,8 +256,7 @@ int nr;
 
 
 
-ongotostmt(type)
-int type;
+void ongotostmt(int type)
 {
 	/* generate the code itself, index in on top of the stack */
 	/* blurh, store the number of entries in the descriptor */
@@ -294,8 +289,7 @@ int type;
 
 
 
-ongosubstmt(type)
-int type;
+void ongosubstmt(int type)
 {
 	List *l;
 	int firstlabel;

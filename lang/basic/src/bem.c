@@ -4,8 +4,12 @@
  */
 
 #include "bem.h"
+#include "parsepar.h"
+#include "system.h"
+#include "graph.h"
 
-#ifndef NORSCID
+
+#ifndef NORCSID
 static char rcs_id[]	= "$Id$" ;
 static char rcs_bem[]	= RCS_BEM ;
 static char rcs_symb[]	= RCS_SYMB ;
@@ -33,9 +37,11 @@ char	*inpfile, *outfile;
 int	BEMINTSIZE = EMINTSIZE;
 int	BEMPTRSIZE = EMPTRSIZE;
 int	BEMFLTSIZE = EMFLTSIZE;
-main(argc,argv)
-int argc;
-char **argv;
+
+extern void initialize(void);
+extern void compileprogram(void);
+
+int main(int argc,char **argv)
 {
 	extern int errorcnt;
 

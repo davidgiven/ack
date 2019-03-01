@@ -4,8 +4,10 @@
  */
 
 #include "bem.h"
+#include "util.h"
+#include "eval.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -19,8 +21,7 @@ int	exprlimit;
 
 
 
-parm(cnt)
-int cnt;
+void parm(int cnt)
 {
 	if( cnt> exprlimit)
 		error("Not enough arguments");
@@ -30,9 +31,7 @@ int cnt;
 
 
 
-callfcn(fcnnr,cnt,typetable)
-int fcnnr,cnt;
-int *typetable;
+int callfcn(int fcnnr,int cnt,int *typetable)
 {
 	int pop=DOUBLETYPE;
 	int res=DOUBLETYPE;

@@ -4,13 +4,14 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <signal.h>
-#include <system.h>
-#include <print.h>
-#include <em.h>
-#include <em_mes.h>
+#include "system.h"
+#include "print.h"
+#include "em.h"
+#include "em_mes.h"
 
 /* Author: M.L. Kersten
 ** Here all the global objects are defined.
