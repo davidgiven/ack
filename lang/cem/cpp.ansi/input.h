@@ -11,4 +11,11 @@
 #define UnGetChar()	((LexSave != EOI) ? ChPushBack(LexSave) : 0)
 
 extern	int LexSave;	/* last character read by GetChar		*/
-extern 	int GetChar();	/* character input, with trigraph parsing	*/
+
+
+/* Returns the working directory from a complete path+filename specification.
+ * If there is just a filename and no path, it returns DOT e.g the current
+ * directory.
+ */
+char *getwdir(register char *fn);
+

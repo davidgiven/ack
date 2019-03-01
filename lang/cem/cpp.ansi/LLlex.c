@@ -15,7 +15,9 @@
 #include "idf.h"
 #include "LLlex.h"
 #include "Lpars.h"
+#include "replace.h"
 #include "class.h"
+#include "error.h"
 #include "bits.h"
 
 #define BUFSIZ 1024
@@ -30,20 +32,26 @@ int AccFileSpecifier = 0; /* return filespecifier <...>		*/
 int LexSave = 0; /* last character read by GetChar       */
 extern int InputLevel; /* # of current macro expansions	*/
 
-extern char* string_token();
-extern arith char_constant();
+
 #define FLG_ESEEN 0x01 /* possibly a floating point number */
 #define FLG_DOTSEEN 0x02 /* certainly a floating point number */
 
-void skipcomment();
-void skiplinecomment(void);
 
-int LLlex()
+/* Private forward definitions */
+
+static arith char_constant(char*);
+static char* string_token(char *, int);
+static int quoted(register int);
+static int val_in_base(register int, int);
+static int trigraph(void);
+
+
+int LLlex(void)
 {
 	return (DOT != EOF) ? GetToken(&dot) : EOF;
 }
 
-int GetToken(ptok) register struct token* ptok;
+int GetToken(register struct token* ptok)
 {
 	/*	GetToken() is the actual token recognizer. It calls the
 	    control line interpreter if it encounters a "\n{w}*#"
@@ -385,7 +393,7 @@ again: /* rescan the input after an error or replacement	*/
 	/*NOTREACHED*/
 }
 
-void skipcomment()
+void skipcomment(void)
 {
 	/*	The last character read has been the '*' of '/_*'.  The
 	    characters, except NL and EOI, between '/_*' and the first
@@ -437,7 +445,7 @@ void skiplinecomment(void)
 	}
 }
 
-arith char_constant(nm) char* nm;
+static arith char_constant(char* nm)
 {
 	register arith val = 0;
 	register int ch;
@@ -471,7 +479,7 @@ arith char_constant(nm) char* nm;
 	return val;
 }
 
-char* string_token(nm, stop_char) char* nm;
+static char* string_token(char *nm, int stop_char)
 {
 	register int ch;
 	register int str_size;
@@ -504,7 +512,7 @@ char* string_token(nm, stop_char) char* nm;
 	return str;
 }
 
-int quoted(ch) register int ch;
+static int quoted(register int ch)
 {
 	/*	quoted() replaces an escaped character sequence by the
 	    character meant.
@@ -567,7 +575,7 @@ int quoted(ch) register int ch;
 	return ch & 0377;
 }
 
-int val_in_base(ch, base) register int ch;
+static int val_in_base(register int ch, int base)
 {
 	switch (base)
 	{
@@ -583,7 +591,7 @@ int val_in_base(ch, base) register int ch;
 	}
 }
 
-int GetChar()
+int GetChar(void)
 {
 	/*	The routines GetChar and trigraph parses the trigraph
 	    sequences and removes occurences of \\\n.
@@ -612,7 +620,7 @@ again:
 	return (LexSave = ch);
 }
 
-int trigraph()
+static int trigraph(void)
 {
 	register int ch;
 

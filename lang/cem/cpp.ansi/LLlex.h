@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 /* D E F I N I T I O N S   F O R   T H E   L E X I C A L   A N A L Y Z E R */
+#ifndef LLLEX_H_
+#define LLLEX_H_
 
 /*	A token from the input stream is represented by an integer,
 	called a "symbol", but it may have other information associated
@@ -44,3 +46,14 @@ extern int err_occurred;	/* "error.c"	*/
 #define	DOT	dot.tk_symb
 
 #define EOF	(-1)
+
+/* Public function declarations */
+
+int LLlex(void);
+int GetToken(register struct token* ptok);
+void skipcomment(void);
+void skiplinecomment(void);
+/* Get next character input, with trigraph parsing and newline	*/
+int GetChar(void);
+
+#endif /* LLLLEX_H_ */

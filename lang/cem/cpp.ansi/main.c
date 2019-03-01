@@ -15,7 +15,14 @@
 #include 	"arith.h"
 #include	"file_info.h"
 #include	"idf.h"
+#include	"init.h"
+#include	"print.h"
+#include	"options.h"
+#include	"error.h"
+#include	"input.h"
 #include	"macro.h"
+#include	"preprocess.h"
+
 
 extern char *symbol2str();
 extern char *getwdir();
@@ -24,7 +31,7 @@ extern int do_dependencies;
 extern char *dep_file;
 int idfsize = IDFSIZE;
 extern char options[];
-static File *dep_fd = STDOUT;
+static File *dep_fd;
 
 arith ifval;
 
@@ -33,13 +40,18 @@ char *prog_name;
 extern char **inctable;
 extern int inc_max, inc_total;
 
-void dependency();
+/* Forward declarations */
+void compile(int argc, char *argv[]);
+void add_dependency(char *);
+static void list_dependencies(char *);
+static void dependency(char *, char *);
 
-main(argc, argv)
-	char *argv[];
+
+int main(int argc, char *argv[])
 {
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
+	dep_fd = STDOUT;
 
 	init_idf();
 
@@ -67,8 +79,7 @@ main(argc, argv)
 	/*NOTREACHED*/
 }
 
-compile(argc, argv)
-	char *argv[];
+void compile(int argc, char *argv[])
 {
 	register char *source = 0;
 	char *dummy;
@@ -97,10 +108,9 @@ compile(argc, argv)
 }
 
 struct idf	*file_head;
-extern char *strrchr();
 
-list_dependencies(source)
-	char *source;
+
+static void list_dependencies(char *source)
 {
 	register struct idf *p = file_head;
 
@@ -115,7 +125,7 @@ list_dependencies(source)
                          * object generated, so don't include the pathname
                          * leading to it.
                          */
-                        if (s = strrchr(source, '/')) {
+                        if ((s = strrchr(source, '/'))) {
                                 source = s + 1;
                         }
 		}
@@ -131,8 +141,7 @@ list_dependencies(source)
 	}
 }
 
-add_dependency(s)
-	char *s;
+void add_dependency(char *s)
 {
 	register struct idf *p = str2idf(s, 0);
 
@@ -143,9 +152,7 @@ add_dependency(s)
 	}
 }
 
-void
-dependency(s, source)
-	char *s, *source;
+static void dependency(char *s, char *source)
 {
 	if (options['i'] && !strncmp(s, "/usr/include/", 13)) {
 		return;
@@ -156,8 +163,7 @@ dependency(s, source)
 	else	fprint(dep_fd, "%s\n", s);
 }
 
-void
-No_Mem()				/* called by alloc package */
+void No_Mem(void)				/* called by alloc package */
 {
 	fatal("out of memory");
 }

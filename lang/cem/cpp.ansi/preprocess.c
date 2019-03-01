@@ -9,14 +9,19 @@
 #include <stdio.h>
 #include <system.h>
 #include <alloc.h>
+#include "preprocess.h"
 #include "input.h"
 #include "parameters.h"
 #include "arith.h"
 #include "LLlex.h"
 #include "class.h"
 #include "macro.h"
+#include "domacro.h"
+#include "replace.h"
 #include "idf.h"
+#include "error.h"
 #include "bits.h"
+#include "skip.h"
 
 char _obuf[OBUFSIZE];
 #ifdef DOBITS
@@ -26,7 +31,7 @@ extern int InputLevel;
 
 extern char* sprint();
 
-Xflush()
+void Xflush(void)
 {
 	sys_write(STDOUT, _obuf, OBUFSIZE);
 }
@@ -45,7 +50,7 @@ struct prag_info
 static struct prag_info* pragma_tab;
 static int pragma_nr;
 
-do_pragma()
+void do_pragma(void)
 {
 	register int size = ITEXTSIZE;
 	char* cur_line = Malloc((unsigned)size);
@@ -123,7 +128,7 @@ do_pragma()
 
 char Xbuf[256];
 
-void preprocess(fn) char* fn;
+void preprocess(char *fn)
 {
 	register int c;
 	register char* op = _obuf;
@@ -535,8 +540,7 @@ void preprocess(fn) char* fn;
 	/*NOTREACHED*/
 }
 
-static char* SkipComment(op, lineno) char* op;
-int* lineno;
+static char* SkipComment(char *op, int *lineno)
 {
 	char* ob = &_obuf[OBUFSIZE];
 	register int c, oldc = '\0';

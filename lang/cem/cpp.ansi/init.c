@@ -13,7 +13,10 @@
 #include	"time.h"
 #include	"class.h"
 #include	"macro.h"
+#include	"print.h"
+#include	"error.h"
 #include	"idf.h"
+#include	"domacro.h"
 
 struct mkey	{
 	char *mk_reserved;
@@ -34,9 +37,8 @@ struct mkey	{
 	{0,		K_UNKNOWN}
 };
 
-char *sprint();
 
-init_pp()
+void init_pp(void)
 {
 	static char *months[12] = {
 		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -74,7 +76,7 @@ init_pp()
 	/* __DATE__ */
 	sprint(dbuf, "\"%s %2d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
-	/* if (tp->tm_mday < 10) dbuf[5] = ' ';		/* hack */
+	/* if (tp->tm_mday < 10) dbuf[5] = ' ';	*/	/* hack */
 	macro_def(str2idf("__DATE__", 0), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */

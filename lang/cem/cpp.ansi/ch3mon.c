@@ -5,13 +5,12 @@
 /* $Id$ */
 /* EVALUATION OF MONADIC OPERATORS */
 
+#include	"ch3mon.h"
 #include	"Lpars.h"
 #include	"arith.h"
 
 /*ARGSUSED2*/
-ch3mon(oper, pval, puns)
-	register arith *pval;
-	int *puns;
+void ch3mon(int oper, register arith *pval, int *puns)
 {
 	switch (oper)	{
 	case '~':

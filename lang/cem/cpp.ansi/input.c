@@ -9,6 +9,8 @@
 #include <string.h>
 #include "file_info.h"
 #include "input.h"
+#include "error.h"
+#include "replace.h"
 
 #define INP_PUSHBACK	3
 #define INP_TYPE	struct file_info
@@ -17,9 +19,7 @@ struct file_info	finfo;
 #include <inp_pkg.body>
 #include <alloc.h>
 
-char *
-getwdir(fn)
-	register char *fn;
+char *getwdir(register char *fn)
 {
 	register char *p;
 	char *strrchr();
@@ -44,7 +44,7 @@ getwdir(fn)
 int	NoUnstack;
 int	InputLevel;
 
-AtEoIT()
+int AtEoIT(void)
 {
 	InputLevel--;
 	/* if (NoUnstack) warning("unexpected EOF"); ??? */
@@ -52,7 +52,7 @@ AtEoIT()
 	return 0;
 }
 
-AtEoIF()
+int AtEoIF(void)
 {
 	extern int nestlevel;
 	extern int nestcount;

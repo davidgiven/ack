@@ -9,14 +9,13 @@
 #include "LLlex.h"
 #include "class.h"
 #include "input.h"
+#include "domacro.h"
+#include "error.h"
 
 extern int InputLevel;
 
-int skipspaces(ch, skipnl) register int ch;
+int skipspaces(register int ch, int skipnl)
 {
-	/*	skipspaces() skips any white space and returns the first
-	    non-space character.
-	*/
 	register int nlseen = 0;
 
 	for (;;)
@@ -65,9 +64,11 @@ int skipspaces(ch, skipnl) register int ch;
 		else
 			return ch;
 	}
+	/* garbage */
+	return 0;
 }
 
-SkipToNewLine()
+int SkipToNewLine(void)
 {
 	register int ch;
 	register int garbage = 0;
