@@ -2,11 +2,11 @@
 
 struct node;
 
-extern int	(*ExprChkTable[])();	/* table of expression checking
+extern int	(*ExprChkTable[])(struct node*);	/* table of expression checking
 					   functions, indexed by node class
 					*/
 
-extern int	(*VarAccChkTable[])();	/* table of variable-access checking
+extern int	(*VarAccChkTable[])(struct node*);	/* table of variable-access checking
 					   functions, indexed by node class
 					*/
 

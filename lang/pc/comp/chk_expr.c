@@ -1383,7 +1383,7 @@ int (*ExprChkTable[])(struct node*) =
 	NodeCrash
 	};
 
-	int (*VarAccChkTable[])() =
+	int (*VarAccChkTable[])(struct node*) =
 	{
 		no_var_access,
 		ChkLinkOrName,
