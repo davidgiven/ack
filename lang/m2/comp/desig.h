@@ -4,10 +4,14 @@
  *
  * Author: Ceriel J.H. Jacobs
  */
+#ifndef DESIG_H_
+#define DESIG_H_
 
 /* D E S I G N A T O R   D E S C R I P T I O N S */
 
 /* $Id$ */
+
+#include <em_arith.h>
 
 /* Generating code for designators is not particularly easy, especially if
    you don't know wether you want the address or the value.
@@ -65,3 +69,21 @@ struct withdesig {
 extern struct withdesig	*WithDesigs;
 
 #define NO_LABEL	((label) 0)
+
+typedef struct type t_type;
+typedef struct node t_node;
+
+
+void LOL(arith offset, arith size);
+void STL(arith offset, arith size);
+void CodeValue(register t_desig *ds, register t_type *tp);
+void ChkForFOR(register t_node *nd);
+void CodeStore(register t_desig *ds, register t_type *tp);
+void CodeCopy(register t_desig *lhs, register t_desig *rhs, arith sz, arith *psize);
+void CodeMove(register t_desig *rhs, register t_node *left, t_type *rtp);
+void CodeAddress(register t_desig *ds);
+void CodeFieldDesig(register t_def *df, register t_desig *ds);
+void CodeVarDesig(register t_def *df, register t_desig *ds);
+void CodeDesig(register t_node *nd, register t_desig *ds);
+
+#endif /* DESIG_H_ */

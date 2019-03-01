@@ -19,16 +19,17 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"idf.h"
+#include	"error.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
+#include	"misc.h"
 
 extern char		*symbol2str();
-extern t_idf		*gen_anon_idf();
 
-LLmessage(tk)
-	register int tk;
+
+void LLmessage(register int tk)
 {
 	if (tk > 0)	{
 		/* if (tk > 0), it represents the token to be inserted.

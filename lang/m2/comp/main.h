@@ -6,8 +6,8 @@
  */
 
 /* S O M E   G L O B A L   V A R I A B L E S */
-
-/* $Id$ */
+#ifndef MAIN_H_
+#define MAIN_H_
 
 extern char options[];	/* indicating which options were given */
 
@@ -23,3 +23,7 @@ extern struct def *Defined;
 extern char **DEFPATH;	/* search path for DEFINITION MODULE's */
 extern int mDEF, nDEF;
 extern int state;	/* either IMPLEMENTATION or PROGRAM */
+
+void do_SYSTEM(void);
+
+#endif /* MAIN_H_ */

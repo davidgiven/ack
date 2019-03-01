@@ -22,20 +22,24 @@
 #include	"em_code.h"
 #include	"assert.h"
 
+#include	"enter.h"
 #include	"idf.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"type.h"
+#include	"error.h"
 #include	"scope.h"
 #include	"node.h"
+#include	"stab.h"
 #include	"main.h"
+#include	"lookup.h"
 #include	"misc.h"
 #include	"f_info.h"
 
-t_def *
-Enter(name, kind, type, pnam)
-	char *name;
-	t_type *type;
+
+static t_def *DoImport(register t_def *, t_scope *, int);
+
+t_def *Enter(char *name, int kind, t_type *type, int pnam)
 {
 	/*	Enter a definition for "name" with kind "kind" and type
 		"type" in the Current Scope. If it is a standard name, also
@@ -52,10 +56,7 @@ Enter(name, kind, type, pnam)
 	return df;
 }
 
-t_def *
-EnterType(name, type)
-	char *name;
-	t_type *type;
+t_def *EnterType(char *name, t_type *type)
 {
 	/*	Enter a type definition for "name"  and type
 		"type" in the Current Scope.
@@ -64,9 +65,7 @@ EnterType(name, type)
 	return Enter(name, D_TYPE, type, 0);
 }
 
-EnterEnumList(Idlist, type)
-	t_node *Idlist;
-	register t_type *type;
+void EnterEnumList(t_node *Idlist, register t_type *type)
 {
 	/*	Put a list of enumeration literals in the symbol table.
 		They all have type "type".
@@ -92,11 +91,8 @@ EnterEnumList(Idlist, type)
 	FreeNode(Idlist);
 }
 
-EnterFieldList(Idlist, type, scope, addr)
-	t_node *Idlist;
-	register t_type *type;
-	t_scope *scope;
-	arith *addr;
+void EnterFieldList(t_node *Idlist, register t_type *type, t_scope *scope,
+	arith *addr)
 {
 	/*	Put a list of fields in the symbol table.
 		They all have type "type", and are put in scope "scope".
@@ -116,15 +112,8 @@ EnterFieldList(Idlist, type, scope, addr)
 	FreeNode(Idlist);
 }
 
-EnterVarList(Idlist, type, local)
-	t_node *Idlist;
-	t_type *type;
+void EnterVarList(t_node *Idlist, t_type *type, int local)
 {
-	/*	Enter a list of identifiers representing variables into the
-		name list. "type" represents the type of the variables.
-		"local" is set if the variables are declared local to a
-		procedure.
-	*/
 	register t_def *df;
 	register t_node *idlist = Idlist;
 	register t_scopelist *sc = CurrVis;
@@ -191,17 +180,12 @@ EnterVarList(Idlist, type, local)
 	FreeNode(Idlist);
 }
 
-EnterParamList(ppr, Idlist, type, VARp, off)
-	t_param **ppr;
-	t_node *Idlist;
-	t_type *type;
-	int VARp;
-	arith *off;
+void EnterParamList(t_param **ppr,
+	t_node *Idlist,
+	t_type *type,
+	int VARp,
+	arith *off)
 {
-	/*	Create (part of) a parameterlist of a procedure.
-		"ids" indicates the list of identifiers, "tp" their type, and
-		"VARp" indicates D_VARPAR or D_VALPAR.
-	*/
 	register t_param *pr;
 	register t_def *df;
 	register t_node *idlist = Idlist;
@@ -245,12 +229,8 @@ EnterParamList(ppr, Idlist, type, VARp, off)
 	FreeNode(Idlist);
 }
 
-STATIC t_def *DoImport();
 
-void
-ImportEffects(idef, scope, flag)
-	register t_def *idef;
-	t_scope *scope;
+static void ImportEffects(register t_def *idef, t_scope *scope, int flag)
 {
 	/*	Handle side effects of an import:
 		- a module could have unqualified exports ???
@@ -316,10 +296,7 @@ ImportEffects(idef, scope, flag)
 	}
 }
 
-STATIC t_def *
-DoImport(df, scope, flag)
-	register t_def *df;
-	t_scope *scope;
+static t_def *DoImport(register t_def *df, t_scope *scope, int flag)
 {
 	/*	Definition "df" is imported to scope "scope".
 	*/
@@ -332,10 +309,7 @@ DoImport(df, scope, flag)
 }
 
 
-STATIC
-ForwModule(df, nd)
-	register t_def *df;
-	t_node *nd;
+static void  ForwModule(register t_def *df, t_node *nd)
 {
 	/*	An import is done from a not yet defined module "df".
 		We could also end up here for not found DEFINITION MODULES.
@@ -360,10 +334,7 @@ ForwModule(df, nd)
 	df->for_node = nd;
 }
 
-STATIC t_def *
-ForwDef(ids, scope)
-	register t_node *ids;
-	t_scope *scope;
+static t_def *ForwDef(register t_node *ids, t_scope *scope)
 {
 	/*	Enter a forward definition of "ids" in scope "scope",
 		if it is not already defined.
@@ -379,14 +350,8 @@ ForwDef(ids, scope)
 	return df;
 }
 
-EnterExportList(Idlist, qualified)
-	t_node *Idlist;
+void EnterExportList(t_node *Idlist, int qualified)
 {
-	/*	From the current scope, the list of identifiers "ids" is
-		exported. Note this fact. If the export is not qualified, make
-		all the "ids" visible in the enclosing scope by defining them
-		in this scope as "imported".
-	*/
 	register t_node *idlist = Idlist;
 	register t_def *df, *df1;
 
@@ -461,8 +426,7 @@ EnterExportList(Idlist, qualified)
 	FreeNode(Idlist);
 }
 
-CheckForImports(df)
-	t_def *df;
+void CheckForImports(t_def *df)
 {
 	/*	We have a definition for "df"; check all imports of
 		it for side-effects
@@ -482,11 +446,7 @@ CheckForImports(df)
 	}
 }
 
-void
-EnterFromImportList(idlist, FromDef, FromId)
-	register t_node *idlist;
-	register t_def *FromDef;
-	t_node *FromId;
+void EnterFromImportList(t_node *idlist, t_def *FromDef, t_node *FromId)
 {
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
@@ -544,9 +504,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 	FreeNode(FromId);
 }
 
-EnterImportList(idlist, local, sc)
-	register t_node *idlist;
-	t_scope *sc;
+void EnterImportList(t_node *idlist, int local, t_scope *sc)
 {
 	/*	Import "idlist" from scope "sc".
 		If the import is not local, definition modules must be read

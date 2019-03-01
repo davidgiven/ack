@@ -26,6 +26,7 @@
 #include	"f_info.h"
 #include	"Lpars.h"
 #include	"class.h"
+#include	"error.h"
 #include	"idf.h"
 #include	"def.h"
 #include	"type.h"
@@ -48,8 +49,7 @@ int	tk_nmb_at_last_syn_err = -ERR_SHADOW;
 extern char	options[];
 extern int	flt_status;
 
-STATIC
-SkipComment()
+static void SkipComment(void)
 {
 	/*	Skip Modula-2 comments (* ... *).
 		Note that comments may be nested (par. 3.5).
@@ -122,8 +122,7 @@ SkipComment()
 	}
 }
 
-STATIC struct string *
-GetString(upto)
+static struct string *GetString(int upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
@@ -169,8 +168,7 @@ GetString(upto)
 
 static char *s_error = "illegal line directive";
 
-STATIC int
-getch()
+static int getch(void)
 {
 	register int ch;
 
@@ -180,8 +178,7 @@ getch()
 	return ch;
 }
 
-void
-CheckForLineDirective()
+void CheckForLineDirective(void)
 {
 	register int ch = getch();
 	register int	i = 0;
@@ -242,8 +239,7 @@ CheckForLineDirective()
 	}
 }
 
-STATIC
-CheckForLet()
+static void CheckForLet()
 {
 	register int ch;
 
@@ -256,8 +252,7 @@ CheckForLet()
 	}
 }
 
-int
-LLlex()
+int LLlex(void)
 {
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.

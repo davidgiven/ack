@@ -30,10 +30,12 @@
 
 #include	"input.h"
 #include	"f_info.h"
+#include    "print.h"
 #include	"LLlex.h"
 #include	"main.h"
 #include	"node.h"
 #include	"warning.h"
+#include	"error.h"
 
 /* error classes */
 #define	ERROR		1
@@ -60,13 +62,12 @@ extern char *symbol2str();
 	FileName, node errors get their information from the
 	node, whereas other errors use the information in the token.
 */
-
-void _error();
+static void _error(int, t_node *, char *, register va_list, int);
 
 #if __STDC__
 #ifdef DEBUG
 /*VARARGS*/
-debug(char *fmt, ...)
+void debug(char *fmt, ...)
 {
 	va_list ap;
 
@@ -79,7 +80,7 @@ debug(char *fmt, ...)
 #endif /* DEBUG */
 
 /*VARARGS*/
-error(char *fmt, ...)
+void error(char *fmt, ...)
 {
 	va_list ap;
 
@@ -91,7 +92,7 @@ error(char *fmt, ...)
 }
 
 /*VARARGS*/
-node_error(t_node *node, char *fmt, ...)
+void node_error(t_node *node, char *fmt, ...)
 {
 	va_list ap;
 
@@ -103,7 +104,7 @@ node_error(t_node *node, char *fmt, ...)
 }
 
 /*VARARGS*/
-warning(int class, char *fmt, ...)
+void warning(int class, char *fmt, ...)
 {
 	va_list ap;
 
@@ -115,7 +116,7 @@ warning(int class, char *fmt, ...)
 }
 
 /*VARARGS*/
-node_warning(t_node *node, int class, char *fmt, ...)
+void node_warning(t_node *node, int class, char *fmt, ...)
 {
 	va_list ap;
 
@@ -127,7 +128,7 @@ node_warning(t_node *node, int class, char *fmt, ...)
 }
 
 /*VARARGS*/
-lexerror(char *fmt, ...)
+void lexerror(char *fmt, ...)
 {
 	va_list ap;
 
@@ -139,7 +140,7 @@ lexerror(char *fmt, ...)
 }
 
 /*VARARGS*/
-lexwarning(int class, char *fmt, ...)
+void lexwarning(int class, char *fmt, ...)
 {
 	va_list ap;
 
@@ -151,7 +152,7 @@ lexwarning(int class, char *fmt, ...)
 }
 
 /*VARARGS*/
-fatal(char *fmt, ...)
+void fatal(char *fmt, ...)
 {
 	va_list ap;
 
@@ -164,7 +165,7 @@ fatal(char *fmt, ...)
 }
 
 /*VARARGS*/
-crash(char *fmt, ...)
+void crash(char *fmt, ...)
 {
 	va_list ap;
 
@@ -182,7 +183,7 @@ crash(char *fmt, ...)
 #else
 #ifdef DEBUG
 /*VARARGS*/
-debug(va_alist)
+void debug(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -197,7 +198,7 @@ debug(va_alist)
 #endif /* DEBUG */
 
 /*VARARGS*/
-error(va_alist)
+void error(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -211,7 +212,7 @@ error(va_alist)
 }
 
 /*VARARGS*/
-node_error(va_alist)
+void node_error(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -226,7 +227,7 @@ node_error(va_alist)
 }
 
 /*VARARGS*/
-warning(va_alist)
+void warning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -241,7 +242,7 @@ warning(va_alist)
 }
 
 /*VARARGS*/
-node_warning(va_alist)
+void node_warning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -257,7 +258,7 @@ node_warning(va_alist)
 }
 
 /*VARARGS*/
-lexerror(va_alist)
+void lexerror(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -271,7 +272,7 @@ lexerror(va_alist)
 }
 
 /*VARARGS*/
-lexwarning(va_alist)
+void lexwarning(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -286,7 +287,7 @@ lexwarning(va_alist)
 }
 
 /*VARARGS*/
-fatal(va_alist)
+void fatal(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -301,7 +302,7 @@ fatal(va_alist)
 }
 
 /*VARARGS*/
-crash(va_alist)
+void crash(va_alist)
 	va_dcl
 {
 	va_list ap;
@@ -320,13 +321,7 @@ crash(va_alist)
 }
 #endif
 
-void
-_error(class, node, fmt, ap, warn_class)
-	int class;
-	t_node *node;
-	char *fmt;
-	register va_list ap;
-	int warn_class;
+static void _error(int class, t_node *node, char *fmt, register va_list ap, int warn_class)
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.

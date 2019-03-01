@@ -4,10 +4,17 @@
  *
  * Author: Ceriel J.H. Jacobs
  */
+#ifndef TYPE_H_
+#define TYPE_H_
 
 /* T Y P E   D E S C R I P T O R   S T R U C T U R E */
 
-/* $Id$ */
+#include "em_arith.h"
+
+
+
+typedef struct def  t_def;
+typedef struct node t_node;
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *par_next;
@@ -189,19 +196,7 @@ extern unsigned int
 extern arith
 	ret_area_size;
 
-extern arith
-	align();		/* type.c */
 
-extern t_type
-	*construct_type(),
-	*standard_type(),
-	*set_type(),
-	*subr_type(),
-	*proc_type(),
-	*enum_type(),
-	*qualified_type(),
-	*intorcard(),
-	*RemoveEqual();	/* All from type.c */
 
 #define NULLTYPE ((t_type *) 0)
 
@@ -240,3 +235,59 @@ extern arith max_int[];
 extern arith min_int[];
 
 #define ufit(n, i)	(((n) & ~full_mask[(i)]) == 0)
+
+/* Forward declarations. */
+
+/* Initialize predefined types. */
+void InitTypes(void);
+/* Compare arith's, and return 1 if "l2" is
+ * greater or equal than "l1", otherwise returns 0.
+ * Takes into account that arith might be unsigned. */
+int chk_bounds(arith l1, arith l2, int fund);
+/* Aligns "pos" to the specified alignment "al" and returns the 
+   aligned "pos".
+ */
+arith align(arith pos, int al);
+/* Create a new standard type "fund" with specified
+   alignment "algn" and "size" bytes. */ 
+t_type *standard_type(int fund, int algn, arith size);
+t_type *enum_type(t_node *EnumList);
+t_type *construct_type(int fund, register t_type *tp);
+t_type *qualified_type(t_node **pnd);
+/*	Check that the value "i" fits in the subrange or enumeration
+	type "tp".  Return 1 if so, 0 otherwise
+*/
+int in_range(arith i, register t_type *tp);
+/*	Construct a subrange type from the constant expressions
+	indicated by "lb" and "ub", but first perform some
+	checks. "base" is either a user-specified base-type, or NULL.
+*/
+t_type *subr_type(t_node *lb, t_node *ub, t_type *base);
+t_type *proc_type(t_type *result_type, t_param *parameters, arith n_bytes_params);
+void genrck(register t_type *tp);
+/*	Get the bounds of a bounded type. */
+void getbounds(register t_type *tp, arith *plo, arith *phi);
+/*	Construct a set type with base type "tp", but first 
+ *  perform some checks */
+t_type *set_type(register t_type *tp);
+void ArrayElSize(register t_type *tp);
+void ArraySizes(register t_type *tp);
+void FreeType(register t_type *tp);
+void DeclareType(t_node *nd, register t_def *df, register t_type *tp);
+void SolveForwardTypeRefs(register t_def *df);
+void ForceForwardTypeDef(register t_def *df);
+t_type *RemoveEqual(register t_type *tpx);
+int type_or_forward(t_type *tp);
+t_type *intorcard(register t_type *left, register t_type *right);
+#ifdef DEBUG
+void DumpType(register t_type *tp);
+#endif
+int fit(arith sz, int nbytes);
+/* Greatest common divisotr. */
+int gcd(int m, int n);
+/* Least common multiple. */
+int lcm(int m, int n);
+
+
+
+#endif /* TYPE_H_ */

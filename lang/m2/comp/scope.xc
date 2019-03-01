@@ -9,13 +9,13 @@
 
 /* $Id$ */
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
-#include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
+#include	"alloc.h"
+#include	"em_arith.h"
+#include	"em_label.h"
 
 #include	"LLlex.h"
 #include	"idf.h"
@@ -23,6 +23,8 @@
 #include	"type.h"
 #include	"def.h"
 #include	"node.h"
+#include	"lookup.h"
+#include	"error.h"
 
 t_scope *PervasiveScope;
 t_scopelist *CurrVis, *GlobalVis;
@@ -35,7 +37,7 @@ extern char options[];
 
 static int	sc_count;
 
-open_scope(scopetype)
+void open_scope(int scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
@@ -55,8 +57,7 @@ open_scope(scopetype)
 	CurrVis = ls;
 }
 
-t_scope *
-open_and_close_scope(scopetype)
+t_scope * open_and_close_scope(int scopetype)
 {
 	t_scope *sc;
 
@@ -66,7 +67,7 @@ open_and_close_scope(scopetype)
 	return sc;
 }
 
-InitScope()
+void InitScope(void)
 {
 	register t_scope *sc = new_scope();
 	register t_scopelist *ls = new_scopelist();
@@ -77,9 +78,7 @@ InitScope()
 	CurrVis = ls;
 }
 
-STATIC
-chk_proc(df)
-	register t_def *df;
+static void chk_proc(register t_def *df)
 {
 	/*	Called at scope closing. Check all definitions, and if one
 		is a D_PROCHEAD, the procedure was not defined.
@@ -101,9 +100,7 @@ chk_proc(df)
 	}
 }
 
-STATIC
-chk_forw(pdf)
-	t_def **pdf;
+static void chk_forw(t_def **pdf)
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
@@ -111,7 +108,7 @@ chk_forw(pdf)
 	*/
 	register t_def *df;
 
-	while (df = *pdf) {
+	while ( (df = *pdf) ) {
 		if (df->df_kind == D_FORWTYPE) {
 			pdf = &df->df_nextinscope;
 			ForceForwardTypeDef(df);	/* removes df */
@@ -157,8 +154,7 @@ df->df_idf->id_text);
 	}
 }
 
-Reverse(pdf)
-	t_def **pdf;
+void Reverse(t_def **pdf)
 {
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
@@ -184,8 +180,7 @@ Reverse(pdf)
 	*pdf = df;
 }
 
-close_scope(flag)
-	register int flag;
+void close_scope(int flag)
 {
 	/*	Close a scope. If "flag" is set, check for forward declarations,
 		either POINTER declarations, or EXPORTs, or forward references
@@ -208,8 +203,7 @@ close_scope(flag)
 }
 
 #ifdef DEBUG
-DumpScope(df)
-	register t_def *df;
+void DumpScope(register t_def *df)
 {
 	while (df) {
 		PrDef(df);

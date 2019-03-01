@@ -12,15 +12,17 @@
 /*	Check expressions, and try to evaluate them as far as possible.
 */
 
-#include   <stdlib.h>
-#include   <string.h>
-#include "parameters.h"
+#include  	<stdlib.h>
+#include  	<string.h>
+#include	"parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
 #include	<alloc.h>
+#include	<flt_arith.h>
+#include	<system.h>
 
 #include	"Lpars.h"
 #include	"idf.h"
@@ -29,21 +31,30 @@
 #include	"def.h"
 #include	"node.h"
 #include	"scope.h"
+#include	"error.h"
 #include	"standards.h"
 #include	"chk_expr.h"
+#include    "cstoper.h"
+#include    "typequiv.h"
 #include	"misc.h"
+#include	"lookup.h"
+#include	"print.h"
 #include	"warning.h"
 #include	"main.h"
 
 extern char *symbol2str();
-extern char *sprint();
-extern arith flt_flt2arith();
 
-STATIC
-df_error(nd, mess, edf)
-	t_node		*nd;		/* node on which error occurred */
-	char		*mess;		/* error message */
-	register t_def	*edf;		/* do we have a name? */
+/* Forward file declarations */
+static int ChkStandard(t_node **);
+static int ChkCast(t_node **);
+
+
+
+
+static void df_error(
+	t_node		*nd,		/* node on which error occurred */
+	char		*mess,		/* error message */
+	register t_def	*edf)		/* do we have a name? */
 {
 	if (edf) {
 		if (edf->df_kind != D_ERROR)  {
@@ -53,10 +64,7 @@ df_error(nd, mess, edf)
 	else node_error(nd, mess);
 }
 
-void
-MkCoercion(pnd, tp)
-	t_node		**pnd;
-	register t_type	*tp;
+void MkCoercion(t_node **pnd, register t_type *tp)
 {
 	/*	Make a coercion from the node indicated by *pnd to the
 		type indicated by tp. If the node indicated by *pnd
@@ -162,9 +170,7 @@ MkCoercion(pnd, tp)
 	*pnd = nd;
 }
 
-int
-ChkVariable(expp, flags)
-	register t_node **expp;
+int ChkVariable(register t_node **expp, int flags)
 {
 	/*	Check that "expp" indicates an item that can be
 		assigned to.
@@ -182,9 +188,7 @@ ChkVariable(expp, flags)
 	return 1;
 }
 
-STATIC int
-ChkArrow(expp)
-	t_node **expp;
+static int ChkArrow(t_node **expp, int flags)
 {
 	/*	Check an application of the '^' operator.
 		The operand must be a variable of a pointer type.
@@ -211,9 +215,7 @@ ChkArrow(expp)
 	return 1;
 }
 
-STATIC int
-ChkArr(expp, flags)
-	t_node **expp;
+static int ChkArr(t_node **expp, int flags)
 {
 	/*	Check an array selection.
 		The left hand side must be a variable of an array type,
@@ -255,9 +257,7 @@ ChkArr(expp, flags)
 }
 
 /*ARGSUSED*/
-STATIC int
-ChkValue(expp)
-	t_node **expp;
+static int ChkValue(t_node **expp, int flags)
 {
 #ifdef DEBUG
 	switch((*expp)->nd_symb) {
@@ -273,9 +273,7 @@ ChkValue(expp)
 	return 1;
 }
 
-STATIC int
-ChkSelOrName(expp, flags)
-	t_node **expp;
+static int ChkSelOrName(t_node **expp, int flags)
 {
 	/*	Check either an ID or a construction of the form
 		ID.ID [ .ID ]*
@@ -348,9 +346,7 @@ ChkSelOrName(expp, flags)
 	return exp->nd_def->df_kind != D_ERROR;
 }
 
-STATIC int
-ChkExSelOrName(expp)
-	t_node **expp;
+static int ChkExSelOrName(t_node **expp, int flags)
 {
 	/*	Check either an ID or an ID.ID [.ID]* occurring in an
 		expression.
@@ -422,20 +418,13 @@ ChkExSelOrName(expp)
 	return 1;
 }
 
-STATIC int
-ChkEl(expp, tp)
-	register t_node **expp;
-	t_type *tp;
+static int ChkEl(register t_node **expp, t_type *tp)
 {
 
 	return ChkExpression(expp) && ChkCompat(expp, tp, "set element");
 }
 
-STATIC int
-ChkElement(expp, tp, set)
-	t_node **expp;
-	t_type *tp;
-	arith *set;
+static int ChkElement(t_node **expp, t_type *tp, arith *set)
 {
 	/*	Check elements of a set. This routine may call itself
 		recursively.
@@ -494,9 +483,7 @@ ChkElement(expp, tp, set)
 	return 1;
 }
 
-arith *
-MkSet(size)
-	unsigned size;
+arith *MkSet(unsigned int size)
 {
 	register arith	*s, *t;
 
@@ -508,8 +495,7 @@ MkSet(size)
 	return s;
 }
 
-FreeSet(s)
-	register arith *s;
+void FreeSet(register arith *s)
 {
 	dec_refcount(s);
 	if (refcount(s) <= 0) {
@@ -518,9 +504,7 @@ FreeSet(s)
 	}
 }
 
-STATIC int
-ChkSet(expp)
-	t_node **expp;
+static int ChkSet(t_node **expp, int flags)
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
 		compile time. Unfortunately this is all rather complicated.
@@ -586,10 +570,7 @@ ChkSet(expp)
 	return retval;
 }
 
-STATIC t_node *
-nextarg(argp, edf)
-	t_node **argp;
-	t_def *edf;
+static t_node *nextarg(t_node **argp, t_def *edf)
 {
 	register t_node *arg = (*argp)->nd_RIGHT;
 
@@ -602,10 +583,7 @@ nextarg(argp, edf)
 	return arg;
 }
 
-STATIC t_node *
-getarg(argp, bases, designator, edf)
-	t_node **argp;
-	t_def *edf;
+static t_node *getarg(t_node **argp, int bases, int designator, t_def *edf)
 {
 	/*	This routine is used to fetch the next argument from an
 		argument list. The argument list is indicated by "argp".
@@ -643,10 +621,7 @@ getarg(argp, bases, designator, edf)
 	return left;
 }
 
-STATIC t_node *
-getname(argp, kinds, bases, edf)
-	t_node **argp;
-	t_def *edf;
+static t_node *getname(t_node **argp, int kinds, int bases, t_def *edf)
 {
 	/*	Get the next argument from argument list "argp".
 		The argument must indicate a definition, and the
@@ -672,9 +647,7 @@ getname(argp, kinds, bases, edf)
 	return left;
 }
 
-STATIC int
-ChkProcCall(exp)
-	register t_node *exp;
+static int ChkProcCall(register t_node *exp)
 {
 	/*	Check a procedure call
 	*/
@@ -735,9 +708,7 @@ ChkProcCall(exp)
 	return retval;
 }
 
-STATIC int
-ChkFunCall(expp)
-	register t_node **expp;
+static int ChkFunCall(register t_node **expp, int flags)
 {
 	/*	Check a call that must have a result
 	*/
@@ -750,12 +721,9 @@ ChkFunCall(expp)
 	return 0;
 }
 
-STATIC int ChkStandard();
-STATIC int ChkCast();
 
-int
-ChkCall(expp)
-	t_node **expp;
+
+int ChkCall(t_node **expp)
 {
 	/*	Check something that looks like a procedure or function call.
 		Of course this does not have to be a call at all,
@@ -795,9 +763,7 @@ ChkCall(expp)
 	return ChkProcCall(*expp);
 }
 
-STATIC t_type *
-ResultOfOperation(operator, tp)
-	t_type *tp;
+static t_type *ResultOfOperation(int operator, t_type *tp)
 {
 	/*	Return the result type of the binary operation "operator",
 		with operand type "tp".
@@ -819,8 +785,7 @@ ResultOfOperation(operator, tp)
 
 #define Boolean(operator) (operator == OR || operator == AND)
 
-STATIC int
-AllowedTypes(operator)
+static int AllowedTypes(int operator)
 {
 	/*	Return a bit mask indicating the allowed operand types
 		for binary operator "operator".
@@ -854,10 +819,10 @@ AllowedTypes(operator)
 	/*NOTREACHED*/
 }
 
-STATIC int
-ChkAddressOper(tpl, tpr, expp)
-	register t_type *tpl, *tpr;
-	register t_node *expp;
+static int ChkAddressOper(
+	register t_type *tpl,
+	register t_type *tpr,
+	register t_node *expp)
 {
 	/*	Check that either "tpl" or "tpr" are both of type
 		address_type, or that one of them is, but the other is
@@ -901,9 +866,7 @@ ChkAddressOper(tpl, tpr, expp)
 	return 0;
 }
 
-STATIC int
-ChkBinOper(expp)
-	t_node **expp;
+static int ChkBinOper(t_node **expp, int flags)
 {
 	/*	Check a binary operation.
 	*/
@@ -1018,9 +981,7 @@ ChkBinOper(expp)
 	return 1;
 }
 
-STATIC int
-ChkUnOper(expp)
-	t_node **expp;
+static int ChkUnOper(t_node **expp, int flags)
 {
 	/*	Check an unary operation.
 	*/
@@ -1093,10 +1054,7 @@ ChkUnOper(expp)
 	return 0;
 }
 
-STATIC t_node *
-getvariable(argp, edf, flags)
-	t_node **argp;
-	t_def *edf;
+static t_node *getvariable(t_node **argp, t_def *edf, int flags)
 {
 	/*	Get the next argument from argument list "argp".
 		It must obey the rules of "ChkVariable".
@@ -1110,9 +1068,7 @@ getvariable(argp, edf, flags)
 	return arg->nd_LEFT;
 }
 
-STATIC int
-ChkStandard(expp)
-	t_node **expp;
+static int ChkStandard(t_node **expp)
 {
 	/*	Check a call of a standard procedure or function
 	*/
@@ -1326,7 +1282,7 @@ ChkStandard(expp)
 #endif
 #ifndef STRICT_3RD_ED
 		if (! options['3'] && edf->df_value.df_stdname == S_TSIZE) {
-			if (arg = arglink->nd_RIGHT) {
+			if ( (arg = arglink->nd_RIGHT) ) {
 				node_warning(arg,
 					     W_OLDFASHIONED,
 					     "TSIZE with multiple parameters, only first parameter used");
@@ -1442,9 +1398,7 @@ ChkStandard(expp)
 	return 1;
 }
 
-STATIC int
-ChkCast(expp)
-	t_node **expp;
+static int ChkCast(t_node **expp)
 {
 	/*	Check a cast and perform it if the argument is constant.
 		If the sizes don't match, only complain if at least one of them
@@ -1507,9 +1461,7 @@ ChkCast(expp)
 	return 1;
 }
 
-TryToString(nd, tp)
-	register t_node *nd;
-	t_type *tp;
+void TryToString(register t_node *nd, t_type *tp)
 {
 	/*	Try a coercion from character constant to string.
 	*/
@@ -1527,25 +1479,20 @@ TryToString(nd, tp)
 	}
 }
 
-STATIC int
-no_desig(expp)
-	t_node **expp;
+static int no_desig(t_node **expp, int flags)
 {
 	node_error(*expp, "designator expected");
 	return 0;
 }
 
-STATIC int
-add_flags(expp, flags)
-	t_node **expp;
+static int add_flags(t_node **expp, int flags)
 {
 	(*expp)->nd_def->df_flags |= flags;
 	return 1;
 }
 
-extern int	PNodeCrash();
 
-int (*ExprChkTable[])() = {
+int (*ExprChkTable[])(t_node **, int) = {
 	ChkValue,
 	ChkArr,
 	ChkBinOper,
@@ -1561,7 +1508,7 @@ int (*ExprChkTable[])() = {
 	PNodeCrash,
 };
 
-int (*DesigChkTable[])() = {
+int (*DesigChkTable[])(t_node **, int) = {
 	no_desig,
 	ChkArr,
 	no_desig,

@@ -61,3 +61,13 @@ extern t_node *dot2node(), *dot2leaf(), *getnode();
 
 #define	IsCast(lnd)	((lnd)->nd_class == Def && is_type((lnd)->nd_def))
 #define	IsProc(lnd)	((lnd)->nd_type->tp_fund == T_PROCEDURE)
+
+
+
+t_node *getnode(int class);
+t_node *dot2node(int class, t_node *left, t_node *right);
+t_node *dot2leaf(int class);
+void FreeNode(register t_node *nd);
+int NodeCrash(register t_node* expp, label exit_label, int end_reached);
+int PNodeCrash(t_node **expp, int flags);
+

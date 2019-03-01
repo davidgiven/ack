@@ -4,6 +4,8 @@
  *
  * Author: Ceriel J.H. Jacobs
  */
+#ifndef DEF_H_
+#define DEF_H_
 
 /* I D E N T I F I E R   D E S C R I P T O R   S T R U C T U R E */
 
@@ -132,12 +134,20 @@ struct def	{		/* list of definitions for a name */
 typedef struct def	t_def;
 /* ALLOCDEF "def" 50 */
 
-extern t_def
-	*define(),
-	*DefineLocalModule(),
-	*MkDef(),
-	*DeclProc(),
-	*lookup(),
-	*lookfor();
 
 #define NULLDEF ((t_def *) 0)
+
+typedef struct scope t_scope;
+typedef struct idf t_idf;
+typedef struct type t_type;
+
+t_def *MkDef(register t_idf *id, register t_scope *scope, int kind);
+t_def *define(register t_idf *id, register t_scope *scope, int kind);
+void RemoveFromIdList(register t_def *df);
+t_def * DeclProc(int type, register t_idf *id);
+void EndProc(register t_def *df, t_idf *id);
+t_def * DefineLocalModule(t_idf *id);
+void CheckWithDef(register t_def *df, t_type *tp);
+void end_definition_list(register t_def **pdf);
+
+#endif /* DEF_H_ */

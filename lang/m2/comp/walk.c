@@ -35,16 +35,19 @@
 #include "node.h"
 #include "Lpars.h"
 #include "desig.h"
+#include "typequiv.h"
 #include "f_info.h"
 #include "idf.h"
 #include "chk_expr.h"
 #include "walk.h"
 #include "misc.h"
+#include "error.h"
+#include "tmpvar.h"
+#include "stab.h"
+#include "code.h"
 #include "warning.h"
 
-extern arith NewPtr();
-extern arith NewInt();
-extern arith TmpSpace();
+int CaseCode(t_node *, label, int);
 
 extern int proclevel;
 extern int gdb_flag;
@@ -58,13 +61,8 @@ static t_type* func_type;
 static t_node* priority;
 static int oldlineno;
 
-static int RegisterMessage();
-static int WalkDef();
-#ifdef DBSYMTAB
-static int stabdef();
-#endif
-static int MkCalls();
-static void UseWarnings();
+
+
 
 #define NO_EXIT_LABEL ((label)0)
 #define RETURN_LABEL ((label)1)
@@ -72,13 +70,18 @@ static void UseWarnings();
 #define REACH_FLAG 1
 #define EXIT_FLAG 2
 
-void DoAssign();
+/* Forward declarations. */
+static void WalkDef(register t_def*);
+static void MkCalls(register t_def*);
+static void UseWarnings(register t_def*);
+static void RegisterMessage(register t_def*);
+static void WalkDefList(register t_def*, void (*proc)(t_def*));
+#ifdef DBSYMTAB
+static void stabdef(t_def*);
+#endif
 
-int
-    LblWalkNode(lbl, nd, exit, reach)
-        label lbl,
-    exit;
-t_node* nd;
+
+int LblWalkNode(label lbl, t_node *nd, int exit, int reach)
 {
 	/*	Generate code for node "nd", after generating instruction
 		label "lbl". "exit" is the exit label for the closest
@@ -91,8 +94,7 @@ t_node* nd;
 
 static arith tmpprio;
 
-STATIC
-DoPriority()
+static void  DoPriority(void)
 {
 	/*	For the time being (???), handle priorities by calls to
 		the runtime system
@@ -107,8 +109,7 @@ DoPriority()
 	}
 }
 
-STATIC
-EndPriority()
+static void EndPriority(void)
 {
 	if (priority)
 	{
@@ -118,8 +119,7 @@ EndPriority()
 	}
 }
 
-def_ilb(l)
-    label l;
+void def_ilb(label l)
 {
 	/*	Instruction label definition. Forget about line number.
 	*/
@@ -127,10 +127,8 @@ def_ilb(l)
 	oldlineno = 0;
 }
 
-DoLineno(nd) register t_node* nd;
+void DoLineno(register t_node* nd)
 {
-	/*	Generate line number information, if necessary.
-	*/
 	if ((!options['L']
 #ifdef DBSYMTAB
 	        || options['g']
@@ -156,13 +154,8 @@ DoLineno(nd) register t_node* nd;
 	}
 }
 
-DoFilename(needed)
+void DoFilename(int needed)
 {
-	/*	Generate filename information, when needed.
-		This routine is called at the generation of a
-		procedure entry, and after generating a call to
-		another procedure.
-	*/
 	static label filename_label = 0;
 
 	oldlineno = 0; /* always invalidate remembered line number */
@@ -180,12 +173,8 @@ DoFilename(needed)
 	}
 }
 
-WalkModule(module) register t_def* module;
+void WalkModule(register t_def* module)
 {
-	/*	Walk through a module, and all its local definitions.
-		Also generate code for its body.
-		This code is collected in an initialization routine.
-	*/
 	register t_scope* sc;
 	t_scopelist* savevis = CurrVis;
 
@@ -284,11 +273,9 @@ WalkModule(module) register t_def* module;
 	WalkDefList(sc->sc_def, UseWarnings);
 }
 
-WalkProcedure(procedure) register t_def* procedure;
+void WalkProcedure(register t_def* procedure)
 {
-	/*	Walk through the definition of a procedure and all its
-		local definitions, checking and generating code.
-	*/
+
 	t_scopelist* savevis = CurrVis;
 	register t_type* tp;
 	register t_param* param;
@@ -574,10 +561,10 @@ WalkProcedure(procedure) register t_def* procedure;
 	WalkDefList(procscope->sc_def, UseWarnings);
 }
 
-static WalkDef(df) register t_def* df;
+/* Walk through a list of definitions */
+static void WalkDef(register t_def* df)
 {
-	/*	Walk through a list of definitions
-	*/
+
 
 	switch (df->df_kind)
 	{
@@ -602,10 +589,10 @@ static WalkDef(df) register t_def* df;
 	}
 }
 
-static MkCalls(df) register t_def* df;
+/* Generate calls to initialization routines of modules */
+static void MkCalls(register t_def* df)
 {
-	/*	Generate calls to initialization routines of modules
-	*/
+
 
 	if (df->df_kind == D_MODULE)
 	{
@@ -614,14 +601,8 @@ static MkCalls(df) register t_def* df;
 	}
 }
 
-WalkLink(nd, exit_label, end_reached) register t_node* nd;
-label exit_label;
+int WalkLink(register t_node* nd, label exit_label, int end_reached)
 {
-	/*	Walk node "nd", which is a link.
-		"exit_label" is set to a label number when inside a LOOP.
-		"end_reached" maintains info about reachability (REACH_FLAG),
-		and whether an EXIT statement was seen (EXIT_FLAG).
-	*/
 
 	while (nd && nd->nd_class == Link)
 	{ /* statement list */
@@ -632,8 +613,7 @@ label exit_label;
 	return WalkNode(nd, exit_label, end_reached);
 }
 
-STATIC
-ForLoopVarExpr(nd) register t_node* nd;
+static void ForLoopVarExpr(register t_node* nd)
 {
 	register t_type* tp = nd->nd_type;
 
@@ -641,12 +621,9 @@ ForLoopVarExpr(nd) register t_node* nd;
 	CodeCoercion(tp, BaseType(tp));
 }
 
-int
-    WalkStat(nd, exit_label, end_reached) register t_node* nd;
-label exit_label;
+int WalkStat(register t_node* nd, label exit_label, int end_reached)
 {
-	/*	Walk through a statement, generating code for it.
-	*/
+
 	register t_node* left = nd->nd_LEFT;
 	register t_node* right = nd->nd_RIGHT;
 
@@ -940,9 +917,8 @@ label exit_label;
 	return end_reached;
 }
 
-extern int NodeCrash();
 
-int (*WalkTable[])() = {
+int (*WalkTable[])(t_node*, label, int) = {
 	NodeCrash,
 	NodeCrash,
 	NodeCrash,
@@ -960,12 +936,9 @@ int (*WalkTable[])() = {
 
 extern t_desig null_desig;
 
-ExpectBool(pnd, true_label, false_label) register t_node** pnd;
-label true_label, false_label;
+void ExpectBool(register t_node** pnd, label true_label, label false_label)
 {
-	/*	"pnd" must indicate a boolean expression. Check this and
-		generate code to evaluate the expression.
-	*/
+
 	t_desig ds;
 
 	ds = null_desig;
@@ -980,13 +953,8 @@ label true_label, false_label;
 	}
 }
 
-int
-    WalkDesignator(pnd, ds, flags)
-        t_node** pnd;
-t_desig* ds;
+int WalkDesignator(t_node** pnd, t_desig* ds, int flags)
 {
-	/*	Check designator and generate code for it
-	*/
 
 	if (!ChkVariable(pnd, flags))
 		return 0;
@@ -996,8 +964,7 @@ t_desig* ds;
 	return 1;
 }
 
-DoForInit(nd)
-    t_node* nd;
+int DoForInit(t_node* nd)
 {
 	register t_node* right = nd->nd_RIGHT;
 	register t_def* df;
@@ -1074,8 +1041,8 @@ DoForInit(nd)
 	return 1;
 }
 
-void
-    DoAssign(nd) register t_node* nd;
+
+void DoAssign(register t_node* nd)
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
@@ -1111,7 +1078,7 @@ void
 	CodeMove(&dsr, nd->nd_LEFT, tp);
 }
 
-static RegisterMessage(df) register t_def* df;
+static void RegisterMessage(register t_def* df)
 {
 	register t_type* tp;
 
@@ -1140,11 +1107,7 @@ static RegisterMessage(df) register t_def* df;
 	}
 }
 
-static void
-    df_warning(nd, df, warning)
-        t_node* nd;
-t_def* df;
-char* warning;
+static void df_warning(t_node* nd, t_def* df, char* warning)
 {
 	if (!(df->df_kind & (D_VARIABLE | D_PROCEDURE | D_TYPE | D_CONST | D_PROCHEAD)))
 	{
@@ -1160,8 +1123,7 @@ char* warning;
 	}
 }
 
-static void
-    UseWarnings(df) register t_def* df;
+static void UseWarnings(register t_def* df)
 {
 	t_node* nd = df->df_scope->sc_end;
 
@@ -1208,8 +1170,7 @@ static void
 	}
 }
 
-WalkDefList(df, proc) register t_def* df;
-int (*proc)();
+static void WalkDefList(register t_def* df, void (*proc)(t_def*))
 {
 	for (; df; df = df->df_nextinscope)
 	{
@@ -1218,9 +1179,7 @@ int (*proc)();
 }
 
 #ifdef DBSYMTAB
-static int
-    stabdef(df)
-        t_def* df;
+static void stabdef(t_def* df)
 {
 	switch (df->df_kind)
 	{

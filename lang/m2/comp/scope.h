@@ -6,8 +6,10 @@
  */
 
 /* S C O P E   M E C H A N I S M */
+#ifndef SCOPE_H_
+#define SCOPE_H_
 
-/* $Id$ */
+
 
 #define OPENSCOPE	0	/* Indicating an open scope */
 #define CLOSEDSCOPE	1	/* Indicating a closed scope (module) */
@@ -58,4 +60,17 @@ extern t_scopelist
 #define scopeclosed(x)	((x)->sc_scopeclosed)
 #define nextvisible(x)	((x)->sc_next)		/* use with scopelists */
 
-t_scope *open_and_close_scope();
+
+typedef struct def t_def;
+
+void Reverse(t_def **pdf);
+void open_scope(int scopetype);
+t_scope * open_and_close_scope(int scopetype);
+void InitScope(void);
+void close_scope(int flag);
+#ifdef DEBUG
+void DumpScope(register t_def *df);
+#endif
+
+
+#endif /* SCOPE_H_ */
