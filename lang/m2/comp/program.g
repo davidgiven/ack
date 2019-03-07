@@ -12,14 +12,14 @@
 {
 #include    <stdlib.h>
 #include    <string.h>
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
-#include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<em_code.h>
-#include	<stb.h>
+#include	"alloc.h"
+#include	"em_arith.h"
+#include	"em_label.h"
+#include	"em_code.h"
+#include	"stb.h"
 
 #include	"main.h"
 #include	"idf.h"
@@ -27,6 +27,10 @@
 #include	"scope.h"
 #include	"def.h"
 #include	"type.h"
+#include	"lookup.h"
+#include	"error.h"
+#include	"stab.h"
+#include	"enter.h"
 #include	"node.h"
 #include	"f_info.h"
 #include	"warning.h"

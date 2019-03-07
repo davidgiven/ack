@@ -3,16 +3,17 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include <stdio.h>
 #include "tokentab.h"
+#include "system.h"
+#include "print.h"
 
 /* Mod van gertjan */
 extern int LLsymb;
 extern int toknum;
 
 
-error_char(format,ch)
-char *format;
-char ch;
+void error_char(char *format,char ch)
 {
 	extern int listing,errorcnt;
 	extern int basicline;
@@ -24,9 +25,7 @@ char ch;
 
 
 
-error_string(format,str)
-char *format;
-char *str;
+void error_string(char* format,char* str)
 {
 	extern int listing,errorcnt;
 	extern int basicline;
@@ -38,8 +37,7 @@ char *str;
 
 
 
-LLmessage( insertedtok )
-int insertedtok;
+void LLmessage(int insertedtok )
 {
     if ( insertedtok < 0 ) {
 	error("Fatal stack overflow\n");

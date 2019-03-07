@@ -14,6 +14,7 @@
 
 #include    "parameters.h"
 #include	"arith.h"
+#include    "print.h"
 #include	"LLlex.h"
 
 /*	This file contains the (non-portable) error-message and diagnostic
@@ -23,8 +24,7 @@
 
 int err_occurred;
 
-err_hdr(s)
-	char *s;
+static void err_hdr(char *s)
 {
 	if (FileName) {
 		fprint(ERROUT, "\"%s\", line %d: %s", FileName, (int)LineNumber, s);
@@ -34,7 +34,7 @@ err_hdr(s)
 
 #if __STDC__
 /*VARARGS*/
-error(char *fmt, ...)
+void error(char *fmt, ...)
 {
 	va_list ap;
 
@@ -47,7 +47,7 @@ error(char *fmt, ...)
 }
 
 /*VARARGS*/
-warning(char *fmt, ...)
+void warning(char *fmt, ...)
 {
 	va_list ap;
 
@@ -59,7 +59,7 @@ warning(char *fmt, ...)
 }
 
 /*VARARGS*/
-strict(char *fmt, ...)
+void strict(char *fmt, ...)
 {
 	va_list ap;
 
@@ -71,7 +71,7 @@ strict(char *fmt, ...)
 }
 
 /*VARARGS*/
-crash(char *fmt, ...)
+void crash(char *fmt, ...)
 {
 	va_list ap;
 
@@ -84,7 +84,7 @@ crash(char *fmt, ...)
 }
 
 /*VARARGS*/
-fatal(char *fmt, ...)
+void fatal(char *fmt, ...)
 {
 	va_list ap;
 
@@ -97,7 +97,7 @@ fatal(char *fmt, ...)
 }
 #else
 /*VARARGS*/
-error(va_alist)
+void error(va_alist)
 	va_dcl
 {
 	char *fmt;
@@ -113,7 +113,7 @@ error(va_alist)
 }
 
 /*VARARGS*/
-warning(va_alist)
+void warning(va_alist)
 	va_dcl
 {
 	char *fmt;
@@ -128,7 +128,7 @@ warning(va_alist)
 }
 
 /*VARARGS*/
-strict(va_alist)
+void strict(va_alist)
 	va_dcl
 {
 	char *fmt;
@@ -143,7 +143,7 @@ strict(va_alist)
 }
 
 /*VARARGS*/
-crash(va_alist)
+void crash(va_alist)
 	va_dcl
 {
 	char *fmt;
@@ -159,7 +159,7 @@ crash(va_alist)
 }
 
 /*VARARGS*/
-fatal(va_alist)
+void fatal(va_alist)
 	va_dcl
 {
 	char *fmt;

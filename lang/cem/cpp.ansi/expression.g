@@ -10,6 +10,9 @@
 {
 #include	"arith.h"
 #include	"LLlex.h"
+#include	"ch3mon.h"
+#include	"ch3bin.h"
+#include	"expr.h"
 
 extern arith ifval;
 }

@@ -9,8 +9,8 @@
 
 /* $Id$ */
 
-#include <stdlib.h>
-#include "parameters.h"
+#include	<stdlib.h>
+#include	"parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
@@ -24,7 +24,10 @@
 #include	"node.h"
 #include	"Lpars.h"
 #include	"standards.h"
+#include	"cstoper.h"
+#include	"chk_expr.h"
 #include	"warning.h"
+#include	"error.h"
 
 extern char	*symbol2str();
 
@@ -45,19 +48,17 @@ arith min_int[] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 
 extern char options[];
 
-void CutSize();
+static void CutSize(register t_node *);
 
-overflow(expp)
-	t_node *expp;
+
+static void overflow(t_node *expp)
 {
 	if (expp->nd_type != address_type) {
 	    node_warning(expp, W_ORDINARY, "overflow in constant expression");
 	}
 }
 
-STATIC
-commonbin(expp)
-	t_node **expp;
+static void commonbin(t_node **expp)
 {
 	register t_node *exp = *expp;
 	t_type *tp = exp->nd_type;
@@ -69,11 +70,10 @@ commonbin(expp)
 	right->nd_type = tp;
 }
 
-cstunary(expp)
-	t_node **expp;
+void cstunary(t_node **expp)
 {
 	/*	The unary operation in "expp" is performed on the constant
-		expression below it, and the result restored in expp.
+		expression below it, and the result stored in expp.
 	*/
 	register t_node *exp = *expp;
 	register t_node *right = exp->nd_RIGHT;
@@ -107,9 +107,7 @@ cstunary(expp)
 	CutSize(*expp);
 }
 
-STATIC
-divide(pdiv, prem)
-	arith *pdiv, *prem;
+static void divide(arith *pdiv, arith *prem)
 {
 	/*	Unsigned divide *pdiv by *prem, and store result in *pdiv,
 		remainder in *prem
@@ -121,9 +119,7 @@ divide(pdiv, prem)
 	*prem = (unsigned arith) o1 % (unsigned arith) o2;
 }
 
-void
-cstibin(expp)
-	t_node **expp;
+void cstibin(t_node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
@@ -232,8 +228,7 @@ cstibin(expp)
 	CutSize(*expp);
 }
 
-cstfbin(expp)
-	t_node **expp;
+void cstfbin(t_node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
@@ -320,9 +315,7 @@ cstfbin(expp)
 	CutSize(exp);
 }
 
-void
-cstubin(expp)
-	t_node **expp;
+void cstubin(t_node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in
@@ -427,9 +420,7 @@ cstubin(expp)
 	CutSize(exp);
 }
 
-void
-cstset(expp)
-	t_node **expp;
+void cstset(t_node **expp)
 {
 	extern arith *MkSet();
 	register t_node *exp = *expp;
@@ -544,8 +535,7 @@ cstset(expp)
 	FreeNode(exp);
 }
 
-cstcall(expp, call)
-	t_node **expp;
+void cstcall(t_node **expp, int call)
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
@@ -619,9 +609,7 @@ cstcall(expp, call)
 	}
 }
 
-void
-CutSize(expr)
-	register t_node *expr;
+static void CutSize(register t_node *expr)
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
@@ -640,7 +628,7 @@ CutSize(expr)
 	}
 }
 
-InitCst()
+void InitCst(void)
 {
 	register int i = 0;
 #ifndef NOCROSS

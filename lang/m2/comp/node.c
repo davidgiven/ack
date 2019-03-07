@@ -22,6 +22,7 @@
 #include	"type.h"
 #include	"node.h"
 #include	"main.h"
+#include	"error.h"
 
 static int	nsubnodes[] = {
 	0,
@@ -39,8 +40,7 @@ static int	nsubnodes[] = {
 	2
 };
 
-t_node *
-getnode(class)
+t_node *getnode(int class)
 {
 	register t_node *nd = new_node();
 
@@ -50,9 +50,7 @@ getnode(class)
 	return nd;
 }
 
-t_node *
-dot2node(class, left, right)
-	t_node *left, *right;
+t_node *dot2node(int class, t_node *left, t_node *right)
 {
 	register t_node *nd = getnode(class);
 
@@ -63,8 +61,7 @@ dot2node(class, left, right)
 	return nd;
 }
 
-t_node *
-dot2leaf(class)
+t_node *dot2leaf(int class)
 {
 	register t_node *nd = getnode(class);
 
@@ -81,15 +78,13 @@ dot2leaf(class)
 	return nd;
 }
 
-void
-FreeNode(nd)
-	register t_node *nd;
+void FreeNode(register t_node *nd)
 {
 	/*	Put nodes that are no longer needed back onto the free
 		list
 	*/
 	if (!nd) return;
-	switch(nsubnodes[nd->nd_class]) {
+	switch(nsubnodes[(unsigned int)nd->nd_class]) {
 	case 2:
 		FreeNode(nd->nd_LEFT);
 		FreeNode(nd->nd_RIGHT);
@@ -102,15 +97,13 @@ FreeNode(nd)
 }
 
 /*ARGSUSED*/
-NodeCrash(expp)
-	t_node *expp;
+int NodeCrash(register t_node* expp, label exit_label, int end_reached)
 {
 	crash("(NodeCrash) Illegal node");
 }
 
 /*ARGSUSED*/
-PNodeCrash(expp)
-	t_node **expp;
+int PNodeCrash(t_node **expp, int flags)
 {
 	crash("(PNodeCrash) Illegal node");
 }
@@ -119,15 +112,14 @@ PNodeCrash(expp)
 
 extern char *symbol2str();
 
-indnt(lvl)
+void indnt(int lvl)
 {
 	while (lvl--) {
 		print("  ");
 	}
 }
 
-printnode(nd, lvl)
-	register t_node *nd;
+void printnode(register t_node *nd, int lvl)
 {
 	indnt(lvl);
 	print("Class: %d; Symbol: %s; Flags: %d\n", nd->nd_class, symbol2str(nd->nd_symb), nd->nd_flags);
@@ -139,8 +131,7 @@ printnode(nd, lvl)
 	}
 }
 
-PrNode(nd, lvl)
-	register t_node *nd;
+void PrNode(register t_node *nd, int lvl)
 {
 	if (! nd) {
 		indnt(lvl); print("<nilnode>\n");

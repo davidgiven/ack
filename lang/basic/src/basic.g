@@ -90,6 +90,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "bem.h"
+#include "util.h"
+#include "gencode.h"
+#include "eval.h"
+#include "func.h"
 #include "llmess.h"
 
 typedef union {

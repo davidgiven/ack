@@ -1,0 +1,11 @@
+User options:
+D	parser debugging
+t	line tracing
+d	debug information
+E	generate full listing
+L	don't generate linenumbers and filename indications
+w	suppress warning diagnostics
+VwN	set word size to N bytes	
+VpN set pointer size to N bytes
+VfN	set real size to N bytes
+			

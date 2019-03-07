@@ -11,7 +11,9 @@
 #include    "parameters.h"
 #include	"class.h"
 #include	"macro.h"
+#include	"domacro.h"
 #include	"idf.h"
+#include	"error.h"
 
 char	options[128];			/* one for every char	*/
 int	inc_pos = 1;			/* place where next -I goes */
@@ -23,10 +25,10 @@ char	**inctable;
 char	*dep_file = 0;
 
 extern int idfsize;
-int	txt2int();
 
-do_option(text)
-	char *text;
+static int txt2int(char **tp);
+
+void do_option(char *text)
 {
 	switch(*text++)	{
 	case '-':
@@ -127,9 +129,7 @@ do_option(text)
 	}
 }
 
-int
-txt2int(tp)
-	char **tp;
+static int txt2int(char **tp)
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.

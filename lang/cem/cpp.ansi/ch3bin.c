@@ -7,10 +7,11 @@
 
 #include	"Lpars.h"
 #include	"arith.h"
+#include	"ch3bin.h"
+#include	"skip.h"
+#include	"error.h"
 
-ch3bin(pval, pis_uns, oper, val, is_uns)
-	register arith *pval, val;
-	int oper, is_uns, *pis_uns;
+void ch3bin(register arith *pval, int *pis_uns, int oper, register arith val, int is_uns)
 {
 	if (is_uns) *pis_uns = 1;
 	switch (oper)	{

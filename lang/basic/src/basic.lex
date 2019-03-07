@@ -3,7 +3,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
-#ifndef NORSCID
+
+#ifndef NORCSID
 static char rcs_lex[] = "$Id$" ;
 #endif
 
@@ -151,7 +152,7 @@ Key keywords [] ={
 int	kex[27];
 
 /* Initialize the keyword table */
-fillkex()
+void fillkex(void)
 {
 	Key *k;
 	int i;
@@ -235,7 +236,7 @@ File *stream;
     }
 }
 
-getinputline()
+int getinputline(void)
 {
 	/* get next input line */
 
@@ -255,7 +256,7 @@ getinputline()
 
 
 
-typechar()
+int typechar(void)
 {
 	switch(*cptr)
 	{
@@ -277,7 +278,7 @@ typechar()
 char name[SIGNIFICANT+1];
 
 
-lookup()
+int lookup(void)
 {
 	Key *k;
 	Symbol *Sym;
@@ -341,7 +342,7 @@ lookup()
 
 
 /* Parsing unsigned numbers */
-readconstant()
+int readconstant(void)
 {
 	/* read HEX and OCTAL numbers */
 	char *c;
@@ -372,9 +373,7 @@ readconstant()
 #ifdef ____
 /* Computes base to the power exponent. This was not done in the old
    compiler                                                          */
-double powr(base,exp)
-double base;
-int exp;
+double powr(double base,int exp)
 {
 	int i;
 	double result;
@@ -398,7 +397,7 @@ int exp;
 #endif
 
 
-number()
+int number(void)
 {
 	long	i1;
 	int overflow = 0;
@@ -468,7 +467,7 @@ number()
 
 
 
-scanstring()
+int scanstring(void)
 {
 	int i,length=0;
 	char firstchar = *cptr;
@@ -532,7 +531,7 @@ scanstring()
 
 
 
-yylex()
+int yylex(void)
 {
 	char *c;
 

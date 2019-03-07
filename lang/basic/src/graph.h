@@ -3,6 +3,9 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#ifndef  __GRAPH_H_INCLUDED__
+#define  __GRAPH_H_INCLUDED__
+
 #ifndef NORCSID
 # define RCS_GRAPH	"$Id$"
 #endif
@@ -35,3 +38,18 @@ extern Linerecord	*firstline,
 extern List	*forwardlabel;
 
 extern List	*gosublabel();
+extern void jumpelm(int nr);
+extern int gotolabel(int nr);
+extern void linewarnings(void);
+
+/*-------------------------- Code generation ---------------------*/
+
+
+extern void genreturns(void);
+extern void gosubstmt(int lab);
+extern void gotostmt(int nr);
+extern void returnstmt(void);
+extern void ongosubstmt(int type);
+extern void ongotostmt(int type);
+
+#endif

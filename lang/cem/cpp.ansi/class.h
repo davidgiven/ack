@@ -10,7 +10,7 @@
 	At present such a class number is supposed to fit in 4 bits.
 */
 
-#define	class(ch)	((tkclass)[ch])
+#define	class(ch)	((tkclass)[(unsigned int)ch])
 
 /*	Being the start of a token is, fortunately, a mutual exclusive
 	property, so, as there are less than 16 classes they can be
@@ -37,11 +37,11 @@
 	class.  This is implemented as a collection of tables to speed up
 	the decision whether a character has a special meaning.
 */
-#define	in_idf(ch)	(inidf[ch])
-#define	is_oct(ch)	(isoct[ch])
-#define	is_dig(ch)	(isdig[ch])
-#define	is_hex(ch)	(ishex[ch])
-#define	is_wsp(ch)	(iswsp[ch])
+#define	in_idf(ch)	(inidf[(unsigned int)ch])
+#define	is_oct(ch)	(isoct[(unsigned int)ch])
+#define	is_dig(ch)	(isdig[(unsigned int)ch])
+#define	is_hex(ch)	(ishex[(unsigned int)ch])
+#define	is_wsp(ch)	(iswsp[(unsigned int)ch])
 
 extern char tkclass[];
 extern char inidf[], isoct[], isdig[], ishex[], iswsp[];

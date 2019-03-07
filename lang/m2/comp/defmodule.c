@@ -26,9 +26,12 @@
 #include "f_info.h"
 #include "idf.h"
 #include "input.h"
+#include "error.h"
 #include "main.h"
 #include "misc.h"
 #include "node.h"
+#include "lookup.h"
+#include "main.h"
 #include "scope.h"
 #include "type.h"
 
@@ -36,13 +39,13 @@
 size_t sys_filesize();
 #endif
 
+extern void DefModule(void); /* Lpars */
+
 t_idf* DefId;
 
-char*
-    getwdir(fn) register char* fn;
+char* getwdir(register char *fn)
 {
 	register char* p;
-	char* strrchr();
 
 	while ((p = strrchr(fn, '/')) && *(p + 1) == '\0')
 	{
@@ -60,8 +63,7 @@ char*
 	return "";
 }
 
-STATIC int
-GetFile(name) char* name;
+static int GetFile(char *name)
 {
 	/*	Try to find a file with basename "name" and extension ".def",
 		in the directories mentioned in "DEFPATH".
@@ -88,8 +90,7 @@ GetFile(name) char* name;
 	return 1;
 }
 
-t_def*
-    GetDefinitionModule(id, incr) register t_idf* id;
+t_def* GetDefinitionModule(register t_idf* id, int incr)
 {
 	/*	Return a pointer to the "def" structure of the definition
 		module indicated by "id".

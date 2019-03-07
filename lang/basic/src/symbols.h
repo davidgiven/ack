@@ -3,6 +3,9 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#ifndef __SYMBOLS_H_INCLUDED__
+#define __SYMBOLS_H_INCLUDED__
+
 #ifndef NORCSID
 # define RCS_SYMB	"$Id$"
 #endif
@@ -85,4 +88,21 @@ typedef struct SYMBOL{
 	int	isparam;
 } Symbol;
 
-extern	Symbol *srchsymbol();
+void initdeftype(void);
+Symbol *srchsymbol(char* str);
+void dcltype(Symbol *s);
+void dclarray(Symbol *s);
+void defarray(Symbol *s);
+int dclspace(int type);
+void optionbase(int ival);
+void setdefaulttype(int type);
+void newscope(Symbol *s);
+void heading(void);
+void endscope(int type);
+void dclparm(Symbol *s);
+int fcncall(Symbol *s);
+int fcnend(int parmcount);
+void callparm(int ind,int type);
+
+#endif /* __SYMBOLS_H_INCLUDED__ */
+

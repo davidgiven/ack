@@ -12,5 +12,10 @@
 #define is_anon_idf(x)		((x)->id_text[0] == '#')
 #define id_not_declared(x)	(not_declared("identifier", (x), ""))
 
-extern struct idf
-	*gen_anon_idf();
+/* Forward declarations. */
+typedef struct idf t_idf;
+typedef struct node t_node;
+
+void match_id(register t_idf *id1, t_idf *id2);
+t_idf *gen_anon_idf(void);
+void not_declared(char *what, t_node *id, char *where);

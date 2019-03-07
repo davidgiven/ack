@@ -9,7 +9,7 @@
 
 /* $Id$ */
 
-#include "parameters.h"
+#include	"parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
@@ -25,7 +25,12 @@
 #include	"idf.h"
 #include	"node.h"
 #include	"scope.h"
+#include	"error.h"
 #include	"walk.h"
+#include	"lookup.h"
+#include	"stab.h"
+#include	"enter.h"
+#include	"typequiv.h"
 #include	"main.h"
 #include	"chk_expr.h"
 #include	"warning.h"
@@ -73,12 +78,8 @@ t_type
 	*std_type,
 	*error_type;
 
-void ArraySizes();
 
-t_type *
-construct_type(fund, tp)
-	int fund;
-	register t_type *tp;
+t_type *construct_type(int fund, register t_type *tp)
 {
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
@@ -117,10 +118,10 @@ construct_type(fund, tp)
 	return dtp;
 }
 
-arith
-align(pos, al)
-	arith pos;
-	int al;
+/* Aligns "pos" to the specified alignment "al"
+ * and returns the aligned "pos".
+ */
+arith align(arith pos, int al)
 {
 	int i = pos % al;
 
@@ -128,11 +129,7 @@ align(pos, al)
 	return pos;
 }
 
-t_type *
-standard_type(fund, algn, size)
-	int fund;
-	int algn;
-	arith size;
+t_type *standard_type(int fund, int algn, arith size)
 {
 	register t_type *tp = new_type();
 
@@ -146,10 +143,8 @@ standard_type(fund, algn, size)
 	return tp;
 }
 
-InitTypes()
+void InitTypes(void)
 {
-	/*	Initialize the predefined types
-	*/
 	register t_type *tp;
 
 	/* first, do some checking
@@ -221,17 +216,12 @@ InitTypes()
 	void_type = error_type;
 }
 
-int
-fit(sz, nbytes)
-	arith sz;
+int fit(arith sz, int nbytes)
 {
 	return ((sz) + ((arith)0x80<<(((nbytes)-1)*8)) & ~full_mask[(nbytes)]) == 0;
 }
 
-STATIC
-u_small(tp, n)
-	register t_type *tp;
-	arith n;
+static void u_small(register t_type *tp, arith n)
 {
 	if (ufit(n, 1)) {
 		tp->tp_size = 1;
@@ -243,9 +233,7 @@ u_small(tp, n)
 	}
 }
 
-t_type *
-enum_type(EnumList)
-	t_node *EnumList;
+t_type *enum_type(t_node *EnumList)
 {
 	register t_type *tp =
 		standard_type(T_ENUMERATION, int_align, int_size);
@@ -258,9 +246,7 @@ enum_type(EnumList)
 	return tp;
 }
 
-t_type *
-qualified_type(pnd)
-	t_node **pnd;
+t_type *qualified_type(t_node **pnd)
 {
 	register t_def *df;
 
@@ -296,26 +282,18 @@ node_error(nd, "identifier \"%s\" is not a type", df->df_idf->id_text);
 }
 
 
-int
-chk_bounds(l1, l2, fund)
-	arith l1, l2;
+int chk_bounds(arith l1, arith l2, int fund)
 {
-	/*	compare to arith's, but be careful. They might be unsigned
-	*/
+
 	if (fund == T_INTEGER) {
 		return l2 >= l1;
 	}
 	return (unsigned arith) l2 >= (unsigned arith) l1;
 }
 
-int
-in_range(i, tp)
-	arith		i;
-	register t_type	*tp;
+int in_range(arith i, register t_type *tp)
 {
-	/*	Check that the value i fits in the subrange or enumeration
-		type tp.  Return 1 if so, 0 otherwise
-	*/
+
 
 	switch(tp->tp_fund) {
 	case T_ENUMERATION:
@@ -330,16 +308,8 @@ in_range(i, tp)
 	/*NOTREACHED*/
 }
 
-t_type *
-subr_type(lb, ub, base)
-	register t_node *lb;
-	t_node *ub;
-	t_type *base;
+t_type *subr_type(t_node *lb, t_node *ub, t_type *base)
 {
-	/*	Construct a subrange type from the constant expressions
-		indicated by "lb" and "ub", but first perform some
-		checks. "base" is either a user-specified base-type, or NULL.
-	*/
 	register t_type *tp = BaseType(lb->nd_type);
 	register t_type *res;
 
@@ -428,11 +398,7 @@ subr_type(lb, ub, base)
 	return res;
 }
 
-t_type *
-proc_type(result_type, parameters, n_bytes_params)
-	t_type *result_type;
-	t_param *parameters;
-	arith n_bytes_params;
+t_type *proc_type(t_type *result_type, t_param *parameters, arith n_bytes_params)
 {
 	register t_type *tp = construct_type(T_PROCEDURE, result_type);
 
@@ -447,8 +413,7 @@ proc_type(result_type, parameters, n_bytes_params)
 	return tp;
 }
 
-genrck(tp)
-	register t_type *tp;
+void genrck(register t_type *tp)
 {
 	/*	generate a range check descriptor for type "tp" when
 		neccessary. Return its label.
@@ -483,13 +448,8 @@ genrck(tp)
 	}
 }
 
-getbounds(tp, plo, phi)
-	register t_type *tp;
-	arith *plo, *phi;
+void getbounds(register t_type *tp, arith *plo, arith *phi)
 {
-	/*	Get the bounds of a bounded type
-	*/
-
 	assert(bounded(tp));
 
 	if (tp->tp_fund == T_SUBRANGE) {
@@ -502,13 +462,9 @@ getbounds(tp, plo, phi)
 	}
 }
 
-t_type *
-set_type(tp)
-	register t_type *tp;
+t_type *set_type(register t_type *tp)
 {
-	/*	Construct a set type with base type "tp", but first
-		perform some checks
-	*/
+
 	arith lb, ub, diff, alloc_size;
 
 	if (! bounded(tp) || tp->tp_size > word_size) {
@@ -542,8 +498,7 @@ set_type(tp)
 	return tp;
 }
 
-ArrayElSize(tp)
-	register t_type *tp;
+void ArrayElSize(register t_type *tp)
 {
 	/* Align element size to alignment requirement of element type.
 	   Also make sure that its size is either a dividor of the word_size,
@@ -569,9 +524,7 @@ ArrayElSize(tp)
 	}
 }
 
-void
-ArraySizes(tp)
-	register t_type *tp;
+void ArraySizes(register t_type *tp)
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
@@ -610,8 +563,7 @@ ArraySizes(tp)
 	C_rom_cst(tp->arr_elsize);
 }
 
-FreeType(tp)
-	register t_type *tp;
+void FreeType(register t_type *tp)
 {
 	/*	Release type structures indicated by "tp".
 		This procedure is only called for types, constructed with
@@ -632,10 +584,7 @@ FreeType(tp)
 	free_type(tp);
 }
 
-DeclareType(nd, df, tp)
-	register t_def *df;
-	register t_type *tp;
-	t_node *nd;
+void DeclareType(t_node *nd, register t_def *df, register t_type *tp)
 {
 	/*	A type with type-description "tp" is declared and must
 		be bound to definition "df".
@@ -677,8 +626,7 @@ DeclareType(nd, df, tp)
 	SolveForwardTypeRefs(df);
 }
 
-SolveForwardTypeRefs(df)
-	register t_def *df;
+void SolveForwardTypeRefs(register t_def *df)
 {
 	register t_node *nd;
 
@@ -700,8 +648,7 @@ SolveForwardTypeRefs(df)
 }
 
 
-ForceForwardTypeDef(df)
-	register t_def *df;
+void ForceForwardTypeDef(register t_def *df)
 {
 	register t_def *df1 = df, *df2;
 	register t_node *nd = df->df_forw_node;
@@ -735,18 +682,14 @@ ForceForwardTypeDef(df)
 	}
 }
 
-t_type *
-RemoveEqual(tpx)
-	register t_type *tpx;
+t_type *RemoveEqual(register t_type *tpx)
 {
 
 	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->tp_next;
 	return tpx;
 }
 
-int
-type_or_forward(tp)
-	t_type *tp;
+int type_or_forward(t_type *tp)
 {
 	/*	POINTER TO IDENTIFIER construction. The IDENTIFIER resides
 		in "dot". This routine handles the different cases.
@@ -809,9 +752,7 @@ type_or_forward(tp)
 	return 0;
 }
 
-int
-gcd(m, n)
-	register int m, n;
+int gcd(int m, int n)
 {
 	/*	Greatest Common Divisor
  	*/
@@ -825,18 +766,14 @@ gcd(m, n)
 	return m;
 }
 
-int
-lcm(m, n)
-	int m, n;
+int lcm(int m, int n)
 {
 	/*	Least Common Multiple
  	*/
 	return m * (n / gcd(m, n));
 }
 
-t_type *
-intorcard(left, right)
-	register t_type *left, *right;
+t_type *intorcard(register t_type *left, register t_type *right)
 {
 	if (left->tp_fund == T_INTORCARD) {
 		t_type *tmp = left;
@@ -852,8 +789,7 @@ intorcard(left, right)
 }
 
 #ifdef DEBUG
-DumpType(tp)
-	register t_type *tp;
+void DumpType(register t_type *tp)
 {
 	if (!tp) return;
 

@@ -17,15 +17,15 @@
 #include	"em_arith.h"
 #include	"em_label.h"
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"f_info.h"
 #include	"misc.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"node.h"
+#include	"error.h"
 
-match_id(id1, id2)
-	register t_idf *id1, *id2;
+void match_id(register t_idf *id1, t_idf *id2)
 {
 	/*	Check that identifiers id1 and id2 are equal. If they
 		are not, check that we did'nt generate them in the
@@ -39,8 +39,7 @@ match_id(id1, id2)
 	}
 }
 
-t_idf *
-gen_anon_idf()
+t_idf *gen_anon_idf(void)
 {
 	/*	A new idf is created out of nowhere, to serve as an
 		anonymous name.
@@ -55,9 +54,7 @@ gen_anon_idf()
 	return str2idf(s, 0);
 }
 
-not_declared(what, id, where)
-	char *what, *where;
-	register t_node *id;
+void not_declared(char *what, t_node *id, char *where)
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message

@@ -13,10 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "parameters.h"
-#include	"f_info.h"
+#include "f_info.h"
 struct f_info	file_info;
-#include	"input.h"
-#include	<inp_pkg.body>
+#include "input.h"
+#include <inp_pkg.body>
 
 
 int AtEoIF(void)

@@ -4,8 +4,10 @@
  */
 
 #include "bem.h"
+#include "util.h"
+#include "gencode.h"
 
-#ifndef NORSCID
+#ifndef NORCSID
 static char rcs_id[] = "$Id$" ;
 #endif
 
@@ -14,8 +16,7 @@ static char rcs_id[] = "$Id$" ;
    generate code for assignment statements
 */
 
-exprtype(ltype,rtype)
-int	ltype,rtype;
+static int exprtype(int ltype,int rtype)
 {
 	/* determine the result type of an expression */
 	if ( ltype==STRINGTYPE || rtype==STRINGTYPE)
@@ -31,9 +32,7 @@ int	ltype,rtype;
 
 
 
-void
-conversion(oldtype,newtype)
-int oldtype,newtype;
+void conversion(int oldtype,int newtype)
 {
 	/* the value on top of the stack should be converted */
 	if ( oldtype==newtype) return;
@@ -62,7 +61,10 @@ int oldtype,newtype;
 			C_lfr((arith)BEMINTSIZE);
 			break;
 		} else if ( newtype==FLOATTYPE || newtype==DOUBLETYPE)
+		{
 			break;
+		}
+		break;
 	default:
 		if (debug) 
 			print("type n=%d o=%d\n",newtype,oldtype);
@@ -72,9 +74,7 @@ int oldtype,newtype;
 
 
 
-void
-extraconvert(oldtype,newtype,topstack)
-int oldtype,newtype,topstack;
+void extraconvert(int oldtype,int newtype,int topstack)
 {
 	/* the value below the top of the stack should be converted */
 	if ( oldtype==newtype ) return;
@@ -116,8 +116,7 @@ int oldtype,newtype,topstack;
 
 	
 
-boolop(ltype,rtype,operator)
-int	ltype,rtype,operator;
+int boolop(int ltype,int rtype,int operator)
 {
 	if ( operator != NOTSYM)
 	{
@@ -158,8 +157,7 @@ int	ltype,rtype,operator;
 
 
 
-genbool(operator)
-int operator;
+void genbool(int operator)
 {
 	int l1,l2;
 
@@ -186,8 +184,7 @@ int operator;
 
 
 
-relop( ltype,rtype,operator)
-int	ltype,rtype,operator;
+int relop(int ltype,int rtype,int operator)
 {
 	int	result;
 
@@ -213,8 +210,7 @@ int	ltype,rtype,operator;
 
 
 
-plusmin(ltype,rtype,operator)
-int	ltype,rtype,operator;
+int plusmin(int ltype,int rtype,int operator)
 {
 	int result;
 
@@ -246,8 +242,7 @@ int	ltype,rtype,operator;
 
 
 
-muldiv(ltype,rtype,operator)
-int	ltype,rtype,operator;
+int muldiv(int ltype,int rtype,int operator)
 {
 	int result;
 
@@ -286,8 +281,7 @@ int	ltype,rtype,operator;
 
 
 
-negate(type)
-int type;
+int negate(int type)
 {
 	switch(type)
 	{
@@ -307,8 +301,7 @@ int type;
 
 
 #ifdef ___
-power(ltype,rtype)
-int	ltype,rtype;
+int power(int ltype,int rtype)
 {
 	int resulttype = exprtype(ltype, rtype);
 
@@ -330,8 +323,7 @@ int	ltype,rtype;
 	return(resulttype);
 }
 #else
-power(ltype,rtype)
-int	ltype,rtype;
+int power(int ltype,int rtype)
 {
 	extraconvert(ltype,DOUBLETYPE,rtype);
 	conversion(rtype,DOUBLETYPE);
@@ -343,8 +335,7 @@ int	ltype,rtype;
 #endif
 
 
-int typesize(ltype)
-int ltype;
+int typesize(int ltype)
 {
 	switch( ltype)
 	{
@@ -364,8 +355,7 @@ int ltype;
 
 
 
-int typestring(type)
-int type;
+int typestring(int type)
 {
 	switch(type)
 	{
@@ -384,8 +374,7 @@ int type;
 
 
 
-loadvar(type)
-int type;
+void loadvar(int type)
 {
 	/* load a simple variable  its address is on the stack*/
         C_loi((arith)typestring(type));
@@ -393,8 +382,7 @@ int type;
 
 
 
-loadint(value)
-int value;
+int loadint(int value)
 {
         C_loc((arith)value);
 	return(INTTYPE);
@@ -402,8 +390,7 @@ int value;
 
 
 
-loaddbl(value)
-char *value;
+int loaddbl(char* value)
 {
 	int index;
 
@@ -417,16 +404,14 @@ char *value;
 
 
 
-loadstr(value)
-int value;
+void loadstr(int value)
 {
 	C_lae_dlb((label)value,(arith)0);
 }
 
 
 
-loadaddr(s)
-Symbol *s;
+int loadaddr(Symbol *s)
 {
 	extern Symbol *fcn;
 	int i,j;
@@ -450,7 +435,7 @@ Symbol *s;
 
 
 /* This is a new routine */
-save_address()
+void save_address(void)
 {
 	C_lae_dnam("dummy3",(arith)0);
 	C_sti((arith)BEMPTRSIZE);
@@ -458,8 +443,7 @@ save_address()
 
 
 
-assign(type,lt)
-int type,lt;
+void assign(int type,int lt)
 {
 	extern int e1,e2;
 
@@ -472,8 +456,7 @@ int type,lt;
 
 
 
-storevar(lab,type)
-int lab,type;
+void storevar(int lab,int type)
 {
 	/*store value back */
 	C_lae_dlb((label)lab,(arith)0);
@@ -488,8 +471,7 @@ Symbol  *arraystk[MAXDIMENSIONS];
 
 
 
-newarrayload(s)
-Symbol *s;
+void newarrayload(Symbol *s)
 {
 	if ( dimtop<MAXDIMENSIONS) dimtop++;
 	if ( s->dimensions==0)
@@ -504,16 +486,14 @@ Symbol *s;
 
 
 
-endarrayload()
+int endarrayload(void)
 {
 	return(arraystk[dimtop--]->symtype);
 }
 
 
 
-void
-loadarray(type)
-int	type;
+void loadarray(int type)
 {
 	int	dim;
 	Symbol	*s;

@@ -19,6 +19,7 @@
 #include	"main.h"
 #include	"warning.h"
 #include	"class.h"
+#include	"error.h"
 
 #define	MINIDFSIZE	14
 
@@ -32,13 +33,30 @@ static int	ndirs = 1;
 int		warning_classes = W_INITIAL;
 int		gdb_flag;
 
-DoOption(text)
-	register char *text;
+#if (!SQUEEZE) | (!NOCROSS)
+static int txt2int(register char **tp)
+{
+	/*	the integer pointed to by *tp is read, while increasing
+		*tp; the resulting value is yielded.
+	*/
+	register int val = 0;
+	register int ch;
+
+	while (ch = **tp, ch >= '0' && ch <= '9')	{
+		val = val * 10 + ch - '0';
+		(*tp)++;
+	}
+	return val;
+}
+#endif
+
+
+void DoOption(register char *text)
 {
 	switch(*text++)	{
 
 	case '-':
-		options[*text]++;	/* debug options etc.	*/
+		options[(unsigned int)*text]++;	/* debug options etc.	*/
 		break;
 
 	case 'U':	/* allow underscores in identifiers */
@@ -54,7 +72,7 @@ DoOption(text)
 	case 's':	/* symmetric: MIN(INTEGER) = -MAX(INTEGER) */
 	case '3':	/* strict 3rd edition Modula-2 */
 	case 'l':	/* local additions enabled */
-		options[text[-1]]++;
+		options[(unsigned int)text[-1]]++;
 		break;
 
 #ifdef DBSYMTAB
@@ -162,7 +180,7 @@ DoOption(text)
 		char c;
 		char *t;
 
-		while (c = *text++)	{
+		while ( (c = *text++) != 0)	{
 			char *strchr();
 
 			t = text;
@@ -235,21 +253,3 @@ DoOption(text)
 	}
 }
 
-#if (!SQUEEZE) | (!NOCROSS)
-int
-txt2int(tp)
-	register char **tp;
-{
-	/*	the integer pointed to by *tp is read, while increasing
-		*tp; the resulting value is yielded.
-	*/
-	register int val = 0;
-	register int ch;
-	
-	while (ch = **tp, ch >= '0' && ch <= '9')	{
-		val = val * 10 + ch - '0';
-		(*tp)++;
-	}
-	return val;
-}
-#endif

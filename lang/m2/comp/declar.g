@@ -10,13 +10,13 @@
 /* $Id$ */
 
 {
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<alloc.h>
 #include	<assert.h>
+#include	"em_arith.h"
+#include	"em_label.h"
+#include	"alloc.h"
 
 #include	"idf.h"
 #include	"LLlex.h"
@@ -24,8 +24,11 @@
 #include	"type.h"
 #include	"scope.h"
 #include	"node.h"
+#include	"enter.h"
+#include	"error.h"
 #include	"misc.h"
 #include	"main.h"
+#include	"typequiv.h"
 #include	"chk_expr.h"
 #include	"warning.h"
 

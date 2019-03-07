@@ -16,21 +16,25 @@
 	cases themselves.
 */
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
-#include	<em_label.h>
-#include	<em_arith.h>
-#include	<em_code.h>
-#include	<alloc.h>
 #include	<assert.h>
+#include	"em_label.h"
+#include	"em_arith.h"
+#include	"em_code.h"
+#include	"alloc.h"
+
 
 #include	"Lpars.h"
 #include	"type.h"
+#include	"error.h"
 #include	"LLlex.h"
 #include	"node.h"
 #include	"desig.h"
 #include	"walk.h"
+#include	"code.h"
+#include	"typequiv.h"
 #include	"chk_expr.h"
 #include	"def.h"
 
@@ -54,10 +58,11 @@ struct case_entry	{
 	arith ce_low, ce_up;		/* lower and upper bound of range */
 };
 
-void AddCases();
-void AddOneCase();
+
 
 /* STATICALLOCDEF "case_entry" 20 */
+
+
 
 /* The constant DENSITY determines when CSA and when CSB instructions
    are generated. Reasonable values are: 2, 3, 4.
@@ -66,8 +71,7 @@ void AddOneCase();
    may be lower.
 */
 
-compact(nr, low, up)
-	arith low, up;
+static int compact(int nr, arith low, arith up)
 {
 	/*	Careful! up - low might not fit in an arith. And then,
 		the test "up-low < 0" might also not work to detect this
@@ -80,199 +84,7 @@ compact(nr, low, up)
 }
 #define nd_lab	nd_symb
 
-int
-CaseCode(nd, exitlabel, end_reached)
-	t_node *nd;
-	label exitlabel;
-{
-	/*	Check the expression, stack a new case header and
-		fill in the necessary fields.
-		"exitlabel" is the exit-label of the closest enclosing
-		LOOP-statement, or 0.
-	*/
-	register struct switch_hdr *sh = new_switch_hdr();
-	register t_node *pnode = nd;
-	register struct case_entry *ce;
-	register arith val;
-	label CaseDescrLab;
-	int rval;
-
-	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
-
-	if (ChkExpression(&(pnode->nd_LEFT))) {
-		MkCoercion(&(pnode->nd_LEFT),BaseType(pnode->nd_LEFT->nd_type));
-		CodePExpr(pnode->nd_LEFT);
-	}
-	sh->sh_type = pnode->nd_LEFT->nd_type;
-	sh->sh_break = ++text_label;
-
-	/* Now, create case label list
-	*/
-	while (pnode = pnode->nd_RIGHT) {
-		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
-			if (pnode->nd_LEFT) {
-				/* non-empty case
-				*/
-				pnode->nd_LEFT->nd_lab = ++text_label;
-				AddCases(sh, /* to descriptor */
-					 pnode->nd_LEFT->nd_LEFT,
-					     /* of case labels */
-					 (label) pnode->nd_LEFT->nd_lab
-					     /* and code label */
-					      );
-			}
-		}
-		else {
-			/* Else part
-			*/
-
-			sh->sh_default = ++text_label;
-			break;
-		}
-	}
-
-	if (!sh->sh_nrofentries) {
-		/* There were no cases, so we have to check the case-expression
-		   here
-		*/
-		if (! (sh->sh_type->tp_fund & T_DISCRETE)) {
-			node_error(nd, "illegal type in CASE-expression");
-		}
-	}
-
-	/* Now generate code for the switch itself
-	   First the part that CSA and CSB descriptions have in common.
-	*/
-	CaseDescrLab = ++data_label;	/* the rom must have a label	*/
-	C_df_dlb(CaseDescrLab);
-	if (sh->sh_default) C_rom_ilb(sh->sh_default);
-	else C_rom_ucon("0", pointer_size);
-	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
-		/* CSA
-		*/
-		int gen = 1;
-
-		ce = sh->sh_entries;
-		while (! ce->ce_label) ce = ce->ce_next;
-		C_rom_cst((arith) 0);
-		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
-		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
-			assert(ce);
-			if (gen || val == ce->ce_low) {
-				gen = 1;
-				C_rom_ilb(ce->ce_label);
-				if (val == ce->ce_up) {
-					gen = 0;
-					ce = ce->ce_next;
-					while (ce && ! ce->ce_label) ce = ce->ce_next;
-				}
-			}
-			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
-			else C_rom_ucon("0", pointer_size);
-		}
-		C_loc(sh->sh_lowerbd);
-		C_sbu(word_size);
-		c_lae_dlb(CaseDescrLab);	/* perform the switch */
-		C_csa(word_size);
-	}
-	else	{ 
-		/* CSB
-		*/
-		C_rom_cst((arith)sh->sh_nrofentries);
-		for (ce = sh->sh_entries; ce; ce = ce->ce_next)	{
-			/* generate the entries: value + prog.label
-			*/
-			if (! ce->ce_label) continue;
-			val = ce->ce_low;
-			do {
-				C_rom_cst(val);
-				C_rom_ilb(ce->ce_label);
-			} while (val++ != ce->ce_up);
-		}
-		c_lae_dlb(CaseDescrLab);	/* perform the switch */
-		C_csb(word_size);
-	}
-
-	/* Now generate code for the cases
-	*/
-	pnode = nd;
-	rval = 0;
-	while (pnode = pnode->nd_RIGHT) {
-		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
-			if (pnode->nd_LEFT) {
-				rval |= LblWalkNode((label) pnode->nd_LEFT->nd_lab,
-					    pnode->nd_LEFT->nd_RIGHT,
-					    exitlabel, end_reached);
-				c_bra(sh->sh_break);
-			}
-		}
-		else {
-			/* Else part
-			*/
-			assert(sh->sh_default != 0);
-
-			rval |= LblWalkNode(sh->sh_default,
-					pnode, exitlabel, end_reached);
-			break;
-		}
-	}
-
-	def_ilb(sh->sh_break);
-	FreeSh(sh);
-	return rval;
-}
-
-FreeSh(sh)
-	register struct switch_hdr *sh;
-{
-	/*	 free the allocated switch structure	
-	*/
-	register struct case_entry *ce;
-
-	ce = sh->sh_entries;
-	while (ce)	{
-		struct case_entry *tmp = ce->ce_next;
-
-		free_case_entry(ce);
-		ce = tmp;
-	}
-
-	free_switch_hdr(sh);
-}
-
-void
-AddCases(sh, node, lbl)
-	struct switch_hdr *sh;
-	register t_node *node;
-	label lbl;
-{
-	/*	Add case labels to the case label list
-	*/
-
-	if (node->nd_class == Link) {
-		if (node->nd_symb == UPTO) {
-			assert(node->nd_LEFT->nd_class == Value);
-			assert(node->nd_RIGHT->nd_class == Value);
-
-			AddOneCase(sh, node->nd_LEFT, node->nd_RIGHT, lbl);
-			return;
-		}
-
-		assert(node->nd_symb == ',');
-		AddCases(sh, node->nd_LEFT, lbl);
-		AddCases(sh, node->nd_RIGHT, lbl);
-		return;
-	}
-
-	assert(node->nd_class == Value);
-	AddOneCase(sh, node, node, lbl);
-}
-
-void
-AddOneCase(sh, lnode, rnode, lbl)
-	register struct switch_hdr *sh;
-	t_node *lnode, *rnode;
-	label lbl;
+static void AddOneCase(struct switch_hdr *sh, t_node *lnode,  t_node *rnode, label lbl)
 {
 	register struct case_entry *ce = new_case_entry();
 	register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
@@ -387,3 +199,188 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_up));
 	}
 	if (ce->ce_label) sh->sh_nrofentries += ce->ce_up - ce->ce_low + 1;
 }
+
+
+static void AddCases(struct switch_hdr *sh, register t_node *node, label lbl)
+{
+	/*	Add case labels to the case label list
+	*/
+
+	if (node->nd_class == Link) {
+		if (node->nd_symb == UPTO) {
+			assert(node->nd_LEFT->nd_class == Value);
+			assert(node->nd_RIGHT->nd_class == Value);
+
+			AddOneCase(sh, node->nd_LEFT, node->nd_RIGHT, lbl);
+			return;
+		}
+
+		assert(node->nd_symb == ',');
+		AddCases(sh, node->nd_LEFT, lbl);
+		AddCases(sh, node->nd_RIGHT, lbl);
+		return;
+	}
+
+	assert(node->nd_class == Value);
+	AddOneCase(sh, node, node, lbl);
+}
+
+
+static void FreeSh(struct switch_hdr *sh)
+{
+	/*	 free the allocated switch structure	
+	*/
+	register struct case_entry *ce;
+
+	ce = sh->sh_entries;
+	while (ce)	{
+		struct case_entry *tmp = ce->ce_next;
+
+		free_case_entry(ce);
+		ce = tmp;
+	}
+
+	free_switch_hdr(sh);
+}
+
+int CaseCode(t_node *nd, label exitlabel, int end_reached)
+{
+	/*	Check the expression, stack a new case header and
+		fill in the necessary fields.
+		"exitlabel" is the exit-label of the closest enclosing
+		LOOP-statement, or 0.
+	*/
+	register struct switch_hdr *sh = new_switch_hdr();
+	register t_node *pnode = nd;
+	register struct case_entry *ce;
+	register arith val;
+	label CaseDescrLab;
+	int rval;
+
+	assert(pnode->nd_class == Stat && pnode->nd_symb == CASE);
+
+	if (ChkExpression(&(pnode->nd_LEFT))) {
+		MkCoercion(&(pnode->nd_LEFT),BaseType(pnode->nd_LEFT->nd_type));
+		CodePExpr(pnode->nd_LEFT);
+	}
+	sh->sh_type = pnode->nd_LEFT->nd_type;
+	sh->sh_break = ++text_label;
+
+	/* Now, create case label list
+	*/
+	while ( (pnode = pnode->nd_RIGHT) ) {
+		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
+			if (pnode->nd_LEFT) {
+				/* non-empty case
+				*/
+				pnode->nd_LEFT->nd_lab = ++text_label;
+				AddCases(sh, /* to descriptor */
+					 pnode->nd_LEFT->nd_LEFT,
+					     /* of case labels */
+					 (label) pnode->nd_LEFT->nd_lab
+					     /* and code label */
+					      );
+			}
+		}
+		else {
+			/* Else part
+			*/
+
+			sh->sh_default = ++text_label;
+			break;
+		}
+	}
+
+	if (!sh->sh_nrofentries) {
+		/* There were no cases, so we have to check the case-expression
+		   here
+		*/
+		if (! (sh->sh_type->tp_fund & T_DISCRETE)) {
+			node_error(nd, "illegal type in CASE-expression");
+		}
+	}
+
+	/* Now generate code for the switch itself
+	   First the part that CSA and CSB descriptions have in common.
+	*/
+	CaseDescrLab = ++data_label;	/* the rom must have a label	*/
+	C_df_dlb(CaseDescrLab);
+	if (sh->sh_default) C_rom_ilb(sh->sh_default);
+	else C_rom_ucon("0", pointer_size);
+	if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
+		/* CSA
+		*/
+		int gen = 1;
+
+		ce = sh->sh_entries;
+		while (! ce->ce_label) ce = ce->ce_next;
+		C_rom_cst((arith) 0);
+		C_rom_cst(sh->sh_upperbd - sh->sh_lowerbd);
+		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
+			assert(ce);
+			if (gen || val == ce->ce_low) {
+				gen = 1;
+				C_rom_ilb(ce->ce_label);
+				if (val == ce->ce_up) {
+					gen = 0;
+					ce = ce->ce_next;
+					while (ce && ! ce->ce_label) ce = ce->ce_next;
+				}
+			}
+			else if (sh->sh_default) C_rom_ilb(sh->sh_default);
+			else C_rom_ucon("0", pointer_size);
+		}
+		C_loc(sh->sh_lowerbd);
+		C_sbu(word_size);
+		c_lae_dlb(CaseDescrLab);	/* perform the switch */
+		C_csa(word_size);
+	}
+	else	{ 
+		/* CSB
+		*/
+		C_rom_cst((arith)sh->sh_nrofentries);
+		for (ce = sh->sh_entries; ce; ce = ce->ce_next)	{
+			/* generate the entries: value + prog.label
+			*/
+			if (! ce->ce_label) continue;
+			val = ce->ce_low;
+			do {
+				C_rom_cst(val);
+				C_rom_ilb(ce->ce_label);
+			} while (val++ != ce->ce_up);
+		}
+		c_lae_dlb(CaseDescrLab);	/* perform the switch */
+		C_csb(word_size);
+	}
+
+	/* Now generate code for the cases
+	*/
+	pnode = nd;
+	rval = 0;
+	while ( (pnode = pnode->nd_RIGHT) ) {
+		if (pnode->nd_class == Link && pnode->nd_symb == '|') {
+			if (pnode->nd_LEFT) {
+				rval |= LblWalkNode((label) pnode->nd_LEFT->nd_lab,
+					    pnode->nd_LEFT->nd_RIGHT,
+					    exitlabel, end_reached);
+				c_bra(sh->sh_break);
+			}
+		}
+		else {
+			/* Else part
+			*/
+			assert(sh->sh_default != 0);
+
+			rval |= LblWalkNode(sh->sh_default,
+					pnode, exitlabel, end_reached);
+			break;
+		}
+	}
+
+	def_ilb(sh->sh_break);
+	FreeSh(sh);
+	return rval;
+}
+
+
+

@@ -9,15 +9,17 @@
 
 /* $Id$ */
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
-#include	<system.h>
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<em_code.h>
-#include	<alloc.h>
 #include	<assert.h>
+#include	"system.h"
+#include	"em_arith.h"
+#include	"em_label.h"
+#include	"em_code.h"
+#include	"print.h"
+#include	"alloc.h"
+
 #include	<stb.h>
 
 #include	"input.h"
@@ -31,24 +33,39 @@
 #include	"standards.h"
 #include	"tokenname.h"
 #include	"node.h"
+#include	"walk.h"
+#include	"cstoper.h"
+#include	"error.h"
+#include	"options.h"
 #include	"warning.h"
-#include	"SYSTEM.h"
+#include	"SYSTEMM2.h"
 
 int		state;			/* either IMPLEMENTATION or PROGRAM */
-char		options[128];
+char	options[128];
 int		DefinitionModule; 
-char		*ProgName;
-char		**DEFPATH;
+char	*ProgName;
+char	**DEFPATH;
 int		nDEF = 2, mDEF = 10;
 int		pass_1 = 1;
-t_def	 	*Defined;
+t_def	 *Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
 static t_node	_emptystat = { Stat, 0, NULLTYPE, { ';' }};
 t_node		*EmptyStatement = &_emptystat;
 
-main(argc, argv)
-	register char **argv;
+
+/* Forward declarations. */
+struct stdproc;
+int Compile(char *, char *);
+static void AddProcs(register struct stdproc *);
+static void AddStandards(void);
+/* External function declarations */
+extern void CompUnit(void);
+extern void DefModule(void); /* Lpars */
+extern void reserve(register struct tokenname *); /* tokenname */
+char* getwdir(register char *); /* defmodule */
+
+int main(int argc, char **argv)
 {
 	register int Nargc = 1;
 	register char **Nargv = &argv[0];
@@ -72,11 +89,9 @@ main(argc, argv)
 	/*NOTREACHED*/
 }
 
-Compile(src, dst)
-	char *src, *dst;
+int Compile(char *src, char *dst)
 {
 	extern struct tokenname tkidf[];
-	extern char *getwdir();
 
 	if (! InsertFile(src, (char **) 0, &src)) {
 		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
@@ -126,7 +141,7 @@ Compile(src, dst)
 }
 
 #ifdef DEBUG
-LexScan()
+void LexScan(void)
 {
 	register t_token *tkp = &dot;
 	extern char *symbol2str();
@@ -198,8 +213,7 @@ static struct stdproc sysprocs[] = {
 
 extern t_def *Enter(), *EnterType();
 
-AddProcs(p)
-	register struct stdproc *p;
+static void AddProcs(register struct stdproc *p)
 {
 	for (; p->st_nam != 0; p++) {
 		if (! Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con)) {
@@ -208,7 +222,7 @@ AddProcs(p)
 	}
 }
 
-AddStandards()
+static void AddStandards(void)
 {
 	register t_def *df;
 	static t_token nilconst = { INTEGER, 0};
@@ -238,7 +252,7 @@ AddStandards()
 	EnterType("BOOLEAN", bool_type);
 }
 
-do_SYSTEM()
+void do_SYSTEM(void)
 {
 	/*	Simulate the reading of the SYSTEM definition module
 	*/
@@ -258,7 +272,7 @@ do_SYSTEM()
 
 int	cntlines;
 
-Info()
+void Info(void)
 {
 	extern int cnt_def, cnt_node, cnt_paramlist, cnt_type,
 		   cnt_switch_hdr, cnt_case_entry, 
@@ -274,14 +288,12 @@ print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif
 
-void
-No_Mem()
+void No_Mem(void)
 {
 	fatal("out of memory");
 }
 
-void
-C_failed()
+void C_failed(void)
 {
 	fatal("write failed");
 }

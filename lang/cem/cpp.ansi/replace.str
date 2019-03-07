@@ -4,6 +4,10 @@
  */
 /* $Id$ */
 /* 	DEFINITIONS FOR THE MACRO REPLACEMENT ROUTINES		*/
+#ifndef _REPLACE_H_
+#define _REPLACE_H_
+
+#include "parameters.h"
 
 struct repl {
 	struct	repl *next;
@@ -48,3 +52,12 @@ struct args {
 /* ALLOCDEF "args" 2 */
 
 #define NO_ARGS		(struct args *)0
+
+struct idf;
+
+void unstackrepl(void);
+int replace(register struct idf *idf);
+void EnableMacros(void);
+void add2repl(register struct repl *repl, int ch);
+
+#endif /* REPLACE_H_ */

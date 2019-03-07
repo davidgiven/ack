@@ -12,23 +12,27 @@
 /*	Code generation for expressions and coercions
 */
 
-#include "parameters.h"
+#include	"parameters.h"
 #include	"debug.h"
 
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<em_code.h>
-#include	<em_abs.h>
 #include	<assert.h>
-#include	<alloc.h>
+#include	"em_arith.h"
+#include	"em_label.h"
+#include	"em_code.h"
+#include	"em_abs.h"
+#include	"alloc.h"
 
+#include	"code.h"
 #include	"type.h"
+#include	"error.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"scope.h"
 #include	"desig.h"
+#include	"chk_expr.h"
 #include	"node.h"
 #include	"Lpars.h"
+#include	"tmpvar.h"
 #include	"standards.h"
 #include	"walk.h"
 
@@ -37,17 +41,19 @@ extern char	options[];
 extern t_desig	null_desig;
 int		fp_used;
 
-void RangeCheck();
-void CodeParameters();
-void CodeCall();
+/* Forward declarations */
+static void CodeParameters(t_param *, register t_node *);
+static void CodeStd(t_node *);
+static void compare(int, label);
+static void truthvalue(int);
+static void CodeUoper(register t_node *);
+static void CodeSet(register t_node *, int);
+static void CodeEl(register t_node *, register t_type *, int);
+static void CodeDAddress(t_node *, int);
+static void DoHIGH(register t_def *);
 
-CodeConst(cst, size)
-	arith cst;
-	int size;
+void CodeConst(arith cst, int size)
 {
-	/*	Generate code to push constant "cst" with size "size"
-	*/
-
 	if (size <= (int) word_size) {
 		C_loc(cst);
 	}
@@ -59,9 +65,7 @@ CodeConst(cst, size)
 	}
 }
 
-void
-CodeString(nd)
-	register t_node *nd;
+void CodeString(register t_node *nd)
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
@@ -73,10 +77,7 @@ CodeString(nd)
 	c_lae_dlb(data_label);
 }
 
-CodeExpr(nd, ds, true_label, false_label)
-	register t_node *nd;
-	register t_desig *ds;
-	label true_label, false_label;
+void CodeExpr(t_node *nd, t_desig *ds, label true_label, label false_label)
 {
 	register t_type *tp = nd->nd_type;
 
@@ -173,8 +174,7 @@ CodeExpr(nd, ds, true_label, false_label)
 	}
 }
 
-CodeCoercion(t1, t2)
-	t_type *t1, *t2;
+void CodeCoercion(t_type *t1, t_type *t2)
 {
 	int fund1, fund2;
 	int sz1 = t1->tp_size;
@@ -293,13 +293,9 @@ CodeCoercion(t1, t2)
 	}
 }
 
-void
-CodeCall(nd)
-	register t_node *nd;
+void CodeCall(t_node *nd)
 {
-	/*	Generate code for a procedure call. Checking of parameters
-		and result is already done.
-	*/
+
 	register t_node *left = nd->nd_LEFT;
 	t_type *result_tp;
 	int needs_fn;
@@ -361,10 +357,8 @@ CodeCall(nd)
 	DoLineno(nd);
 }
 
-void
-CodeParameters(param, arg)
-	t_param *param;
-	register t_node *arg;
+/* Generates code to setup the parameters of a procedure call. */
+static void CodeParameters(t_param *param, register t_node *arg)
 {
 	register t_type *tp;
 	register t_type *arg_type;
@@ -445,9 +439,7 @@ CodeParameters(param, arg)
 	CodePExpr(arg);
 }
 
-CodePString(nd, tp)
-	t_node *nd;
-	t_type *tp;
+void CodePString(t_node *nd, t_type *tp)
 {
 	arith szarg = WA(nd->nd_type->tp_size);
 	register arith zersz = WA(tp->tp_size) - szarg;
@@ -461,9 +453,9 @@ CodePString(nd, tp)
 	C_loi(szarg);
 }
 
-static
-subu(sz)
-	int sz;
+
+
+static void subu(int sz)
 {
 	if (! options['R']) {
 		C_cal(sz == (int) word_size ? "subuchk" : "subulchk");
@@ -471,9 +463,7 @@ subu(sz)
 	C_sbu((arith) sz);
 }
 
-static
-addu(sz)
-	int sz;
+static void addu(int sz)
 {
 	if (! options['R']) {
 		C_cal(sz == (int) word_size ? "adduchk" : "addulchk");
@@ -481,9 +471,7 @@ addu(sz)
 	C_adu((arith)sz);
 }
 
-static int
-complex_lhs(nd)
-	register t_node *nd;
+static int complex_lhs(register t_node *nd)
 {
 	switch(nd->nd_class) {
 	case Value:
@@ -498,8 +486,8 @@ complex_lhs(nd)
 	}
 }
 
-CodeStd(nd)
-	t_node *nd;
+/* Generate code for internal procedures */
+static void CodeStd(t_node *nd)
 {
 	register t_node *arg = nd->nd_RIGHT;
 	register t_node *left = 0;
@@ -654,9 +642,7 @@ CodeStd(nd)
 	}
 }
 
-int
-needs_rangecheck(tpl, tpr)
-	register t_type	*tpl, *tpr;
+static int needs_rangecheck(register t_type *tpl, t_type *tpr)
 {
 	arith rlo, rhi;
 
@@ -679,13 +665,8 @@ needs_rangecheck(tpl, tpr)
 	return 0;
 }
 
-void
-RangeCheck(tpl, tpr)
-	register t_type *tpl, *tpr;
+void RangeCheck(register t_type *tpl, t_type *tpr)
 {
-	/*	Generate a range check if neccessary
-	*/
-
 	arith rlo, rhi;
 
 	if (options['R']) return;
@@ -709,8 +690,7 @@ RangeCheck(tpl, tpr)
 	}
 }
 
-Operands(nd)
-	register t_node *nd;
+void Operands(register t_node *nd)
 {
 
 	CodePExpr(nd->nd_LEFT);
@@ -718,10 +698,11 @@ Operands(nd)
 	DoLineno(nd);
 }
 
-CodeOper(expr, true_label, false_label)
-	register t_node *expr;	/* the expression tree itself	*/
-	label true_label;
-	label false_label;	/* labels to jump to in logical expr's	*/
+void CodeOper(
+	register t_node *expr,	/* the expression tree itself	*/
+	label true_label,
+	label false_label	/* labels to jump to in logical expr's	*/
+)
 {
 	register t_node *leftop = expr->nd_LEFT;
 	register t_node *rightop = expr->nd_RIGHT;
@@ -1019,10 +1000,8 @@ CodeOper(expr, true_label, false_label)
 	}
 }
 
-/*	compare() serves as an auxiliary function of CodeOper	*/
-compare(relop, lbl)
-	int relop;
-	register label lbl;
+/*	Serves as an auxiliary function of CodeOper	*/
+static void compare(int relop, label lbl)
 {
 	switch (relop)	{
 	case '<':
@@ -1048,9 +1027,8 @@ compare(relop, lbl)
 	}
 }
 
-/*	truthvalue() serves as an auxiliary function of CodeOper	*/
-truthvalue(relop)
-	int relop;
+/*	Serves as an auxiliary function of CodeOper	*/
+static void truthvalue(int relop)
 {
 	switch (relop)	{
 	case '<':
@@ -1076,8 +1054,9 @@ truthvalue(relop)
 	}
 }
 
-CodeUoper(nd)
-	register t_node *nd;
+
+/* Generates code for an unary expression */
+void CodeUoper(register t_node *nd)
 {
 	register t_type *tp = nd->nd_type;
 
@@ -1110,8 +1089,7 @@ CodeUoper(nd)
 	}
 }
 
-CodeSet(nd, null_set)
-	register t_node *nd;
+static void CodeSet(register t_node *nd, int null_set)
 {
 	register t_type *tp = nd->nd_type;
 
@@ -1128,9 +1106,7 @@ CodeSet(nd, null_set)
 	if (null_set) C_zer(tp->tp_size);
 }
 
-CodeEl(nd, tp, null_set)
-	register t_node *nd;
-	register t_type *tp;
+static void CodeEl(register t_node *nd, register t_type *tp, int null_set)
 {
 	register t_type *eltype = ElementType(tp);
 
@@ -1155,12 +1131,9 @@ CodeEl(nd, tp, null_set)
 	}
 }
 
-CodePExpr(nd)
-	register t_node *nd;
+void CodePExpr(register t_node *nd)
 {
-	/*	Generate code to push the value of the expression "nd"
-		on the stack.
-	*/
+
 	t_desig designator;
 
 	designator = null_desig;
@@ -1168,8 +1141,7 @@ CodePExpr(nd)
 	CodeValue(&designator, nd->nd_type);
 }
 
-CodeDAddress(nd, chk_controlvar)
-	t_node *nd;
+static void CodeDAddress(t_node *nd, int chk_controlvar)
 {
 	/*	Generate code to push the address of the designator "nd"
 		on the stack.
@@ -1195,12 +1167,9 @@ CodeDAddress(nd, chk_controlvar)
 	}
 }
 
-CodeDStore(nd)
-	register t_node *nd;
+void CodeDStore(register t_node *nd)
 {
-	/*	Generate code to store the expression on the stack into the
-		designator "nd".
-	*/
+
 
 	t_desig designator;
 
@@ -1210,8 +1179,7 @@ CodeDStore(nd)
 	CodeStore(&designator, nd->nd_type);
 }
 
-DoHIGH(df)
-	register t_def *df;
+static void DoHIGH(register t_def *df)
 {
 	/*	Get the high index of a conformant array, indicated by "nd".
 		The high index is the second field in the descriptor of
@@ -1235,26 +1203,22 @@ DoHIGH(df)
 }
 
 #ifdef SQUEEZE
-c_bra(l)
-	label l;
+void c_bra(label l)
 {
 	C_bra((label) l);
 }
 
-c_loc(n)
+void c_loc(int n)
 {
 	C_loc((arith) n);
 }
 
-c_lae_dlb(l)
-	label l;
+void c_lae_dlb(label l)
 {
 	C_lae_dlb(l, (arith) 0);
 }
 
-CAL(name, ssp)
-	char *name;
-	int ssp;
+void CAL(char *name, int ssp)
 {
 	C_cal(name);
 	C_asp((arith) ssp);

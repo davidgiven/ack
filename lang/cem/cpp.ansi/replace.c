@@ -19,19 +19,25 @@
 #include	"arith.h"
 #include	"LLlex.h"
 #include	"class.h"
+#include    "skip.h"
+#include    "domacro.h"
 #include	"replace.h"
+#include    "error.h"
 
-extern char *GetIdentifier();
+;
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
 
-void expand_defined();
-void getactuals();
-void macro2buffer();
+static int expand_macro(register struct repl *, register struct idf *);
+static void expand_defined(register struct repl *);
+static void getactuals(struct repl *, register struct idf *);
+static int actual(struct repl *);
+static void macro_func(register struct idf *);
+static void macro2buffer(register struct repl *, register struct idf *, register struct args *);
+static char *stringify( register struct repl *, register char *, register struct args *);
+static void stash(struct repl *, register int ch, int );
 
-int
-replace(idf)
-	register struct idf *idf;
+int replace(register struct idf *idf)
 {
 	/*	replace is called by the lexical analyzer to perform
 		macro replacement. The routine actualy functions as a
@@ -57,13 +63,12 @@ replace(idf)
 	return 1;
 }
 
-unstackrepl()
+void unstackrepl(void)
 {
 	Unstacked++;
 }
 
-freeargs(args)
-	struct args *args;
+static void freeargs(struct args *args)
 {
 	register int i;
 
@@ -81,7 +86,7 @@ freeargs(args)
 	free_args(args);
 }
 
-EnableMacros()
+void EnableMacros(void)
 {
 	register struct repl *r = ReplaceList, *prev = 0;
 
@@ -103,9 +108,9 @@ EnableMacros()
 	Unstacked = 0;
 }
 
-expand_macro(repl, idf)
-	register struct repl *repl;
-	register struct idf *idf;
+static int expand_macro(
+	register struct repl *repl,
+	register struct idf *idf)
 {
 	/*	expand_macro() does the actual macro replacement.
 		"idf" is a description of the identifier which
@@ -168,9 +173,7 @@ expand_macro(repl, idf)
 	return 1;
 }
 
-void
-expand_defined(repl)
-	register struct repl *repl;
+static void expand_defined(register struct repl *repl)
 {
 	register int ch = GetChar();
 	struct idf *id;
@@ -205,17 +208,13 @@ expand_defined(repl)
 	add2repl(repl, ' ');
 }
 
-newarg(args)
-	struct args *args;
+static void newarg(struct args *args)
 {
 	args->a_expptr = args->a_expbuf = Malloc((unsigned)(args->a_expsize = ARGBUF));
 	args->a_rawptr = args->a_rawbuf = Malloc((unsigned)(args->a_rawsize = ARGBUF));
 }
 
-void
-getactuals(repl, idf)
-	struct repl *repl;
-	register struct idf *idf;
+static void getactuals(struct repl *repl, register struct idf *idf)
 {
 	/*	Get the actual parameters from the input stream.
 		The hard part is done by actual(), only comma's and
@@ -256,8 +255,7 @@ getactuals(repl, idf)
 		error("too many macro arguments");
 }
 
-saveraw(repl)
-struct repl *repl;
+static void saveraw(struct repl *repl)
 {
 	register struct repl *nrepl = ReplaceList;
 	register struct args *ap = nrepl->r_args;
@@ -294,9 +292,7 @@ struct repl *repl;
 	}
 }
 
-int
-actual(repl)
-	struct repl *repl;
+static int actual(struct repl *repl)
 {
 	/*	This routine deals with the scanning of an actual parameter.
 		It keeps in account the opening and closing brackets,
@@ -497,8 +493,7 @@ a_new_line:		ch = GetChar();
 	}
 }
 
-macro_func(idef)
-	register struct idf *idef;
+static void macro_func(register struct idf *idef)
 {
 	/*	macro_func() performs the special actions needed with some
 		macros.  These macros are __FILE__ and __LINE__ which
@@ -526,11 +521,10 @@ macro_func(idef)
 	}
 }
 
-void
-macro2buffer(repl, idf, args)
-	register struct repl *repl;
-	register struct idf *idf;
-	register struct args *args;
+static void macro2buffer(
+	register struct repl *repl,
+	register struct idf *idf,
+	register struct args *args)
 {
 	/*	macro2buffer expands the replacement list and places the
 		result onto the replacement buffer. It deals with the #
@@ -680,11 +674,10 @@ macro2buffer(repl, idf, args)
 		error("illegal use of ## operator");
 }
 
-char *
-stringify(repl, ptr, args)
-	register struct repl *repl;
-	register char *ptr;
-	register struct args *args;
+static char *stringify(
+	register struct repl *repl,
+	register char *ptr,
+	register struct args *args)
 {
 	/*	If a parameter is immediately preceded by a # token
 		both are replaced by a single string literal that
@@ -747,9 +740,7 @@ stringify(repl, ptr, args)
 
 /* The following routine is also called from domacro.c.
  */
-add2repl(repl, ch)
-	register struct repl *repl;
-	int ch;
+void add2repl(register struct repl *repl, int ch)
 {
 	register int index = repl->r_ptr - repl->r_text;
  
@@ -766,10 +757,7 @@ add2repl(repl, ch)
  * buffer. If the variable is zero, we must only stash into the expanded
  * buffer. Otherwise, we must use both buffers.
  */
-stash(repl, ch, stashraw)
-        struct repl *repl;
-        register int ch;
-        int stashraw;
+static void stash(struct repl *repl, register int ch, int stashraw)
 {
 	/* Stash characters into the macro expansion buffer.
 	 */

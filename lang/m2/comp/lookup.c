@@ -9,13 +9,14 @@
 
 /* $Id$ */
 
-#include "parameters.h"
+#include 	"parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
 
+#include	"lookup.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"idf.h"
@@ -29,10 +30,7 @@ extern int	pass_1;
 extern char	options[];
 #endif
 
-t_def *
-lookup(id, scope, import, flags)
-	register t_idf *id;
-	t_scope *scope;
+t_def *lookup(register t_idf *id, t_scope *scope, int import, int flags)
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.
@@ -74,10 +72,7 @@ lookup(id, scope, import, flags)
 	return df;
 }
 
-t_def *
-lookfor(id, vis, message, flags)
-	register t_node *id;
-	register t_scopelist *vis;
+t_def *lookfor(register t_node *id, register t_scopelist *vis, int message, int flags)
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,

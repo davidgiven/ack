@@ -12,41 +12,40 @@
 /*	Routines for testing type equivalence, type compatibility, and
 	assignment compatibility
 */
-#include "parameters.h"
+#include	"parameters.h"
 #include	"debug.h"
 
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
 
+
 #include	"type.h"
 #include	"LLlex.h"
 #include	"idf.h"
 #include	"def.h"
 #include	"node.h"
+#include	"error.h"
+#include	"typequiv.h"
 #include	"warning.h"
 #include	"main.h"
+#include	"stab.h"
 #include	"Lpars.h"
+#include	"print.h"
+#include	"chk_expr.h"
 
-extern char *sprint();
 
-int
-TstTypeEquiv(tp1, tp2)
-	t_type *tp1, *tp2;
+static int TstTypeEquiv(t_type *tp1, t_type *tp2)
 {
 	/*	test if two types are equivalent.
 	*/
 
-	return     tp1 == tp2
-		||
-		   tp1 == error_type
-		||
-		   tp2 == error_type;
+	return (tp1 == tp2) ||
+		   (tp1 == error_type) ||
+		   (tp2 == error_type);
 }
 
-int
-TstParEquiv(tp1, tp2)
-	register t_type *tp1, *tp2;
+static int TstParEquiv(register t_type *tp1, register t_type *tp2)
 {
 	/*	test if two parameter types are equivalent. This routine
 		is used to check if two different procedure declarations
@@ -67,9 +66,7 @@ TstParEquiv(tp1, tp2)
 		   );
 }
 
-int
-TstProcEquiv(tp1, tp2)
-	t_type *tp1, *tp2;
+int TstProcEquiv(t_type *tp1, t_type *tp2)
 {
 	/*	Test if two procedure types are equivalent. This routine
 		may also be used for the testing of assignment compatibility
@@ -99,9 +96,7 @@ TstProcEquiv(tp1, tp2)
 	return p1 == p2;
 }
 
-int
-TstCompat(tp1, tp2)
-	register t_type *tp1, *tp2;
+int TstCompat(register t_type *tp1, register t_type *tp2)
 {
 	/*	test if two types are compatible. See section 6.3 of the
 		Modula-2 Report for a definition of "compatible".
@@ -138,9 +133,7 @@ TstCompat(tp1, tp2)
 	;
 }
 
-int
-TstAssCompat(tp1, tp2)
-	register t_type *tp1, *tp2;
+int TstAssCompat(register t_type *tp1, register t_type *tp2)
 {
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
@@ -177,9 +170,7 @@ TstAssCompat(tp1, tp2)
 	return 0;
 }
 
-char *
-incompat(tp1, tp2)
-	register t_type *tp1, *tp2;
+char *incompat(register t_type *tp1, register t_type *tp2)
 {
 	
 	if (tp1->tp_fund == T_HIDDEN || tp2->tp_fund == T_HIDDEN) {
@@ -188,11 +179,7 @@ incompat(tp1, tp2)
 	return "type incompatibility";
 }
 
-int
-TstParCompat(parno, formaltype, VARflag, nd, edf)
-	register t_type *formaltype;
-	t_node **nd;
-	t_def *edf;
+int TstParCompat(int parno, register t_type *formaltype, int VARflag, t_node **nd, t_def *edf)
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
@@ -268,11 +255,7 @@ TstParCompat(parno, formaltype, VARflag, nd, edf)
 	return 0;
 }
 
-CompatCheck(nd, tp, message, fc)
-	register t_node **nd;
-	t_type *tp;
-	char *message;
-	int (*fc)();
+int CompatCheck(register t_node **nd, t_type *tp, char *message, int (*fc)())
 {
 	if (! (*fc)(tp, (*nd)->nd_type)) {
 		if (message) {
@@ -286,10 +269,7 @@ CompatCheck(nd, tp, message, fc)
 	return 1;
 }
 
-ChkAssCompat(nd, tp, message)
-	t_node **nd;
-	t_type *tp;
-	char *message;
+int ChkAssCompat(t_node **nd, t_type *tp, char *message)
 {
 	/*	Check assignment compatibility of node "nd" with type "tp".
 		Give an error message when it fails
@@ -301,10 +281,7 @@ ChkAssCompat(nd, tp, message)
 	return CompatCheck(nd, tp, message, TstAssCompat);
 }
 
-ChkCompat(nd, tp, message)
-	t_node **nd;
-	t_type *tp;
-	char *message;
+int ChkCompat(t_node **nd, t_type *tp, char *message)
 {
 	/*	Check compatibility of node "nd" with type "tp".
 		Give an error message when it fails
