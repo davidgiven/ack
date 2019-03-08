@@ -5,6 +5,12 @@
 #define RCSID3 "$Id$"
 
 /*
+ * Specials
+ */
+
+0,  KILL,       0,      "kill",
+
+/*
  * Intel 8080 keywords
  */
 0,	REG,		B,		"b",

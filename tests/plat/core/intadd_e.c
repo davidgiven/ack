@@ -27,5 +27,7 @@ void _m_a_i_n(void)
     ASSERT(((unsigned int)1   + (unsigned int)two) == 3);
     ASSERT(((unsigned int)-1  + (unsigned int)two) == 1);
 
+    ASSERT(((unsigned int)two + (unsigned int)256) == 258);
+
     finished();
 }

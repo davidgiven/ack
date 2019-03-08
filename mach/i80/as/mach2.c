@@ -21,3 +21,5 @@
 %token <y_word> STLDAX
 
 %type <y_word> r16 r8
+
+%token <y_word> KILL

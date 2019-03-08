@@ -26,4 +26,37 @@ push d : lxi d, X : pop h    -> lxi h, X : xchg ;
 
 push h : lhld X : pop d      -> xchg : lhld X ;
 
+X -1                         -> X 255 ;
+X -2                         -> X 254 ;
+X -3                         -> X 253 ;
+X -4                         -> X 252 ;
+
+mov a, X : adi -4 : mov X, a : kill a -> dcr X : dcr X : dcr X : dcr X;
+mov a, X : adi -3 : mov X, a : kill a -> dcr X : dcr X : dcr X ;
+mov a, X : adi -2 : mov X, a : kill a -> dcr X : dcr X ;
+mov a, X : adi -1 : mov X, a : kill a -> dcr X ;
+mov a, X : adi 0 : mov X, a : kill a -> ;
+mov a, X : adi 1 : mov X, a : kill a -> inr X ;
+mov a, X : adi 2 : mov X, a : kill a -> inr X : inr X ;
+mov a, X : adi 3 : mov X, a : kill a -> inr X : inr X : inr X ;
+mov a, X : adi 4 : mov X, a : kill a -> inr X : inr X : inr X : inr X;
+
+mov a, X : sbi -4 : mov X, a : kill a -> inr X : inr X : inr X : inr X;
+mov a, X : sbi -3 : mov X, a : kill a -> inr X : inr X : inr X ;
+mov a, X : sbi -2 : mov X, a : kill a -> inr X : inr X ;
+mov a, X : sbi -1 : mov X, a : kill a -> inr X ;
+mov a, X : sbi 0 : mov X, a : kill a -> ;
+mov a, X : sbi 1 : mov X, a : kill a -> dcr X ;
+mov a, X : sbi 2 : mov X, a : kill a -> dcr X : dcr X ;
+mov a, X : sbi 3 : mov X, a : kill a -> dcr X : dcr X : dcr X ;
+mov a, X : sbi 4 : mov X, a : kill a -> dcr X : dcr X : dcr X : dcr X ;
+
+mov a, X : ani 0 : mov X, a : kill a -> mvi X, 0 ;
+mov a, X : ani 255 : mov X, a : kill a -> ;
+
+mov a, X : ori 0 : mov X, a : kill a -> ;
+mov a, X : ori 255 : mov X, a : kill a -> mvi X, 255 ;
+
+mov a, X : xri 0 : mov X, a : kill a -> ;
+
 %%;
