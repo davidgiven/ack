@@ -48,6 +48,7 @@ TOKENS
 
 const1			= { INT num; } 1 num.
 const2			= { INT num; } 2 num.
+largeconst2    = { INT num; } 2 num. /* Word-sized constant with low byte zero */
 smallpconst2   = { INT num; } 2 num. /* Byte-sized positive constant */
 smallnconst2   = { INT num; } 2 num. /* Byte-sized negative constant */
 label			= { ADDR off; } 2 off.
@@ -60,17 +61,18 @@ SETS
 reg1			= reg + lbreg + m.
 b_d_h_sp		= regpair + stackpointer.
 b_d_h_psw		= regpair + psword.
-immediate		= smallpconst2 + smallnconst2 + const2 + label.
+immediate		= largeconst2 + smallpconst2 + smallnconst2 + const2 + label.
 src1			= reg.
 src2			= hl_or_de + const2 + label.
 src1or2			= src1 + src2.
+anyreg      = reg + regpair.
 
 INSTRUCTIONS
 
 /* aci	const1:ro	kills a:cc	cost(2, 7).	*/
    adc	reg1:ro		kills a:cc	cost(1, 4).
    add	reg1:ro 	kills a:cc	cost(1, 4).
-/* adi	const1:ro 	kills a:cc	cost(2, 7).	*/
+   adi	const1:ro 	kills a:cc	cost(2, 7).
    ana	reg1:ro 	kills a:cc	cost(1, 4).
    ani	const1:ro 	kills a:cc	cost(2, 7).
    Call	"call" label:ro			cost(3,17).
@@ -154,6 +156,7 @@ INSTRUCTIONS
    xri	const1:ro 	kills a:cc	cost(2, 7).
    xthl			kills hl	cost(1,18).
    
+   kill anyreg:rw kills :cc cost(0, 0).
 
 MOVES
 
@@ -261,6 +264,9 @@ COERCIONS
 
    from hl_or_de				yields %1.2
 
+   from largeconst2
+      yields {const2, %1.num}
+
    from smallpconst2
       yields {const2, %1.num}
 
@@ -271,6 +277,10 @@ COERCIONS
       uses hl_or_de=%1
       yields %a
 
+   from largeconst2
+      uses hl_or_de=%1
+      yields %a
+      
    from smallpconst2
       uses reg={const1, %1.num & 0xff}
       yields %a
@@ -304,6 +314,9 @@ PATTERNS
 /*********************************************/
 /* Group 1: Load instructions                */
 /*********************************************/
+
+pat loc ($1 != 0) && (($1 & 0xff) == 0)
+   yields {largeconst2, $1}
 
 pat loc ufit($1, 8)
    yields {smallpconst2, $1}
@@ -727,6 +740,18 @@ pat sde
 /****************************************/
 
 pat adi $1==2
+   with hl_or_de largeconst2
+      uses areg
+      gen
+         mov a, %1.1
+         adi {const1, %2.num >> 8}
+         mov %1.1, a
+         kill a
+      yields %1
+   with largeconst2 hl_or_de
+      yields %1 %2
+      leaving
+         adi 2
    with hlreg dereg
       gen
          dad de
@@ -755,6 +780,14 @@ pat sbi $1==2
       yields %2 {const2, 0-%1.num}
       leaving
          adi 2
+   with largeconst2 hl_or_de
+      yields %2 {largeconst2, 0-%1.num}
+      leaving
+         adi 2
+   with smallpconst2 hl_or_de
+      yields %2 {smallnconst2, 0-%1.num}
+      leaving
+         adi 2
    with smallnconst2 hl_or_de
       yields %2 {smallpconst2, 0-%1.num}
       leaving
@@ -768,6 +801,7 @@ pat sbi $1==2
          mvi a, {const1, %2.num >> 8}
          sbb %1.1
          mov %1.1, a
+         kill a
       yields %1
    with hl_or_de hl_or_de
       uses areg
@@ -778,6 +812,7 @@ pat sbi $1==2
          mov a,%2.1
          sbb %1.1
          mov %1.1,a
+         kill a
       yields %1
    with hl_or_de hl_or_de
       uses areg
@@ -788,6 +823,7 @@ pat sbi $1==2
          mov a,%2.1
          sbb %1.1
          mov %2.1,a
+         kill a
       yields %2
 
 pat sbi $1==4
@@ -1282,6 +1318,7 @@ pat and $1==2
          mov a, %1.2
          ani {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
       yields %1
    with smallnconst2 hl_or_de
       yields %1 %2
@@ -1293,9 +1330,11 @@ pat and $1==2
          mov a, %1.2
          ani {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
          mov a, %1.1
          ani {const1, %2.num >> 8}
          mov %1.1, a
+         kill a
       yields %1
    with const2 hl_or_de
       yields %1 %2
@@ -1307,9 +1346,11 @@ pat and $1==2
          mov a, %1.2
          ana %2.2
          mov %2.2, a
+         kill a
          mov a, %1.1
          ana %2.1
          mov %2.1, a
+         kill a
       yields %2
    with hl_or_de hl_or_de
       uses areg
@@ -1317,9 +1358,11 @@ pat and $1==2
          mov a,%1.2
          ana %2.2
          mov %1.2,a
+         kill a
          mov a,%1.1
          ana %2.1
          mov %1.1,a
+         kill a
       yields %1
 
 pat and defined($1)
@@ -1343,6 +1386,7 @@ pat ior $1==2
          mov a, %1.2
          ori {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
       yields %1
    with smallpconst2 hl_or_de
       yields %1 %2
@@ -1354,6 +1398,7 @@ pat ior $1==2
          mov a, %1.2
          ori {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
          move {const1, 0xff}, %1.1
       yields %1
    with smallnconst2 hl_or_de
@@ -1366,9 +1411,11 @@ pat ior $1==2
          mov a, %1.2
          ori {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
          mov a, %1.1
          ori {const1, %2.num >> 8}
          mov %1.1, a
+         kill a
       yields %1
    with const2 hl_or_de
       yields %1 %2
@@ -1380,9 +1427,11 @@ pat ior $1==2
          mov a, %1.2
          ora %2.2
          mov %2.2, a
+         kill a
          mov a, %1.1
          ora %2.1
          mov %2.1, a
+         kill a
       yields %2
    with hl_or_de hl_or_de
       uses areg
@@ -1390,9 +1439,11 @@ pat ior $1==2
          mov a,%1.2
          ora %2.2
          mov %1.2,a
+         kill a
          mov a,%1.1
          ora %2.1
          mov %1.1,a
+         kill a
       yields %1
 
 pat ior defined($1)
@@ -1414,6 +1465,7 @@ pat xor $1==2
          mov a, %1.2
          xri {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
       yields %1
    with smallpconst2 hl_or_de
       yields %1 %2
@@ -1425,9 +1477,11 @@ pat xor $1==2
          mov a, %1.2
          xri {const1, %2.num & 0xff}
          mov %1.2, a
+         kill a
          mov a, %1.1
          xri {const1, %2.num >> 8}
          mov %1.1, a
+         kill a
       yields %1
    with const2 hl_or_de
       yields %1 %2
@@ -1439,9 +1493,11 @@ pat xor $1==2
          mov a, %1.2
          xra %2.2
          mov %2.2, a
+         kill a
          mov a, %1.1
          xra %2.1
          mov %2.1, a
+         kill a
       yields %2
    with hl_or_de hl_or_de
       uses areg
@@ -1449,9 +1505,11 @@ pat xor $1==2
          mov a,%1.2
          xra %2.2
          mov %1.2,a
+         kill a
          mov a,%1.1
          xra %2.1
          mov %1.1,a
+         kill a
       yields %1
 
 pat xor defined($1)
@@ -1470,6 +1528,7 @@ uses areg
 gen mov a,%1.2
     cma.
     mov %1.2,a
+    kill a
     mov a,%1.1
     cma.
     mov %1.1,a				yields %1

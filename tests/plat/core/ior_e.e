@@ -111,5 +111,19 @@ big
     asp 4
 7
 
+	/* Or var with big low-byte-zero const */
+
+	loe big
+	loc 256
+	ior EM_WSIZE
+	loc 258
+	cmu EM_WSIZE
+	zeq *8
+
+    loc __LINE__
+    cal $fail
+    asp 4
+8
+
     cal $finished
     end

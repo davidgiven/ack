@@ -6,6 +6,7 @@ int two = 2;
 int one = 1;
 int zero = 0;
 int minusone = -1;
+int biggish = 258;
 
 /* Bypasses the CRT, so there's no stdio. */
 void _m_a_i_n(void)
@@ -27,6 +28,8 @@ void _m_a_i_n(void)
 
     ASSERT(((unsigned int)2   - (unsigned int)one) == 1);
     ASSERT(((unsigned int)1   - (unsigned int)two) == UINT_MAX);
+
+    ASSERT(((unsigned int)biggish - (unsigned int)256) == 2);
 
     finished();
 }

@@ -10,7 +10,8 @@
  * Intel 8080 parsing rules
  */
 operation
-	:	NOOPOP
+	:   KILL REG {}
+	|	NOOPOP
 			{	emit1($1);}
 	|
 		D8OP expr
