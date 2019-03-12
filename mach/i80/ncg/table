@@ -557,8 +557,18 @@ uses hl_or_de={label,$1}		yields %a
 /* Group 2: Store instructions            */
 /******************************************/
 
+pat lal sti lal loi ($1==$3) && ($2==1) && ($4==1)
+   with areg
+      yields a a
+      leaving
+         lal $1
+         sti 1
+
 pat stl lol $1==$2
-with dereg				yields de de leaving stl $1
+   with dereg
+      yields de de
+      leaving
+         stl $1
 
 #ifdef USE_I80_RSTS
    pat stl $1==0-2
