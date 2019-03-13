@@ -460,15 +460,22 @@ gen move lb,de
     dad de				yields hl
 
 pat loi $1==1
-with exact label
-  uses areg
-  gen lda %1				yields a
-with dereg
-  uses areg
-  gen ldax de				yields a
-with hlreg
-  uses reusing %1, reg
-  gen mov %a,{m}			yields %a
+   with exact label
+      uses areg
+      gen
+         lda %1
+      yields a
+   with dereg
+      uses areg
+      gen
+         ldax de
+      yields a
+   with hlreg
+      uses reusing %1, hl_or_de
+      gen
+         mov %a.2, {m}
+         move {const1, 0}, %a.1
+		yields %a
 
 pat loi $1==2
 with exact label
@@ -1307,7 +1314,9 @@ leaving loc $1 loc $2 cal ".cfu" asp 4+$1 lfr 4
 
 pat loc and ($1==0xff) && ($2==2)
    with hl_or_de
-      yields %1.2
+      gen
+         move {const1, 0}, %1.1
+      yields %1
 
 pat loc and ($1==0xffff) && ($2==2)
 
@@ -2288,9 +2297,16 @@ gen 1:
 pat lfr ret $1==$2				leaving ret 0
 
 pat ret $1==0
-with STACK
-uses hlreg
-gen jmp {label, ".ret"}
+   with STACK
+      uses hlreg
+      gen
+         jmp {label, ".ret"}
+
+pat ret $1==2
+   with dereg STACK
+      uses hlreg
+      gen
+         jmp {label, ".ret"}
 
 pat ret $1==2
 with dereg STACK
