@@ -6,28 +6,19 @@
 
 #include "ass00.h"
 #include "assex.h"
-#include <em_path.h>
+#include "assrl.h"
+#include <stddef.h>
+#include <stdio.h>
 #include <stdarg.h>
+#include "system.h"
 
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
 
 /*
  * this file contains several library routines.
  */
 
-zero(area,length) char *area; unsigned length ; {
-	register char *p;
-	register n;
-	/*
-	 * Clear area of length bytes.
-	 */
-	if ((n=length)==0)
-		return;
-	p = area;
-	do *p++=0; while (--n);
-}
+static char filename[L_tmpnam];
+
 
 /* VARARGS1 */
 static void pr_error(const char* string1, va_list ap) {
@@ -60,7 +51,8 @@ void error(const char* string1, ...)
 }
 
 /* VARARGS1 */
-void werror(const char* string1, ...) {
+void werror(const char* string1, ...)
+{
 	va_list ap;
 	if ( wflag ) return ;
 
@@ -69,57 +61,44 @@ void werror(const char* string1, ...) {
 	va_end(ap);
 }
 
-fatal(s) char *s; {
+void fatal(char *s)
+{
 	/*
 	 * handle fatal errors
 	 */
 	error("Fatal error: %s",s);
 	dump(0);
-	exit(-1);
+	exit(EXIT_FAILURE);
 }
 
-#ifndef CPM
-FILE *frewind(f) FILE *f ; {
-	/* Rewind a file open for writing and open it for reading */
-	/* Assumption, file descriptor is r/w */
-	register FILE *tmp ;
-	tmp=fdopen(dup(fileno(f)),"r");
-	fclose(f);
-	rewind(tmp);
-	return tmp ;
-}
-#endif
 
-int xgetc(af) register FILE *af; {
+
+int xgetc(register FILE *af)
+{
 	register int nextc;
-	/*
-	 * read next character; fatal if there isn't one
-	 */
 	nextc=fgetc(af) ;
 	if ( feof(af) )
 			fatal("unexpected end of file");
 	return nextc ;
 }
 
-xputc(c,af) register FILE *af; {
-	/* output one character and scream if it gives an error */
+void xputc(int c,register FILE *af)
+{
 	fputc(c,af) ;
 	if ( ferror(af) ) fatal("write error") ;
 }
 
 
-putblk(stream,from,amount)
-	register FILE *stream; register char *from ; register int amount ; {
-
+void putblk(register FILE *stream,register char *from, register int amount)
+{
 	for ( ; amount-- ; from++ ) {
 		fputc(*from,stream) ;
 		if ( ferror(stream) ) fatal("write error") ;
 	}
 }
 
-int getblk(stream,from,amount)
-	register FILE *stream; register char *from ; register int amount ; {
-
+int getblk(register FILE *stream, register char *from, register int amount)
+{
 	for ( ; amount-- ; from++ ) {
 		*from = fgetc(stream) ;
 		if ( feof(stream) ) return 1 ;
@@ -127,7 +106,8 @@ int getblk(stream,from,amount)
 	return 0 ;
 }
 
-xput16(w,f) FILE *f; {
+void xput16(int w,FILE *f)
+{
 	/*
 	 * two times xputc
 	 */
@@ -135,19 +115,22 @@ xput16(w,f) FILE *f; {
 	xputc(w>>8,f);
 }
 
-xputarb(l,w,f) int l ; cons_t w ; FILE *f ; {
+void xputarb(int l,cons_t w, FILE* f)
+{
 	while ( l-- ) {
 		xputc( int_cast w,f) ;
 		w >>=8 ;
 	}
 }
 
-put8(n) {
+void put8(int n)
+{
 	xputc(n,tfile);
 	textoff++;
 }
 
-put16(n) {
+void put16(int n)
+{
 	/*
 	 * note reversed order of bytes.
 	 * this is done for faster interpretation.
@@ -157,16 +140,19 @@ put16(n) {
 	textoff += 2;
 }
 
-put32(n) cons_t n ; {
+void put32(cons_t n)
+{
 	put16( int_cast (n>>16)) ;
 	put16( int_cast n) ;
 }
 
-put64(n) cons_t n ; {
+void put64(cons_t n)
+{
 	fatal("put64 called") ;
 }
 
-int xget8() {
+int xget8(void)
+{
 	/*
 	 * Read one byte from ifile.
 	 */
@@ -176,7 +162,8 @@ int xget8() {
 	return fgetc(ifile) ;
 }
 
-unsigned get8() {
+unsigned int get8(void)
+{
 	register int nextc;
 	/*
 	 * Read one byte from ifile.
@@ -191,16 +178,17 @@ unsigned get8() {
 	return nextc ;
 }
 
-cons_t xgetarb(l,f) int l; FILE *f ; {
+cons_t xgetarb(int l,FILE *f)
+{
 	cons_t val ;
 	register int shift ;
 	int c;
 
 	shift=0 ; val=0 ;
 	while ( l-- ) {
-		// val += ((cons_t)(c = ctrunc(xgetc(f))))<<shift ;
-		// Bug here: shifts with too large shift counts
-		// get unspecified results. --Ceriel
+		/* val += ((cons_t)(c = ctrunc(xgetc(f))))<<shift ;
+		   Bug here: shifts with too large shift counts
+		  get unspecified results. --Ceriel */
 		c = ctrunc(xgetc(f));
 		if (shift < 8 * sizeof(cons_t)) {
 			val += ((cons_t)c)<<shift ;
@@ -216,7 +204,8 @@ cons_t xgetarb(l,f) int l; FILE *f ; {
 	return val ;
 }
 
-ext8(b) {
+void ext8(int b)
+{
 	/*
 	 * Handle one byte of data.
 	 */
@@ -224,55 +213,56 @@ ext8(b) {
 	xputc(b,dfile);
 }
 
-extword(w) cons_t w ; {
+void extword(cons_t w)
+{
 	/* Assemble the word constant w.
 	 * NOTE: The bytes are written low to high.
 	 */
-	register i ;
+	register int i ;
 	for ( i=wordsize ; i-- ; ) {
 		ext8( int_cast w) ;
 		w >>= 8 ;
 	}
 }
 
-extarb(size,value) int size ; long value ; {
+void extarb(int size, long value)
+{
 	/* Assemble the 'size' constant value.
 	 * The bytes are again written low to high.
 	 */
-	register i ;
+	register int i ;
 	for ( i=size ; i-- ; ) {
 		ext8( int_cast value ) ;
 		value >>=8 ;
 	}
 }
 
-extadr(a) cons_t a ; {
-	/* Assemble the word constant a.
+void extadr(cons_t a)
+{
+	/* Assemble the pointer constant a.
 	 * NOTE: The bytes are written low to high.
 	 */
-	register i ;
+	register int i ;
 	for ( i=ptrsize ; i-- ; ) {
 		ext8( int_cast a) ;
 		a >>= 8 ;
 	}
 }
 
-xputa(a,f) cons_t a ; FILE *f ; {
-	/* Assemble the pointer constant a.
-	 * NOTE: The bytes are written low to high.
-	 */
-	register i ;
+void xputa(cons_t a,FILE* f)
+{
+
+	register int i ;
 	for ( i=ptrsize ; i-- ; ) {
 		xputc( int_cast a,f) ;
 		a >>= 8 ;
 	}
 }
 
-cons_t xgeta(f) FILE *f ; {
-	/* Read the pointer constant a.
-	 * NOTE: The bytes were written low to high.
-	 */
-	register i, shift ;
+cons_t xgeta(FILE* f)
+{
+
+	register int i, shift ;
 	cons_t val ;
 	val = 0 ; shift=0 ;
 	for ( i=ptrsize ; i-- ; ) {
@@ -282,14 +272,16 @@ cons_t xgeta(f) FILE *f ; {
 	return val ;
 }
 
-int icount(size) {
+int icount(int size)
+{
 	int amount ;
 	amount=(dataoff-lastoff)/size ;
 	if ( amount>MAXBYTE) fatal("Descriptor overflow");
 	return amount ;
 }
 
-set_mode(mode) {
+void set_mode(int mode)
+{
 
 	if (datamode==mode) {   /* in right mode already */
 		switch ( datamode ) {
@@ -389,40 +381,12 @@ set_mode(mode) {
 	}
 }
 
-#ifndef CPM
-int tmpfil() {
-	register char *fname, *cpname ;
-	static char sfname[] = "tmp.00000";
-	register fildes,pid;
-	static char name[80] = TMP_DIR ;
-	int count;
-	/*
-	 * This procedure returns a file-descriptor of a temporary
-	 * file valid for reading and writing.
-	 * After closing the tmpfil-descriptor the file is lost
-	 * Calling this routine frees the program from generating uniqe names.
-	 */
-	fname = sfname+4;
-	count = 10;
-	pid = getpid();
-	while (pid!=0) {
-		*fname++ = (pid&07) + '0';
-		pid >>= 3;
+
+char* tmpfil(void)
+{
+	if (sys_tmpnam(filename)==NULL)
+	{
+		fatal("Cannot create temporary filename.");
 	}
-	*fname = 0;
-	for ( fname=name ; *fname ; fname++ ) ;
-	cpname=sfname ;
-	while ( *fname++ = *cpname++ ) ;
-	do {
-		fname = name;
-		if ((fildes = creat(fname, 0600)) < 0)
-			if ((fildes = creat(fname=sfname, 0600)) < 0)
-				return(-1);
-		if (close(fildes) < 0)
-			;
-	} while((fildes = open(fname, 2)) < 0 && count--);
-	if (unlink(fname) < 0)
-		;
-	return(fildes);
+	return filename;
 }
-#endif
