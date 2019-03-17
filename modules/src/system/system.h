@@ -67,4 +67,19 @@ time_t sys_modtime(char *);
 /* return value for sys_break */
 #define ILL_BREAK	((char *)0)
 
+
+/* Extract the base name from a full path specification
+ * in "str" and returns it in "dst".
+ *
+ * "dst" should be large enough to receive the copied
+ * data.
+ *
+ * Supports both DOS and UNIX style paths.
+ * */
+void sys_basename(const char *str, register char *dst);
+
+/* Creates a temporary filename. This has
+ * the same semantics as ISO C90 tmpnam() */
+char* sys_tmpnam(char *buffer);
+
 #endif /* __SYSTEM_INCLUDED__ */
