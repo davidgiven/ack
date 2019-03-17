@@ -29,3 +29,6 @@ extern int rsbsize;
 
 #define	is_LB(p)	((st_lds(p+rsb_rsbcode, wsize) & RSBMASK) == RSBCODE)
 
+void init_rsb(void);
+void pushrsb(int rsbcode);
+int poprsb(int rtt);

@@ -1,5 +1,5 @@
-/*
-	Handling the proctable
+/** @file
+	proctable management routines.
 */
 
 /* $Id$ */
@@ -7,22 +7,27 @@
 #include	"logging.h"
 #include	"global.h"
 #include	"log.h"
+#include	"io.h"
 #include	"alloc.h"
 #include	"proctab.h"
 
+/** Procedure table */
 struct proc *proctab;
 PRIVATE long pr_cnt;
 
-init_proctab()
+/** Allocates and initializes the procedure table. */
+void init_proctab(void)
 {
 	proctab = (struct proc *)
 			Malloc(NProc * sizeof (struct proc), "proctable");
 	pr_cnt = 0;
 }
 
-add_proc(nloc, ep)
-	size nloc;
-	ptr ep;
+/** Add a procedure to the procedure entry table.
+ *  "ep" is the pointer to the entry point of the
+ *  procedure to add.
+ */
+void add_proc(size nloc, ptr ep)
 {
 	register struct proc *pr = &proctab[pr_cnt++];
 	register struct proc *p;
@@ -55,7 +60,7 @@ add_proc(nloc, ep)
 	pr->pr_ff = ff;
 }
 
-end_init_proctab()
+void end_init_proctab(void)
 {
 #ifdef	LOGGING
 	register long p;

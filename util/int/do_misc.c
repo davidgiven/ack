@@ -1,5 +1,5 @@
-/*
- * Sources of the "MISCELLANEOUS" group instructions
+/** @file
+ *  Sources of the "MISCELLANEOUS" group instructions
  */
 
 /* $Id$ */
@@ -12,38 +12,43 @@
 #include	"warn.h"
 #include	"mem.h"
 #include	"memdirect.h"
+#include	"segment.h"
 #include	"shadow.h"
+#include	"data.h"
 #include	"text.h"
+#include	"stack.h"
 #include	"read.h"
 #include	"fra.h"
 #include	"rsb.h"
+#include	"io.h"
 #include	"linfil.h"
 
 extern int running;			/* from main.c */
 
-/* Two useful but unofficial registers */
+/** Current line number */
 long LIN;
+/** Pointer to the filename. */
 ptr FIL;
 
-PRIVATE index_jump(), range_check(), search_jump();
-PRIVATE gto();
+PRIVATE void index_jump(size), range_check(size), search_jump(size);
+PRIVATE void gto(ptr);
+void putLIN(long);
+void putFIL(ptr);
 
 #define asp(l)		newSP(SP + arg_f(l))
 
-DoASP(l)
-	register long l;
-{
-	/* ASP f: Adjust the stack pointer by f */
+extern void moncall(void);
 
+/** ASP f: Adjust the stack pointer by f */
+void DoASP(register long l)
+{
 	LOG(("@M6 DoASP(%ld)", l));
 	asp(l);
 }
 
-DoASS(l)
-	register size l;
+/** ASS w: Adjust the stack pointer by w-byte integer */
+void DoASS(register size l)
 {
-	/* ASS w: Adjust the stack pointer by w-byte integer */
-
 	LOG(("@M6 DoASS(%ld)", l));
 	spoilFRA();
 	l = spop(arg_wi(l));
@@ -57,10 +62,9 @@ DoASS(l)
 		else {	if (in_stack(a2)) dt_mvs(a1, a2, n); \
 			else dt_mvd(a1, a2, n); }
 
-DoBLM(l)
-	register size l;
+/** BLM z: Block move z bytes; first pop destination addr, then source addr */
+void DoBLM(register size l)
 {
-	/* BLM z: Block move z bytes; first pop destination addr, then source addr */
 	register ptr dp1, dp2;		/* Destination Pointers */
 
 	LOG(("@M6 DoBLM(%ld)", l));
@@ -70,10 +74,9 @@ DoBLM(l)
 	block_move(dp1, dp2, arg_z(l));
 }
 
-DoBLS(l)
-	register size l;
+/** BLS w: Block move, size is in w-byte integer on top of stack */
+void DoBLS(register size l)
 {
-	/* BLS w: Block move, size is in w-byte integer on top of stack */
 	register ptr dp1, dp2;
 
 	LOG(("@M6 DoBLS(%ld)", l));
@@ -84,29 +87,25 @@ DoBLS(l)
 	block_move(dp1, dp2, arg_z(l));
 }
 
-DoCSA(l)
-	register size l;
+/** CSA w: Case jump; address of jump table at top of stack */
+void DoCSA(register size l)
 {
-	/* CSA w: Case jump; address of jump table at top of stack */
-
 	LOG(("@M6 DoCSA(%ld)", l));
 	spoilFRA();
 	index_jump(arg_wi(l));
 }
 
-DoCSB(l)
-	register size l;
+/** CSB w: Table lookup jump; address of jump table at top of stack */
+void DoCSB(register size l)
 {
-	/* CSB w: Table lookup jump; address of jump table at top of stack */
-
 	LOG(("@M6 DoCSB(%ld)", l));
 	spoilFRA();
 	search_jump(arg_wi(l));
 }
 
-DoDCH()
+/** DCH -: Follow dynamic chain, convert LB to LB of caller */
+void DoDCH(void)
 {
-	/* DCH -: Follow dynamic chain, convert LB to LB of caller */
 	register ptr lb;
 
 	LOG(("@M6 DoDCH()"));
@@ -118,10 +117,9 @@ DoDCH()
 	dppush(st_lddp(lb + rsb_LB));
 }
 
-DoDUP(arg)
-	size arg;
+/** DUP s: Duplicate top s bytes */
+void DoDUP(size arg)
 {
-	/* DUP s: Duplicate top s bytes */
 	register ptr oldSP = SP;
 
 	LOG(("@M6 DoDUP(%ld)", arg));
@@ -130,10 +128,9 @@ DoDUP(arg)
 	st_mvs(SP, oldSP, arg);
 }
 
-DoDUS(l)
-	register size l;
+/** DUS w: Duplicate top w bytes */
+void DoDUS(register size l)
 {
-	/* DUS w: Duplicate top w bytes */
 	register ptr oldSP;
 
 	LOG(("@M6 DoDUS(%ld)", l));
@@ -144,10 +141,9 @@ DoDUS(l)
 	st_mvs(SP, oldSP, l);
 }
 
-DoEXG(l)
-	register size l;
+/** EXG w: Exchange top w bytes */
+void DoEXG(register size l)
 {
-	/* EXG w: Exchange top w bytes */
 	register ptr oldSP = SP;
 
 	LOG(("@M6 DoEXG(%ld)", l));
@@ -159,10 +155,9 @@ DoEXG(l)
 	st_dec(l);
 }
 
-DoFIL(arg)
-	register unsigned long arg;
+/** FIL g: File name (external 4 := g) */
+void DoFIL(register unsigned long arg)
 {
-	/* FIL g: File name (external 4 := g) */
 	register ptr p = i2p(arg);
 
 	LOG(("@M6 DoFIL(%lu)", p));
@@ -173,47 +168,42 @@ DoFIL(arg)
 	putFIL(arg_g(p));
 }
 
-DoGTO(arg)
-	register unsigned long arg;
+/** GTO g: Non-local goto, descriptor at g */
+void DoGTO(register unsigned long arg)
 {
-	/* GTO g: Non-local goto, descriptor at g */
 	register ptr p = i2p(arg);
 
 	LOG(("@M6 DoGTO(%lu)", p));
 	gto(arg_gto(p));
 }
 
-DoLIM()
+/** LIM -: Load 16 bit ignore mask */
+void DoLIM(void)
 {
-	/* LIM -: Load 16 bit ignore mask */
 	LOG(("@M6 DoLIM()"));
 	spoilFRA();
 	wpush(IgnMask);
 }
 
-DoLIN(l)
-	register unsigned long l;
+/** LIN n: Line number (external 0 := n) */
+void DoLIN(register unsigned long l)
 {
-	/* LIN n: Line number (external 0 := n) */
-
 	LOG(("@M6 DoLIN(%lu)", l));
 	spoilFRA();
 	putLIN((long) arg_lin(l));
 }
 
-DoLNI()
+/** LNI -: Line number increment */
+void DoLNI(void)
 {
-	/* LNI -: Line number increment */
 	LOG(("@M6 DoLNI()"));
 	spoilFRA();
 	putLIN((long)getLIN() + 1);
 }
 
-DoLOR(l)
-	register long l;
+/** LOR r: Load register (0=LB, 1=SP, 2=HP) */
+void DoLOR(register long l)
 {
-	/* LOR r: Load register (0=LB, 1=SP, 2=HP) */
-
 	LOG(("@M6 DoLOR(%ld)", l));
 	spoilFRA();
 	switch ((int) arg_r(l)) {
@@ -229,9 +219,9 @@ DoLOR(l)
 	}
 }
 
-DoLPB()
+/** LPB -: Convert local base to argument base */
+void DoLPB(void)
 {
-	/* LPB -: Convert local base to argument base */
 	register ptr lb;
 
 	LOG(("@M6 DoLPB()"));
@@ -243,35 +233,33 @@ DoLPB()
 	dppush(lb + rsbsize);
 }
 
-DoMON()
+/** MON -: Monitor call */
+void DoMON(void)
 {
-	/* MON -: Monitor call */
 	LOG(("@M6 DoMON()"));
 	spoilFRA();
 	moncall();
 }
 
-DoNOP()
+/** NOP -: No operation */
+void DoNOP(void)
 {
-	/* NOP -: No operation */
 	LOG(("@M6 DoNOP()"));
 	spoilFRA();
 	message("NOP instruction");
 }
 
-DoRCK(l)
-	register size l;
+/** RCK w: Range check; trap on error */
+void DoRCK(register size l)
 {
-	/* RCK w: Range check; trap on error */
-
 	LOG(("@M6 DoRCK(%ld)", l));
 	spoilFRA();
 	range_check(arg_wi(l));
 }
 
-DoRTT()
+/** RTT -: Return from trap */
+void DoRTT(void)
 {
-	/* RTT -: Return from trap */
 	LOG(("@M6 DoRTT()"));
 
 	switch (poprsb(1)) {
@@ -303,9 +291,9 @@ DoRTT()
 	popFRA(FRASize);
 }
 
-DoSIG()
+/** SIG -: Trap errors to proc identifier on top of stack, \-2 resets default */
+void DoSIG(void)
 {
-	/* SIG -: Trap errors to proc identifier on top of stack, \-2 resets default */
  	register long tpi = spop(psize);
 
 	LOG(("@M6 DoSIG()"));
@@ -325,19 +313,17 @@ DoSIG()
 	}
 }
 
-DoSIM()
+/** SIM -: Store 16 bit ignore mask */
+void DoSIM(void)
 {
-	/* SIM -: Store 16 bit ignore mask */
 	LOG(("@M6 DoSIM()"));
 	spoilFRA();
 	IgnMask = (uwpop() | PreIgnMask) & MASK2;
 }
 
-DoSTR(l)
-	register long l;
+/** STR r: Store register (0=LB, 1=SP, 2=HP) */
+void DoSTR(register long l)
 {
-	/* STR r: Store register (0=LB, 1=SP, 2=HP) */
-
 	LOG(("@M6 DoSTR(%ld)", l));
 	spoilFRA();
 	switch ((int) arg_r(l)) {
@@ -354,9 +340,9 @@ DoSTR(l)
 	}
 }
 
-DoTRP()
+/** TRP -: Cause trap to occur (Error number on stack) */
+void DoTRP(void)
 {
-	/* TRP -: Cause trap to occur (Error number on stack) */
 	register unsigned int tr = (unsigned int)uwpop();
 
 	LOG(("@M6 DoTRP()"));
@@ -369,8 +355,7 @@ DoTRP()
 
 /* Service routines */
 
-PRIVATE gto(p)
-	ptr p;
+PRIVATE void gto(ptr p)
 {
 	register ptr old_LB = LB;
 	register ptr new_PC = dt_ldip(p);
@@ -397,8 +382,7 @@ PRIVATE gto(p)
 	(variables LIN and FIL) and in the data space.
 */
 
-putLIN(lin)
-	long lin;
+void putLIN(long lin)
 {
 	dt_unprot(i2p(LINO_AD), (long)LINSIZE);
 	dt_stn(i2p(LINO_AD), lin, (long)LINSIZE);
@@ -406,8 +390,7 @@ putLIN(lin)
 	dt_prot(i2p(LINO_AD), (long)LINSIZE);
 }
 
-putFIL(fil)
-	ptr fil;
+void putFIL(ptr fil)
 {
 	dt_unprot(i2p(FILN_AD), psize);
 	dt_stdp(i2p(FILN_AD), fil);
@@ -426,8 +409,7 @@ putFIL(fil)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE index_jump(nbytes)
-	size nbytes;
+PRIVATE void index_jump(size nbytes)
 {
 	register ptr cdp = dppop();	/* Case Descriptor Pointer */
 	register long t_index =		/* Table INDEX */
@@ -454,8 +436,7 @@ PRIVATE index_jump(nbytes)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE search_jump(nbytes)
-	size nbytes;
+PRIVATE void search_jump(size nbytes)
 {
 	register ptr cdp = dppop();	/* Case Descriptor Pointer */
 	register long sv = spop(nbytes);/* Search Value */
@@ -486,9 +467,7 @@ PRIVATE search_jump(nbytes)
  *	3. Generate trap if necessary.			*
  *	4. DON'T remove integer.			*
  ********************************************************/
-
-PRIVATE range_check(nbytes)
-	size nbytes;
+PRIVATE void range_check(size nbytes)
 {
 	register ptr rdp = dppop();	/* Range check Descriptor Pointer */
 	register long cv =		/* Check Value */

@@ -4,6 +4,7 @@
 
 /* $Id$ */
 
+#include "stack.h"
 
 /******** Memory address & location defines ********/
 

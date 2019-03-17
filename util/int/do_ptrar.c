@@ -1,12 +1,13 @@
-/*
- * Sources of the "POINTER ARITHMETIC" group instructions
+/** @file
+ *  Sources of the "POINTER ARITHMETIC" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"segcheck.h"
 #include	"global.h"
+#include	"segment.h"
 #include	"log.h"
 #include	"mem.h"
 #include	"trap.h"
@@ -27,10 +28,10 @@
 
 #endif	/* SEGCHECK */
 
-DoADP(l)
-	register long l;
+/** ADP f: Add f to pointer on top of stack */
+void DoADP(register long l)
 {
-	/* ADP f: Add f to pointer on top of stack */
+
 	register ptr p, t = st_lddp(SP);
 
 	LOG(("@R6 DoADP(%ld)", l));
@@ -44,10 +45,9 @@ DoADP(l)
 	st_stdp(SP, p);
 }
 
-DoADS(l)
-	register size l;
+/** ADS w: Add w-byte value and pointer */
+void DoADS(register size l)
 {
-	/* ADS w: Add w-byte value and pointer */
 	register long t = spop(arg_wi(l));
 	register ptr p, s = st_lddp(SP);
 
@@ -62,10 +62,9 @@ DoADS(l)
 	st_stdp(SP, p);
 }
 
-DoSBS(l)
-	register size l;
+/** SBS w: Subtract pointers in same fragment and push diff as size w integer */
+void DoSBS(register size l)
 {
-	/* SBS w: Subtract pointers in same fragment and push diff as size w integer */
 	register ptr t = st_lddp(SP);
 	register ptr s = st_lddp(SP + psize);
 	register long w;

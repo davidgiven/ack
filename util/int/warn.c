@@ -1,5 +1,5 @@
-/*
-	Warnings.
+/** @file
+ *  Warning management.
 */
 
 /* $Id$ */
@@ -32,7 +32,7 @@ PRIVATE struct warn_msg warn_msg[] = {
 
 PRIVATE char *warn_text[WMSG+1];
 
-init_wmsg()
+void init_wmsg(void)
 {
 	register int i;
 	register struct warn_msg *wmsg;
@@ -58,8 +58,7 @@ struct warn_cnt {
 PRIVATE struct warn_cnt *warn_cnt[WMSG];
 PRIVATE char warnmask[WMSG];
 
-PRIVATE long count_wrn(nr)
-	int nr;
+PRIVATE long count_wrn(int nr)
 {	/*	returns the occurrence counter for the warning with number
 		nr; keeps track of the warnings, sorted by warning number,
 		file name and line number.
@@ -67,7 +66,7 @@ PRIVATE long count_wrn(nr)
 	register struct warn_cnt **warn_hook = &warn_cnt[nr];
 	register struct warn_cnt *wrn;
 
-	while (wrn = *warn_hook) {
+	while ( (wrn = *warn_hook) ) {
 		if (wrn->wc_fil == FIL && wrn->wc_lin == LIN) {
 			return ++wrn->wc_cnt;
 		}
@@ -95,10 +94,7 @@ PRIVATE long count_wrn(nr)
 PRIVATE int latest_warning_printed;	/* set if ... */
 
 /*ARGSUSED*/
-do_warn(nr, L, F)
-	int nr;
-	int L;
-	char *F;
+void do_warn(int nr, int L, char *F)
 {
 	latest_warning_printed = 0;
 	if (nr < WMSG) {
@@ -130,8 +126,7 @@ do_warn(nr, L, F)
 
 #ifdef	LOGGING
 
-warningcont(nr)
-	int nr;
+void warningcont(int nr)
 {
 	/* continued warning */
 	if (latest_warning_printed) {
@@ -148,8 +143,7 @@ warningcont(nr)
 
 #endif	/* LOGGING */
 
-set_wmask(i)
-	int i;
+void set_wmask(int i)
 {
 	if (i < WMSG) {
 		warnmask[i] = 1;

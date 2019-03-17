@@ -11,6 +11,7 @@
 /* $Id$ */
 
 #include	"segcheck.h"
+#include	"segment.h"
 #include	"global.h"
 #include	"mem.h"
 #include	"alloc.h"
@@ -26,17 +27,16 @@ PRIVATE ptr *AB_list;
 PRIVATE size frame_limit;
 PRIVATE size curr_frame;
 
-init_AB_list() {
-	/* Allocate space for AB_list & initialize frame variables */
-
+/** Allocate space for AB_list & initialize frame variables */
+void init_AB_list(void)
+{
 	frame_limit = ABLISTSIZE;
 	curr_frame = 0L;
 	AB_list = (ptr *) Malloc(frame_limit * sizeof (ptr), "AB_list");
 	AB_list[curr_frame] = AB;
 }
 
-push_frame(p)
-	ptr p;
+void push_frame(ptr p)
 {
 	if (++curr_frame == frame_limit) {
 		frame_limit = allocfrac(frame_limit);
@@ -46,14 +46,14 @@ push_frame(p)
 	AB_list[curr_frame] = p;
 }
 
-pop_frames() {
+void pop_frames(void)
+{
 	while (AB_list[curr_frame] < AB) {
 		curr_frame--;
 	}
 }
 
-int ptr2seg(p)
-	ptr p;
+int ptr2seg(ptr p)
 {
 	register int s;
 
@@ -74,11 +74,11 @@ int ptr2seg(p)
 
 #else	/* SEGCHECK */
 
-init_AB_list() {}
+void init_AB_list(void) {}
 
-push_frame() {}
+void push_frame(ptr) {}
 
-pop_frames() {}
+void pop_frames(void) {}
 
 #endif	/* SEGCHECK */
 

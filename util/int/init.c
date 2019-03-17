@@ -1,37 +1,46 @@
-/*
-	Startup routines
+/** @file
+	Startup routines.
 */
 
 /* $Id$ */
 
 #include	<stdio.h>
+#include	<string.h>
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"logging.h"
 #include	"global.h"
+#include	"segment.h"
 #include	"log.h"
+#include	"rsb.h"
+#include	"fra.h"
+#include	"read.h"
+#include	"stack.h"
+#include	"text.h"
+#include	"data.h"
 #include	"alloc.h"
 #include	"warn.h"
 #include	"mem.h"
+#include	"io.h"
 #include	"shadow.h"
 #include	"trap.h"
 #include	"read.h"
 
 
 /****************************************************************
- *	The EM-machine is not implemented as a contiguous	*
- *	piece of memory. Instead there are a number of		*
- *	"floating" pieces of memory, each representing a	*
- *	specific part of the machine. There are separate	*
- *	allocations for:					*
- *		- stack and local area (stack),			*
- *		- heap area & global data area (data),		*
- *		- program text & procedure descriptors (text).	*
- *	The names in parenthesis are the names of the global	*
- *	variables used within our program, pointing to		*
- *	the beginning of such an area. The sizes of the global	*
- *	data area and the program text can be determined	*
- *	once and for all in the "rd_header" routine.		*
+ *	The EM-machine is not implemented as a contiguous			*
+ *	piece of memory. Instead there are a number of				*
+ *	"floating" pieces of memory, each representing a			*
+ *	specific part of the machine. There are separate			*
+ *	allocations for:											*
+ *		- stack and local area (stack),							*
+ *		- heap area & global data area (data),					*
+ *		- program text & procedure descriptors (text).			*
+ *	The names in parenthesis are the names of the global		*
+ *	variables used within our program, pointing to				*
+ *	the beginning of such an area. The sizes of the global		*
+ *	data area and the program text can be determined			*
+ *	once and for all in the "rd_header" routine.				*
  ****************************************************************/
 
 extern char **environ;
@@ -41,9 +50,7 @@ PRIVATE size alignedstrlen();
 
 char *load_name;
 
-init(ac, av)
-	int ac;
-	char **av;
+void init(int ac, char **av)
 {
 	register char **p;
 	register size env_vec_size;	/* size of environ vector */
@@ -137,17 +144,14 @@ init(ac, av)
 	wpush((long) ac);	/* push argc */
 }
 
-PRIVATE size alignedstrlen(s)
-	char *s;
+PRIVATE size alignedstrlen(char *s)
 {
 	register size len = strlen(s) + 1;
 
 	return (len + wsize - 1) / wsize * wsize;
 }
 
-PRIVATE ptr storestring(addr, s)
-	ptr addr;
-	char *s;
+PRIVATE ptr storestring(ptr addr, char *s)
 {
 	/*	Store string, aligned to a fit multiple of wsize bytes.
 		Return first address on a wordsize boundary after string.
@@ -174,29 +178,7 @@ PRIVATE ptr storestring(addr, s)
 	return (addr + i);
 }
 
-#ifdef	LOGGING
-dt_clear_area(from, to)
-	ptr from;
-	register ptr to;
-{
-	/* includes *from but excludes *to */
-	register ptr a;
 
-	for (a = from; a < to; a++) {
-		dt_undef(a);
-	}
-}
 
-st_clear_area(from, to)
-	ptr from;
-	register ptr to;
-{
-	/* includes both *from and *to (since ML+1 is unexpressible) */
-	register ptr a;
 
-	for (a = from; a >= to; a--) {
-		st_undef(a);
-	}
-}
-#endif	/* LOGGING */
 

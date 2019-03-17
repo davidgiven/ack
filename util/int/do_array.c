@@ -1,10 +1,10 @@
-/*
- * Sources of the "ARRAY" group instructions
+/** @file
+ *  Sources of the "ARRAY" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"global.h"
 #include	"log.h"
 #include	"trap.h"
@@ -16,26 +16,24 @@
 #define	SAR		2
 #define	AAR		3
 
-PRIVATE arr();
+PRIVATE void arr(int, size);
 
-DoLAR(arg)
-	size arg;
+
+void DoLAR(size arg)
 {
 	/* LAR w: Load array element, descriptor contains integers of size w */
 	LOG(("@A6 DoLAR(%ld)", arg));
 	arr(LAR, arg_wi(arg));
 }
 
-DoSAR(arg)
-	size arg;
+void DoSAR(size arg)
 {
 	/* SAR w: Store array element */
 	LOG(("@A6 DoSAR(%ld)", arg));
 	arr(SAR, arg_wi(arg));
 }
 
-DoAAR(arg)
-	size arg;
+void DoAAR(size arg)
 {
 	/* AAR w: Load address of array element */
 	LOG(("@A6 DoAAR(%ld)", arg));
@@ -54,9 +52,9 @@ DoAAR(arg)
 *	6. Perform the correct function.		*
 *********************************************************/
 
-PRIVATE arr(type, elm_size)
-	int type;			/* operation TYPE */
-	size elm_size;			/* ELeMent SIZE */
+PRIVATE void arr(int type, /* operation TYPE */
+		size elm_size /* ELeMent SIZE */
+		)
 {
 	register ptr desc = dppop();	/* array DESCriptor */
 	register size obj_size;		/* OBJect SIZE */

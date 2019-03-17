@@ -1,10 +1,10 @@
-/*
-	Data access
+/** @file
+	Data access routines
 */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"logging.h"
 #include	"nofloat.h"
 #include	"global.h"
@@ -16,18 +16,20 @@
 #include	"mem.h"
 #include	"shadow.h"
 
-#define	HEAPSIZE	1000L		/* initial heap size */
+/** Initial heap size in bytes. */
+#define	HEAPSIZE	1000L
 
 extern size maxheap;			/* from main.c */
 
 #ifdef	LOGGING
 char *data_sh;				/* shadowbytes */
+PRIVATE void warn_dtbits(ptr, size);
+PRIVATE void dt_clear_area(ptr, ptr );
 #endif	/* LOGGING */
 
-PRIVATE warn_dtbits();
 
-init_data(hb)
-	ptr hb;
+/** Initialize the heap with "hb" address. */
+void init_data(ptr hb)
 {
 	HB = hb;			/* set Heap Base */
 	HP = HB;			/* initialize Heap Pointer */
@@ -49,8 +51,8 @@ init_data(hb)
  *							*
  ********************************************************/
 
-newHP(ap)
-	ptr ap;
+/** Grows the heap space with the new heap pointer. */
+void newHP(ptr ap)
 {
 	register ptr p = ap;
 
@@ -99,9 +101,8 @@ newHP(ap)
  *									*
  ************************************************************************/
 
-dt_stdp(addr, ap)
-	register ptr addr;
-	ptr ap;
+/** Store data pointer "ap" at address "addr". */
+void dt_stdp(register ptr addr, ptr ap)
 {
 	register int i;
 	register long p = (long) ap;
@@ -117,9 +118,7 @@ dt_stdp(addr, ap)
 	}
 }
 
-dt_stip(addr, ap)
-	register ptr addr;
-	ptr ap;
+void dt_stip(register ptr addr, ptr ap)
 {
 	register int i;
 	register long p = (long) ap;
@@ -135,10 +134,8 @@ dt_stip(addr, ap)
 	}
 }
 
-dt_stn(addr, al, n)
-	register ptr addr;
-	long al;
-	size n;
+/** Store "n" byte integer "al" at address "addr". */
+void dt_stn(register ptr addr, long al, size n)
 {
 	register int i;
 	register long l = al;
@@ -160,9 +157,8 @@ dt_stn(addr, al, n)
 	}
 }
 
-dt_stw(addr, al)
-	register ptr addr;
-	long al;
+/** Store word sized integer "al" at address. */
+void dt_stw(register ptr addr, long al)
 {
 	register int i;
 	register long l = al;
@@ -185,10 +181,8 @@ dt_stw(addr, al)
 }
 
 #ifndef	NOFLOAT
-dt_stf(addr, f, n)
-	register ptr addr;
-	double f;
-	register size n;
+/** Store a real value "f" or size "n" bytes at address "addr". */
+void dt_stf(register ptr addr, double f, register size n)
 {
 	register char *cp = (char *) &f;
 	register int i;
@@ -222,8 +216,8 @@ dt_stf(addr, f, n)
  *									*
  ************************************************************************/
 
-ptr dt_lddp(addr)
-	register ptr addr;
+/** Load a data segment pointer located at address "addr". */
+ptr dt_lddp(register ptr addr)
 {
 	register ptr p;
 
@@ -243,8 +237,7 @@ ptr dt_lddp(addr)
 	return (p);
 }
 
-ptr dt_ldip(addr)
-	register ptr addr;
+ptr dt_ldip(register ptr addr)
 {
 	register ptr p;
 
@@ -264,9 +257,8 @@ ptr dt_ldip(addr)
 	return (p);
 }
 
-unsigned long dt_ldu(addr, n)
-	register ptr addr;
-	size n;
+/** Load an unsigned integer of "n" bytes from address "addr". */
+unsigned long dt_ldu(register ptr addr, size n)
 {
 	register int i;
 	register unsigned long u = 0;
@@ -290,8 +282,8 @@ unsigned long dt_ldu(addr, n)
 	return (u);
 }
 
-unsigned long dt_lduw(addr)
-	register ptr addr;
+/** Load an unsigned integer of word size from address "addr". */
+unsigned long dt_lduw(register ptr addr)
 {
 	register int i;
 	register unsigned long u = 0;
@@ -315,9 +307,8 @@ unsigned long dt_lduw(addr)
 	return (u);
 }
 
-long dt_lds(addr, n)
-	register ptr addr;
-	size n;
+/** Load an integer of size "n" bytes from address "addr". */
+long dt_lds(register ptr addr, size n)
 {
 	register int i;
 	register long l;
@@ -342,8 +333,8 @@ long dt_lds(addr, n)
 	return (l);
 }
 
-long dt_ldsw(addr)
-	register ptr addr;
+/** Load a word size integer from address "addr". */
+long dt_ldsw(register ptr addr)
 {
 	register int i;
 	register long l;
@@ -379,9 +370,8 @@ long dt_ldsw(addr)
  *									*
  ************************************************************************/
 
-dt_mvd(d2, d1, n)			/* d1 -> d2 */
-	register ptr d2, d1;
-	size n;
+/** Move "n" bytes from "d1" to "d2". */
+void dt_mvd(ptr d2, ptr d1, size n)
 {
 	register int i;
 
@@ -399,9 +389,8 @@ dt_mvd(d2, d1, n)			/* d1 -> d2 */
 	}
 }
 
-dt_mvs(d, s, n)				/* s -> d */
-	register ptr d, s;
-	size n;
+/** Move "n" bytes from stack address "s" to data address "d". */
+void dt_mvs(ptr d, ptr s, size n)				/* s -> d */
 {
 	register int i;
 
@@ -422,9 +411,7 @@ dt_mvs(d, s, n)				/* s -> d */
 
 #ifdef	LOGGING
 
-PRIVATE warn_dtbits(addr, n)
-	register ptr addr;
-	register size n;
+PRIVATE void warn_dtbits(ptr addr, size n)
 {
 	register int or_bits = 0;
 	register int and_bits = 0xff;
@@ -450,6 +437,16 @@ PRIVATE warn_dtbits(addr, n)
 		warningcont(WWASDATAP);
 	if (or_bits & SH_INSP)
 		warningcont(WWASINSP);
+}
+
+void dt_clear_area(ptr from, ptr to)
+{
+	/* includes *from but excludes *to */
+	register ptr a;
+
+	for (a = from; a < to; a++) {
+		dt_undef(a);
+	}
 }
 
 #endif	/* LOGGING */

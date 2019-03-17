@@ -112,3 +112,11 @@
 
 #define	arg_lin(u)	((u > NLINE) ? (trap(EBADLIN), u) : u)
 
+/* Allocates the "text" variable that will hold the text
+ * segment.
+ */
+void init_text(void);
+/* Sets the new value of the PC register to the specified
+ * value "p".
+ */
+void newPC(register ptr p);

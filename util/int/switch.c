@@ -11,8 +11,7 @@
 #include	"trap.h"
 #include	"warn.h"
 
-do_instr(opcode)
-	unsigned int opcode;
+void do_instr(unsigned int opcode)
 {
 	switch (opcode) {
 #include	"DoCases"	/* for the muscle */
