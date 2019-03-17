@@ -73,9 +73,6 @@ void add_sel( /* this is horrible */
 		given in sdefpp; the hook itself must still be empty.
 	*/
 	arith offset;
-#ifndef NOBITFIELD
-	extern arith add_field();
-#endif /* NOBITFIELD */
 
 	struct tag *tg = stp->tp_idf->id_tag;	/* or union */
 	struct sdef *sdef = idf->id_sdef;
