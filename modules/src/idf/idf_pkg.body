@@ -93,7 +93,7 @@ void hash_stat(void)
 	print("End hash table tally\n");
 }
 
-void idfappfun(int (*fun)(), int opt)
+void idfappfun(int (*fun)(struct idf *, int), int opt)
 {
 	register int i;
 

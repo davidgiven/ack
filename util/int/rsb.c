@@ -11,6 +11,8 @@
 #include	"proctab.h"
 #include	"linfil.h"
 #include	"shadow.h"
+#include	"segment.h"
+#include	"text.h"
 #include	"warn.h"
 
 /* offsets to be added to a local base */
@@ -22,7 +24,7 @@ int rsb_LIN;
 int rsb_FIL;
 int rsbsize;
 
-init_rsb()
+void init_rsb(void)
 {
 	rsb_rsbcode = 0;
 	rsb_PI = wsize;
@@ -33,8 +35,7 @@ init_rsb()
 	rsbsize = rsb_FIL + psize;
 }
 
-pushrsb(rsbcode)
-	int rsbcode;
+void pushrsb(int rsbcode)
 {
 	/* fill Return Status Block */
 	incSP((size)rsbsize);
@@ -61,8 +62,7 @@ pushrsb(rsbcode)
 }
 
 /*ARGSUSED*/
-int poprsb(rtt)
-	int rtt;			/* set to 1 if working for RTT */
+int poprsb(int rtt) /* set to 1 if working for RTT */
 {
 	/* pops the RSB and returns the rsbcode, for further testing */
 	register int rsbcode;

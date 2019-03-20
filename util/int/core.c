@@ -1,17 +1,16 @@
-/*
+/** @file
 	Core dumping routines
 */
 
-/* $Id$ */
-
 #include	"logging.h"
 #include	"global.h"
+#include	"warn.h"
 #include	"shadow.h"
 #include	"fra.h"
 
 #include	<stdio.h>
 
-core_dump()
+void core_dump(void)
 {
 	FILE *core_file;
 	

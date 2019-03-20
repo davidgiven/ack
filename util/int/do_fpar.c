@@ -1,10 +1,10 @@
-/*
- * Sources of the "FLOATING POINT ARITHMETIC" group instructions
+/** @file
+ *  Sources of the "FLOATING POINT ARITHMETIC" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"nofloat.h"
 #include	"global.h"
 #include	"log.h"
@@ -12,6 +12,7 @@
 #include	"trap.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"io.h"
 #include	"warn.h"
 
 #ifndef	NOFLOAT
@@ -30,15 +31,14 @@ extern double fpop();
 #endif /* not __STDC__ */
 #define	SMALL		(1.0/MAXDOUBLE)
 
-PRIVATE double adf(), sbf(), mlf(), dvf();
-PRIVATE double ttttp();
-PRIVATE double floor(), fabs();
-PRIVATE fef(), fif();
+PRIVATE double adf(double, double), sbf(double, double), mlf(double, double), dvf(double, double);
+PRIVATE double ttttp(double, int);
+PRIVATE double floor(double), fabs(double);
+PRIVATE void fef(double, size), fif(double, double, size);
 
 #endif	/* NOFLOAT */
 
-DoADF(l)
-	register size l;
+void DoADF(register size l)
 {
 	/* ADF w: Floating add (*) */
 #ifndef	NOFLOAT
@@ -52,8 +52,7 @@ DoADF(l)
 #endif	/* NOFLOAT */
 }
 
-DoSBF(l)
-	register size l;
+void DoSBF(register size l)
 {
 	/* SBF w: Floating subtract (*) */
 #ifndef	NOFLOAT
@@ -67,8 +66,7 @@ DoSBF(l)
 #endif	/* NOFLOAT */
 }
 
-DoMLF(l)
-	register size l;
+void DoMLF(register size l)
 {
 	/* MLF w: Floating multiply (*) */
 #ifndef	NOFLOAT
@@ -82,8 +80,7 @@ DoMLF(l)
 #endif	/* NOFLOAT */
 }
 
-DoDVF(l)
-	register size l;
+void DoDVF(register size l)
 {
 	/* DVF w: Floating divide (*) */
 #ifndef	NOFLOAT
@@ -97,10 +94,9 @@ DoDVF(l)
 #endif	/* NOFLOAT */
 }
 
-DoNGF(l)
-	register size l;
+void DoNGF(register size l)
 {
-	/* NGF w: Floating negate (*) */
+	/** NGF w: Floating negate (*) */
 #ifndef	NOFLOAT
 	double t = fpop(arg_wf(l));
 
@@ -112,8 +108,7 @@ DoNGF(l)
 #endif	/* NOFLOAT */
 }
 
-DoFIF(l)
-	register size l;
+void DoFIF(register size l)
 {
 	/* FIF w: Floating multiply and split integer and fraction part (*) */
 #ifndef	NOFLOAT
@@ -127,8 +122,7 @@ DoFIF(l)
 #endif	/* NOFLOAT */
 }
 
-DoFEF(l)
-	register size l;
+void DoFEF(register size l)
 {
 	/* FEF w: Split floating number in exponent and fraction part (*) */
 #ifndef	NOFLOAT
@@ -144,8 +138,8 @@ DoFEF(l)
 
 /* Service routines */
 
-PRIVATE double adf(f1, f2)		/* returns f1 + f2 */
-	double f1, f2;
+/** Returns "f1" + "f2" */
+PRIVATE double adf(double f1, double f2)
 {
 	if (must_test && !(IgnMask&BIT(EFOVFL))) {
 		if (f1 > 0.0 && f2 > 0.0) {
@@ -164,8 +158,8 @@ PRIVATE double adf(f1, f2)		/* returns f1 + f2 */
 	return (f1 + f2);
 }
 
-PRIVATE double sbf(f1, f2)		/* returns f1 - f2 */
-	double f1, f2;
+/** Returns "f1" - "f2" */
+PRIVATE double sbf(double  f1, double f2)
 {
 	if (must_test && !(IgnMask&BIT(EFOVFL))) {
 		if (f2 < 0.0 && f1 > 0.0) {
@@ -184,8 +178,8 @@ PRIVATE double sbf(f1, f2)		/* returns f1 - f2 */
 	return (f1 - f2);
 }
 
-PRIVATE double mlf(f1, f2)		/* returns f1 * f2 */
-	double f1, f2;
+/** Returns "f1" * "f2" */
+PRIVATE double mlf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -214,8 +208,8 @@ PRIVATE double mlf(f1, f2)		/* returns f1 * f2 */
 	return (f1 * f2);
 }
 
-PRIVATE double dvf(f1, f2)		/* returns f1 / f2 */
-	double f1, f2;
+/** Returns "f1" / "f2" */
+PRIVATE double dvf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -251,9 +245,7 @@ PRIVATE double dvf(f1, f2)		/* returns f1 / f2 */
 	return (f1 / f2);
 }
 
-PRIVATE fif(f1, f2, n)
-	double f1, f2;
-	size n;
+PRIVATE void fif(double f1, double f2, size n)
 {
 	double f = mlf(f1, f2);
 	double fl = floor(fabs(f));
@@ -262,9 +254,7 @@ PRIVATE fif(f1, f2, n)
 	fpush((f < 0.0) ? -fl : fl, n);	/* push integer-part */
 }
 
-PRIVATE fef(f, n)
-	double f;
-	size n;
+PRIVATE void fef(double f, size n)
 {
 	register long exponent, sign = (long) (f < 0.0);
 
@@ -286,14 +276,12 @@ PRIVATE fef(f, n)
 
 /* floating point service routines, to avoid having to use -lm */
 
-PRIVATE double fabs(f)
-	double f;
+PRIVATE double fabs(double f)
 {
 	return (f < 0.0 ? -f : f);
 }
 
-PRIVATE double floor(f)
-	double f;
+PRIVATE double floor(double f)
 {
 	double res, d;
 	register int sign = 1;
@@ -327,8 +315,8 @@ PRIVATE double floor(f)
 	return res;
 }
 
-PRIVATE double ttttp(f, n)		/* times ten to the power */
-	double f;
+/** Times ten to the power. */
+PRIVATE double ttttp(double f, int n)
 {
 	while (n > 0) {
 		f = mlf(f, 10.0);
@@ -341,13 +329,11 @@ PRIVATE double ttttp(f, n)		/* times ten to the power */
 	return f;
 }
 
-/*	Str2double is used to initialize the global data area with floats;
+/**	Str2double is used to initialize the global data area with floats;
 	we do not use, e.g., sscanf(), to be able to check the grammar of
 	the string and to give warnings.
 */
-
-double str2double(str)
-	char *str;
+double str2double(char *str)
 {
 	register char b;
 	register int sign = 1;		/* either +1 or -1 */
@@ -451,7 +437,8 @@ BadFloat:
 
 #else	/* NOFLOAT */
 
-nofloat() {
+void nofloat(void)
+{
 	fatal("attempt to execute a floating point instruction on an EM machine without FP");
 }
 

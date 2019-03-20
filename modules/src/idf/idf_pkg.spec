@@ -43,3 +43,7 @@ extern void init_idf(void);
 struct idf *str2idf(char* tg, int cp);
 
 #define	findidf(tg)	str2idf(tg, -1)
+
+#ifdef IDF_DEBUG
+void idfappfun(int (*fun)(struct idf *, int), int opt);
+#endif

@@ -1,10 +1,10 @@
-/*
- * Sources of the "LOGICAL" group instructions
+/** @file
+ *  Sources of the "LOGICAL" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"logging.h"
 #include	"global.h"
 #include	"log.h"
@@ -25,11 +25,11 @@ extern int must_test;
 #define	check_def(p,l)
 #endif	/* LOGGING */
 
-DoAND(l)
-	register size l;
+/** AND w: Boolean and on two groups of w bytes. Size of objects to be compared
+ *  (in bytes) on top of stack
+ */
+void DoAND(register size l)
 {
-	/* AND w: Boolean and on two groups of w bytes */
-	/* size of objects to be compared (in bytes) on top of stack */
 	register ptr p;
 
 	LOG(("@X6 DoAND(%ld)", l));
@@ -42,10 +42,9 @@ DoAND(l)
 	st_dec(l);
 }
 
-DoIOR(l)
-	register size l;
+/** IOR w: Boolean inclusive or on two groups of w bytes */
+void DoIOR(register size l)
 {
-	/* IOR w: Boolean inclusive or on two groups of w bytes */
 	register ptr p;
 
 	LOG(("@X6 DoIOR(%ld)", l));
@@ -58,10 +57,9 @@ DoIOR(l)
 	st_dec(l);
 }
 
-DoXOR(l)
-	register size l;
+/** XOR w: Boolean exclusive or on two groups of w bytes */
+void DoXOR(register size l)
 {
-	/* XOR w: Boolean exclusive or on two groups of w bytes */
 	register ptr p;
 
 	LOG(("@X6 DoXOR(%ld)", l));
@@ -74,10 +72,9 @@ DoXOR(l)
 	st_dec(l);
 }
 
-DoCOM(l)
-	register size l;
+/** COM w: Complement (one's complement of top w bytes) */
+void DoCOM(register size l)
 {
-	/* COM w: Complement (one's complement of top w bytes) */
 	register ptr p;
 
 	LOG(("@X6 DoCOM(%ld)", l));
@@ -89,10 +86,9 @@ DoCOM(l)
 	}
 }
 
-DoROL(l)
-	register size l;
+/** ROL w: Rotate left a group of w bytes */
+void DoROL(register size l)
 {
-	/* ROL w: Rotate left a group of w bytes */
 	register long s, t = uwpop();
 	register long signbit;
 
@@ -122,10 +118,9 @@ DoROL(l)
 	npush(s, l);
 }
 
-DoROR(l)
-	register size l;
+/** ROR w: Rotate right a group of w bytes */
+void DoROR(register size l)
 {
-	/* ROR w: Rotate right a group of w bytes */
 	register long s, t = uwpop();
 	register long signbit;
 

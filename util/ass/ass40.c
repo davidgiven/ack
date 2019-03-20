@@ -7,15 +7,13 @@
 #include        "ass00.h"
 #include        "assex.h"
 
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
+
 
 /*
 ** Make scans to do final assignment of instruction sizes & formats
 ** to those not already done. assign final values to labels
 */
-pass_4()
+void pass_4(void)
 {
 	register line_t *lnp;
 	register locl_t *lbp;

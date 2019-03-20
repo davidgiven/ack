@@ -1,10 +1,10 @@
-/*
+/** @file
  * Sources of the "CONVERT" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"nofloat.h"
 #include	"global.h"
 #include	"log.h"
@@ -13,12 +13,9 @@
 #include	"text.h"
 #include	"fra.h"
 #include	"warn.h"
+#include	"stack.h"
 
-#ifndef	NOFLOAT
-extern double fpop();
-#endif	/* NOFLOAT */
-
-DoCII()
+void DoCII(void)
 {
 	/* CII -: Convert integer to integer (*) */
 	register int newsize = swpop();
@@ -62,7 +59,7 @@ DoCII()
 	}
 }
 
-DoCUI()
+void DoCUI(void)
 {
 	/* CUI -: Convert unsigned to integer (*) */
 	register int newsize = swpop();
@@ -112,7 +109,7 @@ DoCUI()
 	}
 }
 
-DoCFI()
+void DoCFI(void)
 {
 	/* CFI -: Convert floating to integer (*) */
 #ifndef	NOFLOAT
@@ -168,7 +165,7 @@ DoCFI()
 #endif	/* NOFLOAT */
 }
 
-DoCIF()
+void DoCIF(void)
 {
 	/* CIF -: Convert integer to floating (*) */
 #ifndef	NOFLOAT
@@ -203,7 +200,7 @@ DoCIF()
 #endif	/* NOFLOAT */
 }
 
-DoCUF()
+void DoCUF(void)
 {
 	/* CUF -: Convert unsigned to floating (*) */
 #ifndef	NOFLOAT
@@ -249,7 +246,7 @@ DoCUF()
 #endif	/* NOFLOAT */
 }
 
-DoCFF()
+void DoCFF(void)
 {
 	/* CFF -: Convert floating to floating (*) */
 #ifndef	NOFLOAT
@@ -276,7 +273,7 @@ DoCFF()
 #endif	/* NOFLOAT */
 }
 
-DoCIU()
+void DoCIU(void)
 {
 	/* CIU -: Convert integer to unsigned */
 	register int newsize = swpop();
@@ -310,7 +307,7 @@ DoCIU()
 	}
 }
 
-DoCUU()
+void DoCUU(void)
 {
 	/* CUU -: Convert unsigned to unsigned */
 	register int newsize = swpop();
@@ -342,7 +339,7 @@ DoCUU()
 	}
 }
 
-DoCFU()
+void DoCFU(void)
 {
 	/* CFU -: Convert floating to unsigned */
 #ifndef	NOFLOAT

@@ -284,8 +284,8 @@ void Info(void)
 {
 	extern int cnt_string_cst, cnt_formal,
 		    cnt_decl_unary, cnt_def, cnt_expr, cnt_field,
-		    cnt_e_stack, cnt_localvar, cnt_proto, cnt_repl,
-		    cnt_args, cnt_macro, cnt_stack_level,
+		    cnt_e_stack, cnt_localvar, cnt_proto,
+		    cnt_stack_level,
 		    cnt_stack_entry, cnt_stmt_block, cnt_sdef, cnt_tag,
 		    cnt_switch_hdr, cnt_case_entry, cnt_type, cnt_brace,
 		    cnt_lint_stack_entry, cnt_state, cnt_auto_def,
@@ -293,16 +293,16 @@ void Info(void)
 	print("\
 %6d string_cst\n%6d formal\n\
 %6d decl_unary\n%6d def\n%6d expr\n%6d field\n\
-%6d e_stack\n%6d localvar\n%6d proto\n%6d repl\n\
-%6d args\n%6d macro\n%6d stack_level\n\
+%6d e_stack\n%6d localvar\n%6d proto\n\
+%6d stack_level\n\
 %6d stack_entry\n%6d stmt_block\n%6d sdef\n%6d tag\n\
 %6d switch_hdr\n%6d case_entry\n%6d type\n%6d brace\n\
 %6d lint_stack_entry\n%6d state\n%6d auto_def\n\
 %6d expr_state\n%6d argument\n",
 	cnt_string_cst, cnt_formal,
 	cnt_decl_unary, cnt_def, cnt_expr, cnt_field,
-	cnt_e_stack, cnt_localvar, cnt_proto, cnt_repl,
-	cnt_args, cnt_macro, cnt_stack_level,
+	cnt_e_stack, cnt_localvar, cnt_proto,
+	cnt_stack_level,
 	cnt_stack_entry, cnt_stmt_block, cnt_sdef, cnt_tag,
 	cnt_switch_hdr, cnt_case_entry, cnt_type, cnt_brace,
 	cnt_lint_stack_entry, cnt_state, cnt_auto_def,

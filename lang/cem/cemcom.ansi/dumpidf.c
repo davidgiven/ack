@@ -14,14 +14,16 @@
 #include	"arith.h"
 #include	"stack.h"
 #include	"def.h"
+#include	"idf.h"
 #include	"type.h"
 #include	"proto.h"
 #include	"struct.h"
 #include	"field.h"
+#include	"print.h"
 #include	"Lpars.h"
 #include	"label.h"
 #include	"expr.h"
-#include	"static.h"
+/*#include	"static.h"*/
 #include	"declar.h"
 
 /*	Some routines (symbol2str, type2str, qual2str) which should have
@@ -36,16 +38,29 @@
 
 extern char options[];
 
-extern char *sprint();
 
 extern struct idf *idf_hashtable[];
-extern char *symbol2str(), *type2str(), *qual2str(), *next_transient();
+extern char *symbol2str();
 
 enum sdef_kind {selector, field};		/* parameter for dumpsdefs */
 
 static int dumplevel;
 
-newline()	{
+/* Forward declarations */
+static void dumpstack(void);
+static char *next_transient(void);
+static char *qual2str(int);
+static char *type2str(register struct type *);
+static void p1_indent(register int);
+static void dumpdefs(register struct def *, int);
+void dumpidf(register struct idf *, int);
+void dumptags(register struct tag *);
+void dumptype(register struct type *);
+void dumpsdefs(register struct sdef *, enum sdef_kind);
+static void p1_expr(int, register struct expr *);
+
+void newline(void)
+{
 	register int dl = dumplevel;
 	
 	print("\n");
@@ -57,10 +72,9 @@ newline()	{
 		print("    ");
 }
 
-int	dumpidf();
 
-dumpidftab(msg, opt)
-	char msg[];
+
+void dumpidftab(char msg[], int opt)
 {
 	/*	Dumps the identifier table in readable form (but in
 		arbitrary order).
@@ -76,7 +90,7 @@ dumpidftab(msg, opt)
 	print(">>> DUMPIDF, %s (end)\n", msg);
 }
 
-dumpstack()
+static void dumpstack(void)
 {
 	/*	Dumps the identifier stack, starting at the top.
 	*/
@@ -96,8 +110,7 @@ dumpstack()
 	print("\n");
 }
 
-dumpidf(idf, opt)
-	register struct idf *idf;
+void dumpidf(register struct idf *idf, int opt)
 {
 	/*	All information about the identifier idf is divulged in a
 		hopefully readable format.
@@ -136,8 +149,7 @@ dumpidf(idf, opt)
 	}
 }
 
-dumpdefs(def, opt)
-	register struct def *def;
+void dumpdefs(register struct def *def, int opt)
 {
 	dumplevel++;
 	while (def && ((opt&4) || def->df_level))	{
@@ -158,8 +170,7 @@ dumpdefs(def, opt)
 	dumplevel--;
 }
 
-dumptags(tag)
-	register struct tag *tag;
+void dumptags(register struct tag *tag)
 {
 	dumplevel++;
 	while (tag)	{
@@ -186,9 +197,7 @@ dumptags(tag)
 	dumplevel--;
 }
 
-dumpsdefs(sdef, sdk)
-	register struct sdef *sdef;
-	enum sdef_kind sdk;
+void dumpsdefs(register struct sdef *sdef, enum sdef_kind sdk)
 {
 	/*	Since sdef's are members of two chains, there are actually
 		two dumpsdefs's, one following the chain of all selectors
@@ -218,8 +227,7 @@ dumpsdefs(sdef, sdk)
 	dumplevel--;
 }
 
-dumpproto(pl)
-	register struct proto *pl;
+void dumpproto(register struct proto *pl)
 {
 	register struct type *type;
 	register int argcnt = 0;
@@ -234,7 +242,7 @@ dumpproto(pl)
 			: (pl->pl_flag & PL_ELLIPSIS
 				? "ellipsis" : "unknown" ));
 		newline();
-		if (type = pl->pl_type){
+		if ( (type = pl->pl_type) ){
 			dumptype(type);
 			newline();
 		}
@@ -250,8 +258,7 @@ dumpproto(pl)
 	print("dump proto type list (end)\n");
 }
 
-dumptype(tp)
-	register struct type *tp;
+void dumptype(register struct type *tp)
 {
 	int ops = 1;
 
@@ -308,9 +315,7 @@ dumptype(tp)
 	dumplevel--;
 }
 
-char *
-type2str(tp)
-	register struct type *tp;
+static char *type2str(register struct type *tp)
 {
 	/*	Yields a pointer to a one-line description of the type tp.
 	*/
@@ -362,9 +367,7 @@ type2str(tp)
 	return buf;
 }
 
-char *
-qual2str(qual)
-	int qual;
+static char *qual2str(int qual)
 {
 	char *buf = next_transient();
 
@@ -381,8 +384,8 @@ qual2str(qual)
 
 GSTATIC char trans_buf[MAXTRANS][300];
 
-char *		/* the ultimate transient buffer supplier */
-next_transient()
+static char *		/* the ultimate transient buffer supplier */
+next_transient(void)
 {
 	static int bnum;
 
@@ -391,9 +394,7 @@ next_transient()
 	return trans_buf[bnum];
 }
 
-print_expr(msg, expr)
-	char msg[];
-	struct expr *expr;
+void print_expr(char msg[], struct expr *expr)
 {
 	/*	Provisional routine to print an expression preceded by a
 		message msg.
@@ -405,8 +406,7 @@ print_expr(msg, expr)
 	}
 }
 
-p1_expr(lvl, expr)
-	register struct expr *expr;
+static void p1_expr(int lvl, register struct expr *expr)
 {
 	p1_indent(lvl);
 	if (!expr)	{
@@ -481,8 +481,7 @@ p1_expr(lvl, expr)
 	}
 }
 
-p1_indent(lvl)
-	register int lvl;
+static void p1_indent(register int lvl)
 {
 	while (lvl--)
 		print("  ");

@@ -1,12 +1,19 @@
-/* $Id$ */
-
+/** @file
+ *  Memory allocation routines that will cause
+ *  fatal error if allocation fails.
+ */
+#include	<stdlib.h>
 #include	"debug.h"
 #include	"global.h"
 #include	"alloc.h"
+#include	"io.h"
 
-char *Malloc(sz, descr)
-	size sz;
-	char *descr;
+/** Allocate "sz" bytes on the heap with description
+ * "descr", raise a fatal error if it cannot be
+ * allocated. Returns a pointer to the newly allocated
+ * block.
+ */
+char *Malloc(size sz, char *descr)
 {
 	register char *new = malloc((unsigned int) (sz));
 	
@@ -31,10 +38,12 @@ char *Malloc(sz, descr)
 	return new;
 }
 
-char *Realloc(old, sz, descr)
-	char *old;
-	size sz;
-	char *descr;
+/** Reallocates an "old" memory block with new size
+ * "sz" in bytes. Raise a fatal error if the block
+ * cannot be reallocated.
+ *
+ */
+char *Realloc(char *old, size sz, char *descr)
 {
 	register char *new = realloc(old, (unsigned int) (sz));
 	

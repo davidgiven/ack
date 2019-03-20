@@ -15,11 +15,13 @@
 #include	"nofloat.h"
 #include	"global.h"
 #include	"log.h"
+#include	"io.h"
 #include	"trap.h"
 #include	"warn.h"
 #include	"text.h"
 #include	"read.h"
 #include	"opcode.h"
+#include	"m_sigtrp.h"
 #include	"rsb.h"
 
 char mess_file[64] = "int.mess";	/* name of message file */
@@ -37,9 +39,13 @@ extern long inr;			/* from log.c */
 
 PRIVATE char *dflt_av[] = {"e.out", 0};	/* default arguments */
 
-main(argc, argv)
-	int argc;
-	char *argv[];
+/* External definitions - too lazy to create a header file for each. */
+extern void init(int , char **);
+extern void disassemble(void);
+extern void tally(void);
+extern void out_tally(void);
+
+int main(int argc, char *argv[])
 {
 	register int i;
 	register int nosetjmp = 1;

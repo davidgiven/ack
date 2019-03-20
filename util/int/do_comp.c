@@ -1,10 +1,10 @@
-/*
- * Sources of the "COMPARE" group instructions
+/** @file
+ *  Sources of the "COMPARE" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"logging.h"
 #include	"nofloat.h"
 #include	"global.h"
@@ -15,15 +15,12 @@
 #include	"trap.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"stack.h"
 
-#ifndef	NOFLOAT
-extern double fpop();
-#endif	/* NOFLOAT */
 
-PRIVATE compare_obj();
+PRIVATE void compare_obj(size);
 
-DoCMI(l)
-	register size l;
+void DoCMI(register size l)
 {
 	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
 	register long t = spop(arg_wi(l));
@@ -34,8 +31,7 @@ DoCMI(l)
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoCMF(l)
-	register size l;
+void DoCMF(register size l)
 {
 	/* CMF w: Compare w byte reals */
 #ifndef	NOFLOAT
@@ -50,8 +46,7 @@ DoCMF(l)
 #endif	/* NOFLOAT */
 }
 
-DoCMU(l)
-	register size l;
+void DoCMU(register size l)
 {
 	/* CMU w: Compare w byte unsigneds */
 	register unsigned long t = upop(arg_wi(l));
@@ -62,8 +57,7 @@ DoCMU(l)
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoCMS(l)
-	register size l;
+void DoCMS(register size l)
 {
 	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
 
@@ -72,7 +66,7 @@ DoCMS(l)
 	compare_obj(arg_w(l));
 }
 
-DoCMP()
+void DoCMP(void)
 {
 	/* CMP -: Compare pointers */
 	register ptr t, s;
@@ -84,7 +78,7 @@ DoCMP()
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-DoTLT()
+void DoTLT(void)
 {
 	/* TLT -: True if less, i.e. iff top of stack < 0 */
 	LOG(("@T6 DoTLT()"));
@@ -92,7 +86,7 @@ DoTLT()
 	wpush((long)(wpop() < 0 ? 1 : 0));
 }
 
-DoTLE()
+void DoTLE(void)
 {
 	/* TLE -: True if less or equal, i.e. iff top of stack <= 0 */
 	LOG(("@T6 DoTLE()"));
@@ -100,7 +94,7 @@ DoTLE()
 	wpush((long)(wpop() <= 0 ? 1 : 0));
 }
 
-DoTEQ()
+void DoTEQ(void)
 {
 	/* TEQ -: True if equal, i.e. iff top of stack = 0 */
 	LOG(("@T6 DoTEQ()"));
@@ -108,7 +102,7 @@ DoTEQ()
 	wpush((long)(wpop() == 0 ? 1 : 0));
 }
 
-DoTNE()
+void DoTNE(void)
 {
 	/* TNE -: True if not equal, i.e. iff top of stack non zero */
 	LOG(("@T6 DoTNE()"));
@@ -116,7 +110,7 @@ DoTNE()
 	wpush((long)(wpop() != 0 ? 1 : 0));
 }
 
-DoTGE()
+void DoTGE(void)
 {
 	/* TGE -: True if greater or equal, i.e. iff top of stack >= 0 */
 	LOG(("@T6 DoTGE()"));
@@ -124,7 +118,7 @@ DoTGE()
 	wpush((long)(wpop() >= 0 ? 1 : 0));
 }
 
-DoTGT()
+void DoTGT(void)
 {
 	/* TGT -: True if greater, i.e. iff top of stack > 0 */
 	LOG(("@T6 DoTGT()"));
@@ -133,17 +127,15 @@ DoTGT()
 }
 
 /********************************************************
- *		Compare objects				*
- *							*
- *	Two 'obj_size' sized objects are bytewise	*
- *	compared; as soon as one byte is different	*
- *	1 is returned, otherwise 0. No type checking	*
- *	is performed. Checking for undefined bytes	*
- *	is done when LOGGING is defined.		*
+ *	Compare objects.
+ *
+ *	Two 'obj_size' sized objects are bytewise
+ *	compared; as soon as one byte is different
+ *	1 is returned, otherwise 0. No type checking
+ *	is performed. Checking for undefined bytes
+ *	is done when LOGGING is defined.
  ********************************************************/
-
-PRIVATE compare_obj(obj_size)
-	size obj_size;
+PRIVATE void compare_obj(size obj_size)
 {
 	register ptr addr1;		/* ADDRess in object highest on st. */
 	register ptr addr2;		/* ADDRess in object deeper in st. */

@@ -4,12 +4,11 @@
  *
  */
 
+#include 		<string.h>
+#include		<stddef.h>
 #include        "ass00.h"
 #include        "assex.h"
-
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
+#include		"asscm.h"
 
 /*
 ** utilities of EM1-assembler/loader
@@ -17,15 +16,16 @@ static char rcs_id[] = "$Id$" ;
 
 static int globstep;
 
+
 /*
  * glohash returns an index in table and leaves a stepsize in globstep
  *
  */
-
-static int glohash(aname,size) char *aname; {
+static int glohash(char *aname ,int size)
+{
 	register char *p;
-	register i;
-	register sum;
+	register int i;
+	register int sum;
 
 	/*
 	 * Computes a hash-value from a string.
@@ -44,17 +44,19 @@ static int glohash(aname,size) char *aname; {
  * return index in labeltable
  */
 
-glob_t *glo2lookup(name,status) char *name; {
-
+glob_t *glo2lookup(char *name ,int status)
+{
 	return(glolookup(name,status,mglobs,oursize->n_mlab));
 }
 
-glob_t *xglolookup(name,status) char *name; {
+glob_t *xglolookup(char *name,int status)
+{
 
 	return(glolookup(name,status,xglobs,oursize->n_glab));
 }
 
-static void findext(g) glob_t *g ; {
+static void findext(glob_t *g)
+{
 	glob_t *x;
 
 	x = xglolookup(g->g_name,ENTERING);
@@ -65,33 +67,30 @@ static void findext(g) glob_t *g ; {
 	g->g_status |= EXT;
 }
 
-glob_t *glolookup(name,status,table,size)
-char *name;     /* name */
-int status;     /* kind of lookup */
-glob_t *table;  /* which table to use */
-int size;       /* size for hash */
+/*
+ * lookup global symbol name in specified table.
+ * Various actions are taken depending on status
+ * parameter.
+ *
+ * DEFINING:
+ *      Lookup or enter the symbol, check for mult. def.
+ * OCCURRING:
+ *      Lookup the symbol, export if not known.
+ * INTERNING:
+ *      Enter symbol local to the module.
+ * EXTERNING:
+ *      Enter symbol visable from every module.
+ * SEARCHING:
+ *      Lookup the symbol, return 0 if not found.
+ * ENTERING:
+ *      Lookup or enter the symbol, don't check
+ */
+glob_t *glolookup(char *name,int status,glob_t *table, int size)
 {
 	register glob_t *g;
-	register rem,j;
+	register int rem,j;
 	int new;
 
-	/*
-	 * lookup global symbol name in specified table.
-	 * Various actions are taken depending on status.
-	 *
-	 * DEFINING:
-	 *      Lookup or enter the symbol, check for mult. def.
-	 * OCCURRING:
-	 *      Lookup the symbol, export if not known.
-	 * INTERNING:
-	 *      Enter symbol local to the module.
-	 * EXTERNING:
-	 *      Enter symbol visable from every module.
-	 * SEARCHING:
-	 *      Lookup the symbol, return 0 if not found.
-	 * ENTERING:
-	 *      Lookup or enter the symbol, don't check
-	 */
 
 	rem = glohash(name,size);
 	j = 0; new=0;
@@ -150,9 +149,18 @@ int size;       /* size for hash */
 	return(g);
 }
 
-locl_t *loclookup(an,status) {
+/*
+ * lookup local label by number and return the
+ * label definition if found.
+ *
+ * DEFINING:
+ *      Lookup or enter the symbol, check for mult. def.
+ *
+ */
+locl_t *loclookup(unsigned int an,int status)
+{
 	register locl_t *lbp,*l_lbp;
-	register unsigned num;
+	register unsigned int num;
 	char hinum;
 
 	if ( !pstate.s_locl ) fatal("label outside procedure");
@@ -188,26 +196,27 @@ locl_t *loclookup(an,status) {
 	return(lbp);
 }
 
-proc_t *prolookup(name,status) char *name; {
-	register proc_t *p;
-	register pstat;
+/*
+ * Look up a procedure name according to status
+ *
+ * PRO_OCC:     Occurrence
+ *      Search both tables, local table first.
+ *      If not found, enter in global table
+ * PRO_INT:     INP
+ *      Enter symbol in local table.
+ * PRO_DEF:     Definition
+ *      Define local procedure.
+ * PRO_EXT:     EXP
+ *      Enter symbol in global table.
+ *
+ *      The EXT bit in this table indicates the the name is used
+ *      as external in this module.
+ */
+proc_t *prolookup(char *name,int status)
+{
+	register proc_t *p= NULL;
+	register int pstat = 0;
 
-	/*
-	 * Look up a procedure name according to status
-	 *
-	 * PRO_OCC:     Occurrence
-	 *      Search both tables, local table first.
-	 *      If not found, enter in global table
-	 * PRO_INT:     INP
-	 *      Enter symbol in local table.
-	 * PRO_DEF:     Definition
-	 *      Define local procedure.
-	 * PRO_EXT:     EXP
-	 *      Enter symbol in global table.
-	 *
-	 *      The EXT bit in this table indicates the the name is used
-	 *      as external in this module.
-	 */
 
 	switch(status) {
 	case PRO_OCC:
@@ -281,18 +290,15 @@ proc_t *prolookup(name,status) char *name; {
 	return(enterproc(name,pstat,p));
 }
 
-proc_t *searchproc(name,table,size)
-	char *name;
-	proc_t *table;
-	int size;
+/*
+ * return a pointer into table to the place where the procedure
+ * name is or should be if in the table.
+ */
+proc_t *searchproc(char *name,proc_t *table,int size)
 {
 	register proc_t *p;
-	register rem,j;
+	register int rem,j;
 
-	/*
-	 * return a pointer into table to the place where the procedure
-	 * name is or should be if in the table.
-	 */
 
 	rem = glohash(name,size);
 	j = 0;
@@ -307,24 +313,21 @@ proc_t *searchproc(name,table,size)
 	return(p);
 }
 
-proc_t *enterproc(name,status,place)
-char *name;
-char status;
-proc_t *place; {
+/*
+ * Enter the procedure name into the table at place place.
+ * Place had better be computed by searchproc().
+ *
+ * NOTE:
+ *      At this point the procedure gets assigned a number.
+ *      This number is used as a parameter of cal and in some
+ *      other ways. There exists a 1-1 correspondence between
+ *      procedures and numbers.
+ *      Two local procedures with the same name in different
+ *      modules have different numbers.
+ */
+proc_t *enterproc(char *name,int status,proc_t *place)
+{
 	register proc_t *p;
-
-	/*
-	 * Enter the procedure name into the table at place place.
-	 * Place had better be computed by searchproc().
-	 *
-	 * NOTE:
-	 *      At this point the procedure gets assigned a number.
-	 *      This number is used as a parameter of cal and in some
-	 *      other ways. There exists a 1-1 correspondence between
-	 *      procedures and numbers.
-	 *      Two local procedures with the same name in different
-	 *      modules have different numbers.
-	 */
 
 	p=place;
 	p->p_name = (char *) getarea((unsigned) (strlen(name) + 1));

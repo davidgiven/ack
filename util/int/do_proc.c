@@ -1,16 +1,17 @@
-/*
- * Sources of the "PROCEDURE CALL" group instructions
+/** @file
+ *  Sources of the "PROCEDURE CALL" group instructions
  */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"logging.h"
 #include	"global.h"
 #include	"log.h"
 #include	"mem.h"
 #include	"shadow.h"
 #include	"memdirect.h"
+#include	"segment.h"
 #include	"trap.h"
 #include	"warn.h"
 #include	"text.h"
@@ -21,51 +22,45 @@
 
 extern int running;			/* from main.c */
 
-PRIVATE lfr(), ret();
+/* Forward declarations */
+PRIVATE void lfr(size), ret(size);
+void call(long, int);
 
-DoCAI()				/* proc identifier on top of stack */
+/** CAI -: Call procedure (procedure identifier on stack) */
+void DoCAI(void)				/* proc identifier on top of stack */
 {
-	/* CAI -: Call procedure (procedure identifier on stack) */
 	register long pi = spop(psize);
 
 	LOG(("@P6 DoCAI(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
-DoCAL(pi)
-	register long pi;
+/** CAL p: Call procedure (with identifier p) */
+void DoCAL(register long pi)
 {
-	/* CAL p: Call procedure (with identifier p) */
-
 	LOG(("@P6 DoCAL(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
-DoLFR(l)
-	register size l;
+/** LFR s: Load function result */
+void DoLFR(register size l)
 {
-	/* LFR s: Load function result */
-
 	LOG(("@P6 DoLFR(%ld)", l));
 	lfr(arg_s(l));
 }
 
-DoRET(l)
-	register size l;
+/** RET z: Return (function result consists of top z bytes) */
+void DoRET(register size l)
 {
-	/* RET z: Return (function result consists of top z bytes) */
-
 	LOG(("@P6 DoRET(%ld)", l));
 	ret(arg_z(l));
 }
 
 /************************************************************************
- *		Calling a new procedure.				*
+ *		Calling a new procedure.										*
  ************************************************************************/
 
-call(new_PI, rsbcode)
-	long new_PI;
-	int rsbcode;
+void call(long new_PI, int rsbcode)
 {
 	/* legality of new_PI has already been checked */
 	register size nloc = proctab[new_PI].pr_nloc;
@@ -84,11 +79,10 @@ call(new_PI, rsbcode)
 }
 
 /************************************************************************
- *		Loading a function result.				*
+ *		Loading a function result.										*
  ************************************************************************/
 
-PRIVATE lfr(sz)
-	size sz;
+PRIVATE void lfr(size sz)
 {
 	if (sz > FRALimit) {
 		wtrap(WILLLFR, EILLINS);
@@ -113,8 +107,7 @@ PRIVATE lfr(sz)
  *		Returning from a procedure.				*
  ************************************************************************/
 
-PRIVATE ret(sz)
-	size sz;
+PRIVATE void ret(size sz)
 {
 	if (sz > FRALimit) {
 		wtrap(WILLRET, EILLINS);

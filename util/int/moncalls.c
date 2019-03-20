@@ -123,13 +123,13 @@ PRIVATE check_buf();
 PRIVATE int savestr();
 PRIVATE int vec();
 
-moncall()
+void moncall(void)
 {
 	int n;				/* number actually read/written */
 	int status;			/* status for wait-call */
 	int flag;			/* various flag parameters */
 	int mode;			/* various mode parameters */
-	int oldmask;			/* for umask call */
+	mode_t oldmask;			/* for umask call */
 	int whence;			/* parameter for lseek */
 	int address;			/* address parameter typed int2 */
 	int owner;			/* owner parameter typed int2 */
@@ -987,7 +987,7 @@ moncall()
 	case 60:			/* Umask */
 
 		mode = pop_int2();
-		oldmask = umask(mode);
+		oldmask = umask((mode_t)mode);
 		push_int(oldmask);
 		LOG(("@m9 Umask: succeeded, mode = %d, oldmask = %d",
 			mode, oldmask));

@@ -1,10 +1,9 @@
-/*
-	Manipulating the Program Counter
-*/
+/** @file
+ *  Program counter manipulation routines */
 
 /* $Id$ */
 
-#include	<em_abs.h>
+#include	"em_abs.h"
 #include	"global.h"
 #include	"alloc.h"
 #include	"trap.h"
@@ -13,9 +12,10 @@
 #include	"proctab.h"
 #include	"warn.h"
 
-init_text() {
-	DB = i2p(NTEXT);		/* set Descriptor Base */
-	NProc = NPROC;			/* set Number of Proc. Descriptors */
+void init_text(void)
+{
+	DB = i2p(NTEXT);	/* set Descriptor Base */
+	NProc = NPROC;		/* set Number of Proc. Descriptors */
 	PI = -1;			/* initialize Procedure Identifier */
 	PC = 0;				/* initialize Program Counter */
 
@@ -31,8 +31,7 @@ init_text() {
  *									*
  ************************************************************************/
 
-newPC(p)
-	register ptr p;
+void newPC(register ptr p)
 {
 	register struct proc *pr = &proctab[PI];
 

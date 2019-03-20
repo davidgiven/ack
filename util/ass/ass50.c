@@ -6,11 +6,8 @@
 
 #include        "ass00.h"
 #include        "assex.h"
+#include		"assrl.h"
 #include        "ip_spec.h"
-
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
 
 /*
 ** Pass 5 of EM1 assembler/loader
@@ -18,7 +15,12 @@ static char rcs_id[] = "$Id$" ;
 ** Write out code
 */
 
-pass_5() {
+static void patchcase(void);
+
+
+
+void pass_5(void)
+{
 	register line_t *lnp;
 	cons_t off1;
 	char defined ;
@@ -78,14 +80,15 @@ pass_5() {
 
 } /* end pass_5 */
 
-genop(startc,value,i_flag) char *startc ; cons_t value ; int i_flag ; {
-	char *currc ;
-	register flag ;
-	char opc ;
 
-	/*
-	 * Real code generation.
-	 */
+/**
+ * Real code generation.
+ */
+void genop(char *startc,cons_t value,int i_flag)
+{
+	char *currc ;
+	register int flag ;
+	char opc ;
 
 	currc= startc ;
 	flag = ctrunc(*currc++);
@@ -161,11 +164,12 @@ genop(startc,value,i_flag) char *startc ; cons_t value ; int i_flag ; {
 	}
 }
 
-patchcase() {
+static void patchcase(void)
+{
 	register relc_t *r;
 	register locl_t *k;
 
-	if ( r= pstate.s_fdata ) {
+	if ( (r= pstate.s_fdata) ) {
 		r= r->r_next ;
 	} else {
 		r= f_data ;

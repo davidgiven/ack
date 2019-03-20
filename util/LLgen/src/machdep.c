@@ -43,17 +43,7 @@ void UNLINK(string x)
 #endif
 }
 
-void RENAME(string x,string y)
-{
-	/* Must move the file "x" to the file "y" */
 
-#ifdef USE_SYS
-	if(!sys_rename(x,y)) fatal(1,"Cannot rename to %s",y);
-#else
-	if (rename(x, y) == -1)
-		fatal(1, "Cannot rename to %s", y);
-#endif
-}
 
 string libpath(string s)
 {

@@ -4,15 +4,12 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <em_spec.h>
-#include <as_spec.h>
-#include <em_flag.h>
-#include <arch.h>
-#include <local.h>
+#include "em_spec.h"
+#include "as_spec.h"
+#include "em_flag.h"
+#include "arch.h"
+#include "local.h"
 
 #define	RCS_ASS	"$Id$"
 
