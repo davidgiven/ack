@@ -26,7 +26,7 @@ int main(int argc, const char* argv[])
 		count++;
 	}
 	printf("\n};\n");
-	printf("const size_t %s_len = %d;\n", argv[1], count);
+	printf("const size_t %s_len = %zu;\n", argv[1], count);
 
 	return 0;
 }
