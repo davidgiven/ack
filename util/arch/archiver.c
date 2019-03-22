@@ -25,6 +25,7 @@ static char RcsId[] = "$Id$";
 #endif
  */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,6 +33,7 @@ static char RcsId[] = "$Id$";
 #include <sys/stat.h>
 #include <signal.h>
 #include <arch.h>
+#include <object.h>
 #include <ranlib.h>
 #include <unistd.h>
 #ifdef AAL
@@ -460,7 +462,7 @@ char *mess;
 	return;
   }
   else if (u_fl && status.st_mtime <= member.ar_date) {
-	wr_arhdr(fd, member);
+	wr_arhdr(fd, &member);
 	copy_member(member, ar_fd, fd, 0);
 	return;
   }

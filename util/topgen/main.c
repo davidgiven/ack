@@ -11,6 +11,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "Lpars.h"
 
 extern int lineno, newline;

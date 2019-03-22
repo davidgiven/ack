@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
