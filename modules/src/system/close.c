@@ -4,6 +4,7 @@
  */
 /* $Id$ */
 
+#include <unistd.h>
 #include "system.h"
 
 void
