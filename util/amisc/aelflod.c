@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include "out.h"
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }

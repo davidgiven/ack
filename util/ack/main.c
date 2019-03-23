@@ -4,9 +4,11 @@
  *
  */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
@@ -386,7 +388,7 @@ static int process(char* arg)
 			if (linker)
 				add_input(&orig, linker);
 			return 1;
-		case F_OK:
+		case F_TRANSFORM:
 			break;
 	}
 	if (!phase)
@@ -555,7 +557,7 @@ static void setneeds(const char* suffix, int tail)
 	p_suffix = suffix;
 	switch (getpath(&phase))
 	{
-		case F_OK:
+		case F_TRANSFORM:
 			for (; phase; phase = phase->t_next)
 			{
 				if (phase->t_needed)

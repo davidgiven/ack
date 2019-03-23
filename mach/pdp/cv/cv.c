@@ -10,6 +10,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 struct exec {
 	short a_magic;
@@ -28,6 +30,7 @@ struct  nlist
 	short           n_value; 
 };
 
+#include <object.h>
 #include <out.h>
 
 #ifndef NORCSID
@@ -164,14 +167,14 @@ main(argc, argv)
 	}
 
 	/* Action at last */
-	wr_int2(e->a_magic);
-	wr_int2(e->a_text);
-	wr_int2(e->a_data);
-	wr_int2(e->a_bss);
-	wr_int2(e->a_syms);
-	wr_int2(e->a_entry);
-	wr_int2(e->a_unused);
-	wr_int2(e->a_flag);
+	cv_int2(e->a_magic);
+	cv_int2(e->a_text);
+	cv_int2(e->a_data);
+	cv_int2(e->a_bss);
+	cv_int2(e->a_syms);
+	cv_int2(e->a_entry);
+	cv_int2(e->a_unused);
+	cv_int2(e->a_flag);
 	emits(&outsect[TEXTSG]) ;
 	emits(&outsect[ROMSG]) ;
 	emits(&outsect[DATASG]) ;
@@ -180,14 +183,14 @@ main(argc, argv)
 	return 0;
 }
 
-wr_int2(n)
+cv_int2(n)
 {
 	putc(n, output);
 	putc((n>>8), output);
 }
 
 /*
-wr_long(l)
+cv_long(l)
 	long l;
 {
 	putc((int)(l >> 16), output);
@@ -231,7 +234,6 @@ emit_symtab()
 	struct nlist PDP_name;	  /* symbol table entry in PDP V7 format */
 	register unsigned short i;
 
-	extern char *malloc();
 	char *chars;
 	long l;
 	long off = OFF_CHAR(outhead);
@@ -289,8 +291,8 @@ emit_symtab()
 			PDP_name.n_name[j] = 0;
 		}
 		fwrite((char *) &PDP_name, sizeof(char), 8, output);
-		wr_int2(PDP_name.n_type);
-		wr_int2(PDP_name.n_value);
+		cv_int2(PDP_name.n_type);
+		cv_int2(PDP_name.n_value);
 	}
 }
 
