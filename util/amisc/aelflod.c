@@ -25,6 +25,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "out.h"
 
 #define ASSERT(x) switch (2) { case 0: case (x): ; }
@@ -859,7 +860,12 @@ int main(int argc, char* argv[])
 	if (ferror(output))
 		fatal("output write error");
 	if (outputfile)
-		chmod(outputfile, 0755);
+	{
+		/* mode = 0755 in standard UNIX */
+		chmod(outputfile, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+	}
+
+
 
 	/* Summarise what we've done. */
 	
