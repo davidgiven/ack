@@ -80,3 +80,18 @@ extern expr_t	addr_inf;	/* .val (address) up to 23 bits! */
 extern expr_t	immed;
 
 #define regerr()	serror("register error")
+
+/* Z8000 specific routines */
+void settype( int type );
+int	twolog(int s);
+void setmod(int opr);
+void chtype(int opr, int typerange );
+void chreg(int opc, int reg);
+ATYPE	checkaddr(valu_t addr );
+void emit_ad(expr_t ad_inf);
+void ldmcode(int wrd1,int wrd2, int num);
+valu_t	adjust(valu_t absval);
+void branch(int opc,expr_t exp);
+void ldrel(int opc,expr_t exp);
+void shiftcode(int w1, int w2);
+void argerr(void);
