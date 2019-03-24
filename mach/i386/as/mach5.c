@@ -8,7 +8,7 @@
  * INTEL 80386 special routines
  */
 
-ea_1_16(param)
+void ea_1_16(int param)
 {
 	reg_1 &= 0377;
         if ((reg_1 & 070) || (param & ~070)) {
@@ -38,8 +38,7 @@ ea_1_16(param)
         }
 }
 
-void
-ea_1(param) {
+void ea_1(int param) {
 	if (! address_long) {
 		ea_1_16(param);
 		return;
@@ -71,16 +70,14 @@ ea_1(param) {
 	}
 }
 
-ea_2(param) {
+void ea_2(int param) {
 
 	op_1 = op_2;
 	RELOMOVE(rel_1, rel_2);
 	ea_1(param);
 }
 
-int
-checkscale(val)
-	valu_t val;
+int checkscale(valu_t val)
 {
 	int v = val;
 
@@ -105,7 +102,7 @@ checkscale(val)
 	/*NOTREACHED*/
 }
 
-reverse() {
+void reverse(void) {
 	struct operand op;
 #ifdef RELOCATION
 	int r = rel_1;
@@ -115,13 +112,13 @@ reverse() {
 	op = op_1; op_1 = op_2; op_2 = op;
 }
 
-badsyntax() {
+void badsyntax(void)
+{
 
 	serror("bad operands");
 }
 
-regsize(sz)
-	int sz;
+void regsize(int sz)
 {
 	register int bit;
 
@@ -135,8 +132,7 @@ regsize(sz)
 	}
 }
 
-void
-indexed() {
+void indexed(void) {
 	if (address_long) {
 		mod_2 = 0;
 		if (sib_2 == -1)
@@ -175,9 +171,7 @@ indexed() {
 	}
 }
 
-ebranch(opc,exp)
-	register int opc;
-	expr_t exp;
+void ebranch(register int opc,expr_t exp)
 {
 	/*	Conditional branching; Full displacements are available
 		on the 80386, so the welknown trick with the reverse branch
@@ -220,9 +214,7 @@ ebranch(opc,exp)
 	}
 }
 
-branch(opc,exp)
-	register int opc;
-	expr_t exp;
+void branch(register int opc,expr_t exp)
 {
 	/*	LOOP, JCXZ, etc. branch instructions.
 		Here, the offset just must fit in a byte.
@@ -237,8 +229,7 @@ branch(opc,exp)
 	emit1((int)dist);
 }
 
-pushop(opc)
-	register int opc;
+void pushop(register int opc)
 {
 
 	regsize(1);
@@ -274,8 +265,7 @@ pushop(opc)
 	}
 }
 
-opsize_exp(exp, nobyte)
-	expr_t exp;
+void opsize_exp(expr_t exp, int nobyte)
 {
 	if (! nobyte) {
 #ifdef RELOCATION
@@ -297,8 +287,7 @@ opsize_exp(exp, nobyte)
 	}
 }
 
-adsize_exp(exp, relpc)
-	expr_t exp;
+void adsize_exp(expr_t exp, int relpc)
 {
 	if (address_long) {
 #ifdef RELOCATION
@@ -314,8 +303,7 @@ adsize_exp(exp, relpc)
 	}
 }
 
-addop(opc) 
-	register int opc;
+void addop(register int opc)
 {
 
 	regsize(opc);
@@ -348,8 +336,7 @@ addop(opc)
 		badsyntax();
 }
 
-rolop(opc)
-	register int opc;
+void rolop(register int opc)
 {
 	register int oreg;
 
@@ -378,8 +365,7 @@ rolop(opc)
 		badsyntax();
 }
 
-incop(opc)
-	register int opc;
+void incop(register int opc)
 {
 
 	regsize(opc);
@@ -392,8 +378,7 @@ incop(opc)
 	}
 }
 
-callop(opc) 
-	register int opc;
+void callop(register int opc)
 {
 
 	regsize(1);
@@ -412,8 +397,7 @@ callop(opc)
 	}
 }
 
-xchg(opc)
-	register int opc;
+void xchg(register int opc)
 {
 
 	regsize(opc);
@@ -428,8 +412,7 @@ xchg(opc)
 		badsyntax();
 }
 
-test(opc)
-	register int opc;
+void test(register int opc)
 {
 
 	regsize(opc);
@@ -453,8 +436,7 @@ test(opc)
 		badsyntax();
 }
 
-mov(opc)
-	register int opc;
+void mov(register int opc)
 {
 
 	regsize(opc);
@@ -495,8 +477,7 @@ mov(opc)
 		badsyntax();
 }
 
-extshft(opc, reg)
-	int opc;
+void extshft(int opc, int reg)
 {
 	int oreg2 = reg_2;
 
@@ -521,8 +502,7 @@ extshft(opc, reg)
 	else	badsyntax();
 }
 
-bittestop(opc)
-	int opc;
+void bittestop(int opc)
 {
 	regsize(1);
 	emit1(0xF);
@@ -542,8 +522,7 @@ bittestop(opc)
 	else	badsyntax();
 }
 
-imul(reg)
-	int reg;
+void imul(int reg)
 {
 	/*	This instruction is more elaborate on the 80386. Its most
 		general form is:
