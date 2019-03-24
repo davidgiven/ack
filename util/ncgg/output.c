@@ -23,6 +23,7 @@ static char rcsid[]= "$Id$";
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "varinfo.h"
 #include "param.h"
 #include "reg.h"

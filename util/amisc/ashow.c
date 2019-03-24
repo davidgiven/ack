@@ -7,6 +7,7 @@ static char	rcsid[] = "$Id$";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <object.h>
 #include <out.h>
 
 #define OK	0	/* Return value of gethead if Orl Korekt. */

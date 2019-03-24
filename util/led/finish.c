@@ -126,8 +126,6 @@ static void handle_relos(struct outhead *head, struct outsect *sects, struct out
 	register int		sectindex;
 	register int		nrelo;
 	register char		*emit;
-	extern char		*getemit();
-	extern struct outrelo	*nextrelo();
 	static long zeros[MAXSECT];
 
 	if (incore) {
@@ -168,7 +166,6 @@ static void handle_relos(struct outhead *head, struct outsect *sects, struct out
 				    long sz = sects[sectindex].os_flen;
 				    long sf = 0;
 				    long blksz;
-				    char *getblk();
 
 				    emit = getblk(sz, &blksz, sectindex);
 				    while (sz) {

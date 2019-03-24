@@ -4,9 +4,8 @@
  */
 /* $Id$ */
 
+#include <unistd.h>
 #include "system.h"
-
-long lseek();
 
 int
 sys_seek(fp, off, whence, poff)

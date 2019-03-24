@@ -11,6 +11,7 @@ static char rcsid[] = "$Id$";
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <unistd.h>
 #include <out.h>
 #include "const.h"
 

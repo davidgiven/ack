@@ -57,7 +57,7 @@ void add_input(path *, trf *);
 int runphase(trf *);
 
 /* scan.c */
-enum f_path { F_OK, F_NOMATCH, F_NOPATH } ;
+enum f_path { F_TRANSFORM, F_NOMATCH, F_NOPATH } ;
 enum f_path getpath(trf **);
 
 /* trans.c */

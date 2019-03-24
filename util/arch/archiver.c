@@ -26,6 +26,7 @@
  #endif
  */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
@@ -552,6 +553,7 @@ void get(int argc, char *argv[])
  */
 void add(char *name, FILE* ar, FILE* dst, char *mess)
 {
+<<<<<<< HEAD
 	static MEMBER member;
 	size_t read_chars;
 	struct stat status;

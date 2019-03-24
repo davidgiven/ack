@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include <fcntl.h>
+#include <unistd.h>
 #include "system.h"
 
 extern File *_get_entry();
@@ -16,7 +18,6 @@ sys_open(path, flag, filep)
 {
 	register int fd;
 	register File *fp;
-	long lseek();
 
 	if ((fp = _get_entry()) == (File *)0)
 		return 0;
