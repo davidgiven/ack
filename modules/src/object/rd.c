@@ -1,9 +1,13 @@
 /* $Id$ */
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "out.h"
+#include "object.h"
 #include "obj.h"
 
 /*
@@ -29,7 +33,7 @@
 
 static long		offset[MAXSECT];
 
-static int		outfile;
+static FILE*	outfile;
 static long		outseek[NPARTS];
 static long		currpos;
 static long		rd_base;
@@ -46,7 +50,7 @@ OUTREAD(int p, char* b, long n)
 	register long l = outseek[p];
 
 	if (currpos != l) {
-		lseek(outfile, l, 0);
+		fseek(outfile, l, SEEK_SET);
 	}
 	rd_bytes(outfile, b, n);
 	l += n;
@@ -57,25 +61,23 @@ OUTREAD(int p, char* b, long n)
 /*
  * Open the output file according to the chosen strategy.
  */
-int
-rd_open(const char* f)
+int rd_open(const char* f)
 {
 
-	if ((outfile = open(f, 0)) < 0)
+	if ((outfile = fopen(f, "rb")) == NULL)
 		return 0;
 	return rd_fdopen(outfile);
 }
 
 static int offcnt;
 
-int
-rd_fdopen(int fd)
+int rd_fdopen(FILE* fd)
 {
 	register int i;
 
 	for (i = 0; i < NPARTS; i++) outseek[i] = 0;
 	offcnt = 0;
-	rd_base = lseek(fd, 0L, 1);
+	rd_base = fseek(fd, 0L, SEEK_CUR);
 	if (rd_base < 0) {
 		return 0;
 	}
@@ -86,16 +88,14 @@ rd_fdopen(int fd)
 	return 1;
 }
 
-void
-rd_close(void)
+void rd_close(void)
 {
 
-	close(outfile);
-	outfile = -1;
+	fclose(outfile);
+	outfile = NULL;
 }
 
-int
-rd_fd(void)
+FILE* rd_fd(void)
 {
 	return outfile;
 }
@@ -220,6 +220,10 @@ rd_string(char* addr, long len)
 
 	OUTREAD(PARTCHAR, addr, len);
 }
+
+
+
+
 
 #ifdef SYMDBUG
 void

@@ -16,147 +16,71 @@ and write ACK-object files and libraries
 .br
 .B #include <object.h>
 .PP
-.B int wr_open(filename)
-.br
-.B char *filename;
+.B FILE* wr_open(const char *filename)
 .PP
 .B void wr_close()
 .PP
-.B void wr_ohead(head)
-.br
-.B struct outhead *head;
+.B void wr_ohead(struct outhead *head)
 .PP
-.B void wr_sect(sect, cnt)
-.br
-.B struct outsect *sect;
-.br
-.B unsigned int cnt;
+.B void wr_sect(struct outsect *sect, unsigned int cnt)
 .PP
-.B void wr_outsect(sectionnr)
-.br
-.B int sectionnr;
+.B void wr_outsect(int sectionnr)
 .PP
-.B void wr_emit(emit, cnt)
-.br
-.B char *emit;
-.br
-.B long cnt;
+.B void wr_emit(const char *emit, long cnt)
 .PP
-.B void wr_putc(ch)
+.B void wr_putc(int ch)
 .PP
-.B void wr_relo(relo, cnt)
-.br
-.B struct outrelo *relo;
-.br
-.B unsigned int cnt;
+.B void wr_relo(const struct outrelo *relo, unsigned int cnt)
 .PP
-.B void wr_name(name, cnt)
-.br
-.B struct outname *name;
-.br
-.B unsigned int cnt;
+.B void wr_name(struct outname *name, unsigned int cnt)
 .PP
-.B void wr_string(stringaddr, cnt)
-.br
-.B char *stringaddr;
-.br
-.B long cnt;
+.B void wr_string(const char *stringaddr, long cnt)
 .PP
-.B void wr_arhdr(fd, arhdr)
-.br
-.B struct ar_hdr *arhdr;
+.B void wr_arhdr(FILE* fd, struct ar_hdr *arhdr)
 .PP
-.B void wr_ranlib(fd, ran, cnt)
-.br
-.B struct ranlib *ran;
-.br
-.B long cnt;
+.B void wr_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 .PP
-.B void wr_int2(fd, i)
+.B void wr_int2(FILE* fd, int i)
 .PP
-.B void wr_long(fd, l)
-.br
-.B long l;
+.B void wr_long(FILE* fd, long l)
 .PP
-.B void wr_bytes(fd, buf, l)
-.br
-.B char *buf;
-.br
-.B long l;
+.B void wr_bytes(FILE* fd, const char* buf, long l)
 .PP
-.B int rd_open(filename)
-.br
-.B char *filename;
+.B int rd_open(const char *filename)
 .PP
-.B int rd_fdopen(fd)
+.B int rd_fdopen(FILE* fd)
 .PP
 .B void rd_close()
 .PP
-.B void rd_ohead(head)
-.br
-.B struct outhead *head;
+.B void rd_ohead(struct outhead *head)
 .PP
-.B void rd_sect(sect, cnt)
-.br
-.B struct outsect *sect;
-.br
-.B unsigned int cnt;
+.B void rd_sect(struct outsect *sect, unsigned int cnt)
 .PP
-.B void rd_outsect(sectionnr)
-.br
-.B int sectionnr;
+.B void rd_outsect(int sectionnr)
 .PP
-.B void rd_emit(emit, cnt)
-.br
-.B char *emit;
-.br
-.B long cnt;
+.B void rd_emit(char *emit, long cnt)
 .PP
-.B void rd_relo(relo, cnt)
-.br
-.B struct outrelo *relo;
-.br
-.B unsigned int cnt;
+.B void rd_relo(struct outrelo *relo, unsigned int cnt)
 .PP
-.B void rd_rew_relo(head)
-.br
-.B struct outhead *head;
+.B void rd_rew_relo(struct outhead *head)
 .PP
-.B void rd_name(name, cnt)
-.br
-.B struct outname *name;
-.br
-.B unsigned int cnt;
+.B void rd_name(struct outname *name, unsigned int cnt)
 .PP
-.B void rd_string(stringaddr, cnt)
-.br
-.B char *stringaddr;
-.br
-.B long cnt;
+.B void rd_string(char *stringaddr, long cnt)
 .PP
-.B int rd_arhdr(fd, arhdr)
-.br
-.B struct ar_hdr *arhdr;
+.B int rd_arhdr(FILE* fd, struct ar_hdr *arhdr)
 .PP
-.B void rd_ranlib(fd, ran, cnt)
-.br
-.B struct ranlib *ran;
-.br
-.B long cnt;
+.B void rd_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 .PP
-.B int rd_int2(fd)
+.B int rd_int2(FILE* fd)
 .PP
-.B unsigned int rd_unsigned2(fd)
+.B unsigned int rd_unsigned2(FILE* fd)
 .PP
-.B long rd_long(fd)
+.B long rd_long(FILE* fd)
 .PP
-.B void rd_bytes(fd, buf, l)
-.br
-.B char *buf;
-.br
-.B long l;
+.B void rd_bytes(FILE* fd, char *buf, long l)
 .PP
-.B int rd_fd()
+.B FILE* rd_fd()
 .SH DESCRIPTION
 These routines come in handy when reading or writing ACK-object files
 or libraries. No checking is performed.
