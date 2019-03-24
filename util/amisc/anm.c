@@ -10,12 +10,10 @@
 **	anm [-gopruns] [name ...]
 */
 
-#include	<fcntl.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include    <string.h>
 #include	<ctype.h>
-#include	<unistd.h>
 
 #include	"object.h"
 #include	"out.h"
@@ -38,10 +36,10 @@ long	s_base[S_MAX];	/* for specially encoded bases */
 char	*filename;
 int	narg;
 
-void do_file();
+static void process(FILE *);
+static void do_file(FILE *);
 
-main(argc, argv)
-char **argv;
+int main(int argc, char **argv)
 {
 
 	if (--argc>0 && argv[1][0]=='-' && argv[1][1]!=0) {
@@ -88,23 +86,21 @@ char **argv;
 	narg = argc;
 
 	while(argc--) {
-		int fd;
+		FILE *fd;
 
 		filename = *++argv;
-		if ((fd = open(filename, 0)) < 0) {
+		if ((fd = fopen(filename, "rb")) == NULL) {
 			fprintf(stderr, "anm: cannot open %s\n", filename);
 			continue;
 		}
 		process(fd);
-		close(fd);
+		fclose(fd);
 	}
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
-extern int rd_unsigned2();
 
-process(fd)
-	int	fd;
+static void process(FILE *fd)
 {
 	unsigned int	magic;
 	long		nextpos;
@@ -116,13 +112,13 @@ process(fd)
 	magic = rd_unsigned2(fd);
 	switch(magic) {
 	case O_MAGIC:
-		lseek(fd, 0L, 0);
+		fseek(fd, 0L, SEEK_SET);
 		do_file(fd);
 		break;
 	case ARMAG:
 	case AALMAG:
 		while (rd_arhdr(fd, &archive_header)) {
-			nextpos = lseek(fd, 0L, 1) + archive_header.ar_size;
+			nextpos = ftell(fd) + archive_header.ar_size;
 			if (nextpos & 1) nextpos++;
 			strncpy(buf,archive_header.ar_name,sizeof(archive_header.ar_name));
 			filename = buf;
@@ -130,7 +126,7 @@ process(fd)
 				printf("\n%s:\n", filename);
 				do_file(fd);
 			}
-			lseek(fd, nextpos, 0);
+			fseek(fd, nextpos, SEEK_SET);
 		}
 		break;
 	default:
@@ -139,9 +135,7 @@ process(fd)
 	}
 }
 
-void
-do_file(fd)
-	int	fd;
+static void do_file(FILE *fd)
 {
 	struct	outname	*nbufp = NULL;
 	struct	outname	nbuf;
@@ -301,8 +295,7 @@ do_file(fd)
 		free((char *)cbufp);
 }
 
-compare(p1, p2)
-struct outname	*p1, *p2;
+int compare(struct outname *p1, struct outname *p2)
 {
 	int	i;
 
@@ -336,7 +329,7 @@ struct outname	*p1, *p2;
 	return(0);
 }
 
-rd_fatal()
+void rd_fatal(void)
 {
 	fprintf(stderr,"read error on %s\n", filename);
 	read_error = 1;

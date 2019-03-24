@@ -32,22 +32,18 @@ long	s_base[S_MAX];	/* for specially encoded bases */
 char	*filename;
 int	narg;
 
-extern int rd_unsigned2();
 
 static const char prefix[] = "_bmodule_";
 
 static struct stringlist modules;
 
-static void do_file(int fd)
+static void do_file(FILE *fd)
 {
 	struct outhead hbuf;
-	struct	outname	*nbufp = NULL;
 	char		*cbufp;
 	long		fi_to_co;
 	long		n;
 	unsigned	readcount;
-	int		i,j;
-	int		compare();
 
 	read_error = 0;
 	rd_fdopen(fd);
@@ -75,7 +71,6 @@ static void do_file(int fd)
 	while (--n >= 0)
 	{
 		struct outname nbuf;
-		struct stringfragment* f;
 
 		rd_name(&nbuf, 1);
 		if (read_error)
@@ -107,12 +102,12 @@ corrupt:
 	fatal("%s --- corrupt", filename);
 }
 
-static void process(int fd)
+static void process(FILE* fd)
 {
 	uint16_t magic = rd_unsigned2(fd);
 	switch(magic) {
 		case O_MAGIC:
-			lseek(fd, 0L, 0);
+			fseek(fd, 0L, SEEK_SET);
 			do_file(fd);
 			break;
 
@@ -124,7 +119,7 @@ static void process(int fd)
 
 			while (rd_arhdr(fd, &archive_header))
 			{
-				long nextpos = lseek(fd, 0L, SEEK_CUR) + archive_header.ar_size;
+				long nextpos = ftell(fd) + archive_header.ar_size;
 				if (nextpos & 1)
 					nextpos++;
 
@@ -132,7 +127,7 @@ static void process(int fd)
 				filename = buf;
 				if (strcmp(filename, SYMDEF) != 0)
 					do_file(fd);
-				lseek(fd, nextpos, 0);
+				fseek(fd, nextpos, SEEK_SET);
 			}
 			break;
 		}
@@ -144,7 +139,6 @@ static void process(int fd)
 
 int main(int argc, char* const argv[])
 {
-	int opt;
 	FILE* outputfp = NULL;
 
 	program_name = argv[0];
@@ -169,15 +163,15 @@ int main(int argc, char* const argv[])
 
 	for (;;)
 	{
-		int fd;
+		FILE *fd;
 
 		filename = argv[optind++];
 		if (!filename)
 			break;
-		if ((fd = open(filename, 0)) < 0)
+		if ((fd = fopen(filename, "rb")) == NULL)
 			fatal("cannot open %s: %s", filename, strerror(errno));
 		process(fd);
-		close(fd);
+		fclose(fd);
 	}
 
 	if (outputfp)
