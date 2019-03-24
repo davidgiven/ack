@@ -244,7 +244,7 @@ archive(void) {
 			fseek(input,offset,0);
 			archsize = header.ar_size;
 			// TODO: To check if this is correct.
-			header.ar_name[AR_NAME_MAX-1] = '\0';
+			header.ar_name[AR_NAME_MAX] = '\0';
 			parse(remember(header.ar_name));
 		}
 		offset += header.ar_size;
