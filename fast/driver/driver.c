@@ -355,13 +355,13 @@ char* stringdup(const char* s)
 
 char* getackhome(void)
 {
-	char *value = stringdup(getenv("ACK_HOME"));
+	char *value = getenv("ACK_HOME");
 	if (value == NULL)
 	{
 #ifndef EM_DIR
 		panic("ACK_HOME must be set.");
 #else
-		return stringdup(EM_DIR);
+		return EM_DIR;
 #endif
 	}
 	return value;
@@ -383,12 +383,12 @@ int main(int argc, char *argv[])
 	char *INCLUDE = NULL;
 	int compile_cnt = 0;
 
-	ackhome = getackhome();
+	ackhome = stringdup(getackhome());
 	if (ackhome == NULL)
 	{
 		panic("ACK_HOME Environment variable is not set.");
 	}
-	tmpdir = sys_gettmpdir();
+	tmpdir = stringdup(sys_gettmpdir());
 	if (tmpdir == NULL)
 	{
 		panic("TMPDIR Environment variable is not set.");
@@ -477,6 +477,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'M': /* use other compiler (for testing) */
 				strcpy(COMP, str + 2);
+				break;
+			case 'P': /* use other cpp (for testing) */
+				strcpy(CPP, str + 2);
 				break;
 			case 's': /* strip */
 				if (str[2] == '\0')
@@ -662,6 +665,10 @@ int main(int argc, char *argv[])
 		append(call, o_FILE);
 		runvec(call, (char *) 0);*/
 		cleanup(tmp_file);
+	}
+	if ((LDFILES.al_argc == 0) && (SRCFILES.al_argc==0))
+	{
+		panic("No input source files or input object files specified.");
 	}
 	exit(RET_CODE);
 }
