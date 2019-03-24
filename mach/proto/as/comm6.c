@@ -11,7 +11,7 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
-#include	<object.h>
+#include	"object.h"
 
 static void new_common(item_t *);
 
@@ -187,7 +187,7 @@ switchsect(int newtyp)
 {
 	sect_t *sp;
 	
-	if (sp = DOTSCT)
+	if ((sp = DOTSCT))
 		sp->s_size = DOTVAL - sp->s_base;
 	if (newtyp == S_UND) {
 		DOTSCT = NULL;
@@ -212,10 +212,16 @@ align(valu_t bytes)
 	if (bytes == 0)
 		bytes = ALIGNWORD;
 	if (sp->s_lign % bytes)
+	{
 		if (bytes % sp->s_lign)
+		{
 			serror("illegal alignment");
+		}
 		else
+		{
 			sp->s_lign = bytes;
+		}
+	}
 	if (pass == PASS_1)
 		/*
 		 * be pessimistic: biggest gap possible

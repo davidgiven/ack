@@ -15,7 +15,7 @@
 #include	"comm0.h"
 #include	"comm1.h"
 #include	"y.tab.h"
-#include	<object.h>
+#include	"object.h"
 
 extern YYSTYPE	yylval;
 
@@ -243,7 +243,8 @@ archive(void) {
 		if (needed()) {
 			fseek(input,offset,0);
 			archsize = header.ar_size;
-			header.ar_name[14] = '\0';
+			// TODO: To check if this is correct.
+			header.ar_name[AR_NAME_MAX-1] = '\0';
 			parse(remember(header.ar_name));
 		}
 		offset += header.ar_size;
@@ -330,7 +331,7 @@ parse(char *s)
 	 */
 #ifdef ASLD
 	for (i = 0; i < H_SIZE; i++) {
-		while (ip = hashtab[H_LOCAL+i]) {
+		while ((ip = hashtab[H_LOCAL+i])) {
 			/*
 			 * cleanup local queue
 			 */
