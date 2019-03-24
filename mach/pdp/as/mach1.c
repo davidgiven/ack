@@ -36,4 +36,11 @@ extern expr_t exp_1, exp_2;
 extern int rel_1, rel_2;
 extern int im1flag INIT(0);
 extern int im2flag INIT(0);
-extern valu_t adjust();
+
+void op1(int mode);
+void op2(int mode);
+void branch(int opc,expr_t exp);
+void ejump(int opc, expr_t exp);
+void sob(int reg, expr_t exp);
+int jump(int opc,int opr);
+valu_t adjust(expr_t exp);

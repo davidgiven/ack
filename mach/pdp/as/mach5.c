@@ -6,7 +6,8 @@
  *
  */
 
-op1(mode)	{
+void op1(int mode)
+{
 	int relpc = 0;
 	if (im1flag)	{
 		if (mode == 067 || mode == 077) {
@@ -23,7 +24,8 @@ op1(mode)	{
 	}
 }
 
-op2(mode)	{
+void op2(int mode)
+{
 	int relpc = 0;
 	if (im2flag)	{
 		if (mode == 067 || mode == 077) {
@@ -40,9 +42,10 @@ op2(mode)	{
 	}
 }
 
-branch(opc,exp) expr_t exp; {
-	register eval;
-	register sm;
+void branch(int opc,expr_t exp)
+{
+	register int eval;
+	register int sm;
 
 	eval = adjust(exp) >> 1;
 	sm = fitb(eval);
@@ -53,8 +56,9 @@ branch(opc,exp) expr_t exp; {
 	emit2(opc | lowb(eval));
 }
 
-ejump(opc, exp) expr_t exp; {
-	register sm,eval;
+void ejump(int opc, expr_t exp)
+{
+	register int sm,eval;
 	int gain;
 
 # ifdef THREE_PASS
@@ -82,7 +86,8 @@ ejump(opc, exp) expr_t exp; {
 # endif
 }
 
-sob(reg, exp) expr_t exp; {
+void sob(int reg, expr_t exp)
+{
 	if ((exp.typ & ~S_DOT) != DOTTYP)	{
 		serror("error in sob-label");
 	}
@@ -91,12 +96,13 @@ sob(reg, exp) expr_t exp; {
 	emit2( OPSOB | (reg << 6) | exp.val);
 }
 
-jump(opc,opr)	{
-	register val;
+int jump(int opc,int opr)
+{
+  register int val;
 
 # ifdef THREE_PASS
 	if (opr==067) {
-		register sm = 0;
+		register int sm = 0;
 
 		val = adjust(exp_1) >> 1;
 		if ( fitb(val) && (exp_1.typ & ~S_DOT) == DOTTYP) {
@@ -111,9 +117,11 @@ jump(opc,opr)	{
 # endif
 	emit2(opc | opr);
 	op1(opr);
+    return(0);
 }
 
-valu_t adjust(exp) expr_t exp; {
+valu_t adjust(expr_t exp)
+{
 	valu_t val;
 
 	val = exp.val - DOTVAL - 2;
