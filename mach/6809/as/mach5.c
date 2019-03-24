@@ -8,9 +8,7 @@
  * Motorola 6809 special routines
  */
 
-branch(opc, exp)
-register int	opc;
-expr_t		exp;
+void branch(register int opc, expr_t exp)
 {
 	register int	sm, dist;
 	int		saving;
@@ -47,7 +45,8 @@ expr_t		exp;
 		emit1(lowb(dist));
 }
 
-regno(r) register r; {
+int regno(register int r)
+{
 	switch (r) {
 	case X:	return 0;
 	case Y:	return 0x20;
@@ -57,15 +56,14 @@ regno(r) register r; {
 	return -1;
 }
 
-emit1or2(n) {
+void emit1or2(int n)
+{
 	if (n & ~0xFF)
 		emit1(n >> 8);
 	emit1(n);
 }
 
-offset(reg, exp, ind)
-register int	reg, ind;
-expr_t		exp;
+void offset(register int reg, expr_t exp, register int ind)
 {
 	if (reg == PC) {
 		int	sm, dist;
