@@ -13,14 +13,23 @@ static char rcsid[] = "$Id$";
 #include "arch.h"
 #include "out.h"
 #include "ranlib.h"
+#include "object.h"
 #include "const.h"
 #include "debug.h"
+#include "finish.h"
+#include "extract.h"
 #include "defs.h"
 #include "memory.h"
+#include "scan.h"
+#include "error.h"
+#include "save.h"
 
 #define ENDLIB		((long)0)
 
 static struct ar_hdr	arhdr;
+
+
+void notelib(long pos);
 
 /*
  * First read a long telling how many ranlib structs there are, then
@@ -29,15 +38,14 @@ static struct ar_hdr	arhdr;
  * We keep only one ranlib table in core, so this table always starts at offset
  * (ind_t)0 from its base.
  */
-static long
-getsymdeftable()
+static long getsymdeftable(void)
 {
 	register ind_t		off;
 	register struct ranlib	*ran;
 	register long		count;
 	register long		nran, nchar;
 	extern long		rd_long();
-	extern int		infile;
+	extern FILE*		infile;
 
 	count = nran = rd_long(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
@@ -81,7 +89,7 @@ extern char	*modulname;
  * scan the table again. We perform these actions as long as new symbols
  * are defined.
  */
-arch()
+void arch(void)
 {
 	long	nran;
 	bool	resolved;
@@ -143,8 +151,7 @@ arch()
  * An archive member that will be loaded is remembered by storing its position
  * in the archive into the table of positions.
  */
-notelib(pos)
-	long		pos;
+void notelib(long pos)
 {
 	register ind_t	off;
 
@@ -165,7 +172,7 @@ static ind_t		posindex = (ind_t)0;
  * that we've processed all needed modules in this archive. Each group of
  * positions of an archive is terminated with ENDLIB.
  */
-arch2()
+void arch2(void)
 {
 	register long	*pos;
 	register ind_t	localpos;

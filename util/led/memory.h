@@ -4,6 +4,9 @@
  */
 /* $Id$ */
 
+#ifndef __MEMORY_H_INCLUDED__
+#define __MEMORY_H_INCLUDED__
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -35,6 +38,8 @@ struct memory {
 };
 extern struct memory	mems[];
 
+struct outname;
+
 #define address(piece,offset)	(mems[(piece)].mem_base+(offset))
 #define modulptr(offset)	(mems[ALLOMODL].mem_base+core_position+(offset))
 
@@ -49,4 +54,7 @@ extern void         dealloc(int piece);
 extern char         *core_alloc(int piece, size_t size);
 extern void         core_free(int piece, char* p);
 extern void         write_bytes(void);
+extern void			freeze_core(void);
 extern void         namecpy(struct outname* name, unsigned nname, long offchar);
+
+#endif /* #ifndef __MEMORY_H_INCLUDED__ */

@@ -35,7 +35,7 @@ static char rcsid[] = "$Id$";
 #define IND_DBUG(x)	(IND_RELO(x) + sizeof(ind_t))
 #endif /* SYMDBUG */
 
-extern int	infile;
+extern FILE*	infile;
 extern int	passnumber;
 
 char		*archname;	/* Name of archive, if reading from archive. */
@@ -66,9 +66,7 @@ static void scan_modul(void);
  * In case of a plain file, the file pointer is repositioned after the
  * examination. Otherwise it is at the beginning of the table of contents.
  */
-int
-getfile(filename)
-	char		*filename;
+int getfile(char* filename)
 {
 	unsigned int	rd_unsigned2();
 	struct ar_hdr	archive_header;
@@ -81,7 +79,7 @@ getfile(filename)
 	modulname = (char *)0;
 
 	if (passnumber == FIRST || !incore) {
-		if ((infile = open(filename, READ)) < 0)
+		if ((infile = fopen(filename, "rb")) == NULL)
 			fatal("can't read %s", filename);
 		magic_number = rd_unsigned2(infile);
 	} else {
@@ -122,7 +120,7 @@ getfile(filename)
 void closefile(char* filename)
 {
 	if (passnumber == FIRST || !incore)
-		close(infile);
+		fclose(infile);
 }
 
 void get_archive_header(struct ar_hdr* archive_header)
@@ -156,8 +154,7 @@ void get_modul(void)
  * to keep everything in core is abandoned, but we will always put the header,
  * the section table, and the name and string table into core.
  */
-static void
-scan_modul(void)
+static void scan_modul(void)
 {
 	bool		space;
 	struct outhead	*head;
@@ -188,8 +185,7 @@ scan_modul(void)
  * If possible, allocate space for the rest of the module. Return whether
  * this was possible.
  */
-static bool
-all_alloc(void)
+static bool all_alloc(void)
 {
 	struct outhead	head;
 
@@ -208,9 +204,7 @@ all_alloc(void)
  * First allocate the section table and read it in, then allocate the rest
  * and return whether this succeeded.
  */
-static bool
-direct_alloc(head)
-	struct outhead	*head;
+static bool direct_alloc(struct outhead *head)
 {
 	ind_t		sectindex = IND_SECT(*head);
 	register struct outsect *sects;
@@ -245,9 +239,7 @@ direct_alloc(head)
  * Allocate space for the indirectly accessed pieces: the section contents and
  * the relocation table, and put their indices in the right place.
  */
-static bool
-indirect_alloc(head)
-	struct outhead	*head;
+static bool indirect_alloc(struct outhead *head)
 {
 	register int	allopiece;
 	unsigned short	nsect = head->oh_nsect;
@@ -283,8 +275,7 @@ indirect_alloc(head)
  * at offset `sectindex'. Put the offset of the allocated piece at offset
  * `emitoff'.
  */
-static bool
-putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
+static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 {
 	long		flen;
 	ind_t		emitindex;
@@ -358,8 +349,7 @@ putdbugindex(ind_t dbugoff, size_t ndbugbytes)
  * Compute addresses and read in. Remember that the contents of the sections
  * and also the relocation table are accessed indirectly.
  */
-static void
-get_indirect(struct outhead* head, struct outsect* sect)
+static void get_indirect(struct outhead* head, struct outsect* sect)
 {
 	register ind_t		*emitindex;
 	register int		nsect;
@@ -385,7 +375,7 @@ get_indirect(struct outhead* head, struct outsect* sect)
 void seek(long pos)
 {
 	if (passnumber == FIRST || !incore)
-		lseek(infile, pos, 0);
+		fseek(infile, pos, SEEK_SET);
 }
 
 /*
@@ -410,8 +400,7 @@ void skip_modul(struct outhead* head)
 /*
  * Read in what we need in pass 2, because we couldn't keep it in core.
  */
-static void
-read_modul(void)
+static void read_modul(void)
 {
 	struct outhead	*head;
 	register struct outsect	*sects;
@@ -544,11 +533,7 @@ struct outrelo* nextrelo(void)
  * Get the section contents in core of which the describing struct has index
  * `sectindex'. `Head' points to the header of the module.
  */
-char *
-getemit(head, sects, sectindex)
-	struct outhead	*head;
-	struct outsect	*sects;
-	int		sectindex;
+char *getemit(struct outhead *head, struct outsect *sects, int sectindex)
 {
 	char		*ret;
 	ind_t		off;
@@ -573,11 +558,7 @@ getemit(head, sects, sectindex)
 	return address(ALLOEMIT + sectindex, off);
 }
 
-char *
-getblk(totalsz, pblksz, sectindex)
-	long	totalsz;
-	long	*pblksz;
-	int	sectindex;
+char *getblk(long totalsz, long *pblksz, int sectindex)
 {
 	char	*ret;
 	long	sz = (1L << 30);
@@ -596,7 +577,7 @@ getblk(totalsz, pblksz, sectindex)
 		sz >>= 1;
 	}
 	fatal("no space for section contents");
-	return (char *) 0;
+	return (char *) NULL;
 }
 
 void endemit(char* emit)
