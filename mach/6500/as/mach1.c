@@ -9,3 +9,6 @@
  */
 
 #define fits_zeropage(x)	(lowb(x) == (int)(x))
+
+void branch(register int opc, expr_t exp);
+void code(expr_t exp, register int opc1, register int opc2);
