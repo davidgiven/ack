@@ -10,10 +10,12 @@
 **	anm [-gopruns] [name ...]
 */
 
+#include	<fcntl.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include    <string.h>
 #include	<ctype.h>
+#include	<unistd.h>
 
 #include	"object.h"
 #include	"out.h"
@@ -36,10 +38,10 @@ long	s_base[S_MAX];	/* for specially encoded bases */
 char	*filename;
 int	narg;
 
-static void process(FILE *);
-static void do_file(FILE *);
+void do_file();
 
-int main(int argc, char **argv)
+main(argc, argv)
+char **argv;
 {
 
 	if (--argc>0 && argv[1][0]=='-' && argv[1][1]!=0) {
@@ -86,21 +88,23 @@ int main(int argc, char **argv)
 	narg = argc;
 
 	while(argc--) {
-		FILE *fd;
+		int fd;
 
 		filename = *++argv;
-		if ((fd = fopen(filename, "rb")) == NULL) {
+		if ((fd = open(filename, 0)) < 0) {
 			fprintf(stderr, "anm: cannot open %s\n", filename);
 			continue;
 		}
 		process(fd);
-		fclose(fd);
+		close(fd);
 	}
-	exit(EXIT_SUCCESS);
+	exit(0);
 }
 
+extern int rd_unsigned2();
 
-static void process(FILE *fd)
+process(fd)
+	int	fd;
 {
 	unsigned int	magic;
 	long		nextpos;
@@ -112,13 +116,13 @@ static void process(FILE *fd)
 	magic = rd_unsigned2(fd);
 	switch(magic) {
 	case O_MAGIC:
-		fseek(fd, 0L, SEEK_SET);
+		lseek(fd, 0L, 0);
 		do_file(fd);
 		break;
 	case ARMAG:
 	case AALMAG:
 		while (rd_arhdr(fd, &archive_header)) {
-			nextpos = ftell(fd) + archive_header.ar_size;
+			nextpos = lseek(fd, 0L, 1) + archive_header.ar_size;
 			if (nextpos & 1) nextpos++;
 			strncpy(buf,archive_header.ar_name,sizeof(archive_header.ar_name));
 			filename = buf;
@@ -126,7 +130,7 @@ static void process(FILE *fd)
 				printf("\n%s:\n", filename);
 				do_file(fd);
 			}
-			fseek(fd, nextpos, SEEK_SET);
+			lseek(fd, nextpos, 0);
 		}
 		break;
 	default:
@@ -135,7 +139,9 @@ static void process(FILE *fd)
 	}
 }
 
-static void do_file(FILE *fd)
+void
+do_file(fd)
+	int	fd;
 {
 	struct	outname	*nbufp = NULL;
 	struct	outname	nbuf;
@@ -295,7 +301,8 @@ static void do_file(FILE *fd)
 		free((char *)cbufp);
 }
 
-int compare(struct outname *p1, struct outname *p2)
+compare(p1, p2)
+struct outname	*p1, *p2;
 {
 	int	i;
 
@@ -329,7 +336,7 @@ int compare(struct outname *p1, struct outname *p2)
 	return(0);
 }
 
-void rd_fatal(void)
+rd_fatal()
 {
 	fprintf(stderr,"read error on %s\n", filename);
 	read_error = 1;

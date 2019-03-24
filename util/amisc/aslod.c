@@ -287,10 +287,8 @@ int main(int argc, char* argv[])
 	if (ferror(output))
 		fatal("output write error");
 	if (outputfile)
-	{
-		/* mode = 0755 in standard UNIX */
-		chmod(outputfile, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	}
+		chmod(outputfile, 0755);
+
 	/* Summarise what we've done. */
 	
 	if (verbose)

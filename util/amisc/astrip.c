@@ -4,11 +4,11 @@
  */
 /* $Id$ */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-#include <sys/stat.h>
-#include "system.h"
+#include <unistd.h>
 #include "object.h"
 #include "out.h"
 
@@ -18,40 +18,34 @@
 
 */
 
-char	tname[L_tmpnam];
+char	temp_name[] = "/tmp/sXXXXXX";
+char	*tname;
 FILE	*tf;
 struct outhead buf;
 int	readerror, writeerror;
 
-
-static int copy(char *, char *, long, FILE *, FILE *);
-static int strip(char *);
-
-int main(int argc, char **argv)
+main(argc, argv)
+char **argv;
 {
 	int	status;
 
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
-	if (sys_tmpnam(tname)==NULL)
-	{
-		fprintf(stderr, "astrip: cannot create temporary filename\n");
-		return(1);
-	}
-	fclose(fopen(tname,"wb"));
+	close(mkstemp(temp_name));
 	while(--argc) {
 		if ((status = strip(argv[argc])) > 1)
 			break;
 	}
-	remove(tname);
-	return status;
+	unlink(temp_name);
+	exit(status);
 }
 
-int strip(char *name)
+strip(name)
+char *name;
 {
 	long size;
-	FILE *fw;
+	int fw;
 
 	if (! rd_open(name)) {
 		fprintf(stderr, "astrip: cannot open %s\n", name);
@@ -84,46 +78,48 @@ int strip(char *name)
 		rd_close();
 		return(1);
 	}
-	fw = fopen(tname, "ab");
-	if ((fw == NULL) || (fseek(fw, (long)SZ_HEAD, SEEK_SET)!=0)) {
+	fw = open(tname, 2);
+	if (fw < 0 || lseek(fw, (long)SZ_HEAD, 0) < 0) {
 		fprintf(stderr, "astrip: cannot create temp file %s\n", tname);
 		rd_close();
-		fclose(fw);
+		close(fw);
 		return(2);
 	}
 	if(copy(name, tname, size, rd_fd(), fw)) {
 		rd_close();
-		fclose(fw);
+		close(fw);
 		return(1);
 	}
 	rd_close();
-	fclose(fw);
+	close(fw);
 	size += SZ_HEAD;
 	if (! rd_open(tname)) {
 		fprintf(stderr, "astrip: cannot read temp file %s\n", tname);
 		return(2);
 	}
-	fw = fopen(name, "wb");
-	if (fw == NULL) {
+	fw = creat(name, 0777);
+	if (fw < 0) {
 		fprintf(stderr, "astrip: cannot write %s\n", name);
 		rd_close();
 		return(1);
 	}
 	if(copy(tname, name, size, rd_fd(), fw)) {
-		fclose(fw);
+		close(fw);
 		rd_close();
 		return(2);
 	}
-	fclose(fw);
+
+	close(fw);
 	rd_close();
-	/* Change the mode to everything. */
-	chmod(name,S_IRWXU | S_IRWXG | S_IRWXO);
 	return(0);
 }
 
-static int copy(char *fnam, char *tnam, long size, FILE *fr, FILE *fw)
+copy(fnam, tnam, size, fr, fw)
+char *fnam;
+char *tnam;
+long size;
 {
-	register int s;
+	register s, n;
 	char lbuf[512];
 
 	while(size != (long)0) {
@@ -145,12 +141,12 @@ static int copy(char *fnam, char *tnam, long size, FILE *fr, FILE *fw)
 	return(0);
 }
 
-void rd_fatal(void)
+rd_fatal()
 {
 	readerror = 1;
 }
 
-void wr_fatal(void)
+wr_fatal()
 {
 	writeerror = 1;
 }

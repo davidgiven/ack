@@ -5,25 +5,18 @@ static char	rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
-#include "object.h"
-#include "out.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <object.h>
+#include <out.h>
 
 #define OK	0	/* Return value of gethead if Orl Korekt. */
 #define BMASK	0xFF	/* To extract least significant 8 bits from an int. */
 
-/* Forward declarations */
-static void show(register struct outhead *);
-static void showflags(unsigned	int);
-static void showsect(void);
-static void showrelo(void);
-static void showname(struct outname *);
-static char *myalloc(unsigned int);
-static void error(char *, ...);
-
-
 /* ARGSUSED */
-int main(int argc, char **argv)
+main(argc, argv)
+	int	argc;
+	char	*argv[];
 #		define prog	argv[0]
 {
 	register char	**arg = argv;
@@ -43,7 +36,6 @@ int main(int argc, char **argv)
 		}
 		rd_close();
 	}
-	return EXIT_SUCCESS;
 }
 
 /*
@@ -51,12 +43,14 @@ int main(int argc, char **argv)
  * NB. The header has already been read and is in the struct outhead `headp'
  * points to.
  */
-static void show(register struct outhead *headp)
+show(headp)
+	register struct outhead	*headp;
 {
 	register int		i;
 	register struct outname	*np;
 	register struct outname	*name;	/* Dynamically allocated name-array. */
 	register char		*string;/* Base of string area. */
+	extern char		*myalloc();
 
 	printf("Version %d\n", headp->oh_stamp);
 	showflags((unsigned) headp->oh_flags);
@@ -96,12 +90,8 @@ static void show(register struct outhead *headp)
 	/*
 	 * Now we can show all names.
 	 */
-	for (np = &name[0]; np < &name[headp->oh_nname]; np++)
-	{
-		/* In C99 this should be "%td" but we are in ANSI C89,
-		 * so we typecast explicitly to int here.
-		 */
-		printf("Name %d:\n", (int)(np - name));
+	for (np = &name[0]; np < &name[headp->oh_nname]; np++) {
+		printf("Name %d:\n", np - name);
 		showname(np);
 	}
 }
@@ -109,7 +99,8 @@ static void show(register struct outhead *headp)
 /*
  * Show flags from header.
  */
-static void showflags(unsigned	int flagword)
+showflags(flagword)
+	unsigned	flagword;
 {
 	if (flagword & HF_LINK) printf("unresolved references left\n");
 }
@@ -117,7 +108,7 @@ static void showflags(unsigned	int flagword)
 /*
  * Show a section.
  */
-static void showsect(void)
+showsect()
 {
 	struct outsect	section;
 
@@ -132,7 +123,7 @@ static void showsect(void)
 /*
  * Show a relocation record.
  */
-static void showrelo(void)
+showrelo()
 {
 	struct outrelo	relrec;
 
@@ -180,7 +171,8 @@ static void showrelo(void)
 /*
  * Show the name in the struct `namep' points to.
  */
-static void showname(struct outname *namep)
+showname(namep)
+	struct outname	*namep;
 {
 	if (namep->on_mptr)
 		printf("\t%s\n", namep->on_mptr);
@@ -227,29 +219,29 @@ static void showname(struct outname *namep)
 /*
  * Core allocation via malloc() but fatal if no core.
  */
-static char *myalloc(unsigned int u)
+char *
+myalloc(u)
+	unsigned int	u;
 {
 	register char	*rcp;
 
 	rcp = malloc(u);
-	if (rcp == (char *) NULL) {
+	if (rcp == (char *) 0) {
 		error("Out of core\n");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	return rcp;
 }
 
-static void error(char *fmt, ...)
+/* VARARGS1 */
+error(s, a1, a2, a3, a4)
+	char	*s;
 {
 	fflush(stdout);
-	/* Diagnostic print, no auto NL */
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
+	fprintf(stderr, s, a1, a2, a3, a4);
 }
 
-void rd_fatal(void)
+rd_fatal()
 {
 	error("Error in reading the object file\n");
 	exit(1);
