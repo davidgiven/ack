@@ -38,7 +38,8 @@ __wr_flush(struct fil *ptr)
 #ifdef OUTSEEK
 	/* seek to correct position even if we aren't going to write now */
 	if (currpos != ptr->currpos) {
-		currpos = fseek(ptr->fd, ptr->currpos, SEEK_SET);
+		fseek(ptr->fd, ptr->currpos, SEEK_SET);
+		currpos = ptr->currpos;
 	}
 #endif
 	if (ptr->pnow > ptr->pbegin) {
@@ -129,7 +130,8 @@ static void BEGINSEEK(int p, long o)
 	ptr->fd = outfile;
 	ptr->currpos = o;
 #else
-	ptr->currpos = fseek(ptr->fd, o, SEEK_SET);
+	fseek(ptr->fd, o, SEEK_SET);
+	ptr->currpos = o;
 #endif
 	if (p >= PARTRELO) o = 0;	/* no attempt to align writes
 					   for the time being */
@@ -259,8 +261,11 @@ wr_outsect(int s)
 
 	if (s != sectionnr && s >= (SECTCNT-1) && sectionnr >= (SECTCNT-1)) {
 #ifdef OUTSEEK
-		if (currpos != ptr->currpos) 
-			currpos = fseek(ptr->fd, ptr->currpos, SEEK_SET);
+		if (currpos != ptr->currpos)
+		{
+			fseek(ptr->fd, ptr->currpos, SEEK_SET);
+			currpos -> ptr->currpos;
+		}
 #endif
 		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
 		ptr->currpos += ptr->pnow - ptr->pbegin;
@@ -269,7 +274,8 @@ wr_outsect(int s)
 #endif
 		offset[sectionnr] = ptr->currpos;
 		if (offset[s] != ptr->currpos) {
-			ptr->currpos = fseek(ptr->fd, offset[s], SEEK_SET);
+			fseek(ptr->fd, offset[s], SEEK_SET);
+			ptr->currpos = offset[s];
 #ifdef OUTSEEK
 			currpos = ptr->currpos;
 #endif

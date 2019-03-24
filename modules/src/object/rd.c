@@ -77,7 +77,7 @@ int rd_fdopen(FILE* fd)
 
 	for (i = 0; i < NPARTS; i++) outseek[i] = 0;
 	offcnt = 0;
-	rd_base = fseek(fd, 0L, SEEK_CUR);
+	rd_base = ftell(fd);
 	if (rd_base < 0) {
 		return 0;
 	}
