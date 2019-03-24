@@ -237,7 +237,7 @@ static enum f_path scan_end(trf **first) {    /* Finalization */
 				*first= curr ;
 			}
 			if ( curr->t_next ) {
-				return F_OK ;
+				return F_TRANSFORM ;
 			}
 			prev=curr ;
 		}
@@ -249,7 +249,7 @@ static enum f_path scan_end(trf **first) {    /* Finalization */
 	if ( prev ) {
 		prev->t_keep=YES ;
 	}
-	return F_OK ;
+	return F_TRANSFORM ;
 }
 
 static void find_cpp(void) {

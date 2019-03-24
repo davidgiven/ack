@@ -9,6 +9,7 @@
 
 struct ar_hdr;
 struct outhead;
+struct outname;
 struct outrelo;
 struct outsect;
 struct ranlib;

@@ -4,8 +4,10 @@
 
 /* $Id$ */
 
+#include	<fcntl.h>
 #include	<stdio.h>
 #include	<stdarg.h>
+#include	<unistd.h>
 
 #include	"logging.h"
 #include	"global.h"

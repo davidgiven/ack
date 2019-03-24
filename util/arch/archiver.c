@@ -26,6 +26,7 @@
  #endif
  */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
@@ -587,6 +588,7 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
 	member.ar_mode = mode2ar(status.st_mode);
 	member.ar_date = status.st_mtime;
 	member.ar_size = status.st_size;
+>>>>>>> upstream/default
 #ifdef DISTRIBUTION
 	if (distr_fl)
 	{
