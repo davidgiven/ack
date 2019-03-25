@@ -865,7 +865,8 @@ static int runvec(struct arglist *vec, char *outp)
 	}
 	if(outp != NULL)
 	{
-		redirect = alloc(strlen(outp)+sizeof(char)*2);
+		/* Don't forget the null character. */
+		redirect = alloc(strlen(outp)+sizeof(char)*3);
 		strcpy(redirect,"1>");
 		strcat(redirect,outp);
 		append(vec,redirect);
