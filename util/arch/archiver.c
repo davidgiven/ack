@@ -420,7 +420,7 @@ void get(int argc, char *argv[])
 			{
 				sys_basename(argv[i],buffer);
 				if (equal(buffer, member->ar_name))
-				break;
+					break;
 			}
 			if (i == argc || app_fl)
 			{
@@ -459,7 +459,7 @@ void get(int argc, char *argv[])
 		else
 		{
 			if (rep_fl)
-			add(argv[i], ar_f, temp_fd, "r - %s\n");
+				add(argv[i], ar_f, temp_fd, "r - %s\n");
 			else if (show_fl)
 			{
 				char buf[sizeof(member->ar_name) + 2];
@@ -497,7 +497,7 @@ void get(int argc, char *argv[])
 			fseek(ar_f, even(member->ar_size), SEEK_CUR);
 		}
 		argv[i] = "";
-	}
+	} /* end while */
 
 	if (argc > 3)
 	{
