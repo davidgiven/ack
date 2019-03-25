@@ -380,7 +380,7 @@ static void writeout(void)
 	}
 	elem[sp_lmnem - sp_fmnem + 1] = nch;
 	printf("0 } ;\n\nchar *opindex[] = {\n");
-	for (i = 0; i <= sp_lmnem - sp_fmnem + 1; i++)
+	for (i = 0; i < sp_lmnem - sp_fmnem + 1; i++)
 	{
 		printf(" &opchoice[%d], /* %d = %s */\n", elem[i], i, em_mnem[i]);
 	}
