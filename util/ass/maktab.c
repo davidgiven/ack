@@ -384,6 +384,8 @@ static void writeout(void)
 	{
 		printf(" &opchoice[%d], /* %d = %s */\n", elem[i], i, em_mnem[i]);
 	}
+	printf(" &opchoice[%d], /* %d = %s */\n", elem[sp_lmnem - sp_fmnem + 1],
+			sp_lmnem - sp_fmnem + 1, "");
 	printf("} ;\n");
 }
 
