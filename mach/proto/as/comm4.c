@@ -223,6 +223,7 @@ static void
 archive(void) {
 	long offset;
 	struct ar_hdr header;
+	char ar_name[AR_NAME_MAX+1];
 	char getsize[AR_TOTAL];
 
 	archmode++;
@@ -234,7 +235,7 @@ archive(void) {
 		if (fread(getsize,AR_TOTAL,1,input) != 1)
 			break;
 		offset += AR_TOTAL;
-		strncpy(header.ar_name,getsize,sizeof header.ar_name) ;
+		strncpy(ar_name,getsize,sizeof(header.ar_name)) ;
 		header.ar_size= (((((long) (getsize[AR_SIZE+1]&0377))<<8)+
 				((long) (getsize[AR_SIZE  ]&0377))<<8)+
 				((long) (getsize[AR_SIZE+3]&0377))<<8)+
@@ -243,9 +244,8 @@ archive(void) {
 		if (needed()) {
 			fseek(input,offset,0);
 			archsize = header.ar_size;
-			// TODO: To check if this is correct.
-			header.ar_name[AR_NAME_MAX] = '\0';
-			parse(remember(header.ar_name));
+			ar_name[AR_NAME_MAX] = '\0';
+			parse(remember(ar_name));
 		}
 		offset += header.ar_size;
 		while (offset % 2)
