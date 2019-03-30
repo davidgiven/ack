@@ -476,9 +476,13 @@ int main(int argc, char *argv[])
 				append(&SRCFILES, str);
 				break;
 			case 'M': /* use other compiler (for testing) */
+				free(COMP);
+				COMP = alloc(strlen(str)+2-1);
 				strcpy(COMP, str + 2);
 				break;
 			case 'P': /* use other cpp (for testing) */
+				free(CPP);
+				CPP = alloc(strlen(str)+2-1);
 				strcpy(CPP, str + 2);
 				break;
 			case 's': /* strip */
@@ -742,6 +746,7 @@ static char * expand_string(char *s)
 	if (!expanded)
 		return s;
 	*q++ = '\0';
+	/* Do not forget the missing null character. */
 	p = alloc((unsigned int) (q - buf));
 	return strcpy(p, buf);
 }
