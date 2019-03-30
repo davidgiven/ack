@@ -395,6 +395,18 @@ char* readident(int c)
 }
 #endif
 
+static void need_stringbuf()
+{
+	if (!maxstring)
+	{
+		maxstring = STRINGMAX;
+		if ((stringbuf = malloc(maxstring)) == 0)
+		{
+			fatal("out of memory");
+		}
+	}
+}
+
 static int innumber(int c)
 {
 	char* p;
@@ -464,11 +476,8 @@ floatconstant:
 
 	*p = '\0';
 	stringlen = p - num;
-	if (stringlen > maxstring)
-	{
-		maxstring = stringlen;
-		stringbuf = realloc(stringbuf, maxstring);
-	}
+	need_stringbuf();
+	assert(stringlen < maxstring);
 	strcpy(stringbuf, num);
 	return NUMBERF;
 }
@@ -478,14 +487,7 @@ static int instring(int termc)
 	char* p;
 	int c;
 
-	if (!maxstring)
-	{
-		maxstring = STRINGMAX;
-		if ((stringbuf = malloc(maxstring)) == 0)
-		{
-			fatal("out of memory");
-		}
-	}
+	need_stringbuf();
 	p = stringbuf;
 	for (;;)
 	{
