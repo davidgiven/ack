@@ -1,3 +1,7 @@
+/** @file
+ * String list implementation.
+ *
+ */
 #include <stdlib.h>
 #include "stringlist.h"
 
@@ -26,16 +30,60 @@ void stringlist_addall(struct stringlist* list, struct stringlist* src)
 	}
 }
 
-void stringlist_free(struct stringlist* list)
+void stringlist_free(struct stringlist* list, int freedata)
 {
 	struct stringfragment* f = list->first;
 
 	while (f)
 	{
 		struct stringfragment* next = f->next;
+		if (freedata)
+		{
+			free(f->data);
+			f->data = NULL;
+		}
 		free(f);
 		f = next;
 	}
+}
+
+void stringlist_init(struct stringlist* list)
+{
+	list->first = NULL;
+	list->last = NULL;
+}
+
+
+char* stringlist_get(struct stringlist *list, int index)
+{
+	struct stringfragment* f = list->first;
+	int i = 0;
+
+	while (f)
+	{
+		if (i == index)
+		{
+			return f->data;
+		}
+		f = f->next;
+		i++;
+
+	}
+	return i;
+
+}
+
+int stringlist_count(struct stringlist *list)
+{
+	struct stringfragment* f = list->first;
+	int i = 0;
+
+	while (f)
+	{
+		f = f->next;
+		i++;
+	}
+	return i;
 }
 
 /* vim: set sw=4 ts=4 expandtab : */
