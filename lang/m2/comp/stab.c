@@ -68,7 +68,7 @@ static void adds_db_str(char *s)
 	while (*s) addc_db_str(*s++);
 }
 
-static void stb_type(register t_type *tp, int assign_num)
+static void stb_type(register struct type *tp, int assign_num)
 {
 	char buf[128];
 	static int	stb_count;
@@ -249,7 +249,7 @@ static void stb_type(register t_type *tp, int assign_num)
 	}
 }
 
-void stb_addtp(char *s, t_type *tp)
+void stb_addtp(char *s, struct type *tp)
 {
 	create_db_str();
 	adds_db_str(s);
@@ -265,9 +265,9 @@ void stb_addtp(char *s, t_type *tp)
 		     (arith) 0);
 }
 
-void stb_string(register t_def *df, int kind)
+void stb_string(register struct def *df, int kind)
 {
-	register t_type	*tp = df->df_type;
+	register struct type *tp = df->df_type;
 	char buf[64];
 
 	create_db_str();
@@ -291,10 +291,10 @@ void stb_string(register t_def *df, int kind)
 		else	adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
 		stb_type(tp->tp_next ? tp->tp_next : void_type, 0);
 		if (gdb_flag) {
-			t_scopelist *sc = df->prc_vis;
+			struct scopelist *sc = df->prc_vis;
 			sc = enclosing(sc);
 			while (sc) {
-				t_def *d = sc->sc_scope->sc_definedby;
+				struct def *d = sc->sc_scope->sc_definedby;
 
 				if (d && d->df_kind == D_PROCEDURE) {
 					adds_db_str(sprint(buf, ",%s", d->df_idf->id_text));

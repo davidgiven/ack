@@ -62,7 +62,7 @@ extern char *symbol2str();
 	FileName, node errors get their information from the
 	node, whereas other errors use the information in the token.
 */
-static void _error(int, t_node *, char *, register va_list, int);
+static void _error(int, struct node *, char *, register va_list, int);
 
 #if __STDC__
 #ifdef DEBUG
@@ -92,7 +92,7 @@ void error(char *fmt, ...)
 }
 
 /*VARARGS*/
-void node_error(t_node *node, char *fmt, ...)
+void node_error(struct node *node, char *fmt, ...)
 {
 	va_list ap;
 
@@ -116,7 +116,7 @@ void warning(int class, char *fmt, ...)
 }
 
 /*VARARGS*/
-void node_warning(t_node *node, int class, char *fmt, ...)
+void node_warning(struct node *node, int class, char *fmt, ...)
 {
 	va_list ap;
 
@@ -219,7 +219,7 @@ void node_error(va_alist)
 
 	va_start(ap);
 	{
-		t_node *node = va_arg(ap, t_node *);
+		struct node *node = va_arg(ap, struct node *);
 		char *fmt = va_arg(ap, char *);
 		_error(ERROR, node, fmt, ap, 0);
 	}
@@ -249,7 +249,7 @@ void node_warning(va_alist)
 
 	va_start(ap);
 	{
-		t_node *nd = va_arg(ap, t_node *);
+		struct node *nd = va_arg(ap, struct node *);
 		int class = va_arg(ap, int);
 		char *fmt = va_arg(ap, char *);
 		_error(WARNING, nd, fmt, ap, class);
@@ -321,7 +321,7 @@ void crash(va_alist)
 }
 #endif
 
-static void _error(int class, t_node *node, char *fmt, register va_list ap, int warn_class)
+static void _error(int class, struct node *node, char *fmt, register va_list ap, int warn_class)
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.

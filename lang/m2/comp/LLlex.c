@@ -36,7 +36,7 @@ extern char *getwdir();
 
 t_token		dot,
 		aside;
-t_type		*toktype;
+struct type 		*toktype;
 int		idfsize = IDFSIZE;
 int		ForeignFlag;
 #ifdef DEBUG
@@ -347,7 +347,7 @@ again:
 	case STIDF:
 	{
 		register char *tag = &buf[0];
-		register t_idf *id;
+		register struct idf *id;
 
 		do	{
 			if (tag - buf < idfsize) *tag++ = ch;

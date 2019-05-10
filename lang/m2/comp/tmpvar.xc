@@ -42,11 +42,11 @@ struct tmpvar {
 
 static struct tmpvar	*TmpInts,	/* for integer temporaries */
 			*TmpPtrs;	/* for pointer temporaries */
-static t_scope	*ProcScope;	/* scope of procedure in which the
+static struct scope	*ProcScope;	/* scope of procedure in which the
 					   temporaries are allocated
 					*/
 
-void TmpOpen(t_scope *sc)
+void TmpOpen(struct scope *sc)
 {
 	/*	Initialize for temporaries in scope "sc".
 	*/
@@ -55,7 +55,7 @@ void TmpOpen(t_scope *sc)
 
 arith TmpSpace(arith sz, int al)
 {
-	register t_scope *sc = ProcScope;
+	register struct scope *sc = ProcScope;
 
 	sc->sc_off = - WA(align(sz - sc->sc_off, al));
 	return sc->sc_off;

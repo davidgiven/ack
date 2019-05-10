@@ -35,7 +35,7 @@
 int		proclevel = 0;		/* nesting level of procedures */
 int		return_occurred;	/* set if a return occurs in a block */
 
-extern t_node	*EmptyStatement;
+extern struct node	*EmptyStatement;
 
 #define needs_static_link()	(proclevel > 1)
 }
@@ -43,7 +43,7 @@ extern t_node	*EmptyStatement;
 /* inline in declaration: need space
  * ProcedureDeclaration
  * {
- * 	t_def *df;
+ * 	struct def *df;
  * } :
  * 			{	++proclevel; }
  * 	ProcedureHeading(&df, D_PROCEDURE)
@@ -55,11 +55,11 @@ extern t_node	*EmptyStatement;
  * ;
 */
 
-ProcedureHeading(t_def **pdf; int type;)
+ProcedureHeading(struct def **pdf; int type;)
 {
-	t_type	*tp = 0;
+	struct type	*tp = 0;
 	arith	parmaddr = needs_static_link() ? pointer_size : 0;
-	t_param	*pr = 0;
+	struct paramlist	*pr = 0;
 } :
 	PROCEDURE IDENT
 			{ *pdf = DeclProc(type, dot.TOK_IDF); }
@@ -88,7 +88,7 @@ warning(W_STRICT, "procedure \"%s\" has a constructed result type",
 			}
 ;
 
-block(t_node **pnd;) :
+block(struct node **pnd;) :
 	[	%persistent
 		declaration
 	]*
@@ -104,7 +104,7 @@ block(t_node **pnd;) :
 
 declaration
 {
-	t_def *df;
+	struct def *df;
 } :
 	CONST [ ConstantDeclaration ';' ]*
 |
@@ -129,7 +129,7 @@ declaration
 ;
 
 /* inline in procedureheading: need space
- * FormalParameters(t_param **ppr; arith *parmaddr; t_type **ptp;):
+ * FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
  * 	'('
  * 	[
  * 		FPSection(ppr, parmaddr)
@@ -145,21 +145,21 @@ declaration
  * ;
 */
 
-FPSection(t_param **ppr; arith *parmaddr;)
+FPSection(struct paramlist **ppr; arith *parmaddr;)
 {
-	t_node	*FPList;
-	t_type	*tp;
+	struct node	*FPList;
+	struct type	*tp;
 	int	VARp;
 } :
 	var(&VARp) IdentList(&FPList) ':' FormalType(&tp)
 			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
 ;
 
-FormalType(t_type **ptp;)
+FormalType(struct type **ptp;)
 		/* index type of conformant array is "CARDINAL".
 		   Recognize a conformant array by size 0.
 		*/
-{	register t_type *tp;
+{	register struct type *tp;
 } :
 	ARRAY OF
 		{ tp = construct_type(T_ARRAY, card_type); }
@@ -173,9 +173,9 @@ FormalType(t_type **ptp;)
 
 TypeDeclaration
 {
-	t_def *df;
-	t_type *tp;
-	register t_node *nd;
+	struct def *df;
+	struct type *tp;
+	register struct node *nd;
 }:
 	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
 			  nd = dot2leaf(Name);
@@ -186,7 +186,7 @@ TypeDeclaration
 			}
 ;
 
-type(register t_type **ptp;):
+type(register struct type **ptp;):
 	%default SimpleType(ptp)
 |
 	ArrayType(ptp)
@@ -200,7 +200,7 @@ type(register t_type **ptp;):
 	ProcedureType(ptp)
 ;
 
-SimpleType(register t_type **ptp;) :
+SimpleType(register struct type **ptp;) :
 	qualtype(ptp)
 	[
 		/* nothing */
@@ -216,17 +216,17 @@ SimpleType(register t_type **ptp;) :
 	SubrangeType(ptp)
 ;
 
-enumeration(t_type **ptp;)
+enumeration(struct type **ptp;)
 {
-	t_node *EnumList;
+	struct node *EnumList;
 } :
 	'(' IdentList(&EnumList) ')'
 		{ *ptp = enum_type(EnumList); }
 ;
 
-IdentList(t_node **p;)
+IdentList(struct node **p;)
 {
-	register t_node *q;
+	register struct node *q;
 } :
 	IDENT		{ *p = q = dot2leaf(Select); }
 	[ %persistent
@@ -237,9 +237,9 @@ IdentList(t_node **p;)
 	]*
 ;
 
-SubrangeType(t_type **ptp;)
+SubrangeType(struct type **ptp;)
 {
-	t_node *nd1, *nd2;
+	struct node *nd1, *nd2;
 }:
 	/*
 	   This is not exactly the rule in the new report, but see
@@ -254,10 +254,10 @@ SubrangeType(t_type **ptp;)
 			}
 ;
 
-ArrayType(t_type **ptp;)
+ArrayType(struct type **ptp;)
 {
-	t_type *tp;
-	register t_type *tp1, *tp2;
+	struct type *tp;
+	register struct type *tp1, *tp2;
 } :
 	ARRAY SimpleType(&tp)
 			{ tp1 = tp2 = construct_type(T_ARRAY, tp); }
@@ -273,9 +273,9 @@ ArrayType(t_type **ptp;)
 			}
 ;
 
-RecordType(t_type **ptp;)
+RecordType(struct type **ptp;)
 {
-	register t_scope *scope;
+	register struct scope *scope;
 	arith size = 0;
 	int xalign = struct_align;
 }
@@ -294,19 +294,19 @@ RecordType(t_type **ptp;)
 	END
 ;
 
-FieldListSequence(t_scope *scope; arith *cnt; int *palign;):
+FieldListSequence(struct scope *scope; arith *cnt; int *palign;):
 	FieldList(scope, cnt, palign)
 	[
 		';' FieldList(scope, cnt, palign)
 	]*
 ;
 
-FieldList(t_scope *scope; arith *cnt; int *palign;)
+FieldList(struct scope *scope; arith *cnt; int *palign;)
 {
-	t_node *FldList;
-	t_type *tp;
-	t_node *nd;
-	register t_def *df;
+	struct node *FldList;
+	struct type *tp;
+	struct node *nd;
+	register struct def *df;
 	arith tcnt, max;
 } :
 [
@@ -374,9 +374,9 @@ FieldList(t_scope *scope; arith *cnt; int *palign;)
 ]
 ;
 
-variant(t_scope *scope; arith *cnt; t_type *tp; int *palign;)
+variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
 {
-	t_node *nd;
+	struct node *nd;
 } :
 	[
 		CaseLabelList(&tp, &nd)
@@ -392,7 +392,7 @@ variant(t_scope *scope; arith *cnt; t_type *tp; int *palign;)
 			/* Changed rule in new modula-2 */
 ;
 
-CaseLabelList(t_type **ptp; t_node **pnd;):
+CaseLabelList(struct type **ptp; struct node **pnd;):
 	CaseLabels(ptp, pnd)
 	[	
 			{ *pnd = dot2node(Link, *pnd, NULLNODE); }
@@ -401,14 +401,14 @@ CaseLabelList(t_type **ptp; t_node **pnd;):
 	]*
 ;
 
-CaseLabels(t_type **ptp; register t_node **pnd;)
+CaseLabels(struct type **ptp; register struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 }:
 	ConstExpression(pnd)
 			{ 
 			  if (*ptp != 0) {
-				t_type *tp = intorcard(*ptp,
+				struct type *tp = intorcard(*ptp,
 					BaseType((*pnd)->nd_type));
 				if (tp) *ptp = tp;
 				ChkCompat(pnd, *ptp, "case label");
@@ -444,8 +444,8 @@ CaseLabels(t_type **ptp; register t_node **pnd;)
 			}
 ;
 
-SetType(t_type **ptp;)
-{	t_type *tp;
+SetType(struct type **ptp;)
+{	struct type *tp;
 } :
 	SET OF SimpleType(&tp)
 			{ *ptp = set_type(tp); }
@@ -455,8 +455,8 @@ SetType(t_type **ptp;)
 	have to be declared yet, so be careful about identifying
 	type-identifiers.
 */
-PointerType(register t_type **ptp;)
-{	register t_type *tp;
+PointerType(register struct type **ptp;)
+{	register struct type *tp;
 } :
 			{ tp = construct_type(T_POINTER, NULLTYPE); }
 	POINTER TO
@@ -468,19 +468,19 @@ PointerType(register t_type **ptp;)
 			{ *ptp = tp; }
 ;
 
-qualtype(t_type **ptp;)
+qualtype(struct type **ptp;)
 {
-	t_node *nd;
+	struct node *nd;
 } :
 	qualident(&nd)
 		{ *ptp = qualified_type(&nd); }
 ;
 
-ProcedureType(t_type **ptp;)
+ProcedureType(struct type **ptp;)
 {
-	t_param *pr = 0;
+	struct paramlist *pr = 0;
 	arith parmaddr = 0;
-	t_type *tp = 0;
+	struct type *tp = 0;
 } :
 	PROCEDURE 
 	[
@@ -490,7 +490,7 @@ ProcedureType(t_type **ptp;)
 			{ *ptp = proc_type(tp, pr, parmaddr); }
 ;
 
-FormalTypeList(t_param **ppr; arith *pparmaddr; t_type **ptp;) :
+FormalTypeList(struct paramlist **ppr; arith *pparmaddr; struct type **ptp;) :
 	'('
 	[
 		VarFormalType(ppr, pparmaddr)
@@ -505,9 +505,9 @@ FormalTypeList(t_param **ppr; arith *pparmaddr; t_type **ptp;) :
 	]
 ;
 
-VarFormalType(t_param **ppr; arith *pparmaddr;)
+VarFormalType(struct paramlist **ppr; arith *pparmaddr;)
 {
-	t_type *tp;
+	struct type *tp;
 	int isvar;
 } :
 	var(&isvar)
@@ -525,9 +525,9 @@ var(int *VARp;) :
 
 ConstantDeclaration
 {
-	t_idf *id;
-	t_node *nd;
-	register t_def *df;
+	struct idf *id;
+	struct node *nd;
+	register struct def *df;
 }:
 	IDENT		{ id = dot.TOK_IDF; }
 	'=' ConstExpression(&nd)
@@ -540,9 +540,9 @@ ConstantDeclaration
 
 VariableDeclaration
 {
-	t_node *VarList;
-	register t_node *nd;
-	t_type *tp;
+	struct node *VarList;
+	register struct node *nd;
+	struct type *tp;
 } :
 	IdentAddr(&VarList)
 			{ nd = VarList; }
@@ -554,9 +554,9 @@ VariableDeclaration
 			{ EnterVarList(VarList, tp, proclevel > 0); }
 ;
 
-IdentAddr(t_node **pnd;) 
+IdentAddr(struct node **pnd;) 
 {
-	register t_node *nd;
+	register struct node *nd;
 } :
 	IDENT		{ nd = dot2leaf(Name);
 			  *pnd = dot2node(Link, nd, NULLNODE);

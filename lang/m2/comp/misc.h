@@ -13,9 +13,9 @@
 #define id_not_declared(x)	(not_declared("identifier", (x), ""))
 
 /* Forward declarations. */
-typedef struct idf t_idf;
-typedef struct node t_node;
+struct idf;
+struct node;
 
-void match_id(register t_idf *id1, t_idf *id2);
-t_idf *gen_anon_idf(void);
-void not_declared(char *what, t_node *id, char *where);
+void match_id(register struct idf *id1, struct idf *id2);
+struct idf *gen_anon_idf(void);
+void not_declared(char *what, struct node *id, char *where);

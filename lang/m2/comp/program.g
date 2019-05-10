@@ -36,7 +36,7 @@
 #include	"warning.h"
 #include	"misc.h"
 
-extern t_def	*GetDefinitionModule();
+extern struct def	*GetDefinitionModule();
 
 }
 /*
@@ -60,8 +60,8 @@ extern t_def	*GetDefinitionModule();
 
 ModuleDeclaration
 {
-	register t_def	*df;
-	t_node		*exportlist;
+	register struct def	*df;
+	struct node		*exportlist;
 	int		qualified;
 } :
 	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
@@ -76,7 +76,7 @@ ModuleDeclaration
 			}
 ;
 
-priority(register t_node **prio;):
+priority(register struct node **prio;):
 	[
 		'[' ConstExpression(prio) ']'
 			{ if (! ((*prio)->nd_type->tp_fund & T_CARDINAL)) {
@@ -87,7 +87,7 @@ priority(register t_node **prio;):
 	]
 ;
 
-export(int *QUALflag; t_node **ExportList;):
+export(int *QUALflag; struct node **ExportList;):
 				{ *ExportList = 0; *QUALflag = D_EXPORTED; }
 	[
 		EXPORT
@@ -103,9 +103,9 @@ export(int *QUALflag; t_node **ExportList;):
 
 import(int local;)
 {
-	t_node		*ImportList;
-	register t_node	*FromId = 0;
-	register t_def	*df;
+	struct node		*ImportList;
+	register struct node	*FromId = 0;
+	register struct def	*df;
 } :
 	/*
 	   When parsing a global module, this is the place where we must
@@ -139,13 +139,13 @@ import(int local;)
 
 DefinitionModule
 {
-	register t_def	*df;
-	t_node		*exportlist;
+	register struct def	*df;
+	struct node		*exportlist;
 	int		dummy;
-	extern t_idf	*DefId;
+	extern struct idf	*DefId;
 	extern int	ForeignFlag;
 	extern char	*sprint();
-	register t_scope *currscope = CurrentScope;
+	register struct scope *currscope = CurrentScope;
 	char buf[512];
 } :
 	DEFINITION
@@ -196,8 +196,8 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 
 definition
 {
-	register t_def	*df;
-	t_def		*dummy;
+	register struct def	*df;
+	struct def		*dummy;
 } :
 	CONST [ %persistent ConstantDeclaration ';' ]*
 |
@@ -231,7 +231,7 @@ definition
 
 ProgramModule
 {
-	register t_def	*df;
+	register struct def	*df;
 } :
 	MODULE
 	IDENT

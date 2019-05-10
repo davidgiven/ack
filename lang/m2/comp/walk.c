@@ -47,7 +47,7 @@
 #include "code.h"
 #include "warning.h"
 
-int CaseCode(t_node *, label, int);
+int CaseCode(struct node *, label, int);
 
 extern int proclevel;
 extern int gdb_flag;
@@ -55,10 +55,10 @@ extern int gdb_flag;
 label text_label;
 label data_label = 1;
 struct withdesig* WithDesigs;
-t_node* Modules;
+struct node* Modules;
 
-static t_type* func_type;
-static t_node* priority;
+static struct type* func_type;
+static struct node* priority;
 static int oldlineno;
 
 
@@ -71,17 +71,17 @@ static int oldlineno;
 #define EXIT_FLAG 2
 
 /* Forward declarations. */
-static void WalkDef(register t_def*);
-static void MkCalls(register t_def*);
-static void UseWarnings(register t_def*);
-static void RegisterMessage(register t_def*);
-static void WalkDefList(register t_def*, void (*proc)(t_def*));
+static void WalkDef(register struct def*);
+static void MkCalls(register struct def*);
+static void UseWarnings(register struct def*);
+static void RegisterMessage(register struct def*);
+static void WalkDefList(register struct def*, void (*proc)(struct def*));
 #ifdef DBSYMTAB
-static void stabdef(t_def*);
+static void stabdef(struct def*);
 #endif
 
 
-int LblWalkNode(label lbl, t_node *nd, int exit, int reach)
+int LblWalkNode(label lbl, struct node *nd, int exit, int reach)
 {
 	/*	Generate code for node "nd", after generating instruction
 		label "lbl". "exit" is the exit label for the closest
@@ -127,7 +127,7 @@ void def_ilb(label l)
 	oldlineno = 0;
 }
 
-void DoLineno(register t_node* nd)
+void DoLineno(register struct node* nd)
 {
 	if ((!options['L']
 #ifdef DBSYMTAB
@@ -173,10 +173,10 @@ void DoFilename(int needed)
 	}
 }
 
-void WalkModule(register t_def* module)
+void WalkModule(register struct def* module)
 {
-	register t_scope* sc;
-	t_scopelist* savevis = CurrVis;
+	register struct scope* sc;
+	struct scopelist* savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
 	priority = module->mod_priority;
@@ -216,7 +216,7 @@ void WalkModule(register t_def* module)
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		register t_node* nd = Modules;
+		register struct node* nd = Modules;
 
 		if (state == IMPLEMENTATION)
 		{
@@ -273,13 +273,13 @@ void WalkModule(register t_def* module)
 	WalkDefList(sc->sc_def, UseWarnings);
 }
 
-void WalkProcedure(register t_def* procedure)
+void WalkProcedure(register struct def* procedure)
 {
 
-	t_scopelist* savevis = CurrVis;
-	register t_type* tp;
-	register t_param* param;
-	register t_scope* procscope = procedure->prc_vis->sc_scope;
+	struct scopelist* savevis = CurrVis;
+	register struct type* tp;
+	register struct paramlist* param;
+	register struct scope* procscope = procedure->prc_vis->sc_scope;
 	label too_big = 0; /* returnsize larger than returnarea */
 	arith StackAdjustment = 0; /* space for conformant arrays */
 	arith retsav = 0; /* temporary space for return value */
@@ -562,7 +562,7 @@ void WalkProcedure(register t_def* procedure)
 }
 
 /* Walk through a list of definitions */
-static void WalkDef(register t_def* df)
+static void WalkDef(register struct def* df)
 {
 
 
@@ -590,7 +590,7 @@ static void WalkDef(register t_def* df)
 }
 
 /* Generate calls to initialization routines of modules */
-static void MkCalls(register t_def* df)
+static void MkCalls(register struct def* df)
 {
 
 
@@ -601,7 +601,7 @@ static void MkCalls(register t_def* df)
 	}
 }
 
-int WalkLink(register t_node* nd, label exit_label, int end_reached)
+int WalkLink(register struct node* nd, label exit_label, int end_reached)
 {
 
 	while (nd && nd->nd_class == Link)
@@ -613,19 +613,19 @@ int WalkLink(register t_node* nd, label exit_label, int end_reached)
 	return WalkNode(nd, exit_label, end_reached);
 }
 
-static void ForLoopVarExpr(register t_node* nd)
+static void ForLoopVarExpr(register struct node* nd)
 {
-	register t_type* tp = nd->nd_type;
+	register struct type* tp = nd->nd_type;
 
 	CodePExpr(nd);
 	CodeCoercion(tp, BaseType(tp));
 }
 
-int WalkStat(register t_node* nd, label exit_label, int end_reached)
+int WalkStat(register struct node* nd, label exit_label, int end_reached)
 {
 
-	register t_node* left = nd->nd_LEFT;
-	register t_node* right = nd->nd_RIGHT;
+	register struct node* left = nd->nd_LEFT;
+	register struct node* right = nd->nd_RIGHT;
 
 	assert(nd->nd_class == Stat);
 
@@ -647,7 +647,7 @@ int WalkStat(register t_node* nd, label exit_label, int end_reached)
 	{
 		case '(':
 		{
-			t_node* nd1 = nd;
+			struct node* nd1 = nd;
 			if (ChkCall(&nd1))
 			{
 				assert(nd == nd1);
@@ -741,8 +741,8 @@ int WalkStat(register t_node* nd, label exit_label, int end_reached)
 			label l2 = ++text_label;
 			int uns = 0;
 			arith stepsize;
-			t_type* bstp;
-			t_node* loopid;
+			struct type* bstp;
+			struct node* loopid;
 
 			good_forvar = DoForInit(left);
 			loopid = left->nd_LEFT;
@@ -840,9 +840,9 @@ int WalkStat(register t_node* nd, label exit_label, int end_reached)
 
 		case WITH:
 		{
-			t_scopelist link;
+			struct scopelist link;
 			struct withdesig wds;
-			t_desig ds;
+			struct desig ds;
 
 			if (!WalkDesignator(&(nd->nd_LEFT), &ds, D_USED))
 				break;
@@ -918,7 +918,7 @@ int WalkStat(register t_node* nd, label exit_label, int end_reached)
 }
 
 
-int (*WalkTable[])(t_node*, label, int) = {
+int (*WalkTable[])(struct node*, label, int) = {
 	NodeCrash,
 	NodeCrash,
 	NodeCrash,
@@ -934,12 +934,12 @@ int (*WalkTable[])(t_node*, label, int) = {
 	WalkLink,
 };
 
-extern t_desig null_desig;
+extern struct desig null_desig;
 
-void ExpectBool(register t_node** pnd, label true_label, label false_label)
+void ExpectBool(register struct node** pnd, label true_label, label false_label)
 {
 
-	t_desig ds;
+	struct desig ds;
 
 	ds = null_desig;
 	if (ChkExpression(pnd))
@@ -953,7 +953,7 @@ void ExpectBool(register t_node** pnd, label true_label, label false_label)
 	}
 }
 
-int WalkDesignator(t_node** pnd, t_desig* ds, int flags)
+int WalkDesignator(struct node** pnd, struct desig* ds, int flags)
 {
 
 	if (!ChkVariable(pnd, flags))
@@ -964,12 +964,12 @@ int WalkDesignator(t_node** pnd, t_desig* ds, int flags)
 	return 1;
 }
 
-int DoForInit(t_node* nd)
+int DoForInit(struct node* nd)
 {
-	register t_node* right = nd->nd_RIGHT;
-	register t_def* df;
-	t_type* base_tp;
-	t_type *tpl, *tpr;
+	register struct node* right = nd->nd_RIGHT;
+	register struct def* df;
+	struct type* base_tp;
+	struct type *tpl, *tpr;
 	int r;
 
 	r = ChkVariable(&(nd->nd_LEFT), D_USED | D_DEFINED);
@@ -994,7 +994,7 @@ int DoForInit(t_node* nd)
 
 	if (df->df_scope != CurrentScope)
 	{
-		register t_scopelist* sc = CurrVis;
+		register struct scopelist* sc = CurrVis;
 
 		for (;;)
 		{
@@ -1042,15 +1042,15 @@ int DoForInit(t_node* nd)
 }
 
 
-void DoAssign(register t_node* nd)
+void DoAssign(register struct node* nd)
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
 	   it sais that the left hand side is evaluated first.
 	   DAMN THE BOOK!
 	*/
-	t_desig dsr;
-	register t_type* tp;
+	struct desig dsr;
+	register struct type* tp;
 
 	if (!(ChkExpression(&(nd->nd_RIGHT)) & ChkVariable(&(nd->nd_LEFT), D_DEFINED)))
 		return;
@@ -1078,9 +1078,9 @@ void DoAssign(register t_node* nd)
 	CodeMove(&dsr, nd->nd_LEFT, tp);
 }
 
-static void RegisterMessage(register t_def* df)
+static void RegisterMessage(register struct def* df)
 {
-	register t_type* tp;
+	register struct type* tp;
 
 	if (df->df_kind == D_VARIABLE)
 	{
@@ -1107,7 +1107,7 @@ static void RegisterMessage(register t_def* df)
 	}
 }
 
-static void df_warning(t_node* nd, t_def* df, char* warning)
+static void df_warning(struct node* nd, struct def* df, char* warning)
 {
 	if (!(df->df_kind & (D_VARIABLE | D_PROCEDURE | D_TYPE | D_CONST | D_PROCHEAD)))
 	{
@@ -1123,9 +1123,9 @@ static void df_warning(t_node* nd, t_def* df, char* warning)
 	}
 }
 
-static void UseWarnings(register t_def* df)
+static void UseWarnings(register struct def* df)
 {
-	t_node* nd = df->df_scope->sc_end;
+	struct node* nd = df->df_scope->sc_end;
 
 	if (is_anon_idf(df->df_idf) || !(df->df_kind & (D_IMPORTED | D_VARIABLE | D_PROCEDURE | D_CONST | D_TYPE)) || (df->df_flags & (D_EXPORTED | D_QEXPORTED)))
 	{
@@ -1134,7 +1134,7 @@ static void UseWarnings(register t_def* df)
 
 	if (df->df_kind & D_IMPORTED)
 	{
-		register t_def* df1 = df->imp_def;
+		register struct def* df1 = df->imp_def;
 
 		df1->df_flags |= df->df_flags & (D_USED | D_DEFINED);
 		if (df->df_kind == D_INUSE)
@@ -1170,7 +1170,7 @@ static void UseWarnings(register t_def* df)
 	}
 }
 
-static void WalkDefList(register t_def* df, void (*proc)(t_def*))
+static void WalkDefList(register struct def* df, void (*proc)(struct def*))
 {
 	for (; df; df = df->df_nextinscope)
 	{
@@ -1179,7 +1179,7 @@ static void WalkDefList(register t_def* df, void (*proc)(t_def*))
 }
 
 #ifdef DBSYMTAB
-static void stabdef(t_def* df)
+static void stabdef(struct def* df)
 {
 	switch (df->df_kind)
 	{

@@ -59,7 +59,7 @@ arith
 
 arith	ret_area_size;
 
-t_type
+struct type
 	*bool_type,
 	*char_type,
 	*int_type,
@@ -79,12 +79,12 @@ t_type
 	*error_type;
 
 
-t_type *construct_type(int fund, register t_type *tp)
+struct type *construct_type(int fund, register struct type *tp)
 {
 	/*	fund must be a type constructor.
 		The pointer to the constructed type is returned.
 	*/
-	register t_type *dtp = new_type();
+	register struct type *dtp = new_type();
 
 	switch (dtp->tp_fund = fund)	{
 	case T_PROCEDURE:
@@ -129,9 +129,9 @@ arith align(arith pos, int al)
 	return pos;
 }
 
-t_type *standard_type(int fund, int algn, arith size)
+struct type *standard_type(int fund, int algn, arith size)
 {
-	register t_type *tp = new_type();
+	register struct type *tp = new_type();
 
 	tp->tp_fund = fund;
 	tp->tp_align = algn;
@@ -145,7 +145,7 @@ t_type *standard_type(int fund, int algn, arith size)
 
 void InitTypes(void)
 {
-	register t_type *tp;
+	register struct type *tp;
 
 	/* first, do some checking
 	*/
@@ -221,7 +221,7 @@ int fit(arith sz, int nbytes)
 	return ((sz) + ((arith)0x80<<(((nbytes)-1)*8)) & ~full_mask[(nbytes)]) == 0;
 }
 
-static void u_small(register t_type *tp, arith n)
+static void u_small(register struct type *tp, arith n)
 {
 	if (ufit(n, 1)) {
 		tp->tp_size = 1;
@@ -233,9 +233,9 @@ static void u_small(register t_type *tp, arith n)
 	}
 }
 
-t_type *enum_type(t_node *EnumList)
+struct type *enum_type(struct node *EnumList)
 {
-	register t_type *tp =
+	register struct type *tp =
 		standard_type(T_ENUMERATION, int_align, int_size);
 
 	EnterEnumList(EnumList, tp);
@@ -246,12 +246,12 @@ t_type *enum_type(t_node *EnumList)
 	return tp;
 }
 
-t_type *qualified_type(t_node **pnd)
+struct type *qualified_type(struct node **pnd)
 {
-	register t_def *df;
+	register struct def *df;
 
 	if (ChkDesig(pnd, D_USED)) {
-		register t_node *nd = *pnd;
+		register struct node *nd = *pnd;
 		if (nd->nd_class != Def) {
 			node_error(nd, "type expected");
 			FreeNode(nd);
@@ -291,7 +291,7 @@ int chk_bounds(arith l1, arith l2, int fund)
 	return (unsigned arith) l2 >= (unsigned arith) l1;
 }
 
-int in_range(arith i, register t_type *tp)
+int in_range(arith i, register struct type *tp)
 {
 
 
@@ -308,10 +308,10 @@ int in_range(arith i, register t_type *tp)
 	/*NOTREACHED*/
 }
 
-t_type *subr_type(t_node *lb, t_node *ub, t_type *base)
+struct type *subr_type(struct node *lb, struct node *ub, struct type *base)
 {
-	register t_type *tp = BaseType(lb->nd_type);
-	register t_type *res;
+	register struct type *tp = BaseType(lb->nd_type);
+	register struct type *res;
 
 	if (tp == intorcard_type) {
 		/* Lower bound >= 0; in this case, the base type is CARDINAL,
@@ -398,9 +398,9 @@ t_type *subr_type(t_node *lb, t_node *ub, t_type *base)
 	return res;
 }
 
-t_type *proc_type(t_type *result_type, t_param *parameters, arith n_bytes_params)
+struct type *proc_type(struct type *result_type, struct paramlist *parameters, arith n_bytes_params)
 {
-	register t_type *tp = construct_type(T_PROCEDURE, result_type);
+	register struct type *tp = construct_type(T_PROCEDURE, result_type);
 
 	tp->prc_params = parameters;
 	tp->prc_nbpar = n_bytes_params;
@@ -413,7 +413,7 @@ t_type *proc_type(t_type *result_type, t_param *parameters, arith n_bytes_params
 	return tp;
 }
 
-void genrck(register t_type *tp)
+void genrck(register struct type *tp)
 {
 	/*	generate a range check descriptor for type "tp" when
 		neccessary. Return its label.
@@ -421,7 +421,7 @@ void genrck(register t_type *tp)
 	arith lb, ub;
 	register label ol;
 	arith size = tp->tp_size;
-	register t_type *btp = BaseType(tp);
+	register struct type *btp = BaseType(tp);
 
 	if (size < word_size) size = word_size;
 	getbounds(tp, &lb, &ub);
@@ -448,7 +448,7 @@ void genrck(register t_type *tp)
 	}
 }
 
-void getbounds(register t_type *tp, arith *plo, arith *phi)
+void getbounds(register struct type *tp, arith *plo, arith *phi)
 {
 	assert(bounded(tp));
 
@@ -462,7 +462,7 @@ void getbounds(register t_type *tp, arith *plo, arith *phi)
 	}
 }
 
-t_type *set_type(register t_type *tp)
+struct type *set_type(register struct type *tp)
 {
 
 	arith lb, ub, diff, alloc_size;
@@ -498,14 +498,14 @@ t_type *set_type(register t_type *tp)
 	return tp;
 }
 
-void ArrayElSize(register t_type *tp)
+void ArrayElSize(register struct type *tp)
 {
 	/* Align element size to alignment requirement of element type.
 	   Also make sure that its size is either a dividor of the word_size,
 	   or a multiple of it.
 	*/
 	register arith algn;
-	register t_type *elem_type = tp->arr_elem;
+	register struct type *elem_type = tp->arr_elem;
 
 	if (elem_type->tp_fund == T_ARRAY) ArraySizes(elem_type);
 	algn = align(elem_type->tp_size, elem_type->tp_align);
@@ -524,11 +524,11 @@ void ArrayElSize(register t_type *tp)
 	}
 }
 
-void ArraySizes(register t_type *tp)
+void ArraySizes(register struct type *tp)
 {
 	/*	Assign sizes to an array type, and check index type
 	*/
-	register t_type *index_type = IndexType(tp);
+	register struct type *index_type = IndexType(tp);
 	arith diff;
 
 	ArrayElSize(tp);
@@ -563,13 +563,13 @@ void ArraySizes(register t_type *tp)
 	C_rom_cst(tp->arr_elsize);
 }
 
-void FreeType(register t_type *tp)
+void FreeType(register struct type *tp)
 {
 	/*	Release type structures indicated by "tp".
 		This procedure is only called for types, constructed with
 		T_PROCEDURE.
 	*/
-	register t_param *pr, *pr1;
+	register struct paramlist *pr, *pr1;
 
 	assert(tp->tp_fund == T_PROCEDURE);
 
@@ -584,7 +584,7 @@ void FreeType(register t_type *tp)
 	free_type(tp);
 }
 
-void DeclareType(t_node *nd, register t_def *df, register t_type *tp)
+void DeclareType(struct node *nd, register struct def *df, register struct type *tp)
 {
 	/*	A type with type-description "tp" is declared and must
 		be bound to definition "df".
@@ -592,7 +592,7 @@ void DeclareType(t_node *nd, register t_def *df, register t_type *tp)
 		"df" is already bound. In that case, it is either an opaque
 		type, or an error message was given when "df" was created.
 	*/
-	register t_type *df_tp = df->df_type;
+	register struct type *df_tp = df->df_type;
 
 	if (df_tp && df_tp->tp_fund == T_HIDDEN) {
 	  	if (! (tp->tp_fund & (T_POINTER|T_HIDDEN|T_EQUAL))) {
@@ -626,9 +626,9 @@ void DeclareType(t_node *nd, register t_def *df, register t_type *tp)
 	SolveForwardTypeRefs(df);
 }
 
-void SolveForwardTypeRefs(register t_def *df)
+void SolveForwardTypeRefs(register struct def *df)
 {
-	register t_node *nd;
+	register struct node *nd;
 
 	if (df->df_kind == D_FORWTYPE) {
 		nd = df->df_forw_node;
@@ -648,10 +648,10 @@ void SolveForwardTypeRefs(register t_def *df)
 }
 
 
-void ForceForwardTypeDef(register t_def *df)
+void ForceForwardTypeDef(register struct def *df)
 {
-	register t_def *df1 = df, *df2;
-	register t_node *nd = df->df_forw_node;
+	register struct def *df1 = df, *df2;
+	register struct node *nd = df->df_forw_node;
 
 	while (df && df->df_kind == D_FORWTYPE) {
 		RemoveFromIdList(df);
@@ -682,20 +682,20 @@ void ForceForwardTypeDef(register t_def *df)
 	}
 }
 
-t_type *RemoveEqual(register t_type *tpx)
+struct type *RemoveEqual(register struct type *tpx)
 {
 
 	if (tpx) while (tpx->tp_fund == T_EQUAL) tpx = tpx->tp_next;
 	return tpx;
 }
 
-int type_or_forward(t_type *tp)
+int type_or_forward(struct type *tp)
 {
 	/*	POINTER TO IDENTIFIER construction. The IDENTIFIER resides
 		in "dot". This routine handles the different cases.
 	*/
-	register t_node *nd;
-	register t_def *df, *df1;
+	register struct node *nd;
+	register struct def *df, *df1;
 
 	if ((df1 = lookup(dot.TOK_IDF, CurrentScope, D_IMPORTED, D_USED))) {
 		/* Either a Module or a Type, but in both cases defined
@@ -773,10 +773,10 @@ int lcm(int m, int n)
 	return m * (n / gcd(m, n));
 }
 
-t_type *intorcard(register t_type *left, register t_type *right)
+struct type *intorcard(register struct type *left, register struct type *right)
 {
 	if (left->tp_fund == T_INTORCARD) {
-		t_type *tmp = left;
+		struct type *tmp = left;
 		left = right;
 		right = tmp;
 	}
@@ -789,7 +789,7 @@ t_type *intorcard(register t_type *left, register t_type *right)
 }
 
 #ifdef DEBUG
-void DumpType(register t_type *tp)
+void DumpType(register struct type *tp)
 {
 	if (!tp) return;
 
@@ -825,7 +825,7 @@ void DumpType(register t_type *tp)
 		break;
 	case T_PROCEDURE:
 		{
-		register t_param *par = ParamList(tp);
+		register struct paramlist *par = ParamList(tp);
 
 		print("PROCEDURE");
 		if (par) {

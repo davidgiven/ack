@@ -20,4 +20,4 @@ struct id_u {
 
 #include	<idf_pkg.spec>
 
-typedef struct idf	t_idf;
+

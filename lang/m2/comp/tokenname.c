@@ -104,7 +104,7 @@ void reserve(register struct tokenname *resv)
 	/*	The names of the tokens described in resv are entered
 		as reserved words.
 	*/
-	register t_idf *p;
+	register struct idf *p;
 
 	while (resv->tn_symbol)	{
 		p = str2idf(resv->tn_name, 0);
