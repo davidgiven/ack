@@ -18,18 +18,13 @@ EM_mkcalls\ \-\ a module to read EM assembly code
 .br
 .B #include <em_comp.h>
 .PP
-.B int EM_open(filename)
-.br
-.B char *filename;
+.B int EM_open(char* filename)
 .PP
-.B void EM_close()
+.B void EM_close(void)
 .PP
-.B int EM_getinstr(instr)
-.B struct e_instr *instr;
+.B int EM_getinstr(struct e_instr *instr)
 .PP
-.B int EM_mkcalls(instr)
-.br
-.B struct e_instr *instr;
+.B int EM_mkcalls(struct e_instr *instr)
 .PP
 .B char *EM_error;
 .PP
@@ -311,7 +306,7 @@ contain the wordsize and pointersize, but only after the first
 ~em/modules/lib/libread_emeV.a: checking library for reading human-readable EM code
 .fi
 .SH MODULES
-em_code(3), string(3), system(3), ~em/lib.bin/em_data.a
+em_code(3), string(3), ~em/lib.bin/em_data.a
 .SH "SEE ALSO"
 em_code(3)
 .br

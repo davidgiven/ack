@@ -6,7 +6,7 @@
 
 /* Variables must be declared somewhere ... */
 
-#include <em_arith.h>
+#include "em_arith.h"
 
 char	*EM_error = 0;
 char	*EM_filename = 0;
