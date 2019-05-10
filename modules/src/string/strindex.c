@@ -8,10 +8,7 @@
 
 #include "ack_string.h"
 
-char *
-strindex(s, c)
-	register char *s;
-	int c;
+char *strindex(register char *s, int c)
 {
 	while (*s)
 		if (*s++ == c)

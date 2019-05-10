@@ -8,9 +8,7 @@
 
 #include "ack_string.h"
 
-char *
-strzero(s)
-	char *s;
+char *strzero(char *s)
 {
 	*s = '\0';
 	return s;
