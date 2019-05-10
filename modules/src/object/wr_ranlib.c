@@ -12,10 +12,10 @@
 #include "obj.h"
 #include "ranlib.h"
 
-void wr_ranlib(FILE* fd, struct ranlib *ran, long cnt1)
+void wr_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 {
 	struct ranlib *r;
-	long cnt, val;
+	long cnt2, val;
 	char *c;
 
 	/*
@@ -30,11 +30,11 @@ void wr_ranlib(FILE* fd, struct ranlib *ran, long cnt1)
 	 */
 	r = ran;
 	c = (char *)r;
-	cnt = cnt1;
-	while (cnt--) {
+	cnt2 = cnt;
+	while (cnt2--) {
 		val = r->ran_off; put4(val, c); c += 4;
 		val = r->ran_pos; put4(val, c); c += 4;
 		r++;
 	}
-	wr_bytes(fd, (char *) ran, cnt1 * SZ_RAN);
+	wr_bytes(fd, (char *) ran, cnt * SZ_RAN);
 }

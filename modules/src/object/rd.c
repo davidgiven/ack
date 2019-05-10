@@ -61,10 +61,10 @@ OUTREAD(int p, char* b, long n)
 /*
  * Open the output file according to the chosen strategy.
  */
-int rd_open(const char* f)
+int rd_open(const char* filename)
 {
 
-	if ((outfile = fopen(f, "rb")) == NULL)
+	if ((outfile = fopen(filename, "rb")) == NULL)
 		return 0;
 	return rd_fdopen(outfile);
 }
@@ -160,10 +160,10 @@ rd_sect(struct outsect* sect, unsigned int cnt)
 }
 
 void
-rd_outsect(int s)
+rd_outsect(int sectno)
 {
-	OUTSECT(s);
-	sectionnr = s;
+	OUTSECT(sectno);
+	sectionnr = sectno;
 }
 
 /*

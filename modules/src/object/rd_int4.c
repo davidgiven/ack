@@ -10,10 +10,11 @@
 #include "object.h"
 #include "obj.h"
 
-void wr_long(FILE* fd, long l)
+
+long rd_int4(FILE* fd)
 {
 	char buf[4];
 
-	put4(l, buf);
-	wr_bytes(fd, buf, 4L);
+	rd_bytes(fd, buf, 4L);
+	return get4(buf);
 }

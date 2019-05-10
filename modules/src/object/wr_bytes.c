@@ -22,7 +22,7 @@ extern void wr_fatal(void);
 /*
  * Just write "cnt" bytes to file-descriptor "fd".
  */
-void wr_bytes(FILE* fd, const char *string, long cnt)
+void wr_bytes(FILE* fd, const char *buf, long cnt)
 {
 
     size_t written_bytes;
@@ -30,12 +30,12 @@ void wr_bytes(FILE* fd, const char *string, long cnt)
     {
         int n = cnt >= maxchunk ? maxchunk : cnt;
 
-        written_bytes = fwrite(string, 1, n, fd);
+        written_bytes = fwrite(buf, 1, n, fd);
         if (written_bytes != (size_t)n)
         {
             wr_fatal();
         }
-        string += n;
+        buf += n;
         cnt -= n;
     }
 }

@@ -13,6 +13,7 @@
 
 extern void rd_fatal(void);
 
+
 int rd_arhdr(FILE* fd, register struct ar_hdr *arhdr)
 {
     char buf[AR_TOTAL];
