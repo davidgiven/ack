@@ -214,7 +214,7 @@ void error(BOOL quit, char *str1, char *str2)
 	char errbuf[256];
 
 	sprint(errbuf, str1, str2);
-	fwrite(errbuf, strlen(errbuf), 1, stderr);
+	fwrite(errbuf, 1, strlen(errbuf), stderr);
 	if (quit)
 	{
 		remove(temp_arch);
@@ -792,7 +792,7 @@ void write_symdef(FILE *ar)
 	}
 #endif
 	wr_arhdr(ar, &arbuf);
-	wr_long(ar, (long) tnum);
+	wr_int4(ar, (long) tnum);
 	/*
 	 * Account for the space occupied by the magic number
 	 * and the ranlib table.
@@ -804,7 +804,7 @@ void write_symdef(FILE *ar)
 	}
 
 	wr_ranlib(ar, tab, (long) tnum);
-	wr_long(ar, (long) tssiz);
+	wr_int4(ar, (long) tssiz);
 	wr_bytes(ar, tstrtab, (long) tssiz);
 }
 
