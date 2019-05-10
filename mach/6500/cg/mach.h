@@ -4,6 +4,9 @@
  */
 /* $Id$ */
 
+#include "tables.h"
+#include "types.h"
+
 #define ex_ap(y)        fprintf(codefile,".extern %s\n",y)
 #define in_ap(y)        /* nothing */
 
@@ -29,3 +32,11 @@
 #define fmt_id(ft, fs)	sprintf(fs,"_%s",ft)
 
 #define BSS_INIT        0
+
+void con_float(void);
+void con_mult(word sz);
+void con_part(register int sz, word w);
+void mes(word type);
+void prolog(full nlocals);
+
+
