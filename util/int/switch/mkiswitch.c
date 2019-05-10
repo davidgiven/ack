@@ -9,9 +9,11 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-extern FILE *popen();
+
 
 #include <ip_spec.h>
 #include <em_spec.h>
@@ -26,7 +28,132 @@ FILE	*ifp;			/* Input File Pointer */
 FILE	*ofp;			/* Output File Pointer */
 char	*Prefix;		/* Prefix for function name */
 
-main(argc, argv)
+
+int
+in(flgs, c)
+	char *flgs;
+	char c;
+{
+	while (*flgs)
+		if (c == *flgs++)
+			return 1;
+	return 0;
+}
+
+
+
+void OutCase(mnem, base, first, i, argstr)
+	char *mnem;
+	char *base;
+	int first;
+	int i;
+	char *argstr;
+{
+	/* Output a case in the switch statement */
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%s(%s); break;\n",
+		base, first+i, Prefix, mnem, argstr);
+}
+
+
+
+
+void ImplicitArg(argstr)
+	char *argstr;
+{
+	sprintf(argstr, "uwpop()");
+}
+
+void NoArgs(argstr)
+	char *argstr;
+{
+	sprintf(argstr, "");
+}
+
+void Mini(argstr, i, flgs)
+	char *argstr;
+	int i;
+	char *flgs;
+{
+	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
+
+	switch (newi) {
+	case -1:
+		sprintf(argstr, "%s",
+			in(flgs, 'w') ? "-wsize" : "-1L");
+		break;
+	case 0:
+		sprintf(argstr, "0L");
+		break;
+	case 1:
+		sprintf(argstr, "%s",
+			in(flgs, 'w') ? "wsize" : "1L");
+		break;
+	default:
+		sprintf(argstr, "%dL%s",
+			newi, in(flgs, 'w') ? "*wsize" : "");
+		break;
+	}
+}
+
+void Shortie(argstr, i, flgs)
+	char *argstr;
+	int i;
+	char *flgs;
+{
+	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
+
+	sprintf(argstr, "S_arg(%d)*%s",
+		newi, in(flgs, 'w') ? "wsize" : "1L");
+}
+
+void TwoSgn(argstr, flgs)
+	char *argstr;
+	char *flgs;
+{
+
+	sprintf(argstr, "%s*%s", in(flgs, 'P') ? "P_arg_2()" : in(flgs, 'N') ? "N_arg_2()" : "L_arg_2()",
+			in(flgs, 'w') ? "wsize" : "1L");
+}
+
+void TwoUns(argstr, flgs)
+	char *argstr;
+	char *flgs;
+{
+
+	sprintf(argstr,	"%s*%s", "U_arg()",
+			in(flgs, 'w') ? "wsize" : "((unsigned long) 1)");
+}
+
+void FourSgn(argstr, flgs)
+	char *argstr;
+	char *flgs;
+{
+
+	sprintf(argstr,	"%s*%s", in(flgs, 'P') ? "P_arg_4()" : in(flgs, 'N') ? "N_arg_4()" : "L_arg_4()",
+			in(flgs, 'w') ? "wsize" : "1L");
+}
+
+
+void fatal(fmt, str)
+	char *fmt;
+	char *str;
+{
+	fprintf(stderr, "%s, (fatal error): ", progname);
+	fprintf(stderr, fmt, str);
+	fprintf(stderr, "\n");
+	exit(1);
+}
+int getmnem(str) char *str ; {
+	char (*ptr)[4] ;
+
+	for ( ptr = em_mnem ; *ptr<= &em_mnem[sp_lmnem][0] ; ptr++ ) {
+		if ( strcmp(*ptr,str)==0 ) return (ptr-em_mnem) ;
+	}
+	fatal("%s","Illegal mnemonic") ;
+	return 0 ;
+}
+
+int main(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -148,128 +275,5 @@ main(argc, argv)
 			fatal("no opcode flag in ip_spec %s\n", flgs);
 		}
 	}
-	exit(0);
+	return EXIT_SUCCESS;
 }
-
-
-OutCase(mnem, base, first, i, argstr)
-	char *mnem;
-	char *base;
-	int first;
-	int i;
-	char *argstr;
-{
-	/* Output a case in the switch statement */
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%s(%s); break;\n",
-		base, first+i, Prefix, mnem, argstr);
-}
-
-
-
-		
-ImplicitArg(argstr)
-	char *argstr;
-{
-	sprintf(argstr, "uwpop()");
-}
-
-NoArgs(argstr)
-	char *argstr;
-{
-	sprintf(argstr, "");
-}
-
-Mini(argstr, i, flgs)
-	char *argstr;
-	int i;
-	char *flgs;
-{
-	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
-
-	switch (newi) {
-	case -1:
-		sprintf(argstr, "%s",
-			in(flgs, 'w') ? "-wsize" : "-1L");
-		break;
-	case 0:
-		sprintf(argstr, "0L");
-		break;
-	case 1:
-		sprintf(argstr, "%s",
-			in(flgs, 'w') ? "wsize" : "1L");
-		break;
-	default:
-		sprintf(argstr, "%dL%s",
-			newi, in(flgs, 'w') ? "*wsize" : "");
-		break;
-	}
-}
-
-Shortie(argstr, i, flgs)
-	char *argstr;
-	int i;
-	char *flgs;
-{
-	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
-
-	sprintf(argstr, "S_arg(%d)*%s",
-		newi, in(flgs, 'w') ? "wsize" : "1L");
-}
-
-TwoSgn(argstr, flgs)
-	char *argstr;
-	char *flgs;
-{
-
-	sprintf(argstr, "%s*%s", in(flgs, 'P') ? "P_arg_2()" : in(flgs, 'N') ? "N_arg_2()" : "L_arg_2()", 
-			in(flgs, 'w') ? "wsize" : "1L");
-}
-
-TwoUns(argstr, flgs)
-	char *argstr;
-	char *flgs;
-{
-
-	sprintf(argstr,	"%s*%s", "U_arg()", 
-			in(flgs, 'w') ? "wsize" : "((unsigned long) 1)");
-}
-
-FourSgn(argstr, flgs)
-	char *argstr;
-	char *flgs;
-{
-
-	sprintf(argstr,	"%s*%s", in(flgs, 'P') ? "P_arg_4()" : in(flgs, 'N') ? "N_arg_4()" : "L_arg_4()",
-			in(flgs, 'w') ? "wsize" : "1L");
-}
-
-int
-in(flgs, c)
-	char *flgs;
-	char c;
-{
-	while (*flgs)
-		if (c == *flgs++)
-			return 1;
-	return 0;
-}
-
-fatal(fmt, str)
-	char *fmt;
-	char *str;
-{
-	fprintf(stderr, "%s, (fatal error): ", progname);
-	fprintf(stderr, fmt, str);
-	fprintf(stderr, "\n");
-	exit(1);
-}
-int getmnem(str) char *str ; {
-	char (*ptr)[4] ;
-
-	for ( ptr = em_mnem ; *ptr<= &em_mnem[sp_lmnem][0] ; ptr++ ) {
-		if ( strcmp(*ptr,str)==0 ) return (ptr-em_mnem) ;
-	}
-	fatal("Illegal mnemonic") ;
-	return 0 ;
-}
-
