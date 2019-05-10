@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <stdlib.h>
 #include "assert.h"
 #include "param.h"
@@ -11,13 +13,10 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#include "subr.h"
+#include "salloc.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+
 
 /*
  * Package for string allocation and garbage collection.
@@ -31,7 +30,33 @@ static char rcsid[] = "$Id$";
 char *stab[MAXSTAB];
 int nstab=0;
 
-string myalloc(size) {
+static void chkstr(string str,char used[])
+{
+	register int low,middle,high;
+
+	low=0; high=nstab-1;
+	while (high>low) {
+		middle= (low+high)>>1;
+		if (str==stab[middle]) {
+			used[middle]=1;
+			return;
+		}
+		if (str<stab[middle])
+			high = middle-1;
+		else
+			low = middle+1;
+	}
+	if (low==high) {
+		if (str==stab[low]) {
+			used[low]=1;
+		}
+		return;
+	}
+}
+
+
+string myalloc(int size)
+{
 	register string p;
 
 	p = (string) malloc(size);
@@ -40,22 +65,22 @@ string myalloc(size) {
 	return(p);
 }
 
-myfree(p) string p; {
-
+void myfree(void* p)
+{
 	free(p);
 }
 
-popstr(nnstab) {
-	register i;
-
+void popstr(int nnstab)
+{
+	register int i;
 	for (i=nnstab;i<nstab;i++)
 		myfree(stab[i]);
 	nstab = nnstab;
 }
 
-char *salloc(size) {
+char *salloc(int size)
+{
 	register char *p;
-
 	if (nstab==MAXSTAB)
 		fatal("String table overflow");
 	p = myalloc(size+1);    /* extra room for terminating zero */
@@ -63,16 +88,16 @@ char *salloc(size) {
 	return(p);
 }
 
-compar(p1,p2) char **p1,**p2; {
-
+int compar(char **p1, char **p2)
+{
 	assert(*p1 != *p2);
 	if (*p1 < *p2)
 		return(-1);
 	return(1);
 }
 
-garbage_collect() {
-	register i;
+void garbage_collect(void) {
+	register int i;
 	struct emline *emlp;
 	token_p tp;
 	tkdef_p tdp;
@@ -115,25 +140,3 @@ garbage_collect() {
 	nstab = fillp-stab;
 }
 
-chkstr(str,used) string str; char used[]; {
-	register low,middle,high;
-
-	low=0; high=nstab-1;
-	while (high>low) {
-		middle= (low+high)>>1;
-		if (str==stab[middle]) {
-			used[middle]=1;
-			return;
-		}
-		if (str<stab[middle])
-			high = middle-1;
-		else
-			low = middle+1;
-	}
-	if (low==high) {
-		if (str==stab[low]) {
-			used[low]=1;
-		}
-		return;
-	}
-}

@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include "equiv.h"
 #include "param.h"
@@ -11,15 +13,12 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#include "subr.h"
+#include "salloc.h"
+#include "reg.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
 
-extern string myalloc();
+
 
 int rar[MAXCREG];
 rl_p* lar;
@@ -27,12 +26,12 @@ int maxindex;
 int regclass[NREGS];
 struct perm* perms;
 
-void permute(int index);
+static void permute(int index);
 
 struct perm* tuples(rl_p* regls, int nregneeded)
 {
 	int class = 0;
-	register i, j;
+	register int i, j;
 
 	/*
 	 * First compute equivalence classes of registers.
@@ -66,11 +65,11 @@ struct perm* tuples(rl_p* regls, int nregneeded)
 	return (perms);
 }
 
-void permute(int index)
+static void permute(int index)
 {
 	register struct perm* pp;
 	register rl_p rlp;
-	register i, j;
+	register int i, j;
 
 	if (index == maxindex)
 	{

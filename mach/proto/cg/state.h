@@ -2,7 +2,9 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+#ifndef STATE_H_
+#define STATE_H_
+
 
 #define STONSTACK	/* if defined state is saved in stackframe */
 
@@ -24,5 +26,10 @@ typedef struct state {
 } state_t,*state_p;
 
 #ifndef STONSTACK
-state_p savestatus();
+state_p state_p savestatus(void);
 #endif
+
+void restorestatus(register state_p sp);
+state_p savestatus(register state_p sp);
+
+#endif /* STATE_H_ */

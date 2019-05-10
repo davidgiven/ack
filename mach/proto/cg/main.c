@@ -1,19 +1,24 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
-#include "param.h"
-#include "mach.h"
-
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  *
  * Author: Hans van Staveren
  */
+#include <stdlib.h>
+#include "tables.h"
+#include "types.h"
+#include <cg_pattern.h>
+#include "data.h"
+#include "tables.h"
+#include "param.h"
+#include "mach.h"
+#include "subr.h"
+#include "fillem.h"
+#include "gencode.h"
+#include "codegen.h"
 
 char *progname;
-extern char startupcode[];
+extern byte startupcode[];
 int maxply=1;
 #ifndef NDEBUG
 int Debug=0;
@@ -21,10 +26,23 @@ int Debug=0;
 
 extern int endofprog;
 
-main(argc,argv) char **argv; {
+
+unsigned ggd(unsigned int a,unsigned int b)
+{
+	register unsigned c;
+
+	do {
+		c = a%b; a=b; b=c;
+	} while (c!=0);
+	return(a);
+}
+
+
+int main(int argc, char **argv)
+{
 	register unsigned n;
 	extern unsigned cc1,cc2,cc3,cc4;
-	unsigned ggd();
+
 
 	progname = argv[0];
 	while (--argc && **++argv == '-') {
@@ -70,11 +88,3 @@ main(argc,argv) char **argv; {
 	out_finish();
 }
 
-unsigned ggd(a,b) register unsigned a,b; {
-	register unsigned c;
-
-	do {
-		c = a%b; a=b; b=c;
-	} while (c!=0);
-	return(a);
-}

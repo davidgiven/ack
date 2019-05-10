@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -10,17 +12,16 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#include "subr.h"
+#include "reg.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+/* Froward local declarations */
+static void awayreg(int);
 
-chrefcount(regno,amount,tflag) {
+void chrefcount(int regno, int amount, int tflag)
+{
 	register struct reginfo *rp;
-	register i;
+	register int i;
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0
@@ -38,9 +39,10 @@ chrefcount(regno,amount,tflag) {
 #endif
 }
 
-getrefcount(regno, tflag) {
+int getrefcount(int regno, int tflag)
+{
 	register struct reginfo *rp;
-	register i,maxcount;
+	register int i,maxcount;
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0
@@ -58,7 +60,8 @@ getrefcount(regno, tflag) {
 #endif
 }
 
-erasereg(regno) {
+void erasereg(int regno)
+{
 	register struct reginfo *rp;
 	register int i;
 
@@ -83,10 +86,11 @@ erasereg(regno) {
 #endif
 }
 
-awayreg(regno) {
+static void awayreg(int regno)
+{
 	register struct reginfo *rp;
 	register tkdef_p tdp;
-	register i;
+	register int i;
 
 	/* Now erase recursively all registers containing
 	 * something using this one
@@ -107,9 +111,10 @@ awayreg(regno) {
 	}
 }
 
-cleanregs() {
+void cleanregs(void)
+{
 	register struct reginfo *rp;
-	register i;
+	register int i;
 
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		rp->r_contents.t_token = 0;
@@ -119,9 +124,10 @@ cleanregs() {
 }
 
 #ifndef NDEBUG
-inctcount(regno) {
+void inctcount(int regno)
+{
 	register struct reginfo *rp;
-	register i;
+	register int i;
 
 	rp = &machregs[regno];
 #if MAXMEMBERS!=0
@@ -137,7 +143,8 @@ inctcount(regno) {
 #endif
 }
 
-chkregs() {
+void chkregs(void)
+{
 	register struct reginfo *rp;
 	register token_p tp;
 	register tkdef_p tdp;

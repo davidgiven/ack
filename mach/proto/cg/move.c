@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -10,23 +12,18 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#include "subr.h"
+#include "reg.h"
+#include "codegen.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
 
-unsigned costcalc();
-
-move(tp1,tp2,ply,toplevel,maxcost) token_p tp1,tp2; unsigned maxcost; {
+int move(token_p tp1,token_p tp2,int ply,int toplevel,unsigned int maxcost)
+{
 	register move_p mp;
 	register unsigned t;
 	register struct reginfo *rp;
 	tkdef_p tdp;
 	int i;
-	unsigned codegen();
 
 	if (eqtoken(tp1,tp2))
 		return(0);

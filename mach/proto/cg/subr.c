@@ -1,8 +1,12 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 #include "assert.h"
 #include <stdio.h>
 #include "param.h"
@@ -12,19 +16,20 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
+#include "subr.h"
+#include "reg.h"
+#include "salloc.h"
+#include "gencode.h"
+#include "regvar.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
 
-extern string myalloc();
 unsigned codegen();
+extern unsigned cc1,cc2,cc3,cc4;
 
-match(tp,tep,optexp) register token_p tp; register set_p tep; {
-	register bitno;
+
+int match(register token_p tp, register set_p tep, int optexp)
+{
+	register int bitno;
 	token_p ct;
 	result_t result;
 
@@ -49,7 +54,8 @@ match(tp,tep,optexp) register token_p tp; register set_p tep; {
 	return(result.e_v.e_con);
 }
 
-instance(instno,token) register token_p token; {
+void instance(int instno,register token_p token)
+{
 	register inst_p inp;
 	int i;
 	token_p tp;
@@ -128,7 +134,9 @@ instance(instno,token) register token_p token; {
 	}
 }
 
-cinstance(instno,token,tp,regno) register token_p token,tp; {
+void cinstance(int instno,register token_p token,
+		 register token_p tp,int regno)
+{
 	register inst_p inp;
 	int i;
 	struct reginfo *rp;
@@ -195,8 +203,9 @@ cinstance(instno,token,tp,regno) register token_p token,tp; {
 	}
 }
 
-eqtoken(tp1,tp2) token_p tp1,tp2; {
-	register i;
+int eqtoken(token_p tp1,token_p tp2)
+{
+	register int i;
 	register tkdef_p tdp;
 
 	if (tp1->t_token!=tp2->t_token)
@@ -229,9 +238,9 @@ eqtoken(tp1,tp2) token_p tp1,tp2; {
 	return(1);
 }
 
-distance(cindex) {
-	register char *bp;
-	register i;
+int distance(int cindex) {
+	register byte *bp;
+	register int i;
 	register token_p tp;
 	int tokexp,tpl;
 	int expsize,toksize,exact;
@@ -281,9 +290,9 @@ distance(cindex) {
 	return(20-exact);
 }
 
-unsigned costcalc(cost) cost_t cost; {
+unsigned costcalc(cost_t cost)
+{
 	result_t result1,result2;
-	extern unsigned cc1,cc2,cc3,cc4;
 
 	result1=compute(&enodes[cost.c_size]);
 	result2=compute(&enodes[cost.c_time]);
@@ -291,20 +300,20 @@ unsigned costcalc(cost) cost_t cost; {
 	return(result1.e_v.e_con*cc1/cc2 + result2.e_v.e_con*cc3/cc4);
 }
 
-ssize(tokexpno) {
+int ssize(int tokexpno) {
 
 	return(machsets[tokexpno].set_size);
 }
 
-tsize(tp) register token_p tp; {
-
+int tsize(register token_p tp)
+{
 	if (tp->t_token==-1)
 		return(machregs[tp->t_att[0].ar].r_size);
 	return(tokens[tp->t_token].t_size);
 }
 
 #ifdef MAXSPLIT
-instsize(tinstno,tp) token_p tp; {
+int instsize(int tinstno,token_p tp) {
 	inst_p inp;
 	struct reginfo *rp;
 
@@ -335,8 +344,8 @@ instsize(tinstno,tp) token_p tp; {
 }
 #endif /* MAXSPLIT */
 
-tref(tp,amount) register token_p tp; {
-	register i;
+void tref(register token_p tp,int amount)  {
+	register int i;
 	register tkdef_p tdp;
 
 	if (tp->t_token==-1)
@@ -352,11 +361,12 @@ tref(tp,amount) register token_p tp; {
 #define MAXSAVE 10
 
 #ifdef MAXSPLIT
-split(tp,ip,ply,toplevel) token_p tp; int *ip; {
+int split(token_p tp,int *ip,int ply,int toplevel)
+{
 	c2_p cp;
 	token_t savestack[MAXSAVE];
 	int ok;
-	register i;
+	register int i;
 	int diff;
 	token_p stp;
 	int tpl;
@@ -392,11 +402,12 @@ found:
 }
 #endif /* MAXSPLIT */
 
-unsigned docoerc(tp,cp,ply,toplevel,forced) token_p tp; c3_p cp; {
+unsigned docoerc(token_p tp,c3_p cp,int ply,int toplevel,int forced)
+{
 	token_t savestack[MAXSAVE];
 	token_p stp;
 	int i,diff;
-	unsigned cost;
+	unsigned int cost;
 	int tpl;        /* saved tokpatlen */
 
 	stp = &fakestack[stackheight-1];
@@ -415,7 +426,8 @@ unsigned docoerc(tp,cp,ply,toplevel,forced) token_p tp; c3_p cp; {
 	return(cost);
 }
 
-unsigned stackupto(limit,ply,toplevel) token_p limit; {
+unsigned stackupto(token_p limit,int ply,int toplevel)
+{
 	token_t savestack[MAXFSTACK];
 	token_p stp;
 	int i,diff;
@@ -473,10 +485,11 @@ unsigned stackupto(limit,ply,toplevel) token_p limit; {
 	return(totalcost);
 }
 
-c3_p findcoerc(tp,tep) token_p tp; set_p tep; {
+c3_p findcoerc(token_p tp,set_p tep)
+{
 	register c3_p cp;
 	token_t rtoken;
-	register i;
+	register int i;
 	register struct reginfo **rpp;
 
 	for (cp=c3coercs;cp< &c3coercs[NC3]; cp++) {
@@ -508,30 +521,42 @@ c3_p findcoerc(tp,tep) token_p tp; set_p tep; {
 	return(0);      /* nothing found */
 }
 
-
-error(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
-
-	fatal(s,a1,a2,a3,a4,a5,a6,a7,a8);
-}
-
-fatal(s,a1,a2,a3,a4,a5,a6,a7,a8) char *s; {
-
+static void error_str(char *s, va_list argptr)
+{
 	fprintf(stderr,"Error: ");
-	fprintf(stderr,s,a1,a2,a3,a4,a5,a6,a7,a8);
+	vfprintf(stderr, s, argptr);
 	fprintf(stderr,"\n");
 	out_finish();
 	abort();
-	exit(-1);
+	exit(EXIT_FAILURE);
+
 }
 
-#ifndef NDEBUG
-badassertion(asstr,file,line) char *asstr, *file; {
+void error(char *s, ...)
+{
+	va_list ap;
+	va_start(ap, s);
+	error_str(s, ap);
+	va_end(ap);
+}
 
+void fatal(char *s, ...)
+{
+	va_list ap;
+	va_start(ap, s);
+	error_str(s, ap);
+	va_end(ap);
+}
+
+
+#ifndef NDEBUG
+void badassertion(char* asstr,char *file,int line)
+{
 	fatal("Assertion \"%s\" failed %s(%d)",asstr,file,line);
 }
 #endif
 
-max(a,b) {
-
+int max(int a,int b)
+{
 	return(a>b ? a : b);
 }

@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <em_spec.h>
 #include <em_flag.h>
 #include "assert.h"
@@ -12,21 +14,36 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
-
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+#include "fillem.h"
 
 #ifndef NDEBUG
 #include <stdio.h>
 extern char em_mnem[][4];
 #endif
 
-byte *trypat(bp,len) register byte *bp; {
-	register patlen,i;
+extern char em_flag[];
+
+static int argtyp(int mn) {
+
+	switch(em_flag[mn-sp_fmnem]&EM_PAR) {
+	case PAR_W:
+	case PAR_S:
+	case PAR_Z:
+	case PAR_O:
+	case PAR_N:
+	case PAR_L:
+	case PAR_F:
+	case PAR_R:
+	case PAR_C:
+		return(EV_INT);
+	default:
+		return(EV_STR);
+	}
+}
+
+byte *trypat(register byte *bp, int len)
+{
+	register int patlen,i;
 	result_t result;
 
 	getint(patlen,bp);
@@ -71,28 +88,10 @@ byte *trypat(bp,len) register byte *bp; {
 	return(bp);
 }
 
-extern char em_flag[];
 
-argtyp(mn) {
 
-	switch(em_flag[mn-sp_fmnem]&EM_PAR) {
-	case PAR_W:
-	case PAR_S:
-	case PAR_Z:
-	case PAR_O:
-	case PAR_N:
-	case PAR_L:
-	case PAR_F:
-	case PAR_R:
-	case PAR_C:
-		return(EV_INT);
-	default:
-		return(EV_STR);
-	}
-}
-
-byte *nextem(toplevel) {
-	register i;
+byte *nextem(int toplevel) {
+	register int i;
 	short hash[3];
 	register byte *bp;
 	byte *cp;
