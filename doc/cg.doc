@@ -1333,23 +1333,20 @@ Tables.c
 Tables.c contains a large number of initialized array's of all sorts.
 Description of each follows:
 .br
-.in 1i
-.ti -0.5i
-byte code rules[]
+.IP "byte code rules[]"
 .br
 Pseudo code interpreted by the code generator.
 Always starts with some opcode followed by operands depending
 on the opcode.
 Integers in this table are between 0 and 32767 and have a one byte
 encoding if between 0 and 127.
-.ti -0.5i
-char stregclass[]
+
+.IP "char stregclass[]"
 .br
 Number of computed static register class per register.
 Two registers are in the same class if they have the same properties
 and don't share a common subregister.
-.ti -0.5i
-struct reginfo machregs[]
+.IP  "struct reginfo machregs[]"
 .br
 Info per register.
 Initialized with representation string, size,
@@ -1357,78 +1354,66 @@ members of the register and set of registers affected when this
 one is changed.
 Also contains room for runtime information,
 like contents and reference count.
-.ti -0.5i
-tkdef_t tokens[]
+.IP  "tkdef_t tokens[]"
 .br
 Information per tokentype.
 Initialized with size, cost, type of operands and formatstring.
-.ti -0.5i
-node_t enodes[]
+.IP  "node_t enodes[]"
 .br
 List of triples representing expressions for the code generator.
-.ti -0.5i
-string code strings[]
+.IP "string code strings[]"
 .br
 List of strings.
 All strings are put in a list and checked for duplication,
 so only one copy per string will reside here.
-.ti -0.5i
-set_t machsets[]
+.IP "set_t machsets[]"
 .br
 List of token expression sets.
 Bit 0 of the set is used for the SCRATCH property of registers,
 bit 1 upto NREG are for the corresponding registers
 and bit NREG+1 upto the end are for corresponding tokens.
-.ti -0.5i
-inst_t tokeninstances[]
+.IP  "inst_t tokeninstances[]"
 .br
 List of descriptions for building tokens.
 Contains type of rule for building one,
 plus operands depending on the type.
-.ti -0.5i
-move_t moves[]
+.IP "move_t moves[]"
 .br
 List of move rules.
 Contains token expressions for source and destination
 plus cost and index for code rule.
-.ti -0.5i
-byte pattern[]
+.IP "byte pattern[]"
 .br
 EM patterns.
 This is structured internally as chains of patterns,
 each chain pointed at by pathash[].
 After each pattern the list of possible code rules is given.
-.ti -0.5i
-int pathash[256]
+.IP  "int pathash[256]"
 .br
 Indices into pattern[] for all patterns with a certain low order
 byte of the hashing function.
-.ti -0.5i
-c1_t c1coercs[]
+.IP  "c1_t c1coercs[]"
 .br
 List of rules to stack tokens.
 Contains token expressions,
 register needed,
 cost
 and code rule.
-.ti -0.5i
-c2_t c2coercs[]
+.IP "c2_t c2coercs[]"
 .br
 List of splitting coercions.
 Token expressions,
 split factor,
 replacements
 and code rule.
-.ti -0.5i
-c3_t c3coercs[]
+.IP "c3_t c3coercs[]"
 .br
 List of one to one coercions.
 Token expressions,
 register needed,
 replacement
 and code rule.
-.ti -0.5i
-struct reginfo **reglist[]
+.IP "struct reginfo **reglist[]"
 .br
 List of lists of pointers to register information.
 For every property the list is here
