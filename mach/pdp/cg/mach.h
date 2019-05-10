@@ -10,6 +10,10 @@
  */
 #define ACK_ASS	/* code for ACK assembler */
 
+#include "tables.h"
+#include "types.h"
+
+
 #ifdef ACK_ASS
 #define COMMENTCHAR '!'
 #define ex_ap(y)	fprintf(codefile,".extern %s\n",y)
@@ -34,14 +38,14 @@
 #define dlb_fmt		"_%d"
 #define	hol_fmt		"hol%d"
 
-#define hol_off		"%d+hol%d"
+#define hol_off		"%ld+hol%d"
 
 #ifdef ACK_ASS
-#define con_cst(x)	fprintf(codefile,".data2 %d\n",x)
+#define con_cst(x)	fprintf(codefile,".data2 %ld\n",x)
 #define con_ilb(x)	fprintf(codefile,".data2 %s\n",x)
 #define con_dlb(x)	fprintf(codefile,".data2 %s\n",x)
 #else
-#define con_cst(x)	fprintf(codefile,"%d\n",x)
+#define con_cst(x)	fprintf(codefile,"%ld\n",x)
 #define con_ilb(x)	fprintf(codefile,"%s\n",x)
 #define con_dlb(x)	fprintf(codefile,"%s\n",x)
 #endif
@@ -54,3 +58,12 @@
 #endif
 
 #define BSS_INIT	0
+
+
+void con_float(void);
+void con_mult(word sz);
+void con_part(register int sz, word w);
+void dlbdlb(string as,string ls);
+void mes(word type);
+void prolog(full nlocals);
+

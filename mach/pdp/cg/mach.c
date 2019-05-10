@@ -1,7 +1,3 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
@@ -13,10 +9,12 @@ static char rcsid[] = "$Id$";
  * machine dependent back end routines for the PDP-11
  */
 
-/* #define REGPATCH		/* save all registers in markblock */
+/* #define REGPATCH	*/	/* save all registers in markblock */
 
-con_part(sz,w) register sz; word w; {
 
+
+void con_part(register int sz, word w)
+{
 	while (part_size % sz)
 		part_size++;
 	if (part_size == TEM_WSIZE)
@@ -33,8 +31,8 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-con_mult(sz) word sz; {
-	long l, atol();
+void con_mult(word sz)  {
+	long l;
 
 	if (sz != 4)
 		fatal("bad icon/ucon size");
@@ -63,8 +61,8 @@ struct regadm {
 } regadm[2];
 int n_regvars;
 
-regscore(off,size,typ,score,totyp) long off; {
-
+int regscore(long off,int size,int typ,int score,int totyp)
+{
 	if (size != 2)
 		return(-1);
 	score -= 1;	/* allow for save/restore */
@@ -79,14 +77,14 @@ regscore(off,size,typ,score,totyp) long off; {
 	return(score);	/* estimated # of words of profit */
 }
 
-i_regsave() {
+void i_regsave(void) {
 
 	Rstring[0] = 0;
 	n_regvars=0;
 }
 
-f_regsave() {
-	register i;
+void f_regsave(void) {
+	register int i;
 
 	if (n_regvars==0 || lbytes==0) {
 #ifdef REGPATCH
@@ -113,8 +111,8 @@ f_regsave() {
 						regadm[i].ra_str);
 }
 
-regsave(regstr,off,size) char *regstr; long off; {
-
+void regsave(char *regstr,long off,int size)
+{
 	fprintf(codefile,"%c Local %ld into %s\n",COMMENTCHAR,off,regstr);
 /* commented away 
 #ifndef REGPATCH
@@ -131,7 +129,7 @@ end of commented away */
 	n_regvars++;
 }
 
-regreturn() {
+void regreturn(void) {
 
 #ifdef REGPATCH
 	fprintf(codefile,"jmp eret\n");
@@ -142,7 +140,7 @@ regreturn() {
 
 #endif
 
-prolog(nlocals) full nlocals; {
+void prolog(full nlocals) {
 
 #ifndef REGVARS
 #ifdef REGPATCH
@@ -160,8 +158,8 @@ prolog(nlocals) full nlocals; {
 #endif
 }
 
-dlbdlb(as,ls) string as,ls; {
-
+void dlbdlb(string as,string ls)
+{
 	if (strlen(as)+strlen(ls)+2<sizeof(labstr)) {
 		strcat(ls,":");
 		strcat(ls,as);
@@ -169,8 +167,9 @@ dlbdlb(as,ls) string as,ls; {
 		fatal("too many consecutive labels");
 }
 
-mes(type) word type; {
-	int argt ;
+void mes(word type)
+{
+	int argt;
 
 	switch ( (int)type ) {
 	case ms_ext :
