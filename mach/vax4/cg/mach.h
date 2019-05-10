@@ -2,7 +2,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+
+#include "tables.h"
+#include "types.h"
+
 #define ex_ap(x)	fprintf(codefile,".extern\t%s\n",x)
 #define in_ap(x)	/* nothing */
 
@@ -30,3 +33,9 @@
 #define MACH_OPTIONS
 
 #define modhead		".sect .text\n.sect .rom\n.sect .data\n.sect .bss\n"
+
+void con_float(void);
+void con_mult(word sz);
+void con_part(register int sz, word w);
+void mes(word type);
+void prolog(full nlocals);
