@@ -8,13 +8,8 @@
 #include <stdint.h>
 #include "flt_misc.h"
 
-void
-flt_mul(e1,e2,e3)
-	register flt_arith *e1,*e2,*e3;
+void flt_mul(flt_arith *e1, flt_arith *e2, flt_arith *res)
 {
-	/*	Multiply the extended numbers e1 and e2, and put the
-		result in e3.
-	*/
 	register int	i,j;		/* loop control	*/
 	unsigned short	mp[4];
 	unsigned short	mc[4];
@@ -25,10 +20,10 @@ flt_mul(e1,e2,e3)
 	flt_status = 0;
 
 	/* first save the sign (XOR)			*/
-	e3->flt_sign = e1->flt_sign ^ e2->flt_sign;
+	res->flt_sign = e1->flt_sign ^ e2->flt_sign;
 
 	/* compute new exponent */
-	e3->flt_exp = e1->flt_exp + e2->flt_exp + 1;
+	res->flt_exp = e1->flt_exp + e2->flt_exp + 1;
 
 	/* 128 bit multiply of mantissas	*/
 
@@ -55,7 +50,7 @@ flt_mul(e1,e2,e3)
 	}
 
 	if (! (result[0] & 0x8000)) {
-		e3->flt_exp--;
+		res->flt_exp--;
 		for (i = 0; i <= 3; i++) {
 			result[i] <<= 1;
 			if (result[i+1]&0x8000) result[i] |= 1;
@@ -65,16 +60,16 @@ flt_mul(e1,e2,e3)
 	/*
 	 *	combine the registers to a total
 	 */
-	e3->m1 = ((uint32_t)result[0] << 16) + result[1];
-	e3->m2 = ((uint32_t)result[2] << 16) + result[3];
+	res->m1 = ((uint32_t)result[0] << 16) + result[1];
+	res->m2 = ((uint32_t)result[2] << 16) + result[3];
 	if (result[4] & 0x8000) {
-		if (++e3->m2 == 0) {
-			e3->m2 = 0;
-			if (++e3->m1 == 0) {
-				e3->m1 = 0x80000000;
-				e3->flt_exp++;
+		if (++res->m2 == 0) {
+			res->m2 = 0;
+			if (++res->m1 == 0) {
+				res->m1 = 0x80000000;
+				res->flt_exp++;
 			}
 		}
 	}
-	flt_chk(e3);
+	flt_chk(res);
 }

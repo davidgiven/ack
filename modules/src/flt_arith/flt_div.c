@@ -8,9 +8,7 @@
 #include <stdint.h>
 #include "flt_misc.h"
 
-void
-flt_div(e1,e2,e3)
-	register flt_arith *e1,*e2,*e3;
+void flt_div(flt_arith *e1,flt_arith *e2,flt_arith *res)
 {
 	uint32_t result[2];
 	register uint32_t *rp;
@@ -21,21 +19,21 @@ flt_div(e1,e2,e3)
 	flt_arith cpe1 = *e1;
 
 	flt_status = 0;
-	e3->flt_sign = e1->flt_sign ^ e2->flt_sign;
+	res->flt_sign = e1->flt_sign ^ e2->flt_sign;
 	if ((e2->m1 | e2->m2) == 0) {
 		flt_status = FLT_DIV0;
-		e3->flt_exp = EXT_MAX;
-		e3->m1 = 0x80000000;
-		e3->m2 = 0L;
+		res->flt_exp = EXT_MAX;
+		res->m1 = 0x80000000;
+		res->m2 = 0L;
 		return;
 	}
 	if ((e1->m1 | e1->m2) == 0) {	/* 0 / anything == 0 */
-		e3->flt_exp = 0;	/* make sure */
-		e3->m1 = e3->m2 = 0L;
-		e3->flt_sign = 0;
+		res->flt_exp = 0;	/* make sure */
+		res->m1 = res->m2 = 0L;
+		res->flt_sign = 0;
 		return;
 	}
-	e3->flt_exp = e1->flt_exp - e2->flt_exp;
+	res->flt_exp = e1->flt_exp - e2->flt_exp;
 
 	u[4] = (e1->m2 & 1) << 15;
 	flt_b64_sft(&(cpe1.flt_mantissa),1);
@@ -112,9 +110,9 @@ flt_div(e1,e2,e3)
 			*rp |= (j & 1) ? q_est : (q_est<<16);
 		}
 	}
-	e3->m1 = result[0];
-	e3->m2 = result[1];
+	res->m1 = result[0];
+	res->m2 = result[1];
 
-	flt_nrm(e3);
-	flt_chk(e3);
+	flt_nrm(res);
+	flt_chk(res);
 }
