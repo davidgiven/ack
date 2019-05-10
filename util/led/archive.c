@@ -45,10 +45,10 @@ static long getsymdeftable(void)
 	register struct ranlib	*ran;
 	register long		count;
 	register long		nran, nchar;
-	extern long		rd_long();
+	extern long		rd_int4();
 	extern FILE*		infile;
 
-	count = nran = rd_long(infile);
+	count = nran = rd_int4(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
 	if (nran > SIZE_MAX / sizeof(struct ranlib))
 		off = BADOFF;	/* nran * size would overflow. */
@@ -58,7 +58,7 @@ static long getsymdeftable(void)
 		fatal("no space for ranlib structs");
 	ran = (struct ranlib *)address(ALLORANL, off);
 	rd_ranlib(infile, ran, count);
-	nchar = rd_long(infile);
+	nchar = rd_int4(infile);
 	debug("%ld ranlib chars\n", nchar, 0, 0, 0);
 	if (nchar != (size_t)nchar ||
 	    (off = hard_alloc(ALLORANL, nchar)) == BADOFF)
