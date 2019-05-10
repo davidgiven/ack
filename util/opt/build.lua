@@ -11,9 +11,9 @@ flex {
 }
 
 local headers = {
-	"./alloc.h", "./ext.h", "./line.h", "./lookup.h", "./optim.h",
-	"./param.h", "./pattern.h", "./pop_push.h", "./proinf.h",
-	"./tes.h", "./types.h",
+	"./alloc.h", "./ext.h", "./getline.h", "./line.h", "./lookup.h", "./optim.h",
+	"./param.h", "./pattern.h", "./pop_push.h", "./proinf.h","./putline.h",
+	"./reg.h","./tes.h", "./types.h","./util.h"
 }
 
 cprogram {
