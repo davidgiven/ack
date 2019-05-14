@@ -486,7 +486,7 @@ void InitCst(void)
 	max_int = full_mask[int_size] & ~(1L << (int_size * 8 - 1));
 	min_int = - max_int;
 	maxint_str = long2str(max_int, 10);
-	maxint_str = Salloc(maxint_str, (unsigned int) strlen(maxint_str));
+	maxint_str = Salloc(maxint_str, (unsigned int) strlen(maxint_str)+sizeof(char));
 	wrd_bits = 8 * (int) word_size;
 	if( !max_intset ) max_intset = wrd_bits - 1;
 }
