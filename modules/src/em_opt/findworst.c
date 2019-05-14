@@ -6,30 +6,30 @@ static char rcsidp3[] = "$Id$";
 
 #define UPDATEWORST(backups) if(backups>mostbackups) mostbackups = backups;
 
-PRIVATE int leftmatch();
-PRIVATE int rightmatch();
+PRIVATE int rightmatch(struct mnems,struct mnems,int, int);
+PRIVATE int leftmatch(struct mnems, struct mnems, int, int);
 
-findworst(patt,repl)
-	struct mnems patt,repl;
+
+void findworst(struct mnems patt,struct mnems repl)
 {
 	/*
-	/* Find the pattern that requires the most backup of output queue.
-	/* Let repl be r1 r2 ... rn. All these are already on the output queue.
-	/* Possibilities in order of most backup first are:
-	/* a)	pattern of form: p1 .... pb r1 r2 .... rn pc ... pd
-	/*	i.e. <repl> completely in pattern.
-	/*	requires a backup of b+n instructions
-	/*	and a goto to state 0.
-	/* b)	pattern of form: p1 .... pb r1 r2 .... ri
-	/*	i.e. a prefix of <repl> ends a pattern.
-	/*	requires a backup of b+n instructions
-	/*	and a goto to state 0.
-	/* c)	pattern of form: ri ri+1 ... rn pc ... pd
-	/*	i.e. a suffix of <repl> starts a pattern.
-	/*	requires a backup of j-i+1 instructions and a goto to state 0.
-	/* d)   pattern of the form: ri ri+1 ... rj
-	/*	i.e. a substring of <repl> is a complete pattern
-	/*	requires a backup of j-i+1 instructions and a goto to state 0.
+	/ Find the pattern that requires the most backup of output queue.
+	/ Let repl be r1 r2 ... rn. All these are already on the output queue.
+	/ Possibilities in order of most backup first are:
+	/ a)	pattern of form: p1 .... pb r1 r2 .... rn pc ... pd
+	/	i.e. <repl> completely in pattern.
+	/	requires a backup of b+n instructions
+	/	and a goto to state 0.
+	/ b)	pattern of form: p1 .... pb r1 r2 .... ri
+	/	i.e. a prefix of <repl> ends a pattern.
+	/	requires a backup of b+n instructions
+	/	and a goto to state 0.
+	/ c)	pattern of form: ri ri+1 ... rn pc ... pd
+	/	i.e. a suffix of <repl> starts a pattern.
+	/	requires a backup of j-i+1 instructions and a goto to state 0.
+	/ d)   pattern of the form: ri ri+1 ... rj
+	/	i.e. a substring of <repl> is a complete pattern
+	/	requires a backup of j-i+1 instructions and a goto to state 0.
 	*/
 	int n = repl.m_len;
 	int diff = patt.m_len - repl.m_len;
@@ -45,7 +45,7 @@ findworst(patt,repl)
 		if(actions[s]==(struct action *)NULL)
 			continue;
 		/* look for case a */
-		if(first=rightmatch(patterns[s],repl,1,n)) {
+		if( (first=rightmatch(patterns[s],repl,1,n))) {
 			UPDATEWORST(first-1+n);
 		}
 		/* look for case b */
@@ -76,16 +76,14 @@ findworst(patt,repl)
 	fprintf(ofile,"\t\tOO_mkrepl(%d,%d,%d);\n",n,diff,mostbackups);
 }
 
-findfail(state,resout,rescpy,resgto)
-	int state;
-	int *resout, *rescpy, *resgto;
+void findfail(int state, int *resout, int *rescpy, int *resgto)
 {
 	/*
-	/* If pattern matching fails in 'state', how many outputs and how many
-	/* push backs are requires. If pattern is of the form p1 p2 .... pn
-	/* look for patterns of the form p2 p3 ... pn; then p3 p4 ... pn; etc.
-	/* The first such match of the form pi pi+1 ... pn requires an output
-	/* of p1 p2 ... pi-1 and a push back of pn pn-1 ... pi.	
+	/ If pattern matching fails in 'state', how many outputs and how many
+	/ push backs are requires. If pattern is of the form p1 p2 .... pn
+	/ look for patterns of the form p2 p3 ... pn; then p3 p4 ... pn; etc.
+	/ The first such match of the form pi pi+1 ... pn requires an output
+	/ of p1 p2 ... pi-1 and a push back of pn pn-1 ... pi.
 	*/
 	int s,i;
 	struct state *p;
@@ -114,15 +112,12 @@ findfail(state,resout,rescpy,resgto)
 	*resgto = 0;
 }
 
-PRIVATE int
-leftmatch(patt,repl,i,j)
-	struct mnems patt,repl;
-	int i,j;
+PRIVATE int leftmatch(struct mnems patt,struct mnems repl,int i,int j)
 {
 	/*
-	/* Return the first complete match of the mnems <ri,ri+1,..,rj> of
-	/* 'repl' in the mnems of 'patt'.  Find the leftmost match.
-	/* Return 0 if fails.
+	/ Return the first complete match of the mnems <ri,ri+1,..,rj> of
+	/ 'repl' in the mnems of 'patt'.  Find the leftmost match.
+	/ Return 0 if fails.
 	*/
 	int lenrij = j-i+1;
 	int lastpos = patt.m_len - lenrij + 1;
@@ -139,15 +134,12 @@ leftmatch(patt,repl,i,j)
 	return(0);
 }
 
-PRIVATE int
-rightmatch(patt,repl,i,j)
-	struct mnems patt,repl;
-	int i,j;
+PRIVATE int rightmatch(struct mnems patt,struct mnems repl,int i,int j)
 {
 	/*
-	/* Return the first complete match of the mnems <ri,ri+1,..,rj> of
-	/* 'repl' in the mnems of 'patt'.  Find the rightmost match.
-	/* Return 0 if fails.
+	/ Return the first complete match of the mnems <ri,ri+1,..,rj> of
+	/ 'repl' in the mnems of 'patt'.  Find the rightmost match.
+	/ Return 0 if fails.
 	*/
 	int lenrij = j-i+1;
 	int lastpos = patt.m_len - lenrij + 1;

@@ -3,6 +3,7 @@
 #include "Lpars.h"
 #include "parser.h"
 
+
 struct idf	*opval;		/* opcode of returned OPCODE*/
 int		lastintval;	/* value of last integer seen */
 int		linenum = 1;	/*current line number of input file*/
@@ -59,7 +60,12 @@ offset		return(OFFSET);
 .		return(yytext[0]);
 %%
 
-back_token()
+int yywrap(void)
+{
+	return 1;
+}
+
+void back_token(void)
 {
 	yyless(0);
 }
