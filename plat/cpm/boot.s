@@ -27,7 +27,7 @@ begtext:
 	mov c, a		! c = high byte of BDOS address
 	mov a, b		! a = high byte of _end
 	cmp c
-	jnc __exit		! emergency exit if a >= c
+	rnc       		! emergency exit if a >= c
 
 	! We have to clear the bss. (argify requires it.)
 	
@@ -46,6 +46,9 @@ begtext:
 
 	! Set up the stack (now it's been cleared, since it's in the BSS).
 
+	lxi h, 0
+	dad sp
+	shld saved_sp			! save old stack pointer
 	lxi sp, stack + STACKSIZE
 
 	! Initialise the rsts (if desired).
@@ -54,8 +57,13 @@ begtext:
 		call .rst_init
 	#endif
 
+    ! Now the 'heap'.
+
+	lxi h, __end
+	shld _cpm_ram
+
 	! C-ify the command line at 0x0080.
-	
+
 	lxi h, 0x0080
 	mov a, m                 ! a = length of command line
 	cpi 0x7F                 ! 127-byte command lines...
@@ -119,16 +127,39 @@ end_of_argify:
 	lhld argc                ! slightly evil
 	mvi h, 0
 	push h
-	call __m_a_i_n
-	! FALLTHROUGH
+	push h                   ! return address is 0
+	jmp __m_a_i_n
+
+.define _cpm_fastexit
+_cpm_fastexit:
+saved_sp = _cpm_fastexit + 1
+	lxi sp, 0                ! patched on startup
+	ret
 
 ! Emergency exit routine.
 
-.define EXIT, __exit
-EXIT:
-__exit:
-	rst 0
+.define EXIT, __exit, _cpm_exit
+EXIT = 0
+__exit = 0
+_cpm_exit = 0
 	
+! Special CP/M stuff.
+
+.define _cpm_fcb
+_cpm_fcb = 0x005c
+
+.define _cpm_ram
+.comm _cpm_ram, 2
+.define _cpm_ramtop
+_cpm_ramtop = 0x0001
+
+.define _cpm_default_dma
+_cpm_default_dma = 0x0080
+
+.define _cpm_cmdlinelen, _cpm_cmdline
+_cpm_cmdlinelen = 0x0080
+_cpm_cmdline = 0x0081
+
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
 

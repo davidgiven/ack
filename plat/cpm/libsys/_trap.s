@@ -3,20 +3,14 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
+#
+#include "asm.h"
 
 .define .trp
 .define earray, erange, eset, eiovfl, efovfl, efunfl, eidivz, eidivz
 .define efdivz, eiund, efund, econv, estack, eheap, eillins, eoddz
 .define ecase, ememflt, ebadptr, ebadpc, ebadlae, ebadmon, ebadlin, ebadgto
 .define eunimpl
-
-.sect .text
 
 ! Trap routine
 ! Expects trap number on stack.
@@ -206,15 +200,11 @@ eunimpl:lxi h,EUNIMPL
 	pop d
 	ret
 1:
-	lxi h, 6
-	push h
-	lxi h, text
-	push h
-	lxi h, 1
-	push h
-	call _write
-	jmp EXIT
+	lxi d, text
+	mvi c, 9        ! write $-terminated string
+	call 0x0005
+	rst 0           ! abend
 
 .sect .rom
-text: .ascii "TRAP!\n"
+text: .ascii "TRAP!\r\n$"
 

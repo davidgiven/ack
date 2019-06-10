@@ -1,8 +1,4 @@
-/* $Source$
- * $State$
- * $Revision$
- */
-
+#include <cpm.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
@@ -11,7 +7,6 @@
 #define STACK_BUFFER 128 /* number of bytes to leave for stack */
 
 extern char _end[1];
-static char* current = _end;
 
 int brk(void* newend)
 {
@@ -24,7 +19,7 @@ int brk(void* newend)
 	    (p < _end))	
 		return -1;
 		
-	current = p;
+	cpm_ram = p;
 	return 0;
 }
 
@@ -34,9 +29,9 @@ void* sbrk(int increment)
 	char* new;
 	
 	if (increment == 0)
-		return current;
+		return cpm_ram;
 		
-	old = current;
+	old = cpm_ram;
 	new = old + increment;
 
 	if ((increment > 0) && (new <= old))
