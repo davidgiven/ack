@@ -45,6 +45,33 @@ local bdos_calls = {
     [40] = "cpm_write_random_filled",
 }
 
+local trap_calls = {
+    "EARRAY",
+    "ERANGE",
+    "ESET",
+    "EIOVFL",
+    "EFOVFL",
+    "EFUNFL",
+    "EIDIVZ",
+    "EFDIVZ",
+    "EIUND",
+    "EFUND",
+    "ECONV",
+    "ESTACK",
+    "EHEAP",
+    "EILLINS",
+    "EODDZ",
+    "ECASE",
+    "EMEMFLT",
+    "EBADPTR",
+    "EBADPC",
+    "EBADLAE",
+    "EBADMON",
+    "EBADLIN",
+    "EBADGTO",
+    "EUNIMPL",
+}
+
 local generated = {}
 for n, name in pairs(bdos_calls) do
     generated[#generated+1] = normalrule {
@@ -53,6 +80,16 @@ for n, name in pairs(bdos_calls) do
         outleaves = { name..".s" },
         commands = {
             "%{ins[1]} "..n.." "..name.." > %{outs}"
+        }
+    }
+end
+for _, name in pairs(trap_calls) do
+    generated[#generated+1] = normalrule {
+        name = name,
+        ins = { "./make_trap.sh" },
+        outleaves = { name..".s" },
+        commands = {
+            "%{ins[1]} "..name:lower().." "..name.." > %{outs}"
         }
     }
 end

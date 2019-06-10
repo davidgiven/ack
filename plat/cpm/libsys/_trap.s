@@ -11,6 +11,10 @@
 .define efdivz, eiund, efund, econv, estack, eheap, eillins, eoddz
 .define ecase, ememflt, ebadptr, ebadpc, ebadlae, ebadmon, ebadlin, ebadgto
 .define eunimpl
+.define EARRAY, ERANGE, ESET, EIOVFL, EFOVFL, EFUNFL, EIDIVZ, EIDIVZ
+.define EFDIVZ, EIUND, EFUND, ECONV, ESTACK, EHEAP, EILLINS, EODDZ
+.define ECASE, EMEMFLT, EBADPTR, EBADPC, EBADLAE, EBADMON, EBADLIN, EBADGTO
+.define EUNIMPL
 
 ! Trap routine
 ! Expects trap number on stack.
@@ -44,126 +48,6 @@
 	EBADLIN = 26
 	EBADGTO = 27
 	EUNIMPL = 63		! unimplemented em-instruction called
-
-earray:	lxi h,EARRAY
-	push h
-	call .trp
-	ret
-
-erange:	lxi h,ERANGE
-	push h
-	call .trp
-	ret
-
-eset:	lxi h,ESET
-	push h
-	call .trp
-	ret
-
-eiovfl:	lxi h,EIOVFL
-	push h
-	call .trp
-	ret
-
-efovfl:	lxi h,EFOVFL
-	push h
-	call .trp
-	ret
-
-efunfl:	lxi h,EFUNFL
-	push h
-	call .trp
-	ret
-
-eidivz:	lxi h,EIDIVZ
-	push h
-	call .trp
-	ret
-
-efdivz:	lxi h,EFDIVZ
-	push h
-	call .trp
-	ret
-
-eiund:	lxi h,EIUND
-	push h
-	call .trp
-	ret
-
-efund:	lxi h,EFUND
-	push h
-	call .trp
-	ret
-
-econv:	lxi h,ECONV
-	push h
-	call .trp
-	ret
-
-estack:	lxi h,ESTACK
-	push h
-	call .trp
-	ret
-
-eheap:	lxi h,EHEAP
-	push h
-	call .trp
-	ret
-
-eillins:lxi h,EILLINS
-	push h
-	call .trp
-	ret
-
-eoddz:	lxi h,EODDZ
-	push h
-	call .trp
-	ret
-
-ecase:	lxi h,ECASE
-	push h
-	call .trp
-	ret
-
-ememflt:lxi h,EMEMFLT
-	push h
-	call .trp
-	ret
-
-ebadptr:lxi h,EBADPTR
-	push h
-	call .trp
-	ret
-
-ebadpc:	lxi h,EBADPC
-	push h
-	call .trp
-	ret
-
-ebadlae:lxi h,EBADLAE
-	push h
-	call .trp
-	ret
-
-ebadmon:lxi h,EBADMON
-	push h
-	call .trp
-	ret
-
-ebadlin:lxi h,EBADLIN
-	push h
-	call .trp
-	ret
-
-ebadgto:lxi h,EBADGTO
-	push h
-	call .trp
-	ret
-
-eunimpl:lxi h,EUNIMPL
-	push h
-	call .trp
-	ret
 
 .trp:
 	pop h
