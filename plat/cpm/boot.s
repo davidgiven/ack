@@ -148,14 +148,18 @@ _cpm_warmboot = 0
 	
 ! Special CP/M stuff.
 
-.define _cpm_fcb
+.define _cpm_fcb, _cpm_fcb2
 _cpm_fcb = 0x005c
+_cpm_fcb2 = 0x006c
 
 .define _cpm_ramtop
 .comm _cpm_ramtop, 2
 
 .define _cpm_default_dma
 _cpm_default_dma = 0x0080
+
+.define _cpm_iobyte
+_cpm_iobyte = 3
 
 .define _cpm_cmdlinelen, _cpm_cmdline
 _cpm_cmdlinelen = 0x0080

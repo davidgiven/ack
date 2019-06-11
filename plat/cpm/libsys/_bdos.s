@@ -16,6 +16,5 @@ call_bdos:
 	call 0x0005
 	pop b          ! restore FP
 	
-	mov d, h
-	mov e, l
+	xchg           ! DE = HL
 	ret

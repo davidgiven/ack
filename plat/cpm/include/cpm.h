@@ -88,7 +88,7 @@ extern void cpm_overwrite_ccp(void);
 /* 11 */ extern uint8_t cpm_const(void);
 /* 12 */ extern uint16_t cpm_get_version(void);
 /* 13 */ extern void cpm_reset_disk_system(void);
-/* 14 */ extern void cpm_select_disk(uint8_t disk);
+/* 14 */ extern void cpm_select_drive(uint8_t disk);
 /* 15 */ extern uint8_t cpm_open_file(FCB* fcb);
 /* 16 */ extern uint8_t cpm_close_file(FCB* fcb);
 /* 17 */ extern uint8_t cpm_findfirst(FCB* fcb);
