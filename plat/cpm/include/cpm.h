@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+/* EM requires 2-byte alignment, even on the i80, so we can't declare these
+ * structures to contain uint16_ts. Use U16() to access them. */
+
 typedef struct
 {
     uint8_t dr;
@@ -13,8 +16,7 @@ typedef struct
     uint8_t rc;
     uint8_t d[16];
     uint8_t cr;
-    uint16_t r;
-    uint8_t r2;
+    uint8_t r[3];
 }
 FCB;
 
@@ -34,28 +36,26 @@ typedef struct
     uint8_t ex;
     uint8_t s[2];
     uint8_t rc;
-    union
-    {
-        uint8_t al8[16];
-        uint16_t al16[8];
-    }
-    al;
+    uint8_t al[16];
 }
 DIRE;
 
 typedef struct
 {
-    uint16_t spt; /* number of 128-byte sectors per track */
+    uint8_t spt[2]; /* number of 128-byte sectors per track */
     uint8_t bsh;  /* block shift; 3=1kB, 4=2kB, 5=4kB etc */
     uint8_t blm;  /* block mask; 0x07=1kB, 0x0f=2kB, 0x1f=4k etc */
     uint8_t exm;  /* extent mask */
-    uint16_t dsm; /* maximum block number */
-    uint16_t drm; /* maximum directory entry number */
-    uint16_t al;  /* directory allocation bitmap */
-    uint16_t cks; /* checksum vector size */
-    uint16_t off; /* number of reserved tracks */
+    uint8_t dsm[2]; /* maximum block number */
+    uint8_t drm[2]; /* maximum directory entry number */
+    uint8_t al[2];  /* directory allocation bitmap */
+    uint8_t cks[2]; /* checksum vector size */
+    uint8_t off[2]; /* number of reserved tracks */
 }
 DPB;
+
+/* Access an unaligned field (see above). */
+#define U16(ptr) (*(uint16_t*)(ptr))
 
 extern FCB cpm_fcb; /* primary FCB */
 extern FCB cpm_fcb2; /* secondary FCB (special purpose) */
