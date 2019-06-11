@@ -22,12 +22,13 @@ begtext:
 	! BDOS and crash CP/M.  We cheat by comparing only high bytes
 	! of each address.
 
-	lxi b, __end
 	lda 0x0007
-	mov c, a		! c = high byte of BDOS address
-	mov a, b		! a = high byte of _end
+	mov c, a        ! c = high byte of BDOS address
+	lda _cpm_ram+1  ! a = high byte of top of BSS, a.k.a. _end
 	cmp c
-	rnc       		! emergency exit if a >= c
+	lxi d, noroom
+	mvi c, 9
+	jnc 0x0005      ! print error and exit if a >= c
 
 	! We have to clear the bss. (argify requires it.)
 	
@@ -59,8 +60,10 @@ begtext:
 
     ! Now the 'heap'.
 
-	lxi h, __end
-	shld _cpm_ram
+	lhld 0x0006              ! BDOS entry point
+	lxi d, -0x806            ! offset to start of CCP
+	dad d                    
+	shld _cpm_ramtop
 
 	! C-ify the command line at 0x0080.
 
@@ -127,31 +130,29 @@ end_of_argify:
 	lhld argc                ! slightly evil
 	mvi h, 0
 	push h
-	push h                   ! return address is 0
-	jmp __m_a_i_n
-
-.define _cpm_fastexit
-_cpm_fastexit:
-saved_sp = _cpm_fastexit + 1
+	call __m_a_i_n
+.define _cpm_exit, EXIT, __exit
+_cpm_exit:
+EXIT:
+__exit:
+	stc                      ! set carry bit
+	jnc _cpm_warmboot        ! warm boot if not set
+saved_sp = . + 1
 	lxi sp, 0                ! patched on startup
 	ret
 
 ! Emergency exit routine.
 
-.define EXIT, __exit, _cpm_exit
-EXIT = 0
-__exit = 0
-_cpm_exit = 0
+.define _cpm_warmboot
+_cpm_warmboot = 0
 	
 ! Special CP/M stuff.
 
 .define _cpm_fcb
 _cpm_fcb = 0x005c
 
-.define _cpm_ram
-.comm _cpm_ram, 2
 .define _cpm_ramtop
-_cpm_ramtop = 0x0001
+.comm _cpm_ramtop, 2
 
 .define _cpm_default_dma
 _cpm_default_dma = 0x0080
@@ -197,5 +198,10 @@ block1: .space 4        ! used by 32 bits divide and
 block2: .space 4        ! multiply routines
 block3: .space 4        ! must be contiguous (.comm doesn't guarantee this)
 
+.sect .data
+.define _cpm_ram
+_cpm_ram: .data2 __end
+
 .sect .rom
 progname: .asciz 'ACKCPM'
+noroom: .ascii 'No room$'

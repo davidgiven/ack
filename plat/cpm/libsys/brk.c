@@ -1,32 +1,29 @@
 #include <cpm.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
 
 #define	OUT_OF_MEMORY (void*)(-1)	/* sbrk returns this on failure */
-#define STACK_BUFFER 128 /* number of bytes to leave for stack */
 
-extern char _end[1];
+extern uint8_t _end[1];
 
 int brk(void* newend)
 {
-	/* We determine the amount of free memory by looking at the address of the
-	 * BDOS vector at 0x0006. */
-	char* memtop = (char*) ((*(unsigned char*)0x0007)<<8);
-	char* p = newend;
+	uint8_t* p = newend;
 	
-	if ((p >= memtop) ||
+	if ((p >= cpm_ramtop) ||
 	    (p < _end))	
 		return -1;
 		
-	cpm_ram = p;
+	cpm_ram = (uint8_t*)p;
 	return 0;
 }
 
 void* sbrk(int increment)
 {
-	char* old;
-	char* new;
+	uint8_t* old;
+	uint8_t* new;
 	
 	if (increment == 0)
 		return cpm_ram;

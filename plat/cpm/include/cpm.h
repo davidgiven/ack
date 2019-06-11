@@ -67,11 +67,14 @@ extern uint8_t* cpm_ramtop;
 extern uint8_t cpm_cmdlinelen;
 extern char cpm_cmdline[0x7f];
 
-/* Special: longjmps out of the program. Don't use if you've overwritten the
- * CCP. */
-extern void cpm_fastexit(void);
+/* Special: if the CCP hasn't been overwritten, returns to it; otherwise does
+ * a warmboot. */
+extern void cpm_exit(void);
 
-/*  0 */ extern void cpm_exit(void);
+/* Extends cpm_ramtop over the CCP, for a little extra space. */
+extern void cpm_overwrite_ccp(void);
+
+/*  0 */ extern void cpm_warmboot(void);
 /*  1 */ extern uint8_t cpm_conin(void);
 /*  2 */ extern void cpm_conout(uint8_t b);
 /*  3 */ extern uint8_t cpm_auxin(void);
