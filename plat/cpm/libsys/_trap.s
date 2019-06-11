@@ -7,10 +7,6 @@
 #include "asm.h"
 
 .define .trp
-.define earray, erange, eset, eiovfl, efovfl, efunfl, eidivz, eidivz
-.define efdivz, eiund, efund, econv, estack, eheap, eillins, eoddz
-.define ecase, ememflt, ebadptr, ebadpc, ebadlae, ebadmon, ebadlin, ebadgto
-.define eunimpl
 .define EARRAY, ERANGE, ESET, EIOVFL, EFOVFL, EFUNFL, EIDIVZ, EIDIVZ
 .define EFDIVZ, EIUND, EFUND, ECONV, ESTACK, EHEAP, EILLINS, EODDZ
 .define ECASE, EMEMFLT, EBADPTR, EBADPC, EBADLAE, EBADMON, EBADLIN, EBADGTO
