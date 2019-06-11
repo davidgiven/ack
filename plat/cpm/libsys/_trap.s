@@ -13,7 +13,8 @@
 .define EUNIMPL
 
 ! Trap routine
-! Expects trap number on stack.
+! Expects trap number in A, and must be called directly from the code
+! where execution should resume (for those traps which support it).
 ! Just returns if trap has to be ignored.
 ! Otherwise it calls a user-defined trap handler if provided.
 ! When no user-defined trap handler is provided or when the user-defined
@@ -46,9 +47,6 @@
 	EUNIMPL = 63		! unimplemented em-instruction called
 
 .trp:
-	pop h
-	xthl
-	push h			! trap number and return address exchanged
 	mov a,l
 	cpi 16
 	jnc 3f			! jump if trap cannot be ignored
@@ -66,10 +64,12 @@
 	ret			! OGEN DICHT EN ... SPRING!!!
 
 3:
-	lhld .trapproc		! user defined trap handler?
+.define .trapproc
+.trapproc = . + 1
+	lxi h, 0            ! user defined trap handler held inline here
 	mov a,l
 	ora h
-	jz 1f			! jump if there was not
+	jz 1f	     		! jump if there was not
 	xra a
 	sta .trapproc		! .trapproc := 0
 	sta .trapproc+1

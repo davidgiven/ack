@@ -2475,5 +2475,6 @@ with hlreg
 gen shld {label,".reghp"}
 
 pat trp
-kills ALL
-gen Call {label,".trp"}
+   with areg
+      kills ALL
+      gen Call {label,".trp"}

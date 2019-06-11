@@ -170,8 +170,7 @@ _cpm_cmdline = 0x0081
 
 ! Some magic data. All EM systems need these.
 
-.define .trppc, .ignmask, _errno
-.comm .trppc, 2
+.define .ignmask, _errno
 .comm .ignmask, 2
 .comm _errno, 2
 
@@ -184,11 +183,10 @@ envp: .space 2          ! envp array (always empty, must be after argv)
 
 ! These are used specifically by the i80 code generator.
 
-.define .trapproc, .retadr, .retadr1
+.define .retadr, .retadr1
 .define .bcreg, .areg
 .define .tmp1, .fra, block1, block2, block3
 
-.comm .trapproc, 2
 .comm .retadr, 2        ! used to save return address
 .comm .retadr1, 2       ! reserve
 .comm .bcreg, 2
