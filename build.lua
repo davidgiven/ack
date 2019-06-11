@@ -27,17 +27,8 @@ vars.plats_with_tests = {
 	"pc86",
 }
 
-local plat_packages = {}
-local test_packages = {}
-for _, p in ipairs(vars.plats) do
-	plat_packages[#plat_packages+1] = "plat/"..p.."+pkg"
-end
-for _, p in ipairs(vars.plats_with_tests) do
-	test_packages[#test_packages+1] = "plat/"..p.."/tests+tests"
-end
-
 installable {
-	name = "ack",
+	name = "ack-common",
 	map = {
 		"lang/basic/src+pkg",
 		"lang/cem/cemcom.ansi+pkg",
@@ -53,6 +44,31 @@ installable {
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
+	},
+}
+
+local plat_packages = {}
+local test_packages = {}
+for _, p in ipairs(vars.plats) do
+	local pkg = "plat/"..p.."+pkg"
+	plat_packages[#plat_packages+1] = pkg
+
+	installable {
+		name = "ack-"..p,
+		map = {
+			"+ack-common",
+			pkg,
+		},
+	}
+end
+for _, p in ipairs(vars.plats_with_tests) do
+	test_packages[#test_packages+1] = "plat/"..p.."/tests+tests"
+end
+
+installable {
+	name = "ack",
+	map = {
+		"+ack-common",
 		"examples+pkg",
 		plat_packages
 	},

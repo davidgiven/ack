@@ -10,16 +10,9 @@
 
 void _sys_write_tty(char c)
 {
-	cpm_bc_register = CPM_BDOS_CONSOLE_OUTPUT;
-	cpm_de_register = c;
-	cpm_bdos();
-
+	cpm_conout(c);
 	if (c == '\n')
-	{
-		cpm_bc_register = CPM_BDOS_CONSOLE_OUTPUT;
-		cpm_de_register = '\r';
-		cpm_bdos();
-	}
+		cpm_conout(c);
 }
 
 ssize_t write(int fd, void* buffer, size_t count)
@@ -37,13 +30,9 @@ ssize_t write(int fd, void* buffer, size_t count)
 	
 	/* Write all data. */
 	
-	i = 0;
-	while (i < count)
-	{
+	i = count;
+	while (i--)
 		_sys_write_tty(*p++);
-			
-		i++;
-	}
 	
 	/* No failures. */
 	

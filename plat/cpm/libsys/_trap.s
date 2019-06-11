@@ -3,23 +3,18 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
+#
+#include "asm.h"
 
 .define .trp
-.define earray, erange, eset, eiovfl, efovfl, efunfl, eidivz, eidivz
-.define efdivz, eiund, efund, econv, estack, eheap, eillins, eoddz
-.define ecase, ememflt, ebadptr, ebadpc, ebadlae, ebadmon, ebadlin, ebadgto
-.define eunimpl
-
-.sect .text
+.define EARRAY, ERANGE, ESET, EIOVFL, EFOVFL, EFUNFL, EIDIVZ, EIDIVZ
+.define EFDIVZ, EIUND, EFUND, ECONV, ESTACK, EHEAP, EILLINS, EODDZ
+.define ECASE, EMEMFLT, EBADPTR, EBADPC, EBADLAE, EBADMON, EBADLIN, EBADGTO
+.define EUNIMPL
 
 ! Trap routine
-! Expects trap number on stack.
+! Expects trap number in A, and must be called directly from the code
+! where execution should resume (for those traps which support it).
 ! Just returns if trap has to be ignored.
 ! Otherwise it calls a user-defined trap handler if provided.
 ! When no user-defined trap handler is provided or when the user-defined
@@ -51,130 +46,7 @@
 	EBADGTO = 27
 	EUNIMPL = 63		! unimplemented em-instruction called
 
-earray:	lxi h,EARRAY
-	push h
-	call .trp
-	ret
-
-erange:	lxi h,ERANGE
-	push h
-	call .trp
-	ret
-
-eset:	lxi h,ESET
-	push h
-	call .trp
-	ret
-
-eiovfl:	lxi h,EIOVFL
-	push h
-	call .trp
-	ret
-
-efovfl:	lxi h,EFOVFL
-	push h
-	call .trp
-	ret
-
-efunfl:	lxi h,EFUNFL
-	push h
-	call .trp
-	ret
-
-eidivz:	lxi h,EIDIVZ
-	push h
-	call .trp
-	ret
-
-efdivz:	lxi h,EFDIVZ
-	push h
-	call .trp
-	ret
-
-eiund:	lxi h,EIUND
-	push h
-	call .trp
-	ret
-
-efund:	lxi h,EFUND
-	push h
-	call .trp
-	ret
-
-econv:	lxi h,ECONV
-	push h
-	call .trp
-	ret
-
-estack:	lxi h,ESTACK
-	push h
-	call .trp
-	ret
-
-eheap:	lxi h,EHEAP
-	push h
-	call .trp
-	ret
-
-eillins:lxi h,EILLINS
-	push h
-	call .trp
-	ret
-
-eoddz:	lxi h,EODDZ
-	push h
-	call .trp
-	ret
-
-ecase:	lxi h,ECASE
-	push h
-	call .trp
-	ret
-
-ememflt:lxi h,EMEMFLT
-	push h
-	call .trp
-	ret
-
-ebadptr:lxi h,EBADPTR
-	push h
-	call .trp
-	ret
-
-ebadpc:	lxi h,EBADPC
-	push h
-	call .trp
-	ret
-
-ebadlae:lxi h,EBADLAE
-	push h
-	call .trp
-	ret
-
-ebadmon:lxi h,EBADMON
-	push h
-	call .trp
-	ret
-
-ebadlin:lxi h,EBADLIN
-	push h
-	call .trp
-	ret
-
-ebadgto:lxi h,EBADGTO
-	push h
-	call .trp
-	ret
-
-eunimpl:lxi h,EUNIMPL
-	push h
-	call .trp
-	ret
-
 .trp:
-	pop h
-	xthl
-	push h			! trap number and return address exchanged
 	mov a,l
 	cpi 16
 	jnc 3f			! jump if trap cannot be ignored
@@ -192,10 +64,12 @@ eunimpl:lxi h,EUNIMPL
 	ret			! OGEN DICHT EN ... SPRING!!!
 
 3:
-	lhld .trapproc		! user defined trap handler?
+.define .trapproc
+.trapproc = . + 1
+	lxi h, 0            ! user defined trap handler held inline here
 	mov a,l
 	ora h
-	jz 1f			! jump if there was not
+	jz 1f	     		! jump if there was not
 	xra a
 	sta .trapproc		! .trapproc := 0
 	sta .trapproc+1
@@ -206,15 +80,11 @@ eunimpl:lxi h,EUNIMPL
 	pop d
 	ret
 1:
-	lxi h, 6
-	push h
-	lxi h, text
-	push h
-	lxi h, 1
-	push h
-	call _write
-	jmp EXIT
+	lxi d, text
+	mvi c, 9        ! write $-terminated string
+	call 0x0005
+	rst 0           ! abend
 
 .sect .rom
-text: .ascii "TRAP!\n"
+text: .ascii "TRAP!\r\n$"
 

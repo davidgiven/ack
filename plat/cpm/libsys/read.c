@@ -36,18 +36,14 @@ ssize_t read(int fd, void* buffer, size_t count)
 
 	/* Read one line from the console. */
 	((unsigned char*)buffer)[-2] = before_n;
-	cpm_bc_register = CPM_BDOS_READ_CONSOLE_BUFFER;
-	cpm_de_register = (uint16_t)(char*)buffer - 2;
-	cpm_bdos();
+	cpm_readline((uint8_t*)buffer - 2);
 	before_n = ((unsigned char*)buffer)[-1];
 
 	((char*)buffer)[before_n] = '\n'; /* Append '\n'. */
 	((short*)buffer)[-1] = save; /* Give back borrowed bytes. */
 
 	/* Echo '\n' to console. */
-	cpm_bc_register = CPM_BDOS_PRINT_STRING;
-	cpm_de_register = (uint16_t)"\r\n$";
-	cpm_bdos();
+	cpm_printstring("\r\n$");
 
 	return (int)before_n + 1;
 }

@@ -22,12 +22,13 @@ begtext:
 	! BDOS and crash CP/M.  We cheat by comparing only high bytes
 	! of each address.
 
-	lxi b, __end
 	lda 0x0007
-	mov c, a		! c = high byte of BDOS address
-	mov a, b		! a = high byte of _end
+	mov c, a        ! c = high byte of BDOS address
+	lda _cpm_ram+1  ! a = high byte of top of BSS, a.k.a. _end
 	cmp c
-	jnc __exit		! emergency exit if a >= c
+	lxi d, noroom
+	mvi c, 9
+	jnc 0x0005      ! print error and exit if a >= c
 
 	! We have to clear the bss. (argify requires it.)
 	
@@ -46,6 +47,9 @@ begtext:
 
 	! Set up the stack (now it's been cleared, since it's in the BSS).
 
+	lxi h, 0
+	dad sp
+	shld saved_sp			! save old stack pointer
 	lxi sp, stack + STACKSIZE
 
 	! Initialise the rsts (if desired).
@@ -54,8 +58,15 @@ begtext:
 		call .rst_init
 	#endif
 
+    ! Now the 'heap'.
+
+	lhld 0x0006              ! BDOS entry point
+	lxi d, -0x806            ! offset to start of CCP
+	dad d                    
+	shld _cpm_ramtop
+
 	! C-ify the command line at 0x0080.
-	
+
 	lxi h, 0x0080
 	mov a, m                 ! a = length of command line
 	cpi 0x7F                 ! 127-byte command lines...
@@ -120,15 +131,40 @@ end_of_argify:
 	mvi h, 0
 	push h
 	call __m_a_i_n
-	! FALLTHROUGH
+.define _cpm_exit, EXIT, __exit
+_cpm_exit:
+EXIT:
+__exit:
+	stc                      ! set carry bit
+	jnc _cpm_warmboot        ! warm boot if not set
+saved_sp = . + 1
+	lxi sp, 0                ! patched on startup
+	ret
 
 ! Emergency exit routine.
 
-.define EXIT, __exit
-EXIT:
-__exit:
-	rst 0
+.define _cpm_warmboot
+_cpm_warmboot = 0
 	
+! Special CP/M stuff.
+
+.define _cpm_fcb, _cpm_fcb2
+_cpm_fcb = 0x005c
+_cpm_fcb2 = 0x006c
+
+.define _cpm_ramtop
+.comm _cpm_ramtop, 2
+
+.define _cpm_default_dma
+_cpm_default_dma = 0x0080
+
+.define _cpm_iobyte
+_cpm_iobyte = 3
+
+.define _cpm_cmdlinelen, _cpm_cmdline
+_cpm_cmdlinelen = 0x0080
+_cpm_cmdline = 0x0081
+
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
 
@@ -139,8 +175,7 @@ __exit:
 
 ! Some magic data. All EM systems need these.
 
-.define .trppc, .ignmask, _errno
-.comm .trppc, 2
+.define .ignmask, _errno
 .comm .ignmask, 2
 .comm _errno, 2
 
@@ -153,11 +188,10 @@ envp: .space 2          ! envp array (always empty, must be after argv)
 
 ! These are used specifically by the i80 code generator.
 
-.define .trapproc, .retadr, .retadr1
+.define .retadr, .retadr1
 .define .bcreg, .areg
 .define .tmp1, .fra, block1, block2, block3
 
-.comm .trapproc, 2
 .comm .retadr, 2        ! used to save return address
 .comm .retadr1, 2       ! reserve
 .comm .bcreg, 2
@@ -168,5 +202,10 @@ block1: .space 4        ! used by 32 bits divide and
 block2: .space 4        ! multiply routines
 block3: .space 4        ! must be contiguous (.comm doesn't guarantee this)
 
+.sect .data
+.define _cpm_ram
+_cpm_ram: .data2 __end
+
 .sect .rom
 progname: .asciz 'ACKCPM'
+noroom: .ascii 'No room$'
