@@ -3,14 +3,15 @@
 #include <string.h>
 #include "smap.h"
 
-static void append(void* mapp, const char* left, void* right)
+#define INCR_SIZE	8
+
+static void append(void* mapp, char* key, void* value)
 {
     struct smap* map = mapp;
     struct smap_node* node;
-
 	if (map->count == map->max)
 	{
-		int newmax = (map->max == 0) ? 8 : (map->max * 2);
+		int newmax = (map->max == 0) ? INCR_SIZE : (map->max * 2);
 		struct smap_node* newarray = realloc(map->item, newmax * sizeof(*newarray));
 
 		map->max = newmax;
@@ -20,11 +21,12 @@ static void append(void* mapp, const char* left, void* right)
     node = &map->item[map->count];
     map->count++;
 
-    node->left = left;
-    node->right = right;
+    node->left = key;
+    node->right = value;
 }
 
-void smap_put(void* mapp, const char* left, void* right)
+
+void smap_put(struct smap *mapp, char* key, void* value)
 {
     struct smap* map = mapp;
     int i;
@@ -32,17 +34,44 @@ void smap_put(void* mapp, const char* left, void* right)
     for (i=0; i<map->count; i++)
     {
         struct smap_node* node = &map->item[i];
-        if (strcmp(node->left, left) == 0)
+        if (strcmp(node->left, key) == 0)
         {
-            node->right = right;
+            node->right = value;
             return;
         }
     }
 
-    append(map, left, right);
+    append(map, key, value);
 }
 
-void smap_add(void* mapp, const char* left, void* right)
+void smap_init(struct smap *mapp)
+{
+	mapp->count = 0;
+	mapp->item = NULL;
+	mapp->max = 0;
+}
+
+
+void smap_free(struct smap *mapp, int free_key, int free_value)
+{
+	int i;
+    for (i=0; i<mapp->count; i++)
+    {
+        struct smap_node* node = &mapp->item[i];
+        if (free_key)
+        {
+        	free(node->left);
+        }
+        if (free_value)
+        {
+        	free(node->right);
+        }
+    }
+	mapp->count = 0;
+	free(mapp->item);
+}
+
+void smap_add(struct smap *mapp, char* key, void* value)
 {
     struct smap* map = mapp;
     int i;
@@ -50,14 +79,14 @@ void smap_add(void* mapp, const char* left, void* right)
     for (i=0; i<map->count; i++)
     {
         struct smap_node* node = &map->item[i];
-        if ((strcmp(node->left, left) == 0) && (node->right == right))
+        if ((strcmp(node->left, key) == 0) && (node->right == value))
             return;
     }
 
-    append(map, left, right);
+    append(map, key, value);
 }
 
-void* smap_get(void* mapp, const char* left)
+void* smap_get(struct smap *mapp, const char* left)
 {
     struct smap* map = mapp;
     int i;

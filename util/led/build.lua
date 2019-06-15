@@ -2,8 +2,10 @@ cprogram {
     name = "led",
     srcs = { "./*.c" },
     deps = {
-        "./const.h", "./debug.h", "./defs.h", "./mach.h",
-        "./memory.h", "./orig.h", "./scan.h",
+        "./archive.h", "./const.h", "./debug.h", "./defs.h", 
+        "./error.h", "./extract.h", "./finish.h", "./mach.h",
+        "./memory.h", "./orig.h", "./output.h", "./relocate.h",
+        "./save.h", "./scan.h", "./sym.h", "./write.h",
         "modules/src/string+lib",
         "modules/src/object+lib",
         "h+emheaders",

@@ -8,7 +8,7 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
-typedef struct node t_node;
+struct node;
 
 #if __STDC__
 #ifdef DEBUG
@@ -19,11 +19,11 @@ void debug(char *fmt, ...);
 /*VARARGS*/
 void error(char *fmt, ...);
 /*VARARGS*/
-void node_error(t_node *node, char *fmt, ...);
+void node_error(struct node *node, char *fmt, ...);
 /*VARARGS*/
 void warning(int class, char *fmt, ...);
 /*VARARGS*/
-void node_warning(t_node *node, int class, char *fmt, ...);
+void node_warning(struct node *node, int class, char *fmt, ...);
 /*VARARGS*/
 void lexerror(char *fmt, ...);
 /*VARARGS*/

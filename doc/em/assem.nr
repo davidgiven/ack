@@ -34,8 +34,7 @@ Instruction labels are unsigned positive integers.
 The scope of an instruction label is its procedure.
 .QQ
 The pseudoinstructions CON, ROM and BSS may be preceded by a
-line containing a
-1\-8 character data label, the first character of which is a
+line containing a character based data label, the first character of which is a
 letter, period or underscore.
 The period may only be followed by
 digits, the others may be followed by letters, digits and underscores.
@@ -200,7 +199,7 @@ l l l.
 <ilb>:\&=:instruction label
 ::'*' followed by an integer in the range 0..32767.
 <pro>:\&=:procedure number ('$' followed by a procedure name)
-<val>:\&=:<arg>, <con>, <pro> or <ilb>.
+<val>:\&=:<arg>, <con>, <str>, <pro> or <ilb>.
 <par>:\&=:<val> or <str>
 <...>*:\&=:zero or more of <...>
 <...>+:\&=:one or more of <...>

@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,20 +11,14 @@ static char rcsid[] = "$Id$";
 #include "types.h"
 #include "tes.h"
 #include "alloc.h"
+#include "util.h"
 #include "line.h"
 #include "lookup.h"
 #include "proinf.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
-
 #ifdef USEMALLOC
 
-short * myalloc();
+short *myalloc(register unsigned int);
 
 #define newcore(size) myalloc(size)
 #define oldcore(p,size) free(p)
@@ -94,101 +90,111 @@ int asizetab[] = {
  * PART 1
  */
 
-line_p	newline(optyp) int optyp; {
+line_p newline(int optyp)
+{
 	register line_p lnp;
-	register kind=optyp;
+	register int kind = optyp;
 
-	if (kind>OPMINI)
+	if (kind > OPMINI)
 		kind = OPMINI;
 	lnp = (line_p) newcore(lsizetab[kind]);
 	lnp->l_optyp = optyp;
-	return(lnp);
+	return (lnp);
 }
 
-oldline(lnp) register line_p lnp; {
-	register kind=lnp->l_optyp&BMASK;
+void oldline(register line_p lnp)
+{
+	register int kind = lnp->l_optyp & BMASK;
 
-	if (kind>OPMINI)
+	if (kind > OPMINI)
 		kind = OPMINI;
 	if (kind == OPLIST)
 		oldargs(lnp->l_a.la_arg);
-	oldcore((short *) lnp,lsizetab[kind]);
+	oldcore((short * ) lnp, lsizetab[kind]);
 }
 
-arg_p newarg(kind) int kind; {
+arg_p newarg(int kind)
+{
 	register arg_p ap;
 
 	ap = (arg_p) newcore(asizetab[kind]);
 	ap->a_typ = kind;
-	return(ap);
+	return (ap);
 }
 
-oldargs(ap) register arg_p ap; {
-	register arg_p	next;
+void oldargs(register arg_p ap)
+{
+	register arg_p next;
 
-	while (ap != (arg_p) 0) {
+	while (ap != (arg_p) 0)
+	{
 		next = ap->a_next;
-		switch(ap->a_typ) {
-		case ARGSTR:
-			oldargb(ap->a_a.a_string.ab_next);
-			break;
-		case ARGICN:
-		case ARGUCN:
-		case ARGFCN:
-			oldargb(ap->a_a.a_con.ac_con.ab_next);
-			break;
+		switch (ap->a_typ)
+		{
+			case ARGSTR:
+				oldargb(ap->a_a.a_string.ab_next);
+				break;
+			case ARGICN:
+			case ARGUCN:
+			case ARGFCN:
+				oldargb(ap->a_a.a_con.ac_con.ab_next);
+				break;
 		}
-		oldcore((short *) ap,asizetab[ap->a_typ]);
+		oldcore((short * ) ap, asizetab[ap->a_typ]);
 		ap = next;
 	}
 }
 
-oldargb(abp) register argb_p abp; {
+void oldargb(register argb_p abp)
+{
 	register argb_p next;
 
-	while (abp != (argb_p) 0) {
+	while (abp != (argb_p) 0)
+	{
 		next = abp->ab_next;
-		oldcore((short *) abp,sizeof (argb_t));
+		oldcore((short * ) abp, sizeof (argb_t));
 		abp = next;
 	}
 }
 
-reg_p newreg() {
-
-	return((reg_p) newcore(sizeof(reg_t)));
+reg_p newreg(void)
+{
+	return ((reg_p) newcore(sizeof(reg_t)));
 }
 
-oldreg(rp) reg_p rp; {
+void oldreg(reg_p rp)
+{
 
-	oldcore((short *) rp,sizeof(reg_t));
+	oldcore((short * ) rp, sizeof(reg_t));
 }
 
-num_p newnum() {
-
-	return((num_p) newcore(sizeof(num_t)));
+num_p newnum(void)
+{
+	return ((num_p) newcore(sizeof(num_t)));
 }
 
-oldnum(lp) num_p lp; {
-
-	oldcore((short *) lp,sizeof(num_t));
+void oldnum(num_p lp)
+{
+	oldcore((short * ) lp, sizeof(num_t));
 }
 
-offset *newrom() {
-
-	return((offset *) newcore(MAXROM*sizeof(offset)));
+offset *newrom(void)
+{
+	return ((offset *) newcore(MAXROM*sizeof(offset)));
 }
 
-sym_p newsym(len) int len; {
+sym_p newsym(int len)
+{
 	/*
 	 * sym_t includes a 2 character s_name at the end
 	 * extend this structure with len-2 characters
 	 */
-	return((sym_p) newcore(sizeof(sym_t) - 2 + len));
+	return ((sym_p) newcore(sizeof(sym_t) - 2 + len));
 }
 
-argb_p newargb() {
-
-	return((argb_p) newcore(sizeof(argb_t)));
+argb_p newargb(void)
+{
+	return ((argb_p) newcore(sizeof(argb_t)));
 }
 
 #ifndef USEMALLOC
@@ -201,68 +207,80 @@ argb_p newargb() {
 
 short *freelist[MAXSHORT];
 
-typedef struct coreblock {
+typedef struct coreblock
+{
 	struct coreblock *co_next;
 	short co_size;
-} core_t,*core_p;
+}core_t,*core_p;
 
 #define SINC	(sizeof(core_t)/sizeof(short))
 #ifdef COREDEBUG
-coreverbose() {
+coreverbose()
+{
 	register size;
 	register short *p;
 	register sum;
 
 	sum = 0;
 	for(size=1;size<MAXSHORT;size++)
-		for (p=freelist[size];p!=0;p = *(short **) p)
-			sum += size;
+	for (p=freelist[size];p!=0;p = *(short **) p)
+	sum += size;
 	fprintf(stderr,"Used core %u\n",(shortsasked-sum)*sizeof(short));
 }
 #endif
 
 #ifdef SEPID
 
-compactcore() {
+compactcore()
+{
 	register core_p corelist=0,tp,cl;
 	int size;
 
 #ifdef COREDEBUG
 	fprintf(stderr,"Almost out of core\n");
 #endif
-	for(size=SINC;size<MAXSHORT;size++) {
-		while ((tp = (core_p) freelist[size]) != (core_p) 0) {
+	for(size=SINC;size<MAXSHORT;size++)
+	{
+		while ((tp = (core_p) freelist[size]) != (core_p) 0)
+		{
 			freelist[size] = (short *) tp->co_next;
 			tp->co_size = size;
-			if (corelist==0 || tp<corelist) {
+			if (corelist==0 || tp<corelist)
+			{
 				tp->co_next = corelist;
 				corelist = tp;
-			} else {
+			}
+			else
+			{
 				for(cl=corelist;cl->co_next != 0 && tp>cl->co_next;
-							cl = cl->co_next)
-					;
+						cl = cl->co_next)
+				;
 				tp->co_next = cl->co_next;
 				cl->co_next = tp;
 			}
 		}
 	}
-	while (corelist != 0) {
+	while (corelist != 0)
+	{
 		while ((short *) corelist->co_next ==
-		    (short *) corelist + corelist->co_size) {
+				(short *) corelist + corelist->co_size)
+		{
 			corelist->co_size += corelist->co_next->co_size;
-			corelist->co_next =  corelist->co_next->co_next;
+			corelist->co_next = corelist->co_next->co_next;
 		}
 		assert(corelist->co_next==0 ||
-			(short *) corelist->co_next >
-			    (short *) corelist + corelist->co_size);
-		while (corelist->co_size >= MAXSHORT+SINC) {
+				(short *) corelist->co_next >
+				(short *) corelist + corelist->co_size);
+		while (corelist->co_size >= MAXSHORT+SINC)
+		{
 			oldcore((short *) corelist + corelist->co_size-(MAXSHORT-1),
-				sizeof(short)*(MAXSHORT-1));
+					sizeof(short)*(MAXSHORT-1));
 			corelist->co_size -= MAXSHORT;
 		}
-		if (corelist->co_size >= MAXSHORT) {
+		if (corelist->co_size >= MAXSHORT)
+		{
 			oldcore((short *) corelist + corelist->co_size-SINC,
-				sizeof(short)*SINC);
+					sizeof(short)*SINC);
 			corelist->co_size -= SINC;
 		}
 		cl = corelist->co_next;
@@ -271,7 +289,8 @@ compactcore() {
 	}
 }
 
-short *grabcore(size) int size; {
+short *grabcore(size) int size;
+{
 	register short *p;
 	register trysize;
 
@@ -283,9 +302,11 @@ short *grabcore(size) int size; {
 	 */
 
 	assert(size<2*MAXSHORT);
-	for(trysize=2*MAXSHORT-2; trysize>size; trysize -= 2) {
+	for(trysize=2*MAXSHORT-2; trysize>size; trysize -= 2)
+	{
 		p = freelist[trysize/sizeof(short)];
-		if ( p != (short *) 0) {
+		if ( p != (short *) 0)
+		{
 			freelist[trysize/sizeof(short)] = *(short **) p;
 			oldcore(p+size/sizeof(short),trysize-size);
 			return(p);
@@ -299,13 +320,16 @@ short *grabcore(size) int size; {
 	 */
 
 	compactcore();
-	if ((p=freelist[size/sizeof(short)]) != 0) {
+	if ((p=freelist[size/sizeof(short)]) != 0)
+	{
 		freelist[size/sizeof(short)] = * (short **) p;
 		return(p);
 	}
-	for(trysize=2*MAXSHORT-2; trysize>size; trysize -= 2) {
+	for(trysize=2*MAXSHORT-2; trysize>size; trysize -= 2)
+	{
 		p = freelist[trysize/sizeof(short)];
-		if ( p != (short *) 0) {
+		if ( p != (short *) 0)
+		{
 			freelist[trysize/sizeof(short)] = *(short **) p;
 			oldcore(p+size/sizeof(short),trysize-size);
 			return(p);
@@ -320,26 +344,30 @@ short *grabcore(size) int size; {
 }
 #endif	/* SEPID */
 
-short *newcore(size) int size; {
+short *newcore(size) int size;
+{
 	register short *p,*q;
 
 	size = (size + sizeof(int) - 1) & ~(sizeof(int) - 1);
-	if( size < 2*MAXSHORT ) {
+	if( size < 2*MAXSHORT )
+	{
 		if ((p=freelist[size/sizeof(short)]) != (short *) 0)
-			freelist[size/sizeof(short)] = *(short **) p;
-		else {
+		freelist[size/sizeof(short)] = *(short **) p;
+		else
+		{
 			p = freshcore(size);
 #ifdef SEPID
 			if (p == (short *) 0)
-				p = grabcore(size);
+			p = grabcore(size);
 #endif
 		}
-	} else
-		p = freshcore(size);
+	}
+	else
+	p = freshcore(size);
 	if (p == 0)
-		error("out of memory");
-	for (q=p; size > 0 ; size -= sizeof(short))
-		*q++ = 0;
+	error("out of memory");
+	for (q=p; size > 0; size -= sizeof(short))
+	*q++ = 0;
 	return(p);
 }
 
@@ -350,7 +378,8 @@ short *newcore(size) int size; {
  * you can use these as substitutes
  */
 
-char *malloc(size) int size; {
+char *malloc(size) int size;
+{
 
 	/*
 	 * malloc(III) is called by stdio,
@@ -360,12 +389,14 @@ char *malloc(size) int size; {
 	return( (char *) newcore(size));
 }
 
-free() {
+free()
+{
 
 }
 #endif
 
-oldcore(p,size) short *p; int size; {
+oldcore(p,size) short *p; int size;
+{
 #ifdef CORECHECK
 	register short *cp;
 #endif
@@ -373,8 +404,8 @@ oldcore(p,size) short *p; int size; {
 	assert(size<2*MAXSHORT);
 #ifdef CORECHECK
 	for (cp=freelist[size/sizeof(short)]; cp != (short *) 0;
-	    cp = *(short **) cp)
-		assert(cp != p);
+			cp = *(short **) cp)
+	assert(cp != p);
 #endif
 	*(short **) p = freelist[size/sizeof(short)];
 	freelist[size/sizeof(short)] = p;
@@ -382,7 +413,8 @@ oldcore(p,size) short *p; int size; {
 
 short *ccur,*cend;
 
-coreinit(p1,p2) short *p1,*p2; {
+coreinit(p1,p2) short *p1,*p2;
+{
 
 	/*
 	 * coreinit is called with the boundaries of a piece of
@@ -393,25 +425,28 @@ coreinit(p1,p2) short *p1,*p2; {
 	cend = p2;
 }
 
-short *freshcore(size) int size; {
+short *freshcore(size) int size;
+{
 	register short *temp;
 	static int cchunk=CCHUNK;
-	
-	while(&ccur[size/sizeof(short)] >= cend && cchunk>0) {
-		do {
+
+	while(&ccur[size/sizeof(short)] >= cend && cchunk>0)
+	{
+		do
+		{
 			temp = (short *) sbrk(cchunk*sizeof(short));
 			if (temp == (short *) -1)
-				cchunk >>= 1;
+			cchunk >>= 1;
 			else if (temp != cend)
-				ccur = cend = temp;
-		} while (temp == (short *) -1 && cchunk>0);
+			ccur = cend = temp;
+		}while (temp == (short *) -1 && cchunk>0);
 		cend += cchunk;
 #ifdef COREDEBUG
 		shortsasked += cchunk;
 #endif
 	}
 	if (cchunk==0)
-		return(0);
+	return(0);
 	temp = ccur;
 	ccur = &ccur[size/sizeof(short)];
 	return(temp);
@@ -419,21 +454,22 @@ short *freshcore(size) int size; {
 
 #else	/* USEMALLOC */
 
-coreinit() {
-
+void coreinit(void)
+{
 	/*
 	 * Empty function, no initialization needed
 	 */
 }
 
-short *myalloc(size) register size; {
-	register short *p,*q;
+short *myalloc(register unsigned int size)
+{
+	register short *p, *q;
 
-	p = (short *)malloc(size);
+	p = (short *) malloc(size);
 	if (p == 0)
 		error("out of memory");
-	for(q=p;size>0;size -= sizeof(short))
+	for (q = p; size > 0; size -= sizeof(short))
 		*q++ = 0;
-	return(p);
+	return (p);
 }
 #endif

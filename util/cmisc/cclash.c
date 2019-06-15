@@ -30,6 +30,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define DEF_LENGTH	8
@@ -84,20 +85,32 @@ char * keywords[] = {
 	0
 };
 
+
+void InsertId(char *,int);
+char *Malloc(unsigned int);
+char *Salloc(char *);
+int EnHash(char*);
+void EndOfProgram(void);
+void DoOption(char*);
+void CheckId(char *, int);
+void saveline(register struct idf *);
+void mapline(char *);
+
+
+
 struct idf *maplist = 0;
 
-DefineKeys()
+void DefineKeys(void)
 {
 	register char **pkey = &keywords[0];
 	register char *id;
 
-	while (id = *pkey++)
+	while ((id = *pkey++))
 		if (strlen(id) >= maxlen)
 			InsertId(id, 1);
 }
 
-DoOption(str)
-	char *str;
+void DoOption(char *str)
 {
 	switch (str[1]) {
 
@@ -129,8 +142,7 @@ struct idf *hash_tab[HASHSIZE];
 
 char *Malloc(), *Salloc();
 
-InsertId(id, key)
-	char *id;
+void InsertId(char *id, int key)
 {
 	int hash_val = EnHash(id);
 	register struct idf *idp = hash_tab[hash_val];
@@ -168,11 +180,9 @@ InsertId(id, key)
 	p->id_key = key;
 }
 
-char *
-Malloc(n)
-	unsigned n;
+char *Malloc(unsigned n)
 {
-	char *mem, *malloc();
+	char *mem;
 
 	if ((mem = malloc(n)) == 0) {
 		fprintf(stderr, "%s: out of memory\n", ProgName);
@@ -181,9 +191,7 @@ Malloc(n)
 	return mem;
 }
 
-char *
-Salloc(str)
-	char *str;
+char *Salloc(char *str)
 {
 	if (str == 0)
 		str = "";
@@ -191,11 +199,10 @@ Salloc(str)
 	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
-EnHash(id)
-	char *id;
+int EnHash(char *id)
 {
 	register unsigned hash_val = 0;
-	register n = maxlen;
+	register int n = maxlen;
 
 	while (n-- && *id)
 		hash_val = 31 * hash_val + *id++;
@@ -203,9 +210,9 @@ EnHash(id)
 	return hash_val % (unsigned) HASHSIZE;
 }
 
-BeginOfProgram() { DefineKeys(); }
+void BeginOfProgram(void) { DefineKeys(); }
 
-EndOfProgram()
+void EndOfProgram(void)
 {
 	register int i;
 	register struct idf *idp, *p;
@@ -216,12 +223,12 @@ EndOfProgram()
 				continue;
 
 			switch (action) {
-				register n;
+				register int n;
 
 			case ACT_LISTONLY:
 				n = 0;
 				if (idp->id_key == 0) {
-					printf(idp->id_name);
+					printf("%s",idp->id_name);
 					n++;
 				}
 				for (p = idp->id_same; p; p = p->id_same)
@@ -260,8 +267,7 @@ EndOfProgram()
 	}
 }
 
-saveline(p)
-	register struct idf *p;
+void saveline(register struct idf *p)
 {
 	register struct idf *idp = maplist, *idp1 = 0;
 
@@ -278,10 +284,9 @@ saveline(p)
 	}
 }
 
-mapline(nm)
-	char *nm;
+void mapline(char *nm)
 {
-	static map_count = 0;
+	static int map_count = 0;
 
 	switch (action) {
 
@@ -295,8 +300,7 @@ mapline(nm)
 	}
 }
 
-CheckId(id, s)
-	char *id;
+void CheckId(char *id, int s)
 {
 	if (s >= maxlen)
 		InsertId(id, 0);

@@ -7,9 +7,7 @@
 
 #include "flt_misc.h"
 
-void
-flt_modf(e, ipart, fpart)
-	register flt_arith *e, *ipart, *fpart;
+void flt_modf(flt_arith *e, flt_arith *ipart, flt_arith *fpart)
 {
 	if (e->flt_exp < 0) {
 		*fpart = *e;

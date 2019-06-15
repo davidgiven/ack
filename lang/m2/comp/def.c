@@ -48,14 +48,14 @@ static void internal(register char *c)
 		C_inp(c);
 }
 
-static void DefInFront(register t_def *df)
+static void DefInFront(register struct def *df)
 {
 	/*	Put definition "df" in front of the list of definitions
 	 in its scope.
 	 This is neccessary because in some cases the order in this
 	 list is important.
 	 */
-	register t_def *df1 = df->df_scope->sc_def;
+	register struct def *df1 = df->df_scope->sc_def;
 
 	if (df1 != df)
 	{
@@ -82,12 +82,12 @@ static void DefInFront(register t_def *df)
 	}
 }
 
-t_def *MkDef(register t_idf *id, register t_scope *scope, int kind)
+struct def *MkDef(register struct idf *id, register struct scope *scope, int kind)
 {
 	/*	Create a new definition structure in scope "scope", with
 	 id "id" and kind "kind".
 	 */
-	register t_def *df;
+	register struct def *df;
 
 	df = new_def();
 	df->df_idf = id;
@@ -109,14 +109,14 @@ t_def *MkDef(register t_idf *id, register t_scope *scope, int kind)
 	return df;
 }
 
-t_def *define(register t_idf *id, register t_scope *scope, int kind)
+struct def *define(register struct idf *id, register struct scope *scope, int kind)
 {
 	/*	Declare an identifier in a scope, but first check if it
 	 already has been defined.
 	 If so, then check for the cases in which this is legal,
 	 and otherwise give an error message.
 	 */
-	register t_def *df;
+	register struct def *df;
 
 	DO_DEBUG(options['S'], print("define %s, %x\n", id->id_text, kind));
 	df = lookup(id, scope, D_IMPORT, 0);
@@ -211,14 +211,14 @@ t_def *define(register t_idf *id, register t_scope *scope, int kind)
 	return MkDef(id, scope, kind);
 }
 
-void end_definition_list(register t_def **pdf)
+void end_definition_list(register struct def **pdf)
 {
 	/*	Remove all imports from a definition module. This is
 	 neccesary because the implementation module might import
 	 them again.
 	 Also, mark all other definitions "QUALIFIED EXPORT".
 	 */
-	register t_def *df;
+	register struct def *df;
 
 	while ( (df = *pdf) )
 	{
@@ -241,12 +241,12 @@ void end_definition_list(register t_def **pdf)
 	}
 }
 
-void RemoveFromIdList(register t_def *df)
+void RemoveFromIdList(register struct def *df)
 {
 	/*	Remove definition "df" from the definition list
 	 */
-	register t_idf *id = df->df_idf;
-	register t_def *df1;
+	register struct idf *id = df->df_idf;
+	register struct def *df1;
 
 	if ((df1 = id->id_def) == df)
 		id->id_def = df->df_next;
@@ -261,14 +261,14 @@ void RemoveFromIdList(register t_def *df)
 	}
 }
 
-t_def * DeclProc(int type, register t_idf *id)
+struct def * DeclProc(int type, register struct idf *id)
 {
 	/*	A procedure is declared, either in a definition or a program
 	 module. Create a def structure for it (if neccessary).
 	 Also create a name for it.
 	 */
-	register t_def *df;
-	register t_scope *scope;
+	register struct def *df;
+	register struct scope *scope;
 	static int nmcount;
 	char buf[256];
 
@@ -326,7 +326,7 @@ t_def * DeclProc(int type, register t_idf *id)
 	return df;
 }
 
-void EndProc(register t_def *df, t_idf *id)
+void EndProc(register struct def *df, struct idf *id)
 {
 	/*	The end of a procedure declaration.
 	 Check that the closing identifier matches the name of the
@@ -344,13 +344,13 @@ void EndProc(register t_def *df, t_idf *id)
 	}
 }
 
-t_def * DefineLocalModule(t_idf *id)
+struct def * DefineLocalModule(struct idf *id)
 {
 	/*	Create a definition for a local module. Also give it
 	 a name to be used for code generation.
 	 */
-	register t_def *df = define(id, CurrentScope, D_MODULE);
-	register t_scope *sc;
+	register struct def *df = define(id, CurrentScope, D_MODULE);
+	register struct scope *sc;
 	static int modulecount = 0;
 	char buf[256];
 	extern int proclevel;
@@ -385,7 +385,7 @@ t_def * DefineLocalModule(t_idf *id)
 	return df;
 }
 
-void CheckWithDef(register t_def *df, t_type *tp)
+void CheckWithDef(register struct def *df, struct type *tp)
 {
 	/*	Check the header of a procedure declaration against a
 	 possible earlier definition in the definition module.
@@ -409,7 +409,7 @@ void CheckWithDef(register t_def *df, t_type *tp)
 }
 
 #ifdef DEBUG
-void PrDef(register t_def *df)
+void PrDef(register struct def *df)
 {
 	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }

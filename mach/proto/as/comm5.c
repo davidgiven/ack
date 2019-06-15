@@ -395,6 +395,18 @@ char* readident(int c)
 }
 #endif
 
+static void need_stringbuf()
+{
+	if (!maxstring)
+	{
+		maxstring = STRINGMAX;
+		if ((stringbuf = malloc(maxstring)) == 0)
+		{
+			fatal("out of memory");
+		}
+	}
+}
+
 static int innumber(int c)
 {
 	char* p;
@@ -439,7 +451,7 @@ static int innumber(int c)
 	if (radix != 16 && (c == 'f' || c == 'b'))
 		return (infbsym(num));
 	yylval.y_valu = 0;
-	while (c = *p++)
+	while ((c = *p++))
 	{
 		if (c > '9')
 			c -= ('a' - '9' - 1);
@@ -464,11 +476,8 @@ floatconstant:
 
 	*p = '\0';
 	stringlen = p - num;
-	if (stringlen > maxstring)
-	{
-		maxstring = stringlen;
-		stringbuf = realloc(stringbuf, maxstring);
-	}
+	need_stringbuf();
+	assert(stringlen < maxstring);
 	strcpy(stringbuf, num);
 	return NUMBERF;
 }
@@ -478,14 +487,7 @@ static int instring(int termc)
 	char* p;
 	int c;
 
-	if (!maxstring)
-	{
-		maxstring = STRINGMAX;
-		if ((stringbuf = malloc(maxstring)) == 0)
-		{
-			fatal("out of memory");
-		}
-	}
+	need_stringbuf();
 	p = stringbuf;
 	for (;;)
 	{
@@ -593,7 +595,7 @@ int hash(const char* p)
 	int c;
 
 	h = 0;
-	while (c = *p++)
+	while ((c = *p++))
 	{
 		h <<= 2;
 		h += c;
@@ -668,10 +670,16 @@ item_t* fb_shift(int lab)
 
 	ip = fb_ptr[FB_FORW + lab];
 	if (ip == 0)
+	{
 		if (pass == PASS_1)
+		{
 			ip = fb_alloc(lab);
+		}
 		else
+		{
 			ip = fb_ptr[FB_HEAD + lab];
+		}
+	}
 	fb_ptr[FB_BACK + lab] = ip;
 	fb_ptr[FB_FORW + lab] = ip->i_next;
 	return (ip);

@@ -13,11 +13,6 @@
 #include "util.h"
 
 
-
-#ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
-#endif
-
 /* Symboltable management module */
 
 int	deftype[128];		/* default type declarer */
@@ -32,8 +27,8 @@ void initdeftype(void)
 {
 	int i;
 
-	for(i='a';i<='z';i++) deftype[i]= DOUBLETYPE;
-	for(i='A';i<='Z';i++) deftype[i]= DOUBLETYPE;
+	for(i='a';i<='z';i++) deftype[(unsigned char)i]= DOUBLETYPE;
+	for(i='A';i<='Z';i++) deftype[(unsigned char)i]= DOUBLETYPE;
 }
 
 
@@ -223,9 +218,9 @@ void setdefaulttype(int type)
 		last= *cptr;
 		if ( !isalpha(last))
 			error("letter expected");
-		else for(i=first;i<=last;i++) deftype[i]= type;
+		else for(i=first;i<=last;i++) deftype[(unsigned char)i]= type;
 		cptr++;
-	} else deftype[first]=type;
+	} else deftype[(unsigned char)first]=type;
 	if ( *cptr== ',') 
 	{
 		cptr++;

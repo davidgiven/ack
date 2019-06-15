@@ -31,7 +31,10 @@ operation
 			{	emit1($1);}
 	|
 		BRANCH expr
-			{	branch($1,$2);}
+			{
+                /* Empty expression */
+                struct expr_t expr = {0,0};
+                branch($1,$2,expr);}
 	|
 		BBRANCH bitexp ',' expr8 ',' expr
 			{

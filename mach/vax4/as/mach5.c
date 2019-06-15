@@ -12,9 +12,7 @@
 #define rev_cond_branch(opc)	((opc) ^ 1)
 
 /* Process one operand. */
-static
-oprnd(p)
-	register struct operand *p;
+static void oprnd(register struct operand *p)
 {
 	int	sm;
 
@@ -203,8 +201,7 @@ oprnd(p)
 }
 
 /* Give an upper bound on the size of the operands */
-static int
-size_ops()
+static int size_ops(void)
 {
 	register struct operand *p = &opnd[0];
 	register int i;
@@ -241,8 +238,7 @@ size_ops()
 }
 
 /* Branch with byte or word offset  */
-branch(opc, exp)
-	expr_t exp;
+void branch(int opc, expr_t exp)
 {
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) &&
@@ -272,8 +268,7 @@ branch(opc, exp)
    they are replaced by a reversed conditional branch over a word-branch or
    jump.
 */
-ext_branch(opc, exp)
-	expr_t exp;
+void ext_branch(int opc, expr_t exp)
 {
 	int sm;
 	int gain = opc == BRB ? 1 : 3;
@@ -340,7 +335,7 @@ ext_branch(opc, exp)
 }
 
 /* Generate code for the operands */
-operands()
+void operands(void)
 {
 	register int i;
 

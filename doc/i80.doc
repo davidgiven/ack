@@ -10,7 +10,7 @@ A back end is a part of the Amsterdam Compiler Kit (ACK).
 It translates EM, a family of intermediate languages, into the
 assembly language of some target machine, here the Intel 8080 and Intel 8085 microprocessors.
 .AE
-.NH1
+.NH 1
 INTRODUCTION
 .PP
 To simplify the task of producing portable (cross) compilers and 

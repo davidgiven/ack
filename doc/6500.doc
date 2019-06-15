@@ -405,7 +405,7 @@ The code rule section is the largest section in the table.
 They specify EM patterns, stack patterns, code to be generated,
 etc.
 The syntax is:
-.IP code rule:
+.IP "code rule:"
 EM pattern '|' stack pattern '|' code '|'
 stack replacement '|' EM replacement '|'
 .PP
@@ -605,7 +605,7 @@ loc
 stl
 .R
 $1==0
-.sp1
+.sp 1
 and the input is
 .sp 1
 .br

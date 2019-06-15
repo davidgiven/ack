@@ -4,16 +4,13 @@
  *
  */
 
-#ifndef NORCSID
-static char rcs_mach[] = "$Id$" ;
-static char rcs_h[] = RCS_H ;
-#endif
-
 /*
  * machine dependent back end routines for the Zilog Z80 (as well as Intel 8080)
  */
 
-con_part(sz,w) register sz; word w; {
+
+void con_part(register int sz, word w)
+{
 
 	while (part_size % sz)
 		part_size++;
@@ -31,15 +28,15 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-con_mult(sz) word sz; {
-	long atol();
-
+void con_mult(word sz)
+{
 	if (argval != 4)
 		fatal("bad icon/ucon size");
 	fprintf(codefile, ".data4\t%ld\n", atol(str));
 }
 
-con_float() {
+void con_float(void)
+{
 	static int been_here;
 	int sz = argval;
 
@@ -56,9 +53,8 @@ con_float() {
 	}
 }
 
-
-prolog(nlocals) full nlocals; {
-
+void prolog(full nlocals)
+{
 	fprintf(codefile,"\tpush\tiy\n\tld\thl,0\n\tadd\thl,sp\n\tpush\thl\n\tpop\tiy\n");
 	switch (nlocals) {
 	case 8: fprintf(codefile,"\tpush\thl\n");
@@ -72,7 +68,8 @@ prolog(nlocals) full nlocals; {
 	}
 }
 
-mes(type) word type ; {
+void mes(word type)
+{
 	int argt ;
 
 	switch ( (int)type ) {

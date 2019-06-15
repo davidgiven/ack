@@ -7,36 +7,26 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .B #include <system.h>
 .B #include <print.h>
 .PP
-.B void print(format [, arg] ... )
-.B char *format;
+.B void print(char *format [, arg] ... )
 .PP
-.B void fprint(filep, format [, arg] ... )
-.B File *filep;
-.B char *format;
+.B void fprint(File *filep, char *format [, arg] ... )
 .PP
-.B char *sprint(s, format [, arg] ... )
-.B char *s, *format;
+.B char *sprint(char *s, char *format [, arg] ... )
 .PP
-.B void doprnt(filep, format, args)
-.B File *filep;
-.B char *format;
-.B va_list args;
+.B void doprnt(File *filep, char *format, va_list args)
 .PP
-.B int _format(buf, format, args)
-.B char *buf;
-.B char *format;
-.B va_list args;
+.B int _format(char *buf, char *format, va_lsit args)
 .fi
 .SH DESCRIPTION
-.I Print
+.I print
 writes output on standard output.
-.I Fprint
+.I fprint
 and
 .I doprnt
 place output on the open file known by
 .IR filep .
 .I filep could for instance be STDOUT or STDERR.
-.I Sprint
+.I sprint
 places `output' in the string
 .IR s ,
 followed by the character `\\0'.
@@ -102,7 +92,7 @@ The
 routine builds the string, but does not null-terminate it. It returns the
 length of the string.
 .PP
-.I Doprnt
+.I doprnt
 takes
 .I args
 as the address of the arguments of the format string.

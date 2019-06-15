@@ -11,10 +11,10 @@
 
 /* $Id$ */
 
-extern int	(*ExprChkTable[])(t_node **, int);	/* table of expression checking
+extern int	(*ExprChkTable[])(struct node **, int);	/* table of expression checking
 					   functions, indexed by node class
 					*/
-extern int	(*DesigChkTable[])(t_node **, int);	/* table of designator checking
+extern int	(*DesigChkTable[])(struct node **, int);	/* table of designator checking
 					   functions, indexed by node class
 					*/
 
@@ -26,10 +26,10 @@ extern int	(*DesigChkTable[])(t_node **, int);	/* table of designator checking
 #define dec_refcount(s)		(*((int *)(s) - 1) -= 1)
 #define refcount(s)		(*((int *)(s) - 1))
 
-void MkCoercion(t_node **pnd, register t_type *tp);
-int ChkVariable(register t_node **expp, int flags);
-int ChkCall(t_node **expp);
-void TryToString(register t_node *nd, t_type *tp);
+void MkCoercion(struct node **pnd, register struct type *tp);
+int ChkVariable(register struct node **expp, int flags);
+int ChkCall(struct node **expp);
+void TryToString(register struct node *nd, struct type *tp);
 
 /* Generates a set of "size" bytes and increments its reference count. */
 arith *MkSet(unsigned int size);

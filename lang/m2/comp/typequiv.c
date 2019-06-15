@@ -35,7 +35,7 @@
 #include	"chk_expr.h"
 
 
-static int TstTypeEquiv(t_type *tp1, t_type *tp2)
+static int TstTypeEquiv(struct type *tp1, struct type *tp2)
 {
 	/*	test if two types are equivalent.
 	*/
@@ -45,7 +45,7 @@ static int TstTypeEquiv(t_type *tp1, t_type *tp2)
 		   (tp2 == error_type);
 }
 
-static int TstParEquiv(register t_type *tp1, register t_type *tp2)
+static int TstParEquiv(register struct type *tp1, register struct type *tp2)
 {
 	/*	test if two parameter types are equivalent. This routine
 		is used to check if two different procedure declarations
@@ -66,13 +66,13 @@ static int TstParEquiv(register t_type *tp1, register t_type *tp2)
 		   );
 }
 
-int TstProcEquiv(t_type *tp1, t_type *tp2)
+int TstProcEquiv(struct type *tp1, struct type *tp2)
 {
 	/*	Test if two procedure types are equivalent. This routine
 		may also be used for the testing of assignment compatibility
 		between procedure variables and procedures.
 	*/
-	register t_param *p1, *p2;
+	register struct paramlist *p1, *p2;
 
 	/* First check if the result types are equivalent
 	*/
@@ -96,7 +96,7 @@ int TstProcEquiv(t_type *tp1, t_type *tp2)
 	return p1 == p2;
 }
 
-int TstCompat(register t_type *tp1, register t_type *tp2)
+int TstCompat(register struct type *tp1, register struct type *tp2)
 {
 	/*	test if two types are compatible. See section 6.3 of the
 		Modula-2 Report for a definition of "compatible".
@@ -108,7 +108,7 @@ int TstCompat(register t_type *tp1, register t_type *tp2)
 	tp2 = BaseType(tp2);
 	if (tp2->tp_fund != T_INTORCARD &&
 	    (tp1->tp_fund == T_INTORCARD || tp1 == address_type)) {
-		t_type *tmp = tp2;
+		struct type *tmp = tp2;
 		
 		tp2 = tp1;
 		tp1 = tmp;
@@ -133,7 +133,7 @@ int TstCompat(register t_type *tp1, register t_type *tp2)
 	;
 }
 
-int TstAssCompat(register t_type *tp1, register t_type *tp2)
+int TstAssCompat(register struct type *tp1, register struct type *tp2)
 {
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
@@ -170,7 +170,7 @@ int TstAssCompat(register t_type *tp1, register t_type *tp2)
 	return 0;
 }
 
-char *incompat(register t_type *tp1, register t_type *tp2)
+char *incompat(register struct type *tp1, register struct type *tp2)
 {
 	
 	if (tp1->tp_fund == T_HIDDEN || tp2->tp_fund == T_HIDDEN) {
@@ -179,7 +179,7 @@ char *incompat(register t_type *tp1, register t_type *tp2)
 	return "type incompatibility";
 }
 
-int TstParCompat(int parno, register t_type *formaltype, int VARflag, t_node **nd, t_def *edf)
+int TstParCompat(int parno, register struct type *formaltype, int VARflag, struct node **nd, struct def *edf)
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
@@ -188,7 +188,7 @@ int TstParCompat(int parno, register t_type *formaltype, int VARflag, t_node **n
 		may do too.
 		Or: a WORD may do.
 	*/
-	register t_type *actualtype = (*nd)->nd_type;
+	register struct type *actualtype = (*nd)->nd_type;
 	char ebuf[256];
 
 	if (edf) {
@@ -255,7 +255,7 @@ int TstParCompat(int parno, register t_type *formaltype, int VARflag, t_node **n
 	return 0;
 }
 
-int CompatCheck(register t_node **nd, t_type *tp, char *message, int (*fc)())
+int CompatCheck(register struct node **nd, struct type *tp, char *message, int (*fc)())
 {
 	if (! (*fc)(tp, (*nd)->nd_type)) {
 		if (message) {
@@ -269,7 +269,7 @@ int CompatCheck(register t_node **nd, t_type *tp, char *message, int (*fc)())
 	return 1;
 }
 
-int ChkAssCompat(t_node **nd, t_type *tp, char *message)
+int ChkAssCompat(struct node **nd, struct type *tp, char *message)
 {
 	/*	Check assignment compatibility of node "nd" with type "tp".
 		Give an error message when it fails
@@ -281,7 +281,7 @@ int ChkAssCompat(t_node **nd, t_type *tp, char *message)
 	return CompatCheck(nd, tp, message, TstAssCompat);
 }
 
-int ChkCompat(t_node **nd, t_type *tp, char *message)
+int ChkCompat(struct node **nd, struct type *tp, char *message)
 {
 	/*	Check compatibility of node "nd" with type "tp".
 		Give an error message when it fails

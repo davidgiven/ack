@@ -3,10 +3,10 @@
 .SH NAME
 em_decode, em_encode \- compact to readable EM and v.v.
 .SH SYNOPSIS
-.B ~em/lib.bin/em_decode
+.B em_decode
 [ inputfile [ outputfile ] ]
 .br
-.B ~em/lib.bin/em_encode
+.B em_encode
 [ inputfile [ outputfile ] ]
 .SH DESCRIPTION
 Most programs involved with the EM project only produce and accept
@@ -15,12 +15,12 @@ These files are only machine readable.
 A description of this compact form can be found in [1].
 To inspect the code produced by compilers or to patch them for one reason
 or another, human readable assembly code is needed.
-Em_decode produces human readable assembly code from the compact form.
+em_decode produces human readable assembly code from the compact form.
 .PP
-Em_decode accepts the normal compact form in both optimized and
+em_decode accepts the normal compact form in both optimized and
 unoptimized form.
 .PP
-Em_encode produces the compact form
+em_encode produces the compact form
 out of these human readable assembly code.
 .PP
 The first argument is the input file.

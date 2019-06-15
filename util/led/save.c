@@ -17,51 +17,51 @@ static char rcsid[] = "$Id$";
 #include <stdbool.h>
 #include <string.h>
 #include "arch.h"
+#include "save.h"
 #include "out.h"
 #include "const.h"
 #include "memory.h"
 
-void
-savemagic()
+extern bool	incore;
+extern char	*core_alloc();
+
+long	NLChars = 0;	/* Size of string area for local names. */
+long	NGChars = 0;	/* Idem for global names. */
+
+void savemagic(void)
 {
 	register char	*p;
 
 	if (!incore)
 		return;
 
-	if ((p = core_alloc(ALLOMODL, sizeof(int))) != (char *)0) {
+	if ((p = core_alloc(ALLOMODL, (long)sizeof(int))) != (char *)0) {
 		*(unsigned short *)p = AALMAG;
 		core_position += sizeof(int);
 	}
 }
 
-void
-savehdr(hdr)
-	struct ar_hdr	*hdr;
+void savehdr(struct ar_hdr *hdr)
 {
 	register char	*p;
 
 	if (!incore)
 		return;
 
-	if ((p=core_alloc(ALLOMODL, sizeof(struct ar_hdr)))!=(char *)0) {
+	if ((p=core_alloc(ALLOMODL,(long)sizeof(struct ar_hdr)))!=(char *)0) {
 		*(struct ar_hdr *)p = *hdr;
 		core_position += int_align(sizeof(struct ar_hdr));
 	}
 }
 
-long	NLChars = 0;	/* Size of string area for local names. */
-long	NGChars = 0;	/* Idem for global names. */
+
 
 /*
  * Put the string in cp into the block allocated for the string area.
  * Return its offset in this area. We don't use the first char of the string
  * area, so that empty strings can be distinguished from the first string.
  */
-ind_t
-savechar(piece, off)
-	register int	piece;
-	register ind_t	off;
+ind_t savechar(register int piece, register ind_t off)
 {
 	register size_t	len;
 	register ind_t	newoff;
@@ -90,9 +90,7 @@ savechar(piece, off)
  * allocation, but the string of which name->on_foff is the offset may be
  * destroyed, so we save that first.
  */
-void
-savelocal(name)
-	struct outname	*name;
+void savelocal(struct outname *name)
 {
 	ind_t		savindex;
 	struct outname	*new;
@@ -101,7 +99,7 @@ savelocal(name)
 		return;
 
 	new = (struct outname *)
-			core_alloc(ALLOLOCL, sizeof(struct outname));
+			core_alloc(ALLOLOCL, (long)sizeof(struct outname));
 	if (new != (struct outname *)0) {
 		*new = *name;
 		new->on_foff = savindex;

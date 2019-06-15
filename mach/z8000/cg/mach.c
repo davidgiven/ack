@@ -9,8 +9,8 @@
  * machine dependent back end routines for the z8000
  */
 
-con_part(sz,w) register sz; word w; {
-
+void con_part(register int sz, word w)
+{
 	while (part_size % sz)
 		part_size++;
 	if (part_size == TEM_WSIZE)
@@ -27,15 +27,15 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-con_mult(sz) word sz; {
-
+void con_mult(word sz)
+{
 	if (sz != 4)
 		fatal("bad icon/ucon size");
 	fprintf(codefile,"\t.data4 %s\n", str);
 }
 
-con_float() {
-
+void con_float(void)
+{
 static int been_here;
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
@@ -58,7 +58,8 @@ string holstr(n) word n; {
 }
 */
 
-prolog(nlocals) full nlocals; {
+void prolog(full nlocals)
+{
 
 	fprintf(codefile,"\tpush\t*RR14, R13\n\tld\tR13, R15\n");
 	if (nlocals == 0)
@@ -67,7 +68,8 @@ prolog(nlocals) full nlocals; {
 		fprintf(codefile,"\tsub\tR15, $%d\n",nlocals);
 }
 
-mes(type) word type ; {
+void mes(word type)
+{
 	int argt ;
 
 	switch ( (int)type ) {

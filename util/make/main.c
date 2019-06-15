@@ -196,7 +196,7 @@ void fatal(char *msg, char* value)
     } else
     {
         fprintf(stderr, "%s: ", myname);
-        fprintf(stderr, msg);
+        fprintf(stderr, "%s",msg);
     }
     fputc('\n', stderr);
     exit(1);

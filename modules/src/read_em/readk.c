@@ -11,8 +11,7 @@
 
 /* get16, get32: read a signed constant
 */
-PRIVATE int
-get16()
+PRIVATE int get16(void)
 {
 	register int l_byte, h_byte;
 
@@ -22,8 +21,7 @@ get16()
 	return l_byte | (h_byte << 8);
 }
 
-PRIVATE arith
-get32()
+PRIVATE arith get32(void)
 {
 	register arith l;
 	register int h_byte;
@@ -41,9 +39,7 @@ PRIVATE struct string *getstring();
 /* getarg : read an argument of any type, and check it against "typset"
    if neccesary. Put result in "ap".
 */
-PRIVATE void
-getarg(typset, ap)
-	register struct e_arg *ap;
+PRIVATE void getarg(int typset, register struct e_arg *ap)
 {
 	register int i = getbyte();
 #ifdef CHECKING
@@ -190,9 +186,7 @@ getarg(typset, ap)
 #ifdef CHECKING
 /* checkident: check that a string indeed represents an identifier
 */
-PRIVATE int
-checkident(s)
-	register struct string *s;
+PRIVATE int checkident(register struct string *s)
 {
 	register char *p;
 	register int n;
@@ -214,8 +208,7 @@ checkident(s)
 /* getstring: read a string from the input
 */
 /*ARGSUSED*/
-PRIVATE struct string *
-getstring(isident)
+PRIVATE struct string *getstring(int isident)
 {
 	register char *p;
 	register int n;
@@ -259,9 +252,7 @@ getstring(isident)
 
 /* gethead: read the start of an EM-line
 */
-PRIVATE void
-gethead(p)
-	register struct e_instr *p;
+PRIVATE void gethead(register struct e_instr *p)
 {
 	register int i;
 

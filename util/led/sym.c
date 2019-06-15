@@ -16,6 +16,7 @@ static char rcsid[] = "$Id$";
 #include <stdbool.h>
 #include "out.h"
 #include "const.h"
+#include "error.h"
 #include "memory.h"
 #include "debug.h"
 #include "sym.h"
@@ -41,7 +42,7 @@ unsigned short	NGlobals = 0;	/* Number of global names. */
 /*
  * Initialize the symbol table. All indices should be noticeably invalid.
  */
-init_symboltable()
+void init_symboltable(void)
 {
 	register ind_t	*rap;
 
@@ -56,10 +57,7 @@ init_symboltable()
  * in this element of the list is returned. When a match cannot be found,
  * NIL is returned.
  */
-struct outname *
-searchname(string, hashval)
-	char			*string;
-	int			hashval;
+struct outname *searchname(char *string, int hashval)
 {
 	register char		*rcp;
 	register char		*namestring;
@@ -105,9 +103,9 @@ void entername(struct outname* name, int hashval)
 
 	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
-	symindex = hard_alloc(ALLOSYMB, sizeof(struct symbol));
+	symindex = hard_alloc(ALLOSYMB, (long)sizeof(struct symbol));
 	debug("; %ld\n", symindex, 0, 0, 0);
-	namindex = hard_alloc(ALLOGLOB, sizeof(struct outname));
+	namindex = hard_alloc(ALLOGLOB, (long)sizeof(struct outname));
 	if (savindex == BADOFF || symindex == BADOFF || namindex == BADOFF)
 		fatal("symbol table overflow");
 	sym = (struct symbol *)address(ALLOSYMB, symindex);
@@ -124,9 +122,7 @@ void entername(struct outname* name, int hashval)
  * Return the index of `name' in the symbol table in the order in which
  * it was entered. We need a REAL index, not a byte offset.
  */
-unsigned
-indexof(name)
-	struct outname	*name;
+unsigned int indexof(struct outname *name)
 {
 	return name - (struct outname *)address(ALLOGLOB, (ind_t)0);
 }
@@ -136,9 +132,7 @@ indexof(name)
  * 0 <= hash(p) < NHASH, so it can - and will - be used
  * as index in a hash table.
  */
-int
-hash(p)
-	register char		*p;
+int hash(register char* p)
 {
 	register unsigned short	h = 0;
 	register int		c;

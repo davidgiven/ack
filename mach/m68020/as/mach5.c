@@ -21,9 +21,9 @@
  * then emitted in one go, by emit_instr().
  */
 
-void move_special();
 
-emit_instr()
+
+void emit_instr(void)
 {
 	register instr_t *ip;
 
@@ -38,17 +38,13 @@ emit_instr()
 
 
 #ifdef RELOCATION
-t_emit2(word, relotype, reloinfo, relnm)
-short word;
-short relotype;
-valu_t relnm;
+void t_emit2(short word, short relotype, int reloinfo, valu_t relnm)
 #else
-t_emit2(word)
-short word;
+void t_emit2(short word)
 #endif
 {
 #ifdef RELOCATION
-	if (instrp->i_reloinfo = reloinfo) {
+	if ((instrp->i_reloinfo = reloinfo)) {
 		RELOMOVE(instrp->i_relonami, relnm);
 		instrp->i_relotype = relotype;
 	}
@@ -59,21 +55,16 @@ short word;
 }
 
 #ifdef RELOCATION
-t_emit4(words, relotype, reloinfo, relnm)
-long words;
-short relotype;
-valu_t relnm;
+void t_emit4(long words, short relotype, int reloinfo, valu_t relnm)
 #else
-t_emit4(words)
-long words;
+void t_emit4(long words)
 #endif
 {
 	T_EMIT2((short)(words>>16), relotype, reloinfo, relnm);
 	T_EMIT2((short)(words), 0, 0, 0);
 }
 
-void
-ea_1(sz, bits)
+void ea_1(int sz, int bits)
 {
 		/* Because displacements come in three sizes (null displacement,
 		 * word and long displacement), each displacement requires
@@ -81,8 +72,8 @@ ea_1(sz, bits)
 		 * one of these calls is a dummy call.
 		 */
 
-	register flag;
-	register sm, sm1, sm2;
+	register int flag;
+	register int sm, sm1, sm2;
 
 	if (mrg_1 > 074)
 		serror("no specials");
@@ -195,7 +186,7 @@ ea_1(sz, bits)
 		T_EMIT2(loww(bd_1.val), bd_1.typ, (flag>>8), bd_rel1);
 }
 
-ea_2(sz, bits)
+void ea_2(int sz, int bits)
 { 
 	mrg_1  = mrg_2;
 	bd_1   = bd_2;
@@ -206,27 +197,26 @@ ea_2(sz, bits)
 	ea_1(sz, bits);
 }
 
-checksize(sz, bits)
+void checksize(int sz, int bits)
 {
 	if ((bits & (1 << (sz>>6))) == 0)
 		serror("bad size");
 }
 
-check_fsize(sz, size)
+void check_fsize(int sz, int size)
 {
 	if (sz != size)
 		serror("bad size");
 }
 
-ch_sz_dreg(size, mode)
+void ch_sz_dreg(int size, int mode)
 {
 	if (mode == 0 &&
 	    (size == FSIZE_X || size == FSIZE_P || size == FSIZE_D))
 		serror("illegal size for data register");
 }
 
-checkscale(val)
-valu_t val;
+int checkscale(valu_t val)
 {
 	int v = val;
 
@@ -240,13 +230,12 @@ valu_t val;
 	}
 }
 
-badoperand()
+void badoperand(void)
 {
 	serror("bad operand(s)");
 }
 
-void
-shift_op(opc, sz)
+void shift_op(int opc, int sz)
 {
 	if (mrg_1 < 010 && mrg_2 < 010) {
 		T_EMIT2((opc & 0170470) | sz | mrg_1<<9 | mrg_2, 0, 0, 0);
@@ -267,10 +256,9 @@ shift_op(opc, sz)
 	ea_2(SIZE_W, MEM|ALT);
 }
 
-void
-bitop(opc)
+void bitop(int opc)
 {
-	register bits;
+	register int bits;
 
 	bits = DTA|ALT;
 	if (opc == 0 && (mrg_1 < 010 || mrg_2 != 074))
@@ -289,15 +277,14 @@ bitop(opc)
 	badoperand();
 }
 
-bitfield(opc, extension)
+void bitfield(int opc, int extension)
 {
 	T_EMIT2(opc | mrg_2, 0, 0, 0);
 	T_EMIT2(extension, 0, 0, 0);
 	ea_2(SIZE_L, (mrg_2 < 010) ? 0 : (CTR | ALT));
 }
 
-void
-add(opc, sz)
+void add(int opc, int sz)
 {
 	if ((mrg_2 & 070) == 010)
 		checksize(sz, 2|4);
@@ -332,8 +319,7 @@ add(opc, sz)
 	badoperand();
 }
 
-void
-and(opc, sz)
+void and(int opc, int sz)
 {
 	if (mrg_1 == 074 && mrg_2 >= 076) {	/* ccr or sr */
 		if (sz != SIZE_NON)
@@ -359,7 +345,7 @@ and(opc, sz)
 	badoperand();
 }
 
-to_dreg(opc, sz, bits)
+int to_dreg(int opc, int sz, int bits)
 {
 	if ((mrg_2 & 070) != 000)
 		return(0);
@@ -368,7 +354,7 @@ to_dreg(opc, sz, bits)
 	return(1);
 }
 
-from_dreg(opc, sz, bits)
+int from_dreg(int opc, int sz, int bits)
 {
 	if ((mrg_1 & 070) != 000)
 		return(0);
@@ -377,10 +363,9 @@ from_dreg(opc, sz, bits)
 	return(1);
 }
 
-void
-cmp(sz)
+void cmp(int sz)
 {
-	register opc;
+	register int opc;
 
 	if ((mrg_1&070) == 030 && (mrg_2&070) == 030) {
 		T_EMIT2(0130410 | sz | (mrg_1&7) | (mrg_2&7)<<9, 0, 0, 0);
@@ -408,7 +393,7 @@ cmp(sz)
 	badoperand();
 }
 
-link_instr(sz, areg)
+void link_instr(int sz, int areg)
 {
 	if (sz == SIZE_NON) {
 		if (bd_2.typ == S_ABS && fitw(bd_2.val))
@@ -424,10 +409,9 @@ link_instr(sz, areg)
 	ea_2(sz, 0);
 }
 
-void
-move(sz)
+void move(int sz)
 {
-	register opc;
+	register int opc;
 
 	if (mrg_1 > 074 || mrg_2 > 074) {
 		move_special(sz);
@@ -457,8 +441,7 @@ move(sz)
 	ea_2(sz, ALT);
 }
 
-void
-move_special(sz)
+void move_special(int sz)
 {
 	if (mrg_2 >= 076) {
 		if (sz != SIZE_NON)
@@ -487,9 +470,9 @@ move_special(sz)
 	badoperand();
 }
 
-movem(dr, sz, regs)
+void movem(int dr, int sz, int regs)
 {
-	register i;
+	register int i;
 
 	if ((mrg_2>>3) == 04) {
 		regs = reverse(regs, 16);
@@ -509,8 +492,7 @@ movem(dr, sz, regs)
 	ea_2(sz, i);
 }
 
-reverse(regs, max)
-	register int regs;
+int reverse(register int regs, int max)
 {
 	register int r, i;
 
@@ -524,8 +506,7 @@ reverse(regs, max)
 	return regs;
 }
 
-void
-movep(sz)
+void movep(int sz)
 {
 	checksize(sz, 2|4);
 	if (mrg_1<010 && (mrg_2&070)==050) {
@@ -541,11 +522,9 @@ movep(sz)
 	badoperand();
 }
 
-void
-branch(opc, exp)
-expr_t exp;
+void branch(int opc, expr_t exp)
 {
-	register sm;
+	register int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -578,11 +557,9 @@ expr_t exp;
 	T_EMIT4(exp.val, exp.typ, RELPC|RELO4, relonami);
 }
 
-void
-cpbcc(opc, exp)
-expr_t exp;
+void cpbcc(int opc, expr_t exp)
 {
-	register sm;
+	register int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -606,8 +583,7 @@ expr_t exp;
 	T_EMIT4(exp.val, exp.typ, RELPC|RELO4, relonami);
 }
 
-void
-ea7071(sz)
+void ea7071(int sz)
 {
 	mrg_2 = 071;
 	switch (sz) {
@@ -685,11 +661,9 @@ ea7071(sz)
 			mrg_2 = 070;
 }
 
-void
-fbranch(opc, exp)
-expr_t exp;
+void fbranch(int opc, expr_t exp)
 {
-	register sm;
+	register int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 

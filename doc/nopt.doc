@@ -514,7 +514,7 @@ contains routines to build the data structure from the input
 .BI C_ xxx
 routines and place the structure on the pattern queue. These routines are also
 used to build the data structures when a replacement is constructed.
-.IP aux.c 10
+.IP utils.c 10
 routines to implement the external functions used in the pattern table.
 
 .LP

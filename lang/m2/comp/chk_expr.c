@@ -26,8 +26,8 @@
 
 #include	"Lpars.h"
 #include	"idf.h"
-#include	"type.h"
 #include	"LLlex.h"
+#include	"type.h"
 #include	"def.h"
 #include	"node.h"
 #include	"scope.h"
@@ -45,16 +45,16 @@
 extern char *symbol2str();
 
 /* Forward file declarations */
-static int ChkStandard(t_node **);
-static int ChkCast(t_node **);
+static int ChkStandard(struct node **);
+static int ChkCast(struct node **);
 
 
 
 
 static void df_error(
-	t_node		*nd,		/* node on which error occurred */
+	struct node		*nd,		/* node on which error occurred */
 	char		*mess,		/* error message */
-	register t_def	*edf)		/* do we have a name? */
+	register struct def	*edf)		/* do we have a name? */
 {
 	if (edf) {
 		if (edf->df_kind != D_ERROR)  {
@@ -64,7 +64,7 @@ static void df_error(
 	else node_error(nd, mess);
 }
 
-void MkCoercion(t_node **pnd, register t_type *tp)
+void MkCoercion(struct node **pnd, register struct type *tp)
 {
 	/*	Make a coercion from the node indicated by *pnd to the
 		type indicated by tp. If the node indicated by *pnd
@@ -74,8 +74,8 @@ void MkCoercion(t_node **pnd, register t_type *tp)
 		- we are in the second pass and the coercion might cause
 		  an error
 	*/
-	register t_node	*nd = *pnd;
-	register t_type	*nd_tp = nd->nd_type;
+	register struct node	*nd = *pnd;
+	register struct type *nd_tp = nd->nd_type;
 	extern int	pass_1;
 	char		*wmess = 0;
 	arith		op;
@@ -170,12 +170,12 @@ void MkCoercion(t_node **pnd, register t_type *tp)
 	*pnd = nd;
 }
 
-int ChkVariable(register t_node **expp, int flags)
+int ChkVariable(register struct node **expp, int flags)
 {
 	/*	Check that "expp" indicates an item that can be
 		assigned to.
 	*/
-	register t_node *exp;
+	register struct node *exp;
 
 	if (! ChkDesig(expp, flags)) return 0;
 
@@ -188,13 +188,13 @@ int ChkVariable(register t_node **expp, int flags)
 	return 1;
 }
 
-static int ChkArrow(t_node **expp, int flags)
+static int ChkArrow(struct node **expp, int flags)
 {
 	/*	Check an application of the '^' operator.
 		The operand must be a variable of a pointer type.
 	*/
-	register t_type *tp;
-	register t_node *exp = *expp;
+	register struct type *tp;
+	register struct node *exp = *expp;
 
 	assert(exp->nd_class == Arrow);
 	assert(exp->nd_symb == '^');
@@ -215,7 +215,7 @@ static int ChkArrow(t_node **expp, int flags)
 	return 1;
 }
 
-static int ChkArr(t_node **expp, int flags)
+static int ChkArr(struct node **expp, int flags)
 {
 	/*	Check an array selection.
 		The left hand side must be a variable of an array type,
@@ -223,8 +223,8 @@ static int ChkArr(t_node **expp, int flags)
 		assignment compatible with the array-index.
 	*/
 
-	register t_type *tpl;
-	register t_node *exp = *expp;
+	register struct type *tpl;
+	register struct node *exp = *expp;
 
 	assert(exp->nd_class == Arrsel);
 	assert(exp->nd_symb == '[' || exp->nd_symb == ',');
@@ -257,7 +257,7 @@ static int ChkArr(t_node **expp, int flags)
 }
 
 /*ARGSUSED*/
-static int ChkValue(t_node **expp, int flags)
+static int ChkValue(struct node **expp, int flags)
 {
 #ifdef DEBUG
 	switch((*expp)->nd_symb) {
@@ -273,13 +273,13 @@ static int ChkValue(t_node **expp, int flags)
 	return 1;
 }
 
-static int ChkSelOrName(t_node **expp, int flags)
+static int ChkSelOrName(struct node **expp, int flags)
 {
 	/*	Check either an ID or a construction of the form
 		ID.ID [ .ID ]*
 	*/
-	register t_def *df;
-	register t_node *exp = *expp;
+	register struct def *df;
+	register struct node *exp = *expp;
 
 	exp->nd_type = error_type;
 
@@ -296,7 +296,7 @@ static int ChkSelOrName(t_node **expp, int flags)
 		/*	A selection from a record or a module.
 			Modules also have a record type.
 		*/
-		register t_node *left;
+		register struct node *left;
 
 		assert(exp->nd_symb == '.');
 
@@ -346,13 +346,13 @@ static int ChkSelOrName(t_node **expp, int flags)
 	return exp->nd_def->df_kind != D_ERROR;
 }
 
-static int ChkExSelOrName(t_node **expp, int flags)
+static int ChkExSelOrName(struct node **expp, int flags)
 {
 	/*	Check either an ID or an ID.ID [.ID]* occurring in an
 		expression.
 	*/
-	register t_def *df;
-	register t_node *exp;
+	register struct def *df;
+	register struct node *exp;
 
 	if (! ChkSelOrName(expp, D_USED)) return 0;
 
@@ -418,20 +418,20 @@ static int ChkExSelOrName(t_node **expp, int flags)
 	return 1;
 }
 
-static int ChkEl(register t_node **expp, t_type *tp)
+static int ChkEl(register struct node **expp, struct type *tp)
 {
 
 	return ChkExpression(expp) && ChkCompat(expp, tp, "set element");
 }
 
-static int ChkElement(t_node **expp, t_type *tp, arith *set)
+static int ChkElement(struct node **expp, struct type *tp, arith *set)
 {
 	/*	Check elements of a set. This routine may call itself
 		recursively.
 		Also try to compute the set!
 	*/
-	register t_node *expr = *expp;
-	t_type *el_type = ElementType(tp);
+	register struct node *expr = *expp;
+	struct type *el_type = ElementType(tp);
 	register unsigned int i;
 	arith low, high;
 
@@ -504,15 +504,15 @@ void FreeSet(register arith *s)
 	}
 }
 
-static int ChkSet(t_node **expp, int flags)
+static int ChkSet(struct node **expp, int flags)
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
 		compile time. Unfortunately this is all rather complicated.
 	*/
-	register t_type *tp;
-	register t_node *exp = *expp;
-	register t_node *nd;
-	register t_def *df;
+	register struct type *tp;
+	register struct node *exp = *expp;
+	register struct node *nd;
+	register struct def *df;
 	int retval = 1;
 	int SetIsConstant = 1;
 
@@ -570,9 +570,9 @@ static int ChkSet(t_node **expp, int flags)
 	return retval;
 }
 
-static t_node *nextarg(t_node **argp, t_def *edf)
+static struct node *nextarg(struct node **argp, struct def *edf)
 {
-	register t_node *arg = (*argp)->nd_RIGHT;
+	register struct node *arg = (*argp)->nd_RIGHT;
 
 	if (! arg) {
 		df_error(*argp, "too few arguments supplied", edf);
@@ -583,7 +583,7 @@ static t_node *nextarg(t_node **argp, t_def *edf)
 	return arg;
 }
 
-static t_node *getarg(t_node **argp, int bases, int designator, t_def *edf)
+static struct node *getarg(struct node **argp, int bases, int designator, struct def *edf)
 {
 	/*	This routine is used to fetch the next argument from an
 		argument list. The argument list is indicated by "argp".
@@ -593,8 +593,8 @@ static t_node *getarg(t_node **argp, int bases, int designator, t_def *edf)
 		that it must be a designator and may not be a register
 		variable.
 	*/
-	register t_node *arg = nextarg(argp, edf);
-	register t_node *left;
+	register struct node *arg = nextarg(argp, edf);
+	register struct node *left;
 
 	if (! arg ||
 	    ! arg->nd_LEFT ||
@@ -608,7 +608,7 @@ static t_node *getarg(t_node **argp, int bases, int designator, t_def *edf)
 	}
 
 	if (bases) {
-		t_type *tp = BaseType(left->nd_type);
+		struct type *tp = BaseType(left->nd_type);
 
 		if (! designator) MkCoercion(&(arg->nd_LEFT), tp);
 		left = arg->nd_LEFT;
@@ -621,14 +621,14 @@ static t_node *getarg(t_node **argp, int bases, int designator, t_def *edf)
 	return left;
 }
 
-static t_node *getname(t_node **argp, int kinds, int bases, t_def *edf)
+static struct node *getname(struct node **argp, int kinds, int bases, struct def *edf)
 {
 	/*	Get the next argument from argument list "argp".
 		The argument must indicate a definition, and the
 		definition kind must be one of "kinds".
 	*/
-	register t_node *arg = nextarg(argp, edf);
-	register t_node *left;
+	register struct node *arg = nextarg(argp, edf);
+	register struct node *left;
 
 	if (!arg || !arg->nd_LEFT || ! ChkDesig(&(arg->nd_LEFT), D_USED)) return 0;
 
@@ -647,14 +647,14 @@ static t_node *getname(t_node **argp, int kinds, int bases, t_def *edf)
 	return left;
 }
 
-static int ChkProcCall(register t_node *exp)
+static int ChkProcCall(register struct node *exp)
 {
 	/*	Check a procedure call
 	*/
-	register t_node *left;
-	t_node *argp;
-	t_def *edf = 0;
-	register t_param *param;
+	register struct node *left;
+	struct node *argp;
+	struct def *edf = 0;
+	register struct paramlist *param;
 	int retval = 1;
 	int cnt = 0;
 
@@ -708,7 +708,7 @@ static int ChkProcCall(register t_node *exp)
 	return retval;
 }
 
-static int ChkFunCall(register t_node **expp, int flags)
+static int ChkFunCall(register struct node **expp, int flags)
 {
 	/*	Check a call that must have a result
 	*/
@@ -723,7 +723,7 @@ static int ChkFunCall(register t_node **expp, int flags)
 
 
 
-int ChkCall(t_node **expp)
+int ChkCall(struct node **expp)
 {
 	/*	Check something that looks like a procedure or function call.
 		Of course this does not have to be a call at all,
@@ -733,7 +733,7 @@ int ChkCall(t_node **expp)
 	/* First, get the name of the function or procedure
 	*/
 	if (ChkDesig(&((*expp)->nd_LEFT), D_USED)) {
-		register t_node *left = (*expp)->nd_LEFT;
+		register struct node *left = (*expp)->nd_LEFT;
 		
 		if (IsCast(left)) {
 			/* It was a type cast.
@@ -763,7 +763,7 @@ int ChkCall(t_node **expp)
 	return ChkProcCall(*expp);
 }
 
-static t_type *ResultOfOperation(int operator, t_type *tp)
+static struct type *ResultOfOperation(int operator, struct type *tp)
 {
 	/*	Return the result type of the binary operation "operator",
 		with operand type "tp".
@@ -820,9 +820,9 @@ static int AllowedTypes(int operator)
 }
 
 static int ChkAddressOper(
-	register t_type *tpl,
-	register t_type *tpr,
-	register t_node *expp)
+	register struct type *tpl,
+	register struct type *tpr,
+	register struct node *expp)
 {
 	/*	Check that either "tpl" or "tpr" are both of type
 		address_type, or that one of them is, but the other is
@@ -833,8 +833,8 @@ static int ChkAddressOper(
 
 	if (tpr == address_type && expp->nd_symb == '+') {
 		/* use the fact that '+' is a commutative operator */
-		t_type *tmptype = tpr;
-		t_node *tmpnode = expp->nd_RIGHT;
+		struct type *tmptype = tpr;
+		struct node *tmpnode = expp->nd_RIGHT;
 
 		tpr = tpl;
 		expp->nd_RIGHT = expp->nd_LEFT;
@@ -866,13 +866,13 @@ static int ChkAddressOper(
 	return 0;
 }
 
-static int ChkBinOper(t_node **expp, int flags)
+static int ChkBinOper(struct node **expp, int flags)
 {
 	/*	Check a binary operation.
 	*/
-	register t_node *exp = *expp;
-	register t_type *tpl, *tpr;
-	t_type *result_type;
+	register struct node *exp = *expp;
+	register struct type *tpl, *tpr;
+	struct type *result_type;
 	int allowed;
 	int retval;
 	char *symb;
@@ -981,13 +981,13 @@ static int ChkBinOper(t_node **expp, int flags)
 	return 1;
 }
 
-static int ChkUnOper(t_node **expp, int flags)
+static int ChkUnOper(struct node **expp, int flags)
 {
 	/*	Check an unary operation.
 	*/
-	register t_node *exp = *expp;
-	register t_node *right = exp->nd_RIGHT;
-	register t_type *tpr;
+	register struct node *exp = *expp;
+	register struct node *right = exp->nd_RIGHT;
+	register struct type *tpr;
 
 	if (exp->nd_symb == COERCION) return 1;
 	if (exp->nd_symb == '(') {
@@ -1054,12 +1054,12 @@ static int ChkUnOper(t_node **expp, int flags)
 	return 0;
 }
 
-static t_node *getvariable(t_node **argp, t_def *edf, int flags)
+static struct node *getvariable(struct node **argp, struct def *edf, int flags)
 {
 	/*	Get the next argument from argument list "argp".
 		It must obey the rules of "ChkVariable".
 	*/
-	register t_node *arg = nextarg(argp, edf);
+	register struct node *arg = nextarg(argp, edf);
 
 	if (! arg ||
 	    ! arg->nd_LEFT ||
@@ -1068,14 +1068,14 @@ static t_node *getvariable(t_node **argp, t_def *edf, int flags)
 	return arg->nd_LEFT;
 }
 
-static int ChkStandard(t_node **expp)
+static int ChkStandard(struct node **expp)
 {
 	/*	Check a call of a standard procedure or function
 	*/
-	register t_node *exp = *expp;
-	t_node *arglink = exp;
-	register t_node *arg;
-	register t_def *edf = exp->nd_LEFT->nd_def;
+	register struct node *exp = *expp;
+	struct node *arglink = exp;
+	register struct node *arg;
+	register struct def *edf = exp->nd_LEFT->nd_def;
 	int free_it = 0;
 	int isconstant = 0;
 
@@ -1126,8 +1126,8 @@ static int ChkStandard(t_node **expp)
 
 	case S_SHORT:
 	case S_LONG: {
-		t_type *tp;
-		t_type *s1, *s2, *s3, *d1, *d2, *d3;
+		struct type *tp;
+		struct type *s1, *s2, *s3, *d1, *d2, *d3;
 
 		if (!(arg = getarg(&arglink, 0, 0, edf))) {
 			return 0;
@@ -1349,8 +1349,8 @@ static int ChkStandard(t_node **expp)
 	case S_EXCL:
 	case S_INCL:
 		{
-		register t_type *tp;
-		t_node *dummy;
+		register struct type *tp;
+		struct node *dummy;
 
 		exp->nd_type = 0;
 		if (!(arg = getvariable(&arglink, edf, D_USED|D_DEFINED))) return 0;
@@ -1398,7 +1398,7 @@ static int ChkStandard(t_node **expp)
 	return 1;
 }
 
-static int ChkCast(t_node **expp)
+static int ChkCast(struct node **expp)
 {
 	/*	Check a cast and perform it if the argument is constant.
 		If the sizes don't match, only complain if at least one of them
@@ -1407,10 +1407,10 @@ static int ChkCast(t_node **expp)
 		is no problem as such values take a word on the EM stack
 		anyway.
 	*/
-	register t_node *exp = *expp;
-	register t_node *arg = exp->nd_RIGHT;
-	register t_type *lefttype = exp->nd_LEFT->nd_type;
-	t_def		*df = exp->nd_LEFT->nd_def;
+	register struct node *exp = *expp;
+	register struct node *arg = exp->nd_RIGHT;
+	register struct type *lefttype = exp->nd_LEFT->nd_type;
+	struct def		*df = exp->nd_LEFT->nd_def;
 
 	if ((! arg) || arg->nd_RIGHT) {
 		df_error(exp, "type cast must have 1 parameter", df);
@@ -1461,7 +1461,7 @@ static int ChkCast(t_node **expp)
 	return 1;
 }
 
-void TryToString(register t_node *nd, t_type *tp)
+void TryToString(register struct node *nd, struct type *tp)
 {
 	/*	Try a coercion from character constant to string.
 	*/
@@ -1479,20 +1479,20 @@ void TryToString(register t_node *nd, t_type *tp)
 	}
 }
 
-static int no_desig(t_node **expp, int flags)
+static int no_desig(struct node **expp, int flags)
 {
 	node_error(*expp, "designator expected");
 	return 0;
 }
 
-static int add_flags(t_node **expp, int flags)
+static int add_flags(struct node **expp, int flags)
 {
 	(*expp)->nd_def->df_flags |= flags;
 	return 1;
 }
 
 
-int (*ExprChkTable[])(t_node **, int) = {
+int (*ExprChkTable[])(struct node **, int) = {
 	ChkValue,
 	ChkArr,
 	ChkBinOper,
@@ -1508,7 +1508,7 @@ int (*ExprChkTable[])(t_node **, int) = {
 	PNodeCrash,
 };
 
-int (*DesigChkTable[])(t_node **, int) = {
+int (*DesigChkTable[])(struct node **, int) = {
 	no_desig,
 	ChkArr,
 	no_desig,

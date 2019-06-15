@@ -8,9 +8,7 @@
 
 #include "ack_string.h"
 
-value(c, b)
-	char c;
-	int b;
+static int value(char c, int b)
 {
 	register int ch;
 
@@ -23,10 +21,7 @@ value(c, b)
 	return b;
 }
 
-long
-str2long(str, base)
-	register char *str;
-	int base;
+long str2long(register char *str, int base)
 {
 	int minus = 0, d;
 	long l = 0;

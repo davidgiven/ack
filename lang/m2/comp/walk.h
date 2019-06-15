@@ -11,13 +11,13 @@
 #include "em_label.h"
 
 /* Forward type declarations. */
-typedef struct node t_node;
-typedef struct def  t_def;
-typedef struct desig t_desig;
+struct node;
+struct def;
+struct desig;
 
 /*	Definition of WalkNode macro
 */
-extern int (*WalkTable[])(t_node*, label, int);
+extern int (*WalkTable[])(struct node*, label, int);
 
 #define	WalkNode(xnd, xlab, rch)	(*WalkTable[(unsigned int)((xnd)->nd_class)])((xnd), (xlab),(rch))
 
@@ -33,10 +33,10 @@ extern label	data_label;
 
 
 
-int LblWalkNode(label lbl, t_node *nd, int exit, int reach);
+int LblWalkNode(label lbl, struct node *nd, int exit, int reach);
 void def_ilb(label l);
 /* Generate line information as necessary for "nd". */
-void DoLineno(register t_node* nd);
+void DoLineno(register struct node* nd);
 /*	Generate filename information, when needed.
 	This routine is called at the generation of a
 	procedure entry, and after generating a call to
@@ -49,27 +49,27 @@ void DoFilename(int needed);
 	Also generate code for its body.
 	This code is collected in an initialization routine.
 */
-void WalkModule(register t_def* module);
+void WalkModule(register struct def* module);
 /*	Walk through the definition of a procedure and all its
 	local definitions, checking and generating code.
 */
-void WalkProcedure(register t_def* procedure);
+void WalkProcedure(register struct def* procedure);
 
 /*	Walk node "nd", which is a link.
 	"exit_label" is set to a label number when inside a LOOP.
 	"end_reached" maintains info about reachability (REACH_FLAG),
 	and whether an EXIT statement was seen (EXIT_FLAG).
 */
-int WalkLink(register t_node* nd, label exit_label, int end_reached);
+int WalkLink(register struct node* nd, label exit_label, int end_reached);
 /* Walk through a statement node "nd", generating code for it. */
-int WalkStat(register t_node* nd, label exit_label, int end_reached);
+int WalkStat(register struct node* nd, label exit_label, int end_reached);
 /*	Generate code to evaluate a boolean expression "pnd" */
-void ExpectBool(register t_node** pnd, label true_label, label false_label);
+void ExpectBool(register struct node** pnd, label true_label, label false_label);
 /* Check designator and generate code for it */
-int WalkDesignator(t_node** pnd, t_desig* ds, int flags);
+int WalkDesignator(struct node** pnd, struct desig* ds, int flags);
 
-void DoAssign(register t_node* nd);
+void DoAssign(register struct node* nd);
 
-int DoForInit(t_node* nd);
+int DoForInit(struct node* nd);
 
 #endif /* WALK_H_ */

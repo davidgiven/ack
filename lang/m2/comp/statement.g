@@ -24,12 +24,12 @@
 #include	"node.h"
 
 static int	loopcount = 0;	/* Count nested loops */
-extern t_node *EmptyStatement;
+extern struct node *EmptyStatement;
 }
 
-statement(register t_node **pnd;)
+statement(register struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 	extern int return_occurred;
 } :
 	/*
@@ -110,10 +110,10 @@ ProcedureCall:
 ;
 */
 
-StatementSequence(register t_node **pnd;)
+StatementSequence(register struct node **pnd;)
 {
-	t_node *nd;
-	register t_node *nd1;
+	struct node *nd;
+	register struct node *nd1;
 } :
 	statement(pnd)
 	[ %persistent
@@ -129,9 +129,9 @@ StatementSequence(register t_node **pnd;)
 	]*
 ;
 
-IfStatement(t_node **pnd;)
+IfStatement(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 } :
 	IF		{ nd = dot2leaf(Stat);
 			  *pnd = nd;
@@ -160,10 +160,10 @@ IfStatement(t_node **pnd;)
 	END
 ;
 
-CaseStatement(t_node **pnd;)
+CaseStatement(struct node **pnd;)
 {
-	register t_node *nd;
-	t_type *tp = 0;
+	register struct node *nd;
+	struct type  *tp = 0;
 } :
 	CASE		{ *pnd = nd = dot2leaf(Stat); }
 	expression(&(nd->nd_LEFT))
@@ -181,7 +181,7 @@ CaseStatement(t_node **pnd;)
 	END
 ;
 
-case(t_node **pnd; t_type **ptp;) :
+case(struct node **pnd; struct type  **ptp;) :
 	[ CaseLabelList(ptp, pnd)
 	  ':'		{ *pnd = dot2node(Link, *pnd, NULLNODE); }
 	  StatementSequence(&((*pnd)->nd_RIGHT))
@@ -193,9 +193,9 @@ case(t_node **pnd; t_type **ptp;) :
 ;
 
 /* inline in statement; lack of space 
-WhileStatement(t_node **pnd;)
+WhileStatement(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 }:
 	WHILE		{ *pnd = nd = dot2leaf(Stat); }
 	expression(&(nd->nd_LEFT))
@@ -204,9 +204,9 @@ WhileStatement(t_node **pnd;)
 	END
 ;
 
-RepeatStatement(t_node **pnd;)
+RepeatStatement(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 }:
 	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
 	StatementSequence(&(nd->nd_LEFT))
@@ -215,9 +215,9 @@ RepeatStatement(t_node **pnd;)
 ;
 */
 
-ForStatement(t_node **pnd;)
+ForStatement(struct node **pnd;)
 {
-	register t_node *nd, *nd1;
+	register struct node *nd, *nd1;
 }:
 	FOR		{ *pnd = nd = dot2leaf(Stat); }
 	IDENT		{ nd1 = dot2leaf(Name); }
@@ -249,15 +249,15 @@ ForStatement(t_node **pnd;)
 ;
 
 /* inline in Statement; lack of space
-LoopStatement(t_node **pnd;):
+LoopStatement(struct node **pnd;):
 	LOOP		{ *pnd = dot2leaf(Stat); }
 	StatementSequence(&((*pnd)->nd_RIGHT))
 	END
 ;
 
-WithStatement(t_node **pnd;)
+WithStatement(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 }:
 	WITH		{ *pnd = nd = dot2leaf(Stat); }
 	designator(&(nd->nd_LEFT))
@@ -267,11 +267,11 @@ WithStatement(t_node **pnd;)
 ;
 */
 
-ReturnStatement(t_node **pnd;)
+ReturnStatement(struct node **pnd;)
 {
-	register t_def *df = CurrentScope->sc_definedby;
-	register t_type *tp = df->df_type ? ResultType(df->df_type) : 0;
-	register t_node *nd;
+	register struct def *df = CurrentScope->sc_definedby;
+	register struct type  *tp = df->df_type ? ResultType(df->df_type) : 0;
+	register struct node *nd;
 } :
 
 	RETURN		{ *pnd = nd = dot2leaf(Stat); }

@@ -40,6 +40,8 @@ static char rcsid[] = "$Id$";
 #include "memory.h"
 #include "object.h"
 #include "sym.h"
+#include "finish.h"
+#include "write.h"
 
 #ifndef USEMALLOC
 static void copy_down(struct memory* mem, ind_t dist);
@@ -655,8 +657,7 @@ void core_free(int piece, char* p)
  * Reset index into piece of memory for modules and
  * take care that the allocated pieces will not be moved.
  */
-void
-freeze_core()
+void freeze_core(void)
 {
 	register int	i;
 

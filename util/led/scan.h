@@ -4,6 +4,11 @@
  */
 /* $Id$ */
 
+#ifndef __SCAN_H_INCLUDED__
+#define __SCAN_H_INCLUDED__
+
+#include "arch.h"
+
 /*
  * Offsets of the pieces of the input module in core.
  */
@@ -26,3 +31,12 @@ extern struct outrelo* nextrelo(void);
 extern char* getemit(struct outhead* head, struct outsect* sects, int sectindex);
 extern char* getblk(long totalsz, long* pblksz, int sectindex);
 extern void endemit(char* emit);
+/*
+ * Open the file with name `filename' (if necessary) and examine the first
+ * few bytes to see if it's a plain file or an archive.
+ * In case of a plain file, the file pointer is repositioned after the
+ * examination. Otherwise it is at the beginning of the table of contents.
+ */
+int getfile(char* filename);
+
+#endif /* __SCAN_H_INCLUDED__ */

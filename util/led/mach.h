@@ -9,8 +9,11 @@
  * Values depend on the machine on which this program should run.
  * Now for Vax 11/750.
  */
+#ifndef __MACH_H_INCLUDED__
+#define __MACH_H_INCLUDED__
 
-#include <local.h>
+
+#include "local.h"
 
 #define K 1024L
 
@@ -49,3 +52,5 @@
 	mems[ALLOMODL].mem_left = 12 * K;
 	mems[ALLORANL].mem_left = 4 * K;
 #endif
+
+#endif /* __MACH_H_INCLUDED__ */

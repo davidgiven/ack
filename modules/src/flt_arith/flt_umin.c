@@ -7,9 +7,7 @@
 
 #include "flt_misc.h"
 
-void
-flt_umin(e)
-	flt_arith *e;
+void flt_umin(flt_arith *e)
 {
 	/*	Unary minus
 	*/

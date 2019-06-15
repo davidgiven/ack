@@ -8,8 +8,9 @@
  * Motorola 6800 special routines
  */
 
-branch(opc,exp) register opc; expr_t exp; {
-	register sm, dist;
+void branch(register int opc,expr_t exp)
+{
+	register int sm, dist;
 	int saving;
 
 	dist = exp.val - (DOTVAL + 2);

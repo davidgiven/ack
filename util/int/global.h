@@ -1,8 +1,8 @@
 /*
 	Defines and externs of general interest
 */
-
-/* $Id$ */
+#ifndef GLOBAL_H_
+#define GLOBAL_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,3 +157,4 @@ extern ptr SL;			/* Stack Limit */
 #define	min(i,j)	(((i) < (j)) ? (i) : (j))
 
 
+#endif /* GLOBAL_H_ */

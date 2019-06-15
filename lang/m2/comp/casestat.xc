@@ -42,7 +42,7 @@ struct switch_hdr	{
 	label sh_break;			/* label of statement after this one */
 	label sh_default;		/* label of ELSE part, or 0 */
 	int sh_nrofentries;		/* number of cases */
-	t_type *sh_type;		/* type of case expression */
+	struct type *sh_type;	/* type of case expression */
 	arith sh_lowerbd;		/* lowest case label */
 	arith sh_upperbd;		/* highest case label */
 	struct case_entry *sh_entries;	/* the cases with their generated
@@ -84,7 +84,7 @@ static int compact(int nr, arith low, arith up)
 }
 #define nd_lab	nd_symb
 
-static void AddOneCase(struct switch_hdr *sh, t_node *lnode,  t_node *rnode, label lbl)
+static void AddOneCase(struct switch_hdr *sh, struct node *lnode,  struct node *rnode, label lbl)
 {
 	register struct case_entry *ce = new_case_entry();
 	register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
@@ -201,7 +201,7 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_up));
 }
 
 
-static void AddCases(struct switch_hdr *sh, register t_node *node, label lbl)
+static void AddCases(struct switch_hdr *sh, register struct node *node, label lbl)
 {
 	/*	Add case labels to the case label list
 	*/
@@ -243,7 +243,7 @@ static void FreeSh(struct switch_hdr *sh)
 	free_switch_hdr(sh);
 }
 
-int CaseCode(t_node *nd, label exitlabel, int end_reached)
+int CaseCode(struct node *nd, label exitlabel, int end_reached)
 {
 	/*	Check the expression, stack a new case header and
 		fill in the necessary fields.
@@ -251,7 +251,7 @@ int CaseCode(t_node *nd, label exitlabel, int end_reached)
 		LOOP-statement, or 0.
 	*/
 	register struct switch_hdr *sh = new_switch_hdr();
-	register t_node *pnode = nd;
+	register struct node *pnode = nd;
 	register struct case_entry *ce;
 	register arith val;
 	label CaseDescrLab;

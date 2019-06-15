@@ -47,11 +47,11 @@ char	*ProgName;
 char	**DEFPATH;
 int		nDEF = 2, mDEF = 10;
 int		pass_1 = 1;
-t_def	 *Defined;
+struct def	 *Defined;
 extern int 	err_occurred;
 extern int	fp_used;		/* set if floating point used */
-static t_node	_emptystat = { Stat, 0, NULLTYPE, { ';' }};
-t_node		*EmptyStatement = &_emptystat;
+static struct node	_emptystat = { Stat, 0, NULLTYPE, { ';' }};
+struct node		*EmptyStatement = &_emptystat;
 
 
 /* Forward declarations. */
@@ -211,7 +211,7 @@ static struct stdproc sysprocs[] = {
 	{ 0,		0 }
 };
 
-extern t_def *Enter(), *EnterType();
+extern struct def *Enter(), *EnterType();
 
 static void AddProcs(register struct stdproc *p)
 {
@@ -224,7 +224,7 @@ static void AddProcs(register struct stdproc *p)
 
 static void AddStandards(void)
 {
-	register t_def *df;
+	register struct def *df;
 	static t_token nilconst = { INTEGER, 0};
 
 	AddProcs(stdprocs);

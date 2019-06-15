@@ -4,10 +4,15 @@
  *
  * Author: Ceriel J.H. Jacobs
  */
+#ifndef NODE_H_
+#define NODE_H_
+
+#include "em_arith.h"
+#include "em_label.h"
 
 /* N O D E   O F   A N   A B S T R A C T   P A R S E T R E E */
 
-/* $Id$ */
+
 
 struct node {
 	char nd_class;		/* kind of node */
@@ -47,13 +52,13 @@ struct node {
 #define nd_RVAL		nd_token.TOK_RVAL
 };
 
-typedef struct node	t_node;
+
 
 /* ALLOCDEF "node" 50 */
 
-extern t_node *dot2node(), *dot2leaf(), *getnode();
+extern struct node *dot2node(), *dot2leaf(), *getnode();
 
-#define NULLNODE ((t_node *) 0)
+#define NULLNODE ((struct node *) 0)
 
 #define HASSELECTORS	002
 #define VARIABLE	004
@@ -64,10 +69,11 @@ extern t_node *dot2node(), *dot2leaf(), *getnode();
 
 
 
-t_node *getnode(int class);
-t_node *dot2node(int class, t_node *left, t_node *right);
-t_node *dot2leaf(int class);
-void FreeNode(register t_node *nd);
-int NodeCrash(register t_node* expp, label exit_label, int end_reached);
-int PNodeCrash(t_node **expp, int flags);
+struct node *getnode(int class);
+struct node *dot2node(int class, struct node *left, struct node *right);
+struct node *dot2leaf(int class);
+void FreeNode(register struct node *nd);
+int NodeCrash(register struct node* expp, label exit_label, int end_reached);
+int PNodeCrash(struct node **expp, int flags);
 
+#endif /* NODE_H_ */

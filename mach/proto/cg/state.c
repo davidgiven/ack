@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
@@ -11,13 +13,10 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "state.h"
 #include "extern.h"
+#include "subr.h"
+#include "salloc.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+
 
 extern int nstab;	/* salloc.c */
 
@@ -27,10 +26,24 @@ extern string myalloc();
 state_p stlist=0;
 #endif
 
+
+static void bmove(register short *from, register short *to, register int nbytes)
+{
+	if (nbytes<=0)
+		return;
+	assert(sizeof(short)==2 && (nbytes&1)==0);
+	nbytes>>=1;
+	do
+		*to++ = *from++;
+	while (--nbytes);
+}
+
 #ifdef STONSTACK
-savestatus(sp) register state_p sp; {
+state_p savestatus(register state_p sp)
+{
 #else
-state_p savestatus() {
+state_p state_p savestatus(void)
+{
 	register state_p sp;
 
 	if ((sp=stlist)==0)
@@ -56,8 +69,8 @@ state_p savestatus() {
 #endif
 }
 
-restorestatus(sp) register state_p sp; {
-
+void restorestatus(register state_p sp)
+{
 	stackheight = sp->st_sh;
 	bmove((short *)sp->st_fs,(short *)fakestack,stackheight*sizeof(token_t));
 	nallreg = sp->st_na;
@@ -74,20 +87,11 @@ restorestatus(sp) register state_p sp; {
 }
 
 #ifndef STONSTACK
-freestatus(sp) state_p sp; {
-
+void freestatus(state_p sp)
+{
 	sp->st_next = stlist;
 	stlist = sp;
 }
 #endif
 
-bmove(from,to,nbytes) register short *from,*to; register nbytes; {
 
-	if (nbytes<=0)
-		return;
-	assert(sizeof(short)==2 && (nbytes&1)==0);
-	nbytes>>=1;
-	do
-		*to++ = *from++;
-	while (--nbytes);
-}

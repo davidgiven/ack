@@ -26,8 +26,8 @@
 #include	"lookup.h"
 #include	"error.h"
 
-t_scope *PervasiveScope;
-t_scopelist *CurrVis, *GlobalVis;
+struct scope *PervasiveScope;
+struct scopelist *CurrVis, *GlobalVis;
 extern int proclevel;
 extern char options[];
 
@@ -41,8 +41,8 @@ void open_scope(int scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
-	register t_scope *sc = new_scope();
-	register t_scopelist *ls = new_scopelist();
+	register struct scope *sc = new_scope();
+	register struct scopelist *ls = new_scopelist();
 	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 
@@ -57,9 +57,9 @@ void open_scope(int scopetype)
 	CurrVis = ls;
 }
 
-t_scope * open_and_close_scope(int scopetype)
+struct scope * open_and_close_scope(int scopetype)
 {
-	t_scope *sc;
+	struct scope *sc;
 
 	open_scope(scopetype);
 	sc = CurrentScope;
@@ -69,8 +69,8 @@ t_scope * open_and_close_scope(int scopetype)
 
 void InitScope(void)
 {
-	register t_scope *sc = new_scope();
-	register t_scopelist *ls = new_scopelist();
+	register struct scope *sc = new_scope();
+	register struct scopelist *ls = new_scopelist();
 
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
@@ -78,7 +78,7 @@ void InitScope(void)
 	CurrVis = ls;
 }
 
-static void chk_proc(register t_def *df)
+static void chk_proc(register struct def *df)
 {
 	/*	Called at scope closing. Check all definitions, and if one
 		is a D_PROCHEAD, the procedure was not defined.
@@ -100,13 +100,13 @@ static void chk_proc(register t_def *df)
 	}
 }
 
-static void chk_forw(t_def **pdf)
+static void chk_forw(struct def **pdf)
 {
 	/*	Called at scope close. Look for all forward definitions and
 		if the scope was a closed scope, give an error message for
 		them, and otherwise move them to the enclosing scope.
 	*/
-	register t_def *df;
+	register struct def *df;
 
 	while ( (df = *pdf) ) {
 		if (df->df_kind == D_FORWTYPE) {
@@ -131,9 +131,9 @@ df->df_idf->id_text);
 				   Maybe the definitions are in the
 				   enclosing scope?
 				*/
-				register t_scopelist *ls =
+				register struct scopelist *ls =
 						nextvisible(CurrVis);
-				register t_def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
+				register struct def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
 
 				*pdf = df->df_nextinscope;
 	
@@ -154,14 +154,14 @@ df->df_idf->id_text);
 	}
 }
 
-void Reverse(t_def **pdf)
+void Reverse(struct def **pdf)
 {
 	/*	Reverse the order in the list of definitions in a scope.
 		This is neccesary because this list is built in reverse.
 		Also, while we're at it, remove uninteresting definitions
 		from this list.
 	*/
-	register t_def *df, *df1;
+	register struct def *df, *df1;
 #define INTERESTING (D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE|D_IMPORTED|D_TYPE|D_CONST|D_FIELD)
 
 	df = 0;
@@ -169,7 +169,7 @@ void Reverse(t_def **pdf)
 
 	while (df1) {
 		if (df1->df_kind & INTERESTING) {
-			t_def *prev = df;
+			struct def *prev = df;
 
 			df = df1;
 			df1 = df1->df_nextinscope;
@@ -186,7 +186,7 @@ void close_scope(int flag)
 		either POINTER declarations, or EXPORTs, or forward references
 		to MODULES
 	*/
-	register t_scope *sc = CurrentScope;
+	register struct scope *sc = CurrentScope;
 
 	assert(sc != 0);
 
@@ -203,7 +203,7 @@ void close_scope(int flag)
 }
 
 #ifdef DEBUG
-void DumpScope(register t_def *df)
+void DumpScope(register struct def *df)
 {
 	while (df) {
 		PrDef(df);

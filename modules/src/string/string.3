@@ -9,46 +9,27 @@ conversions between strings and row of bytes
 .nf
 .B #include <ack_string.h>
 .PP
-.B char *strindex(s, c)
-.B char *s, c;
+.B char *strindex(char *s, int c)
 .PP
-.B char *strrindex(s, c)
-.B char *s, c;
+.B char *strrindex(char *s, int c)
 .PP
-.B char *strzero(s)
-.B char *s;
+.B char *strzero(char *s)
 .PP
-.B char *str2bts(s, b, pn)
-.B char *s, *b;
-.B int *pn;
+.B char *str2bts(char *s, char *b, int *n)
 .PP
-.B char *long2str(l, base)
-.B long l;
-.B int base;
+.B char *long2str(long l, int b)
 .PP
-.B long str2long(s, base)
-.B char *s;
-.B int base;
+.B long str2long(char *s, int b)
 .PP
-.B char *btscpy(b1, b2, n)
-.B char *b1, *b2;
-.B int n;
+.B char *btscpy(char *b1, char *b2, int n)
 .PP
-.B char *btscat(b1, n1, b2, n2)
-.B char *b1, *b2;
-.B int n1, n2;
+.B char *btscat(char *b1, int n1, char *b2, int n2)
 .PP
-.B int btscmp(b1, n1, b2, n2)
-.B char *b1, *b2;
-.B int n1, n2;
+.B int btscmp(char *b1, int n1, char *b2, int n2)
 .PP
-.B char *btszero(b, n)
-.B char *b;
-.B int n;
+.B char *btszero(char *b, int n)
 .PP
-.B char *bts2str(b, n, s)
-.B char *b, *s;
-.B int n;
+.B char *bts2str(char *b, int n, char *s)
 .fi
 .SH DESCRIPTION
 The 
@@ -60,7 +41,7 @@ functions operate on variable-length rows of bytes,
 regardless of null bytes.
 Neither of these functions check for overflow of any receiving area.
 .PP
-.I Strindex
+.I strindex
 .RI ( strrindex )
 returns a pointer to the first (last)
 occurrence of character 
@@ -72,12 +53,12 @@ or zero if
 does not occur in
 .IR s .
 .PP
-.I Strzero
+.I strzero
 turns
 .I s
 into a null string.
 .PP
-.I Bts2str
+.I bts2str
 turns a row of
 .I n
 consecutive bytes, the first of which is pointed by
@@ -100,7 +81,7 @@ is turned into the string consisting of the following characters
 .RE
 The latter string could be represented in C as "\e\e000\e\en".
 .PP
-.I Str2bts
+.I str2bts
 turns string
 .I s
 into a sequence of bytes pointed by
@@ -108,7 +89,7 @@ into a sequence of bytes pointed by
 It has the inverse effect to
 .IR bts2str .
 The length of the resulting byte sequence is returned in
-.RI * pn .
+.RI *n .
 .br
 Both the functions
 .I bts2str
@@ -116,7 +97,7 @@ and
 .I str2bts
 return a pointer to the result.
 .PP
-.I Long2str
+.I long2str
 converts a long value
 .I l
 into a null-terminated string according to
@@ -126,13 +107,13 @@ This base may be any of 2..16.
 A negative base (in the range -16..-2) indicates that the long must be
 seen as unsigned.
 A pointer to the string is returned.
-.I Str2long
+.I str2long
 returns the value that is represented in
 .IR s ,
 according to
 .IR base .
 .PP
-.I Btscpy
+.I btscpy
 copies
 .I n
 bytes from the string of bytes
@@ -142,7 +123,7 @@ to
 and returns
 .IR b1 .
 .PP
-.I Btscat
+.I btscat
 appends a copy of
 .I n2
 bytes from
@@ -152,10 +133,10 @@ to the end of
 consisting of
 .I n1
 bytes.
-.I B1
+.I b1
 is returned.
 .PP
-.I Btscmp
+.I btscmp
 compares row of bytes
 .I b1
 with length 
@@ -170,12 +151,12 @@ is lexicographically greater then, equal to, or less than
 .IR b2 ,
 respectively.
 .PP
-.I Btszero
+.I btszero
 places
 .I n
 null bytes in the string
 .IR b .
-.I B
+.I b
 is returned.
 .SH FILES
 ~em/modules/lib/libstring.a

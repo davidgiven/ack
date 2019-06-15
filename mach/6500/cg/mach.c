@@ -3,8 +3,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-con_part(sz,w) register sz; word w; {
-
+void con_part(register int sz, word w)
+{
 	while (part_size % sz)
 		part_size++;
 	if (part_size == TEM_WSIZE)
@@ -21,17 +21,16 @@ con_part(sz,w) register sz; word w; {
 	part_size += sz;
 }
 
-con_mult(sz) word sz; {
-	long atol();
-
+void con_mult(word sz)
+{
 	if (sz != 4)
 		fatal("bad icon/ucon size");
 	fprintf(codefile,".data4 %ld\n", atol(str));
 }
 
 
-con_float() {
-
+void con_float(void)
+{
 static int been_here;
 	if (argval != 4 && argval != 8)
 		fatal("bad fcon size");
@@ -45,8 +44,8 @@ static int been_here;
 	}
 }
 
-prolog(nlocals) full nlocals; {
-
+void prolog(full nlocals)
+{
 	fprintf(codefile,"\tjsr Pro\n");
 	if (nlocals == 0)
 		return;
@@ -56,9 +55,9 @@ prolog(nlocals) full nlocals; {
 					nlocals, nlocals);
 }
 
-mes(type) word type; {
+void mes(word type)
+{
 	int argt ;
-
 	switch ( (int)type ) {
 	case ms_ext :
 		for (;;) {

@@ -8,8 +8,7 @@
  * Motorola 68000/68010 auxiliary functions
  */
 
-static int
-extension_offset()
+static int extension_offset(void)
 {
 	switch(curr_instr) {
 	case MOVEM:
@@ -25,9 +24,9 @@ extension_offset()
 	return 2;
 }
 
-ea_1(sz, bits)
+void ea_1(int sz, int bits)
 {
-	register flag;
+	register int flag;
 
 	if (mrg_1 > 074)
 		serror("no specials");
@@ -61,7 +60,7 @@ ea_1(sz, bits)
 		emit2(loww(exp_1.val));
 }
 
-ea_2(sz, bits)
+void ea_2(int sz, int bits)
 { 
 	mrg_1 = mrg_2;
 	exp_1 = exp_2;
@@ -69,30 +68,30 @@ ea_2(sz, bits)
 	ea_1(sz, bits);
 }
 
-indexmode(hibyte)
+void indexmode(int hibyte)
 {
 	Xfit(fitb(exp_2.val));
 	exp_2.val = hibyte | lowb(exp_2.val);
 }
 
-checksize(sz, bits)
+void checksize(int sz, int bits)
 {
 	if ((bits & (1 << (sz>>6))) == 0)
 		serror("bad size");
 }
 
-test68010()
+void test68010(void)
 {
 	if (model != 1 && pass == PASS_3)
 		warning("68010 instruction");
 }
 
-badoperand()
+void badoperand(void)
 {
 	serror("bad operands");
 }
 
-shift_op(opc, sz)
+void shift_op(int opc, int sz)
 {
 	if (mrg_1 < 010 && mrg_2 < 010) {
 		emit2((opc&0170470) | sz | mrg_1<<9 | mrg_2);
@@ -113,9 +112,9 @@ shift_op(opc, sz)
 	ea_2(SIZE_W, MEM|ALT);
 }
 
-bitop(opc)
+void bitop(int opc)
 {
-	register bits;
+	register int bits;
 
 	bits = DTA|ALT;
 	if (opc == 0 && (mrg_1 < 010 || mrg_2 != 074))
@@ -134,7 +133,7 @@ bitop(opc)
 	badoperand();
 }
 
-add(opc, sz)
+void add(int opc, int sz)
 {
 	if ((mrg_2 & 070) == 010)
 		checksize(sz, 2|4);
@@ -168,7 +167,7 @@ add(opc, sz)
 	badoperand();
 }
 
-and(opc, sz)
+void and(int opc, int sz)
 {
 	if (mrg_1 == 074 && mrg_2 >= 076) {	/* ccr or sr */
 		if (sz != SIZE_NON)
@@ -194,7 +193,7 @@ and(opc, sz)
 	badoperand();
 }
 
-to_dreg(opc, sz, bits)
+int to_dreg(int opc, int sz, int bits)
 {
 	if ((mrg_2 & 070) != 000)
 		return(0);
@@ -203,7 +202,7 @@ to_dreg(opc, sz, bits)
 	return(1);
 }
 
-from_dreg(opc, sz, bits)
+int from_dreg(int opc, int sz, int bits)
 {
 	if ((mrg_1 & 070) != 000)
 		return(0);
@@ -212,9 +211,9 @@ from_dreg(opc, sz, bits)
 	return(1);
 }
 
-cmp(sz)
+void cmp(int sz)
 {
-	register opc;
+	register int opc;
 
 	if ((mrg_1&070) == 030 && (mrg_2&070) == 030) {
 		emit2(0130410 | sz | (mrg_1&7) | (mrg_2&7)<<9);
@@ -259,9 +258,9 @@ cmp(sz)
 	badoperand();
 }
 
-move(sz)
+void move(int sz)
 {
-	register opc;
+	register int opc;
 
 	if (mrg_1 > 074 || mrg_2 > 074) {
 		move_special(sz);
@@ -291,7 +290,7 @@ move(sz)
 	ea_2(sz, ALT);
 }
 
-move_special(sz)
+void move_special(int sz)
 {
 	if (mrg_2 >= 076) {
 		if (sz != SIZE_NON)
@@ -322,9 +321,7 @@ move_special(sz)
 	badoperand();
 }
 
-int
-reverse(regs, max)
-	register int regs;
+int reverse(register int regs, int max)
 {
 	register int r, i;
 
@@ -337,9 +334,9 @@ reverse(regs, max)
 	return regs;
 }
 
-movem(dr, sz, regs)
+void movem(int dr, int sz, int regs)
 {
-	register i;
+	register int i;
 
 	if ((mrg_2>>3) == 04) {
 		regs = reverse(regs, 16);
@@ -359,7 +356,7 @@ movem(dr, sz, regs)
 	ea_2(sz, i);
 }
 
-movep(sz)
+void movep(int sz)
 {
 	checksize(sz, 2|4);
 	if (mrg_1<010 && (mrg_2&070)==050) {
@@ -375,10 +372,9 @@ movep(sz)
 	badoperand();
 }
 
-branch(opc, exp)
-expr_t exp;
+void branch(int opc, expr_t exp)
 {
-	register sm;
+	register int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -406,7 +402,7 @@ expr_t exp;
 	}
 }
 
-ea5x73(rg, sz)
+void ea5x73(int rg, int sz)
 {
 	if ((exp_2.typ & ~S_DOT) == DOTTYP) {
 		/* pc relative with index */
@@ -426,9 +422,9 @@ ea5x73(rg, sz)
 		badoperand();
 }
 
-ea707172(sz)
+void ea707172(int sz)
 {
-	register sm;
+	register int sm;
 
 	mrg_2 = 071;
 	switch (sz) {
@@ -474,20 +470,20 @@ ea707172(sz)
 	}
 }
 
-ea6x(rg, ir, sz)
+void ea6x(int rg, int ir, int sz)
 {
 	mrg_2 = 060 | rg;
 	checksize(sz, 2|4);
 	indexmode(ir<<12 | (sz&0200)<<4);
 }
 
-ea72()
+void ea72(void)
 {
 	mrg_2 = 072;
 	exp_2.val -= (DOTVAL + extension_offset());
 }
 
-ea73(ri, sz)
+void ea73(int ri, int sz)
 {
 	mrg_2 = 073;
 	exp_2.val -= (DOTVAL + extension_offset());
@@ -495,15 +491,14 @@ ea73(ri, sz)
 	indexmode(ri<<12 | (sz&0200)<<4);
 }
 
-Xnofit()
+void Xnofit(void)
 {
 	if (pass == PASS_3) serror("too big");
 }
 
-fbranch(opc, exp)
-expr_t exp;
+void fbranch(int opc, expr_t exp)
 {
-	register sm;
+	register int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -528,14 +523,14 @@ expr_t exp;
 	emit4(exp.val);
 }
 
-ch_sz_dreg(size, mode)
+void ch_sz_dreg(int size, int mode)
 {
 	if (mode == 0 &&
 	    (size == FSIZE_X || size == FSIZE_P || size == FSIZE_D))
 		serror("illegal size for data register");
 }
 
-check_fsize(sz, size)
+void check_fsize(int sz, int size)
 {
 	if (sz != size) serror("bad size");
 }

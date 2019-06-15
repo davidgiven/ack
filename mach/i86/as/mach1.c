@@ -42,3 +42,21 @@ char	dr_m[8][8] = {
 	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1
 };
 #endif
+
+/* 8086 specific routines */
+void ea_1(int param);
+void ea_2(int param);
+void reverse(void);
+void badsyntax(void);
+void regsize(register int sz);
+void indexed(void);
+void branch(register int opc,expr_t exp);
+void pushop(register int opc);
+void addop(register int opc);
+void rolop(register int opc);
+void incop(register int opc);
+void callop(register int opc);
+void xchg(register int opc);
+void test(register int opc);
+void mov(register int opc);
+void imul(int opc);

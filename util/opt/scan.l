@@ -1,8 +1,4 @@
 %{
-#ifndef NORCSID
-static char rcsid2[] = "$Id$";
-#endif
-
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
@@ -13,6 +9,8 @@ static char rcsid2[] = "$Id$";
 extern long atol();
 extern char patid[128];
 extern int lino;
+extern int mlookup(char* name);
+extern void yyerror(const char *);
 
 #include "y.tab.h"
 

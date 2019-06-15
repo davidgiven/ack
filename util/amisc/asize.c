@@ -14,8 +14,7 @@
 
 */
 
-main(argc, argv)
-char **argv;
+int main(int argc, char **argv)
 {
 	struct outhead	buf;
 	struct outsect	sbuf;
@@ -60,10 +59,10 @@ char **argv;
 		printf(" = %ld = 0x%lx\n", sum, sum);
 		rd_close();
 	}
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
-rd_fatal()
+void rd_fatal(void)
 {
 	fprintf(stderr, "read error\n");
 	exit(2);

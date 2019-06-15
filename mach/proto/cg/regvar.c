@@ -1,12 +1,16 @@
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include "param.h"
 #include "tables.h"
 
 #ifdef REGVARS
 
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
+
 
 #include "types.h"
 #include <cg_pattern.h>
@@ -15,18 +19,20 @@ static char rcsid[] = "$Id$";
 #include <em_reg.h>
 #include "result.h"
 #include "extern.h"
+#include "salloc.h"
+#include "fillem.h"
+#include "regvar.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
-extern string myalloc();
 struct regvar *rvlist;
 
-struct regvar *
-linkreg(of,sz,tp,sc) long of; {
+/* Defined in mach.c of the specific machine. */
+extern int regscore(long off,int size,int typ,int score,int totyp);
+extern void i_regsave(void);
+extern void f_regsave(void);
+void regsave(char *regstr,long off,int size);
+
+struct regvar *linkreg(long of,int sz,int tp,int sc)
+{
 	struct regvar *rvlp;
 
 	rvlp= (struct regvar *) myalloc(sizeof *rvlp);
@@ -40,9 +46,10 @@ linkreg(of,sz,tp,sc) long of; {
 	return(rvlp);
 }
 
-tryreg(rvlp,typ) struct regvar *rvlp; {
+void tryreg(struct regvar *rvlp, int typ)
+{
 	int score;
-	register i;
+	register int i;
 	struct regassigned *ra;
 	struct regvar *save;
 
@@ -85,9 +92,10 @@ tryreg(rvlp,typ) struct regvar *rvlp; {
 	}
 }
 
-fixregvars(saveall) {
+void fixregvars(int saveall)
+{
 	register struct regvar *rv;
-	register rvtyp,i;
+	register int rvtyp,i;
 	
 	swtxt();
 	i_regsave();	/* machine dependent initialization */
@@ -107,7 +115,8 @@ fixregvars(saveall) {
 	f_regsave();
 }
 
-isregvar(off) long off; {
+int isregvar(long off)
+{
 	register struct regvar *rvlp;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
@@ -116,7 +125,7 @@ isregvar(off) long off; {
 	return(-1);
 }
 
-unlinkregs() {
+void unlinkregs(void) {
 	register struct regvar *rvlp,*t;
 	register struct regassigned *ra;
 	int rvtyp,i;

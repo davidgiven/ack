@@ -167,7 +167,7 @@ reglist	:	ALL
 			{ if (($$ = regbit[$1]) < 0) serror("register error");}
 	|
 		reglist ',' REG
-			{	register i;
+			{	register int i;
 				if ((i = regbit[$3]) < 0 || ($1 & i) != 0)
 					serror("register error");
 				$$ = $1 | i;

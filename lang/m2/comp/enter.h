@@ -9,38 +9,38 @@
 #define ENTER_H_
 
 /* Forward declarations. */
-typedef struct type t_type;
-typedef struct def  t_def;
-typedef struct node t_node;
-typedef struct scope t_scope;
-typedef struct paramlist t_param;
+struct type;
+struct node;
+struct scope;
+struct paramlist;
+struct def;
 
 
-t_def *Enter(char *name, int kind, t_type *type, int pnam);
-t_def *EnterType(char *name, t_type *type);
-void EnterEnumList(t_node *Idlist, register t_type *type);
-void EnterFieldList(t_node *Idlist, register t_type *type, t_scope *scope,
+struct def *Enter(char *name, int kind, struct type  *type, int pnam);
+struct def *EnterType(char *name, struct type  *type);
+void EnterEnumList(struct node *Idlist, register struct type  *type);
+void EnterFieldList(struct node *Idlist, register struct type  *type, struct scope *scope,
 	arith *addr);
 /*	Enter a list of identifiers representing variables into the
 	name list. "type" represents the type of the variables.
 	"local" is set if the variables are declared local to a
 	procedure.
 */
-void EnterVarList(t_node *Idlist, t_type *type, int local);
+void EnterVarList(struct node *Idlist, struct type  *type, int local);
 /*	Create (part of) a parameterlist of a procedure.
 	"ids" indicates the list of identifiers, "tp" their type, and
 	"VARp" indicates D_VARPAR or D_VALPAR.
 */
-void EnterParamList(t_param **ppr, t_node *Idlist, t_type *type,
+void EnterParamList(struct paramlist **ppr, struct node *Idlist, struct type  *type,
 	int VARp, arith *off);
 /*	From the current scope, the list of identifiers "ids" is
 	exported. Note this fact. If the export is not qualified, make
 	all the "ids" visible in the enclosing scope by defining them
 	in this scope as "imported".
 */
-void EnterExportList(t_node *Idlist, int qualified);
-void CheckForImports(t_def *df);
-void EnterFromImportList(t_node *idlist, t_def *FromDef, t_node *FromId);
-void EnterImportList(t_node *idlist, int local, t_scope *sc);
+void EnterExportList(struct node *Idlist, int qualified);
+void CheckForImports(struct def *df);
+void EnterFromImportList(struct node *idlist, struct def *FromDef, struct node *FromId);
+void EnterImportList(struct node *idlist, int local, struct scope *sc);
 
 #endif /* ENTER_H_ */

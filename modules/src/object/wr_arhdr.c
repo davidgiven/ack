@@ -1,18 +1,24 @@
 /* $Id$ */
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+
+
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include <stdlib.h>
+#include <stdio.h>
+#include "out.h"
+#include "arch.h"
+#include "object.h"
 #include "obj.h"
 
-void
-wr_arhdr(fd, arhdr)
-	register struct ar_hdr	*arhdr;
+
+void wr_arhdr(FILE* fd, register struct ar_hdr	*arhdr)
 {
 	char buf[AR_TOTAL];
 	register char *c = buf;
 	register char *p = arhdr->ar_name;
-	register int i = 14;
+	register int i = AR_NAME_MAX;
 
 	while (i--) {
 		*c++ = *p++;

@@ -1,9 +1,6 @@
 /* $Id: mach5.c, v3.3 25-Apr-89 AJM */
 
-branch(brtyp, link, val)
-word_t brtyp;
-word_t link;
-valu_t val;
+void branch(word_t brtyp, word_t link, valu_t val)
 {
 	valu_t offset;
 
@@ -16,10 +13,7 @@ valu_t val;
 	return;
 }
 
-data(opc, ins, val, typ)
-long opc, ins;
-valu_t val;
-short typ;
+void data(long opc, long ins, valu_t val, short typ)
 {
 	valu_t tmpval;
 	int adrflag = 0;
@@ -92,10 +86,7 @@ short typ;
    12-bit field.  Unfortunately this means that some numbers may not fit at
    all. */
 
-calcimm(opc,val,typ)
-word_t *opc;
-valu_t *val;
-short typ;
+int calcimm(word_t *opc, valu_t *val,short typ)
 {
 	int i = 0;
 
@@ -176,9 +167,7 @@ short typ;
 
 /* Calculate an offset in an address */
 
-word_t
-calcoffset(val)
-valu_t val;
+word_t calcoffset(valu_t val)
 {
 	if((val & 0xFFFFF000) == 0)
 		return(val|0x00800000);
@@ -192,9 +181,7 @@ valu_t val;
 
 /* This routine deals with STR and LDR instructions */
 
-strldr(opc, ins, val)
-long opc, ins;
-valu_t val;
+void strldr(long opc, long ins, valu_t val)
 {
 
 	long reg, reg2;	/* The registers we are using */
@@ -310,10 +297,7 @@ valu_t val;
    optimisation problem with mobile addresses ! */
 
 
-calcadr(ins, reg, val, typ)
-word_t ins, reg;
-valu_t val;
-short typ;
+void calcadr(word_t ins, word_t reg, valu_t val, short typ)
 {
 	valu_t tmpval = val;
 	word_t opc = 0xff;	/* Dummy opc used as a flag for data() */
@@ -336,11 +320,7 @@ short typ;
 }
 
 
-word_t
-calcshft(val, typ, styp)
-valu_t val;
-short typ;
-word_t styp;
+word_t calcshft(valu_t val, short typ, word_t styp)
 {
 	if (typ == S_UND) 
 		return(0);
@@ -354,8 +334,7 @@ word_t styp;
 	return((val & 0x1F)<<7);
 }
 
-rotateleft2(x)
-long *x;
+void rotateleft2(long *x)
 {
 	unsigned long bits;
 
@@ -380,9 +359,7 @@ long *x;
    less instruction, because that will upset other addresses.
 */
 
-putaddr(opc, ins, val, count)
-long opc, ins, val;			
-int count;
+void putaddr(long opc, long ins, long val, int count)
 {
 	long tmpval = val;
 	long reg = ins & 0x0000F000;
@@ -448,9 +425,9 @@ int count;
 #define PBITTABSZ	128
 static char *pbittab[PBITTABSZ];
 
-oursmall(fitsmall, gain)
+int oursmall(int fitsmall, int gain)
 {
-	register bit;
+	register int bit;
 	register char *p;
 
 	if (DOTSCT == NULL)
@@ -505,6 +482,9 @@ oursmall(fitsmall, gain)
 				serror("This one is fatal!");
 		}
 		return(*p & bit);
+     default:
+            assert(0);
+            
 	}
 	/*NOTREACHED*/
 }

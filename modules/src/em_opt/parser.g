@@ -17,6 +17,7 @@ static char rcsidp1[] = "$Id$";
 #endif
 
 #include "parser.h"
+#include "alloc.h"
 
 #define MAXPRIO 11
 
@@ -33,6 +34,20 @@ int		nerrors = 0;
 static int	lencurrpatt;
 static int	lenthisrepl;
 static int	currentstate;		/* Current state of dfa */
+
+extern void back_token(void);
+extern void parser(void);
+
+/* Forward declarations */
+void addaction(int, int, struct exp_node *,struct exp_node *, 
+ struct mnem_list *);
+struct mnem_elem **constructlist(struct mnem_list *, int);
+struct mnem_list *addelem(struct mnem_list *, struct idf *,
+	struct exp_node *);
+int dotransition(int, struct idf *, struct mnem_list *, int);
+int priority(int);
+void LLmessage(int);
+
 }
 
 input	: /* empty */
@@ -326,11 +341,8 @@ binop	: LOGAND
 %lexical yylex;
 
 {
-addaction(startline, state, restrictions, finaltest, repllist)
-	int startline;
-	int state;
-	struct exp_node *restrictions, *finaltest;
-	struct mnem_list *repllist;
+void addaction(int startline, int state, struct exp_node *restrictions, 
+	struct exp_node *finaltest, struct mnem_list *repllist)
 {
 	struct action *p, *q;
 	p=(struct action *)Malloc(sizeof(struct action));
@@ -349,10 +361,7 @@ addaction(startline, state, restrictions, finaltest, repllist)
 	}
 }
 
-struct mnem_elem **
-constructlist(list,len)
-	struct mnem_list *list;
-	int len;
+struct mnem_elem **constructlist(struct mnem_list *list, int len)
 {
 	struct mnem_elem **p;
 	p = (struct mnem_elem **)
@@ -364,11 +373,9 @@ constructlist(list,len)
 	return(p);
 }
 
-struct mnem_list *
-addelem(oldlist, mnem, test)
-	struct mnem_list *oldlist;
-	struct idf *mnem;
-	struct exp_node *test;
+struct mnem_list *addelem(struct mnem_list *oldlist,
+	struct idf *mnem,
+	struct exp_node *test)
 {
 	struct mnem_list *reslist;
 	struct mnem_elem *element;
@@ -381,12 +388,11 @@ addelem(oldlist, mnem, test)
 	return(reslist);
 }
 
-int
-dotransition(state, mnem, mnem_list, lenlist)
-	int state;
-	struct idf *mnem;
-	struct mnem_list *mnem_list;
-	int lenlist;
+int dotransition(
+	int state,
+	struct idf *mnem,
+	struct mnem_list *mnem_list,
+	int lenlist)
 {
 	struct state *p;
 	/* look for existing transition */
@@ -399,7 +405,7 @@ dotransition(state, mnem, mnem_list, lenlist)
 		p=(struct state *)Malloc(sizeof(struct state));
 		p->op=mnem;
 		if(++higheststate>MAXSTATES) {
-			fprintf(stderr,"Parser: More than %s states\n",MAXSTATES);
+			fprintf(stderr,"Parser: More than %d states\n",MAXSTATES);
 			sys_stop(S_EXIT);
 		}
 		p->goto_state= higheststate;
@@ -427,7 +433,7 @@ combinetests(test1, test2)
 		return(mknode(LOGAND,test1,test2));
 }
 
-priority(op) int op; {
+int priority(int op)  {
 	switch (op) {
 	case LOGOR:	return(1);
 	case LOGAND:	return(2);
@@ -456,10 +462,8 @@ priority(op) int op; {
 	return(0);
 }
 
-struct exp_node *
-mknode(op,left,right)
-	int op;
-	struct exp_node *left,*right;
+struct exp_node *mknode(int op, struct exp_node *left,
+    struct exp_node *right)
 {
 	struct exp_node *p;
 	p = (struct exp_node *)Malloc(sizeof(struct exp_node));
@@ -469,9 +473,7 @@ mknode(op,left,right)
 	return(p);
 }
 
-struct exp_node *
-mkleaf(op,val)
-	int op,val;
+struct exp_node *mkleaf(int op, int val)
 {	
 	struct exp_node *p;
 	p = (struct exp_node *)Malloc(sizeof(struct exp_node));
@@ -480,8 +482,7 @@ mkleaf(op,val)
 	return(p);
 }
 
-LLmessage(insertedtok)
-	int insertedtok;
+void LLmessage(int insertedtok)
 {
 	nerrors++;
 	fprintf(stderr,"parser: syntax error on line %d: ",linenum);
@@ -492,7 +493,8 @@ LLmessage(insertedtok)
 	else fprintf(stderr,"Deleted token %d\n",LLsymb);
 }
 
-main() {
+int main(int argc, char **argv) 
+{
 	initlex();
 	states[0] = (struct state *)NULL;
 	patterns[0].m_len = 0;

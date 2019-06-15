@@ -3,6 +3,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Id$ */
+#ifndef INSTRUCT_H_
+#define INSTRUCT_H_
 
 #ifndef _COST_
 #include "cost.h"
@@ -39,3 +41,8 @@ extern instr_t l_instr[];
  * if it contains the same information and is allowed as an operand
  * in this place. Too difficult for now.
  */
+struct varinfo;
+
+struct varinfo *gen_inst(char *ident, int star);
+
+#endif /* INSTRUCT_H_ */

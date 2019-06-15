@@ -24,6 +24,8 @@ struct tests {
 	{ 0, 0, 0, 0}
 };
 
+int dotest(register struct tests *p);
+
 int
 main()
 {
@@ -37,9 +39,7 @@ main()
 	return exit_status;
 }
 
-int
-dotest(p)
-	register struct tests *p;
+int dotest(register struct tests *p)
 {
 	char buf[128];
 	flt_arith e1, e2, e;

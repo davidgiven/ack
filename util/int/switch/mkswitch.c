@@ -11,6 +11,7 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
 #include <stdio.h>
 
 extern FILE *popen();
@@ -22,7 +23,154 @@ FILE	*ofp;			/* Output File Pointer */
 FILE	*ffp = 0;		/* Function File Pointer */
 char	*Prefix;		/* Prefix for function name */
 
-main(argc, argv)
+int in(char *flgs, char c)
+{
+	while (*flgs)
+		if (c == *flgs++)
+			return 1;
+	return 0;
+}
+
+
+void NoArgs(base, first, mnem)
+	char *base;
+	int first;
+	char *mnem;
+{
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%sz(); break;\n",
+		base, first, Prefix, mnem);
+	if (ffp) {
+		fprintf(ffp, "%s%sz() {", Prefix, mnem);
+		fprintf(ffp, "LOG((\"@ %s%sz()\"));}\n", Prefix, mnem);
+	}
+}
+
+void Mini(i, flgs, base, first, mnem)
+	int i;
+	char *flgs;
+	char *base;
+	int first;
+	char *mnem;
+{
+	char arg[16];
+	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
+
+	switch (newi) {
+	case -1:
+		sprintf(arg, "%s",
+			in(flgs, 'w') ? "-wsize" : "-1L");
+		break;
+	case 0:
+		sprintf(arg, "0L");
+		break;
+	case 1:
+		sprintf(arg, "%s",
+			in(flgs, 'w') ? "wsize" : "1L");
+		break;
+	default:
+		sprintf(arg, "%dL%s",
+			newi, in(flgs, 'w') ? "*wsize" : "");
+		break;
+	}
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%sm(%s); break;\n",
+		base, first+i, Prefix, mnem, arg);
+	if (ffp) {
+		fprintf(ffp, "%s%sm(arg) long arg; {",
+				Prefix, mnem);
+		fprintf(ffp, "LOG((\"@ %s%sm(%%d)\", arg));}\n",
+				Prefix, mnem);
+	}
+}
+
+void Shortie(i, flgs, base, first, mnem)
+	int i;
+	char *flgs;
+	char *base;
+	int first;
+	char *mnem;
+{
+	char arg[16];
+	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
+
+	sprintf(arg, "%dL, %s", newi, (in(flgs, 'w') ? "wsize" : "1L"));
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%ss(%s); break;\n",
+		base, first+i, Prefix, mnem, arg);
+	if (ffp) {
+		fprintf(ffp, "%s%ss(hob, wfac) long hob; size wfac; {",
+				Prefix, mnem);
+		fprintf(ffp, "LOG((\"@ %s%ss(%%d)\", hob, wfac));",
+				Prefix, mnem);
+		fprintf(ffp, " newPC(PC+1);}\n");
+	}
+}
+
+void TwoSgn(flgs, base, first, mnem)
+	char *flgs;
+	char *base;
+	int first;
+	char *mnem;
+{
+	char *xy = in(flgs, 'P') ? "p2" : in(flgs, 'N') ? "n2" : "l2";
+
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
+			base, first, Prefix, mnem, xy,
+			in(flgs, 'w') ? "wsize" : "1L");
+	if (ffp) {
+		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
+		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
+				Prefix, mnem, xy);
+		fprintf(ffp, " newPC(PC+2);}\n");
+	}
+}
+
+void TwoUns(flgs, base, first, mnem)
+	char *flgs;
+	char *base;
+	int first;
+	char *mnem;
+{
+	char *xy = "u";
+
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
+			base, first, Prefix, mnem, xy,
+			in(flgs, 'w') ? "wsize" : "1L");
+	if (ffp) {
+		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
+		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
+				Prefix, mnem, xy);
+		fprintf(ffp, " newPC(PC+2);}\n");
+	}
+}
+
+void FourSgn(flgs, base, first, mnem)
+	char *flgs;
+	char *base;
+	int first;
+	char *mnem;
+{
+	char *xy = in(flgs, 'P') ? "p4" : in(flgs, 'N') ? "n4" : "l4";
+
+	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
+			base, first, Prefix, mnem, xy,
+			in(flgs, 'w') ? "wsize" : "1L");
+	if (ffp) {
+		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
+		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
+				Prefix, mnem, xy);
+		fprintf(ffp, " newPC(PC+4);}\n");
+	}
+}
+
+
+void fatal(char *fmt, char *str)
+{
+	fprintf(stderr, "%s, (fatal error): ", progname);
+	fprintf(stderr, fmt, str);
+	fprintf(stderr, "\n");
+	exit(1);
+}
+
+int main(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -135,154 +283,4 @@ main(argc, argv)
 		}
 	}
 	exit(0);
-}
-
-NoArgs(base, first, mnem)
-	char *base;
-	int first;
-	char *mnem;
-{
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%sz(); break;\n",
-		base, first, Prefix, mnem);
-	if (ffp) {
-		fprintf(ffp, "%s%sz() {", Prefix, mnem);
-		fprintf(ffp, "LOG((\"@ %s%sz()\"));}\n", Prefix, mnem);
-	}
-}
-
-Mini(i, flgs, base, first, mnem)
-	int i;
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
-{
-	char arg[16];
-	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
-
-	switch (newi) {
-	case -1:
-		sprintf(arg, "%s",
-			in(flgs, 'w') ? "-wsize" : "-1L");
-		break;
-	case 0:
-		sprintf(arg, "0L");
-		break;
-	case 1:
-		sprintf(arg, "%s",
-			in(flgs, 'w') ? "wsize" : "1L");
-		break;
-	default:
-		sprintf(arg, "%dL%s",
-			newi, in(flgs, 'w') ? "*wsize" : "");
-		break;
-	}
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%sm(%s); break;\n",
-		base, first+i, Prefix, mnem, arg);
-	if (ffp) {
-		fprintf(ffp, "%s%sm(arg) long arg; {",
-				Prefix, mnem);
-		fprintf(ffp, "LOG((\"@ %s%sm(%%d)\", arg));}\n",
-				Prefix, mnem);
-	}
-}
-
-Shortie(i, flgs, base, first, mnem)
-	int i;
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
-{
-	char arg[16];
-	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
-
-	sprintf(arg, "%dL, %s", newi, (in(flgs, 'w') ? "wsize" : "1L"));
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%ss(%s); break;\n",
-		base, first+i, Prefix, mnem, arg);
-	if (ffp) {
-		fprintf(ffp, "%s%ss(hob, wfac) long hob; size wfac; {",
-				Prefix, mnem);
-		fprintf(ffp, "LOG((\"@ %s%ss(%%d)\", hob, wfac));",
-				Prefix, mnem);
-		fprintf(ffp, " newPC(PC+1);}\n");
-	}
-}
-
-TwoSgn(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
-{
-	char *xy = in(flgs, 'P') ? "p2" : in(flgs, 'N') ? "n2" : "l2";
-
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
-			base, first, Prefix, mnem, xy,
-			in(flgs, 'w') ? "wsize" : "1L");
-	if (ffp) {
-		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
-		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
-				Prefix, mnem, xy);
-		fprintf(ffp, " newPC(PC+2);}\n");
-	}
-}
-
-TwoUns(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
-{
-	char *xy = "u";
-
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
-			base, first, Prefix, mnem, xy,
-			in(flgs, 'w') ? "wsize" : "1L");
-	if (ffp) {
-		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
-		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
-				Prefix, mnem, xy);
-		fprintf(ffp, " newPC(PC+2);}\n");
-	}
-}
-
-FourSgn(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
-{
-	char *xy = in(flgs, 'P') ? "p4" : in(flgs, 'N') ? "n4" : "l4";
-
-	fprintf(ofp, "\t\tcase %s+%d:\t%s%s%s(%s); break;\n",
-			base, first, Prefix, mnem, xy,
-			in(flgs, 'w') ? "wsize" : "1L");
-	if (ffp) {
-		fprintf(ffp, "%s%s%s(arg) long arg; {", Prefix, mnem, xy);
-		fprintf(ffp, "LOG((\"@ %s%s%s(%%d)\", arg));",
-				Prefix, mnem, xy);
-		fprintf(ffp, " newPC(PC+4);}\n");
-	}
-}
-
-int
-in(flgs, c)
-	char *flgs;
-	char c;
-{
-	while (*flgs)
-		if (c == *flgs++)
-			return 1;
-	return 0;
-}
-
-fatal(fmt, str)
-	char *fmt;
-	char *str;
-{
-	fprintf(stderr, "%s, (fatal error): ", progname);
-	fprintf(stderr, fmt, str);
-	fprintf(stderr, "\n");
-	exit(1);
 }

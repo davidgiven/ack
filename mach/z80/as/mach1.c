@@ -34,3 +34,10 @@ extern expr_t	exp_ind;
 #ifndef ASLD
 extern int	rel_ind;
 #endif
+
+/*
+ * Zilog Z80 special routines
+ */
+void xyreg(int r,int byte);
+void xymem(int r,int byte);
+void branch(register int opc,expr_t exp);

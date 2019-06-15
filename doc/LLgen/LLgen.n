@@ -9,7 +9,6 @@
 .		if t .ds <, ,\
 \}\
 \}
-.cs 5 22u
 .ND
 .EQ
 delim @@

@@ -1,8 +1,10 @@
 %{
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,12 +15,7 @@ static char rcsid[] = "$Id$";
 #include <em_mnem.h>
 #include "optim.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+
 
 #define op_CBO	(op_plast+1)
 
@@ -48,6 +45,22 @@ int CBO_instrs[] = {
 
 int	patCBO;
 int	rplCBO;
+
+/* Forward declarations */
+void inithash(void);
+unsigned hashname(register char *name);
+void enter(char *name,int value);
+int mlookup(char* name);
+int lookup(int comm,int operator,int lnode,int rnode);
+void printnodes(void);
+void initio(void);
+void outpat(int exprno, int instrno);
+void outbyte(int b);
+void outshort(int s);
+void out(int w);
+int yylex(void);
+void yyerror(const char*);
+
 %}
 
 %union {
@@ -241,8 +254,9 @@ struct hashmnem {
 	byte h_value;
 } hashmnem[HASHSIZE];
 
-inithash() {
-	register i;
+void inithash(void) 
+{
+	register int i;
 
 	enter("lab",op_lab);
 	enter("LLP",op_LLP);
@@ -254,7 +268,8 @@ inithash() {
 		enter(em_mnem[i],i+sp_fmnem);
 }
 
-unsigned hashname(name) register char *name; {
+unsigned hashname(register char *name) 
+{
 	register unsigned h;
 
 	h = (*name++)&BMASK;
@@ -263,7 +278,8 @@ unsigned hashname(name) register char *name; {
 	return(h);
 }
 
-enter(name,value) char *name; {
+void enter(char *name,int value) 
+{
 	register unsigned h;
 
 	h=hashname(name)%HASHSIZE;
@@ -273,7 +289,8 @@ enter(name,value) char *name; {
 	hashmnem[h].h_value = value;
 }
 
-int mlookup(name) char *name; {
+int mlookup(char* name) 
+{
 	register unsigned h;
 
 	h = hashname(name)%HASHSIZE;
@@ -283,8 +300,8 @@ int mlookup(name) char *name; {
 	return(hashmnem[h].h_value&BMASK);	/* 0 if not found */
 }
 
-main() {
-
+int main(void) 
+{
 	inithash();
 	initio();
 	yyparse();
@@ -293,24 +310,26 @@ main() {
 	return nerrors;
 }
 
-int yywrap(void) {
+int yywrap(void) 
+{
 	return 1;
 }
 
-yyerror(s) char *s; {
-
+void yyerror(const char *s)
+{
 	fprintf(stderr,"line %d: %s\n",lino,s);
 	nerrors++;
 }
 
-lookup(comm,operator,lnode,rnode) {
+int lookup(int comm,int operator,int lnode,int rnode) {
+
 	register expr_p p;
 
 	for (p=nodes+1;p<lastnode;p++) {
 		if (p->ex_operator != operator)
 			continue;
-		if (!(p->ex_lnode == lnode && p->ex_rnode == rnode ||
-		    comm && p->ex_lnode == rnode && p->ex_rnode == lnode))
+		if (!((p->ex_lnode == lnode && p->ex_rnode == rnode) ||
+		    (comm && p->ex_lnode == rnode && p->ex_rnode == lnode)))
 			continue;
 		return(p-nodes);
 	}
@@ -323,20 +342,22 @@ lookup(comm,operator,lnode,rnode) {
 	return(p-nodes);
 }
 
-printnodes() {
+void printnodes(void) 
+{
 	register expr_p p;
 
 	printf("};\n\nshort lastind = %d;\n\nexpr_t enodes[] = {\n",prevind);
 	for (p=nodes;p<lastnode;p++)
-		printf("/* %3d */\t%3d,%6u,%6u,\n",
+		printf("/* %3d */\t{%3d,%6u,%6u},\n",
 			p-nodes,p->ex_operator,p->ex_lnode,p->ex_rnode);
 	printf("};\n\niarg_t iargs[%d];\n", (maxpatlen>0 ? maxpatlen : 1));
 	if (patid[0])
 		printf("static char rcsid[] = %s;\n",patid);
 }
 
-initio() {
-	register i;
+void initio(void) 
+{
+	register int i;
 
 	printf("#include \"param.h\"\n#include \"types.h\"\n");
 	printf("#include \"pattern.h\"\n\n");
@@ -377,7 +398,7 @@ initio() {
 	curind = 1;
 }
 
-outpat(exprno, instrno)
+void outpat(int exprno, int instrno)
 {
 	register int i;
 
@@ -403,20 +424,20 @@ outpat(exprno, instrno)
 	if (patlen>maxpatlen) maxpatlen=patlen;
 }
 
-outbyte(b) {
-
+void outbyte(int b) 
+{
 	printf(",%3d",b);
 	curind++;
 }
 
-outshort(s) {
-
+void outshort(int s) 
+{
 	outbyte(s&0377);
 	outbyte((s>>8)&0377);
 }
 
-out(w) {
-
+void out(int w) 
+{
 	if (w<255) {
 		outbyte(w);
 	} else {

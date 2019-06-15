@@ -9,12 +9,12 @@
 		EM_mkcalls
 */
 
-#include <em_spec.h>
-#include <em_mnem.h>
-#include <em_pseu.h>
-#include <em_flag.h>
+#include "em_spec.h"
+#include "em_mnem.h"
+#include "em_pseu.h"
+#include "em_flag.h"
 #include "em_ptyp.h"
-#include <em.h>
+#include "em.h"
 #include "em_comp.h"
 #include <assert.h>
 
@@ -31,9 +31,7 @@ static int listtype = 0;	/* indicates pseudo when generating code for
 	The argument must be of a type allowed by "typset".
 	Return a pointer to the next argument.
 */
-PRIVATE int
-checkarg(arg, typset)
-	register struct e_arg *arg;
+PRIVATE int checkarg(register struct e_arg *arg, int typset)
 {
 
 	if (((!typset) && arg->ema_argtype) ||
@@ -58,9 +56,7 @@ checkarg(arg, typset)
 
 /*	EM_doinstr: An EM instruction
 */
-PRIVATE void
-EM_doinstr(p)
-	register struct e_instr *p;
+PRIVATE void EM_doinstr(register struct e_instr *p)
 {
 	register int parametertype;	/* parametertype of the instruction */
 
@@ -94,9 +90,7 @@ EM_doinstr(p)
 #include "C_mnem.h"
 }
 
-PRIVATE void
-EM_dopseudo(p)
-	register struct e_instr *p;
+PRIVATE void EM_dopseudo(register struct e_instr *p)
 {
 
 	switch(p->em_opcode) {
@@ -326,9 +320,7 @@ EM_dopseudo(p)
 	}
 }
 
-PRIVATE void
-EM_docon(p)
-	register struct e_instr *p;
+PRIVATE void EM_docon(register struct e_instr *p)
 {
 	checkarg(&(p->em_arg), val_ptyp);
 	switch(p->em_argtype) {
@@ -365,9 +357,7 @@ EM_docon(p)
 	}
 }
 
-PRIVATE void
-EM_dostartmes(p)
-	register struct e_instr *p;
+PRIVATE void EM_dostartmes(register struct e_instr *p)
 {
 
 	if (listtype) {
@@ -379,9 +369,7 @@ EM_dostartmes(p)
 	listtype = ps_mes;
 }
 
-EXPORT int
-EM_mkcalls(line)
-	register struct e_instr *line;
+EXPORT int EM_mkcalls(register struct e_instr *line)
 {
 
 #ifdef CHECKING

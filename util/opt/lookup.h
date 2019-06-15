@@ -2,7 +2,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+#ifndef LOOKUP_H_
+#define LOOKUP_H_
+
+#include "types.h"
 
 #define IDL	100
 
@@ -28,3 +31,14 @@ extern sym_p symhash[NSYMHASH],symlookup();
 #define OCCURRING	0
 #define DEFINING	1
 #define NOTHING		2
+
+/** Return the hash value of the specified string. */
+unsigned hash(char *string);
+num_p numlookup(unsigned number);
+/** Search the hash table for the specified name
+ *  and symbol type specified in `flags`.
+ */
+sym_p symlookup(char *name, int status, int flags);
+
+
+#endif /* LOOKUP_H_ */
