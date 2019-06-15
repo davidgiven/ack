@@ -634,7 +634,7 @@ GROUP 3 \- INTEGER ARITHMETIC
   RMI \*w :	Remainder (*)
   NGI \*w :	Negate (two's complement) (*)
   SLI \*w :	Shift left (*)
-  SRI \*w :	Shift right (*)
+  SRI \*w :	Shift right
 .DE
 
 .DS

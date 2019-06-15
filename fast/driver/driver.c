@@ -152,7 +152,7 @@ const struct system_information machine_info[2] =
 		}}
 #else
 #ifdef FM2
-		/* pc Flags */
+		/* modula-2 Flags */
 		{1, {
 		   "-Vw2.2i2.2l4.2p2.2f8.2S2.2"
 		}}
@@ -207,7 +207,7 @@ const struct system_information machine_info[2] =
 		}}
 #else
 #ifdef FM2
-		/* pc Flags */
+		/* modula-2 Flags */
 		{1, {
 		   "-Vw2.2i2.2l4.2p4.2f8.2S2.2"
 		}}
@@ -219,7 +219,6 @@ const struct system_information machine_info[2] =
 
 
 struct arglist CPP_FLAGS = {0,{NULL}};
-
 
 
 struct arglist LD_HEAD =
@@ -298,12 +297,12 @@ static int cv_flag = 0;
 char *mkstr(char *, ...);
 static char *alloc(unsigned int);
 static char *extension(char *);
-static char *expand_string(char *);
+static char *expand_string(char *s, struct system_information *);
 static void error(char *, char *, char *);
 static void warning(char *, char *, char *);
 static void panic(char *);
 static void append(register struct arglist *, char *);
-static void expand(register struct arglist *);
+static void expand(register struct arglist *, struct system_information *);
 static void concat(struct arglist *, struct arglist *);
 static int runvec(struct arglist *, char *);
 static int needsprep(char *);
@@ -344,6 +343,12 @@ void trapcc(int sig)
 #define lang_suffix()	"p"
 #define comp_name()	"$H/lib/ack/em_pc"
 #endif /* FPC */
+
+/** Default library directories to search in. */
+
+#define LIB_DIR_1		"$H/share/ack/$S"
+#define LIB_DIR_2		"$H/lib/ack/plat/$S"
+
 
 #ifdef FCC
 int lang_opt(char *str)
@@ -524,6 +529,8 @@ char* search_library_path(struct stringlist *dirs, char* lib)
 	return NULL;
 }
 
+
+
 int main(int argc, char *argv[])
 {
 	/* Contains the directories being searched for libraries */
@@ -574,11 +581,16 @@ int main(int argc, char *argv[])
 	sys_basename(*argv++, ProgCall);
 
 	/* get compiler to use. */
-	COMP = expand_string(comp_name());
+	COMP = expand_string(comp_name(),sys_info);
 	/* get c pre-processor to use */
-	CPP = expand_string(CPP_NAME);
+	CPP = expand_string(CPP_NAME,sys_info);
 	/** get linker to use */
-	LD = expand_string(sys_info->linker);
+	LD = expand_string(sys_info->linker,sys_info);
+
+	/* Add system directory path. */
+	stringlist_add(&library_dirs,expand_string(LIB_DIR_1,sys_info));
+	stringlist_add(&library_dirs,expand_string(LIB_DIR_2,sys_info));
+
 
 
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -682,6 +694,9 @@ int main(int argc, char *argv[])
 	{
 		append(&COMP_FLAGS, sys_info->compiler_flags.al_argv[count]);
 	}
+#ifdef FPC
+	append(&COMP_FLAGS, "-d");
+#endif
 
 	/* Now for each srcfile, if it starts with -l then replace it with the correct real
 	 * path immediately.
@@ -734,12 +749,12 @@ int main(int argc, char *argv[])
 	}
 
 #ifdef FM2
-	INCLUDE = expand_string("-I$H/lib/m2");
+	INCLUDE = expand_string("-I$H/lib/m2",sys_info);
 #endif /* FM2 */
 #ifdef FCC
 /*	INCLUDE = expand_string(
 			ansi_c ? "-I$H/include/tail_ac" : "-I$H/include/_tail_cc"); */
-	INCLUDE = expand_string("-I$H/share/ack/include");
+	INCLUDE = expand_string("-I$H/share/ack/include",sys_info);
 /*	append(&COMP_FLAGS, "-L");*/
 #endif /* FCC */
 	count = SRCFILES.al_argc;
@@ -912,7 +927,7 @@ int main(int argc, char *argv[])
 		if (cv_flag)
 		{
 			init(call);
-			append(call, expand_string(sys_info->cv));
+			append(call, expand_string(sys_info->cv, sys_info));
 			append(call, tmp_file);
 			append(call, o_FILE);
 			if (runvec(call, (char *) 0)==EXIT_FAILURE)
@@ -959,7 +974,7 @@ static char * alloc(unsigned int u)
 	return p;
 }
 
-static char * expand_string(char *s)
+static char * expand_string(char *s, struct system_information *sysinfo)
 {
 	char buf[1024];
 	register char *p = s;
@@ -986,10 +1001,10 @@ static char * expand_string(char *s)
 				strcpy(q, ackhome);
 				break;
 			case 'M':
-				strcpy(q, MACHNAME);
+				strcpy(q, sysinfo->arch);
 				break;
 			case 'S':
-				strcpy(q, SYSNAME);
+				strcpy(q, sysinfo->platform);
 				break;
 			default:
 				panic("internal error");
@@ -1018,14 +1033,14 @@ static void append(register struct arglist *al, char *arg)
 	al->al_argv[(al->al_argc)++] = arg;
 }
 
-static void expand(register struct arglist *al)
+static void expand(register struct arglist *al, struct system_information *sysinfo)
 {
 	register int i = al->al_argc;
 	register char **p = &(al->al_argv[0]);
 
 	while (i-- > 0)
 	{
-		*p = expand_string(*p);
+		*p = expand_string(*p,sysinfo);
 		p++;
 	}
 }

@@ -14,7 +14,7 @@
 #include	"text.h"
 #include	"fra.h"
 
-PRIVATE long adi(long, long, size), sbi(long, long, size), dvi(long, long);
+PRIVATE long adi(long, long, size), sbi(long, long, size), dvi(long, long, size);
 PRIVATE long mli(long, long, size), rmi(long, long), ngi(long, size);
 PRIVATE long sli(long, long, size), sri(long, long, size);
 
@@ -55,7 +55,7 @@ void DoDVI(register size l)
 
 	LOG(("@I6 DoDVI(%ld)", l));
 	spoilFRA();
-	npush(dvi(spop(l), t), l);
+	npush(dvi(spop(l), t, l), l);
 }
 
 /** RMI w: Remainder (*) */
@@ -162,7 +162,7 @@ PRIVATE long mli(long w1, long w2, size nbytes)
 	return (w1 * w2);
 }
 
-PRIVATE long dvi(long w1, long w2)
+PRIVATE long dvi(long w1, long w2, size nbytes)
 {
 	if (w2 == 0) {
 		if (!(IgnMask&BIT(EIDIVZ))) {
@@ -170,6 +170,17 @@ PRIVATE long dvi(long w1, long w2)
 		}
 		else	return (0L);
 	}
+
+	/* Check for division overflow. */
+	if ((w1 == i_mins(nbytes)) && (w2 == -1))
+	{
+		if (must_test && !(IgnMask&BIT(EIOVFL)))
+		{
+			trap(EIOVFL);
+		} else return i_mins(nbytes);
+	}
+
+
 	return (w1 / w2);
 }
 
@@ -212,11 +223,20 @@ PRIVATE long sli(long w1, long w2, size nbytes)
 	
 		if (!(IgnMask&BIT(EIOVFL))) {
 			/* check overflow */
-			if (	(w1 >= 0 && (w1 >> (nbytes*8 - w2)) != 0)
-			||	(w1 < 0 && (w1 >> (nbytes*8 - w2)) != -1)
-			) {
+
+			/* If the value is positive, then check, this is taken
+			 * from rule INT32-C of SEI website.
+			 */
+			if ((w1 >= 0) && (w1 > (i_maxs(nbytes) >> w2)))
+			{
 				trap(EIOVFL);
 			}
+
+			if ((w1 < 0) && (w1 < (i_mins(nbytes) >> w2)))
+			{
+				trap(EIOVFL);
+			}
+
 		}
 	}	
 
