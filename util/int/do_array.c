@@ -58,12 +58,13 @@ PRIVATE void arr(int type, /* operation TYPE */
 {
 	register ptr desc = dppop();	/* array DESCriptor */
 	register size obj_size;		/* OBJect SIZE */
-	register long diff =		/* between index and lower bound */
-		spop(elm_size) - mem_lds(desc, elm_size);
+	long index = spop(elm_size);
+	long diff =		/* between index and lower bound */
+		index - mem_lds(desc, elm_size);
 	register ptr arr_addr = dppop();/* ARRay ADDRess */
 
 	if (must_test && !(IgnMask&BIT(EARRAY))) {
-		if (diff < 0 || diff > mem_lds(desc + elm_size, elm_size)) {
+		if (diff < 0 || index > mem_lds(desc + elm_size, elm_size)) {
 			trap(EARRAY);
 		}
 	}
