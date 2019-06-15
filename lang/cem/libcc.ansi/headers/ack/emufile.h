@@ -30,6 +30,11 @@ struct FILE {
 #define	FOPEN_MAX	20
 extern FILE	*__iotab[FOPEN_MAX];
 
+#define	stdin       (&__stdin)
+#define	stdout      (&__stdout)
+#define	stderr      (&__stderr)
+extern FILE	__stdin, __stdout, __stderr;
+
 #define	FILENAME_MAX 255
 #define	TMP_MAX     999
 #define	L_tmpnam    (sizeof("/tmp/") + 15)
@@ -38,8 +43,6 @@ extern FILE	*__iotab[FOPEN_MAX];
 extern int __fillbuf(FILE *_stream);
 extern int __flushbuf(int _c, FILE *_stream);
 
-#define	getchar()	getc(stdin)
-#define	putchar(c)	putc(c,stdout)
 #define	getc(p)		(--(p)->_count >= 0 ? (int) (*(p)->_ptr++) : \
 				__fillbuf(p))
 #define	putc(c, p)	(--(p)->_count >= 0 ? \

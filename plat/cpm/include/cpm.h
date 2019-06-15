@@ -114,4 +114,12 @@ extern void cpm_overwrite_ccp(void);
 /* 37 */ extern uint8_t cpm_reset_drives(uint16_t drive_bitmap);
 /* 40 */ extern uint8_t cpm_write_random_filled(FCB* fcb);
 
+/* File descriptor emulation */
+
+struct FCBE
+{
+    FCB fcb; /* drive 0 means the console */
+    uint8_t user;
+};
+
 #endif

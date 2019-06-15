@@ -23,13 +23,7 @@ typedef struct FILE FILE;
 #define	SEEK_CUR    1
 #define	SEEK_END    2
 
-#define	stdin       (&__stdin)
-#define	stdout      (&__stdout)
-#define	stderr      (&__stderr)
-
 typedef long int fpos_t;
-
-extern FILE	__stdin, __stdout, __stderr;
 
 extern int	remove(const char *_filename);
 extern int	rename(const char *_old, const char *_new);
@@ -76,7 +70,10 @@ extern int	feof(FILE *_stream);
 extern int	ferror(FILE *_stream);
 extern void	perror(const char *_s);
 
-/* Internal function used by several places which is approximately itoa(). */
+#define	getchar()	getc(stdin)
+#define	putchar(c)	putc(c, stdout)
+
+/* Internal function used in several places which is approximately itoa(). */
 extern char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
 
 #if ACKCONF_WANT_EMULATED_FILE

@@ -44,6 +44,7 @@ for _, plat in ipairs(vars.plats) do
 			"./core/setjmp/*.c",
 			"./core/setjmp/*.e",
 			"./core/stdlib/*.c",
+			"./core/stdio/*.c",
 			"./core/string/*.c",
 			"./core/time/*.c",
 			"./sys/exit/*.c",
