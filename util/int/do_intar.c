@@ -181,9 +181,6 @@ PRIVATE long dvi(long w1, long w2, size nbytes)
 	}
 
 
-	if (must_test && !(IgnMask&BIT(EIOVFL)))
-	{
-	}
 	return (w1 / w2);
 }
 
@@ -240,10 +237,6 @@ PRIVATE long sli(long w1, long w2, size nbytes)
 				trap(EIOVFL);
 			}
 
-/*			if ((w1 < 0) && (w2 != 0) && ((w1 >> (nbytes*8 - w2)) != -1))
-			{
-				trap(EIOVFL);
-			}*/
 		}
 	}	
 
