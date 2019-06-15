@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 

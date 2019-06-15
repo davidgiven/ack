@@ -76,6 +76,9 @@ extern int	feof(FILE *_stream);
 extern int	ferror(FILE *_stream);
 extern void	perror(const char *_s);
 
+/* Internal function used by several places which is approximately itoa(). */
+extern char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
+
 #if ACKCONF_WANT_EMULATED_FILE
 #include <ack/emufile.h>
 #else

@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include "loc_incl.h"
+#include "doprnt.h"
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_STDIO_FLOAT
 

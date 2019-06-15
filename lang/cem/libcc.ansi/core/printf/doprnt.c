@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "loc_incl.h"
+#include "doprnt.h"
 
 #if ACKCONF_WANT_STDIO
 
@@ -44,15 +44,13 @@ gnum(register const char* f, int* ip, va_list* app)
 #define set_pointer(flags) /* compilation might continue */
 #endif
 
+int (*_doprnt_put)(int c);
+
 #define PUTC(c)                  \
 	do                           \
 	{                            \
-		int i = putc(c, stream); \
-		if (i == EOF)            \
-		{                        \
-			if (ferror(stream))  \
-				return -1;       \
-		}                        \
+	    if (_doprnt_put(c))      \
+		    return -1;           \
 	} while (0)
 
 /* print an ordinal number */
@@ -157,7 +155,7 @@ o_print(va_list* ap, int flags, char* s, char c, int precision, int is_signed)
 	return s;
 }
 
-int _doprnt(register const char* fmt, va_list ap, void (*put)(int))
+int _doprnt(register const char* fmt, va_list ap)
 {
 	register char* s;
 	register int j;
@@ -176,7 +174,7 @@ int _doprnt(register const char* fmt, va_list ap, void (*put)(int))
 				PUTC('\r');
 			}
 #endif
-			put(c);
+			PUTC(c);
 			nrchars++;
 			continue;
 		}
@@ -263,7 +261,7 @@ int _doprnt(register const char* fmt, va_list ap, void (*put)(int))
 					nrchars++;
 				}
 #endif
-				put(c);
+				PUTC(c);
 				nrchars++;
 				continue;
 			case 'n':
@@ -366,32 +364,32 @@ int _doprnt(register const char* fmt, va_list ap, void (*put)(int))
 					{
 						j--;
 						nrchars++;
-						put(*s1++);
+						PUTC(*s1++);
 					}
 					else
 					{
 						j -= 2;
 						nrchars += 2;
-						put(*s1++);
-						put(*s1++);
+						PUTC(*s1++);
+						PUTC(*s1++);
 					}
 				}
 				do
 				{
-					put(zfill);
+					PUTC(zfill);
 				} while (--i);
 			}
 
 		nrchars += j;
 		while (--j >= 0)
 		{
-			put(*s1++);
+			PUTC(*s1++);
 		}
 
 		if (i > 0)
 			nrchars += i;
 		while (--i >= 0)
-			put(zfill);
+			PUTC(zfill);
 	}
 	return nrchars;
 }

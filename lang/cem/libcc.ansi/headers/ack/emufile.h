@@ -56,4 +56,7 @@ extern int fileno(FILE *_stream);
 extern FILE* fdopen(int fildes, const char *type);
 #define	fileno(stream) ((stream)->_fd)
 
+#define	io_testflag(p,x)	((p)->_flags & (x))
+extern void __register_stdio_cleanup(void);
+
 #endif

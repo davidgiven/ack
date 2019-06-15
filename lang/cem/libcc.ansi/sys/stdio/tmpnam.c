@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 

@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 

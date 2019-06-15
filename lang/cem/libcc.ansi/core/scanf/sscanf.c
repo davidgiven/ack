@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "loc_incl.h"
+#include "doscan.h"
 
 #if ACKCONF_WANT_STDIO
 
@@ -35,7 +35,9 @@ int sscanf(const char* s, const char* format, ...)
 	va_start(ap, format);
 
 	input_buffer = s;
-	retval = _doscan(format, ap, sscanf_getc, sscanf_ungetc);
+	_doscan_get = sscanf_getc;
+	_doscan_unget = sscanf_ungetc;
+	retval = _doscan(format, ap);
 
 	va_end(ap);
 

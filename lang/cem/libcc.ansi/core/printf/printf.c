@@ -1,21 +1,20 @@
 /*
- * sprintf - print formatted output on an array
+ * printf - write on the standard output stream
  */
 /* $Id$ */
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 
-int sprintf(char* s, const char* format, ...)
+int printf(const char* format, ...)
 {
 	va_list ap;
 	int retval;
 
 	va_start(ap, format);
-	retval = vsnprintf(s, 32767, format, ap);
+	retval = vfprintf(stdout, format, ap);
 	va_end(ap);
 
 	return retval;

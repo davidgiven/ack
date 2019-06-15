@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include "loc_incl.h"
+#include "doscan.h"
 
 #if ACKCONF_WANT_STDIO
 
@@ -26,14 +26,16 @@
 static char Xtable[NR_CHARS];
 static char inp_buf[NUMLEN];
 
+int (*_doscan_get)(void);
+void (*_doscan_unget)(int c);
+
 /* Collect a number of characters which constitite an ordinal number.
  * When the type is 'i', the base can be 8, 10, or 16, depending on the
  * first 1 or 2 characters. This means that the base must be adjusted
  * according to the format of the number. At the end of the function, base
  * is then set to 0, so strtol() will get the right argument.
  */
-static char*
-o_collect(register int c, char type, int width, int* basep, int (*get)(void), void (*unget)(int c))
+static char* o_collect(register int c, char type, int width, int* basep)
 {
 	register char* bufp = inp_buf;
 	register int base;
@@ -62,14 +64,14 @@ o_collect(register int c, char type, int width, int* basep, int (*get)(void), vo
 	{
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 	}
 
 	if (width && c == '0' && base == 16)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 		if (c != 'x' && c != 'X')
 		{
 			if (type == 'i')
@@ -79,7 +81,7 @@ o_collect(register int c, char type, int width, int* basep, int (*get)(void), vo
 		{
 			*bufp++ = c;
 			if (--width)
-				c = get();
+				c = _doscan_get();
 		}
 	}
 	else if (type == 'i')
@@ -94,14 +96,14 @@ o_collect(register int c, char type, int width, int* basep, int (*get)(void), vo
 		{
 			*bufp++ = c;
 			if (--width)
-				c = get();
+				c = _doscan_get();
 		}
 		else
 			break;
 	}
 
 	if (width && c != EOF)
-		unget(c);
+		_doscan_unget(c);
 	if (type == 'i')
 		base = 0;
 	*basep = base;
@@ -118,8 +120,7 @@ o_collect(register int c, char type, int width, int* basep, int (*get)(void), vo
  * not necessary, although the use of the width field can cause incomplete
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
-static char*
-f_collect(register int c, register int width, int (*get)(void), void (*unget)(int c))
+static char* f_collect(register int c, register int width)
 {
 	register char* bufp = inp_buf;
 	int digit_seen = 0;
@@ -128,7 +129,7 @@ f_collect(register int c, register int width, int (*get)(void), void (*unget)(in
 	{
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 	}
 
 	while (width && isdigit(c))
@@ -136,26 +137,26 @@ f_collect(register int c, register int width, int (*get)(void), void (*unget)(in
 		digit_seen++;
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 	}
 	if (width && c == '.')
 	{
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = get();
+				c = _doscan_get();
 		}
 	}
 
 	if (!digit_seen)
 	{
 		if (width && c != EOF)
-			unget(c);
+			_doscan_unget(c);
 		return inp_buf - 1;
 	}
 	else
@@ -165,30 +166,30 @@ f_collect(register int c, register int width, int (*get)(void), void (*unget)(in
 	{
 		*bufp++ = c;
 		if (--width)
-			c = get();
+			c = _doscan_get();
 		if (width && (c == '+' || c == '-'))
 		{
 			*bufp++ = c;
 			if (--width)
-				c = get();
+				c = _doscan_get();
 		}
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = get();
+				c = _doscan_get();
 		}
 		if (!digit_seen)
 		{
 			if (width && c != EOF)
-				unget(c);
+				_doscan_unget(c);
 			return inp_buf - 1;
 		}
 	}
 
 	if (width && c != EOF)
-		unget(c);
+		_doscan_unget(c);
 	*bufp = '\0';
 	return bufp - 1;
 }
@@ -198,7 +199,7 @@ f_collect(register int c, register int width, int (*get)(void), void (*unget)(in
  * the routine that does the scanning 
  */
 
-int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int c))
+int _doscan(const char* format, va_list ap)
 {
 	int done = 0; /* number of items done */
 	int nrchars = 0; /* number of characters read */
@@ -225,15 +226,15 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 		{
 			while (isspace(*format))
 				format++; /* skip whitespace */
-			ic = get();
+			ic = _doscan_get();
 			nrchars++;
 			while (isspace(ic))
 			{
-				ic = get();
+				ic = _doscan_get();
 				nrchars++;
 			}
 			if (ic != EOF)
-				unget(ic);
+				_doscan_unget(ic);
 			nrchars--;
 		}
 		if (!*format)
@@ -241,12 +242,12 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 
 		if (*format != '%')
 		{
-			ic = get();
+			ic = _doscan_get();
 			nrchars++;
 			if (ic != *format++)
 			{
 				if (ic != EOF)
-					unget(ic);
+					_doscan_unget(ic);
 				nrchars--;
 				break; /* error */
 			}
@@ -255,7 +256,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 		format++;
 		if (*format == '%')
 		{
-			ic = get();
+			ic = _doscan_get();
 			nrchars++;
 			if (ic == '%')
 			{
@@ -298,7 +299,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 		{
 			do
 			{
-				ic = get();
+				ic = _doscan_get();
 				nrchars++;
 			} while (isspace(ic));
 			if (ic == EOF)
@@ -306,7 +307,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 		}
 		else if (kind != 'n')
 		{ /* %c or %[ */
-			ic = get();
+			ic = _doscan_get();
 			if (ic == EOF)
 				break; /* outer while */
 			nrchars++;
@@ -343,7 +344,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 				if (!width)
 					return done;
 
-				str = o_collect(ic, kind, width, &base, get, unget);
+				str = o_collect(ic, kind, width, &base);
 				if (str < inp_buf
 				    || (str == inp_buf
 				           && (*str == '-'
@@ -384,7 +385,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = get();
+						ic = _doscan_get();
 						nrchars++;
 					}
 				}
@@ -392,7 +393,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 				if (width)
 				{
 					if (ic != EOF)
-						unget(ic);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				break;
@@ -410,7 +411,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = get();
+						ic = _doscan_get();
 						nrchars++;
 					}
 				}
@@ -420,7 +421,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 				if (width)
 				{
 					if (ic != EOF)
-						unget(ic);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				break;
@@ -467,7 +468,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 				if (!*format || !(Xtable[ic] ^ reverse))
 				{
 					if (ic != EOF)
-						unget(ic);
+						_doscan_unget(ic);
 					return done;
 				}
 
@@ -480,7 +481,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = get();
+						ic = _doscan_get();
 						nrchars++;
 					}
 				} while (width && ic != EOF && (Xtable[ic] ^ reverse));
@@ -488,7 +489,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 				if (width)
 				{
 					if (ic != EOF)
-						unget(ic);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				if (!(flags & FL_NOASSIGN))
@@ -507,7 +508,7 @@ int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int 
 
 				if (!width)
 					return done;
-				str = f_collect(ic, width, get, unget);
+				str = f_collect(ic, width);
 
 				if (str < inp_buf
 				    || (str == inp_buf
