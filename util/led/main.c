@@ -22,8 +22,15 @@ static char rcsid[] = "$Id$";
 #include "defs.h"
 #include "memory.h"
 #include "orig.h"
+#include "scan.h"
 #include "sym.h"
+#include "extract.h"
+#include "error.h"
+#include "output.h"
+#include "finish.h"
+#include "archive.h"
 
+extern bool	incore;
 #ifndef NOSTATISTICS
 int		statistics;
 #endif
@@ -32,30 +39,29 @@ int			DEB = 0;
 #endif
 int		Verbose = 0;
 
-static			initializations();
-static			first_pass();
-static uint32_t		number(const char *);
+static void     initializations(int, char*[]);
+static void     first_pass(char**);
+static uint32_t	number(const char *);
 static void		setlign(int, uint32_t);
 static void		setbase(int, uint32_t);
-static void		enterundef(const char *, int);
-static			pass1();
-static			evaluate();
+static struct outname	*makename(char*);
+static void     pass1(char*);
+static void     evaluate(void);
 static void		norm_commons();
-static			complete_sections();
-static void		change_names();
-static bool		setbit();
-static bool		tstbit();
-static			second_pass();
-static			pass2();
+static void     complete_sections(void);
+static void		change_names(void);
+static void     enterundef(const char *, int);
+static bool		setbit(int, char[]);
+static bool		tstbit(int, char[]);
+static void     second_pass(char**);
+static void     pass2(char*);
 #ifndef NOSTATISTICS
-static			do_statistics();
+static void     do_statistics(void);
 #endif
 
-void addbase();
+void addbase(struct outname *);
 
-main(argc, argv)
-	int	argc;
-	char	**argv;
+int main(int argc, char **argv)
 {
 	initializations(argc, argv);
 	first_pass(argv);
@@ -71,8 +77,7 @@ main(argc, argv)
 }
 
 #ifndef NOSTATISTICS
-static
-do_statistics()
+static void do_statistics(void)
 {
 	register struct memory *m = mems;
 
@@ -92,10 +97,7 @@ struct outhead	outhead;	/* Header of final output file. */
 struct outsect	outsect[MAXSECT];/* Its section table. */
 
 /* ARGSUSED */
-static
-initializations(argc, argv)
-	int		argc;
-	char		*argv[];
+static void initializations(int argc, char *argv[])
 {
 	/*
 	 * Avoid malloc()s.
@@ -123,9 +125,7 @@ int	exitstatus = 0;
  * If the argument starts with a '-', it's a flag, else it is either
  * a plain file to be loaded, or an archive.
  */
-static
-first_pass(argv)
-	register char		**argv;
+static void first_pass(register char **argv)
 {
 	register char		*argp;
 	int			sectno;
@@ -255,8 +255,7 @@ first_pass(argv)
  * else if it starts with 0, it's octal,
  * else it's decimal.
  */
-static uint32_t
-number(const char *s)
+static uint32_t number(const char *s)
 {
 	register int	digit;
 	register uint32_t value = 0;
@@ -273,7 +272,7 @@ number(const char *s)
 			s++;
 		}
 	}
-	while (digit = *s++) {
+	while ((digit = *s++)) {
 		if (digit >= 'A' && digit <= 'F')
 			digit = digit - 'A' + 10;
 		else if (digit >= 'a' && digit <= 'f')
@@ -299,12 +298,10 @@ static char	lignmap[MAXSECT / WIDTH];
 static uint32_t	sect_lign[MAXSECT];
 
 /*
-/*
  * Set the alignment of section `sectno' to `lign', if this doesn't
  * conflict with earlier alignment.
  */
-static void
-setlign(int sectno, uint32_t lign)
+static void setlign(int sectno, uint32_t lign)
 {
 	extern bool	setbit();
 
@@ -332,8 +329,7 @@ setbase(int sectno, uint32_t base)
 /*
  * Do -u name by entering the undefined name in the symbol table.
  */
-static void
-enterundef(const char *string, int hashval)
+static void enterundef(const char *string, int hashval)
 {
 	struct outname	namebuf;
 	size_t		len;
@@ -364,9 +360,7 @@ enterundef(const char *string, int hashval)
  * extracted. If it is an archive it is examined to see if it defines any
  * undefined symbols.
  */
-static
-pass1(file)
-	char	*file;
+static void pass1(char* file)
 {
 	if (getfile(file) == PLAIN) {
 		debug("%s: plain file\n", file, 0, 0, 0);
@@ -388,8 +382,7 @@ pass1(file)
  * sections. We then add the section bases to the values of names in
  * corresponding sections.
  */
-static
-evaluate()
+static void evaluate(void)
 {
 	norm_commons();
 	complete_sections();
@@ -411,8 +404,7 @@ long	sect_comm[MAXSECT];
  * just like "normal" names. We also count the total size of common names
  * within each section to be able to compute the final size in the machine.
  */
-static void
-norm_commons()
+static void norm_commons(void)
 {
 	register struct outname	*name;
 	register int		cnt;
@@ -470,8 +462,7 @@ struct orig	relorig[MAXSECT];
  * Compute the offsets in file and machine that the sections will have.
  * Also set the origins to 0.
  */
-static
-complete_sections()
+static void complete_sections(void)
 {
 	register uint32_t base = 0;
 	register uint32_t foff;
@@ -508,8 +499,7 @@ complete_sections()
  * For each name we add the base of its section to its value, unless
  * the output has to be able to be linked again, as indicated by RFLAG.
  */
-static void
-change_names()
+static void change_names(void)
 {
 	register int		cnt;
 	register struct outname	*name;
@@ -539,10 +529,7 @@ change_names()
  * This function sets a bit with index `indx' in string.
  * It returns whether it was already set.
  */
-bool
-setbit(indx, string)
-	int	indx;
-	char	string[];
+bool setbit(int indx, char string[])
 {
 	register int	byte_index, bit_index;
 	register int	byte;
@@ -562,10 +549,7 @@ setbit(indx, string)
 /*
  * This function returns whether the bit given by `indx' is set in `string'.
  */
-static bool
-tstbit(indx, string)
-	int	indx;
-	char	string[];
+static bool tstbit(int indx, char string[])
 {
 	register int	byte_index, bit_index;
 	register int	byte;
@@ -581,9 +565,7 @@ tstbit(indx, string)
 /*
  * Add the base of the section of a name to its value.
  */
-void
-addbase(name)
-	struct outname	*name;
+void addbase(struct outname *name)
 {
 	register int	type = name->on_type & S_TYP;
 	register int	sectindex = type - S_MIN;
@@ -607,9 +589,7 @@ addbase(name)
 /*
  * Flags have already been processed, so we ignore them here.
  */
-static
-second_pass(argv)
-	char	**argv;
+static void second_pass(char **argv)
 {
 	passnumber = SECOND;
 	while (*++argv) {
@@ -628,9 +608,7 @@ second_pass(argv)
 	}
 }
 
-static
-pass2(file)
-	char	*file;
+static void pass2(char* file)
 {
 	if (getfile(file) == PLAIN) {
 		debug("%s: plain file\n", file, 0, 0, 0);

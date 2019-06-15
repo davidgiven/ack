@@ -10,15 +10,19 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <object.h>
-#include <out.h>
+#include "out.h"
+#include "object.h"
 #include "const.h"
+#include "output.h"
 #include "memory.h"
+#include "error.h"
+#include "write.h"
 #include "sym.h"
 
-static void generate_section_names();
+static void generate_section_names(void);
 
 extern struct outhead	outhead;
+extern bool		incore;
 extern int		flagword;
 
 /*
@@ -27,7 +31,7 @@ extern int		flagword;
  * flag was given.
  * If this flag is given we don't need the string table either.
  */
-beginoutput()
+void beginoutput(void)
 {
 	extern long	NLChars, NGChars;
 	extern char	*outputname;
@@ -55,8 +59,7 @@ beginoutput()
  * Generate names for all sections and put them after the global names.
  * Section names are used for relocation.
  */
-static void
-generate_section_names()
+static void generate_section_names(void)
 {
 	register struct outname	*name;
 	register int		sectindex;
@@ -81,7 +84,7 @@ generate_section_names()
  * written out, and we just finish that.
  * If we did, we write out our pieces of core.
  */
-endoutput()
+void endoutput(void)
 {
 	if (!incore) {
 		if (!(flagword & SFLAG))

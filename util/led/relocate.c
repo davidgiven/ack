@@ -17,6 +17,7 @@ static char rcsid[] = "$Id$";
 #include "defs.h"
 #include "orig.h"
 #include "sym.h"
+#include "relocate.h"
 
 #define UBYTE(x) ((x)&BYTEMASK)
 
@@ -443,7 +444,7 @@ static void put_mips_valu(char* addr, uint32_t value)
  * significance should be attributed to each byte.
  * We do not check for overflow.
  */
-static putvalu(uint32_t valu, char* addr, uint16_t type)
+static void putvalu(uint32_t valu, char* addr, uint16_t type)
 {
 
 	switch (type & RELSZ)
@@ -547,11 +548,7 @@ long* valu_out; /* Out variable. */
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-relocate(head, emit, names, relo, off) struct outhead* head;
-char* emit;
-struct outname names[];
-struct outrelo* relo;
-long off;
+void relocate(struct outhead *head, char* emit, struct outname names[], struct outrelo *relo, long off)
 {
 	long valu;
 	int sectindex = relo->or_sect - S_MIN;

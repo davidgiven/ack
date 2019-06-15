@@ -119,3 +119,44 @@ short	eamode[] = {
 			 * '(expression).w', which still have to be relocatable.
 			 */
 #endif
+
+/* 680x0 specific routines */
+void emit_instr(void);
+
+#ifdef RELOCATION
+void t_emit2(short word, short relotype, int reloinfo, valu_t relnm);
+#else
+void t_emit2(short word);
+#endif
+
+#ifdef RELOCATION
+void t_emit4(long words, short relotype, int reloinfo, valu_t relnm);
+#else
+void t_emit4(long words);
+#endif
+
+void ea_1(int sz, int bits);
+void ea_2(int sz, int bits);
+void checksize(int sz, int bits);
+void check_fsize(int sz, int size);
+void ch_sz_dreg(int size, int mode);
+int checkscale(valu_t val);
+void badoperand(void);
+void shift_op(int opc, int sz);
+void bitop(int opc);
+void bitfield(int opc, int extension);
+void add(int opc, int sz);
+void and(int opc, int sz);
+int to_dreg(int opc, int sz, int bits);
+int from_dreg(int opc, int sz, int bits);
+void cmp(int sz);
+void link_instr(int sz, int areg);
+void move(int sz);
+void move_special(int sz);
+void movem(int dr, int sz, int regs);
+int reverse(register int regs, int max);
+void movep(int sz);
+void branch(int opc, expr_t exp);
+void cpbcc(int opc, expr_t exp);
+void ea7071(int sz);
+void fbranch(int opc, expr_t exp);

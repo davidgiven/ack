@@ -1,4 +1,7 @@
 /* $Id$ */
+#ifndef PARSER_H_
+#define PARSER_H_
+
 #include <stdio.h>
 #include <system.h>
 
@@ -88,10 +91,17 @@ extern struct idf	*opval;		/* opcode of returned OPCODE*/
 extern int		lastintval;	/* value of last integer seen */
 extern int		linenum;	/*line number of input file*/
 
-/* Functions not returning int */
-char			*Malloc();
-struct exp_node		*mknode();
-struct exp_node		*mkleaf();
-struct exp_node 	*combinetests();
-struct mnem_list	*addelem();
-struct mnem_elem	**constructlist();
+struct exp_node 	*mknode(int, struct exp_node *, struct exp_node *);
+struct exp_node 	*mkleaf(int, int);
+struct exp_node 	*combinetests(struct exp_node *, struct exp_node *);
+struct mnem_list 	*addelem(struct mnem_list *, struct idf *, struct exp_node *);
+struct mnem_elem 	**constructlist(struct mnem_list *, int);
+void findworst(struct mnems,struct mnems);
+
+void outputincalls(void);
+void outputnopt(void);
+void initlex(void);
+void findfail(int, int *, int *, int *);
+
+
+#endif /* PARSER_H_ */

@@ -41,7 +41,7 @@ size_t sys_filesize();
 
 extern void DefModule(void); /* Lpars */
 
-t_idf* DefId;
+struct idf* DefId;
 
 char* getwdir(register char *fn)
 {
@@ -90,19 +90,19 @@ static int GetFile(char *name)
 	return 1;
 }
 
-t_def* GetDefinitionModule(register t_idf* id, int incr)
+struct def* GetDefinitionModule(register struct idf* id, int incr)
 {
 	/*	Return a pointer to the "def" structure of the definition
 		module indicated by "id".
 		We may have to read the definition module itself.
 		Also increment level by "incr".
 	*/
-	register t_def* df;
+	register struct def* df;
 	static int level;
-	t_scopelist* vis;
+	struct scopelist* vis;
 	char* fn = FileName;
 	int ln = LineNumber;
-	t_scope* newsc;
+	struct scope* newsc;
 
 	level += incr;
 	df = lookup(id, GlobalScope, D_IMPORTED, 0);
@@ -139,9 +139,9 @@ t_def* GetDefinitionModule(register t_idf* id, int incr)
 					   remember its name because we have 
 					   to call its initialization routine
 					*/
-					static t_node* nd_end;
-					register t_node* n;
-					extern t_node* Modules;
+					static struct node* nd_end;
+					register struct node* n;
+					extern struct node* Modules;
 
 					n = dot2leaf(Def);
 					n->nd_def = newsc->sc_definedby;

@@ -40,7 +40,7 @@
 extern int	proclevel;
 extern char	options[];
 
-static int WordOrDouble(t_desig *ds, arith size)
+static int WordOrDouble(struct desig *ds, arith size)
 {
 	/*	Check if designator is suitable for word or double-word
 		operation
@@ -80,7 +80,7 @@ void STL(arith offset, arith size)
 	}
 }
 
-int DoLoad(register t_desig *ds, arith size)
+int DoLoad(register struct desig *ds, arith size)
 {
 	/*	Try to load designator with word or double-word operation.
 		Return 0 if not done
@@ -104,7 +104,7 @@ int DoLoad(register t_desig *ds, arith size)
 	return 1;
 }
 
-int DoStore(register t_desig *ds, arith size)
+int DoStore(register struct desig *ds, arith size)
 {
 	/*	Try to store designator with word or double-word operation.
 		Return 0 if not done
@@ -152,7 +152,7 @@ int DoStore(register t_desig *ds, arith size)
 				   multiple of word_size only
 				*/
 
-static int suitable_move(register t_type *tp)
+static int suitable_move(register struct type *tp)
 {
 	/*	Find out how to load or store the value indicated by "ds".
 		There are four ways:
@@ -170,7 +170,7 @@ static int suitable_move(register t_type *tp)
 	return USE_BLM;
 }
 
-void CodeValue(register t_desig *ds, register t_type *tp)
+void CodeValue(register struct desig *ds, register struct type *tp)
 {
 	/*	Generate code to load the value of the designator described
 		in "ds".
@@ -233,12 +233,12 @@ void CodeValue(register t_desig *ds, register t_type *tp)
 	ds->dsg_kind = DSG_LOADED;
 }
 
-void ChkForFOR(register t_node *nd)
+void ChkForFOR(register struct node *nd)
 {
 	/*	Check for an assignment to a FOR-loop control variable
 	*/
 	if (nd->nd_class == Def) {
-		register t_def *df = nd->nd_def;
+		register struct def *df = nd->nd_def;
 
 		if (df->df_flags & D_FORLOOP) {
 			node_warning(nd,
@@ -250,7 +250,7 @@ void ChkForFOR(register t_node *nd)
 	}
 }
 
-void CodeStore(register t_desig *ds, register t_type *tp)
+void CodeStore(register struct desig *ds, register struct type *tp)
 {
 	/*	Generate code to store the value on the stack in the designator
 		described in "ds"
@@ -295,12 +295,12 @@ void CodeStore(register t_desig *ds, register t_type *tp)
 	ds->dsg_kind = DSG_INIT;
 }
 
-void CodeCopy(register t_desig *lhs, register t_desig *rhs, arith sz, arith *psize)
+void CodeCopy(register struct desig *lhs, register struct desig *rhs, arith sz, arith *psize)
 {
 	/*	Do part of a copy, which is assumed to be "reasonable",
 		so that it can be done with LOI/STI or BLM.
 	*/
-	t_desig l, r;
+	struct desig l, r;
 
 	l = *lhs; r = *rhs;
 	*psize -= sz;
@@ -318,17 +318,17 @@ void CodeCopy(register t_desig *lhs, register t_desig *rhs, arith sz, arith *psi
 	}
 }
 
-t_desig null_desig;
+struct desig null_desig;
 
-void CodeMove(register t_desig *rhs, register t_node *left, t_type *rtp)
+void CodeMove(register struct desig *rhs, register struct node *left, struct type *rtp)
 {
 	/*	Generate code for an assignment. Testing of type
 		compatibility and the like is already done.
 		Go through some (considerable) trouble to see if a BLM can be
 		generated.
 	*/
-	t_desig lhs;
-	register t_type *tp = left->nd_type;
+	struct desig lhs;
+	register struct type *tp = left->nd_type;
 	int loadedflag = 0;
 
 	lhs = null_desig;
@@ -419,7 +419,7 @@ void CodeMove(register t_desig *rhs, register t_node *left, t_type *rtp)
 	}
 }
 
-void CodeAddress(register t_desig *ds)
+void CodeAddress(register struct desig *ds)
 {
 	/*	Generate code to load the address of the designator described
 	   	in "ds"
@@ -459,7 +459,7 @@ void CodeAddress(register t_desig *ds)
 	ds->dsg_kind = DSG_PLOADED;
 }
 
-void CodeFieldDesig(register t_def *df, register t_desig *ds)
+void CodeFieldDesig(register struct def *df, register struct desig *ds)
 {
 	/* Generate code for a field designator. Only the code common for
 	   address as well as value computation is generated, and the
@@ -509,14 +509,14 @@ void CodeFieldDesig(register t_def *df, register t_desig *ds)
 	}
 }
 
-void CodeVarDesig(register t_def *df, register t_desig *ds)
+void CodeVarDesig(register struct def *df, register struct desig *ds)
 {
 	/*	Generate code for a variable represented by a "def" structure.
 		Of course, there are numerous cases: the variable is local,
 		it is a value parameter, it is a var parameter, it is one of
 		those of an enclosing procedure, or it is global.
 	*/
-	register t_scope *sc = df->df_scope;
+	register struct scope *sc = df->df_scope;
 	int difflevel;
 
 	/* Selections from a module are handled earlier, when identifying
@@ -585,12 +585,12 @@ void CodeVarDesig(register t_def *df, register t_desig *ds)
 	ds->dsg_def = df;
 }
 
-void CodeDesig(register t_node *nd, register t_desig *ds)
+void CodeDesig(register struct node *nd, register struct desig *ds)
 {
 	/*	Generate code for a designator. Use divide and conquer
 		principle
 	*/
-	register t_def *df;
+	register struct def *df;
 
 	switch(nd->nd_class) {	/* Divide */
 	case Def:

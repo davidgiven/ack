@@ -214,7 +214,7 @@ void error(BOOL quit, char *str1, char *str2)
 	char errbuf[256];
 
 	sprint(errbuf, str1, str2);
-	fwrite(errbuf, strlen(errbuf), 1, stderr);
+	fwrite(errbuf, 1, strlen(errbuf), stderr);
 	if (quit)
 	{
 		remove(temp_arch);
@@ -420,7 +420,7 @@ void get(int argc, char *argv[])
 			{
 				sys_basename(argv[i],buffer);
 				if (equal(buffer, member->ar_name))
-				break;
+					break;
 			}
 			if (i == argc || app_fl)
 			{
@@ -459,7 +459,7 @@ void get(int argc, char *argv[])
 		else
 		{
 			if (rep_fl)
-			add(argv[i], ar_f, temp_fd, "r - %s\n");
+				add(argv[i], ar_f, temp_fd, "r - %s\n");
 			else if (show_fl)
 			{
 				char buf[sizeof(member->ar_name) + 2];
@@ -497,7 +497,7 @@ void get(int argc, char *argv[])
 			fseek(ar_f, even(member->ar_size), SEEK_CUR);
 		}
 		argv[i] = "";
-	}
+	} /* end while */
 
 	if (argc > 3)
 	{
@@ -588,6 +588,9 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
 	member.ar_mode = mode2ar(status.st_mode);
 	member.ar_date = status.st_mtime;
 	member.ar_size = status.st_size;
+<<<<<<< HEAD
+>>>>>>> upstream/default
+=======
 >>>>>>> upstream/default
 #ifdef DISTRIBUTION
 	if (distr_fl)
@@ -793,7 +796,7 @@ void write_symdef(FILE *ar)
 	}
 #endif
 	wr_arhdr(ar, &arbuf);
-	wr_long(ar, (long) tnum);
+	wr_int4(ar, (long) tnum);
 	/*
 	 * Account for the space occupied by the magic number
 	 * and the ranlib table.
@@ -805,7 +808,7 @@ void write_symdef(FILE *ar)
 	}
 
 	wr_ranlib(ar, tab, (long) tnum);
-	wr_long(ar, (long) tssiz);
+	wr_int4(ar, (long) tssiz);
 	wr_bytes(ar, tstrtab, (long) tssiz);
 }
 

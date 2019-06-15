@@ -38,19 +38,19 @@
 
 extern int	proclevel;
 extern char	options[];
-extern t_desig	null_desig;
+extern struct desig	null_desig;
 int		fp_used;
 
 /* Forward declarations */
-static void CodeParameters(t_param *, register t_node *);
-static void CodeStd(t_node *);
+static void CodeParameters(struct paramlist *, register struct node *);
+static void CodeStd(struct node *);
 static void compare(int, label);
 static void truthvalue(int);
-static void CodeUoper(register t_node *);
-static void CodeSet(register t_node *, int);
-static void CodeEl(register t_node *, register t_type *, int);
-static void CodeDAddress(t_node *, int);
-static void DoHIGH(register t_def *);
+static void CodeUoper(register struct node *);
+static void CodeSet(register struct node *, int);
+static void CodeEl(register struct node *, register struct type *, int);
+static void CodeDAddress(struct node *, int);
+static void DoHIGH(register struct def *);
 
 void CodeConst(arith cst, int size)
 {
@@ -65,7 +65,7 @@ void CodeConst(arith cst, int size)
 	}
 }
 
-void CodeString(register t_node *nd)
+void CodeString(register struct node *nd)
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
@@ -77,9 +77,9 @@ void CodeString(register t_node *nd)
 	c_lae_dlb(data_label);
 }
 
-void CodeExpr(t_node *nd, t_desig *ds, label true_label, label false_label)
+void CodeExpr(struct node *nd, struct desig *ds, label true_label, label false_label)
 {
-	register t_type *tp = nd->nd_type;
+	register struct type *tp = nd->nd_type;
 
 	DoLineno(nd);
 	if (tp->tp_fund == T_REAL) fp_used = 1;
@@ -174,7 +174,7 @@ void CodeExpr(t_node *nd, t_desig *ds, label true_label, label false_label)
 	}
 }
 
-void CodeCoercion(t_type *t1, t_type *t2)
+void CodeCoercion(struct type *t1, struct type *t2)
 {
 	int fund1, fund2;
 	int sz1 = t1->tp_size;
@@ -293,11 +293,11 @@ void CodeCoercion(t_type *t1, t_type *t2)
 	}
 }
 
-void CodeCall(t_node *nd)
+void CodeCall(struct node *nd)
 {
 
-	register t_node *left = nd->nd_LEFT;
-	t_type *result_tp;
+	register struct node *left = nd->nd_LEFT;
+	struct type *result_tp;
 	int needs_fn;
 
 	if (left->nd_type == std_type) {
@@ -320,7 +320,7 @@ void CodeCall(t_node *nd)
 
 	switch(left->nd_class) {
 	case Def: {
-		register t_def *df = left->nd_def;
+		register struct def *df = left->nd_def;
 
 		if (df->df_kind == D_CONST) {
 			/* a procedure address */
@@ -358,10 +358,10 @@ void CodeCall(t_node *nd)
 }
 
 /* Generates code to setup the parameters of a procedure call. */
-static void CodeParameters(t_param *param, register t_node *arg)
+static void CodeParameters(struct paramlist *param, register struct node *arg)
 {
-	register t_type *tp;
-	register t_type *arg_type;
+	register struct type *tp;
+	register struct type *arg_type;
 
 	assert(param != 0 && arg != 0);
 
@@ -373,7 +373,7 @@ static void CodeParameters(t_param *param, register t_node *arg)
 	arg = arg->nd_LEFT;
 	arg_type = arg->nd_type;
 	if (IsConformantArray(tp)) {
-		register t_type *elem = tp->arr_elem;
+		register struct type *elem = tp->arr_elem;
 
 		C_loc(tp->arr_elsize);
 		if (IsConformantArray(arg_type)) {
@@ -439,7 +439,7 @@ static void CodeParameters(t_param *param, register t_node *arg)
 	CodePExpr(arg);
 }
 
-void CodePString(t_node *nd, t_type *tp)
+void CodePString(struct node *nd, struct type *tp)
 {
 	arith szarg = WA(nd->nd_type->tp_size);
 	register arith zersz = WA(tp->tp_size) - szarg;
@@ -471,7 +471,7 @@ static void addu(int sz)
 	C_adu((arith)sz);
 }
 
-static int complex_lhs(register t_node *nd)
+static int complex_lhs(register struct node *nd)
 {
 	switch(nd->nd_class) {
 	case Value:
@@ -487,11 +487,11 @@ static int complex_lhs(register t_node *nd)
 }
 
 /* Generate code for internal procedures */
-static void CodeStd(t_node *nd)
+static void CodeStd(struct node *nd)
 {
-	register t_node *arg = nd->nd_RIGHT;
-	register t_node *left = 0;
-	register t_type *tp = 0;
+	register struct node *arg = nd->nd_RIGHT;
+	register struct node *left = 0;
+	register struct type *tp = 0;
 	int std = nd->nd_LEFT->nd_def->df_value.df_stdname;
 
 	if (arg) {
@@ -642,7 +642,7 @@ static void CodeStd(t_node *nd)
 	}
 }
 
-static int needs_rangecheck(register t_type *tpl, t_type *tpr)
+static int needs_rangecheck(register struct type *tpl, struct type *tpr)
 {
 	arith rlo, rhi;
 
@@ -665,7 +665,7 @@ static int needs_rangecheck(register t_type *tpl, t_type *tpr)
 	return 0;
 }
 
-void RangeCheck(register t_type *tpl, t_type *tpr)
+void RangeCheck(register struct type *tpl, struct type *tpr)
 {
 	arith rlo, rhi;
 
@@ -690,7 +690,7 @@ void RangeCheck(register t_type *tpl, t_type *tpr)
 	}
 }
 
-void Operands(register t_node *nd)
+void Operands(register struct node *nd)
 {
 
 	CodePExpr(nd->nd_LEFT);
@@ -699,13 +699,13 @@ void Operands(register t_node *nd)
 }
 
 void CodeOper(
-	register t_node *expr,	/* the expression tree itself	*/
+	register struct node *expr,	/* the expression tree itself	*/
 	label true_label,
 	label false_label	/* labels to jump to in logical expr's	*/
 )
 {
-	register t_node *leftop = expr->nd_LEFT;
-	register t_node *rightop = expr->nd_RIGHT;
+	register struct node *leftop = expr->nd_LEFT;
+	register struct node *rightop = expr->nd_RIGHT;
 	int fund = expr->nd_type->tp_fund;
 	arith size = expr->nd_type->tp_size;
 
@@ -850,7 +850,7 @@ void CodeOper(
 	case GREATEREQUAL:
 	case '=':
 	case '#': {
-		t_type *tp;
+		struct type *tp;
 
 		Operands(expr);
 		tp = BaseType(leftop->nd_type);
@@ -913,7 +913,7 @@ void CodeOper(
 		   stack
 		*/
 		label l_toolarge = NO_LABEL, l_cont = NO_LABEL;
-		t_type *ltp = leftop->nd_type;
+		struct type *ltp = leftop->nd_type;
 
 		if (leftop->nd_symb == COERCION) {
 			/* Could be coercion to word_type. */
@@ -968,7 +968,7 @@ void CodeOper(
 	case OR:
 	case AND: {
 		label  l_maybe = ++text_label, l_end = NO_LABEL;
-		t_desig Des;
+		struct desig Des;
 
 		Des = null_desig;
 
@@ -1056,9 +1056,9 @@ static void truthvalue(int relop)
 
 
 /* Generates code for an unary expression */
-void CodeUoper(register t_node *nd)
+void CodeUoper(register struct node *nd)
 {
-	register t_type *tp = nd->nd_type;
+	register struct type *tp = nd->nd_type;
 
 	CodePExpr(nd->nd_RIGHT);
 	switch(nd->nd_symb) {
@@ -1089,9 +1089,9 @@ void CodeUoper(register t_node *nd)
 	}
 }
 
-static void CodeSet(register t_node *nd, int null_set)
+static void CodeSet(register struct node *nd, int null_set)
 {
-	register t_type *tp = nd->nd_type;
+	register struct type *tp = nd->nd_type;
 
 	nd = nd->nd_NEXT;
 	while (nd) {
@@ -1106,9 +1106,9 @@ static void CodeSet(register t_node *nd, int null_set)
 	if (null_set) C_zer(tp->tp_size);
 }
 
-static void CodeEl(register t_node *nd, register t_type *tp, int null_set)
+static void CodeEl(register struct node *nd, register struct type *tp, int null_set)
 {
-	register t_type *eltype = ElementType(tp);
+	register struct type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
 		if (null_set) C_zer(tp->tp_size);
@@ -1131,23 +1131,23 @@ static void CodeEl(register t_node *nd, register t_type *tp, int null_set)
 	}
 }
 
-void CodePExpr(register t_node *nd)
+void CodePExpr(register struct node *nd)
 {
 
-	t_desig designator;
+	struct desig designator;
 
 	designator = null_desig;
 	CodeExpr(nd, &designator, NO_LABEL, NO_LABEL);
 	CodeValue(&designator, nd->nd_type);
 }
 
-static void CodeDAddress(t_node *nd, int chk_controlvar)
+static void CodeDAddress(struct node *nd, int chk_controlvar)
 {
 	/*	Generate code to push the address of the designator "nd"
 		on the stack.
 	*/
 
-	t_desig designator;
+	struct desig designator;
 	int chkptr;
 
 	designator = null_desig;
@@ -1167,11 +1167,11 @@ static void CodeDAddress(t_node *nd, int chk_controlvar)
 	}
 }
 
-void CodeDStore(register t_node *nd)
+void CodeDStore(register struct node *nd)
 {
 
 
-	t_desig designator;
+	struct desig designator;
 
 	designator = null_desig;
 	ChkForFOR(nd);
@@ -1179,7 +1179,7 @@ void CodeDStore(register t_node *nd)
 	CodeStore(&designator, nd->nd_type);
 }
 
-static void DoHIGH(register t_def *df)
+static void DoHIGH(register struct def *df)
 {
 	/*	Get the high index of a conformant array, indicated by "nd".
 		The high index is the second field in the descriptor of

@@ -115,3 +115,32 @@ extern struct {
 } mode1, mode2, *mode_ptr ;
 
 #define	not_imm(mode_ptr)	if ( (mode_ptr)->m_mode==0x14 ) ill_imm() ;
+
+
+/* NS Specific routines */
+void clrmode(void);
+int ind_mode(int type);
+void badsyntax(void);
+void ill_imm(void);
+void form2(int id, int sval);
+void form3(int id);
+void form4(int id);
+void form5(int id, int sval);
+void form7x(int id,int i_type);
+void form8(int id,int reg);
+void form9(int id,int i_type,int f_type);
+void form11(int id);
+void form14(int id,int reg);
+void frm15_0(int id,int reg);
+void frm15_1(int id,int i_type,int s_type);
+void frm15_5(int id);
+void gen1(int id);
+void gengen(int id);
+void disp(register expr_t *expr, int relpc);
+void putdisp(valu_t val,int size);
+void dot_adjust(register expr_t *expr);
+int testsize(int type,int val);
+void imm(int i_type,register expr_t *expr);
+int reg_list(int list,int reverse);
+int cpu_opt(int indic);
+int string_opt(int indic);

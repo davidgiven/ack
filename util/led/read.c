@@ -10,10 +10,11 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "error.h"
 
 int	infile;	/* The current input file. */
 
-rd_fatal()
+void rd_fatal(void)
 {
 	fatal("read error");
 }

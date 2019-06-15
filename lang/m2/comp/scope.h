@@ -9,7 +9,7 @@
 #ifndef SCOPE_H_
 #define SCOPE_H_
 
-
+struct def;
 
 #define OPENSCOPE	0	/* Indicating an open scope */
 #define CLOSEDSCOPE	1	/* Indicating a closed scope (module) */
@@ -45,13 +45,12 @@ struct scopelist {
 	int sc_count;
 };
 
-typedef struct scope t_scope;
-typedef struct scopelist t_scopelist;
 
-extern t_scope
+
+extern struct scope
 	*PervasiveScope;
 
-extern t_scopelist
+extern struct scopelist
 	*CurrVis, *GlobalVis;
 
 #define CurrentScope	(CurrVis->sc_scope)
@@ -61,15 +60,15 @@ extern t_scopelist
 #define nextvisible(x)	((x)->sc_next)		/* use with scopelists */
 
 
-typedef struct def t_def;
 
-void Reverse(t_def **pdf);
+
+void Reverse(struct def **pdf);
 void open_scope(int scopetype);
-t_scope * open_and_close_scope(int scopetype);
+struct scope * open_and_close_scope(int scopetype);
 void InitScope(void);
 void close_scope(int flag);
 #ifdef DEBUG
-void DumpScope(register t_def *df);
+void DumpScope(register struct def *df);
 #endif
 
 

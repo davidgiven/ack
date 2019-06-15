@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef DEF_LENGTH
 #define DEF_LENGTH	8
@@ -32,13 +33,22 @@ struct idf {
 
 struct idf *hash_tab[HASHSIZE];
 
-char *Malloc(), *Salloc();
-struct idf *FindId();
+char *Malloc(unsigned int);
+char *Salloc(char *);
+int EnHash(char*);
+void EndOfProgram(void);
+void DoOption(char*);
+void CheckId(char *, int);
+void DoMacro(char *);
+void GetMacros(char *);
+void InsertMacro(char *, char *);
+struct idf *FindId(char *);
+
+
 
 extern char *ProgName;
 
-DoOption(str)
-	char *str;
+void DoOption(char* str)
 {
 	switch (str[1]) {
 
@@ -57,8 +67,7 @@ DoOption(str)
 }
 
 /*ARGSUSED*/
-CheckId(id, len)
-	char *id;
+void CheckId(char *id, int len)
 {
 	struct idf *idp = FindId(id);
 
@@ -70,8 +79,7 @@ CheckId(id, len)
 	}
 }
 
-DoMacro(str)
-	char *str;
+void DoMacro(char *str)
 {
 	char *id, *text;
 
@@ -92,11 +100,10 @@ DoMacro(str)
 	InsertMacro(id, text);
 }
 
-GetMacros(fn)
-	char *fn;
+void GetMacros(char *fn)
 {
 	FILE *fp;
-	register c;
+	register int c;
 	char buf[LINE_LEN];
 	char *bufp = &buf[0];
 
@@ -118,8 +125,7 @@ GetMacros(fn)
 	fclose(fp);
 }
 
-InsertMacro(id, text)
-	char *id, *text;
+void InsertMacro(char *id, char *text)
 {
 	int hash_val = EnHash(id);
 	struct idf *idp = hash_tab[hash_val];
@@ -143,11 +149,9 @@ InsertMacro(id, text)
 	hash_tab[hash_val] = idp;
 }
 
-char *
-Malloc(n)
-	unsigned n;
+char *Malloc(unsigned int n)
 {
-	char *mem, *malloc();
+	char *mem;
 
 	if ((mem = malloc(n)) == 0) {
 		fprintf(stderr, "%s: out of memory\n", ProgName);
@@ -156,9 +160,7 @@ Malloc(n)
 	return mem;
 }
 
-char *
-Salloc(str)
-	char *str;
+char *Salloc(char *str)
 {
 	if (str == 0) {
 		str = "";
@@ -166,11 +168,9 @@ Salloc(str)
 	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
-struct idf *
-FindId(id)
-	char *id;
+struct idf *FindId(char *id)
 {
-	register hash_val = EnHash(id);
+	register int hash_val = EnHash(id);
 	register struct idf *idp = hash_tab[hash_val];
 
 	while (idp) {
@@ -182,8 +182,7 @@ FindId(id)
 	return 0;
 }
 
-EnHash(id)
-	char *id;
+int EnHash(char *id)
 {
 	register unsigned hash_val = 0;
 
@@ -196,11 +195,11 @@ EnHash(id)
 
 extern int GCcopy;
 
-BeginOfProgram()
+void BeginOfProgram(void)
 {
 	GCcopy = 1;
 }
 
-EndOfProgram()
+void EndOfProgram(void)
 {
 }

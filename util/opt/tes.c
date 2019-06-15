@@ -1,12 +1,8 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
 /*
  * This file contains the main part of the top element size computation phase. 
  *
  * Author: Hans van Eck. 
  */
-
 #include <assert.h>
 #include <stdio.h>
 #include <em_spec.h>
@@ -39,152 +35,206 @@ extern char flow_tab[];
 int state;
 static int stacktop = 0;
 
-init_state()
+/* Forward declarations */
+static void do_inst_label(line_p);
+static void assign_label(register num_p);
+
+void init_state(void)
 {
 	stacktop = 0;
 	state = KNOWN;
 }
 
-tes_pseudos()
+void tes_pseudos(void)
 {
 	register line_p lp;
 
-	for (lp = pseudos; lp != (line_p)0; lp = lp->l_next) {
-		switch(INSTR(lp)) {
-		case ps_con:
-		case ps_rom:
-			if (lp->l_optyp == OPLIST) {
-				register arg_p ap = lp->l_a.la_arg;
+	for (lp = pseudos; lp != (line_p) 0; lp = lp->l_next)
+	{
+		switch (INSTR(lp))
+		{
+			case ps_con:
+			case ps_rom:
+				if (lp->l_optyp == OPLIST)
+				{
+					register arg_p ap = lp->l_a.la_arg;
 
-				while (ap != (arg_p) 0) {
-					if (ap->a_typ == ARGNUM) {
-						assign_label(ap->a_a.a_np->n_repl);
+					while (ap != (arg_p) 0)
+					{
+						if (ap->a_typ == ARGNUM)
+						{
+							assign_label(ap->a_a.a_np->n_repl);
+						}
+						ap = ap->a_next;
 					}
-					ap = ap->a_next;
 				}
-			} else if (lp->l_optyp == OPNUMLAB)
-				assign_label(lp->l_a.la_np->n_repl);
+				else if (lp->l_optyp == OPNUMLAB)
+					assign_label(lp->l_a.la_np->n_repl);
 		}
 	}
 }
 
-void
-tes_instr(lnp, x, y)
-line_p lnp, x, y;
+void tes_instr(line_p lnp, line_p x, line_p y)
 {
 	char *s;
-	register instr = INSTR(lnp);
+	register int instr = INSTR(lnp);
 	register int arg, argdef;
 	int neg = 0;
 
-	if (instr == op_lab) {
+	if (instr == op_lab)
+	{
 		do_inst_label(lnp);
 		return;
 	}
-	if (instr < sp_fmnem || instr > sp_lmnem) {
+	if (instr < sp_fmnem || instr > sp_lmnem)
+	{
 		return;
 	}
 
-	if (state == NOTREACHED) return;	/* What else ? */
+	if (state == NOTREACHED)
+		return; /* What else ? */
 	s = pop_push[instr];
 
-	if (*s != '0') {
-		while (*s != '\0') {
+	if (*s != '0')
+	{
+		while (*s != '\0')
+		{
 			neg = (*s++ == '-');
 
-			if (TYPE(lnp) == OPSHORT) {
+			if (TYPE(lnp) == OPSHORT)
+			{
 				arg = SHORT(lnp);
-				if (arg < wordsize) arg = wordsize;
+				if (arg < wordsize)
+					arg = wordsize;
 				argdef = TRUE;
-			} else if (IS_MINI(lnp)) {
+			}
+			else if (IS_MINI(lnp))
+			{
 				arg = MINI(lnp);
-				if (arg > 0 && arg < wordsize) arg = wordsize;
-				if (arg < 0 && -arg < wordsize) arg = -wordsize;
+				if (arg > 0 && arg < wordsize)
+					arg = wordsize;
+				if (arg < 0 && -arg < wordsize)
+					arg = -wordsize;
 				argdef = TRUE;
-			} else {
+			}
+			else
+			{
 				argdef = FALSE;
 			}
-			switch (*s++) {
-			case 'w': stacktop = wordsize; break;
-			case 'd': stacktop = wordsize * 2; break;
-			case 'p': stacktop = pointersize; break;
-			case 'a':
-				if (argdef == FALSE || instr == op_ass) {
+			switch (*s++)
+			{
+				case 'w':
+					stacktop = wordsize;
+					break;
+				case 'd':
+					stacktop = wordsize * 2;
+					break;
+				case 'p':
+					stacktop = pointersize;
+					break;
+				case 'a':
+					if (argdef == FALSE || instr == op_ass)
+					{
+						stacktop = 0;
+					}
+					else
+					{
+						stacktop = arg;
+					}
+					break;
+				case 'x':
+					if (IS_LOC(x))
+					{
+						arg = MINI(x);
+						if (arg < wordsize)
+							arg = wordsize;
+						stacktop = arg;
+					}
+					else
+					{
+						stacktop = 0;
+					}
+					break;
+				case 'y':
+					if (IS_LOC(y))
+					{
+						arg = MINI(y);
+						if (arg < wordsize)
+							arg = wordsize;
+						stacktop = arg;
+					}
+					else
+					{
+						stacktop = 0;
+					}
+					break;
+				case '?':
 					stacktop = 0;
-				} else {
-					stacktop = arg;
-				}
-				break;
-			case 'x':
-				if (IS_LOC(x)) {
-					arg = MINI(x);
-					if (arg < wordsize) arg = wordsize;
-					stacktop = arg;
-				} else {
-					stacktop = 0;
-				}
-				break;
-			case 'y':
-				if (IS_LOC(y)) {
-					arg = MINI(y);
-					if (arg < wordsize) arg = wordsize;
-					stacktop = arg;
-				} else {
-					stacktop = 0;
-				}
-				break;
-			case '?':
-				stacktop = 0;
-				break;
-			default:
-				assert(FALSE);
+					break;
+				default:
+					assert(FALSE);
 			}
 		}
 		/*
 		 * When the last argument was negative, the element size
 		 * must be negated.  This is to catch 'asp -4'.
 		 */
-		if (neg) stacktop = -stacktop;
+		if (neg)
+			stacktop = -stacktop;
 	}
 
-	if (stacktop < 0) stacktop = 0;
+	if (stacktop < 0)
+		stacktop = 0;
 
-	if (ISABRANCH(instr)) do_inst_label(lnp);
-	if (NON_CONTINUABLE(instr)) {
+	if (ISABRANCH(instr))
+		do_inst_label(lnp);
+	if (NON_CONTINUABLE(instr))
+	{
 		state = NOTREACHED;
 		stacktop = 0;
 	}
 }
 
-assign_label(label)
-register num_p label;
+static void assign_label(register num_p label)
 {
-	if (label->n_flags & NUMSET) {
-		if (state == NOTREACHED || stacktop > label->n_size) {
+	if (label->n_flags & NUMSET)
+	{
+		if (state == NOTREACHED || stacktop > label->n_size)
+		{
 			stacktop = label->n_size;
-		} else if ( stacktop < label->n_size) {
+		}
+		else if (stacktop < label->n_size)
+		{
 			label->n_size = stacktop;
 		}
-	} else {
+	}
+	else
+	{
 		label->n_size = stacktop;
 		label->n_flags |= NUMSET;
 	}
 }
 
-do_inst_label(lnp)	/* (re-)install a label */
-line_p lnp;
+/* (re-)install a label */
+static void do_inst_label(line_p lnp)
 {
 	num_p label = lnp->l_a.la_np->n_repl;
 	int instr = INSTR(lnp);
 
 	assign_label(label);
 
-	if (instr == op_lab) {
-		if (state == NOTREACHED)  {
-		} else {
+	if (instr == op_lab)
+	{
+		if (state == NOTREACHED)
+		{
+		}
+		else
+		{
 			label->n_flags |= NUMFALLTHROUGH;
 		}
-	} else if (ISCONDBRANCH(instr)) {	/* conditional branch */
+	}
+	else if (ISCONDBRANCH(instr))
+	{ /* conditional branch */
 		label->n_flags |= NUMCOND;
 	}
 	state = KNOWN;

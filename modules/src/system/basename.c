@@ -12,11 +12,21 @@ void sys_basename(char *str, register char *dst)
 	register char *p2 = p1;
 	register char *end;
 	register char *start;
+	int len;
 
-	int len = strlen(str);
+	if ((str == NULL) || (*str == '\0'))
+	{
+		dst[0] = '.';
+		dst[1] = '\0';
+		return;
+	}
+
+	len = strlen(str);
 	/* Point to the end of the string. */
 	p1 = p1 + len - 1;
 	end = p1;
+
+
 
 	while ((*p1 == '/') || (*p1 == '\\'))
 	{

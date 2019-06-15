@@ -38,9 +38,8 @@ extern int maxtokensize;
 extern int nprocargs, maxprocargs;
 extern int use_tes;
 
-extern char *mystrcpy();
-extern char *myalloc();
-
 extern void error(const char* s, ...);
 extern void fatal(const char* s, ...);
-
+extern int tabovf(char *string);
+extern int strlookup(char *str);
+extern void errorexit(void);

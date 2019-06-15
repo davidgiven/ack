@@ -11,9 +11,9 @@
 
 #include "em_arith.h"
 
-typedef struct scope t_scope;
+struct scope;
 
-void TmpOpen(t_scope *sc);
+void TmpOpen(struct scope *sc);
 arith TmpSpace(arith sz, int al);
 arith NewInt(void);
 arith NewPtr(void);

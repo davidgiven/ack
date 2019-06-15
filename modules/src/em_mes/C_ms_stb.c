@@ -19,12 +19,7 @@ void C_ms_stb_cst(char* s, int e1, int e2, arith e3)
 	C_mes_end();
 }
 
-void
-C_ms_stb_dlb(s, e1, e2, l, off)
-	char	*s;
-	int	e1, e2;
-	label	l;
-	arith	off;
+void C_ms_stb_dlb(char *s, int e1, int e2, label l, arith off)
 {
 	C_mes_begin(ms_stb);
 	if (s) C_scon(s, (arith) (strlen(s)+1));
@@ -34,12 +29,7 @@ C_ms_stb_dlb(s, e1, e2, l, off)
 	C_mes_end();
 }
 
-void
-C_ms_stb_dnam(s, e1, e2, l, off)
-	char	*s;
-	int	e1, e2;
-	char	*l;
-	arith	off;
+void C_ms_stb_dnam(char *s, int e1, int e2, char *l, arith off)
 {
 	C_mes_begin(ms_stb);
 	if (s) C_scon(s, (arith) (strlen(s)+1));
@@ -49,11 +39,7 @@ C_ms_stb_dnam(s, e1, e2, l, off)
 	C_mes_end();
 }
 
-void
-C_ms_stb_ilb(s, e1, e2, l)
-	char	*s;
-	int	e1, e2;
-	label	l;
+void C_ms_stb_ilb(char *s, int e1, int e2, label l)
 {
 	C_mes_begin(ms_stb);
 	if (s) C_scon(s, (arith) (strlen(s)+1));
@@ -63,11 +49,7 @@ C_ms_stb_ilb(s, e1, e2, l)
 	C_mes_end();
 }
 
-void
-C_ms_stb_pnam(s, e1, e2, p)
-	char	*s;
-	int	e1, e2;
-	char	*p;
+void C_ms_stb_pnam(char *s, int e1, int e2, char *p)
 {
 	C_mes_begin(ms_stb);
 	if (s) C_scon(s, (arith) (strlen(s)+1));

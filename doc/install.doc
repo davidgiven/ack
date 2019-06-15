@@ -1,4 +1,3 @@
-.\" $Id$
 .if n .nr PD 1v
 .if n .nr LL 78m
 .if n .ll 78m
@@ -18,13 +17,6 @@ This document
 describes the process of installing the Amsterdam Compiler Kit (ACK).
 It depends on the combination of hard- and software how
 hard it will be to install the Kit.
-This description is intended for a Sun-3 or SPARC workstation.
-Installation on VAXen running Berkeley
-.UX
-or Ultrix,
-Sun-2 systems and most System V 
-.UX
-systems should be easy.
 As of this distribution, installation on PDP-11's or other
 systems with a small address space is no longer supported.
 See section 8 for installation on other systems.
@@ -35,7 +27,7 @@ In the ACK installation process, three directory trees are used:
 .IP "-"
 the ACK source tree. This is the tree on the ACK distribution medium.
 For the rest of this document, we will refer to this directory 
-as $SRC_HOME;
+as $ACK_SRC_HOME;
 .IP "-"
 a configuration tree. This tree is built by the installation process and
 is used to do compilations in. Its structure reflects that of the source tree,
@@ -45,10 +37,10 @@ as $CONFIG;
 .IP "-"
 an ACK users tree. This tree is also built by the installation process.
 For the rest of this document, we will refer to this directory 
-as $TARGET_HOME;
+as $ACK_HOME;
 .LP
 After installation,
-the directories in $TARGET_HOME contain the following information:
+the directories in $ACK_HOME contain the following information:
 .if n .sp 1
 .if n .nr PD 0
 .IP "bin" 14
@@ -57,30 +49,41 @@ See the section about "Commands".
 .IP "lib"
 root of a tree containing almost all libraries used by
 commands.
-Files specific to a certain machine are collected in one subtree
-per machine. E.g. "lib/pdp", "lib/z8000".
+Files specific to a certain platform are collected in one subtree
+per platform. E.g. "lib/cpm", "lib/pdpv7".
 The names used here are the same names as used for subtrees
-of "$SRC_HOME/mach".
+of "$ACK_SRC_HOME/plat". Each of the platform specific directory
+contains the following libraries:
+.TS
+l l.
+libb	B run-time system
+libbc	Basic run-time system
+libc	C run-time system
+libpc	Pascal run-time system
+libm2	Modula-2 run-time system
+liboc	Occam run-time system
+.TE
+
 .IP "lib/descr"
-command descriptor files used by the program ack.
+command descriptor files used by the program ack to determine utilities to call.
 .IP "lib/LLgen"
 files used by the LL(1) parser generator.
 .IP "lib/flex"
 files used by the lexical analyzer generator Flex.
 .IP "lib/m2"
 definition modules for Modula-2.
-.IP "lib.bin"
+.IP "lib/ack"
 root of a tree containing almost all binaries used by
 commands.
-All programs specific to a certain machine are collected in one subtree
-per machine. E.g. "lib.bin/pdp", "lib.bin/z8000".
+All programs specific to a certain platform are collected in one subtree
+per machine. E.g. "lib/ack/pdpv7", "lib/ack/cpm".
 The names used here are the same names as used for subtrees
-of "$SRC_HOME/mach".
-.IP "lib.bin/ego"
+of "$ACK_SRC_HOME/plat".
+.IP "lib/ack/ego"
 files used by the global optimizer.
-.IP "lib.bin/lint"
+.IP "lib/ack/lint"
 binaries for the lint passes and lint libraries.
-.IP "lib.bin/ceg"
+.IP "lib/ack/ceg"
 files used by the code-expander-generator.
 .IP "etc"
 contains the file "ip_spec.t" needed for EM interpreters and EM documentation.
@@ -120,7 +123,7 @@ em_abs.h	contains trap numbers and address for lin and fil
 em_ego.h	definition of names for some global optimizer
 	messages
 em_flag.h	definition of bits in array em_flag in
-	$TARGET_HOME/lib.bin/em_data.a. Describes parameters
+	$ACK_HOME/lib.bin/em_data.a. Describes parameters
 	effect on flow of instructions
 em_mes.h	definition of names for mes pseudo numbers
 em_mnem.h	instruction => compact mapping
@@ -187,7 +190,7 @@ The directories in the source tree contain the following information:
 .IP "bin" 14
 source of some shell-scripts.
 .IP "lib"
-mostly description files for the "ack" program.
+mostly description files for the "ack" program. 
 .IP "etc"
 the main description of EM sits here.
 Files (e.g. em_table) describing
@@ -202,30 +205,23 @@ These directories have subdirectories named:
 .in +3n
 .TS
 l l.
-cg	the backend   (*.m => *.s)
-ncg	the new backend   (*.m => *.s)
-as	the assembler (*.s => *.o) or
+cg	the backend code generator  (*.m => *.s)
+ncg	the new backend code generator  (*.m => *.s)
+mcg	the modified backend code generator (*.m => *.s)
+as	the CPU specific assembler (*.s => *.o) or
 	assembler/linker (*.s + libraries => a.out)
-cv	conversion programs for a.out files
+cv	conversion programs for a.out files. Mostly replaced by "cvmach"
 dl	down-load programs
 top	the target optimizer
-int	source for an interpreter
+int	source for an interpreter (requires POSIX compliant host)
+ce	code expander (fast back-end)
 
-libbc	to create Basic run-time system and libraries
-libcc	to create C run-time system and libraries
-libcc.ansi	to create ANSI C run-time system and libraries
-libpc	to create Pascal run-time system and libraries
-libf77	to create Fortran run-time system and libraries
-libm2	to create Modula-2 run-time system and libraries
-liboc	to create occam run-time system and libraries
-libem	EM runtime system, only depending on CPU type
+libem	to create runtime system used by code generators
 libend	library defining end, edata, etext
-libfp	to create floating point library
+libfp	to create floating point emulation library
 libdb	to create debugger support library
-libsys	system-dependent EM library
 libce	fast cc-compatible C compiler library support
 
-ce	code expander (fast back-end)
 
 test	various tests
 .TE
@@ -245,6 +241,21 @@ mach/proto/fp	floating point package sources
 mach/proto/libg	makefiles for compiling libraries
 mach/proto/grind	machine-independent debugger support
 .TE
+
+.IP "plat"
+Group of directories which are specific to each operating system. 
+These dirctories have subdirectories named:
+
+.TS
+l l.
+cvmach	conversion program to convert from a.out to platform specific binaries.
+emu	system specific platform emulator or simulator used for testing.
+libsys	system-dependent library used to interface with the operating system.
+include/ack	system-dependent include files for building libc library, including mandatory "plat.h"
+include/sys	system-dependent include files used with libsys.
+.TE
+
+
 .IP "emtest"
 contains prototype of em test set.
 .IP "lang"
@@ -262,26 +273,26 @@ the Pascal compiler proper.
 the C front-end.
 .IP "lang/cem/libcc"
 .br
-directories with sources of C runtime system, libraries (in EM or C).
+directories with sources of C runtime system, libraries (in EM or C). \fIObsolete\fP.
 .IP "lang/cem/libcc/gen"
 .br
 sources for routines in chapter III of 
 .UX
 programmers manual,
-excluding stdio.
+excluding stdio. \fIObsolete\fP.
 .IP "lang/cem/libcc/stdio"
 .br
-stdio sources.
+stdio sources. \fIObsolete\fP.
 .IP "lang/cem/libcc/math"
 .br
 sources for mathematical routines, normally available with the
-\fB-lm\fP option to \fIcc\fP.
+\fB-lm\fP option to \fIcc\fP. \fIObsolete\fP.
 .IP "lang/cem/libcc/mon"
 .br
-sources for routines in chapter II, mostly written in EM.
+sources for routines in chapter II, mostly written in EM. \fIObsolete\fP.
 .IP "lang/cem/cemcom"
 .br
-the compiler proper.
+the compiler proper. \fIObsolete\fP.
 .IP "lang/cem/cemcom.ansi"
 .br
 the ANSI C compiler proper.
@@ -290,7 +301,10 @@ the ANSI C compiler proper.
 the ANSI C preprocessor.
 .IP "lang/cem/libcc.ansi"
 .br
-the ANSI C library sources.
+Portable part of the ANSI C library sources. The platform specific source code is in
+libsys.
+.IP "lang
+
 .IP "lang/cem/ctest"
 .br
 the C test set.
@@ -388,54 +402,79 @@ contains sub-directories for installing the fast ACK compatible compilers.
 contains the sources of the fast ACK compatible compiler drivers.
 .IP "fcc"
 contains the fast cc-compatible C compiler for SUN-3 and VAX.
+.IP "modules"
+root of a tree containing modules (optional install)
+.IP "modules/src/alloc"
+Memory management module.
+.IP "modules/src/data"
+Data structures and collections module.
+.IP "modules/src/em_code"
+EM assembly generator module (*.[km])
+.IP "modules/src/em_data"
+EM data managemet module.
+.IP "modules/src/em_mes"
+EM Message pseudo-instruction generator module. 
+.IP "modules/src/em_opt"
+EM Optimizer 
+.IP "modules/src/flt_arith"
+Floating point support routine module.
+.IP "modules/src/object"
+ACK Object file format support reader/writer module.
+.IP "modules/src/print"
+Light version of standard output routines. Optimized for space compared to standard C version.
+.IP "modules/src/read_em"
+Compact (*.k) EM reader module.
+.IP "modules/src/string"
+String utility module. 
+.IP "modules/src/system"
+Module related to the ACK system in general as well as wrapper over standard C library calls to 
+solve portability issues. 
 .IP "util"
 contains directories with sources for various utilities.
 .IP "util/ack"
 the program used for translation with the Kit.
-.IP "util/opt"
-the EM peephole optimizer (*.k => *.m).
-.IP "util/ego"
-the global optimizer.
-.IP "util/topgen"
-the target optimizer generator.
-.IP "util/misc"
-decode (*.[km] => *.e) + encode (*.e => *.k).
-.IP "util/data"
-the C-code for $TARGET_HOME/lib.bin/em_data.a.
-These sources are created by the Makefile in `etc`.
-.IP "util/ass"
-the EM assembler (*.[km] + libraries => e.out).
-.IP "util/arch"
-the archivers to be used for all EM utilities.
-.IP "util/cgg"
-a program needed for compiling backends.
-.IP "util/ncgg"
-a program needed for compiling the newest backends.
-.IP "util/cpp"
-the C preprocessor.
-.IP "util/shf"
-various shell files.
-.IP "util/LLgen"
-the extended LL(1) parser generator.
 .IP "util/amisc"
 contains some programs handling ACK a.out format, such as anm, asize.
+.IP "util/arch"
+the archivers to be used for all EM utilities.
+.IP "util/ass"
+the EM assembler and linker (*.[km] + libraries => e.out).
+.IP "util/byacc"
+this is Berkeley yacc, in the public domain. \fIObsolete\fP.
+.IP "util/ceg"
+code expander generator.
+.IP "util/cgg"
+a program needed for compiling backends.
 .IP "util/cmisc"
 contains some programs to help in resolving name conflicts, and
 a dependency generator for makefiles.
-.IP "util/led"
-the ACK link-editor, reading ACK relocatable a.out format, and writing
-ACK a.out format.
-.IP "util/int"
-an EM interpreter, written in C. Very useful for checking out software,
-but slow.
-.IP "util/ceg"
-code expander generator.
+.IP "util/cpp"
+the C preprocessor. \fIObsolete\fP.
+.IP "util/ego"
+the global optimizer.
 .IP "util/grind"
 a symbolic debugger.
-.IP "util/byacc"
-this is Berkeley yacc, in the public domain.
+.IP "util/int"
+an EM interpreter, written in C. Very useful for checking out software.
+.IP "util/led"
+the ACK link-editor, reading CPU specific ACK relocatable a.out format, and writing
+ACK a.out format.
+.IP "util/LLgen"
+the extended LL(1) parser generator.
+.IP "util/make"
+simple make tool.
+.IP "util/misc"
+decode (*.[km] => *.e) + encode (*.e => *.k).
+.IP "util/ncgg"
+a program needed for compiling the newest backends.
+.IP "util/opt"
+the EM peephole optimizer (*.k => *.m).
+.IP "util/shf"
+various shell files.
+.IP "util/topgen"
+the target optimizer generator.
 .IP "util/flex"
-this is a replacement for lex. It carries the following copyright notice:
+this is a replacement for lex. \fIObsolete\fP. It carries the following copyright notice:
 .IP ""
 .nf
 Copyright (c) 1990 The Regents of the University of California.
@@ -469,8 +508,8 @@ PURPOSE.
 .if n .nr PD 1v
 .LP
 All path names mentioned in the text of this document are relative to
-$SRC_HOME, unless they start with '/' or one of $SRC_HOME,
-$TARGET_HOME or $CONFIG.
+$ACK_SRC_HOME, unless they start with '/' or one of $ACK_SRC_HOME,
+$ACK_HOME or $CONFIG.
 .NH
 Restoring the ACK tree
 .PP
@@ -480,7 +519,7 @@ distribution tree structure.
 Proceed as follows
 .IP "  \-" 10
 Create a directory, for example /usr/share/local/src/ack, on a device
-with at least 15 Megabytes left. This directory will be $SRC_HOME.
+with at least 15 Megabytes left. This directory will be $ACK_SRC_HOME.
 .IP "  \-"
 Change to that directory (cd ...).
 .IP "  \-"
@@ -497,7 +536,7 @@ Adapting ACK to the local system
 Before compiling the sources in the Kit some installation dependent
 actions have to be taken.
 Most of these are performed by an interactive shell script in the file
-.I $SRC_HOME/first/first.
+.I $ACK_SRC_HOME/first/first.
 Calling this script should be done
 from another directory, for instance an empty directory which will later
 become $CONFIG.
@@ -508,8 +547,8 @@ script are:
 .if n .sp 1
 .if n .nr PD 0
 .IP \-
-Asking for the path names of the ACK source directory ($SRC_HOME), the
-configuration directory ($CONFIG), and the ACK users directory ($TARGET_HOME).
+Asking for the path names of the ACK source directory ($ACK_SRC_HOME), the
+configuration directory ($CONFIG), and the ACK users directory ($ACK_HOME).
 About 5M are needed for the configuration tree. The disk space needed
 for the ACK users tree depends on which front-ends and back-ends are to be
 installed.
@@ -566,7 +605,7 @@ on a different machine".
 .IP \-
 Setting the default machine for which code is
 produced to the local type of system according to the table above.
-This in done in the file "$TARGET_HOME/config/local.h".
+This in done in the file "$ACK_HOME/config/local.h".
 See also section 9.1.
 .IP \-
 Asking for things that don't have to be installed.
@@ -599,7 +638,7 @@ Most configuration directories will have Makefiles
 used to compile and install the programs in that
 directory.
 All programs needed for compilation and/or cross compilation
-with the Kit are installed in $TARGET_HOME by these Makefiles.
+with the Kit are installed in $ACK_HOME by these Makefiles.
 These Makefiles are produced from corresponding files called
 "proto.make" in the source tree. In fact, the "proto.make" files
 are almost complete Makefiles, except for some macro definitions that
@@ -618,7 +657,7 @@ Calling the "TakeAction" script.
 All these Makefiles do not have to be called separately.
 We wrote a shell script calling the make's needed to install
 the whole Kit.
-This script consists of the file $SRC_HOME/TakeAction
+This script consists of the file $ACK_SRC_HOME/TakeAction
 and a few files called Action in some configuration directories.
 The Action files describe in a very simple form which actions
 have to be performed in which directories.
@@ -645,7 +684,7 @@ what must be installed.
 .LP
 If the installation succeeded, the Kit is ready to be used.
 Read section 6 and the manuals provided
-with the Kit (in the $TARGET_HOME/man directory) on how to use it.
+with the Kit (in the $ACK_HOME/man directory) on how to use it.
 .NH 2
 Problems
 .NH 3
@@ -654,7 +693,7 @@ on Unisoft m68000 systems.
 The Unisoft C compiler has a bug which impedes the correct
 translation of the peephole optimizer.
 For a more detailed description of this phenomenon see
-the file "$SRC_HOME/mach/m68k2/Unisoft_bug".
+the file "$ACK_SRC_HOME/mach/m68k2/Unisoft_bug".
 (This observation was made in 1985 or so, so it is probably
 no longer true).
 .NH 3
@@ -727,7 +766,7 @@ If that directory contains an Action file issue the command
 .NH
 Commands
 .PP
-The following commands are available in the $TARGET_HOME/bin directory after compilation
+The following commands are available in the $ACK_HOME/bin directory after compilation
 of the Kit:
 .IP "\fIack\fP, \fIacc\fP, \fIabc\fP, \fIapc\fP, \fIocm\fP, \fIm2\fP, \fIf2c\fP  and their links" 14
 .br
@@ -780,7 +819,7 @@ this is a cc-compatible fast C compiler, available on SUN-3 and VAX
 systems. It compiles very fast, but produces slow code.
 .LP
 We currently make the Kit available to our users by telling
-them that they should include the $TARGET_HOME/bin directory in
+them that they should include the $ACK_HOME/bin directory in
 their PATH shell variable.
 The programs will still work when moved to a different
 directory or linked to.
@@ -793,7 +832,7 @@ Any call name not being \fIcc\fP, \fIacc\fP, \fIabc\fP, \fIpc\fP, \fIf2c\fP,
 \fIocm\fP, \fIm2\fP, or \fIapc\fP will be
 interpreted as the name of a 'machine description' and the
 program will try to find a description file with that name.
-The installation process will only touch the utilities in the $TARGET_HOME/bin
+The installation process will only touch the utilities in the $ACK_HOME/bin
 directory, not copies of these utilities.
 .NH
 Machines
@@ -802,7 +841,7 @@ Below is a table with entries for all commands in
 the bin directory used to (cross)compile for a particular machine.
 The name in the first column gives the name in the bin directory.
 The column headed dir indicates which subdirectories of
-$TARGET_HOME/lib and/or $TARGET_HOME/lib.bin are needed for compilation.
+$ACK_HOME/lib and/or $ACK_HOME/lib.bin are needed for compilation.
 The column head i/p contains the integer and pointer size used in units of
 bytes.
 The subdirectories with the same name in mach contain the sources.
@@ -1002,11 +1041,11 @@ the second takes 2/4 and 4/4 files,
 and the last one takes 2/2, 2/4 and 4/4.
 The PDP 11 interpreter executes floating point instructions.
 .LP
-The program \fB$TARGET_HOME/bin/em\fP calls the appropriate
+The program \fB$ACK_HOME/bin/em\fP calls the appropriate
 interpreter.
 The interpreters are looked for in the em22, em24 and em44
-subdirectories of $TARGET_HOME/lib.bin.
-The third interpreter is available as the program \fB$TARGET_HOME/bin/int\fP
+subdirectories of $ACK_HOME/lib.bin.
+The third interpreter is available as the program \fB$ACK_HOME/bin/int\fP
 in the bin directory.
 .NH
 Compilation on a different machine.
@@ -1036,7 +1075,7 @@ which is a major undertaking.
 .NH 2
 Universal assembler/loader, link editor
 .PP
-For most machines, the description files in $TARGET_HOME/lib/*/descr use our
+For most machines, the description files in $ACK_HOME/lib/*/descr use our
 universal assembler and our link editor.
 The load file produced is not directly
 usable in any system known to us,
@@ -1046,23 +1085,23 @@ executable files.
 The \fIdl\fP programs present for some machines unravel
 our a.out files and transmit commands to load memory
 to a microprocessor over a serial line.
-The file $TARGET_HOME/man/man5/ack.out.5 contains a description of the format of
+The file $ACK_HOME/man/man5/ack.out.5 contains a description of the format of
 the universal assembler load file.
 It might be useful to those who wish or need to write their
 own conversion programs.
 Also, a module is included to read and write our a.out format.
-See $TARGET_HOME/man/man3/object.3.
+See $ACK_HOME/man/man3/object.3.
 .NH
 Options
 .NH 2
 Default machine
 .PP
-There is one important option in $TARGET_HOME/config/local.h.
+There is one important option in $ACK_HOME/config/local.h.
 The utility \fIack\fP uses a default machine name when called
 as \fIacc\fP, \fIcc\fP, \fIabc\fP, \fIapc\fP, \fIpc\fP, \fIocm\fP,
 \fIm2\fP, \fIf2c\fP, or \fIack\fP.
 The machine name used by default is determined by the
-definition of ACKM in $TARGET_HOME/config/local.h.
+definition of ACKM in $ACK_HOME/config/local.h.
 The Kit is distributed with "sun3" as the default machine,
 but the shell script "first" in the directory "first" alters this
 to suit the target system.
@@ -1071,14 +1110,14 @@ and by default produce code that can't run on the local system.
 .NH 2
 Pathnames
 .PP
-Absolute path names are concentrated in "$TARGET_HOME/config/em_path.h".
+Absolute path names are concentrated in "$ACK_HOME/config/em_path.h".
 Only the utilities \fIack\fP, \fIflex\fP, and \fILLgen\fP use
 absolute path names to access files in the Kit.
 The tree is distributed with /usr/em as the working
 directory.
 The definition of EM_DIR in em_path.h should be altered to
 specify the root
-directory for the Compiler Kit binaries on the local system ($TARGET_HOME).
+directory for the Compiler Kit binaries on the local system ($ACK_HOME).
 This is done automatically by the shell script "first" in the
 directory "first".
 Em_path.h also specifies which directory should be used for
@@ -1090,7 +1129,7 @@ The shape of the tree should not be altered lightly because
 most Makefiles and the
 utility \fIack\fP know the shape of the ACK tree.
 The knowledge of the utility \fIack\fP about the shape of the tree is
-concentrated in the files in the directory $TARGET_HOME/lib/*/descr and $TARGET_HOME/lib/descr/*.
+concentrated in the files in the directory $ACK_HOME/lib/*/descr and $ACK_HOME/lib/descr/*.
 .NH
 Makefiles
 .PP
@@ -1120,11 +1159,11 @@ Opr should be an off-line printer daemon.
 On some systems it exists under another name e.g. lpr.
 The easiest way to call such a spooler is using a shell script
 with the name opr that calls lpr.
-This script should be placed in /usr/bin or $TARGET_HOME/bin or
+This script should be placed in /usr/bin or $ACK_HOME/bin or
 one of the directories in the PATH environment variable.
 .IP clean
 remove all files not needed for day-to-day use,
-that is binaries not in $TARGET_HOME/bin or $TARGET_HOME/lib.bin, object files etc.
+that is binaries not in $ACK_HOME/bin or $ACK_HOME/lib.bin, object files etc.
 .LP
 Example:
 .DS
@@ -1132,13 +1171,13 @@ make install
 .DE
 given as command in a configuration directory will cause
 compilation of all programs in the directory and copying of the results
-to the $TARGET_HOME/bin and $TARGET_HOME/lib.bin directories.
+to the $ACK_HOME/bin and $ACK_HOME/lib.bin directories.
 .NH
 Testing
 .PP
 Test sets are available in Pascal, C, Basic and EM assembly:
 .IP EM 8
-the directory $SRC_HOME/emtest contains a few EM test programs.
+the directory $ACK_SRC_HOME/emtest contains a few EM test programs.
 The EM assembly files in these tests must be transformed into
 load files.
 These tests use the LIN and NOP instructions to mark the passing of each
@@ -1151,7 +1190,7 @@ The test finishes normally with 0 as the last number printed
 In all other cases a bug showed its
 existence.
 .IP Pascal
-the directory $SRC_HOME/lang/pc/test contains a few Pascal test programs.
+the directory $ACK_SRC_HOME/lang/pc/test contains a few Pascal test programs.
 All these programs print the number of errors found and a
 identification of these errors.
 .sp 1
@@ -1170,7 +1209,7 @@ Easton, Pennsylvania 18042
 USA
 .DE
 .IP C
-the sub-directories in $SRC_HOME/lang/cem/ctest contain C test programs.
+the sub-directories in $ACK_SRC_HOME/lang/cem/ctest contain C test programs.
 The idea behind these tests is:
 if there is a program called xx.c, compile it into xx.cem.
 Run it with standard output to xx.cem.r, compare this file to
@@ -1184,7 +1223,7 @@ The contents of the result files depend on the word size,
 the xx.cem.g files on the distribution are intended for a
 32-bit machine.
 .IP Basic
-the directory $SRC_HOME/lang/basic/test contains some forty Basic programs.
+the directory $ACK_SRC_HOME/lang/basic/test contains some forty Basic programs.
 Not all of these programs are correct, some have syntactic errors,
 some simply don't work.
 The Makefile in that directory attempts to compile and run
@@ -1198,8 +1237,8 @@ An example of the output of a make is present in the file Out.std.
 Documentation
 .PP
 After installation, the manual pages for Amsterdam Compiler Kit can be found
-in the $TARGET_HOME/man directory. Also, the following documents are provided
-in the $TARGET_HOME/doc directory:
+in the $ACK_HOME/man directory. Also, the following documents are provided
+in the $ACK_HOME/doc directory:
 .TS
 l l.
 toolkit.doc	general overview (CACM article)

@@ -31,7 +31,7 @@ extern char	options[];
 }
 
 /* inline, we need room for pdp/11
-number(t_node **p;) :
+number(struct node **p;) :
 [
 	%default
 	INTEGER
@@ -43,7 +43,7 @@ number(t_node **p;) :
 ;
 */
 
-qualident(t_node **p;)
+qualident(struct node **p;)
 {
 } :
 	IDENT	{ *p = dot2leaf(Name); }
@@ -52,16 +52,16 @@ qualident(t_node **p;)
 	]*
 ;
 
-selector(register t_node **pnd;)
-{ t_node *nd;
+selector(register struct node **pnd;)
+{ struct node *nd;
 } :
 	'.'	{ nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
 	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
 ;
 
-ExpList(t_node **pnd;)
+ExpList(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 } :
 	expression(pnd)		{ *pnd = nd = dot2node(Link,*pnd,NULLNODE);
 				  nd->nd_symb = ',';
@@ -74,7 +74,7 @@ ExpList(t_node **pnd;)
 	]*
 ;
 
-ConstExpression(register t_node **pnd;)
+ConstExpression(register struct node **pnd;)
 {
 }:
 	expression(pnd)
@@ -98,7 +98,7 @@ ConstExpression(register t_node **pnd;)
 		}
 ;
 
-expression(register t_node **pnd;)
+expression(register struct node **pnd;)
 {
 } :
 	SimpleExpression(pnd)
@@ -117,9 +117,9 @@ relation:
 ;
 */
 
-SimpleExpression(register t_node **pnd;)
+SimpleExpression(register struct node **pnd;)
 {
-	register t_node *nd = 0;
+	register struct node *nd = 0;
 } :
 	[
 		[ '+' | '-' ]
@@ -150,9 +150,9 @@ AddOperator:
 ;
 */
 
-term(t_node **pnd;)
+term(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 }:
 	factor(pnd)	{ nd = *pnd; }
 	[
@@ -170,10 +170,10 @@ MulOperator:
 ;
 */
 
-factor(register t_node **p;)
+factor(register struct node **p;)
 {
-	register t_node *nd;
-	t_node *nd1;
+	register struct node *nd;
+	struct node *nd1;
 } :
 	qualident(p)
 	[
@@ -224,9 +224,9 @@ factor(register t_node **p;)
 	factor(&((*p)->nd_RIGHT))
 ;
 
-bare_set(t_node **pnd;)
+bare_set(struct node **pnd;)
 {
-	register t_node *nd;
+	register struct node *nd;
 } :
 	'{'		{ DOT = SET;
 			  *pnd = nd = dot2leaf(Xset);
@@ -242,11 +242,11 @@ bare_set(t_node **pnd;)
 	'}'
 ;
 
-ActualParameters(t_node **pnd;):
+ActualParameters(struct node **pnd;):
 	'(' ExpList(pnd)? ')'
 ;
 
-element(register t_node *nd;) :
+element(register struct node *nd;) :
 	expression(&(nd->nd_RIGHT))
 	[
 		UPTO
@@ -259,13 +259,13 @@ element(register t_node *nd;) :
 			}
 ;
 
-designator(t_node **pnd;)
+designator(struct node **pnd;)
 :
 	qualident(pnd)
 	designator_tail(pnd)
 ;
 
-designator_tail(register t_node **pnd;):
+designator_tail(register struct node **pnd;):
 	visible_designator_tail(pnd)
 	[ %persistent
 		%default
@@ -276,9 +276,9 @@ designator_tail(register t_node **pnd;):
 |
 ;
 
-visible_designator_tail(t_node **pnd;)
+visible_designator_tail(struct node **pnd;)
 {
-	register t_node *nd = *pnd;
+	register struct node *nd = *pnd;
 }:
 	'['		{ nd = dot2node(Arrsel, nd, NULLNODE); }
 		expression(&(nd->nd_RIGHT))

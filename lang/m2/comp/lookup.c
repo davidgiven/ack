@@ -30,14 +30,14 @@ extern int	pass_1;
 extern char	options[];
 #endif
 
-t_def *lookup(register t_idf *id, t_scope *scope, int import, int flags)
+struct def *lookup(register struct idf *id, struct scope *scope, int import, int flags)
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.
 		Return a pointer to its "def" structure if it exists,
 		otherwise return 0.
 	*/
-	register t_def *df, *df1;
+	register struct def *df, *df1;
 
 	/* Look in the chain of definitions of this "id" for one with scope
 	   "scope".
@@ -72,15 +72,15 @@ t_def *lookup(register t_idf *id, t_scope *scope, int import, int flags)
 	return df;
 }
 
-t_def *lookfor(register t_node *id, register t_scopelist *vis, int message, int flags)
+struct def *lookfor(register struct node *id, register struct scopelist *vis, int message, int flags)
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
 		if message is set, give an error message
 	*/
-	register t_scopelist *sc;
-	t_scopelist *sc1 = 0;
-	t_def *df;
+	register struct scopelist *sc;
+	struct scopelist *sc1 = 0;
+	struct def *df;
 
 	for (sc = vis; sc; sc = nextvisible(sc)) {
 		df = lookup(id->nd_IDF, sc->sc_scope, D_IMPORTED, flags);

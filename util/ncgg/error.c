@@ -13,12 +13,12 @@ static char rcsid[]= "$Id$";
 
 int nerrors=0;
 
-yyerror(s) char *s; {
-
+void yyerror(char *s)
+{
 	error("Parser gives %s",s);
 }
 
-goodbye() {
+void goodbye(void) {
 
 	error("This was fatal, goodbye!");
 #ifndef NDEBUG
@@ -60,7 +60,8 @@ void error(const char* s, ...)
 	va_end(ap);
 }
 
-tabovf(string) char *string; {
-
+int tabovf(char *string)
+{
 	fatal("%s overflow",string);
+	return 0;
 }

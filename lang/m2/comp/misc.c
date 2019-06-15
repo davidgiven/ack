@@ -25,7 +25,7 @@
 #include	"node.h"
 #include	"error.h"
 
-void match_id(register t_idf *id1, t_idf *id2)
+void match_id(register struct idf *id1, struct idf *id2)
 {
 	/*	Check that identifiers id1 and id2 are equal. If they
 		are not, check that we did'nt generate them in the
@@ -39,7 +39,7 @@ void match_id(register t_idf *id1, t_idf *id2)
 	}
 }
 
-t_idf *gen_anon_idf(void)
+struct idf *gen_anon_idf(void)
 {
 	/*	A new idf is created out of nowhere, to serve as an
 		anonymous name.
@@ -54,7 +54,7 @@ t_idf *gen_anon_idf(void)
 	return str2idf(s, 0);
 }
 
-void not_declared(char *what, t_node *id, char *where)
+void not_declared(char *what, struct node *id, char *where)
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message

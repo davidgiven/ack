@@ -91,7 +91,7 @@ f2	: F2_1  reg  ','  src
 			      if ( oprtype[ SRC ] == IM
 				&& ( $1 == 0x0B00 || $1 == 0x0A00   ) )
 				    /* cp or cpb */
-			      {   setmode( DST );
+			      {   setmod( DST );
 				  emit2( mode | $1 + 0x201 | $2<<4 );
 				  break;
 			      }
@@ -182,7 +182,7 @@ f2	: F2_1  reg  ','  src
 			       }
 			       break;
 			  case REG: case IR: case DA: case X:
-			       setmode( SRC );
+			       setmod( SRC );
 			       emit2( mode | 0x2000 | $1 | $4<<4 | $2 );
 			       if ( mode>>12 == 4 ) emit_ad( addr_inf );
 			       break;
@@ -202,7 +202,7 @@ f2	: F2_1  reg  ','  src
 		  if ( oprtype[ SRC ] == REG )
 		  {   switch( oprtype[ DST ] )
 		      {   case IR: case DA: case X:
-			       setmode( DST );
+			       setmod( DST );
 			       emit2( mode | 0x2E00 | $1 | $2<<4 | $4 );
 			       if ( mode>>12 == 4 ) emit_ad( addr_inf );
 			       break;
@@ -252,7 +252,7 @@ f2	: F2_1  reg  ','  src
 				   emit4( immed.val );
 				   break;
 			  case REG: case IR: case DA: case X:
-			       setmode( SRC );
+			       setmod( SRC );
 			       emit2( mode | 0x1400 | $4<<4 | $2 );
 			       if ( mode>>12 == 4 ) emit_ad( addr_inf );
 			       break;
@@ -272,7 +272,7 @@ f2	: F2_1  reg  ','  src
 		  if ( oprtype[ SRC ] == REG )
 		  {   switch( oprtype[ DST ] )
 		      {   case IR: case DA: case X:
-			       setmode( DST );
+			       setmod( DST );
 			       emit2( mode | 0x1D00 | $2<<4 | $4 );
 			       if ( mode>>12 == 4 ) emit_ad( addr_inf );
 			       break;

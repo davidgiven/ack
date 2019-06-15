@@ -49,7 +49,6 @@ struct desig {
 				*/
 };
 
-typedef struct desig	t_desig;
 
 /* The next structure describes the designator in a with-statement.
    We have a linked list of them, as with-statements may be nested.
@@ -61,7 +60,7 @@ struct withdesig {
 	struct scope *w_scope;	/* scope in which fields of this record
 				   reside
 				*/
-	t_desig w_desig;	/* a desig structure for this particular
+	struct desig w_desig;	/* a desig structure for this particular
 				   designator
 				*/
 };
@@ -70,20 +69,20 @@ extern struct withdesig	*WithDesigs;
 
 #define NO_LABEL	((label) 0)
 
-typedef struct type t_type;
-typedef struct node t_node;
+struct type;
+struct node;
 
 
 void LOL(arith offset, arith size);
 void STL(arith offset, arith size);
-void CodeValue(register t_desig *ds, register t_type *tp);
-void ChkForFOR(register t_node *nd);
-void CodeStore(register t_desig *ds, register t_type *tp);
-void CodeCopy(register t_desig *lhs, register t_desig *rhs, arith sz, arith *psize);
-void CodeMove(register t_desig *rhs, register t_node *left, t_type *rtp);
-void CodeAddress(register t_desig *ds);
-void CodeFieldDesig(register t_def *df, register t_desig *ds);
-void CodeVarDesig(register t_def *df, register t_desig *ds);
-void CodeDesig(register t_node *nd, register t_desig *ds);
+void CodeValue(register struct desig *ds, register struct type *tp);
+void ChkForFOR(register struct node *nd);
+void CodeStore(register struct desig *ds, register struct type *tp);
+void CodeCopy(register struct desig *lhs, register struct desig *rhs, arith sz, arith *psize);
+void CodeMove(register struct desig *rhs, register struct node *left, struct type *rtp);
+void CodeAddress(register struct desig *ds);
+void CodeFieldDesig(register struct def *df, register struct desig *ds);
+void CodeVarDesig(register struct def *df, register struct desig *ds);
+void CodeDesig(register struct node *nd, register struct desig *ds);
 
 #endif /* DESIG_H_ */

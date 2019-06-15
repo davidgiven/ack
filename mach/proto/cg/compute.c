@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,13 +16,9 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "glosym.h"
 #include "extern.h"
+#include "subr.h"
+#include "salloc.h"
 
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
 
 #define LLEAF 01
 #define LDEF  02
@@ -73,9 +71,10 @@ char opdesc[] = {
 	LLDEF,			/* EX_REGVAR */
 };
 
-string salloc();
 
-string mycat(s1,s2) string s1,s2; {
+
+string mycat(string s1,string s2)
+{
 	register string s;
 
 	s=salloc(strlen(s1)+strlen(s2));
@@ -84,7 +83,8 @@ string mycat(s1,s2) string s1,s2; {
 	return(s);
 }
 
-string mystrcpy(s) string s; {
+string mystrcpy(string s)
+{
 	register string r;
 
 	r=salloc(strlen(s));
@@ -94,7 +94,8 @@ string mystrcpy(s) string s; {
 
 char digstr[21][15];
 
-string tostring(n) word n; {
+string tostring(word n)
+{
 	char buf[25];
 
 	if (n>=-20 && n<=20 && (n&1)==0) {
@@ -108,7 +109,8 @@ string tostring(n) word n; {
 
 result_t undefres= {EV_UNDEF};
 
-result_t compute(node) register node_p node; {
+result_t compute(register node_p node)
+{
 	result_t leaf1,leaf2,result;
 	token_p tp;
 	int desc;

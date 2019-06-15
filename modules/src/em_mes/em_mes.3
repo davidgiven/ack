@@ -6,68 +6,39 @@ em_mes \- EM-message generating routines
 .nf
 .B #include <em.h>
 .PP
-.B void C_ms_err()
+.B void C_ms_err(void)
 .PP
-.B void C_ms_opt()
+.B void C_ms_opt(void)
 .PP
-.B void C_ms_emx(wsiz, psiz)
-.B arith wsiz, psiz;
+.B void C_ms_emx(arith wsiz, arith psiz)
 .PP
 .B #include <em_reg.h>
-.B void C_ms_reg(offs, siz, class, prior)
-.B arith offs, siz;
-.B int class, prior;
+.B void C_ms_reg(arith offs, arith siz, int class, int prior)
 .PP
-.B void C_ms_src(nlines, filnam)
-.B int nlines;
-.B char *filnam;
+.B void C_ms_src(int nlines, char *filnam)
 .PP
-.B void C_ms_flt()
+.B void C_ms_flt(void)
 .PP
-.B void C_ms_com(str)
-.B char *str;
+.B void C_ms_com(char *str)
 .PP
-.B void C_ms_par(nparams)
-.B arith nparams;
+.B void C_ms_par(arith nparams)
 .PP
 .B #include <em_ego.h>
-.B void C_ms_ego(hint, offs, siz, regno)
-.B int hint, regno;
-.B arith offs, siz;
+.B void C_ms_ego(int hint, arith offs, arith siz, int regno)
 .PP
-.B void C_ms_gto()
+.B void C_ms_gto(void)
 .PP
-.B void C_ms_stb_cst(s, e1, e2, e3)
-.B char *s;
-.B int e1, e2;
-.B arith e3;
+.B void C_ms_stb_cst(char *s, int e1, int e2, arith e3)
 .PP
-.B void C_ms_stb_dlb(s, e1, e2, l, off)
-.B char *s;
-.B int e1, e2;
-.B label l;
-.B arith off;
+.B void C_ms_stb_dlb(char *s, int e1, int e2, label l, arith off)
 .PP
-.B void C_ms_stb_dnam(s, e1, e2, l, off)
-.B char *s;
-.B int e1, e2;
-.B char *l;
-.B arith off;
+.B void C_ms_stb_dnam(char *s, int e1, int e2, char *l, arith off)
 .PP
-.B void C_ms_stb_ilb(s, e1, e2, l)
-.B char *s;
-.B int e1, e2;
-.B label l;
+.B void C_ms_stb_ilb(char *s, int e1, int e2, label l)
 .PP
-.B void C_ms_stb_pnam(s, e1, e2, p)
-.B char *s;
-.B int e1, e2;
-.B char *p;
+.B void C_ms_stb_pnam(char *s, int e1, int e2, char *p)
 .PP
-.B void C_ms_std(s, e1, l)
-.B char *s;
-.B int e1;
-.B int l;
+.B void C_ms_std(char* s, int e1, int l)
 .fi
 .SH DESCRIPTION
 This set of routines forms a front end for the
@@ -108,7 +79,7 @@ can be used to indicate that a local variable, having offset
 and size (in bytes)
 .IR siz ,
 may be stored in a register.
-.I Class
+.I class
 indicates the use of the variable.
 The following classes are allowed (the names are defined in em_reg.h):
 .RS
@@ -122,7 +93,7 @@ pointer variable
 floating point variable
 .LP
 .RE
-.I Prior
+.I prior
 is taken to be the priority of the variable; higher numbers indicate
 better candidates.
 .PP

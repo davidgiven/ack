@@ -66,3 +66,9 @@ extern struct operand opnd[6];	/* maximum number of operands of a VAX
 				   instruction is 6
 				*/
 extern int op_ind;		/* index in opng array */
+
+/* VAX4 Specific instructions */
+void branch(int opc, expr_t exp);
+void ext_branch(int opc, expr_t exp);
+void operands(void);
+

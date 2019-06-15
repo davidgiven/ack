@@ -12,22 +12,20 @@
 #define MASK1	0x1FFF
 #define MASK2	0x1FFE
 
-page()
-	{
+void page(void)
+{
 	if(((DOTVAL - 1) & MASK1) == MASK1)
 		serror("page violation");
-	}
+}
 
-pag2()
-	{
+void pag2(void)
+{
 	if(((DOTVAL - 1) & MASK1) >= MASK2)
 		serror("page violation");
-	}
+}
 
-rela(exp,ind)
-expr_t exp;
-int   ind;
-	{
+void rela(expr_t exp,int ind)
+{
 	int c, d;
 	page();
 	if(pass == PASS_3){
@@ -58,11 +56,8 @@ int   ind;
 	emit1(low7(c) | ind);
 }
 
-absoa(exp, ix, ind)
-expr_t	exp;
-int	ix;
-unsigned ind;
-	{
+void absoa(expr_t exp, int ix, unsigned int ind)
+{
 	pag2();
 #ifdef ASLD
 	if(pass == PASS_3 && (exp.val & MASK) != (DOTVAL & MASK))
@@ -74,10 +69,8 @@ unsigned ind;
 	emit2(low13(exp.val) | ind | ix);
 }
 
-absob(exp, ind)
-expr_t	exp;
-unsigned ind;
-	{
+void absob(expr_t exp, unsigned int ind)
+{
 	pag2();
 #ifdef ASLD
 	if (exp.val < 0)

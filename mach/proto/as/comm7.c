@@ -13,7 +13,7 @@
 #include "comm1.h"
 #include "y.tab.h"
 #include <stdarg.h>
-#include <object.h>
+#include "object.h"
 
 valu_t load(const item_t* ip)
 {
@@ -77,7 +77,7 @@ char* remember(char* s)
 		assert(nleft >= 0);
 	}
 	p = next;
-	while (*p++ = *s++)
+	while ((*p++ = *s++))
 		;
 	s = next;
 	next = p;
@@ -133,7 +133,7 @@ int printx(int ndig, valu_t val)
 	} while (--n);
 	do
 	{
-		c = "0123456789ABCDEF"[*--p];
+		c = "0123456789ABCDEF"[(unsigned char)*--p];
 		putchar(c);
 	} while (p > buf);
 	return (ndig);
@@ -232,6 +232,8 @@ int small(int fitsmall, int gain)
 		case PASS_3:
 			assert(fitsmall || (*p & bit) == 0);
 			return (*p & bit);
+		default:
+			assert(0);
 	}
 	/*NOTREACHED*/
 }
@@ -368,7 +370,7 @@ void emitstr(int zero)
 #endif
 
 #define gen1 emit1
-#include <con_float>
+#include "con_float"
 
 void emitf(int size, int negative)
 {

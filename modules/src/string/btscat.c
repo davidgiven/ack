@@ -8,12 +8,7 @@
 
 #include "ack_string.h"
 
-char *
-btscat(b1, n1, b2, n2)
-	char *b1;
-	int n1;
-	register char *b2;
-	register int n2;
+char *btscat(char* b1, int n1, register char *b2, register int n2)
 {
 	register char *b = b1 + n1;
 

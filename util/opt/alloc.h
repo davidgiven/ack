@@ -2,7 +2,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+#ifndef ALLOC_H_
+#define ALLOC_H_
+
+#include "types.h"
 
 extern line_p 	newline();
 extern offset	*newrom();
@@ -12,9 +15,12 @@ extern arg_p	newarg();
 extern argb_p	newargb();
 extern reg_p	newreg();
 
-extern		oldline();
-extern		oldloc();
-extern		oldreg();
+void oldline(register line_p lnp);
+void oldreg(reg_p rp);
+void oldargs(register arg_p ap);
+void oldargb(register argb_p abp);
+void oldnum(num_p lp);
+void coreinit(void);
 
 #define USEMALLOC	/* if defined malloc() and free() are used */
 
@@ -47,3 +53,5 @@ extern		oldreg();
 #define STACKROOM 1	/* 0 gives problems */
 
 #endif	/* USEMALLOC */
+
+#endif /* ALLOC_H_ */

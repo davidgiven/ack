@@ -28,51 +28,32 @@ extern int	flt_status;
 
 #define FLT_STRLEN	32
 .PP
-.B void flt_add(e1, e2, e3)
-.B flt_arith *e1, *e2, *e3;
+.B void flt_add(flt_arith *e1, flt_arith *e2,flt_arith *res)
 .PP
-.B void flt_mul(e1, e2, e3)
-.B flt_arith *e1, *e2, *e3;
+.B void flt_mul(flt_arith *e1, flt_arith *e2, flt_arith *res)
 .PP
-.B void flt_sub(e1, e2, e3)
-.B flt_arith *e1, *e2, *e3;
+.B void flt_sub(flt_arith *e1, flt_arith *e2, flt_arith *res)
 .PP
-.B void flt_div(e1, e2, e3)
-.B flt_arith *e1, *e2, *e3;
+.B void flt_div(flt_arith *e1, flt_arith *e2, flt_arith *res)
 .PP
-.B void flt_umin(e)
-.B flt_arith *e;
+.B void flt_umin(flt_arith *e)
 .PP
-.B void flt_modf(e1, intpart, fractpart)
-.B flt_arith *e1, *intpart, *fractpart;
+.B void flt_modf(flt_arith *e, flt_arith *ipart, flt_arith *fpart)
 .PP
-.B int flt_cmp(e1, e2)
-.B flt_arith *e1, *e2;
+.B int flt_cmp(flt_arith *e1, flt_arith *e2)
 .PP
-.B void flt_str2flt(s, e)
-.B char *s;
-.B flt_arith *e;
+.B void flt_str2flt(char *s, flt_arith *e)
 .PP
-.B void flt_flt2str(e, buf, bufsize)
-.B flt_arith *e;
-.B char *buf;
-.B int bufsize;
+.B void flt_flt2str(flt_arith *e, char *buf, int bufsize)
 .PP
 .B int flt_status;
 .PP
 .B #include <em_arith.h>
-.B void flt_arith2flt(n, e, uns)
-.B arith n;
-.B flt_arith *e;
-.B int uns;
+.B void flt_arith2flt(arith n, flt_arith *e, int uns)
 .PP
-.B arith flt_flt2arith(e, uns)
-.B flt_arith *e;
-.B int uns;
+.B arith flt_flt2arith(register flt_arith *e, int uns)
 .PP
-.B void flt_b64_sft(m, n)
-.B struct flt_mantissa *m;
-.B int n;
+.B void flt_b64_sft(register struct flt_mantissa *e, register int n)
 .SH DESCRIPTION
 This set of routines emulates floating point arithmetic, in a high
 precision. It is intended primarily for compilers that need to evaluate
@@ -86,7 +67,7 @@ adds the numbers indicated by
 and
 .I e2
 and stores the result indirectly through
-.IR e3 .
+.IR res.
 .PP
 .B flt_mul
 multiplies the numbers indicated by
@@ -94,7 +75,7 @@ multiplies the numbers indicated by
 and
 .I e2
 and stores the result indirectly through
-.IR e3 .
+.IR res.
 .PP
 .B flt_sub
 subtracts the number indicated by
@@ -102,7 +83,7 @@ subtracts the number indicated by
 from the one indicated by
 .I e1
 and stores the result indirectly through
-.IR e3 .
+.IR res .
 .PP
 .B flt_div
 divides the number indicated by
@@ -110,7 +91,7 @@ divides the number indicated by
 by the one indicated by
 .I e2
 and stores the result indirectly through
-.IR e3 .
+.IR res.
 .PP
 .B flt_umin
 negates the number indicated by
@@ -124,20 +105,20 @@ splits the number indicated by
 in an integer and a fraction part, and stores the integer part through
 .I intpart
 and the fraction part through
-.IR fractpart .
+.IR fpart .
 So, adding the numbers indicated by
-.I intpart
+.I ipart
 and
-.I fractpart
+.I fpart
 results (in the absence of rounding error) in the number
 indicated by
 .IR e .
 Also, the absolute value of the number indicated by
-.I intpart
+.I ipart
 is less than or equal to the absolute value of the number indicated by
 .IR e .
 The absolute value of the number indicated by
-.I fractpart
+.I fpart
 is less than 1.
 .PP
 .B flt_cmp

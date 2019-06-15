@@ -3,6 +3,9 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /* $Id$ */
+#ifndef __DEFS_H_INCLUDED__
+#define __DEFS_H_INCLUDED__
+
 
 /*
  * We need the S_EXT because we leave locals alone.
@@ -12,3 +15,6 @@
 #define ISCOMMON(n)	(((n)->on_type & (S_COM | S_EXT)) == (S_COM | S_EXT))
 
 #define mustsavelocal(name)	(!((name)->on_type & S_SCT))
+
+
+#endif /* __DEFS_H_INCLUDED__ */

@@ -8,11 +8,11 @@
  * NS 16032 special routines
  */
 
-clrmode() {	/* clear the current mode */
+void clrmode(void) {	/* clear the current mode */
 	mode_ptr->m_ndisp   = 0 ;
 }
 
-int ind_mode(type) {
+int ind_mode(int type) {
 	switch ( type ) {
 	case 'b' :	return 0x1C ;
 	case 'w' :	return 0x1D ;
@@ -24,95 +24,95 @@ int ind_mode(type) {
 	}
 }
 
-badsyntax() {
+void badsyntax(void) {
 
 	serror("bad operands");
 }
 
-ill_imm() {
+void ill_imm(void) {
 	serror("immediate operand not allowed") ;
 }
 /* Create  the output formats */
-form2(id,sval) {
+void form2(int id, int sval) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1( id_g1(id) | 0xC | (id_op(id)<<4) | ((sval&1)<<7 ) ) ;
 	emit1( (sval>>1) | (mode1.m_mode<<3) ) ;
 }
 
-form3(id) {
+void form3(int id) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1( id_g1(id) | 0x7C | ((id_op(id)&1)<<7) ) ;
 	emit1( (id_op(id)>>1) | (mode1.m_mode<<3) ) ;
 }
 
-form4(id) {
+void form4(int id) {
 	assert ( id_t1(id)==T_INT && id_t2(id)==T_INT );
 	emit1( id_g2(id) | (id_op(id)<<2) | ((mode2.m_mode&3)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-form5(id,sval) {
+void form5(int id, int sval) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1(0xE) ;
 	emit1( id_g1(id) | (id_op(id)<<2) | ((sval&1)<<7 ) ) ;
 	emit1( (sval>>1) ) ;
 }
 
-form7x(id,i_type) {
+void form7x(int id,int i_type) {
 	assert ( id_t1(id)==T_INT && id_t2(id)==T_INT );
 	emit1(0xCE) ;
 	emit1( i_type | (id_op(id)<<2) | ((mode2.m_mode&3)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-form8(id,reg) {
+void form8(int id,int reg) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1( 0x2E | ((id_op(id)&3)<<6) ) ;
 	emit1( id_g1(id) | (id_op(id)&04) | (reg<<3) | ((mode2.m_mode&03)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-form9(id,i_type,f_type) {
+void form9(int id,int i_type,int f_type) {
 	emit1(0x3E) ;
 	emit1( i_type | (f_type<<2) | (id_op(id)<<3) | ((mode2.m_mode&03)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-form11(id) {
+void form11(int id) {
 	assert ( id_t1(id)==T_FL && id_t2(id)==T_FL && id_g1(id)==id_g2(id) );
 	emit1(0xBE) ;
 	emit1( id_g1(id) | (id_op(id)<<2) | ((mode2.m_mode&3)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-form14(id,reg) {
+void form14(int id,int reg) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1(0x1E) ;
 	emit1( id_g1(id) | (id_op(id)<<2) | ((reg&1)<<7 ) ) ;
 	emit1( (reg>>1) | (mode1.m_mode<<3) ) ;
 }
 
-frm15_0(id,reg) {
+void frm15_0(int id,int reg) {
 	assert ( id_t1(id)==T_INT ) ;
 	emit1(0x16 /* + slave<<5 */ ) ;
 	emit1( id_g1(id) | (id_op(id)<<2) | ((reg&1)<<7 ) ) ;
 	emit1( (reg>>1) | (mode1.m_mode<<3) ) ;
 }
 
-frm15_1(id,i_type,s_type) {
+void frm15_1(int id,int i_type,int s_type) {
 	emit1(0x16 /* + slave<<5 */ ) ;
 	emit1( i_type | (s_type<<2) | (id_op(id)<<3) | ((mode2.m_mode&03)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-frm15_5(id) {
+void frm15_5(int id) {
 	assert(id_t1(id)==T_SLAVE&& id_t2(id)==T_SLAVE&& id_g1(id)==id_g2(id) );
 	emit1(0x16 /* + slave<<5 */ ) ;
 	emit1( id_g1(id) | (id_op(id)<<2) | ((mode2.m_mode&3)<<6) ) ;
 	emit1( (mode2.m_mode>>2) | (mode1.m_mode<<3) ) ;
 }
 
-gen1(id) {
+void gen1(int id) {
 	if ( (mode1.m_mode&0x1C)==0x1C ) {
 		emit1(mode1.m_index) ;
 	}
@@ -130,7 +130,7 @@ gen1(id) {
 	}
 }
 
-gengen(id) {
+void gengen(int id) {
 	if ( (mode1.m_mode&0x1C)==0x1C ) {
 		emit1(mode1.m_index) ;
 	}
@@ -163,8 +163,8 @@ gengen(id) {
 	}
 }
 
-disp(expr, relpc) register expr_t *expr ; {
-	register sm1, sm2 ;
+void disp(register expr_t *expr, int relpc) {
+	register int sm1, sm2 ;
 
 	sm1=0 ; sm2=0 ;
 	if (DOTTYP >= 0x2 && DOTTYP<=0x7F &&
@@ -202,7 +202,8 @@ disp(expr, relpc) register expr_t *expr ; {
 	else		putdisp(expr->val,4) ;
 }
 
-putdisp(val,size) valu_t val ; {
+void putdisp(valu_t val,int size)
+{
 	switch ( size ) {
 	case 1 :
 		emit1( ((int)val)&0x7F ) ;
@@ -220,7 +221,8 @@ putdisp(val,size) valu_t val ; {
 	}
 }
 
-dot_adjust(expr) register expr_t *expr ; {
+void dot_adjust(register expr_t *expr)
+{
 	expr->val -= DOTVAL ;
 	if ( pass==PASS_2 ) {
 		if ( (expr->typ&S_DOT) == 0 && expr->val>0 ) {
@@ -239,7 +241,8 @@ dot_adjust(expr) register expr_t *expr ; {
  * an immediate value in a field which is too small to fit in.
  */
 
-testsize(type,val) {
+int testsize(int type,int val)
+{
 /* check if value fits in type */
 	switch( type ) {
 	case I_DOUBLE : return fit32(val);
@@ -248,7 +251,8 @@ testsize(type,val) {
 	}
 }
 
-imm(i_type,expr) register expr_t *expr ; {
+void imm(int i_type,register expr_t *expr)
+{
 /* emit value of immediate expression , after check on FIT */
 	if (!testsize(i_type,(int)expr->val))
 		warning("immediate operand too large");
@@ -278,8 +282,9 @@ imm(i_type,expr) register expr_t *expr ; {
 }
 
 
-reg_list(list,reverse) {
-	register rev_list, i ;
+int reg_list(int list,int reverse)
+{
+	register int rev_list, i ;
 	if ( !reverse ) {
 		return list ;
 	}
@@ -291,7 +296,9 @@ reg_list(list,reverse) {
 	}
 	return rev_list ;
 }
-cpu_opt(indic) {
+
+int cpu_opt(int indic)
+{
 	switch( indic ) {
 	case 'i' : return 1 ;
 	case 'f' : return 2 ;
@@ -303,7 +310,7 @@ cpu_opt(indic) {
 	}
 }
 
-string_opt(indic) {
+int string_opt(int indic) {
 	switch( indic ) {
 	case 'b' : return SO_BACKW ;
 	case 'u' : return SO_UNTIL ;

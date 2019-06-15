@@ -1,8 +1,5 @@
 %{
 
-#ifndef NORCSID
-static char rcsid2[]="$Id$";
-#endif
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
@@ -14,11 +11,14 @@ static char rcsid2[]="$Id$";
 
 #include <stdio.h>
 #include <assert.h>
-#include <em_spec.h>
-#include <em_flag.h>
-#include <em_reg.h>
+#include <stdarg.h>
+#include "em_spec.h"
+#include "em_flag.h"
+#include "em_reg.h"
 
+#define EXTERN extern
 #include "booth.h"
+#undef EXTERN
 #include "y.tab.h"
 
 int lineno = 1;
@@ -158,10 +158,15 @@ return			return(RETURN);
 .                       return(yytext[0]);
 %%
 
-yyerror(s,a1,a2,a3,a4) string s; {
 
+void yyerror(string s, ...) 
+{
+	va_list ap;
+	va_start(ap, s);
+	
 	fprintf(stderr,"\"%s\", line %d:",iname ? iname : "",lineno);
-	fprintf(stderr,s,a1,a2,a3,a4);
+	vfprintf(stderr,s,ap);
 	fprintf(stderr,"\n");
-        nerrors++;
+	nerrors++;
+	va_end(ap);
 }

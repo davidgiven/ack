@@ -13,8 +13,8 @@
 
 
 
-typedef struct def  t_def;
-typedef struct node t_node;
+struct def;
+struct node;
 
 struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 	struct paramlist *par_next;
@@ -23,7 +23,7 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 #define TypeOfParam(xpar)	((xpar)->par_def->df_type)
 };
 
-typedef struct paramlist t_param;
+struct paramlist;
 
 /* ALLOCDEF "paramlist" 20 */
 
@@ -124,11 +124,11 @@ struct type	{
 	} tp_value;
 };
 
-typedef struct type t_type;
+struct type;
 
 /* ALLOCDEF "type" 50 */
 
-extern t_type
+extern struct type 
 	*bool_type,
 	*char_type,
 	*int_type,
@@ -198,7 +198,7 @@ extern arith
 
 
 
-#define NULLTYPE ((t_type *) 0)
+#define NULLTYPE ((struct type  *) 0)
 
 #define IsConformantArray(tpx)	((tpx)->tp_fund==T_ARRAY && (tpx)->tp_size==0)
 #define bounded(tpx)		((tpx)->tp_fund & T_INDEX)
@@ -250,37 +250,37 @@ int chk_bounds(arith l1, arith l2, int fund);
 arith align(arith pos, int al);
 /* Create a new standard type "fund" with specified
    alignment "algn" and "size" bytes. */ 
-t_type *standard_type(int fund, int algn, arith size);
-t_type *enum_type(t_node *EnumList);
-t_type *construct_type(int fund, register t_type *tp);
-t_type *qualified_type(t_node **pnd);
+struct type  *standard_type(int fund, int algn, arith size);
+struct type  *enum_type(struct node *EnumList);
+struct type  *construct_type(int fund, register struct type  *tp);
+struct type  *qualified_type(struct node **pnd);
 /*	Check that the value "i" fits in the subrange or enumeration
 	type "tp".  Return 1 if so, 0 otherwise
 */
-int in_range(arith i, register t_type *tp);
+int in_range(arith i, register struct type  *tp);
 /*	Construct a subrange type from the constant expressions
 	indicated by "lb" and "ub", but first perform some
 	checks. "base" is either a user-specified base-type, or NULL.
 */
-t_type *subr_type(t_node *lb, t_node *ub, t_type *base);
-t_type *proc_type(t_type *result_type, t_param *parameters, arith n_bytes_params);
-void genrck(register t_type *tp);
+struct type  *subr_type(struct node *lb, struct node *ub, struct type  *base);
+struct type  *proc_type(struct type  *result_type, struct paramlist *parameters, arith n_bytes_params);
+void genrck(register struct type  *tp);
 /*	Get the bounds of a bounded type. */
-void getbounds(register t_type *tp, arith *plo, arith *phi);
+void getbounds(register struct type  *tp, arith *plo, arith *phi);
 /*	Construct a set type with base type "tp", but first 
  *  perform some checks */
-t_type *set_type(register t_type *tp);
-void ArrayElSize(register t_type *tp);
-void ArraySizes(register t_type *tp);
-void FreeType(register t_type *tp);
-void DeclareType(t_node *nd, register t_def *df, register t_type *tp);
-void SolveForwardTypeRefs(register t_def *df);
-void ForceForwardTypeDef(register t_def *df);
-t_type *RemoveEqual(register t_type *tpx);
-int type_or_forward(t_type *tp);
-t_type *intorcard(register t_type *left, register t_type *right);
+struct type  *set_type(register struct type  *tp);
+void ArrayElSize(register struct type  *tp);
+void ArraySizes(register struct type  *tp);
+void FreeType(register struct type  *tp);
+void DeclareType(struct node *nd, register struct def *df, register struct type  *tp);
+void SolveForwardTypeRefs(register struct def *df);
+void ForceForwardTypeDef(register struct def *df);
+struct type  *RemoveEqual(register struct type  *tpx);
+int type_or_forward(struct type  *tp);
+struct type  *intorcard(register struct type  *left, register struct type  *right);
 #ifdef DEBUG
-void DumpType(register t_type *tp);
+void DumpType(register struct type  *tp);
 #endif
 int fit(arith sz, int nbytes);
 /* Greatest common divisotr. */

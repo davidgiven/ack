@@ -1,7 +1,9 @@
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+/*
+ * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
+ * See the copyright notice in the ACK home directory, in the file "Copyright".
+ *
+ * Author: Hans van Staveren
+ */
 #include "assert.h"
 #include <stdio.h>
 #include "param.h"
@@ -11,39 +13,35 @@ static char rcsid[] = "$Id$";
 #include "data.h"
 #include "result.h"
 #include "extern.h"
-
-/*
- * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
- * See the copyright notice in the ACK home directory, in the file "Copyright".
- *
- * Author: Hans van Staveren
- */
+#include "subr.h"
+#include "gencode.h"
+#include "fillem.h"
 
 FILE *codefile;
-extern FILE *freopen();
 
-out_init(filename) char *filename; {
+
+void out_init(char *filename)
+{
 
 #ifndef NDEBUG
-	static char stderrbuff[BUFSIZ];
 
-    if (Debug) {
-	codefile = stderr;
-	if (!isatty(2))
-		setbuf(stderr,stderrbuff);
-    } else {
-#endif
-	if (filename == (char *) 0)
-		codefile = stdout;
+	if (Debug)
+	{
+		codefile = stderr;
+	}
 	else
-		if ((codefile=freopen(filename,"w",stdout))==NULL)
-			error("Can't create %s",filename);
+	{
+#endif
+		if (filename == (char *) 0)
+			codefile = stdout;
+		else if ((codefile = freopen(filename, "w", stdout)) == NULL)
+			error("Can't create %s", filename);
 #ifndef NDEBUG
-    }
+	}
 #endif
 }
 
-out_finish() {
+void out_finish(void) {
 
 #ifndef NDEBUG
 	if (Debug)
@@ -53,14 +51,15 @@ out_finish() {
 		fclose(codefile);
 }
 
-tstoutput() {
+void tstoutput(void) {
 
 	if (ferror(codefile))
 		error("Write error on output");
 }
 
-gencode(code) register char *code; {
-	register c;
+void gencode(register char *code)
+{
+	register int c;
 	int tokno,fldno,insno,regno,subno;
 	register token_p tp;
 
@@ -131,7 +130,8 @@ gencode(code) register char *code; {
 	}
 }
 
-genexpr(nodeno) {
+void genexpr(int nodeno)
+{
 	result_t result;
 
 	result= compute(&enodes[nodeno]);
@@ -149,12 +149,14 @@ genexpr(nodeno) {
 	}
 }
 
-gennl() {
+void gennl(void)
+{
 	fputc('\n',codefile);
 }
 
-prtoken(tp) token_p tp; {
-	register c;
+void prtoken(token_p tp)
+{
+	register int c;
 	register char *code;
 	register tkdef_p tdp;
 

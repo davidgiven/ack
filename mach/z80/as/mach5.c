@@ -8,7 +8,8 @@
  * Zilog Z80 special routines
  */
 
-xyreg(r,byte) {
+void xyreg(int r,int byte)
+{
 
 	if (r==IX)
 		emit1(0335);
@@ -19,7 +20,8 @@ xyreg(r,byte) {
 	emit1(byte);
 }
 
-xymem(r,byte) {
+void xymem(int r,int byte)
+{
 
 	xyreg(r,byte);
 	if (r != HL) {
@@ -31,8 +33,9 @@ xymem(r,byte) {
 	}
 }
 
-branch(opc,exp) register opc; expr_t exp; {
-	register sm,dist;
+void branch(register int opc,expr_t exp)
+{
+	register int sm,dist;
 
 	dist = exp.val - (DOTVAL + 2);
 	if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))

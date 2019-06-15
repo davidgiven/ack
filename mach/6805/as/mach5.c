@@ -9,8 +9,9 @@
  */
 
 /* VARARGS2 */
-branch(opc,exp,cell) register opc; expr_t cell; expr_t exp; {
-	register sm, dist;
+void branch(register int opc,expr_t exp,expr_t cell)
+{
+	register int sm, dist;
 	int saving;
 
 	dist = exp.val - (DOTVAL + 2);

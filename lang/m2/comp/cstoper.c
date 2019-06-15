@@ -48,21 +48,21 @@ arith min_int[] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 
 extern char options[];
 
-static void CutSize(register t_node *);
+static void CutSize(register struct node *);
 
 
-static void overflow(t_node *expp)
+static void overflow(struct node *expp)
 {
 	if (expp->nd_type != address_type) {
 	    node_warning(expp, W_ORDINARY, "overflow in constant expression");
 	}
 }
 
-static void commonbin(t_node **expp)
+static void commonbin(struct node **expp)
 {
-	register t_node *exp = *expp;
-	t_type *tp = exp->nd_type;
-	register t_node *right = exp->nd_RIGHT;
+	register struct node *exp = *expp;
+	struct type *tp = exp->nd_type;
+	register struct node *right = exp->nd_RIGHT;
 	
 	exp->nd_RIGHT = 0;
 	FreeNode(exp);
@@ -70,13 +70,13 @@ static void commonbin(t_node **expp)
 	right->nd_type = tp;
 }
 
-void cstunary(t_node **expp)
+void cstunary(struct node **expp)
 {
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result stored in expp.
 	*/
-	register t_node *exp = *expp;
-	register t_node *right = exp->nd_RIGHT;
+	register struct node *exp = *expp;
+	register struct node *right = exp->nd_RIGHT;
 	register arith o1 = right->nd_INT;
 
 	switch(exp->nd_symb) {
@@ -119,13 +119,13 @@ static void divide(arith *pdiv, arith *prem)
 	*prem = (unsigned arith) o1 % (unsigned arith) o2;
 }
 
-void cstibin(t_node **expp)
+void cstibin(struct node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
 		This version is for INTEGER expressions.
 	*/
-	register t_node *exp = *expp;
+	register struct node *exp = *expp;
 	register arith o1 = exp->nd_LEFT->nd_INT;
 	register arith o2 = exp->nd_RIGHT->nd_INT;
 	register int sz = exp->nd_type->tp_size;
@@ -228,13 +228,13 @@ void cstibin(t_node **expp)
 	CutSize(*expp);
 }
 
-void cstfbin(t_node **expp)
+void cstfbin(struct node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
 		This version is for REAL expressions.
 	*/
-	register t_node *exp = *expp;
+	register struct node *exp = *expp;
 	register struct real *p = exp->nd_LEFT->nd_REAL;
 	register flt_arith *o1 = &p->r_val;
 	register flt_arith *o2 = &exp->nd_RIGHT->nd_RVAL;
@@ -288,7 +288,7 @@ void cstfbin(t_node **expp)
 
 	switch(flt_status) {
 	case FLT_OVFL:
-		node_warning(exp, "floating point overflow on %s", 
+		node_warning(exp, W_ORDINARY, "floating point overflow on %s",
 				symbol2str(exp->nd_symb));
 		break;
 	case FLT_DIV0:
@@ -315,13 +315,13 @@ void cstfbin(t_node **expp)
 	CutSize(exp);
 }
 
-void cstubin(t_node **expp)
+void cstubin(struct node **expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in
 		expp.
 	*/
-	register t_node *exp = *expp;
+	register struct node *exp = *expp;
 	arith o1 = exp->nd_LEFT->nd_INT;
 	arith o2 = exp->nd_RIGHT->nd_INT;
 	register int sz = exp->nd_type->tp_size;
@@ -420,10 +420,10 @@ void cstubin(t_node **expp)
 	CutSize(exp);
 }
 
-void cstset(t_node **expp)
+void cstset(struct node **expp)
 {
 	extern arith *MkSet();
-	register t_node *exp = *expp;
+	register struct node *exp = *expp;
 	register arith *set1, *set2, *set3;
 	register unsigned int setsize;
 	register int j;
@@ -535,13 +535,13 @@ void cstset(t_node **expp)
 	FreeNode(exp);
 }
 
-void cstcall(t_node **expp, int call)
+void cstcall(struct node **expp, int call)
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
 	*/
-	register t_node *expr;
-	register t_type *tp;
+	register struct node *expr;
+	register struct type *tp;
 
 	assert((*expp)->nd_class == Call);
 	expr = (*expp)->nd_RIGHT->nd_LEFT;
@@ -609,12 +609,12 @@ void cstcall(t_node **expp, int call)
 	}
 }
 
-static void CutSize(register t_node *expr)
+static void CutSize(register struct node *expr)
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	register t_type *tp = BaseType(expr->nd_type);
+	register struct type *tp = BaseType(expr->nd_type);
 
 	assert(expr->nd_class == Value);
 	if (tp->tp_fund == T_REAL) return;

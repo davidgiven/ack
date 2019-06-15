@@ -11,8 +11,12 @@
  *	part. In this case #define OUTSEEK.
  */
 
-#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "out.h"
+#include "object.h"
 #include "obj.h"
+#include "ranlib.h"
 
 /*
  * Parts of the output file.
@@ -21,7 +25,7 @@ static long		offset[MAXSECT];
 struct fil		__parts[NPARTS];
 
 #ifdef OUTSEEK
-static int		outfile;
+static FILE*	outfile;
 static long		currpos;
 #endif
 int			__sectionnr;
@@ -34,7 +38,8 @@ __wr_flush(struct fil *ptr)
 #ifdef OUTSEEK
 	/* seek to correct position even if we aren't going to write now */
 	if (currpos != ptr->currpos) {
-		currpos = lseek(ptr->fd, ptr->currpos, 0);
+		fseek(ptr->fd, ptr->currpos, SEEK_SET);
+		currpos = ptr->currpos;
 	}
 #endif
 	if (ptr->pnow > ptr->pbegin) {
@@ -116,8 +121,7 @@ OUTWRITE(int p, const char *b, long n)
 	}
 }
 
-static void
-BEGINSEEK(int p, long o)
+static void BEGINSEEK(int p, long o)
 	/* p = part number, o = offset in file */
 {
 	struct fil *ptr = &__parts[p];
@@ -126,7 +130,8 @@ BEGINSEEK(int p, long o)
 	ptr->fd = outfile;
 	ptr->currpos = o;
 #else
-	ptr->currpos = lseek(ptr->fd, o, 0);
+	fseek(ptr->fd, o, SEEK_SET);
+	ptr->currpos = o;
 #endif
 	if (p >= PARTRELO) o = 0;	/* no attempt to align writes
 					   for the time being */
@@ -139,39 +144,37 @@ BEGINSEEK(int p, long o)
 /*
  * Open the output file according to the chosen strategy.
  */
-int
-wr_open(const char *f)
+int wr_open(const char *filename)
 {
 	struct fil	*fdp;
 
-	close(creat(f, 0666));
+	fclose(fopen(filename,"wb"));
 #ifdef OUTSEEK
-	if ((outfile = open(f, 1)) < 0)
+	if ((outfile = fopen(filename, "ab+")) == NULL)
 		return 0;
 	currpos = 0;
 #else /* not OUTSEEK */
 	for (fdp = &__parts[PARTEMIT]; fdp < &__parts[NPARTS]; fdp++)
-		if ((fdp->fd = open(f, 1)) < 0)
+		if ((fdp->fd = fopen(filename, "wb+")) == NULL)
 			return 0;
 #endif /* not OUTSEEK */
 	offcnt = 0;
 	return 1;
 }
 
-void
-wr_close()
+void wr_close(void)
 {
 	struct fil *ptr;
 
 	for (ptr = &__parts[PARTEMIT]; ptr < &__parts[NPARTS]; ptr++) {
 		__wr_flush(ptr);
 #ifndef OUTSEEK
-		close(ptr->fd);
+		fclose(ptr->fd);
 #endif /* not OUTSEEK */
-		ptr->fd = -1;
+		ptr->fd = NULL;
 	}
 #ifdef OUTSEEK
-	close(outfile);
+	fclose(outfile);
 	outfile = -1;
 #endif /* OUTSEEK */
 }
@@ -251,15 +254,18 @@ wr_sect(const struct outsect *sect, unsigned int cnt)
 }
 
 void
-wr_outsect(int s)
+wr_outsect(int sectno)
 	/* s = section number */
 {
 	struct fil *ptr = &__parts[PARTEMIT + getsect(sectionnr)];
 
-	if (s != sectionnr && s >= (SECTCNT-1) && sectionnr >= (SECTCNT-1)) {
+	if (sectno != sectionnr && sectno >= (SECTCNT-1) && sectionnr >= (SECTCNT-1)) {
 #ifdef OUTSEEK
-		if (currpos != ptr->currpos) 
-			currpos = lseek(ptr->fd, ptr->currpos, 0);
+		if (currpos != ptr->currpos)
+		{
+			fseek(ptr->fd, ptr->currpos, SEEK_SET);
+			currpos -> ptr->currpos;
+		}
 #endif
 		wr_bytes(ptr->fd, ptr->pbegin, (long)(ptr->pnow - ptr->pbegin));
 		ptr->currpos += ptr->pnow - ptr->pbegin;
@@ -267,17 +273,18 @@ wr_outsect(int s)
 		currpos = ptr->currpos;
 #endif
 		offset[sectionnr] = ptr->currpos;
-		if (offset[s] != ptr->currpos) {
-			ptr->currpos = lseek(ptr->fd, offset[s], 0);
+		if (offset[sectno] != ptr->currpos) {
+			fseek(ptr->fd, offset[sectno], SEEK_SET);
+			ptr->currpos = offset[sectno];
 #ifdef OUTSEEK
 			currpos = ptr->currpos;
 #endif
 		}
-		ptr->cnt = WBUFSIZ - ((int)offset[s] & (WBUFSIZ-1));
+		ptr->cnt = WBUFSIZ - ((int)offset[sectno] & (WBUFSIZ-1));
 		ptr->pbegin = ptr->pbuf + (WBUFSIZ - ptr->cnt);
 		ptr->pnow = ptr->pbegin;
 	}
-	sectionnr = s;
+	sectionnr = sectno;
 }
 
 /*

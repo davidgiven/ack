@@ -2,7 +2,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+#ifndef DATA_H_
+#define DATA_H_
+
+#include "types.h"
 
 typedef struct {
 	int     t_token;        /* kind of token, -1 for register */
@@ -56,3 +59,5 @@ typedef struct {
 	int rl_n;       /* number in list */
 	int rl_list[NREGS];
 } rl_t,*rl_p;
+
+#endif /* DATA_H_ */

@@ -14,26 +14,32 @@ static char rcsid[] = "$Id$";
 #include <string.h>
 #include <object.h>
 #include "out.h"
+#include "object.h"
 #include "const.h"
 #include "memory.h"
 #include "sym.h"
+#include "error.h"
+#include "write.h"
 
 extern struct outhead	outhead;
 extern struct outsect	outsect[];
 extern int		flagword;
+extern bool		incore;
 
-wr_fatal()
+static long		off_char;
+
+void wr_fatal(void)
 {
 	fatal("write error");
 }
 
-static long		off_char;
+
 
 /*
  * Open the output file according to the chosen strategy.
  * Write away the header and section table: they will not change anymore.
  */
-begin_write()
+void begin_write(void)
 {
 	register struct outhead *hd = &outhead;
 
@@ -43,9 +49,7 @@ begin_write()
 	off_char = OFF_CHAR(*hd);
 }
 
-static struct outname *
-sectname(sectindex)
-	int			sectindex;
+static struct outname *sectname(int sectindex)
 {
 	static struct outname	namebuf;
 
@@ -60,7 +64,7 @@ sectname(sectindex)
 /*
  * Write out the symbol table and the section names.
  */
-end_write()
+void end_write(void)
 {
 	register struct outname	*name;
 	register int		sectindex;
@@ -78,18 +82,14 @@ end_write()
 		wrt_name(sectname(sectindex), 1);
 }
 
-wrt_emit(emit, sectindex, cnt)
-	char		*emit;
-	int		sectindex;
-	long		cnt;
+void wrt_emit(char *emit, int sectindex, long cnt)
 {
 
 	wr_outsect(sectindex);
 	wr_emit(emit, cnt);
 }
 
-wrt_nulls(sectindex, cnt)
-	register long cnt;
+void wrt_nulls(int sectindex, register long cnt)
 {
 	static char nullbuf[BUFSIZ];
 
@@ -101,8 +101,7 @@ wrt_nulls(sectindex, cnt)
 	}
 }
 
-wrt_name(name, writename)
-	register struct outname	*name;
+void wrt_name(register struct outname *name, int writename)
 {
 	assert(!incore);
 	assert(!(flagword & SFLAG));

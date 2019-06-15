@@ -16,9 +16,7 @@ static char rcsid[] = "$Id$";
 /*
  * Byte order: |  3  |  2  |  1  |  0  |
  */
-con_part(sz, w)
-	register int	sz;
-	word		w;
+void con_part(register int sz, word w)
 {
 	/*
 	 * Align new bytes on boundary of its on size.
@@ -39,8 +37,7 @@ con_part(sz, w)
 	part_size += sz;
 }
 
-con_mult(sz)
-	word	sz;
+void con_mult(word sz)
 {
 	if (sz != 4)
 		fatal("bad icon/ucon size");
@@ -50,8 +47,7 @@ con_mult(sz)
 #ifdef MACH_OPTIONS
 static int gdb_flag = 0;
 
-mach_option(s)
-	char *s;
+void mach_option(char *s)
 {
 	if (! strcmp(s, "-gdb")) {
 		gdb_flag = 1;
@@ -62,12 +58,11 @@ mach_option(s)
 }
 #endif /* MACH_OPTIONS */
 
-mes(mesno)
-	word	mesno;
+void mes(word type)
 {
 	int argt, a1, a2 ;
 
-	switch ( (int)mesno ) {
+	switch ( (int)type ) {
 	case ms_ext :
 		for (;;) {
 			switch ( argt=getarg(
@@ -137,8 +132,7 @@ mes(mesno)
 #include <con_float>
 
 #ifndef REGVARS
-prolog(nlocals)
-	full	nlocals;
+void prolog(full nlocals)
 {
 	fprintf(codefile,".data2 00\n");
 	if (nlocals == 0)
@@ -170,7 +164,7 @@ static full	nlocals;	/* Number of local variables. */
 /*
  * Save number of locals.
  */
-prolog(n)
+void prolog(full n)
 {
 	nlocals = n;
 }
@@ -187,7 +181,7 @@ static struct s_reg {
 /*
  * Initialize saving of registers.
  */
-i_regsave()
+void i_regsave(void)
 {
 	p_reg = a_reg;
 }
@@ -196,10 +190,7 @@ i_regsave()
  * Called for each register to be saved.
  * Save the parameters in the struct.
  */
-regsave(str, off, size)
-	char	*str;
-	long	off;
-	int	size;
+void regsave(char *str, long off, int size)
 {
 	p_reg->sr_str = str;
 	p_reg->sr_off = off;
@@ -213,7 +204,7 @@ regsave(str, off, size)
 /*
  * Generate code to save the registers.
  */
-f_regsave()
+void f_regsave(void)
 {
 	register struct s_reg	*p;
 	register int	mask;
@@ -267,9 +258,7 @@ f_regsave()
 
 regreturn() { }
 
-regscore(off, size, typ, score, totyp)
-	long	off;
-	int	size, typ, totyp, score;
+int regscore(long off, int size, int typ, int score, int totyp)
 {
 	register int	i = score;
 

@@ -14,6 +14,9 @@ static char rcsid[]= "$Id$";
 #include "iocc.h"
 #include "instruct.h"
 #include "expr.h"
+#include "coerc.h"
+#include "hall.h"
+#include "subr.h"
 #include "extern.h"
 #include <cgg_cg.h>
 #include <em_reg.h>
@@ -49,6 +52,14 @@ iocc_t subr_iocc(),tokm_iocc(),ident_iocc(),all_iocc(),percident_iocc(), descr_i
 extern int narexpr;
 extern expr_t arexp[];
 
+extern void skipupto(int tok,char *str);
+extern void outpatterns(void);
+extern void dopattern(int stackcoerc, varinfo *kills, varinfo *allocates,
+			varinfo *generates, varinfo *yields, varinfo *leaving);
+extern int yylex(void);			
+extern int argtyp(int mn);
+extern void yyerror (char const *s);
+			
 int niops;
 iocc_t iops[20];
 %}

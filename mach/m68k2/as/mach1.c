@@ -76,3 +76,33 @@ short	eamode[] = {
 /* 074L */	DTA|MEM             |PUTL | (RELO4      )<<8,
 };
 #endif
+
+/* 680x0 specific instructions */
+void ea_1(int sz, int bits);
+void ea_2(int sz, int bits);
+void indexmode(int hibyte);
+void checksize(int sz, int bits);
+void test68010(void);
+void badoperand(void);
+void shift_op(int opc, int sz);
+void bitop(int opc);
+void add(int opc, int sz);
+void and(int opc, int sz);
+int to_dreg(int opc, int sz, int bits);
+int from_dreg(int opc, int sz, int bits);
+void cmp(int sz);
+void move(int sz);
+void move_special(int sz);
+int reverse(register int regs, int max);
+void movem(int dr, int sz, int regs);
+void movep(int sz);
+void branch(int opc, expr_t exp);
+void ea5x73(int rg, int sz);
+void ea707172(int sz);
+void ea6x(int rg, int ir, int sz);
+void ea72(void);
+void ea73(int ri, int sz);
+void Xnofit(void);
+void fbranch(int opc, expr_t exp);
+void ch_sz_dreg(int size, int mode);
+void check_fsize(int sz, int size);

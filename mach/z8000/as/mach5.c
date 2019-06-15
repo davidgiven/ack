@@ -4,37 +4,33 @@
  */
 #define RCSID5 "$Id$"
 
-settype( type )
-int	type;
+void settype( int type )
 {	oprtype[ operand ] = type;	}
 
 
-int	twolog( s )
-int	s;
+int	twolog(int s)
 {	int	twopower = 0;
 	while ( (s>>=1) != 0 )  twopower++;
 	return( twopower );
 }
 
 
-setmode( opr )
-int	opr;
-{	mode = modetbl[ twolog( oprtype[opr] ) ] << 12;	}
+void setmod(int opr)
+{
+    mode = modetbl[ twolog( oprtype[opr] ) ] << 12;
+}
 
 
-chtype( opr, typerange )
-int	opr,
-	typerange;
+void chtype(int opr, int typerange )
 /* Check type of 'opr' with given 'typerange' and
 ** set the global var 'mode'.
 */
 {	if ( (oprtype[opr] & typerange) != oprtype[opr] )  argerr();
-	else /* We have a permitted type for 'opr'. */  setmode( opr );
+	else /* We have a permitted type for 'opr'. */  setmod( opr );
 }
 
 
-chreg( opc, reg )
-int	opc, reg;
+void chreg(int opc, int reg)
 {	switch( opc ) {
 	case 0xB10A: case 0x1B00: case 0x1900:
 		/* R32 expected	*/  if (reg & 1) regerr();  break;
@@ -43,8 +39,7 @@ int	opc, reg;
 	}
 }
 
-ATYPE	checkaddr( addr )
-valu_t	addr;
+ATYPE	checkaddr( valu_t addr )
 /* Called by functions emit_ad() and branch().	*/
 {	ATYPE	addr_struct;
 
@@ -57,8 +52,7 @@ valu_t	addr;
 	return( addr_struct );
 }
 
-emit_ad( ad_inf )
-expr_t	ad_inf;
+void emit_ad(expr_t ad_inf)
 /* When the type of an operand is 'da' or 'x' this function
 ** emits the address.
 */
@@ -75,8 +69,7 @@ expr_t	ad_inf;
 }
 
 
-ldmcode( wrd1, wrd2, num )
-int	wrd1, wrd2, num;
+void ldmcode(int wrd1,int wrd2, int num)
 {	fit(fit4(num-1));
 	emit2( mode | wrd1 );
 	emit2( wrd2<<8 | num-1 );
@@ -84,8 +77,7 @@ int	wrd1, wrd2, num;
 }
 
 
-valu_t	adjust( absval )
-valu_t	absval;
+valu_t	adjust(valu_t absval)
 {	valu_t	val = absval - DOTVAL - 2;
 
 	if ( pass == PASS_2 && val > 0 ) val -= DOTGAIN;
@@ -93,9 +85,7 @@ valu_t	absval;
 }
 
 
-branch( opc, exp )
-int	opc;
-expr_t	exp;
+void branch(int opc,expr_t exp)
 /* This routine determines for the F3 format instructions whether the
 ** relative address is small enough to fit in normal code; If this is
 ** so normal code is emitted otherwise 'long' code is emitted contai-
@@ -145,9 +135,7 @@ expr_t	exp;
 }
 
 
-ldrel( opc, exp )
-int	opc;
-expr_t	exp;
+void ldrel(int opc,expr_t exp)
 /* This routine determines for the F4 format instructions whether the
 ** address is within the same segment  (meaning a relative address of
 ** less than 16 bits); If this is so normal code is emitted otherwise
@@ -160,8 +148,7 @@ expr_t	exp;
 }
 
 
-shiftcode( w1, w2 )
-int	w1, w2;
+void shiftcode(int w1, int w2)
 {   switch( w1 & 0x0F04 )
     {   /* Remember: w2 negative means right shift !   */
         case 0x200: /*byte*/  fit( w2>=-8 && w2<=8 );  break;
@@ -173,5 +160,5 @@ int	w1, w2;
 }
 
 
-argerr()
+void argerr(void)
 {	serror( "illegal operand" );	}

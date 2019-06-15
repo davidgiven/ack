@@ -100,3 +100,28 @@ char    dr_m[8][8] = {
         -1,     -1,     -1,     -1,     -1,     -1,     -1,     -1
 };
 #endif
+
+/* 80386 specific routines */
+void ea_1_16(int param);
+void ea_1(int param);
+void ea_2(int param);
+int checkscale(valu_t val);
+void reverse(void);
+void badsyntax(void);
+void regsize(int sz);
+void indexed(void);
+void ebranch(register int opc,expr_t exp);
+void branch(register int opc,expr_t exp);
+void pushop(register int opc);
+void opsize_exp(expr_t exp, int nobyte);
+void adsize_exp(expr_t exp, int relpc);
+void addop(register int opc);
+void rolop(register int opc);
+void incop(register int opc);
+void callop(register int opc);
+void xchg(register int opc);
+void test(register int opc);
+void mov(register int opc);
+void extshft(int opc, int reg);
+void bittestop(int opc);
+void imul(int reg);

@@ -2,9 +2,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
+#ifndef TYPES_H_
+#define TYPES_H_
 
-typedef char byte;
+typedef unsigned char byte;
 typedef char bool;
 typedef struct line line_t;
 typedef struct line *line_p;
@@ -23,3 +24,5 @@ typedef long offset;
 #else
 typedef short offset;
 #endif
+
+#endif /* TYPES_H_ */

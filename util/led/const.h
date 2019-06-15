@@ -4,6 +4,9 @@
  */
 /* $Id$ */
 
+#ifndef __CONST_H_INCLUDED__
+#define __CONST_H_INCLUDED__
+
 #define FALSE		0
 #define TRUE		1
 
@@ -22,3 +25,5 @@
 #define SECOND		2		/* Idem.			*/
 
 #define BADOFF		((ind_t)-1)
+
+#endif /* __CONST_H_INCLUDED__ */

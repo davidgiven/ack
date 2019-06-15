@@ -14,15 +14,6 @@
 Something wrong here! Only one of FM2, FPC, or FCC must be defined
 #endif
 
-#ifdef sun3
-#define MACHNAME	"m68020"
-#define SYSNAME		"sun3"
-#endif
-
-#ifdef vax4
-#define MACHNAME	"vax4"
-#define SYSNAME		"vax4"
-#endif
 
 #ifdef i386
 #define MACHNAME	"i386"
@@ -37,6 +28,8 @@ Something wrong here! Only one of FM2, FPC, or FCC must be defined
 #include <stdarg.h>
 #include <limits.h>
 #include <stddef.h>
+#include "smap.h"
+#include "stringlist.h"
 #include "em_path.h"
 #include "system.h"
 
@@ -76,25 +69,158 @@ struct arglist
 
 static char *CPP;
 static char *COMP;
+static char *LD;
 static char *cc = "cc";
 
 static int kids = -1;
 static int ecount = 0;
 
-struct arglist CPP_FLAGS =
+
+struct size_info
 {
+	/* size in bytes */
+	int size;
+	/* alignment */
+	int align;
+};
+
+/** Contains information on the different systems supported. */
+struct system_information
+{
+	/** Architecture / machine name */
+	char* arch;
+	/** Platform name */
+	char* platform;
+	/** Linker path and name */
+	char *linker;
+	/** Runtime startup file */
+	char *startup;
+	/** Converter path and name */
+	char *cv;
+	/** C preprocessor command line arguments. */
+	struct arglist cpp_flags;
+	/** Compiler flags. */
+	struct arglist compiler_flags;
+};
+
+const struct system_information machine_info[2] =
+{
+		{
+		  "em22"   				/* arch */,
+		  "em22"   				/* platform */,
+		  "$H/lib/ack/em_ass"   /* linker */,
 #ifdef FCC
-		7,
+		  "c-ansi.m"           /* startup file */,
 #else
-		13,
+#ifdef FPC
+		  "pascal.m"           /* startup file */,
+#ifdef FM2
+		  "modula2.m"           /* startup file */,
 #endif
-		{ "-D__unix", "-D_EM_WSIZE=4", "-D_EM_PSIZE=4", "-D_EM_SSIZE=2",
-				"-D_EM_LSIZE=4", "-D_EM_FSIZE=4", "-D_EM_DSIZE=8",
-#ifndef FCC
-		"-DEM_WSIZE=4", "-DEM_PSIZE=4", "-DEM_SSIZE=2", "-DEM_LSIZE=4",
-		"-DEM_FSIZE=4", "-DEM_DSIZE=8",
 #endif
-	} };
+#endif
+		  NULL					/* converter */,
+		  /** CPP Flags */
+		  {17,{
+		   "-DEM_WSIZE=2",
+		   "-DEM_PSIZE=2",
+		   "-DEM_SSIZE=2",
+		   "-DEM_LSIZE=4",
+		   "-DEM_FSIZE=4",
+		   "-DEM_DSIZE=8",
+		   "-DEM_XSIZE=8",
+		   "-D_EM_WSIZE=2",
+		   "-D_EM_PSIZE=2",
+		   "-D_EM_SSIZE=2",
+		   "-D_EM_LSIZE=4",
+		   "-D_EM_FSIZE=4",
+		   "-D_EM_DSIZE=8",
+		   "-D_EM_XSIZE=8",
+		   "-Dem22",
+		   "-D__em22",
+		   "-D__unix"}},
+		/* compiler flags */
+#ifdef FCC
+		{1, {
+           "-Vw2.2i2.2p2.2f4.2s2.2l4.2d8.2x8.2"
+		}}
+#else
+#ifdef FPC
+		/* pc Flags */
+		{1, {
+		   "-Vw2.2i2.2l4.2p2.2f8.2S2.2"
+		}}
+#else
+#ifdef FM2
+		/* pc Flags */
+		{1, {
+		   "-Vw2.2i2.2l4.2p2.2f8.2S2.2"
+		}}
+#endif
+#endif
+#endif
+		},
+		{
+		  "em24"   				/* arch */,
+		  "em24"   				/* platform */,
+		  "$H/lib/ack/em_ass"   /* linker */,
+#ifdef FCC
+		  "c-ansi.m"           /* startup file */,
+#else
+#ifdef FPC
+		  "pascal.m"           /* startup file */,
+#ifdef FM2
+		  "modula2.m"           /* startup file */,
+#endif
+#endif
+#endif
+		  NULL					/* converter */,
+		  /** CPP Flags */
+		  {17,{
+		   "-DEM_WSIZE=2",
+		   "-DEM_PSIZE=4",
+		   "-DEM_SSIZE=2",
+		   "-DEM_LSIZE=4",
+		   "-DEM_FSIZE=4",
+		   "-DEM_DSIZE=8",
+		   "-DEM_XSIZE=8",
+		   "-D_EM_WSIZE=2",
+		   "-D_EM_PSIZE=4",
+		   "-D_EM_SSIZE=2",
+		   "-D_EM_LSIZE=4",
+		   "-D_EM_FSIZE=4",
+		   "-D_EM_DSIZE=8",
+		   "-D_EM_XSIZE=8",
+		   "-Dem24",
+		   "-D__em24",
+		   "-D__unix"}},
+		/* compiler flags */
+#ifdef FCC
+		{1, {
+           "-Vw2.2i2.2p4.2f4.2s2.2l4.2d8.2x8.2"
+		}}
+#else
+#ifdef FPC
+		/* pc Flags */
+		{1, {
+		   "-Vw2.2i2.2l4.2p4.2f8.2S2.2"
+		}}
+#else
+#ifdef FM2
+		/* pc Flags */
+		{1, {
+		   "-Vw2.2i2.2l4.2p4.2f8.2S2.2"
+		}}
+#endif
+#endif
+#endif
+		}
+};
+
+
+struct arglist CPP_FLAGS = {0,{NULL}};
+
+
 
 struct arglist LD_HEAD =
 { 2,
@@ -110,28 +236,6 @@ struct arglist LD_HEAD =
 #endif
 }};
 
-struct arglist LD_TAIL =
-		{
-#if defined(sun3) || defined(i386)
-				5,
-#else
-				4,
-#endif
-				{
-#ifdef FCC
-						"$H/lib/$S/tail_$A",
-#endif
-#ifdef FM2
-						"$H/lib/$S/tail_m2",
-#endif
-#ifdef FPC
-						"$H/lib/$S/tail_pc",
-#endif
-#if defined(sun3) || defined(i386)
-						"$H/lib/$M/tail_fp",
-#endif
-						"$H/lib/$M/tail_em", "$H/lib/$S/tail_mon",
-						"$H/lib/$M/end_em" } };
 
 struct arglist align =
 { 5,
@@ -189,6 +293,7 @@ static int v_flag = 0;
 static int O_flag = 0;
 /* Only ANSI C is now supported. */
 static int ansi_c = 1;
+static int cv_flag = 0;
 
 char *mkstr(char *, ...);
 static char *alloc(unsigned int);
@@ -346,49 +451,119 @@ int lang_opt(char *str)
 
 char* stringdup(const char* s)
 {
+	char *p;
 	if (s == NULL)
 		return NULL;
-	char *p = alloc(strlen(s) + sizeof(char));
+	p = alloc(strlen(s) + sizeof(char));
 	strcpy(p, s);
 	return p;
 }
 
 char* getackhome(void)
 {
-	char *value = stringdup(getenv("ACK_HOME"));
+	char *value = getenv("ACK_HOME");
 	if (value == NULL)
 	{
 #ifndef EM_DIR
 		panic("ACK_HOME must be set.");
 #else
-		return stringdup(EM_DIR);
+		return EM_DIR;
 #endif
 	}
 	return value;
 }
 
 
+#define LIB_PREFIX "lib"
+#define LIB_SUFFIX ".a"
 
+/** From a library library directory list,
+ *  search for the libraries that exist, and return
+ *  the full path to the directory where the
+ *  library is located.
+ *
+ *  The search starts from the first added directory
+ *  item at the command line.
+ *
+ *  @param[in] dirs The directory list to search in.
+ *  @param[in] lib The library name to search for.
+ *  @returns The full path specification, allocated in the heap, it must
+ *   be freed by the caller.
+ */
+char* search_library_path(struct stringlist *dirs, char* lib)
+{
+	char  fname[FILENAME_MAX];
+	FILE  *fd;
+	int len;
+	int dirs_count;
+	int index = stringlist_count(dirs)-1;
+
+	dirs_count = stringlist_count(dirs);
+	for (index = 0; index < dirs_count; index++)
+	{
+		strcpy(fname, stringlist_get(dirs,index));
+		len = strlen(fname);
+		/* len-1 is the NULL character */
+		if (fname[len-1] != '/')
+		{
+			/* Add trailing slash */
+			fname[len] = '/';
+			fname[len+1] = 0;
+			len++;
+		}
+		fname[len] = 0;
+		strcat(fname,lib);
+		fd = fopen(fname,"rb");
+		if (fd!=NULL)
+		{
+			/* Return the path! */
+			fclose(fd);
+			return stringdup(fname);
+		}
+	}
+	return NULL;
+}
 
 int main(int argc, char *argv[])
 {
+	/* Contains the directories being searched for libraries */
+	struct stringlist library_dirs;
+	/* Contains the library lists  */
+	struct stringlist libraries;
+	/* Contains the directory paths. */
+	struct smap paths;
+	/* Contains the src file list */
+	struct stringlist srcfiles;
 	char *str;
+	char *startup_file;
 	char **argvec;
 	int count;
+	int index;
+	int libs_count;
 	char *ext;
 	FILE* fd;
 	register struct arglist *call = &CALL_VEC;
+	char tmpbuffer[256];
 	char *file;
 	char *ldfile;
 	char *INCLUDE = NULL;
 	int compile_cnt = 0;
+	struct system_information* sys_info;
 
-	ackhome = getackhome();
+	startup_file = NULL;
+	sys_info = &machine_info[0];
+	strcpy(tmpbuffer, LIB_PREFIX);
+	stringlist_init(&library_dirs);
+	stringlist_init(&libraries);
+	stringlist_init(&srcfiles);
+	smap_init(&paths);
+
+	ackhome = stringdup(getackhome());
 	if (ackhome == NULL)
 	{
 		panic("ACK_HOME Environment variable is not set.");
 	}
-	tmpdir = sys_gettmpdir();
+	tmpdir = stringdup(sys_gettmpdir());
 	if (tmpdir == NULL)
 	{
 		panic("TMPDIR Environment variable is not set.");
@@ -402,17 +577,9 @@ int main(int argc, char *argv[])
 	COMP = expand_string(comp_name());
 	/* get c pre-processor to use */
 	CPP = expand_string(CPP_NAME);
+	/** get linker to use */
+	LD = expand_string(sys_info->linker);
 
-#ifdef vax4
-	append(&CPP_FLAGS, "-D__vax");
-#endif
-#ifdef sun3
-	append(&CPP_FLAGS, "-D__sun");
-#endif
-#ifdef m68020
-	append(&CPP_FLAGS, "-D__mc68020");
-	append(&CPP_FLAGS, "-D__mc68000");
-#endif
 
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		signal(SIGINT, trapcc);
@@ -422,7 +589,7 @@ int main(int argc, char *argv[])
 	{
 		if (*(str = *argv++) != '-')
 		{
-			append(&SRCFILES, str);
+			stringlist_add(&srcfiles,stringdup(str));
 			continue;
 		}
 
@@ -472,11 +639,25 @@ int main(int argc, char *argv[])
 				if (str[2] == 'n')
 					noexec = 1;
 				break;
+			case 'L':
+				stringlist_add(&library_dirs,stringdup(str+2));
+				break;
 			case 'l': /* library file */
-				append(&SRCFILES, str);
+				stringlist_add(&srcfiles,stringdup(str));
 				break;
 			case 'M': /* use other compiler (for testing) */
+				free(COMP);
+				COMP = alloc(strlen(str)+2-1);
 				strcpy(COMP, str + 2);
+				break;
+			case 'P': /* use other cpp (for testing) */
+				free(CPP);
+				CPP = alloc(strlen(str)+2-1);
+				strcpy(CPP, str + 2);
+				break;
+			case 'X': /* use other linker (for testing) */
+				LD = alloc(strlen(str)+2-1);
+				strcpy(LD, str + 2);
 				break;
 			case 's': /* strip */
 				if (str[2] == '\0')
@@ -491,8 +672,48 @@ int main(int argc, char *argv[])
 			}
 	}
 
+	/* Add C preprocessor flags. */
+	for (count = 0; count < sys_info->cpp_flags.al_argc; count++)
+	{
+		append(&CPP_FLAGS, sys_info->cpp_flags.al_argv[count]);
+	}
+	/* Add compiler flags. */
+	for (count = 0; count < sys_info->compiler_flags.al_argc; count++)
+	{
+		append(&COMP_FLAGS, sys_info->compiler_flags.al_argv[count]);
+	}
+
+	/* Now for each srcfile, if it starts with -l then replace it with the correct real
+	 * path immediately.
+	 */
+	count = stringlist_count(&srcfiles);
+	for (index = 0; index < count; index++)
+	{
+		str = stringlist_get(&srcfiles,index);
+		/* -l parameter */
+		if (*str == '-')
+		{
+			/* Search for the directory where this library might be located. */
+			strcpy(tmpbuffer,LIB_PREFIX);
+			strcat(tmpbuffer,str+2);
+			strcat(tmpbuffer,LIB_SUFFIX);
+			str = search_library_path(&library_dirs,tmpbuffer);
+			if (str != NULL)
+			{
+				stringlist_add(&srcfiles,str);
+				append(&SRCFILES,str);
+			}
+		} else
+		{
+			append(&SRCFILES,str);
+		}
+	}
+
+
 	if (ecount)
+	{
 		exit(EXIT_FAILURE);
+	}
 
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
@@ -519,12 +740,12 @@ int main(int argc, char *argv[])
 /*	INCLUDE = expand_string(
 			ansi_c ? "-I$H/include/tail_ac" : "-I$H/include/_tail_cc"); */
 	INCLUDE = expand_string("-I$H/share/ack/include");
-	append(&COMP_FLAGS, "-L");
+/*	append(&COMP_FLAGS, "-L");*/
 #endif /* FCC */
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
 
-	/* For each source file... */
+	/* For argument file */
 	while (count-- > 0)
 	{
 		register char *f;
@@ -532,7 +753,8 @@ int main(int argc, char *argv[])
 
 		ext = extension(file);
 
-		/* if not standard input and file is equal to the supported language suffix. */
+		/* if not standard input and file is equal to the supported language suffix,
+		 * then compile it */
 		if (file[0] != '-' && ext != file && (!strcmp(ext, lang_suffix())))
 		{
 			if (compile_cnt > 1)
@@ -610,7 +832,8 @@ int main(int argc, char *argv[])
 			}
 			cleanup(tmp_file);
 			tmp_file[0] = '\0';
-		}
+		}  /* endif compiling source file. */
+
 
 		else if (file[0] != '-' && strcmp(ext, "o") && strcmp(ext, "a"))
 		{
@@ -625,24 +848,48 @@ int main(int argc, char *argv[])
 		append(&LDFILES, file);
 	}
 
+
+	/* See if we need to convert the flags. */
+	cv_flag =  sys_info->cv!=NULL;
+
 	/* *.s to a.out */
 	if (RET_CODE == 0 && LDFILES.al_argc > 0)
 	{
 		init(call);
-//		expand(&LD_HEAD);
+/*		expand(&LD_HEAD);
 //		cc = "cc.2g";
-//		expand(&LD_TAIL);
-		append(call, expand_string(LD_NAME));
-//		concat(call, &align);
+		expand(&LD_TAIL);*/
+		append(call, LD);
+/*		concat(call, &align);*/
+		append(call, "-p");
+		append(call, "-sx");
 		append(call, "-o");
 
-		if (sys_tmpnam(tmp_file)==NULL)
+		if (cv_flag)
 		{
-			panic("Cannot get temporary filename.");
+			if (sys_tmpnam(tmp_file)==NULL)
+			{
+				panic("Cannot get temporary filename.");
+			}
+			append(call, tmp_file);
+		} else
+		{
+			append(call, o_FILE);
 		}
-		append(call, tmp_file);
-//		concat(call, &LD_HEAD);
-//		concat(call, &LD_FLAGS);
+/*		concat(call, &LD_HEAD);
+		concat(call, &LD_FLAGS);*/
+
+		if (sys_info->startup!=NULL)
+		{
+			startup_file = search_library_path(&library_dirs,sys_info->startup);
+			if (startup_file!=NULL)
+			{
+				append(call,startup_file);
+			} else
+			{
+				panic("Cannot find startup file.");
+			}
+		}
 		concat(call, &LDFILES);
 /*		if (g_flag)
 			append(call, expand_string("$H/lib/$M/tail_db"));
@@ -656,13 +903,35 @@ int main(int argc, char *argv[])
 			cleanup(tmp_file);
 			exit(RET_CODE);
 		}
-	/*	init(call);
-		append(call, expand_string(CV_NAME));
-		append(call, tmp_file);
-		append(call, o_FILE);
-		runvec(call, (char *) 0);*/
-		cleanup(tmp_file);
+
+		/* Check if we need to convert the file to
+		 * a standard executable file for the specific
+		 * target.
+		 *
+		 */
+		if (cv_flag)
+		{
+			init(call);
+			append(call, expand_string(sys_info->cv));
+			append(call, tmp_file);
+			append(call, o_FILE);
+			if (runvec(call, (char *) 0)==EXIT_FAILURE)
+			{
+				cleanup(tmp_file);
+				exit(RET_CODE);
+			}
+			cleanup(tmp_file);
+		}
 	}
+	if ((LDFILES.al_argc == 0) && (SRCFILES.al_argc==0))
+	{
+		panic("No input source files or input object files specified.");
+	}
+	stringlist_free(&library_dirs,1);
+	stringlist_free(&libraries,1);
+	if (startup_file!=NULL)
+		free(startup_file);
+	smap_free(&paths,1,1);
 	exit(RET_CODE);
 }
 
@@ -735,6 +1004,7 @@ static char * expand_string(char *s)
 	if (!expanded)
 		return s;
 	*q++ = '\0';
+	/* Do not forget the missing null character. */
 	p = alloc((unsigned int) (q - buf));
 	return strcpy(p, buf);
 }
@@ -799,7 +1069,7 @@ char *mkstr(char *dst, ...)
 	return dst;
 }
 
-static char * extension(char *fn)
+static char *extension(char *fn)
 {
 	register char *c = fn;
 
@@ -858,12 +1128,17 @@ static int runvec(struct arglist *vec, char *outp)
 	}
 	if(outp != NULL)
 	{
-		redirect = alloc(strlen(outp)+sizeof(char)*2);
+		/* Don't forget the null character. */
+		redirect = alloc(strlen(outp)+sizeof(char)*3);
 		strcpy(redirect,"1>");
 		strcat(redirect,outp);
 		append(vec,redirect);
 	}
 	p = arg2str(vec);
+	if ((v_flag) && (p != NULL))
+	{
+		fprintf(stdout,"Executing : %s\n",p);
+	}
 
 	status = system(p);
 	free(p);

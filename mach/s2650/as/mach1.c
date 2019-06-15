@@ -22,3 +22,9 @@
 extern expr_t	par_exp;
 extern unsigned	p_indirect;
 extern int	p_indexed;
+
+void page(void);
+void pag2(void);
+void rela(expr_t exp,int ind);
+void absoa(expr_t exp, int ix, unsigned int ind);
+void absob(expr_t exp, unsigned int ind);

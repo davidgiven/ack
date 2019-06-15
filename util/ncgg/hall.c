@@ -3,18 +3,19 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #ifndef NORCSID
-static char rcsid[]= "$Id$";
+static char rcsid[] = "$Id$";
 #endif
 
 #include <assert.h>
 #include "param.h"
 #include "set.h"
 #include "extern.h"
+#include "hall.h"
 #include <stdio.h>
 
 /*
  * This file implements the marriage thesis from Hall.
- * The thesis says that given a number, say N, of subsets from
+ * The thesis says that givoid hallverbose(void)ven a number, say N, of subsets from
  * a finite set, it is possible to create a set with cardinality N,
  * that contains one member for each of the subsets,
  * iff for each number, say M, of subsets from 2 to N the union of
@@ -29,56 +30,66 @@ static char rcsid[]= "$Id$";
 
 #define MAXHALL (TOKPATMAX+MAXALLREG)
 short hallsets[MAXHALL][SETSIZE];
-int nhallsets= -1;
+int nhallsets = -1;
 int hallfreq[MAXHALL][2];
 
-hallverbose() {
-	register i;
-	register max;
-	
-	fprintf(stderr,"Table of hall frequencies\n   #   pre   post\n");
-	for (max=MAXHALL-1;hallfreq[max][0]==0 && hallfreq[max][1]==0;max--)
+int recurhall(int, short [][SETSIZE]);
+void unite(register short *, short *);
+
+
+void hallverbose(void)
+{
+	register int i;
+	register int max;
+
+	fprintf(stderr, "Table of hall frequencies\n   #   pre   post\n");
+	for (max = MAXHALL - 1; hallfreq[max][0] == 0 && hallfreq[max][1] == 0;
+			max--)
 		;
-	for (i=0;i<=max;i++)
-		fprintf(stderr,"%3d%6d%6d\n",i,hallfreq[i][0],hallfreq[i][1]);
+	for (i = 0; i <= max; i++)
+		fprintf(stderr, "%3d%6d%6d\n", i, hallfreq[i][0], hallfreq[i][1]);
 }
 
-inithall() {
+void inithall(void)
+{
 
 	assert(nhallsets == -1);
-	nhallsets=0;
+	nhallsets = 0;
 }
 
-nexthall(sp) register short *sp; {
-	register i;
-	
-	assert(nhallsets>=0);
-	for(i=0;i<SETSIZE;i++)
+void nexthall(register short *sp)
+{
+	register int i;
+
+	assert(nhallsets >= 0);
+	for (i = 0; i < SETSIZE; i++)
 		hallsets[nhallsets][i] = sp[i];
 	nhallsets++;
 }
 
-card(sp) register short *sp; {
-	register sum,i;
-	
-	sum=0;
-	for(i=0;i<8*sizeof(short)*SETSIZE;i++)
-		if (BIT(sp,i))
+int card(register short *sp)
+{
+	register int sum, i;
+
+	sum = 0;
+	for (i = 0; i < 8 * sizeof(short) * SETSIZE; i++)
+		if (BIT(sp, i))
 			sum++;
-	return(sum);
+	return (sum);
 }
 
-checkhall() {
-
-	assert(nhallsets>=0);
+void checkhall(void)
+{
+	assert(nhallsets >= 0);
 	if (!hall())
 		error("Hall says: \"You can't have those registers\"");
 }
 
-hall() {
-	register i,j,k;
+int hall(void)
+{
+	register int i, j, k;
 	int ok;
-	
+
 	hallfreq[nhallsets][0]++;
 	/*
 	 * If a set has cardinality >= nhallsets it can never be the cause
@@ -86,66 +97,72 @@ hall() {
 	 * But then nhallsets is less, so this step can be re-applied.
 	 */
 
-	do {
+	do
+	{
 		ok = 0;
-		for(i=0;i<nhallsets;i++)
-			if (card(hallsets[i])>=nhallsets) {
-				for (j=i+1;j<nhallsets;j++)
-					for(k=0;k<SETSIZE;k++)
-						hallsets[j-1][k] =
-							hallsets[j][k];
+		for (i = 0; i < nhallsets; i++)
+			if (card(hallsets[i]) >= nhallsets)
+			{
+				for (j = i + 1; j < nhallsets; j++)
+					for (k = 0; k < SETSIZE; k++)
+						hallsets[j - 1][k] = hallsets[j][k];
 				nhallsets--;
 				ok = 1;
 				break;
 			}
 	} while (ok);
-	
+
 	/*
 	 * Now all sets have cardinality < nhallsets
 	 */
-	
+
 	hallfreq[nhallsets][1]++;
-	ok=recurhall(nhallsets,hallsets);
+	ok = recurhall(nhallsets, hallsets);
 	nhallsets = -1;
-	return(ok);
+	return (ok);
 }
 
-recurhall(nhallsets,hallsets) short hallsets[][SETSIZE]; {
+int recurhall(int nhallsets, short hallsets[][SETSIZE])
+{
 	short copysets[MAXHALL][SETSIZE];
 	short setsum[SETSIZE];
-	register i,j,k,ncopys;
-	
+	register int i, j, k, ncopys;
+
 	/*
 	 * First check cardinality of union of all
 	 */
-	for(k=0;k<SETSIZE;k++)
-		setsum[k]=0;
-	for(i=0;i<nhallsets;i++)
-		unite(hallsets[i],setsum);
-	if (card(setsum)<nhallsets)
-		return(0);
+	for (k = 0; k < SETSIZE; k++)
+		setsum[k] = 0;
+	for (i = 0; i < nhallsets; i++)
+		unite(hallsets[i], setsum);
+	if (card(setsum) < nhallsets)
+		return (0);
 	/*
 	 * Now check the hall property of everything but one set,
 	 * for all sets
 	 */
-	for(i=0;i<nhallsets;i++) {
-		ncopys=0;
-		for(j=0;j<nhallsets;j++) if (j!=i) {
-			for(k=0;k<SETSIZE;k++)
-				copysets[ncopys][k] = hallsets[j][k];
-			ncopys++;
-		}
-		assert(ncopys == nhallsets-1);
-		if (!recurhall(ncopys,copysets))
-			return(0);
+	for (i = 0; i < nhallsets; i++)
+	{
+		ncopys = 0;
+		for (j = 0; j < nhallsets; j++)
+			if (j != i)
+			{
+				for (k = 0; k < SETSIZE; k++)
+					copysets[ncopys][k] = hallsets[j][k];
+				ncopys++;
+			}
+		assert(ncopys == nhallsets - 1);
+		if (!recurhall(ncopys, copysets))
+			return (0);
 	}
-	return(1);
+	return (1);
 }
 
-unite(sp,into) register short *sp,*into; {
-	register i;
-	
-	for(i=0;i<SETSIZE;i++)
+void unite(register short *sp, short *into)
+{
+	register int i;
+
+	for (i = 0; i < SETSIZE; i++)
 		into[i] |= sp[i];
 }
 

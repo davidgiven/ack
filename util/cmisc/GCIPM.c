@@ -10,17 +10,30 @@
 
 #include <stdio.h>
 
-extern CheckId();
-extern DoOption();
-extern BeginOfProgram(), EndOfProgram();
+extern void BeginOfProgram(void);
+extern void EndOfProgram(void);
+extern void DoOption(char*);
+extern void CheckId(char *, int);
+
 
 #define MAX_ID_LEN	256
 
 char *ProgName;
 int GCcopy;
 
-main(argc, argv)
-	char *argv[];
+
+void DoFile(FILE *);
+void SkipString(FILE *, int);
+void SkipComment(FILE *);
+void DoIdent(FILE *, int);
+int StartId(int);
+int InId(int);
+int StartNum(int);
+void DoNum(register FILE *, int);
+
+
+
+int main(int argc, char *argv[])
 {
 	char **nargv;
 	int nargc = 0;
@@ -55,13 +68,12 @@ main(argc, argv)
 		DoFile(stdin);
 	}
 	EndOfProgram();
-	exit(0);
+	return 0;
 }
 
-DoFile(fp)
-	FILE *fp;
+void DoFile(FILE *fp)
 {
-	register c;
+	register int c;
 
 	while ((c = getc(fp)) != EOF) {
 		switch (c) {
@@ -98,10 +110,9 @@ DoFile(fp)
 	fclose(fp);
 }
 
-SkipString(fp, stopc)
-	FILE *fp;
+void SkipString(FILE *fp, int stopc)
 {
-	register c;
+	register int c;
 
 	while ((c = getc(fp)) != EOF) {
 		if (GCcopy) putchar(c);
@@ -116,10 +127,9 @@ SkipString(fp, stopc)
 	}
 }
 
-SkipComment(fp)
-	FILE *fp;
+void SkipComment(FILE *fp)
 {
-	register c;
+	register int c;
 
 	while ((c = getc(fp)) != EOF) {
 		if (GCcopy) putchar(c);
@@ -133,12 +143,11 @@ SkipComment(fp)
 	}
 }
 
-DoIdent(fp, s)
-	FILE *fp;
+void DoIdent(FILE *fp, int s)
 {
 	char id_buf[MAX_ID_LEN];
-	register cnt = 1;
-	register c;
+	register int cnt = 1;
+	register int c;
 
 	id_buf[0] = s;
 
@@ -155,7 +164,7 @@ DoIdent(fp, s)
 	}
 }
 
-StartId(c)
+int StartId(int c)
 {
 	switch (c) {
 
@@ -179,7 +188,7 @@ StartId(c)
 	}
 }
 
-InId(c)
+int InId(int c)
 {
 	switch (c) {
 
@@ -205,7 +214,7 @@ InId(c)
 	}
 }
 
-StartNum(c)
+int StartNum(int c)
 {
 	switch(c) {
 	case '0': case '1': case '2': case '3': case '4':
@@ -223,8 +232,7 @@ StartNum(c)
 #define getoct(c, fp)	do { c = getc((fp)); if (GCcopy) putchar(c);} while (isoct(c))
 #define gethex(c, fp)	do { c = getc((fp)); if (GCcopy) putchar(c);} while (ishex(c))
 
-DoNum(fp, c)
-	register FILE *fp;
+void DoNum(register FILE *fp, int c)
 {
 	if (c != '0') {
 		getdec(c, fp);

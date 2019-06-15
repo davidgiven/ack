@@ -5,7 +5,7 @@ wr_open, wr_close, wr_ohead, wr_sect, wr_outsect, wr_emit, wr_putc, wr_relo,
 wr_name, wr_string, wr_arhdr, wr_ranlib, wr_int2, wr_long, wr_bytes,
 rd_open, rd_fdopen, rd_close, rd_ohead, rd_sect, rd_outsect,
 rd_emit, rd_relo, rd_rew_relo, rd_name, rd_string, rd_arhdr, rd_ranlib,
-rd_int2, rd_unsigned2, rd_long, rd_bytes, rd_fd\ \-\ routines to read
+rd_int2, rd_unsigned2, rd_int4, rd_bytes, rd_fd\ \-\ routines to read
 and write ACK-object files and libraries
 .SH SYNOPSIS
 .B #include <out.h>
@@ -16,222 +16,146 @@ and write ACK-object files and libraries
 .br
 .B #include <object.h>
 .PP
-.B int wr_open(filename)
-.br
-.B char *filename;
+.B int wr_open(const char *filename)
 .PP
-.B void wr_close()
+.B void wr_close(void)
 .PP
-.B void wr_ohead(head)
-.br
-.B struct outhead *head;
+.B void wr_ohead(const struct outhead *head)
 .PP
-.B void wr_sect(sect, cnt)
-.br
-.B struct outsect *sect;
-.br
-.B unsigned int cnt;
+.B void wr_sect(const struct outsect *sect, unsigned int cnt)
 .PP
-.B void wr_outsect(sectionnr)
-.br
-.B int sectionnr;
+.B void wr_outsect(int sectno)
 .PP
-.B void wr_emit(emit, cnt)
-.br
-.B char *emit;
-.br
-.B long cnt;
+.B void wr_emit(const char *emit, long cnt)
 .PP
-.B void wr_putc(ch)
+.B void wr_putc(int c)
 .PP
-.B void wr_relo(relo, cnt)
-.br
-.B struct outrelo *relo;
-.br
-.B unsigned int cnt;
+.B void wr_relo(const struct outrelo *relo, unsigned int cnt)
 .PP
-.B void wr_name(name, cnt)
-.br
-.B struct outname *name;
-.br
-.B unsigned int cnt;
+.B void wr_name(const struct outname *name, unsigned int cnt)
 .PP
-.B void wr_string(stringaddr, cnt)
-.br
-.B char *stringaddr;
-.br
-.B long cnt;
+.B void wr_string(const char *addr, long len)
 .PP
-.B void wr_arhdr(fd, arhdr)
-.br
-.B struct ar_hdr *arhdr;
+.B void wr_arhdr(FILE* fd, struct ar_hdr *arhdr)
 .PP
-.B void wr_ranlib(fd, ran, cnt)
-.br
-.B struct ranlib *ran;
-.br
-.B long cnt;
+.B void wr_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 .PP
-.B void wr_int2(fd, i)
+.B void wr_int2(FILE* fd, int i)
 .PP
-.B void wr_long(fd, l)
-.br
-.B long l;
+.B void wr_long(FILE* fd, long l)
 .PP
-.B void wr_bytes(fd, buf, l)
-.br
-.B char *buf;
-.br
-.B long l;
+.B void wr_bytes(FILE* fd, const char* buf, long cnt)
 .PP
-.B int rd_open(filename)
-.br
-.B char *filename;
+.B int rd_open(const char *filename)
 .PP
-.B int rd_fdopen(fd)
+.B int rd_fdopen(FILE* fd)
 .PP
-.B void rd_close()
+.B void rd_close(void)
 .PP
-.B void rd_ohead(head)
-.br
-.B struct outhead *head;
+.B void rd_ohead(struct outhead *head)
 .PP
-.B void rd_sect(sect, cnt)
-.br
-.B struct outsect *sect;
-.br
-.B unsigned int cnt;
+.B void rd_sect(struct outsect *sect, unsigned int cnt)
 .PP
-.B void rd_outsect(sectionnr)
-.br
-.B int sectionnr;
+.B void rd_outsect(int sectno)
 .PP
-.B void rd_emit(emit, cnt)
-.br
-.B char *emit;
-.br
-.B long cnt;
+.B void rd_emit(char *emit, long cnt)
 .PP
-.B void rd_relo(relo, cnt)
-.br
-.B struct outrelo *relo;
-.br
-.B unsigned int cnt;
+.B void rd_relo(struct outrelo *relo, unsigned int cnt)
 .PP
-.B void rd_rew_relo(head)
-.br
-.B struct outhead *head;
+.B void rd_rew_relos(struct outhead *head)
 .PP
-.B void rd_name(name, cnt)
-.br
-.B struct outname *name;
-.br
-.B unsigned int cnt;
+.B void rd_name(struct outname *name, unsigned int cnt)
 .PP
-.B void rd_string(stringaddr, cnt)
-.br
-.B char *stringaddr;
-.br
-.B long cnt;
+.B void rd_string(char *stringaddr, long cnt)
 .PP
-.B int rd_arhdr(fd, arhdr)
-.br
-.B struct ar_hdr *arhdr;
+.B int rd_arhdr(FILE* fd, struct ar_hdr *arhdr)
 .PP
-.B void rd_ranlib(fd, ran, cnt)
-.br
-.B struct ranlib *ran;
-.br
-.B long cnt;
+.B void rd_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 .PP
-.B int rd_int2(fd)
+.B int rd_int2(FILE* fd)
 .PP
-.B unsigned int rd_unsigned2(fd)
+.B unsigned int rd_unsigned2(FILE* fd)
 .PP
-.B long rd_long(fd)
+.B long rd_int4FILE* fd)
 .PP
-.B void rd_bytes(fd, buf, l)
-.br
-.B char *buf;
-.br
-.B long l;
+.B void rd_bytes(FILE* fd, char *buf, long l)
 .PP
-.B int rd_fd()
+.B FILE* rd_fd(void)
 .SH DESCRIPTION
 These routines come in handy when reading or writing ACK-object files
 or libraries. No checking is performed.
 .PP
-.I Wr_open
+.I wr_open
 opens the file
 .I filename
 for writing and initializes some of this modules local variables.
 It must be called before writing parts of the object file.
 It returns 1 if it succeeds, 0 if it fails.
 .PP
-.I Wr_close
+.I wr_close
 closes the object file. Don't forget to call it, because it might
 flush internal buffers.
 .PP
-.I Wr_ohead
+.I wr_ohead
 writes the
 .I head
 header structure.
 This routine must be called before the routines to write the other
 parts.
 .PP
-.I Wr_sect
+.I wr_sect
 writes
 .I cnt
 section headers, starting at
 .IB sect .
 Before writing a section, its section header must be written.
 .PP
-.I Wr_outsect
+.I wr_outsect
 indicates that the next section to be written is
-.IB sectionnr .
+.IB secno .
 This routine can be used to switch between sections.
 .PP
-.I Wr_emit
+.I wr_emit
 writes
 .I cnt
 bytes, starting at
 .IB emit ,
 of the current section.
 .PP
-.I Wr_putc
-adds character
+.I wr_putc
+adds byte
 .I ch
 to the current section.
 .PP
-.I Wr_relo
+.I wr_relo
 writes
 .I cnt
 outrelo structures, indicated by
 .IB relo ,
 in the relocation information part of the object file.
 .PP
-.I Wr_name
+.I wr_name
 writes
 .I cnt
 outname structures, indicated by
 .IB name ,
 in the name-table part of the object file.
 .PP
-.I Wr_string
+.I wr_string
 writes
 .I cnt
 bytes, indicated by
-.IB stringaddr ,
+.IB addr,
 in the string table part of the object file.
 .PP
 The next few routines can be used independantly:
-.I Wr_arhdr
+.I wr_arhdr
 writes the archive member header
 .I arhdr
 to file descriptor
 .IB fd .
 .PP
-.I Wr_ranlib
+.I wr_ranlib
 writes
 .I cnt
 ranlib structures, indicated by
@@ -239,23 +163,23 @@ ranlib structures, indicated by
 to file descriptor
 .IB fd.
 .PP
-.I Wr_int2
+.I wr_int2
 writes a 2-byte integer
 .I i
 to file descriptor
 .IB fd ,
 low order byte first.
 .PP
-.I Wr_long
+.I wr_long
 writes a 4-byte integer
 .I l
 to file descriptor
 .IB fd ,
 low order word first, low order byte first.
 .PP
-.I Wr_bytes
+.I wr_bytes
 writes
-.I l
+.I cnt
 bytes from
 .I buf
 to file descriptor
@@ -267,7 +191,7 @@ routines are the opposite of the
 .I wr_
 routines. However, a few of them deserve special mentioning:
 .PP
-.I Rd_fdopen
+.I rd_fdopen
 initialises for reading an "object file" from file descriptor
 .IB fd ,
 at its current position.
@@ -277,16 +201,16 @@ When using this entry point for reading,
 .I rd_close
 does not have to be called.
 .PP
-.I Rd_rew_relo
+.I rd_rew_relos
 rewinds the relocation part, so that it can be read again.
 \fILed\fR(6) sometimes needs this.
 .PP
-.I Rd_unsigned2
+.I rd_unsigned2
 reads two bytes from file descriptor
 .I fd
-and interpretes them as an unsigned integer.
+and interprets them as an unsigned integer.
 .PP
-.I Rd_arhdr
+.I rd_arhdr
 returns 1 if a header was read, and 0 on end-of-file.
 .PP
 When using any of the reading routines, a routine

@@ -7,6 +7,7 @@
 --   is = { set of rule types which made the target }
 -- }
 
+local posix = require("posix")
 local emitter = {}
 local rules = {}
 local targets = {}
@@ -544,7 +545,7 @@ local function definerule(rulename, types, cb)
 
 		local args = {}
 		for propname, typespec in pairs(types) do
-			if not e[propname] then
+			if e[propname] == nil then
 				if not typespec.optional and (typespec.default == nil) then
 					error(string.format("missing mandatory property '%s'", propname))
 				end

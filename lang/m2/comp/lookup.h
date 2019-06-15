@@ -9,13 +9,13 @@
 #define LOOKUP_H_
 
 /* Forward declarations. */
-typedef struct idf t_idf;
-typedef struct scope t_scope;
-typedef struct node t_node;
-typedef struct def t_def;
-typedef struct scopelist t_scopelist;
+struct idf;
+struct scope;
+struct node;
+struct scopelist;
+struct def;
 
-t_def *lookup(register t_idf *id, t_scope *scope, int import, int flags);
-t_def *lookfor(register t_node *id, register t_scopelist *vis, int message, int flags);
+struct def *lookup(register struct idf *id, struct scope *scope, int import, int flags);
+struct def *lookfor(register struct node *id, register struct scopelist *vis, int message, int flags);
 
 #endif /* LOOKUP_H_ */
