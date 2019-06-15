@@ -588,10 +588,6 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
 	member.ar_mode = mode2ar(status.st_mode);
 	member.ar_date = status.st_mtime;
 	member.ar_size = status.st_size;
-<<<<<<< HEAD
->>>>>>> upstream/default
-=======
->>>>>>> upstream/default
 #ifdef DISTRIBUTION
 	if (distr_fl)
 	{
