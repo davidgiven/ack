@@ -11,7 +11,7 @@
 
 int vprintf(const char* format, va_list arg)
 {
-	return _doprnt(format, arg, stdout);
+	return vfprintf(stdout, format, arg);
 }
 
 #endif

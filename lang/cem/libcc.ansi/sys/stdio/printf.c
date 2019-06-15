@@ -15,9 +15,7 @@ int printf(const char* format, ...)
 	int retval;
 
 	va_start(ap, format);
-
-	retval = _doprnt(format, ap, stdout);
-
+	retval = vfprintf(stdout, format, ap);
 	va_end(ap);
 
 	return retval;

@@ -15,9 +15,7 @@ int fprintf(FILE* stream, const char* format, ...)
 	int retval;
 
 	va_start(ap, format);
-
-	retval = _doprnt(format, ap, stream);
-
+	retval = vfprintf(stream, format, ap);
 	va_end(ap);
 
 	return retval;

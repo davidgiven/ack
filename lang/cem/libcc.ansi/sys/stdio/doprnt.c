@@ -157,7 +157,7 @@ o_print(va_list* ap, int flags, char* s, char c, int precision, int is_signed)
 	return s;
 }
 
-int _doprnt(register const char* fmt, va_list ap, FILE* stream)
+int _doprnt(register const char* fmt, va_list ap, void (*put)(int))
 {
 	register char* s;
 	register int j;
@@ -176,7 +176,7 @@ int _doprnt(register const char* fmt, va_list ap, FILE* stream)
 				PUTC('\r');
 			}
 #endif
-			PUTC(c);
+			put(c);
 			nrchars++;
 			continue;
 		}
@@ -263,7 +263,7 @@ int _doprnt(register const char* fmt, va_list ap, FILE* stream)
 					nrchars++;
 				}
 #endif
-				PUTC(c);
+				put(c);
 				nrchars++;
 				continue;
 			case 'n':
@@ -366,32 +366,32 @@ int _doprnt(register const char* fmt, va_list ap, FILE* stream)
 					{
 						j--;
 						nrchars++;
-						PUTC(*s1++);
+						put(*s1++);
 					}
 					else
 					{
 						j -= 2;
 						nrchars += 2;
-						PUTC(*s1++);
-						PUTC(*s1++);
+						put(*s1++);
+						put(*s1++);
 					}
 				}
 				do
 				{
-					PUTC(zfill);
+					put(zfill);
 				} while (--i);
 			}
 
 		nrchars += j;
 		while (--j >= 0)
 		{
-			PUTC(*s1++);
+			put(*s1++);
 		}
 
 		if (i > 0)
 			nrchars += i;
 		while (--i >= 0)
-			PUTC(zfill);
+			put(zfill);
 	}
 	return nrchars;
 }

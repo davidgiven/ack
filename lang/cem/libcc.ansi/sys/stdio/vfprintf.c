@@ -9,9 +9,17 @@
 
 #if ACKCONF_WANT_STDIO
 
+static FILE* vfprintf_stream;
+
+static void vfprintf_putc(int c)
+{
+	putc(c, vfprintf_stream);
+}
+
 int vfprintf(FILE* stream, const char* format, va_list arg)
 {
-	return _doprnt(format, arg, stream);
+	vfprintf_stream = stream;
+	return _doprnt(format, arg, vfprintf_putc);
 }
 
 #endif

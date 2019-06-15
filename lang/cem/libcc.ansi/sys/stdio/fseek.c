@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "loc_incl.h"
 
-#if ACKCONF_WANT_STDIO
+#if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
 int fseek(FILE* stream, long int offset, int whence)
 {

@@ -10,8 +10,8 @@
 #define	io_testflag(p,x)	((p)->_flags & (x))
 
 #include	<stdarg.h>
-int _doprnt(const char *format, va_list ap, FILE *stream);
-int _doscan(FILE * stream, const char *format, va_list ap);
+int _doprnt(const char *format, va_list ap, void (*put)(int c));
+int _doscan(const char *format, va_list ap, int (*get)(void), void (*unget)(int c));
 char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
 char *_f_print(va_list *ap, int flags, char *s, char c, int precision);
 

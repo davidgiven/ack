@@ -15,9 +15,7 @@ int scanf(const char* format, ...)
 	int retval;
 
 	va_start(ap, format);
-
-	retval = _doscan(stdin, format, ap);
-
+	retval = vfscanf(stdin, format, ap);
 	va_end(ap);
 
 	return retval;

@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#if ACKCONF_WANT_STDIO
+#if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
 int(fileno)(FILE* stream)
 {

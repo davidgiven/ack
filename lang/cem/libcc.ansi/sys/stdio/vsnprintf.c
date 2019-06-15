@@ -9,19 +9,26 @@
 
 #if ACKCONF_WANT_STDIO
 
-int vsnprintf(char* s, size_t len, const char* format, va_list arg)
+static char* output_buffer;
+static size_t output_buffer_len;
+
+static void snprintf_putc(int c)
+{
+	if (output_buffer_len)
+	{
+		*output_buffer++ = c;
+		output_buffer_len--;
+	}
+}
+
+int vsnprintf(char* s, size_t len, const char* format, va_list ap)
 {
 	int retval;
-	FILE tmp_stream;
 
-	tmp_stream._fd = -1;
-	tmp_stream._flags = _IOWRITE + _IONBF + _IOWRITING;
-	tmp_stream._buf = (unsigned char*)s;
-	tmp_stream._ptr = (unsigned char*)s;
-	tmp_stream._count = len;
-
-	retval = _doprnt(format, arg, &tmp_stream);
-	putc('\0', &tmp_stream);
+	output_buffer = s;
+	output_buffer_len = len;
+	retval = _doprnt(format, ap, snprintf_putc);
+	snprintf_putc('\0');
 
 	return retval;
 }

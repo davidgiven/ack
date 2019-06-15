@@ -13,7 +13,7 @@
 
 char* tmpnam(char* s)
 {
-	static char name_buffer[L_tmpnam] = "/tmp/tmp.";
+	static char name_buffer[L_tmpnam] = ACK_TMP_PREFIX;
 	static unsigned long count = 0;
 	static char* name = NULL;
 

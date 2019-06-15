@@ -33,8 +33,7 @@ static char inp_buf[NUMLEN];
  * is then set to 0, so strtol() will get the right argument.
  */
 static char*
-o_collect(register int c, register FILE* stream, char type,
-    int width, int* basep)
+o_collect(register int c, char type, int width, int* basep, int (*get)(void), void (*unget)(int c))
 {
 	register char* bufp = inp_buf;
 	register int base;
@@ -63,14 +62,14 @@ o_collect(register int c, register FILE* stream, char type,
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 	}
 
 	if (width && c == '0' && base == 16)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 		if (c != 'x' && c != 'X')
 		{
 			if (type == 'i')
@@ -80,7 +79,7 @@ o_collect(register int c, register FILE* stream, char type,
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = get();
 		}
 	}
 	else if (type == 'i')
@@ -95,14 +94,14 @@ o_collect(register int c, register FILE* stream, char type,
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = get();
 		}
 		else
 			break;
 	}
 
 	if (width && c != EOF)
-		ungetc(c, stream);
+		unget(c);
 	if (type == 'i')
 		base = 0;
 	*basep = base;
@@ -120,7 +119,7 @@ o_collect(register int c, register FILE* stream, char type,
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
 static char*
-f_collect(register int c, register FILE* stream, register int width)
+f_collect(register int c, register int width, int (*get)(void), void (*unget)(int c))
 {
 	register char* bufp = inp_buf;
 	int digit_seen = 0;
@@ -129,7 +128,7 @@ f_collect(register int c, register FILE* stream, register int width)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 	}
 
 	while (width && isdigit(c))
@@ -137,26 +136,26 @@ f_collect(register int c, register FILE* stream, register int width)
 		digit_seen++;
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 	}
 	if (width && c == '.')
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = get();
 		}
 	}
 
 	if (!digit_seen)
 	{
 		if (width && c != EOF)
-			ungetc(c, stream);
+			unget(c);
 		return inp_buf - 1;
 	}
 	else
@@ -166,30 +165,30 @@ f_collect(register int c, register FILE* stream, register int width)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = get();
 		if (width && (c == '+' || c == '-'))
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = get();
 		}
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = get();
 		}
 		if (!digit_seen)
 		{
 			if (width && c != EOF)
-				ungetc(c, stream);
+				unget(c);
 			return inp_buf - 1;
 		}
 	}
 
 	if (width && c != EOF)
-		ungetc(c, stream);
+		unget(c);
 	*bufp = '\0';
 	return bufp - 1;
 }
@@ -199,7 +198,7 @@ f_collect(register int c, register FILE* stream, register int width)
  * the routine that does the scanning 
  */
 
-int _doscan(register FILE* stream, const char* format, va_list ap)
+int _doscan(const char* format, va_list ap, int (*get)(void), void (*unget)(int c))
 {
 	int done = 0; /* number of items done */
 	int nrchars = 0; /* number of characters read */
@@ -226,15 +225,15 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		{
 			while (isspace(*format))
 				format++; /* skip whitespace */
-			ic = getc(stream);
+			ic = get();
 			nrchars++;
 			while (isspace(ic))
 			{
-				ic = getc(stream);
+				ic = get();
 				nrchars++;
 			}
 			if (ic != EOF)
-				ungetc(ic, stream);
+				unget(ic);
 			nrchars--;
 		}
 		if (!*format)
@@ -242,12 +241,12 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 
 		if (*format != '%')
 		{
-			ic = getc(stream);
+			ic = get();
 			nrchars++;
 			if (ic != *format++)
 			{
 				if (ic != EOF)
-					ungetc(ic, stream);
+					unget(ic);
 				nrchars--;
 				break; /* error */
 			}
@@ -256,7 +255,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		format++;
 		if (*format == '%')
 		{
-			ic = getc(stream);
+			ic = get();
 			nrchars++;
 			if (ic == '%')
 			{
@@ -299,7 +298,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		{
 			do
 			{
-				ic = getc(stream);
+				ic = get();
 				nrchars++;
 			} while (isspace(ic));
 			if (ic == EOF)
@@ -307,7 +306,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		}
 		else if (kind != 'n')
 		{ /* %c or %[ */
-			ic = getc(stream);
+			ic = get();
 			if (ic == EOF)
 				break; /* outer while */
 			nrchars++;
@@ -344,7 +343,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (!width)
 					return done;
 
-				str = o_collect(ic, stream, kind, width, &base);
+				str = o_collect(ic, kind, width, &base, get, unget);
 				if (str < inp_buf
 				    || (str == inp_buf
 				           && (*str == '-'
@@ -385,7 +384,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = get();
 						nrchars++;
 					}
 				}
@@ -393,7 +392,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						unget(ic);
 					nrchars--;
 				}
 				break;
@@ -411,7 +410,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = get();
 						nrchars++;
 					}
 				}
@@ -421,7 +420,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						unget(ic);
 					nrchars--;
 				}
 				break;
@@ -468,7 +467,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (!*format || !(Xtable[ic] ^ reverse))
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						unget(ic);
 					return done;
 				}
 
@@ -481,7 +480,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = get();
 						nrchars++;
 					}
 				} while (width && ic != EOF && (Xtable[ic] ^ reverse));
@@ -489,7 +488,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						unget(ic);
 					nrchars--;
 				}
 				if (!(flags & FL_NOASSIGN))
@@ -508,7 +507,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 
 				if (!width)
 					return done;
-				str = f_collect(ic, stream, width);
+				str = f_collect(ic, width, get, unget);
 
 				if (str < inp_buf
 				    || (str == inp_buf

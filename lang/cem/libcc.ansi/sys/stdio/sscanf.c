@@ -10,21 +10,32 @@
 
 #if ACKCONF_WANT_STDIO
 
+static const char* input_buffer;
+
+static int sscanf_getc(void)
+{
+	char c = *input_buffer;
+	if (c == 0)
+		return EOF;
+	input_buffer++;
+	return c;
+}
+
+static void sscanf_ungetc(int c)
+{
+	/* sscanf always ungets the last character read. */
+	input_buffer--;
+}
+
 int sscanf(const char* s, const char* format, ...)
 {
 	va_list ap;
 	int retval;
-	FILE tmp_stream;
 
 	va_start(ap, format);
 
-	tmp_stream._fd = -1;
-	tmp_stream._flags = _IOREAD + _IONBF + _IOREADING;
-	tmp_stream._buf = (unsigned char*)s;
-	tmp_stream._ptr = (unsigned char*)s;
-	tmp_stream._count = strlen(s);
-
-	retval = _doscan(&tmp_stream, format, ap);
+	input_buffer = s;
+	retval = _doscan(format, ap, sscanf_getc, sscanf_ungetc);
 
 	va_end(ap);
 
