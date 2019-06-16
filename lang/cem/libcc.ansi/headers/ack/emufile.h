@@ -25,7 +25,9 @@ struct FILE {
 #define _IOWRITING	0x100
 #define	_IOAPPEND	0x200
 
+#if !defined BUFSIZ
 #define	BUFSIZ      1024
+#endif
 
 #define	FOPEN_MAX	20
 extern FILE	*__iotab[FOPEN_MAX];

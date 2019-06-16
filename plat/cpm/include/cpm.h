@@ -67,9 +67,18 @@ extern uint8_t* cpm_ramtop;
 extern uint8_t cpm_cmdlinelen;
 extern char cpm_cmdline[0x7f];
 
+/* Special: parses a filename into an FCB. Returns the user code (if any).
+ * Warning: cannot fail (because CP/M filespecs are incredibly lax). */
+
+extern uint8_t cpm_parse_filename(FCB* fcb, const char* filename);
+
 /* Special: if the CCP hasn't been overwritten, returns to it; otherwise does
  * a warmboot. */
 extern void cpm_exit(void);
+
+/* Special: equivalent to cpm_read_random() except if you read unwritten data
+ * 0 is returned (and the buffer contains garbage). */
+extern uint8_t cpm_read_random_safe(FCB* fcb);
 
 /* Extends cpm_ramtop over the CCP, for a little extra space. */
 extern void cpm_overwrite_ccp(void);
@@ -114,12 +123,7 @@ extern void cpm_overwrite_ccp(void);
 /* 37 */ extern uint8_t cpm_reset_drives(uint16_t drive_bitmap);
 /* 40 */ extern uint8_t cpm_write_random_filled(FCB* fcb);
 
-/* File descriptor emulation */
-
-struct FCBE
-{
-    FCB fcb; /* drive 0 means the console */
-    uint8_t user;
-};
+#define cpm_get_user() cpm_get_set_user(0xff)
+#define cpm_set_user(u) cpm_get_set_user(u)
 
 #endif
