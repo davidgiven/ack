@@ -11,7 +11,7 @@ definerule("plat_testsuite",
 	function(e)
 		-- Remember this is executed from the caller's directory; local
 		-- target names will resolve there.
-		local testfiles = e.tests
+		local testfiles = filenamesof(e.tests)
 		local skipsets = {}
 		for _, set in ipairs(e.skipsets) do
 			skipsets[set] = true
@@ -40,7 +40,7 @@ definerule("plat_testsuite",
 
 		local tests = {}
 		for _, f in ipairs(testfiles) do
-			local fs = replace(basename(filenamesof(f)[1]), "%.[^.]+$", "")
+			local fs = replace(basename(f), "%.[^.]+$", "")
 			local _, _, lang = fs:find("_([^_]+)$")
 			if not lang then
 				lang = "e"
