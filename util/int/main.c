@@ -45,14 +45,35 @@ extern void disassemble(void);
 extern void tally(void);
 extern void out_tally(void);
 
+/** Check dynamically that the interpreter can run on the target machine. */
+static void check_requirements(char *name)
+{
+	
+	/* Verify that shift right supported signed shifts. According to ISO C90,
+	 * this is not mandatory, we should not support it here!
+	 */
+	int shrv = -4;
+	if ((shrv >> 1) != -2)
+	{
+		fprintf(stderr,
+			"%s compiled with compiler that does not support signed right shifts. Aborted.",
+			name);
+		exit(1);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	register int i;
 	register int nosetjmp = 1;
 	int must_disassemble = 0;
 	int must_tally = 0;
-	
+
+
 	prog_name = argv[0];
+
+	check_requirements(prog_name);
+
 
 	/* Initialize the EM machine */
 	PreIgnMask = 0;
