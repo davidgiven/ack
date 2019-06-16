@@ -17,6 +17,7 @@ ssize_t read(int fd, void* buffer, size_t count)
 	struct FCBE* fcbe = &__fd[fd];
 	uint8_t olduser;
 	ssize_t result;
+	uint8_t* src;
 
     __init_file_descriptors();
 	if (fcbe->fcb.dr == 0)
@@ -36,8 +37,6 @@ ssize_t read(int fd, void* buffer, size_t count)
 		goto done;
 	if (fcbe->offset || !SECTOR_ALIGNED(count))
 	{
-		uint8_t delta;
-
 		/* We need to read bytes until we're at a sector boundary. */
 
 		cpm_set_dma(__transfer_buffer);
@@ -46,13 +45,13 @@ ssize_t read(int fd, void* buffer, size_t count)
 
 		/* Copy enough bytes to reach the end of the sector. */
 
-		delta = 128 - fcbe->offset;
-		if (delta > count)
-			delta = count;
-		memcpy(bbuffer, __transfer_buffer+fcbe->offset, delta);
-		fcbe->offset += delta;
-		count -= delta;
-		bbuffer += delta;
+		src = __transfer_buffer + fcbe->offset;
+		while ((count != 0) && (fcbe->offset != 128))
+		{
+			*bbuffer++ = *src++;
+			fcbe->offset++;
+			count--;
+		}
 
 		/* If we've read enough bytes, advance to the next sector. */
 
@@ -89,7 +88,13 @@ ssize_t read(int fd, void* buffer, size_t count)
 		if (cpm_read_random_safe(&fcbe->fcb) != 0)
 			goto eio;
 
-		memcpy(bbuffer, __transfer_buffer, count);
+		src = __transfer_buffer;
+		while (count != 0)
+		{
+			*bbuffer++ = *src++;
+			count--;
+		}
+
 		fcbe->offset = count;
 	}
 

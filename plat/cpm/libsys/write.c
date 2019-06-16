@@ -19,10 +19,11 @@ void _sys_write_tty(char c)
 
 ssize_t write(int fd, void* buffer, size_t count)
 {
-	uint8_t* bbuffer = buffer;
+	const uint8_t* bbuffer = buffer;
 	struct FCBE* fcbe = &__fd[fd];
 	uint8_t olduser;
 	uint16_t result;
+	uint8_t* dest;
 
     __init_file_descriptors();
 	if (fcbe->fcb.dr == 0)
@@ -40,8 +41,6 @@ ssize_t write(int fd, void* buffer, size_t count)
 
 	if (fcbe->offset || !SECTOR_ALIGNED(count))
 	{
-		uint8_t delta;
-
 		/* We're not at a sector boundary, so we need to do a
 		 * read/modify/write of the initial fragment. */
 
@@ -51,13 +50,13 @@ ssize_t write(int fd, void* buffer, size_t count)
 
 		/* Copy enough bytes to reach the end of the sector. */
 
-		delta = 128 - fcbe->offset;
-		if (delta > count)
-			delta = count;
-		memcpy(__transfer_buffer+fcbe->offset, bbuffer, delta);
-		fcbe->offset += delta;
-		count -= delta;
-		bbuffer += delta;
+		dest = __transfer_buffer + fcbe->offset;
+		while ((count != 0) && (fcbe->offset != 128))
+		{
+			*dest++ = *bbuffer++;
+			fcbe->offset++;
+			count--;
+		}
 
 		/* Write back. */
 
@@ -94,7 +93,12 @@ ssize_t write(int fd, void* buffer, size_t count)
 		if (cpm_read_random_safe(&fcbe->fcb) != 0)
 			goto eio;
 
-		memcpy(__transfer_buffer, bbuffer, count);
+		dest = __transfer_buffer;
+		while (count != 0)
+		{
+			*dest++ = *bbuffer++;
+			count--;
+		}
 
 		if (cpm_write_random(&fcbe->fcb) != 0)
 			goto eio;

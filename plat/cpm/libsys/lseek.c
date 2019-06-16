@@ -24,5 +24,5 @@ off_t lseek(int fd, off_t offset, int whence)
     
     U16(fcbe->fcb.r) = offset>>7;
     fcbe->offset = offset & 0x7f;
-    return 0;
+    return offset;
 }
