@@ -1,26 +1,22 @@
-# $Source$
-# $State$
-# $Revision$
-
-
 The cpm platform
 =================
 
 cpm is an i80-based BSP that generates CP/M executables that can be run on any
 CP/M-compliant machine.
 
-This port only implements a very limited set of syscalls --- and most of those
-are stubs required to make the demo apps link. File descriptors 0, 1 and 2
-represent the console. Each read() blocks and reads an entire line (it can't
-read part of a line) from the CP/M line editor, then appends \n. Each write()
-converts \n to \r\n. The line editor and \n conversion can't be turned off.
+CP/M has special needs in many ways, the main one being that it doesn't
+support byte-accessible files --- only complete 128-byte sectors can be read
+or written. The port's read/write/open/close/lseek etc should handle this
+transparently, but trying to write a fragment of a sector will involve a
+read/modify/write cycle. No buffering is done (that's stdio's job).
 
-There's a special, if rather minimilist, interface to give applications access
+File descriptors 0, 1 and 2 represent the console, as usual.
+
+In addition, there's a special interface to give applications direct access
 to CP/M. See include/cpm.h for details.
 
-Link with `ack -fp` to enable software floating point. Otherwise, attempts to
-use floating-point numbers will cause the program to terminate.
-
+Floating point is not supported and attempts to use floating-point numbers
+will cause the program to terminate.
 
 Example command line
 ====================
