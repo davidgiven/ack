@@ -5,9 +5,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../stdio/loc_incl.h"
 
-#if ACKCONF_WANT_STDIO
+#if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
 FILE* fdopen(int fd, const char* mode)
 {

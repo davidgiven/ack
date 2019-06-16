@@ -3,7 +3,7 @@
  */
 /* $Id$ */
 
-#include "loc_incl.h"
+#include <stdio.h>
 
 #if ACKCONF_WANT_STDIO
 

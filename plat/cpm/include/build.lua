@@ -9,6 +9,7 @@ local function addheader(h)
 end
 
 addheader("ack/plat.h")
+addheader("ack/file.h")
 addheader("sys/types.h")
 addheader("cpm.h")
 

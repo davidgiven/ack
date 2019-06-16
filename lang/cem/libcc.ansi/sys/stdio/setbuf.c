@@ -4,9 +4,8 @@
 /* $Id$ */
 
 #include <stdio.h>
-#include "loc_incl.h"
 
-#if ACKCONF_WANT_STDIO
+#if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
 void setbuf(register FILE* stream, char* buf)
 {

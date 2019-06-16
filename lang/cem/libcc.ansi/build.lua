@@ -39,9 +39,12 @@ for _, plat in ipairs(vars.plats) do
 			"./core/math/*.c",
 			"./core/math/*.e",
 			"./core/misc/*.c",
+			"./core/printf/*.c",
+			"./core/scanf/*.c",
 			"./core/setjmp/*.c",
 			"./core/setjmp/*.e",
 			"./core/stdlib/*.c",
+			"./core/stdio/*.c",
 			"./core/string/*.c",
 			"./core/time/*.c",
 			"./sys/exit/*.c",
@@ -57,7 +60,6 @@ for _, plat in ipairs(vars.plats) do
 			"./core/stdlib/ext_fmt.h",
 			"./core/time/loc_time.h",
 			"./sys/malloc/malloc.h",
-			"./sys/stdio/loc_incl.h",
 		},
 		vars = { plat = plat }
 	}

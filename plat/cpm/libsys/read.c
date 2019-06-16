@@ -3,47 +3,109 @@
  * $Revision$
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 #include <cpm.h>
+#include "cpmsys.h"
 
 ssize_t read(int fd, void* buffer, size_t count)
 {
-	short save;
-	unsigned char before_n;
+	uint8_t* bbuffer = buffer;
+	struct FCBE* fcbe = &__fd[fd];
+	uint8_t olduser;
+	ssize_t result;
+	uint8_t* src;
 
-	/* We're only allowed to read from fd 0, 1 or 2. */
-	if ((fd < 0) || (fd > 2))
+    __init_file_descriptors();
+	if (fcbe->fcb.dr == 0)
 	{
-		errno = EBADF;
-		return -1;
+		/* Read from the console. */
+
+		if (count == 0)
+			return 0;
+		*(uint8_t*)buffer = cpm_conin();
+		return 1;
 	}
 
-	/* We need room for at least 1 char plus '\n'. */
-	if (count < 2)
+	olduser = cpm_get_user();
+	cpm_set_user(fcbe->user);
+
+	if (U16(fcbe->fcb.r) >= fcbe->length)
+		goto done;
+	if (fcbe->offset || !SECTOR_ALIGNED(count))
 	{
-		errno = EINVAL;
-		return -1;
+		/* We need to read bytes until we're at a sector boundary. */
+
+		cpm_set_dma(__transfer_buffer);
+		if (cpm_read_random_safe(&fcbe->fcb) != 0)
+			goto eio;
+
+		/* Copy enough bytes to reach the end of the sector. */
+
+		src = __transfer_buffer + fcbe->offset;
+		while ((count != 0) && (fcbe->offset != 128))
+		{
+			*bbuffer++ = *src++;
+			fcbe->offset++;
+			count--;
+		}
+
+		/* If we've read enough bytes, advance to the next sector. */
+
+		if (fcbe->offset == 128)
+		{
+			U16(fcbe->fcb.r)++;
+			fcbe->offset = 0;
+		}
 	}
 
-	/* Make room to append '\n' later. */
-	before_n = count > 255 ? 255 : count - 1;
+	while (count >= 128)
+	{
+		if (U16(fcbe->fcb.r) >= fcbe->length)
+			goto done;
 
-	/* Borrow 2 bytes of RAM before the buffer. */
-	/* This might overwrite count!!! */
-	save = ((short*)buffer)[-1];
+		/* Read entire sectors directly into the destination buffer. */
 
-	/* Read one line from the console. */
-	((unsigned char*)buffer)[-2] = before_n;
-	cpm_readline((uint8_t*)buffer - 2);
-	before_n = ((unsigned char*)buffer)[-1];
+		cpm_set_dma(bbuffer);
+		if (cpm_read_random_safe(&fcbe->fcb) != 0)
+			goto eio;
+		count -= 128;
+		bbuffer += 128;
+		U16(fcbe->fcb.r)++;
+	}
 
-	((char*)buffer)[before_n] = '\n'; /* Append '\n'. */
-	((short*)buffer)[-1] = save; /* Give back borrowed bytes. */
+	if (count != 0)
+	{
+		if (U16(fcbe->fcb.r) >= fcbe->length)
+			goto done;
 
-	/* Echo '\n' to console. */
-	cpm_printstring("\r\n$");
+		/* There's some trailing data to read. */
 
-	return (int)before_n + 1;
+		cpm_set_dma(__transfer_buffer);
+		if (cpm_read_random_safe(&fcbe->fcb) != 0)
+			goto eio;
+
+		src = __transfer_buffer;
+		while (count != 0)
+		{
+			*bbuffer++ = *src++;
+			count--;
+		}
+
+		fcbe->offset = count;
+	}
+
+done:
+	result = bbuffer - (uint8_t*)buffer;
+exit:
+	cpm_set_user(olduser);
+	return result;
+
+eio:
+	errno = EIO;
+	result = -1;
+	goto exit;
 }

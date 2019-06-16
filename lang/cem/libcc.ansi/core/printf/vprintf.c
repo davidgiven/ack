@@ -5,13 +5,12 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 
 int vprintf(const char* format, va_list arg)
 {
-	return _doprnt(format, arg, stdout);
+	return vfprintf(stdout, format, arg);
 }
 
 #endif

@@ -6,11 +6,12 @@ definerule("plat_testsuite",
 		method = { type="string" },
 		sets = { type="table", default={"core", "b", "bugs", "m2", "floats"}},
 		skipsets = { type="table", default={}},
+		tests = { type="targets", default={} },
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
 		-- target names will resolve there.
-		local testfiles = {}
+		local testfiles = filenamesof(e.tests)
 		local skipsets = {}
 		for _, set in ipairs(e.skipsets) do
 			skipsets[set] = true

@@ -63,4 +63,9 @@
 #define ACKCONF_WANT_STDIO 1
 #endif
 
+#ifndef ACKCONF_WANT_EMULATED_FILE
+/* Implement FILE* on top of read()/write() file descriptors. */
+#define ACKCONF_WANT_EMULATED_FILE 1
+#endif
+
 #endif

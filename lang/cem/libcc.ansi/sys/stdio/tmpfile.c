@@ -7,13 +7,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 
 FILE* tmpfile(void)
 {
-	static char name_buffer[L_tmpnam] = "/tmp/tmp.";
+	static char name_buffer[L_tmpnam] = ACK_TMP_PREFIX;
 	static char* name = NULL;
 	FILE* file;
 

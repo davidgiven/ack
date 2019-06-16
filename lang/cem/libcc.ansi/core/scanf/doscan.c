@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include "loc_incl.h"
+#include "doscan.h"
 
 #if ACKCONF_WANT_STDIO
 
@@ -26,15 +26,16 @@
 static char Xtable[NR_CHARS];
 static char inp_buf[NUMLEN];
 
+int (*_doscan_get)(void);
+void (*_doscan_unget)(int c);
+
 /* Collect a number of characters which constitite an ordinal number.
  * When the type is 'i', the base can be 8, 10, or 16, depending on the
  * first 1 or 2 characters. This means that the base must be adjusted
  * according to the format of the number. At the end of the function, base
  * is then set to 0, so strtol() will get the right argument.
  */
-static char*
-o_collect(register int c, register FILE* stream, char type,
-    int width, int* basep)
+static char* o_collect(register int c, char type, int width, int* basep)
 {
 	register char* bufp = inp_buf;
 	register int base;
@@ -63,14 +64,14 @@ o_collect(register int c, register FILE* stream, char type,
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 	}
 
 	if (width && c == '0' && base == 16)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 		if (c != 'x' && c != 'X')
 		{
 			if (type == 'i')
@@ -80,7 +81,7 @@ o_collect(register int c, register FILE* stream, char type,
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = _doscan_get();
 		}
 	}
 	else if (type == 'i')
@@ -95,14 +96,14 @@ o_collect(register int c, register FILE* stream, char type,
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = _doscan_get();
 		}
 		else
 			break;
 	}
 
 	if (width && c != EOF)
-		ungetc(c, stream);
+		_doscan_unget(c);
 	if (type == 'i')
 		base = 0;
 	*basep = base;
@@ -119,8 +120,7 @@ o_collect(register int c, register FILE* stream, char type,
  * not necessary, although the use of the width field can cause incomplete
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
-static char*
-f_collect(register int c, register FILE* stream, register int width)
+static char* f_collect(register int c, register int width)
 {
 	register char* bufp = inp_buf;
 	int digit_seen = 0;
@@ -129,7 +129,7 @@ f_collect(register int c, register FILE* stream, register int width)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 	}
 
 	while (width && isdigit(c))
@@ -137,26 +137,26 @@ f_collect(register int c, register FILE* stream, register int width)
 		digit_seen++;
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 	}
 	if (width && c == '.')
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = _doscan_get();
 		}
 	}
 
 	if (!digit_seen)
 	{
 		if (width && c != EOF)
-			ungetc(c, stream);
+			_doscan_unget(c);
 		return inp_buf - 1;
 	}
 	else
@@ -166,30 +166,30 @@ f_collect(register int c, register FILE* stream, register int width)
 	{
 		*bufp++ = c;
 		if (--width)
-			c = getc(stream);
+			c = _doscan_get();
 		if (width && (c == '+' || c == '-'))
 		{
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = _doscan_get();
 		}
 		while (width && isdigit(c))
 		{
 			digit_seen++;
 			*bufp++ = c;
 			if (--width)
-				c = getc(stream);
+				c = _doscan_get();
 		}
 		if (!digit_seen)
 		{
 			if (width && c != EOF)
-				ungetc(c, stream);
+				_doscan_unget(c);
 			return inp_buf - 1;
 		}
 	}
 
 	if (width && c != EOF)
-		ungetc(c, stream);
+		_doscan_unget(c);
 	*bufp = '\0';
 	return bufp - 1;
 }
@@ -199,7 +199,7 @@ f_collect(register int c, register FILE* stream, register int width)
  * the routine that does the scanning 
  */
 
-int _doscan(register FILE* stream, const char* format, va_list ap)
+int _doscan(const char* format, va_list ap)
 {
 	int done = 0; /* number of items done */
 	int nrchars = 0; /* number of characters read */
@@ -226,15 +226,15 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		{
 			while (isspace(*format))
 				format++; /* skip whitespace */
-			ic = getc(stream);
+			ic = _doscan_get();
 			nrchars++;
 			while (isspace(ic))
 			{
-				ic = getc(stream);
+				ic = _doscan_get();
 				nrchars++;
 			}
 			if (ic != EOF)
-				ungetc(ic, stream);
+				_doscan_unget(ic);
 			nrchars--;
 		}
 		if (!*format)
@@ -242,12 +242,12 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 
 		if (*format != '%')
 		{
-			ic = getc(stream);
+			ic = _doscan_get();
 			nrchars++;
 			if (ic != *format++)
 			{
 				if (ic != EOF)
-					ungetc(ic, stream);
+					_doscan_unget(ic);
 				nrchars--;
 				break; /* error */
 			}
@@ -256,7 +256,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		format++;
 		if (*format == '%')
 		{
-			ic = getc(stream);
+			ic = _doscan_get();
 			nrchars++;
 			if (ic == '%')
 			{
@@ -299,7 +299,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		{
 			do
 			{
-				ic = getc(stream);
+				ic = _doscan_get();
 				nrchars++;
 			} while (isspace(ic));
 			if (ic == EOF)
@@ -307,7 +307,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 		}
 		else if (kind != 'n')
 		{ /* %c or %[ */
-			ic = getc(stream);
+			ic = _doscan_get();
 			if (ic == EOF)
 				break; /* outer while */
 			nrchars++;
@@ -344,7 +344,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (!width)
 					return done;
 
-				str = o_collect(ic, stream, kind, width, &base);
+				str = o_collect(ic, kind, width, &base);
 				if (str < inp_buf
 				    || (str == inp_buf
 				           && (*str == '-'
@@ -385,7 +385,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = _doscan_get();
 						nrchars++;
 					}
 				}
@@ -393,7 +393,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				break;
@@ -411,7 +411,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = _doscan_get();
 						nrchars++;
 					}
 				}
@@ -421,7 +421,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				break;
@@ -468,7 +468,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (!*format || !(Xtable[ic] ^ reverse))
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						_doscan_unget(ic);
 					return done;
 				}
 
@@ -481,7 +481,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 						*str++ = (char)ic;
 					if (--width)
 					{
-						ic = getc(stream);
+						ic = _doscan_get();
 						nrchars++;
 					}
 				} while (width && ic != EOF && (Xtable[ic] ^ reverse));
@@ -489,7 +489,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 				if (width)
 				{
 					if (ic != EOF)
-						ungetc(ic, stream);
+						_doscan_unget(ic);
 					nrchars--;
 				}
 				if (!(flags & FL_NOASSIGN))
@@ -508,7 +508,7 @@ int _doscan(register FILE* stream, const char* format, va_list ap)
 
 				if (!width)
 					return done;
-				str = f_collect(ic, stream, width);
+				str = f_collect(ic, width);
 
 				if (str < inp_buf
 				    || (str == inp_buf

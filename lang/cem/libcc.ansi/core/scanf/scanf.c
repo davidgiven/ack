@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "loc_incl.h"
 
 #if ACKCONF_WANT_STDIO
 
@@ -15,9 +14,7 @@ int scanf(const char* format, ...)
 	int retval;
 
 	va_start(ap, format);
-
-	retval = _doscan(stdin, format, ap);
-
+	retval = vfscanf(stdin, format, ap);
 	va_end(ap);
 
 	return retval;

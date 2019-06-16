@@ -7,9 +7,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "loc_incl.h"
 
-#if ACKCONF_WANT_STDIO
+#if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
 #define PMODE 0666
 
