@@ -4,8 +4,6 @@
 /*
  * Uses _rck_ for range checks.  Catches the EM trap if a value is out
  * of range, and continues with the next instruction after _rck_.
- *
- * Some back ends, like i80, ignore _rck_, so this test fails.
  */
 
 testnr
@@ -18,6 +16,11 @@ caught
     inp $never
     exp $_m_a_i_n
     pro $_m_a_i_n,0
+
+/* These architecture ignore _rck_. */
+#if defined i80
+    cal $finished
+#endif
 
     lim           ; load ignore mask
     loc 2
