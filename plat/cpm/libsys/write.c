@@ -12,9 +12,9 @@
 
 void _sys_write_tty(char c)
 {
-	cpm_conout(c);
 	if (c == '\n')
-		cpm_conout(c);
+		cpm_conout('\r');
+	cpm_conout(c);
 }
 
 ssize_t write(int fd, void* buffer, size_t count)
