@@ -44,19 +44,6 @@ begtext:
 	
 	jmp (__m_a_i_n)
 	 	
-#if 0
-	mov eax, (esp)    ! eax = argc
-	lea ebx, 4(esp)   ! ebx = argv
-	lea ecx, (esp)(eax*4)
-	add ecx, 12       ! environ
-	
-	push ecx         ! environ
-	push ebx         ! argc
-	push eax         ! argv
-	push eax         ! dummy, representing the return argument
-	xor ebp, ebp
-#endif
-	
 	! This provides an emergency exit routine used by EM.
 	
 .define EXIT
