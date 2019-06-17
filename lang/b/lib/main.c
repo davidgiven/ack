@@ -173,6 +173,8 @@ void patch_addresses(uintptr_t** p)
     while (*p)
     {
         uintptr_t* q = *p++;
+		if (*q & MASK)
+			abort();
         *q >>= SHIFT;
     }
 }
