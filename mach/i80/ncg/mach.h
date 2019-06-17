@@ -7,7 +7,8 @@
 #define in_ap(y)        /* nothing */
 
 #define newilb(x)       fprintf(codefile,"%s:\n",x)
-#define newdlb(x)       fprintf(codefile,"%s:\n",x)
+#define newdlb(x)       fprintf(codefile,".align 2\n%s:\n",x)
+#define newplb(x)       fprintf(codefile,".align 2\n%s:\n", x)
 #define dlbdlb(x,y)     fprintf(codefile,"%s = %s\n",x,y)
 #define newlbss(l,x)       fprintf(codefile,".comm %s,%u\n",l,x);
 

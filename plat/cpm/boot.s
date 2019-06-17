@@ -10,10 +10,10 @@
 .sect .data
 .sect .bss
 
-MAX_ARGV = 8
+MAX_ARGV = 10
 
 .sect .bss
-STACKSIZE = 2*1024
+STACKSIZE = 512
 .comm stack, STACKSIZE
 
 .sect .text
@@ -140,6 +140,7 @@ __exit:
 saved_sp = . + 1
 	lxi sp, 0                ! patched on startup
 	ret
+	.align 2
 
 ! Emergency exit routine.
 
@@ -181,7 +182,8 @@ _cpm_cmdline = 0x0081
 
 ! Used to store the argv array.
 
-argc: .space 1          ! number of args
+.sect .bss
+argc: .space 2          ! number of args
 argv0: .space 2         ! always points at progname
 argv: .space 2*MAX_ARGV ! argv array (must be after argv0)
 envp: .space 2          ! envp array (always empty, must be after argv)
@@ -195,7 +197,7 @@ envp: .space 2          ! envp array (always empty, must be after argv)
 .comm .retadr, 2        ! used to save return address
 .comm .retadr1, 2       ! reserve
 .comm .bcreg, 2
-.comm .areg, 1
+.comm .areg, 2
 .comm .tmp1, 2
 .comm .fra, 8           ! 8 bytes function return area
 block1: .space 4        ! used by 32 bits divide and

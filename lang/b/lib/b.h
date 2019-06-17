@@ -14,6 +14,8 @@
 #error Unsupported EM_PSIZE
 #endif
 
+#define MASK ((1<<SHIFT)-1)
+
 extern FILE* input_unit;
 extern FILE* output_unit;
 
