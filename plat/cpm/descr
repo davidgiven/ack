@@ -77,8 +77,8 @@ name led
 		(.e:{TAIL}={PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libsys.a \
 				   {PLATFORMDIR}/libc.a \
-		           {PLATFORMDIR}/libsys.a \
 				   {PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libsys.a \
 		           {PLATFORMDIR}/libend.a)
 	linker
 end
