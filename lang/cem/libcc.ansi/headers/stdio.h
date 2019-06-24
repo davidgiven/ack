@@ -75,6 +75,7 @@ extern void	perror(const char *_s);
 
 /* Internal function used in several places which is approximately itoa(). */
 extern char *_i_compute(unsigned long val, int base, char *s, int nrdigits);
+extern void itoa(long val, char* buffer, int radix);
 
 #if ACKCONF_WANT_EMULATED_FILE
 #include <ack/emufile.h>

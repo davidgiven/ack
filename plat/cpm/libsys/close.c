@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 #include <cpm.h>
 #include "cpmsys.h"
 

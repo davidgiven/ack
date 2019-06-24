@@ -83,6 +83,9 @@ extern uint8_t cpm_read_random_safe(FCB* fcb);
 /* Extends cpm_ramtop over the CCP, for a little extra space. */
 extern void cpm_overwrite_ccp(void);
 
+/* Like cpm_printstring, but uses C-style strings terminated with a \0. */
+extern void cpm_printstring0(const char* s);
+
 /*  0 */ extern void cpm_warmboot(void);
 /*  1 */ extern uint8_t cpm_conin(void);
 /*  2 */ extern void cpm_conout(uint8_t b);
@@ -125,5 +128,9 @@ extern void cpm_overwrite_ccp(void);
 
 #define cpm_get_user() cpm_get_set_user(0xff)
 #define cpm_set_user(u) cpm_get_set_user(u)
+
+extern uint8_t bios_conin(void);
+extern uint8_t bios_const(void);
+extern void bios_conout(uint8_t c);
 
 #endif
