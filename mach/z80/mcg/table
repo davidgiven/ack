@@ -1,0 +1,820 @@
+OPTIONS
+
+REGISTERS
+
+    /* Registers are allocated top down. The odd order below is to make sure
+     * that cheap registers get allocated first.
+     *
+     * Attributes may have at most one of: int, float, long, double. These
+     * indicate that the register is used to store a value of that type. If
+     * your register can store more than one type, create an alias. Registers
+     * with none of these cannot be copied by the code generator (and so cannot
+     * be moved from register to register or spilt).
+     */
+
+    reghl named("hl", "h", "l")                   regpair int hlreg iret;
+    regbc named("bc", "b", "c")                   regpair int bcdereg;
+    regde named("de", "d", "e")                   regpair int bcdereg;
+    regix named("ix")                             int;
+
+    reghlx named("hl", "h", "l")                  xreg long lret;
+    regbcx named("bc", "b", "c")                  xreg long;
+    regdex named("de", "d", "e")                  xreg long;
+
+
+
+
+DECLARATIONS
+
+    ubyteX;   /* bottom 8 bits valid, the rest undefined */
+    ubyte0;   /* bottom 8 bits valid, the rest 0 */
+    ushortX;  /* bottom 16 bits valid, the rest undefined */
+    ushort0;  /* bottom 16 bits valid, the rest 0 */
+
+	local fragment;
+
+	address fragment;
+	intregorzero fragment;
+	byteregorzero fragment;
+	shortregorzero fragment;
+
+
+
+PATTERNS
+
+/* Special */
+
+	PAIR(BLOCK.I, BLOCK.I);
+
+
+
+/* Locals */
+
+	
+/* Miscellaneous special things */
+
+	out:(int)reg = POP.I
+		emit "lw %out, 0(sp)"
+        emit "addiu sp, sp, 4"
+		cost 8;
+
+    out:(long)reg = POP.L
+        emit "lw %out.0, 4(sp)"
+        emit "lw %out.1, 0(sp)"
+        emit "addiu sp, sp, 8"
+        cost 12;
+
+	SETRET.I(in:(iret)reg)
+		emit "! setret.i"
+		cost 1;
+#if 0
+
+    SETRET.L(in:(lret)reg)
+        emit "! setret.l"
+        cost 1;
+
+	SETRET.F(in:(fret)reg)
+		emit "! setret.f"
+		cost 1;
+
+	SETRET.D(in:(dret)reg)
+		emit "! setret.d"
+		cost 1;
+
+	STACKADJUST.I(delta:CONST.I)
+        when signed_constant(%delta, 16)
+		emit "addiu sp, sp, $delta"
+		cost 4;
+
+	STACKADJUST.I(in:intregorzero)
+		emit "addu sp, sp, %in"
+		cost 4;
+
+	STACKADJUST.I(NEG.I(in:intregorzero))
+		emit "subu sp, sp, %in"
+		cost 4;
+
+    out:(int)reg = GETFP.I
+        emit "mov %out, fp"
+        cost 4;
+
+    SETFP.I(in:(int)reg)
+        emit "mov fp, %in"
+        cost 4;
+
+    out:(int)reg = CHAINFP.I(in:(int)reg)
+        emit "lw %out, 0(%in)"
+        cost 4;
+
+    out:(int)reg = FPTOAB.I(GETFP.I)
+        emit "addiu %out, fp, 8"
+        cost 4;
+
+    out:(int)reg = FPTOAB.I(in:(int)reg)
+        emit "addiu %out, %in, 8"
+        cost 4;
+
+    out:(int)reg = FPTOLB.I(in:(int)reg)
+        with %out == %in
+        cost 1;
+
+    out:(int)reg = GETSP.I
+        emit "mov %out, sp"
+        cost 4;
+
+    SETSP.I(in:(int)reg)
+        emit "mov sp, %in"
+        cost 4;
+
+    out:(int)reg = ANY.I
+        cost 1;
+
+    out:(long)reg = ANY.L
+        cost 1;
+
+
+
+/* Memory operations */
+
+    /* Stores */
+
+	STORE.L(addr:address, value:(long)reg)
+		emit "sw %value.0, 0+%addr"
+		emit "sw %value.1, 4+%addr"
+		cost 8;
+
+	STORE.I(addr:address, value:intregorzero)
+		emit "sw %value, %addr"
+		cost 4;
+
+    STORE.I(label:LABEL.I, value:intregorzero)
+        emit "lui at, ha16[$label]"
+        emit "sw %value, lo16[$label] (at)"
+		cost 8;
+
+	STOREH.I(addr:address, value:shortregorzero)
+		emit "sh %value, %addr"
+		cost 4;
+
+    STOREH.I(label:LABEL.I, value:shortregorzero)
+        emit "lui at, ha16[$label]"
+        emit "sh %value, lo16[$label] (at)"
+		cost 8;
+#endif
+
+    STOREB.I(address:(hlreg)reg, value:(int)reg)
+	emit "ld (%address), %value.1"
+	cost 1;
+#if 0
+
+    STOREB.I(label:LABEL.I, value:byteregorzero)
+        emit "lui at, ha16[$label]"
+        emit "sb %value, lo16[$label] (at)"
+		cost 8;
+
+	STORE.F(addr:address, value:(float)reg)
+		emit "swc1 %value, %addr"
+		cost 4;
+
+    STORE.F(label:LABEL.I, value:(float)reg)
+        emit "lui at, ha16[$label]"
+        emit "swc1 %value, lo16[$label] (at)"
+		cost 8;
+
+	STORE.D(addr:address, value:(double)reg)
+		emit "sdc1 %value, %addr"
+		cost 4;
+
+    STORE.D(label:LABEL.I, value:(double)reg)
+        emit "lui at, ha16[$label]"
+        emit "sdc1 %value, lo16[$label] (at)"
+		cost 8;
+#endif
+
+    /* Loads */
+
+	out:(int)reg = LOAD.I(local:local)
+		emit "ld %out.2, (iy+$local)"
+		emit "ld %out.1, (iy+$local+1)"
+		cost 6;
+
+#if 0
+	out:(int)reg = LOAD.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lw %out, lo16[$label] (at)"
+		cost 8;
+
+    /* We can't just load directly because %out.0 and %addr might share
+     * a register, resulting in %addr being corrupted before %out.1 is
+     * loaded. */
+    out:(long)reg = LOAD.L(addr:address)
+        emit "lw at, 0+%addr"
+        emit "lw %out.1, 4+%addr"
+        emit "mov %out.0, at"
+        cost 12;
+
+	out:(int)ushort0 = LOADH.I(addr:address)
+		emit "lhu %out, %addr"
+		cost 4;
+
+	out:(int)reg = EXTENDH.I(LOADH.I(addr:address))
+		emit "lh %out, %addr"
+		cost 4;
+
+	out:(int)ushort0 = LOADH.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lhu %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(int)reg = EXTENDH.I(LOADH.I(label:LABEL.I))
+		emit "lui at, ha16[$label]"
+        emit "lh %out, lo16[$label] (at)"
+		cost 8;
+#endif
+
+	out:(int)reg = LOADB.I(in:(hlreg)reg)
+		emit "ld %out.2, (%in)"
+		cost 1;
+
+	out:(int)reg = EXTENDB.I(LOADB.I(in:(hlreg)reg))
+		emit "ld %out.2, (%in)"
+		emit "ld %out.1, 0"
+		cost 3;
+
+#if 0
+	out:(int)ubyte0 = LOADB.I(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lbu %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(int)reg = EXTENDB.I(LOADB.I(label:LABEL.I))
+		emit "lui at, ha16[$label]"
+        emit "lb %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(float)reg = LOAD.F(addr:address)
+		emit "lwc1 %out, %addr"
+		cost 4;
+
+	out:(float)reg = LOAD.F(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "lwc1 %out, lo16[$label] (at)"
+		cost 8;
+
+	out:(double)reg = LOAD.D(addr:address)
+		emit "ldc1 %out, %addr"
+		cost 4;
+
+	out:(double)reg = LOAD.D(label:LABEL.I)
+		emit "lui at, ha16[$label]"
+        emit "ldc1 %out, lo16[$label] (at)"
+		cost 8;
+#endif
+
+    /* ubyte intrinsics */
+
+    out:(int)ubyteX = in:(int)ubyte0
+        with %out == %in
+        emit "! ubyte0 -> ubyteX"
+        cost 1;
+
+#if 0
+    out:(int)ubyte0 = in:(int)ubyteX
+        emit "andiu %out, %in, 0xff ! ubyteX -> ubyte0"
+        cost 4;
+
+    out:(int)reg = in:(int)ubyte0
+        with %out == %in
+        emit "! ubyte0 -> reg"
+        cost 4;
+
+    out:(int)ubyteX = in:(int)reg
+        with %out == %in
+        emit "! reg -> ubyteX"
+        cost 1;
+
+    /* ushort intrinsics */
+
+    out:(int)ushortX = in:(int)ushort0
+        with %out == %in
+        emit "! ushort0 -> ushortX"
+        cost 1;
+
+    out:(int)ushort0 = in:(int)ushortX
+        emit "andiu %out, %in, 0xffff ! ushortX -> ushort0"
+        cost 4;
+
+    out:(int)reg = in:(int)ushort0
+        with %out == %in
+        emit "! ushort0 -> reg"
+        cost 4;
+
+    out:(int)ushortX = in:(int)reg
+        with %out == %in
+        emit "! reg -> ushortX"
+        cost 1;
+
+
+
+/* Extensions and conversions */
+
+    out:(int)reg = EXTENDB.I(in:intregorzero)
+        emit "seb %out, %in"
+        cost 4;
+
+    out:(int)reg = EXTENDH.I(in:intregorzero)
+        emit "seh %out, %in"
+        cost 4;
+#endif
+
+    out:(int)reg = FROMSI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMSI.I(int) -> int"
+        cost 1;
+
+#if 0
+    out:(int)reg = FROMUI.I(in:(int)reg)
+        with %out == %in
+        emit "! FROMUI.I(int) -> int"
+        cost 1;
+
+    out:(long)reg = FROMSI.L(in:(int)reg)
+        emit "mov %out.0, %in"
+        emit "sra %out.1, %in, 31"
+        cost 8;
+
+    out:(long)reg = FROMUI.L(in:(int)reg)
+        emit "mr %out.0, %in"
+        emit "li %out.1, 0"
+        cost 8;
+
+    out:(lret)reg = FROMIPAIR.L(in1:(int)reg, in2:(int)reg)
+        with preserved(%in1), preserved(%in2)
+        emit "mov %out.0, %in1"
+        emit "mov %out.1, %in2"
+        cost 8;
+    
+    out:(int)reg = FROML0.I(in:(long)reg)
+        emit "mov %out, %in.0"
+        cost 4;
+
+    out:(int)reg = FROML1.I(in:(long)reg)
+        emit "mov %out, %in.1"
+        cost 4;
+
+	intregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	intregorzero = value:(int)reg
+		emit "%value";
+
+	intregorzero = value:(int)ubyte0
+		emit "%value";
+
+	intregorzero = value:(int)ushort0
+		emit "%value";
+
+	shortregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	shortregorzero = value:(int)ushort0
+		emit "%value";
+
+	shortregorzero = value:(int)ushortX
+		emit "%value";
+
+	shortregorzero = value:(int)ubyte0
+		emit "%value";
+
+	byteregorzero = zero:CONST.I
+		when specific_constant(%zero, 0)
+		emit "zero";
+
+	byteregorzero = value:(int)ubyte0
+		emit "%value";
+
+	byteregorzero = value:(int)ubyteX
+		emit "%value";
+#endif
+
+
+
+/* Locals and stack-relatives */
+
+	out:(hlreg)reg = in:LOCAL.I
+		emit "ld %out, $in"
+		emit "add %out, iy"
+		cost 5;
+
+	local = in:LOCAL.I
+		emit "$in";
+
+#if 0
+	address = ADD.I(GETSP.I, offset:CONST.I)
+        when signed_constant(%offset, 16)
+		emit "$offset(sp)";
+
+
+
+/* Memory addressing modes */
+
+	address = ADD.I(addr:(int)reg, offset:CONST.I)
+        when signed_constant(%offset, 16)
+		emit "$offset(%addr)";
+
+	address = addr:(int)reg
+		emit "0(%addr)";
+#endif
+
+
+/* Branches */
+
+	JUMP(addr:BLOCK.I)
+		emit "jp $addr"
+		cost 3;
+
+#if 0
+	FARJUMP(addr:LABEL.I)
+        with corrupted(volatile)
+		emit "j $addr"
+        emit "nop"
+		cost 8;
+
+    JUMP(dest:(int)reg)
+        emit "jr %dest"
+        emit "nop"
+        cost 8;
+
+	CJUMPEQ(left:(int)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "beq %left, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+	CJUMPLT(left:(int)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "bltz %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLE(left:(int)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "blez %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    #define CALLLABEL(insn) \
+        insn (dest:LABEL.I) \
+            with corrupted(volatile) \
+            emit "jal $dest" \
+            emit "nop" \
+            cost 8;
+
+    CALLLABEL(CALL)
+    out:(iret)reg = CALLLABEL(CALL.I)
+    out:(lret)reg = CALLLABEL(CALL.L)
+
+    #define CALLINDIRECT(insn) \
+        insn (dest:(int)reg) \
+            with corrupted(volatile) \
+            emit "jalr %dest" \
+            emit "nop" \
+            cost 8;
+
+    CALLINDIRECT(CALL)
+    out:(iret)reg = CALLINDIRECT(CALL.I)
+    out:(lret)reg = CALLINDIRECT(CALL.L)
+
+    JUMP(dest:LABEL.I)
+        emit "b $dest"
+        emit "nop"
+        cost 8;
+
+
+
+/* Conditional branches */
+
+    /* Normally COMPARE returns a condition code (in a flags register) which the CJUMP
+     * instructions can then operate on. But MIPS doesn't have a flags register, and
+     * requires you to know what condition you're testing for when you do the comparison.
+     * mcg doesn't like this much and we have to list every combination individually.
+     */
+
+    /* Signed integer comparisons against zero */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "beq %left, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "bltz %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, zero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%zero, 0)
+        emit "blez %left, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    /* Signed integer comparisons against a constant */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "li at, $value"
+        emit "beq %left, at, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when signed_constant(%value, 16)
+        emit "slti at, %left, $value"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, value:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when constant_within_inclusive_range(%value, -0x8000, 0x7ffe)
+        emit "slti at, %left, 1+$value"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    /* Signed integer comparisons against a register */
+
+	CJUMPEQ(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "beq %left, %right, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLT(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "slt at, %left, %right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+	CJUMPLE(COMPARESI.I(left:(int)reg, right:(int)reg), PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "slt at, %right, %left"
+        emit "beq at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    /* Unsigned integer comparisons against a constant */
+
+    CJUMPLT(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:CONST.I), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when signed_constant(%right, 16)
+        when specific_constant(%alwayszero, 0)
+        emit "sltiu at, %left, $right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLE(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:CONST.I), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when constant_within_inclusive_range(%right, -0x8000, 0x7ffe)
+        when specific_constant(%alwayszero, 0)
+        emit "sltiu at, %left, 1+$right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 20;
+
+    /* Unsigned integer comparisons against registers */
+
+    CJUMPEQ(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "beq %left, %right, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLT(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "sltu at, %left, %right"
+        emit "bne at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+    CJUMPLE(COMPARESI.I(COMPAREUI.I(left:(int)reg, right:(int)reg), alwayszero:CONST.I), PAIR(true:BLOCK.I, false:BLOCK.I))
+        when specific_constant(%alwayszero, 0)
+        emit "sltu at, %right, %left"
+        emit "beq at, zero, $true"
+        emit "nop"
+        emit "b $false"
+        emit "nop"
+        cost 16;
+
+
+
+
+/* Comparisons */
+
+	/* The COMPARE nodes return tristate integer values; -1, 0 or 1. */
+
+    out:(int)reg = COMPARESI.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
+        emit "slt at, %left, %right"
+        emit "bne at, zero, 1f"
+        emit "li %out, -1" /* delay slot */
+        emit "slt %out, %right, %left"
+        emit "1:"
+        cost 20;
+
+    out:(int)reg = COMPAREUI.I(left:(int)reg, right:(int)reg)
+        with preserved(%left), preserved(%right)
+        emit "sltu at, %left, %right"
+        emit "bne at, zero, 1f"
+        emit "li %out, -1" /* delay slot */
+        emit "sltu %out, %right, %left"
+        emit "1:"
+        cost 20;
+
+    out:(iret)reg = COMPAREUL.I(left:(lret)reg, right:(lret1)reg)
+        emit "jal .compareul"
+        emit "nop"
+        cost 30;
+
+    out:(int)reg = COMPAREF.I(left:(float)reg, right:(float)reg)
+        with preserved(%left), preserved(%right)
+        emit "c.lt.s 0, %left, %right"
+        emit "li %out, -1"
+        emit "bc1t 0, 1f"
+        emit "nop"
+        emit "c.lt.s 0, %right, %left"
+        emit "li %out, 1"
+        emit "movf %out, zero, 0"
+        emit "1:"
+        cost 28;
+
+    out:(int)reg = COMPARED.I(left:(double)reg, right:(double)reg)
+        with preserved(%left), preserved(%right)
+        emit "c.lt.d 0, %left, %right"
+        emit "li %out, -1"
+        emit "bc1t 0, 1f"
+        emit "nop"
+        emit "c.lt.d 0, %right, %left"
+        emit "li %out, 1"
+        emit "movf %out, zero, 0"
+        emit "1:"
+        cost 28;
+
+/* Booleans */
+
+	/* If 0 then 1, else 0 */
+	out:(int)reg = IFEQ.I(in:intregorzero)
+		emit "sltiu %out, %in, 1"
+		cost 4;
+
+	/* If -1 then 1, else 0 */
+	out:(int)reg = IFLT.I(in:intregorzero)
+		emit "srl %out, %in, 31"
+		cost 4;
+
+	/* If 1 or 0 then 1, else 0 */
+	out:(int)reg = IFLE.I(in:intregorzero)
+		emit "slti %out, %in, 1"
+		cost 4;
+
+#endif
+
+/* ALU operations */
+
+	/* reg + reg */
+    #define ALUR(name, instr) \
+        out:(int)reg = name(left:(hlreg)reg, right:(regpair)reg) \
+			with %out == %left							   \
+            emit instr " %out, %right"                     \
+            cost 1;                                        \
+
+	/* reg + const */
+    #define ALUC(name, instr, predicate) \
+        out:(int)reg = name(left:intregorzero, right:CONST.I)  \
+            when predicate(%right, 16)                     \
+            emit instr " %out, %left, $right"              \
+            cost 4;                                        \
+
+	/* const + reg */
+    #define ALUC_reversed(name, instr, predicate) \
+        out:(int)reg = name(left:CONST.I, right:intregorzero)  \
+            when predicate(%left, 16)                      \
+            emit instr " %out, %right, $left"              \
+            cost 4;                                        \
+
+	/* reg + const AND const + reg */
+    #define ALUCC(name, instr, predicate)                  \
+        ALUC(name, instr, predicate)                       \
+        ALUC_reversed(name, instr, predicate)
+
+    //ALUCC(ADD.I, "addiu", signed_constant)
+    ALUR(ADD.I, "add")
+
+	out:(int)reg = SUB.I(left:(hlreg)reg, right:(regpair)reg)
+		with %out == %left
+		emit "add %out, -%right"
+		cost 4;
+
+#if 0
+	out:(int)reg = SUB.I(left:intregorzero, right:intregorzero)
+		emit "subu %out, %left, %right"
+		cost 4;
+
+	out:(int)reg = SUB.I(left:intregorzero, right:CONST.I)
+		emit "addiu %out, %left, -[$right]"
+		cost 4;
+
+	out:(int)reg = DIV.I(left:intregorzero, right:intregorzero)
+		emit "div %left, %right"
+		emit "mflo %out"
+		cost 8;
+
+	out:(int)reg = DIVU.I(left:intregorzero, right:intregorzero)
+		emit "divu %left, %right"
+		emit "mflo %out"
+		cost 8;
+
+	out:(int)reg = MOD.I(left:intregorzero, right:intregorzero)
+		emit "div %left, %right"
+		emit "mfhi %out"
+		cost 8;
+
+	out:(int)reg = MODU.I(left:intregorzero, right:intregorzero)
+		emit "divu %left, %right"
+		emit "mfhi %out"
+		cost 8;
+
+    ALUR(MUL.I, "mul")
+
+    ALUR(ASL.I, "sllv")
+    ALUC(ASL.I, "sll", signed_constant)
+    ALUR(ASR.I, "srav")
+    ALUC(ASR.I, "sra", signed_constant)
+
+    ALUR(LSL.I, "sllv")
+    ALUC(LSL.I, "sll", signed_constant)
+    ALUR(LSR.I, "srlv")
+    ALUC(LSR.I, "srl", signed_constant)
+
+    out:(int)reg = NEG.I(left:intregorzero)
+        emit "subu %out, zero, %left"
+        cost 4;
+
+    out:(int)reg = NOT.I(in:intregorzero)
+        emit "nor %out, %in, %in"
+        cost 4;
+
+    ALUR(AND.I, "and")
+    ALUCC(AND.I, "andi", signed_constant)
+
+    ALUR(OR.I, "or")
+    ALUCC(OR.I, "ori", unsigned_constant)
+
+    ALUR(EOR.I, "xor")
+    ALUCC(EOR.I, "xori", unsigned_constant)
+
+	out:(int)reg = value:LABEL.I
+		emit "lui %out, hi16[$value]"
+        emit "ori %out, %out, lo16[$value]"
+		cost 4;
+#endif
+
+	out:(int)reg = value:BLOCK.I
+		emit "ld %out, $value"
+		cost 3;
+
+	out:(int)reg = value:CONST.I
+		emit "ld %out, $value"
+		cost 3;
+
+
+/* vim: set sw=4 ts=4 expandtab : */
+
