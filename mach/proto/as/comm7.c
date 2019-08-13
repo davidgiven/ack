@@ -336,6 +336,21 @@ void emitx(valu_t val, int n)
 	}
 }
 
+void emit8(int64_t arg)
+{
+#ifdef WORDS_REVERSED
+	emit2((int)(arg >> 48));
+	emit2((int)(arg >> 32));
+	emit2((int)(arg >> 16));
+	emit2((int)(arg));
+#else
+	emit2((int)(arg));
+	emit2((int)(arg >> 16));
+	emit2((int)(arg >> 32));
+	emit2((int)(arg >> 48));
+#endif
+}
+
 void emitstr(int zero)
 {
 	int i;

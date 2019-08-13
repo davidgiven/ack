@@ -22,6 +22,7 @@ static item_t	*last_it, *o_it;
 %union {
 	word_t	y_word;
 	valu_t	y_valu;
+	int64_t	y_valu8;
 	expr_t	y_expr;
 	item_t	*y_item;
 #ifdef ASLD
@@ -38,15 +39,17 @@ static item_t	*last_it, *o_it;
 %token <y_valu> CODE1
 %token <y_valu> CODE2
 %token <y_valu> CODE4
-%token NUMBER0		/* keep NUMBER* in this order */
+%token NUMBER0		/* keep NUMBER[0-4] in this order */
 %token NUMBER1
 %token NUMBER2
 %token NUMBER3
-%token <y_valu> NUMBER
+%token NUMBER4
+%token <y_valu8> NUMBER8
 %token NUMBERF
 %token DOT
 %token EXTERN
 %token <y_word> DATA
+%token DATA8
 %token <y_word> DATAF
 %token <y_word> ASCII
 %token SECTION
@@ -70,10 +73,11 @@ static item_t	*last_it, *o_it;
 %left '<' '>' OP_LE OP_GE
 %left OP_LL OP_RR
 %left '+' '-'
-%left '*' '/' '%' 
+%left '*' '/' '%'
 %nonassoc '~'
 
 %type <y_valu> absexp optabs1 optabs2
+%type <y_valu8> datum8
 %type <y_expr> expr
 %type <y_item> id_fb
 
@@ -105,7 +109,7 @@ program	:	/* empty */
 #endif
 	|	program IDENT ':'
 			{	newident($2, DOTTYP); newlabel($2);}
-	|	program NUMBER ':'
+	|	program NUMBER8 ':'
 			{	if ($2 < 0 || $2 > 9) {
 					serror("bad f/b label");
 					$2 = 0;
@@ -121,8 +125,8 @@ program	:	/* empty */
 	|	program operation ';'
 	|	program operation '\n'
 			{	lineno++; LISTLINE(1); RELODONE;}
-	|	program '#' NUMBER STRING '\n'
-			{	lineno = $3;
+	|	program '#' NUMBER8 STRING '\n'
+			{	lineno = $3; /* long = int64_t */
 				if (modulename) strncpy(modulename, stringbuf, STRINGMAX-1);
 				LISTLINE(1); RELODONE;
 			}
@@ -251,7 +255,8 @@ operation
 				DOTSCT->s_zero += $2;
 			}
 	|	DATA datalist
-	|   DATAF dataflist
+	|	DATA8 data8list
+	|	DATAF dataflist
 	|	ASCII STRING
 			{	emitstr($1);}
 	;
@@ -280,6 +285,20 @@ datalist
 			}
 	;
 
+/* datum8 isn't expr, because int64_t may be wider than valu_t. */
+datum8	:	NUMBER8
+			{	$$ = $1;}
+	|	'-' NUMBER8
+			{	$$ = -$2;}
+	;
+
+data8list
+	:	datum8
+			{	emit8($1);}
+	|	data8list ',' datum8
+			{	emit8($3);}
+	;
+
 numberf
 	:	NUMBERF
 			{
@@ -300,10 +319,12 @@ expr	:	error
 			{	serror("expr syntax err");
 				$$.val = 0; $$.typ = S_UND;
 			}
-	|	NUMBER
-			{	$$.val = $1; $$.typ = S_ABS;}
+	|	NUMBER8
+			{	$$.val = $1; /* valu_t = int64_t */
+				$$.typ = S_ABS;
+			}
 	|	id_fb
-			{	$$.val = load($1); 
+			{	$$.val = load($1);
 				last_it = $1;
 				$$.typ = $1->i_type & ~S_EXT;
 			}
