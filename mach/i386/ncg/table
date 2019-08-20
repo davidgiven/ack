@@ -961,6 +961,14 @@ with EXACT rmorconst const
   uses reusing %1,REG=%1
   gen add %a,%2			yields %a
 
+pat adi $1==8
+with REG REG rmorconst rmorconst
+  gen add %1,%3
+      adc %2,%4			yields %2 %1
+with rmorconst rmorconst REG REG
+  gen add %3,%1
+      adc %4,%2			yields %4 %3
+
 /*
 pat adi !defined($1)
 with CXREG ACC
@@ -969,12 +977,16 @@ with CXREG ACC
 */
 
 pat sbi $1==4
-
 with rmorconst REG
   gen sub %2,%1			yields %2
 with EXACT REG rmorconst
   gen sub %1,%2
       neg %1			yields %1
+
+pat sbi $1==8
+with rmorconst rmorconst REG REG
+  gen sub %3,%1
+      sbb %4,%2			yields %4 %3
 
 /*
 pat sbi !defined($1)
@@ -995,6 +1007,11 @@ with rm const
   uses reusing %1,REG
   gen imul %a,%1,%2		yields %a
 
+pat mli $1==8
+with ACC DXREG
+  kills ALL
+  gen proccall {label,".mli8"}	yields edx eax
+
 /*
 pat mli !defined($1)
 with ACC
@@ -1007,6 +1024,10 @@ with noacc ACC
   uses DXREG
   gen cdq.
       idiv %1			yields eax
+
+pat dvi $1==8
+  kills ALL
+  gen proccall {label,".dvi8"}	yields edx eax
 
 /*
 pat dvi !defined($1)
@@ -1021,6 +1042,10 @@ with noacc ACC
   gen cdq.
       idiv %1			yields edx
 
+pat rmi $1==8
+  kills ALL
+  gen proccall {label,".dvi8"}	yields ecx ebx
+
 /*
 pat rmi !defined($1)
 with ACC
@@ -1031,6 +1056,12 @@ with ACC
 pat ngi $1==4
 with REG
   gen neg %1			yields %1
+
+pat ngi $1==8
+with REG REG
+  gen neg %2
+      neg %1
+      sbb %2,{ANYCON,0}		yields %2 %1
 
 /*
 pat ngi !defined($1)
@@ -1114,6 +1145,10 @@ with noacc ACC
 uses DXREG={ANYCON,0}
 gen div %1			yields eax
 
+pat dvu $1==8
+  kills ALL
+  gen proccall {label,".dvu8"}	yields edx eax
+
 /*
 pat dvu !defined($1)
 with ACC STACK
@@ -1125,6 +1160,10 @@ pat rmu $1==4
 with noacc ACC
 uses DXREG={ANYCON,0}
 gen div %1			yields edx
+
+pat rmu $1==8
+  kills ALL
+  gen proccall {label,".dvu8"}	yields ecx ebx
 
 /*
 pat rmu !defined($1)
