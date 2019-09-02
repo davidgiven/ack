@@ -123,9 +123,13 @@ single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
 	}
 |
 	[ SHORT | LONG ]
-	{	if (ds->ds_size)
-			error("repeated size specifier");
-		ds->ds_size = DOT;
+	{	if (ds->ds_size == LONG && DOT == LONG)
+			ds->ds_size = LNGLNG;
+		else {
+			if (ds->ds_size)
+				error("repeated size specifier");
+			ds->ds_size = DOT;
+		}
 	}
 |
 	[ SIGNED | UNSIGNED ]

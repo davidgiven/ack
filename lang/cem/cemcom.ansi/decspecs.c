@@ -69,7 +69,8 @@ void do_decspecs(register struct decspecs *ds)
 	}
 	if (ds->ds_size)
 	{
-		register int ds_isshort = (ds->ds_size == SHORT);
+		int ds_isshort = (ds->ds_size == SHORT);
+		int ds_islong = (ds->ds_size == LONG);
 
 		if (ds->ds_typedef)
 			goto SIZE_ERROR;
@@ -78,10 +79,18 @@ void do_decspecs(register struct decspecs *ds)
 		{
 			if (ds_isshort)
 				tp = short_type;
-			else
+			else if (ds_islong)
 				tp = long_type;
+			else
+			{
+				assert(ds->ds_size == LNGLNG);
+				if (no_long_long())
+					tp = error_type;
+				else
+					tp = lnglng_type;
+			}
 		}
-		else if (tp == double_type && !ds_isshort)
+		else if (tp == double_type && ds_islong)
 		{
 			tp = lngdbl_type;
 		}
@@ -121,6 +130,11 @@ void do_decspecs(register struct decspecs *ds)
 		{
 			if (ds_isunsigned)
 				tp = ulong_type;
+		}
+		else if (tp == lnglng_type)
+		{
+			if (ds_isunsigned)
+				tp = ulnglng_type;
 		}
 		else
 		{

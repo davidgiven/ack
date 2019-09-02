@@ -71,6 +71,7 @@ extern struct type
 	*word_type, *uword_type,
 	*int_type, *uint_type,
 	*long_type, *ulong_type,
+	*lnglng_type, *ulnglng_type,
 	*float_type, *double_type, *lngdbl_type,
 	*void_type,
 	*string_type, *funint_type, *error_type;
@@ -93,6 +94,7 @@ void idf2type(struct idf *idf, struct type **tpp);
 arith align(arith pos, int al);
 struct type * standard_type(int fund, int sgn, int algn, arith sz);
 void completed(struct type *tp);
+int no_long_long(void);
 
 
 /* ALLOCDEF "type" 50 */

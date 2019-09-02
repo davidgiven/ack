@@ -133,13 +133,15 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 		case '+':
 			/*	We have the following possibilities :
 				int + int, pointer + int, pointer + long,
-				long + long, double + double
+				long + long, long long + long long,
+				double + double
 			*/
 			operands(expr, gencode);
 			if (gencode) {
 				switch (tp->tp_fund) {
 				case INT:
 				case LONG:
+				case LNGLNG:
 					if (tp->tp_unsigned)
 						C_adu(tp->tp_size);
 					else
@@ -165,6 +167,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 					switch (tp->tp_fund) {
 					case INT:
 					case LONG:
+					case LNGLNG:
 					case POINTER:
 						C_ngi(tp->tp_size);
 						break;
@@ -181,7 +184,8 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 			}
 			/*	else binary; we have the following flavours:
 				int - int, pointer - int, pointer - long,
-				pointer - pointer, long - long, double - double
+				pointer - pointer, long - long,
+				long long - long long, double - double
 			*/
 			operands(expr, gencode);
 			if (!gencode)
@@ -189,6 +193,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 			switch (tp->tp_fund) {
 			case INT:
 			case LONG:
+			case LNGLNG:
 				if (tp->tp_unsigned)
 					C_sbu(tp->tp_size);
 				else
@@ -224,6 +229,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 				switch (tp->tp_fund) {
 				case INT:
 				case LONG:
+				case LNGLNG:
 				case POINTER:
 					if (tp->tp_unsigned)
 						C_mlu(tp->tp_size);
@@ -246,6 +252,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 				switch (tp->tp_fund) {
 				case INT:
 				case LONG:
+				case LNGLNG:
 				case POINTER:
 					if (tp->tp_unsigned)
 						C_dvu(tp->tp_size);
@@ -264,7 +271,8 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 			break;
 		case '%':
 			operands(expr, gencode);
-			assert(tp->tp_fund==INT || tp->tp_fund==LONG);
+			assert(tp->tp_fund==INT || tp->tp_fund==LONG ||
+			       tp->tp_fund==LNGLNG);
 			if (gencode)
 				if (tp->tp_unsigned)
 					C_rmu(tp->tp_size);
@@ -301,6 +309,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 				switch (tp->tp_fund) {
 				case INT:
 				case LONG:
+				case LNGLNG:
 					if (left->ex_type->tp_unsigned)
 						C_cmu(size);
 					else
@@ -736,6 +745,7 @@ void assop(register struct type *type, int oper)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 		switch (oper) {
 		case PLUSAB:
@@ -1014,10 +1024,13 @@ void load_val(register struct expr *expr, int rlval)
 
 void load_cst(arith val, arith siz)
 {
+	/*	EM can't encode ldc with constant over 4 bytes.
+		Such a constant must go into rom.
+	*/
 	if ((int)siz <= (int)word_size)
 		C_loc(val);
 	else
-	if ((int)siz == (int)dword_size)
+	if ((int)siz == (int)dword_size && (int)dword_size <= 4)
 		C_ldc(val);
 	else {
 		label datlab;

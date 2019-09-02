@@ -10,6 +10,7 @@
 #ifndef NOCROSS
 extern arith
 	short_size, word_size, dword_size, int_size, long_size,
+	lnglng_size,
 	float_size, double_size, lngdbl_size,
 	pointer_size;
 
@@ -20,6 +21,7 @@ extern arith max_int, max_unsigned;	/* cstoper.c	*/
 #define dword_size	((arith)2*SZ_WORD)
 #define int_size	((arith)SZ_INT)
 #define long_size	((arith)SZ_LONG)
+#define lnglng_size	((arith)SZ_LNGLNG)
 #define float_size	((arith)SZ_FLOAT)
 #define double_size	((arith)SZ_DOUBLE)
 #define	lngdbl_size	((arith)SZ_LNGDBL)

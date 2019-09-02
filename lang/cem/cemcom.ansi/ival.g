@@ -518,6 +518,7 @@ void check_ival(struct expr **expp, register struct type *tp)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 	case POINTER:
 		ch3cast(expp, '=', tp);

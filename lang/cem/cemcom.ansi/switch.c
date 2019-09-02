@@ -61,7 +61,7 @@ void code_startswitch(struct expr **expp)
 	register label l_break = text_label();
 	register struct switch_hdr *sh = new_switch_hdr();
 	int fund = any2arith(expp, SWITCH);
-				    /* INT, LONG, FLOAT, DOUBLE or LNGDBL */
+			/* INT, LONG, LNGLNG, FLOAT, DOUBLE or LNGDBL */
 	
 	switch (fund) {
 	case FLOAT:

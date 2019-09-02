@@ -101,6 +101,10 @@ void init_code(char *dst_file)
 		stb_typedef(ushort_type, "unsigned short");
 		stb_typedef(ulong_type, "unsigned long");
 		stb_typedef(uint_type, "unsigned int");
+		if (lnglng_size >= 0) {
+			stb_typedef(lnglng_type, "long long");
+			stb_typedef(ulnglng_type, "unsigned long long");
+		}
 		stb_typedef(float_type, "float");
 		stb_typedef(double_type, "double");
 		stb_typedef(lngdbl_type, "long double");

@@ -25,6 +25,7 @@
  */
 struct type *schar_type, *uchar_type, *short_type, *ushort_type, *word_type,
 		*uword_type, *int_type, *uint_type, *long_type, *ulong_type,
+		*lnglng_type, *ulnglng_type,
 		*float_type, *double_type, *lngdbl_type, *void_type, *string_type,
 		*funint_type, *error_type;
 
@@ -290,4 +291,21 @@ void completed(struct type *tp)
 		}
 		atp = atp->next;
 	}
+}
+
+int no_long_long(void)
+{
+	static int shown = 0;
+
+	if (lnglng_size < 0)
+	{
+		if (!shown)
+		{
+			error("no long long for this machine");
+			shown = 1;
+		}
+		return 1;
+	}
+	else
+		return 0;
 }

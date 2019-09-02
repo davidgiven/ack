@@ -159,6 +159,12 @@ next_option:			/* to allow combined one-char options */
 				if (algn != 0)
 					long_align = algn;
 				break;
+			case 'q':	/* long long	*/
+				if (sz != (arith)0)
+					lnglng_size = sz;
+				if (algn != 0)
+					lnglng_align = algn;
+				break;
 			case 'f':	/* float	*/
 				if (sz != (arith)0)
 					float_size = sz;

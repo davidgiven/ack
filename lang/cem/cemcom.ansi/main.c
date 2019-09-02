@@ -57,6 +57,7 @@ arith
 	dword_size = (2 * SZ_WORD),
 	int_size = SZ_INT,
 	long_size = SZ_LONG,
+	lnglng_size = SZ_LNGLNG,
 	float_size = SZ_FLOAT,
 	double_size = SZ_DOUBLE,
 	lngdbl_size = SZ_LNGDBL,
@@ -67,6 +68,7 @@ int
 	word_align = AL_WORD,
 	int_align = AL_INT,
 	long_align = AL_LONG,
+	lnglng_align = AL_LNGLNG,
 	float_align = AL_FLOAT,
 	double_align = AL_DOUBLE,
 	lngdbl_align = AL_LNGDBL,
@@ -226,6 +228,10 @@ static void init(void)
 
 	long_type = standard_type(LONG, 0, long_align, long_size);
 	ulong_type = standard_type(LONG, UNSIGNED, long_align, long_size);
+
+	lnglng_type = standard_type(LNGLNG, 0, lnglng_align, lnglng_size);
+	ulnglng_type = standard_type(LNGLNG, UNSIGNED, lnglng_align,
+				     lnglng_size);
 
 	float_type = standard_type(FLOAT, 0, float_align, float_size);
 	double_type = standard_type(DOUBLE, 0, double_align, double_size);

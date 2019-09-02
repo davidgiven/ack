@@ -175,7 +175,11 @@ void init_cst(void)
 	register int i = 0;
 	register arith bt = (arith)0;
 
-	while (!(bt < 0))	{
+	/*	FIXME arith is insufficient for long long.  We ignore
+		this problem and write masks up to full_mask[8], but
+		masks are wrong after bt < 0.
+	*/
+	while (!(bt < 0) || i < 8) {
 		bt = (bt << 8) + 0377, i++;
 		if (i > MAXSIZE)
 			fatal("array full_mask too small for this machine");

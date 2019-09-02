@@ -137,6 +137,7 @@ static int convtype(register struct type *tp)
 	case INT:
 	case ERRONEOUS:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 		return tp->tp_unsigned ? T_UNSIGNED : T_SIGNED;
 	case FLOAT:
