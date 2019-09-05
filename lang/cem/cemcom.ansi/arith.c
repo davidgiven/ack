@@ -371,8 +371,7 @@ int int2int(struct expr **expp, register struct type *tp)
 					unsigned int x = ~0;
 					unsigned int y = -1;
 			*/
-			extern long full_mask[];
-			long remainder = exp->VL_VALUE &
+			writh remainder = exp->VL_VALUE &
 						~full_mask[(int)(tp->tp_size)];
 
 			if (remainder == 0 ||
@@ -389,6 +388,16 @@ int int2int(struct expr **expp, register struct type *tp)
 	return exp->ex_type->tp_fund;
 }
 
+static int fit4(writh val, int uns)
+{
+	/* Does this value fit in 4 bytes? */
+	unsigned writh u = (unsigned writh)val;
+
+	if (!uns)
+		u += 0x80000000UL;
+	return (u & full_mask[4]) == u;
+}
+
 /* With compile-time constants, we don't set fp_used, since this is done
  * only when necessary in eval.c.
  */
@@ -400,10 +409,10 @@ void int2float(register struct expr **expp, struct type *tp)
 	register struct expr *exp = *expp;
 	int uns = exp->ex_type->tp_unsigned;
 	
-	if (is_cp_cst(exp)) {
+	if (is_cp_cst(exp) && fit4(exp->VL_VALUE, uns)) {
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);
+		flt_arith2flt((arith)exp->VL_VALUE, &(exp->FL_ARITH), uns);
 	}
 	else	{
 		fp_used = 1;
@@ -417,24 +426,35 @@ void float2int(struct expr **expp, struct type *tp)
 		converted to the integral type tp.
 	*/
 	register struct expr *ex = *expp;
-	
+
 	if (is_fp_cst(ex)) {
 		arith ar = flt_flt2arith(&ex->FL_ARITH, tp->tp_unsigned);
-
+#ifdef NOTDEF
+		/*	Historically, we always did the conversion at
+		    compile time.   This is now wrong if type arith is
+		    too narrow for an 8-byte integer.
+		*/
 		if (flt_status == FLT_OVFL)
 			expr_warning(ex,"overflow in float to int conversion");
 		else if (flt_status == FLT_UNFL)
 			expr_warning(ex,"underflow in float to unsigned conversion");
-		ex->ex_type = tp;
-		/* The following lines are copied from fill_int_expr */
-		ex->ex_class = Value;
-		ex->VL_CLASS = Const;
-		ex->VL_VALUE = ar;
-		cut_size(ex);
-	} else {
-		fp_used = 1;
-		*expp = arith2arith(tp, FLOAT2INT, ex);
+#endif /* NOTDEF */
+		/*	Now, we defer the conversion until run time
+		    unless it fits in 4 bytes.
+		*/
+		if (flt_status != FLT_OVFL && flt_status != FLT_UNFL &&
+		    fit4((writh)ar, tp->tp_unsigned)) {
+			ex->ex_type = tp;
+			/* The following lines are copied from fill_int_expr */
+			ex->ex_class = Value;
+			ex->VL_CLASS = Const;
+			ex->VL_VALUE = (writh)ar;
+			cut_size(ex);
+			return;
+		}
 	}
+	fp_used = 1;
+	*expp = arith2arith(tp, FLOAT2INT, ex);
 }
 
 void float2float(register struct expr **expp, struct type *tp)
@@ -639,4 +659,26 @@ void field2arith(register struct expr **expp)
 void switch_sign_fp(register struct expr *expr)
 {
 	flt_umin(&(expr->FL_ARITH));
+}
+
+char *writh2str(writh val, int uns)
+{
+	/*	Converts val to a decimal string, like
+		long2str(val, 10), but allows wider values.
+	*/
+	static char buf[NUMSIZE + 1];
+	char *cp = &buf[NUMSIZE + 1];
+	int negative = (!uns && val < 0);
+	unsigned writh u = (unsigned writh)val;
+
+	if (negative)
+		u = -u;
+	*--cp = '\0';
+	do {
+		*--cp = '0' + (u % 10);
+		u /= 10;
+	} while (u != 0);
+	if (negative)
+		*--cp = '-';
+	return cp;
 }

@@ -22,7 +22,6 @@
 
 
 extern char options[];
-extern arith full_mask[/*MAXSIZE + 1*/];	/* cstoper.c */
 char *symbol2str();
 
 void ch3mon(int oper, register struct expr **expp)
@@ -122,7 +121,7 @@ void ch3mon(int oper, register struct expr **expp)
 	case '-':
 		any2arith(expp, oper);
 		if (is_cp_cst(*expp))	{
-			arith o1 = (*expp)->VL_VALUE;
+			writh o1 = (*expp)->VL_VALUE;
 
 			(*expp)->VL_VALUE = (oper == '-') ? -o1 :
 			  ((*expp)->ex_type->tp_unsigned ?

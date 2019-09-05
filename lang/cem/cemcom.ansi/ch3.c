@@ -320,7 +320,7 @@ void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 			    }
 			    if (oldtp->tp_up->tp_fund == VOID
 				&& is_cp_cst(exp)
-				&& exp->VL_VALUE == (arith)0)
+				&& exp->VL_VALUE == 0)
 				break;	/* switch */
 		    }
 		    /* falltrough */
@@ -366,7 +366,7 @@ void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 		case NOTEQUAL:
 		case '=':
 		case RETURN:
-			if (is_cp_cst(exp) && exp->VL_VALUE == (arith)0)
+			if (is_cp_cst(exp) && exp->VL_VALUE == 0)
 				break;
 		default:
 			expr_strict(exp,

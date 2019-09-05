@@ -32,8 +32,6 @@
 #include	"level.h"
 #include    "print.h"
 
-extern long full_mask[];
-
 #define INCR_SIZE	64
 
 static struct db_str

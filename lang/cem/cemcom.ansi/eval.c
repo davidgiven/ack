@@ -106,7 +106,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 	case String:	/* a string constant	*/
 		if (gencode) {
 			string2pointer(expr);
-			C_lae_dlb(expr->VL_LBL, expr->VL_VALUE);
+			C_lae_dlb(expr->VL_LBL, (arith)expr->VL_VALUE);
 		}
 		break;
 	case Float:	/* a floating constant	*/
@@ -575,7 +575,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 				NO_LABEL, NO_LABEL);
 			assert(is_cp_cst(right));
 			if (gencode) {
-				C_adp(right->VL_VALUE);
+				C_adp((arith)right->VL_VALUE);
 			}
 			break;
 		case ',':
@@ -858,10 +858,11 @@ void store_val(register struct value *vl, register struct type *tp)
 {
 	register int inword = 0;
 	register int indword = 0;
-	arith val = vl->vl_value;
+	writh wval = vl->vl_value;
+	arith val = (arith)wval;
 
 	if (vl->vl_class == Const) {	/* absolute addressing */
-		load_cst(val, pointer_size);
+		load_cst(wval, pointer_size);
 		store_block(tp->tp_size, tp->tp_align);
 		return;
 	}
@@ -930,7 +931,8 @@ void load_val(register struct expr *expr, int rlval)
 	register struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
 	register int inword = 0, indword = 0;
-	register arith val = expr->VL_VALUE;
+	writh wval = expr->VL_VALUE;
+	arith val = (arith)wval;
 
 	if (expr->ex_type->tp_fund == FLOAT
 	    || expr->ex_type->tp_fund == DOUBLE
@@ -938,11 +940,11 @@ void load_val(register struct expr *expr, int rlval)
 		fp_used = 1;
 	if (expr->VL_CLASS == Const) {
 		if (rvalue) { /* absolute addressing */
-			load_cst(val, pointer_size);
+			load_cst(wval, pointer_size);
 			load_block(tp->tp_size, tp->tp_align);
 		}
 		else	/* integer, unsigned, long, enum etc	*/
-			load_cst(val, tp->tp_size);
+			load_cst(wval, tp->tp_size);
 		return;
 	}
 	if (rvalue) {
@@ -1022,7 +1024,7 @@ void load_val(register struct expr *expr, int rlval)
 	}
 }
 
-void load_cst(arith val, arith siz)
+void load_cst(writh val, arith siz)
 {
 	/*	EM can't encode ldc with constant over 4 bytes.
 		Such a constant must go into rom.
@@ -1036,7 +1038,7 @@ void load_cst(arith val, arith siz)
 		label datlab;
 
 		C_df_dlb(datlab = data_label());
-		C_rom_icon(long2str((long)val, 10), siz);
+		C_rom_icon(writh2str(val, 0), siz);
 		C_lae_dlb(datlab, (arith)0);
 		C_loi(siz);
 	}

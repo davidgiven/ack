@@ -32,13 +32,13 @@ extern char options[];
 
 int	density = DENSITY;
 
-static int compact(int nr, arith low, arith up)
+static int compact(int nr, writh low, writh up)
 {
 	/*	Careful! up - low might not fit in an arith. And then,
 		the test "up-low < 0" might also not work to detect this
 		situation! Or is this just a bug in the M68020/M68000?
 	*/
-	arith diff = up - low;
+	writh diff = up - low;
 
 	return (nr == 0 || (diff >= 0 && diff / nr <= (density - 1)));
 }
@@ -117,10 +117,10 @@ void code_endswitch(void)
 	    C_rom_ilb(sh->sh_default);
 	    if (compact(sh->sh_nrofentries, sh->sh_lowerbd, sh->sh_upperbd)) {
 		/* CSA */
-		register arith val;
+		writh val;
 
-		C_rom_icon(long2str((long)sh->sh_lowerbd,10), size);
-		C_rom_icon(long2str((long)(sh->sh_upperbd - sh->sh_lowerbd),10),
+		C_rom_icon(writh2str(sh->sh_lowerbd, 0), size);
+		C_rom_icon(writh2str(sh->sh_upperbd - sh->sh_lowerbd, 0),
 				size);
 		ce = sh->sh_entries;
 		for (val = sh->sh_lowerbd; val <= sh->sh_upperbd; val++) {
@@ -136,10 +136,10 @@ void code_endswitch(void)
 		C_csa(size);
 	    }
 	    else { /* CSB */
-		C_rom_icon(long2str((long)sh->sh_nrofentries,10),size);
+		C_rom_icon(writh2str(sh->sh_nrofentries, 0), size);
 		for (ce = sh->sh_entries; ce; ce = ce->next) {
 			/* generate the entries: value + prog.label	*/
-			C_rom_icon(long2str((long)ce->ce_value,10),size);
+			C_rom_icon(writh2str(ce->ce_value, 0), size);
 			C_rom_ilb(ce->ce_label);
 		}
 		C_lae_dlb(tablabel, (arith)0); /* perform the switch	*/
@@ -162,7 +162,7 @@ void code_endswitch(void)
 
 void code_case(struct expr *expr)
 {
-	register arith val;
+	writh val;
 	register struct case_entry *ce;
 	register struct switch_hdr *sh = switch_stack;
 	

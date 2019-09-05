@@ -26,7 +26,7 @@ struct token	{
 			char *tok_bts;	/* row of bytes */
 			int tok_len;	/* length of row of bytes */
 		} tok_string;
-		arith tok_ival;		/* for INTEGER */
+		writh tok_ival;		/* for INTEGER */
 		char *tok_fval;		/* for FLOATING */
 	} tok_data;
 };

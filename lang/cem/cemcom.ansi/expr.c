@@ -184,21 +184,21 @@ void idf2expr(register struct expr *expr)
 	if (def->df_sc == ENUM)
 	{
 		expr->VL_CLASS = Const;
-		expr->VL_VALUE = def->df_address;
+		expr->VL_VALUE = (writh)def->df_address;
 	}
 #ifndef	LINT
 	else if (def->df_sc == STATIC && def->df_level >= L_LOCAL)
 	{
 		expr->VL_CLASS = Label;
 		expr->VL_LBL = def->df_address;
-		expr->VL_VALUE = (arith) 0;
+		expr->VL_VALUE = 0;
 	}
 #endif	/* LINT */
 	else
 	{
 		expr->VL_CLASS = Name;
 		expr->VL_IDF = idf;
-		expr->VL_VALUE = (arith) 0;
+		expr->VL_VALUE = 0;
 	}
 }
 
@@ -270,12 +270,12 @@ arith ivalue, int fund)
 
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
-	fill_int_expr(expr, ivalue, fund);
+	fill_int_expr(expr, (writh)ivalue, fund);
 	return expr;
 }
 
 void fill_int_expr(register struct expr *ex,
-arith ivalue, int fund)
+writh ivalue, int fund)
 {
 	/*	Details derived from ivalue and fund are put into the
 	 constant integer expression ex.
@@ -293,6 +293,16 @@ arith ivalue, int fund)
 		break;
 	case ULONG:
 		ex->ex_type = ulong_type;
+		break;
+	case LNGLNG:
+		ex->ex_type = lnglng_type;
+		break;
+	case ULNGLNG:
+		ex->ex_type = ulnglng_type;
+		break;
+	case ERRONEOUS:		/* 123LL when no_long_long() */
+		ex->ex_type = error_type;
+		ex->ex_flags |= EX_ERROR;
 		break;
 	default:
 		crash("(fill_int_expr) bad fund %s\n", symbol2str(fund));
@@ -406,6 +416,7 @@ void chk_cst_expr(struct expr **expp)
 	case INT:
 	case ENUM:
 	case LONG:
+	case LNGLNG:
 		if (is_ld_cst(expr))
 		{
 			return;

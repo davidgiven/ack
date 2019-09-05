@@ -117,11 +117,6 @@
 /*#define NOBITFIELD	1	*//* if NOT defined, implement bitfields	*/
 
 
-!File: spec_arith.h
-/* describes internal compiler arithmetics */
-#undef	SPECIAL_ARITHMETICS	/* something different from native long */
-
-
 !File: static.h
 #define GSTATIC			/* for large global "static" arrays */
 

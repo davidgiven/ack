@@ -118,11 +118,11 @@ void reject_params(register struct declarator *dc)
 
 void check_array_subscript(register struct expr *expr)
 {
-	arith size = expr->VL_VALUE;
+	writh size = expr->VL_VALUE;
 
 	if (size < 0)	{
 		error("array size is negative");
-		expr->VL_VALUE = (arith)1;
+		expr->VL_VALUE = 1;
 	}
 	else
 	if (size == 0) {
@@ -131,6 +131,6 @@ void check_array_subscript(register struct expr *expr)
 	else
 	if (size & ~max_unsigned) {	/* absolutely ridiculous */
 		expr_error(expr, "overflow in array size");
-		expr->VL_VALUE = (arith)1;
+		expr->VL_VALUE = 1;
 	}
 }

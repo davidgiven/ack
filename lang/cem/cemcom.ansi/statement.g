@@ -147,7 +147,7 @@ if_statement
 				/*	The comparison has been optimized
 					to a 0 or 1.
 				*/
-				if (expr->VL_VALUE == (arith)0)	{
+				if (expr->VL_VALUE == 0)	{
 					C_bra(l_false);
 				}
 				/* else fall through */
@@ -210,7 +210,7 @@ while_statement
 		{
 			opnd2test(&expr, WHILE);
 			if (is_cp_cst(expr))	{
-				if (expr->VL_VALUE == (arith)0)	{
+				if (expr->VL_VALUE == 0)	{
 					C_bra(l_break);
 				}
 			}
@@ -264,11 +264,11 @@ do_statement
 		{
 			opnd2test(&expr, WHILE);
 			if (is_cp_cst(expr))	{
-				if (expr->VL_VALUE == (arith)1)	{
+				if (expr->VL_VALUE == 1)	{
 					C_bra(l_body);
 				}
 #ifdef	LINT
-				end_do_stmt(1, expr->VL_VALUE != (arith)0);
+				end_do_stmt(1, expr->VL_VALUE != 0);
 #endif	/* LINT */
 			}
 			else	{
@@ -313,7 +313,7 @@ for_statement
 		{
 			opnd2test(&e_test, FOR);
 			if (is_cp_cst(e_test))	{
-				if (e_test->VL_VALUE == (arith)0)	{
+				if (e_test->VL_VALUE == 0)	{
 					C_bra(l_break);
 				}
 			}

@@ -602,7 +602,7 @@ void loc_init(struct expr *expr, struct idf *id)
 			EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			vl.vl_class = Name;
 			vl.vl_data.vl_idf = id;
-			vl.vl_value = (arith)0;
+			vl.vl_value = 0;
 			store_val(&vl, tp);
 		}
 #else	/* LINT */

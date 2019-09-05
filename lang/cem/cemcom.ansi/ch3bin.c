@@ -206,7 +206,7 @@ void ch3bin(register struct expr **expp, int oper, struct expr *expr)
 				where o1 == (*expp)->VL_VALUE;
 				and ((oper == AND) || (oper == OR))
 			*/
-			if ((oper == AND) == (ex->VL_VALUE != (arith)0)) {
+			if ((oper == AND) == (ex->VL_VALUE != 0)) {
 				*expp = expr;
 			}
 			else {
@@ -224,13 +224,13 @@ void ch3bin(register struct expr **expp, int oper, struct expr *expr)
 				where o2 == expr->VL_VALUE
 				and ((oper == AND) || (oper == OR))
 			*/
-			if ((oper == AND) == (expr->VL_VALUE != (arith)0)) {
+			if ((oper == AND) == (expr->VL_VALUE != 0)) {
 				(*expp)->ex_flags |= expr->ex_flags | EX_ILVALUE;
 				free_expression(expr);
 			}
 			else {
 				if (oper == OR)
-					expr->VL_VALUE = (arith)1;
+					expr->VL_VALUE = 1;
 				ch3bin(expp, ',', expr);
 			}
 		}

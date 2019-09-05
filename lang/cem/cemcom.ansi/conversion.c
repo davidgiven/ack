@@ -112,8 +112,6 @@ void conversion(register struct type *from_type, register struct type *to_type)
 	if ((int)(to_type->tp_size) < (int)word_size
 	    && to_cnvtype != T_FLOATING
 	    ) {
-		extern arith full_mask[];
-
 		if (to_cnvtype == T_SIGNED) {
 			C_loc(to_type->tp_size);
 			C_loc(word_size);
