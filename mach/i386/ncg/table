@@ -2339,11 +2339,55 @@ with SHIFT_CREG REG
 with ANYCON REG
   gen rol %2,%1				yields %2
 
+pat rol $1==8
+with SHIFT_CREG REG REG
+  uses REG
+  gen testb cl,{ANYCON,32}
+      je {label,1f}
+      xchg %2,%3
+      1:
+      mov %a,%3
+      shld %3,%2,cl
+      shld %2,%a,cl			yields %3 %2
+
+pat loc rol ($1&32)==0 && $2==8
+with REG REG
+  uses REG
+  gen mov %a,%2
+      shld %2,%1,{ANYCON,$1&31}
+      shld %1,%a,{ANYCON,$1&31}		yields %2 %1
+pat loc rol ($1&63)==32 && $2==8
+  leaving exg 4
+pat loc rol ($1&32)!=0 && $2==8
+  leaving loc (0-$1)&31 ror 8
+
 pat ror $1==4
 with SHIFT_CREG REG
   gen ror %2,cl				yields %2
 with ANYCON REG
   gen ror %2,%1				yields %2
+
+pat ror $1==8
+with SHIFT_CREG REG REG
+  uses REG
+  gen testb cl,{ANYCON,32}
+      je {label,1f}
+      xchg %2,%3
+      1:
+      mov %a,%2
+      shrd %2,%3,cl
+      shrd %3,%a,cl			yields %3 %2
+
+pat loc ror ($1&32)==0 && $2==8
+with REG REG
+  uses REG
+  gen mov %a,%1
+      shrd %1,%2,{ANYCON,$1&31}
+      shrd %2,%a,{ANYCON,$1&31}		yields %2 %1
+pat loc ror ($1&63)==32 && $2==8
+  leaving exg 4
+pat loc ror ($1&32)!=0 && $2==8
+  leaving loc (0-$1)&31 rol 8
 
 /*******************************************************************
  *  Group 10 : Set Instructions					   *
