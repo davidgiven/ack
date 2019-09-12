@@ -1,5 +1,5 @@
 #
-    mes 2, EM_WSIZE, EM_PSIZE
+    mes 2, _EM_WSIZE, _EM_PSIZE
 
 /*
  * Tests _rol_ (rotate left) and _ror_ (rotate right).  Several back
@@ -14,7 +14,7 @@
  * You can cheat this test if _cmu_ always pushes zero.
  */
 
-#if EM_WSIZE == 2
+#if _EM_WSIZE == 2
 #define LEN2  4
     exa table2
     exa left2
@@ -55,10 +55,10 @@ val4right11
     con 2298473143U4
 
     exp $_m_a_i_n
-    pro $_m_a_i_n, EM_WSIZE
-#define i -EM_WSIZE
+    pro $_m_a_i_n, _EM_WSIZE
+#define i -_EM_WSIZE
 
-#if EM_WSIZE == 2
+#if _EM_WSIZE == 2
     /*
      * Loop for LEN2 items in table2.
      */
@@ -70,20 +70,20 @@ val4right11
     lae left2
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* left distance */
     rol 2         /* rotate left */
     lae table2
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* expected result */
     cmu 2
     zeq *2
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
@@ -94,20 +94,20 @@ val4right11
     lae right2
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* right distance */
     ror 2         /* rotate right */
     lae table2
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* expected result */
     cmu 2
     zeq *3
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
@@ -117,7 +117,7 @@ val4right11
     lol i
     loc LEN2
     blt *1
-#endif /* EM_WSIZE == 2 */
+#endif /* _EM_WSIZE == 2 */
 
     /*
      * Loop for LEN4 items in table4.
@@ -130,23 +130,23 @@ val4right11
     lae left4
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* left distance */
     loc 2
-    loc EM_WSIZE
+    loc _EM_WSIZE
     cii
     rol 4         /* rotate left */
     lae table4
     lol i
     loc 2
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 4         /* expected result */
     cmu 4
     zeq *5
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
@@ -157,23 +157,23 @@ val4right11
     lae right4
     lol i
     loc 1
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 2         /* right distance */
     loc 2
-    loc EM_WSIZE
+    loc _EM_WSIZE
     cii
     ror 4         /* rotate right */
     lae table4
     lol i
     loc 2
-    sli EM_WSIZE
-    ads EM_WSIZE
+    sli _EM_WSIZE
+    ads _EM_WSIZE
     loi 4         /* expected result */
     cmu 4
     zeq *6
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
@@ -197,7 +197,7 @@ val4right11
     cmu 4
     zeq *7
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
@@ -212,7 +212,7 @@ val4right11
     cmu 4
     zeq *8
     loc __LINE__
-    loc EM_WSIZE
+    loc _EM_WSIZE
     loc 4
     cuu
     cal $fail
