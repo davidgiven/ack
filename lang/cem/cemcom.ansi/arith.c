@@ -143,7 +143,11 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		converted to the signed type, else both operands are
 		converted to an unsigned type.
 	*/
-	if (t1 == LNGLNG && u1 && (t2 != LNGLNG || !u2))
+	if (shifting) {
+		/*	In shifts like o1 << o2, never convert o1,
+			and let ch3bin() convert o2 to int.
+		*/
+	} else if (t1 == LNGLNG && u1 && (t2 != LNGLNG || !u2))
 		convert2 = ulnglng_type;
 	else if (t2 == LNGLNG && u2 && (t1 != LNGLNG || !u1))
 		convert1 = ulnglng_type;
@@ -180,7 +184,7 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 	else if (t2 == LONG && t1 != LONG)
 		convert1 = long_type;
 
-	if (convert1 && !shifting)	/* ??? */
+	if (convert1)
 		t1 = int2int(e1p, convert1);
 	if (convert2)
 		t2 = int2int(e2p, convert2);
