@@ -1038,7 +1038,7 @@ with noacc ACC
 
 pat dvi $1==8
   kills ALL
-  gen proccall {label,".dvi8"}	yields edx eax
+  gen proccall {label,".dvi8"}	yields ebx eax
 
 /*
 pat dvi !defined($1)
@@ -1055,7 +1055,7 @@ with noacc ACC
 
 pat rmi $1==8
   kills ALL
-  gen proccall {label,".dvi8"}	yields ecx ebx
+  gen proccall {label,".rmi8"}	yields ecx edx
 
 /*
 pat rmi !defined($1)
@@ -1202,7 +1202,7 @@ gen div %1			yields eax
 
 pat dvu $1==8
   kills ALL
-  gen proccall {label,".dvu8"}	yields edx eax
+  gen proccall {label,".dvu8"}	yields ebx eax
 
 /*
 pat dvu !defined($1)
@@ -1218,7 +1218,7 @@ gen div %1			yields edx
 
 pat rmu $1==8
   kills ALL
-  gen proccall {label,".dvu8"}	yields ecx ebx
+  gen proccall {label,".rmu8"}	yields ecx edx
 
 /*
 pat rmu !defined($1)
