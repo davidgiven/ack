@@ -973,7 +973,7 @@ with EXACT rmorconst const
   gen add %a,%2			yields %a
 
 pat adi $1==8
-with REG REG rmorconst rmorconst
+with EXACT REG REG rmorconst rmorconst
   gen add %1,%3
       adc %2,%4			yields %2 %1
 with rmorconst rmorconst REG REG
@@ -1104,6 +1104,8 @@ pat loc sli ($1&32)==0 && $2==8
 with REG REG
   gen shld %2,%1,{ANYCON,$1&31}
       sal %1,{ANYCON,$1&31}	yields %2 %1
+pat loc sli ($1&63)==32 && $2==8
+with a_word a_word		yields %1 {ANYCON,0}
 pat loc sli ($1&32)!=0 && $2==8
 with REG REG
   gen sal %1,{ANYCON,$1&31}	yields %1 {ANYCON,0}
@@ -1253,6 +1255,8 @@ pat loc sru ($1&32)==0 && $2==8
 with REG REG
   gen shrd %2,%1,{ANYCON,$1&31}
       shr %1,{ANYCON,$1&31}	yields %2 %1
+pat loc sru ($1&63)==32 && $2==8
+with a_word a_word		yields {ANYCON,0} %2
 pat loc sru ($1&32)!=0 && $2==8
 with REG REG
   gen shr %2,{ANYCON,$1&31}	yields {ANYCON,0} %2
