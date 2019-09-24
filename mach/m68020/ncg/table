@@ -612,6 +612,7 @@ add_l  "add.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
 add_w  "add.w"	any2:ro,	D_REG+LOCAL:rw:cc	cost(2,3).
 add_w  "add.w"	conreg2:ro,	alterable2:rw:cc	cost(2,6).
 #endif
+addx_l "addx.l" D_REG4:ro,	D_REG4:rw kills :cc	cost(2,3).
 and_l  "and.l"	data4:ro,	D_REG4:rw:cc		cost(2,3).
 and_l  "and.l"	D_REG4:ro,	memalt4:rw:cc		cost(2,6).
 and_l  "and.l"	consts4:ro,	datalt4:rw:cc		cost(2,6).
@@ -628,6 +629,7 @@ asr   "asr #1,"	memalt2:rw:cc				cost(2,4).
 asl_w  "asl.w"	shconreg:ro,	D_REG:rw:cc		cost(2,5).
 asr_w  "asr.w"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 #endif
+bchg		const:ro,	D_REG:rw kills:cc	cost(2,4).
 bclr		const:ro,	D_REG:rw kills:cc	cost(2,4).
 bra		label					cost(2,5).
 bcc		label					cost(2,5).
@@ -671,14 +673,15 @@ eor_l  "eor.l"	conreg4:ro,	datalt4:rw:cc		cost(2,6).
 #if WORD_SIZE==2
 eor_w  "eor.w"	conreg2:ro,	datalt2:rw:cc		cost(2,4).
 #endif
+exg		genreg4:rw,	genreg4:rw		cost(2,3).
 /* in the next two instructions: LOCAL only allowed if register var */
 ext_l  "ext.l"	D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
 ext_w  "ext.w"	D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
 jmp		address+control4			cost(2,0).
 jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
 lea		address+control4:ro, A_REG+areg:wo	cost(2,0).
+lsl_l  "lsl.l"	shconreg:ro,	D_REG4:rw:cc		cost(2,4).
 /*
-lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
 */
 lsr_l  "lsr.l"	shconreg:ro,	D_REG4:rw:cc		cost(2,4).
@@ -709,6 +712,8 @@ neg_l  "neg.l"	memory4:rw:cc				cost(2,6).
 #if WORD_SIZE==2
 neg_w  "neg.w"	memory2:rw:cc				cost(2,6).
 #endif
+negx_l "negx.l" D_REG4:rw:cc				cost(2,3).
+negx_l "negx.l" memory4:rw:cc				cost(2,6).
 not_l  "not.l"	D_REG4:rw:cc				cost(2,3).
 not_l  "not.l"	memory4:rw:cc				cost(2,6).
 #if WORD_SIZE==2
@@ -733,6 +738,7 @@ ror_w  "ror.w"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 #endif
 roxl "roxl #1,"	memalt2:rw:cc				cost(2,4).
 roxr "roxr #1,"	memalt2:rw:cc				cost(2,4).
+slt		datalt1:rw				cost(2,3).
 sne		datalt1:rw				cost(2,3).
 sub_l  "sub.l"	any4:ro,	D_REG4:rw:cc		cost(2,3).
 sub_l  "sub.l"	any4+areg:ro,	A_REG+areg:rw		cost(2,3).
@@ -740,6 +746,9 @@ sub_l  "sub.l"	conreg4:ro,	alterable4:rw:cc	cost(2,6).
 #if WORD_SIZE==2
 sub_w  "sub.w"	any2:ro,	D_REG+LOCAL:rw:cc	cost(2,3).
 sub_w  "sub.w"	conreg2:ro,	alterable2:rw:cc	cost(2,6).
+#endif
+subx_l "subx.l" D_REG4:ro,	D_REG4:rw kills :cc	cost(2,3).
+#if WORD_SIZE==2
 /* On a swap, we only want the lower part of D_REG, so don't set cc */
 swap		D_REG:rw kills :cc			cost(2,2).
 #endif
@@ -773,6 +782,7 @@ divs_l "divs.l" data4:ro,	D_REG4:rw:cc		cost(2,90).
 divu_l "divu.l" data4:ro,	D_REG4:rw:cc		cost(2,78).
 divsl_l "divsl.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,90).
 divul_l "divul.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,78).
+mulu_l "mulu.l" data4:ro,	DREG_pair:rw kills :cc	cost(2,44).
 pea		address+control4+regX			cost(2,4).
 #if WORD_SIZE==2
 cmp2_w "cmp2.w" address+control2:ro, genreg2:ro kills :cc cost(2,18).
@@ -3796,6 +3806,18 @@ with exact any4 STACK
     gen add_l {post_inc4, sp}, %a
 			yields	%a
 
+pat adi $1==8
+with exact any4 any4 DD_REG4 DD_REG4
+    uses reusing %1, DD_REG4 = %1
+    gen add_l %2, %4
+	addx_l %a, %3	yields	%4 %3
+with DD_REG4 DD_REG4 D_REG4 any4
+    gen add_l %4, %2
+	addx_l %3, %1	yields	%2 %1
+with DD_REG4 DD_REG4 D_REG4 STACK
+    gen add_l {post_inc4, sp}, %2
+	addx_l %3, %1	yields	%2 %1
+
 #if WORD_SIZE==2
 pat sbi $1==2
 with any2-bconst DD_REG
@@ -3822,6 +3844,12 @@ with exact any4 STACK
 with any4-bconst4 AA_REG
     gen sub_l %1, %2	yields	%2
 
+pat sbi $1==8
+with D_REG4 any4-D_REG4 DD_REG4 DD_REG4
+    /* only 3 of DD_REG4; may unstack %2 into AA_REG */
+    gen sub_l %2, %4
+        subx_l %1, %3	yields	%4 %3
+
 #if WORD_SIZE==2
 pat loc loc cii ldc mli $1==2 && $2==4 && highw($4)==0 && loww($4)>0 && $5==4
 with any2-pre_post
@@ -3847,6 +3875,34 @@ with STACK
 			yields	dl1
 #endif
 
+#ifdef TBL68020
+pat mli $1==8
+with exact data4 data4 DD_REG4 DD_REG4	/* yh yl xh xl */
+    uses DD_REG4 = %4
+    gen mulu_l %1, %a			/* xl * yh */
+	mulu_l %2, %3			/* xh * yl */
+	add_l %3, %a
+	mulu_l %2, {DREG_pair, %3, %4}	/* xl * yl */
+	add_l %a, %3
+			yields	%4 %3
+with DD_REG4 DD_REG4 data4 data4	/* yh yl xh xl */
+    uses DD_REG = %2
+    gen mulu_l %3, %a			/* yl * xh */
+	mulu_l %4, %1			/* yh * xl */
+	add_l %1, %a
+	mulu_l %4, {DREG_pair, %1, %2}	/* yl * xl */
+	add_l %a, %1
+			yields	%2 %1
+with DD_REG4 DD_REG4 STACK		/* yh yl xh xl */
+    uses DD_REG4 = %2
+    gen mulu_l {post_inc4, sp}, %a	/* yl * xh */
+	mulu_l {indirect4, sp}, %1	/* yh * xl */
+	add_l %1, %a
+	mulu_l {post_inc4, sp}, {DREG_pair, %1, %2} /* yl * xl */
+	add_l %a, %1
+			yields	%2 %1
+#endif /* TBL68020 */
+
 #if WORD_SIZE==2
 pat dvi $1==2
 with data2-sconsts DD_REG
@@ -3864,6 +3920,14 @@ with STACK
     kills ALL
     gen jsr {absolute4, ".dvi"}
 			yields	dl1
+#endif /* TBL68020 */
+
+#ifdef TBL68020
+pat dvi $1==8
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".dvi8"}
+			yields	dl1 dl0
 #endif /* TBL68020 */
 
 #if WORD_SIZE==2
@@ -3891,6 +3955,14 @@ with STACK
 			yields	dl2
 #endif /* TBL68020 */
 
+#ifdef TBL68020
+pat rmi $1==8
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".rmi8"}
+			yields	dl1 dl0
+#endif /* TBL68020 */
+
 #if WORD_SIZE==2
 pat ngi $1==2
 with DD_REG
@@ -3900,6 +3972,11 @@ with DD_REG
 pat ngi $1==4
 with DD_REG4
     gen neg_l %1	yields	%1
+
+pat ngi $1==8
+with DD_REG4 DD_REG4
+    gen neg_l %2
+	negx_l %1	yields	%2 %1
 
 #if WORD_SIZE==2
 pat sli $1==2
@@ -3911,6 +3988,43 @@ pat sli $1==4
 with shconreg DD_REG4
     gen asl_l %1, %2	yields	%2
 
+pat sli $1==8
+with DD_REG4 DD_REG4 DD_REG4
+    uses AA_REG = %3		/* no 4th DD_REG */
+    gen lsl_l %1, %3
+	lsl_l %1, %2		/* shift by %1 modulo 64 */
+	bchg {const, 5}, %1
+	bne {slabel, 1f}	/* jump if shift >= 32 */
+	neg_l %1
+	exg %a, %3
+	lsr_l %1, %3		/* (32 - shift) modulo 64 */
+	or_l %3, %2		/* shift bits from %3 to %2 */
+	move %a, %3
+	bra {slabel, 2f}
+	1:
+	move %a, %2
+	lsl_l %1, %2		/* (shift - 32) modulo 64 */
+	2:		yields	%3 %2
+
+pat loc sli ($1&32)==0 && $2==8
+with DD_REG4 DD_REG4
+    uses AA_REG = %2, DD_REG = {bconst, $1&31}
+    gen lsl_l %b, %2
+	lsl_l %b, %1
+	bset {const, 5}, %b
+	neg_l %b
+	exg %a, %2
+	lsr_l %b, %2
+	or_l %2, %1
+	move %a, %2
+			yields	%2 %1
+pat loc sli ($1&63)==32 && $2==8
+with any4 any4		yields	{zero_const, 0} %2
+pat loc sli ($1&32)!=0 && $2==8
+with any4 DD_REG4
+    uses reusing %1, DD_REG = {bconst, $1&31}
+    gen lsl_l %a, %2	yields	{zero_const, 0} %2
+
 #if WORD_SIZE==2
 pat sri $1==2
 with shconreg DD_REG
@@ -3920,6 +4034,43 @@ with shconreg DD_REG
 pat sri $1==4
 with shconreg DD_REG4
     gen asr_l %1, %2	yields	%2
+
+pat sri $1==8
+with DD_REG4 DD_REG4 DD_REG4
+    uses AA_REG = %2		/* no 4th DD_REG */
+    gen asr_l %1, %2
+	lsr_l %1, %3		/* shift by %1 modulo 64 */
+	bchg {const, 5}, %1
+	bne {slabel, 1f}	/* jump if shift >= 32 */
+	neg_l %1
+	exg %a, %2
+	lsl_l %1, %2		/* (32 - shift) modulo 64 */
+	or_l %2, %3		/* shift bits from %2 to %3 */
+	move %a, %2
+	bra {slabel, 2f}
+	1:
+	move %a, %3
+	asr_l %1, %3		/* (shift - 32) modulo 64 */
+	2:		yields	%3 %2
+
+pat loc sri ($1&32)==0 && $2==8
+with DD_REG4 DD_REG4
+    uses AA_REG = %1, DD_REG = {bconst, $1&31}
+    gen asr_l %b, %1
+	lsr_l %b, %2
+	bset {const, 5}, %b
+	neg_l %b
+	exg %a, %1
+	lsl_l %b, %1
+	or_l %1, %2
+	move %a, %1
+			yields	%2 %1
+pat loc sri ($1&63)==32 && $2==8
+with DD_REG4 any4	yields	%1	leaving loc 4 loc 8 cii
+pat loc sri ($1&32)!=0 && $2==8
+with DD_REG4 any4
+    uses reusing %2, DD_REG = {bconst, $1&31}
+    gen asr_l %a, %1	yields	%1	leaving loc 4 loc 8 cii
 
 /************************************************
  * Group 4: unsigned arithmetic.		*
@@ -3947,6 +4098,8 @@ with STACK
 			yields	dl1
 #endif /* TBL68020 */
 
+pat mlu $1==8			leaving mli 8
+
 #if WORD_SIZE==2
 pat dvu $1==2
 with data2-sconsts data2
@@ -3964,6 +4117,14 @@ with STACK
     kills ALL
     gen jsr {absolute4, ".dvu"}
 			yields	dl1
+#endif /* TBL68020 */
+
+#ifdef TBL68020
+pat dvu $1==8
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".dvu8"}
+			yields	dl1 dl0
 #endif /* TBL68020 */
 
 #if WORD_SIZE==2
@@ -3992,7 +4153,17 @@ with STACK
 			yields	dl2
 #endif /* TBL68020 */
 
+#ifdef TBL68020
+pat rmu $1==8
+with STACK
+    kills ALL
+    gen jsr {absolute4, ".rmu8"}
+			yields	dl1 dl0
+#endif /* TBL68020 */
+
 pat slu				leaving sli $1
+
+pat loc slu $2==8		leaving loc $1 sli 8
 
 #if WORD_SIZE==2
 pat sru $1==2
@@ -4003,6 +4174,43 @@ with shconreg DD_REG
 pat sru $1==4
 with shconreg DD_REG4
     gen lsr_l %1, %2	yields	%2
+
+pat sru $1==8
+with DD_REG4 DD_REG4 DD_REG4
+    uses AA_REG = %2		/* no 4th DD_REG */
+    gen lsr_l %1, %2
+	lsr_l %1, %3		/* shift by %1 modulo 64 */
+	bchg {const, 5}, %1
+	bne {slabel, 1f}	/* jump if shift >= 32 */
+	neg_l %1
+	exg %a, %2
+	lsl_l %1, %2		/* (32 - shift) modulo 64 */
+	or_l %2, %3		/* shift bits from %2 to %3 */
+	move %a, %2
+	bra {slabel, 2f}
+	1:
+	move %a, %3
+	lsr_l %1, %3		/* (shift - 32) modulo 64 */
+	2:		yields	%3 %2
+
+pat loc sru ($1&32)==0 && $2==8
+with DD_REG4 DD_REG4
+    uses AA_REG = %2, DD_REG = {bconst, $1&31}
+    gen lsr_l %b, %1
+	lsr_l %b, %2
+	bset {const, 5}, %b
+	neg_l %b
+	exg %a, %1
+	lsl_l %b, %1
+	or_l %1, %2
+	move %a, %1
+			yields	%2 %1
+pat loc sru ($1&63)==32 && $2==8
+with any4 any4		yields	%1 {zero_const, 0}
+pat loc sru ($1&32)!=0 && $2==8
+with DD_REG4 any4
+    uses reusing %2, DD_REG = {bconst, $1&31}
+    gen lsr_l %a, %1	yields	%1 {zero_const, 0}
 
 /************************************************
  * Group 5: floating point arithmetic		*
@@ -4753,6 +4961,17 @@ with exact any_int STACK
     uses reusing %1,DD_REG=%1
     gen xxx* {post_inc_int, sp}, %a	yields %a
 
+proc log8 example and
+with exact data4 data4 DD_REG4 DD_REG4
+    gen xxx* %1, %3
+	xxx* %2, %4			yields	%4 %3
+with DD_REG4 DD_REG4 data4 data4
+    gen xxx* %3, %1
+	xxx* %4, %2			yields	%2 %1
+with DD_REG4 DD_REG4 STACK
+    gen xxx* {post_inc4, sp}, %1
+	xxx* {post_inc4, sp}, %2	yields	%2 %1
+
 proc logdef example and
 with STACK
     uses DD_REG4 = {const, $1/WORD_SIZE -1},
@@ -4813,6 +5032,7 @@ pat and $1==WORD_SIZE			call logw(AND_I)
 #if WORD_SIZE==2
 pat and $1==2*WORD_SIZE			call log2w("and.l")
 #endif
+pat and $1==8				call log8("and.l")
 pat and $1>4 && $1/WORD_SIZE<=65536	call logdef(AND_I)
 pat and defined($1)			call logbdef(AND_I)
 pat and !defined($1)			call logndef(AND_I)
@@ -4821,6 +5041,7 @@ pat ior $1==WORD_SIZE			call logw(OR_I)
 #if WORD_SIZE==2
 pat ior $1==2*WORD_SIZE			call log2w("or.l")
 #endif
+pat ior $1==8				call log8("or.l")
 pat ior $1>2 && $1/WORD_SIZE<=65536	call logdef(OR_I)
 pat ior defined($1)			call logbdef(OR_I)
 pat ior !defined($1)			call logndef(OR_I)
@@ -4834,6 +5055,21 @@ with DD_REG conreg2-bconst
 pat xor $1==4
 with DD_REG4 conreg4-bconst4
     gen eor_l %2, %1	yields	%1
+
+pat xor $1==8
+with exact any4 any4 DD_REG4 DD_REG4
+    uses reusing %1, DD_REG4 = %1
+    gen eor_l %a, %3
+	move %2, %a
+	eor_l %a, %4	yields	%4 %3
+with DD_REG4 DD_REG4 D_REG4 any4
+    gen eor_l %3, %1
+	move %4, %3
+	eor_l %3, %2	yields	%2 %1
+with DD_REG4 DD_REG4 DD_REG4 STACK
+    gen eor_l %3, %1
+        move_l {post_inc4, sp}, %3
+	eor_l %3, %2	yields	%2 %1
 
 pat xor $1>4 && $1/WORD_SIZE<=65536		call logdef(EOR_I)
 pat xor defined($1)			call logbdef(EOR_I)
@@ -4907,6 +5143,50 @@ pat rol $1==4
 with shconreg DD_REG4
     gen rol_l %1, %2	yields	%2
 
+pat rol $1==8
+with DD_REG4 DD_REG4 DD_REG4
+    uses AA_REG, AA_REG		/* no 4th DD_REG */
+    gen bclr {const, 5}, %1
+	beq {slabel, 1f}
+	exg %2, %3		/* rotate left 32 */
+	1:
+	move %2, %a
+	move %3, %b
+	lsl_l %1, %2
+	lsl_l %1, %3
+	bset {const, 5}, %1
+	neg_l %1		/* (32 - shift) modulo 64 */
+	exg %a, %2
+	lsr_l %1, %2
+	or_l %2, %3		/* rotate bits from %2 to %3 */
+	move %a, %2
+	exg %b, %3
+	lsr_l %1, %3
+	or_l %3, %2		/* rotate bits from %3 to %2 */
+	move %b, %3
+			yields	%3 %2
+
+pat loc rol ($1&32)==0 && $2==8
+with DD_REG4 DD_REG4
+    uses AA_REG, AA_REG, DD_REG = {bconst, $1&31}
+    gen move %1, %a
+	move %2, %b
+	lsl_l %c, %1
+	lsl_l %c, %2
+	bset {const, 5}, %c
+	neg_l %c
+	exg %a, %1
+	lsr_l %c, %1
+	or_l %1, %2
+	move %a, %1
+	exg %b, %2
+	lsr_l %c, %2
+	or_l %2, %1
+	move %b, %2
+			yields	%2 %1
+pat loc rol ($1&63)==32 && $2==8	leaving exg 4
+pat loc rol ($1&32)!=0 && $2==8		leaving loc (0-$1)&31 ror 8
+
 #if WORD_SIZE==2
 pat ror $1==2
 with shconreg DD_REG
@@ -4917,7 +5197,51 @@ pat ror $1==4
 with shconreg DD_REG4
     gen ror_l %1, %2	yields	%2
 
-	
+pat ror $1==8
+with DD_REG4 DD_REG4 DD_REG4
+    uses AA_REG, AA_REG		/* no 4th DD_REG */
+    gen bclr {const, 5}, %1
+	beq {slabel, 1f}
+	exg %2, %3		/* rotate right 32 */
+	1:
+	move %2, %a
+	move %3, %b
+	lsr_l %1, %2
+	lsr_l %1, %3
+	bset {const, 5}, %1
+	neg_l %1		/* (32 - shift) modulo 64 */
+	exg %a, %2
+	lsl_l %1, %2
+	or_l %2, %3		/* rotate bits from %2 to %3 */
+	move %a, %2
+	exg %b, %3
+	lsl_l %1, %3
+	or_l %3, %2		/* rotate bits from %3 to %2 */
+	move %b, %3
+			yields	%3 %2
+
+pat loc ror ($1&32)==0 && $2==8
+with DD_REG4 DD_REG4
+    uses AA_REG, AA_REG, DD_REG = {bconst, $1&31}
+    gen move %1, %a
+	move %2, %b
+	lsr_l %c, %1
+	lsr_l %c, %2
+	bset {const, 5}, %c
+	neg_l %c
+	exg %a, %1
+	lsl_l %c, %1
+	or_l %1, %2
+	move %a, %1
+	exg %b, %2
+	lsl_l %c, %2
+	or_l %2, %1
+	move %b, %2
+			yields	%2 %1
+pat loc ror ($1&63)==32 && $2==8	leaving exg 4
+pat loc ror ($1&32)!=0 && $2==8		leaving loc (0-$1)&31 rol 8
+
+
 
 
 /************************************************
@@ -6391,6 +6715,55 @@ pat cmu zge $1==WORD_SIZE		call cmuzxx("bcc","bls")
 pat cmu zgt $1==WORD_SIZE		call cmuzxx("bhi","bcs")
 
 
+proc cmx8txx example cmi tlt
+with exact DD_REG4 DD_REG4 any4 any4
+    uses reusing %3, DD_REG4 = %3
+    gen sub_l %4, %2
+	subx_l %a, %1	/* keep overflow flag */
+	sxx[2] %1
+	neg_b %1	yields	{dreg1, %1}
+with D_REG4 any4-D_REG4 DD_REG4 DD_REG4
+    /* only 3 of DD_REG4; may unstack %2 into AA_REG */
+    gen sub_l %2, %4
+	subx_l %1, %3
+	sxx[1] %3
+	neg_b %3	yields	{dreg1, %3}
+
+pat cmi tlt $1==8			call cmx8txx("slt","sgt")
+pat cmi tle $1==8			call cmx8txx("sle","sge")
+pat cmi tge $1==8			call cmx8txx("sge","sle")
+pat cmi tgt $1==8			call cmx8txx("sgt","slt")
+pat cms teq $1==8			call cmx8txx("seq","seq")
+pat cms tne $1==8			call cmx8txx("sne","sne")
+pat cmu tlt $1==8			call cmx8txx("scs","shi")
+pat cmu tle $1==8			call cmx8txx("sls","scc")
+pat cmu tge $1==8			call cmx8txx("scc","sls")
+pat cmu tgt $1==8			call cmx8txx("shi","scs")
+
+proc cmx8zxx example cmi zlt
+with exact DD_REG4 DD_REG4 any4 any4
+    kills ALL
+    uses reusing %3, DD_REG4 = %3
+    gen sub_l %4, %2
+	subx_l %a, %1
+	bxx[2] {llabel, $2}
+with D_REG4 any4-D_REG4 DD_REG4 DD_REG4 STACK
+    gen sub_l %2, %4
+	subx_l %1, %3
+	bxx[1] {llabel, $2}
+
+pat cmi zlt $1==8			call cmx8zxx("blt","bgt")
+pat cmi zle $1==8			call cmx8zxx("ble","bge")
+pat cmi zge $1==8			call cmx8zxx("bge","ble")
+pat cmi zgt $1==8			call cmx8zxx("bgt","blt")
+pat cms zeq $1==8			call cmx8zxx("beq","beq")
+pat cms zne $1==8			call cmx8zxx("bne","bne")
+pat cmu zlt $1==8			call cmx8zxx("bcs","bhi")
+pat cmu zle $1==8			call cmx8zxx("bls","bcc")
+pat cmu zge $1==8			call cmx8zxx("bcc","bls")
+pat cmu zgt $1==8			call cmx8zxx("bhi","bcs")
+
+
 #if TBL68881
 proc cmf4zxx example cmf zlt
 with FS_REG FS_REG
@@ -6629,6 +7002,33 @@ uses reusing %1,DD_REG4
 
 pat loc loc ciu $1==$2	/* skip this */
 pat loc loc cui $1==$2	/* skip this */
+
+pat loc loc cii $1==4 && $2==8
+with exact test_set1+test_set2
+			yields	%1 {zero_const, 0}
+with test_set4
+    uses DD_REG4
+    gen test %1
+	slt {dreg1, %a}
+#ifdef TBL68020
+	extb_l %a
+#else
+	ext_w %a
+	ext_l %a
+#endif
+			yields	%1 %a
+
+pat loc loc cii $1<4 && $2==8
+			leaving loc $1 loc 4 cii loc 4 loc 8 cii
+
+pat loc loc ciu $1==4 && $2==8		yields {zero_const, 0}
+pat loc loc cui $1==4 && $2==8		yields {zero_const, 0}
+pat loc loc cuu $1==4 && $2==8		yields {zero_const, 0}
+
+pat loc loc cii $1==8 && $2==4		leaving asp 4
+pat loc loc ciu $1==8 && $2==4		leaving asp 4
+pat loc loc cui $1==8 && $2==4		leaving asp 4
+pat loc loc cuu $1==8 && $2==4		leaving asp 4
 
 
 /* The following rules should be handled by the peephole optimizer, I think */

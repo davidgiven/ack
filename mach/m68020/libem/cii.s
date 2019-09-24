@@ -13,12 +13,19 @@
 	sub.l	d0, sp		! pop extra bytes
 	jmp	(a0)
 1:
-	clr.l	d1
-	tst.l	(sp)
-	bne	4f
-	not.l	d1		! d1 contains sign of source
-4:
-	asr.l	#2, d0
+	move.l	(sp), d1
+	lsr.l	#1, d0
+	bcs	1f		! branch if source size == 1
+	lsr.l	#1, d0
+	bcs	2f		! branch if source size == 2
+	tst.l	d1
+	bra	4f
+1:	lsr.l	#1, d0		! size difference / 4
+	ext.w	d1
+2:	ext.l	d1
+	move.l	d1, (sp)
+4:	slt	d1
+	extb.l	d1		! d1 contains sign of source
 	sub.l	#1, d0
 2:
 	move.l	d1, -(sp)
