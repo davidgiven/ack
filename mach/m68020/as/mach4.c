@@ -225,12 +225,17 @@ creg	:	CREG
 off_width		/* note: these should be curly brackets, but that would
 			 * leave us without brackets for expressions.
 			 */
-	:	'[' abs31 ':' abs31 ']'
+	:	'[' off31 ':' wid31 ']'
 			{	$$ = ($2<<6) | $4;
 			}
 	;
-abs31	:	DREG	{	$$ = 040 | $1;}
-	|	absexp	{	fit(fit5($1));
+off31	:	DREG	{	$$ = 040 | $1;}
+	|	absexp	{	fit(fit5($1));     /* 0 to 31 */
+				$$ = low5($1);
+			}
+	;
+wid31	:	DREG	{	$$ = 040 | $1;}
+	|	absexp	{	fit(fit5($1) - 1); /* 1 to 32 */
 				$$ = low5($1);
 			}
 	;
