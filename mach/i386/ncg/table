@@ -1107,7 +1107,7 @@ with REG REG
 pat loc sli ($1&63)==32 && $2==8
 with a_word a_word		yields %1 {ANYCON,0}
 pat loc sli ($1&32)!=0 && $2==8
-with REG REG
+with REG a_word
   gen sal %1,{ANYCON,$1&31}	yields %1 {ANYCON,0}
 
 /*
@@ -1140,11 +1140,13 @@ pat loc sri ($1&32)==0 && $2==8
 with REG REG
   gen shrd %1,%2,{ANYCON,$1&31}
       sar %2,{ANYCON,$1&31}	yields %2 %1
+pat loc sri ($1&63)==32
+with a_word ACC
+  gen cdq.			yields edx eax
 pat loc sri ($1&32)!=0 && $2==8
-with REG REG
-  gen mov %1,%2
-      sar %1,{ANYCON,$1&31}
-      sar %2,{ANYCON,31}	yields %2 %1
+with a_word ACC
+  gen sar eax,{ANYCON,$1&31}
+      cdq.			yields edx eax
 
 /*
 pat sri !defined($1)
@@ -1258,7 +1260,7 @@ with REG REG
 pat loc sru ($1&63)==32 && $2==8
 with a_word a_word		yields {ANYCON,0} %2
 pat loc sru ($1&32)!=0 && $2==8
-with REG REG
+with a_word REG
   gen shr %2,{ANYCON,$1&31}	yields {ANYCON,0} %2
 
 /*
@@ -2212,18 +2214,18 @@ with ACC
 
 pat loc loc cii $1<4 && $2==8	leaving loc $1 loc 4 cii loc 4 loc $2 cii
 
-pat loc loc cii $1==8 && $2<=4
+pat loc loc cii $1==8 && $2==4
 with a_word a_word		yields %1
 
 pat loc loc ciu				leaving loc $1 loc $2 cuu
 pat loc loc cui				leaving loc $1 loc $2 cuu
 
-pat loc loc cuu $1==$2 || ($1<=4 && $2<=4)
+pat loc loc cuu $1==$2
 
-pat loc loc cuu $1<=4 && $2==8
+pat loc loc cuu $1==4 && $2==8
 with a_word			yields {ANYCON,0} %1
 
-pat loc loc cuu $1==8 && $2<=4
+pat loc loc cuu $1==8 && $2==4
 with a_word a_word		yields %1
 
 pat loc loc cif $1==4 && $2==4		leaving loc 4 cal ".cif4" asp 4
