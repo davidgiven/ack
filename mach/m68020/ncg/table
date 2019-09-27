@@ -6057,6 +6057,11 @@ with any4 D_REG4+DLOCAL+const4+absolute4 STACK
 	move %2,dl0
 	jmp {absolute4, ".csa4"}
 
+pat csa $1==8
+with any4 STACK
+    gen move %1,a0
+	jmp {absolute4, ".csa8"}
+
 #if WORD_SIZE==2
 pat csb $1==2
 #if TBL68020
@@ -6078,6 +6083,11 @@ with any4 D_REG4+DLOCAL+const4+absolute4 STACK
     gen move %1,a0
 	move %2,dl0
 	jmp {absolute4, ".csb4"}
+
+pat csb $1==8
+with any4 STACK
+    gen move %1,a0
+	jmp {absolute4, ".csb8"}
 
 pat dch				leaving loi 4
 

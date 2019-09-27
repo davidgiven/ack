@@ -1,10 +1,11 @@
+
 include("plat/build.lua")
 
 definerule("plat_testsuite",
 	{
 		plat = { type="string" },
 		method = { type="string" },
-		-- added long-long/lldivrem_e.c
+		-- added long-long/llswitch_e.c
 		sets = { type="table", default={"core", "b", "bugs", "m2", "floats", "long-long"}},
 		skipsets = { type="table", default={}},
 		tests = { type="targets", default={} },

@@ -3074,6 +3074,11 @@ with BXREG ACC
 kills ALL
   gen jmp {label, ".csa4"}
 
+pat csa $1==8
+with BXREG ACC DXREG
+kills ALL
+  gen jmp {label, ".csa8"}
+
 pat csa !defined($1)
 with rm-BXREG-ACC BXREG ACC
 kills ALL
@@ -3085,6 +3090,11 @@ pat csb $1==4
 with BXREG ACC
 kills ALL
   gen jmp {label, ".csb4"}
+
+pat csb $1==8
+with BXREG ACC DXREG
+kills ALL
+  gen jmp {label, ".csb8"}
 
 pat csb !defined($1)
 with rm-BXREG-ACC BXREG ACC
