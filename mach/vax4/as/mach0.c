@@ -12,8 +12,6 @@
 #define LISTING
 #define RELOCATION
 
-#undef valu_t
-#define valu_t long
 #undef word_t
 #define word_t long
 #undef ADDR_T

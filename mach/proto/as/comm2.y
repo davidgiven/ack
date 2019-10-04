@@ -22,7 +22,6 @@ static item_t	*last_it, *o_it;
 %union {
 	word_t	y_word;
 	valu_t	y_valu;
-	int64_t	y_valu8;
 	expr_t	y_expr;
 	item_t	*y_item;
 #ifdef ASLD
@@ -44,7 +43,7 @@ static item_t	*last_it, *o_it;
 %token NUMBER2
 %token NUMBER3
 %token NUMBER4
-%token <y_valu8> NUMBER8
+%token <y_valu> NUMBER8
 %token NUMBERF
 %token DOT
 %token EXTERN
@@ -77,7 +76,6 @@ static item_t	*last_it, *o_it;
 %nonassoc '~'
 
 %type <y_valu> absexp optabs1 optabs2
-%type <y_valu8> datum8
 %type <y_expr> expr
 %type <y_item> id_fb
 
@@ -285,17 +283,10 @@ datalist
 			}
 	;
 
-/* datum8 isn't expr, because int64_t may be wider than valu_t. */
-datum8	:	NUMBER8
-			{	$$ = $1;}
-	|	'-' NUMBER8
-			{	$$ = -$2;}
-	;
-
 data8list
-	:	datum8
+	:	absexp
 			{	emit8($1);}
-	|	data8list ',' datum8
+	|	data8list ',' absexp
 			{	emit8($3);}
 	;
 

@@ -10,8 +10,6 @@
 #define	THREE_PASS	/* branch and offset optimization */
 #define	LISTING		/* enable listing facilities */
 
-#undef	valu_t
-#define valu_t		long
 #undef	ADDR_T
 #define	ADDR_T		long
 #undef	ALIGNSECT

@@ -121,7 +121,7 @@ void putval(int c)
 			v = yylval.y_valu;
 			goto putnum;
 		case NUMBER8:
-			v = yylval.y_valu8;
+			v = yylval.y_valu;
 			for (n = 0; n < sizeof(v); n++)
 			{
 				if (v == 0)
@@ -132,7 +132,7 @@ void putval(int c)
 				c = NUMBER0 + n;
 			else
 				n = 8;
-			v = yylval.y_valu8;
+			v = yylval.y_valu;
 		putnum:
 			putc(c, tempfile);
 			putc(c >> 8, tempfile);
@@ -236,10 +236,7 @@ int getval(int c)
 				v <<= 8;
 				v |= getc(tempfile);
 			}
-			if (c == NUMBER8)
-				yylval.y_valu8 = v;
-			else
-				yylval.y_valu = v;
+			yylval.y_valu = v;
 			return (c);
 		case IDENT:
 		case FBSYM:
@@ -421,7 +418,7 @@ static void need_stringbuf()
 
 static int innumber(int c)
 {
-	uint64_t uv;
+	uvalu_t uv;
 	char* p;
 	int radix;
 	static char num[40 + 1];
@@ -473,7 +470,7 @@ static int innumber(int c)
 			serror("digit exceeds radix");
 		uv = uv * radix + c;
 	}
-	yylval.y_valu8 = uv; /* signed = unsigned */
+	yylval.y_valu = uv; /* signed = unsigned */
 	return (NUMBER8);
 
 floatconstant:
