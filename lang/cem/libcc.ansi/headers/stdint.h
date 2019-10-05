@@ -27,17 +27,29 @@ typedef unsigned short  uint16_t;
 #if	_EM_WSIZE == 4
 typedef signed int      int32_t;
 typedef unsigned int    uint32_t;
-#else
-typedef signed long     int32_t;
-typedef unsigned long   uint32_t;
-#endif
 #define INT32_MAX       2147483647
 #define INT32_MIN       (-2147483648)
 #define UINT32_MAX      4294967295U
+#else
+typedef signed long     int32_t;
+typedef unsigned long   uint32_t;
+#define INT32_MAX       2147483647L
+#define INT32_MIN       (-2147483648L)
+#define UINT32_MAX      4294967295UL
+#endif
 
-/* We only get int64_t if long longs are 8 bytes. */
+/* We only get int64_t if longs or long longs are 8 bytes. */
 
-#if _EM_LLSIZE == 8
+#if _EM_LSIZE == 8
+typedef signed long     int64_t;
+typedef unsigned long   uint64_t;
+#define INT64_MAX       9223372036854775807L
+#define INT64_MIN       (-9223372036854775808L)
+#define UINT64_MAX      18446744073709551615UL
+
+typedef int64_t         intmax_t;
+typedef uint64_t        uintmax_t;
+#elif _EM_LLSIZE == 8
 typedef signed long long    int64_t;
 typedef unsigned long long  uint64_t;
 #define INT64_MAX       9223372036854775807LL
