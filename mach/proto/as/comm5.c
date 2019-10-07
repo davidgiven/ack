@@ -101,7 +101,7 @@ int yylex(void)
 
 void putval(int c)
 {
-	valu_t v;
+	int64_t v;
 	int n = 0;
 	char* p = 0;
 
@@ -110,14 +110,17 @@ void putval(int c)
 	{
 		case CODE1:
 			n = 1;
+			v = yylval.y_valu;
 			goto putnum;
 		case CODE2:
 			n = 2;
+			v = yylval.y_valu;
 			goto putnum;
 		case CODE4:
 			n = 4;
+			v = yylval.y_valu;
 			goto putnum;
-		case NUMBER:
+		case NUMBER8:
 			v = yylval.y_valu;
 			for (n = 0; n < sizeof(v); n++)
 			{
@@ -125,12 +128,14 @@ void putval(int c)
 					break;
 				v >>= 8;
 			}
-			assert(n <= 4);
-			c = NUMBER0 + n;
+			if (n <= 4)
+				c = NUMBER0 + n;
+			else
+				n = 8;
+			v = yylval.y_valu;
 		putnum:
 			putc(c, tempfile);
 			putc(c >> 8, tempfile);
-			v = yylval.y_valu;
 			while (--n >= 0)
 				putc((int)(v >> (n * 8)), tempfile);
 			return;
@@ -188,8 +193,8 @@ void putval(int c)
 
 int getval(int c)
 {
+	int64_t v;
 	int n = 0;
-	valu_t v;
 	char* p = 0;
 
 	switch (c)
@@ -204,22 +209,26 @@ int getval(int c)
 			n = 4;
 			goto getnum;
 		case NUMBER0:
-			c = NUMBER;
+			c = NUMBER8;
 			goto getnum;
 		case NUMBER1:
 			n = 1;
-			c = NUMBER;
+			c = NUMBER8;
 			goto getnum;
 		case NUMBER2:
 			n = 2;
-			c = NUMBER;
+			c = NUMBER8;
 			goto getnum;
 		case NUMBER3:
 			n = 3;
-			c = NUMBER;
+			c = NUMBER8;
 			goto getnum;
-		case NUMBER:
+		case NUMBER4:
 			n = 4;
+			c = NUMBER8;
+			goto getnum;
+		case NUMBER8:
+			n = 8;
 		getnum:
 			v = 0;
 			while (--n >= 0)
@@ -409,6 +418,7 @@ static void need_stringbuf()
 
 static int innumber(int c)
 {
+	uvalu_t uv;
 	char* p;
 	int radix;
 	static char num[40 + 1];
@@ -450,7 +460,7 @@ static int innumber(int c)
 	}
 	if (radix != 16 && (c == 'f' || c == 'b'))
 		return (infbsym(num));
-	yylval.y_valu = 0;
+	uv = 0;
 	while ((c = *p++))
 	{
 		if (c > '9')
@@ -458,9 +468,10 @@ static int innumber(int c)
 		c -= '0';
 		if ((unsigned)c >= radix)
 			serror("digit exceeds radix");
-		yylval.y_valu = yylval.y_valu * radix + c;
+		uv = uv * radix + c;
 	}
-	return (NUMBER);
+	yylval.y_valu = uv; /* signed = unsigned */
+	return (NUMBER8);
 
 floatconstant:
 	do

@@ -5,30 +5,25 @@
 /* $Id$ */
 /* COMPILER ARITHMETIC */
 
-/*	Normally the compiler does its internal arithmetics in longs
-	native to the source machine, which is always good for local
-	compilations, and generally OK too for cross compilations
-	downwards and sidewards.  For upwards cross compilation and
-	to save storage on small machines, SPECIAL_ARITHMETICS will
-	be handy.
+/*	The compiler uses 2 types, arith and writh, for its internal
+	arithmetic.  Type arith is normally long, and may be too
+	narrow for long long values.  We can't change arith to a wider
+	type, because both <em_arith.h> (pulled by <em.h>) and
+	<flt_arith.h> define arith.
+
+	Type writh (wide arithmetic) is for values that might not fit
+	in arith.  Normally writh is the long long native to the
+	source machine, which is always good for local compilations,
+	and generally OK too for cross compilations downwards and
+	sidewards.
 */
 #ifndef ARITH_H_
 #define ARITH_H_
 
-#include	"parameters.h"
-
-#ifndef	SPECIAL_ARITHMETICS
-
 #include    <em_arith.h>		/* obtain definition of "arith"	*/
-#include	<flt_arith.h>
 
-#else	/* SPECIAL_ARITHMETICS */
-
-/*	All preprocessor arithmetic should be done in longs.
-*/
-#define	arith	long				/* dummy */
-
-#endif	/* SPECIAL_ARITHMETICS */
+#define	writh		long long
+/* The compiler also uses "unsigned writh". */
 
 struct expr;
 struct type;
@@ -36,6 +31,8 @@ struct type;
 #define	arith_size	(sizeof(arith))
 #define	arith_sign	((arith) 1 << (arith_size * 8 - 1))
 #define	max_arith	(~arith_sign)
+
+extern writh full_mask[];		/* cstoper.c */
 
 void arithbalance(register struct expr **e1p, int oper, register struct expr **e2p);
 void relbalance(register struct expr **e1p, int oper, register struct expr **e2p);
@@ -57,5 +54,6 @@ void any2opnd(register struct expr **expp, int oper);
 void any2parameter(register struct expr **expp);
 void field2arith(register struct expr **expp);
 void switch_sign_fp(register struct expr *expr);
+char *writh2str(writh val, int uns);
 
 #endif /* ARITH_H_ */

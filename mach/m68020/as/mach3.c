@@ -68,8 +68,8 @@
 {0,	BITFIELD,	0166300,	"bfclr"},
 {0,	BITFIELD,	0167300,	"bfset"},
 {0,	BF_TO_D,	0164700,	"bfextu"},
-{0,	BF_TO_D,	0164700,	"bfexts"},
-{0,	BF_TO_D,	0164700,	"bfffo"},
+{0,	BF_TO_D,	0165700,	"bfexts"},
+{0,	BF_TO_D,	0166700,	"bfffo"},  /* not 0164700 */
 {0,	BFINS,		0167700,	"bfins"},
 
 {0,	SHIFT,		0160340,	"asr"},

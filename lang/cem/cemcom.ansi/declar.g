@@ -123,9 +123,13 @@ single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
 	}
 |
 	[ SHORT | LONG ]
-	{	if (ds->ds_size)
-			error("repeated size specifier");
-		ds->ds_size = DOT;
+	{	if (ds->ds_size == LONG && DOT == LONG)
+			ds->ds_size = LNGLNG;
+		else {
+			if (ds->ds_size)
+				error("repeated size specifier");
+			ds->ds_size = DOT;
+		}
 	}
 |
 	[ SIGNED | UNSIGNED ]
@@ -339,7 +343,7 @@ arrayer(arith *sizep;)
 			constant_expression(&expr)
 			{
 				check_array_subscript(expr);
-				*sizep = expr->VL_VALUE;
+				*sizep = (arith)expr->VL_VALUE;
 				free_expression(expr);
 			}
 		]?
@@ -426,7 +430,7 @@ enumerator(struct type *tp; arith *lp;)
 		'='
 		constant_expression(&expr)
 		{
-			*lp = expr->VL_VALUE;
+			*lp = (arith)expr->VL_VALUE;
 			free_expression(expr);
 		}
 	]?
@@ -544,7 +548,7 @@ bit_expression(struct field **fd;)
 	':'
 	constant_expression(&expr)
 	{
-		(*fd)->fd_width = expr->VL_VALUE;
+		(*fd)->fd_width = (arith)expr->VL_VALUE;
 		free_expression(expr);
 #ifdef NOBITFIELD
 		error("bitfields are not implemented");

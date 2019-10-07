@@ -6,8 +6,8 @@
 /*	DUMP ROUTINES	*/
 
 
-#ifdef	DEBUG
 #include	"parameters.h"
+#ifdef	DEBUG
 #include	<ack_string.h>
 #include	<alloc.h>
 #include	<flt_arith.h>
@@ -442,8 +442,8 @@ static void p1_expr(int lvl, register struct expr *expr)
 			print("(Unknown) ");
 			break;
 		}
-		print(expr->ex_type->tp_unsigned ? "%lu\n" : "%ld\n",
-			expr->VL_VALUE);
+		print("%s\n", writh2str(expr->VL_VALUE,
+					expr->ex_type->tp_unsigned));
 		break;
 	case String:
 	{

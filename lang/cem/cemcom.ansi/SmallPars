@@ -55,6 +55,7 @@
 #define SZ_WORD		4
 #define	SZ_INT		4
 #define	SZ_LONG		4
+#define	SZ_LNGLNG	-1
 #define	SZ_FLOAT	4
 #define	SZ_DOUBLE	8
 #define	SZ_LNGDBL	8	/* for now */
@@ -66,6 +67,7 @@
 #define AL_WORD		SZ_WORD
 #define	AL_INT		SZ_WORD
 #define	AL_LONG		SZ_WORD
+#define	AL_LNGLNG	SZ_WORD
 #define	AL_FLOAT	SZ_WORD
 #define	AL_DOUBLE	SZ_WORD
 #define	AL_LNGDBL	SZ_WORD
@@ -113,11 +115,6 @@
 
 !File: nobitfield.h
 /*#define NOBITFIELD	1	/* if NOT defined, implement bitfields	*/
-
-
-!File: spec_arith.h
-/* describes internal compiler arithmetics */
-#undef	SPECIAL_ARITHMETICS	/* something different from native long */
 
 
 !File: static.h

@@ -104,8 +104,10 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 
 #ifdef	____
 struct tokenname tkfunny[] =	{	/* internal keywords */
+	{LNGLNG, "long long"},
 	{LNGDBL, "long double"},
 	{ULONG, "unsigned long"},
+	{ULNGLNG, "unsigned long long"},
 
 	{ARRAY, "array"},
 	{FUNCTION, "function"},

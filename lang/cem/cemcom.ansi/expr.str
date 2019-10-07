@@ -23,7 +23,7 @@
 
 struct value	{
 	int vl_class;		/* Const, Name or Label	*/
-	arith vl_value;		/* constant value or offset */
+	writh vl_value;		/* constant value or offset */
 	union {
 		struct idf *vl_idf;	/* external name */
 		label vl_lbl;		/* compiler-generated label */
@@ -100,8 +100,6 @@ struct expr	{
 #define	ISNAME(e)	((e)->ex_class == Value && (e)->VL_CLASS == Name)
 #define	ISCOMMA(e)	((e)->ex_class == Oper && (e)->OP_OPER == INITCOMMA)
 
-extern struct expr *intexpr(), *new_oper();
-
 /* ALLOCDEF "expr" 20 */
 
 
@@ -113,7 +111,7 @@ void string2expr(register struct expr **expp, char *str, int len);
 void int2expr(struct expr *expr);
 void float2expr(register struct expr *expr);
 struct expr* intexpr(arith ivalue, int fund);
-void fill_int_expr(register struct expr *ex,arith ivalue, int fund);
+void fill_int_expr(register struct expr *ex, writh ivalue, int fund);
 struct expr *new_oper(struct type *tp, register struct expr *e1, int oper,
 		register struct expr *e2);
 void chk_cst_expr(struct expr **expp);

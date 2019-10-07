@@ -83,6 +83,6 @@
 
 %type <y_word> bcdx op_ea regs rrange 
 %type <y_word> reg sizedef sizenon creg
-%type <y_word> off_width abs31 bd_areg_index
+%type <y_word> off_width off31 wid31 bd_areg_index
 %type <y_word> areg_index areg scale cp_cond fc mask
 %type <y_word> fsize fregs fcregs frlist frrange

@@ -12,6 +12,7 @@
 */
 
 #include	<assert.h>
+#include	<stddef.h>
 #include    "parameters.h"
 #include	<alloc.h>
 #include	<flt_arith.h>
@@ -45,7 +46,8 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		have a floating type, in which case the flags shouldn't
 		travel upward in the expression tree.
 	*/
-	register int t1, t2, u1, u2;
+	struct type *convert1, *convert2;
+	int t1, t2, u1, u2;
 	int shifting = (oper == LEFT || oper == RIGHT
 			|| oper == LEFTAB || oper == RIGHTAB);
 	int ptrdiff = 0;
@@ -56,9 +58,11 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 	if (int_size != pointer_size) {
 		if (ptrdiff = ((*e1p)->ex_flags & EX_PTRDIFF)
 			    || ((*e2p)->ex_flags & EX_PTRDIFF)) {
-			if (!((*e1p)->ex_flags & EX_PTRDIFF) && t1 == LONG)
+			if (!((*e1p)->ex_flags & EX_PTRDIFF)
+			    && (t1 == LONG || t1 == LNGLNG))
 				ptrdiff = 0;
-			if (!((*e2p)->ex_flags & EX_PTRDIFF) && t2 == LONG
+			if (!((*e2p)->ex_flags & EX_PTRDIFF)
+			    && (t2 == LONG || t2 == LNGLNG)
 			    && !shifting)
 				ptrdiff = 0;
 		}
@@ -67,7 +71,9 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		(*e2p)->ex_flags &= ~EX_PTRDIFF;
 	}
 
-	/* Now t1 and t2 are either INT, LONG, FLOAT, DOUBLE, or LNGDBL */
+	/*	Now t1 and t2 are either INT, LONG, LNGLNG,
+		FLOAT, DOUBLE, or LNGDBL
+	*/
 
 	/*	If any operand has the type long double, the other operand
 		is converted to long double.
@@ -82,11 +88,12 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		}
 		return;
 	} else if (t2 == LNGDBL) {
-		if (t1 != LNGDBL)
+		if (t1 != LNGDBL) {
 		    if (t1 == DOUBLE || t1 == FLOAT)
 			float2float(e1p, lngdbl_type);
 		    else
 			int2float(e1p, lngdbl_type);
+		}
 		return;
 	}
 
@@ -120,38 +127,67 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		return;
 	}
 
-	/* Now they are INT or LONG */
+	/* Now they are INT, LONG or LNGLNG */
 	u1 = (*e1p)->ex_type->tp_unsigned;
 	u2 = (*e2p)->ex_type->tp_unsigned;
+	convert1 = NULL;
+	convert2 = NULL;
 
-	/*	If either operand has type unsigned long int, the other
-		operand is converted to unsigned long int.
-	*/
-	if (t1 == LONG && u1 && (t2 != LONG || !u2))
-		t2 = int2int(e2p, ulong_type);
-	else if (t2 == LONG && u2 && (t1 != LONG || !u1)
-			&& !shifting)	/* ??? */
-		t1 = int2int(e1p, ulong_type);
+	/*	If either operand is a long long, the other operand
+		is converted to long long; else if either operand is
+		a long, the other operand is converted to a long.
 
-	/*	If one operand has type long int and the other has type unsigned
-		int, if a long int can represent all values of an unsigned int,
-		the operand of type unsigned int is converted to long int; if
-		a long int cannot represent all values of an unsigned int,
-		both operands are converted to unsigned long int.
+		If one operand is signed and the other operand is
+		unsigned, if the signed type can represent all values
+		of the unsigned type, the unsigned operand is
+		converted to the signed type, else both operands are
+		converted to an unsigned type.
 	*/
-	if (t1 == LONG && t2 == INT && u2)
-		t2 = int2int(e2p, (int_size<long_size)? long_type : ulong_type);
-	else if (t2 == LONG && t1 == INT && u1 && !shifting)	/* ??? */
-		t1 = int2int(e1p, (int_size<long_size)? long_type : ulong_type);
+	if (shifting) {
+		/*	In shifts like o1 << o2, never convert o1,
+			and let ch3bin() convert o2 to int.
+		*/
+	} else if (t1 == LNGLNG && u1 && (t2 != LNGLNG || !u2))
+		convert2 = ulnglng_type;
+	else if (t2 == LNGLNG && u2 && (t1 != LNGLNG || !u1))
+		convert1 = ulnglng_type;
+	else if (t1 == LNGLNG && t2 != LNGLNG && u2) {
+		if ((t2 == LONG ? long_size : int_size) < lnglng_size)
+			convert2 = lnglng_type;
+		else
+			convert1 = convert2 = ulnglng_type;
+	} else if (t2 == LNGLNG && t1 != LNGLNG && u1) {
+		if ((t1 == LONG ? long_size : int_size) < lnglng_size)
+			convert1 = lnglng_type;
+		else
+			convert1 = convert2 = ulnglng_type;
+	} else if (t1 == LNGLNG && t2 != LNGLNG)
+		convert2 = lnglng_type;
+	else if (t2 == LNGLNG && t1 != LNGLNG)
+		convert1 = lnglng_type;
+	else if (t1 == LONG && u1 && (t2 != LONG || !u2))
+		convert2 = ulong_type;
+	else if (t2 == LONG && u2 && (t1 != LONG || !u1))
+		convert1 = ulong_type;
+	else if (t1 == LONG && t2 == INT && u2) {
+		if (int_size < long_size)
+			convert2 = long_type;
+		else
+			convert1 = convert2 = ulong_type;
+	} else if (t2 == LONG && t1 == INT && u1) {
+		if (int_size < long_size)
+			convert1 = long_type;
+		else
+			convert1 = convert2 = ulong_type;
+	} else if (t1 == LONG && t2 != LONG)
+		convert2 = long_type;
+	else if (t2 == LONG && t1 != LONG)
+		convert1 = long_type;
 
-	/*	If either operand has type long int, the other operand is con-
-		verted to long int.
-	*/
-	if (t1 == LONG && t2 != LONG)
-		t2 = int2int(e2p, long_type);
-	else
-	if (t2 == LONG && t1 != LONG && !shifting)	/* ??? */
-		t1 = int2int(e1p, long_type);
+	if (convert1)
+		t1 = int2int(e1p, convert1);
+	if (convert2)
+		t2 = int2int(e2p, convert2);
 
 	u1 = (*e1p)->ex_type->tp_unsigned;
 	u2 = (*e2p)->ex_type->tp_unsigned;
@@ -161,10 +197,10 @@ void arithbalance(register struct expr **e1p, int oper, register struct expr **e
 		Otherwise, both operands have type int.
 	*/
 	if (u1 && !u2 && !shifting)
-		t2 = int2int(e2p, (t1 == LONG) ? ulong_type : uint_type);
+		t2 = int2int(e2p, uint_type);
 	else
 	if (!u1 && u2 && !shifting)
-		t1 = int2int(e1p, (t2 == LONG) ? ulong_type : uint_type);
+		t1 = int2int(e1p, uint_type);
 
 	if (int_size != pointer_size) {
 		if (ptrdiff) {
@@ -259,6 +295,7 @@ any2arith(register struct expr **expp, register int oper)
 		break;
 	case INT:
 	case LONG:
+	case LNGLNG:
 		break;
 	case ENUM:
 #ifndef	LINT
@@ -338,8 +375,7 @@ int int2int(struct expr **expp, register struct type *tp)
 					unsigned int x = ~0;
 					unsigned int y = -1;
 			*/
-			extern long full_mask[];
-			long remainder = exp->VL_VALUE &
+			writh remainder = exp->VL_VALUE &
 						~full_mask[(int)(tp->tp_size)];
 
 			if (remainder == 0 ||
@@ -356,6 +392,16 @@ int int2int(struct expr **expp, register struct type *tp)
 	return exp->ex_type->tp_fund;
 }
 
+static int fit4(writh val, int uns)
+{
+	/* Does this value fit in 4 bytes? */
+	unsigned writh u = (unsigned writh)val;
+
+	if (!uns)
+		u += 0x80000000UL;
+	return (u & full_mask[4]) == u;
+}
+
 /* With compile-time constants, we don't set fp_used, since this is done
  * only when necessary in eval.c.
  */
@@ -367,10 +413,10 @@ void int2float(register struct expr **expp, struct type *tp)
 	register struct expr *exp = *expp;
 	int uns = exp->ex_type->tp_unsigned;
 	
-	if (is_cp_cst(exp)) {
+	if (is_cp_cst(exp) && fit4(exp->VL_VALUE, uns)) {
 		exp->ex_type = tp;
 		exp->ex_class = Float;
-		flt_arith2flt(exp->VL_VALUE, &(exp->FL_ARITH), uns);
+		flt_arith2flt((arith)exp->VL_VALUE, &(exp->FL_ARITH), uns);
 	}
 	else	{
 		fp_used = 1;
@@ -384,24 +430,35 @@ void float2int(struct expr **expp, struct type *tp)
 		converted to the integral type tp.
 	*/
 	register struct expr *ex = *expp;
-	
+
 	if (is_fp_cst(ex)) {
 		arith ar = flt_flt2arith(&ex->FL_ARITH, tp->tp_unsigned);
-
+#ifdef NOTDEF
+		/*	Historically, we always did the conversion at
+		    compile time.   This is now wrong if type arith is
+		    too narrow for an 8-byte integer.
+		*/
 		if (flt_status == FLT_OVFL)
 			expr_warning(ex,"overflow in float to int conversion");
 		else if (flt_status == FLT_UNFL)
 			expr_warning(ex,"underflow in float to unsigned conversion");
-		ex->ex_type = tp;
-		/* The following lines are copied from fill_int_expr */
-		ex->ex_class = Value;
-		ex->VL_CLASS = Const;
-		ex->VL_VALUE = ar;
-		cut_size(ex);
-	} else {
-		fp_used = 1;
-		*expp = arith2arith(tp, FLOAT2INT, ex);
+#endif /* NOTDEF */
+		/*	Now, we defer the conversion until run time
+		    unless it fits in 4 bytes.
+		*/
+		if (flt_status != FLT_OVFL && flt_status != FLT_UNFL &&
+		    fit4((writh)ar, tp->tp_unsigned)) {
+			ex->ex_type = tp;
+			/* The following lines are copied from fill_int_expr */
+			ex->ex_class = Value;
+			ex->VL_CLASS = Const;
+			ex->VL_VALUE = (writh)ar;
+			cut_size(ex);
+			return;
+		}
 	}
+	fp_used = 1;
+	*expp = arith2arith(tp, FLOAT2INT, ex);
 }
 
 void float2float(register struct expr **expp, struct type *tp)
@@ -457,7 +514,7 @@ void opnd2integral(register struct expr **expp, int oper)
 {
 	register int fund = (*expp)->ex_type->tp_fund;
 
-	if (fund != INT && fund != LONG)	{
+	if (fund != INT && fund != LONG && fund != LNGLNG) {
 		expr_error(*expp, "%s operand to %s",
 				symbol2str(fund), symbol2str(oper));
 		erroneous2int(expp);
@@ -486,6 +543,7 @@ void opnd2logical(register struct expr **expp, int oper)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 	case POINTER:
 	case FLOAT:
@@ -605,4 +663,26 @@ void field2arith(register struct expr **expp)
 void switch_sign_fp(register struct expr *expr)
 {
 	flt_umin(&(expr->FL_ARITH));
+}
+
+char *writh2str(writh val, int uns)
+{
+	/*	Converts val to a decimal string, like
+		long2str(val, 10), but allows wider values.
+	*/
+	static char buf[NUMSIZE + 1];
+	char *cp = &buf[NUMSIZE + 1];
+	int negative = (!uns && val < 0);
+	unsigned writh u = (unsigned writh)val;
+
+	if (negative)
+		u = -u;
+	*--cp = '\0';
+	do {
+		*--cp = '0' + (u % 10);
+		u /= 10;
+	} while (u != 0);
+	if (negative)
+		*--cp = '-';
+	return cp;
 }

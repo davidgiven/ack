@@ -58,6 +58,7 @@ void ch3sel(struct expr **expp, int oper, struct idf *idf)
 				break;
 			case INT:
 			case LONG:
+			case LNGLNG:
 				/* An error is given in idf2sdef() */
 				ch3cast(expp, CAST, pa_type);
 				sd = idf2sdef(idf, tp);
@@ -82,6 +83,7 @@ void ch3sel(struct expr **expp, int oper, struct idf *idf)
 		break;
 	case INT:
 	case LONG:
+	case LNGLNG:
 		/* warning will be given by idf2sdef() */
 		break;
 	default:
@@ -318,7 +320,7 @@ void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 			    }
 			    if (oldtp->tp_up->tp_fund == VOID
 				&& is_cp_cst(exp)
-				&& exp->VL_VALUE == (arith)0)
+				&& exp->VL_VALUE == 0)
 				break;	/* switch */
 		    }
 		    /* falltrough */
@@ -364,7 +366,7 @@ void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 		case NOTEQUAL:
 		case '=':
 		case RETURN:
-			if (is_cp_cst(exp) && exp->VL_VALUE == (arith)0)
+			if (is_cp_cst(exp) && exp->VL_VALUE == 0)
 				break;
 		default:
 			expr_strict(exp,
@@ -679,6 +681,7 @@ int is_integral_type(register struct type *tp)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 		return 1;
 #ifndef NOBITFIELD
@@ -697,6 +700,7 @@ int is_arith_type(register struct type *tp)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 	case FLOAT:
 	case DOUBLE:

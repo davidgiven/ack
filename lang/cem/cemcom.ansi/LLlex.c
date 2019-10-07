@@ -17,6 +17,7 @@
 #include "Lpars.h"
 #include "class.h"
 #include "sizes.h"
+#include "type.h"     /* no_long_long() */
 #include "error.h"
 #include "domacro.h"
 #include "specials.h" /* registration of special identifiers */
@@ -37,7 +38,6 @@ int LexSave = 0; /* last character read by GetChar	*/
 
 #define FLG_ESEEN 0x01 /* possibly a floating point number */
 #define FLG_DOTSEEN 0x02 /* certainly a floating point number */
-extern arith full_mask[];
 
 #ifdef LINT
 extern int lint_skip_comment;
@@ -594,10 +594,12 @@ static void strflt2tok(char fltbuf[], struct token* ptok)
 static void strint2tok(char intbuf[], struct token* ptok)
 {
 	register char* cp = intbuf;
-	int base = 10;
-	arith val = 0, dig, ubound;
-	int uns_flg = 0, lng_flg = 0, malformed = 0, ovfl = 0;
-	int fund;
+	int base = 10, dig;
+	unsigned writh val = 0, ubound;
+	int uns_flg = 0, lng_flg = 0, lnglng_flg = 0;
+	int malformed = 0, ovfl = 0;
+	unsigned writh uint_mask, ulng_mask, ulnglng_mask;
+	int cut, fund;
 
 	assert(*cp != '-');
 	if (*cp == '0')
@@ -611,11 +613,8 @@ static void strint2tok(char intbuf[], struct token* ptok)
 		else
 			base = 8;
 	}
-	/* The upperbound will be the same as when computed with
-	 * max_unsigned_arith / base (since base is even). The problem here
-	 * is that unsigned arith is not accepted by all compilers.
-	 */
-	ubound = max_arith / (base / 2);
+	/* The upperbound checks if val * base would overflow. */
+	ubound = ~(unsigned writh)0 / base;
 
 	while (is_hex(*cp))
 	{
@@ -626,10 +625,10 @@ static void strint2tok(char intbuf[], struct token* ptok)
 		}
 		else
 		{
-			if (val < 0 || val > ubound)
+			if (val > ubound)
 				ovfl++;
 			val *= base;
-			if (val < 0 && val + dig >= 0)
+			if (val > val + dig)
 				ovfl++;
 			val += dig;
 		}
@@ -639,7 +638,16 @@ static void strint2tok(char intbuf[], struct token* ptok)
 	while (*cp)
 	{
 		if (*cp == 'l' || *cp == 'L')
-			lng_flg++;
+		{
+			if (*cp == *(cp + 1))
+			{
+				/* 'll' or 'LL' */
+				lnglng_flg++;
+				cp++;
+			}
+			else
+				lng_flg++;
+		}
 		else if (*cp == 'u' || *cp == 'U')
 			uns_flg++;
 		else
@@ -658,51 +666,83 @@ static void strint2tok(char intbuf[], struct token* ptok)
 	}
 	else
 	{
-		if (lng_flg > 1)
+		if (lng_flg + lnglng_flg > 1)
 			lexerror("only one long suffix allowed");
 		if (uns_flg > 1)
 			lexerror("only one unsigned suffix allowed");
 	}
+
+	/* Get masks like 0XFFFF, 0XFFFFFFFF as unsigned values. */
+	uint_mask = (unsigned writh)full_mask[(int)int_size];
+	ulng_mask = (unsigned writh)full_mask[(int)long_size];
+	if (lnglng_size < 0)
+		ulnglng_mask = 0;
+	else
+		ulnglng_mask = (unsigned writh)full_mask[(int)lnglng_size];
+
+	/*	If a decimal literal with no suffix is too big for int
+	    and long, then C89 tries unsigned long, but C99 tries
+	    long long (WG14, Rationale for C99, C99RationaleV5.10.pdf,
+	    6.4.4.1 Integer constants).
+		This compiler follows C89 when the literal has no
+	    long long suffix.
+	*/
+	cut = 0;
 	if (ovfl)
 	{
 		lexwarning("overflow in constant");
-		fund = ULONG;
+		cut = 1; /* cut the size of the constant */
 	}
-	else if (!lng_flg && (val & full_mask[(int)int_size]) == val)
+	else if (!lng_flg && !lnglng_flg && (val & uint_mask) == val)
 	{
-		if (val >= 0 && val <= max_int)
-		{
+		if ((val & (uint_mask >> 1)) == val)
 			fund = INT;
-		}
-		else if (int_size == long_size)
-		{
-			fund = UNSIGNED;
-		}
 		else if (base == 10 && !uns_flg)
-			fund = LONG;
+		{
+			if ((val & (ulng_mask >> 1)) == val)
+				fund = LONG;
+			else
+				fund = ULONG;
+		}
 		else
 			fund = UNSIGNED;
 	}
-	else if ((val & full_mask[(int)long_size]) == val)
+	else if (!lnglng_flg && (val & ulng_mask) == val)
 	{
-		if (val >= 0)
+		if ((val & (ulng_mask >> 1)) == val)
 			fund = LONG;
 		else
 			fund = ULONG;
 	}
-	else
-	{ /* sizeof(arith) is greater than long_size */
-		assert(arith_size > long_size);
-		lexwarning("constant too large for target machine");
-		/* cut the size to prevent further complaints */
-		val &= full_mask[(int)long_size];
-		fund = ULONG;
-	}
-	if (lng_flg)
+	else if (lnglng_flg && (val & ulnglng_mask) == val)
 	{
-		/* fund can't be INT */
-		if (fund == UNSIGNED)
+		if ((val & (ulnglng_mask >> 1)) == val)
+			fund = LNGLNG;
+		else
+			fund = ULNGLNG;
+	}
+	else if (lnglng_flg && no_long_long())
+		fund = ERRONEOUS;
+	else
+	{
+		assert(sizeof(val) > long_size ||
+		       (lnglng_size >= 0 && sizeof(val) > lnglng_size));
+		lexwarning("constant too large for target machine");
+		cut = 1;
+	}
+	if (cut)
+	{
+		/* cut the size to prevent further complaints */
+		if (lnglng_flg)
+		{
+			fund = ULNGLNG;
+			val &= ulnglng_mask;
+		}
+		else
+		{
 			fund = ULONG;
+			val &= ulng_mask;
+		}
 	}
 	if (uns_flg)
 	{
@@ -710,7 +750,9 @@ static void strint2tok(char intbuf[], struct token* ptok)
 			fund = UNSIGNED;
 		else if (fund == LONG)
 			fund = ULONG;
+		else if (fund == LNGLNG)
+			fund = ULNGLNG;
 	}
 	ptok->tk_fund = fund;
-	ptok->tk_ival = val;
+	ptok->tk_ival = (writh)val;
 }

@@ -18,7 +18,7 @@
 #include    "error.h"
 
 /* full_mask[1] == 0XFF, full_mask[2] == 0XFFFF, .. */
-arith full_mask[MAXSIZE + 1];
+writh full_mask[MAXSIZE + 1];
 #ifndef NOCROSS
 arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
@@ -31,8 +31,8 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 		expressions *expp(ld) and expr(ct), and the result restored in
 		*expp.
 	*/
-	register arith o1 = (*expp)->VL_VALUE;
-	register arith o2 = expr->VL_VALUE;
+	unsigned writh o1 = (unsigned writh)(*expp)->VL_VALUE;
+	unsigned writh o2 = (unsigned writh)expr->VL_VALUE;
 	int uns = (*expp)->ex_type->tp_unsigned;
 
 	assert(is_ld_cst(*expp) && is_cp_cst(expr));
@@ -49,9 +49,9 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 			break;
 		}
 		if (uns)
-			o1 /= (unsigned arith) o2;
-		else
 			o1 /= o2;
+		else
+			o1 = (unsigned writh)((writh)o1 / (writh)o2);
 		break;
 	case '%':
 		if (o2 == 0)	{
@@ -62,9 +62,9 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 			break;
 		}
 		if (uns)
-			o1 %= (unsigned arith) o2;
-		else
 			o1 %= o2;
+		else
+			o1 = (unsigned writh)((writh)o1 % (writh)o2);
 		break;
 	case '+':
 		o1 += o2;
@@ -78,15 +78,14 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 	case RIGHT:
 		if (o2 == 0)
 			break;
-		if (uns)	{
-			o1 = (o1 >> 1) & ~arith_sign;
-			o1 >>= (o2 - 1);
-		}
-		else	o1 >>= o2;
+		if (uns)
+			o1 >>= o2;
+		else
+			o1 = (unsigned writh)((writh)o1 >> (writh)o2);
 		break;
 	case '<':
 		{
-			arith tmp = o1;
+			writh tmp = o1;
 
 			o1 = o2;
 			o2 = tmp;
@@ -94,13 +93,13 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 		/* Fall through */
 	case '>':
 		if (uns)
-			o1 = (unsigned arith) o1 > (unsigned arith) o2;
-		else
 			o1 = o1 > o2;
+		else
+			o1 = (writh)o1 > (writh)o2;
 		break;
 	case LESSEQ:
 		{
-			arith tmp = o1;
+			writh tmp = o1;
 
 			o1 = o2;
 			o2 = tmp;
@@ -108,9 +107,9 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 		/* Fall through */
 	case GREATEREQ:
 		if (uns)
-			o1 = (unsigned arith) o1 >= (unsigned arith) o2;
-		else
 			o1 = o1 >= o2;
+		else
+			o1 = (writh)o1 >= (writh)o2;
 		break;
 	case EQUAL:
 		o1 = o1 == o2;
@@ -128,7 +127,7 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 		o1 ^= o2;
 		break;
 	}
-	(*expp)->VL_VALUE = o1;
+	(*expp)->VL_VALUE = (writh)o1;
 	cut_size(*expp);
 	(*expp)->ex_flags |= expr->ex_flags;
 	(*expp)->ex_flags &= ~EX_PARENS;
@@ -140,7 +139,7 @@ void cut_size(register struct expr *expr)
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	register arith o1 = expr->VL_VALUE;
+	writh o1 = expr->VL_VALUE;
 	int uns = expr->ex_type->tp_unsigned;
 	int size = (int) expr->ex_type->tp_size;
 
@@ -159,8 +158,8 @@ void cut_size(register struct expr *expr)
 		o1 &= full_mask[size];
 	}
 	else {
-		int nbits = (int) (arith_size - size) * 8;
-		arith remainder = o1 & ~full_mask[size];
+		int nbits = (int) (sizeof(o1) - size) * 8;
+		writh remainder = o1 & ~full_mask[size];
 
 		if (remainder != 0 && remainder != ~full_mask[size])
 		    if (!ResultKnown)
@@ -173,18 +172,20 @@ void cut_size(register struct expr *expr)
 void init_cst(void)
 {
 	register int i = 0;
-	register arith bt = (arith)0;
+	unsigned writh bt = 0;
 
-	while (!(bt < 0))	{
+	while (!((writh)bt < 0)) {
 		bt = (bt << 8) + 0377, i++;
 		if (i > MAXSIZE)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 	}
-	if ((int)long_size > arith_size)
-		fatal("sizeof (arith) insufficient on this machine");
+	/* signed comparison; lnglng_size might be -1 */
+	if (long_size > (arith)sizeof(writh) ||
+	    lnglng_size > (arith)sizeof(writh))
+		fatal("sizeof(writh) insufficient on this machine");
 #ifndef NOCROSS
-	max_int = full_mask[(int)int_size] & ~(1L << ((int)int_size * 8 - 1));
-	max_unsigned = full_mask[(int)int_size];
+	max_int = (arith)((unsigned writh)full_mask[(int)int_size] >> 1);
+	max_unsigned = (arith)full_mask[(int)int_size];
 #endif /* NOCROSS */
 }

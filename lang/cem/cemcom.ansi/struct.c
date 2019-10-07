@@ -360,6 +360,7 @@ add_field(
 	case SHORT:
 	case ENUM:
 	case LONG:
+	case LNGLNG:
 		strict("non-portable field type");
 	case INT:
 		/* right type; size OK? */

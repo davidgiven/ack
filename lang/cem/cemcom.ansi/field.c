@@ -28,8 +28,6 @@
 #include    "eval.h"
 
 
-extern arith full_mask[];	/* cstoper.c	*/
-
 /*	Eval_field() evaluates expressions involving bit fields.
 	The various instructions are not yet optimised in the expression
 	tree and are therefore dealt with in this function.
@@ -136,6 +134,8 @@ void store_field(
 	register struct expr *leftop,
 	arith tmpvar)
 {
+	arith high_mask;
+
 	C_loc(fd->fd_mask);
 	C_and(word_size);
 	if (code == TRUE)
@@ -145,7 +145,8 @@ void store_field(
 		C_slu(word_size);
 	else
 		C_sli(word_size);
-	C_loc(~((fd->fd_mask << fd->fd_shift) | ~full_mask[(int)word_size]));
+	high_mask = (arith)~full_mask[(int)word_size];
+	C_loc(~((fd->fd_mask << fd->fd_shift) | high_mask));
 	if (leftop->ex_depth == 0)	{	/* simple case	*/
 		load_val(leftop, RVAL);
 		C_and(word_size);

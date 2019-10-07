@@ -10,6 +10,7 @@
 #ifndef NOCROSS
 extern int
 	short_align, word_align, int_align, long_align,
+	lnglng_align,
 	float_align, double_align, lngdbl_align,
 	pointer_align,
 	struct_align, union_align;
@@ -18,6 +19,7 @@ extern int
 #define word_align	((int)AL_WORD)
 #define int_align	((int)AL_INT)
 #define long_align	((int)AL_LONG)
+#define lnglng_align	((int)AL_LNGLNG)
 #define float_align	((int)AL_FLOAT)
 #define double_align	((int)AL_DOUBLE)
 #define	lngdbl_align	((int)AL_LNGDBL)

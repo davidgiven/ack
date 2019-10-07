@@ -11,8 +11,6 @@
 #define	LISTING		/* enable listing facilities */
 #define RELOCATION	/* generate relocation info */
 
-#undef valu_t
-#define valu_t long
 #undef ADDR_T
 #define ADDR_T long
 

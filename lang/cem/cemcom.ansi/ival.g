@@ -518,6 +518,7 @@ void check_ival(struct expr **expp, register struct type *tp)
 	case SHORT:
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case ENUM:
 	case POINTER:
 		ch3cast(expp, '=', tp);
@@ -543,11 +544,11 @@ void check_ival(struct expr **expp, register struct type *tp)
 			if (idf->id_def->df_type->tp_fund == FUNCTION)
 				C_con_pnam(idf->id_text);
 			else	/* e.g., int a; int *p = &a; */
-				C_con_dnam(idf->id_text, expr->VL_VALUE);
+				C_con_dnam(idf->id_text, (arith)expr->VL_VALUE);
 		}
 		else {
 			assert(expr->VL_CLASS == Label);
-			C_con_dlb(expr->VL_LBL, expr->VL_VALUE);
+			C_con_dlb(expr->VL_LBL, (arith)expr->VL_VALUE);
 		}
 		break;
 	case FLOAT:
@@ -594,7 +595,7 @@ and also to prevent runtime coercions for compile-time constants.
 		print_expr("init-expr after cast", expr);
 #endif /* DEBUG */
 		if (is_cp_cst(expr))
-			put_bf(tp, expr->VL_VALUE);
+			put_bf(tp, (arith)expr->VL_VALUE);
 		else
 			illegal_init_cst(expr);
 		break;
@@ -700,7 +701,7 @@ void put_bf(struct type *tp, arith val)
 		field |= (val & fd->fd_mask) << fd->fd_shift;
 	if (sd->sd_sdef == 0 || sd->sd_sdef->sd_offset != offset) {
 		/* the selector was the last stored at this address	*/
-		exp.VL_VALUE = field;
+		exp.VL_VALUE = (writh)field;
 		con_int(&exp);
 		field = (arith)0;
 		offset = (arith)-1;
@@ -738,11 +739,11 @@ void con_int(register struct expr *ex)
 
 	assert(is_cp_cst(ex));
 	if (tp->tp_unsigned)
-		C_con_ucon(long2str((long)ex->VL_VALUE, -10), tp->tp_size);
+		C_con_ucon(writh2str(ex->VL_VALUE, 1), tp->tp_size);
 	else if (tp->tp_size == word_size)
-		C_con_cst(ex->VL_VALUE);
+		C_con_cst((arith)ex->VL_VALUE);
 	else
-		C_con_icon(long2str((long)ex->VL_VALUE, 10), tp->tp_size);
+		C_con_icon(writh2str(ex->VL_VALUE, 0), tp->tp_size);
 }
 
 void illegal_init_cst(struct expr *ex)

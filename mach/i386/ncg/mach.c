@@ -34,13 +34,11 @@ con_part(sz,w) register sz; word w; {
 }
 
 void
-con_mult(sz) word sz; {
-	long l;
+con_mult(word sz) {
 
-	if (sz != 4)
+	if (sz != 8)
 		fatal("bad icon/ucon size");
-	l = atol(str);
-	fprintf(codefile,"\t.data4 %ld\n", l);
+	fprintf(codefile,".data8\t%s\n", str);
 }
 
 #define CODE_GENERATOR  

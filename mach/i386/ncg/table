@@ -234,8 +234,12 @@ jmp label cost(1,4).
 proccall "call" label+rm cost(1,8).
 jxx "syntax error" label cost(1,4).
 setxx "syntax error" REG1:rw cost(2,4).
+seta REG1:rw cost(2,4).
+setb REG1:rw cost(2,4).
+setl REG1:rw cost(2,4).
 setle REG1:rw cost(2,4).
 setg REG1:rw cost(2,4).
+setne REG1:rw cost(2,4).
 lea anyreg:rw, halfindir:ro.
 lea LOCAL:rw, halfindir:ro.	/* only for register variables, UNSAFE!!! */
 leave cost(1,4).
@@ -255,12 +259,14 @@ movzxb anyreg:wo, REG+rm1:ro.
 movzx anyreg:wo, REG+rm2:ro.
 mul rmorconst:ro kills :cc eax edx cost(2,41).
 neg rmorconst:rw:cc.
+negb rm1:rw:cc.
 not rmorconst:rw.
 #ifdef REGVARS
 or LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
 or rm:rw:cc, regorconst:ro.
 or anyreg:rw:cc, rmorconst:ro.
+orb REG1:rw, REG1:ro.
 pop anyreg:wo cost(1,4).
 pop rm:wo.
 push anyreg:ro cost(1,2).
@@ -276,7 +282,9 @@ sar rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
 sbb rm:rw:cc, regorconst:ro.
 sbb anyreg:rw:cc, rmorconst:ro.
 shl rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+shld rm:rw, anyreg:ro, ANYCON+SHIFT_CREG:ro kills :cc cost(2,3).
 shr rm:rw, ANYCON+SHIFT_CREG:ro kills :cc.
+shrd rm:rw, anyreg:ro, ANYCON+SHIFT_CREG:ro kills :cc cost(2,3).
 #ifdef REGVARS
 sub LOCAL:rw:cc, rmorconst:ro.	/* only for register variables; UNSAFE !!! */
 #endif
@@ -506,7 +514,10 @@ PATTERNS
 
 pat loc					yields {ANYCON,$1}
 
+#if 0
+/* wrong because .Xtrp assumes trap < 16 */
 pat ldc					leaving loc 18 trp
+#endif
 
 pat lol					yields {LOCAL,$1,4}
 
@@ -961,6 +972,14 @@ with EXACT rmorconst const
   uses reusing %1,REG=%1
   gen add %a,%2			yields %a
 
+pat adi $1==8
+with EXACT REG REG rmorconst rmorconst
+  gen add %1,%3
+      adc %2,%4			yields %2 %1
+with rmorconst rmorconst REG REG
+  gen add %3,%1
+      adc %4,%2			yields %4 %3
+
 /*
 pat adi !defined($1)
 with CXREG ACC
@@ -969,12 +988,16 @@ with CXREG ACC
 */
 
 pat sbi $1==4
-
 with rmorconst REG
   gen sub %2,%1			yields %2
 with EXACT REG rmorconst
   gen sub %1,%2
       neg %1			yields %1
+
+pat sbi $1==8
+with rmorconst rmorconst REG REG
+  gen sub %3,%1
+      sbb %4,%2			yields %4 %3
 
 /*
 pat sbi !defined($1)
@@ -995,6 +1018,11 @@ with rm const
   uses reusing %1,REG
   gen imul %a,%1,%2		yields %a
 
+pat mli $1==8
+with ACC DXREG
+  kills ALL
+  gen proccall {label,".mli8"}	yields edx eax
+
 /*
 pat mli !defined($1)
 with ACC
@@ -1007,6 +1035,10 @@ with noacc ACC
   uses DXREG
   gen cdq.
       idiv %1			yields eax
+
+pat dvi $1==8
+  kills ALL
+  gen proccall {label,".dvi8"}	yields ebx eax
 
 /*
 pat dvi !defined($1)
@@ -1021,6 +1053,10 @@ with noacc ACC
   gen cdq.
       idiv %1			yields edx
 
+pat rmi $1==8
+  kills ALL
+  gen proccall {label,".rmi8"}	yields ecx edx
+
 /*
 pat rmi !defined($1)
 with ACC
@@ -1031,6 +1067,12 @@ with ACC
 pat ngi $1==4
 with REG
   gen neg %1			yields %1
+
+pat ngi $1==8
+with REG REG
+  gen neg %2
+      neg %1
+      sbb %2,{ANYCON,0}		yields %2 %1
 
 /*
 pat ngi !defined($1)
@@ -1045,6 +1087,29 @@ with ANYCON REG
 with SHIFT_CREG REG
   gen sal %2,cl			yields %2
 
+pat sli $1==8
+with SHIFT_CREG REG REG
+  gen testb cl,{ANYCON,32}
+      jne {label,1f}
+      shld %3,%2,cl
+      sal %2,cl
+      jmp {label,2f}
+      1:
+      mov %3,%2
+      sal %3,cl
+      xor %2,%2
+      2:			yields %3 %2
+
+pat loc sli ($1&32)==0 && $2==8
+with REG REG
+  gen shld %2,%1,{ANYCON,$1&31}
+      sal %1,{ANYCON,$1&31}	yields %2 %1
+pat loc sli ($1&63)==32 && $2==8
+with a_word a_word		yields %1 {ANYCON,0}
+pat loc sli ($1&32)!=0 && $2==8
+with REG a_word
+  gen sal %1,{ANYCON,$1&31}	yields %1 {ANYCON,0}
+
 /*
 pat sli !defined($1)
 with ACC
@@ -1057,6 +1122,31 @@ with SHIFT_CREG REG
   gen sar %2,cl			yields %2
 with ANYCON REG
   gen sar %2,%1			yields %2
+
+pat sri $1==8
+with SHIFT_CREG REG REG
+  gen testb cl,{ANYCON,32}
+      jne {label,1f}
+      shrd %2,%3,cl
+      sar %3,cl
+      jmp {label,2f}
+      1:
+      mov %2,%3
+      sar %2,cl
+      sar %3,{ANYCON,31}
+      2:			yields %3 %2
+
+pat loc sri ($1&32)==0 && $2==8
+with REG REG
+  gen shrd %1,%2,{ANYCON,$1&31}
+      sar %2,{ANYCON,$1&31}	yields %2 %1
+pat loc sri ($1&63)==32
+with a_word ACC
+  gen cdq.			yields edx eax
+pat loc sri ($1&32)!=0 && $2==8
+with a_word ACC
+  gen sar eax,{ANYCON,$1&31}
+      cdq.			yields edx eax
 
 /*
 pat sri !defined($1)
@@ -1114,6 +1204,10 @@ with noacc ACC
 uses DXREG={ANYCON,0}
 gen div %1			yields eax
 
+pat dvu $1==8
+  kills ALL
+  gen proccall {label,".dvu8"}	yields ebx eax
+
 /*
 pat dvu !defined($1)
 with ACC STACK
@@ -1125,6 +1219,10 @@ pat rmu $1==4
 with noacc ACC
 uses DXREG={ANYCON,0}
 gen div %1			yields edx
+
+pat rmu $1==8
+  kills ALL
+  gen proccall {label,".rmu8"}	yields ecx edx
 
 /*
 pat rmu !defined($1)
@@ -1141,6 +1239,29 @@ with SHIFT_CREG REG
 gen shr %2,cl			yields %2
 with ANYCON REG
 gen shr %2,%1			yields %2
+
+pat sru $1==8
+with SHIFT_CREG REG REG
+  gen testb cl,{ANYCON,32}
+      jne {label,1f}
+      shrd %2,%3,cl
+      shr %3,cl
+      jmp {label,2f}
+      1:
+      mov %2,%3
+      shr %2,cl
+      xor %3,%3
+      2:			yields %3 %2
+
+pat loc sru ($1&32)==0 && $2==8
+with REG REG
+  gen shrd %2,%1,{ANYCON,$1&31}
+      shr %1,{ANYCON,$1&31}	yields %2 %1
+pat loc sru ($1&63)==32 && $2==8
+with a_word a_word		yields {ANYCON,0} %2
+pat loc sru ($1&32)!=0 && $2==8
+with a_word REG
+  gen shr %2,{ANYCON,$1&31}	yields {ANYCON,0} %2
 
 /*
 pat sru !defined($1)
@@ -2046,10 +2167,13 @@ with CXREG DXREG ACC
 kills ALL
 gen proccall {label,".cii"}		yields %3
 
+#if 0
+/* wrong when integer size > 4 */
 pat ciu					leaving cuu
 pat cui					leaving cuu
 
 pat cuu
+#endif
 
 pat loc loc cii zeq $1==1
 with GENREG STACK
@@ -2084,10 +2208,25 @@ with exact rm2
 uses reusing %1,GENREG
 gen movsx %a,%1			yields %a
 
+pat loc loc cii $1==4 && $2==8
+with ACC
+  gen cdq.			yields edx eax
+
+pat loc loc cii $1<4 && $2==8	leaving loc $1 loc 4 cii loc 4 loc $2 cii
+
+pat loc loc cii $1==8 && $2==4
+with a_word a_word		yields %1
+
 pat loc loc ciu				leaving loc $1 loc $2 cuu
 pat loc loc cui				leaving loc $1 loc $2 cuu
 
 pat loc loc cuu $1==$2
+
+pat loc loc cuu $1==4 && $2==8
+with a_word			yields {ANYCON,0} %1
+
+pat loc loc cuu $1==8 && $2==4
+with a_word a_word		yields %1
 
 pat loc loc cif $1==4 && $2==4		leaving loc 4 cal ".cif4" asp 4
 pat loc loc cif $1==4 && $2==8		leaving loc 4 cal ".cif8"
@@ -2206,11 +2345,55 @@ with SHIFT_CREG REG
 with ANYCON REG
   gen rol %2,%1				yields %2
 
+pat rol $1==8
+with SHIFT_CREG REG REG
+  uses REG
+  gen testb cl,{ANYCON,32}
+      je {label,1f}
+      xchg %2,%3
+      1:
+      mov %a,%3
+      shld %3,%2,cl
+      shld %2,%a,cl			yields %3 %2
+
+pat loc rol ($1&32)==0 && $2==8
+with REG REG
+  uses REG
+  gen mov %a,%2
+      shld %2,%1,{ANYCON,$1&31}
+      shld %1,%a,{ANYCON,$1&31}		yields %2 %1
+pat loc rol ($1&63)==32 && $2==8
+  leaving exg 4
+pat loc rol ($1&32)!=0 && $2==8
+  leaving loc (0-$1)&31 ror 8
+
 pat ror $1==4
 with SHIFT_CREG REG
   gen ror %2,cl				yields %2
 with ANYCON REG
   gen ror %2,%1				yields %2
+
+pat ror $1==8
+with SHIFT_CREG REG REG
+  uses REG
+  gen testb cl,{ANYCON,32}
+      je {label,1f}
+      xchg %2,%3
+      1:
+      mov %a,%2
+      shrd %2,%3,cl
+      shrd %3,%a,cl			yields %3 %2
+
+pat loc ror ($1&32)==0 && $2==8
+with REG REG
+  uses REG
+  gen mov %a,%1
+      shrd %1,%2,{ANYCON,$1&31}
+      shrd %2,%a,{ANYCON,$1&31}		yields %2 %1
+pat loc ror ($1&63)==32 && $2==8
+  leaving exg 4
+pat loc ror ($1&32)!=0 && $2==8
+  leaving loc (0-$1)&31 rol 8
 
 /*******************************************************************
  *  Group 10 : Set Instructions					   *
@@ -2393,7 +2576,30 @@ with rmorconst register
       dec %a
       2:			yields %a
 
+pat cmi $1==8
+with rmorconst rmorconst GENREG GENREG
+  /* Let dx = 0x100 or 0x101 if a < b, 0 if a == b, 1 if a > b.
+     Shift left so 0x100 becomes the sign bit of edx. */
+  /* can't use 5th REG */
+  gen sub %3,%1
+      setne %3.1
+      sbb %4,%2
+      setl %4.2
+      setg %4.1
+      orb %4.1,%3.1
+      shl %4,{ANYCON,23}	yields %4
+
 pat cmu $1==4				 leaving cmp
+
+pat cmu $1==8
+with rmorconst rmorconst GENREG GENREG
+  gen sub %3,%1
+      setne %3.1
+      sbb %4,%2
+      setb %4.2
+      seta %4.1
+      orb %4.1,%3.1
+      shl %4,{ANYCON,23}	yields %4
 
 pat cms $1==4
 with REG rmorconst
@@ -2554,6 +2760,49 @@ pat cmp zge	    call cmxzxx("jae","jbe")
 pat cmp zgt	    call cmxzxx("ja","jb")
 pat cms zeq $1==4   call cmxzxx("je","je")
 pat cms zne $1==4   call cmxzxx("jne","jne")
+
+proc cmx8txxn example cmi tgt
+with GENREG REG rmorconst rmorconst
+  /* can't use 5th REG */
+  gen sub %1,%3
+      sbb %2,%4
+      setxx* %2.1
+      movzxb %2,%2.1		yields %2
+proc cmx8txxy example cmi tlt
+with rmorconst rmorconst GENREG REG
+  gen sub %3,%1
+      sbb %4,%2
+      setxx* %4.1
+      movzxb %4,%4.1		yields %4
+
+pat cmi tlt $1==8	call cmx8txxy("setl")
+pat cmi tle $1==8	call cmx8txxn("setge")
+pat cmi tge $1==8	call cmx8txxy("setge")
+pat cmi tgt $1==8	call cmx8txxn("setl")
+pat cmu tlt $1==8	call cmx8txxy("setb")
+pat cmu tle $1==8	call cmx8txxn("setae")
+pat cmu tge $1==8	call cmx8txxy("setae")
+pat cmu tgt $1==8	call cmx8txxn("setb")
+
+proc cmx8zxxn example cmi zgt
+with REG REG rmorconst rmorconst STACK
+  gen sub %1,%3
+      sbb %2,%4
+      jxx* {label,$2}
+proc cmx8zxxy example cmi zlt
+with rmorconst rmorconst REG REG STACK
+  gen sub %3,%1
+      sbb %4,%2
+      jxx* {label,$2}
+
+pat cmi zlt $1==8	call cmx8zxxy("jl")
+pat cmi zle $1==8	call cmx8zxxn("jge")
+pat cmi zge $1==8	call cmx8zxxy("jge")
+pat cmi zgt $1==8	call cmx8zxxn("jl")
+pat cmu zlt $1==8	call cmx8zxxy("jb")
+pat cmu zle $1==8	call cmx8zxxn("jae")
+pat cmu zge $1==8	call cmx8zxxy("jae")
+pat cmu zgt $1==8	call cmx8zxxn("jb")
 
 pat cms zne $1==8
 with regorconst regorconst rm rm STACK
@@ -2825,6 +3074,11 @@ with BXREG ACC
 kills ALL
   gen jmp {label, ".csa4"}
 
+pat csa $1==8
+with BXREG ACC DXREG
+kills ALL
+  gen jmp {label, ".csa8"}
+
 pat csa !defined($1)
 with rm-BXREG-ACC BXREG ACC
 kills ALL
@@ -2836,6 +3090,11 @@ pat csb $1==4
 with BXREG ACC
 kills ALL
   gen jmp {label, ".csb4"}
+
+pat csb $1==8
+with BXREG ACC DXREG
+kills ALL
+  gen jmp {label, ".csb8"}
 
 pat csb !defined($1)
 with rm-BXREG-ACC BXREG ACC

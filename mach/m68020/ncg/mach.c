@@ -45,11 +45,11 @@ con_part(sz,w) register sz; word w; {
 }
 
 void
-con_mult(sz) word sz; {
+con_mult(word sz) {
 
-	if (sz != 4)
+	if (sz != 8)
 		fatal("bad icon/ucon size");
-	fprintf(codefile,".data4 %s\n",str);
+	fprintf(codefile,".data8\t%s\n", str);
 }
 
 #define IEEEFLOAT

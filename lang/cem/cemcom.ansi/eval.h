@@ -12,6 +12,7 @@
 
 
 #include <em.h>
+#include "arith.h" /* writh */
 
 struct expr;
 struct value;
@@ -30,7 +31,7 @@ void assop(register struct type *type, int oper);
 */
 void store_val(register struct value *vl, register struct type *tp);
 void load_val(register struct expr *expr, int rlval);
-void load_cst(arith val, arith siz);
+void load_cst(writh val, arith siz);
 
 #endif /* LINT */
 

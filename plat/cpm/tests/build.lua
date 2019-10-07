@@ -6,7 +6,8 @@ plat_testsuite {
     method = "plat/cpm/emu+emu",
     skipsets = {
         "b",      -- B is broken on i80
-        "floats"  -- floats aren't supported
+        "floats", -- floats aren't supported
+        "long-long",
     },
     tests = { "./*.c" },
 }

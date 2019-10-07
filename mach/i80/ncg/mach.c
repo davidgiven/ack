@@ -32,12 +32,12 @@ void con_part(int sz, word w)
 	part_size += sz;
 }
 
-void con_mult(sz) word sz;
-{
+void
+con_mult(word sz) {
 
-	if (argval != 4)
+	if (sz != 4 && sz != 8)
 		fatal("bad icon/ucon size");
-	fprintf(codefile, ".data4\t%ld\n", atol(str));
+	fprintf(codefile,".data%d\t%s\n", (int)sz, str);
 }
 
 #define CODE_GENERATOR

@@ -58,7 +58,8 @@ _include	<string.h>
 
 #define	GENLAB		"I"		/* compiler generated labels */
 
-#define	valu_t		long		/* type of expression values */
+#define	valu_t		int64_t		/* type of expression values */
+#define	uvalu_t		uint64_t	/* unsigned valu_t */
 #define	ADDR_T		unsigned short	/* type of dot */
 #define	word_t		short		/* type of keyword value */
 /*

@@ -10,9 +10,6 @@
 #define RELOCATION          /* generate relocatable code */
 #define DEBUG 0
 
-#undef valu_t
-#define valu_t int32_t
-
 #undef ADDR_T
 #define ADDR_T uint32_t
 

@@ -41,12 +41,11 @@ con_part(int sz, word w)
 }
 
 void
-con_mult(word sz)
-{
+con_mult(word sz) {
 
-	if (argval != 4)
+	if (sz != 8)
 		fatal("bad icon/ucon size");
-	fprintf(codefile,".data4 %s\n", str);
+	fprintf(codefile,".data8\t%s\n", str);
 }
 
 #define CODE_GENERATOR  

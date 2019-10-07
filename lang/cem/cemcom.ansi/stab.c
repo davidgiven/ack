@@ -32,8 +32,6 @@
 #include	"level.h"
 #include    "print.h"
 
-extern long full_mask[];
-
 #define INCR_SIZE	64
 
 static struct db_str
@@ -74,9 +72,10 @@ static void adds_db_str(char *s)
 
 static void stb_type(register struct type *tp)
 {
-	char buf[128];
+	char buf[128], *range;
 	static int stb_count;
 	long l;
+	int uns;
 
 	if (tp->tp_dbindex > 0)
 	{
@@ -101,18 +100,26 @@ static void stb_type(register struct type *tp)
 		break;
 	case INT:
 	case LONG:
+	case LNGLNG:
 	case CHAR:
 	case SHORT:
-		l = full_mask[(int) tp->tp_size];
-		if (tp->tp_unsigned)
+		switch ((tp->tp_size << 3) + !tp->tp_unsigned)
 		{
-			adds_db_str(sprint(buf, "r%d;0;%ld", tp->tp_dbindex, l));
+#define R(s) range = #s; break
+		case 0010: R(0;255);
+		case 0011: R(-128;127);
+		case 0020: R(0;65535);
+		case 0021: R(-32768;32767);
+		default:   R(0;-1); /* acts as 0;4294967295 */
+		case 0041: R(-2147483648;2147483647);
+		/*	The stabs reader in gdb(1) needs an octal integer
+			when its value doesn't fit in type long.
+		*/
+		case 0100: R(0;01777777777777777777777);
+		case 0101: R(01000000000000000000000;0777777777777777777777);
+#undef R
 		}
-		else
-		{
-			l &= ~(1L << ((int) tp->tp_size * 8 - 1));
-			adds_db_str(sprint(buf, "r%d;%ld;%ld", tp->tp_dbindex, -l - 1, l));
-		}
+		adds_db_str(sprint(buf, "r%d;%s", tp->tp_dbindex, range));
 		break;
 	case FLOAT:
 	case DOUBLE:

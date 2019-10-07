@@ -101,6 +101,10 @@ void init_code(char *dst_file)
 		stb_typedef(ushort_type, "unsigned short");
 		stb_typedef(ulong_type, "unsigned long");
 		stb_typedef(uint_type, "unsigned int");
+		if (lnglng_size >= 0) {
+			stb_typedef(lnglng_type, "long long");
+			stb_typedef(ulnglng_type, "unsigned long long");
+		}
 		stb_typedef(float_type, "float");
 		stb_typedef(double_type, "double");
 		stb_typedef(lngdbl_type, "long double");
@@ -598,7 +602,7 @@ void loc_init(struct expr *expr, struct idf *id)
 			EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
 			vl.vl_class = Name;
 			vl.vl_data.vl_idf = id;
-			vl.vl_value = (arith)0;
+			vl.vl_value = 0;
 			store_val(&vl, tp);
 		}
 #else	/* LINT */

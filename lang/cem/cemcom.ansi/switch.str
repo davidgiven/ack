@@ -22,8 +22,8 @@ struct switch_hdr	{
 	int sh_nrofentries;
 	struct type *sh_type;
 	struct expr *sh_expr;
-	arith sh_lowerbd;
-	arith sh_upperbd;
+	writh sh_lowerbd;
+	writh sh_upperbd;
 	struct case_entry *sh_entries;
 };
 
@@ -32,7 +32,7 @@ struct switch_hdr	{
 struct case_entry	{
 	struct case_entry *next;
 	label ce_label;
-	arith ce_value;
+	writh ce_value;
 };
 
 /* ALLOCDEF "case_entry" 20 */

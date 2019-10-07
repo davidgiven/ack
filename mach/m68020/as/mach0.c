@@ -14,8 +14,6 @@
 #define RELOCATION		/* generate relocatable code */
 #define DEBUG 0
 
-#undef	valu_t
-#define	valu_t		long
 #undef	ADDR_T
 #define	ADDR_T		long
 

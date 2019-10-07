@@ -154,9 +154,8 @@ if the number starts with '0x' it is hexadecimal else
     if the number starts with '0' it is octal else
         it's decimal.
 .fi
-The range of numbers depends on the machine.
-A rule of the thumb is that the width of the machine's registers
-the same is as the number of bits allowed in numbers.
+The width of numbers is at least 64 bits, so the .data8 pseudo may
+accept the full range of 8-byte values.
 .IP comment
 The character '!' denotes the start of comment, every character
 up to the next newline is skipped.
@@ -185,10 +184,10 @@ machine.
 \&\\$1
 .sp 1
 ..
-.Pu ".extern \fIidentifier [, identifier]*\fP"
+.Pu ".extern \fIidentifier\fP [, \fIidentifier\fP]*"
 The identifiers mentioned in the list are exported and can be
 used in other modules.
-.Pu ".define \fIidentifier [, identifier]*\fP"
+.Pu ".define \fIidentifier\fP [, \fIidentifier\fP]*"
 Used for modules that are to be part of a libary.
 The .define pseudo's should be the first in such modules.
 When scanning a module in a library the assembler\-loader
@@ -197,21 +196,25 @@ mentioned in a .define list. If so, it includes that module in
 the program.
 The identifiers mentioned in the list are exported and can be
 used in other modules.
-.Pu ".data1 \fIexpression [, expression]*\fP"
+.Pu ".data1 \fIexpression\fP [, \fIexpression\fP]*"
 Initialize a sequence of bytes.
 This is not followed by automatic alignment.
-.Pu ".data2 \fIexpression [, expression]*\fP"
+.Pu ".data2 \fIexpression\fP [, \fIexpression\fP]*"
 Initialize a sequence of shorts (2-byte values).
 This is not followed by automatic alignment.
-.Pu ".data4 \fIexpression [, expression]*\fP"
+.Pu ".data4 \fIexpression\fP [, \fIexpression\fP]*"
 Initialize a sequence of longs (4-byte values).
 This is not followed by automatic alignment.
-.Pu ".dataf4 \fIliteralfloat [, literalfloat]*\fP"
+.Pu ".data8 \fIexpression\fP [, \fIexpression\fP]*"
+Initialize a sequence of long longs (8-byte values).
+The expressions must be absolute.
+This is not followed by automatic alignment.
+.Pu ".dataf4 \fIliteralfloat\fP [, \fIliteralfloat\fP]*"
 Initialize a sequence of floats (4-byte values).
 The values must be literal floating point constants containing
 a dot character.
 This is not followed by automatic alignment.
-.Pu ".dataf8 \fIliteralfloat [, literalfloat]*\fP"
+.Pu ".dataf8 \fIliteralfloat\fP [, \fIliteralfloat\fP]*"
 Initialize a sequence of doubles (8-byte values).
 The values must be literal floating point constants containing
 a dot character.

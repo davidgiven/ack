@@ -12,9 +12,6 @@
 #define RELOCATION	/* generate relocation info */
 #define DEBUG 0
 
-#undef valu_t
-#define valu_t long
-
 #undef ALIGNWORD
 #define ALIGNWORD 2
 #undef ALIGNSECT
