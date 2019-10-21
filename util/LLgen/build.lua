@@ -6,9 +6,9 @@ clibrary {
 cprogram {
 	name = "llgen",
 
-	-- These use pre-LLgen'd versions of LLgen.c, Lpars.c and tokens.c. If
-	-- LLgen.g gets updated, they need rebuilding. Use the bootstrap script to
-	-- do this.
+	-- These use pre-LLgen'd versions of LLgen.c, Lpars.c, Lpars.h, and
+	-- tokens.c. If LLgen.g or tokens.g gets updated, they need
+	-- rebuilding. Use the bootstrap target to do this.
 
 	srcs = { "./src/*.c" },
 	deps = { "+headers" },
@@ -17,6 +17,20 @@ cprogram {
 			"-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"",
 			"-DNON_CORRECTING"
 		},
+	}
+}
+
+-- This bootstrap target rebuilds LLgen's own parser with LLgen.
+-- It acts like ./bootstrap.sh but without installing LLgen in PATH.
+normalrule {
+	name = "bootstrap",
+	ins = "+llgen",
+	outleaves = { "phony" },
+	commands = {
+		"cd %{abspath(cwd()..\"/src\")}",
+		"%{abspath(ins)} -vvv -x tokens.g LLgen.g",
+		"echo",
+		"echo You should now be able to rebuild LLgen with the new parser.",
 	}
 }
 
