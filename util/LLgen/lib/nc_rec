@@ -118,8 +118,8 @@ static struct nonterminal *nonterminals;
 /* These functions must be called instead of the original functions in
  * 'malloc.h'. They offer a checking allocation mechanism.
 */
-static char *Malloc(unsigned);
-static char *Realloc(char*, unsigned);
+static void *Malloc(size_t);
+static void *Realloc(void *, size_t);
 
 
 
@@ -164,11 +164,11 @@ void LLnc_recover(void);
 
 
 
-static char *Malloc(unsigned size)
+static void *Malloc(size_t size)
 {
-	char *p;
+	void *p;
 
-	if ((p = malloc(size)) == (char *)0) {
+	if ((p = malloc(size)) == NULL) {
 		fprintf(stderr, "fatal error: out of memory\n");
 		exit(1);
 	}
@@ -176,11 +176,11 @@ static char *Malloc(unsigned size)
 }
 
 
-static char *Realloc(char *ptr, unsigned size)
+static void *Realloc(void *ptr, size_t size)
 {
-	char *p;
+	void *p;
 
-	if ((p = realloc(ptr, size)) == (char *)0) {
+	if ((p = realloc(ptr, size)) == NULL) {
 		fprintf(stderr, "fatal error: out of memory\n");
 		exit(1);
 	}
@@ -195,13 +195,13 @@ static void init_grammar(void)
 	int i;
 
 	terminals = (struct terminal *)
-		Malloc((unsigned) LLFIRST_NT * sizeof(struct terminal));
+		Malloc(LLFIRST_NT * sizeof(struct terminal));
 	for (i = 0; i < LLFIRST_NT; i++) {
 		(terminals + i)->link = (struct symbol *)0;
 	}
 
 	nonterminals = (struct nonterminal *)
-		Malloc((unsigned)LLNNONTERMINALS * sizeof(struct nonterminal));
+		Malloc(LLNNONTERMINALS * sizeof(struct nonterminal));
 	for (i = 0; i < LLNNONTERMINALS; i++) {
 		(nonterminals + i)->rule = (struct lhs *)0;
 		(nonterminals + i)->link = (struct symbol *)0;
@@ -637,8 +637,7 @@ static void new_head(struct stacks *stack, struct stack_elt *ptr)
 		/* buffer full? */
 		stack->heads_buf_size += LLHEADS_BUF_INCR;
 		stack->heads_buf = (struct stack_elt **)
-			Realloc((char *)
-				stack->heads_buf, (unsigned)
+			Realloc(stack->heads_buf,
 				stack->heads_buf_size *
 					sizeof(struct stack_elt *)
 			);
@@ -677,8 +676,8 @@ static void to_delete(struct stacks *stack, struct stack_elt *ptr)
 	else if (stack->nr_cleanups == stack->cleanup_buf_size) {
 		stack->cleanup_buf_size += LLCLEANUP_BUF_INCR;
 		stack->cleanup_buf = (struct stack_elt **)
-			Realloc((char *) stack->cleanup_buf,
-				(unsigned) stack->cleanup_buf_size *
+			Realloc(stack->cleanup_buf,
+				stack->cleanup_buf_size *
 				sizeof(struct stack_elt *));
 	}
 	*(stack->cleanup_buf + stack->nr_cleanups) = ptr;
@@ -790,8 +789,7 @@ static int join(struct stacks *stack, struct stack_elt *top, int l_ahead)
 
 		/* Allocate one more pointer to descendants */
 		size = se->nr_nexts * sizeof(struct edge);
-		se->edges = (struct edge *)Realloc((char *) se->edges,
-							(unsigned) size);
+		se->edges = (struct edge *)Realloc(se->edges, size);
 
 		/* Link it */
 		(se->edges + se->nr_nexts - 1)->ptr = top->edges->ptr;
@@ -904,8 +902,8 @@ static void generate_heads(struct stacks *stack, struct stack_elt *se,
 			else if (stack->nr_visited == stack->visited_buf_size) {
 				stack->visited_buf_size += LL_VIS_INCR;
 				stack->visited_buf = (struct stack_elt **)
-					Realloc((char *) stack->visited_buf,
-					(unsigned) stack->visited_buf_size *
+					Realloc(stack->visited_buf,
+					stack->visited_buf_size *
 					sizeof(struct stack_elt *));
 			}
 			*(stack->visited_buf + stack->nr_visited) = next_se;
@@ -1089,7 +1087,7 @@ static struct stack_elt *split(struct stack_elt *se)
 #endif
 
 	new_stack->edges = (struct edge *)
-		Malloc((unsigned)se->nr_nexts * sizeof(struct edge));
+		Malloc(se->nr_nexts * sizeof(struct edge));
 
 	/* Copy gets the same successors as the original */
 	memcpy((char *) new_stack->edges, (char *) se->edges,
@@ -1242,14 +1240,14 @@ static void match_heads(struct stacks *stack, int symb)
 			if (stack->heads_buf_size == 0) {
 				stack->heads_buf_size = LLHEADS_BUF_INCR;
 				stack->heads_buf = (struct stack_elt **)
-					Malloc((unsigned)stack->heads_buf_size *
+					Malloc(stack->heads_buf_size *
 						sizeof(struct stack_elt *));
 			}
 			else if (stack->nr_heads == stack->heads_buf_size) {
 				stack->heads_buf_size += LLHEADS_BUF_INCR;
 				stack->heads_buf = (struct stack_elt **)
-					Realloc((char *) stack->heads_buf,
-						(unsigned) stack->heads_buf_size *
+					Realloc(stack->heads_buf,
+						stack->heads_buf_size *
 						sizeof(struct stack_elt *));
 			}
 			*(stack->heads_buf + stack->nr_heads) =

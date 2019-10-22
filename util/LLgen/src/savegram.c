@@ -88,7 +88,7 @@ void save_grammar(FILE *f)
 	/* Generate some constants in the grammar file */
 
 	/* Allocate terms list */
-	t_list = (struct t_list *) alloc((unsigned) nterms * sizeof(struct t_list));
+	t_list = (struct t_list *) alloc(nterms * sizeof(struct t_list));
 	t_list_index = 0;
 
 	sub_list = (struct subparse_list *) alloc(nsubstarts * sizeof(struct subparse_list));

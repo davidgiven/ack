@@ -16,12 +16,8 @@
  * Machine dependant things
  */
 #include <stdio.h>
-#ifdef USE_SYS
-#include <system.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
-# include "alloc.h"
 # include "extern.h"
 # include "types.h"
 
@@ -33,29 +29,18 @@ static string rcsid5 = "$Id$";
 #define LIBDIR "lib"
 #endif
 
-void UNLINK(string x)
-{
-	/* Must remove the file "x" */
-#ifdef USE_SYS
-	sys_remove(x);	/* systemcall to remove file */
-#else
-	remove(x);
-#endif
-}
-
-
 
 string libpath(string s)
 {
 	/* Must deliver a full pathname to the library file "s" */
 	register string p;
-	register int length;
+	register size_t length;
 
 	char* libdir = getenv("LLGEN_LIB_DIR");
 	if (!libdir)
 		libdir = LIBDIR;
 	length = strlen(libdir) + strlen(s) + 2;
-	p = (string) alloc((unsigned) length);
+	p = (string) alloc(length);
 	strcpy(p,libdir);
 	strcat(p,"/");
 	strcat(p,s);

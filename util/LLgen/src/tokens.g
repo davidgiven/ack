@@ -360,7 +360,7 @@ int input(void)
 	 */
 	register int c;
 
-	if (c = backupc) {
+	if ((c = backupc)) {
 			/* Last char was "unput()". Deliver it again
 			 */
 		backupc = 0;

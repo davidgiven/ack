@@ -20,7 +20,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-# include "alloc.h"
 # include "types.h"
 # include "io.h"
 # include "extern.h"
@@ -102,7 +101,7 @@ STATIC void doclose(FILE *f)
 STATIC int *mk_tokenlist(void)
 {
 	register int i = ntokens;
-	register int *p = (int *) alloc((unsigned) (i * sizeof(int))) + i;
+	register int *p = (int *) alloc(i * sizeof(int)) + i;
 
 	while (i--)
 		*--p = -1;
@@ -295,7 +294,7 @@ STATIC void genrecovery(void)
 	for (psetl = setptr; psetl < maxptr; psetl++)
 		prset(*psetl);
 	fputs(c_arrend, f);
-	index = (int *) alloc((unsigned) (assval * sizeof(int)));
+	index = (int *) alloc(assval * sizeof(int));
 	for (q = index; q < &index[assval];)
 		*q++ = -1;
 	for (t = tokens; t < maxt; t++)
@@ -344,7 +343,7 @@ STATIC void genncrecovery(void)
 	fprintf(f, "#define LLFIRST_NT %d\n", assval);
 	fprintf(f, "#define LLSETSIZE %d\n", nbytes);
 
-	index = (int *) alloc((unsigned) (assval * sizeof(int)));
+	index = (int *) alloc(assval * sizeof(int));
 	for (q = index; q < &index[assval];) *q++ = -1;
 	for (t = tokens; t < maxt; t++)
 	{
@@ -988,14 +987,14 @@ STATIC int *dopush(register p_gram p, int safety, int toplevel, int **pp)
 	/*
 	 * The safety only matters if toplevel != 0
 	 */
-	unsigned int i = 100;
+	size_t i = 100;
 	register int *ip = (int *) alloc(100 * sizeof(int));
 
 	*pp = ip;
 
 	for (;;)
 	{
-		if (ip - *pp >= i)
+		if ((size_t)(ip - *pp) >= i)
 		{
 			*pp = (int *) ralloc((p_mem) (*pp), (i + 100) * sizeof(int));
 			ip = *pp + i;

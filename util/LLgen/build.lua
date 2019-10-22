@@ -1,6 +1,6 @@
 clibrary {
 	name = "headers",
-	hdrs = { "./src/*.h" }
+	hdrs = { "./src/*.h" } -- rm alloc.h
 }
 
 cprogram {

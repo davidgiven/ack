@@ -18,6 +18,8 @@
  * Type and structure definitions
  */
 
+#include <stddef.h>	/* size_t */
+
 typedef	int	*p_set;		/* pointer to bitset */
 typedef char	*p_mem;		/* pointer to some core */
 typedef char	*string;
@@ -259,13 +261,18 @@ typedef struct info_alloc {
 	/*
 	 * Structure used for dynamically growing arrays
 	 */
-	unsigned i_size;	/* Size of the array */
-	unsigned i_esize;	/* Size of an element */
-	unsigned i_incr;	/* When filled, add room for i_incr elements */
+	size_t	i_size;		/* Size of the array */
+	size_t	i_esize;	/* Size of an element */
+	size_t	i_incr;		/* When filled, add room for i_incr elements */
 	p_mem	i_ptr;		/* ptr to base of array */
 	p_mem	i_max;		/* ptr to first free */
 	p_mem	i_top;		/* ptr to top of array */
 } t_info, *p_info;
+
+/* alloc.c */
+p_mem alloc(size_t);
+p_mem ralloc(p_mem, size_t);
+p_mem new_mem(p_info);
 
 # ifdef NDEBUG
 # define STATIC static

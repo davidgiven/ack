@@ -6,7 +6,6 @@
 /* $Id$ */
 #ifdef LL_DEBUG
 #include <assert.h>
-#include <stdio.h>
 #define LL_assert(x)	assert(x)
 #else
 #define LL_assert(x)	/* nothing */
@@ -368,7 +367,7 @@ int input(void)
 	 */
 	register int c;
 
-	if (c = backupc) {
+	if ((c = backupc)) {
 			/* Last char was "unput()". Deliver it again
 			 */
 		backupc = 0;

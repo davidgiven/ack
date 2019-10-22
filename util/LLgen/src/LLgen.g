@@ -131,7 +131,7 @@ def			{	register string p; }
 				ff->ff_name = p;
 				ff->ff_next = start;
 				start = ff;
-				while (ff = ff->ff_next) {
+				while ((ff = ff->ff_next)) {
 					if (! strcmp(p, ff->ff_name)) {
 						error(linecount, "\"%s\" already used in a %%start", p);
 						break;
@@ -261,7 +261,7 @@ productions(p_gram *p;)
 			{	if (n_alts >= max_alts-2) {
 					alt_table = (p_gram ) ralloc(
 						(p_mem) alt_table,
-						(unsigned)(max_alts+=ALTINCR)*sizeof(t_gram));
+						(max_alts+=ALTINCR)*sizeof(t_gram));
 				}
 				if (t & DEF) {
 					if (haddefault) {
@@ -348,7 +348,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 				if (n_rules >= max_rules-2) {
 					rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
-						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
+						  (max_rules+=RULEINCR)*sizeof(t_gram));
 				}
 				elmcnt++;
 				rule_table[n_rules++] =
@@ -363,7 +363,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 			{	if (n_rules >= max_rules-2) {
 					rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
-						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
+						  (max_rules+=RULEINCR)*sizeof(t_gram));
 				}
 				kind = FIXED;
 				cnt = 0;
@@ -391,7 +391,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 					if (n_rules >= max_rules-2) {
 					    rule_table = (p_gram) ralloc(
 						  (p_mem) rule_table,
-						  (unsigned)(max_rules+=RULEINCR)*sizeof(t_gram));
+						  (max_rules+=RULEINCR)*sizeof(t_gram));
 					}
 				    }
 				    elem = *--(q->t_rule);
@@ -653,7 +653,7 @@ STATIC p_gram copyrule(register p_gram p,int length)
 	register p_gram t;
 	p_gram rule;
 
-	t = (p_gram) alloc((unsigned) length * sizeof(t_gram));
+	t = (p_gram) alloc(length * sizeof(t_gram));
 	rule = t;
 	while (length--) {
 		*t++ = *p++;
