@@ -12,6 +12,7 @@
 #include	"text.h"
 #include	"fra.h"
 #include	"warn.h"
+#include	"switch.h"
 
 /*	Note that in the EM assembly language brach instructions have
 	lables as their arguments, where in the EM machine language they

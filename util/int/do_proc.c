@@ -19,6 +19,7 @@
 #include	"fra.h"
 #include	"rsb.h"
 #include	"linfil.h"
+#include	"switch.h"
 #include	"whatever.h"
 
 extern int running;			/* from main.c */

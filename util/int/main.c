@@ -23,6 +23,7 @@
 #include	"opcode.h"
 #include	"m_sigtrp.h"
 #include	"rsb.h"
+#include	"switch.h"
 #include	"whatever.h"
 
 char mess_file[64] = "int.mess";	/* name of message file */

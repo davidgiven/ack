@@ -11,6 +11,7 @@
 #include	"mem.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 #define	LAR		1
 #define	SAR		2

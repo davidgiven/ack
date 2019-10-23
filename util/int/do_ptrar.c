@@ -14,6 +14,7 @@
 #include	"warn.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 #define	adp(p,w)	((p) + (w))
 #define	sbs(t,s)	((s) - (t))

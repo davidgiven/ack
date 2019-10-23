@@ -10,6 +10,7 @@
 #include	"text.h"
 #include	"trap.h"
 #include	"warn.h"
+#include	"switch.h"
 
 void do_instr(unsigned int opcode)
 {

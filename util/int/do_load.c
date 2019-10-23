@@ -13,6 +13,7 @@
 #include	"fra.h"
 #include	"rsb.h"
 #include	"warn.h"
+#include	"switch.h"
 
 PRIVATE ptr lexback_LB(unsigned long);
 

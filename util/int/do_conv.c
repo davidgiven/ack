@@ -14,6 +14,7 @@
 #include	"fra.h"
 #include	"warn.h"
 #include	"stack.h"
+#include	"switch.h"
 
 void DoCII(void)
 {

@@ -13,6 +13,7 @@
 #include	"warn.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 PRIVATE long adi(long, long, size), sbi(long, long, size), dvi(long, long, size);
 PRIVATE long mli(long, long, size), rmi(long, long), ngi(long, size);
