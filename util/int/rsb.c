@@ -14,6 +14,7 @@
 #include	"segment.h"
 #include	"text.h"
 #include	"warn.h"
+#include	"whatever.h"
 
 /* offsets to be added to a local base */
 int rsb_rsbcode;

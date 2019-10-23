@@ -12,6 +12,8 @@
 
 /* $Id$ */
 
+#include "global.h"	/* ptr */
+
 /* struct stat */
 #define	V7st_dev	0L, 2L			/* short */
 #define	V7st_ino	2L, 2L			/* unsigned short */
@@ -67,3 +69,10 @@
 #define	V7t_lnextc	5L, 1L			/* char */
 #define	V7t_sz_ltch	6L
 
+struct stat;
+struct timeb;
+struct tms;
+
+int stat2mem(ptr, struct stat *);
+int timeb2mem(ptr, struct timeb *);
+int tms2mem(ptr, struct tms *);

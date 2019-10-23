@@ -11,7 +11,7 @@ g/^#/d
 .r tokendefs
 a
 
-enterkeyw() {
+void enterkeyw(void) {
 	register symbol *sy_p;
 
 .

@@ -106,7 +106,7 @@ extern int	curr_token;
 int	 yyparse(void);
 /* comm4.c */
 void	 stop(void);
-void	 newmodule(const char *);
+void	 newmodule(char *);
 /* comm5.c */
 int	 yylex(void);
 void	 putval(int);

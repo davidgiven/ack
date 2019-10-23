@@ -3,7 +3,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
- 
+
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,16 +24,20 @@
  */
 
 
-#define TRUE  1
-#define FALSE 0
+void error(const char *s)
+{
+	fprintf(stderr,"%s\n",s);
+	exit(-1);
+}
 
-convert(mnemfile,classfile)
-	FILE *mnemfile, *classfile;
+
+void convert(FILE *mnemfile, FILE *classfile)
 {
 	char mnem1[10], mnem2[10],def[10];
-	int src,res,newcl,opc;
+	int src,res,opc;
+	bool newcl;
 
-	newcl = TRUE;
+	newcl = true;
 	printf("struct class classtab[] = {\n");
 	printf("\tNOCLASS,\tNOCLASS,\n");
 	/* EM mnemonics start at 1, arrays in C at 0 */
@@ -52,29 +57,18 @@ convert(mnemfile,classfile)
 			 * it has no class.
 			 */
 			printf("\tNOCLASS,\tNOCLASS,\n");
-			newcl = FALSE;
+			newcl = false;
 		} else {
 			printf("\tCLASS%d,\t\tCLASS%d,\n",src,res);
 			/* print a line like "CLASS8, CLASS1," */
-			newcl = TRUE;
+			newcl = true;
 		}
 	}
 	printf("};\n");
 }
 
 
-
-error(s)
-	char *s;
-{
-	fprintf(stderr,"%s\n",s);
-	exit(-1);
-}
-
-
-main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc, char *argv[])
 {
 	FILE *f1,*f2;
 

@@ -12,15 +12,9 @@ static char rcsid[] = "$Id$";
 #include "hall.h"
 #include "expr.h"
 #include "extern.h"
+#include "lookup.h"
 
 char *filename;
-
-extern void enterkeyw(void);
-extern void initio(void);
-extern void initemhash(void);
-extern void finishio(void);
-extern void statistics(void);
-extern int yyparse(void);
 
 int main(int argc, char **argv)
 {

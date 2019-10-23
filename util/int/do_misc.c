@@ -22,6 +22,7 @@
 #include	"rsb.h"
 #include	"io.h"
 #include	"linfil.h"
+#include	"whatever.h"
 
 extern int running;			/* from main.c */
 
@@ -32,12 +33,8 @@ ptr FIL;
 
 PRIVATE void index_jump(size), range_check(size), search_jump(size);
 PRIVATE void gto(ptr);
-void putLIN(long);
-void putFIL(ptr);
 
 #define asp(l)		newSP(SP + arg_f(l))
-
-extern void moncall(void);
 
 /** ASP f: Adjust the stack pointer by f */
 void DoASP(register long l)

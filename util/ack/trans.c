@@ -317,7 +317,8 @@ static growstring scanvars(const char* line)
 				{
 					case A_VAR:
 						gr_add(&name, 0);
-						if (tr = getvar(gr_start(name)))
+						tr = getvar(gr_start(name));
+						if (tr != NULL)
 						{
 							while (*tr)
 							{
@@ -333,7 +334,8 @@ static growstring scanvars(const char* line)
 						break;
 					case C_VAR:
 						gr_add(&name, 0);
-						if (tr = getvar(gr_start(name)))
+						tr = getvar(gr_start(name));
+						if (tr != NULL)
 						{
 							while (*tr)
 							{

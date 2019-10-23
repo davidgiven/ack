@@ -25,7 +25,7 @@ Something very wrong here!
 #define SYNTAX_68020	1
 #endif
 
-/* #define	FANCY_MODES	1
+/* #define	FANCY_MODES	1 */
 /*	On the M68020, there are some real fancy addressing modes.
 	Their use makes the code a bit shorter, but also much slower.
 	The FANCY_MODES #define enables the use of these addressing

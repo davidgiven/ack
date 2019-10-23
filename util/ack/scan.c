@@ -113,12 +113,12 @@ static void try(list_elem *f_scan, const char *suffix) {
 				*/
 				register trf *sneak ;
 				sneak= trafo ;
-				while( sneak=sneak->t_next ) {
+				while( (sneak=sneak->t_next) ) {
 					sneak->t_scan=YES ;
 				}
 				scan_found() ;
 				sneak= trafo ;
-				while( sneak=sneak->t_next ) {
+				while( (sneak=sneak->t_next) ) {
 					sneak->t_scan=NO ;
 				}
 				return ;

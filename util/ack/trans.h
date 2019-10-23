@@ -50,7 +50,6 @@ int setfiles(trf *);
 void disc_files(trf *);
 void disc_inputs(trf *);
 void rmfile(path *);
-void rmtemps(void);
 void add_input(path *, trf *);
 
 /* run.c */

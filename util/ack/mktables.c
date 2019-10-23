@@ -22,10 +22,12 @@ FILE *dmach ;
 
 int offset ;
 
-void readm();
+void start(const char *) ;
+void stop(int) ;
+void readm(void) ;
 
-main(argc,argv) char **argv ; {
-	register i ;
+int main(int argc, char **argv) {
+	int i ;
 
 	start(argv[1]) ;
 	for ( i=2 ; i<argc ; i++ ) {
@@ -36,7 +38,7 @@ main(argc,argv) char **argv ; {
 	return 0 ;
 }
 
-start(dir) char *dir ; {
+void start(const char *dir) {
 	tail= dname ;
 	while ( *dir ) {
 		*tail++ = *dir ++ ;
@@ -53,14 +55,14 @@ start(dir) char *dir ; {
 	fprintf(intab,"char intable[] = {\n") ;
 }
 
-stop(filled) {
+void stop(int filled) {
 	fprintf(dmach,"\t{\"\",\t-1\t}\n} ;\n") ;
 	if ( !filled ) fprintf(intab,"\t0\n") ;
 	fprintf(intab,"\n} ;\n") ;
 	fclose(dmach); fclose(intab) ;
 }
 
-FILE *do_open(file) char *file ; {
+FILE *do_open(const char *file) {
 	FILE *fd;
 
 	strcpy(tail,file) ;
@@ -100,7 +102,7 @@ readm() {
 			  fprintf(stderr,"warning: non-ascii in %s\n",fname) ;
 			  fprintf(intab,"%4d,",token) ;
 			} else {
-			  fprintf(intab,"  0,",token) ;
+			  fprintf(intab,"  0,") ;
 			  break ;
 			}
 		} else if ( isprint(token) ) {

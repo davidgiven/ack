@@ -9,6 +9,7 @@
 #include	"global.h"
 #include	"mem.h"
 #include	"warn.h"
+#include	"whatever.h"
 
 #ifdef WANT_SGTTY
 #include	<sgtty.h>
@@ -42,9 +43,7 @@
  * (0 for success, -1 for failure)					*
  ***********************************************************************/
 
-int do_ioctl(fd, req, addr)
-	int fd, req;
-	ptr addr;
+int do_ioctl(int fd, int req, ptr addr)
 {
 	register long e;
 #ifdef WANT_SGTTY

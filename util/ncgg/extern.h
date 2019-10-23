@@ -38,8 +38,23 @@ extern int maxtokensize;
 extern int nprocargs, maxprocargs;
 extern int use_tes;
 
-extern void error(const char* s, ...);
+/* genenerated files */
+extern void enterkeyw(void);
+extern int yyparse(void);
+
+/* emlookup.c */
+extern void initemhash(void);
+
+/* error.c */
 extern void fatal(const char* s, ...);
+extern void error(const char* s, ...);
 extern int tabovf(char *string);
-extern int strlookup(char *str);
+
+/* output.c */
 extern void errorexit(void);
+extern void initio(void);
+extern void finishio(void);
+extern void statistics(void);
+
+/* strlookup.c */
+extern int strlookup(char *str);

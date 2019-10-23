@@ -94,7 +94,7 @@ PRIVATE long count_wrn(int nr)
 PRIVATE int latest_warning_printed;	/* set if ... */
 
 /*ARGSUSED*/
-void do_warn(int nr, int L, char *F)
+void do_warn(int nr, int L, const char *F)
 {
 	latest_warning_printed = 0;
 	if (nr < WMSG) {

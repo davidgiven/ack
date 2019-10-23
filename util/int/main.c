@@ -23,6 +23,7 @@
 #include	"opcode.h"
 #include	"m_sigtrp.h"
 #include	"rsb.h"
+#include	"whatever.h"
 
 char mess_file[64] = "int.mess";	/* name of message file */
 
@@ -38,12 +39,6 @@ extern long inr;			/* from log.c */
 #endif	/* LOGGING */
 
 PRIVATE char *dflt_av[] = {"e.out", 0};	/* default arguments */
-
-/* External definitions - too lazy to create a header file for each. */
-extern void init(int , char **);
-extern void disassemble(void);
-extern void tally(void);
-extern void out_tally(void);
 
 /** Check dynamically that the interpreter can run on the target machine. */
 static void check_requirements(char *name)

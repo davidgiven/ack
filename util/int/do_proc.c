@@ -19,12 +19,12 @@
 #include	"fra.h"
 #include	"rsb.h"
 #include	"linfil.h"
+#include	"whatever.h"
 
 extern int running;			/* from main.c */
 
 /* Forward declarations */
 PRIVATE void lfr(size), ret(size);
-void call(long, int);
 
 /** CAI -: Call procedure (procedure identifier on stack) */
 void DoCAI(void)				/* proc identifier on top of stack */

@@ -169,7 +169,7 @@ static void varinit(void)
 	register char* envstr;
 	extern char* em_dir;
 
-	if (envstr = getenv("ACKDIR"))
+	if ((envstr = getenv("ACKDIR")) != NULL)
 	{
 		em_dir = keeps(envstr);
 	}

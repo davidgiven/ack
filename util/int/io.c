@@ -16,6 +16,7 @@
 #include	"warn.h"
 #include	"log.h"
 #include	"linfil.h"
+#include	"whatever.h"
 
 extern int running;			/* from main.c */
 extern char *prog_name;			/* from main.c */

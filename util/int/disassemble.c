@@ -9,6 +9,7 @@
 #include	"memdirect.h"
 #include	"proctab.h"
 #include	"alloc.h"
+#include	"whatever.h"
 
 PRIVATE ptr TC;
 PRIVATE void do_pr_instr(unsigned int);

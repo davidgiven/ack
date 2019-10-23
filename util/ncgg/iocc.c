@@ -174,11 +174,12 @@ iocc_t descr_iocc(char *ident)
 			default:
 				assert(0);
 			case TYPINT:
-				if (tp->tk_att[i].ta_type != -1)
+				if (tp->tk_att[i].ta_type != -1) {
 					if (tp->tk_att[i].ta_type == -2)
 						arexp[i] = iextoaddr(arexp[i]);
 					else
 						typerr++;
+				}
 				break;
 			case TYPBOOL:
 				typerr++;

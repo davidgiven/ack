@@ -4,6 +4,7 @@
 
 /* $Id$ */
 
+#include "data.h"
 #include "stack.h"
 
 /******** Memory address & location defines ********/
@@ -65,12 +66,3 @@
 
 #define	st_inc(n)	newSP(SP - (n))	/* stack grows */
 #define	st_dec(n)	newSP(SP + (n))	/* stack shrinks */
-
-
-/******** Function return types ********/
-
-extern ptr st_ldip(), dt_ldip();
-extern ptr st_lddp(), dt_lddp(), dppop();
-extern long st_lds(), st_ldsw(), dt_lds(), dt_ldsw(), spop(), swpop(), wpop();
-extern unsigned long st_ldu(), st_lduw(), dt_ldu(), dt_lduw(), upop(), uwpop();
-
