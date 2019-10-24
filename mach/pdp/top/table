@@ -6,6 +6,13 @@ MAXOP		2;
 LABEL_STARTER	'I';
 OPC_TERMINATOR	' ';
 
+{
+int no_side_effects(char *);
+int is_register(char *);
+int is_scratchreg(char *);
+int carry_dead(char *);
+}
+
 %%;
 
 /* useful addressing modes: */

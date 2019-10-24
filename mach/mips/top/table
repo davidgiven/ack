@@ -4,6 +4,10 @@
 MAXOP 5;
 LABEL_STARTER '.';
 
+{
+int plus(const char *, const char *, const char *);
+}
+
 %%;
 
 X, Y, Z                      { TRUE };

@@ -41,14 +41,14 @@ extern void error(char *s, char* s1);
 
 optim_description
 	{ struct symtab *p; } :
-	SPACE* parameter_line*
+	SPACE* parameters
 			{   p = findident("MAXOP",LOOKING,&deftable);
 			    if (p == 0) maxoperand = 2;	/* default */
 			    else maxoperand = p->s_num;
 			}
 	separator SPACE* mode_definitions
-	separator SPACE* patterns		
-	separator 
+	separator SPACE* patterns
+	separator
 			{   register int c;
 			    fprintf(genc, linedir, lineno, inpfile);
 			    while ((c = getc(input)) != EOF) {
@@ -57,17 +57,25 @@ optim_description
 			}
 ;
 
+parameters :
+	[ parameter_line | declaration_block ]*
+;
+
 parameter_line
-	{ struct symtab *p;} :
+	{ struct symtab *p;
+	  int lin;
+	} :
 	identifier
 			{   p = findident(idbuf,ENTERING,&deftable);}
 	SPACE
+			{   lin = lineno;}
 	value
 			{   p->s_num = atoi(buf);}
 			/* This action in fact only needed for MAXOP */
 	LINE_TERMINATOR
 	SPACE*
-			{   fprintf(genh,"#define %s %s\n",p->s_name,buf);}
+			{   fprintf(genh, linedir, lin, inpfile);
+			    fprintf(genh,"#define %s %s\n",p->s_name,buf);}
 ;
 
 value
@@ -87,6 +95,27 @@ value
 			{   *p1++ = dot.t_attrib;}
 	]*
 			{   *p1 = '\0';}
+;
+
+declaration_block :
+	OPEN_BRACKET
+			{   fprintf(genh, linedir, lineno, inpfile);}
+	[
+	    [   LINE_TERMINATOR
+	    |   OPERAND_SEPARATOR
+	    |	PATTERN_SEPARATOR
+	    |	INSTRUCTION_SEPARATOR
+	    |   SPACE
+	    |	LETTER
+	    |	DIGIT
+	    |	OTHER
+	    |	'%'
+	    ]
+			{   putc(dot.t_attrib, genh);}
+	]*
+	CLOSE_BRACKET
+	SPACE*
+			{   putc('\n', genh);}
 ;
 
 mode_definitions
