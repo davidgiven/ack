@@ -23,6 +23,9 @@ static char rcsid2[] = "$Id$";
 #include "regvar.h"
 #include <em_reg.h>
 #endif
+#ifdef USE_TES
+#include "label.h"
+#endif
 #include "extern.h"
 
 /*
@@ -80,10 +83,16 @@ static int regallowed=0;
 extern char em_flag[];
 extern short em_ptyp[];
 
-/* machine dependent */
+/*
+ * Declare the machine dependent functions.
+ *
+ * These functions now return void, which is not compatible with
+ * traditional K&R C.  Old mach.c files stop working until one fixes
+ * them to return void, not int.
+ */
 void con_part(int, word);
 void con_mult(word);
-void con_float(void); /* actually returns void, but need K&R C compatibility */
+void con_float(void);
 void prolog(full nlocals);
 void mes(word);
 
@@ -706,8 +715,8 @@ static void savelab(void) {
 	}
 	p = argstr;
 	q = labstr;
-	while (*q++ = *p++)
-		;
+	while ((*q++ = *p++) != '\0')
+		continue;
 }
 
 static void dumplab(void) {

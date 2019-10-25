@@ -18,7 +18,7 @@
 #include <stb.h>
 
 void
-con_part(sz,w) register sz; word w; {
+con_part(int sz, word w) {
 
 	while (part_size % sz)
 		part_size++;
@@ -88,7 +88,7 @@ regscore(off,size,typ,score,totyp)
 	return score;
 }
 struct regsav_t {
-	char	*rs_reg;	/* e.g. "a3" or "d5" */
+	const char *rs_reg;	/* e.g. "a3" or "d5" */
 	long	rs_off;		/* offset of variable */
 	int	rs_size;	/* 2 or 4 bytes */
 } regsav[9];

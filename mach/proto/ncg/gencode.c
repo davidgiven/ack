@@ -13,7 +13,7 @@ static char rcsid[] = "$Id$";
 #include "result.h"
 #include "extern.h"
 #ifdef USE_TES
-#include "mach.h"
+#include "xmach.h"
 #endif
 
 /*

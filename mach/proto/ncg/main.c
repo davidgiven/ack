@@ -6,7 +6,7 @@ static char rcsid[] = "$Id$";
 #include "param.h"
 #include "tables.h"
 #include "types.h"
-#include "mach.h"
+#include "xmach.h"
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
