@@ -120,7 +120,7 @@ declaration_block :
 
 mode_definitions
 	{ int lin; } :
-			{   fputs("tok_chk(varno) {\n\tint r;\n", genc);
+			{   fputs("int tok_chk(int varno) {\n\tint r;\n", genc);
 			    fputs("\tchar *VAL;\n\n",genc);
 			    fputs("\tVAL = var[varno].value;\n",genc);
 			    fputs("\tswitch(varno) {\n",genc);

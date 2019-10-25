@@ -6,21 +6,18 @@
 #include "top.h"
 #include "queue.h"
 
-empty_queue(q)
-	register queue q;
+void empty_queue(queue q)
 {
 	q->head = q->tail = (instr_p) 0;
 	q->qlen = 0;
 }
 
-int empty(q)
-	queue q;
+int empty(queue q)
 {
 	return q->qlen == 0;
 }
 
-remove_head(q)
-	register queue q;
+void remove_head(queue q)
 {
 	if ( (q->head = q->head->fw) == (instr_p) 0) {
 		q->tail = (instr_p) 0;
@@ -30,9 +27,7 @@ remove_head(q)
 	q->qlen--;
 }
 
-add(q,instr)
-	register queue q;
-	register instr_p instr;
+void add(queue q, instr_p instr)
 {
 	if (q->qlen++ == 0) {
 		q->head = q->tail = instr;
@@ -45,9 +40,7 @@ add(q,instr)
 	instr->fw = (instr_p) 0;
 }
 
-insert(q,instr)
-	register queue q;
-	register instr_p instr;
+void insert(queue q, instr_p instr)
 {
 	if (q->qlen++ == 0) {
 		q->head = q->tail = instr;
@@ -60,8 +53,7 @@ insert(q,instr)
 	instr->bw = (instr_p) 0;
 }
 
-join_queues(q1,q2)
-	register queue q1,q2;
+void join_queues(queue q1, queue q2)
 {
 	if (q1->qlen > 0) {
 		q2->qlen += q1->qlen;

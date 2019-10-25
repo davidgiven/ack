@@ -89,5 +89,3 @@ typedef int bool;
 
 #define NIL (instr_p) 0
 #define NULLSTRING (char *) 0
-
-#define assert(x) if(!(x)) badassertion(__FILE__,__LINE__)
