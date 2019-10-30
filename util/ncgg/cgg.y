@@ -607,7 +607,7 @@ coercdeflist_el
 		{startline = lineno; tokpatlen=0; inithall();}
 	  STACK allocates generates YIELDS tokeninstance
 		{ checkhall();
-		  n_coerc(0,0,$4,$5,(struct varinfo *) 0,$7);
+		  n_coerc(0,0,$4,$5,NULL,&$7);
 		  freevi($4);
 		  freevi($5);
 		}
@@ -623,7 +623,7 @@ coercdeflist_el
 	  optexpr allocates generates yields
 	  	{ tokpatro[0] = 0;
 		  checkhall();
-		  n_coerc($3,$5,$6,$7,$8);
+		  n_coerc($3,$5,$6,$7,$8,NULL);
 		  freevi($6);
 		  freevi($7);
 		  cursetno = -1;

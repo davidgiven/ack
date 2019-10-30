@@ -208,7 +208,7 @@ set_t unstackset;
 
 /*VARARGS5*/
 
-void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_t in)
+void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_p inp)
 {
 	register c3_p c3p;
 	register int i;
@@ -236,7 +236,7 @@ void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct vari
 	{
 		NEW(rp, struct varinfo);
 		rp->vi_next = 0;
-		rp->vi_int[0] = in.in_index;
+		rp->vi_int[0] = inp->in_index;
 	}
 	if (nallreg > 1)
 		error("More than 1 register may not be allocated");
@@ -250,7 +250,7 @@ void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct vari
 	dopattern(ti == 0, VI_NULL, al, ge, rp, VI_NULL);
 	if (ti == 0)
 		for (i = 0; i < SETSIZE; i++)
-			unstackset.set_val[i] |= in.in_set[i];
+			unstackset.set_val[i] |= inp->in_set[i];
 	freevi(rp);
 }
 
