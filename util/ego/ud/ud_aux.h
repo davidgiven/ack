@@ -10,12 +10,14 @@
  */
 
 
-extern repl_line();		/* (line_p old,new; bblock_p b)
+void repl_line(line_p old, line_p new, bblock_p b);
+				/*
 				 * Replace EM instruction 'old' by a
 				 * copy of 'new'. Update doubly-linked
 				 * list.
 				 */
-extern bool same_var();		/* (line_p use,def)
+bool same_var(line_p use, line_p def);
+				/*
 				 * 'use' is an instruction that uses a variable
 				 * for which we maintain ud-info (e.g. a LOL).
 				 * See if 'def' references the same variable.

@@ -107,7 +107,7 @@ int elemsize(lnp)
 
 
 
-concatenate(list1,list2)
+void concatenate(list1,list2)
 	line_p list1,list2;
 {
 	/* Append list2 to the end of list1. list1 may not be empty. */

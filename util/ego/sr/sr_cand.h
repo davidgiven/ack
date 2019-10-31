@@ -9,7 +9,8 @@
  */
 
 
-extern	candidates();		/* (loop_p lp; lset *iv_cand, *vars)
+void candidates(loop_p lp, lset *iv_cand, lset *vars);
+				/*
 				 * Find candidate induction variables,
 				 * i.e. local variables that are assigned
 				 * a value precisely once within the loop,

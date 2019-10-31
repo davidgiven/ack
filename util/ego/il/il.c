@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <em_path.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
@@ -21,7 +22,9 @@
 #include "../share/map.h"
 #include "il_aux.h"
 #include "il1_anal.h"
+#include "il1_aux.h"
 #include "il2_aux.h"
+#include "il3_change.h"
 #include "il3_subst.h"
 #include "../share/get.h"
 #include "../share/put.h"
@@ -56,7 +59,7 @@ int Sbig_caller, Sdispensable, Schangedcallee, Sbigcallee, Sspace, Szeroratio;
  * The call descriptors are put in a file (calfile).
  */
 
-pass1(lnam, bnam, cnam) char* lnam, *bnam, *cnam;
+STATIC void pass1(const char *lnam, const char *bnam, const char *cnam)
 {
 	FILE* f, *gf, *cf, *ccf; /* The EM input, the basic block graph,
 				  * the call-list file and the calcnt file.
@@ -124,8 +127,7 @@ pass1(lnam, bnam, cnam) char* lnam, *bnam, *cnam;
 
 STATIC char cname2[128] = TMP_DIR;
 
-pass2(cnam, space) char* cnam;
-long space;
+STATIC void pass2(const char *cnam, long space)
 {
 	FILE* cf, *cf2, *ccf;
 	call_p c, a;
@@ -176,7 +178,7 @@ long space;
  * EM textfile.
  */
 
-pass3(lnam, lnam2) char* lnam, *lnam2;
+void pass3(const char *lnam, const char *lnam2)
 {
 	bool verbose = TRUE;
 	FILE* lfile, *lfilerand, *lfile2, *sfile;
@@ -244,7 +246,7 @@ pass3(lnam, lnam2) char* lnam, *lnam2;
 	}
 }
 
-STATIC il_extptab(ptab)
+STATIC void il_extptab(ptab)
     proc_p ptab;
 {
 	/* Allocate space for extension of proctable entries.
@@ -261,7 +263,7 @@ STATIC il_extptab(ptab)
 	}
 }
 
-STATIC il_cleanptab(ptab)
+STATIC void il_cleanptab(ptab)
     proc_p ptab;
 {
 	/* De-allocate space for extensions */
@@ -275,7 +277,7 @@ STATIC il_cleanptab(ptab)
 }
 
 #ifdef VERBOSE
-Sdiagnostics()
+STATIC void Sdiagnostics()
 {
 	/* print statictical information */
 
@@ -324,7 +326,7 @@ void il_flags(void *vp)
 	}
 }
 
-main(argc, argv) int argc;
+int main(argc, argv) int argc;
 char* argv[];
 {
 	struct files* files = findfiles(argc, argv);

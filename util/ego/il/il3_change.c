@@ -54,7 +54,7 @@ STATIC line_p par_expr(l,expr)
 
 
 
-STATIC rem_text(l1,l2)
+STATIC void rem_text(l1,l2)
 	line_p l1,l2;
 {
 	/* Remove the lines from l1 to l2 (inclusive) */
@@ -69,7 +69,7 @@ STATIC rem_text(l1,l2)
 
 
 
-STATIC store_tmp(p,l,size)
+STATIC void store_tmp(p,l,size)
 	proc_p p;
 	line_p l;
 	offset  size;
@@ -103,7 +103,7 @@ STATIC store_tmp(p,l,size)
 
 
 
-STATIC chg_actuals(c,cal)
+STATIC void chg_actuals(c,cal)
 	call_p c;
 	line_p cal;
 {
@@ -131,7 +131,7 @@ STATIC chg_actuals(c,cal)
 
 
 
-STATIC rm_callpart(c,cal)
+STATIC void rm_callpart(c,cal)
 	call_p c;
 	line_p cal;
 {
@@ -155,7 +155,7 @@ STATIC rm_callpart(c,cal)
 
 
 
-chg_callseq(c,cal,l_out)
+void chg_callseq(c,cal,l_out)
 	call_p c;
 	line_p cal,*l_out;
 {
@@ -237,7 +237,7 @@ STATIC void act_info(off,acts,ab_off,act_out,off_out)
 
 
 
-STATIC store_off(off,l)
+STATIC void store_off(off,l)
 	offset off;
 	line_p l;
 {
@@ -251,7 +251,7 @@ STATIC store_off(off,l)
 
 
 
-STATIC inl_actual(l,expr)
+STATIC void inl_actual(l,expr)
 	line_p l, expr;
 {
 	/* Expand an actual parameter in line.
@@ -281,7 +281,7 @@ STATIC inl_actual(l,expr)
 
 
 
-STATIC localref(l,c,ab_off,lb_off)
+STATIC void localref(l,c,ab_off,lb_off)
 	line_p l;
 	call_p c;
 	offset ab_off, lb_off;
@@ -311,7 +311,7 @@ STATIC localref(l,c,ab_off,lb_off)
 
 
 
-STATIC chg_mes(l,c,ab_off,lb_off)
+STATIC void chg_mes(l,c,ab_off,lb_off)
 	line_p l;
 	call_p c;
 	offset ab_off, lb_off;
@@ -355,7 +355,7 @@ STATIC chg_mes(l,c,ab_off,lb_off)
 
 
 
-STATIC chg_ret(l,c,lab)
+STATIC void chg_ret(l,c,lab)
 	line_p l,lab;
 	call_p c;
 {
@@ -379,7 +379,7 @@ STATIC chg_ret(l,c,lab)
 
 
 
-STATIC mod_instr(l,c,lab,ab_off,lb_off,lab_off)
+STATIC void mod_instr(l,c,lab,ab_off,lb_off,lab_off)
 	line_p l,lab;
 	call_p c;
 	offset ab_off,lb_off;
@@ -421,7 +421,7 @@ STATIC mod_instr(l,c,lab,ab_off,lb_off,lab_off)
 }
 
 
-modify(text,c,lab,ab_off,lb_off,lab_off)
+void modify(text,c,lab,ab_off,lb_off,lab_off)
 	line_p text,lab;
 	call_p c;
 	offset ab_off,lb_off;
@@ -453,7 +453,7 @@ modify(text,c,lab,ab_off,lb_off,lab_off)
 
 
 
-mod_actuals(nc,c,lab,ab_off,lb_off,lab_off)
+void mod_actuals(nc,c,lab,ab_off,lb_off,lab_off)
 	call_p nc,c;
 	line_p lab;
 	offset ab_off,lb_off;
@@ -534,7 +534,7 @@ insert(text,l,firstline)
 
 
 
-liquidate(p,text)
+void liquidate(p,text)
 	proc_p p;
 	line_p text;
 {

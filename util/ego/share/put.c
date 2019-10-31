@@ -240,7 +240,7 @@ void putdtable(dblock_p head, FILE *df)
 	}
 	fclose(curoutp);
 	if (omap != (obj_p *) 0) {
-		oldmap((short **) omap,olength);  /* release memory for omap */
+		oldmap((void **) omap,olength);  /* release memory for omap */
 	}
 }
 
@@ -309,7 +309,7 @@ void putptable(proc_p head, FILE *pf, bool all)
 	}
 	fclose(curoutp);
 	if (pmap != (proc_p *) 0) {
-		oldmap((short **) pmap,plength);  /* release memory for pmap */
+		oldmap((void **) pmap,plength);  /* release memory for pmap */
 	}
 }
 
@@ -416,9 +416,9 @@ void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
 		oldbblock(b);
 	}
 	/* Release the memory for the lmap, lbmap, bmap, lpmap tables */
-	if (lmap != (line_p *) 0) oldmap((short **) lmap,llength);
-	if (lbmap != (bblock_p *) 0) oldmap((short **) lbmap,llength);
-	if (bmap != (bblock_p *) 0)  oldmap((short **) bmap,blength);
-	if (lpmap != (loop_p *) 0) oldmap((short **) lpmap,lplength);
+	if (lmap != (line_p *) 0) oldmap((void **) lmap,llength);
+	if (lbmap != (bblock_p *) 0) oldmap((void **) lbmap,llength);
+	if (bmap != (bblock_p *) 0)  oldmap((void **) bmap,blength);
+	if (lpmap != (loop_p *) 0) oldmap((void **) lpmap,lplength);
 	curoutp = lf;
 }

@@ -109,9 +109,7 @@ bool value_known(def,val_out)
 
 
 
-bool affected(use,v,l)
-	line_p use,l;
-	short  v;
+bool affected(line_p use, short v, line_p l)
 {
 	/* See if the variable referenced by 'use' may be
 	 * changed by instruction l, which is either a cal, cai or
@@ -223,7 +221,7 @@ line_p unique_def(use,b,defnr_out)
 
 
 
-fold_const(l,b,val)
+void fold_const(l,b,val)
 	line_p l;
 	bblock_p b;
 	offset val;

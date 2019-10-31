@@ -33,7 +33,7 @@
 /* prevent small constants from being put in a register */
 
 
-clean_tab(items)
+void clean_tab(items)
 	item_p items[];
 {
 	int t;
@@ -85,7 +85,7 @@ item_p item_of(off,items)
 
 
 
-fill_item(item,l)
+void fill_item(item,l)
 	item_p item;
 	line_p l;
 {
@@ -238,7 +238,7 @@ STATIC short item_size(item)
 
 
 
-STATIC init_item(a,b)
+STATIC void init_item(a,b)
 	item_p a,b;
 {
 	a->it_type = b->it_type;
@@ -296,7 +296,7 @@ STATIC void add_item(item,t,items)
 
 
 
-STATIC add_usage(l,b,items)
+STATIC void add_usage(l,b,items)
 	line_p l;
 	bblock_p b;
 	item_p items[];
@@ -323,7 +323,7 @@ STATIC add_usage(l,b,items)
 
 
 
-build_itemlist(p,items,nrinstr_out)
+void build_itemlist(p,items,nrinstr_out)
 	proc_p p;
 	item_p items[];
 	int    *nrinstr_out;
@@ -336,7 +336,7 @@ build_itemlist(p,items,nrinstr_out)
 
 	register line_p l;
 	register bblock_p b;
-	register cnt= 0;
+	register int cnt= 0;
 
 	clean_tab(items);
 	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {

@@ -34,7 +34,7 @@ short	dfs_nr;
 bblock_p *vertex;  /* dynamically allocated array */
 
 
-STATIC dfs(v)
+STATIC void dfs(v)
 	bblock_p v;
 {
 	/* Depth First Search */
@@ -56,7 +56,7 @@ STATIC dfs(v)
 
 
 
-STATIC compress(v)
+STATIC void compress(v)
 	bblock_p v;
 {
 	if (v->B_ANCESTOR->B_ANCESTOR != (bblock_p) 0) {
@@ -83,7 +83,7 @@ STATIC bblock_p eval(v)
 
 
 
-STATIC linkblocks(v,w)
+STATIC void linkblocks(v,w)
 	bblock_p v,w;
 {
 	w->B_ANCESTOR = v;
@@ -91,9 +91,7 @@ STATIC linkblocks(v,w)
 
 
 
-dominators(r,n)
-	bblock_p r;
-	short n;
+void dominators(bblock_p r, short n)
 {
 	/* Compute the immediate dominator of every basic
 	 * block in the control flow graph rooted by r.
@@ -139,5 +137,6 @@ dominators(r,n)
 		}
 	}
 	r->b_idom = (bblock_p) 0;
-	oldmap(vertex,n);   /* release memory for dynamic array vertex */
+	/* release memory for dynamic array vertex */
+	oldmap((void **) vertex,n);
 }

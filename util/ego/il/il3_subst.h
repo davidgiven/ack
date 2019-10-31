@@ -9,10 +9,12 @@
  *  I L 3 _ S U B S T . H
  */
 
-extern line_p scan_to_cal();	/* (line_p lines; short n)
+line_p scan_to_cal(line_p lines, short n);
+				/*
 				 * Find the n-th cal instruction.
 				 */
-extern substitute();	/* (FILE *lf;call_p c; line_ pcal,firstline)
+void substitute(FILE *lf, call_p c, line_p cal, line_p firstline);
+			/*
 			 * Perform in line substitution of the call described
 	 		 * by c. The EM text of the called routine is fetched
 	 		 * and modified, the calling sequence is changed,

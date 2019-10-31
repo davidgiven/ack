@@ -49,7 +49,7 @@ STATIC lset cand,		/* set of candidates */
 
 
 
-STATIC un_cand(lnp)
+STATIC void un_cand(lnp)
 	line_p lnp;
 {
 	/* remove the variable stored into by lnp from the list of
@@ -84,7 +84,7 @@ STATIC bool is_cand(lnp)
 }
 
 
-STATIC make_cand(lnp)
+STATIC void make_cand(lnp)
 	line_p lnp;
 {
 	/* make the variable stored into by lnp a candidate */
@@ -96,14 +96,14 @@ STATIC make_cand(lnp)
 
 
 
-STATIC do_dismiss(lnp)
+STATIC void do_dismiss(lnp)
 	line_p lnp;
 {
 	Ladd(lnp,&dism);
 }
 
 
-STATIC dismiss(lnp)
+STATIC void dismiss(lnp)
 	line_p lnp;
 {
 	/* The variable referenced by lnp is turned definitely into
@@ -151,7 +151,7 @@ STATIC void try_cand(lnp,b)
 }
 
 
-candidates(lp,cand_out,vars_out)
+void candidates(lp,cand_out,vars_out)
 	loop_p lp;
 	lset   *cand_out, *vars_out;
 {

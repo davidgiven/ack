@@ -57,7 +57,7 @@ STATIC bool is_reg(off,s)
 }
 
 
-rem_actuals(acts)
+void rem_actuals(acts)
 	actual_p acts;
 {
 	/* remove the actual-list */
@@ -73,7 +73,7 @@ rem_actuals(acts)
 
 
 
-remov_formals(p)
+void remov_formals(p)
 	proc_p p;
 {
 	/* Remove the list of formals of p */

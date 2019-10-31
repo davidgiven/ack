@@ -9,8 +9,9 @@
  *
  */
 
-extern bool is_ivexpr();/* (line_p l; lset ivs,vars; line_p *lbegin; iv_p *iv;
-			 *	int *out_sign)
+bool is_ivexpr(line_p l, lset ivs, lset vars, line_p *lbegin, iv_p *iv,
+	       int *out_sign);
+			/*
 			 * Try to recognize an expression that is a linear
 			 * function of presicely one induction variable.
 			 * It may only use loop constants (besides the

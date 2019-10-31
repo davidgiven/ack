@@ -18,11 +18,11 @@
 					 * register message of the local with
 					 * the given offset.
 					 */
-extern time_p	cons_time();		/* (line_p l; bblock_p b)
+time_p cons_time(line_p l, bblock_p b); /*
 					 * Construct a 'time' record with
 					 * fields 'l' and 'b'.
 					 */
-extern short loop_scale(); 		/* (short lev)
+short loop_scale(short lev); 		/*
 					 * Estimate how many times an item
 					 * appearing in a loop of nesting
 					 * level 'lev' will be used dynamically.

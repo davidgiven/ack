@@ -80,7 +80,7 @@ bool does_impl_def(l)
 }
 
 
-make_defs(p)
+void make_defs(p)
 	proc_p p;
 {
 	/* Make a map of all explicit definitions
@@ -134,7 +134,7 @@ make_defs(p)
 
 
 
-STATIC init_gen(nrdefs)
+STATIC void init_gen(nrdefs)
 	short nrdefs;
 {
 	/* Initializing routine of gen_sets. Compute the set
@@ -161,7 +161,7 @@ STATIC init_gen(nrdefs)
 
 
 
-STATIC clean_gen()
+STATIC void clean_gen()
 {
 	Cdeleteset(all_globl_defs);
 	Cdeleteset(all_indir_defs);
@@ -200,7 +200,7 @@ STATIC bool same_target(l,defnr)
 
 
 
-STATIC rem_prev_defs(l,gen_p)
+STATIC void rem_prev_defs(l,gen_p)
 	line_p l;
 	cset   *gen_p;
 {
@@ -223,7 +223,7 @@ STATIC rem_prev_defs(l,gen_p)
 
 
 
-STATIC impl_globl_defs(p,gen_p)
+STATIC void impl_globl_defs(p,gen_p)
 	proc_p p;
 	cset   *gen_p;
 {
@@ -287,7 +287,7 @@ STATIC void impl_gen_defs(l,gen_p)
 
 
 
-gen_sets(p)
+void gen_sets(p)
 	proc_p p;
 {
 	/* Compute for every basic block b of p the
@@ -329,9 +329,7 @@ gen_sets(p)
 
 
 
-STATIC killed_defs(v,b)
-	short v;
-	bblock_p b;
+STATIC void killed_defs(short v, bblock_p b)
 {
 	/* Put all definitions of v occurring outside b
 	 * in KILL(b). In fact, we also put explicit
@@ -355,7 +353,7 @@ STATIC killed_defs(v,b)
 
 
 
-kill_sets(p)
+void kill_sets(p)
 	proc_p p;
 {
 	/* For every basic block b of p compute the set

@@ -21,6 +21,8 @@
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_interv.h"
+#include "ra_pack.h"
+#include "ra_profits.h"
 
 
 short regs_occupied[NRREGTYPES];	/* #occupied registers for reg_pointer,
@@ -28,7 +30,7 @@ short regs_occupied[NRREGTYPES];	/* #occupied registers for reg_pointer,
 					 */
 #define reg_available(t)	(regs_available[t] > regs_occupied[t])
 
-STATIC initregcount()
+STATIC void initregcount()
 {
 	int t;
 
@@ -47,9 +49,7 @@ STATIC alloc_p make_dummy()
 }
 
 
-STATIC bool fits_in(a,b,cont_item)
-	alloc_p a,b;
-	bool *cont_item;
+STATIC bool fits_in(alloc_p a, alloc_p b, bool *cont_item)
 {
 	/* See if allocation a can be assigned the same register as b.
 	 * Both allocations should be of the same register-type.
@@ -152,7 +152,7 @@ STATIC alloc_p choose_location(alloc,packed,p)
 
 
 
-STATIC update_lists(alloc,unpacked,packed,fit)
+STATIC void update_lists(alloc,unpacked,packed,fit)
 	alloc_p alloc,unpacked,packed,fit;
 {
 	/* 'alloc' has been granted a register; move it from the 'unpacked'
@@ -237,7 +237,7 @@ STATIC alloc_p best_cumprofits(list,x_out,prev_out)
 
 
 
-STATIC account_regsave(packed,unpacked)
+STATIC void account_regsave(packed,unpacked)
 	alloc_p packed,unpacked;
 {
 	/* After all packing has been done, we check for every allocated
@@ -327,7 +327,7 @@ STATIC alloc_p find_prev(alloc,list)
  * account_regsave from rejecting it.
  */
 
-STATIC repl_allocs(new,old,packed)
+STATIC void repl_allocs(new,old,packed)
 	alloc_p new,old,packed;
 {
 	alloc_p x,next,prev,*p;
@@ -356,7 +356,7 @@ STATIC repl_allocs(new,old,packed)
 
 
 
-STATIC assemble_allocs(packed)
+STATIC void assemble_allocs(packed)
 	alloc_p packed;
 {
 	register alloc_p x,m,next;
@@ -377,10 +377,8 @@ STATIC assemble_allocs(packed)
 	}
 }
 
-pack(alloclist,time_opt,packed_out,not_packed_out,p)
-	alloc_p alloclist, *packed_out,*not_packed_out;
-	bool time_opt;
-	proc_p p;
+void pack(alloc_p alloclist, bool time_opt, alloc_p *packed_out,
+	  alloc_p *not_packed_out, proc_p p)
 {
 	/* This is the packing system. It decides which allations
 	 * to grant a register.

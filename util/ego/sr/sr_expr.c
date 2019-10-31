@@ -111,10 +111,9 @@ STATIC int me_kind(l,sign_in,sign_out)
 
 
 
-STATIC bool match_expr(l,iv_allowed,lbegin,iv_seen,sign)
-	line_p l,*lbegin;
-	bool   iv_allowed, *iv_seen;
-	int    sign;
+STATIC bool
+match_expr(line_p l, bool iv_allowed, line_p *lbegin, bool *iv_seen,
+	   int sign)
 {
 	/* This routine is a top down parser for simple
 	 * EM expressions. It recognizes expressions that

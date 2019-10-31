@@ -56,11 +56,11 @@ STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 		case BINAIR_OP:
 		case REMAINDER:
 			if (commutative(avp1->av_instr & BMASK))
-				return	avp1->av_oleft == avp2->av_oleft &&
-					avp1->av_oright == avp2->av_oright
+				return	(avp1->av_oleft == avp2->av_oleft &&
+					 avp1->av_oright == avp2->av_oright)
 					||
-					avp1->av_oleft == avp2->av_oright &&
-					avp1->av_oright == avp2->av_oleft
+					(avp1->av_oleft == avp2->av_oright &&
+					 avp1->av_oright == avp2->av_oleft)
 					;
 			else
 				return	avp1->av_oleft == avp2->av_oleft &&
@@ -98,7 +98,8 @@ STATIC entity_p result_local(offset size, line_p l)
 	if (l == (line_p) 0)
 		return (entity_p) 0;
 
-	if (INSTR(l)==op_stl && size==ws || INSTR(l)==op_sdl && size==2*ws) {
+	if ((INSTR(l)==op_stl && size==ws) ||
+	    (INSTR(l)==op_sdl && size==2*ws)) {
 		enp = getentity(l, &dummy);
 		if (is_regvar(enp->en_loc)) {
 			OUTTRACE("save local found, %ld(LB)", enp->en_loc);

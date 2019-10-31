@@ -26,6 +26,7 @@
 #include "../share/get.h"
 #include "../share/put.h"
 #include "../share/def.h"
+#include "../share/utils.h"
 #include "cf.h"
 #include "cf_succ.h"
 #include "cf_idom.h"
@@ -75,7 +76,7 @@ STATIC short state; /* We use a finite state machine with the
 			 *  INIT:   initial state
 			 */
 
-STATIC nextblock()
+STATIC void nextblock()
 {
 	/* allocate a new basic block structure and
 	 * set b, bp and lp.
@@ -138,12 +139,9 @@ STATIC line_p doread_line(p_out)
 	return lnp;
 }
 
-STATIC bool getbblocks(fp, kind_out, n_out, g_out, l_out)
-    FILE* fp;
-short* kind_out;
-short* n_out;
-bblock_p* g_out;
-line_p* l_out;
+STATIC bool
+getbblocks(FILE *fp, short *kind_out, short *n_out, bblock_p *g_out,
+	   line_p *l_out)
 {
 	bblock_p head = (bblock_p)0;
 	line_p headl = (line_p)0;
@@ -252,7 +250,7 @@ line_p* l_out;
 	}
 }
 
-STATIC interproc_analysis(p)
+STATIC void interproc_analysis(p)
     proc_p p;
 {
 	/* Interprocedural analysis of a procedure p determines:
@@ -362,7 +360,7 @@ STATIC interproc_analysis(p)
 	}
 }
 
-STATIC cf_cleanproc(p)
+STATIC void cf_cleanproc(p)
     proc_p p;
 {
 	/* Remove the extended data structures of p */
@@ -477,7 +475,7 @@ STATIC bool add_info(q, p)
 	return diff;
 }
 
-STATIC trans_clos(head)
+STATIC void trans_clos(head)
     proc_p head;
 {
 	/* Compute the transitive closure of the used/changed
@@ -508,7 +506,7 @@ STATIC trans_clos(head)
 	}
 }
 
-indir_calls()
+STATIC void indir_calls()
 {
 	Cindex i;
 	proc_p p;
@@ -522,7 +520,7 @@ indir_calls()
 	Cdeleteset(cai_set);
 }
 
-main(argc, argv) int argc;
+int main(argc, argv) int argc;
 char* argv[];
 {
 	FILE* f, *f2, *gf2; /* The EM input, EM output, basic block output */

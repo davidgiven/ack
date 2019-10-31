@@ -83,7 +83,7 @@ STATIC void traverse_defs(p,action)
 
 
 
-STATIC make_copytab(p)
+STATIC void make_copytab(p)
 	proc_p p;
 {
 	/* Make a table of all copies appearing in procedure p.
@@ -165,7 +165,7 @@ STATIC void gen_kill_copies(p)
 
 
 
-STATIC intersect_outs(bbset,setp,full_set)
+STATIC void intersect_outs(bbset,setp,full_set)
 	lset bbset;
 	cset *setp,full_set;
 {
@@ -183,7 +183,7 @@ STATIC intersect_outs(bbset,setp,full_set)
 
 
 
-STATIC init_cin(p,full_set)
+STATIC void init_cin(p,full_set)
 	proc_p p;
 	cset full_set;
 {
@@ -218,7 +218,7 @@ STATIC init_cin(p,full_set)
 
 
 
-STATIC solve_cin(p)
+STATIC void solve_cin(p)
 	proc_p p;
 {
 	/* Solve the data flow equations for reaching
@@ -267,7 +267,7 @@ STATIC solve_cin(p)
 
 
 
-copy_analysis(p)
+void copy_analysis(p)
 	proc_p p;
 {
 	/* Determine which copies procedure p has. Compute C_IN(b),
@@ -311,7 +311,7 @@ bool is_copy(def)
 
 
 
-fold_var(old,new,b)
+void fold_var(old,new,b)
 	line_p old, new;
 	bblock_p b;
 {
@@ -369,10 +369,7 @@ END DEBUG */
 
 
 
-bool value_retained(copy,defnr,use,b)
-	line_p copy,use;
-	short  defnr;
-	bblock_p b;
+bool value_retained(line_p copy, short defnr, line_p use, bblock_p b)
 {
 	/* See if the right hand side variable of the
 	 * copy still has the same value at 'use'.

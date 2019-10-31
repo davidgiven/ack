@@ -18,6 +18,7 @@
 #include "../share/files.h"
 #include "../share/get.h"
 #include "../share/put.h"
+#include "../share/cset.h"
 #include "../share/lset.h"
 #include "../share/map.h"
 #include "../share/alloc.h"
@@ -25,6 +26,7 @@
 #include "ra.h"
 #include "ra_items.h"
 #include "ra_allocl.h"
+#include "ra_lifet.h"
 #include "ra_profits.h"
 #include "ra_pack.h"
 #include "ra_xform.h"
@@ -34,6 +36,8 @@
 #define newralpx()	(lpext_p)	newstruct(lpext_ra)
 #define oldrabx(x)	oldstruct(bext_ra,x)
 #define oldralpx(x)	oldstruct(lpext_ra,x)
+
+STATIC void stat_regusage(alloc_p list);
 
 short alloc_id;
 static item_p items[NRITEMTYPES];
@@ -72,7 +76,7 @@ STATIC cond_p getcondtab(f)
 	return tab;
 }
 
-get_atab(f,tab)
+STATIC void get_atab(f,tab)
 	FILE *f;
 	cond_p tab[NRREGTYPES][NRREGTYPES];
 {
@@ -88,7 +92,7 @@ get_atab(f,tab)
 }
 
 
-get_otab(f,tab)
+STATIC void get_otab(f,tab)
 	FILE *f;
 	cond_p tab[NRREGTYPES];
 {
@@ -155,7 +159,7 @@ STATIC bblock_p header(lp)
 }
 
 
-STATIC ra_extproc(p)
+STATIC void ra_extproc(p)
 	proc_p p;
 {
 	/* Allocate the extended data structures for procedure p */
@@ -178,7 +182,7 @@ STATIC ra_extproc(p)
 
 
 
-STATIC ra_cleanproc(p)
+STATIC void ra_cleanproc(p)
 	proc_p p;
 {
 	/* Allocate the extended data structures for procedure p */
@@ -199,7 +203,7 @@ STATIC ra_cleanproc(p)
 
 
 
-STATIC loop_blocks(p)
+STATIC void loop_blocks(p)
 	proc_p p;
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
@@ -218,7 +222,7 @@ STATIC loop_blocks(p)
 
 
 
-STATIC make_instrmap(p,map)
+STATIC void make_instrmap(p,map)
 	proc_p p;
 	line_p map[];
 {
@@ -253,7 +257,7 @@ STATIC bool useful_item(item)
 }
 
 
-STATIC cleantimeset(s)
+STATIC void cleantimeset(s)
 	lset s;
 {
 	register Lindex i;
@@ -300,7 +304,7 @@ STATIC item_p cat_items(items)
 
 
 
-STATIC clean_interval(list)
+STATIC void clean_interval(list)
 	interv_p list;
 {
 	register interv_p x,next;
@@ -313,7 +317,7 @@ STATIC clean_interval(list)
 
 
 
-STATIC clean_allocs(list)
+STATIC void clean_allocs(list)
 	alloc_p list;
 {
 	register alloc_p x,next;
@@ -331,7 +335,7 @@ STATIC clean_allocs(list)
 
 
 
-STATIC cleanitems(list)
+STATIC void cleanitems(list)
 	item_p list;
 {
 	register item_p x,next;
@@ -390,13 +394,13 @@ void ra_optimize(void *vp)
 	clean_allocs(unpacked);
 	clean_allocs(packed);
 	cleanitems(itemlist);
-	oldmap(instrmap,nrinstrs-1);
+	oldmap((void **) instrmap,nrinstrs-1);
 	ra_cleanproc(p);
 }
 
 
 
-main(argc,argv)
+int main(argc,argv)
 	int argc;
 	char *argv[];
 {
@@ -430,6 +434,10 @@ char *str_regtypes[] = {
 };
 
 
+/*
+ * All calls to print_items() and print_allocs() are in comments!
+ */
+#if 0
 print_items(items,p)
 	item_p items[];
 	proc_p p;
@@ -510,10 +518,11 @@ print_allocs(list)
 		}
 	}
 }
+#endif
 
 
-short regs_needed[4];
-stat_regusage(list)
+STATIC short regs_needed[4];
+STATIC void stat_regusage(list)
 	alloc_p list;
 {
 	int i;
@@ -531,6 +540,10 @@ stat_regusage(list)
 
 		
 
+/*
+ * All calls to statistics() are in comments!
+ */
+#if 0
 int cnt_regtypes[reg_float+1];
 
 statistics(items)
@@ -557,3 +570,4 @@ statistics(items)
 		fprintf(stderr, "#%s = %d\n",str_regtypes[r],cnt_regtypes[r]);
 	}
 }
+#endif

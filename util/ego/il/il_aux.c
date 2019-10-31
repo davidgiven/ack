@@ -106,7 +106,7 @@ line_p copy_expr(l1)
 
 
 
-rem_call(c)
+void rem_call(c)
 	call_p c;
 {
 	actual_p act, nexta;
@@ -132,7 +132,7 @@ rem_call(c)
 
 
 
-/* rem_graph */
+/* remunit */
 
 STATIC short remlines(l)
 	line_p l;
@@ -149,11 +149,7 @@ STATIC short remlines(l)
 
 
 
-void
-remunit(kind,p,l)
-	short    kind;
-	proc_p   p;
-	line_p   l;
+void remunit(short kind, proc_p p, line_p l)
 {
 	register bblock_p b;
 	bblock_p next;
@@ -176,12 +172,13 @@ remunit(kind,p,l)
 		oldloop(Lelem(pi));
 	}
 	Ldeleteset(p->p_loops);
-	oldmap(lmap,llength);
-	oldmap(lbmap,llength);
-	oldmap(bmap,blength);
-	oldmap(lpmap,lplength);
+	oldmap((void **) lmap,llength);
+	oldmap((void **) lbmap,llength);
+	oldmap((void **) bmap,blength);
+	oldmap((void **) lpmap,lplength);
 }
-remcc(head)
+
+void remcc(head)
 	calcnt_p head;
 {
 	calcnt_p cc, next;
@@ -271,8 +268,8 @@ line_p get_text(lf,p_out)
 	 * and labels to basic blocks are not used.
 	 */
 	if (*p_out != (proc_p) 0) {
-		oldmap(lmap,llength);
-		oldmap(lbmap,llength);
+		oldmap((void **) lmap,llength);
+		oldmap((void **) lbmap,llength);
 		lmap = oldlmap;
 		lpmap = oldlpmap;
 	}
@@ -309,7 +306,7 @@ calcnt_p getcc(ccf,p)
 /* The following routines are only used by the Inline Substitution phase */
 
 
-STATIC putactuals(alist,cfile)
+STATIC void putactuals(alist,cfile)
 	actual_p alist;
 	FILE     *cfile;
 {
@@ -336,10 +333,7 @@ STATIC putactuals(alist,cfile)
 
 
 
-putcall(c,cfile,level)
-	call_p c;
-	FILE   *cfile;
-	short  level;
+void putcall(call_p c, FILE *cfile, short level)
 {
 	/* output a call */
 
