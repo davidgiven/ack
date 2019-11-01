@@ -13,6 +13,7 @@ void stop(void);
 void fatal(char *format, ...);
 void warning(char *format, ...);
 void error(char *format, ...);
+int do_debug(char *format, ...);
 int do_verbose(char *format, ...);
 
 

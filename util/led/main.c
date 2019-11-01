@@ -580,7 +580,7 @@ void addbase(struct outname *name)
 		address((name->on_type & S_EXT) ? ALLOGCHR : ALLOLCHR,
 			(ind_t)name->on_foff
 		),
-		name->on_type, name->on_valu, 0
+		name->on_type, (unsigned long)name->on_valu, 0
 	);
 }
 

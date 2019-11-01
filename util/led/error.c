@@ -61,6 +61,17 @@ void error(char *format, ...)
 }
 
 /* VARARGS1 */
+int do_debug(char *format, ...)
+{
+	/* printf() and return 1 */
+	va_list ap;
+	va_start(ap, format);
+	vprintf(format, ap);
+	va_end(ap);
+	return 1;
+}
+
+/* VARARGS1 */
 int do_verbose(char *format, ...)
 {
 	va_list ap;

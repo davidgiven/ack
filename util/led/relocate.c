@@ -416,7 +416,8 @@ static void put_mips_valu(char* addr, uint32_t value)
 
 	/* The two bottom zero bits are implicit. */
 	if (value & 3)
-		fatal("invalid MIPS relocation value 0x%x", value);
+		fatal("invalid MIPS relocation value 0x%lx",
+		      (unsigned long)value);
 	value >>= 2;
 
 	switch (opcode >> 26)
@@ -560,7 +561,8 @@ void relocate(struct outhead *head, char* emit, struct outname names[], struct o
 	 * Pick up previous value at location to be relocated.
 	 */
 	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
-	debug("read relocation from 0x%08x type 0x%x value 0x%08x symbol %d\n", realaddress, relo->or_type, valu, relo->or_nami);
+	debug("read relocation from 0x%08lx type 0x%x value 0x%08lx symbol %u\n",
+	      (unsigned long)realaddress, relo->or_type, valu, relo->or_nami);
 
 	/*
 	 * Or_nami is an index in the name table of the considered module.
@@ -595,7 +597,8 @@ void relocate(struct outhead *head, char* emit, struct outname names[], struct o
 	/*
 	 * Now put the value back.
 	 */
-	debug("written fixed up relocation to 0x%08x type 0x%x value 0x%08x\n", realaddress, relo->or_type, valu, 0);
+	debug("written fixed up relocation to 0x%08lx type 0x%x value 0x%08lx\n",
+	      (unsigned long)realaddress, relo->or_type, valu, 0);
 	putvalu(valu, emit + (relo->or_addr - off), relo->or_type);
 
 	/*
