@@ -24,7 +24,7 @@
 #include "../share/utils.h"
 #include "ud_defs.h"
 
-repl_line(old,new,b)
+void repl_line(old,new,b)
 	line_p old,new;
 	bblock_p b;
 {

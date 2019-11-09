@@ -103,7 +103,7 @@ STATIC short map_value(tab,val,time)
 }
 
 
-STATIC init_root(root)
+STATIC void init_root(root)
 	bblock_p root;
 {
 	/* Initialise the IN OUT sets of the entry block of the
@@ -133,7 +133,7 @@ STATIC init_root(root)
 
 
 
-STATIC unite_outs(bbset,setp)
+STATIC void unite_outs(bbset,setp)
 	lset bbset;
 	cset *setp;
 {
@@ -151,7 +151,7 @@ STATIC unite_outs(bbset,setp)
 
 
 
-STATIC solve_equations(p)
+STATIC void solve_equations(p)
 	proc_p p;
 {
 	/* Solve the data flow equations for reaching
@@ -390,7 +390,7 @@ pr_cblocks(p)
 
 #endif
 
-STATIC ud_analysis(p)
+STATIC void ud_analysis(p)
 	proc_p p;
 {
 	/* Perform use-definition analysis on procedure p */
@@ -415,20 +415,20 @@ STATIC ud_analysis(p)
 
 
 
-STATIC clean_maps()
+STATIC void clean_maps()
 {
 	local_p *p;
 	cset *v;
 
-	oldmap(defs,nrexpldefs);
+	oldmap((void **) defs,nrexpldefs);
 	for (p = &locals[1]; p <= &locals[nrlocals]; p++) {
 		oldlocal(*p);
 	}
-	oldmap(locals,nrlocals);
+	oldmap((void **) locals,nrlocals);
 	for (v = &vardefs[1]; v <= &vardefs[nrvars]; v++) {
 		Cdeleteset(*v);
 	}
-	oldmap(vardefs,nrvars);
+	oldmap((void **) vardefs,nrvars);
 }
 
 
@@ -469,7 +469,7 @@ STATIC bool try_optim(l,b)
 
 
 
-value_propagation(p)
+STATIC void value_propagation(p)
 	proc_p p;
 {
 	/* Apply value propagation to procedure p */
@@ -484,7 +484,7 @@ value_propagation(p)
 	 * e.g. the value of A might be statically known too now.
 	 */
 
-	 while (changes) {
+	while (changes) {
 		changes = FALSE;
 		for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
 			for (l = b->b_start; l != (line_p) 0; l = next) {
@@ -495,12 +495,12 @@ value_propagation(p)
 			}
 		}
 	}
-	oldmap(copies,nrcopies);
+	oldmap((void **) copies,nrcopies);
 	oldtable(def_to_copynr,nrdefs);
 }
 
 
-STATIC ud_extend(p)
+STATIC void ud_extend(p)
 	proc_p p;
 {
 	/* Allocate extended data structures for Use Definition analysis */
@@ -513,7 +513,7 @@ STATIC ud_extend(p)
 }
 
 
-STATIC ud_cleanup(p)
+STATIC void ud_cleanup(p)
 	proc_p p;
 {
 	/* Deallocate extended data structures for Use Definition analysis */
@@ -553,7 +553,7 @@ void ud_optimize(void *vp)
 	clean_maps();
 }
 
-main(argc,argv)
+int main(argc,argv)
 	int argc;
 	char *argv[];
 {

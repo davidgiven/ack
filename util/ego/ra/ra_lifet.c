@@ -23,6 +23,7 @@
 #include "../share/alloc.h"
 #include "ra.h"
 #include "ra_aux.h"
+#include "ra_interv.h"
 #include "ra_items.h"
 #include "ra_lifet.h"
 
@@ -33,7 +34,7 @@
 #define is_deadmsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ego && \
 			 aoff(ARG(l),1) == ego_dead)
 
-build_lifetimes(items)
+void build_lifetimes(items)
 	item_p items[];
 {
 	/* compute the it_lives attribute of every item; this is

@@ -35,6 +35,10 @@ void stop(void) {
 	exit(nerrors != 0);
 }
 
+static void stop_on_signal(int sig) {
+	stop();
+}
+
 int
 main(int argc, char **argv)
 {
@@ -54,9 +58,9 @@ main(int argc, char **argv)
 	}
 
 	progname = *argv++; argc--;
-	for (p = sigs; i = *p++; )
+	for (p = sigs; (i = *p++) != 0; )
 		if (signal(i, SIG_IGN) != SIG_IGN)
-			signal(i, stop);
+			signal(i, stop_on_signal);
 	for (i = 0; i < argc; i++) {
 		p = argv[i];
 		if (*p++ != '-')
@@ -433,7 +437,7 @@ pass_23(int n)
 }
 
 void
-newmodule(const char *s)
+newmodule(char *s)
 {
 	static char nmbuf[STRINGMAX];
 

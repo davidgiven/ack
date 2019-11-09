@@ -17,7 +17,6 @@
  */
 
 #include <stdlib.h>
-# include "alloc.h"
 # include "types.h"
 # include "extern.h"
 
@@ -27,7 +26,7 @@ static string rcsid = "$Id$";
 
 static string e_nomem = "Out of memory";
 
-p_mem alloc(unsigned int size)
+p_mem alloc(size_t size)
 {
 	/*
 	   Allocate "size" bytes. Panic if it fails
@@ -38,7 +37,7 @@ p_mem alloc(unsigned int size)
 	return p;
 }
 
-p_mem ralloc(p_mem p,unsigned int size)
+p_mem ralloc(p_mem p,size_t size)
 {
 	/*
 	   Re-allocate the chunk of memory indicated by "p", to
@@ -61,7 +60,7 @@ p_mem new_mem(register p_info p)
 	   be updated each time this routine is called
 	 */
 	p_mem	rp;
-	unsigned sz;
+	size_t	sz;
 
 	if (p->i_max >= p->i_top) {	/* No more free elements */
 		sz = p->i_size;

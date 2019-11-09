@@ -17,6 +17,7 @@
 #include "../share/debug.h"
 #include "../share/map.h"
 #include "ic.h"
+#include "ic_io.h"
 #include "ic_lookup.h"
 #include "../share/alloc.h"
 
@@ -43,8 +44,7 @@ char *lastname;
 
 
 
-lab_id instr_lab(number)
-	short number;
+lab_id instr_lab(short number)
 {
 	register num_p *npp, np;
 
@@ -82,7 +82,7 @@ lab_id instr_lab(number)
 
 /*  symlookup */
 
-STATIC unsigned hash(string) char *string; {
+STATIC unsigned hash(const char *string) {
 	register char *p;
 	register unsigned i,sum;
 
@@ -91,9 +91,7 @@ STATIC unsigned hash(string) char *string; {
 	return(sum);
 }
 
-dblock_p symlookup(name, status)
-	char *name;
-	int  status;
+dblock_p symlookup(const char *name, int status)
 {
 	/* Look up the name of a data block. The name can appear
 	 * in either a defining or applied occurrence (status is
@@ -206,9 +204,7 @@ proc_p getproc(status)
 
 /* proclookup */
 
-proc_p proclookup(name, status)
-	char *name;
-	int  status;
+proc_p proclookup(const char *name, int status)
 {
 	register prc_p *ppp,  pp;
 	register proc_p dp;
@@ -271,7 +267,7 @@ proc_p proclookup(name, status)
 
 /* cleaninstrlabs */
 
-cleaninstrlabs()
+void cleaninstrlabs()
 {
 	register num_p *npp, np, next;
 
@@ -290,7 +286,7 @@ cleaninstrlabs()
 
 /* dump_procnames */
 
-dump_procnames(hash,n,f)
+void dump_procnames(hash,n,f)
 	prc_p  hash[];
 	int    n;
 	FILE   *f;
@@ -328,7 +324,7 @@ dump_procnames(hash,n,f)
 
 /* cleanprocs */
 
-cleanprocs(hash,n,mask)
+void cleanprocs(hash,n,mask)
 	prc_p hash[];
 	int   n,mask;
 {
@@ -372,7 +368,7 @@ cleanprocs(hash,n,mask)
 
 /* dump_dblocknames */
 
-dump_dblocknames(hash,n,f)
+void dump_dblocknames(hash,n,f)
 	sym_p  hash[];
 	int    n;
 	FILE   *f;
@@ -404,7 +400,7 @@ dump_dblocknames(hash,n,f)
 
 /* cleandblocks */
 
-cleandblocks(hash,n,mask)
+void cleandblocks(hash,n,mask)
 	sym_p hash[];
 	int   n,mask;
 {

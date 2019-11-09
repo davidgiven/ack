@@ -5,16 +5,24 @@
 /* $Id$ */
 
 #include	"sysidf.h"
+#include	"io.h"
 #include	"log.h"
 #include	"alloc.h"
 #include	"shadow.h"
+#include	"m_sigtrp.h"
+#include	"monstruct.h"
+#include	"whatever.h"
 
 #include	<sys/types.h>
 #include	<sys/stat.h>
 #include	<sys/times.h>
+#include	<sys/wait.h>
 #include	<errno.h>
+#include	<signal.h>
+#include	<string.h>
 #include	<time.h>
 #include	<unistd.h>
+#include	<utime.h>
 
 extern int running;			/* from main.c */
 extern int fd_limit;			/* from io.c */
@@ -1091,7 +1099,7 @@ PRIVATE int vec(n1, n2, addr, vecvec)
 
 	/* copy the elements */
 	for (	cp1 = buf[n1], n_ent = 0, p = addr;
-		ldp = mem_lddp(p);
+		(ldp = mem_lddp(p)) != 0;
 		p += psize, n_ent++
 	) {
 		if (!savestr(n2, ldp)) {
@@ -1099,7 +1107,7 @@ PRIVATE int vec(n1, n2, addr, vecvec)
 		}
 		(*vecvec)[n_ent] = cp1;
 		cp2 = buf[n2];
-		while (*cp1++ = *cp2++) {
+		while ((*cp1++ = *cp2++) != '\0') {
 			/* nothing */
 		}
 	}
@@ -1107,9 +1115,7 @@ PRIVATE int vec(n1, n2, addr, vecvec)
 	return 1;
 }
 
-int memfault(addr, length)
-	ptr addr;
-	size length;
+int memfault(ptr addr, size length)
 {
 	/* centralizes (almost) all memory access tests in MON */
 	if (!is_in_mem(addr, length)) {
@@ -1119,17 +1125,14 @@ int memfault(addr, length)
 	return 0;
 }
 
-efault(wrn)
-	int wrn;			/* warning number */
+void efault(int wrn /* warning number */)
 {
 	warning(wrn);
 	errno = 14;			/* EFAULT */
 }
 
-einval(wrn)
-	int wrn;			/* warning number */
+void einval(int wrn /* warning number */)
 {
 	warning(wrn);
 	errno = 22;			/* EINVAL */
 }
-

@@ -13,6 +13,7 @@
 #include <em_mnem.h>
 #include "../share/types.h"
 #include "il.h"
+#include "il_aux.h"
 #include "il1_cal.h"
 #include "../share/debug.h"
 #include "../share/alloc.h"
@@ -91,7 +92,7 @@ STATIC void inc_count(caller,callee)
 
 
 
-anal_cal(p,call,b,cf)
+void anal_cal(p,call,b,cf)
 	proc_p p;
 	line_p call;
 	bblock_p b;

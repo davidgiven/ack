@@ -95,15 +95,15 @@ offset get_off() {
 	}
 }
 
-STATIC make_string(n) int n; {
+STATIC void make_string(n) int n; {
 	
 	sprintf(string,".%u",n);
 }
 
-STATIC inident() {
-	register n;
+STATIC void inident() {
+	register int n;
 	register char *p = string;
-	register c;
+	register int c;
 
 	n = get_int();
 	while (n--) {
@@ -140,7 +140,7 @@ int table3(n) int n; {
 }
 
 int table1() {
-	register n;
+	register int n;
 
 	n = readbyte();
 	if (n == EOF)
@@ -161,7 +161,7 @@ int table1() {
 }
 
 int table2() {
-	register n;
+	register int n;
 
 	n = readbyte();
 	if ((n < sp_fcst0 + sp_ncst0) && (n >= sp_fcst0)) {
@@ -174,10 +174,7 @@ int table2() {
 
 
 
-file_init(f,state,length)
-	FILE *f;
-	short state;
-	long  length;
+void file_init(FILE *f, short state, long length)
 {
 	short n;
 
@@ -193,7 +190,7 @@ file_init(f,state,length)
 
 
 
-arch_init(arch)
+void arch_init(arch)
 	FILE *arch;
 {
 	short n;

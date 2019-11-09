@@ -78,7 +78,7 @@ int flt_cmp(flt_arith *e1, flt_arith *e2);
  *  digits.  They may not both be missing. The decimal point, the e and the
  *  exponent may be missing.
  */
-void flt_str2flt(char *s, flt_arith *e);
+void flt_str2flt(const char *s, flt_arith *e);
 /** Converts the number indicated by `e` into a string, in a scientific
  *  notation acceptable for EM. The result is stored in `buf`. At most
  *  `bufsize` characters are  stored.   The  maximum  length  needed  is

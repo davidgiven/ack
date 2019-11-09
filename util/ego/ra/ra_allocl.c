@@ -27,7 +27,7 @@
 #include "ra_allocl.h"
 #include "ra_interv.h"
 
-STATIC count_usage(p,item,nrloops,sloopcnt,dloopcnt)
+STATIC void count_usage(p,item,nrloops,sloopcnt,dloopcnt)
 	proc_p p;
 	item_p item;
 	short  nrloops, sloopcnt[], dloopcnt[];
@@ -92,7 +92,7 @@ STATIC alloc_p cons_alloc(item,timespan,stat_usecount,
 }
 
 
-STATIC insert_alloc(alloc,list_p)
+STATIC void insert_alloc(alloc,list_p)
 	alloc_p alloc, *list_p;
 {
 	alloc->al_next = *list_p;
@@ -157,7 +157,7 @@ STATIC bblock_p init_point(item)
 }
 
 
-STATIC add_blocks(b,s,span)
+STATIC void add_blocks(b,s,span)
 	bblock_p b;
 	cset *s;
 	interv_p *span;
@@ -176,7 +176,7 @@ STATIC add_blocks(b,s,span)
 
 
 
-STATIC whole_lifetime(item,ini_out,span_out)
+STATIC void whole_lifetime(item,ini_out,span_out)
 	item_p item;
 	bblock_p *ini_out;
 	interv_p *span_out;
@@ -267,12 +267,10 @@ STATIC short countuses(usage,b)
 
 
 
-STATIC allocs_of_item(p,item,loops,sloopcnt,dloopcnt,alloc_list_p)
-	proc_p p;
-	item_p item;
-	lset loops;
-	short *sloopcnt,*dloopcnt; /* dynamic arrays */
-	alloc_p *alloc_list_p;
+STATIC void
+allocs_of_item(proc_p p, item_p item, lset loops,
+	       short *sloopcnt, short *dloopcnt, /* dynamic arrays */
+	       alloc_p *alloc_list_p)
 {
 	register Lindex li;
 	loop_p lp;
@@ -328,10 +326,7 @@ STATIC allocs_of_item(p,item,loops,sloopcnt,dloopcnt,alloc_list_p)
 
 
 
-alloc_p build_alloc_list(p,nrloops,itemlist)
-	proc_p p;
-	short nrloops;
-	item_p itemlist;
+alloc_p build_alloc_list(proc_p p, short nrloops, item_p itemlist)
 {
 	short *sloopcnt,*dloopcnt; /* dynamic arrays */
 	register item_p item;
@@ -351,7 +346,7 @@ alloc_p build_alloc_list(p,nrloops,itemlist)
 
 
 
-build_rivals_graph(alloclist)
+void build_rivals_graph(alloclist)
 	alloc_p alloclist;
 {
 	/* See which allocations in the list are rivals of each other,

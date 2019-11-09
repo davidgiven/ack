@@ -21,12 +21,13 @@
 #include "../share/lset.h"
 #include "../share/cset.h"
 #include "cf.h"
+#include "cf_succ.h"
 #include "../share/map.h"
 
 extern char em_flag[];
 
 
-STATIC succeeds(succ,pred)
+STATIC void succeeds(succ,pred)
 	bblock_p succ, pred;
 {
 	assert(pred != (bblock_p) 0);
@@ -75,7 +76,7 @@ STATIC arg_p use_label(arg,b)
 
 
 
-STATIC case_flow(instr,desc,b)
+STATIC void case_flow(instr,desc,b)
 	short    instr;
 	line_p   desc;
 	bblock_p b;
@@ -176,7 +177,7 @@ STATIC line_p case_descr(lnp)
 
 
 
-STATIC last2_instrs(b,last_out,prev_out)
+STATIC void last2_instrs(b,last_out,prev_out)
 	bblock_p b;
 	line_p   *last_out,*prev_out;
 {
@@ -205,7 +206,7 @@ STATIC last2_instrs(b,last_out,prev_out)
 
 
 
-control_flow(head)
+void control_flow(head)
 	bblock_p head;
 {
 	/* compute the successor and predecessor relation

@@ -97,8 +97,7 @@ int sz;
 #include <ctype.h>
 #include <flt_arith.h>
 
-int float_cst(str, sz, buf) char *str, *buf;
-int sz;
+static int float_cst(const char *float_str, int sz, char *buf)
 {
 	int overflow = 0;
 	flt_arith e;
@@ -107,7 +106,7 @@ int sz;
 	{
 		return 1;
 	}
-	flt_str2flt(str, &e);
+	flt_str2flt(float_str, &e);
 #ifdef IEEEFLOAT
 	if (sz == 4)
 	{
@@ -115,7 +114,7 @@ int sz;
 #ifdef PDPFLOAT
 		e.flt_exp += 129;
 #else
-	e.flt_exp += 127;
+		e.flt_exp += 127;
 #endif
 		if (e.flt_mantissa.flt_h_32 == 0)
 			e.flt_exp = 0;

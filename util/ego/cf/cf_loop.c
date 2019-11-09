@@ -83,7 +83,7 @@ STATIC bool inner_loop(l1,l2)
 
 
 
-STATIC insrt(b,lpb,s_p)
+STATIC void insrt(b,lpb,s_p)
 	bblock_p b;
 	lset *lpb;
 	lset *s_p;
@@ -162,7 +162,7 @@ STATIC loop_p org_loop(lp,loops)
 
 
 
-STATIC collapse_loops(loops_p)
+STATIC void collapse_loops(loops_p)
 	lset *loops_p;
 {
 	register Lindex li1, li2;
@@ -187,7 +187,7 @@ STATIC collapse_loops(loops_p)
 }
 
 
-STATIC loop_per_block(lp)
+STATIC void loop_per_block(lp)
 	loop_p lp;
 {
 	bblock_p b;
@@ -205,7 +205,7 @@ STATIC loop_per_block(lp)
 
 
 
-STATIC loop_attrib(loops)
+STATIC void loop_attrib(loops)
 	lset loops;
 {
 	/* Compute several attributes */
@@ -223,7 +223,7 @@ STATIC loop_attrib(loops)
 
 
 
-STATIC nest_levels(loops)
+STATIC void nest_levels(loops)
 	lset loops;
 {
 	/* Compute the nesting levels of all loops of
@@ -250,7 +250,7 @@ STATIC nest_levels(loops)
 }
 
 
-STATIC cleanup(loops)
+STATIC void cleanup(loops)
 	lset loops;
 {
 	/* Throw away the LP_BLOCKS sets */
@@ -280,7 +280,7 @@ STATIC bool does_exit(b,lp)
 }
 
 
-STATIC mark_succ(b,lp)
+STATIC void mark_succ(b,lp)
 	bblock_p b;
 	loop_p   lp;
 {
@@ -339,7 +339,7 @@ STATIC void mark_blocks(lp)
 
 
 
-STATIC mark_loopblocks(loops)
+STATIC void mark_loopblocks(loops)
 	lset loops;
 {
 	/* Determine for all loops which basic blocks
@@ -360,7 +360,7 @@ STATIC mark_loopblocks(loops)
 
 
 
-loop_detection(p)
+void loop_detection(p)
 	proc_p p;
 {
 	/* Find all natural loops of procedure p. Every loop is

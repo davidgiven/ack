@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
  
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,18 +14,38 @@
 
 /* STANDARD MACHINE-INDEPENT C CODE *************/
 
-extern char *lstrip();
-extern instr_p newinstr();
-extern instr_p read_instr();
-extern instr_p gen_instr();
+static void optimize(void);
+static bool try_hashentry(int *, queue);
+static int hash(queue);
+static void fill_window(queue, int);
+static void write_first(queue);
+static void set_opcode(instr_p);
+static bool check_pattern(patdescr_p, queue);
+static bool check_operands(patdescr_p, queue);
+static void clear_vars(void);
+static bool opmatch(templ_p, const char *);
+static bool split_operands(instr_p);
+static void labeldef(instr_p);
+static bool operand(instr_p, int);
+static bool remainder_empty(instr_p);
+static char *lstrip(char *, const char *);
+static bool rstrip(char *, const char *);
+static bool unify(const char *, struct variable *);
+static void xform(patdescr_p, queue);
+static void replacement(patdescr_p, queue);
+static instr_p gen_instr(idescr_p);
+static instr_p read_instr(void);
+static instr_p newinstr(void);
+static void oldinstr(instr_p);
+static bool op_separator(instr_p);
+static bool well_shaped(const char *);
+static bool is_letter(char);
 
-struct variable var[NRVARS+1];
-struct variable ANY;  /* ANY symbol matching any instruction */
+static struct variable var[NRVARS+1];
+static struct variable ANY;  /* ANY symbol matching any instruction */
 
-char *REST;  /* Opcode of first instruction not matched by current pattern */
-
-void labeldef();
-void set_opcode();
+/* Opcode of first instruction not matched by current pattern */
+static char *REST;
 
 #include "gen.c"
 
@@ -36,7 +57,7 @@ void set_opcode();
 /* Skip white space in the unprocessed part of instruction 'ip' */
 #define skip_white(ip)	while (is_white(*(ip)->rest_line)) (ip)->rest_line++
 
-main()
+int main(void)
 {
 	optimize();
 	exit(0);
@@ -63,7 +84,7 @@ main()
  * is written to the output and is removed.
  */
 
-optimize()
+static void optimize(void)
 {
 	struct queue_t windowq, backupq;
 	queue window, backup;
@@ -93,11 +114,9 @@ optimize()
 
 
 
-bool try_hashentry(list,window)
-	int *list;
-	queue window;
+static bool try_hashentry(int *list, queue window)
 {
-	register int *pp;
+	int *pp;
 	patdescr_p p;
 
 	for (pp = list; *pp != -1; pp++) {
@@ -126,11 +145,10 @@ bool try_hashentry(list,window)
 */
 
 
-int hash(w)
-	queue w;
+static int hash(queue w)
 {
-	register char *p;
-	register sum,i;
+	char *p;
+	int sum,i;
 	instr_p ip;
 
 	ip = qhead(w);
@@ -147,10 +165,9 @@ int hash(w)
  * When end-of-file is encountered it may contain fewer items.
  */
 
-fill_window(w,len)
-	register queue w;
+static void fill_window(queue w, int len)
 {
-	register instr_p ip;
+	instr_p ip;
 
 	while(qlength(w) < len) {
 		if ((ip = read_instr()) == NIL) break;
@@ -160,10 +177,9 @@ fill_window(w,len)
 	}
 }
 
-write_first(w)
-	queue w;
+static void write_first(queue w)
 {
-	register instr_p ip = qhead(w);
+	instr_p ip = qhead(w);
 
 	fputs(ip->line, stdout);
 	remove_head(w);
@@ -173,12 +189,9 @@ write_first(w)
 
 /* Try to recognize the opcode part of an instruction */
 
-void
-set_opcode(ip)
-	register instr_p ip;
+static void set_opcode(instr_p ip)
 {
-	register char *p,*q;
-	char *qlim;
+	char *p,*q,*qlim;
 
 	if (ip->state == JUNK) return;
 	skip_white(ip);
@@ -206,13 +219,10 @@ set_opcode(ip)
 
 /* Check if pattern 'p' matches the current input */
 
-bool check_pattern(p,w)
-	patdescr_p p;
-	queue w;
+static bool check_pattern(patdescr_p p, queue w)
 {
-	register idescr_p id_p;
-	idescr_p idlim;
-	register instr_p ip;
+	idescr_p id_p, idlim;
+	instr_p ip;
 
 	ip = qhead(w);
 	ANY.vstate = UNINSTANTIATED;
@@ -232,12 +242,10 @@ bool check_pattern(p,w)
 
 
 
-bool check_operands(p,w)
-	patdescr_p p;
-	queue w;
+static bool check_operands(patdescr_p p, queue w)
 {
-	register instr_p ip;
-	register idescr_p id_p;
+	instr_p ip;
+	idescr_p id_p;
 	int n;
 
 	/* fprintf(stderr,"try pattern %d\n",p-patterns); */
@@ -263,9 +271,9 @@ bool check_operands(p,w)
 
 /* Reset all variables to uninstantiated */
 
-clear_vars()
+static void clear_vars(void)
 {
-	register v;
+	int v;
 
 	for (v = 1; v <= NRVARS; v++) var[v].vstate = UNINSTANTIATED;
 }
@@ -278,9 +286,7 @@ clear_vars()
  * mode-definitions part of the table.
  */
 
-bool opmatch(t,s)
-	templ_p t;
-	char *s;
+static bool opmatch(templ_p t, const char *s)
 {
 	char *l, buf[MAXOPLEN+1];
 	bool was_instantiated;
@@ -304,10 +310,9 @@ bool opmatch(t,s)
 
 /* Try to recognize the operands of an instruction */
 
-bool split_operands(ip)
-	register instr_p ip;
+static bool split_operands(instr_p ip)
 {
-	register int i;
+	int i;
 	bool res;
 
 	if (strcmp(ip->opc,"labdef") ==0) {
@@ -322,11 +327,9 @@ bool split_operands(ip)
 
 
 
-void
-labeldef(ip)
-	register instr_p ip;
+static void labeldef(instr_p ip)
 {
-	register char *p;
+	char *p;
 	int oplen;
 
 	p = ip->rest_line;
@@ -344,10 +347,9 @@ labeldef(ip)
 
 /* Try to recognize the next operand of instruction 'ip' */
 
-bool operand(ip,n)
-	register instr_p ip;
+static bool operand(instr_p ip, int n)
 {
-	register char *p;
+	char *p;
 	int oplen;
 #ifdef PAREN_OPEN
 	int nesting = 0;
@@ -381,8 +383,7 @@ bool operand(ip,n)
  * (or contains only white space).
  */
 
-bool remainder_empty(ip)
-	instr_p ip;
+static bool remainder_empty(instr_p ip)
 {
 	skip_white(ip);
 	return *ip->rest_line == '\n';
@@ -393,8 +394,7 @@ bool remainder_empty(ip)
  * succeeds then return a pointer to the rest (unmatched part) of 'str'.
  */
 
-char *lstrip(str,ctxt)
-	register char *str, *ctxt;
+static char *lstrip(char *str, const char *ctxt)
 {
 	assert(ctxt != NULLSTRING);
 	while (*str != '\0' && *str == *ctxt) {
@@ -410,10 +410,10 @@ char *lstrip(str,ctxt)
  * replace truncate 'str'.
  */
 
-bool rstrip(str,ctxt)
-	char *str,*ctxt;
+static bool rstrip(char *str, const char *ctxt)
 {
-	register char *s, *c;
+	char *s;
+	const char *c;
 
 	for (s = str; *s != '\0'; s++);
 	for (c = ctxt; *c != '\0'; c++);
@@ -432,9 +432,7 @@ bool rstrip(str,ctxt)
  * variable becomes instantiated to the string.
  */
 
-bool unify(str,v)
-	char *str;
-	register struct variable *v;
+static bool unify(const char *str, struct variable *v)
 {
 	if (v->vstate == UNINSTANTIATED) {
 		v->vstate = INSTANTIATED;
@@ -449,11 +447,9 @@ bool unify(str,v)
 
 /* Transform the working window according to pattern 'p' */
 
-xform(p,w)
-	patdescr_p p;
-	queue w;
+static void xform(patdescr_p p, queue w)
 {
-	register instr_p ip;
+	instr_p ip;
 	int i;
 
 	for (i = 0; i < p->patlen; i++) {
@@ -471,11 +467,9 @@ xform(p,w)
  * Note that we generate instructions in reverser order.
  */
 
-replacement(p,w)
-	register patdescr_p p;
-	queue w;
+static void replacement(patdescr_p p, queue w)
 {
-	register idescr_p id_p;
+	idescr_p id_p;
 
 	for (id_p = &p->repl[p->replen-1]; id_p >= p->repl; id_p--) {
 		insert(w,gen_instr(id_p));
@@ -490,13 +484,11 @@ replacement(p,w)
  * in exactly the same way as normal instructions that are just read in.
  */
 
-instr_p gen_instr(id_p)
-	idescr_p id_p;
+static instr_p gen_instr(idescr_p id_p)
 {
-	char *opc;
+	char *opc, *s;
 	instr_p ip;
-	register templ_p t;
-	register char *s;
+	templ_p t;
 	bool islabdef;
 	int n;
 	static char tmp[] = "x";
@@ -547,13 +539,12 @@ instr_p gen_instr(id_p)
 
 static bool junk_state = FALSE;  /* TRUE while processing a very long line */
 
-instr_p read_instr()
+static instr_p read_instr(void)
 {
 	instr_p ip;
-	register int c;
-	register char *p;
-	register FILE *inp = stdin;
-	char *plim;
+	int c;
+	char *p, *plim;
+	FILE *inp = stdin;
 
 	ip = newinstr();
 	plim = &ip->line[MAXLINELEN];
@@ -586,9 +577,9 @@ instr_p read_instr()
 static instr_p instr_pool;
 int nr_mallocs = 0; /* for statistics */
 
-instr_p newinstr()
+static instr_p newinstr(void)
 {
-	register instr_p ip;
+	instr_p ip;
 	int i;
 
 	if (instr_pool == NIL) {
@@ -607,8 +598,7 @@ instr_p newinstr()
 	return ip;
 }
 
-oldinstr(ip)
-	instr_p ip;
+static void oldinstr(instr_p ip)
 {
 	ip->fw = instr_pool;
 	instr_pool = ip;
@@ -616,30 +606,9 @@ oldinstr(ip)
 
 
 
-/* Debugging stuff */
-
-badassertion(file,line)
-	char *file;
-	unsigned line; 
-{
-	fprintf(stderr,"assertion failed file %s, line %u\n",file,line);
-	error("assertion");
-}
-
-/* VARARGS1 */
-error(s,a)
-	char *s,*a; 
-{
-	fprintf(stderr,s,a);
-	fprintf(stderr,"\n");
-	abort();
-	exit(-1);
-}
-
 /* Low level routines */
 
-bool op_separator(ip)
-	instr_p ip;
+static bool op_separator(instr_p ip)
 {
 	skip_white(ip);
 	if (*(ip->rest_line) == OP_SEPARATOR) {
@@ -652,14 +621,13 @@ bool op_separator(ip)
 
 
 
-bool well_shaped(opc)
-	char *opc;
+static bool well_shaped(const char *opc)
 {
 	return is_letter(opc[0]);
 }
 
 
-bool is_letter(c)
+static bool is_letter(char c)
 {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }

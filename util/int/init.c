@@ -21,10 +21,12 @@
 #include	"alloc.h"
 #include	"warn.h"
 #include	"mem.h"
+#include	"m_sigtrp.h"
 #include	"io.h"
 #include	"shadow.h"
 #include	"trap.h"
 #include	"read.h"
+#include	"whatever.h"
 
 
 /****************************************************************

@@ -19,7 +19,7 @@ void	Cjoin(cset, cset *);
 void	Cintersect(cset, cset *);
 void	Cdeleteset(cset);
 bool	Cis_subset(cset, cset);
-void	Cclearset(cset, cset *);
+void	Cclear_set(cset *);
 void	Ccopy_set(cset, cset *);
 void	Csubtract(cset, cset *);
 bool	Cequal(cset, cset);

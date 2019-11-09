@@ -25,7 +25,7 @@ void *myalloc(size_t);
 
 line_p	  newline(byte optype);
 arg_p	  newarg(byte argtyp);
-short	**newmap(short length);
+void	**newmap(short length);
 cset	  newbitvect(short nrbytes);
 cond_p 	  newcondtab(int length);
 
@@ -35,12 +35,12 @@ void oldargs(arg_p);
 void oldargb(argb_p);
 void oldobjects(obj_p);
 void olddblock(dblock_p);
-void oldmap(short **mp, short length);
+void oldmap(void **mp, short length);
 void oldbitvect(cset s, short nrbytes);
 void oldcondtab(cond_p);
 
 short	*newtable(short length);
-void	 oldtable(short **mp, short length);
+void	 oldtable(short *mp, short length);
 
 #define newdblock()	(dblock_p) newstruct(dblock)
 #define newobject()	(obj_p) newstruct(obj)

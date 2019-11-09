@@ -14,6 +14,7 @@
 #include	"fra.h"
 #include	"io.h"
 #include	"warn.h"
+#include	"switch.h"
 
 #ifndef	NOFLOAT
 

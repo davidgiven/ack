@@ -16,6 +16,7 @@
 #include	"text.h"
 #include	"fra.h"
 #include	"stack.h"
+#include	"switch.h"
 
 
 PRIVATE void compare_obj(size);

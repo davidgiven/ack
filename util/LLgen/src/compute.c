@@ -19,7 +19,6 @@
 
 # include <stdlib.h>
 # include <stdio.h>
-# include "alloc.h"
 # include "types.h"
 # include "extern.h"
 # include "sets.h"
@@ -198,7 +197,7 @@ void do_compute(void)
 	for (f = files; f < maxfiles; f++)
 	{
 		register p_set s;
-		f->f_used = s = (p_set) alloc((unsigned) n * sizeof(*(f->f_used)));
+		f->f_used = s = (p_set) alloc(n * sizeof(*(f->f_used)));
 		for (i = n; i; i--)
 			*s++ = 0;
 		for (i = f->f_nonterminals; i != -1; i = p->n_next)
@@ -497,9 +496,7 @@ STATIC int nc_first(p_set setp,register p_gram p,int flag)
 
 				q = g_getterm(p);
 				if (flag == 0)
-				{
-					if (nc_first(q->t_nc_first,q->t_rule,0))/*nothing*/;
-				}
+					(void)nc_first(q->t_nc_first,q->t_rule,0);
 				if (!noenter) s |= setunion(setp,q->t_nc_first);
 				p++;
 				if (r_getkind(q) == STAR ||
@@ -512,9 +509,7 @@ STATIC int nc_first(p_set setp,register p_gram p,int flag)
 
 				l = g_getlink(p);
 				if (flag == 0)
-				{
-					if (nc_first(l->l_nc_symbs,l->l_rule,0))/*nothing*/;
-				}
+					(void)nc_first(l->l_nc_symbs,l->l_rule,0);
 				if (noenter == 0)
 				{
 					s |= setunion(setp,l->l_nc_symbs);
@@ -528,14 +523,15 @@ STATIC int nc_first(p_set setp,register p_gram p,int flag)
 				register p_start subp;
 
 				if (!noenter)
-				if (subpars_sim)
-				s |= setunion(setp, start_firsts);
-				else
 				{
-					for (subp = g_getsubparse(p); subp;
+					if (subpars_sim)
+						s |= setunion(setp, start_firsts);
+					else
+					{
+						for (subp = g_getsubparse(p); subp;
 							subp = subp->ff_next)
-					s |= setunion(setp, (&nonterms[subp->ff_nont])->n_nc_first);
-
+							s |= setunion(setp, (&nonterms[subp->ff_nont])->n_nc_first);
+					}
 				}
 				p++;
 				continue;
@@ -863,7 +859,7 @@ STATIC void do_lengthcomp(void)
 	register p_nont p;
 	p_mem alloc();
 
-	length = (p_length) alloc((unsigned) (nnonterms * sizeof(*length)));
+	length = (p_length) alloc(nnonterms * sizeof(*length));
 	for (pl = &length[nnonterms - 1]; pl >= length; pl--)
 	{
 		pl->val = pl->cnt = INFINITY;

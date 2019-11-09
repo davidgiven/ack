@@ -22,7 +22,7 @@
 #include "../share/files.h"
 #include "ic_lib.h"
 
-STATIC skip_string(n)
+STATIC void skip_string(n)
     offset n;
 {
 	/* Read a string of length n and void it */
@@ -60,7 +60,7 @@ STATIC void skip_arguments()
 	}
 }
 
-STATIC bool proc_wanted(name) char* name;
+STATIC bool proc_wanted(const char *name)
 {
 	/* See if 'name' is the name of an external procedure
 	 * that has been used before, but for which no body
@@ -79,7 +79,7 @@ STATIC bool proc_wanted(name) char* name;
 	}
 }
 
-STATIC bool data_wanted(name) char* name;
+STATIC bool data_wanted(const char *name)
 {
 	/* See if 'name' is the name of an externally visible
 	 * data block that has been used before, but for which

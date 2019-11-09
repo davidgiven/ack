@@ -67,7 +67,3 @@ void garbage_collect(void);
 void itokcost(void);
 void error(const char *s, ...);
 void fatal(const char *s, ...);
-
-#ifdef MACH_OPTIONS
-void mach_option(char *); /* machine dependent */
-#endif

@@ -9,6 +9,7 @@
 #include	"global.h"
 #include	"mem.h"
 #include	"monstruct.h"
+#include	"whatever.h"
 
 #include	<sys/types.h>
 #include	<sys/stat.h>
@@ -42,9 +43,7 @@ PRIVATE mem_stfld(addr, offset, length, val)
 	mem_stn(addr + offset, val, length);
 }
 
-int stat2mem(addr, statb)
-	ptr addr;
-	struct stat *statb;
+int stat2mem(ptr addr, struct stat *statb)
 {
 	if (memfault(addr, V7st_sz))
 		return 0;
@@ -62,9 +61,7 @@ int stat2mem(addr, statb)
 	return 1;
 }
 
-int timeb2mem(addr, timebb)
-	ptr addr;
-	struct timeb *timebb;
+int timeb2mem(ptr addr, struct timeb *timebb)
 {
 	if (memfault(addr, V7tb_sz))
 		return 0;
@@ -75,9 +72,7 @@ int timeb2mem(addr, timebb)
 	return 1;
 }
 
-int tms2mem(addr, tmsb)
-	ptr addr;
-	struct tms *tmsb;
+int tms2mem(ptr addr, struct tms *tmsb)
 {
 	if (memfault(addr, V7tms_sz))
 		return 0;

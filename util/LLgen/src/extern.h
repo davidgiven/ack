@@ -19,6 +19,8 @@
  * some variables that are visible in more than one file
  */
 
+# include "types.h"
+
 # define LTEXTSZ	256	/* Size of longest token */
 
 /*
@@ -94,22 +96,38 @@ extern p_gram	illegal_gram;
 extern int	strip_grammar;
 extern int	in_production;
 
+/* LLgen.g */
+void LLparse(void);
+
+/* check.c */
+void conflchecks(void);
+
+/* compute.c */
+void do_compute(void);
+int empty(p_gram);
+int t_safety(int, int, int, int);
+int t_after(int, int, int);
+
+/* gencode.c */
+void gencode(int);
+
+/* machdep.c */
+void TMPNAM(string);
+string libpath(string);
+
+/* main.c */
 void error(int lineno,string s,string t);
 void warning(int lineno,string s,string t);
 void fatal(int lineno,string s,string t);
-
-
-int empty(register p_gram);
-int t_safety(int, int, int, int);
-int t_after(int, int, int);
-string store(string);
-void name_init(void);
-p_gram search(int, register string, int);
-void co_reach(void);
-void install(string, string);
 void copyfile(string);
+void install(string, string);
 
+/* name.c */
+void name_init(void);
+string store(string);
+p_gram search(int, string, int);
 
-
+/* reach.c */
+void co_reach(void);
 
 #endif /* EXTERN_H_ */

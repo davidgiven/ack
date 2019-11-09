@@ -14,7 +14,7 @@ static char rcs_mh[]= ID_MH ;
  */
 
 void
-con_part(sz,w) register sz; word w; {
+con_part(int sz, word w) {
 
 	while (part_size % sz)
 		part_size++;

@@ -52,12 +52,12 @@ lab_id lastlid = 0;
 offset mespar = UNKNOWN_SIZE;
 /* argumument of ps_par message of current procedure */
 
-extern process_lines();
-extern int readline();
-extern line_p readoperand();
-extern line_p inpseudo();
+STATIC void process_lines(FILE *);
+STATIC int readline(short *, line_p *);
+STATIC line_p readoperand(short);
+STATIC line_p inpseudo(short);
 
-main(argc, argv) int argc;
+int main(argc, argv) int argc;
 char* argv[];
 {
 	/* The input files must be legal EM Compact
@@ -133,7 +133,7 @@ char* argv[];
 #define END_INSTR 4
 #define DELETED_INSTR 5
 
-STATIC add_end()
+STATIC void add_end()
 {
 	/* Add an end-pseudo to the current instruction list */
 
@@ -142,7 +142,7 @@ STATIC add_end()
 	lastline->l_instr = ps_end;
 }
 
-process_lines(fout)
+STATIC void process_lines(fout)
     FILE* fout;
 {
 	line_p lnp;
@@ -235,8 +235,7 @@ process_lines(fout)
 	}
 }
 
-int readline(instr_out, lnp_out) short* instr_out;
-line_p* lnp_out;
+STATIC int readline(short *instr_out, line_p *lnp_out)
 {
 	register line_p lnp;
 	short n;
@@ -310,7 +309,7 @@ line_p* lnp_out;
 	/* NOTREACHED */
 }
 
-line_p readoperand(instr) short instr;
+STATIC line_p readoperand(short instr)
 {
 	/* Read the operand of the given instruction.
 	 * Create a line struct and return a pointer to it.
@@ -432,7 +431,7 @@ static char* hol_label()
 	return lastname;
 }
 
-line_p inpseudo(n) short n;
+STATIC line_p inpseudo(short n)
 {
 	int m;
 	line_p lnp;

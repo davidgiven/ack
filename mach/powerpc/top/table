@@ -4,6 +4,13 @@
 MAXOP 5;
 LABEL_STARTER '.';
 
+{
+int not_using_sp(const char *);
+int positive(const char *);
+int lift(const char *);
+int plus(const char *, const char *, char *);
+}
+
 %%;
 
 L1, L2, L3, L4, L5  { not_using_sp(VAL) };
@@ -160,7 +167,7 @@ static int liftcmp(const void *a, const void *b) {
 int lift(const char *s) {
 	return bsearch(&s, liftables,
 	    sizeof(liftables) / sizeof(liftables[0]),
-	    sizeof(liftables[0]), liftcmp);
+	    sizeof(liftables[0]), liftcmp) != NULL;
 }
 
 
@@ -170,7 +177,7 @@ static int fits16(long l) {
 }
 
 /* Tries sum = a + b with signed 16-bit integers. */
-int plus(const char *a, const char *b, const char *sum)
+int plus(const char *a, const char *b, char *sum)
 {
 	long la, lb, lsum;
 	char *end;

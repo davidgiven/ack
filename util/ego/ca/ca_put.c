@@ -11,6 +11,7 @@
 #include <em_mes.h>
 #include "../share/types.h"
 #include "ca.h"
+#include "ca_put.h"
 #include "../share/debug.h"
 #include "../share/def.h"
 #include "../share/map.h"
@@ -22,18 +23,18 @@ FILE *outfile;
 
 STATIC proc_p thispro;
 
-STATIC outinst(m) {
+STATIC void outinst(int m) {
 
 	outbyte( (byte) m );
 }
 
-STATIC coutshort(i) short i; {
+STATIC void coutshort(short i) {
 
 	outbyte( (byte) (i&BMASK) );
 	outbyte( (byte) (i>>8) );
 }
 
-STATIC coutint(i) short i; {
+STATIC void coutint(short i) {
 
 	if (i>= -sp_zcst0 && i< sp_ncst0-sp_zcst0)
 		outbyte( (byte) (i+sp_zcst0+sp_fcst0) );
@@ -43,7 +44,7 @@ STATIC coutint(i) short i; {
 	}
 }
 
-STATIC coutoff(off) offset off; {
+STATIC void coutoff(offset off) {
 
 	if ((short) off == off)
 		coutint((short) off);
@@ -55,9 +56,7 @@ STATIC coutoff(off) offset off; {
 }
 
 
-STATIC outsym(s,t)
-	char *s;
-	int t;
+STATIC void outsym(const char *s, int t)
 {
 	register byte *p;
 	register unsigned num;
@@ -85,21 +84,19 @@ STATIC outsym(s,t)
 }
 
 
-STATIC outdsym(dbl)
-	dblock_p dbl;
+STATIC void outdsym(dblock_p dbl)
 {
 	if (dnames[dbl->d_id]) outsym(dnames[dbl->d_id],sp_dnam);
 }
 
 
-STATIC outpsym(p)
-	proc_p p;
+STATIC void outpsym(proc_p p)
 {
 	outsym(pnames[p->p_id],sp_pnam);
 }
 
 
-STATIC outddef(id) short id; {
+STATIC void outddef(short id) {
 
 	dblock_p dbl;
 
@@ -111,7 +108,7 @@ STATIC outddef(id) short id; {
 	}
 }
 
-STATIC outpdef(p) proc_p p; {
+STATIC void outpdef(proc_p p) {
 	p->p_flags2 |= PF_SYMOUT;
 	if (p->p_flags1 & PF_EXTERNAL) {
 		outinst(ps_exp);
@@ -120,7 +117,7 @@ STATIC outpdef(p) proc_p p; {
 }
 
 
-STATIC outdocc(obj) obj_p obj; {
+STATIC void outdocc(obj_p obj) {
 	dblock_p dbl;
 
 	dbl = obj->o_dblock;
@@ -135,7 +132,7 @@ STATIC outdocc(obj) obj_p obj; {
 }
 
 
-STATIC outpocc(p) proc_p p; {
+STATIC void outpocc(proc_p p) {
 	if ((p->p_flags2 & PF_SYMOUT) == 0) {
 		p->p_flags2 |= PF_SYMOUT;
 		if ((p->p_flags1 & PF_EXTERNAL) == 0) {
@@ -146,8 +143,7 @@ STATIC outpocc(p) proc_p p; {
 }
 
 
-STATIC coutobject(obj)
-	obj_p obj;
+STATIC void coutobject(obj_p obj)
 {
 	/* In general, an object is defined by a global data
 	 * label and an offset. There are two special cases:
@@ -169,7 +165,7 @@ STATIC coutobject(obj)
 }
 
 
-STATIC cputstr(abp) register argb_p abp; {
+STATIC void cputstr(argb_p abp) {
 	register argb_p tbp;
 	register length;
 
@@ -188,8 +184,7 @@ STATIC cputstr(abp) register argb_p abp; {
 }
 
 
-STATIC outnum(n)
-	int n;
+STATIC void outnum(int n)
 {
 	if (n < 256) {
 		outbyte((byte) sp_ilb1);
@@ -201,8 +196,7 @@ STATIC outnum(n)
 }
 
 
-STATIC numlab(n)
-	int n;
+STATIC void numlab(int n)
 {
 	if (n < sp_nilb0) {
 		outbyte((byte) (n + sp_filb0));
@@ -212,8 +206,7 @@ STATIC numlab(n)
 }
 
 
-STATIC cputargs(lnp)
-	line_p lnp;
+STATIC void cputargs(line_p lnp)
 {
 	register arg_p ap;
 	int cnt = 0;
@@ -264,8 +257,7 @@ STATIC cputargs(lnp)
 
 
 
-STATIC outoperand(lnp)
-	line_p lnp;
+STATIC void outoperand(line_p lnp)
 {
 	/* Output the operand of instruction lnp */
 
@@ -320,8 +312,7 @@ STATIC outoperand(lnp)
 }
 
 
-STATIC outvisibility(lnp)
-	line_p lnp;
+STATIC void outvisibility(line_p lnp)
 {
 	/* In EM names of datalabels and procedures can be made
 	 * externally visible, so they can be used in other files.
@@ -377,9 +368,7 @@ STATIC outvisibility(lnp)
 }
 
 
-cputlines(l,lf)
-	line_p l;
-	FILE *lf;
+void cputlines(line_p l, FILE *lf)
 {
 	/* Output the lines in Campact assembly language
 	 * format.
@@ -405,13 +394,12 @@ cputlines(l,lf)
 		oldline(lnp);
 	}
 	if (lmap != (line_p *) 0) {
-		oldmap(lmap,llength);
+		oldmap((void **) lmap,llength);
 		lmap = (line_p *) 0;
 	}
 }
 
-cputmagic(lf)
-	FILE *lf;
+void cputmagic(FILE *lf)
 {
 	/* write the magic number */
 

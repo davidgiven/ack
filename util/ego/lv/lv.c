@@ -41,16 +41,16 @@ short nrvars;
 STATIC int Slv;
 STATIC bool mesgflag = FALSE;  /* Suppress generation of live/dead info */
 
-STATIC app_block();
+STATIC void app_block();
 
-STATIC clean_up()
+STATIC void clean_up()
 {
 	local_p *p;
 
 	for (p = &locals[1]; p <= &locals[nrlocals]; p++) {
 		oldlocal(*p);
 	}
-	oldmap(locals,nrlocals);
+	oldmap((void **) locals,nrlocals);
 }
 
 
@@ -137,7 +137,7 @@ STATIC bool is_def(l)
 }
 
 
-STATIC def_use(p)
+STATIC void def_use(p)
 	proc_p p;
 {
 	/* Compute DEF(b) and USE(b), for every basic block b
@@ -200,7 +200,7 @@ STATIC def_use(p)
 
 
 
-STATIC unite_ins(bbset,setp)
+STATIC void unite_ins(bbset,setp)
 	lset bbset;
 	cset *setp;
 {
@@ -218,7 +218,7 @@ STATIC unite_ins(bbset,setp)
 
 
 
-STATIC solve_lv(p)
+STATIC void solve_lv(p)
 	proc_p p;
 {
 	/* Solve the data flow equations for Live Variables,
@@ -254,7 +254,7 @@ STATIC solve_lv(p)
 }
 
 
-STATIC live_variables_analysis(p)
+STATIC void live_variables_analysis(p)
 	proc_p p;
 {
 	make_localtab(p);
@@ -264,7 +264,7 @@ STATIC live_variables_analysis(p)
 }
 
 
-STATIC init_live_dead(b)
+STATIC void init_live_dead(b)
 	bblock_p b;
 {
 	/* For every register variable, see if it is
@@ -313,7 +313,7 @@ STATIC line_p make_mesg(mesg,loc)
 
 
 
-STATIC block_entry(b,prev)
+STATIC void block_entry(b,prev)
 	bblock_p b,prev;
 {
 	short v,vn;
@@ -345,7 +345,7 @@ STATIC block_entry(b,prev)
 
 
 
-STATIC app_block(l,b)
+STATIC void app_block(l,b)
 	line_p l;
 	bblock_p b;
 {
@@ -369,7 +369,7 @@ STATIC app_block(l,b)
 
 
 
-STATIC definition(l,useless_out,v_out,mesgflag)
+STATIC void definition(l,useless_out,v_out,mesgflag)
 	line_p l;
 	bool *useless_out;
 	short *v_out;
@@ -420,7 +420,7 @@ STATIC definition(l,useless_out,v_out,mesgflag)
 
 
 
-STATIC use(l,mesgflag)
+STATIC void use(l,mesgflag)
 	line_p l;
 	bool mesgflag;
 {
@@ -451,7 +451,7 @@ STATIC use(l,mesgflag)
 STATIC void nothing(line_p l1, line_p l2, offset size)
 { }  /* No action to be undertaken at level 0 of parser */
 
-STATIC rem_code(l1,l2,b)
+STATIC void rem_code(l1,l2,b)
 	line_p l1,l2;
 	bblock_p b;
 {
@@ -481,9 +481,7 @@ STATIC rem_code(l1,l2,b)
 
 
 
-lv_mesg(p,mesgflag)
-	proc_p p;
-	bool mesgflag;
+STATIC void lv_mesg(proc_p p, bool mesgflag)
 {
 	/* Create live/dead messages for every possible register
 	 * variable of p. A dead-message is put after a "use" of
@@ -553,8 +551,7 @@ OUTVERBOSE("useless assignment ,proc %d,local %d", curproc->p_id,
 }
 
 
-STATIC lv_extend(p)
-	proc_p p;
+STATIC void lv_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
@@ -566,8 +563,7 @@ STATIC lv_extend(p)
 }
 
 
-STATIC lv_cleanup(p)
-	proc_p p;
+STATIC void lv_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 
@@ -610,7 +606,7 @@ void lv_optimize(void *vp)
 
 
 
-main(argc,argv)
+int main(argc,argv)
 	int argc;
 	char *argv[];
 {

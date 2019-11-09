@@ -216,7 +216,7 @@ static void add_exponent(register flt_arith *e, int exp)
 	flt_status = status;
 }
 
-void flt_str2flt(char *s, flt_arith *e)
+void flt_str2flt(const char *s, flt_arith *e)
 {
 	register int	c;
 	int		dotseen = 0;

@@ -47,9 +47,7 @@ STATIC line_p fetch_text(lf,c)
 
 
 
-line_p scan_to_cal(lines,n)
-	line_p lines;
-	short  n;
+line_p scan_to_cal(line_p lines, short n)
 {
 	/* Find the n-th CAL instruction */
 
@@ -65,7 +63,7 @@ line_p scan_to_cal(lines,n)
 
 
 
-substitute(lf,c,cal,firstline)
+void substitute(lf,c,cal,firstline)
 	FILE *lf;
 	call_p c;
 	line_p cal,firstline;

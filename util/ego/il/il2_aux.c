@@ -17,6 +17,7 @@
 #include "../share/debug.h"
 #include "../share/alloc.h"
 #include "../share/global.h"
+#include "../share/cset.h"
 #include "../share/lset.h"
 #include "il_aux.h"
 #include "il2_aux.h"
@@ -34,6 +35,9 @@
 #define CHANGED(p)	p->p_flags2 |= PF_CHANGED
 #define IS_CHANGED(p)	(p->p_flags2 & PF_CHANGED)
 
+#ifdef VERBOSE
+STATIC void Sstat(proc_p proclist, long space);
+#endif
 
 
 STATIC bool match_pars(fm,act)
@@ -220,7 +224,7 @@ STATIC short param_score(c)
 
 
 
-assign_ratio(c)
+void assign_ratio(c)
 	call_p c;
 {
 	/* This routine is one of the most important ones
@@ -289,7 +293,7 @@ call_p abstract(c)
 
 
 
-STATIC adjust_counts(callee,ccf)
+STATIC void adjust_counts(callee,ccf)
 	proc_p callee;
 	FILE   *ccf;
 {
@@ -389,7 +393,7 @@ STATIC call_p find_origin(c)
 
 
 
-STATIC selected(a)
+STATIC void selected(a)
 	call_p a;
 {
 	/* The call a is selected for in line expansion.
@@ -406,7 +410,7 @@ STATIC selected(a)
 
 
 
-STATIC compare(x,best,space)
+STATIC void compare(x,best,space)
 	call_p x, *best;
 	long  space;
 {
@@ -450,7 +454,7 @@ STATIC call_p best_one(list,space)
 
 
 
-STATIC singles(cals)
+STATIC void singles(cals)
 	call_p cals;
 {
 	/* If a procedure is only called once, this call
@@ -486,7 +490,7 @@ STATIC singles(cals)
 
 
 
-STATIC single_calls(proclist)
+STATIC void single_calls(proclist)
 	proc_p proclist;
 {
 	proc_p p;
@@ -505,7 +509,7 @@ STATIC single_calls(proclist)
 
 
 
-select_calls(proclist,ccf,space)
+void select_calls(proclist,ccf,space)
 	proc_p proclist;
 	FILE   *ccf;
 	long space ;
@@ -549,7 +553,7 @@ select_calls(proclist,ccf,space)
 
 
 
-STATIC nonnested_calls(cfile)
+STATIC void nonnested_calls(cfile)
 	FILE *cfile;
 {
 	register call_p c,a;
@@ -569,7 +573,7 @@ STATIC nonnested_calls(cfile)
 
 
 
-STATIC copy_pars(src,dest)
+STATIC void copy_pars(src,dest)
 	call_p src, dest;
 {
 	/* Copy the actual parameters of src to dest. */
@@ -589,7 +593,7 @@ STATIC copy_pars(src,dest)
 
 
 
-STATIC nest_pars(cals)
+STATIC void nest_pars(cals)
 	call_p cals;
 {
 	/* Recursive auxiliary procedure of add_actuals. */
@@ -607,7 +611,7 @@ STATIC nest_pars(cals)
 
 
 
-add_actuals(proclist,cfile)
+void add_actuals(proclist,cfile)
 	proc_p proclist;
 	FILE   *cfile;
 {
@@ -633,7 +637,7 @@ add_actuals(proclist,cfile)
 
 
 
-STATIC clean(cals)
+STATIC void clean(cals)
 	call_p *cals;
 {
 	call_p c,next,*cpp;
@@ -655,7 +659,7 @@ STATIC clean(cals)
 }
 
 
-cleancals(proclist)
+void cleancals(proclist)
 	proc_p proclist;
 {
 	/* Remove all calls in the P_CALS list of p
@@ -672,7 +676,7 @@ cleancals(proclist)
 
 
 
-append_abstract(a,p)
+void append_abstract(a,p)
 	call_p a;
 	proc_p p;
 {
@@ -698,7 +702,7 @@ append_abstract(a,p)
  */
 
 
-Sstatist(list,space)
+STATIC void Sstatist(list,space)
 	call_p list;
 	long space;
 {
@@ -717,7 +721,7 @@ Sstatist(list,space)
 	}
 }
 
-Sstat(proclist,space)
+STATIC void Sstat(proclist,space)
 	proc_p proclist;
 	long space;
 {

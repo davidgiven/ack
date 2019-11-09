@@ -24,6 +24,7 @@ cprogram {
 		"modules/src/em_data+lib",
 		"h+emheaders",
 		"+itemtab_h",
+		"./ra*.h",
 	},
 	vars = {
 		["+cflags"] = {"-DVERBOSE", "-DNOTCOMPACT"}

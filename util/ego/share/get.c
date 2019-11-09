@@ -136,7 +136,7 @@ STATIC lset getlset(void *(*p)(short))
 	int id;
 
 	s = Lempty_set();
-	while (id = getshort()) {
+	while ((id = getshort()) != 0) {
 		Ladd( (*p) (id), &s);
 	}
 	return s;

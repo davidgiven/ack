@@ -5,7 +5,6 @@
 /* $Id$ */
 #ifdef LL_DEBUG
 #include <assert.h>
-#include <stdio.h>
 #define LL_assert(x)	assert(x)
 #else
 #define LL_assert(x)	/* nothing */

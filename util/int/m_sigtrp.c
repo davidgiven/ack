@@ -12,6 +12,7 @@
 #include	"trap.h"
 #include	"m_sigtrp.h"
 #include	"io.h"
+#include	"whatever.h"
 
 /*************************** SIGTRP *************************************
  *  The monitor call "sigtrp()" is handled by "do_sigtrp()".  The first	*

@@ -16,23 +16,24 @@ extern short nrcopies;		/* number of copies in the current procedure
 				 * (length of copies-table)
 				 */
 
-extern copy_analysis();		/* (proc_p p)
+void copy_analysis(proc_p p);	/*
 				 * Determine which copies procedure p has.
 				 * Compute C_IN(b), for every basic block b.
 				 */
-extern bool is_copy();		/* (line_p def)
+bool is_copy(line_p def);	/*
 				 * See if the definition def is also a 'copy',
 				 * i.e. an statement of the form
 				 * 'A := B' (or, in EM terminology:
 				 * a sequence 'Load Variable; Store Variable').
 				 */
-extern fold_var();		/* (line_p old,new; bblock_p b)
+void fold_var(line_p old, line_p new, bblock_p b);
+				/*
 				 * The variable referenced by the
 				 * EM instruction 'old' must be replaced
 				 * by the variable referenced by 'new'.
 				 */
-extern bool value_retained();	/* (line_p copy; short defnr; line_p use;
-				 * bblock_p b)
+bool value_retained(line_p copy, short defnr, line_p use, bblock_p b);
+				/*
 				 * See if the right hand side variable of the
 				 * copy still has the same value at 'use'.
 				 * If the copy and the use are in the same

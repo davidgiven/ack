@@ -14,3 +14,10 @@ struct queue_t {
 #define qhead(q)	(q)->head
 #define qlength(q)	(q)->qlen
 #define next(x)		(x)->fw
+
+void empty_queue(queue);
+int empty(queue);
+void remove_head(queue);
+void add(queue, instr_p);
+void insert(queue, instr_p);
+void join_queues(queue, queue);

@@ -9,10 +9,10 @@
 #define newilb(x)       fprintf(codefile,"%s:\n",x)
 #define newdlb(x)       fprintf(codefile,"%s:\n",x)
 #define dlbdlb(x,y)     fprintf(codefile,"%s = %s\n",x,y)
-#define newlbss(l,x)       fprintf(codefile,".comm %s,%u\n",l,x);
+#define newlbss(l,x)       fprintf(codefile,".comm %s,%ld\n",l,x);
 
-#define cst_fmt         "%d"
-#define off_fmt         "%d"
+#define cst_fmt         "%ld"
+#define off_fmt         "%ld"
 #define ilb_fmt         "I%x_%x"
 #define dlb_fmt         "_%d"
 #define hol_fmt         "hol%d"

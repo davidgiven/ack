@@ -11,6 +11,7 @@
 #include	"mem.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 PRIVATE void bit_test(size), create_set(size);
 

@@ -70,7 +70,7 @@ formal_p find_formal(p,type,off)
 
 
 
-STATIC no_inl_pars(p)
+STATIC void no_inl_pars(p)
 	proc_p p;
 {
 	/* p may not have any in line parameters */
@@ -81,7 +81,7 @@ STATIC no_inl_pars(p)
 
 
 
-STATIC inc_use(f,b)
+STATIC void inc_use(f,b)
 	formal_p f;
 	bblock_p b;
 {

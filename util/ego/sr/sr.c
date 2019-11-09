@@ -23,6 +23,7 @@
 #include "../share/utils.h"
 #include "sr_aux.h"
 #include "sr_iv.h"
+#include "sr_reduce.h"
 
 /* Strength reduction tries to change expensive operators occurring
  * in a loop into cheaper operators. The expensive operators considered
@@ -69,7 +70,7 @@ void sr_machinit(void *vp)
 	fscanf(f,"%d",&sli_threshold);
 }
 
-STATIC del_ivs(ivs)
+STATIC void del_ivs(ivs)
 	lset ivs;
 {
 	/* Delete the set of iv structs */
@@ -83,7 +84,7 @@ STATIC del_ivs(ivs)
 }
 
 
-STATIC do_loop(loop)
+STATIC void do_loop(loop)
 	loop_p loop;
 {
 	lset ivs, vars;
@@ -111,7 +112,7 @@ STATIC do_loop(loop)
 
 
 
-STATIC loopblocks(p)
+STATIC void loopblocks(p)
 	proc_p p;
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
@@ -129,7 +130,7 @@ STATIC loopblocks(p)
 
 
 
-STATIC opt_proc(p)
+STATIC void opt_proc(p)
 	proc_p p;
 {
 	/* Optimize all loops of one procedure. We first do all
@@ -182,7 +183,7 @@ STATIC bblock_p header(lp)
 
 
 
-STATIC sr_extproc(p)
+STATIC void sr_extproc(p)
 	proc_p p;
 {
 	/* Allocate the extended data structures for procedure p */
@@ -202,7 +203,7 @@ STATIC sr_extproc(p)
 }
 
 
-STATIC sr_cleanproc(p)
+STATIC void sr_cleanproc(p)
 	proc_p p;
 {
 	/* Remove the extended data structures for procedure p */
@@ -232,7 +233,7 @@ void sr_optimize(void *vp)
 
 
 
-main(argc,argv)
+int main(argc,argv)
 	int argc;
 	char *argv[];
 {

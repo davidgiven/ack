@@ -68,7 +68,7 @@ STATIC void localvar(offset off, short size, local_p *locs, bool reg,
 
 
 
-STATIC check_message(line_p l, local_p *locs)
+STATIC void check_message(line_p l, local_p *locs)
 {
 	/* See if l is a register message */
 

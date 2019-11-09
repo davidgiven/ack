@@ -14,6 +14,7 @@
 #include	"trap.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 #ifdef	LOGGING
 extern int must_test;

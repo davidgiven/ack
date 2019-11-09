@@ -18,9 +18,7 @@
 #include "ra_aux.h"
 #include "ra_profits.h"
 
-STATIC bool test_cond(cond,val)
-	short cond;
-	offset val;
+STATIC bool test_cond(short cond, offset val)
 {
 	switch(cond) {
 		case DEFAULT:
@@ -34,10 +32,7 @@ STATIC bool test_cond(cond,val)
 	}
 }
 
-STATIC short map_value(tab,val,time)
-	struct cond_tab tab[];
-	offset val;
-	bool time;
+STATIC short map_value(struct cond_tab tab[], offset val, bool time)
 {
 	cond_p p;
 
@@ -49,10 +44,7 @@ STATIC short map_value(tab,val,time)
 }
 
 
-STATIC short index_value(tab,n,time)
-	struct cond_tab tab[];
-	short n;
-	bool time;
+STATIC short index_value(struct cond_tab tab[], short n, bool time)
 {
 	cond_p p;
 
@@ -61,16 +53,15 @@ STATIC short index_value(tab,n,time)
 }
 
 
-allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out) 
-	short itemtyp, localtyp,totyp,size;
-	offset off;
-	short *time_out, *space_out;
+STATIC void
+allocscore(short itemtyp, short localtyp, short size, offset off,
+	   short totyp, short *time_out, short *space_out) 
 {
 	cond_p m = (cond_p) 0;
 
 	if (localtyp == reg_loop) localtyp = reg_any;
-	if (size == ws || size == ps && totyp == reg_pointer ||
-	    size == 2 * ws && totyp == reg_float) {
+	if (size == ws || (size == ps && totyp == reg_pointer) ||
+	    (size == 2 * ws && totyp == reg_float)) {
 		switch(itemtyp) {
 		   case LOCALVAR:
 			m = alocaltab[localtyp][totyp];
@@ -103,10 +94,9 @@ allocscore(itemtyp,localtyp,size,off,totyp,time_out,space_out)
 	*/
 }
 
-opening_cost(itemtyp,localtyp,off,time_out,space_out) 
-	short itemtyp, localtyp;
-	offset off;
-	short *time_out, *space_out;
+STATIC void
+opening_cost(short itemtyp, short localtyp, offset off,
+	     short *time_out, short *space_out) 
 {
 	cond_p m;
 
@@ -142,8 +132,7 @@ opening_cost(itemtyp,localtyp,off,time_out,space_out)
 
 
 
-regsave_cost(regs,time_out,space_out)
-	short regs[], *time_out, *space_out;
+void regsave_cost(short regs[], short *time_out, short *space_out)
 {
 	/* Estimate the costs of saving and restoring the registers
 	 * The array regs contains the number of registers of every
@@ -178,9 +167,7 @@ STATIC short dyn_inits(inits)
 
 
 
-compute_profits(alloclist,time_opt)
-	alloc_p alloclist;
-	bool time_opt;
+void compute_profits(alloc_p alloclist, bool time_opt)
 {
 	/* Compute the profits attribute of every allocation.
 	 * If the item of an allocation may be put in several types

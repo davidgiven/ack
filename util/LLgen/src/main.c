@@ -33,14 +33,6 @@ STATIC void readgrammar(int, char *[]);
 STATIC void doparse(register p_file);
 STATIC void comfatal(void);
 
-extern void UNLINK(string);
-extern void RENAME(string, string);
-extern void TMPNAM(string);
-extern string libpath(string);
-extern void conflchecks(void);
-extern void do_compute(void);
-extern void gencode(int);
-
 int main(int argc, register string argv[])
 {
 	register string arg;
@@ -210,8 +202,8 @@ int main(int argc, register string argv[])
 	}
 	else
 		gencode(argc);
-	UNLINK(f_temp);
-	UNLINK(f_pars);
+	remove(f_temp);
+	remove(f_pars);
 	if (verbose)
 	{
 		fprintf(stderr, "number of nonterminals: %d\n", nnonterms);
@@ -235,7 +227,7 @@ STATIC void readgrammar(int argc, char *argv[])
 	/*
 	 * Build the file structure
 	 */
-	files = p = (p_file) alloc((unsigned) (argc + 1) * sizeof(t_file));
+	files = p = (p_file) alloc((argc + 1) * sizeof(t_file));
 	if (argc-- == 1)
 	{
 		finput = stdin;
@@ -328,11 +320,11 @@ STATIC void comfatal(void)
 	if (fact != NULL)
 	{
 		fclose(fact);
-		UNLINK(f_temp);
+		remove(f_temp);
 	}
 	if (fpars != NULL)
 		fclose(fpars);
-	UNLINK(f_pars);
+	remove(f_pars);
 	exit(EXIT_FAILURE);
 }
 

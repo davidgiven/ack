@@ -19,8 +19,7 @@
 #include "ra.h"
 #include "ra_interv.h"
 
-interv_p cons_interval(t_start,t_stop)
-	short t_start,t_stop;
+interv_p cons_interval(short t_start, short t_stop)
 {
 	interv_p x;
 
@@ -32,9 +31,7 @@ interv_p cons_interval(t_start,t_stop)
 
 
 
-add_interval(t1,t2,list)
-	short t1,t2;
-	interv_p *list;
+void add_interval(short t1, short t2, interv_p *list)
 {
 	/* Add interval (t1,t2) to the list of intervals (which is
 	 * an in-out parameter!). The list is sorted in 'chronological'
@@ -116,7 +113,7 @@ interv_p proc_lifetime(p)
 
 
 
-STATIC set_min_max(iv1,iv2)
+STATIC void set_min_max(iv1,iv2)
 	interv_p *iv1,*iv2;
 {
 	/* Auxiliary routine of intersect */
@@ -201,9 +198,7 @@ bool not_disjoint(list1,list2)
 
 
 
-bool contains(t,timespan)
-	short t;
-	interv_p timespan;
+bool contains(short t, interv_p timespan)
 {
 	register interv_p iv;
 

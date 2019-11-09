@@ -13,6 +13,7 @@
 #include	"warn.h"
 #include	"text.h"
 #include	"fra.h"
+#include	"switch.h"
 
 /************************************************************************
  *	No checking is performed, except for division by zero.		*

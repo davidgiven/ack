@@ -9,6 +9,7 @@
 #include	"global.h"
 #include	"linfil.h"
 #include	"alloc.h"
+#include	"whatever.h"
 
 struct line_tally
 { /* one for each line */

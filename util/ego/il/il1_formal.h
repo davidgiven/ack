@@ -8,8 +8,8 @@
  *  I L 1 _ F O R M A L . C
  */
 
-extern void formal();	/* (proc_p p; bblock_p b; offset off;
-			 *    int type, usage)
+void formal(proc_p p, bblock_p b, offset off, int type, int usage);
+			/*
 			 * Analyze a reference to a parameter of p.
 			 * The type denotes its size (single,double,
 			 * pointer).

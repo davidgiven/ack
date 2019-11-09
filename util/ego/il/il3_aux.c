@@ -14,7 +14,6 @@
 #include "../share/debug.h"
 #include "../share/alloc.h"
 #include "../share/global.h"
-#include "il_aux.h"
 #include "il3_aux.h"
 
 
@@ -33,7 +32,7 @@ line_p last_line(lines)
 
 
 
-app_list(list,l)
+void app_list(list,l)
 	line_p list,l;
 {
 	/* Append the list after line l */
@@ -53,7 +52,7 @@ app_list(list,l)
 
 
 
-rem_line(l)
+void rem_line(l)
 	line_p l;
 {
 	/* Remove a line from the list */

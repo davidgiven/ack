@@ -706,7 +706,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					do
 					{
 						npos = exactmatch = 0;
-						for (rpp = reglist[propno]; rp = *rpp; rpp++)
+						for (rpp = reglist[propno]; (rp = *rpp) != NULL; rpp++)
 							if (getrefcount((int)(rp - machregs), FALSE) == 0)
 							{
 								pos[npos++] = rp - machregs;

@@ -4,6 +4,7 @@
    optimizer itself one day ...
 */
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -121,14 +122,15 @@ cleanup()
 }
 
 /*VARARGS1*/
-static void
-    fatal(s, s2) char* s;
-char* s2;
+static void fatal(const char *s, ...)
 {
 	/*	A fatal error occurred; exit gracefully */
 
+	va_list ap;
+	va_start(ap, s);
+
 	fprint(STDERR, "%s: ", prog_name);
-	fprint(STDERR, s, s2);
+	doprnt(STDERR, s, ap);
 	fprint(STDERR, "\n");
 	cleanup();
 	sys_stop(S_EXIT);

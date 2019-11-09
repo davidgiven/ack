@@ -184,12 +184,12 @@ void olddblock(dblock_p dbl) {
 }
 
 
-short **newmap(short length) {
-	return((short **) newcore((length+1) * sizeof(short *)));
+void **newmap(short length) {
+	return(newcore((length+1) * sizeof(short *)));
 }
 
 /*ARGSUSED1*/
-void oldmap(short **mp, short length) {
+void oldmap(void **mp, short length) {
 	oldcore(mp, (length+1) * sizeof(short *));
 }
 
@@ -213,7 +213,7 @@ short *newtable(short length) {
 }
 
 /*ARGSUSED1*/
-void oldtable(short **mp, short length) {
+void oldtable(short *mp, short length) {
 	oldcore(mp, (length+1) * sizeof(short));
 }
 

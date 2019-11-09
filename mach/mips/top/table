@@ -4,6 +4,10 @@
 MAXOP 5;
 LABEL_STARTER '.';
 
+{
+int plus(const char *, const char *, char *);
+}
+
 %%;
 
 X, Y, Z                      { TRUE };
@@ -27,7 +31,7 @@ static int fits16(long l) {
 }
 
 /* Tries sum = a + b with signed 16-bit integers. */
-int plus(const char *a, const char *b, const char *sum)
+int plus(const char *a, const char *b, char *sum)
 {
         long la, lb, lsum;
         char *end;

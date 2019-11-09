@@ -19,7 +19,6 @@
 
 #include <string.h>
 #include <stdio.h>
-# include "alloc.h"
 # include "types.h"
 # include "extern.h"
 # include "assert.h"

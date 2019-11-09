@@ -64,6 +64,9 @@ typedef struct
 
 /* Own routines */
 
+/* files.h */
+extern void rmtemps(void);
+
 /* rmach.c */
 extern void setlist(char*);
 
@@ -80,6 +83,7 @@ extern void fatal(const char*, ...);
 extern void vprint(const char*, ...);
 extern void fuerror(const char*, ...);
 extern void werror(const char*, ...);
+extern void error(const char*, ...);
 extern void quit(int);
 extern char* keeps(const char*);
 #define throws(str) free(str)

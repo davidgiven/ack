@@ -12,6 +12,7 @@
 #include	"text.h"
 #include	"fra.h"
 #include	"warn.h"
+#include	"switch.h"
 
 /** STL l: Store local or parameter */
 void DoSTL(register long l)

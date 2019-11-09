@@ -8,14 +8,16 @@
  *  I L 1 _ A N A L . H
  */
 
-extern apriori();      /* (proc_p proctab)
+void apriori(proc_p proctab);
+		       /*
 			* For every procedure, see if we can determine
 	 		* from the information provided by the previous
 	 		* phases of the optimizer that it cannot or should not
 	 		* be expanded in line. This will reduce the length
 	 		* of the call list.
 	 		*/
-extern anal_proc();    /* (proc_p p, FILE *cf, *cff)
+void anal_proc(proc_p p, FILE *cf, FILE *cff);
+		       /*
 			* Analyse a procedure. See which formal parameters
 			* it uses and which procedures it calls.
 			* cf and ccf are the call-file and the call-count file.

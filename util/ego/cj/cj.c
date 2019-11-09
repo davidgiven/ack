@@ -134,7 +134,7 @@ STATIC bool is_desirable(text)
 }
 
 
-STATIC cp_loops(b1,b2)
+STATIC void cp_loops(b1,b2)
 	bblock_p b1,b2;
 {
 	/* Copy the loopset of b2 to b1 */
@@ -149,7 +149,7 @@ STATIC cp_loops(b1,b2)
 }
 
 
-STATIC jump_cross(l1,l2,b1,b2)
+STATIC void jump_cross(l1,l2,b1,b2)
 	line_p l1,l2;
 	bblock_p b1,b2;
 {
@@ -317,7 +317,7 @@ void cj_optimize(void *vp)
 }
 
 
-main(argc,argv)
+int main(argc,argv)
 	int argc;
 	char *argv[];
 {

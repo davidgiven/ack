@@ -76,7 +76,7 @@ STATIC bool is_same(l,lnp)
 }
 
 
-STATIC ivar(lnp,step)
+STATIC void ivar(lnp,step)
 	line_p	lnp;
 	int	step;
 {
@@ -153,7 +153,7 @@ STATIC void try_patterns(lnp)
 }
 
 
-induc_vars(loop,ivar_out, vars_out)
+void induc_vars(loop,ivar_out, vars_out)
 	loop_p loop;
 	lset   *ivar_out, *vars_out;
 {

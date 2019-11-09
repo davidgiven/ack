@@ -66,7 +66,7 @@ line_p move_pointer(tmp,dir)
 
 /* make_header */
 
-STATIC copy_loops(b1,b2,except)
+STATIC void copy_loops(b1,b2,except)
 	bblock_p b1,b2;
 	loop_p except;
 {
@@ -108,7 +108,7 @@ STATIC lab_id label(b)
 }
 
 
-STATIC adjust_jump(newtarg,oldtarg,c)
+STATIC void adjust_jump(newtarg,oldtarg,c)
 	bblock_p newtarg,oldtarg,c;
 {
 	/* If the last instruction of c is a jump to the

@@ -15,6 +15,7 @@
 #include	"stack.h"
 #include	"fra.h"
 #include	"warn.h"
+#include	"switch.h"
 
 PRIVATE long inc(long), dec(long);
 

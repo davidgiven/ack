@@ -785,7 +785,7 @@ static void verbose(void)
 	fprintf(stderr, "Sets %d(%d)\n", nmachsets, MAXSETS);
 	fprintf(stderr, "Tokeninstances %d(%d)\n", narinstance, MAXINSTANCE);
 	fprintf(stderr, "Strings %d(%d)\n", ncodestrings, MAXSTRINGS);
-	fprintf(stderr, "Enodes %d(%d)\n", lastnode - nodes, MAXNODES);
+	fprintf(stderr, "Enodes %d(%d)\n", (int)(lastnode - nodes), MAXNODES);
 	fprintf(stderr, "Patbytes %d(%d)\n", npatbytes, MAXPATTERN);
 }
 

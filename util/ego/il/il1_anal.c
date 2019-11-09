@@ -15,6 +15,7 @@
 #include "il.h"
 #include "../share/debug.h"
 #include "../share/alloc.h"
+#include "../share/cset.h"
 #include "../share/global.h"
 #include "../share/lset.h"
 #include "../share/utils.h"
@@ -38,7 +39,7 @@
 
 
 
-apriori(proctab)
+void apriori(proctab)
 	proc_p proctab;
 {
 	/* For every procedure, see if we can determine
@@ -68,7 +69,7 @@ apriori(proctab)
 }
 
 
-STATIC check_labels(p,arglist)
+STATIC void check_labels(p,arglist)
 	proc_p p;
 	arg_p arglist;
 {
@@ -91,7 +92,7 @@ STATIC check_labels(p,arglist)
 
 
 
-STATIC anal_instr(p,b,cf)
+STATIC void anal_instr(p,b,cf)
 	proc_p   p;
 	bblock_p b;
 	FILE     *cf;
@@ -152,7 +153,7 @@ STATIC anal_instr(p,b,cf)
 
 
 
-anal_proc(p,cf,ccf)
+void anal_proc(p,cf,ccf)
 	proc_p p;
 	FILE   *cf,*ccf;
 {

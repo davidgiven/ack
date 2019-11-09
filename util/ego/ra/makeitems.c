@@ -3,7 +3,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
- 
+
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,16 +21,20 @@
  */
 
 
-#define TRUE  1
-#define FALSE 0
+void error(const char *s)
+{
+	fprintf(stderr,"%s\n",s);
+	exit(-1);
+}
 
-convert(mnemfile,itemfile)
-	FILE *mnemfile, *itemfile;
+
+void convert(FILE *mnemfile, FILE *itemfile)
 {
 	char mnem1[20], mnem2[20],def[20],itemtype[20];
-	int newcl,opc,index;
+	int opc,index;
+	bool newcl;
 
-	newcl = TRUE;
+	newcl = true;
 	printf("struct item_descr itemtab[] = {\n");
 	for (;;) {
 		fscanf(mnemfile,"%19s%19s%d",def,mnem1,&opc);
@@ -47,28 +52,17 @@ convert(mnemfile,itemfile)
 			 * it has no type.
 			 */
 			printf("{NO_ITEM,0}, /* %s */\n", mnem1);
-			newcl = FALSE;
+			newcl = false;
 		} else {
 			printf("{%s,%d}, /* %s */\n",itemtype,index, mnem1);
-			newcl = TRUE;
+			newcl = true;
 		}
 	}
 	printf("};\n");
 }
 
 
-
-error(s)
-	char *s;
-{
-	fprintf(stderr,"%s\n",s);
-	exit(-1);
-}
-
-
-main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc, char *argv[])
 {
 	FILE *f1,*f2;
 

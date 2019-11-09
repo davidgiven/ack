@@ -55,7 +55,7 @@ STATIC int regtyp(code)
 }
 
 
-STATIC gen_regmes(tmp,score,code,p)
+STATIC void gen_regmes(tmp,score,code,p)
 	offset tmp;
 	int score;
 	code_p code;
@@ -121,7 +121,7 @@ STATIC line_p newcode(code,tmp)
 
 
 
-STATIC replcode(code,text)
+STATIC void replcode(code,text)
 	code_p code;
 	line_p text;
 {
@@ -171,7 +171,7 @@ STATIC line_p add_code(pl, l)
 
 
 
-STATIC init_code(code,tmp)
+STATIC void init_code(code,tmp)
 	code_p code;
 	offset tmp;
 {
@@ -239,7 +239,7 @@ STATIC init_code(code,tmp)
 	*p = l; /* new last instruction */
 }
 
-STATIC incr_code(code,tmp)
+STATIC void incr_code(code,tmp)
 	code_p  code;
 	offset  tmp;
 {
@@ -322,7 +322,7 @@ STATIC incr_code(code,tmp)
 }
 
 
-STATIC remcode(c)
+STATIC void remcode(c)
 	code_p c;
 {
 	line_p l, next;
@@ -453,7 +453,7 @@ STATIC code_p available(c,vars)
 	return (code_p) 0;
 }
 
-STATIC fix_header(lp)
+STATIC void fix_header(lp)
 	loop_p lp;
 {
 	/* Check if a header block was added, and if so, add a branch to
@@ -487,7 +487,7 @@ STATIC fix_header(lp)
 	}
 }
 
-STATIC reduce(code,vars)
+STATIC void reduce(code,vars)
 	code_p code;
 	lset   vars;
 {
@@ -711,7 +711,7 @@ STATIC void try_array(lp,ivs,vars,b,arr)
 
 
 
-STATIC clean_avail()
+STATIC void clean_avail()
 {
 	Lindex i;
 
@@ -723,7 +723,7 @@ STATIC clean_avail()
 
 
 
-strength_reduction(lp,ivs,vars)
+void strength_reduction(lp,ivs,vars)
 	loop_p lp;	/* description of the loop */
 	lset    ivs;	/* set of induction variables of the loop */
 	lset	vars;	/* set of local variables changed in loop */

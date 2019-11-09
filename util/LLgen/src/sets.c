@@ -63,7 +63,7 @@ p_set get_set(void)
 	static p_set sets, maxsets;
 
 	if ((p = sets) >= maxsets) {
-		q = p = (p_set) alloc((unsigned) (50*setsize*sizeof(*sets)));
+		q = p = (p_set) alloc(50*setsize*sizeof(*sets));
 		maxsets = p + 50 * setsize;
 		do {
 			*q++ = 0;
@@ -81,7 +81,7 @@ p_set setalloc(void)
 	register p_set	p;
 	register int	size = setsize;
 
-	p = (p_set) alloc((unsigned) (size * sizeof(*p))) + size;
+	p = (p_set) alloc(size * sizeof(*p)) + size;
 	do {
 		*--p = 0;
 	} while (--size);

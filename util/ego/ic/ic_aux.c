@@ -28,8 +28,7 @@
 
 /* opr_size */
 
-offset opr_size(instr)
-	short instr;
+offset opr_size(short instr)
 {
 	switch(instr) {
 		case op_loe:
@@ -96,9 +95,7 @@ STATIC offset argsize(arg)
 }
 
 
-STATIC offset blocksize(pseudo,args)
-	byte  pseudo;
-	arg_p args;
+STATIC offset blocksize(byte pseudo, arg_p args)
 {
 	/* Determine the number of bytes of a datablock */
 
@@ -167,7 +164,7 @@ STATIC arg_p copy_rom(args)
 
 
 
-dblockdef(db,n,lnp)
+void dblockdef(db,n,lnp)
 	dblock_p db;
 	int	 n;
 	line_p	 lnp;
@@ -206,10 +203,7 @@ dblockdef(db,n,lnp)
 
 /* combine */
 
-combine(db,l1,l2,pseu)
-	dblock_p db;
-	line_p   l1,l2;
-	byte pseu;
+void combine(dblock_p db, line_p l1, line_p l2, byte pseu)
 {
 	/* Combine two successive ROMs/CONs (without a data label
 	 * in between into a single ROM. E.g.:
@@ -258,7 +252,7 @@ combine(db,l1,l2,pseu)
 
 /* arglist */
 
-STATIC arg_string(length,abp)
+STATIC void arg_string(length,abp)
 	offset  length;
 	register argb_p abp;
 {
@@ -447,10 +441,7 @@ STATIC obj_p make_object(dbl,off,size)
 
 
 
-obj_p object(ident,off,size)
-	char *ident;
-	offset off;
-	offset size;
+obj_p object(char *ident, offset off, offset size)
 {
 	dblock_p dbl;
 

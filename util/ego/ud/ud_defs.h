@@ -13,21 +13,21 @@ extern short nrexpldefs;	/* number of explicit definitions */
 extern line_p *defs;		/* map of explicit definitions */
 extern cset *vardefs;		/* set of explicit defs. of all variables */
 
-extern make_defs();		/* (proc_p p)
+void make_defs(proc_p p);	/*
 				 * Compute defs[], vardefs[]
 				 * and CHGVARS(b) (for every b).
 				 */
-extern gen_sets();		/* (proc_p p)
+void gen_sets(proc_p p);	/*
 				 * Compute GEN(b) (for every b).
 				 */
-extern kill_sets();		/* (proc_p p)
-				 *Compute KILL(b) (for every b).
+void kill_sets(proc_p p);	/*
+				 * Compute KILL(b) (for every b).
 				 */
-extern bool does_expl_def();	/* (line_p l)
+bool does_expl_def(line_p l);	/*
 				 * See if instruction l does an explicit
 				 * definition (e.g. a STL).
 				 */
-extern bool does_impl_def();	/* (line_p l)
+bool does_impl_def(line_p l);	/*
 				 * See if instruction l does an implicit
 				 * definition (e.g. a CAL).
 				 */

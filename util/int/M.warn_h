@@ -9,5 +9,10 @@ sed '
 	s/.*"/#define	/
 '
 
+echo
+echo 'void init_wmsg(void);'
+echo 'void do_warn(int, int, const char *);'
+echo 'void set_wmask(int);'
+echo
 echo '#define	warning(n)	do_warn((n), __LINE__, __FILE__)'
 

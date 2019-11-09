@@ -20,6 +20,7 @@ definerule("build_ncg",
 				"mach/proto/ncg/result.h",
 				"mach/proto/ncg/state.h",
 				"mach/proto/ncg/types.h",
+				"mach/proto/ncg/xmach.h",
 				"mach/"..e.arch.."/ncg/mach.c",
 				"mach/"..e.arch.."/ncg/*.h",
 			}

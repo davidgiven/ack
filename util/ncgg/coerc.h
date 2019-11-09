@@ -23,8 +23,7 @@ struct varinfo *gen_preturn(void);
 struct varinfo *gen_tlab(int n);
 void n_stack(int s, int e, int p, struct varinfo *vi);
 void checkstacking(register short *sp);
-/* cgg.y is buggy!!! it has one less parameter.. */
-/*void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_t in);*/
+void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_p inp);
 void checkunstacking(int setno);
 
 #endif /* COERC_H_ */

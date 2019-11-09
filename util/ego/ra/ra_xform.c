@@ -77,8 +77,7 @@ struct repl repl_tab[NRREPLACEMENTS][REPL_LENGTH] = {
 
 
 
-init_replacements(psize,wsize)
-	short psize,wsize;
+void init_replacements(short psize, short wsize)
 {
 	/* The replacement code to be generated depends on the
 	 * wordsize and pointer size of the target machine.
@@ -137,9 +136,7 @@ STATIC int repl_index(l)
 
 
 
-STATIC bool is_current(alloc,t)
-	alloc_p alloc;
-	short t;
+STATIC bool is_current(alloc_p alloc, short t)
 {
 	/* Is time t part of alloc's timespan? */
 
@@ -147,7 +144,7 @@ STATIC bool is_current(alloc,t)
 }
 
 
-STATIC match_item(item,l)
+STATIC bool match_item(item,l)
 	item_p item;
 	line_p l;
 {
@@ -188,7 +185,7 @@ STATIC alloc_p find_alloc(alloclist,l,t)
 }
 
 
-STATIC replace_line(l,b,list)
+STATIC void replace_line(l,b,list)
 	line_p l,list;
 	bblock_p b;
 {
@@ -245,7 +242,7 @@ STATIC line_p repl_code(lnp,regnr)
 
 
 
-STATIC apply_alloc(b,l,alloc)
+STATIC void apply_alloc(b,l,alloc)
 	bblock_p b;
 	line_p l;
 	alloc_p alloc;
@@ -355,7 +352,7 @@ STATIC line_p init_place(b)
 
 
 
-STATIC append_code(l1,l2,b)
+STATIC void append_code(l1,l2,b)
 	line_p l1,l2;
 	bblock_p b;
 {
@@ -380,7 +377,7 @@ STATIC append_code(l1,l2,b)
 
 
 
-STATIC emit_init_code(list)
+STATIC void emit_init_code(list)
 	alloc_p list;
 {
 	/* Emit initialization code for all packed allocations.
@@ -409,7 +406,7 @@ STATIC emit_init_code(list)
 
 
 
-STATIC emit_mesregs(p,alloclist)
+STATIC void emit_mesregs(p,alloclist)
 	proc_p  p;
 	alloc_p alloclist;
 {
@@ -432,7 +429,7 @@ STATIC emit_mesregs(p,alloclist)
 
 
 
-rem_mes(p)
+STATIC void rem_mes(p)
 	proc_p p;
 {
 	register bblock_p b;
@@ -455,11 +452,8 @@ rem_mes(p)
 
 
 
-xform_proc(p,alloclist,nrinstrs,instrmap)
-	proc_p p;
-	alloc_p alloclist;
-	short nrinstrs;
-	line_p instrmap[];
+void
+xform_proc(proc_p p, alloc_p alloclist, short nrinstrs, line_p instrmap[])
 {
 	/* Transform every instruction of procedure p that uses an item
 	 * at a point where the item is kept in a register.
@@ -498,10 +492,7 @@ xform_proc(p,alloclist,nrinstrs,instrmap)
 
 
 
-bool always_in_reg(off,allocs,size_out)
-	offset off;
-	alloc_p allocs;
-	short *size_out;
+bool always_in_reg(offset off, alloc_p allocs, short *size_out)
 {
 	/* See if the local variable with the given offset is stored
 	 * in a register during its entire lifetime. As a side effect,
@@ -526,7 +517,7 @@ bool always_in_reg(off,allocs,size_out)
 }
 
 
-rem_locals(p,allocs)
+void rem_locals(p,allocs)
 	proc_p p;
 	alloc_p allocs;
 {

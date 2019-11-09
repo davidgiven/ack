@@ -18,6 +18,7 @@
 #include	"linfil.h"
 #include	"rsb.h"
 #include	"fra.h"
+#include	"whatever.h"
 
 extern jmp_buf trapbuf; /* from main.c */
 

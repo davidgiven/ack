@@ -9,7 +9,8 @@
  */
 
 
-extern	FILE	*next_file();	/* (int argc, char *argv[])
+FILE *next_file(int argc, char *argv[]);
+				/*
 				 * See if there are any more EM input files.
 				 * 'argv' contains the names of the files
 				 * that are passed as arguments to ic.
