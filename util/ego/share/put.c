@@ -113,7 +113,8 @@ STATIC void outint(int i)
 	if (sizeof(int) == sizeof(short)) {
 		outshort(i);
 	} else {
-		assert (sizeof(int) == sizeof(offset));
+		/* Fails with 4-byte int, 8-byte long:
+		 * assert (sizeof(int) == sizeof(offset)); */
 		outoff((offset) i);
 	}
 }

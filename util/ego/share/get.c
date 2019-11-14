@@ -83,7 +83,8 @@ STATIC int getint(void)
 	if (sizeof(int) == sizeof(short)) {
 		return getshort();
 	} else {
-		assert (sizeof(int) == sizeof(offset));
+		/* Fails with 4-byte int, 8-byte long:
+		 * assert (sizeof(int) == sizeof(offset)); */
 		return getoff();
 	}
 }

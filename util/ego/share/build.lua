@@ -55,6 +55,6 @@ clibrary {
 		"modules/src/em_data+lib",
 	},
 	vars = {
-		["+cflags"] = {"-DVERBOSE", "-DNOTCOMPACT"}
+		["+cflags"] = {"-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"}
 	}
 }
