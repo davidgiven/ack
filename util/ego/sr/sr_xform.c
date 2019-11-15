@@ -138,9 +138,7 @@ STATIC void adjust_jump(newtarg,oldtarg,c)
 }
 
 
-void
-make_header(lp)
-	loop_p lp;
+void make_header(loop_p lp)
 {
 	/* Make sure that the loop has a header block, i.e. a block
 	 * has the loop entry block as its only successor and
@@ -149,6 +147,7 @@ make_header(lp)
 	 */
 
 	bblock_p b,c,entry;
+	line_p branch,last;
 	Lindex i,next;
 
 	if (lp->LP_HEADER != (bblock_p) 0) return;
@@ -159,6 +158,17 @@ make_header(lp)
 	 */
 	b = freshblock(); /* new block with new b_id */
 	entry = lp->lp_entry;
+
+	/* In the header, add a branch from to the entry block. */
+	branch = newline(OPINSTRLAB);
+	assert(INSTR(entry->b_start) == op_lab);
+	INSTRLAB(branch) = INSTRLAB(entry->b_start);
+	branch->l_instr = op_bra;
+	b->b_start = branch;
+
+	/* Plan to insert code before the branch. */
+	assert(lp->LP_INSTR == 0);
+	lp->LP_INSTR = branch;
 
 	/* update succ/pred. Also take care that any jump from outside
 	 * the loop to the entry block now goes to b.
@@ -180,14 +190,24 @@ make_header(lp)
 			adjust_jump(b,entry,c);
 		}
 	}
-	assert(lp->LP_INSTR == 0);
-	lp->LP_INSTR = b->b_start;
+
 	Ladd(b,&entry->b_pred);
 	Ladd(entry,&b->b_succ);
+
 	/* put header block at end of procedure */
-	for (c = curproc->p_start; c->b_next != 0; c = c->b_next);
+	for (c = curproc->p_start; c->b_next != 0; c = c->b_next)
+		continue;
 	c->b_next = b;
 	/* b->b_next = 0; */
+
+	/* move the END pseudo to header block */
+	last = last_instr(c);
+	assert(INSTR(last) == ps_end);
+	assert(PREV(last) != (line_p) 0);
+	PREV(last)->l_next = 0;
+	DLINK(branch, last);
+
+	/* fix loops and dominance */
 	copy_loops(b,entry,lp);
 	b->b_idom = entry->b_idom;
 	entry->b_idom = b;
