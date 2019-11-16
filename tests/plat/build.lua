@@ -5,7 +5,7 @@ definerule("plat_testsuite",
 	{
 		plat = { type="string" },
 		method = { type="string" },
-		-- added long-long/llswitch_e.c
+		-- added bugs/bug-203-ego-sr_c-O3.c
 		sets = { type="table", default={"core", "b", "bugs", "m2", "floats", "long-long"}},
 		skipsets = { type="table", default={}},
 		tests = { type="targets", default={} },
@@ -48,6 +48,14 @@ definerule("plat_testsuite",
 				lang = "e"
 			end
 
+			-- If lang is "c-O3", then build with -O3.
+			local _, _, optimize = lang:find("(-O[^-]*)$")
+			if optimize then
+				lang = lang:sub(1, -1 - #optimize)
+			else
+				optimize = "-O0"
+			end
+
 			local bin = ackprogram {
 				name = fs.."_bin",
 				srcs = { f },
@@ -55,7 +63,7 @@ definerule("plat_testsuite",
 				vars = {
 					plat = e.plat,
 					lang = lang,
-					ackcflags = "-O0 -Bmain"
+					ackcflags = optimize.." -Bmain"
 				}
 			}
 

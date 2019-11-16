@@ -9,7 +9,7 @@ local function build_ego(name)
 			"h+emheaders",
 		},
 		vars = {
-			["+cflags"] = {"-DVERBOSE", "-DNOTCOMPACT"}
+			["+cflags"] = {"-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"}
 		}
 	}
 end
