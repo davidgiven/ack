@@ -45,6 +45,24 @@ local bdos_calls = {
     [40] = "cpm_write_random_filled",
 }
 
+local bios_calls = {
+    [ 6] = "cpm_bios_const",
+    [ 9] = "cpm_bios_conin",
+    [12] = "cpm_bios_conout",
+    [15] = "cpm_bios_list",
+    [18] = "cpm_bios_punch",
+    [21] = "cpm_bios_reader",
+    [24] = "cpm_bios_home",
+    -- Special: [27] = "cpm_bios_seldsk",
+    [30] = "cpm_bios_settrk",
+    [33] = "cpm_bios_setsec",
+    [36] = "cpm_bios_setdma",
+    [39] = "cpm_bios_read",
+    [42] = "cpm_bios_write",
+    [45] = "cpm_bios_listst",
+    -- Special: [48] = "cpm_bios_sectran", 
+}
+
 local trap_calls = {
     "EARRAY",
     "EBADGTO",
@@ -77,6 +95,16 @@ for n, name in pairs(bdos_calls) do
     generated[#generated+1] = normalrule {
         name = name,
         ins = { "./make_bdos_call.sh" },
+        outleaves = { name..".s" },
+        commands = {
+            "%{ins[1]} "..n.." "..name.." > %{outs}"
+        }
+    }
+end
+for n, name in pairs(bios_calls) do
+    generated[#generated+1] = normalrule {
+        name = name,
+        ins = { "./make_bios_call.sh" },
         outleaves = { name..".s" },
         commands = {
             "%{ins[1]} "..n.." "..name.." > %{outs}"

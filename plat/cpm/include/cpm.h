@@ -54,6 +54,17 @@ typedef struct
 }
 DPB;
 
+typedef struct
+{
+    uint8_t xlt[2];     /* address of translation vector */
+    uint8_t scratch[6]; /* BDOS scratchpad */
+    uint8_t dirbuf[2];  /* address of directory scratchpad */
+    uint8_t dpb[2];     /* address of DPB */
+    uint8_t csv[2];     /* address of disk change scratchpad */
+    uint8_t alv[2];     /* address of allocation bitmap */
+}
+DPH;
+
 /* Access an unaligned field (see above). */
 #define U16(ptr) (*(uint16_t*)(ptr))
 
@@ -129,8 +140,22 @@ extern void cpm_printstring0(const char* s);
 #define cpm_get_user() cpm_get_set_user(0xff)
 #define cpm_set_user(u) cpm_get_set_user(u)
 
-extern uint8_t bios_conin(void);
-extern uint8_t bios_const(void);
-extern void bios_conout(uint8_t c);
+extern void cpm_bios_boot(void);
+extern void cpm_bios_wboot(void);
+extern uint8_t cpm_bios_const(void);
+extern uint8_t cpm_bios_conin(void);
+extern void cpm_bios_conout(uint8_t c);
+extern void cpm_bios_list(uint8_t c);
+extern void cpm_bios_punch(uint8_t c);
+extern uint8_t cpm_bios_reader(void);
+extern void cpm_bios_home(void);
+extern DPH* cpm_bios_seldsk(uint8_t disk);
+extern void cpm_bios_settrk(uint16_t track);
+extern void cpm_bios_setsec(uint16_t sector);
+extern void cpm_bios_setdma(void* dma);
+extern uint8_t cpm_bios_read(void);
+extern uint8_t cpm_bios_write(void);
+extern uint8_t cpm_bios_listst(void);
+extern uint16_t cpm_bios_sectran(uint8_t* table, uint16_t sector);
 
 #endif
