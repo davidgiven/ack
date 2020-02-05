@@ -162,7 +162,8 @@ int _doprnt(register const char* fmt, va_list ap)
 	int i, c, width, precision, zfill, flags, between_fill;
 	int nrchars = 0;
 	const char* oldfmt;
-	char *s1, buf[1025];
+	char *s1;
+	static char buf[16]; /* used to store rendered numbers */
 
 	while (c = *fmt++)
 	{
