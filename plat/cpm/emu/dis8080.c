@@ -167,8 +167,8 @@ static struct insn insns[0x100] =
     { "mov m, e",      NOTHING },
     { "mov m, h",      NOTHING },
     { "mov m, l",      NOTHING },
-    { "mov m, m",      NOTHING },
     { "hlt",           NOTHING },
+	{ "mov m, a",      NOTHING },
 
     /* 77-7f */
     { "mov a, b",      NOTHING },
