@@ -60,7 +60,6 @@ procedure getname;
 	begin
 		writeln;
 		writeln('Hi there! I''m written in Pascal. Before we start, what is your name?');
-		writeln;
 		readstring(name, namelen);
 		writeln;
 		write('Hello, ');
