@@ -154,7 +154,7 @@ extern void cpm_bios_settrk(uint16_t track);
 extern void cpm_bios_setsec(uint16_t sector);
 extern void cpm_bios_setdma(void* dma);
 extern uint8_t cpm_bios_read(void);
-extern uint8_t cpm_bios_write(void);
+extern uint8_t cpm_bios_write(uint8_t deblock);
 extern uint8_t cpm_bios_listst(void);
 extern uint16_t cpm_bios_sectran(uint8_t* table, uint16_t sector);
 
