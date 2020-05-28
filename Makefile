@@ -9,7 +9,8 @@ DEFAULT_PLATFORM = pc86
 
 # Where should the ACK put its temporary files?
 
-ACK_TEMP_DIR = /tmp
+#ACK_TEMP_DIR = /tmp
+ACK_TEMP_DIR = tmp
 
 # Where is the ACK going to be installed, eventually? If you don't want to
 # install it and just want to run the ACK from the build directory
@@ -31,6 +32,7 @@ LDFLAGS =
 
 AR = ar
 CC = gcc
+#CC = clang
 
 # Which build system to use; use 'ninja' or 'make' (in lower case). Leave
 # blank to autodetect.

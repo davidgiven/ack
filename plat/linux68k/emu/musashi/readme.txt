@@ -1,7 +1,7 @@
                                     MUSASHI
                                     =======
 
-                                  Version 3.4
+                                  Version 4.10
 
              A portable Motorola M680x0 processor emulation engine.
             Copyright 1998-2002 Karl Stenerud.  All rights reserved.
@@ -11,8 +11,9 @@
 INTRODUCTION:
 ------------
 
-Musashi is a Motorola 68000, 68010, 68EC020, and 68020 emulator written in C.
-This emulator was written with two goals in mind: portability and speed.
+Musashi is a Motorola 68000, 68010, 68EC020, 68020, 68EC030, 68030, 68EC040 and
+68040 emulator written in C.  This emulator was written with two goals in mind:
+portability and speed.
 
 The emulator is written to ANSI C89 specifications.  It also uses inline
 functions, which are C9X compliant.
@@ -146,11 +147,23 @@ To enable separate immediate reads:
     unsigned int  m68k_read_immediate_16(unsigned int address);
     unsigned int  m68k_read_immediate_32(unsigned int address);
 
+    Now you also have the pcrelative stuff:
+    unsigned int  m68k_read_pcrelative_8(unsigned int address);
+    unsigned int  m68k_read_pcrelative_16(unsigned int address);
+    unsigned int  m68k_read_pcrelative_32(unsigned int address);
+
 - If you need to know the current PC (for banking and such), set
   M68K_MONITOR_PC to OPT_SPECIFY_HANDLER, and set M68K_SET_PC_CALLBACK(A) to
   your routine.
 
+- In the unlikely case where you need to emulate some PMMU in the immediate
+  reads and/or pcrealtive stuff, you'll need to explicitely call the
+  translation address mechanism from your user functions this way :
 
+    if (PMMU_ENABLED)
+        address = pmmu_translate_addr(address);
+
+  (this is handled automatically by normal memory accesses).
 
 ADDRESS SPACES:
 --------------
@@ -212,9 +225,12 @@ To set the CPU type you want to use:
     M68K_CPU_TYPE_68000,
     M68K_CPU_TYPE_68010,
     M68K_CPU_TYPE_68EC020,
-    M68K_CPU_TYPE_68020
-
-
+    M68K_CPU_TYPE_68020,
+    M68K_CPU_TYPE_68EC030,
+    M68K_CPU_TYPE_68030,
+    M68K_CPU_TYPE_68EC040,
+    M68K_CPU_TYPE_68040,
+    M68K_CPU_TYPE_SCC68070 (which is a 68010 with a 32 bit data bus).
 
 CLOCK FREQUENCY:
 ---------------
@@ -302,4 +318,25 @@ of the CPU.
 EXAMPLE:
 -------
 
-The subdir example contains a full example (currently DOS only).
+The subdir example contains a full example (currently linux & Dos only).
+
+Compilation
+-----------
+
+You can use the default Makefile in Musashi's directory, it works like this :
+1st build m68kmake, which will build m68kops.c and m68kops.h based on the
+contents of m68k_in.c.
+Then compile m68kcpu.o and m68kops.o. Add m68kdasm.o if you want the
+disassemble functions. When linking this to your project you will need libm
+for the fpu emulation of the 68040.
+
+Using some custom m68kconf.h outside Musashi's directory
+--------------------------------------------------------
+
+It can be useful to keep an untouched musashi directory in a project (from
+git for example) and maintain a separate m68kconf.h specific to the
+project. For this, pass -DMUSASHI_CNF="mycustomconfig.h" to gcc (or whatever
+compiler you use). Notice that if you use an unix shell (or make which uses
+the shell to launch its commands), then you need to escape the quotes like
+this : -DMUSASHI_CNF=\"mycustomconfig.h\"
+
