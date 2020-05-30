@@ -1259,27 +1259,30 @@ static void fpgen_rm_reg(uint16 w2)
 	  REG_FP[dst].high ^= 0x8000;
 	  SET_CONDITION_CODES(REG_FP[dst]);
 	  USE_CYCLES(3);
-	  break;
-	}
+          break;
+        }
       case 0x1e:		// FGETEXP
 	{
           sint16 temp;
 
           temp = source.high;	// get the exponent
           temp -= 0x3fff;	// take off the bias
-          REG_FP[dst] = double_to_fx80((double)temp);
+          REG_FP[dst] = int32_to_floatx80((int32)temp);
           SET_CONDITION_CODES(REG_FP[dst]);
 	  USE_CYCLES(6);
-	}
+          break;
+        }
 
 
       case 0x1f:		// FGETMANT  (TBB)
         {
-          REG_FP[dst] = source;
-          REG_FP[dst].high &= ~0x7fff;	// clear the bias, keep sign
-          REG_FP[dst].high |= 0x3fff;	// set new bias, 1.0 <= result < 2.0
+          floatx80 temp = source;
+          temp.high &= ~0x7fff;	// clear the bias, keep sign
+          temp.high |= 0x3fff;	// set new bias, 1.0 <= result < 2.0
+          REG_FP[dst] = temp;
           SET_CONDITION_CODES(REG_FP[dst]);
-          //USE_CYCLES(6);
+          USE_CYCLES(6);
+          break;
         }
 
 
@@ -1611,8 +1614,8 @@ void m68040_fpu_op0()
 	    {
 	      case 0x0:	// FPU ALU FP, FP
 	      case 0x2:	// FPU ALU ea, FP
-		{
-		  fpgen_rm_reg(w2);
+                {
+                  fpgen_rm_reg(w2);
 		  break;
 		}
 
