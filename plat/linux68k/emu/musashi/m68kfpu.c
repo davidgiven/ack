@@ -967,7 +967,7 @@ static void WRITE_EA_64(int ea, uint64 data)
                   m68ki_write_32(ea+4, (uint32)(data));
                   break;
                 }
-              default:	fatalerror("M68kFPU: WRITE_EA_32: unhandled mode %d, reg %d at %08X\n", mode, reg, REG_PC);
+              default:	fatalerror("M68kFPU: WRITE_EA_64: unhandled mode %d, reg %d at %08X\n", mode, reg, REG_PC);
             }
           break;
         }
@@ -1224,18 +1224,18 @@ static void fpgen_rm_reg(uint16 w2)
 	}
       case 0x01:		// Fsint
 	{
-	  sint32 temp;
-	  temp = floatx80_to_int32(source);
-	  REG_FP[dst] = int32_to_floatx80(temp);
-	  SET_CONDITION_CODES(REG_FP[dst]);  // JFF needs update condition codes
-	  break;
-	}
+          sint64 temp;
+          temp = floatx80_to_int64(source);
+          REG_FP[dst] = int64_to_floatx80(temp);
+          SET_CONDITION_CODES(REG_FP[dst]);  // JFF needs update condition codes
+          break;
+        }
       case 0x03:		// FsintRZ
-	{
-	  sint32 temp;
-	  temp = floatx80_to_int32_round_to_zero(source);
-	  REG_FP[dst] = int32_to_floatx80(temp);
-	  SET_CONDITION_CODES(REG_FP[dst]);  // JFF needs update condition codes
+        {
+          sint64 temp;
+          temp = floatx80_to_int64_round_to_zero(source);
+          REG_FP[dst] = int64_to_floatx80(temp);
+          SET_CONDITION_CODES(REG_FP[dst]);  // JFF needs update condition codes
 	  break;
 	}
       case 0x04:		// FSQRT
