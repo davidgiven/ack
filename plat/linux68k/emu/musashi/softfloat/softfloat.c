@@ -95,7 +95,7 @@ static int32 roundAndPackInt32( flag zSign, bits64 absZ )
 	if ( zSign ) z = - z;
 	if ( ( absZ>>32 ) || ( z && ( ( z < 0 ) ^ zSign ) ) ) {
 		float_raise( float_flag_invalid );
-		return zSign ? (sbits32) 0x80000000 : 0x7FFFFFFF;
+                return z /* zSign ? (sbits32) 0x80000000 : 0x7FFFFFFF*/;
 	}
 	if ( roundBits ) float_exception_flags |= float_flag_inexact;
 	return z;
@@ -146,9 +146,9 @@ static int64 roundAndPackInt64( flag zSign, bits64 absZ0, bits64 absZ1 )
 	if ( z && ( ( z < 0 ) ^ zSign ) ) {
 	overflow:
 		float_raise( float_flag_invalid );
-		return
-				zSign ? (sbits64) LIT64( 0x8000000000000000 )
-                     : (sbits64)( 0x7FFFFFFFFFFFFFFF );
+                return z
+                        /*	zSign ? (sbits64) LIT64( 0x8000000000000000 )
+                     : (sbits64)( 0x7FFFFFFFFFFFFFFF )*/;
 	}
 	if ( absZ1 ) float_exception_flags |= float_flag_inexact;
 	return z;
