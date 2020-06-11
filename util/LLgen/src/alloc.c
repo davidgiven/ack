@@ -17,6 +17,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 # include "types.h"
 # include "extern.h"
 
@@ -83,6 +84,7 @@ p_mem new_mem(register p_info p)
 			ralloc(p->i_ptr, p->i_size);
 		p->i_max = p->i_ptr + sz;
 		p->i_top = p->i_ptr + p->i_size;
+		memset(p->i_max, 0, p->i_size - sz);
 	}
 	rp = p->i_max;
 	p->i_max += p->i_esize;
