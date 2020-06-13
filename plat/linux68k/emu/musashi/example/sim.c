@@ -142,7 +142,7 @@ unsigned int cpu_read_byte(unsigned int address)
 	}
 	if(address > MAX_RAM)
 		exit_error("Attempted to read byte from RAM address %08x", address);
-		return READ_BYTE(g_ram, address);
+	return READ_BYTE(g_ram, address);
 }
 
 unsigned int cpu_read_word(unsigned int address)
@@ -166,7 +166,7 @@ unsigned int cpu_read_word(unsigned int address)
 	}
 	if(address > MAX_RAM)
 		exit_error("Attempted to read word from RAM address %08x", address);
-		return READ_WORD(g_ram, address);
+	return READ_WORD(g_ram, address);
 }
 
 unsigned int cpu_read_long(unsigned int address)
@@ -190,7 +190,7 @@ unsigned int cpu_read_long(unsigned int address)
 	}
 	if(address > MAX_RAM)
 		exit_error("Attempted to read long from RAM address %08x", address);
-		return READ_LONG(g_ram, address);
+	return READ_LONG(g_ram, address);
 }
 
 
@@ -359,6 +359,7 @@ unsigned int input_device_read(void)
 
 void input_device_write(unsigned int value)
 {
+	(void)value;
 }
 
 
@@ -491,8 +492,9 @@ void disassemble_program()
 	fflush(stdout);
 }
 
-void cpu_instr_callback()
+void cpu_instr_callback(int pc)
 {
+	(void)pc;
 /* The following code would print out instructions as they are executed */
 /*
 	static char buff[100];

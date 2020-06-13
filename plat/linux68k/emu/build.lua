@@ -11,15 +11,15 @@ normalrule {
 		"+m68kmake",
 		"./musashi/m68k_in.c",
 		"./musashi/m68kcpu.h",
+		"./musashi/m68kmmu.h",
 		"./m68kconf.h",
 		"./musashi/m68kcpu.c",
+		"./musashi/m68kfpu.c",
 		"./musashi/m68kdasm.c",
 		"./musashi/m68k.h",
+		"./musashi/softfloat",
 	},
 	outleaves = {
-		"m68kopac.c",
-		"m68kopdm.c",
-		"m68kopnz.c",
 		"m68kops.c",
 		"m68kops.h",
 		"m68kcpu.h",
@@ -29,7 +29,7 @@ normalrule {
 		"m68k.h",
 	},
 	commands = {
-		"cp %{ins[2]} %{ins[3]} %{ins[4]} %{ins[5]} %{ins[6]} %{ins[7]} %{dir}",
+		"cp -R %{ins[2]} %{ins[3]} %{ins[4]} %{ins[5]} %{ins[6]} %{ins[7]} %{ins[8]} %{ins[9]} %{ins[10]} %{dir}",
 		"cd %{dir} && %{ins[1]}"
 	}
 }
@@ -50,9 +50,9 @@ cprogram {
 	srcs = {
 		"./sim.c",
 		matching(filenamesof("+m68k_engine"), "%.c$"),
+		"./musashi/softfloat/softfloat.c",
 	},
 	deps = {
 		"+headers",
 	}
 }
-
