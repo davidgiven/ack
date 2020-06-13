@@ -75,7 +75,7 @@ void exit_error(char* fmt, ...)
 	fprintf(stderr, "\n");
 	pc = m68k_get_reg(NULL, M68K_REG_PPC);
 	m68k_disassemble(buff, pc, M68K_CPU_TYPE_68020);
-        fprintf(stderr, "At %04x: %s\n", pc, buff);
+	fprintf(stderr, "At %04x: %s\n", pc, buff);
 
 	exit(EXIT_FAILURE);
 }
@@ -93,7 +93,7 @@ uint32_t cpu_read_long(uint32_t address)
 	switch (address)
 	{
 		case 0x00: return INIT_SP;
-                case 0x04: return entrypoint;
+		case 0x04: return entrypoint;
 		case 0x80: emulated_syscall(); return 0x10000;
 		case 0x10000: return 0x4e734e73; /* rte; rte */
 		case 0x10004: return 0;
@@ -173,12 +173,13 @@ void disassemble_program()
 	char buff2[100];
 
 	pc = cpu_read_long_dasm(4);
-        printf("entry point is %0x\n", entrypoint);
-        printf("pc is %0x\n", pc);
+	printf("entry point is %0x\n", entrypoint);
+	printf("pc is %0x\n", pc);
 
-        while(pc <= entrypoint + 0x16e)
+
+	while(pc <= entrypoint + 0x16e)
 	{
-                instr_size = m68k_disassemble(buff, pc, M68K_CPU_TYPE_68020);
+		instr_size = m68k_disassemble(buff, pc, M68K_CPU_TYPE_68020);
 		make_hex(buff2, pc, instr_size);
 		printf("%03x: %-20s: %s\n", pc, buff2, buff);
 		pc += instr_size;
@@ -236,58 +237,58 @@ static void emulated_syscall(void)
 	{
 		case 1: /* exit */
 			exit(m68k_get_reg(NULL, M68K_REG_D1));
-			
-                case 3: /* read */
+
+		case 3: /* read */
 		{
 			uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
 			uint32_t ptr = m68k_get_reg(NULL, M68K_REG_D2);
-                        uint32_t count = m68k_get_reg(NULL, M68K_REG_D3);
-                        m68k_set_reg(M68K_REG_D0, read(fd, g_ram + transform_address(ptr), count));
+			uint32_t count = m68k_get_reg(NULL, M68K_REG_D3);
+			m68k_set_reg(M68K_REG_D0, read(fd, g_ram + transform_address(ptr), count));
 			break;
 		}
 
-                case 4: /* write */
-                {
-                        uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
-                        uint32_t ptr = m68k_get_reg(NULL, M68K_REG_D2);
-                        uint32_t len = m68k_get_reg(NULL, M68K_REG_D3);
-                        m68k_set_reg(M68K_REG_D0, write(fd, g_ram + transform_address(ptr), len));
-                        break;
-                }
+		case 4: /* write */
+		{
+			uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
+			uint32_t ptr = m68k_get_reg(NULL, M68K_REG_D2);
+			uint32_t len = m68k_get_reg(NULL, M68K_REG_D3);
+			m68k_set_reg(M68K_REG_D0, write(fd, g_ram + transform_address(ptr), len));
+			break;
+		}
 
-                case 5: /* open */
-                {
-                        uint32_t pathname = m68k_get_reg(NULL, M68K_REG_D1);
-                        uint32_t flags = m68k_get_reg(NULL, M68K_REG_D2);
-                        uint32_t mode = m68k_get_reg(NULL, M68K_REG_D3);
-                        m68k_set_reg(M68K_REG_D0, open(g_ram + transform_address(pathname), flags, mode));
-                        break;
-                }
+		case 5: /* open */
+		{
+			uint32_t pathname = m68k_get_reg(NULL, M68K_REG_D1);
+			uint32_t flags = m68k_get_reg(NULL, M68K_REG_D2);
+			uint32_t mode = m68k_get_reg(NULL, M68K_REG_D3);
+			m68k_set_reg(M68K_REG_D0, open(g_ram + transform_address(pathname), flags, mode));
+			break;
+		}
 
-                case 6: /* close */
-                {
-                        uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
-                        m68k_set_reg(M68K_REG_D0, close(fd));
-                        break;
-                }
+		case 6: /* close */
+		{
+			uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
+			m68k_set_reg(M68K_REG_D0, close(fd));
+			break;
+		}
 
-                case 10: /* unlink */
-                {
-                        uint32_t pathname = m68k_get_reg(NULL, M68K_REG_D1);
-                        m68k_set_reg(M68K_REG_D0, unlink(g_ram + transform_address(pathname)));
-                        break;
-                }
+		case 10: /* unlink */
+		{
+			uint32_t pathname = m68k_get_reg(NULL, M68K_REG_D1);
+			m68k_set_reg(M68K_REG_D0, unlink(g_ram + transform_address(pathname)));
+			break;
+		}
 
-                case 19: /* lseek */
-                {
-                        uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
-                        uint32_t offset = m68k_get_reg(NULL, M68K_REG_D2);
-                        uint32_t whence = m68k_get_reg(NULL, M68K_REG_D3);
-                        m68k_set_reg(M68K_REG_D0, lseek(fd, offset, whence));
-                        break;
-                }
+		case 19: /* lseek */
+		{
+			uint32_t fd = m68k_get_reg(NULL, M68K_REG_D1);
+			uint32_t offset = m68k_get_reg(NULL, M68K_REG_D2);
+			uint32_t whence = m68k_get_reg(NULL, M68K_REG_D3);
+			m68k_set_reg(M68K_REG_D0, lseek(fd, offset, whence));
+			break;
+		}
 
-                case 45: /* brk */
+		case 45: /* brk */
 		{
 			uint32_t newpos = m68k_get_reg(NULL, M68K_REG_D1);
 			if (newpos == 0)
@@ -302,8 +303,8 @@ static void emulated_syscall(void)
 			break;
 		}
 
-                case 20: /* getpid */
-                case 48: /* signal */
+		case 20: /* getpid */
+		case 48: /* signal */
 		case 54: /* ioctl */
 		case 78: /* gettimeofday */
 			m68k_set_reg(M68K_REG_D0, 0);
@@ -331,9 +332,9 @@ static void load_program(FILE* fd)
 	if (fread(g_ram, 1, phentsize, fd) != phentsize)
 		exit_error("couldn't read program header");
 
-        uint32_t offset = READ_LONG(g_ram, 0x04);
-        uint32_t vaddr = READ_LONG(g_ram, 0x08);
-        uint32_t filesz = READ_LONG(g_ram, 0x10);
+	uint32_t offset = READ_LONG(g_ram, 0x04);
+	uint32_t vaddr = READ_LONG(g_ram, 0x08);
+	uint32_t filesz = READ_LONG(g_ram, 0x10);
 	uint32_t memsz = READ_LONG(g_ram, 0x14);
 	brkbase = brkpos = vaddr + memsz;
 
@@ -361,23 +362,19 @@ int main(int argc, char* argv[])
 
 	load_program(fhandle);
 
-        //disassemble_program();
+	//disassemble_program();
 
-        //printf("now at line %d\n", __LINE__);
-        m68k_set_cpu_type(M68K_CPU_TYPE_68040);
-        //printf("now at line %d\n", __LINE__);
-        m68k_init();
-        //printf("initialising core\n");
-        m68k_pulse_reset();
-        //printf("now at line %d\n", __LINE__);
+	m68k_set_cpu_type(M68K_CPU_TYPE_68040);
+	m68k_init();
+	m68k_pulse_reset();
 
 	/* On entry, the Linux stack looks like this.
 	 * 
 	 * sp+..           NULL
-     * sp+8+(4*argc)   env (X quads)
-     * sp+4+(4*argc)   NULL
-     * sp+4            argv (argc quads)
-     * sp              argc
+	 * sp+8+(4*argc)   env (X quads)
+	 * sp+4+(4*argc)   NULL
+	 * sp+4            argv (argc quads)
+	 * sp              argc
 	 *
 	 * We'll set it up with a bodgy stack frame with argc=0 just to keep the
 	 * startup code happy.
@@ -392,13 +389,12 @@ int main(int argc, char* argv[])
 		unsigned long argv = sp;
 		cpu_write_long(sp -= 4, argv);
 		cpu_write_long(sp -= 4, 0);
-                m68k_set_reg(M68K_REG_SP, sp);   /* init sp is also addr 0 */
+		m68k_set_reg(M68K_REG_SP, sp);   /* init sp is also addr 0 */
 	}
 
-        //printf("running program ");
-        for (;;) {
-             m68k_execute(100000);
-        }
+	for (;;) {
+		m68k_execute(100000);
+	}
 
 	return 0;
 }
