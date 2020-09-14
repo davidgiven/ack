@@ -35,7 +35,6 @@
 #define oldlvbx(x)	oldstruct(bext_lv,x)
 
 
-short nrglobals;
 short nrvars;
 
 STATIC int Slv;

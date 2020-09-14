@@ -19,6 +19,35 @@ int bsymb_part;
 int code_part;
 int string_part;
 
+int paramsize;
+struct	hshtab hshtab[HSHSIZ];
+int	hshused;
+int	eof;
+int	peekc;
+const char* ctab;
+struct	hshtab *bsym;
+struct	hshtab *paraml, *parame;
+int	cval;
+int	isn;
+char	symbuf[NCPS+1];
+FILE	*sbufp;
+int	stack;
+struct	tnode **cp;
+int	*space;
+int	ospace[OSSIZ];
+int	retlab;
+int	nerror;
+struct	swtab swtab[SWSIZ];
+struct	swtab *swp;
+int	deflab;
+int	contlab;
+int	brklab;
+
+int opdope[];
+int line;
+int peeksym, peeksym2;
+
+
 void
 init(char *s, int val)
 {
