@@ -42,27 +42,27 @@ struct	swtab {
 
 extern int wordsize;
 extern const char* modulename;
-int paramsize;
-struct	hshtab hshtab[HSHSIZ];
-int	hshused;
-int	eof;
-int	peekc;
-const char* ctab;
-struct	hshtab *bsym;
-struct	hshtab *paraml, *parame;
-int	cval;
-int	isn;
-char	symbuf[NCPS+1];
-FILE	*sbufp;
-int	stack;
-struct	tnode **cp;
-int	*space;
-int	ospace[OSSIZ];
-int	retlab;
-int	nerror;
-struct	swtab swtab[SWSIZ];
-struct	swtab *swp;
-int	deflab;
+extern int paramsize;
+extern struct	hshtab hshtab[HSHSIZ];
+extern int	hshused;
+extern int	eof;
+extern int	peekc;
+extern const char* ctab;
+extern struct	hshtab *bsym;
+extern struct	hshtab *paraml, *parame;
+extern int	cval;
+extern int	isn;
+extern char	symbuf[NCPS+1];
+extern FILE	*sbufp;
+extern int	stack;
+extern struct	tnode **cp;
+extern int	*space;
+extern int	ospace[OSSIZ];
+extern int	retlab;
+extern int	nerror;
+extern struct	swtab swtab[SWSIZ];
+extern struct	swtab *swp;
+extern int	deflab;
 extern int	contlab;
 extern int	brklab;
 
@@ -70,16 +70,16 @@ extern int opdope[];
 extern int line;
 extern int peeksym, peeksym2;
 
-void error(char *s, ...);
-void printtoken(int tok, FILE *out);
-struct tnode * block(int op, int value, struct tnode *tr1, struct tnode *tr2);
-void rcexpr(struct tnode *tr);
-void cbranch(struct tnode *t, int lab);
-void jump(int lab);
-void fnlabel(int l);
-void tonativeaddr(void);
-void fromnativeaddr(void);
-char* manglename(char* name, char prefix);
+extern void error(char *s, ...);
+extern void printtoken(int tok, FILE *out);
+extern struct tnode * block(int op, int value, struct tnode *tr1, struct tnode *tr2);
+extern void rcexpr(struct tnode *tr);
+extern void cbranch(struct tnode *t, int lab);
+extern void jump(int lab);
+extern void fnlabel(int l);
+extern void tonativeaddr(void);
+extern void fromnativeaddr(void);
+extern char* manglename(char* name, char prefix);
 
 #define	EOFC	0
 #define	SEMI	1

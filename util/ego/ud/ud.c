@@ -33,7 +33,6 @@
 #define newudbx()	(bext_p) newstruct(bext_ud)
 #define oldudbx(x)	oldstruct(bext_ud,x)
 
-short nrglobals;
 short nrvars;
 
 int Svalue,Svariable;
