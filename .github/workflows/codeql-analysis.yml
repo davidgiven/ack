@@ -52,7 +52,7 @@ jobs:
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: make
-      run: make CC=$CC PREFIX=/tmp/acki +ack
+      run: make PREFIX=/tmp/acki +ack
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
