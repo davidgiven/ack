@@ -1366,15 +1366,15 @@ STATIC void gencases(int *tokenlist, int caseno, int compacted)
 	}
 }
 
-static char namebuf[20];
-
 /*
  * Generate a target file name from the
  * source file name s.
- */STATIC string genname(string s)
+ */
+STATIC string genname(string s)
 {
-	register string c, d;
+	register string namebuf, c, d;
 
+	namebuf = alloc(strlen(s) + 3);
 	c = namebuf;
 	while (*s)
 	{
@@ -1394,14 +1394,10 @@ static char namebuf[20];
 			break;
 	if (d == namebuf)
 		d = c;
-	if (d >= &namebuf[12])
-	{
-		fatal(0, "%s : filename too long", namebuf);
-	}
 	*d++ = '.';
 	*d++ = 'c';
-	*d = '\0';
-	return namebuf;
+	*d++ = '\0';
+	return ralloc(namebuf, d - namebuf);
 }
 
 STATIC void genpush(int d)
@@ -1509,7 +1505,7 @@ STATIC void correct_prefix(void)
 		fprintf(f, "#define LLoldlevel %soldlevel\n", s);
 		fprintf(f, "#define LLmessage %smessage\n", s);
 #ifdef NON_CORRECTING
-		fprintf(f, "#define LLnc_recovery %sncrecovery\n", s);
+		fprintf(f, "#define LLnc_recover %sncrecover\n", s);
 		fprintf(f, "#define LLstartsymb %sstartsymb\n", s);
 #endif
 	}
