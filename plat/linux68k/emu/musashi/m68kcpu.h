@@ -609,7 +609,7 @@ extern sigjmp_buf m68ki_aerr_trap;
 	if(sigsetjmp(m68ki_aerr_trap, 0) != 0) \
 	{ \
 		m68ki_exception_address_error(m68k); \
-		if(m68ki_stopped) \
+		if(CPU_STOPPED) \
 		{ \
 			if (m68ki_remaining_cycles > 0) \
 				m68ki_remaining_cycles = 0; \

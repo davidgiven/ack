@@ -600,7 +600,12 @@ static void default_instr_hook_callback(unsigned int pc)
 
 #if M68K_EMULATE_ADDRESS_ERROR
 	#include <setjmp.h>
+
+#ifdef _BSD_SETJMP_H
+ sigjmp_buf m68ki_aerr_trap;
+#else
 	jmp_buf m68ki_aerr_trap;
+#endif 
 #endif /* M68K_EMULATE_ADDRESS_ERROR */
 
 /* ======================================================================== */
