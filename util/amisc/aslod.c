@@ -95,9 +95,10 @@ int follows(struct outsect* pa, struct outsect* pb)
  * to the output stream, zero filling any uninitialised
  * space. */
  
-void emits(struct outsect* section)
+void emits(struct outsect* section, struct outsect* nextsect)
 {
 	char buffer[BUFSIZ];
+	uint32_t real_size;
 
 	/* Copy the actual data. */
 	
@@ -111,12 +112,19 @@ void emits(struct outsect* section)
 			n -= blocksize;
 		}
 	}
-	
+
+	/* Calculate the actual size of the section in the final memory
+	 * layout.  Take into account the next section's alignment, if any.  */
+	real_size = section->os_size;
+	if (nextsect)
+		real_size = align(section->os_base + real_size, nextsect->os_lign)
+			    - section->os_base;
+
 	/* Zero fill any remaining space. */
 	
-	if (section->os_flen != section->os_size)
+	if (section->os_flen != real_size)
 	{
-		long n = section->os_size - section->os_flen;
+		uint32_t n = real_size - section->os_flen;
 		memset(buffer, 0, BUFSIZ);
 
 		while (n > 0)
@@ -280,9 +288,9 @@ int main(int argc, char* argv[])
 
 	/* And go! */
 	
-	emits(&outsect[TEXT]);
-	emits(&outsect[ROM]);
-	emits(&outsect[DATA]);
+	emits(&outsect[TEXT], &outsect[ROM]);
+	emits(&outsect[ROM], &outsect[DATA]);
+	emits(&outsect[DATA], NULL);
 
 	if (ferror(output))
 		fatal("output write error");
