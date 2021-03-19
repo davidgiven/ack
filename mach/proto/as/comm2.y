@@ -59,6 +59,7 @@ static item_t	*last_it, *o_it;
 %token ALIGN
 %token ASSERT
 %token SPACE
+%token SEEK
 %token <y_word> LINE
 %token FILe
 %token <y_word> LIST
@@ -251,6 +252,16 @@ operation
 					nosect();
 				DOTVAL += $2;
 				DOTSCT->s_zero += $2;
+			}
+	|	SEEK absexp
+			{	if (DOTSCT == NULL)
+					nosect();
+				if ($2 < DOTVAL)
+					serror("cannot move location counter backwards");
+				if (pass == PASS_1)
+					DOTSCT->s_flag |= SOUGHT;
+				DOTSCT->s_zero += $2 - DOTVAL;
+				DOTVAL = $2;
 			}
 	|	DATA datalist
 	|	DATA8 data8list

@@ -37,6 +37,7 @@ item_t	keytab[] = {
 	{0,	ALIGN,		0,		".align"},
 	{0,	ASSERT,		0,		".assert"},
 	{0,	SPACE,		0,		".space"},
+	{0,	SEEK,		0,		".seek"},
 	{0,	COMMON,		0,		".comm"},
 	{0,	SECTION,	0,		".sect"},
 	{0,	BASE,		0,		".base"},

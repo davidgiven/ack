@@ -142,6 +142,8 @@ newbase(valu_t base)
 		nosect();
 	if (sp->s_flag & BASED)
 		serror("already based");
+	if (sp->s_flag & SOUGHT)
+		serror("cannot rebase section after a seek");
 	sp->s_base = base;
 	sp->s_flag |= BASED;
 	DOTVAL += base;

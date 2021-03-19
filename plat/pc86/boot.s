@@ -12,19 +12,6 @@
 
 .sect .text
 
-! ****** WARNING! ******
-!
-! The PC boot sector requires a magic number at the end to signify that the
-! disk is bootable. Unfortunately, the ACK assembler is a bit simple and we
-! can't tell it to put the 0xAA55 at a particular address without writing our
-! own custom binary generator. As a result, we need to manually insert just
-! the right amount of padding in order to make this work.
-!
-! If you ever need to change the boot code, this needs adjusting. I recommend
-! a hex editor.
-
-PADDING = 0xB3
-
 ! Some definitions.
 
 BOOT_SEGMENT = 0x07C0        ! Where we've been loaded
@@ -317,7 +304,7 @@ exename: .asciz 'pc86.img'
 
 	! ...and we need this to fool the PC into booting our boot sector.
 	
-	.space PADDING
+	.seek 0x1FE
 	.data2 0xAA55
 
 ! Define symbols at the beginning of our various segments, so that we can find
