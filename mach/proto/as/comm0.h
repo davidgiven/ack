@@ -226,6 +226,7 @@ typedef	struct sect_t	sect_t;
 
 /* s_flag bits: */
 #define	BASED		1	/* at fixed position */
+#define	SOUGHT		2	/* did a .seek in the section */
 
 /* sflag bits: */
 #define	SYM_EXT		001	/* external symbols */
