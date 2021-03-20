@@ -234,6 +234,9 @@ The default is the word-size of the target machine.
 .Pu ".space \fIexpression\fP"
 Allocate the indicated amount of bytes.
 The expression must be absolute.
+.Pu ".seek \fIexpression\fP"
+Advance the current position to the value of the expression.
+The expression must be absolute.
 .Pu ".comm \fIname\fP,\fIexpression\fP"
 Allocate the indicated amount of bytes and assign the location of the first
 byte allocated to
@@ -248,9 +251,8 @@ is extern, then assemblers leave definition of
 to the linkeditor \fIled\fP(1).
 .Pu .sect \fIname\fP
 section name definition.
-.Pu ".base \fIexpresssion\fP"
-Set the starting address of the first of the consecutive segments 
-(text) to the value of the expression.
+.Pu ".base \fIexpression\fP"
+Set the starting address of the current section to the value of the expression.
 The expression must be absolute.
 .Pu .assert \fIexpression\fP
 assembly-time assertion checking. Stop with a fatal error message when
