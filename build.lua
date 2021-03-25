@@ -44,6 +44,7 @@ installable {
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
+		"man+pkg",
 	},
 }
 
