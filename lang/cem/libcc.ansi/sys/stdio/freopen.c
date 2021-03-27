@@ -50,6 +50,9 @@ FILE* freopen(const char* name, const char* mode, FILE* stream)
 		switch (*mode++)
 		{
 			case 'b':
+#if ACKCONF_WANT_O_TEXT_O_BINARY
+				flags |= _IOBINARY;
+#endif
 				continue;
 			case '+':
 				rwmode = O_RDWR;
@@ -62,16 +65,21 @@ FILE* freopen(const char* name, const char* mode, FILE* stream)
 		break;
 	}
 
+#if !ACKCONF_WANT_O_TEXT_O_BINARY
 	if ((rwflags & O_TRUNC)
 	    || (((fd = open(name, rwmode)) < 0)
 	           && (rwflags & O_CREAT)))
 	{
-		if (((fd = creat(name, PMODE)) < 0) && flags | _IOREAD)
+		if (((fd = creat(name, PMODE)) >= 0) && (flags & _IOREAD))
 		{
 			(void)close(fd);
 			fd = open(name, rwmode);
 		}
 	}
+#else
+	rwflags |= (flags & _IOBINARY) ? O_BINARY : O_TEXT;
+	fd = open(name, rwmode | rwflags, PMODE);
+#endif
 
 	if (fd < 0)
 	{

@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
@@ -68,6 +67,9 @@ FILE* fopen(const char* name, const char* mode)
 		switch (*mode++)
 		{
 			case 'b':
+#if ACKCONF_WANT_O_TEXT_O_BINARY
+				flags |= _IOBINARY;
+#endif
 				continue;
 			case '+':
 				rwmode = O_RDWR;
@@ -80,6 +82,7 @@ FILE* fopen(const char* name, const char* mode)
 		break;
 	}
 
+#if !ACKCONF_WANT_O_TEXT_O_BINARY
 	/* Perform a creat() when the file should be truncated or when
 	 * the file is opened for writing and the open() failed.
 	 */
@@ -87,12 +90,16 @@ FILE* fopen(const char* name, const char* mode)
 	    || (((fd = open(name, rwmode)) < 0)
 	           && (rwflags & O_CREAT)))
 	{
-		if (((fd = creat(name, PMODE)) > 0) && flags | _IOREAD)
+		if (((fd = creat(name, PMODE)) >= 0) && (flags & _IOREAD))
 		{
 			(void)close(fd);
 			fd = open(name, rwmode);
 		}
 	}
+#else
+	rwflags |= (flags & _IOBINARY) ? O_BINARY : O_TEXT;
+	fd = open(name, rwmode | rwflags, PMODE);
+#endif
 
 	if (fd < 0)
 		return (FILE*)NULL;
