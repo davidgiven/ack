@@ -6,8 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#define	OUT_OF_MEMORY (void*)(-1)	/* sbrk returns this on failure */
+#include "libsys.h"
 
 struct for_main {
 	int argc;
