@@ -49,5 +49,10 @@ extern ssize_t _sys_rawread(int, char *, size_t);
 extern ssize_t _sys_rawwrite(int, const char *, size_t);
 extern int _sys_isopen(int);
 extern int _sys_isreadyr(int);
+extern int _sys_exists(const char *);
+extern int _sys_rawcreat(const char *, unsigned);
+extern int _sys_rawopen(const char *, int);
+extern off_t _sys_rawlseek(int, off_t, int);
+
 
 #endif
