@@ -41,6 +41,21 @@ extern struct _fdmodes _sys_fdmodes;
 
 #define _FDVECMASK (sizeof(_fdvec_t) * CHAR_BIT - 1)
 
+/* Structures for getting MS-DOS's idea of the current date and time. */
+
+struct _dosdate {
+	uint8_t day;
+	uint8_t month;
+	uint16_t year;
+};
+
+struct _dostime {
+	uint8_t minute;
+	uint8_t hour;
+	uint8_t hsecond;
+	uint8_t second;
+};
+
 extern int _sys_getmode(int);
 extern int _sys_setmode(int, int);
 extern int _sys_iseof(int);
@@ -53,6 +68,7 @@ extern int _sys_exists(const char *);
 extern int _sys_rawcreat(const char *, unsigned);
 extern int _sys_rawopen(const char *, int);
 extern off_t _sys_rawlseek(int, off_t, int);
-
+extern void _sys_getdate(struct _dosdate *);
+extern void _sys_gettime(struct _dostime *);
 
 #endif
