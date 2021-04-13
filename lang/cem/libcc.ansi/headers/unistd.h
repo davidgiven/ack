@@ -24,6 +24,10 @@
         O_WRONLY = 1,
         O_RDWR = 2,
         
+    #if ACKCONF_WANT_O_TEXT_O_BINARY
+        O_TEXT = 010000,
+        O_BINARY = 020000,
+    #endif
         O_CREAT = 0100,
         O_TRUNC = 01000,
         O_APPEND = 02000,

@@ -5,6 +5,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#if ACKCONF_WANT_O_TEXT_O_BINARY
+    #include <unistd.h>
+    #include <fcntl.h>
+#endif
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
@@ -38,6 +42,9 @@ FILE* fdopen(int fd, const char* mode)
 		switch (*mode++)
 		{
 			case 'b':
+#if ACKCONF_WANT_O_TEXT_O_BINARY
+				flags |= _IOBINARY;
+#endif
 				continue;
 			case '+':
 				flags |= _IOREAD | _IOWRITE;
@@ -56,6 +63,17 @@ FILE* fdopen(int fd, const char* mode)
 
 	if ((flags & _IOREAD) && (flags & _IOWRITE))
 		flags &= ~(_IOREADING | _IOWRITING);
+
+#if ACKCONF_WANT_O_TEXT_O_BINARY
+	{
+		/*
+		 * FIXME: this assumes that any platform that has O_TEXT and
+		 * O_BINARY will also have a _setmode() function.
+		 */
+		extern int _setmode(int, int);
+		_setmode(fd, (flags & _IOBINARY) ? O_BINARY : O_TEXT);
+	}
+#endif
 
 	stream->_count = 0;
 	stream->_fd = fd;

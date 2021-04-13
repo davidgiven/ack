@@ -24,6 +24,7 @@ struct FILE {
 #define	_IOREADING	0x080
 #define _IOWRITING	0x100
 #define	_IOAPPEND	0x200
+#define _IOBINARY	0x400
 
 #if !defined BUFSIZ
 #define	BUFSIZ      1024

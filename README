@@ -37,6 +37,7 @@ linuxmips     produces ELF executables for little-endian MIPS32r2 Linux systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
 pdpv7         produces PDP/11 V7 Unix binaries
+msdos86       produces i86 MS-DOS .COM files
 
 
 
