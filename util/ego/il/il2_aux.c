@@ -508,6 +508,42 @@ STATIC void single_calls(proclist)
 			
 
 
+STATIC void unused(proclist)
+	proc_p proclist;
+{
+	/* See if any procedures are defined but will
+	 * never be called. These can be safely removed.
+	 * https://github.com/davidgiven/ack/issues/230
+	 *
+	 * FIXME:
+	 *  1. This does not remove all unused procedures,
+	 *     but only those which would be considered
+	 *     suitable for inlining if used. It is not
+	 *     yet safe to remove "unsuitable" procedures,
+	 *     since the IL pass does not maintain correct
+	 *     caller counts for these.
+	 *  2. Static data structures defined inside
+	 *     unused procedures are not yet removed.
+	 *  3. The "whole program" (-a) setting is ignored.
+	 */
+
+	proc_p p;
+
+	for (p = proclist; p != (proc_p) 0; p = p->p_next) {
+		if (!BIG_CALLER(p) && !IS_DISPENSABLE(p) && SUITABLE(p) &&
+		    p->P_NRCALLED == 0 &&
+		    (p->p_flags1 & (PF_EXTERNAL | PF_LPI)) == 0) {
+			DISPENSABLE(p);
+			OUTVERBOSE("unused: procedure %d can be removed",
+			  p->p_id, 0);
+#ifdef VERBOSE
+			Spremoved++;
+#endif
+		}
+	}
+}
+
+
 
 void select_calls(proclist,ccf,space)
 	proc_p proclist;
@@ -545,6 +581,7 @@ void select_calls(proclist,ccf,space)
 		CHANGED(chp);
 	}
 	single_calls(proclist);
+	unused(proclist);
 #ifdef VERBOSE
 	Sstat(proclist,space);
 #endif
