@@ -118,24 +118,24 @@ The following suffices exist:
 .TS
 tab(:);
 l l.
-.z:no arguments
-.l:16-bit argument
-.L:32-bit argument
-.u:16-bit unsigned argument
-.lw:16-bit argument divided by the wordsize
-.Lw:32-bit argument divided by the wordsize
-.p:positive 16-bit argument
-.P:positive 32-bit argument
-.pw:positive 16-bit argument divided by the wordsize
-.Pw:positive 32-bit argument divided by the wordsize
-.n:negative 16-bit argument
-.N:negative 32-bit argument
-.nw:negative 16-bit argument divided by the wordsize
-.Nw:negative 32-bit argument divided by the wordsize
-.s<num>:shortie with <num> as high order argument byte
-.w<num>:shortie with argument divided by the wordsize
-.<num>:mini with <num> as argument
-.<num>W:mini with <num>*wordsize as argument
+\ .z:no arguments
+\ .l:16-bit argument
+\ .L:32-bit argument
+\ .u:16-bit unsigned argument
+\ .lw:16-bit argument divided by the wordsize
+\ .Lw:32-bit argument divided by the wordsize
+\ .p:positive 16-bit argument
+\ .P:positive 32-bit argument
+\ .pw:positive 16-bit argument divided by the wordsize
+\ .Pw:positive 32-bit argument divided by the wordsize
+\ .n:negative 16-bit argument
+\ .N:negative 32-bit argument
+\ .nw:negative 16-bit argument divided by the wordsize
+\ .Nw:negative 32-bit argument divided by the wordsize
+\ .s<num>:shortie with <num> as high order argument byte
+\ .w<num>:shortie with argument divided by the wordsize
+\ .<num>:mini with <num> as argument
+\ .<num>W:mini with <num>*wordsize as argument
 .TE
 .LP
 <num> is a possibly negative integer.
