@@ -24,7 +24,12 @@ begtext:
 	xchg bx, ax
 	jc bad_sys
 
-	! Clear BSS.
+	! Clear BSS.  If under the small memory model, assume that ss
+	! already points to the program data segment.
+#if SEPID
+	push ss
+	pop es
+#endif
 	mov di, begbss
 	mov cx, endbss+1
 	sub cx, di
@@ -67,10 +72,37 @@ copy_env:
 	jnz copy_env
 	mov cx, sp
 
-	! Reset DF and es properly.
-	cld
+	! Reset es properly.
 	push ss
 	pop es
+
+#ifdef SEPID
+	! If under the small data model, copy command line arguments from
+	! the PSP onto the stack.
+	mov si, 0x0080
+	lodsw
+	cbw
+	inc ax
+	shr ax, 1
+	inc ax
+	add si, ax
+	add si, ax
+	xchg di, ax
+copy_args:
+	lodsw
+	push ax
+	dec di
+	jnz copy_args
+
+	mov di, sp
+#endif
+
+	! Reset ds and DF properly.
+#if SEPID
+	push ss
+	pop ds
+#endif
+	cld
 
 	! Reserve space for argc and the argv and envp pointers on the
 	! stack.  These will be passed to __m_a_i_n later.
@@ -82,8 +114,12 @@ copy_env:
 	push bx				! MS-DOS version
 	push cx				! env. string data
 	push dx				! count of env. vars.
+#if SEPID
+	push di				! raw command line
+#else
 	mov ax, 0x0080
 	push ax				! raw command line
+#endif
 	call __sys_initmain
 	add sp, 10
 
@@ -97,6 +133,7 @@ copy_env:
 	push ax
 	call _exit
 
+#if !SEPID
 bad_sys:
 	mov dx, bad_sys_msg
 dos_msg:
@@ -109,6 +146,27 @@ no_room:
 	call dos_msg
 	movb al, -1
 	jmp al_exit
+#else
+bad_sys:
+	movb ah, 9
+	cwd				! dx := 0
+	push es
+	push dx
+	push ss
+	pop ds
+	mov dx, bad_sys_msg
+	int 0x21
+	retf				! return to the 'int 0x20' at PSP:0
+
+no_room:
+	push ss
+	pop ds
+	mov dx, no_room_msg
+	movb ah, 9
+	int 0x21
+	movb al, -1
+	jmp al_exit
+#endif
 
 	! Exit.
 .define __exit
