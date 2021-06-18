@@ -22,6 +22,7 @@ end
 
 simpleprogram("abmodules")
 simpleprogram("aelflod")
+simpleprogram("amzlod")
 simpleprogram("anm")
 simpleprogram("ashow")
 simpleprogram("asize")
@@ -33,6 +34,7 @@ installable {
 	map = {
 		"+abmodules-pkg",
 		"+aelflod-pkg",
+		"+amzlod-pkg",
 		"+anm-pkg",
 		"+ashow-pkg",
 		"+asize-pkg",
