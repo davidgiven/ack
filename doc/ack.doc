@@ -240,7 +240,6 @@ The flags \fB\-m\fP, \fB\-o\fP,
 not handed down to any transformation.
 The matching is performed in the order in which the entries
 appear in the definition.
-The scanning stops after first match is found.
 When a match is found, the variable assignment is executed.
 A * in the match expression matches any sequence of characters,
 a * in the right hand part of the assignment is

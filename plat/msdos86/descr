@@ -33,6 +33,7 @@ var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
 
 var SEPID=-b0:0x100
 var LOD=aslod
+var BOOT=boot.o
 
 name be
 	from .m.g
@@ -55,10 +56,11 @@ name led
 	program {EM}/lib/ack/em_led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -i SEPID=-b1:0
+	mapflag -i BOOT=boot-sepid.o
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID} \
 		({RTS}:.b=-u _i_main) \
-	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
+	    (.e:{HEAD}={PLATFORMDIR}/{BOOT}) \
 		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
 		({RTS}:.mod={PLATFORMDIR}/modula2.o) \

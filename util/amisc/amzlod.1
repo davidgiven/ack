@@ -1,0 +1,36 @@
+.TH AMZLOD 1 2021-06-18
+.SH NAME
+amzlod \- ACK MZ loader
+.SH SYNOPSIS
+.B amzlod
+[\-h] [\-v] inputfile outputfile
+.SH DESCRIPTION
+.I amzlod
+converts an absolute ack.out file with separate instruction
+and data spaces, into a simple binary memory
+dump wrapped up in an MZ executable.
+It is suitable for producing executables for the MS-DOS
+operating system.
+.PP
+.I amzlod
+accepts the following flags:
+.TP
+.B \-h
+Print a help message and exit.
+.TP
+.B \-v
+Be verbose.
+.PP
+The input file must contain exactly four segments: TEXT, ROM,
+DATA and BSS, in that order.
+ROM, DATA and BSS must occupy contiguous memory.
+The file must have all references resolved and be linked to
+fixed addresses.
+All text and data address offsets must fit in 16 bits.
+.PP
+.I amzlod
+will write out an MZ header followed by each segment, in order,
+ensuring that enough padding is inserted between each segment
+to keep the offsets correct.
+.SH "SEE ALSO"
+ack.out(5)

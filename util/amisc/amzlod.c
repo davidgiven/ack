@@ -1,21 +1,14 @@
 /*
- * Simple tool to produce a memory dump for an absolute
- * ack.out file. Suitable for noddy operating systems
- * like DOS, CP/M, Arthur, etc. Also useful for RAM
- * images (but *not* ROM images, note) and, more
- * importantly, general test purposes.
+ * Simple tool to produce an MS-DOS MZ executable for an
+ * absolute ack.out file.  This is currently only useful
+ * for the MS-DOS target.
  * 
- * Mostly pinched from the ARM cv (and then rewritten in
- * ANSI C). Which, according to the comment, was pinched
- * from m68k2; therefore I am merely continuing a time-
- * honoured tradition.
+ * Derived from aslod.c and aelflod.c.
  * 
- * (I was 10 when the original for this was checked into
- * CVS...)
- * 
- * dtrg, 2006-10-17
+ * TK Chia, June 2021
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -25,8 +18,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "out.h"
-
-#define ASSERT(x) switch (2) { case 0: case (x): ; }
 
 /*
  * Header and section table of ack object file.
@@ -40,14 +31,11 @@ char* outputfile = NULL;                /* Name of output file, or NULL */
 char* program;                          /* Name of current program: argv[0] */
 
 FILE* input;                            /* Input stream */
-FILE* output;                           /* Output stream */
-
-#define readf(a, b, c)	fread((a), (b), (int)(c), input)
-#define writef(a, b, c)	fwrite((a), (b), (int)(c), output)
+FILE* output = NULL;                    /* Output stream */
 
 bool verbose = false;
 
-/* Segment numbers understood by aslod. */
+/* Segment numbers understood by amzlod. */
 
 enum {
 	TEXT = 0,
@@ -71,9 +59,37 @@ void fatal(const char* s, ...)
 	
 	fprintf(stderr, "\n");
 	
+	if (output)
+		fclose(output);
 	if (outputfile)
 		unlink(outputfile);
 	exit(1);
+}
+
+/* Read bytes from the input file. */
+
+void readf(void *a, size_t b, size_t c)
+{
+	int err;
+	errno = 0;
+	if (fread(a, b, c, input) != c)
+	{
+		err = errno;
+		fatal("read error: %s.", err ? strerror(err) : "end of file?");
+	}
+}
+
+/* Write bytes to the output file. */
+
+void writef(const void *a, size_t b, size_t c)
+{
+	int err;
+	errno = 0;
+	if (fwrite(a, b, c, output) != c)
+	{
+		err = errno;
+		fatal("write error: %s.", err ? strerror(err) : "disk full?");
+	}
 }
 
 /* Calculate the result of a aligned to b (rounding up if necessary). */
@@ -89,6 +105,100 @@ int follows(struct outsect* pa, struct outsect* pb)
 	/* return 1 if pa follows pb */
  
 	return (pa->os_base == align(pb->os_base+pb->os_size, pa->os_lign));
+}
+
+/* Writes out a 16-bit word (in little endian form). */
+
+void emit16(unsigned short value)
+{
+	unsigned char buffer[2];
+
+	buffer[1] = (value >> 8) & 0xFF;
+	buffer[0] = (value >> 0) & 0xFF;
+
+	writef(buffer, 1, sizeof(buffer));
+}
+
+/* Number of bytes in a paragraph, and in a "page", in the MZ format
+ * definition.
+ */
+
+#define MZ_PARA_SZ	0x0010U
+#define MZ_PG_SZ	0x0200U
+
+/* Various pre-set parameters for the output MZ file.
+ *
+ * MZ_HDR_PARAS gives the MZ header size in (16-byte) paragraphs.  (NOTE:
+ * MS-DOS 1.x will round this size up to a multiple of the page size ---
+ * i.e. 0x20 paragraphs.  So if we want the output program to not crash on
+ * DOS 1.x, we will need to pad the header to the page size.  Urrgh.  If
+ * compatibility with DOS 1.x is not needed, we can squish the header to only
+ * 2 paragraphs.)
+ *
+ * MZ_INI_SP is the initial stack pointer value within the program's data
+ * segment.  MZ_STK_SZ is the minimum size of the stack we want to ensure
+ * for the output program.
+ */
+
+#define MZ_HDR_PARAS	0x0020U
+#define MZ_INI_SP	0x0000U
+#define MZ_STK_SZ	0x0100U
+
+/* Writes out an appropriate MS-DOS MZ header.  (The MZ header format is
+ * documented at OSDev (https://wiki.osdev.org/MZ), in Ralf Brown's
+ * Interrupt List (www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html),
+ * and possibly elsewhere.)
+ */
+
+void emith(void)
+{
+	uint32_t text_start, text_size, total_size;
+	uint16_t data_start, data_end, stack_end, min_extra_paras;
+	size_t n;
+
+	/* Write the magic number. */
+	emit16(0x5A4D);
+	/* Write the size of the executable code and data. */
+	text_size = align(outsect[TEXT].os_size, MZ_PARA_SZ);
+	total_size  = MZ_HDR_PARAS * MZ_PARA_SZ;
+	total_size += text_size;
+	total_size += align(outsect[ROM].os_base + outsect[ROM].os_size,
+			    outsect[DATA].os_lign) - outsect[ROM].os_base;
+	total_size += align(outsect[DATA].os_base + outsect[DATA].os_size,
+			    outsect[BSS].os_lign) - outsect[DATA].os_base;
+	emit16(total_size % MZ_PG_SZ);
+	emit16((total_size + MZ_PG_SZ - 1) / MZ_PG_SZ);
+	/* Write the relocation entry count. */
+	emit16(0);
+	/* Write the header size. */
+	emit16(MZ_HDR_PARAS);
+	/* Write the minimum and maximum extra paragraph count. */
+	data_end = outsect[DATA].os_base + outsect[DATA].os_size;
+	data_end = (uint16_t)align(data_end, MZ_PARA_SZ);
+	stack_end = (uint16_t)align(MZ_INI_SP, MZ_PARA_SZ);
+	emit16((uint16_t)(stack_end - data_end) / MZ_PARA_SZ);
+	emit16(0xFFFFU);
+	/* Write the initial ss (relative) and sp. */
+	data_start = outsect[ROM].os_base;
+	emit16((uint16_t)(text_size / MZ_PARA_SZ - data_start / MZ_PARA_SZ));
+	emit16(MZ_INI_SP);
+	/* Write a dummy checksum. */
+	emit16(0);
+	/*
+	 * Write the initial ip and (relative) cs.  Assume that the entry
+	 * point is right at the start of the text section.
+	 */
+	text_start = outsect[TEXT].os_base;
+	emit16(text_start);
+	emit16(-(text_start / MZ_PARA_SZ));
+	/* Write the relocation table offset. */
+	emit16(0x001CU);
+	/* Write the overlay number --- 0, since this is a main program. */
+	emit16(0);
+	/* Pad to the pre-set header size. */
+	n = (MZ_PARA_SZ / 2) * MZ_HDR_PARAS - (0x1CU / 2);
+	while (n-- != 0)
+		emit16(0);
 }
 
 /* Copies the contents of a section from the input stream
@@ -114,10 +224,14 @@ void emits(struct outsect* section, struct outsect* nextsect)
 	}
 
 	/* Calculate the actual size of the section in the final memory
-	 * layout.  Take into account the next section's alignment, if any.  */
+	 * layout.  Take into account the next section's alignment, if any.
+	 * If there is no next section, align to a paragraph boundary. */
 	real_size = section->os_size;
 	if (nextsect)
 		real_size = align(section->os_base + real_size, nextsect->os_lign)
+			    - section->os_base;
+	else
+		real_size = align(section->os_base + real_size, MZ_PARA_SZ)
 			    - section->os_base;
 
 	/* Zero fill any remaining space. */
@@ -183,6 +297,8 @@ int rsect(FILE* f, struct outsect* sect)
 
 int main(int argc, char* argv[])
 {
+	uint16_t bss_max;
+
 	/* General housecleaning and setup. */
 	
 	input = stdin;
@@ -196,7 +312,7 @@ int main(int argc, char* argv[])
 		switch (argv[1][1])
 		{
 			case 'h':
-				fprintf(stderr, "%s: Syntax: aslod [-h] <inputfile> <outputfile>\n",
+				fprintf(stderr, "%s: Syntax: amzlod [-h] [-v] <inputfile> <outputfile>\n",
 					program);
 				exit(0);
 				
@@ -221,14 +337,14 @@ int main(int argc, char* argv[])
 			break;
 			
 		case 3: /* Both input and output files specified. */
-			output = fopen(argv[2], "w");
+			output = fopen(argv[2], "wb");
 			if (!output)
 				fatal("unable to open output file.");
 			outputfile = argv[2];
 			/* fall through */
 			
 		case 2: /* Input file specified. */
-			input = fopen(argv[1], "r");
+			input = fopen(argv[1], "rb");
 			if (!input)
 				fatal("unable to open input file.");
 			break;
@@ -263,17 +379,42 @@ int main(int argc, char* argv[])
 
 	/* A few checks */
 
+	if (outsect[TEXT].os_base % MZ_PARA_SZ != 0)
+		fatal("the text segment is not paragraph aligned.");
+
+	if (outsect[ROM].os_base % MZ_PARA_SZ != 0)
+		fatal("the rom segment is not paragraph aligned.");
+
 	if (outsect[BSS].os_flen != 0)
 		fatal("the bss space contains initialized data.");
 
 	if (!follows(&outsect[BSS], &outsect[DATA]))
 		fatal("the bss segment must follow the data segment.");
 
-	if (!follows(& outsect[ROM], &outsect[TEXT]))
-		fatal("the rom segment must follow the text segment.");
-
 	if (!follows(&outsect[DATA], &outsect[ROM]))
 		fatal("the data segment must follow the rom segment.") ;
+
+	if (outsect[TEXT].os_base > 0xFFFFUL ||
+	    outsect[TEXT].os_size > 0xFFFFUL - outsect[TEXT].os_base)
+		fatal("text segment addresses do not fit into 16 bits.");
+
+	bss_max = (uint16_t)MZ_INI_SP - (uint16_t)MZ_STK_SZ;
+
+	if (outsect[ROM].os_base > 0xFFFFUL ||
+	    outsect[ROM].os_size > 0xFFFFUL - outsect[ROM].os_base)
+		fatal("rom segment addresses do not fit into 16 bits.");
+
+	if (outsect[DATA].os_base > 0xFFFFUL ||
+	    outsect[DATA].os_size > 0xFFFFUL - outsect[DATA].os_base)
+		fatal("data segment addresses do not fit into 16 bits.");
+
+	if (outsect[BSS].os_base > 0xFFFFUL ||
+	    outsect[BSS].os_size > 0xFFFFUL - outsect[BSS].os_base)
+		fatal("bss segment addresses do not fit into 16 bits.");
+
+	if (outsect[BSS].os_base > bss_max ||
+	    outsect[BSS].os_size > bss_max - outsect[BSS].os_base)
+		fatal("not enough space left for stack.");
 
 	/* Check for an optional end segment (which is otherwise
 	 * ignored). */
@@ -286,11 +427,15 @@ int main(int argc, char* argv[])
 			fatal("end segment must be empty");
 	}
 
+	/* Write out the MZ header. */
+
+	emith();
+
 	/* And go! */
 	
-	emits(&outsect[TEXT], &outsect[ROM]);
+	emits(&outsect[TEXT], NULL);
 	emits(&outsect[ROM], &outsect[DATA]);
-	emits(&outsect[DATA], NULL);
+	emits(&outsect[DATA], &outsect[BSS]);
 
 	if (ferror(output))
 		fatal("output write error");

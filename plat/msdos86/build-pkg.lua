@@ -3,7 +3,19 @@ include("plat/build.lua")
 ackfile {
 	name = "boot",
 	srcs = { "./boot.s" },
-	vars = { plat = "msdos86" }
+	vars = {
+		["+ackcflags"] = { "-DSEPID=0" },
+		plat = "msdos86"
+	}
+}
+
+ackfile {
+	name = "boot-sepid",
+	srcs = { "./boot.s" },
+	vars = {
+		["+ackcflags"] = { "-DSEPID=1" },
+		plat = "msdos86"
+	}
 }
 
 build_plat_libs {
@@ -17,9 +29,10 @@ installable {
 	map = {
 		"+tools",
 		"+libs",
-        "./include+pkg",
+		"./include+pkg",
 		["$(PLATIND)/msdos86/boot.o"] = "+boot",
-        ["$(PLATIND)/msdos86/libsys.a"] = "./libsys+lib",
+		["$(PLATIND)/msdos86/boot-sepid.o"] = "+boot-sepid",
+		["$(PLATIND)/msdos86/libsys.a"] = "./libsys+lib",
 	}
 }
 

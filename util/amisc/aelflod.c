@@ -717,17 +717,17 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "Warning: relocation information present.");
 	if (!((outhead.oh_nsect == NUM_SEGMENTS) ||
 	      (outhead.oh_nsect == (NUM_SEGMENTS+1))))
-		fatal("the input file must have %d sections, not %ld.",
-			NUM_SEGMENTS, outhead.oh_nsect);
+		fatal("the input file must have %u sections, not %u.",
+			(unsigned)NUM_SEGMENTS, (unsigned)outhead.oh_nsect);
 			
 	/* Read in the section headers. */
 	
 	{
-		int i;
+		unsigned i;
 		for (i=0; i<outhead.oh_nsect; i++)
 		{
 			if (!rsect(input, &outsect[i]))
-				fatal("failed to read section header %d.", i);
+				fatal("failed to read section header %u.", i);
 		}
 	}
 

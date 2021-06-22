@@ -556,20 +556,20 @@ static int mapflag(list_head* maplist, const char* cflag)
 	   The star matches anything as in the shell.
 	   If the entry matches the assignment will take place
 	   This replacement is subjected to argument matching only.
-	   When a match took place the replacement is returned
-	   when not, (char *)0.
+	   When a match took place 1 is returned, when not, 0.
 	   The replacement sits in stable storage.
 	*/
+	register int matched = 0;
 	register list_elem* elem;
 
 	scanlist(l_first(*maplist), elem)
 	{
 		if (mapexpand(l_content(*elem), cflag))
 		{
-			return 1;
+			matched = 1;
 		}
 	}
-	return 0;
+	return matched;
 }
 
 static int mapexpand(char* mapentry, const char* cflag)
