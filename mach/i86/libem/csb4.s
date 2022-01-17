@@ -16,7 +16,7 @@
 	jne     1b
 	cmp	dx,2(bx)
 	jne     1b
-	pop	bx
+	pop	cx
 	mov	bx,4(bx)
 2:
 	test    bx,bx
