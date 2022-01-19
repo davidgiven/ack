@@ -7,6 +7,7 @@ acklibrary {
 		"plat/linux/libsys/close.c",
 		"plat/linux/libsys/creat.c",
 		"plat/linux/libsys/execve.c",
+		"plat/linux/libsys/fork.c",
 		"plat/linux/libsys/getpid.c",
 		"plat/linux/libsys/gettimeofday.c",
 		"plat/linux/libsys/ioctl.c",
@@ -19,6 +20,8 @@ acklibrary {
 		"plat/linux/libsys/signal.c",
 		"plat/linux/libsys/sigprocmask.c",
 		"plat/linux/libsys/unlink.c",
+		"plat/linux/libsys/wait.c",
+		"plat/linux/libsys/waitpid.c",
 		"plat/linux/libsys/write.c",
 	},
 	deps = {

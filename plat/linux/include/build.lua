@@ -13,6 +13,7 @@ addheader("ack/fcntl.h")
 addheader("ack/signal.h")
 addheader("sys/ioctl.h")
 addheader("sys/types.h")
+addheader("sys/wait.h")
 
 
 acklibrary {
