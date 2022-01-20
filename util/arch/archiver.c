@@ -24,6 +24,9 @@
  #ifdef DISTRIBUTION
  *    D: make distribution: use distr_time, uid=2, gid=2, mode=0644
  #endif
+ #ifdef AAL
+ *    s: ignored; for compatibility with GNU ar (says to build index table)
+ #endif
  */
 
 #include <fcntl.h>
@@ -323,6 +326,10 @@ int main(int argc, char *argv[])
 #ifdef DISTRIBUTION
 			case 'D' :
 			distr_fl = TRUE;
+			break;
+#endif
+#ifdef AAL
+		case 's':
 			break;
 #endif
 		default:
