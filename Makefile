@@ -5,45 +5,45 @@
 
 # What platform to build for by default?
 
-DEFAULT_PLATFORM = pc86
+DEFAULT_PLATFORM ?= pc86
 
 # Where should the ACK put its temporary files?
 
-ACK_TEMP_DIR = /tmp
+ACK_TEMP_DIR ?= /tmp
 
 # Where is the ACK going to be installed, eventually? If you don't want to
 # install it and just want to run the ACK from the build directory
 # (/tmp/ack-build/staging, by default), leave this as $(INSDIR).
 
-PREFIX = /usr/local
+PREFIX ?= /usr/local
 #PREFIX = $(INSDIR)
 
 # Where do you want to put the object files used when building?
 
-BUILDDIR = $(ACK_TEMP_DIR)/ack-build
+BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 
 # What build flags do you want to use for native code?
 
-CFLAGS = -g -Wno-return-type
-LDFLAGS = 
+CFLAGS ?= -g -Wno-return-type
+LDFLAGS ?= 
 
 # Various commands.
 
-AR = ar
-CC = gcc
+AR ?= ar
+CC ?= gcc
 
 # Which build system to use; use 'ninja' or 'make' (in lower case). Leave
 # blank to autodetect.
 
-BUILDSYSTEM =
+BUILDSYSTEM ?=
 
 # Build flags for ninja.
 
-NINJAFLAGS =
+NINJAFLAGS ?=
 
 # Build flags for make.
 
-MAKEFLAGS = 
+MAKEFLAGS ?= 
 
 # ======================================================================= #
 #                         END OF CONFIGURATION                            #
