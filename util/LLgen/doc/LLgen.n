@@ -9,7 +9,10 @@
 .		if t .ds <, ,\
 \}\
 \}
-.cs 5 22u
+.R1
+database doc/LLgen.refs
+accumulate
+.R2
 .ND
 .EQ
 delim @@
