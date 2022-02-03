@@ -22,8 +22,15 @@ SRCS = \
 	src/sets.c \
 	src/tokens.c
 
+DOCS = \
+	doc/LLgen.n \
+	doc/LLgen_NCER.n \
+
 OBJS = $(patsubst %.c, $(OBJDIR)/%.o, $(SRCS))
 DEPS = $(patsubst %.c, $(OBJDIR)/%.d, $(SRCS))
+PDFS = $(patsubst doc/%.n, $(OBJDIR)/%.pdf, $(DOCS))
+
+all: LLgen doc
 
 LLgen: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
@@ -33,16 +40,19 @@ $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) -MMD -c -o $@ $<
 
 $(OBJDIR)/%.pdf: doc/%.n doc/LLgen.refs
-	refer -p doc/LLgen.refs $^ | groff -G -e -g -p -ms -Tpdf > $@
+	@mkdir -p $(dir $@)
+	groff -R -G -e -g -p -ms -Tpdf $< > $@
+
+doc:: $(PDFS)
 
 clean:
 	rm -rf $(OBJDIR)
 
-install: LLgen doc/LLgen.1 $(OBJDIR)/LLgen.pdf $(OBJDIR)/LLgen_NCER.pdf $(wildcard lib/*)
-	install -D -s LLgen                    -T $(PREFIX)/bin/LLgen
-	install -D    doc/LLgen.1              -T $(PREFIX)/man/man1/LLgen.1
-	install -D    $(OBJDIR)/LLgen.pdf      -T $(PREFIX)/doc/LLgen
-	install -D    $(OBJDIR)/LLgen_NCER.pdf -T $(PREFIX)/doc/LLgen
+install: LLgen doc/LLgen.1 $(PDFS) $(wildcard lib/*)
+	install -D -s LLgen                    -t $(PREFIX)/bin
+	install -D    doc/LLgen.1              -t $(PREFIX)/man/man1
+	install -D    $(OBJDIR)/LLgen.pdf      -t $(PREFIX)/doc/LLgen
+	install -D    $(OBJDIR)/LLgen_NCER.pdf -t $(PREFIX)/doc/LLgen
 	install -D    $(wildcard lib/*)        -t $(PREFIX)/share/LLgen
 	
 -include $(DEPS)
