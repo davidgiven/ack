@@ -20,9 +20,15 @@ to give some insight into how the ACK works.
     </tr>
     <tr>
       <td>LLgen</td>
-      <td><a href="olddocs/LLgen.html">html</a></td>
+      <td><a href="olddocs/LLgen/index.html">html</a></td>
       <td><a href="olddocs/LLgen.pdf">pdf</a></td>
       <td>the LL(1) parser generator</td>
+    </tr>
+    <tr>
+      <td>LLgen_NCER</td>
+      <td><a href="olddocs/LLgen_NCER/index.html">html</a></td>
+      <td><a href="olddocs/LLgen_NCER.pdf">pdf</a></td>
+      <td>LLgen's error recovery system</td>
     </tr>
     <tr>
       <td>ack</td>

@@ -1,0 +1,4302 @@
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Sat Feb  5 21:46:53 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>Top-down Non-Correcting Error Recovery in LLgen</title>
+
+</head>
+<body>
+
+<h1 align="center">Top-down Non-Correcting Error Recovery in LLgen</h1>
+
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#1.1. Non-correcting syntax error recovery">1.1. Non-correcting syntax error recovery</a><br>
+<a href="#1.2. Overview of LLgen">1.2. Overview of LLgen</a><br>
+<a href="#1.3. Incorporation of non-correcting error recovery inLLgen">1.3. Incorporation of non-correcting error recovery inLLgen</a><br>
+<a href="#2. The LL suffix parser">2. The LL suffix parser</a><br>
+<a href="#2.1. LLgen conflict resolvers and their implications">2.1. LLgen conflict resolvers and their implications</a><br>
+<a href="#2.2. The suffix parser algorithm">2.2. The suffix parser algorithm</a><br>
+<a href="#2.3. The prediction graph data structure">2.3. The prediction graph data structure</a><br>
+<a href="#2.4. Handling right recursion">2.4. Handling right recursion</a><br>
+<a href="#2.5. Handling left recursion">2.5. Handling left recursion</a><br>
+<a href="#2.6. Some optimizations using reference counts">2.6. Some optimizations using reference counts</a><br>
+<a href="#2.7. The algorithm to delete inaccessible loops">2.7. The algorithm to delete inaccessible loops</a><br>
+<a href="#2.8. Marking loop elements">2.8. Marking loop elements</a><br>
+<a href="#2.9. Optimizations using FIRST and FOLLOW sets">2.9. Optimizations using FIRST and FOLLOW sets</a><br>
+<a href="#3. Test results">3. Test results</a><br>
+<a href="#3.1. Performance">3.1. Performance</a><br>
+<a href="#3.1.1. Time and space measurements on the effect of thefirst-set optimization">3.1.1. Time and space measurements on the effect of thefirst-set optimization</a><br>
+<a href="#3.1.2. Input that is recognized in quadratic time">3.1.2. Input that is recognized in quadratic time</a><br>
+<a href="#3.1.3. Time measurements on the effect of leaving out theloop-deletion algorithm">3.1.3. Time measurements on the effect of leaving out theloop-deletion algorithm</a><br>
+<a href="#3.1.4. Space measurements on the effect of leaving out theloop-deletion algorithm">3.1.4. Space measurements on the effect of leaving out theloop-deletion algorithm</a><br>
+<a href="#3.2. Problems encountered">3.2. Problems encountered</a><br>
+<a href="#3.2.1. The LLgen error reporting mechanism.">3.2.1. The LLgen error reporting mechanism.</a><br>
+<a href="#3.2.2. Parsers being started in semantic actions">3.2.2. Parsers being started in semantic actions</a><br>
+<a href="#3.2.3. Syntactic errors being handled in semantic actions">3.2.3. Syntactic errors being handled in semantic actions</a><br>
+<a href="#3.2.4. Semantic actions that read input">3.2.4. Semantic actions that read input</a><br>
+<a href="#3.3. Examples of error recovery">3.3. Examples of error recovery</a><br>
+<a href="#4. Conclusion">4. Conclusion</a><br>
+<a href="#5. Bibliography">5. Bibliography</a><br>
+<a href="#Appendix A: Implementation Issues">Appendix A: Implementation Issues</a><br>
+<a href="#A.1 The grammar data structure">A.1 The grammar data structure</a><br>
+<a href="#A.2 Delayed deletes">A.2 Delayed deletes</a><br>
+<a href="#A.3 Clearing flags">A.3 Clearing flags</a><br>
+<a href="#A.4 Implementation of %erroneous directive">A.4 Implementation of %erroneous directive</a><br>
+<a href="#Appendix B: Using the non-correcting error recovery">Appendix B: Using the non-correcting error recovery</a><br>
+
+<hr>
+
+
+<p align="center"><i>Arthur van Deudekom <br>
+Peter Kooiman</i> <br>
+Department of Mathematics and Computer Science <br>
+Vrije Universiteit <br>
+Amsterdam</p>
+
+<p align="center" style="margin-top: 1em">Supervised by
+<i><br>
+dr. D. Grune</i> <br>
+Department of Mathematics and Computer Science <br>
+Vrije Universiteit <br>
+Amsterdam</p>
+
+
+<p align="center" style="margin-top: 1em"><i>ABSTRACT</i></p>
+
+<p style="margin-top: 1em">This paper describes the design
+and implementation of a parser generator with non-correcting
+error recovery based on the extended LL(1) parser generator
+LLgen. It describes a top-down algorithm for implementing
+this error recovery technique that can handle left-recursive
+grammars. The parser generator has been tested with several
+existing ACK-compilers, among which C and Modula-2. Various
+optimizations have been tried and are discussed in this
+paper.</p>
+
+<h2>1. Introduction
+<a name="1. Introduction"></a>
+</h2>
+
+
+<p style="margin-left:10%; margin-top: 1em">One of the
+trickier problems in constructing parser-generators is what
+to do when the input to the generated parser is not well
+formed. Several approaches are known, most of which are
+&lsquo;correcting&rsquo;, meaning that they modify the input
+to make it correct. However, in most cases there are several
+possible corrections, and often the one chosen will turn out
+to be the wrong one. As a result of such an incorrect
+choice, spurious error messages can occur. Every programmer
+knows from experience how the omission of a single
+&lsquo;)&rsquo; can on occasion lead to pages of error
+messages.</p>
+
+<p style="margin-left:10%; margin-top: 1em">A radically
+different approach is to just discard all the input up to
+and including the offending token, and start with a clean
+slate at the token following the offending one. [RICHTER]
+describes how this idea can be used to construct a
+non-correcting error recovery system that will never
+introduce spurious error messages. It is, however, possible
+that errors are overlooked.</p>
+
+<p style="margin-left:10%; margin-top: 1em">In this paper
+we describe the incorporation of this non-correcting error
+recovery into LLgen, an existing LL(1) parser generator. In
+this introduction, we will describe in detail this
+non-correcting error recovery technique, give an overview of
+LLgen and how it handles errors, and finally describe how we
+have incorporated noncorrecting error recovery in LLgen.</p>
+
+<h3>1.1. Non-correcting syntax error recovery
+<a name="1.1. Non-correcting syntax error recovery"></a>
+</h3>
+
+
+<p style="margin-top: 1em">Richter describes how syntax
+error recovery can be done without making any corrections to
+the input text. Richter gives three reasons why recovery
+without correction is desirable:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="2%">
+
+
+<p style="margin-top: 1em">1</p></td>
+<td width="8%"></td>
+<td width="90%">
+
+
+<p style="margin-top: 1em">In most cases there are many
+possible corrections, the choice among which will severely
+influence the further processing of the input. Thus, the
+probability of selecting the right correction is not
+high.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="2%">
+
+
+<p>2</p></td>
+<td width="8%"></td>
+<td width="90%">
+
+
+<p>The harm done by selecting the wrong correction is often
+unlimited.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="2%">
+
+
+<p>3</p></td>
+<td width="8%"></td>
+<td width="90%">
+
+
+<p>The loss of information to the user of a non-correcting
+recovery technique need not be grave.</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">The non-correcting technique
+described by Richter can be summarized as follows: When a
+syntax-error has occurred, the input up to and including the
+erroneous symbol is discarded; the remainder of the input is
+processed by a substring parser of the input language, that
+is a parser that recognizes any substring of a string in the
+input language. When the substring parser detects a syntax
+error, the offending symbol is reported as another error,
+and the input up to and including the erroneous symbol is
+discarded. The process is then repeated with the remaining
+input, possibly finding other syntax errors, until all the
+input is scanned. This process yields what Richter calls a
+<i>suffix analysis</i> of an input string. Formally, given
+an input string <i>x</i> , suffix analysis produces a set of
+strings</p>
+
+
+<p align="center"><img src="grohtml-68409-2.png" alt="Image grohtml-68409-2.png"></p>
+
+<p>and a set of symbols
+<img src="grohtml-68409-3.png" alt="Image grohtml-68409-3.png">
+such that</p>
+
+
+<p style="margin-left:10%; margin-top: 1em"><img src="grohtml-68409-4.png" alt="Image grohtml-68409-4.png"></p>
+
+<p style="margin-top: 1em">and such that:
+<img src="grohtml-68409-5.png" alt="Image grohtml-68409-5.png">
+is the longest prefix of
+<img src="grohtml-68409-6.png" alt="Image grohtml-68409-6.png">
+that is a prefix of a string in the input language L,
+formally: there is a string
+<img src="grohtml-68409-7.png" alt="Image grohtml-68409-7.png">
+such that
+<img src="grohtml-68409-8.png" alt="Image grohtml-68409-8.png">
+is in L, but there is no string
+<img src="grohtml-68409-9.png" alt="Image grohtml-68409-9.png">
+such that
+<img src="grohtml-68409-10.png" alt="Image grohtml-68409-10.png">
+is in L;</p>
+
+<p style="margin-left:10%; margin-top: 1em">For
+<img src="grohtml-68409-11.png" alt="Image grohtml-68409-11.png">
+,
+<img src="grohtml-68409-12.png" alt="Image grohtml-68409-12.png">
+is a longest substring of
+<img src="grohtml-68409-13.png" alt="Image grohtml-68409-13.png">
+that is also a substring of a string in L, formally there
+are strings
+<img src="grohtml-68409-14.png" alt="Image grohtml-68409-14.png">
+and
+<img src="grohtml-68409-15.png" alt="Image grohtml-68409-15.png">
+such that
+<img src="grohtml-68409-16.png" alt="Image grohtml-68409-16.png">
+is in L, but there are no strings
+<img src="grohtml-68409-17.png" alt="Image grohtml-68409-17.png">
+en
+<img src="grohtml-68409-18.png" alt="Image grohtml-68409-18.png">
+such that
+<img src="grohtml-68409-19.png" alt="Image grohtml-68409-19.png">
+is in L;</p>
+
+
+<p style="margin-left:10%; margin-top: 1em"><img src="grohtml-68409-20.png" alt="Image grohtml-68409-20.png">
+is a substring of
+<img src="grohtml-68409-21.png" alt="Image grohtml-68409-21.png">
+that is a substring of a string in L, formally: there exist
+<img src="grohtml-68409-22.png" alt="Image grohtml-68409-22.png">
+and
+<img src="grohtml-68409-23.png" alt="Image grohtml-68409-23.png">
+, such that
+<img src="grohtml-68409-24.png" alt="Image grohtml-68409-24.png">
+is in L. Note that
+<img src="grohtml-68409-25.png" alt="Image grohtml-68409-25.png">
+need not be a suffix of a string in L, if
+<img src="grohtml-68409-26.png" alt="Image grohtml-68409-26.png">
+represents incomplete input
+<img src="grohtml-68409-27.png" alt="Image grohtml-68409-27.png">
+is not a suffix of a string in L.</p>
+
+<p style="margin-top: 1em">Now, the
+<img src="grohtml-68409-28.png" alt="Image grohtml-68409-28.png">
+indicate points at which an error is detected. The
+&quot;real&quot; error need not be at
+<img src="grohtml-68409-29.png" alt="Image grohtml-68409-29.png">
+, it can have occurred anywhere within
+<img src="grohtml-68409-30.png" alt="Image grohtml-68409-30.png">
+. In his paper, Richter shows that, although this method may
+miss errors, it will never introduce spurious errors.</p>
+
+<p style="margin-top: 1em">For implementing the technique,
+a parser that recognizes any substring of the input language
+is needed. If we confine ourselves to syntactical analysis,
+it is sufficient to construct a substring recognizer.
+Richter himself does not give a practical construction, but
+[CORMACK] describes how a LR substring parser can be
+constructed that handles BC-LR(1,1) grammars. In this paper,
+we describe the construction of a LL substring recognizer
+that can handle any grammar. Furthermore, our recognizer is
+actually a suffix-recognizer, that is, a recognizer that
+recognizes any suffix of a string in the input language. Our
+suffix recognizer has the correct-prefix property, meaning
+that it detects the first syntax error as early as possible
+in a left-to-right scan of the input. Specifically, if the
+input language is L and the invalid input is
+<img src="grohtml-68409-31.png" alt="Image grohtml-68409-31.png">
+, it finds a string
+<img src="grohtml-68409-32.png" alt="Image grohtml-68409-32.png">
+and an input symbol
+<img src="grohtml-68409-33.png" alt="Image grohtml-68409-33.png">
+such that
+<img src="grohtml-68409-34.png" alt="Image grohtml-68409-34.png">
+, there is a string
+<img src="grohtml-68409-35.png" alt="Image grohtml-68409-35.png">
+such that
+<img src="grohtml-68409-36.png" alt="Image grohtml-68409-36.png">
+is in L, and there is no string
+<img src="grohtml-68409-37.png" alt="Image grohtml-68409-37.png">
+such that
+<img src="grohtml-68409-38.png" alt="Image grohtml-68409-38.png">
+is in L. Because the suffix parser has this correct-prefix
+property, it can be used as a substring parser, because it
+will detect the first input symbol that is not part of a
+substring of the language. Because it is a
+suffix-recognizer, it additionally will detect incomplete
+input, because in that case at the end of the input the
+parser will not be in an accepting state.</p>
+
+<h3>1.2. Overview of LLgen
+<a name="1.2. Overview of LLgen"></a>
+</h3>
+
+
+<p style="margin-top: 1em">LLgen is an extended LL(1)
+parser generator. For a complete description, see [GRUNE].
+LLgen can actually handle grammars that are not LL(1),
+because it allows the use of conflict-resolvers. In case of
+an LL(1) conflict, these resolvers are used to statically or
+dynamically decide which rule to use. As we will see later,
+this feature makes it necessary for the suffix-recognizer to
+handle grammars that are not LL(1). Semantic actions can
+occur anywhere in the grammar rules, and they are executed
+when their position is reached during parsing. A typical
+LLgen rule looks like</p>
+
+<p style="margin-left:10%; margin-top: 1em">S: A {
+<i>action</i> } B</p>
+
+<p style="margin-top: 1em">where the action is a piece of
+C-code, that will be executed when the parser is using the
+rule for S and has recognized A.</p>
+
+<p style="margin-top: 1em">LLgen-generated parsers use
+correcting syntax error recovery, based on a scheme designed
+by Rohrich [ROEHRICH], inserting or deleting symbols at the
+point of error detection until correct input results. This
+means that actions in the parser will always be executed in
+an order that could also have resulted from syntactically
+correct input, and most importantly, once a grammar-rule is
+started it is guaranteed to be completed. This means that
+syntactic errors can never result in inconsistencies for the
+actions. Actions only have to deal with syntactically
+correct input. In a nutshell, the error recovery in
+LLgen-parsers works as follows: Suppose the parser is
+presented with correct input that breaks off before the end.
+The error recovery mechanism now provides a continuation
+path, chosen in such a way that all active rules are left as
+soon as possible. Effectively, the continuation path is the
+&lsquo;shortest way out&rsquo;. The symbols on this path are
+called &lsquo;acceptable&rsquo;, and end-of-file is also
+&lsquo;acceptable&rsquo;. Furthermore, at each point along
+this &lsquo;shortest path&rsquo; there can be other
+terminals that would be correct; these are
+&lsquo;acceptable&rsquo; as well. Now, when an error occurs,
+all symbols that are not acceptable are discarded, until an
+acceptable symbol appears in the input. The tokens on the
+path up to but not including the acceptable input symbol are
+inserted. From then on, normal parsing resumes.</p>
+
+<h3>1.3. Incorporation of non-correcting error recovery inLLgen
+<a name="1.3. Incorporation of non-correcting error recovery inLLgen"></a>
+</h3>
+
+
+<p style="margin-top: 1em">An important consideration in
+incorporating the non-correcting recovery in LLgen was that
+correct programs should suffer as little as possible in what
+regards compilation speed. Furthermore, the existing error
+recovery method has the highly desirable property that rules
+that are started will be finished too, thus ensuring that
+errors in the input text will not cause inconsistencies in
+the semantic actions. We have implemented the non-correcting
+error recovery in such a way that this property is
+preserved.</p>
+
+<p style="margin-top: 1em">The way we have achieved these
+goals is by actually including the suffix recognizer as a
+&lsquo;second recognizer&rsquo; in the generated parser.
+Correct programs are handled in the usual way by the parser,
+but if an error occurs the following happens: instead of
+going to the standard error recovery routine, the parser
+starts executing the non-correcting error handler. This
+process continues, reporting all errors, until the end of
+the input text is reached. Then, control is handed back to
+the standard error recovery routine. This routine will now
+think there is no more input, and thus start inserting
+tokens so as to construct a &lsquo;shortest way out&rsquo;.
+This ensures that all rules that were started are also
+finished, and no inconsistencies can occur in the semantic
+actions. However, this method does require some
+modifications to the error reporting routine. Normally, if
+the generated parser inserts a token, it reports this to the
+user, but in this case this is undesirable. The insertions
+only serve to maintain consistency in the semantic actions
+and do not signify errors, so reporting of insertions should
+be suppressed.</p>
+
+<h2>2. The LL suffix parser
+<a name="2. The LL suffix parser"></a>
+</h2>
+
+
+<p style="margin-left:30%; margin-top: 1em">In this
+chapter, we describe the construction of the LL suffix
+parser. The described parser is not restricted to LL(1)
+grammars, because the presence of conflict resolvers in
+LLgen allows for more general grammars, that may even be
+left-recursive. We start this chapter with a discussion of
+the implications of conflict resolvers, and continue with
+descriptions of the parser algorithm, the used
+data-structures, the handling of left- and right recursion,
+and some possible optimizations.</p>
+
+<h3>2.1. LLgen conflict resolvers and their implications
+<a name="2.1. LLgen conflict resolvers and their implications"></a>
+</h3>
+
+
+<p style="margin-top: 1em">In grammars that are nearly but
+not completely LL(1), conflicts will arise in the two places
+where parsing decisions are made: the choice of which
+alternative to start (&lsquo;alternation conflicts&rsquo;)
+and the decision to stop or continue a repeated item
+(&lsquo;repetition conflicts&rsquo;). In order to allow
+LLgen to handle this type of grammar, the user can specify
+conflict resolvers in those places where conflicts arise.
+These resolvers are Boolean expressions labeling an
+alternative, and are evaluated when a conflict arises during
+parsing. If the expression evaluates to &lsquo;true&rsquo;
+the labeled alternative will be taken. The Boolean
+expressions are expressions in C, and can consult any
+information available at the point they occur. However, if a
+syntactic error has occurred in the input, and the
+non-correcting error recovery starts, we can no longer rely
+on the conflict resolvers to guide parsing decisions. The
+suffix recognizer is only concerned with syntax, and will
+not execute any semantic actions. It recognizes suffices of
+correct input, but does not know or care what prefix would
+make the suffix a correct program; as a result, the
+information that conflict resolvers could use is not
+available, because the semantic actions that would build
+this information have not been executed. Therefore, the
+information used by the conflict resolvers is no longer
+reliable, and the suffix parser needs to be able to handle
+the underlying grammar without their help. In particular, it
+has to be able to handle left-recursive grammars.</p>
+
+<h3>2.2. The suffix parser algorithm
+<a name="2.2. The suffix parser algorithm"></a>
+</h3>
+
+
+<p style="margin-top: 1em">Our algorithm needs easy access
+to the grammar rules; in the description we assume there is
+an efficient way to access the grammar rules. In the next
+chapter we will describe the details of the actual
+implementation. For the moment, we will only consider
+grammars that are not left- or right-recursive. In the next
+section, we will discuss how the algorithm has to be adapted
+to handle left- and right recursion.</p>
+
+<p style="margin-top: 1em">Suppose the grammar is G, and
+the input to the suffix recognizer is
+<img src="grohtml-68409-39.png" alt="Image grohtml-68409-39.png">
+. Remember that parsing is always started by the
+&lsquo;normal&rsquo; LLgen generated parser. It&rsquo;s only
+after a syntactic error has occurred that the suffix
+recognizer will be started. The input to the suffix
+recognizer thus is the &lsquo;tail&rsquo; of the input,
+starting at the first symbol after the position where the
+first syntax error was found.</p>
+
+<p style="margin-top: 1em">Now, in order to get parsing
+going again, the parser scans the grammar for rules which
+contain symbol
+<img src="grohtml-68409-40.png" alt="Image grohtml-68409-40.png">
+in the right hand side:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-41.png" alt="Image grohtml-68409-41.png"></p>
+
+<p style="margin-top: 1em">where
+<img src="grohtml-68409-42.png" alt="Image grohtml-68409-42.png">
+and
+<img src="grohtml-68409-43.png" alt="Image grohtml-68409-43.png">
+represent a string of terminals and non-terminals, possible
+empty. Now, for each of these rules found, and for any
+string
+<img src="grohtml-68409-44.png" alt="Image grohtml-68409-44.png">
+...
+<img src="grohtml-68409-45.png" alt="Image grohtml-68409-45.png">
+that can be generated by
+<img src="grohtml-68409-46.png" alt="Image grohtml-68409-46.png">
+it holds that
+<img src="grohtml-68409-47.png" alt="Image grohtml-68409-47.png">
+...
+<img src="grohtml-68409-48.png" alt="Image grohtml-68409-48.png">
+is a substring of some string in L. This can be shown as
+follows, supposing that the start symbol is S and S
+<img src="grohtml-68409-49.png" alt="Image grohtml-68409-49.png">
+A
+<img src="grohtml-68409-50.png" alt="Image grohtml-68409-50.png">
+:</p>
+
+<p style="margin-top: 1em">S
+<img src="grohtml-68409-51.png" alt="Image grohtml-68409-51.png">
+A
+<img src="grohtml-68409-52.png" alt="Image grohtml-68409-52.png">
+<img src="grohtml-68409-53.png" alt="Image grohtml-68409-53.png">
+...
+<img src="grohtml-68409-54.png" alt="Image grohtml-68409-54.png"></p>
+
+<p style="margin-top: 1em">Of course, there may very well
+be more than one such string
+<img src="grohtml-68409-55.png" alt="Image grohtml-68409-55.png">
+..
+<img src="grohtml-68409-56.png" alt="Image grohtml-68409-56.png">
+, and one of these strings can be empty as well, if
+<img src="grohtml-68409-57.png" alt="Image grohtml-68409-57.png">
+can produce empty. Now, in what we will call the
+<i>predicting phase</i> the algorithm will produce all
+possible symbols
+<img src="grohtml-68409-58.png" alt="Image grohtml-68409-58.png">
+. Then, in what we will call the <i>accepting phase</i>
+these symbols are matched against the input, and those not
+matching are discarded. Then, entering the next predicting
+phase, the algorithm will produce all symbols
+<img src="grohtml-68409-59.png" alt="Image grohtml-68409-59.png">
+, and match them against the next input symbol in the
+subsequent accepting phase, etc. In case one of the strings
+<img src="grohtml-68409-60.png" alt="Image grohtml-68409-60.png">
+...
+<img src="grohtml-68409-61.png" alt="Image grohtml-68409-61.png">
+is empty, or the end of one of the strings is reached, some
+way to continue is needed; we will discuss this later. First
+let&rsquo;s see how the algorithm produces the strings
+<img src="grohtml-68409-62.png" alt="Image grohtml-68409-62.png">
+...
+<img src="grohtml-68409-63.png" alt="Image grohtml-68409-63.png">
+.</p>
+
+<p style="margin-top: 1em">For each rule in the grammar of
+the form</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-64.png" alt="Image grohtml-68409-64.png">
+...</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-65.png" alt="Image grohtml-68409-65.png"></p>
+
+<p style="margin-top: 1em">with each
+<img src="grohtml-68409-66.png" alt="Image grohtml-68409-66.png">
+a terminal or nonterminal, a <i>prediction graph</i> is
+created that looks like this:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684092.png" alt="Image grohtml-684092.png"></p>
+
+<p style="margin-top: 1em">The bottom element of these
+prediction graphs is an end-marker containing the left-hand
+side of the rule used. All these graphs have
+<img src="grohtml-68409-78.png" alt="Image grohtml-68409-78.png">
+on top, and this
+<img src="grohtml-68409-79.png" alt="Image grohtml-68409-79.png">
+is matched against the
+<img src="grohtml-68409-80.png" alt="Image grohtml-68409-80.png">
+in the input in the accepting phase that follows, removing
+the
+<img src="grohtml-68409-81.png" alt="Image grohtml-68409-81.png">
+from the graph. If the prediction graph is now empty, we
+have to find a way to continue; this case is treated later.
+First we will consider what to do if the prediction graph is
+not empty. There are two possibilities: either
+<img src="grohtml-68409-82.png" alt="Image grohtml-68409-82.png">
+is a terminal, or it is a nonterminal. If it is a terminal,
+we are finished for the moment; if not, the algorithm scans
+for rules of the form</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-83.png" alt="Image grohtml-68409-83.png">
+:</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-84.png" alt="Image grohtml-68409-84.png">
+...</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-85.png" alt="Image grohtml-68409-85.png"></p>
+
+<p style="margin-top: 1em">with each
+<img src="grohtml-68409-86.png" alt="Image grohtml-68409-86.png">
+a terminal or nonterminal. Now, the algorithm substitutes
+the top of the prediction graph with the right-hand sides of
+all the rules found. Because there can be more than one
+rule, the prediction graph can now become a DAG (Directed
+Acyclic Graph). Supposing there are two rules with
+<img src="grohtml-68409-87.png" alt="Image grohtml-68409-87.png">
+in the LHS:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-88.png" alt="Image grohtml-68409-88.png">
+:</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-89.png" alt="Image grohtml-68409-89.png">
+...
+<img src="grohtml-68409-90.png" alt="Image grohtml-68409-90.png"></p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-91.png" alt="Image grohtml-68409-91.png">
+:</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-92.png" alt="Image grohtml-68409-92.png">
+...</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-93.png" alt="Image grohtml-68409-93.png"></p>
+
+<p style="margin-top: 1em">the prediction graph will now
+look like this:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684093.png" alt="Image grohtml-684093.png"></p>
+
+<p style="margin-top: 1em">The graph element representing
+<img src="grohtml-68409-109.png" alt="Image grohtml-68409-109.png">
+is left in the stack, the notation
+<img src="grohtml-68409-110.png" alt="Image grohtml-68409-110.png">
+indicates it has been substituted. These substituted element
+will from now on be ignored by the algorithm. The elements
+<img src="grohtml-68409-111.png" alt="Image grohtml-68409-111.png">
+and
+<img src="grohtml-68409-112.png" alt="Image grohtml-68409-112.png">
+are now &lsquo;on top&rsquo; of the prediction graph.</p>
+
+<p style="margin-top: 1em">If
+<img src="grohtml-68409-113.png" alt="Image grohtml-68409-113.png">
+can also produce empty, its successor in the prediction
+graph has to be processed as well; the algorithm walks down
+the graph to this successor, and there the process is
+repeated; if it is a terminal we are finished, else we
+substitute it with the right hand sides of its grammar rule.
+However, the element that we want to substitute now, say
+<img src="grohtml-68409-114.png" alt="Image grohtml-68409-114.png">
+, cannot be marked &lsquo;substituted&rsquo; just like that,
+because it can be on another path, on which it cannot be
+substituted yet. Therefore, a copy of element
+<img src="grohtml-68409-115.png" alt="Image grohtml-68409-115.png">
+is made, it is marked
+<img src="grohtml-68409-116.png" alt="Image grohtml-68409-116.png">
+, and an edge is created from
+<img src="grohtml-68409-117.png" alt="Image grohtml-68409-117.png">
+to the successor of
+<img src="grohtml-68409-118.png" alt="Image grohtml-68409-118.png">
+. This produces graphs like this:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684094.png" alt="Image grohtml-684094.png"></p>
+
+<p style="margin-top: 1em">This process of substituting is
+repeated with all nonterminals that are now on top of the
+prediction graph, until there are only terminals on top of
+the graph. This completes the prediction phase of the
+algorithm, not taking into account what to do if an END
+marker appears on top of the graph. Now, the algorithm
+enters its accepting phase, in which the terminals on top
+are compared with the next symbol in the input. If a
+terminal in the graph matches the input, its element is
+deleted from the graph, and the substitution process will
+continue with its successors, in the next prediction phase.
+If a terminal on top of the graph does not match the input,
+the path it is on represents a &lsquo;dead-end&rsquo;, which
+does not need to be processed any further. The terminal is
+no longer a &lsquo;top&rsquo;, and the algorithm will not
+visit it again.</p>
+
+<p style="margin-top: 1em">There is one tricky situation:
+consider again this graph:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684095.png" alt="Image grohtml-684095.png"></p>
+
+<p style="margin-top: 1em">Here, the algorithm is
+processing
+<img src="grohtml-68409-155.png" alt="Image grohtml-68409-155.png">
+in the predicting phase, and using some rule it has produced
+<img src="grohtml-68409-156.png" alt="Image grohtml-68409-156.png">
+on top; there is another rule with
+<img src="grohtml-68409-157.png" alt="Image grohtml-68409-157.png">
+in its LHS which has produced nonterminal
+<img src="grohtml-68409-158.png" alt="Image grohtml-68409-158.png">
+on top. Now, suppose
+<img src="grohtml-68409-159.png" alt="Image grohtml-68409-159.png">
+is a nonterminal that can produce empty. Now, the algorithm
+starts substituting
+<img src="grohtml-68409-160.png" alt="Image grohtml-68409-160.png">
+, and walks down
+<img src="grohtml-68409-161.png" alt="Image grohtml-68409-161.png">
+. What we definitely do not want is the algorithm to start
+substituting
+<img src="grohtml-68409-162.png" alt="Image grohtml-68409-162.png">
+again, because then we would loop forever. Therefore, if the
+algorithm starts processing element
+<img src="grohtml-68409-163.png" alt="Image grohtml-68409-163.png">
+it should make it
+<img src="grohtml-68409-164.png" alt="Image grohtml-68409-164.png">
+before it does anything else. On entering the element for
+the second time in the prediction phase , it sees that it is
+already substituted, so there is nothing to do. It then just
+walks to the successor of
+<img src="grohtml-68409-165.png" alt="Image grohtml-68409-165.png">
+and starts substituting it. This is correct, since the fact
+that the algorithm enters an element for the second time in
+a prediction phase means that the element indirectly can
+produce the empty string, and thus its successor must be
+substituted as well in the prediction phase.</p>
+
+<p style="margin-top: 1em">It is easy to see that the
+substitution process will stop: the algorithm can only loop
+if it starts processing an element for the second time in a
+prediction phase, or if the processing of an element
+eventually yields a graph with that same element on top. The
+first case cannot occur because the algorithm marks elements
+it is processing as &lsquo;substituted&rsquo; before it does
+anything else, meaning that those elements will not be
+processed again; the second case can only occur if the
+grammar is left-recursive, which we assumed it was not.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="100%">
+
+
+<p>The algorithm simulates left-most derivations of strings
+<img src="grohtml-68409-166.png" alt="Image grohtml-68409-166.png">
+..
+<img src="grohtml-68409-167.png" alt="Image grohtml-68409-167.png">
+starting from
+<img src="grohtml-68409-168.png" alt="Image grohtml-68409-168.png">
+..
+<img src="grohtml-68409-169.png" alt="Image grohtml-68409-169.png">
+; as we showed before, if the algorithm recognizes a string
+<img src="grohtml-68409-170.png" alt="Image grohtml-68409-170.png">
+..
+<img src="grohtml-68409-171.png" alt="Image grohtml-68409-171.png">
+that string is a substring of some string in L. Conversely,
+because the algorithm start out by using all rules of the
+form A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="100%">
+
+
+
+<p><img src="grohtml-68409-172.png" alt="Image grohtml-68409-172.png">
+, and then proceeds to simulate all possible left-most
+derivations, it will recognize all input
+<img src="grohtml-68409-173.png" alt="Image grohtml-68409-173.png">
+...
+<img src="grohtml-68409-174.png" alt="Image grohtml-68409-174.png">
+that can be produced starting from
+<img src="grohtml-68409-175.png" alt="Image grohtml-68409-175.png">
+.</p> </td></tr>
+</table>
+
+<p style="margin-top: 1em">Now we will discuss what has to
+be done if an END marker appears as top of the prediction
+graph. When this happens, it means that starting from some
+rule</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-176.png" alt="Image grohtml-68409-176.png"></p>
+
+<p style="margin-top: 1em">the algorithm has produced a
+leftmost-derivation of a string
+<img src="grohtml-68409-177.png" alt="Image grohtml-68409-177.png">
+starting from
+<img src="grohtml-68409-178.png" alt="Image grohtml-68409-178.png">
+, or that
+<img src="grohtml-68409-179.png" alt="Image grohtml-68409-179.png">
+can produce empty and the string so far is just
+<img src="grohtml-68409-180.png" alt="Image grohtml-68409-180.png">
+. The next step is to assume that the have recognized A and
+that that some string produced by
+<img src="grohtml-68409-181.png" alt="Image grohtml-68409-181.png">
+is part of the prefix that makes the suffix we are
+recognizing a correct string in L. Remember that in the END
+marker we kept record of the LHS of the rule that has
+started the graph, and we will now use this LHS to continue
+recognizing. What the algorithm does is scan for all rules
+of the form:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>B:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-182.png" alt="Image grohtml-68409-182.png">
+A</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-183.png" alt="Image grohtml-68409-183.png"></p>
+
+<p style="margin-top: 1em">with
+<img src="grohtml-68409-184.png" alt="Image grohtml-68409-184.png">
+and
+<img src="grohtml-68409-185.png" alt="Image grohtml-68409-185.png">
+possibly empty strings of terminals and nonterminals. The
+algorithm now starts a new component in the prediction
+graph, and if
+<img src="grohtml-68409-186.png" alt="Image grohtml-68409-186.png">
+is
+<img src="grohtml-68409-187.png" alt="Image grohtml-68409-187.png">
+...
+<img src="grohtml-68409-188.png" alt="Image grohtml-68409-188.png">
+it looks like this:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684096.png" alt="Image grohtml-684096.png"></p>
+
+<p style="margin-top: 1em">Note that the END marker now
+contains B, because we have started to match a rule for B.
+If the
+<img src="grohtml-68409-198.png" alt="Image grohtml-68409-198.png">
+in the rule for B was empty, this just produces and END
+marker with B in it; in this case, the process is just
+repeated with all rules of the form:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>C:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-199.png" alt="Image grohtml-68409-199.png">
+B</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-200.png" alt="Image grohtml-68409-200.png"></p>
+
+<p style="margin-top: 1em">etc, until we have a prediction
+graph with a nonterminal or terminal on top. Now, the
+substitution algorithm is again applied over all
+nonterminals on top, until every top contains a terminal. It
+is possible that during substitution again an END marker
+will turn up; if this happens we again scan for rules to
+continue with etc. This &lsquo;continuation algorithm&rsquo;
+can only loop if, when trying to build a new prediction
+graph for matched symbol A, it produces an empty graph with
+again matched symbol A. If this happens, the grammar was
+(directly or indirectly) right-recursive, and we assumed
+that it was not. Therefore, the algorithm will terminate.
+The terminals on top of the new graph after applying this
+&lsquo;continuation&rsquo; algorithm are exactly those that
+could follow the string
+<img src="grohtml-68409-201.png" alt="Image grohtml-68409-201.png">
+..
+<img src="grohtml-68409-202.png" alt="Image grohtml-68409-202.png">
+in a substring of a string in L. To see this, suppose we
+have &lsquo;recognized&rsquo; the rule</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-203.png" alt="Image grohtml-68409-203.png"></p>
+
+<p style="margin-top: 1em">and
+<img src="grohtml-68409-204.png" alt="Image grohtml-68409-204.png">
+...
+<img src="grohtml-68409-205.png" alt="Image grohtml-68409-205.png">
+is the string produced from
+<img src="grohtml-68409-206.png" alt="Image grohtml-68409-206.png">
+by the algorithm. Now, using rule:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>B:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-207.png" alt="Image grohtml-68409-207.png">
+A</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-208.png" alt="Image grohtml-68409-208.png"></p>
+
+<p style="margin-top: 1em">and supposing that S
+<img src="grohtml-68409-209.png" alt="Image grohtml-68409-209.png">
+<img src="grohtml-68409-210.png" alt="Image grohtml-68409-210.png">
+B
+<img src="grohtml-68409-211.png" alt="Image grohtml-68409-211.png">
+we get</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>S
+<img src="grohtml-68409-212.png" alt="Image grohtml-68409-212.png">
+<img src="grohtml-68409-213.png" alt="Image grohtml-68409-213.png">
+B
+<img src="grohtml-68409-214.png" alt="Image grohtml-68409-214.png">
+<img src="grohtml-68409-215.png" alt="Image grohtml-68409-215.png">
+<img src="grohtml-68409-216.png" alt="Image grohtml-68409-216.png">
+A
+<img src="grohtml-68409-217.png" alt="Image grohtml-68409-217.png">
+<img src="grohtml-68409-218.png" alt="Image grohtml-68409-218.png">
+<img src="grohtml-68409-219.png" alt="Image grohtml-68409-219.png">
+<img src="grohtml-68409-220.png" alt="Image grohtml-68409-220.png">
+...</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-221.png" alt="Image grohtml-68409-221.png">
+<img src="grohtml-68409-222.png" alt="Image grohtml-68409-222.png">
+<img src="grohtml-68409-223.png" alt="Image grohtml-68409-223.png"></p>
+
+<p style="margin-top: 1em">and thus any string produced by
+a derivation starting from
+<img src="grohtml-68409-224.png" alt="Image grohtml-68409-224.png">
+can come right after
+<img src="grohtml-68409-225.png" alt="Image grohtml-68409-225.png">
+...
+<img src="grohtml-68409-226.png" alt="Image grohtml-68409-226.png">
+in a substring of some string in L. The algorithm will
+proceed to generate all these strings starting from
+<img src="grohtml-68409-227.png" alt="Image grohtml-68409-227.png">
+. If
+<img src="grohtml-68409-228.png" alt="Image grohtml-68409-228.png">
+produces empty, the above is just repeated. Because in the
+&lsquo;continuation&rsquo; part all possible rules are
+considered, the whole algorithm will recognize all
+substrings of any string in L. In order to determine if we
+have actually recognized a suffix of some string in L, we
+need to remember if within a predicting phase the
+&lsquo;continuation&rsquo; part of the algorithm has been
+run on an END marker containing the start-symbol S; if this
+is the case, then the input seen until now is a suffix of
+some string in L. Formally, it means that there is a
+derivation starting from start symbol
+<img src="grohtml-68409-229.png" alt="Image grohtml-68409-229.png">
+such that if the input seen until now is
+<img src="grohtml-68409-230.png" alt="Image grohtml-68409-230.png">
+..
+<img src="grohtml-68409-231.png" alt="Image grohtml-68409-231.png">
+, then:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>S
+<img src="grohtml-68409-232.png" alt="Image grohtml-68409-232.png">
+<img src="grohtml-68409-233.png" alt="Image grohtml-68409-233.png">
+..</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-234.png" alt="Image grohtml-68409-234.png"></p>
+
+<p style="margin-top: 1em">where
+<img src="grohtml-68409-235.png" alt="Image grohtml-68409-235.png">
+can be empty,
+<img src="grohtml-68409-236.png" alt="Image grohtml-68409-236.png">
+is not empty.</p>
+
+<h3>2.3. The prediction graph data structure
+<a name="2.3. The prediction graph data structure"></a>
+</h3>
+
+
+<p style="margin-top: 1em">The graphs that are produced by
+the suffix recognizer may grow extremely large; to
+facilitate an efficient implementation we have devised a way
+of keeping the size of the data structure under control, in
+a way that is very similar to the way described in
+[TOMITA].</p>
+
+<p style="margin-top: 1em">The basic idea is, that in a
+prediction phase of the algorithm, it is not necessary to
+explicitly substitute each nonterminal every time it turns
+up as a &lsquo;top&rsquo;; it is sufficient to do it once,
+because the second substitution will produce exactly the
+same subgraph starting at the substituted nonterminal. Here
+is an example:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684097.png" alt="Image grohtml-684097.png"></p>
+
+<p style="margin-top: 1em">Here, in the left component of
+the graph, nonterminal B has been substituted. Now, in the
+same prediction phase, the algorithm again runs into B, now
+in the right component. There is no need to compute again
+what the substitution will produce, it is exactly the part
+on top of B in the left component. Therefore, all that is
+needed is:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684098.png" alt="Image grohtml-684098.png"></p>
+
+<p style="margin-top: 1em">So, when, in a prediction phase
+of the algorithm, a nonterminal is substituted, the
+nonterminal is placed on a list, together with a pointer to
+the substituted nonterminal. If in the same prediction phase
+a nonterminal that is on the list becomes a top, all we need
+to do is place an edge between the already substituted one
+and the successor of the top we are currently processing.
+When a prediction phase is finished, the list is cleared.
+There is one catch: if we consider again the last picture,
+note that if nonterminal B can (directly or indirectly)
+produce empty, it is also necessary to substitute D.
+However, it is not difficult to determine if a nonterminal
+can produce empty. LLgen already computes this information
+for each nonterminal.</p>
+
+<p style="margin-top: 1em">Without this &lsquo;joining
+together&rsquo; of graph components, each element in the
+graph has exactly one successor, except the END marker,
+which has none. Now that components get joined as described,
+an element can have any number of successors. The recognizer
+algorithm now has to consider all successors of a graph
+element instead of one.</p>
+
+<h3>2.4. Handling right recursion
+<a name="2.4. Handling right recursion"></a>
+</h3>
+
+
+<p style="margin-top: 1em">The only problem right-recursive
+grammars cause in the algorithm is in the
+&lsquo;continuation&rsquo; part; they can cause this part of
+the algorithm to loop forever. As an example, consider:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-243.png" alt="Image grohtml-68409-243.png">
+B</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>B:
+<img src="grohtml-68409-244.png" alt="Image grohtml-68409-244.png">
+C</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>C:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-245.png" alt="Image grohtml-68409-245.png">
+A</p> </td></tr>
+</table>
+
+<p style="margin-top: 1em">Now suppose the
+&lsquo;substitution&rsquo; part of the algorithm has turned
+up an END marker with nonterminal A in it. The continuation
+algorithm will now produce:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-684099.png" alt="Image grohtml-684099.png"></p>
+
+<p style="margin-top: 1em">etc. etc. However, a slight
+modification to the algorithm suffices to eliminate this
+problem; within each prediction phase of the algorithm, we
+simply maintain a list of nonterminals that have turned up
+in an END marker. As soon as an END marker turns up whose
+nonterminal is already in the list, we stop the
+&lsquo;continuation&rsquo; algorithm; the part of the graph
+that would be produced by it already has been generated by
+an earlier invocation of the algorithm in the same
+prediction phase. At the end of a prediction phase, when all
+heads are terminals, we clear the list. This way, no looping
+can occur; even if the right recursion is indirect, for
+instance if in the above example the rule for A had been</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+
+<p><img src="grohtml-68409-247.png" alt="Image grohtml-68409-247.png">
+B</p> </td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-248.png" alt="Image grohtml-68409-248.png"></p>
+
+<p style="margin-top: 1em">where
+<img src="grohtml-68409-249.png" alt="Image grohtml-68409-249.png">
+can produce empty, the algorithm still works; the
+substitution of
+<img src="grohtml-68409-250.png" alt="Image grohtml-68409-250.png">
+will yield an END marker on top, and when trying to find a
+continuation for LHS A the algorithm notices A is already on
+the list.</p>
+
+<h3>2.5. Handling left recursion
+<a name="2.5. Handling left recursion"></a>
+</h3>
+
+
+<p style="margin-top: 1em">Left-recursion is,
+unfortunately, a much tougher problem than right-recursion.
+The result of left-recursive grammar rules is that the
+substitution algorithm never stops, because it can keep on
+building the graph with the same set of rules without ever
+turning up a terminal. One course of action would be to
+pre-process the grammar rules to eliminate left-recursion;
+there are algorithms that eliminate direct and indirect
+left-recursion. However, we have taken another course; by
+allowing the produced graphs to contain loops, we can handle
+left recursion without any modifications to the grammar. As
+soon as we come to the point that we want to substitute a
+nonterminal which was already substituted earlier on the
+same path and in the same prediction phase, we can make a
+link from the &lsquo;older&rsquo; nonterminal to the
+successor of the &lsquo;new&rsquo; nonterminal. In this way
+we have constructed a loop in the graph. As an example,
+suppose we have the following rules:</p>
+
+<p style="margin-top: 1em">D: A</p>
+
+<p style="margin-top: 1em">A: B a</p>
+
+<p style="margin-top: 1em">B: A | x</p>
+
+<p style="margin-top: 1em">Suppose also that we have
+nonterminal &lsquo;D&rsquo; on top of a stack. We now start
+substituting &lsquo;D&rsquo;:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840910.png" alt="Image grohtml-6840910.png"></p>
+
+<p style="margin-top: 1em">We now have an &lsquo;A&rsquo;
+on top of of the stack which was already substituted on the
+same path and also in the same prediction phase. To avoid
+never ending substitution we make a loop as follows:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840911.png" alt="Image grohtml-6840911.png"></p>
+
+<p style="margin-top: 1em">The dashed box with
+&lsquo;A&rsquo; in it means that it can be deleted, because
+there is already an occurrence of it in the loop.</p>
+
+<p style="margin-top: 1em">The most beautiful result of
+loops in graphs is that the original parsing algorithm needs
+only one minor change. When the algorithm visits an element
+which has more than one outgoing edge the algorithm starts
+tracking down both paths, just like before, only now there
+may be one or more backedges among these edges, but the
+algorithm needs not to be aware of this fact. The only
+difficulty with loops is that the algorithm might go into a
+loop; it continues searching for terminals but it might
+happen that there are no valid terminals in the loop. The
+solution to this problem is not very difficult; just set a
+flag at all elements we visit. When we reach an element
+which has this flag turned on, we don&rsquo;t have to search
+any further. At the end of the prediction phase, when we
+have found all possible new heads, all flags are cleared.
+Even if there are no loops in the prediction graph, setting
+flags may be used as an optimization: it is possible that
+two paths come together at one point. In that situation it
+is useless to scan for the second time the part of the graph
+which both paths have in common.</p>
+
+<h3>2.6. Some optimizations using reference counts
+<a name="2.6. Some optimizations using reference counts"></a>
+</h3>
+
+
+<p style="margin-top: 1em">As explained in section 2.2, it
+is sometimes necessary to copy a prediction graph element
+before substituting it. In order to determine if a certain
+element has to be copied, it is convenient to maintain a
+reference count in each graph element. This reference count
+keeps track of the number of edges that enter an element.
+Now, when we want to substitute an element with reference
+count not 0, we need to copy it, because there is another
+path in the prediction graph that contains the element we
+want to substitute, and on this other path the element
+cannot be substituted yet.</p>
+
+<p style="margin-top: 1em">Maintaining reference counts
+also enables us to perform another optimization: remember
+that if, in a prediction phase, a terminal is predicted that
+does not match the current inputsymbol, we from then on just
+ignore the path in the graph starting at the terminal.
+However, we can safely delete the terminal from the graph;
+furthermore, all its successors in the prediction graph that
+have reference count 0 can be deleted as well, as can their
+successors with reference count 0, etc. This way, we delete
+from the prediction graph most elements that are no longer
+accessible, but not all of them; as will be explained in the
+next section, loops in the prediction graph can cause
+problems.</p>
+
+<h3>2.7. The algorithm to delete inaccessible loops
+<a name="2.7. The algorithm to delete inaccessible loops"></a>
+</h3>
+
+
+<p style="margin-top: 1em">Deleting graph elements which
+are no longer reachable is not as easy as it looks when
+there are loops in the graph, introduced by the extension to
+the algorithm that handles left recursive grammars. Suppose
+for example that we have a very simple loop as in the left
+picture below:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840912.png" alt="Image grohtml-6840912.png"></p>
+
+<p style="margin-top: 1em">The number below each symbol
+indicates the reference count of that element. Suppose now
+that we delete &lsquo;x&rsquo;, then we have the situation
+depicted in the picture on the right. The loop consisting of
+&lsquo;[B]&rsquo;, &lsquo;a&rsquo; and &lsquo;[A]&rsquo; is
+now unreachable, so all these elements can be deallocated.
+The reference count of &lsquo;[B]&rsquo; is 1, so it will
+not be deleted. To be precise all elements in the loop have
+their reference counts on 1, and consequently none of these
+will be deleted. But we stated earlier that all elements of
+the loop cannot be reached anymore and that the loop had to
+be deleted! In this example the reference counts of the loop
+elements are all 1, but in more complex situations it is
+also possible that some of the elements have a reference
+count of more than 1.</p>
+
+<p style="margin-top: 1em">To solve this problem we present
+an algorithm, devised by E. Wattel, that determines whether
+a loop can be deleted or not. The algorithm consists of two
+parts. The first part of the algorithm goes as follows: it
+presumes that all elements of the loop will indeed be
+deleted. Every time it deletes an element it decreases the
+reference count of all the successors of the element that
+are also member of the same loop. How the algorithm knows
+which elements belong to the loop and which do not will be
+explained later. The situation of the example above will now
+look like this:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840913.png" alt="Image grohtml-6840913.png"></p>
+
+<p style="margin-top: 1em">The number below each symbol
+indicates again the reference count after we have applied
+the first part of the algorithm.</p>
+
+<p style="margin-top: 1em">The second part of the algorithm
+checks and restores the reference counts of all members of
+the loop . When it finds out that one or more reference
+counts are not 0, it concludes that it is still possible to
+enter the loop in some way, and that it cannot be deleted
+yet. In the other case it reports that the loop can be
+deleted, which is also true in our example.</p>
+
+<p style="margin-top: 1em">We will now formally describe
+the first part of the algorithm that finds all directed
+circuits from a given vertex, and determines if the vertices
+on those circuits can be deleted. The algorithm works on
+prediction-graphs in which every edge that is in a circuit
+is marked. Note that a marked edge may be in more than one
+circuit. We will call this mark &lsquo;C&rsquo;. The input
+to the algorithm is such a prediction graph, and a start
+vertex, say A. The first part of the algorithm is:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="3%">
+
+
+<p style="margin-top: 1em">1</p></td>
+<td width="10%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">Put the start vertex A on a list
+L; mark all edges &lsquo;unused&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="3%">
+
+
+<p style="margin-top: 1em">2</p></td>
+<td width="10%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">If L is empty, stop</p></td></tr>
+<tr valign="top" align="left">
+<td width="3%">
+
+
+<p style="margin-top: 1em">3</p></td>
+<td width="10%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">For each vertex in list L, check
+if there are edges marked both C&rsquo; and
+&lsquo;unused&rsquo;. For each edge found, mark it
+&lsquo;used&rsquo;, and traverse it to its other endpoint;
+put this endpoint on a new list M, initially empty</p></td></tr>
+<tr valign="top" align="left">
+<td width="3%">
+
+
+<p style="margin-top: 1em">4</p></td>
+<td width="10%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">Decrease the reference count of
+all vertices on M by 1</p></td></tr>
+<tr valign="top" align="left">
+<td width="3%">
+
+
+<p style="margin-top: 1em">5</p></td>
+<td width="10%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">L := M; go to 2</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">It is clear that the algorithm
+will terminate: each edge is only traversed once, and the
+number of edges is finite. We will now prove some properties
+of this part of the algorithm.</p>
+
+<p style="margin-top: 1em"><i>An edge is traversed by the
+algorithm if and only if it is on some directed circuit
+<img src="grohtml-68409-255.png" alt="Image grohtml-68409-255.png">
+...
+<img src="grohtml-68409-256.png" alt="Image grohtml-68409-256.png">
+.</i></p>
+
+<p style="margin-top: 1em">The if-part is easy; if an edge
+<img src="grohtml-68409-257.png" alt="Image grohtml-68409-257.png">
+connecting vertices
+<img src="grohtml-68409-258.png" alt="Image grohtml-68409-258.png">
+and
+<img src="grohtml-68409-259.png" alt="Image grohtml-68409-259.png">
+is on some directed circuit starting in
+<img src="grohtml-68409-260.png" alt="Image grohtml-68409-260.png">
+, then there is a path
+<img src="grohtml-68409-261.png" alt="Image grohtml-68409-261.png">
+...
+<img src="grohtml-68409-262.png" alt="Image grohtml-68409-262.png">
+; let
+<img src="grohtml-68409-263.png" alt="Image grohtml-68409-263.png">
+...
+<img src="grohtml-68409-264.png" alt="Image grohtml-68409-264.png">
+be a path of minimum length from
+<img src="grohtml-68409-265.png" alt="Image grohtml-68409-265.png">
+to
+<img src="grohtml-68409-266.png" alt="Image grohtml-68409-266.png">
+. If the length of the path from
+<img src="grohtml-68409-267.png" alt="Image grohtml-68409-267.png">
+to
+<img src="grohtml-68409-268.png" alt="Image grohtml-68409-268.png">
+is
+<img src="grohtml-68409-269.png" alt="Image grohtml-68409-269.png">
+, then after turn
+<img src="grohtml-68409-270.png" alt="Image grohtml-68409-270.png">
+of the algorithm
+<img src="grohtml-68409-271.png" alt="Image grohtml-68409-271.png">
+will be on list L. To see that this is the case, suppose
+that
+<img src="grohtml-68409-272.png" alt="Image grohtml-68409-272.png">
+is not on list L after turn
+<img src="grohtml-68409-273.png" alt="Image grohtml-68409-273.png">
+; this means that the edge entering
+<img src="grohtml-68409-274.png" alt="Image grohtml-68409-274.png">
+was already marked used in a previous turn, but then there
+would be a shorter path from
+<img src="grohtml-68409-275.png" alt="Image grohtml-68409-275.png">
+to
+<img src="grohtml-68409-276.png" alt="Image grohtml-68409-276.png">
+, contradicting the assumption that the path is of minimum
+length. The edge
+<img src="grohtml-68409-277.png" alt="Image grohtml-68409-277.png">
+is marked &lsquo;C&rsquo;, because it is in a circuit; it is
+marked &lsquo;unused&rsquo;, for if it were marked used,
+there would be a shorter path from
+<img src="grohtml-68409-278.png" alt="Image grohtml-68409-278.png">
+to
+<img src="grohtml-68409-279.png" alt="Image grohtml-68409-279.png">
+. So, in turn
+<img src="grohtml-68409-280.png" alt="Image grohtml-68409-280.png">
+, the edge
+<img src="grohtml-68409-281.png" alt="Image grohtml-68409-281.png">
+will be traversed.</p>
+
+<p style="margin-top: 1em">On the other hand, suppose that
+an edge
+<img src="grohtml-68409-282.png" alt="Image grohtml-68409-282.png">
+is traversed by the algorithm; we will show by induction on
+the number of turns the algorithm has made that
+<img src="grohtml-68409-283.png" alt="Image grohtml-68409-283.png">
+is on a directed circuit
+<img src="grohtml-68409-284.png" alt="Image grohtml-68409-284.png">
+..
+<img src="grohtml-68409-285.png" alt="Image grohtml-68409-285.png">
+. In the first turn, all edges from
+<img src="grohtml-68409-286.png" alt="Image grohtml-68409-286.png">
+that are marked &lsquo;C&rsquo; are traversed, and clearly,
+if an edge from
+<img src="grohtml-68409-287.png" alt="Image grohtml-68409-287.png">
+is part of a circuit then that edge is part of a circuit
+from
+<img src="grohtml-68409-288.png" alt="Image grohtml-68409-288.png">
+to
+<img src="grohtml-68409-289.png" alt="Image grohtml-68409-289.png">
+. Now suppose that in turn
+<img src="grohtml-68409-290.png" alt="Image grohtml-68409-290.png">
+an edge
+<img src="grohtml-68409-291.png" alt="Image grohtml-68409-291.png">
+connecting vertices
+<img src="grohtml-68409-292.png" alt="Image grohtml-68409-292.png">
+and
+<img src="grohtml-68409-293.png" alt="Image grohtml-68409-293.png">
+is traversed. This means the edge is marked &lsquo;C&rsquo;,
+so it is part of some circuit. If there is a path from
+<img src="grohtml-68409-294.png" alt="Image grohtml-68409-294.png">
+to
+<img src="grohtml-68409-295.png" alt="Image grohtml-68409-295.png">
+, we can simply trace a circuit
+<img src="grohtml-68409-296.png" alt="Image grohtml-68409-296.png">
+...
+<img src="grohtml-68409-297.png" alt="Image grohtml-68409-297.png">
+...
+<img src="grohtml-68409-298.png" alt="Image grohtml-68409-298.png">
+, and clearly
+<img src="grohtml-68409-299.png" alt="Image grohtml-68409-299.png">
+is on a circuit from
+<img src="grohtml-68409-300.png" alt="Image grohtml-68409-300.png">
+to
+<img src="grohtml-68409-301.png" alt="Image grohtml-68409-301.png">
+. Now, suppose there is no path from
+<img src="grohtml-68409-302.png" alt="Image grohtml-68409-302.png">
+to
+<img src="grohtml-68409-303.png" alt="Image grohtml-68409-303.png">
+. We can always trace a circuit
+<img src="grohtml-68409-304.png" alt="Image grohtml-68409-304.png">
+...
+<img src="grohtml-68409-305.png" alt="Image grohtml-68409-305.png">
+because the edge from
+<img src="grohtml-68409-306.png" alt="Image grohtml-68409-306.png">
+to
+<img src="grohtml-68409-307.png" alt="Image grohtml-68409-307.png">
+is part of a circuit; and by the induction hypothesis there
+is a circuit
+<img src="grohtml-68409-308.png" alt="Image grohtml-68409-308.png">
+...
+<img src="grohtml-68409-309.png" alt="Image grohtml-68409-309.png">
+...
+<img src="grohtml-68409-310.png" alt="Image grohtml-68409-310.png">
+. We can now make a &lsquo;detour&rsquo; at
+<img src="grohtml-68409-311.png" alt="Image grohtml-68409-311.png">
+, yielding a circuit
+<img src="grohtml-68409-312.png" alt="Image grohtml-68409-312.png">
+...
+<img src="grohtml-68409-313.png" alt="Image grohtml-68409-313.png">
+...
+<img src="grohtml-68409-314.png" alt="Image grohtml-68409-314.png">
+...
+<img src="grohtml-68409-315.png" alt="Image grohtml-68409-315.png">
+. This case is shown in the picture below. So in either case
+<img src="grohtml-68409-316.png" alt="Image grohtml-68409-316.png">
+is on a circuit from
+<img src="grohtml-68409-317.png" alt="Image grohtml-68409-317.png">
+to
+<img src="grohtml-68409-318.png" alt="Image grohtml-68409-318.png">
+.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840914.png" alt="Image grohtml-6840914.png"></p>
+
+<p style="margin-top: 1em"><i>A vertex appears on list L if
+and only if it is on some directed circuit from
+<img src="grohtml-68409-322.png" alt="Image grohtml-68409-322.png">
+to
+<img src="grohtml-68409-323.png" alt="Image grohtml-68409-323.png">
+.</i></p>
+
+<p style="margin-top: 1em">If a vertex is in such a
+circuit, there is an edge that enters it, which is part of a
+circuit form
+<img src="grohtml-68409-324.png" alt="Image grohtml-68409-324.png">
+to
+<img src="grohtml-68409-325.png" alt="Image grohtml-68409-325.png">
+; we already showed that this edge is traversed by the
+algorithm, and thus the vertex will appear on list L.
+Conversely, if a vertex appears on list L, then an edge
+entering that vertex has been traversed by the algorithm; we
+showed that this edge is part of a circuit from
+<img src="grohtml-68409-326.png" alt="Image grohtml-68409-326.png">
+to
+<img src="grohtml-68409-327.png" alt="Image grohtml-68409-327.png">
+, and thus the vertex is part of a circuit from
+<img src="grohtml-68409-328.png" alt="Image grohtml-68409-328.png">
+to
+<img src="grohtml-68409-329.png" alt="Image grohtml-68409-329.png">
+.</p>
+
+<p style="margin-top: 1em"><i>When the algorithm is
+finished, each vertex that is part of some directed circuit
+from
+<img src="grohtml-68409-330.png" alt="Image grohtml-68409-330.png">
+to
+<img src="grohtml-68409-331.png" alt="Image grohtml-68409-331.png">
+has its reference count decreased by exactly the number of
+edges entering it that are part of a directed circuit from
+<img src="grohtml-68409-332.png" alt="Image grohtml-68409-332.png">
+to
+<img src="grohtml-68409-333.png" alt="Image grohtml-68409-333.png">
+.</i></p>
+
+<p style="margin-top: 1em">Each edge that is part of some
+circuit from
+<img src="grohtml-68409-334.png" alt="Image grohtml-68409-334.png">
+to
+<img src="grohtml-68409-335.png" alt="Image grohtml-68409-335.png">
+is traversed exactly once; the reference count of the
+endpoint is decreased by one after an edge has been
+traversed. Thus, if a vertex is endpoint of
+<img src="grohtml-68409-336.png" alt="Image grohtml-68409-336.png">
+such vertices, its reference count is decreased by
+<img src="grohtml-68409-337.png" alt="Image grohtml-68409-337.png">
+.</p>
+
+<p style="margin-top: 1em"><i>If the reference count of
+each of the vertices visited by the algorithm is 0 after the
+algorithm has finised, all these vertices can be deleted; if
+the reference count is not zero for one or more of the
+visited vertices, then none of them can be deleted.</i></p>
+
+<p style="margin-top: 1em">Suppose all visited vertices
+have reference count 0; this means that each of the vertices
+is only entered by edges that are on a circuit from
+<img src="grohtml-68409-338.png" alt="Image grohtml-68409-338.png">
+to
+<img src="grohtml-68409-339.png" alt="Image grohtml-68409-339.png">
+. Therefore, it holds that any path leading to any of the
+visited vertices has to start in one of the visited
+vertices; there is no path starting in an unvisited vertex
+to a visited one. Thus, all the visited vertices are
+unreachable. Conversely, if one of the visited vertices has
+reference count not zero, then there is a path from an
+unvisited vertex to this vertex. Because from the vertex
+with reference count non zero, we can get to
+<img src="grohtml-68409-340.png" alt="Image grohtml-68409-340.png">
+, and from
+<img src="grohtml-68409-341.png" alt="Image grohtml-68409-341.png">
+we can get to any of the other vertices, all visited
+vertices are reachable.</p>
+
+<p style="margin-top: 1em">The second part of the algorithm
+now checks if all reference counts are zero, and if they
+are, it deletes all visited vertices.</p>
+
+<h3>2.8. Marking loop elements
+<a name="2.8. Marking loop elements"></a>
+</h3>
+
+
+<p style="margin-top: 1em">One point we have omitted so far
+is how the edges in the prediction graph that are part of a
+loop get marked. Basically, a loop can be detected:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>a. when it is made;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>b. when we want to know about it.</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">The first approach checks if a
+loop is constructed as soon as we join two paths in the
+graph, and if so, marks all edges of the loop. The other
+approach does not do any checking when two paths are joined
+together; it starts looking for loops when we want to delete
+an element with reference count not 0, marking all edges
+belonging to the loops it discovers. In practice it turns
+out that we very often encounter elements that we would like
+to delete, but that have reference count not 0, whereas the
+joining of paths occurs relatively infrequently. We
+therefore have chosen to check if a loop is created when two
+paths in a prediction graph are joined.</p>
+
+<p style="margin-top: 1em">Now the question arises how to
+find and mark all edges of the loop. For this problem we
+devised also an algorithm. Because we already know that
+there is an edge from the element on which the new path is
+connected to the successor of the joined element, the
+algorithm only has to find a path from this last element
+back to the first one. This can be done by a backtracking
+depth first search; to find a path from one element to
+another we have to find a possible empty path from one of
+the successors of the first element to the last element. As
+soon as we have found a path, we can mark all the edges on
+the path and also the backedge as loop edges. In case that
+there is more than one path back to the first element it is
+necessary that the algorithm continues searching after it
+has found one path.</p>
+
+<p style="margin-top: 1em">To avoid looping of this
+algorithm we have to set a flag at the elements which are on
+the path already. When the algorithm is backtracking it can
+clear the flags at the elements it is leaving.</p>
+
+<p style="margin-top: 1em">To speed up the searching
+process we can set flags at the edges we have already
+visited but did not lead back to the first element. When the
+algorithm encounters such an edge it already knows that this
+edge is not worth searching again and can be skipped. At the
+end of the algorithm these flags have to be cleared
+again.</p>
+
+<p style="margin-top: 1em">One might propose another
+optimization: as soon as we reach an edge that is already
+marked as a loop edge, we can stop searching for other loop
+edges. There is, however, a case in which this can go wrong.
+Imagine the following situation:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840915.png" alt="Image grohtml-6840915.png"></p>
+
+<p style="margin-top: 1em">What we have here is a
+prediction graph with two loops; all edges that belong to a
+loop are again marked with an &lsquo;C&rsquo;. Note that the
+edge between &lsquo;[H]&rsquo; and &lsquo;[A]&rsquo; is not
+a loop edge. Suppose that &lsquo;[J]&rsquo; is not yet
+completely substituted, i.e. there is another production
+rule for J:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%">
+
+
+<p>J:</p></td>
+<td width="12%">
+
+
+<p>E</p></td>
+<td width="75%">
+</td></tr>
+</table>
+
+<p style="margin-top: 1em">The &lsquo;E&rsquo; on top of
+the right path is now joined with the &lsquo;[E]&rsquo; on
+the left path, which is depicted by the dashed arrow between
+&lsquo;[E]&rsquo; and &lsquo;[J]&rsquo;. When we take a good
+look at the graph we see that the two loops are merged into
+one. But that is not the most important observation we have
+to make: not only the edge between &lsquo;[E]&rsquo; and
+&lsquo;[J]&rsquo; must be marked as a loop edge, but also
+the edge between &lsquo;[H]&rsquo; and &lsquo;[A]&rsquo;! So
+it is not possible to stop searching for loop edges as soon
+as we have found an edge which was already marked as a loop
+edge. We have to continue until we reach the element at
+which we started: &lsquo;[E]&rsquo;. So the optimization
+proposed above is incorrect.</p>
+
+<h3>2.9. Optimizations using FIRST and FOLLOW sets
+<a name="2.9. Optimizations using FIRST and FOLLOW sets"></a>
+</h3>
+
+
+<p style="margin-top: 1em">In the algorithm as we have
+described it, every nonterminal on top of the graph is
+substituted until only terminals remain on top; these
+terminals are then matched against the current input symbol.
+However, by using FIRST sets, we can save considerably on
+the number of computations necessary. Suppose one of the top
+elements of the graph is nonterminal A, and the current
+inputsymbol is
+<img src="grohtml-68409-343.png" alt="Image grohtml-68409-343.png">
+. Then, it is of no use to substitute A if terminal
+<img src="grohtml-68409-344.png" alt="Image grohtml-68409-344.png">
+is not in FIRST(A), because then substituting A will never
+produce
+<img src="grohtml-68409-345.png" alt="Image grohtml-68409-345.png">
+on top of the graph. So, before substituting a nonterminal
+we check if the current inputsymbol is in its FIRST set; if
+it is not, we can declare the path the nonterminal is on a
+dead end, and delete it, without having to perform the
+actual substitution. Of course, if A can produce empty, we
+still have to consider its successor in the graph.</p>
+
+<p style="margin-top: 1em">Similarly, when we have an END
+marker on top, with nonterminal B in it, and we consider
+using rule</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="12%">
+
+
+<p>D:</p></td>
+<td width="13%">
+
+
+
+<p><img src="grohtml-68409-346.png" alt="Image grohtml-68409-346.png">
+B C</p></td>
+<td width="62%">
+</td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-347.png" alt="Image grohtml-68409-347.png"></p>
+
+<p style="margin-top: 1em">We first check if the current
+inputsymbol is in FIRST(C); if this is not the case, there
+is no need to start a graph component with this rule,
+because it will never produce the next inputsymbol on top.
+Again, if C produces empty, we still have to evaluate the
+part of the rule following C.</p>
+
+<p style="margin-top: 1em">To circumvent the problems
+caused in the FIRST set optimization by nonterminal that
+produce empty, we can also make use of FOLLOW-sets. When
+substituting, if we encounter a nonterminal whose FIRST set
+does not contain the current inputsymbol but which can
+produce empty, we check if the current inputsymbol is in its
+FOLLOW set. If it is not, there is no need to process its
+successor. Similarly, in case we are processing an END
+marker as explained above, there is no need to process the
+part of the rule following C if FIRST(C) does not contain
+the input symbol, or C produces empty but the inputsymbol is
+not in FOLLOW(C).</p>
+
+<h2>3. Test results
+<a name="3. Test results"></a>
+</h2>
+
+
+<p style="margin-left:30%; margin-top: 1em">In this
+chapter, we discuss some test results that were obtained by
+recompiling existing ACK compilers with the modified LLgen.
+We tried several combinations of possible optimizations,
+including &lsquo;dumb&rsquo; ones, like no optimization at
+all, not even deleting unreachable prediction graph
+elements. The incorporation of LLgen with non-correcting
+error recovery went smoothly; only minor modifications to
+the Make-files were necessary. Specifically, these
+modifications consisted of passing an extra flag to LLgen,
+and including the new generated C-file Lncor.c in the list
+of generated C-files. Also, the LLmessage error reporting
+routine had to be adapted. We successfully recompiled the C,
+Modula-2 and Occam compilers; in the next sections, we
+discuss some test results that were obtained with the
+Modula-2 and C compilers.</p>
+
+<h3>3.1. Performance
+<a name="3.1. Performance"></a>
+</h3>
+
+
+<p style="margin-top: 1em">We will now present and discuss,
+with the aid of some diagrams, time and space measurements
+on the non-correcting error recovery. We have measured the
+effect of various optimizations. These optimizations include
+the first-set optimization and the follow-set optimization.
+We also measured the effect of leaving out the loop-deletion
+algorithm, regarding both time and space. We performed out
+measurements using C- and Modula-2-programs of three
+different sizes; one of approximately 750 tokens, one of
+appr. 5000 tokens and one of appr. 15000 tokens. We have
+chosen to represent the sizes of programs in the number of
+tokens instead of number of lines, because the number of
+tokens more realistically reflects the load the programs put
+on the error recovery mechanism. Also we give our time
+measurements in usertime instead of realtime, because
+realtime depends heavily on the load of the system, which
+usertime does not. Our space measurements are based on the
+size of the prediction graphs. Note that all files are
+entirely recognized by the non-correcting error recovery
+technique. We achieved this by putting a &lsquo;1&rsquo; at
+the beginning of each file; because then each file starts
+with a syntax error LLgen is forced to continue with the
+non-correcting error recovery.</p>
+
+<h4>3.1.1. Time and space measurements on the effect of thefirst-set optimization
+<a name="3.1.1. Time and space measurements on the effect of thefirst-set optimization"></a>
+</h4>
+
+
+<p style="margin-top: 1em">In the diagram below we show our
+time measurements we got from recognizing the C-programs
+both with and without first-set optimization.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840916.png" alt="Image grohtml-6840916.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Time
+measurements of three C-programs with and without first-set
+optimization</i></p>
+
+<p style="margin-top: 1em">Notice the considerable time
+savings we get when the first-set optimization is turned on;
+a factor of slightly more than 3. Obviously this is an
+extremely useful optimization. On the other hand we found
+there were no measurable time savings when using the
+follow-set optimization; for that reason we did not chart
+the result of this optimization. It seems that the time
+savings gained by the optimization are waisted again by the
+extra processing time needed. We conclude that this
+optimization is of little or no use when we want to save on
+time.</p>
+
+<p style="margin-top: 1em">In the following picture the
+time measurements of three Modula-2 programs are given,
+again with and without first-set optimization.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840917.png" alt="Image grohtml-6840917.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Time
+measurements of three Modula-2-programs with and without
+first-set optimization</i></p>
+
+<p style="margin-top: 1em">From this picture we can
+conclude mainly the same as above; considerable time savings
+when we use the first-set optimization; the factor is
+somewhat less, but still more than 2. Again we have omitted
+the results of the follow-set optimization, for the same
+reason as before.</p>
+
+<p style="margin-top: 1em">There is however one remarkable
+difference between the two languages: parsing C-programs
+needs almost twice the time as parsing programs of
+comparable sizes written in Modula-2. This can be explained
+by the fact that the C-grammar is far more complicated than
+that of Modula-2, and also the production rules are longer
+in C, so building, deleting and definitely traversing the
+graph will consume more time.</p>
+
+<p style="margin-top: 1em">Now we come to the space
+measurements of both C- and Modula-2 programs. In the
+picture below we present the maximum sizes of the prediction
+graphs, during the recognition of the three C-programs.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840918.png" alt="Image grohtml-6840918.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Maximum sizes
+of the prediction graphs when recognizing three
+C-programs</i></p>
+
+<p style="margin-top: 1em">From this diagram we see that,
+although the prediction graphs are smaller when the
+first-set optimization is used, the space savings are not as
+spectacular as the time savings achieved by this
+optimization.</p>
+
+<p style="margin-top: 1em">In Modula-2 the first-set
+optimization also causes a decrease in memory usage. The
+savings are less than in C, but still about 1.5 Kb. Again
+this can be explained by the fact that the rules of the
+Modula-2 grammar are shorter than that of C.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840919.png" alt="Image grohtml-6840919.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Maximum sizes
+of the prediction graphs when recognizing three
+Modula-2-programs</i></p>
+
+<h4>3.1.2. Input that is recognized in quadratic time
+<a name="3.1.2. Input that is recognized in quadratic time"></a>
+</h4>
+
+
+<p style="margin-top: 1em">The measurements presented may
+suggest that the time required to recognize input depends
+linearly on the length of the input; however, this is not
+always the case. When there are recursive rules in the
+grammar, the time needed to recognize input that is produced
+by this rules can become proportional to the square of the
+input length. Consider this set of grammar rules:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>S:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;{&rsquo; A &rsquo;}&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;a&rsquo; A |</p></td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-352.png" alt="Image grohtml-68409-352.png"></p>
+
+<p style="margin-top: 1em">When the input is
+&lsquo;{aaa....&rsquo;, the algorithm will produce the
+following prediction graphs:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840920.png" alt="Image grohtml-6840920.png"></p>
+
+<p style="margin-top: 1em">In each prediction phase, a new
+[A] appears on the prediction graph. However, since A also
+produces empty, the prediction algorithm has to traverse all
+the elements [A] until it finds the element &lsquo;}&rsquo;.
+In the first prediction phase, there is one element [A], in
+the second there are two, etc, so in all 1 + 2 + 3 + ... + k
+=
+<img src="grohtml-68409-354.png" alt="Image grohtml-68409-354.png">
+elements have to be traversed if there are k prediction
+phases, making this proportional to the square of the input
+length. We constructed a parser with this simple input
+grammar and measured the processing time the error recovery
+mechanism used. In the following diagram the dashed line
+shows the processing time needed; the dotted line is the
+curve
+<img src="grohtml-68409-355.png" alt="Image grohtml-68409-355.png">
+. Clearly the processing time is proportional to the square
+of the number of tokens.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840921.png" alt="Image grohtml-6840921.png"></p>
+
+<p style="margin-top: 1em">In the grammar used for the C
+compiler, array initializations are handled by a recursive
+rule, so we would expect that the error recovery mechanism
+needs quadratic processing time to recognize such an
+initialization; we made measurements on the processing time
+and indeed, the processing time needed grows proportionally
+to the square of the size of the input, as the next figure
+shows. Here, the processing times are about half of those in
+the previous example; this is so because the recursion
+appears after two tokens are recognized. Note that the
+algorithm only takes quadratic time when it is recognizing
+input that is generated by a recursive grammar rule. Other
+input is still recognized in linear time, regardless of the
+fact that there are recursive grammar rules.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840922.png" alt="Image grohtml-6840922.png"></p>
+
+<p style="margin-top: 1em">Unfortunately, there is no easy
+way to speed up the recognition of these recursively defined
+language elements; they are caused by the substituted tokens
+that are left in the prediction graph, and we cannot just
+delete those &lsquo;dummies&rsquo; from the graph during a
+prediction phase because the &lsquo;join&rsquo; part of the
+prediction algorithm depends on them. One could traverse the
+graph after a prediction phase to delete the dummies, but
+then the processing time needed to recognize non-recursively
+defined language elements would increase dramatically.
+However, we feel that in practice things like large array
+initializations will not occur in hand-made programs; when
+they occur, it is probably in computer-generated programs,
+which normally will be correct anyway, meaning that the
+error recovery never sees them. When testing such generated
+programs, one is likely to use small test-cases, which are
+handled well by the error recovery.</p>
+
+<h4>3.1.3. Time measurements on the effect of leaving out theloop-deletion algorithm
+<a name="3.1.3. Time measurements on the effect of leaving out theloop-deletion algorithm"></a>
+</h4>
+
+
+<p style="margin-top: 1em">We now show what effect the
+loop-deletion algorithm has on processing time. To put it
+another way: how much time can be saved when we turn off the
+loop-deletion algorithm. In the diagram below we give the
+measurements of the three C-programs; note that we do use
+the first-set optimization.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840923.png" alt="Image grohtml-6840923.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Time
+measurements on processing three C-programs with and without
+the loop-deletion algorithm</i></p>
+
+<p style="margin-top: 1em">The diagram shows that the
+loop-deletion algorithm does not dramatically slow down the
+recognizing process. There is, however, a measurable time
+loss of &plusmn;25%. As we will see later, the loop-deletion
+algorithm will turn out to be extremely useful in efficient
+use of memory when there are many loops in the graph.</p>
+
+<p style="margin-top: 1em">The effect of the loop-detecion
+algorithm on parsing Modula-2 programs is even less than
+with C-programs; in fact there is no measurable time
+loss:</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840924.png" alt="Image grohtml-6840924.png"></p>
+
+<p align="center" style="margin-top: 1em"><i>Time
+measurements on processing three Modula-2-programs with and
+without a loop-deletion algorithm</i></p>
+
+<p style="margin-top: 1em">There are at least two reasons
+for this; both result from the relative simplicity of the
+Modula-2 grammar. The distance from a head to an end of
+stack marker is shorter than in C, and secondly Modula-2
+causes fewer joins to occur than C, meaning that the loop
+marking algorithm is run less often and when it is run it
+has fewer paths to search.</p>
+
+<h4>3.1.4. Space measurements on the effect of leaving out theloop-deletion algorithm
+<a name="3.1.4. Space measurements on the effect of leaving out theloop-deletion algorithm"></a>
+</h4>
+
+
+<p style="margin-top: 1em">Clearly, to make any
+measurements on the space-usage effects of leaving out the
+loop-deletion algorithm we need a program that causes the
+prediction graph to contain loops; however, we have not been
+able to devise a C or Modula-2 program that does this. In
+order to be able to make measurements, we added an extra
+alternative to a rule of the C compiler grammar, making it
+directly left-recursive. To make LLgen accept this new
+grammar, we put a &lsquo;%if&rsquo; directive in the
+rule.</p>
+
+<p style="margin-top: 1em">We have input our standard C
+test program consisting of 800 tokens to the error recovery
+routine for this &lsquo;doctored&rsquo; C compiler, and
+compared the storage needed for the prediction graphs with
+the loop deletion algorithm enabled with the storage needed
+when the algorithm is disabled. With the loop-deletion
+algorithm enabled, the maximum size of the prediction graph
+was 5576 bytes. When the loop algorithm was disabled, the
+maximum size of the prediction graph grew to 12676 bytes;
+furthermore, 12676 bytes of heap were allocated for the
+prediction graph, but not deallocated again, because they
+were in use by graph elements that were in inaccessible
+loops. The user-time the program needed decreased only
+slightly, from 0.9 to 1.0 seconds. Given the relatively
+small input program, this data suggests that when loops are
+actually being made, the loop deletion algorithm is
+definitely worth the extra overhead it costs, considering
+the space that would otherwise be occupied by inaccessible
+loops. To verify this, we input the C program consisting of
+15000 tokens to the compiler; execution time increased from
+17.3 to 21.1 seconds after enabling the loop deletion
+algorithm, while the maximum size of the prediction graph
+shrunk from 328664 to 13664 bytes. With the loop-deletion
+algorithm disabled, 326720 bytes allocated for the graph
+were not deallocated again. Again, given the relatively
+small increase in execution time and the large reduction of
+memory usage, we feel that the loop-deletion algorithm is
+useful enough to justify the overhead it creates.</p>
+
+<h3>3.2. Problems encountered
+<a name="3.2. Problems encountered"></a>
+</h3>
+
+
+<p style="margin-top: 1em">In this section we describe some
+of the problems we encountered while testing the
+non-correcting error recovery.</p>
+
+<h4>3.2.1. The LLgen error reporting mechanism.
+<a name="3.2.1. The LLgen error reporting mechanism."></a>
+</h4>
+
+
+<p style="margin-top: 1em">The parsers generated by LLgen
+call a user-supplied error reporting routine, usually called
+LLmessage. This routine is called with an integer parameter
+that is positive, zero or negative. When the parameter is
+positive the parser has just inserted a token, whose number
+is equal to the parameter; if it is zero, the parser has
+deleted a token whose number is in a global variable called
+LLsymb; if it is negative, it means that LLgen expected
+end-of-file, but did not find it. The routine LLmessage is
+supposed to print an error message, and when a token is
+inserted, it should set all necessary attributes.</p>
+
+<p style="margin-top: 1em">However, when non-correcting
+error recovery is used, the situation becomes slightly
+different; when the parser inserts a token, it is only to
+keep the semantic actions consistent, and does no longer
+signify an error. However, the LLmessage routine still has
+to be called because the attributes of the inserted token
+need to be set. Therefore, when non-correcting error
+recovery is used, the LLmessage routine should not print an
+error message when the parameter is positive, or else it
+will print highly confusing error messages indeed.
+Furthermore, the LLmessage routine will usually print a
+message like &lsquo;token ... deleted&rsquo; when it is
+called with parameter equal to zero; however, when the
+non-correcting error recovery is used, it is more
+appropriate to report something like &lsquo;token ...
+illegal&rsquo;, as the non-correcting error recovery does
+not delete tokens. Finally, when an unexpected end-of-file
+is encountered, LLgen normally just inserts the missing
+tokens and calls LLmessage with the parameter equal to the
+token number; when non-correcting error recovery is used we
+need a way to actually report we have encountered an
+unexpected end-of-file. The way we achieved this is by
+calling LLgen with parameter 0 and the global variable
+LLsymb set to EOFILE when this situation occurs; the routine
+LLmessage should print something like &lsquo;unexpected end
+of file&rsquo; when it is called with parameter 0 and LLsymb
+is EOFILE. To facilitate switching between correcting and
+non-correcting error recovery, the file Lpars.h contains a
+statement &lsquo;#define LLNONCORR&rsquo; if non-correcting
+error recovery is used.</p>
+
+<h4>3.2.2. Parsers being started in semantic actions
+<a name="3.2.2. Parsers being started in semantic actions"></a>
+</h4>
+
+
+<p style="margin-top: 1em">LLgen allows the programmer to
+define more than one nonterminal as the start symbol of the
+input grammar; it will generate a parsing routine for each
+of the start symbols. However, the error recovery code is
+generated only once; it is shared by all parsers. The
+programmer is free to call any of the generated parsers
+whenever he wants; for instance, in the C-compiler a
+separate parser for expressions in #if and #elsif statements
+is used. Whenever the lexical analyzer encounters such a
+statement, it calls the expression parser. It is also
+possible to call a parser in a semantic action of another
+parser; in the MODULA-2 compiler a separate parser for
+definition modules is used. When the main parser encounters
+a FROM defmod IMPORT statement a semantic actions opens the
+definition module defmod and starts the parser for
+definition modules.</p>
+
+<p style="margin-top: 1em">The fact that subparsers can be
+started just about anywhere causes problems when
+non-correcting error recovery is used. Suppose a parser
+calls another parser in a semantic action to parse a
+separate input file. In the Modula-2 compiler, after seeing
+the FROM defmod IMPORT statement a semantic action opens
+defmod and parses it; now, if a syntax error occurred before
+the FROM IMPORT statement, the non-correcting error recovery
+will not execute the action that opens and parses the
+definition module, but it will not report an error either,
+because the statement FROM defmod IMPORT is part of the
+input language of the main parser. However, suppose that
+during the parsing of a definition module an error occurs;
+then, some semantic actions that would normally be executed
+during parsing of the definition module will not have taken
+place. When normal parsing is now resumed by the main
+parser, after the non-correcting error recovery has finished
+with the definition module, a lot of spurious semantic
+errors are likely to be reported, because the semantic
+actions that would normally have been executed during the
+definition module parsing have not been executed by the
+error recovery. Therefore, it is desirable that the main
+parser does not resume normal parsing, but instead continues
+with the non-correcting error recovery as well. Any
+syntactic errors in the main program will still be reported,
+but no spurious semantic errors will be reported that
+way.</p>
+
+<p style="margin-top: 1em">When the lexical analyzer calls
+other parsers, as is the case in the ACK C compiler,
+recursive invocations of the non-correcting error recovery
+routine can occur. This will happen if a parser starts the
+error recovery, the error recovery calls the lexical
+analyzer, which starts another parser that finds a syntax
+error and calls the error recovery again. This is not really
+a problem, but is has consequences for the implementation of
+the error recovery routine.</p>
+
+<p style="margin-top: 1em">The worst case occurs when two
+parsers are involved in parsing one input file, and the
+secondary parser (e.g. an inline assembly parser) is called
+in a semantic action of the main parser. Suppose now that
+the input text contains a syntax error; after detecting this
+error, the parser starts the non-correcting error recovery.
+This recovery does not execute any semantic actions;
+therefore it will not start the subparser at those points
+where the original LLgen generated parser would. As a
+result, parts of the program that would be accepted by the
+subparser will now probably be rejected as illegal, because
+the error recovery does not know it should use another
+grammar to check these parts. This is a serious problem, and
+we have devised and implemented two ways to solve it.</p>
+
+<p style="margin-top: 1em">The first solution is based on
+the assumption that whenever a semantic action occurs in the
+grammar, another parser can be started at that point.
+Obviously, we have no way of knowing which semantic actions
+start a parser and which don&rsquo;t, so we assume the
+worst. Now, assume that in the grammar there are k symbols
+defined as start symbols, say
+<img src="grohtml-68409-360.png" alt="Image grohtml-68409-360.png">
+. Each of these symbols will cause LLgen to generate a
+parser that can be called in any of the semantic actions of
+the grammar. We now introduce a new symbol
+<img src="grohtml-68409-361.png" alt="Image grohtml-68409-361.png">
+, and a new grammar rule
+<img src="grohtml-68409-362.png" alt="Image grohtml-68409-362.png">
+. In the grammar the error recovery algorithm uses, we
+insert this symbol X at all positions where there are
+semantic actions in the original grammar, so a rule
+<img src="grohtml-68409-363.png" alt="Image grohtml-68409-363.png">
+{ action }
+<img src="grohtml-68409-364.png" alt="Image grohtml-68409-364.png">
+becomes
+<img src="grohtml-68409-365.png" alt="Image grohtml-68409-365.png">
+. As a result, at each position in a grammar rule where a
+semantic action occurs, we now accept any input that would
+be accepted by any of the parsers. Clearly, this solution is
+somewhat of a kludge, as it will accept a lot of input that
+is not accepted by the original parser. However, it is
+guaranteed to never give spurious error messages, because
+whenever a parser would be started by the original parser,
+there now is an
+<img src="grohtml-68409-366.png" alt="Image grohtml-68409-366.png">
+in the grammar that produces all the strings that would be
+accepted by that parser. We have implemented this solution,
+and found it to be extremely slow, which of course was to be
+expected given the number of semantic actions in the average
+grammar. Furthermore, because each time a semantic action
+occurs in the grammar a string accepted by any of the
+generated parsers is accepted, including strings recognized
+by the currently running parser, error messages become hard
+to interpret. As an example, consider the following C
+program:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>main()</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>{</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>int i, j;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>while (i &lt; j</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>j++;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>i = 1;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>j = 2;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>}</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">Clearly, there is a
+&lsquo;)&rsquo; missing in the while-statement; however, if
+this program is input to the error recovery it will complain
+&quot;} illegal&quot;, since after recognizing the
+expression controlling the while the original parser starts
+a semantic action, so the non-correcting recovery will
+accept a valid C program at that point; after recognizing
+the three statements following the while-statement as a
+separate program the recognizer expects the missing
+&lsquo;)&rsquo;, but gets &lsquo;}&rsquo; instead.</p>
+
+<p style="margin-top: 1em">Our second solution is based on
+the observation that if we knew which semantic actions can
+start other parsers, we would only have to introduce the new
+symbol
+<img src="grohtml-68409-367.png" alt="Image grohtml-68409-367.png">
+at those places where parsers can get started. We have
+therefore extended LLgen with a new directive %substart,
+which is used to indicate to the parser generator that
+another parser may be started. The %substart is followed by
+the startsymbols that will produce the parsers that can be
+called, so %substart A, B, C; indicates that in the semantic
+action following the directive the parsers produced by
+startsymbols A, B, en C can be started. In the grammar used
+by the error recovery, a new symbol
+<img src="grohtml-68409-368.png" alt="Image grohtml-68409-368.png">
+will be introduced at this point, along with a new rule
+<img src="grohtml-68409-369.png" alt="Image grohtml-68409-369.png">
+. Of course, this solution can still accept input that would
+not have been accepted by original parser, for instance if a
+parser is started conditionally, based on other semantic
+information. However, it is a big improvement over the first
+solution, both in performance and the input it accepts.</p>
+
+<h4>3.2.3. Syntactic errors being handled in semantic actions
+<a name="3.2.3. Syntactic errors being handled in semantic actions"></a>
+</h4>
+
+
+<p style="margin-top: 1em">A programmer may decide to
+handle certain syntactic errors in semantic actions, for
+instance because he is not satisfied with the standard error
+recovery. However, since the non-correcting error recovery
+does not execute semantic actions, this may cause errors to
+remain undetected. We encountered the following example in
+the ACK Modula-2 compiler, in the grammar rule for
+assignment statement:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>Assignment_statement:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>lvalue</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>[</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;=&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>{</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>error(&quot;:= expected&quot;);</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>}</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>|</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;:=&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>]</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>expression</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>;</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">This works well in the original
+LLgen; however, statements like &lsquo;j=9&rsquo; are not
+treated as syntactic, but as semantic errors. The original
+LLgen generated parser will print the (semantic) error
+message, but the non-correcting recovery will not execute
+the semantic action and therefore the erroneous input will
+be accepted.</p>
+
+<p style="margin-top: 1em">To facilitate the incorporation
+of non-correcting error recovery in parsers that use this
+kind of &lsquo;trick&rsquo;, we extended LLgen with the
+%erroneous directive. The directive indicates to the
+non-correcting recovery mechanism that the token following
+it is not really part of the grammar. When recognizing
+input, the error recovery will ignore tokens in the grammar
+that have %erroneous in front of them. If in the example
+above, the &rsquo;=&rsquo; is replaced with %erroneous
+&rsquo;=&rsquo;, the non-correcting mechanism will report an
+error when it sees a statement like &rsquo;j = 9&rsquo;. See
+appendix B for details about the implementation of the
+%erroneous directive.</p>
+
+<p style="margin-top: 1em">Another example is in the ACK C
+compiler. For some reason, the grammar accepts function
+definitions without &lsquo;()&rsquo;, so according to the
+syntax a function definition can look like:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>int func</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>{</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>....</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>}</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">The absence of the
+&lsquo;()&rsquo;, however, causes &lsquo;func&rsquo; to be
+entered in the symbol table as non-function, and when the
+parser encounters the body a semantic action will complain
+with the error message &quot;Making function body for
+non-function&quot;. This again will cause the non-correcting
+error recovery to miss errors. Consider this piece of
+code:</p>
+
+<p style="margin-top: 1em">int i int j = 1; <br>
+{}</p>
+
+<p style="margin-top: 1em">where apparently there&rsquo;s a
+&lsquo;;&rsquo; missing between the declarations of i and j.
+The original LLgen-generated parser only gives semantic
+errors: <br>
+&quot;Making function body for non-function&quot; <br>
+&quot;j is not in parameter list&quot; <br>
+&quot;Illegal initialization of formal parameter,
+ignored&quot;</p>
+
+<p style="margin-top: 1em">As a result, the non-correcting
+error recovery will not report any errors in this piece of
+code, because it does not execute the semantic actions that
+recognize and report the error. Unfortunately, due to the
+way the C-grammar is written, it is not possible to solve
+this problem using a %erroneous directive; the part of the
+grammar that deals with declaratons would have to be
+rewritten so as to syntactically reject functions without
+&lsquo;()&rsquo;.</p>
+
+<h4>3.2.4. Semantic actions that read input
+<a name="3.2.4. Semantic actions that read input"></a>
+</h4>
+
+
+<p style="margin-top: 1em">There are no restrictions on
+what a semantic action can do; there is nothing to stop the
+programmer from writing a parser in such a way that some of
+the input to the parser is processed by semantic actions.
+Obviously, because the non-correcting error recovery does
+not execute semantic actions, this kind of parser will not
+work at all with the new error recovery. Ironically, LLgen
+itself is written in such a fashion; {}-enclosed C-code in
+its input is processed by a semantic action in the LLgen
+grammar. We feel that it is bad practice to write parsers
+this way; the &lsquo;eating&rsquo; of parts of the input
+should be done in the lexical analyzer, not in the parser.
+After all, in the case of LLgen, one can regard a semantic
+action in the input as one token, and thus it should be
+handled by the lexical analyzer as such.</p>
+
+<h3>3.3. Examples of error recovery
+<a name="3.3. Examples of error recovery"></a>
+</h3>
+
+
+<p style="margin-top: 1em">We will now give some examples
+that compare non-correcting error recovery with the
+correcting error recovery used by parsers generated by
+&lsquo;standard&rsquo; LLgen.</p>
+
+<p style="margin-top: 1em">Consider the next C program,
+where there is a &lsquo;)&rsquo; missing in the header of
+function &lsquo;test&rsquo;.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>1</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>int test(a,b</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>2</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>3</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>int a,b;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>4</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>5</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>{</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>6</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>if (a &lt; b)</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>7</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>return(1);</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>8</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>else</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>9</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>return(0);</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>10</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>}</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">This small error derails the
+&lsquo;standard&rsquo; parser; it produces the following
+error messages, where we have left out 7 messages reporting
+semantic errors:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: , missing before type_identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: , missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: ) missing before ;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 5: { deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 6: if deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 6: &lt; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 6: ) missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 6: ) deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: identifier missing before return</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: ; missing before return</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: { missing before return</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 8: else deleted</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">In contrast, the parser using
+non-correcting error recovery produces only one error
+message:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: type_identifier illegal</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">This error message correctly
+pin-points the error: there should have been a
+&lsquo;)&rsquo; at the position where type-identifier
+&lsquo;int&rsquo; is.</p>
+
+<p style="margin-top: 1em">Now, an example with Modula-2;
+consider this program:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>1</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>MODULE test;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>2</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>3</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>TYPES</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>4</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>ElementRecordType = RECORD</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>5</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>Element: ElementType;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>6</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>Next,</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>7</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>Prior: ElementPointerType;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>8</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>END;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>9</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>10</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>VARS a,b,c: ElementRecordType;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>11</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>12</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>13</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>BEGIN</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>14</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>15</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>a := b;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>16</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>17</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>END test.</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">There are two syntactic errors
+in this program; on line 3, TYPES should be TYPE, and on
+line 10, VARS should be VAR. We have left out the type
+declarations of ElementType and ElementPointerType; clearly
+this will generate semantic errors, but we are only
+interested in syntactic errors anyway. The correcting error
+recovery parser again derails on this program; it produces
+the following syntactic error messages:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: CONST missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 4: &rsquo;=&rsquo; missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 4: RECORD deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 5: &rsquo;:&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 5: &rsquo;;&rsquo; missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 5: &rsquo;=&rsquo; missing before
+&rsquo;;&rsquo;</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 5: number missing before &rsquo;;&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 6: &rsquo;,&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: &rsquo;=&rsquo; missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: &rsquo;:&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: &rsquo;;&rsquo; missing before identifier</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: &rsquo;=&rsquo; missing before
+&rsquo;;&rsquo;</p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 7: number missing before &rsquo;;&rsquo;</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 8: &rsquo;;&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: &rsquo;,&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: &rsquo;,&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: &rsquo;:&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: &rsquo;;&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 13: BEGIN deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 15: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 15: := deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 15: identifier deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 15: &rsquo;;&rsquo; deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 17: END deleted</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 17: identifier deleted</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">The error correction mechanism
+clearly makes the wrong guess by inserting CONST on line 3;
+as a result, all that follows is rejected as incorrect. In
+contrast, the non-correcting error recovery mechanism only
+produces two error messages:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 3: identifier illegal</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>line 10: identifier illegal</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">This again exactly pin-points
+the errors: the identifiers TYPES and VARS constitute the
+only errors in the program. Note that the presence of more
+than one error does not cause any problems to the
+non-correcting recovery mechanism.</p>
+
+<h2>4. Conclusion
+<a name="4. Conclusion"></a>
+</h2>
+
+
+<p style="margin-top: 1em">After implementing and testing a
+non-correcting error recovery mechanism we have come to the
+conclusion that it indeed is superior to correcting
+mechanisms in what regards the error messages it produces;
+the examples we have given clearly show this. However, there
+is a clear loss of performance when errors are present in a
+program, although we have found this performance degradation
+to be acceptable. We feel that the benefits of better error
+messages outweigh the loss of performance. In any case,
+correct programs do not suffer at all from the incorporation
+of a non-correcting recovery mechanism. The error recovery
+mechanism we implemented does not make unreasonable demands
+on resources; the size of the prediction graphs stays within
+reasonable limits.</p>
+
+<p style="margin-top: 1em">The main problems we encountered
+had to do with recognizing &lsquo;languages within
+languages&rsquo;, and semantic actions that did unreasonable
+things like eating input. The more
+&lsquo;well-behaved&rsquo; a parser is, the better the
+results the non-correcting error recovery mechanism gives.
+This is also true for the input grammars: with a language
+like Modula-2, whose syntax has been designed with parser
+generators in mind, the performance of the non-correcting
+mechanism is better than with C, whose syntax is extremely
+hard, if not impossible to describe with a LL(1)
+grammar.</p>
+
+<h2>5. Bibliography
+<a name="5. Bibliography"></a>
+</h2>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="25%">
+
+
+<p style="margin-top: 1em">[CORMACK]</p></td>
+<td width="5%"></td>
+<td width="70%">
+
+
+<p style="margin-top: 1em">Gordon V. Cormack, &lsquo;An LR
+substring parser for noncorrecting syntax error
+recovery&rsquo;, ACM SIGPLAN Notices, vol. 24, no. 7, p.
+161-169, July 1989</p></td></tr>
+<tr valign="top" align="left">
+<td width="25%">
+
+
+<p>[GRUNE]</p></td>
+<td width="5%"></td>
+<td width="70%">
+
+
+<p>Dick Grune, Ceriel J.H. Jacobs, &lsquo;A programmer
+friendly LL(1) parser generator&rsquo;, Softw. Pract.
+Exper., vol. 18, no. 1, p. 29-38, Jan 1988</p></td></tr>
+<tr valign="top" align="left">
+<td width="25%">
+
+
+<p>[RICHTER]</p></td>
+<td width="5%"></td>
+<td width="70%">
+
+
+<p>Helmut Richter, &lsquo;Noncorrecting syntax error
+recovery&rsquo;, ACM Trans. Prog. Lang. Sys., vol.7, no.3,
+p. 478-489, July 1985</p></td></tr>
+<tr valign="top" align="left">
+<td width="25%">
+
+
+<p>[ROEHRICH]</p></td>
+<td width="5%"></td>
+<td width="70%">
+
+
+<p>Johannes Rohrich, &lsquo;Methods for the automatic
+construction of error correcting parsers&rsquo;, Acta
+Inform., vol. 13, no. 2, p. 115-139, Feb 1980</p></td></tr>
+<tr valign="top" align="left">
+<td width="25%">
+
+
+<p>[TOMITA]</p></td>
+<td width="5%"></td>
+<td width="70%">
+
+
+<p>Masaru Tomita, Efficient parsing for natural language,
+Kluwer Academic Publishers, Boston, p.210, 1986</p></td></tr>
+</table>
+
+<h2>Appendix A: Implementation Issues
+<a name="Appendix A: Implementation Issues"></a>
+</h2>
+
+
+<p style="margin-left:44%; margin-top: 1em">In this
+appendix we will describe some implementation issues; the
+data structure used to store the grammar during
+non-correcting error recovery, postponing deletions of graph
+elements until after the prediction phase, and the
+implementation of the %substart directive .</p>
+
+<h2>A.1 The grammar data structure
+<a name="A.1 The grammar data structure"></a>
+</h2>
+
+
+<p style="margin-top: 1em">The grammar data structure used
+by the non-correcting error recovery technique has to meet
+two conditions: easy access to a rule as a whole to make
+substituting nonterminals efficient and easy access to each
+symbol in the RHS of a rule to make starting error recovery
+and finding continuations efficient. To fulfill these
+conditions we decided to construct the storage of the
+grammar as follows.</p>
+
+<p style="margin-top: 1em">A rule in the grammar is divided
+in two parts: a LHS and a RHS. The LHS is represented by a
+struct &lsquo;lhs&rsquo; and for each symbol in the RHS a
+struct &rsquo;symbol&rsquo; is constructed. A struct
+&lsquo;lhs&rsquo; contains the number of the nonterminal
+forming the LHS of the rule, a pointer to the RHS, the
+first- and follow-sets of the nonterminal and a flag
+&rsquo;empty&rsquo; which indicates whether the nonterminal
+produces empty or not. A struct &lsquo;symbol&rsquo;
+contains a field indicating the type of the symbol, i.e. a
+terminal or a nonterminal, the number of the symbol, a
+&lsquo;link&rsquo; pointer to a struct &lsquo;symbol&rsquo;
+that represents the same symbol, a &lsquo;next&rsquo;
+pointer to the rest of the RHS and a pointer back to the
+LHS.</p>
+
+<p style="margin-top: 1em">A special struct
+&lsquo;symbol&rsquo; is added to the end of the RHS to
+indicate the end of a rule. The type of this struct is
+LLEORULE, the number is set to -1 and the pointers
+&rsquo;link&rsquo; and &lsquo;next&rsquo; are nil.</p>
+
+<p style="margin-top: 1em">In case that there is more than
+one RHS for a LHS, all the RHS&rsquo;s are put after each
+other and separated by another special struct
+&lsquo;symbol&rsquo;. The type of this struct is LLALT, the
+number is set to -1 and the &rsquo;link&rsquo; pointer is
+nil. After the last RHS a &lsquo;LLEORULE&rsquo;-struct
+marker is added.</p>
+
+<p style="margin-top: 1em">Finally, to make searching
+efficient there are two arrays: &lsquo;terminals&rsquo; and
+&lsquo;nonterminals&rsquo;. &lsquo;terminals&rsquo; is
+indexed by the number of a terminal and contains for each
+terminal a struct containing a &rsquo;link&rsquo; pointer to
+a symbol, representing this terminal, in the RHS of a rule.
+Because this symbol has again a &rsquo;link&rsquo; pointer
+to another symbol representing the terminal, it is possible
+by following this chain of pointers to find all rules
+containing such a terminal. In a similar way
+&lsquo;nonterminals&rsquo; is indexed by the number of a
+nonterminal and contains for each nonterminal a struct. This
+struct not only contains a &rsquo;link&rsquo; pointer
+linking all rules with this nonterminal, but also contains a
+&rsquo;rule&rsquo; pointer. This pointer points to the RHS
+or RHS&rsquo;s of the rules of which the nonterminal forms
+the LHS.</p>
+
+<p style="margin-top: 1em">As an example, consider the
+following grammar:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="100%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="100%">
+
+
+<p>a B</p></td></tr>
+<tr valign="top" align="left">
+<td width="100%">
+
+
+<p>B:</p></td></tr>
+<tr valign="top" align="left">
+<td width="100%">
+
+
+<p>a |</p></td></tr>
+</table>
+
+
+<p><img src="grohtml-68409-370.png" alt="Image grohtml-68409-370.png"></p>
+
+<p style="margin-top: 1em">This will result in the picture
+below. Note that &lsquo;pointer&rsquo; fields without an
+arrow indicate nil pointers.</p>
+
+
+<p align="center" style="margin-top: 1em"><img src="grohtml-6840925.png" alt="Image grohtml-6840925.png"></p>
+
+<p style="margin-top: 1em">Note that the empty alternative
+for &lsquo;B&rsquo; is represented in the data structure by
+the &lsquo;LLEORULE-struct&rsquo; immediately following the
+&lsquo;LLALT&rsquo;-struct. When there are still other
+alternatives the &lsquo;LLEORULE&rsquo;-struct is replaced
+by a &lsquo;LLALT&rsquo;-struct followed by the other
+alternatives and a &lsquo;LLEORULE&rsquo;-struct. Finally,
+when the empty rule is the only rule for a nonterminal the
+RHS will consist only of a
+&lsquo;LLEORULE&rsquo;-struct.</p>
+
+<h2>A.2 Delayed deletes
+<a name="A.2 Delayed deletes"></a>
+</h2>
+
+
+<p style="margin-top: 1em">We encountered a problem with
+deleting elements during the prediction phase. Imagine that
+we have a nonterminal &lsquo;B&rsquo; on top of the graph,
+and &lsquo;B&rsquo; has two alternatives. Now suppose that
+we apply the first alternative and we find out that this
+alternative leads to a &lsquo;dead end&rsquo;, i.e. a head
+that does not match the input symbol, so we want to get rid
+of it. When we delete it immediately the deletion algorithm
+will also deallocate &lsquo;[B]&rsquo; and possibly some
+elements below &lsquo;[B]&rsquo;. However, there was another
+alternative for &lsquo;[B]&rsquo; which was not yet
+developed and maybe this alternative leads to a head which
+is legal. But &lsquo;[B]&rsquo; has already been deleted and
+thus cannot be used anymore. A similar situation can occur
+when we want to delete a joined element; the substitution of
+a nonterminal that only produces empty and thus has no
+element above it in the graph can also lead to such a
+situation. We therefore decided to put &lsquo;dead
+ends&rsquo; on a list, &lsquo;cleanup_arr[]&rsquo;, and
+after the prediction phase has finished we delete all
+elements on this list, and all their descendants that become
+unreachable of course.</p>
+
+<h2>A.3 Clearing flags
+<a name="A.3 Clearing flags"></a>
+</h2>
+
+
+<p style="margin-top: 1em">We implemented two different
+ways to clear the flags set by the prediction phase of the
+algorithm; the first recursively tracks down the whole graph
+following the flags, the second puts all elements visited by
+the prediction phase on a list; after the prediction phase
+has finished the algorithm walks through this list clearing
+the flags of all elements on it. We took measurements on
+both algorithms and found out that with small programs the
+times did not differ much but large programs were processed
+faster by the second algorithm. Therefore we decided to use
+the second algorithm.</p>
+
+<p style="margin-top: 1em">To speed up the algorithm even
+more, we do not deallocate the list after a prediction phase
+has finished. We just set the number of elements on the list
+to 0. This saves considerably on the number of
+&lsquo;Malloc&rsquo;-calls.</p>
+
+<h2>A.4 Implementation of %erroneous directive
+<a name="A.4 Implementation of %erroneous directive"></a>
+</h2>
+
+
+<p style="margin-top: 1em">As explained in chapter 3, the
+user can put a %erroneous directive in front of a terminal,
+making the non-correcting error recovery mechanism ignore
+that terminal. However, implementing this directive was not
+entirely straightforward; consider, for example, the
+rule</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;a&rsquo; | %erroneous &rsquo;b&rsquo; |
+&rsquo;c&rsquo;;</p> </td></tr>
+</table>
+
+<p style="margin-top: 1em">Just leaving out terminal
+&rsquo;b&rsquo; will not do, because then nonterminal A
+produces empty all of a sudden, which it did not before. The
+rule should become</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;a&rsquo; | &rsquo;c&rsquo;;</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">but this is hard to implement in
+LLgen. We took a different approach: we introduce a new
+terminal &rsquo;ERRONEOUS&rsquo;, and substitute it for all
+terminals with an %erroneous directive in front of them.
+Thus, the example rule becomes</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>A:</p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p>&rsquo;a&rsquo; | ERRONEOUS | &rsquo;c&rsquo;;</p></td></tr>
+</table>
+
+<p style="margin-top: 1em">Since the terminal ERRONEOUS
+will never be in the input to the parser, this has exactly
+the desired effect; when a predicting phase produces
+ERRONEOUS as head of a prediction graph this head will never
+match the input. In particular, it will not match the
+terminal that was originally there (in this case
+&rsquo;b&rsquo;) so that terminal is no longer regarded as
+part of the input language at that point.</p>
+
+<h2>Appendix B: Using the non-correcting error recovery
+<a name="Appendix B: Using the non-correcting error recovery"></a>
+</h2>
+
+
+<p style="margin-top: 1em">To use the new non-correcting
+error recovery mechanism, LLgen has to be called with the
+new flag -n. LLgen will then create an extra file called
+&lsquo;Lncor.c&rsquo; which contains the code for the
+non-correcting recovery mechanism. This file has to be
+compiled and linked with the rest of the program, just like
+the file &lsquo;Lpars.c&rsquo;.</p>
+
+<p style="margin-top: 1em">The user-supplied error
+reporting routine &lsquo;LLmessage&rsquo; will have to be
+modified slightly; when it is called with a positive
+parameter, it should only set the attributes of the inserted
+token, but not report an error. Note that the lexical
+analyzer still must return the same token as it did the last
+time it was called. When LLmessage is called with parameter
+0, it should report that the token in global variable LLsymb
+is illegal; if the value of LLsymb is &lsquo;EOFILE&rsquo;,
+the routine should report an unexpected End-of-file. When
+LLmessage is called with parameter -1, it should report that
+end-of-file was expected. To facilitate switching between
+correcting and non-correcting error recovery, the file
+Lpars.h contains a statement &lsquo;#define LLNONCORR&rsquo;
+which indicates that the non-correcting mechanism is
+enabled. Here is a skeleton for the modified LLmessage
+routine:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>#include &quot;Lpars.h&quot;</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>extern int LLsymb;</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>LLmessage(flag)</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>int flag;</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>if (flag &lt; 0)</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Error message &quot;end-of-file expected&quot;
+*/;</small></p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>}</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>else if (flag)</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* flag equals the number of the inserted token
+*/</small></p> </td></tr>
+</table>
+
+<p><small>#ifndef LLNONCORR</small></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Error message &quot;token inserted&quot;
+*/;</small></p> </td></tr>
+</table>
+
+<p><small>#endif</small></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Code to set attributes for inserted token
+*/</small></p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Code to make lexical analyzer return same
+token as before */</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>else</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* The number of the illegal or deleted token is
+in LLsymb */</small></p></td></tr>
+</table>
+
+<p><small>#ifndef LLNONCORR</small></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Error message &quot;token deleted&quot;
+*/;</small></p> </td></tr>
+</table>
+
+<p><small>#else</small></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>if (LLsymb == EOFILE)</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Error message &quot;unexpected end of
+file&quot; */</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>}</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>else</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>{</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>/* Error message &quot;token illegal&quot;
+*/;</small></p> </td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>}</small></p></td></tr>
+</table>
+
+<p><small>#endif</small></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>}</small></p></td></tr>
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="87%">
+
+
+<p><small>}</small></p></td></tr>
+</table>
+
+<p style="margin-top: 1em">For best results, one should
+check if the parser calls other parsers in semantic actions;
+if this is the case, and the called parser processes the
+same input file as the calling parser, then a %substart
+should be put in front of the semantic action that starts a
+parser. If a semantic action calls parsers defined by
+startsymbols say A and B, then &lsquo;%substart A, B;&rsquo;
+should be put in front of the action. As an alternative, one
+can use the -s flag of LLgen; this has the same effect as
+putting &lsquo;%substart X, Y, ....;&rsquo; in front of all
+semantic actions, where X, Y, .... are the startsymbols of
+the grammar. Clearly, it is preferable to analyze the
+grammar and put %substart directives only where
+appropriate.</p>
+
+<p style="margin-top: 1em">Finally, beware of syntactic
+errors being handled in semantic actions; eg, one could have
+a rule like</p>
+
+<p style="margin-top: 1em"><small>Assignment_statement:
+lvalue <br>
+[ <br>
+&rsquo;=&rsquo; <br>
+{ <br>
+error(&quot;:= expected&quot;); <br>
+}</small></p>
+
+<p style="margin-top: 1em"><small>|</small></p>
+
+<p style="margin-top: 1em"><small>&rsquo;:=&rsquo; <br>
+] <br>
+expression <br>
+;</small></p>
+
+<p style="margin-top: 1em">To ensure that the
+non-correcting mechanism will recognize the &lsquo;=&rsquo;
+as a syntactic error, a &lsquo;%erroneous&rsquo; directive
+should be put in front of it.</p>
+<hr>
+</body>
+</html>
