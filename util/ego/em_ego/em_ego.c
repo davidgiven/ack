@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <limits.h>
 #include "em_path.h"
 #include "system.h"
 #include "print.h"
@@ -59,12 +60,10 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-static char tmpbase[] = TMP_DIR "/ego.XXXXXX";
-static char ddump[128] = TMP_DIR; /* data label dump file */
-static char pdump[128] = TMP_DIR; /* procedure name dump file */
-static char tmpbufs[NTEMPS * 2][128] = {
-	TMP_DIR
-};
+static char tmpbase[NAME_MAX];
+static char ddump[NAME_MAX]; /* data label dump file */
+static char pdump[NAME_MAX]; /* procedure name dump file */
+static char tmpbufs[NTEMPS * 2][NAME_MAX];
 
 static int O2phases[] = { /* Passes for -O2 */
 	CJ, BO, SP, 0
@@ -407,7 +406,15 @@ int main(int argc, char* argv[])
 		fatal("no correct -P flag given");
 	}
 
-	close(mkstemp(tmpbase));
+	{
+		char* tmpdir = getenv("TMPDIR");
+		if (!tmpdir)
+			tmpdir = "/tmp";
+		strcpy(tmpbase, tmpdir);
+		strcat(tmpbase, "/ego.XXXXXX");
+		close(mkstemp(tmpbase));
+	}
+
 	strcpy(ddump, tmpbase);
 	strcpy(pdump, tmpbase);
 	strcpy(tmpbufs[0], tmpbase);
