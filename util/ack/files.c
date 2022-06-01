@@ -26,18 +26,6 @@ static char *add_u(int part, char *ptr) {
 	return ptr+1 ;
 }
 
-static char *unique(void) {
-	/* Get the next unique part of the internal filename */
-	static int u_next = 0 ;
-	static char buf[10] ;
-	register char *ptr ;
-
-	ptr=add_u(u_next,buf) ;
-	*ptr=0 ;
-	u_next++ ;
-	return buf ;
-}
-
 int setfiles(trf *phase) {
 	/* Set the out structure according to the in structure,
 	   the transformation and some global data */
@@ -66,15 +54,16 @@ int setfiles(trf *phase) {
 	} else {
 		gr_init(&pathname) ;
 		if ( !phase->t_keep && !t_flag ) {
-			gr_cat(&pathname,TMP_DIR) ;
-			gr_cat(&pathname,"/") ;
-			gr_cat(&pathname,template) ;
-			gr_cat(&pathname,unique()) ;
+			char* tmpdir = getenv("TMPDIR");
+			if (!tmpdir)
+				tmpdir = "/tmp";
+			gr_cat(&pathname, tmpdir);
+			gr_cat(&pathname, "/Ack-XXXXXX");
+			mkstemp(pathname.gr_string);
 			out.p_keep=NO ;
 		} else {
 			if ( !p_basename ) {
 				gr_cat(&pathname,"Ack") ;
-				gr_cat(&pathname,unique()) ;
 				p_basename=keeps(gr_start(pathname)) ;
 				werror("Output written on %s%s",
 					p_basename,phase->t_out) ;

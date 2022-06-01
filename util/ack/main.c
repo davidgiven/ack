@@ -83,7 +83,6 @@ int main(int argc, char** argv)
 	}
 	transini();
 	scanneeds();
-	sprintf(template, TMPNAME, getpid());
 	if (n_error && !k_flag)
 		exit(n_error);
 

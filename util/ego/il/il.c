@@ -29,6 +29,7 @@
 #include "../share/get.h"
 #include "../share/put.h"
 #include "../share/go.h"
+#include <limits.h>
 
 int calnr;
 int complete_program;
@@ -36,11 +37,12 @@ calcnt_p cchead; /* call-count info of current proc */
 STATIC long space = 0;
 STATIC long total_size = 0;
 
-STATIC char cname[128] = TMP_DIR;
-STATIC char ccname[128] = TMP_DIR;
+STATIC char cname[NAME_MAX];
+STATIC char ccname[NAME_MAX];
+STATIC char cname2[NAME_MAX];
 
 /* For debugging only */
-STATIC char sname[128] = TMP_DIR;
+STATIC char sname[NAME_MAX];
 STATIC int kp_temps = 0;
 
 int Ssubst;
@@ -124,8 +126,6 @@ STATIC void pass1(const char *lnam, const char *bnam, const char *cnam)
  * Pass 2 reads the calfile and determines which calls should
  * be expanded in line. It does not use the EM text.
  */
-
-STATIC char cname2[128] = TMP_DIR;
 
 STATIC void pass2(const char *cnam, long space)
 {
@@ -331,13 +331,23 @@ char* argv[];
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f;
+	char* tmpdir = getenv("TMPDIR");
 
 	go(argc, argv, no_action, no_action, no_action, il_flags);
 	il_extptab(fproc); /* add extended data structures */
+	if (!tmpdir)
+		tmpdir = "/tmp";
+
+	strcpy(cname, tmpdir);
+	strcpy(ccname, tmpdir);
+	strcpy(sname, tmpdir);
+	strcpy(cname2, tmpdir);
+
 	strcat(cname, "/ego.i1.XXXXXX");
 	strcat(ccname, "/ego.i2.XXXXXX");
 	strcat(sname, "/ego.i3.XXXXXX");
 	strcat(cname2, "/ego.i4.XXXXXX");
+
 	close(mkstemp(cname));
 	close(mkstemp(ccname));
 	close(mkstemp(sname));

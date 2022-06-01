@@ -39,8 +39,6 @@ int n_error = 0; /* Number of errors encountered */
 char* progname = NULL; /* The program call name */
 
 char* outfile = NULL; /* The result file e.g. a.out */
-char template[20] = {}; /* The template for temporary file
-         names */
 
 trf* linker = NULL; /* Pointer to the Loader/Linker */
 trf* cpp_trafo = NULL; /* Pointer to C-preprocessor */
