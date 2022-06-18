@@ -42,11 +42,11 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/%.pdf: doc/%.n doc/LLgen.refs
 	@mkdir -p $(dir $@)
-	refer $< | groff -G -e -g -p -ms -Tpdf $< > $@
+	refer -p doc/LLgen.refs $< | groff -G -e -g -p -ms -Tpdf $< > $@
 
 $(OBJDIR)/%/index.html: doc/%.n doc/LLgen.refs
 	@mkdir -p $(dir $@)
-	refer $< | (cd $(dir $@) && groff -I$(PWD) -G -e -g -p -ms -Thtml) > $@
+	(cd $(dir $@) && refer -p $(PWD)/doc/LLgen.refs | groff -G -e -g -p -ms -Thtml) < $< > $@
 
 doc:: $(PDFS) $(HTMLS)
 

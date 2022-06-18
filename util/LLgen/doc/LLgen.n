@@ -10,7 +10,6 @@
 \}\
 \}
 .R1
-database doc/LLgen.refs
 accumulate
 .R2
 .ND
