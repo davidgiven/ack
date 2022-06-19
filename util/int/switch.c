@@ -11,6 +11,8 @@
 #include	"trap.h"
 #include	"warn.h"
 #include	"switch.h"
+#include	"stack.h"
+#include	"data.h"
 
 void do_instr(unsigned int opcode)
 {

@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 struct exec {
 	short a_magic;
@@ -51,6 +52,11 @@ char	*output_file;
 int	outputfile_created;
 FILE	*output;
 int	rom_in_text;
+
+static cv_int2();
+static fatal();
+static emits();
+static emit_symtab();
 
 char *program ;
 

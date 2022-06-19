@@ -19,6 +19,7 @@ void dt_stip(register ptr addr, ptr ap);
 void dt_stf(register ptr addr, double f, register size n);
 #endif
 
+ptr dt_ldip(ptr addr);
 ptr dt_lddp(register ptr addr);
 unsigned long dt_ldu(register ptr addr, size n);
 unsigned long dt_lduw(register ptr addr);
