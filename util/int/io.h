@@ -8,9 +8,10 @@
 #ifndef IO_H_
 #define IO_H_
 
-void fatal(char *fmt, ...);
-void message(char *fmt, ...);
-void init_ofiles(int firsttime);
-void close_down(int rc);
+extern void fatal(char *fmt, ...);
+extern void message(char *fmt, ...);
+extern void init_ofiles(int firsttime);
+extern void close_down(int rc);
+extern void incr_mess_id(void);
 
 #endif /* IO_H_ */

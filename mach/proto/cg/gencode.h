@@ -17,6 +17,6 @@ void gencode(register char *code);
 void genexpr(int nodeno);
 void gennl(void);
 void prtoken(token_p tp);
-
+void regreturn(void);
 
 #endif /* GENCODE_H_ */
