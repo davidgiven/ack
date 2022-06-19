@@ -17,6 +17,7 @@
 #include "glosym.h"
 #include "extern.h"
 #include "subr.h"
+#include "regvar.h"
 #include "salloc.h"
 
 
