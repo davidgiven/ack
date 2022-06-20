@@ -1,0 +1,38 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: apt
+      run: sudo apt update && sudo apt install bison flex ninja-build
+    - name: make
+      run: make
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: brew
+      run: brew install ninja
+    - name: make
+      run: make
+
+  build-windows:
+    runs-on: windows-latest
+    with:
+        update: true
+        msystem: MINGW32
+        install: >-
+          diffutils
+          make
+          ninja
+          zip
+    - uses: actions/checkout@v3
+    - name: build
+      run: make
+
+
