@@ -24,15 +24,14 @@ jobs:
   build-windows:
     runs-on: windows-latest
     with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          diffutils
-          make
-          ninja
-          zip
+      update: true
+      msystem: MINGW32
+      install: >-
+        diffutils
+        make
+        ninja
+        zip
     - uses: actions/checkout@v3
     - name: build
       run: make
-
 
