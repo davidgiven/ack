@@ -35,6 +35,9 @@ jobs:
             diffutils
             make
             ninja
+            mingw-w64-i686-gcc
+            bison
+            flex
             zip
       - uses: actions/checkout@v3
       - name: build
