@@ -8,18 +8,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt
-      run: sudo apt update && sudo apt install bison flex ninja-build
+      run: sudo apt update && sudo apt install bison flex ninja-build lua lua-posix
     - name: make
-      run: make
+      run: make LUA=lua
 
   build-macos:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja
+      run: brew install ninja lua luarocks
+    - name: luarocks
+      run |
+        luarocks install luaposix
     - name: make
-      run: make
+      run: make LUA=lua
 
   build-windows:
     runs-on: windows-latest
@@ -35,12 +38,16 @@ jobs:
           make
           mingw-w64-i686-gcc
           mingw-w64-i686-lua
+          mingw-w64-x86_64-lua-luarocks
           ninja
           bison
           flex
           zip
+    - name: luarocks
+      run |
+        luarocks install luaposix
     - uses: actions/checkout@v3
     - name: build
       run: |
-        make
+        make LUA=lua
 
