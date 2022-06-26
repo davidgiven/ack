@@ -45,7 +45,7 @@ jobs:
           zip
     - name: luarocks
       run: |
-        /mingw32/bin/luarocks install lua-posix
+        /mingw32/bin/luarocks --lua-dir=/usr/local/opt/lua@5.1 install lua-posix
     - uses: actions/checkout@v3
     - name: build
       run: |
