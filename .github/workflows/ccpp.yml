@@ -19,7 +19,7 @@ jobs:
     - name: brew
       run: brew install ninja lua luarocks
     - name: luarocks
-      run |
+      run: |
         luarocks install luaposix
     - name: make
       run: make LUA=lua
@@ -44,7 +44,7 @@ jobs:
           flex
           zip
     - name: luarocks
-      run |
+      run: |
         luarocks install luaposix
     - uses: actions/checkout@v3
     - name: build
