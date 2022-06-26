@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja lua5.1 luarocks
+      run: brew install ninja lua@5.1 luarocks
     - name: luarocks
       run: |
         luarocks install lua-posix
