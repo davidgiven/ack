@@ -22,7 +22,9 @@ jobs:
       run: |
         luarocks install --lua-version 5.1 luaposix 33.0.0-1
     - name: make
-      run: make LUA=/usr/local/bin/lua5.1
+      run: |
+        eval $(luarocks --lua-version 5.1 path)
+        make LUA=/usr/local/bin/lua5.1
 
   build-windows:
     runs-on: windows-latest
