@@ -39,19 +39,18 @@ jobs:
         install: >-
           make
           mingw-w64-i686-gcc
-          mingw-w64-i686-lua51
-          mingw-w64-i686-lua-luarocks
+          mingw-w64-x86_64-lua51
+          mingw-w64-x86_64-lua-luarocks
           ninja
           bison
           flex
           zip
-          git
     - name: luarocks
       run: |
-        /mingw32/bin/luarocks --lua-version 5.1 install luaposix 33.0.0-1
+        git config --global url."https://".insteadOf git://
+        /mingw64/bin/luarocks --lua-version 5.1 install luaposix 33.0.0-1
     - uses: actions/checkout@v3
     - name: build
       run: |
-        eval $(/mingw32/bin/luarocks --lua-version 5.1 path)
-        make LUA=/mingw32/bin/lua5.1
+         make LUA=/mingw64/bin/lua5.1
 
