@@ -45,6 +45,7 @@ jobs:
           bison
           flex
           zip
+          git
     - name: luarocks
       run: |
         git config --global url."https://".insteadOf git://
