@@ -26,32 +26,32 @@ jobs:
         eval $(luarocks --lua-version 5.1 path)
         make LUA=/usr/local/bin/lua5.1
 
-  build-windows:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        msystem: MINGW32
-        install: >-
-          make
-          mingw-w64-i686-gcc
-          mingw-w64-x86_64-lua51
-          mingw-w64-x86_64-lua-luarocks
-          ninja
-          bison
-          flex
-          zip
-          git
-    - name: luarocks
-      run: |
-        git config --global url."https://".insteadOf git://
-        /mingw64/bin/luarocks --lua-version 5.1 install luaposix 33.0.0-1
-    - uses: actions/checkout@v3
-    - name: build
-      run: |
-         make LUA=/mingw64/bin/lua5.1
-
+#  build-windows:
+#    runs-on: windows-latest
+#    defaults:
+#      run:
+#        shell: msys2 {0}
+#    steps:
+#    - uses: msys2/setup-msys2@v2
+#      with:
+#        update: true
+#        msystem: MINGW32
+#        install: >-
+#          make
+#          mingw-w64-i686-gcc
+#          mingw-w64-x86_64-lua51
+#          mingw-w64-x86_64-lua-luarocks
+#          ninja
+#          bison
+#          flex
+#          zip
+#          git
+#    - name: luarocks
+#      run: |
+#        git config --global url."https://".insteadOf git://
+#        /mingw64/bin/luarocks --lua-version 5.1 install luaposix 33.0.0-1
+#    - uses: actions/checkout@v3
+#    - name: build
+#      run: |
+#         make LUA=/mingw64/bin/lua5.1
+#
