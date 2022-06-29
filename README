@@ -56,6 +56,8 @@ Requirements:
 
 - GNU make.
 
+- Lua (any version) with the lua-posix library installed.
+
 - (optionally) ninja; if you've got this, this will be autodetected and give
   you faster builds.
 
