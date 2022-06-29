@@ -12,6 +12,8 @@
 
 .sect .text
 
+#define STACK_BUFFER 128 /* number of bytes to leave for stack */
+
 begtext:
 	! Make sure we are running under MS-DOS 2 or above.
 	!
@@ -20,9 +22,38 @@ begtext:
 	! segment.  (DOS 3+ does; DOS 2.x does not.)
 	movb ah, 0x30
 	int 0x21
+	cbw
 	cmpb al, 2
-	xchg bx, ax
-	jc bad_sys
+	xchg bp, ax
+	jnc ok_sys
+
+	mov dx, bad_sys_msg
+dos_msg:
+	movb ah, 9
+	int 0x21
+	ret
+
+ok_sys:
+	! Resize the program's memory control block (MCB) to cover only the
+	! program's near code and data space.  Use the starting sp value as
+	! a guide to how much memory we can grab.  Abort on any failure.
+	!
+	! As a side effect, this also frees up any memory allocated to our
+	! program beyond 64 KiB.  (The freed memory can possibly be used by
+	! e.g. child processes, in the future.)
+	!
+	! Also check that we have some space between the BSS end and the
+	! starting sp.
+	cmp sp, endbss+STACK_BUFFER
+	jb no_room
+
+	movb ah, 0x4a
+	mov bx, sp
+	movb cl, 4
+	shr bx, cl
+	inc bx
+	int 0x21
+	jc no_room
 
 	! Clear BSS.
 	mov di, begbss
@@ -35,11 +66,12 @@ begtext:
 
 	! Get the size of the environment variables plus (if present) the
 	! program name.  Also count the number of environment variables.
-	mov es, (0x002C)
 	xor di, di
+	mov es, 0x002C(di)
 	! ax = 0 from above
 	cwd				! dx = count of env. vars.
-	mov cx, -1
+	! cx = 0 from above
+	dec cx				! cx = max. str. bytes to scan
 	scasb				! handle special case of empty env.
 	jz is_empty_env
 size_env:
@@ -48,7 +80,7 @@ size_env:
 	scasb
 	jnz size_env
 is_empty_env:
-	cmpb bl, 2
+	cmp bp, 2
 	jz no_argv0
 	scasw
 	repnz scasb
@@ -58,10 +90,9 @@ no_argv0:
 	! onto the stack.
 	mov si, di
 	dec si
-	and si, -2
 	std
 copy_env:
-	test si, si
+	and si, -2
 	eseg lodsw
 	push ax
 	jnz copy_env
@@ -79,7 +110,7 @@ copy_env:
 
 	! Build up argc, argv[], and envp[].
 	push ax				! output buffer for argc, argv, envp
-	push bx				! MS-DOS version
+	push bp				! MS-DOS version
 	push cx				! env. string data
 	push dx				! count of env. vars.
 	mov ax, 0x0080
@@ -96,13 +127,6 @@ copy_env:
 	add sp, 6
 	push ax
 	call _exit
-
-bad_sys:
-	mov dx, bad_sys_msg
-dos_msg:
-	movb ah, 9
-	int 0x21
-	ret
 
 no_room:
 	mov dx, no_room_msg
