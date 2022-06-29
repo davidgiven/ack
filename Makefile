@@ -31,6 +31,7 @@ LDFLAGS ?=
 
 AR ?= ar
 CC ?= gcc
+LUA ?= lua
 
 # Which build system to use; use 'ninja' or 'make' (in lower case). Leave
 # blank to autodetect.
@@ -104,12 +105,12 @@ else
 $(error unknown BUILDSYSTEM = $(BUILDSYSTEM))
 endif
 
-$(build-file): first/ackbuilder.lua Makefile $(lua-files) $(our-lua)
+$(build-file): first/ackbuilder.lua Makefile
 	@mkdir -p $(BUILDDIR)
-	@$(our-lua) first/ackbuilder.lua \
+	@$(LUA) first/ackbuilder.lua \
 		first/build.lua build.lua \
 		--$(BUILDSYSTEM) \
-		LUA=$(our-lua) \
+		LUA=$(LUA) \
 		DEFAULT_PLATFORM=$(DEFAULT_PLATFORM) \
 		OBJDIR=$(OBJDIR) \
 		BINDIR=$(BINDIR) \
@@ -131,21 +132,3 @@ install:
 clean:
 	rm -rf $(BUILDDIR)
 
-uname := $(shell uname)
-ifeq (Linux,$(uname))
-# Turn on LUA_USE_POSIX so that Lua is not compiled with the dangerous
-# tmpnam(.) function.  But, do not use LUA_USE_LINUX here, since that will
-# also turn on LUA_USE_READLINE, and I do not want to force everyone to
-# install libreadline-dev.  -- tkchia
-$(our-lua): CFLAGS += -DLUA_USE_POSIX -DLUA_USE_DLOPEN
-$(our-lua): LDFLAGS += -ldl
-else
-ifeq (Darwin,$(uname))
-$(our-lua): CFLAGS += -DLUA_USE_MACOSX
-endif
-endif
-
-$(our-lua): first/lua-5.1/*.c first/lua-5.1/*.h
-	@echo Bootstrapping build
-	@mkdir -p $(BUILDDIR)
-	@$(CC) $(CFLAGS) -o $(our-lua) -O first/lua-5.1/*.c $(LDFLAGS) -lm
