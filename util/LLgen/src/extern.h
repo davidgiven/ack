@@ -97,37 +97,40 @@ extern int	strip_grammar;
 extern int	in_production;
 
 /* LLgen.g */
-void LLparse(void);
+extern void LLparse(void);
 
 /* check.c */
-void conflchecks(void);
+extern void conflchecks(void);
 
 /* compute.c */
-void do_compute(void);
-int empty(p_gram);
-int t_safety(int, int, int, int);
-int t_after(int, int, int);
+extern void do_compute(void);
+extern int empty(p_gram);
+extern int t_safety(int, int, int, int);
+extern int t_after(int, int, int);
 
 /* gencode.c */
-void gencode(int);
+extern void gencode(int);
 
 /* machdep.c */
-void TMPNAM(string);
-string libpath(string);
+extern string maketempfile(void);
+extern string libpath(string);
 
 /* main.c */
-void error(int lineno,string s,string t);
-void warning(int lineno,string s,string t);
-void fatal(int lineno,string s,string t);
-void copyfile(string);
-void install(string, string);
+extern void error(int lineno,string s,string t);
+extern void warning(int lineno,string s,string t);
+extern void fatal(int lineno,string s,string t);
+extern void copyfile(string);
+extern void install(string, string);
 
 /* name.c */
-void name_init(void);
-string store(string);
-p_gram search(int, string, int);
+extern void name_init(void);
+extern string store(string);
+extern p_gram search(int, string, int);
 
 /* reach.c */
-void co_reach(void);
+extern void co_reach(void);
+
+/* utils.c */
+extern string aprintf(const char* fmt, ...);
 
 #endif /* EXTERN_H_ */

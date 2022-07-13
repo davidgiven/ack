@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 # include "extern.h"
 # include "types.h"
 
@@ -39,18 +40,20 @@ string libpath(string s)
 	char* libdir = getenv("LLGEN_LIB_DIR");
 	if (!libdir)
 		libdir = LIBDIR;
-	length = strlen(libdir) + strlen(s) + 2;
-	p = (string) alloc(length);
-	strcpy(p,libdir);
-	strcat(p,"/");
-	strcat(p,s);
-	return p;
+	return aprintf("%s/%s", libdir, s);
 }
 
-void TMPNAM(string result)
+string maketempfile()
 {
-   if (tmpnam(result)==NULL)
-   {
+	string tmp = getenv("TMP");
+	if (!tmp)
+		tmp = "/tmp";
+
+	string filename = aprintf("%s/llgen-XXXXXX", tmp);
+	int fd = mkstemp(filename);
+	if (fd == -1)
 	   fatal(1, "Cannot create temporary file.", NULL);
-   }
+
+	close(fd);
+	return filename;
 }

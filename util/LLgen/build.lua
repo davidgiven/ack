@@ -1,6 +1,13 @@
 clibrary {
 	name = "headers",
-	hdrs = { "./src/*.h" } -- rm alloc.h
+	hdrs = {
+		"./src/cclass.h",
+		"./src/extern.h",
+		"./src/io.h",
+		"./src/Lpars.h",
+		"./src/sets.h",
+		"./src/types.h",
+	}
 }
 
 cprogram {
@@ -10,11 +17,28 @@ cprogram {
 	-- tokens.c. If LLgen.g or tokens.g gets updated, they need
 	-- rebuilding. Use the bootstrap target to do this.
 
-	srcs = { "./src/*.c" },
+	srcs = {
+		"./src/LLgen.c",
+		"./src/Lpars.c",
+		"./src/alloc.c",
+		"./src/cclass.c",
+		"./src/check.c",
+		"./src/compute.c",
+		"./src/gencode.c",
+		"./src/global.c",
+		"./src/machdep.c",
+		"./src/main.c",
+		"./src/name.c",
+		"./src/reach.c",
+		"./src/savegram.c",
+		"./src/sets.c",
+		"./src/tokens.c",
+		"./src/utils.c",
+	},
 	deps = { "+headers" },
 	vars = {
 		["+cflags"] = {
-			"-DLIBDIR=\\\""..posix.getcwd().."/"..cwd().."/lib\\\"",
+			"-DLIBDIR=\\\""..cwd().."/lib\\\"",
 			"-DNON_CORRECTING"
 		},
 	}
@@ -55,8 +79,11 @@ definerule("llgen",
 				"util/LLgen+llgen",
 				e.srcs,
 			},
+			vars = {
+				srcs = e.srcs
+			},
 			commands = {
-				"cd %{dir} && rm -f %{outs} && %{abspath(ins)}"
+				"rm -f %{outs} && %{ins[1]} -o%{dirname(outs[1])} %{srcs}"
 			}
 		}
 	end
