@@ -345,11 +345,10 @@ local function templateexpand(list, vars)
 		o[#o+1] = s:gsub("%%%b{}",
 			function(expr)
 				expr = expr:sub(3, -2)
-				local chunk, e = loadstring("return ("..expr..")", expr)
+				local chunk, e = load("return ("..expr..")", expr, nil, vars)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
-				setfenv(chunk, vars)
 				local value = chunk()
 				if (value == nil) then
 					error(string.format("template expression '%s' expands to nil (probably an undefined variable)", expr))
@@ -381,10 +380,7 @@ local function loadbuildfile(filename)
 				local thisglobals = {}
 				thisglobals._G = thisglobals
 				setmetatable(thisglobals, {__index = globals})
-				chunk, e = loadstring(data, "@"..filename)
-				if not e then
-					setfenv(chunk, thisglobals)
-				end
+				chunk, e = load(data, filename, nil, thisglobals)
 			end
 		end
 		if e then
