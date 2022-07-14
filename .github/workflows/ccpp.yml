@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt
-      run: sudo apt update && sudo apt install bison flex ninja-build luajit
+      run: sudo apt update && sudo apt install bison flex ninja-build lua
     - name: make
       run: make
 
@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja luajit
+      run: brew install ninja lua@5.1
     - name: make
       run: |
         make
@@ -35,7 +35,7 @@ jobs:
         install: >-
           make
           mingw-w64-i686-gcc
-          mingw-w64-i686-luajit
+          mingw-w64-i686-lua5.1
           ninja
           bison
           flex
