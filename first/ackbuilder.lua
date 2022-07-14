@@ -20,6 +20,24 @@ local loadingstack = {}
 -- Forward references
 local loadtarget
 
+-- Compatibility polyfill for load
+local function loadf(text, source, mode, env)
+	if rawget(_G, "loadstring") then
+		local chunk, e = loadstring(text, "@"..source)
+		if chunk then
+			setfenv(chunk, env)
+		end
+		return chunk, e
+	else
+		return load(text, source, mode, env)
+	end
+end
+
+-- Compatibility polyfill for unpack
+if not rawget(_G, "unpack") then
+	unpack = table.unpack
+end
+
 local function print(...)
 	local function print_no_nl(list)
 		for _, s in ipairs(list) do
@@ -341,7 +359,7 @@ local function templateexpand(list, vars)
 		o[#o+1] = s:gsub("%%%b{}",
 			function(expr)
 				expr = expr:sub(3, -2)
-				local chunk, e = load("return ("..expr..")", expr, nil, vars)
+				local chunk, e = loadf("return ("..expr..")", expr, nil, vars)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
@@ -376,7 +394,7 @@ local function loadbuildfile(filename)
 				local thisglobals = {}
 				thisglobals._G = thisglobals
 				setmetatable(thisglobals, {__index = globals})
-				chunk, e = load(data, filename, nil, thisglobals)
+				chunk, e = loadf(data, filename, nil, thisglobals)
 			end
 		end
 		if e then
