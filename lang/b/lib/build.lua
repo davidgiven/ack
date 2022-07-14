@@ -4,12 +4,12 @@ for _, plat in ipairs(vars.plats) do
     acklibrary {
         name = "lib_"..plat,
         srcs = {
-			"./*.c",
-			"./*.e",
+			"./init.c",
+			"./main.c",
         },
 		hdrs = {}, -- must be empty
 		deps = {
-			"./*.h",
+			"./b.h",
 			"h+emheaders",
 			"lang/cem/libcc.ansi/headers+pkg",
 			"plat/"..plat.."/include+pkg",

@@ -13,7 +13,7 @@ local cgglexer = flex {
 cprogram {
 	name = "cgg",
 	srcs = concat(
-		"./*.c",
+		"./main.c",
 		matching(filenamesof(cggparser), "%.c$"),
 		matching(filenamesof(cgglexer), "%.c$")
 	),

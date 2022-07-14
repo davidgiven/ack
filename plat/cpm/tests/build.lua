@@ -9,5 +9,7 @@ plat_testsuite {
         "floats", -- floats aren't supported
         "long-long",
     },
-    tests = { "./*.c" },
+    tests = {
+		"./parsefcb_c.c",
+	}
 }

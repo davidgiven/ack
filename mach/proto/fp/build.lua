@@ -3,10 +3,51 @@ include("plat/build.lua")
 -- For now, all floats are little-endian.
 local byte_order = "mach/i86/libfp/byte_order.h"
 
+local srcs = {
+	"./adder.c",
+	"./add_ext.c",
+	"./adf4.c",
+	"./adf8.c",
+	"./cff4.c",
+	"./cff8.c",
+	"./cfi.c",
+	"./cfu.c",
+	"./cif4.c",
+	"./cif8.c",
+	"./cmf4.c",
+	"./cmf8.c",
+	"./compact.c",
+	"./cuf4.c",
+	"./cuf8.c",
+	"./div_ext.c",
+	"./dvf4.c",
+	"./dvf8.c",
+	"./extend.c",
+	"./fef4.c",
+	"./fef8.c",
+	"./fif4.c",
+	"./fif8.c",
+	"./fptrp.e",
+	"./mlf4.c",
+	"./mlf8.c",
+	"./mul_ext.c",
+	"./ngf4.c",
+	"./ngf8.c",
+	"./nrm_ext.c",
+	"./sbf4.c",
+	"./sbf8.c",
+	"./sft_ext.c",
+	"./shifter.c",
+	"./sub_ext.c",
+	"./zrf4.c",
+	"./zrf8.c",
+	"./zrf_ext.c",
+}
+
 -- For now, only cpm uses software floating-point.
 for _, plat in ipairs({"cpm"}) do
 	local edits = {}
-	for _, src in fpairs("./*.c", "./*.e") do
+	for _, src in fpairs(srcs) do
 
 		-- Compile each src file into assembly code.
 		local n = basename(src):gsub("%.%w*$", "")
@@ -14,7 +55,11 @@ for _, plat in ipairs({"cpm"}) do
 			name = "s_"..plat.."/"..n,
 			srcs = { src },
 			deps = {
-				"./*.h",
+				"./FP_bias.h",
+				"./FP_shift.h",
+				"./FP_trap.h",
+				"./FP_types.h",
+				"./get_put.h",
 				byte_order,
 			},
 			suffix = ".s",

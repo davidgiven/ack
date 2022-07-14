@@ -1,9 +1,13 @@
 clibrary {
 	name = "lib",
 	srcs = {
-		"./*.c"
+		"./AtEoIF.c",
+		"./AtEoIT.c",
 	},
-	hdrs = { "./inp_pkg.*" }
+	hdrs = {
+		"./inp_pkg.body",
+		"./inp_pkg.spec",
+	}
 }
 
 

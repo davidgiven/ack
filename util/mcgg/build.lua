@@ -2,12 +2,16 @@ include("first/yacc.lua")
 
 flex {
 	name = "flex",
-	srcs = { "./*.l" },
+	srcs = {
+		"./scan.l",
+	}
 }
 
 yacc {
 	name = "yacc",
-	srcs = { "./*.y" },
+	srcs = {
+		"./gram.y",
+	}
 }
 
 normalrule {
@@ -41,7 +45,7 @@ clibrary {
 cprogram {
 	name = "mcgg",
 	srcs = {
-		"./*.c",
+		"./iburg.c",
 		matching(filenamesof("+flex"), "%.c$"),
 		matching(filenamesof("+yacc"), "%.c$")
 	},

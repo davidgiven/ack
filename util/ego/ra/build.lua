@@ -18,13 +18,31 @@ normalrule {
 
 cprogram {
 	name = "ra",
-	srcs = { "./ra*.c" },
+	srcs = {
+		"./ra_allocl.c",
+		"./ra_aux.c",
+		"./ra.c",
+		"./ra_interv.c",
+		"./ra_items.c",
+		"./ra_lifet.c",
+		"./ra_pack.c",
+		"./ra_profits.c",
+		"./ra_xform.c",
+	},
 	deps = {
 		"util/ego/share+lib",
 		"modules/src/em_data+lib",
 		"h+emheaders",
 		"+itemtab_h",
-		"./ra*.h",
+		"./ra_allocl.h",
+		"./ra_aux.h",
+		"./ra.h",
+		"./ra_interv.h",
+		"./ra_items.h",
+		"./ra_lifet.h",
+		"./ra_pack.h",
+		"./ra_profits.h",
+		"./ra_xform.h",
 	},
 	vars = {
 		["+cflags"] = {"-DVERBOSE", "-DNOTCOMPACT"}

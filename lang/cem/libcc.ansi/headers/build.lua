@@ -11,9 +11,38 @@ local function addheader(dir, list)
 	end
 end
 
-addheader("", filenamesof("./*.h"))
-addheader("sys/", filenamesof("./sys/*.h"))
-addheader("ack/", filenamesof("./ack/*.h"))
+addheader("", filenamesof(
+		"./assert.h",
+		"./ctype.h",
+		"./errno.h",
+		"./fcntl.h",
+		"./float.h",
+		"./iso646.h",
+		"./limits.h",
+		"./locale.h",
+		"./math.h",
+		"./setjmp.h",
+		"./signal.h",
+		"./stdarg.h",
+		"./stdbool.h",
+		"./stddef.h",
+		"./stdint.h",
+		"./stdio.h",
+		"./stdlib.h",
+		"./string.h",
+		"./time.h",
+		"./unistd.h"
+	))
+
+addheader("sys/", filenamesof(
+		"./sys/time.h",
+		"./sys/times.h"
+	))
+
+addheader("ack/", filenamesof(
+		"./ack/config.h",
+		"./ack/emufile.h"
+	))
 
 acklibrary {
 	name = "headers",

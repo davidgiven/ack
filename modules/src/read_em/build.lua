@@ -56,7 +56,7 @@ local function variant(name, cflags)
 			"modules/src/em_data+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
-			"./*.h",
+			"./em_comp.h",
 		}
 	}
 end

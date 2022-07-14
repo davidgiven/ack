@@ -20,7 +20,10 @@ clibrary {
 
 cprogram {
 	name = "emuppc",
-	srcs = { "./*.c" },
+	srcs = {
+		"./emu.c",
+		"./main.c",
+	},
 	deps = {
 		"+dispatcher_lib"
 	}

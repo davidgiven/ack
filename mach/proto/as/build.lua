@@ -11,10 +11,7 @@ definerule("build_as",
 		local archlib = clibrary {
 			name = e.name.."/archlib",
 			srcs = {},
-			hdrs = {
-				"mach/"..e.arch.."/as/mach*.c",
-				"mach/"..e.arch.."/as/*.h"
-			}
+			hdrs = { "mach/"..e.arch.."/as+headers" },
 		}
 
 		local preprocessedy = cppfile {
@@ -38,7 +35,12 @@ definerule("build_as",
 		return cprogram {
 			name = e.name,
 			srcs = concat(
-				"mach/proto/as/*.c",
+				"mach/proto/as/comm3.c",
+				"mach/proto/as/comm4.c",
+				"mach/proto/as/comm5.c",
+				"mach/proto/as/comm6.c",
+				"mach/proto/as/comm7.c",
+				"mach/proto/as/comm8.c",
 				matching(filenamesof(yaccfiles), "%.c$")
 			),
 			deps = {

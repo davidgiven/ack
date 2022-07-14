@@ -27,7 +27,7 @@ acklibrary {
 		"plat/linux/libsys/write.c",
 	},
 	deps = {
-		"plat/linux/libsys/*.h",
+		"plat/linux/libsys+headers",
 		"lang/cem/libcc.ansi/headers+headers",
 		"plat/linuxppc/include+pkg",
 	},

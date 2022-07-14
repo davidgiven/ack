@@ -20,7 +20,7 @@ definerule("plat_testsuite",
 		end
 		for _, set in ipairs(e.sets) do
 			if not skipsets[set] then
-				local fs = filenamesof("tests/plat/"..set.."/*")
+				local fs = filenamesof("tests/plat/"..set.."+srcs")
 				for _, f in ipairs(fs) do
 					testfiles[#testfiles+1] = f
 				end

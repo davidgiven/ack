@@ -58,7 +58,8 @@ normalrule {
 	name = "next_c",
 	ins = {
 		"./make.next",
-		"./*.str",
+		"./macro.str",
+		"./replace.str",
 	},
 	outleaves = { "next.c" },
 	commands = {
@@ -82,7 +83,22 @@ tabgen {
 cprogram {
 	name = "cpp",
 	srcs = concat(
-		"./*.c",
+		"./ch3bin.c",
+		"./ch3mon.c",
+		"./domacro.c",
+		"./error.c",
+		"./expr.c",
+		"./idf.c",
+		"./init.c",
+		"./input.c",
+		"./LLlex.c",
+		"./LLmessage.c",
+		"./main.c",
+		"./options.c",
+		"./preprocess.c",
+		"./replace.c",
+		"./skip.c",
+		"./tokenname.c",
 		matching(filenamesof(llgen), "%.c$"),
 		"+next_c",
 		"+symbol2str_c",

@@ -1,13 +1,10 @@
 acklibrary {
     name = "lib",
     srcs = {
-        "./*.e",
-        "./*.c",
-        "plat/em/libsys/*.c",
-        "plat/em/libsys/*.e",
+        "plat/em/libsys+srcs",
     },
 	deps = {
-		"plat/em/libsys/*.h",
+		"plat/em/libsys+headers",
 		"lang/cem/libcc.ansi/headers+headers",
         "plat/em22/include+pkg",
 		"h+emheaders",

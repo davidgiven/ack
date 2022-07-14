@@ -2,7 +2,7 @@ include("util/LLgen/build.lua")
 
 llgen {
 	name = "llgen",
-	srcs = { "./*.g" }
+	srcs = { "./basic.g" }
 }
 
 normalrule {
@@ -21,11 +21,29 @@ normalrule {
 cprogram {
 	name = "em_bem",
 	srcs = {
-		"./*.c",
+		"./bem.c",
+		"./compile.c",
+		"./eval.c",
+		"./func.c",
+		"./gencode.c",
+		"./graph.c",
+		"./initialize.c",
+		"./parsepar.c",
+		"./symbols.c",
+		"./util.c",
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
-		"./*.h",
+		"./bem.h",
+		"./eval.h",
+		"./func.h",
+		"./gencode.h",
+		"./graph.h",
+		"./llmess.h",
+		"./parsepar.h",
+		"./symbols.h",
+		"./util.h",
+		"./yylexp.h",
 		"+llgen",
 		"+tokentab_h",
 		"h+emheaders",

@@ -2,10 +2,11 @@
 cprogram {
 	name = "em_b",
 	srcs = {
-		"./*.c",
+		"./b0.c",
+		"./b1.c",
 	},
 	deps = {
-		"./*.h",
+		"./b.h",
 		"modules+headers",
 		"modules/src/alloc+lib",
 		"modules/src/data+lib",

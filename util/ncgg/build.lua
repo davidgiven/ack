@@ -27,7 +27,20 @@ normalrule {
 cprogram {
 	name = "ncgg",
 	srcs = concat(
-		"./*.c",
+		"./coerc.c",
+		"./emlookup.c",
+		"./error.c",
+		"./expr.c",
+		"./hall.c",
+		"./instruct.c",
+		"./iocc.c",
+		"./lookup.c",
+		"./main.c",
+		"./output.c",
+		"./set.c",
+		"./strlookup.c",
+		"./subr.c",
+		"./var.c",
 		matching(filenamesof(cggparser), "%.c$"),
 		matching(filenamesof(cgglexer), "%.c$"),
 		"+keywords"

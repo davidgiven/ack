@@ -1,6 +1,20 @@
 cprogram {
     name = "led",
-    srcs = { "./*.c" },
+    srcs = {
+		"./archive.c",
+		"./error.c",
+		"./extract.c",
+		"./finish.c",
+		"./main.c",
+		"./memory.c",
+		"./output.c",
+		"./read.c",
+		"./relocate.c",
+		"./save.c",
+		"./scan.c",
+		"./sym.c",
+		"./write.c",
+	},
     deps = {
         "./archive.h", "./const.h", "./debug.h", "./defs.h", 
         "./error.h", "./extract.h", "./finish.h", "./mach.h",

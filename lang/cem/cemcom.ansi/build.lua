@@ -13,11 +13,34 @@ normalrule {
 	}
 }
 
-local str_files = basename(filenamesof("./*.str"))
+local str_files = {
+		"./code.str",
+		"./declar.str",
+		"./def.str",
+		"./estack.str",
+		"./expr.str",
+		"./field.str",
+		"./idf.str",
+		"./l_brace.str",
+		"./l_outdef.str",
+		"./l_state.str",
+		"./macro.str",
+		"./next.str",
+		"./proto.str",
+		"./stack.str",
+		"./stmt.str",
+		"./struct.str",
+		"./switch.str",
+		"./type.str",
+		"./util.str"
+}
+
+local str_bases = basename(filenamesof(str_files))
+
 local str_targets = {}
 
-for _, f in ipairs(str_files) do
-	local bf = f:gsub("%.str$", "")
+for _, f in ipairs(str_bases) do
+	local bf = f:gsub("%.str$", ""):gsub("^$./", "")
 	str_targets[#str_targets+1] = normalrule {
 		name = "allocd_header/"..bf,
 		ins = { "./make.allocd", "./"..f },
@@ -32,7 +55,7 @@ normalrule {
 	name = "next-c",
 	ins = {
 		"./make.next",
-		"./*.str",
+		str_files
 	},
 	outleaves = { "next.c" },
 	commands = {
@@ -78,7 +101,11 @@ llgen {
 	name = "llgen",
 	srcs = {
 		"+tokenfile-g", -- must be first
-		"./*.g",
+		"./declar.g",
+		"./expression.g",
+		"./ival.g",
+		"./program.g",
+		"./statement.g",
 	},
 }
 

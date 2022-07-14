@@ -15,7 +15,10 @@ llgen {
 	srcs = {
 		-- order here is important
 		"+tokenfile_g",
-		"./*.g",
+		"./declar.g",
+		"./expression.g",
+		"./program.g",
+		"./statement.g",
 	}
 }
 
@@ -31,7 +34,14 @@ normalrule {
 	}
 }
 
-for _, f in ipairs(filenamesof("./*.xh")) do
+local xh_files = {
+	"./def.xh",
+	"./node.xh",
+	"./real.xh",
+	"./type.xh",
+}
+
+for _, f in ipairs(filenamesof(xh_files)) do
 	local name = replace(basename(f), "%.xh$", "")
 	normalrule {
 		name = name.."_h",
@@ -46,7 +56,13 @@ for _, f in ipairs(filenamesof("./*.xh")) do
 	}
 end
 
-for _, f in ipairs(filenamesof("./*.xc")) do
+local xc_files = {
+	"./casestat.xc",
+	"./scope.xc",
+	"./tmpvar.xc",
+}
+
+for _, f in ipairs(filenamesof(xc_files)) do
 	local name = replace(basename(f), "%.xc$", "")
 	normalrule {
 		name = name.."_c",
@@ -65,8 +81,8 @@ normalrule {
 	name = "next_c",
 	ins = {
 		"./make.next",
-		"./*.xh",
-		"./*.xc",
+		xh_files,
+		xc_files
 	},
 	outleaves = { "next.c" },
 	commands = {
@@ -94,7 +110,28 @@ tabgen {
 cprogram {
 	name = "em_m2",
 	srcs = {
-		"./*.c",
+		"./chk_expr.c",
+		"./code.c",
+		"./cstoper.c",
+		"./def.c",
+		"./defmodule.c",
+		"./desig.c",
+		"./enter.c",
+		"./error.c",
+		"./idf.c",
+		"./input.c",
+		"./LLlex.c",
+		"./LLmessage.c",
+		"./lookup.c",
+		"./main.c",
+		"./misc.c",
+		"./node.c",
+		"./options.c",
+		"./stab.c",
+		"./tokenname.c",
+		"./type.c",
+		"./typequiv.c",
+		"./walk.c",
 		"+casestat_c",
 		"+next_c",
 		"+scope_c",
