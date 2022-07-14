@@ -16,7 +16,8 @@
  * Some important file names and variables
  */
 
-# include <stdio.h>
+#include <stdio.h>
+#include "types.h"
 
 /* FILES */
 
