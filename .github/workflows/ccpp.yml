@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt
-      run: sudo apt update && sudo apt install bison flex ninja-build lua5.1 lua-posix
+      run: sudo apt update && sudo apt install bison flex ninja-build luajit
     - name: make
       run: make LUA=lua
 
@@ -17,14 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja lua@5.1 luarocks
-    - name: luarocks
-      run: |
-        luarocks install --lua-version 5.1 luaposix 33.0.0-1
+      run: brew install ninja luajit
     - name: make
       run: |
-        eval $(luarocks --lua-version 5.1 path)
-        make LUA=/usr/local/bin/lua5.1
+        make
 
   build-windows:
     runs-on: windows-latest
@@ -39,19 +35,14 @@ jobs:
         install: >-
           make
           mingw-w64-i686-gcc
-          mingw-w64-i686-lua51
-          mingw-w64-i686-lua-luarocks
+          mingw-w64-i686-luajit
           ninja
           bison
           flex
           zip
           git
-    - name: luarocks
-      run: |
-        /mingw32/bin/luarocks --lua-version 5.1 install luaposix 33.0.0-1
     - uses: actions/checkout@v3
     - name: build
       run: |
-        eval $(/mingw32/bin/luarocks --lua-version 5.1 path)
-        make LUA=/mingw32/bin/lua5.1
+        make
 
