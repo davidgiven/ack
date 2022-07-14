@@ -10,7 +10,7 @@ jobs:
     - name: apt
       run: sudo apt update && sudo apt install bison flex ninja-build luajit
     - name: make
-      run: make LUA=lua
+      run: make
 
   build-macos:
     runs-on: macos-latest
