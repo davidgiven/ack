@@ -32,7 +32,6 @@ ed:	$(OBJS)
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/wait.h>
 #include <stdio.h>
 
 /****************************/
@@ -2157,6 +2156,10 @@ int gflg, pflag;
 int System(c)
 char *c;
 {
+#if 0
+/* dtrg: disabled because we don't need it for the ACK and this doesn't work on
+ * Windows. */
+
   int pid, status;
 
   switch (pid = fork()) {
@@ -2169,6 +2172,8 @@ char *c;
       default:	while (wait(&status) != pid);
 }
   return status;
+#endif
+  return -1;
 }
 
 /*	unmkpat.c	*/
