@@ -374,6 +374,15 @@ void copyto(string target, string source)
 	fclose(ftarget);
 }
 
+static int isabspath(string path)
+{
+	if (path[0] == '/') /* Unix paths */
+		return 1;
+	if (path[0] && (path[1] == ':')) /* Windows paths */
+		return 1;
+	return 0;
+}
+
 void install(string target, string source)
 {
 	/*
@@ -384,7 +393,7 @@ void install(string target, string source)
 	register int c1, c2;
 	register FILE *f1, *f2;
 	int cnt;
-	string realtarget = (target[0] != '/') ? aprintf("%s/%s", f_dir, target) : target;
+	string realtarget = !isabspath(target) ? aprintf("%s/%s", f_dir, target) : target;
 
 	/*
 	 * First open temporary, generated for source
