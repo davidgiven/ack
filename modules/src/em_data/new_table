@@ -25,6 +25,8 @@ $ed - $em_table <<'A' | awk '{print $0,'$m'+i++}' > Z
 1,/^$/d
 1,/^$/g/	/s// /gp
 A
+which awk
+cat Z
 
 i=`wc -l <Y`
 echo 'lpseu' `expr $i + $p - 1` >>X
