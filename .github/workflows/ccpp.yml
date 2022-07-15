@@ -31,7 +31,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         update: true
-        msystem: MINGW32
+        msystem: MSYS
         install: >-
           make
           mingw-w64-i686-gcc
