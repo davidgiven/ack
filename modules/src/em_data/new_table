@@ -6,8 +6,8 @@ em_table=$2
 h=${3-.}
 d=${4-.}
 
-p=$(grep fpseu $em_table` | cut -f2)
-m=$(grep fmnem $em_table` | cut -f2)
+p=$(grep fpseu $em_table | cut -f2)
+m=$(grep fmnem $em_table | cut -f2)
 
 $ed - $em_table <<'A' > X
 1,/^$/g/	/s// /gp
