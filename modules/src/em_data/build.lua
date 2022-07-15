@@ -17,7 +17,8 @@ local generated = normalrule {
 		"h+emheaders"
 	},
 	commands = {
-		"%{ins[1]} %{ins[2]} %{ins[3]} %{dir} %{dir}"
+		"%{ins[1]} %{ins[2]} %{ins[3]} %{dir} %{dir}",
+		"cat %{outs[1]}",
 	}
 }
 
