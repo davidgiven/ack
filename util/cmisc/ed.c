@@ -981,7 +981,7 @@ char *fname;
   nonascii = nullchar = truncated = 0;
 
   if (diag) printf("\"%s\" ", fname);
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "rb")) == NULL) {
 	printf("file open err\n");
 	return(ERR);
   }
@@ -1028,7 +1028,7 @@ int apflg;
 
   lines = bytes = 0;
   if (diag) printf("\"%s\" ", fname);
-  if ((fp = fopen(fname, (apflg ? "a" : "w"))) == NULL) {
+  if ((fp = fopen(fname, (apflg ? "ab" : "wb"))) == NULL) {
 	printf("file open error\n");
 	return(ERR);
   }
