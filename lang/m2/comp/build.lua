@@ -51,7 +51,8 @@ for _, f in ipairs(filenamesof(xh_files)) do
 		},
 		outleaves = { name..".h" },
 		commands = {
-			"%{ins[1]} < %{ins[2]} > %{outs}"
+			"%{ins[1]} < %{ins[2]} > %{outs}",
+			"cat %{outs}",
 		}
 	}
 end
