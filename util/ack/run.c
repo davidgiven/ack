@@ -4,7 +4,6 @@
  *
  */
 
-#include <sys/wait.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -72,60 +71,66 @@ int runphase(trf *phase) {
 	return result ;
 }
 
+static char* build_command_line(const char* prog)
+{
+	/* Calculate the maximum length of the command line. */
+
+	int len = strlen(prog);
+	for (int i=1; i<(argcount-1); i++)
+		len += strlen(arglist[i])*2 + 1;
+
+	/* Now actually build the command line. */
+
+	char* cmdline = malloc(len + 1);
+	strcpy(cmdline, prog);
+	char* p = cmdline + strlen(prog);
+
+	for (int i=1; i<(argcount-1); i++)
+	{
+		const char* word = arglist[i];
+		*p++ = ' ';
+
+		for (;;)
+		{
+			char c = *word++;
+			if (!c)
+				break;
+			if ((c == ' ') || (c == '\"') || (c == '\''))
+				*p++ = '\\';
+			*p++ = c;
+		}
+	}
+
+	*p = 0;
+	return cmdline;
+}
+
 static int run_exec(trf *phase, const char *prog) {
 	int status, child, waitchild ;
+	int oldstdin = -1;
+	int oldstdout = -1;
 
 	fflush(stdout) ;
 	fflush(stderr) ;
-	child= fork() ;
-	if ( child== - 1) {
-		fatal("Cannot fork %s", prog) ;
-	}
-	if ( child ) {
-		/* The parent */
-		do {
-			waitchild= wait(&status) ;
-			if ( waitchild== -1 ) {
-				fatal("missing child") ;
-			}
-		} while ( waitchild!=child) ;
-		if ( status ) {
-			switch ( status&0177 ) {
-			case 0 :
-				break ;
-			case SIGHUP:
-			case SIGINT:
-			case SIGQUIT:
-			case SIGTERM:
-				quit(-5) ;
-			default:
-				error("%s died with signal %d",
-                                      prog,status&0177) ;
-			}
-			/* The assumption is that processes voluntarely
-			   dying with a non-zero status already produced
-			   some sort of error message to the outside world.
-			*/
-			n_error++ ;
-			return 0 ;
-		}
-		return 1 ; /* From the parent */
-	}
-	/* The child */
+
 	if ( phase->t_stdin ) {
-		if ( !in.p_path ) {
+		if (!in.p_path)
 			fatal("no input file for %s",phase->t_name) ;
-		}
+
+		oldstdin = dup(0);
 		close(0) ;
-		if ( open(in.p_path,0)!=0 ) {
+		if (open(in.p_path,0)!=0) {
 			error("cannot open %s",in.p_path) ;
 			exit(1) ;
 		}
 	}
+
 	if ( phase->t_stdout ) {
 		if ( !out.p_path ) {
 			fatal("no output file for %s",phase->t_name) ;
 		}
+
+		oldstdout = dup(1);
 		close(1) ;
 		if ( creat(out.p_path,0666)!=1 ) {
 			close(1); dup(2);
@@ -133,11 +138,44 @@ static int run_exec(trf *phase, const char *prog) {
 			exit(1) ;
 		}
 	}
-      execv(prog,arglist) ;
-	if ( phase->t_stdout ) { close(1) ; dup(2) ; }
-      error("Cannot execute %s",prog) ;
-	exit(1) ;
-	/*NOTREACHED*/
+
+	char* cmdline = build_command_line(prog);
+	status = system(cmdline);
+	free(cmdline);
+
+	if ( oldstdin != -1 ) {
+		close(0);
+		dup2(oldstdin, 0);
+		close(oldstdin);
+	}
+
+	if ( oldstdout != -1 ) {
+		close(1);
+		dup2(oldstdout, 1);
+		close(oldstdout);
+	}
+
+	if ( status ) {
+		switch ( status&0177 ) {
+		case 0 :
+			break ;
+		case SIGHUP:
+		case SIGINT:
+		case SIGQUIT:
+		case SIGTERM:
+			quit(-5) ;
+		default:
+			error("%s died with signal %d",
+								  prog,status&0177) ;
+		}
+		/* The assumption is that processes voluntarely
+		   dying with a non-zero status already produced
+		   some sort of error message to the outside world.
+		*/
+		n_error++ ;
+		return 0;
+	}
+	return 1 ;
 }
 
 static void x_arg(char *string) {
