@@ -2,7 +2,7 @@
 export ED=$1
 EM_TABLE=$2
 ARGTYPE=$3
-list=`$ARGTYPE w $EM_TABLE`
+list=$($ARGTYPE w $EM_TABLE | tr -d '\r')
 echo "switch(p->em_opcode) {"
 for i in $list
 do

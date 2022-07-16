@@ -36,7 +36,7 @@ do
 EOF
 	done
 done
-list=`$ARGTYPE g $EM_TABLE`
+list=$($ARGTYPE g $EM_TABLE | tr -d '\r')
 cat << 'EOF'
 	default:
 /* a "g" argument */
