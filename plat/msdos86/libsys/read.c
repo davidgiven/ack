@@ -33,6 +33,10 @@ ssize_t read(int fd, void* buffer, size_t count)
 	 * file pointer to just before the ^Z.  Also set an internal flag
 	 * for the fd so that we do not try to read any further (until e.g. 
 	 * a seek happens).
+	 *
+	 * If a low-level read returns an error (-1) before anything has
+	 * actually been read, we can pass the error indication (-1) up to
+	 * the caller.
 	 */
 	p = buffer;
 	tot = 0;
@@ -41,7 +45,7 @@ ssize_t read(int fd, void* buffer, size_t count)
 	{
 		r = _sys_rawread(fd, p, count - (p - (char *)buffer));
 		if (r <= 0)
-			return tot;
+			return tot ? tot : r;
 
 		q = memchr(p, 0x1a, (size_t)r);
 		if (q)
