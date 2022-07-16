@@ -37,12 +37,12 @@ calcnt_p cchead; /* call-count info of current proc */
 STATIC long space = 0;
 STATIC long total_size = 0;
 
-STATIC char cname[NAME_MAX];
-STATIC char ccname[NAME_MAX];
-STATIC char cname2[NAME_MAX];
+STATIC char cname[PATH_MAX];
+STATIC char ccname[PATH_MAX];
+STATIC char cname2[PATH_MAX];
 
 /* For debugging only */
-STATIC char sname[NAME_MAX];
+STATIC char sname[PATH_MAX];
 STATIC int kp_temps = 0;
 
 int Ssubst;
