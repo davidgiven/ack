@@ -22,7 +22,7 @@ local loadtarget
 
 -- Compatibility polyfill for load
 local function loadf(text, source, mode, env)
-	if rawget(_G, "loadstring") then
+	if rawget(_G, "loadstring") and rawget(_G, "setfenv") then
 		local chunk, e = loadstring(text, "@"..source)
 		if chunk then
 			setfenv(chunk, env)
