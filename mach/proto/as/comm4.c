@@ -44,9 +44,6 @@ main(int argc, char **argv)
 {
 	char *p;
 	int i;
-	static char sigs[] = {
-		SIGHUP, SIGINT, SIGQUIT, SIGTERM, 0
-	};
 
 	/* the next test should be performed by the
 	 * preprocessor, but it cannot, so it is performed by the compiler.
@@ -58,9 +55,8 @@ main(int argc, char **argv)
 	}
 
 	progname = *argv++; argc--;
-	for (p = sigs; (i = *p++) != 0; )
-		if (signal(i, SIG_IGN) != SIG_IGN)
-			signal(i, stop_on_signal);
+	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
+		signal(SIGINT, stop_on_signal);
 	for (i = 0; i < argc; i++) {
 		p = argv[i];
 		if (*p++ != '-')
