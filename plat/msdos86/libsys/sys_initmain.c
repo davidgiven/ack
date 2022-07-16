@@ -22,7 +22,7 @@ struct for_main {
  * Return zero if everything went well, non-zero otherwise.
  */
 int _sys_initmain(char *arg_data, size_t n_env_vars, char *env_data,
-    unsigned msdos_ver, struct for_main *out)
+    unsigned msdos_ver_major, struct for_main *out)
 {
 	char **argv, **envp;
 	char c, *p, **pp;
@@ -100,7 +100,7 @@ int _sys_initmain(char *arg_data, size_t n_env_vars, char *env_data,
 	 * shortword) following the environment variables, so advance p by 3
 	 * bytes to get at the program name.
 	 */
-	if ((msdos_ver & 0x00ff) >= 3)
+	if (msdos_ver_major >= 3)
 	{
 		p += 3;
 		argv[0] = p;
