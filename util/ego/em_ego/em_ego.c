@@ -59,10 +59,10 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-static char tmpbase[NAME_MAX];
-static char ddump[NAME_MAX]; /* data label dump file */
-static char pdump[NAME_MAX]; /* procedure name dump file */
-static char tmpbufs[NTEMPS * 2][NAME_MAX];
+static char tmpbase[PATH_MAX];
+static char ddump[PATH_MAX]; /* data label dump file */
+static char pdump[PATH_MAX]; /* procedure name dump file */
+static char tmpbufs[NTEMPS * 2][PATH_MAX];
 
 static int O2phases[] = { /* Passes for -O2 */
 	CJ, BO, SP, 0
@@ -320,10 +320,6 @@ int main(int argc, char* argv[])
 	int opt;
 	int i;
 
-	if (signal(SIGHUP, catch) == SIG_IGN)
-		(void)signal(SIGHUP, SIG_IGN);
-	if (signal(SIGQUIT, catch) == SIG_IGN)
-		(void)signal(SIGQUIT, SIG_IGN);
 	if (signal(SIGINT, catch) == SIG_IGN)
 		(void)signal(SIGINT, SIG_IGN);
 	prog_name = argv[0];
