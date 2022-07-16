@@ -76,7 +76,7 @@ void data_float(const char* data, size_t size, bool is_ro)
     fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
 }
 
-static bool istext(c)
+static bool istext(char c)
 {
     return isprint(c) && (c != '"');
 }
