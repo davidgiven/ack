@@ -105,7 +105,7 @@ else
 $(error unknown BUILDSYSTEM = $(BUILDSYSTEM))
 endif
 
-$(build-file): first/ackbuilder.lua Makefile
+$(build-file): first/ackbuilder.lua Makefile $(lua-files)
 	@mkdir -p $(BUILDDIR)
 	@$(LUA) first/ackbuilder.lua \
 		first/build.lua build.lua \
