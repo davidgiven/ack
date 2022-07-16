@@ -6,8 +6,8 @@ em_table=$2
 h=${3-.}
 d=${4-.}
 
-p=$(grep fpseu $em_table | tr -d '\r' | cut -f2)
-m=$(grep fmnem $em_table | tr -d '\r' | cut -f2)
+p=$(grep fpseu $em_table | cut -f2)
+m=$(grep fmnem $em_table | cut -f2)
 
 $ed - $em_table <<'A' > X
 1,/^$/g/	/s// /gp
@@ -23,7 +23,7 @@ $ed - $em_table <<'A' | awk '{print $0,'$m'+i++}' > Z
 1,/^$/d
 1,/^$/g/	/s// /gp
 A
-$ed - $em_table <<'A' | awk '{print $0,'$m'+i++}'
+$ed - $em_table | awk '{print $0,'$m'+i++}'
 
 i=`wc -l <Y`
 echo 'lpseu' `expr $i + $p - 1` >>X
