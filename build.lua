@@ -28,6 +28,11 @@ vars.plats_with_tests = {
 	"pc86",
 }
 
+local int = {}
+if os.getenv("OS") ~= "Windows_NT" then
+	int[#int+1] = "util/int+pkg"
+end
+
 installable {
 	name = "ack-common",
 	map = {
@@ -41,10 +46,10 @@ installable {
 		"util/arch+pkg",
 		"util/ass+pkg",
 		"util/ego+pkg",
-		"util/int+pkg",
 		"util/led+pkg",
 		"util/misc+pkg",
 		"util/opt+pkg",
+		int
 	},
 }
 
