@@ -84,4 +84,9 @@ void sys_basename(const char *str, register char *dst);
  * the same semantics as ISO C90 tmpnam() */
 char* sys_tmpnam(char *buffer);
 
+#if defined WIN32
+/* Really? */
+extern char* strndup(const char* s, size_t n);
+#endif
+
 #endif /* __SYSTEM_INCLUDED__ */

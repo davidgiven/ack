@@ -15,7 +15,7 @@ bool tracing(char k)
     if (!tracechars)
         return false;
 
-    return index(tracechars, k);
+    return strchr(tracechars, k);
 }
 
 void tracef(char k, const char* fmt, ...)
