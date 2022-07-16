@@ -8,6 +8,7 @@ clibrary {
 		"./rename.c", "./seek.c", "./stop.c", "./system.c",
 		--"./unlock.c”,”./tmpdir.c”,
 		"./write.c",
+		"./syssystem.c",
 	},
 	hdrs = { "./system.h" },
 }

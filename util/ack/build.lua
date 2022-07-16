@@ -34,6 +34,7 @@ cprogram {
 	deps = {
 		"h+emheaders",
 		"h+local",
+		"modules/src/system+lib",
 		"./ack.h",
 		"./data.h",
 		"./dmach.h",

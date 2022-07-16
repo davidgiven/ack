@@ -48,6 +48,8 @@ off_t sys_filesize(char *);
 int sys_chmode(char *, int);
 /* Return the temporary directory location */
 char* sys_gettmpdir(void);
+/* Call another program. */
+int sys_system(const char* prog, const char* const* argv);
 #if 0
 int sys_lock(char *);
 int sys_unlock(char *);

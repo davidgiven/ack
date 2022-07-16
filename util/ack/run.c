@@ -15,6 +15,7 @@
 #include "grows.h"
 #include "data.h"
 #include <signal.h>
+#include "system.h"
 
 #ifndef NORCSID
 static char rcs_id[] = "$Id$";
@@ -84,40 +85,6 @@ int runphase(trf* phase)
 	return result;
 }
 
-static char* build_command_line(const char* prog)
-{
-	/* Calculate the maximum length of the command line. */
-
-	int len = strlen(prog);
-	for (int i = 1; i < (argcount - 1); i++)
-		len += strlen(arglist[i]) * 2 + 1;
-
-	/* Now actually build the command line. */
-
-	char* cmdline = malloc(len + 1);
-	strcpy(cmdline, prog);
-	char* p = cmdline + strlen(prog);
-
-	for (int i = 1; i < (argcount - 1); i++)
-	{
-		const char* word = arglist[i];
-		*p++ = ' ';
-
-		for (;;)
-		{
-			char c = *word++;
-			if (!c)
-				break;
-			if ((c == ' ') || (c == '\"') || (c == '\''))
-				*p++ = '\\';
-			*p++ = c;
-		}
-	}
-
-	*p = 0;
-	return cmdline;
-}
-
 static int run_exec(trf* phase, const char* prog)
 {
 	int status, child, waitchild;
@@ -159,9 +126,7 @@ static int run_exec(trf* phase, const char* prog)
 		}
 	}
 
-	char* cmdline = build_command_line(prog);
-	status = system(cmdline);
-	free(cmdline);
+	status = sys_system(prog, arglist);
 
 	if (oldstdin != -1)
 	{
