@@ -25,4 +25,4 @@ int cnt_\1;\
 #define	new_\1() ((struct \1 *) st_alloc((char **)\&h_\1, sizeof(struct \1), \2))\
 #endif\
 #define	free_\1(p) st_free(p, \&h_\1, sizeof(struct \1))\
-:'
+:' | tr -d '\r'
