@@ -22,7 +22,7 @@ int string_part;
 int paramsize;
 struct	hshtab hshtab[HSHSIZ];
 int	hshused;
-int	eof;
+int	ateof;
 int	peekc;
 const char* ctab;
 struct	hshtab *bsym;
@@ -129,7 +129,7 @@ main(int argc, char *argv[])
 	string_part = 0;
 	code_part = C_getid();
 	C_beginpart(code_part);
-	while (!eof) {
+	while (!ateof) {
 		extdef();
 		blkend();
 	}
@@ -368,12 +368,12 @@ symbol(void)
 		c = peekc;
 		peekc = 0;
 	} else
-		if (eof)
+		if (ateof)
 			return EOFC;
 		else
 			c = getchar();
 	if (c==EOF) {
-		eof++;
+		ateof++;
 		return(EOFC);
 	}
 
@@ -453,7 +453,7 @@ loop:
 				}
 			}
 		}
-		eof++;
+		ateof++;
 		error("Nonterminated comment");
 		return EOFC;
 
@@ -820,7 +820,7 @@ stmt:
 	if ((o = symbol()) == LBRACE) {
 		if (d)
 			blkhed();
-		while (!eof) {
+		while (!ateof) {
 			if ((o = symbol()) == RBRACE)
 				goto bend;
 			pushsym(o);

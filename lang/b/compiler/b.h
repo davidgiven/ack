@@ -45,7 +45,7 @@ extern const char* modulename;
 extern int paramsize;
 extern struct	hshtab hshtab[HSHSIZ];
 extern int	hshused;
-extern int	eof;
+extern int	ateof;
 extern int	peekc;
 extern const char* ctab;
 extern struct	hshtab *bsym;
