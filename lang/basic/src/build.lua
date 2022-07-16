@@ -9,12 +9,11 @@ normalrule {
 	name = "tokentab_h",
 	ins = {
 		"./maketokentab",
-		"util/cmisc+ed",
 		matching(filenamesof("+llgen"), "/Lpars.h$"),
 	},
 	outleaves = { "tokentab.h" },
 	commands = {
-		"%{ins} %{outs}"
+		"%{ins[1]} < %{ins[2]} > %{outs}"
 	}
 }
 
