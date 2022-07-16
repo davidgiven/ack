@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include "system.h"
 
 extern File *_get_entry();
@@ -23,11 +24,11 @@ sys_open(path, flag, filep)
 		return 0;
 	switch (flag) {
 	case OP_READ:
-		if ((fd = open(path, 0)) < 0)
+		if ((fd = open(path, O_RDONLY|O_BINARY)) < 0)
 			return 0;
 		break;
 	case OP_APPEND:
-		if ((fd = open(path, 1)) < 0) {
+		if ((fd = open(path, O_WRONLY|O_BINARY)) < 0) {
 			if (access(path, 0) == 0)
 				return 0;
 		}
@@ -40,7 +41,7 @@ sys_open(path, flag, filep)
 		}
 		/* Fall through */
 	case OP_WRITE:
-		if ((fd = creat(path, 0666)) < 0)
+		if ((fd = open(path, O_CREAT|O_WRONLY|O_BINARY, 0666)) < 0)
 			return 0;
 		break;
 	default:

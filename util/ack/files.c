@@ -54,12 +54,22 @@ int setfiles(trf *phase) {
 	} else {
 		gr_init(&pathname) ;
 		if ( !phase->t_keep && !t_flag ) {
+			/* Unix temporary directory. */
 			char* tmpdir = getenv("TMPDIR");
+			/* Fallback: Windows, running under MSYS2. */
+			if (!tmpdir)
+				tmpdir = getenv("temp");
+			/* Fallback: Windows, running natively. */
+			if (!tmpdir)
+				tmpdir = getenv("TEMP");
+			/* Fallback: Hard-coded directory. */
 			if (!tmpdir)
 				tmpdir = "/tmp";
 			gr_cat(&pathname, tmpdir);
 			gr_cat(&pathname, "/Ack-XXXXXX");
-			mkstemp(pathname.gr_string);
+			int fd = mkstemp(pathname.gr_string);
+			close(fd);
+			remove(pathname.gr_string);
 			out.p_keep=NO ;
 		} else {
 			if ( !p_basename ) {

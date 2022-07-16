@@ -56,11 +56,8 @@ int main(int argc, char** argv)
 	}
 	if (callname)
 	{
-		if (machine)
-		{
-			fuerror("can not produce code for both %s and %s", callname, machine);
-		}
-		machine = callname;
+		if (!machine)
+			machine = callname;
 	}
 	if (!machine && !(machine = getenv("ACKM")))
 	{
@@ -329,6 +326,8 @@ static void firstarg(char* argp)
 	register char* name;
 
 	name = strrchr(argp, '/');
+	if (!name)
+		name = strrchr(argp, '\\');
 	if (name && *(name + 1))
 	{
 		name++;

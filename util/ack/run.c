@@ -23,7 +23,7 @@ static char rcs_id[] = "$Id$";
 
 #define ARG_MORE 40 /* The size of args chunks to allocate */
 
-static int run_exec(trf*, const char*);
+static int run_exec(trf*);
 static void x_arg(char*);
 
 static char** arglist; /* The first argument */
@@ -81,11 +81,11 @@ int runphase(trf* phase)
 		x_arg(l_content(*elem));
 	}
 	x_arg((char*)0);
-	result = run_exec(phase, prog);
+	result = run_exec(phase);
 	return result;
 }
 
-static int run_exec(trf* phase, const char* prog)
+static int run_exec(trf* phase)
 {
 	int status, child, waitchild;
 	int oldstdin = -1;
@@ -101,7 +101,7 @@ static int run_exec(trf* phase, const char* prog)
 
 		oldstdin = dup(0);
 		close(0);
-		if (open(in.p_path, 0) != 0)
+		if (open(in.p_path, O_RDONLY|O_BINARY) != 0)
 		{
 			error("cannot open %s", in.p_path);
 			exit(1);
@@ -111,13 +111,11 @@ static int run_exec(trf* phase, const char* prog)
 	if (phase->t_stdout)
 	{
 		if (!out.p_path)
-		{
 			fatal("no output file for %s", phase->t_name);
-		}
 
 		oldstdout = dup(1);
 		close(1);
-		if (creat(out.p_path, 0666) != 1)
+		if (open(out.p_path, O_CREAT|O_WRONLY|O_BINARY, 0666) != 1)
 		{
 			close(1);
 			dup(2);
@@ -126,7 +124,7 @@ static int run_exec(trf* phase, const char* prog)
 		}
 	}
 
-	status = sys_system(prog, arglist);
+	status = sys_system(phase->t_prog, (const char* const*) arglist);
 
 	if (oldstdin != -1)
 	{
@@ -137,7 +135,7 @@ static int run_exec(trf* phase, const char* prog)
 
 	if (oldstdout != -1)
 	{
-		close(1);
+		int i = close(1);
 		dup2(oldstdout, 1);
 		close(oldstdout);
 	}
@@ -145,7 +143,7 @@ static int run_exec(trf* phase, const char* prog)
 	if (status)
 	{
 		if (status & 0177)
-			error("%s died with signal %d", prog, status & 0177);
+			error("%s died with signal %d", phase->t_prog, status & 0177);
 
 		/* The assumption is that processes voluntarely
 		   dying with a non-zero status already produced
