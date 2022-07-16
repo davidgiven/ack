@@ -59,8 +59,7 @@ int main(int argc, char** argv)
 	{
 		if (machine)
 		{
-			fuerror("can not produce code for both %s and %s",
-			    callname, machine);
+			fuerror("can not produce code for both %s and %s", callname, machine);
 		}
 		machine = callname;
 	}
@@ -121,8 +120,7 @@ int main(int argc, char** argv)
 #ifdef DEBUG
 				if (debug)
 				{
-					vprint("phase %s is blocked\n",
-					    phase->t_name);
+					vprint("phase %s is blocked\n", phase->t_name);
 				}
 #endif
 				disc_inputs(phase);
@@ -402,8 +400,7 @@ static int process(char* arg)
 		*/
 			tmp->t_visited = YES;
 			if (tmp->t_priority < 0)
-				werror("Using phase %s (negative priority)",
-				    tmp->t_name);
+				werror("Using phase %s (negative priority)", tmp->t_name);
 			if (!rts && tmp->t_rts)
 				rts = tmp->t_rts;
 			if (tmp->t_needed)
@@ -472,13 +469,11 @@ static int startrf(trf* first)
 			{
 				if (!orig.p_path)
 				{
-					vprint("phase %s failed\n",
-					    phase->t_name);
+					vprint("phase %s failed\n", phase->t_name);
 				}
 				else
 				{
-					vprint("phase %s for %s failed\n",
-					    phase->t_name, orig.p_path);
+					vprint("phase %s for %s failed\n", phase->t_name, orig.p_path);
 				}
 			}
 #endif
@@ -490,8 +485,7 @@ static int startrf(trf* first)
 		{
 #ifdef DEBUG
 			if (debug)
-				vprint("Transformation sequence complete for %s\n",
-				    orig.p_path);
+				vprint("Transformation sequence complete for %s\n", orig.p_path);
 #endif
 			/* No more work on this file */
 			if (!in.p_keep)
@@ -543,9 +537,15 @@ static int mayprep(void)
 static void scanneeds(void)
 {
 	register list_elem* elem;
-	scanlist(l_first(head_list), elem) { setneeds(l_content(*elem), 0); }
+	scanlist(l_first(head_list), elem)
+	{
+		setneeds(l_content(*elem), 0);
+	}
 	l_clear(&head_list);
-	scanlist(l_first(tail_list), elem) { setneeds(l_content(*elem), 1); }
+	scanlist(l_first(tail_list), elem)
+	{
+		setneeds(l_content(*elem), 1);
+	}
 	l_clear(&tail_list);
 }
 
@@ -572,8 +572,7 @@ static void setneeds(const char* suffix, int tail)
 			werror("\"%s\": unrecognized suffix", suffix);
 			break;
 		case F_NOPATH:
-			werror("sorry, cannot produce the desired file(s) from %s files",
-			    suffix);
+			werror("sorry, cannot produce the desired file(s) from %s files", suffix);
 			break;
 	}
 }
