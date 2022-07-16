@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
 #include <sys/stat.h>
 #include "system.h"
 #include "object.h"
@@ -31,9 +30,6 @@ int main(int argc, char **argv)
 {
 	int	status;
 
-	signal(SIGHUP, SIG_IGN);
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
 	if (sys_tmpnam(tname)==NULL)
 	{
 		fprintf(stderr, "astrip: cannot create temporary filename\n");
