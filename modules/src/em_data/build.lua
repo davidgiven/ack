@@ -13,7 +13,7 @@ for _, f in ipairs(GENFILES) do
 		name = "em_"..f:gsub("%.", "_"),
 		ins = {
 			"./make_"..f:gsub("%.", "_")..".lua",
-			"./em_table_lib.lua",
+			"h/em_table_lib.lua",
 			"h/em_table", -- relative to root, which is a bit evil
 		},
 		outleaves = {

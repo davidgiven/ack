@@ -1,4 +1,4 @@
-require "modules.src.em_data.em_table_lib"
+require "h.em_table_lib"
 
 local specs, pseudos, mnems = load_table()
 
