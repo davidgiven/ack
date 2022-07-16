@@ -9,6 +9,7 @@ clibrary {
 		--"./unlock.c”,”./tmpdir.c”,
 		"./write.c",
 		"./syssystem.c",
+		"./strndup.c",
 	},
 	hdrs = { "./system.h" },
 }
