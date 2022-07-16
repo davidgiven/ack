@@ -179,18 +179,9 @@ static int run_exec(trf* phase, const char* prog)
 
 	if (status)
 	{
-		switch (status & 0177)
-		{
-			case 0:
-				break;
-			case SIGHUP:
-			case SIGINT:
-			case SIGQUIT:
-			case SIGTERM:
-				quit(-5);
-			default:
-				error("%s died with signal %d", prog, status & 0177);
-		}
+		if (status & 0177)
+			error("%s died with signal %d", prog, status & 0177);
+
 		/* The assumption is that processes voluntarely
 		   dying with a non-zero status already produced
 		   some sort of error message to the outside world.

@@ -21,7 +21,6 @@ static char rcs_id[] = "$Id$";
 static char rcs_ack[] = RCS_ACK;
 #endif
 
-static int sigs[] = { SIGINT, SIGHUP, SIGTERM, 0 };
 static int arg_count;
 
 static char* srcvar(void);
@@ -85,13 +84,8 @@ int main(int argc, char** argv)
 	if (n_error && !k_flag)
 		exit(n_error);
 
-	for (n_sig = sigs; *n_sig; n_sig++)
-	{
-		if (signal(*n_sig, noodstop) == SIG_IGN)
-		{
-			signal(*n_sig, SIG_IGN);
-		}
-	}
+	if (signal(SIGINT, noodstop) == SIG_IGN)
+		signal(SIGINT, SIG_IGN);
 
 	scanlist(l_first(arguments), elem)
 	{
