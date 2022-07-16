@@ -19,6 +19,7 @@
 #include 	"parameters.h"
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<assert.h>
 #include	"em_label.h"
 #include	"em_arith.h"
@@ -50,7 +51,8 @@ struct switch_hdr	{
 					*/
 };
 
-/* STATICALLOCDEF "switch_hdr" 5 */
+#define	new_switch_hdr() ((struct switch_hdr*) calloc(1, sizeof(struct switch_hdr)))
+#define	free_switch_hdr(p) free(p)
 
 struct case_entry	{
 	struct case_entry *ce_next;	/* next in list */
@@ -60,7 +62,8 @@ struct case_entry	{
 
 
 
-/* STATICALLOCDEF "case_entry" 20 */
+#define	new_case_entry() ((struct case_entry*) calloc(1, sizeof(struct case_entry)))
+#define	free_case_entry(p) free(p)
 
 
 

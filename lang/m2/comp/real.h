@@ -16,4 +16,5 @@ struct real {
 	flt_arith	r_val;
 };
 
-/* ALLOCDEF "real" 20 */
+#define	new_real() ((struct real*) calloc(1, sizeof(struct real)))
+#define	free_real(p) free(p)

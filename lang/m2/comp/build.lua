@@ -34,55 +34,10 @@ normalrule {
 	}
 }
 
-local xh_files = {
-	"./def.xh",
-	"./node.xh",
-	"./real.xh",
-	"./type.xh",
-}
-
-for _, f in ipairs(filenamesof(xh_files)) do
-	local name = replace(basename(f), "%.xh$", "")
-	normalrule {
-		name = name.."_h",
-		ins = {
-			"./make.allocd",
-			f
-		},
-		outleaves = { name..".h" },
-		commands = {
-			"%{ins[1]} < %{ins[2]} > %{outs}",
-		}
-	}
-end
-
-local xc_files = {
-	"./casestat.xc",
-	"./scope.xc",
-	"./tmpvar.xc",
-}
-
-for _, f in ipairs(filenamesof(xc_files)) do
-	local name = replace(basename(f), "%.xc$", "")
-	normalrule {
-		name = name.."_c",
-		ins = {
-			"./make.allocd",
-			f
-		},
-		outleaves = { name..".c" },
-		commands = {
-			"%{ins[1]} < %{ins[2]} > %{outs}"
-		}
-	}
-end
-
 normalrule {
 	name = "next_c",
 	ins = {
 		"./make.next",
-		xh_files,
-		xc_files
 	},
 	outleaves = { "next.c" },
 	commands = {
@@ -110,6 +65,12 @@ tabgen {
 cprogram {
 	name = "em_m2",
 	srcs = {
+		"+chartab_c",
+		"+next_c",
+		"+symbol2str_c",
+		"./LLlex.c",
+		"./LLmessage.c",
+		"./casestat.c",
 		"./chk_expr.c",
 		"./code.c",
 		"./cstoper.c",
@@ -120,33 +81,23 @@ cprogram {
 		"./error.c",
 		"./idf.c",
 		"./input.c",
-		"./LLlex.c",
-		"./LLmessage.c",
 		"./lookup.c",
 		"./main.c",
 		"./misc.c",
 		"./node.c",
 		"./options.c",
+		"./scope.c",
 		"./stab.c",
+		"./tmpvar.c",
 		"./tokenname.c",
 		"./type.c",
 		"./typequiv.c",
 		"./walk.c",
-		"+casestat_c",
-		"+next_c",
-		"+scope_c",
-		"+symbol2str_c",
-		"+tmpvar_c",
-		"+chartab_c",
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
-		"+def_h",
 		"+llgen",
-		"+node_h",
 		"+parameters_h",
-		"+real_h",
-		"+type_h",
 		"h+emheaders",
 		"lang/m2/include+headers",
 		"modules+headers",

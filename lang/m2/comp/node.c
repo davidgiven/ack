@@ -16,6 +16,7 @@
 #include	<em_arith.h>
 #include	<alloc.h>
 #include	<system.h>
+#include	<stdlib.h>
 
 #include	"LLlex.h"
 #include	"def.h"

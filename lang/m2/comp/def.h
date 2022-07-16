@@ -132,7 +132,8 @@ struct def	{		/* list of definitions for a name */
 };
 
 
-/* ALLOCDEF "def" 50 */
+#define	new_def() ((struct def*) calloc(1, sizeof(struct def)))
+#define	free_def(p) free(p)
 
 
 #define NULLDEF ((struct def *) 0)

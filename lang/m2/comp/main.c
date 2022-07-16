@@ -13,6 +13,7 @@
 #include	"debug.h"
 
 #include	<assert.h>
+#include	<stdlib.h>
 #include	"system.h"
 #include	"em_arith.h"
 #include	"em_label.h"

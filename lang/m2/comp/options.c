@@ -14,6 +14,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<alloc.h>
+#include	<stdlib.h>
 
 #include	"type.h"
 #include	"main.h"

@@ -25,6 +25,7 @@
 #include	<em_reg.h>
 #include	<alloc.h>
 #include	<assert.h>
+#include	<stdlib.h>
 
 #include	"LLlex.h"
 #include	"def.h"
@@ -32,13 +33,15 @@
 #include	"scope.h"
 #include	"tmpvar.h"
 #include	"main.h"
+#include	"tmpvar.h"
 
 struct tmpvar {
 	struct tmpvar	*t_next;
 	arith		t_offset;	/* offset from LocalBase */
 };
 
-/* STATICALLOCDEF "tmpvar" 10 */
+#define	new_tmpvar() ((struct tmpvar*) calloc(1, sizeof(struct tmpvar)))
+#define	free_tmpvar(p) free(p)
 
 static struct tmpvar	*TmpInts,	/* for integer temporaries */
 			*TmpPtrs;	/* for pointer temporaries */

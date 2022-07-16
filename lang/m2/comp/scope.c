@@ -12,6 +12,7 @@
 #include 	"parameters.h"
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<assert.h>
 #include	"alloc.h"
 #include	"em_arith.h"
@@ -31,9 +32,11 @@ struct scopelist *CurrVis, *GlobalVis;
 extern int proclevel;
 extern char options[];
 
-/* STATICALLOCDEF "scope" 10 */
+#define	new_scope() ((struct scope*) calloc(1, sizeof(struct scope)))
+#define	free_scope(p) free(p)
 
-/* STATICALLOCDEF "scopelist" 10 */
+#define	new_scopelist() ((struct scopelist*) calloc(1, sizeof(struct scopelist)))
+#define	free_scopelist(p) free(p)
 
 static int	sc_count;
 

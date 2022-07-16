@@ -24,8 +24,8 @@ struct paramlist {		/* structure for parameterlist of a PROCEDURE */
 };
 
 struct paramlist;
-
-/* ALLOCDEF "paramlist" 20 */
+#define	new_paramlist() ((struct paramlist*) calloc(1, sizeof(struct paramlist)))
+#define	free_paramlist(p) free(p)
 
 struct enume {
 	struct def *en_enums;	/* Definitions of enumeration literals */
@@ -36,7 +36,8 @@ struct enume {
 #define enm_rck		tp_value.tp_enum->en_rck
 };
 
-/* ALLOCDEF "enume" 5 */
+#define	new_enume() ((struct enume*) calloc(1, sizeof(struct enume)))
+#define	free_enume(p) free(p)
 
 struct subrange {
 	arith su_lb, su_ub;	/* lower bound and upper bound */
@@ -46,7 +47,8 @@ struct subrange {
 #define sub_rck	tp_value.tp_subrange->su_rck
 };
 
-/* ALLOCDEF "subrange" 5 */
+#define	new_subrange() ((struct subrange*) calloc(1, sizeof(struct subrange)))
+#define	free_subrange(p) free(p)
 
 struct array {
 	struct type *ar_elem;	/* type of elements */
@@ -61,7 +63,8 @@ struct array {
 #define arr_high	tp_value.tp_arr->ar_high
 };
 
-/* ALLOCDEF "array" 5 */
+#define	new_array() ((struct array*) calloc(1, sizeof(struct array)))
+#define	free_array(p) free(p)
 
 struct record {
 	struct scope *rc_scope;	/* scope of this record */
@@ -126,7 +129,8 @@ struct type	{
 
 struct type;
 
-/* ALLOCDEF "type" 50 */
+#define	new_type() ((struct type*) calloc(1, sizeof(struct type)))
+#define	free_type(p) free(p)
 
 extern struct type 
 	*bool_type,

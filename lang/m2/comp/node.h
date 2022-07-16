@@ -52,9 +52,8 @@ struct node {
 #define nd_RVAL		nd_token.TOK_RVAL
 };
 
-
-
-/* ALLOCDEF "node" 50 */
+#define	new_node() ((struct node*) calloc(1, sizeof(struct node)))
+#define	free_node(p) free(p)
 
 extern struct node *dot2node(), *dot2leaf(), *getnode();
 
