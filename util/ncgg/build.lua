@@ -13,14 +13,12 @@ local cgglexer = flex {
 normalrule {
 	name = "keywords",
 	ins = {
-		"./cvtkeywords",
-		"util/cmisc+ed",
+		"./make_enterkeyw_c.lua",
 		"./keywords",
-		matching(filenamesof(cggparser), "%.h$")
 	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
-		"%{ins[1]} %{ins[2]} %{ins[3]} %{ins[4]} %{outs[1]}"
+		"$LUA %{ins[1]} < %{ins[2]} > %{outs[1]}"
 	}
 }
 
