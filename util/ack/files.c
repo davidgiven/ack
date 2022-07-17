@@ -69,7 +69,6 @@ int setfiles(trf *phase) {
 			gr_cat(&pathname, "/Ack-XXXXXX");
 			int fd = mkstemp(pathname.gr_string);
 			close(fd);
-			remove(pathname.gr_string);
 			out.p_keep=NO ;
 		} else {
 			if ( !p_basename ) {

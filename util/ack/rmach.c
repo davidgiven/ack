@@ -141,7 +141,6 @@ static void intrf(void) {
 			new->t_stdin= YES ;
 		} else
 		if ( strcmp(ty_name,STD_OUT)==0 ) {
-			fprintf(stderr, "setting stdout for %s\n", new->t_name);
 			if ( new->t_stdout ) twice=YES ;
 			new->t_stdout= YES ;
 		} else
