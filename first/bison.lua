@@ -1,10 +1,10 @@
-definerule("yacc",
+definerule("bison",
 	{
 		srcs = { type="targets" },
 		commands = {
 			type="strings",
 			default={
-				"yacc -t -b %{dir}/y -d %{ins}"
+				"bison -t -b %{dir}/y -d %{ins}"
 			}
 		},
 	},

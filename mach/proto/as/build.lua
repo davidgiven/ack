@@ -1,4 +1,4 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
 definerule("build_as",
 	{
@@ -15,7 +15,7 @@ definerule("build_as",
 		}
 
 		local preprocessedy = cppfile {
-			name = e.name.."/yaccinput",
+			name = e.name.."/bisoninput",
 			srcs = { "mach/proto/as/comm2.y" },
 			outleaf = "comm2.y",
 			deps = {
@@ -27,8 +27,8 @@ definerule("build_as",
 			},
 		}
 
-		local yaccfiles = yacc {
-			name = e.name.."/yacc",
+		local bisonfiles = bison {
+			name = e.name.."/bison",
 			srcs = { preprocessedy }
 		}
 
@@ -41,14 +41,14 @@ definerule("build_as",
 				"mach/proto/as/comm6.c",
 				"mach/proto/as/comm7.c",
 				"mach/proto/as/comm8.c",
-				matching(filenamesof(yaccfiles), "%.c$")
+				matching(filenamesof(bisonfiles), "%.c$")
 			),
 			deps = {
 				"h+emheaders",
 				"modules/src/object+lib",
 				"modules/src/flt_arith+lib",
 				archlib,
-				yaccfiles,
+				bisonfiles,
 				e.deps
 			}
 		}

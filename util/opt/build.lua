@@ -1,7 +1,7 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
-yacc {
-	name = "yacc",
+bison {
+	name = "bison",
 	srcs = { "./mktab.y" }
 }
 
@@ -19,13 +19,13 @@ local headers = {
 cprogram {
 	name = "mktab",
 	srcs = {
-		matching(filenamesof("+yacc"), "%.c$"),
+		matching(filenamesof("+bison"), "%.c$"),
 		matching(filenamesof("+flex"), "%.c$"),
 	},
 	deps = concat(
 		headers,
 		"+flex",
-		"+yacc",
+		"+bison",
 		"modules/src/em_data+lib"
 	)
 }

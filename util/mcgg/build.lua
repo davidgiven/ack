@@ -1,4 +1,4 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
 flex {
 	name = "flex",
@@ -7,8 +7,8 @@ flex {
 	}
 }
 
-yacc {
-	name = "yacc",
+bison {
+	name = "bison",
 	srcs = {
 		"./gram.y",
 	}
@@ -47,12 +47,12 @@ cprogram {
 	srcs = {
 		"./iburg.c",
 		matching(filenamesof("+flex"), "%.c$"),
-		matching(filenamesof("+yacc"), "%.c$")
+		matching(filenamesof("+bison"), "%.c$")
 	},
 	deps = {
 		"./iburg.h",
 		"+lib",
-		"+yacc",
+		"+bison",
 		"modules/src/data+lib",
 		"modules+headers",
 	}

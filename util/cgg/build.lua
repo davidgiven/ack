@@ -1,6 +1,6 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
-local cggparser = yacc {
+local cggparser = bison {
 	name = "cggparser",
 	srcs = { "./bootgram.y" }
 }
