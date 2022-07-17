@@ -60,6 +60,7 @@ void fileinit(void)
 	else
 	{
 		outfile = stdout;
+		freopen(NULL, "wb", stdout);
 		outshort(sp_magic);
 	}
 }
@@ -84,8 +85,11 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 	if (argc)
-		if (freopen(*argv, "r", stdin) == NULL)
+		if (freopen(*argv, "rb", stdin) == NULL)
 			error("Cannot open %s", *argv);
+	else
+		freopen(NULL, "rb", stdin);
+
 	fileinit();
 #ifdef USEMALLOC
 	coreinit();

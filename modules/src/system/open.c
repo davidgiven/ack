@@ -45,7 +45,7 @@ sys_open(path, flag, filep)
 		}
 		/* Fall through */
 	case OP_WRITE:
-		if ((fd = open(path, O_CREAT|O_WRONLY|O_BINARY, 0666)) < 0)
+		if ((fd = open(path, O_CREAT|O_TRUNC|O_WRONLY|O_BINARY, 0666)) < 0)
 			return 0;
 		break;
 	default:

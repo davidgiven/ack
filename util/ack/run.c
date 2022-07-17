@@ -119,7 +119,7 @@ static int run_exec(trf* phase)
 
 		oldstdout = dup(1);
 		close(1);
-		if (open(out.p_path, O_CREAT|O_WRONLY|O_BINARY, 0666) != 1)
+		if (open(out.p_path, O_CREAT|O_TRUNC|O_WRONLY|O_BINARY, 0666) != 1)
 		{
 			close(1);
 			dup(2);
@@ -139,7 +139,7 @@ static int run_exec(trf* phase)
 
 	if (oldstdout != -1)
 	{
-		int i = close(1);
+		close(1);
 		dup2(oldstdout, 1);
 		close(oldstdout);
 	}
