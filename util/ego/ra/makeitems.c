@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
 	if (argc != 3) {
 		error("usage: makeitems mnemfile itemfile");
 	}
-	if ((f1 = fopen(argv[1],"r")) == NULL) {
+	if ((f1 = fopen(argv[1],"rb")) == NULL) {
 		error("cannot open mnemonic file");
 	}
-	if ((f2 = fopen(argv[2],"r")) == NULL) {
+	if ((f2 = fopen(argv[2],"rb")) == NULL) {
 		error("cannot open item file");
 	}
 	convert(f1,f2);

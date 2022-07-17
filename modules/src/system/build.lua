@@ -10,6 +10,7 @@ clibrary {
 		"./write.c",
 		"./syssystem.c",
 		"./strndup.c",
+		"./setbinarymode.c",
 	},
 	hdrs = { "./system.h" },
 }

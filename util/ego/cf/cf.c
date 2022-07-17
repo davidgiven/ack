@@ -557,15 +557,15 @@ char* argv[];
 	fdblock = getdtable(dname_in); /* data block table */
 	lpi_set = Cempty_set(plength);
 	cai_set = Cempty_set(plength);
-	if ((f = fopen(lname_in, "r")) == NULL)
+	if ((f = fopen(lname_in, "rb")) == NULL)
 	{
 		error("cannot open %s", lname_in);
 	}
-	if ((f2 = fopen(lname_out, "w")) == NULL)
+	if ((f2 = fopen(lname_out, "wb")) == NULL)
 	{
 		error("cannot open %s", lname_out);
 	}
-	if ((gf2 = fopen(bname_out, "w")) == NULL)
+	if ((gf2 = fopen(bname_out, "wb")) == NULL)
 	{
 		error("cannot open %s", bname_out);
 	}
@@ -603,12 +603,12 @@ char* argv[];
 	/* Compute transitive closure of used/changed
 	 * variables information for every procedure.
 	 */
-	if ((f = fopen(dname_out, "w")) == NULL)
+	if ((f = fopen(dname_out, "wb")) == NULL)
 	{
 		error("cannot open %s", dname_out);
 	}
 	putdtable(fdblock, f);
-	if ((f = fopen(pname_out, "w")) == NULL)
+	if ((f = fopen(pname_out, "wb")) == NULL)
 	{
 		error("cannot open %s", pname_out);
 	}

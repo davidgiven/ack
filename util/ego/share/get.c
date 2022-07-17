@@ -167,7 +167,7 @@ proc_p getptable(const char *pname)
 	proc_p head, p, *pp;
 	short all;
 
-	if ((curinp = fopen(pname,"r")) == NULL) {
+	if ((curinp = fopen(pname,"rb")) == NULL) {
 		error("cannot open %s",pname);
 	}
 
@@ -234,7 +234,7 @@ dblock_p getdtable(const char *dname)
 	int n;
 
 	head = (dblock_p) 0;
-	if ((curinp = fopen(dname,"r")) == NULL) {
+	if ((curinp = fopen(dname,"rb")) == NULL) {
 		error("cannot open %s", dname);
 	}
 	olength = getshort();

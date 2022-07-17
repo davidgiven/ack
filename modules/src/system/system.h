@@ -89,4 +89,8 @@ char* sys_tmpnam(char *buffer);
 extern char* strndup(const char* s, size_t n);
 #endif
 
+/* Sets stdin, stdout or stderr to binary mode --- required on Windows, noop on
+ * sane systems. */
+extern void sys_setbinarymode(FILE* fp);
+
 #endif /* __SYSTEM_INCLUDED__ */

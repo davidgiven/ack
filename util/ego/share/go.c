@@ -33,7 +33,7 @@ STATIC void mach_init(char* machfile, void (*phase_machinit)(void *))
 
 	FILE* f;
 
-	f = openfile(machfile, "r");
+	f = openfile(machfile, "rb");
 	fscanf(f, "%d", &ws);
 	fscanf(f, "%d", &ps);
 	if (ws != ps && ps != 2 * ws)
@@ -104,10 +104,10 @@ void go(int argc, char * const *argv,
 	(*initialize)(NULL);
 	if (optimize == no_action)
 		return;
-	f = openfile(files->lname_in, "r");
-	gf = openfile(files->bname_in, "r");
-	f2 = openfile(files->lname_out, "w");
-	gf2 = openfile(files->bname_out, "w");
+	f = openfile(files->lname_in, "rb");
+	gf = openfile(files->bname_in, "rb");
+	f2 = openfile(files->lname_out, "wb");
+	gf2 = openfile(files->bname_out, "wb");
 	mesregs = Lempty_set();
 	while (getunit(gf, f, &kind, &g, &l, &curproc, TRUE))
 	{
@@ -135,10 +135,10 @@ void go(int argc, char * const *argv,
 	fclose(f2);
 	fclose(gf);
 	fclose(gf2);
-	f = openfile(files->dname_out, "w");
+	f = openfile(files->dname_out, "wb");
 	putdtable(fdblock, f);
 	/* fclose(f); done by putdtable */
-	f = openfile(files->pname_out, "w");
+	f = openfile(files->pname_out, "wb");
 	putptable(fproc, f, TRUE);
 	/* fclose(f); done by putptable */
 	core_usage();

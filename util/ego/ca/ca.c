@@ -13,6 +13,7 @@
 #include <string.h>
 #include <em_pseu.h>
 #include <em_mes.h>
+#include "system.h"
 #include "../share/types.h"
 #include "ca.h"
 #include "../share/debug.h"
@@ -257,15 +258,16 @@ char* argv[];
 	fproc = getptable(pname_in); /* proc table */
 	fdblock = getdtable(dname_in); /* data block table */
 	dlength = makedmap(fdblock); /* allocate dmap table */
-	df = openfile(dname_out, "r");
+	df = openfile(dname_out, "rb");
 	getdnames(df);
 	fclose(df);
-	pf = openfile(pname_out, "r");
+	pf = openfile(pname_out, "rb");
 	getpnames(pf);
 	fclose(pf);
 	uniq_names();
-	f = openfile(lname_in, "r");
+	f = openfile(lname_in, "rb");
 	f2 = stdout;
+	sys_setbinarymode(f2);
 	cputmagic(f2); /* write magic number */
 	while ((lnp = get_ca_lines(f, &curproc)) != (line_p)0)
 	{
