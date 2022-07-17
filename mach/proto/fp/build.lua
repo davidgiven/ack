@@ -69,17 +69,16 @@ for _, plat in ipairs({"cpm"}) do
 			}
 		}
 
-		-- Run FP.script to edit the assembly code.
+		-- Run massage_s.lua to edit the assembly code.
 		edits[#edits+1] = normalrule {
 			name = "ed_"..plat.."/"..n,
 			ins = {
-				"./FP.script",
-				"util/cmisc+ed",
+				"./massage_s.lua",
 				assembly,
 			},
 			outleaves = { n..".s" },
 			commands = {
-				"%{ins[2]} -s %{ins[3]} <%{ins[1]} >%{outs}"
+				"$LUA %{ins[1]} <%{ins[2]} >%{outs}"
 			}
 		}
 	end
