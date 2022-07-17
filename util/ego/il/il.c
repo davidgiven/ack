@@ -12,6 +12,7 @@
 #include <em_path.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
+#include "system.h"
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -331,12 +332,10 @@ char* argv[];
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f;
-	char* tmpdir = getenv("TMPDIR");
+	char* tmpdir = sys_gettmpdir();
 
 	go(argc, argv, no_action, no_action, no_action, il_flags);
 	il_extptab(fproc); /* add extended data structures */
-	if (!tmpdir)
-		tmpdir = "/tmp";
 
 	strcpy(cname, tmpdir);
 	strcpy(ccname, tmpdir);

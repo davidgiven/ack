@@ -177,6 +177,7 @@ cprogram {
 		"./il/il.h",
 		"util/ego/share+lib",
 		"modules/src/em_data+lib",
+		"modules/src/system+lib",
 		"h+emheaders",
 	},
 	vars = {

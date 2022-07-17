@@ -390,10 +390,7 @@ int main(int argc, char* argv[])
 	}
 
 	{
-		char* tmpdir = getenv("TMPDIR");
-		if (!tmpdir)
-			tmpdir = "/tmp";
-		strcpy(tmpbase, tmpdir);
+		strcpy(tmpbase, sys_gettmpdir());
 		strcat(tmpbase, "/ego.XXXXXX");
 		close(mkstemp(tmpbase));
 	}

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "system.h"
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
@@ -54,18 +55,7 @@ int setfiles(trf *phase) {
 	} else {
 		gr_init(&pathname) ;
 		if ( !phase->t_keep && !t_flag ) {
-			/* Unix temporary directory. */
-			char* tmpdir = getenv("TMPDIR");
-			/* Fallback: Windows, running under MSYS2. */
-			if (!tmpdir)
-				tmpdir = getenv("temp");
-			/* Fallback: Windows, running natively. */
-			if (!tmpdir)
-				tmpdir = getenv("TEMP");
-			/* Fallback: Hard-coded directory. */
-			if (!tmpdir)
-				tmpdir = "/tmp";
-			gr_cat(&pathname, tmpdir);
+			gr_cat(&pathname, sys_gettmpdir());
 			gr_cat(&pathname, "/Ack-XXXXXX");
 			int fd = mkstemp(pathname.gr_string);
 			close(fd);

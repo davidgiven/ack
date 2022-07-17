@@ -11,17 +11,24 @@ char* sys_gettmpdir(void)
 	char* result = 0;
 	/* Check the UNIX temporary directory */
 	result = getenv("TMPDIR");
-	if (result != 0)
+	if (result)
 		return result;
 	result = getenv("TMP");
-	if (result != 0)
+	if (result)
 	    return result;
 	/* DOS compatible systems */
-	result = getenv("TEMP");
-	if (result != 0)
+	result = getenv("temp");
+	if (result)
 		return result;
-	/* Then try current directory */
-	return ".";
+	result = getenv("TEMP");
+	if (result)
+		return result;
+	/* Then try and guess. */
+	#if defined WIN32
+		return ".";
+	#else
+		return "/tmp";
+	#endif
 }
 
 
