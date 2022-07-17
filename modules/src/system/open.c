@@ -9,6 +9,10 @@
 #include <errno.h>
 #include "system.h"
 
+#if !defined WIN32
+#define O_BINARY 0
+#endif
+
 extern File *_get_entry();
 
 int
