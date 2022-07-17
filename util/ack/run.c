@@ -21,6 +21,10 @@
 static char rcs_id[] = "$Id$";
 #endif
 
+#if !defined WIN32
+#define O_BINARY 0
+#endif
+
 #define ARG_MORE 40 /* The size of args chunks to allocate */
 
 static int run_exec(trf*);
