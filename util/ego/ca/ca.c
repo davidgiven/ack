@@ -174,7 +174,7 @@ STATIC void getpnames(dumpp)
 	}
 }
 
-STATIC new_name(s) char** s;
+STATIC int new_name(s) char** s;
 {
 	static int nn = 0;
 	char buf[20];
@@ -190,7 +190,7 @@ STATIC new_name(s) char** s;
 	strcpy(*s, buf);
 }
 
-STATIC uniq_names()
+STATIC int uniq_names()
 {
 	/* The names of all internal procedures and data blocks
 	 * are made different. As the optimizer combines several
@@ -218,7 +218,7 @@ STATIC uniq_names()
 	}
 }
 
-main(argc, argv) int argc;
+int main(argc, argv) int argc;
 char* argv[];
 {
 	/* CA does not output proctable etc. files. Instead, its
