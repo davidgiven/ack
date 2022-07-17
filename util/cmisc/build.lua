@@ -25,11 +25,6 @@ definerule("tabgen",
 )
 
 cprogram {
-	name = "ed",
-	srcs = { "./ed.c" }
-}
-
-cprogram {
 	name = "objectify",
 	srcs = { "./objectify.c" }
 }
