@@ -28,8 +28,10 @@ vars.plats_with_tests = {
 	"pc86",
 }
 
+local is_windows = os.getenv("OS") == "Windows_NT"
+
 local int = {}
-if os.getenv("OS") ~= "Windows_NT" then
+if not is_windows then
 	int[#int+1] = "util/int+pkg"
 end
 
@@ -80,16 +82,29 @@ installable {
 	},
 }
 
-normalrule {
-	name = "tests",
-	ins = {
-		"first/testsummary.sh",
-		test_packages
-	},
-	outleaves = {
-		"stamp"
-	},
-	commands = {
-		"%{ins}"
+if not is_windows then
+	normalrule {
+		name = "tests",
+		ins = {
+			"first/testsummary.sh",
+			test_packages
+		},
+		outleaves = {
+			"stamp"
+		},
+		commands = {
+			"%{ins}"
+		}
 	}
-}
+else
+	normalrule {
+		name = "tests",
+		ins = {},
+		outleaves = {
+			"stamp"
+		},
+		commands = {
+			"touch %{outs}"
+		}
+	}
+end
