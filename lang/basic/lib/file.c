@@ -76,19 +76,19 @@ void _opnchn(int reclen, String* fname, String* mode)
 	{
 		case 'O':
 		case 'o':
-			if ((f = fopen(fname->strval, "w")) == NULL)
+			if ((f = fopen(fname->strval, "wb")) == NULL)
 				error(28);
 			m = OMODE;
 			break;
 		case 'I':
 		case 'i':
-			if ((f = fopen(fname->strval, "r")) == NULL)
+			if ((f = fopen(fname->strval, "rb")) == NULL)
 				error(28);
 			m = IMODE;
 			break;
 		case 'r':
 		case 'R':
-			if ((f = fopen(fname->strval, "a")) == NULL)
+			if ((f = fopen(fname->strval, "ab")) == NULL)
 				error(28);
 			m = RMODE;
 			break;

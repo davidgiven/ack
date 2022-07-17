@@ -108,7 +108,7 @@ main(argc, argv)
 	case 3:	if (! wr_open(argv[2]))
 			fatal("Can't write %s.\n", argv[2]);
 		output_file = argv[2];
-		if ((input = fopen(argv[1], "r")) == (FILE *)0)
+		if ((input = fopen(argv[1], "rb")) == (FILE *)0)
 			fatal("Can't read %s.\n", argv[1]);
 		break;
 	default:fatal("Usage: %s <Mantra object> <ACK object>.\n", argv[0]);

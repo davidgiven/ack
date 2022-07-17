@@ -56,7 +56,7 @@ int main(int argc, char* const argv[])
         switch (c)
         {
             case 'C':
-                cfg_dot_file = fopen(optarg, "w");
+                cfg_dot_file = fopen(optarg, "wb");
                 if (!cfg_dot_file)
                     fatal("couldn't open output file '%s': %s",
                         optarg, strerror(errno));
@@ -64,7 +64,7 @@ int main(int argc, char* const argv[])
                 break;
 
             case 'D':
-                dominance_dot_file = fopen(optarg, "w");
+                dominance_dot_file = fopen(optarg, "wb");
                 if (!dominance_dot_file)
                     fatal("couldn't open output file '%s': %s",
                         optarg, strerror(errno));
@@ -98,7 +98,7 @@ int main(int argc, char* const argv[])
 
     if (outputfilename)
     {
-        outputfile = fopen(outputfilename, "w");
+        outputfile = fopen(outputfilename, "wb");
         if (!outputfile)
             fatal("couldn't open output '%s': %s",
                 outputfilename, strerror(errno));

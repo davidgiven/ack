@@ -102,12 +102,12 @@ main(argc, argv)
 	}
 	switch (argc) {
 	case 1:	break;
-	case 3:	if ((output = fopen(argv[2], "w")) == (FILE *)0)
+	case 3:	if ((output = fopen(argv[2], "wb")) == (FILE *)0)
 			fatal("Can't write %s.\n", argv[2]);
 		ofile = argv[2];
 		ofile_created = 1;
 		/* FALLTHROUGH */
-	case 2:	if ((input = fopen(argv[1], "r")) == (FILE *)0)
+	case 2:	if ((input = fopen(argv[1], "rb")) == (FILE *)0)
 			fatal("Can't read %s.\n", argv[1]);
 		break;
 	default:fatal("Usage: %s <as object> <dl object>.\n", argv[0]);

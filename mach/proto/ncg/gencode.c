@@ -39,7 +39,7 @@ void out_init(char *filename) {
 	if (filename == (char *) 0)
 		codefile = stdout;
 	else
-		if ((codefile=freopen(filename,"w",stdout))==NULL)
+		if ((codefile=freopen(filename,"wb",stdout))==NULL)
 			error("Can't create %s",filename);
 #ifndef NDEBUG
     }

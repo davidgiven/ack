@@ -141,7 +141,7 @@ static long our_atol(register char *s)
 
 void in_init(char *filename) {
 
-	if ((emfile=freopen(filename,"r",stdin))==NULL)
+	if ((emfile=freopen(filename,"rb",stdin))==NULL)
 		error("Can't open %s",filename);
 	if (get16()!=sp_magic)
 		error("Bad format %s",filename);

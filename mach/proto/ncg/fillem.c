@@ -140,7 +140,7 @@ static long our_atol(char *s) {
 void in_init(char *filename) {
 
 	emfile = stdin;
-	if (filename && (emfile=freopen(filename,"r",stdin))==NULL)
+	if (filename && (emfile=freopen(filename,"rb",stdin))==NULL)
 		error("Can't open %s",filename);
 	if (get16()!=sp_magic)
 		error("Bad format %s",filename ? filename : "standard-input");

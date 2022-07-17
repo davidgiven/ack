@@ -86,7 +86,7 @@ main(argc, argv)
 	switch (argc) {
 	case 1: rd_fdopen(0);
 		break;
-	case 3:	if ((output = fopen(argv[2], "w")) == NULL) {
+	case 3:	if ((output = fopen(argv[2], "wb")) == NULL) {
 			fatal("Can't write %s.\n", argv[2]);
 		}
 		output_file = argv[2];

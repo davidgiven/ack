@@ -165,7 +165,7 @@ pass_1(int argc, char **argv)
 			continue;
 		}
 #endif
-		if ((input = fopen(p, "r")) == NULL)
+		if ((input = fopen(p, "rb")) == NULL)
 			fatal("can't open %s", p);
 #ifdef ASLD
 		if (

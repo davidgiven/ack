@@ -139,19 +139,19 @@ while true do
 	end
 end
 
-local definitionsfp = io.open(args[1], "w")
+local definitionsfp = io.open(args[1], "wb")
 for word, value in pairs(words) do
 	definitionsfp:write("%token <y_word> OP_", tostring(value), " /* ", word, " */\n")
 end
 definitionsfp:close()
 
-local tokensfp = io.open(args[2], "w")
+local tokensfp = io.open(args[2], "wb")
 for word, value in pairs(words) do
 	tokensfp:write("0, OP_", value, ", 0, \"", word, "\",\n")
 end
 tokensfp:close()
 
-local rulesfp = io.open(args[3], "w")
+local rulesfp = io.open(args[3], "wb")
 rulesfp:write("operation\n")
 for index, insn in ipairs(insns) do
 	if index == 1 then

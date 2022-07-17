@@ -13,7 +13,7 @@ char *filename;
 #ifndef sys_close
 	if ( sys_open( filename, OP_WRITE, &codefile)) {
 #else
-	if ((codefile = fopen(filename, "w")) != NULL) {
+	if ((codefile = fopen(filename, "wb")) != NULL) {
 #endif
 #ifdef __solaris__
 		fprint(codefile, ".section \".text\"\n");
