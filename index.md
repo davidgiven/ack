@@ -8,8 +8,8 @@ Introduction
 The Amsterdam Compiler Kit is a cross-platform compiler and toolchain
 suite that is small, portable, extremely fast, and extremely flexible. It
 targets a number of low-end machines including the Z80, 8086 and 80386, but
-there are many other code generators available. It supports several
-languages, including ANSI C, Pascal and Modula-2, and contains integrated
+there are many other code generators available. It supports several languages,
+including ANSI C, B, Pascal and Modula-2, and contains integrated
 runtime libraries including a libc.
 
 The toolchain is mainly known as being the default toolchain for [Minix 1 and
@@ -51,8 +51,10 @@ Still not dead! Development has been proceeding slowly in the background; we
 just stopped making formal releases and never got round to updating this page.
 The code is a lot cleaner now since 6.0pre5 and it builds on OSX and Windows.
 There are backends for MIPS and PowerPC and the 8080 backend has been
-dramatically improved, among many, many other fixes. Fetch it from [the Github
-repository](https://github.com/davidgiven/ack).
+dramatically improved; there's a new B frontend; there's a new optional code
+generator used by some architectures that produces better code on
+register-centric machines; and there are many, many other changes. Fetch it
+from [the Github repository](https://github.com/davidgiven/ack).
 
 ### 2016-06-05
 
