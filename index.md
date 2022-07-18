@@ -16,39 +16,43 @@ The toolchain is mainly known as being the default toolchain for [Minix 1 and
 2](http://minix1.woodhull.com/); with a bit of effort it gives you a complete
 ANSI C toolchain which will run in a 64/64kB address space on an 8086.
 
-The ACK runs on Unix systems; most development happens on Linux.
+The ACK runs on Unix systems, OSX and Windows; most development happens on Linux.
 
 For more information, see the [About the ACK](about.html) page.
 
 Getting it
 ----------
 
-Want to use it? See [the Github release page](https://github.com/davidgiven/ack/releases/latest).
+Want to use it? See [the Github repository](https://github.com/davidgiven/ack).
 
-Want to develop for it? See [the Github repository](https://github.com/davidgiven/ack).
-
-The release package is pruned and simplified to remove a lot of the non-working
-code (so unless you're interested in said code, I would recommend it).
-Installation instructions are in the README.
-
-Note that I recommend that if you want to *use* the ACK, you get the source
-tarball rather than a Github snapshot --- it's edited and pruned and easier to
-work with than a checkout from Git.
+There are some releases available, but the development model has moved away
+from making releases and as a result they're all pretty old. Instead I'd
+recommend that you check out the head of git (or download the source tarball).
+It should then build from there.
 
 Documentation
 -------------
 
-Some fairly heavy maintenance is currently being done on the ACK, which means
-the documentation is not in very good shape. Most of the documentation is in
-the form of man pages, which are supplied with the source; however, a number of
+Some fairly heavy maintenance has been done on the ACK, which means the
+documentation is not in very good shape. Most of the documentation is in the
+form of man pages, which are supplied with the source; however, a number of
 [rather old white papers](olddocs.html) are also available, that may give some
 insight as to the design and architecture of the system.
 
-If you have queries, your best bit is probably to [join the mailing
-list](http://sourceforge.net/mail/?group_id=130811).
+If you have queries, your best bit is probably to [file a Github
+issue](https://github.com/davidgiven/ack/issues/new).
 
 New news
 --------
+
+### 2022-07-18
+
+Still not dead! Development has been proceeding slowly in the background; we
+just stopped making formal releases and never got round to updating this page.
+The code is a lot cleaner now since 6.0pre5 and it builds on OSX and Windows.
+There are backends for MIPS and PowerPC and the 8080 backend has been
+dramatically improved, among many, many other fixes. Fetch it from [the Github
+repository](https://github.com/davidgiven/ack).
 
 ### 2016-06-05
 
