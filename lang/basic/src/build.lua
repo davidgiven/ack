@@ -43,6 +43,7 @@ cprogram {
 		"./symbols.h",
 		"./util.h",
 		"./yylexp.h",
+		"./basic.lex",
 		"+llgen",
 		"+tokentab_h",
 		"h+emheaders",

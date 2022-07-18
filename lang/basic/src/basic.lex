@@ -572,6 +572,7 @@ int yylex(void)
 		/* handle double operators */
 		case ' ':
 		case '\t':
+		case '\r':
 			cptr++;
 			return(yylex());
 		case '&':
