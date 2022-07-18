@@ -38,12 +38,12 @@ calcnt_p cchead; /* call-count info of current proc */
 STATIC long space = 0;
 STATIC long total_size = 0;
 
-STATIC char cname[PATH_MAX];
-STATIC char ccname[PATH_MAX];
-STATIC char cname2[PATH_MAX];
+STATIC char* cname;
+STATIC char* ccname;
+STATIC char* cname2;
 
 /* For debugging only */
-STATIC char sname[PATH_MAX];
+STATIC char* sname;
 STATIC int kp_temps = 0;
 
 int Ssubst;
@@ -337,20 +337,11 @@ char* argv[];
 	go(argc, argv, no_action, no_action, no_action, il_flags);
 	il_extptab(fproc); /* add extended data structures */
 
-	strcpy(cname, tmpdir);
-	strcpy(ccname, tmpdir);
-	strcpy(sname, tmpdir);
-	strcpy(cname2, tmpdir);
+	cname = sys_maketempfile("il", "i1");
+	ccname = sys_maketempfile("il", "i2");
+	sname = sys_maketempfile("il", "i3");
+	cname2 = sys_maketempfile("il", "i4");
 
-	strcat(cname, "/ego.i1.XXXXXX");
-	strcat(ccname, "/ego.i2.XXXXXX");
-	strcat(sname, "/ego.i3.XXXXXX");
-	strcat(cname2, "/ego.i4.XXXXXX");
-
-	close(mkstemp(cname));
-	close(mkstemp(ccname));
-	close(mkstemp(sname));
-	close(mkstemp(cname2));
 	pass1(files->lname_in, files->bname_in, cname); /* grep calls, analyse procedures */
 	space = total_size * space / 100;
 	pass2(cname, space); /* select calls to be expanded */

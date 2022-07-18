@@ -59,7 +59,7 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-static char tmpbase[PATH_MAX];
+static char* tmpbase;
 static char ddump[PATH_MAX]; /* data label dump file */
 static char pdump[PATH_MAX]; /* procedure name dump file */
 static char tmpbufs[NTEMPS * 2][PATH_MAX];
@@ -389,11 +389,7 @@ int main(int argc, char* argv[])
 		fatal("no correct -P flag given");
 	}
 
-	{
-		strcpy(tmpbase, sys_gettmpdir());
-		strcat(tmpbase, "/ego.XXXXXX");
-		close(mkstemp(tmpbase));
-	}
+	tmpbase = sys_maketempfile("ego", "");
 
 	strcpy(ddump, tmpbase);
 	strcpy(pdump, tmpbase);

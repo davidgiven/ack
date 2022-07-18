@@ -17,7 +17,7 @@
  * this file contains several library routines.
  */
 
-static char filename[L_tmpnam];
+static char* filename;
 
 
 /* VARARGS1 */
@@ -384,9 +384,5 @@ void set_mode(int mode)
 
 char* tmpfil(void)
 {
-	if (sys_tmpnam(filename)==NULL)
-	{
-		fatal("Cannot create temporary filename.");
-	}
-	return filename;
+	return sys_maketempfile("ack-ass", "dat");
 }

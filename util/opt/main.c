@@ -48,11 +48,7 @@ void fileinit(void)
 		error("wrong input file");
 	if (Lflag)
 	{
-
-		if (sys_tmpnam(tempname)==NULL)
-		{
-			error("can't create temporary file.");
-		}
+		tempname = sys_maketempfile("opt", "dat");
 		outfile = fopen(tempname, "wb");
 		if (outfile == NULL)
 			error("can't create %s", tempname);

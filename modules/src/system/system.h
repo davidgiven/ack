@@ -78,11 +78,11 @@ time_t sys_modtime(char *);
  *
  * Supports both DOS and UNIX style paths.
  * */
-void sys_basename(const char *str, register char *dst);
+extern void sys_basename(const char *str, register char *dst);
 
-/* Creates a temporary filename. This has
- * the same semantics as ISO C90 tmpnam() */
-char* sys_tmpnam(char *buffer);
+/* Creates a temporary filename, makes it, and returns a malloc'd string
+ * containing the filename. */
+extern char* sys_maketempfile(const char* prefix, const char* suffix);
 
 #if defined WIN32
 /* Really? */
@@ -92,5 +92,9 @@ extern char* strndup(const char* s, size_t n);
 /* Sets stdin, stdout or stderr to binary mode --- required on Windows, noop on
  * sane systems. */
 extern void sys_setbinarymode(FILE* fp);
+
+/* As system sprintf(), except uses malloc() to allocate a new buffer of the
+ * right size for the result. */
+extern char* aprintf(const char* format, ...);
 
 #endif /* __SYSTEM_INCLUDED__ */

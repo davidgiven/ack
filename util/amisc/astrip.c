@@ -17,7 +17,7 @@
 
 */
 
-char	tname[L_tmpnam];
+char* tname;
 FILE	*tf;
 struct outhead buf;
 int	readerror, writeerror;
@@ -30,12 +30,7 @@ int main(int argc, char **argv)
 {
 	int	status;
 
-	if (sys_tmpnam(tname)==NULL)
-	{
-		fprintf(stderr, "astrip: cannot create temporary filename\n");
-		return(1);
-	}
-	fclose(fopen(tname,"wb"));
+	tname = sys_maketempfile("ack", "dat");
 	while(--argc) {
 		if ((status = strip(argv[argc])) > 1)
 			break;
