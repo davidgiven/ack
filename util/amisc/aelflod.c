@@ -691,14 +691,14 @@ int main(int argc, char* argv[])
 			break;
 			
 		case 3: /* Both input and output files specified. */
-			output = fopen(argv[2], "w");
+			output = fopen(argv[2], "wb");
 			if (!output)
 				fatal("unable to open output file.");
 			outputfile = argv[2];
 			/* fall through */
 			
 		case 2: /* Input file specified. */
-			input = fopen(argv[1], "r");
+			input = fopen(argv[1], "rb");
 			if (!input)
 				fatal("unable to open input file.");
 			break;

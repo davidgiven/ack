@@ -104,7 +104,10 @@ int C_open(char* nm)
 	*/
 
 	if (nm == 0)
+	{
 		C_ofp = STDOUT;	/* standard output	*/
+		sys_setbinarymode(stdout);
+	}
 	else
 	{
 

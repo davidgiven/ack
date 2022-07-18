@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 			/* fall through */
 			
 		case 2: /* Input file specified. */
-			input = fopen(argv[1], "r");
+			input = fopen(argv[1], "rb");
 			if (!input)
 				fatal("unable to open input file.");
 			break;

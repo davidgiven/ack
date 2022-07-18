@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "alloc.h"
+#include "system.h"
 #include "em_label.h"
 #include "em_arith.h"
 #include "em_pseu.h"
@@ -136,7 +137,10 @@ EXPORT int EM_open(char *filename)
 		}
 	}
 	else
+	{
 		fd = stdin;
+		sys_setbinarymode(stdin);
+	}
 	EM_filename = filename;
 	init_input();
 
