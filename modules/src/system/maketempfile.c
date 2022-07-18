@@ -6,6 +6,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <unistd.h>
 #include "system.h"
 #include "astring.h"
 
