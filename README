@@ -2,7 +2,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2018-02-23
+                                2022-06-18
 
 
 INTRODUCTION
@@ -45,7 +45,8 @@ INSTALLATION
 ============
 
 The version 5.0 build mechanism has been completely rewritten. Installation
-ought to be fairly straightforward.
+ought to be fairly straightforward. It will build on Unixishes including Linux,
+OSX, and Windows using MSYS2 and mingw32.
 
 Requirements:
 
