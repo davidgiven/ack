@@ -32,7 +32,7 @@ char* sys_maketempfile(const char* prefix, const char* suffix)
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);
 
-	unsigned int seed = (unsigned int)(uintptr_t)prefix
+	unsigned int seed = (unsigned int)(intptr_t)prefix
 		^ (unsigned int)ts.tv_sec ^ (unsigned int)ts.tv_nsec;
 	const char* tempdir = sys_gettmpdir();
 
