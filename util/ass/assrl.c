@@ -127,7 +127,7 @@ void copyout(void)
 	if (remtext != 0)
 		remtext = wordsize - remtext;
 
-	if ((ifile = fopen(eout, "w")) == 0)
+	if ((ifile = fopen(eout, "wb")) == 0)
 		fatal("can't create e.out");
 
 	rewind(tfile);
