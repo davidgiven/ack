@@ -435,7 +435,7 @@ do_file(p)
 		}
 		return;
 	}
-	if ((f = fopen(p->t_args[0]->t_str, "r")) == NULL) {
+	if ((f = fopen(p->t_args[0]->t_str, "rb")) == NULL) {
 		error("could not open %s", p->t_args[0]->t_str);
 		return;
 	}
@@ -810,7 +810,7 @@ do_source(p)
   FILE		*old_db_in = db_in;
 
   p = p->t_args[0];
-  if ((db_in = fopen(p->t_str, "r")) == NULL) {
+  if ((db_in = fopen(p->t_str, "rb")) == NULL) {
 	db_in = old_db_in;
 	error("could not open %s", p->t_str);
 	return;

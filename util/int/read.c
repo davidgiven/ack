@@ -61,7 +61,7 @@ PRIVATE long rd_int(size);
 
 void rd_open(char *fname)
 { /* Open loadfile */
-	if ((load_fp = fopen(fname, "r")) == NULL)
+	if ((load_fp = fopen(fname, "rb")) == NULL)
 	{
 		fatal("Cannot open loadfile '%s'", fname);
 	}

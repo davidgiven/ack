@@ -115,7 +115,7 @@ void out_tally(void)
 	if (!*hook)
 		return;
 
-	tally_fp = fopen("int.tally", "w");
+	tally_fp = fopen("int.tally", "wb");
 	if (!tally_fp)
 		return;
 

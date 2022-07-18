@@ -151,7 +151,7 @@ int main(int argc, char* const argv[])
 		switch (opt)
 		{
 			case 'o':
-				outputfp = fopen(optarg, "w");
+				outputfp = fopen(optarg, "wb");
 				if (!outputfp)
 					fatal("cannot open output file: %s", strerror(errno));
 				break;

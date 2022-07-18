@@ -14,7 +14,7 @@ void core_dump(void)
 {
 	FILE *core_file;
 	
-	core_file = fopen("int.core", "w");
+	core_file = fopen("int.core", "wb");
 	if (!core_file) {
 		/* no point in giving a fatal error again! */
 		return;
