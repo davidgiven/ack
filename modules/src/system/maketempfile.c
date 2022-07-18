@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "system.h"
+#include "astring.h"
 
 #if defined WIN32
 static unsigned temper(unsigned x)
@@ -20,7 +21,8 @@ static unsigned temper(unsigned x)
 
 static int rand_r(unsigned *seed)
 {
-	return temper(*seed = *seed * 1103515245 + 12345)/2;
+	*seed = *seed * 1103515245 + 12345;
+	return temper(*seed)/2;
 }
 #endif
 
@@ -36,8 +38,9 @@ char* sys_maketempfile(const char* prefix, const char* suffix)
 	for (;;)
 	{
 		unsigned int hash = rand_r(&seed);
-		char* filename = aprintf("%s/ack-%s-%x%s",
+		char* filename = aprintf("%s/ack.%s-%x%s%s",
 			tempdir, prefix, hash,
+			((*suffix == 0) || (*suffix == '.')) ? "" : ".",
 			suffix);
 		int fd = open(filename, O_CREAT|O_EXCL|O_RDWR, 0600);
 		if (fd != -1)

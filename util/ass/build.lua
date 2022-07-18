@@ -44,7 +44,7 @@ cprogram {
 		"h+local",
 		--"modules/src/alloc+lib",
 		"modules/src/em_data+lib",
-		--"modules/src/data+lib",
+		"modules/src/data+lib",
 		--"modules/src/object+lib",
 		"modules/src/system+lib",
 		"./ass00.h",

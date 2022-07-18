@@ -2,7 +2,6 @@ clibrary {
 	name = "lib",
 	srcs = {
 		"./access.c",
-		"./aprintf.c",
 		"./basename.c",
 		"./break.c",
 		"./chmode.c",
@@ -27,4 +26,7 @@ clibrary {
 		--"./unlock.c”,
 	},
 	hdrs = { "./system.h" },
+	deps = {
+		"modules/src/data+lib",
+	}
 }

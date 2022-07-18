@@ -84,6 +84,7 @@ local function variant(name, cflags)
 			"modules/src/print+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
+			"modules/src/data+lib",
 			"modules/src/em_data+lib"
 		),
 		vars = {

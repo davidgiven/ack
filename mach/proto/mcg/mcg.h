@@ -79,7 +79,6 @@ struct em
     } u;
 };
     
-extern const char* aprintf(const char* fmt, ...);
 extern void tracef(char k, const char* fmt, ...);
 extern bool tracing(char k);
 
