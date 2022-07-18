@@ -16,7 +16,7 @@ extern	bool	repl_longmuls;
 extern	byte	em_flag[];
 extern	line_p	instrs,pseudos;
 extern	FILE	*outfile;
-extern	char	tempname[];
+extern	char	*tempname;
 extern	offset	wordsize;
 extern	offset	pointersize;
 extern	char	*progname;

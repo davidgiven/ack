@@ -7,12 +7,21 @@
 #include <unistd.h>
 #include "system.h"
 
-int
-sys_write(fp, bufptr, nbytes)
-	File *fp;
-	char *bufptr;
-	int nbytes;
+int sys_write(File* fp, char* bufptr, int nbytes)
 {
-	if (! fp) return 0;
-	return write(fp->o_fd, bufptr, nbytes) == nbytes;
+	if (!fp)
+		return 0;
+	
+	while (nbytes != 0)
+	{
+		int len = write(fp->o_fd, bufptr, nbytes);
+		if (len < 0)
+			return 0;
+
+		bufptr += len;
+		nbytes -= len;
+	}
+
+	return 1;
 }
+

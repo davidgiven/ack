@@ -83,9 +83,9 @@ char* argv[];
 	const char* dname_out = argv[6];
 	const char* lname_out = argv[7];
 
-	FILE* lfile = openfile(lname_out, "w");
-	FILE* pdump = openfile(pdump_out, "w");
-	FILE* ddump = openfile(ddump_out, "w");
+	FILE* lfile = openfile(lname_out, "wb");
+	FILE* pdump = openfile(pdump_out, "wb");
+	FILE* ddump = openfile(ddump_out, "wb");
 
 	FILE* dfile;
 	FILE* pfile;
@@ -117,9 +117,9 @@ char* argv[];
 	cleanprocs(prochash, NPROCHASH, 0);
 	cleandblocks(symhash, NSYMHASH, 0);
 	/* Now write the datablock table and the proctable */
-	dfile = openfile(dname_out, "w");
+	dfile = openfile(dname_out, "wb");
 	putdtable(fdblock, dfile);
-	pfile = openfile(pname_out, "w");
+	pfile = openfile(pname_out, "wb");
 	putptable(fproc, pfile, FALSE);
 	exit(0);
 }

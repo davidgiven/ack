@@ -65,7 +65,7 @@ acquire_malout()	{
 	static char buf[BUFSIZ];
 	
 	if (!malout)	{
-		malout = freopen("mal.out", "w", stderr);	
+		malout = freopen("mal.out", "wb", stderr);	
 		setbuf(malout, buf);
 	}
 }

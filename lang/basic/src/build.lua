@@ -2,30 +2,48 @@ include("util/LLgen/build.lua")
 
 llgen {
 	name = "llgen",
-	srcs = { "./*.g" }
+	srcs = { "./basic.g" }
 }
 
 normalrule {
 	name = "tokentab_h",
 	ins = {
 		"./maketokentab",
-		"util/cmisc+ed",
 		matching(filenamesof("+llgen"), "/Lpars.h$"),
 	},
 	outleaves = { "tokentab.h" },
 	commands = {
-		"%{ins} %{outs}"
+		"%{ins[1]} < %{ins[2]} > %{outs}"
 	}
 }
 
 cprogram {
 	name = "em_bem",
 	srcs = {
-		"./*.c",
+		"./bem.c",
+		"./compile.c",
+		"./eval.c",
+		"./func.c",
+		"./gencode.c",
+		"./graph.c",
+		"./initialize.c",
+		"./parsepar.c",
+		"./symbols.c",
+		"./util.c",
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {
-		"./*.h",
+		"./bem.h",
+		"./eval.h",
+		"./func.h",
+		"./gencode.h",
+		"./graph.h",
+		"./llmess.h",
+		"./parsepar.h",
+		"./symbols.h",
+		"./util.h",
+		"./yylexp.h",
+		"./basic.lex",
 		"+llgen",
 		"+tokentab_h",
 		"h+emheaders",

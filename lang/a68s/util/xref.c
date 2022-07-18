@@ -93,13 +93,13 @@ int narg;
 		postin[0] = dup(0);
 	if (pass1) {
 		if (useroif) {
-			if ((hashin = fopen(oifile, "r")) == NULL)
+			if ((hashin = fopen(oifile, "rb")) == NULL)
 				fatal("bad ignore/only file: %s",oifile);
 			buildhash();
 			fclose(hashin);
 		}
 		input = stdin;
-		output = fdopen(scanout[1], "w");
+		output = fdopen(scanout[1], "wb");
 		nfiles = argc;
 		setjmp(env);
 		while (argc--)
@@ -203,9 +203,9 @@ scan(s) char *s;
 				oifsuf++;
 		if (lastc != oifile[oifsuf] ) {
 			oifile[oifsuf] = lastc;
-			if ((hashin = fopen(oifile, "r")) == NULL) {
+			if ((hashin = fopen(oifile, "rb")) == NULL) {
 				oifile[oifsuf] = 'x';
-				if ((hashin = fopen(oifile, "r")) == NULL)
+				if ((hashin = fopen(oifile, "rb")) == NULL)
 					fatal("cannot open %s",oifile);
 			}
 			buildhash();
@@ -215,7 +215,7 @@ scan(s) char *s;
 	if (s[0]=='-' && s[1]=='\0')
 		input = stdin;
 	else
-		if ((input = fopen(s, "r")) == NULL)
+		if ((input = fopen(s, "rb")) == NULL)
 			fatal("cannot open %s",s);
 	switch (type) {
 	case 'x': 

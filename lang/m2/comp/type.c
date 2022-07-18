@@ -12,6 +12,7 @@
 #include	"parameters.h"
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<assert.h>
 #include	<ack_string.h>
 #include	<alloc.h>

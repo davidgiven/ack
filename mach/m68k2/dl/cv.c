@@ -36,11 +36,11 @@ main(argc,argv) char **argv; {
 		fprintf(stderr,"Usage: %s VU-a.out Bleasdale-a.out\n",argv[0]);
 		exit(-1);
 	}
-	if (freopen(argv[1],"r",stdin)==NULL) {
+	if (freopen(argv[1],"rb",stdin)==NULL) {
 		perror(argv[1]);
 		exit(-1);
 	}
-	if (freopen(argv[2],"w",stdout)==NULL) {
+	if (freopen(argv[2],"wb",stdout)==NULL) {
 		perror(argv[2]);
 		exit(-1);
 	}

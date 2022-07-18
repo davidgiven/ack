@@ -39,7 +39,7 @@ main(argc,argv) char **argv; {
 	s = "a.out";
 	if (argc >= 2)
 		s = argv[1];
-	if (freopen(s,"r",stdin) == NULL)
+	if (freopen(s,"rb",stdin) == NULL)
 		fatal("can't open %s",s);
 	s = "/dev/tty05";
 	if (argc >= 3)
@@ -54,7 +54,7 @@ main(argc,argv) char **argv; {
 		tty.sg_flags = RAW;
 		stty(ttyfd,&tty);
 	} else {
-		freopen(s,"w",stdout);
+		freopen(s,"wb",stdout);
 	}
 	first = 1; osg = 0;
 	/* uid = getuid(); */

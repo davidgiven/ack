@@ -3,6 +3,7 @@ cprogram {
 	srcs = { "./archiver.c" },
 	deps = {
 		"h+emheaders",
+		"modules/src/data+lib",
 		"modules/src/object+lib",
 		"modules/src/print+lib",
 		"modules/src/string+lib",

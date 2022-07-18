@@ -1,7 +1,7 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
-yacc {
-	name = "yacc",
+bison {
+	name = "bison",
 	srcs = { "./mktab.y" }
 }
 
@@ -19,13 +19,13 @@ local headers = {
 cprogram {
 	name = "mktab",
 	srcs = {
-		matching(filenamesof("+yacc"), "%.c$"),
+		matching(filenamesof("+bison"), "%.c$"),
 		matching(filenamesof("+flex"), "%.c$"),
 	},
 	deps = concat(
 		headers,
 		"+flex",
-		"+yacc",
+		"+bison",
 		"modules/src/em_data+lib"
 	)
 }
@@ -61,7 +61,21 @@ local function variant(name, cflags)
 		srcs = {
 			"+pattern_c",
 			"+pop_push_c",
-			"./*.c",
+			"./alloc.c",
+			"./backward.c",
+			"./cleanup.c",
+			"./flow.c",
+			"./getline.c",
+			"./lookup.c",
+			"./main.c",
+			"./peephole.c",
+			"./process.c",
+			"./putline.c",
+			"./reg.c",
+			"./special.c",
+			"./tes.c",
+			"./util.c",
+			"./var.c",
 		},
 		deps = concat(
 			headers,
@@ -70,6 +84,7 @@ local function variant(name, cflags)
 			"modules/src/print+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
+			"modules/src/data+lib",
 			"modules/src/em_data+lib"
 		),
 		vars = {

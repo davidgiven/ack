@@ -1,4 +1,9 @@
 clibrary {
 	name = "headers",
-	hdrs = {"./*.h"}
+	hdrs = {
+		"./pc_err.h",
+		"./pc_file.h",
+		"./pc.h",
+		"./pc_math.h",
+	}
 }

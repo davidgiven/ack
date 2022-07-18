@@ -298,7 +298,7 @@ char* argv[];
 				return NULL;
 			}
 			filename = argv[argcnt];
-			if ((curfile = fopen(filename, "r")) == NULL)
+			if ((curfile = fopen(filename, "rb")) == NULL)
 			{
 				error("cannot open %s", filename);
 			}

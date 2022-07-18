@@ -1,6 +1,8 @@
 ackfile {
 	name = "bdos_o",
-	srcs = { "./*.s" },
+	srcs = {
+		"./bdos.s",
+	},
 	vars = { plat = "cpm" },
 }
 
@@ -38,7 +40,12 @@ cprogram {
 	name = "emu",
 	srcs = {
 		"+bdos_c",
-		"./*.c"
+		"./biosbdos.c",
+		"./dis8080.c",
+		"./emulator.c",
+		"./fileio.c",
+		"./intel_8080_emulator.c",
+		"./main.c",
 	},
 }
 

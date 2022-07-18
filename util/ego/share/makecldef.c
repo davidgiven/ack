@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
 	if (argc != 3) {
 		error("usage: makeclassdef mnemfile classfile");
 	}
-	if ((f1 = fopen(argv[1],"r")) == NULL) {
+	if ((f1 = fopen(argv[1],"rb")) == NULL) {
 		error("cannot open mnemonic file");
 	}
-	if ((f2 = fopen(argv[2],"r")) == NULL) {
+	if ((f2 = fopen(argv[2],"rb")) == NULL) {
 		error("cannot open class file");
 	}
 	convert(f1,f2);

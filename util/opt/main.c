@@ -48,17 +48,14 @@ void fileinit(void)
 		error("wrong input file");
 	if (Lflag)
 	{
-
-		if (sys_tmpnam(tempname)==NULL)
-		{
-			error("can't create temporary file.");
-		}
+		tempname = sys_maketempfile("opt", "dat");
 		outfile = fopen(tempname, "wb");
 		if (outfile == NULL)
 			error("can't create %s", tempname);
 	}
 	else
 	{
+		sys_setbinarymode(stdout);
 		outfile = stdout;
 		outshort(sp_magic);
 	}
@@ -84,8 +81,13 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 	if (argc)
-		if (freopen(*argv, "r", stdin) == NULL)
+	{
+		if (freopen(*argv, "rb", stdin) == NULL)
 			error("Cannot open %s", *argv);
+	}
+	else
+		sys_setbinarymode(stdin);
+
 	fileinit();
 #ifdef USEMALLOC
 	coreinit();

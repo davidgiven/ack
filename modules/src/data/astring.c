@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-const char* aprintf(const char* fmt, ...)
+char* aprintf(const char* fmt, ...)
 {
     int n;
     char* p;

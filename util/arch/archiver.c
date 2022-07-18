@@ -120,8 +120,7 @@ char io_buffer[IO_SIZE];
 
 char *progname;
 
-char temp_buf[L_tmpnam];
-char *temp_arch = &temp_buf[0];
+char *temp_arch;
 
 void do_object(FILE* f, long size);
 void do_names(struct outhead *headp);
@@ -348,10 +347,7 @@ int main(int argc, char *argv[])
 		distr_time = statbuf.st_mtime;
 	}
 #endif
-	if (sys_tmpnam(temp_arch) == NULL)
-	{
-		error(TRUE, "Cannot create a temporary filename\n", NULL);
-	}
+	temp_arch = sys_maketempfile("aal", "dat");
 
 	if (app_fl + ex_fl + del_fl + rep_fl + show_fl + pr_fl != 1)
 		usage();

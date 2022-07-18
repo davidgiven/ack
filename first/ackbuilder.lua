@@ -7,7 +7,6 @@
 --   is = { set of rule types which made the target }
 -- }
 
-local posix = require("posix")
 local emitter = {}
 local rules = {}
 local targets = {}
@@ -20,6 +19,24 @@ local loadingstack = {}
 
 -- Forward references
 local loadtarget
+
+-- Compatibility polyfill for load
+local function loadf(text, source, mode, env)
+	if rawget(_G, "loadstring") and rawget(_G, "setfenv") then
+		local chunk, e = loadstring(text, "@"..source)
+		if chunk then
+			setfenv(chunk, env)
+		end
+		return chunk, e
+	else
+		return load(text, source, mode, env)
+	end
+end
+
+-- Compatibility polyfill for unpack
+if not rawget(_G, "unpack") then
+	unpack = table.unpack
+end
 
 local function print(...)
 	local function print_no_nl(list)
@@ -125,7 +142,7 @@ local function concatpath(...)
 end
 
 -- Returns a list of the targets within the given collection; the keys of any
--- keyed items are lost. Lists and wildcards are expanded.
+-- keyed items are lost. Lists are expanded.
 local function targetsof(...)
 	local o = {}
 
@@ -226,9 +243,6 @@ local function abspath(...)
 	return dotocollection({...},
 		function(filename)
 			assertString(filename, 1)
-			if not filename:find("^[/$]") then
-				filename = concatpath(posix.getcwd(), filename)
-			end
 			return filename
 		end
 	)
@@ -345,11 +359,10 @@ local function templateexpand(list, vars)
 		o[#o+1] = s:gsub("%%%b{}",
 			function(expr)
 				expr = expr:sub(3, -2)
-				local chunk, e = loadstring("return ("..expr..")", expr)
+				local chunk, e = loadf("return ("..expr..")", expr, nil, vars)
 				if e then
 					error(string.format("error evaluating expression: %s", e))
 				end
-				setfenv(chunk, vars)
 				local value = chunk()
 				if (value == nil) then
 					error(string.format("template expression '%s' expands to nil (probably an undefined variable)", expr))
@@ -381,10 +394,7 @@ local function loadbuildfile(filename)
 				local thisglobals = {}
 				thisglobals._G = thisglobals
 				setmetatable(thisglobals, {__index = globals})
-				chunk, e = loadstring(data, "@"..filename)
-				if not e then
-					setfenv(chunk, thisglobals)
-				end
+				chunk, e = loadf(data, filename, nil, thisglobals)
 			end
 		end
 		if e then
@@ -401,13 +411,17 @@ end
 
 local function loadbuildfilefor(filepart, targetpart)
 	local normalname = concatpath(filepart, "/build.lua")
-	if posix.access(normalname, "r") then
+	local fp = io.open(normalname, "r")
+	if fp then
+		fp:close()
 		loadbuildfile(normalname)
 		return
 	end
 
 	local extendedname = concatpath(filepart, "/build-"..targetpart..".lua")
-	if posix.access(extendedname, "r") then
+	fp = io.open(extendedname, "r")
+	if fp then
+		fp:close()
 		loadbuildfile(extendedname)
 		return
 	end
@@ -424,10 +438,7 @@ loadtarget = function(targetname)
 	if not targetname:find("%+") then
 		local files
 		if targetname:find("[?*]") then
-			files = posix.glob(targetname)
-			if not files then
-				files = {}
-			end
+			error("wildcards not supported")
 		else
 			files = {targetname}
 		end
@@ -823,8 +834,6 @@ local function parse_arguments(argmap, arg)
 end
 
 globals = {
-	posix = posix,
-
 	abspath = abspath,
 	asstring = asstring,
 	basename = basename,

@@ -45,15 +45,16 @@ FILE	*fout;
 FILE	*fpars;
 FILE	*finput;
 FILE	*fact;
-char	f_pars[L_tmpnam+sizeof(char)]; /* Add one more character for NULL, just in case of buggy implementations. */
-char	f_temp[L_tmpnam+sizeof(char)];
+string	f_dir;
+string	f_pars;
+string	f_temp;
 #ifdef NON_CORRECTING
-char	f_nc[20];
+string	f_nc;
 #endif
-char	f_out[20];
+string	f_out;
 string	f_input;
-char	f_include[20];
-char	f_rec[20];
+string	f_include;
+string	f_rec;
 string	e_noopen = "Cannot open %s";
 int	verbose;
 int	wflag;

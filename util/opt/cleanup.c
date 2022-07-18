@@ -31,7 +31,7 @@ void cleanup(void)
 	c = fclose(outfile);
 	assert(c != EOF);
 	outfile = stdout;
-	infile = fopen(tempname, "r");
+	infile = fopen(tempname, "rb");
 	if (infile == NULL)
 		error("temp file disappeared");
 	outshort(sp_magic);

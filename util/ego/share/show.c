@@ -93,7 +93,7 @@ main(argc, argv)
 	if (argc != 3 || argv[1][0] != '-') {
 		error("usage: %s -[ldpbc] filename",argv[0]);
 	}
-	if ((f = fopen(argv[2], "r")) == NULL) {
+	if ((f = fopen(argv[2], "rb")) == NULL) {
 		error("cannot open %s", argv[2]);
 	}
 	switch(argv[1][1]) {

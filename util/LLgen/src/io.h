@@ -16,26 +16,28 @@
  * Some important file names and variables
  */
 
-# include <stdio.h>
+#include <stdio.h>
+#include "types.h"
 
 /* FILES */
 
-# define OUTFILE	"%s.output"	/* -v option */
-# define HFILE		"%spars.h"	/* file for "#define's " */
-# define RFILE		"%spars.c"	/* Error recovery */
+# define OUTFILE	"%s/%s.output"	/* -v option */
+# define HFILE		"%s/%spars.h"	/* file for "#define's " */
+# define RFILE		"%s/%spars.c"	/* Error recovery */
 #ifdef NON_CORRECTING
-# define NCFILE		"%sncor.c"	/* Non-corrcting error recovery */
+# define NCFILE		"%s/%sncor.c"	/* Non-corrcting error recovery */
 #endif
 extern FILE *finput;
 extern FILE *fpars;
 extern FILE *fact;
 extern FILE *fout;
-extern char	f_pars[];
-extern char	f_temp[];
-extern char	f_out[];
-extern string	f_input;
-extern char	f_include[];
-extern char	f_rec[];
+extern string f_dir;
+extern string f_pars;
+extern string f_temp;
+extern string f_out;
+extern string f_input;
+extern string f_include;
+extern string f_rec;
 #ifdef NON_CORRECTING
-extern char	f_nc[];
+extern string f_nc;
 #endif

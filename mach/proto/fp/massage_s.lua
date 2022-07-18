@@ -1,0 +1,47 @@
+local syms = {
+	"_adf4",
+	"_adf8",
+	"_cff4",
+	"_cff8",
+	"_cfi",
+	"_cfu",
+	"_cif4",
+	"_cif8",
+	"_cmf4",
+	"_cmf8",
+	"_cuf4",
+	"_cuf8",
+	"_dvf4",
+	"_dvf8",
+	"_fef4",
+	"_fef8",
+	"_fif4",
+	"_fif8",
+	"_mlf4",
+	"_mlf8",
+	"_ngf4",
+	"_ngf8",
+	"_sbf4",
+	"_sbf8",
+	"_zrf4",
+	"_zrf8",
+	"_add_ext",
+	"_div_ext",
+	"_mul_ext",
+	"_nrm_ext",
+	"_sft_ext",
+	"_sub_ext",
+	"_zrf_ext",
+	"_compact",
+	"_extend",
+	"_b64_add",
+	"_b64_sft",
+	"_b64_rsft",
+	"_b64_lsft",
+}
+
+local data = io.stdin:read("*a")
+for _, s in ipairs(syms) do
+    data = data:gsub(s, (s:gsub("^_", ".")))
+end
+io.stdout:write(data)

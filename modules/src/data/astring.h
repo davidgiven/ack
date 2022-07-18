@@ -1,7 +1,7 @@
 #ifndef ASTRING_H
 #define ASTRING_H
 
-extern const char* aprintf(const char* fmt, ...);
+extern char* aprintf(const char* fmt, ...);
 
 #endif
 

@@ -71,13 +71,13 @@ STATIC void outsym(const char *s, int t)
 			coutshort((short) num);
 		}
 	} else {
-		p= s;
+		p= (byte*) s;
 		while (*p && p < &s[IDL])
 			p++;
 		num = p - s;
 		outbyte( (byte) t);
 		coutint((short) num);
-		p = s;
+		p = (byte*) s;
 		while (num--)
 			outbyte( (byte) *p++ );
 	}
@@ -167,7 +167,7 @@ STATIC void coutobject(obj_p obj)
 
 STATIC void cputstr(argb_p abp) {
 	register argb_p tbp;
-	register length;
+	register int length;
 
 	length = 0;
 	tbp = abp;

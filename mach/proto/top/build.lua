@@ -12,7 +12,10 @@ definerule("build_top",
 
 		return cprogram {
 			name = e.name,
-			srcs = { "mach/proto/top/*.c", },
+			srcs = {
+				"mach/proto/top/queue.c",
+				"mach/proto/top/top.c",
+			},
 			deps = { t },
 		}
 	end

@@ -153,7 +153,7 @@ static void argument(char *arg)
 		return;
 	}
 	curfile = arg; /* for error messages etc. */
-	if ((ifile = fopen(arg, "r")) == NULL)
+	if ((ifile = fopen(arg, "rb")) == NULL)
 	{
 		error("can't open %s", arg);
 		return;
@@ -385,10 +385,10 @@ void init_files(void)
 	 * It has the nice property of generating truly unique names.
 	 */
 
-	tfile = fopen(tmpfil(), "w+");
-	dfile = fopen(tmpfil(), "w+");
-	rtfile = fopen(tmpfil(), "w+");
-	rdfile = fopen(tmpfil(), "w+");
+	tfile = fopen(tmpfil(), "wb+");
+	dfile = fopen(tmpfil(), "wb+");
+	rtfile = fopen(tmpfil(), "wb+");
+	rdfile = fopen(tmpfil(), "wb+");
 }
 
 void initproc(void)

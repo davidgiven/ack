@@ -1,6 +1,6 @@
 cprogram {
     name = "cv",
-    srcs = { "./*.c" },
+    srcs = { "./cv.c" },
     deps = {
         "h+emheaders",
         "modules/src/object+lib",

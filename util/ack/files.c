@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "system.h"
 #include "ack.h"
 #include "list.h"
 #include "trans.h"
@@ -52,16 +53,11 @@ int setfiles(trf *phase) {
 		out.p_keeps=NO ;
 		out.p_keep=YES ;
 	} else {
-		gr_init(&pathname) ;
 		if ( !phase->t_keep && !t_flag ) {
-			char* tmpdir = getenv("TMPDIR");
-			if (!tmpdir)
-				tmpdir = "/tmp";
-			gr_cat(&pathname, tmpdir);
-			gr_cat(&pathname, "/Ack-XXXXXX");
-			mkstemp(pathname.gr_string);
+			out.p_path = sys_maketempfile("ack", phase->t_out);
 			out.p_keep=NO ;
 		} else {
+			gr_init(&pathname) ;
 			if ( !p_basename ) {
 				gr_cat(&pathname,"Ack") ;
 				p_basename=keeps(gr_start(pathname)) ;
@@ -70,10 +66,10 @@ int setfiles(trf *phase) {
 			} else {
 				gr_cat(&pathname,p_basename) ;
 			}
+			gr_cat(&pathname,phase->t_out) ;
+			out.p_path= gr_final(&pathname) ;
 			out.p_keep=YES ;
 		}
-		gr_cat(&pathname,phase->t_out) ;
-		out.p_path= gr_final(&pathname) ;
 		out.p_keeps= YES ;
 	}
 	scanlist( l_first(arguments), elem) {

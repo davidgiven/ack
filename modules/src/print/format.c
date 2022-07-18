@@ -37,12 +37,12 @@ $ */
 int
 _format(char *buf, const char *fmt, va_list argp)
 {
-	register char *pf = fmt;
-	register char *pb = buf;
+	const char *pf = fmt;
+	char *pb = buf;
 
 	while (*pf) {
 		if (*pf == '%') {
-			register width, base, pad, npad;
+			int width, base, pad, npad;
 			char *arg;
 			char cbuf[2];
 			char *badformat = "<bad format>";

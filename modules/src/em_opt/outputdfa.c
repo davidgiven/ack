@@ -48,7 +48,7 @@ PRIVATE void openofile(char *filename)
 	strcpy(ofilename, filename);
 	strcpy(ofiletemp, filename);
 	strcat(ofiletemp, ".new");
-	if ((ofile = fopen(ofiletemp, "w")) == NULL)
+	if ((ofile = fopen(ofiletemp, "wb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannot open output file %s\n", ofiletemp);
 		sys_stop(S_EXIT);
@@ -65,12 +65,12 @@ PRIVATE void installofile(void)
 	register FILE *f1, *f2;
 	register int c1, c2;
 	fclose(ofile);
-	if ((f1 = fopen(ofiletemp, "r")) == NULL)
+	if ((f1 = fopen(ofiletemp, "rb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannont reopen file %s\n", ofiletemp);
 		sys_stop(S_EXIT);
 	}
-	if ((f2 = fopen(ofilename, "r")) == NULL)
+	if ((f2 = fopen(ofilename, "rb")) == NULL)
 	{
 		fclose(f1);
 		RENAME(ofiletemp, ofilename);

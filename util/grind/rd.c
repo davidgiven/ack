@@ -108,7 +108,7 @@ int
 rd_open(f)
   char	*f;
 {
-  if ((inf = fopen(f, "r")) == NULL) return 0;
+  if ((inf = fopen(f, "rb")) == NULL) return 0;
   return 1;
 }
 
@@ -346,7 +346,7 @@ int
 rd_open(f)
   char	*f;
 {
-  if ((inf = fopen(f, "r")) == NULL) return 0;
+  if ((inf = fopen(f, "rb")) == NULL) return 0;
   return 1;
 }
 

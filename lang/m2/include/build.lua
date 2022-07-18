@@ -1,4 +1,7 @@
 clibrary {
 	name = "headers",
-	hdrs = {"./*.h"}
+	hdrs = {
+		"./libm2.h",
+		"./m2_traps.h",
+	}
 }

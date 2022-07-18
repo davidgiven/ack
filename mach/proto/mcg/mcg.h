@@ -9,6 +9,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include "system.h"
 #include "em_arith.h"
 #include "em_label.h"
 #include "em.h"
@@ -78,7 +79,6 @@ struct em
     } u;
 };
     
-extern const char* aprintf(const char* fmt, ...);
 extern void tracef(char k, const char* fmt, ...);
 extern bool tracing(char k);
 

@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <string.h>
 #include <limits.h>
 #include "em_path.h"
@@ -60,10 +59,10 @@ static const struct
 #define MAXARGS 1024 /* mar # of args */
 #define NTEMPS 4 /* # of temporary files; not tunable */
 
-static char tmpbase[NAME_MAX];
-static char ddump[NAME_MAX]; /* data label dump file */
-static char pdump[NAME_MAX]; /* procedure name dump file */
-static char tmpbufs[NTEMPS * 2][NAME_MAX];
+static char* tmpbase;
+static char ddump[PATH_MAX]; /* data label dump file */
+static char pdump[PATH_MAX]; /* procedure name dump file */
+static char tmpbufs[NTEMPS * 2][PATH_MAX];
 
 static int O2phases[] = { /* Passes for -O2 */
 	CJ, BO, SP, 0
@@ -281,7 +280,7 @@ static void
 			if (descr_file)
 			{
 				phargs[argc++] = "-M";
-				phargs[argc++] = descr_file;
+				phargs[argc++] = (char*) descr_file;
 			}
 
 			for (i=0; i<nphase_args; i++)
@@ -291,40 +290,28 @@ static void
 			break;
 		}
 	}
-	if ((pid = fork()) < 0)
-	{
-		fatal("Could not fork");
-	}
-	else if (pid == 0)
-	{
-		if (v_flag)
-		{
-			register int i = 0;
 
-			while (phargs[i])
-			{
-				fprint(STDERR, "%s ", phargs[i]);
-				i++;
-			}
-			fprint(STDERR, "\n");
-		}
-		(void)execv(phargs[0], phargs);
-		fatal("Could not exec %s", phargs[0]);
-		sys_stop(S_EXIT);
-	}
-	else
+	if (v_flag)
 	{
-		while (wait(&status) != pid) /* nothing */
-			;
-		if ((status & 0177) != 0)
+		register int i = 0;
+
+		while (phargs[i])
 		{
-			fatal("%s got a unix signal", phargs[0]);
+			fprint(STDERR, "%s ", phargs[i]);
+			i++;
 		}
-		if (((status >> 8) & 0377) != 0)
-		{
-			cleanup();
-			sys_stop(S_EXIT);
-		}
+		fprint(STDERR, "\n");
+	}
+
+	status = sys_system(phargs[0], (const char* const*) phargs);
+	if ((status & 0177) != 0)
+	{
+		fatal("%s got a unix signal", phargs[0]);
+	}
+	if (((status >> 8) & 0377) != 0)
+	{
+		cleanup();
+		sys_stop(S_EXIT);
 	}
 }
 
@@ -333,10 +320,6 @@ int main(int argc, char* argv[])
 	int opt;
 	int i;
 
-	if (signal(SIGHUP, catch) == SIG_IGN)
-		(void)signal(SIGHUP, SIG_IGN);
-	if (signal(SIGQUIT, catch) == SIG_IGN)
-		(void)signal(SIGQUIT, SIG_IGN);
 	if (signal(SIGINT, catch) == SIG_IGN)
 		(void)signal(SIGINT, SIG_IGN);
 	prog_name = argv[0];
@@ -406,14 +389,7 @@ int main(int argc, char* argv[])
 		fatal("no correct -P flag given");
 	}
 
-	{
-		char* tmpdir = getenv("TMPDIR");
-		if (!tmpdir)
-			tmpdir = "/tmp";
-		strcpy(tmpbase, tmpdir);
-		strcat(tmpbase, "/ego.XXXXXX");
-		close(mkstemp(tmpbase));
-	}
+	tmpbase = sys_maketempfile("ego", "");
 
 	strcpy(ddump, tmpbase);
 	strcpy(pdump, tmpbase);

@@ -1,6 +1,9 @@
 acklibrary {
     name = "internal",
-    hdrs = { "./*.h" }
+    hdrs = {
+		"./asm.h",
+		"./cpmsys.h",
+	}
 }
 
 local bdos_calls = {
@@ -125,8 +128,32 @@ end
 acklibrary {
     name = "lib",
     srcs = {
-        "./*.c",
-        "./*.s",
+		"./_bdos.s",
+		"./_bios_raw.s",
+		"./_bios.s",
+		"./bios_sectran.s",
+		"./bios_seldsk.s",
+		"./brk.c",
+		"./close.c",
+		"./cpm_overwrite_ccp.s",
+		"./cpm_printstring0.s",
+		"./cpm_read_random_safe.c",
+		"./creat.c",
+		-- "./errno.s",
+		"./fcb.c",
+		"./fd.c",
+		"./getpid.c",
+		"./_hol0.s",
+		"./_inn2.s",
+		"./isatty.c",
+		"./kill.c",
+		"./lseek.c",
+		"./open.c",
+		"./read.c",
+		"./signal.c",
+		"./time.c",
+		"./_trap.s",
+		"./write.c",
         generated
     },
 	deps = {

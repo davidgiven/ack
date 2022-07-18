@@ -48,6 +48,27 @@ definerule("acklibrary",
 	},
 	function (e)
 		local em = (e.vars.plat or ""):find("^em")
+
+		local function splitter(srcs, num, cmd)
+			local commands = {
+			}
+			local t = {}
+			local function flush()
+				commands[#commands+1] = cmd:gsub("%%%%", asstring(t))
+				t = {}
+			end
+			for _, target in ipairs(srcs) do
+				t[#t+1] = target
+				if #t == num then
+					flush()
+				end
+			end
+			if #t ~= 0 then
+				flush()
+			end
+			return table.concat(commands, " && ")
+		end
+
 		return clibrary {
 			name = e.name,
 			srcs = e.srcs,
@@ -56,11 +77,14 @@ definerule("acklibrary",
 				"util/arch+pkg",
 				e.deps
 			},
+			vars = {
+				splitter = splitter
+			},
 			_cfile = ackfile,
 			suffix = em and ".m" or ".o",
 			commands = {
 				"rm -f %{outs[1]}",
-				"ACKDIR=$(INSDIR) $(INSDIR)/bin/aal qc %{outs[1]} %{ins}"
+				"%{splitter(ins, 100, 'ACKDIR=$(INSDIR) $(INSDIR)/bin/aal qc '..tostring(outs[1])..' %%')}"
 			}
 		}
 	end

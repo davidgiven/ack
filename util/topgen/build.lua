@@ -2,13 +2,19 @@ include("util/LLgen/build.lua")
 
 llgen {
 	name = "llgen",
-	srcs = { "./*.g" }
+	srcs = {
+		"./topgen.g",
+	}
 }
 
 cprogram {
 	name = "topgen",
 	srcs = {
-		"./*.c",
+		"./hash.c",
+		"./LLlex.c",
+		"./main.c",
+		"./pattern.c",
+		"./symtab.c",
 		matching(filenamesof("+llgen"), "%.c$"),
 	},
 	deps = {

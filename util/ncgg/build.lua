@@ -1,6 +1,6 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
-local cggparser = yacc {
+local cggparser = bison {
 	name = "cggparser",
 	srcs = { "./cgg.y" }
 }
@@ -13,21 +13,32 @@ local cgglexer = flex {
 normalrule {
 	name = "keywords",
 	ins = {
-		"./cvtkeywords",
-		"util/cmisc+ed",
+		"./make_enterkeyw_c.lua",
 		"./keywords",
-		matching(filenamesof(cggparser), "%.h$")
 	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
-		"%{ins[1]} %{ins[2]} %{ins[3]} %{ins[4]} %{outs[1]}"
+		"$LUA %{ins[1]} < %{ins[2]} > %{outs[1]}"
 	}
 }
 
 cprogram {
 	name = "ncgg",
 	srcs = concat(
-		"./*.c",
+		"./coerc.c",
+		"./emlookup.c",
+		"./error.c",
+		"./expr.c",
+		"./hall.c",
+		"./instruct.c",
+		"./iocc.c",
+		"./lookup.c",
+		"./main.c",
+		"./output.c",
+		"./set.c",
+		"./strlookup.c",
+		"./subr.c",
+		"./var.c",
 		matching(filenamesof(cggparser), "%.c$"),
 		matching(filenamesof(cgglexer), "%.c$"),
 		"+keywords"

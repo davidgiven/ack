@@ -12,6 +12,7 @@
 #include <em_path.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
+#include "system.h"
 #include "../share/types.h"
 #include "il.h"
 #include "../share/debug.h"
@@ -37,12 +38,12 @@ calcnt_p cchead; /* call-count info of current proc */
 STATIC long space = 0;
 STATIC long total_size = 0;
 
-STATIC char cname[NAME_MAX];
-STATIC char ccname[NAME_MAX];
-STATIC char cname2[NAME_MAX];
+STATIC char* cname;
+STATIC char* ccname;
+STATIC char* cname2;
 
 /* For debugging only */
-STATIC char sname[NAME_MAX];
+STATIC char* sname;
 STATIC int kp_temps = 0;
 
 int Ssubst;
@@ -71,10 +72,10 @@ STATIC void pass1(const char *lnam, const char *bnam, const char *cnam)
 	short kind;
 	line_p l;
 
-	f = openfile(lnam, "r");
-	gf = openfile(bnam, "r");
-	cf = openfile(cnam, "w");
-	ccf = openfile(ccname, "w");
+	f = openfile(lnam, "rb");
+	gf = openfile(bnam, "rb");
+	cf = openfile(cnam, "wb");
+	ccf = openfile(ccname, "wb");
 	mesregs = Lempty_set();
 	apriori(fproc);
 	/* use information from the procedure table to
@@ -132,9 +133,9 @@ STATIC void pass2(const char *cnam, long space)
 	FILE* cf, *cf2, *ccf;
 	call_p c, a;
 
-	cf = openfile(cnam, "r");
-	cf2 = openfile(cname2, "w");
-	ccf = openfile(ccname, "r");
+	cf = openfile(cnam, "rb");
+	cf2 = openfile(cname2, "wb");
+	ccf = openfile(ccname, "rb");
 	while ((c = getcall(cf)) != (call_p)0)
 	{
 		/* process all calls */
@@ -161,7 +162,7 @@ STATIC void pass2(const char *cnam, long space)
 	fclose(ccf);
 	if (!kp_temps)
 		unlink(ccname);
-	cf2 = openfile(cname2, "r");
+	cf2 = openfile(cname2, "rb");
 	add_actuals(fproc, cf2);
 	cleancals(fproc); /* remove calls that were not selected */
 	/* add actual parameters to each selected call */
@@ -186,12 +187,12 @@ void pass3(const char *lnam, const char *lnam2)
 	line_p l, startscan, cal;
 	short lastcid; /* last call-id seen */
 
-	lfile = openfile(lnam, "r");
-	lfilerand = openfile(lnam, "r");
-	lfile2 = openfile(lnam2, "w");
+	lfile = openfile(lnam, "rb");
+	lfilerand = openfile(lnam, "rb");
+	lfile2 = openfile(lnam2, "wb");
 	if (verbose)
 	{
-		sfile = openfile(sname, "w");
+		sfile = openfile(sname, "wb");
 	}
 	mesregs = Lempty_set();
 	while ((l = get_text(lfile, &curproc)) != (line_p)0)
@@ -331,35 +332,24 @@ char* argv[];
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f;
-	char* tmpdir = getenv("TMPDIR");
+	char* tmpdir = sys_gettmpdir();
 
 	go(argc, argv, no_action, no_action, no_action, il_flags);
 	il_extptab(fproc); /* add extended data structures */
-	if (!tmpdir)
-		tmpdir = "/tmp";
 
-	strcpy(cname, tmpdir);
-	strcpy(ccname, tmpdir);
-	strcpy(sname, tmpdir);
-	strcpy(cname2, tmpdir);
+	cname = sys_maketempfile("il", "i1");
+	ccname = sys_maketempfile("il", "i2");
+	sname = sys_maketempfile("il", "i3");
+	cname2 = sys_maketempfile("il", "i4");
 
-	strcat(cname, "/ego.i1.XXXXXX");
-	strcat(ccname, "/ego.i2.XXXXXX");
-	strcat(sname, "/ego.i3.XXXXXX");
-	strcat(cname2, "/ego.i4.XXXXXX");
-
-	close(mkstemp(cname));
-	close(mkstemp(ccname));
-	close(mkstemp(sname));
-	close(mkstemp(cname2));
 	pass1(files->lname_in, files->bname_in, cname); /* grep calls, analyse procedures */
 	space = total_size * space / 100;
 	pass2(cname, space); /* select calls to be expanded */
 	pass3(files->lname_in, files->lname_out); /* do substitutions */
-	f = openfile(files->dname_out, "w");
+	f = openfile(files->dname_out, "wb");
 	il_cleanptab(fproc); /* remove extended data structures */
 	putdtable(fdblock, f);
-	f = openfile(files->pname_out, "w");
+	f = openfile(files->pname_out, "wb");
 	putptable(fproc, f, FALSE);
 	report("inline substitutions", Ssubst);
 #ifdef VERBOSE

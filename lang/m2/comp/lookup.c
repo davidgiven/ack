@@ -15,6 +15,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
+#include	<stdlib.h>
 
 #include	"lookup.h"
 #include	"LLlex.h"

@@ -1,6 +1,6 @@
-include("first/yacc.lua")
+include("first/bison.lua")
 
-local cggparser = yacc {
+local cggparser = bison {
 	name = "cggparser",
 	srcs = { "./bootgram.y" }
 }
@@ -13,7 +13,7 @@ local cgglexer = flex {
 cprogram {
 	name = "cgg",
 	srcs = concat(
-		"./*.c",
+		"./main.c",
 		matching(filenamesof(cggparser), "%.c$"),
 		matching(filenamesof(cgglexer), "%.c$")
 	),

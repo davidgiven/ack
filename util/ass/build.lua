@@ -26,7 +26,17 @@ normalrule {
 cprogram {
 	name = "em_ass",
 	srcs = {
-		"./ass*.c",
+		"./ass00.c",
+		"./ass30.c",
+		"./ass40.c",
+		"./ass50.c",
+		"./ass60.c",
+		"./ass70.c",
+		"./ass80.c",
+		"./assci.c",
+		"./asscm.c",
+		"./assda.c",
+		"./assrl.c",
 		"+asstb",
 	},
 	deps = {
@@ -34,10 +44,14 @@ cprogram {
 		"h+local",
 		--"modules/src/alloc+lib",
 		"modules/src/em_data+lib",
-		--"modules/src/data+lib",
+		"modules/src/data+lib",
 		--"modules/src/object+lib",
 		"modules/src/system+lib",
-		"./ass*.h",
+		"./ass00.h",
+		"./assci.h",
+		"./asscm.h",
+		"./assex.h",
+		"./assrl.h",
 	}
 }
 

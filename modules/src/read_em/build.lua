@@ -1,28 +1,26 @@
 normalrule {
 	name = "c_mnem_narg_h",
 	ins = {
-		"./m_C_mnem_na",
-		"util/cmisc+ed",
+		"./make_C_mnem_narg_h.lua",
+		"h/em_table_lib.lua",
 		"h/em_table",
-		"./argtype"
 	},
 	outleaves = "C_mnem_narg.h",
 	commands = {
-		"%{ins} > %{outs}"
+		"$LUA %{ins[1]} < %{ins[3]} > %{outs}"
 	}
 }
 	
 normalrule {
 	name = "c_mnem_h",
 	ins = {
-		"./m_C_mnem",
-		"util/cmisc+ed",
+		"./make_C_mnem_h.lua",
+		"h/em_table_lib.lua",
 		"h/em_table",
-		"./argtype"
 	},
 	outleaves = "C_mnem.h",
 	commands = {
-		"%{ins} > %{outs}"
+		"$LUA %{ins[1]} < %{ins[3]} > %{outs}"
 	}
 }
 	
@@ -56,7 +54,7 @@ local function variant(name, cflags)
 			"modules/src/em_data+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
-			"./*.h",
+			"./em_comp.h",
 		}
 	}
 end
