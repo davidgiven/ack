@@ -15,8 +15,12 @@ ACK_TEMP_DIR ?= /tmp
 # install it and just want to run the ACK from the build directory
 # (/tmp/ack-build/staging, by default), leave this as $(INSDIR).
 
+ifeq ($(OS),Windows_NT)
+PREFIX ?= c:/ack
+else
 PREFIX ?= /usr/local
 #PREFIX = $(INSDIR)
+endif
 
 # Where do you want to put the object files used when building?
 
@@ -119,11 +123,15 @@ $(build-file): first/ackbuilder.lua Makefile $(lua-files)
 		INSDIR=$(INSDIR) \
 		PLATIND=$(PLATIND) \
 		PLATDEP=$(PLATDEP) \
-		PREFIX=$(PREFIX) \
+		PREFIX="$(PREFIX)" \
 		AR=$(AR) \
 		CC=$(CC) \
 		CFLAGS="$(CFLAGS)" \
+		LDFLAGS="$(LDFLAGS)" \
 		> $(build-file)
+
+ack-setup.exe: etc/windows-installer.nsi
+	makensis -dBUILDDIR=$(BUILDDIR)/staging -dOUTFILE="$$(realpath $@)" $<
 
 install:
 	mkdir -p $(PREFIX)
