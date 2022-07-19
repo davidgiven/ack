@@ -16,7 +16,7 @@ ACK_TEMP_DIR ?= /tmp
 # (/tmp/ack-build/staging, by default), leave this as $(INSDIR).
 
 ifeq ($(OS),Windows_NT)
-PREFIX ?= c:/Program Files (x86)/Amsterdam Compiler Kit
+PREFIX ?= c:/ack
 else
 PREFIX ?= /usr/local
 #PREFIX = $(INSDIR)

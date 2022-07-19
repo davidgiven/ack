@@ -4,7 +4,7 @@ Name "The Amsterdam Compiler Kit"
 OutFile "${OUTFILE}"
 Unicode True
 
-InstallDir "$PROGRAMFILES\Amsterdam Compiler Kit"
+InstallDir "c:\ack"
 
 RequestExecutionLevel admin
 SetCompressor /solid lzma
@@ -17,6 +17,11 @@ SetCompressor /solid lzma
 	know what you're doing you shouldn't install this.$\r$\n\
 	$\r$\n\
 	This wizard will install the ACK on your computer.$\r$\n\
+	$\r$\n\
+	Please note that it doesn't support being installed into a path \
+	with a space in it, and if you put it anywhere other than the default \
+	then you'll need to set the ACKDIR environment variable to point to it \
+	before use.$\r$\n\
 	$\r$\n\
 	$_CLICK"
 
@@ -51,14 +56,6 @@ Section "The ACK (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
 	File /r "${BUILDDIR}\*.*"
-	;File /oname=wordgrinder.exe "bin\wordgrinder-builtin-sdl-release.exe"
-	;File /oname=cwordgrinder.exe "bin\wordgrinder-builtin-wincon-release.exe"
-	;File "README.wg"
-	;File "licenses\COPYING.*"
-
-	;CreateDirectory $INSTDIR\Dictionaries
-	;File /oname=Dictionaries\British.dictionary "extras\british.dictionary"
-	;File /oname=Dictionaries\American-Canadian.dictionary "extras\american-canadian.dictionary"
 
 	; Write the uninstall keys for Windows
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WordGrinder" "DisplayName" "WordGrinder for Windows"
