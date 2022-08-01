@@ -65,9 +65,11 @@ int main(int argc, char **argv)
 	if (nerrors == 0)
 	{
 		finishio();
-		statistics();
 		if (verbose)
+		{
+			statistics();
 			hallverbose();
+		}
 	}
 	else
 	{
