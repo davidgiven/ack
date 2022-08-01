@@ -13,7 +13,7 @@ void enterkeyw(void) {
 
 for line in io.stdin:lines() do
 	if not line:find("^#") then
-		local _, _, w1, w2 = line:find("^(%g+)%s+(%g+)$")
+		local _, _, w1, w2 = line:find("^([^ \t]+)%s+([^ \t]+)$")
 		print(string.format([[
 			lookup("%s", symkeyw, newsymbol)->sy_value.syv_keywno = %s;
 		]], w1, w2))

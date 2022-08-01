@@ -33,9 +33,9 @@ function load_table()
 			break
 		end
 
-		local _, _, name, num, flags = line:find("^(%w+)%s+(%d+)%s+(%g+)$")
+		local _, _, name, num, flags = line:find("^(%w+)%s+(%d+)%s+([^ \t]+)$")
 		if not name then
-			error("malformed pseudo line in em_table")
+			error("malformed pseudo line in em_table: ")
 		end
 
 		pseudos[#pseudos+1] = {
@@ -54,7 +54,7 @@ function load_table()
 			break
 		end
 
-		local _, _, name, flags1, flags2 = line:find("^(%w+)%s+(%g+)%s+(%g+)$")
+		local _, _, name, flags1, flags2 = line:find("^(%w+)%s+([^ \t]+)%s+([^ \t]+)$")
 		if not name then
 			error("malformed mnemonic line in em_table")
 		end
