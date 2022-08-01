@@ -23,5 +23,6 @@ extern struct tm *gmtime();
 extern struct tm *localtime();
 extern char *asctime();
 extern char *ctime();
+extern void tzset(void);
 
 #endif /* _TIME_H */

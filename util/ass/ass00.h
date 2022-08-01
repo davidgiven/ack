@@ -4,6 +4,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include "em_spec.h"
 #include "as_spec.h"

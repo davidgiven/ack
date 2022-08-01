@@ -83,7 +83,7 @@ lab_id instr_lab(short number)
 /*  symlookup */
 
 STATIC unsigned hash(const char *string) {
-	register char *p;
+	register const char *p;
 	register unsigned i,sum;
 
 	for (sum=i=0,p=string;*p;i += 3)

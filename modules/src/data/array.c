@@ -12,7 +12,7 @@ static void extend(struct array* array)
 		struct array* newarray = realloc(array->item, newmax * sizeof(*newarray));
 
 		array->max = newmax;
-		array->item = newarray;
+		array->item = (void**) newarray;
 	}
 }
 

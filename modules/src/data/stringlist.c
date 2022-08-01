@@ -69,7 +69,7 @@ char* stringlist_get(struct stringlist *list, int index)
 		i++;
 
 	}
-	return i;
+	return NULL;
 
 }
 

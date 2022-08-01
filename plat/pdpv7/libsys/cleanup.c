@@ -1,3 +1,3 @@
-_cleanup()
+void _cleanup(void)
 {
 }

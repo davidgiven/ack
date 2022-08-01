@@ -83,8 +83,7 @@ long di_off;
 int firstreg;
 
 int
-regscore(off, size, typ, score, totyp)
-	long off;
+regscore(long off, int size, int typ, int score, int totyp)
 {
 	if (size != 2) return -1;
 	score -= 1;
@@ -133,9 +132,7 @@ f_regsave()
 }
 
 void
-regsave(regstr, off, size)
-	const char *regstr;
-	long off;
+regsave(const char* regstr, long off, int size)
 {
 	if (strcmp(regstr, "si") == 0) {
 		if (! firstreg) firstreg = -1;

@@ -116,4 +116,8 @@ struct tchars {
 #define EXTA    14
 #define EXTB    15
 
+extern int ioctl(int fd, unsigned int request, ...);
+extern int gtty(int fildes, struct sgttyb* argp);
+extern int stty(int fildes, struct sgttyb* argp);
+
 #endif /* _SGTTY_H */

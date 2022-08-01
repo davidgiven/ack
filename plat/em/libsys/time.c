@@ -1,8 +1,10 @@
 /* $Id$ */
 #include <sys/types.h>
 #include <sys/timeb.h>
-time_t
-time(timpt) time_t *timpt ; {
+
+extern void ftime(struct timeb* buf);
+
+time_t time(time_t* timpt) {
 	struct timeb buf ;
 
 	ftime(&buf) ;

@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <em_spec.h>
 #include "types.h"
 #include "def.h"
@@ -69,7 +70,7 @@ void OUTVERBOSE(const char *s, int n1, int n2)
 
 void VA(short *a) {
 	if (a == (short *) 0)  error("VA: 0 argument");
-	if ( ((unsigned) a & 01) == 01) {
+	if ( ((intptr_t) a & 01) == 01) {
 		/* MACHINE DEPENDENT TEST */
 		error("VA: odd argument");
 	}

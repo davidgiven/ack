@@ -6,7 +6,7 @@
 
 static label_p label_list = (label_p)0;
 
-void add_label(num, height, flth)
+void add_label(int num, int height, int flth)
 {
 	label_p lbl = (label_p)0;
 

@@ -88,8 +88,11 @@ char *salloc(int size)
 	return(p);
 }
 
-int compar(char **p1, char **p2)
+int compar(const void* pp1, const void* pp2)
 {
+	const char **p1 = (const char**) pp1;
+	const char **p2 = (const char**) pp2;
+
 	assert(*p1 != *p2);
 	if (*p1 < *p2)
 		return(-1);

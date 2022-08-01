@@ -60,8 +60,7 @@ con_mult(word sz) {
 #include <con_float>
 
 int
-regscore(off,size,typ,score,totyp)
-	long off;
+regscore(long off, int size, int typ, int score, int totyp)
 {
 	if (score == 0) return -1;
 	switch(typ) {
@@ -183,9 +182,7 @@ f_regsave()
 }
 
 void
-regsave(s,off,size)
-	const char *s;
-	long off;
+regsave(const char* s, long off, int size)
 {
 	assert (regnr < 9);
 	regsav[regnr].rs_reg = s;

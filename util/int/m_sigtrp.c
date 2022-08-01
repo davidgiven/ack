@@ -100,7 +100,7 @@ int do_sigtrp(
 	}
 	else if (tn >= 0 && tn <= 252)
 	{/* legal tn */
-		if ((int) signal(sn, HndlEmSig) == -1)
+		if (signal(sn, HndlEmSig) == SIG_ERR)
 		{
 			sig_map[sn] = old_tn;
 			return (-1);

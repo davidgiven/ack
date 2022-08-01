@@ -36,11 +36,11 @@ extern void smap_init(struct smap *mapp);
  *  it does not already exist, otherwise replaces the
  *  value `value` associated with the existing `key`.
  */
-extern void smap_put(struct smap *mapp, char* key, void* value);
+extern void smap_put(struct smap *mapp, const char* key, void* value);
 /** Adds a new item in a string map only if `key` does
  *  not already exist in the string map.
  */
-extern void smap_add(struct smap *mapp, char* key, void* value);
+extern void smap_add(struct smap *mapp, const char* key, void* value);
 /** Returns the value associated with the specified `key`, returns
  *  NULL if `key` is not present in the string map.
  *
