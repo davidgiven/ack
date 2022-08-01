@@ -28,7 +28,7 @@ cons_t nicepr(int typ, addr_u *ap)
 	case CONST:
 		return (ap->ad_i);
 	case LOCSYM:
-		return (int_cast ap->ad_lp);
+		return (int_cast (intptr_t)ap->ad_lp);
 	case GLOOFF:
 		return (ap->ad_df.df_gp - mglobs);
 	case GLOSYM:
@@ -135,7 +135,7 @@ void dump(int n)
 				if (lbp->l_defined != EMPTY)
 					printf("    %8d%8d%8d%8d  %-s\n",
 							lbp->l_hinum * LOCLABSIZE + i,
-							int_cast lbp, lbp->l_min, lbp->l_max,
+							int_cast (intptr_t)lbp, lbp->l_min, lbp->l_max,
 							labstr[(unsigned char)lbp->l_defined]);
 			}
 		}

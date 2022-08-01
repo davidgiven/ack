@@ -128,7 +128,7 @@ PRIVATE size buf_cnt[5];		/* Current sizes of the buffers */
 PRIVATE char *buf[5];			/* Pointers to the buffers */
 
 PRIVATE check_buf();
-PRIVATE int savestr();
+PRIVATE int savestr(int n, ptr addr);
 PRIVATE int vec();
 
 void moncall(void)
@@ -702,7 +702,7 @@ void moncall(void)
 #ifdef	SYS_V				/* from system.h */
 		utimbuf.x = actime;
 		utimbuf.y = modtime;
-		if (!savestr(0, dsp1) || utime(buf[0], &utimbuf) == -1) {
+		if (!savestr(0, dsp1) || utime(buf[0], (struct utimbuf*) &utimbuf) == -1) {
 #else	/* SYS_V */
 		utimbuf[0] = actime;
 		utimbuf[1] = modtime;
@@ -1037,9 +1037,7 @@ PRIVATE check_buf(n, sz)
 	}
 }
 
-PRIVATE int savestr(n, addr)
-	int n;
-	ptr addr;
+PRIVATE int savestr(int n, ptr addr)
 {
 	register size len;
 	register char *cp, ch;

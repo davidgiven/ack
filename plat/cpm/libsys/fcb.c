@@ -37,7 +37,7 @@ uint8_t cpm_parse_filename(FCB* fcb, const char* filename)
             c = *filename++;
             if (isdigit(c))
             {
-                user = strtol(filename-1, &filename, 10);
+                user = strtol(filename-1, (char**) &filename, 10);
                 c = *filename++;
             }
             c = toupper(c);

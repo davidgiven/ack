@@ -1,3 +1,5 @@
+extern int ioctl(int fd, unsigned int request, ...);
+
 int isatty(int fd)
 {
     unsigned u;

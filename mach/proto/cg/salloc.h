@@ -10,11 +10,11 @@
 
 #include "types.h"
 
-string myalloc(int size);
-void myfree(void* p);
-void popstr(int nnstab);
-char *salloc(int size);
-int compar(char **p1, char **p2);
-void garbage_collect(void);
+extern string myalloc(int size);
+extern void myfree(void* p);
+extern void popstr(int nnstab);
+extern char *salloc(int size);
+extern int compar(const void* pp1, const void* pp2);
+extern void garbage_collect(void);
 
 #endif /* SALLOC_H_ */

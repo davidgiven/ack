@@ -1,14 +1,14 @@
 /* $Id$ */
 #include <signal.h>
 
-typedef void (*callvec)() ;
+extern void _setsig(int (*)(int));
 
-static callvec vector[16] = {
+static sighandler_t vector[16] = {
       SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL,
       SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL, SIG_DFL
 } ;
 
-static char mapvec[] = {
+static const char mapvec[] = {
 	0,              /* EARRAY */
 	0,              /* ERANGE */
 	0,              /* ESET */
@@ -42,16 +42,17 @@ static char mapvec[] = {
 #define VECBASE 128
 
 static          firsttime       = 1 ;
-static int      catchtrp() ;
-static int      procesig() ;
+extern int      sigtrp(int mapval, int sig) ;
+static int      catchtrp(int trapno) ;
+static int      procesig(int signo) ;
 
-callvec signal(sig,func) int sig ; callvec func ; {
+sighandler_t signal(int sig, sighandler_t func) {
 	register index, i ;
-	callvec  prev ;
+	sighandler_t  prev ;
 
 	index= sig-1 ;
 	if ( index<0 || index>=(sizeof vector/sizeof vector[0]) ) {
-		return (callvec) -1 ;
+		return (sighandler_t) -1 ;
 	}
 	if ( firsttime ) {
 		firsttime= 0 ;
@@ -68,13 +69,13 @@ callvec signal(sig,func) int sig ; callvec func ; {
 		} else {
 			mapval=VECBASE+sig;
 		}
-		if ( sigtrp(mapval,sig)== -1 ) return (callvec) -1;
+		if ( sigtrp(mapval,sig)== -1 ) return (sighandler_t) -1;
 
 	}
 	return prev ;
 }
 
-static int catchtrp(trapno) int trapno ; {
+static int catchtrp(int trapno) {
 	if ( trapno>VECBASE &&
 	     trapno<=VECBASE + (sizeof vector/sizeof vector[0]) ) {
 		return procesig(trapno-VECBASE) ;
@@ -86,9 +87,9 @@ static int catchtrp(trapno) int trapno ; {
 	return 0 ; /* Failed to handle the trap */
 }
 
-static int procesig(sig) int sig ; {
+static int procesig(int sig) {
 	register index ;
-	callvec  trf ;
+	sighandler_t  trf ;
 
 	index= sig-1 ;
 	trf= vector[index] ;

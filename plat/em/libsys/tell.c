@@ -3,9 +3,9 @@
  * return offset in file.
  */
 
-long	lseek();
+long	lseek(int fd, int offset, int whence);
 
-long tell(f)
+long tell(int fd)
 {
-	return(lseek(f, 0L, 1));
+	return(lseek(fd, 0L, 1));
 }

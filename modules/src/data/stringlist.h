@@ -3,7 +3,7 @@
 
 struct stringfragment
 {
-	const char* data;
+	char* data;
 	struct stringfragment* next;
 };
 

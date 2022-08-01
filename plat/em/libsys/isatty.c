@@ -1,5 +1,6 @@
-/* $Id$ */
-isatty(f)
+#include <sgtty.h>
+
+int isatty(int fd)
 {
 	char buf[128];
 	/* not a sgttyb struct; it might not be large enough;
@@ -7,6 +8,6 @@ isatty(f)
 	   where gtty is an ioctl(..., TCGETA, ...)
 	*/
 
-	if (gtty(f, buf) < 0) return 0;
+	if (gtty(fd, (void*) buf) < 0) return 0;
 	return 1;
 }

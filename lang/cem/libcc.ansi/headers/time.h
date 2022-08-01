@@ -37,6 +37,7 @@ extern struct tm* localtime(const time_t *_timer);
 extern size_t strftime(char *_s, size_t _maxsize,
 			const char *_format,
 			const struct tm *_timeptr);
+extern void tzset(void);
 
 /* Extensions not in the standard */
 

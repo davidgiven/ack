@@ -123,7 +123,7 @@ void printpatterns(void) {
 	i++;
     }
     fputs("};\n", genc);
-    fputs("int\ncheck_constraint(patno){\n\tint r;\n\tswitch(patno){\n",genc);
+    fputs("int\ncheck_constraint(int patno){\n\tint r;\n\tswitch(patno){\n",genc);
     p = pattable;
     while (p < current) {
 	if (p->p_constraint) {

@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -53,10 +54,10 @@ int	outputfile_created;
 FILE	*output;
 int	rom_in_text;
 
-static cv_int2();
-static fatal();
-static emits();
-static emit_symtab();
+static void cv_int2(int n);
+static void fatal(const char* s, ...);
+static void emits(struct outsect*);
+static void emit_symtab(void);
 
 char *program ;
 
@@ -71,9 +72,7 @@ char flag ;
 #define LSECT	BSSSG+1
 #define NSECT	LSECT+1
 
-main(argc, argv)
-	int	argc;
-	char	*argv[];
+int main(int argc, char* argv[])
 {
 	register struct exec *e = &exec;
 
@@ -189,7 +188,7 @@ main(argc, argv)
 	return 0;
 }
 
-cv_int2(n)
+void cv_int2(int n)
 {
 	putc(n, output);
 	putc((n>>8), output);
@@ -209,7 +208,7 @@ cv_long(l)
 /*
  * Transfer the emitted byted from one file to another.
  */
-emits(section) struct outsect *section ; {
+void emits(struct outsect* section) {
 	register long	n ;
 	register int	blk;
 	char		buffer[BUFSIZ];
@@ -234,7 +233,7 @@ emits(section) struct outsect *section ; {
 	}
 }
 
-emit_symtab()
+void emit_symtab(void)
 {
 	struct outname ACK_name;  /* symbol table entry in ACK format */
 	struct nlist PDP_name;	  /* symbol table entry in PDP V7 format */
@@ -303,17 +302,21 @@ emit_symtab()
 }
 
 /* VARARGS1 */
-fatal(s, a1, a2)
-	char	*s;
+void fatal(const char* s, ...)
 {
+	va_list ap;
+
 	fprintf(stderr,"%s: ",program) ;
-	fprintf(stderr, s, a1, a2);
+	va_start(ap, s);
+	vfprintf(stderr, s, ap);
+	va_end(ap);
+
 	if (outputfile_created)
 		unlink(output_file);
 	exit(1);
 }
 
-rd_fatal()
+void rd_fatal(void)
 {
 	fatal("read error\n");
 }

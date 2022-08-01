@@ -5,7 +5,7 @@
 
 #define INCR_SIZE	8
 
-static void append(void* mapp, char* key, void* value)
+static void append(void* mapp, const char* key, void* value)
 {
     struct smap* map = mapp;
     struct smap_node* node;
@@ -26,7 +26,7 @@ static void append(void* mapp, char* key, void* value)
 }
 
 
-void smap_put(struct smap *mapp, char* key, void* value)
+void smap_put(struct smap *mapp, const char* key, void* value)
 {
     struct smap* map = mapp;
     int i;
@@ -71,7 +71,7 @@ void smap_free(struct smap *mapp, int free_key, int free_value)
 	free(mapp->item);
 }
 
-void smap_add(struct smap *mapp, char* key, void* value)
+void smap_add(struct smap *mapp, const char* key, void* value)
 {
     struct smap* map = mapp;
     int i;

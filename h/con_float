@@ -288,7 +288,10 @@ void con_float(void)
 	fprintf(codefile, "!float %s sz %d\n", str, (int)argval);
 	if (rval == 2)
 	{
-		fprintf(stderr, "Warning: overflow in floating point constant %s\n", str);
+		/* If this is enabled, it causes huge amounts of build system spam, so
+		 * I've silenced it. dtrg 2022-08-01 */
+
+		/* fprintf(stderr, "Warning: overflow in floating point constant %s\n", str);*/
 	}
 	fprintf(codefile, ".data1 0%o", buf[0] & 0377);
 	for (i = 1; i < (int)argval; i++)
