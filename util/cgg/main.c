@@ -21,6 +21,7 @@ static void initio(void);
 static int eqregclass(int r1, int r2);
 static void compueq(void);
 
+static int want_verbose = 0;
 
 
 char *myalloc(int n)
@@ -297,6 +298,9 @@ int main(int argc, char *argv[])
 				case 'c':
 					cname = &argv[0][2];
 					break;
+				case 'v':
+					want_verbose = 1;
+					break;
 				default:
 					fprintf(stderr, "Bad flag %s\n", argv[0]);
 					break;
@@ -316,9 +320,11 @@ int main(int argc, char *argv[])
 		compueq();
 		hashpatterns();
 		finishio();
-		verbose();
+		if (want_verbose)
+			verbose();
 	}
-	debug();
+	if (want_verbose)
+		debug();
 	exit(nerrors);
 }
 
@@ -777,7 +783,6 @@ static void outregvar(void)
 
 static void verbose(void)
 {
-
 	fprintf(stderr, "Codebytes %d\n", codebytes);
 	fprintf(stderr, "Registers %d(%d)\n", nmachregs, MAXREGS);
 	fprintf(stderr, "Properties %d(%d)\n", nprops, MAXPROPS);
