@@ -112,10 +112,11 @@ static void chk_forw(struct def **pdf)
 	register struct def *df;
 
 	while ( (df = *pdf) ) {
-		if (df->df_kind == D_FORWTYPE) {
-			pdf = &df->df_nextinscope;
+		while (df->df_kind == D_FORWTYPE) {
+			register struct def *df2 = df->df_nextinscope;
+			pdf = NULL;
 			ForceForwardTypeDef(df);	/* removes df */
-			continue;
+			df = df2;
 		}
 		if (df->df_kind & (D_FORWARD|D_FORWMODULE)) {
 			/* These definitions must be found in
@@ -138,7 +139,8 @@ df->df_idf->id_text);
 						nextvisible(CurrVis);
 				register struct def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
 
-				*pdf = df->df_nextinscope;
+				if (pdf)
+					*pdf = df->df_nextinscope;
 	
 				if (! df1) {
 					if (df->df_kind == D_FORWMODULE) {
