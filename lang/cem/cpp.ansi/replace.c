@@ -706,32 +706,36 @@ static char *stringify(
 		assert(n != 0);
 		p = args->a_rawvec[n-1];
 		add2repl(repl, '"');
-		while (*p) {
-			if (is_wsp(*p)) {
-				if (!space) {
-					space = 1;
-					add2repl(repl, ' ');
-				}
-				p++;
-				continue;
-			}
-			space = 0;
 
-			if (!delim && (*p == '"' || *p == '\''))
-				delim = *p;
-			else if (*p == delim && !backslash)
-				delim = 0;
-			backslash = *p == '\\';
-			if (*p == '"' || (delim && *p == '\\'))
-				add2repl(repl, '\\');
-			if (*p == TOKSEP || *p == NOEXPM) p++;
-			else add2repl(repl, *p++);
+		if (p) {
+			while (*p) {
+				if (is_wsp(*p)) {
+					if (!space) {
+						space = 1;
+						add2repl(repl, ' ');
+					}
+					p++;
+					continue;
+				}
+				space = 0;
+
+				if (!delim && (*p == '"' || *p == '\''))
+					delim = *p;
+				else if (*p == delim && !backslash)
+					delim = 0;
+				backslash = *p == '\\';
+				if (*p == '"' || (delim && *p == '\\'))
+					add2repl(repl, '\\');
+				if (*p == TOKSEP || *p == NOEXPM) p++;
+				else add2repl(repl, *p++);
+			}
+
+			/* trim spaces in the replacement list */
+			for (--repl->r_ptr; is_wsp(*repl->r_ptr); repl->r_ptr--)
+				/* EMPTY */;
+			++repl->r_ptr;		/* oops, one to far */
 		}
 
-		/* trim spaces in the replacement list */
-		for (--repl->r_ptr; is_wsp(*repl->r_ptr); repl->r_ptr--)
-			/* EMPTY */;
-		++repl->r_ptr;		/* oops, one to far */
 		add2repl(repl, '"');
 	} else
 		error("illegal use of # operator");
