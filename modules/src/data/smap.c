@@ -26,7 +26,7 @@ static void append(void* mapp, const char* key, void* value)
 }
 
 
-void smap_put(struct smap *mapp, const char* key, void* value)
+void smap_put(void *mapp, const char* key, void* value)
 {
     struct smap* map = mapp;
     int i;
@@ -44,34 +44,36 @@ void smap_put(struct smap *mapp, const char* key, void* value)
     append(map, key, value);
 }
 
-void smap_init(struct smap *mapp)
+void smap_init(void *mapp)
 {
-	mapp->count = 0;
-	mapp->item = NULL;
-	mapp->max = 0;
+    struct smap* map = mapp;
+	map->count = 0;
+	map->item = NULL;
+	map->max = 0;
 }
 
 
-void smap_free(struct smap *mapp, int free_key, int free_value)
+void smap_free(void *mapp, int free_key, int free_value)
 {
+    struct smap* map = mapp;
 	int i;
-    for (i=0; i<mapp->count; i++)
+    for (i=0; i<map->count; i++)
     {
-        struct smap_node* node = &mapp->item[i];
+        struct smap_node* node = &map->item[i];
         if (free_key)
         {
-        	free(node->left);
+        	free((void*) node->left);
         }
         if (free_value)
         {
         	free(node->right);
         }
     }
-	mapp->count = 0;
-	free(mapp->item);
+	map->count = 0;
+	free(map->item);
 }
 
-void smap_add(struct smap *mapp, const char* key, void* value)
+void smap_add(void *mapp, const char* key, void* value)
 {
     struct smap* map = mapp;
     int i;
@@ -86,7 +88,7 @@ void smap_add(struct smap *mapp, const char* key, void* value)
     append(map, key, value);
 }
 
-void* smap_get(struct smap *mapp, const char* left)
+void* smap_get(void *mapp, const char* left)
 {
     struct smap* map = mapp;
     int i;
