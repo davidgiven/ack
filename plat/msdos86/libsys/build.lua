@@ -13,6 +13,7 @@ acklibrary {
 		"./lseek.c",
 		"./open.c",
 		"./read.c",
+		"./rename.s",
 		"./setmode.c",
 		"./signal.c",
 		"./sys_exists.s",
