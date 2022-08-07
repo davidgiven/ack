@@ -1,6 +1,7 @@
 acklibrary {
     name = "lib",
     srcs = {
+		"./brk.c",
 		"./close.s",
 		"./errno.s",
 		"./getpid.s",
