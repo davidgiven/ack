@@ -6,6 +6,7 @@ acklibrary {
 		"./getpid.s",
 		"./_hol0.s",
 		"./isatty.s",
+		"./rename.s",
 		"./sys_exists.s",
 		"./sys_getdate.s",
 		"./sys_gettime.s",

@@ -1,6 +1,7 @@
 acklibrary {
     name = "lib",
     srcs = {
+		"./rename.s",
 --		"./brk.c",
 --		"./close.s",
 --		"./creat.c",
