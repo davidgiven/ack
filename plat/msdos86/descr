@@ -84,5 +84,5 @@ name cv
 	mapflag -i LOD=amzlod
 	program {EM}/bin/{LOD}
 	args < >
-	outfile msdos86.exe
+	outfile msdos86.com
 end
