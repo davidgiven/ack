@@ -45,9 +45,8 @@ dpmi_cs     = 0x2c
 dpmi_sp     = 0x2e
 dpmi_ss     = 0x30
 
-dpmi_ps     = 0x32 ! WORD: protected register segment
-dpmi_rs     = 0x34 ! WORD: real register segment
-dpmi_psp    = 0x36 ! WORD: PSP segment
+dpmi_rs     = 0x32 ! WORD: real segment
+dpmi_psp    = 0x34 ! WORD: PSP segment
 dpmi_switch = 0x38 ! DWORD: far pointer of pmode switch routine
 
     .seek 0x3c
@@ -79,33 +78,10 @@ exe_start:
 
     mov ax, 1                   ! 32-bit app
     callf (dpmi_switch)
-    jc no_pmode
+    jnc pmode                   ! Success!
 
-    mov (dpmi_edx), go_msg
-    mov ax, (dpmi_rs)
-    mov (dpmi_ds), ax
-    mov (dpmi_eax+1), 9
-    call int21
-    mov ax, 0x4c00
-    int 0x21
+    ! Could not switch to protected mode.
 
-    ! Simulate DOS interrupt bx.
-int21:
-    mov bx, 0x21
-callint:
-    xor ax, ax
-    mov (dpmi_ss), ax           ! zero stack: DPMI host allocates one.
-    mov (dpmi_sp), ax
-    push ds
-    pop es
-    mov di, ax
-    mov ax, 0x300
-    int 0x31                    ! simulate DOS interrupt
-    push cs
-    pop ds
-    ret
-
-no_pmode: ! Could not switch to protected mode.
     mov dx, no_pmode_msg
     jmp exit_with_error
 
@@ -120,8 +96,41 @@ exit_with_error:
     mov ax, 0x4cff
     int 0x21                    ! terminate with error code al
 
+pmode:
+    ! We're now in protected mode! Switch our code segment to 32-bit mode.
+
+    mov cx, cs
+    lar cx, cx
+    movb cl, ch
+    movb ch, 0xc0
+    mov bx, cs
+    mov ax, 0x0009
+    int 0x31                    ! Make selector 32 bit
+
     .use32
-start_32bit:
+    o16 mov (dpmi_edx), go_msg
+    o16 mov ax, (dpmi_rs)
+    o16 mov (dpmi_ds), ax
+    movb (dpmi_eax+1), 9
+    call int21
+    o16 mov ax, 0x4c00
+    int 0x21
+
+    ! Simulate DOS interrupt bx.
+int21:
+    o16 mov bx, 0x21
+callint:
+    o16 xor ax, ax
+    o16 mov (dpmi_ss), ax           ! zero stack: DPMI host allocates one.
+    o16 mov (dpmi_sp), ax
+    push ds
+    pop es
+    mov di, ax
+    o16 mov ax, 0x300
+    int 0x31                    ! simulate DOS interrupt
+    push cs
+    pop ds
+    ret
 
 go_msg:
     .ascii "Go!$"
