@@ -115,7 +115,6 @@ int combine(int typ1, int typ2, int op)
 				return (S_ABS);
 			break;
 	}
-	fprintf(stderr, "typ1=%d typ2=%d pass=%d\n", typ1, typ2, pass);
 	if (pass != PASS_1)
 		serror("illegal operator");
 	return (S_UND);
