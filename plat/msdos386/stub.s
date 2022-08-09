@@ -162,7 +162,7 @@ exe_start:
     mov bx, (fh)
     mov ax, 0x4200
     xor cx, cx                  ! high offset
-    xor dx, dx                  ! low offset
+    mov dx, text_top            ! low offset
     int 0x21                    ! lseek
 
     o32 xor edi, edi            ! destination 32-bit register
@@ -194,7 +194,7 @@ exe_start:
     o32 mov eax, (pmemhandle)
     o32 movzx ebx, (rseg)
     push es
-    push text_top
+    push 0
     retf
 
 bad_dpmi:
@@ -224,12 +224,6 @@ exit_with_error:
 1:
     mov ax, 0x4cff
     int 0x21                    ! terminate with error code al
-
-pmode:
-    .use32
-    mov ax, 0x4c00
-    int 0x21
-    .use16
 
     ! Simulate DOS interrupt.
 int21:
@@ -266,6 +260,7 @@ no_file_msg:
     .asciz "Couldn't open .exe"
 no_dpmi_msg:
     .asciz "No DPMI host installed"
+.align 2
 text_top:
 
 exe_text_pages = [text_top - exe_header + 511] / 512

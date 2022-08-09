@@ -72,6 +72,6 @@ name cv
 	from .out
 	to .exe
 	program {EM}/bin/aslod
-	args < >
+	args -p {PLATFORMDIR}/stub.exe < >
 	outfile msdos386.exe
 end
