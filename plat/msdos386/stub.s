@@ -51,6 +51,7 @@ exe_start:
     xor di, di
     xorb al, al
     mov cx, 0xffff
+    cld
 1:
     repne scasb                 ! find end of next string
     eseg cmpb (di), 0
@@ -90,8 +91,8 @@ exe_start:
     xor cx, cx                  ! high offset
     xor dx, dx                  ! low offset
     int 0x21                    ! lseek
-    mov (textlen+0), ax
-    mov (textlen+2), dx
+    mov (pmemlen+0), ax
+    mov (pmemlen+2), dx
 
     ! Initialise DPMI.
 
@@ -115,7 +116,7 @@ exe_start:
     callf (pmode_switch)
     jc bad_dpmi
 
-    ! We're now in protected mode. (0xa9)
+    ! We're now in protected mode. (ae)
 
     mov (psegcs), cs
     mov (psegds), ds
@@ -127,14 +128,15 @@ exe_start:
     int 0x31                    ! allocate LDT
     jc bad_dpmi
     mov es, ax
+    mov (psegcs32), ax
 
-    mov cx, (textlen+0)
-    mov bx, (textlen+2)
+    mov cx, (pmemlen+0)
+    mov bx, (pmemlen+2)
     mov ax, 0x0501
     int 0x31                    ! allocate linear address
     jc bad_dpmi
-    mov (pmemhandle+0), si
-    mov (pmemhandle+2), di
+    mov (pmemhandle+0), di
+    mov (pmemhandle+2), si
 
     mov dx, cx
     mov cx, bx
@@ -144,8 +146,8 @@ exe_start:
     jc bad_dpmi
 
     mov bx, es
-    mov dx, (textlen+0)
-    mov cx, (textlen+2)
+    mov dx, (pmemlen+0)
+    mov cx, (pmemlen+2)
     mov ax, 0x0008
     int 0x31                    ! set segment limit
 
@@ -157,7 +159,23 @@ exe_start:
     mov ax, 0x0009
     int 0x31                    ! set descriptor access rights
 
-    ! Load the program. (0xff)
+    ! Allocate the data segment (as a simple clone of the code segment). (10e)
+
+    mov ax, 0x000a
+    mov bx, es
+    int 0x31
+    mov fs, ax
+    mov (psegds32), ax
+
+    mov cx, ax
+    and cx, 3
+    shl cx, 5
+    or cx, 0xc093               ! 32-bit, big, data, r/w, expand-up
+    mov bx, fs
+    mov ax, 0x0009
+    int 0x31                    ! set descriptor access rights
+
+    ! Load the program.
 
     mov bx, (fh)
     mov ax, 0x4200
@@ -179,6 +197,7 @@ exe_start:
 
     o32 movzx ecx, ax           ! number of bytes read
     o32 mov esi, transfer_buffer
+    cld
     o32 rep movsb
     jmp 1b
 2:
@@ -191,11 +210,74 @@ exe_start:
 
     ! Jump to the new segment and enter 32-bit mode!
 
-    o32 mov eax, (pmemhandle)
-    o32 movzx ebx, (rseg)
+    mov ax, (psegcs)
+    mov bx, (psegds)
+    mov cx, (rseg)
+    o32 mov edx, realloc
+    push es
+    pop ds
     push es
     push 0
     retf
+
+    ! ALL CODE ABOVE THIS POINT DISCARDED ON ENTRY TO 32-BIT CODE
+    ! (it's reused as the 16-bit stack)
+stack16:
+
+    ! Helper routine which reallocates the linear block that the 32-bit code
+    ! is running from. This can't happen from inside the 32-bit code itself
+    ! because it might move.
+    !
+    ! On entry, ds and ss are ignored. On exit, ds is set to the 32-bit segment.
+    !  eax: new block size
+realloc:
+    cseg mov ds, (psegds)
+    cli                         ! atomically switch stacks
+    o32 mov (dpmi_ebp), esp     ! yes, saving esp into the ebp field
+    mov (dpmi_ss), ss
+    mov ss, (psegds)
+    mov sp, stack16
+    sti
+    pusha
+
+    o32 add eax, 1024*1024 - 1
+    o32 and eax, ~[1024*1024 - 1]
+    o32 mov (pmemlen), eax
+    mov cx, (pmemlen+0)
+    mov bx, (pmemlen+2)
+    mov di, (pmemhandle+0)
+    mov si, (pmemhandle+2)
+    mov ax, 0x0503
+    int 0x31                    ! resize memory block
+    jc bad_dpmi
+    mov (pmemhandle+0), di
+    mov (pmemhandle+2), si
+    mov (pmemaddr+0), cx
+    mov (pmemaddr+2), bx
+
+    mov bx, (psegds32)
+    mov dx, (pmemlen+0)
+    mov cx, (pmemlen+2)
+    mov ax, 0x0008
+    int 0x31                    ! set ds segment limit
+    jc bad_dpmi
+    mov dx, (pmemaddr+0)
+    mov cx, (pmemaddr+2)
+    mov ax, 0x0007
+    int 0x31                    ! set ds linear address
+    jc bad_dpmi
+    mov bx, (psegcs32)
+    int 0x31                    ! set cs linear address
+    jc bad_dpmi
+    
+    popa
+    cli                         ! atomically switch stacks back
+    mov ss, (dpmi_ss)
+    o32 mov esp, (dpmi_ebp)
+    mov ds, (psegds32)
+    sti
+
+    o32 retf
 
 bad_dpmi:
     mov si, bad_dpmi_msg
@@ -250,8 +332,6 @@ int21:
     mov bx, (dpmi_ebx)
     mov cx, (dpmi_ecx)
     mov dx, (dpmi_edx)
-    push (dpmi_flags)
-    popf
     ret
 
 bad_dpmi_msg:
@@ -260,7 +340,7 @@ no_file_msg:
     .asciz "Couldn't open .exe"
 no_dpmi_msg:
     .asciz "No DPMI host installed"
-.align 2
+.align 4
 text_top:
 
 exe_text_pages = [text_top - exe_header + 511] / 512
@@ -294,9 +374,12 @@ rseg:           .space 2 ! real mode
 pspseg:         .space 2 ! real mode
 psegcs:         .space 2 ! protected mode 16-bit code segment
 psegds:         .space 2 ! protected mode 16-bit data segment
+psegcs32:       .space 2 ! protected mode 32-bit code segment
+psegds32:       .space 2 ! protected mode 32-bit data segment
+pmemaddr:       .space 4 ! protected mode linear memory address
 pmemhandle:     .space 4 ! protected mode linear memory handle
+pmemlen:        .space 4 ! protected mode linear memory length
 fh:             .space 2
-textlen:        .space 4
 
     .space 128
 stack:

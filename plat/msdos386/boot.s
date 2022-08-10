@@ -13,56 +13,72 @@
 .sect .text
 #define STACK_BUFFER 128 /* number of bytes to leave for stack */
 
+! g 18b to break at the retf before coming here
 begtext:
-    mov eax, 0x4c00
-    int 0x21
-
-    ! Make sure we are running under MS-DOS 2 or above.
+    ! On entry, the stub has cs and ds pointing at the 32-bit
+    ! segment, but ss is still pointing at the 16-bit segment.
     !
-    ! While at it, also remember the actual DOS version, so that we know
-    ! whether DOS gives us the program's name in the environment
-    ! segment.  (DOS 3+ does; DOS 2.x does not.)
-    movb ah, 0x30
-    int 0x21
-    cbw
-    cmpb al, 2
-    xchg bp, ax
-    jnc ok_sys
+    !   si:di memory handle of linear block
+    !   ax: pmode code segment of stub
+    !   dx: pointer to realloc routine
+    !   fs: data segment (just a clone of the code segment)
 
-    mov dx, bad_sys_msg
-dos_msg:
-    ret
+    ! Resize the segment to include the BSS.
 
-ok_sys:
-    ! Resize the program's memory control block (MCB) to cover only the
-    ! program's near code and data space.  Use the starting sp value as
-    ! a guide to how much memory we can grab.  Abort on any failure.
-    !
-    ! As a side effect, this also frees up any memory allocated to our
-    ! program beyond 64 KiB.  (The freed memory can possibly be used by
-    ! e.g. child processes, in the future.)
-    !
-    ! Also check that we have some space between the BSS end and the
-    ! starting sp.
-    cmp sp, endbss+STACK_BUFFER
-    jb no_room
-
-    movb ah, 0x4a
-    mov bx, sp
-    movb cl, 4
-    shr bx, cl
-    inc bx
-    int 0x21
-    jc no_room
+    o16 cseg mov (realloc_ptr+4), ax
+    cseg mov (realloc_ptr+0), edx
+    mov eax, endbss
+    cseg callf (realloc_ptr)
 
     ! Clear BSS.
-    mov di, begbss
-    mov cx, endbss+1
-    sub cx, di
-    shr cx, 1
-    xor ax, ax
+
+    mov edi, begbss
+    mov ecx, endbss+1
+    sub ecx, edi
+    shr ecx, 1
+    xor eax, eax
     cld
     rep stosw
+
+    ! It's now safe to switch stacks.
+
+    cli
+    mov eax, ds
+    mov ss, eax
+    mov sp, .stack
+    sti
+
+    ! Create a handle for low 1MB access.
+
+    o16 mov ax, 0x0000
+    o16 mov cx, 1
+    int 0x31                    ! allocate LDT
+    mov es, ax
+    o16 mov bx, ax
+    o16 mov (.doshandle), bx
+
+    xor ecx, ecx
+    xor edx, edx
+    o16 mov ax, 0x0007
+    int 0x31                    ! set base address to 0
+    o16 mov cx, 0x0010
+    o16 mov ax, 0x0008
+    int 0x31                    ! set limit to 1MB
+
+    mov cx, ds
+    and cx, 3
+    shl cx, 5
+    or cx, 0xc093               ! 32-bit, big, data, r/w, expand-up
+    mov ax, 0x0009
+    int 0x31                    ! set descriptor access rights
+
+    ! Locate the PSP.
+    
+    movb ah, 0x62
+    int 0x21
+    movzx ebx, bx
+    shl ebx, 4                  ! convert to linear address
+    mov (.psp), ebx
 
     ! Get the size of the environment variables plus (if present) the
     ! program name.  Also count the number of environment variables.
@@ -130,7 +146,7 @@ copy_env:
 
 no_room:
     mov dx, no_room_msg
-    call dos_msg
+    !call dos_msg
     movb al, -1
     jmp al_exit
 
@@ -146,6 +162,11 @@ EXIT:
 al_exit:
     movb ah, 0x4c
     int 0x21
+
+    ! This must be in the code segment due to bootstrap issues.
+realloc_ptr:
+    .data2 0
+    .data4 0
 
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
@@ -167,6 +188,13 @@ no_room_msg: .ascii 'No room$'
 .comm .trppc, 4
 .comm .ignmask, 4
 .comm _errno, 4
+
+.comm .doshandle, 2
+.comm .psp, 4
+
+.sect .bss
+    .space 512
+.stack:
 
 ! vim: ts=4 sw=4 et ft=asm
 

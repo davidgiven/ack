@@ -39,6 +39,7 @@ name as
 	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
+
 end
 name led
 	from .o.a
@@ -66,6 +67,7 @@ name led
 		           {PLATFORMDIR}/libc.a \
 		           {PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libend.a)
+
 	linker
 end
 name cv
