@@ -56,6 +56,7 @@ begtext:
     mov es, ax
     o16 mov bx, ax
     o16 mov (.doshandle), bx
+    mov es, bx
 
     xor ecx, ecx
     xor edx, edx
@@ -76,63 +77,79 @@ begtext:
     
     movb ah, 0x62
     int 0x21
-    movzx ebx, bx
-    shl ebx, 4                  ! convert to linear address
-    mov (.psp), ebx
+    movzx esi, bx
+    shl esi, 4                  ! convert to linear address
 
-    ! Get the size of the environment variables plus (if present) the
-    ! program name.  Also count the number of environment variables.
-    xor di, di
-    mov es, 0x002C(di)
-    ! ax = 0 from above
-    cwd             ! dx = count of env. vars.
-    ! cx = 0 from above
-    dec cx              ! cx = max. str. bytes to scan
-    scasb               ! handle special case of empty env.
-    jz is_empty_env
-size_env:
-    inc dx
-    repnz scasb
+    ! Copy the whole thing into 32-bit memory.
+
+    mov ecx, 0x100/4
+    mov edi, _psp
+    cld
+1:
+    eseg lods
+    mov (edi), eax
+    add edi, 4
+    loop 1b
+
+    ! Find the environment.
+
+    mov es, (_psp + 0x002C)     ! converted to pmode segment
+    
+    ! Count the size of the environment variable block.
+
+    xorb al, al                 ! byte to test for
+    xor edi, edi
+    xor edx, edx
+    cld
+    mov ecx, -1
     scasb
-    jnz size_env
-is_empty_env:
-    cmp bp, 2
-    jz no_argv0
-    scasw
+    jz 2f                       ! empty environment
+1:
     repnz scasb
-no_argv0:
+    inc edx
+    scasb
+    jnz 1b
+2:
+    add edi, 2                  ! skip the mysterious word
+    repnz scasb                 ! program name
 
-    ! Copy out the environment variables and (possibly) program name
-    ! onto the stack.
-    mov si, di
-    dec si
+    ! Copy the whole environment block onto the stack.
+
+    mov esi, edi
+    add esi, 3
+    and esi, ~3                 ! round up
+    jz empty_environment
+    mov ecx, esi
+    shr ecx, 2                  ! number of dwords
     std
-copy_env:
-    and si, -2
-    eseg lodsw
-    push ax
-    jnz copy_env
-    mov cx, sp
+    sub esi, 4
+1:
+    eseg lods
+    push eax
+    loop 1b
+empty_environment:
+    mov ecx, esp                ! environment data
 
     ! Reset DF and es properly.
+
     cld
     push ss
     pop es
 
     ! Reserve space for argc and the argv and envp pointers on the
     ! stack.  These will be passed to __m_a_i_n later.
-    sub sp, 6
-    mov ax, sp
+
+    sub esp, 3*4
+    mov eax, esp
 
     ! Build up argc, argv[], and envp[].
-    push ax             ! output buffer for argc, argv, envp
-    push bp             ! MS-DOS version
-    push cx             ! env. string data
-    push dx             ! count of env. vars.
-    mov ax, 0x0080
-    push ax             ! raw command line
+    push eax            ! output buffer for argc, argv, envp
+    push 3              ! MS-DOS version
+    push ecx            ! env. string data
+    push edx            ! count of env. vars.
+    push _psp+0x80      ! raw command line
     call __sys_initmain
-    add sp, 10
+    add esp, 5*4
 
     ! Bail out if something went wrong.
     test ax, ax
@@ -190,7 +207,7 @@ no_room_msg: .ascii 'No room$'
 .comm _errno, 4
 
 .comm .doshandle, 2
-.comm .psp, 4
+.comm _psp, 256
 
 .sect .bss
     .space 512
