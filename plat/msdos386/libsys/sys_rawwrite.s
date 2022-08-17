@@ -32,31 +32,39 @@ file_handle = 2*4
 read_buffer = 3*4
 amount_to_write = 4*4
 
-	mov es, (pmode_ds)
 	mov amount_transferred(ebp), 0
 
 mainloop:
-	mov ecx, 32*1024
-	cmp amount_to_write(ebp), ecx
-	jge 2f
-	mov ecx, amount_to_write(ebp)
-	test ecx, ecx
+	mov eax, amount_to_write(ebp)
+	test eax, eax
 	jz exit
+
+	mov ecx, 32*1024
+	cmp eax, ecx
+	jge 2f
+	mov ecx, eax
 2:
+
 	! Copy ecx bytes into the transfer buffer.
 
 	push ecx
 	mov esi, read_buffer(ebp)
 	movzx edi, (transfer_buffer_ptr)
+	mov es, (pmode_ds)
+	cld
 	rep movsb
 	pop ecx
+
+	! Write from the transfer buffer to DOS.
 
 	movb ah, 0x40
 	o16 mov dx, (transfer_buffer_ptr)
 	o16 mov bx, file_handle(ebp)
 	or ebx, 0x210000
 	callf (interrupt_ptr)
-	movzx eax, ax
+	jc exit
+
+	! Update counters and go again.
 
 	add read_buffer(ebp), eax
 	add amount_transferred(ebp), eax
@@ -64,7 +72,7 @@ mainloop:
 	jmp mainloop
 
 exit:
-	mov eax, amount_to_write(ebp)
+	mov eax, amount_transferred(ebp)
 	leave
 	ret
 

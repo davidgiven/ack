@@ -36,7 +36,7 @@ begtext:
     cseg mov (interrupt_ptr+0), esi
     cseg o16 mov (transfer_buffer_ptr), di
 
-    mov eax, endbss
+    mov eax, __end
     cseg callf (realloc_ptr)
 
     ! Clear BSS.
@@ -161,7 +161,7 @@ empty_environment:
     add esp, 5*4
 
     ! Bail out if something went wrong.
-    test ax, ax
+    test eax, eax
     jnz no_room
 
     ! argc, argv, and envp are now at the stack top.  Now go.
@@ -197,6 +197,7 @@ rmode:               .space 2
 pmode_cs:            .space 2
 pmode_ds:            .space 2
 
+.define realloc_ptr
 .define interrupt_ptr
 .define rmode
 .define pmode_cs

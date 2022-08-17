@@ -337,12 +337,12 @@ interrupt:
     pop ds
     pop es
     pushf
-    mov ax, (dpmi_eax)
-    mov bx, (dpmi_ebx)
-    mov cx, (dpmi_ecx)
-    mov dx, (dpmi_edx)
-    mov si, (dpmi_esi)
-    mov di, (dpmi_edi)
+    o32 movzx eax, (dpmi_eax)
+    o32 movzx ebx, (dpmi_ebx)
+    o32 movzx ecx, (dpmi_ecx)
+    o32 movzx edx, (dpmi_edx)
+    o32 movzx esi, (dpmi_esi)
+    o32 movzx edi, (dpmi_edi)
     popf
     ret
 

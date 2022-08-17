@@ -8,28 +8,8 @@
 #include <unistd.h>
 #include "libsys.h"
 
-#define STACK_BUFFER 128 /* number of bytes to leave for stack */
-
 extern char _end[1];
 static char* current = _end;
-
-int brk(void* newend)
-{
-	/* This variable is used to figure out the current stack pointer,
-	 * by taking its address. */
-	char dummy;
-	char* p = newend;
-	
-	if ((p > (&dummy - STACK_BUFFER)) ||
-	    (p < _end))	
-	{
-		errno = ENOMEM;
-		return -1;
-	}
-		
-	current = p;
-	return 0;
-}
 
 void* sbrk(int increment)
 {

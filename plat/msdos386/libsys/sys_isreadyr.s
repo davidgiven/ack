@@ -17,13 +17,13 @@
 
 .define __sys_isreadyr
 __sys_isreadyr:
-	int 3
-	mov bx, sp
-	mov ax, 0x4406
-	mov bx, 2(bx)
+	mov ebx, sp
+	mov eax, 0x4406
+	mov ebx, 4(ebx)
 	int 0x21
 	jnc ok
 	movb al, 0
 ok:
 	cbw
+	cwd
 	ret

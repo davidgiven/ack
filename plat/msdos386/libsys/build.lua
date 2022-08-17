@@ -1,13 +1,14 @@
 acklibrary {
     name = "lib",
     srcs = {
-		"./brk.c",
+		"./_hol0.s",
+		"./brk.s",
 		"./close.s",
 		"./errno.s",
 		"./getpid.s",
-		"./_hol0.s",
 		"./isatty.s",
 		"./rename.s",
+		"./sbrk.c",
 		"./sys_exists.s",
 		"./sys_getdate.s",
 		"./sys_gettime.s",
